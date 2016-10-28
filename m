@@ -1,33 +1,63 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Changes to Rocksdb in tree
-Date: Fri, 28 Oct 2016 10:46:07 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1610281044550.10754@piezo.us.to>
-References: <db531186-389a-fafe-c911-8e75a33da72a@digiware.nl>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: rocksdb breakage on master?
+Date: Fri, 28 Oct 2016 18:55:01 +0800
+Message-ID: <CAJE9aONTbGWqctP06jaJifbzY=ngWaNTvRtQqOBxDQoQZUfA9A@mail.gmail.com>
+References: <CALe9h7e27rDp7V9CCWdyQrAvDZ67kJbQVS5fYV0zdt9B4Lj0MA@mail.gmail.com>
+ <CAJE9aOPoK3G6gF1AAojCFq3mMXZ7j2awypw4fHp+72wcJznKAg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39369 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752419AbcJ1KqL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2016 06:46:11 -0400
-In-Reply-To: <db531186-389a-fafe-c911-8e75a33da72a@digiware.nl>
+Received: from mail-qk0-f170.google.com ([209.85.220.170]:34388 "EHLO
+        mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757670AbcJ1KzD (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Oct 2016 06:55:03 -0400
+Received: by mail-qk0-f170.google.com with SMTP id x11so33059975qka.1
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Oct 2016 03:55:02 -0700 (PDT)
+In-Reply-To: <CAJE9aOPoK3G6gF1AAojCFq3mMXZ7j2awypw4fHp+72wcJznKAg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Bassam Tabbara <bassamtabbara@hotmail.com>, Kefu Chai <kchai@redhat.com>
 
-On Fri, 28 Oct 2016, Willem Jan Withagen wrote:
-> Hi,
-> 
-> Now that we have an In-tree rocksdb:
-> When I have changes to rocksdb how to I get them permanently into the
-> Ceph tree?
-> 
-> I submitted the changes upstream to rocksdb.
+On Fri, Oct 28, 2016 at 4:43 PM, kefu chai <tchaikov@gmail.com> wrote:
+> On Fri, Oct 28, 2016 at 1:37 AM, John Spray <jspray@redhat.com> wrote:
+>> I had a totally failing test branch based on recent master:
+>> http://pulpito.ceph.com/jspray-2016-10-27_14:08:19-fs-wip-jcsp-testing-20161026-distro-basic-mira
+>>
+>> With OSD coredumps and failures like this:
+>>> Command failed on mira110 with status 132: 'sudo MALLOC_CHECK_=3 adjust-ulimits ceph-coverage /home/ubuntu/cephtest/archive/coverage ceph-osd --cluster ceph --mkfs --mkkey -i 0 --monmap /home/ubuntu/cephtest/ceph.monmap'
+>>
+>> So I tried reverting these two guys:
+>> 418bfd7bb5ec1dcec2b011e9df118c33ce38d398 cmake: use external project for rocksdb
+>> 5bbcf8547c45eb962507d26649cab2c1dec20dc6 pickup new rocksdb with
+>> support for linux cmake
+>> ( from PR https://github.com/ceph/ceph/pull/11385)
+>>
+>> ...and my current run seems to be passing.
+>
+> John and all, sorry for the inconvenience. i am looking at it.
 
-Once they are merged upstream in rocksdb we will push the commit to 
-github.com/ceph/rocksdb and update the submodule.  If you like, we can 
-cherry-pick the patch in our tree too for the time being (in which case 
-you can submit a PR to ceph/rocksdb too).
+it's the march=native option in the cmake script used by rocksdb. and
+the building machine has the avx instruction set, while the test node
+does not. i am preparing a fix now.
 
-sage
+>
+>
+>>
+>> John
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Regards
+> Kefu Chai
+
+
+
+-- 
+Regards
+Kefu Chai
