@@ -1,61 +1,67 @@
-From: Orit Wasserman <owasserm@redhat.com>
-Subject: Re: rgw and the next jewel release v10.2.4
-Date: Tue, 1 Nov 2016 10:17:36 +0100
-Message-ID: <CABo9giQyGvsYXGs90kLwvE+oekHFNtDZm=T7cPBqPp8cVs=Yow@mail.gmail.com>
-References: <5811C853.1070706@dachary.org> <robbat2-20161027T210703-533951955Z@orbis-terrarum.net>
- <581277B8.9020708@dachary.org> <CADRKj5Q3kuF0vKPNnXMy0D7kvsZKSsN-f8Ay3_4hLQ8mjBCDvw@mail.gmail.com>
+From: Mustafa Muhammad <mustafa1024m@gmail.com>
+Subject: Lots of radosgw-admin commands fail after upgrade
+Date: Tue, 1 Nov 2016 16:13:42 +0300
+Message-ID: <CAFehDbCTSPLmh8LY03q0cfV1v2ACzF24ZShAk+OgSXYJLVjPqg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:37937 "EHLO
-        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1034776AbcKAJRj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Nov 2016 05:17:39 -0400
-Received: by mail-wm0-f52.google.com with SMTP id n67so274510398wme.1
-        for <ceph-devel@vger.kernel.org>; Tue, 01 Nov 2016 02:17:38 -0700 (PDT)
-In-Reply-To: <CADRKj5Q3kuF0vKPNnXMy0D7kvsZKSsN-f8Ay3_4hLQ8mjBCDvw@mail.gmail.com>
+Received: from mail-lf0-f45.google.com ([209.85.215.45]:33587 "EHLO
+        mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1169096AbcKANNp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Nov 2016 09:13:45 -0400
+Received: by mail-lf0-f45.google.com with SMTP id c13so19263472lfg.0
+        for <ceph-devel@vger.kernel.org>; Tue, 01 Nov 2016 06:13:44 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: Loic Dachary <loic@dachary.org>, "Robin H. Johnson" <robbat2@gentoo.org>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-https://github.com/ceph/ceph/pull/11280 is merged in master.
-Loic, is it still possible to backport it to 10.2.4?
+Hello,
+I have production cluster configured with multiple placement pools according to:
 
-Thanks,
-Orit
+http://cephnotes.ksperis.com/blog/2014/11/28/placement-pools-on-rados-gw
 
-On Fri, Oct 28, 2016 at 12:05 AM, Yehuda Sadeh-Weinraub
-<yehuda@redhat.com> wrote:
-> We need to have it in master first. Sadly this one has been
-> accidentally closed so we missed some time on it. I'll be happy to see
-> it in 10.2.4, but we need to have it merged to master first. Orit is
-> supposed to look into that.
->
-> Yehuda
->
-> On Thu, Oct 27, 2016 at 2:55 PM, Loic Dachary <loic@dachary.org> wrote:
->> Hi Robin,
->>
->> Since it's not yet merged in master I'm deferring to Yehuda's decision. I'd be happy to delay 10.2.4 if necessary.
->>
->> Cheers
->>
->> On 27/10/2016 23:10, Robin H. Johnson wrote:
->>> On Thu, Oct 27, 2016 at 11:26:43AM +0200, Loic Dachary wrote:
->>>> Hi Yehuda,
->>>>
->>>> The next jewel release as found at
->>>> https://github.com/ceph/ceph/tree/jewel passed the rgw suite
->>>> (http://tracker.ceph.com/issues/17487#note-18). Do you think the jewel
->>>> branch is ready for QE to start their own round of testing ?
->>> Can you please bring in the StaticSites fix in
->>> https://github.com/ceph/ceph/pull/11280
->>>
->>> This issue has been dragging since late August now :-(.
->>> (it got reverted last time because it exposed a test suite bug)
->>>
->>
->> --
->> Loïc Dachary, Artisan Logiciel Libre
+After upgrading to Jewel, most radosgw-admin are failing, probably
+because there is no realm
+
+
+# radosgw-admin realm list
+{
+    "default_info": "",
+    "realms": []
+}
+
+
+# radosgw-admin zone get
+unable to initialize zone: (2) No such file or directory
+
+
+# radosgw-admin regionmap get
+failed to read current period info: 2016-11-01 16:08:14.099948
+7f21b55ee9c0  0 RGWPeriod::init failed to init realm  id  : (2) No
+such file or directory(2) No such file or directory
+{
+    "zonegroups": [],
+    "master_zonegroup": "",
+    "bucket_quota": {
+        "enabled": false,
+        "max_size_kb": -1,
+        "max_objects": -1
+    },
+    "user_quota": {
+        "enabled": false,
+        "max_size_kb": -1,
+        "max_objects": -1
+    }
+}
+
+
+# radosgw-admin bucket stats
+2016-11-01 16:07:55.860053 7f6e747f89c0  0 zonegroup default missing
+zone for master_zone=
+couldn't init storage provider
+
+I have previous region.conf.json and zone.conf.json, how can I make
+everything work again? Will creating new realm fix this?
+
+Regards
+Mustafa Muhammad
