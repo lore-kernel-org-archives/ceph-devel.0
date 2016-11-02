@@ -1,43 +1,61 @@
-From: Hidekazu Nakamura <hid-nakamura@vf.jp.nec.com>
-Subject: Plugin for querying rgw metadata
-Date: Wed, 2 Nov 2016 04:08:28 +0000
-Message-ID: <8FC2060F93794D44942D588B8B547287121F993F@BPXM03GP.gisp.nec.co.jp>
+From: Yoann Moulin <yoann.moulin@epfl.ch>
+Subject: Re: ceph-post-file : Permission denied (publickey).
+Date: Wed, 2 Nov 2016 09:54:25 +0100
+Message-ID: <7f4235ea-9a4b-66db-3e49-7be4b526513d@epfl.ch>
+References: <89b95e99-73e5-474e-df5f-cbd7927924ed@epfl.ch>
+ <20161028021506.GE6026@rskikr.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-2022-jp"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from TYO200.gate.nec.co.jp ([210.143.35.50]:44414 "EHLO
-        tyo200.gate.nec.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750698AbcKBEJ2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Nov 2016 00:09:28 -0400
-Received: from tyo202.gate.nec.co.jp ([10.7.69.202])
-        by tyo200.gate.nec.co.jp (8.13.8/8.13.4) with ESMTP id uA249PAU010045
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Wed, 2 Nov 2016 13:09:26 +0900 (JST)
-Received: from mailgate3.nec.co.jp ([10.7.69.195])
-        by tyo202.gate.nec.co.jp (8.13.8/8.13.4) with ESMTP id uA249Mxt000017
-        for <ceph-devel@vger.kernel.org>; Wed, 2 Nov 2016 13:09:22 +0900 (JST)
-Received: from mailsv3.nec.co.jp (imss61.nec.co.jp [10.7.69.156]) by mailgate3.nec.co.jp (8.11.7/3.7W-MAILGATE-NEC) with ESMTP
-        id uA249M227894 for <ceph-devel@vger.kernel.org>; Wed, 2 Nov 2016 13:09:22 +0900 (JST)
-Received: from mail03.kamome.nec.co.jp (mail03.kamome.nec.co.jp [10.25.43.7])
-        by mailsv3.nec.co.jp (8.13.8/8.13.4) with ESMTP id uA249Mos018971
-        for <ceph-devel@vger.kernel.org>; Wed, 2 Nov 2016 13:09:22 +0900 (JST)
-Content-Language: ja-JP
+Received: from smtp5.epfl.ch ([128.178.224.8]:51274 "EHLO smtp5.epfl.ch"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755526AbcKBIyb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 2 Nov 2016 04:54:31 -0400
+In-Reply-To: <20161028021506.GE6026@rskikr.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: Haruhiko Katou <har-katou@ts.jp.nec.com>
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi ceph developers,
+Hello,
 
-I heard at OpenStack Summit Barcelona[*] that community will develop plugin
-which put metadata into elasticsearch for querying metadata.
-Could anyone teach me spec of it?
+>> I tried to upload files with ceph-post-file but got "Permission denied (publickey)."
+>>
+>>> $ ceph-post-file 17180.tgz
+>>> args: -- 17180.tgz
+>>> /usr/bin/ceph-post-file: upload tag 60a84fdd-b9e9-42cb-817e-5a90e0f9bcf0
+>>> /usr/bin/ceph-post-file: user: yoann@kveikur
+>>> /usr/bin/ceph-post-file: will upload file 17180.tgz
+>>> Permission denied (publickey).
+>>> Couldn't read packet: Connection reset by peer
+>>
+>> do I need to set anything on my side to be able to upload file with this command ?
+> 
+> $ ./bin/ceph-post-file test_file
+> args: -- test_file
+> ./bin/ceph-post-file: upload tag eedc0ac6-a2fa-45d5-8fe1-8f7548da3bb2
+> ./bin/ceph-post-file: user: brad@localhost
+> ./bin/ceph-post-file: will upload file test_file
+> sftp> mkdir post/eedc0ac6-a2fa-45d5-8fe1-8f7548da3bb2_brad@localhost_38cc969c-04af-4d5b-b862-ec9d594d3a3c
+> sftp> cd post/eedc0ac6-a2fa-45d5-8fe1-8f7548da3bb2_brad@localhost_38cc969c-04af-4d5b-b862-ec9d594d3a3c
+> sftp> put /tmp/tmp.1biVN9avrx user
+> sftp> put test_file
+> ./bin/ceph-post-file: copy the upload id below to share with a dev:
+> 
+> ceph-post-file: eedc0ac6-a2fa-45d5-8fe1-8f7548da3bb2
+> 
+> You can test connectivity with something like the following.
+> 
+> $ sftp -o "IdentityFile=../share/id_rsa_drop.ceph.com" -C -oCheckHostIP=no -oGlobalKnownHostsFile=../share/known_hosts_drop.ceph.com -oBatchMode=no -oIdentitiesOnly=yes -- postfile@drop.ceph.com
+> Connected to drop.ceph.com.
+> sftp>
 
-My concern is whether operator could know object sync status between zones.
+Finally I found time to look on why it wasn't working, I only had the dsa key, I grab the rsa key from git and change the path in the
+ceph-post-file from dsa to rsa and it works
 
-[*]https://www.openstack.org/videos/video/ceph-now-and-later-our-plan-for-open-unified-cloud-storage
+Thanks
 
-Thanks,
-Hidekazu Nakamura
-
+-- 
+Yoann Moulin
+EPFL IC-IT
