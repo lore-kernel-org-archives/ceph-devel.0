@@ -1,19 +1,19 @@
 From: Zhiqiang Wang <wonzhq@gmail.com>
 Subject: Re: Partial replicas read/write
-Date: Wed, 2 Nov 2016 21:03:23 +0800
-Message-ID: <CA+cZ7shn3Y2xykJMUrG1Q+G9AFX7STmWvx8fdnMUKp7q408C0Q@mail.gmail.com>
+Date: Wed, 2 Nov 2016 21:24:24 +0800
+Message-ID: <CA+cZ7shjv2uBFN21SqNVoVdvzS58k16VTS-iO-ERT43O9JL+Zg@mail.gmail.com>
 References: <CA+cZ7shWJ7DLfJrEy-nZiq7=J3r=dzCd0ukEUpv6RLHDoVSYZg@mail.gmail.com>
  <686669248.875.1478008018724@ox.pcextreme.nl> <CA+cZ7sjynuwneCPM9Rzm1r_G2NsVTe1ekixUxOPjnyd6pB2iNw@mail.gmail.com>
  <CAN=+7FWtXgVasEqDGcPgE_KYN1yM+GwTyyaTT1ma2tH3EXXTaQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f50.google.com ([209.85.214.50]:35223 "EHLO
-        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753816AbcKBNEA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Nov 2016 09:04:00 -0400
-Received: by mail-it0-f50.google.com with SMTP id e187so80639134itc.0
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Nov 2016 06:03:59 -0700 (PDT)
+Received: from mail-it0-f53.google.com ([209.85.214.53]:38474 "EHLO
+        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752839AbcKBNY0 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Nov 2016 09:24:26 -0400
+Received: by mail-it0-f53.google.com with SMTP id q124so35995261itd.1
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Nov 2016 06:24:26 -0700 (PDT)
 In-Reply-To: <CAN=+7FWtXgVasEqDGcPgE_KYN1yM+GwTyyaTT1ma2tH3EXXTaQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -36,14 +36,6 @@ Cc: Wido den Hollander <wido@42on.com>, "ceph-devel@vger.kernel.org" <ceph-devel
 > we'd just end up recovering the same objects on the other osd) If we
 > allow degraded writes, that osd *might not actually have that object*,
 > and the object would end up being unfound.  Fundamentally, because
-
-When talking about *the object*, do you mean the object who is updated
-in last_update? Yes, this object could end up being unfound. But since
-the object data is not actually committed on any of the osds and the
-write op is not committed to the client in this case, maybe we could
-rollback the corresponding pglog entry and do some special handling
-when choosing the authoritative log osd?
-
 > replicated pools rely on recovery to fix divergent log entries, we
 > need every acting set osd which records the log entry for a write to
 > remember the actual update, and it's important to complete those
@@ -83,6 +75,16 @@ when choosing the authoritative log osd?
 > the very few entries at the head of the log representing divergent
 > updates and cases where the pg is degraded beyond min_size -- exactly
 > the cases where we need to perform recovery ASAP.
+
+I considered this approach as well, and have two concerns:
+1) There are cases no OSD has all of the latest object data in the pg.
+If an OSD who is the only shard which has the latest data of an
+object, and it is chosen to be the backfill targets, but not in the
+acting set, we end up with this object being unfound in this interval.
+2) Even if we are able to reach a situation which we have very few
+entries divergent updates, we are still suffering from this same issue
+until the pg is recovered.
+
 > -Sam
 >
 > On Tue, Nov 1, 2016 at 8:57 AM, Zhiqiang Wang <wonzhq@gmail.com> wrote:
