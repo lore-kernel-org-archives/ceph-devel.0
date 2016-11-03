@@ -1,67 +1,38 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: ceph, XioMessenger issue
-Date: Thu, 3 Nov 2016 08:49:42 -0400 (EDT)
-Message-ID: <1286081286.93716669.1478177382304.JavaMail.zimbra@redhat.com>
-References: <FEC85B105C5F644CA51BDB90657EEA98281CB374@ddsm-mbx01.digdes.com> <alpine.DEB.2.11.1611022003390.20331@piezo.us.to> <DB5PR05MB1607074AA7D7B7E04076A241A9A30@DB5PR05MB1607.eurprd05.prod.outlook.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: mounting manila share with 4.8 kernel
+Date: Thu, 3 Nov 2016 14:19:46 +0100
+Message-ID: <CABZ+qqkXYYmSwwhekjTTYZFZCitE_FSWs37z=jmMk1xqtDHTcw@mail.gmail.com>
+References: <CABZ+qqk8ucZodD=H=BAp4RySRLdNtD=+eneCWUO8xOYBYfupOg@mail.gmail.com>
+ <CAOi1vP-N+5-5jFmqvbhY-VTfvG2=5ykiuEjD3EDGqnaPObrgsA@mail.gmail.com> <CABZ+qqmtGduKSRKeKzDUpn=Ct-MGFnnwVMz1Fx9x=Grd_Ukw7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx6-phx2.redhat.com ([209.132.183.39]:39067 "EHLO
-        mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755863AbcKCMuX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2016 08:50:23 -0400
-In-Reply-To: <DB5PR05MB1607074AA7D7B7E04076A241A9A30@DB5PR05MB1607.eurprd05.prod.outlook.com>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:36945 "EHLO
+        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755228AbcKCNUa (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2016 09:20:30 -0400
+Received: by mail-wm0-f52.google.com with SMTP id t79so100577211wmt.0
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Nov 2016 06:20:29 -0700 (PDT)
+Received: from mail-wm0-f44.google.com (mail-wm0-f44.google.com. [74.125.82.44])
+        by smtp.gmail.com with ESMTPSA id b184sm9061556wma.0.2016.11.03.06.20.26
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 03 Nov 2016 06:20:27 -0700 (PDT)
+Received: by mail-wm0-f44.google.com with SMTP id t79so100575624wmt.0
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Nov 2016 06:20:26 -0700 (PDT)
+In-Reply-To: <CABZ+qqmtGduKSRKeKzDUpn=Ct-MGFnnwVMz1Fx9x=Grd_Ukw7g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Avner Ben Hanoch <avnerb@mellanox.com>
-Cc: Sage Weil <sweil@redhat.com>, Marov Aleksey <Marov.A@raidix.com>, ceph-devel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>
 
-Hi Avner,
+On Thu, Nov 3, 2016 at 11:23 AM, Dan van der Ster <dan@vanderster.com> wrote:
+> Actually we can reproduce this caps issue without using namespaces. It
+> seems that the kernel will not mount at all if the client cap does not
+> have 'allow r' on the mds.
 
-Please make your work visible by creating PRs for your pipeline of commits.  If many commits are of a similar type, such as this 1-line cleanup, please consider batching them into a smaller number of PRs.
+Ahh I found this in the 4.9 PR:
 
-Regards,
+      ceph: avoid accessing / when mounting a subpath
 
-Matt
-
------ Original Message -----
-> From: "Avner Ben Hanoch" <avnerb@mellanox.com>
-> To: "Sage Weil" <sweil@redhat.com>, "Marov Aleksey" <Marov.A@raidix.com>
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Thursday, November 3, 2016 3:27:40 AM
-> Subject: RE: ceph, XioMessenger issue
-> 
-> We (in Mellanox) build with Xio on a regular basis.  We have a bunch of
-> commits in the pipe that we are submitting 1 after the other.  Currently,
-> the pipe is blocked by this PR  https://github.com/ceph/ceph/pull/9444
-> After we complete releasing new version here we'll struggle with the needed
-> merges
-> 
-> > -----Original Message-----
-> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> > owner@vger.kernel.org] On Behalf Of Sage Weil
-> > Sent: Wednesday, November 02, 2016 22:07
-> > To: Marov Aleksey
-> > 
-> > 
-> > It sounds like nobody else has hit this yet except you, so apparently
-> > others
-> > also are building with[out] xio in their dev environments.  :(
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-707-0660
-fax.  734-769-8938
-cel.  734-216-5309
+Cheers, Dan
