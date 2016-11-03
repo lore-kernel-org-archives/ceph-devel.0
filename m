@@ -1,67 +1,66 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: rocksdb optimization regression (bluestore perf regression)
-Date: Thu, 3 Nov 2016 16:16:44 +0000
-Message-ID: <BY2PR02MB396B7E9F7A21EF88EC0EC09F4A30@BY2PR02MB396.namprd02.prod.outlook.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: rocksdb optimization regression (bluestore perf regression)
+Date: Thu, 3 Nov 2016 11:40:38 -0500
+Message-ID: <6d41b47b-b666-7753-4f97-e73f432acda8@redhat.com>
 References: <ea832d2a-96f4-7334-9d34-40d21740df6f@redhat.com>
  <25965474-3493-53f7-26f8-6d0686abe8f1@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam03on0057.outbound.protection.outlook.com ([104.47.42.57]:4796
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1758690AbcKCQQu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 3 Nov 2016 12:16:50 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:54380 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757606AbcKCQkl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 3 Nov 2016 12:40:41 -0400
 In-Reply-To: <25965474-3493-53f7-26f8-6d0686abe8f1@mirantis.com>
-Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIE1hcmsgIQ0KSSBnb3QgbXkgb2xkIG51bWJlcnMgYmFjayBmb3IgMTZLIG1pbl9hbGxv
-Y19zaXplICwgeWV0IHRvIHRyeSB3aXRoIDRLIG1pbl9hbGxvY19zaXplLg0KSGVyZSBpcyB0aGUg
-cGVyZiB0cmFjZSBJIHdhcyB0YWxraW5nIGluIHRoZSBzdGFuZHVwLi4NCg0KICAgMy42MyUgIGxp
-YnRjbWFsbG9jLnNvLjQuMi42ICBbLl0gdGNfbmV3YXJyYXkNCiAgIDIuMzklICBsaWJ0Y21hbGxv
-Yy5zby40LjIuNiAgWy5dIHRjX2RlbGV0ZWFycmF5DQogICAyLjIyJSAgbGliYy0yLjIzLnNvICAg
-ICAgICAgIFsuXSBfX21lbWNweV9zc2UyX3VuYWxpZ25lZA0KICAgMS42OSUgIGNlcGgtb3NkICAg
-ICAgICAgICAgICBbLl0gX1pON3JvY2tzZGI2Y3JjMzJjMTBFeHRlbmRJbXBsSVhhZExfWk5TMF9M
-MTBTbG93X0NSQzMyRVBtUFBLaEVFRUVqalBLY20NCg0KU2VlIHRoZSBsYXN0IG9uZSAsIGl0IGlz
-IHVzaW5nIFNsb3dfQ1JDIHN0aWxsICwgYnV0IHdpdGggbXVjaCBsb3dlciBjcHUgdXRpbGl6YXRp
-b24gbm93IHRoYW4gdGhlIHByZXZpb3VzIG1hc3Rlci4NCg0KSWdvci9NYXJrLA0KQ291bGQgeW91
-IHBsZWFzZSBjb25maXJtIHlvdSBhcmUgYWxzbyBzZWVpbmcgdGhlIHNhbWUgPw0KDQpUaGFua3Mg
-JiBSZWdhcmRzDQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBj
-ZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJA
-dmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgSWdvciBGZWRvdG92DQpTZW50OiBUaHVyc2Rh
-eSwgTm92ZW1iZXIgMDMsIDIwMTYgOTowMiBBTQ0KVG86IE1hcmsgTmVsc29uOyBjZXBoLWRldmVs
-DQpTdWJqZWN0OiBSZTogcm9ja3NkYiBvcHRpbWl6YXRpb24gcmVncmVzc2lvbiAoYmx1ZXN0b3Jl
-IHBlcmYgcmVncmVzc2lvbikNCg0KTWFyaywNCg0KdGhhbmtzIGZvciB1cGRhdGUuDQoNCkkndmUg
-SnVzdCBtYWRlIGEgYnJpZWYgdHJ5Lg0KDQpQZXJmb3JtYW5jZSBpcyBtdWNoIGJldHRlciBub3cg
-YnV0IG51bWJlcnMgSSBjYW4gc2VlIHdpdGggbXkgb2xkIGJyYW5jaCBhcmUgc3RpbGwgdW5yZWFj
-aGFibGUuDQoNCkFwcHJveCDRhTIgdGltZXMgc2xvd2VyICggaXQgd2FzIH4xMNGFIHNsb3dlciBi
-ZWZvcmUpIGZvciByYW5kb20gNEsgci93IHVzaW5nIEZJTyBhZ2FpbnN0IHN0YW5kYWxvbmUgYmx1
-ZXN0b3JlIGluc3RhbmNlLg0KDQoNClRoYW5rcywNCg0KSWdvcg0KDQoNCk9uIDAzLjExLjIwMTYg
-MTc6NTksIE1hcmsgTmVsc29uIHdyb3RlOg0KPiBNb3N0bHkgdGhpcyBpcyBmb3IgSWdvciBhbmQg
-U29tbmF0aDoNCj4NCj4gSXQgbG9va3MgbGlrZSB0aGUgcmVncmVzc2lvbiB3YXMgaW5kZWVkIGNh
-dXNlZCBieSBsYWNrIG9mIE8yDQo+IG9wdGltaXphdGlvbiBmb3Igcm9ja3NkYiBpbiBtYXN0ZXIg
-YWZ0ZXIgNDE4YmZkNy4gIFRoZSBmb2xsb3dpbmcgUFINCj4gYXBwZWFycyB0byByZXNvbHZlIHRo
-ZSBwZXJmb3JtYW5jZSByZWdyZXNzaW9uIGluIG15IHRlc3RzOg0KPg0KPiBodHRwczovL2dpdGh1
-Yi5jb20vY2VwaC9jZXBoL3B1bGwvMTE3NjcNCj4NCj4gTWFyaw0KPiAtLQ0KPiBUbyB1bnN1YnNj
-cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
-bCIgaW4NCj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
-cmcNCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpv
-cmRvbW8taW5mby5odG1sDQoNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2Vu
-ZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCnRoZSBib2R5IG9mIGEgbWVz
-c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQpNb3JlIG1ham9yZG9tbyBpbmZvIGF0
-ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNClBMRUFTRSBOT1RF
-OiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3Nh
-Z2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGll
-bnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0
-aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBo
-YXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBk
-aXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlz
-IHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNh
-dGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBl
-LW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFs
-bCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJk
-IGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg==
+On 11/03/2016 11:01 AM, Igor Fedotov wrote:
+> Mark,
+>
+> thanks for update.
+>
+> I've Just made a brief try.
+>
+> Performance is much better now but numbers I can see with my old branch
+> are still unreachable.
+>
+> Approx х2 times slower ( it was ~10х slower before) for random 4K r/w
+> using FIO against standalone bluestore instance.
+
+Can you check and see if https://github.com/ceph/ceph/pull/11530 is 
+impacting you vs old defaults?  So far this appears to be a win on our 
+NVMe setup, but it's one of the big changes that might impact small 
+random write performance.
+
+If this is impacting you, it would be really interesting to save one or 
+more of the OSD logs in each case and run:
+
+https://github.com/ceph/cbt/blob/master/tools/ceph_rocksdb_log_parser.py
+
+Mark
+
+>
+>
+> Thanks,
+>
+> Igor
+>
+>
+> On 03.11.2016 17:59, Mark Nelson wrote:
+>> Mostly this is for Igor and Somnath:
+>>
+>> It looks like the regression was indeed caused by lack of O2
+>> optimization for rocksdb in master after 418bfd7.  The following PR
+>> appears to resolve the performance regression in my tests:
+>>
+>> https://github.com/ceph/ceph/pull/11767
+>>
+>> Mark
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
