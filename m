@@ -1,52 +1,77 @@
-From: Tim Serong <tserong-IBi9RG/b67k@public.gmane.org>
-Subject: Introducing DeepSea: A tool for deploying Ceph using
-	Salt
-Date: Thu, 3 Nov 2016 16:52:20 +1100
-Message-ID: <0c7928bb-947a-23c9-5770-e588dbffb6af@suse.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: pools without rules
+Date: Thu, 3 Nov 2016 10:43:48 +0100
+Message-ID: <CAOi1vP9L9Z9ttjE4MXykRprAH2XHTPVXpM2GaE3tX5oSxk=B6Q@mail.gmail.com>
+References: <CA+LTicvDBOTt=d-W8FzgBbpmxrgtM0VFWKFFoEspk+Wekr2deA@mail.gmail.com>
+ <CA+LTicsMfaG4C-yL_VGPMuKV0+gmXaTR+E9-1JrNYTgM0g9Drg@mail.gmail.com>
+ <alpine.DEB.2.11.1610311332100.20331@piezo.us.to> <CA+LTicszpfwTGHH1F5Ayys2=QMP2+61DeRPWk-F52JWV4nhOLQ@mail.gmail.com>
+ <alpine.DEB.2.11.1610311640280.20331@piezo.us.to> <CA+LTicuA41=jx5w+LSipaEHZaGo=nQYp0XBukA8aQCc03ggVYg@mail.gmail.com>
+ <CA+LTictrhoQEsJwGOynUzHCWgzenj5BYpuSfrngptGNYVXmUzg@mail.gmail.com>
+ <CA+aFP1BZL1ygPtmGEjsyV8GiUWfVveA7+fTpNY0L59b6=e3V7Q@mail.gmail.com>
+ <C554BA39-3862-4420-9A7A-BCD349B60882@Teradata.com> <CA+LTicsu3Ods3keSCxfkXk2S5JR8agqunL+HXeYBVOYFRkrY_Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f48.google.com ([209.85.213.48]:36538 "EHLO
+        mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752466AbcKCJnu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2016 05:43:50 -0400
+Received: by mail-vk0-f48.google.com with SMTP id p9so34766072vkd.3
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Nov 2016 02:43:50 -0700 (PDT)
+In-Reply-To: <CA+LTicsu3Ods3keSCxfkXk2S5JR8agqunL+HXeYBVOYFRkrY_Q@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: John Calcote <john.calcote@gmail.com>
+Cc: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>, "dillaman@redhat.com" <dillaman@redhat.com>, Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>, kefu chai <tchaikov@gmail.com>, Ali Maredia <amaredia@redhat.com>
 
-Hi All,
+On Thu, Nov 3, 2016 at 2:40 AM, John Calcote <john.calcote@gmail.com> wrote:
+> I've now built the entire code base from a clean checkout of master -
+> the build completed without errors. However, the main build (as
+> defined by the README file) does NOT build the documentation - it does
+> build the man pages, but not the "read-the-docs" rst files.
 
-I thought I should make a little noise about a project some of us at
-SUSE have been working on, called DeepSea.  It's a collection of Salt
-states, runners and modules for orchestrating deployment of Ceph
-clusters.  To help everyone get a feel for it, I've written a blog post
-which walks through using DeepSea to set up a small test cluster:
+Correct.
 
-  http://ourobengr.com/2016/11/hello-salty-goodness/
+>
+> One thing I haven't mentioned before: I'm building on Ubuntu 14.04 - I
+> realize this may be an issue if I'm expected to use a later OS to
+> build docs.
+>
+> Can Anyone help me? I'm just trying to help out here, and I've done
+> everything myself that could reasonably be expected of a software
+> engineer with 30 years experience. I may be new to Ceph, but I'm not
+> new to development, and I'm telling you all, there's a problem with
+> building the docs. Once again, here's what happens:
+>
+> ----------------SNIP----------------
+> jcalcote@jmc-u14:~/dev/git/ceph$ ./admin/build-doc
+> Top Level States:  ['RecoveryMachine']
+> Unpacking /home/jcalcote/dev/git/ceph/src/pybind/rados
+>   Running setup.py (path:/tmp/pip-awYqow-build/setup.py) egg_info for
+> package from file:///home/jcalcote/dev/git/ceph/src/pybind/rados
+>     ERROR: Cannot find Cythonized file rados.c
+>     WARNING: Cython is not installed.
+>     Complete output from command python setup.py egg_info:
+>     ERROR: Cannot find Cythonized file rados.c
+>
+> WARNING: Cython is not installed.
+>
+> ----------------------------------------
+> Cleaning up...
+> Command python setup.py egg_info failed with error code 1 in
+> /tmp/pip-awYqow-build
+> Storing debug log for failure in /home/jcalcote/.pip/pip.log
+> ----------------SNIP----------------
 
-If you'd like to try it out yourself, the code is on GitHub:
+I don't think a lot of people use build-doc, so it may very well be
+broken, especially given the recent transition to cmake.  Kefu and Ali
+might be able to help, if it's indeed related to that.
 
-  https://github.com/SUSE/DeepSea
+I'd try checking out something pre-cmake/cython, like v10.2.0 (or even
+something older), and seeing if it works there.  Or if the changes
+aren't too invasive, just submit the PR and mention that build-doc
+seems to be wedged...
 
-More detailed documentation can be found at:
+Thanks,
 
-  https://github.com/SUSE/DeepSea/wiki/intro
-  https://github.com/SUSE/DeepSea/wiki/management
-  https://github.com/SUSE/DeepSea/wiki/policy
-
-Usual story: feedback, issues, pull requests are all welcome ;)
-
-Enjoy,
-
-Tim
--- 
-Tim Serong
-Senior Clustering Engineer
-SUSE
-tserong-IBi9RG/b67k@public.gmane.org
+                Ilya
