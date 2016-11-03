@@ -1,76 +1,105 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: pools without rules
-Date: Thu, 3 Nov 2016 10:43:48 +0100
-Message-ID: <CAOi1vP9L9Z9ttjE4MXykRprAH2XHTPVXpM2GaE3tX5oSxk=B6Q@mail.gmail.com>
-References: <CA+LTicvDBOTt=d-W8FzgBbpmxrgtM0VFWKFFoEspk+Wekr2deA@mail.gmail.com>
- <CA+LTicsMfaG4C-yL_VGPMuKV0+gmXaTR+E9-1JrNYTgM0g9Drg@mail.gmail.com>
- <alpine.DEB.2.11.1610311332100.20331@piezo.us.to> <CA+LTicszpfwTGHH1F5Ayys2=QMP2+61DeRPWk-F52JWV4nhOLQ@mail.gmail.com>
- <alpine.DEB.2.11.1610311640280.20331@piezo.us.to> <CA+LTicuA41=jx5w+LSipaEHZaGo=nQYp0XBukA8aQCc03ggVYg@mail.gmail.com>
- <CA+LTictrhoQEsJwGOynUzHCWgzenj5BYpuSfrngptGNYVXmUzg@mail.gmail.com>
- <CA+aFP1BZL1ygPtmGEjsyV8GiUWfVveA7+fTpNY0L59b6=e3V7Q@mail.gmail.com>
- <C554BA39-3862-4420-9A7A-BCD349B60882@Teradata.com> <CA+LTicsu3Ods3keSCxfkXk2S5JR8agqunL+HXeYBVOYFRkrY_Q@mail.gmail.com>
+Subject: Re: mounting manila share with 4.8 kernel
+Date: Thu, 3 Nov 2016 11:02:07 +0100
+Message-ID: <CAOi1vP-N+5-5jFmqvbhY-VTfvG2=5ykiuEjD3EDGqnaPObrgsA@mail.gmail.com>
+References: <CABZ+qqk8ucZodD=H=BAp4RySRLdNtD=+eneCWUO8xOYBYfupOg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f48.google.com ([209.85.213.48]:36538 "EHLO
-        mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752466AbcKCJnu (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2016 05:43:50 -0400
-Received: by mail-vk0-f48.google.com with SMTP id p9so34766072vkd.3
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Nov 2016 02:43:50 -0700 (PDT)
-In-Reply-To: <CA+LTicsu3Ods3keSCxfkXk2S5JR8agqunL+HXeYBVOYFRkrY_Q@mail.gmail.com>
+Received: from mail-vk0-f45.google.com ([209.85.213.45]:35974 "EHLO
+        mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750756AbcKCKCI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2016 06:02:08 -0400
+Received: by mail-vk0-f45.google.com with SMTP id p9so35085416vkd.3
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Nov 2016 03:02:08 -0700 (PDT)
+In-Reply-To: <CABZ+qqk8ucZodD=H=BAp4RySRLdNtD=+eneCWUO8xOYBYfupOg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Calcote <john.calcote@gmail.com>
-Cc: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>, "dillaman@redhat.com" <dillaman@redhat.com>, Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>, kefu chai <tchaikov@gmail.com>, Ali Maredia <amaredia@redhat.com>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>
 
-On Thu, Nov 3, 2016 at 2:40 AM, John Calcote <john.calcote@gmail.com> wrote:
-> I've now built the entire code base from a clean checkout of master -
-> the build completed without errors. However, the main build (as
-> defined by the README file) does NOT build the documentation - it does
-> build the man pages, but not the "read-the-docs" rst files.
+On Wed, Nov 2, 2016 at 6:16 PM, Dan van der Ster <dan@vanderster.com> wrote:
+> Hi,
+>
+> I'm not able to mount a manila created share with the 4.8.6 kernel.
+> AFAICT rados namespaces support was added in 4.8, but still I get a
+> weird error mounting:
+>
+> # mount -t ceph
+> 188.184.80.24:6789:/volumes/_nogroup/bf476d31-32fa-444a-9f75-eb1da8039641
+> /mnt -o name=ricardo02,secret=xxxx==
+> mount: 188.184.80.24:6789:/volumes/_nogroup/bf476d31-32fa-444a-9f75-eb1da8039641
+> is write-protected, mounting read-only
+> mount: cannot mount
+> 188.184.80.24:6789:/volumes/_nogroup/bf476d31-32fa-444a-9f75-eb1da8039641
+> read-only
+>
+> That user ricardo02 has namespace scoped caps:
+>
+> client.ricardo02
+> key: xxx==
+> caps: [mds] allow rw path=/volumes/_nogroup/bf476d31-32fa-444a-9f75-eb1da8039641
+> caps: [mon] allow r
+> caps: [osd] allow rw pool=cephfs_data
+> namespace=fsvolumens_bf476d31-32fa-444a-9f75-eb1da8039641
+>
+> I confirmed that I can mount with the super manila user:
+>
+> # mount -t ceph 188.184.80.24:6789:/ /mnt -o name=manila,secret=xxx==
+> # ls /mnt/
+> volumes
+>
+> Is there something I'm doing wrong with the kernel client, or are
+> these manila-created shares still not accessible with 4.8.6 ?
+>
+>
+> And BTW, randomly I tried mounting with the limited cap ricard02 user
+> at prefix / and got a kernel oops:
+>
+> # mount -t ceph 188.184.80.24:6789:/ /mnt -o name=ricardo02,secret=xxx==
+> <hangs...>
+>
+> [ 1119.856805] ------------[ cut here ]------------
+> [ 1119.857254] WARNING: CPU: 2 PID: 55 at fs/ceph/mds_client.c:2657
+> dispatch+0x5d4/0xa60 [ceph]
+> [ 1119.858058] Modules linked in: ceph libceph fscache
+> crct10dif_pclmul crc32_pclmul ghash_clmulni_intel aesni_intel lrw
+> gf128mul glue_helper ablk_helper cryptd ppdev cirrus ttm
+> drm_kms_helper joydev input_leds virtio_balloon drm parport_pc
+> syscopyarea sysfillrect parport sysimgblt fb_sys_fops i2c_piix4 pcspkr
+> acpi_cpufreq nfsd auth_rpcgss nfs_acl lockd grace ip_tables xfs
+> libcrc32c ata_generic pata_acpi virtio_blk virtio_net crc32c_intel
+> ata_piix virtio_pci virtio_ring virtio serio_raw libata floppy sunrpc
+> [ 1119.863023] CPU: 2 PID: 55 Comm: kworker/2:1 Not tainted
+> 4.8.6-1.el7.elrepo.x86_64 #1
+> [ 1119.863750] Hardware name: Fedora Project OpenStack Nova, BIOS
+> seabios-1.7.5-11.el7 04/01/2014
+> [ 1119.864552] Workqueue: ceph-msgr ceph_con_workfn [libceph]
+> [ 1119.865098]  0000000000000286 000000004eba1f8d ffff880208f57c30
+> ffffffff8135409f
+> [ 1119.865847]  0000000000000000 0000000000000000 ffff880208f57c70
+> ffffffff810817b1
+> [ 1119.866586]  00000a6108f57c50 ffff8802041ee100 000000000000000b
+> ffff880205b5a400
+> [ 1119.867359] Call Trace:
+> [ 1119.867589]  [<ffffffff8135409f>] dump_stack+0x63/0x84
+> [ 1119.868077]  [<ffffffff810817b1>] __warn+0xd1/0xf0
+> [ 1119.868518]  [<ffffffff810818ed>] warn_slowpath_null+0x1d/0x20
+> [ 1119.869078]  [<ffffffffa0487a74>] dispatch+0x5d4/0xa60 [ceph]
+> [ 1119.869610]  [<ffffffffa0408e3e>] try_read+0x9be/0x11a0 [libceph]
+> [ 1119.870207]  [<ffffffff810ba515>] ? put_prev_entity+0x35/0x730
+> [ 1119.872062]  [<ffffffffa04096ca>] ceph_con_workfn+0xaa/0x5d0 [libceph]
+> [ 1119.874021]  [<ffffffff8109ad82>] process_one_work+0x152/0x400
+> [ 1119.875888]  [<ffffffff8109b675>] worker_thread+0x125/0x4b0
+> [ 1119.877743]  [<ffffffff8109b550>] ? rescuer_thread+0x380/0x380
+> [ 1119.879552]  [<ffffffff810a1168>] kthread+0xd8/0xf0
+> [ 1119.881294]  [<ffffffff8173ad7f>] ret_from_fork+0x1f/0x40
+> [ 1119.883113]  [<ffffffff810a1090>] ? kthread_park+0x60/0x60
+> [ 1119.884960] ---[ end trace a512b13698936699 ]---
 
-Correct.
-
->
-> One thing I haven't mentioned before: I'm building on Ubuntu 14.04 - I
-> realize this may be an issue if I'm expected to use a later OS to
-> build docs.
->
-> Can Anyone help me? I'm just trying to help out here, and I've done
-> everything myself that could reasonably be expected of a software
-> engineer with 30 years experience. I may be new to Ceph, but I'm not
-> new to development, and I'm telling you all, there's a problem with
-> building the docs. Once again, here's what happens:
->
-> ----------------SNIP----------------
-> jcalcote@jmc-u14:~/dev/git/ceph$ ./admin/build-doc
-> Top Level States:  ['RecoveryMachine']
-> Unpacking /home/jcalcote/dev/git/ceph/src/pybind/rados
->   Running setup.py (path:/tmp/pip-awYqow-build/setup.py) egg_info for
-> package from file:///home/jcalcote/dev/git/ceph/src/pybind/rados
->     ERROR: Cannot find Cythonized file rados.c
->     WARNING: Cython is not installed.
->     Complete output from command python setup.py egg_info:
->     ERROR: Cannot find Cythonized file rados.c
->
-> WARNING: Cython is not installed.
->
-> ----------------------------------------
-> Cleaning up...
-> Command python setup.py egg_info failed with error code 1 in
-> /tmp/pip-awYqow-build
-> Storing debug log for failure in /home/jcalcote/.pip/pip.log
-> ----------------SNIP----------------
-
-I don't think a lot of people use build-doc, so it may very well be
-broken, especially given the recent transition to cmake.  Kefu and Ali
-might be able to help, if it's indeed related to that.
-
-I'd try checking out something pre-cmake/cython, like v10.2.0 (or even
-something older), and seeing if it works there.  Or if the changes
-aren't too invasive, just submit the PR and mention that build-doc
-seems to be wedged...
+This is not an oops, just a warning.  I think it's fixed in 4.9 with
+https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=fcff415c9421b417ef91d48f546f3c4566ddc358.
+Can't try the caps right now though - Zheng?
 
 Thanks,
 
