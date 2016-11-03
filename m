@@ -1,34 +1,62 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: rocksdb optimization regression (bluestore perf regression)
-Date: Thu, 3 Nov 2016 09:59:01 -0500
-Message-ID: <ea832d2a-96f4-7334-9d34-40d21740df6f@redhat.com>
+From: Avner Ben Hanoch <avnerb@mellanox.com>
+Subject: RE: ceph, XioMessenger issue
+Date: Thu, 3 Nov 2016 14:20:05 +0000
+Message-ID: <DB5PR05MB160708C3D1918AA60BC183FEA9A30@DB5PR05MB1607.eurprd05.prod.outlook.com>
+References: <FEC85B105C5F644CA51BDB90657EEA98281CB374@ddsm-mbx01.digdes.com>
+ <alpine.DEB.2.11.1611022003390.20331@piezo.us.to>
+ <DB5PR05MB1607074AA7D7B7E04076A241A9A30@DB5PR05MB1607.eurprd05.prod.outlook.com>
+ <1286081286.93716669.1478177382304.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46566 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755798AbcKCO7E (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 3 Nov 2016 10:59:04 -0400
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 8F3377F7B1
-        for <ceph-devel@vger.kernel.org>; Thu,  3 Nov 2016 14:59:03 +0000 (UTC)
-Received: from [10.3.112.103] (ovpn-112-103.phx2.redhat.com [10.3.112.103])
-        by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uA3Ex1b0025604
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Thu, 3 Nov 2016 10:59:03 -0400
+Received: from mail-db5eur01on0080.outbound.protection.outlook.com ([104.47.2.80]:11520
+        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752121AbcKCPx1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 3 Nov 2016 11:53:27 -0400
+In-Reply-To: <1286081286.93716669.1478177382304.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, Marov Aleksey <Marov.A@raidix.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Mostly this is for Igor and Somnath:
-
-It looks like the regression was indeed caused by lack of O2 
-optimization for rocksdb in master after 418bfd7.  The following PR 
-appears to resolve the performance regression in my tests:
-
-https://github.com/ceph/ceph/pull/11767
-
-Mark
+SEkgTWF0dCwNCg0KVGhhbmtzIGZvciB5b3VyIHN1Z2dlc3Rpb24sIHdlJ2xsIGNvbnNpZGVyIGl0
+Lg0KSW4gZ2VuZXJhbCwgd2UgZG9uJ3Qgc3VibWl0IFBScyBpbiBwYXJhbGxlbCBiZWNhdXNlIHdl
+IHdhbnQgY29udHJvbCBvbiB0aGVpciBhY2NlcHRhbmNlIG9yZGVyIHNpbmNlIG1hbnkgdGltZXMg
+b25lIFhpbyBQUiBpcyBiYXNlZCBvbiB0aGUgb3RoZXIuDQoNClJlZ2FyZHMsDQpBdm5lcg0KDQo+
+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IE1hdHQgQmVuamFtaW4gW21haWx0
+bzptYmVuamFtaW5AcmVkaGF0LmNvbV0NCj4gU2VudDogVGh1cnNkYXksIE5vdmVtYmVyIDAzLCAy
+MDE2IDE0OjUwDQo+IFN1YmplY3Q6IFJlOiBjZXBoLCBYaW9NZXNzZW5nZXIgaXNzdWUNCj4gDQo+
+IEhpIEF2bmVyLA0KPiANCj4gUGxlYXNlIG1ha2UgeW91ciB3b3JrIHZpc2libGUgYnkgY3JlYXRp
+bmcgUFJzIGZvciB5b3VyIHBpcGVsaW5lIG9mIGNvbW1pdHMuICBJZg0KPiBtYW55IGNvbW1pdHMg
+YXJlIG9mIGEgc2ltaWxhciB0eXBlLCBzdWNoIGFzIHRoaXMgMS1saW5lIGNsZWFudXAsIHBsZWFz
+ZQ0KPiBjb25zaWRlciBiYXRjaGluZyB0aGVtIGludG8gYSBzbWFsbGVyIG51bWJlciBvZiBQUnMu
+DQo+IA0KPiBSZWdhcmRzLA0KPiANCj4gTWF0dA0KPiANCj4gLS0tLS0gT3JpZ2luYWwgTWVzc2Fn
+ZSAtLS0tLQ0KPiA+IEZyb206ICJBdm5lciBCZW4gSGFub2NoIiA8YXZuZXJiQG1lbGxhbm94LmNv
+bT4NCj4gPiBUbzogIlNhZ2UgV2VpbCIgPHN3ZWlsQHJlZGhhdC5jb20+LCAiTWFyb3YgQWxla3Nl
+eSINCj4gPiA8TWFyb3YuQUByYWlkaXguY29tPg0KPiA+IENjOiBjZXBoLWRldmVsQHZnZXIua2Vy
+bmVsLm9yZw0KPiA+IFNlbnQ6IFRodXJzZGF5LCBOb3ZlbWJlciAzLCAyMDE2IDM6Mjc6NDAgQU0N
+Cj4gPiBTdWJqZWN0OiBSRTogY2VwaCwgWGlvTWVzc2VuZ2VyIGlzc3VlDQo+ID4NCj4gPiBXZSAo
+aW4gTWVsbGFub3gpIGJ1aWxkIHdpdGggWGlvIG9uIGEgcmVndWxhciBiYXNpcy4gIFdlIGhhdmUg
+YSBidW5jaA0KPiA+IG9mIGNvbW1pdHMgaW4gdGhlIHBpcGUgdGhhdCB3ZSBhcmUgc3VibWl0dGlu
+ZyAxIGFmdGVyIHRoZSBvdGhlci4NCj4gPiBDdXJyZW50bHksIHRoZSBwaXBlIGlzIGJsb2NrZWQg
+YnkgdGhpcyBQUg0KPiA+IGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC85NDQ0DQo+
+ID4gQWZ0ZXIgd2UgY29tcGxldGUgcmVsZWFzaW5nIG5ldyB2ZXJzaW9uIGhlcmUgd2UnbGwgc3Ry
+dWdnbGUgd2l0aCB0aGUNCj4gPiBuZWVkZWQgbWVyZ2VzDQo+ID4NCj4gPiA+IC0tLS0tT3JpZ2lu
+YWwgTWVzc2FnZS0tLS0tDQo+ID4gPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVs
+Lm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+ID4gPiBvd25lckB2Z2VyLmtlcm5lbC5vcmddIE9u
+IEJlaGFsZiBPZiBTYWdlIFdlaWwNCj4gPiA+IFNlbnQ6IFdlZG5lc2RheSwgTm92ZW1iZXIgMDIs
+IDIwMTYgMjI6MDcNCj4gPiA+IFRvOiBNYXJvdiBBbGVrc2V5DQo+ID4gPg0KPiA+ID4NCj4gPiA+
+IEl0IHNvdW5kcyBsaWtlIG5vYm9keSBlbHNlIGhhcyBoaXQgdGhpcyB5ZXQgZXhjZXB0IHlvdSwg
+c28NCj4gPiA+IGFwcGFyZW50bHkgb3RoZXJzIGFsc28gYXJlIGJ1aWxkaW5nIHdpdGhbb3V0XSB4
+aW8gaW4gdGhlaXIgZGV2DQo+ID4gPiBlbnZpcm9ubWVudHMuICA6KA0KPiA+IC0tDQo+ID4gVG8g
+dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNl
+cGgtZGV2ZWwiDQo+ID4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2Vy
+Lmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8NCj4gPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJu
+ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gPg0KPiANCj4gLS0NCj4gTWF0dCBCZW5qYW1p
+bg0KPiBSZWQgSGF0LCBJbmMuDQo+IDMxNSBXZXN0IEh1cm9uIFN0cmVldCwgU3VpdGUgMTQwQQ0K
+PiBBbm4gQXJib3IsIE1pY2hpZ2FuIDQ4MTAzDQo+IA0KPiBodHRwOi8vd3d3LnJlZGhhdC5jb20v
+ZW4vdGVjaG5vbG9naWVzL3N0b3JhZ2UNCj4gDQo+IHRlbC4gIDczNC03MDctMDY2MA0KPiBmYXgu
+ICA3MzQtNzY5LTg5MzgNCj4gY2VsLiAgNzM0LTIxNi01MzA5DQo=
