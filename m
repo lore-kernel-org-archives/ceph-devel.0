@@ -1,46 +1,59 @@
-From: Hidekazu Nakamura <hid-nakamura@vf.jp.nec.com>
-Subject: RE: Plugin for querying rgw metadata
-Date: Fri, 4 Nov 2016 00:52:46 +0000
-Message-ID: <8FC2060F93794D44942D588B8B547287121FAA41@BPXM03GP.gisp.nec.co.jp>
+From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
+Subject: Re: Plugin for querying rgw metadata
+Date: Thu, 3 Nov 2016 18:15:01 -0700
+Message-ID: <CADRKj5RL0zZSQK-N_gqEM-fJmW7maw=MwGpY54UFeWwGo=0jwA@mail.gmail.com>
 References: <8FC2060F93794D44942D588B8B547287121F993F@BPXM03GP.gisp.nec.co.jp>
- <CADRKj5RN4KWCHH9WhWYMRXsDi1L2x6ry6z_hHUcy426VbspQnQ@mail.gmail.com>
+ <CADRKj5RN4KWCHH9WhWYMRXsDi1L2x6ry6z_hHUcy426VbspQnQ@mail.gmail.com> <8FC2060F93794D44942D588B8B547287121FAA41@BPXM03GP.gisp.nec.co.jp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from TYO201.gate.nec.co.jp ([210.143.35.51]:62130 "EHLO
-        tyo201.gate.nec.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752511AbcKDAyO (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2016 20:54:14 -0400
-In-Reply-To: <CADRKj5RN4KWCHH9WhWYMRXsDi1L2x6ry6z_hHUcy426VbspQnQ@mail.gmail.com>
-Content-Language: ja-JP
+Received: from mail-vk0-f41.google.com ([209.85.213.41]:34358 "EHLO
+        mail-vk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752892AbcKDBPD (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2016 21:15:03 -0400
+Received: by mail-vk0-f41.google.com with SMTP id x186so55190011vkd.1
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Nov 2016 18:15:02 -0700 (PDT)
+In-Reply-To: <8FC2060F93794D44942D588B8B547287121FAA41@BPXM03GP.gisp.nec.co.jp>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
+To: Hidekazu Nakamura <hid-nakamura@vf.jp.nec.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Haruhiko Katou <har-katou@ts.jp.nec.com>
 
-WWFodWRhLA0KDQo+ID4gSSBoZWFyZCBhdCBPcGVuU3RhY2sgU3VtbWl0IEJhcmNlbG9uYVsqXSB0
-aGF0IGNvbW11bml0eSB3aWxsIGRldmVsb3ANCj4gcGx1Z2luDQo+ID4gd2hpY2ggcHV0IG1ldGFk
-YXRhIGludG8gZWxhc3RpY3NlYXJjaCBmb3IgcXVlcnlpbmcgbWV0YWRhdGEuDQo+ID4gQ291bGQg
-YW55b25lIHRlYWNoIG1lIHNwZWMgb2YgaXQ/DQo+IA0KPiBJIHNlbnQgYW4gZW1haWwgdG8gY2Vw
-aC1kZXZlbCBhIHdoaWxlIGJhY2sgZGVzY3JpYmluZyBpdCwgaGVyZSBpdCBpczoNCj4gDQo+IGh0
-dHA6Ly93d3cuc3Bpbmljcy5uZXQvbGlzdHMvY2VwaC1kZXZlbC9tc2czMjIxOS5odG1sDQoNClRo
-YW5rIHlvdSBmb3IgcG9pbnRpbmcuDQpBcyBmYXIgYXMgSSB1bmRlcnN0YW5kLCBNeSBjb25jZXJu
-IGlzIG5vdCBzYXRpc2ZpZWQgYnkgdGhpcyBmZWF0dXJlLg0KDQo+ID4NCj4gPiBNeSBjb25jZXJu
-IGlzIHdoZXRoZXIgb3BlcmF0b3IgY291bGQga25vdyBvYmplY3Qgc3luYyBzdGF0dXMgYmV0d2Vl
-biB6b25lcy4NCj4gDQo+ICdyYWRvc2d3LWFkbWluIHN5bmMgc3RhdHVzJyBjYW4gYmUgdXNlZCB0
-byBxdWVyeSBlYWNoIHpvbmUgYWJvdXQgdGhlDQo+IHN5bmMgc3RhdHVzLCBidXQgaXQncyBub3Qg
-YSBwZXItb2JqZWN0IGdyYW51bGFyaXR5Lg0KDQpZZXMsICdyYWRvc2d3LWFkbWluIHN5bmMgc3Rh
-dHVzJyByZXByZXNlbnRzIG92ZXJhbGwgc3RhdHVzIGJldHdlZW4gem9uZXMuDQpQZXItb2JqZWN0
-IGlzIG5lZWRlZCBmb3IgZGlzYXN0ZXIgcmVjb3ZlcnkgcHVycG9zZXMuIEJlY2F1c2UgbXVsdGlz
-aXRlIHN5bmMgaXMgDQphc3luY2hyb25vdXMgYXMgeW91IGtub3csIGl0J3MgcG9zc2libGUgdGhh
-dCBvYmplY3QgaXMgdXBsb2FkZWQgb25seSBzaW5nbGUgem9uZQ0Kd2hlbiBvdGhlciB6b25lcyBh
-cmUgZG93bi4NCkRvZXMgY29tbXVuaXR5IGhhdmUgcGxhbiB0byBkZXZlbG9wIHN5bmMgc3RhdHVz
-IHBlci1vYmplY3QgZ3JhbnVsYXJpdHk/DQoNClRoYW5rcywNCkhpZGVrYXp1IE5ha2FtdXJhDQoN
-Cg0KPiBZZWh1ZGENCj4gDQo+ID4NCj4gPg0KPiBbKl1odHRwczovL3d3dy5vcGVuc3RhY2sub3Jn
-L3ZpZGVvcy92aWRlby9jZXBoLW5vdy1hbmQtbGF0ZXItb3VyLXBsYW4tDQo+IGZvci1vcGVuLXVu
-aWZpZWQtY2xvdWQtc3RvcmFnZQ0KPiA+DQo+ID4gVGhhbmtzLA0KPiA+IEhpZGVrYXp1IE5ha2Ft
-dXJhDQo+ID4NCj4gPiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
-IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiBpbg0KPiA+IHRoZSBib2R5IG9m
-IGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+ID4gTW9yZSBtYWpvcmRv
-bW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+On Thu, Nov 3, 2016 at 5:52 PM, Hidekazu Nakamura
+<hid-nakamura@vf.jp.nec.com> wrote:
+> Yahuda,
+>
+>> > I heard at OpenStack Summit Barcelona[*] that community will develop
+>> plugin
+>> > which put metadata into elasticsearch for querying metadata.
+>> > Could anyone teach me spec of it?
+>>
+>> I sent an email to ceph-devel a while back describing it, here it is:
+>>
+>> http://www.spinics.net/lists/ceph-devel/msg32219.html
+>
+> Thank you for pointing.
+> As far as I understand, My concern is not satisfied by this feature.
+>
+>> >
+>> > My concern is whether operator could know object sync status between zones.
+>>
+>> 'radosgw-admin sync status' can be used to query each zone about the
+>> sync status, but it's not a per-object granularity.
+>
+> Yes, 'radosgw-admin sync status' represents overall status between zones.
+> Per-object is needed for disaster recovery purposes. Because multisite sync is
+> asynchronous as you know, it's possible that object is uploaded only single zone
+> when other zones are down.
+> Does community have plan to develop sync status per-object granularity?
+>
+
+No immediate plan, but I created the following ticket:
+
+http://tracker.ceph.com/issues/17795
+
+This can be accomplished by iterating through the data shards,
+gathering modified buckets list and then going through the bucket
+indexes and get a list of all the objects that need to be synced.
+
+Yehuda
