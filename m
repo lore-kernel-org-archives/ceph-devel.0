@@ -1,39 +1,248 @@
-From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
-Subject: ceph-disk and /dev/dm-* permissions - race condition?
-Date: Fri, 4 Nov 2016 10:51:45 -0400
-Message-ID: <CAGbviv+bFfR=oC=XhYKB7zQBce3Ph59GALnhoKS_0e71z649mg@mail.gmail.com>
+From: John Calcote <john.calcote@gmail.com>
+Subject: Re: pools without rules
+Date: Fri, 4 Nov 2016 09:21:17 -0600
+Message-ID: <CA+LTictHL-wsMv1rSPZR9Keq15w5Re8j3rhioomNwM_npKJNqA@mail.gmail.com>
+References: <CA+LTicvDBOTt=d-W8FzgBbpmxrgtM0VFWKFFoEspk+Wekr2deA@mail.gmail.com>
+ <CA+LTicsMfaG4C-yL_VGPMuKV0+gmXaTR+E9-1JrNYTgM0g9Drg@mail.gmail.com>
+ <alpine.DEB.2.11.1610311332100.20331@piezo.us.to> <CA+LTicszpfwTGHH1F5Ayys2=QMP2+61DeRPWk-F52JWV4nhOLQ@mail.gmail.com>
+ <alpine.DEB.2.11.1610311640280.20331@piezo.us.to> <CA+LTicuA41=jx5w+LSipaEHZaGo=nQYp0XBukA8aQCc03ggVYg@mail.gmail.com>
+ <CA+LTictrhoQEsJwGOynUzHCWgzenj5BYpuSfrngptGNYVXmUzg@mail.gmail.com>
+ <CA+aFP1BZL1ygPtmGEjsyV8GiUWfVveA7+fTpNY0L59b6=e3V7Q@mail.gmail.com>
+ <C554BA39-3862-4420-9A7A-BCD349B60882@Teradata.com> <CA+LTicsu3Ods3keSCxfkXk2S5JR8agqunL+HXeYBVOYFRkrY_Q@mail.gmail.com>
+ <CALe9h7cxXEp511axZNDJUmTMce3wtYEWEXpqpE7nNnaX+kxuDg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f177.google.com ([209.85.161.177]:34529 "EHLO
-        mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934593AbcKDOvr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Nov 2016 10:51:47 -0400
-Received: by mail-yw0-f177.google.com with SMTP id t125so89124783ywc.1
-        for <ceph-devel@vger.kernel.org>; Fri, 04 Nov 2016 07:51:46 -0700 (PDT)
+Received: from mail-ua0-f178.google.com ([209.85.217.178]:33242 "EHLO
+        mail-ua0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935294AbcKDPVT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 4 Nov 2016 11:21:19 -0400
+Received: by mail-ua0-f178.google.com with SMTP id 20so68839189uak.0
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Nov 2016 08:21:18 -0700 (PDT)
+In-Reply-To: <CALe9h7cxXEp511axZNDJUmTMce3wtYEWEXpqpE7nNnaX+kxuDg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>, "dillaman@redhat.com" <dillaman@redhat.com>, Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-We are running 10.2.3 with encrypted OSDs and journals using the old
-(i.e. non-Luks) keys and are seeing issues with the ceph-osd processes
-after a reboot of a storage server.  Our data and journals are on
-separate partitions on the same disk.
+Well, that is the really strange part - Cython is installed on the
+system - the doc build just reports it missing.
 
-After a reboot, sometimes the OSDs fail to start because of
-permissions problems.  The /dev/dm-* devices come back with
-permissions set to "root:disk" sometimes instead of "ceph:ceph".
-Weirder still is that sometimes the ceph-osd will start and work in
-spite of the incorrect perrmissions (root:disk) and other times they
-will fail and the logs show permissions errors when trying to access
-the journals. Sometimes half of the /dev/dm- devices are "root:disk"
-and others are "ceph:ceph".  There's no clear pattern, so that's what
-leads me to think its a race condition in the ceph_disk "dmcrypt_map"
-function.
+John
 
-Is there a known issue with ceph-disk and/or ceph-osd related to
-timing of the encrypted devices being setup and the permissions
-getting changed to the ceph processes can access them?
-
-Wyllys Ingersoll
-Keeper Technology, LLC
+On Fri, Nov 4, 2016 at 3:54 AM, John Spray <jspray@redhat.com> wrote:
+> On Thu, Nov 3, 2016 at 2:40 AM, John Calcote <john.calcote@gmail.com> wrote:
+>> I've now built the entire code base from a clean checkout of master -
+>> the build completed without errors. However, the main build (as
+>> defined by the README file) does NOT build the documentation - it does
+>> build the man pages, but not the "read-the-docs" rst files.
+>>
+>> One thing I haven't mentioned before: I'm building on Ubuntu 14.04 - I
+>> realize this may be an issue if I'm expected to use a later OS to
+>> build docs.
+>>
+>> Can Anyone help me? I'm just trying to help out here, and I've done
+>> everything myself that could reasonably be expected of a software
+>> engineer with 30 years experience. I may be new to Ceph, but I'm not
+>> new to development, and I'm telling you all, there's a problem with
+>> building the docs. Once again, here's what happens:
+>>
+>> ----------------SNIP----------------
+>> jcalcote@jmc-u14:~/dev/git/ceph$ ./admin/build-doc
+>> Top Level States:  ['RecoveryMachine']
+>> Unpacking /home/jcalcote/dev/git/ceph/src/pybind/rados
+>>   Running setup.py (path:/tmp/pip-awYqow-build/setup.py) egg_info for
+>> package from file:///home/jcalcote/dev/git/ceph/src/pybind/rados
+>>     ERROR: Cannot find Cythonized file rados.c
+>>     WARNING: Cython is not installed.
+>>     Complete output from command python setup.py egg_info:
+>>     ERROR: Cannot find Cythonized file rados.c
+>>
+>> WARNING: Cython is not installed.
+>
+> Have you tried installing Cython?  I'm surprised you have an
+> otherwise-working build if cython is not installed at all.
+>
+> Docs build working locally here (when running admin/build-doc).
+>
+> John
+>
+>>
+>> ----------------------------------------
+>> Cleaning up...
+>> Command python setup.py egg_info failed with error code 1 in
+>> /tmp/pip-awYqow-build
+>> Storing debug log for failure in /home/jcalcote/.pip/pip.log
+>> ----------------SNIP----------------
+>>
+>> Thanks in advance,
+>> John
+>>
+>>
+>> On Tue, Nov 1, 2016 at 6:41 PM, Kamble, Nitin A
+>> <Nitin.Kamble@teradata.com> wrote:
+>>> Hi John,
+>>>
+>>> I just follow the instructions in README, and it builds everything for me including docs.
+>>>
+>>> - Nitin
+>>>
+>>>> On Nov 1, 2016, at 5:25 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>
+>>>> Have you tried running the "install-deps.sh" script in the 'ceph' root
+>>>> directory?
+>>>>
+>>>> On Tue, Nov 1, 2016 at 7:00 PM, John Calcote <john.calcote@gmail.com> wrote:
+>>>>> Ok - Sage doesn't do doc - can anyone else help me out? I really need
+>>>>> to build the doc and after some recent changes, I'm getting the error
+>>>>> below when trying to run ./admin/build_doc.
+>>>>>
+>>>>> On Mon, Oct 31, 2016 at 6:28 PM, John Calcote <john.calcote@gmail.com> wrote:
+>>>>>> Hi Sage,
+>>>>>>
+>>>>>> I have a built and tested crush_map.rst doc patch ready to submit via
+>>>>>> github pull request, but after updating to the latest upstream code, I
+>>>>>> find I cannot build the doc anymore. Here's my output:
+>>>>>>
+>>>>>> jcalcote@jmc-u14:~/dev/git/ceph$ ./admin/build-doc
+>>>>>> Top Level States:  ['RecoveryMachine']
+>>>>>> Unpacking /home/jcalcote/dev/git/ceph/src/pybind/rados
+>>>>>>  Running setup.py (path:/tmp/pip-bhQUtc-build/setup.py) egg_info for
+>>>>>> package from file:///home/jcalcote/dev/git/ceph/src/pybind/rados
+>>>>>>    ERROR: Cannot find Cythonized file rados.c
+>>>>>>    WARNING: Cython is not installed.
+>>>>>>    Complete output from command python setup.py egg_info:
+>>>>>>    ERROR: Cannot find Cythonized file rados.c
+>>>>>>
+>>>>>> WARNING: Cython is not installed.
+>>>>>>
+>>>>>> ----------------------------------------
+>>>>>> Cleaning up...
+>>>>>> Command python setup.py egg_info failed with error code 1 in
+>>>>>> /tmp/pip-bhQUtc-build
+>>>>>> Storing debug log for failure in /home/jcalcote/.pip/pip.log
+>>>>>>
+>>>>>> I have installed the few additional doc dependencies required by the
+>>>>>> updated doc_dep.debs.txt. Not sure what's broken...
+>>>>>>
+>>>>>> Any ideas?
+>>>>>>
+>>>>>> Thanks,
+>>>>>> John
+>>>>>>
+>>>>>> On Mon, Oct 31, 2016 at 10:45 AM, Sage Weil <sage@newdream.net> wrote:
+>>>>>>> On Mon, 31 Oct 2016, John Calcote wrote:
+>>>>>>>> Hi Sage,
+>>>>>>>>
+>>>>>>>> Thank you for the response.
+>>>>>>>>
+>>>>>>>> First: I've been writing ceph management software for a large storage
+>>>>>>>> vendor for a year now and this is the first I've heard of this. I'll
+>>>>>>>> admit, all of the bits of "urban knowledge" I've picked up from more
+>>>>>>>> experienced co-workers along the way has pointed me in the direction
+>>>>>>>> of a single rule per ruleset with matching ids, but none of them could
+>>>>>>>> tell me where they learned this "fact". Because these bits of
+>>>>>>>> information were out of context and word-of-mouth in nature, I've
+>>>>>>>> spent a fair amount of time pouring over the Ceph docs to determine
+>>>>>>>> the "real story". All my research for the last few months - both in
+>>>>>>>> the Ceph docs and in the CRUSH whitepaper, as well as from
+>>>>>>>> experimentation where the docs fell short - has lead me to believe
+>>>>>>>> that the intended use of rules and rulesets was different than you
+>>>>>>>> suggest. Don't get me wrong - I believe you know what you're talking
+>>>>>>>> about - I'm just concerned that others who are new to Ceph will come
+>>>>>>>> to the same conclusions.
+>>>>>>>
+>>>>>>> Yes.. the rule == ruleset was not the intended original approach, but we
+>>>>>>> found that in practice the rulesets didn't add anything useful that
+>>>>>>> you couldn't just as easily (and less confusingly) do with separate rules.
+>>>>>>> We tried to squash them out a few releases back but didn't get all
+>>>>>>> the way there, and taking the final step has some compatibility
+>>>>>>> implications, so we didn't finish.  This is the main excuse why it's not
+>>>>>>> well documented.  But yes, you're right.. it's not very clear.  :(
+>>>>>>> Probably we should, at a minimum, ensure that the original ruleset idea of
+>>>>>>> having multiple rules at the same ruleset *isn't* documented or
+>>>>>>> suggested...
+>>>>>>>
+>>>>>>>> Second: By my experimentation with very late code, Ceph monitor does,
+>>>>>>>> indeed, allow deletion of all rules in a set. It also allows the use
+>>>>>>>> of a ruleset in a pool whose size is outside the size constraints of
+>>>>>>>> all of the rules in the set. One thing I have NOT tried is writing to
+>>>>>>>> a pool in these conditions. Now that I consider it in light of other
+>>>>>>>> such situations, I'm inclined to believe that the write would hang or
+>>>>>>>> fail - probably hang. (I recently set up a pool whose single crush
+>>>>>>>> rule specified replicas on OSDs across more hosts than I had
+>>>>>>>> available, and the write attempt simply hung, and there was no log
+>>>>>>>> information in any logs to indicate a problem.)
+>>>>>>>
+>>>>>>> Okay, we should fix this then.  :(
+>>>>>>>
+>>>>>>>> Q: Is there something I can do to help make this issue less fuzzy for
+>>>>>>>> other noobs like myself? I'd be happy to work on docs or do whatever
+>>>>>>>> you suggest.
+>>>>>>>
+>>>>>>> - Let's make sure there aren't docs that suggest multiple rules in a
+>>>>>>> ruleset.
+>>>>>>>
+>>>>>>> - Let's prevent the tools from adding multiple rules in a ruleset.
+>>>>>>>
+>>>>>>> - A cleanup project could remove min/max size for rules, and just make
+>>>>>>> ruleset==ruleid explicitly...
+>>>>>>>
+>>>>>>> ?
+>>>>>>> sage
+>>>>>>>
+>>>>>>>
+>>>>>>>>
+>>>>>>>> Kind regards,
+>>>>>>>> John
+>>>>>>>>
+>>>>>>>> On Mon, Oct 31, 2016 at 7:33 AM, Sage Weil <sage@newdream.net> wrote:
+>>>>>>>>> On Sun, 30 Oct 2016, John Calcote wrote:
+>>>>>>>>>> Hi all -
+>>>>>>>>>>
+>>>>>>>>>> I posted this question to the ceph-user list a few days ago but no one
+>>>>>>>>>> responded, so I thought I'd send it to the devel list too:
+>>>>>>>>>>
+>>>>>>>>>> What happens if I create a pool and associated it with a ruleset (say,
+>>>>>>>>>> set '2', for instance), and then I remove all the rules from set '2'?
+>>>>>>>>>>
+>>>>>>>>>> Similarly, what happens if I add a single rule to ruleset 2 that's
+>>>>>>>>>> size-constrained to pools of size 2 - 3, but then create a replicated
+>>>>>>>>>> pool of size 4 using that ruleset?
+>>>>>>>>>>
+>>>>>>>>>> Is there a fundamental rule that ceph uses (e.g., random selection) to
+>>>>>>>>>> choose osds on which to store the replicas?
+>>>>>>>>>
+>>>>>>>>> 1- Ceph mon's should prevent you from removing the rule.  If not, that's a
+>>>>>>>>> usability bug.
+>>>>>>>>>
+>>>>>>>>> 2- If you somehow get to the point where there is no rule, the PGs
+>>>>>>>>> map to an empty set of OSDs, and they'll probably just show up as 'stale'
+>>>>>>>>> + something or inactive until you fix the pool to point to a valid
+>>>>>>>>> crush rule.
+>>>>>>>>>
+>>>>>>>>> 3- Most of the rule "set" logic has been deprecated/streamlined so that
+>>>>>>>>> for new clusters and new rules there is only one rule per ruleset and the
+>>>>>>>>> ids match up.
+>>>>>>>>>
+>>>>>>>>> sage
+>>>>>>>>
+>>>>>>>>
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>>>>
+>>>> --
+>>>> Jason
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
