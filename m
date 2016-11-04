@@ -1,84 +1,71 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: trying to get osd-scrub-repair to work on my jenkins builder
-Date: Fri, 4 Nov 2016 18:09:34 +0100
-Message-ID: <b09099ce-7419-f802-c84b-a425d1c445ff@digiware.nl>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: rocksdb wal proposed improvement
+Date: Fri, 4 Nov 2016 17:13:44 +0000
+Message-ID: <BY2PR02MB396C98FBEF3854409E23BB5F4A20@BY2PR02MB396.namprd02.prod.outlook.com>
+References: <alpine.DEB.2.11.1611041605190.20331@piezo.us.to>
+ <BY2PR02MB396573EAF55652571831CE3F4A20@BY2PR02MB396.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:42347 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756399AbcKDRJk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 4 Nov 2016 13:09:40 -0400
-Received: from [192.168.101.51] (vpn.ecoracks.nl [176.74.240.1])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by smtp.digiware.nl (Postfix) with ESMTPSA id 5D65D27F24
-        for <ceph-devel@vger.kernel.org>; Fri,  4 Nov 2016 18:09:36 +0100 (CET)
+Received: from mail-cys01nam02on0044.outbound.protection.outlook.com ([104.47.37.44]:27256
+        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1756742AbcKDRNq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 4 Nov 2016 13:13:46 -0400
+In-Reply-To: <BY2PR02MB396573EAF55652571831CE3F4A20@BY2PR02MB396.namprd02.prod.outlook.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "g.marripudi@samsung.com" <g.marripudi@samsung.com>
 
-Hi,
+Ohh I see what you are saying, you are saying rather than merging two files=
+ completely, take the first file and check for updates for in the 2nd and f=
+lush only the 1st..May be we should take 1st one and check for updates for =
+the min_write_buffer_number_to_merge and flush the 1st one..Likewise for ot=
+hers..
 
-On my workstation if have this tst completing just fine. But on my
-Jenkins-builder it keeps running into this state where it does not make
-any progress.
-Any particulars I should look for? I can let this run for an hour, but
-pg 2.0 stays active+degrades, and the script requires it to be clean.
-and the pgmap version is steadily incrementing.
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel=
+.org] On Behalf Of Somnath Roy
+Sent: Friday, November 04, 2016 10:07 AM
+To: Sage Weil
+Cc: ceph-devel@vger.kernel.org; g.marripudi@samsung.com
+Subject: RE: rocksdb wal proposed improvement
 
-What should be in the log files that points me to the problem?
+Sage,
+My understanding was rocksdb is already doing this kind of merge before flu=
+sh. I thought It will always go through min_write_buffer_number_to_merge me=
+mTable files and merge the updates, but, it will not be able to merge if sa=
+me key update came beyond min_write_buffer_number_to_merge files. Am I miss=
+ing anything ?
 
-Thanx,
---WjW
+Thanks & Regards
+Somnath
 
+-----Original Message-----
+From: Sage Weil [mailto:sweil@redhat.com]
+Sent: Friday, November 04, 2016 9:06 AM
+To: Somnath Roy
+Cc: ceph-devel@vger.kernel.org; g.marripudi@samsung.com
+Subject: rocksdb wal proposed improvement
 
-    cluster 667960a1-a2ae-11e6-a834-69c386980813
-     health HEALTH_WARN
-            1 pgs degraded
-            1 pgs stuck degraded
-            1 pgs stuck unclean
-            recovery 2/6 objects degraded (33.333%)
-            too few PGs per OSD (1 < min 30)
-           
-noscrub,nodeep-scrub,sortbitwise,require_jewel_osds,require_kraken_osds
-flag(s) set
-     monmap e1: 1 mons at {a=127.0.0.1:7107/0}
-            election epoch 3, quorum 0 a
-        mgr no daemons active
-     osdmap e117: 10 osds: 10 up, 10 in
-            flags
-noscrub,nodeep-scrub,sortbitwise,require_jewel_osds,require_kraken_osds
-      pgmap v674: 5 pgs, 2 pools, 7 bytes data, 1 objects
-            60710 MB used, 2314 GB / 2374 GB avail
-            2/6 objects degraded (33.333%)
-                   4 active+clean
-                   1 active+degraded
+Here's a quick write-up of what I think we should improve in rocksdb:
 
-PG_STAT OBJECTS MISSING_ON_PRIMARY DEGRADED MISPLACED UNFOUND BYTES LOG
-DISK_LOG STATE           STATE_STAMP                VERSION REPORTED
-UP            UP_PRIMARY ACTING        ACTING_PRIMARY LAST_SCRUB
-SCRUB_STAMP                LAST_DEEP_SCRUB DEEP_SCRUB_STAMP
-122: 2.0           1                  0        2         0       0    
-7   1        1 active+degraded 2016-11-04 17:55:00.190833    72'1 
-117:139 [3,1,9,0,6,2]          3 [3,1,9,0,6,2]              3       72'1
-2016-11-04 17:54:37.943943            72'1 2016-11-04 17:54:37.943943
-122: 1.3           0                  0        0         0       0    
-0   0        0    active+clean 2016-11-04 17:55:00.321568     0'0 
-117:139       [4,1,5]          4       [4,1,5]              4        0'0
-2016-11-04 17:52:24.704377             0'0 2016-11-04 17:52:24.704377
-122: 1.2           0                  0        0         0       0    
-0   0        0    active+clean 2016-11-04 17:55:00.249497     0'0 
-117:188       [0,5,9]          0       [0,5,9]              0        0'0
-2016-11-04 17:52:24.704324             0'0 2016-11-04 17:52:24.704324
-122: 1.1           0                  0        0         0       0    
-0   0        0    active+clean 2016-11-04 17:55:00.133525     0'0   
-116:7       [7,3,8]          7       [7,3,8]              7        0'0
-2016-11-04 17:52:24.704269             0'0 2016-11-04 17:52:24.704269
-122: 1.0           0                  0        0         0       0    
-0   0        0    active+clean 2016-11-04 17:53:18.409300     0'0    
-60:7       [8,0,2]          8       [8,0,2]              8        0'0
-2016-11-04 17:52:24.704159             0'0 2016-11-04 17:52:24.704159
+http://pad.ceph.com/p/rocksdb-wal-improvement
 
-
+sage
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in th=
+e body of a message to majordomo@vger.kernel.org More majordomo info at  ht=
+tp://vger.kernel.org/majordomo-info.html
