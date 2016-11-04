@@ -1,127 +1,124 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [RFC PATCH 07/10] ceph: update cap message struct version to 9
-Date: Fri,  4 Nov 2016 07:34:30 -0400
-Message-ID: <1478259273-3471-8-git-send-email-jlayton@redhat.com>
+Subject: [RFC PATCH 04/10] ceph: save off btime and change_attr when we get an InodeStat
+Date: Fri,  4 Nov 2016 07:34:27 -0400
+Message-ID: <1478259273-3471-5-git-send-email-jlayton@redhat.com>
 References: <1478259273-3471-1-git-send-email-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45620 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:52706 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1761596AbcKDLek (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 4 Nov 2016 07:34:40 -0400
+        id S1761368AbcKDLei (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 4 Nov 2016 07:34:38 -0400
 In-Reply-To: <1478259273-3471-1-git-send-email-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: idryomov@gmail.com, zyan@redhat.com, sage@redhat.com
 
-The userland ceph has MClientCaps at struct version 9. This brings the
-kernel up the same version.
-
-With this change, we have to start tracking the btime and change_attr,
-so that the client can pass back sane values in cap messages. The
-client doesn't care about the btime at all, so this is just passed
-around, but the change_attr is used when ceph is exported via NFS.
-
-For now, the new "sync" parm is left at 0, to preserve the existing
-behavior of the client.
+Needed so we can send the proper values in cap flushes.
 
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- fs/ceph/caps.c | 33 +++++++++++++++++++++++++--------
- 1 file changed, 25 insertions(+), 8 deletions(-)
+ fs/ceph/inode.c                    |  9 ++++++++-
+ fs/ceph/mds_client.c               | 10 ++++++++++
+ fs/ceph/mds_client.h               |  2 ++
+ fs/ceph/super.h                    |  2 ++
+ include/linux/ceph/ceph_features.h |  2 ++
+ 5 files changed, 24 insertions(+), 1 deletion(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 6e99866b1946..452f5024589f 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -991,9 +991,9 @@ struct cap_msg_args {
- 	struct ceph_mds_session	*session;
- 	u64			ino, cid, follows;
- 	u64			flush_tid, oldest_flush_tid, size, max_size;
--	u64			xattr_version;
-+	u64			xattr_version, change_attr;
- 	struct ceph_buffer	*xattr_buf;
--	struct timespec		atime, mtime, ctime;
-+	struct timespec		atime, mtime, ctime, btime;
- 	int			op, caps, wanted, dirty;
- 	u32			seq, issue_seq, mseq, time_warp_seq;
- 	kuid_t			uid;
-@@ -1026,13 +1026,13 @@ static int send_cap_msg(struct cap_msg_args *arg)
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index f03dc579e0ec..f7a3ec6d7152 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -436,6 +436,9 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
+ 	ci->i_inline_version = 0;
+ 	ci->i_time_warp_seq = 0;
+ 	ci->i_ceph_flags = 0;
++
++	memset(&ci->i_btime, 0, sizeof(ci->i_btime));
++
+ 	atomic64_set(&ci->i_ordered_count, 1);
+ 	atomic64_set(&ci->i_release_count, 1);
+ 	atomic64_set(&ci->i_complete_seq[0], 0);
+@@ -798,7 +801,10 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
  
- 	/* flock buffer size + inline version + inline data size +
- 	 * osd_epoch_barrier + oldest_flush_tid */
--	extra_len = 4 + 8 + 4 + 4 + 8;
-+	extra_len = 4 + 8 + 4 + 4 + 8 + 4 + 4 + 4 + 8 + 8 + 1;
- 	msg = ceph_msg_new(CEPH_MSG_CLIENT_CAPS, sizeof(*fc) + extra_len,
- 			   GFP_NOFS, false);
- 	if (!msg)
- 		return -ENOMEM;
+ 	/* update inode */
+ 	ci->i_version = le64_to_cpu(info->version);
+-	inode->i_version++;
++
++	/* Always take a larger change attr */
++	inode->i_version = max(inode->i_version, iinfo->change_attr);
++
+ 	inode->i_rdev = le32_to_cpu(info->rdev);
+ 	inode->i_blkbits = fls(le32_to_cpu(info->layout.fl_stripe_unit)) - 1;
  
--	msg->hdr.version = cpu_to_le16(6);
-+	msg->hdr.version = cpu_to_le16(9);
- 	msg->hdr.tid = cpu_to_le64(arg->flush_tid);
- 
- 	fc = msg->front.iov_base;
-@@ -1068,17 +1068,30 @@ static int send_cap_msg(struct cap_msg_args *arg)
+@@ -807,6 +813,7 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
+ 		inode->i_mode = le32_to_cpu(info->mode);
+ 		inode->i_uid = make_kuid(&init_user_ns, le32_to_cpu(info->uid));
+ 		inode->i_gid = make_kgid(&init_user_ns, le32_to_cpu(info->gid));
++		ci->i_btime = iinfo->btime;
+ 		dout("%p mode 0%o uid.gid %d.%d\n", inode, inode->i_mode,
+ 		     from_kuid(&init_user_ns, inode->i_uid),
+ 		     from_kgid(&init_user_ns, inode->i_gid));
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 815acd1a56d4..7217404f0f7c 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -111,6 +111,16 @@ static int parse_reply_info_in(void **p, void *end,
+ 		}
  	}
  
- 	p = fc + 1;
--	/* flock buffer size */
-+	/* flock buffer size (version 2) */
- 	ceph_encode_32(&p, 0);
--	/* inline version */
-+	/* inline version (version 4) */
- 	ceph_encode_64(&p, arg->inline_data ? 0 : CEPH_INLINE_NONE);
- 	/* inline data size */
- 	ceph_encode_32(&p, 0);
--	/* osd_epoch_barrier */
-+	/* osd_epoch_barrier (version 5) */
- 	ceph_encode_32(&p, 0);
--	/* oldest_flush_tid */
-+	/* oldest_flush_tid (version 6) */
- 	ceph_encode_64(&p, arg->oldest_flush_tid);
- 
-+	/* caller_uid/caller_gid (version 7) */
-+	ceph_encode_32(&p, (u32)-1);
-+	ceph_encode_32(&p, (u32)-1);
++	if (features & CEPH_FEATURE_FS_BTIME) {
++		ceph_decode_need(p, end, sizeof(struct ceph_timespec), bad);
++		ceph_decode_timespec(&info->btime, *p);
++		*p += sizeof(struct ceph_timespec);
++		ceph_decode_64_safe(p, end, info->change_attr, bad);
++	} else {
++		memset(&info->btime, 0, sizeof(info->btime));
++		info->change_attr = 0;
++	}
 +
-+	/* pool namespace (version 8) */
-+	ceph_encode_32(&p, 0);
-+
-+	/* btime, change_attr, sync (version 9) */
-+	ceph_encode_timespec(p, &arg->btime);
-+	p += sizeof(struct ceph_timespec);
-+	ceph_encode_64(&p, arg->change_attr);
-+	ceph_encode_8(&p, 0);
-+
- 	ceph_con_send(&arg->session->s_con, msg);
  	return 0;
- }
-@@ -1189,9 +1202,11 @@ static int __send_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
- 		arg.xattr_buf = NULL;
- 	}
+ bad:
+ 	return err;
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index 3c6f77b7bb02..e217a3dd3f19 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -46,6 +46,8 @@ struct ceph_mds_reply_info_in {
+ 	char *inline_data;
+ 	u32 pool_ns_len;
+ 	char *pool_ns_data;
++	struct timespec btime;
++	u64 change_attr;
+ };
  
-+	arg.change_attr = inode->i_version;
- 	arg.mtime = inode->i_mtime;
- 	arg.atime = inode->i_atime;
- 	arg.ctime = inode->i_ctime;
-+	arg.btime = ci->i_btime;
+ struct ceph_mds_reply_dir_entry {
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 3e3fa9163059..244fd8dbff31 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -288,6 +288,8 @@ struct ceph_inode_info {
+ 	struct ceph_file_layout i_layout;
+ 	char *i_symlink;
  
- 	arg.op = op;
- 	arg.caps = cap->implemented;
-@@ -1241,10 +1256,12 @@ static inline int __send_flush_snap(struct inode *inode,
- 	arg.max_size = 0;
- 	arg.xattr_version = capsnap->xattr_version;
- 	arg.xattr_buf = capsnap->xattr_blob;
-+	arg.change_attr = capsnap->change_attr;
++	struct timespec i_btime;
++
+ 	/* for dirs */
+ 	struct timespec i_rctime;
+ 	u64 i_rbytes, i_rfiles, i_rsubdirs;
+diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
+index ae2f66833762..95b174a676d5 100644
+--- a/include/linux/ceph/ceph_features.h
++++ b/include/linux/ceph/ceph_features.h
+@@ -76,6 +76,8 @@
+ // duplicated since it was introduced at the same time as CEPH_FEATURE_CRUSH_TUNABLES5
+ #define CEPH_FEATURE_NEW_OSDOPREPLY_ENCODING   (1ULL<<58) /* New, v7 encoding */
+ #define CEPH_FEATURE_FS_FILE_LAYOUT_V2       (1ULL<<58) /* file_layout_t */
++#define CEPH_FEATURE_FS_BTIME			(1ULL<<59) /* btime */
++#define CEPH_FEATURE_FS_CHANGE_ATTR		(1ULL<<59) /* change_attr */
  
- 	arg.atime = capsnap->atime;
- 	arg.mtime = capsnap->mtime;
- 	arg.ctime = capsnap->ctime;
-+	arg.btime = capsnap->btime;
- 
- 	arg.op = CEPH_CAP_OP_FLUSHSNAP;
- 	arg.caps = capsnap->issued;
+ /*
+  * The introduction of CEPH_FEATURE_OSD_SNAPMAPPER caused the feature
 -- 
 2.7.4
 
