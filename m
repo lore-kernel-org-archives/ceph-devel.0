@@ -1,55 +1,50 @@
-From: Jeff Layton <jlayton@poochiereds.net>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
 Subject: Re: kraken
-Date: Thu, 03 Nov 2016 18:36:25 -0400
-Message-ID: <1478212585.17105.3.camel@poochiereds.net>
+Date: Fri, 4 Nov 2016 00:15:51 +0000
+Message-ID: <C7C78408-3020-4F57-9E66-F621116BC504@Teradata.com>
 References: <alpine.DEB.2.11.1611011319120.20331@piezo.us.to>
+ <EAD3EBB1-A294-401A-8352-BCF19A3FBECC@Teradata.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:34985 "EHLO
-        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933204AbcKCWg3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2016 18:36:29 -0400
-Received: by mail-qt0-f171.google.com with SMTP id c47so37904616qtc.2
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Nov 2016 15:36:28 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1611011319120.20331@piezo.us.to>
+Received: from nat13.teradata.com ([153.65.16.13]:33241 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S933372AbcKDAPz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Nov 2016 20:15:55 -0400
+In-Reply-To: <EAD3EBB1-A294-401A-8352-BCF19A3FBECC@Teradata.com>
+Content-Language: en-US
+Content-ID: <9101777CA3B0034DAE1F583AA8F44387@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
-Cc: John Spray <jspray@redhat.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 2016-11-01 at 13:20 +0000, Sage Weil wrote:
-> Hey everyone,
-> 
-> I think we're about ready for a kraken feature freeze.  The main item we 
-> were waiting for was the EC overwrites and Sam has a working branch for 
-> review this week.  There are still a few odds and ends that I have on my 
-> list to get in (like the new CRUSH tunable), but it's a short list.
-> 
-> How does next Monday (11/7) sound for an initial freeze?
-> 
-> 
-
-I have a PR up that I'd like to see go in that fixes some really slow
-fsync performance in libcephfs:
-
-    https://github.com/ceph/ceph/pull/11710
-
-The catch here is that it requires a protocol change in MClientCaps, so
-it'd be good to merge that in with the btime/change_attr stuff before
-release. At this point though, I just want to understand whether the
-general approach is sound. Do we want to allow the client to hint to
-the MDS that it should flush its log.
-
-Also, we probably need to think about what to do with the libcephfs API
-overhaul:
-
-    https://github.com/ceph/ceph/pull/11647
-
-That will rev the libcephfs version to "2", and break the API. I have
-the ganesha and samba patches done.
-
-Do we want that in kraken, or should it wait for luminous?
--- 
-Jeff Layton <jlayton@poochiereds.net>
+SGkgU2FnZSwNCiAgICBUaGFua3MgZm9yIHB1bGxpbmcgbXkgUFIsIGFuZCBhbHNvIGV4cGxhaW5p
+bmcgdGhlIGN1cnJlbnQgQ0VQSEZTIHN0YXR1cyBvbiBDRE0gY2FsbC4NCg0KVG8gZm9sbG93IG9u
+IG9uIHRoZSBDRVBIRlMgZGlzY3Vzc2lvbiwgSSBkbyBub3Qgc2VlIGFueSBkb2N1bWVudGF0aW9u
+IGZvciBkZXBsb3lpbmcgbXVsdGlwbGUNCmNlcGhmcyBpbiBhIGNsdXN0ZXIuIEVzcGVjaWFsbHkg
+aGVyZTogaHR0cDovL2RvY3MuY2VwaC5jb20vZG9jcy9tYXN0ZXIvY2VwaGZzLw0KDQpUaGF0IG1l
+YW5zIHVubGVzcyBzb21lYm9keSBhZGRzIGRvY3VtZW50YXRpb24gZm9yIGRlcGxveWluZyBtdWx0
+aXBsZSBjZXBoZnMsIGtyYWtlbiB3b27igJl0DQpzaG93IHRoZSBmZWF0dXJlLCBhbmQgcGVvcGxl
+IG1heSBub3QgdXNlIGFuZCB2YWxpZGF0ZSBpdC4NCg0KQW55IGNoYW5jZSBzb21lb25lIGNhbiBt
+YWtlIGFuZCBwdXNoIHRoZSBtdWx0aXBsZSBjZXBoZnMgZGVwbG95bWVudCBkb2N1bWVudGF0aW9u
+IGJlZm9yZQ0KdGhlIGtyYWtlbiByZWxlYXNlPw0KDQpUaGFua3MsDQpOaXRpbg0KDQo+IE9uIE5v
+diAxLCAyMDE2LCBhdCAxMDoyMCBBTSwgS2FtYmxlLCBOaXRpbiBBIDxOaXRpbi5LYW1ibGVAVGVy
+YWRhdGEuY29tPiB3cm90ZToNCj4gDQo+IEkgbm90aWNlZCBjdXJyZW50IG1hc3RlciBpcyBicm9r
+ZW4gb24gU0xFUy4gSSBwdXNoZWQgYSBQUiB3aXRoIGEgc2luZ2xlIGxpbmUgY2hhbmdlIGZvciBp
+dC4gDQo+IEkgd291bGQgbGlrZSBLcmFrZW4gdG8gaGF2ZSB0aGlzIGZpeC4NCj4gDQo+IGh0dHBz
+Oi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8xMTcwOA0KPiANCj4gDQo+IFRoYW5rcywNCj4g
+Tml0aW4NCj4gDQo+PiBPbiBOb3YgMSwgMjAxNiwgYXQgNjoyMCBBTSwgU2FnZSBXZWlsIDxzd2Vp
+bEByZWRoYXQuY29tPiB3cm90ZToNCj4+IA0KPj4gSGV5IGV2ZXJ5b25lLA0KPj4gDQo+PiBJIHRo
+aW5rIHdlJ3JlIGFib3V0IHJlYWR5IGZvciBhIGtyYWtlbiBmZWF0dXJlIGZyZWV6ZS4gIFRoZSBt
+YWluIGl0ZW0gd2UgDQo+PiB3ZXJlIHdhaXRpbmcgZm9yIHdhcyB0aGUgRUMgb3ZlcndyaXRlcyBh
+bmQgU2FtIGhhcyBhIHdvcmtpbmcgYnJhbmNoIGZvciANCj4+IHJldmlldyB0aGlzIHdlZWsuICBU
+aGVyZSBhcmUgc3RpbGwgYSBmZXcgb2RkcyBhbmQgZW5kcyB0aGF0IEkgaGF2ZSBvbiBteSANCj4+
+IGxpc3QgdG8gZ2V0IGluIChsaWtlIHRoZSBuZXcgQ1JVU0ggdHVuYWJsZSksIGJ1dCBpdCdzIGEg
+c2hvcnQgbGlzdC4NCj4+IA0KPj4gSG93IGRvZXMgbmV4dCBNb25kYXkgKDExLzcpIHNvdW5kIGZv
+ciBhbiBpbml0aWFsIGZyZWV6ZT8NCj4+IA0KPj4gc2FnZQ0KPj4gDQo+PiAtLQ0KPj4gVG8gdW5z
+dWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgt
+ZGV2ZWwiIGluDQo+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
+bmVsLm9yZw0KPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9y
+Zy9tYWpvcmRvbW8taW5mby5odG1sDQo+IA0KDQo=
