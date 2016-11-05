@@ -1,20 +1,18 @@
 From: jazeltq@gmail.com
 Subject: [PATCH] Add support readv,writev for rbd
-Date: Sat,  5 Nov 2016 13:07:59 +0800
-Message-ID: <20161105050759.79567-1-jazeltq@gmail.com>
-Return-path: <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
-List-Archive: <http://lists.nongnu.org/archive/html/qemu-devel/>
-List-Post: <mailto:qemu-devel@nongnu.org>
-List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
-	<mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Errors-To: qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org
-Sender: "Qemu-devel" <qemu-devel-bounces+gceq-qemu-devel=gmane.org@nongnu.org>
+Date: Sat,  5 Nov 2016 13:12:59 +0800
+Message-ID: <20161105051259.79914-1-jazeltq@gmail.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qk0-f196.google.com ([209.85.220.196]:34835 "EHLO
+        mail-qk0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750703AbcKEFNT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 5 Nov 2016 01:13:19 -0400
+Received: by mail-qk0-f196.google.com with SMTP id n204so7248138qke.2
+        for <ceph-devel@vger.kernel.org>; Fri, 04 Nov 2016 22:13:18 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: jdurgin@redhat.com, jcody@redhat.com, jdillama@redhat.com, kwolf@redhat.com, mreitz@redhat.com, qemu-block@nongnu.org
-Cc: tianqing <tianqing@unitedstck.com>, ceph-devel@vger.kernel.org, qemu-devel@nongnu.org
-List-Id: ceph-devel.vger.kernel.org
+Cc: qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, tianqing <tianqing@unitedstck.com>
 
 From: tianqing <tianqing@unitedstck.com>
 
@@ -207,3 +205,4 @@ index a57b3e3..a405c02 100644
                                        int64_t sector_num,
 -- 
 1.8.3.1
+
