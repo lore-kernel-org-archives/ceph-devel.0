@@ -1,55 +1,191 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] ceph: include linux/crush/mapper.h in crush/mapper.c
-Date: Mon, 7 Nov 2016 19:38:53 +0100
-Message-ID: <CAOi1vP9bmfZ2QaXqOP5MnX3bLnf9s2j1XjgNqzxiuoQQeanTkA@mail.gmail.com>
-References: <20161028112324.14850-1-tklauser@distanz.ch>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: [RFC PATCH 07/10] ceph: update cap message struct version to 9
+Date: Mon, 07 Nov 2016 13:39:27 -0500
+Message-ID: <1478543967.2386.43.camel@redhat.com>
+References: <1478259273-3471-1-git-send-email-jlayton@redhat.com>
+                  <1478259273-3471-8-git-send-email-jlayton@redhat.com>
+                  <1478264250.27698.1.camel@redhat.com>
+                  <CAAM7YAnzECeDocm5Mf+5DwDzyMgC0HXrh3jC9RLbi17T76XXOw@mail.gmail.com>
+            <1478517694.2386.13.camel@redhat.com>
+                 <alpine.DEB.2.11.1611071400160.18089@piezo.us.to>
+         <1478528548.2386.26.camel@redhat.com>
+         <alpine.DEB.2.11.1611071431420.18089@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f193.google.com ([209.85.217.193]:36860 "EHLO
-        mail-ua0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932635AbcKGSiy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Nov 2016 13:38:54 -0500
-Received: by mail-ua0-f193.google.com with SMTP id 12so6394187uas.3
-        for <ceph-devel@vger.kernel.org>; Mon, 07 Nov 2016 10:38:54 -0800 (PST)
-In-Reply-To: <20161028112324.14850-1-tklauser@distanz.ch>
+Received: from mail-qk0-f169.google.com ([209.85.220.169]:36200 "EHLO
+        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932837AbcKGSkh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Nov 2016 13:40:37 -0500
+Received: by mail-qk0-f169.google.com with SMTP id n21so77020654qka.3
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Nov 2016 10:39:31 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1611071431420.18089@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Tobias Klauser <tklauser@distanz.ch>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: "Yan, Zheng" <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Zheng Yan <zyan@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
 
-On Fri, Oct 28, 2016 at 1:23 PM, Tobias Klauser <tklauser@distanz.ch> wrote=
-:
-> Include linux/crush/mapper.h in crush/mapper.c to get the prototypes of
-> crush_find_rule and crush_do_rule which are defined there. This fixes
-> the following GCC warnings when building with 'W=3D1':
->
->   net/ceph/crush/mapper.c:40:5: warning: no previous prototype for =E2=80=
-=98crush_find_rule=E2=80=99 [-Wmissing-prototypes]
->   net/ceph/crush/mapper.c:793:5: warning: no previous prototype for =E2=
-=80=98crush_do_rule=E2=80=99 [-Wmissing-prototypes]
->
-> Signed-off-by: Tobias Klauser <tklauser@distanz.ch>
-> ---
->  net/ceph/crush/mapper.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
-> index a421e905331a..407bd146ba9e 100644
-> --- a/net/ceph/crush/mapper.c
-> +++ b/net/ceph/crush/mapper.c
-> @@ -17,6 +17,7 @@
->  # include <linux/kernel.h>
->  # include <linux/crush/crush.h>
->  # include <linux/crush/hash.h>
-> +# include <linux/crush/mapper.h>
->  #else
->  # include "crush_compat.h"
->  # include "crush.h"
+On Mon, 2016-11-07 at 14:36 +0000, Sage Weil wrote:
+> On Mon, 7 Nov 2016, Jeff Layton wrote:
+> > On Mon, 2016-11-07 at 14:05 +0000, Sage Weil wrote:
+> > > On Mon, 7 Nov 2016, Jeff Layton wrote:
+> > > > On Mon, 2016-11-07 at 16:43 +0800, Yan, Zheng wrote:
+> > > > > On Fri, Nov 4, 2016 at 8:57 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> > > > > > 
+> > > > > > On Fri, 2016-11-04 at 07:34 -0400, Jeff Layton wrote:
+> > > > > > > 
+> > > > > > > The userland ceph has MClientCaps at struct version 9. This brings the
+> > > > > > > kernel up the same version.
+> > > > > > > 
+> > > > > > > With this change, we have to start tracking the btime and change_attr,
+> > > > > > > so that the client can pass back sane values in cap messages. The
+> > > > > > > client doesn't care about the btime at all, so this is just passed
+> > > > > > > around, but the change_attr is used when ceph is exported via NFS.
+> > > > > > > 
+> > > > > > > For now, the new "sync" parm is left at 0, to preserve the existing
+> > > > > > > behavior of the client.
+> > > > > > > 
+> > > > > > > Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> > > > > > > ---
+> > > > > > >  fs/ceph/caps.c | 33 +++++++++++++++++++++++++--------
+> > > > > > >  1 file changed, 25 insertions(+), 8 deletions(-)
+> > > > > > > 
+> > > > > > > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> > > > > > > index 6e99866b1946..452f5024589f 100644
+> > > > > > > --- a/fs/ceph/caps.c
+> > > > > > > +++ b/fs/ceph/caps.c
+> > > > > > > @@ -991,9 +991,9 @@ struct cap_msg_args {
+> > > > > > >       struct ceph_mds_session *session;
+> > > > > > >       u64                     ino, cid, follows;
+> > > > > > >       u64                     flush_tid, oldest_flush_tid, size, max_size;
+> > > > > > > -     u64                     xattr_version;
+> > > > > > > +     u64                     xattr_version, change_attr;
+> > > > > > >       struct ceph_buffer      *xattr_buf;
+> > > > > > > -     struct timespec         atime, mtime, ctime;
+> > > > > > > +     struct timespec         atime, mtime, ctime, btime;
+> > > > > > >       int                     op, caps, wanted, dirty;
+> > > > > > >       u32                     seq, issue_seq, mseq, time_warp_seq;
+> > > > > > >       kuid_t                  uid;
+> > > > > > > @@ -1026,13 +1026,13 @@ static int send_cap_msg(struct cap_msg_args *arg)
+> > > > > > > 
+> > > > > > >       /* flock buffer size + inline version + inline data size +
+> > > > > > >        * osd_epoch_barrier + oldest_flush_tid */
+> > > > > > > -     extra_len = 4 + 8 + 4 + 4 + 8;
+> > > > > > > +     extra_len = 4 + 8 + 4 + 4 + 8 + 4 + 4 + 4 + 8 + 8 + 1;
+> > > > > > >       msg = ceph_msg_new(CEPH_MSG_CLIENT_CAPS, sizeof(*fc) + extra_len,
+> > > > > > >                          GFP_NOFS, false);
+> > > > > > >       if (!msg)
+> > > > > > >               return -ENOMEM;
+> > > > > > > 
+> > > > > > > -     msg->hdr.version = cpu_to_le16(6);
+> > > > > > > +     msg->hdr.version = cpu_to_le16(9);
+> > > > > > >       msg->hdr.tid = cpu_to_le64(arg->flush_tid);
+> > > > > > > 
+> > > > > > >       fc = msg->front.iov_base;
+> > > > > > > @@ -1068,17 +1068,30 @@ static int send_cap_msg(struct cap_msg_args *arg)
+> > > > > > >       }
+> > > > > > > 
+> > > > > > >       p = fc + 1;
+> > > > > > > -     /* flock buffer size */
+> > > > > > > +     /* flock buffer size (version 2) */
+> > > > > > >       ceph_encode_32(&p, 0);
+> > > > > > > -     /* inline version */
+> > > > > > > +     /* inline version (version 4) */
+> > > > > > >       ceph_encode_64(&p, arg->inline_data ? 0 : CEPH_INLINE_NONE);
+> > > > > > >       /* inline data size */
+> > > > > > >       ceph_encode_32(&p, 0);
+> > > > > > > -     /* osd_epoch_barrier */
+> > > > > > > +     /* osd_epoch_barrier (version 5) */
+> > > > > > >       ceph_encode_32(&p, 0);
+> > > > > > > -     /* oldest_flush_tid */
+> > > > > > > +     /* oldest_flush_tid (version 6) */
+> > > > > > >       ceph_encode_64(&p, arg->oldest_flush_tid);
+> > > > > > > 
+> > > > > > > +     /* caller_uid/caller_gid (version 7) */
+> > > > > > > +     ceph_encode_32(&p, (u32)-1);
+> > > > > > > +     ceph_encode_32(&p, (u32)-1);
+> > > > > > 
+> > > > > > A bit of self-review...
+> > > > > > 
+> > > > > > Not sure if we want to set the above to something else -- maybe 0 or to
+> > > > > > current's creds? That may not always make sense though (during e.g.
+> > > > > > writeback).
+> > > > > > 
+> > > > 
+> > > > Looking further, I'm not quite sure I understand why we send creds at
+> > > > all in cap messages. Can you clarify where that matters?
+> > > > 
+> > > > The way I look at it, would be to consider caps to be something like a
+> > > > more granular NFS delegation or SMB oplock.
+> > > > 
+> > > > In that light, a cap flush is just the client sending updated attrs for
+> > > > the exclusive caps that it has already been granted. Is there a
+> > > > situation where we would ever want to refuse that update?
+> > > 
+> > > A chmod or chown can be done locally if you have excl caps and flushed 
+> > > back to the MDS via a caps message.  We need to verify the user has 
+> > > permission to make the change.
+> > > 
+> > 
+> > My take is that once the MDS has delegated Ax to the client, then it's
+> > effectively trusting the client to handle permissions enforcement
+> > correctly. I don't see why we should second guess that.
+> > 
+> > > > Note that nothing ever checks the return code for _do_cap_update in the
+> > > > userland code. If the permissions check fails, then we'll end up
+> > > > silently dropping the updated attrs on the floor.
+> > > 
+> > > Yeah.  This was mainly for expediency... the protocol assumes that flushes 
+> > > don't fail.  Given that the client does it's own permissions check, I 
+> > > think the way to improve this is to have it prevent the flush in the first 
+> > > place, so that it's only nefarious clients that are effected (and who 
+> > > cares if they get confused).  I don't think we have a particularly good 
+> > > way to tell the client it can't, say, sudo chmod 0:0 a file, though.
+> > > 
+> > 
+> > Sorry, I don't quite follow. How would we prevent the flush from a
+> > nefarious client (which is not something we can really control)?
+> > 
+> > In any case...ISTM that the permissions check in _do_cap_update ought to
+> > be replaced by a cephx key check. IOW, what we really want to know is
+> > whether the client is truly the one to which we delegated the caps. If
+> > so, then we sort of have to trust that it's doing the right thing with
+> > respect to permissions checking here.
+> 
+> The capability can say "you are allowed to be uid 1000 or uid 1020." We 
+> want to delegate the EXCL caps to the client so that a create + chmod + 
+> chown + write can all happen efficiently, but we still need to ensure that 
+> the values they set are legal (a permitted uid/gid combo).
+> 
+> A common example would be user workstations that are allowed access to 
+> /home/user and restricted via their mds caps to their uid/gid.  We need to 
+> prevent them from doing a 'sudo chown 0:0 foo'...
+> 
+> 
 
-Applied.
 
-Thanks,
+On what basis do you make such a decision though? For instance, NFS does
+root-squashing which is (generally) a per-export+per-client thing.
+It sounds like you're saying that ceph has different semantics here?
 
-                Ilya
+(cc'ing Greg here)
+
+Also, chown (at least under POSIX) is reserved for superuser only, and
+now that I look, I think this check in MDSAuthCaps::is_capable may be
+wrong:
+
+      // chown/chgrp
+      if (mask & MAY_CHOWN) {
+        if (new_uid != caller_uid ||   // you can't chown to someone else
+            inode_uid != caller_uid) { // you can't chown from someone else
+          continue;
+        }
+      }
+
+Shouldn't this just be a check for whether the caller_uid is 0 (or
+whatever the correct check for the equivalent to the kernel's CAP_CHOWN
+would be)?
+
+-- 
+Jeff Layton <jlayton@redhat.com>
