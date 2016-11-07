@@ -1,31 +1,26 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: rados and the next jewel release v10.2.4
-Date: Mon, 7 Nov 2016 14:50:51 +0100
-Message-ID: <582086BB.2030702@dachary.org>
-References: <5811C998.8010708@dachary.org>
+Subject: jewel branch for v10.2.4 ready for QE
+Date: Mon, 7 Nov 2016 14:52:51 +0100
+Message-ID: <58208733.3080505@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:49374 "EHLO
-        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752427AbcKGNu4 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Nov 2016 08:50:56 -0500
-In-Reply-To: <5811C998.8010708@dachary.org>
+Received: from relay5-d.mail.gandi.net ([217.70.183.197]:44981 "EHLO
+        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932176AbcKGNw4 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Nov 2016 08:52:56 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
+To: Yuri Weinstein <yweinste@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
 
-For the record Sam, Josh and Kefu approved the branch on condition that a few pull requests are merged, the last of which went in today https://github.com/ceph/ceph/pull/11679
+Hi Yuri,
 
-On 27/10/2016 11:32, Loic Dachary wrote:
-> Hi Sam,
-> 
-> The next jewel release as found at https://github.com/ceph/ceph/tree/jewel passed the rados suite (http://tracker.ceph.com/issues/17487#note-19 except for one rare transient failure http://tracker.ceph.com/issues/15454). Do you think the jewel branch is ready for QE to start their own round of testing ?
-> 
-> Cheers
-> 
+The jewel branch for v10.2.4 as found at https://github.com/ceph/ceph/commits/jewel has been approved by Greg, Yehuda, Jason and Sam and is ready for QE. For the record, the head is https://github.com/ceph/ceph/commit/0c38c464fff2280a6345b470f1c83aa6229776cc and the details of the tests run are at http://tracker.ceph.com/issues/17487
+
+Cheers
 
 -- 
 Loïc Dachary, Artisan Logiciel Libre
+
