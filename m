@@ -1,194 +1,94 @@
-From: Mustafa Muhammad <mustafa1024m@gmail.com>
-Subject: Re: Lots of radosgw-admin commands fail after upgrade
-Date: Mon, 7 Nov 2016 12:05:04 +0300
-Message-ID: <CAFehDbAeF6UqhGHUVYOjvTDhE-+qDAGfLPnk==bbjEUypzeWPw@mail.gmail.com>
-References: <CAFehDbCTSPLmh8LY03q0cfV1v2ACzF24ZShAk+OgSXYJLVjPqg@mail.gmail.com>
- <CABo9giRVAb-+2zvKWTWhRVF4fftG=szDxgrXBXNmDpH-yQrWMw@mail.gmail.com>
- <CAFehDbC6yBsbQCPVmwE+DCod-Xmbafp1MU_r1wYZ0xd_q3Dt3Q@mail.gmail.com> <CABo9giTbFUrW1uE4iO5c5=4S4sT9mtxoD+8gi1vemcLCf3RVew@mail.gmail.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: [RFC PATCH 08/10] ceph: add sync parameter to send_cap_msg
+Date: Mon, 07 Nov 2016 05:51:06 -0500
+Message-ID: <1478515866.2386.1.camel@redhat.com>
+References: <1478259273-3471-1-git-send-email-jlayton@redhat.com>
+         <1478259273-3471-9-git-send-email-jlayton@redhat.com>
+         <CAAM7YAmbTNzxg3ApfYfAJRaJDDU=sOo-hHg4BUMYTdBNX0ybOA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f53.google.com ([209.85.215.53]:33390 "EHLO
-        mail-lf0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750981AbcKGJFG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Nov 2016 04:05:06 -0500
-Received: by mail-lf0-f53.google.com with SMTP id c13so107740688lfg.0
-        for <ceph-devel@vger.kernel.org>; Mon, 07 Nov 2016 01:05:05 -0800 (PST)
-In-Reply-To: <CABo9giTbFUrW1uE4iO5c5=4S4sT9mtxoD+8gi1vemcLCf3RVew@mail.gmail.com>
+Received: from mail-yw0-f173.google.com ([209.85.161.173]:35417 "EHLO
+        mail-yw0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750995AbcKGKvK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Nov 2016 05:51:10 -0500
+Received: by mail-yw0-f173.google.com with SMTP id i145so33936915ywg.2
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Nov 2016 02:51:09 -0800 (PST)
+In-Reply-To: <CAAM7YAmbTNzxg3ApfYfAJRaJDDU=sOo-hHg4BUMYTdBNX0ybOA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Orit Wasserman <owasserm@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Zheng Yan <zyan@redhat.com>, Sage Weil <sage@redhat.com>
 
-I understood the script and applied it, "zone get" works fine now with
-realm, but "radosgw-admin zonegroup get" gives "master_zone":
-"default" and realm id with value, then after a minute it goes back to
-empty master_zone and realm id.
-So I still get:
-radosgw-admin bucket stats
-2016-11-07 12:04:13.680779 7f7a88e929c0  0 zonegroup default missing
-zone for master_zone=
-couldn't init storage provider
-What should I do?
+On Mon, 2016-11-07 at 16:32 +0800, Yan, Zheng wrote:
+> On Fri, Nov 4, 2016 at 7:34 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> > 
+> > So we can request an MDS log flush on a cap message when we know that
+> > we'll be waiting on the result.
+> > 
+> > Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> > ---
+> >  fs/ceph/caps.c | 6 ++++--
+> >  1 file changed, 4 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> > index 452f5024589f..e92c6ce53af6 100644
+> > --- a/fs/ceph/caps.c
+> > +++ b/fs/ceph/caps.c
+> > @@ -999,7 +999,7 @@ struct cap_msg_args {
+> >         kuid_t                  uid;
+> >         kgid_t                  gid;
+> >         umode_t                 mode;
+> > -       bool                    inline_data;
+> > +       bool                    inline_data, sync;
+> >  };
+> > 
+> >  /*
+> > @@ -1090,7 +1090,7 @@ static int send_cap_msg(struct cap_msg_args *arg)
+> >         ceph_encode_timespec(p, &arg->btime);
+> >         p += sizeof(struct ceph_timespec);
+> >         ceph_encode_64(&p, arg->change_attr);
+> > -       ceph_encode_8(&p, 0);
+> > +       ceph_encode_8(&p, arg->sync);
+> 
+> this is the 'flag' field? In MClientCaps, it's 'unsigned int'
+> 
 
-Thanks
-Mustafa
+Thanks for the review.
 
-On Wed, Nov 2, 2016 at 12:39 PM, Orit Wasserman <owasserm@redhat.com> wrote:
-> Hi,
-> You have hit the master zone issue.
-> Here is a fix I prefer:
-> http://lists.ceph.com/pipermail/ceph-users-ceph.com/2016-July/011157.html
-> It is very important notice to run the fix when the radosgw is down.
->
-> Good luck,
-> Orit
->
-> On Tue, Nov 1, 2016 at 10:07 PM, Mustafa Muhammad
-> <mustafa1024m@gmail.com> wrote:
->> On Tue, Nov 1, 2016 at 5:04 PM, Orit Wasserman <owasserm@redhat.com> wrote:
->>> Hi,
->>> what version of jewel are you using?
->>> can you try raodsgw-admin zone get --rgw-zone default and
->>> radosgw-admin zonegroup get --rgw-zonegroup default?
->>>
->> Hello, I am using 10.2.3
->> #radosgw-admin zone get --rgw-zone default
->> {
->>     "id": "default",
->>     "name": "default",
->>     "domain_root": ".rgw",
->>     "control_pool": ".rgw.control",
->>     "gc_pool": ".rgw.gc",
->>     "log_pool": ".log",
->>     "intent_log_pool": ".intent-log",
->>     "usage_log_pool": ".usage",
->>     "user_keys_pool": ".users",
->>     "user_email_pool": ".users.email",
->>     "user_swift_pool": ".users.swift",
->>     "user_uid_pool": ".users.uid",
->>     "system_key": {
->>         "access_key": "",
->>         "secret_key": ""
->>     },
->>     "placement_pools": [],
->>     "metadata_heap": ".rgw.meta",
->>     "realm_id": ""
->> }
->>
->> # radosgw-admin zonegroup get --rgw-zonegroup default
->> {
->>     "id": "default",
->>     "name": "default",
->>     "api_name": "",
->>     "is_master": "true",
->>     "endpoints": [],
->>     "hostnames": [],
->>     "hostnames_s3website": [],
->>     "master_zone": "",
->>     "zones": [
->>         {
->>             "id": "default",
->>             "name": "default",
->>             "endpoints": [],
->>             "log_meta": "false",
->>             "log_data": "false",
->>             "bucket_index_max_shards": 0,
->>             "read_only": "false"
->>         }
->>     ],
->>     "placement_targets": [
->>         {
->>             "name": "cinema-placement",
->>             "tags": []
->>         },
->>         {
->>             "name": "cinema-source-placement",
->>             "tags": []
->>         },
->>         {
->>             "name": "default-placement",
->>             "tags": []
->>         },
->>         {
->>             "name": "erasure-placement",
->>             "tags": []
->>         },
->>         {
->>             "name": "share-placement",
->>             "tags": []
->>         },
->>         {
->>             "name": "share2016-placement",
->>             "tags": []
->>         },
->>         {
->>             "name": "test-placement",
->>             "tags": []
->>         }
->>     ],
->>     "default_placement": "default-placement",
->>     "realm_id": ""
->> }
->>
->>
->> Thanks
->> Mustafa
->>
->>> Orit
->>>
->>> On Tue, Nov 1, 2016 at 2:13 PM, Mustafa Muhammad <mustafa1024m@gmail.com> wrote:
->>>> Hello,
->>>> I have production cluster configured with multiple placement pools according to:
->>>>
->>>> http://cephnotes.ksperis.com/blog/2014/11/28/placement-pools-on-rados-gw
->>>>
->>>> After upgrading to Jewel, most radosgw-admin are failing, probably
->>>> because there is no realm
->>>>
->>>>
->>>> # radosgw-admin realm list
->>>> {
->>>>     "default_info": "",
->>>>     "realms": []
->>>> }
->>>>
->>>>
->>>> # radosgw-admin zone get
->>>> unable to initialize zone: (2) No such file or directory
->>>>
->>>>
->>>> # radosgw-admin regionmap get
->>>> failed to read current period info: 2016-11-01 16:08:14.099948
->>>> 7f21b55ee9c0  0 RGWPeriod::init failed to init realm  id  : (2) No
->>>> such file or directory(2) No such file or directory
->>>> {
->>>>     "zonegroups": [],
->>>>     "master_zonegroup": "",
->>>>     "bucket_quota": {
->>>>         "enabled": false,
->>>>         "max_size_kb": -1,
->>>>         "max_objects": -1
->>>>     },
->>>>     "user_quota": {
->>>>         "enabled": false,
->>>>         "max_size_kb": -1,
->>>>         "max_objects": -1
->>>>     }
->>>> }
->>>>
->>>>
->>>> # radosgw-admin bucket stats
->>>> 2016-11-01 16:07:55.860053 7f6e747f89c0  0 zonegroup default missing
->>>> zone for master_zone=
->>>> couldn't init storage provider
->>>>
->>>> I have previous region.conf.json and zone.conf.json, how can I make
->>>> everything work again? Will creating new realm fix this?
->>>>
->>>> Regards
->>>> Mustafa Muhammad
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yes, the first version of the userland patch series had this as a bool,
+but I changed to a flags field based on some review of that set.
+
+I'll be posting a newer kernel set in the next day or two.
+
+> > 
+> > 
+> >         ceph_con_send(&arg->session->s_con, msg);
+> >         return 0;
+> > @@ -1223,6 +1223,7 @@ static int __send_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
+> >         arg.mode = inode->i_mode;
+> > 
+> >         arg.inline_data = ci->i_inline_version != CEPH_INLINE_NONE;
+> > +       arg.sync = false;
+> > 
+> >         spin_unlock(&ci->i_ceph_lock);
+> > 
+> > @@ -1278,6 +1279,7 @@ static inline int __send_flush_snap(struct inode *inode,
+> >         arg.mode = capsnap->mode;
+> > 
+> >         arg.inline_data = capsnap->inline_data;
+> > +       arg.sync = false;
+> > 
+> >         return send_cap_msg(&arg);
+> >  }
+> > --
+> > 2.7.4
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+-- 
+Jeff Layton <jlayton@redhat.com>
