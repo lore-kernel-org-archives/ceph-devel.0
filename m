@@ -1,49 +1,54 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: debug coredump on teuthology
-Date: Mon, 7 Nov 2016 20:31:14 +0800
-Message-ID: <CAJE9aOOQSuO2Wmu0dasUxJ1mht1gcrUcckfNcsHDEKQ6ubG5wg@mail.gmail.com>
-References: <CAJE9aOOy503R8HAjhqOKA0RCfZA9y67h0JQfFzcXaFSZr6Fs5g@mail.gmail.com>
- <alpine.DEB.2.11.1611041319550.20331@piezo.us.to>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: trying to get osd-scrub-repair to work on my jenkins builder
+Date: Mon, 7 Nov 2016 13:40:03 +0100
+Message-ID: <8b02c406-1413-5678-2d42-cda6111e8230@digiware.nl>
+References: <b09099ce-7419-f802-c84b-a425d1c445ff@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f173.google.com ([209.85.216.173]:36844 "EHLO
-        mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750980AbcKGMbQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Nov 2016 07:31:16 -0500
-Received: by mail-qt0-f173.google.com with SMTP id w33so85701950qtc.3
-        for <ceph-devel@vger.kernel.org>; Mon, 07 Nov 2016 04:31:15 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1611041319550.20331@piezo.us.to>
+Received: from smtp.digiware.nl ([176.74.240.9]:21333 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752280AbcKGMkR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 7 Nov 2016 07:40:17 -0500
+Received: from [192.168.101.51] (vpn.ecoracks.nl [176.74.240.1])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id 640F727CF3
+        for <ceph-devel@vger.kernel.org>; Mon,  7 Nov 2016 13:40:13 +0100 (CET)
+In-Reply-To: <b09099ce-7419-f802-c84b-a425d1c445ff@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Brad Hubbard <bhubbard@redhat.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Nov 4, 2016 at 9:22 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Fri, 4 Nov 2016, kefu chai wrote:
->> hi ceph developers,
->>
->> i just pulled together a simple script at
->> https://github.com/tchaikov/sepia-bt/blob/master/bt.sh for debugging
->> the coredump on teuthology. what it does is
->>
->> 1. download the ceph packages
->> 2. extract them so we have the debugged executable and symbols
->> 3. launch gdb and set the necessary paths
->>
->> et voil=C3=A0!
->>
->> the idea of this script comes from badone (Brad). i just translate it
->> into a shell script.
->>
->> pull requests welcomed!
->
-> This is great!  Maybe we should put it in ceph.git/src/scripts?
+On 4-11-2016 18:09, Willem Jan Withagen wrote:
+> Hi,
+> 
+> On my workstation if have this tst completing just fine. But on my
+> Jenkins-builder it keeps running into this state where it does not make
+> any progress.
+> Any particulars I should look for? I can let this run for an hour, but
+> pg 2.0 stays active+degrades, and the script requires it to be clean.
+> and the pgmap version is steadily incrementing.
 
-sure, will do.
+And as a side-track to this, it is not where things go wrong. But it is
+nog right either...
 
+ceph -c ./build/src/test/osd/testdir/osd-scrub-repair/ceph.conf --format
+xml status 2>/dev/null | \
+        xml sel \
+        -t -m "//pgmap/recovering_keys_per_sec" -v . -o ' ' \
+        -t -m "//pgmap/recovering_bytes_per_sec" -v . -o ' ' \
+        -t -m "//pgmap/recovering_objects_per_sec" -v .)
+    test -n "$progress"
 
---=20
-Regards
-Kefu Chai
+Does not seem to work because the output does not contain any of the xml
+fields...
+Now I've been beating myself over the head, but I cannot find the
+request that does have these fields.
+
+So a suggestion is welcom, and I'll submit a patch.
+
+thanx,
+--WjW
+
