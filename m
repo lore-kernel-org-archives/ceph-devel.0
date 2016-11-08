@@ -1,53 +1,30 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: fix printing wrong return variable in
- ceph_direct_read_write()
-Date: Tue, 8 Nov 2016 22:21:30 +0800
-Message-ID: <80D4752E-4A7F-428F-9FDA-A4E6916FF717@redhat.com>
-References: <CAGkCoNJ3ie=5artOKOnNdtpx=gj=jvA26SS2XVzLBg644Zui=A@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.1 \(3251\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAGkCoNJ3ie=5artOKOnNdtpx=gj=jvA26SS2XVzLBg644Zui=A@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Zhi Zhang <zhang.david2011@gmail.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Sage Weil <sage@newdream.net>
+Subject: Re: New Jewel cluster has firefly tunables by default
+Date: Tue, 8 Nov 2016 14:30:02 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1611081428510.29278@piezo.us.to>
+References: <56283c4e-47f3-2fe8-5f14-d8b363e91426@corp.ovh.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:55004 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751111AbcKHOaF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Nov 2016 09:30:05 -0500
+In-Reply-To: <56283c4e-47f3-2fe8-5f14-d8b363e91426@corp.ovh.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Tomasz Kuzemko <tomasz.kuzemko@corp.ovh.com>
+Cc: ceph-devel@vger.kernel.org
 
+On Tue, 8 Nov 2016, Tomasz Kuzemko wrote:
+> Hi,
+> I noticed that when a fresh Jewel cluster is deployed, by default it has
+> "firefly" tunables set. Is there some reason not to set "optimal" by
+> default or is this a bug?
 
-> On 8 Nov 2016, at 17:16, Zhi Zhang <zhang.david2011@gmail.com> wrote:
-> 
-> Fix printing wrong return variable for invalidate_inode_pages2_range
-> in ceph_direct_read_write().
-> 
-> Signed-off-by: Zhi Zhang <zhang.david2011@gmail.com>
-> ---
-> fs/ceph/file.c | 2 +-
-> 1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 18630e8..0136195 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -906,7 +906,7 @@ void ceph_sync_write_wait(struct inode *inode)
->                                       pos >> PAGE_SHIFT,
->                                       (pos + count) >> PAGE_SHIFT);
->               if (ret2 < 0)
-> -                       dout("invalidate_inode_pages2_range returned
-> %d\n", ret);
-> +                       dout("invalidate_inode_pages2_range returned
-> %d\n", ret2);
-> 
->               flags = CEPH_OSD_FLAG_ORDERSNAP |
->                       CEPH_OSD_FLAG_ONDISK |
-> 
-> 
+We usually lag by one or two stable releases so that older clients can 
+connect.  In particular, the kernel clients tend to lag as most users 
+are using distro kernels (and the kernel doesn't always get the support 
+immediately).
 
-Applied, Thanks
-
-Yan, Zheng
-
-> Regards,
-> Zhi Zhang (David)
-> Contact: zhang.david2011@gmail.com
->             zhangz.david@outlook.com
+sage
