@@ -1,55 +1,65 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Seeking help in getting run-tox-ceph-detect-init to work.
-Date: Tue, 8 Nov 2016 23:57:23 +0100
-Message-ID: <6a74274e-4134-183c-f8fa-a180b5a93783@digiware.nl>
+From: David Zafman <dzafman@redhat.com>
+Subject: Re: trying to get osd-scrub-repair to work on my jenkins builder
+Date: Tue, 8 Nov 2016 15:01:58 -0800
+Message-ID: <68bcf424-6ec6-329e-a245-a30942f501c9@redhat.com>
+References: <b09099ce-7419-f802-c84b-a425d1c445ff@digiware.nl>
+ <8b02c406-1413-5678-2d42-cda6111e8230@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:64519 "EHLO smtp.digiware.nl"
+Received: from mx1.redhat.com ([209.132.183.28]:56884 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752999AbcKHW5c (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 8 Nov 2016 17:57:32 -0500
-Received: from [192.168.10.10] (asus [192.168.10.10])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by smtp.digiware.nl (Postfix) with ESMTPSA id 5CD8C27FD2
-        for <ceph-devel@vger.kernel.org>; Tue,  8 Nov 2016 23:57:24 +0100 (CET)
+        id S1752475AbcKHXCA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 8 Nov 2016 18:02:00 -0500
+In-Reply-To: <8b02c406-1413-5678-2d42-cda6111e8230@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
 
-I'm looking for a developer with more Python experience....
-Especially with getting things thru tox.
+Willem,
 
-I was able to add FreeBSD support to ceph-detect-init in #11829. But
-then that is tested in run-tox-detect-init. Which now fails in a Linux
-Jenkins run:
-https://jenkins.ceph.com/job/ceph-pull-requests/13621/consoleFull#124607955c19247c4-fcb7-4c61-9a5d-7e2b9731c678
+At first I thought the fields were missing but I checked the xml output 
+right there in get_is_making_recovery_progress() and the "xml sel" did 
+see those fields while recovery was in progress.
 
-But that heavily depends on mock and variations on
-platform.linux_distribution(), which is over my head.
+David
 
-Like:
-    def test_get(self):
-        g = ceph_detect_init.get
-       with mock.patch('platform.linux_distribution',
-                        lambda **kwargs: (('unknown', '', ''))):
-            self.assertRaises(exc.UnsupportedPlatform, g)
 
-Which hits the assert because linux_distribution() returns
-	(' ', ' ', ' ')
-and the system info needs to be extracted from other functions.
-
-The brutal way would be to override this test, but the question then is
-with what? Because there is no one function that returns the required
-values. So the code would be a copy from what is in the _init_.py code.
-
-And that feels like a butcher testing his own meat.
-
-So help very much welcomed,
---WjW
-
+On 11/7/16 4:40 AM, Willem Jan Withagen wrote:
+> On 4-11-2016 18:09, Willem Jan Withagen wrote:
+>> Hi,
+>>
+>> On my workstation if have this tst completing just fine. But on my
+>> Jenkins-builder it keeps running into this state where it does not make
+>> any progress.
+>> Any particulars I should look for? I can let this run for an hour, but
+>> pg 2.0 stays active+degrades, and the script requires it to be clean.
+>> and the pgmap version is steadily incrementing.
+> And as a side-track to this, it is not where things go wrong. But it is
+> nog right either...
+>
+> ceph -c ./build/src/test/osd/testdir/osd-scrub-repair/ceph.conf --format
+> xml status 2>/dev/null | \
+>          xml sel \
+>          -t -m "//pgmap/recovering_keys_per_sec" -v . -o ' ' \
+>          -t -m "//pgmap/recovering_bytes_per_sec" -v . -o ' ' \
+>          -t -m "//pgmap/recovering_objects_per_sec" -v .)
+>      test -n "$progress"
+>
+> Does not seem to work because the output does not contain any of the xml
+> fields...
+> Now I've been beating myself over the head, but I cannot find the
+> request that does have these fields.
+>
+> So a suggestion is welcom, and I'll submit a patch.
+>
+> thanx,
+> --WjW
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
