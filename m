@@ -1,75 +1,32 @@
 From: Sage Weil <sweil@redhat.com>
-Subject: Re: 25G RDMA networking thoughts???
-Date: Tue, 8 Nov 2016 21:45:27 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1611082144360.29278@piezo.us.to>
-References: <acbd757e-d360-4e37-bc26-60eb9d6ec162.james.liu@alibaba-inc.com>,alpine.DEB.2.11.1611082116420.29278@piezo.us.to <16962d43-7f03-4e92-9eee-b3f4ab80408c.james.liu@alibaba-inc.com>
+Subject: master branch merges must pass unit tests
+Date: Tue, 8 Nov 2016 21:49:41 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1611082147590.29278@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1366109801-1478641529=:29278"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51866 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37450 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753831AbcKHVpa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 8 Nov 2016 16:45:30 -0500
-In-Reply-To: <16962d43-7f03-4e92-9eee-b3f4ab80408c.james.liu@alibaba-inc.com>
+        id S1753391AbcKHVuZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 8 Nov 2016 16:50:25 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 3C32680F99
+        for <ceph-devel@vger.kernel.org>; Tue,  8 Nov 2016 21:49:44 +0000 (UTC)
+Received: from ovpn-112-71.phx2.redhat.com (ovpn-112-71.phx2.redhat.com [10.3.112.71])
+        by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uA8LngBI008151
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+        for <ceph-devel@vger.kernel.org>; Tue, 8 Nov 2016 16:49:43 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "LIU, Fei" <james.liu@alibaba-inc.com>
-Cc: Haomai Wang <haomai@xsky.com>, ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+I enabled the github check that the unit tests pass in order to merge to 
+master.  These tests still aren't completely reliable, but they're close, 
+and we'll make better progress if we start enforcing it now.
 
---8323329-1366109801-1478641529=:29278
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-
-On Wed, 9 Nov 2016, LIU, Fei wrote:
-> Hi Sage，
->    Yes, Totally understood.  25G RDMA network for Ceph cluster is built for
-> interal test. Xio messenger and Async messenger(But it can only support
-> infiniband,right) are going to be two options. We are carefully evaluate
-> both of these two options. But the most important goal in the end is to see
-> how bluestore works with rdma to bring down the total latency for workload
-> like OLTP.  
-> 
-> Hi Haomai,
->    Would you mind let us know when the async messenger is going to support
-> ethernet if not support yet?
-
-The default async backend is PosixStack which is all TCP-based.  (And 
-async is now the default messenger in kraken.)
+Note that core developers can still override the check to merge if 
+it's necessary, but I encourage you to avoid doing so!
 
 sage
-
-> 
->    Regards,
->    James
->       ------------------------------------------------------------------
-> From:Sage Weil <sweil@redhat.com>
-> Time:2016 Nov 8 (Tue) 13:19
-> To:James <james.liu@alibaba-inc.com>
-> Subject:Re: 25G RDMA networking thoughts???
-> 
-> [adding ceph-devel]
-> 
-> On Wed, 9 Nov 2016, LIU, Fei wrote:
-> > Hi Sage,
-> >    I was wondering do you have any thoughts of 25G RDMA networking
-> > construction besides of xio-messenger/async?  Is there any guidance to bu
-> ild
-> > 25G RDMA netowrk to better control the whole Ceph cluster latency?
-> 
-> The only RDMA options right now are XioMessenger and AsyncMessenger's new 
-> RDMA backend. Both are experimental, but we'd be very interested in 
-> hearing about your experience.
-> 
-> I wouldn't assume that latency is network-related, though.  More often 
-> than not we're finding it's the OSD backend or the OSD request internals 
-> (e.g., request scheduling or peering) that's the culprit...
-> 
-> sage
-> 
-> 
-> 
-> 
---8323329-1366109801-1478641529=:29278--
