@@ -1,78 +1,156 @@
-From: Dong Wu <archer.wudong@gmail.com>
-Subject: Fwd: [ceph-users] Hammer OSD memory increase when add new machine
-Date: Tue, 8 Nov 2016 11:17:32 +0800
-Message-ID: <CAAL-TMdf-8Q9nd1px+VqFeQtVjg=vX6or4Xv0X3YW=-OzkNKgQ@mail.gmail.com>
-References: <CAAL-TMfWddz2x7GzTghoJzp=_=d-OwtVa7fxvt8aD-rFCUqiWg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f49.google.com ([209.85.213.49]:35513 "EHLO
-        mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750786AbcKHDRe (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Nov 2016 22:17:34 -0500
-Received: by mail-vk0-f49.google.com with SMTP id w194so138334675vkw.2
-        for <ceph-devel@vger.kernel.org>; Mon, 07 Nov 2016 19:17:33 -0800 (PST)
-In-Reply-To: <CAAL-TMfWddz2x7GzTghoJzp=_=d-OwtVa7fxvt8aD-rFCUqiWg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users <ceph-users@lists.ceph.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+From: jazeltq@gmail.com
+Subject: [RFC v2] RBD: Add support readv,writev for rbd
+Date: Tue,  8 Nov 2016 15:11:40 +0800
+Message-ID: <20161108071140.98922-1-jazeltq@gmail.com>
+Return-path: <qemu-block-bounces+gceqb-qemu-block=m.gmane.org@nongnu.org>
+List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-block>,
+	<mailto:qemu-block-request@nongnu.org?subject=unsubscribe>
+List-Archive: <http://lists.nongnu.org/archive/html/qemu-block/>
+List-Post: <mailto:qemu-block@nongnu.org>
+List-Help: <mailto:qemu-block-request@nongnu.org?subject=help>
+List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-block>,
+	<mailto:qemu-block-request@nongnu.org?subject=subscribe>
+Errors-To: qemu-block-bounces+gceqb-qemu-block=m.gmane.org@nongnu.org
+Sender: "Qemu-block"
+	<qemu-block-bounces+gceqb-qemu-block=m.gmane.org@nongnu.org>
+To: jdurgin@redhat.com, jcody@redhat.com, jdillama@redhat.com, kwolf@redhat.com, mreitz@redhat.com, qemu-block@nongnu.org
+Cc: tianqing <tianqing@unitedstack.com>, ceph-devel@vger.kernel.org, qemu-devel@nongnu.org
+List-Id: ceph-devel.vger.kernel.org
 
-any sugesstions?
+From: tianqing <tianqing@unitedstack.com>
 
-Thanks.
+Rbd can do readv and writev directly, so wo do not need to transform
+iov to buf or vice versa any more.
 
+Signed-off-by: tianqing <tianqing@unitedstack.com>
+---
+ block/rbd.c | 41 ++++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 36 insertions(+), 5 deletions(-)
 
----------- Forwarded message ----------
-From: Dong Wu <archer.wudong@gmail.com>
-Date: 2016-10-27 18:50 GMT+08:00
-Subject: Re: [ceph-users] Hammer OSD memory increase when add new machine
-To: huang jun <hjwsm1989@gmail.com>
-=E6=8A=84=E9=80=81=EF=BC=9A ceph-users <ceph-users@lists.ceph.com>
-
-
-2016-10-27 17:50 GMT+08:00 huang jun <hjwsm1989@gmail.com>:
-> how do you add the new machine ?
-> does it first added to default ruleset and then you add the new rule
-> for this group?
-> do you have data pool use the default rule, does these pool contain data?
-
-we dont use default ruleset, when we add new group machine,
-crush_location auto generate root and chassis, then we add a new rule
-for this group.
-
-
-> 2016-10-27 17:34 GMT+08:00 Dong Wu <archer.wudong@gmail.com>:
->> Hi all,
->>
->> We have a ceph cluster only use rbd. The cluster contains several
->> group machines, each group contains several machines, then each
->> machine has 12 SSDs, each ssd as an OSD (journal and data together).
->> eg:
->> group1: machine1~machine12
->> group2: machine13~machine24
->> ......
->> each group is separated with other group, which means each group has
->> separated pools.
->>
->> we use Hammer(0.94.6) compiled with jemalloc(4.2).
->>
->> We have found that when we add a new group machine, the other group
->> machine's memory increase 5% more or less (OSDs usage).
->>
->> each group's data is separated with others, so backfill only in group,
->> not across.
->> Why add a group of machine cause others memory increase? Is this reasona=
-ble?
->>
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
->
->
->
-> --
-> Thank you!
-> HuangJun
+diff --git a/block/rbd.c b/block/rbd.c
+index a57b3e3..93fe299 100644
+--- a/block/rbd.c
++++ b/block/rbd.c
+@@ -73,7 +73,12 @@ typedef struct RBDAIOCB {
+     BlockAIOCB common;
+     int64_t ret;
+     QEMUIOVector *qiov;
++/* Note:
++ * The LIBRBD_SUPPORTS_IOVEC is defined in librbd.h.
++ */
++#ifndef LIBRBD_SUPPORTS_IOVEC
+     char *bounce;
++#endif
+     RBDAIOCmd cmd;
+     int error;
+     struct BDRVRBDState *s;
+@@ -83,7 +88,9 @@ typedef struct RADOSCB {
+     RBDAIOCB *acb;
+     struct BDRVRBDState *s;
+     int64_t size;
++#ifndef LIBRBD_SUPPORTS_IOVEC
+     char *buf;
++#endif
+     int64_t ret;
+ } RADOSCB;
+ 
+@@ -426,11 +433,21 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
+         }
+     } else {
+         if (r < 0) {
++#ifndef LIBRBD_SUPPORTS_IOVEC
+             memset(rcb->buf, 0, rcb->size);
++#else
++            iov_memset(acb->qiov->iov, acb->qiov->niov, 0, 0, acb->qiov->size);
++#endif
+             acb->ret = r;
+             acb->error = 1;
+         } else if (r < rcb->size) {
++#ifndef LIBRBD_SUPPORTS_IOVEC
+             memset(rcb->buf + r, 0, rcb->size - r);
++#else
++            iov_memset(acb->qiov->iov, acb->qiov->niov,
++                       r, 0, acb->qiov->size - r);
++#endif
++
+             if (!acb->error) {
+                 acb->ret = rcb->size;
+             }
+@@ -441,10 +458,12 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
+ 
+     g_free(rcb);
+ 
++#ifndef LIBRBD_SUPPORTS_IOVEC
+     if (acb->cmd == RBD_AIO_READ) {
+         qemu_iovec_from_buf(acb->qiov, 0, acb->bounce, acb->qiov->size);
+     }
+     qemu_vfree(acb->bounce);
++#endif
+     acb->common.cb(acb->common.opaque, (acb->ret > 0 ? 0 : acb->ret));
+ 
+     qemu_aio_unref(acb);
+@@ -664,6 +683,7 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
+     acb->cmd = cmd;
+     acb->qiov = qiov;
+     assert(!qiov || qiov->size == size);
++#ifndef LIBRBD_SUPPORTS_IOVEC
+     if (cmd == RBD_AIO_DISCARD || cmd == RBD_AIO_FLUSH) {
+         acb->bounce = NULL;
+     } else {
+@@ -672,19 +692,20 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
+             goto failed;
+         }
+     }
+-    acb->ret = 0;
+-    acb->error = 0;
+-    acb->s = s;
+-
+     if (cmd == RBD_AIO_WRITE) {
+         qemu_iovec_to_buf(acb->qiov, 0, acb->bounce, qiov->size);
+     }
+-
+     buf = acb->bounce;
++#endif
++    acb->ret = 0;
++    acb->error = 0;
++    acb->s = s;
+ 
+     rcb = g_new(RADOSCB, 1);
+     rcb->acb = acb;
++#ifndef LIBRBD_SUPPORTS_IOVEC
+     rcb->buf = buf;
++#endif
+     rcb->s = acb->s;
+     rcb->size = size;
+     r = rbd_aio_create_completion(rcb, (rbd_callback_t) rbd_finish_aiocb, &c);
+@@ -694,10 +715,18 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
+ 
+     switch (cmd) {
+     case RBD_AIO_WRITE:
++#ifndef LIBRBD_SUPPORTS_IOVEC
+         r = rbd_aio_write(s->image, off, size, buf, c);
++#else
++        r = rbd_aio_writev(s->image, qiov->iov, qiov->niov, off, c);
++#endif
+         break;
+     case RBD_AIO_READ:
++#ifndef LIBRBD_SUPPORTS_IOVEC
+         r = rbd_aio_read(s->image, off, size, buf, c);
++#else
++        r = rbd_aio_readv(s->image, qiov->iov, qiov->niov, off, c);
++#endif
+         break;
+     case RBD_AIO_DISCARD:
+         r = rbd_aio_discard_wrapper(s->image, off, size, c);
+@@ -719,7 +748,9 @@ failed_completion:
+     rbd_aio_release(c);
+ failed:
+     g_free(rcb);
++#ifndef LIBRBD_SUPPORTS_IOVEC
+     qemu_vfree(acb->bounce);
++#endif
+     qemu_aio_unref(acb);
+     return NULL;
+ }
+-- 
+2.10.2
