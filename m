@@ -1,77 +1,78 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [RFC PATCH 07/10] ceph: update cap message struct version to 9
-Date: Mon, 7 Nov 2016 23:21:23 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1611072318290.29278@piezo.us.to>
-References: <alpine.DEB.2.11.1611072121100.29278@piezo.us.to> <CAJ4mKGZ8hJ8183Nj8vtexswRcqN4Ye8Qoqtrav6-GCs2d3hmgw@mail.gmail.com>
+From: Dong Wu <archer.wudong@gmail.com>
+Subject: Fwd: [ceph-users] Hammer OSD memory increase when add new machine
+Date: Tue, 8 Nov 2016 11:17:32 +0800
+Message-ID: <CAAL-TMdf-8Q9nd1px+VqFeQtVjg=vX6or4Xv0X3YW=-OzkNKgQ@mail.gmail.com>
+References: <CAAL-TMfWddz2x7GzTghoJzp=_=d-OwtVa7fxvt8aD-rFCUqiWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1089753980-1478560886=:29278"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48980 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751081AbcKGXV1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 7 Nov 2016 18:21:27 -0500
-In-Reply-To: <CAJ4mKGZ8hJ8183Nj8vtexswRcqN4Ye8Qoqtrav6-GCs2d3hmgw@mail.gmail.com>
+Received: from mail-vk0-f49.google.com ([209.85.213.49]:35513 "EHLO
+        mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750786AbcKHDRe (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Nov 2016 22:17:34 -0500
+Received: by mail-vk0-f49.google.com with SMTP id w194so138334675vkw.2
+        for <ceph-devel@vger.kernel.org>; Mon, 07 Nov 2016 19:17:33 -0800 (PST)
+In-Reply-To: <CAAL-TMfWddz2x7GzTghoJzp=_=d-OwtVa7fxvt8aD-rFCUqiWg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Jeff Layton <jlayton@redhat.com>, "Yan, Zheng" <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Zheng Yan <zyan@redhat.com>
+To: ceph-users <ceph-users@lists.ceph.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+any sugesstions?
 
---8323329-1089753980-1478560886=:29278
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Thanks.
 
-On Mon, 7 Nov 2016, Gregory Farnum wrote:
-> On Mon, Nov 7, 2016 at 1:21 PM, Sage Weil <sweil@redhat.com> wrote:
-> > On Mon, 7 Nov 2016, Jeff Layton wrote:
-> >> On Mon, 2016-11-07 at 20:09 +0000, Sage Weil wrote:
-> >> > On Mon, 7 Nov 2016, Gregory Farnum wrote:
-> >> > > On Mon, Nov 7, 2016 at 10:39 AM, Jeff Layton <jlayton@redhat.com> wrote:
-> >> > > > On Mon, 2016-11-07 at 14:36 +0000, Sage Weil wrote:
-> >> > > >> On Mon, 7 Nov 2016, Jeff Layton wrote:
-> >> > > >> > On Mon, 2016-11-07 at 14:05 +0000, Sage Weil wrote:
-> >> > > >> > > On Mon, 7 Nov 2016, Jeff Layton wrote:
-> >> > > >> > > > On Mon, 2016-11-07 at 16:43 +0800, Yan, Zheng wrote:
-> >> > > >> > > > > On Fri, Nov 4, 2016 at 8:57 PM, Jeff Layton <jlayton@redhat.com> wrote:
-> >> > > >> > > > > >
 
-[okay, time to prune this a bit]
+---------- Forwarded message ----------
+From: Dong Wu <archer.wudong@gmail.com>
+Date: 2016-10-27 18:50 GMT+08:00
+Subject: Re: [ceph-users] Hammer OSD memory increase when add new machine
+To: huang jun <hjwsm1989@gmail.com>
+=E6=8A=84=E9=80=81=EF=BC=9A ceph-users <ceph-users@lists.ceph.com>
 
-> >> It still seems to me like that should just be a check for superuser
-> >> status. Something like:
-> >>
-> >>       if (mask & MAY_CHOWN) {
-> >>       // only root can chown
-> >>         if (i->match.uid != 0 || caller_uid != 0)
-> >>           continue;
-> >>         }
-> >>       }
-> >>
-> >> i.e. only allow chown if the capability has a uid of 0 and the
-> >> caller_uid is also 0.
-> >>
-> >> I don't think we want to ever grant an unprivileged user the ability to
-> >> chown, do we?
-> >
-> > Ah, yep.  Except that the Locker.cc caller needs to be fixed to only ask
-> > for MAY_CHOWN if the uid is changing.  Right now it's only passing
-> > MAY_WRITE which looks wrong too...
-> 
-> Don't we want to let users chown between their own UIDs? A POSIX
-> superuser — ie root — really has very little meaning in terms of CephX
-> permissions. But it's perfectly legitimate for a tenant with 3 users
-> to chmod files between those 3. :/
 
-Maybe, but it'd be a different kind of check though, because it depends on 
-multiple caps in order to permit the operation.  So we'd need a couple 
-function-global bools like chown_src_allowed and chown_dst_allowed or 
-something like that.
+2016-10-27 17:50 GMT+08:00 huang jun <hjwsm1989@gmail.com>:
+> how do you add the new machine ?
+> does it first added to default ruleset and then you add the new rule
+> for this group?
+> do you have data pool use the default rule, does these pool contain data?
 
-I'm not sure it would work even then, though, because on the client the 
-user would still have to sudo chown ... to get past the client kernel's 
-checks (I assume?).
+we dont use default ruleset, when we add new group machine,
+crush_location auto generate root and chassis, then we add a new rule
+for this group.
 
-sage
---8323329-1089753980-1478560886=:29278--
+
+> 2016-10-27 17:34 GMT+08:00 Dong Wu <archer.wudong@gmail.com>:
+>> Hi all,
+>>
+>> We have a ceph cluster only use rbd. The cluster contains several
+>> group machines, each group contains several machines, then each
+>> machine has 12 SSDs, each ssd as an OSD (journal and data together).
+>> eg:
+>> group1: machine1~machine12
+>> group2: machine13~machine24
+>> ......
+>> each group is separated with other group, which means each group has
+>> separated pools.
+>>
+>> we use Hammer(0.94.6) compiled with jemalloc(4.2).
+>>
+>> We have found that when we add a new group machine, the other group
+>> machine's memory increase 5% more or less (OSDs usage).
+>>
+>> each group's data is separated with others, so backfill only in group,
+>> not across.
+>> Why add a group of machine cause others memory increase? Is this reasona=
+ble?
+>>
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>
+>
+>
+>
+> --
+> Thank you!
+> HuangJun
