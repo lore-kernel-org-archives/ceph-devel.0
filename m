@@ -1,76 +1,54 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: trying to get osd-scrub-repair to work on my jenkins builder
-Date: Wed, 9 Nov 2016 00:21:02 +0100
-Message-ID: <93f4ceb7-eaf2-bb9e-d0e8-599130054bd6@digiware.nl>
-References: <b09099ce-7419-f802-c84b-a425d1c445ff@digiware.nl>
- <8b02c406-1413-5678-2d42-cda6111e8230@digiware.nl>
- <68bcf424-6ec6-329e-a245-a30942f501c9@redhat.com>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: status of spdk
+Date: Tue, 8 Nov 2016 15:31:44 -0800
+Message-ID: <CADRKj5R+kwpr+_D+bx48gw_BHzX0jcQG-52C_kiLuTeqeEV+Qw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:52512 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753294AbcKHXVH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 8 Nov 2016 18:21:07 -0500
-In-Reply-To: <68bcf424-6ec6-329e-a245-a30942f501c9@redhat.com>
+Received: from mail-ua0-f180.google.com ([209.85.217.180]:34078 "EHLO
+        mail-ua0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751095AbcKHXbr (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Nov 2016 18:31:47 -0500
+Received: by mail-ua0-f180.google.com with SMTP id 51so160610900uai.1
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Nov 2016 15:31:47 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Zafman <dzafman@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Wang, Haomai" <haomaiwang@gmail.com>, "Weil, Sage" <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 9-11-2016 00:01, David Zafman wrote:
-> 
-> Willem,
-> 
-> At first I thought the fields were missing but I checked the xml output
-> right there in get_is_making_recovery_progress() and the "xml sel" did
-> see those fields while recovery was in progress.
+I just started looking at spdk, and have a few comments and questions.
 
-Oke, ...
+First, it's not clear to me how we should handle build. At the moment
+the spdk code resides as a submodule in the ceph tree, but it depends
+on dpdk, which currently needs to be downloaded separately. We can add
+it as a submodule (upstream is here: git://dpdk.org/dpdk). That been
+said, getting it to build was a bit tricky and I think it might be
+broken with cmake. In order to get it working I resorted to building a
+system library and use that.
 
-That leaves a challenge, and I'll have to review the output on FreeBSD
-again, and see where, what, how it then works.
+The way to currently configure an osd to use bluestore with spdk is by
+creating a symbolic link that replaces the bluestore 'block' device to
+point to a file that has a name that is prefixed with 'spdk:'.
+Originally I assumed that the suffix would be the nvme device id, but
+it seems that it's not really needed, however, the file itself needs
+to contain the device id (see
+https://github.com/yehudasa/ceph/tree/wip-yehuda-spdk for a couple of
+minor fixes).
 
---WjW
+As I understand it, in order to support multiple osds on the same NVMe
+device we have a few options. We can leverage NVMe namespaces, but
+that's not supported on all devices. We can configure bluestore to
+only use part of the device (device sharding? not sure if it supports
+it). I think it's best if we could keep bluestore out of the loop
+there and have the NVMe driver abstract multiple partitions of the
+NVMe device. The idea is to be able to define multiple partitions on
+the device (e.g., each partition will be defined by the offset, size,
+and namespace), and have the osd set to use a specific partition.
+We'll probably need a special tool to manage it, and potentially keep
+the partition table information on the device itself. The tool could
+also manage the creation of the block link. We should probably rethink
+how the link is structure and what it points at.
 
-> 
-> David
-> 
-> 
-> On 11/7/16 4:40 AM, Willem Jan Withagen wrote:
->> On 4-11-2016 18:09, Willem Jan Withagen wrote:
->>> Hi,
->>>
->>> On my workstation if have this tst completing just fine. But on my
->>> Jenkins-builder it keeps running into this state where it does not make
->>> any progress.
->>> Any particulars I should look for? I can let this run for an hour, but
->>> pg 2.0 stays active+degrades, and the script requires it to be clean.
->>> and the pgmap version is steadily incrementing.
->> And as a side-track to this, it is not where things go wrong. But it is
->> nog right either...
->>
->> ceph -c ./build/src/test/osd/testdir/osd-scrub-repair/ceph.conf --format
->> xml status 2>/dev/null | \
->>          xml sel \
->>          -t -m "//pgmap/recovering_keys_per_sec" -v . -o ' ' \
->>          -t -m "//pgmap/recovering_bytes_per_sec" -v . -o ' ' \
->>          -t -m "//pgmap/recovering_objects_per_sec" -v .)
->>      test -n "$progress"
->>
->> Does not seem to work because the output does not contain any of the xml
->> fields...
->> Now I've been beating myself over the head, but I cannot find the
->> request that does have these fields.
->>
->> So a suggestion is welcom, and I'll submit a patch.
->>
->> thanx,
->> --WjW
->>
->> -- 
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Any thoughts?
 
+Yehuda
