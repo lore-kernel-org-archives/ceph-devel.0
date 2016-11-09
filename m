@@ -1,7 +1,7 @@
 From: "Gohad, Tushar" <tushar.gohad@intel.com>
 Subject: RE: status of spdk
-Date: Wed, 9 Nov 2016 21:00:53 +0000
-Message-ID: <82115773F5CCE44DA5B6CE8B3878B6F0294DA23A@fmsmsx115.amr.corp.intel.com>
+Date: Wed, 9 Nov 2016 21:10:13 +0000
+Message-ID: <82115773F5CCE44DA5B6CE8B3878B6F0294DA2DC@fmsmsx115.amr.corp.intel.com>
 References: <CADRKj5R+kwpr+_D+bx48gw_BHzX0jcQG-52C_kiLuTeqeEV+Qw@mail.gmail.com>
  <alpine.DEB.2.11.1611082334390.32512@piezo.us.to>
  <CADRKj5T0=J1QuMjgDKr9WMME-bT6_DoY7UjnQdYUBUJ3YiJU1A@mail.gmail.com>
@@ -13,10 +13,10 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:20031 "EHLO mga14.intel.com"
+Received: from mga07.intel.com ([134.134.136.100]:46778 "EHLO mga07.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753892AbcKIVBP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 9 Nov 2016 16:01:15 -0500
+        id S1754104AbcKIVKP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 9 Nov 2016 16:10:15 -0500
 In-Reply-To: <alpine.DEB.2.11.1611092054550.29278@piezo.us.to>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
@@ -24,50 +24,39 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>, "Moreno, Orlando" <orlando.moreno@intel.com>
 Cc: Dong Wu <archer.wudong@gmail.com>, "LIU, Fei" <james.liu@alibaba-inc.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, "Wang, Haomai" <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "'ifedotov@mirantis.com'" <ifedotov@mirantis.com>
 
+>> Multiple DPDK/SPDK instances on a single host does not work because 
+>> the current implementation in Ceph does not support it. This issue is 
+>> tracked here: http://tracker.ceph.com/issues/16966 There is 
+>> multi-process support in DPDK, but you must configure the EAL 
+>> correctly for it to work. I have been working on a patch, 
+>> https://github.com/ommoreno/ceph/tree/wip-16966, that allows the user 
+>> to configure multiple BlueStore OSDs backed by SPDK. Though this patch 
+>> works, I think it needs a few additions to actually make it performant.
+>> This is just to get the 1 OSD process per NVMe case working. A 
+>> multi-OSD per NVMe solution will probably require more work as 
+>> described in this thread.
+
+> TBH I'm not sure how important the multi-osd per NVMe case is.  
+> The only reason to do that would be performance bottlenecks within the 
+> OSD itself, and I'd rather focus our efforts on eliminating those than on 
+> enabling a bandaid solution.
+
+Completely agree here.
+
+> As I understand it the scenarios that are most interesting are
+
+> 1- sharing the same network device to multiple osds with DPDK (this will presumably be pretty common unless/until we combine many OSDs into a single process), and
+
+> 2- sharing a tiny portion of the NVMe device for the osd_data (usually a few MB of metadata that gets mounted at /var/lib/ceph/osd/$cluster-$id).  
+> Not sure this will be feasible or not.
+
+Unfortunately, this is not feasible without some form of partitioning support in SPDK (namespace/GPT or in form of a new LVM-like layer on top of SPDK bdev) - the latter is under development at the moment.
+
+The limitation that Orlando identified is, not being able to launch multiple SPDK-based OSDs on a node today.  Igor and Orlando's PR (16966) is to add a config option to limit the number of hugepages assigned to an OSD via an EAL switch.  The other limitation today is being able to specify the CPU mask assigned to each OSD which would require config addition.
+
+Tushar 
 
 
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
-Sent: Wednesday, November 9, 2016 1:59 PM
-To: Moreno, Orlando <orlando.moreno@intel.com>
-Cc: Dong Wu <archer.wudong@gmail.com>; LIU, Fei <james.liu@alibaba-inc.com>; Yehuda Sadeh-Weinraub <yehuda@redhat.com>; Wang, Haomai <haomaiwang@gmail.com>; ceph-devel <ceph-devel@vger.kernel.org>; 'ifedotov@mirantis.com' <ifedotov@mirantis.com>
-Subject: RE: status of spdk
-
-On Wed, 9 Nov 2016, Moreno, Orlando wrote:
-> Hi all,
-> 
-> Multiple DPDK/SPDK instances on a single host does not work because 
-> the current implementation in Ceph does not support it. This issue is 
-> tracked here: http://tracker.ceph.com/issues/16966 There is 
-> multi-process support in DPDK, but you must configure the EAL 
-> correctly for it to work. I have been working on a patch, 
-> https://github.com/ommoreno/ceph/tree/wip-16966, that allows the user 
-> to configure multiple BlueStore OSDs backed by SPDK. Though this patch 
-> works, I think it needs a few additions to actually make it performant.
-> 
-> This is just to get the 1 OSD process per NVMe case working. A 
-> multi-OSD per NVMe solution will probably require more work as 
-> described in this thread.
-
-TBH I'm not sure how important the multi-osd per NVMe case is.  The only reason to do that would be performance bottlenecks within the OSD itself, and I'd rather focus our efforts on eliminating those than on enabling a bandaid solution.
-
-As I understand it the scenarios that are most interesting are
-
-1- sharing the same network device to multiple osds with DPDK (this will presumably be pretty common unless/until we combine many OSDs into a single process), and
-
-2- sharing a tiny portion of the NVMe device for the osd_data (usually a few MB of metadata that gets mounted at /var/lib/ceph/osd/$cluster-$id).  
-Not sure this will be feasible or not.
-
-As I think Haomai mentioned, the next barrier is probably the requirements around DPDK event loop and dedicated core?
-
-sage
-
-
-
- > 
-> Thanks,
-> Orlando
-> 
 > 
 > -----Original Message-----
 > From: ceph-devel-owner@vger.kernel.org 
