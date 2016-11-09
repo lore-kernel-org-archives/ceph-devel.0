@@ -1,136 +1,251 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Seeking help in getting run-tox-ceph-detect-init to work.
-Date: Wed, 9 Nov 2016 10:41:13 +0100
-Message-ID: <7df47593-c520-745a-1fb8-196f26f7fa39@digiware.nl>
-References: <6a74274e-4134-183c-f8fa-a180b5a93783@digiware.nl>
- <CAJE9aOOj-A-kkBzjyOei7JHRY=qRmT_fVF9L7M_wFyypMKvoBQ@mail.gmail.com>
+From: Orit Wasserman <owasserm@redhat.com>
+Subject: Re: Lots of radosgw-admin commands fail after upgrade
+Date: Wed, 9 Nov 2016 11:11:10 +0100
+Message-ID: <CABo9giQWq_unoXu_qwEkmrqod9rLk8bmUh+k_jotyvAAW7L+9Q@mail.gmail.com>
+References: <CAFehDbCTSPLmh8LY03q0cfV1v2ACzF24ZShAk+OgSXYJLVjPqg@mail.gmail.com>
+ <CABo9giRVAb-+2zvKWTWhRVF4fftG=szDxgrXBXNmDpH-yQrWMw@mail.gmail.com>
+ <CAFehDbC6yBsbQCPVmwE+DCod-Xmbafp1MU_r1wYZ0xd_q3Dt3Q@mail.gmail.com>
+ <CABo9giTbFUrW1uE4iO5c5=4S4sT9mtxoD+8gi1vemcLCf3RVew@mail.gmail.com>
+ <CAFehDbAeF6UqhGHUVYOjvTDhE-+qDAGfLPnk==bbjEUypzeWPw@mail.gmail.com>
+ <CABo9giRgopdCqURUJQX3OHCG=O_Q17ZuoJxeX-1-tc1aXpzN1g@mail.gmail.com>
+ <CAFehDbDaDdMHTtxLqq8kjd5Xd9RePqDDCXtJm7_7UMCD7Q3LOg@mail.gmail.com>
+ <CABo9giTWVHYGdrqpmtYP8-iDY5tM+a4MrBczwha27=g-HzmRcw@mail.gmail.com> <CAFehDbDDF0cMiHre0DnbSD2-sxc6cFubLVHSOs2HMTtLbkeKJA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:25672 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751095AbcKIJlU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 9 Nov 2016 04:41:20 -0500
-In-Reply-To: <CAJE9aOOj-A-kkBzjyOei7JHRY=qRmT_fVF9L7M_wFyypMKvoBQ@mail.gmail.com>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:38150 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751203AbcKIKLN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2016 05:11:13 -0500
+Received: by mail-wm0-f42.google.com with SMTP id f82so232173910wmf.1
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Nov 2016 02:11:12 -0800 (PST)
+In-Reply-To: <CAFehDbDDF0cMiHre0DnbSD2-sxc6cFubLVHSOs2HMTtLbkeKJA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Mustafa Muhammad <mustafa1024m@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 9-11-2016 09:17, kefu chai wrote:
-> On Wed, Nov 9, 2016 at 6:57 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> Hi,
+On Wed, Nov 9, 2016 at 6:45 AM, Mustafa Muhammad <mustafa1024m@gmail.com> wrote:
+> On Tue, Nov 8, 2016 at 3:16 PM, Orit Wasserman <owasserm@redhat.com> wrote:
+>> On Tue, Nov 8, 2016 at 1:11 PM, Mustafa Muhammad <mustafa1024m@gmail.com> wrote:
+>>> On Tue, Nov 8, 2016 at 2:21 PM, Orit Wasserman <owasserm@redhat.com> wrote:
+>>>> On Mon, Nov 7, 2016 at 10:05 AM, Mustafa Muhammad
+>>>> <mustafa1024m@gmail.com> wrote:
+>>>>> I understood the script and applied it, "zone get" works fine now with
+>>>>> realm, but "radosgw-admin zonegroup get" gives "master_zone":
+>>>>> "default" and realm id with value, then after a minute it goes back to
+>>>>> empty master_zone and realm id.
+>>>>
+>>>> Hi,
+>>>> Is it possible you have an old radosgw-admin running (from hammer)?
+>>>> if so you encountered http://tracker.ceph.com/issues/17371, it will be
+>>>> fixed in 10.2.4.
+>>>
+>>> I found I have one Infernalis 9.2.1
+>>>
 >>
->> I'm looking for a developer with more Python experience....
->> Especially with getting things thru tox.
+>> that explains it ...
 >>
->> I was able to add FreeBSD support to ceph-detect-init in #11829. But
->> then that is tested in run-tox-detect-init. Which now fails in a Linux
->> Jenkins run:
->> https://jenkins.ceph.com/job/ceph-pull-requests/13621/consoleFull#124607955c19247c4-fcb7-4c61-9a5d-7e2b9731c678
+>>>> Can you provides logs?
+>>>
+>>> What logs exactly?
+>>>
+>> rgw logs but it looks like we know the cause so it is not important.
 >>
->> But that heavily depends on mock and variations on
->> platform.linux_distribution(), which is over my head.
+>>>>
+>>>> Try the procedure again and this time also run in the end:
+>>>> radosgw-admin period update --commit
+>>>
+>>> After updating that RGW?
+>>>
+>> yes after doing all the steps
 >>
->> Like:
->>     def test_get(self):
->>         g = ceph_detect_init.get
->>        with mock.patch('platform.linux_distribution',
->>                         lambda **kwargs: (('unknown', '', ''))):
->>             self.assertRaises(exc.UnsupportedPlatform, g)
->>
->> Which hits the assert because linux_distribution() returns
->>         (' ', ' ', ' ')
->> and the system info needs to be extracted from other functions.
->>
->> The brutal way would be to override this test, but the question then is
->> with what? Because there is no one function that returns the required
->> values. So the code would be a copy from what is in the _init_.py code.
->>
->> And that feels like a butcher testing his own meat.
-> 
-> yes, you need to mock some methods get called in
-> platform_information(), please see the updated patch at:
-> https://github.com/tchaikov/ceph/commit/fced2823c311bee2be0d226759809fc10170a6ff
-> 
-> in which, i also added a test for unsupported system.
+> All RGWs now on 10.2.2, can't make them 10.2.3 because they won't start.
+> Stopped them all and run the script again with "radosgw-admin period
+> update --commit" at the end, still getting:
+> "zonegroup default missing zone for master_zone="
+> If I wait till 10.2.4, should it be fixed?
+>
 
-Cool,
+yes it was fixed in 10.2.4
 
-I sort of understand the code, and indeed you are copying the working
-code from the module.
-
-But this what it delivers.
-
---WjW
-
- =================================== FAILURES
-===================================
-13: _________________________ TestCephDetectInit.test_get
-__________________________
-13: NOTE: Incompatible Exception Representation, displaying natively:
-13:
-13: _StringException: Traceback (most recent call last):
-13:   File
-"/usr/srcs/Ceph/work/ceph/src/ceph-detect-init/tests/test_all.py", line
-155, in test_get
-13:     self.assertRaises(exc.UnsupportedPlatform, g)
-13:   File
-"/usr/srcs/Ceph/work/ceph/src/ceph-detect-init/.tox/py27/lib/python2.7/site-packages/testtools/testcase.py",
-line 485, in assertRaises
-13:     self.assertThat(our_callable, matcher)
-13:   File
-"/usr/srcs/Ceph/work/ceph/src/ceph-detect-init/.tox/py27/lib/python2.7/site-packages/testtools/testcase.py",
-line 498, in assertThat
-13:     raise mismatch_error
-13: testtools.matchers._impl.MismatchError: <function get at
-0x8089b1500> returned <module 'ceph_detect_init.freebsd' from
-'/usr/srcs/Ceph/work/ceph/src/ceph-detect-init/ceph_detect_init/freebsd/__init__.pyc'>
-13:
-13:
-13: _________________ TestCephDetectInit.test_platform_information
-_________________
-13: NOTE: Incompatible Exception Representation, displaying natively:
-13:
-13: _StringException: Traceback (most recent call last):
-13:   File
-"/usr/srcs/Ceph/work/ceph/src/ceph-detect-init/tests/test_all.py", line
-234, in test_platform_information
-13:     ceph_detect_init.platform_information())
-13:   File
-"/usr/srcs/Ceph/work/ceph/src/ceph-detect-init/.tox/py27/lib/python2.7/site-packages/testtools/testcase.py",
-line 411, in assertEqual
-13:     self.assertThat(observed, matcher, message)
-13:   File
-"/usr/srcs/Ceph/work/ceph/src/ceph-detect-init/.tox/py27/lib/python2.7/site-packages/testtools/testcase.py",
-line 498, in assertThat
-13:     raise mismatch_error
-13: testtools.matchers._impl.MismatchError: ('debian', '6.0', 'squeeze')
-!= ('freebsd', '12.0-CURRENT', 'r306554M:')
-13:
-13:
-13: _________________________ TestCephDetectInit.test_run
-__________________________
-13: NOTE: Incompatible Exception Representation, displaying natively:
-13:
-13: _StringException: Traceback (most recent call last):
-13:   File
-"/usr/srcs/Ceph/work/ceph/src/ceph-detect-init/tests/test_all.py", line
-262, in test_run
-13:     self.assertRaises(exc.UnsupportedPlatform, main.run, argv)
-13:   File
-"/usr/srcs/Ceph/work/ceph/src/ceph-detect-init/.tox/py27/lib/python2.7/site-packages/testtools/testcase.py",
-line 485, in assertRaises
-13:     self.assertThat(our_callable, matcher)
-13:   File
-"/usr/srcs/Ceph/work/ceph/src/ceph-detect-init/.tox/py27/lib/python2.7/site-packages/testtools/testcase.py",
-line 498, in assertThat
-13:     raise mismatch_error
-13: testtools.matchers._impl.MismatchError: <function run at
-0x8089b17d0> returned 0
-13:
-
---WjW
-
-
+> Regards
+> Mustafa
+>
+>>>>
+>>>> Orit
+>>>>
+>>>
+>>> Thanks a lot :)
+>>>
+>>> Regards
+>>> Mustafa
+>>>
+>>>>> So I still get:
+>>>>> radosgw-admin bucket stats
+>>>>> 2016-11-07 12:04:13.680779 7f7a88e929c0  0 zonegroup default missing
+>>>>> zone for master_zone=
+>>>>> couldn't init storage provider
+>>>>> What should I do?
+>>>>>
+>>>>> Thanks
+>>>>> Mustafa
+>>>>>
+>>>>> On Wed, Nov 2, 2016 at 12:39 PM, Orit Wasserman <owasserm@redhat.com> wrote:
+>>>>>> Hi,
+>>>>>> You have hit the master zone issue.
+>>>>>> Here is a fix I prefer:
+>>>>>> http://lists.ceph.com/pipermail/ceph-users-ceph.com/2016-July/011157.html
+>>>>>> It is very important notice to run the fix when the radosgw is down.
+>>>>>>
+>>>>>> Good luck,
+>>>>>> Orit
+>>>>>>
+>>>>>> On Tue, Nov 1, 2016 at 10:07 PM, Mustafa Muhammad
+>>>>>> <mustafa1024m@gmail.com> wrote:
+>>>>>>> On Tue, Nov 1, 2016 at 5:04 PM, Orit Wasserman <owasserm@redhat.com> wrote:
+>>>>>>>> Hi,
+>>>>>>>> what version of jewel are you using?
+>>>>>>>> can you try raodsgw-admin zone get --rgw-zone default and
+>>>>>>>> radosgw-admin zonegroup get --rgw-zonegroup default?
+>>>>>>>>
+>>>>>>> Hello, I am using 10.2.3
+>>>>>>> #radosgw-admin zone get --rgw-zone default
+>>>>>>> {
+>>>>>>>     "id": "default",
+>>>>>>>     "name": "default",
+>>>>>>>     "domain_root": ".rgw",
+>>>>>>>     "control_pool": ".rgw.control",
+>>>>>>>     "gc_pool": ".rgw.gc",
+>>>>>>>     "log_pool": ".log",
+>>>>>>>     "intent_log_pool": ".intent-log",
+>>>>>>>     "usage_log_pool": ".usage",
+>>>>>>>     "user_keys_pool": ".users",
+>>>>>>>     "user_email_pool": ".users.email",
+>>>>>>>     "user_swift_pool": ".users.swift",
+>>>>>>>     "user_uid_pool": ".users.uid",
+>>>>>>>     "system_key": {
+>>>>>>>         "access_key": "",
+>>>>>>>         "secret_key": ""
+>>>>>>>     },
+>>>>>>>     "placement_pools": [],
+>>>>>>>     "metadata_heap": ".rgw.meta",
+>>>>>>>     "realm_id": ""
+>>>>>>> }
+>>>>>>>
+>>>>>>> # radosgw-admin zonegroup get --rgw-zonegroup default
+>>>>>>> {
+>>>>>>>     "id": "default",
+>>>>>>>     "name": "default",
+>>>>>>>     "api_name": "",
+>>>>>>>     "is_master": "true",
+>>>>>>>     "endpoints": [],
+>>>>>>>     "hostnames": [],
+>>>>>>>     "hostnames_s3website": [],
+>>>>>>>     "master_zone": "",
+>>>>>>>     "zones": [
+>>>>>>>         {
+>>>>>>>             "id": "default",
+>>>>>>>             "name": "default",
+>>>>>>>             "endpoints": [],
+>>>>>>>             "log_meta": "false",
+>>>>>>>             "log_data": "false",
+>>>>>>>             "bucket_index_max_shards": 0,
+>>>>>>>             "read_only": "false"
+>>>>>>>         }
+>>>>>>>     ],
+>>>>>>>     "placement_targets": [
+>>>>>>>         {
+>>>>>>>             "name": "cinema-placement",
+>>>>>>>             "tags": []
+>>>>>>>         },
+>>>>>>>         {
+>>>>>>>             "name": "cinema-source-placement",
+>>>>>>>             "tags": []
+>>>>>>>         },
+>>>>>>>         {
+>>>>>>>             "name": "default-placement",
+>>>>>>>             "tags": []
+>>>>>>>         },
+>>>>>>>         {
+>>>>>>>             "name": "erasure-placement",
+>>>>>>>             "tags": []
+>>>>>>>         },
+>>>>>>>         {
+>>>>>>>             "name": "share-placement",
+>>>>>>>             "tags": []
+>>>>>>>         },
+>>>>>>>         {
+>>>>>>>             "name": "share2016-placement",
+>>>>>>>             "tags": []
+>>>>>>>         },
+>>>>>>>         {
+>>>>>>>             "name": "test-placement",
+>>>>>>>             "tags": []
+>>>>>>>         }
+>>>>>>>     ],
+>>>>>>>     "default_placement": "default-placement",
+>>>>>>>     "realm_id": ""
+>>>>>>> }
+>>>>>>>
+>>>>>>>
+>>>>>>> Thanks
+>>>>>>> Mustafa
+>>>>>>>
+>>>>>>>> Orit
+>>>>>>>>
+>>>>>>>> On Tue, Nov 1, 2016 at 2:13 PM, Mustafa Muhammad <mustafa1024m@gmail.com> wrote:
+>>>>>>>>> Hello,
+>>>>>>>>> I have production cluster configured with multiple placement pools according to:
+>>>>>>>>>
+>>>>>>>>> http://cephnotes.ksperis.com/blog/2014/11/28/placement-pools-on-rados-gw
+>>>>>>>>>
+>>>>>>>>> After upgrading to Jewel, most radosgw-admin are failing, probably
+>>>>>>>>> because there is no realm
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> # radosgw-admin realm list
+>>>>>>>>> {
+>>>>>>>>>     "default_info": "",
+>>>>>>>>>     "realms": []
+>>>>>>>>> }
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> # radosgw-admin zone get
+>>>>>>>>> unable to initialize zone: (2) No such file or directory
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> # radosgw-admin regionmap get
+>>>>>>>>> failed to read current period info: 2016-11-01 16:08:14.099948
+>>>>>>>>> 7f21b55ee9c0  0 RGWPeriod::init failed to init realm  id  : (2) No
+>>>>>>>>> such file or directory(2) No such file or directory
+>>>>>>>>> {
+>>>>>>>>>     "zonegroups": [],
+>>>>>>>>>     "master_zonegroup": "",
+>>>>>>>>>     "bucket_quota": {
+>>>>>>>>>         "enabled": false,
+>>>>>>>>>         "max_size_kb": -1,
+>>>>>>>>>         "max_objects": -1
+>>>>>>>>>     },
+>>>>>>>>>     "user_quota": {
+>>>>>>>>>         "enabled": false,
+>>>>>>>>>         "max_size_kb": -1,
+>>>>>>>>>         "max_objects": -1
+>>>>>>>>>     }
+>>>>>>>>> }
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> # radosgw-admin bucket stats
+>>>>>>>>> 2016-11-01 16:07:55.860053 7f6e747f89c0  0 zonegroup default missing
+>>>>>>>>> zone for master_zone=
+>>>>>>>>> couldn't init storage provider
+>>>>>>>>>
+>>>>>>>>> I have previous region.conf.json and zone.conf.json, how can I make
+>>>>>>>>> everything work again? Will creating new realm fix this?
+>>>>>>>>>
+>>>>>>>>> Regards
+>>>>>>>>> Mustafa Muhammad
+>>>>>>>>> --
+>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
