@@ -1,179 +1,245 @@
-From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
-Subject: Re: status of spdk
-Date: Wed, 09 Nov 2016 13:23:08 +0800
-Message-ID: <879F4BA7-4E5C-4407-AA5B-3CFEA0FAF6FB@alibaba-inc.com>
-References: <CADRKj5R+kwpr+_D+bx48gw_BHzX0jcQG-52C_kiLuTeqeEV+Qw@mail.gmail.com>
- <alpine.DEB.2.11.1611082334390.32512@piezo.us.to>
- <CADRKj5T0=J1QuMjgDKr9WMME-bT6_DoY7UjnQdYUBUJ3YiJU1A@mail.gmail.com>
- <41F4566A-4573-4CB9-81F4-1688ED2534C1@alibaba-inc.com>
- <CACJqLybju4p+y08Uq5rFhhJ2h_pXMLTohr0t+6Lkg3EDQjQvRw@mail.gmail.com>
- <7E8F4A68-9D8E-4E4A-B3C3-1D0EF5278590@alibaba-inc.com>
- <FF7FC980937D6342B9D289F5F3C7C2625AB65713@shsmsx102.ccr.corp.intel.com>
+From: Mustafa Muhammad <mustafa1024m@gmail.com>
+Subject: Re: Lots of radosgw-admin commands fail after upgrade
+Date: Wed, 9 Nov 2016 08:45:01 +0300
+Message-ID: <CAFehDbDDF0cMiHre0DnbSD2-sxc6cFubLVHSOs2HMTtLbkeKJA@mail.gmail.com>
+References: <CAFehDbCTSPLmh8LY03q0cfV1v2ACzF24ZShAk+OgSXYJLVjPqg@mail.gmail.com>
+ <CABo9giRVAb-+2zvKWTWhRVF4fftG=szDxgrXBXNmDpH-yQrWMw@mail.gmail.com>
+ <CAFehDbC6yBsbQCPVmwE+DCod-Xmbafp1MU_r1wYZ0xd_q3Dt3Q@mail.gmail.com>
+ <CABo9giTbFUrW1uE4iO5c5=4S4sT9mtxoD+8gi1vemcLCf3RVew@mail.gmail.com>
+ <CAFehDbAeF6UqhGHUVYOjvTDhE-+qDAGfLPnk==bbjEUypzeWPw@mail.gmail.com>
+ <CABo9giRgopdCqURUJQX3OHCG=O_Q17ZuoJxeX-1-tc1aXpzN1g@mail.gmail.com>
+ <CAFehDbDaDdMHTtxLqq8kjd5Xd9RePqDDCXtJm7_7UMCD7Q3LOg@mail.gmail.com> <CABo9giTWVHYGdrqpmtYP8-iDY5tM+a4MrBczwha27=g-HzmRcw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from out0-150.mail.aliyun.com ([140.205.0.150]:35458 "EHLO
-        out0-150.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750774AbcKIF3q (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2016 00:29:46 -0500
-In-Reply-To: <FF7FC980937D6342B9D289F5F3C7C2625AB65713@shsmsx102.ccr.corp.intel.com>
+Received: from mail-lf0-f52.google.com ([209.85.215.52]:34921 "EHLO
+        mail-lf0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750774AbcKIFpE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2016 00:45:04 -0500
+Received: by mail-lf0-f52.google.com with SMTP id b14so155821120lfg.2
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Nov 2016 21:45:03 -0800 (PST)
+In-Reply-To: <CABo9giTWVHYGdrqpmtYP8-iDY5tM+a4MrBczwha27=g-HzmRcw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Liu, Changpeng" <changpeng.liu@intel.com>, Haomai Wang <haomaiwang@gmail.com>
-Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, "Cao, Gang" <gang.cao@intel.com>, "Yang, Ziye" <ziye.yang@intel.com>, "Dai, Qihua" <qihua.dai@intel.com>, "Harris, James R" <james.r.harris@intel.com>
+To: Orit Wasserman <owasserm@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Changpeng,
-  Thanks a lot for your update.
+On Tue, Nov 8, 2016 at 3:16 PM, Orit Wasserman <owasserm@redhat.com> wrote:
+> On Tue, Nov 8, 2016 at 1:11 PM, Mustafa Muhammad <mustafa1024m@gmail.com> wrote:
+>> On Tue, Nov 8, 2016 at 2:21 PM, Orit Wasserman <owasserm@redhat.com> wrote:
+>>> On Mon, Nov 7, 2016 at 10:05 AM, Mustafa Muhammad
+>>> <mustafa1024m@gmail.com> wrote:
+>>>> I understood the script and applied it, "zone get" works fine now with
+>>>> realm, but "radosgw-admin zonegroup get" gives "master_zone":
+>>>> "default" and realm id with value, then after a minute it goes back to
+>>>> empty master_zone and realm id.
+>>>
+>>> Hi,
+>>> Is it possible you have an old radosgw-admin running (from hammer)?
+>>> if so you encountered http://tracker.ceph.com/issues/17371, it will be
+>>> fixed in 10.2.4.
+>>
+>> I found I have one Infernalis 9.2.1
+>>
+>
+> that explains it ...
+>
+>>> Can you provides logs?
+>>
+>> What logs exactly?
+>>
+> rgw logs but it looks like we know the cause so it is not important.
+>
+>>>
+>>> Try the procedure again and this time also run in the end:
+>>> radosgw-admin period update --commit
+>>
+>> After updating that RGW?
+>>
+> yes after doing all the steps
+>
+All RGWs now on 10.2.2, can't make them 10.2.3 because they won't start.
+Stopped them all and run the script again with "radosgw-admin period
+update --commit" at the end, still getting:
+"zonegroup default missing zone for master_zone="
+If I wait till 10.2.4, should it be fixed?
 
-  Regards,
-  James
+Regards
+Mustafa
 
-On 11/8/16, 9:09 PM, "Liu, Changpeng" <changpeng.liu@intel.com> wrote:
-
-    Hi James,
-    
-    Yes, the multi processes support of SPDK is under development, Gang is the developer for the feature of  SPDK.
-    We are targeting to release the feature in 16.12 version for SPDK(WW50).
-    
-    
-    > -----Original Message-----
-    > From: LIU, Fei [mailto:james.liu@alibaba-inc.com]
-    > Sent: Wednesday, November 9, 2016 1:03 PM
-    > To: Haomai Wang <haomaiwang@gmail.com>; Liu, Changpeng
-    > <changpeng.liu@intel.com>
-    > Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>; Sage Weil
-    > <sweil@redhat.com>; ceph-devel <ceph-devel@vger.kernel.org>
-    > Subject: Re: status of spdk
-    > 
-    > Haomai,
-    >    Thanks a lot.
-    > 
-    >    Regards,
-    >    James
-    > 
-    > Hi Changpeng,
-    >    Would you mind updating us about the status of multi processes support of
-    > spdk?
-    > 
-    >    Regards,
-    >    James
-    > 
-    > On 11/8/16, 8:59 PM, "Haomai Wang" <haomaiwang@gmail.com> wrote:
-    > 
-    >     On Wed, Nov 9, 2016 at 8:21 AM, LIU, Fei <james.liu@alibaba-inc.com> wrote:
-    >     > Hi Yehuda and Haomai,
-    >     >    The issue of drives driven by SPDK is not able to be shared by multiple OSDs
-    > as kernel NVMe drive since SPDK as a process so far can not be shared across
-    > multiple processes like OSDs, right?
-    > 
-    >     spdk nvme supports multi process is a undergoing spdk feature now, it
-    >     will be implemented via shared memory among multi process.
-    > 
-    >     >
-    >     >    Regards,
-    >     >    James
-    >     >
-    >     >
-    >     >
-    >     > On 11/8/16, 4:06 PM, "Yehuda Sadeh-Weinraub" <ceph-devel-
-    > owner@vger.kernel.org on behalf of yehuda@redhat.com> wrote:
-    >     >
-    >     >     On Tue, Nov 8, 2016 at 3:40 PM, Sage Weil <sweil@redhat.com> wrote:
-    >     >     > On Tue, 8 Nov 2016, Yehuda Sadeh-Weinraub wrote:
-    >     >     >> I just started looking at spdk, and have a few comments and questions.
-    >     >     >>
-    >     >     >> First, it's not clear to me how we should handle build. At the moment
-    >     >     >> the spdk code resides as a submodule in the ceph tree, but it depends
-    >     >     >> on dpdk, which currently needs to be downloaded separately. We can
-    > add
-    >     >     >> it as a submodule (upstream is here: git://dpdk.org/dpdk). That been
-    >     >     >> said, getting it to build was a bit tricky and I think it might be
-    >     >     >> broken with cmake. In order to get it working I resorted to building a
-    >     >     >> system library and use that.
-    >     >     >
-    >     >     > Note that this PR is about to merge
-    >     >     >
-    >     >     >         https://github.com/ceph/ceph/pull/10748
-    >     >     >
-    >     >     > which adds the DPDK submodule, so hopefully this issue will go away
-    > when
-    >     >     > that merged or with a follow-on cleanup.
-    >     >     >
-    >     >     >> The way to currently configure an osd to use bluestore with spdk is by
-    >     >     >> creating a symbolic link that replaces the bluestore 'block' device to
-    >     >     >> point to a file that has a name that is prefixed with 'spdk:'.
-    >     >     >> Originally I assumed that the suffix would be the nvme device id, but
-    >     >     >> it seems that it's not really needed, however, the file itself needs
-    >     >     >> to contain the device id (see
-    >     >     >> https://github.com/yehudasa/ceph/tree/wip-yehuda-spdk for a couple
-    > of
-    >     >     >> minor fixes).
-    >     >     >
-    >     >     > Open a PR for those?
-    >     >
-    >     >     Sure
-    >     >
-    >     >     >
-    >     >     >> As I understand it, in order to support multiple osds on the same NVMe
-    >     >     >> device we have a few options. We can leverage NVMe namespaces, but
-    >     >     >> that's not supported on all devices. We can configure bluestore to
-    >     >     >> only use part of the device (device sharding? not sure if it supports
-    >     >     >> it). I think it's best if we could keep bluestore out of the loop
-    >     >     >> there and have the NVMe driver abstract multiple partitions of the
-    >     >     >> NVMe device. The idea is to be able to define multiple partitions on
-    >     >     >> the device (e.g., each partition will be defined by the offset, size,
-    >     >     >> and namespace), and have the osd set to use a specific partition.
-    >     >     >> We'll probably need a special tool to manage it, and potentially keep
-    >     >     >> the partition table information on the device itself. The tool could
-    >     >     >> also manage the creation of the block link. We should probably rethink
-    >     >     >> how the link is structure and what it points at.
-    >     >     >
-    >     >     > I agree that bluestore shouldn't get involved.
-    >     >     >
-    >     >     > Is the NVMe namespaces meant to support multiple processes sharing
-    > the
-    >     >     > same hardware device?
-    >     >
-    >     >     More of a partitioning solution, but yes (as far as I undestand).
-    >     >
-    >     >     >
-    >     >     > Also, if you do that, is it possible to give one of the namespaces to the
-    >     >     > kernel?  That might solve the bootstrapping problem we currently have
-    >     >
-    >     >     Theoretically, but not right now (or ever?). See here:
-    >     >
-    >     >     https://lists.01.org/pipermail/spdk/2016-July/000073.html
-    >     >
-    >     >     > where we have nowhere to put the $osd_data filesystem with the device
-    >     >     > metadata.  (This is admittedly not necessarily a blocking issue.  Putting
-    >     >     > those dirs on / wouldn't be the end of the world; it just means cards
-    >     >     > can't be easily moved between boxes.)
-    >     >     >
-    >     >
-    >     >     Maybe we can use bluestore for these too ;) that been said, there
-    >     >     might be some kind of a loopback solution that could work, but not
-    >     >     sure if it won't create major bottlenecks that we'd want to avoid.
-    >     >
-    >     >     Yehuda
-    >     >     --
-    >     >     To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-    >     >     the body of a message to majordomo@vger.kernel.org
-    >     >     More majordomo info at  http://vger.kernel.org/majordomo-info.html
-    >     >
-    >     >
-    >     >
-    > 
-    > 
-    > 
-    >     --
-    >     Best Regards,
-    > 
-    >     Wheat
-    > 
-    > 
-    
-    
-
-
+>>>
+>>> Orit
+>>>
+>>
+>> Thanks a lot :)
+>>
+>> Regards
+>> Mustafa
+>>
+>>>> So I still get:
+>>>> radosgw-admin bucket stats
+>>>> 2016-11-07 12:04:13.680779 7f7a88e929c0  0 zonegroup default missing
+>>>> zone for master_zone=
+>>>> couldn't init storage provider
+>>>> What should I do?
+>>>>
+>>>> Thanks
+>>>> Mustafa
+>>>>
+>>>> On Wed, Nov 2, 2016 at 12:39 PM, Orit Wasserman <owasserm@redhat.com> wrote:
+>>>>> Hi,
+>>>>> You have hit the master zone issue.
+>>>>> Here is a fix I prefer:
+>>>>> http://lists.ceph.com/pipermail/ceph-users-ceph.com/2016-July/011157.html
+>>>>> It is very important notice to run the fix when the radosgw is down.
+>>>>>
+>>>>> Good luck,
+>>>>> Orit
+>>>>>
+>>>>> On Tue, Nov 1, 2016 at 10:07 PM, Mustafa Muhammad
+>>>>> <mustafa1024m@gmail.com> wrote:
+>>>>>> On Tue, Nov 1, 2016 at 5:04 PM, Orit Wasserman <owasserm@redhat.com> wrote:
+>>>>>>> Hi,
+>>>>>>> what version of jewel are you using?
+>>>>>>> can you try raodsgw-admin zone get --rgw-zone default and
+>>>>>>> radosgw-admin zonegroup get --rgw-zonegroup default?
+>>>>>>>
+>>>>>> Hello, I am using 10.2.3
+>>>>>> #radosgw-admin zone get --rgw-zone default
+>>>>>> {
+>>>>>>     "id": "default",
+>>>>>>     "name": "default",
+>>>>>>     "domain_root": ".rgw",
+>>>>>>     "control_pool": ".rgw.control",
+>>>>>>     "gc_pool": ".rgw.gc",
+>>>>>>     "log_pool": ".log",
+>>>>>>     "intent_log_pool": ".intent-log",
+>>>>>>     "usage_log_pool": ".usage",
+>>>>>>     "user_keys_pool": ".users",
+>>>>>>     "user_email_pool": ".users.email",
+>>>>>>     "user_swift_pool": ".users.swift",
+>>>>>>     "user_uid_pool": ".users.uid",
+>>>>>>     "system_key": {
+>>>>>>         "access_key": "",
+>>>>>>         "secret_key": ""
+>>>>>>     },
+>>>>>>     "placement_pools": [],
+>>>>>>     "metadata_heap": ".rgw.meta",
+>>>>>>     "realm_id": ""
+>>>>>> }
+>>>>>>
+>>>>>> # radosgw-admin zonegroup get --rgw-zonegroup default
+>>>>>> {
+>>>>>>     "id": "default",
+>>>>>>     "name": "default",
+>>>>>>     "api_name": "",
+>>>>>>     "is_master": "true",
+>>>>>>     "endpoints": [],
+>>>>>>     "hostnames": [],
+>>>>>>     "hostnames_s3website": [],
+>>>>>>     "master_zone": "",
+>>>>>>     "zones": [
+>>>>>>         {
+>>>>>>             "id": "default",
+>>>>>>             "name": "default",
+>>>>>>             "endpoints": [],
+>>>>>>             "log_meta": "false",
+>>>>>>             "log_data": "false",
+>>>>>>             "bucket_index_max_shards": 0,
+>>>>>>             "read_only": "false"
+>>>>>>         }
+>>>>>>     ],
+>>>>>>     "placement_targets": [
+>>>>>>         {
+>>>>>>             "name": "cinema-placement",
+>>>>>>             "tags": []
+>>>>>>         },
+>>>>>>         {
+>>>>>>             "name": "cinema-source-placement",
+>>>>>>             "tags": []
+>>>>>>         },
+>>>>>>         {
+>>>>>>             "name": "default-placement",
+>>>>>>             "tags": []
+>>>>>>         },
+>>>>>>         {
+>>>>>>             "name": "erasure-placement",
+>>>>>>             "tags": []
+>>>>>>         },
+>>>>>>         {
+>>>>>>             "name": "share-placement",
+>>>>>>             "tags": []
+>>>>>>         },
+>>>>>>         {
+>>>>>>             "name": "share2016-placement",
+>>>>>>             "tags": []
+>>>>>>         },
+>>>>>>         {
+>>>>>>             "name": "test-placement",
+>>>>>>             "tags": []
+>>>>>>         }
+>>>>>>     ],
+>>>>>>     "default_placement": "default-placement",
+>>>>>>     "realm_id": ""
+>>>>>> }
+>>>>>>
+>>>>>>
+>>>>>> Thanks
+>>>>>> Mustafa
+>>>>>>
+>>>>>>> Orit
+>>>>>>>
+>>>>>>> On Tue, Nov 1, 2016 at 2:13 PM, Mustafa Muhammad <mustafa1024m@gmail.com> wrote:
+>>>>>>>> Hello,
+>>>>>>>> I have production cluster configured with multiple placement pools according to:
+>>>>>>>>
+>>>>>>>> http://cephnotes.ksperis.com/blog/2014/11/28/placement-pools-on-rados-gw
+>>>>>>>>
+>>>>>>>> After upgrading to Jewel, most radosgw-admin are failing, probably
+>>>>>>>> because there is no realm
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> # radosgw-admin realm list
+>>>>>>>> {
+>>>>>>>>     "default_info": "",
+>>>>>>>>     "realms": []
+>>>>>>>> }
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> # radosgw-admin zone get
+>>>>>>>> unable to initialize zone: (2) No such file or directory
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> # radosgw-admin regionmap get
+>>>>>>>> failed to read current period info: 2016-11-01 16:08:14.099948
+>>>>>>>> 7f21b55ee9c0  0 RGWPeriod::init failed to init realm  id  : (2) No
+>>>>>>>> such file or directory(2) No such file or directory
+>>>>>>>> {
+>>>>>>>>     "zonegroups": [],
+>>>>>>>>     "master_zonegroup": "",
+>>>>>>>>     "bucket_quota": {
+>>>>>>>>         "enabled": false,
+>>>>>>>>         "max_size_kb": -1,
+>>>>>>>>         "max_objects": -1
+>>>>>>>>     },
+>>>>>>>>     "user_quota": {
+>>>>>>>>         "enabled": false,
+>>>>>>>>         "max_size_kb": -1,
+>>>>>>>>         "max_objects": -1
+>>>>>>>>     }
+>>>>>>>> }
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> # radosgw-admin bucket stats
+>>>>>>>> 2016-11-01 16:07:55.860053 7f6e747f89c0  0 zonegroup default missing
+>>>>>>>> zone for master_zone=
+>>>>>>>> couldn't init storage provider
+>>>>>>>>
+>>>>>>>> I have previous region.conf.json and zone.conf.json, how can I make
+>>>>>>>> everything work again? Will creating new realm fix this?
+>>>>>>>>
+>>>>>>>> Regards
+>>>>>>>> Mustafa Muhammad
+>>>>>>>> --
+>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
