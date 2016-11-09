@@ -1,55 +1,64 @@
-From: Sage Weil <sage@newdream.net>
+From: "Gohad, Tushar" <tushar.gohad@intel.com>
 Subject: RE: status of spdk
-Date: Wed, 9 Nov 2016 20:58:45 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1611092054550.29278@piezo.us.to>
-References: <CADRKj5R+kwpr+_D+bx48gw_BHzX0jcQG-52C_kiLuTeqeEV+Qw@mail.gmail.com> <alpine.DEB.2.11.1611082334390.32512@piezo.us.to> <CADRKj5T0=J1QuMjgDKr9WMME-bT6_DoY7UjnQdYUBUJ3YiJU1A@mail.gmail.com> <41F4566A-4573-4CB9-81F4-1688ED2534C1@alibaba-inc.com>
- <CAAL-TMeZpUok4QWUXuC5G-VLqJYxKcJdFPu6rdWLG5f+kWxohw@mail.gmail.com> <034AAD465C6CBE4F96D9FB98573A79A602670AB7@FMSMSX108.amr.corp.intel.com>
+Date: Wed, 9 Nov 2016 21:00:53 +0000
+Message-ID: <82115773F5CCE44DA5B6CE8B3878B6F0294DA23A@fmsmsx115.amr.corp.intel.com>
+References: <CADRKj5R+kwpr+_D+bx48gw_BHzX0jcQG-52C_kiLuTeqeEV+Qw@mail.gmail.com>
+ <alpine.DEB.2.11.1611082334390.32512@piezo.us.to>
+ <CADRKj5T0=J1QuMjgDKr9WMME-bT6_DoY7UjnQdYUBUJ3YiJU1A@mail.gmail.com>
+ <41F4566A-4573-4CB9-81F4-1688ED2534C1@alibaba-inc.com>
+ <CAAL-TMeZpUok4QWUXuC5G-VLqJYxKcJdFPu6rdWLG5f+kWxohw@mail.gmail.com>
+ <034AAD465C6CBE4F96D9FB98573A79A602670AB7@FMSMSX108.amr.corp.intel.com>
+ <alpine.DEB.2.11.1611092054550.29278@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38331 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752576AbcKIU6t (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2016 15:58:49 -0500
-In-Reply-To: <034AAD465C6CBE4F96D9FB98573A79A602670AB7@FMSMSX108.amr.corp.intel.com>
+Received: from mga14.intel.com ([192.55.52.115]:20031 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753892AbcKIVBP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 9 Nov 2016 16:01:15 -0500
+In-Reply-To: <alpine.DEB.2.11.1611092054550.29278@piezo.us.to>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Moreno, Orlando" <orlando.moreno@intel.com>
+To: Sage Weil <sage@newdream.net>, "Moreno, Orlando" <orlando.moreno@intel.com>
 Cc: Dong Wu <archer.wudong@gmail.com>, "LIU, Fei" <james.liu@alibaba-inc.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, "Wang, Haomai" <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "'ifedotov@mirantis.com'" <ifedotov@mirantis.com>
+
+
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+Sent: Wednesday, November 9, 2016 1:59 PM
+To: Moreno, Orlando <orlando.moreno@intel.com>
+Cc: Dong Wu <archer.wudong@gmail.com>; LIU, Fei <james.liu@alibaba-inc.com>; Yehuda Sadeh-Weinraub <yehuda@redhat.com>; Wang, Haomai <haomaiwang@gmail.com>; ceph-devel <ceph-devel@vger.kernel.org>; 'ifedotov@mirantis.com' <ifedotov@mirantis.com>
+Subject: RE: status of spdk
 
 On Wed, 9 Nov 2016, Moreno, Orlando wrote:
 > Hi all,
 > 
-> Multiple DPDK/SPDK instances on a single host does not work because the 
-> current implementation in Ceph does not support it. This issue is 
+> Multiple DPDK/SPDK instances on a single host does not work because 
+> the current implementation in Ceph does not support it. This issue is 
 > tracked here: http://tracker.ceph.com/issues/16966 There is 
-> multi-process support in DPDK, but you must configure the EAL correctly 
-> for it to work. I have been working on a patch, 
-> https://github.com/ommoreno/ceph/tree/wip-16966, that allows the user to 
-> configure multiple BlueStore OSDs backed by SPDK. Though this patch 
+> multi-process support in DPDK, but you must configure the EAL 
+> correctly for it to work. I have been working on a patch, 
+> https://github.com/ommoreno/ceph/tree/wip-16966, that allows the user 
+> to configure multiple BlueStore OSDs backed by SPDK. Though this patch 
 > works, I think it needs a few additions to actually make it performant.
 > 
-> This is just to get the 1 OSD process per NVMe case working. A multi-OSD 
-> per NVMe solution will probably require more work as described in this 
-> thread.
+> This is just to get the 1 OSD process per NVMe case working. A 
+> multi-OSD per NVMe solution will probably require more work as 
+> described in this thread.
 
-TBH I'm not sure how important the multi-osd per NVMe case is.  The only 
-reason to do that would be performance bottlenecks within the OSD itself, 
-and I'd rather focus our efforts on eliminating those than on enabling a 
-bandaid solution.
+TBH I'm not sure how important the multi-osd per NVMe case is.  The only reason to do that would be performance bottlenecks within the OSD itself, and I'd rather focus our efforts on eliminating those than on enabling a bandaid solution.
 
 As I understand it the scenarios that are most interesting are
 
-1- sharing the same network device to multiple osds with DPDK (this will 
-presumably be pretty common unless/until we combine many OSDs into a 
-single process), and
+1- sharing the same network device to multiple osds with DPDK (this will presumably be pretty common unless/until we combine many OSDs into a single process), and
 
-2- sharing a tiny portion of the NVMe device for the osd_data (usually a 
-few MB of metadata that gets mounted at /var/lib/ceph/osd/$cluster-$id).  
+2- sharing a tiny portion of the NVMe device for the osd_data (usually a few MB of metadata that gets mounted at /var/lib/ceph/osd/$cluster-$id).  
 Not sure this will be feasible or not.
 
-As I think Haomai mentioned, the next barrier is probably the requirements 
-around DPDK event loop and dedicated core?
+As I think Haomai mentioned, the next barrier is probably the requirements around DPDK event loop and dedicated core?
 
 sage
 
@@ -61,10 +70,13 @@ sage
 > 
 > 
 > -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Dong Wu
+> From: ceph-devel-owner@vger.kernel.org 
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Dong Wu
 > Sent: Tuesday, November 8, 2016 7:45 PM
 > To: LIU, Fei <james.liu@alibaba-inc.com>
-> Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>; Sage Weil <sweil@redhat.com>; Wang, Haomai <haomaiwang@gmail.com>; ceph-devel <ceph-devel@vger.kernel.org>
+> Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>; Sage Weil 
+> <sweil@redhat.com>; Wang, Haomai <haomaiwang@gmail.com>; ceph-devel 
+> <ceph-devel@vger.kernel.org>
 > Subject: Re: status of spdk
 > 
 > Hi, Yehuda and Haomai,
@@ -138,8 +150,8 @@ sage
 > >
 > >     >
 > >     > Also, if you do that, is it possible to give one of the namespaces to the
-> >     > kernel?  That might solve the bootstrapping problem we currently 
-> > have
+> >     > kernel?  That might solve the bootstrapping problem we 
+> > currently have
 > >
 > >     Theoretically, but not right now (or ever?). See here:
 > >
@@ -159,7 +171,8 @@ sage
 > >     --
 > >     To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > >     the body of a message to majordomo@vger.kernel.org
-> >     More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >     More majordomo info at  
+> > http://vger.kernel.org/majordomo-info.html
 > >
 > >
 > >
@@ -168,10 +181,14 @@ sage
 > > in the body of a message to majordomo@vger.kernel.org More majordomo 
 > > info at  http://vger.kernel.org/majordomo-info.html
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
