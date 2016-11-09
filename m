@@ -1,183 +1,37 @@
-From: "Gohad, Tushar" <tushar.gohad@intel.com>
-Subject: RE: status of spdk
-Date: Wed, 9 Nov 2016 21:10:13 +0000
-Message-ID: <82115773F5CCE44DA5B6CE8B3878B6F0294DA2DC@fmsmsx115.amr.corp.intel.com>
-References: <CADRKj5R+kwpr+_D+bx48gw_BHzX0jcQG-52C_kiLuTeqeEV+Qw@mail.gmail.com>
- <alpine.DEB.2.11.1611082334390.32512@piezo.us.to>
- <CADRKj5T0=J1QuMjgDKr9WMME-bT6_DoY7UjnQdYUBUJ3YiJU1A@mail.gmail.com>
- <41F4566A-4573-4CB9-81F4-1688ED2534C1@alibaba-inc.com>
- <CAAL-TMeZpUok4QWUXuC5G-VLqJYxKcJdFPu6rdWLG5f+kWxohw@mail.gmail.com>
- <034AAD465C6CBE4F96D9FB98573A79A602670AB7@FMSMSX108.amr.corp.intel.com>
- <alpine.DEB.2.11.1611092054550.29278@piezo.us.to>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Bluestore with rocksdb vs ZS
+Date: Wed, 9 Nov 2016 22:57:39 +0000
+Message-ID: <BY2PR02MB39674DF9B9B8848C6A17C8AF4B90@BY2PR02MB396.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga07.intel.com ([134.134.136.100]:46778 "EHLO mga07.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754104AbcKIVKP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 9 Nov 2016 16:10:15 -0500
-In-Reply-To: <alpine.DEB.2.11.1611092054550.29278@piezo.us.to>
+Received: from mail-sn1nam01on0087.outbound.protection.outlook.com ([104.47.32.87]:59264
+        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752871AbcKIW5n (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 9 Nov 2016 17:57:43 -0500
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, "Moreno, Orlando" <orlando.moreno@intel.com>
-Cc: Dong Wu <archer.wudong@gmail.com>, "LIU, Fei" <james.liu@alibaba-inc.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, "Wang, Haomai" <haomaiwang@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "'ifedotov@mirantis.com'" <ifedotov@mirantis.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
->> Multiple DPDK/SPDK instances on a single host does not work because 
->> the current implementation in Ceph does not support it. This issue is 
->> tracked here: http://tracker.ceph.com/issues/16966 There is 
->> multi-process support in DPDK, but you must configure the EAL 
->> correctly for it to work. I have been working on a patch, 
->> https://github.com/ommoreno/ceph/tree/wip-16966, that allows the user 
->> to configure multiple BlueStore OSDs backed by SPDK. Though this patch 
->> works, I think it needs a few additions to actually make it performant.
->> This is just to get the 1 OSD process per NVMe case working. A 
->> multi-OSD per NVMe solution will probably require more work as 
->> described in this thread.
+Hi,
+Here is the slide we presented in today's performance meeting.
 
-> TBH I'm not sure how important the multi-osd per NVMe case is.  
-> The only reason to do that would be performance bottlenecks within the 
-> OSD itself, and I'd rather focus our efforts on eliminating those than on 
-> enabling a bandaid solution.
+https://drive.google.com/file/d/0B7W-S0z_ymMJZXI3bkZLX3Z2U0E/view?usp=3Dsha=
+ring
 
-Completely agree here.
+Feel free to come back if anybody has any query.
 
-> As I understand it the scenarios that are most interesting are
-
-> 1- sharing the same network device to multiple osds with DPDK (this will presumably be pretty common unless/until we combine many OSDs into a single process), and
-
-> 2- sharing a tiny portion of the NVMe device for the osd_data (usually a few MB of metadata that gets mounted at /var/lib/ceph/osd/$cluster-$id).  
-> Not sure this will be feasible or not.
-
-Unfortunately, this is not feasible without some form of partitioning support in SPDK (namespace/GPT or in form of a new LVM-like layer on top of SPDK bdev) - the latter is under development at the moment.
-
-The limitation that Orlando identified is, not being able to launch multiple SPDK-based OSDs on a node today.  Igor and Orlando's PR (16966) is to add a config option to limit the number of hugepages assigned to an OSD via an EAL switch.  The other limitation today is being able to specify the CPU mask assigned to each OSD which would require config addition.
-
-Tushar 
-
-
-> 
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org 
-> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Dong Wu
-> Sent: Tuesday, November 8, 2016 7:45 PM
-> To: LIU, Fei <james.liu@alibaba-inc.com>
-> Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>; Sage Weil 
-> <sweil@redhat.com>; Wang, Haomai <haomaiwang@gmail.com>; ceph-devel 
-> <ceph-devel@vger.kernel.org>
-> Subject: Re: status of spdk
-> 
-> Hi, Yehuda and Haomai,
->     DPDK backend may have the same problem. I had tried to use haomai's  PR: https://github.com/ceph/ceph/pull/10748 to test dpdk backend, but failed to start multiple OSDs on the host with only one network card, alse i read about the dpdk multi-process support:
-> http://dpdk.org/doc/guides/prog_guide/multi_proc_support.html, but did not find any config  to set multi-process support. Anything wrong or multi-process support not been implemented?
-> 
-> 2016-11-09 8:21 GMT+08:00 LIU, Fei <james.liu@alibaba-inc.com>:
-> > Hi Yehuda and Haomai,
-> >    The issue of drives driven by SPDK is not able to be shared by multiple OSDs as kernel NVMe drive since SPDK as a process so far can not be shared across multiple processes like OSDs, right?
-> >
-> >    Regards,
-> >    James
-> >
-> >
-> >
-> > On 11/8/16, 4:06 PM, "Yehuda Sadeh-Weinraub" <ceph-devel-owner@vger.kernel.org on behalf of yehuda@redhat.com> wrote:
-> >
-> >     On Tue, Nov 8, 2016 at 3:40 PM, Sage Weil <sweil@redhat.com> wrote:
-> >     > On Tue, 8 Nov 2016, Yehuda Sadeh-Weinraub wrote:
-> >     >> I just started looking at spdk, and have a few comments and questions.
-> >     >>
-> >     >> First, it's not clear to me how we should handle build. At the moment
-> >     >> the spdk code resides as a submodule in the ceph tree, but it depends
-> >     >> on dpdk, which currently needs to be downloaded separately. We can add
-> >     >> it as a submodule (upstream is here: git://dpdk.org/dpdk). That been
-> >     >> said, getting it to build was a bit tricky and I think it might be
-> >     >> broken with cmake. In order to get it working I resorted to building a
-> >     >> system library and use that.
-> >     >
-> >     > Note that this PR is about to merge
-> >     >
-> >     >         https://github.com/ceph/ceph/pull/10748
-> >     >
-> >     > which adds the DPDK submodule, so hopefully this issue will go away when
-> >     > that merged or with a follow-on cleanup.
-> >     >
-> >     >> The way to currently configure an osd to use bluestore with spdk is by
-> >     >> creating a symbolic link that replaces the bluestore 'block' device to
-> >     >> point to a file that has a name that is prefixed with 'spdk:'.
-> >     >> Originally I assumed that the suffix would be the nvme device id, but
-> >     >> it seems that it's not really needed, however, the file itself needs
-> >     >> to contain the device id (see
-> >     >> https://github.com/yehudasa/ceph/tree/wip-yehuda-spdk for a couple of
-> >     >> minor fixes).
-> >     >
-> >     > Open a PR for those?
-> >
-> >     Sure
-> >
-> >     >
-> >     >> As I understand it, in order to support multiple osds on the same NVMe
-> >     >> device we have a few options. We can leverage NVMe namespaces, but
-> >     >> that's not supported on all devices. We can configure bluestore to
-> >     >> only use part of the device (device sharding? not sure if it supports
-> >     >> it). I think it's best if we could keep bluestore out of the loop
-> >     >> there and have the NVMe driver abstract multiple partitions of the
-> >     >> NVMe device. The idea is to be able to define multiple partitions on
-> >     >> the device (e.g., each partition will be defined by the offset, size,
-> >     >> and namespace), and have the osd set to use a specific partition.
-> >     >> We'll probably need a special tool to manage it, and potentially keep
-> >     >> the partition table information on the device itself. The tool could
-> >     >> also manage the creation of the block link. We should probably rethink
-> >     >> how the link is structure and what it points at.
-> >     >
-> >     > I agree that bluestore shouldn't get involved.
-> >     >
-> >     > Is the NVMe namespaces meant to support multiple processes sharing the
-> >     > same hardware device?
-> >
-> >     More of a partitioning solution, but yes (as far as I undestand).
-> >
-> >     >
-> >     > Also, if you do that, is it possible to give one of the namespaces to the
-> >     > kernel?  That might solve the bootstrapping problem we 
-> > currently have
-> >
-> >     Theoretically, but not right now (or ever?). See here:
-> >
-> >     https://lists.01.org/pipermail/spdk/2016-July/000073.html
-> >
-> >     > where we have nowhere to put the $osd_data filesystem with the device
-> >     > metadata.  (This is admittedly not necessarily a blocking issue.  Putting
-> >     > those dirs on / wouldn't be the end of the world; it just means cards
-> >     > can't be easily moved between boxes.)
-> >     >
-> >
-> >     Maybe we can use bluestore for these too ;) that been said, there
-> >     might be some kind of a loopback solution that could work, but not
-> >     sure if it won't create major bottlenecks that we'd want to avoid.
-> >
-> >     Yehuda
-> >     --
-> >     To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >     the body of a message to majordomo@vger.kernel.org
-> >     More majordomo info at  
-> > http://vger.kernel.org/majordomo-info.html
-> >
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> > in the body of a message to majordomo@vger.kernel.org More majordomo 
-> > info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks & Regards
+Somnath
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
