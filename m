@@ -1,110 +1,93 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: 25G RDMA networking thoughts???
-Date: Wed, 9 Nov 2016 11:33:39 +0800
-Message-ID: <CACJqLyb=fZEtqVpTtgidMQMocEEPt3XphreCN9U5rmRmqej0VA@mail.gmail.com>
-References: <acbd757e-d360-4e37-bc26-60eb9d6ec162.james.liu@alibaba-inc.com>
- <16962d43-7f03-4e92-9eee-b3f4ab80408c.james.liu@alibaba-inc.com> <35adaeb1-25ff-4f16-be56-0589e483f054.james.liu@alibaba-inc.com>
+From: Haomai Wang <haomaiwang@gmail.com>
+Subject: Re: status of spdk
+Date: Wed, 9 Nov 2016 12:45:44 +0800
+Message-ID: <CACJqLyb-yUBJvOz50xDy187hczso6ynPx03Bq8HB-cEs+QrQCA@mail.gmail.com>
+References: <CADRKj5R+kwpr+_D+bx48gw_BHzX0jcQG-52C_kiLuTeqeEV+Qw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ty1jpn01on0090.outbound.protection.outlook.com ([104.47.93.90]:6602
-        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751282AbcKIDd4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 8 Nov 2016 22:33:56 -0500
-Received: by mail-ua0-f174.google.com with SMTP id b35so164003986uaa.3
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Nov 2016 19:33:47 -0800 (PST)
-In-Reply-To: <35adaeb1-25ff-4f16-be56-0589e483f054.james.liu@alibaba-inc.com>
+Received: from mail-vk0-f46.google.com ([209.85.213.46]:34336 "EHLO
+        mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751564AbcKIEpq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Nov 2016 23:45:46 -0500
+Received: by mail-vk0-f46.google.com with SMTP id x186so166954866vkd.1
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Nov 2016 20:45:45 -0800 (PST)
+In-Reply-To: <CADRKj5R+kwpr+_D+bx48gw_BHzX0jcQG-52C_kiLuTeqeEV+Qw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "LIU, Fei" <james.liu@alibaba-inc.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: "Weil, Sage" <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Nov 9, 2016 at 5:51 AM, LIU, Fei <james.liu@alibaba-inc.com> wrote:
-> Hi Sage=EF=BC=8C
->    thanks=EF=BC=8CSorry for confusing you.  What i am trying to say is as=
-ync with
-> RDMA over ethernet.  I understand that async messenger support TCP based
-> ethernet well.
-> Secondly, would be possible to have data traffice among osds categorized
-> into different service level to better provide QoS for the whole Ceph
-> cluster service if we can within the 25G RDMA faclitiis?
-> Thirdly, would be possible to provide unified network for both storage an=
-d
-> compute within QoS control? We don't expect the replication/recovery/refi=
-ll
-> to have bad impact to the latency of application.
+On Wed, Nov 9, 2016 at 7:31 AM, Yehuda Sadeh-Weinraub <yehuda@redhat.com> wrote:
+> I just started looking at spdk, and have a few comments and questions.
+>
+> First, it's not clear to me how we should handle build. At the moment
+> the spdk code resides as a submodule in the ceph tree, but it depends
+> on dpdk, which currently needs to be downloaded separately. We can add
+> it as a submodule (upstream is here: git://dpdk.org/dpdk). That been
+> said, getting it to build was a bit tricky and I think it might be
+> broken with cmake. In order to get it working I resorted to building a
+> system library and use that.
 
-Currently I only use rdma over ib to test. I don't have eth over ib
-nic by hand. I don't know what need to do for eth rdma nic...
+yes, because we expect dpdk submodule will merge soon. we left this aside..
+
+now the eaisest way is yum install dpdk-devel to complete the build
+instead of git clone dpdk repo separated.
 
 >
+> The way to currently configure an osd to use bluestore with spdk is by
+> creating a symbolic link that replaces the bluestore 'block' device to
+> point to a file that has a name that is prefixed with 'spdk:'.
+> Originally I assumed that the suffix would be the nvme device id, but
+> it seems that it's not really needed, however, the file itself needs
+> to contain the device id (see
+> https://github.com/yehudasa/ceph/tree/wip-yehuda-spdk for a couple of
+> minor fixes).
+
+hmm, I commented in config_opt.h.
+// If you want to use spdk driver, you need to specify NVMe serial number here
+// with "spdk:" prefix.
+// Users can use 'lspci -vvv -d 8086:0953 | grep "Device Serial Number"' to
+// get the serial number of Intel(R) Fultondale NVMe controllers.
+// Example:
+// bluestore_block_path = spdk:55cd2e404bd73932
+
+we don't need to create symbolic link by hand, it could be done in
+bluestore codes.
+
 >
->    Regards,
->    James
+> As I understand it, in order to support multiple osds on the same NVMe
+> device we have a few options. We can leverage NVMe namespaces, but
+> that's not supported on all devices. We can configure bluestore to
+> only use part of the device (device sharding? not sure if it supports
+> it). I think it's best if we could keep bluestore out of the loop
+> there and have the NVMe driver abstract multiple partitions of the
+> NVMe device. The idea is to be able to define multiple partitions on
+> the device (e.g., each partition will be defined by the offset, size,
+> and namespace), and have the osd set to use a specific partition.
+> We'll probably need a special tool to manage it, and potentially keep
+> the partition table information on the device itself. The tool could
+> also manage the creation of the block link. We should probably rethink
+> how the link is structure and what it points at.
+
+I discussed multi namespace with intel, spdk will embedded multi
+namespace management.
+But before ceph-osd single process can support multi OSD instance, I
+think we need to do offset/length in application side.
+
+Besides these problems, the most important thing is getting ride of
+spdk dependence on dpdk. before multi-osd within single process
+feature is done, we can't bear the multi polling threads occur 100%
+cpu times.
+
 >
-> ------------------------------------------------------------------
-> From:Sage Weil <sweil@redhat.com>
-> Time:2016 Nov 8 (Tue) 13:45
-> To:James <james.liu@alibaba-inc.com>
-> Cc:Haomai Wang <haomai@xsky.com>; ceph-devel <ceph-devel@vger.kernel.org>
-> Subject:Re: 25G RDMA networking thoughts???
+> Any thoughts?
 >
-> On Wed, 9 Nov 2016, LIU, Fei wrote:
->> Hi Sage=EF=BC=8C
->>    Yes, Totally understood.  25G RDMA network for Ceph cluster is built
->> for
->> interal test. Xio messenger and Async messenger(But it can only support
->> infiniband,right) are going to be two options. We are carefully evaluate
->> both of these two options. But the most important goal in the end is to
->> see
->> how bluestore works with rdma to bring down the total latency for worklo=
-ad
->> like OLTP.
->>
->> Hi Haomai,
->>    Would you mind let us know when the async messenger is going to suppo=
-rt
->> ethernet if not support yet?
->
-> The default async backend is PosixStack which is all TCP-based.  (And
-> async is now the default messenger in kraken.)
->
-> sage
->
->>
->>    Regards,
->>    James
->>       ------------------------------------------------------------------
->> From:Sage Weil <sweil@redhat.com>
->> Time:2016 Nov 8 (Tue) 13:19
->> To:James <james.liu@alibaba-inc.com>
->> Subject:Re: 25G RDMA networking thoughts???
->>
->> [adding ceph-devel]
->>
->> On Wed, 9 Nov 2016, LIU, Fei wrote:
->> > Hi Sage,
->> >    I was wondering do you have any thoughts of 25G RDMA networking
->> > construction besides of xio-messenger/async?  Is there any guidance to
->> > bu
->> ild
->> > 25G RDMA netowrk to better control the whole Ceph cluster latency?
->>
->> The only RDMA options right now are XioMessenger and AsyncMessenger's ne=
-w
->> RDMA backend. Both are experimental, but we'd be very interested in
->> hearing about your experience.
->>
->> I wouldn't assume that latency is network-related, though.  More often
->> than not we're finding it's the OSD backend or the OSD request internals
->> (e.g., request scheduling or peering) that's the culprit...
->>
->> sage
->>
->>
->>
->>
->
->
+> Yehuda
+
+
+
+-- 
+Best Regards,
+
+Wheat
