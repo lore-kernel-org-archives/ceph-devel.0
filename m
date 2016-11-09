@@ -1,44 +1,51 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: master branch merges must pass unit tests
-Date: Wed, 9 Nov 2016 10:29:38 +0100
-Message-ID: <5822EC82.6080306@dachary.org>
-References: <alpine.DEB.2.11.1611082147590.29278@piezo.us.to>
- <alpine.DEB.2.11.1611082331480.29278@piezo.us.to>
+Subject: Re: what is infernalis' EOL date?
+Date: Wed, 9 Nov 2016 10:30:35 +0100
+Message-ID: <5822ECBB.2090705@dachary.org>
+References: <CALqRxCz0GFp141xT92sNZVpPLkCoRnqwQSUkZfLJ=VLwEb50cA@mail.gmail.com>
+ <CAN=+7FVhwt9AfRgjLKZ1w_Z2WtNVa4kMzjndm8AfvuDjZ1GhrA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:49173 "EHLO
-        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753456AbcKIJ3m (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2016 04:29:42 -0500
-In-Reply-To: <alpine.DEB.2.11.1611082331480.29278@piezo.us.to>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:45415 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752013AbcKIJak (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2016 04:30:40 -0500
+In-Reply-To: <CAN=+7FVhwt9AfRgjLKZ1w_Z2WtNVa4kMzjndm8AfvuDjZ1GhrA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Samuel Just <sjust@redhat.com>, Ken Dreyer <kdreyer@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
 
 
-On 09/11/2016 00:34, Sage Weil wrote:
-> On Tue, 8 Nov 2016, Sage Weil wrote:
->> I enabled the github check that the unit tests pass in order to merge to 
->> master.  These tests still aren't completely reliable, but they're close, 
->> and we'll make better progress if we start enforcing it now.
+On 08/11/2016 21:17, Samuel Just wrote:
+> I think the EOL would have been the date of the Jewel release, right?
+
+Right.
+
+> -Sam
 > 
-> I went a bit further and also checked the box requiring a review and 
-> preventing pushes directly to master branch.  These are already uneforced 
-> requirements so this shouldn't slow people down *except* that we need to 
-> start using the new github 'review' feature that lets you explicitly 
-> approve changes.
+> On Tue, Nov 8, 2016 at 8:50 AM, Ken Dreyer <kdreyer@redhat.com> wrote:
+>> Hi folks,
+>>
+>> http://docs.ceph.com/docs/master/releases/ does not list an EOL date
+>> for Infernalis.
+>>
+>> Can we say "Feb 2016" there? That was the date of the last point
+>> release, v9.2.1.
+>>
+>> - Ken
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> Again, the core developers can override these restrictions if necessary.
-> 
-> I haven't done anything to the stable branches, but we might want to do 
-> the same thing there...
-
-Good move :-) I will do the same for the stable branches.
-
-Cheers
 
 -- 
-Loïc Dachary, Artisan Logiciel Libre
+LoÃ¯c Dachary, Artisan Logiciel Libre
