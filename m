@@ -1,48 +1,75 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: master branch merges must pass unit tests
-Date: Wed, 9 Nov 2016 08:37:45 -0500
-Message-ID: <CAC-Np1wATLgOiRJ4OFef2=1-3xawPprrAKFghi25VwGY-A21fQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1611082147590.29278@piezo.us.to>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: bump librados' soversion
+Date: Wed, 9 Nov 2016 08:52:37 -0500
+Message-ID: <CA+aFP1BE+PFCnkYBwxARuL=PMGy5REdVW22tEvJGYkuchvhxiw@mail.gmail.com>
+References: <CAJE9aOMoOJSccnXA=gCxuO3KN+0fziF3mRhMxBcF3dy4tmwy9A@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f179.google.com ([209.85.220.179]:34345 "EHLO
-        mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752650AbcKINhq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2016 08:37:46 -0500
-Received: by mail-qk0-f179.google.com with SMTP id q130so255838152qke.1
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Nov 2016 05:37:46 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1611082147590.29278@piezo.us.to>
+Received: from mail-lf0-f44.google.com ([209.85.215.44]:35636 "EHLO
+        mail-lf0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932719AbcKINwj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2016 08:52:39 -0500
+Received: by mail-lf0-f44.google.com with SMTP id b14so164634622lfg.2
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Nov 2016 05:52:38 -0800 (PST)
+In-Reply-To: <CAJE9aOMoOJSccnXA=gCxuO3KN+0fziF3mRhMxBcF3dy4tmwy9A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
 
-On Tue, Nov 8, 2016 at 4:49 PM, Sage Weil <sweil@redhat.com> wrote:
-> I enabled the github check that the unit tests pass in order to merge to
-> master.
+Am I correct in assuming the original issue that forced this change
+was because a >2GB message was sent over the wire and that bug has
+been fixed?
 
-Thank you!
+If so, can we just revert the API change and do a soversion bump when
+we really clean up the librados API, which has been talked about for a
+while now? There is some cleanup work needed in the librbd API that
+would break the API, so it would be nice to do it all at once instead
+of library-by-library, release-by-release.
 
-> These tests still aren't completely reliable, but they're close,
-> and we'll make better progress if we start enforcing it now.
+There only seems to be a few places within the codebase that even use
+"advance", and they could be switched over to a new a "advance2" /
+"advance64" method in the interim if required.
+
+If we do bump the soversion for this, obviously the current failing
+client upgrade test would just need to be removed.
+
+
+On Wed, Nov 9, 2016 at 1:16 AM, kefu chai <tchaikov@gmail.com> wrote:
+> hi cephers,
 >
-
-I would like to see some effort put into make it more reliable. One of
-the things that it has to do is reboot the box where it runs
-to ensure that processes are really killed. I would love to see some
-effort put into the targets to make them robust.
-
-There is nothing too complicated going on at the CI level, we just
-call run-make-check.sh:
-
-https://github.com/ceph/ceph-build/blob/master/ceph-pull-requests/config/definitions/ceph-pull-requests.yml#L49
-
-> Note that core developers can still override the check to merge if
-> it's necessary, but I encourage you to avoid doing so!
+> i am proposing bumping the soversion of librados2 to librados3. as in
+> 053bfa6[0], we changed the function signature of
+> ceph::buffer::list::advance(), which is incompatible with the prior
+> version of librados. that's partially why we have
+> http://tracker.ceph.com/issues/17809, in which, the old librbd client
+> fails to start, due to unresolved symbols.
 >
-> sage
+> and if user has some (homebrew) packages depending on librados2. those
+> packages will be broken as well. the same applies to executables
+> linked against librados2 shared library. so we need to bump the
+> soversion. but to minimize the impact, i think we will not introduce
+> incompatible changes between major releases, in other words, the
+> soversion won't change from jewel to kraken, for example. if i
+> understand sage's comment correctly.
+>
+> yes, i knew this issue was raised before from time to time. but maybe
+> this is a good chance to do the soversion change in kraken.
+>
+> a PR is posted to address this problem. see
+> https://github.com/ceph/ceph/pull/11843.
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> [0] https://github.com/ceph/ceph/pull/9395/commits/053bfa650ba1d656dfb20e389ef25afc4c383bb3
+> [1] https://github.com/ceph/ceph/pull/9395#issuecomment-224278945
+>
+> --
+> Regards
+> Kefu Chai
+
+
+
+-- 
+Jason
