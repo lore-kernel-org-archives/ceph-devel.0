@@ -1,46 +1,71 @@
 From: kefu chai <tchaikov@gmail.com>
-Subject: bump librados' soversion
-Date: Wed, 9 Nov 2016 14:16:25 +0800
-Message-ID: <CAJE9aOMoOJSccnXA=gCxuO3KN+0fziF3mRhMxBcF3dy4tmwy9A@mail.gmail.com>
+Subject: Re: Seeking help in getting run-tox-ceph-detect-init to work.
+Date: Wed, 9 Nov 2016 16:17:56 +0800
+Message-ID: <CAJE9aOOj-A-kkBzjyOei7JHRY=qRmT_fVF9L7M_wFyypMKvoBQ@mail.gmail.com>
+References: <6a74274e-4134-183c-f8fa-a180b5a93783@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:33843 "EHLO
-        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750877AbcKIGQ0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2016 01:16:26 -0500
-Received: by mail-qk0-f177.google.com with SMTP id q130so245093117qke.1
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Nov 2016 22:16:26 -0800 (PST)
+Received: from mail-qk0-f171.google.com ([209.85.220.171]:34855 "EHLO
+        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751095AbcKIIR5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2016 03:17:57 -0500
+Received: by mail-qk0-f171.google.com with SMTP id n204so236927969qke.2
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Nov 2016 00:17:57 -0800 (PST)
+In-Reply-To: <6a74274e-4134-183c-f8fa-a180b5a93783@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, dillaman@redhat.com
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-hi cephers,
+On Wed, Nov 9, 2016 at 6:57 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> Hi,
+>
+> I'm looking for a developer with more Python experience....
+> Especially with getting things thru tox.
+>
+> I was able to add FreeBSD support to ceph-detect-init in #11829. But
+> then that is tested in run-tox-detect-init. Which now fails in a Linux
+> Jenkins run:
+> https://jenkins.ceph.com/job/ceph-pull-requests/13621/consoleFull#124607955c19247c4-fcb7-4c61-9a5d-7e2b9731c678
+>
+> But that heavily depends on mock and variations on
+> platform.linux_distribution(), which is over my head.
+>
+> Like:
+>     def test_get(self):
+>         g = ceph_detect_init.get
+>        with mock.patch('platform.linux_distribution',
+>                         lambda **kwargs: (('unknown', '', ''))):
+>             self.assertRaises(exc.UnsupportedPlatform, g)
+>
+> Which hits the assert because linux_distribution() returns
+>         (' ', ' ', ' ')
+> and the system info needs to be extracted from other functions.
+>
+> The brutal way would be to override this test, but the question then is
+> with what? Because there is no one function that returns the required
+> values. So the code would be a copy from what is in the _init_.py code.
+>
+> And that feels like a butcher testing his own meat.
 
-i am proposing bumping the soversion of librados2 to librados3. as in
-053bfa6[0], we changed the function signature of
-ceph::buffer::list::advance(), which is incompatible with the prior
-version of librados. that's partially why we have
-http://tracker.ceph.com/issues/17809, in which, the old librbd client
-fails to start, due to unresolved symbols.
+yes, you need to mock some methods get called in
+platform_information(), please see the updated patch at:
+https://github.com/tchaikov/ceph/commit/fced2823c311bee2be0d226759809fc10170a6ff
 
-and if user has some (homebrew) packages depending on librados2. those
-packages will be broken as well. the same applies to executables
-linked against librados2 shared library. so we need to bump the
-soversion. but to minimize the impact, i think we will not introduce
-incompatible changes between major releases, in other words, the
-soversion won't change from jewel to kraken, for example. if i
-understand sage's comment correctly.
+in which, i also added a test for unsupported system.
 
-yes, i knew this issue was raised before from time to time. but maybe
-this is a good chance to do the soversion change in kraken.
+>
+> So help very much welcomed,
+> --WjW
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-a PR is posted to address this problem. see
-https://github.com/ceph/ceph/pull/11843.
 
---
-[0] https://github.com/ceph/ceph/pull/9395/commits/053bfa650ba1d656dfb20e389ef25afc4c383bb3
-[1] https://github.com/ceph/ceph/pull/9395#issuecomment-224278945
 
 -- 
 Regards
