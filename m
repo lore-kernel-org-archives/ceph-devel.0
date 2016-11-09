@@ -1,132 +1,179 @@
-From: "Liu, Changpeng" <changpeng.liu@intel.com>
-Subject: RE: status of spdk
-Date: Wed, 9 Nov 2016 05:09:04 +0000
-Message-ID: <FF7FC980937D6342B9D289F5F3C7C2625AB65713@shsmsx102.ccr.corp.intel.com>
+From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
+Subject: Re: status of spdk
+Date: Wed, 09 Nov 2016 13:23:08 +0800
+Message-ID: <879F4BA7-4E5C-4407-AA5B-3CFEA0FAF6FB@alibaba-inc.com>
 References: <CADRKj5R+kwpr+_D+bx48gw_BHzX0jcQG-52C_kiLuTeqeEV+Qw@mail.gmail.com>
  <alpine.DEB.2.11.1611082334390.32512@piezo.us.to>
  <CADRKj5T0=J1QuMjgDKr9WMME-bT6_DoY7UjnQdYUBUJ3YiJU1A@mail.gmail.com>
  <41F4566A-4573-4CB9-81F4-1688ED2534C1@alibaba-inc.com>
  <CACJqLybju4p+y08Uq5rFhhJ2h_pXMLTohr0t+6Lkg3EDQjQvRw@mail.gmail.com>
  <7E8F4A68-9D8E-4E4A-B3C3-1D0EF5278590@alibaba-inc.com>
+ <FF7FC980937D6342B9D289F5F3C7C2625AB65713@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain;
+        charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:9395 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751226AbcKIFJx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 9 Nov 2016 00:09:53 -0500
-In-Reply-To: <7E8F4A68-9D8E-4E4A-B3C3-1D0EF5278590@alibaba-inc.com>
-Content-Language: en-US
+Received: from out0-150.mail.aliyun.com ([140.205.0.150]:35458 "EHLO
+        out0-150.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750774AbcKIF3q (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Nov 2016 00:29:46 -0500
+In-Reply-To: <FF7FC980937D6342B9D289F5F3C7C2625AB65713@shsmsx102.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "LIU, Fei" <james.liu@alibaba-inc.com>, Haomai Wang <haomaiwang@gmail.com>
+To: "Liu, Changpeng" <changpeng.liu@intel.com>, Haomai Wang <haomaiwang@gmail.com>
 Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, "Cao, Gang" <gang.cao@intel.com>, "Yang, Ziye" <ziye.yang@intel.com>, "Dai, Qihua" <qihua.dai@intel.com>, "Harris, James R" <james.r.harris@intel.com>
 
-SGkgSmFtZXMsDQoNClllcywgdGhlIG11bHRpIHByb2Nlc3NlcyBzdXBwb3J0IG9mIFNQREsgaXMg
-dW5kZXIgZGV2ZWxvcG1lbnQsIEdhbmcgaXMgdGhlIGRldmVsb3BlciBmb3IgdGhlIGZlYXR1cmUg
-b2YgIFNQREsuDQpXZSBhcmUgdGFyZ2V0aW5nIHRvIHJlbGVhc2UgdGhlIGZlYXR1cmUgaW4gMTYu
-MTIgdmVyc2lvbiBmb3IgU1BESyhXVzUwKS4NCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
-LS0tDQo+IEZyb206IExJVSwgRmVpIFttYWlsdG86amFtZXMubGl1QGFsaWJhYmEtaW5jLmNvbV0N
-Cj4gU2VudDogV2VkbmVzZGF5LCBOb3ZlbWJlciA5LCAyMDE2IDE6MDMgUE0NCj4gVG86IEhhb21h
-aSBXYW5nIDxoYW9tYWl3YW5nQGdtYWlsLmNvbT47IExpdSwgQ2hhbmdwZW5nDQo+IDxjaGFuZ3Bl
-bmcubGl1QGludGVsLmNvbT4NCj4gQ2M6IFllaHVkYSBTYWRlaC1XZWlucmF1YiA8eWVodWRhQHJl
-ZGhhdC5jb20+OyBTYWdlIFdlaWwNCj4gPHN3ZWlsQHJlZGhhdC5jb20+OyBjZXBoLWRldmVsIDxj
-ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IHN0YXR1cyBvZiBzcGRr
-DQo+IA0KPiBIYW9tYWksDQo+ICAgIFRoYW5rcyBhIGxvdC4NCj4gDQo+ICAgIFJlZ2FyZHMsDQo+
-ICAgIEphbWVzDQo+IA0KPiBIaSBDaGFuZ3BlbmcsDQo+ICAgIFdvdWxkIHlvdSBtaW5kIHVwZGF0
-aW5nIHVzIGFib3V0IHRoZSBzdGF0dXMgb2YgbXVsdGkgcHJvY2Vzc2VzIHN1cHBvcnQgb2YNCj4g
-c3Bkaz8NCj4gDQo+ICAgIFJlZ2FyZHMsDQo+ICAgIEphbWVzDQo+IA0KPiBPbiAxMS84LzE2LCA4
-OjU5IFBNLCAiSGFvbWFpIFdhbmciIDxoYW9tYWl3YW5nQGdtYWlsLmNvbT4gd3JvdGU6DQo+IA0K
-PiAgICAgT24gV2VkLCBOb3YgOSwgMjAxNiBhdCA4OjIxIEFNLCBMSVUsIEZlaSA8amFtZXMubGl1
-QGFsaWJhYmEtaW5jLmNvbT4gd3JvdGU6DQo+ICAgICA+IEhpIFllaHVkYSBhbmQgSGFvbWFpLA0K
-PiAgICAgPiAgICBUaGUgaXNzdWUgb2YgZHJpdmVzIGRyaXZlbiBieSBTUERLIGlzIG5vdCBhYmxl
-IHRvIGJlIHNoYXJlZCBieSBtdWx0aXBsZSBPU0RzDQo+IGFzIGtlcm5lbCBOVk1lIGRyaXZlIHNp
-bmNlIFNQREsgYXMgYSBwcm9jZXNzIHNvIGZhciBjYW4gbm90IGJlIHNoYXJlZCBhY3Jvc3MNCj4g
-bXVsdGlwbGUgcHJvY2Vzc2VzIGxpa2UgT1NEcywgcmlnaHQ/DQo+IA0KPiAgICAgc3BkayBudm1l
-IHN1cHBvcnRzIG11bHRpIHByb2Nlc3MgaXMgYSB1bmRlcmdvaW5nIHNwZGsgZmVhdHVyZSBub3cs
-IGl0DQo+ICAgICB3aWxsIGJlIGltcGxlbWVudGVkIHZpYSBzaGFyZWQgbWVtb3J5IGFtb25nIG11
-bHRpIHByb2Nlc3MuDQo+IA0KPiAgICAgPg0KPiAgICAgPiAgICBSZWdhcmRzLA0KPiAgICAgPiAg
-ICBKYW1lcw0KPiAgICAgPg0KPiAgICAgPg0KPiAgICAgPg0KPiAgICAgPiBPbiAxMS84LzE2LCA0
-OjA2IFBNLCAiWWVodWRhIFNhZGVoLVdlaW5yYXViIiA8Y2VwaC1kZXZlbC0NCj4gb3duZXJAdmdl
-ci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiB5ZWh1ZGFAcmVkaGF0LmNvbT4gd3JvdGU6DQo+ICAg
-ICA+DQo+ICAgICA+ICAgICBPbiBUdWUsIE5vdiA4LCAyMDE2IGF0IDM6NDAgUE0sIFNhZ2UgV2Vp
-bCA8c3dlaWxAcmVkaGF0LmNvbT4gd3JvdGU6DQo+ICAgICA+ICAgICA+IE9uIFR1ZSwgOCBOb3Yg
-MjAxNiwgWWVodWRhIFNhZGVoLVdlaW5yYXViIHdyb3RlOg0KPiAgICAgPiAgICAgPj4gSSBqdXN0
-IHN0YXJ0ZWQgbG9va2luZyBhdCBzcGRrLCBhbmQgaGF2ZSBhIGZldyBjb21tZW50cyBhbmQgcXVl
-c3Rpb25zLg0KPiAgICAgPiAgICAgPj4NCj4gICAgID4gICAgID4+IEZpcnN0LCBpdCdzIG5vdCBj
-bGVhciB0byBtZSBob3cgd2Ugc2hvdWxkIGhhbmRsZSBidWlsZC4gQXQgdGhlIG1vbWVudA0KPiAg
-ICAgPiAgICAgPj4gdGhlIHNwZGsgY29kZSByZXNpZGVzIGFzIGEgc3VibW9kdWxlIGluIHRoZSBj
-ZXBoIHRyZWUsIGJ1dCBpdCBkZXBlbmRzDQo+ICAgICA+ICAgICA+PiBvbiBkcGRrLCB3aGljaCBj
-dXJyZW50bHkgbmVlZHMgdG8gYmUgZG93bmxvYWRlZCBzZXBhcmF0ZWx5LiBXZSBjYW4NCj4gYWRk
-DQo+ICAgICA+ICAgICA+PiBpdCBhcyBhIHN1Ym1vZHVsZSAodXBzdHJlYW0gaXMgaGVyZTogZ2l0
-Oi8vZHBkay5vcmcvZHBkaykuIFRoYXQgYmVlbg0KPiAgICAgPiAgICAgPj4gc2FpZCwgZ2V0dGlu
-ZyBpdCB0byBidWlsZCB3YXMgYSBiaXQgdHJpY2t5IGFuZCBJIHRoaW5rIGl0IG1pZ2h0IGJlDQo+
-ICAgICA+ICAgICA+PiBicm9rZW4gd2l0aCBjbWFrZS4gSW4gb3JkZXIgdG8gZ2V0IGl0IHdvcmtp
-bmcgSSByZXNvcnRlZCB0byBidWlsZGluZyBhDQo+ICAgICA+ICAgICA+PiBzeXN0ZW0gbGlicmFy
-eSBhbmQgdXNlIHRoYXQuDQo+ICAgICA+ICAgICA+DQo+ICAgICA+ICAgICA+IE5vdGUgdGhhdCB0
-aGlzIFBSIGlzIGFib3V0IHRvIG1lcmdlDQo+ICAgICA+ICAgICA+DQo+ICAgICA+ICAgICA+ICAg
-ICAgICAgaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzEwNzQ4DQo+ICAgICA+ICAg
-ICA+DQo+ICAgICA+ICAgICA+IHdoaWNoIGFkZHMgdGhlIERQREsgc3VibW9kdWxlLCBzbyBob3Bl
-ZnVsbHkgdGhpcyBpc3N1ZSB3aWxsIGdvIGF3YXkNCj4gd2hlbg0KPiAgICAgPiAgICAgPiB0aGF0
-IG1lcmdlZCBvciB3aXRoIGEgZm9sbG93LW9uIGNsZWFudXAuDQo+ICAgICA+ICAgICA+DQo+ICAg
-ICA+ICAgICA+PiBUaGUgd2F5IHRvIGN1cnJlbnRseSBjb25maWd1cmUgYW4gb3NkIHRvIHVzZSBi
-bHVlc3RvcmUgd2l0aCBzcGRrIGlzIGJ5DQo+ICAgICA+ICAgICA+PiBjcmVhdGluZyBhIHN5bWJv
-bGljIGxpbmsgdGhhdCByZXBsYWNlcyB0aGUgYmx1ZXN0b3JlICdibG9jaycgZGV2aWNlIHRvDQo+
-ICAgICA+ICAgICA+PiBwb2ludCB0byBhIGZpbGUgdGhhdCBoYXMgYSBuYW1lIHRoYXQgaXMgcHJl
-Zml4ZWQgd2l0aCAnc3BkazonLg0KPiAgICAgPiAgICAgPj4gT3JpZ2luYWxseSBJIGFzc3VtZWQg
-dGhhdCB0aGUgc3VmZml4IHdvdWxkIGJlIHRoZSBudm1lIGRldmljZSBpZCwgYnV0DQo+ICAgICA+
-ICAgICA+PiBpdCBzZWVtcyB0aGF0IGl0J3Mgbm90IHJlYWxseSBuZWVkZWQsIGhvd2V2ZXIsIHRo
-ZSBmaWxlIGl0c2VsZiBuZWVkcw0KPiAgICAgPiAgICAgPj4gdG8gY29udGFpbiB0aGUgZGV2aWNl
-IGlkIChzZWUNCj4gICAgID4gICAgID4+IGh0dHBzOi8vZ2l0aHViLmNvbS95ZWh1ZGFzYS9jZXBo
-L3RyZWUvd2lwLXllaHVkYS1zcGRrIGZvciBhIGNvdXBsZQ0KPiBvZg0KPiAgICAgPiAgICAgPj4g
-bWlub3IgZml4ZXMpLg0KPiAgICAgPiAgICAgPg0KPiAgICAgPiAgICAgPiBPcGVuIGEgUFIgZm9y
-IHRob3NlPw0KPiAgICAgPg0KPiAgICAgPiAgICAgU3VyZQ0KPiAgICAgPg0KPiAgICAgPiAgICAg
-Pg0KPiAgICAgPiAgICAgPj4gQXMgSSB1bmRlcnN0YW5kIGl0LCBpbiBvcmRlciB0byBzdXBwb3J0
-IG11bHRpcGxlIG9zZHMgb24gdGhlIHNhbWUgTlZNZQ0KPiAgICAgPiAgICAgPj4gZGV2aWNlIHdl
-IGhhdmUgYSBmZXcgb3B0aW9ucy4gV2UgY2FuIGxldmVyYWdlIE5WTWUgbmFtZXNwYWNlcywgYnV0
-DQo+ICAgICA+ICAgICA+PiB0aGF0J3Mgbm90IHN1cHBvcnRlZCBvbiBhbGwgZGV2aWNlcy4gV2Ug
-Y2FuIGNvbmZpZ3VyZSBibHVlc3RvcmUgdG8NCj4gICAgID4gICAgID4+IG9ubHkgdXNlIHBhcnQg
-b2YgdGhlIGRldmljZSAoZGV2aWNlIHNoYXJkaW5nPyBub3Qgc3VyZSBpZiBpdCBzdXBwb3J0cw0K
-PiAgICAgPiAgICAgPj4gaXQpLiBJIHRoaW5rIGl0J3MgYmVzdCBpZiB3ZSBjb3VsZCBrZWVwIGJs
-dWVzdG9yZSBvdXQgb2YgdGhlIGxvb3ANCj4gICAgID4gICAgID4+IHRoZXJlIGFuZCBoYXZlIHRo
-ZSBOVk1lIGRyaXZlciBhYnN0cmFjdCBtdWx0aXBsZSBwYXJ0aXRpb25zIG9mIHRoZQ0KPiAgICAg
-PiAgICAgPj4gTlZNZSBkZXZpY2UuIFRoZSBpZGVhIGlzIHRvIGJlIGFibGUgdG8gZGVmaW5lIG11
-bHRpcGxlIHBhcnRpdGlvbnMgb24NCj4gICAgID4gICAgID4+IHRoZSBkZXZpY2UgKGUuZy4sIGVh
-Y2ggcGFydGl0aW9uIHdpbGwgYmUgZGVmaW5lZCBieSB0aGUgb2Zmc2V0LCBzaXplLA0KPiAgICAg
-PiAgICAgPj4gYW5kIG5hbWVzcGFjZSksIGFuZCBoYXZlIHRoZSBvc2Qgc2V0IHRvIHVzZSBhIHNw
-ZWNpZmljIHBhcnRpdGlvbi4NCj4gICAgID4gICAgID4+IFdlJ2xsIHByb2JhYmx5IG5lZWQgYSBz
-cGVjaWFsIHRvb2wgdG8gbWFuYWdlIGl0LCBhbmQgcG90ZW50aWFsbHkga2VlcA0KPiAgICAgPiAg
-ICAgPj4gdGhlIHBhcnRpdGlvbiB0YWJsZSBpbmZvcm1hdGlvbiBvbiB0aGUgZGV2aWNlIGl0c2Vs
-Zi4gVGhlIHRvb2wgY291bGQNCj4gICAgID4gICAgID4+IGFsc28gbWFuYWdlIHRoZSBjcmVhdGlv
-biBvZiB0aGUgYmxvY2sgbGluay4gV2Ugc2hvdWxkIHByb2JhYmx5IHJldGhpbmsNCj4gICAgID4g
-ICAgID4+IGhvdyB0aGUgbGluayBpcyBzdHJ1Y3R1cmUgYW5kIHdoYXQgaXQgcG9pbnRzIGF0Lg0K
-PiAgICAgPiAgICAgPg0KPiAgICAgPiAgICAgPiBJIGFncmVlIHRoYXQgYmx1ZXN0b3JlIHNob3Vs
-ZG4ndCBnZXQgaW52b2x2ZWQuDQo+ICAgICA+ICAgICA+DQo+ICAgICA+ICAgICA+IElzIHRoZSBO
-Vk1lIG5hbWVzcGFjZXMgbWVhbnQgdG8gc3VwcG9ydCBtdWx0aXBsZSBwcm9jZXNzZXMgc2hhcmlu
-Zw0KPiB0aGUNCj4gICAgID4gICAgID4gc2FtZSBoYXJkd2FyZSBkZXZpY2U/DQo+ICAgICA+DQo+
-ICAgICA+ICAgICBNb3JlIG9mIGEgcGFydGl0aW9uaW5nIHNvbHV0aW9uLCBidXQgeWVzIChhcyBm
-YXIgYXMgSSB1bmRlc3RhbmQpLg0KPiAgICAgPg0KPiAgICAgPiAgICAgPg0KPiAgICAgPiAgICAg
-PiBBbHNvLCBpZiB5b3UgZG8gdGhhdCwgaXMgaXQgcG9zc2libGUgdG8gZ2l2ZSBvbmUgb2YgdGhl
-IG5hbWVzcGFjZXMgdG8gdGhlDQo+ICAgICA+ICAgICA+IGtlcm5lbD8gIFRoYXQgbWlnaHQgc29s
-dmUgdGhlIGJvb3RzdHJhcHBpbmcgcHJvYmxlbSB3ZSBjdXJyZW50bHkgaGF2ZQ0KPiAgICAgPg0K
-PiAgICAgPiAgICAgVGhlb3JldGljYWxseSwgYnV0IG5vdCByaWdodCBub3cgKG9yIGV2ZXI/KS4g
-U2VlIGhlcmU6DQo+ICAgICA+DQo+ICAgICA+ICAgICBodHRwczovL2xpc3RzLjAxLm9yZy9waXBl
-cm1haWwvc3Bkay8yMDE2LUp1bHkvMDAwMDczLmh0bWwNCj4gICAgID4NCj4gICAgID4gICAgID4g
-d2hlcmUgd2UgaGF2ZSBub3doZXJlIHRvIHB1dCB0aGUgJG9zZF9kYXRhIGZpbGVzeXN0ZW0gd2l0
-aCB0aGUgZGV2aWNlDQo+ICAgICA+ICAgICA+IG1ldGFkYXRhLiAgKFRoaXMgaXMgYWRtaXR0ZWRs
-eSBub3QgbmVjZXNzYXJpbHkgYSBibG9ja2luZyBpc3N1ZS4gIFB1dHRpbmcNCj4gICAgID4gICAg
-ID4gdGhvc2UgZGlycyBvbiAvIHdvdWxkbid0IGJlIHRoZSBlbmQgb2YgdGhlIHdvcmxkOyBpdCBq
-dXN0IG1lYW5zIGNhcmRzDQo+ICAgICA+ICAgICA+IGNhbid0IGJlIGVhc2lseSBtb3ZlZCBiZXR3
-ZWVuIGJveGVzLikNCj4gICAgID4gICAgID4NCj4gICAgID4NCj4gICAgID4gICAgIE1heWJlIHdl
-IGNhbiB1c2UgYmx1ZXN0b3JlIGZvciB0aGVzZSB0b28gOykgdGhhdCBiZWVuIHNhaWQsIHRoZXJl
-DQo+ICAgICA+ICAgICBtaWdodCBiZSBzb21lIGtpbmQgb2YgYSBsb29wYmFjayBzb2x1dGlvbiB0
-aGF0IGNvdWxkIHdvcmssIGJ1dCBub3QNCj4gICAgID4gICAgIHN1cmUgaWYgaXQgd29uJ3QgY3Jl
-YXRlIG1ham9yIGJvdHRsZW5lY2tzIHRoYXQgd2UnZCB3YW50IHRvIGF2b2lkLg0KPiAgICAgPg0K
-PiAgICAgPiAgICAgWWVodWRhDQo+ICAgICA+ICAgICAtLQ0KPiAgICAgPiAgICAgVG8gdW5zdWJz
-Y3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2
-ZWwiIGluDQo+ICAgICA+ICAgICB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
-ZXIua2VybmVsLm9yZw0KPiAgICAgPiAgICAgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDov
-L3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ICAgICA+DQo+ICAgICA+DQo+
-ICAgICA+DQo+IA0KPiANCj4gDQo+ICAgICAtLQ0KPiAgICAgQmVzdCBSZWdhcmRzLA0KPiANCj4g
-ICAgIFdoZWF0DQo+IA0KPiANCg0K
+Hi Changpeng,
+  Thanks a lot for your update.
+
+  Regards,
+  James
+
+On 11/8/16, 9:09 PM, "Liu, Changpeng" <changpeng.liu@intel.com> wrote:
+
+    Hi James,
+    
+    Yes, the multi processes support of SPDK is under development, Gang is the developer for the feature of  SPDK.
+    We are targeting to release the feature in 16.12 version for SPDK(WW50).
+    
+    
+    > -----Original Message-----
+    > From: LIU, Fei [mailto:james.liu@alibaba-inc.com]
+    > Sent: Wednesday, November 9, 2016 1:03 PM
+    > To: Haomai Wang <haomaiwang@gmail.com>; Liu, Changpeng
+    > <changpeng.liu@intel.com>
+    > Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>; Sage Weil
+    > <sweil@redhat.com>; ceph-devel <ceph-devel@vger.kernel.org>
+    > Subject: Re: status of spdk
+    > 
+    > Haomai,
+    >    Thanks a lot.
+    > 
+    >    Regards,
+    >    James
+    > 
+    > Hi Changpeng,
+    >    Would you mind updating us about the status of multi processes support of
+    > spdk?
+    > 
+    >    Regards,
+    >    James
+    > 
+    > On 11/8/16, 8:59 PM, "Haomai Wang" <haomaiwang@gmail.com> wrote:
+    > 
+    >     On Wed, Nov 9, 2016 at 8:21 AM, LIU, Fei <james.liu@alibaba-inc.com> wrote:
+    >     > Hi Yehuda and Haomai,
+    >     >    The issue of drives driven by SPDK is not able to be shared by multiple OSDs
+    > as kernel NVMe drive since SPDK as a process so far can not be shared across
+    > multiple processes like OSDs, right?
+    > 
+    >     spdk nvme supports multi process is a undergoing spdk feature now, it
+    >     will be implemented via shared memory among multi process.
+    > 
+    >     >
+    >     >    Regards,
+    >     >    James
+    >     >
+    >     >
+    >     >
+    >     > On 11/8/16, 4:06 PM, "Yehuda Sadeh-Weinraub" <ceph-devel-
+    > owner@vger.kernel.org on behalf of yehuda@redhat.com> wrote:
+    >     >
+    >     >     On Tue, Nov 8, 2016 at 3:40 PM, Sage Weil <sweil@redhat.com> wrote:
+    >     >     > On Tue, 8 Nov 2016, Yehuda Sadeh-Weinraub wrote:
+    >     >     >> I just started looking at spdk, and have a few comments and questions.
+    >     >     >>
+    >     >     >> First, it's not clear to me how we should handle build. At the moment
+    >     >     >> the spdk code resides as a submodule in the ceph tree, but it depends
+    >     >     >> on dpdk, which currently needs to be downloaded separately. We can
+    > add
+    >     >     >> it as a submodule (upstream is here: git://dpdk.org/dpdk). That been
+    >     >     >> said, getting it to build was a bit tricky and I think it might be
+    >     >     >> broken with cmake. In order to get it working I resorted to building a
+    >     >     >> system library and use that.
+    >     >     >
+    >     >     > Note that this PR is about to merge
+    >     >     >
+    >     >     >         https://github.com/ceph/ceph/pull/10748
+    >     >     >
+    >     >     > which adds the DPDK submodule, so hopefully this issue will go away
+    > when
+    >     >     > that merged or with a follow-on cleanup.
+    >     >     >
+    >     >     >> The way to currently configure an osd to use bluestore with spdk is by
+    >     >     >> creating a symbolic link that replaces the bluestore 'block' device to
+    >     >     >> point to a file that has a name that is prefixed with 'spdk:'.
+    >     >     >> Originally I assumed that the suffix would be the nvme device id, but
+    >     >     >> it seems that it's not really needed, however, the file itself needs
+    >     >     >> to contain the device id (see
+    >     >     >> https://github.com/yehudasa/ceph/tree/wip-yehuda-spdk for a couple
+    > of
+    >     >     >> minor fixes).
+    >     >     >
+    >     >     > Open a PR for those?
+    >     >
+    >     >     Sure
+    >     >
+    >     >     >
+    >     >     >> As I understand it, in order to support multiple osds on the same NVMe
+    >     >     >> device we have a few options. We can leverage NVMe namespaces, but
+    >     >     >> that's not supported on all devices. We can configure bluestore to
+    >     >     >> only use part of the device (device sharding? not sure if it supports
+    >     >     >> it). I think it's best if we could keep bluestore out of the loop
+    >     >     >> there and have the NVMe driver abstract multiple partitions of the
+    >     >     >> NVMe device. The idea is to be able to define multiple partitions on
+    >     >     >> the device (e.g., each partition will be defined by the offset, size,
+    >     >     >> and namespace), and have the osd set to use a specific partition.
+    >     >     >> We'll probably need a special tool to manage it, and potentially keep
+    >     >     >> the partition table information on the device itself. The tool could
+    >     >     >> also manage the creation of the block link. We should probably rethink
+    >     >     >> how the link is structure and what it points at.
+    >     >     >
+    >     >     > I agree that bluestore shouldn't get involved.
+    >     >     >
+    >     >     > Is the NVMe namespaces meant to support multiple processes sharing
+    > the
+    >     >     > same hardware device?
+    >     >
+    >     >     More of a partitioning solution, but yes (as far as I undestand).
+    >     >
+    >     >     >
+    >     >     > Also, if you do that, is it possible to give one of the namespaces to the
+    >     >     > kernel?  That might solve the bootstrapping problem we currently have
+    >     >
+    >     >     Theoretically, but not right now (or ever?). See here:
+    >     >
+    >     >     https://lists.01.org/pipermail/spdk/2016-July/000073.html
+    >     >
+    >     >     > where we have nowhere to put the $osd_data filesystem with the device
+    >     >     > metadata.  (This is admittedly not necessarily a blocking issue.  Putting
+    >     >     > those dirs on / wouldn't be the end of the world; it just means cards
+    >     >     > can't be easily moved between boxes.)
+    >     >     >
+    >     >
+    >     >     Maybe we can use bluestore for these too ;) that been said, there
+    >     >     might be some kind of a loopback solution that could work, but not
+    >     >     sure if it won't create major bottlenecks that we'd want to avoid.
+    >     >
+    >     >     Yehuda
+    >     >     --
+    >     >     To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+    >     >     the body of a message to majordomo@vger.kernel.org
+    >     >     More majordomo info at  http://vger.kernel.org/majordomo-info.html
+    >     >
+    >     >
+    >     >
+    > 
+    > 
+    > 
+    >     --
+    >     Best Regards,
+    > 
+    >     Wheat
+    > 
+    > 
+    
+    
+
+
