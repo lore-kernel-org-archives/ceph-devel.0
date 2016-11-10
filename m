@@ -1,156 +1,167 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: Bluestore with rocksdb vs ZS
-Date: Thu, 10 Nov 2016 17:43:38 +0300
-Message-ID: <0e6f8164-67a1-140d-4147-47e1ce48b198@mirantis.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bluestore with rocksdb vs ZS
+Date: Thu, 10 Nov 2016 16:44:43 +0000
+Message-ID: <BY2PR02MB396CA1594D1B254027BCBFFF4B80@BY2PR02MB396.namprd02.prod.outlook.com>
 References: <BY2PR02MB39674DF9B9B8848C6A17C8AF4B90@BY2PR02MB396.namprd02.prod.outlook.com>
  <fe4d4d36-693b-76b5-6cc2-a2b57a24173f@mirantis.com>
  <BY2PR02MB396475AD2EA210858957AD8F4B90@BY2PR02MB396.namprd02.prod.outlook.com>
  <ead268ca-c8e0-c61c-3df0-519383b19284@mirantis.com>
  <BY2PR02MB39611A9FF851334E0536911F4B80@BY2PR02MB396.namprd02.prod.outlook.com>
+ <0e6f8164-67a1-140d-4147-47e1ce48b198@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:34596 "EHLO
-        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933598AbcKJOnm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Nov 2016 09:43:42 -0500
-Received: by mail-qk0-f182.google.com with SMTP id q130so298301101qke.1
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Nov 2016 06:43:41 -0800 (PST)
-In-Reply-To: <BY2PR02MB39611A9FF851334E0536911F4B80@BY2PR02MB396.namprd02.prod.outlook.com>
+Received: from mail-cys01nam02on0061.outbound.protection.outlook.com ([104.47.37.61]:37904
+        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S935106AbcKJQor (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 10 Nov 2016 11:44:47 -0500
+In-Reply-To: <0e6f8164-67a1-140d-4147-47e1ce48b198@mirantis.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Somnath,
-
-
-On 10.11.2016 6:52, Somnath Roy wrote:
-> Igor,
-> Please see my response inline.
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: Igor Fedotov [mailto:ifedotov@mirantis.com]
-> Sent: Wednesday, November 09, 2016 4:26 PM
-> To: Somnath Roy; ceph-devel@vger.kernel.org
-> Subject: Re: Bluestore with rocksdb vs ZS
->
-> Somnath,
->
-> thanks a lot for your update.
->
-> The numbers in your response are for non-ceph case, right?
->
-> And for "single osd - steady state" case you observed (as per slide 5) 2K IOPS * 4K = 8Mb/s BW (and even less)? Comparing to 80Mb/s = 20K IOPS
-> * 4K  your hardware can provide for 4K random write.
->
-> [Somnath] No, it is much more worse. Steady state iops for 4k min_alloc + rocks = ~500 , 4k min_alloc + zs , 16K min_alloc + rocks = ~1K, ZS + 512kb rbd obect is ~1.8K
-[Igor] Yeah, I just provided max estimation for ZS  + 512 K obj. Main 
-point here is that OSD performance is >10x times slower comparing to 
-your system performance.
->
-> Is that correct or I missed something? Then if my calculations are correct I can easily explain why you're not getting steady state - one needs 4Tb / 8 Mb = 512K seconds to reach that state, i.e. the state when onodes are completely filled and not growing any more.
->
-> [Somnath] The performance on slide 5 we are getting after reaching to steady state. Before reaching steady state as other slide was showing we are > 5X faster for 4k min_alloc + rocks. Regarding reaching to steady state , we cheated not to do actual data write , but it was writing all metadata. This is achieved by setting max_alloc_size = 4k and it was much much faster as data write of 4K not happening :-)
-[Igor] Not sure I understand why data write isn't happening. IMHO you 
-just have smaller granularity for your extents/blobs (similar to real 4K 
-writes) but benefit from large write blocks processing (You mentioned 1M 
-writes to achieve steady state, right?)
-Anyway - I just wanted to point out that for 2-5K IOPS and 4K writes 
-getting to steady state takes much longer than 7 hours.  I.e. not 
-getting steady state within 7 hours at slide 3 is OK.
-
->
-> Again if I'm correct - could you please share your ceph config & fio job files (ones for slide 5 are enough for the first look) - probably you should tune bluestore onode cache and collection/cache shards counts. I experienced similar degradation due to bluestore misconfiguration.
->
-> [Somnath] Here is the bluestore options we used..
->
-> 	bluestore_rocksdb_options = "max_write_buffer_number=16,min_write_buffer_number_to_merge=2,recycle_log_file_num=16,compaction_threads=8,flusher_threads=4,max_background_compactions=8,max_background_flushes=4,max_bytes_for_level_base=5368709120,write_buffer_size=83886080,level0_file_num_compaction_trigger=2,level0_slowdown_writes_trigger=400,level0_stop_writes_trigger=800,stats_dump_period_sec=10"
->
->       osd_op_num_threads_per_shard = 2
->       osd_op_num_shards = 20
->          rocksdb_cache_size = 129496729
->          bluestore_min_alloc_size = 16384
->          #bluestore_min_alloc_size = 4096
->          bluestore_csum = false
->          bluestore_csum_type = none	
->         bluestore_max_ops = 0
->         bluestore_max_bytes = 0
->          #bluestore_buffer_cache_size = 104857600
->          bluestore_onode_cache_size = 30000
->          
->
-> And one more questions - againsе what ceph interface did you run FIO tests. Recently added ObjectStore one? Or RBD?
->
-> [Somnath] It's on top of rbd
->
-[Igor] I'm curious how many collections do you actually have for single 
-OSD case. To minimize request contention your osd_op_num_shards, amount 
-of collections and amount of fio jobs have to be similar or close enough.
-Otherwise IMHO you might experience performance degradation since the 
-probability that some requests waste time pending at 
-collection/cache_shard lock is pretty high.
-As far as I understand currently you have 32 jobs, 20 shards and ? 
-collections (IMHO 8 due to default for osd_pool_default_pg_num param?). 
-May be adjusting these values will help a bit.
-
-Another point - In your case you probably have 1M onodes for 4Tb image 
-and 4Mb object size. Hence your blyestore_onode_cahce_size = 30000 might 
-be ineffective. Most probably most of onodes lookup will miss the cache.
-
-And final point - are you using the same physical storage device for 
-block/db/wal purposes. Just different logical partitions, right? What's 
-about using different ones - wouldn't that increase the IOPS/BW?
-
-Thanks,
-Igor
-> Igor
->
->
->
-> On 11/10/2016 2:39 AM, Somnath Roy wrote:
->> Sure, it is running on SanDisk Infiniflash HW. Each Drive BW while test is running was ~400 MB/s and iops is ~20K , 100% 4K random write.
->> In case of 16 OSD test, it was 16 drive Infiniflash JBOF with 2 hosts attached to it. The hosts were HW zoned to 8 drives each.
->> The entire box BW is limited to max 12GB/s read/write, when it is fully populated i.e 64 drives . Since it is 16 drives , box will give 16 X 400 MB/s = ~6.4 GB/s.
->> 100% Read iops for this 16 drive box is ~800K and 100% write iops is ~300K iops.
->> Drives were having separate partition for Bluestore data/wal/db.
->>
->> Thanks & Regards
->> Somnath
->>
->> -----Original Message-----
->> From: Igor Fedotov [mailto:ifedotov@mirantis.com]
->> Sent: Wednesday, November 09, 2016 3:26 PM
->> To: Somnath Roy; ceph-devel@vger.kernel.org
->> Subject: Re: Bluestore with rocksdb vs ZS
->>
->> Hi Somnath,
->>
->> could you please describe the storage hardware used in your
->> benchmarking: what drives, how are they organized, etc... What are the performance characteristics of the storage subsystem without Ceph?
->>
->> Thanks in advance,
->>
->> Igor
->>
->>
->> On 11/10/2016 1:57 AM, Somnath Roy wrote:
->>> Hi,
->>> Here is the slide we presented in today's performance meeting.
->>>
->>> https://drive.google.com/file/d/0B7W-S0z_ymMJZXI3bkZLX3Z2U0E/view?usp=
->>> sharing
->>>
->>> Feel free to come back if anybody has any query.
->>>
->>> Thanks & Regards
->>> Somnath
->>> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo@vger.kernel.org More majordomo
->>> info at  http://vger.kernel.org/majordomo-info.html
-
+SWdvciwNCjw8aW5saW5lDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBJZ29y
+IEZlZG90b3YgW21haWx0bzppZmVkb3RvdkBtaXJhbnRpcy5jb21dIA0KU2VudDogVGh1cnNkYXks
+IE5vdmVtYmVyIDEwLCAyMDE2IDY6NDQgQU0NClRvOiBTb21uYXRoIFJveTsgY2VwaC1kZXZlbEB2
+Z2VyLmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBCbHVlc3RvcmUgd2l0aCByb2Nrc2RiIHZzIFpT
+DQoNClNvbW5hdGgsDQoNCg0KT24gMTAuMTEuMjAxNiA2OjUyLCBTb21uYXRoIFJveSB3cm90ZToN
+Cj4gSWdvciwNCj4gUGxlYXNlIHNlZSBteSByZXNwb25zZSBpbmxpbmUuDQo+DQo+IFRoYW5rcyAm
+IFJlZ2FyZHMNCj4gU29tbmF0aA0KPg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBG
+cm9tOiBJZ29yIEZlZG90b3YgW21haWx0bzppZmVkb3RvdkBtaXJhbnRpcy5jb21dDQo+IFNlbnQ6
+IFdlZG5lc2RheSwgTm92ZW1iZXIgMDksIDIwMTYgNDoyNiBQTQ0KPiBUbzogU29tbmF0aCBSb3k7
+IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBCbHVlc3RvcmUgd2l0
+aCByb2Nrc2RiIHZzIFpTDQo+DQo+IFNvbW5hdGgsDQo+DQo+IHRoYW5rcyBhIGxvdCBmb3IgeW91
+ciB1cGRhdGUuDQo+DQo+IFRoZSBudW1iZXJzIGluIHlvdXIgcmVzcG9uc2UgYXJlIGZvciBub24t
+Y2VwaCBjYXNlLCByaWdodD8NCj4NCj4gQW5kIGZvciAic2luZ2xlIG9zZCAtIHN0ZWFkeSBzdGF0
+ZSIgY2FzZSB5b3Ugb2JzZXJ2ZWQgKGFzIHBlciBzbGlkZSA1KSANCj4gMksgSU9QUyAqIDRLID0g
+OE1iL3MgQlcgKGFuZCBldmVuIGxlc3MpPyBDb21wYXJpbmcgdG8gODBNYi9zID0gMjBLIA0KPiBJ
+T1BTDQo+ICogNEsgIHlvdXIgaGFyZHdhcmUgY2FuIHByb3ZpZGUgZm9yIDRLIHJhbmRvbSB3cml0
+ZS4NCj4NCj4gW1NvbW5hdGhdIE5vLCBpdCBpcyBtdWNoIG1vcmUgd29yc2UuIFN0ZWFkeSBzdGF0
+ZSBpb3BzIGZvciA0ayANCj4gbWluX2FsbG9jICsgcm9ja3MgPSB+NTAwICwgNGsgbWluX2FsbG9j
+ICsgenMgLCAxNksgbWluX2FsbG9jICsgcm9ja3MgPSANCj4gfjFLLCBaUyArIDUxMmtiIHJiZCBv
+YmVjdCBpcyB+MS44Sw0KW0lnb3JdIFllYWgsIEkganVzdCBwcm92aWRlZCBtYXggZXN0aW1hdGlv
+biBmb3IgWlMgICsgNTEyIEsgb2JqLiBNYWluIHBvaW50IGhlcmUgaXMgdGhhdCBPU0QgcGVyZm9y
+bWFuY2UgaXMgPjEweCB0aW1lcyBzbG93ZXIgY29tcGFyaW5nIHRvIHlvdXIgc3lzdGVtIHBlcmZv
+cm1hbmNlLg0KPg0KPiBJcyB0aGF0IGNvcnJlY3Qgb3IgSSBtaXNzZWQgc29tZXRoaW5nPyBUaGVu
+IGlmIG15IGNhbGN1bGF0aW9ucyBhcmUgY29ycmVjdCBJIGNhbiBlYXNpbHkgZXhwbGFpbiB3aHkg
+eW91J3JlIG5vdCBnZXR0aW5nIHN0ZWFkeSBzdGF0ZSAtIG9uZSBuZWVkcyA0VGIgLyA4IE1iID0g
+NTEySyBzZWNvbmRzIHRvIHJlYWNoIHRoYXQgc3RhdGUsIGkuZS4gdGhlIHN0YXRlIHdoZW4gb25v
+ZGVzIGFyZSBjb21wbGV0ZWx5IGZpbGxlZCBhbmQgbm90IGdyb3dpbmcgYW55IG1vcmUuDQo+DQo+
+IFtTb21uYXRoXSBUaGUgcGVyZm9ybWFuY2Ugb24gc2xpZGUgNSB3ZSBhcmUgZ2V0dGluZyBhZnRl
+ciByZWFjaGluZyB0byANCj4gc3RlYWR5IHN0YXRlLiBCZWZvcmUgcmVhY2hpbmcgc3RlYWR5IHN0
+YXRlIGFzIG90aGVyIHNsaWRlIHdhcyBzaG93aW5nIA0KPiB3ZSBhcmUgPiA1WCBmYXN0ZXIgZm9y
+IDRrIG1pbl9hbGxvYyArIHJvY2tzLiBSZWdhcmRpbmcgcmVhY2hpbmcgdG8gDQo+IHN0ZWFkeSBz
+dGF0ZSAsIHdlIGNoZWF0ZWQgbm90IHRvIGRvIGFjdHVhbCBkYXRhIHdyaXRlICwgYnV0IGl0IHdh
+cyANCj4gd3JpdGluZyBhbGwgbWV0YWRhdGEuIFRoaXMgaXMgYWNoaWV2ZWQgYnkgc2V0dGluZyBt
+YXhfYWxsb2Nfc2l6ZSA9IDRrIA0KPiBhbmQgaXQgd2FzIG11Y2ggbXVjaCBmYXN0ZXIgYXMgZGF0
+YSB3cml0ZSBvZiA0SyBub3QgaGFwcGVuaW5nIDotKQ0KW0lnb3JdIE5vdCBzdXJlIEkgdW5kZXJz
+dGFuZCB3aHkgZGF0YSB3cml0ZSBpc24ndCBoYXBwZW5pbmcuIElNSE8geW91IGp1c3QgaGF2ZSBz
+bWFsbGVyIGdyYW51bGFyaXR5IGZvciB5b3VyIGV4dGVudHMvYmxvYnMgKHNpbWlsYXIgdG8gcmVh
+bCA0Sw0Kd3JpdGVzKSBidXQgYmVuZWZpdCBmcm9tIGxhcmdlIHdyaXRlIGJsb2NrcyBwcm9jZXNz
+aW5nIChZb3UgbWVudGlvbmVkIDFNIHdyaXRlcyB0byBhY2hpZXZlIHN0ZWFkeSBzdGF0ZSwgcmln
+aHQ/KSBBbnl3YXkgLSBJIGp1c3Qgd2FudGVkIHRvIHBvaW50IG91dCB0aGF0IGZvciAyLTVLIElP
+UFMgYW5kIDRLIHdyaXRlcyBnZXR0aW5nIHRvIHN0ZWFkeSBzdGF0ZSB0YWtlcyBtdWNoIGxvbmdl
+ciB0aGFuIDcgaG91cnMuICBJLmUuIG5vdCBnZXR0aW5nIHN0ZWFkeSBzdGF0ZSB3aXRoaW4gNyBo
+b3VycyBhdCBzbGlkZSAzIGlzIE9LLg0KDQpbU29tbmF0aF0gV2Ugc2hvcnQgY2lyY3VpdGVkIG5v
+dCB0byBkbyBkYXRhIHdyaXRlICwgaXQncyBhIGhhY2tlZCBjb2RlIHRvIGV4cGVkaXRlIHByZWNv
+bmRpdGlvbmluZy4gUmVnYXJkaW5nIHBlcmZvcm1hbmNlLCB3ZSBhcmUgZ2V0dGluZyAxMi0xM0sg
+aW9wcyBmb3IgYSBzbWFsbCBpbWFnZSAsIGJ1dCwgSSB3b3VsZCBzYXkgaW4geW91ciBzaW5nbGUg
+b3NkIHNldCB1cCB0cnkgdG8gY3JlYXRlIGEgYmlnZ2VyIGltYWdlIGxpa2UgMVRCIG9yIHNvIGFu
+ZCBzZWUgd2hhdCBwZXJmb3JtYW5jZSB5b3UgYXJlIGdldHRpbmcgYWZ0ZXIgZG9pbmcgc2F5IDFN
+IHByZWNvbmRpdGlvbmluZyBhbmQgdGhlbiB3cml0aW5nIDEwMCA0SyBSVy4NCg0KPg0KPiBBZ2Fp
+biBpZiBJJ20gY29ycmVjdCAtIGNvdWxkIHlvdSBwbGVhc2Ugc2hhcmUgeW91ciBjZXBoIGNvbmZp
+ZyAmIGZpbyBqb2IgZmlsZXMgKG9uZXMgZm9yIHNsaWRlIDUgYXJlIGVub3VnaCBmb3IgdGhlIGZp
+cnN0IGxvb2spIC0gcHJvYmFibHkgeW91IHNob3VsZCB0dW5lIGJsdWVzdG9yZSBvbm9kZSBjYWNo
+ZSBhbmQgY29sbGVjdGlvbi9jYWNoZSBzaGFyZHMgY291bnRzLiBJIGV4cGVyaWVuY2VkIHNpbWls
+YXIgZGVncmFkYXRpb24gZHVlIHRvIGJsdWVzdG9yZSBtaXNjb25maWd1cmF0aW9uLg0KPg0KPiBb
+U29tbmF0aF0gSGVyZSBpcyB0aGUgYmx1ZXN0b3JlIG9wdGlvbnMgd2UgdXNlZC4uDQo+DQo+IAli
+bHVlc3RvcmVfcm9ja3NkYl9vcHRpb25zID0gIm1heF93cml0ZV9idWZmZXJfbnVtYmVyPTE2LG1p
+bl93cml0ZV9idWZmZXJfbnVtYmVyX3RvX21lcmdlPTIscmVjeWNsZV9sb2dfZmlsZV9udW09MTYs
+Y29tcGFjdGlvbl90aHJlYWRzPTgsZmx1c2hlcl90aHJlYWRzPTQsbWF4X2JhY2tncm91bmRfY29t
+cGFjdGlvbnM9OCxtYXhfYmFja2dyb3VuZF9mbHVzaGVzPTQsbWF4X2J5dGVzX2Zvcl9sZXZlbF9i
+YXNlPTUzNjg3MDkxMjAsd3JpdGVfYnVmZmVyX3NpemU9ODM4ODYwODAsbGV2ZWwwX2ZpbGVfbnVt
+X2NvbXBhY3Rpb25fdHJpZ2dlcj0yLGxldmVsMF9zbG93ZG93bl93cml0ZXNfdHJpZ2dlcj00MDAs
+bGV2ZWwwX3N0b3Bfd3JpdGVzX3RyaWdnZXI9ODAwLHN0YXRzX2R1bXBfcGVyaW9kX3NlYz0xMCIN
+Cj4NCj4gICAgICAgb3NkX29wX251bV90aHJlYWRzX3Blcl9zaGFyZCA9IDINCj4gICAgICAgb3Nk
+X29wX251bV9zaGFyZHMgPSAyMA0KPiAgICAgICAgICByb2Nrc2RiX2NhY2hlX3NpemUgPSAxMjk0
+OTY3MjkNCj4gICAgICAgICAgYmx1ZXN0b3JlX21pbl9hbGxvY19zaXplID0gMTYzODQNCj4gICAg
+ICAgICAgI2JsdWVzdG9yZV9taW5fYWxsb2Nfc2l6ZSA9IDQwOTYNCj4gICAgICAgICAgYmx1ZXN0
+b3JlX2NzdW0gPSBmYWxzZQ0KPiAgICAgICAgICBibHVlc3RvcmVfY3N1bV90eXBlID0gbm9uZQkN
+Cj4gICAgICAgICBibHVlc3RvcmVfbWF4X29wcyA9IDANCj4gICAgICAgICBibHVlc3RvcmVfbWF4
+X2J5dGVzID0gMA0KPiAgICAgICAgICAjYmx1ZXN0b3JlX2J1ZmZlcl9jYWNoZV9zaXplID0gMTA0
+ODU3NjAwDQo+ICAgICAgICAgIGJsdWVzdG9yZV9vbm9kZV9jYWNoZV9zaXplID0gMzAwMDANCj4g
+ICAgICAgICAgDQo+DQo+IEFuZCBvbmUgbW9yZSBxdWVzdGlvbnMgLSBhZ2FpbnPQtSB3aGF0IGNl
+cGggaW50ZXJmYWNlIGRpZCB5b3UgcnVuIEZJTyB0ZXN0cy4gUmVjZW50bHkgYWRkZWQgT2JqZWN0
+U3RvcmUgb25lPyBPciBSQkQ/DQo+DQo+IFtTb21uYXRoXSBJdCdzIG9uIHRvcCBvZiByYmQNCj4N
+CltJZ29yXSBJJ20gY3VyaW91cyBob3cgbWFueSBjb2xsZWN0aW9ucyBkbyB5b3UgYWN0dWFsbHkg
+aGF2ZSBmb3Igc2luZ2xlIE9TRCBjYXNlLiBUbyBtaW5pbWl6ZSByZXF1ZXN0IGNvbnRlbnRpb24g
+eW91ciBvc2Rfb3BfbnVtX3NoYXJkcywgYW1vdW50IG9mIGNvbGxlY3Rpb25zIGFuZCBhbW91bnQg
+b2YgZmlvIGpvYnMgaGF2ZSB0byBiZSBzaW1pbGFyIG9yIGNsb3NlIGVub3VnaC4NCk90aGVyd2lz
+ZSBJTUhPIHlvdSBtaWdodCBleHBlcmllbmNlIHBlcmZvcm1hbmNlIGRlZ3JhZGF0aW9uIHNpbmNl
+IHRoZSBwcm9iYWJpbGl0eSB0aGF0IHNvbWUgcmVxdWVzdHMgd2FzdGUgdGltZSBwZW5kaW5nIGF0
+IGNvbGxlY3Rpb24vY2FjaGVfc2hhcmQgbG9jayBpcyBwcmV0dHkgaGlnaC4NCkFzIGZhciBhcyBJ
+IHVuZGVyc3RhbmQgY3VycmVudGx5IHlvdSBoYXZlIDMyIGpvYnMsIDIwIHNoYXJkcyBhbmQgPyAN
+CmNvbGxlY3Rpb25zIChJTUhPIDggZHVlIHRvIGRlZmF1bHQgZm9yIG9zZF9wb29sX2RlZmF1bHRf
+cGdfbnVtIHBhcmFtPykuIA0KTWF5IGJlIGFkanVzdGluZyB0aGVzZSB2YWx1ZXMgd2lsbCBoZWxw
+IGEgYml0Lg0KDQpbU29tbmF0aF0gWWVzLCB3ZSBpbmNyZWFzZWQgcGdfbnVtIHRvIDI1NiBvciA1
+MTIgKG5lZWQgdG8gY2hlY2sgZXhhY3QpDQoNCkFub3RoZXIgcG9pbnQgLSBJbiB5b3VyIGNhc2Ug
+eW91IHByb2JhYmx5IGhhdmUgMU0gb25vZGVzIGZvciA0VGIgaW1hZ2UgYW5kIDRNYiBvYmplY3Qg
+c2l6ZS4gSGVuY2UgeW91ciBibHllc3RvcmVfb25vZGVfY2FoY2Vfc2l6ZSA9IDMwMDAwIG1pZ2h0
+IGJlIGluZWZmZWN0aXZlLiBNb3N0IHByb2JhYmx5IG1vc3Qgb2Ygb25vZGVzIGxvb2t1cCB3aWxs
+IG1pc3MgdGhlIGNhY2hlLg0KDQpbU29tbmF0aF0gSSBkb24ndCB0aGluayBpbiByZWFsIHdvcmxk
+IHdlIGNhbid0IHNlcnZlIGV2ZXJ5dGhpbmcgZnJvbSBvbm9kZSBjYWNoZSAsIHNvLCBJTUhPLCB0
+aGlzIHJhdGlvIHByb2JhYmx5IG1ha2Ugc2Vuc2UuDQoNCkFuZCBmaW5hbCBwb2ludCAtIGFyZSB5
+b3UgdXNpbmcgdGhlIHNhbWUgcGh5c2ljYWwgc3RvcmFnZSBkZXZpY2UgZm9yIGJsb2NrL2RiL3dh
+bCBwdXJwb3Nlcy4gSnVzdCBkaWZmZXJlbnQgbG9naWNhbCBwYXJ0aXRpb25zLCByaWdodD8gV2hh
+dCdzIGFib3V0IHVzaW5nIGRpZmZlcmVudCBvbmVzIC0gd291bGRuJ3QgdGhhdCBpbmNyZWFzZSB0
+aGUgSU9QUy9CVz8NCg0KW1NvbW5hdGhdIFllcywgc2FtZSBkcml2ZSBkaWZmZXJlbnQgbG9naWNh
+bCBwYXJ0aXRpb24uIFdlIHRyaWVkIHNlcGFyYXRlIGRldmljZSBmb3IgZGIvd2FsIGFuZCBpdCBk
+aWRuJ3QgaW1wcm92ZSBwZXJmb3JtYW5jZSBtdWNoICwgc28sIGRldmljZSBkb2Vzbid0IHNlZW0g
+dG8gYmUgYSBib3R0bGVuZWNrLiBJIHRyaWVkIE5WUkFNIGFzIFdBTCBmb3IgMTZLIG1pbl9hbGxv
+YyBhbmQgaXQgaXMgZ2l2aW5nIDEwJSBidW1wLiBUaGlzIGlzIG1vc3RseSBiZWNhdXNlIG9mIGxv
+d2VyIGxhdGVuY3kgSSBndWVzcy4NCg0KVGhhbmtzLA0KSWdvcg0KPiBJZ29yDQo+DQo+DQo+DQo+
+IE9uIDExLzEwLzIwMTYgMjozOSBBTSwgU29tbmF0aCBSb3kgd3JvdGU6DQo+PiBTdXJlLCBpdCBp
+cyBydW5uaW5nIG9uIFNhbkRpc2sgSW5maW5pZmxhc2ggSFcuIEVhY2ggRHJpdmUgQlcgd2hpbGUg
+dGVzdCBpcyBydW5uaW5nIHdhcyB+NDAwIE1CL3MgYW5kIGlvcHMgaXMgfjIwSyAsIDEwMCUgNEsg
+cmFuZG9tIHdyaXRlLg0KPj4gSW4gY2FzZSBvZiAxNiBPU0QgdGVzdCwgaXQgd2FzIDE2IGRyaXZl
+IEluZmluaWZsYXNoIEpCT0Ygd2l0aCAyIGhvc3RzIGF0dGFjaGVkIHRvIGl0LiBUaGUgaG9zdHMg
+d2VyZSBIVyB6b25lZCB0byA4IGRyaXZlcyBlYWNoLg0KPj4gVGhlIGVudGlyZSBib3ggQlcgaXMg
+bGltaXRlZCB0byBtYXggMTJHQi9zIHJlYWQvd3JpdGUsIHdoZW4gaXQgaXMgZnVsbHkgcG9wdWxh
+dGVkIGkuZSA2NCBkcml2ZXMgLiBTaW5jZSBpdCBpcyAxNiBkcml2ZXMgLCBib3ggd2lsbCBnaXZl
+IDE2IFggNDAwIE1CL3MgPSB+Ni40IEdCL3MuDQo+PiAxMDAlIFJlYWQgaW9wcyBmb3IgdGhpcyAx
+NiBkcml2ZSBib3ggaXMgfjgwMEsgYW5kIDEwMCUgd3JpdGUgaW9wcyBpcyB+MzAwSyBpb3BzLg0K
+Pj4gRHJpdmVzIHdlcmUgaGF2aW5nIHNlcGFyYXRlIHBhcnRpdGlvbiBmb3IgQmx1ZXN0b3JlIGRh
+dGEvd2FsL2RiLg0KPj4NCj4+IFRoYW5rcyAmIFJlZ2FyZHMNCj4+IFNvbW5hdGgNCj4+DQo+PiAt
+LS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4gRnJvbTogSWdvciBGZWRvdG92IFttYWlsdG86
+aWZlZG90b3ZAbWlyYW50aXMuY29tXQ0KPj4gU2VudDogV2VkbmVzZGF5LCBOb3ZlbWJlciAwOSwg
+MjAxNiAzOjI2IFBNDQo+PiBUbzogU29tbmF0aCBSb3k7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwu
+b3JnDQo+PiBTdWJqZWN0OiBSZTogQmx1ZXN0b3JlIHdpdGggcm9ja3NkYiB2cyBaUw0KPj4NCj4+
+IEhpIFNvbW5hdGgsDQo+Pg0KPj4gY291bGQgeW91IHBsZWFzZSBkZXNjcmliZSB0aGUgc3RvcmFn
+ZSBoYXJkd2FyZSB1c2VkIGluIHlvdXINCj4+IGJlbmNobWFya2luZzogd2hhdCBkcml2ZXMsIGhv
+dyBhcmUgdGhleSBvcmdhbml6ZWQsIGV0Yy4uLiBXaGF0IGFyZSB0aGUgcGVyZm9ybWFuY2UgY2hh
+cmFjdGVyaXN0aWNzIG9mIHRoZSBzdG9yYWdlIHN1YnN5c3RlbSB3aXRob3V0IENlcGg/DQo+Pg0K
+Pj4gVGhhbmtzIGluIGFkdmFuY2UsDQo+Pg0KPj4gSWdvcg0KPj4NCj4+DQo+PiBPbiAxMS8xMC8y
+MDE2IDE6NTcgQU0sIFNvbW5hdGggUm95IHdyb3RlOg0KPj4+IEhpLA0KPj4+IEhlcmUgaXMgdGhl
+IHNsaWRlIHdlIHByZXNlbnRlZCBpbiB0b2RheSdzIHBlcmZvcm1hbmNlIG1lZXRpbmcuDQo+Pj4N
+Cj4+PiBodHRwczovL2RyaXZlLmdvb2dsZS5jb20vZmlsZS9kLzBCN1ctUzB6X3ltTUpaWEkzYmta
+TFgzWjJVMEUvdmlldz91cw0KPj4+IHA9DQo+Pj4gc2hhcmluZw0KPj4+DQo+Pj4gRmVlbCBmcmVl
+IHRvIGNvbWUgYmFjayBpZiBhbnlib2R5IGhhcyBhbnkgcXVlcnkuDQo+Pj4NCj4+PiBUaGFua3Mg
+JiBSZWdhcmRzDQo+Pj4gU29tbmF0aA0KPj4+IFBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24g
+Y29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25s
+eSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUu
+IElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBp
+ZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMg
+bWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0
+cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0
+ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxl
+YXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFi
+b3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBt
+ZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJv
+bmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4+PiAtLQ0KPj4+IFRvIHVuc3Vic2NyaWJlIGZyb20g
+dGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPj4+IGlu
+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUg
+bWFqb3Jkb21vIA0KPj4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21v
+LWluZm8uaHRtbA0KDQo=
