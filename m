@@ -1,113 +1,56 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Bluestore with rocksdb vs ZS
-Date: Thu, 10 Nov 2016 03:52:21 +0000
-Message-ID: <BY2PR02MB39611A9FF851334E0536911F4B80@BY2PR02MB396.namprd02.prod.outlook.com>
-References: <BY2PR02MB39674DF9B9B8848C6A17C8AF4B90@BY2PR02MB396.namprd02.prod.outlook.com>
- <fe4d4d36-693b-76b5-6cc2-a2b57a24173f@mirantis.com>
- <BY2PR02MB396475AD2EA210858957AD8F4B90@BY2PR02MB396.namprd02.prod.outlook.com>
- <ead268ca-c8e0-c61c-3df0-519383b19284@mirantis.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: starting with jewel v10.2.5
+Date: Thu, 10 Nov 2016 11:44:41 +0100
+Message-ID: <edf0820f-4ffc-223c-1804-e817a9d77fd2@dachary.org>
+References: <5811D09C.9080307@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0072.outbound.protection.outlook.com ([104.47.32.72]:46067
-        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754624AbcKJDwY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 9 Nov 2016 22:52:24 -0500
-In-Reply-To: <ead268ca-c8e0-c61c-3df0-519383b19284@mirantis.com>
-Content-Language: en-US
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:37207 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755024AbcKJKpR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Nov 2016 05:45:17 -0500
+In-Reply-To: <5811D09C.9080307@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Abhishek Varshney <abhishek.varshney@flipkart.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>, Abhishek Lekshmanan <abhishek@suse.com>
 
-SWdvciwNClBsZWFzZSBzZWUgbXkgcmVzcG9uc2UgaW5saW5lLg0KDQpUaGFua3MgJiBSZWdhcmRz
-DQpTb21uYXRoDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBJZ29yIEZlZG90
-b3YgW21haWx0bzppZmVkb3RvdkBtaXJhbnRpcy5jb21dIA0KU2VudDogV2VkbmVzZGF5LCBOb3Zl
-bWJlciAwOSwgMjAxNiA0OjI2IFBNDQpUbzogU29tbmF0aCBSb3k7IGNlcGgtZGV2ZWxAdmdlci5r
-ZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogQmx1ZXN0b3JlIHdpdGggcm9ja3NkYiB2cyBaUw0KDQpT
-b21uYXRoLA0KDQp0aGFua3MgYSBsb3QgZm9yIHlvdXIgdXBkYXRlLg0KDQpUaGUgbnVtYmVycyBp
-biB5b3VyIHJlc3BvbnNlIGFyZSBmb3Igbm9uLWNlcGggY2FzZSwgcmlnaHQ/DQoNCkFuZCBmb3Ig
-InNpbmdsZSBvc2QgLSBzdGVhZHkgc3RhdGUiIGNhc2UgeW91IG9ic2VydmVkIChhcyBwZXIgc2xp
-ZGUgNSkgMksgSU9QUyAqIDRLID0gOE1iL3MgQlcgKGFuZCBldmVuIGxlc3MpPyBDb21wYXJpbmcg
-dG8gODBNYi9zID0gMjBLIElPUFMNCiogNEsgIHlvdXIgaGFyZHdhcmUgY2FuIHByb3ZpZGUgZm9y
-IDRLIHJhbmRvbSB3cml0ZS4NCg0KW1NvbW5hdGhdIE5vLCBpdCBpcyBtdWNoIG1vcmUgd29yc2Uu
-IFN0ZWFkeSBzdGF0ZSBpb3BzIGZvciA0ayBtaW5fYWxsb2MgKyByb2NrcyA9IH41MDAgLCA0ayBt
-aW5fYWxsb2MgKyB6cyAsIDE2SyBtaW5fYWxsb2MgKyByb2NrcyA9IH4xSywgWlMgKyA1MTJrYiBy
-YmQgb2JlY3QgaXMgfjEuOEsNCg0KSXMgdGhhdCBjb3JyZWN0IG9yIEkgbWlzc2VkIHNvbWV0aGlu
-Zz8gVGhlbiBpZiBteSBjYWxjdWxhdGlvbnMgYXJlIGNvcnJlY3QgSSBjYW4gZWFzaWx5IGV4cGxh
-aW4gd2h5IHlvdSdyZSBub3QgZ2V0dGluZyBzdGVhZHkgc3RhdGUgLSBvbmUgbmVlZHMgNFRiIC8g
-OCBNYiA9IDUxMksgc2Vjb25kcyB0byByZWFjaCB0aGF0IHN0YXRlLCBpLmUuIHRoZSBzdGF0ZSB3
-aGVuIG9ub2RlcyBhcmUgY29tcGxldGVseSBmaWxsZWQgYW5kIG5vdCBncm93aW5nIGFueSBtb3Jl
-Lg0KDQpbU29tbmF0aF0gVGhlIHBlcmZvcm1hbmNlIG9uIHNsaWRlIDUgd2UgYXJlIGdldHRpbmcg
-YWZ0ZXIgcmVhY2hpbmcgdG8gc3RlYWR5IHN0YXRlLiBCZWZvcmUgcmVhY2hpbmcgc3RlYWR5IHN0
-YXRlIGFzIG90aGVyIHNsaWRlIHdhcyBzaG93aW5nIHdlIGFyZSA+IDVYIGZhc3RlciBmb3IgNGsg
-bWluX2FsbG9jICsgcm9ja3MuIFJlZ2FyZGluZyByZWFjaGluZyB0byBzdGVhZHkgc3RhdGUgLCB3
-ZSBjaGVhdGVkIG5vdCB0byBkbyBhY3R1YWwgZGF0YSB3cml0ZSAsIGJ1dCBpdCB3YXMgd3JpdGlu
-ZyBhbGwgbWV0YWRhdGEuIFRoaXMgaXMgYWNoaWV2ZWQgYnkgc2V0dGluZyBtYXhfYWxsb2Nfc2l6
-ZSA9IDRrIGFuZCBpdCB3YXMgbXVjaCBtdWNoIGZhc3RlciBhcyBkYXRhIHdyaXRlIG9mIDRLIG5v
-dCBoYXBwZW5pbmcgOi0pDQoNCkFnYWluIGlmIEknbSBjb3JyZWN0IC0gY291bGQgeW91IHBsZWFz
-ZSBzaGFyZSB5b3VyIGNlcGggY29uZmlnICYgZmlvIGpvYiBmaWxlcyAob25lcyBmb3Igc2xpZGUg
-NSBhcmUgZW5vdWdoIGZvciB0aGUgZmlyc3QgbG9vaykgLSBwcm9iYWJseSB5b3Ugc2hvdWxkIHR1
-bmUgYmx1ZXN0b3JlIG9ub2RlIGNhY2hlIGFuZCBjb2xsZWN0aW9uL2NhY2hlIHNoYXJkcyBjb3Vu
-dHMuIEkgZXhwZXJpZW5jZWQgc2ltaWxhciBkZWdyYWRhdGlvbiBkdWUgdG8gYmx1ZXN0b3JlIG1p
-c2NvbmZpZ3VyYXRpb24uDQoNCltTb21uYXRoXSBIZXJlIGlzIHRoZSBibHVlc3RvcmUgb3B0aW9u
-cyB3ZSB1c2VkLi4NCg0KCWJsdWVzdG9yZV9yb2Nrc2RiX29wdGlvbnMgPSAibWF4X3dyaXRlX2J1
-ZmZlcl9udW1iZXI9MTYsbWluX3dyaXRlX2J1ZmZlcl9udW1iZXJfdG9fbWVyZ2U9MixyZWN5Y2xl
-X2xvZ19maWxlX251bT0xNixjb21wYWN0aW9uX3RocmVhZHM9OCxmbHVzaGVyX3RocmVhZHM9NCxt
-YXhfYmFja2dyb3VuZF9jb21wYWN0aW9ucz04LG1heF9iYWNrZ3JvdW5kX2ZsdXNoZXM9NCxtYXhf
-Ynl0ZXNfZm9yX2xldmVsX2Jhc2U9NTM2ODcwOTEyMCx3cml0ZV9idWZmZXJfc2l6ZT04Mzg4NjA4
-MCxsZXZlbDBfZmlsZV9udW1fY29tcGFjdGlvbl90cmlnZ2VyPTIsbGV2ZWwwX3Nsb3dkb3duX3dy
-aXRlc190cmlnZ2VyPTQwMCxsZXZlbDBfc3RvcF93cml0ZXNfdHJpZ2dlcj04MDAsc3RhdHNfZHVt
-cF9wZXJpb2Rfc2VjPTEwIg0KDQogICAgIG9zZF9vcF9udW1fdGhyZWFkc19wZXJfc2hhcmQgPSAy
-DQogICAgIG9zZF9vcF9udW1fc2hhcmRzID0gMjANCiAgICAgICAgcm9ja3NkYl9jYWNoZV9zaXpl
-ID0gMTI5NDk2NzI5DQogICAgICAgIGJsdWVzdG9yZV9taW5fYWxsb2Nfc2l6ZSA9IDE2Mzg0DQog
-ICAgICAgICNibHVlc3RvcmVfbWluX2FsbG9jX3NpemUgPSA0MDk2DQogICAgICAgIGJsdWVzdG9y
-ZV9jc3VtID0gZmFsc2UNCiAgICAgICAgYmx1ZXN0b3JlX2NzdW1fdHlwZSA9IG5vbmUJDQogICAg
-ICAgYmx1ZXN0b3JlX21heF9vcHMgPSAwDQogICAgICAgYmx1ZXN0b3JlX21heF9ieXRlcyA9IDAN
-CiAgICAgICAgI2JsdWVzdG9yZV9idWZmZXJfY2FjaGVfc2l6ZSA9IDEwNDg1NzYwMA0KICAgICAg
-ICBibHVlc3RvcmVfb25vZGVfY2FjaGVfc2l6ZSA9IDMwMDAwDQogICAgICAgIA0KDQpBbmQgb25l
-IG1vcmUgcXVlc3Rpb25zIC0gYWdhaW5z0LUgd2hhdCBjZXBoIGludGVyZmFjZSBkaWQgeW91IHJ1
-biBGSU8gdGVzdHMuIFJlY2VudGx5IGFkZGVkIE9iamVjdFN0b3JlIG9uZT8gT3IgUkJEPw0KDQpb
-U29tbmF0aF0gSXQncyBvbiB0b3Agb2YgcmJkDQoNCg0KVGhhbmtzLA0KDQpJZ29yDQoNCg0KDQpP
-biAxMS8xMC8yMDE2IDI6MzkgQU0sIFNvbW5hdGggUm95IHdyb3RlOg0KPiBTdXJlLCBpdCBpcyBy
-dW5uaW5nIG9uIFNhbkRpc2sgSW5maW5pZmxhc2ggSFcuIEVhY2ggRHJpdmUgQlcgd2hpbGUgdGVz
-dCBpcyBydW5uaW5nIHdhcyB+NDAwIE1CL3MgYW5kIGlvcHMgaXMgfjIwSyAsIDEwMCUgNEsgcmFu
-ZG9tIHdyaXRlLg0KPiBJbiBjYXNlIG9mIDE2IE9TRCB0ZXN0LCBpdCB3YXMgMTYgZHJpdmUgSW5m
-aW5pZmxhc2ggSkJPRiB3aXRoIDIgaG9zdHMgYXR0YWNoZWQgdG8gaXQuIFRoZSBob3N0cyB3ZXJl
-IEhXIHpvbmVkIHRvIDggZHJpdmVzIGVhY2guDQo+IFRoZSBlbnRpcmUgYm94IEJXIGlzIGxpbWl0
-ZWQgdG8gbWF4IDEyR0IvcyByZWFkL3dyaXRlLCB3aGVuIGl0IGlzIGZ1bGx5IHBvcHVsYXRlZCBp
-LmUgNjQgZHJpdmVzIC4gU2luY2UgaXQgaXMgMTYgZHJpdmVzICwgYm94IHdpbGwgZ2l2ZSAxNiBY
-IDQwMCBNQi9zID0gfjYuNCBHQi9zLg0KPiAxMDAlIFJlYWQgaW9wcyBmb3IgdGhpcyAxNiBkcml2
-ZSBib3ggaXMgfjgwMEsgYW5kIDEwMCUgd3JpdGUgaW9wcyBpcyB+MzAwSyBpb3BzLg0KPiBEcml2
-ZXMgd2VyZSBoYXZpbmcgc2VwYXJhdGUgcGFydGl0aW9uIGZvciBCbHVlc3RvcmUgZGF0YS93YWwv
-ZGIuDQo+DQo+IFRoYW5rcyAmIFJlZ2FyZHMNCj4gU29tbmF0aA0KPg0KPiAtLS0tLU9yaWdpbmFs
-IE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBJZ29yIEZlZG90b3YgW21haWx0bzppZmVkb3RvdkBtaXJh
-bnRpcy5jb21dDQo+IFNlbnQ6IFdlZG5lc2RheSwgTm92ZW1iZXIgMDksIDIwMTYgMzoyNiBQTQ0K
-PiBUbzogU29tbmF0aCBSb3k7IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6
-IFJlOiBCbHVlc3RvcmUgd2l0aCByb2Nrc2RiIHZzIFpTDQo+DQo+IEhpIFNvbW5hdGgsDQo+DQo+
-IGNvdWxkIHlvdSBwbGVhc2UgZGVzY3JpYmUgdGhlIHN0b3JhZ2UgaGFyZHdhcmUgdXNlZCBpbiB5
-b3VyDQo+IGJlbmNobWFya2luZzogd2hhdCBkcml2ZXMsIGhvdyBhcmUgdGhleSBvcmdhbml6ZWQs
-IGV0Yy4uLiBXaGF0IGFyZSB0aGUgcGVyZm9ybWFuY2UgY2hhcmFjdGVyaXN0aWNzIG9mIHRoZSBz
-dG9yYWdlIHN1YnN5c3RlbSB3aXRob3V0IENlcGg/DQo+DQo+IFRoYW5rcyBpbiBhZHZhbmNlLA0K
-Pg0KPiBJZ29yDQo+DQo+DQo+IE9uIDExLzEwLzIwMTYgMTo1NyBBTSwgU29tbmF0aCBSb3kgd3Jv
-dGU6DQo+PiBIaSwNCj4+IEhlcmUgaXMgdGhlIHNsaWRlIHdlIHByZXNlbnRlZCBpbiB0b2RheSdz
-IHBlcmZvcm1hbmNlIG1lZXRpbmcuDQo+Pg0KPj4gaHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL2Zp
-bGUvZC8wQjdXLVMwel95bU1KWlhJM2JrWkxYM1oyVTBFL3ZpZXc/dXNwPQ0KPj4gc2hhcmluZw0K
-Pj4NCj4+IEZlZWwgZnJlZSB0byBjb21lIGJhY2sgaWYgYW55Ym9keSBoYXMgYW55IHF1ZXJ5Lg0K
-Pj4NCj4+IFRoYW5rcyAmIFJlZ2FyZHMNCj4+IFNvbW5hdGgNCj4+IFBMRUFTRSBOT1RFOiBUaGUg
-aW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMg
-aW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykg
-bmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50
-ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJl
-Y2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1p
-bmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmlj
-dGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBp
-biBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwg
-KGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3Bp
-ZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGll
-cyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4+IC0tDQo+PiBUbyB1bnN1YnNj
-cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
-bCINCj4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
-b3JnIE1vcmUgbWFqb3Jkb21vDQo+PiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
-am9yZG9tby1pbmZvLmh0bWwNCg0K
+Hi,
+
+For the record the plan was implemented (i.e. using jewel-next until 10.2.4 is released):
+
+* Documentation http://tracker.ceph.com/projects/ceph-releases/wiki/HOWTO_keep_backporting_while_the_release_branch_is_frozen
+* jewel 10.2.5 backports http://tracker.ceph.com/issues/17851
+* all PR re-targeted to jewel-next https://github.com/ceph/ceph/milestone/8
+* tests running on jewel-backports (integration branch with ~40 PRs) http://tracker.ceph.com/issues/17851#note-2
+
+The only unforseen inconvenience is that we must not use the ceph-workbench script to set the release version after merging because it relies on the existing tags to figure out which is next. This is however self discipline that only is a concern for backporters and will be transparent to everyone else. Ideally ceph-workbench is patched to address that but I'd rather wait until we are sure the plan to keep backporting while testing actually is helpful.
+
+Cheers
+
+On 27/10/2016 12:02, Loic Dachary wrote:
+> Hi Abhishek & Nathan & Abhishek,
+> 
+> Hopefully jewel will start testing with QE tomorrow or early next week. 
+> 
+> In the past we kept backporting but we were very careful not to merge anything because the release process is not able to work with a SHA1, it will create the next jewel release with whatever is at the tip of that branch. This limitation has been there for years and there is little chance that it will be resolved any time soon. It routinely creates frustration when something is merged by accident and tests have to be run again (or worse: they are not run and the release is done anyway). It also creates extra work for the backporters who need to collect backports that could have been merged because they passed the tests.
+> 
+> Instead, I propose that we backport, test and merge to wip-jewel, as if it was the jewel branch, until the release is done. And when it's done we rebase wip-jewel on top of jewel (or we verify that there is no need to rebase), we push all commits from wip-jewel to jewel, we delete the wip-jewel branch and we resume backporting to the jewel branch.
+> 
+> In a nutshell it means we have a little extra work:
+> 
+> a) re-targeting backports to wip-jewel in each PR (which is now possible with github)
+> b) pushing wip-jewel to jewel after the release and re-targeting backports to jewel
+> 
+> And the benefits are that 
+> 
+> a) we don't have to stop merging while QE runs tests and the release is prepared, which takes a few weeks
+> b) there is no risk of an accidental merge that would break the release process
+> 
+> What do you think ?
+> 
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
