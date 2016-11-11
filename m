@@ -1,34 +1,32 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: How do I add a note to the Ceph release notes?
-Date: Fri, 11 Nov 2016 09:47:03 +0100 (CET)
-Message-ID: <539332276.1908.1478854023888@ox.pcextreme.nl>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Tracker "Source" field default value changed from "other" to empty
+Date: Fri, 11 Nov 2016 10:11:05 +0100
+Message-ID: <939a67e9-160c-421b-eb60-87f054c53464@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:48839 "EHLO
-        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755792AbcKKIrU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Nov 2016 03:47:20 -0500
-Received: from 109.72.87.221 (ox01.pcextreme.nl [109.72.87.221])
-        by smtp01.mail.pcextreme.nl (Postfix) with ESMTPSA id 25262762C0
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Nov 2016 09:47:03 +0100 (CET)
+Received: from mx2.suse.de ([195.135.220.15]:58332 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S965735AbcKKJLI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 11 Nov 2016 04:11:08 -0500
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 3BAE4ABFC
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Nov 2016 09:11:06 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+The tracker has a custom field called "Source" which is supposed to 
+indicate who found, or first reported, a given issue. In practice, the 
+field is rarely used and it typically is left at its default value, 
+which is "other". Over time, I have found this to be a low-grade 
+annoyance, so today I changed the default value to empty (not filled out).
 
-With the merge of PR #11665 [0] the Monitors will no longer allow pools to be removed by default
+For me, this is a no-brainer :-) but if anyone has objections let's discuss!
 
-Users explicitly need to set mon_allow_pool_delete to true in their ceph.conf before they can remove pools.
-
-I would like to add this to the release notes of Kraken, but where do I add this? I found a script which generates the release notes from Git.
-
-I thought there would be a tracker issue, but couldn't find that one either.
-
-Hints?
-
-Wido
-
-[0]: https://github.com/ceph/ceph/pull/11665
+-- 
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
