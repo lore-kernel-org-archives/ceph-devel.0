@@ -1,137 +1,127 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: handling MDS permission check failures in cap updates (was: [RFC
- PATCH 07/10] ceph: update cap message struct version to 9)
-Date: Fri, 11 Nov 2016 15:07:58 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1611111506070.29579@piezo.us.to>
-References: <alpine.DEB.2.11.1611072121100.29278@piezo.us.to>                 <CAJ4mKGZ8hJ8183Nj8vtexswRcqN4Ye8Qoqtrav6-GCs2d3hmgw@mail.gmail.com>                 <alpine.DEB.2.11.1611072318290.29278@piezo.us.to>         <1478868317.2482.23.camel@redhat.com>
-         <alpine.DEB.2.11.1611111445310.29579@piezo.us.to> <1478876433.2482.32.camel@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Why does ceph-osd not daemonize in ceph-disk
+Date: Fri, 11 Nov 2016 16:17:36 +0100
+Message-ID: <92f8aaec-2458-c411-0e50-1eae5bd88345@dachary.org>
+References: <7dbf8d17-ef39-26c5-73f3-d9eb8e7c58c7@digiware.nl>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1906293676-1478876880=:29579"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37314 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756435AbcKKPIB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 11 Nov 2016 10:08:01 -0500
-In-Reply-To: <1478876433.2482.32.camel@redhat.com>
+Received: from relay5-d.mail.gandi.net ([217.70.183.197]:58160 "EHLO
+        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932857AbcKKPRj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Nov 2016 10:17:39 -0500
+In-Reply-To: <7dbf8d17-ef39-26c5-73f3-d9eb8e7c58c7@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, "Yan, Zheng" <ukernel@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>
+To: Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi,
 
---8323329-1906293676-1478876880=:29579
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+FYI when the init system is unknown, it runs ceph-osd directly instead of delegating to the init system.
 
-On Fri, 11 Nov 2016, Jeff Layton wrote:
-> On Fri, 2016-11-11 at 14:48 +0000, Sage Weil wrote:
-> > On Fri, 11 Nov 2016, Jeff Layton wrote:
-> > > On Mon, 2016-11-07 at 23:21 +0000, Sage Weil wrote:
-> > > > On Mon, 7 Nov 2016, Gregory Farnum wrote:
-> > > > > On Mon, Nov 7, 2016 at 1:21 PM, Sage Weil <sweil@redhat.com> wrote:
-> > > > > > On Mon, 7 Nov 2016, Jeff Layton wrote:
-> > > > > >> On Mon, 2016-11-07 at 20:09 +0000, Sage Weil wrote:
-> > > > > >> > On Mon, 7 Nov 2016, Gregory Farnum wrote:
-> > > > > >> > > On Mon, Nov 7, 2016 at 10:39 AM, Jeff Layton <jlayton@redhat.com> wrote:
-> > > > > >> > > > On Mon, 2016-11-07 at 14:36 +0000, Sage Weil wrote:
-> > > > > >> > > >> On Mon, 7 Nov 2016, Jeff Layton wrote:
-> > > > > >> > > >> > On Mon, 2016-11-07 at 14:05 +0000, Sage Weil wrote:
-> > > > > >> > > >> > > On Mon, 7 Nov 2016, Jeff Layton wrote:
-> > > > > >> > > >> > > > On Mon, 2016-11-07 at 16:43 +0800, Yan, Zheng wrote:
-> > > > > >> > > >> > > > > On Fri, Nov 4, 2016 at 8:57 PM, Jeff Layton <jlayton@redhat.com> wrote:
-> > > > > >> > > >> > > > > >
-> > > > 
-> > > > [okay, time to prune this a bit]
-> > > > 
-> > > > > >> It still seems to me like that should just be a check for superuser
-> > > > > >> status. Something like:
-> > > > > >>
-> > > > > >>       if (mask & MAY_CHOWN) {
-> > > > > >>       // only root can chown
-> > > > > >>         if (i->match.uid != 0 || caller_uid != 0)
-> > > > > >>           continue;
-> > > > > >>         }
-> > > > > >>       }
-> > > > > >>
-> > > > > >> i.e. only allow chown if the capability has a uid of 0 and the
-> > > > > >> caller_uid is also 0.
-> > > > > >>
-> > > > > >> I don't think we want to ever grant an unprivileged user the ability to
-> > > > > >> chown, do we?
-> > > > > >
-> > > > > > Ah, yep.  Except that the Locker.cc caller needs to be fixed to only ask
-> > > > > > for MAY_CHOWN if the uid is changing.  Right now it's only passing
-> > > > > > MAY_WRITE which looks wrong too...
-> > > > > 
-> > > > > Don't we want to let users chown between their own UIDs? A POSIX
-> > > > > superuser — ie root — really has very little meaning in terms of CephX
-> > > > > permissions. But it's perfectly legitimate for a tenant with 3 users
-> > > > > to chmod files between those 3. :/
-> > > > 
-> > > > Maybe, but it'd be a different kind of check though, because it depends on 
-> > > > multiple caps in order to permit the operation.  So we'd need a couple 
-> > > > function-global bools like chown_src_allowed and chown_dst_allowed or 
-> > > > something like that.
-> > > > 
-> > > > I'm not sure it would work even then, though, because on the client the 
-> > > > user would still have to sudo chown ... to get past the client kernel's 
-> > > > checks (I assume?).
-> > > > 
-> > > > 
-> > > 
-> > > Not necessarily. Most kernel filesystems call setattr_prepare, which is
-> > > where the CAP_CHOWN check happens, but (e.g.) NFS doesn't call it as it
-> > > always delegates the permission checking for setattr to the server.
-> > > 
-> > > Looks like both the in-kernel and Ceph client and FUSE always call that
-> > > function, so CAP_CHOWN permissions are always checked client-side there.
-> > > Still, with libcephfs a program need not deal with the kernel at all, so
-> > > you can't really rely on that.
-> > 
-> > In the libcephfs case it's still doing the Client.cc checks, though, 
-> > right?  Both the Linux VFS (on ceph.ko) and Client.cc are implementing 
-> > client-side checks...
-> > 
+https://github.com/ceph/ceph/blob/master/src/ceph-disk/ceph_disk/main.py#L3468
+
+The reason why it does not daemonize is unclear to me.
+
+Cheers
+
+On 11/11/2016 13:50, Willem Jan Withagen wrote:
+> Hi,
 > 
-> Only if fuse_default_permissions is set (which is a misnomer since it
-> affects more than just ceph-fuse). It's not set by default, but probably
-> should be.
+> As one of the last steps to complete my first run op porting I need to
+> get ceph-disk working...
+> But I'm getting a stall in test_activate for the OSD. why doesn't the
+> activation of the OSD background and the script continues.
 > 
+> --WjW
 > 
-> > > Isn't this potentially silent metadata corruption? You could end up with
-> > > a program that issues an ownership change that appears to work, only to
-> > > find later that it got reverted because the mds decided it didn't want
-> > > to apply it once the caps got updated.
-> > > 
-> > > I think the simplest solution would be to just not issue exclusive caps
-> > > at all if you aren't prepared to accept cached updates from the client
-> > > for the corresponding metadata. Those clients would get shared caps
-> > > only. So, you could have clients to which you allow Fx caps, but only
-> > > As?
-> > 
-> > That would be safe, but it would kill performance for any user writing 
-> > files and restricted to a particular user by their caps.  I think it's 
-> > definitely worth maintaining the Client code do the checks so that 
-> > unpermitted updates aren't dropped... which, if I'm not mistaken, 
-> > is already in place.
-> > 
+> During testing is starts ceph-osd like:
 > 
-> I don't see why that would kill performance. chown/chgrp/chmod would all
-> come under Auth caps, whereas read/write (which is where we really care
-> about performance) come under File caps.
+> function test_activate() {
+>     local to_prepare=$1
+>     local to_activate=$2
+>     local osd_uuid=$($uuidgen)
 > 
-> chown/chgrp/chmod are all pretty rare in most workloads, so having to
-> call the mds to apply them in those cases doesn't seem like a heavy
-> burden.
+>     ${CEPH_DISK} $CEPH_DISK_ARGS \
+>         prepare --osd-uuid $osd_uuid $to_prepare || return 1
+> 
+>     $timeout $TIMEOUT ${CEPH_DISK} $CEPH_DISK_ARGS \
+>         activate \
+>         --mark-init=none \
+>         $to_activate || return 1
+> 
+>     test_pool_read_write $osd_uuid || return 1
+> }
+> 
+> Which results in script output:
+> 
+> activate: ceph osd.0 data dir is ready at testdir/test-ceph-disk/dir
+> command_check_call: Running command_check: ../build/bin/ceph-osd
+> --cluster=ceph --id=0 --osd-data=testdir/test-ceph-disk/dir
+> --osd-journal=testdir/test-ceph-disk/dir/journal
+> starting osd.0 at - osd_data testdir/test-ceph-disk/dir
+> testdir/test-ceph-disk/dir/journal
+> 
+> And is the processtable this looks like:
+> 
+> /usr/bin/timeout 360
+> /usr/srcs/Ceph/work/ceph/src/ceph-disk/.tox/py27/bin/coverage run
+> --append --source=ceph_disk --
+> /usr/srcs/Ceph/work/ceph/src/ceph-disk/.tox/py27/bin/ceph-disk --verbose
+> --prepend-to-path= --statedir=testdir/test-ceph-disk
+> --sysconfdir=testdir/test-ceph-disk activate --mark-init=none
+> testdir/test-ceph-disk/dir
+> 
+> and:
+> 
+>  CEPH_BIN=/usr/srcs/Ceph/work/ceph/build/bin
+> CEPH_ROOT=/usr/srcs/Ceph/work/ceph CEPH_CONF=/dev/null
+> LD_LIBRARY_PATH=/usr/srcs/Ceph/work/ceph/build/lib
+> CEPH_BUILD_VIRTUALENV=/tmp
+> VIRTUAL_ENV=/usr/srcs/Ceph/work/ceph/src/ceph-disk/.tox/py27
+> PATH=/tmp/ceph-disk-virtualenv/bin:/tmp/ceph-detect-init-virtualenv/bin:.:../build/bin:/usr/srcs/Ceph/work/ceph/build/bin:.:/usr/srcs/Ceph/work/ceph/src/ceph-disk/.tox/py27/bin:/tmp/ceph-disk-virtualenv/bin:/home/wjw/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/usr/X11R6/bin:.:/usr/srcs/Ceph/work/ceph/build/bin:/usr/srcs/Ceph/work/ceph/src
+> PYTHONHASHSEED=648437795 CEPH_LIB=/usr/srcs/Ceph/work/ceph/build/lib
+> CEPH_DISK=/usr/srcs/Ceph/work/ceph/src/ceph-disk/.tox/py27/bin/coverage
+> run --append --source=ceph_disk --
+> /usr/srcs/Ceph/work/ceph/src/ceph-disk/.tox/py27/bin/ceph-disk
+> PWD=/usr/srcs/Ceph/work/ceph/build CEPH_ARGS=
+> --fsid=19836d4d-ad32-429e-bf30-588f9d8d18d1 --auth-supported=none
+> --mon-host=127.0.0.1:7451 --chdir= --journal-dio=false
+> --erasure-code-dir=/usr/srcs/Ceph/work/ceph/build/lib
+> --plugin-dir=/usr/srcs/Ceph/work/ceph/build/lib
+> --log-file=testdir/test-ceph-disk/$name.log
+> --pid-file=testdir/test-ceph-disk/$name.pidfile
+> --osd-class-dir=/usr/srcs/Ceph/work/ceph/build/lib
+> --run-dir=testdir/test-ceph-disk --osd-failsafe-full-ratio=.99
+> --osd-journal-size=100 --debug-osd=20 --debug-bdev=20
+> --debug-bluestore=20 --osd-max-object-name-len=460
+> --osd-max-object-namespace-len=64  SHLVL=1 CEPH_MON=127.0.0.1:7451
+> _=/usr/bin/timeout ../build/bin/ceph-osd --cluster=ceph --id=0
+> --osd-data=testdir/test-ceph-disk/dir
+> --osd-journal=testdir/test-ceph-disk/dir/journal
+> 
+> And is the osd.0.log I see:
+> 2016-11-11 13:41:36.562422 b678000  2 osd.0 0 boot
+> 2016-11-11 13:41:36.614480 b678000  0 osd.0 0 done with init, starting
+> boot process
+> 2016-11-11 13:41:36.614532 b678000  1 osd.0 0 We are healthy, booting
+> 2016-11-11 13:41:36.614535 b678000 10 osd.0 0 start_boot - have maps 0..0
+> 2016-11-11 13:41:36.616877 ba89b00 10 osd.0 0 _preboot _preboot mon has
+> osdmaps 1..5
+> 2016-11-11 13:41:36.618842 b7d6d80 10 osd.0 5 _preboot _preboot mon has
+> osdmaps 1..5
+> 2016-11-11 13:41:36.618846 b7d6d80 10 osd.0 5 _send_boot
+> 2016-11-11 13:41:36.724501 b7d6d80 10 osd.0 6 boot_epoch is 6
+> 2016-11-11 13:41:36.724505 b7d6d80  1 osd.0 6 state: booting -> active
+> 
+> So the OSD should actually finish and go into background.
+> But the command stalls, and aborts after the shell timeout.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-It's tar xf that I'm worried about.. that'll do a create following by 
-chmod, maybe chown, and then file write, which are currently all flushed 
-async, and would now turn synchronous.
-
-But AFAICS it's not needed, since both the kernel and userspace clients 
-are doing the client-side check...
-
-sage
---8323329-1906293676-1478876880=:29579--
+-- 
+Loïc Dachary, Artisan Logiciel Libre
