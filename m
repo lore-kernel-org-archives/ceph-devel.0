@@ -1,34 +1,34 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: master branch merges must pass unit tests
-Date: Thu, 10 Nov 2016 21:48:56 -0500
-Message-ID: <CA+2bHPY7aFuqrzNffwUfBJBPTqL9xiQ3U=SAoQfUaAp25cNp-A@mail.gmail.com>
-References: <alpine.DEB.2.11.1611082147590.29278@piezo.us.to>
- <alpine.DEB.2.11.1611082331480.29278@piezo.us.to> <CA+2bHPae64=fuuUCz2yaa0rEKahwDVgupU3JLeBwkm8SxW_Gyg@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: How do I add a note to the Ceph release notes?
+Date: Fri, 11 Nov 2016 09:47:03 +0100 (CET)
+Message-ID: <539332276.1908.1478854023888@ox.pcextreme.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f46.google.com ([209.85.214.46]:37878 "EHLO
-        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S964951AbcKKCt2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Nov 2016 21:49:28 -0500
-Received: by mail-it0-f46.google.com with SMTP id u205so89522268itc.0
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Nov 2016 18:49:27 -0800 (PST)
-In-Reply-To: <CA+2bHPae64=fuuUCz2yaa0rEKahwDVgupU3JLeBwkm8SxW_Gyg@mail.gmail.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:48839 "EHLO
+        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755792AbcKKIrU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Nov 2016 03:47:20 -0500
+Received: from 109.72.87.221 (ox01.pcextreme.nl [109.72.87.221])
+        by smtp01.mail.pcextreme.nl (Postfix) with ESMTPSA id 25262762C0
+        for <ceph-devel@vger.kernel.org>; Fri, 11 Nov 2016 09:47:03 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Nov 10, 2016 at 9:14 PM, Patrick Donnelly <pdonnell@redhat.com> wrote:
-> My understanding is that only users/teams with admin writes (or
+Hi,
 
-s/writes/rights/
+With the merge of PR #11665 [0] the Monitors will no longer allow pools to be removed by default
 
-> I don't think we have anyone with admin on ceph/ceph but
-> maybe I somehow can't see those users/teams.
+Users explicitly need to set mon_allow_pool_delete to true in their ceph.conf before they can remove pools.
 
-I see the organization just has several owners which includes team
-leads. Makes sense to me.
+I would like to add this to the release notes of Kraken, but where do I add this? I found a script which generates the release notes from Git.
 
--- 
-Patrick Donnelly
+I thought there would be a tracker issue, but couldn't find that one either.
+
+Hints?
+
+Wido
+
+[0]: https://github.com/ceph/ceph/pull/11665
