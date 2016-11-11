@@ -1,157 +1,169 @@
-From: Sage Weil <sweil@redhat.com>
+From: Bassam Tabbara <Bassam.Tabbara@quantum.com>
 Subject: Re: A Transformation of our Global Context
-Date: Fri, 11 Nov 2016 23:45:42 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1611112342490.29579@piezo.us.to>
-References: <20160610185033.GA29233@ultraspiritum.eng.arb.redhat.com> <CAJ4mKGatR70eFdKx4_RhPT3rHOp+pTz6VZBWy_mpAiK8j-TpMg@mail.gmail.com> <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com> <CAJ4mKGaSyKN+_52-+CSKhFXsL2WE+5T_Z6egpbBNaJvGs4a-Og@mail.gmail.com>
- <alpine.DEB.2.11.1606101616210.6221@cpach.fuggernut.com> <20160610210433.GA16959@ultraspiritum.eng.arb.redhat.com> <alpine.DEB.2.11.1606101716180.6221@cpach.fuggernut.com> <CADRKj5S-wzkZztQvyPMQHLCD-NqmQewbyKY65y1SyKtbjX8bzw@mail.gmail.com>
- <C313FA75-BCBE-49AE-A3C5-5234F2E7D4E6@quantum.com> <CADRKj5Qd5oRhS4mvZCez1y0P5TmYHga8HrKM8KNJADGRigU=cw@mail.gmail.com> <5C4C9469-AE52-4A06-9AE0-9AB1899D279A@quantum.com>
+Date: Fri, 11 Nov 2016 23:51:07 +0000
+Message-ID: <F5103888-B667-4902-B6A0-17F5EEC7E94D@quantum.com>
+References: <20160610185033.GA29233@ultraspiritum.eng.arb.redhat.com>
+ <CAJ4mKGatR70eFdKx4_RhPT3rHOp+pTz6VZBWy_mpAiK8j-TpMg@mail.gmail.com>
+ <20160610195837.GB29233@ultraspiritum.eng.arb.redhat.com>
+ <CAJ4mKGaSyKN+_52-+CSKhFXsL2WE+5T_Z6egpbBNaJvGs4a-Og@mail.gmail.com>
+ <alpine.DEB.2.11.1606101616210.6221@cpach.fuggernut.com>
+ <20160610210433.GA16959@ultraspiritum.eng.arb.redhat.com>
+ <alpine.DEB.2.11.1606101716180.6221@cpach.fuggernut.com>
+ <CADRKj5S-wzkZztQvyPMQHLCD-NqmQewbyKY65y1SyKtbjX8bzw@mail.gmail.com>
+ <C313FA75-BCBE-49AE-A3C5-5234F2E7D4E6@quantum.com>
+ <CADRKj5Qd5oRhS4mvZCez1y0P5TmYHga8HrKM8KNJADGRigU=cw@mail.gmail.com>
+ <5C4C9469-AE52-4A06-9AE0-9AB1899D279A@quantum.com>
+ <alpine.DEB.2.11.1611112342490.29579@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-131989460-1478907945=:29579"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35138 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933797AbcKKXpq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 11 Nov 2016 18:45:46 -0500
-In-Reply-To: <5C4C9469-AE52-4A06-9AE0-9AB1899D279A@quantum.com>
+Received: from mx0b-000ceb01.pphosted.com ([67.231.152.126]:33840 "EHLO
+        mx04-000ceb01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S933709AbcKKXvM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 11 Nov 2016 18:51:12 -0500
+In-Reply-To: <alpine.DEB.2.11.1611112342490.29579@piezo.us.to>
+Content-Language: en-US
+Content-ID: <324D7A34FBED504ABD149E67E9E74431@QUANTUM.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Bassam Tabbara <Bassam.Tabbara@quantum.com>
+To: Sage Weil <sweil@redhat.com>
 Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, "Adam C. Emerson" <aemerson@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-131989460-1478907945=:29579
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-
-On Fri, 11 Nov 2016, Bassam Tabbara wrote:
-> Yehuda, when I looked at this a few months ago, I thought there might be 
-> a way to make it less of an annoyance. If we can remove the clock_skew 
-
-Happy to remove that, BTW.  We don't use it.
-
-> and figure out a way around dout/logging (i.e. make those process wide) 
-> then the number of classes we would need to pass the context to is 
-> greatly reduced. This is roughly the path we take for the clients 
-> (librados for example). I’ll try to prototype this over the next few 
-> weeks as we would love to be able to run multiple OSDs and MONs in the 
-> same process.
-
-The problem here is that currently debugging levels are per-entity. We'd 
-need to make the choice that per-process is sufficient for our purposes in 
-order to make that leap...
-
-But either way, our options are basically another global for debug levels, 
-or some thread-local shenanigans, or a cct argument everywhere.  Right?
-
-sage
-
-
-> 
-> > On Nov 11, 2016, at 2:53 PM, Yehuda Sadeh-Weinraub <yehuda@redhat.com> wrote:
-> > 
-> > On Fri, Nov 11, 2016 at 2:17 PM, Bassam Tabbara
-> > <Bassam.Tabbara@quantum.com> wrote:
-> >> Sorry, I’m late to the discussion, but why not just pass the context to every class that needs it. Its a painful one time change but the compiler will keep you honest. Also if we can figure out a way around the clock skew (which seems like a corner case) I think the surface are is significantly reduced. Using TLS and other mechanisms seems like more complication.
-> > 
-> > Because then you end up with passing around extra param that you need
-> > to get trickled down to the most basic functions. That's basically
-> > what we are doing now and it's a huge annoyance.
-> > 
-> > Yehuda
-> > 
-> >> 
-> >> Thanks!
-> >> Bassam
-> >> 
-> >>> On Nov 11, 2016, at 1:31 PM, Yehuda Sadeh-Weinraub <yehuda@redhat.com> wrote:
-> >>> 
-> >>> Resurrecting this thread.
-> >>> 
-> >>> Trying to extract a simple and practical plan. Here are my thoughts:
-> >>> 
-> >>> We need to have different ceph contexts for:
-> >>> - process (e.g, ceph-osd)
-> >>> - entity (e.g., osd.1, osd.2)
-> >>> - cluster (? -- maybe in the case where it's a client)
-> >>> 
-> >>> We can make a thread local storage variable that will reference the
-> >>> context this thread needs to use.
-> >>> Threads that deal with common stuff should use the process or entity
-> >>> context. This should be set explicitly in these threads. Upon thread
-> >>> creation we need to set the context for that thread. By default the
-> >>> context that will be used will be the process context. g_ceph_context
-> >>> can be changed to be a function (via a macro) that handles the context
-> >>> selection logic.
-> >>> 
-> >>> Thoughts?
-> >>> 
-> >>> Yehuda
-> >>> 
-> >>> On Fri, Jun 10, 2016 at 2:20 PM, Sage Weil <sage@newdream.net> wrote:
-> >>>> On Fri, 10 Jun 2016, Adam C. Emerson wrote:
-> >>>>> On 10/06/2016, Sage Weil wrote:
-> >>>>>> I think the crux of the issue is the debug/logging code.  Almost all
-> >>>>>> the other uses of cct are related to config options that are
-> >>>>>> per-cluster.
-> >>>>> 
-> >>>>> That is correct. I thought we might pull some things like (like the
-> >>>>> Crypto stuff) while we were at it but that was more "As long as I'm
-> >>>>> here anyway I might as well see if there's anything more to do..."
-> >>>>> 
-> >>>>>> And with logging... it seems like even this is really a per-cluster
-> >>>>>> (well, per entity) thing.  Sorting through a log file that combines
-> >>>>>> output from two different objecters sounds horrific, and when we
-> >>>>>> cram multiple OSDs into one process, we're going to want them to
-> >>>>>> still feed into different log files.
-> >>>>> 
-> >>>>> This is a good point that I had not considered. Though, I'm not sure
-> >>>>> if the un-separated case is that much better. I think part of the
-> >>>>> savings we would want from multi-OSD work (at least in principle) is
-> >>>>> to be able to have them share messengers and other overhead. In that
-> >>>>> case giving each OSD its own fully fledged CephContext doesn't make
-> >>>>> sense, I don't think.
-> >>>> 
-> >>>> The messengers aren't tied to CephContext, so I don't think this changes
-> >>>> things in that regard.  I'm guessing we'll end up with something where
-> >>>> each entity has a thing that implements the Messenger interface but many
-> >>>> of those are sharing all their resources behind the scenes (thread pools,
-> >>>> multiplexing their connections, etc.).  We'll have to figure out how the
-> >>>> config options related to messenger itself are handled, but I think that
-> >>>> oddity needs to be done explicitly anyway.  We wouldn't for instance, want
-> >>>> to assume that all clusters in the same process must share the same
-> >>>> messenger options.  (Maybe we invent an entity that governs the shared
-> >>>> resources (process.NNN) and somehow direct config options/admin socket
-> >>>> commands/whatever toward that?  Who knows.)
-> >>>> 
-> >>>>> Some form of sterring might work, perhaps making the log system smart
-> >>>>> enough to shove things around based on subsystem or an entity
-> >>>>> identifier or something.
-> >>>>> 
-> >>>>>> How bad is the cct plumbing patch?  I fear this might still be the
-> >>>>>> best path forward...
-> >>>>> 
-> >>>>> It's not great? Really at all. I wrote it and I don't like it. I
-> >>>>> could pull it up and smack it into shape and make sure it passes tests
-> >>>>> if it were necessary.
-> >>>> 
-> >>>> Is it pushed somewhere?  Maybe much of the pain is related to the clock
-> >>>> thing...
-> >>>> 
-> >>>> sage
-> >>>> --
-> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>>> the body of a message to majordomo@vger.kernel.org
-> >>>> More majordomo info at  https://urldefense.proofpoint.com/v2/url?u=http-3A__vger.kernel.org_majordomo-2Dinfo.html&d=DQIBaQ&c=8S5idjlO_n28Ko3lg6lskTMwneSC-WqZ5EBTEEvDlkg&r=BTMd2ANcDl5P_nTkEam5zzywWdGjHoaoXy4JMG_yHPA&m=QKRlbMbVgp2mHcuHDtHefIP61023h3qQSsiXl9dsMFY&s=-_S4Iv0GTotef4x0R2-A98N0ufnGQnNa3OOZJwPwjqw&e=
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>> the body of a message to majordomo@vger.kernel.org
-> >>> More majordomo info at  https://urldefense.proofpoint.com/v2/url?u=http-3A__vger.kernel.org_majordomo-2Dinfo.html&d=DQIBaQ&c=8S5idjlO_n28Ko3lg6lskTMwneSC-WqZ5EBTEEvDlkg&r=BTMd2ANcDl5P_nTkEam5zzywWdGjHoaoXy4JMG_yHPA&m=QKRlbMbVgp2mHcuHDtHefIP61023h3qQSsiXl9dsMFY&s=-_S4Iv0GTotef4x0R2-A98N0ufnGQnNa3OOZJwPwjqw&e=
-> >> 
-> >> 
-> >> ----------------------------------------------------------------------
-> >> The information contained in this transmission may be confidential. Any disclosure, copying, or further distribution of confidential information is not permitted unless such privilege is explicitly granted in writing by Quantum. Quantum reserves the right to have electronic communications, including email and attachments, sent across its networks filtered through anti virus and spam software programs and retain such messages in order to comply with applicable data security and retention requirements. Quantum is not responsible for the proper and complete transmission of the substance of this communication or for any delay in its receipt.
-> 
-> 
---8323329-131989460-1478907945=:29579--
+PiBCdXQgZWl0aGVyIHdheSwgb3VyIG9wdGlvbnMgYXJlIGJhc2ljYWxseSBhbm90aGVyIGdsb2Jh
+bCBmb3IgZGVidWcgbGV2ZWxzLCANCj4gb3Igc29tZSB0aHJlYWQtbG9jYWwgc2hlbmFuaWdhbnMs
+IG9yIGEgY2N0IGFyZ3VtZW50IGV2ZXJ5d2hlcmUuICBSaWdodD8NCg0KeWVzLiBhbm90aGVyIGds
+b2JhbCBmb3IgZGVidWcgbGV2ZWxzIHNlZW1zIGxpa2UgaXQgd291bGQgZ28gYSBsb25nIHdheSBh
+bmQgZG9lcyBtYWtlIGFzc3VtcHRpb25zIGFib3V0IHRocmVhZGluZyBtb2RlbC4NCg0KPiBPbiBO
+b3YgMTEsIDIwMTYsIGF0IDM6NDUgUE0sIFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT4gd3Jv
+dGU6DQo+IA0KPiBPbiBGcmksIDExIE5vdiAyMDE2LCBCYXNzYW0gVGFiYmFyYSB3cm90ZToNCj4+
+IFllaHVkYSwgd2hlbiBJIGxvb2tlZCBhdCB0aGlzIGEgZmV3IG1vbnRocyBhZ28sIEkgdGhvdWdo
+dCB0aGVyZSBtaWdodCBiZSANCj4+IGEgd2F5IHRvIG1ha2UgaXQgbGVzcyBvZiBhbiBhbm5veWFu
+Y2UuIElmIHdlIGNhbiByZW1vdmUgdGhlIGNsb2NrX3NrZXcgDQo+IA0KPiBIYXBweSB0byByZW1v
+dmUgdGhhdCwgQlRXLiAgV2UgZG9uJ3QgdXNlIGl0Lg0KPiANCj4+IGFuZCBmaWd1cmUgb3V0IGEg
+d2F5IGFyb3VuZCBkb3V0L2xvZ2dpbmcgKGkuZS4gbWFrZSB0aG9zZSBwcm9jZXNzIHdpZGUpIA0K
+Pj4gdGhlbiB0aGUgbnVtYmVyIG9mIGNsYXNzZXMgd2Ugd291bGQgbmVlZCB0byBwYXNzIHRoZSBj
+b250ZXh0IHRvIGlzIA0KPj4gZ3JlYXRseSByZWR1Y2VkLiBUaGlzIGlzIHJvdWdobHkgdGhlIHBh
+dGggd2UgdGFrZSBmb3IgdGhlIGNsaWVudHMgDQo+PiAobGlicmFkb3MgZm9yIGV4YW1wbGUpLiBJ
+4oCZbGwgdHJ5IHRvIHByb3RvdHlwZSB0aGlzIG92ZXIgdGhlIG5leHQgZmV3IA0KPj4gd2Vla3Mg
+YXMgd2Ugd291bGQgbG92ZSB0byBiZSBhYmxlIHRvIHJ1biBtdWx0aXBsZSBPU0RzIGFuZCBNT05z
+IGluIHRoZSANCj4+IHNhbWUgcHJvY2Vzcy4NCj4gDQo+IFRoZSBwcm9ibGVtIGhlcmUgaXMgdGhh
+dCBjdXJyZW50bHkgZGVidWdnaW5nIGxldmVscyBhcmUgcGVyLWVudGl0eS4gV2UnZCANCj4gbmVl
+ZCB0byBtYWtlIHRoZSBjaG9pY2UgdGhhdCBwZXItcHJvY2VzcyBpcyBzdWZmaWNpZW50IGZvciBv
+dXIgcHVycG9zZXMgaW4gDQo+IG9yZGVyIHRvIG1ha2UgdGhhdCBsZWFwLi4uDQo+IA0KPiBCdXQg
+ZWl0aGVyIHdheSwgb3VyIG9wdGlvbnMgYXJlIGJhc2ljYWxseSBhbm90aGVyIGdsb2JhbCBmb3Ig
+ZGVidWcgbGV2ZWxzLCANCj4gb3Igc29tZSB0aHJlYWQtbG9jYWwgc2hlbmFuaWdhbnMsIG9yIGEg
+Y2N0IGFyZ3VtZW50IGV2ZXJ5d2hlcmUuICBSaWdodD8NCj4gDQo+IHNhZ2UNCj4gDQo+IA0KPj4g
+DQo+Pj4gT24gTm92IDExLCAyMDE2LCBhdCAyOjUzIFBNLCBZZWh1ZGEgU2FkZWgtV2VpbnJhdWIg
+PHllaHVkYUByZWRoYXQuY29tPiB3cm90ZToNCj4+PiANCj4+PiBPbiBGcmksIE5vdiAxMSwgMjAx
+NiBhdCAyOjE3IFBNLCBCYXNzYW0gVGFiYmFyYQ0KPj4+IDxCYXNzYW0uVGFiYmFyYUBxdWFudHVt
+LmNvbT4gd3JvdGU6DQo+Pj4+IFNvcnJ5LCBJ4oCZbSBsYXRlIHRvIHRoZSBkaXNjdXNzaW9uLCBi
+dXQgd2h5IG5vdCBqdXN0IHBhc3MgdGhlIGNvbnRleHQgdG8gZXZlcnkgY2xhc3MgdGhhdCBuZWVk
+cyBpdC4gSXRzIGEgcGFpbmZ1bCBvbmUgdGltZSBjaGFuZ2UgYnV0IHRoZSBjb21waWxlciB3aWxs
+IGtlZXAgeW91IGhvbmVzdC4gQWxzbyBpZiB3ZSBjYW4gZmlndXJlIG91dCBhIHdheSBhcm91bmQg
+dGhlIGNsb2NrIHNrZXcgKHdoaWNoIHNlZW1zIGxpa2UgYSBjb3JuZXIgY2FzZSkgSSB0aGluayB0
+aGUgc3VyZmFjZSBhcmUgaXMgc2lnbmlmaWNhbnRseSByZWR1Y2VkLiBVc2luZyBUTFMgYW5kIG90
+aGVyIG1lY2hhbmlzbXMgc2VlbXMgbGlrZSBtb3JlIGNvbXBsaWNhdGlvbi4NCj4+PiANCj4+PiBC
+ZWNhdXNlIHRoZW4geW91IGVuZCB1cCB3aXRoIHBhc3NpbmcgYXJvdW5kIGV4dHJhIHBhcmFtIHRo
+YXQgeW91IG5lZWQNCj4+PiB0byBnZXQgdHJpY2tsZWQgZG93biB0byB0aGUgbW9zdCBiYXNpYyBm
+dW5jdGlvbnMuIFRoYXQncyBiYXNpY2FsbHkNCj4+PiB3aGF0IHdlIGFyZSBkb2luZyBub3cgYW5k
+IGl0J3MgYSBodWdlIGFubm95YW5jZS4NCj4+PiANCj4+PiBZZWh1ZGENCj4+PiANCj4+Pj4gDQo+
+Pj4+IFRoYW5rcyENCj4+Pj4gQmFzc2FtDQo+Pj4+IA0KPj4+Pj4gT24gTm92IDExLCAyMDE2LCBh
+dCAxOjMxIFBNLCBZZWh1ZGEgU2FkZWgtV2VpbnJhdWIgPHllaHVkYUByZWRoYXQuY29tPiB3cm90
+ZToNCj4+Pj4+IA0KPj4+Pj4gUmVzdXJyZWN0aW5nIHRoaXMgdGhyZWFkLg0KPj4+Pj4gDQo+Pj4+
+PiBUcnlpbmcgdG8gZXh0cmFjdCBhIHNpbXBsZSBhbmQgcHJhY3RpY2FsIHBsYW4uIEhlcmUgYXJl
+IG15IHRob3VnaHRzOg0KPj4+Pj4gDQo+Pj4+PiBXZSBuZWVkIHRvIGhhdmUgZGlmZmVyZW50IGNl
+cGggY29udGV4dHMgZm9yOg0KPj4+Pj4gLSBwcm9jZXNzIChlLmcsIGNlcGgtb3NkKQ0KPj4+Pj4g
+LSBlbnRpdHkgKGUuZy4sIG9zZC4xLCBvc2QuMikNCj4+Pj4+IC0gY2x1c3RlciAoPyAtLSBtYXli
+ZSBpbiB0aGUgY2FzZSB3aGVyZSBpdCdzIGEgY2xpZW50KQ0KPj4+Pj4gDQo+Pj4+PiBXZSBjYW4g
+bWFrZSBhIHRocmVhZCBsb2NhbCBzdG9yYWdlIHZhcmlhYmxlIHRoYXQgd2lsbCByZWZlcmVuY2Ug
+dGhlDQo+Pj4+PiBjb250ZXh0IHRoaXMgdGhyZWFkIG5lZWRzIHRvIHVzZS4NCj4+Pj4+IFRocmVh
+ZHMgdGhhdCBkZWFsIHdpdGggY29tbW9uIHN0dWZmIHNob3VsZCB1c2UgdGhlIHByb2Nlc3Mgb3Ig
+ZW50aXR5DQo+Pj4+PiBjb250ZXh0LiBUaGlzIHNob3VsZCBiZSBzZXQgZXhwbGljaXRseSBpbiB0
+aGVzZSB0aHJlYWRzLiBVcG9uIHRocmVhZA0KPj4+Pj4gY3JlYXRpb24gd2UgbmVlZCB0byBzZXQg
+dGhlIGNvbnRleHQgZm9yIHRoYXQgdGhyZWFkLiBCeSBkZWZhdWx0IHRoZQ0KPj4+Pj4gY29udGV4
+dCB0aGF0IHdpbGwgYmUgdXNlZCB3aWxsIGJlIHRoZSBwcm9jZXNzIGNvbnRleHQuIGdfY2VwaF9j
+b250ZXh0DQo+Pj4+PiBjYW4gYmUgY2hhbmdlZCB0byBiZSBhIGZ1bmN0aW9uICh2aWEgYSBtYWNy
+bykgdGhhdCBoYW5kbGVzIHRoZSBjb250ZXh0DQo+Pj4+PiBzZWxlY3Rpb24gbG9naWMuDQo+Pj4+
+PiANCj4+Pj4+IFRob3VnaHRzPw0KPj4+Pj4gDQo+Pj4+PiBZZWh1ZGENCj4+Pj4+IA0KPj4+Pj4g
+T24gRnJpLCBKdW4gMTAsIDIwMTYgYXQgMjoyMCBQTSwgU2FnZSBXZWlsIDxzYWdlQG5ld2RyZWFt
+Lm5ldD4gd3JvdGU6DQo+Pj4+Pj4gT24gRnJpLCAxMCBKdW4gMjAxNiwgQWRhbSBDLiBFbWVyc29u
+IHdyb3RlOg0KPj4+Pj4+PiBPbiAxMC8wNi8yMDE2LCBTYWdlIFdlaWwgd3JvdGU6DQo+Pj4+Pj4+
+PiBJIHRoaW5rIHRoZSBjcnV4IG9mIHRoZSBpc3N1ZSBpcyB0aGUgZGVidWcvbG9nZ2luZyBjb2Rl
+LiAgQWxtb3N0IGFsbA0KPj4+Pj4+Pj4gdGhlIG90aGVyIHVzZXMgb2YgY2N0IGFyZSByZWxhdGVk
+IHRvIGNvbmZpZyBvcHRpb25zIHRoYXQgYXJlDQo+Pj4+Pj4+PiBwZXItY2x1c3Rlci4NCj4+Pj4+
+Pj4gDQo+Pj4+Pj4+IFRoYXQgaXMgY29ycmVjdC4gSSB0aG91Z2h0IHdlIG1pZ2h0IHB1bGwgc29t
+ZSB0aGluZ3MgbGlrZSAobGlrZSB0aGUNCj4+Pj4+Pj4gQ3J5cHRvIHN0dWZmKSB3aGlsZSB3ZSB3
+ZXJlIGF0IGl0IGJ1dCB0aGF0IHdhcyBtb3JlICJBcyBsb25nIGFzIEknbQ0KPj4+Pj4+PiBoZXJl
+IGFueXdheSBJIG1pZ2h0IGFzIHdlbGwgc2VlIGlmIHRoZXJlJ3MgYW55dGhpbmcgbW9yZSB0byBk
+by4uLiINCj4+Pj4+Pj4gDQo+Pj4+Pj4+PiBBbmQgd2l0aCBsb2dnaW5nLi4uIGl0IHNlZW1zIGxp
+a2UgZXZlbiB0aGlzIGlzIHJlYWxseSBhIHBlci1jbHVzdGVyDQo+Pj4+Pj4+PiAod2VsbCwgcGVy
+IGVudGl0eSkgdGhpbmcuICBTb3J0aW5nIHRocm91Z2ggYSBsb2cgZmlsZSB0aGF0IGNvbWJpbmVz
+DQo+Pj4+Pj4+PiBvdXRwdXQgZnJvbSB0d28gZGlmZmVyZW50IG9iamVjdGVycyBzb3VuZHMgaG9y
+cmlmaWMsIGFuZCB3aGVuIHdlDQo+Pj4+Pj4+PiBjcmFtIG11bHRpcGxlIE9TRHMgaW50byBvbmUg
+cHJvY2Vzcywgd2UncmUgZ29pbmcgdG8gd2FudCB0aGVtIHRvDQo+Pj4+Pj4+PiBzdGlsbCBmZWVk
+IGludG8gZGlmZmVyZW50IGxvZyBmaWxlcy4NCj4+Pj4+Pj4gDQo+Pj4+Pj4+IFRoaXMgaXMgYSBn
+b29kIHBvaW50IHRoYXQgSSBoYWQgbm90IGNvbnNpZGVyZWQuIFRob3VnaCwgSSdtIG5vdCBzdXJl
+DQo+Pj4+Pj4+IGlmIHRoZSB1bi1zZXBhcmF0ZWQgY2FzZSBpcyB0aGF0IG11Y2ggYmV0dGVyLiBJ
+IHRoaW5rIHBhcnQgb2YgdGhlDQo+Pj4+Pj4+IHNhdmluZ3Mgd2Ugd291bGQgd2FudCBmcm9tIG11
+bHRpLU9TRCB3b3JrIChhdCBsZWFzdCBpbiBwcmluY2lwbGUpIGlzDQo+Pj4+Pj4+IHRvIGJlIGFi
+bGUgdG8gaGF2ZSB0aGVtIHNoYXJlIG1lc3NlbmdlcnMgYW5kIG90aGVyIG92ZXJoZWFkLiBJbiB0
+aGF0DQo+Pj4+Pj4+IGNhc2UgZ2l2aW5nIGVhY2ggT1NEIGl0cyBvd24gZnVsbHkgZmxlZGdlZCBD
+ZXBoQ29udGV4dCBkb2Vzbid0IG1ha2UNCj4+Pj4+Pj4gc2Vuc2UsIEkgZG9uJ3QgdGhpbmsuDQo+
+Pj4+Pj4gDQo+Pj4+Pj4gVGhlIG1lc3NlbmdlcnMgYXJlbid0IHRpZWQgdG8gQ2VwaENvbnRleHQs
+IHNvIEkgZG9uJ3QgdGhpbmsgdGhpcyBjaGFuZ2VzDQo+Pj4+Pj4gdGhpbmdzIGluIHRoYXQgcmVn
+YXJkLiAgSSdtIGd1ZXNzaW5nIHdlJ2xsIGVuZCB1cCB3aXRoIHNvbWV0aGluZyB3aGVyZQ0KPj4+
+Pj4+IGVhY2ggZW50aXR5IGhhcyBhIHRoaW5nIHRoYXQgaW1wbGVtZW50cyB0aGUgTWVzc2VuZ2Vy
+IGludGVyZmFjZSBidXQgbWFueQ0KPj4+Pj4+IG9mIHRob3NlIGFyZSBzaGFyaW5nIGFsbCB0aGVp
+ciByZXNvdXJjZXMgYmVoaW5kIHRoZSBzY2VuZXMgKHRocmVhZCBwb29scywNCj4+Pj4+PiBtdWx0
+aXBsZXhpbmcgdGhlaXIgY29ubmVjdGlvbnMsIGV0Yy4pLiAgV2UnbGwgaGF2ZSB0byBmaWd1cmUg
+b3V0IGhvdyB0aGUNCj4+Pj4+PiBjb25maWcgb3B0aW9ucyByZWxhdGVkIHRvIG1lc3NlbmdlciBp
+dHNlbGYgYXJlIGhhbmRsZWQsIGJ1dCBJIHRoaW5rIHRoYXQNCj4+Pj4+PiBvZGRpdHkgbmVlZHMg
+dG8gYmUgZG9uZSBleHBsaWNpdGx5IGFueXdheS4gIFdlIHdvdWxkbid0IGZvciBpbnN0YW5jZSwg
+d2FudA0KPj4+Pj4+IHRvIGFzc3VtZSB0aGF0IGFsbCBjbHVzdGVycyBpbiB0aGUgc2FtZSBwcm9j
+ZXNzIG11c3Qgc2hhcmUgdGhlIHNhbWUNCj4+Pj4+PiBtZXNzZW5nZXIgb3B0aW9ucy4gIChNYXli
+ZSB3ZSBpbnZlbnQgYW4gZW50aXR5IHRoYXQgZ292ZXJucyB0aGUgc2hhcmVkDQo+Pj4+Pj4gcmVz
+b3VyY2VzIChwcm9jZXNzLk5OTikgYW5kIHNvbWVob3cgZGlyZWN0IGNvbmZpZyBvcHRpb25zL2Fk
+bWluIHNvY2tldA0KPj4+Pj4+IGNvbW1hbmRzL3doYXRldmVyIHRvd2FyZCB0aGF0PyAgV2hvIGtu
+b3dzLikNCj4+Pj4+PiANCj4+Pj4+Pj4gU29tZSBmb3JtIG9mIHN0ZXJyaW5nIG1pZ2h0IHdvcmss
+IHBlcmhhcHMgbWFraW5nIHRoZSBsb2cgc3lzdGVtIHNtYXJ0DQo+Pj4+Pj4+IGVub3VnaCB0byBz
+aG92ZSB0aGluZ3MgYXJvdW5kIGJhc2VkIG9uIHN1YnN5c3RlbSBvciBhbiBlbnRpdHkNCj4+Pj4+
+Pj4gaWRlbnRpZmllciBvciBzb21ldGhpbmcuDQo+Pj4+Pj4+IA0KPj4+Pj4+Pj4gSG93IGJhZCBp
+cyB0aGUgY2N0IHBsdW1iaW5nIHBhdGNoPyAgSSBmZWFyIHRoaXMgbWlnaHQgc3RpbGwgYmUgdGhl
+DQo+Pj4+Pj4+PiBiZXN0IHBhdGggZm9yd2FyZC4uLg0KPj4+Pj4+PiANCj4+Pj4+Pj4gSXQncyBu
+b3QgZ3JlYXQ/IFJlYWxseSBhdCBhbGwuIEkgd3JvdGUgaXQgYW5kIEkgZG9uJ3QgbGlrZSBpdC4g
+SQ0KPj4+Pj4+PiBjb3VsZCBwdWxsIGl0IHVwIGFuZCBzbWFjayBpdCBpbnRvIHNoYXBlIGFuZCBt
+YWtlIHN1cmUgaXQgcGFzc2VzIHRlc3RzDQo+Pj4+Pj4+IGlmIGl0IHdlcmUgbmVjZXNzYXJ5Lg0K
+Pj4+Pj4+IA0KPj4+Pj4+IElzIGl0IHB1c2hlZCBzb21ld2hlcmU/ICBNYXliZSBtdWNoIG9mIHRo
+ZSBwYWluIGlzIHJlbGF0ZWQgdG8gdGhlIGNsb2NrDQo+Pj4+Pj4gdGhpbmcuLi4NCj4+Pj4+PiAN
+Cj4+Pj4+PiBzYWdlDQo+Pj4+Pj4gLS0NCj4+Pj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMg
+bGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCj4+Pj4+PiB0
+aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPj4+Pj4+
+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHBzOi8vdXJsZGVmZW5zZS5wcm9vZnBvaW50LmNv
+bS92Mi91cmw/dT1odHRwLTNBX192Z2VyLmtlcm5lbC5vcmdfbWFqb3Jkb21vLTJEaW5mby5odG1s
+JmQ9RFFJQmFRJmM9OFM1aWRqbE9fbjI4S28zbGc2bHNrVE13bmVTQy1XcVo1RUJURUV2RGxrZyZy
+PUJUTWQyQU5jRGw1UF9uVGtFYW01enp5d1dkR2pIb2FvWHk0Sk1HX3lIUEEmbT1RS1JsYk1iVmdw
+Mm1IY3VIRHRIZWZJUDYxMDIzaDNxUVNzaVhsOWRzTUZZJnM9LV9TNEl2MEdUb3RlZjR4MFIyLUE5
+OE4wdWZuR1FuTmEzT09aSndQd2pxdyZlPQ0KPj4+Pj4gLS0NCj4+Pj4+IFRvIHVuc3Vic2NyaWJl
+IGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBp
+bg0KPj4+Pj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
+cmcNCj4+Pj4+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHBzOi8vdXJsZGVmZW5zZS5wcm9v
+ZnBvaW50LmNvbS92Mi91cmw/dT1odHRwLTNBX192Z2VyLmtlcm5lbC5vcmdfbWFqb3Jkb21vLTJE
+aW5mby5odG1sJmQ9RFFJQmFRJmM9OFM1aWRqbE9fbjI4S28zbGc2bHNrVE13bmVTQy1XcVo1RUJU
+RUV2RGxrZyZyPUJUTWQyQU5jRGw1UF9uVGtFYW01enp5d1dkR2pIb2FvWHk0Sk1HX3lIUEEmbT1R
+S1JsYk1iVmdwMm1IY3VIRHRIZWZJUDYxMDIzaDNxUVNzaVhsOWRzTUZZJnM9LV9TNEl2MEdUb3Rl
+ZjR4MFIyLUE5OE4wdWZuR1FuTmEzT09aSndQd2pxdyZlPQ0KPj4+PiANCj4+Pj4gDQo+Pj4+IC0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0NCj4+Pj4gVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIHRyYW5z
+bWlzc2lvbiBtYXkgYmUgY29uZmlkZW50aWFsLiBBbnkgZGlzY2xvc3VyZSwgY29weWluZywgb3Ig
+ZnVydGhlciBkaXN0cmlidXRpb24gb2YgY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGlzIG5vdCBw
+ZXJtaXR0ZWQgdW5sZXNzIHN1Y2ggcHJpdmlsZWdlIGlzIGV4cGxpY2l0bHkgZ3JhbnRlZCBpbiB3
+cml0aW5nIGJ5IFF1YW50dW0uIFF1YW50dW0gcmVzZXJ2ZXMgdGhlIHJpZ2h0IHRvIGhhdmUgZWxl
+Y3Ryb25pYyBjb21tdW5pY2F0aW9ucywgaW5jbHVkaW5nIGVtYWlsIGFuZCBhdHRhY2htZW50cywg
+c2VudCBhY3Jvc3MgaXRzIG5ldHdvcmtzIGZpbHRlcmVkIHRocm91Z2ggYW50aSB2aXJ1cyBhbmQg
+c3BhbSBzb2Z0d2FyZSBwcm9ncmFtcyBhbmQgcmV0YWluIHN1Y2ggbWVzc2FnZXMgaW4gb3JkZXIg
+dG8gY29tcGx5IHdpdGggYXBwbGljYWJsZSBkYXRhIHNlY3VyaXR5IGFuZCByZXRlbnRpb24gcmVx
+dWlyZW1lbnRzLiBRdWFudHVtIGlzIG5vdCByZXNwb25zaWJsZSBmb3IgdGhlIHByb3BlciBhbmQg
+Y29tcGxldGUgdHJhbnNtaXNzaW9uIG9mIHRoZSBzdWJzdGFuY2Ugb2YgdGhpcyBjb21tdW5pY2F0
+aW9uIG9yIGZvciBhbnkgZGVsYXkgaW4gaXRzIHJlY2VpcHQuDQo+PiANCg0K
