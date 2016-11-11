@@ -1,45 +1,49 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 4.9-rc5
-Date: Fri, 11 Nov 2016 16:43:40 +0100
-Message-ID: <1478879020-20000-1-git-send-email-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Why does ceph-osd not daemonize in ceph-disk
+Date: Fri, 11 Nov 2016 16:44:48 +0100
+Message-ID: <896aebe2-3048-a6b6-97a9-b7dbf740d39b@dachary.org>
+References: <7dbf8d17-ef39-26c5-73f3-d9eb8e7c58c7@digiware.nl>
+ <92f8aaec-2458-c411-0e50-1eae5bd88345@dachary.org>
+ <alpine.DEB.2.11.1611111519530.29579@piezo.us.to>
+ <d76b7362-8863-0b39-f517-4c8bcd1655b8@digiware.nl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:59368 "EHLO
+        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754181AbcKKPov (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Nov 2016 10:44:51 -0500
+In-Reply-To: <d76b7362-8863-0b39-f517-4c8bcd1655b8@digiware.nl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Linus,
 
-The following changes since commit bc33b0ca11e3df467777a4fa7639ba488c9d4911:
 
-  Linux 4.9-rc4 (2016-11-05 16:23:36 -0700)
+On 11/11/2016 16:30, Willem Jan Withagen wrote:
+> On 11-11-2016 16:21, Sage Weil wrote:
+>> On Fri, 11 Nov 2016, Loic Dachary wrote:
+>>> Hi,
+>>>
+>>> FYI when the init system is unknown, it runs ceph-osd directly instead of delegating to the init system.
+>>>
+>>> https://github.com/ceph/ceph/blob/master/src/ceph-disk/ceph_disk/main.py#L3468
+>>>
+>>> The reason why it does not daemonize is unclear to me.
+>>
+>> Does ceph-osd daemonize if you run it manually from the command line?
+> 
+> Yup,
+> 
+> created a small wrapper to see what happened in there, and I actually
+> see the wrapper exiting. Only this happy event does not make it thru to
+> the python friends. :( And after 360 sec timeout kills the lot.
 
-are available in the git repository at:
+Couldy you show the command line you're using to manually run the OSD ? I suspect the arguments are not the same: the python script populates the CEPH_ARGS environment variable.
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.9-rc5
+Just a thought ;-)
 
-for you to fetch changes up to 264048afab27d7c27eedf5394714e0b396d787f7:
-
-  libceph: initialize last_linger_id with a large integer (2016-11-10 20:13:08 +0100)
-
-----------------------------------------------------------------
-Ceph's ->read_iter() implementation is incompatible with the new
-generic_file_splice_read() code that went into -rc1.  Switch to the
-less efficient default_file_splice_read() for now; the proper fix is
-being held for 4.10.
-
-We also have a fix for a 4.8 regression and a trival libceph fixup.
-
-----------------------------------------------------------------
-Ilya Dryomov (1):
-      libceph: initialize last_linger_id with a large integer
-
-Yan, Zheng (2):
-      ceph: use default file splice read callback
-      libceph: fix legacy layout decode with pool 0
-
- fs/ceph/file.c                  | 1 -
- include/linux/ceph/osd_client.h | 2 ++
- net/ceph/ceph_fs.c              | 3 ++-
- net/ceph/osd_client.c           | 1 +
- 4 files changed, 5 insertions(+), 2 deletions(-)
+-- 
+Loïc Dachary, Artisan Logiciel Libre
