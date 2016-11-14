@@ -1,59 +1,39 @@
-From: Ramana Raja <rraja@redhat.com>
-Subject: Re: help unblock CephFS/Manila CI
-Date: Mon, 14 Nov 2016 04:55:30 -0500 (EST)
-Message-ID: <1141294993.14930447.1479117330885.JavaMail.zimbra@redhat.com>
-References: <2036507714.14884454.1479105588795.JavaMail.zimbra@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: How can OSD udev rules race with lvm at boot time ?
+Date: Mon, 14 Nov 2016 11:26:44 +0100
+Message-ID: <29b296db-034b-f91d-b7fe-b3f3f86a1df1@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:40288 "EHLO
-        mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752280AbcKNJzd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Nov 2016 04:55:33 -0500
-Received: from zmail15.collab.prod.int.phx2.redhat.com (zmail15.collab.prod.int.phx2.redhat.com [10.5.83.17])
-        by mx5-phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uAE9tW6g046877
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Nov 2016 04:55:32 -0500
-In-Reply-To: <2036507714.14884454.1479105588795.JavaMail.zimbra@redhat.com>
+Received: from relay6-d.mail.gandi.net ([217.70.183.198]:35506 "EHLO
+        relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934138AbcKNK0w (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Nov 2016 05:26:52 -0500
+Received: from mfilter27-d.gandi.net (mfilter27-d.gandi.net [217.70.178.155])
+        by relay6-d.mail.gandi.net (Postfix) with ESMTP id 42D17FB910
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Nov 2016 11:26:50 +0100 (CET)
+Received: from relay6-d.mail.gandi.net ([IPv6:::ffff:217.70.183.198])
+        by mfilter27-d.gandi.net (mfilter27-d.gandi.net [::ffff:10.0.15.180]) (amavisd-new, port 10024)
+        with ESMTP id fuPNjuec-MqM for <ceph-devel@vger.kernel.org>;
+        Mon, 14 Nov 2016 11:26:48 +0100 (CET)
+Received: from [192.168.3.3] (x4db3cfd5.dyn.telefonica.de [77.179.207.213])
+        (Authenticated sender: loic@dachary.org)
+        by relay6-d.mail.gandi.net (Postfix) with ESMTPSA id D5350FB90F
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Nov 2016 11:26:44 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Monday, November 14, 2016 Ramana Raja <rraja@redhat.com> wrote:
-> Hi,
-> 
-> OpenStack Manila's cephfs-native driver CI is broken [1]
-> due to http://tracker.ceph.com/issues/17816
-> 
-> The commit 427f357f0eed32c9ce17590ae9303a94e8b710e7 fixed the
-> issue in Jewel four days ago. It's included in the latest Jewel
-> packages created by  gitbuilder for trusty [2] but not for
-> xenial [3], which is used by the cephfs-native driver CI [4].
-> 
-> Any help to include the fix in gitbuilder's Jewel packages
-> for xenial to unblock the  CephFS/Manila CI would be great.
-> Also, it'd be nice to know why gitbuilder picked up the fix
-> for trusty packages but not for xenial.
+Hi,
 
-Loic pointed out that the latest Jewel packages for xenial were
-not being built by gitbuilder due to device running out of space.
+It looks like OSD udev rules race with LVM at boot time. In a nutshell, if /var/lib/ceph is on a LVM volume different from /, udev may fire events trying to start OSDs before the LVM volume is mounted and fail. This problem has been reported a few times over the past months and I believe it is real.
 
-Created an issue http://tracker.ceph.com/issues/17890 at
-http://tracker.ceph.com/projects/lab
+I don't think there is any safeguard preventing such a race and it makes sense to me that it can happen sometimes. I'd like to reproduce it reliably to assert this is the reason why it happens. And, more importantly, to figure out a fix and verify it works. So far all my attemps have failed: the OSD comes back up every time. The details about this issue are at http://tracker.ceph.com/issues/17889
 
--Ramana
+If someone has ideas about how to handle this, it would be most welcome :-)
 
-> 
-> Thanks,
-> Ramana
-> 
-> [1] https://bugs.launchpad.net/devstack-plugin-ceph/+bug/1640256
-> [2] http://gitbuilder.ceph.com/ceph-deb-trusty-x86_64-basic/ref/jewel/sha1
-> [3] http://gitbuilder.ceph.com/ceph-deb-xenial-x86_64-basic/ref/jewel/sha1
-> [4]
-> http://logs.openstack.org/61/394961/3/check/gate-manila-tempest-dsvm-cephfs-native-ubuntu-xenial-nv/ed528f4/logs/devstacklog.txt.gz#_2016-11-13_13_19_35_327
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Cheers
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
