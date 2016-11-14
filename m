@@ -1,14 +1,12 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: Can we drop ubuntu 14.04 (trusty) for kraken and
-	lumninous?
-Date: Mon, 14 Nov 2016 14:24:19 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1611141424060.29579@piezo.us.to>
-References: <alpine.DEB.2.11.1611111837410.29579@piezo.us.to>
+From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: A VM with 6 volumes - hangs
+Date: Mon, 14 Nov 2016 20:16:23 +0530
+Message-ID: <CANA9Uk62k74k5g3PcpxoL3cGARafQ9LvzH5Gj_FqtNm2RyuFqg@mail.gmail.com>
+References: <CANA9Uk7ZZzWZe7PdYaCd8r5B3bp+5grKrWcPRVH2sMNX2P5cmQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="===============1564607324=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1611111837410.29579-ie3vfNGmdjePKud3HExfWg@public.gmane.org>
+In-Reply-To: <CANA9Uk7ZZzWZe7PdYaCd8r5B3bp+5grKrWcPRVH2sMNX2P5cmQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,26 +16,73 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 11 Nov 2016, Sage Weil wrote:
-> Currently the distros we use for upstream testing are
-> 
->  centos 7.x
->  ubuntu 16.04 (xenial)
->  ubuntu 14.04 (trusty)
-> 
-> We also do some basic testing for Debian 8 and Fedora (some old version).
-> 
-> Jewel was the first release that had native systemd and full xenial 
-> support, so it's helpful to have both 14.04 and 16.04 supported to provide 
-> an upgrade path.  But I think we can safely drop 14.04 now for kraken and 
-> luminous.  Our options are
-> 
-> 1) keep testing on xenial and trusty, and keep building packages for both
+--===============1564607324==
+Content-Type: multipart/alternative; boundary=94eb2c05fde65e7eda054143e7a3
 
-Sounds like we'll keep trusty around for a while.  Thanks, everyone!
+--94eb2c05fde65e7eda054143e7a3
+Content-Type: text/plain; charset=UTF-8
 
-sage
++ceph-devel
+
+On Fri, Nov 11, 2016 at 5:09 PM, M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+wrote:
+
+> Hello,
+> I am using the ceph volumes with a VM. Details are below:
+>
+> VM:
+>   OS: Ubuntu 14.0.4
+>    CPU: 12 Cores
+>    RAM: 40 GB
+>
+> Volumes:
+>    Size: 1 TB
+>     No:   6 Volumes
+>
+>
+> With above, VM got hung without any read/write operation.
+>
+> Any suggestions..
+>
+> Thanks
+> Swami
+>
+
+--94eb2c05fde65e7eda054143e7a3
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">+ceph-devel<br><div class=3D"gmail_extra"><br><div class=
+=3D"gmail_quote">On Fri, Nov 11, 2016 at 5:09 PM, M Ranga Swami Reddy <span=
+ dir=3D"ltr">&lt;<a href=3D"mailto:swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">=
+swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_qu=
+ote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex=
+"><div dir=3D"ltr">Hello,<div>I am using the ceph=C2=A0volumes with a VM. D=
+etails are below:</div><div><br></div><div>VM:</div><div>=C2=A0 OS: Ubuntu =
+14.0.4</div><div>=C2=A0 =C2=A0CPU: 12 Cores</div><div>=C2=A0 =C2=A0RAM: 40 =
+GB</div><div><br></div><div>Volumes:</div><div>=C2=A0 =C2=A0Size: 1 TB</div=
+><div>=C2=A0 =C2=A0 No: =C2=A0 6 Volumes</div><div><br></div><div><br></div=
+><div>With above, VM got hung without any read/write operation.</div><div><=
+br></div><div>Any suggestions..</div><div><br></div><div>Thanks</div><span =
+class=3D"HOEnZb"><font color=3D"#888888"><div>Swami</div></font></span></di=
+v>
+</blockquote></div><br></div></div>
+
+--94eb2c05fde65e7eda054143e7a3--
+
+--===============1564607324==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1564607324==--
