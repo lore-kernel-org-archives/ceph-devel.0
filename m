@@ -1,66 +1,81 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: security roadmap
-Date: Mon, 14 Nov 2016 18:36:24 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1611141701000.29579@piezo.us.to>
+From: Ruben Kerkhof <ruben@rubenkerkhof.com>
+Subject: Re: How can OSD udev rules race with lvm at boot time ?
+Date: Mon, 14 Nov 2016 21:29:28 +0100
+Message-ID: <CAPed3OELgYa3+ieferaHvzJ7k8GzSFLN9gTKEEDjO_UHgay=zw@mail.gmail.com>
+References: <29b296db-034b-f91d-b7fe-b3f3f86a1df1@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59986 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932458AbcKNSg0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 14 Nov 2016 13:36:26 -0500
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 09F8D34A6
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Nov 2016 18:36:26 +0000 (UTC)
-Received: from ovpn-112-71.phx2.redhat.com (ovpn-112-71.phx2.redhat.com [10.3.112.71])
-        by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uAEIaOn9022460
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Nov 2016 13:36:25 -0500
+Received: from mail-ua0-f177.google.com ([209.85.217.177]:36535 "EHLO
+        mail-ua0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932462AbcKNU3z (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Nov 2016 15:29:55 -0500
+Received: by mail-ua0-f177.google.com with SMTP id b35so71928999uaa.3
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Nov 2016 12:29:49 -0800 (PST)
+In-Reply-To: <29b296db-034b-f91d-b7fe-b3f3f86a1df1@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Now seems like a good time to review our security roadmap.
+On Mon, Nov 14, 2016 at 11:26 AM, Loic Dachary <loic@dachary.org> wrote:
+> Hi,
 
-I've updated the trello board[1] to have a separate security list and 
-moved the relevant cards there.  They include:
+Hi Loic,
 
-- resurrect coverity ci at scan.coverity.com.  This stopped sending out 
-useful emails a while ago and the cron job has probably died; I'll try 
-to get it going again.
+I really appreciate you looking into this. While as a workaround for
+this issue I stopped using LVM on my Ceph nodes, I'd like to go back
+to LVM eventually.
+>
+> It looks like OSD udev rules race with LVM at boot time. In a nutshell, i=
+f /var/lib/ceph is on a LVM volume different from /, udev may fire events t=
+rying to start OSDs before the LVM volume is mounted and fail. This problem=
+ has been reported a few times over the past months and I believe it is rea=
+l.
 
-- coverity backlog: there is a big backlog of issues in coverity that 
-should be addressed.  Many of them are low priority (e.g., exceptions 
-not caught in test code), but those issues obscure the real problems.
+Just thinking out loud, but does udev make any guarantees at all about
+filesystems being available (and writable) when udev rules run?
 
-- hybrid kerberos/cephx auth mode: We've discussed this recently during 
-CDM, notes here:
+> I don't think there is any safeguard preventing such a race and it makes =
+sense to me that it can happen sometimes. I'd like to reproduce it reliably=
+ to assert this is the reason why it happens. And, more importantly, to fig=
+ure out a fix and verify it works. So far all my attemps have failed: the O=
+SD comes back up every time. The details about this issue are at http://tra=
+cker.ceph.com/issues/17889
+>
+> If someone has ideas about how to handle this, it would be most welcome :=
+-)
 
- http://pad.ceph.com/p/kerberos
+I'm trying to follow how osds are activated since this has been a
+mystery for me so far.
+Please bear with my, but this is how I understand it works:
 
-- on the wire encryption: this is currently blocked by the msgr2 wire 
-protocol revamp.
+- the ceph udev rules call ceph-disk trigger when udev detects a
+device / partition suitable for ceph based on GPT uuids.
+- ceph-disk trigger restarts an instantiated service, let's say
+ceph-disk@/dev/sda.service. (properly escaped). This is asynchronous.
+- ceph-disk.service calls ceph-disk trigger --sync /dev/sda
+- ceph-disk trigger --sync /dev/sda calls ceph-disk activate /dev/sda
 
-- librbd: client-side encryption.  The idea is to provide a key to librbd 
-so that it encrypts all data before it is sent to rados.  This has to 
-happen in librbd and not qemu in order to support cloning of 
-encrypted images.
+Now the first thing ceph-disk/main.py does (always) is mkdir
+/var/lib/ceph, and take a file lock on
+/var/lib/ceph/tmp/ceph-disk.prepare.lock and
+/var/lib/ceph/tmp/ceph-disk.activate.lock.
+Unless I'm mistaken this doesn't actually seem to be needed in the
+ceph-disk trigger case.
+Then we could add a RequiresMountsFor=3D/var/lib/ceph to
+ceph-disk.service and be done with it.
 
-- ceph-disk: revamp boostrap process.  This just came up on ceph-devel 
-today.  I think moving the bootstrap code into the monitor will simplify 
-issues like this and be easier to maintain/use going forward...
+As for how to reproduce the issue, one thought that comes to mind is
+if you're testing this in a vm, perhaps you could put and I/O cap on
+the disks, and this will improve your change of invoking the race.
+>
+> Cheers
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
 
-- rgw: encryption.  This is work in progress to implement the S3 
-encryption APIs.
+Kind regards,
 
-Are there items we're missing that should go on this list?
-
-Perhaps we should dedicate some time during the next CDM to go over the 
-security roadmap as a whole and any specific issues that are not well 
-defined.
-
-Thanks!
-sage
-
+Ruben Kerkhof
