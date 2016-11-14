@@ -1,31 +1,43 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: ceph v10.2.4 QE validation status
-Date: Sun, 13 Nov 2016 13:34:52 +0100
-Message-ID: <0f317cd4-1d50-215f-c91b-ebb5f0278e57@suse.cz>
-References: <CAMMFjmEkMUBCnZFqMr_kcfZgB5jm3CjVNfXpSAXT7ZCwMLQEfg@mail.gmail.com>
- <CALe9h7dGfVTYfp0grQ3=Xq=0f01S2zN=ttJjoOKES6qmUg7wSQ@mail.gmail.com>
+From: Ramana Raja <rraja@redhat.com>
+Subject: help unblock CephFS/Manila CI
+Date: Mon, 14 Nov 2016 01:39:48 -0500 (EST)
+Message-ID: <2036507714.14884454.1479105588795.JavaMail.zimbra@redhat.com>
+References: <1636748406.14877195.1479103166505.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:58001 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933747AbcKMMe4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 13 Nov 2016 07:34:56 -0500
-In-Reply-To: <CALe9h7dGfVTYfp0grQ3=Xq=0f01S2zN=ttJjoOKES6qmUg7wSQ@mail.gmail.com>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:49788 "EHLO
+        mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932189AbcKNGjt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Nov 2016 01:39:49 -0500
+Received: from zmail15.collab.prod.int.phx2.redhat.com (zmail15.collab.prod.int.phx2.redhat.com [10.5.83.17])
+        by mx3-phx2.redhat.com (8.13.8/8.13.8) with ESMTP id uAE6dngR004683
+        for <ceph-devel@vger.kernel.org>; Mon, 14 Nov 2016 01:39:49 -0500
+In-Reply-To: <1636748406.14877195.1479103166505.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>, Yuri Weinstein <yweinste@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <ldachary@redhat.com>, "Dachary, Loic" <loic@dachary.org>, "Weil, Sage" <sage@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, "Durgin, Josh" <jdurgin@redhat.com>
+To: ceph-devel@vger.kernel.org
 
->> fs - http://tracker.ceph.com/issues/17832 (Greg pls review/approve)
->
-> OK.  BTW feel free to backport the patch from master that disables the
-> unstable flock tests.
+Hi,
 
-Here's the backport:
+OpenStack Manila's cephfs-native driver CI is broken [1]
+due to http://tracker.ceph.com/issues/17816
 
-* http://tracker.ceph.com/issues/17885
-* https://github.com/ceph/ceph/pull/11953
+The commit 427f357f0eed32c9ce17590ae9303a94e8b710e7 fixed the
+issue in Jewel four days ago. It's included in the latest Jewel
+packages created by  gitbuilder for trusty [2] but not for
+xenial [3], which is used by the cephfs-native driver CI [4]. 
 
-Nathan
+Any help to include the fix in gitbuilder's Jewel packages
+for xenial to unblock the  CephFS/Manila CI would be great.
+Also, it'd be nice to know why gitbuilder picked up the fix
+for trusty packages but not for xenial.
+
+Thanks,
+Ramana
+
+[1] https://bugs.launchpad.net/devstack-plugin-ceph/+bug/1640256
+[2] http://gitbuilder.ceph.com/ceph-deb-trusty-x86_64-basic/ref/jewel/sha1
+[3] http://gitbuilder.ceph.com/ceph-deb-xenial-x86_64-basic/ref/jewel/sha1
+[4] http://logs.openstack.org/61/394961/3/check/gate-manila-tempest-dsvm-cephfs-native-ubuntu-xenial-nv/ed528f4/logs/devstacklog.txt.gz#_2016-11-13_13_19_35_327
