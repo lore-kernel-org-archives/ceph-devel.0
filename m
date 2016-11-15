@@ -1,43 +1,81 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: drivers/block/rbd.c:838: bad if expression ?
-Date: Tue, 15 Nov 2016 14:07:52 +0100
-Message-ID: <CAOi1vP_R8_1_WT+NSr+nanXf_O-8gvijDgB6f04zH+VYj_rs0w@mail.gmail.com>
-References: <VI1PR08MB1022C985BAEC457437FABBF69CBF0@VI1PR08MB1022.eurprd08.prod.outlook.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: A way to reduce compression overhead
+Date: Tue, 15 Nov 2016 16:14:33 +0300
+Message-ID: <a3f50c37-dfb1-a516-f768-2074204227d1@mirantis.com>
+References: <828b8988-5c29-8ec3-be00-e6c45fa15ab0@mirantis.com>
+ <alpine.DEB.2.11.1611082019530.29278@piezo.us.to>
+ <a2381759-4f9b-97dc-53cb-279e51337056@mirantis.com>
+ <alpine.DEB.2.11.1611112330530.29579@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <VI1PR08MB1022C985BAEC457437FABBF69CBF0@VI1PR08MB1022.eurprd08.prod.outlook.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: David Binderman <dcb314@hotmail.com>
-Cc: "sage@redhat.com" <sage@redhat.com>, "elder@kernel.org" <elder@kernel.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-it0-f50.google.com ([209.85.214.50]:38315 "EHLO
+        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932987AbcKONPI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Nov 2016 08:15:08 -0500
+Received: by mail-it0-f50.google.com with SMTP id o1so773088ito.1
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Nov 2016 05:15:08 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1611112330530.29579@piezo.us.to>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Nov 15, 2016 at 11:38 AM, David Binderman <dcb314@hotmail.com> wrot=
-e:
-> Hello there,
+Sage,
+please find inline.
+On 12.11.2016 2:42, Sage Weil wrote:
+> On Wed, 9 Nov 2016, Igor Fedotov wrote:
 >
-> drivers/block/rbd.c:838:34: warning: logical =E2=80=98and=E2=80=99 of mut=
-ually exclusive tests is always false [-Wlogical-op]
+> The concern I have here is that it probably won't map well onto EC.  The
+> primary can't easily have the local ObjectStore chunking things up and
+> then "pass it to the replica".. there's an intermediate layer between the
+> replication code and the ObjectStore (and is getting a bit more
+> sophisticated with the coming EC changes).
 >
-> Source code is
+> I think the simplest approach here would be to keep it simple.  For
+> example, a min_alloc_size and max compressed chunk size specified for the
+> pool.  The intermediate layer can apply the EC striping parameters, and
+> then chunk/compress accordingly.
 >
->    } else if (token > Opt_last_int && token < Opt_last_string) {
+> I agree that worrying about client-side compression seems like a lot at
+> this stage, but it's going to be the very next thing we ask about, so we
+> should consider it to make sure we don't put up any major roadblocks.
 >
-> but
+> Either way, though, we should probably wait for the EC overwrite changes
+> to land...
+Got it, thanks. Will start working on POC meanwhile.
 >
-> enum {
->     Opt_queue_depth,
->     Opt_last_int,
->     /* int args above */
->     Opt_last_string,
+> As for GC,
+>
+>>> I'm curious what you have in mind!  The blob_depth as currently
+>>> implemented is not terribly reliable...
+>> General idea is to estimate allocated vs stored ratio for the blob(s) under
+>> the extent being written.
+>> Where stored and allocated are measured in allocation units. And can be
+>> calculated using blobs ref_map.
+>> If that ratio is greater than 1 (+-some correction) - we need to perform GC
+>> for these blobs. Given the fact we do that after compression preprocessing
+>> it's expensive to merge the compressed extent being written and old shards.
+>> Hence that shards are written as standalone extents as opposed to current
+>> implementation when we try to merge both new and existing extents into  a
+>> single entity. Not a big drawback IMHO. Evidently this is valid for new
+>> compressed extents (that are AU aligned) only. Uncompressed ones can be merged
+>> in any fashion.
+>> This is just a draft hence comments are highly appreciated.
+> Yeah, I think this is a more sensible approach (focusing on allocated vs
+> referenced).  It seems like the most straightforward thing to do is
+> actually look at the old_extents in the wctx--since those are the ref_maps
+> that will become less referenced than before--in order to identify which
+> blobs might need rewriting.  Avoiding the merge case vastly simplifies it.
+> That also isn't any persistent metadata that we have to maintain (that
+> might become incorrect or inconsistent).
+>
+> We'd probably do the _do_write_data (which will do the various
+> punch_hole's), then check for any gc work, then do the final
+> _do_alloc_write and _wctx_finish?
+>
+Sounds good. Still need a detailed consistent algorithm though - working 
+on that.
+>
 
-Hi David,
-
-It's just a placeholder for any string options that might be added in
-the future.  See opt_tokens definition in net/ceph/ceph_common.c for an
-example (fsid, secret, etc).
-
-Thanks,
-
-                Ilya
