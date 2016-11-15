@@ -1,35 +1,41 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: ceph v10.2.4 QE validation status
-Date: Tue, 15 Nov 2016 09:18:59 +0100
-Message-ID: <91ea2d8b-31d4-6430-fa3a-6fb5385e06c1@suse.cz>
-References: <CAMMFjmEkMUBCnZFqMr_kcfZgB5jm3CjVNfXpSAXT7ZCwMLQEfg@mail.gmail.com>
- <CAMMFjmGRO7F30WwU8NwMU=t3bEXEhz1G6bwZwqyQJrp7mceZdQ@mail.gmail.com>
+From: Tianshan Qu <qutianshan@gmail.com>
+Subject: Re: rgw/multisite: unlock failure problem
+Date: Tue, 15 Nov 2016 16:30:59 +0800
+Message-ID: <CAEv+sP4JY_7QrQdtix8gy4ZyRQ8LP3834ZCVY80xaQUdTFd-sg@mail.gmail.com>
+References: <CAEv+sP6p9sdMt61yucxy10azo5jwQf-e765YbcHvDYQcXrfWPQ@mail.gmail.com>
+ <CADRKj5Rp-EB=nnxne55t4d+PWV5Uqpxx7LoGp4FYnnmhj6_6Nw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:49455 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752343AbcKOITD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 15 Nov 2016 03:19:03 -0500
-In-Reply-To: <CAMMFjmGRO7F30WwU8NwMU=t3bEXEhz1G6bwZwqyQJrp7mceZdQ@mail.gmail.com>
+Received: from mail-ua0-f171.google.com ([209.85.217.171]:33735 "EHLO
+        mail-ua0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S941318AbcKOIbB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Nov 2016 03:31:01 -0500
+Received: by mail-ua0-f171.google.com with SMTP id 20so82560015uak.0
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Nov 2016 00:31:00 -0800 (PST)
+In-Reply-To: <CADRKj5Rp-EB=nnxne55t4d+PWV5Uqpxx7LoGp4FYnnmhj6_6Nw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <ldachary@redhat.com>, "Dachary, Loic" <loic@dachary.org>, "Weil, Sage" <sage@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, John Spray <jspray@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-> upgrade/infernalis-x (jewel) - deprecated (Nathan is still working
-> to make it pass, see issues in the tacker summary above)
+http://tracker.ceph.com/issues/17907
 
-Actually, I'm no longer working on it. Two fixes were merged that 
-brought the run from 100% fail to 8/11 passing. This is the latest run:
-
-http://pulpito.ceph.com/yuriw-2016-11-14_16:21:41-upgrade:infernalis-x-jewel-distro-basic-vps/
-
-I didn't look, but based on previous runs the two fails are MON crashes 
-and the dead job is an unknown (there tends to be one dead job in every 
-run, but not always in the same test).
-
-Perhaps a developer could look at those three?
-
-Nathan
+2016-11-15 5:26 GMT+08:00 Yehuda Sadeh-Weinraub <yehuda@redhat.com>:
+> On Sun, Nov 13, 2016 at 10:40 PM, Tianshan Qu <qutianshan@gmail.com> wrote:
+>> Hi:
+>>
+>> There is a problem with unlock multiste sync log.
+>> The situation is set rgw_num_rados_handles > 1 and
+>> rgw_num_async_rados_threads default 32. since multisite use async
+>> thread pool, so lock and unlock operation may get different threads,
+>> which may direct to different rados handles, and lock operation use
+>> client.xxxx to identify owner, different rados handles means different
+>> client, leads to unlock fail, and next lock will return locked, rgw
+>> log will show many -16 error.
+>> Is there a good way to solve this?
+>
+> Can you open a ceph tracker issue for that?
+>
+> Thanks,
+> Yehuda
