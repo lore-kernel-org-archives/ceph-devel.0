@@ -1,85 +1,58 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Understanding encrypted OSD's and cephx
-Date: Tue, 15 Nov 2016 14:27:55 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1611151420160.29579@piezo.us.to>
-References: <7a406860-1bc6-7534-9e2c-341bb6ac09eb@suse.com> <alpine.DEB.2.11.1611141608140.29579@piezo.us.to> <c343594b-b84a-ea54-c78b-52ef2d35b81d@suse.com>
+Subject: Re: A way to reduce compression overhead
+Date: Tue, 15 Nov 2016 14:31:35 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1611151431080.29579@piezo.us.to>
+References: <828b8988-5c29-8ec3-be00-e6c45fa15ab0@mirantis.com> <alpine.DEB.2.11.1611082019530.29278@piezo.us.to> <a2381759-4f9b-97dc-53cb-279e51337056@mirantis.com> <alpine.DEB.2.11.1611112330530.29579@piezo.us.to>
+ <a3f50c37-dfb1-a516-f768-2074204227d1@mirantis.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:43121 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:43151 "EHLO
         cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935175AbcKOO2E (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Nov 2016 09:28:04 -0500
-In-Reply-To: <c343594b-b84a-ea54-c78b-52ef2d35b81d@suse.com>
+        with ESMTP id S935217AbcKOObj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Nov 2016 09:31:39 -0500
+In-Reply-To: <a3f50c37-dfb1-a516-f768-2074204227d1@mirantis.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Owen Synge <osynge@suse.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 15 Nov 2016, Owen Synge wrote:
-> > and instead define a new monitor command to do all of this in one go.  
-> > For example, 'osd bootstrap' could take the necessary arguments (e.g., the 
-> > uuid and local key) and in one step set up the various keys for you.  I 
-> > think that's going to be the most maintainable and sane solution going 
-> > forward.
-> 
-> Having a single command to do this sounds a good long term solution.
-> 
-> I would add that a replay attack is still a danger, with a one command
-> approach.
-> 
-> Using the trigger of OSD registering to prevent replay attacks, seems
-> like a better compromise than making each command only work once, so
-> setup can be repeated until success, and then since replay is prevented
-> other keys cannot be exposed.
+On Tue, 15 Nov 2016, Igor Fedotov wrote:
+> > > > I'm curious what you have in mind!  The blob_depth as currently
+> > > > implemented is not terribly reliable...
+> > > General idea is to estimate allocated vs stored ratio for the blob(s)
+> > > under
+> > > the extent being written.
+> > > Where stored and allocated are measured in allocation units. And can be
+> > > calculated using blobs ref_map.
+> > > If that ratio is greater than 1 (+-some correction) - we need to perform
+> > > GC
+> > > for these blobs. Given the fact we do that after compression preprocessing
+> > > it's expensive to merge the compressed extent being written and old
+> > > shards.
+> > > Hence that shards are written as standalone extents as opposed to current
+> > > implementation when we try to merge both new and existing extents into  a
+> > > single entity. Not a big drawback IMHO. Evidently this is valid for new
+> > > compressed extents (that are AU aligned) only. Uncompressed ones can be
+> > > merged
+> > > in any fashion.
+> > > This is just a draft hence comments are highly appreciated.
+> > Yeah, I think this is a more sensible approach (focusing on allocated vs
+> > referenced).  It seems like the most straightforward thing to do is
+> > actually look at the old_extents in the wctx--since those are the ref_maps
+> > that will become less referenced than before--in order to identify which
+> > blobs might need rewriting.  Avoiding the merge case vastly simplifies it.
+> > That also isn't any persistent metadata that we have to maintain (that
+> > might become incorrect or inconsistent).
+> > 
+> > We'd probably do the _do_write_data (which will do the various
+> > punch_hole's), then check for any gc work, then do the final
+> > _do_alloc_write and _wctx_finish?
+> > 
+> Sounds good. Still need a detailed consistent algorithm though - working on
+> that.
 
-There are two options:
+In the meantime, perhaps we should remove the blob_depth code for now so 
+it doesn't end up in the on-disk format.
 
- (1) Make the command always instantiate a new osd id and set of keys, 
-such that you get leaked/garbage state if there is a command resend, 
-or
-
- (2) make the command properly idempotent.  The trick here is that we need 
-to uniquely identify the bootstrap command by some piece of state that is 
-private so that the command cannot be used to fetch secrets for the 
-created osd.  This shouldn't really be a problem.
-
-In the end, this will be significantly more secure than what we were doing 
-before.  The recommended workflow will become
-
- (1) push bootstrap-{osd,mon,mds} key to host
- (2) create daemon (via new bootstrap command that is tailor-made for the 
-purpose)
- (3) remove bootstrap key
-
-Before we commit to this, there is an alternative model that does all key 
-creation on some other trusted host, but it would mean a more significant 
-rewrite of the ceph-disk tooling...
-
-> > In the meantime, though... let's just change the ceph deploy test to 
-> > install the admin key so that we can make the tests pass?  And set teh bug 
-> > severity on this so that we make sure it's addressed in a complete way 
-> > soon.
-> 
-> I fully agree.
-> 
-> Please can you (Sage) raise the bug so this plan is executed with
-> appropriate timeliness, as I feel if you raise the bug it will enhance
-> the importance. I would suggest you also include the replay attack issue
-> in the bug report.
-> 
-> I will need help to understand how to change the functional test suite.
-> The change will be just to issue:
-> 
->     ceph-deploy admin $TARGET_NODE
-> 
-> before issuing:
-> 
->     ceph-deploy osd create --dmcrypt $TARGET_NODE:sdb:sdc
-
-Yep, that's it.  Should just be a few lines of code in 
-
-https://github.com/ceph/ceph-qa-suite/blob/master/tasks/ceph_deploy.py
-
-Thanks!
 sage
