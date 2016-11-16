@@ -1,45 +1,55 @@
-From: David Disseldorp <ddiss@suse.de>
-Subject: Re: udev remove events to mark OSD down/out on disk-pull
-Date: Wed, 16 Nov 2016 16:16:02 +0100
-Message-ID: <20161116161602.7d5ff898@suse.de>
-References: <20161116033042.68eee001@suse.de>
-        <alpine.DEB.2.11.1611161448100.8814@piezo.us.to>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: Can we drop ubuntu 14.04 (trusty) for kraken and lumninous?
+Date: Wed, 16 Nov 2016 10:40:04 -0800
+Message-ID: <CAMMFjmE_S0ew2h7wWFF2wQccjffX7iGiJS=sxgkvOcvv86DG6Q@mail.gmail.com>
+References: <alpine.DEB.2.11.1611111837410.29579@piezo.us.to> <alpine.DEB.2.11.1611141424060.29579@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:41409 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932123AbcKPPQF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 16 Nov 2016 10:16:05 -0500
-In-Reply-To: <alpine.DEB.2.11.1611161448100.8814@piezo.us.to>
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:35170 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752897AbcKPSkG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Nov 2016 13:40:06 -0500
+Received: by mail-wm0-f49.google.com with SMTP id a197so258022129wmd.0
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Nov 2016 10:40:05 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1611141424060.29579@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>, "Cerza, Zack" <zack@redhat.com>, David Galloway <dgallowa@redhat.com>, "Mick, Dan" <dmick@redhat.com>, Vasu Kulkarni <vasu@redhat.com>
 
-On Wed, 16 Nov 2016 14:50:30 +0000 (UTC), Sage Weil wrote:
+Sage,
 
-> On Wed, 16 Nov 2016, David Disseldorp wrote:
-> > Hi,
-> > 
-> > I'm currently looking at ways to speed up OSD down/out notifications
-> > for disk-pull events, and was investigating using udev remove events
-> > for this.
-> > 
-> > IIUC, the outage currently propagates through to the mons via OSD device
-> > I/O error -> filestore I/O error ->  ceph-osd ceph_abort() -> heartbeat
-> > failure.  
-> 
-> We just merged (post-jewel) a change that makes connection refused events 
-> trigger an immediate mark-down of the peer OSD.  I think this will have 
-> the same effect, as long as the ceph-osd process is killed in a timely 
-> manner.  Have you tried it?  I'd suggest making sure that it's not 
-> sufficient before investing too much time into a udev-based approach...
-> 
-> See a033dc6f5b4cef357db6f5951062d680e880ba0e
+We had discussed xenial support in sepia today and right now jobs
+asking for it from smithi and mira nodes will fail because there are
+no bare-metals provisioned for it.
 
-Looks much cleaner than handling this in udev. I'll test this with
-Jewel and follow up - thanks Sage!
+The question is - how do we split nodes between 14.04, 16.04 and centos ?
 
-Cheers, David
+Thx
+YuriW
+
+On Mon, Nov 14, 2016 at 6:24 AM, Sage Weil <sage@newdream.net> wrote:
+> On Fri, 11 Nov 2016, Sage Weil wrote:
+>> Currently the distros we use for upstream testing are
+>>
+>>  centos 7.x
+>>  ubuntu 16.04 (xenial)
+>>  ubuntu 14.04 (trusty)
+>>
+>> We also do some basic testing for Debian 8 and Fedora (some old version).
+>>
+>> Jewel was the first release that had native systemd and full xenial
+>> support, so it's helpful to have both 14.04 and 16.04 supported to provide
+>> an upgrade path.  But I think we can safely drop 14.04 now for kraken and
+>> luminous.  Our options are
+>>
+>> 1) keep testing on xenial and trusty, and keep building packages for both
+>
+> Sounds like we'll keep trusty around for a while.  Thanks, everyone!
+>
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
