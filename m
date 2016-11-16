@@ -1,29 +1,42 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
+From: John Spray <jspray@redhat.com>
 Subject: Re: Build Warnings: spotting them, and cleaning them up
-Date: Wed, 16 Nov 2016 17:10:18 -0500
-Message-ID: <20161116221018.GA8507@ultraspiritum.eng.arb.redhat.com>
+Date: Wed, 16 Nov 2016 22:11:55 +0000
+Message-ID: <CALe9h7eC_JqpbfDzJek-4MS1bW35MTVhPDYJCQYd+3RFqGL22w@mail.gmail.com>
 References: <CAJ4mKGa6ECp6Qdy9jU2fF_NWONKZp=hviTyN68LXvw94J9Fd9w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:31068 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752278AbcKPWLx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 16 Nov 2016 17:11:53 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 627B4335E87
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Nov 2016 22:11:53 +0000 (UTC)
-Content-Disposition: inline
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:36207 "EHLO
+        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932658AbcKPWMR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Nov 2016 17:12:17 -0500
+Received: by mail-qk0-f173.google.com with SMTP id n21so194809869qka.3
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Nov 2016 14:12:16 -0800 (PST)
 In-Reply-To: <CAJ4mKGa6ECp6Qdy9jU2fF_NWONKZp=hviTyN68LXvw94J9Fd9w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <gfarnum@redhat.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 16/11/2016, Gregory Farnum wrote:
+On Wed, Nov 16, 2016 at 10:05 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+> Recently, Patrick noticed an issue with the MDS TrackedOp
+> implementation where we weren't actually dumping out the event lists
+> anywhere. It turned out to be as a result of an incorrect cleanup, and
+> he fixed it by just reverting the commit in
+> https://github.com/ceph/ceph/pull/11985.
+>
+> But we also wanted to clean up the spurious "now" parameter which goes
+> on used, and John did that in https://github.com/ceph/ceph/pull/12007.
+> It was reviewed by Patrick, Kefu, and myself and got merged with green
+> checkboxes (ie, Github and Jenkins agreed it was good).
+>
+> Then Patrick noticed we'd missed the Monitor's use of TrackedOp code
+> and it was spawning warnings because the relevant _dump() functions no
+> longer had matching parameter lists
+> (https://github.com/ceph/ceph/pull/12029). This concerned me since
+> we'd gotten a pass from Jenkins.
+>
 > It turns out, Jenkins assumes the build is good if the build script
 > returns 0 — it doesn't know anything about the actual text output and
 > doesn't scan for warnings.
@@ -35,35 +48,34 @@ On 16/11/2016, Gregory Farnum wrote:
 > warnings. At the moment, I'm only seeing one (repeated many times
 > over) resulting from use of the "remove_whitespace" iterator
 > functionality in RGW. Does anybody know a good way to handle that?
-
-I have a fix for this in my Clangtastic branch, it turns off warnings
-in the building of boost and makes inluded boost a system include.
-
+>
 > We also have another (seemingly real) warning: the BlueStore
 > BitAllocator says there are missing return statements in
 > BmapEntry::operator new [](size_t). I didn't look at the code; maybe
 > it's failing to detect return statements in an if-else block. But that
 > should be fixed up as well.
-
-I have a fix for that I'm about to push, I just have it return nullptr
-and mark it noexcept.
-
-(We could also make it throw something and remove the assert entirely,
-but this is more in tune with the current pattern.)
-
-> 1) The Ceph source should build warning-free. If we have warnings
-> from external code we still trust, we need a way to suppress *only*
-> those warnings so that issues we introduce can easily be detected.
-
-This is in principle fairly easily done with cmake hackery. Either
-marking something as a system include path or fiddling the build flags
-per-target.
-
+>
+> So, I guess I'll just throw out a few statements and see how people
+> react to them:
+>
+> 1) The Ceph source should build warning-free. If we have warnings from
+> external code we still trust, we need a way to suppress *only* those
+> warnings so that issues we introduce can easily be detected.
+>
 > 2) Patches that generate new warnings should not be merged.
+>
+> 3) We should turn on -Werr just as soon as the existing BlueStore
+> warning is fixed and the boost warnings can be suppressed. That should
+> happen quickly.
+>
+> 4) If we do that, I guess the existing Jenkins is okay?
 
-I agree while-heartedly!
+Yes to all points.
 
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC, Freenode}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+John
+
+> -Greg
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
