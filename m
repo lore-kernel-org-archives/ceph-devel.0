@@ -1,43 +1,88 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: Ceph Infrastructure Downtime
-Date: Fri, 18 Nov 2016 11:26:01 -0500
-Message-ID: <CAAZbbf0C2HYXsgneUbW2+OKz=2xnFJooOZQ5vj-BvRq4ARBVVw@mail.gmail.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: Automate PGs calculation in Ceph?
+Date: Fri, 18 Nov 2016 16:59:48 +0000
+Message-ID: <3FB1D7FD-6F5F-46EE-AB25-E701B918382E@Teradata.com>
+References: <CA+HUO7LtJANRqMDC8AsFDp-Fr2u1toafiKX6uCSvjCjC-4MoyQ@mail.gmail.com>
+ <CALe9h7eKrZmQ1gjv_TT4T8+q9u7nNVL9o7jH-jiMfCXft5co+w@mail.gmail.com>
+ <CA+HUO7JZSYJpzeAsqqbereRgRu8gV0p+v8ppxO12Y29yi2uEZg@mail.gmail.com>
+ <CALe9h7c5qvn3tj+0TXs5ONOaMor4T45-LdzCh9XBuQNE6ypcPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f171.google.com ([209.85.220.171]:33938 "EHLO
-        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752174AbcKRQ0C (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Nov 2016 11:26:02 -0500
-Received: by mail-qk0-f171.google.com with SMTP id q130so269827821qke.1
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Nov 2016 08:26:02 -0800 (PST)
+Received: from nat13.teradata.com ([153.65.16.13]:33565 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1754207AbcKRQ74 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Nov 2016 11:59:56 -0500
+In-Reply-To: <CALe9h7c5qvn3tj+0TXs5ONOaMor4T45-LdzCh9XBuQNE6ypcPw@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <FA21B616977C394897C23364B66D4E7F@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Sebastien Han <shan@redhat.com>, Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Hey Cephers,
-
-Due to Dreamhost shutting down the old DreamCompute cluster in their
-US-East 1 region, we are in the process of beginning the migration of
-Ceph infrastructure.  We will need to move download.ceph.com,
-tracker.ceph.com, and docs.ceph.com to their US-East 2 region.
-
-The current plan is to move the VMs on 25 NOV 2016 throughout the day.
-Expect them to be down intermittently.
-
-Ceph.com will remain up for migration at a later date, and already has
-a message in the banner about the outage. Expect to see
-notifications/banners on some of the other sites as well, but this
-should serve as your main notification.
-
-If you have any questions or concerns feel free to send them my way
-and I can put you in touch with the right resource. Thanks.
-
--- 
-
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
+DQo+IE9uIE5vdiAxOCwgMjAxNiwgYXQgNjoxMSBBTSwgSm9obiBTcHJheSA8anNwcmF5QHJlZGhh
+dC5jb20+IHdyb3RlOg0KPiANCj4gT24gRnJpLCBOb3YgMTgsIDIwMTYgYXQgMTo0OCBQTSwgU2Vi
+YXN0aWVuIEhhbiA8c2hhbkByZWRoYXQuY29tPiB3cm90ZToNCj4+IFRoYW5rcyBKb2huIHRoYXQg
+bWFrZXMgc2Vuc2UsIHNpbmNlIHdlIG1pc3MgdXNlcidzIG92ZXJhbGwgaW50ZW50DQo+PiB0aGVy
+ZSBpcyBubyBwb2ludCBvZiBkb2luZyB0aGlzIHdpdGhpbiB0aGUgbW9ucyA6KS4NCj4+IEl0IHdv
+dWxkIGJlIG5pY2UgdG8gaGF2ZSBzb21ldGhpbmcgYSBiaXQgbW9yZSBkeW5hbWljIHRob3VnaCwg
+d2hlcmUgd2UNCj4+IGNhbiBkZWNyZWFzZSBQR3MgYmFzZWQgb24gdGhlIHRvcG9sb2d5IGFuZCB0
+aGUgY3VycmVudCBudW1iZXIgb2YNCj4+IHBvb2xzLi4uIE9mIGNvdXJzZSB0aGlzIHdpbGwgdHJp
+Z2dlciBtb3ZlbWVudHMgYnV0IHRoaXMgaXMgbm90IGFuDQo+PiBpc3N1ZSBmb3IgQ2VwaCA6KS4N
+Cj4gDQo+IFllYWgsIGJlaW5nIGFibGUgdG8gZGVjcmVhc2UgcGdfbnVtIChpLmUuIGRvIHBnIGpv
+aW5zIG9uIHRoZSBPU0RzKQ0KPiB3b3VsZCBzb2x2ZSBhIGxvdCBvZiB1c2FiaWxpdHkgcHJvYmxl
+bXM6IGN1cnJlbnRseSB3ZSBoYXZlIG5vIGNob2ljZQ0KPiBidXQgdG8gZWR1Y2F0ZSB1c2VycyBh
+Ym91dCBQR3Mgb24gZGF5IDEgaW4gb3JkZXIgZm9yIHRoZW0gdG8gZGVjaWRlDQo+IGhvdyBtYW55
+IHRoZXkgd2FudCBpbiBhIHBvb2wuICBJZiB3ZSBjb3VsZCBhdXRvLWd1ZXNzLCBhbmQgdGhlbg0K
+PiBkZWNyZWFzZSBsYXRlciBpZiB3ZSBnZXQgaXQgd3JvbmcsIHRoZW4gbW9zdCB1c2VycyB3b3Vs
+ZCBub3QgbmVlZCB0bw0KPiBrbm93IHdoYXQgYSBQRyBpcyB0byBkbyBub3JtYWwgb3BlcmF0aW9u
+cy4NCj4gDQo+IEkgd291bGQgZW52aXNpb24gYW55IGF1dG8tZGVjcmVhc2UgaW4gcGdfbnVtIHdv
+cmtpbmcgaW4gY29uY2VydCB3aXRoIGENCj4gZ3VpZGVkIHBvb2wgY3JlYXRpb24gcHJvY2Vzczsg
+YXMgd2VsbCBhcyByZWNvbW1lbmRpbmcgaG93IG1hbnkgcGdzIG5ldw0KPiBwb29scyBzaG91bGQg
+aGF2ZSwgd2Ugd291bGQgcmVjb21tZW5kIGFueSBkZWNyZWFzZSBpbiBleGlzdGluZyBwb29scywN
+Cj4gYW5kIHByb3ZpZGUgaW5mb3JtYXRpb24gYWJvdXQgdGhlIGV4cGVjdGVkIGNvc3Qgb2YgdGhl
+IGFzc29jaWF0ZWQgZGF0YQ0KPiBtb3ZlbWVudC4NCj4gDQo+IEpvaG4NCj4gDQoNClRoaXMgYXV0
+byBhZGp1c3RpbmcgcGdfbnVtIGxvZ2ljIGlzIGEgZ3JlYXQgaWRlYS4gSSB3b3VsZCBsb3ZlIHRv
+IHNlZSB0aGlzIGhhcHBlbi4NCg0KTml0aW4NCg0KPj4gDQo+PiBPbiBUaHUsIE5vdiAxNywgMjAx
+NiBhdCAxMDowMiBQTSwgSm9obiBTcHJheSA8anNwcmF5QHJlZGhhdC5jb20+IHdyb3RlOg0KPj4+
+IE9uIFRodSwgTm92IDE3LCAyMDE2IGF0IDY6MTQgUE0sIFNlYmFzdGllbiBIYW4gPHNoYW5AcmVk
+aGF0LmNvbT4gd3JvdGU6DQo+Pj4+IEhleSwNCj4+Pj4gDQo+Pj4+IEkgd2FzIHdvbmRlcmluZywg
+c2luY2Ugd2UgaGF2ZSBQRyBjYWxjIG9ubGluZSB0byBkZWNpZGUgdGhlIHJpZ2h0DQo+Pj4+IHZh
+bHVlIGZvciBvdXIgUEdzIHBlciBwb29sLiBUaGUgbG9naWMgc2VlbXMgdG8gYmUgZWFzeSBhbmQg
+d2VsbA0KPj4+PiB1bmRlcnN0b29kLiBMb29rcyBsaWtlIGEgc2ltcGxlIGNhbGN1bGF0aW9uLCBJ
+IGRvbid0IHNlZSBhbnl0aGluZyBsaWtlDQo+Pj4+IGRlcGVuZGluZyBvbiBhIHVzZSBjYXNlIHdl
+IGFyZSBjaGFuZ2luZyB0aGUgdmFsdWUgb3IgYW55dGhpbmcuDQo+Pj4+IA0KPj4+PiBBbnkgcmVh
+c29uIHdoeSB0aGlzIGxvZ2ljIGlzIG5vdCBwYXJ0IG9mIENlcGg/DQo+Pj4+IE1vbnMga25vdyBh
+Ym91dCBldmVyeXRoaW5nIG9uIHRoZSBjbHVzdGVyIGFuZCBzaW5jZSB0aGV5IG1hbmFnZSBwb29s
+DQo+Pj4+IGNyZWF0aW9ucyB0aGV5IHNob3VsZCBiZSBhYmxlIHRvIHRha2UgdGhlIHJpZ2h0IGRl
+Y2lzaW9uLg0KPj4+PiANCj4+Pj4gQW0gSSBtaXNzaW5nIHNvbWV0aGluZz8NCj4+PiANCj4+PiBJ
+IHRoaW5rIHRoZSByZWFzb24gbm9ib2R5IGhhcyBkb25lIHRoaXMgc28gZmFyIGlzIHRoYXQgdGhl
+cmUncyBubw0KPj4+IG92ZXJhbGwgKG11bHRpcGxlIHBvb2xzIGF0IGEgdGltZSkgc2V0dXAgaW50
+ZXJmYWNlIGluIENlcGguICBUbyBkbyB0aGUNCj4+PiBwZyBjYWxjIHN0dWZmLCB5b3UgbmVlZCBh
+IHVzZXIgdG8gdGVsbCB5b3Ugbm90IGp1c3QgdGhhdCB0aGV5IHdhbnQgYQ0KPj4+IHBvb2wsIGJ1
+dCBob3cgbWFueSBwb29scyB0aGV5IHdhbnQgYW5kIHdoYXQgdGhleSB3aWxsIHVzZSB0aGVtIGZv
+cjoNCj4+PiBzb21ldGhpbmcgZnJpZW5kbGllciB0aGFuIHRoZSBjdXJyZW50ICJvc2QgcG9vbCBj
+cmVhdGUiIGNvbW1hbmQgY2FuDQo+Pj4gaGFuZGxlLg0KPj4+IA0KPj4+IEhhdmluZyBtb25zIGRv
+IGFueSBraW5kIG9mIGd1ZXNzaW5nIG9uIGEgInBvb2wgYXQgYSB0aW1lIiBiYXNpcw0KPj4+IHdp
+dGhvdXQgdmlzaWJpbGl0eSBvZiB0aGUgdXNlcidzIG92ZXJhbGwgaW50ZW50IGlzIHByZXR0eSBk
+YW5nZXJvdXMsDQo+Pj4gYmVjYXVzZSB1c2VycyBjYW4gbmV2ZXIgZml4IGEgYmFkIGF1dG9tYXRp
+YyBjaG9pY2UgKGNhbid0IGRlY3JlYXNlDQo+Pj4gcGdfbnVtKS4NCj4+PiANCj4+PiBKb2huDQo+
+Pj4gDQo+Pj4+IFRoYW5rcyENCj4+Pj4gDQo+Pj4+IC0tDQo+Pj4+IENoZWVycw0KPj4+PiANCj4+
+Pj4g4oCT4oCT4oCT4oCT4oCT4oCTDQo+Pj4+IFPDqWJhc3RpZW4gSGFuDQo+Pj4+IFByaW5jaXBh
+bCBTdG9yYWdlIEFyY2hpdGVjdA0KPj4+PiANCj4+Pj4gIkFsd2F5cyBnaXZlIDEwMCUuIFVubGVz
+cyB5b3UncmUgZ2l2aW5nIGJsb29kLiINCj4+Pj4gDQo+Pj4+IE1haWw6IHNlYkByZWRoYXQuY29t
+DQo+Pj4+IEFkZHJlc3M6IDExIGJpcywgcnVlIFJvcXXDqXBpbmUgLSA3NTAwOCBQYXJpcw0KPj4+
+PiAtLQ0KPj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAi
+dW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCj4+Pj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRv
+IG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4+Pj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAg
+aHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+PiANCj4+IA0KPj4g
+DQo+PiAtLQ0KPj4gQ2hlZXJzDQo+PiANCj4+IOKAk+KAk+KAk+KAk+KAk+KAkw0KPj4gU8OpYmFz
+dGllbiBIYW4NCj4+IFByaW5jaXBhbCBTdG9yYWdlIEFyY2hpdGVjdA0KPj4gDQo+PiAiQWx3YXlz
+IGdpdmUgMTAwJS4gVW5sZXNzIHlvdSdyZSBnaXZpbmcgYmxvb2QuIg0KPj4gDQo+PiBNYWlsOiBz
+ZWJAcmVkaGF0LmNvbQ0KPj4gQWRkcmVzczogMTEgYmlzLCBydWUgUm9xdcOpcGluZSAtIDc1MDA4
+IFBhcmlzDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBs
+aW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2Ug
+dG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBo
+dHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0K
