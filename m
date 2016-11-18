@@ -1,89 +1,175 @@
-From: Sebastien Han <shan@redhat.com>
-Subject: Re: Automate PGs calculation in Ceph?
-Date: Fri, 18 Nov 2016 14:48:42 +0100
-Message-ID: <CA+HUO7JZSYJpzeAsqqbereRgRu8gV0p+v8ppxO12Y29yi2uEZg@mail.gmail.com>
-References: <CA+HUO7LtJANRqMDC8AsFDp-Fr2u1toafiKX6uCSvjCjC-4MoyQ@mail.gmail.com>
- <CALe9h7eKrZmQ1gjv_TT4T8+q9u7nNVL9o7jH-jiMfCXft5co+w@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: proposal for fine-grain dout control
+Date: Fri, 18 Nov 2016 15:04:38 +0100
+Message-ID: <CAOi1vP94GDwABdfphqWDc2nZ4pp3GFZVXUnhNFgMuc21fpUknA@mail.gmail.com>
+References: <20161117043223.GA22459@T530I>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:36320 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753027AbcKRNtJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Nov 2016 08:49:09 -0500
-Received: by mail-wm0-f45.google.com with SMTP id g23so39534792wme.1
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Nov 2016 05:49:03 -0800 (PST)
-In-Reply-To: <CALe9h7eKrZmQ1gjv_TT4T8+q9u7nNVL9o7jH-jiMfCXft5co+w@mail.gmail.com>
+Received: from mail-vk0-f48.google.com ([209.85.213.48]:36731 "EHLO
+        mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752234AbcKROEk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Nov 2016 09:04:40 -0500
+Received: by mail-vk0-f48.google.com with SMTP id p9so168404015vkd.3
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Nov 2016 06:04:40 -0800 (PST)
+In-Reply-To: <20161117043223.GA22459@T530I>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: caifeng.zhu@uniswdc.com
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Thanks John that makes sense, since we miss user's overall intent
-there is no point of doing this within the mons :).
-It would be nice to have something a bit more dynamic though, where we
-can decrease PGs based on the topology and the current number of
-pools... Of course this will trigger movements but this is not an
-issue for Ceph :).
-
-On Thu, Nov 17, 2016 at 10:02 PM, John Spray <jspray@redhat.com> wrote:
-> On Thu, Nov 17, 2016 at 6:14 PM, Sebastien Han <shan@redhat.com> wrote:
->> Hey,
->>
->> I was wondering, since we have PG calc online to decide the right
->> value for our PGs per pool. The logic seems to be easy and well
->> understood. Looks like a simple calculation, I don't see anything like
->> depending on a use case we are changing the value or anything.
->>
->> Any reason why this logic is not part of Ceph?
->> Mons know about everything on the cluster and since they manage pool
->> creations they should be able to take the right decision.
->>
->> Am I missing something?
+On Thu, Nov 17, 2016 at 5:32 AM,  <caifeng.zhu@uniswdc.com> wrote:
+> Currently dout control is based on module and trace level.
+> In practice, we find that it is much easier to control dout
+> by specifying module, file, function and line, as done by
+> kernel rbd/cephfs client module. The paragraphs below try to
+> propose a way to implement similar control at the ceph server
+> side.
 >
-> I think the reason nobody has done this so far is that there's no
-> overall (multiple pools at a time) setup interface in Ceph.  To do the
-> pg calc stuff, you need a user to tell you not just that they want a
-> pool, but how many pools they want and what they will use them for:
-> something friendlier than the current "osd pool create" command can
-> handle.
+> As the kernel clients, we can define control points (called
+> doutpoints later) for dout in the macro dout_impl and collect
+> them into a seperate ELF section, like below:
 >
-> Having mons do any kind of guessing on a "pool at a time" basis
-> without visibility of the user's overall intent is pretty dangerous,
-> because users can never fix a bad automatic choice (can't decrease
-> pg_num).
+>  #define dout_impl(cct, sub, v)                                         \
+>    do {                                                                 \
+> -  if (cct->_conf->subsys.should_gather(sub, v)) {                      \
+> +  static doutpoint_t *_dop;                                            \
+> +  DOUTPOINT(TOSTR(sub), __FILE__, __func__, __LINE__);                 \
+> +                                                                       \
+> +  if (cct->_conf->subsys.should_gather(sub, v) ||                      \
+> +      doutpoint_active(_dop)) {                                        \
 >
-> John
+> In the above code, DOUTPOINT will define a doutpoint and ask linker
+> to collect it into an ELF section, such as "set_doutpoint". Instead of
+> adding __attribute__((section("set_doutpoint"))) to variables, we resort
+> to inline ASM like below:
 >
->> Thanks!
->>
->> --
->> Cheers
->>
->> ––––––
->> Sébastien Han
->> Principal Storage Architect
->>
->> "Always give 100%. Unless you're giving blood."
->>
->> Mail: seb@redhat.com
->> Address: 11 bis, rue Roquépine - 75008 Paris
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +typedef struct doutpoint {
+> +       const char *    dop_module;     // module
+> +       const char *    dop_file;       // file name
+> +       const char *    dop_func;       // function name
+> +       int             dop_line;       // line no
+> +       volatile int    dop_state;      // state 0:off, 1:on
+> +} doutpoint_t;
+>
+> +#define        TOSTR(a)        #a
+> +#define DOUTPOINT(module, file, func, line)                             \
+> +do {                                                                    \
+> +   __asm__(".pushsection set_doutpoint, \"aw\", @progbits" "\n"         \
+> +           ".align 32"   "\n"                                           \
+> +           "416:"        "\n"                                           \
+> +           ".quad %c1"   "\n"                                           \
+> +           ".quad %c2"   "\n"                                           \
+> +           ".quad %c3"   "\n"                                           \
+> +           ".long %c4"   "\n"                                           \
+> +           ".long 0"     "\n"                                           \
+> +           ".popsection" "\n"                                           \
+> +           "leaq 416b(%%rip), %0" "\n"                                  \
+> +           : "=r"(_dop)                                                 \
+> +           : "i"(module), "i"(file), "i"(func), "i"(line));             \
+> +} while(0)
+>
+> The reason for inline ASM is that: in C++, there are inline and template
+> functions. static variables defined in these functions will be automatically
+> added attributes by the compiler. thus it impossible to collect all doutpoints
+> into one section.
+>
+> There is another problem to consider: collect doutpoints of shared libs into
+> the main executable. We solve the problem by defining a constructor function
+> and a weak function. The contructor function will automatically register doupoints
+> of shared libs into the main executable. The weak function is to be overriden by
+> the main executable, providing where to register doutponits.
+>
+> //
+> // in common/dout.h
+> //
+> +typedef struct doutsection {
+> +       doutpoint_t *   start;
+> +       doutpoint_t *   stop;
+> +} doutsection_t;
+>
+> //
+> // in common/dout.cc
+> //
+> +extern doutpoint_t __start_set_doutpoint[]
+> +       __attribute__((weak, visibility("hidden")));
+> +extern doutpoint_t __stop_set_doutpoint[]
+> +       __attribute__((weak, visibility("hidden")));
+> +
+> +extern void doutsection_global(doutsection_t **s, int *n)
+> +       __attribute__((weak));
+> +
+> +
+> +static void
+> +doutsection_array(doutsection_t **s, int *n)
+> +{
+> +       static doutsection_t _sections[10];
+> +
+> +       /*
+> +        * If doutsection_global is defined, provide
+> +        * from the global one; otherwise, fall back
+> +        * to local ones.
+> +        */
+> +       if (doutsection_global)
+> +               doutsection_global(s, n);
+> +       else {
+> +               *s = _sections;
+> +               *n = 10;
+> +       }
+> +}
+> +
+> +/*
+> + * The 'contructor' attribute means the function will be
+> + * called after dynamic linking for the library or before
+> + * entering into main for the executable.
+> + */
+> +void __attribute__((constructor))
+> +doutpoint_register(void)
+> +{
+> +       int i, n;
+> +       doutsection_t *s;
+> +
+> +       doutsection_array(&s, &n);
+> +       for (i = 0; i < n; i++, s++) {
+> +               if (!s->start) {
+> +                       s->start = __start_set_doutpoint;
+> +                       s->stop = __stop_set_doutpoint;
+> +                       return;
+> +               }
+> +       }
+> +}
+>
+> //
+> // in global/global_init.cc
+> //
+> void
+> doutsection_global(doutsection_t **s, int *n)
+> {
+>         static doutsection_t _sections[10];
+>
+>         *s = _sections;
+>         *n = 10;
+> }
+>
+> There are some shortcomings of the proposal: mainly archtecture
+> dependency and compiler dependency. DOUTPOINT exploits one x86
+> instruction; weak symbol support may be different on different
+> compilers.
+>
+> Glad and eager to hear your opinions!
+> If it is useful, I'll post the whole patch.
 
+As someone who has experience with kernel dynamic_debug mechanism,
+I wish we had a subsystem/level mechanism in the kernel client instead.
+While sometimes handy, enabling only a few selected douts doesn't come
+useful that often - more frequently the dout you really need isn't
+there and you end up fiddling with "perf probe" and others, longing for
+a good scriptable dynamic tracer.
 
+It looks like you are proposing this as an addition to the existing
+module/level scheme and not as a replacement though, so it's just an
+observation...
 
--- 
-Cheers
+Thanks,
 
-––––––
-Sébastien Han
-Principal Storage Architect
-
-"Always give 100%. Unless you're giving blood."
-
-Mail: seb@redhat.com
-Address: 11 bis, rue Roquépine - 75008 Paris
+                Ilya
