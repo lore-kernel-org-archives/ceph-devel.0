@@ -1,44 +1,77 @@
-From: xxhdx1985126 <xxhdx1985126@163.com>
-Subject: Why gdb can't find symbol table when trying to debug ceph?
-Date: Sat, 19 Nov 2016 19:00:18 +0800 (CST)
-Message-ID: <46ed7fdb.45dc.1587c3e763c.Coremail.xxhdx1985126@163.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: Why gdb can't find symbol table when trying to debug ceph?
+Date: Sun, 20 Nov 2016 09:51:47 +0800
+Message-ID: <CABAwU-aLAisvzEPc25H8=dY-TvTgiN7yCkkZWX-f6Tv=fPAvvw@mail.gmail.com>
+References: <46ed7fdb.45dc.1587c3e763c.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m13-83.163.com ([220.181.13.83]:26521 "EHLO m13-83.163.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752446AbcKSLAY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 19 Nov 2016 06:00:24 -0500
+Received: from mail-qk0-f172.google.com ([209.85.220.172]:33218 "EHLO
+        mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752997AbcKTBvt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Nov 2016 20:51:49 -0500
+Received: by mail-qk0-f172.google.com with SMTP id x190so311126590qkb.0
+        for <ceph-devel@vger.kernel.org>; Sat, 19 Nov 2016 17:51:49 -0800 (PST)
+In-Reply-To: <46ed7fdb.45dc.1587c3e763c.Coremail.xxhdx1985126@163.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: xxhdx1985126 <xxhdx1985126@163.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-CkhpLCBldmVyeW9uZS4KCgpJJ20gdHJ5aW5nIHRvIGZpeCBhIHByb2JsZW0gaW4gY2VwaCB1c2lu
-ZyBpdHMgY29yZSBmaWxlIGFuZCBnZGIuCmdkYiBzdWNjZXNzZnVsbHkgbG9hZGVkIGRlYnVnIHN5
-bWJvbCBmcm9tIGNlcGgtZGVidWdpbmZvOgoKClJlYWRpbmcgc3ltYm9scyBmcm9tIC91c3IvYmlu
-L2NlcGgtb3NkLi4uUmVhZGluZyBzeW1ib2xzIGZyb20gL3Vzci9saWIvZGVidWcvdXNyL2Jpbi9j
-ZXBoLW9zZC5kZWJ1Zy4uLmRvbmUuCgoKSG93ZXZlciwgaXQgc3RpbGwgY2FuJ3QgZmluZCB0aGUg
-c3ltYm9sIHRhYmxlIHdoZW4gSSB1c2UgImJ0IiB0byB0cmFjZSB0aGUgc3RhY2s6CgoKIzAgwqAw
-eDAwMDAwMDM5M2RhMGY2NWIgaW4gPz8gKCkKTm8gc3ltYm9sIHRhYmxlIGluZm8gYXZhaWxhYmxl
-LgojMSDCoDB4MDAwMDAwMDAwMGE1MTYzNiBpbiBpbnN0YWxsX3N0YW5kYXJkX3NpZ2hhbmRsZXJz
-ICgpIGF0IGdsb2JhbC9zaWduYWxfaGFuZGxlci5jYzoxMjEKTm8gbG9jYWxzLgojMiDCoDB4MDAw
-MDdmYzdhNzdmOWVkMCBpbiA/PyAoKQpObyBzeW1ib2wgdGFibGUgaW5mbyBhdmFpbGFibGUuCiMz
-IMKgMHgwMDAwN2ZjN2E3N2Y5ZTEwIGluID8/ICgpCk5vIHN5bWJvbCB0YWJsZSBpbmZvIGF2YWls
-YWJsZS4KIzQgwqAweDAwMDA3ZmM3YTc3ZjliOTAgaW4gPz8gKCkKTm8gc3ltYm9sIHRhYmxlIGlu
-Zm8gYXZhaWxhYmxlLgojNSDCoDB4MDAwMDdmYzY2ZDMxNDJlMCBpbiA/PyAoKQpObyBzeW1ib2wg
-dGFibGUgaW5mbyBhdmFpbGFibGUuCiM2IMKgMHgwMDAwN2ZjN2ZhYzY0MTAwIGluID8/ICgpCk5v
-IHN5bWJvbCB0YWJsZSBpbmZvIGF2YWlsYWJsZS4KIzcgwqAweDAwMDAwMDM5MDAwMDAwMDAgaW4g
-Pz8gKCkKTm8gc3ltYm9sIHRhYmxlIGluZm8gYXZhaWxhYmxlLgojOCDCoDB4MDAwMDAwMDAwMGE1
-MTE1NSBpbiBTaWduYWxIYW5kbGVyOjp1bnJlZ2lzdGVyX2hhbmRsZXIgKHRoaXM9MHgxMTA1NDQw
-LCBzaWdudW09PHZhbHVlIG9wdGltaXplZCBvdXQ+LCBoYW5kbGVyPTx2YWx1ZSBvcHRpbWl6ZWQg
-b3V0PikgYXQgZ2xvYmFsL3NpZ25hbF9oYW5kbGVyLmNjOjMxNwpObyBsb2NhbHMuCiM5IMKgMHgw
-MDAwMDAzOTNlYWJjYzMzIGluID8/ICgpCk5vIHN5bWJvbCB0YWJsZSBpbmZvIGF2YWlsYWJsZS4K
-IzEwIDB4MDAwMDAwMzkzZWFiY2QyZSBpbiA/PyAoKQpObyBzeW1ib2wgdGFibGUgaW5mbyBhdmFp
-bGFibGUuCgoKV2h5IGlzIHRoaXMgaGFwcGVuaW5nPwoKClBTOiB3aGVuIGdkYiBzdGFydGVkIHJ1
-bm5pbmcsIGl0IHByb21wdGVkIHRoZSBmb2xsb3dpbmcgd2FybmluZzoKCgpCRkQ6IFdhcm5pbmc6
-IC9ob21lL3h1eHVlaGFuL29ubGluZV9wcm9ibGVtcy4yMDE2LTExLTE5LjctMDEvY29yZS1jZXBo
-LW9zZC02LTMyMzM3LTMyMzM3LTE5OTA2LTE0Nzk1MTAwNDkgaXMgdHJ1bmNhdGVkOiBleHBlY3Rl
-ZCBjb3JlIGZpbGUgc2l6ZSA+PSA4MzcyODk5ODQwLCBmb3VuZDogNzQzOTMzNTQyNAoKCkNvdWxk
-IHRoaXMgYmUgdGhlIGNhdXNlIG9mIGdkYiBub3QgZmluZGluZyB0aGUgc3ltYm9sIHRhYmxlPw==
+that maybe the reason, do you have the same problem if there is no such warning?
 
+2016-11-19 19:00 GMT+08:00 xxhdx1985126 <xxhdx1985126@163.com>:
+>
+> Hi, everyone.
+>
+>
+> I'm trying to fix a problem in ceph using its core file and gdb.
+> gdb successfully loaded debug symbol from ceph-debuginfo:
+>
+>
+> Reading symbols from /usr/bin/ceph-osd...Reading symbols from /usr/lib/debug/usr/bin/ceph-osd.debug...done.
+>
+>
+> However, it still can't find the symbol table when I use "bt" to trace the stack:
+>
+>
+> #0  0x000000393da0f65b in ?? ()
+> No symbol table info available.
+> #1  0x0000000000a51636 in install_standard_sighandlers () at global/signal_handler.cc:121
+> No locals.
+> #2  0x00007fc7a77f9ed0 in ?? ()
+> No symbol table info available.
+> #3  0x00007fc7a77f9e10 in ?? ()
+> No symbol table info available.
+> #4  0x00007fc7a77f9b90 in ?? ()
+> No symbol table info available.
+> #5  0x00007fc66d3142e0 in ?? ()
+> No symbol table info available.
+> #6  0x00007fc7fac64100 in ?? ()
+> No symbol table info available.
+> #7  0x0000003900000000 in ?? ()
+> No symbol table info available.
+> #8  0x0000000000a51155 in SignalHandler::unregister_handler (this=0x1105440, signum=<value optimized out>, handler=<value optimized out>) at global/signal_handler.cc:317
+> No locals.
+> #9  0x000000393eabcc33 in ?? ()
+> No symbol table info available.
+> #10 0x000000393eabcd2e in ?? ()
+> No symbol table info available.
+>
+>
+> Why is this happening?
+>
+>
+> PS: when gdb started running, it prompted the following warning:
+>
+>
+> BFD: Warning: /home/xuxuehan/online_problems.2016-11-19.7-01/core-ceph-osd-6-32337-32337-19906-1479510049 is truncated: expected core file size >= 8372899840, found: 7439335424
+>
+>
+> Could this be the cause of gdb not finding the symbol table?
+
+
+
+-- 
+Thank you!
+HuangJun
