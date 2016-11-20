@@ -1,143 +1,109 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: Re: Re: Why gdb can't find symbol table when trying to debug ceph?
-Date: Sun, 20 Nov 2016 15:40:29 +0800
-Message-ID: <CABAwU-aJ9DSBpEA_hB0yCKWJQxjF+-8EXezbJZWeU4XW134exQ@mail.gmail.com>
+From: xxhdx1985126 <xxhdx1985126@163.com>
+Subject: Re:Re: Re: Re: Why gdb can't find symbol table when trying to debug
+ ceph?
+Date: Sun, 20 Nov 2016 18:29:18 +0800 (CST)
+Message-ID: <f91dec5.3fa0.158814870d1.Coremail.xxhdx1985126@163.com>
 References: <46ed7fdb.45dc.1587c3e763c.Coremail.xxhdx1985126@163.com>
  <CABAwU-aLAisvzEPc25H8=dY-TvTgiN7yCkkZWX-f6Tv=fPAvvw@mail.gmail.com>
- <7d40c922.2c59.158809be358.Coremail.xxhdx1985126@163.com> <CABAwU-ZykAV85h6mhCruDc6vOjFXDn3iROYV10kfV0O0vf1eOw@mail.gmail.com>
+ <7d40c922.2c59.158809be358.Coremail.xxhdx1985126@163.com>
+ <CABAwU-ZykAV85h6mhCruDc6vOjFXDn3iROYV10kfV0O0vf1eOw@mail.gmail.com>
  <5af207ce.2d28.15880a4148d.Coremail.xxhdx1985126@163.com>
+ <CABAwU-aJ9DSBpEA_hB0yCKWJQxjF+-8EXezbJZWeU4XW134exQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f180.google.com ([209.85.220.180]:33975 "EHLO
-        mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753099AbcKTHka (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 20 Nov 2016 02:40:30 -0500
-Received: by mail-qk0-f180.google.com with SMTP id q130so315922315qke.1
-        for <ceph-devel@vger.kernel.org>; Sat, 19 Nov 2016 23:40:30 -0800 (PST)
-In-Reply-To: <5af207ce.2d28.15880a4148d.Coremail.xxhdx1985126@163.com>
+Received: from m13-60.163.com ([220.181.13.60]:58625 "EHLO m13-60.163.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753352AbcKTKo1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 20 Nov 2016 05:44:27 -0500
+In-Reply-To: <CABAwU-aJ9DSBpEA_hB0yCKWJQxjF+-8EXezbJZWeU4XW134exQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: xxhdx1985126 <xxhdx1985126@163.com>
+To: huang jun <hjwsm1989@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-For first question, you can reinstall the ceph-debuginfo package
-released with your ceph package.
-for the assert problem, you can create an issue to track this
-http://tracker.ceph.com/projects/ceph/issues
-
-
-2016-11-20 15:29 GMT+08:00 xxhdx1985126 <xxhdx1985126@163.com>:
->
-> No, how to verify it? And do you have any clue what made that assert fail? Thank you
->
->
->
->
->
->
->
->
->
-> At 2016-11-20 15:28:26, "huang jun" <hjwsm1989@gmail.com> wrote:
->>seems like the ceph and ceph-debuginfo package version not match, do
->>you verified it?
->>
->>2016-11-20 15:20 GMT+08:00 xxhdx1985126 <xxhdx1985126@163.com>:
->>> In my test today, the same problem came up even there is no such warning....
->>>
->>> By the way, the problem of ceph that I want to fix is as such: some of my osd can't finish the recovery+backfilling process due to the failure of the following assert:
->>>
->>> 2016-11-19 07:00:49.133814 7fc7a77ff700 -1 error_msg osd/ReplicatedPG.cc: In function 'void ReplicatedPG::wait_for_unreadable_object(const hobject_t&, OpRequestRef)' thread 7fc7a77ff700 time 2016-11-19 07:00:48.914231
->>> osd/ReplicatedPG.cc: 387: FAILED assert(needs_recovery)
->>>
->>>  ceph version 0.94.5-12-g83f56a1 (83f56a1c84e3dbd95a4c394335a7b1dc926dd1c4)
->>>  1: (ReplicatedPG::wait_for_unreadable_object(hobject_t const&, std::tr1::shared_ptr<OpRequest>)+0x3f5) [0x8b5a65]
->>>  2: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>&)+0x5e9) [0x8f0c79]
->>>  3: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&, ThreadPool::TPHandle&)+0x4e3) [0x87fdc3]
->>>  4: (OSD::dequeue_op(boost::intrusive_ptr<PG>, std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x178) [0x66b3f8]
->>>  5: (OSD::ShardedOpWQ::_process(unsigned int, ceph::heartbeat_handle_d*)+0x59e) [0x66f8ee]
->>>  6: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x795) [0xa76d85]
->>>  7: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xa7a610]
->>>  8: /lib64/libpthread.so.0() [0x393da07a51]
->>>  9: (clone()+0x6d) [0x393d6e893d]
->>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
->>>
->>> I'm using ceph-0.94.5 which should be the version "Hammer".
->>> Do you have any clue about what made this assert fail?
->>>
->>>
->>> At 2016-11-20 09:51:47, "huang jun" <hjwsm1989@gmail.com> wrote:
->>>>that maybe the reason, do you have the same problem if there is no such warning?
->>>>
->>>>2016-11-19 19:00 GMT+08:00 xxhdx1985126 <xxhdx1985126@163.com>:
->>>>>
->>>>> Hi, everyone.
->>>>>
->>>>>
->>>>> I'm trying to fix a problem in ceph using its core file and gdb.
->>>>> gdb successfully loaded debug symbol from ceph-debuginfo:
->>>>>
->>>>>
->>>>> Reading symbols from /usr/bin/ceph-osd...Reading symbols from /usr/lib/debug/usr/bin/ceph-osd.debug...done.
->>>>>
->>>>>
->>>>> However, it still can't find the symbol table when I use "bt" to trace the stack:
->>>>>
->>>>>
->>>>> #0  0x000000393da0f65b in ?? ()
->>>>> No symbol table info available.
->>>>> #1  0x0000000000a51636 in install_standard_sighandlers () at global/signal_handler.cc:121
->>>>> No locals.
->>>>> #2  0x00007fc7a77f9ed0 in ?? ()
->>>>> No symbol table info available.
->>>>> #3  0x00007fc7a77f9e10 in ?? ()
->>>>> No symbol table info available.
->>>>> #4  0x00007fc7a77f9b90 in ?? ()
->>>>> No symbol table info available.
->>>>> #5  0x00007fc66d3142e0 in ?? ()
->>>>> No symbol table info available.
->>>>> #6  0x00007fc7fac64100 in ?? ()
->>>>> No symbol table info available.
->>>>> #7  0x0000003900000000 in ?? ()
->>>>> No symbol table info available.
->>>>> #8  0x0000000000a51155 in SignalHandler::unregister_handler (this=0x1105440, signum=<value optimized out>, handler=<value optimized out>) at global/signal_handler.cc:317
->>>>> No locals.
->>>>> #9  0x000000393eabcc33 in ?? ()
->>>>> No symbol table info available.
->>>>> #10 0x000000393eabcd2e in ?? ()
->>>>> No symbol table info available.
->>>>>
->>>>>
->>>>> Why is this happening?
->>>>>
->>>>>
->>>>> PS: when gdb started running, it prompted the following warning:
->>>>>
->>>>>
->>>>> BFD: Warning: /home/xuxuehan/online_problems.2016-11-19.7-01/core-ceph-osd-6-32337-32337-19906-1479510049 is truncated: expected core file size >= 8372899840, found: 7439335424
->>>>>
->>>>>
->>>>> Could this be the cause of gdb not finding the symbol table?
->>>>
->>>>
->>>>
->>>>--
->>>>Thank you!
->>>>HuangJun
->>
->>
->>
->>--
->>Thank you!
->>HuangJun
->
->
->
->
-
-
-
--- 
-Thank you!
-HuangJun
+CgoKSGksIHRoYW5rcyBmb3IgeW91ciBoZWxwLgoKCkkgY2hlY2tlZCB0aGUgdmVyc2lvbiBvZiBi
+b3RoIG15IGNlcGggYW5kIGNlcGgtZGVidWdpbmZvIHBhY2thZ2UgYXJlIHRoZSBzYW1lLiBJcyB0
+aGVyZSBhbnkgb3RoZXIgcG9zc2libGUgY2F1c2U/ClRoYW5rIHlvdTotKQoKCgoKCgoKQXQgMjAx
+Ni0xMS0yMCAxNTo0MDoyOSwgImh1YW5nIGp1biIgPGhqd3NtMTk4OUBnbWFpbC5jb20+IHdyb3Rl
+Ogo+Rm9yIGZpcnN0IHF1ZXN0aW9uLCB5b3UgY2FuIHJlaW5zdGFsbCB0aGUgY2VwaC1kZWJ1Z2lu
+Zm8gcGFja2FnZQo+cmVsZWFzZWQgd2l0aCB5b3VyIGNlcGggcGFja2FnZS4KPmZvciB0aGUgYXNz
+ZXJ0IHByb2JsZW0sIHlvdSBjYW4gY3JlYXRlIGFuIGlzc3VlIHRvIHRyYWNrIHRoaXMKPmh0dHA6
+Ly90cmFja2VyLmNlcGguY29tL3Byb2plY3RzL2NlcGgvaXNzdWVzCj4KPgo+MjAxNi0xMS0yMCAx
+NToyOSBHTVQrMDg6MDAgeHhoZHgxOTg1MTI2IDx4eGhkeDE5ODUxMjZAMTYzLmNvbT46Cj4+Cj4+
+IE5vLCBob3cgdG8gdmVyaWZ5IGl0PyBBbmQgZG8geW91IGhhdmUgYW55IGNsdWUgd2hhdCBtYWRl
+IHRoYXQgYXNzZXJ0IGZhaWw/IFRoYW5rIHlvdQo+Pgo+Pgo+Pgo+Pgo+Pgo+Pgo+Pgo+Pgo+Pgo+
+PiBBdCAyMDE2LTExLTIwIDE1OjI4OjI2LCAiaHVhbmcganVuIiA8aGp3c20xOTg5QGdtYWlsLmNv
+bT4gd3JvdGU6Cj4+PnNlZW1zIGxpa2UgdGhlIGNlcGggYW5kIGNlcGgtZGVidWdpbmZvIHBhY2th
+Z2UgdmVyc2lvbiBub3QgbWF0Y2gsIGRvCj4+PnlvdSB2ZXJpZmllZCBpdD8KPj4+Cj4+PjIwMTYt
+MTEtMjAgMTU6MjAgR01UKzA4OjAwIHh4aGR4MTk4NTEyNiA8eHhoZHgxOTg1MTI2QDE2My5jb20+
+Ogo+Pj4+IEluIG15IHRlc3QgdG9kYXksIHRoZSBzYW1lIHByb2JsZW0gY2FtZSB1cCBldmVuIHRo
+ZXJlIGlzIG5vIHN1Y2ggd2FybmluZy4uLi4KPj4+Pgo+Pj4+IEJ5IHRoZSB3YXksIHRoZSBwcm9i
+bGVtIG9mIGNlcGggdGhhdCBJIHdhbnQgdG8gZml4IGlzIGFzIHN1Y2g6IHNvbWUgb2YgbXkgb3Nk
+IGNhbid0IGZpbmlzaCB0aGUgcmVjb3ZlcnkrYmFja2ZpbGxpbmcgcHJvY2VzcyBkdWUgdG8gdGhl
+IGZhaWx1cmUgb2YgdGhlIGZvbGxvd2luZyBhc3NlcnQ6Cj4+Pj4KPj4+PiAyMDE2LTExLTE5IDA3
+OjAwOjQ5LjEzMzgxNCA3ZmM3YTc3ZmY3MDAgLTEgZXJyb3JfbXNnIG9zZC9SZXBsaWNhdGVkUEcu
+Y2M6IEluIGZ1bmN0aW9uICd2b2lkIFJlcGxpY2F0ZWRQRzo6d2FpdF9mb3JfdW5yZWFkYWJsZV9v
+YmplY3QoY29uc3QgaG9iamVjdF90JiwgT3BSZXF1ZXN0UmVmKScgdGhyZWFkIDdmYzdhNzdmZjcw
+MCB0aW1lIDIwMTYtMTEtMTkgMDc6MDA6NDguOTE0MjMxCj4+Pj4gb3NkL1JlcGxpY2F0ZWRQRy5j
+YzogMzg3OiBGQUlMRUQgYXNzZXJ0KG5lZWRzX3JlY292ZXJ5KQo+Pj4+Cj4+Pj4gIGNlcGggdmVy
+c2lvbiAwLjk0LjUtMTItZzgzZjU2YTEgKDgzZjU2YTFjODRlM2RiZDk1YTRjMzk0MzM1YTdiMWRj
+OTI2ZGQxYzQpCj4+Pj4gIDE6IChSZXBsaWNhdGVkUEc6OndhaXRfZm9yX3VucmVhZGFibGVfb2Jq
+ZWN0KGhvYmplY3RfdCBjb25zdCYsIHN0ZDo6dHIxOjpzaGFyZWRfcHRyPE9wUmVxdWVzdD4pKzB4
+M2Y1KSBbMHg4YjVhNjVdCj4+Pj4gIDI6IChSZXBsaWNhdGVkUEc6OmRvX29wKHN0ZDo6dHIxOjpz
+aGFyZWRfcHRyPE9wUmVxdWVzdD4mKSsweDVlOSkgWzB4OGYwYzc5XQo+Pj4+ICAzOiAoUmVwbGlj
+YXRlZFBHOjpkb19yZXF1ZXN0KHN0ZDo6dHIxOjpzaGFyZWRfcHRyPE9wUmVxdWVzdD4mLCBUaHJl
+YWRQb29sOjpUUEhhbmRsZSYpKzB4NGUzKSBbMHg4N2ZkYzNdCj4+Pj4gIDQ6IChPU0Q6OmRlcXVl
+dWVfb3AoYm9vc3Q6OmludHJ1c2l2ZV9wdHI8UEc+LCBzdGQ6OnRyMTo6c2hhcmVkX3B0cjxPcFJl
+cXVlc3Q+LCBUaHJlYWRQb29sOjpUUEhhbmRsZSYpKzB4MTc4KSBbMHg2NmIzZjhdCj4+Pj4gIDU6
+IChPU0Q6OlNoYXJkZWRPcFdROjpfcHJvY2Vzcyh1bnNpZ25lZCBpbnQsIGNlcGg6OmhlYXJ0YmVh
+dF9oYW5kbGVfZCopKzB4NTllKSBbMHg2NmY4ZWVdCj4+Pj4gIDY6IChTaGFyZGVkVGhyZWFkUG9v
+bDo6c2hhcmRlZHRocmVhZHBvb2xfd29ya2VyKHVuc2lnbmVkIGludCkrMHg3OTUpIFsweGE3NmQ4
+NV0KPj4+PiAgNzogKFNoYXJkZWRUaHJlYWRQb29sOjpXb3JrVGhyZWFkU2hhcmRlZDo6ZW50cnko
+KSsweDEwKSBbMHhhN2E2MTBdCj4+Pj4gIDg6IC9saWI2NC9saWJwdGhyZWFkLnNvLjAoKSBbMHgz
+OTNkYTA3YTUxXQo+Pj4+ICA5OiAoY2xvbmUoKSsweDZkKSBbMHgzOTNkNmU4OTNkXQo+Pj4+ICBO
+T1RFOiBhIGNvcHkgb2YgdGhlIGV4ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4ZWN1dGFi
+bGU+YCBpcyBuZWVkZWQgdG8gaW50ZXJwcmV0IHRoaXMuCj4+Pj4KPj4+PiBJJ20gdXNpbmcgY2Vw
+aC0wLjk0LjUgd2hpY2ggc2hvdWxkIGJlIHRoZSB2ZXJzaW9uICJIYW1tZXIiLgo+Pj4+IERvIHlv
+dSBoYXZlIGFueSBjbHVlIGFib3V0IHdoYXQgbWFkZSB0aGlzIGFzc2VydCBmYWlsPwo+Pj4+Cj4+
+Pj4KPj4+PiBBdCAyMDE2LTExLTIwIDA5OjUxOjQ3LCAiaHVhbmcganVuIiA8aGp3c20xOTg5QGdt
+YWlsLmNvbT4gd3JvdGU6Cj4+Pj4+dGhhdCBtYXliZSB0aGUgcmVhc29uLCBkbyB5b3UgaGF2ZSB0
+aGUgc2FtZSBwcm9ibGVtIGlmIHRoZXJlIGlzIG5vIHN1Y2ggd2FybmluZz8KPj4+Pj4KPj4+Pj4y
+MDE2LTExLTE5IDE5OjAwIEdNVCswODowMCB4eGhkeDE5ODUxMjYgPHh4aGR4MTk4NTEyNkAxNjMu
+Y29tPjoKPj4+Pj4+Cj4+Pj4+PiBIaSwgZXZlcnlvbmUuCj4+Pj4+Pgo+Pj4+Pj4KPj4+Pj4+IEkn
+bSB0cnlpbmcgdG8gZml4IGEgcHJvYmxlbSBpbiBjZXBoIHVzaW5nIGl0cyBjb3JlIGZpbGUgYW5k
+IGdkYi4KPj4+Pj4+IGdkYiBzdWNjZXNzZnVsbHkgbG9hZGVkIGRlYnVnIHN5bWJvbCBmcm9tIGNl
+cGgtZGVidWdpbmZvOgo+Pj4+Pj4KPj4+Pj4+Cj4+Pj4+PiBSZWFkaW5nIHN5bWJvbHMgZnJvbSAv
+dXNyL2Jpbi9jZXBoLW9zZC4uLlJlYWRpbmcgc3ltYm9scyBmcm9tIC91c3IvbGliL2RlYnVnL3Vz
+ci9iaW4vY2VwaC1vc2QuZGVidWcuLi5kb25lLgo+Pj4+Pj4KPj4+Pj4+Cj4+Pj4+PiBIb3dldmVy
+LCBpdCBzdGlsbCBjYW4ndCBmaW5kIHRoZSBzeW1ib2wgdGFibGUgd2hlbiBJIHVzZSAiYnQiIHRv
+IHRyYWNlIHRoZSBzdGFjazoKPj4+Pj4+Cj4+Pj4+Pgo+Pj4+Pj4gIzAgIDB4MDAwMDAwMzkzZGEw
+ZjY1YiBpbiA/PyAoKQo+Pj4+Pj4gTm8gc3ltYm9sIHRhYmxlIGluZm8gYXZhaWxhYmxlLgo+Pj4+
+Pj4gIzEgIDB4MDAwMDAwMDAwMGE1MTYzNiBpbiBpbnN0YWxsX3N0YW5kYXJkX3NpZ2hhbmRsZXJz
+ICgpIGF0IGdsb2JhbC9zaWduYWxfaGFuZGxlci5jYzoxMjEKPj4+Pj4+IE5vIGxvY2Fscy4KPj4+
+Pj4+ICMyICAweDAwMDA3ZmM3YTc3ZjllZDAgaW4gPz8gKCkKPj4+Pj4+IE5vIHN5bWJvbCB0YWJs
+ZSBpbmZvIGF2YWlsYWJsZS4KPj4+Pj4+ICMzICAweDAwMDA3ZmM3YTc3ZjllMTAgaW4gPz8gKCkK
+Pj4+Pj4+IE5vIHN5bWJvbCB0YWJsZSBpbmZvIGF2YWlsYWJsZS4KPj4+Pj4+ICM0ICAweDAwMDA3
+ZmM3YTc3ZjliOTAgaW4gPz8gKCkKPj4+Pj4+IE5vIHN5bWJvbCB0YWJsZSBpbmZvIGF2YWlsYWJs
+ZS4KPj4+Pj4+ICM1ICAweDAwMDA3ZmM2NmQzMTQyZTAgaW4gPz8gKCkKPj4+Pj4+IE5vIHN5bWJv
+bCB0YWJsZSBpbmZvIGF2YWlsYWJsZS4KPj4+Pj4+ICM2ICAweDAwMDA3ZmM3ZmFjNjQxMDAgaW4g
+Pz8gKCkKPj4+Pj4+IE5vIHN5bWJvbCB0YWJsZSBpbmZvIGF2YWlsYWJsZS4KPj4+Pj4+ICM3ICAw
+eDAwMDAwMDM5MDAwMDAwMDAgaW4gPz8gKCkKPj4+Pj4+IE5vIHN5bWJvbCB0YWJsZSBpbmZvIGF2
+YWlsYWJsZS4KPj4+Pj4+ICM4ICAweDAwMDAwMDAwMDBhNTExNTUgaW4gU2lnbmFsSGFuZGxlcjo6
+dW5yZWdpc3Rlcl9oYW5kbGVyICh0aGlzPTB4MTEwNTQ0MCwgc2lnbnVtPTx2YWx1ZSBvcHRpbWl6
+ZWQgb3V0PiwgaGFuZGxlcj08dmFsdWUgb3B0aW1pemVkIG91dD4pIGF0IGdsb2JhbC9zaWduYWxf
+aGFuZGxlci5jYzozMTcKPj4+Pj4+IE5vIGxvY2Fscy4KPj4+Pj4+ICM5ICAweDAwMDAwMDM5M2Vh
+YmNjMzMgaW4gPz8gKCkKPj4+Pj4+IE5vIHN5bWJvbCB0YWJsZSBpbmZvIGF2YWlsYWJsZS4KPj4+
+Pj4+ICMxMCAweDAwMDAwMDM5M2VhYmNkMmUgaW4gPz8gKCkKPj4+Pj4+IE5vIHN5bWJvbCB0YWJs
+ZSBpbmZvIGF2YWlsYWJsZS4KPj4+Pj4+Cj4+Pj4+Pgo+Pj4+Pj4gV2h5IGlzIHRoaXMgaGFwcGVu
+aW5nPwo+Pj4+Pj4KPj4+Pj4+Cj4+Pj4+PiBQUzogd2hlbiBnZGIgc3RhcnRlZCBydW5uaW5nLCBp
+dCBwcm9tcHRlZCB0aGUgZm9sbG93aW5nIHdhcm5pbmc6Cj4+Pj4+Pgo+Pj4+Pj4KPj4+Pj4+IEJG
+RDogV2FybmluZzogL2hvbWUveHV4dWVoYW4vb25saW5lX3Byb2JsZW1zLjIwMTYtMTEtMTkuNy0w
+MS9jb3JlLWNlcGgtb3NkLTYtMzIzMzctMzIzMzctMTk5MDYtMTQ3OTUxMDA0OSBpcyB0cnVuY2F0
+ZWQ6IGV4cGVjdGVkIGNvcmUgZmlsZSBzaXplID49IDgzNzI4OTk4NDAsIGZvdW5kOiA3NDM5MzM1
+NDI0Cj4+Pj4+Pgo+Pj4+Pj4KPj4+Pj4+IENvdWxkIHRoaXMgYmUgdGhlIGNhdXNlIG9mIGdkYiBu
+b3QgZmluZGluZyB0aGUgc3ltYm9sIHRhYmxlPwo+Pj4+Pgo+Pj4+Pgo+Pj4+Pgo+Pj4+Pi0tCj4+
+Pj4+VGhhbmsgeW91IQo+Pj4+Pkh1YW5nSnVuCj4+Pgo+Pj4KPj4+Cj4+Pi0tCj4+PlRoYW5rIHlv
+dSEKPj4+SHVhbmdKdW4KPj4KPj4KPj4KPj4KPgo+Cj4KPi0tIAo+VGhhbmsgeW91IQo+SHVhbmdK
+dW4KCgoKwqA=
