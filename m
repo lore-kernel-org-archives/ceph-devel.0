@@ -1,93 +1,143 @@
-From: xxhdx1985126 <xxhdx1985126@163.com>
-Subject: Re:Re: Re: Why gdb can't find symbol table when trying to debug
- ceph?
-Date: Sun, 20 Nov 2016 15:29:46 +0800 (CST)
-Message-ID: <5af207ce.2d28.15880a4148d.Coremail.xxhdx1985126@163.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: Re: Re: Why gdb can't find symbol table when trying to debug ceph?
+Date: Sun, 20 Nov 2016 15:40:29 +0800
+Message-ID: <CABAwU-aJ9DSBpEA_hB0yCKWJQxjF+-8EXezbJZWeU4XW134exQ@mail.gmail.com>
 References: <46ed7fdb.45dc.1587c3e763c.Coremail.xxhdx1985126@163.com>
  <CABAwU-aLAisvzEPc25H8=dY-TvTgiN7yCkkZWX-f6Tv=fPAvvw@mail.gmail.com>
- <7d40c922.2c59.158809be358.Coremail.xxhdx1985126@163.com>
- <CABAwU-ZykAV85h6mhCruDc6vOjFXDn3iROYV10kfV0O0vf1eOw@mail.gmail.com>
+ <7d40c922.2c59.158809be358.Coremail.xxhdx1985126@163.com> <CABAwU-ZykAV85h6mhCruDc6vOjFXDn3iROYV10kfV0O0vf1eOw@mail.gmail.com>
+ <5af207ce.2d28.15880a4148d.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m13-7.163.com ([220.181.13.7]:22085 "EHLO m13-7.163.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752927AbcKTH3t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 20 Nov 2016 02:29:49 -0500
-In-Reply-To: <CABAwU-ZykAV85h6mhCruDc6vOjFXDn3iROYV10kfV0O0vf1eOw@mail.gmail.com>
+Received: from mail-qk0-f180.google.com ([209.85.220.180]:33975 "EHLO
+        mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753099AbcKTHka (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 20 Nov 2016 02:40:30 -0500
+Received: by mail-qk0-f180.google.com with SMTP id q130so315922315qke.1
+        for <ceph-devel@vger.kernel.org>; Sat, 19 Nov 2016 23:40:30 -0800 (PST)
+In-Reply-To: <5af207ce.2d28.15880a4148d.Coremail.xxhdx1985126@163.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
+To: xxhdx1985126 <xxhdx1985126@163.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Ck5vLCBob3cgdG8gdmVyaWZ5IGl0PyBBbmQgZG8geW91IGhhdmUgYW55IGNsdWUgd2hhdCBtYWRl
-IHRoYXQgYXNzZXJ0IGZhaWw/IFRoYW5rIHlvdQoKCgoKCgoKCgpBdCAyMDE2LTExLTIwIDE1OjI4
-OjI2LCAiaHVhbmcganVuIiA8aGp3c20xOTg5QGdtYWlsLmNvbT4gd3JvdGU6Cj5zZWVtcyBsaWtl
-IHRoZSBjZXBoIGFuZCBjZXBoLWRlYnVnaW5mbyBwYWNrYWdlIHZlcnNpb24gbm90IG1hdGNoLCBk
-bwo+eW91IHZlcmlmaWVkIGl0Pwo+Cj4yMDE2LTExLTIwIDE1OjIwIEdNVCswODowMCB4eGhkeDE5
-ODUxMjYgPHh4aGR4MTk4NTEyNkAxNjMuY29tPjoKPj4gSW4gbXkgdGVzdCB0b2RheSwgdGhlIHNh
-bWUgcHJvYmxlbSBjYW1lIHVwIGV2ZW4gdGhlcmUgaXMgbm8gc3VjaCB3YXJuaW5nLi4uLgo+Pgo+
-PiBCeSB0aGUgd2F5LCB0aGUgcHJvYmxlbSBvZiBjZXBoIHRoYXQgSSB3YW50IHRvIGZpeCBpcyBh
-cyBzdWNoOiBzb21lIG9mIG15IG9zZCBjYW4ndCBmaW5pc2ggdGhlIHJlY292ZXJ5K2JhY2tmaWxs
-aW5nIHByb2Nlc3MgZHVlIHRvIHRoZSBmYWlsdXJlIG9mIHRoZSBmb2xsb3dpbmcgYXNzZXJ0Ogo+
-Pgo+PiAyMDE2LTExLTE5IDA3OjAwOjQ5LjEzMzgxNCA3ZmM3YTc3ZmY3MDAgLTEgZXJyb3JfbXNn
-IG9zZC9SZXBsaWNhdGVkUEcuY2M6IEluIGZ1bmN0aW9uICd2b2lkIFJlcGxpY2F0ZWRQRzo6d2Fp
-dF9mb3JfdW5yZWFkYWJsZV9vYmplY3QoY29uc3QgaG9iamVjdF90JiwgT3BSZXF1ZXN0UmVmKScg
-dGhyZWFkIDdmYzdhNzdmZjcwMCB0aW1lIDIwMTYtMTEtMTkgMDc6MDA6NDguOTE0MjMxCj4+IG9z
-ZC9SZXBsaWNhdGVkUEcuY2M6IDM4NzogRkFJTEVEIGFzc2VydChuZWVkc19yZWNvdmVyeSkKPj4K
-Pj4gIGNlcGggdmVyc2lvbiAwLjk0LjUtMTItZzgzZjU2YTEgKDgzZjU2YTFjODRlM2RiZDk1YTRj
-Mzk0MzM1YTdiMWRjOTI2ZGQxYzQpCj4+ICAxOiAoUmVwbGljYXRlZFBHOjp3YWl0X2Zvcl91bnJl
-YWRhYmxlX29iamVjdChob2JqZWN0X3QgY29uc3QmLCBzdGQ6OnRyMTo6c2hhcmVkX3B0cjxPcFJl
-cXVlc3Q+KSsweDNmNSkgWzB4OGI1YTY1XQo+PiAgMjogKFJlcGxpY2F0ZWRQRzo6ZG9fb3Aoc3Rk
-Ojp0cjE6OnNoYXJlZF9wdHI8T3BSZXF1ZXN0PiYpKzB4NWU5KSBbMHg4ZjBjNzldCj4+ICAzOiAo
-UmVwbGljYXRlZFBHOjpkb19yZXF1ZXN0KHN0ZDo6dHIxOjpzaGFyZWRfcHRyPE9wUmVxdWVzdD4m
-LCBUaHJlYWRQb29sOjpUUEhhbmRsZSYpKzB4NGUzKSBbMHg4N2ZkYzNdCj4+ICA0OiAoT1NEOjpk
-ZXF1ZXVlX29wKGJvb3N0OjppbnRydXNpdmVfcHRyPFBHPiwgc3RkOjp0cjE6OnNoYXJlZF9wdHI8
-T3BSZXF1ZXN0PiwgVGhyZWFkUG9vbDo6VFBIYW5kbGUmKSsweDE3OCkgWzB4NjZiM2Y4XQo+PiAg
-NTogKE9TRDo6U2hhcmRlZE9wV1E6Ol9wcm9jZXNzKHVuc2lnbmVkIGludCwgY2VwaDo6aGVhcnRi
-ZWF0X2hhbmRsZV9kKikrMHg1OWUpIFsweDY2ZjhlZV0KPj4gIDY6IChTaGFyZGVkVGhyZWFkUG9v
-bDo6c2hhcmRlZHRocmVhZHBvb2xfd29ya2VyKHVuc2lnbmVkIGludCkrMHg3OTUpIFsweGE3NmQ4
-NV0KPj4gIDc6IChTaGFyZGVkVGhyZWFkUG9vbDo6V29ya1RocmVhZFNoYXJkZWQ6OmVudHJ5KCkr
-MHgxMCkgWzB4YTdhNjEwXQo+PiAgODogL2xpYjY0L2xpYnB0aHJlYWQuc28uMCgpIFsweDM5M2Rh
-MDdhNTFdCj4+ICA5OiAoY2xvbmUoKSsweDZkKSBbMHgzOTNkNmU4OTNkXQo+PiAgTk9URTogYSBj
-b3B5IG9mIHRoZSBleGVjdXRhYmxlLCBvciBgb2JqZHVtcCAtcmRTIDxleGVjdXRhYmxlPmAgaXMg
-bmVlZGVkIHRvIGludGVycHJldCB0aGlzLgo+Pgo+PiBJJ20gdXNpbmcgY2VwaC0wLjk0LjUgd2hp
-Y2ggc2hvdWxkIGJlIHRoZSB2ZXJzaW9uICJIYW1tZXIiLgo+PiBEbyB5b3UgaGF2ZSBhbnkgY2x1
-ZSBhYm91dCB3aGF0IG1hZGUgdGhpcyBhc3NlcnQgZmFpbD8KPj4KPj4KPj4gQXQgMjAxNi0xMS0y
-MCAwOTo1MTo0NywgImh1YW5nIGp1biIgPGhqd3NtMTk4OUBnbWFpbC5jb20+IHdyb3RlOgo+Pj50
-aGF0IG1heWJlIHRoZSByZWFzb24sIGRvIHlvdSBoYXZlIHRoZSBzYW1lIHByb2JsZW0gaWYgdGhl
-cmUgaXMgbm8gc3VjaCB3YXJuaW5nPwo+Pj4KPj4+MjAxNi0xMS0xOSAxOTowMCBHTVQrMDg6MDAg
-eHhoZHgxOTg1MTI2IDx4eGhkeDE5ODUxMjZAMTYzLmNvbT46Cj4+Pj4KPj4+PiBIaSwgZXZlcnlv
-bmUuCj4+Pj4KPj4+Pgo+Pj4+IEknbSB0cnlpbmcgdG8gZml4IGEgcHJvYmxlbSBpbiBjZXBoIHVz
-aW5nIGl0cyBjb3JlIGZpbGUgYW5kIGdkYi4KPj4+PiBnZGIgc3VjY2Vzc2Z1bGx5IGxvYWRlZCBk
-ZWJ1ZyBzeW1ib2wgZnJvbSBjZXBoLWRlYnVnaW5mbzoKPj4+Pgo+Pj4+Cj4+Pj4gUmVhZGluZyBz
-eW1ib2xzIGZyb20gL3Vzci9iaW4vY2VwaC1vc2QuLi5SZWFkaW5nIHN5bWJvbHMgZnJvbSAvdXNy
-L2xpYi9kZWJ1Zy91c3IvYmluL2NlcGgtb3NkLmRlYnVnLi4uZG9uZS4KPj4+Pgo+Pj4+Cj4+Pj4g
-SG93ZXZlciwgaXQgc3RpbGwgY2FuJ3QgZmluZCB0aGUgc3ltYm9sIHRhYmxlIHdoZW4gSSB1c2Ug
-ImJ0IiB0byB0cmFjZSB0aGUgc3RhY2s6Cj4+Pj4KPj4+Pgo+Pj4+ICMwICAweDAwMDAwMDM5M2Rh
-MGY2NWIgaW4gPz8gKCkKPj4+PiBObyBzeW1ib2wgdGFibGUgaW5mbyBhdmFpbGFibGUuCj4+Pj4g
-IzEgIDB4MDAwMDAwMDAwMGE1MTYzNiBpbiBpbnN0YWxsX3N0YW5kYXJkX3NpZ2hhbmRsZXJzICgp
-IGF0IGdsb2JhbC9zaWduYWxfaGFuZGxlci5jYzoxMjEKPj4+PiBObyBsb2NhbHMuCj4+Pj4gIzIg
-IDB4MDAwMDdmYzdhNzdmOWVkMCBpbiA/PyAoKQo+Pj4+IE5vIHN5bWJvbCB0YWJsZSBpbmZvIGF2
-YWlsYWJsZS4KPj4+PiAjMyAgMHgwMDAwN2ZjN2E3N2Y5ZTEwIGluID8/ICgpCj4+Pj4gTm8gc3lt
-Ym9sIHRhYmxlIGluZm8gYXZhaWxhYmxlLgo+Pj4+ICM0ICAweDAwMDA3ZmM3YTc3ZjliOTAgaW4g
-Pz8gKCkKPj4+PiBObyBzeW1ib2wgdGFibGUgaW5mbyBhdmFpbGFibGUuCj4+Pj4gIzUgIDB4MDAw
-MDdmYzY2ZDMxNDJlMCBpbiA/PyAoKQo+Pj4+IE5vIHN5bWJvbCB0YWJsZSBpbmZvIGF2YWlsYWJs
-ZS4KPj4+PiAjNiAgMHgwMDAwN2ZjN2ZhYzY0MTAwIGluID8/ICgpCj4+Pj4gTm8gc3ltYm9sIHRh
-YmxlIGluZm8gYXZhaWxhYmxlLgo+Pj4+ICM3ICAweDAwMDAwMDM5MDAwMDAwMDAgaW4gPz8gKCkK
-Pj4+PiBObyBzeW1ib2wgdGFibGUgaW5mbyBhdmFpbGFibGUuCj4+Pj4gIzggIDB4MDAwMDAwMDAw
-MGE1MTE1NSBpbiBTaWduYWxIYW5kbGVyOjp1bnJlZ2lzdGVyX2hhbmRsZXIgKHRoaXM9MHgxMTA1
-NDQwLCBzaWdudW09PHZhbHVlIG9wdGltaXplZCBvdXQ+LCBoYW5kbGVyPTx2YWx1ZSBvcHRpbWl6
-ZWQgb3V0PikgYXQgZ2xvYmFsL3NpZ25hbF9oYW5kbGVyLmNjOjMxNwo+Pj4+IE5vIGxvY2Fscy4K
-Pj4+PiAjOSAgMHgwMDAwMDAzOTNlYWJjYzMzIGluID8/ICgpCj4+Pj4gTm8gc3ltYm9sIHRhYmxl
-IGluZm8gYXZhaWxhYmxlLgo+Pj4+ICMxMCAweDAwMDAwMDM5M2VhYmNkMmUgaW4gPz8gKCkKPj4+
-PiBObyBzeW1ib2wgdGFibGUgaW5mbyBhdmFpbGFibGUuCj4+Pj4KPj4+Pgo+Pj4+IFdoeSBpcyB0
-aGlzIGhhcHBlbmluZz8KPj4+Pgo+Pj4+Cj4+Pj4gUFM6IHdoZW4gZ2RiIHN0YXJ0ZWQgcnVubmlu
-ZywgaXQgcHJvbXB0ZWQgdGhlIGZvbGxvd2luZyB3YXJuaW5nOgo+Pj4+Cj4+Pj4KPj4+PiBCRkQ6
-IFdhcm5pbmc6IC9ob21lL3h1eHVlaGFuL29ubGluZV9wcm9ibGVtcy4yMDE2LTExLTE5LjctMDEv
-Y29yZS1jZXBoLW9zZC02LTMyMzM3LTMyMzM3LTE5OTA2LTE0Nzk1MTAwNDkgaXMgdHJ1bmNhdGVk
-OiBleHBlY3RlZCBjb3JlIGZpbGUgc2l6ZSA+PSA4MzcyODk5ODQwLCBmb3VuZDogNzQzOTMzNTQy
-NAo+Pj4+Cj4+Pj4KPj4+PiBDb3VsZCB0aGlzIGJlIHRoZSBjYXVzZSBvZiBnZGIgbm90IGZpbmRp
-bmcgdGhlIHN5bWJvbCB0YWJsZT8KPj4+Cj4+Pgo+Pj4KPj4+LS0KPj4+VGhhbmsgeW91IQo+Pj5I
-dWFuZ0p1bgo+Cj4KPgo+LS0gCj5UaGFuayB5b3UhCj5IdWFuZ0p1bgoKCgrCoA==
+For first question, you can reinstall the ceph-debuginfo package
+released with your ceph package.
+for the assert problem, you can create an issue to track this
+http://tracker.ceph.com/projects/ceph/issues
+
+
+2016-11-20 15:29 GMT+08:00 xxhdx1985126 <xxhdx1985126@163.com>:
+>
+> No, how to verify it? And do you have any clue what made that assert fail? Thank you
+>
+>
+>
+>
+>
+>
+>
+>
+>
+> At 2016-11-20 15:28:26, "huang jun" <hjwsm1989@gmail.com> wrote:
+>>seems like the ceph and ceph-debuginfo package version not match, do
+>>you verified it?
+>>
+>>2016-11-20 15:20 GMT+08:00 xxhdx1985126 <xxhdx1985126@163.com>:
+>>> In my test today, the same problem came up even there is no such warning....
+>>>
+>>> By the way, the problem of ceph that I want to fix is as such: some of my osd can't finish the recovery+backfilling process due to the failure of the following assert:
+>>>
+>>> 2016-11-19 07:00:49.133814 7fc7a77ff700 -1 error_msg osd/ReplicatedPG.cc: In function 'void ReplicatedPG::wait_for_unreadable_object(const hobject_t&, OpRequestRef)' thread 7fc7a77ff700 time 2016-11-19 07:00:48.914231
+>>> osd/ReplicatedPG.cc: 387: FAILED assert(needs_recovery)
+>>>
+>>>  ceph version 0.94.5-12-g83f56a1 (83f56a1c84e3dbd95a4c394335a7b1dc926dd1c4)
+>>>  1: (ReplicatedPG::wait_for_unreadable_object(hobject_t const&, std::tr1::shared_ptr<OpRequest>)+0x3f5) [0x8b5a65]
+>>>  2: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>&)+0x5e9) [0x8f0c79]
+>>>  3: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&, ThreadPool::TPHandle&)+0x4e3) [0x87fdc3]
+>>>  4: (OSD::dequeue_op(boost::intrusive_ptr<PG>, std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x178) [0x66b3f8]
+>>>  5: (OSD::ShardedOpWQ::_process(unsigned int, ceph::heartbeat_handle_d*)+0x59e) [0x66f8ee]
+>>>  6: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x795) [0xa76d85]
+>>>  7: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xa7a610]
+>>>  8: /lib64/libpthread.so.0() [0x393da07a51]
+>>>  9: (clone()+0x6d) [0x393d6e893d]
+>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>>>
+>>> I'm using ceph-0.94.5 which should be the version "Hammer".
+>>> Do you have any clue about what made this assert fail?
+>>>
+>>>
+>>> At 2016-11-20 09:51:47, "huang jun" <hjwsm1989@gmail.com> wrote:
+>>>>that maybe the reason, do you have the same problem if there is no such warning?
+>>>>
+>>>>2016-11-19 19:00 GMT+08:00 xxhdx1985126 <xxhdx1985126@163.com>:
+>>>>>
+>>>>> Hi, everyone.
+>>>>>
+>>>>>
+>>>>> I'm trying to fix a problem in ceph using its core file and gdb.
+>>>>> gdb successfully loaded debug symbol from ceph-debuginfo:
+>>>>>
+>>>>>
+>>>>> Reading symbols from /usr/bin/ceph-osd...Reading symbols from /usr/lib/debug/usr/bin/ceph-osd.debug...done.
+>>>>>
+>>>>>
+>>>>> However, it still can't find the symbol table when I use "bt" to trace the stack:
+>>>>>
+>>>>>
+>>>>> #0  0x000000393da0f65b in ?? ()
+>>>>> No symbol table info available.
+>>>>> #1  0x0000000000a51636 in install_standard_sighandlers () at global/signal_handler.cc:121
+>>>>> No locals.
+>>>>> #2  0x00007fc7a77f9ed0 in ?? ()
+>>>>> No symbol table info available.
+>>>>> #3  0x00007fc7a77f9e10 in ?? ()
+>>>>> No symbol table info available.
+>>>>> #4  0x00007fc7a77f9b90 in ?? ()
+>>>>> No symbol table info available.
+>>>>> #5  0x00007fc66d3142e0 in ?? ()
+>>>>> No symbol table info available.
+>>>>> #6  0x00007fc7fac64100 in ?? ()
+>>>>> No symbol table info available.
+>>>>> #7  0x0000003900000000 in ?? ()
+>>>>> No symbol table info available.
+>>>>> #8  0x0000000000a51155 in SignalHandler::unregister_handler (this=0x1105440, signum=<value optimized out>, handler=<value optimized out>) at global/signal_handler.cc:317
+>>>>> No locals.
+>>>>> #9  0x000000393eabcc33 in ?? ()
+>>>>> No symbol table info available.
+>>>>> #10 0x000000393eabcd2e in ?? ()
+>>>>> No symbol table info available.
+>>>>>
+>>>>>
+>>>>> Why is this happening?
+>>>>>
+>>>>>
+>>>>> PS: when gdb started running, it prompted the following warning:
+>>>>>
+>>>>>
+>>>>> BFD: Warning: /home/xuxuehan/online_problems.2016-11-19.7-01/core-ceph-osd-6-32337-32337-19906-1479510049 is truncated: expected core file size >= 8372899840, found: 7439335424
+>>>>>
+>>>>>
+>>>>> Could this be the cause of gdb not finding the symbol table?
+>>>>
+>>>>
+>>>>
+>>>>--
+>>>>Thank you!
+>>>>HuangJun
+>>
+>>
+>>
+>>--
+>>Thank you!
+>>HuangJun
+>
+>
+>
+>
+
+
+
+-- 
+Thank you!
+HuangJun
