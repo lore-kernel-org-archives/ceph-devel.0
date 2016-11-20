@@ -1,184 +1,45 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: Re: Re: Re: Why gdb can't find symbol table when trying to debug
- ceph?
-Date: Mon, 21 Nov 2016 10:59:05 +1000
-Message-ID: <20161121005905.GB26846@rskikr.localdomain>
-References: <46ed7fdb.45dc.1587c3e763c.Coremail.xxhdx1985126@163.com>
- <CABAwU-aLAisvzEPc25H8=dY-TvTgiN7yCkkZWX-f6Tv=fPAvvw@mail.gmail.com>
- <7d40c922.2c59.158809be358.Coremail.xxhdx1985126@163.com>
- <CABAwU-ZykAV85h6mhCruDc6vOjFXDn3iROYV10kfV0O0vf1eOw@mail.gmail.com>
- <5af207ce.2d28.15880a4148d.Coremail.xxhdx1985126@163.com>
- <CABAwU-aJ9DSBpEA_hB0yCKWJQxjF+-8EXezbJZWeU4XW134exQ@mail.gmail.com>
- <f91dec5.3fa0.158814870d1.Coremail.xxhdx1985126@163.com>
+From: Avner Ben Hanoch <avnerb@mellanox.com>
+Subject: RE: ceph issue
+Date: Sun, 20 Nov 2016 13:21:44 +0000
+Message-ID: <DB3PR05MB0793F9D1BC69A47250F996EDA9B20@DB3PR05MB0793.eurprd05.prod.outlook.com>
+References: <FEC85B105C5F644CA51BDB90657EEA9828425083@ddsm-mbx01.digdes.com>
+ <alpine.DEB.2.11.1611171448450.15311@piezo.us.to>
+ <CACJqLybjnFedWh+TdN4W6u2+VKWBsJAtVi0A8VjbJ2mGX8aZxA@mail.gmail.com>
+ <FEC85B105C5F644CA51BDB90657EEA98284250E8@ddsm-mbx01.digdes.com>
+ <CACJqLyZRDpinsMZtDbM_zZHfi87FzC1HrCP0KRFEgAxgzGpjYQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f49.google.com ([74.125.83.49]:35228 "EHLO
-        mail-pg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751320AbcKUA7N (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 20 Nov 2016 19:59:13 -0500
-Received: by mail-pg0-f49.google.com with SMTP id p66so124319510pga.2
-        for <ceph-devel@vger.kernel.org>; Sun, 20 Nov 2016 16:59:13 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <f91dec5.3fa0.158814870d1.Coremail.xxhdx1985126@163.com>
+Received: from mail-he1eur01on0081.outbound.protection.outlook.com ([104.47.0.81]:17757
+        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751713AbcKUCAs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 20 Nov 2016 21:00:48 -0500
+In-Reply-To: <CACJqLyZRDpinsMZtDbM_zZHfi87FzC1HrCP0KRFEgAxgzGpjYQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: xxhdx1985126 <xxhdx1985126@163.com>
-Cc: huang jun <hjwsm1989@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomai@xsky.com>, Marov Aleksey <Marov.A@raidix.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-
-On Sun, Nov 20, 2016 at 8:29 PM, xxhdx1985126 <xxhdx1985126@163.com> wrote:
->
->
->
-> Hi, thanks for your help.
->
->
-> I checked the version of both my ceph and ceph-debuginfo package are the same. Is there any other possible cause?
-> Thank you:-)
-
-Check the recent thread titled "debug coredump on teuthology" for details of how
-to match a binary with the correct debuginfo via the buildid. A truncated
-coredump could certainly cause this as could not having the debuginfo loaded for
-all of the binaries involved or having the wrong versions. gdb should give you
-clues as to what is wrong and matching binaries and debuginfo by buildid should
-ensure you get the right versions. "info shared" will show you all .so involved.
-
->
->
->
->
->
->
->
-> At 2016-11-20 15:40:29, "huang jun" <hjwsm1989@gmail.com> wrote:
->>For first question, you can reinstall the ceph-debuginfo package
->>released with your ceph package.
->>for the assert problem, you can create an issue to track this
->>http://tracker.ceph.com/projects/ceph/issues
->>
->>
->>2016-11-20 15:29 GMT+08:00 xxhdx1985126 <xxhdx1985126@163.com>:
->>>
->>> No, how to verify it? And do you have any clue what made that assert fail? Thank you
->>>
->>>
->>>
->>>
->>>
->>>
->>>
->>>
->>>
->>> At 2016-11-20 15:28:26, "huang jun" <hjwsm1989@gmail.com> wrote:
->>>>seems like the ceph and ceph-debuginfo package version not match, do
->>>>you verified it?
->>>>
->>>>2016-11-20 15:20 GMT+08:00 xxhdx1985126 <xxhdx1985126@163.com>:
->>>>> In my test today, the same problem came up even there is no such warning....
->>>>>
->>>>> By the way, the problem of ceph that I want to fix is as such: some of my osd can't finish the recovery+backfilling process due to the failure of the following assert:
->>>>>
->>>>> 2016-11-19 07:00:49.133814 7fc7a77ff700 -1 error_msg osd/ReplicatedPG.cc: In function 'void ReplicatedPG::wait_for_unreadable_object(const hobject_t&, OpRequestRef)' thread 7fc7a77ff700 time 2016-11-19 07:00:48.914231
->>>>> osd/ReplicatedPG.cc: 387: FAILED assert(needs_recovery)
->>>>>
->>>>>  ceph version 0.94.5-12-g83f56a1 (83f56a1c84e3dbd95a4c394335a7b1dc926dd1c4)
->>>>>  1: (ReplicatedPG::wait_for_unreadable_object(hobject_t const&, std::tr1::shared_ptr<OpRequest>)+0x3f5) [0x8b5a65]
->>>>>  2: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>&)+0x5e9) [0x8f0c79]
->>>>>  3: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&, ThreadPool::TPHandle&)+0x4e3) [0x87fdc3]
->>>>>  4: (OSD::dequeue_op(boost::intrusive_ptr<PG>, std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x178) [0x66b3f8]
->>>>>  5: (OSD::ShardedOpWQ::_process(unsigned int, ceph::heartbeat_handle_d*)+0x59e) [0x66f8ee]
->>>>>  6: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x795) [0xa76d85]
->>>>>  7: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xa7a610]
->>>>>  8: /lib64/libpthread.so.0() [0x393da07a51]
->>>>>  9: (clone()+0x6d) [0x393d6e893d]
->>>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
->>>>>
->>>>> I'm using ceph-0.94.5 which should be the version "Hammer".
->>>>> Do you have any clue about what made this assert fail?
->>>>>
->>>>>
->>>>> At 2016-11-20 09:51:47, "huang jun" <hjwsm1989@gmail.com> wrote:
->>>>>>that maybe the reason, do you have the same problem if there is no such warning?
->>>>>>
->>>>>>2016-11-19 19:00 GMT+08:00 xxhdx1985126 <xxhdx1985126@163.com>:
->>>>>>>
->>>>>>> Hi, everyone.
->>>>>>>
->>>>>>>
->>>>>>> I'm trying to fix a problem in ceph using its core file and gdb.
->>>>>>> gdb successfully loaded debug symbol from ceph-debuginfo:
->>>>>>>
->>>>>>>
->>>>>>> Reading symbols from /usr/bin/ceph-osd...Reading symbols from /usr/lib/debug/usr/bin/ceph-osd.debug...done.
->>>>>>>
->>>>>>>
->>>>>>> However, it still can't find the symbol table when I use "bt" to trace the stack:
->>>>>>>
->>>>>>>
->>>>>>> #0  0x000000393da0f65b in ?? ()
->>>>>>> No symbol table info available.
->>>>>>> #1  0x0000000000a51636 in install_standard_sighandlers () at global/signal_handler.cc:121
->>>>>>> No locals.
->>>>>>> #2  0x00007fc7a77f9ed0 in ?? ()
->>>>>>> No symbol table info available.
->>>>>>> #3  0x00007fc7a77f9e10 in ?? ()
->>>>>>> No symbol table info available.
->>>>>>> #4  0x00007fc7a77f9b90 in ?? ()
->>>>>>> No symbol table info available.
->>>>>>> #5  0x00007fc66d3142e0 in ?? ()
->>>>>>> No symbol table info available.
->>>>>>> #6  0x00007fc7fac64100 in ?? ()
->>>>>>> No symbol table info available.
->>>>>>> #7  0x0000003900000000 in ?? ()
->>>>>>> No symbol table info available.
->>>>>>> #8  0x0000000000a51155 in SignalHandler::unregister_handler (this=0x1105440, signum=<value optimized out>, handler=<value optimized out>) at global/signal_handler.cc:317
->>>>>>> No locals.
->>>>>>> #9  0x000000393eabcc33 in ?? ()
->>>>>>> No symbol table info available.
->>>>>>> #10 0x000000393eabcd2e in ?? ()
->>>>>>> No symbol table info available.
->>>>>>>
->>>>>>>
->>>>>>> Why is this happening?
->>>>>>>
->>>>>>>
->>>>>>> PS: when gdb started running, it prompted the following warning:
->>>>>>>
->>>>>>>
->>>>>>> BFD: Warning: /home/xuxuehan/online_problems.2016-11-19.7-01/core-ceph-osd-6-32337-32337-19906-1479510049 is truncated: expected core file size >= 8372899840, found: 7439335424
->>>>>>>
->>>>>>>
->>>>>>> Could this be the cause of gdb not finding the symbol table?
->>>>>>
->>>>>>
->>>>>>
->>>>>>--
->>>>>>Thank you!
->>>>>>HuangJun
->>>>
->>>>
->>>>
->>>>--
->>>>Thank you!
->>>>HuangJun
->>>
->>>
->>>
->>>
->>
->>
->>
->>--
->>Thank you!
->>HuangJun
->
->
->
->  
-
-
-
--- 
-Cheers,
-Brad
+VGhpcyBQUiBkb2Vzbid0IGhhdmUgYW55IGVmZmVjdCBvbiB0aGUgYXNzZXJ0aW9uLiAgSSBzdGls
+bCBnZXQgaXQgaW4gc2FtZSBzaXR1YXRpb24NCg0KLS0tDQokIC4vZmlvIC0taW9lbmdpbmU9cmJk
+IC0taW52YWxpZGF0ZT0wIC0tcnc9d3JpdGUgLS1icz0xME0gLS1udW1qb2JzPTEgLS1jbGllbnRu
+YW1lPWFkbWluIC0tcG9vbD1yYmQgLS1pb2RlcHRoPTEyOCAtLXJiZG5hbWU9aW1nMmcgLS1uYW1l
+PTENCjE6IChnPTApOiBydz13cml0ZSwgYnM9MTBNLTEwTS8xME0tMTBNLzEwTS0xME0sIGlvZW5n
+aW5lPXJiZCwgaW9kZXB0aD0xMjgNCmZpby0yLjEzLTkxLWdiNjc4DQpTdGFydGluZyAxIHByb2Nl
+c3MNCnJiZCBlbmdpbmU6IFJCRCB2ZXJzaW9uOiAwLjEuMTENCi9tbnQvZGF0YS9hdm5lcmIvcnBt
+YnVpbGQvQlVJTEQvY2VwaC0xMS4wLjItMTYxMS1nZWIyNTk2NS9zcmMvbG9nL1N1YnN5c3RlbU1h
+cC5oOiBJbiBmdW5jdGlvbiAnYm9vbCBjZXBoOjpsb2dnaW5nOjpTdWJzeXN0ZW1NYXA6OnNob3Vs
+ZF9nYXRoZXIodW5zaWduZWQgaW50LCBpbnQpJyB0aHJlYWQgN2Y3YzdiM2E1NzAwIHRpbWUgMjAx
+Ni0xMS0yMCAxMzoxNzo1Ni4wOTAyODkNCi9tbnQvZGF0YS9hdm5lcmIvcnBtYnVpbGQvQlVJTEQv
+Y2VwaC0xMS4wLjItMTYxMS1nZWIyNTk2NS9zcmMvbG9nL1N1YnN5c3RlbU1hcC5oOiA2MjogRkFJ
+TEVEIGFzc2VydChzdWIgPCBtX3N1YnN5cy5zaXplKCkpDQogY2VwaCB2ZXJzaW9uIDExLjAuMi0x
+NjExLWdlYjI1OTY1IChlYjI1OTY1Yjc0YWExYTAzNzlkMDkxMTY5ZDgwNzg2ZjMwYzcyYThiKQ0K
+LS0tDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogY2VwaC1kZXZlbC1v
+d25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLQ0KPiBvd25lckB2Z2VyLmtl
+cm5lbC5vcmddIE9uIEJlaGFsZiBPZiBIYW9tYWkgV2FuZw0KPiBTdWJqZWN0OiBSZTogY2VwaCBp
+c3N1ZQ0KPiANCj4gc29ycnksIEkgZ290IHRoZSBpc3N1ZS4gSSBzdWJtaXR0ZWQgYQ0KPiBwciho
+dHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMTIwNjgpLiBwbHogdGVzdGVkIHdpdGgg
+dGhpcy4NCg==
