@@ -1,77 +1,81 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: Why gdb can't find symbol table when trying to debug ceph?
-Date: Sun, 20 Nov 2016 09:51:47 +0800
-Message-ID: <CABAwU-aLAisvzEPc25H8=dY-TvTgiN7yCkkZWX-f6Tv=fPAvvw@mail.gmail.com>
+From: xxhdx1985126 <xxhdx1985126@163.com>
+Subject: Re:Re: Why gdb can't find symbol table when trying to debug ceph?
+Date: Sun, 20 Nov 2016 15:20:49 +0800 (CST)
+Message-ID: <7d40c922.2c59.158809be358.Coremail.xxhdx1985126@163.com>
 References: <46ed7fdb.45dc.1587c3e763c.Coremail.xxhdx1985126@163.com>
+ <CABAwU-aLAisvzEPc25H8=dY-TvTgiN7yCkkZWX-f6Tv=fPAvvw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f172.google.com ([209.85.220.172]:33218 "EHLO
-        mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752997AbcKTBvt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 19 Nov 2016 20:51:49 -0500
-Received: by mail-qk0-f172.google.com with SMTP id x190so311126590qkb.0
-        for <ceph-devel@vger.kernel.org>; Sat, 19 Nov 2016 17:51:49 -0800 (PST)
-In-Reply-To: <46ed7fdb.45dc.1587c3e763c.Coremail.xxhdx1985126@163.com>
+Received: from m13-7.163.com ([220.181.13.7]:16569 "EHLO m13-7.163.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750728AbcKTHUw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 20 Nov 2016 02:20:52 -0500
+In-Reply-To: <CABAwU-aLAisvzEPc25H8=dY-TvTgiN7yCkkZWX-f6Tv=fPAvvw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: xxhdx1985126 <xxhdx1985126@163.com>
+To: huang jun <hjwsm1989@gmail.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-that maybe the reason, do you have the same problem if there is no such warning?
-
-2016-11-19 19:00 GMT+08:00 xxhdx1985126 <xxhdx1985126@163.com>:
->
-> Hi, everyone.
->
->
-> I'm trying to fix a problem in ceph using its core file and gdb.
-> gdb successfully loaded debug symbol from ceph-debuginfo:
->
->
-> Reading symbols from /usr/bin/ceph-osd...Reading symbols from /usr/lib/debug/usr/bin/ceph-osd.debug...done.
->
->
-> However, it still can't find the symbol table when I use "bt" to trace the stack:
->
->
-> #0  0x000000393da0f65b in ?? ()
-> No symbol table info available.
-> #1  0x0000000000a51636 in install_standard_sighandlers () at global/signal_handler.cc:121
-> No locals.
-> #2  0x00007fc7a77f9ed0 in ?? ()
-> No symbol table info available.
-> #3  0x00007fc7a77f9e10 in ?? ()
-> No symbol table info available.
-> #4  0x00007fc7a77f9b90 in ?? ()
-> No symbol table info available.
-> #5  0x00007fc66d3142e0 in ?? ()
-> No symbol table info available.
-> #6  0x00007fc7fac64100 in ?? ()
-> No symbol table info available.
-> #7  0x0000003900000000 in ?? ()
-> No symbol table info available.
-> #8  0x0000000000a51155 in SignalHandler::unregister_handler (this=0x1105440, signum=<value optimized out>, handler=<value optimized out>) at global/signal_handler.cc:317
-> No locals.
-> #9  0x000000393eabcc33 in ?? ()
-> No symbol table info available.
-> #10 0x000000393eabcd2e in ?? ()
-> No symbol table info available.
->
->
-> Why is this happening?
->
->
-> PS: when gdb started running, it prompted the following warning:
->
->
-> BFD: Warning: /home/xuxuehan/online_problems.2016-11-19.7-01/core-ceph-osd-6-32337-32337-19906-1479510049 is truncated: expected core file size >= 8372899840, found: 7439335424
->
->
-> Could this be the cause of gdb not finding the symbol table?
-
-
-
--- 
-Thank you!
-HuangJun
+SW4gbXkgdGVzdCB0b2RheSwgdGhlIHNhbWUgcHJvYmxlbSBjYW1lIHVwIGV2ZW4gdGhlcmUgaXMg
+bm8gc3VjaCB3YXJuaW5nLi4uLgoKQnkgdGhlIHdheSwgdGhlIHByb2JsZW0gb2YgY2VwaCB0aGF0
+IEkgd2FudCB0byBmaXggaXMgYXMgc3VjaDogc29tZSBvZiBteSBvc2QgY2FuJ3QgZmluaXNoIHRo
+ZSByZWNvdmVyeStiYWNrZmlsbGluZyBwcm9jZXNzIGR1ZSB0byB0aGUgZmFpbHVyZSBvZiB0aGUg
+Zm9sbG93aW5nIGFzc2VydDoKCjIwMTYtMTEtMTkgMDc6MDA6NDkuMTMzODE0IDdmYzdhNzdmZjcw
+MCAtMSBlcnJvcl9tc2cgb3NkL1JlcGxpY2F0ZWRQRy5jYzogSW4gZnVuY3Rpb24gJ3ZvaWQgUmVw
+bGljYXRlZFBHOjp3YWl0X2Zvcl91bnJlYWRhYmxlX29iamVjdChjb25zdCBob2JqZWN0X3QmLCBP
+cFJlcXVlc3RSZWYpJyB0aHJlYWQgN2ZjN2E3N2ZmNzAwIHRpbWUgMjAxNi0xMS0xOSAwNzowMDo0
+OC45MTQyMzEKb3NkL1JlcGxpY2F0ZWRQRy5jYzogMzg3OiBGQUlMRUQgYXNzZXJ0KG5lZWRzX3Jl
+Y292ZXJ5KQoKIGNlcGggdmVyc2lvbiAwLjk0LjUtMTItZzgzZjU2YTEgKDgzZjU2YTFjODRlM2Ri
+ZDk1YTRjMzk0MzM1YTdiMWRjOTI2ZGQxYzQpCiAxOiAoUmVwbGljYXRlZFBHOjp3YWl0X2Zvcl91
+bnJlYWRhYmxlX29iamVjdChob2JqZWN0X3QgY29uc3QmLCBzdGQ6OnRyMTo6c2hhcmVkX3B0cjxP
+cFJlcXVlc3Q+KSsweDNmNSkgWzB4OGI1YTY1XQogMjogKFJlcGxpY2F0ZWRQRzo6ZG9fb3Aoc3Rk
+Ojp0cjE6OnNoYXJlZF9wdHI8T3BSZXF1ZXN0PiYpKzB4NWU5KSBbMHg4ZjBjNzldCiAzOiAoUmVw
+bGljYXRlZFBHOjpkb19yZXF1ZXN0KHN0ZDo6dHIxOjpzaGFyZWRfcHRyPE9wUmVxdWVzdD4mLCBU
+aHJlYWRQb29sOjpUUEhhbmRsZSYpKzB4NGUzKSBbMHg4N2ZkYzNdCiA0OiAoT1NEOjpkZXF1ZXVl
+X29wKGJvb3N0OjppbnRydXNpdmVfcHRyPFBHPiwgc3RkOjp0cjE6OnNoYXJlZF9wdHI8T3BSZXF1
+ZXN0PiwgVGhyZWFkUG9vbDo6VFBIYW5kbGUmKSsweDE3OCkgWzB4NjZiM2Y4XQogNTogKE9TRDo6
+U2hhcmRlZE9wV1E6Ol9wcm9jZXNzKHVuc2lnbmVkIGludCwgY2VwaDo6aGVhcnRiZWF0X2hhbmRs
+ZV9kKikrMHg1OWUpIFsweDY2ZjhlZV0KIDY6IChTaGFyZGVkVGhyZWFkUG9vbDo6c2hhcmRlZHRo
+cmVhZHBvb2xfd29ya2VyKHVuc2lnbmVkIGludCkrMHg3OTUpIFsweGE3NmQ4NV0KIDc6IChTaGFy
+ZGVkVGhyZWFkUG9vbDo6V29ya1RocmVhZFNoYXJkZWQ6OmVudHJ5KCkrMHgxMCkgWzB4YTdhNjEw
+XQogODogL2xpYjY0L2xpYnB0aHJlYWQuc28uMCgpIFsweDM5M2RhMDdhNTFdCiA5OiAoY2xvbmUo
+KSsweDZkKSBbMHgzOTNkNmU4OTNkXQogTk9URTogYSBjb3B5IG9mIHRoZSBleGVjdXRhYmxlLCBv
+ciBgb2JqZHVtcCAtcmRTIDxleGVjdXRhYmxlPmAgaXMgbmVlZGVkIHRvIGludGVycHJldCB0aGlz
+LgoKSSdtIHVzaW5nIGNlcGgtMC45NC41IHdoaWNoIHNob3VsZCBiZSB0aGUgdmVyc2lvbiAiSGFt
+bWVyIi4KRG8geW91IGhhdmUgYW55IGNsdWUgYWJvdXQgd2hhdCBtYWRlIHRoaXMgYXNzZXJ0IGZh
+aWw/CgoKQXQgMjAxNi0xMS0yMCAwOTo1MTo0NywgImh1YW5nIGp1biIgPGhqd3NtMTk4OUBnbWFp
+bC5jb20+IHdyb3RlOgo+dGhhdCBtYXliZSB0aGUgcmVhc29uLCBkbyB5b3UgaGF2ZSB0aGUgc2Ft
+ZSBwcm9ibGVtIGlmIHRoZXJlIGlzIG5vIHN1Y2ggd2FybmluZz8KPgo+MjAxNi0xMS0xOSAxOTow
+MCBHTVQrMDg6MDAgeHhoZHgxOTg1MTI2IDx4eGhkeDE5ODUxMjZAMTYzLmNvbT46Cj4+Cj4+IEhp
+LCBldmVyeW9uZS4KPj4KPj4KPj4gSSdtIHRyeWluZyB0byBmaXggYSBwcm9ibGVtIGluIGNlcGgg
+dXNpbmcgaXRzIGNvcmUgZmlsZSBhbmQgZ2RiLgo+PiBnZGIgc3VjY2Vzc2Z1bGx5IGxvYWRlZCBk
+ZWJ1ZyBzeW1ib2wgZnJvbSBjZXBoLWRlYnVnaW5mbzoKPj4KPj4KPj4gUmVhZGluZyBzeW1ib2xz
+IGZyb20gL3Vzci9iaW4vY2VwaC1vc2QuLi5SZWFkaW5nIHN5bWJvbHMgZnJvbSAvdXNyL2xpYi9k
+ZWJ1Zy91c3IvYmluL2NlcGgtb3NkLmRlYnVnLi4uZG9uZS4KPj4KPj4KPj4gSG93ZXZlciwgaXQg
+c3RpbGwgY2FuJ3QgZmluZCB0aGUgc3ltYm9sIHRhYmxlIHdoZW4gSSB1c2UgImJ0IiB0byB0cmFj
+ZSB0aGUgc3RhY2s6Cj4+Cj4+Cj4+ICMwICAweDAwMDAwMDM5M2RhMGY2NWIgaW4gPz8gKCkKPj4g
+Tm8gc3ltYm9sIHRhYmxlIGluZm8gYXZhaWxhYmxlLgo+PiAjMSAgMHgwMDAwMDAwMDAwYTUxNjM2
+IGluIGluc3RhbGxfc3RhbmRhcmRfc2lnaGFuZGxlcnMgKCkgYXQgZ2xvYmFsL3NpZ25hbF9oYW5k
+bGVyLmNjOjEyMQo+PiBObyBsb2NhbHMuCj4+ICMyICAweDAwMDA3ZmM3YTc3ZjllZDAgaW4gPz8g
+KCkKPj4gTm8gc3ltYm9sIHRhYmxlIGluZm8gYXZhaWxhYmxlLgo+PiAjMyAgMHgwMDAwN2ZjN2E3
+N2Y5ZTEwIGluID8/ICgpCj4+IE5vIHN5bWJvbCB0YWJsZSBpbmZvIGF2YWlsYWJsZS4KPj4gIzQg
+IDB4MDAwMDdmYzdhNzdmOWI5MCBpbiA/PyAoKQo+PiBObyBzeW1ib2wgdGFibGUgaW5mbyBhdmFp
+bGFibGUuCj4+ICM1ICAweDAwMDA3ZmM2NmQzMTQyZTAgaW4gPz8gKCkKPj4gTm8gc3ltYm9sIHRh
+YmxlIGluZm8gYXZhaWxhYmxlLgo+PiAjNiAgMHgwMDAwN2ZjN2ZhYzY0MTAwIGluID8/ICgpCj4+
+IE5vIHN5bWJvbCB0YWJsZSBpbmZvIGF2YWlsYWJsZS4KPj4gIzcgIDB4MDAwMDAwMzkwMDAwMDAw
+MCBpbiA/PyAoKQo+PiBObyBzeW1ib2wgdGFibGUgaW5mbyBhdmFpbGFibGUuCj4+ICM4ICAweDAw
+MDAwMDAwMDBhNTExNTUgaW4gU2lnbmFsSGFuZGxlcjo6dW5yZWdpc3Rlcl9oYW5kbGVyICh0aGlz
+PTB4MTEwNTQ0MCwgc2lnbnVtPTx2YWx1ZSBvcHRpbWl6ZWQgb3V0PiwgaGFuZGxlcj08dmFsdWUg
+b3B0aW1pemVkIG91dD4pIGF0IGdsb2JhbC9zaWduYWxfaGFuZGxlci5jYzozMTcKPj4gTm8gbG9j
+YWxzLgo+PiAjOSAgMHgwMDAwMDAzOTNlYWJjYzMzIGluID8/ICgpCj4+IE5vIHN5bWJvbCB0YWJs
+ZSBpbmZvIGF2YWlsYWJsZS4KPj4gIzEwIDB4MDAwMDAwMzkzZWFiY2QyZSBpbiA/PyAoKQo+PiBO
+byBzeW1ib2wgdGFibGUgaW5mbyBhdmFpbGFibGUuCj4+Cj4+Cj4+IFdoeSBpcyB0aGlzIGhhcHBl
+bmluZz8KPj4KPj4KPj4gUFM6IHdoZW4gZ2RiIHN0YXJ0ZWQgcnVubmluZywgaXQgcHJvbXB0ZWQg
+dGhlIGZvbGxvd2luZyB3YXJuaW5nOgo+Pgo+Pgo+PiBCRkQ6IFdhcm5pbmc6IC9ob21lL3h1eHVl
+aGFuL29ubGluZV9wcm9ibGVtcy4yMDE2LTExLTE5LjctMDEvY29yZS1jZXBoLW9zZC02LTMyMzM3
+LTMyMzM3LTE5OTA2LTE0Nzk1MTAwNDkgaXMgdHJ1bmNhdGVkOiBleHBlY3RlZCBjb3JlIGZpbGUg
+c2l6ZSA+PSA4MzcyODk5ODQwLCBmb3VuZDogNzQzOTMzNTQyNAo+Pgo+Pgo+PiBDb3VsZCB0aGlz
+IGJlIHRoZSBjYXVzZSBvZiBnZGIgbm90IGZpbmRpbmcgdGhlIHN5bWJvbCB0YWJsZT8KPgo+Cj4K
+Pi0tIAo+VGhhbmsgeW91IQo+SHVhbmdKdW4K
