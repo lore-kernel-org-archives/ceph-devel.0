@@ -1,75 +1,88 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: 0.94.9 assert
-Date: Mon, 21 Nov 2016 16:02:54 +0800
-Message-ID: <CABAwU-Y1GBTHU4ht+FQQjW6hFo7XvLLUnk6dHBxycvYFSoZD2g@mail.gmail.com>
-References: <CAAWNVq9aJ_yPXX4V=8Q8zy-eJ9mVhoKR_hp2pa5ikFGU0oV2wg@mail.gmail.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: ceph issue
+Date: Mon, 21 Nov 2016 18:40:04 +0800
+Message-ID: <CACJqLyaCJdK+G6V3_Cm36PRYrwQCoRZ02MyJCnDudSUmC=O4Tg@mail.gmail.com>
+References: <FEC85B105C5F644CA51BDB90657EEA9828425083@ddsm-mbx01.digdes.com>
+ <alpine.DEB.2.11.1611171448450.15311@piezo.us.to> <CACJqLybjnFedWh+TdN4W6u2+VKWBsJAtVi0A8VjbJ2mGX8aZxA@mail.gmail.com>
+ <FEC85B105C5F644CA51BDB90657EEA98284250E8@ddsm-mbx01.digdes.com>
+ <CACJqLyZRDpinsMZtDbM_zZHfi87FzC1HrCP0KRFEgAxgzGpjYQ@mail.gmail.com> <DB3PR05MB0793F7194A5C64F018E61012A9B20@DB3PR05MB0793.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:35375 "EHLO
-        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752502AbcKUIC4 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Nov 2016 03:02:56 -0500
-Received: by mail-qk0-f173.google.com with SMTP id n204so340507374qke.2
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Nov 2016 00:02:55 -0800 (PST)
-In-Reply-To: <CAAWNVq9aJ_yPXX4V=8Q8zy-eJ9mVhoKR_hp2pa5ikFGU0oV2wg@mail.gmail.com>
+Received: from mail-hk2apc01on0110.outbound.protection.outlook.com ([104.47.124.110]:62784
+        "EHLO APC01-HK2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1753521AbcKUKz4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 21 Nov 2016 05:55:56 -0500
+Received: by mail-vk0-f45.google.com with SMTP id 137so215612048vkl.0
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Nov 2016 02:40:11 -0800 (PST)
+In-Reply-To: <DB3PR05MB0793F7194A5C64F018E61012A9B20@DB3PR05MB0793.eurprd05.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Peter Gervai <grin@grin.hu>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Avner Ben Hanoch <avnerb@mellanox.com>
+Cc: Marov Aleksey <Marov.A@raidix.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-seems like a disk error, you can check your dmesg output,
+@Avner plz try again, I submit a new patch to fix leaks.
 
-2016-11-21 15:33 GMT+08:00 Peter Gervai <grin@grin.hu>:
-> Hello,
+On Sun, Nov 20, 2016 at 10:29 PM, Avner Ben Hanoch <avnerb@mellanox.com> wrote:
+> Perhaps similar fix needed in additional places.
+> See my stack trace below (failed on same assert(sub < m_subsys.size()))
 >
-> This is Hammer(LTS), this may have been already fixed, maybe not, but
-> you have asked me to write to you, so I do.
->
-> osd repeatedly failing (online for 2-3 days), with the same assert:
->
-> 2016-11-21 02:20:26.115902 7f1756cb9700 -1 os/FileStore.cc: In
-> function 'virtual int FileStore::read(coll_t, const ghobject_t&,
-> uint64_t, size_t, ceph::bufferlist&, uint32_t, bool)' thread
-> 7f1756cb9700 time 2016-11-21 02:20:26.039891
-> os/FileStore.cc: 2854: FAILED assert(allow_eio ||
-> !m_filestore_fail_eio || got != -5)
->
->  ceph version 0.94.9 (fe6d859066244b97b24f09d46552afc2071e6f90)
->  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-> const*)+0x76) [0xc0f196]
->  2: (FileStore::read(coll_t, ghobject_t const&, unsigned long,
-> unsigned long, ceph::buffer::list&, unsigned int, bool)+0xcc2)
-> [0x911012]
->  3: (ReplicatedBackend::be_deep_scrub(hobject_t const&, unsigned int,
-> ScrubMap::object&, ThreadPool::TPHandle&)+0x31c) [0xa2268c]
->  4: (PGBackend::be_scan_list(ScrubMap&, std::vector<hobject_t,
-> std::allocator<hobject_t> > const&, bool, unsigned int,
-> ThreadPool::TPHandle&)+0x2ca) [0x8d33fa]
->  5: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t, bool,
-> unsigned int, ThreadPool::TPHandle&)+0x1fa) [0x7dfdda]
->  6: (PG::chunky_scrub(ThreadPool::TPHandle&)+0x3be) [0x7e835e]
->  7: (PG::scrub(ThreadPool::TPHandle&)+0x1d7) [0x7e9a67]
->  8: (OSD::ScrubWQ::_process(PG*, ThreadPool::TPHandle&)+0x19) [0x6b6ab9]
->  9: (ThreadPool::worker(ThreadPool::WorkThread*)+0xa77) [0xbff747]
->  10: (ThreadPool::WorkThread::entry()+0x10) [0xc00810]
->  11: (()+0x80a4) [0x7f17794870a4]
->  12: (clone()+0x6d) [0x7f17779df62d]
->
-> I have the full event log on request. My problem is that I see no
-> other related log (with "perror" for example, as I have briefly seen
-> in the source, though I don't know where was it supposed to go), so I
-> don't know whether it's a disk error, a file format error or else. I
-> try to poke the osd with a 'ceph osd repair', and see what happens.
->
-> Peter
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Thank you!
-HuangJun
+> #0  0x00007fffe55525f7 in __GI_raise (sig=sig@entry=6) at ../nptl/sysdeps/unix/sysv/linux/raise.c:56
+> #1  0x00007fffe5553ce8 in __GI_abort () at abort.c:90
+> #2  0x00007fffe6dbbd47 in ceph::__ceph_assert_fail (assertion=assertion@entry=0x7fffe70599d8 "sub < m_subsys.size()",
+>     file=file@entry=0x7fffe7059688 "/mnt/data/avnerb/rpmbuild/BUILD/ceph-11.0.2-1611-geb25965/src/log/SubsystemMap.h", line=line@entry=62,
+>     func=func@entry=0x7fffe7074040 <_ZZN4ceph7logging12SubsystemMap13should_gatherEjiE19__PRETTY_FUNCTION__> "bool ceph::logging::SubsystemMap::should_gather(unsigned int, int)")
+>     at /usr/src/debug/ceph-11.0.2-1611-geb25965/src/common/assert.cc:78
+> #3  0x00007fffe6cd215a in ceph::logging::SubsystemMap::should_gather (level=10, sub=27, this=<optimized out>) at /usr/src/debug/ceph-11.0.2-1611-geb25965/src/log/SubsystemMap.h:62
+> #4  0x00007fffe6e65865 in should_gather (level=10, sub=27, this=<optimized out>) at /usr/src/debug/ceph-11.0.2-1611-geb25965/src/msg/async/net_handler.cc:180
+> #5  ceph::NetHandler::generic_connect (this=0x86dc18, addr=..., nonblock=nonblock@entry=false) at /usr/src/debug/ceph-11.0.2-1611-geb25965/src/msg/async/net_handler.cc:174
+> #6  0x00007fffe6e65b17 in ceph::NetHandler::connect (this=<optimized out>, addr=...) at /usr/src/debug/ceph-11.0.2-1611-geb25965/src/msg/async/net_handler.cc:198
+> #7  0x00007fffe700105c in RDMAConnectedSocketImpl::try_connect (this=this@entry=0x7fffbc000ef0, peer_addr=..., opts=...) at /usr/src/debug/ceph-11.0.2-1611-geb25965/src/msg/async/rdma/RDMAConnectedSocketImpl.cc:111
+> #8  0x00007fffe6e68ed4 in RDMAWorker::connect (this=0x7fffa806e650, addr=..., opts=..., socket=0x7fffa00235b0) at /usr/src/debug/ceph-11.0.2-1611-geb25965/src/msg/async/rdma/RDMAStack.cc:48
+> #9  0x00007fffe6fee873 in AsyncConnection::_process_connection (this=this@entry=0x7fffa0023450) at /usr/src/debug/ceph-11.0.2-1611-geb25965/src/msg/async/AsyncConnection.cc:864
+> #10 0x00007fffe6ff5148 in AsyncConnection::process (this=0x7fffa0023450) at /usr/src/debug/ceph-11.0.2-1611-geb25965/src/msg/async/AsyncConnection.cc:812
+> #11 0x00007fffe6e5d6ac in EventCenter::process_events (this=this@entry=0x7fffa806e6d0, timeout_microseconds=<optimized out>, timeout_microseconds@entry=30000000)
+>     at /usr/src/debug/ceph-11.0.2-1611-geb25965/src/msg/async/Event.cc:430
+> #12 0x00007fffe6e5fbba in NetworkStack::__lambda1::operator() (__closure=0x7fffa80f5630) at /usr/src/debug/ceph-11.0.2-1611-geb25965/src/msg/async/Stack.cc:47
+> #13 0x00007fffe3e71220 in std::(anonymous namespace)::execute_native_thread_routine (__p=<optimized out>) at ../../../../../libstdc++-v3/src/c++11/thread.cc:84
+> #14 0x00007fffe5ae9dc5 in start_thread (arg=0x7fffcbb93700) at pthread_create.c:308
+> #15 0x00007fffe561321d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:113
+>
+>
+>> -----Original Message-----
+>> From: Avner Ben Hanoch
+>> Sent: Sunday, November 20, 2016 15:22
+>> To: 'Haomai Wang' <haomai@xsky.com>; Marov Aleksey
+>> <Marov.A@raidix.com>
+>> Cc: Sage Weil <sweil@redhat.com>; ceph-devel@vger.kernel.org
+>> Subject: RE: ceph issue
+>>
+>> This PR doesn't have any effect on the assertion.  I still get it in same situation
+>>
+>> ---
+>> $ ./fio --ioengine=rbd --invalidate=0 --rw=write --bs=10M --numjobs=1 --
+>> clientname=admin --pool=rbd --iodepth=128 --rbdname=img2g --name=1
+>> 1: (g=0): rw=write, bs=10M-10M/10M-10M/10M-10M, ioengine=rbd,
+>> iodepth=128
+>> fio-2.13-91-gb678
+>> Starting 1 process
+>> rbd engine: RBD version: 0.1.11
+>> /mnt/data/avnerb/rpmbuild/BUILD/ceph-11.0.2-1611-
+>> geb25965/src/log/SubsystemMap.h: In function 'bool
+>> ceph::logging::SubsystemMap::should_gather(unsigned int, int)' thread
+>> 7f7c7b3a5700 time 2016-11-20 13:17:56.090289
+>> /mnt/data/avnerb/rpmbuild/BUILD/ceph-11.0.2-1611-
+>> geb25965/src/log/SubsystemMap.h: 62: FAILED assert(sub < m_subsys.size())
+>> ceph version 11.0.2-1611-geb25965
+>> (eb25965b74aa1a0379d091169d80786f30c72a8b)
+>> ---
+>>
+>> > -----Original Message-----
+>> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+>> > owner@vger.kernel.org] On Behalf Of Haomai Wang
+>> > Subject: Re: ceph issue
+>> >
+>> > sorry, I got the issue. I submitted a
+>> > pr(https://github.com/ceph/ceph/pull/12068). plz tested with this.
