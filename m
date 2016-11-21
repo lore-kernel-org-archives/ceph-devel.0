@@ -1,191 +1,59 @@
-From: caifeng.zhu@uniswdc.com
-Subject: Re: proposal for fine-grain dout control
-Date: Mon, 21 Nov 2016 11:17:35 +0800
-Message-ID: <20161121031734.GA33595@T530I>
-References: <20161117043223.GA22459@T530I>
- <CAOi1vP94GDwABdfphqWDc2nZ4pp3GFZVXUnhNFgMuc21fpUknA@mail.gmail.com>
+From: Peter Gervai <grin@grin.hu>
+Subject: 0.94.9 assert
+Date: Mon, 21 Nov 2016 08:33:10 +0100
+Message-ID: <CAAWNVq9aJ_yPXX4V=8Q8zy-eJ9mVhoKR_hp2pa5ikFGU0oV2wg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtpbg202.qq.com ([184.105.206.29]:59788 "EHLO smtpbg202.qq.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751995AbcKUDUq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 20 Nov 2016 22:20:46 -0500
-Content-Disposition: inline
-In-Reply-To: <CAOi1vP94GDwABdfphqWDc2nZ4pp3GFZVXUnhNFgMuc21fpUknA@mail.gmail.com>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:35782 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752149AbcKUHdd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Nov 2016 02:33:33 -0500
+Received: by mail-wm0-f41.google.com with SMTP id a197so130204359wmd.0
+        for <ceph-devel@vger.kernel.org>; Sun, 20 Nov 2016 23:33:32 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: caifeng.zhu@uniswdc.com, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Fri, Nov 18, 2016 at 03:04:38PM +0100, Ilya Dryomov wrote:
-> On Thu, Nov 17, 2016 at 5:32 AM,  <caifeng.zhu@uniswdc.com> wrote:
-> > Currently dout control is based on module and trace level.
-> > In practice, we find that it is much easier to control dout
-> > by specifying module, file, function and line, as done by
-> > kernel rbd/cephfs client module. The paragraphs below try to
-> > propose a way to implement similar control at the ceph server
-> > side.
-> >
-> > As the kernel clients, we can define control points (called
-> > doutpoints later) for dout in the macro dout_impl and collect
-> > them into a seperate ELF section, like below:
-> >
-> >  #define dout_impl(cct, sub, v)                                         \
-> >    do {                                                                 \
-> > -  if (cct->_conf->subsys.should_gather(sub, v)) {                      \
-> > +  static doutpoint_t *_dop;                                            \
-> > +  DOUTPOINT(TOSTR(sub), __FILE__, __func__, __LINE__);                 \
-> > +                                                                       \
-> > +  if (cct->_conf->subsys.should_gather(sub, v) ||                      \
-> > +      doutpoint_active(_dop)) {                                        \
-> >
-> > In the above code, DOUTPOINT will define a doutpoint and ask linker
-> > to collect it into an ELF section, such as "set_doutpoint". Instead of
-> > adding __attribute__((section("set_doutpoint"))) to variables, we resort
-> > to inline ASM like below:
-> >
-> > +typedef struct doutpoint {
-> > +       const char *    dop_module;     // module
-> > +       const char *    dop_file;       // file name
-> > +       const char *    dop_func;       // function name
-> > +       int             dop_line;       // line no
-> > +       volatile int    dop_state;      // state 0:off, 1:on
-> > +} doutpoint_t;
-> >
-> > +#define        TOSTR(a)        #a
-> > +#define DOUTPOINT(module, file, func, line)                             \
-> > +do {                                                                    \
-> > +   __asm__(".pushsection set_doutpoint, \"aw\", @progbits" "\n"         \
-> > +           ".align 32"   "\n"                                           \
-> > +           "416:"        "\n"                                           \
-> > +           ".quad %c1"   "\n"                                           \
-> > +           ".quad %c2"   "\n"                                           \
-> > +           ".quad %c3"   "\n"                                           \
-> > +           ".long %c4"   "\n"                                           \
-> > +           ".long 0"     "\n"                                           \
-> > +           ".popsection" "\n"                                           \
-> > +           "leaq 416b(%%rip), %0" "\n"                                  \
-> > +           : "=r"(_dop)                                                 \
-> > +           : "i"(module), "i"(file), "i"(func), "i"(line));             \
-> > +} while(0)
-> >
-> > The reason for inline ASM is that: in C++, there are inline and template
-> > functions. static variables defined in these functions will be automatically
-> > added attributes by the compiler. thus it impossible to collect all doutpoints
-> > into one section.
-> >
-> > There is another problem to consider: collect doutpoints of shared libs into
-> > the main executable. We solve the problem by defining a constructor function
-> > and a weak function. The contructor function will automatically register doupoints
-> > of shared libs into the main executable. The weak function is to be overriden by
-> > the main executable, providing where to register doutponits.
-> >
-> > //
-> > // in common/dout.h
-> > //
-> > +typedef struct doutsection {
-> > +       doutpoint_t *   start;
-> > +       doutpoint_t *   stop;
-> > +} doutsection_t;
-> >
-> > //
-> > // in common/dout.cc
-> > //
-> > +extern doutpoint_t __start_set_doutpoint[]
-> > +       __attribute__((weak, visibility("hidden")));
-> > +extern doutpoint_t __stop_set_doutpoint[]
-> > +       __attribute__((weak, visibility("hidden")));
-> > +
-> > +extern void doutsection_global(doutsection_t **s, int *n)
-> > +       __attribute__((weak));
-> > +
-> > +
-> > +static void
-> > +doutsection_array(doutsection_t **s, int *n)
-> > +{
-> > +       static doutsection_t _sections[10];
-> > +
-> > +       /*
-> > +        * If doutsection_global is defined, provide
-> > +        * from the global one; otherwise, fall back
-> > +        * to local ones.
-> > +        */
-> > +       if (doutsection_global)
-> > +               doutsection_global(s, n);
-> > +       else {
-> > +               *s = _sections;
-> > +               *n = 10;
-> > +       }
-> > +}
-> > +
-> > +/*
-> > + * The 'contructor' attribute means the function will be
-> > + * called after dynamic linking for the library or before
-> > + * entering into main for the executable.
-> > + */
-> > +void __attribute__((constructor))
-> > +doutpoint_register(void)
-> > +{
-> > +       int i, n;
-> > +       doutsection_t *s;
-> > +
-> > +       doutsection_array(&s, &n);
-> > +       for (i = 0; i < n; i++, s++) {
-> > +               if (!s->start) {
-> > +                       s->start = __start_set_doutpoint;
-> > +                       s->stop = __stop_set_doutpoint;
-> > +                       return;
-> > +               }
-> > +       }
-> > +}
-> >
-> > //
-> > // in global/global_init.cc
-> > //
-> > void
-> > doutsection_global(doutsection_t **s, int *n)
-> > {
-> >         static doutsection_t _sections[10];
-> >
-> >         *s = _sections;
-> >         *n = 10;
-> > }
-> >
-> > There are some shortcomings of the proposal: mainly archtecture
-> > dependency and compiler dependency. DOUTPOINT exploits one x86
-> > instruction; weak symbol support may be different on different
-> > compilers.
-> >
-> > Glad and eager to hear your opinions!
-> > If it is useful, I'll post the whole patch.
-> 
-> As someone who has experience with kernel dynamic_debug mechanism,
-> I wish we had a subsystem/level mechanism in the kernel client instead.
-> While sometimes handy, enabling only a few selected douts doesn't come
-> useful that often - more frequently the dout you really need isn't
-> there and you end up fiddling with "perf probe" and others, longing for
-> a good scriptable dynamic tracer.
-> 
-> It looks like you are proposing this as an addition to the existing
-> module/level scheme and not as a replacement though, so it's just an
-> observation...
+Hello,
 
-Yes, the proposal is an improvement, rather than a replacement. 
+This is Hammer(LTS), this may have been already fixed, maybe not, but
+you have asked me to write to you, so I do.
 
-When analyzing a problem, we usually started with gross-grained info. After
-some analysis and study, we can pinpoint the problem. At that time,we need 
-fine-grained info. For the current dout, when pinpointing a problem, usually 
-I'm flooded with too much info. By fine-grained dout control, it is much
-easier to get what I really want.
+osd repeatedly failing (online for 2-3 days), with the same assert:
 
-> 
-> Thanks,
-> 
->                 Ilya
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+2016-11-21 02:20:26.115902 7f1756cb9700 -1 os/FileStore.cc: In
+function 'virtual int FileStore::read(coll_t, const ghobject_t&,
+uint64_t, size_t, ceph::bufferlist&, uint32_t, bool)' thread
+7f1756cb9700 time 2016-11-21 02:20:26.039891
+os/FileStore.cc: 2854: FAILED assert(allow_eio ||
+!m_filestore_fail_eio || got != -5)
 
+ ceph version 0.94.9 (fe6d859066244b97b24f09d46552afc2071e6f90)
+ 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+const*)+0x76) [0xc0f196]
+ 2: (FileStore::read(coll_t, ghobject_t const&, unsigned long,
+unsigned long, ceph::buffer::list&, unsigned int, bool)+0xcc2)
+[0x911012]
+ 3: (ReplicatedBackend::be_deep_scrub(hobject_t const&, unsigned int,
+ScrubMap::object&, ThreadPool::TPHandle&)+0x31c) [0xa2268c]
+ 4: (PGBackend::be_scan_list(ScrubMap&, std::vector<hobject_t,
+std::allocator<hobject_t> > const&, bool, unsigned int,
+ThreadPool::TPHandle&)+0x2ca) [0x8d33fa]
+ 5: (PG::build_scrub_map_chunk(ScrubMap&, hobject_t, hobject_t, bool,
+unsigned int, ThreadPool::TPHandle&)+0x1fa) [0x7dfdda]
+ 6: (PG::chunky_scrub(ThreadPool::TPHandle&)+0x3be) [0x7e835e]
+ 7: (PG::scrub(ThreadPool::TPHandle&)+0x1d7) [0x7e9a67]
+ 8: (OSD::ScrubWQ::_process(PG*, ThreadPool::TPHandle&)+0x19) [0x6b6ab9]
+ 9: (ThreadPool::worker(ThreadPool::WorkThread*)+0xa77) [0xbff747]
+ 10: (ThreadPool::WorkThread::entry()+0x10) [0xc00810]
+ 11: (()+0x80a4) [0x7f17794870a4]
+ 12: (clone()+0x6d) [0x7f17779df62d]
 
+I have the full event log on request. My problem is that I see no
+other related log (with "perror" for example, as I have briefly seen
+in the source, though I don't know where was it supposed to go), so I
+don't know whether it's a disk error, a file format error or else. I
+try to poke the osd with a 'ceph osd repair', and see what happens.
+
+Peter
