@@ -1,54 +1,31 @@
 From: caifeng.zhu@uniswdc.com
 Subject: Re: proposal for fine-grain dout control
-Date: Mon, 21 Nov 2016 10:55:13 +0800
-Message-ID: <20161121025513.GA33465@T530I>
+Date: Mon, 21 Nov 2016 11:17:35 +0800
+Message-ID: <20161121031734.GA33595@T530I>
 References: <20161117043223.GA22459@T530I>
- <CALe9h7eQsr9mq_A6Rc62y3hhPKWfSWPO6Tny26eR+iDgfhUrGw@mail.gmail.com>
+ <CAOi1vP94GDwABdfphqWDc2nZ4pp3GFZVXUnhNFgMuc21fpUknA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtpbgbr2.qq.com ([54.207.22.56]:33033 "EHLO smtpbgbr2.qq.com"
+Received: from smtpbg202.qq.com ([184.105.206.29]:59788 "EHLO smtpbg202.qq.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751428AbcKUC60 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 20 Nov 2016 21:58:26 -0500
+        id S1751995AbcKUDUq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 20 Nov 2016 22:20:46 -0500
 Content-Disposition: inline
-In-Reply-To: <CALe9h7eQsr9mq_A6Rc62y3hhPKWfSWPO6Tny26eR+iDgfhUrGw@mail.gmail.com>
+In-Reply-To: <CAOi1vP94GDwABdfphqWDc2nZ4pp3GFZVXUnhNFgMuc21fpUknA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
+To: Ilya Dryomov <idryomov@gmail.com>
 Cc: caifeng.zhu@uniswdc.com, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Nov 18, 2016 at 02:14:09PM +0000, John Spray wrote:
-> On Thu, Nov 17, 2016 at 4:32 AM,  <caifeng.zhu@uniswdc.com> wrote:
+On Fri, Nov 18, 2016 at 03:04:38PM +0100, Ilya Dryomov wrote:
+> On Thu, Nov 17, 2016 at 5:32 AM,  <caifeng.zhu@uniswdc.com> wrote:
 > > Currently dout control is based on module and trace level.
 > > In practice, we find that it is much easier to control dout
 > > by specifying module, file, function and line, as done by
 > > kernel rbd/cephfs client module. The paragraphs below try to
 > > propose a way to implement similar control at the ceph server
 > > side.
-> 
-> Are you aware of the existing LTTng tracepoint support in Ceph?  Can
-> you talk about why you want to do fine-grained dout control instead of
-> using LTTng for this?
-> 
-> John
-
-Our goals for fine-grained dout control are to 
-1 provide a builtin tracing mechanism to help analyze and pinpoint 
-  problems from both lab and field.
-
-2 be compatabile with existent dout traces, and so can utilize current 
-  traces with no code change and grow with newly added dout traces, 
-  imposing no burden on developers.
-
-Yes, I know LTTng tracepoints already in Ceph. Usually, traceponits are 
-intended to cover important strategic points in the source code; they are 
-not intented for general or corner source points where bugs usually hide. 
-Thus there are much fewer tracepoints than dout traces. Also, in field, 
-we may don't have the luxury of lttng to trace a problem occuring once in 
-hours or days.
-
-> 
 > >
 > > As the kernel clients, we can define control points (called
 > > doutpoints later) for dout in the macro dout_impl and collect
@@ -182,12 +159,30 @@ hours or days.
 > >
 > > Glad and eager to hear your opinions!
 > > If it is useful, I'll post the whole patch.
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> As someone who has experience with kernel dynamic_debug mechanism,
+> I wish we had a subsystem/level mechanism in the kernel client instead.
+> While sometimes handy, enabling only a few selected douts doesn't come
+> useful that often - more frequently the dout you really need isn't
+> there and you end up fiddling with "perf probe" and others, longing for
+> a good scriptable dynamic tracer.
+> 
+> It looks like you are proposing this as an addition to the existing
+> module/level scheme and not as a replacement though, so it's just an
+> observation...
+
+Yes, the proposal is an improvement, rather than a replacement. 
+
+When analyzing a problem, we usually started with gross-grained info. After
+some analysis and study, we can pinpoint the problem. At that time,we need 
+fine-grained info. For the current dout, when pinpointing a problem, usually 
+I'm flooded with too much info. By fine-grained dout control, it is much
+easier to get what I really want.
+
+> 
+> Thanks,
+> 
+>                 Ilya
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
