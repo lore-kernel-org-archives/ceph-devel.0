@@ -1,101 +1,196 @@
-From: Avner Ben Hanoch <avnerb@mellanox.com>
-Subject: RE: ceph issue
-Date: Sun, 20 Nov 2016 14:29:39 +0000
-Message-ID: <DB3PR05MB0793F7194A5C64F018E61012A9B20@DB3PR05MB0793.eurprd05.prod.outlook.com>
-References: <FEC85B105C5F644CA51BDB90657EEA9828425083@ddsm-mbx01.digdes.com>
- <alpine.DEB.2.11.1611171448450.15311@piezo.us.to>
- <CACJqLybjnFedWh+TdN4W6u2+VKWBsJAtVi0A8VjbJ2mGX8aZxA@mail.gmail.com>
- <FEC85B105C5F644CA51BDB90657EEA98284250E8@ddsm-mbx01.digdes.com>
- <CACJqLyZRDpinsMZtDbM_zZHfi87FzC1HrCP0KRFEgAxgzGpjYQ@mail.gmail.com>
+From: caifeng.zhu@uniswdc.com
+Subject: Re: proposal for fine-grain dout control
+Date: Mon, 21 Nov 2016 10:55:13 +0800
+Message-ID: <20161121025513.GA33465@T530I>
+References: <20161117043223.GA22459@T530I>
+ <CALe9h7eQsr9mq_A6Rc62y3hhPKWfSWPO6Tny26eR+iDgfhUrGw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-db5eur01on0073.outbound.protection.outlook.com ([104.47.2.73]:65168
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752228AbcKUCCM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 20 Nov 2016 21:02:12 -0500
-Content-Language: en-US
+Received: from smtpbgbr2.qq.com ([54.207.22.56]:33033 "EHLO smtpbgbr2.qq.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751428AbcKUC60 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 20 Nov 2016 21:58:26 -0500
+Content-Disposition: inline
+In-Reply-To: <CALe9h7eQsr9mq_A6Rc62y3hhPKWfSWPO6Tny26eR+iDgfhUrGw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>, Marov Aleksey <Marov.A@raidix.com>
-Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: caifeng.zhu@uniswdc.com, Ceph Development <ceph-devel@vger.kernel.org>
 
-UGVyaGFwcyBzaW1pbGFyIGZpeCBuZWVkZWQgaW4gYWRkaXRpb25hbCBwbGFjZXMuDQpTZWUgbXkg
-c3RhY2sgdHJhY2UgYmVsb3cgKGZhaWxlZCBvbiBzYW1lIGFzc2VydChzdWIgPCBtX3N1YnN5cy5z
-aXplKCkpKQ0KDQotLQ0KIzAgIDB4MDAwMDdmZmZlNTU1MjVmNyBpbiBfX0dJX3JhaXNlIChzaWc9
-c2lnQGVudHJ5PTYpIGF0IC4uL25wdGwvc3lzZGVwcy91bml4L3N5c3YvbGludXgvcmFpc2UuYzo1
-Ng0KIzEgIDB4MDAwMDdmZmZlNTU1M2NlOCBpbiBfX0dJX2Fib3J0ICgpIGF0IGFib3J0LmM6OTAN
-CiMyICAweDAwMDA3ZmZmZTZkYmJkNDcgaW4gY2VwaDo6X19jZXBoX2Fzc2VydF9mYWlsIChhc3Nl
-cnRpb249YXNzZXJ0aW9uQGVudHJ5PTB4N2ZmZmU3MDU5OWQ4ICJzdWIgPCBtX3N1YnN5cy5zaXpl
-KCkiLA0KICAgIGZpbGU9ZmlsZUBlbnRyeT0weDdmZmZlNzA1OTY4OCAiL21udC9kYXRhL2F2bmVy
-Yi9ycG1idWlsZC9CVUlMRC9jZXBoLTExLjAuMi0xNjExLWdlYjI1OTY1L3NyYy9sb2cvU3Vic3lz
-dGVtTWFwLmgiLCBsaW5lPWxpbmVAZW50cnk9NjIsDQogICAgZnVuYz1mdW5jQGVudHJ5PTB4N2Zm
-ZmU3MDc0MDQwIDxfWlpONGNlcGg3bG9nZ2luZzEyU3Vic3lzdGVtTWFwMTNzaG91bGRfZ2F0aGVy
-RWppRTE5X19QUkVUVFlfRlVOQ1RJT05fXz4gImJvb2wgY2VwaDo6bG9nZ2luZzo6U3Vic3lzdGVt
-TWFwOjpzaG91bGRfZ2F0aGVyKHVuc2lnbmVkIGludCwgaW50KSIpDQogICAgYXQgL3Vzci9zcmMv
-ZGVidWcvY2VwaC0xMS4wLjItMTYxMS1nZWIyNTk2NS9zcmMvY29tbW9uL2Fzc2VydC5jYzo3OA0K
-IzMgIDB4MDAwMDdmZmZlNmNkMjE1YSBpbiBjZXBoOjpsb2dnaW5nOjpTdWJzeXN0ZW1NYXA6OnNo
-b3VsZF9nYXRoZXIgKGxldmVsPTEwLCBzdWI9MjcsIHRoaXM9PG9wdGltaXplZCBvdXQ+KSBhdCAv
-dXNyL3NyYy9kZWJ1Zy9jZXBoLTExLjAuMi0xNjExLWdlYjI1OTY1L3NyYy9sb2cvU3Vic3lzdGVt
-TWFwLmg6NjINCiM0ICAweDAwMDA3ZmZmZTZlNjU4NjUgaW4gc2hvdWxkX2dhdGhlciAobGV2ZWw9
-MTAsIHN1Yj0yNywgdGhpcz08b3B0aW1pemVkIG91dD4pIGF0IC91c3Ivc3JjL2RlYnVnL2NlcGgt
-MTEuMC4yLTE2MTEtZ2ViMjU5NjUvc3JjL21zZy9hc3luYy9uZXRfaGFuZGxlci5jYzoxODANCiM1
-ICBjZXBoOjpOZXRIYW5kbGVyOjpnZW5lcmljX2Nvbm5lY3QgKHRoaXM9MHg4NmRjMTgsIGFkZHI9
-Li4uLCBub25ibG9jaz1ub25ibG9ja0BlbnRyeT1mYWxzZSkgYXQgL3Vzci9zcmMvZGVidWcvY2Vw
-aC0xMS4wLjItMTYxMS1nZWIyNTk2NS9zcmMvbXNnL2FzeW5jL25ldF9oYW5kbGVyLmNjOjE3NA0K
-IzYgIDB4MDAwMDdmZmZlNmU2NWIxNyBpbiBjZXBoOjpOZXRIYW5kbGVyOjpjb25uZWN0ICh0aGlz
-PTxvcHRpbWl6ZWQgb3V0PiwgYWRkcj0uLi4pIGF0IC91c3Ivc3JjL2RlYnVnL2NlcGgtMTEuMC4y
-LTE2MTEtZ2ViMjU5NjUvc3JjL21zZy9hc3luYy9uZXRfaGFuZGxlci5jYzoxOTgNCiM3ICAweDAw
-MDA3ZmZmZTcwMDEwNWMgaW4gUkRNQUNvbm5lY3RlZFNvY2tldEltcGw6OnRyeV9jb25uZWN0ICh0
-aGlzPXRoaXNAZW50cnk9MHg3ZmZmYmMwMDBlZjAsIHBlZXJfYWRkcj0uLi4sIG9wdHM9Li4uKSBh
-dCAvdXNyL3NyYy9kZWJ1Zy9jZXBoLTExLjAuMi0xNjExLWdlYjI1OTY1L3NyYy9tc2cvYXN5bmMv
-cmRtYS9SRE1BQ29ubmVjdGVkU29ja2V0SW1wbC5jYzoxMTENCiM4ICAweDAwMDA3ZmZmZTZlNjhl
-ZDQgaW4gUkRNQVdvcmtlcjo6Y29ubmVjdCAodGhpcz0weDdmZmZhODA2ZTY1MCwgYWRkcj0uLi4s
-IG9wdHM9Li4uLCBzb2NrZXQ9MHg3ZmZmYTAwMjM1YjApIGF0IC91c3Ivc3JjL2RlYnVnL2NlcGgt
-MTEuMC4yLTE2MTEtZ2ViMjU5NjUvc3JjL21zZy9hc3luYy9yZG1hL1JETUFTdGFjay5jYzo0OA0K
-IzkgIDB4MDAwMDdmZmZlNmZlZTg3MyBpbiBBc3luY0Nvbm5lY3Rpb246Ol9wcm9jZXNzX2Nvbm5l
-Y3Rpb24gKHRoaXM9dGhpc0BlbnRyeT0weDdmZmZhMDAyMzQ1MCkgYXQgL3Vzci9zcmMvZGVidWcv
-Y2VwaC0xMS4wLjItMTYxMS1nZWIyNTk2NS9zcmMvbXNnL2FzeW5jL0FzeW5jQ29ubmVjdGlvbi5j
-Yzo4NjQNCiMxMCAweDAwMDA3ZmZmZTZmZjUxNDggaW4gQXN5bmNDb25uZWN0aW9uOjpwcm9jZXNz
-ICh0aGlzPTB4N2ZmZmEwMDIzNDUwKSBhdCAvdXNyL3NyYy9kZWJ1Zy9jZXBoLTExLjAuMi0xNjEx
-LWdlYjI1OTY1L3NyYy9tc2cvYXN5bmMvQXN5bmNDb25uZWN0aW9uLmNjOjgxMg0KIzExIDB4MDAw
-MDdmZmZlNmU1ZDZhYyBpbiBFdmVudENlbnRlcjo6cHJvY2Vzc19ldmVudHMgKHRoaXM9dGhpc0Bl
-bnRyeT0weDdmZmZhODA2ZTZkMCwgdGltZW91dF9taWNyb3NlY29uZHM9PG9wdGltaXplZCBvdXQ+
-LCB0aW1lb3V0X21pY3Jvc2Vjb25kc0BlbnRyeT0zMDAwMDAwMCkNCiAgICBhdCAvdXNyL3NyYy9k
-ZWJ1Zy9jZXBoLTExLjAuMi0xNjExLWdlYjI1OTY1L3NyYy9tc2cvYXN5bmMvRXZlbnQuY2M6NDMw
-DQojMTIgMHgwMDAwN2ZmZmU2ZTVmYmJhIGluIE5ldHdvcmtTdGFjazo6X19sYW1iZGExOjpvcGVy
-YXRvcigpIChfX2Nsb3N1cmU9MHg3ZmZmYTgwZjU2MzApIGF0IC91c3Ivc3JjL2RlYnVnL2NlcGgt
-MTEuMC4yLTE2MTEtZ2ViMjU5NjUvc3JjL21zZy9hc3luYy9TdGFjay5jYzo0Nw0KIzEzIDB4MDAw
-MDdmZmZlM2U3MTIyMCBpbiBzdGQ6Oihhbm9ueW1vdXMgbmFtZXNwYWNlKTo6ZXhlY3V0ZV9uYXRp
-dmVfdGhyZWFkX3JvdXRpbmUgKF9fcD08b3B0aW1pemVkIG91dD4pIGF0IC4uLy4uLy4uLy4uLy4u
-L2xpYnN0ZGMrKy12My9zcmMvYysrMTEvdGhyZWFkLmNjOjg0DQojMTQgMHgwMDAwN2ZmZmU1YWU5
-ZGM1IGluIHN0YXJ0X3RocmVhZCAoYXJnPTB4N2ZmZmNiYjkzNzAwKSBhdCBwdGhyZWFkX2NyZWF0
-ZS5jOjMwOA0KIzE1IDB4MDAwMDdmZmZlNTYxMzIxZCBpbiBjbG9uZSAoKSBhdCAuLi9zeXNkZXBz
-L3VuaXgvc3lzdi9saW51eC94ODZfNjQvY2xvbmUuUzoxMTMgDQoNCg0KPiAtLS0tLU9yaWdpbmFs
-IE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBdm5lciBCZW4gSGFub2NoDQo+IFNlbnQ6IFN1bmRheSwg
-Tm92ZW1iZXIgMjAsIDIwMTYgMTU6MjINCj4gVG86ICdIYW9tYWkgV2FuZycgPGhhb21haUB4c2t5
-LmNvbT47IE1hcm92IEFsZWtzZXkNCj4gPE1hcm92LkFAcmFpZGl4LmNvbT4NCj4gQ2M6IFNhZ2Ug
-V2VpbCA8c3dlaWxAcmVkaGF0LmNvbT47IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1
-YmplY3Q6IFJFOiBjZXBoIGlzc3VlDQo+IA0KPiBUaGlzIFBSIGRvZXNuJ3QgaGF2ZSBhbnkgZWZm
-ZWN0IG9uIHRoZSBhc3NlcnRpb24uICBJIHN0aWxsIGdldCBpdCBpbiBzYW1lIHNpdHVhdGlvbg0K
-PiANCj4gLS0tDQo+ICQgLi9maW8gLS1pb2VuZ2luZT1yYmQgLS1pbnZhbGlkYXRlPTAgLS1ydz13
-cml0ZSAtLWJzPTEwTSAtLW51bWpvYnM9MSAtLQ0KPiBjbGllbnRuYW1lPWFkbWluIC0tcG9vbD1y
-YmQgLS1pb2RlcHRoPTEyOCAtLXJiZG5hbWU9aW1nMmcgLS1uYW1lPTENCj4gMTogKGc9MCk6IHJ3
-PXdyaXRlLCBicz0xME0tMTBNLzEwTS0xME0vMTBNLTEwTSwgaW9lbmdpbmU9cmJkLA0KPiBpb2Rl
-cHRoPTEyOA0KPiBmaW8tMi4xMy05MS1nYjY3OA0KPiBTdGFydGluZyAxIHByb2Nlc3MNCj4gcmJk
-IGVuZ2luZTogUkJEIHZlcnNpb246IDAuMS4xMQ0KPiAvbW50L2RhdGEvYXZuZXJiL3JwbWJ1aWxk
-L0JVSUxEL2NlcGgtMTEuMC4yLTE2MTEtDQo+IGdlYjI1OTY1L3NyYy9sb2cvU3Vic3lzdGVtTWFw
-Lmg6IEluIGZ1bmN0aW9uICdib29sDQo+IGNlcGg6OmxvZ2dpbmc6OlN1YnN5c3RlbU1hcDo6c2hv
-dWxkX2dhdGhlcih1bnNpZ25lZCBpbnQsIGludCknIHRocmVhZA0KPiA3ZjdjN2IzYTU3MDAgdGlt
-ZSAyMDE2LTExLTIwIDEzOjE3OjU2LjA5MDI4OQ0KPiAvbW50L2RhdGEvYXZuZXJiL3JwbWJ1aWxk
-L0JVSUxEL2NlcGgtMTEuMC4yLTE2MTEtDQo+IGdlYjI1OTY1L3NyYy9sb2cvU3Vic3lzdGVtTWFw
-Lmg6IDYyOiBGQUlMRUQgYXNzZXJ0KHN1YiA8IG1fc3Vic3lzLnNpemUoKSkNCj4gY2VwaCB2ZXJz
-aW9uIDExLjAuMi0xNjExLWdlYjI1OTY1DQo+IChlYjI1OTY1Yjc0YWExYTAzNzlkMDkxMTY5ZDgw
-Nzg2ZjMwYzcyYThiKQ0KPiAtLS0NCj4gDQo+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
-Cj4gPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgt
-ZGV2ZWwtDQo+ID4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgSGFvbWFpIFdh
-bmcNCj4gPiBTdWJqZWN0OiBSZTogY2VwaCBpc3N1ZQ0KPiA+DQo+ID4gc29ycnksIEkgZ290IHRo
-ZSBpc3N1ZS4gSSBzdWJtaXR0ZWQgYQ0KPiA+IHByKGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2Nl
-cGgvcHVsbC8xMjA2OCkuIHBseiB0ZXN0ZWQgd2l0aCB0aGlzLg0K
+On Fri, Nov 18, 2016 at 02:14:09PM +0000, John Spray wrote:
+> On Thu, Nov 17, 2016 at 4:32 AM,  <caifeng.zhu@uniswdc.com> wrote:
+> > Currently dout control is based on module and trace level.
+> > In practice, we find that it is much easier to control dout
+> > by specifying module, file, function and line, as done by
+> > kernel rbd/cephfs client module. The paragraphs below try to
+> > propose a way to implement similar control at the ceph server
+> > side.
+> 
+> Are you aware of the existing LTTng tracepoint support in Ceph?  Can
+> you talk about why you want to do fine-grained dout control instead of
+> using LTTng for this?
+> 
+> John
+
+Our goals for fine-grained dout control are to 
+1 provide a builtin tracing mechanism to help analyze and pinpoint 
+  problems from both lab and field.
+
+2 be compatabile with existent dout traces, and so can utilize current 
+  traces with no code change and grow with newly added dout traces, 
+  imposing no burden on developers.
+
+Yes, I know LTTng tracepoints already in Ceph. Usually, traceponits are 
+intended to cover important strategic points in the source code; they are 
+not intented for general or corner source points where bugs usually hide. 
+Thus there are much fewer tracepoints than dout traces. Also, in field, 
+we may don't have the luxury of lttng to trace a problem occuring once in 
+hours or days.
+
+> 
+> >
+> > As the kernel clients, we can define control points (called
+> > doutpoints later) for dout in the macro dout_impl and collect
+> > them into a seperate ELF section, like below:
+> >
+> >  #define dout_impl(cct, sub, v)                                         \
+> >    do {                                                                 \
+> > -  if (cct->_conf->subsys.should_gather(sub, v)) {                      \
+> > +  static doutpoint_t *_dop;                                            \
+> > +  DOUTPOINT(TOSTR(sub), __FILE__, __func__, __LINE__);                 \
+> > +                                                                       \
+> > +  if (cct->_conf->subsys.should_gather(sub, v) ||                      \
+> > +      doutpoint_active(_dop)) {                                        \
+> >
+> > In the above code, DOUTPOINT will define a doutpoint and ask linker
+> > to collect it into an ELF section, such as "set_doutpoint". Instead of
+> > adding __attribute__((section("set_doutpoint"))) to variables, we resort
+> > to inline ASM like below:
+> >
+> > +typedef struct doutpoint {
+> > +       const char *    dop_module;     // module
+> > +       const char *    dop_file;       // file name
+> > +       const char *    dop_func;       // function name
+> > +       int             dop_line;       // line no
+> > +       volatile int    dop_state;      // state 0:off, 1:on
+> > +} doutpoint_t;
+> >
+> > +#define        TOSTR(a)        #a
+> > +#define DOUTPOINT(module, file, func, line)                             \
+> > +do {                                                                    \
+> > +   __asm__(".pushsection set_doutpoint, \"aw\", @progbits" "\n"         \
+> > +           ".align 32"   "\n"                                           \
+> > +           "416:"        "\n"                                           \
+> > +           ".quad %c1"   "\n"                                           \
+> > +           ".quad %c2"   "\n"                                           \
+> > +           ".quad %c3"   "\n"                                           \
+> > +           ".long %c4"   "\n"                                           \
+> > +           ".long 0"     "\n"                                           \
+> > +           ".popsection" "\n"                                           \
+> > +           "leaq 416b(%%rip), %0" "\n"                                  \
+> > +           : "=r"(_dop)                                                 \
+> > +           : "i"(module), "i"(file), "i"(func), "i"(line));             \
+> > +} while(0)
+> >
+> > The reason for inline ASM is that: in C++, there are inline and template
+> > functions. static variables defined in these functions will be automatically
+> > added attributes by the compiler. thus it impossible to collect all doutpoints
+> > into one section.
+> >
+> > There is another problem to consider: collect doutpoints of shared libs into
+> > the main executable. We solve the problem by defining a constructor function
+> > and a weak function. The contructor function will automatically register doupoints
+> > of shared libs into the main executable. The weak function is to be overriden by
+> > the main executable, providing where to register doutponits.
+> >
+> > //
+> > // in common/dout.h
+> > //
+> > +typedef struct doutsection {
+> > +       doutpoint_t *   start;
+> > +       doutpoint_t *   stop;
+> > +} doutsection_t;
+> >
+> > //
+> > // in common/dout.cc
+> > //
+> > +extern doutpoint_t __start_set_doutpoint[]
+> > +       __attribute__((weak, visibility("hidden")));
+> > +extern doutpoint_t __stop_set_doutpoint[]
+> > +       __attribute__((weak, visibility("hidden")));
+> > +
+> > +extern void doutsection_global(doutsection_t **s, int *n)
+> > +       __attribute__((weak));
+> > +
+> > +
+> > +static void
+> > +doutsection_array(doutsection_t **s, int *n)
+> > +{
+> > +       static doutsection_t _sections[10];
+> > +
+> > +       /*
+> > +        * If doutsection_global is defined, provide
+> > +        * from the global one; otherwise, fall back
+> > +        * to local ones.
+> > +        */
+> > +       if (doutsection_global)
+> > +               doutsection_global(s, n);
+> > +       else {
+> > +               *s = _sections;
+> > +               *n = 10;
+> > +       }
+> > +}
+> > +
+> > +/*
+> > + * The 'contructor' attribute means the function will be
+> > + * called after dynamic linking for the library or before
+> > + * entering into main for the executable.
+> > + */
+> > +void __attribute__((constructor))
+> > +doutpoint_register(void)
+> > +{
+> > +       int i, n;
+> > +       doutsection_t *s;
+> > +
+> > +       doutsection_array(&s, &n);
+> > +       for (i = 0; i < n; i++, s++) {
+> > +               if (!s->start) {
+> > +                       s->start = __start_set_doutpoint;
+> > +                       s->stop = __stop_set_doutpoint;
+> > +                       return;
+> > +               }
+> > +       }
+> > +}
+> >
+> > //
+> > // in global/global_init.cc
+> > //
+> > void
+> > doutsection_global(doutsection_t **s, int *n)
+> > {
+> >         static doutsection_t _sections[10];
+> >
+> >         *s = _sections;
+> >         *n = 10;
+> > }
+> >
+> > There are some shortcomings of the proposal: mainly archtecture
+> > dependency and compiler dependency. DOUTPOINT exploits one x86
+> > instruction; weak symbol support may be different on different
+> > compilers.
+> >
+> > Glad and eager to hear your opinions!
+> > If it is useful, I'll post the whole patch.
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
