@@ -1,68 +1,73 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: uint32_t BlueStore::Extent::logical_offset?
-Date: Tue, 22 Nov 2016 21:53:18 +0000
-Message-ID: <BY2PR02MB39660B0A6749CC3D6AF505EF4B40@BY2PR02MB396.namprd02.prod.outlook.com>
-References: <8e0b5262-32ef-02a6-6812-a3e82369e9aa@mirantis.com>
- <alpine.DEB.2.11.1611222146240.11236@piezo.us.to>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: crush multi-pick anomaly
+Date: Tue, 22 Nov 2016 17:23:54 -0500
+Message-ID: <20161122222354.GC20744@ultraspiritum.eng.arb.redhat.com>
+References: <alpine.DEB.2.11.1611221521220.11236@piezo.us.to>
+ <20161122173013.GA20744@ultraspiritum.eng.arb.redhat.com>
+ <alpine.DEB.2.11.1611222139450.15296@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0052.outbound.protection.outlook.com ([104.47.37.52]:21280
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933012AbcKVWJN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 22 Nov 2016 17:09:13 -0500
-In-Reply-To: <alpine.DEB.2.11.1611222146240.11236@piezo.us.to>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:51954 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932474AbcKVWZG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 22 Nov 2016 17:25:06 -0500
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 226CC61B9C
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Nov 2016 22:25:06 +0000 (UTC)
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.11.1611222139450.15296@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: sjust@redhat.com, ceph-devel@vger.kernel.org
 
-Sage,
-OSD max obect size in the latest master is 100G , it used to be smaller..
-
-OPTION(osd_max_object_size, OPT_U64, 100*1024L*1024L*1024L) // OSD's maximu=
-m object size
-
-Thanks & Regards
-Somnath
-
------Original Message-----
-From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel=
-.org] On Behalf Of Sage Weil
-Sent: Tuesday, November 22, 2016 1:47 PM
-To: Igor Fedotov
-Cc: ceph-devel
-Subject: Re: uint32_t BlueStore::Extent::logical_offset?
-
-On Tue, 22 Nov 2016, Igor Fedotov wrote:
-> Hi Sage,
+On 22/11/2016, Sage Weil wrote:
+> Hmm.  What if the weights are alternatives based on num_rep, but
+> rather based on r (or rather which replica we are choosing).  So the
+> first choice is based on the actual weights.  The second choice is
+> based on the r=2 weights.  The third choice is based on r=3 weights.
 >
->
-> I'm wondering why BlueStore::Extent::logical_offset is 32-bit wide.
->
-> IMHO it's to be uint64_t unless we limit onode size to 4Gb.
->
-> Looks like we have implicit truncate when doing set_lextent/new Extent
-> at the moment and hence some issues with large onodes are possible.
+> In a perfect world, those weights are actually a function of our
+> previous selection(s); in this case, since that is not
+> computationally feasible (right?), we can precalculate values that
+> are "average" for possible prior choices. It'd be a bit more
+> complicated, but assume for a moment that we could do this...
 
-The max object size enforced in the OSD is ~128 MB (or in that neighborhood=
-, if I remember correctly).  We really shouldn't be storing individual rado=
-s objects that are orders of magnitude larger than that.
+So! We /can/ do something like this. A 'cumulative' reweighting, where
+we calibrate r=n as a correction on r=n-1.
 
-sage
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in th=
-e body of a message to majordomo@vger.kernel.org More majordomo info at  ht=
-tp://vger.kernel.org/majordomo-info.html
-PLEASE NOTE: The information contained in this electronic mail message is i=
-ntended only for the use of the designated recipient(s) named above. If the=
- reader of this message is not the intended recipient, you are hereby notif=
-ied that you have received this message in error and that any review, disse=
-mination, distribution, or copying of this message is strictly prohibited. =
-If you have received this communication in error, please notify the sender =
-by telephone or e-mail (as shown above) immediately and destroy any and all=
- copies of this message in your possession (whether hard copies or electron=
-ically stored copies).
+The downsides would be that there are fewer 'possible' distributions
+if we skew per-round. (That is, there are distributions we can achieve
+adjusting everything up-front that we can't achieve going per-round.)
+I'm strongly suspect that as our maximum 'r' goes up the difference
+between possible all-at-once distributions and possible per-round
+distributions gets bigger.
+
+Second, currently every OSD has an equal chance of being the primary,
+secondary, tertiary... Under this scheme the lowest weight OSDs would
+be the primary for a disproportionately large share of the objects
+they hold. If we assume that low-weight OSDs are smaller machines and
+primaries do more work than secondaries, this might be bad.
+
+Third, it would be more computationally intensive. Especially if we
+want to support a large bucket where each OSD has a unique weight
+shared by no other OSD. I don't nkow HOW intensive (and there's room
+to try and make things smarter) but it might be unavoidably quite long
+for large buckets.
+
+If those don't seem too bad as tradeoffs, we can do something along
+these lines and I'll get to hammering at it. It seems like a fairly
+large amount of complexity for the problem being solved, but that all
+depends on how much the Distribution Surprise is biting people, I
+guess.
+
+I /suspect/ we will want to support the old, unmodified mode of
+operation on a scale finer than a CRUSH tunable.
+
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC, Freenode}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
