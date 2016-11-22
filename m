@@ -1,40 +1,38 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: osd/*PG* code cleanup
-Date: Tue, 22 Nov 2016 03:22:30 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1611220318580.5480@piezo.us.to>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: powercycle suite with -k testing
+Date: Tue, 22 Nov 2016 07:10:16 +0100
+Message-ID: <93d7f6cb-5640-98fc-29ce-fed3f19ab5cb@suse.cz>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41540 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:45358 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755039AbcKVDWd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 21 Nov 2016 22:22:33 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id C77D281222
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Nov 2016 03:22:32 +0000 (UTC)
+        id S1750714AbcKVGKS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 22 Nov 2016 01:10:18 -0500
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 618FFAAC8
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Nov 2016 06:10:17 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sjust@redhat.com
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hey Sam,
+Greetings:
 
-I think now is the time to do a cleanup the PG class and file names--right 
-after a big refactor that is effectively a backport-barrier anyway.  If we 
-do it after kraken it will make it hard to backport to kraken, and the 
-recent changes have just drastically cut the probability that anything 
-post-kraken will be backported to jewel without care anyway.
+During hammer integration testing, I ran some powercycle suites with "-k 
+testing" and found that I could reproduce 
+http://tracker.ceph.com/issues/17984 not only on the hammer-backports 
+branch, but in hammer and jewel as well. But it only fails with "-k 
+testing" (i.e. the "testing" kernel).
 
-I think we should
+Can anyone shed light on this?
 
- - rename ReplicatedPG -> PrimaryLogPG
- - PGBackend and *Backend -> PLPG[*]Backend
+(I seem to remember that there is some kind of problem with "-k 
+testing", perhaps that it uses whichever kernel happens to be installed 
+on the test node from the last run?)
 
-Eventually we also need to move most of PG into PrimaryLogPG, but it's 
-less important that that happens now...
-
-What do you think?
-
-sage
+-- 
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
