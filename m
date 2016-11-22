@@ -1,93 +1,93 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: ceph-disk and /dev/dm-* permissions - race condition?
-Date: Wed, 23 Nov 2016 00:33:07 +0100
-Message-ID: <04a836d4-480e-9ba2-9691-c5bf48d55219@dachary.org>
-References: <CAGbviv+bFfR=oC=XhYKB7zQBce3Ph59GALnhoKS_0e71z649mg@mail.gmail.com>
- <2ef16457-2c08-8b1a-0c44-0a08955c2238@dachary.org>
- <CAGbvivLrrjFp5_LHWQq4Z4DaUfF2OnCVgJK1FKbWL9X+voUHCw@mail.gmail.com>
- <41c84ca4-c14b-511e-fa73-6b846bd6e74c@dachary.org>
- <CAGbvivLbGkwaEGSitOYrna41pqKPucVL6kBYTX5om28A4GkNTA@mail.gmail.com>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: Re: uint32_t BlueStore::Extent::logical_offset?
+Date: Tue, 22 Nov 2016 17:42:10 -0500 (EST)
+Message-ID: <1238161574.49831392.1479854530227.JavaMail.zimbra@redhat.com>
+References: <8e0b5262-32ef-02a6-6812-a3e82369e9aa@mirantis.com> <alpine.DEB.2.11.1611222146240.11236@piezo.us.to> <BY2PR02MB39660B0A6749CC3D6AF505EF4B40@BY2PR02MB396.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:41030 "EHLO
-        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755650AbcKVXe0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Nov 2016 18:34:26 -0500
-In-Reply-To: <CAGbvivLbGkwaEGSitOYrna41pqKPucVL6kBYTX5om28A4GkNTA@mail.gmail.com>
+Received: from mx5-phx2.redhat.com ([209.132.183.37]:55140 "EHLO
+        mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932474AbcKVXnQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Nov 2016 18:43:16 -0500
+In-Reply-To: <BY2PR02MB39660B0A6749CC3D6AF505EF4B40@BY2PR02MB396.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
+It would seem preferable not to bake-in such a limit on extent size, even if offsets exceeding that won't immediately be used.
 
+Matt
 
-On 22/11/2016 20:13, Wyllys Ingersoll wrote:
-> I dont know, but making the change in the 55-dm.rules file seems to do
-> the trick well enough for now.
-
-It does. But there does not seem to be a way to package this workaround. This is the reason why I'm trying to find another fix.
-
-Cheers
-
+----- Original Message -----
+> From: "Somnath Roy" <Somnath.Roy@sandisk.com>
+> To: "Sage Weil" <sage@newdream.net>, "Igor Fedotov" <ifedotov@mirantis.com>
+> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+> Sent: Tuesday, November 22, 2016 4:53:18 PM
+> Subject: RE: uint32_t BlueStore::Extent::logical_offset?
 > 
-> On Tue, Nov 22, 2016 at 12:07 PM, Loic Dachary <loic@dachary.org> wrote:
->>
->>
->> On 22/11/2016 16:13, Wyllys Ingersoll wrote:
->>> I think that sounds reasonable, obviously more testing will be needed
->>> to verify.  Our situation occurred on an Ubuntu Trusty (upstart based,
->>> not systemd) server, so I dont think this will help for non-systemd
->>> systems.
->>
->> I don't think there is a way to enforce an order with upstart. But maybe there is ? If you don't know about it I will research.
->>
->>> On Tue, Nov 22, 2016 at 9:48 AM, Loic Dachary <loic@dachary.org> wrote:
->>>> Hi,
->>>>
->>>> It should be enough to add After=local-fs.target to /lib/systemd/system/ceph-disk@.service and have ceph-disk trigger --sync chown ceph:ceph /dev/XXX to fix this issue (and others). Since local-fs.target indirectly depends on dm, this ensures ceph disk activation will only happen after dm is finished. It is entirely possible that the ownership is incorrect when ceph-disk trigger --sync starts running, but it will no longer race with dm and it can safely chown ceph:ceph and proceed with activation.
->>>>
->>>> I'm testing this with https://github.com/ceph/ceph/pull/12136 but I'm not sure yet if I'm missing something or if that's the right thing to do.
->>>>
->>>> What do you think ?
->>>>
->>>> On 04/11/2016 15:51, Wyllys Ingersoll wrote:
->>>>> We are running 10.2.3 with encrypted OSDs and journals using the old
->>>>> (i.e. non-Luks) keys and are seeing issues with the ceph-osd processes
->>>>> after a reboot of a storage server.  Our data and journals are on
->>>>> separate partitions on the same disk.
->>>>>
->>>>> After a reboot, sometimes the OSDs fail to start because of
->>>>> permissions problems.  The /dev/dm-* devices come back with
->>>>> permissions set to "root:disk" sometimes instead of "ceph:ceph".
->>>>> Weirder still is that sometimes the ceph-osd will start and work in
->>>>> spite of the incorrect perrmissions (root:disk) and other times they
->>>>> will fail and the logs show permissions errors when trying to access
->>>>> the journals. Sometimes half of the /dev/dm- devices are "root:disk"
->>>>> and others are "ceph:ceph".  There's no clear pattern, so that's what
->>>>> leads me to think its a race condition in the ceph_disk "dmcrypt_map"
->>>>> function.
->>>>>
->>>>> Is there a known issue with ceph-disk and/or ceph-osd related to
->>>>> timing of the encrypted devices being setup and the permissions
->>>>> getting changed to the ceph processes can access them?
->>>>>
->>>>> Wyllys Ingersoll
->>>>> Keeper Technology, LLC
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>
->>>> --
->>>> Loïc Dachary, Artisan Logiciel Libre
->>>
->>
->> --
->> Loïc Dachary, Artisan Logiciel Libre
+> Sage,
+> OSD max obect size in the latest master is 100G , it used to be smaller..
+> 
+> OPTION(osd_max_object_size, OPT_U64, 100*1024L*1024L*1024L) // OSD's maximum
+> object size
+> 
+> Thanks & Regards
+> Somnath
+> 
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org
+> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Sage Weil
+> Sent: Tuesday, November 22, 2016 1:47 PM
+> To: Igor Fedotov
+> Cc: ceph-devel
+> Subject: Re: uint32_t BlueStore::Extent::logical_offset?
+> 
+> On Tue, 22 Nov 2016, Igor Fedotov wrote:
+> > Hi Sage,
+> >
+> >
+> > I'm wondering why BlueStore::Extent::logical_offset is 32-bit wide.
+> >
+> > IMHO it's to be uint64_t unless we limit onode size to 4Gb.
+> >
+> > Looks like we have implicit truncate when doing set_lextent/new Extent
+> > at the moment and hence some issues with large onodes are possible.
+> 
+> The max object size enforced in the OSD is ~128 MB (or in that neighborhood,
+> if I remember correctly).  We really shouldn't be storing individual rados
+> objects that are orders of magnitude larger than that.
+> 
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
+> PLEASE NOTE: The information contained in this electronic mail message is
+> intended only for the use of the designated recipient(s) named above. If the
+> reader of this message is not the intended recipient, you are hereby
+> notified that you have received this message in error and that any review,
+> dissemination, distribution, or copying of this message is strictly
+> prohibited. If you have received this communication in error, please notify
+> the sender by telephone or e-mail (as shown above) immediately and destroy
+> any and all copies of this message in your possession (whether hard copies
+> or electronically stored copies).
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 
 -- 
-Loïc Dachary, Artisan Logiciel Libre
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-821-5101
+fax.  734-769-8938
+cel.  734-216-5309
