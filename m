@@ -1,32 +1,34 @@
-From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
-Subject: Re: 11/23/2016 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 23 Nov 2016 21:31:47 +0100
-Message-ID: <20161123203147.GF26997@predictor>
-References: <cb6d61ef-c2c0-3499-7580-a1b8df0a94f6@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: ceph.git housecleaning
+Date: Wed, 23 Nov 2016 23:32:33 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1611232330290.21102@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from predictor.org.pl ([185.5.97.54]:45175 "EHLO predictor.org.pl"
+Received: from mx1.redhat.com ([209.132.183.28]:33662 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933483AbcKWU3d (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 23 Nov 2016 15:29:33 -0500
-Content-Disposition: inline
-In-Reply-To: <cb6d61ef-c2c0-3499-7580-a1b8df0a94f6@redhat.com>
+        id S933995AbcKWXcf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 23 Nov 2016 18:32:35 -0500
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 041D9C04D30A
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Nov 2016 23:32:35 +0000 (UTC)
+Received: from ovpn-112-42.phx2.redhat.com (ovpn-112-42.phx2.redhat.com [10.3.112.42])
+        by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uANNWXi4021197
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Nov 2016 18:32:34 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Wed, Nov 23, 2016 at 09:51:30AM -0600, Mark Nelson wrote:
-> 8AM PST as usual!  Ben Niven-Jenkins from Nokia will be stopping by
-> to give a presentation on bluestore testing they've been doing at
-> Nokia. Why work on the day before Thanksgiving when you can listen
-> to an interesting presentation! :D  See you there!
+I've removed most of the stale branches from ceph.git.  We went from 500+ 
+to 100 something.  I'll remove the others shortly once we get ceph-ci.git 
+set up, unless there is an open PR against the branch.
 
-Any chance to have today's recording posted somewhere?
+All old/current branches are archived in the new ceph-old.git repo at
 
--- 
-Piotr Dałek
-branch@predictor.org.pl
-http://blog.predictor.org.pl
+	https://github.com/ceph/ceph-old
+
+Happy Thanksgiving!
+sage
