@@ -1,38 +1,40 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Static analysis
-Date: Wed, 23 Nov 2016 17:06:37 +1000
-Message-ID: <20161123070637.GF26846@rskikr.localdomain>
+From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
+Subject: Re: Static analysis
+Date: Wed, 23 Nov 2016 08:25:24 +0100
+Message-ID: <20161123072524.GE26997@predictor>
+References: <20161123070637.GF26846@rskikr.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f41.google.com ([74.125.83.41]:35814 "EHLO
-        mail-pg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752138AbcKWHNT (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Nov 2016 02:13:19 -0500
-Received: by mail-pg0-f41.google.com with SMTP id p66so2897154pga.2
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Nov 2016 23:13:19 -0800 (PST)
-Received: from rskikr.localdomain ([66.187.239.11])
-        by smtp.gmail.com with ESMTPSA id g22sm31883005pgn.20.2016.11.22.23.06.42
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 22 Nov 2016 23:06:44 -0800 (PST)
+Received: from predictor.org.pl ([185.5.97.54]:39168 "EHLO predictor.org.pl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751644AbcKWHcG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 23 Nov 2016 02:32:06 -0500
 Content-Disposition: inline
+In-Reply-To: <20161123070637.GF26846@rskikr.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-I did a run of the Clang Static Analyzer and it turned up multiple issues which
-Kefu gobbled up :) The reports are quite detailed and walk you through how the
-issue can present.
+On Wed, Nov 23, 2016 at 05:06:37PM +1000, Brad Hubbard wrote:
+> I did a run of the Clang Static Analyzer and it turned up multiple issues which
+> Kefu gobbled up :) The reports are quite detailed and walk you through how the
+> issue can present.
+> 
+> See https://github.com/ceph/ceph/pull/12145 and
+> https://github.com/ceph/ceph/pull/12148
+> 
+> Given how easy it is to run [1] (although slow) would it be a good idea to be
+> running this regulary, perhaps in addition to coverity scans?
+> 
+> [1] mkdir build && cd build && scan-build cmake .. && scan-build make -jX
 
-See https://github.com/ceph/ceph/pull/12145 and
-https://github.com/ceph/ceph/pull/12148
-
-Given how easy it is to run [1] (although slow) would it be a good idea to be
-running this regulary, perhaps in addition to coverity scans?
-
-[1] mkdir build && cd build && scan-build cmake .. && scan-build make -jX
++1. Certainly this will help finding out obscure bugs that show up later in
+unexpected places.
 
 -- 
-Cheers,
-Brad
+Piotr Dałek
+branch@predictor.org.pl
+http://blog.predictor.org.pl
