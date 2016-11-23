@@ -1,59 +1,30 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 11/23/2016 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 23 Nov 2016 09:51:30 -0600
-Message-ID: <cb6d61ef-c2c0-3499-7580-a1b8df0a94f6@redhat.com>
-Reply-To: mnelson@redhat.com
+From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
+Subject: Decrease size of clusters
+Date: Thu, 24 Nov 2016 01:31:11 +0800
+Message-ID: <7012B64A-C2C2-4C67-A819-06220AD0C10E@alibaba-inc.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain;
+        charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51084 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752087AbcKWPvd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 23 Nov 2016 10:51:33 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 93A52B5370
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Nov 2016 15:51:33 +0000 (UTC)
-Received: from [10.3.112.58] (ovpn-112-58.phx2.redhat.com [10.3.112.58])
-        by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uANFpVGP020943
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Nov 2016 10:51:33 -0500
+Received: from out0-136.mail.aliyun.com ([140.205.0.136]:52207 "EHLO
+        out0-136.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933766AbcKWRhw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Nov 2016 12:37:52 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-8AM PST as usual!  Ben Niven-Jenkins from Nokia will be stopping by to 
-give a presentation on bluestore testing they've been doing at Nokia. 
-Why work on the day before Thanksgiving when you can listen to an 
-interesting presentation! :D  See you there!
+Hi Sage,
+  We are investigating the possibilities of decreasing size of pg numbers and pgp numbers as we want to decrease the cluster size.
+  We need to  move out of OSDs from clusters from time to time. Initially, the PG number probably a good match the number of OSDs underneath. However, as we moved some of OSDs out ,the number of PGs is not going to be a good match any more to the number of OSDs.
+  We of course want to decrease the number of PGs to tune up the performance of clusters. 
+   
+   Any advices and any plan to support this feature?
 
-Here's the links:
-
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
-
-To join the Meeting:
-https://bluejeans.com/268261044
-
-To join via Browser:
-https://bluejeans.com/268261044/browser
-
-To join with Lync:
-https://bluejeans.com/268261044/lync
+  Regards,
+  James
 
 
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
 
-To join via Phone:
-1) Dial:
-                 +1 408 740 7256
-                 +1 888 240 2560(US Toll Free)
-                 +1 408 317 9253(Alternate Number)
-                 (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
