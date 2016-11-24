@@ -1,106 +1,68 @@
-From: Tim Serong <tserong-IBi9RG/b67k@public.gmane.org>
-Subject: Re: Introducing DeepSea: A tool for deploying Ceph
- using Salt
-Date: Thu, 24 Nov 2016 19:09:46 +1100
-Message-ID: <5928afcf-2afe-18ad-a1c4-9786d0087347@suse.com>
-References: <0c7928bb-947a-23c9-5770-e588dbffb6af@suse.com>
-	<CAEhqmj+DDJHFnoTAZrAwnX-7C6mkYgdAu3RKwZH=vd6-OuZD8Q@mail.gmail.com>
+From: xxhdx1985126 <xxhdx1985126@163.com>
+Subject: Assertion "needs_recovery" fails when balance_read reaches a
+ replica OSD where the target object is not recovered yet.
+Date: Thu, 24 Nov 2016 17:11:16 +0800 (CST)
+Message-ID: <60cd753.ad12.158959a7049.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAEhqmj+DDJHFnoTAZrAwnX-7C6mkYgdAu3RKwZH=vd6-OuZD8Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Bill Sanders <billysanders-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mproxyhzb2.163.com ([123.58.178.202]:44690 "EHLO
+        mproxyhzb2.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S936362AbcKXJoK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Nov 2016 04:44:10 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 11/12/2016 05:30 AM, Bill Sanders wrote:
-> I'm curious what the relationship is with python_ceph_cfg[0] and
-> DeepSea, which have some overlap in contributors and functionality (and
-> supporting organizations?).
-
-DeepSea and python-ceph-cfg look at ceph deployment from two different
-perspectives.
-
-python-ceph-cfg is a low-level python library for doing
-individual/discrete tasks necessary to deploy ceph.  So, for example, it
-has methods for zapping a disk, preparing an OSD, creating a keyring,
-etc.  Think of it as operating approximately on a node level (although
-you could argue that's an oversimplification, as it includes functions
-to check quorum status, create pools, etc., which are really cluster level).
-
-DeepSea is a high-level user-facing tool for orchestrating ceph
-deployment with salt.  So DeepSea knows how to install ceph, discover
-what disks are on each node, lets you assign different roles to nodes
-("these nodes will be MONs, the storage nodes will use all their spare
-disks as OSDs", etc.).  Think of it as operating on a cluster level.
-
-Regards,
-
-Tim
-
-> 
-> [0] https://github.com/oms4suse/python-ceph-cfg
-> 
-> Bill Sanders
-> 
-> On Wed, Nov 2, 2016 at 10:52 PM, Tim Serong <tserong-IBi9RG/b67k@public.gmane.org
-> <mailto:tserong-IBi9RG/b67k@public.gmane.org>> wrote:
-> 
->     Hi All,
-> 
->     I thought I should make a little noise about a project some of us at
->     SUSE have been working on, called DeepSea.  It's a collection of Salt
->     states, runners and modules for orchestrating deployment of Ceph
->     clusters.  To help everyone get a feel for it, I've written a blog post
->     which walks through using DeepSea to set up a small test cluster:
-> 
->       http://ourobengr.com/2016/11/hello-salty-goodness/
->     <http://ourobengr.com/2016/11/hello-salty-goodness/>
-> 
->     If you'd like to try it out yourself, the code is on GitHub:
-> 
->       https://github.com/SUSE/DeepSea <https://github.com/SUSE/DeepSea>
-> 
->     More detailed documentation can be found at:
-> 
->       https://github.com/SUSE/DeepSea/wiki/intro
->     <https://github.com/SUSE/DeepSea/wiki/intro>
->       https://github.com/SUSE/DeepSea/wiki/management
->     <https://github.com/SUSE/DeepSea/wiki/management>
->       https://github.com/SUSE/DeepSea/wiki/policy
->     <https://github.com/SUSE/DeepSea/wiki/policy>
-> 
->     Usual story: feedback, issues, pull requests are all welcome ;)
-> 
->     Enjoy,
-> 
->     Tim
->     --
->     Tim Serong
->     Senior Clustering Engineer
->     SUSE
->     tserong-IBi9RG/b67k@public.gmane.org <mailto:tserong-IBi9RG/b67k@public.gmane.org>
->     _______________________________________________
->     ceph-users mailing list
->     ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
->     http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->     <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>
-> 
-> 
-
-
--- 
-Tim Serong
-Senior Clustering Engineer
-SUSE
-tserong-IBi9RG/b67k@public.gmane.org
+SGksIGV2ZXJ5b25lLgoKSW4gb3VyIG9ubGluZSBzeXN0ZW0sIHNvbWUgT1NEcyBhbHdheXMgZmFp
+bCBkdWUgdG8gdGhlIGZvbGxvd2luZyBlcnJvcjoKCjIwMTYtMTAtMjUgMTk6MDA6MDAuNjI2NTY3
+IDdmOWE2M2JmZjcwMCAtMSBlcnJvcl9tc2cgb3NkL1JlcGxpY2F0ZWRQRy5jYzogSW4gZnVuY3Rp
+b24gJ3ZvaWQgUmVwbGljYXRlZFBHOjp3YWl0X2Zvcl91bnJlYWRhYmxlX29iamVjdChjb25zdCBo
+b2JqZWN0X3QmLCBPcFJlcXVlc3RSZWYpJyB0aHJlYWQgN2Y5YTYzYmZmNzAwIHRpbWUgMjAxNi0x
+MC0yNSAxOTowMDowMC42MjQ0OTkKb3NkL1JlcGxpY2F0ZWRQRy5jYzogMzg3OiBGQUlMRUQgYXNz
+ZXJ0KG5lZWRzX3JlY292ZXJ5KQoKY2VwaCB2ZXJzaW9uIDAuOTQuNS0xMi1nODNmNTZhMSAoODNm
+NTZhMWM4NGUzZGJkOTVhNGMzOTQzMzVhN2IxZGM5MjZkZDFjNCkKIDE6IChSZXBsaWNhdGVkUEc6
+OndhaXRfZm9yX3VucmVhZGFibGVfb2JqZWN0KGhvYmplY3RfdCBjb25zdCYsIHN0ZDo6dHIxOjpz
+aGFyZWRfcHRyJmx0O09wUmVxdWVzdCZndDspKzB4M2Y1KSBbMHg4YjVhNjVdCiAyOiAoUmVwbGlj
+YXRlZFBHOjpkb19vcChzdGQ6OnRyMTo6c2hhcmVkX3B0ciZsdDtPcFJlcXVlc3QmZ3Q7JikrMHg1
+ZTkpIFsweDhmMGM3OV0KIDM6IChSZXBsaWNhdGVkUEc6OmRvX3JlcXVlc3Qoc3RkOjp0cjE6OnNo
+YXJlZF9wdHImbHQ7T3BSZXF1ZXN0Jmd0OyYsIFRocmVhZFBvb2w6OlRQSGFuZGxlJikrMHg0ZTMp
+IFsweDg3ZmRjM10KIDQ6IChPU0Q6OmRlcXVldWVfb3AoYm9vc3Q6OmludHJ1c2l2ZV9wdHImbHQ7
+UEcmZ3Q7LCBzdGQ6OnRyMTo6c2hhcmVkX3B0ciZsdDtPcFJlcXVlc3QmZ3Q7LCBUaHJlYWRQb29s
+OjpUUEhhbmRsZSYpKzB4MTc4KSBbMHg2NmIzZjhdCiA1OiAoT1NEOjpTaGFyZGVkT3BXUTo6X3By
+b2Nlc3ModW5zaWduZWQgaW50LCBjZXBoOjpoZWFydGJlYXRfaGFuZGxlX2QqKSsweDU5ZSkgWzB4
+NjZmOGVlXQogNjogKFNoYXJkZWRUaHJlYWRQb29sOjpzaGFyZGVkdGhyZWFkcG9vbF93b3JrZXIo
+dW5zaWduZWQgaW50KSsweDc5NSkgWzB4YTc2ZDg1XQogNzogKFNoYXJkZWRUaHJlYWRQb29sOjpX
+b3JrVGhyZWFkU2hhcmRlZDo6ZW50cnkoKSsweDEwKSBbMHhhN2E2MTBdCiA4OiAvbGliNjQvbGli
+cHRocmVhZC5zby4wKCkgWzB4MzQ3MTQwN2E1MV0KIDk6IChjbG9uZSgpKzB4NmQpIFsweDM0NzEw
+ZTg5M2RdCiBOT1RFOiBhIGNvcHkgb2YgdGhlIGV4ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMg
+Jmx0O2V4ZWN1dGFibGUmZ3Q7YCBpcyBuZWVkZWQgdG8gaW50ZXJwcmV0IHRoaXMuCgpPdXIgdmVy
+aW9uIG9mIGNlcGggaXMgMC45NC41LiAKQWZ0ZXIgZG9pbmcgc29tZSByZWFkaW5nIG9mIHRoZSBz
+b3VyY2UgY29kZSBhbmQgYW5hbHlzaXMgb2Ygb3VyIG9ubGluZSBzY2VuYXJpb3MsIHdlIG1hZGUg
+c29tZSBjb25qZWN0dXJlOgogICAgICAgV2hlbiBlbmNvdW50ZXJpbmcgYSBsYXJnZSBudW1iZXIg
+b2YgImJhbGFuY2VfcmVhZHMiLCB0aGUgT1NEcyBjYW4gYmUgc28gYnVzeSB0aGF0IHRoZXkgY2Fu
+J3Qgc2VuZCBoZWFydGJlYXRzIGluIHRpbWUsIHdoaWNoIGNvdWxkIGxlYWQgdG8gbW9uaXRvcnMg
+d3JvbmdseSBtYXJrIHRoZW0gZG93biBhbmQgdHJpZ2dlcnMgb3RoZXIgT1NEcyB0byBnbyB0aHJv
+dWdoIHBlZXJpbmcrcmVjb3ZlcnkrcHJvY2VzcyBkdXJpbmcgd2hpY2gsIG9uIHRoZSByZXBsaWNh
+IE9TRHMsIHRoZSBhc3NlcnRpb24gIm5lZWRzX3JlY292ZXJ5IiBhdCBSZXBsaWNhdGVkUEcuY2M6
+Mzg3IGhhcyBhIGxhcmdlIHByb2JhYmlsaXR5IHRvIGZhaWwuCgpUbyBjb25maXJtIHRoaXMgZ3Vl
+c3MsIHdlIGRpZCBzb21lIGRlc2lnbmF0ZWQgdGVzdC4gSWYgSSB3cml0ZSBleHRyYSBjb2RlIHRv
+IG1ha2UgdGhlIHJlY292ZXJ5IG9mIHNvbWUgb2JqZWN0IHdhaXQgZm9yIHRob3NlIG9wcyB0YXJn
+ZXRpbmcgdGhhdCBvYmplY3Qgd2l0aCB0aGUgdHlwZSAiQ0VQSF9NU0dfT1NEX09QIiAgdG8gZmlu
+aXNoLCB0aGUgYXNzZXJ0aW9uICJuZWVkc19yZWNvdmVyeSIgYXQgUmVwbGljYXRlZFBHLmNjOjM4
+NyB3aWxsIGFsd2F5cyBmYWlsLiBBbmQgb24gdGhlIG90aGVyIGhhbmQsIGlmIEkgbWFrZSB0aG9z
+ZSBvcHMgdGFyZ2V0aW5nIHNvbWUgb2JqZWN0IHdpdGggdGhlIHR5cGUgIkNFUEhfTVNHX09TRF9P
+UCIgd2FpdCBmb3IgdGhlIGNvcnJlc3BvbmRpbmcgcmVjb3ZlcnkgdG8gZmluaXNoLCB0aGUgYXNz
+ZXJ0aW9uIHdvbid0IGJlIHRyaWdnZXJlZC4KCkNhbiB3ZSBjb21lIHRvIHRoZSBjb25jbHVzaW9u
+IHRoYXQgdGhlIGNhdXNlIHRvIHRoZSBhc3NlcnRpb24gZmFpbHVyZSBpcyBqdXN0IGFzIHdlIHRo
+b3VnaHQ/IEFuZCwgaXQgc2VlbXMgdGhhdCB0aGUgcHVycG9zZSBvZiB0aGUgZmFpbGVkIGFzc2Vy
+dGlvbiBpcyB0byBtYWtlIHN1cmUgdGhhdCB0aGUgIm1pc3NpbmdfbG9jLm5lZWRzX3JlY292ZXJ5
+X21hcCIgZG8gY29udGFpbiB0aGUgdW5yZWFkYWJsZSBvYmplY3QuIEhvd2V2ZXIsICJtaXNzaW5n
+X2xvYy5uZWVkc19yZWNvdmVyeV9tYXAiIHNlZW1zIHRvIGJlIGFsd2F5cyBlbXB0eSBvbiByZXBs
+aWNhIE9TRHMuIENhbiB3ZSBmaXggdGhpcyBwcm9ibGVtIHNpbXBseSBieSBieXBhc3NpbmcgdGhp
+cyBhc3NlcnRpb24gaW4gc29tZSB3YXkgbGlrZToKICAgICAgICAgICAgICBpZiAoIGlzX3ByaW1h
+cnkoKSApewoJICAgICAgICAgICAgICBib29sIG5lZWRzX3JlY292ZXJ5ID0gbWlzc2luZ19sb2Mu
+bmVlZHNfcmVjb3Zlcnkoc29pZCwgJnYpOwoJICAgICAgICAgICAgICBhc3NlcnQobmVlZHNfcmVj
+b3ZlcnkpOwogICAgICAgICAgICAgICB9CgpJJ3ZlIGFsc28gc3VibWl0IGEgbmV3IGlzc3VlOiBC
+VUcgIzE4MDIxLiBQbGVhc2UgaGVscCBtZS4gVGhhbmsgeW91Oi0p
