@@ -1,68 +1,78 @@
-From: xxhdx1985126 <xxhdx1985126@163.com>
-Subject: Assertion "needs_recovery" fails when balance_read reaches a
- replica OSD where the target object is not recovered yet.
-Date: Thu, 24 Nov 2016 17:11:16 +0800 (CST)
-Message-ID: <60cd753.ad12.158959a7049.Coremail.xxhdx1985126@163.com>
+From: Xuehan Xu <xxhdx1985126@gmail.com>
+Subject: Assertion "needs_recovery" fails when balance_read reaches a replica
+ OSD where the target object is not recovered yet.
+Date: Thu, 24 Nov 2016 19:30:11 +0800
+Message-ID: <CAJACTuf0+ZPGE9Rdvjikt1HgahC5F_yZP2b1G5zDuf3C_c7W5Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GBK
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mproxyhzb2.163.com ([123.58.178.202]:44690 "EHLO
-        mproxyhzb2.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S936362AbcKXJoK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Nov 2016 04:44:10 -0500
+Received: from mail-qt0-f178.google.com ([209.85.216.178]:35462 "EHLO
+        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S964851AbcKXLaM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Nov 2016 06:30:12 -0500
+Received: by mail-qt0-f178.google.com with SMTP id c47so37657292qtc.2
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Nov 2016 03:30:12 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-SGksIGV2ZXJ5b25lLgoKSW4gb3VyIG9ubGluZSBzeXN0ZW0sIHNvbWUgT1NEcyBhbHdheXMgZmFp
-bCBkdWUgdG8gdGhlIGZvbGxvd2luZyBlcnJvcjoKCjIwMTYtMTAtMjUgMTk6MDA6MDAuNjI2NTY3
-IDdmOWE2M2JmZjcwMCAtMSBlcnJvcl9tc2cgb3NkL1JlcGxpY2F0ZWRQRy5jYzogSW4gZnVuY3Rp
-b24gJ3ZvaWQgUmVwbGljYXRlZFBHOjp3YWl0X2Zvcl91bnJlYWRhYmxlX29iamVjdChjb25zdCBo
-b2JqZWN0X3QmLCBPcFJlcXVlc3RSZWYpJyB0aHJlYWQgN2Y5YTYzYmZmNzAwIHRpbWUgMjAxNi0x
-MC0yNSAxOTowMDowMC42MjQ0OTkKb3NkL1JlcGxpY2F0ZWRQRy5jYzogMzg3OiBGQUlMRUQgYXNz
-ZXJ0KG5lZWRzX3JlY292ZXJ5KQoKY2VwaCB2ZXJzaW9uIDAuOTQuNS0xMi1nODNmNTZhMSAoODNm
-NTZhMWM4NGUzZGJkOTVhNGMzOTQzMzVhN2IxZGM5MjZkZDFjNCkKIDE6IChSZXBsaWNhdGVkUEc6
-OndhaXRfZm9yX3VucmVhZGFibGVfb2JqZWN0KGhvYmplY3RfdCBjb25zdCYsIHN0ZDo6dHIxOjpz
-aGFyZWRfcHRyJmx0O09wUmVxdWVzdCZndDspKzB4M2Y1KSBbMHg4YjVhNjVdCiAyOiAoUmVwbGlj
-YXRlZFBHOjpkb19vcChzdGQ6OnRyMTo6c2hhcmVkX3B0ciZsdDtPcFJlcXVlc3QmZ3Q7JikrMHg1
-ZTkpIFsweDhmMGM3OV0KIDM6IChSZXBsaWNhdGVkUEc6OmRvX3JlcXVlc3Qoc3RkOjp0cjE6OnNo
-YXJlZF9wdHImbHQ7T3BSZXF1ZXN0Jmd0OyYsIFRocmVhZFBvb2w6OlRQSGFuZGxlJikrMHg0ZTMp
-IFsweDg3ZmRjM10KIDQ6IChPU0Q6OmRlcXVldWVfb3AoYm9vc3Q6OmludHJ1c2l2ZV9wdHImbHQ7
-UEcmZ3Q7LCBzdGQ6OnRyMTo6c2hhcmVkX3B0ciZsdDtPcFJlcXVlc3QmZ3Q7LCBUaHJlYWRQb29s
-OjpUUEhhbmRsZSYpKzB4MTc4KSBbMHg2NmIzZjhdCiA1OiAoT1NEOjpTaGFyZGVkT3BXUTo6X3By
-b2Nlc3ModW5zaWduZWQgaW50LCBjZXBoOjpoZWFydGJlYXRfaGFuZGxlX2QqKSsweDU5ZSkgWzB4
-NjZmOGVlXQogNjogKFNoYXJkZWRUaHJlYWRQb29sOjpzaGFyZGVkdGhyZWFkcG9vbF93b3JrZXIo
-dW5zaWduZWQgaW50KSsweDc5NSkgWzB4YTc2ZDg1XQogNzogKFNoYXJkZWRUaHJlYWRQb29sOjpX
-b3JrVGhyZWFkU2hhcmRlZDo6ZW50cnkoKSsweDEwKSBbMHhhN2E2MTBdCiA4OiAvbGliNjQvbGli
-cHRocmVhZC5zby4wKCkgWzB4MzQ3MTQwN2E1MV0KIDk6IChjbG9uZSgpKzB4NmQpIFsweDM0NzEw
-ZTg5M2RdCiBOT1RFOiBhIGNvcHkgb2YgdGhlIGV4ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMg
-Jmx0O2V4ZWN1dGFibGUmZ3Q7YCBpcyBuZWVkZWQgdG8gaW50ZXJwcmV0IHRoaXMuCgpPdXIgdmVy
-aW9uIG9mIGNlcGggaXMgMC45NC41LiAKQWZ0ZXIgZG9pbmcgc29tZSByZWFkaW5nIG9mIHRoZSBz
-b3VyY2UgY29kZSBhbmQgYW5hbHlzaXMgb2Ygb3VyIG9ubGluZSBzY2VuYXJpb3MsIHdlIG1hZGUg
-c29tZSBjb25qZWN0dXJlOgogICAgICAgV2hlbiBlbmNvdW50ZXJpbmcgYSBsYXJnZSBudW1iZXIg
-b2YgImJhbGFuY2VfcmVhZHMiLCB0aGUgT1NEcyBjYW4gYmUgc28gYnVzeSB0aGF0IHRoZXkgY2Fu
-J3Qgc2VuZCBoZWFydGJlYXRzIGluIHRpbWUsIHdoaWNoIGNvdWxkIGxlYWQgdG8gbW9uaXRvcnMg
-d3JvbmdseSBtYXJrIHRoZW0gZG93biBhbmQgdHJpZ2dlcnMgb3RoZXIgT1NEcyB0byBnbyB0aHJv
-dWdoIHBlZXJpbmcrcmVjb3ZlcnkrcHJvY2VzcyBkdXJpbmcgd2hpY2gsIG9uIHRoZSByZXBsaWNh
-IE9TRHMsIHRoZSBhc3NlcnRpb24gIm5lZWRzX3JlY292ZXJ5IiBhdCBSZXBsaWNhdGVkUEcuY2M6
-Mzg3IGhhcyBhIGxhcmdlIHByb2JhYmlsaXR5IHRvIGZhaWwuCgpUbyBjb25maXJtIHRoaXMgZ3Vl
-c3MsIHdlIGRpZCBzb21lIGRlc2lnbmF0ZWQgdGVzdC4gSWYgSSB3cml0ZSBleHRyYSBjb2RlIHRv
-IG1ha2UgdGhlIHJlY292ZXJ5IG9mIHNvbWUgb2JqZWN0IHdhaXQgZm9yIHRob3NlIG9wcyB0YXJn
-ZXRpbmcgdGhhdCBvYmplY3Qgd2l0aCB0aGUgdHlwZSAiQ0VQSF9NU0dfT1NEX09QIiAgdG8gZmlu
-aXNoLCB0aGUgYXNzZXJ0aW9uICJuZWVkc19yZWNvdmVyeSIgYXQgUmVwbGljYXRlZFBHLmNjOjM4
-NyB3aWxsIGFsd2F5cyBmYWlsLiBBbmQgb24gdGhlIG90aGVyIGhhbmQsIGlmIEkgbWFrZSB0aG9z
-ZSBvcHMgdGFyZ2V0aW5nIHNvbWUgb2JqZWN0IHdpdGggdGhlIHR5cGUgIkNFUEhfTVNHX09TRF9P
-UCIgd2FpdCBmb3IgdGhlIGNvcnJlc3BvbmRpbmcgcmVjb3ZlcnkgdG8gZmluaXNoLCB0aGUgYXNz
-ZXJ0aW9uIHdvbid0IGJlIHRyaWdnZXJlZC4KCkNhbiB3ZSBjb21lIHRvIHRoZSBjb25jbHVzaW9u
-IHRoYXQgdGhlIGNhdXNlIHRvIHRoZSBhc3NlcnRpb24gZmFpbHVyZSBpcyBqdXN0IGFzIHdlIHRo
-b3VnaHQ/IEFuZCwgaXQgc2VlbXMgdGhhdCB0aGUgcHVycG9zZSBvZiB0aGUgZmFpbGVkIGFzc2Vy
-dGlvbiBpcyB0byBtYWtlIHN1cmUgdGhhdCB0aGUgIm1pc3NpbmdfbG9jLm5lZWRzX3JlY292ZXJ5
-X21hcCIgZG8gY29udGFpbiB0aGUgdW5yZWFkYWJsZSBvYmplY3QuIEhvd2V2ZXIsICJtaXNzaW5n
-X2xvYy5uZWVkc19yZWNvdmVyeV9tYXAiIHNlZW1zIHRvIGJlIGFsd2F5cyBlbXB0eSBvbiByZXBs
-aWNhIE9TRHMuIENhbiB3ZSBmaXggdGhpcyBwcm9ibGVtIHNpbXBseSBieSBieXBhc3NpbmcgdGhp
-cyBhc3NlcnRpb24gaW4gc29tZSB3YXkgbGlrZToKICAgICAgICAgICAgICBpZiAoIGlzX3ByaW1h
-cnkoKSApewoJICAgICAgICAgICAgICBib29sIG5lZWRzX3JlY292ZXJ5ID0gbWlzc2luZ19sb2Mu
-bmVlZHNfcmVjb3Zlcnkoc29pZCwgJnYpOwoJICAgICAgICAgICAgICBhc3NlcnQobmVlZHNfcmVj
-b3ZlcnkpOwogICAgICAgICAgICAgICB9CgpJJ3ZlIGFsc28gc3VibWl0IGEgbmV3IGlzc3VlOiBC
-VUcgIzE4MDIxLiBQbGVhc2UgaGVscCBtZS4gVGhhbmsgeW91Oi0p
+Hi, everyone.
+
+In our online system, some OSDs always fail due to the following error:
+
+2016-10-25 19:00:00.626567 7f9a63bff700 -1 error_msg
+osd/ReplicatedPG.cc: In function 'void
+ReplicatedPG::wait_for_unreadable_object(const hobject_t&,
+OpRequestRef)' thread 7f9a63bff700 time 2016-10-25 19:00:00.624499
+osd/ReplicatedPG.cc: 387: FAILED assert(needs_recovery)
+
+ceph version 0.94.5-12-g83f56a1 (83f56a1c84e3dbd95a4c394335a7b1dc926dd1c4)
+ 1: (ReplicatedPG::wait_for_unreadable_object(hobject_t const&,
+std::tr1::shared_ptr&lt;OpRequest&gt;)+0x3f5) [0x8b5a65]
+ 2: (ReplicatedPG::do_op(std::tr1::shared_ptr&lt;OpRequest&gt;&)+0x5e9)
+[0x8f0c79]
+ 3: (ReplicatedPG::do_request(std::tr1::shared_ptr&lt;OpRequest&gt;&,
+ThreadPool::TPHandle&)+0x4e3) [0x87fdc3]
+ 4: (OSD::dequeue_op(boost::intrusive_ptr&lt;PG&gt;,
+std::tr1::shared_ptr&lt;OpRequest&gt;, ThreadPool::TPHandle&)+0x178)
+[0x66b3f8]
+ 5: (OSD::ShardedOpWQ::_process(unsigned int,
+ceph::heartbeat_handle_d*)+0x59e) [0x66f8ee]
+ 6: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x795) [0xa76d85]
+ 7: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xa7a610]
+ 8: /lib64/libpthread.so.0() [0x3471407a51]
+ 9: (clone()+0x6d) [0x34710e893d]
+ NOTE: a copy of the executable, or `objdump -rdS &lt;executable&gt;`
+is needed to interpret this.
+
+Our verion of ceph is 0.94.5.
+After doing some reading of the source code and analysis of our online
+scenarios, we made some conjecture:
+       When encountering a large number of "balance_reads", the OSDs
+can be so busy that they can't send heartbeats in time, which could
+lead to monitors wrongly mark them down and triggers other OSDs to go
+through peering+recovery+process during which, on the replica OSDs,
+the assertion "needs_recovery" at ReplicatedPG.cc:387 has a large
+probability to fail.
+
+To confirm this guess, we did some designated test. If I write extra
+code to make the recovery of some object wait for those ops targeting
+that object with the type "CEPH_MSG_OSD_OP"  to finish, the assertion
+"needs_recovery" at ReplicatedPG.cc:387 will always fail. And on the
+other hand, if I make those ops targeting some object with the type
+"CEPH_MSG_OSD_OP" wait for the corresponding recovery to finish, the
+assertion won't be triggered.
+
+Can we come to the conclusion that the cause to the assertion failure
+is just as we thought? And, it seems that the purpose of the failed
+assertion is to make sure that the "missing_loc.needs_recovery_map" do
+contain the unreadable object. However,
+"missing_loc.needs_recovery_map" seems to be always empty on replica
+OSDs. Can we fix this problem simply by bypassing this assertion in
+some way like:
+              if ( is_primary() ){
+             bool needs_recovery = missing_loc.needs_recovery(soid, &v);
+             assert(needs_recovery);
+               }
+
+I've also submit a new issue: BUG #18021. Please help me. Thank you:-)
