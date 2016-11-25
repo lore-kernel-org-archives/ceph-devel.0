@@ -1,78 +1,75 @@
-From: Xuehan Xu <xxhdx1985126@gmail.com>
-Subject: Assertion "needs_recovery" fails when balance_read reaches a replica
- OSD where the target object is not recovered yet.
-Date: Thu, 24 Nov 2016 19:30:11 +0800
-Message-ID: <CAJACTuf0+ZPGE9Rdvjikt1HgahC5F_yZP2b1G5zDuf3C_c7W5Q@mail.gmail.com>
+From: xxhdx1985126 <xxhdx1985126@163.com>
+Subject: Fw:Assertion "needs_recovery" fails when balance_read reaches a
+ replica OSD where the target object is not recovered yet.
+Date: Fri, 25 Nov 2016 14:47:24 +0800 (CST)
+Message-ID: <4232dc21.6265.1589a3d146c.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f178.google.com ([209.85.216.178]:35462 "EHLO
-        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S964851AbcKXLaM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Nov 2016 06:30:12 -0500
-Received: by mail-qt0-f178.google.com with SMTP id c47so37657292qtc.2
-        for <ceph-devel@vger.kernel.org>; Thu, 24 Nov 2016 03:30:12 -0800 (PST)
+Received: from m13-124.163.com ([220.181.13.124]:32523 "EHLO m13-124.163.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750995AbcKYGra (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 25 Nov 2016 01:47:30 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi, everyone.
-
-In our online system, some OSDs always fail due to the following error:
-
-2016-10-25 19:00:00.626567 7f9a63bff700 -1 error_msg
-osd/ReplicatedPG.cc: In function 'void
-ReplicatedPG::wait_for_unreadable_object(const hobject_t&,
-OpRequestRef)' thread 7f9a63bff700 time 2016-10-25 19:00:00.624499
-osd/ReplicatedPG.cc: 387: FAILED assert(needs_recovery)
-
-ceph version 0.94.5-12-g83f56a1 (83f56a1c84e3dbd95a4c394335a7b1dc926dd1c4)
- 1: (ReplicatedPG::wait_for_unreadable_object(hobject_t const&,
-std::tr1::shared_ptr&lt;OpRequest&gt;)+0x3f5) [0x8b5a65]
- 2: (ReplicatedPG::do_op(std::tr1::shared_ptr&lt;OpRequest&gt;&)+0x5e9)
-[0x8f0c79]
- 3: (ReplicatedPG::do_request(std::tr1::shared_ptr&lt;OpRequest&gt;&,
-ThreadPool::TPHandle&)+0x4e3) [0x87fdc3]
- 4: (OSD::dequeue_op(boost::intrusive_ptr&lt;PG&gt;,
-std::tr1::shared_ptr&lt;OpRequest&gt;, ThreadPool::TPHandle&)+0x178)
-[0x66b3f8]
- 5: (OSD::ShardedOpWQ::_process(unsigned int,
-ceph::heartbeat_handle_d*)+0x59e) [0x66f8ee]
- 6: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x795) [0xa76d85]
- 7: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xa7a610]
- 8: /lib64/libpthread.so.0() [0x3471407a51]
- 9: (clone()+0x6d) [0x34710e893d]
- NOTE: a copy of the executable, or `objdump -rdS &lt;executable&gt;`
-is needed to interpret this.
-
-Our verion of ceph is 0.94.5.
-After doing some reading of the source code and analysis of our online
-scenarios, we made some conjecture:
-       When encountering a large number of "balance_reads", the OSDs
-can be so busy that they can't send heartbeats in time, which could
-lead to monitors wrongly mark them down and triggers other OSDs to go
-through peering+recovery+process during which, on the replica OSDs,
-the assertion "needs_recovery" at ReplicatedPG.cc:387 has a large
-probability to fail.
-
-To confirm this guess, we did some designated test. If I write extra
-code to make the recovery of some object wait for those ops targeting
-that object with the type "CEPH_MSG_OSD_OP"  to finish, the assertion
-"needs_recovery" at ReplicatedPG.cc:387 will always fail. And on the
-other hand, if I make those ops targeting some object with the type
-"CEPH_MSG_OSD_OP" wait for the corresponding recovery to finish, the
-assertion won't be triggered.
-
-Can we come to the conclusion that the cause to the assertion failure
-is just as we thought? And, it seems that the purpose of the failed
-assertion is to make sure that the "missing_loc.needs_recovery_map" do
-contain the unreadable object. However,
-"missing_loc.needs_recovery_map" seems to be always empty on replica
-OSDs. Can we fix this problem simply by bypassing this assertion in
-some way like:
-              if ( is_primary() ){
-             bool needs_recovery = missing_loc.needs_recovery(soid, &v);
-             assert(needs_recovery);
-               }
-
-I've also submit a new issue: BUG #18021. Please help me. Thank you:-)
+SGksIGV2ZXJ5b25lLgoKQ2FuIEkgYnlwYXNzIHRoaXMgcHJvYmxlbSBieSBub3QgdXNpbmcgTElC
+UkFET1NfT1BFUkFUSU9OX0JBTEFOQ0VfUkVBRFM/IFRoYW5rIHlvdTotKQoKCgotLS0tLS0tLSBG
+b3J3YXJkaW5nIG1lc3NhZ2VzIC0tLS0tLS0tCkZyb206ICJ4eGhkeDE5ODUxMjYiIDx4eGhkeDE5
+ODUxMjZAMTYzLmNvbT4KRGF0ZTogMjAxNi0xMS0yNCAxNzoxMToxNgpUbzogICJjZXBoLWRldmVs
+QHZnZXIua2VybmVsLm9yZyIgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPgpTdWJqZWN0OiBB
+c3NlcnRpb24gIm5lZWRzX3JlY292ZXJ5IiBmYWlscyB3aGVuIGJhbGFuY2VfcmVhZCByZWFjaGVz
+IGEgcmVwbGljYSBPU0Qgd2hlcmUgdGhlIHRhcmdldCBvYmplY3QgaXMgbm90IHJlY292ZXJlZCB5
+ZXQuCkhpLCBldmVyeW9uZS4KCkluIG91ciBvbmxpbmUgc3lzdGVtLCBzb21lIE9TRHMgYWx3YXlz
+IGZhaWwgZHVlIHRvIHRoZSBmb2xsb3dpbmcgZXJyb3I6CgoyMDE2LTEwLTI1IDE5OjAwOjAwLjYy
+NjU2NyA3ZjlhNjNiZmY3MDAgLTEgZXJyb3JfbXNnIG9zZC9SZXBsaWNhdGVkUEcuY2M6IEluIGZ1
+bmN0aW9uICd2b2lkIFJlcGxpY2F0ZWRQRzo6d2FpdF9mb3JfdW5yZWFkYWJsZV9vYmplY3QoY29u
+c3QgaG9iamVjdF90JiwgT3BSZXF1ZXN0UmVmKScgdGhyZWFkIDdmOWE2M2JmZjcwMCB0aW1lIDIw
+MTYtMTAtMjUgMTk6MDA6MDAuNjI0NDk5Cm9zZC9SZXBsaWNhdGVkUEcuY2M6IDM4NzogRkFJTEVE
+IGFzc2VydChuZWVkc19yZWNvdmVyeSkKCmNlcGggdmVyc2lvbiAwLjk0LjUtMTItZzgzZjU2YTEg
+KDgzZjU2YTFjODRlM2RiZDk1YTRjMzk0MzM1YTdiMWRjOTI2ZGQxYzQpCiAxOiAoUmVwbGljYXRl
+ZFBHOjp3YWl0X2Zvcl91bnJlYWRhYmxlX29iamVjdChob2JqZWN0X3QgY29uc3QmLCBzdGQ6OnRy
+MTo6c2hhcmVkX3B0ciZsdDtPcFJlcXVlc3QmZ3Q7KSsweDNmNSkgWzB4OGI1YTY1XQogMjogKFJl
+cGxpY2F0ZWRQRzo6ZG9fb3Aoc3RkOjp0cjE6OnNoYXJlZF9wdHImbHQ7T3BSZXF1ZXN0Jmd0OyYp
+KzB4NWU5KSBbMHg4ZjBjNzldCiAzOiAoUmVwbGljYXRlZFBHOjpkb19yZXF1ZXN0KHN0ZDo6dHIx
+OjpzaGFyZWRfcHRyJmx0O09wUmVxdWVzdCZndDsmLCBUaHJlYWRQb29sOjpUUEhhbmRsZSYpKzB4
+NGUzKSBbMHg4N2ZkYzNdCiA0OiAoT1NEOjpkZXF1ZXVlX29wKGJvb3N0OjppbnRydXNpdmVfcHRy
+Jmx0O1BHJmd0Oywgc3RkOjp0cjE6OnNoYXJlZF9wdHImbHQ7T3BSZXF1ZXN0Jmd0OywgVGhyZWFk
+UG9vbDo6VFBIYW5kbGUmKSsweDE3OCkgWzB4NjZiM2Y4XQogNTogKE9TRDo6U2hhcmRlZE9wV1E6
+Ol9wcm9jZXNzKHVuc2lnbmVkIGludCwgY2VwaDo6aGVhcnRiZWF0X2hhbmRsZV9kKikrMHg1OWUp
+IFsweDY2ZjhlZV0KIDY6IChTaGFyZGVkVGhyZWFkUG9vbDo6c2hhcmRlZHRocmVhZHBvb2xfd29y
+a2VyKHVuc2lnbmVkIGludCkrMHg3OTUpIFsweGE3NmQ4NV0KIDc6IChTaGFyZGVkVGhyZWFkUG9v
+bDo6V29ya1RocmVhZFNoYXJkZWQ6OmVudHJ5KCkrMHgxMCkgWzB4YTdhNjEwXQogODogL2xpYjY0
+L2xpYnB0aHJlYWQuc28uMCgpIFsweDM0NzE0MDdhNTFdCiA5OiAoY2xvbmUoKSsweDZkKSBbMHgz
+NDcxMGU4OTNkXQogTk9URTogYSBjb3B5IG9mIHRoZSBleGVjdXRhYmxlLCBvciBgb2JqZHVtcCAt
+cmRTICZsdDtleGVjdXRhYmxlJmd0O2AgaXMgbmVlZGVkIHRvIGludGVycHJldCB0aGlzLgoKT3Vy
+IHZlcmlvbiBvZiBjZXBoIGlzIDAuOTQuNS4gCkFmdGVyIGRvaW5nIHNvbWUgcmVhZGluZyBvZiB0
+aGUgc291cmNlIGNvZGUgYW5kIGFuYWx5c2lzIG9mIG91ciBvbmxpbmUgc2NlbmFyaW9zLCB3ZSBt
+YWRlIHNvbWUgY29uamVjdHVyZToKICAgICAgIFdoZW4gZW5jb3VudGVyaW5nIGEgbGFyZ2UgbnVt
+YmVyIG9mICJiYWxhbmNlX3JlYWRzIiwgdGhlIE9TRHMgY2FuIGJlIHNvIGJ1c3kgdGhhdCB0aGV5
+IGNhbid0IHNlbmQgaGVhcnRiZWF0cyBpbiB0aW1lLCB3aGljaCBjb3VsZCBsZWFkIHRvIG1vbml0
+b3JzIHdyb25nbHkgbWFyayB0aGVtIGRvd24gYW5kIHRyaWdnZXJzIG90aGVyIE9TRHMgdG8gZ28g
+dGhyb3VnaCBwZWVyaW5nK3JlY292ZXJ5K3Byb2Nlc3MgZHVyaW5nIHdoaWNoLCBvbiB0aGUgcmVw
+bGljYSBPU0RzLCB0aGUgYXNzZXJ0aW9uICJuZWVkc19yZWNvdmVyeSIgYXQgUmVwbGljYXRlZFBH
+LmNjOjM4NyBoYXMgYSBsYXJnZSBwcm9iYWJpbGl0eSB0byBmYWlsLgoKVG8gY29uZmlybSB0aGlz
+IGd1ZXNzLCB3ZSBkaWQgc29tZSBkZXNpZ25hdGVkIHRlc3QuIElmIEkgd3JpdGUgZXh0cmEgY29k
+ZSB0byBtYWtlIHRoZSByZWNvdmVyeSBvZiBzb21lIG9iamVjdCB3YWl0IGZvciB0aG9zZSBvcHMg
+dGFyZ2V0aW5nIHRoYXQgb2JqZWN0IHdpdGggdGhlIHR5cGUgIkNFUEhfTVNHX09TRF9PUCIgIHRv
+IGZpbmlzaCwgdGhlIGFzc2VydGlvbiAibmVlZHNfcmVjb3ZlcnkiIGF0IFJlcGxpY2F0ZWRQRy5j
+YzozODcgd2lsbCBhbHdheXMgZmFpbC4gQW5kIG9uIHRoZSBvdGhlciBoYW5kLCBpZiBJIG1ha2Ug
+dGhvc2Ugb3BzIHRhcmdldGluZyBzb21lIG9iamVjdCB3aXRoIHRoZSB0eXBlICJDRVBIX01TR19P
+U0RfT1AiIHdhaXQgZm9yIHRoZSBjb3JyZXNwb25kaW5nIHJlY292ZXJ5IHRvIGZpbmlzaCwgdGhl
+IGFzc2VydGlvbiB3b24ndCBiZSB0cmlnZ2VyZWQuCgpDYW4gd2UgY29tZSB0byB0aGUgY29uY2x1
+c2lvbiB0aGF0IHRoZSBjYXVzZSB0byB0aGUgYXNzZXJ0aW9uIGZhaWx1cmUgaXMganVzdCBhcyB3
+ZSB0aG91Z2h0PyBBbmQsIGl0IHNlZW1zIHRoYXQgdGhlIHB1cnBvc2Ugb2YgdGhlIGZhaWxlZCBh
+c3NlcnRpb24gaXMgdG8gbWFrZSBzdXJlIHRoYXQgdGhlICJtaXNzaW5nX2xvYy5uZWVkc19yZWNv
+dmVyeV9tYXAiIGRvIGNvbnRhaW4gdGhlIHVucmVhZGFibGUgb2JqZWN0LiBIb3dldmVyLCAibWlz
+c2luZ19sb2MubmVlZHNfcmVjb3ZlcnlfbWFwIiBzZWVtcyB0byBiZSBhbHdheXMgZW1wdHkgb24g
+cmVwbGljYSBPU0RzLiBDYW4gd2UgZml4IHRoaXMgcHJvYmxlbSBzaW1wbHkgYnkgYnlwYXNzaW5n
+IHRoaXMgYXNzZXJ0aW9uIGluIHNvbWUgd2F5IGxpa2U6CiAgICAgICAgICAgICAgaWYgKCBpc19w
+cmltYXJ5KCkgKXsKCSAgICAgICAgICAgICAgYm9vbCBuZWVkc19yZWNvdmVyeSA9IG1pc3Npbmdf
+bG9jLm5lZWRzX3JlY292ZXJ5KHNvaWQsICZ2KTsKCSAgICAgICAgICAgICAgYXNzZXJ0KG5lZWRz
+X3JlY292ZXJ5KTsKICAgICAgICAgICAgICAgfQoKSSd2ZSBhbHNvIHN1Ym1pdCBhIG5ldyBpc3N1
+ZTogQlVHICMxODAyMS4gUGxlYXNlIGhlbHAgbWUuIFRoYW5rIHlvdTotKQ==
