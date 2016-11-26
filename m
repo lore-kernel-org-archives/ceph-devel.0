@@ -1,30 +1,49 @@
-From: John Spray <jspray@redhat.com>
-Subject: "exe" ceph-mds processes
-Date: Sat, 26 Nov 2016 01:58:02 +0000
-Message-ID: <CALe9h7fort-NWax8LUXMB1gGycvUXNundNzdbzVaypcpQWEC6w@mail.gmail.com>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: What is XFS/filesystem corruption and whose fault is it?
+Date: Sat, 26 Nov 2016 14:56:16 +0100 (CET)
+Message-ID: <1843397305.3730062.1480168576510.JavaMail.zimbra@oxygem.tv>
+References: <e7d7de6a-fd30-4957-b49d-9f3f2ae10871@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f173.google.com ([209.85.216.173]:33565 "EHLO
-        mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753549AbcKZB6Y (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Nov 2016 20:58:24 -0500
-Received: by mail-qt0-f173.google.com with SMTP id p16so78631716qta.0
-        for <ceph-devel@vger.kernel.org>; Fri, 25 Nov 2016 17:58:23 -0800 (PST)
+Received: from mailpro.odiso.net ([89.248.211.110]:41400 "EHLO
+        mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751192AbcKZN4f (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 26 Nov 2016 08:56:35 -0500
+In-Reply-To: <e7d7de6a-fd30-4957-b49d-9f3f2ae10871@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>, Patrick Donnelly <pdonnell@redhat.com>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Since 66a122025 we've respawned MDSs using /proc/self/exe to avoid
-issues if argv[0] was no longer there, but I've only just realised
-that this leads to the respawned daemons not showing up as "ceph-mds"
-in the process list any more, they're just "exe".
+I think writeback should not be a problem if barrier is enabled.
 
-I guess we could:
- * Switch the logic to try resolving argv[0] and only use
-proc/self/exe if we can't find argv[0]?
- * Create a link to /proc/self/exe named ceph-mds, and exec that?
+you can loose last x seconds of writes, but fs should not break.
 
-Any thoughts?
 
-John
+Also for ssd drives, you need supercapacitor (generally present in all enterprise ssd),
+to not loose datas in ssd memory buffer
+
+----- Mail original -----
+De: "Nathan Cutler" <ncutler@suse.cz>
+À: "ceph-devel" <ceph-devel@vger.kernel.org>
+Envoyé: Vendredi 25 Novembre 2016 17:26:07
+Objet: What is XFS/filesystem corruption and whose fault is it?
+
+I've been doing some research on OSDs not starting after power outages, 
+when supposedly "uncorruptible" XFS filesystems are corrupted and need 
+repair. This led me to write the following brief blog post: 
+
+http://smithfarm-thebrain.blogspot.cz/2016/11/what-is-xfsfilesystem-corruption-and.html 
+
+Any comments and/or suggestions for improvement would be most welcome. 
+
+Thanks for reading! 
+
+Nathan 
+-- 
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in 
+the body of a message to majordomo@vger.kernel.org 
+More majordomo info at http://vger.kernel.org/majordomo-info.html 
+
