@@ -1,49 +1,40 @@
-From: Alexandre DERUMIER <aderumier@odiso.com>
-Subject: Re: What is XFS/filesystem corruption and whose fault is it?
-Date: Sat, 26 Nov 2016 14:56:16 +0100 (CET)
-Message-ID: <1843397305.3730062.1480168576510.JavaMail.zimbra@oxygem.tv>
-References: <e7d7de6a-fd30-4957-b49d-9f3f2ae10871@suse.cz>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: "exe" ceph-mds processes
+Date: Sat, 26 Nov 2016 14:34:18 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1611261433390.28496@piezo.us.to>
+References: <CALe9h7fort-NWax8LUXMB1gGycvUXNundNzdbzVaypcpQWEC6w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailpro.odiso.net ([89.248.211.110]:41400 "EHLO
-        mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751192AbcKZN4f (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 26 Nov 2016 08:56:35 -0500
-In-Reply-To: <e7d7de6a-fd30-4957-b49d-9f3f2ae10871@suse.cz>
+Received: from mx1.redhat.com ([209.132.183.28]:37378 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751568AbcKZOe1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 26 Nov 2016 09:34:27 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id C894DC04B31B
+        for <ceph-devel@vger.kernel.org>; Sat, 26 Nov 2016 14:34:20 +0000 (UTC)
+In-Reply-To: <CALe9h7fort-NWax8LUXMB1gGycvUXNundNzdbzVaypcpQWEC6w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Patrick Donnelly <pdonnell@redhat.com>
 
-I think writeback should not be a problem if barrier is enabled.
+On Sat, 26 Nov 2016, John Spray wrote:
+> Since 66a122025 we've respawned MDSs using /proc/self/exe to avoid
+> issues if argv[0] was no longer there, but I've only just realised
+> that this leads to the respawned daemons not showing up as "ceph-mds"
+> in the process list any more, they're just "exe".
+> 
+> I guess we could:
+>  * Switch the logic to try resolving argv[0] and only use
+> proc/self/exe if we can't find argv[0]?
+>  * Create a link to /proc/self/exe named ceph-mds, and exec that?
 
-you can loose last x seconds of writes, but fs should not break.
+We could also check if argv[0] is 'exe' and, if so, rewrite it so that the 
+ps output shows ceph-mds...
 
+http://stackoverflow.com/questions/23398952/changing-linux-ps-output-by-changing-argv0
 
-Also for ssd drives, you need supercapacitor (generally present in all enterprise ssd),
-to not loose datas in ssd memory buffer
-
------ Mail original -----
-De: "Nathan Cutler" <ncutler@suse.cz>
-À: "ceph-devel" <ceph-devel@vger.kernel.org>
-Envoyé: Vendredi 25 Novembre 2016 17:26:07
-Objet: What is XFS/filesystem corruption and whose fault is it?
-
-I've been doing some research on OSDs not starting after power outages, 
-when supposedly "uncorruptible" XFS filesystems are corrupted and need 
-repair. This led me to write the following brief blog post: 
-
-http://smithfarm-thebrain.blogspot.cz/2016/11/what-is-xfsfilesystem-corruption-and.html 
-
-Any comments and/or suggestions for improvement would be most welcome. 
-
-Thanks for reading! 
-
-Nathan 
--- 
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in 
-the body of a message to majordomo@vger.kernel.org 
-More majordomo info at http://vger.kernel.org/majordomo-info.html 
-
+sage
