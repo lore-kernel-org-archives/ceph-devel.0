@@ -1,51 +1,80 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: Proposition - latency histogram
-Date: Mon, 28 Nov 2016 16:46:20 +0000
-Message-ID: <BLUPR0201MB1524749EAC9F82FC140D379DE88A0@BLUPR0201MB1524.namprd02.prod.outlook.com>
-References: <69bf4eec-3959-f021-ad8f-d1b6d3e2ceaf@corp.ovh.com>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: Proposition - latency histogram
+Date: Mon, 28 Nov 2016 18:05:42 -0500
+Message-ID: <CANP1eJH1+ejUupk84ikBLBhPMs79hJSus1u1Q9t2EhBaXYk8hQ@mail.gmail.com>
+References: <69bf4eec-3959-f021-ad8f-d1b6d3e2ceaf@corp.ovh.com> <BLUPR0201MB1524749EAC9F82FC140D379DE88A0@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0049.outbound.protection.outlook.com ([104.47.32.49]:26992
-        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754767AbcK1WR5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 28 Nov 2016 17:17:57 -0500
-In-Reply-To: <69bf4eec-3959-f021-ad8f-d1b6d3e2ceaf@corp.ovh.com>
-Content-Language: en-US
+Received: from mail-lf0-f42.google.com ([209.85.215.42]:34977 "EHLO
+        mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933063AbcK1XFp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2016 18:05:45 -0500
+Received: by mail-lf0-f42.google.com with SMTP id b14so108301972lfg.2
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Nov 2016 15:05:44 -0800 (PST)
+In-Reply-To: <BLUPR0201MB1524749EAC9F82FC140D379DE88A0@BLUPR0201MB1524.namprd02.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?= <bartlomiej.swiecki@corp.ovh.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?= <bartlomiej.swiecki@corp.ovh.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
-ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
-Z10gT24gQmVoYWxmIE9mIEJhcnRsb21pZWogU3dpZWNraQ0KPiBTZW50OiBNb25kYXksIE5vdmVt
-YmVyIDI4LCAyMDE2IDg6MjIgQU0NCj4gVG86IENlcGggRGV2ZWxvcG1lbnQgPGNlcGgtZGV2ZWxA
-dmdlci5rZXJuZWwub3JnPg0KPiBTdWJqZWN0OiBQcm9wb3NpdGlvbiAtIGxhdGVuY3kgaGlzdG9n
-cmFtDQo+IA0KPiBIaSwNCj4gDQo+IA0KPiBDdXJyZW50bHkgd2UgY2FuIHF1ZXJ5IE9TRCBmb3Ig
-b3AgbGF0ZW5jeSBidXQgaXQncyBnaXZlbiBhcyBhbiBhdmVyYWdlLg0KPiBBdmVyYWdlIG1heSBu
-b3QgZ2l2ZQ0KPiB0aGUgYmV0cyBpbmZvcm1hdGlvbiBpbiB0aGlzIGNhc2UgLSBpLmUuIHNwaWtl
-cyBjYW4gZWFzaWx5IGdldCBoaWRkZW4gdGhlcmUuDQo+IA0KPiBJbnN0ZWFkIG9mIGFuIGF2ZXJh
-Z2Ugd2UgY291bGQgZWFzaWx5IGRvIGEgc2ltcGxlIGhpc3RvZ3JhbSAtIHF1YW50aXplIHRoZQ0K
-PiBsYXRlbmN5IGludG8gcHJlZGVmaW5lZCBzZXQgb2YgdGltZSBpbnRlcnZhbHMsIGZvciBlYWNo
-IG9mIHRoZW0gaGF2ZSBhIHNpbXBsZQ0KPiBwZXJmb3JtYW5jZSBjb3VudGVyLCBhdCBlYWNoIG9w
-IGluY3JlYXNlIG9uZSBvZiB0aGVtLiBTaW5jZSB0aG9zZSBhcmUgcGVyDQo+IE9TRCwgd2UgY291
-bGQgaGF2ZSBwcmV0dHkgaGlnaCByZXNvbHV0aW9uIHdpdGggZnJhY3Rpb25hbCBtZW1vcnkgdXNh
-Z2UsDQo+IHBlcmZvcm1hbmNlIGltcGFjdCBzaG91bGQgYmUgbmVnbGlnaWJsZSBzaW5jZSBvbmx5
-IG9uZSAodHdvIGlmIHNwbGl0IGludG8gcmVhZA0KPiBhbmQgd3JpdGUpIG9mIHRob3NlIGNvdW50
-ZXJzIHdvdWxkIGJlIGluY3JlbWVudGVkIHBlciBvbmUgb3NkIG9wLg0KPiANCg0KKzENCg0KQSBy
-ZW1pbmRlciwgdGhlcmUgYXJlIGRpZmZlcmVudCBsYXRlbmN5IGRvbWFpbnMgZm9yIHRoZSBkaWZm
-ZXJlbnQgbWVkaWEgdHlwZXMgKGZsYXNoLCBIREQpLiBPbmUgc29sdXRpb24gaXMgdG8gbWFrZSB0
-aGUgYnVja2V0cyBiZSBwYXJhbWV0ZXJpemVkLg0KDQo+IEluIGFkZGl0aW9uIHdlIGNvdWxkIGFs
-c28gZG8gdGhpcyBpbiAyRCAtIGVhY2ggY291bnRlciBtYXRjaGluZyBnaXZlbiBsYXRlbmN5DQo+
-IHJhbmdlIGFuZCBvcCBzaXplIHJhbmdlLg0KPiBoYXZpbmcgc3VjaCAyRCB0YWJsZSB3b3VsZCBz
-aG93IGJvdGggbGF0ZW5jeSBoaXN0b2dyYW0sIHJlcXVlc3Qgc2l6ZQ0KPiBoaXN0b2dyYW0gYW5k
-IGNvbWJpbmF0aW9ucyBvZiB0aG9zZSAoaS5lLiBsYXRlbmN5IGhpc3RvZ3JhbSBvZiB+NGsgb3Bz
-IG9ubHkpLg0KPiANCj4gV2hhdCBkbyB5b3UgdGhpbmsgYWJvdXQgdGhpcyBpZGVhPyBJIGNhbiBw
-cmVwYXJlIHNvbWUgY29kZSAtIGEgc2ltcGxlIHByb29mDQo+IG9mIGNvbmNlcHQgbG9va3MgcmVh
-bGx5IHN0cmFpZ2h0Zm9yd2FyZCB0byBpbXBsZW1lbnQuDQo+IA0KPiANCj4gQmFydGVrDQo+IA0K
-PiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
-dWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9y
-ZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3Zn
-ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+On Mon, Nov 28, 2016 at 11:46 AM, Allen Samuels
+<Allen.Samuels@sandisk.com> wrote:
+>
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> > owner@vger.kernel.org] On Behalf Of Bartlomiej Swiecki
+> > Sent: Monday, November 28, 2016 8:22 AM
+> > To: Ceph Development <ceph-devel@vger.kernel.org>
+> > Subject: Proposition - latency histogram
+> >
+> > Hi,
+> >
+> >
+> > Currently we can query OSD for op latency but it's given as an average.
+> > Average may not give
+> > the bets information in this case - i.e. spikes can easily get hidden there.
+> >
+> > Instead of an average we could easily do a simple histogram - quantize the
+> > latency into predefined set of time intervals, for each of them have a simple
+> > performance counter, at each op increase one of them. Since those are per
+> > OSD, we could have pretty high resolution with fractional memory usage,
+> > performance impact should be negligible since only one (two if split into read
+> > and write) of those counters would be incremented per one osd op.
+> >
+>
+> +1
+>
+> A reminder, there are different latency domains for the different media types (flash, HDD). One solution is to make the buckets be parameterized.
+
+
+The histogram can be represented using Count Min Sketch which can
+compress a lot buckets in a small space giving us more resolution in
+the X axis in exchange for some error in Y axis. You can later
+transform it on the fly into something that is closely related to the
+buckets you want to use. If you have a cluster that uses different
+kind of storage (nvme, ssd, spinning disk and maybe EC) you will end
+up values all over the map (as you mentioned).
+
+And while Count Min Sketch it should be enough to estimate and show a
+visual representation of PDF or CDF (probability/cumulative density
+function) from the discretized estimate.
+
+There's also other sketches for doing histograms like these, but I'm
+less familiar with them. I'm guessing that somebody with a
+stats/science background can point to them/
+
+
+>
+>
+> > In addition we could also do this in 2D - each counter matching given latency
+> > range and op size range.
+> > having such 2D table would show both latency histogram, request size
+> > histogram and combinations of those (i.e. latency histogram of ~4k ops only).
+> >
+> > What do you think about this idea? I can prepare some code - a simple proof
+> > of concept looks really straightforward to implement.
+> >
+> >
+> > Bartek
+> >
