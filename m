@@ -1,169 +1,45 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Introducing DeepSea: A tool for deploying Ceph
-	using Salt
-Date: Mon, 28 Nov 2016 16:47:31 +0530
-Message-ID: <CANA9Uk6D6nyjvbmqfJJ57-VxK-GMqBeRJ_E9n5E1URH3m99Ggg@mail.gmail.com>
-References: <0c7928bb-947a-23c9-5770-e588dbffb6af@suse.com>
-	<CANA9Uk6WbrdOv9FHmPaGYKodk94O-apUSya+7vEe+i+9seF8qw@mail.gmail.com>
+From: "Igor.Podoski@ts.fujitsu.com" <Igor.Podoski@ts.fujitsu.com>
+Subject: RE: "exe" ceph-mds processes
+Date: Mon, 28 Nov 2016 11:29:40 +0000
+Message-ID: <432789e85f484dfca805b29e8c82d929@R01UKEXCASM222.r01.fujitsu.local>
+References: <CALe9h7fort-NWax8LUXMB1gGycvUXNundNzdbzVaypcpQWEC6w@mail.gmail.com>
+ <alpine.DEB.2.11.1611261433390.28496@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1568959139=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANA9Uk6WbrdOv9FHmPaGYKodk94O-apUSya+7vEe+i+9seF8qw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Tim Serong <tserong-IBi9RG/b67k@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail1.bemta6.messagelabs.com ([193.109.254.106]:11020 "EHLO
+        mail1.bemta6.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1753751AbcK1LhW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 28 Nov 2016 06:37:22 -0500
+In-Reply-To: <alpine.DEB.2.11.1611261433390.28496@piezo.us.to>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Patrick Donnelly <pdonnell@redhat.com>
 
---===============1568959139==
-Content-Type: multipart/alternative; boundary=001a113b51242f9c8c05425a9e5e
+> > I guess we could:
+> >  * Switch the logic to try resolving argv[0] and only use
+> > proc/self/exe if we can't find argv[0]?
+> >  * Create a link to /proc/self/exe named ceph-mds, and exec that?
+> 
+> We could also check if argv[0] is 'exe' and, if so, rewrite it so that the ps
+> output shows ceph-mds...
 
---001a113b51242f9c8c05425a9e5e
-Content-Type: text/plain; charset=UTF-8
+For ps/pgrep/pkill it'll work, but 'top' reports process name differently and you'll see 'exe' there. I think this is because 'ps' is looking on command line and 'top' on something else in procfs. You need to run also prctl(PR_SET_NAME, argv[0]) shortly after process starts. This could be a race condition, when system will be under big load, for a moment process name would change from 'ceph-mds' to 'exe' and then back to 'ceph-mds', pid will remain the same but some third party monitoring software could be confused (depends how they check the process name).
 
-Hello Tim,
-Can you please confirm, if the DeepSea works on Ubuntu also?
+I'm not sure, but I think you could pass argv again here, then respawn will short to:
+execv("/proc/self/exe", argv);
 
-Thanks
+And process name will be kept, since first start will set argv[0] and passing argv to execv + prctl will propagate it.
 
-On Fri, Nov 25, 2016 at 3:34 PM, M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-wrote:
-
-> Hello Tim,
-> Can you please confirm, if the DeepSea works on Ubuntu also?
->
-> Thanks
-> Swami
->
-> On Thu, Nov 3, 2016 at 11:22 AM, Tim Serong <tserong-IBi9RG/b67k@public.gmane.org> wrote:
->
->> Hi All,
->>
->> I thought I should make a little noise about a project some of us at
->> SUSE have been working on, called DeepSea.  It's a collection of Salt
->> states, runners and modules for orchestrating deployment of Ceph
->> clusters.  To help everyone get a feel for it, I've written a blog post
->> which walks through using DeepSea to set up a small test cluster:
->>
->>   http://ourobengr.com/2016/11/hello-salty-goodness/
->>
->> If you'd like to try it out yourself, the code is on GitHub:
->>
->>   https://github.com/SUSE/DeepSea
->>
->> More detailed documentation can be found at:
->>
->>   https://github.com/SUSE/DeepSea/wiki/intro
->>   https://github.com/SUSE/DeepSea/wiki/management
->>   https://github.com/SUSE/DeepSea/wiki/policy
->>
->> Usual story: feedback, issues, pull requests are all welcome ;)
->>
->> Enjoy,
->>
->> Tim
->> --
->> Tim Serong
->> Senior Clustering Engineer
->> SUSE
->> tserong-IBi9RG/b67k@public.gmane.org
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
->
->
-
---001a113b51242f9c8c05425a9e5e
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><span style=3D"font-size:12.8px">Hello Tim,</span><div sty=
-le=3D"font-size:12.8px">Can you please confirm, if the DeepSea works on Ubu=
-ntu also?</div><div style=3D"font-size:12.8px"><br></div><div style=3D"font=
--size:12.8px">Thanks</div></div><div class=3D"gmail_extra"><br><div class=
-=3D"gmail_quote">On Fri, Nov 25, 2016 at 3:34 PM, M Ranga Swami Reddy <span=
- dir=3D"ltr">&lt;<a href=3D"mailto:swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">=
-swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_qu=
-ote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex=
-"><div dir=3D"ltr">Hello Tim,<div>Can you please confirm, if the DeepSea wo=
-rks on Ubuntu also?</div><div><br></div><div>Thanks</div><span class=3D"HOE=
-nZb"><font color=3D"#888888"><div>Swami</div></font></span></div><div class=
-=3D"HOEnZb"><div class=3D"h5"><div class=3D"gmail_extra"><br><div class=3D"=
-gmail_quote">On Thu, Nov 3, 2016 at 11:22 AM, Tim Serong <span dir=3D"ltr">=
-&lt;<a href=3D"mailto:tserong-IBi9RG/b67k@public.gmane.org" target=3D"_blank">tserong-IBi9RG/b67k@public.gmane.org<=
-/a>&gt;</span> wrote:<br><blockquote class=3D"gmail_quote" style=3D"margin:=
-0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">Hi All,<br>
-<br>
-I thought I should make a little noise about a project some of us at<br>
-SUSE have been working on, called DeepSea.=C2=A0 It&#39;s a collection of S=
-alt<br>
-states, runners and modules for orchestrating deployment of Ceph<br>
-clusters.=C2=A0 To help everyone get a feel for it, I&#39;ve written a blog=
- post<br>
-which walks through using DeepSea to set up a small test cluster:<br>
-<br>
-=C2=A0 <a href=3D"http://ourobengr.com/2016/11/hello-salty-goodness/" rel=
-=3D"noreferrer" target=3D"_blank">http://ourobengr.com/2016/11/h<wbr>ello-s=
-alty-goodness/</a><br>
-<br>
-If you&#39;d like to try it out yourself, the code is on GitHub:<br>
-<br>
-=C2=A0 <a href=3D"https://github.com/SUSE/DeepSea" rel=3D"noreferrer" targe=
-t=3D"_blank">https://github.com/SUSE/DeepSe<wbr>a</a><br>
-<br>
-More detailed documentation can be found at:<br>
-<br>
-=C2=A0 <a href=3D"https://github.com/SUSE/DeepSea/wiki/intro" rel=3D"norefe=
-rrer" target=3D"_blank">https://github.com/SUSE/DeepSe<wbr>a/wiki/intro</a>=
-<br>
-=C2=A0 <a href=3D"https://github.com/SUSE/DeepSea/wiki/management" rel=3D"n=
-oreferrer" target=3D"_blank">https://github.com/SUSE/DeepSe<wbr>a/wiki/mana=
-gement</a><br>
-=C2=A0 <a href=3D"https://github.com/SUSE/DeepSea/wiki/policy" rel=3D"noref=
-errer" target=3D"_blank">https://github.com/SUSE/DeepSe<wbr>a/wiki/policy</=
-a><br>
-<br>
-Usual story: feedback, issues, pull requests are all welcome ;)<br>
-<br>
-Enjoy,<br>
-<br>
-Tim<br>
-<span class=3D"m_8121482894204104367HOEnZb"><font color=3D"#888888">--<br>
-Tim Serong<br>
-Senior Clustering Engineer<br>
-SUSE<br>
-<a href=3D"mailto:tserong-IBi9RG/b67k@public.gmane.org" target=3D"_blank">tserong-IBi9RG/b67k@public.gmane.org</a><=
-br>
-______________________________<wbr>_________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-users@l=
-ists.ceph.com</a><br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
-oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo<wbr>.cgi/ceph-u=
-sers-ceph.com</a><br>
-</font></span></blockquote></div><br></div>
-</div></div></blockquote></div><br></div>
-
---001a113b51242f9c8c05425a9e5e--
-
---===============1568959139==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1568959139==--
+> http://stackoverflow.com/questions/23398952/changing-linux-ps-output-
+> by-changing-argv0
+> 
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
