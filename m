@@ -1,59 +1,73 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: "exe" ceph-mds processes
-Date: Mon, 28 Nov 2016 15:50:01 -0500
-Message-ID: <CA+2bHPa2CrrJr_-7_bzOOdpyLSy87Z-H_y1EH4ORxU7Nk3Z2Nw@mail.gmail.com>
-References: <CALe9h7fort-NWax8LUXMB1gGycvUXNundNzdbzVaypcpQWEC6w@mail.gmail.com>
- <alpine.DEB.2.11.1611261433390.28496@piezo.us.to> <432789e85f484dfca805b29e8c82d929@R01UKEXCASM222.r01.fujitsu.local>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Fw:Assertion "needs_recovery" fails when balance_read reaches a
+ replica OSD where the target object is not recovered yet.
+Date: Mon, 28 Nov 2016 13:08:44 -0800
+Message-ID: <CAJ4mKGbB--_Hfwze=JcA_6qyEqUQ7dS-PqduGPT8Y6D4SXo+uA@mail.gmail.com>
+References: <4232dc21.6265.1589a3d146c.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f173.google.com ([209.85.223.173]:35447 "EHLO
-        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752677AbcK1Uuc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2016 15:50:32 -0500
-Received: by mail-io0-f173.google.com with SMTP id a124so252599642ioe.2
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Nov 2016 12:50:32 -0800 (PST)
-In-Reply-To: <432789e85f484dfca805b29e8c82d929@R01UKEXCASM222.r01.fujitsu.local>
+Received: from mail-io0-f172.google.com ([209.85.223.172]:35080 "EHLO
+        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753352AbcK1VIv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2016 16:08:51 -0500
+Received: by mail-io0-f172.google.com with SMTP id a124so253546909ioe.2
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Nov 2016 13:08:46 -0800 (PST)
+In-Reply-To: <4232dc21.6265.1589a3d146c.Coremail.xxhdx1985126@163.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Igor.Podoski@ts.fujitsu.com" <Igor.Podoski@ts.fujitsu.com>
-Cc: Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: xxhdx1985126 <xxhdx1985126@163.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Nov 28, 2016 at 6:29 AM, Igor.Podoski@ts.fujitsu.com
-<Igor.Podoski@ts.fujitsu.com> wrote:
->> > I guess we could:
->> >  * Switch the logic to try resolving argv[0] and only use
->> > proc/self/exe if we can't find argv[0]?
->> >  * Create a link to /proc/self/exe named ceph-mds, and exec that?
->>
->> We could also check if argv[0] is 'exe' and, if so, rewrite it so that the ps
->> output shows ceph-mds...
+On Thu, Nov 24, 2016 at 10:47 PM, xxhdx1985126 <xxhdx1985126@163.com> wrote:
+> Hi, everyone.
 >
-> For ps/pgrep/pkill it'll work, but 'top' reports process name differently and you'll see 'exe' there. I think this is because 'ps' is looking on command line and 'top' on something else in procfs. You need to run also prctl(PR_SET_NAME, argv[0]) shortly after process starts. This could be a race condition, when system will be under big load, for a moment process name would change from 'ceph-mds' to 'exe' and then back to 'ceph-mds', pid will remain the same but some third party monitoring software could be confused (depends how they check the process name).
+> Can I bypass this problem by not using LIBRADOS_OPERATION_BALANCE_READS? Thank you:-)
+
+Yes, I believe so. The balance reads option is not well-tested and
+won't work for data which isn't already stable/persisted. It's really
+intended for reading long-term immutable data like a Hadoop data
+store.
+-Greg
+
 >
-> I'm not sure, but I think you could pass argv again here, then respawn will short to:
-> execv("/proc/self/exe", argv);
 >
-> And process name will be kept, since first start will set argv[0] and passing argv to execv + prctl will propagate it.
-
-The process name (/proc/self/comm) is the first argument to execve:
-
-https://github.com/torvalds/linux/blob/master/fs/exec.c#L1691-L1713
-
-and
-
-https://github.com/torvalds/linux/blob/master/fs/exec.c#L1296
-
-Changing argv[0] will not help.
-
-The only options I'm aware of to fix this are (a) change the first
-argument to execve (and use a symlink as John suggested) or (b) use
-prctl at startup.
-
-Probably (b) is more palatable and maybe something we'd want to
-unconditionally set to the "ideal" name of the exectuable. In this
-case, that would be "ceph-mds".
-
--- 
-Patrick Donnelly
+>
+> -------- Forwarding messages --------
+> From: "xxhdx1985126" <xxhdx1985126@163.com>
+> Date: 2016-11-24 17:11:16
+> To:  "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+> Subject: Assertion "needs_recovery" fails when balance_read reaches a replica OSD where the target object is not recovered yet.
+> Hi, everyone.
+>
+> In our online system, some OSDs always fail due to the following error:
+>
+> 2016-10-25 19:00:00.626567 7f9a63bff700 -1 error_msg osd/ReplicatedPG.cc: In function 'void ReplicatedPG::wait_for_unreadable_object(const hobject_t&, OpRequestRef)' thread 7f9a63bff700 time 2016-10-25 19:00:00.624499
+> osd/ReplicatedPG.cc: 387: FAILED assert(needs_recovery)
+>
+> ceph version 0.94.5-12-g83f56a1 (83f56a1c84e3dbd95a4c394335a7b1dc926dd1c4)
+>  1: (ReplicatedPG::wait_for_unreadable_object(hobject_t const&, std::tr1::shared_ptr&lt;OpRequest&gt;)+0x3f5) [0x8b5a65]
+>  2: (ReplicatedPG::do_op(std::tr1::shared_ptr&lt;OpRequest&gt;&)+0x5e9) [0x8f0c79]
+>  3: (ReplicatedPG::do_request(std::tr1::shared_ptr&lt;OpRequest&gt;&, ThreadPool::TPHandle&)+0x4e3) [0x87fdc3]
+>  4: (OSD::dequeue_op(boost::intrusive_ptr&lt;PG&gt;, std::tr1::shared_ptr&lt;OpRequest&gt;, ThreadPool::TPHandle&)+0x178) [0x66b3f8]
+>  5: (OSD::ShardedOpWQ::_process(unsigned int, ceph::heartbeat_handle_d*)+0x59e) [0x66f8ee]
+>  6: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x795) [0xa76d85]
+>  7: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xa7a610]
+>  8: /lib64/libpthread.so.0() [0x3471407a51]
+>  9: (clone()+0x6d) [0x34710e893d]
+>  NOTE: a copy of the executable, or `objdump -rdS &lt;executable&gt;` is needed to interpret this.
+>
+> Our verion of ceph is 0.94.5.
+> After doing some reading of the source code and analysis of our online scenarios, we made some conjecture:
+>        When encountering a large number of "balance_reads", the OSDs can be so busy that they can't send heartbeats in time, which could lead to monitors wrongly mark them down and triggers other OSDs to go through peering+recovery+process during which, on the replica OSDs, the assertion "needs_recovery" at ReplicatedPG.cc:387 has a large probability to fail.
+>
+> To confirm this guess, we did some designated test. If I write extra code to make the recovery of some object wait for those ops targeting that object with the type "CEPH_MSG_OSD_OP"  to finish, the assertion "needs_recovery" at ReplicatedPG.cc:387 will always fail. And on the other hand, if I make those ops targeting some object with the type "CEPH_MSG_OSD_OP" wait for the corresponding recovery to finish, the assertion won't be triggered.
+>
+> Can we come to the conclusion that the cause to the assertion failure is just as we thought? And, it seems that the purpose of the failed assertion is to make sure that the "missing_loc.needs_recovery_map" do contain the unreadable object. However, "missing_loc.needs_recovery_map" seems to be always empty on replica OSDs. Can we fix this problem simply by bypassing this assertion in some way like:
+>               if ( is_primary() ){
+>                       bool needs_recovery = missing_loc.needs_recovery(soid, &v);
+>                       assert(needs_recovery);
+>                }
+>
+> I've also submit a new issue: BUG #18021. Please help me. Thank you:-)
