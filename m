@@ -1,40 +1,46 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: "exe" ceph-mds processes
-Date: Sat, 26 Nov 2016 14:34:18 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1611261433390.28496@piezo.us.to>
-References: <CALe9h7fort-NWax8LUXMB1gGycvUXNundNzdbzVaypcpQWEC6w@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Is Ceph-FreeBSD package building information wanted in the Ceph tree?
+Date: Mon, 28 Nov 2016 11:21:05 +0100
+Message-ID: <bd20aaaa-93a3-2f7e-482f-b544a4aaf80e@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37378 "EHLO mx1.redhat.com"
+Received: from smtp.digiware.nl ([176.74.240.9]:60451 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751568AbcKZOe1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 26 Nov 2016 09:34:27 -0500
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        id S1754175AbcK1KVM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 28 Nov 2016 05:21:12 -0500
+Received: from [192.168.10.67] (opteron [192.168.10.67])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id C894DC04B31B
-        for <ceph-devel@vger.kernel.org>; Sat, 26 Nov 2016 14:34:20 +0000 (UTC)
-In-Reply-To: <CALe9h7fort-NWax8LUXMB1gGycvUXNundNzdbzVaypcpQWEC6w@mail.gmail.com>
+        by smtp.digiware.nl (Postfix) with ESMTPSA id E16EF286BD
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Nov 2016 11:21:07 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Patrick Donnelly <pdonnell@redhat.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sat, 26 Nov 2016, John Spray wrote:
-> Since 66a122025 we've respawned MDSs using /proc/self/exe to avoid
-> issues if argv[0] was no longer there, but I've only just realised
-> that this leads to the respawned daemons not showing up as "ceph-mds"
-> in the process list any more, they're just "exe".
-> 
-> I guess we could:
->  * Switch the logic to try resolving argv[0] and only use
-> proc/self/exe if we can't find argv[0]?
->  * Create a link to /proc/self/exe named ceph-mds, and exec that?
+Hi,
 
-We could also check if argv[0] is 'exe' and, if so, rewrite it so that the 
-ps output shows ceph-mds...
+The Ceph package build config is almost ready for submission to the
+FreeBSD Ports system.
+Now the question is, is a copy of this also wanted in the Ceph-tree?
 
-http://stackoverflow.com/questions/23398952/changing-linux-ps-output-by-changing-argv0
+Note that the FreeBSD ports are already publicly available in SVN, and
+completely trackable there.
 
-sage
+Advantage is that all FreeBSD items are in the tree.
+Disadvantage would probably be:
+ -  There ia absolutely no way to test this
+ -  it is not going to be used by users from the tree, but from
+	/usr/ports
+ -  The version in the Ceph tree will always lagg, if only because
+	changes will be submitted after acceptance by the Ceph
+	developers.
+
+In my personal opinion it does have value, because it will inform
+porters to other systems that there is already infrastructure for BSD.
+
+But the reason for asking is that I'm bivalent about this.
+
+Thanx,
+--WjW
