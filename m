@@ -1,62 +1,51 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: What is XFS/filesystem corruption and whose fault is it?
-Date: Mon, 28 Nov 2016 13:10:11 -0800
-Message-ID: <CAJ4mKGZEpa045MWB=tbE-YXPDMNbBCetq2g_wfOUBZRsN+GStQ@mail.gmail.com>
-References: <e7d7de6a-fd30-4957-b49d-9f3f2ae10871@suse.cz> <1843397305.3730062.1480168576510.JavaMail.zimbra@oxygem.tv>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: Proposition - latency histogram
+Date: Mon, 28 Nov 2016 16:46:20 +0000
+Message-ID: <BLUPR0201MB1524749EAC9F82FC140D379DE88A0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+References: <69bf4eec-3959-f021-ad8f-d1b6d3e2ceaf@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f172.google.com ([209.85.223.172]:36461 "EHLO
-        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754874AbcK1VKM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2016 16:10:12 -0500
-Received: by mail-io0-f172.google.com with SMTP id m5so115850471ioe.3
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Nov 2016 13:10:12 -0800 (PST)
-In-Reply-To: <1843397305.3730062.1480168576510.JavaMail.zimbra@oxygem.tv>
+Received: from mail-sn1nam01on0049.outbound.protection.outlook.com ([104.47.32.49]:26992
+        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754767AbcK1WR5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 28 Nov 2016 17:17:57 -0500
+In-Reply-To: <69bf4eec-3959-f021-ad8f-d1b6d3e2ceaf@corp.ovh.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Nathan Cutler <ncutler@suse.cz>, ceph-devel <ceph-devel@vger.kernel.org>
+To: =?utf-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?= <bartlomiej.swiecki@corp.ovh.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sat, Nov 26, 2016 at 5:56 AM, Alexandre DERUMIER <aderumier@odiso.com> wrote:
-> I think writeback should not be a problem if barrier is enabled.
->
-> you can loose last x seconds of writes, but fs should not break.
-
-That might work for XFS but it won't work for the wider Ceph cluster —
-it's against the RADOS guarantees and expectations for an OSD to go
-back in time after committing an update and *can* result in failure.
--Greg
-
->
->
-> Also for ssd drives, you need supercapacitor (generally present in all enterprise ssd),
-> to not loose datas in ssd memory buffer
->
-> ----- Mail original -----
-> De: "Nathan Cutler" <ncutler@suse.cz>
-> À: "ceph-devel" <ceph-devel@vger.kernel.org>
-> Envoyé: Vendredi 25 Novembre 2016 17:26:07
-> Objet: What is XFS/filesystem corruption and whose fault is it?
->
-> I've been doing some research on OSDs not starting after power outages,
-> when supposedly "uncorruptible" XFS filesystems are corrupted and need
-> repair. This led me to write the following brief blog post:
->
-> http://smithfarm-thebrain.blogspot.cz/2016/11/what-is-xfsfilesystem-corruption-and.html
->
-> Any comments and/or suggestions for improvement would be most welcome.
->
-> Thanks for reading!
->
-> Nathan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
+Z10gT24gQmVoYWxmIE9mIEJhcnRsb21pZWogU3dpZWNraQ0KPiBTZW50OiBNb25kYXksIE5vdmVt
+YmVyIDI4LCAyMDE2IDg6MjIgQU0NCj4gVG86IENlcGggRGV2ZWxvcG1lbnQgPGNlcGgtZGV2ZWxA
+dmdlci5rZXJuZWwub3JnPg0KPiBTdWJqZWN0OiBQcm9wb3NpdGlvbiAtIGxhdGVuY3kgaGlzdG9n
+cmFtDQo+IA0KPiBIaSwNCj4gDQo+IA0KPiBDdXJyZW50bHkgd2UgY2FuIHF1ZXJ5IE9TRCBmb3Ig
+b3AgbGF0ZW5jeSBidXQgaXQncyBnaXZlbiBhcyBhbiBhdmVyYWdlLg0KPiBBdmVyYWdlIG1heSBu
+b3QgZ2l2ZQ0KPiB0aGUgYmV0cyBpbmZvcm1hdGlvbiBpbiB0aGlzIGNhc2UgLSBpLmUuIHNwaWtl
+cyBjYW4gZWFzaWx5IGdldCBoaWRkZW4gdGhlcmUuDQo+IA0KPiBJbnN0ZWFkIG9mIGFuIGF2ZXJh
+Z2Ugd2UgY291bGQgZWFzaWx5IGRvIGEgc2ltcGxlIGhpc3RvZ3JhbSAtIHF1YW50aXplIHRoZQ0K
+PiBsYXRlbmN5IGludG8gcHJlZGVmaW5lZCBzZXQgb2YgdGltZSBpbnRlcnZhbHMsIGZvciBlYWNo
+IG9mIHRoZW0gaGF2ZSBhIHNpbXBsZQ0KPiBwZXJmb3JtYW5jZSBjb3VudGVyLCBhdCBlYWNoIG9w
+IGluY3JlYXNlIG9uZSBvZiB0aGVtLiBTaW5jZSB0aG9zZSBhcmUgcGVyDQo+IE9TRCwgd2UgY291
+bGQgaGF2ZSBwcmV0dHkgaGlnaCByZXNvbHV0aW9uIHdpdGggZnJhY3Rpb25hbCBtZW1vcnkgdXNh
+Z2UsDQo+IHBlcmZvcm1hbmNlIGltcGFjdCBzaG91bGQgYmUgbmVnbGlnaWJsZSBzaW5jZSBvbmx5
+IG9uZSAodHdvIGlmIHNwbGl0IGludG8gcmVhZA0KPiBhbmQgd3JpdGUpIG9mIHRob3NlIGNvdW50
+ZXJzIHdvdWxkIGJlIGluY3JlbWVudGVkIHBlciBvbmUgb3NkIG9wLg0KPiANCg0KKzENCg0KQSBy
+ZW1pbmRlciwgdGhlcmUgYXJlIGRpZmZlcmVudCBsYXRlbmN5IGRvbWFpbnMgZm9yIHRoZSBkaWZm
+ZXJlbnQgbWVkaWEgdHlwZXMgKGZsYXNoLCBIREQpLiBPbmUgc29sdXRpb24gaXMgdG8gbWFrZSB0
+aGUgYnVja2V0cyBiZSBwYXJhbWV0ZXJpemVkLg0KDQo+IEluIGFkZGl0aW9uIHdlIGNvdWxkIGFs
+c28gZG8gdGhpcyBpbiAyRCAtIGVhY2ggY291bnRlciBtYXRjaGluZyBnaXZlbiBsYXRlbmN5DQo+
+IHJhbmdlIGFuZCBvcCBzaXplIHJhbmdlLg0KPiBoYXZpbmcgc3VjaCAyRCB0YWJsZSB3b3VsZCBz
+aG93IGJvdGggbGF0ZW5jeSBoaXN0b2dyYW0sIHJlcXVlc3Qgc2l6ZQ0KPiBoaXN0b2dyYW0gYW5k
+IGNvbWJpbmF0aW9ucyBvZiB0aG9zZSAoaS5lLiBsYXRlbmN5IGhpc3RvZ3JhbSBvZiB+NGsgb3Bz
+IG9ubHkpLg0KPiANCj4gV2hhdCBkbyB5b3UgdGhpbmsgYWJvdXQgdGhpcyBpZGVhPyBJIGNhbiBw
+cmVwYXJlIHNvbWUgY29kZSAtIGEgc2ltcGxlIHByb29mDQo+IG9mIGNvbmNlcHQgbG9va3MgcmVh
+bGx5IHN0cmFpZ2h0Zm9yd2FyZCB0byBpbXBsZW1lbnQuDQo+IA0KPiANCj4gQmFydGVrDQo+IA0K
+PiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
+dWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9y
+ZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3Zn
+ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
