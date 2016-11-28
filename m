@@ -1,58 +1,64 @@
-From: Sage Weil <sage@newdream.net>
+From: John Spray <jspray@redhat.com>
 Subject: Re: Proposition - latency histogram
-Date: Mon, 28 Nov 2016 16:51:38 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1611281648510.28496@piezo.us.to>
-References: <69bf4eec-3959-f021-ad8f-d1b6d3e2ceaf@corp.ovh.com>
+Date: Mon, 28 Nov 2016 17:43:23 +0000
+Message-ID: <CALe9h7fNkuNvocbhkonMOE13O1G4ygW-c0HccK-fXtX-C8CT7A@mail.gmail.com>
+References: <69bf4eec-3959-f021-ad8f-d1b6d3e2ceaf@corp.ovh.com> <alpine.DEB.2.11.1611281648510.28496@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-848652567-1480351734=:28496"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48516 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932406AbcK1Qvm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2016 11:51:42 -0500
-In-Reply-To: <69bf4eec-3959-f021-ad8f-d1b6d3e2ceaf@corp.ovh.com>
-Content-ID: <alpine.DEB.2.11.1611281648580.28496@piezo.us.to>
+Received: from mail-qk0-f176.google.com ([209.85.220.176]:34675 "EHLO
+        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751226AbcK1Rnp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2016 12:43:45 -0500
+Received: by mail-qk0-f176.google.com with SMTP id q130so147694372qke.1
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Nov 2016 09:43:44 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1611281648510.28496@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?Bart=B3omiej_=A6wi=EAcki?= <bartlomiej.swiecki@corp.ovh.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?= <bartlomiej.swiecki@corp.ovh.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Mon, Nov 28, 2016 at 4:51 PM, Sage Weil <sage@newdream.net> wrote:
+> On Mon, 28 Nov 2016, BartÅ‚omiej ÅšwiÄ™cki wrote:
+>> Hi,
+>>
+>> Currently we can query OSD for op latency but it's given as an average.
+>> Average may not give the bets information in this case - i.e. spikes can
+>> easily get hidden there.
+>>
+>> Instead of an average we could easily do a simple histogram - quantize
+>> the latency into predefined set of time intervals, for each of them have
+>> a simple performance counter, at each op increase one of them. Since
+>> those are per OSD, we could have pretty high resolution with fractional
+>> memory usage, performance impact should be negligible since only one
+>> (two if split into read and write) of those counters would be
+>> incremented per one osd op.
+>>
+>> In addition we could also do this in 2D - each counter matching given
+>> latency range and op size range. having such 2D table would show both
+>> latency histogram, request size histogram and combinations of those
+>> (i.e. latency histogram of ~4k ops only).
+>>
+>> What do you think about this idea? I can prepare some code - a simple proof of
+>> concept looks really
+>> straightforward to implement.
+>
+> This sounds like a great idea.  I think the main issue is that the data
+> won't be easily exposed via the perfcounter interface... at least not in a
+> way that generic tools can visualize.  Unless there is a standardish way
+> to report histogram metrics?
 
---8323329-848652567-1480351734=:28496
-Content-Type: TEXT/PLAIN; CHARSET=ISO-8859-2
-Content-Transfer-Encoding: 8BIT
-Content-ID: <alpine.DEB.2.11.1611281648581.28496@piezo.us.to>
+Newer tools are waking up to the need for histograms, e.g. Prometheus
+has a histogram datatype:
+https://prometheus.io/docs/concepts/metric_types/#histogram
 
-On Mon, 28 Nov 2016, Bart³omiej ¦wiêcki wrote:
-> Hi,
-> 
-> Currently we can query OSD for op latency but it's given as an average. 
-> Average may not give the bets information in this case - i.e. spikes can 
-> easily get hidden there.
-> 
-> Instead of an average we could easily do a simple histogram - quantize 
-> the latency into predefined set of time intervals, for each of them have 
-> a simple performance counter, at each op increase one of them. Since 
-> those are per OSD, we could have pretty high resolution with fractional 
-> memory usage, performance impact should be negligible since only one 
-> (two if split into read and write) of those counters would be 
-> incremented per one osd op.
-> 
-> In addition we could also do this in 2D - each counter matching given 
-> latency range and op size range. having such 2D table would show both 
-> latency histogram, request size histogram and combinations of those 
-> (i.e. latency histogram of ~4k ops only).
-> 
-> What do you think about this idea? I can prepare some code - a simple proof of
-> concept looks really
-> straightforward to implement.
+Someone has done some work on adding support in grafana:
+https://github.com/grafana/grafana/issues/600
 
-This sounds like a great idea.  I think the main issue is that the data 
-won't be easily exposed via the perfcounter interface... at least not in a 
-way that generic tools can visualize.  Unless there is a standardish way 
-to report histogram metrics?
+Should be reasonably straightforward to add a histogram type to the
+perf counters: people might end up flattening it to a series of scalar
+time series with _bucket suffixes or whatever, but I'd definitely be
+in favour of us adding an explicit histogram type internally.
 
-sage
---8323329-848652567-1480351734=:28496--
+John
