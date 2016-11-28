@@ -1,64 +1,28 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Proposition - latency histogram
-Date: Mon, 28 Nov 2016 17:43:23 +0000
-Message-ID: <CALe9h7fNkuNvocbhkonMOE13O1G4ygW-c0HccK-fXtX-C8CT7A@mail.gmail.com>
-References: <69bf4eec-3959-f021-ad8f-d1b6d3e2ceaf@corp.ovh.com> <alpine.DEB.2.11.1611281648510.28496@piezo.us.to>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: Is Ceph-FreeBSD package building information wanted in the Ceph
+ tree?
+Date: Mon, 28 Nov 2016 20:52:15 +0100
+Message-ID: <a604c816-f6ce-d945-2860-472676cde61f@suse.cz>
+References: <bd20aaaa-93a3-2f7e-482f-b544a4aaf80e@digiware.nl>
+ <alpine.DEB.2.11.1611281438100.28496@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:34675 "EHLO
-        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751226AbcK1Rnp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Nov 2016 12:43:45 -0500
-Received: by mail-qk0-f176.google.com with SMTP id q130so147694372qke.1
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Nov 2016 09:43:44 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1611281648510.28496@piezo.us.to>
+Received: from mx2.suse.de ([195.135.220.15]:56638 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753105AbcK1TwV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 28 Nov 2016 14:52:21 -0500
+In-Reply-To: <alpine.DEB.2.11.1611281438100.28496@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?= <bartlomiej.swiecki@corp.ovh.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Abhishek Lekshmanan <abhishek@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Nov 28, 2016 at 4:51 PM, Sage Weil <sage@newdream.net> wrote:
-> On Mon, 28 Nov 2016, Bartłomiej Święcki wrote:
->> Hi,
->>
->> Currently we can query OSD for op latency but it's given as an average.
->> Average may not give the bets information in this case - i.e. spikes can
->> easily get hidden there.
->>
->> Instead of an average we could easily do a simple histogram - quantize
->> the latency into predefined set of time intervals, for each of them have
->> a simple performance counter, at each op increase one of them. Since
->> those are per OSD, we could have pretty high resolution with fractional
->> memory usage, performance impact should be negligible since only one
->> (two if split into read and write) of those counters would be
->> incremented per one osd op.
->>
->> In addition we could also do this in 2D - each counter matching given
->> latency range and op size range. having such 2D table would show both
->> latency histogram, request size histogram and combinations of those
->> (i.e. latency histogram of ~4k ops only).
->>
->> What do you think about this idea? I can prepare some code - a simple proof of
->> concept looks really
->> straightforward to implement.
->
-> This sounds like a great idea.  I think the main issue is that the data
-> won't be easily exposed via the perfcounter interface... at least not in a
-> way that generic tools can visualize.  Unless there is a standardish way
-> to report histogram metrics?
+> On another note, as soon as we have a working port, it would be nice to
+> have a jenkins job that ensures that we don't break the FreeBSD build
+> going forward...
 
-Newer tools are waking up to the need for histograms, e.g. Prometheus
-has a histogram datatype:
-https://prometheus.io/docs/concepts/metric_types/#histogram
+Oooh, can we have that for the openSUSE Leap build as well?
 
-Someone has done some work on adding support in grafana:
-https://github.com/grafana/grafana/issues/600
-
-Should be reasonably straightforward to add a histogram type to the
-perf counters: people might end up flattening it to a series of scalar
-time series with _bucket suffixes or whatever, but I'd definitely be
-in favour of us adding an explicit histogram type internally.
-
-John
+Nathan
