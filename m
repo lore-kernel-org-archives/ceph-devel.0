@@ -1,39 +1,26 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH] libceph: wake up sync waiter when unregistering request
-Date: Tue, 29 Nov 2016 19:49:21 +0800
-Message-ID: <20161129114921.62964-1-zyan@redhat.com>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: XFS on RBD deadlock
+Date: Tue, 29 Nov 2016 04:04:05 -0800
+Message-ID: <20161129120405.GA11089@infradead.org>
+References: <1480418228.2258.28.camel@pengutronix.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52060 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1757344AbcK2Ltb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 29 Nov 2016 06:49:31 -0500
+Received: from bombadil.infradead.org ([198.137.202.9]:36553 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755028AbcK2MEb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Nov 2016 07:04:31 -0500
+Content-Disposition: inline
+In-Reply-To: <1480418228.2258.28.camel@pengutronix.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: idryomov@gmail.com, ceph-devel@vger.kernel.org
-Cc: "Yan, Zheng" <zyan@redhat.com>
+To: Lucas Stach <l.stach@pengutronix.de>
+Cc: ceph-devel@vger.kernel.org, linux-xfs@vger.kernel.org, Michael Olbrich <m.olbrich@pengutronix.de>, =?iso-8859-1?Q?Bj=F6rn_L=E4ssig?= <b.laessig@pengutronix.de>
 
-Current code does not wake up sync waiter if osd replies error
-or the request does not want ondisk ack.
+On Tue, Nov 29, 2016 at 12:17:08PM +0100, Lucas Stach wrote:
+> 2. RBD worker is trying to handle the XFS block request, but the
+> involved crypto code recurses into the XFS superblock shrinker, as it's
+> trying to allocate memory with GFP_KERNEL in __crypto_alloc_tfm.
 
-Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
----
- net/ceph/osd_client.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
-
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index e6ae15b..54ffe8b 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -2934,8 +2934,7 @@ static void handle_reply(struct ceph_osd *osd, struct ceph_msg *msg)
- 			dout("req %p tid %llu cb\n", req, req->r_tid);
- 			__complete_request(req);
- 		}
--		if (m.flags & CEPH_OSD_FLAG_ONDISK)
--			complete_all(&req->r_safe_completion);
-+		complete_all(&req->r_safe_completion);
- 		ceph_osdc_put_request(req);
- 	} else {
- 		if (req->r_unsafe_callback) {
--- 
-2.7.4
-
+And that's where the issues start - crypto_alloc_skcipher and friends
+are not intended to be called from the writeback path.
