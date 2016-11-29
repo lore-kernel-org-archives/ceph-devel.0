@@ -1,36 +1,31 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: XFS on RBD deadlock
-Date: Tue, 29 Nov 2016 14:19:07 +0100
-Message-ID: <CAOi1vP8Od6RgNchXGsXP3gs-6P0x9ZTS7dVfpsmfuDMZm2ZyHg@mail.gmail.com>
-References: <1480418228.2258.28.camel@pengutronix.de> <20161129120405.GA11089@infradead.org>
+Subject: Re: [PATCH] libceph: wake up sync waiter when unregistering request
+Date: Tue, 29 Nov 2016 14:54:21 +0100
+Message-ID: <CAOi1vP8ieneOG-UhTysHNoOvoZ3_kcV_x7zqw9p3BSUpMLK_9Q@mail.gmail.com>
+References: <20161129114921.62964-1-zyan@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f53.google.com ([209.85.213.53]:35127 "EHLO
-        mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757294AbcK2NTI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Nov 2016 08:19:08 -0500
-In-Reply-To: <20161129120405.GA11089@infradead.org>
+Received: from mail-vk0-f42.google.com ([209.85.213.42]:32942 "EHLO
+        mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755393AbcK2NyW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Nov 2016 08:54:22 -0500
+Received: by mail-vk0-f42.google.com with SMTP id 137so91982778vkl.0
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Nov 2016 05:54:22 -0800 (PST)
+In-Reply-To: <20161129114921.62964-1-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Lucas Stach <l.stach@pengutronix.de>, Ceph Development <ceph-devel@vger.kernel.org>, linux-xfs@vger.kernel.org, Michael Olbrich <m.olbrich@pengutronix.de>, =?UTF-8?B?QmrDtnJuIEzDpHNzaWc=?= <b.laessig@pengutronix.de>
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Nov 29, 2016 at 1:04 PM, Christoph Hellwig <hch@infradead.org> wrote:
-> On Tue, Nov 29, 2016 at 12:17:08PM +0100, Lucas Stach wrote:
->> 2. RBD worker is trying to handle the XFS block request, but the
->> involved crypto code recurses into the XFS superblock shrinker, as it's
->> trying to allocate memory with GFP_KERNEL in __crypto_alloc_tfm.
->
-> And that's where the issues start - crypto_alloc_skcipher and friends
-> are not intended to be called from the writeback path.
+On Tue, Nov 29, 2016 at 12:49 PM, Yan, Zheng <zyan@redhat.com> wrote:
+> Current code does not wake up sync waiter if osd replies error
+> or the request does not want ondisk ack.
 
-Yeah, and to worsen things it's allocated and then destroyed on *every*
-write.  I'm in the process of re-writing that code for CONFIG_VMAP_STACK
-and will look into fixing this as well.
+Hi Zheng,
 
-In the meantime, disabling cephx message signing should take that
-allocation out of the way.
+Did you mean to write "and" instead of "or" - "if osd replies error
+*and* the request does not want ondisk ack"?
 
 Thanks,
 
