@@ -1,87 +1,80 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: How can OSD udev rules race with lvm at boot time ?
-Date: Wed, 30 Nov 2016 07:15:01 +0100
-Message-ID: <022ec982-0897-a285-b07d-757ce738a76c@dachary.org>
-References: <29b296db-034b-f91d-b7fe-b3f3f86a1df1@dachary.org>
- <CAPed3OELgYa3+ieferaHvzJ7k8GzSFLN9gTKEEDjO_UHgay=zw@mail.gmail.com>
+Subject: Re: puzzling ceph with systemd boot sequence error
+Date: Wed, 30 Nov 2016 07:24:24 +0100
+Message-ID: <b853373c-5490-ff27-2283-e3c0d36b1060@dachary.org>
+References: <348e1d53-2195-2e43-bc89-ce1788cc3700@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:33091 "EHLO
-        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751566AbcK3GQG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Nov 2016 01:16:06 -0500
-In-Reply-To: <CAPed3OELgYa3+ieferaHvzJ7k8GzSFLN9gTKEEDjO_UHgay=zw@mail.gmail.com>
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:49391 "EHLO
+        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751606AbcK3GY3 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Nov 2016 01:24:29 -0500
+Received: from mfilter28-d.gandi.net (mfilter28-d.gandi.net [217.70.178.159])
+        by relay2-d.mail.gandi.net (Postfix) with ESMTP id 8783AC5A61
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Nov 2016 07:24:27 +0100 (CET)
+Received: from relay2-d.mail.gandi.net ([IPv6:::ffff:217.70.183.194])
+        by mfilter28-d.gandi.net (mfilter28-d.gandi.net [::ffff:10.0.15.180]) (amavisd-new, port 10024)
+        with ESMTP id Bql36Bdw479n for <ceph-devel@vger.kernel.org>;
+        Wed, 30 Nov 2016 07:24:25 +0100 (CET)
+Received: from [192.168.1.7] (x4db35934.dyn.telefonica.de [77.179.89.52])
+        (Authenticated sender: loic@dachary.org)
+        by relay2-d.mail.gandi.net (Postfix) with ESMTPSA id AF3BFC5A56
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Nov 2016 07:24:25 +0100 (CET)
+In-Reply-To: <348e1d53-2195-2e43-bc89-ce1788cc3700@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ruben Kerkhof <ruben@rubenkerkhof.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Ruben,
+I was misreading the error message.
 
-On 14/11/2016 21:29, Ruben Kerkhof wrote:
-> On Mon, Nov 14, 2016 at 11:26 AM, Loic Dachary <loic@dachary.org> wrote:
->> Hi,
-> 
-> Hi Loic,
-> 
-> I really appreciate you looking into this. While as a workaround for
-> this issue I stopped using LVM on my Ceph nodes, I'd like to go back
-> to LVM eventually.
->>
->> It looks like OSD udev rules race with LVM at boot time. In a nutshell, if /var/lib/ceph is on a LVM volume different from /, udev may fire events trying to start OSDs before the LVM volume is mounted and fail. This problem has been reported a few times over the past months and I believe it is real.
-> 
-> Just thinking out loud, but does udev make any guarantees at all about
-> filesystems being available (and writable) when udev rules run?
-> 
->> I don't think there is any safeguard preventing such a race and it makes sense to me that it can happen sometimes. I'd like to reproduce it reliably to assert this is the reason why it happens. And, more importantly, to figure out a fix and verify it works. So far all my attemps have failed: the OSD comes back up every time. The details about this issue are at http://tracker.ceph.com/issues/17889
->>
->> If someone has ideas about how to handle this, it would be most welcome :-)
-> 
-> I'm trying to follow how osds are activated since this has been a
-> mystery for me so far.
-> Please bear with my, but this is how I understand it works:
-> 
-> - the ceph udev rules call ceph-disk trigger when udev detects a
-> device / partition suitable for ceph based on GPT uuids.
-> - ceph-disk trigger restarts an instantiated service, let's say
-> ceph-disk@/dev/sda.service. (properly escaped). This is asynchronous.
-> - ceph-disk.service calls ceph-disk trigger --sync /dev/sda
-> - ceph-disk trigger --sync /dev/sda calls ceph-disk activate /dev/sda
-> 
-> Now the first thing ceph-disk/main.py does (always) is mkdir
-> /var/lib/ceph, and take a file lock on
-> /var/lib/ceph/tmp/ceph-disk.prepare.lock and
-> /var/lib/ceph/tmp/ceph-disk.activate.lock.
-> Unless I'm mistaken this doesn't actually seem to be needed in the
-> ceph-disk trigger case.
+* ERROR: unable to open OSD superblock on /var/lib/ceph/osd/XXXX-0: (2) No such file or directory
 
-It is necessary when trigger is called as a side effect of preparing a disk. After the partition is created, it will trigger the udev/trigger sequence you described above. And we do not want that sequence to interfere with an ongoing disk preparation. Similarly, if two udev events try to activate the osd at the same time, we do not want both to run in parallel. It is idempotent and there is no harm in running activation multiple times in sequence.
-
-> Then we could add a RequiresMountsFor=/var/lib/ceph to
-> ceph-disk.service and be done with it.
-
-I think we already have that by default, unfortunately.
-
-> As for how to reproduce the issue, one thought that comes to mind is
-> if you're testing this in a vm, perhaps you could put and I/O cap on
-> the disks, and this will improve your change of invoking the race.
-
-Maybe it's a race between ceph-disk@.service and ceph-osd@.service, amplified by lvm. I'm trying to explore that at http://tracker.ceph.com/issues/17889#note-20
+does not mean /var/lib/ceph/osd/XXXX-0 does not exist. It means files within /var/lib/ceph/osd/XXXX-0 do not exist. It would be clearer if the path of the missing file name was displayed instead of the directory [1].
 
 Cheers
 
->> --
->> Loïc Dachary, Artisan Logiciel Libre
+[1] https://github.com/ceph/ceph/blob/jewel/src/ceph_osd.cc#L411
+
+On 29/11/2016 12:23, Loic Dachary wrote:
+> Hi,
 > 
-> Kind regards,
+> An error has been reported a few times [1] on RHEL 7.2 with jewel 10.2.3 (not exactly jewel 10.2.3 but the modified RedHat version of it, however I don't think the differences are significant in that context and it is likely that CentOS or Ubuntu 16.04 users run into the same problem, only not frequently enough to report it).
 > 
-> Ruben Kerkhof
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> In a nutshell the partition on which ceph OSD are supposed to be mounted is not available when the OSD tries to start, at boot time. So the OSD tries a few times complaining the directory is not there and gives up. It could be a simple unit ordering problem if systemd did not have a way to order the units... but it does. And all units implicitly depends on local-fs.target which ensures they run after local file systems are mounted, even if it means waiting for LVM volumes to be available.
+> 
+> What really puzzles me is that despite /var being mounted, the OSD can't find the desired directory. The output of journalctl --all --this-boot --no-pager -o_verbose shows (redacted for brievety) /var is mounted before the OSD tries to start:
+> 
+> Fri 2016-11-25 08:23:03.653729 CET
+> 
+>     UNIT=var.mount
+>     MESSAGE=Mounting /var...
+> 
+> Fri 2016-11-25 08:23:03.943381 CET
+> 
+>     _CMDLINE=/usr/lib/systemd/systemd --switched-root --system --deserialize 21
+>     UNIT=var.mount
+>     MESSAGE=Mounted /var.
+> 
+> Fri 2016-11-25 08:23:13.452598 CET
+> 
+>     UNIT=ceph-osd@0.service
+>     MESSAGE=Starting Ceph object storage daemon...
+> 
+> Fri 2016-11-25 08:23:18.633909 CET
+> 
+>     _SYSTEMD_UNIT=ceph-osd@0.service
+>     MESSAGE=2016-11-25 08:23:18.633504 7f251db78800 -1 [0;31m ** ERROR: unable to open OSD superblock on /var/lib/ceph/osd/XXXX-0: (2) No such file or directory
+>     _CMDLINE=/usr/bin/ceph-osd -f --cluster XXXX --id 0 --setuser ceph --setgroup ceph
+> 
+> If systemctl start ceph-osd@0.service is run manually later on, it works as expected. The failure is not permanent, it looks like a race.
+> 
+> I'll keep investigating and update the issue [1] as I make progress. If someone has a clue about what's going on, it would be good news. Even reports of similar problems would help, specially if they happen on other distributions. I'm hoping this is something simple that I don't see because I stared at the problem for too long :-)
+> 
+> Cheers
+> 
+> [1] http://tracker.ceph.com/issues/17889 OSD udev / systemd may race with lvm at boot time
 > 
 
 -- 
