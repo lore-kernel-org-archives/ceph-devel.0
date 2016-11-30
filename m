@@ -1,45 +1,46 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Is Ceph-FreeBSD package building information wanted in the Ceph
- tree?
-Date: Wed, 30 Nov 2016 12:51:20 +0100
-Message-ID: <2e66e146-2102-04a6-9694-97e62229ef5c@digiware.nl>
-References: <bd20aaaa-93a3-2f7e-482f-b544a4aaf80e@digiware.nl>
- <alpine.DEB.2.11.1611281438100.28496@piezo.us.to>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: repository build process change
+Date: Wed, 30 Nov 2016 07:49:07 -0500
+Message-ID: <CAC-Np1yyC5xuCSJypa7xgJqWF9fx9h6Y9NsJdgvxajdyep56XQ@mail.gmail.com>
+References: <CAC-Np1zuviMENxn-4ZWMbC78b7J2x1asxg-i3ks+7uTkfuyaRA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:45596 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751038AbcK3Lvk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 30 Nov 2016 06:51:40 -0500
-In-Reply-To: <alpine.DEB.2.11.1611281438100.28496@piezo.us.to>
+Received: from mail-qk0-f172.google.com ([209.85.220.172]:36811 "EHLO
+        mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932844AbcK3MtJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Nov 2016 07:49:09 -0500
+Received: by mail-qk0-f172.google.com with SMTP id n21so207851707qka.3
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Nov 2016 04:49:08 -0800 (PST)
+In-Reply-To: <CAC-Np1zuviMENxn-4ZWMbC78b7J2x1asxg-i3ks+7uTkfuyaRA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 28-11-2016 15:41, Sage Weil wrote:
-> On another note, as soon as we have a working port, it would be nice to 
-> have a jenkins job that ensures that we don't break the FreeBSD build 
-> going forward...
+On Wed, Nov 23, 2016 at 3:15 PM, Alfredo Deza <adeza@redhat.com> wrote:
+> Starting next week we will start building binaries and repositories
+> from the ceph-ci.git repo (https://github.com/ceph/ceph-ci).
+>
+> The current build process, which uses ceph.git will also continue at
+> the same time, so there is
+> enough time to transition over.
+>
+> This doesn't change anything for a developer except where it needs to
+> push to get a repository
+> with binaries for a given branch.
+>
+> After a week of correctly building from both repositories I will send
+> a follow up email to warn of the change.
 
-I have Jenkins for FreeBSD back on line:
+Last night we enabled ceph-ci builds and I managed to get a
+configuration setting wrong and builds got stuck.
 
-http://cephdev.digiware.nl:8180/jenkins/
+This has since been corrected and everything should be as normal. We
+are working to enable the new ceph-ci builds this week.
 
-It builds:
-	wip.FreeBSD: all of my recent work I commit to my fork
-	ceph-master: HEAD of the current official git Ceph tree
-		BUT augmented with a (the few) essential patches that I
-		have commited in PRs.
-
-Both builds are atm. run in the CET night at resp 6:00 and 1:00.
-Build Failures are reported and mailed to me.
-
-If you would like to have any other integration, let me know and I'll
-see if I/we can accomodate that in our openstack cluster.
-
---WjW
-
-
+Sorry for any troubles.
+>
+> Let me know if you have any questions,
+>
+>
+> Thanks!
