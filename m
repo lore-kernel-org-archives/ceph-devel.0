@@ -1,84 +1,135 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: disk enclosure LEDs
-Date: Wed, 30 Nov 2016 16:51:54 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1611301606060.2097@piezo.novalocal>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: ceph v10.2.4 QE validation status
+Date: Wed, 30 Nov 2016 16:57:08 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1611301656070.2097@piezo.novalocal>
+References: <CAMMFjmEkMUBCnZFqMr_kcfZgB5jm3CjVNfXpSAXT7ZCwMLQEfg@mail.gmail.com> <CAMMFjmGRO7F30WwU8NwMU=t3bEXEhz1G6bwZwqyQJrp7mceZdQ@mail.gmail.com> <87r362tr92.fsf@suse.com> <alpine.DEB.2.11.1611231441130.21102@piezo.us.to> <87mvgia7if.fsf@suse.com>
+ <87zikh3tj3.fsf@suse.com> <alpine.DEB.2.11.1611301601010.2097@piezo.novalocal> <87y4013pmw.fsf@suse.com> <87vav53p8u.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-429468212-1480525031=:2097"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42836 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755213AbcK3Qv4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 30 Nov 2016 11:51:56 -0500
-Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 486328F515
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Nov 2016 16:51:56 +0000 (UTC)
-Received: from ovpn-112-118.phx2.redhat.com (ovpn-112-118.phx2.redhat.com [10.3.112.118])
-        by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uAUGpsi6003490
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Nov 2016 11:51:55 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:34515 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753148AbcK3Q5N (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Nov 2016 11:57:13 -0500
+In-Reply-To: <87vav53p8u.fsf@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Abhishek L <abhishek@suse.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <ldachary@redhat.com>, "Dachary, Loic" <loic@dachary.org>, "Dillaman, Jason" <dillaman@redhat.com>, Nathan Cutler <ncutler@suse.cz>, Ilya Dryomov <idryomov@gmail.com>, John Spray <jspray@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, Yuri Weinstein <yweinste@redhat.com>
 
-Hi all,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-libstoragemgmt has made progress on a generic interface for twiddling 
-enclosure LEDs!
+--8323329-429468212-1480525031=:2097
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 
->      * RHEL 7.3 or Fedora 24+
->      * sudo yum install libstoragemgmt
->      * sudo lsmcli local-disk-ident-led-on --path /dev/sdX
->      * sudo lsmcli local-disk-ident-led-off --path /dev/sdX
->      * sudo lsmcli local-disk-fault-led-on --path /dev/sdX
->      * sudo lsmcli local-disk-fault-led-off --path /dev/sdX
-
-> Python API document:
+On Wed, 30 Nov 2016, Abhishek L wrote:
+> Abhishek L writes:
 > 
->      python2 -c'import lsm; help(lsm.LocalDisk.ident_led_on)'
->      python2 -c'import lsm; help(lsm.LocalDisk.ident_led_off)'
->      python2 -c'import lsm; help(lsm.LocalDisk.fault_led_on)'
->      python2 -c'import lsm; help(lsm.LocalDisk.fault_led_off)'
+> > Sage Weil writes:
+> >
+> >> On Wed, 30 Nov 2016, Abhishek L wrote:
+> >>>
+> >>> Abhishek L writes:
+> >>>
+> >>> > Sage Weil writes:
+> >>> >
+> >>> >> On Wed, 23 Nov 2016, Abhishek L wrote:
+> >>> >>>
+> >>> >>> Hi Sage, Greg,
+> >>> >>>
+> >>> >>>
+> >>> >>> Yuri Weinstein writes:
+> >>> >>>
+> >>> >>> > See updated status - http://tracker.ceph.com/issues/17487#note-32
+> >>> >>> >
+> >>> >>> > Outstanding issues:
+> >>> >>> >
+> >>> >>> > knfs - http://tracker.ceph.com/issues/16397 (same as in v10.2.3, Greg
+> >>> >>> > pls review/approve, assumed Approved ?)
+> >>> >>> >
+> >>> >>> > upgrade/hammer-x (jewel) - http://tracker.ceph.com/issues/17847 ((Sage
+> >>> >>> > pls review/approve, seems persistent, but maybe not a showstopper)
+> >>> >>> >
+> >>> >>> > upgrade/infernalis-x (jewel) - deprecated (Nathan is still working
+> >>> >>> > to make it pass, see issues in the tacker summary above)
+> >>> >>> >
+> >>> >>> > Sage, jewel 10.2.4 can be released as soon as you agree with the
+> >>> >>> > findings/summary.
+> >>> >>>
+> >>> >>> Do you think we're ready to release 10.2.4 yet?
+> >>> >>
+> >>> >> I'm reproducing http://tracker.ceph.com/issues/17847 with logs to make
+> >>> >> sure this isn't a regression.
+> >>> >>
+> >>> >> We can ignore the infernalis runs.
+> >>> >>
+> >>> >> I think we can ignore the knfs selinux issue too.. Greg, can you confirm?
+> >>> >>
+> >>> > Added the prs 12001 & 12167 on top of the jewel branch and scheduled rados runs
+> >>> > at
+> >>> > http://pulpito.ceph.com/abhi-2016-11-29_10:22:25-rados-wip-jewel-10-2-4-distro-basic-smithi/ &
+> >>
+> >> https://github.com/ceph/ceph-qa-suite/pull/1292
+> >>
+> >> avoids xenial for the rados upgrade tests (in jewel branch).
 > 
-> C API document:
-> 
->      Check header file `libstoragemgmt_local_disk.h` in
->      `libstoragemgmt-devel` rpm package. The functions are:
-> 
->      lsm_local_disk_ident_led_on()
->      lsm_local_disk_ident_led_off()
->      lsm_local_disk_fault_led_on()
->      lsm_local_disk_fault_led_off()
+> Ah alright, maybe this was the cause after all, let's get this in (or
+> push a branch to ceph-qa-suite so that I can schedule against that)
 
-Since this is in a reasonably usable state, I think It's time for us to 
-figure out how we are going to do this in ceph.
+I added a patch for the client-upgrade tests to the same branch. You 
+should be able to just schedule with --suite-branch jewel-avoid-xenial 
+instead of --suite-branch jewel (for both rados and 
+upgrade/client-upgrade).
 
-A few ideas:
-
- ceph osd identify osd.123    # blink for a few seconds?
-
-or
-
- ceph osd ident-led-on osd.123  # turn on
- ceph osd ident-led-off osd.123  # turn off
- ceph osd fault-led-on osd.123  # turn on
- ceph osd fault-led-off osd.123  # turn off
-
-This would mean persistently recording the LED state in the OSDMap.  And 
-it would mean ceph-osd is the one twiddling the LEDs.  But that might not 
-be the way to go in all cases.  For example, if we have an OSD that fails, 
-once we confirm that we've healed (and don't need that OSDs data) we'd 
-probably want to set the fault light so that the disk can be pulled 
-safely.  In that case, ceph-osd isn't running (it's long-since failed), 
-and we'd need some other agent on the node to twiddle the light.  Do we 
-really want multiple things twiddling lights?
-
-We also often have a N:M mapping of osds to devices (multiple devices per 
-OSD, multiple OSDs per device), which means a per-OSD flag might not be 
-the right way to think about this anyway.
-
-Has anyone thought this through yet?
-
-Thanks!
 sage
+
+
+> >>
+> >> The upgrade tests already explicitly call out trusty, so they should be
+> >> fine.
+> >>
+> >>> > updated the tracker at http://tracker.ceph.com/issues/17851#note-17,
+> >>> > with details of the test. I'll update the progress once the suite goes
+> >>> > through
+> >>>
+> >>> Had around 11 tests fail from 296 scheduled, there were a couple of
+> >>> valgrind issues on ceph-mon (which were seen at earlier runs on jewel as
+> >>> well) and an s3test failure, rest of the issues were looking related to
+> >>> infrastructure as they were failing to get specific version numbers from
+> >>> gitbuilders.
+> >>>
+> >>> Reported this issue as:
+> >>>
+> >>> http://tracker.ceph.com/issues/18089
+> >>>
+> >>> subsequent re runs are still failing with similar errors. The details
+> >>> are updated at
+> >>>
+> >>> http://tracker.ceph.com/issues/17487#note-37
+> >>>
+> >>> The upgrade suite has also failed with similar errors.
+> >>
+> >> Which one?
+> > The upgrade/client-upgrade suite (I hope this is the right upgrade
+> > suite), the errors are the same failed to fetch package version errors
+> > seen for the rados suite, so not actual test run errors yet.
+> >
+> > http://pulpito.ceph.com/abhi-2016-11-30_09:58:50-upgrade:client-upgrade-wip-jewel-10-2-4-distro-basic-smithi/
+> > is the run
+> >
+> > Best,
+> > Abhishek
+> 
+> 
+> --
+> Abhishek Lekshmanan
+> SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+--8323329-429468212-1480525031=:2097--
