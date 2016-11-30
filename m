@@ -1,88 +1,108 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: disk enclosure LEDs
-Date: Thu, 1 Dec 2016 00:15:25 +0000
-Message-ID: <CALe9h7d3Lv5Hwxh0sdtkSXQrPZqXG2UdVc2nvSN9ra2Gu6eM5A@mail.gmail.com>
-References: <alpine.DEB.2.11.1611301606060.2097@piezo.novalocal> <eb52d1a8-8058-b57b-1585-828385953919@suse.de>
+From: Bassam Tabbara <Bassam.Tabbara-+vhbC7un7QRBDgjK7y7TUQ@public.gmane.org>
+Subject: Announcing: Embedded Ceph and Rook
+Date: Wed, 30 Nov 2016 23:46:59 +0000
+Message-ID: <228E0F98-9B6F-4086-B373-F11AB4384D85@quantum.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f172.google.com ([209.85.220.172]:33112 "EHLO
-        mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752330AbcLAAPr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Nov 2016 19:15:47 -0500
-Received: by mail-qk0-f172.google.com with SMTP id x190so228430865qkb.0
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Nov 2016 16:15:46 -0800 (PST)
-In-Reply-To: <eb52d1a8-8058-b57b-1585-828385953919@suse.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Joao Eduardo Luis <joao@suse.de>
-Cc: Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0704390455=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, The Sacred Order of the
+	Squid Cybernetic <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Nov 30, 2016 at 7:37 PM, Joao Eduardo Luis <joao@suse.de> wrote:
-> On 11/30/2016 04:51 PM, Sage Weil wrote:
->>
->> Since this is in a reasonably usable state, I think It's time for us to
->> figure out how we are going to do this in ceph.
->>
->> A few ideas:
->>
->>  ceph osd identify osd.123    # blink for a few seconds?
->>
->> or
->>
->>  ceph osd ident-led-on osd.123  # turn on
->>  ceph osd ident-led-off osd.123  # turn off
->>  ceph osd fault-led-on osd.123  # turn on
->>  ceph osd fault-led-off osd.123  # turn off
->>
->> This would mean persistently recording the LED state in the OSDMap.  And
->> it would mean ceph-osd is the one twiddling the LEDs.  But that might not
->> be the way to go in all cases.  For example, if we have an OSD that fails,
->> once we confirm that we've healed (and don't need that OSDs data) we'd
->> probably want to set the fault light so that the disk can be pulled
->> safely.  In that case, ceph-osd isn't running (it's long-since failed),
->> and we'd need some other agent on the node to twiddle the light.  Do we
->> really want multiple things twiddling lights?
->
->
-> Although this is really neat, I don't think ceph is the place to implement
-> or even manage it.
->
-> This should fall under a management tool's purview.
+--===============0704390455==
+Content-Language: en-US
+Content-Type: multipart/alternative;
+	boundary="_000_228E0F989B6F4086B373F11AB4384D85quantumcom_"
 
-I would agree that any persistence/policy parts don't belong in the
-OSD or the mons, but the remote access part where we reach across the
-network and do something with libstoragemgmt is very useful to have
-inside Ceph, because it means we can have management tools that just
-speak librados and don't have to have their own remote access to all
-the nodes in the system.
+--_000_228E0F989B6F4086B373F11AB4384D85quantumcom_
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 
-Put another way, I'd like it to be the case that people who want to
-twiddle LEDs can write a ceph-mgr module that does that, rather than
-having to push out a libstoragemgmt-enabled agent to the Ceph servers.
+SGVsbG8gQ2VwaGVycywNCg0KSSB3YW50ZWQgdG8gbGV0IHlvdSBrbm93IGFib3V0IGEgbmV3IGxp
+YnJhcnkgdGhhdCBpcyBub3cgYXZhaWxhYmxlIGluIG1hc3Rlci4gSXQncyBjYWxsZWQg4oCcbGli
+Y2VwaGTigJ0gYW5kIGl0IGVuYWJsZXMgdGhlIGVtYmVkZGluZyBvZiBDZXBoIGRhZW1vbnMgbGlr
+ZSBNT04gYW5kIE9TRCAoYW5kIHNvb24gTURTIGFuZCBSR1cpIGludG8gb3RoZXIgYXBwbGljYXRp
+b25zLiBVc2luZyBsaWJjZXBoZCBpdCdzIHBvc3NpYmxlIHRvIGNyZWF0ZSBuZXcgYXBwbGljYXRp
+b25zIHRoYXQgY2xvc2VseSBpbnRlZ3JhdGUgQ2VwaCBzdG9yYWdlIHdpdGhvdXQgYnJpbmdpbmcg
+aW4gdGhlIGZ1bGwgZGlzdHJpYnV0aW9uIG9mIENlcGggYW5kIGl0cyBkZXBlbmRlbmNpZXMuIEZv
+ciBleGFtcGxlLCB5b3UgY2FuIGJ1aWxkIHN0b3JhZ2UgYXBwbGljYXRpb24gdGhhdCBydW5zIHRo
+ZSBDZXBoIGRhZW1vbnMgb24gbGltaXRlZCBkaXN0cmlidXRpb25zIGxpa2UgQ29yZU9TIG5hdGl2
+ZWx5IG9yIGFsb25nIHNpZGUgYSBoeXBlcnZpc29yIGZvciBoeXBlcmNvbnZlcmdlZCBzY2VuYXJp
+b3MuIFRoZSBnb2FsIGlzIHRvIGVuYWJsZSBhIGJyb2FkZXIgZWNvc3lzdGVtIG9mIHNvbHV0aW9u
+cyBidWlsdCBhcm91bmQgQ2VwaCBhbmQgcmVkdWNlIHNvbWUgb2YgdGhlIGZyaWN0aW9uIGZvciBh
+ZG9wdGluZyBDZXBoIHRvZGF5LiBTZWUgaHR0cDovL3BhZC5jZXBoLmNvbS9wL2VtYmVkZGVkLWNl
+cGggZm9yIHRoZSBibHVlcHJpbnQuDQoNCldlIChRdWFudHVtKSBhcmUgdXNpbmcgZW1iZWRkZWQg
+Q2VwaCBpbiBhIG5ldyBvcGVuLXNvdXJjZSBwcm9qZWN0IGNhbGxlZCBSb29rIChodHRwczovL2dp
+dGh1Yi5jb20vcm9vay9yb29rIGFuZCBodHRwczovL3Jvb2suaW8pLiBSb29rIGludGVncmF0ZXMg
+ZW1iZWRkZWQgQ2VwaCBpbiBhIGRlcGxveW1lbnQgdGhhdCBpcyB0YXJnZXRpbmcgY2xvdWQtbmF0
+aXZlIGFwcGxpY2F0aW9ucy4NCg0KUGxlYXNlIGZlZWwgZnJlZSB0byByZXNwb25kIHdpdGggZmVl
+ZGJhY2suIEFsc28gaWYgeW914oCZcmUgaW4gdGhlIFNlYXR0bGUgYXJlYSBuZXh0IHdlZWsgc3Rv
+cCBieSBmb3IgYSBtZWV0dXAgb24gZW1iZWRkZWQgQ2VwaCBhbmQgaXRzIHVzZSBpbiBSb29rIGh0
+dHBzOi8vd3d3Lm1lZXR1cC5jb20vUGFjaWZpYy1Ob3J0aHdlc3QtQ2VwaC1NZWV0dXAvZXZlbnRz
+LzIzNTYzMjEwNi8NCg0KVGhhbmtzIQ0KQmFzc2FtDQoNCg==
 
-John
+--_000_228E0F989B6F4086B373F11AB4384D85quantumcom_
+Content-Type: text/html; charset="utf-8"
+Content-ID: <EFB6B4A8A32B8748980A49637FF75249-ZEslsULX5o5BDgjK7y7TUQ@public.gmane.org>
+Content-Transfer-Encoding: base64
 
-> That doesn't mean we couldn't keep some info on ceph itself, but in that
-> case it should be kept either on the mon's kv config-key or ceph-mgr (e.g.,
-> set of osds that actually support this, which led to turn if something
-> misbehaves, whatever).
->
-> And adding this sort of information to the osdmap is overkill. This is not
-> something that the osds should be concerned about, but whatever tool/service
-> monitors the osds.
->
-> Besides, we'd be taking a stand on how to do something completely ceph
-> unrelated - "how to blink your enclosure's leds". I'm guessing this will be
-> hardware dependent; availability of the required libraries will be distro
-> dependent; and people may want to implement this in totally different ways
-> from whatever we concoct here.
->
-> I don't see a good argument to delegate this to ceph.
->
->   -Joao
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PGh0bWw+DQo8aGVhZD4NCjxtZXRhIGh0dHAtZXF1aXY9IkNvbnRlbnQtVHlwZSIgY29udGVudD0i
+dGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04Ij4NCjwvaGVhZD4NCjxib2R5IHN0eWxlPSJ3b3JkLXdy
+YXA6IGJyZWFrLXdvcmQ7IC13ZWJraXQtbmJzcC1tb2RlOiBzcGFjZTsgLXdlYmtpdC1saW5lLWJy
+ZWFrOiBhZnRlci13aGl0ZS1zcGFjZTsiIGNsYXNzPSIiPg0KPGRpdiBjbGFzcz0iIj5IZWxsbyBD
+ZXBoZXJzLDwvZGl2Pg0KPGRpdiBjbGFzcz0iIj48YnIgY2xhc3M9IiI+DQpJIHdhbnRlZCB0byBs
+ZXQgeW91IGtub3cgYWJvdXQgYSBuZXcgbGlicmFyeSB0aGF0IGlzIG5vdyBhdmFpbGFibGUgaW4g
+bWFzdGVyLiBJdCdzIGNhbGxlZCDigJxsaWJjZXBoZOKAnSBhbmQgaXQgZW5hYmxlcyB0aGUgZW1i
+ZWRkaW5nIG9mIENlcGggZGFlbW9ucyBsaWtlIE1PTiBhbmQgT1NEIChhbmQgc29vbiBNRFMgYW5k
+IFJHVykgaW50byBvdGhlciBhcHBsaWNhdGlvbnMuIFVzaW5nIGxpYmNlcGhkIGl0J3MgcG9zc2li
+bGUgdG8gY3JlYXRlIG5ldyBhcHBsaWNhdGlvbnMNCiB0aGF0IGNsb3NlbHkgaW50ZWdyYXRlIENl
+cGggc3RvcmFnZSB3aXRob3V0IGJyaW5naW5nIGluIHRoZSBmdWxsIGRpc3RyaWJ1dGlvbiBvZiBD
+ZXBoIGFuZCBpdHMgZGVwZW5kZW5jaWVzLiBGb3IgZXhhbXBsZSwgeW91IGNhbiBidWlsZCBzdG9y
+YWdlIGFwcGxpY2F0aW9uIHRoYXQgcnVucyB0aGUgQ2VwaCBkYWVtb25zIG9uIGxpbWl0ZWQgZGlz
+dHJpYnV0aW9ucyBsaWtlIENvcmVPUyBuYXRpdmVseSBvciBhbG9uZyBzaWRlIGEgaHlwZXJ2aXNv
+ciBmb3INCiBoeXBlcmNvbnZlcmdlZCBzY2VuYXJpb3MuIFRoZSBnb2FsIGlzIHRvIGVuYWJsZSBh
+IGJyb2FkZXIgZWNvc3lzdGVtIG9mIHNvbHV0aW9ucyBidWlsdCBhcm91bmQgQ2VwaCBhbmQgcmVk
+dWNlIHNvbWUgb2YgdGhlIGZyaWN0aW9uIGZvciBhZG9wdGluZyBDZXBoIHRvZGF5LiBTZWUNCjxh
+IGhyZWY9Imh0dHA6Ly9wYWQuY2VwaC5jb20vcC9lbWJlZGRlZC1jZXBoIiBjbGFzcz0iIj5odHRw
+Oi8vcGFkLmNlcGguY29tL3AvZW1iZWRkZWQtY2VwaDwvYT4mbmJzcDtmb3IgdGhlIGJsdWVwcmlu
+dC48L2Rpdj4NCjxkaXYgY2xhc3M9IiI+PGJyIGNsYXNzPSIiPg0KPC9kaXY+DQo8ZGl2IGNsYXNz
+PSIiPldlIChRdWFudHVtKSBhcmUgdXNpbmcgZW1iZWRkZWQgQ2VwaCBpbiBhIG5ldyBvcGVuLXNv
+dXJjZSBwcm9qZWN0IGNhbGxlZCBSb29rICg8YSBocmVmPSJodHRwczovL2dpdGh1Yi5jb20vcm9v
+ay9yb29rIiBjbGFzcz0iIj5odHRwczovL2dpdGh1Yi5jb20vcm9vay9yb29rPC9hPiZuYnNwO2Fu
+ZCZuYnNwO2h0dHBzOi8vcm9vay5pbykuJm5ic3A7Um9vayBpbnRlZ3JhdGVzIGVtYmVkZGVkIENl
+cGggaW4gYSBkZXBsb3ltZW50IHRoYXQgaXMgdGFyZ2V0aW5nDQogY2xvdWQtbmF0aXZlIGFwcGxp
+Y2F0aW9ucy48L2Rpdj4NCjxkaXYgY2xhc3M9IiI+PGJyIGNsYXNzPSIiPg0KPC9kaXY+DQo8ZGl2
+IGNsYXNzPSIiPlBsZWFzZSBmZWVsIGZyZWUgdG8gcmVzcG9uZCB3aXRoIGZlZWRiYWNrLiBBbHNv
+IGlmIHlvdeKAmXJlIGluIHRoZSBTZWF0dGxlIGFyZWEgbmV4dCB3ZWVrIHN0b3AgYnkgZm9yIGEg
+bWVldHVwIG9uIGVtYmVkZGVkIENlcGggYW5kIGl0cyB1c2UgaW4gUm9vaw0KPGEgaHJlZj0iaHR0
+cHM6Ly93d3cubWVldHVwLmNvbS9QYWNpZmljLU5vcnRod2VzdC1DZXBoLU1lZXR1cC9ldmVudHMv
+MjM1NjMyMTA2LyIgY2xhc3M9IiI+DQpodHRwczovL3d3dy5tZWV0dXAuY29tL1BhY2lmaWMtTm9y
+dGh3ZXN0LUNlcGgtTWVldHVwL2V2ZW50cy8yMzU2MzIxMDYvPC9hPjwvZGl2Pg0KPGRpdiBjbGFz
+cz0iIj48YnIgY2xhc3M9IiI+DQo8L2Rpdj4NCjxkaXYgY2xhc3M9IiI+VGhhbmtzITwvZGl2Pg0K
+PGRpdiBjbGFzcz0iIj5CYXNzYW08L2Rpdj4NCjxkaXYgY2xhc3M9IiI+PGJyIGNsYXNzPSIiPg0K
+PC9kaXY+DQo8L2JvZHk+DQo8L2h0bWw+DQo=
+
+--_000_228E0F989B6F4086B373F11AB4384D85quantumcom_--
+
+--===============0704390455==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0704390455==--
