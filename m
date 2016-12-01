@@ -1,204 +1,130 @@
-From: Vasu Kulkarni <vakulkar-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: stalls caused by scrub on jewel
-Date: Thu, 1 Dec 2016 09:25:03 -0800
-Message-ID: <CAKPXa=bpf6v8JbrZ_Aq_hSpOSQmPtcRNR5kOONLLM7cJ-j26vw@mail.gmail.com>
-References: <alpine.DEB.2.11.1611152232260.2650@piezo.us.to>
-	<67e859f3-1aa6-e4b5-06b5-664583f668f1@univ-lorraine.fr>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: BlueStore Latency Breakdown
+Date: Thu, 1 Dec 2016 17:37:21 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612011647400.2702@piezo.novalocal>
+References: <9919FCA5-993E-4153-9A6E-AA64E592A3A4@alibaba-inc.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0508398023=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <67e859f3-1aa6-e4b5-06b5-664583f668f1-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: =?UTF-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org>
-Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-278993621-1480613844=:2702"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:39150 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752008AbcLARhZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 1 Dec 2016 12:37:25 -0500
+In-Reply-To: <9919FCA5-993E-4153-9A6E-AA64E592A3A4@alibaba-inc.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "LIU, Fei" <james.liu@alibaba-inc.com>
+Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel@vger.kernel.org
 
---===============0508398023==
-Content-Type: multipart/alternative; boundary=001a113cdbc01bbda805429c1ae4
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
---001a113cdbc01bbda805429c1ae4
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+--8323329-278993621-1480613844=:2702
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 
-On Thu, Dec 1, 2016 at 7:24 AM, Fr=C3=A9d=C3=A9ric Nass <
-frederic.nass-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org> wrote:
+[adding ceph-devel]
 
->
-> Hi Sage, Sam,
->
-> We're impacted by this bug (case 01725311). Our cluster is running RHCS
-> 2.0 and is no more capable to scrub neither deep-scrub.
->
-> [1] http://tracker.ceph.com/issues/17859
-> [2] https://bugzilla.redhat.com/show_bug.cgi?id=3D1394007
-> [3] https://github.com/ceph/ceph/pull/11898
->
-> I'm worried we'll have to live with a cluster that can't scrub/deep-scrub
-> until March 2017 (ETA for RHCS 2.2 running Jewel 10.2.4).
->
-> Can we have this fix any sooner ?
->
+On Thu, 1 Dec 2016, LIU, Fei wrote:
+> Hi Sage:
+> 
+>     Here are the benchmark results that we got:        
+> 
+>         1. With bluestore storage engine，The latency of fio 16KB, single IO
+> with three replicas is  around 1.2ms
+> 
+>         2. With bluestore storage engine，The latenc of fio 16KB, single IO
+> with single replicas is  around 0.7ms
+> 
+>         3. With filestore storage engine，The latenc of fio 16KB, single IO
+> with three replicas is  around 0.8ms
+> 
+>     The IO flow including space allocation, data write and metadata write.
+> All of these operations are serialized . The data was written to block
+> device(SATA SSD) through AIO. The metadata was written to  RocksDB (NVMe
+> SSD).
+> 
+>  
+> 
+> Here are what we observed and latency breakdown through percounter and log:
+> 
+> 1.       Prepare stage of transaction：90us
+> 
+> 2.       Data was written through AIO(SATA SSD): 110us(3520 16k random write
+> latency is around 80-90us)
+> 
+> 3.       Metadata was written twice by calling submit_transaction_sync, The
+> total latency is around 350us(The logging mechanism was used in bluefs,
+> everytime, the IO to bluefs will be written to log then to data, so here is
+> total four IOs.)
 
-Since this is merged in master and pending backport to jewel, I dont think
-you will have to wait for 2.2 to get that, It should be in a hotfix much
-sooner.
+This is part of the problem.  The bluefs logging path should not be 
+triggered unless it is a totally fresh OSD and the wal log files haven't 
+been recycled yet.  There is an option to precondition the rocksdb log
 
+	OPTION(bluestore_precondition_bluefs, OPT_U64, 512*1024*1024)  // write this much data at mkfs
 
+that you may have adjusted or might not be writing enough data?  Have you 
+adjusted the rocksdb parameters at all?
 
->
-> Regards
->
-> Fr=C3=A9d=C3=A9ric.
->
->
-> Le 15/11/2016 =C3=A0 23:35, Sage Weil a =C3=A9crit :
->
->> Hi everyone,
->>
->> There was a regression in jewel that can trigger long OSD stalls during
->> scrub.  How long the stalls are depends on how many objects are in your
->> PGs, how fast your storage device is, and what is cached, but in at leas=
-t
->> one case they were long enough that the OSD internal heartbeat check
->> failed and it committed suicide (120 seconds).
->>
->> The workaround for now is to simply
->>
->>   ceph osd set noscrub
->>
->> as the bug is only triggered by scrub.  A fix is being tested and will b=
-e
->> available shortly.
->>
->> If you've seen any kind of weird latencies or slow requests on jewel, I
->> suggest setting noscrub and seeing if they go away!
->>
->> The tracker bug is
->>
->>   http://tracker.ceph.com/issues/17859
->>
->> Big thanks to Yoann Moulin for helping track this down!
->>
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
+Actually, testing this now, it looks like the preconditioning isn't 
+working the way it should.  You can work around this just by writing a 
+bunch of data to bluestore to get the rocksdb logs to roll over.  The 
+easiest way to do this is
 
---001a113cdbc01bbda805429c1ae4
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+  rados -p rbd bench 30 write -b 65536 --write-omap
 
-<div dir=3D"ltr"><br><div class=3D"gmail_extra"><br><div class=3D"gmail_quo=
-te">On Thu, Dec 1, 2016 at 7:24 AM, Fr=C3=A9d=C3=A9ric Nass <span dir=3D"lt=
-r">&lt;<a href=3D"mailto:frederic.nass-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org" target=3D"_blank">=
-frederic.nass-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org</a>&gt;</span> wrote:<br><blockquote class=
-=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padd=
-ing-left:1ex"><br>
-Hi Sage, Sam,<br>
-<br>
-We&#39;re impacted by this bug (case 01725311). Our cluster is running RHCS=
- 2.0 and is no more capable to scrub neither deep-scrub.<br>
-<br>
-[1] <a href=3D"http://tracker.ceph.com/issues/17859" rel=3D"noreferrer" tar=
-get=3D"_blank">http://tracker.ceph.com/issues<wbr>/17859</a><br>
-[2] <a href=3D"https://bugzilla.redhat.com/show_bug.cgi?id=3D1394007" rel=
-=3D"noreferrer" target=3D"_blank">https://bugzilla.redhat.com/sh<wbr>ow_bug=
-.cgi?id=3D1394007</a><br>
-[3] <a href=3D"https://github.com/ceph/ceph/pull/11898" rel=3D"noreferrer" =
-target=3D"_blank">https://github.com/ceph/ceph/p<wbr>ull/11898</a><br>
-<br>
-I&#39;m worried we&#39;ll have to live with a cluster that can&#39;t scrub/=
-deep-scrub until March 2017 (ETA for RHCS 2.2 running Jewel 10.2.4).<br>
-<br>
-Can we have this fix any sooner ?<br></blockquote><div><br></div><div>Since=
- this is merged in master and pending backport to jewel, I dont think you w=
-ill have to wait for 2.2 to get that, It should be in a hotfix much sooner.=
-<br></div><div><br>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"m=
-argin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
-<br>
-Regards<br>
-<br>
-Fr=C3=A9d=C3=A9ric.<div><div class=3D"h5"><br>
-<br>
-Le 15/11/2016 =C3=A0 23:35, Sage Weil a =C3=A9crit :<br>
-<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
-x #ccc solid;padding-left:1ex">
-Hi everyone,<br>
-<br>
-There was a regression in jewel that can trigger long OSD stalls during<br>
-scrub.=C2=A0 How long the stalls are depends on how many objects are in you=
-r<br>
-PGs, how fast your storage device is, and what is cached, but in at least<b=
-r>
-one case they were long enough that the OSD internal heartbeat check<br>
-failed and it committed suicide (120 seconds).<br>
-<br>
-The workaround for now is to simply<br>
-<br>
-=C2=A0 ceph osd set noscrub<br>
-<br>
-as the bug is only triggered by scrub.=C2=A0 A fix is being tested and will=
- be<br>
-available shortly.<br>
-<br>
-If you&#39;ve seen any kind of weird latencies or slow requests on jewel, I=
-<br>
-suggest setting noscrub and seeing if they go away!<br>
-<br>
-The tracker bug is<br>
-<br>
-=C2=A0 <a href=3D"http://tracker.ceph.com/issues/17859" rel=3D"noreferrer" =
-target=3D"_blank">http://tracker.ceph.com/issues<wbr>/17859</a><br>
-<br>
-Big thanks to Yoann Moulin for helping track this down!<br>
-<br>
-sage<br>
---<br>
-To unsubscribe from this list: send the line &quot;unsubscribe ceph-devel&q=
-uot; in<br>
-the body of a message to <a href=3D"mailto:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" targe=
-t=3D"_blank">majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>
-More majordomo info at=C2=A0 <a href=3D"http://vger.kernel.org/majordomo-in=
-fo.html" rel=3D"noreferrer" target=3D"_blank">http://vger.kernel.org/majord=
-o<wbr>mo-info.html</a><br>
-</blockquote>
-<br></div></div>
-______________________________<wbr>_________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-users@l=
-ists.ceph.com</a><br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
-oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo<wbr>.cgi/ceph-u=
-sers-ceph.com</a><br>
-</blockquote></div><br></div></div>
+and be sure to write serveral hundred megabytes to each OSD.  After that, 
+you should see the latency drop way down.
 
---001a113cdbc01bbda805429c1ae4--
+> The whole process for a bluestore write hence take : 90+110+350=550us
+> 
+>     Three replicas were used in Ceph:  We first wrote to primary then to two
+> replicas and return. The total latency including the networking latency will
+> be  
+> 
+>     network_latency + primary_osd_bluestore_latency +
+> slave_osd_bluestore_latency which equals to 200+550+550=1.3ms(the networking
+> latency is around 200us for three replicas) . It is pretty close to 1.2ms .
+> 
+>  
+> 
+>    For further verified , we have test the cluster with single replics with
+> below latency calculation:
+> 
+>    network_latency + primary_osd_bluestore_latency which is equal to
+> 100+550＝0.65us (networking latency is 100us with single replica), it is
+> pretty close to to 0.7ms.
+> 
+>  
+> 
+> Here is our preliminary conclusion:
+> 
+>             1. Latency of Bluestore is worse than filestore because metadata
+> and data write twice in difference place in bluestore.
 
---===============0508398023==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+As mentioned during the perf call, I think the path we should take is an 
+option or some auto-tuning so that in BlueStore can choose to do 
+write-ahead logging of the data write even when it is <= min_alloc_size.  
+This will allow the operation to commit with a single IO + flush to the 
+nvme wal device and the data write to the slower device to happen 
+asynchronously.
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>             2. It take too much time for calling submit_sync_latency twice
+> to write metadata 。more optimization should be made over here
 
---===============0508398023==--
+This is a easist thing to fix... I've opened a ticket:
+
+	http://tracker.ceph.com/issues/18105
+
+>             3. Could be possible to make metadata and data write in parallel
+> for improving the latency.    
+
+Definitely not.  We cannot write any metadata that references data until 
+the data is on stable storage or else a power failure will lead to 
+corruption.
+
+Thanks for the detailed breakdown!
+
+sage
+--8323329-278993621-1480613844=:2702--
