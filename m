@@ -1,117 +1,123 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: ceph v10.2.4 QE validation status
-Date: Thu, 1 Dec 2016 08:26:39 -0500
-Message-ID: <CAC-Np1y-vffembS6a-=Xctb=eeL=K6y_EPkHns2GY4u=tZVGuQ@mail.gmail.com>
-References: <CAMMFjmEkMUBCnZFqMr_kcfZgB5jm3CjVNfXpSAXT7ZCwMLQEfg@mail.gmail.com>
- <CAMMFjmGRO7F30WwU8NwMU=t3bEXEhz1G6bwZwqyQJrp7mceZdQ@mail.gmail.com> <87r362tr92.fsf@suse.com>
+From: Jeff Layton <jlayton@poochiereds.net>
+Subject: LSF/MM 2017: Call for Proposals
+Date: Thu, 01 Dec 2016 09:11:46 -0500
+Message-ID: <1480601506.2511.7.camel@poochiereds.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f182.google.com ([209.85.216.182]:34062 "EHLO
-        mail-qt0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754525AbcLAN0l (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Dec 2016 08:26:41 -0500
-Received: by mail-qt0-f182.google.com with SMTP id n6so220172674qtd.1
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Dec 2016 05:26:40 -0800 (PST)
-In-Reply-To: <87r362tr92.fsf@suse.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek L <abhishek@suse.com>
-Cc: Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <ldachary@redhat.com>, "Dachary, Loic" <loic@dachary.org>, "Dillaman, Jason" <dillaman@redhat.com>, Nathan Cutler <ncutler@suse.cz>, Ilya Dryomov <idryomov@gmail.com>, John Spray <jspray@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, Yuri Weinstein <yweinste@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <owner-linux-mm@kvack.org>
+Sender: owner-linux-mm@kvack.org
+To: linux-block@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-ide@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-nfs@vger.kernel.org, linux-scsi@vger.kernel.org, "xfs@oss.sgi.com" <xfs@oss.sgi.com>, ceph-devel@vger.kernel.org, linux-nvme@lists.infradead.org
+Cc: "lsf-pc@lists.linux-foundation.org" <lsf-pc@lists.linux-foundation.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Nov 23, 2016 at 5:39 AM, Abhishek L <abhishek@suse.com> wrote:
->
-> Hi Sage, Greg,
->
->
-> Yuri Weinstein writes:
->
->> See updated status - http://tracker.ceph.com/issues/17487#note-32
->>
->> Outstanding issues:
->>
->> knfs - http://tracker.ceph.com/issues/16397 (same as in v10.2.3, Greg
->> pls review/approve, assumed Approved ?)
->>
->> upgrade/hammer-x (jewel) - http://tracker.ceph.com/issues/17847 ((Sage
->> pls review/approve, seems persistent, but maybe not a showstopper)
->>
->> upgrade/infernalis-x (jewel) - deprecated (Nathan is still working
->> to make it pass, see issues in the tacker summary above)
->>
->> Sage, jewel 10.2.4 can be released as soon as you agree with the
->> findings/summary.
->
-> Do you think we're ready to release 10.2.4 yet?
+The annual Linux Storage, Filesystem and Memory Management (LSF/MM)
+Summit for 2017 will be held on March 20th and 21st at the Hyatt
+Cambridge, Cambridge, MA. LSF/MM is an invitation-only technical
+workshop to map out improvements to the Linux storage, filesystem and
+memory management subsystems that will make their way into the mainline
+kernel within the coming years.
 
-I thought this PR had made it https://github.com/ceph/ceph/pull/11749
-but apparently it didn't for Jewel
+    http://events.linuxfoundation.org/events/linux-storage-filesystem-and-mm-summit
 
-The backport PR for Jewel is https://github.com/ceph/ceph/pull/11884
+Like last year, LSF/MM will be colocated with the Linux Foundation Vault
+conference which takes place on March 22nd and 23rd in the same Venue.
+For those that do not know, Vault is designed to be an event where open
+source storage and filesystem practitioners meet storage implementors
+and, as such, it would be of benefit for LSF/MM attendees to attend.
 
-It fixes quite a bit of issues we've had for deployment. It is only
-relevant when bootstrapping, when keys are needed for the first time.
+Unlike past years, Vault admission is not free for LSF/MM attendees this
+year unless they're giving a talk. There is a discount for LSF/MM
+attendees, however we would also like to encourage folks to submit talk
+proposals to speak at the Vault conference.
 
-Hopefully we can include it as well.
->
->
-> Best,
-> Abhishek
->>
->> Thx
->> YuriW
->>
->> On Fri, Nov 11, 2016 at 8:47 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
->>> Detailed summary of the QE Validation can be found here
->>> http://tracker.ceph.com/issues/17487#note-32
->>>
->>> The following suites were in scope of this point release validation:
->>>
->>> rados (subset 35/50 297 jobs)
->>> rbd
->>> rgw
->>> fs
->>> krbd
->>> kcephfs
->>> knfs
->>> rest
->>> hadoop
->>> samba
->>> ceph-deploy
->>> ceph-disk
->>> upgrade/client-upgrade
->>> upgrade/hammer-x (jewel)
->>> upgrade/infernalis-x (jewel) - deprecated
->>> powercycle
->>> (please let me know if any suites are missing from this ^ list)
->>>
->>> ==============================
->>> Issues requiring approval/decision:
->>>
->>> fs - http://tracker.ceph.com/issues/17832 (Greg pls review/approve)
->>>
->>> krbd - http://tracker.ceph.com/issues/17221 (Jason, Ilya pls review/approve)
->>>
->>> knfs - http://tracker.ceph.com/issues/16397 (same as in v10.2.3, Greg
->>> pls review/approve)
->>>
->>> upgrade/hammer-x (jewel) - http://tracker.ceph.com/issues/17847 ((Sage
->>> pls review/approve)
->>>
->>> upgrade/infernalis-x (jewel) - deprecated, but Nathan is still working
->>> to make it pass (Sage pls review/approve)
->>>
->>> powercycle - in progress
->>>
->>> Thx
->>> YuriW
->
->
-> --
-> Abhishek Lekshmanan
-> SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+    http://events.linuxfoundation.org/events/vault
+
+On behalf of the committee I am issuing a call for agenda proposals that
+are suitable for cross-track discussion as well as technical subjects
+for the breakout sessions.
+
+If advance notice is required for visa applications then please point
+that out in your proposal or request to attend, and submit the topic
+as soon as possible.
+
+1) Proposals for agenda topics should be sent before January 15th, 2016
+to:
+
+    lsf-pc@lists.linux-foundation.org
+
+and cc the Linux list or lists that are relevant for the topic in
+question:
+
+    ATA:   linux-ide@vger.kernel.org
+    Block: linux-block@vger.kernel.org
+    FS:    linux-fsdevel@vger.kernel.org
+    MM:    linux-mm@kvack.org
+    SCSI:  linux-scsi@vger.kernel.org
+    NVMe:  linux-nvme@lists.infradead.org
+
+Please tag your proposal with [LSF/MM TOPIC] to make it easier to track.
+In addition, please make sure to start a new thread for each topic
+rather than following up to an existing one.  Agenda topics and
+attendees will be selected by the program committee, but the final
+agenda will be formed by consensus of the attendees on the day.
+
+2) Requests to attend the summit for those that are not proposing a
+topic should be sent to:
+
+    lsf-pc@lists.linux-foundation.org
+
+Please summarise what expertise you will bring to the meeting, and what
+you would like to discuss. Please also tag your email with [LSF/MM
+ATTEND] and send it as a new thread so there is less chance of it
+getting lost.
+
+We will try to cap attendance at around 25-30 per track to facilitate
+discussions although the final numbers will depend on the room sizes at
+the venue.
+
+Brief presentations are allowed to guide discussion, but are strongly
+discouraged. There will be no recording or audio bridge. However, we
+expect that written minutes will be published as we did in previous
+years:
+
+2016: https://lwn.net/Articles/lsfmm2016/
+
+2015: https://lwn.net/Articles/lsfmm2015/
+
+2014: http://lwn.net/Articles/LSFMM2014/
+
+2013: http://lwn.net/Articles/548089/
+
+3) If you have feedback on last year's meeting that we can use to
+improve this year's, please also send that to:
+
+    lsf-pc@lists.linux-foundation.org
+
+Thank you on behalf of the program committee:
+
+Storage:
+    James Bottomley
+    Martin K. Petersen (track chair)
+    Sagi Grimberg
+
+Filesystems:
+    Anna Schumaker
+    Chris Mason
+    Eric Sandeen
+    Jan Kara
+    Jeff Layton (summit chair)
+    Josef Bacik (track chair)
+    Trond Myklebust
+
+MM:
+    Johannes Weiner
+    Rik van Riel (track chair)
+-- 
+Jeff Layton <jlayton@poochiereds.net>
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
