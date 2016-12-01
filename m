@@ -1,73 +1,39 @@
-From: =?UTF-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org>
-Subject: Re: stalls caused by scrub on jewel
-Date: Thu, 1 Dec 2016 16:24:43 +0100
-Message-ID: <67e859f3-1aa6-e4b5-06b5-664583f668f1@univ-lorraine.fr>
-References: <alpine.DEB.2.11.1611152232260.2650@piezo.us.to>
+From: Jesse Williamson <jwilliamson@suse.de>
+Subject: Re: disk enclosure LEDs
+Date: Thu, 1 Dec 2016 07:27:02 -0800 (PST)
+Message-ID: <alpine.LSU.2.20.1612010701500.16655@ancalagon.suse.de>
+References: <alpine.DEB.2.11.1611301606060.2097@piezo.novalocal> <CALe9h7ct1+VwwdWshLPkAJTgAKLa4=+gbxPAkTfa=J488Hv7KA@mail.gmail.com> <3f1f9b7f-c715-c382-603d-67fabe31a001@grimmer.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; Format="flowed"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1611152232260.2650-ie3vfNGmdjePKud3HExfWg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; format=flowed; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:45661 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753591AbcLAP1W (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 1 Dec 2016 10:27:22 -0500
+In-Reply-To: <3f1f9b7f-c715-c382-603d-67fabe31a001@grimmer.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Lenz Grimmer <lenz@grimmer.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
+On Thu, 1 Dec 2016, Lenz Grimmer wrote:
 
-Hi Sage, Sam,
+Hi,
 
-We're impacted by this bug (case 01725311). Our cluster is running RHCS =
+> Instead, I would be in favor if it could tell me which disks it actually
+> uses, which would allow me to pass this device name to any given tool I
+> choose for blinking the LED on that device.
 
-2.0 and is no more capable to scrub neither deep-scrub.
+This seems like a good path to me.
 
-[1] http://tracker.ceph.com/issues/17859
-[2] https://bugzilla.redhat.com/show_bug.cgi?id=3D1394007
-[3] https://github.com/ceph/ceph/pull/11898
+The suggestion Joao made of a plugin is my second choice. That itself 
+opens up new opportunities for error, but I like that it doesn't tie 
+another dependency into OSD.
 
-I'm worried we'll have to live with a cluster that can't =
+> There was a pull request about this, but I don't think it ever got
+> merged - http://tracker.ceph.com/issues/3120
 
-scrub/deep-scrub until March 2017 (ETA for RHCS 2.2 running Jewel 10.2.4).
+Would exposing this through the console (if this has not been done 
+already) enable enough to address John's concern?
 
-Can we have this fix any sooner ?
-
-Regards
-
-Fr=E9d=E9ric.
-
-Le 15/11/2016 =E0 23:35, Sage Weil a =E9crit :
-> Hi everyone,
->
-> There was a regression in jewel that can trigger long OSD stalls during
-> scrub.  How long the stalls are depends on how many objects are in your
-> PGs, how fast your storage device is, and what is cached, but in at least
-> one case they were long enough that the OSD internal heartbeat check
-> failed and it committed suicide (120 seconds).
->
-> The workaround for now is to simply
->
->   ceph osd set noscrub
->
-> as the bug is only triggered by scrub.  A fix is being tested and will be
-> available shortly.
->
-> If you've seen any kind of weird latencies or slow requests on jewel, I
-> suggest setting noscrub and seeing if they go away!
->
-> The tracker bug is
->
->   http://tracker.ceph.com/issues/17859
->
-> Big thanks to Yoann Moulin for helping track this down!
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-Jesse
