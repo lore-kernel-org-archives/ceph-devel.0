@@ -1,69 +1,48 @@
-From: Zhen Cao <juehuiconst@gmail.com>
-Subject: Fwd: Ceph PG Number
-Date: Thu, 1 Dec 2016 10:44:00 +0800
-Message-ID: <CAOmt5rLndRVm9hx5Kfvg7yWLQcdeD06GPtdUjVGX=wjty2tWiw@mail.gmail.com>
-References: <CAOmt5rK42=8DcdrkeHgqsY6o2NjaQ+5wWOeZToZNsPd0GtS2ew@mail.gmail.com>
- <20161130083105.GM26997@predictor> <CAOmt5rKynSwpdtXGDFJXD956mbLf5rR6XAg7p8wDwfpJk=RgUw@mail.gmail.com>
+From: Bassam Tabbara <Bassam.Tabbara@quantum.com>
+Subject: Announcing: Embedded Ceph and Rook
+Date: Thu, 1 Dec 2016 03:09:19 +0000
+Message-ID: <61EA8A10-88D8-4E76-B710-64B928C28B0A@Quantum.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f65.google.com ([209.85.213.65]:34031 "EHLO
-        mail-vk0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753786AbcLACoB (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Nov 2016 21:44:01 -0500
-Received: by mail-vk0-f65.google.com with SMTP id p9so10010347vkd.1
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Nov 2016 18:44:01 -0800 (PST)
-In-Reply-To: <CAOmt5rKynSwpdtXGDFJXD956mbLf5rR6XAg7p8wDwfpJk=RgUw@mail.gmail.com>
+Received: from mx0a-000ceb01.pphosted.com ([67.231.144.126]:44731 "EHLO
+        mx04-000ceb01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1752054AbcLADZA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 30 Nov 2016 22:25:00 -0500
+Received: from pps.filterd (m0078707.ppops.net [127.0.0.1])
+        by mx0a-000ceb01.pphosted.com (8.16.0.17/8.16.0.17) with SMTP id uB13543X002372
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Nov 2016 19:09:22 -0800
+Received: from ppoxedge1.quantum.com ([146.174.252.27])
+        by mx0a-000ceb01.pphosted.com with ESMTP id 271ku4u8wk-1
+        (version=TLSv1 cipher=ECDHE-RSA-AES256-SHA bits=256 verify=NOT)
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Nov 2016 19:09:22 -0800
+Content-Language: en-US
+Content-ID: <F4B0DCD57BC9F44B9E3A5F2E414F760E@QUANTUM.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sage@newdream.net
-Cc: ceph-devel@vger.kernel.org
+To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
----------- Forwarded message ----------
-From: Zhen Cao <juehuiconst@gmail.com>
-Date: 2016-11-30 17:01 GMT+08:00
-Subject: Re: Ceph PG Number
-To: Piotr Da=C5=82ek <branch@predictor.org.pl>
-
-
-Thanks! I understood it.
-
-http://docs.ceph.com/docs/jewel/rados/operations/placement-groups/ said
-
-Ideally objects are evenly distributed in each placement group. Since
-CRUSH computes the placement group for each object, but does not
-actually know how much data is stored in each OSD within this
-placement group, the ratio between the number of placement groups and
-the number of OSDs may influence the distribution of the data
-significantly.
-
-For instance, if there was single a placement group for ten OSDs in a
-three replica pool, only three OSD would be used because CRUSH would
-have no other choice. When more placement groups are available,
-objects are more likely to be evenly spread among them. CRUSH also
-makes every effort to evenly spread OSDs among all existing Placement
-Groups.
-
-I got it,thanks for your help!
-
-
-2016-11-30 16:31 GMT+08:00 Piotr Da=C5=82ek <branch@predictor.org.pl>:
-> On Wed, Nov 30, 2016 at 04:22:10PM +0800, Zhen Cao wrote:
->> Hi,
->> I am reading the RADOS paper,but i could not understand why more PGs
->> per OSD result in a more balanced distribution.I konw the mapping
->> procedure between oid and osd=EF=BC=8Cbut it is neverless difficult to
->> understand for me.
->> Thanks for your help!
->
-> In a nuthshell - because each PG corresponds to multiple objects.
-> And because of this, it is possible that some PGs will aggregate more
-> objects than other PGs, resulting in lack of acutal balance. Also see her=
-e:
-> http://docs.ceph.com/docs/jewel/rados/operations/placement-groups/
->
-> --
-> Piotr Da=C5=82ek
-> branch@predictor.org.pl
-> http://blog.predictor.org.pl
+SGVsbG8gQ2VwaGVycywNCg0KSSB3YW50ZWQgdG8gbGV0IHlvdSBrbm93IGFib3V0IGEgbmV3IGxp
+YnJhcnkgdGhhdCBpcyBub3cgYXZhaWxhYmxlIGluIG1hc3Rlci4gSXQncyBjYWxsZWQg4oCcbGli
+Y2VwaGTigJ0gYW5kIGl0IGVuYWJsZXMgdGhlIGVtYmVkZGluZyBvZiBDZXBoIGRhZW1vbnMgbGlr
+ZSBNT04gYW5kIE9TRCAoYW5kIHNvb24gTURTIGFuZCBSR1cpIGludG8gb3RoZXIgYXBwbGljYXRp
+b25zLiBVc2luZyBsaWJjZXBoZCBpdCdzIHBvc3NpYmxlIHRvIGNyZWF0ZSBuZXcgYXBwbGljYXRp
+b25zIHRoYXQgY2xvc2VseSBpbnRlZ3JhdGUgQ2VwaCBzdG9yYWdlIHdpdGhvdXQgYnJpbmdpbmcg
+aW4gdGhlIGZ1bGwgZGlzdHJpYnV0aW9uIG9mIENlcGggYW5kIGl0cyBkZXBlbmRlbmNpZXMuIEZv
+ciBleGFtcGxlLCB5b3UgY2FuIGJ1aWxkIHN0b3JhZ2UgYXBwbGljYXRpb24gdGhhdCBydW5zIHRo
+ZSBDZXBoIGRhZW1vbnMgb24gbGltaXRlZCBkaXN0cmlidXRpb25zIGxpa2UgQ29yZU9TIG5hdGl2
+ZWx5IG9yIGFsb25nIHNpZGUgYSBoeXBlcnZpc29yIGZvciBoeXBlcmNvbnZlcmdlZCBzY2VuYXJp
+b3MuIFRoZSBnb2FsIGlzIHRvIGVuYWJsZSBhIGJyb2FkZXIgZWNvc3lzdGVtIG9mIHNvbHV0aW9u
+cyBidWlsdCBhcm91bmQgQ2VwaCBhbmQgcmVkdWNlIHNvbWUgb2YgdGhlIGZyaWN0aW9uIGZvciBh
+ZG9wdGluZyBDZXBoIHRvZGF5LiBTZWUgaHR0cDovL3BhZC5jZXBoLmNvbS9wL2VtYmVkZGVkLWNl
+cGggZm9yIHRoZSBibHVlcHJpbnQuDQoNCldlIChRdWFudHVtKSBhcmUgdXNpbmcgZW1iZWRkZWQg
+Q2VwaCBpbiBhIG5ldyBvcGVuLXNvdXJjZSBwcm9qZWN0IGNhbGxlZCBSb29rIChodHRwczovL2dp
+dGh1Yi5jb20vcm9vay9yb29rIGFuZCBodHRwczovL3Jvb2suaW8pLiBSb29rIGludGVncmF0ZXMg
+ZW1iZWRkZWQgQ2VwaCBpbiBhIGRlcGxveW1lbnQgdGhhdCBpcyB0YXJnZXRpbmcgY2xvdWQtbmF0
+aXZlIGFwcGxpY2F0aW9ucy4NCg0KUGxlYXNlIGZlZWwgZnJlZSB0byByZXNwb25kIHdpdGggZmVl
+ZGJhY2suIEFsc28gaWYgeW914oCZcmUgaW4gdGhlIFNlYXR0bGUgYXJlYSBuZXh0IHdlZWsgc3Rv
+cCBieSBmb3IgYSBtZWV0dXAgb24gZW1iZWRkZWQgQ2VwaCBhbmQgaXRzIHVzZSBpbiBSb29rIGh0
+dHBzOi8vd3d3Lm1lZXR1cC5jb20vUGFjaWZpYy1Ob3J0aHdlc3QtQ2VwaC1NZWV0dXAvZXZlbnRz
+LzIzNTYzMjEwNi8NCg0KVGhhbmtzIQ0KQmFzc2FtDQoNCg==
