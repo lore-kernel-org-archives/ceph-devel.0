@@ -1,66 +1,66 @@
-From: Henrik Korkuc <lists@kirneh.eu>
-Subject: Re: What is XFS/filesystem corruption and whose fault is it?
-Date: Thu, 1 Dec 2016 23:11:10 +0200
-Message-ID: <cf95e8e8-cf4e-67c6-c2a9-0587a69dc7de@kirneh.eu>
-References: <e7d7de6a-fd30-4957-b49d-9f3f2ae10871@suse.cz>
- <7F16E120-AF6C-4277-B10A-851783A8F9E8@gmail.com>
- <1923182119.3955394.1480618333252.JavaMail.zimbra@oxygem.tv>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Question about recovery vs backfill priorities
+Date: Thu, 1 Dec 2016 22:10:33 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612012158570.2097@piezo.novalocal>
+References: <3b219d94-431d-0a4f-e656-826003028a9d@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-284103546-1480630235=:2097"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from alpha.syseng.pro ([37.48.90.241]:58064 "EHLO alpha.syseng.pro"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750975AbcLAVUZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 1 Dec 2016 16:20:25 -0500
-In-Reply-To: <1923182119.3955394.1480618333252.JavaMail.zimbra@oxygem.tv>
+Received: from cobra.newdream.net ([66.33.216.30]:42359 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750919AbcLAWKh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Dec 2016 17:10:37 -0500
+In-Reply-To: <3b219d94-431d-0a4f-e656-826003028a9d@corp.ovh.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>, Dan Jakubiec <dan.jakubiec@gmail.com>
-Cc: Nathan Cutler <ncutler@suse.cz>, ceph-devel <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-2?Q?Bart=B3omiej_=A6wi=EAcki?= <bartlomiej.swiecki@corp.ovh.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 16-12-01 20:52, Alexandre DERUMIER wrote:
->>> That might work for XFS but it won't work for the wider Ceph cluster —
->>> it's against the RADOS guarantees and expectations for an OSD to go
->>> back in time after committing an update and *can* result in failure.
->>> -Greg
-> But we have osd journals (sync writes) and it should replay on failure ?
-if data gets to xfs it means it was flushed from the journal and Ceph 
-thinks that data is safe on filesystem, so it is very likely that this 
-data will not be present in journals anymore
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
->
-> ----- Mail original -----
-> De: "Dan Jakubiec" <dan.jakubiec@gmail.com>
-> À: "Nathan Cutler" <ncutler@suse.cz>
-> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
-> Envoyé: Jeudi 1 Décembre 2016 17:04:32
-> Objet: Re: What is XFS/filesystem corruption and whose fault is it?
->
-> We lost a whole cluster once due to incorrect write cache settings on multiple OSDs.
->
-> I think the recommendations on that page are correct, but I would also add that you must disable any write caching on the drive itself as well.
->
-> The XFS FAQ is the best place I've found that explains all the ins and outs (Q24 thru Q28):
->
-> http://xfs.org/index.php/XFS_FAQ <http://xfs.org/index.php/XFS_FAQ>
->
-> -- Dan
->
->> On Nov 25, 2016, at 10:26, Nathan Cutler <ncutler@suse.cz> wrote:
->>
->> I've been doing some research on OSDs not starting after power outages, when supposedly "uncorruptible" XFS filesystems are corrupted and need repair. This led me to write the following brief blog post:
->>
->> http://smithfarm-thebrain.blogspot.cz/2016/11/what-is-xfsfilesystem-corruption-and.html
->>
->> Any comments and/or suggestions for improvement would be most welcome.
->>
->> Thanks for reading!
->>
->> Nathan
->> -- 
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at http://vger.kernel.org/majordomo-info.html
+--8323329-284103546-1480630235=:2097
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 
+Hi Bartek,
 
+On Thu, 1 Dec 2016, Bartłomiej Święcki wrote:
+> We're currently being hit by an issue with cluster recovery. The cluster size
+> has been significantly extended (~50% new OSDs) and started recovery.
+> During recovery there was a HW failure and we ended up with some PGS in peered
+> state with size < min_size (inactive).
+> Those peered PGs are waiting for backfill but the cluster still prefers
+> recovery of recovery_wait PGs - in our case this could be even few hours
+> before all recovery is finished (we're speeding up recovery up to limits to
+> get the downtime as short as possible). Those peered PGs are blocked during
+> this time and the whole cluster just struggles to operate at a reasonable
+> level.
+> 
+> We're running hammer 0.94.6 there and from the code it looks like recovery
+> will always have higher priority (jewel seems similar).
+> Documentation only says that log-based recovery must finish before backfills.
+> Is this requirement needed for data consistency or something else?
+
+For a given single PG, it will do it's own log recovery (to bring acting 
+OSDs fully up to date) before starting backfill, but between PGs there's 
+no dependency.
+
+> Ideally we'd like it to be this order: undersized inactive (size < min_size)
+> recovery_wait => undersized inactive (size < min_size) wait_backfill =>
+> degraded recovery_wait => degraded wait_backfill => remapped wait_backfill.
+> Changing priority calculation doesn't seem to be that hard but would it end up
+> with inconsistent data?
+
+We could definitely improve this, yeah.  The prioritization code is based 
+around PG::get_{recovery,backfill}_priority(), and the 
+OSD_{RECOVERY,BACKFILL}_* #defines in PG.h.  It currently assumes (log) 
+recovery is always higher priority than backfill, but as you say we can do 
+better.  As long as everything maps into a 0..255 priority value it should 
+be fine.
+
+Getting the undersized inactive bumped to the top should be a simple tweak 
+(just force a top-value priority in that case)...
+
+sage
+--8323329-284103546-1480630235=:2097--
