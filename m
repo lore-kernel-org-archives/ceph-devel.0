@@ -1,36 +1,55 @@
-From: Yoann Moulin <yoann.moulin@epfl.ch>
-Subject: Re: [ceph-users] stalls caused by scrub on jewel
-Date: Thu, 1 Dec 2016 16:47:08 +0100
-Message-ID: <0309fdb3-1924-dec4-9658-b8f3055b3518@epfl.ch>
-References: <alpine.DEB.2.11.1611152232260.2650@piezo.us.to>
- <67e859f3-1aa6-e4b5-06b5-664583f668f1@univ-lorraine.fr>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+From: Dan Jakubiec <dan.jakubiec@gmail.com>
+Subject: Re: What is XFS/filesystem corruption and whose fault is it?
+Date: Thu, 1 Dec 2016 10:04:32 -0600
+Message-ID: <7F16E120-AF6C-4277-B10A-851783A8F9E8@gmail.com>
+References: <e7d7de6a-fd30-4957-b49d-9f3f2ae10871@suse.cz>
+Mime-Version: 1.0 (Mac OS X Mail 10.1 \(3251\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp4.epfl.ch ([128.178.224.219]:57168 "EHLO smtp4.epfl.ch"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750812AbcLAPrO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 1 Dec 2016 10:47:14 -0500
-In-Reply-To: <67e859f3-1aa6-e4b5-06b5-664583f668f1@univ-lorraine.fr>
+Received: from mail-yw0-f180.google.com ([209.85.161.180]:36654 "EHLO
+        mail-yw0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750738AbcLAQEf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Dec 2016 11:04:35 -0500
+Received: by mail-yw0-f180.google.com with SMTP id a10so194223305ywa.3
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Dec 2016 08:04:35 -0800 (PST)
+In-Reply-To: <e7d7de6a-fd30-4957-b49d-9f3f2ae10871@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass@univ-lorraine.fr>, Sage Weil <sweil@redhat.com>, ceph-users@ceph.com, ceph-devel@vger.kernel.org
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hello,
+We lost a whole cluster once due to incorrect write cache settings on =
+multiple OSDs.
 
-> We're impacted by this bug (case 01725311). Our cluster is running RHCS 2.0 and is no more capable to scrub neither deep-scrub.
-> 
-> [1] http://tracker.ceph.com/issues/17859
-> [2] https://bugzilla.redhat.com/show_bug.cgi?id=1394007
-> [3] https://github.com/ceph/ceph/pull/11898
-> 
-> I'm worried we'll have to live with a cluster that can't scrub/deep-scrub until March 2017 (ETA for RHCS 2.2 running Jewel 10.2.4).
-> 
-> Can we have this fix any sooner ?
+I think the recommendations on that page are correct, but I would also =
+add that you must disable any write caching on the drive itself as well.
 
-As far as I know about that bug, it appears if you have big PGs, a workaround could be increasing the pg_num of the pool that has the biggest PGs.
+The XFS FAQ is the best place I've found that explains all the ins and =
+outs (Q24 thru Q28):
 
--- 
-Yoann Moulin
-EPFL IC-IT
+http://xfs.org/index.php/XFS_FAQ <http://xfs.org/index.php/XFS_FAQ>
+
+-- Dan
+
+> On Nov 25, 2016, at 10:26, Nathan Cutler <ncutler@suse.cz> wrote:
+>=20
+> I've been doing some research on OSDs not starting after power =
+outages, when supposedly "uncorruptible" XFS filesystems are corrupted =
+and need repair. This led me to write the following brief blog post:
+>=20
+> =
+http://smithfarm-thebrain.blogspot.cz/2016/11/what-is-xfsfilesystem-corrup=
+tion-and.html
+>=20
+> Any comments and/or suggestions for improvement would be most welcome.
+>=20
+> Thanks for reading!
+>=20
+> Nathan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
