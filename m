@@ -1,73 +1,81 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Question about recovery vs backfill priorities
-Date: Fri, 2 Dec 2016 02:41:46 +0100 (CET)
-Message-ID: <89240638.3445.1480642907062@ox.pcextreme.nl>
-References: <3b219d94-431d-0a4f-e656-826003028a9d@corp.ovh.com>
- <alpine.DEB.2.11.1612012158570.2097@piezo.novalocal>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: ceph issue
+Date: Fri, 2 Dec 2016 11:12:05 +0800
+Message-ID: <CACJqLyaw8Oag6XN-HSyrRPonMhMxqpbXuQei6cFE0LdBaNxUqw@mail.gmail.com>
+References: <FEC85B105C5F644CA51BDB90657EEA9828425083@ddsm-mbx01.digdes.com>
+ <alpine.DEB.2.11.1611171448450.15311@piezo.us.to> <CACJqLybjnFedWh+TdN4W6u2+VKWBsJAtVi0A8VjbJ2mGX8aZxA@mail.gmail.com>
+ <FEC85B105C5F644CA51BDB90657EEA98284250E8@ddsm-mbx01.digdes.com>
+ <CACJqLyZRDpinsMZtDbM_zZHfi87FzC1HrCP0KRFEgAxgzGpjYQ@mail.gmail.com>
+ <DB3PR05MB0793F7194A5C64F018E61012A9B20@DB3PR05MB0793.eurprd05.prod.outlook.com>
+ <CACJqLyaCJdK+G6V3_Cm36PRYrwQCoRZ02MyJCnDudSUmC=O4Tg@mail.gmail.com>
+ <FEC85B105C5F644CA51BDB90657EEA982DC9E133@DDSM-MBX2.digdes.com>
+ <DB3PR05MB0793FB50C98346C4983E3ABBA9B40@DB3PR05MB0793.eurprd05.prod.outlook.com>
+ <FEC85B105C5F644CA51BDB90657EEA982DC9F1CC@DDSM-MBX2.digdes.com> <DB3PR05MB079316AC35562CC422E44DC0A9B70@DB3PR05MB0793.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:47257 "EHLO
-        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753253AbcLBBlv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Dec 2016 20:41:51 -0500
-In-Reply-To: <alpine.DEB.2.11.1612012158570.2097@piezo.novalocal>
+Received: from mail-hk2apc01on0116.outbound.protection.outlook.com ([104.47.124.116]:7225
+        "EHLO APC01-HK2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1755246AbcLBDMP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 1 Dec 2016 22:12:15 -0500
+Received: by mail-ua0-f173.google.com with SMTP id 12so269234405uas.2
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Dec 2016 19:12:09 -0800 (PST)
+In-Reply-To: <DB3PR05MB079316AC35562CC422E44DC0A9B70@DB3PR05MB0793.eurprd05.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, =?UTF-8?Q?Bart=C5=82omiej_=C5=9Awi=C4=99cki?= <bartlomiej.swiecki@corp.ovh.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Avner Ben Hanoch <avnerb@mellanox.com>
+Cc: Marov Aleksey <Marov.A@raidix.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+On Wed, Nov 23, 2016 at 5:30 PM, Avner Ben Hanoch <avnerb@mellanox.com> wrote:
+>
+> I guess that like the rest of ceph, the new rdma code must also support multiple applications in parallel.
+>
+> I am also reproducing your error => 2 instances of fio can't run in parallel with ceph rdma.
+>
+> * with ceph -s shows HEALTH_WARN (with "9 requests are blocked > 32 sec")
+>
+> * and with all osds printing messages like " heartbeat_check: no reply from ..."
+>
+> * And with log files contains errors:
+>   $ grep error ceph-osd.0.log
+>   2016-11-23 09:20:46.988154 7f9b26260700 -1 Fail to open '/proc/0/cmdline' error = (2) No such file or directory
+>   2016-11-23 09:20:54.090388 7f9b43951700  1 -- 36.0.0.2:6802/10634 >> 36.0.0.4:0/19587 conn(0x7f9b256a8000 :6802 s=STATE_OPEN pgs=1 cs=1 l=1).read_bulk reading from fd=139 : Unknown error -104
+>   2016-11-23 09:20:58.411912 7f9b44953700  1 RDMAStack polling work request returned error for buffer(0x7f9b1fee21b0) status(12:RETRY_EXC_ERR
+>   2016-11-23 09:20:58.411934 7f9b44953700  1 RDMAStack polling work request returned error for buffer(0x7f9b553d20d0) status(12:RETRY_EXC_ERR
 
-> Op 1 december 2016 om 23:10 schreef Sage Weil <sage@newdream.net>:
-> 
-> 
-> Hi Bartek,
-> 
-> On Thu, 1 Dec 2016, Bartłomiej Święcki wrote:
-> > We're currently being hit by an issue with cluster recovery. The cluster size
-> > has been significantly extended (~50% new OSDs) and started recovery.
-> > During recovery there was a HW failure and we ended up with some PGS in peered
-> > state with size < min_size (inactive).
-> > Those peered PGs are waiting for backfill but the cluster still prefers
-> > recovery of recovery_wait PGs - in our case this could be even few hours
-> > before all recovery is finished (we're speeding up recovery up to limits to
-> > get the downtime as short as possible). Those peered PGs are blocked during
-> > this time and the whole cluster just struggles to operate at a reasonable
-> > level.
-> > 
-> > We're running hammer 0.94.6 there and from the code it looks like recovery
-> > will always have higher priority (jewel seems similar).
-> > Documentation only says that log-based recovery must finish before backfills.
-> > Is this requirement needed for data consistency or something else?
-> 
-> For a given single PG, it will do it's own log recovery (to bring acting 
-> OSDs fully up to date) before starting backfill, but between PGs there's 
-> no dependency.
-> 
-> > Ideally we'd like it to be this order: undersized inactive (size < min_size)
-> > recovery_wait => undersized inactive (size < min_size) wait_backfill =>
-> > degraded recovery_wait => degraded wait_backfill => remapped wait_backfill.
-> > Changing priority calculation doesn't seem to be that hard but would it end up
-> > with inconsistent data?
-> 
-> We could definitely improve this, yeah.  The prioritization code is based 
-> around PG::get_{recovery,backfill}_priority(), and the 
-> OSD_{RECOVERY,BACKFILL}_* #defines in PG.h.  It currently assumes (log) 
-> recovery is always higher priority than backfill, but as you say we can do 
-> better.  As long as everything maps into a 0..255 priority value it should 
-> be fine.
-> 
-> Getting the undersized inactive bumped to the top should be a simple tweak 
-> (just force a top-value priority in that case)...
+error is "IBV_WC_RETRY_EXC_ERR (12) - Transport Retry Counter
+Exceeded: The local transport timeout retry counter was exceeded while
+trying to send this message. This means that the remote side didn't
+send any Ack or Nack. If this happens when sending the first message,
+usually this mean that the connection attributes are wrong or the
+remote side isn't in a state that it can respond to messages. If this
+happens after sending the first message, usually it means that the
+remote QP isn't available anymore. Relevant for RC QPs."
 
-Would be very, very welcome. inactive PGs should always get priority imho.
+we set qp retry_cnt to 7 and timeout is 14
 
-I find it difficult to explain this to people why Ceph doesn't already do so. I've seen this happen multiple times.
+  // How long to wait before retrying if packet lost or server dead.
+  // Supposedly the timeout is 4.096us*2^timeout.  However, the actual
+  // timeout appears to be 4.096us*2^(timeout+1), so the setting
+  // below creates a 135ms timeout.
+  qpa.timeout = 14;
 
-Would this be just a fix in PG.cc in get_backfill_priority and get_recovery_priority? it seems so.
+  // How many times to retry after timeouts before giving up.
+  qpa.retry_cnt = 7;
 
-Wido
+is this means the receiver side lack of memory or not polling work request ASAP?
 
-> 
-> sage
+>
+>
+>
+> Command lines that I used:
+>   ./fio --ioengine=rbd --invalidate=0 --rw=write --bs=128K --numjobs=1 --clientname=admin --pool=rbd --iodepth=128 --rbdname=img2g --name=1
+>   ./fio --ioengine=rbd --invalidate=0 --rw=write --bs=128K --numjobs=1 --clientname=admin --pool=rbd --iodepth=128 --rbdname=img2g2 --name=1
+>
+> > -----Original Message-----
+> > From: Marov Aleksey
+> > Sent: Tuesday, November 22, 2016 17:59
+> >
+> > I didn't try this blocksize. But in my case fio crushed if I use more than one
+> > job. With one job everything works fine. Is it worth more deep investigating?
