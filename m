@@ -1,106 +1,85 @@
-From: Federico Lucifredi <federico@redhat.com>
-Subject: Re: Ceph QoS user stories
-Date: Fri, 2 Dec 2016 17:16:16 -0500
-Message-ID: <CAJhGp1E3wMN8evMJhaFREKFn+jbJcCSsWyAdaYs1PSn1wW4hLg@mail.gmail.com>
-References: <alpine.DEB.2.11.1612021847590.22800@piezo.novalocal>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: teuthology-suite --rerun puzzle (take 2)
+Date: Fri, 2 Dec 2016 14:29:23 -0800
+Message-ID: <CAMMFjmGcPYOL3rAkWJsR7F4Xo6f-w4V+hrKXiGNk7ZHo-O5fLQ@mail.gmail.com>
+References: <CA+2bHPZwXDfWrjJ=i-QsAOWaZWVX+JFwmuvbkjh2mVgYQcWShA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f174.google.com ([209.85.216.174]:36805 "EHLO
-        mail-qt0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753780AbcLBWQs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Dec 2016 17:16:48 -0500
-Received: by mail-qt0-f174.google.com with SMTP id w33so265143752qtc.3
-        for <ceph-devel@vger.kernel.org>; Fri, 02 Dec 2016 14:16:47 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1612021847590.22800@piezo.novalocal>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:35384 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753439AbcLBW3m (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Dec 2016 17:29:42 -0500
+Received: by mail-wm0-f42.google.com with SMTP id a197so29822306wmd.0
+        for <ceph-devel@vger.kernel.org>; Fri, 02 Dec 2016 14:29:24 -0800 (PST)
+In-Reply-To: <CA+2bHPZwXDfWrjJ=i-QsAOWaZWVX+JFwmuvbkjh2mVgYQcWShA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: Patrick Donnelly <pdonnell@redhat.com>
+Cc: Zack Cerza <zack@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+Patrick
 
- The primary QoS issue we see with OpenStack users is wanting to
-guarantee minimum IOPS to each Cinder-mounted RBD volume as a way to
-guarantee the health of well-mannered workloads against badly-behaving
-ones.
+The underlining bug is fix by Zack, pls give a try !
 
- As an OpenStack Administrator, I want to guarantee a minimum number
-of IOPS to each Cinder volume to prevent any tenant from interfering
-with another.
+Thx
+YuriW
 
-  The number of IOPS may vary per volume, but in many cases a
-"standard" and "high" number would probably suffice. The guarantee is
-more important than the granularity.
-
-  This is something impacting users at today's Ceph performance level.
-
-  Looking at the future, once Bluestore becomes the default,  there
-will also be latency requirements from the crowd that wants to run
-databases with RBD backends — both low latency and low jitter in the
-latency, but rather than applying that to all volumes, it will be only
-to select ones backing RDBMs. Well, at least in the case of a general
-purpose cluster.
-
-
- My hunch is that Enterprise users that want hard-QoS guarantees will
-accept that a capacity planning exercise is necessary, software can
-only allocate existing capacity, not create more. Community users may
-value more some "fairness" in distributing existing resources instead.
-Just a hunch at this point.
-
- Best -F
-
-_________________________________________
--- "You must try until your brain hurts —Elon Musk
-(Federico L. Lucifredi) - federico at redhat.com - GnuPG 0x4A73884C
-
-On Fri, Dec 2, 2016 at 2:01 PM, Sage Weil <sweil@redhat.com> wrote:
+On Tue, Nov 22, 2016 at 7:44 AM, Patrick Donnelly <pdonnell@redhat.com> wrote:
+> I'm trying to rerun failures from this test run:
+> http://pulpito.ceph.com/pdonnell-2016-11-21_19:10:15-fs-master-distro-basic-mira/
 >
-> Hi all,
+> However, I can't seem to get teuthology working right (it filters all jobs):
 >
-> We're working on getting infrasture into RADOS to allow for proper
-> distributed quality-of-service guarantees.  The work is based on the
-> mclock paper published in OSDI'10
+> $ teuthology-suite --machine-type mira --ceph master --newest 20
+> --suite-branch wip-fs-reorg-2 -p 80 -k distro --rerun
+> pdonnell-2016-11-21_19:10:15-fs-master-distro-basic-mira
+> {'suite': u'fs', 'descriptions': [u'fs/verify/{begin.yaml
+> clusters/fixed-2-ucephfs.yaml fs/xfs.yaml mount/fuse.yaml
+> overrides/{debug.yaml frag_enable.yaml mon-debug.yaml
+> whitelist_wrongly_marked_down.yaml}
+> tasks/cfuse_workunit_suites_fsstress.yaml validater/valgrind.yaml}',
+> u'fs/basic/{begin.yaml clusters/fixed-2-ucephfs.yaml fs/xfs.yaml
+> inline/no.yaml mount/fuse.yaml overrides/{debug.yaml frag_enable.yaml
+> whitelist_wrongly_marked_down.yaml} tasks/libcephfs_python.yaml}',
+> u'fs/verify/{begin.yaml clusters/fixed-2-ucephfs.yaml fs/xfs.yaml
+> mount/fuse.yaml overrides/{debug.yaml frag_enable.yaml mon-debug.yaml
+> whitelist_wrongly_marked_down.yaml}
+> tasks/cfuse_workunit_suites_dbench.yaml validater/valgrind.yaml}',
+> u'fs/verify/{begin.yaml clusters/fixed-2-ucephfs.yaml fs/xfs.yaml
+> mount/fuse.yaml overrides/{debug.yaml frag_enable.yaml mon-debug.yaml
+> whitelist_wrongly_marked_down.yaml}
+> tasks/libcephfs_interface_tests.yaml validater/valgrind.yaml}',
+> u'fs/basic/{begin.yaml clusters/fixed-2-ucephfs.yaml fs/xfs.yaml
+> inline/yes.yaml mount/fuse.yaml overrides/{debug.yaml frag_enable.yaml
+> whitelist_wrongly_marked_down.yaml} tasks/libcephfs_python.yaml}']}
+> 2016-11-22 06:20:23,079.079 INFO:teuthology.suite.run:kernel sha1: distro
+> 2016-11-22 06:20:23,717.717 INFO:teuthology.suite.run:ceph sha1:
+> 013d4b2053c8be1bee62b01f03c88c861006c9f3
+> 2016-11-22 06:20:23,717.717 INFO:teuthology.suite.run:skipping ceph
+> package verification
+> 2016-11-22 06:20:23,717.717 INFO:teuthology.suite.run:teuthology branch: master
+> 2016-11-22 06:20:23,759.759 INFO:teuthology.suite.run:ceph-qa-suite
+> branch: wip-fs-reorg-2 eef0d958ddd6b75f6a2bc07fb61f293e043f0d17
+> 2016-11-22 06:20:23,763.763 INFO:teuthology.repo_utils:Fetching from
+> upstream into /home/pdonnell/src/ceph-qa-suite_wip-fs-reorg-2
+> 2016-11-22 06:20:23,805.805 INFO:teuthology.repo_utils:Resetting repo
+> at /home/pdonnell/src/ceph-qa-suite_wip-fs-reorg-2 to branch
+> wip-fs-reorg-2
+> 2016-11-22 06:20:24,001.001 INFO:teuthology.suite.run:Suite fs in
+> /home/pdonnell/src/ceph-qa-suite_wip-fs-reorg-2/suites/fs generated 91
+> jobs (not yet filtered)
+> 2016-11-22 06:20:24,010.010 INFO:teuthology.suite.run:Suite fs in
+> /home/pdonnell/src/ceph-qa-suite_wip-fs-reorg-2/suites/fs scheduled 0
+> jobs.
+> 2016-11-22 06:20:24,010.010 INFO:teuthology.suite.run:91/91 jobs were
+> filtered out.
 >
->         https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Gulati.pdf
 >
-> There are a few ways this can be applied:
+> Anyone see the problem?
 >
->  - We can use mclock simply as a better way to prioritize background
-> activity (scrub, snap trimming, recovery, rebalancing) against client IO.
->  - We can use d-mclock to set QoS parameters (e.g., min IOPS or
-> proportional priority/weight) on RADOS pools
->  - We can use d-mclock to set QoS parameters (e.g., min IOPS) for
-> individual clients.
->
-> Once the rados capabilities are in place, there will be a significant
-> amount of effort needed to get all of the APIs in place to configure and
-> set policy.  In order to make sure we build somethign that makes sense,
-> I'd like to collection a set of user stores that we'd like to support so
-> that we can make sure we capture everything (or at least the important
-> things).
->
-> Please add any use-cases that are important to you to this pad:
->
->         http://pad.ceph.com/p/qos-user-stories
->
-> or as a follow-up to this email.
->
-> mClock works in terms of a minimum allocation (of IOPS or bandwidth; they
-> are sort of reduced into a single unit of work), a maximum (i.e. simple
-> cap), and a proportional weighting (to allocation any additional capacity
-> after the minimum allocations are satisfied).  It's somewhat flexible in
-> terms of how we apply it to specific clients, classes of clients, or types
-> of work (e.g., recovery).  How we put it all together really depends on
-> what kinds of things we need to accomplish (e.g., do we need to support a
-> guaranteed level of service shared across a specific set of N different
-> clients, or only individual clients?).
->
-> Thanks!
-> sage
->
+> --
+> Patrick Donnelly
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
