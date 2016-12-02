@@ -1,14 +1,16 @@
-From: Yehuda Sadeh-Weinraub <yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: rgw: how to prevent rgw user from creating a new
-	bucket?
-Date: Fri, 2 Dec 2016 08:13:30 -0800
-Message-ID: <CADRKj5Rt6gDPXwQH9UivgWhLRqzbzVD7VECogU7iTmKUAihBHg@mail.gmail.com>
-References: <584158A2.9020303@xtaotech.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+From: Dan Jakubiec <dan.jakubiec-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: stalls caused by scrub on jewel
+Date: Fri, 2 Dec 2016 10:15:45 -0600
+Message-ID: <7770A453-1C79-4B89-A402-481D6463AA87@gmail.com>
+References: <alpine.DEB.2.11.1611152232260.2650@piezo.us.to>
+	<67e859f3-1aa6-e4b5-06b5-664583f668f1@univ-lorraine.fr>
+	<0309fdb3-1924-dec4-9658-b8f3055b3518@epfl.ch>
+	<9F915199-F93D-4F5E-82F8-ACA428ADFA30@univ-lorraine.fr>
+Mime-Version: 1.0 (Mac OS X Mail 10.1 \(3251\))
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <584158A2.9020303-/BaA95PH9wJWk0Htik3J/w@public.gmane.org>
+In-Reply-To: <9F915199-F93D-4F5E-82F8-ACA428ADFA30-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,32 +20,45 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Yang Joseph <joseph.yang-/BaA95PH9wJWk0Htik3J/w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Javen Wu <javen.wu-/BaA95PH9wJWk0Htik3J/w@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: =?utf-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org>
+Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, Dec 2, 2016 at 3:18 AM, Yang Joseph <joseph.yang-/BaA95PH9wJWk0Htik3J/w@public.gmane.org> wrote:
-> Hello,
->
-> I would like only to allow the user to read the object in a already existed
-> bucket, and not allow users
-> to create new bucket. It supposed to execute the following command:
->
-> $ radosgw-admin metadata put user:test3 < ...
->   ...
->         "caps": [
->             {
->                 "type": "buckets",
->                 "perm": "read"
->             }
->
-> But why user test3 can still create new bucket after I have set its caps to
-> "buckets=read"?
->
-
-
-Because this cap is unrelated. iirc starting at jewel you can do:
-
-$ radosgw-admin user modify --uid=test3 --max-buckets=-1
-
-Yehuda
+Rm9yIHdoYXQgaXQncyB3b3J0aC4uLiB0aGlzIHNvdW5kcyBsaWtlIHRoZSBjb25kaXRpb24gd2Ug
+aGl0IHdlIHJlLWVuYWJsZWQgc2NydWIgb24gb3VyIDE2IE9TRHMgKGFmdGVyIDYgdG8gOCB3ZWVr
+cyBvZiBub3NjcnViKS4gIFRoZXkgZmxhcHBlZCBmb3IgYWJvdXQgMzAgbWludXRlcyBhcyBtb3N0
+IG9mIHRoZSBPU0RzIHJhbmRvbWx5IGhpdCBzdWljaWRlIHRpbWVvdXRzIGhlcmUgYW5kIHRoZXJl
+LgoKVGhpcyBzZXR0bGVkIGRvd24gYWZ0ZXIgYWJvdXQgYW4gaG91ciBhbmQgdGhlIE9TRHMgc3Rv
+cHBlZCBkeWluZy4gIFdlIGhhdmUgc2luY2UgbGVmdCBzY3J1YiBlbmFibGVkIGZvciBhYm91dCA0
+IGRheXMgYW5kIGhhdmUgb25seSBzZWVuIHRocmVlIHNtYWxsIHNwdXJ0cyBvZiBPU0QgZmxhcHBp
+bmcgc2luY2UgdGhlbiAod2hpY2ggcXVpY2tseSByZXNvbHZlZCB0aGVtc2VsdmVzKS4KCi0tIERh
+bgoKPiBPbiBEZWMgMSwgMjAxNiwgYXQgMTQ6MzgsIEZyw6lkw6lyaWMgTmFzcyA8ZnJlZGVyaWMu
+bmFzc0B1bml2LWxvcnJhaW5lLmZyPiB3cm90ZToKPiAKPiBIaSBZb2FubiwKPiAKPiBUaGFuayB5
+b3UgZm9yIHlvdXIgaW5wdXQuIEkgd2FzIGp1c3QgdG9sZCBieSBSSCBzdXBwb3J0IHRoYXQgaXTi
+gJlzIGdvbm5hIG1ha2UgaXQgdG8gUkhDUyAyLjAgKDEwLjIuMykuIFRoYW5rIHlvdSBndXlzIGZv
+ciB0aGUgZml4ICEKPiAKPiBXZSB0aG91Z2h0IGFib3V0IGluY3JlYXNpbmcgdGhlIG51bWJlciBv
+ZiBQR3MganVzdCBhZnRlciBjaGFuZ2luZyB0aGUgbWVyZ2Uvc3BsaXQgdGhyZXNob2xkIHZhbHVl
+cyBidXQgdGhpcyB3b3VsZCBoYXZlIGxlZCB0byBhIF9sb3RfIG9mIGRhdGEgbW92ZW1lbnRzICgx
+LjIgYmlsbGlvbiBvZiBYRlMgZmlsZXMpIG92ZXIgd2Vla3MsIHdpdGhvdXQgYW55IHBvc3NpYmls
+aXR5IHRvIHNjcnViIC8gZGVlcC1zY3J1YiB0byBlbnN1cmUgZGF0YSBjb25zaXN0ZW5jeS4gU3Rp
+bGwgYXMgc29vbiBhcyB3ZSBnZXQgdGhlIGZpeCwgd2Ugd2lsbCBpbmNyZWFzZSB0aGUgbnVtYmVy
+IG9mIFBHcy4KPiAKPiBSZWdhcmRzLAo+IAo+IEZyZWRlcmljLgo+IAo+IAo+IAo+PiBMZSAxIGTD
+qWMuIDIwMTYgw6AgMTY6NDcsIFlvYW5uIE1vdWxpbiA8eW9hbm4ubW91bGluQGVwZmwuY2g+IGEg
+w6ljcml0IDoKPj4gCj4+IEhlbGxvLAo+PiAKPj4+IFdlJ3JlIGltcGFjdGVkIGJ5IHRoaXMgYnVn
+IChjYXNlIDAxNzI1MzExKS4gT3VyIGNsdXN0ZXIgaXMgcnVubmluZyBSSENTIDIuMCBhbmQgaXMg
+bm8gbW9yZSBjYXBhYmxlIHRvIHNjcnViIG5laXRoZXIgZGVlcC1zY3J1Yi4KPj4+IAo+Pj4gWzFd
+IGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8xNzg1OQo+Pj4gWzJdIGh0dHBzOi8vYnVn
+emlsbGEucmVkaGF0LmNvbS9zaG93X2J1Zy5jZ2k/aWQ9MTM5NDAwNwo+Pj4gWzNdIGh0dHBzOi8v
+Z2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8xMTg5OAo+Pj4gCj4+PiBJJ20gd29ycmllZCB3ZSds
+bCBoYXZlIHRvIGxpdmUgd2l0aCBhIGNsdXN0ZXIgdGhhdCBjYW4ndCBzY3J1Yi9kZWVwLXNjcnVi
+IHVudGlsIE1hcmNoIDIwMTcgKEVUQSBmb3IgUkhDUyAyLjIgcnVubmluZyBKZXdlbCAxMC4yLjQp
+Lgo+Pj4gCj4+PiBDYW4gd2UgaGF2ZSB0aGlzIGZpeCBhbnkgc29vbmVyID8KPj4gCj4+IEFzIGZh
+ciBhcyBJIGtub3cgYWJvdXQgdGhhdCBidWcsIGl0IGFwcGVhcnMgaWYgeW91IGhhdmUgYmlnIFBH
+cywgYSB3b3JrYXJvdW5kIGNvdWxkIGJlIGluY3JlYXNpbmcgdGhlIHBnX251bSBvZiB0aGUgcG9v
+bCB0aGF0IGhhcyB0aGUgYmlnZ2VzdCBQR3MuCj4+IAo+PiAtLSAKPj4gWW9hbm4gTW91bGluCj4+
+IEVQRkwgSUMtSVQKPiAKPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fXwo+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBo
+LmNvbQo+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBo
+LmNvbQoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2Vw
+aC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlz
+dHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
