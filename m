@@ -1,119 +1,98 @@
-From: Dan Jakubiec <dan.jakubiec@gmail.com>
-Subject: Re: [ceph-users] stalls caused by scrub on jewel
-Date: Fri, 2 Dec 2016 12:09:32 -0600
-Message-ID: <E5777170-6704-4655-9B48-064D6BC04365@gmail.com>
-References: <alpine.DEB.2.11.1611152232260.2650@piezo.us.to>
- <67e859f3-1aa6-e4b5-06b5-664583f668f1@univ-lorraine.fr>
- <0309fdb3-1924-dec4-9658-b8f3055b3518@epfl.ch>
- <9F915199-F93D-4F5E-82F8-ACA428ADFA30@univ-lorraine.fr>
- <7770A453-1C79-4B89-A402-481D6463AA87@gmail.com>
- <alpine.DEB.2.11.1612021643080.22800@piezo.novalocal>
-Mime-Version: 1.0 (Mac OS X Mail 10.1 \(3251\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+From: Alan Johnson <alanj@supermicro.com>
+Subject: RE: disk enclosure LEDs
+Date: Fri, 2 Dec 2016 17:57:28 +0000
+Message-ID: <be5f1672179b4d41b2692a02fe71a7cd@Ex2013-MBX2.supermicro.com>
+References: <alpine.DEB.2.11.1611301606060.2097@piezo.novalocal>
+ <eb52d1a8-8058-b57b-1585-828385953919@suse.de>
+ <CALe9h7d3Lv5Hwxh0sdtkSXQrPZqXG2UdVc2nvSN9ra2Gu6eM5A@mail.gmail.com>
+ <20161202092301.f65vgyjrssujfyrj@suse.de>
+ <alpine.DEB.2.11.1612021417080.22800@piezo.novalocal>
+ <BLUPR0201MB1524A241C45983E2CEF8844DE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f193.google.com ([209.85.161.193]:33724 "EHLO
-        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753444AbcLBSJf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Dec 2016 13:09:35 -0500
-Received: by mail-yw0-f193.google.com with SMTP id s68so22239532ywg.0
-        for <ceph-devel@vger.kernel.org>; Fri, 02 Dec 2016 10:09:35 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1612021643080.22800@piezo.novalocal>
+Received: from mg1.supermicro.com ([207.212.57.75]:9730 "EHLO
+        mg1.supermicro.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758895AbcLBSSE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Dec 2016 13:18:04 -0500
+In-Reply-To: <BLUPR0201MB1524A241C45983E2CEF8844DE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: =?utf-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass@univ-lorraine.fr>, Yoann Moulin <yoann.moulin@epfl.ch>, ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>, Lars Marowsky-Bree <lmb@suse.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Alex Yin <alexy@supermicro.com>
 
+As a hardware vendor we would like some sort of API to hook into - we do have a proprietary way of identifying failing devices but would rather conform to something more standard within the Ceph arena.
 
-> On Dec 2, 2016, at 10:48, Sage Weil <sage@newdream.net> wrote:
->=20
-> On Fri, 2 Dec 2016, Dan Jakubiec wrote:
->> For what it's worth... this sounds like the condition we hit we=20
->> re-enabled scrub on our 16 OSDs (after 6 to 8 weeks of noscrub).  =
-They=20
->> flapped for about 30 minutes as most of the OSDs randomly hit suicide=20=
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Allen Samuels
+Sent: Friday, December 02, 2016 11:57 AM
+To: Sage Weil; Lars Marowsky-Bree
+Cc: Ceph Development
+Subject: RE: disk enclosure LEDs
 
->> timeouts here and there.
->>=20
->> This settled down after about an hour and the OSDs stopped dying.  We=20=
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel- 
+> owner@vger.kernel.org] On Behalf Of Sage Weil
+> Sent: Friday, December 02, 2016 6:24 AM
+> To: Lars Marowsky-Bree <lmb@suse.com>
+> Cc: Ceph Development <ceph-devel@vger.kernel.org>
+> Subject: Re: disk enclosure LEDs
+> 
+> On Fri, 2 Dec 2016, Lars Marowsky-Bree wrote:
+> > On 2016-12-01T00:15:25, John Spray <jspray@redhat.com> wrote:
+> >
+> > > Put another way, I'd like it to be the case that people who want 
+> > > to twiddle LEDs can write a ceph-mgr module that does that, rather 
+> > > than having to push out a libstoragemgmt-enabled agent to the Ceph servers.
+> >
+> > I'm not sure I agree.
+> >
+> > I understand some of the motivation, but the key use cases where I'd 
+> > want to "twiddle LEDs" involve enclosures that either don't yet have 
+> > an OSD deployed (e.g., where to plug in the new disk), or where the 
+> > OSD has failed (and may not even be able to start).
+> >
+> > And I don't want to have to maintain multiple paths for interacting 
+> > with the enclosures.
+> 
+> I agree with John that it would be great to have ceph-mgr plugins 
+> doing this sort of thing.  But the OSD can't be the only path, and I 
+> also don't like the idea of multiple paths.
+> 
+> The problem is that there needs to be something on the hosts that's 
+> doing this, and I don't want to just ignore it and hope some other 
+> layer solves it; years have gone by and nobody has done it, and I'd 
+> like to avoid a fragmented approach if we can.
+> 
+> On the other hand, if we simply make an opinionated choice about some 
+> other per-host agent service, like we did in the original Calamari 
+> (which used salt and zeromq, IIRC), we'll probably end up offending 
+> more users than we please.
+> 
+> Perhaps the way forward is to pick *some* external host agent and 
+> service to start with and ensure that it is integrated into ceph-mgr 
+> in a pluggable way such that we have (1) the osd:device mappings 
+> available, (2) a standard API for working with LEDs etc, and (3) a 
+> working plugin for twiddling the LEDs, but ensure that other "disk services" backends can also be used?
 
->> have since left scrub enabled for about 4 days and have only seen =
-three=20
->> small spurts of OSD flapping since then (which quickly resolved=20
->> themselves).
->=20
-> Yeah.  I think what's happening is that with a cold cache it is slow=20=
+I think it's important to separate this problem into two pieces: ceph-specific and platform-specific.
 
-> enough to suicide, but with a warm cache it manages to complete =
-(although=20
-> I bet it's still stalling other client IO for perhaps multiple =
-seconds). =20
-> I would leave noscrub set for now.
+The ceph-specific part of the problem is to create a single abstraction and mechanism so that upper-level tools (ceph-mgr, GUIs, workflow scripts, etc.) can manipulation the abstraction without worrying about the implementation details. I'm completely with John that ceph-mgr is the right place for the upper-layer to terminated. Ultimately, we'll have infrastructure that ties the physical state of the drives (power up/down, lights on/off, etc.) more closely to the operational state of the system -- this is an area where more standardized automation will remove a significant barrier to wide-spread deployments.
 
-Ah... thanks for the suggestion!  We are indeed working through some =
-jerky performance issues.  Perhaps this is a layer of that onion, thank =
-you.
+The platform-specific part definitely should be pluggable/configurable/soft/manipulable, etc. It'll be quite some time (if ever) before something like libstoragemgmt becomes a reliable, universal, standard interface. We can't let that hold back the development of the upper-level infrastructure stuff.
 
--- Dan
+So, I'd vote for having an API termination in ceph-mgr. Have the mgr contact the destination system (the OSD is *NOT* the right path) to perform the action. Then do something like invoke a configurable shell script (something that's configurable) to perform the actual operation. 
 
->=20
+ 
+> 
 > sage
->=20
->=20
->=20
->=20
->>=20
->> -- Dan
->>=20
->>> On Dec 1, 2016, at 14:38, Fr=C3=A9d=C3=A9ric Nass =
-<frederic.nass@univ-lorraine.fr> wrote:
->>>=20
->>> Hi Yoann,
->>>=20
->>> Thank you for your input. I was just told by RH support that it=E2=80=99=
-s gonna make it to RHCS 2.0 (10.2.3). Thank you guys for the fix !
->>>=20
->>> We thought about increasing the number of PGs just after changing =
-the merge/split threshold values but this would have led to a _lot_ of =
-data movements (1.2 billion of XFS files) over weeks, without any =
-possibility to scrub / deep-scrub to ensure data consistency. Still as =
-soon as we get the fix, we will increase the number of PGs.
->>>=20
->>> Regards,
->>>=20
->>> Frederic.
->>>=20
->>>=20
->>>=20
->>>> Le 1 d=C3=A9c. 2016 =C3=A0 16:47, Yoann Moulin =
-<yoann.moulin@epfl.ch> a =C3=A9crit :
->>>>=20
->>>> Hello,
->>>>=20
->>>>> We're impacted by this bug (case 01725311). Our cluster is running =
-RHCS 2.0 and is no more capable to scrub neither deep-scrub.
->>>>>=20
->>>>> [1] http://tracker.ceph.com/issues/17859
->>>>> [2] https://bugzilla.redhat.com/show_bug.cgi?id=3D1394007
->>>>> [3] https://github.com/ceph/ceph/pull/11898
->>>>>=20
->>>>> I'm worried we'll have to live with a cluster that can't =
-scrub/deep-scrub until March 2017 (ETA for RHCS 2.2 running Jewel =
-10.2.4).
->>>>>=20
->>>>> Can we have this fix any sooner ?
->>>>=20
->>>> As far as I know about that bug, it appears if you have big PGs, a =
-workaround could be increasing the pg_num of the pool that has the =
-biggest PGs.
->>>>=20
->>>> --=20
->>>> Yoann Moulin
->>>> EPFL IC-IT
->>>=20
->>> _______________________________________________
->>> ceph-users mailing list
->>> ceph-users@lists.ceph.com
->>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>=20
-
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> in the body of a message to majordomo@vger.kernel.org More majordomo 
+> info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
