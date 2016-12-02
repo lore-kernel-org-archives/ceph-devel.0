@@ -1,48 +1,51 @@
-From: Lars Marowsky-Bree <lmb@suse.com>
+From: Bassam Tabbara <Bassam.Tabbara@quantum.com>
 Subject: Re: disk enclosure LEDs
-Date: Fri, 2 Dec 2016 15:27:40 +0100
-Message-ID: <20161202142740.pyycxyacdmn5dgc3@suse.de>
+Date: Fri, 2 Dec 2016 15:27:03 +0000
+Message-ID: <0E156C80-E597-4887-A8A1-E2F41FC3A2BE@quantum.com>
 References: <alpine.DEB.2.11.1611301606060.2097@piezo.novalocal>
  <eb52d1a8-8058-b57b-1585-828385953919@suse.de>
  <CALe9h7d3Lv5Hwxh0sdtkSXQrPZqXG2UdVc2nvSN9ra2Gu6eM5A@mail.gmail.com>
  <20161202092301.f65vgyjrssujfyrj@suse.de>
  <alpine.DEB.2.11.1612021417080.22800@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:52700 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S934417AbcLBO2P (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 2 Dec 2016 09:28:15 -0500
-Content-Disposition: inline
+Received: from mx0b-000ceb01.pphosted.com ([67.231.152.126]:59143 "EHLO
+        mx04-000ceb01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1751207AbcLBP51 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Dec 2016 10:57:27 -0500
 In-Reply-To: <alpine.DEB.2.11.1612021417080.22800@piezo.novalocal>
+Content-Language: en-US
+Content-ID: <0762D0AEFAB64145B40D316A211D1A13@QUANTUM.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Lars Marowsky-Bree <lmb@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 2016-12-02T14:23:39, Sage Weil <sage@newdream.net> wrote:
-
-> On the other hand, if we simply make an opinionated choice about some 
-> other per-host agent service, like we did in the original Calamari (which 
-> used salt and zeromq, IIRC), we'll probably end up offending more users 
-> than we please.
-
-> Perhaps the way forward is to pick *some* external host agent and service 
-> to start with and ensure that it is integrated into ceph-mgr in a 
-> pluggable way such that we have (1) the osd:device mappings available, (2) 
-> a standard API for working with LEDs etc, and (3) a working plugin for 
-> twiddling the LEDs, but ensure that other "disk services" backends can 
-> also be used?
-
-Yes, that makes sense. Making an opinionated choice about the API the
-ceph-mgr plugin has and then we can patch in whatever transport we want.
-
-
-
-
--- 
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
-"Experience is the name everyone gives to their mistakes." -- Oscar Wilde
-
+PiBPbiB0aGUgb3RoZXIgaGFuZCwgaWYgd2Ugc2ltcGx5IG1ha2UgYW4gb3BpbmlvbmF0ZWQgY2hv
+aWNlIGFib3V0IHNvbWUgDQo+IG90aGVyIHBlci1ob3N0IGFnZW50IHNlcnZpY2UsIGxpa2Ugd2Ug
+ZGlkIGluIHRoZSBvcmlnaW5hbCBDYWxhbWFyaSAod2hpY2ggDQo+IHVzZWQgc2FsdCBhbmQgemVy
+b21xLCBJSVJDKSwgd2UnbGwgcHJvYmFibHkgZW5kIHVwIG9mZmVuZGluZyBtb3JlIHVzZXJzIA0K
+PiB0aGFuIHdlIHBsZWFzZS4NCg0KSSB0aGluayBpdCBmaW5lIGZvciBDZXBoIHRvIGhhdmUgYW4g
+b3BpbmlvbmF0ZWQgc3RvcnkgaGVyZSwgYXMgbG9uZyBhcyBpdCByZW1haW5zIG9wdGlvbmFsLg0K
+VGhpcyB3b3VsZCBtZWFuIHRoYXQgd2UgbmVlZCB0byBlbnN1cmUgYSBjbGVhbiBzZXBhcmF0aW9u
+IGJldHdlZW4g4oCcbWFuYWdlbWVudOKAnSBmdW5jdGlvbnMNCih0aG9zZSB0aGF0IGNhdGVyIHRv
+IGFkbWluaXN0cmF0b3JzL3VzZXJzIGFuZCBhcmUgaGlnaGx5IG9waW5pb25hdGVkKSBhbmQg4oCc
+ZGF0YSBtYW5hZ2VtZW504oCdIA0KZnVuY3Rpb25zICh0aG9zZSB0aGF0IGVuc3VyZSB0aGUgZGF0
+YSBpcyBzdG9yZWQgc2FmZWx5IGluIHRoZSBjbHVzdGVyIGFuZCBhcmUgbm90IG9waW5pb25hdGVk
+KS4NCg0KPiBQZXJoYXBzIHRoZSB3YXkgZm9yd2FyZCBpcyB0byBwaWNrICpzb21lKiBleHRlcm5h
+bCBob3N0IGFnZW50IGFuZCBzZXJ2aWNlIA0KPiB0byBzdGFydCB3aXRoIGFuZCBlbnN1cmUgdGhh
+dCBpdCBpcyBpbnRlZ3JhdGVkIGludG8gY2VwaC1tZ3IgaW4gYSANCj4gcGx1Z2dhYmxlIHdheSBz
+dWNoIHRoYXQgd2UgaGF2ZSAoMSkgdGhlIG9zZDpkZXZpY2UgbWFwcGluZ3MgYXZhaWxhYmxlLCAo
+MikgDQo+IGEgc3RhbmRhcmQgQVBJIGZvciB3b3JraW5nIHdpdGggTEVEcyBldGMsIGFuZCAoMykg
+YSB3b3JraW5nIHBsdWdpbiBmb3IgDQo+IHR3aWRkbGluZyB0aGUgTEVEcywgYnV0IGVuc3VyZSB0
+aGF0IG90aGVyICJkaXNrIHNlcnZpY2VzIiBiYWNrZW5kcyBjYW4gDQo+IGFsc28gYmUgdXNlZD8N
+Cg0KSSBiZWxpZXZlIHRoZXJlIGlzIGEgbmVlZCBmb3IgYSBjZXBoLW1nciAqYWdlbnQqIG9uIGV2
+ZXJ5IGhvc3QsIG90aGVyd2lzZSBJIGRvbuKAmXQNCnNlZSBob3cgb25lIGNvdWxkIGltcGxlbWVu
+dCBzb21lIG9mIHRoZSBlbnZpc2lvbmVkIOKAnG1hbmFnZW1lbnTigJ0gZnVuY3Rpb25zIGZvcg0K
+Y2VwaC1tZ3Ig4oCUIHRoaXMgTEVEIGV4YW1wbGUgaXMgYSBnb29kIGV4YW1wbGUuIFR1cm5pbmcg
+dGhlIE9TRHMgaW50byB0aGlzIGFnZW50IA0Kc2VlbXMgdG8gdmlvbGF0ZSB0aGUgY2xlYW4gc2Vw
+YXJhdGlvbiBJIG1lbnRpb24gYWJvdmUuIElmIHRoZXJlIHdhcyBhIGNlcGgtbWdyLWFnZW50IA0K
+SSB3b3VsZCByZWNvbW1lbmQgbW92aW5nIHN0YXQgY29sbGVjdGlvbiBpbnRvIGl0IHdoaWNoIGN1
+cnJlbnRseSBoYXMgZ29uZQ0KaW50byBPU0RzIGFuZCBNT05zLg0KDQpCYXNzYW0=
