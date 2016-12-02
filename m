@@ -1,42 +1,36 @@
-From: Yang Joseph <joseph.yang-/BaA95PH9wJWk0Htik3J/w@public.gmane.org>
-Subject: rgw: how to prevent rgw user from creating a new
-	bucket?
-Date: Fri, 2 Dec 2016 19:18:58 +0800
-Message-ID: <584158A2.9020303@xtaotech.com>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: Computation in the storage
+Date: Fri, 2 Dec 2016 11:40:16 +0000
+Message-ID: <d8129d7a-af37-ad74-38c8-f5a9d59f183b@suse.de>
+References: <26283_1480676624_58415510_26283_122_1_EBBC07637B509B40B2E594A11E62C54F022DA808@OPEXCLILM32.corporate.adroot.infra.ftgroup>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, Javen Wu <javen.wu-/BaA95PH9wJWk0Htik3J/w@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:53207 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751608AbcLBLkU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 2 Dec 2016 06:40:20 -0500
+In-Reply-To: <26283_1480676624_58415510_26283_122_1_EBBC07637B509B40B2E594A11E62C54F022DA808@OPEXCLILM32.corporate.adroot.infra.ftgroup>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: nebil.benmabrouk@orange.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hello,
+On 12/02/2016 11:03 AM, nebil.benmabrouk@orange.com wrote:
+> Hello,
+>
+> I  am interested in embedding some specific data processing in the storage close to the data.
+> I read that, we can integrate some code (e.g., java classes) in Ceph, but I find no documentation about it.
 
-I would like only to allow the user to read the object in a already 
-existed bucket, and not allow users
-to create new bucket. It supposed to execute the following command:
+What you are looking is actually 'rados object classes' (or ceph 
+classes, according to the docs), and you may find a brief remark about 
+that here
 
-$ radosgw-admin metadata put user:test3 < ...
-   ...
-         "caps": [
-             {
-                 "type": "buckets",
-                 "perm": "read"
-             }
+  http://docs.ceph.com/docs/master/architecture/#extending-ceph
 
-But why user test3 can still create new bucket after I have set its caps 
-to "buckets=read"?
+which contains pointers to the code you should look into.
 
-thx,
+Somehow it feels like there should be some more information about this 
+somewhere, but I can't really recall where.
 
-Yang Honggang
+   -Joao
