@@ -1,50 +1,57 @@
-From: =?UTF-8?B?6ams5bu65pyL?= <majianpeng@gmail.com>
-Subject: Rocksdb bug
-Date: Sat, 3 Dec 2016 20:37:59 +0800
-Message-ID: <CALurOm2bof_AcgXFZx0a2v36=pFZD4B8YCGi9DgZNm3NMJC1Aw@mail.gmail.com>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: raw rados listing with seek to marker
+Date: Sat, 3 Dec 2016 09:29:35 -0800
+Message-ID: <CADRKj5Tv-NN8gCJgR-X2kCVtYzNJnS9r78FtaGZm6GrX3s2EuQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f46.google.com ([209.85.213.46]:36717 "EHLO
-        mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750912AbcLCMiA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Dec 2016 07:38:00 -0500
-Received: by mail-vk0-f46.google.com with SMTP id p9so159095956vkd.3
-        for <ceph-devel@vger.kernel.org>; Sat, 03 Dec 2016 04:38:00 -0800 (PST)
+Received: from mail-ua0-f176.google.com ([209.85.217.176]:32831 "EHLO
+        mail-ua0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750917AbcLCR3h (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Dec 2016 12:29:37 -0500
+Received: by mail-ua0-f176.google.com with SMTP id 20so311715540uak.0
+        for <ceph-devel@vger.kernel.org>; Sat, 03 Dec 2016 09:29:37 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: jianpeng.ma@intel.com
+To: "Weil, Sage" <sweil@redhat.com>, "Just, Samuel" <sjust@redhat.com>, David Zafman <dzafman@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi All
-     Based v11.0.2 i did write-test and always met this bug as followings:
-    -1> 2016-12-03 11:47:34.897412 7fa4207fd700 -1 rocksdb:
-submit_transaction error: NotFound:  code = 1 Rocksdb transaction:
-Put( Prefix = M key =
-0x000000000000079c'.0000000272.00000000000000075338' Value size = 182)
-Put( Prefix = M key = 0x000000000000079c'._epoch' Value size = 4)
-Put( Prefix = M key = 0x000000000000079c'._info' Value size = 855)
-Put( Prefix = O key =
-0x7f8000000000000001600ab4'%!rbd_data.5f126b8b4567.000000000000233e!='0xfffffffffffffffeffffffffffffffff
-Value size = 526)
-Put( Prefix = L key = 0x0000000004be661a Value size = 4138)
-     0> 2016-12-03 11:47:34.899063 7fa4207fd700 -1
-/root/ceph/src/os/bluestore/BlueStore.cc: In function 'void
-BlueStore::_kv_sync_thread()' thread 7fa4207fd700 time 2016-12-03
-11:47:34.897441
-/root/ceph/src/os/bluestore/BlueStore.cc: 6484: FAILED assert(r == 0)
+rgw uses raw rados listing when doing certain operations. For example
+when listing metadata entries (these aren't being indexed). When doing
+a full metadata sync the rgw at the secondary zone sends a request to
+the master to get a list of all the metadata entries (of a specific
+section), so that it can build an internal index for these entries so
+that it can fetch them.
+One of the main issues here is that since the metadata listing relies
+on raw rados objects listing, the operation cannot be paged.
+I've looked at the nobjects listing code, and this is what I
+understand happening:
+ - we iterate through all the pgs in the pool, one by one and in order
+ - for each pg we're at we read a chunk of the next X (where X 1024)
+entries via rados pgls operation
+ - for each chunk rados returns a cookie, which is some kind of a
+descriptor that points at either the current, or the next chunk that
+can be used to fetch the next chunk
 
- ceph version v11.0.2 (697fe64f9f106252c49a2c4fe4d79aea29363be7)
- 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x8b) [0x5651411b675b]
- 2: (BlueStore::_kv_sync_thread()+0x1be4) [0x565140f5e404]
- 3: (BlueStore::KVSyncThread::entry()+0xd) [0x565140f6bc5d]
- 4: (()+0x8182) [0x7fa45c1e8182]
- 5: (clone()+0x6d) [0x7fa45ab5547d]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
+rados itself with the nobjects api provides some seek mechanism, but
+it's pretty rudimentary and only seeks by rounding down to the current
+pg. I was looking at introducing a marker for nobjects listing (see:
+https://github.com/yehudasa/ceph/commits/wip-18079), but there are a
+few points I'm not completely sure about:
+ - I was using cookie and current_pg as the marker, but that only
+points to the current chunk that was just read (but not necessarily
+consumed completely). Is there a way to generate a cookie that would
+point at any entry within the current chunk?
+ - Is entries order guaranteed within the chunk? E.g., if I know that
+the last cookie was C, and the last object we saw was O, can we
+request C again, and skip to object O and not miss any entries created
+before original operation started? (it is ok to miss on entries
+created after original operation started, as we're going to get these
+via separate log)
+ - is there any other field that we need to keep for the marker other
+than these two?
+ - what to do with the old object listing api? the code internally
+defaults to using it, so if implementing seek only for nobjects it
+won't work by default. I'm not sure we want to implement it for the
+legacy listing infrastructure.
 
-But test the same case on master code, i don't see this bug.
-I need help. Thanks very much
-
-Jianpeng.
+Yehuda
