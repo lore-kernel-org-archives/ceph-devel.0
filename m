@@ -1,57 +1,70 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: raw rados listing with seek to marker
-Date: Sat, 3 Dec 2016 09:29:35 -0800
-Message-ID: <CADRKj5Tv-NN8gCJgR-X2kCVtYzNJnS9r78FtaGZm6GrX3s2EuQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Rocksdb bug
+Date: Sat, 3 Dec 2016 17:07:16 +0000
+Message-ID: <BY2PR02MB396B6EC95A80B385C184634F4810@BY2PR02MB396.namprd02.prod.outlook.com>
+References: <CALurOm2bof_AcgXFZx0a2v36=pFZD4B8YCGi9DgZNm3NMJC1Aw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f176.google.com ([209.85.217.176]:32831 "EHLO
-        mail-ua0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750917AbcLCR3h (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Dec 2016 12:29:37 -0500
-Received: by mail-ua0-f176.google.com with SMTP id 20so311715540uak.0
-        for <ceph-devel@vger.kernel.org>; Sat, 03 Dec 2016 09:29:37 -0800 (PST)
+Received: from mail-sn1nam01on0055.outbound.protection.outlook.com ([104.47.32.55]:37696
+        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752152AbcLCSnk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 3 Dec 2016 13:43:40 -0500
+In-Reply-To: <CALurOm2bof_AcgXFZx0a2v36=pFZD4B8YCGi9DgZNm3NMJC1Aw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Weil, Sage" <sweil@redhat.com>, "Just, Samuel" <sjust@redhat.com>, David Zafman <dzafman@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: =?utf-8?B?6ams5bu65pyL?= <majianpeng@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: "jianpeng.ma@intel.com" <jianpeng.ma@intel.com>
 
-rgw uses raw rados listing when doing certain operations. For example
-when listing metadata entries (these aren't being indexed). When doing
-a full metadata sync the rgw at the secondary zone sends a request to
-the master to get a list of all the metadata entries (of a specific
-section), so that it can build an internal index for these entries so
-that it can fetch them.
-One of the main issues here is that since the metadata listing relies
-on raw rados objects listing, the operation cannot be paged.
-I've looked at the nobjects listing code, and this is what I
-understand happening:
- - we iterate through all the pgs in the pool, one by one and in order
- - for each pg we're at we read a chunk of the next X (where X 1024)
-entries via rados pgls operation
- - for each chunk rados returns a cookie, which is some kind of a
-descriptor that points at either the current, or the next chunk that
-can be used to fetch the next chunk
-
-rados itself with the nobjects api provides some seek mechanism, but
-it's pretty rudimentary and only seeks by rounding down to the current
-pg. I was looking at introducing a marker for nobjects listing (see:
-https://github.com/yehudasa/ceph/commits/wip-18079), but there are a
-few points I'm not completely sure about:
- - I was using cookie and current_pg as the marker, but that only
-points to the current chunk that was just read (but not necessarily
-consumed completely). Is there a way to generate a cookie that would
-point at any entry within the current chunk?
- - Is entries order guaranteed within the chunk? E.g., if I know that
-the last cookie was C, and the last object we saw was O, can we
-request C again, and skip to object O and not miss any entries created
-before original operation started? (it is ok to miss on entries
-created after original operation started, as we're going to get these
-via separate log)
- - is there any other field that we need to keep for the marker other
-than these two?
- - what to do with the old object listing api? the code internally
-defaults to using it, so if implementing seek only for nobjects it
-won't work by default. I'm not sure we want to implement it for the
-legacy listing infrastructure.
-
-Yehuda
+VGhpcyBidWcgaXMgcmVzb2x2ZWQgd2l0aCBsYXRlc3Qgcm9ja3NkYi4gU2VlIHRoZSB0aGlzLg0K
+aHR0cHM6Ly9naXRodWIuY29tL2ZhY2Vib29rL3JvY2tzZGIvcHVsbC8xMzEzDQoNCklmIHlvdSB3
+YW50IHRvIGtlZXAgdGhlIGJsdWVzdG9yZSBjb2RlIGJhc2Ugc2FtZSwgYnVpbGRpbmcgYWdhaW5z
+dCBsYXRlc3Qgcm9ja3Mgc2hvdWxkIGhlbHAuDQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgN
+Cg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdl
+ci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9u
+IEJlaGFsZiBPZiA/Pz8NClNlbnQ6IFNhdHVyZGF5LCBEZWNlbWJlciAwMywgMjAxNiA0OjM4IEFN
+DQpUbzogY2VwaC1kZXZlbA0KQ2M6IGppYW5wZW5nLm1hQGludGVsLmNvbQ0KU3ViamVjdDogUm9j
+a3NkYiBidWcNCg0KSGkgQWxsDQogICAgIEJhc2VkIHYxMS4wLjIgaSBkaWQgd3JpdGUtdGVzdCBh
+bmQgYWx3YXlzIG1ldCB0aGlzIGJ1ZyBhcyBmb2xsb3dpbmdzOg0KICAgIC0xPiAyMDE2LTEyLTAz
+IDExOjQ3OjM0Ljg5NzQxMiA3ZmE0MjA3ZmQ3MDAgLTEgcm9ja3NkYjoNCnN1Ym1pdF90cmFuc2Fj
+dGlvbiBlcnJvcjogTm90Rm91bmQ6ICBjb2RlID0gMSBSb2Nrc2RiIHRyYW5zYWN0aW9uOg0KUHV0
+KCBQcmVmaXggPSBNIGtleSA9DQoweDAwMDAwMDAwMDAwMDA3OWMnLjAwMDAwMDAyNzIuMDAwMDAw
+MDAwMDAwMDAwNzUzMzgnIFZhbHVlIHNpemUgPSAxODIpIFB1dCggUHJlZml4ID0gTSBrZXkgPSAw
+eDAwMDAwMDAwMDAwMDA3OWMnLl9lcG9jaCcgVmFsdWUgc2l6ZSA9IDQpIFB1dCggUHJlZml4ID0g
+TSBrZXkgPSAweDAwMDAwMDAwMDAwMDA3OWMnLl9pbmZvJyBWYWx1ZSBzaXplID0gODU1KSBQdXQo
+IFByZWZpeCA9IE8ga2V5ID0gMHg3ZjgwMDAwMDAwMDAwMDAwMDE2MDBhYjQnJSFyYmRfZGF0YS41
+ZjEyNmI4YjQ1NjcuMDAwMDAwMDAwMDAwMjMzZSE9JzB4ZmZmZmZmZmZmZmZmZmZmZWZmZmZmZmZm
+ZmZmZmZmZmYNClZhbHVlIHNpemUgPSA1MjYpDQpQdXQoIFByZWZpeCA9IEwga2V5ID0gMHgwMDAw
+MDAwMDA0YmU2NjFhIFZhbHVlIHNpemUgPSA0MTM4KQ0KICAgICAwPiAyMDE2LTEyLTAzIDExOjQ3
+OjM0Ljg5OTA2MyA3ZmE0MjA3ZmQ3MDAgLTENCi9yb290L2NlcGgvc3JjL29zL2JsdWVzdG9yZS9C
+bHVlU3RvcmUuY2M6IEluIGZ1bmN0aW9uICd2b2lkIEJsdWVTdG9yZTo6X2t2X3N5bmNfdGhyZWFk
+KCknIHRocmVhZCA3ZmE0MjA3ZmQ3MDAgdGltZSAyMDE2LTEyLTAzDQoxMTo0NzozNC44OTc0NDEN
+Ci9yb290L2NlcGgvc3JjL29zL2JsdWVzdG9yZS9CbHVlU3RvcmUuY2M6IDY0ODQ6IEZBSUxFRCBh
+c3NlcnQociA9PSAwKQ0KDQogY2VwaCB2ZXJzaW9uIHYxMS4wLjIgKDY5N2ZlNjRmOWYxMDYyNTJj
+NDlhMmM0ZmU0ZDc5YWVhMjkzNjNiZTcpDQogMTogKGNlcGg6Ol9fY2VwaF9hc3NlcnRfZmFpbChj
+aGFyIGNvbnN0KiwgY2hhciBjb25zdCosIGludCwgY2hhcg0KY29uc3QqKSsweDhiKSBbMHg1NjUx
+NDExYjY3NWJdDQogMjogKEJsdWVTdG9yZTo6X2t2X3N5bmNfdGhyZWFkKCkrMHgxYmU0KSBbMHg1
+NjUxNDBmNWU0MDRdDQogMzogKEJsdWVTdG9yZTo6S1ZTeW5jVGhyZWFkOjplbnRyeSgpKzB4ZCkg
+WzB4NTY1MTQwZjZiYzVkXQ0KIDQ6ICgoKSsweDgxODIpIFsweDdmYTQ1YzFlODE4Ml0NCiA1OiAo
+Y2xvbmUoKSsweDZkKSBbMHg3ZmE0NWFiNTU0N2RdDQogTk9URTogYSBjb3B5IG9mIHRoZSBleGVj
+dXRhYmxlLCBvciBgb2JqZHVtcCAtcmRTIDxleGVjdXRhYmxlPmAgaXMgbmVlZGVkIHRvIGludGVy
+cHJldCB0aGlzLg0KDQpCdXQgdGVzdCB0aGUgc2FtZSBjYXNlIG9uIG1hc3RlciBjb2RlLCBpIGRv
+bid0IHNlZSB0aGlzIGJ1Zy4NCkkgbmVlZCBoZWxwLiBUaGFua3MgdmVyeSBtdWNoDQoNCkppYW5w
+ZW5nLg0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1
+bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jk
+b21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5r
+ZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRp
+b24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQg
+b25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJv
+dmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVj
+aXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRo
+aXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBk
+aXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hp
+Yml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwg
+cGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3du
+IGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhp
+cyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVj
+dHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg==
