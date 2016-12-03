@@ -1,100 +1,46 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: Computation in the storage
-Date: Sat, 3 Dec 2016 11:02:13 +1000
-Message-ID: <20161203010213.GR7342@rskikr.localdomain>
-References: <26283_1480676624_58415510_26283_122_1_EBBC07637B509B40B2E594A11E62C54F022DA808@OPEXCLILM32.corporate.adroot.infra.ftgroup>
- <d8129d7a-af37-ad74-38c8-f5a9d59f183b@suse.de>
- <CAF-wwdHPXaX3fe+dk9ovdAfc00N5xQrzj2TaRAuBOjH77L4yDg@mail.gmail.com>
- <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com>
+From: Ning Yao <zay11022@gmail.com>
+Subject: Client Message Priority Optimazation
+Date: Sat, 3 Dec 2016 17:21:20 +0800
+Message-ID: <CALZt5jzdRA8obUCqGeSnS_ZEEY2C77=+i7kc1z_qXJ8MRVPZfA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f48.google.com ([74.125.83.48]:34635 "EHLO
-        mail-pg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932568AbcLCBCW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Dec 2016 20:02:22 -0500
-Received: by mail-pg0-f48.google.com with SMTP id x23so113132864pgx.1
-        for <ceph-devel@vger.kernel.org>; Fri, 02 Dec 2016 17:02:22 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com>
+Received: from mail-io0-f176.google.com ([209.85.223.176]:35247 "EHLO
+        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752173AbcLCJVV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Dec 2016 04:21:21 -0500
+Received: by mail-io0-f176.google.com with SMTP id a124so522177054ioe.2
+        for <ceph-devel@vger.kernel.org>; Sat, 03 Dec 2016 01:21:21 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
-Cc: Joao Eduardo Luis <joao@suse.de>, "nebil.benmabrouk@orange.com" <nebil.benmabrouk@orange.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+
+Hi, all
+
+Currently,  we can modify osd_client_op_priority to assign different
+clients' ops with different priority such like we can assign high
+priority for OLTP and assign low priority for OLAP. However, there are
+some consideration as below:
+
+1) it seems OLTP's client op still can be blocked by OLAP's sub_ops
+since sub_ops use the CEPH_MSG_PRIO_DEFAULT.  So should we consider
+sub_op should inherit the message's priority from client Ops (if
+client ops do not give priority  explicitly, use CEPH_MSG_PRIO_DEFAULT
+by default), does this make sense?
+
+2) secondly, reply message is assigned with
+priority(CEPH_MSG_PRIO_HIGH), but there is no restriction for client
+Ops' priority (use can set 210), which will lead to blocked for reply
+message. So should we think change those kind of message to highest
+priority(CEPH_MSG_PRIO_HIGHEST). Currently, it seems no ops use
+CEPH_MSG_PRIO_HIGHEST.
+
+3) I think the kick recovery ops should inherit the client ops priority
+
+4) Is that possible to add test cases to verify whether it works
+properly as expected in ceph-qa-suite as Sam mentioned before? Any
+guidelines?
 
 
-
-On Sat, Dec 3, 2016 at 9:04 AM, Kamble, Nitin A <Nitin.Kamble@teradata.com> wrote:
->
->> On Dec 2, 2016, at 3:49 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
->>
->> On Fri, Dec 2, 2016 at 9:40 PM, Joao Eduardo Luis <joao@suse.de> wrote:
->>> On 12/02/2016 11:03 AM, nebil.benmabrouk@orange.com wrote:
->>>>
->>>> Hello,
->>>>
->>>> I  am interested in embedding some specific data processing in the storage
->>>> close to the data.
->>>> I read that, we can integrate some code (e.g., java classes) in Ceph, but
->>>> I find no documentation about it.
->>>
->>>
->>> What you are looking is actually 'rados object classes' (or ceph classes,
->>> according to the docs), and you may find a brief remark about that here
->>>
->>> http://docs.ceph.com/docs/master/architecture/#extending-ceph
->>>
->
-> Is anybody using real RADOS object classes on ceph clusters? Any of them on github?
-> I would like to look at some of the real world examples if it is there.
-
-Most of what's in src/cls/ are real world examples, although not third party
-which I know is what you meant but I'll let others comment on those.
-
-If you "ls /usr/lib64/rados-classes/libcls_*" (by default) you'll see the
-classes being loaded by the ceph osds when they start.
-
-> And more documentation of this feature would definitely help too.
->
-> Thanks,
-> Nitin
->
->>> which contains pointers to the code you should look into.
->>>
->>> Somehow it feels like there should be some more information about this
->>> somewhere, but I can't really recall where.
->>
->> Hmmm... that needs updating. Any takers?
->>
->> Look at the following.
->>
->> src/objclass/objclass.h
->> src/test/fooclass.cc
->> src/test/barclass.cc
->>
->> All the code below src/cls/, especially "hello".
->>
->>>
->>>  -Joao
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->>
->> --
->> Cheers,
->> Brad
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-
-
--- 
-Cheers,
-Brad
+Regards
+Ning Yao
