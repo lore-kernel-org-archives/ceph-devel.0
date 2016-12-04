@@ -1,65 +1,33 @@
-From: Varada Kari <Varada.Kari@sandisk.com>
-Subject: Re: Rocksdb bug
-Date: Sat, 3 Dec 2016 13:50:26 +0000
-Message-ID: <SN1PR0201MB14860908FD0C38F108406936E2810@SN1PR0201MB1486.namprd02.prod.outlook.com>
-References: <CALurOm2bof_AcgXFZx0a2v36=pFZD4B8YCGi9DgZNm3NMJC1Aw@mail.gmail.com>
+From: Noah Watkins <noahwatkins@gmail.com>
+Subject: Re: Computation in the storage
+Date: Sun, 4 Dec 2016 15:02:13 -0800
+Message-ID: <CAB2gnbVn0U_G12L8XV=hbznB2i_TMo40TpC5cVzJZKOr_MAQ7Q@mail.gmail.com>
+References: <26283_1480676624_58415510_26283_122_1_EBBC07637B509B40B2E594A11E62C54F022DA808@OPEXCLILM32.corporate.adroot.infra.ftgroup>
+ <d8129d7a-af37-ad74-38c8-f5a9d59f183b@suse.de> <CAF-wwdHPXaX3fe+dk9ovdAfc00N5xQrzj2TaRAuBOjH77L4yDg@mail.gmail.com>
+ <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam03on0083.outbound.protection.outlook.com ([104.47.42.83]:1923
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750764AbcLCT0f (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 3 Dec 2016 14:26:35 -0500
-Content-Language: en-US
+Received: from mail-oi0-f54.google.com ([209.85.218.54]:34101 "EHLO
+        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750979AbcLDXCP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Dec 2016 18:02:15 -0500
+Received: by mail-oi0-f54.google.com with SMTP id y198so322362306oia.1
+        for <ceph-devel@vger.kernel.org>; Sun, 04 Dec 2016 15:02:14 -0800 (PST)
+In-Reply-To: <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?gb2312?B?wu29qMXz?= <majianpeng@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
-Cc: "jianpeng.ma@intel.com" <jianpeng.ma@intel.com>
+To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
+Cc: Brad Hubbard <bhubbard@redhat.com>, Joao Eduardo Luis <joao@suse.de>, "nebil.benmabrouk@orange.com" <nebil.benmabrouk@orange.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGksDQoNCkNvdWxkIHlvdSBwbGVhc2UgZW5hYmxlIHJvY2tzZGIgbG9nZ2luZyBhbmQgZ2V0IHRo
-ZSBsb2dzLCBpZiB5b3UgYXJlDQpoaXR0aW5nIHRoZSBpc3N1ZSBjb25zaXN0ZW50bHk/DQoNClRo
-YW5rcywNClZhcmFkYQ0KDQpPbiBTYXR1cmRheSAwMyBEZWNlbWJlciAyMDE2IDA2OjA4IFBNLCDC
-7b2oxfMgd3JvdGU6DQo+IEhpIEFsbA0KPiAgICAgIEJhc2VkIHYxMS4wLjIgaSBkaWQgd3JpdGUt
-dGVzdCBhbmQgYWx3YXlzIG1ldCB0aGlzIGJ1ZyBhcyBmb2xsb3dpbmdzOg0KPiAgICAgLTE+IDIw
-MTYtMTItMDMgMTE6NDc6MzQuODk3NDEyIDdmYTQyMDdmZDcwMCAtMSByb2Nrc2RiOg0KPiBzdWJt
-aXRfdHJhbnNhY3Rpb24gZXJyb3I6IE5vdEZvdW5kOiAgY29kZSA9IDEgUm9ja3NkYiB0cmFuc2Fj
-dGlvbjoNCj4gUHV0KCBQcmVmaXggPSBNIGtleSA9DQo+IDB4MDAwMDAwMDAwMDAwMDc5YycuMDAw
-MDAwMDI3Mi4wMDAwMDAwMDAwMDAwMDA3NTMzOCcgVmFsdWUgc2l6ZSA9IDE4MikNCj4gUHV0KCBQ
-cmVmaXggPSBNIGtleSA9IDB4MDAwMDAwMDAwMDAwMDc5YycuX2Vwb2NoJyBWYWx1ZSBzaXplID0g
-NCkNCj4gUHV0KCBQcmVmaXggPSBNIGtleSA9IDB4MDAwMDAwMDAwMDAwMDc5YycuX2luZm8nIFZh
-bHVlIHNpemUgPSA4NTUpDQo+IFB1dCggUHJlZml4ID0gTyBrZXkgPQ0KPiAweDdmODAwMDAwMDAw
-MDAwMDAwMTYwMGFiNCclIXJiZF9kYXRhLjVmMTI2YjhiNDU2Ny4wMDAwMDAwMDAwMDAyMzNlIT0n
-MHhmZmZmZmZmZmZmZmZmZmZlZmZmZmZmZmZmZmZmZmZmZg0KPiBWYWx1ZSBzaXplID0gNTI2KQ0K
-PiBQdXQoIFByZWZpeCA9IEwga2V5ID0gMHgwMDAwMDAwMDA0YmU2NjFhIFZhbHVlIHNpemUgPSA0
-MTM4KQ0KPiAgICAgIDA+IDIwMTYtMTItMDMgMTE6NDc6MzQuODk5MDYzIDdmYTQyMDdmZDcwMCAt
-MQ0KPiAvcm9vdC9jZXBoL3NyYy9vcy9ibHVlc3RvcmUvQmx1ZVN0b3JlLmNjOiBJbiBmdW5jdGlv
-biAndm9pZA0KPiBCbHVlU3RvcmU6Ol9rdl9zeW5jX3RocmVhZCgpJyB0aHJlYWQgN2ZhNDIwN2Zk
-NzAwIHRpbWUgMjAxNi0xMi0wMw0KPiAxMTo0NzozNC44OTc0NDENCj4gL3Jvb3QvY2VwaC9zcmMv
-b3MvYmx1ZXN0b3JlL0JsdWVTdG9yZS5jYzogNjQ4NDogRkFJTEVEIGFzc2VydChyID09IDApDQo+
-DQo+ICBjZXBoIHZlcnNpb24gdjExLjAuMiAoNjk3ZmU2NGY5ZjEwNjI1MmM0OWEyYzRmZTRkNzlh
-ZWEyOTM2M2JlNykNCj4gIDE6IChjZXBoOjpfX2NlcGhfYXNzZXJ0X2ZhaWwoY2hhciBjb25zdCos
-IGNoYXIgY29uc3QqLCBpbnQsIGNoYXINCj4gY29uc3QqKSsweDhiKSBbMHg1NjUxNDExYjY3NWJd
-DQo+ICAyOiAoQmx1ZVN0b3JlOjpfa3Zfc3luY190aHJlYWQoKSsweDFiZTQpIFsweDU2NTE0MGY1
-ZTQwNF0NCj4gIDM6IChCbHVlU3RvcmU6OktWU3luY1RocmVhZDo6ZW50cnkoKSsweGQpIFsweDU2
-NTE0MGY2YmM1ZF0NCj4gIDQ6ICgoKSsweDgxODIpIFsweDdmYTQ1YzFlODE4Ml0NCj4gIDU6IChj
-bG9uZSgpKzB4NmQpIFsweDdmYTQ1YWI1NTQ3ZF0NCj4gIE5PVEU6IGEgY29weSBvZiB0aGUgZXhl
-Y3V0YWJsZSwgb3IgYG9iamR1bXAgLXJkUyA8ZXhlY3V0YWJsZT5gIGlzDQo+IG5lZWRlZCB0byBp
-bnRlcnByZXQgdGhpcy4NCj4NCj4gQnV0IHRlc3QgdGhlIHNhbWUgY2FzZSBvbiBtYXN0ZXIgY29k
-ZSwgaSBkb24ndCBzZWUgdGhpcyBidWcuDQo+IEkgbmVlZCBoZWxwLiBUaGFua3MgdmVyeSBtdWNo
-DQo+DQo+IEppYW5wZW5nLg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDog
-c2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCj4gdGhlIGJvZHkgb2Yg
-YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4gTW9yZSBtYWpvcmRvbW8g
-aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+DQoN
-ClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25p
-YyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWdu
-YXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNz
-YWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmll
-ZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBh
-bnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhp
-cyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRo
-aXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRl
-bGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJv
-eSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAo
-d2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCg==
+On Fri, Dec 2, 2016 at 3:04 PM, Kamble, Nitin A
+<Nitin.Kamble@teradata.com> wrote:
+>
+> Is anybody using real RADOS object classes on ceph clusters? Any of them on github?
+> I would like to look at some of the real world examples if it is there.
+> And more documentation of this feature would definitely help too.
+
+We use object classes [0] for a distributed shared log [1] on Ceph.
+
+[0]: https://github.com/noahdesu/ceph/blob/zlog/jewel/src/cls/zlog/cls_zlog.cc
+[1]: https://github.com/noahdesu/zlog
