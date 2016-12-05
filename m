@@ -1,7 +1,7 @@
-From: Bassam Tabbara <Bassam.Tabbara@quantum.com>
-Subject: Re: disk enclosure LEDs
-Date: Mon, 5 Dec 2016 17:48:01 +0000
-Message-ID: <865BAEF1-BA1D-44E7-A096-14A9FAB84A79@quantum.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: disk enclosure LEDs
+Date: Mon, 5 Dec 2016 18:02:08 +0000
+Message-ID: <BLUPR0201MB1524F23AC0ECA14A043F2BD5E8830@BLUPR0201MB1524.namprd02.prod.outlook.com>
 References: <alpine.DEB.2.11.1611301606060.2097@piezo.novalocal>
  <eb52d1a8-8058-b57b-1585-828385953919@suse.de>
  <CALe9h7d3Lv5Hwxh0sdtkSXQrPZqXG2UdVc2nvSN9ra2Gu6eM5A@mail.gmail.com>
@@ -13,33 +13,59 @@ References: <alpine.DEB.2.11.1611301606060.2097@piezo.novalocal>
  <CALe9h7fJOM2vrxAoi+=xdc01z0kkjpH8048bFe1wF1pBw1yVsQ@mail.gmail.com>
  <20161205125836.lxcbv5ai5qdavitr@suse.de>
  <CALe9h7esr-SwWis58JLKnjCF0y2Rcj3116nNVKNdrrqBPRW-0A@mail.gmail.com>
+ <865BAEF1-BA1D-44E7-A096-14A9FAB84A79@quantum.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx05-000ceb01.pphosted.com ([67.231.144.126]:46418 "EHLO
-        mx04-000ceb01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1751696AbcLERsI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2016 12:48:08 -0500
-In-Reply-To: <CALe9h7esr-SwWis58JLKnjCF0y2Rcj3116nNVKNdrrqBPRW-0A@mail.gmail.com>
+Received: from mail-bn3nam01on0088.outbound.protection.outlook.com ([104.47.33.88]:8448
+        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751427AbcLESRt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 5 Dec 2016 13:17:49 -0500
+In-Reply-To: <865BAEF1-BA1D-44E7-A096-14A9FAB84A79@quantum.com>
 Content-Language: en-US
-Content-ID: <99E05C6073B74D4492CE9379F037E331@QUANTUM.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
+To: Bassam Tabbara <Bassam.Tabbara@quantum.com>, John Spray <jspray@redhat.com>
 Cc: Lars Marowsky-Bree <lmb@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-PiBZZXMsIGFsdGhvdWdoIG9ubHkgYSB0aW55IHBhcnQgb2Ygd2hhdCB0b29scyBsaWtlIGFuc2li
-bGUgZG8gLS0gYW5kIGluDQo+IHRoZSBwcm9jZXNzLCB3ZSBzYXZlIHRoZSBlZmZvcnQgb2YgaW50
-ZWdyYXRpbmcgd2l0aCBhbGwgb2YgdGhlIGFib3ZlLg0KPiBJTUhPIGl0IHdvdWxkIGFjdHVhbGx5
-IGJlIGJldHRlciB2YWx1ZSBmb3IgbW9uZXkgdG8gd3JpdGUgb3VyIG93bg0KPiBhZ2VudCB0aGFu
-IHRvIG1haW50YWluIGFuZCB0ZXN0IGEgcGx1Z2dhYmxlIGluZnJhc3RydWN0dXJlIHRoYXQgY291
-bGQNCj4gdXNlIGFueSBvZiB0aGVtIChlc3BlY2lhbGx5IGFzIHNvbWUgaGF2ZSBkaWZmZXJlbnQg
-c2VtYW50aWNzKSwgYW5kDQo+IGhhbmRsZSBuZXdlci9vbGRlciB2ZXJzaW9ucyBvZiB0aGVtLCBl
-dGMuDQoNCkNhbG1hcmkgd2FzIHVzaW5nIHNhbHQgc3RhY2sgKGFtb25nIG90aGVyIHRoaW5ncyku
-IEkgYWdyZWUgd2l0aCBKb2huIHRoYXQgQ2VwaCBzaG91bGQgDQpoYXZlIGl0cyBvd24gc2ltcGxl
-IHN0b3J5IGZvciBtYW5hZ2VtZW50LiBJIGp1c3QgaG9wZSB0aGF0IGl0IHJlbWFpbnMgKm9wdGlv
-bmFsKiBhcw0Kd2XigJl2ZSBzZWVuIG9uIHRoaXMgdGhyZWFkIHRoZXJlIGFyZSBudW1lcm91cyBh
-cHByb2FjaGVzIHRvIHRoaXMgcHJvYmxlbS4gSXRzIGFsc28NCm5vdCBpbW1lZGlhdGVseSBvYnZp
-b3VzIHRoYXQgdGhlIGRpZmZlcmVudCBzb2x1dGlvbnMgY291bGQgYmUgbGF5ZXJlZC4NCg0KU2hv
-dWxkIHRoaXMgYmUgYSB0b3BpYyBmb3IgdGhlIG5leHQgQ0RNPw0KDQoNCg==
+SSdtIGluZGlmZmVyZW50IHRvIGFnZW50IHZzLiBhZ2VudC1sZXNzLg0KDQpJICpiZWxpZXZlKiB0
+aGF0IGhhdmluZyBhIGNlcGgtcHJpdmF0ZSBkaXN0cmlidXRpb24gaXMgZWFzaWVyL3NpbXBsZXIv
+bW9yZSByZWxpYWJsZSB0aGFuIHRyeWluZyB0byBsYXllciBvdmVyIHNvbWUgb3RoZXIgc3lzdGVt
+IChhbnNpYmxlLCBzYWx0LCBldGMuKSBbaS5lLiwgSSBhZ3JlZSB3aXRoIEpvaG5dLiBCdXQgdGhp
+cyBpc24ndCBhIHN0cm9uZ2x5IGhlbGQgYmVsaWVmLg0KDQpJJ20gKm1ldGFwaHlzaWNhbGx5IGNl
+cnRhaW4qIHRoYXQgd2hhdGV2ZXIgZGlzdHJpYnV0aW9uIHNjaGVtZSBpcyBhZG9wdGVkIHRoYXQg
+aXQgbm90IGJlIG9wdGlvbmFsLiBBIGxhcmdlIGJhcnJpZXIgdG8gYWRvcHRpb24gb2YgQ2VwaCB0
+b2RheSBpcyB0aGUgbGFjayBvZiAibWlkZGxlLXdhcmUiIHRoYXQgaGFuZGxlcyBpbmZyZXF1ZW50
+IG9wZXJhdGlvbmFsIGV2ZW50cyAobm9kZSBhZGRpdGlvbi9yZW1vdmFsLCBtZWRpYSBmYWlsdXJl
+L3JlY292ZXJ5LCBtaWdyYXRpb24sIGV0Yy4pLiBJTU8sIHRoaXMgbWlkZGxlLXdhcmUgd2lsbCBo
+YXZlIHRvIGJlIGEgc3RhbmRhcmQgcGFydCBvZiBDZXBoLCBpLmUuLCBmdWxseSBmdW5jdGlvbmFs
+ICJvdXQgb2YgdGhlICBib3giIHdpdGhvdXQgc2l0ZS1zcGVjaWZpYyB0d2lkZGxpbmcgKHRob3Vn
+aCBoYXZpbmcgYSBtZWNoYW5pc20gdG8gaW5zZXJ0IHNpdGUtc3BlY2lmaWMgc3R1ZmYgaXMgZmlu
+ZSB3aXRoIG1lLCBpdCBqdXN0IGNhbid0IGJlICpyZXF1aXJlZCopLiANCg0KSW4gbXkgbWluZCwg
+dGhlIGRpc3RyaWJ1dGlvbiBzY2hlbWUgaXMgdGhlIG5leHQgc3RlcCBpbiB0aGUgZXZvbHV0aW9u
+IG9mIENlcGgtbWdyLiBJdCdzIHdoYXQncyBtaXNzaW5nIDopDQoNCg0KPiAtLS0tLU9yaWdpbmFs
+IE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBb
+bWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9m
+IEJhc3NhbSBUYWJiYXJhDQo+IFNlbnQ6IE1vbmRheSwgRGVjZW1iZXIgMDUsIDIwMTYgOTo0OCBB
+TQ0KPiBUbzogSm9obiBTcHJheSA8anNwcmF5QHJlZGhhdC5jb20+DQo+IENjOiBMYXJzIE1hcm93
+c2t5LUJyZWUgPGxtYkBzdXNlLmNvbT47IENlcGggRGV2ZWxvcG1lbnQgPGNlcGgtDQo+IGRldmVs
+QHZnZXIua2VybmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IGRpc2sgZW5jbG9zdXJlIExFRHMNCj4g
+DQo+ID4gWWVzLCBhbHRob3VnaCBvbmx5IGEgdGlueSBwYXJ0IG9mIHdoYXQgdG9vbHMgbGlrZSBh
+bnNpYmxlIGRvIC0tIGFuZCBpbg0KPiA+IHRoZSBwcm9jZXNzLCB3ZSBzYXZlIHRoZSBlZmZvcnQg
+b2YgaW50ZWdyYXRpbmcgd2l0aCBhbGwgb2YgdGhlIGFib3ZlLg0KPiA+IElNSE8gaXQgd291bGQg
+YWN0dWFsbHkgYmUgYmV0dGVyIHZhbHVlIGZvciBtb25leSB0byB3cml0ZSBvdXIgb3duDQo+ID4g
+YWdlbnQgdGhhbiB0byBtYWludGFpbiBhbmQgdGVzdCBhIHBsdWdnYWJsZSBpbmZyYXN0cnVjdHVy
+ZSB0aGF0IGNvdWxkDQo+ID4gdXNlIGFueSBvZiB0aGVtIChlc3BlY2lhbGx5IGFzIHNvbWUgaGF2
+ZSBkaWZmZXJlbnQgc2VtYW50aWNzKSwgYW5kDQo+ID4gaGFuZGxlIG5ld2VyL29sZGVyIHZlcnNp
+b25zIG9mIHRoZW0sIGV0Yy4NCj4gDQo+IENhbG1hcmkgd2FzIHVzaW5nIHNhbHQgc3RhY2sgKGFt
+b25nIG90aGVyIHRoaW5ncykuIEkgYWdyZWUgd2l0aCBKb2huIHRoYXQNCj4gQ2VwaCBzaG91bGQg
+aGF2ZSBpdHMgb3duIHNpbXBsZSBzdG9yeSBmb3IgbWFuYWdlbWVudC4gSSBqdXN0IGhvcGUgdGhh
+dCBpdA0KPiByZW1haW5zICpvcHRpb25hbCogYXMgd2XigJl2ZSBzZWVuIG9uIHRoaXMgdGhyZWFk
+IHRoZXJlIGFyZSBudW1lcm91cw0KPiBhcHByb2FjaGVzIHRvIHRoaXMgcHJvYmxlbS4gSXRzIGFs
+c28gbm90IGltbWVkaWF0ZWx5IG9idmlvdXMgdGhhdCB0aGUNCj4gZGlmZmVyZW50IHNvbHV0aW9u
+cyBjb3VsZCBiZSBsYXllcmVkLg0KPiANCj4gU2hvdWxkIHRoaXMgYmUgYSB0b3BpYyBmb3IgdGhl
+IG5leHQgQ0RNPw0KPiANCj4gDQo+IAQgey5uICsgICAgICAgKyUgIGx6d20gIGIg66eyICByICB5
+x6kg1696WCAgFyAg3Kh9ICAgxqB6ICZqOit2ICAgICAgICB6WisgICt6ZiAgIGggICB+ICAgIGkg
+ICB6IB4gdw0KPiA/ICAgICYgKd+iG2YNCg==
