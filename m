@@ -1,101 +1,45 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: FreeBSD-Ceph: Jenkins build is back to normal : ceph-master #70
-Date: Mon, 5 Dec 2016 17:19:04 +0100
-Message-ID: <d682db59-3c61-e53f-1145-f0f71fe4538c@digiware.nl>
-References: <1011204597.37.1480951219760.JavaMail.jenkins@cephdev.digiware.nl>
+From: Bassam Tabbara <Bassam.Tabbara@quantum.com>
+Subject: Re: disk enclosure LEDs
+Date: Mon, 5 Dec 2016 17:48:01 +0000
+Message-ID: <865BAEF1-BA1D-44E7-A096-14A9FAB84A79@quantum.com>
+References: <alpine.DEB.2.11.1611301606060.2097@piezo.novalocal>
+ <eb52d1a8-8058-b57b-1585-828385953919@suse.de>
+ <CALe9h7d3Lv5Hwxh0sdtkSXQrPZqXG2UdVc2nvSN9ra2Gu6eM5A@mail.gmail.com>
+ <20161202092301.f65vgyjrssujfyrj@suse.de>
+ <alpine.DEB.2.11.1612021417080.22800@piezo.novalocal>
+ <BLUPR0201MB1524A241C45983E2CEF8844DE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <be5f1672179b4d41b2692a02fe71a7cd@Ex2013-MBX2.supermicro.com>
+ <BLUPR0201MB1524F8910A0625ECACC4B29AE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <CALe9h7fJOM2vrxAoi+=xdc01z0kkjpH8048bFe1wF1pBw1yVsQ@mail.gmail.com>
+ <20161205125836.lxcbv5ai5qdavitr@suse.de>
+ <CALe9h7esr-SwWis58JLKnjCF0y2Rcj3116nNVKNdrrqBPRW-0A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:20320 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751201AbcLEQTT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 5 Dec 2016 11:19:19 -0500
-In-Reply-To: <1011204597.37.1480951219760.JavaMail.jenkins@cephdev.digiware.nl>
+Received: from mx05-000ceb01.pphosted.com ([67.231.144.126]:46418 "EHLO
+        mx04-000ceb01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1751696AbcLERsI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2016 12:48:08 -0500
+In-Reply-To: <CALe9h7esr-SwWis58JLKnjCF0y2Rcj3116nNVKNdrrqBPRW-0A@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <99E05C6073B74D4492CE9379F037E331@QUANTUM.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: FreeBSD Filesystems <freebsd-fs@freebsd.org>
+To: John Spray <jspray@redhat.com>
+Cc: Lars Marowsky-Bree <lmb@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
-
-It been just a bit more than 1 year ago I started this undertaking:
-	Ceph on FreeBSD.
-So as sort as anniversary I'm sort of pleased to say that quite a lot of
-the code in Ceph/ceph now actually builds/runs/tests according the
-testset that comes with the repo.
-(And tonight is sort of Dutch pre-Xmas: Sinterklaas, and we give away
-presents. :D )
-
-What I have not looked into are RBD, CephFS and fuse.
- * RBD has 2 sides: libRBD which is largely just userspace code.
-   Porting that will not be a major undertaking. Kernel RBD might be
-   possible, but then with largely different code.(more based on ggated)
- * CephFS and fuse are  still uncharted territory so I'll have to see
-   what is going to happen there.
-
-The code has not been stress tested at all. Like I said: it gets thru
-the testset. But it requires ZFS and some hand holding. Certainly
-ceph-disk will not do all things it does on Linux. So most/all of the
-setup needs to be done with care and double checking.
-
-Building a FreeBSD package is in the works, but I've yet to learn how to
-get the embedded Python parts installed in a way that they work.
-And some tweaks are needed to DIY.
-
-For those interested, I've started Jenkins to build a FreeBSD version
-once per day from master.... The results are public for everybody.
-
--------- Forwarded Message --------
-Subject: Jenkins build is back to normal : ceph-master #70
-Date: Mon, 5 Dec 2016 16:20:19 +0100 (CET)
-From: jenkins@digiware.nl
-Reply-To: jenkins@digiware.nl
-To: wjw@digiware.nl
-
-http://cephdev.digiware.nl:8180/jenkins/job/ceph-master/70/
-
--------------------------------
-
-To get here there are still a few patches required. This you see
-happening at the beginning of the jobs.
-
-The following patches are still under review, but applied here:
-Buildsystem:
-	CMakeLists.txt-boost.diff
-
-Subsystem:
-	src_rocksdb_CMakeText.txt.diff
-
-Code:
-	msg_async_AsyncMessenger.cc.diff
-	src_rgw_rgw_file.cc.diff
-
-Code/compiler-bug:
-	test_test_denc.cc.diff
-	test_test_mempool.cc.diff
-
-Tests:
-	qa_workunits_ceph-disk.diff
-	src_ceph-disk_tests_ceph-disk.sh.diff
-	src_ceph-disk_tests_test_main.py.diff
-	src_test_pybind_CMakeLists.txt.diff
-	src_test_pybind_nosetests.diff
-
-If anybody wants to have these patches, I'll put them online.
-The alternative is to fetch my https://github.com/wjwithagen/ceph tree,
-and checkout wip.FreeBSD.
-But that is sort of a moving target and will not always compile.
-
-Thanx to:
-	Sage Weil
-	Kefu Chai
-	Haomai Wang
-	and many more Ceph developers
-that were patient enough with me, and helped me to get this far.
-
-Thanx,
---WjW
-
---WjW
-
+PiBZZXMsIGFsdGhvdWdoIG9ubHkgYSB0aW55IHBhcnQgb2Ygd2hhdCB0b29scyBsaWtlIGFuc2li
+bGUgZG8gLS0gYW5kIGluDQo+IHRoZSBwcm9jZXNzLCB3ZSBzYXZlIHRoZSBlZmZvcnQgb2YgaW50
+ZWdyYXRpbmcgd2l0aCBhbGwgb2YgdGhlIGFib3ZlLg0KPiBJTUhPIGl0IHdvdWxkIGFjdHVhbGx5
+IGJlIGJldHRlciB2YWx1ZSBmb3IgbW9uZXkgdG8gd3JpdGUgb3VyIG93bg0KPiBhZ2VudCB0aGFu
+IHRvIG1haW50YWluIGFuZCB0ZXN0IGEgcGx1Z2dhYmxlIGluZnJhc3RydWN0dXJlIHRoYXQgY291
+bGQNCj4gdXNlIGFueSBvZiB0aGVtIChlc3BlY2lhbGx5IGFzIHNvbWUgaGF2ZSBkaWZmZXJlbnQg
+c2VtYW50aWNzKSwgYW5kDQo+IGhhbmRsZSBuZXdlci9vbGRlciB2ZXJzaW9ucyBvZiB0aGVtLCBl
+dGMuDQoNCkNhbG1hcmkgd2FzIHVzaW5nIHNhbHQgc3RhY2sgKGFtb25nIG90aGVyIHRoaW5ncyku
+IEkgYWdyZWUgd2l0aCBKb2huIHRoYXQgQ2VwaCBzaG91bGQgDQpoYXZlIGl0cyBvd24gc2ltcGxl
+IHN0b3J5IGZvciBtYW5hZ2VtZW50LiBJIGp1c3QgaG9wZSB0aGF0IGl0IHJlbWFpbnMgKm9wdGlv
+bmFsKiBhcw0Kd2XigJl2ZSBzZWVuIG9uIHRoaXMgdGhyZWFkIHRoZXJlIGFyZSBudW1lcm91cyBh
+cHByb2FjaGVzIHRvIHRoaXMgcHJvYmxlbS4gSXRzIGFsc28NCm5vdCBpbW1lZGlhdGVseSBvYnZp
+b3VzIHRoYXQgdGhlIGRpZmZlcmVudCBzb2x1dGlvbnMgY291bGQgYmUgbGF5ZXJlZC4NCg0KU2hv
+dWxkIHRoaXMgYmUgYSB0b3BpYyBmb3IgdGhlIG5leHQgQ0RNPw0KDQoNCg==
