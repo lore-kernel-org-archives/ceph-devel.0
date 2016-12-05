@@ -1,161 +1,93 @@
-From: Abhishek L <abhishek@suse.com>
-Subject: Re: ceph v10.2.4 QE validation status
-Date: Mon, 05 Dec 2016 12:53:15 +0100
-Message-ID: <87oa0q4mok.fsf@suse.com>
-References: <CAMMFjmEkMUBCnZFqMr_kcfZgB5jm3CjVNfXpSAXT7ZCwMLQEfg@mail.gmail.com> <CAMMFjmGRO7F30WwU8NwMU=t3bEXEhz1G6bwZwqyQJrp7mceZdQ@mail.gmail.com> <87r362tr92.fsf@suse.com> <alpine.DEB.2.11.1611231441130.21102@piezo.us.to> <87mvgia7if.fsf@suse.com> <87zikh3tj3.fsf@suse.com> <alpine.DEB.2.11.1611301601010.2097@piezo.novalocal> <87y4013pmw.fsf@suse.com> <87vav53p8u.fsf@suse.com> <alpine.DEB.2.11.1611301656070.2097@piezo.novalocal> <87twam4ejf.fsf@suse.com>
+From: Avner Ben Hanoch <avnerb@mellanox.com>
+Subject: RE: ceph issue
+Date: Mon, 5 Dec 2016 09:37:22 +0000
+Message-ID: <DB3PR05MB07934D1948253BC4C19CC558A9830@DB3PR05MB0793.eurprd05.prod.outlook.com>
+References: <FEC85B105C5F644CA51BDB90657EEA9828425083@ddsm-mbx01.digdes.com>
+ <alpine.DEB.2.11.1611171448450.15311@piezo.us.to>
+ <CACJqLybjnFedWh+TdN4W6u2+VKWBsJAtVi0A8VjbJ2mGX8aZxA@mail.gmail.com>
+ <FEC85B105C5F644CA51BDB90657EEA98284250E8@ddsm-mbx01.digdes.com>
+ <CACJqLyZRDpinsMZtDbM_zZHfi87FzC1HrCP0KRFEgAxgzGpjYQ@mail.gmail.com>
+ <DB3PR05MB0793F7194A5C64F018E61012A9B20@DB3PR05MB0793.eurprd05.prod.outlook.com>
+ <CACJqLyaCJdK+G6V3_Cm36PRYrwQCoRZ02MyJCnDudSUmC=O4Tg@mail.gmail.com>
+ <FEC85B105C5F644CA51BDB90657EEA982DC9E133@DDSM-MBX2.digdes.com>
+ <DB3PR05MB0793FB50C98346C4983E3ABBA9B40@DB3PR05MB0793.eurprd05.prod.outlook.com>
+ <FEC85B105C5F644CA51BDB90657EEA982DC9F1CC@DDSM-MBX2.digdes.com>
+ <DB3PR05MB079316AC35562CC422E44DC0A9B70@DB3PR05MB0793.eurprd05.prod.outlook.com>
+ <CACJqLyaw8Oag6XN-HSyrRPonMhMxqpbXuQei6cFE0LdBaNxUqw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:54811 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750951AbcLELxT (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Mon, 5 Dec 2016 06:53:19 -0500
-In-reply-to: <87twam4ejf.fsf@suse.com>
+Received: from mail-db5eur01on0051.outbound.protection.outlook.com ([104.47.2.51]:56128
+        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751201AbcLEMKS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 5 Dec 2016 07:10:18 -0500
+In-Reply-To: <CACJqLyaw8Oag6XN-HSyrRPonMhMxqpbXuQei6cFE0LdBaNxUqw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "Durgin, Josh" <jdurgin@redhat.com>, Yuri Weinstein <yweinste@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Alfredo Deza <adeza@redhat.com>, Samuel Just <sjust@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <ldachary@redhat.com>, "Dachary, Loic" <loic@dachary.org>, Nathan Cutler <ncutler@suse.cz>, Ilya Dryomov <idryomov@gmail.com>, John Spray <jspray@redhat.com>
+To: Haomai Wang <haomai@xsky.com>
+Cc: Marov Aleksey <Marov.A@raidix.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-
-Abhishek L writes:
-
-> Sage Weil writes:
->
->> On Wed, 30 Nov 2016, Abhishek L wrote:
->>> Abhishek L writes:
->>>
->>> > Sage Weil writes:
->>> >
->>> >> On Wed, 30 Nov 2016, Abhishek L wrote:
->>> >>>
->>> >>> Abhishek L writes:
->>> >>>
->>> >>> > Sage Weil writes:
->>> >>> >
->>> >>> >> On Wed, 23 Nov 2016, Abhishek L wrote:
->>> >>> >>>
->>> >>> >>> Hi Sage, Greg,
->>> >>> >>>
->>> >>> >>>
->>> >>> >>> Yuri Weinstein writes:
->>> >>> >>>
->>> >>> >>> > See updated status - http://tracker.ceph.com/issues/17487#note-32
->>> >>> >>> >
->>> >>> >>> > Outstanding issues:
->>> >>> >>> >
->>> >>> >>> > knfs - http://tracker.ceph.com/issues/16397 (same as in v10.2.3, Greg
->>> >>> >>> > pls review/approve, assumed Approved ?)
->>> >>> >>> >
->>> >>> >>> > upgrade/hammer-x (jewel) - http://tracker.ceph.com/issues/17847 ((Sage
->>> >>> >>> > pls review/approve, seems persistent, but maybe not a showstopper)
->>> >>> >>> >
->>> >>> >>> > upgrade/infernalis-x (jewel) - deprecated (Nathan is still working
->>> >>> >>> > to make it pass, see issues in the tacker summary above)
->>> >>> >>> >
->>> >>> >>> > Sage, jewel 10.2.4 can be released as soon as you agree with the
->>> >>> >>> > findings/summary.
->>> >>> >>>
->>> >>> >>> Do you think we're ready to release 10.2.4 yet?
->>> >>> >>
->>> >>> >> I'm reproducing http://tracker.ceph.com/issues/17847 with logs to make
->>> >>> >> sure this isn't a regression.
->>> >>> >>
->>> >>> >> We can ignore the infernalis runs.
->>> >>> >>
->>> >>> >> I think we can ignore the knfs selinux issue too.. Greg, can you confirm?
->>> >>> >>
->>> >>> > Added the prs 12001 & 12167 on top of the jewel branch and scheduled rados runs
->>> >>> > at
->>> >>> > http://pulpito.ceph.com/abhi-2016-11-29_10:22:25-rados-wip-jewel-10-2-4-distro-basic-smithi/ &
->>> >>
->>> >> https://github.com/ceph/ceph-qa-suite/pull/1292
->>> >>
->>> >> avoids xenial for the rados upgrade tests (in jewel branch).
->>>
->>> Ah alright, maybe this was the cause after all, let's get this in (or
->>> push a branch to ceph-qa-suite so that I can schedule against that)
->>
->> I added a patch for the client-upgrade tests to the same branch. You
->> should be able to just schedule with --suite-branch jewel-avoid-xenial
->> instead of --suite-branch jewel (for both rados and
->> upgrade/client-upgrade).
->>
->> sage
->>
->>
->>> >>
->>> >> The upgrade tests already explicitly call out trusty, so they should be
->>> >> fine.
->>> >>
->>> >>> > updated the tracker at http://tracker.ceph.com/issues/17851#note-17,
->>> >>> > with details of the test. I'll update the progress once the suite goes
->>> >>> > through
->>> >>>
->>> >>> Had around 11 tests fail from 296 scheduled, there were a couple of
->>> >>> valgrind issues on ceph-mon (which were seen at earlier runs on jewel as
->>> >>> well) and an s3test failure, rest of the issues were looking related to
->>> >>> infrastructure as they were failing to get specific version numbers from
->>> >>> gitbuilders.
->>> >>>
->>> >>> Reported this issue as:
->>> >>>
->>> >>> http://tracker.ceph.com/issues/18089
->>> >>>
->>> >>> subsequent re runs are still failing with similar errors. The details
->>> >>> are updated at
->>> >>>
->>> >>> http://tracker.ceph.com/issues/17487#note-37
->>> >>>
->>> >>> The upgrade suite has also failed with similar errors.
->>> >>
->>> >> Which one?
->>> > The upgrade/client-upgrade suite (I hope this is the right upgrade
->>> > suite), the errors are the same failed to fetch package version errors
->>> > seen for the rados suite, so not actual test run errors yet.
->>> >
->>> > http://pulpito.ceph.com/abhi-2016-11-30_09:58:50-upgrade:client-upgrade-wip-jewel-10-2-4-distro-basic-smithi/
->>> > is the run
->>> >
-> Update on the current status,
-> For prs 12001 & 12167: (sage/Sam)
->
-> The upgrade passed with the exception of infernalis/jewel which failed
-> with RBD (test_librbd_api.sh) (jdillaman please approve)
->
-> http://pulpito.ceph.com/abhi-2016-12-02_09:45:37-upgrade:client-upgrade-wip-jewel-10-2-4-distro-basic-smithi/
->
-> the rados run (with the exception of the valgrind issue) are still
-> waiting for completion for 4 of the 296 jobs, this one suite always
-> seems to die when scheduled, this is the current url of the rados jobs
-> (still waiting)
-> http://pulpito.ceph.com/abhi-2016-12-02_10:06:39-rados-wip-jewel-10-2-4-rc-distro-basic-smithi/
-
-Loic was able to spot the error in this run (which was a regression
-introduced by f95ed3e, this was later fixed in
-https://github.com/ceph/ceph-qa-suite/pull/1297, so running this suite
-on the latest branch came out green,
-
-http://pulpito.front.sepia.ceph.com/abhi-2016-12-05_10:25:26-rados-wip-jewel-10-2-4-rc-distro-basic-smithi/
-
-Which means 12167 is also good to go.
->
->
-> for pr 12207: (josh)
-> the rgw suite also saw the same valgrind issue
-> (http://pulpito.ceph.com/abhi-2016-12-01_22:19:07-rgw-wip-jewel-10-2-4-rc-distro-basic-smithi/)
->
-> https://github.com/ceph/ceph/pull/12267, (mon cleanup)  was merged on Sam's approval.
->
-> prs 11884 & 12067 (Sam, Alfredo):
-> the ceph create-keys  pr #11884 hasn't been merged yet into jewel, is
-> there any suite that must be run to validate this. Same applies for
-> https://github.com/ceph/ceph/pull/12067 (OSDMon: MOSDBoot )
-
-12067 was merged on Sam's approval as well. Which only leaves us with
-11884.
-
-Best,
-Abhishek Lekshmanan
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+SGkgSGFvbWFpLCBBbGV4ZXkNCg0KV2l0aCBsYXRlc3QgYXN5bmMvcmRtYSBjb2RlIEkgZG9uJ3Qg
+c2VlIHRoZSBmaW8gZXJyb3JzIChub3QgZm9yIG11bHRpcGxlIGZpbyBpbnN0YW5jZXMgbmVpdGhl
+ciB0byBiaWcgYmxvY2sgc2l6ZSkgLSB0aGFua3MgZm9yIHlvdXIgd29yayBIYW9tYWkuDQoNCkFs
+ZXhleSAtIGRvIHlvdSBzdGlsbCBzZWUgYW55IGlzc3VlIHdpdGggZmlvPw0KDQpSZWdhcmRzLA0K
+ICBBdm5lcg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEhhb21haSBX
+YW5nIFttYWlsdG86aGFvbWFpQHhza3kuY29tXQ0KPiBTZW50OiBGcmlkYXksIERlY2VtYmVyIDAy
+LCAyMDE2IDA1OjEyDQo+IFRvOiBBdm5lciBCZW4gSGFub2NoIDxhdm5lcmJAbWVsbGFub3guY29t
+Pg0KPiBDYzogTWFyb3YgQWxla3NleSA8TWFyb3YuQUByYWlkaXguY29tPjsgU2FnZSBXZWlsIDxz
+d2VpbEByZWRoYXQuY29tPjsNCj4gY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVj
+dDogUmU6IGNlcGggaXNzdWUNCj4gDQo+IE9uIFdlZCwgTm92IDIzLCAyMDE2IGF0IDU6MzAgUE0s
+IEF2bmVyIEJlbiBIYW5vY2gNCj4gPGF2bmVyYkBtZWxsYW5veC5jb20+IHdyb3RlOg0KPiA+DQo+
+ID4gSSBndWVzcyB0aGF0IGxpa2UgdGhlIHJlc3Qgb2YgY2VwaCwgdGhlIG5ldyByZG1hIGNvZGUg
+bXVzdCBhbHNvIHN1cHBvcnQNCj4gbXVsdGlwbGUgYXBwbGljYXRpb25zIGluIHBhcmFsbGVsLg0K
+PiA+DQo+ID4gSSBhbSBhbHNvIHJlcHJvZHVjaW5nIHlvdXIgZXJyb3IgPT4gMiBpbnN0YW5jZXMg
+b2YgZmlvIGNhbid0IHJ1biBpbiBwYXJhbGxlbA0KPiB3aXRoIGNlcGggcmRtYS4NCj4gPg0KPiA+
+ICogd2l0aCBjZXBoIC1zIHNob3dzIEhFQUxUSF9XQVJOICh3aXRoICI5IHJlcXVlc3RzIGFyZSBi
+bG9ja2VkID4gMzINCj4gPiBzZWMiKQ0KPiA+DQo+ID4gKiBhbmQgd2l0aCBhbGwgb3NkcyBwcmlu
+dGluZyBtZXNzYWdlcyBsaWtlICIgaGVhcnRiZWF0X2NoZWNrOiBubyByZXBseSBmcm9tDQo+IC4u
+LiINCj4gPg0KPiA+ICogQW5kIHdpdGggbG9nIGZpbGVzIGNvbnRhaW5zIGVycm9yczoNCj4gPiAg
+ICQgZ3JlcCBlcnJvciBjZXBoLW9zZC4wLmxvZw0KPiA+ICAgMjAxNi0xMS0yMyAwOToyMDo0Ni45
+ODgxNTQgN2Y5YjI2MjYwNzAwIC0xIEZhaWwgdG8gb3BlbiAnL3Byb2MvMC9jbWRsaW5lJw0KPiBl
+cnJvciA9ICgyKSBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5DQo+ID4gICAyMDE2LTExLTIzIDA5
+OjIwOjU0LjA5MDM4OCA3ZjliNDM5NTE3MDAgIDEgLS0gMzYuMC4wLjI6NjgwMi8xMDYzNCA+Pg0K
+PiAzNi4wLjAuNDowLzE5NTg3IGNvbm4oMHg3ZjliMjU2YTgwMDAgOjY4MDIgcz1TVEFURV9PUEVO
+IHBncz0xIGNzPTENCj4gbD0xKS5yZWFkX2J1bGsgcmVhZGluZyBmcm9tIGZkPTEzOSA6IFVua25v
+d24gZXJyb3IgLTEwNA0KPiA+ICAgMjAxNi0xMS0yMyAwOToyMDo1OC40MTE5MTIgN2Y5YjQ0OTUz
+NzAwICAxIFJETUFTdGFjayBwb2xsaW5nIHdvcmsNCj4gcmVxdWVzdCByZXR1cm5lZCBlcnJvciBm
+b3IgYnVmZmVyKDB4N2Y5YjFmZWUyMWIwKSBzdGF0dXMoMTI6UkVUUllfRVhDX0VSUg0KPiA+ICAg
+MjAxNi0xMS0yMyAwOToyMDo1OC40MTE5MzQgN2Y5YjQ0OTUzNzAwICAxIFJETUFTdGFjayBwb2xs
+aW5nIHdvcmsNCj4gPiByZXF1ZXN0IHJldHVybmVkIGVycm9yIGZvciBidWZmZXIoMHg3ZjliNTUz
+ZDIwZDApDQo+ID4gc3RhdHVzKDEyOlJFVFJZX0VYQ19FUlINCj4gDQo+IGVycm9yIGlzICJJQlZf
+V0NfUkVUUllfRVhDX0VSUiAoMTIpIC0gVHJhbnNwb3J0IFJldHJ5IENvdW50ZXINCj4gRXhjZWVk
+ZWQ6IFRoZSBsb2NhbCB0cmFuc3BvcnQgdGltZW91dCByZXRyeSBjb3VudGVyIHdhcyBleGNlZWRl
+ZCB3aGlsZQ0KPiB0cnlpbmcgdG8gc2VuZCB0aGlzIG1lc3NhZ2UuIFRoaXMgbWVhbnMgdGhhdCB0
+aGUgcmVtb3RlIHNpZGUgZGlkbid0IHNlbmQgYW55DQo+IEFjayBvciBOYWNrLiBJZiB0aGlzIGhh
+cHBlbnMgd2hlbiBzZW5kaW5nIHRoZSBmaXJzdCBtZXNzYWdlLCB1c3VhbGx5IHRoaXMgbWVhbg0K
+PiB0aGF0IHRoZSBjb25uZWN0aW9uIGF0dHJpYnV0ZXMgYXJlIHdyb25nIG9yIHRoZSByZW1vdGUg
+c2lkZSBpc24ndCBpbiBhIHN0YXRlDQo+IHRoYXQgaXQgY2FuIHJlc3BvbmQgdG8gbWVzc2FnZXMu
+IElmIHRoaXMgaGFwcGVucyBhZnRlciBzZW5kaW5nIHRoZSBmaXJzdA0KPiBtZXNzYWdlLCB1c3Vh
+bGx5IGl0IG1lYW5zIHRoYXQgdGhlIHJlbW90ZSBRUCBpc24ndCBhdmFpbGFibGUgYW55bW9yZS4N
+Cj4gUmVsZXZhbnQgZm9yIFJDIFFQcy4iDQo+IA0KPiB3ZSBzZXQgcXAgcmV0cnlfY250IHRvIDcg
+YW5kIHRpbWVvdXQgaXMgMTQNCj4gDQo+ICAgLy8gSG93IGxvbmcgdG8gd2FpdCBiZWZvcmUgcmV0
+cnlpbmcgaWYgcGFja2V0IGxvc3Qgb3Igc2VydmVyIGRlYWQuDQo+ICAgLy8gU3VwcG9zZWRseSB0
+aGUgdGltZW91dCBpcyA0LjA5NnVzKjJedGltZW91dC4gIEhvd2V2ZXIsIHRoZSBhY3R1YWwNCj4g
+ICAvLyB0aW1lb3V0IGFwcGVhcnMgdG8gYmUgNC4wOTZ1cyoyXih0aW1lb3V0KzEpLCBzbyB0aGUg
+c2V0dGluZw0KPiAgIC8vIGJlbG93IGNyZWF0ZXMgYSAxMzVtcyB0aW1lb3V0Lg0KPiAgIHFwYS50
+aW1lb3V0ID0gMTQ7DQo+IA0KPiAgIC8vIEhvdyBtYW55IHRpbWVzIHRvIHJldHJ5IGFmdGVyIHRp
+bWVvdXRzIGJlZm9yZSBnaXZpbmcgdXAuDQo+ICAgcXBhLnJldHJ5X2NudCA9IDc7DQo+IA0KPiBp
+cyB0aGlzIG1lYW5zIHRoZSByZWNlaXZlciBzaWRlIGxhY2sgb2YgbWVtb3J5IG9yIG5vdCBwb2xs
+aW5nIHdvcmsgcmVxdWVzdA0KPiBBU0FQPw0KPiANCj4gPg0KPiA+DQo+ID4NCj4gPiBDb21tYW5k
+IGxpbmVzIHRoYXQgSSB1c2VkOg0KPiA+ICAgLi9maW8gLS1pb2VuZ2luZT1yYmQgLS1pbnZhbGlk
+YXRlPTAgLS1ydz13cml0ZSAtLWJzPTEyOEsgLS1udW1qb2JzPTEgLS0NCj4gY2xpZW50bmFtZT1h
+ZG1pbiAtLXBvb2w9cmJkIC0taW9kZXB0aD0xMjggLS1yYmRuYW1lPWltZzJnIC0tbmFtZT0xDQo+
+ID4gICAuL2ZpbyAtLWlvZW5naW5lPXJiZCAtLWludmFsaWRhdGU9MCAtLXJ3PXdyaXRlIC0tYnM9
+MTI4SyAtLW51bWpvYnM9MQ0KPiA+IC0tY2xpZW50bmFtZT1hZG1pbiAtLXBvb2w9cmJkIC0taW9k
+ZXB0aD0xMjggLS1yYmRuYW1lPWltZzJnMiAtLW5hbWU9MQ0KPiA+DQo+ID4gPiAtLS0tLU9yaWdp
+bmFsIE1lc3NhZ2UtLS0tLQ0KPiA+ID4gRnJvbTogTWFyb3YgQWxla3NleQ0KPiA+ID4gU2VudDog
+VHVlc2RheSwgTm92ZW1iZXIgMjIsIDIwMTYgMTc6NTkNCj4gPiA+DQo+ID4gPiBJIGRpZG4ndCB0
+cnkgdGhpcyBibG9ja3NpemUuIEJ1dCBpbiBteSBjYXNlIGZpbyBjcnVzaGVkIGlmIEkgdXNlDQo+
+ID4gPiBtb3JlIHRoYW4gb25lIGpvYi4gV2l0aCBvbmUgam9iIGV2ZXJ5dGhpbmcgd29ya3MgZmlu
+ZS4gSXMgaXQgd29ydGggbW9yZQ0KPiBkZWVwIGludmVzdGlnYXRpbmc/DQo=
