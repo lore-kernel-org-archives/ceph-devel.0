@@ -1,116 +1,161 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH] ceph: don't set req->r_locked_dir in ceph_d_revalidate
-Date: Mon, 05 Dec 2016 06:47:26 -0500
-Message-ID: <1480938446.2544.4.camel@redhat.com>
-References: <1480697536-10107-1-git-send-email-jlayton@redhat.com>
-         <415F6BA5-3FA3-45FD-A709-C438B4EACE3C@redhat.com>
+From: Abhishek L <abhishek@suse.com>
+Subject: Re: ceph v10.2.4 QE validation status
+Date: Mon, 05 Dec 2016 12:53:15 +0100
+Message-ID: <87oa0q4mok.fsf@suse.com>
+References: <CAMMFjmEkMUBCnZFqMr_kcfZgB5jm3CjVNfXpSAXT7ZCwMLQEfg@mail.gmail.com> <CAMMFjmGRO7F30WwU8NwMU=t3bEXEhz1G6bwZwqyQJrp7mceZdQ@mail.gmail.com> <87r362tr92.fsf@suse.com> <alpine.DEB.2.11.1611231441130.21102@piezo.us.to> <87mvgia7if.fsf@suse.com> <87zikh3tj3.fsf@suse.com> <alpine.DEB.2.11.1611301601010.2097@piezo.novalocal> <87y4013pmw.fsf@suse.com> <87vav53p8u.fsf@suse.com> <alpine.DEB.2.11.1611301656070.2097@piezo.novalocal> <87twam4ejf.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f174.google.com ([209.85.216.174]:34935 "EHLO
-        mail-qt0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750928AbcLELra (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2016 06:47:30 -0500
-Received: by mail-qt0-f174.google.com with SMTP id c47so310847921qtc.2
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Dec 2016 03:47:30 -0800 (PST)
-In-Reply-To: <415F6BA5-3FA3-45FD-A709-C438B4EACE3C@redhat.com>
+Received: from smtp.nue.novell.com ([195.135.221.5]:54811 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750951AbcLELxT (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Mon, 5 Dec 2016 06:53:19 -0500
+In-reply-to: <87twam4ejf.fsf@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, donatas.abraitis@gmail.com, viro@zeniv.linux.org.uk
+To: Sage Weil <sweil@redhat.com>
+Cc: "Durgin, Josh" <jdurgin@redhat.com>, Yuri Weinstein <yweinste@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Alfredo Deza <adeza@redhat.com>, Samuel Just <sjust@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <ldachary@redhat.com>, "Dachary, Loic" <loic@dachary.org>, Nathan Cutler <ncutler@suse.cz>, Ilya Dryomov <idryomov@gmail.com>, John Spray <jspray@redhat.com>
 
-On Mon, 2016-12-05 at 10:28 +0800, Yan, Zheng wrote:
-> > 
-> > On 3 Dec 2016, at 00:52, Jeff Layton <jlayton@redhat.com> wrote:
-> > 
-> > This function sets req->r_locked_dir which is supposed to indicate to
-> > ceph_fill_trace that the parent's i_rwsem is locked for write.
-> > Unfortunately, there is no guarantee that the dir will be locked when
-> > d_revalidate is called, so we really don't want ceph_fill_trace to do
-> > any dcache manipulation from this context. Clear req->r_locked_dir since
-> > it's clearly not safe to do that.
-> > 
-> > What we really want to know with d_revalidate is whether the dentry
-> > still points to the same inode. ceph_fill_trace installs a pointer to
-> > the inode in req->r_target_inode, so we can just compare that to
-> > d_inode(dentry) to see if it's the same one after the lookup.
-> > 
-> > Also, since we aren't generally interested in the parent here, we can
-> > switch to using a GETATTR to hint that to the MDS, which also means that
-> > we only need to reserve one cap.
-> > 
-> > Finally, just remove the d_unhashed check. That's really outside the
-> > purview of a filesystem's d_revalidate. If the thing became unhashed
-> > while we're checking it, then that's up to the VFS to handle anyway.
-> > 
-> > Fixes: 200fd27c8fa2 (ceph: use lookup request to revalidate dentry)
-> > Reported-by: Donatas Abraitis <donatas.abraitis@gmail.com>
-> > Cc: stable@vger.kernel.org # v4.6+
-> > Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> > ---
-> > fs/ceph/dir.c | 24 ++++++++++++++----------
-> > 1 file changed, 14 insertions(+), 10 deletions(-)
-> > 
-> > diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> > index 78180d151730..a594c7879cc2 100644
-> > --- a/fs/ceph/dir.c
-> > +++ b/fs/ceph/dir.c
-> > @@ -1261,26 +1261,30 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
-> > 			return -ECHILD;
-> > 
-> > 		op = ceph_snap(dir) == CEPH_SNAPDIR ?
-> > -			CEPH_MDS_OP_LOOKUPSNAP : CEPH_MDS_OP_LOOKUP;
-> > +			CEPH_MDS_OP_LOOKUPSNAP : CEPH_MDS_OP_GETATTR;
-> > 		req = ceph_mdsc_create_request(mdsc, op, USE_ANY_MDS);
-> > 		if (!IS_ERR(req)) {
-> > 			req->r_dentry = dget(dentry);
-> > -			req->r_num_caps = 2;
-> > +			req->r_num_caps = op == CEPH_MDS_OP_GETATTR ? 1 : 2;
-> > 
-> > 			mask = CEPH_STAT_CAP_INODE | CEPH_CAP_AUTH_SHARED;
-> > 			if (ceph_security_xattr_wanted(dir))
-> > 				mask |= CEPH_CAP_XATTR_SHARED;
-> > 			req->r_args.getattr.mask = mask;
-> > 
-> > -			req->r_locked_dir = dir;
-> > 			err = ceph_mdsc_do_request(mdsc, NULL, req);
-> > -			if (err == 0 || err == -ENOENT) {
-> > -				if (dentry == req->r_dentry) {
-> > -					valid = !d_unhashed(dentry);
-> > -				} else {
-> > -					d_invalidate(req->r_dentry);
-> > -					err = -EAGAIN;
-> > -				}
-> > +			switch (err) {
-> > +			case 0:
-> > +				if (d_really_is_positive(dentry) &&
-> > +				    d_inode(dentry) == req->r_target_inode)
-> > +					valid = 1;
-> > +				break;
-> > +			case -ENOENT:
-> > +				if (d_really_is_negative(dentry))
-> > +					valid = 1;
-> > +				/* Fallthrough */
-> > +			default:
-> > +				break;
-> > 			}
-> > 			ceph_mdsc_put_request(req);
-> > 			dout("d_revalidate %p lookup result=%d\n”,
-> 
-> Looks good. As we discussed, please write a patch that guarantees safe access to d_parent when parent is not locked.
-> (__choose_mds, build_dentry_path and probably ceph_encode_dentry_release)
-> 
-> Regards
-> Yan, Zheng
-> 
 
-Thanks. I'll add your Reviewed-by and merge it into ceph-client.git if
-that's ok.
+Abhishek L writes:
 
-The issue with parent stability while walking back up the tree is a
-bigger problem, but is separate from this one. I'm still looking at
-that...
+> Sage Weil writes:
+>
+>> On Wed, 30 Nov 2016, Abhishek L wrote:
+>>> Abhishek L writes:
+>>>
+>>> > Sage Weil writes:
+>>> >
+>>> >> On Wed, 30 Nov 2016, Abhishek L wrote:
+>>> >>>
+>>> >>> Abhishek L writes:
+>>> >>>
+>>> >>> > Sage Weil writes:
+>>> >>> >
+>>> >>> >> On Wed, 23 Nov 2016, Abhishek L wrote:
+>>> >>> >>>
+>>> >>> >>> Hi Sage, Greg,
+>>> >>> >>>
+>>> >>> >>>
+>>> >>> >>> Yuri Weinstein writes:
+>>> >>> >>>
+>>> >>> >>> > See updated status - http://tracker.ceph.com/issues/17487#note-32
+>>> >>> >>> >
+>>> >>> >>> > Outstanding issues:
+>>> >>> >>> >
+>>> >>> >>> > knfs - http://tracker.ceph.com/issues/16397 (same as in v10.2.3, Greg
+>>> >>> >>> > pls review/approve, assumed Approved ?)
+>>> >>> >>> >
+>>> >>> >>> > upgrade/hammer-x (jewel) - http://tracker.ceph.com/issues/17847 ((Sage
+>>> >>> >>> > pls review/approve, seems persistent, but maybe not a showstopper)
+>>> >>> >>> >
+>>> >>> >>> > upgrade/infernalis-x (jewel) - deprecated (Nathan is still working
+>>> >>> >>> > to make it pass, see issues in the tacker summary above)
+>>> >>> >>> >
+>>> >>> >>> > Sage, jewel 10.2.4 can be released as soon as you agree with the
+>>> >>> >>> > findings/summary.
+>>> >>> >>>
+>>> >>> >>> Do you think we're ready to release 10.2.4 yet?
+>>> >>> >>
+>>> >>> >> I'm reproducing http://tracker.ceph.com/issues/17847 with logs to make
+>>> >>> >> sure this isn't a regression.
+>>> >>> >>
+>>> >>> >> We can ignore the infernalis runs.
+>>> >>> >>
+>>> >>> >> I think we can ignore the knfs selinux issue too.. Greg, can you confirm?
+>>> >>> >>
+>>> >>> > Added the prs 12001 & 12167 on top of the jewel branch and scheduled rados runs
+>>> >>> > at
+>>> >>> > http://pulpito.ceph.com/abhi-2016-11-29_10:22:25-rados-wip-jewel-10-2-4-distro-basic-smithi/ &
+>>> >>
+>>> >> https://github.com/ceph/ceph-qa-suite/pull/1292
+>>> >>
+>>> >> avoids xenial for the rados upgrade tests (in jewel branch).
+>>>
+>>> Ah alright, maybe this was the cause after all, let's get this in (or
+>>> push a branch to ceph-qa-suite so that I can schedule against that)
+>>
+>> I added a patch for the client-upgrade tests to the same branch. You
+>> should be able to just schedule with --suite-branch jewel-avoid-xenial
+>> instead of --suite-branch jewel (for both rados and
+>> upgrade/client-upgrade).
+>>
+>> sage
+>>
+>>
+>>> >>
+>>> >> The upgrade tests already explicitly call out trusty, so they should be
+>>> >> fine.
+>>> >>
+>>> >>> > updated the tracker at http://tracker.ceph.com/issues/17851#note-17,
+>>> >>> > with details of the test. I'll update the progress once the suite goes
+>>> >>> > through
+>>> >>>
+>>> >>> Had around 11 tests fail from 296 scheduled, there were a couple of
+>>> >>> valgrind issues on ceph-mon (which were seen at earlier runs on jewel as
+>>> >>> well) and an s3test failure, rest of the issues were looking related to
+>>> >>> infrastructure as they were failing to get specific version numbers from
+>>> >>> gitbuilders.
+>>> >>>
+>>> >>> Reported this issue as:
+>>> >>>
+>>> >>> http://tracker.ceph.com/issues/18089
+>>> >>>
+>>> >>> subsequent re runs are still failing with similar errors. The details
+>>> >>> are updated at
+>>> >>>
+>>> >>> http://tracker.ceph.com/issues/17487#note-37
+>>> >>>
+>>> >>> The upgrade suite has also failed with similar errors.
+>>> >>
+>>> >> Which one?
+>>> > The upgrade/client-upgrade suite (I hope this is the right upgrade
+>>> > suite), the errors are the same failed to fetch package version errors
+>>> > seen for the rados suite, so not actual test run errors yet.
+>>> >
+>>> > http://pulpito.ceph.com/abhi-2016-11-30_09:58:50-upgrade:client-upgrade-wip-jewel-10-2-4-distro-basic-smithi/
+>>> > is the run
+>>> >
+> Update on the current status,
+> For prs 12001 & 12167: (sage/Sam)
+>
+> The upgrade passed with the exception of infernalis/jewel which failed
+> with RBD (test_librbd_api.sh) (jdillaman please approve)
+>
+> http://pulpito.ceph.com/abhi-2016-12-02_09:45:37-upgrade:client-upgrade-wip-jewel-10-2-4-distro-basic-smithi/
+>
+> the rados run (with the exception of the valgrind issue) are still
+> waiting for completion for 4 of the 296 jobs, this one suite always
+> seems to die when scheduled, this is the current url of the rados jobs
+> (still waiting)
+> http://pulpito.ceph.com/abhi-2016-12-02_10:06:39-rados-wip-jewel-10-2-4-rc-distro-basic-smithi/
 
--- 
-Jeff Layton <jlayton@redhat.com>
+Loic was able to spot the error in this run (which was a regression
+introduced by f95ed3e, this was later fixed in
+https://github.com/ceph/ceph-qa-suite/pull/1297, so running this suite
+on the latest branch came out green,
+
+http://pulpito.front.sepia.ceph.com/abhi-2016-12-05_10:25:26-rados-wip-jewel-10-2-4-rc-distro-basic-smithi/
+
+Which means 12167 is also good to go.
+>
+>
+> for pr 12207: (josh)
+> the rgw suite also saw the same valgrind issue
+> (http://pulpito.ceph.com/abhi-2016-12-01_22:19:07-rgw-wip-jewel-10-2-4-rc-distro-basic-smithi/)
+>
+> https://github.com/ceph/ceph/pull/12267, (mon cleanup)  was merged on Sam's approval.
+>
+> prs 11884 & 12067 (Sam, Alfredo):
+> the ceph create-keys  pr #11884 hasn't been merged yet into jewel, is
+> there any suite that must be run to validate this. Same applies for
+> https://github.com/ceph/ceph/pull/12067 (OSDMon: MOSDBoot )
+
+12067 was merged on Sam's approval as well. Which only leaves us with
+11884.
+
+Best,
+Abhishek Lekshmanan
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
