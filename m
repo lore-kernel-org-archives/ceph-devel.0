@@ -1,125 +1,45 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: disk enclosure LEDs
-Date: Mon, 5 Dec 2016 22:50:14 +0000
-Message-ID: <BLUPR0201MB1524C8DDCDD501A02C072675E8830@BLUPR0201MB1524.namprd02.prod.outlook.com>
-References: <20161202092301.f65vgyjrssujfyrj@suse.de>
- <alpine.DEB.2.11.1612021417080.22800@piezo.novalocal>
- <BLUPR0201MB1524A241C45983E2CEF8844DE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <be5f1672179b4d41b2692a02fe71a7cd@Ex2013-MBX2.supermicro.com>
- <BLUPR0201MB1524F8910A0625ECACC4B29AE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <CALe9h7fJOM2vrxAoi+=xdc01z0kkjpH8048bFe1wF1pBw1yVsQ@mail.gmail.com>
- <20161205125836.lxcbv5ai5qdavitr@suse.de>
- <CALe9h7esr-SwWis58JLKnjCF0y2Rcj3116nNVKNdrrqBPRW-0A@mail.gmail.com>
- <865BAEF1-BA1D-44E7-A096-14A9FAB84A79@quantum.com>
- <BLUPR0201MB1524F23AC0ECA14A043F2BD5E8830@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <20161205184105.3agjcjy4ufb7smzg@suse.de>
- <CALe9h7caW+KBV5r7P5Ps_1NFtfhTmL=B=MDLN9822q7EqaHrZA@mail.gmail.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: Computation in the storage
+Date: Mon, 5 Dec 2016 23:08:07 +0000
+Message-ID: <64D605E0-8851-4F60-B0AB-864CBDA7B3F7@Teradata.com>
+References: <26283_1480676624_58415510_26283_122_1_EBBC07637B509B40B2E594A11E62C54F022DA808@OPEXCLILM32.corporate.adroot.infra.ftgroup>
+ <d8129d7a-af37-ad74-38c8-f5a9d59f183b@suse.de>
+ <CAF-wwdHPXaX3fe+dk9ovdAfc00N5xQrzj2TaRAuBOjH77L4yDg@mail.gmail.com>
+ <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com>
+ <CAB2gnbVn0U_G12L8XV=hbznB2i_TMo40TpC5cVzJZKOr_MAQ7Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn3nam01on0059.outbound.protection.outlook.com ([104.47.33.59]:60650
-        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751998AbcLEXGP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 5 Dec 2016 18:06:15 -0500
-In-Reply-To: <CALe9h7caW+KBV5r7P5Ps_1NFtfhTmL=B=MDLN9822q7EqaHrZA@mail.gmail.com>
+Received: from nat13.teradata.com ([153.65.16.13]:33373 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751998AbcLEXIJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2016 18:08:09 -0500
+In-Reply-To: <CAB2gnbVn0U_G12L8XV=hbznB2i_TMo40TpC5cVzJZKOr_MAQ7Q@mail.gmail.com>
 Content-Language: en-US
+Content-ID: <A3926C24FC3CD346A186BD2E760C2FB6@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>, Lars Marowsky-Bree <lmb@suse.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Noah Watkins <noahwatkins@gmail.com>
+Cc: Brad Hubbard <bhubbard@redhat.com>, Joao Eduardo Luis <joao@suse.de>, "nebil.benmabrouk@orange.com" <nebil.benmabrouk@orange.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZn
-ZXIua2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9y
-Z10gT24gQmVoYWxmIE9mIEpvaG4gU3ByYXkNCj4gU2VudDogTW9uZGF5LCBEZWNlbWJlciAwNSwg
-MjAxNiAxMToyOCBBTQ0KPiBUbzogTGFycyBNYXJvd3NreS1CcmVlIDxsbWJAc3VzZS5jb20+DQo+
-IENjOiBDZXBoIERldmVsb3BtZW50IDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NCj4gU3Vi
-amVjdDogUmU6IGRpc2sgZW5jbG9zdXJlIExFRHMNCj4gDQo+IE9uIE1vbiwgRGVjIDUsIDIwMTYg
-YXQgNjo0MSBQTSwgTGFycyBNYXJvd3NreS1CcmVlIDxsbWJAc3VzZS5jb20+DQo+IHdyb3RlOg0K
-PiA+IE9uIDIwMTYtMTItMDVUMTg6MDI6MDgsIEFsbGVuIFNhbXVlbHMgPEFsbGVuLlNhbXVlbHNA
-c2FuZGlzay5jb20+DQo+IHdyb3RlOg0KPiA+DQo+ID4+IEknbSBpbmRpZmZlcmVudCB0byBhZ2Vu
-dCB2cy4gYWdlbnQtbGVzcy4NCj4gPj4NCj4gPj4gSSAqYmVsaWV2ZSogdGhhdCBoYXZpbmcgYSBj
-ZXBoLXByaXZhdGUgZGlzdHJpYnV0aW9uIGlzIGVhc2llci9zaW1wbGVyL21vcmUNCj4gcmVsaWFi
-bGUgdGhhbiB0cnlpbmcgdG8gbGF5ZXIgb3ZlciBzb21lIG90aGVyIHN5c3RlbSAoYW5zaWJsZSwg
-c2FsdCwgZXRjLikgW2kuZS4sIEkNCj4gYWdyZWUgd2l0aCBKb2huXS4gQnV0IHRoaXMgaXNuJ3Qg
-YSBzdHJvbmdseSBoZWxkIGJlbGllZi4NCj4gPj4NCj4gPj4gSSdtICptZXRhcGh5c2ljYWxseSBj
-ZXJ0YWluKiB0aGF0IHdoYXRldmVyIGRpc3RyaWJ1dGlvbiBzY2hlbWUgaXMNCj4gYWRvcHRlZCB0
-aGF0IGl0IG5vdCBiZSBvcHRpb25hbC4gQSBsYXJnZSBiYXJyaWVyIHRvIGFkb3B0aW9uIG9mIENl
-cGggdG9kYXkgaXMNCj4gdGhlIGxhY2sgb2YgIm1pZGRsZS13YXJlIiB0aGF0IGhhbmRsZXMgaW5m
-cmVxdWVudCBvcGVyYXRpb25hbCBldmVudHMgKG5vZGUNCj4gYWRkaXRpb24vcmVtb3ZhbCwgbWVk
-aWEgZmFpbHVyZS9yZWNvdmVyeSwgbWlncmF0aW9uLCBldGMuKS4gSU1PLCB0aGlzIG1pZGRsZS0N
-Cj4gd2FyZSB3aWxsIGhhdmUgdG8gYmUgYSBzdGFuZGFyZCBwYXJ0IG9mIENlcGgsIGkuZS4sIGZ1
-bGx5IGZ1bmN0aW9uYWwgIm91dCBvZiB0aGUNCj4gYm94IiB3aXRob3V0IHNpdGUtc3BlY2lmaWMg
-dHdpZGRsaW5nICh0aG91Z2ggaGF2aW5nIGEgbWVjaGFuaXNtIHRvIGluc2VydA0KPiBzaXRlLXNw
-ZWNpZmljIHN0dWZmIGlzIGZpbmUgd2l0aCBtZSwgaXQganVzdCBjYW4ndCBiZSAqcmVxdWlyZWQq
-KS4NCj4gPj4NCj4gPj4gSW4gbXkgbWluZCwgdGhlIGRpc3RyaWJ1dGlvbiBzY2hlbWUgaXMgdGhl
-IG5leHQgc3RlcCBpbiB0aGUgZXZvbHV0aW9uDQo+ID4+IG9mIENlcGgtbWdyLiBJdCdzIHdoYXQn
-cyBtaXNzaW5nIDopDQo+ID4NCj4gPiBJIHNlZSB0aGUgYmVuZWZpdHMgb2YgaGF2aW5nIGEgY2Vw
-aC1zcGVjaWZpYyBhZ2VudCBmb3IgaGFyZHdhcmUNCj4gPiBpbnRlcmFjdGlvbi4gSG93ZXZlciwg
-dGhhdCB0aGVuIHNoaWZ0cyB0aGUgcHJvYmxlbSBmb3IgYm9vdHN0cmFwcGluZw0KPiA+IHNhaWQg
-Q2VwaCBhZ2VudC4NCj4gDQo+IEJvb3RzdHJhcHBpbmcgd291bGQgYmUgdGhlIHNhbWUgYXMgd2Ug
-YWxyZWFkeSBoYXZlIGZvciBpbnN0YWxsaW5nIE9TRHMgYW5kDQo+IE1EU3MuICBTbyBjZXBoLWRl
-cGxveS9jZXBoLWFuc2libGUvd2hhdGV2ZXIgbmVlZHMgdG8gYmUgYWJsZSB0byBkbyB0aGUNCj4g
-c2FtZSB0aGluZyBmb3IgdGhlIHBlci1ob3N0IGFnZW50IHRoYXQgaXQgY3VycmVudGx5IGRvZXMg
-Zm9yIE9TRHMsIG5vIG92ZXJhbGwNCj4gaW5jcmVhc2UgaW4gY29tcGxleGl0eS4NCj4gDQo+ID4g
-QW5kIHdoZW4geW91IG9wZW4gdGhlIGNhbiBvZiB3b3JtcyB0aGF0IGlzIHNlcnZlciBhZGRpdGlv
-bi9yZW1vdmFsLA0KPiA+IGV0YyB3ZSBzdGFydCBoaXR0aW5nIHRoZSBxdWVzdGlvbiBvZiBlaXRo
-ZXIgc3Bpbm5pbmcgdXAgYSBkaXN0cmlidXRpb24NCj4gPiBtZWNoYW5pc20gYXMgd2VsbC4NCj4g
-Pg0KPiA+IFdoZW4gd2Ugd2FudCB0byBsb29rIGF0IGNvbnRhaW5lci1pemluZyBDZXBoIGluIGh5
-cGVyLWNvbnZlcmdlZA0KPiA+IGVudmlyb25tZW50cywgdGhpcyBnZXRzIGV2ZW4gd29yc2UuDQo+
-IA0KPiBJJ20gaW1hZ2luaW5nIHRoYXQgaW4gYSBjb250YWluZXItcGVyLXNlcnZpY2UgbW9kZWws
-IHdoZXJlIHNvbWV0aGluZw0KPiBleHRlcm5hbCBoYXMgY29uZmlndXJlZCB0aGUgT1NEIGNvbnRh
-aW5lcnMgdG8gaGF2ZSBhY2Nlc3MgdG8gdGhlIGJsb2NrDQo+IGRldmljZSB0aGF0IHRoZXkgd2ls
-bCBydW4gb24sIGl0IGRvZXNuJ3Qgc2VlbSB1bnJlYXNvbmFibGUgdG8gaGF2ZSB0aGUgc2FtZQ0K
-PiBjb25maWd1cmF0aW9uIHByb2Nlc3Mgc2V0IHVwIHRoZSBjZXBoIGFnZW50IGNvbnRhaW5lciB3
-aXRoIGFjY2VzcyB0byBhbGwgdGhlDQo+IE9TRCBibG9jayBkZXZpY2VzLiAgV2hhdCBhcmUgeW91
-ciB0aG91Z2h0cyBhYm91dCBob3cgdGhpcyB3b3VsZCAob3INCj4gd291bGRuJ3QpIHdvcms/DQoN
-ClRoZSBjdXJyZW50IE9TRCBkZXNpZ24gaXMgcGVyLWRyaXZlIGFuZCBub3QtcmVsaWFibGUuIFdl
-IG5lZWQgYSBwaWVjZSBvZiBzb2Z0d2FyZSwgcnVubmluZyBvbiB0aGUgdGFyZ2V0IHN5c3RlbSwg
-dGhhdCdzIE5PVCBwZXItZHJpdmUgYW5kIE5PVCBub3QtcmVsaWFibGUgKGkuZS4sIHJlbGlhYmxl
-IDopKS4gV2UgbmVlZCB0aGUgbWFuYWdlbWVudCBzeXN0ZW0gdG8gYmUgYWJsZSB0byBkaWcgb3V0
-IG9mIHRoZSBPU0QncyBzeXN0ZW0gd2h5IGl0IGNyYXNoZWQgLS0gaS5lLiwgcmVhZCBsb2dzIGFu
-ZCBvdGhlciB0eXBlcyBvZiBzdGF0dXMsIGV0Yy4gSXQncyBwb3NzaWJsZSB0byBtdXRhdGUgdGhl
-IE9TRCB0aGVyZSwgYnV0IEkgZG9uJ3QgdGhpbmsgaXQncyBlYXN5IG5vciBzb29uLg0KPiANCj4g
-Pg0KPiA+IGUuZy4sIHRoZSBjZXBoYWxvcG9kIHR1cm5zIGludG8gYSBjZXBoYWxvYmxvYi4gIChT
-b3JyeS4gSSdtIHRlcnJpYmxlDQo+ID4gd2l0aCBwdW5zLikNCj4gPg0KPiA+IEkgbmVlZCBhIG1l
-Y2hhbmlzbSBmb3IgaW50ZXJhY3Rpbmcgd2l0aCBlbmNsb3N1cmVzICh0byBzdGljayB3aXRoIHRo
-ZQ0KPiA+IGV4YW1wbGUpLCBidXQgSSBkb24ndCBuZWVkIGl0IHRvIGJlIHBhcnQgb2YgQ2VwaCwg
-c2luY2UgSSBuZWVkIGl0IGZvcg0KPiA+IG90aGVyIHBhcnRzIG9mIG15IGluZnJhc3RydWN0dXJl
-IHRvbyBhbnl3YXkuDQo+ID4NCj4gPg0KPiA+IElmIGl0J3MgcGFydCBvZiBDZXBoLCBJIGVuZCB1
-cCB3cml0aW5nIGEgc3BlY2lhbCBjYXNlIGZvciBDZXBoLg0KPiANCj4gSSB0aGluayB0aGlzIHdv
-dWxkIGNlYXNlIHRvIGJlIGEgcHJvYmxlbSBmb3IgeW91IGlmIHdlIGp1c3QgaGFkIGEgZmxhZyBp
-biBDZXBoDQo+IHRvIGRpc2FibGUgaXRzIG93biBzbWFydG1vbnRvb2xzIHR5cGUgc3R1ZmY/ICBU
-aGF0IHdheSB3aGVuIHNvbWVvbmUgd2FzDQo+IHVzaW5nIGFuIGV4dGVybmFsIHRvb2wgdGhlcmUg
-d291bGQgYmUgbm8gY29uZmxpY3QuDQo+IA0KPiBUaGVyZSBpcyBzb21lIGR1cGxpY2F0aW9uIG9m
-IGVmZm9ydCwgYnV0IEkgZG9uJ3QgdGhpbmsgdGhhdCdzIGludHJpbnNpY2FsbHkNCj4gcHJvYmxl
-bWF0aWM6IEkgcHJlZGljdCB0aGF0IHdlJ2xsIGFsd2F5cyBoYXZlIG1hbnkgdXNlcnMgd2hvIGRv
-IG5vdCB0YWtlIHVwDQo+IGFueSBvZiB0aGUgZXh0ZXJuYWwgdG9vbHMgYW5kIHdpbGwgYmVuZWZp
-dCBmcm9tIHRoZSBidWlsdC1pbiBDZXBoIGJpdHMuDQo+IA0KPiA+IEFuZCBJIG5lZWQgYSB3YXkg
-dG8gaGFuZGxlIGl0IHdoZW4gQ2VwaCBpdHNlbGYgaXNuJ3QgYXJvdW5kIHlldDsgaG93DQo+ID4g
-ZG8gSSBibGluayBhbiBlbmNsb3N1cmUgdGhhdCByZWNlaXZlcyBhIG5ldyBkaXNrPyBBaCwgSSBw
-cmUtcmVnaXN0ZXIgYQ0KPiA+IGdpdmVuIGVuY2xvc3VyZSB3aXRoIENlcGgsIGJlZm9yZSBhbiBP
-U0QgaXMgZXZlbiBjcmVhdGVkLiBJIGtub3cgQ2VwaA0KPiA+IGhhcyBtYW55IHRlbnRhY2xlcywg
-YnV0IC4uLiA7LSkNCj4gDQo+IFdoaWxlIGF0IHJ1bnRpbWUgd2Ugc2hvdWxkbid0IGhhdmUgdHdv
-IGFnZW50cyBjb21wZXRpbmcgdG8gbWFuYWdlIHRoZQ0KPiBzYW1lIGRldmljZSwgSSB0aGluayBp
-dCBpcyByZWFzb25hYmxlIHRvIGhhdmUgYSBzZXBhcmF0ZSBwaWVjZSBvZiBzb2Z0d2FyZSB0aGF0
-DQo+IGRvZXMgaW5zdGFsbGF0aW9uIHZzLiBkb2VzIHRoZSBvbmdvaW5nIG1vbml0b3JpbmcuICBX
-ZSBzaG91bGRuJ3QgbGV0IHRoZQ0KPiBjb25zdHJhaW50cyBvdmVyIGluc3RhbGxhdGlvbiAoZXNw
-ZWNpYWxseSB0aGUgbmVlZCB0byBvcGVyYXRlIG9uIGNlcGhsZXNzDQo+IG1hY2hpbmVzKSByZXN0
-cmljdCBob3cgd2UgbWFuYWdlIHN5c3RlbXMgdGhyb3VnaCB0aGVpciBsaWZlIGN5Y2xlcy4gIEFn
-YWluLCBJDQo+IGRvbid0IHRoaW5rIHRoZSBidWlsdC1pbiBDZXBoIGZ1bmN0aW9uYWxpdHkgaXMg
-bXV0dWFsbHkgZXhjbHVzaXZlIHdpdGggaGF2aW5nIGENCj4gZ29vZCBleHRlcm5hbCBpbnN0YWxs
-YXRpb24gdG9vbCB0aGF0IHRvdWNoZXMgc29tZSBvZiB0aGUgc2FtZSBmdW5jdGlvbmFsaXR5Lg0K
-PiANCj4gSm9obg0KPiANCj4gDQo+ID4NCj4gPg0KPiA+IFJlZ2FyZHMsDQo+ID4gICAgIExhcnMN
-Cj4gPg0KPiA+IC0tDQo+ID4gU1VTRSBMaW51eCBHbWJILCBHRjogRmVsaXggSW1lbmTDtnJmZmVy
-LCBKYW5lIFNtaXRoYXJkLCBHcmFoYW0gTm9ydG9uLA0KPiA+IEhSQiAyMTI4NCAoQUcgTsO8cm5i
-ZXJnKSAiRXhwZXJpZW5jZSBpcyB0aGUgbmFtZSBldmVyeW9uZSBnaXZlcyB0bw0KPiA+IHRoZWly
-IG1pc3Rha2VzLiIgLS0gT3NjYXIgV2lsZGUNCj4gPg0KPiA+IC0tDQo+ID4gVG8gdW5zdWJzY3Jp
-YmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwi
-DQo+ID4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
-cmcgTW9yZQ0KPiBtYWpvcmRvbW8NCj4gPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3Jn
-L21ham9yZG9tby1pbmZvLmh0bWwNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxp
-c3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZQ0KPiBib2R5
-IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21v
-IGluZm8gYXQNCj4gaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+
+> On Dec 4, 2016, at 3:02 PM, Noah Watkins <noahwatkins@gmail.com> wrote:
+> 
+> On Fri, Dec 2, 2016 at 3:04 PM, Kamble, Nitin A
+> <Nitin.Kamble@teradata.com> wrote:
+>> 
+>> Is anybody using real RADOS object classes on ceph clusters? Any of them on github?
+>> I would like to look at some of the real world examples if it is there.
+>> And more documentation of this feature would definitely help too.
+> 
+> We use object classes [0] for a distributed shared log [1] on Ceph.
+> 
+> [0]: https://github.com/noahdesu/ceph/blob/zlog/jewel/src/cls/zlog/cls_zlog.cc
+> [1]: https://github.com/noahdesu/zlog
+
+
+Thank you Noah & Brad for your pointers for sample Ceph classes. 
+
+Nitin
+
