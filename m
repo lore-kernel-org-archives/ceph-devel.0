@@ -1,102 +1,67 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Question about recovery vs backfill priorities
-Date: Mon, 5 Dec 2016 15:18:54 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612051518290.2711@piezo.novalocal>
-References: <3b219d94-431d-0a4f-e656-826003028a9d@corp.ovh.com> <alpine.DEB.2.11.1612012158570.2097@piezo.novalocal> <899b3678-82fc-3dcf-a3ed-151aa033dc79@corp.ovh.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: disk enclosure LEDs
+Date: Mon, 5 Dec 2016 15:28:24 +0000
+Message-ID: <CALe9h7esr-SwWis58JLKnjCF0y2Rcj3116nNVKNdrrqBPRW-0A@mail.gmail.com>
+References: <alpine.DEB.2.11.1611301606060.2097@piezo.novalocal>
+ <eb52d1a8-8058-b57b-1585-828385953919@suse.de> <CALe9h7d3Lv5Hwxh0sdtkSXQrPZqXG2UdVc2nvSN9ra2Gu6eM5A@mail.gmail.com>
+ <20161202092301.f65vgyjrssujfyrj@suse.de> <alpine.DEB.2.11.1612021417080.22800@piezo.novalocal>
+ <BLUPR0201MB1524A241C45983E2CEF8844DE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <be5f1672179b4d41b2692a02fe71a7cd@Ex2013-MBX2.supermicro.com>
+ <BLUPR0201MB1524F8910A0625ECACC4B29AE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <CALe9h7fJOM2vrxAoi+=xdc01z0kkjpH8048bFe1wF1pBw1yVsQ@mail.gmail.com> <20161205125836.lxcbv5ai5qdavitr@suse.de>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-42556452-1480951137=:2711"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:32965 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751039AbcLEPUF (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2016 10:20:05 -0500
-In-Reply-To: <899b3678-82fc-3dcf-a3ed-151aa033dc79@corp.ovh.com>
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:35306 "EHLO
+        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751080AbcLEP2p (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2016 10:28:45 -0500
+Received: by mail-qk0-f173.google.com with SMTP id n204so349303092qke.2
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Dec 2016 07:28:45 -0800 (PST)
+In-Reply-To: <20161205125836.lxcbv5ai5qdavitr@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?Bart=B3omiej_=A6wi=EAcki?= <bartlomiej.swiecki@corp.ovh.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, sjust@redhat.com
+To: Lars Marowsky-Bree <lmb@suse.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Mon, Dec 5, 2016 at 12:58 PM, Lars Marowsky-Bree <lmb@suse.com> wrote:
+> On 2016-12-05T12:44:51, John Spray <jspray@redhat.com> wrote:
+>
+>> Question to the OpenAttic folks, who afaik are the only ones on the
+>> thread actively building tools like this: if ceph-mgr modules could do
+>> arbitrary command remote execution on OSD nodes, is that what you
+>> would use for blinking LEDs?  How would you wire that up to the rest
+>> of your stack?
+>
+> So, in "our" world, we have Salt minions for remote execution
+> everywhere.
+>
+> If Ceph requires an additional remote execution channel, aren't we
+> rebuilding work that's part of both Salt, Ansible, Puppet, ...?
 
---8323329-42556452-1480951137=:2711
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Yes, although only a tiny part of what tools like ansible do -- and in
+the process, we save the effort of integrating with all of the above.
+IMHO it would actually be better value for money to write our own
+agent than to maintain and test a pluggable infrastructure that could
+use any of them (especially as some have different semantics), and
+handle newer/older versions of them, etc.
 
-On Mon, 5 Dec 2016, Bartłomiej Święcki wrote:
-> Hi,
-> 
-> I made a quick draft of how new priority code could look like, please let me
-> know if that's a good direction:
-> 
-> https://github.com/ceph/ceph/compare/master...ovh:wip-rework-recovery-priorities
-> 
-> Haven't tested it yet though so no PR yet, will do it today.
+John
 
-That looks reasonable to me!
-
-> A side question: Is there any reason why pool_recovery_priority is not
-> adjusting backfill priority?
-> Maybe it would be beneficial to include it there too?
-
-I'm guessing not... Sam?
-
-sage
-
-
-
-> 
+>
+> The advantage of having a ceph remote agent is most prominent if you
+> view ceph as an isolated distributed system.
+>
+>
 > Regards,
-> Bartek
-> 
-> 
-> On 12/01/2016 11:10 PM, Sage Weil wrote:
-> > Hi Bartek,
-> > 
-> > On Thu, 1 Dec 2016, Bartłomiej Święcki wrote:
-> > > We're currently being hit by an issue with cluster recovery. The cluster
-> > > size
-> > > has been significantly extended (~50% new OSDs) and started recovery.
-> > > During recovery there was a HW failure and we ended up with some PGS in
-> > > peered
-> > > state with size < min_size (inactive).
-> > > Those peered PGs are waiting for backfill but the cluster still prefers
-> > > recovery of recovery_wait PGs - in our case this could be even few hours
-> > > before all recovery is finished (we're speeding up recovery up to limits
-> > > to
-> > > get the downtime as short as possible). Those peered PGs are blocked
-> > > during
-> > > this time and the whole cluster just struggles to operate at a reasonable
-> > > level.
-> > > 
-> > > We're running hammer 0.94.6 there and from the code it looks like recovery
-> > > will always have higher priority (jewel seems similar).
-> > > Documentation only says that log-based recovery must finish before
-> > > backfills.
-> > > Is this requirement needed for data consistency or something else?
-> > For a given single PG, it will do it's own log recovery (to bring acting
-> > OSDs fully up to date) before starting backfill, but between PGs there's
-> > no dependency.
-> > 
-> > > Ideally we'd like it to be this order: undersized inactive (size <
-> > > min_size)
-> > > recovery_wait => undersized inactive (size < min_size) wait_backfill =>
-> > > degraded recovery_wait => degraded wait_backfill => remapped
-> > > wait_backfill.
-> > > Changing priority calculation doesn't seem to be that hard but would it
-> > > end up
-> > > with inconsistent data?
-> > We could definitely improve this, yeah.  The prioritization code is based
-> > around PG::get_{recovery,backfill}_priority(), and the
-> > OSD_{RECOVERY,BACKFILL}_* #defines in PG.h.  It currently assumes (log)
-> > recovery is always higher priority than backfill, but as you say we can do
-> > better.  As long as everything maps into a 0..255 priority value it should
-> > be fine.
-> > 
-> > Getting the undersized inactive bumped to the top should be a simple tweak
-> > (just force a top-value priority in that case)...
-> > 
-> > sage
-> 
-> 
---8323329-42556452-1480951137=:2711--
+>     Lars
+>
+> --
+> SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+> "Experience is the name everyone gives to their mistakes." -- Oscar Wilde
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
