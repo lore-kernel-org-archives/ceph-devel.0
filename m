@@ -1,98 +1,102 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: raw rados listing with seek to marker
-Date: Mon, 5 Dec 2016 14:40:13 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612051440090.2711@piezo.novalocal>
-References: <CADRKj5Tv-NN8gCJgR-X2kCVtYzNJnS9r78FtaGZm6GrX3s2EuQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Question about recovery vs backfill priorities
+Date: Mon, 5 Dec 2016 15:18:54 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612051518290.2711@piezo.novalocal>
+References: <3b219d94-431d-0a4f-e656-826003028a9d@corp.ovh.com> <alpine.DEB.2.11.1612012158570.2097@piezo.novalocal> <899b3678-82fc-3dcf-a3ed-151aa033dc79@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-42556452-1480951137=:2711"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37564 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751320AbcLEOkb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 5 Dec 2016 09:40:31 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 7965E8F231
-        for <ceph-devel@vger.kernel.org>; Mon,  5 Dec 2016 14:40:16 +0000 (UTC)
-In-Reply-To: <CADRKj5Tv-NN8gCJgR-X2kCVtYzNJnS9r78FtaGZm6GrX3s2EuQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:32965 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751039AbcLEPUF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2016 10:20:05 -0500
+In-Reply-To: <899b3678-82fc-3dcf-a3ed-151aa033dc79@corp.ovh.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: "Just, Samuel" <sjust@redhat.com>, David Zafman <dzafman@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-2?Q?Bart=B3omiej_=A6wi=EAcki?= <bartlomiej.swiecki@corp.ovh.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, sjust@redhat.com
 
-On Sat, 3 Dec 2016, Yehuda Sadeh-Weinraub wrote:
-> rgw uses raw rados listing when doing certain operations. For example
-> when listing metadata entries (these aren't being indexed). When doing
-> a full metadata sync the rgw at the secondary zone sends a request to
-> the master to get a list of all the metadata entries (of a specific
-> section), so that it can build an internal index for these entries so
-> that it can fetch them.
-> One of the main issues here is that since the metadata listing relies
-> on raw rados objects listing, the operation cannot be paged.
-> I've looked at the nobjects listing code, and this is what I
-> understand happening:
->  - we iterate through all the pgs in the pool, one by one and in order
->  - for each pg we're at we read a chunk of the next X (where X 1024)
-> entries via rados pgls operation
->  - for each chunk rados returns a cookie, which is some kind of a
-> descriptor that points at either the current, or the next chunk that
-> can be used to fetch the next chunk
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-42556452-1480951137=:2711
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+
+On Mon, 5 Dec 2016, Bartłomiej Święcki wrote:
+> Hi,
 > 
-> rados itself with the nobjects api provides some seek mechanism, but
-> it's pretty rudimentary and only seeks by rounding down to the current
-> pg. I was looking at introducing a marker for nobjects listing (see:
-> https://github.com/yehudasa/ceph/commits/wip-18079), but there are a
-> few points I'm not completely sure about:
->  - I was using cookie and current_pg as the marker, but that only
-> points to the current chunk that was just read (but not necessarily
-> consumed completely). Is there a way to generate a cookie that would
-> point at any entry within the current chunk?
+> I made a quick draft of how new priority code could look like, please let me
+> know if that's a good direction:
+> 
+> https://github.com/ceph/ceph/compare/master...ovh:wip-rework-recovery-priorities
+> 
+> Haven't tested it yet though so no PR yet, will do it today.
 
-The real marker is this:
+That looks reasonable to me!
 
-    collection_list_handle_t cookie;
+> A side question: Is there any reason why pool_recovery_priority is not
+> adjusting backfill priority?
+> Maybe it would be beneficial to include it there too?
 
-in Objecter::NListContext, which is defined as
-
-typedef hobject_t collection_list_handle_t;
-
-In principle, we could use the hobject_t to iterater over the whole pool, 
-but the mapping onto PGs is fragmented when sortbitwise isn't set, so we 
-can't really remove this until we drop support for pre-jewel clusters and 
-!sortbitwise in the client.
-
->  - Is entries order guaranteed within the chunk? E.g., if I know that
-> the last cookie was C, and the last object we saw was O, can we
-> request C again, and skip to object O and not miss any entries created
-> before original operation started? (it is ok to miss on entries
-> created after original operation started, as we're going to get these
-> via separate log)
-
-The OSD sets C either as hobject_t::get_max() (end of pg) or the next 
-object that it didn't return as part of the result set.  If you are 
-listing objects and return A,B,C and D is the 'next', and before you 
-continue a C+1 is created, you'll "miss" that, but that's generally okay 
-since it was creating during (not before) you were listing.
-
->  - is there any other field that we need to keep for the marker other
-> than these two?
-
-The hobject_t alone should be enough.  When you set the marker, just 
-calculate current_pg from that.  That means that getting/setting the 
-marker won't work properly for non-sortbitwise OSDs, but I think that's 
-okay--starting with kraken we *require* that sortbitwise is set before 
-allowing new OSDs to start, so a jewel is the last version that can ever 
-have !sortbitwise.  You can put a check in rgw that verifies that the 
-flag is set before starting...
-
->  - what to do with the old object listing api? the code internally
-> defaults to using it, so if implementing seek only for nobjects it
-> won't work by default. I'm not sure we want to implement it for the
-> legacy listing infrastructure.
-
-Hmm... I think we should implement it for the non-"n" variant too (I 
-don't think it's necessarily legacy; users may be enumerating 
-within a namespace).
+I'm guessing not... Sam?
 
 sage
+
+
+
+> 
+> Regards,
+> Bartek
+> 
+> 
+> On 12/01/2016 11:10 PM, Sage Weil wrote:
+> > Hi Bartek,
+> > 
+> > On Thu, 1 Dec 2016, Bartłomiej Święcki wrote:
+> > > We're currently being hit by an issue with cluster recovery. The cluster
+> > > size
+> > > has been significantly extended (~50% new OSDs) and started recovery.
+> > > During recovery there was a HW failure and we ended up with some PGS in
+> > > peered
+> > > state with size < min_size (inactive).
+> > > Those peered PGs are waiting for backfill but the cluster still prefers
+> > > recovery of recovery_wait PGs - in our case this could be even few hours
+> > > before all recovery is finished (we're speeding up recovery up to limits
+> > > to
+> > > get the downtime as short as possible). Those peered PGs are blocked
+> > > during
+> > > this time and the whole cluster just struggles to operate at a reasonable
+> > > level.
+> > > 
+> > > We're running hammer 0.94.6 there and from the code it looks like recovery
+> > > will always have higher priority (jewel seems similar).
+> > > Documentation only says that log-based recovery must finish before
+> > > backfills.
+> > > Is this requirement needed for data consistency or something else?
+> > For a given single PG, it will do it's own log recovery (to bring acting
+> > OSDs fully up to date) before starting backfill, but between PGs there's
+> > no dependency.
+> > 
+> > > Ideally we'd like it to be this order: undersized inactive (size <
+> > > min_size)
+> > > recovery_wait => undersized inactive (size < min_size) wait_backfill =>
+> > > degraded recovery_wait => degraded wait_backfill => remapped
+> > > wait_backfill.
+> > > Changing priority calculation doesn't seem to be that hard but would it
+> > > end up
+> > > with inconsistent data?
+> > We could definitely improve this, yeah.  The prioritization code is based
+> > around PG::get_{recovery,backfill}_priority(), and the
+> > OSD_{RECOVERY,BACKFILL}_* #defines in PG.h.  It currently assumes (log)
+> > recovery is always higher priority than backfill, but as you say we can do
+> > better.  As long as everything maps into a 0..255 priority value it should
+> > be fine.
+> > 
+> > Getting the undersized inactive bumped to the top should be a simple tweak
+> > (just force a top-value priority in that case)...
+> > 
+> > sage
+> 
+> 
+--8323329-42556452-1480951137=:2711--
