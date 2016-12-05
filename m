@@ -1,72 +1,98 @@
-From: Jeff Applewhite <japplewh@redhat.com>
-Subject: Re: disk enclosure LEDs
-Date: Mon, 5 Dec 2016 08:23:44 -0500
-Message-ID: <CANh1uDOw_u09p8pUDvz=83nUsU8eh1S4oD0CYWSi-6RKf5w3mw@mail.gmail.com>
-References: <alpine.DEB.2.11.1611301606060.2097@piezo.novalocal>
- <eb52d1a8-8058-b57b-1585-828385953919@suse.de> <CALe9h7d3Lv5Hwxh0sdtkSXQrPZqXG2UdVc2nvSN9ra2Gu6eM5A@mail.gmail.com>
- <20161202092301.f65vgyjrssujfyrj@suse.de> <alpine.DEB.2.11.1612021417080.22800@piezo.novalocal>
- <BLUPR0201MB1524A241C45983E2CEF8844DE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <be5f1672179b4d41b2692a02fe71a7cd@Ex2013-MBX2.supermicro.com>
- <BLUPR0201MB1524F8910A0625ECACC4B29AE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <CALe9h7fJOM2vrxAoi+=xdc01z0kkjpH8048bFe1wF1pBw1yVsQ@mail.gmail.com> <20161205125836.lxcbv5ai5qdavitr@suse.de>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: raw rados listing with seek to marker
+Date: Mon, 5 Dec 2016 14:40:13 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612051440090.2711@piezo.novalocal>
+References: <CADRKj5Tv-NN8gCJgR-X2kCVtYzNJnS9r78FtaGZm6GrX3s2EuQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wj0-f181.google.com ([209.85.210.181]:34175 "EHLO
-        mail-wj0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751670AbcLENXr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2016 08:23:47 -0500
-Received: by mail-wj0-f181.google.com with SMTP id tg4so34848142wjb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Dec 2016 05:23:46 -0800 (PST)
-In-Reply-To: <20161205125836.lxcbv5ai5qdavitr@suse.de>
+Received: from mx1.redhat.com ([209.132.183.28]:37564 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751320AbcLEOkb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 5 Dec 2016 09:40:31 -0500
+Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 7965E8F231
+        for <ceph-devel@vger.kernel.org>; Mon,  5 Dec 2016 14:40:16 +0000 (UTC)
+In-Reply-To: <CADRKj5Tv-NN8gCJgR-X2kCVtYzNJnS9r78FtaGZm6GrX3s2EuQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lars Marowsky-Bree <lmb@suse.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: "Just, Samuel" <sjust@redhat.com>, David Zafman <dzafman@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-In the case of Tendrl we have Ceph node agents that communicate with
-an etcd central store for all operations. In this particular case I
-think we would likely trigger the local node agent to run a local
-ansible playbook to execute the needed code (via etcd). So an API to
-consume these events from Ceph efficiently would be the enabling
-technology we'd be interested in.
+On Sat, 3 Dec 2016, Yehuda Sadeh-Weinraub wrote:
+> rgw uses raw rados listing when doing certain operations. For example
+> when listing metadata entries (these aren't being indexed). When doing
+> a full metadata sync the rgw at the secondary zone sends a request to
+> the master to get a list of all the metadata entries (of a specific
+> section), so that it can build an internal index for these entries so
+> that it can fetch them.
+> One of the main issues here is that since the metadata listing relies
+> on raw rados objects listing, the operation cannot be paged.
+> I've looked at the nobjects listing code, and this is what I
+> understand happening:
+>  - we iterate through all the pgs in the pool, one by one and in order
+>  - for each pg we're at we read a chunk of the next X (where X 1024)
+> entries via rados pgls operation
+>  - for each chunk rados returns a cookie, which is some kind of a
+> descriptor that points at either the current, or the next chunk that
+> can be used to fetch the next chunk
+> 
+> rados itself with the nobjects api provides some seek mechanism, but
+> it's pretty rudimentary and only seeks by rounding down to the current
+> pg. I was looking at introducing a marker for nobjects listing (see:
+> https://github.com/yehudasa/ceph/commits/wip-18079), but there are a
+> few points I'm not completely sure about:
+>  - I was using cookie and current_pg as the marker, but that only
+> points to the current chunk that was just read (but not necessarily
+> consumed completely). Is there a way to generate a cookie that would
+> point at any entry within the current chunk?
 
-Jeff
+The real marker is this:
 
-On Mon, Dec 5, 2016 at 7:58 AM, Lars Marowsky-Bree <lmb@suse.com> wrote:
-> On 2016-12-05T12:44:51, John Spray <jspray@redhat.com> wrote:
->
->> Question to the OpenAttic folks, who afaik are the only ones on the
->> thread actively building tools like this: if ceph-mgr modules could do
->> arbitrary command remote execution on OSD nodes, is that what you
->> would use for blinking LEDs?  How would you wire that up to the rest
->> of your stack?
->
-> So, in "our" world, we have Salt minions for remote execution
-> everywhere.
->
-> If Ceph requires an additional remote execution channel, aren't we
-> rebuilding work that's part of both Salt, Ansible, Puppet, ...?
->
-> The advantage of having a ceph remote agent is most prominent if you
-> view ceph as an isolated distributed system.
->
->
-> Regards,
->     Lars
->
-> --
-> SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
-> "Experience is the name everyone gives to their mistakes." -- Oscar Wilde
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+    collection_list_handle_t cookie;
 
+in Objecter::NListContext, which is defined as
 
+typedef hobject_t collection_list_handle_t;
 
--- 
-Jeff Applewhite
-Principal Product Manager
+In principle, we could use the hobject_t to iterater over the whole pool, 
+but the mapping onto PGs is fragmented when sortbitwise isn't set, so we 
+can't really remove this until we drop support for pre-jewel clusters and 
+!sortbitwise in the client.
+
+>  - Is entries order guaranteed within the chunk? E.g., if I know that
+> the last cookie was C, and the last object we saw was O, can we
+> request C again, and skip to object O and not miss any entries created
+> before original operation started? (it is ok to miss on entries
+> created after original operation started, as we're going to get these
+> via separate log)
+
+The OSD sets C either as hobject_t::get_max() (end of pg) or the next 
+object that it didn't return as part of the result set.  If you are 
+listing objects and return A,B,C and D is the 'next', and before you 
+continue a C+1 is created, you'll "miss" that, but that's generally okay 
+since it was creating during (not before) you were listing.
+
+>  - is there any other field that we need to keep for the marker other
+> than these two?
+
+The hobject_t alone should be enough.  When you set the marker, just 
+calculate current_pg from that.  That means that getting/setting the 
+marker won't work properly for non-sortbitwise OSDs, but I think that's 
+okay--starting with kraken we *require* that sortbitwise is set before 
+allowing new OSDs to start, so a jewel is the last version that can ever 
+have !sortbitwise.  You can put a check in rgw that verifies that the 
+flag is set before starting...
+
+>  - what to do with the old object listing api? the code internally
+> defaults to using it, so if implementing seek only for nobjects it
+> won't work by default. I'm not sure we want to implement it for the
+> legacy listing infrastructure.
+
+Hmm... I think we should implement it for the non-"n" variant too (I 
+don't think it's necessarily legacy; users may be enumerating 
+within a namespace).
+
+sage
