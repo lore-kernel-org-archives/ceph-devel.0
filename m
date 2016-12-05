@@ -1,33 +1,106 @@
-From: Noah Watkins <noahwatkins@gmail.com>
-Subject: Re: Computation in the storage
-Date: Sun, 4 Dec 2016 15:02:13 -0800
-Message-ID: <CAB2gnbVn0U_G12L8XV=hbznB2i_TMo40TpC5cVzJZKOr_MAQ7Q@mail.gmail.com>
-References: <26283_1480676624_58415510_26283_122_1_EBBC07637B509B40B2E594A11E62C54F022DA808@OPEXCLILM32.corporate.adroot.infra.ftgroup>
- <d8129d7a-af37-ad74-38c8-f5a9d59f183b@suse.de> <CAF-wwdHPXaX3fe+dk9ovdAfc00N5xQrzj2TaRAuBOjH77L4yDg@mail.gmail.com>
- <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH] ceph: don't set req->r_locked_dir in ceph_d_revalidate
+Date: Mon, 5 Dec 2016 10:28:20 +0800
+Message-ID: <415F6BA5-3FA3-45FD-A709-C438B4EACE3C@redhat.com>
+References: <1480697536-10107-1-git-send-email-jlayton@redhat.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.1 \(3251\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f54.google.com ([209.85.218.54]:34101 "EHLO
-        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750979AbcLDXCP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Dec 2016 18:02:15 -0500
-Received: by mail-oi0-f54.google.com with SMTP id y198so322362306oia.1
-        for <ceph-devel@vger.kernel.org>; Sun, 04 Dec 2016 15:02:14 -0800 (PST)
-In-Reply-To: <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com>
+Received: from mx1.redhat.com ([209.132.183.28]:60870 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751075AbcLEC21 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 4 Dec 2016 21:28:27 -0500
+In-Reply-To: <1480697536-10107-1-git-send-email-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
-Cc: Brad Hubbard <bhubbard@redhat.com>, Joao Eduardo Luis <joao@suse.de>, "nebil.benmabrouk@orange.com" <nebil.benmabrouk@orange.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jeff Layton <jlayton@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, donatas.abraitis@gmail.com, viro@zeniv.linux.org.uk
 
-On Fri, Dec 2, 2016 at 3:04 PM, Kamble, Nitin A
-<Nitin.Kamble@teradata.com> wrote:
->
-> Is anybody using real RADOS object classes on ceph clusters? Any of them on github?
-> I would like to look at some of the real world examples if it is there.
-> And more documentation of this feature would definitely help too.
 
-We use object classes [0] for a distributed shared log [1] on Ceph.
+> On 3 Dec 2016, at 00:52, Jeff Layton <jlayton@redhat.com> wrote:
+> 
+> This function sets req->r_locked_dir which is supposed to indicate to
+> ceph_fill_trace that the parent's i_rwsem is locked for write.
+> Unfortunately, there is no guarantee that the dir will be locked when
+> d_revalidate is called, so we really don't want ceph_fill_trace to do
+> any dcache manipulation from this context. Clear req->r_locked_dir since
+> it's clearly not safe to do that.
+> 
+> What we really want to know with d_revalidate is whether the dentry
+> still points to the same inode. ceph_fill_trace installs a pointer to
+> the inode in req->r_target_inode, so we can just compare that to
+> d_inode(dentry) to see if it's the same one after the lookup.
+> 
+> Also, since we aren't generally interested in the parent here, we can
+> switch to using a GETATTR to hint that to the MDS, which also means that
+> we only need to reserve one cap.
+> 
+> Finally, just remove the d_unhashed check. That's really outside the
+> purview of a filesystem's d_revalidate. If the thing became unhashed
+> while we're checking it, then that's up to the VFS to handle anyway.
+> 
+> Fixes: 200fd27c8fa2 (ceph: use lookup request to revalidate dentry)
+> Reported-by: Donatas Abraitis <donatas.abraitis@gmail.com>
+> Cc: stable@vger.kernel.org # v4.6+
+> Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> ---
+> fs/ceph/dir.c | 24 ++++++++++++++----------
+> 1 file changed, 14 insertions(+), 10 deletions(-)
+> 
+> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> index 78180d151730..a594c7879cc2 100644
+> --- a/fs/ceph/dir.c
+> +++ b/fs/ceph/dir.c
+> @@ -1261,26 +1261,30 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
+> 			return -ECHILD;
+> 
+> 		op = ceph_snap(dir) == CEPH_SNAPDIR ?
+> -			CEPH_MDS_OP_LOOKUPSNAP : CEPH_MDS_OP_LOOKUP;
+> +			CEPH_MDS_OP_LOOKUPSNAP : CEPH_MDS_OP_GETATTR;
+> 		req = ceph_mdsc_create_request(mdsc, op, USE_ANY_MDS);
+> 		if (!IS_ERR(req)) {
+> 			req->r_dentry = dget(dentry);
+> -			req->r_num_caps = 2;
+> +			req->r_num_caps = op == CEPH_MDS_OP_GETATTR ? 1 : 2;
+> 
+> 			mask = CEPH_STAT_CAP_INODE | CEPH_CAP_AUTH_SHARED;
+> 			if (ceph_security_xattr_wanted(dir))
+> 				mask |= CEPH_CAP_XATTR_SHARED;
+> 			req->r_args.getattr.mask = mask;
+> 
+> -			req->r_locked_dir = dir;
+> 			err = ceph_mdsc_do_request(mdsc, NULL, req);
+> -			if (err == 0 || err == -ENOENT) {
+> -				if (dentry == req->r_dentry) {
+> -					valid = !d_unhashed(dentry);
+> -				} else {
+> -					d_invalidate(req->r_dentry);
+> -					err = -EAGAIN;
+> -				}
+> +			switch (err) {
+> +			case 0:
+> +				if (d_really_is_positive(dentry) &&
+> +				    d_inode(dentry) == req->r_target_inode)
+> +					valid = 1;
+> +				break;
+> +			case -ENOENT:
+> +				if (d_really_is_negative(dentry))
+> +					valid = 1;
+> +				/* Fallthrough */
+> +			default:
+> +				break;
+> 			}
+> 			ceph_mdsc_put_request(req);
+> 			dout("d_revalidate %p lookup result=%d\n”,
 
-[0]: https://github.com/noahdesu/ceph/blob/zlog/jewel/src/cls/zlog/cls_zlog.cc
-[1]: https://github.com/noahdesu/zlog
+Looks good. As we discussed, please write a patch that guarantees safe access to d_parent when parent is not locked.
+(__choose_mds, build_dentry_path and probably ceph_encode_dentry_release)
+
+Regards
+Yan, Zheng
+
+-- 
+> 2.7.4
+> 
+
