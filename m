@@ -1,98 +1,85 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: [ceph-users] stalls caused by scrub on jewel
-Date: Tue, 6 Dec 2016 17:05:23 +0100
-Message-ID: <0a5f96b1-9013-7365-8b79-b9b38938fe6b@digiware.nl>
-References: <alpine.DEB.2.11.1611152232260.2650@piezo.us.to>
- <CABZ+qqmyyGrvLRT2zRMn5_RXWPeKyiKaPXfJRZ3qCY5v13-m_Q@mail.gmail.com>
- <alpine.DEB.2.11.1612061415400.4753@piezo.novalocal>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bluestore with ZS
+Date: Tue, 6 Dec 2016 15:56:22 +0000
+Message-ID: <BY2PR02MB396443BEF29616A50E014D6F4820@BY2PR02MB396.namprd02.prod.outlook.com>
+References: <BY2PR02MB39644AE8ABB2551CC39A46AF4820@BY2PR02MB396.namprd02.prod.outlook.com>
+ <ca516a6a-0089-2b7c-95aa-3a21de181f35@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:34270 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751570AbcLFQF2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 6 Dec 2016 11:05:28 -0500
-In-Reply-To: <alpine.DEB.2.11.1612061415400.4753@piezo.novalocal>
+Received: from mail-dm3nam03on0052.outbound.protection.outlook.com ([104.47.41.52]:29734
+        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1753663AbcLFQLF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 6 Dec 2016 11:11:05 -0500
+In-Reply-To: <ca516a6a-0089-2b7c-95aa-3a21de181f35@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Dan van der Ster <dan@vanderster.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 6-12-2016 15:16, Sage Weil wrote:
-> On Tue, 6 Dec 2016, Dan van der Ster wrote:
->> Hi Sage,
->>
->> Could you please clarify: do we need to set nodeep-scrub also, or does
->> this somehow only affect the (shallow) scrub?
->>
->> (Note that deep scrubs will start when the deep_scrub_interval has
->> passed, even with noscrub set).
-> 
-> Hmm, I thought that 'noscrub' would also stop deep scrubs, but I just 
-> looked at the code and I was wrong.  So you should set nodeep-scrub too!
+No Problem , take your time..Hopefully, by then we can give you stable mult=
+i_kv version.
 
-Yup, as I too had to find in the code
+-----Original Message-----
+From: Mark Nelson [mailto:mnelson@redhat.com]=20
+Sent: Tuesday, December 06, 2016 7:54 AM
+To: Somnath Roy
+Cc: ceph-devel
+Subject: Re: Bluestore with ZS
 
-And it is even worse... You are very likely to get a stampeding horde of
-OSDs going into deepscrub one after the other. This rendering your
-cluster unworkable. This because very likely all timers more or less
-will have the same expire.
+Excellent Somnath!
 
-It has hit us too.
-On a friday just before I was packing my bag... I was home just a tid
-bit late that day. :(
+I will attempt to test this today, though I also am going to be looking at =
+the new RBD erasure coding stuff so it might be a day or two.
 
---WjW
+Mark
 
-
-> 
-> sage
-> 
-> 
->>
->> Cheers, Dan
->>
->>
->> On Tue, Nov 15, 2016 at 11:35 PM, Sage Weil <sweil@redhat.com> wrote:
->>> Hi everyone,
->>>
->>> There was a regression in jewel that can trigger long OSD stalls during
->>> scrub.  How long the stalls are depends on how many objects are in your
->>> PGs, how fast your storage device is, and what is cached, but in at least
->>> one case they were long enough that the OSD internal heartbeat check
->>> failed and it committed suicide (120 seconds).
->>>
->>> The workaround for now is to simply
->>>
->>>  ceph osd set noscrub
->>>
->>> as the bug is only triggered by scrub.  A fix is being tested and will be
->>> available shortly.
->>>
->>> If you've seen any kind of weird latencies or slow requests on jewel, I
->>> suggest setting noscrub and seeing if they go away!
->>>
->>> The tracker bug is
->>>
->>>  http://tracker.ceph.com/issues/17859
->>>
->>> Big thanks to Yoann Moulin for helping track this down!
->>>
->>> sage
->>> _______________________________________________
->>> ceph-users mailing list
->>> ceph-users@lists.ceph.com
->>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+On 12/06/2016 02:33 AM, Somnath Roy wrote:
+> Mark,
+> Please find the Bluestore + ZS integrated code synced with today's master=
+ in the following location.
+>
+> https://github.com/somnathr/ceph/tree/wip-bluestore-zs
+>
+> As discussed in the standup , this is with single kv_sync_thread.
+> I am still cleaning up multi kv_sync_thread  version and will send out a =
+pull request for Sage to review hopefully by tomorrow.
+>
+> Here is the steps you need to follow to use this.
+>
+> 1.  ./do_cmake.sh -DWITH_ZS=3D1
+>
+> 2. make and make install
+>
+> 3. In the ceph.conf , use the following option.
+>
+> enable experimental unrecoverable data corrupting features =3D bluestore=
+=20
+> zs rocksdb bluestore_sync_submit_transaction =3D false=20
+> bluestore_kvbackend=3Dzs
+>
+> With smaller volumes you will be seeing rocks outperforming ZS , but, for=
+ bigger volumes ZS is catching up fast.
+> The code (shim layer and thus BlueStore)  is no way optimally using ZS ye=
+t and we are in process of optimizing it further (with multi kv_sync, more =
+batching etc. etc.).
+> Will keep community posted on this.
+>
+> Thanks & Regards
+> Somnath
+>
+>
+>
+> PLEASE NOTE: The information contained in this electronic mail message is=
+ intended only for the use of the designated recipient(s) named above. If t=
+he reader of this message is not the intended recipient, you are hereby not=
+ified that you have received this message in error and that any review, dis=
+semination, distribution, or copying of this message is strictly prohibited=
+. If you have received this communication in error, please notify the sende=
+r by telephone or e-mail (as shown above) immediately and destroy any and a=
+ll copies of this message in your possession (whether hard copies or electr=
+onically stored copies).
+>
