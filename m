@@ -1,146 +1,63 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: disk enclosure LEDs
-Date: Tue, 6 Dec 2016 02:18:51 +0000
-Message-ID: <BLUPR0201MB1524119A4001F7F3B7451333E8820@BLUPR0201MB1524.namprd02.prod.outlook.com>
-References: <20161202092301.f65vgyjrssujfyrj@suse.de>
- <alpine.DEB.2.11.1612021417080.22800@piezo.novalocal>
- <BLUPR0201MB1524A241C45983E2CEF8844DE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <be5f1672179b4d41b2692a02fe71a7cd@Ex2013-MBX2.supermicro.com>
- <BLUPR0201MB1524F8910A0625ECACC4B29AE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <CALe9h7fJOM2vrxAoi+=xdc01z0kkjpH8048bFe1wF1pBw1yVsQ@mail.gmail.com>
- <20161205125836.lxcbv5ai5qdavitr@suse.de>
- <CALe9h7esr-SwWis58JLKnjCF0y2Rcj3116nNVKNdrrqBPRW-0A@mail.gmail.com>
- <865BAEF1-BA1D-44E7-A096-14A9FAB84A79@quantum.com>
- <BLUPR0201MB1524F23AC0ECA14A043F2BD5E8830@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <20161205184105.3agjcjy4ufb7smzg@suse.de>
- <CALe9h7caW+KBV5r7P5Ps_1NFtfhTmL=B=MDLN9822q7EqaHrZA@mail.gmail.com>
- <BLUPR0201MB1524C8DDCDD501A02C072675E8830@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <CALe9h7cNq+48y5rMtTedBBKBy_w_NUV2h5gdMuLzUmmv9foORg@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Bluestore with ZS
+Date: Tue, 6 Dec 2016 08:33:38 +0000
+Message-ID: <BY2PR02MB39644AE8ABB2551CC39A46AF4820@BY2PR02MB396.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam01on0048.outbound.protection.outlook.com ([104.47.34.48]:35714
-        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+Received: from mail-by2nam03on0057.outbound.protection.outlook.com ([104.47.42.57]:36320
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751378AbcLFCSy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 5 Dec 2016 21:18:54 -0500
-In-Reply-To: <CALe9h7cNq+48y5rMtTedBBKBy_w_NUV2h5gdMuLzUmmv9foORg@mail.gmail.com>
+        id S1752135AbcLFItW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 6 Dec 2016 03:49:22 -0500
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Lars Marowsky-Bree <lmb@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBKb2huIFNwcmF5IFttYWlsdG86
-anNwcmF5QHJlZGhhdC5jb21dDQo+IFNlbnQ6IE1vbmRheSwgRGVjZW1iZXIgMDUsIDIwMTYgNDoy
-MCBQTQ0KPiBUbzogQWxsZW4gU2FtdWVscyA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT4NCj4g
-Q2M6IExhcnMgTWFyb3dza3ktQnJlZSA8bG1iQHN1c2UuY29tPjsgQ2VwaCBEZXZlbG9wbWVudCA8
-Y2VwaC0NCj4gZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KPiBTdWJqZWN0OiBSZTogZGlzayBlbmNs
-b3N1cmUgTEVEcw0KPiANCj4gT24gTW9uLCBEZWMgNSwgMjAxNiBhdCAxMDo1MCBQTSwgQWxsZW4g
-U2FtdWVscw0KPiA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT4gd3JvdGU6DQo+ID4+IC0tLS0t
-T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
-ZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gPj4gb3duZXJAdmdlci5rZXJuZWwub3Jn
-XSBPbiBCZWhhbGYgT2YgSm9obiBTcHJheQ0KPiA+PiBTZW50OiBNb25kYXksIERlY2VtYmVyIDA1
-LCAyMDE2IDExOjI4IEFNDQo+ID4+IFRvOiBMYXJzIE1hcm93c2t5LUJyZWUgPGxtYkBzdXNlLmNv
-bT4NCj4gPj4gQ2M6IENlcGggRGV2ZWxvcG1lbnQgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
-Pg0KPiA+PiBTdWJqZWN0OiBSZTogZGlzayBlbmNsb3N1cmUgTEVEcw0KPiA+Pg0KPiA+PiBPbiBN
-b24sIERlYyA1LCAyMDE2IGF0IDY6NDEgUE0sIExhcnMgTWFyb3dza3ktQnJlZSA8bG1iQHN1c2Uu
-Y29tPg0KPiA+PiB3cm90ZToNCj4gPj4gPiBPbiAyMDE2LTEyLTA1VDE4OjAyOjA4LCBBbGxlbiBT
-YW11ZWxzIDxBbGxlbi5TYW11ZWxzQHNhbmRpc2suY29tPg0KPiA+PiB3cm90ZToNCj4gPj4gPg0K
-PiA+PiA+PiBJJ20gaW5kaWZmZXJlbnQgdG8gYWdlbnQgdnMuIGFnZW50LWxlc3MuDQo+ID4+ID4+
-DQo+ID4+ID4+IEkgKmJlbGlldmUqIHRoYXQgaGF2aW5nIGEgY2VwaC1wcml2YXRlIGRpc3RyaWJ1
-dGlvbiBpcw0KPiA+PiA+PiBlYXNpZXIvc2ltcGxlci9tb3JlDQo+ID4+IHJlbGlhYmxlIHRoYW4g
-dHJ5aW5nIHRvIGxheWVyIG92ZXIgc29tZSBvdGhlciBzeXN0ZW0gKGFuc2libGUsIHNhbHQsDQo+
-ID4+IGV0Yy4pIFtpLmUuLCBJIGFncmVlIHdpdGggSm9obl0uIEJ1dCB0aGlzIGlzbid0IGEgc3Ry
-b25nbHkgaGVsZCBiZWxpZWYuDQo+ID4+ID4+DQo+ID4+ID4+IEknbSAqbWV0YXBoeXNpY2FsbHkg
-Y2VydGFpbiogdGhhdCB3aGF0ZXZlciBkaXN0cmlidXRpb24gc2NoZW1lIGlzDQo+ID4+IGFkb3B0
-ZWQgdGhhdCBpdCBub3QgYmUgb3B0aW9uYWwuIEEgbGFyZ2UgYmFycmllciB0byBhZG9wdGlvbiBv
-ZiBDZXBoDQo+ID4+IHRvZGF5IGlzIHRoZSBsYWNrIG9mICJtaWRkbGUtd2FyZSIgdGhhdCBoYW5k
-bGVzIGluZnJlcXVlbnQNCj4gPj4gb3BlcmF0aW9uYWwgZXZlbnRzIChub2RlIGFkZGl0aW9uL3Jl
-bW92YWwsIG1lZGlhIGZhaWx1cmUvcmVjb3ZlcnksDQo+ID4+IG1pZ3JhdGlvbiwgZXRjLikuIElN
-TywgdGhpcyBtaWRkbGUtIHdhcmUgd2lsbCBoYXZlIHRvIGJlIGEgc3RhbmRhcmQNCj4gPj4gcGFy
-dCBvZiBDZXBoLCBpLmUuLCBmdWxseSBmdW5jdGlvbmFsICJvdXQgb2YgdGhlIGJveCIgd2l0aG91
-dA0KPiA+PiBzaXRlLXNwZWNpZmljIHR3aWRkbGluZyAodGhvdWdoIGhhdmluZyBhIG1lY2hhbmlz
-bSB0byBpbnNlcnQgc2l0ZS1zcGVjaWZpYw0KPiBzdHVmZiBpcyBmaW5lIHdpdGggbWUsIGl0IGp1
-c3QgY2FuJ3QgYmUgKnJlcXVpcmVkKikuDQo+ID4+ID4+DQo+ID4+ID4+IEluIG15IG1pbmQsIHRo
-ZSBkaXN0cmlidXRpb24gc2NoZW1lIGlzIHRoZSBuZXh0IHN0ZXAgaW4gdGhlDQo+ID4+ID4+IGV2
-b2x1dGlvbiBvZiBDZXBoLW1nci4gSXQncyB3aGF0J3MgbWlzc2luZyA6KQ0KPiA+PiA+DQo+ID4+
-ID4gSSBzZWUgdGhlIGJlbmVmaXRzIG9mIGhhdmluZyBhIGNlcGgtc3BlY2lmaWMgYWdlbnQgZm9y
-IGhhcmR3YXJlDQo+ID4+ID4gaW50ZXJhY3Rpb24uIEhvd2V2ZXIsIHRoYXQgdGhlbiBzaGlmdHMg
-dGhlIHByb2JsZW0gZm9yDQo+ID4+ID4gYm9vdHN0cmFwcGluZyBzYWlkIENlcGggYWdlbnQuDQo+
-ID4+DQo+ID4+IEJvb3RzdHJhcHBpbmcgd291bGQgYmUgdGhlIHNhbWUgYXMgd2UgYWxyZWFkeSBo
-YXZlIGZvciBpbnN0YWxsaW5nDQo+ID4+IE9TRHMgYW5kIE1EU3MuICBTbyBjZXBoLWRlcGxveS9j
-ZXBoLWFuc2libGUvd2hhdGV2ZXIgbmVlZHMgdG8gYmUNCj4gYWJsZQ0KPiA+PiB0byBkbyB0aGUg
-c2FtZSB0aGluZyBmb3IgdGhlIHBlci1ob3N0IGFnZW50IHRoYXQgaXQgY3VycmVudGx5IGRvZXMN
-Cj4gPj4gZm9yIE9TRHMsIG5vIG92ZXJhbGwgaW5jcmVhc2UgaW4gY29tcGxleGl0eS4NCj4gPj4N
-Cj4gPj4gPiBBbmQgd2hlbiB5b3Ugb3BlbiB0aGUgY2FuIG9mIHdvcm1zIHRoYXQgaXMgc2VydmVy
-IGFkZGl0aW9uL3JlbW92YWwsDQo+ID4+ID4gZXRjIHdlIHN0YXJ0IGhpdHRpbmcgdGhlIHF1ZXN0
-aW9uIG9mIGVpdGhlciBzcGlubmluZyB1cCBhDQo+ID4+ID4gZGlzdHJpYnV0aW9uIG1lY2hhbmlz
-bSBhcyB3ZWxsLg0KPiA+PiA+DQo+ID4+ID4gV2hlbiB3ZSB3YW50IHRvIGxvb2sgYXQgY29udGFp
-bmVyLWl6aW5nIENlcGggaW4gaHlwZXItY29udmVyZ2VkDQo+ID4+ID4gZW52aXJvbm1lbnRzLCB0
-aGlzIGdldHMgZXZlbiB3b3JzZS4NCj4gPj4NCj4gPj4gSSdtIGltYWdpbmluZyB0aGF0IGluIGEg
-Y29udGFpbmVyLXBlci1zZXJ2aWNlIG1vZGVsLCB3aGVyZSBzb21ldGhpbmcNCj4gPj4gZXh0ZXJu
-YWwgaGFzIGNvbmZpZ3VyZWQgdGhlIE9TRCBjb250YWluZXJzIHRvIGhhdmUgYWNjZXNzIHRvIHRo
-ZQ0KPiA+PiBibG9jayBkZXZpY2UgdGhhdCB0aGV5IHdpbGwgcnVuIG9uLCBpdCBkb2Vzbid0IHNl
-ZW0gdW5yZWFzb25hYmxlIHRvDQo+ID4+IGhhdmUgdGhlIHNhbWUgY29uZmlndXJhdGlvbiBwcm9j
-ZXNzIHNldCB1cCB0aGUgY2VwaCBhZ2VudCBjb250YWluZXINCj4gPj4gd2l0aCBhY2Nlc3MgdG8g
-YWxsIHRoZSBPU0QgYmxvY2sgZGV2aWNlcy4gIFdoYXQgYXJlIHlvdXIgdGhvdWdodHMNCj4gPj4g
-YWJvdXQgaG93IHRoaXMgd291bGQgKG9yDQo+ID4+IHdvdWxkbid0KSB3b3JrPw0KPiA+DQo+ID4g
-VGhlIGN1cnJlbnQgT1NEIGRlc2lnbiBpcyBwZXItZHJpdmUgYW5kIG5vdC1yZWxpYWJsZS4gV2Ug
-bmVlZCBhIHBpZWNlIG9mDQo+IHNvZnR3YXJlLCBydW5uaW5nIG9uIHRoZSB0YXJnZXQgc3lzdGVt
-LCB0aGF0J3MgTk9UIHBlci1kcml2ZSBhbmQgTk9UIG5vdC0NCj4gcmVsaWFibGUgKGkuZS4sIHJl
-bGlhYmxlIDopKS4gV2UgbmVlZCB0aGUgbWFuYWdlbWVudCBzeXN0ZW0gdG8gYmUgYWJsZSB0byBk
-aWcNCj4gb3V0IG9mIHRoZSBPU0QncyBzeXN0ZW0gd2h5IGl0IGNyYXNoZWQgLS0gaS5lLiwgcmVh
-ZCBsb2dzIGFuZCBvdGhlciB0eXBlcyBvZg0KPiBzdGF0dXMsIGV0Yy4gSXQncyBwb3NzaWJsZSB0
-byBtdXRhdGUgdGhlIE9TRCB0aGVyZSwgYnV0IEkgZG9uJ3QgdGhpbmsgaXQncyBlYXN5DQo+IG5v
-ciBzb29uLg0KPiANCj4gSSB0aGluayBJJ3ZlIGxvc3QgeW91IHRoZXJlIC0tIHdoYXQncyB0aGUg
-cmVsYXRpb24gYmV0d2VlbiB3aGF0IHlvdSd2ZSBqdXN0DQo+IHNhaWQgYW5kIHRoZSBpc3N1ZSBv
-ZiBjb250YWluZXJpc2F0aW9uPw0KDQpQZXJoYXBzIG5vbmUsIGp1c3QgdGhhdCB0aGUgY29udGFp
-bmVyIHdvcmxkIHRlbmRzIHRvIHdhbnQgdG8gaWdub3JlIGJveCBib3VuZGFyaWVzLCBzdG9yYWdl
-IG1hbmFnZW1lbnQgZG9lc24ndCBoYXZlIHRoYXQgbHV4dXJ5Lg0KDQo+IA0KPiBKb2huDQo+IA0K
-PiA+Pg0KPiA+PiA+DQo+ID4+ID4gZS5nLiwgdGhlIGNlcGhhbG9wb2QgdHVybnMgaW50byBhIGNl
-cGhhbG9ibG9iLiAgKFNvcnJ5LiBJJ20NCj4gPj4gPiB0ZXJyaWJsZSB3aXRoIHB1bnMuKQ0KPiA+
-PiA+DQo+ID4+ID4gSSBuZWVkIGEgbWVjaGFuaXNtIGZvciBpbnRlcmFjdGluZyB3aXRoIGVuY2xv
-c3VyZXMgKHRvIHN0aWNrIHdpdGgNCj4gPj4gPiB0aGUgZXhhbXBsZSksIGJ1dCBJIGRvbid0IG5l
-ZWQgaXQgdG8gYmUgcGFydCBvZiBDZXBoLCBzaW5jZSBJIG5lZWQNCj4gPj4gPiBpdCBmb3Igb3Ro
-ZXIgcGFydHMgb2YgbXkgaW5mcmFzdHJ1Y3R1cmUgdG9vIGFueXdheS4NCj4gPj4gPg0KPiA+PiA+
-DQo+ID4+ID4gSWYgaXQncyBwYXJ0IG9mIENlcGgsIEkgZW5kIHVwIHdyaXRpbmcgYSBzcGVjaWFs
-IGNhc2UgZm9yIENlcGguDQo+ID4+DQo+ID4+IEkgdGhpbmsgdGhpcyB3b3VsZCBjZWFzZSB0byBi
-ZSBhIHByb2JsZW0gZm9yIHlvdSBpZiB3ZSBqdXN0IGhhZCBhDQo+ID4+IGZsYWcgaW4gQ2VwaCB0
-byBkaXNhYmxlIGl0cyBvd24gc21hcnRtb250b29scyB0eXBlIHN0dWZmPyAgVGhhdCB3YXkNCj4g
-Pj4gd2hlbiBzb21lb25lIHdhcyB1c2luZyBhbiBleHRlcm5hbCB0b29sIHRoZXJlIHdvdWxkIGJl
-IG5vIGNvbmZsaWN0Lg0KPiA+Pg0KPiA+PiBUaGVyZSBpcyBzb21lIGR1cGxpY2F0aW9uIG9mIGVm
-Zm9ydCwgYnV0IEkgZG9uJ3QgdGhpbmsgdGhhdCdzDQo+ID4+IGludHJpbnNpY2FsbHkNCj4gPj4g
-cHJvYmxlbWF0aWM6IEkgcHJlZGljdCB0aGF0IHdlJ2xsIGFsd2F5cyBoYXZlIG1hbnkgdXNlcnMg
-d2hvIGRvIG5vdA0KPiA+PiB0YWtlIHVwIGFueSBvZiB0aGUgZXh0ZXJuYWwgdG9vbHMgYW5kIHdp
-bGwgYmVuZWZpdCBmcm9tIHRoZSBidWlsdC1pbiBDZXBoDQo+IGJpdHMuDQo+ID4+DQo+ID4+ID4g
-QW5kIEkgbmVlZCBhIHdheSB0byBoYW5kbGUgaXQgd2hlbiBDZXBoIGl0c2VsZiBpc24ndCBhcm91
-bmQgeWV0Ow0KPiA+PiA+IGhvdyBkbyBJIGJsaW5rIGFuIGVuY2xvc3VyZSB0aGF0IHJlY2VpdmVz
-IGEgbmV3IGRpc2s/IEFoLCBJDQo+ID4+ID4gcHJlLXJlZ2lzdGVyIGEgZ2l2ZW4gZW5jbG9zdXJl
-IHdpdGggQ2VwaCwgYmVmb3JlIGFuIE9TRCBpcyBldmVuDQo+ID4+ID4gY3JlYXRlZC4gSSBrbm93
-IENlcGggaGFzIG1hbnkgdGVudGFjbGVzLCBidXQgLi4uIDstKQ0KPiA+Pg0KPiA+PiBXaGlsZSBh
-dCBydW50aW1lIHdlIHNob3VsZG4ndCBoYXZlIHR3byBhZ2VudHMgY29tcGV0aW5nIHRvIG1hbmFn
-ZSB0aGUNCj4gPj4gc2FtZSBkZXZpY2UsIEkgdGhpbmsgaXQgaXMgcmVhc29uYWJsZSB0byBoYXZl
-IGEgc2VwYXJhdGUgcGllY2Ugb2YNCj4gPj4gc29mdHdhcmUgdGhhdCBkb2VzIGluc3RhbGxhdGlv
-biB2cy4gZG9lcyB0aGUgb25nb2luZyBtb25pdG9yaW5nLiAgV2UNCj4gPj4gc2hvdWxkbid0IGxl
-dCB0aGUgY29uc3RyYWludHMgb3ZlciBpbnN0YWxsYXRpb24gKGVzcGVjaWFsbHkgdGhlIG5lZWQN
-Cj4gPj4gdG8gb3BlcmF0ZSBvbiBjZXBobGVzcw0KPiA+PiBtYWNoaW5lcykgcmVzdHJpY3QgaG93
-IHdlIG1hbmFnZSBzeXN0ZW1zIHRocm91Z2ggdGhlaXIgbGlmZSBjeWNsZXMuDQo+ID4+IEFnYWlu
-LCBJIGRvbid0IHRoaW5rIHRoZSBidWlsdC1pbiBDZXBoIGZ1bmN0aW9uYWxpdHkgaXMgbXV0dWFs
-bHkNCj4gPj4gZXhjbHVzaXZlIHdpdGggaGF2aW5nIGEgZ29vZCBleHRlcm5hbCBpbnN0YWxsYXRp
-b24gdG9vbCB0aGF0IHRvdWNoZXMgc29tZQ0KPiBvZiB0aGUgc2FtZSBmdW5jdGlvbmFsaXR5Lg0K
-PiA+Pg0KPiA+PiBKb2huDQo+ID4+DQo+ID4+DQo+ID4+ID4NCj4gPj4gPg0KPiA+PiA+IFJlZ2Fy
-ZHMsDQo+ID4+ID4gICAgIExhcnMNCj4gPj4gPg0KPiA+PiA+IC0tDQo+ID4+ID4gU1VTRSBMaW51
-eCBHbWJILCBHRjogRmVsaXggSW1lbmTDtnJmZmVyLCBKYW5lIFNtaXRoYXJkLCBHcmFoYW0NCj4g
-Pj4gPiBOb3J0b24sIEhSQiAyMTI4NCAoQUcgTsO8cm5iZXJnKSAiRXhwZXJpZW5jZSBpcyB0aGUg
-bmFtZSBldmVyeW9uZQ0KPiA+PiA+IGdpdmVzIHRvIHRoZWlyIG1pc3Rha2VzLiIgLS0gT3NjYXIg
-V2lsZGUNCj4gPj4gPg0KPiA+PiA+IC0tDQo+ID4+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlz
-IGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+ID4+ID4gaW4g
-dGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZQ0K
-PiA+PiBtYWpvcmRvbW8NCj4gPj4gPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
-am9yZG9tby1pbmZvLmh0bWwNCj4gPj4gLS0NCj4gPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlz
-IGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+ID4+IGluIHRo
-ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUNCj4g
-bWFqb3Jkb21vDQo+ID4+IGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
-aW5mby5odG1sDQo=
+Mark,
+Please find the Bluestore + ZS integrated code synced with today's master i=
+n the following location.
+
+https://github.com/somnathr/ceph/tree/wip-bluestore-zs
+
+As discussed in the standup , this is with single kv_sync_thread.
+I am still cleaning up multi kv_sync_thread  version and will send out a pu=
+ll request for Sage to review hopefully by tomorrow.
+
+Here is the steps you need to follow to use this.
+
+1.  ./do_cmake.sh -DWITH_ZS=3D1
+
+2. make and make install
+
+3. In the ceph.conf , use the following option.
+
+enable experimental unrecoverable data corrupting features =3D bluestore zs=
+ rocksdb
+bluestore_sync_submit_transaction =3D false
+bluestore_kvbackend=3Dzs
+
+With smaller volumes you will be seeing rocks outperforming ZS , but, for b=
+igger volumes ZS is catching up fast.
+The code (shim layer and thus BlueStore)  is no way optimally using ZS yet =
+and we are in process of optimizing it further (with multi kv_sync, more ba=
+tching etc. etc.).
+Will keep community posted on this.
+
+Thanks & Regards
+Somnath
+
+
+
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
