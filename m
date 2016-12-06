@@ -1,64 +1,65 @@
-From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
-Subject: Re: stalls caused by scrub on jewel
-Date: Tue, 6 Dec 2016 11:09:33 +0100
-Message-ID: <CABZ+qqmyyGrvLRT2zRMn5_RXWPeKyiKaPXfJRZ3qCY5v13-m_Q@mail.gmail.com>
-References: <alpine.DEB.2.11.1611152232260.2650@piezo.us.to>
+From: David Disseldorp <ddiss@suse.de>
+Subject: Re: [PATCH] Ceph RADOS cluster mutex helper for Samba CTDB
+Date: Tue, 6 Dec 2016 13:14:04 +0100
+Message-ID: <20161206131404.38f737d0@suse.de>
+References: <20161201151715.019228c1@suse.de>
+        <CAJ+X7mTkBLQDYb+r9LELQe-sqfG_4YkQ9HbkDFAp70cPp7V8zA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1611152232260.2650-ie3vfNGmdjePKud3HExfWg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:37019 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751643AbcLFMO6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 6 Dec 2016 07:14:58 -0500
+In-Reply-To: <CAJ+X7mTkBLQDYb+r9LELQe-sqfG_4YkQ9HbkDFAp70cPp7V8zA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Amitay Isaacs <amitay@gmail.com>
+Cc: Samba Technical <samba-technical@lists.samba.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+On Tue, 6 Dec 2016 18:58:41 +1100, Amitay Isaacs wrote:
 
-Could you please clarify: do we need to set nodeep-scrub also, or does
-this somehow only affect the (shallow) scrub?
+> On Fri, Dec 2, 2016 at 1:17 AM, David Disseldorp <ddiss@suse.de> wrote:
+> 
+> > Hi,
+> >
+> > The attached patch-set implements a cluster mutex helper for Samba CTDB
+> > using Ceph librados.
+> >
+> > ctdb_mutex_ceph_rados_helper_lock can be used as a recovery lock provider
+> > for CTDB.  When configured, split brain avoidance during CTDB recovery
+> > will be handled using locks against an object located in a Ceph RADOS
+> > pool.
+> >
+> > I've also attached a standalone test script - @Martin: does this belong
+> > in the ctdb test suite, or can I just commit it as a standalone test?
+> > It has a few non-standard dependencies: a running Ceph cluster, the
+> > rados and jq binaries.
+> >
+> > Feedback appreciated.
+> >
+> >  
+> This code does not belong in ctdb/tools.  You can move it to an appropriate
+> directory in ctdb/utils.
+> 
+> Please include the test code also as part of the commit.  Someone with
+> ceph-rados setup should be able to run this test.
+> I would appreciate if you can add few comments in the test script
+> describing the requirements and how to run the test.
 
-(Note that deep scrubs will start when the deep_scrub_interval has
-passed, even with noscrub set).
+Thanks for the feedback, Amitay. Please find a v2 patchset attached,
+with the following changes:
+- move ctdb_mutex_ceph_rados_helper under ctdb/utils/ceph
+- add test_ceph_rados_reclock.sh and document usage
 
-Cheers, Dan
+Cheers, David
 
+--
 
-On Tue, Nov 15, 2016 at 11:35 PM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> Hi everyone,
->
-> There was a regression in jewel that can trigger long OSD stalls during
-> scrub.  How long the stalls are depends on how many objects are in your
-> PGs, how fast your storage device is, and what is cached, but in at least
-> one case they were long enough that the OSD internal heartbeat check
-> failed and it committed suicide (120 seconds).
->
-> The workaround for now is to simply
->
->  ceph osd set noscrub
->
-> as the bug is only triggered by scrub.  A fix is being tested and will be
-> available shortly.
->
-> If you've seen any kind of weird latencies or slow requests on jewel, I
-> suggest setting noscrub and seeing if they go away!
->
-> The tracker bug is
->
->  http://tracker.ceph.com/issues/17859
->
-> Big thanks to Yoann Moulin for helping track this down!
->
-> sage
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+ ctdb/doc/Makefile                             |   3 +-
+ ctdb/doc/ctdb_mutex_ceph_rados_helper.7.xml   |  90 +++++
+ .../utils/ceph/ctdb_mutex_ceph_rados_helper.c | 334 ++++++++++++++++++
+ ctdb/utils/ceph/test_ceph_rados_reclock.sh    | 151 ++++++++
+ ctdb/wscript                                  |  19 +
+ 5 files changed, 596 insertions(+), 1 deletion(-)
