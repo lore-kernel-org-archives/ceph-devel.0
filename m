@@ -1,146 +1,146 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: disk enclosure LEDs
-Date: Tue, 6 Dec 2016 00:20:00 +0000
-Message-ID: <CALe9h7cNq+48y5rMtTedBBKBy_w_NUV2h5gdMuLzUmmv9foORg@mail.gmail.com>
-References: <20161202092301.f65vgyjrssujfyrj@suse.de> <alpine.DEB.2.11.1612021417080.22800@piezo.novalocal>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: disk enclosure LEDs
+Date: Tue, 6 Dec 2016 02:18:51 +0000
+Message-ID: <BLUPR0201MB1524119A4001F7F3B7451333E8820@BLUPR0201MB1524.namprd02.prod.outlook.com>
+References: <20161202092301.f65vgyjrssujfyrj@suse.de>
+ <alpine.DEB.2.11.1612021417080.22800@piezo.novalocal>
  <BLUPR0201MB1524A241C45983E2CEF8844DE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
  <be5f1672179b4d41b2692a02fe71a7cd@Ex2013-MBX2.supermicro.com>
  <BLUPR0201MB1524F8910A0625ECACC4B29AE88E0@BLUPR0201MB1524.namprd02.prod.outlook.com>
  <CALe9h7fJOM2vrxAoi+=xdc01z0kkjpH8048bFe1wF1pBw1yVsQ@mail.gmail.com>
- <20161205125836.lxcbv5ai5qdavitr@suse.de> <CALe9h7esr-SwWis58JLKnjCF0y2Rcj3116nNVKNdrrqBPRW-0A@mail.gmail.com>
- <865BAEF1-BA1D-44E7-A096-14A9FAB84A79@quantum.com> <BLUPR0201MB1524F23AC0ECA14A043F2BD5E8830@BLUPR0201MB1524.namprd02.prod.outlook.com>
- <20161205184105.3agjcjy4ufb7smzg@suse.de> <CALe9h7caW+KBV5r7P5Ps_1NFtfhTmL=B=MDLN9822q7EqaHrZA@mail.gmail.com>
+ <20161205125836.lxcbv5ai5qdavitr@suse.de>
+ <CALe9h7esr-SwWis58JLKnjCF0y2Rcj3116nNVKNdrrqBPRW-0A@mail.gmail.com>
+ <865BAEF1-BA1D-44E7-A096-14A9FAB84A79@quantum.com>
+ <BLUPR0201MB1524F23AC0ECA14A043F2BD5E8830@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <20161205184105.3agjcjy4ufb7smzg@suse.de>
+ <CALe9h7caW+KBV5r7P5Ps_1NFtfhTmL=B=MDLN9822q7EqaHrZA@mail.gmail.com>
  <BLUPR0201MB1524C8DDCDD501A02C072675E8830@BLUPR0201MB1524.namprd02.prod.outlook.com>
+ <CALe9h7cNq+48y5rMtTedBBKBy_w_NUV2h5gdMuLzUmmv9foORg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f178.google.com ([209.85.220.178]:36290 "EHLO
-        mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751696AbcLFAUW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Dec 2016 19:20:22 -0500
-Received: by mail-qk0-f178.google.com with SMTP id n21so364491081qka.3
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Dec 2016 16:20:21 -0800 (PST)
-In-Reply-To: <BLUPR0201MB1524C8DDCDD501A02C072675E8830@BLUPR0201MB1524.namprd02.prod.outlook.com>
+Received: from mail-by2nam01on0048.outbound.protection.outlook.com ([104.47.34.48]:35714
+        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751378AbcLFCSy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 5 Dec 2016 21:18:54 -0500
+In-Reply-To: <CALe9h7cNq+48y5rMtTedBBKBy_w_NUV2h5gdMuLzUmmv9foORg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>
+To: John Spray <jspray@redhat.com>
 Cc: Lars Marowsky-Bree <lmb@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Dec 5, 2016 at 10:50 PM, Allen Samuels
-<Allen.Samuels@sandisk.com> wrote:
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
->> owner@vger.kernel.org] On Behalf Of John Spray
->> Sent: Monday, December 05, 2016 11:28 AM
->> To: Lars Marowsky-Bree <lmb@suse.com>
->> Cc: Ceph Development <ceph-devel@vger.kernel.org>
->> Subject: Re: disk enclosure LEDs
->>
->> On Mon, Dec 5, 2016 at 6:41 PM, Lars Marowsky-Bree <lmb@suse.com>
->> wrote:
->> > On 2016-12-05T18:02:08, Allen Samuels <Allen.Samuels@sandisk.com>
->> wrote:
->> >
->> >> I'm indifferent to agent vs. agent-less.
->> >>
->> >> I *believe* that having a ceph-private distribution is easier/simpler/more
->> reliable than trying to layer over some other system (ansible, salt, etc.) [i.e., I
->> agree with John]. But this isn't a strongly held belief.
->> >>
->> >> I'm *metaphysically certain* that whatever distribution scheme is
->> adopted that it not be optional. A large barrier to adoption of Ceph today is
->> the lack of "middle-ware" that handles infrequent operational events (node
->> addition/removal, media failure/recovery, migration, etc.). IMO, this middle-
->> ware will have to be a standard part of Ceph, i.e., fully functional "out of the
->> box" without site-specific twiddling (though having a mechanism to insert
->> site-specific stuff is fine with me, it just can't be *required*).
->> >>
->> >> In my mind, the distribution scheme is the next step in the evolution
->> >> of Ceph-mgr. It's what's missing :)
->> >
->> > I see the benefits of having a ceph-specific agent for hardware
->> > interaction. However, that then shifts the problem for bootstrapping
->> > said Ceph agent.
->>
->> Bootstrapping would be the same as we already have for installing OSDs and
->> MDSs.  So ceph-deploy/ceph-ansible/whatever needs to be able to do the
->> same thing for the per-host agent that it currently does for OSDs, no overall
->> increase in complexity.
->>
->> > And when you open the can of worms that is server addition/removal,
->> > etc we start hitting the question of either spinning up a distribution
->> > mechanism as well.
->> >
->> > When we want to look at container-izing Ceph in hyper-converged
->> > environments, this gets even worse.
->>
->> I'm imagining that in a container-per-service model, where something
->> external has configured the OSD containers to have access to the block
->> device that they will run on, it doesn't seem unreasonable to have the same
->> configuration process set up the ceph agent container with access to all the
->> OSD block devices.  What are your thoughts about how this would (or
->> wouldn't) work?
->
-> The current OSD design is per-drive and not-reliable. We need a piece of software, running on the target system, that's NOT per-drive and NOT not-reliable (i.e., reliable :)). We need the management system to be able to dig out of the OSD's system why it crashed -- i.e., read logs and other types of status, etc. It's possible to mutate the OSD there, but I don't think it's easy nor soon.
-
-I think I've lost you there -- what's the relation between what you've
-just said and the issue of containerisation?
-
-John
-
->>
->> >
->> > e.g., the cephalopod turns into a cephaloblob.  (Sorry. I'm terrible
->> > with puns.)
->> >
->> > I need a mechanism for interacting with enclosures (to stick with the
->> > example), but I don't need it to be part of Ceph, since I need it for
->> > other parts of my infrastructure too anyway.
->> >
->> >
->> > If it's part of Ceph, I end up writing a special case for Ceph.
->>
->> I think this would cease to be a problem for you if we just had a flag in Ceph
->> to disable its own smartmontools type stuff?  That way when someone was
->> using an external tool there would be no conflict.
->>
->> There is some duplication of effort, but I don't think that's intrinsically
->> problematic: I predict that we'll always have many users who do not take up
->> any of the external tools and will benefit from the built-in Ceph bits.
->>
->> > And I need a way to handle it when Ceph itself isn't around yet; how
->> > do I blink an enclosure that receives a new disk? Ah, I pre-register a
->> > given enclosure with Ceph, before an OSD is even created. I know Ceph
->> > has many tentacles, but ... ;-)
->>
->> While at runtime we shouldn't have two agents competing to manage the
->> same device, I think it is reasonable to have a separate piece of software that
->> does installation vs. does the ongoing monitoring.  We shouldn't let the
->> constraints over installation (especially the need to operate on cephless
->> machines) restrict how we manage systems through their life cycles.  Again, I
->> don't think the built-in Ceph functionality is mutually exclusive with having a
->> good external installation tool that touches some of the same functionality.
->>
->> John
->>
->>
->> >
->> >
->> > Regards,
->> >     Lars
->> >
->> > --
->> > SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
->> > HRB 21284 (AG Nürnberg) "Experience is the name everyone gives to
->> > their mistakes." -- Oscar Wilde
->> >
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> > in the body of a message to majordomo@vger.kernel.org More
->> majordomo
->> > info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
->> body of a message to majordomo@vger.kernel.org More majordomo info at
->> http://vger.kernel.org/majordomo-info.html
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBKb2huIFNwcmF5IFttYWlsdG86
+anNwcmF5QHJlZGhhdC5jb21dDQo+IFNlbnQ6IE1vbmRheSwgRGVjZW1iZXIgMDUsIDIwMTYgNDoy
+MCBQTQ0KPiBUbzogQWxsZW4gU2FtdWVscyA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT4NCj4g
+Q2M6IExhcnMgTWFyb3dza3ktQnJlZSA8bG1iQHN1c2UuY29tPjsgQ2VwaCBEZXZlbG9wbWVudCA8
+Y2VwaC0NCj4gZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KPiBTdWJqZWN0OiBSZTogZGlzayBlbmNs
+b3N1cmUgTEVEcw0KPiANCj4gT24gTW9uLCBEZWMgNSwgMjAxNiBhdCAxMDo1MCBQTSwgQWxsZW4g
+U2FtdWVscw0KPiA8QWxsZW4uU2FtdWVsc0BzYW5kaXNrLmNvbT4gd3JvdGU6DQo+ID4+IC0tLS0t
+T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
+ZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gPj4gb3duZXJAdmdlci5rZXJuZWwub3Jn
+XSBPbiBCZWhhbGYgT2YgSm9obiBTcHJheQ0KPiA+PiBTZW50OiBNb25kYXksIERlY2VtYmVyIDA1
+LCAyMDE2IDExOjI4IEFNDQo+ID4+IFRvOiBMYXJzIE1hcm93c2t5LUJyZWUgPGxtYkBzdXNlLmNv
+bT4NCj4gPj4gQ2M6IENlcGggRGV2ZWxvcG1lbnQgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3Jn
+Pg0KPiA+PiBTdWJqZWN0OiBSZTogZGlzayBlbmNsb3N1cmUgTEVEcw0KPiA+Pg0KPiA+PiBPbiBN
+b24sIERlYyA1LCAyMDE2IGF0IDY6NDEgUE0sIExhcnMgTWFyb3dza3ktQnJlZSA8bG1iQHN1c2Uu
+Y29tPg0KPiA+PiB3cm90ZToNCj4gPj4gPiBPbiAyMDE2LTEyLTA1VDE4OjAyOjA4LCBBbGxlbiBT
+YW11ZWxzIDxBbGxlbi5TYW11ZWxzQHNhbmRpc2suY29tPg0KPiA+PiB3cm90ZToNCj4gPj4gPg0K
+PiA+PiA+PiBJJ20gaW5kaWZmZXJlbnQgdG8gYWdlbnQgdnMuIGFnZW50LWxlc3MuDQo+ID4+ID4+
+DQo+ID4+ID4+IEkgKmJlbGlldmUqIHRoYXQgaGF2aW5nIGEgY2VwaC1wcml2YXRlIGRpc3RyaWJ1
+dGlvbiBpcw0KPiA+PiA+PiBlYXNpZXIvc2ltcGxlci9tb3JlDQo+ID4+IHJlbGlhYmxlIHRoYW4g
+dHJ5aW5nIHRvIGxheWVyIG92ZXIgc29tZSBvdGhlciBzeXN0ZW0gKGFuc2libGUsIHNhbHQsDQo+
+ID4+IGV0Yy4pIFtpLmUuLCBJIGFncmVlIHdpdGggSm9obl0uIEJ1dCB0aGlzIGlzbid0IGEgc3Ry
+b25nbHkgaGVsZCBiZWxpZWYuDQo+ID4+ID4+DQo+ID4+ID4+IEknbSAqbWV0YXBoeXNpY2FsbHkg
+Y2VydGFpbiogdGhhdCB3aGF0ZXZlciBkaXN0cmlidXRpb24gc2NoZW1lIGlzDQo+ID4+IGFkb3B0
+ZWQgdGhhdCBpdCBub3QgYmUgb3B0aW9uYWwuIEEgbGFyZ2UgYmFycmllciB0byBhZG9wdGlvbiBv
+ZiBDZXBoDQo+ID4+IHRvZGF5IGlzIHRoZSBsYWNrIG9mICJtaWRkbGUtd2FyZSIgdGhhdCBoYW5k
+bGVzIGluZnJlcXVlbnQNCj4gPj4gb3BlcmF0aW9uYWwgZXZlbnRzIChub2RlIGFkZGl0aW9uL3Jl
+bW92YWwsIG1lZGlhIGZhaWx1cmUvcmVjb3ZlcnksDQo+ID4+IG1pZ3JhdGlvbiwgZXRjLikuIElN
+TywgdGhpcyBtaWRkbGUtIHdhcmUgd2lsbCBoYXZlIHRvIGJlIGEgc3RhbmRhcmQNCj4gPj4gcGFy
+dCBvZiBDZXBoLCBpLmUuLCBmdWxseSBmdW5jdGlvbmFsICJvdXQgb2YgdGhlIGJveCIgd2l0aG91
+dA0KPiA+PiBzaXRlLXNwZWNpZmljIHR3aWRkbGluZyAodGhvdWdoIGhhdmluZyBhIG1lY2hhbmlz
+bSB0byBpbnNlcnQgc2l0ZS1zcGVjaWZpYw0KPiBzdHVmZiBpcyBmaW5lIHdpdGggbWUsIGl0IGp1
+c3QgY2FuJ3QgYmUgKnJlcXVpcmVkKikuDQo+ID4+ID4+DQo+ID4+ID4+IEluIG15IG1pbmQsIHRo
+ZSBkaXN0cmlidXRpb24gc2NoZW1lIGlzIHRoZSBuZXh0IHN0ZXAgaW4gdGhlDQo+ID4+ID4+IGV2
+b2x1dGlvbiBvZiBDZXBoLW1nci4gSXQncyB3aGF0J3MgbWlzc2luZyA6KQ0KPiA+PiA+DQo+ID4+
+ID4gSSBzZWUgdGhlIGJlbmVmaXRzIG9mIGhhdmluZyBhIGNlcGgtc3BlY2lmaWMgYWdlbnQgZm9y
+IGhhcmR3YXJlDQo+ID4+ID4gaW50ZXJhY3Rpb24uIEhvd2V2ZXIsIHRoYXQgdGhlbiBzaGlmdHMg
+dGhlIHByb2JsZW0gZm9yDQo+ID4+ID4gYm9vdHN0cmFwcGluZyBzYWlkIENlcGggYWdlbnQuDQo+
+ID4+DQo+ID4+IEJvb3RzdHJhcHBpbmcgd291bGQgYmUgdGhlIHNhbWUgYXMgd2UgYWxyZWFkeSBo
+YXZlIGZvciBpbnN0YWxsaW5nDQo+ID4+IE9TRHMgYW5kIE1EU3MuICBTbyBjZXBoLWRlcGxveS9j
+ZXBoLWFuc2libGUvd2hhdGV2ZXIgbmVlZHMgdG8gYmUNCj4gYWJsZQ0KPiA+PiB0byBkbyB0aGUg
+c2FtZSB0aGluZyBmb3IgdGhlIHBlci1ob3N0IGFnZW50IHRoYXQgaXQgY3VycmVudGx5IGRvZXMN
+Cj4gPj4gZm9yIE9TRHMsIG5vIG92ZXJhbGwgaW5jcmVhc2UgaW4gY29tcGxleGl0eS4NCj4gPj4N
+Cj4gPj4gPiBBbmQgd2hlbiB5b3Ugb3BlbiB0aGUgY2FuIG9mIHdvcm1zIHRoYXQgaXMgc2VydmVy
+IGFkZGl0aW9uL3JlbW92YWwsDQo+ID4+ID4gZXRjIHdlIHN0YXJ0IGhpdHRpbmcgdGhlIHF1ZXN0
+aW9uIG9mIGVpdGhlciBzcGlubmluZyB1cCBhDQo+ID4+ID4gZGlzdHJpYnV0aW9uIG1lY2hhbmlz
+bSBhcyB3ZWxsLg0KPiA+PiA+DQo+ID4+ID4gV2hlbiB3ZSB3YW50IHRvIGxvb2sgYXQgY29udGFp
+bmVyLWl6aW5nIENlcGggaW4gaHlwZXItY29udmVyZ2VkDQo+ID4+ID4gZW52aXJvbm1lbnRzLCB0
+aGlzIGdldHMgZXZlbiB3b3JzZS4NCj4gPj4NCj4gPj4gSSdtIGltYWdpbmluZyB0aGF0IGluIGEg
+Y29udGFpbmVyLXBlci1zZXJ2aWNlIG1vZGVsLCB3aGVyZSBzb21ldGhpbmcNCj4gPj4gZXh0ZXJu
+YWwgaGFzIGNvbmZpZ3VyZWQgdGhlIE9TRCBjb250YWluZXJzIHRvIGhhdmUgYWNjZXNzIHRvIHRo
+ZQ0KPiA+PiBibG9jayBkZXZpY2UgdGhhdCB0aGV5IHdpbGwgcnVuIG9uLCBpdCBkb2Vzbid0IHNl
+ZW0gdW5yZWFzb25hYmxlIHRvDQo+ID4+IGhhdmUgdGhlIHNhbWUgY29uZmlndXJhdGlvbiBwcm9j
+ZXNzIHNldCB1cCB0aGUgY2VwaCBhZ2VudCBjb250YWluZXINCj4gPj4gd2l0aCBhY2Nlc3MgdG8g
+YWxsIHRoZSBPU0QgYmxvY2sgZGV2aWNlcy4gIFdoYXQgYXJlIHlvdXIgdGhvdWdodHMNCj4gPj4g
+YWJvdXQgaG93IHRoaXMgd291bGQgKG9yDQo+ID4+IHdvdWxkbid0KSB3b3JrPw0KPiA+DQo+ID4g
+VGhlIGN1cnJlbnQgT1NEIGRlc2lnbiBpcyBwZXItZHJpdmUgYW5kIG5vdC1yZWxpYWJsZS4gV2Ug
+bmVlZCBhIHBpZWNlIG9mDQo+IHNvZnR3YXJlLCBydW5uaW5nIG9uIHRoZSB0YXJnZXQgc3lzdGVt
+LCB0aGF0J3MgTk9UIHBlci1kcml2ZSBhbmQgTk9UIG5vdC0NCj4gcmVsaWFibGUgKGkuZS4sIHJl
+bGlhYmxlIDopKS4gV2UgbmVlZCB0aGUgbWFuYWdlbWVudCBzeXN0ZW0gdG8gYmUgYWJsZSB0byBk
+aWcNCj4gb3V0IG9mIHRoZSBPU0QncyBzeXN0ZW0gd2h5IGl0IGNyYXNoZWQgLS0gaS5lLiwgcmVh
+ZCBsb2dzIGFuZCBvdGhlciB0eXBlcyBvZg0KPiBzdGF0dXMsIGV0Yy4gSXQncyBwb3NzaWJsZSB0
+byBtdXRhdGUgdGhlIE9TRCB0aGVyZSwgYnV0IEkgZG9uJ3QgdGhpbmsgaXQncyBlYXN5DQo+IG5v
+ciBzb29uLg0KPiANCj4gSSB0aGluayBJJ3ZlIGxvc3QgeW91IHRoZXJlIC0tIHdoYXQncyB0aGUg
+cmVsYXRpb24gYmV0d2VlbiB3aGF0IHlvdSd2ZSBqdXN0DQo+IHNhaWQgYW5kIHRoZSBpc3N1ZSBv
+ZiBjb250YWluZXJpc2F0aW9uPw0KDQpQZXJoYXBzIG5vbmUsIGp1c3QgdGhhdCB0aGUgY29udGFp
+bmVyIHdvcmxkIHRlbmRzIHRvIHdhbnQgdG8gaWdub3JlIGJveCBib3VuZGFyaWVzLCBzdG9yYWdl
+IG1hbmFnZW1lbnQgZG9lc24ndCBoYXZlIHRoYXQgbHV4dXJ5Lg0KDQo+IA0KPiBKb2huDQo+IA0K
+PiA+Pg0KPiA+PiA+DQo+ID4+ID4gZS5nLiwgdGhlIGNlcGhhbG9wb2QgdHVybnMgaW50byBhIGNl
+cGhhbG9ibG9iLiAgKFNvcnJ5LiBJJ20NCj4gPj4gPiB0ZXJyaWJsZSB3aXRoIHB1bnMuKQ0KPiA+
+PiA+DQo+ID4+ID4gSSBuZWVkIGEgbWVjaGFuaXNtIGZvciBpbnRlcmFjdGluZyB3aXRoIGVuY2xv
+c3VyZXMgKHRvIHN0aWNrIHdpdGgNCj4gPj4gPiB0aGUgZXhhbXBsZSksIGJ1dCBJIGRvbid0IG5l
+ZWQgaXQgdG8gYmUgcGFydCBvZiBDZXBoLCBzaW5jZSBJIG5lZWQNCj4gPj4gPiBpdCBmb3Igb3Ro
+ZXIgcGFydHMgb2YgbXkgaW5mcmFzdHJ1Y3R1cmUgdG9vIGFueXdheS4NCj4gPj4gPg0KPiA+PiA+
+DQo+ID4+ID4gSWYgaXQncyBwYXJ0IG9mIENlcGgsIEkgZW5kIHVwIHdyaXRpbmcgYSBzcGVjaWFs
+IGNhc2UgZm9yIENlcGguDQo+ID4+DQo+ID4+IEkgdGhpbmsgdGhpcyB3b3VsZCBjZWFzZSB0byBi
+ZSBhIHByb2JsZW0gZm9yIHlvdSBpZiB3ZSBqdXN0IGhhZCBhDQo+ID4+IGZsYWcgaW4gQ2VwaCB0
+byBkaXNhYmxlIGl0cyBvd24gc21hcnRtb250b29scyB0eXBlIHN0dWZmPyAgVGhhdCB3YXkNCj4g
+Pj4gd2hlbiBzb21lb25lIHdhcyB1c2luZyBhbiBleHRlcm5hbCB0b29sIHRoZXJlIHdvdWxkIGJl
+IG5vIGNvbmZsaWN0Lg0KPiA+Pg0KPiA+PiBUaGVyZSBpcyBzb21lIGR1cGxpY2F0aW9uIG9mIGVm
+Zm9ydCwgYnV0IEkgZG9uJ3QgdGhpbmsgdGhhdCdzDQo+ID4+IGludHJpbnNpY2FsbHkNCj4gPj4g
+cHJvYmxlbWF0aWM6IEkgcHJlZGljdCB0aGF0IHdlJ2xsIGFsd2F5cyBoYXZlIG1hbnkgdXNlcnMg
+d2hvIGRvIG5vdA0KPiA+PiB0YWtlIHVwIGFueSBvZiB0aGUgZXh0ZXJuYWwgdG9vbHMgYW5kIHdp
+bGwgYmVuZWZpdCBmcm9tIHRoZSBidWlsdC1pbiBDZXBoDQo+IGJpdHMuDQo+ID4+DQo+ID4+ID4g
+QW5kIEkgbmVlZCBhIHdheSB0byBoYW5kbGUgaXQgd2hlbiBDZXBoIGl0c2VsZiBpc24ndCBhcm91
+bmQgeWV0Ow0KPiA+PiA+IGhvdyBkbyBJIGJsaW5rIGFuIGVuY2xvc3VyZSB0aGF0IHJlY2VpdmVz
+IGEgbmV3IGRpc2s/IEFoLCBJDQo+ID4+ID4gcHJlLXJlZ2lzdGVyIGEgZ2l2ZW4gZW5jbG9zdXJl
+IHdpdGggQ2VwaCwgYmVmb3JlIGFuIE9TRCBpcyBldmVuDQo+ID4+ID4gY3JlYXRlZC4gSSBrbm93
+IENlcGggaGFzIG1hbnkgdGVudGFjbGVzLCBidXQgLi4uIDstKQ0KPiA+Pg0KPiA+PiBXaGlsZSBh
+dCBydW50aW1lIHdlIHNob3VsZG4ndCBoYXZlIHR3byBhZ2VudHMgY29tcGV0aW5nIHRvIG1hbmFn
+ZSB0aGUNCj4gPj4gc2FtZSBkZXZpY2UsIEkgdGhpbmsgaXQgaXMgcmVhc29uYWJsZSB0byBoYXZl
+IGEgc2VwYXJhdGUgcGllY2Ugb2YNCj4gPj4gc29mdHdhcmUgdGhhdCBkb2VzIGluc3RhbGxhdGlv
+biB2cy4gZG9lcyB0aGUgb25nb2luZyBtb25pdG9yaW5nLiAgV2UNCj4gPj4gc2hvdWxkbid0IGxl
+dCB0aGUgY29uc3RyYWludHMgb3ZlciBpbnN0YWxsYXRpb24gKGVzcGVjaWFsbHkgdGhlIG5lZWQN
+Cj4gPj4gdG8gb3BlcmF0ZSBvbiBjZXBobGVzcw0KPiA+PiBtYWNoaW5lcykgcmVzdHJpY3QgaG93
+IHdlIG1hbmFnZSBzeXN0ZW1zIHRocm91Z2ggdGhlaXIgbGlmZSBjeWNsZXMuDQo+ID4+IEFnYWlu
+LCBJIGRvbid0IHRoaW5rIHRoZSBidWlsdC1pbiBDZXBoIGZ1bmN0aW9uYWxpdHkgaXMgbXV0dWFs
+bHkNCj4gPj4gZXhjbHVzaXZlIHdpdGggaGF2aW5nIGEgZ29vZCBleHRlcm5hbCBpbnN0YWxsYXRp
+b24gdG9vbCB0aGF0IHRvdWNoZXMgc29tZQ0KPiBvZiB0aGUgc2FtZSBmdW5jdGlvbmFsaXR5Lg0K
+PiA+Pg0KPiA+PiBKb2huDQo+ID4+DQo+ID4+DQo+ID4+ID4NCj4gPj4gPg0KPiA+PiA+IFJlZ2Fy
+ZHMsDQo+ID4+ID4gICAgIExhcnMNCj4gPj4gPg0KPiA+PiA+IC0tDQo+ID4+ID4gU1VTRSBMaW51
+eCBHbWJILCBHRjogRmVsaXggSW1lbmTDtnJmZmVyLCBKYW5lIFNtaXRoYXJkLCBHcmFoYW0NCj4g
+Pj4gPiBOb3J0b24sIEhSQiAyMTI4NCAoQUcgTsO8cm5iZXJnKSAiRXhwZXJpZW5jZSBpcyB0aGUg
+bmFtZSBldmVyeW9uZQ0KPiA+PiA+IGdpdmVzIHRvIHRoZWlyIG1pc3Rha2VzLiIgLS0gT3NjYXIg
+V2lsZGUNCj4gPj4gPg0KPiA+PiA+IC0tDQo+ID4+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlz
+IGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+ID4+ID4gaW4g
+dGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZQ0K
+PiA+PiBtYWpvcmRvbW8NCj4gPj4gPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
+am9yZG9tby1pbmZvLmh0bWwNCj4gPj4gLS0NCj4gPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlz
+IGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+ID4+IGluIHRo
+ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUNCj4g
+bWFqb3Jkb21vDQo+ID4+IGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
+aW5mby5odG1sDQo=
