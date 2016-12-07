@@ -1,59 +1,48 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 12/07/2016 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 7 Dec 2016 08:20:37 -0600
-Message-ID: <0497ffc3-4fd6-744d-b212-684e6acdaa5f@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Question about ReplicatedBackend::sub_op_modify_reply
+Date: Wed, 7 Dec 2016 14:29:55 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612071429320.22485@piezo.novalocal>
+References: <41f33622.d4cc.158d91430e9.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:14088 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751884AbcLGOUk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 7 Dec 2016 09:20:40 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id E0C3DC05492B
-        for <ceph-devel@vger.kernel.org>; Wed,  7 Dec 2016 14:20:39 +0000 (UTC)
-Received: from [10.3.112.15] (ovpn-112-15.phx2.redhat.com [10.3.112.15])
-        by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uB7EKbmE002077
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Wed, 7 Dec 2016 09:20:39 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:51742 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752263AbcLGO36 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2016 09:29:58 -0500
+In-Reply-To: <41f33622.d4cc.158d91430e9.Coremail.xxhdx1985126@163.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: xxhdx1985126 <xxhdx1985126@163.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-8AM PST as usual!  We have CDM today as well, but we've decided not to 
-cancel the performance meeting so we can cover a couple of hot recent 
-topics, including: Testing at Intel, RBD with EC overwrite, and 
-Zetascale development.
+On Wed, 7 Dec 2016, xxhdx1985126 wrote:
+> Hi, everyone.
+> 
+> 
+> I'm trying to read the source code of ceph, and I found that some code seems strange.
+> In ReplicatedBackend::sub_op_modify_reply, there is the following code:
+> 		if (r->ack_type & CEPH_OSD_FLAG_ONDISK) {
+> 			assert(ip_op.waiting_for_commit.count(from));
+> 			ip_op.waiting_for_commit.erase(from);
+> 			if (ip_op.op) {
+> 				ostringstream ss;
+> 				ss << "sub_op_commit_rec_from_osd." << from.osd;
+> 				ip_op.op->mark_event(ss.str());
+> 			}
+> 		} else {
+> 			assert(ip_op.waiting_for_applied.count(from));
+> 			if (ip_op.op) {
+> 				ostringstream ss;
+> 				ss << "sub_op_applied_rec_from_osd." << from.osd;
+> 				ip_op.op->mark_event(ss.str());
+> 			}
+> 		}
+> 		ip_op.waiting_for_applied.erase(from);
+> It seems that the statement "ip_op.waiting_for_applied.erase(from)" should be in the "else" clause, otherwise items in waiting_for_applied could be errorly erased when ack_type is CEPH_OSD_FLAG_ONDISK.
+> 
+> Why put it outside the "else" clause?
 
-Here's the links:
+The commit/ondisk message implies applied.
 
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
-
-To join the Meeting:
-https://bluejeans.com/268261044
-
-To join via Browser:
-https://bluejeans.com/268261044/browser
-
-To join with Lync:
-https://bluejeans.com/268261044/lync
-
-
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
-
-To join via Phone:
-1) Dial:
-                  +1 408 740 7256
-                  +1 888 240 2560(US Toll Free)
-                  +1 408 317 9253(Alternate Number)
-                  (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
+sage
