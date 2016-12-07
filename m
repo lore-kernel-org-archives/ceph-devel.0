@@ -1,124 +1,58 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: enabling shared ccache dirs in default builds
-Date: Wed, 7 Dec 2016 18:07:30 +0100
-Message-ID: <91f410e8-3073-7093-1ed7-2046f69d06f5@digiware.nl>
-References: <CAJ4mKGZSnN+RE7d5wrzghmtWZA1w1e7NT8JeW4nArwVdijggkQ@mail.gmail.com>
- <fde7b31e-75ba-9c71-a0d2-1467e65b1d54@digiware.nl>
- <CAJ4mKGZW35ULXFmf14rjmtEvBtJZfPN2eHPM-ogSw4xx8rmS+w@mail.gmail.com>
+From: Robert LeBlanc <robert@leblancnet.us>
+Subject: Re: FW: Ceph dmClock
+Date: Wed, 7 Dec 2016 11:48:31 -0700
+Message-ID: <CAANLjFpyperAkB62s5G7bYMm2J8Z-SOu1S8imT2-QHq+AiVKaQ@mail.gmail.com>
+References: <116d5b63f1dc428998675dbe6e8c56eb@skt-tnetpmx1.SKT.AD>
+ <38265764-574c-368c-6427-23330ac5dc66@redhat.com> <df8d1c8d93754dbcb30a01e4e6b00129@skt-tnetpmx1.SKT.AD>
+ <0e9bcc68-cf57-ca5c-a0b9-26c635b78a59@redhat.com> <3f6258a2100e4218a15023b82b9a156a@skt-tnetpmx1.SKT.AD>
+ <e3321edabb3d42f2881c3e1ca30ad5b2@skt-tnetpmx1.SKT.AD> <CAKk8r1BnqHJt-EtP+9xBUE=oA8taO9ak+CdJk6BrjdhzHT3Ukw@mail.gmail.com>
+ <d3e52b41-47b9-c660-1c96-6383609719ca@redhat.com> <CAKk8r1BadDo7KCVL0eA09TBxYLTXmtHLqzH=Tc6m8zZAVebFfw@mail.gmail.com>
+ <CAKk8r1Dw1MACKhOUfyhzv5dQX5Ae+9S1B9T99qXUOGmQ4HyzWA@mail.gmail.com> <e2b99c22-ad7c-d0ae-6f9d-63c8d0322f20@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:11523 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752017AbcLGRHr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 7 Dec 2016 12:07:47 -0500
-In-Reply-To: <CAJ4mKGZW35ULXFmf14rjmtEvBtJZfPN2eHPM-ogSw4xx8rmS+w@mail.gmail.com>
+Received: from mail-oi0-f50.google.com ([209.85.218.50]:36436 "EHLO
+        mail-oi0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932520AbcLGSsd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2016 13:48:33 -0500
+Received: by mail-oi0-f50.google.com with SMTP id v84so426363893oie.3
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Dec 2016 10:48:32 -0800 (PST)
+In-Reply-To: <e2b99c22-ad7c-d0ae-6f9d-63c8d0322f20@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "J. Eric Ivancich" <ivancich@redhat.com>
+Cc: Byung Su Park <pbs1108@gmail.com>, =?UTF-8?B?67CV67OR7IiY?= <bspark8@sk.com>, =?UTF-8?B?6rmA7YOc7JuFL1NEUyBUZWNoLiBMYWI=?= <taewoong.kim@sk.com>, =?UTF-8?B?7JeE7KO86rSAL1NEUyBUZWNoLiBMYWI=?= <jugwan.eom@sk.com>, =?UTF-8?B?6rmA7Iq566+8L1NEUyBUZWNoLiBMYWI=?= <seungminkim@sk.com>, Sage Weil <sweil@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Samuel Just <sjust@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 7-12-2016 17:46, Gregory Farnum wrote:
-> On Wed, Dec 7, 2016 at 1:26 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> On 7-12-2016 01:09, Gregory Farnum wrote:
->>> The default (or at least, ./do_cmake.sh-setup) Ceph build makes use of
->>> cmake. This is nice for speeding up builds, but as the amount of disk
->>> space increases it really explodes disk usage on dev boxes. As of
->>> today, a Ceph repo with build artifacts is ~30GB, and my ccache
->>> directory is ~32GB.
->>>
->>> For me and many of the other Red Hat devs, that's a significant
->>> fraction of the 256GB available on our (shared box) home-dir SSDs, and
->>> I don't think there's *too* much advantage to be gained by giving each
->>> dev their own ccache dir. If anybody has expertise configuring ccache
->>> and wants to tweak our build scripts to make setting that up easy,
->>> it'd be cool — I started in on the ccache man page and it doesn't look
->>> too hard but I've never configured any of it. Created a ticket at
->>> http://tracker.ceph.com/issues/18160
->>
->> From the ccache site:
->> "Another reason to use ccache is that the same cache is used for builds
->> in different directories. If you have several versions or branches of a
->> software stored in different directories, many of the object files in a
->> build directory can probably be taken from the cache even if they were
->> compiled for another version or branch
->> "
->>
->> So why not have a shared/global ccache. I would expect the larger part
->> of the project to generate the same code over and over for most of the
->> users? On average only a small fraction of the compile is different
->> between developers, and even that will be absorbed by a large general
->> cache. The trick with a cache is that the benifits increase if there are
->> more users doing/reusing more of the same. So the advantage of 300G
->> cache is better that 10*30G. Note that ccache can even compress data in
->> the cache, leading to even more objects in your cache. With an even
->> better hit ratio.
->>
->> Get ride of all personal ccache.conf files and
->> in global /etc/ccache.conf
->> cache_dir = /somewhere/you/want/then/ccache
->> max_size = as large as possible
->> umask = 777
->> # or 775 if devs are all in the same group.
-> 
-> Yes, something like this would be involved too. But if you grep for
-> ccache in ceph.git you'll notice it's doing some level of autoconfig —
-> I don't know how much — which needs to play nicely as well.
-> Now that I look at it with fresh eyes it looks like maybe our tooling
-> is only invoking ccache and we do just need the config; I'm just a
-> little fidgety about it because some of the test-dir contents are
-> referencing specific directories and I'm not sure if we invoke any of
-> those bits via make check or similar.
+On Tue, Nov 29, 2016 at 11:59 AM, J. Eric Ivancich <ivancich@redhat.com> wr=
+ote:
+> On 11/27/2016 04:50 AM, Byung Su Park wrote:
+>> P4
+>> : To see current QoS quality between clients in the Ceph cluster with
+>> the pool (LibRADOS) unit based mclock operation queue, we did some tests=
+.
+>> Although each the client=E2=80=99s moment IO variation was present, unde=
+r some
+>> test conditions, a satisfactory QoS result came out in terms of the
+>> average value.
+>> (Note that, currently the some IO variation also appears at the default
+>> WPQ operation queue).
+>> (Also, additional experimentation and analysis is required with various
+>> test conditions and issues).
+>> The specific test environment and result are attached in additional pdf
+>> file.
+>
+> The results look very impressive. I've seen the IO variation in my tests
+> as well, and it seems unlikely to be due to operation queuing.
 
-Well, these are all references to ccache in the Cmake sources:
+If you have not also set "osd_op_queue_cut_off =3D low" in addition to
+"osd_op_queue =3D wpq", then you should see much better variation in op
+latency between clients. There seems to be an issue with snapshots and
+cut_off low at the moment, so use caution with snapshots. [1] I can't
+pull up the tracker at the moment to know that status.
 
-./src/CMakeLists.txt:693:if (WITH_CCACHE AND CCACHE_FOUND)
-./src/CMakeLists.txt:694:  list(APPEND ROCKSDB_CMAKE_ARGS
--DCMAKE_CXX_COMPILER=ccache)
-./src/CMakeLists.txt:696:else(WITH_CCACHE AND CCACHE_FOUND)
-./src/CMakeLists.txt:698:endif(WITH_CCACHE AND CCACHE_FOUND)
+[1] http://tracker.ceph.com/issues/15774
 
-This^^^^^^ is code for rocksdb to use ccache, so nothing there.
-
-./CMakeLists.txt:40:option(WITH_CCACHE "Build with ccache.")
-./CMakeLists.txt:41:if(WITH_CCACHE)
-./CMakeLists.txt:42:  find_program(CCACHE_FOUND ccache)
-./CMakeLists.txt:43:  if(CCACHE_FOUND)
-./CMakeLists.txt:44:    message(STATUS "Building with ccache:
-${CCACHE_FOUND}, CCACHE_DIR=$ENV{CCACHE_DIR}")
-./CMakeLists.txt:45:    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE
-ccache)
-./CMakeLists.txt:46:    # ccache does not accelerate link (ld), but let
-it handle it. by passing it
-./CMakeLists.txt:49:    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK
-ccache)
-./CMakeLists.txt:50:  else(CCACHE_FOUND)
-./CMakeLists.txt:51:    message(FATAL_ERROR "Can't find ccache. Is it
-installed?")
-./CMakeLists.txt:52:  endif(CCACHE_FOUND)
-./CMakeLists.txt:53:endif(WITH_CCACHE)
-
-This^^^^ is code to educate Cmake to use ccache as compiler/linker....
-
-So nothing scary there...
-
-And in the *.sh files is the only real reference to ccache:
-./src/test/docker-test-helper.sh:119:    local ccache
-./src/test/docker-test-helper.sh:120:    mkdir -p $HOME/.ccache
-./src/test/docker-test-helper.sh:121:    ccache="--volume
-$HOME/.ccache:$HOME/.ccache"
-./src/test/docker-test-helper.sh:123:    local cmd="docker run $opts
---rm --name $image --privileged $ccache"
-
-And I known nothing of docker, but it's use seems to override the global
-cache. And could deserve a bit of rewrite if this access is actually
-intended to use the cache that is build outside of the docker.
-Perhaps ask Loic.
-
-But other than that I was not able to find references to ccache.
-
---WjW
-
-
-
+----------------
+Robert LeBlanc
+PGP Fingerprint 79A2 9CA4 6CC4 45DD A904  C70E E654 3BB2 FA62 B9F1
