@@ -1,58 +1,83 @@
-From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: CDM in ~2.5 hours
-Date: Wed, 7 Dec 2016 10:13:13 -0500
-Message-ID: <CAAZbbf1VxrcVcYmZajr_Uw9ZANWMy=M=cTS-LC1Up5GS6aT7aA@mail.gmail.com>
-References: <CAAZbbf3S39dcMwqJT0fAwJNoE7S3fT6mmX90=fFyCHXDGdRjOA@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: enabling shared ccache dirs in default builds
+Date: Wed, 7 Dec 2016 08:46:40 -0800
+Message-ID: <CAJ4mKGZW35ULXFmf14rjmtEvBtJZfPN2eHPM-ogSw4xx8rmS+w@mail.gmail.com>
+References: <CAJ4mKGZSnN+RE7d5wrzghmtWZA1w1e7NT8JeW4nArwVdijggkQ@mail.gmail.com>
+ <fde7b31e-75ba-9c71-a0d2-1467e65b1d54@digiware.nl>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1222729409=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAAZbbf3S39dcMwqJT0fAwJNoE7S3fT6mmX90=fFyCHXDGdRjOA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============1222729409==
-Content-Type: multipart/alternative; boundary=94eb2c043eb4ac9d14054312f593
-
---94eb2c043eb4ac9d14054312f593
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-oi0-f49.google.com ([209.85.218.49]:33723 "EHLO
+        mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752362AbcLGQql (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2016 11:46:41 -0500
+Received: by mail-oi0-f49.google.com with SMTP id w63so423424147oiw.0
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Dec 2016 08:46:41 -0800 (PST)
+In-Reply-To: <fde7b31e-75ba-9c71-a0d2-1467e65b1d54@digiware.nl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Her cephers,
+On Wed, Dec 7, 2016 at 1:26 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> On 7-12-2016 01:09, Gregory Farnum wrote:
+>> The default (or at least, ./do_cmake.sh-setup) Ceph build makes use of
+>> cmake. This is nice for speeding up builds, but as the amount of disk
+>> space increases it really explodes disk usage on dev boxes. As of
+>> today, a Ceph repo with build artifacts is ~30GB, and my ccache
+>> directory is ~32GB.
+>>
+>> For me and many of the other Red Hat devs, that's a significant
+>> fraction of the 256GB available on our (shared box) home-dir SSDs, and
+>> I don't think there's *too* much advantage to be gained by giving each
+>> dev their own ccache dir. If anybody has expertise configuring ccache
+>> and wants to tweak our build scripts to make setting that up easy,
+>> it'd be cool — I started in on the ccache man page and it doesn't look
+>> too hard but I've never configured any of it. Created a ticket at
+>> http://tracker.ceph.com/issues/18160
+>
+> From the ccache site:
+> "Another reason to use ccache is that the same cache is used for builds
+> in different directories. If you have several versions or branches of a
+> software stored in different directories, many of the object files in a
+> build directory can probably be taken from the cache even if they were
+> compiled for another version or branch
+> "
+>
+> So why not have a shared/global ccache. I would expect the larger part
+> of the project to generate the same code over and over for most of the
+> users? On average only a small fraction of the compile is different
+> between developers, and even that will be absorbed by a large general
+> cache. The trick with a cache is that the benifits increase if there are
+> more users doing/reusing more of the same. So the advantage of 300G
+> cache is better that 10*30G. Note that ccache can even compress data in
+> the cache, leading to even more objects in your cache. With an even
+> better hit ratio.
+>
+> Get ride of all personal ccache.conf files and
+> in global /etc/ccache.conf
+> cache_dir = /somewhere/you/want/then/ccache
+> max_size = as large as possible
+> umask = 777
+> # or 775 if devs are all in the same group.
 
-Just a reminder that this month's CDM is today at 12:30p EST. Sage will be
-hosting today while I'm traveling. If you have any questions or
-difficulties joining, drop them in irc/slack and we'll try to help out.
-Thanks.
+Yes, something like this would be involved too. But if you grep for
+ccache in ceph.git you'll notice it's doing some level of autoconfig —
+I don't know how much — which needs to play nicely as well.
+Now that I look at it with fresh eyes it looks like maybe our tooling
+is only invoking ccache and we do just need the config; I'm just a
+little fidgety about it because some of the test-dir contents are
+referencing specific directories and I'm not sure if we invoke any of
+those bits via make check or similar.
+-Greg
 
---94eb2c043eb4ac9d14054312f593
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"auto">Her cephers,<div dir=3D"auto"><br></div><div dir=3D"auto"=
->Just a reminder that this month&#39;s CDM is today at 12:30p EST. Sage wil=
-l be hosting today while I&#39;m traveling. If you have any questions or di=
-fficulties joining, drop them in irc/slack and we&#39;ll try to help out. T=
-hanks.</div></div>
-
---94eb2c043eb4ac9d14054312f593--
-
---===============1222729409==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1222729409==--
+>
+> --WjW
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
