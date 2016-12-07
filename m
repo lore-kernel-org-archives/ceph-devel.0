@@ -1,36 +1,175 @@
 From: Alfredo Deza <adeza@redhat.com>
-Subject: use ceph-ci.git to get repositories out of dev branches
-Date: Wed, 7 Dec 2016 07:34:22 -0500
-Message-ID: <CAC-Np1y=2DY7Rve+ao73i7EtKrFY1K_jnDR86Yhhgt9XF7gsQw@mail.gmail.com>
+Subject: Re: ceph v10.2.4 QE validation status
+Date: Wed, 7 Dec 2016 08:06:40 -0500
+Message-ID: <CAC-Np1ynHTWHOeCSWV_gzHwv4dqmPbBKuYpwXWLXbS42d_MGzQ@mail.gmail.com>
+References: <CAMMFjmEkMUBCnZFqMr_kcfZgB5jm3CjVNfXpSAXT7ZCwMLQEfg@mail.gmail.com>
+ <CAMMFjmGRO7F30WwU8NwMU=t3bEXEhz1G6bwZwqyQJrp7mceZdQ@mail.gmail.com>
+ <87r362tr92.fsf@suse.com> <alpine.DEB.2.11.1611231441130.21102@piezo.us.to>
+ <87mvgia7if.fsf@suse.com> <87zikh3tj3.fsf@suse.com> <alpine.DEB.2.11.1611301601010.2097@piezo.novalocal>
+ <87y4013pmw.fsf@suse.com> <87vav53p8u.fsf@suse.com> <alpine.DEB.2.11.1611301656070.2097@piezo.novalocal>
+ <87twam4ejf.fsf@suse.com> <87oa0q4mok.fsf@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:34941 "EHLO
-        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751212AbcLGMeX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2016 07:34:23 -0500
-Received: by mail-qk0-f176.google.com with SMTP id n204so411720498qke.2
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Dec 2016 04:34:23 -0800 (PST)
+Received: from mail-qk0-f182.google.com ([209.85.220.182]:36195 "EHLO
+        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752532AbcLGNGm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2016 08:06:42 -0500
+Received: by mail-qk0-f182.google.com with SMTP id n21so412659123qka.3
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Dec 2016 05:06:42 -0800 (PST)
+In-Reply-To: <87oa0q4mok.fsf@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: Andrew Schoen <aschoen@redhat.com>
+To: Abhishek L <abhishek@suse.com>
+Cc: Sage Weil <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, Yuri Weinstein <yweinste@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Samuel Just <sjust@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <ldachary@redhat.com>, "Dachary, Loic" <loic@dachary.org>, Nathan Cutler <ncutler@suse.cz>, Ilya Dryomov <idryomov@gmail.com>, John Spray <jspray@redhat.com>
 
-As announced on November 23rd, please start pushing development
-branches to ceph-ci.git (https://github.com/ceph/ceph-ci) to get
-repositories.
+On Mon, Dec 5, 2016 at 6:53 AM, Abhishek L <abhishek@suse.com> wrote:
+>
+> Abhishek L writes:
+>
+>> Sage Weil writes:
+>>
+>>> On Wed, 30 Nov 2016, Abhishek L wrote:
+>>>> Abhishek L writes:
+>>>>
+>>>> > Sage Weil writes:
+>>>> >
+>>>> >> On Wed, 30 Nov 2016, Abhishek L wrote:
+>>>> >>>
+>>>> >>> Abhishek L writes:
+>>>> >>>
+>>>> >>> > Sage Weil writes:
+>>>> >>> >
+>>>> >>> >> On Wed, 23 Nov 2016, Abhishek L wrote:
+>>>> >>> >>>
+>>>> >>> >>> Hi Sage, Greg,
+>>>> >>> >>>
+>>>> >>> >>>
+>>>> >>> >>> Yuri Weinstein writes:
+>>>> >>> >>>
+>>>> >>> >>> > See updated status - http://tracker.ceph.com/issues/17487#note-32
+>>>> >>> >>> >
+>>>> >>> >>> > Outstanding issues:
+>>>> >>> >>> >
+>>>> >>> >>> > knfs - http://tracker.ceph.com/issues/16397 (same as in v10.2.3, Greg
+>>>> >>> >>> > pls review/approve, assumed Approved ?)
+>>>> >>> >>> >
+>>>> >>> >>> > upgrade/hammer-x (jewel) - http://tracker.ceph.com/issues/17847 ((Sage
+>>>> >>> >>> > pls review/approve, seems persistent, but maybe not a showstopper)
+>>>> >>> >>> >
+>>>> >>> >>> > upgrade/infernalis-x (jewel) - deprecated (Nathan is still working
+>>>> >>> >>> > to make it pass, see issues in the tacker summary above)
+>>>> >>> >>> >
+>>>> >>> >>> > Sage, jewel 10.2.4 can be released as soon as you agree with the
+>>>> >>> >>> > findings/summary.
+>>>> >>> >>>
+>>>> >>> >>> Do you think we're ready to release 10.2.4 yet?
+>>>> >>> >>
+>>>> >>> >> I'm reproducing http://tracker.ceph.com/issues/17847 with logs to make
+>>>> >>> >> sure this isn't a regression.
+>>>> >>> >>
+>>>> >>> >> We can ignore the infernalis runs.
+>>>> >>> >>
+>>>> >>> >> I think we can ignore the knfs selinux issue too.. Greg, can you confirm?
+>>>> >>> >>
+>>>> >>> > Added the prs 12001 & 12167 on top of the jewel branch and scheduled rados runs
+>>>> >>> > at
+>>>> >>> > http://pulpito.ceph.com/abhi-2016-11-29_10:22:25-rados-wip-jewel-10-2-4-distro-basic-smithi/ &
+>>>> >>
+>>>> >> https://github.com/ceph/ceph-qa-suite/pull/1292
+>>>> >>
+>>>> >> avoids xenial for the rados upgrade tests (in jewel branch).
+>>>>
+>>>> Ah alright, maybe this was the cause after all, let's get this in (or
+>>>> push a branch to ceph-qa-suite so that I can schedule against that)
+>>>
+>>> I added a patch for the client-upgrade tests to the same branch. You
+>>> should be able to just schedule with --suite-branch jewel-avoid-xenial
+>>> instead of --suite-branch jewel (for both rados and
+>>> upgrade/client-upgrade).
+>>>
+>>> sage
+>>>
+>>>
+>>>> >>
+>>>> >> The upgrade tests already explicitly call out trusty, so they should be
+>>>> >> fine.
+>>>> >>
+>>>> >>> > updated the tracker at http://tracker.ceph.com/issues/17851#note-17,
+>>>> >>> > with details of the test. I'll update the progress once the suite goes
+>>>> >>> > through
+>>>> >>>
+>>>> >>> Had around 11 tests fail from 296 scheduled, there were a couple of
+>>>> >>> valgrind issues on ceph-mon (which were seen at earlier runs on jewel as
+>>>> >>> well) and an s3test failure, rest of the issues were looking related to
+>>>> >>> infrastructure as they were failing to get specific version numbers from
+>>>> >>> gitbuilders.
+>>>> >>>
+>>>> >>> Reported this issue as:
+>>>> >>>
+>>>> >>> http://tracker.ceph.com/issues/18089
+>>>> >>>
+>>>> >>> subsequent re runs are still failing with similar errors. The details
+>>>> >>> are updated at
+>>>> >>>
+>>>> >>> http://tracker.ceph.com/issues/17487#note-37
+>>>> >>>
+>>>> >>> The upgrade suite has also failed with similar errors.
+>>>> >>
+>>>> >> Which one?
+>>>> > The upgrade/client-upgrade suite (I hope this is the right upgrade
+>>>> > suite), the errors are the same failed to fetch package version errors
+>>>> > seen for the rados suite, so not actual test run errors yet.
+>>>> >
+>>>> > http://pulpito.ceph.com/abhi-2016-11-30_09:58:50-upgrade:client-upgrade-wip-jewel-10-2-4-distro-basic-smithi/
+>>>> > is the run
+>>>> >
+>> Update on the current status,
+>> For prs 12001 & 12167: (sage/Sam)
+>>
+>> The upgrade passed with the exception of infernalis/jewel which failed
+>> with RBD (test_librbd_api.sh) (jdillaman please approve)
+>>
+>> http://pulpito.ceph.com/abhi-2016-12-02_09:45:37-upgrade:client-upgrade-wip-jewel-10-2-4-distro-basic-smithi/
+>>
+>> the rados run (with the exception of the valgrind issue) are still
+>> waiting for completion for 4 of the 296 jobs, this one suite always
+>> seems to die when scheduled, this is the current url of the rados jobs
+>> (still waiting)
+>> http://pulpito.ceph.com/abhi-2016-12-02_10:06:39-rados-wip-jewel-10-2-4-rc-distro-basic-smithi/
+>
+> Loic was able to spot the error in this run (which was a regression
+> introduced by f95ed3e, this was later fixed in
+> https://github.com/ceph/ceph-qa-suite/pull/1297, so running this suite
+> on the latest branch came out green,
+>
+> http://pulpito.front.sepia.ceph.com/abhi-2016-12-05_10:25:26-rados-wip-jewel-10-2-4-rc-distro-basic-smithi/
+>
+> Which means 12167 is also good to go.
+>>
+>>
+>> for pr 12207: (josh)
+>> the rgw suite also saw the same valgrind issue
+>> (http://pulpito.ceph.com/abhi-2016-12-01_22:19:07-rgw-wip-jewel-10-2-4-rc-distro-basic-smithi/)
+>>
+>> https://github.com/ceph/ceph/pull/12267, (mon cleanup)  was merged on Sam's approval.
+>>
+>> prs 11884 & 12067 (Sam, Alfredo):
+>> the ceph create-keys  pr #11884 hasn't been merged yet into jewel, is
+>> there any suite that must be run to validate this. Same applies for
+>> https://github.com/ceph/ceph/pull/12067 (OSDMon: MOSDBoot )
+>
+> 12067 was merged on Sam's approval as well. Which only leaves us with
+> 11884.
 
-This doesn't change reporting in https://shaman.ceph.com and it
-shouldn't affect testing via teuthology.
+Bummed that 11884 didn't make it. It fixes issues where it hangs for
+ever for any tool that tries to bootstrap and encounters problems
+during deployment.
 
-The ceph.git repository will continue to build binaries and
-repositories for another week to help transitioning.
+There isn't a specific suite that must be run to validate this.
 
-If you have any issues, please mention them in the #sepia or
-#ceph-devel channels to me (alfredodeza) or Andrew Schoen
-(andrewschoen).
-
-Thanks!
-
-
--Alfredo
+>
+> Best,
+> Abhishek Lekshmanan
+> SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
