@@ -1,33 +1,33 @@
-From: John Spray <jspray@redhat.com>
-Subject: OSD leaks & selinux denials
-Date: Wed, 7 Dec 2016 11:03:21 +0000
-Message-ID: <CALe9h7c4UEeXznHF0KbghJGENEqd4KdAQEAAryVtp9yW67=M0w@mail.gmail.com>
+From: xxhdx1985126 <xxhdx1985126@163.com>
+Subject: Question about ReplicatedBackend::sub_op_modify_reply
+Date: Wed, 7 Dec 2016 19:38:48 +0800 (CST)
+Message-ID: <41f33622.d4cc.158d91430e9.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f169.google.com ([209.85.216.169]:35723 "EHLO
-        mail-qt0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751905AbcLGLDm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2016 06:03:42 -0500
-Received: by mail-qt0-f169.google.com with SMTP id c47so374509194qtc.2
-        for <ceph-devel@vger.kernel.org>; Wed, 07 Dec 2016 03:03:42 -0800 (PST)
+Received: from m13-152.163.com ([220.181.13.152]:59477 "EHLO m13-152.163.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751476AbcLGLyh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 7 Dec 2016 06:54:37 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "sjust@redhat.com" <sjust@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I generally ignore these on the assumption that they'd also be
-appearing in rados suite runs, but since we're so close to Kraken I'm
-flagging them:
-
-['type=AVC msg=audit(1481075825.792:4517): avc:  denied  { open } for
-pid=24997 comm="ceph-osd" path="/var/lib/ceph/osd/ceph-1/type"
-dev="nvme0n1p3" ino=25 scontext=system_u:system_r:ceph_t:s0
-tcontext=unconfined_u:object_r:unlabeled_t:s0 tclass=file', 't...
-  http://pulpito.ceph.com/jspray-2016-12-07_00:24:14-fs-wip-jcsp-testing-20161206-distro-basic-smithi/612516
-
-osd (Leak_DefinitelyLost)
-  http://pulpito.ceph.com/jspray-2016-12-07_00:24:14-fs-wip-jcsp-testing-20161206-distro-basic-smithi/612548
-  http://pulpito.ceph.com/jspray-2016-12-07_00:24:14-fs-wip-jcsp-testing-20161206-distro-basic-smithi/612640
-
-
-John
+CkhpLCBldmVyeW9uZS4KCgpJJ20gdHJ5aW5nIHRvIHJlYWQgdGhlIHNvdXJjZSBjb2RlIG9mIGNl
+cGgsIGFuZCBJIGZvdW5kIHRoYXQgc29tZSBjb2RlIHNlZW1zIHN0cmFuZ2UuCkluIFJlcGxpY2F0
+ZWRCYWNrZW5kOjpzdWJfb3BfbW9kaWZ5X3JlcGx5LCB0aGVyZSBpcyB0aGUgZm9sbG93aW5nIGNv
+ZGU6CgkJaWYgKHItPmFja190eXBlICYgQ0VQSF9PU0RfRkxBR19PTkRJU0spIHsKCQkJYXNzZXJ0
+KGlwX29wLndhaXRpbmdfZm9yX2NvbW1pdC5jb3VudChmcm9tKSk7CgkJCWlwX29wLndhaXRpbmdf
+Zm9yX2NvbW1pdC5lcmFzZShmcm9tKTsKCQkJaWYgKGlwX29wLm9wKSB7CgkJCQlvc3RyaW5nc3Ry
+ZWFtIHNzOwoJCQkJc3MgPDwgInN1Yl9vcF9jb21taXRfcmVjX2Zyb21fb3NkLiIgPDwgZnJvbS5v
+c2Q7CgkJCQlpcF9vcC5vcC0+bWFya19ldmVudChzcy5zdHIoKSk7CgkJCX0KCQl9IGVsc2UgewoJ
+CQlhc3NlcnQoaXBfb3Aud2FpdGluZ19mb3JfYXBwbGllZC5jb3VudChmcm9tKSk7CgkJCWlmIChp
+cF9vcC5vcCkgewoJCQkJb3N0cmluZ3N0cmVhbSBzczsKCQkJCXNzIDw8ICJzdWJfb3BfYXBwbGll
+ZF9yZWNfZnJvbV9vc2QuIiA8PCBmcm9tLm9zZDsKCQkJCWlwX29wLm9wLT5tYXJrX2V2ZW50KHNz
+LnN0cigpKTsKCQkJfQoJCX0KCQlpcF9vcC53YWl0aW5nX2Zvcl9hcHBsaWVkLmVyYXNlKGZyb20p
+OwpJdCBzZWVtcyB0aGF0IHRoZSBzdGF0ZW1lbnQgImlwX29wLndhaXRpbmdfZm9yX2FwcGxpZWQu
+ZXJhc2UoZnJvbSkiIHNob3VsZCBiZSBpbiB0aGUgImVsc2UiIGNsYXVzZSwgb3RoZXJ3aXNlIGl0
+ZW1zIGluIHdhaXRpbmdfZm9yX2FwcGxpZWQgY291bGQgYmUgZXJyb3JseSBlcmFzZWQgd2hlbiBh
+Y2tfdHlwZSBpcyBDRVBIX09TRF9GTEFHX09ORElTSy4KCldoeSBwdXQgaXQgb3V0c2lkZSB0aGUg
+ImVsc2UiIGNsYXVzZT8KVGhhbmsgeW91Oi0p
