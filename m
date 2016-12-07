@@ -1,34 +1,82 @@
-From: Bassam Tabbara <Bassam.Tabbara@quantum.com>
-Subject: Re: enabling shared ccache dirs in default builds
-Date: Wed, 7 Dec 2016 00:19:44 +0000
-Message-ID: <EF2107A2-04C1-498E-9E33-0872E51AFA65@quantum.com>
-References: <CAJ4mKGZSnN+RE7d5wrzghmtWZA1w1e7NT8JeW4nArwVdijggkQ@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Bluestore with ZS
+Date: Wed, 7 Dec 2016 01:29:12 +0000
+Message-ID: <BY2PR02MB396A1E7F05D1247FCA51AC3F4850@BY2PR02MB396.namprd02.prod.outlook.com>
+References: <BY2PR02MB39644AE8ABB2551CC39A46AF4820@BY2PR02MB396.namprd02.prod.outlook.com>
+ <ca516a6a-0089-2b7c-95aa-3a21de181f35@redhat.com>
+ <BY2PR02MB396443BEF29616A50E014D6F4820@BY2PR02MB396.namprd02.prod.outlook.com>
+ <A0D66DA6-605B-4761-A5C9-D52F2D1A6837@alibaba-inc.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx05-000ceb01.pphosted.com ([67.231.144.126]:37574 "EHLO
-        mx04-000ceb01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1750960AbcLGAmr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Dec 2016 19:42:47 -0500
-In-Reply-To: <CAJ4mKGZSnN+RE7d5wrzghmtWZA1w1e7NT8JeW4nArwVdijggkQ@mail.gmail.com>
+Received: from mail-by2nam01on0048.outbound.protection.outlook.com ([104.47.34.48]:50898
+        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751134AbcLGB3O (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 6 Dec 2016 20:29:14 -0500
+In-Reply-To: <A0D66DA6-605B-4761-A5C9-D52F2D1A6837@alibaba-inc.com>
 Content-Language: en-US
-Content-ID: <A6EE8CA9733EE1409D63469DADC63E69@QUANTUM.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
+To: "LIU, Fei" <james.liu@alibaba-inc.com>, Mark Nelson <mnelson@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-> The default (or at least, ./do_cmake.sh-setup) Ceph build makes use of
-> cmake. This is nice for speeding up builds, but as the amount of disk
-> space increases it really explodes disk usage on dev boxes. As of
-> today, a Ceph repo with build artifacts is ~30GB, and my ccache
-> directory is ~32GB.
-> 
-
-One option is to limit the ccache size by creating a conf file as such:
-
-> cat ~/.ccache/ccache.conf 
-max_size = 10G
-
-
+Tm8sIGFzIEkgc2FpZCwgd2UgYXJlIGluIHByb2Nlc3Mgb2Ygb3B0aW1pemluZyBpdCBmdXJ0aGVy
+IHdpdGggbXVsdGkga3Zfc3luYyB0aHJlYWQgYW5kIG9uY2UgaXQgaXMgZG9uZSAsIHdpbGwgc2Vu
+ZCBvdXQgdGhlIHVwZGF0ZWQgbnVtYmVycy4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0aA0K
+DQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogTElVLCBGZWkgW21haWx0bzpqYW1l
+cy5saXVAYWxpYmFiYS1pbmMuY29tXSANClNlbnQ6IFR1ZXNkYXksIERlY2VtYmVyIDA2LCAyMDE2
+IDU6MjQgUE0NClRvOiBTb21uYXRoIFJveTsgTWFyayBOZWxzb24NCkNjOiBjZXBoLWRldmVsDQpT
+dWJqZWN0OiBSZTogQmx1ZXN0b3JlIHdpdGggWlMNCg0KSGkgU29tbmF0aCwNCiAgIEdyZWF0IGpv
+Yi4gRG8geW91IGhhdmUgYW55IGxhdGVzdCBwZXJmb3JtYW5jZSBkYXRhIHRvIHNoYXJlIG90aGVy
+IHRoYW4gdGhlIG9uZSB5b3Ugc2VudCB0d28gd2Vla3MgYWdvPw0KDQogIFJlZ2FyZHMsDQogIEph
+bWVzDQoNCk9uIDEyLzYvMTYsIDExOjU2IFBNLCAiU29tbmF0aCBSb3kiIDxjZXBoLWRldmVsLW93
+bmVyQHZnZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2YgU29tbmF0aC5Sb3lAc2FuZGlzay5jb20+
+IHdyb3RlOg0KDQogICAgTm8gUHJvYmxlbSAsIHRha2UgeW91ciB0aW1lLi5Ib3BlZnVsbHksIGJ5
+IHRoZW4gd2UgY2FuIGdpdmUgeW91IHN0YWJsZSBtdWx0aV9rdiB2ZXJzaW9uLg0KICAgIA0KICAg
+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQogICAgRnJvbTogTWFyayBOZWxzb24gW21haWx0
+bzptbmVsc29uQHJlZGhhdC5jb21dIA0KICAgIFNlbnQ6IFR1ZXNkYXksIERlY2VtYmVyIDA2LCAy
+MDE2IDc6NTQgQU0NCiAgICBUbzogU29tbmF0aCBSb3kNCiAgICBDYzogY2VwaC1kZXZlbA0KICAg
+IFN1YmplY3Q6IFJlOiBCbHVlc3RvcmUgd2l0aCBaUw0KICAgIA0KICAgIEV4Y2VsbGVudCBTb21u
+YXRoIQ0KICAgIA0KICAgIEkgd2lsbCBhdHRlbXB0IHRvIHRlc3QgdGhpcyB0b2RheSwgdGhvdWdo
+IEkgYWxzbyBhbSBnb2luZyB0byBiZSBsb29raW5nIGF0IHRoZSBuZXcgUkJEIGVyYXN1cmUgY29k
+aW5nIHN0dWZmIHNvIGl0IG1pZ2h0IGJlIGEgZGF5IG9yIHR3by4NCiAgICANCiAgICBNYXJrDQog
+ICAgDQogICAgT24gMTIvMDYvMjAxNiAwMjozMyBBTSwgU29tbmF0aCBSb3kgd3JvdGU6DQogICAg
+PiBNYXJrLA0KICAgID4gUGxlYXNlIGZpbmQgdGhlIEJsdWVzdG9yZSArIFpTIGludGVncmF0ZWQg
+Y29kZSBzeW5jZWQgd2l0aCB0b2RheSdzIG1hc3RlciBpbiB0aGUgZm9sbG93aW5nIGxvY2F0aW9u
+Lg0KICAgID4NCiAgICA+IGh0dHBzOi8vZ2l0aHViLmNvbS9zb21uYXRoci9jZXBoL3RyZWUvd2lw
+LWJsdWVzdG9yZS16cw0KICAgID4NCiAgICA+IEFzIGRpc2N1c3NlZCBpbiB0aGUgc3RhbmR1cCAs
+IHRoaXMgaXMgd2l0aCBzaW5nbGUga3Zfc3luY190aHJlYWQuDQogICAgPiBJIGFtIHN0aWxsIGNs
+ZWFuaW5nIHVwIG11bHRpIGt2X3N5bmNfdGhyZWFkICB2ZXJzaW9uIGFuZCB3aWxsIHNlbmQgb3V0
+IGEgcHVsbCByZXF1ZXN0IGZvciBTYWdlIHRvIHJldmlldyBob3BlZnVsbHkgYnkgdG9tb3Jyb3cu
+DQogICAgPg0KICAgID4gSGVyZSBpcyB0aGUgc3RlcHMgeW91IG5lZWQgdG8gZm9sbG93IHRvIHVz
+ZSB0aGlzLg0KICAgID4NCiAgICA+IDEuICAuL2RvX2NtYWtlLnNoIC1EV0lUSF9aUz0xDQogICAg
+Pg0KICAgID4gMi4gbWFrZSBhbmQgbWFrZSBpbnN0YWxsDQogICAgPg0KICAgID4gMy4gSW4gdGhl
+IGNlcGguY29uZiAsIHVzZSB0aGUgZm9sbG93aW5nIG9wdGlvbi4NCiAgICA+DQogICAgPiBlbmFi
+bGUgZXhwZXJpbWVudGFsIHVucmVjb3ZlcmFibGUgZGF0YSBjb3JydXB0aW5nIGZlYXR1cmVzID0g
+Ymx1ZXN0b3JlIA0KICAgID4genMgcm9ja3NkYiBibHVlc3RvcmVfc3luY19zdWJtaXRfdHJhbnNh
+Y3Rpb24gPSBmYWxzZSANCiAgICA+IGJsdWVzdG9yZV9rdmJhY2tlbmQ9enMNCiAgICA+DQogICAg
+PiBXaXRoIHNtYWxsZXIgdm9sdW1lcyB5b3Ugd2lsbCBiZSBzZWVpbmcgcm9ja3Mgb3V0cGVyZm9y
+bWluZyBaUyAsIGJ1dCwgZm9yIGJpZ2dlciB2b2x1bWVzIFpTIGlzIGNhdGNoaW5nIHVwIGZhc3Qu
+DQogICAgPiBUaGUgY29kZSAoc2hpbSBsYXllciBhbmQgdGh1cyBCbHVlU3RvcmUpICBpcyBubyB3
+YXkgb3B0aW1hbGx5IHVzaW5nIFpTIHlldCBhbmQgd2UgYXJlIGluIHByb2Nlc3Mgb2Ygb3B0aW1p
+emluZyBpdCBmdXJ0aGVyICh3aXRoIG11bHRpIGt2X3N5bmMsIG1vcmUgYmF0Y2hpbmcgZXRjLiBl
+dGMuKS4NCiAgICA+IFdpbGwga2VlcCBjb21tdW5pdHkgcG9zdGVkIG9uIHRoaXMuDQogICAgPg0K
+ICAgID4gVGhhbmtzICYgUmVnYXJkcw0KICAgID4gU29tbmF0aA0KICAgID4NCiAgICA+DQogICAg
+Pg0KICAgID4gUExFQVNFIE5PVEU6IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBl
+bGVjdHJvbmljIG1haWwgbWVzc2FnZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRo
+ZSBkZXNpZ25hdGVkIHJlY2lwaWVudChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0
+aGlzIG1lc3NhZ2UgaXMgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5
+IG5vdGlmaWVkIHRoYXQgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFu
+ZCB0aGF0IGFueSByZXZpZXcsIGRpc3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWlu
+ZyBvZiB0aGlzIG1lc3NhZ2UgaXMgc3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVj
+ZWl2ZWQgdGhpcyBjb21tdW5pY2F0aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5k
+ZXIgYnkgdGVsZXBob25lIG9yIGUtbWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFu
+ZCBkZXN0cm95IGFueSBhbmQgYWxsIGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3Nz
+ZXNzaW9uICh3aGV0aGVyIGhhcmQgY29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3Bp
+ZXMpLg0KICAgID4NCiAgICAtLQ0KICAgIFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBz
+ZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbg0KICAgIHRoZSBib2R5IG9m
+IGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQogICAgTW9yZSBtYWpvcmRv
+bW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQog
+ICAgDQoNCg0K
