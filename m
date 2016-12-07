@@ -1,106 +1,33 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Bluestore with ZS
-Date: Wed, 7 Dec 2016 10:36:33 +0000
-Message-ID: <BY2PR02MB39691AD37D1FFA35B35046BF4850@BY2PR02MB396.namprd02.prod.outlook.com>
-References: <BY2PR02MB39644AE8ABB2551CC39A46AF4820@BY2PR02MB396.namprd02.prod.outlook.com>
- <ca516a6a-0089-2b7c-95aa-3a21de181f35@redhat.com>
+From: John Spray <jspray@redhat.com>
+Subject: OSD leaks & selinux denials
+Date: Wed, 7 Dec 2016 11:03:21 +0000
+Message-ID: <CALe9h7c4UEeXznHF0KbghJGENEqd4KdAQEAAryVtp9yW67=M0w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0042.outbound.protection.outlook.com ([104.47.37.42]:18287
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752017AbcLGKgg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 7 Dec 2016 05:36:36 -0500
-Content-Language: en-US
+Received: from mail-qt0-f169.google.com ([209.85.216.169]:35723 "EHLO
+        mail-qt0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751905AbcLGLDm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 7 Dec 2016 06:03:42 -0500
+Received: by mail-qt0-f169.google.com with SMTP id c47so374509194qtc.2
+        for <ceph-devel@vger.kernel.org>; Wed, 07 Dec 2016 03:03:42 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "sjust@redhat.com" <sjust@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Sage,
-Here is the multi kv sync code for your review.
+I generally ignore these on the assumption that they'd also be
+appearing in rados suite runs, but since we're so close to Kraken I'm
+flagging them:
 
-https://github.com/somnathr/ceph/tree/wip-bluestore-multi-kv-sync-thread
+['type=AVC msg=audit(1481075825.792:4517): avc:  denied  { open } for
+pid=24997 comm="ceph-osd" path="/var/lib/ceph/osd/ceph-1/type"
+dev="nvme0n1p3" ino=25 scontext=system_u:system_r:ceph_t:s0
+tcontext=unconfined_u:object_r:unlabeled_t:s0 tclass=file', 't...
+  http://pulpito.ceph.com/jspray-2016-12-07_00:24:14-fs-wip-jcsp-testing-20161206-distro-basic-smithi/612516
 
-It is giving ZS significant performance boost but we believe we can optimiz=
-e shim further. We are working on that.
-
-BTW, I have coded on top of your allocator changes (https://github.com/ceph=
-/ceph/pull/12343)
-
-Thanks & Regards
-Somnath
+osd (Leak_DefinitelyLost)
+  http://pulpito.ceph.com/jspray-2016-12-07_00:24:14-fs-wip-jcsp-testing-20161206-distro-basic-smithi/612548
+  http://pulpito.ceph.com/jspray-2016-12-07_00:24:14-fs-wip-jcsp-testing-20161206-distro-basic-smithi/612640
 
 
------Original Message-----
-From: Somnath Roy=20
-Sent: Tuesday, December 06, 2016 7:56 AM
-To: 'Mark Nelson'
-Cc: ceph-devel
-Subject: RE: Bluestore with ZS
-
-No Problem , take your time..Hopefully, by then we can give you stable mult=
-i_kv version.
-
------Original Message-----
-From: Mark Nelson [mailto:mnelson@redhat.com]
-Sent: Tuesday, December 06, 2016 7:54 AM
-To: Somnath Roy
-Cc: ceph-devel
-Subject: Re: Bluestore with ZS
-
-Excellent Somnath!
-
-I will attempt to test this today, though I also am going to be looking at =
-the new RBD erasure coding stuff so it might be a day or two.
-
-Mark
-
-On 12/06/2016 02:33 AM, Somnath Roy wrote:
-> Mark,
-> Please find the Bluestore + ZS integrated code synced with today's master=
- in the following location.
->
-> https://github.com/somnathr/ceph/tree/wip-bluestore-zs
->
-> As discussed in the standup , this is with single kv_sync_thread.
-> I am still cleaning up multi kv_sync_thread  version and will send out a =
-pull request for Sage to review hopefully by tomorrow.
->
-> Here is the steps you need to follow to use this.
->
-> 1.  ./do_cmake.sh -DWITH_ZS=3D1
->
-> 2. make and make install
->
-> 3. In the ceph.conf , use the following option.
->
-> enable experimental unrecoverable data corrupting features =3D bluestore=
-=20
-> zs rocksdb bluestore_sync_submit_transaction =3D false=20
-> bluestore_kvbackend=3Dzs
->
-> With smaller volumes you will be seeing rocks outperforming ZS , but, for=
- bigger volumes ZS is catching up fast.
-> The code (shim layer and thus BlueStore)  is no way optimally using ZS ye=
-t and we are in process of optimizing it further (with multi kv_sync, more =
-batching etc. etc.).
-> Will keep community posted on this.
->
-> Thanks & Regards
-> Somnath
->
->
->
-> PLEASE NOTE: The information contained in this electronic mail message is=
- intended only for the use of the designated recipient(s) named above. If t=
-he reader of this message is not the intended recipient, you are hereby not=
-ified that you have received this message in error and that any review, dis=
-semination, distribution, or copying of this message is strictly prohibited=
-. If you have received this communication in error, please notify the sende=
-r by telephone or e-mail (as shown above) immediately and destroy any and a=
-ll copies of this message in your possession (whether hard copies or electr=
-onically stored copies).
->
+John
