@@ -1,45 +1,119 @@
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [Lsf-pc] LSF/MM 2017: Call for Proposals
-Date: Thu, 8 Dec 2016 13:34:55 +0100
-Message-ID: <20161208123455.GC4049@quack2.suse.cz>
-References: <1480601506.2511.7.camel@poochiereds.net>
- <1481122626.2354.14.camel@HansenPartnership.com>
- <20161208122619.GA26535@dhcp22.suse.cz>
+From: =?UTF-8?B?QsOhcmEgQW7EjWluY292w6E=?= <bara@redhat.com>
+Subject: Re: [Ceph Doc Conventions] ObjectStore, FileStore, BlueStore x Object
+ Store, File Store, Blue Store
+Date: Thu, 8 Dec 2016 13:37:32 +0100
+Message-ID: <9708b99d-6500-32f8-2974-49652626b209@redhat.com>
+References: <13e0f1cc-5b25-6b05-65fb-66b961eafe7c@redhat.com>
+ <CALe9h7cre-GhZgwzuoNOzK_V=EXaDP6mrau6N=uQxS39r5FZsA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20161208122619.GA26535@dhcp22.suse.cz>
-Sender: owner-linux-mm@kvack.org
-To: Michal Hocko <mhocko@kernel.org>
-Cc: James Bottomley <James.Bottomley@HansenPartnership.com>, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, "lsf-pc@lists.linux-foundation.org" <lsf-pc@lists.linux-foundation.org>, linux-scsi@vger.kernel.org, linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-nvme@lists.infradead.org, "xfs@oss.sgi.com" <xfs@oss.sgi.com>, linux-block@vger.kernel.org, linux-ide@vger.kernel.org, linux-fsdevel@vger.kernel.org, Jeff Layton <jlayton@poochiereds.net>, linux-ext4@vger.kernel.org, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:46136 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932428AbcLHMhf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 8 Dec 2016 07:37:35 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 3EBC2C054910
+        for <ceph-devel@vger.kernel.org>; Thu,  8 Dec 2016 12:37:35 +0000 (UTC)
+In-Reply-To: <CALe9h7cre-GhZgwzuoNOzK_V=EXaDP6mrau6N=uQxS39r5FZsA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Federico Lucifredi <flucifre@redhat.com>, Neil Levine <nlevine@redhat.com>, ceph-docs <ceph-docs@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu 08-12-16 13:26:19, Michal Hocko wrote:
-> On Wed 07-12-16 06:57:06, James Bottomley wrote:
-> [...]
-> > Just on this point, since there seems to be a lot of confusion: lsf-pc
-> > is the list for contacting the programme committee, so you cannot
-> > subscribe to it.
-> > 
-> > There is no -discuss equivalent, like kernel summit has, because we
-> > expect you to cc the relevant existing mailing list and have the
-> > discussion there instead rather than expecting people to subscribe to a
-> > new list.
-> 
-> There used to be lsf@lists.linux-foundation.org. Is it not active
-> anymore?
+Hi John,
 
-No sure about the current state but usually it gets populated by the
-selected attendees each year.
+On 12/08/2016 01:23 PM, John Spray wrote:
+> On Thu, Dec 8, 2016 at 11:12 AM, Bára Ančincová <bara@redhat.com> wrote:
+>> Dear all,
+>>
+>> the Ceph documentation team is currently developing Ceph documentation
+>> conventions and we ran into the following question:
+>>
+>> What is the preferred spelling of various stores?
+>>
+>> I saw that the Ceph community mainly uses FileStore and BlueStore [1][2].
+>> However, we have Object Store in our guidelines[3] and we'd prefer to use it
+>> that way. Based on this logic it should be File Store and Blue Store.
+>>
+>> What spelling would you prefer? Is it ok to move from FileStore and
+>> BlueStore to File Store and Blue Store in the official downstream docs?
+>
+> I would prefer that these not be re-written because:
+>  * It creates unnecessary diffs between upstream docs and vendor docs
+> (more work for you!)
+>  * It decreases googleability (or at least forces the search engine to
+> work harder to unify the two spellings)
+>
+> It's a bit different to Filesystem vs. File System, because that was
+> an existing term where different people use different forms, whereas
+> these are our own terms.  To me, writing Blue Store instead of
+> BlueStore feels a bit like writing Mac Book instead of MacBook.
+>
+> Regarding Object Store: it depends on the context and whether you're
+> talking about a generic Object Store (like RGW/S3) or whether you're
+> talking about the internal Ceph component (which I would always call
+> ObjectStore).  I store my S3 objects in an object store, but I
+> configure my OSD to use ObjectStore.
+>
+> John
 
-								Honza
+Thank you very much for this explanation. This is exactly what we've 
+been looking for and why we reached out to the wider community.
+
+Has anyone else different preference? If not we will use FileStore, 
+BlueStore and ObjectStore and I'll update the Ceph conventions accordingly.
+
+Cheers,
+
+Bara
+
+
+>
+>> Please feel free to include anyone else who might be interested in this
+>> topic.
+>>
+>> Cheers,
+>>
+>> Bara
+>>
+>> [1]
+>> http://www.sebastien-han.fr/blog/2013/12/02/ceph-performance-interesting-things-going-on/
+>> [2] http://www.sebastien-han.fr/blog/2016/03/21/ceph-a-new-store-is-coming/
+>> [3]
+>> https://gitlab.cee.redhat.com/ccs-internal-documentation/glossary-of-terms-and-conventions-for-product-documentation/merge_requests/28/diffs
+>> (disclaimer - still WIP and many things are missing. Please free to comment
+>> if you have any feedback. We will definitely share the final version with
+>> you to get your ack. I personally believe that Ceph docs conventions is
+>> something that we really need to achieve consistency in our docs and to
+>> improve them.)
+>>
+>> --
+>> Bara Ancincova
+>> Technical Writer
+>> Customer Content Services
+>> IRC nick: bara
+>>
+>> Red Hat Czech, s.r.o.
+>> Purkynova 99
+>> 612 45 Brno, Czech Republic
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+Bara Ancincova
+Technical Writer
+Customer Content Services
+IRC nick: bara
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Red Hat Czech, s.r.o.
+Purkynova 99
+612 45 Brno, Czech Republic
