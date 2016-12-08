@@ -1,84 +1,39 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: [Ceph Doc Conventions] ObjectStore, FileStore, BlueStore x Object
- Store, File Store, Blue Store
-Date: Thu, 8 Dec 2016 12:23:58 +0000
-Message-ID: <CALe9h7cre-GhZgwzuoNOzK_V=EXaDP6mrau6N=uQxS39r5FZsA@mail.gmail.com>
-References: <13e0f1cc-5b25-6b05-65fb-66b961eafe7c@redhat.com>
+From: Michal Hocko <mhocko@kernel.org>
+Subject: Re: LSF/MM 2017: Call for Proposals
+Date: Thu, 8 Dec 2016 13:26:19 +0100
+Message-ID: <20161208122619.GA26535@dhcp22.suse.cz>
+References: <1480601506.2511.7.camel@poochiereds.net>
+ <1481122626.2354.14.camel@HansenPartnership.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:34615 "EHLO
-        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753113AbcLHMYU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Dec 2016 07:24:20 -0500
-Received: by mail-qk0-f176.google.com with SMTP id q130so260079777qke.1
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Dec 2016 04:24:20 -0800 (PST)
-In-Reply-To: <13e0f1cc-5b25-6b05-65fb-66b961eafe7c@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?QsOhcmEgQW7EjWluY292w6E=?= <bara@redhat.com>
-Cc: Federico Lucifredi <flucifre@redhat.com>, Neil Levine <nlevine@redhat.com>, ceph-docs <ceph-docs@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <1481122626.2354.14.camel@HansenPartnership.com>
+Sender: owner-linux-mm@kvack.org
+To: James Bottomley <James.Bottomley@HansenPartnership.com>
+Cc: Jeff Layton <jlayton@poochiereds.net>, linux-block@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-ide@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-nfs@vger.kernel.org, linux-scsi@vger.kernel.org, "xfs@oss.sgi.com" <xfs@oss.sgi.com>, ceph-devel@vger.kernel.org, linux-nvme@lists.infradead.org, "lsf-pc@lists.linux-foundation.org" <lsf-pc@lists.linux-foundation.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Dec 8, 2016 at 11:12 AM, Bára Ančincová <bara@redhat.com> wrote:
-> Dear all,
->
-> the Ceph documentation team is currently developing Ceph documentation
-> conventions and we ran into the following question:
->
-> What is the preferred spelling of various stores?
->
-> I saw that the Ceph community mainly uses FileStore and BlueStore [1][2].
-> However, we have Object Store in our guidelines[3] and we'd prefer to use it
-> that way. Based on this logic it should be File Store and Blue Store.
->
-> What spelling would you prefer? Is it ok to move from FileStore and
-> BlueStore to File Store and Blue Store in the official downstream docs?
+On Wed 07-12-16 06:57:06, James Bottomley wrote:
+[...]
+> Just on this point, since there seems to be a lot of confusion: lsf-pc
+> is the list for contacting the programme committee, so you cannot
+> subscribe to it.
+> 
+> There is no -discuss equivalent, like kernel summit has, because we
+> expect you to cc the relevant existing mailing list and have the
+> discussion there instead rather than expecting people to subscribe to a
+> new list.
 
-I would prefer that these not be re-written because:
- * It creates unnecessary diffs between upstream docs and vendor docs
-(more work for you!)
- * It decreases googleability (or at least forces the search engine to
-work harder to unify the two spellings)
+There used to be lsf@lists.linux-foundation.org. Is it not active
+anymore?
 
-It's a bit different to Filesystem vs. File System, because that was
-an existing term where different people use different forms, whereas
-these are our own terms.  To me, writing Blue Store instead of
-BlueStore feels a bit like writing Mac Book instead of MacBook.
+-- 
+Michal Hocko
+SUSE Labs
 
-Regarding Object Store: it depends on the context and whether you're
-talking about a generic Object Store (like RGW/S3) or whether you're
-talking about the internal Ceph component (which I would always call
-ObjectStore).  I store my S3 objects in an object store, but I
-configure my OSD to use ObjectStore.
-
-John
-
-> Please feel free to include anyone else who might be interested in this
-> topic.
->
-> Cheers,
->
-> Bara
->
-> [1]
-> http://www.sebastien-han.fr/blog/2013/12/02/ceph-performance-interesting-things-going-on/
-> [2] http://www.sebastien-han.fr/blog/2016/03/21/ceph-a-new-store-is-coming/
-> [3]
-> https://gitlab.cee.redhat.com/ccs-internal-documentation/glossary-of-terms-and-conventions-for-product-documentation/merge_requests/28/diffs
-> (disclaimer - still WIP and many things are missing. Please free to comment
-> if you have any feedback. We will definitely share the final version with
-> you to get your ack. I personally believe that Ceph docs conventions is
-> something that we really need to achieve consistency in our docs and to
-> improve them.)
->
-> --
-> Bara Ancincova
-> Technical Writer
-> Customer Content Services
-> IRC nick: bara
->
-> Red Hat Czech, s.r.o.
-> Purkynova 99
-> 612 45 Brno, Czech Republic
->
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
