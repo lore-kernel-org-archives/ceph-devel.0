@@ -1,33 +1,46 @@
-From: "Chagam, Anjaneya" <anjaneya.chagam@intel.com>
-Subject: RE: Ceph master latency breakdown
-Date: Thu, 8 Dec 2016 14:57:37 +0000
-Message-ID: <ED1FEFDBDC3D874AB5F252B4B91BFDE839E30F37@FMSMSX102.amr.corp.intel.com>
-References: <6C767E85-9C45-469B-A4F7-3B5D38E8B0B6@alibaba-inc.com>
+From: James Bottomley <James.Bottomley@HansenPartnership.com>
+Subject: Re: LSF/MM 2017: Call for Proposals
+Date: Thu, 08 Dec 2016 07:30:43 -0800
+Message-ID: <1481211043.2361.1.camel@HansenPartnership.com>
+References: <1480601506.2511.7.camel@poochiereds.net>
+	 <1481122626.2354.14.camel@HansenPartnership.com>
+	 <20161208122619.GA26535@dhcp22.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:24972 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932298AbcLHPAm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 8 Dec 2016 10:00:42 -0500
-In-Reply-To: <6C767E85-9C45-469B-A4F7-3B5D38E8B0B6@alibaba-inc.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "LIU, Fei" <james.liu@alibaba-inc.com>, Somnath Roy <Somnath.Roy@sandisk.com>, "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20161208122619.GA26535@dhcp22.suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: Michal Hocko <mhocko@kernel.org>
+Cc: Jeff Layton <jlayton@poochiereds.net>, linux-block@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-cifs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-ide@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mm@kvack.org, linux-nfs@vger.kernel.org, linux-scsi@vger.kernel.org, "xfs@oss.sgi.com" <xfs@oss.sgi.com>, ceph-devel@vger.kernel.org, linux-nvme@lists.infradead.org, "lsf-pc@lists.linux-foundation.org" <lsf-pc@lists.linux-foundation.org>
+List-Id: ceph-devel.vger.kernel.org
 
-SmFtZXMsDQpQdWxsIHJlcXVlc3QgaW4gcHJvZ3Jlc3MgLSBzdGF5IHR1bmVkLCB3aWxsIHNvcnQg
-dGhpcyBieSB0b21vcnJvdy4gDQpUaHggYSBsb3QsDQpSZWRkeQ0KDQotLS0tLU9yaWdpbmFsIE1l
-c3NhZ2UtLS0tLQ0KRnJvbTogTElVLCBGZWkgW21haWx0bzpqYW1lcy5saXVAYWxpYmFiYS1pbmMu
-Y29tXSANClNlbnQ6IFdlZG5lc2RheSwgRGVjZW1iZXIgNywgMjAxNiA3OjMyIFBNDQpUbzogU29t
-bmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPjsgU2FnZSBXZWlsIChzd2VpbEByZWRo
-YXQuY29tKSA8c3dlaWxAcmVkaGF0LmNvbT47IENoYWdhbSwgQW5qYW5leWEgPGFuamFuZXlhLmNo
-YWdhbUBpbnRlbC5jb20+DQpDYzogY2VwaC1kZXZlbCA8Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5v
-cmc+DQpTdWJqZWN0OiBDZXBoIG1hc3RlciBsYXRlbmN5IGJyZWFrZG93bg0KDQpIaSBTYWdlIGFu
-ZCBJbnRlbCBmb2xrcywNCg0KICAgV291bGQgeW91IG1pbmQgY29uZmlybWluZyB0aGUgdGhlIHB1
-bGwgcmVxdWVzdCBmb3IgbGF0ZW5jeSBicmVha2Rvd24gd2l0aCBiZWxvdyBsaW5rPw0KICBodHRw
-czovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMTIzMzANCiAgDQogIEl0IHdvdWxkIGJlIGdy
-ZWF0IHRvIGhhdmUgdGhlIGxhdGVuY3kgYnJlYWtkb3duIHByZXNlbnRhdGlvbiBpbiB0aGUgbWVl
-dGluZy4NCiAgDQogIFRoYW5rcywNCiAgSmFtZXMNCg0KDQo=
+On Thu, 2016-12-08 at 13:26 +0100, Michal Hocko wrote:
+> On Wed 07-12-16 06:57:06, James Bottomley wrote:
+> [...]
+> > Just on this point, since there seems to be a lot of confusion: lsf
+> > -pc
+> > is the list for contacting the programme committee, so you cannot
+> > subscribe to it.
+> > 
+> > There is no -discuss equivalent, like kernel summit has, because we
+> > expect you to cc the relevant existing mailing list and have the
+> > discussion there instead rather than expecting people to subscribe
+> > to a
+> > new list.
+> 
+> There used to be lsf@lists.linux-foundation.org. Is it not active
+> anymore?
+
+Not until we get the list of invitees sorted out.  And then it's only
+for stuff actually to do with lsf (like logistics, bof or session
+requests or other meetups).  Any technical stuff should still be cc'd
+to the relevant mailing list.
+
+James
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
