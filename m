@@ -1,65 +1,125 @@
-From: =?UTF-8?B?QsOhcmEgQW7EjWluY292w6E=?= <bara@redhat.com>
-Subject: [Ceph Doc Conventions] ObjectStore, FileStore, BlueStore x Object
- Store, File Store, Blue Store
-Date: Thu, 8 Dec 2016 12:12:59 +0100
-Message-ID: <13e0f1cc-5b25-6b05-65fb-66b961eafe7c@redhat.com>
+From: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?=
+        <bartlomiej.swiecki@corp.ovh.com>
+Subject: Re: Question about recovery vs backfill priorities
+Date: Thu, 8 Dec 2016 12:49:06 +0100
+Message-ID: <c9a25a66-eb1d-72ab-6153-56925580701a@corp.ovh.com>
+References: <3b219d94-431d-0a4f-e656-826003028a9d@corp.ovh.com>
+ <alpine.DEB.2.11.1612012158570.2097@piezo.novalocal>
+ <899b3678-82fc-3dcf-a3ed-151aa033dc79@corp.ovh.com>
+ <alpine.DEB.2.11.1612051518290.2711@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43872 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751704AbcLHLWe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 8 Dec 2016 06:22:34 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 1A048C04B30E
-        for <ceph-devel@vger.kernel.org>; Thu,  8 Dec 2016 11:13:02 +0000 (UTC)
+Received: from 2.mo301.mail-out.ovh.net ([137.74.110.65]:48094 "EHLO
+        2.mo301.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751987AbcLHL6u (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Dec 2016 06:58:50 -0500
+In-Reply-To: <alpine.DEB.2.11.1612051518290.2711@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Federico Lucifredi <flucifre@redhat.com>, Neil Levine <nlevine@redhat.com>
-Cc: ceph-docs <ceph-docs@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Ceph-release-team <ceph-release-team@redhat.com>
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, sjust@redhat.com
 
-Dear all,
+Ok, so here we go: https://github.com/ceph/ceph/pull/12389
 
-the Ceph documentation team is currently developing Ceph documentation 
-conventions and we ran into the following question:
+I included ceph_pool_recovery in backfill. I also noticed that priority 
+could be negative
+so I made sure this code will properly work in such cases.
 
-What is the preferred spelling of various stores?
+I've been testing this locally and backfill for inactive pages recovery 
+is much better now.
 
-I saw that the Ceph community mainly uses FileStore and BlueStore 
-[1][2]. However, we have Object Store in our guidelines[3] and we'd 
-prefer to use it that way. Based on this logic it should be File Store 
-and Blue Store.
+While testing I found another problem causing IO stalls, also confirmed 
+on 10.2.3.
+I made the cluster having some unfound objects during recovery by 
+bringing all copies down,
+after bringing one OSD up, some requests ended up in "waiting for 
+missing objects". If I left
+the cluster to fully recover, this eventually went away but the io was 
+blocked even though
+there was no inactive PG. When I manually restarted OSD having "waiting 
+for missing objects"
+on different test run, fio (the one I used to do IO load on the cluster) 
+unblocked so I guess
+those requests could have been unblocked earlier.
 
-What spelling would you prefer? Is it ok to move from FileStore and 
-BlueStore to File Store and Blue Store in the official downstream docs?
+Is this something we could also improve?
 
-Please feel free to include anyone else who might be interested in this 
-topic.
 
-Cheers,
+Thanks,
+Bartek
 
-Bara
+On 12/05/2016 04:18 PM, Sage Weil wrote:
+> On Mon, 5 Dec 2016, Bartłomiej Święcki wrote:
+>> Hi,
+>>
+>> I made a quick draft of how new priority code could look like, please let me
+>> know if that's a good direction:
+>>
+>> https://github.com/ceph/ceph/compare/master...ovh:wip-rework-recovery-priorities
+>>
+>> Haven't tested it yet though so no PR yet, will do it today.
+> That looks reasonable to me!
+>
+>> A side question: Is there any reason why pool_recovery_priority is not
+>> adjusting backfill priority?
+>> Maybe it would be beneficial to include it there too?
+> I'm guessing not... Sam?
+>
+> sage
+>
+>
+>
+>> Regards,
+>> Bartek
+>>
+>>
+>> On 12/01/2016 11:10 PM, Sage Weil wrote:
+>>> Hi Bartek,
+>>>
+>>> On Thu, 1 Dec 2016, Bartłomiej Święcki wrote:
+>>>> We're currently being hit by an issue with cluster recovery. The cluster
+>>>> size
+>>>> has been significantly extended (~50% new OSDs) and started recovery.
+>>>> During recovery there was a HW failure and we ended up with some PGS in
+>>>> peered
+>>>> state with size < min_size (inactive).
+>>>> Those peered PGs are waiting for backfill but the cluster still prefers
+>>>> recovery of recovery_wait PGs - in our case this could be even few hours
+>>>> before all recovery is finished (we're speeding up recovery up to limits
+>>>> to
+>>>> get the downtime as short as possible). Those peered PGs are blocked
+>>>> during
+>>>> this time and the whole cluster just struggles to operate at a reasonable
+>>>> level.
+>>>>
+>>>> We're running hammer 0.94.6 there and from the code it looks like recovery
+>>>> will always have higher priority (jewel seems similar).
+>>>> Documentation only says that log-based recovery must finish before
+>>>> backfills.
+>>>> Is this requirement needed for data consistency or something else?
+>>> For a given single PG, it will do it's own log recovery (to bring acting
+>>> OSDs fully up to date) before starting backfill, but between PGs there's
+>>> no dependency.
+>>>
+>>>> Ideally we'd like it to be this order: undersized inactive (size <
+>>>> min_size)
+>>>> recovery_wait => undersized inactive (size < min_size) wait_backfill =>
+>>>> degraded recovery_wait => degraded wait_backfill => remapped
+>>>> wait_backfill.
+>>>> Changing priority calculation doesn't seem to be that hard but would it
+>>>> end up
+>>>> with inconsistent data?
+>>> We could definitely improve this, yeah.  The prioritization code is based
+>>> around PG::get_{recovery,backfill}_priority(), and the
+>>> OSD_{RECOVERY,BACKFILL}_* #defines in PG.h.  It currently assumes (log)
+>>> recovery is always higher priority than backfill, but as you say we can do
+>>> better.  As long as everything maps into a 0..255 priority value it should
+>>> be fine.
+>>>
+>>> Getting the undersized inactive bumped to the top should be a simple tweak
+>>> (just force a top-value priority in that case)...
+>>>
+>>> sage
 
-[1] 
-http://www.sebastien-han.fr/blog/2013/12/02/ceph-performance-interesting-things-going-on/
-[2] http://www.sebastien-han.fr/blog/2016/03/21/ceph-a-new-store-is-coming/
-[3] 
-https://gitlab.cee.redhat.com/ccs-internal-documentation/glossary-of-terms-and-conventions-for-product-documentation/merge_requests/28/diffs
-(disclaimer - still WIP and many things are missing. Please free to 
-comment if you have any feedback. We will definitely share the final 
-version with you to get your ack. I personally believe that Ceph docs 
-conventions is something that we really need to achieve consistency in 
-our docs and to improve them.)
-
--- 
-Bara Ancincova
-Technical Writer
-Customer Content Services
-IRC nick: bara
-
-Red Hat Czech, s.r.o.
-Purkynova 99
-612 45 Brno, Czech Republic
