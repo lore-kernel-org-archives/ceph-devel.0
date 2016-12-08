@@ -1,142 +1,35 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: [Ceph Doc Conventions] ObjectStore, FileStore, BlueStore x Object
- Store, File Store, Blue Store
-Date: Thu, 8 Dec 2016 13:23:43 -0800
-Message-ID: <CAJ4mKGa6P93kXBNo3D0xwjK=scdZn4tYn7D5bVke27XSJVvSbw@mail.gmail.com>
-References: <13e0f1cc-5b25-6b05-65fb-66b961eafe7c@redhat.com>
- <CALe9h7cre-GhZgwzuoNOzK_V=EXaDP6mrau6N=uQxS39r5FZsA@mail.gmail.com> <9708b99d-6500-32f8-2974-49652626b209@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Reshard is not stabilizing in latest master
+Date: Thu, 8 Dec 2016 21:38:12 +0000
+Message-ID: <DM2PR02MB398ED2929DBD480C2CCFC88F4840@DM2PR02MB398.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f181.google.com ([209.85.223.181]:34380 "EHLO
-        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752510AbcLHVXp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Dec 2016 16:23:45 -0500
-Received: by mail-io0-f181.google.com with SMTP id p42so26652108ioo.1
-        for <ceph-devel@vger.kernel.org>; Thu, 08 Dec 2016 13:23:44 -0800 (PST)
-In-Reply-To: <9708b99d-6500-32f8-2974-49652626b209@redhat.com>
+Received: from mail-sn1nam01on0044.outbound.protection.outlook.com ([104.47.32.44]:20465
+        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932708AbcLHVyx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 8 Dec 2016 16:54:53 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?QsOhcmEgQW7EjWluY292w6E=?= <bara@redhat.com>
-Cc: John Spray <jspray@redhat.com>, Federico Lucifredi <flucifre@redhat.com>, Neil Levine <nlevine@redhat.com>, ceph-docs <ceph-docs@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Dec 8, 2016 at 4:37 AM, Bára Ančincová <bara@redhat.com> wrote:
-> Hi John,
->
->
-> On 12/08/2016 01:23 PM, John Spray wrote:
->>
->> On Thu, Dec 8, 2016 at 11:12 AM, Bára Ančincová <bara@redhat.com> wrote:
->>>
->>> Dear all,
->>>
->>> the Ceph documentation team is currently developing Ceph documentation
->>> conventions and we ran into the following question:
->>>
->>> What is the preferred spelling of various stores?
->>>
->>> I saw that the Ceph community mainly uses FileStore and BlueStore [1][2].
->>> However, we have Object Store in our guidelines[3] and we'd prefer to use
->>> it
->>> that way. Based on this logic it should be File Store and Blue Store.
->>>
->>> What spelling would you prefer? Is it ok to move from FileStore and
->>> BlueStore to File Store and Blue Store in the official downstream docs?
->>
->>
->> I would prefer that these not be re-written because:
->>  * It creates unnecessary diffs between upstream docs and vendor docs
->> (more work for you!)
->>  * It decreases googleability (or at least forces the search engine to
->> work harder to unify the two spellings)
->>
->> It's a bit different to Filesystem vs. File System, because that was
->> an existing term where different people use different forms, whereas
->> these are our own terms.  To me, writing Blue Store instead of
->> BlueStore feels a bit like writing Mac Book instead of MacBook.
->>
->> Regarding Object Store: it depends on the context and whether you're
->> talking about a generic Object Store (like RGW/S3) or whether you're
->> talking about the internal Ceph component (which I would always call
->> ObjectStore).  I store my S3 objects in an object store, but I
->> configure my OSD to use ObjectStore.
->>
->> John
->
->
-> Thank you very much for this explanation. This is exactly what we've been
-> looking for and why we reached out to the wider community.
->
-> Has anyone else different preference? If not we will use FileStore,
-> BlueStore and ObjectStore and I'll update the Ceph conventions accordingly.
+Sage,
+I am seeing reshard is not stabilizing even after I precondition an image w=
+ith 4K seq. It was happening with 2 weeks old master. Anything change on th=
+at part of the code base recently ? Otherwise I need to debug.
 
-I think maybe you and John are referring to different things by
-"Object Store" and "ObjectStore" in the examples you both gave. There
-is an ObjectStore for backing the OSD the same way we have BlueStore
-and FileStore, but it's not supported and I don't think should ever be
-mentioned in downstream pages. There's also the Red Hat Ceph Storage
-Object Store (or whatever we call RGW in product terms) and that is
-always two words, as John said. :)
--Greg
-
->
-> Cheers,
->
-> Bara
->
->
->
->>
->>> Please feel free to include anyone else who might be interested in this
->>> topic.
->>>
->>> Cheers,
->>>
->>> Bara
->>>
->>> [1]
->>>
->>> http://www.sebastien-han.fr/blog/2013/12/02/ceph-performance-interesting-things-going-on/
->>> [2]
->>> http://www.sebastien-han.fr/blog/2016/03/21/ceph-a-new-store-is-coming/
->>> [3]
->>>
->>> https://gitlab.cee.redhat.com/ccs-internal-documentation/glossary-of-terms-and-conventions-for-product-documentation/merge_requests/28/diffs
->>> (disclaimer - still WIP and many things are missing. Please free to
->>> comment
->>> if you have any feedback. We will definitely share the final version with
->>> you to get your ack. I personally believe that Ceph docs conventions is
->>> something that we really need to achieve consistency in our docs and to
->>> improve them.)
->>>
->>> --
->>> Bara Ancincova
->>> Technical Writer
->>> Customer Content Services
->>> IRC nick: bara
->>>
->>> Red Hat Czech, s.r.o.
->>> Purkynova 99
->>> 612 45 Brno, Czech Republic
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
->
-> --
-> Bara Ancincova
-> Technical Writer
-> Customer Content Services
-> IRC nick: bara
->
-> Red Hat Czech, s.r.o.
-> Purkynova 99
-> 612 45 Brno, Czech Republic
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks & Regards
+Somnath
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
