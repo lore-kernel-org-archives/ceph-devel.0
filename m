@@ -1,81 +1,38 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re:Re: Question about ReplicatedBackend::sub_op_modify_reply
-Date: Fri, 9 Dec 2016 03:54:37 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612090353310.5710@piezo.novalocal>
-References: <41f33622.d4cc.158d91430e9.Coremail.xxhdx1985126@163.com> <alpine.DEB.2.11.1612071429320.22485@piezo.novalocal> <4bb8100c.56f0.158e1b25e72.Coremail.xxhdx1985126@163.com>
+From: Alexey Sheplyakov <asheplyakov@mirantis.com>
+Subject: Re: 10.2.4 Jewel released -- IMPORTANT
+Date: Fri, 9 Dec 2016 10:15:31 +0400
+Message-ID: <CAC7t81ah1By3DktohaCinV5g9XYGb7cUO6nfa8aqu6b7xrxDWg@mail.gmail.com>
+References: <877f7c3p6k.fsf@suse.com> <alpine.DEB.2.11.1612072305350.26733@piezo.novalocal>
+ <CAC7t81a4Ctd8z7x55k+qzYHE+T5M8Y-3PyFe3t3BtZgNK54FmQ@mail.gmail.com> <CAJ4mKGbLAuVxqsfR-KAFmVthikBiMLPu1UAn+HfpYsqNbY0etg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1121986784-1481255680=:5710"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34370 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932192AbcLIDym (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Dec 2016 22:54:42 -0500
-In-Reply-To: <4bb8100c.56f0.158e1b25e72.Coremail.xxhdx1985126@163.com>
+Received: from mail-yw0-f171.google.com ([209.85.161.171]:34760 "EHLO
+        mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752070AbcLIGPc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Dec 2016 01:15:32 -0500
+Received: by mail-yw0-f171.google.com with SMTP id t125so7058816ywc.1
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Dec 2016 22:15:32 -0800 (PST)
+In-Reply-To: <CAJ4mKGbLAuVxqsfR-KAFmVthikBiMLPu1UAn+HfpYsqNbY0etg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: xxhdx1985126 <xxhdx1985126@163.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, Abhishek L <abhishek@suse.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi,
 
---8323329-1121986784-1481255680=:5710
-Content-Type: TEXT/PLAIN; charset=ISO-8859-15
-Content-Transfer-Encoding: 8BIT
+> Hmm, I'd assume in the case of a checksum error you'd expect the data
+> to show up again pretty quickly.
 
-On Fri, 9 Dec 2016, xxhdx1985126 wrote:
-> Thanks for the quick reply:-)
-> 
-> By the way,  according to my understanding of the source code, the ondisk
-> callback is trigger both when journal write complete or syscall(SYS_syncfs,
-> fd) complete. Is this right?
+"pretty quickly" compared to what?
 
-The syncfs path only happens if you're using btrfs ('parallel' mode) since 
-with xfs we don't even write to the fs until the journaled event has 
-committed.
+> In any case I've updated https://github.com/ceph/ceph/pull/12374 to
+> deal with that more gracefully by setting a configurable number of
+> retry attempts on EAGAIN.
 
-s
- > 
-> 
-> 
-> At 2016-12-07 22:29:55, "Sage Weil" <sage@newdream.net> wrote:
-> >On Wed, 7 Dec 2016, xxhdx1985126 wrote:
-> >> Hi, everyone.
-> >> 
-> >> 
-> >> I'm trying to read the source code of ceph, and I found that some code se
-> ems strange.
-> >> In ReplicatedBackend::sub_op_modify_reply, there is the following code:
-> >> 		if (r->ack_type & CEPH_OSD_FLAG_ONDISK) {
-> >> 			assert(ip_op.waiting_for_commit.count(from));
-> >> 			ip_op.waiting_for_commit.erase(from);
-> >> 			if (ip_op.op) {
-> >> 				ostringstream ss;
-> >> 				ss << "sub_op_commit_rec_from_osd." << from.osd;
-> >> 				ip_op.op->mark_event(ss.str());
-> >> 			}
-> >> 		} else {
-> >> 			assert(ip_op.waiting_for_applied.count(from));
-> >> 			if (ip_op.op) {
-> >> 				ostringstream ss;
-> >> 				ss << "sub_op_applied_rec_from_osd." << from.osd;
-> >> 				ip_op.op->mark_event(ss.str());
-> >> 			}
-> >> 		}
-> >> 		ip_op.waiting_for_applied.erase(from);
-> >> It seems that the statement "ip_op.waiting_for_applied.erase(from)" shoul
-> d be in the "else" clause, otherwise items in waiting_for_applied could be e
-> rrorly erased when ack_type is CEPH_OSD_FLAG_ONDISK.
-> >> 
-> >> Why put it outside the "else" clause?
-> >
-> >The commit/ondisk message implies applied.
-> >
-> >sage
-> 
-> 
->  
-> 
-> 
-> 
---8323329-1121986784-1481255680=:5710--
+I don't think these retries make sense: CPU will complete those 2 (or even 200)
+loops much faster than the missing data could possibly arrive. It's simpler
+(and more efficient) to wait for the data with select/[e]poll
+
+Best regards,
+       Alexey
