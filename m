@@ -1,73 +1,81 @@
-From: Amitay Isaacs <amitay@gmail.com>
-Subject: Re: [PATCH] Ceph RADOS cluster mutex helper for Samba CTDB
-Date: Fri, 9 Dec 2016 14:11:06 +1100
-Message-ID: <CAJ+X7mQYAgO8Uc-kuc2Nmb4K-q+_pv=GyZX2ajST=BMZSjTj2w@mail.gmail.com>
-References: <20161201151715.019228c1@suse.de>
- <CAJ+X7mTkBLQDYb+r9LELQe-sqfG_4YkQ9HbkDFAp70cPp7V8zA@mail.gmail.com>
- <20161206131404.38f737d0@suse.de> <20161206131827.273bd9b8@suse.de>
- <CAJ+X7mRh04D+Yvtf0xx3dT6rTa=9KvJagyK=1PJQC=1R+u++7w@mail.gmail.com>
- <20161208193954.7ce6b896@suse.de>
+From: Sage Weil <sage@newdream.net>
+Subject: Re:Re: Question about ReplicatedBackend::sub_op_modify_reply
+Date: Fri, 9 Dec 2016 03:54:37 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612090353310.5710@piezo.novalocal>
+References: <41f33622.d4cc.158d91430e9.Coremail.xxhdx1985126@163.com> <alpine.DEB.2.11.1612071429320.22485@piezo.novalocal> <4bb8100c.56f0.158e1b25e72.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <samba-technical-bounces@lists.samba.org>
-In-Reply-To: <20161208193954.7ce6b896@suse.de>
-List-Unsubscribe: <https://lists.samba.org/mailman/options/samba-technical>,
- <mailto:samba-technical-request@lists.samba.org?subject=unsubscribe>
-List-Archive: <http://lists.samba.org/pipermail/samba-technical/>
-List-Post: <mailto:samba-technical@lists.samba.org>
-List-Help: <mailto:samba-technical-request@lists.samba.org?subject=help>
-List-Subscribe: <https://lists.samba.org/mailman/listinfo/samba-technical>,
- <mailto:samba-technical-request@lists.samba.org?subject=subscribe>
-Errors-To: samba-technical-bounces@lists.samba.org
-Sender: "samba-technical" <samba-technical-bounces@lists.samba.org>
-To: David Disseldorp <ddiss@suse.de>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Samba Technical <samba-technical@lists.samba.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1121986784-1481255680=:5710"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:34370 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932192AbcLIDym (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Dec 2016 22:54:42 -0500
+In-Reply-To: <4bb8100c.56f0.158e1b25e72.Coremail.xxhdx1985126@163.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: xxhdx1985126 <xxhdx1985126@163.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Dec 9, 2016 at 5:39 AM, David Disseldorp <ddiss@suse.de> wrote:
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-> Hi Amitay,
->
-> On Wed, 7 Dec 2016 13:32:34 +1100, Amitay Isaacs wrote:
->
-> > Hi David,
+--8323329-1121986784-1481255680=:5710
+Content-Type: TEXT/PLAIN; charset=ISO-8859-15
+Content-Transfer-Encoding: 8BIT
+
+On Fri, 9 Dec 2016, xxhdx1985126 wrote:
+> Thanks for the quick reply:-)
+> 
+> By the way,  according to my understanding of the source code, the ondisk
+> callback is trigger both when journal write complete or syscall(SYS_syncfs,
+> fd) complete. Is this right?
+
+The syncfs path only happens if you're using btrfs ('parallel' mode) since 
+with xfs we don't even write to the fs until the journaled event has 
+committed.
+
+s
+ > 
+> 
+> 
+> At 2016-12-07 22:29:55, "Sage Weil" <sage@newdream.net> wrote:
+> >On Wed, 7 Dec 2016, xxhdx1985126 wrote:
+> >> Hi, everyone.
+> >> 
+> >> 
+> >> I'm trying to read the source code of ceph, and I found that some code se
+> ems strange.
+> >> In ReplicatedBackend::sub_op_modify_reply, there is the following code:
+> >> 		if (r->ack_type & CEPH_OSD_FLAG_ONDISK) {
+> >> 			assert(ip_op.waiting_for_commit.count(from));
+> >> 			ip_op.waiting_for_commit.erase(from);
+> >> 			if (ip_op.op) {
+> >> 				ostringstream ss;
+> >> 				ss << "sub_op_commit_rec_from_osd." << from.osd;
+> >> 				ip_op.op->mark_event(ss.str());
+> >> 			}
+> >> 		} else {
+> >> 			assert(ip_op.waiting_for_applied.count(from));
+> >> 			if (ip_op.op) {
+> >> 				ostringstream ss;
+> >> 				ss << "sub_op_applied_rec_from_osd." << from.osd;
+> >> 				ip_op.op->mark_event(ss.str());
+> >> 			}
+> >> 		}
+> >> 		ip_op.waiting_for_applied.erase(from);
+> >> It seems that the statement "ip_op.waiting_for_applied.erase(from)" shoul
+> d be in the "else" clause, otherwise items in waiting_for_applied could be e
+> rrorly erased when ack_type is CEPH_OSD_FLAG_ONDISK.
+> >> 
+> >> Why put it outside the "else" clause?
 > >
-> > On Tue, Dec 6, 2016 at 11:18 PM, David Disseldorp <ddiss@suse.de> wrote:
+> >The commit/ondisk message implies applied.
 > >
-> > > This time with the patch-set attached...
-> > >
-> > > >  ctdb/doc/Makefile                             |   3 +-
-> > > >  ctdb/doc/ctdb_mutex_ceph_rados_helper.7.xml   |  90 +++++
-> > > >  .../utils/ceph/ctdb_mutex_ceph_rados_helper.c | 334
-> ++++++++++++++++++
-> > > >  ctdb/utils/ceph/test_ceph_rados_reclock.sh    | 151 ++++++++
-> > > >  ctdb/wscript                                  |  19 +
-> > > >  5 files changed, 596 insertions(+), 1 deletion(-)
-> > >
-> >
-> > In patch 1, why do you need to include any of the CTDB files
-> > (protocol/protocol.h and common/system.h) and have dependency on
-> > ctdb-system?  I don't see you are using any of the functions defined in
-> > common/system.h.
-> >
-> > Please include the manpage in SAMBA_BINARY() definition. Also include it
-> in
-> > manpages[] list.  It might be better to merge patch 1 and patch 2.
->
-> Thanks for the feedback. Please find a new version attached (atop the
-> etcd changes), attempting to address your points above:
-> - drop unnecessary includes and ctdb-system dependency
->   + add separate talloc and tevent deps
->   + use tevent_timeval_current_ofs() instead of timeval_current_ofs()
-> - conditionally generate the man page
->
-> Cheers, David
-
-
-Looks good.  Pushed to autobuild with following minor fixups.
-
-- In manpage, replace ctdb_mutex_ceph_rados_helper_lock with
-ctdb_mutex_ceph_rados_helper
-- In wscript, add missing manpages_ceph in the dist target
-
-Amitay.
+> >sage
+> 
+> 
+>  
+> 
+> 
+> 
+--8323329-1121986784-1481255680=:5710--
