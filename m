@@ -1,22 +1,35 @@
-From: xxhdx1985126 <xxhdx1985126@163.com>
-Subject: Question about OSDService
-Date: Fri, 9 Dec 2016 17:43:38 +0800 (CST)
-Message-ID: <46828928.bf4b.158e2f77511.Coremail.xxhdx1985126@163.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m13-20.163.com ([220.181.13.20]:14281 "EHLO m13-20.163.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932583AbcLIJ6t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 9 Dec 2016 04:58:49 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph fix for 4.9-rc9
+Date: Fri,  9 Dec 2016 12:18:16 +0100
+Message-ID: <1481282296-31456-1-git-send-email-idryomov@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-CkhpLCBldmVyeW9uZS4KCgpJJ20gYSBsaXR0bGUgY29uZnVzZWQgYWJvdXQgT1NEU2VydmljZS4g
-QXMgZmFyIGFzIEkga25vdywgY2xhc3MgT1NEIGNhbiBhY2NvbXBsaXNoIGFsbCB0aGUgdGFzayB0
-aGF0IGEgT1NEIG5lZWQgdG8gZG8sIHdoYXQgaXMgT1NEU2VydmljZSB1c2VkIGZvcj8gRXNwZWNp
-YWxseSwgd2hhdCBpcyB0aGUgbWVhbmluZyBvZiBtZXRob2RzIGxpa2XCoE9TRFNlcnZpY2U6Omdl
-dF9uZXh0bWFwX3Jlc2VydmVkLMKgT1NEU2VydmljZTo6cmVsZWFzZV9tYXAswqBPU0RTZXJ2aWNl
-Ojphd2FpdF9yZXNlcnZlZF9tYXBzPwoKClRoYW5rczotKQ==
+Hi Linus,
+
+The following changes since commit 3e5de27e940d00d8d504dfb96625fb654f641509:
+
+  Linux 4.9-rc8 (2016-12-04 12:50:51 -0800)
+
+are available in the git repository at:
+
+  https://github.com/ceph/ceph-client.git tags/ceph-for-4.9-rc9
+
+for you to fetch changes up to c3f4688a08fd86f1bf8e055724c84b7a40a09733:
+
+  ceph: don't set req->r_locked_dir in ceph_d_revalidate (2016-12-08 14:32:16 +0100)
+
+----------------------------------------------------------------
+A fix for an issue with ->d_revalidate() in ceph, causing frequent
+kernel crashes.  Marked for stable - it goes back to 4.6, but started
+popping up only in 4.8.
+
+----------------------------------------------------------------
+Jeff Layton (1):
+      ceph: don't set req->r_locked_dir in ceph_d_revalidate
+
+ fs/ceph/dir.c | 24 ++++++++++++++----------
+ 1 file changed, 14 insertions(+), 10 deletions(-)
