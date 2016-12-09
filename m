@@ -1,63 +1,73 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Reshard is not stabilizing in latest master
-Date: Fri, 9 Dec 2016 02:44:40 +0000
-Message-ID: <BY2PR02MB396DC43832DA107A62066B0F4870@BY2PR02MB396.namprd02.prod.outlook.com>
-References: <DM2PR02MB398ED2929DBD480C2CCFC88F4840@DM2PR02MB398.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1612090059480.32281@piezo.novalocal>
+From: Amitay Isaacs <amitay@gmail.com>
+Subject: Re: [PATCH] Ceph RADOS cluster mutex helper for Samba CTDB
+Date: Fri, 9 Dec 2016 14:11:06 +1100
+Message-ID: <CAJ+X7mQYAgO8Uc-kuc2Nmb4K-q+_pv=GyZX2ajST=BMZSjTj2w@mail.gmail.com>
+References: <20161201151715.019228c1@suse.de>
+ <CAJ+X7mTkBLQDYb+r9LELQe-sqfG_4YkQ9HbkDFAp70cPp7V8zA@mail.gmail.com>
+ <20161206131404.38f737d0@suse.de> <20161206131827.273bd9b8@suse.de>
+ <CAJ+X7mRh04D+Yvtf0xx3dT6rTa=9KvJagyK=1PJQC=1R+u++7w@mail.gmail.com>
+ <20161208193954.7ce6b896@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0058.outbound.protection.outlook.com ([104.47.32.58]:34567
-        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754046AbcLICom (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 8 Dec 2016 21:44:42 -0500
-In-Reply-To: <alpine.DEB.2.11.1612090059480.32281@piezo.novalocal>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <samba-technical-bounces@lists.samba.org>
+In-Reply-To: <20161208193954.7ce6b896@suse.de>
+List-Unsubscribe: <https://lists.samba.org/mailman/options/samba-technical>,
+ <mailto:samba-technical-request@lists.samba.org?subject=unsubscribe>
+List-Archive: <http://lists.samba.org/pipermail/samba-technical/>
+List-Post: <mailto:samba-technical@lists.samba.org>
+List-Help: <mailto:samba-technical-request@lists.samba.org?subject=help>
+List-Subscribe: <https://lists.samba.org/mailman/listinfo/samba-technical>,
+ <mailto:samba-technical-request@lists.samba.org?subject=subscribe>
+Errors-To: samba-technical-bounces@lists.samba.org
+Sender: "samba-technical" <samba-technical-bounces@lists.samba.org>
+To: David Disseldorp <ddiss@suse.de>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Samba Technical <samba-technical@lists.samba.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Sage,
-Please find it in the following location , it's a zipped file.
+On Fri, Dec 9, 2016 at 5:39 AM, David Disseldorp <ddiss@suse.de> wrote:
 
-https://drive.google.com/open?id=3D0B7W-S0z_ymMJd0V1XzVhQWR4ak0
+> Hi Amitay,
+>
+> On Wed, 7 Dec 2016 13:32:34 +1100, Amitay Isaacs wrote:
+>
+> > Hi David,
+> >
+> > On Tue, Dec 6, 2016 at 11:18 PM, David Disseldorp <ddiss@suse.de> wrote:
+> >
+> > > This time with the patch-set attached...
+> > >
+> > > >  ctdb/doc/Makefile                             |   3 +-
+> > > >  ctdb/doc/ctdb_mutex_ceph_rados_helper.7.xml   |  90 +++++
+> > > >  .../utils/ceph/ctdb_mutex_ceph_rados_helper.c | 334
+> ++++++++++++++++++
+> > > >  ctdb/utils/ceph/test_ceph_rados_reclock.sh    | 151 ++++++++
+> > > >  ctdb/wscript                                  |  19 +
+> > > >  5 files changed, 596 insertions(+), 1 deletion(-)
+> > >
+> >
+> > In patch 1, why do you need to include any of the CTDB files
+> > (protocol/protocol.h and common/system.h) and have dependency on
+> > ctdb-system?  I don't see you are using any of the functions defined in
+> > common/system.h.
+> >
+> > Please include the manpage in SAMBA_BINARY() definition. Also include it
+> in
+> > manpages[] list.  It might be better to merge patch 1 and patch 2.
+>
+> Thanks for the feedback. Please find a new version attached (atop the
+> etcd changes), attempting to address your points above:
+> - drop unnecessary includes and ctdb-system dependency
+>   + add separate talloc and tevent deps
+>   + use tevent_timeval_current_ofs() instead of timeval_current_ofs()
+> - conditionally generate the man page
+>
+> Cheers, David
 
 
-What I found that the following shard length always comes below bluestore_e=
-xtent_map_shard_min_size and triggering reshard.
+Looks good.  Pushed to autobuild with following minor fixups.
 
-2016-12-08 20:07:56.950527 7fe9140f7700 20 bluestore.extentmap(0x557183546d=
-48) update shard 0x3ff000 is 25 bytes (was 25) from 1 extents
+- In manpage, replace ctdb_mutex_ceph_rados_helper_lock with
+ctdb_mutex_ceph_rados_helper
+- In wscript, add missing manpages_ceph in the dist target
 
-Thanks & Regards
-Somnath
-
------Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com]
-Sent: Thursday, December 08, 2016 5:00 PM
-To: Somnath Roy
-Cc: ceph-devel
-Subject: Re: Reshard is not stabilizing in latest master
-
-On Thu, 8 Dec 2016, Somnath Roy wrote:
-> Sage,
-> I am seeing reshard is not stabilizing even after I precondition an image=
- with 4K seq. It was happening with 2 weeks old master. Anything change on =
-that part of the code base recently ? Otherwise I need to debug.
-
-Nope.  If you have a cluster where it isn't stabilizing just turn on debug =
-bluestore =3D 20 for a minute and send me the log.
-
-sage
-PLEASE NOTE: The information contained in this electronic mail message is i=
-ntended only for the use of the designated recipient(s) named above. If the=
- reader of this message is not the intended recipient, you are hereby notif=
-ied that you have received this message in error and that any review, disse=
-mination, distribution, or copying of this message is strictly prohibited. =
-If you have received this communication in error, please notify the sender =
-by telephone or e-mail (as shown above) immediately and destroy any and all=
- copies of this message in your possession (whether hard copies or electron=
-ically stored copies).
+Amitay.
