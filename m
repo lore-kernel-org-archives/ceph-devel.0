@@ -1,39 +1,62 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: Red Hat Summit CFP Closing
-Date: Mon, 12 Dec 2016 14:43:43 -0500
-Message-ID: <CAAZbbf1-NNXZybh63GLhPuanVE+WPF4kWba-uMsgnk8Ztj+9aQ@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: use ceph-ci.git to get repositories out of dev branches
+Date: Mon, 12 Dec 2016 20:44:03 +0100
+Message-ID: <fb0b5283-d482-629d-31ee-ddf1ef651455@digiware.nl>
+References: <CAC-Np1y=2DY7Rve+ao73i7EtKrFY1K_jnDR86Yhhgt9XF7gsQw@mail.gmail.com>
+ <CAC-Np1wgRYptDTeF7=MSmWMW1B1tP_=RNp8EtTGkSy+ZqrP-rA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f180.google.com ([209.85.220.180]:33521 "EHLO
-        mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750712AbcLLTno (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2016 14:43:44 -0500
-Received: by mail-qk0-f180.google.com with SMTP id x190so94366401qkb.0
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Dec 2016 11:43:44 -0800 (PST)
+Received: from smtp.digiware.nl ([176.74.240.9]:55994 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752435AbcLLToI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 12 Dec 2016 14:44:08 -0500
+In-Reply-To: <CAC-Np1wgRYptDTeF7=MSmWMW1B1tP_=RNp8EtTGkSy+ZqrP-rA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
+To: Alfredo Deza <adeza@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Andrew Schoen <aschoen@redhat.com>
 
-Hey cephers,
+On 12-12-2016 13:48, Alfredo Deza wrote:
+> **REMINDER**
+> 
+> Please, push development branches to ceph-ci.git to get
+> repositories/binaries built.
+> 
+> We are scheduled to restrict permissions to ceph.git in a few days.
+> 
+> Thanks!
+> 
+> On Wed, Dec 7, 2016 at 7:34 AM, Alfredo Deza <adeza@redhat.com> wrote:
+>> As announced on November 23rd, please start pushing development
+>> branches to ceph-ci.git (https://github.com/ceph/ceph-ci) to get
+>> repositories.
+>>
+>> This doesn't change reporting in https://shaman.ceph.com and it
+>> shouldn't affect testing via teuthology.
+>>
+>> The ceph.git repository will continue to build binaries and
+>> repositories for another week to help transitioning.
+>>
+>> If you have any issues, please mention them in the #sepia or
+>> #ceph-devel channels to me (alfredodeza) or Andrew Schoen
+>> (andrewschoen).
 
-Just a friendly reminder that the CFP for Red Hat summit is quickly
-coming to a close. This year the "upstream" talks are integrated into
-the main conference (instead of being relegated to their own attached
-mini-conf), so they will get much more traction.
+Hi Alfredo,
 
-If you would like to submit a Ceph talk, please do so before the 16th,
-and let me know about it so I can lobby for its inclusion! Thanks.
+Not being a native git-citizen, this is perhaps a bit to cryptic for me.
 
-https://rh2017.smarteventscloud.com/portal/cfp/cfpLogin.ww?sc_cid=70160000000dJVLAA2&intcmp=7016000000155f5AAA
+So instead of makeing PRs in my ceph-fork, I should
+	fork ceph-ci
+        new PRs should be submitted from this fork against ceph-ci.
+??
+
+Any suggestions on how to migrate my current ceph-fork to a
+ceph-ci-fork? Or am I going to "lose" all my changes in the log of the
+current, and transfer the changes thru diff/patch..
+
+Thanx,
+--WjW
 
 
-
--- 
-
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
