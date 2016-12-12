@@ -1,436 +1,162 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 09/15] libceph: remove now unused ceph_*{en,de}crypt*() functions
-Date: Mon, 12 Dec 2016 21:48:54 +0100
-Message-ID: <1481575740-1834-10-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 14/15] libceph: drop len argument of *verify_authorizer_reply()
+Date: Mon, 12 Dec 2016 21:48:59 +0100
+Message-ID: <1481575740-1834-15-git-send-email-idryomov@gmail.com>
 References: <1481575740-1834-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:36662 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932485AbcLLUuN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2016 15:50:13 -0500
-Received: by mail-wm0-f67.google.com with SMTP id m203so13731909wma.3
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Dec 2016 12:50:12 -0800 (PST)
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:34914 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932405AbcLLUuR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2016 15:50:17 -0500
+Received: by mail-wm0-f65.google.com with SMTP id a20so13798986wme.2
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Dec 2016 12:50:16 -0800 (PST)
 Received: from dhcp-1-105.brq.redhat.com ([213.175.37.12])
-        by smtp.gmail.com with ESMTPSA id 135sm37201887wmh.14.2016.12.12.12.50.09
+        by smtp.gmail.com with ESMTPSA id 135sm37201887wmh.14.2016.12.12.12.50.14
         for <ceph-devel@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 12 Dec 2016 12:50:09 -0800 (PST)
+        Mon, 12 Dec 2016 12:50:14 -0800 (PST)
 In-Reply-To: <1481575740-1834-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
+The length of the reply is protocol-dependent - for cephx it's
+ceph_x_authorize_reply.  Nothing sensible can be passed from the
+messenger layer anyway.
+
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- net/ceph/crypto.c | 369 ------------------------------------------------------
- net/ceph/crypto.h |  14 ---
- 2 files changed, 383 deletions(-)
+ fs/ceph/mds_client.c           | 4 ++--
+ include/linux/ceph/auth.h      | 5 ++---
+ include/linux/ceph/messenger.h | 2 +-
+ net/ceph/auth.c                | 4 ++--
+ net/ceph/auth_x.c              | 2 +-
+ net/ceph/messenger.c           | 2 +-
+ net/ceph/osd_client.c          | 4 ++--
+ 7 files changed, 11 insertions(+), 12 deletions(-)
 
-diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
-index 32099c5c4c75..38936e1fd644 100644
---- a/net/ceph/crypto.c
-+++ b/net/ceph/crypto.c
-@@ -157,375 +157,6 @@ static void teardown_sgtable(struct sg_table *sgt)
- 		sg_free_table(sgt);
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 815acd1a56d4..bf4d3d26850c 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -3943,13 +3943,13 @@ static struct ceph_auth_handshake *get_authorizer(struct ceph_connection *con,
  }
  
--static int ceph_aes_encrypt(const void *key, int key_len,
--			    void *dst, size_t *dst_len,
--			    const void *src, size_t src_len)
--{
--	struct scatterlist sg_in[2], prealloc_sg;
--	struct sg_table sg_out;
--	struct crypto_skcipher *tfm = ceph_crypto_alloc_cipher();
--	SKCIPHER_REQUEST_ON_STACK(req, tfm);
--	int ret;
--	char iv[AES_BLOCK_SIZE];
--	size_t zero_padding = (0x10 - (src_len & 0x0f));
--	char pad[16];
--
--	if (IS_ERR(tfm))
--		return PTR_ERR(tfm);
--
--	memset(pad, zero_padding, zero_padding);
--
--	*dst_len = src_len + zero_padding;
--
--	sg_init_table(sg_in, 2);
--	sg_set_buf(&sg_in[0], src, src_len);
--	sg_set_buf(&sg_in[1], pad, zero_padding);
--	ret = setup_sgtable(&sg_out, &prealloc_sg, dst, *dst_len);
--	if (ret)
--		goto out_tfm;
--
--	crypto_skcipher_setkey((void *)tfm, key, key_len);
--	memcpy(iv, aes_iv, AES_BLOCK_SIZE);
--
--	skcipher_request_set_tfm(req, tfm);
--	skcipher_request_set_callback(req, 0, NULL, NULL);
--	skcipher_request_set_crypt(req, sg_in, sg_out.sgl,
--				   src_len + zero_padding, iv);
--
--	/*
--	print_hex_dump(KERN_ERR, "enc key: ", DUMP_PREFIX_NONE, 16, 1,
--		       key, key_len, 1);
--	print_hex_dump(KERN_ERR, "enc src: ", DUMP_PREFIX_NONE, 16, 1,
--			src, src_len, 1);
--	print_hex_dump(KERN_ERR, "enc pad: ", DUMP_PREFIX_NONE, 16, 1,
--			pad, zero_padding, 1);
--	*/
--	ret = crypto_skcipher_encrypt(req);
--	skcipher_request_zero(req);
--	if (ret < 0) {
--		pr_err("ceph_aes_crypt failed %d\n", ret);
--		goto out_sg;
--	}
--	/*
--	print_hex_dump(KERN_ERR, "enc out: ", DUMP_PREFIX_NONE, 16, 1,
--		       dst, *dst_len, 1);
--	*/
--
--out_sg:
--	teardown_sgtable(&sg_out);
--out_tfm:
--	crypto_free_skcipher(tfm);
--	return ret;
--}
--
--static int ceph_aes_encrypt2(const void *key, int key_len, void *dst,
--			     size_t *dst_len,
--			     const void *src1, size_t src1_len,
--			     const void *src2, size_t src2_len)
--{
--	struct scatterlist sg_in[3], prealloc_sg;
--	struct sg_table sg_out;
--	struct crypto_skcipher *tfm = ceph_crypto_alloc_cipher();
--	SKCIPHER_REQUEST_ON_STACK(req, tfm);
--	int ret;
--	char iv[AES_BLOCK_SIZE];
--	size_t zero_padding = (0x10 - ((src1_len + src2_len) & 0x0f));
--	char pad[16];
--
--	if (IS_ERR(tfm))
--		return PTR_ERR(tfm);
--
--	memset(pad, zero_padding, zero_padding);
--
--	*dst_len = src1_len + src2_len + zero_padding;
--
--	sg_init_table(sg_in, 3);
--	sg_set_buf(&sg_in[0], src1, src1_len);
--	sg_set_buf(&sg_in[1], src2, src2_len);
--	sg_set_buf(&sg_in[2], pad, zero_padding);
--	ret = setup_sgtable(&sg_out, &prealloc_sg, dst, *dst_len);
--	if (ret)
--		goto out_tfm;
--
--	crypto_skcipher_setkey((void *)tfm, key, key_len);
--	memcpy(iv, aes_iv, AES_BLOCK_SIZE);
--
--	skcipher_request_set_tfm(req, tfm);
--	skcipher_request_set_callback(req, 0, NULL, NULL);
--	skcipher_request_set_crypt(req, sg_in, sg_out.sgl,
--				   src1_len + src2_len + zero_padding, iv);
--
--	/*
--	print_hex_dump(KERN_ERR, "enc  key: ", DUMP_PREFIX_NONE, 16, 1,
--		       key, key_len, 1);
--	print_hex_dump(KERN_ERR, "enc src1: ", DUMP_PREFIX_NONE, 16, 1,
--			src1, src1_len, 1);
--	print_hex_dump(KERN_ERR, "enc src2: ", DUMP_PREFIX_NONE, 16, 1,
--			src2, src2_len, 1);
--	print_hex_dump(KERN_ERR, "enc  pad: ", DUMP_PREFIX_NONE, 16, 1,
--			pad, zero_padding, 1);
--	*/
--	ret = crypto_skcipher_encrypt(req);
--	skcipher_request_zero(req);
--	if (ret < 0) {
--		pr_err("ceph_aes_crypt2 failed %d\n", ret);
--		goto out_sg;
--	}
--	/*
--	print_hex_dump(KERN_ERR, "enc  out: ", DUMP_PREFIX_NONE, 16, 1,
--		       dst, *dst_len, 1);
--	*/
--
--out_sg:
--	teardown_sgtable(&sg_out);
--out_tfm:
--	crypto_free_skcipher(tfm);
--	return ret;
--}
--
--static int ceph_aes_decrypt(const void *key, int key_len,
--			    void *dst, size_t *dst_len,
--			    const void *src, size_t src_len)
--{
--	struct sg_table sg_in;
--	struct scatterlist sg_out[2], prealloc_sg;
--	struct crypto_skcipher *tfm = ceph_crypto_alloc_cipher();
--	SKCIPHER_REQUEST_ON_STACK(req, tfm);
--	char pad[16];
--	char iv[AES_BLOCK_SIZE];
--	int ret;
--	int last_byte;
--
--	if (IS_ERR(tfm))
--		return PTR_ERR(tfm);
--
--	sg_init_table(sg_out, 2);
--	sg_set_buf(&sg_out[0], dst, *dst_len);
--	sg_set_buf(&sg_out[1], pad, sizeof(pad));
--	ret = setup_sgtable(&sg_in, &prealloc_sg, src, src_len);
--	if (ret)
--		goto out_tfm;
--
--	crypto_skcipher_setkey((void *)tfm, key, key_len);
--	memcpy(iv, aes_iv, AES_BLOCK_SIZE);
--
--	skcipher_request_set_tfm(req, tfm);
--	skcipher_request_set_callback(req, 0, NULL, NULL);
--	skcipher_request_set_crypt(req, sg_in.sgl, sg_out,
--				   src_len, iv);
--
--	/*
--	print_hex_dump(KERN_ERR, "dec key: ", DUMP_PREFIX_NONE, 16, 1,
--		       key, key_len, 1);
--	print_hex_dump(KERN_ERR, "dec  in: ", DUMP_PREFIX_NONE, 16, 1,
--		       src, src_len, 1);
--	*/
--	ret = crypto_skcipher_decrypt(req);
--	skcipher_request_zero(req);
--	if (ret < 0) {
--		pr_err("ceph_aes_decrypt failed %d\n", ret);
--		goto out_sg;
--	}
--
--	if (src_len <= *dst_len)
--		last_byte = ((char *)dst)[src_len - 1];
--	else
--		last_byte = pad[src_len - *dst_len - 1];
--	if (last_byte <= 16 && src_len >= last_byte) {
--		*dst_len = src_len - last_byte;
--	} else {
--		pr_err("ceph_aes_decrypt got bad padding %d on src len %d\n",
--		       last_byte, (int)src_len);
--		return -EPERM;  /* bad padding */
--	}
--	/*
--	print_hex_dump(KERN_ERR, "dec out: ", DUMP_PREFIX_NONE, 16, 1,
--		       dst, *dst_len, 1);
--	*/
--
--out_sg:
--	teardown_sgtable(&sg_in);
--out_tfm:
--	crypto_free_skcipher(tfm);
--	return ret;
--}
--
--static int ceph_aes_decrypt2(const void *key, int key_len,
--			     void *dst1, size_t *dst1_len,
--			     void *dst2, size_t *dst2_len,
--			     const void *src, size_t src_len)
--{
--	struct sg_table sg_in;
--	struct scatterlist sg_out[3], prealloc_sg;
--	struct crypto_skcipher *tfm = ceph_crypto_alloc_cipher();
--	SKCIPHER_REQUEST_ON_STACK(req, tfm);
--	char pad[16];
--	char iv[AES_BLOCK_SIZE];
--	int ret;
--	int last_byte;
--
--	if (IS_ERR(tfm))
--		return PTR_ERR(tfm);
--
--	sg_init_table(sg_out, 3);
--	sg_set_buf(&sg_out[0], dst1, *dst1_len);
--	sg_set_buf(&sg_out[1], dst2, *dst2_len);
--	sg_set_buf(&sg_out[2], pad, sizeof(pad));
--	ret = setup_sgtable(&sg_in, &prealloc_sg, src, src_len);
--	if (ret)
--		goto out_tfm;
--
--	crypto_skcipher_setkey((void *)tfm, key, key_len);
--	memcpy(iv, aes_iv, AES_BLOCK_SIZE);
--
--	skcipher_request_set_tfm(req, tfm);
--	skcipher_request_set_callback(req, 0, NULL, NULL);
--	skcipher_request_set_crypt(req, sg_in.sgl, sg_out,
--				   src_len, iv);
--
--	/*
--	print_hex_dump(KERN_ERR, "dec  key: ", DUMP_PREFIX_NONE, 16, 1,
--		       key, key_len, 1);
--	print_hex_dump(KERN_ERR, "dec   in: ", DUMP_PREFIX_NONE, 16, 1,
--		       src, src_len, 1);
--	*/
--	ret = crypto_skcipher_decrypt(req);
--	skcipher_request_zero(req);
--	if (ret < 0) {
--		pr_err("ceph_aes_decrypt failed %d\n", ret);
--		goto out_sg;
--	}
--
--	if (src_len <= *dst1_len)
--		last_byte = ((char *)dst1)[src_len - 1];
--	else if (src_len <= *dst1_len + *dst2_len)
--		last_byte = ((char *)dst2)[src_len - *dst1_len - 1];
--	else
--		last_byte = pad[src_len - *dst1_len - *dst2_len - 1];
--	if (last_byte <= 16 && src_len >= last_byte) {
--		src_len -= last_byte;
--	} else {
--		pr_err("ceph_aes_decrypt got bad padding %d on src len %d\n",
--		       last_byte, (int)src_len);
--		return -EPERM;  /* bad padding */
--	}
--
--	if (src_len < *dst1_len) {
--		*dst1_len = src_len;
--		*dst2_len = 0;
--	} else {
--		*dst2_len = src_len - *dst1_len;
--	}
--	/*
--	print_hex_dump(KERN_ERR, "dec  out1: ", DUMP_PREFIX_NONE, 16, 1,
--		       dst1, *dst1_len, 1);
--	print_hex_dump(KERN_ERR, "dec  out2: ", DUMP_PREFIX_NONE, 16, 1,
--		       dst2, *dst2_len, 1);
--	*/
--
--out_sg:
--	teardown_sgtable(&sg_in);
--out_tfm:
--	crypto_free_skcipher(tfm);
--	return ret;
--}
--
--
--int ceph_decrypt(struct ceph_crypto_key *secret, void *dst, size_t *dst_len,
--		 const void *src, size_t src_len)
--{
--	switch (secret->type) {
--	case CEPH_CRYPTO_NONE:
--		if (*dst_len < src_len)
--			return -ERANGE;
--		memcpy(dst, src, src_len);
--		*dst_len = src_len;
--		return 0;
--
--	case CEPH_CRYPTO_AES:
--		return ceph_aes_decrypt(secret->key, secret->len, dst,
--					dst_len, src, src_len);
--
--	default:
--		return -EINVAL;
--	}
--}
--
--int ceph_decrypt2(struct ceph_crypto_key *secret,
--			void *dst1, size_t *dst1_len,
--			void *dst2, size_t *dst2_len,
--			const void *src, size_t src_len)
--{
--	size_t t;
--
--	switch (secret->type) {
--	case CEPH_CRYPTO_NONE:
--		if (*dst1_len + *dst2_len < src_len)
--			return -ERANGE;
--		t = min(*dst1_len, src_len);
--		memcpy(dst1, src, t);
--		*dst1_len = t;
--		src += t;
--		src_len -= t;
--		if (src_len) {
--			t = min(*dst2_len, src_len);
--			memcpy(dst2, src, t);
--			*dst2_len = t;
--		}
--		return 0;
--
--	case CEPH_CRYPTO_AES:
--		return ceph_aes_decrypt2(secret->key, secret->len,
--					 dst1, dst1_len, dst2, dst2_len,
--					 src, src_len);
--
--	default:
--		return -EINVAL;
--	}
--}
--
--int ceph_encrypt(struct ceph_crypto_key *secret, void *dst, size_t *dst_len,
--		 const void *src, size_t src_len)
--{
--	switch (secret->type) {
--	case CEPH_CRYPTO_NONE:
--		if (*dst_len < src_len)
--			return -ERANGE;
--		memcpy(dst, src, src_len);
--		*dst_len = src_len;
--		return 0;
--
--	case CEPH_CRYPTO_AES:
--		return ceph_aes_encrypt(secret->key, secret->len, dst,
--					dst_len, src, src_len);
--
--	default:
--		return -EINVAL;
--	}
--}
--
--int ceph_encrypt2(struct ceph_crypto_key *secret, void *dst, size_t *dst_len,
--		  const void *src1, size_t src1_len,
--		  const void *src2, size_t src2_len)
--{
--	switch (secret->type) {
--	case CEPH_CRYPTO_NONE:
--		if (*dst_len < src1_len + src2_len)
--			return -ERANGE;
--		memcpy(dst, src1, src1_len);
--		memcpy(dst + src1_len, src2, src2_len);
--		*dst_len = src1_len + src2_len;
--		return 0;
--
--	case CEPH_CRYPTO_AES:
--		return ceph_aes_encrypt2(secret->key, secret->len, dst, dst_len,
--					 src1, src1_len, src2, src2_len);
--
--	default:
--		return -EINVAL;
--	}
--}
--
- static int ceph_aes_crypt(const struct ceph_crypto_key *key, bool encrypt,
- 			  void *buf, int buf_len, int in_len, int *pout_len)
- {
-diff --git a/net/ceph/crypto.h b/net/ceph/crypto.h
-index 73da34e8c62e..c33bcafd3829 100644
---- a/net/ceph/crypto.h
-+++ b/net/ceph/crypto.h
-@@ -29,20 +29,6 @@ int ceph_crypto_key_decode(struct ceph_crypto_key *key, void **p, void *end);
- int ceph_crypto_key_unarmor(struct ceph_crypto_key *key, const char *in);
  
- /* crypto.c */
--int ceph_decrypt(struct ceph_crypto_key *secret,
--		 void *dst, size_t *dst_len,
--		 const void *src, size_t src_len);
--int ceph_encrypt(struct ceph_crypto_key *secret,
--		 void *dst, size_t *dst_len,
--		 const void *src, size_t src_len);
--int ceph_decrypt2(struct ceph_crypto_key *secret,
--		  void *dst1, size_t *dst1_len,
--		  void *dst2, size_t *dst2_len,
--		  const void *src, size_t src_len);
--int ceph_encrypt2(struct ceph_crypto_key *secret,
--		  void *dst, size_t *dst_len,
--		  const void *src1, size_t src1_len,
--		  const void *src2, size_t src2_len);
- int ceph_crypt(const struct ceph_crypto_key *key, bool encrypt,
- 	       void *buf, int buf_len, int in_len, int *pout_len);
- int ceph_crypto_init(void);
+-static int verify_authorizer_reply(struct ceph_connection *con, int len)
++static int verify_authorizer_reply(struct ceph_connection *con)
+ {
+ 	struct ceph_mds_session *s = con->private;
+ 	struct ceph_mds_client *mdsc = s->s_mdsc;
+ 	struct ceph_auth_client *ac = mdsc->fsc->client->monc.auth;
+ 
+-	return ceph_auth_verify_authorizer_reply(ac, s->s_auth.authorizer, len);
++	return ceph_auth_verify_authorizer_reply(ac, s->s_auth.authorizer);
+ }
+ 
+ static int invalidate_authorizer(struct ceph_connection *con)
+diff --git a/include/linux/ceph/auth.h b/include/linux/ceph/auth.h
+index 374bb1c4ef52..a6747789fe5c 100644
+--- a/include/linux/ceph/auth.h
++++ b/include/linux/ceph/auth.h
+@@ -64,7 +64,7 @@ struct ceph_auth_client_ops {
+ 	int (*update_authorizer)(struct ceph_auth_client *ac, int peer_type,
+ 				 struct ceph_auth_handshake *auth);
+ 	int (*verify_authorizer_reply)(struct ceph_auth_client *ac,
+-				       struct ceph_authorizer *a, size_t len);
++				       struct ceph_authorizer *a);
+ 	void (*invalidate_authorizer)(struct ceph_auth_client *ac,
+ 				      int peer_type);
+ 
+@@ -118,8 +118,7 @@ extern int ceph_auth_update_authorizer(struct ceph_auth_client *ac,
+ 				       int peer_type,
+ 				       struct ceph_auth_handshake *a);
+ extern int ceph_auth_verify_authorizer_reply(struct ceph_auth_client *ac,
+-					     struct ceph_authorizer *a,
+-					     size_t len);
++					     struct ceph_authorizer *a);
+ extern void ceph_auth_invalidate_authorizer(struct ceph_auth_client *ac,
+ 					    int peer_type);
+ 
+diff --git a/include/linux/ceph/messenger.h b/include/linux/ceph/messenger.h
+index 8dbd7879fdc6..531f2d882bd9 100644
+--- a/include/linux/ceph/messenger.h
++++ b/include/linux/ceph/messenger.h
+@@ -30,7 +30,7 @@ struct ceph_connection_operations {
+ 	struct ceph_auth_handshake *(*get_authorizer) (
+ 				struct ceph_connection *con,
+ 			       int *proto, int force_new);
+-	int (*verify_authorizer_reply) (struct ceph_connection *con, int len);
++	int (*verify_authorizer_reply) (struct ceph_connection *con);
+ 	int (*invalidate_authorizer)(struct ceph_connection *con);
+ 
+ 	/* there was some error on the socket (disconnect, whatever) */
+diff --git a/net/ceph/auth.c b/net/ceph/auth.c
+index c822b3ae1bd3..48bb8d95195b 100644
+--- a/net/ceph/auth.c
++++ b/net/ceph/auth.c
+@@ -315,13 +315,13 @@ int ceph_auth_update_authorizer(struct ceph_auth_client *ac,
+ EXPORT_SYMBOL(ceph_auth_update_authorizer);
+ 
+ int ceph_auth_verify_authorizer_reply(struct ceph_auth_client *ac,
+-				      struct ceph_authorizer *a, size_t len)
++				      struct ceph_authorizer *a)
+ {
+ 	int ret = 0;
+ 
+ 	mutex_lock(&ac->mutex);
+ 	if (ac->ops && ac->ops->verify_authorizer_reply)
+-		ret = ac->ops->verify_authorizer_reply(ac, a, len);
++		ret = ac->ops->verify_authorizer_reply(ac, a);
+ 	mutex_unlock(&ac->mutex);
+ 	return ret;
+ }
+diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
+index b216131915e7..2034fb926670 100644
+--- a/net/ceph/auth_x.c
++++ b/net/ceph/auth_x.c
+@@ -623,7 +623,7 @@ static int ceph_x_update_authorizer(
+ }
+ 
+ static int ceph_x_verify_authorizer_reply(struct ceph_auth_client *ac,
+-					  struct ceph_authorizer *a, size_t len)
++					  struct ceph_authorizer *a)
+ {
+ 	struct ceph_x_authorizer *au = (void *)a;
+ 	void *p = au->enc_buf;
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 2efb335deada..dba380429a05 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -2033,7 +2033,7 @@ static int process_connect(struct ceph_connection *con)
+ 		 * should also define ->verify_authorizer_reply().
+ 		 * See get_connect_authorizer().
+ 		 */
+-		ret = con->ops->verify_authorizer_reply(con, 0);
++		ret = con->ops->verify_authorizer_reply(con);
+ 		if (ret < 0) {
+ 			con->error_msg = "bad authorize reply";
+ 			return ret;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index e6ae15bc41b7..5d812a26f05a 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -4478,13 +4478,13 @@ static struct ceph_auth_handshake *get_authorizer(struct ceph_connection *con,
+ }
+ 
+ 
+-static int verify_authorizer_reply(struct ceph_connection *con, int len)
++static int verify_authorizer_reply(struct ceph_connection *con)
+ {
+ 	struct ceph_osd *o = con->private;
+ 	struct ceph_osd_client *osdc = o->o_osdc;
+ 	struct ceph_auth_client *ac = osdc->client->monc.auth;
+ 
+-	return ceph_auth_verify_authorizer_reply(ac, o->o_auth.authorizer, len);
++	return ceph_auth_verify_authorizer_reply(ac, o->o_auth.authorizer);
+ }
+ 
+ static int invalidate_authorizer(struct ceph_connection *con)
 -- 
 2.4.3
 
