@@ -1,85 +1,60 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 04/15] libceph: introduce ceph_crypt() for in-place en/decryption
-Date: Mon, 12 Dec 2016 22:15:13 +0100
-Message-ID: <CAOi1vP_4vEygrs6LN+dM8KJTiiFNUfO9jQ3hfzO5qStP0n=L0w@mail.gmail.com>
-References: <1481575740-1834-1-git-send-email-idryomov@gmail.com>
- <1481575740-1834-5-git-send-email-idryomov@gmail.com> <alpine.DEB.2.11.1612122111360.27603@piezo.novalocal>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: performance of reading objects in placement group operation
+Date: Mon, 12 Dec 2016 13:18:14 -0800
+Message-ID: <CAJ4mKGat+U=02s0a0V-F5kENYiZPxk5KeLG_Pb9e3RMrsxRESA@mail.gmail.com>
+References: <CAB2gnbUXpuWfwM-3VBkqqsazo-ko213LZyOA2azsfeeYZGAsRA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f65.google.com ([209.85.213.65]:34684 "EHLO
-        mail-vk0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752690AbcLLVPO (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2016 16:15:14 -0500
-Received: by mail-vk0-f65.google.com with SMTP id p9so5062061vkd.1
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Dec 2016 13:15:14 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1612122111360.27603@piezo.novalocal>
+Received: from mail-io0-f182.google.com ([209.85.223.182]:35616 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753060AbcLLVSQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2016 16:18:16 -0500
+Received: by mail-io0-f182.google.com with SMTP id h30so193835632iod.2
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Dec 2016 13:18:16 -0800 (PST)
+In-Reply-To: <CAB2gnbUXpuWfwM-3VBkqqsazo-ko213LZyOA2azsfeeYZGAsRA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Noah Watkins <noahwatkins@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Dec 12, 2016 at 10:11 PM, Sage Weil <sage@newdream.net> wrote:
-> On Mon, 12 Dec 2016, Ilya Dryomov wrote:
->> Starting with 4.9, kernel stacks may be vmalloced and therefore not
->> guaranteed to be physically contiguous; the new CONFIG_VMAP_STACK
->> option is enabled by default on x86.  This makes it invalid to use
->> on-stack buffers with the crypto scatterlist API, as sg_set_buf()
->> expects a logical address and won't work with vmalloced addresses.
->>
->> There isn't a different (e.g. kvec-based) crypto API we could switch
->> net/ceph/crypto.c to and the current scatterlist.h API isn't getting
->> updated to accommodate this use case.  Allocating a new header and
->> padding for each operation is a non-starter, so do the en/decryption
->> in-place on a single pre-assembled (header + data + padding) heap
->> buffer.  This is explicitly supported by the crypto API:
->>
->>     "... the caller may provide the same scatter/gather list for the
->>      plaintext and cipher text. After the completion of the cipher
->>      operation, the plaintext data is replaced with the ciphertext data
->>      in case of an encryption and vice versa for a decryption."
->>
->> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
->> ---
->>  net/ceph/crypto.c | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
->>  net/ceph/crypto.h |  2 ++
->>  2 files changed, 89 insertions(+)
->>
->> diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
->> index db2847ac5f12..32099c5c4c75 100644
->> --- a/net/ceph/crypto.c
->> +++ b/net/ceph/crypto.c
->> @@ -526,6 +526,93 @@ int ceph_encrypt2(struct ceph_crypto_key *secret, void *dst, size_t *dst_len,
->>       }
->>  }
->>
->> +static int ceph_aes_crypt(const struct ceph_crypto_key *key, bool encrypt,
->> +                       void *buf, int buf_len, int in_len, int *pout_len)
->> +{
->> +     struct crypto_skcipher *tfm = ceph_crypto_alloc_cipher();
->> +     SKCIPHER_REQUEST_ON_STACK(req, tfm);
->> +     struct sg_table sgt;
->> +     struct scatterlist prealloc_sg;
->> +     char iv[AES_BLOCK_SIZE];
->> +     int pad_byte = AES_BLOCK_SIZE - (in_len & (AES_BLOCK_SIZE - 1));
+On Sat, Dec 10, 2016 at 3:54 PM, Noah Watkins <noahwatkins@gmail.com> wrote:
+> tl;dr does the osd perform any sort of optimistic fetching of objects
+> (not intra-object data, but rather pre-fetching of objects that have
+> yet to be requested by a client)?
 >
-> nit: pad_bytes?
-
-It's also used as a PKCS7 pad *byte*
-
+> Slightly longer question:
 >
->> +     int crypt_len = encrypt ? in_len + pad_byte : in_len;
->> +     int ret;
->> +
->> +     if (IS_ERR(tfm))
->> +             return PTR_ERR(tfm);
->> +
->> +     WARN_ON(crypt_len > buf_len);
->> +     if (encrypt)
->> +             memset(buf + in_len, pad_byte, pad_byte);
+> I've been experimenting with adding PG-level operations, and I'm stuck
+> tracking down a performance discrepancy between reading object data
+> within the context of `ReplicatedPG::do_pg_op` and reading object data
+> through the normal `do_op` path, only after dropping Linux page cache.
+>
+> When I measure the latency of `safe_pread` in `FileStore::read` I see
+> that when running with a hot cache normal object reads from a client
+> (via `do_op`), and object reads dispatched in `do_pg_op` perform
+> similarly, and are fast as one would expect. But running on a cold
+> cache (OSD restart plus drop_caches), I see that a small fraction of
+> reads via `do_op` have a high latency as would be expected having to
+> hit disk, but a very large fraction of object reads through `do_pg_op`
+> are expensive. This seems to suggest that there is some sort of
+> pre-fetching occurring, but I cannot find any sort of pre-fetching
+> mechanism. Is the OSD pre-fetching, or can this be explained by some
+> other mechanism?
 
-here, so I went with byte.
+I don't have a lot of this in my head, but I know that the RADOS guys
+are going to ask what config/flags you're using — in particular,
+sortbitwise probably makes a big difference.
 
-Thanks,
+Also, I'm not sure exactly what ops you're doing but I wonder if in
+some of these cases you're reading "sequentially" our of leveldb and
+in others you're depending on data that's stored purely in the
+filesystem — I think this would also depend on your current config.
+Certainly you should expect data in the filesystem (the object's FS
+inodes, and *probably* the ghobject_info_t if it fits in an
+inode-located xattr?) to be prefetched but the leveldb to perform
+better on linear scans.
 
-                Ilya
+At least, I think?
+-Greg
