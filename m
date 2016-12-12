@@ -1,48 +1,21 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: use ceph-ci.git to get repositories out of dev branches
-Date: Mon, 12 Dec 2016 07:48:43 -0500
-Message-ID: <CAC-Np1wgRYptDTeF7=MSmWMW1B1tP_=RNp8EtTGkSy+ZqrP-rA@mail.gmail.com>
-References: <CAC-Np1y=2DY7Rve+ao73i7EtKrFY1K_jnDR86Yhhgt9XF7gsQw@mail.gmail.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Is Hammer end of life now?
+Date: Mon, 12 Dec 2016 08:02:27 -0700
+Message-ID: <CALqRxCxMvAZTgA5sO4cJzFhzVjL=0xYnXrLO2n57VZf21R3b9Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f170.google.com ([209.85.216.170]:34175 "EHLO
-        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751471AbcLLMso (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2016 07:48:44 -0500
-Received: by mail-qt0-f170.google.com with SMTP id n6so74463624qtd.1
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Dec 2016 04:48:44 -0800 (PST)
-In-Reply-To: <CAC-Np1y=2DY7Rve+ao73i7EtKrFY1K_jnDR86Yhhgt9XF7gsQw@mail.gmail.com>
+Received: from mail-vk0-f49.google.com ([209.85.213.49]:33310 "EHLO
+        mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750910AbcLLPC3 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2016 10:02:29 -0500
+Received: by mail-vk0-f49.google.com with SMTP id 137so41553822vkl.0
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Dec 2016 07:02:28 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: Andrew Schoen <aschoen@redhat.com>
 
-**REMINDER**
+http://docs.ceph.com/docs/master/releases/ says Hammer's estimated
+retirement is "November 2016"
 
-Please, push development branches to ceph-ci.git to get
-repositories/binaries built.
-
-We are scheduled to restrict permissions to ceph.git in a few days.
-
-Thanks!
-
-On Wed, Dec 7, 2016 at 7:34 AM, Alfredo Deza <adeza@redhat.com> wrote:
-> As announced on November 23rd, please start pushing development
-> branches to ceph-ci.git (https://github.com/ceph/ceph-ci) to get
-> repositories.
->
-> This doesn't change reporting in https://shaman.ceph.com and it
-> shouldn't affect testing via teuthology.
->
-> The ceph.git repository will continue to build binaries and
-> repositories for another week to help transitioning.
->
-> If you have any issues, please mention them in the #sepia or
-> #ceph-devel channels to me (alfredodeza) or Andrew Schoen
-> (andrewschoen).
->
-> Thanks!
->
->
-> -Alfredo
+Is Hammer EOL now? Should I put "December 2016" for actual retirement?
