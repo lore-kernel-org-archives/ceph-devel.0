@@ -1,77 +1,68 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: use ceph-ci.git to get repositories out of dev branches
-Date: Mon, 12 Dec 2016 21:06:07 +0100
-Message-ID: <e8bc131d-4df5-fb33-6295-14406a6263c4@digiware.nl>
-References: <CAC-Np1y=2DY7Rve+ao73i7EtKrFY1K_jnDR86Yhhgt9XF7gsQw@mail.gmail.com>
- <CAC-Np1wgRYptDTeF7=MSmWMW1B1tP_=RNp8EtTGkSy+ZqrP-rA@mail.gmail.com>
- <fb0b5283-d482-629d-31ee-ddf1ef651455@digiware.nl>
- <CALe9h7eXcGtFNtCZT8ZG-v3hKgAVYS5mQGnUAjVLejtXMt1d1Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH 00/15] wip-crypto
+Date: Mon, 12 Dec 2016 21:48:45 +0100
+Message-ID: <1481575740-1834-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:60217 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752165AbcLLUGN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 12 Dec 2016 15:06:13 -0500
-In-Reply-To: <CALe9h7eXcGtFNtCZT8ZG-v3hKgAVYS5mQGnUAjVLejtXMt1d1Q@mail.gmail.com>
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:33447 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752704AbcLLUuE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2016 15:50:04 -0500
+Received: by mail-wm0-f68.google.com with SMTP id u144so13764873wmu.0
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Dec 2016 12:50:03 -0800 (PST)
+Received: from dhcp-1-105.brq.redhat.com ([213.175.37.12])
+        by smtp.gmail.com with ESMTPSA id 135sm37201887wmh.14.2016.12.12.12.50.01
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 12 Dec 2016 12:50:01 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Alfredo Deza <adeza@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Andrew Schoen <aschoen@redhat.com>
+To: ceph-devel@vger.kernel.org
 
-On 12-12-2016 20:54, John Spray wrote:
-> On Mon, Dec 12, 2016 at 7:44 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> On 12-12-2016 13:48, Alfredo Deza wrote:
->>> **REMINDER**
->>>
->>> Please, push development branches to ceph-ci.git to get
->>> repositories/binaries built.
->>>
->>> We are scheduled to restrict permissions to ceph.git in a few days.
->>>
->>> Thanks!
->>>
->>> On Wed, Dec 7, 2016 at 7:34 AM, Alfredo Deza <adeza@redhat.com> wrote:
->>>> As announced on November 23rd, please start pushing development
->>>> branches to ceph-ci.git (https://github.com/ceph/ceph-ci) to get
->>>> repositories.
->>>>
->>>> This doesn't change reporting in https://shaman.ceph.com and it
->>>> shouldn't affect testing via teuthology.
->>>>
->>>> The ceph.git repository will continue to build binaries and
->>>> repositories for another week to help transitioning.
->>>>
->>>> If you have any issues, please mention them in the #sepia or
->>>> #ceph-devel channels to me (alfredodeza) or Andrew Schoen
->>>> (andrewschoen).
->>
->> Hi Alfredo,
->>
->> Not being a native git-citizen, this is perhaps a bit to cryptic for me.
->>
->> So instead of makeing PRs in my ceph-fork, I should
->>         fork ceph-ci
->>         new PRs should be submitted from this fork against ceph-ci.
->> ??
->>
->> Any suggestions on how to migrate my current ceph-fork to a
->> ceph-ci-fork? Or am I going to "lose" all my changes in the log of the
->> current, and transfer the changes thru diff/patch..
-> 
-> Don't worry, if you are just opening pull requests then none of this
-> affects you.
-> 
-> The change is that when we wanted to build branches for testing, we
-> pushed them to ceph.git.  Now we push things that we want to build to
-> ceph-ci.git.  Pull requests are still opened against ceph.git.
+Hello,
 
-Ah, oke,
+This branch started as a rewrite of ceph_*{en,de}crypt*() functions to
+cope with the new CONFIG_VMAP_STACK config option, but later expanded
+to include fixes for two other issues:
 
-I'm going back into relaxed hacking mode.
+- in-place en/decryption (patches 1-9)
+- useless cipher context creation on every request (patches 10-11)
+- authorize reply verification (patches 13-14)
 
-Thnx,
---WjW
+Thanks,
 
+                Ilya
+
+
+Ilya Dryomov (15):
+  libceph: ceph_x_encrypt_buflen() takes in_len
+  libceph: old_key in process_one_ticket() is redundant
+  libceph: introduce ceph_x_encrypt_offset()
+  libceph: introduce ceph_crypt() for in-place en/decryption
+  libceph: rename and align ceph_x_authorizer::reply_buf
+  libceph: tweak calcu_signature() a little
+  libceph: switch ceph_x_encrypt() to ceph_crypt()
+  libceph: switch ceph_x_decrypt() to ceph_crypt()
+  libceph: remove now unused ceph_*{en,de}crypt*() functions
+  libceph: uninline ceph_crypto_key_destroy()
+  libceph: stop allocating a new cipher on every crypto request
+  libceph: no need for GFP_NOFS in ceph_monc_init()
+  libceph: verify authorize reply on connect
+  libceph: drop len argument of *verify_authorizer_reply()
+  libceph: no need to drop con->mutex for ->get_authorizer()
+
+ fs/ceph/mds_client.c           |   4 +-
+ include/linux/ceph/auth.h      |   5 +-
+ include/linux/ceph/messenger.h |   2 +-
+ net/ceph/auth.c                |   4 +-
+ net/ceph/auth_x.c              | 197 +++++++++---------
+ net/ceph/auth_x.h              |   3 +-
+ net/ceph/crypto.c              | 461 ++++++++++-------------------------------
+ net/ceph/crypto.h              |  26 +--
+ net/ceph/messenger.c           |  19 +-
+ net/ceph/mon_client.c          |  12 +-
+ net/ceph/osd_client.c          |   4 +-
+ 11 files changed, 246 insertions(+), 491 deletions(-)
+
+-- 
+2.4.3
 
