@@ -1,70 +1,261 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 13/15] libceph: verify authorize reply on connect
-Date: Mon, 12 Dec 2016 21:48:58 +0100
-Message-ID: <1481575740-1834-14-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 11/15] libceph: stop allocating a new cipher on every crypto request
+Date: Mon, 12 Dec 2016 21:48:56 +0100
+Message-ID: <1481575740-1834-12-git-send-email-idryomov@gmail.com>
 References: <1481575740-1834-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:36702 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932510AbcLLUuQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2016 15:50:16 -0500
-Received: by mail-wm0-f65.google.com with SMTP id m203so13732291wma.3
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Dec 2016 12:50:15 -0800 (PST)
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:34643 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932514AbcLLUuO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2016 15:50:14 -0500
+Received: by mail-wm0-f67.google.com with SMTP id g23so13807769wme.1
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Dec 2016 12:50:13 -0800 (PST)
 Received: from dhcp-1-105.brq.redhat.com ([213.175.37.12])
-        by smtp.gmail.com with ESMTPSA id 135sm37201887wmh.14.2016.12.12.12.50.13
+        by smtp.gmail.com with ESMTPSA id 135sm37201887wmh.14.2016.12.12.12.50.11
         for <ceph-devel@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 12 Dec 2016 12:50:13 -0800 (PST)
+        Mon, 12 Dec 2016 12:50:12 -0800 (PST)
 In-Reply-To: <1481575740-1834-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-After sending an authorizer (ceph_x_authorize_a + ceph_x_authorize_b),
-the client gets back a ceph_x_authorize_reply, which it is supposed to
-verify to ensure the authenticity and protect against replay attacks.
-The code for doing this is there (ceph_x_verify_authorizer_reply(),
-ceph_auth_verify_authorizer_reply() + plumbing), but it is never
-invoked by the the messenger.
+This is useless and more importantly not allowed on the writeback path,
+because crypto_alloc_skcipher() allocates memory with GFP_KERNEL, which
+can recurse back into the filesystem:
 
-AFAICT this goes back to 2009, when ceph authentication protocols
-support was added to the kernel client in 4e7a5dcd1bba ("ceph:
-negotiate authentication protocol; implement AUTH_NONE protocol").
+    kworker/9:3     D ffff92303f318180     0 20732      2 0x00000080
+    Workqueue: ceph-msgr ceph_con_workfn [libceph]
+     ffff923035dd4480 ffff923038f8a0c0 0000000000000001 000000009eb27318
+     ffff92269eb28000 ffff92269eb27338 ffff923036b145ac ffff923035dd4480
+     00000000ffffffff ffff923036b145b0 ffffffff951eb4e1 ffff923036b145a8
+    Call Trace:
+     [<ffffffff951eb4e1>] ? schedule+0x31/0x80
+     [<ffffffff951eb77a>] ? schedule_preempt_disabled+0xa/0x10
+     [<ffffffff951ed1f4>] ? __mutex_lock_slowpath+0xb4/0x130
+     [<ffffffff951ed28b>] ? mutex_lock+0x1b/0x30
+     [<ffffffffc0a974b3>] ? xfs_reclaim_inodes_ag+0x233/0x2d0 [xfs]
+     [<ffffffff94d92ba5>] ? move_active_pages_to_lru+0x125/0x270
+     [<ffffffff94f2b985>] ? radix_tree_gang_lookup_tag+0xc5/0x1c0
+     [<ffffffff94dad0f3>] ? __list_lru_walk_one.isra.3+0x33/0x120
+     [<ffffffffc0a98331>] ? xfs_reclaim_inodes_nr+0x31/0x40 [xfs]
+     [<ffffffff94e05bfe>] ? super_cache_scan+0x17e/0x190
+     [<ffffffff94d919f3>] ? shrink_slab.part.38+0x1e3/0x3d0
+     [<ffffffff94d9616a>] ? shrink_node+0x10a/0x320
+     [<ffffffff94d96474>] ? do_try_to_free_pages+0xf4/0x350
+     [<ffffffff94d967ba>] ? try_to_free_pages+0xea/0x1b0
+     [<ffffffff94d863bd>] ? __alloc_pages_nodemask+0x61d/0xe60
+     [<ffffffff94ddf42d>] ? cache_grow_begin+0x9d/0x560
+     [<ffffffff94ddfb88>] ? fallback_alloc+0x148/0x1c0
+     [<ffffffff94ed84e7>] ? __crypto_alloc_tfm+0x37/0x130
+     [<ffffffff94de09db>] ? __kmalloc+0x1eb/0x580
+     [<ffffffffc09fe2db>] ? crush_choose_firstn+0x3eb/0x470 [libceph]
+     [<ffffffff94ed84e7>] ? __crypto_alloc_tfm+0x37/0x130
+     [<ffffffff94ed9c19>] ? crypto_spawn_tfm+0x39/0x60
+     [<ffffffffc08b30a3>] ? crypto_cbc_init_tfm+0x23/0x40 [cbc]
+     [<ffffffff94ed857c>] ? __crypto_alloc_tfm+0xcc/0x130
+     [<ffffffff94edcc23>] ? crypto_skcipher_init_tfm+0x113/0x180
+     [<ffffffff94ed7cc3>] ? crypto_create_tfm+0x43/0xb0
+     [<ffffffff94ed83b0>] ? crypto_larval_lookup+0x150/0x150
+     [<ffffffff94ed7da2>] ? crypto_alloc_tfm+0x72/0x120
+     [<ffffffffc0a01dd7>] ? ceph_aes_encrypt2+0x67/0x400 [libceph]
+     [<ffffffffc09fd264>] ? ceph_pg_to_up_acting_osds+0x84/0x5b0 [libceph]
+     [<ffffffff950d40a0>] ? release_sock+0x40/0x90
+     [<ffffffff95139f94>] ? tcp_recvmsg+0x4b4/0xae0
+     [<ffffffffc0a02714>] ? ceph_encrypt2+0x54/0xc0 [libceph]
+     [<ffffffffc0a02b4d>] ? ceph_x_encrypt+0x5d/0x90 [libceph]
+     [<ffffffffc0a02bdf>] ? calcu_signature+0x5f/0x90 [libceph]
+     [<ffffffffc0a02ef5>] ? ceph_x_sign_message+0x35/0x50 [libceph]
+     [<ffffffffc09e948c>] ? prepare_write_message_footer+0x5c/0xa0 [libceph]
+     [<ffffffffc09ecd18>] ? ceph_con_workfn+0x2258/0x2dd0 [libceph]
+     [<ffffffffc09e9903>] ? queue_con_delay+0x33/0xd0 [libceph]
+     [<ffffffffc09f68ed>] ? __submit_request+0x20d/0x2f0 [libceph]
+     [<ffffffffc09f6ef8>] ? ceph_osdc_start_request+0x28/0x30 [libceph]
+     [<ffffffffc0b52603>] ? rbd_queue_workfn+0x2f3/0x350 [rbd]
+     [<ffffffff94c94ec0>] ? process_one_work+0x160/0x410
+     [<ffffffff94c951bd>] ? worker_thread+0x4d/0x480
+     [<ffffffff94c95170>] ? process_one_work+0x410/0x410
+     [<ffffffff94c9af8d>] ? kthread+0xcd/0xf0
+     [<ffffffff951efb2f>] ? ret_from_fork+0x1f/0x40
+     [<ffffffff94c9aec0>] ? kthread_create_on_node+0x190/0x190
 
-The second param of ceph_connection_operations::verify_authorizer_reply
-is unused all the way down.  Pass 0 to facilitate backporting, and kill
-it in the next commit.
+Allocating the cipher along with the key fixes the issue - as long the
+key doesn't change, a single cipher context can be used concurrently in
+multiple requests.
 
-Cc: stable@vger.kernel.org
+We still can't take that GFP_KERNEL allocation though.  Both
+ceph_crypto_key_clone() and ceph_crypto_key_decode() are called from
+GFP_NOFS context, so resort to memalloc_noio_{save,restore}() here.
+
+Reported-by: Lucas Stach <l.stach@pengutronix.de>
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- net/ceph/messenger.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ net/ceph/crypto.c | 85 +++++++++++++++++++++++++++++++++++++++----------------
+ net/ceph/crypto.h |  1 +
+ 2 files changed, 61 insertions(+), 25 deletions(-)
 
-diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-index a5502898ea33..2efb335deada 100644
---- a/net/ceph/messenger.c
-+++ b/net/ceph/messenger.c
-@@ -2027,6 +2027,19 @@ static int process_connect(struct ceph_connection *con)
+diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
+index c4d8f68e0b18..3949ce70be07 100644
+--- a/net/ceph/crypto.c
++++ b/net/ceph/crypto.c
+@@ -13,14 +13,60 @@
+ #include <linux/ceph/decode.h>
+ #include "crypto.h"
  
- 	dout("process_connect on %p tag %d\n", con, (int)con->in_tag);
- 
-+	if (con->auth_reply_buf) {
-+		/*
-+		 * Any connection that defines ->get_authorizer()
-+		 * should also define ->verify_authorizer_reply().
-+		 * See get_connect_authorizer().
-+		 */
-+		ret = con->ops->verify_authorizer_reply(con, 0);
-+		if (ret < 0) {
-+			con->error_msg = "bad authorize reply";
-+			return ret;
-+		}
++/*
++ * Set ->key and ->tfm.  The rest of the key should be filled in before
++ * this function is called.
++ */
++static int set_secret(struct ceph_crypto_key *key, void *buf)
++{
++	unsigned int noio_flag;
++	int ret;
++
++	key->key = NULL;
++	key->tfm = NULL;
++
++	switch (key->type) {
++	case CEPH_CRYPTO_NONE:
++		return 0; /* nothing to do */
++	case CEPH_CRYPTO_AES:
++		break;
++	default:
++		return -ENOTSUPP;
 +	}
 +
- 	switch (con->in_reply.tag) {
- 	case CEPH_MSGR_TAG_FEATURES:
- 		pr_err("%s%lld %s feature set mismatch,"
++	WARN_ON(!key->len);
++	key->key = kmemdup(buf, key->len, GFP_NOIO);
++	if (!key->key) {
++		ret = -ENOMEM;
++		goto fail;
++	}
++
++	/* crypto_alloc_skcipher() allocates with GFP_KERNEL */
++	noio_flag = memalloc_noio_save();
++	key->tfm = crypto_alloc_skcipher("cbc(aes)", 0, CRYPTO_ALG_ASYNC);
++	memalloc_noio_restore(noio_flag);
++	if (IS_ERR(key->tfm)) {
++		ret = PTR_ERR(key->tfm);
++		key->tfm = NULL;
++		goto fail;
++	}
++
++	ret = crypto_skcipher_setkey(key->tfm, key->key, key->len);
++	if (ret)
++		goto fail;
++
++	return 0;
++
++fail:
++	ceph_crypto_key_destroy(key);
++	return ret;
++}
++
+ int ceph_crypto_key_clone(struct ceph_crypto_key *dst,
+ 			  const struct ceph_crypto_key *src)
+ {
+ 	memcpy(dst, src, sizeof(struct ceph_crypto_key));
+-	dst->key = kmemdup(src->key, src->len, GFP_NOFS);
+-	if (!dst->key)
+-		return -ENOMEM;
+-	return 0;
++	return set_secret(dst, src->key);
+ }
+ 
+ int ceph_crypto_key_encode(struct ceph_crypto_key *key, void **p, void *end)
+@@ -37,16 +83,16 @@ int ceph_crypto_key_encode(struct ceph_crypto_key *key, void **p, void *end)
+ 
+ int ceph_crypto_key_decode(struct ceph_crypto_key *key, void **p, void *end)
+ {
++	int ret;
++
+ 	ceph_decode_need(p, end, 2*sizeof(u16) + sizeof(key->created), bad);
+ 	key->type = ceph_decode_16(p);
+ 	ceph_decode_copy(p, &key->created, sizeof(key->created));
+ 	key->len = ceph_decode_16(p);
+ 	ceph_decode_need(p, end, key->len, bad);
+-	key->key = kmalloc(key->len, GFP_NOFS);
+-	if (!key->key)
+-		return -ENOMEM;
+-	ceph_decode_copy(p, key->key, key->len);
+-	return 0;
++	ret = set_secret(key, *p);
++	*p += key->len;
++	return ret;
+ 
+ bad:
+ 	dout("failed to decode crypto key\n");
+@@ -85,14 +131,11 @@ void ceph_crypto_key_destroy(struct ceph_crypto_key *key)
+ 	if (key) {
+ 		kfree(key->key);
+ 		key->key = NULL;
++		crypto_free_skcipher(key->tfm);
++		key->tfm = NULL;
+ 	}
+ }
+ 
+-static struct crypto_skcipher *ceph_crypto_alloc_cipher(void)
+-{
+-	return crypto_alloc_skcipher("cbc(aes)", 0, CRYPTO_ALG_ASYNC);
+-}
+-
+ static const u8 *aes_iv = (u8 *)CEPH_AES_IV;
+ 
+ /*
+@@ -168,8 +211,7 @@ static void teardown_sgtable(struct sg_table *sgt)
+ static int ceph_aes_crypt(const struct ceph_crypto_key *key, bool encrypt,
+ 			  void *buf, int buf_len, int in_len, int *pout_len)
+ {
+-	struct crypto_skcipher *tfm = ceph_crypto_alloc_cipher();
+-	SKCIPHER_REQUEST_ON_STACK(req, tfm);
++	SKCIPHER_REQUEST_ON_STACK(req, key->tfm);
+ 	struct sg_table sgt;
+ 	struct scatterlist prealloc_sg;
+ 	char iv[AES_BLOCK_SIZE];
+@@ -177,20 +219,15 @@ static int ceph_aes_crypt(const struct ceph_crypto_key *key, bool encrypt,
+ 	int crypt_len = encrypt ? in_len + pad_byte : in_len;
+ 	int ret;
+ 
+-	if (IS_ERR(tfm))
+-		return PTR_ERR(tfm);
+-
+ 	WARN_ON(crypt_len > buf_len);
+ 	if (encrypt)
+ 		memset(buf + in_len, pad_byte, pad_byte);
+ 	ret = setup_sgtable(&sgt, &prealloc_sg, buf, crypt_len);
+ 	if (ret)
+-		goto out_tfm;
++		return ret;
+ 
+-	crypto_skcipher_setkey((void *)tfm, key->key, key->len);
+ 	memcpy(iv, aes_iv, AES_BLOCK_SIZE);
+-
+-	skcipher_request_set_tfm(req, tfm);
++	skcipher_request_set_tfm(req, key->tfm);
+ 	skcipher_request_set_callback(req, 0, NULL, NULL);
+ 	skcipher_request_set_crypt(req, sgt.sgl, sgt.sgl, crypt_len, iv);
+ 
+@@ -232,8 +269,6 @@ static int ceph_aes_crypt(const struct ceph_crypto_key *key, bool encrypt,
+ 
+ out_sgt:
+ 	teardown_sgtable(&sgt);
+-out_tfm:
+-	crypto_free_skcipher(tfm);
+ 	return ret;
+ }
+ 
+diff --git a/net/ceph/crypto.h b/net/ceph/crypto.h
+index c4211590b721..58d83aa7740f 100644
+--- a/net/ceph/crypto.h
++++ b/net/ceph/crypto.h
+@@ -12,6 +12,7 @@ struct ceph_crypto_key {
+ 	struct ceph_timespec created;
+ 	int len;
+ 	void *key;
++	struct crypto_skcipher *tfm;
+ };
+ 
+ int ceph_crypto_key_clone(struct ceph_crypto_key *dst,
 -- 
 2.4.3
 
