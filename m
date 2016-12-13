@@ -1,270 +1,88 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Mismatching nonce for 'ceph osd.0 tell'
-Date: Tue, 13 Dec 2016 02:34:03 +0100
-Message-ID: <bf482945-5876-33f4-073b-5de4b4ee6ccc@digiware.nl>
-References: <f54dda71-dabf-cab2-948c-83b9f2007aff@digiware.nl>
- <CACJqLybyu1_rKj7g7qSfrtZCVMhJvgcvU2Q7vfoRUvs-3hT3JQ@mail.gmail.com>
- <14688c37-068c-0bc6-615d-de2f8f5bfdc6@digiware.nl>
- <CAJ4mKGawPKP=rGB9t1wkwn00sYcBE8T9ac327mGLv90Z4MFxpg@mail.gmail.com>
- <3df7e2ed-eb34-8ba8-8a8d-9d7b66e45315@digiware.nl>
- <CAJ4mKGa+wydRuMtvCYiOe823v9UkN2Qk0FkViqHhLAPmGeFoGA@mail.gmail.com>
- <89a9ee77-21db-e955-7bb3-c4adc3bb94bf@digiware.nl>
- <CAJ4mKGboUvhJhf1=bUD=unSAc4Z+1nQPmYXRFb=CfmA-Wk6GEQ@mail.gmail.com>
- <e467d1f1-8a29-1a32-b113-0d71e00d5ec5@digiware.nl>
- <CAJE9aOO5N4w=EZer310DYa9+rnszwR-afTx7M_dRjOtyS78pWw@mail.gmail.com>
- <ced59373-1ebf-554e-a383-bfe266067a22@digiware.nl>
- <CAJE9aONPZGj0ZXZRMiVnzW3RYGoOi8K5bW1caxa5vy=FJQV-ig@mail.gmail.com>
- <390636b2-3bcf-a3c0-1d50-9e62e53bbda8@digiware.nl>
- <822ea89a-d556-9ff1-5302-115ef05890cc@digiware.nl>
- <1a42b836-94c8-b265-66af-d2b563cc9c7d@digiware.nl>
- <87ad4e8e-a94d-079b-5c84-fa61849dbffc@digiware.nl>
+From: Dong Wu <archer.wudong@gmail.com>
+Subject: How to release Hammer osd RAM when compiled with jemalloc
+Date: Tue, 13 Dec 2016 10:22:57 +0800
+Message-ID: <CAAL-TMcjJi7dQrOHiBUwQCgJ5R2cWDeLBB3XzKAogvaAR7yUxg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:11428 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752578AbcLMBeK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 12 Dec 2016 20:34:10 -0500
-In-Reply-To: <87ad4e8e-a94d-079b-5c84-fa61849dbffc@digiware.nl>
+Received: from mail-qk0-f193.google.com ([209.85.220.193]:36145 "EHLO
+        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752913AbcLMCW6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Dec 2016 21:22:58 -0500
+Received: by mail-qk0-f193.google.com with SMTP id h201so12996306qke.3
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Dec 2016 18:22:58 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Haomai Wang <haomai@xsky.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-On 13-12-2016 02:02, Willem Jan Withagen wrote:
-> On 10-12-2016 01:39, Willem Jan Withagen wrote:
->> On 9-12-2016 13:02, Willem Jan Withagen wrote:
->>> On 9-12-2016 10:22, Willem Jan Withagen wrote:
->>>> On 9-12-2016 09:59, kefu chai wrote:
->>>>> On Thu, Dec 8, 2016 at 8:30 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>>>>> On 8-12-2016 11:03, kefu chai wrote:
->>>>>>> On Tue, Oct 4, 2016 at 7:57 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>>>>>>> On 3-10-2016 19:50, Gregory Farnum wrote:
->>>>>>>>>> Question here is:
->>>>>>>>>>   If I ask 'ceph osd dump', I'm actually asking ceph-mon.
->>>>>>>>>>   And cehp-mon has learned this from (crush?)maps being sent to it by
->>>>>>>>>>   ceph-osd.
->>>>>>>>> The monitor has learned about specific IP addresses/nonces/etc via
->>>>>>>>> MOSDBoot messages from the OSDs. The crush locations are set via
->>>>>>>>> monitor command messages, generally invoked as part of the init
->>>>>>>>> scripts. Maps are generated entirely on the monitor. :)
->>>>>>>>>
->>>>>>>>>> Is there an easy way to debug/monitor the content of what ceph-osd sends
->>>>>>>>>> and ceph-mon receives in the maps?
->>>>>>>>>> Just to make sure that it is clear where the problem occurs.
->>>>>>>>> You should be able to see the info going in and out by bumping the
->>>>>>>>> debug levels up — every message's "print" function is invoked when
->>>>>>>>> it's sent/received as long as you have "debug ms = 1". It looks like
->>>>>>>>> the MOSDBoot message doesn't natively dump its addresses but you can
->>>>>>>>> add them easily if you need to.
->>>>>>>> Hi Greg,
->>>>>>>>
->>>>>>>> Thanx for the answer....
->>>>>>>>
->>>>>>>> I've got debug_ms already pumped up all the way to 20.
->>>>>>>> So I do get to see what addresses are selected during bind. But still
->>>>>>>> they do not end up at the MON, and 'ceph osd dump' reports:
->>>>>>>>         :/0
->>>>>>>> as bind address.
->>>>>>>>
->>>>>>>> I'm going to add some more debugs to actually see what MOSDBoot is doing....
->>>>>>> there are multiple messengers used by ceph-osd, the one connected by
->>>>>>> rados client is the external/public messenger. it is also used by osd
->>>>>>> to talk with the monitor.
->>>>>>>
->>>>>>> the nonce of the external address of an OSD does not change after it's
->>>>>>> up: it's always the pid of ceph-osd process. and the (peer) address of
->>>>>>> the booting OSD collected by monitor comes from the connection's
->>>>>>> peer_addr field, which is set when the monitor accepts the connection
->>>>>>> from OSD. see STATE_ACCEPTING_WAIT_BANNER_ADDR case block in
->>>>>>> AsyncConnection::_process_connection().
->>>>>>>
->>>>>>> but there are chances that an OSD is restarted and fail to bind its
->>>>>>> external messenger to the specified the port. in that case, ceph-osd
->>>>>>> will try with another port, but keep the nonce the same. but when it
->>>>>>> comes to other messengers used by ceph-osd, their nonces increase by
->>>>>>> 1000000 every time they rebind. that's why "ceph osd thrash" can
->>>>>>> change the nonces of the cluster_addr, heartbeat_back_addr and
->>>>>>> heartbeat_front_addr. the PR of
->>>>>>> https://github.com/ceph/ceph/pull/11706 actually changes the behavior
->>>>>>> of the messengers of these three messengers. and it has nothing to do
->>>>>>> with the external messenger to which the ceph cli client is
->>>>>>> connecting.
->>>>>>>
->>>>>>> so you might want to check
->>>>>>> 1) how/why the nonce of the messenger in MonClient is 1000000 + $pid
->>>>>>> 2) while the nonce of the same messenger is $pid when the ceph cli
->>>>>>> connects to it.
->>>>>>>
->>>>>>> my PR of https://github.com/ceph/ceph/pull/11804 is more of a cleanup.
->>>>>>> it avoids setting the nonce before the rebind finishes. and i tried
->>>>>>> with your producer on my linux box, no luck =(
->>>>>> Right,
->>>>>>
->>>>>> You gave me a lot of things to think about, and to start figuring out.
->>>>>>
->>>>>> And you are right that something really bad needs to happen to an OSD to
->>>>>> get in this state. But that is what the tests actually do: They just
->>>>>> down/up or kill OSDs and restart.
->>>>>>
->>>>>> And from previous discussions I "learned" that if the process doesn't
->>>>>> die but needs to rebind on the port, the OSD stays at the same port but
->>>>>> increments the nonce to indicate that it is a fresh connection. And log
->>>>> the external messenger should *not* increment its nonce.
->>>>>
->>>>>> printing actually shows that the code is going thru a rebind.
->>>>> and it should *not* go through rebind().
->>>> I have to dig thru the testscript but as far as I can tell just about
->>>> all of the daemons are getting reboots in this test.
->>>>
->>>> So when would I get a rebind?
->>>>
->>>> I thought it was because I had an OSD incorrectly marked down:
->>>> ./src/osd/OSD.cc:7074:                 << " wrongly marked me down";
->>>> This I found in the logs, and then I got a rebind.
->>>>
->>>> Wido suggested looking for this message, on my question why my OSDs were
->>>> not getting UP after a good hustle with all OSDs and MONs.
->>>>
->>>> And that is one of the tests in cephtool-test-mon.sh.
->>>> right before the 'ceph tell osd.0 version' there are tests like:
->>>>   ceph osd set noup
->>>>   ceph osd down 0
->>>>   ceph osd dump | grep 'osd.0 down'
->>>>   ceph osd unset noup
->>>> and
->>>>   ceph osd reweight osd.0 .5
->>>>   ceph osd dump | grep ^osd.0 | grep 'weight 0.5'
->>>>   ceph osd out 0
->>>>   ceph osd in 0
->>>>   ceph osd dump | grep ^osd.0 | grep 'weight 0.5'
->>>>
->>>>
->>>>>> Now the bad thing is that the Linux and FreeBSD log do comparable things
->>>>>> with my (small) change to the setting of addr. And the nonce is indeed
->>>>>> incremented, which increment is actually picked up by all ceph components.
->>>> So now I have 2 challenges??
->>>>
->>>> 1) Find out why I get a rebind, where you think I should not.
->>>>    For that I'll have to collect all maltreatment that is done in
->>>>    cephtool-test-mon.sh. And again compare the Linux and FreeBSD logs
->>>>    to see what is up.
->>>> 2) If we get a rebind...
->>>>    Why doesn't the FreeBSD version end up with consistent noncees.
->>>>
->>>> "Good thing" about the previous code was that I could tweak it, and at
->>>> least get it to Work for FreeBSD. Have not had the time to see if I
->>>> could again with this code....
->>> So the smallest sequence I can find that demonstrates the problem:
->>> function test_mon_rebind()
->>> {
->>>   ceph osd set noup
->>>   ceph osd down 0
->>>   ceph osd dump | grep 'osd.0 down'
->>>   ceph osd unset noup
->>>   max_run=1000
->>>   for ((i=0; i < $max_run; i++)); do
->>>     if ! ceph osd dump | grep 'osd.0 up'; then
->>>       echo "waiting for osd.0 to come back up ($i/$max_run)"
->>>       sleep 1
->>>     else
->>>       break
->>>     fi
->>>   done
->>>   ceph osd dump | grep 'osd.0 up'
->>>
->>>   for id in `ceph osd ls` ; do
->>>     retry_eagain 5 map_enxio_to_eagain ceph tell osd.$id version
->>>   done
->>> }
->>>
->>> Which matches with what I thought I knew:
->>>   OSD down => up => rebind
->>> which follows from the log where the osd complains about being marked
->>> down incorrectly.
->>> search for
->>>    log_channel(cluster) log [WRN] : map e8 wrongly marked me down
->>> in the osd.0.log
->>>
->>
->> I ran the code snippet, and it DOES generate a rebind even on Linux
->> Centos 7.
->> So I expect that the rebind action is called for?
->>
->> Also note that at least one nonce is incremented, AND new ports are
->> selected.
->> 6801,6802,6803 are avoided, and it looks like already connected ports
->> are avoided as well.
->> (obvious, since binding on them will not work)
->>
->> Next is the FreeBSD log, and that one is relatively seriously wrong
->> since nonce are 0 .
->> And that must be incorrect.
->>
->> Last is the log of the current master code with the patch I made of
->> msg->my_addr, versus addr.
->> IMHO a change that should be semantical equal?
->>   return bind(msgr->my_inst.addr, new_avoid);
->>   // return bind(addr, new_avoid);
->> One thing that is not working there is the port avoidance. That I have
->> to look into since there is no reason
->> why this should not work under FreeBSD.
-> 
-> I have tested with the new code Kefu submitted to master this afternoon:
-> The Linux variant gives:
-> 7f36b1dd1700  1 -- 127.0.0.1:6800/13799 <== mon.2 127.0.0.1:8204/0 38
-> ==== osd_map(18..21 src has 1..21) v3 ==== 1012+0+0 (424389225 0 0)
-> 0x7f36cdcc7cc0 con 0x7f36cdb24000
-> 7f36b5ac6700  0 log_channel(cluster) log [WRN] : map e21 wrongly marked
-> me down
-> 7f36b5ac6700  1 -- 127.0.0.1:6801/13799 rebind rebind avoid 6801,6802,6803
-> 7f36b5ac6700  1 -- 127.0.0.1:6801/13799 shutdown_connections
-> 7f36b5ac6700  1 -- 127.0.0.1:6812/1013799 _finish_bind bind my_inst.addr
-> is 127.0.0.1:6812/1013799
-> 7f36b5ac6700  1  Processor -- start
-> 
-> Note that the new allocated channel is on port 6812 with an incremented
-> nonce, and the channel on port 6800 is not touched. Probably because it
-> is still open, and it is not the channel being rebound.
-> 
-> Now the FreeBSD version:
-> bb99f80  1 -- 127.0.0.1:6800/6449 <== mon.1 127.0.0.1:7203/0 158 ====
-> osd_map(172..175 src has 1..175) v3 ==== 1045+0+0 (1598708051 0 0)
-> 0xc08eb40 con 0xbbca000
-> bb98d80  0 log_channel(cluster) log [WRN] : map e175 wrongly marked me down
-> bb98d80  1 -- 127.0.0.1:6801/6449 rebind rebind avoid 6801,6802,6803
-> bb98d80  1 -- 127.0.0.1:6801/6449 shutdown_connections
-> bb98d80  1 -- 127.0.0.1:6800/1006449 _finish_bind bind my_inst.addr is
-> 127.0.0.1:6800/1006449
-> bb98d80  1  Processor -- start
-> 
-> And here the new channel is allocated on port 6800, as if that would be
-> available. Should it also not be marked as such in avoid_ports??
-> But that port is still being used as is indicated in the first line.
-> FreeBSD does not seem to have a problem binding to that port ??
-> And thus a channel is listening on 6800, but with a new nonce.
-> So that could be the reason that ceph and rados are complaining that
-> they cannot talk to osd.0
-> 
-> So why is 6800 not in the list for channels to avoid?
+Hi, all
+   I have a cluster with nearly 1000 osds, and each osd already
+occupied 2.5G physical memory on average, which cause each host 90%
+memory useage. when use tcmalloc, we can use "ceph tell osd.* release"
+to release unused memory, but in my cluster, ceph is build with
+jemalloc, so can't use "ceph tell osd.* release", is there any methods
+to release some memory?
 
-I patched osd/OSD.cc: (added to fit with 80 chars)
---- a/src/osd/OSD.cc
-+++ b/src/osd/OSD.cc
-@@ -7126,6 +7126,7 @@ void OSD::_committed_osd_maps(epoch_t first,
-epoch_t last, MOSDMap *m)
-        start_waiting_for_healthy();
+another question:
+can I decrease the following config value which used for cached osdmap
+ to lower osd's memory?
 
-        set<int> avoid_ports;
-+        avoid_ports.insert(client_messenger->get_myaddr().get_port());
-        avoid_ports.insert(cluster_messenger->get_myaddr().get_port());
- avoid_ports.insert(hb_back_server_messenger->get_myaddr().get_port());
- avoid_ports.insert(hb_front_server_messenger->get_myaddr().get_port());
+"mon_min_osdmap_epochs": "500"
+"osd_map_max_advance": "200",
+"osd_map_cache_size": "500",
+"osd_map_message_max": "100",
+"osd_map_share_max_epochs": "100"
 
-And just adding this extra port to avoid gets things done.
 
-I guess that there are enough remarks to be made on this patch??
+here is one of my host memory usage:
+Tasks: 547 total,   1 running, 546 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.7 us,  0.4 sy,  0.0 ni, 98.8 id,  0.0 wa,  0.0 hi,  0.1 si,  0.0 st
+KiB Mem:  65474900 total, 65174136 used,   300764 free,    63472 buffers
+KiB Swap:  4194300 total,  1273384 used,  2920916 free,  7100148 cached
 
---WjW
+PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND
+190259 root      20   0 12.1g 2.6g 5328 S     8  4.2   5445:38
+ceph-osd
+177520 root      20   0 11.9g 2.6g 5560 S    10  4.1   4725:24
+ceph-osd
+166517 root      20   0 12.2g 2.5g 5320 S     4  4.1   5399:44
+ceph-osd
+171744 root      20   0 11.9g 2.5g 5984 S     4  4.1   4911:13
+ceph-osd
+   958 root      20   0 11.9g 2.5g 4652 S     6  4.0   4821:20
+ceph-osd
+ 16134 root      20   0 12.4g 2.5g 5252 S     4  4.0   5336:00
+ceph-osd
+183738 root      20   0 12.1g 2.5g 4500 S     6  4.0   4748:43
+ceph-osd
+  8482 root      20   0 11.6g 2.5g 5760 S     4  4.0   4937:24
+ceph-osd
+161514 root      20   0 12.1g 2.5g 5712 S     6  3.9   4937:30
+ceph-osd
+ 37148 root      20   0 5919m 2.4g 4164 S     2  3.9   2709:53
+ceph-osd
+ 48327 root      20   0 5956m 2.4g 3872 S     0  3.8   2782:25
+ceph-osd
+ 31214 root      20   0 5990m 2.4g 4336 S     4  3.8   3020:38
+ceph-osd
+ 24254 root      20   0 5762m 2.4g 4404 S     4  3.8   2852:50
+ceph-osd
+ 19524 root      20   0 5782m 2.4g 4608 S     2  3.8   2752:12
+ceph-osd
+ 40557 root      20   0 5875m 2.4g 4492 S     4  3.8   2808:41
+ceph-osd
+ 22458 root      20   0 5769m 2.3g 4084 S     2  3.8   2820:34
+ceph-osd
+ 28668 root      20   0 5796m 2.3g 4424 S     2  3.8   2728:06
+ceph-osd
+ 20885 root      20   0 5867m 2.3g 4368 S     2  3.7   2802:10
+ceph-osd
+ 26382 root      20   0 5857m 2.3g 4176 S     4  3.7   3012:35
+ceph-osd
+ 44276 root      20   0 5828m 2.3g 4792 S     0  3.6   2891:12
+ceph-osd
+ 34035 root      20   0 5887m 2.2g 3984 S     4  3.5   2836:21 ceph-osd
 
+
+Thanks.
+Regards.
