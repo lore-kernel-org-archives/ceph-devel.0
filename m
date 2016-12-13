@@ -1,7 +1,7 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Bluestore with ZS
-Date: Tue, 13 Dec 2016 21:40:16 +0000
-Message-ID: <BY2PR02MB3966ECC22A81F33449D022DF49B0@BY2PR02MB396.namprd02.prod.outlook.com>
+Date: Tue, 13 Dec 2016 21:44:28 +0000
+Message-ID: <BY2PR02MB3968021B4711649E7D72C04F49B0@BY2PR02MB396.namprd02.prod.outlook.com>
 References: <BY2PR02MB39644AE8ABB2551CC39A46AF4820@BY2PR02MB396.namprd02.prod.outlook.com>
  <ca516a6a-0089-2b7c-95aa-3a21de181f35@redhat.com>
  <BY2PR02MB396F6FA5C8A06E86A698208F49B0@BY2PR02MB396.namprd02.prod.outlook.com>
@@ -10,22 +10,31 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam03on0077.outbound.protection.outlook.com ([104.47.42.77]:59552
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+Received: from mail-dm3nam03on0057.outbound.protection.outlook.com ([104.47.41.57]:29856
+        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932705AbcLMWNc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Dec 2016 17:13:32 -0500
-In-Reply-To: <f8bc4a5c-1c7e-c311-e9d3-c3f54b77ac24@redhat.com>
+        id S934927AbcLMWSy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 13 Dec 2016 17:18:54 -0500
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Mark Nelson <mnelson@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+Ohh, for compilation ?
+Hmm, strange , for me make -j<core> is not much different. Need to see..
+
+-----Original Message-----
+From: Somnath Roy=20
+Sent: Tuesday, December 13, 2016 1:40 PM
+To: 'Mark Nelson'
+Cc: ceph-devel
+Subject: RE: Bluestore with ZS
+
 Have you set bluestore_num_kv_sync_threads =3D <number> (say 4 ?)
 
 -----Original Message-----
-From: Mark Nelson [mailto:mnelson@redhat.com]=20
+From: Mark Nelson [mailto:mnelson@redhat.com]
 Sent: Tuesday, December 13, 2016 1:13 PM
 To: Somnath Roy
 Cc: ceph-devel
@@ -71,7 +80,7 @@ ly recommend to try with the following code base.
 > It is giving ZS significant performance boost but we believe we can optim=
 ize shim further. We are working on that.
 >
-> BTW, I have coded on top of your allocator changes=20
+> BTW, I have coded on top of your allocator changes
 > (https://github.com/ceph/ceph/pull/12343)
 >
 > Thanks & Regards
