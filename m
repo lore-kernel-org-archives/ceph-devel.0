@@ -1,111 +1,71 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Reshard is not stabilizing in latest master
-Date: Tue, 13 Dec 2016 15:33:00 +0000
-Message-ID: <BY2PR02MB396541902D2FC549657FA0EF49B0@BY2PR02MB396.namprd02.prod.outlook.com>
-References: <DM2PR02MB398ED2929DBD480C2CCFC88F4840@DM2PR02MB398.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1612090059480.32281@piezo.novalocal>
- <BY2PR02MB396DC43832DA107A62066B0F4870@BY2PR02MB396.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1612121738050.25581@piezo.novalocal>
- <8276d3ed-f169-b4d8-5301-f3d25347b502@mirantis.com>
- <BY2PR02MB396968E5056460170608E6BF4980@BY2PR02MB396.namprd02.prod.outlook.com>
- <2abd6172-75bf-2b42-0a5a-33eeb24da648@mirantis.com>
- <CABbLZY3XBBj0wfekJfOacd4DteMqdCVP1Q2J_SzeRSybXyUQLg@mail.gmail.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: A way to reduce BlueStore KV traffic
+Date: Tue, 13 Dec 2016 19:21:25 +0300
+Message-ID: <dc12e490-1c62-93a1-e65a-8e8fb423b8f7@mirantis.com>
+References: <es4in77lf83vwmserwh0urhs.1481225501151@email.android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam02on0088.outbound.protection.outlook.com ([104.47.36.88]:19048
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933015AbcLMPs1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Dec 2016 10:48:27 -0500
-In-Reply-To: <CABbLZY3XBBj0wfekJfOacd4DteMqdCVP1Q2J_SzeRSybXyUQLg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-yb0-f175.google.com ([209.85.213.175]:35005 "EHLO
+        mail-yb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753379AbcLMQV1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2016 11:21:27 -0500
+Received: by mail-yb0-f175.google.com with SMTP id d128so18452962ybh.2
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2016 08:21:27 -0800 (PST)
+Received: from [127.0.0.1] ([91.218.144.129])
+        by smtp.googlemail.com with ESMTPSA id f76sm19783499ywb.18.2016.12.13.08.21.25
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 13 Dec 2016 08:21:26 -0800 (PST)
+In-Reply-To: <es4in77lf83vwmserwh0urhs.1481225501151@email.android.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Varada Kari <varada.kari@gmail.com>, Igor Fedotov <ifedotov@mirantis.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Tm9wZSwgdXNpbmcgYWxsIGRlZmF1bHQgZm9yIHNoYXJkIHJlbGF0ZWQgc3R1ZmYuIFJlZ2FyZGlu
-ZyBtYXggYmxvYiBzaXplL21heCBhbGxvYyBzaXplIHdlIGRpc2N1c3NlZCBpbiB0aGUgc3RhbmR1
-cHMgc2hvdWxkbid0IGFmZmVjdCBzaGFyZHMuDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
-DQpGcm9tOiBWYXJhZGEgS2FyaSBbbWFpbHRvOnZhcmFkYS5rYXJpQGdtYWlsLmNvbV0NClNlbnQ6
-IFR1ZXNkYXksIERlY2VtYmVyIDEzLCAyMDE2IDc6MDcgQU0NClRvOiBJZ29yIEZlZG90b3YNCkNj
-OiBTb21uYXRoIFJveTsgU2FnZSBXZWlsOyBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogUmVzaGFy
-ZCBpcyBub3Qgc3RhYmlsaXppbmcgaW4gbGF0ZXN0IG1hc3Rlcg0KDQpTb21uYXRoIG1pZ2h0IGJl
-IHVzaW5nIHNvbWUgb2YgY29uZmlnIHBhcmFtcyB0byBleHBlZGl0ZSB0aGUgc2hhcmRpbmcgbGlr
-ZSBtYXhfYmxvYl9zaXplIGV0Yy4uIGFsb25nIHdpdGggc29tZSBtb3JlIGNvbmZpZ3MuIEhlIHNo
-YXJlZCB0aGVtIGluIHRoZSBjYWxsIHllc3RlcmRheS4NCg0KVmFyYWRhDQoNCk9uIFR1ZSwgRGVj
-IDEzLCAyMDE2IGF0IDc6MTMgUE0sIElnb3IgRmVkb3RvdiA8aWZlZG90b3ZAbWlyYW50aXMuY29t
-PiB3cm90ZToNCj4gQW55IGNoYW5nZXMgaW4gc2hhcmRzIHNlcmlhbGl6YXRpb24gb3IgZ2VuZXJh
-bCBlbmNvZGluZyBpbmZyYSBzaW5jZQ0KPiB0aGF0IHRpbWU/DQo+DQo+IHNoYXJkIG1pbi9tYXgg
-c2l6ZSBjaGFuZ2VzPw0KPg0KPg0KPg0KPiBPbiAxMi4xMi4yMDE2IDIxOjAzLCBTb21uYXRoIFJv
-eSB3cm90ZToNCj4+DQo+PiBNYWtlIHNlbnNlICwgYnV0LCBhbnkgaWRlYSB3aHkgaXQgaXMgc2hv
-d2luZyB1cCBub3cgYXMgaXQgaXMgbm90DQo+PiBoYXBwZW5pbmcgd2l0aCBvbGQgbWFzdGVyID8g
-V2hhdCBwb3NzaWJseSBJIGRpZCB0byByZXByb2R1Y2UgaXQsIGp1c3QgY3VyaW91cy4NCj4+DQo+
-PiBUaGFua3MgJiBSZWdhcmRzDQo+PiBTb21uYXRoDQo+Pg0KPj4gLS0tLS1PcmlnaW5hbCBNZXNz
-YWdlLS0tLS0NCj4+IEZyb206IElnb3IgRmVkb3RvdiBbbWFpbHRvOmlmZWRvdG92QG1pcmFudGlz
-LmNvbV0NCj4+IFNlbnQ6IE1vbmRheSwgRGVjZW1iZXIgMTIsIDIwMTYgOTo0NiBBTQ0KPj4gVG86
-IFNhZ2UgV2VpbDsgU29tbmF0aCBSb3kNCj4+IENjOiBjZXBoLWRldmVsDQo+PiBTdWJqZWN0OiBS
-ZTogUmVzaGFyZCBpcyBub3Qgc3RhYmlsaXppbmcgaW4gbGF0ZXN0IG1hc3Rlcg0KPj4NCj4+IHll
-YWgsIEkndmUgZ290IHRoZSBzYW1lIGV4cGxhbmF0aW9uIDEwIG1pbiBhZ28uDQo+PiBQUiBpcyBy
-ZWFkeSB0b286DQo+PiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMTI0NDcNCj4+
-DQo+PiBPbiAxMi4xMi4yMDE2IDIwOjM5LCBTYWdlIFdlaWwgd3JvdGU6DQo+Pj4NCj4+PiBPbiBG
-cmksIDkgRGVjIDIwMTYsIFNvbW5hdGggUm95IHdyb3RlOg0KPj4+Pg0KPj4+PiBTYWdlLA0KPj4+
-PiBQbGVhc2UgZmluZCBpdCBpbiB0aGUgZm9sbG93aW5nIGxvY2F0aW9uICwgaXQncyBhIHppcHBl
-ZCBmaWxlLg0KPj4+Pg0KPj4+PiBodHRwczovL2RyaXZlLmdvb2dsZS5jb20vb3Blbj9pZD0wQjdX
-LVMwel95bU1KZDBWMVh6VmhRV1I0YWswDQo+Pj4+DQo+Pj4+DQo+Pj4+IFdoYXQgSSBmb3VuZCB0
-aGF0IHRoZSBmb2xsb3dpbmcgc2hhcmQgbGVuZ3RoIGFsd2F5cyBjb21lcyBiZWxvdw0KPj4+PiBi
-bHVlc3RvcmVfZXh0ZW50X21hcF9zaGFyZF9taW5fc2l6ZSBhbmQgdHJpZ2dlcmluZyByZXNoYXJk
-Lg0KPj4+Pg0KPj4+PiAyMDE2LTEyLTA4IDIwOjA3OjU2Ljk1MDUyNyA3ZmU5MTQwZjc3MDAgMjAN
-Cj4+Pj4gYmx1ZXN0b3JlLmV4dGVudG1hcCgweDU1NzE4MzU0NmQ0OCkgdXBkYXRlIHNoYXJkIDB4
-M2ZmMDAwIGlzIDI1DQo+Pj4+IGJ5dGVzICh3YXMgMjUpIGZyb20gMSBleHRlbnRzDQo+Pj4NCj4+
-PiBBbGwgb2YgdGhlIGluc3RhbmNlcyBhcmUgYXQgb2Zmc2V0IDB4M2ZmMDAwLCB3aGljaCBpcyBy
-aWdodCBhdCB0aGUNCj4+PiBlbmQgb2YgdGhlIG9iamVjdC4gIEkgdGhpbmsgd2UganVzdCBuZWVk
-IHNvbWUgc3BlY2lhbCBjYXNlIGNvZGUgdG8NCj4+PiBoYW5kbGUgd2hlbiB0aGUgbGFzdCBsaXR0
-bGUgYml0IGVuZHMgdXAgYmVpbmcgc21hbGwsIGFuZCBwdWxsIGl0DQo+Pj4gaW50byB0aGUgcHJl
-dmlvdXMgc2hhcmQgKHByb2JhYmx5KS4NCj4+Pg0KPj4+IHNhZ2UNCj4+Pg0KPj4+DQo+Pj4+IFRo
-YW5rcyAmIFJlZ2FyZHMNCj4+Pj4gU29tbmF0aA0KPj4+Pg0KPj4+PiAtLS0tLU9yaWdpbmFsIE1l
-c3NhZ2UtLS0tLQ0KPj4+PiBGcm9tOiBTYWdlIFdlaWwgW21haWx0bzpzd2VpbEByZWRoYXQuY29t
-XQ0KPj4+PiBTZW50OiBUaHVyc2RheSwgRGVjZW1iZXIgMDgsIDIwMTYgNTowMCBQTQ0KPj4+PiBU
-bzogU29tbmF0aCBSb3kNCj4+Pj4gQ2M6IGNlcGgtZGV2ZWwNCj4+Pj4gU3ViamVjdDogUmU6IFJl
-c2hhcmQgaXMgbm90IHN0YWJpbGl6aW5nIGluIGxhdGVzdCBtYXN0ZXINCj4+Pj4NCj4+Pj4gT24g
-VGh1LCA4IERlYyAyMDE2LCBTb21uYXRoIFJveSB3cm90ZToNCj4+Pj4+DQo+Pj4+PiBTYWdlLA0K
-Pj4+Pj4gSSBhbSBzZWVpbmcgcmVzaGFyZCBpcyBub3Qgc3RhYmlsaXppbmcgZXZlbiBhZnRlciBJ
-IHByZWNvbmRpdGlvbg0KPj4+Pj4gYW4gaW1hZ2Ugd2l0aCA0SyBzZXEuIEl0IHdhcyBoYXBwZW5p
-bmcgd2l0aCAyIHdlZWtzIG9sZCBtYXN0ZXIuDQo+Pj4+PiBBbnl0aGluZyBjaGFuZ2Ugb24gdGhh
-dCBwYXJ0IG9mIHRoZSBjb2RlIGJhc2UgcmVjZW50bHkgPyBPdGhlcndpc2UgSSBuZWVkIHRvIGRl
-YnVnLg0KPj4+Pg0KPj4+PiBOb3BlLiAgSWYgeW91IGhhdmUgYSBjbHVzdGVyIHdoZXJlIGl0IGlz
-bid0IHN0YWJpbGl6aW5nIGp1c3QgdHVybg0KPj4+PiBvbiBkZWJ1ZyBibHVlc3RvcmUgPSAyMCBm
-b3IgYSBtaW51dGUgYW5kIHNlbmQgbWUgdGhlIGxvZy4NCj4+Pj4NCj4+Pj4gc2FnZQ0KPj4+PiBQ
-TEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMg
-bWFpbA0KPj4+PiBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRl
-c2lnbmF0ZWQgcmVjaXBpZW50KHMpDQo+Pj4+IG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9m
-IHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkDQo+Pj4+IHJlY2lwaWVudCwgeW91IGFy
-ZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzDQo+Pj4+IG1lc3Nh
-Z2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0
-aW9uLA0KPj4+PiBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJp
-dGVkLiBJZiB5b3UgaGF2ZQ0KPj4+PiByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJy
-b3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieQ0KPj4+PiB0ZWxlcGhvbmUgb3IgZS1tYWls
-IChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55DQo+Pj4+IGFuZCBh
-bGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFy
-ZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+Pj4+DQo+Pj4+DQo+
-Pj4gLS0NCj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAi
-dW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8g
-bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbw0KPj4+IGluZm8gYXQgIGh0
-dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPg0KPg0KPiAtLQ0KPiBU
-byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUg
-Y2VwaC1kZXZlbCINCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2Vy
-Lmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8NCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVs
-Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNv
-bnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkg
-Zm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJ
-ZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVu
-dCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1l
-c3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJp
-YnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVk
-LiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFz
-ZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92
-ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVz
-c2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25p
-Y2FsbHkgc3RvcmVkIGNvcGllcykuDQo=
+Hey cephers!
+
+We are fighting for KV traffic reduction in BlueStore for a while.
+We're pushing huge amount of data to KV (object meta data,  write ahead 
+log, block device allocation map etc ) and this impacts the performance 
+dramatically. Below I'm trying to fix that by storing most of object 
+meta data to block device directly. Actually we should use a second 
+(fast) block device that can be physically co-located with DB or WAL 
+devices.
+Let's start from onode meta data only for the sake of simplicity.
+We have somewhat 4K - 64K and even more meta data per single onode for 
+4M object.  That includes user attrs, csum info, logical to physical 
+extent mappings etc. This information is updated (partially or totally) 
+on each write. The idea is to save that info to fast block device by 
+direct use of an additional BlockDevice instance. E.g. one can allocate 
+additional partition sharing the same physical device with DB for that. 
+Instead of full onode representation KV DB will contain allocated 
+physical extents layout for this meta data similar to blob pextents 
+vector on per-onode basis - i.e. some indexing info.  Plus some minor 
+data too if needed. Additionally KV to hold free space tracking info 
+from the second FreeList manager for fast block device.
+When saving onode bluestore has to allocate required space at fast 
+device, mark old extents for release, write both onode and user data to 
+block devices (in parallel) and update a db with space allocations. I.e. 
+meta data overwrite procedure starts to resemble user data overwrite.
+
+Similar idea can be applied for WAL - one can store user data to fast 
+device directly and update indexing information in KV only.
+
+Indexing information is pretty short and perhaps one should read it into 
+memory on store mount and do not retrieve from DB during the operation.
+
+This way DB traffic is reduced considerably and hence compaction will 
+happen less frequently. Moreover we might probably remove var encoding 
+stuff since we can be less careful about serialized onode size from now on.
+
+There is some POC code located at
+https://github.com/ifed01/ceph/tree/wip_bluestore_minimize_db
+POC code lacks WAL support, index retrieval on startup, var encoding 
+elimination at the moment.
+Performance testing are still in progress.
+
+Any thoughts/comments?
+
+Thanks,
+Igor
