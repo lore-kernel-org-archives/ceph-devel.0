@@ -1,126 +1,141 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
+From: Sage Weil <sweil@redhat.com>
 Subject: RE: A way to reduce BlueStore KV traffic
-Date: Tue, 13 Dec 2016 18:06:10 +0000
-Message-ID: <BY2PR02MB39675198B8FDE6594F9BACDF49B0@BY2PR02MB396.namprd02.prod.outlook.com>
-References: <es4in77lf83vwmserwh0urhs.1481225501151@email.android.com>
- <dc12e490-1c62-93a1-e65a-8e8fb423b8f7@mirantis.com>
- <9b74c666-0ce6-e80d-76a0-141f70cdf821@redhat.com>
+Date: Tue, 13 Dec 2016 18:31:32 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612131811450.32565@piezo.novalocal>
+References: <es4in77lf83vwmserwh0urhs.1481225501151@email.android.com> <dc12e490-1c62-93a1-e65a-8e8fb423b8f7@mirantis.com> <9b74c666-0ce6-e80d-76a0-141f70cdf821@redhat.com> <BY2PR02MB39675198B8FDE6594F9BACDF49B0@BY2PR02MB396.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1337818417-1481653094=:32565"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0075.outbound.protection.outlook.com ([104.47.37.75]:58594
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S934273AbcLMSGM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Dec 2016 13:06:12 -0500
-In-Reply-To: <9b74c666-0ce6-e80d-76a0-141f70cdf821@redhat.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:38996 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932250AbcLMSkF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 13 Dec 2016 13:40:05 -0500
+In-Reply-To: <BY2PR02MB39675198B8FDE6594F9BACDF49B0@BY2PR02MB396.namprd02.prod.outlook.com>
+Content-ID: <alpine.DEB.2.11.1612131820360.32565@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Somnath Roy <Somnath.Roy@sandisk.com>
+Cc: Mark Nelson <mnelson@redhat.com>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SWdvciwNClRoaXMgaXMgbmljZSBidXQgSSBhbSBub3QgeWV0IHJlYWR5IHRvIGdpdmUgdXAgb24g
-REJzIHlldCA6LSkgVGhpcyBpcyBhZGRpbmcgZXh0cmEgY29tcGxleGl0eSBvbiBkZXBsb3ltZW50
-ICBhcyB3ZWxsLiBOb3Qgc3VyZSBhYm91dCB0aGUgZXh0cmEgcmVhZC93cml0ZSBpbXBhY3Qgb24g
-c2xvd2VyIGRldmljZXMgYXMgd2VsbCAsIHlvdXIgYmVuY2htYXJrIHNob3VsZCByZXZlYWwgdGhh
-dC4NClRoZXJlIGFyZSBsb3Qgb2YgZWZmb3J0IGdvaW5nIG9uIHRvIHJlZHVjZSBkYiB0cmFmZmlj
-LCBvcHRpbWl6ZSBrdnMgZXRjLiBhbmQgaG9wZWZ1bGx5IHRoYXQgd2lsbCByZXNvbHZlIHRoZSBt
-YXR0ZXIuIE90aGVyd2lzZSwgd2UgbmVlZCB0byBnbyB3aXRoIHRoaXMgcm91dGUgcHJvYmFibHku
-DQpUaGFua3MgZm9yIHRha2luZyB0aGUgaW5pdGlhdGl2ZSBhbmQgd2lsbCB3YWl0IGZvciB5b3Vy
-IGRldGFpbGVkIGJlbmNobWFyay4NCg0KUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFs
-IE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21h
-aWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIE1hcmsg
-TmVsc29uDQpTZW50OiBUdWVzZGF5LCBEZWNlbWJlciAxMywgMjAxNiA5OjAxIEFNDQpUbzogSWdv
-ciBGZWRvdG92OyBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogQSB3YXkgdG8gcmVkdWNlIEJsdWVT
-dG9yZSBLViB0cmFmZmljDQoNCg0KDQpPbiAxMi8xMy8yMDE2IDEwOjIxIEFNLCBJZ29yIEZlZG90
-b3Ygd3JvdGU6DQo+IEhleSBjZXBoZXJzIQ0KPg0KPiBXZSBhcmUgZmlnaHRpbmcgZm9yIEtWIHRy
-YWZmaWMgcmVkdWN0aW9uIGluIEJsdWVTdG9yZSBmb3IgYSB3aGlsZS4NCj4gV2UncmUgcHVzaGlu
-ZyBodWdlIGFtb3VudCBvZiBkYXRhIHRvIEtWIChvYmplY3QgbWV0YSBkYXRhLCAgd3JpdGUNCj4g
-YWhlYWQgbG9nLCBibG9jayBkZXZpY2UgYWxsb2NhdGlvbiBtYXAgZXRjICkgYW5kIHRoaXMgaW1w
-YWN0cyB0aGUNCj4gcGVyZm9ybWFuY2UgZHJhbWF0aWNhbGx5LiBCZWxvdyBJJ20gdHJ5aW5nIHRv
-IGZpeCB0aGF0IGJ5IHN0b3JpbmcgbW9zdA0KPiBvZiBvYmplY3QgbWV0YSBkYXRhIHRvIGJsb2Nr
-IGRldmljZSBkaXJlY3RseS4gQWN0dWFsbHkgd2Ugc2hvdWxkIHVzZSBhDQo+IHNlY29uZA0KPiAo
-ZmFzdCkgYmxvY2sgZGV2aWNlIHRoYXQgY2FuIGJlIHBoeXNpY2FsbHkgY28tbG9jYXRlZCB3aXRo
-IERCIG9yIFdBTA0KPiBkZXZpY2VzLg0KDQpJbmRlZWQhICBLViB0cmFmZmljIChzcGVjaWZpY2Fs
-bHkgUm9ja3NkYiBjb21wYWN0aW9uKSBpcyBwcm9iYWJseSBteSAjMSBjb25jZXJuIHJpZ2h0IG5v
-dyBmb3IgQmx1ZXN0b3JlLiAgQmFzZWQgb24gd2hhdCB3ZSBzYXcgd2hlbiBzZXBhcmF0aW5nIGRh
-dGEgb3V0IGludG8gZGlmZmVyZW50IGNvbHVtbiBmYW1pbGllcywgYWJvdXQgMi8zIG9mIHRoZSBj
-b21wYWN0aW9uIHRyYWZmaWMgd2FzIGZvciBvYmplY3QgbWV0YWRhdGEgYW5kIHRoZSBvdGhlciAx
-LzMgZm9yIHBnbG9nLiAgV0FMIHdyaXRlcywgYXQgbGVhc3QgaW4gbXkgc2V0dXAsIHdlcmUgbGVh
-a2luZyB2ZXJ5IG1pbmltYWxseSBpbnRvIHRoZSBoaWdoZXIgbGV2ZWxzIGFuZCB3YXMgbGVzcyBv
-ZiBhIGNvbmNlcm4uDQoNCj4gTGV0J3Mgc3RhcnQgZnJvbSBvbm9kZSBtZXRhIGRhdGEgb25seSBm
-b3IgdGhlIHNha2Ugb2Ygc2ltcGxpY2l0eS4NCj4gV2UgaGF2ZSBzb21ld2hhdCA0SyAtIDY0SyBh
-bmQgZXZlbiBtb3JlIG1ldGEgZGF0YSBwZXIgc2luZ2xlIG9ub2RlIGZvcg0KPiA0TSBvYmplY3Qu
-ICBUaGF0IGluY2x1ZGVzIHVzZXIgYXR0cnMsIGNzdW0gaW5mbywgbG9naWNhbCB0byBwaHlzaWNh
-bA0KPiBleHRlbnQgbWFwcGluZ3MgZXRjLiBUaGlzIGluZm9ybWF0aW9uIGlzIHVwZGF0ZWQgKHBh
-cnRpYWxseSBvcg0KPiB0b3RhbGx5KSBvbiBlYWNoIHdyaXRlLiBUaGUgaWRlYSBpcyB0byBzYXZl
-IHRoYXQgaW5mbyB0byBmYXN0IGJsb2NrDQo+IGRldmljZSBieSBkaXJlY3QgdXNlIG9mIGFuIGFk
-ZGl0aW9uYWwgQmxvY2tEZXZpY2UgaW5zdGFuY2UuIEUuZy4gb25lDQo+IGNhbiBhbGxvY2F0ZSBh
-ZGRpdGlvbmFsIHBhcnRpdGlvbiBzaGFyaW5nIHRoZSBzYW1lIHBoeXNpY2FsIGRldmljZSB3aXRo
-IERCIGZvciB0aGF0Lg0KDQpUaGUgYmlnIHByb2JsZW0gd2UgaGF2ZSByaWdodCBub3cgaXMgdGhl
-IGNvbWJpbmF0aW9uIG9mIGFsbCBvZiB0aGF0IHBlci1JTyBtZXRhZGF0YSBjb21wb3VuZGVkIHdp
-dGggdGhlIHdyaXRlLWFtcCAvIGNvbXBhY3Rpb24gb3ZlcmhlYWQgaW4gUm9ja3NEQi4gIEkgdGhp
-bmsgaXQncyBnb2luZyB0byB0YWtlIGEgY29uY2VydGVkIGVmZm9ydCB0byBmdXJ0aGVyIGF1ZGl0
-IHdoYXQgd2UgYXJlIHdyaXRpbmcgb3V0IChsaWtlIGRldGVybWluaW5nIGlmIHdlIHJlYWxseSBu
-ZWVkIHRoaW5ncyBsaWtlIHRoZSBwZXItYmxvYiBoZWFkZXIgaW5mbyBhcyBWYXJhZGEgbWVudGlv
-bmVkKSBhbG9uZyB3aXRoIGdldHRpbmcgdGhhdCBkYXRhIG91dCBvZiByb2Nrc2RiLiAgV2hldGhl
-ciB0aGF0IG1lYW5zIHNpbXBseSBzd2l0Y2hpbmcgdG8gc29tZXRoaW5nIGxpa2UgemV0YXNjYWxl
-LCBvciB0aGUgaWRlYSB5b3UgYXJlIHByb3Bvc2luZyBoZXJlIEknbSBub3Qgc3VyZS4NCkhvcGVm
-dWxseSBJIHdpbGwgYmUgdGVzdGluZyBTb21uYXRoJ3MgemV0YXNjYWxlIGJyYW5jaCBzb29uLg0K
-DQo+IEluc3RlYWQgb2YgZnVsbCBvbm9kZSByZXByZXNlbnRhdGlvbiBLViBEQiB3aWxsIGNvbnRh
-aW4gYWxsb2NhdGVkDQo+IHBoeXNpY2FsIGV4dGVudHMgbGF5b3V0IGZvciB0aGlzIG1ldGEgZGF0
-YSBzaW1pbGFyIHRvIGJsb2IgcGV4dGVudHMNCj4gdmVjdG9yIG9uIHBlci1vbm9kZSBiYXNpcyAt
-IGkuZS4gc29tZSBpbmRleGluZyBpbmZvLiAgUGx1cyBzb21lIG1pbm9yDQo+IGRhdGEgdG9vIGlm
-IG5lZWRlZC4gQWRkaXRpb25hbGx5IEtWIHRvIGhvbGQgZnJlZSBzcGFjZSB0cmFja2luZyBpbmZv
-DQo+IGZyb20gdGhlIHNlY29uZCBGcmVlTGlzdCBtYW5hZ2VyIGZvciBmYXN0IGJsb2NrIGRldmlj
-ZS4NCj4gV2hlbiBzYXZpbmcgb25vZGUgYmx1ZXN0b3JlIGhhcyB0byBhbGxvY2F0ZSByZXF1aXJl
-ZCBzcGFjZSBhdCBmYXN0DQo+IGRldmljZSwgbWFyayBvbGQgZXh0ZW50cyBmb3IgcmVsZWFzZSwg
-d3JpdGUgYm90aCBvbm9kZSBhbmQgdXNlciBkYXRhDQo+IHRvIGJsb2NrIGRldmljZXMgKGluIHBh
-cmFsbGVsKSBhbmQgdXBkYXRlIGEgZGIgd2l0aCBzcGFjZSBhbGxvY2F0aW9ucy4gSS5lLg0KPiBt
-ZXRhIGRhdGEgb3ZlcndyaXRlIHByb2NlZHVyZSBzdGFydHMgdG8gcmVzZW1ibGUgdXNlciBkYXRh
-IG92ZXJ3cml0ZS4NCj4NCj4gU2ltaWxhciBpZGVhIGNhbiBiZSBhcHBsaWVkIGZvciBXQUwgLSBv
-bmUgY2FuIHN0b3JlIHVzZXIgZGF0YSB0byBmYXN0DQo+IGRldmljZSBkaXJlY3RseSBhbmQgdXBk
-YXRlIGluZGV4aW5nIGluZm9ybWF0aW9uIGluIEtWIG9ubHkuDQoNCkkgZG9uJ3QgdGhpbmsgdGhl
-IFdBTCBpcyBhY3R1YWxseSBodXJ0aW5nIHVzIG11Y2ggcmlnaHQgbm93IGZ3aXcuDQoNCj4NCj4g
-SW5kZXhpbmcgaW5mb3JtYXRpb24gaXMgcHJldHR5IHNob3J0IGFuZCBwZXJoYXBzIG9uZSBzaG91
-bGQgcmVhZCBpdA0KPiBpbnRvIG1lbW9yeSBvbiBzdG9yZSBtb3VudCBhbmQgZG8gbm90IHJldHJp
-ZXZlIGZyb20gREIgZHVyaW5nIHRoZSBvcGVyYXRpb24uDQo+DQo+IFRoaXMgd2F5IERCIHRyYWZm
-aWMgaXMgcmVkdWNlZCBjb25zaWRlcmFibHkgYW5kIGhlbmNlIGNvbXBhY3Rpb24gd2lsbA0KPiBo
-YXBwZW4gbGVzcyBmcmVxdWVudGx5LiBNb3Jlb3ZlciB3ZSBtaWdodCBwcm9iYWJseSByZW1vdmUg
-dmFyIGVuY29kaW5nDQo+IHN0dWZmIHNpbmNlIHdlIGNhbiBiZSBsZXNzIGNhcmVmdWwgYWJvdXQg
-c2VyaWFsaXplZCBvbm9kZSBzaXplIGZyb20gbm93IG9uLg0KDQpJIHRoaW5rIHlvdXIgcHJvcG9z
-YWwgaXMgaGVhZGluZyBpbiB0aGUgcmlnaHQgZGlyZWN0aW9uIGlmIHdlIGludGVuZCB0byBzdGlj
-ayB3aXRoIHJvY2tzZGIuICBJZiB3ZSBkZWNpZGUgdG8gbW92ZSB0b3dhcmQgemV0YXNjYWxlLCB3
-ZSdsbCBuZWVkIHRvIHRoaW5rIGFib3V0IHNvbWUga2luZCBvZiBXQUwgc29sdXRpb24sIGJ1dCBJ
-J20gbGVzcyBzdXJlIGlmIHdlIG5lZWQgdG8gbW92ZSBkYXRhIG91dCBvZiB0aGUgS1Ygc3RvcmUu
-ICBNYXliZSBTb21uYXRoIG9yIEFsbGVuIHdpbGwgY29tbWVudC4NCkkgYWdyZWUgcmVnYXJkaW5n
-IHZhcmludCBlbmNvZGluZyByZWdhcmRsZXNzIG9mIHdoYXQgd2UgZG8sIEknZCBtdWNoIHJhdGhl
-ciBhdCBsZWFzdCBiYXRjaCBpbnRvIHByZWZpeFZhcmludCBvciBldmVuIGp1c3QgZm9jdXMgb24g
-Y29tcHJlc3Npb24gb2YgdGhlIDAvMSBjYXNlLg0KDQo+DQo+IFRoZXJlIGlzIHNvbWUgUE9DIGNv
-ZGUgbG9jYXRlZCBhdA0KPiBodHRwczovL2dpdGh1Yi5jb20vaWZlZDAxL2NlcGgvdHJlZS93aXBf
-Ymx1ZXN0b3JlX21pbmltaXplX2RiDQo+IFBPQyBjb2RlIGxhY2tzIFdBTCBzdXBwb3J0LCBpbmRl
-eCByZXRyaWV2YWwgb24gc3RhcnR1cCwgdmFyIGVuY29kaW5nDQo+IGVsaW1pbmF0aW9uIGF0IHRo
-ZSBtb21lbnQuDQo+IFBlcmZvcm1hbmNlIHRlc3RpbmcgYXJlIHN0aWxsIGluIHByb2dyZXNzLg0K
-Pg0KPiBBbnkgdGhvdWdodHMvY29tbWVudHM/DQoNCkknZCBiZSBoYXBweSB0byB0YWtlIGl0IGZv
-ciBhIHRlc3QgZHJpdmUgb25jZSBJJ3ZlIGdvdCBzb21lIG9mIHRoZSB6ZXRhc2NhbGUgdGVzdGlu
-ZyBkb25lLiAgVGhlcmUncyBwbGVudHkgb2YgbWVyaXQgZm9yIHRyeWluZyBpdCBhdCBsZWFzdC4N
-Cg0KPg0KPiBUaGFua3MsDQo+IElnb3INCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlz
-IGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+IGluIHRoZSBi
-b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jk
-b21vDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRt
-bA0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1
-YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21v
-QHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJu
-ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24g
-Y29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25s
-eSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUu
-IElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBp
-ZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMg
-bWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0
-cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0
-ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxl
-YXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFi
-b3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBt
-ZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJv
-bmljYWxseSBzdG9yZWQgY29waWVzKS4NCg==
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-1337818417-1481653094=:32565
+Content-Type: TEXT/PLAIN; CHARSET=UTF-8
+Content-Transfer-Encoding: 8BIT
+Content-ID: <alpine.DEB.2.11.1612131820361.32565@piezo.novalocal>
+
+On Tue, 13 Dec 2016, Somnath Roy wrote:
+> Igor,
+> This is nice but I am not yet ready to give up on DBs yet :-) This is adding extra complexity on deployment  as well. Not sure about the extra read/write impact on slower devices as well , your benchmark should reveal that.
+> There are lot of effort going on to reduce db traffic, optimize kvs etc. and hopefully that will resolve the matter. Otherwise, we need to go with this route probably.
+
+I tend to agree.  I don't think the kv interface is not to blame here, but 
+the implementation behind it.  It gives you efficient lookups and space 
+utilization, locality, ordered object enumeration, and atomic 
+transactions.  The current set of tradeoffs in rocksdb is proving to be 
+less than ideal, but I think that's something that can be fixed either 
+within rocksdb or by swapping in another kv db.
+
+Managing onodes on disk manually means we have to implement the ordered 
+lookup, or keep using kv just for the name -> onode block translation.  
+And then deal with space reclamaition, etc.  I don't think it's just a 
+complexity trade-off, though, where doing it ourselves means doing it 
+better.. the same can be done by teh kv store itself.  For example, on 
+flash, if we don't need locality, we could keep the name -> onode (nid?) 
+mapping inline and put the metadata itself elsewhere.  Some kv db's do 
+that, including LSM-based ones: they put all the keys in one set of sst 
+files and the data/values in another set, and show pretty impressive gains 
+(esp when, say, putting hte key data on ssd and value data on hdd).
+
+I would be inclined to look at rocksdb alternatives like ZS or maybe 
+tokudb (https://github.com/percona/PerconaFT) before scrapping the kv 
+store entirely...
+
+I also think there's opportunity to improve the pg log kv behavior with a 
+time-series friendly column family or similar.  The current rocksdb 
+compaction strategies aren't quite right, but i don't think they're too 
+far off from something that will avoid any compaction of pg log data in 
+the general case.
+
+I'll take a look a mull this over some more...
+
+> On 12/13/2016 10:21 AM, Igor Fedotov wrote:
+> > Hey cephers!
+> >
+> > We are fighting for KV traffic reduction in BlueStore for a while.
+> > We're pushing huge amount of data to KV (object meta data,  write
+> > ahead log, block device allocation map etc ) and this impacts the
+> > performance dramatically. Below I'm trying to fix that by storing most
+> > of object meta data to block device directly. Actually we should use a
+> > second
+> > (fast) block device that can be physically co-located with DB or WAL
+> > devices.
+> 
+> Indeed!  KV traffic (specifically Rocksdb compaction) is probably my #1 concern right now for Bluestore.  Based on what we saw when separating data out into different column families, about 2/3 of the compaction traffic was for object metadata and the other 1/3 for pglog.  WAL writes, at least in my setup, were leaking very minimally into the higher levels and was less of a concern.
+> 
+> > Let's start from onode meta data only for the sake of simplicity.
+> > We have somewhat 4K - 64K and even more meta data per single onode for
+> > 4M object.  That includes user attrs, csum info, logical to physical
+> > extent mappings etc. This information is updated (partially or
+> > totally) on each write. The idea is to save that info to fast block
+> > device by direct use of an additional BlockDevice instance. E.g. one
+> > can allocate additional partition sharing the same physical device with DB for that.
+> 
+> The big problem we have right now is the combination of all of that per-IO metadata compounded with the write-amp / compaction overhead in RocksDB.  I think it's going to take a concerted effort to further audit what we are writing out (like determining if we really need things like the per-blob header info as Varada mentioned) along with getting that data out of rocksdb.  Whether that means simply switching to something like zetascale, or the idea you are proposing here I'm not sure.
+> Hopefully I will be testing Somnath's zetascale branch soon.
+> 
+> > Instead of full onode representation KV DB will contain allocated
+> > physical extents layout for this meta data similar to blob pextents
+> > vector on per-onode basis - i.e. some indexing info.  Plus some minor
+> > data too if needed. Additionally KV to hold free space tracking info
+> > from the second FreeList manager for fast block device.
+> > When saving onode bluestore has to allocate required space at fast
+> > device, mark old extents for release, write both onode and user data
+> > to block devices (in parallel) and update a db with space allocations. I.e.
+> > meta data overwrite procedure starts to resemble user data overwrite.
+> >
+> > Similar idea can be applied for WAL - one can store user data to fast
+> > device directly and update indexing information in KV only.
+> 
+> I don't think the WAL is actually hurting us much right now fwiw.
+> 
+> >
+> > Indexing information is pretty short and perhaps one should read it
+> > into memory on store mount and do not retrieve from DB during the operation.
+
+Any strategy that assumes we put everything in RAM is going to be 
+problematic for some workloads.  We can't assume objects are 4MB.  RGW 
+users, for example, are free to upload nothing for 4K objects if they 
+like.
+
+> > This way DB traffic is reduced considerably and hence compaction will
+> > happen less frequently. Moreover we might probably remove var encoding
+> > stuff since we can be less careful about serialized onode size from now on.
+> 
+> I think your proposal is heading in the right direction if we intend to stick with rocksdb.  If we decide to move toward zetascale, we'll need to think about some kind of WAL solution, but I'm less sure if we need to move data out of the KV store.  Maybe Somnath or Allen will comment.
+> I agree regarding varint encoding regardless of what we do, I'd much rather at least batch into prefixVarint or even just focus on compression of the 0/1 case.
+> 
+> >
+> > There is some POC code located at
+> > https://github.com/ifed01/ceph/tree/wip_bluestore_minimize_db
+> > POC code lacks WAL support, index retrieval on startup, var encoding
+> > elimination at the moment.
+> > Performance testing are still in progress.
+> >
+> > Any thoughts/comments?
+> 
+> I'd be happy to take it for a test drive once I've got some of the zetascale testing done.  There's plenty of merit for trying it at least.
+> 
+> >
+> > Thanks,
+> > Igor
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
+> N?????r??y??????X??ǧv???)޺{.n?????z?]z????ay?ʇڙ??j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
+--8323329-1337818417-1481653094=:32565--
