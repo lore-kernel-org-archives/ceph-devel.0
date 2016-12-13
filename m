@@ -1,35 +1,28 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Is Hammer end of life now?
-Date: Tue, 13 Dec 2016 09:31:58 +0100
-Message-ID: <32f8de21-677f-812f-dfae-3dc4b4ebb42b@suse.cz>
-References: <CALqRxCxMvAZTgA5sO4cJzFhzVjL=0xYnXrLO2n57VZf21R3b9Q@mail.gmail.com>
- <71343bb5-fb1f-a389-3e8c-bbb38a42496e@suse.cz>
- <CADRKj5SJ4C57HSG4Ys3eC0LUWGXid=E7oCGRNjbsV0pKaaT3Eg@mail.gmail.com>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: question about backfill on erasure pool
+Date: Tue, 13 Dec 2016 17:58:41 +0800
+Message-ID: <CABAwU-b6m6xfLXvLwfR4DXMxW4kwzyvVYpKPm_NzRxzDWoROVA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:53916 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932193AbcLMIcB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Dec 2016 03:32:01 -0500
-In-Reply-To: <CADRKj5SJ4C57HSG4Ys3eC0LUWGXid=E7oCGRNjbsV0pKaaT3Eg@mail.gmail.com>
+Received: from mail-qt0-f180.google.com ([209.85.216.180]:36282 "EHLO
+        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752056AbcLMJ6n (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2016 04:58:43 -0500
+Received: by mail-qt0-f180.google.com with SMTP id w33so101583768qtc.3
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2016 01:58:42 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Cc: Ken Dreyer <kdreyer@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Yehuda:
-
-> Need to have 18187 and 17985 backported.
-
-Both of those are already staged. I will schedule another round of tests 
-today.
-
-I see you marked http://tracker.ceph.com/issues/16122 for backport to 
-hammer. I gave it a try, but it is beyond my capabilities. Depending on 
-if this backport is a "must-have" or a "nice-to-have", either someone 
-other than me would have to do it or we could just omit it.
-
-Thanks,
-Nathan
+hi,all
+i have a question about pg backfill on erasure pool.
+pg0 in erasure pool, which k:m=2:1,
+at first, pg0 on osd [1,2,3], after osd.4 added,
+the pg0 is now distribute to osd [1,2,4],
+for replicated pool, it will do backfill from primary(osd.1) to osd.4,
+for erasure code pool, the primary osd.1 needs to read the data chunks
+from osd.1 and osd.2,
+then decode and push the parity chunk to osd.4,
+in the above case, the osd.3 is up and contain the parity chunk,
+why dont let osd.3 push the parity chunk to osd.4?
