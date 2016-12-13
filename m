@@ -1,48 +1,111 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: question about backfill on erasure pool
-Date: Tue, 13 Dec 2016 07:42:17 -0800
-Message-ID: <CAN=+7FWNccmp32oWy9sHhONBqdyf989Kq2ydSd_Ah3K_UydY6w@mail.gmail.com>
-References: <CABAwU-b6m6xfLXvLwfR4DXMxW4kwzyvVYpKPm_NzRxzDWoROVA@mail.gmail.com>
- <alpine.DEB.2.11.1612131247350.32565@piezo.novalocal>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Reshard is not stabilizing in latest master
+Date: Tue, 13 Dec 2016 15:33:00 +0000
+Message-ID: <BY2PR02MB396541902D2FC549657FA0EF49B0@BY2PR02MB396.namprd02.prod.outlook.com>
+References: <DM2PR02MB398ED2929DBD480C2CCFC88F4840@DM2PR02MB398.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1612090059480.32281@piezo.novalocal>
+ <BY2PR02MB396DC43832DA107A62066B0F4870@BY2PR02MB396.namprd02.prod.outlook.com>
+ <alpine.DEB.2.11.1612121738050.25581@piezo.novalocal>
+ <8276d3ed-f169-b4d8-5301-f3d25347b502@mirantis.com>
+ <BY2PR02MB396968E5056460170608E6BF4980@BY2PR02MB396.namprd02.prod.outlook.com>
+ <2abd6172-75bf-2b42-0a5a-33eeb24da648@mirantis.com>
+ <CABbLZY3XBBj0wfekJfOacd4DteMqdCVP1Q2J_SzeRSybXyUQLg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:33586 "EHLO
-        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932346AbcLMPmT (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2016 10:42:19 -0500
-Received: by mail-qk0-f173.google.com with SMTP id x190so120128013qkb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2016 07:42:18 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1612131247350.32565@piezo.novalocal>
+Received: from mail-sn1nam02on0088.outbound.protection.outlook.com ([104.47.36.88]:19048
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S933015AbcLMPs1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 13 Dec 2016 10:48:27 -0500
+In-Reply-To: <CABbLZY3XBBj0wfekJfOacd4DteMqdCVP1Q2J_SzeRSybXyUQLg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: huang jun <hjwsm1989@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Varada Kari <varada.kari@gmail.com>, Igor Fedotov <ifedotov@mirantis.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Actually, I'm not sure it wouldn't read the parity chunk from osd.3,
-I'd have to check.  However, the data would still go through the
-primary.
--Sam
-
-On Tue, Dec 13, 2016 at 4:48 AM, Sage Weil <sage@newdream.net> wrote:
-> On Tue, 13 Dec 2016, huang jun wrote:
->> hi,all
->> i have a question about pg backfill on erasure pool.
->> pg0 in erasure pool, which k:m=2:1,
->> at first, pg0 on osd [1,2,3], after osd.4 added,
->> the pg0 is now distribute to osd [1,2,4],
->> for replicated pool, it will do backfill from primary(osd.1) to osd.4,
->> for erasure code pool, the primary osd.1 needs to read the data chunks
->> from osd.1 and osd.2,
->> then decode and push the parity chunk to osd.4,
->> in the above case, the osd.3 is up and contain the parity chunk,
->> why dont let osd.3 push the parity chunk to osd.4?
->
-> I don't think there is any reason why we couldn't... it just hasn't been
-> implemented.  Sam?
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Tm9wZSwgdXNpbmcgYWxsIGRlZmF1bHQgZm9yIHNoYXJkIHJlbGF0ZWQgc3R1ZmYuIFJlZ2FyZGlu
+ZyBtYXggYmxvYiBzaXplL21heCBhbGxvYyBzaXplIHdlIGRpc2N1c3NlZCBpbiB0aGUgc3RhbmR1
+cHMgc2hvdWxkbid0IGFmZmVjdCBzaGFyZHMuDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
+DQpGcm9tOiBWYXJhZGEgS2FyaSBbbWFpbHRvOnZhcmFkYS5rYXJpQGdtYWlsLmNvbV0NClNlbnQ6
+IFR1ZXNkYXksIERlY2VtYmVyIDEzLCAyMDE2IDc6MDcgQU0NClRvOiBJZ29yIEZlZG90b3YNCkNj
+OiBTb21uYXRoIFJveTsgU2FnZSBXZWlsOyBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogUmVzaGFy
+ZCBpcyBub3Qgc3RhYmlsaXppbmcgaW4gbGF0ZXN0IG1hc3Rlcg0KDQpTb21uYXRoIG1pZ2h0IGJl
+IHVzaW5nIHNvbWUgb2YgY29uZmlnIHBhcmFtcyB0byBleHBlZGl0ZSB0aGUgc2hhcmRpbmcgbGlr
+ZSBtYXhfYmxvYl9zaXplIGV0Yy4uIGFsb25nIHdpdGggc29tZSBtb3JlIGNvbmZpZ3MuIEhlIHNo
+YXJlZCB0aGVtIGluIHRoZSBjYWxsIHllc3RlcmRheS4NCg0KVmFyYWRhDQoNCk9uIFR1ZSwgRGVj
+IDEzLCAyMDE2IGF0IDc6MTMgUE0sIElnb3IgRmVkb3RvdiA8aWZlZG90b3ZAbWlyYW50aXMuY29t
+PiB3cm90ZToNCj4gQW55IGNoYW5nZXMgaW4gc2hhcmRzIHNlcmlhbGl6YXRpb24gb3IgZ2VuZXJh
+bCBlbmNvZGluZyBpbmZyYSBzaW5jZQ0KPiB0aGF0IHRpbWU/DQo+DQo+IHNoYXJkIG1pbi9tYXgg
+c2l6ZSBjaGFuZ2VzPw0KPg0KPg0KPg0KPiBPbiAxMi4xMi4yMDE2IDIxOjAzLCBTb21uYXRoIFJv
+eSB3cm90ZToNCj4+DQo+PiBNYWtlIHNlbnNlICwgYnV0LCBhbnkgaWRlYSB3aHkgaXQgaXMgc2hv
+d2luZyB1cCBub3cgYXMgaXQgaXMgbm90DQo+PiBoYXBwZW5pbmcgd2l0aCBvbGQgbWFzdGVyID8g
+V2hhdCBwb3NzaWJseSBJIGRpZCB0byByZXByb2R1Y2UgaXQsIGp1c3QgY3VyaW91cy4NCj4+DQo+
+PiBUaGFua3MgJiBSZWdhcmRzDQo+PiBTb21uYXRoDQo+Pg0KPj4gLS0tLS1PcmlnaW5hbCBNZXNz
+YWdlLS0tLS0NCj4+IEZyb206IElnb3IgRmVkb3RvdiBbbWFpbHRvOmlmZWRvdG92QG1pcmFudGlz
+LmNvbV0NCj4+IFNlbnQ6IE1vbmRheSwgRGVjZW1iZXIgMTIsIDIwMTYgOTo0NiBBTQ0KPj4gVG86
+IFNhZ2UgV2VpbDsgU29tbmF0aCBSb3kNCj4+IENjOiBjZXBoLWRldmVsDQo+PiBTdWJqZWN0OiBS
+ZTogUmVzaGFyZCBpcyBub3Qgc3RhYmlsaXppbmcgaW4gbGF0ZXN0IG1hc3Rlcg0KPj4NCj4+IHll
+YWgsIEkndmUgZ290IHRoZSBzYW1lIGV4cGxhbmF0aW9uIDEwIG1pbiBhZ28uDQo+PiBQUiBpcyBy
+ZWFkeSB0b286DQo+PiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMTI0NDcNCj4+
+DQo+PiBPbiAxMi4xMi4yMDE2IDIwOjM5LCBTYWdlIFdlaWwgd3JvdGU6DQo+Pj4NCj4+PiBPbiBG
+cmksIDkgRGVjIDIwMTYsIFNvbW5hdGggUm95IHdyb3RlOg0KPj4+Pg0KPj4+PiBTYWdlLA0KPj4+
+PiBQbGVhc2UgZmluZCBpdCBpbiB0aGUgZm9sbG93aW5nIGxvY2F0aW9uICwgaXQncyBhIHppcHBl
+ZCBmaWxlLg0KPj4+Pg0KPj4+PiBodHRwczovL2RyaXZlLmdvb2dsZS5jb20vb3Blbj9pZD0wQjdX
+LVMwel95bU1KZDBWMVh6VmhRV1I0YWswDQo+Pj4+DQo+Pj4+DQo+Pj4+IFdoYXQgSSBmb3VuZCB0
+aGF0IHRoZSBmb2xsb3dpbmcgc2hhcmQgbGVuZ3RoIGFsd2F5cyBjb21lcyBiZWxvdw0KPj4+PiBi
+bHVlc3RvcmVfZXh0ZW50X21hcF9zaGFyZF9taW5fc2l6ZSBhbmQgdHJpZ2dlcmluZyByZXNoYXJk
+Lg0KPj4+Pg0KPj4+PiAyMDE2LTEyLTA4IDIwOjA3OjU2Ljk1MDUyNyA3ZmU5MTQwZjc3MDAgMjAN
+Cj4+Pj4gYmx1ZXN0b3JlLmV4dGVudG1hcCgweDU1NzE4MzU0NmQ0OCkgdXBkYXRlIHNoYXJkIDB4
+M2ZmMDAwIGlzIDI1DQo+Pj4+IGJ5dGVzICh3YXMgMjUpIGZyb20gMSBleHRlbnRzDQo+Pj4NCj4+
+PiBBbGwgb2YgdGhlIGluc3RhbmNlcyBhcmUgYXQgb2Zmc2V0IDB4M2ZmMDAwLCB3aGljaCBpcyBy
+aWdodCBhdCB0aGUNCj4+PiBlbmQgb2YgdGhlIG9iamVjdC4gIEkgdGhpbmsgd2UganVzdCBuZWVk
+IHNvbWUgc3BlY2lhbCBjYXNlIGNvZGUgdG8NCj4+PiBoYW5kbGUgd2hlbiB0aGUgbGFzdCBsaXR0
+bGUgYml0IGVuZHMgdXAgYmVpbmcgc21hbGwsIGFuZCBwdWxsIGl0DQo+Pj4gaW50byB0aGUgcHJl
+dmlvdXMgc2hhcmQgKHByb2JhYmx5KS4NCj4+Pg0KPj4+IHNhZ2UNCj4+Pg0KPj4+DQo+Pj4+IFRo
+YW5rcyAmIFJlZ2FyZHMNCj4+Pj4gU29tbmF0aA0KPj4+Pg0KPj4+PiAtLS0tLU9yaWdpbmFsIE1l
+c3NhZ2UtLS0tLQ0KPj4+PiBGcm9tOiBTYWdlIFdlaWwgW21haWx0bzpzd2VpbEByZWRoYXQuY29t
+XQ0KPj4+PiBTZW50OiBUaHVyc2RheSwgRGVjZW1iZXIgMDgsIDIwMTYgNTowMCBQTQ0KPj4+PiBU
+bzogU29tbmF0aCBSb3kNCj4+Pj4gQ2M6IGNlcGgtZGV2ZWwNCj4+Pj4gU3ViamVjdDogUmU6IFJl
+c2hhcmQgaXMgbm90IHN0YWJpbGl6aW5nIGluIGxhdGVzdCBtYXN0ZXINCj4+Pj4NCj4+Pj4gT24g
+VGh1LCA4IERlYyAyMDE2LCBTb21uYXRoIFJveSB3cm90ZToNCj4+Pj4+DQo+Pj4+PiBTYWdlLA0K
+Pj4+Pj4gSSBhbSBzZWVpbmcgcmVzaGFyZCBpcyBub3Qgc3RhYmlsaXppbmcgZXZlbiBhZnRlciBJ
+IHByZWNvbmRpdGlvbg0KPj4+Pj4gYW4gaW1hZ2Ugd2l0aCA0SyBzZXEuIEl0IHdhcyBoYXBwZW5p
+bmcgd2l0aCAyIHdlZWtzIG9sZCBtYXN0ZXIuDQo+Pj4+PiBBbnl0aGluZyBjaGFuZ2Ugb24gdGhh
+dCBwYXJ0IG9mIHRoZSBjb2RlIGJhc2UgcmVjZW50bHkgPyBPdGhlcndpc2UgSSBuZWVkIHRvIGRl
+YnVnLg0KPj4+Pg0KPj4+PiBOb3BlLiAgSWYgeW91IGhhdmUgYSBjbHVzdGVyIHdoZXJlIGl0IGlz
+bid0IHN0YWJpbGl6aW5nIGp1c3QgdHVybg0KPj4+PiBvbiBkZWJ1ZyBibHVlc3RvcmUgPSAyMCBm
+b3IgYSBtaW51dGUgYW5kIHNlbmQgbWUgdGhlIGxvZy4NCj4+Pj4NCj4+Pj4gc2FnZQ0KPj4+PiBQ
+TEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMg
+bWFpbA0KPj4+PiBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRl
+c2lnbmF0ZWQgcmVjaXBpZW50KHMpDQo+Pj4+IG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9m
+IHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkDQo+Pj4+IHJlY2lwaWVudCwgeW91IGFy
+ZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzDQo+Pj4+IG1lc3Nh
+Z2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0
+aW9uLA0KPj4+PiBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJp
+dGVkLiBJZiB5b3UgaGF2ZQ0KPj4+PiByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJy
+b3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieQ0KPj4+PiB0ZWxlcGhvbmUgb3IgZS1tYWls
+IChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55DQo+Pj4+IGFuZCBh
+bGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFy
+ZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+Pj4+DQo+Pj4+DQo+
+Pj4gLS0NCj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAi
+dW5zdWJzY3JpYmUgY2VwaC1kZXZlbCINCj4+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8g
+bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbw0KPj4+IGluZm8gYXQgIGh0
+dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPg0KPg0KPiAtLQ0KPiBU
+byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUg
+Y2VwaC1kZXZlbCINCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2Vy
+Lmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8NCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVs
+Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQpQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNv
+bnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9uaWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkg
+Zm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2lnbmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJ
+ZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVzc2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVu
+dCwgeW91IGFyZSBoZXJlYnkgbm90aWZpZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1l
+c3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQgYW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJp
+YnV0aW9uLCBvciBjb3B5aW5nIG9mIHRoaXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVk
+LiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFz
+ZSBub3RpZnkgdGhlIHNlbmRlciBieSB0ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92
+ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ryb3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVz
+c2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24gKHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25p
+Y2FsbHkgc3RvcmVkIGNvcGllcykuDQo=
