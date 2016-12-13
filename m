@@ -1,173 +1,126 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH 1/3] ceph: clean up unsafe d_parent access in __choose_mds
-Date: Tue, 13 Dec 2016 13:04:11 -0500
-Message-ID: <1481652253-14780-2-git-send-email-jlayton@redhat.com>
-References: <1481652253-14780-1-git-send-email-jlayton@redhat.com>
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <1481652253-14780-1-git-send-email-jlayton@redhat.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: ceph-devel@vger.kernel.org
-Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, linux-fsdevel@vger.kernel.org, dhowells@redhat.com, viro@ZenIV.linux.org.uk
-List-Id: ceph-devel.vger.kernel.org
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: A way to reduce BlueStore KV traffic
+Date: Tue, 13 Dec 2016 18:06:10 +0000
+Message-ID: <BY2PR02MB39675198B8FDE6594F9BACDF49B0@BY2PR02MB396.namprd02.prod.outlook.com>
+References: <es4in77lf83vwmserwh0urhs.1481225501151@email.android.com>
+ <dc12e490-1c62-93a1-e65a-8e8fb423b8f7@mirantis.com>
+ <9b74c666-0ce6-e80d-76a0-141f70cdf821@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-cys01nam02on0075.outbound.protection.outlook.com ([104.47.37.75]:58594
+        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S934273AbcLMSGM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 13 Dec 2016 13:06:12 -0500
+In-Reply-To: <9b74c666-0ce6-e80d-76a0-141f70cdf821@redhat.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-__choose_mds exists to pick an MDS to use when issuing a call. Doing
-that typically involves picking an inode and using the authoritative
-MDS for it. In most cases, that's pretty straightforward, as we are
-using an inode to which we hold a reference (usually represented by
-r_dentry or r_inode in the request).
-
-In the case of a snapshotted directory however, we need to fetch
-the non-snapped parent, which involves walking back up the parents
-in the tree. The dentries in the snapshot dir are effectively frozen
-but the overall parent is _not_, and could change if a concurrent
-rename were to occur.
-
-Clean this code up and take special care to ensure the validity of
-the entries we're working with. First, hold the rcu_read_lock so we
-can ensure that any d_parent we find won't go away.
-
-Change get_nonsnap_parent to return an inode, and take a reference to
-that inode before returning (if any). Change the other places where we
-set "inode" in __choose_mds to also take a reference, and then call iput
-on that inode before exiting the function.
-
-Link: http://tracker.ceph.com/issues/18148
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
----
- fs/ceph/mds_client.c | 59 ++++++++++++++++++++++++++++++++++------------------
- 1 file changed, 39 insertions(+), 20 deletions(-)
-
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 815acd1a56d4..d51cfd2c6def 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -667,6 +667,27 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
- }
- 
- /*
-+ * Walk back up the dentry tree until we hit a dentry representing a
-+ * non-snapshot inode. We do this using the rcu_read_lock (which must be held
-+ * when calling this) to ensure that the objects won't disappear while we're
-+ * working with them. Once we hit a candidate dentry, we attempt to take a
-+ * reference to it, and return that as the result.
-+ */
-+static struct inode *get_nonsnap_parent(struct dentry *dentry) { struct inode
-+	*inode = NULL;
-+
-+	while (dentry && !IS_ROOT(dentry)) {
-+		inode = d_inode_rcu(dentry);
-+		if (!inode || ceph_snap(inode) == CEPH_NOSNAP)
-+			break;
-+		dentry = dentry->d_parent;
-+	}
-+	if (inode)
-+		inode = igrab(inode);
-+	return inode;
-+}
-+
-+/*
-  * Choose mds to send request to next.  If there is a hint set in the
-  * request (e.g., due to a prior forward hint from the mds), use that.
-  * Otherwise, consult frag tree and/or caps to identify the
-@@ -674,19 +695,6 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
-  *
-  * Called under mdsc->mutex.
-  */
--static struct dentry *get_nonsnap_parent(struct dentry *dentry)
--{
--	/*
--	 * we don't need to worry about protecting the d_parent access
--	 * here because we never renaming inside the snapped namespace
--	 * except to resplice to another snapdir, and either the old or new
--	 * result is a valid result.
--	 */
--	while (!IS_ROOT(dentry) && ceph_snap(d_inode(dentry)) != CEPH_NOSNAP)
--		dentry = dentry->d_parent;
--	return dentry;
--}
--
- static int __choose_mds(struct ceph_mds_client *mdsc,
- 			struct ceph_mds_request *req)
- {
-@@ -716,30 +724,38 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
- 	inode = NULL;
- 	if (req->r_inode) {
- 		inode = req->r_inode;
-+		ihold(inode);
- 	} else if (req->r_dentry) {
- 		/* ignore race with rename; old or new d_parent is okay */
--		struct dentry *parent = req->r_dentry->d_parent;
--		struct inode *dir = d_inode(parent);
-+		struct dentry *parent;
-+		struct inode *dir;
-+
-+		rcu_read_lock();
-+		parent = req->r_dentry->d_parent;
-+		dir = d_inode_rcu(parent);
- 
- 		if (dir->i_sb != mdsc->fsc->sb) {
- 			/* not this fs! */
- 			inode = d_inode(req->r_dentry);
-+			ihold(inode);
- 		} else if (ceph_snap(dir) != CEPH_NOSNAP) {
- 			/* direct snapped/virtual snapdir requests
- 			 * based on parent dir inode */
--			struct dentry *dn = get_nonsnap_parent(parent);
--			inode = d_inode(dn);
-+			inode = get_nonsnap_parent(parent);
- 			dout("__choose_mds using nonsnap parent %p\n", inode);
- 		} else {
- 			/* dentry target */
- 			inode = d_inode(req->r_dentry);
- 			if (!inode || mode == USE_AUTH_MDS) {
- 				/* dir + name */
--				inode = dir;
-+				inode = igrab(dir);
- 				hash = ceph_dentry_hash(dir, req->r_dentry);
- 				is_hash = true;
-+			} else {
-+				ihold(inode);
- 			}
- 		}
-+		rcu_read_unlock();
- 	}
- 
- 	dout("__choose_mds %p is_hash=%d (%d) mode %d\n", inode, (int)is_hash,
-@@ -768,7 +784,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
- 				     (int)r, frag.ndist);
- 				if (ceph_mdsmap_get_state(mdsc->mdsmap, mds) >=
- 				    CEPH_MDS_STATE_ACTIVE)
--					return mds;
-+					goto out;
- 			}
- 
- 			/* since this file/dir wasn't known to be
-@@ -783,7 +799,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
- 				     inode, ceph_vinop(inode), frag.frag, mds);
- 				if (ceph_mdsmap_get_state(mdsc->mdsmap, mds) >=
- 				    CEPH_MDS_STATE_ACTIVE)
--					return mds;
-+					goto out;
- 			}
- 		}
- 	}
-@@ -796,6 +812,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
- 		cap = rb_entry(rb_first(&ci->i_caps), struct ceph_cap, ci_node);
- 	if (!cap) {
- 		spin_unlock(&ci->i_ceph_lock);
-+		iput(inode);
- 		goto random;
- 	}
- 	mds = cap->session->s_mds;
-@@ -803,6 +820,8 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
- 	     inode, ceph_vinop(inode), mds,
- 	     cap == ci->i_auth_cap ? "auth " : "", cap);
- 	spin_unlock(&ci->i_ceph_lock);
-+out:
-+	iput(inode);
- 	return mds;
- 
- random:
--- 
-2.7.4
-
+SWdvciwNClRoaXMgaXMgbmljZSBidXQgSSBhbSBub3QgeWV0IHJlYWR5IHRvIGdpdmUgdXAgb24g
+REJzIHlldCA6LSkgVGhpcyBpcyBhZGRpbmcgZXh0cmEgY29tcGxleGl0eSBvbiBkZXBsb3ltZW50
+ICBhcyB3ZWxsLiBOb3Qgc3VyZSBhYm91dCB0aGUgZXh0cmEgcmVhZC93cml0ZSBpbXBhY3Qgb24g
+c2xvd2VyIGRldmljZXMgYXMgd2VsbCAsIHlvdXIgYmVuY2htYXJrIHNob3VsZCByZXZlYWwgdGhh
+dC4NClRoZXJlIGFyZSBsb3Qgb2YgZWZmb3J0IGdvaW5nIG9uIHRvIHJlZHVjZSBkYiB0cmFmZmlj
+LCBvcHRpbWl6ZSBrdnMgZXRjLiBhbmQgaG9wZWZ1bGx5IHRoYXQgd2lsbCByZXNvbHZlIHRoZSBt
+YXR0ZXIuIE90aGVyd2lzZSwgd2UgbmVlZCB0byBnbyB3aXRoIHRoaXMgcm91dGUgcHJvYmFibHku
+DQpUaGFua3MgZm9yIHRha2luZyB0aGUgaW5pdGlhdGl2ZSBhbmQgd2lsbCB3YWl0IGZvciB5b3Vy
+IGRldGFpbGVkIGJlbmNobWFyay4NCg0KUmVnYXJkcw0KU29tbmF0aA0KDQotLS0tLU9yaWdpbmFs
+IE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21h
+aWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIE1hcmsg
+TmVsc29uDQpTZW50OiBUdWVzZGF5LCBEZWNlbWJlciAxMywgMjAxNiA5OjAxIEFNDQpUbzogSWdv
+ciBGZWRvdG92OyBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogQSB3YXkgdG8gcmVkdWNlIEJsdWVT
+dG9yZSBLViB0cmFmZmljDQoNCg0KDQpPbiAxMi8xMy8yMDE2IDEwOjIxIEFNLCBJZ29yIEZlZG90
+b3Ygd3JvdGU6DQo+IEhleSBjZXBoZXJzIQ0KPg0KPiBXZSBhcmUgZmlnaHRpbmcgZm9yIEtWIHRy
+YWZmaWMgcmVkdWN0aW9uIGluIEJsdWVTdG9yZSBmb3IgYSB3aGlsZS4NCj4gV2UncmUgcHVzaGlu
+ZyBodWdlIGFtb3VudCBvZiBkYXRhIHRvIEtWIChvYmplY3QgbWV0YSBkYXRhLCAgd3JpdGUNCj4g
+YWhlYWQgbG9nLCBibG9jayBkZXZpY2UgYWxsb2NhdGlvbiBtYXAgZXRjICkgYW5kIHRoaXMgaW1w
+YWN0cyB0aGUNCj4gcGVyZm9ybWFuY2UgZHJhbWF0aWNhbGx5LiBCZWxvdyBJJ20gdHJ5aW5nIHRv
+IGZpeCB0aGF0IGJ5IHN0b3JpbmcgbW9zdA0KPiBvZiBvYmplY3QgbWV0YSBkYXRhIHRvIGJsb2Nr
+IGRldmljZSBkaXJlY3RseS4gQWN0dWFsbHkgd2Ugc2hvdWxkIHVzZSBhDQo+IHNlY29uZA0KPiAo
+ZmFzdCkgYmxvY2sgZGV2aWNlIHRoYXQgY2FuIGJlIHBoeXNpY2FsbHkgY28tbG9jYXRlZCB3aXRo
+IERCIG9yIFdBTA0KPiBkZXZpY2VzLg0KDQpJbmRlZWQhICBLViB0cmFmZmljIChzcGVjaWZpY2Fs
+bHkgUm9ja3NkYiBjb21wYWN0aW9uKSBpcyBwcm9iYWJseSBteSAjMSBjb25jZXJuIHJpZ2h0IG5v
+dyBmb3IgQmx1ZXN0b3JlLiAgQmFzZWQgb24gd2hhdCB3ZSBzYXcgd2hlbiBzZXBhcmF0aW5nIGRh
+dGEgb3V0IGludG8gZGlmZmVyZW50IGNvbHVtbiBmYW1pbGllcywgYWJvdXQgMi8zIG9mIHRoZSBj
+b21wYWN0aW9uIHRyYWZmaWMgd2FzIGZvciBvYmplY3QgbWV0YWRhdGEgYW5kIHRoZSBvdGhlciAx
+LzMgZm9yIHBnbG9nLiAgV0FMIHdyaXRlcywgYXQgbGVhc3QgaW4gbXkgc2V0dXAsIHdlcmUgbGVh
+a2luZyB2ZXJ5IG1pbmltYWxseSBpbnRvIHRoZSBoaWdoZXIgbGV2ZWxzIGFuZCB3YXMgbGVzcyBv
+ZiBhIGNvbmNlcm4uDQoNCj4gTGV0J3Mgc3RhcnQgZnJvbSBvbm9kZSBtZXRhIGRhdGEgb25seSBm
+b3IgdGhlIHNha2Ugb2Ygc2ltcGxpY2l0eS4NCj4gV2UgaGF2ZSBzb21ld2hhdCA0SyAtIDY0SyBh
+bmQgZXZlbiBtb3JlIG1ldGEgZGF0YSBwZXIgc2luZ2xlIG9ub2RlIGZvcg0KPiA0TSBvYmplY3Qu
+ICBUaGF0IGluY2x1ZGVzIHVzZXIgYXR0cnMsIGNzdW0gaW5mbywgbG9naWNhbCB0byBwaHlzaWNh
+bA0KPiBleHRlbnQgbWFwcGluZ3MgZXRjLiBUaGlzIGluZm9ybWF0aW9uIGlzIHVwZGF0ZWQgKHBh
+cnRpYWxseSBvcg0KPiB0b3RhbGx5KSBvbiBlYWNoIHdyaXRlLiBUaGUgaWRlYSBpcyB0byBzYXZl
+IHRoYXQgaW5mbyB0byBmYXN0IGJsb2NrDQo+IGRldmljZSBieSBkaXJlY3QgdXNlIG9mIGFuIGFk
+ZGl0aW9uYWwgQmxvY2tEZXZpY2UgaW5zdGFuY2UuIEUuZy4gb25lDQo+IGNhbiBhbGxvY2F0ZSBh
+ZGRpdGlvbmFsIHBhcnRpdGlvbiBzaGFyaW5nIHRoZSBzYW1lIHBoeXNpY2FsIGRldmljZSB3aXRo
+IERCIGZvciB0aGF0Lg0KDQpUaGUgYmlnIHByb2JsZW0gd2UgaGF2ZSByaWdodCBub3cgaXMgdGhl
+IGNvbWJpbmF0aW9uIG9mIGFsbCBvZiB0aGF0IHBlci1JTyBtZXRhZGF0YSBjb21wb3VuZGVkIHdp
+dGggdGhlIHdyaXRlLWFtcCAvIGNvbXBhY3Rpb24gb3ZlcmhlYWQgaW4gUm9ja3NEQi4gIEkgdGhp
+bmsgaXQncyBnb2luZyB0byB0YWtlIGEgY29uY2VydGVkIGVmZm9ydCB0byBmdXJ0aGVyIGF1ZGl0
+IHdoYXQgd2UgYXJlIHdyaXRpbmcgb3V0IChsaWtlIGRldGVybWluaW5nIGlmIHdlIHJlYWxseSBu
+ZWVkIHRoaW5ncyBsaWtlIHRoZSBwZXItYmxvYiBoZWFkZXIgaW5mbyBhcyBWYXJhZGEgbWVudGlv
+bmVkKSBhbG9uZyB3aXRoIGdldHRpbmcgdGhhdCBkYXRhIG91dCBvZiByb2Nrc2RiLiAgV2hldGhl
+ciB0aGF0IG1lYW5zIHNpbXBseSBzd2l0Y2hpbmcgdG8gc29tZXRoaW5nIGxpa2UgemV0YXNjYWxl
+LCBvciB0aGUgaWRlYSB5b3UgYXJlIHByb3Bvc2luZyBoZXJlIEknbSBub3Qgc3VyZS4NCkhvcGVm
+dWxseSBJIHdpbGwgYmUgdGVzdGluZyBTb21uYXRoJ3MgemV0YXNjYWxlIGJyYW5jaCBzb29uLg0K
+DQo+IEluc3RlYWQgb2YgZnVsbCBvbm9kZSByZXByZXNlbnRhdGlvbiBLViBEQiB3aWxsIGNvbnRh
+aW4gYWxsb2NhdGVkDQo+IHBoeXNpY2FsIGV4dGVudHMgbGF5b3V0IGZvciB0aGlzIG1ldGEgZGF0
+YSBzaW1pbGFyIHRvIGJsb2IgcGV4dGVudHMNCj4gdmVjdG9yIG9uIHBlci1vbm9kZSBiYXNpcyAt
+IGkuZS4gc29tZSBpbmRleGluZyBpbmZvLiAgUGx1cyBzb21lIG1pbm9yDQo+IGRhdGEgdG9vIGlm
+IG5lZWRlZC4gQWRkaXRpb25hbGx5IEtWIHRvIGhvbGQgZnJlZSBzcGFjZSB0cmFja2luZyBpbmZv
+DQo+IGZyb20gdGhlIHNlY29uZCBGcmVlTGlzdCBtYW5hZ2VyIGZvciBmYXN0IGJsb2NrIGRldmlj
+ZS4NCj4gV2hlbiBzYXZpbmcgb25vZGUgYmx1ZXN0b3JlIGhhcyB0byBhbGxvY2F0ZSByZXF1aXJl
+ZCBzcGFjZSBhdCBmYXN0DQo+IGRldmljZSwgbWFyayBvbGQgZXh0ZW50cyBmb3IgcmVsZWFzZSwg
+d3JpdGUgYm90aCBvbm9kZSBhbmQgdXNlciBkYXRhDQo+IHRvIGJsb2NrIGRldmljZXMgKGluIHBh
+cmFsbGVsKSBhbmQgdXBkYXRlIGEgZGIgd2l0aCBzcGFjZSBhbGxvY2F0aW9ucy4gSS5lLg0KPiBt
+ZXRhIGRhdGEgb3ZlcndyaXRlIHByb2NlZHVyZSBzdGFydHMgdG8gcmVzZW1ibGUgdXNlciBkYXRh
+IG92ZXJ3cml0ZS4NCj4NCj4gU2ltaWxhciBpZGVhIGNhbiBiZSBhcHBsaWVkIGZvciBXQUwgLSBv
+bmUgY2FuIHN0b3JlIHVzZXIgZGF0YSB0byBmYXN0DQo+IGRldmljZSBkaXJlY3RseSBhbmQgdXBk
+YXRlIGluZGV4aW5nIGluZm9ybWF0aW9uIGluIEtWIG9ubHkuDQoNCkkgZG9uJ3QgdGhpbmsgdGhl
+IFdBTCBpcyBhY3R1YWxseSBodXJ0aW5nIHVzIG11Y2ggcmlnaHQgbm93IGZ3aXcuDQoNCj4NCj4g
+SW5kZXhpbmcgaW5mb3JtYXRpb24gaXMgcHJldHR5IHNob3J0IGFuZCBwZXJoYXBzIG9uZSBzaG91
+bGQgcmVhZCBpdA0KPiBpbnRvIG1lbW9yeSBvbiBzdG9yZSBtb3VudCBhbmQgZG8gbm90IHJldHJp
+ZXZlIGZyb20gREIgZHVyaW5nIHRoZSBvcGVyYXRpb24uDQo+DQo+IFRoaXMgd2F5IERCIHRyYWZm
+aWMgaXMgcmVkdWNlZCBjb25zaWRlcmFibHkgYW5kIGhlbmNlIGNvbXBhY3Rpb24gd2lsbA0KPiBo
+YXBwZW4gbGVzcyBmcmVxdWVudGx5LiBNb3Jlb3ZlciB3ZSBtaWdodCBwcm9iYWJseSByZW1vdmUg
+dmFyIGVuY29kaW5nDQo+IHN0dWZmIHNpbmNlIHdlIGNhbiBiZSBsZXNzIGNhcmVmdWwgYWJvdXQg
+c2VyaWFsaXplZCBvbm9kZSBzaXplIGZyb20gbm93IG9uLg0KDQpJIHRoaW5rIHlvdXIgcHJvcG9z
+YWwgaXMgaGVhZGluZyBpbiB0aGUgcmlnaHQgZGlyZWN0aW9uIGlmIHdlIGludGVuZCB0byBzdGlj
+ayB3aXRoIHJvY2tzZGIuICBJZiB3ZSBkZWNpZGUgdG8gbW92ZSB0b3dhcmQgemV0YXNjYWxlLCB3
+ZSdsbCBuZWVkIHRvIHRoaW5rIGFib3V0IHNvbWUga2luZCBvZiBXQUwgc29sdXRpb24sIGJ1dCBJ
+J20gbGVzcyBzdXJlIGlmIHdlIG5lZWQgdG8gbW92ZSBkYXRhIG91dCBvZiB0aGUgS1Ygc3RvcmUu
+ICBNYXliZSBTb21uYXRoIG9yIEFsbGVuIHdpbGwgY29tbWVudC4NCkkgYWdyZWUgcmVnYXJkaW5n
+IHZhcmludCBlbmNvZGluZyByZWdhcmRsZXNzIG9mIHdoYXQgd2UgZG8sIEknZCBtdWNoIHJhdGhl
+ciBhdCBsZWFzdCBiYXRjaCBpbnRvIHByZWZpeFZhcmludCBvciBldmVuIGp1c3QgZm9jdXMgb24g
+Y29tcHJlc3Npb24gb2YgdGhlIDAvMSBjYXNlLg0KDQo+DQo+IFRoZXJlIGlzIHNvbWUgUE9DIGNv
+ZGUgbG9jYXRlZCBhdA0KPiBodHRwczovL2dpdGh1Yi5jb20vaWZlZDAxL2NlcGgvdHJlZS93aXBf
+Ymx1ZXN0b3JlX21pbmltaXplX2RiDQo+IFBPQyBjb2RlIGxhY2tzIFdBTCBzdXBwb3J0LCBpbmRl
+eCByZXRyaWV2YWwgb24gc3RhcnR1cCwgdmFyIGVuY29kaW5nDQo+IGVsaW1pbmF0aW9uIGF0IHRo
+ZSBtb21lbnQuDQo+IFBlcmZvcm1hbmNlIHRlc3RpbmcgYXJlIHN0aWxsIGluIHByb2dyZXNzLg0K
+Pg0KPiBBbnkgdGhvdWdodHMvY29tbWVudHM/DQoNCkknZCBiZSBoYXBweSB0byB0YWtlIGl0IGZv
+ciBhIHRlc3QgZHJpdmUgb25jZSBJJ3ZlIGdvdCBzb21lIG9mIHRoZSB6ZXRhc2NhbGUgdGVzdGlu
+ZyBkb25lLiAgVGhlcmUncyBwbGVudHkgb2YgbWVyaXQgZm9yIHRyeWluZyBpdCBhdCBsZWFzdC4N
+Cg0KPg0KPiBUaGFua3MsDQo+IElnb3INCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlz
+IGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiDQo+IGluIHRoZSBi
+b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jk
+b21vDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRt
+bA0KLS0NClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1
+YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21v
+QHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJu
+ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24g
+Y29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25s
+eSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUu
+IElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBp
+ZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMg
+bWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0
+cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0
+ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxl
+YXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFi
+b3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBt
+ZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJv
+bmljYWxseSBzdG9yZWQgY29waWVzKS4NCg==
