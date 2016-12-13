@@ -1,35 +1,54 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: question about backfill on erasure pool
-Date: Tue, 13 Dec 2016 12:48:05 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612131247350.32565@piezo.novalocal>
-References: <CABAwU-b6m6xfLXvLwfR4DXMxW4kwzyvVYpKPm_NzRxzDWoROVA@mail.gmail.com>
+Subject: Re: gmock issues when switching Git branches
+Date: Tue, 13 Dec 2016 12:51:05 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612131249060.32565@piezo.novalocal>
+References: <1172024124.4367.1481629902991@ox.pcextreme.nl>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56742 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:56759 "EHLO
         cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752056AbcLMMsJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2016 07:48:09 -0500
-In-Reply-To: <CABAwU-b6m6xfLXvLwfR4DXMxW4kwzyvVYpKPm_NzRxzDWoROVA@mail.gmail.com>
+        with ESMTP id S1752056AbcLMMvI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2016 07:51:08 -0500
+In-Reply-To: <1172024124.4367.1481629902991@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: huang jun <hjwsm1989@gmail.com>
+To: Wido den Hollander <wido@42on.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 13 Dec 2016, huang jun wrote:
-> hi,all
-> i have a question about pg backfill on erasure pool.
-> pg0 in erasure pool, which k:m=2:1,
-> at first, pg0 on osd [1,2,3], after osd.4 added,
-> the pg0 is now distribute to osd [1,2,4],
-> for replicated pool, it will do backfill from primary(osd.1) to osd.4,
-> for erasure code pool, the primary osd.1 needs to read the data chunks
-> from osd.1 and osd.2,
-> then decode and push the parity chunk to osd.4,
-> in the above case, the osd.3 is up and contain the parity chunk,
-> why dont let osd.3 push the parity chunk to osd.4?
+On Tue, 13 Dec 2016, Wido den Hollander wrote:
+> Hi,
+> 
+> I've been seeing this multiple times when switching Git branches on git Git repo:
+> 
+> wido@wido-desktop:~/repos/ceph$ git branch
+>   firefly
+>   hammer
+>   jewel
+> * master
+> wido@wido-desktop:~/repos/ceph$ git checkout jewel
+> error: Updating the following directories would lose untracked files in it:
+> 	src/gmock
+> 
+> Aborting
+> wido@wido-desktop:~/repos/ceph$
+> 
+> The gmock submodule is often preventing me from switching branches.
+> 
+> Since I don't work with Git submodules that much I usually end up 
+> removing the directory and going a submodule update.
 
-I don't think there is any reason why we couldn't... it just hasn't been 
-implemented.  Sam?
+That's what I do too.  :)  The problem is that the submodule structure 
+changed after jewel.
+
+> Is that the good way to go? And am I the only one running into this?
+
+I just keep a separate checkout for jewel (and each other release), e.g. 
+
+ git clone git@github.com:ceph/ceph ceph.jewel
+ git clone git@github.com:ceph/ceph ceph.hammer
+
+That reduces the amount of rebuilding I have to do (at the expense of disk 
+space).
 
 sage
