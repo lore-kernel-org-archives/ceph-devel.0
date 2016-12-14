@@ -1,35 +1,49 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: how to delete a zone in rgw?
-Date: Wed, 14 Dec 2016 09:32:09 -0500
-Message-ID: <326e0d82-6ca7-a1fd-37da-0dd820a8c5c4@redhat.com>
-References: <CACKY0b8JR0ytBcp7NC+J7k8rvZ2TCXxP8xhTA2jt0MvrBJmSCA@mail.gmail.com>
+From: =?UTF-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org>
+Subject: Performance issues on Jewel 10.2.2.
+Date: Wed, 14 Dec 2016 15:33:36 +0100
+Message-ID: <8e12168e-46fd-313a-e399-fc7624a40739@univ-lorraine.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f170.google.com ([209.85.216.170]:34112 "EHLO
-        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755266AbcLNOcz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Dec 2016 09:32:55 -0500
-Received: by mail-qt0-f170.google.com with SMTP id n6so25034406qtd.1
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Dec 2016 06:32:11 -0800 (PST)
-In-Reply-To: <CACKY0b8JR0ytBcp7NC+J7k8rvZ2TCXxP8xhTA2jt0MvrBJmSCA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: liuchang0812 <liuchang0812@gmail.com>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-
-On 12/14/2016 08:42 AM, liuchang0812 wrote:
-> radosgw-admin provides zone list/get/set only. Should we implement delete?
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-There is a 'zone delete' command in radosgw-admin that does this.
-
-Note that if the zone is still part of a zonegroup in the current 
-period, you should remove it with 'zonegroup remove' and commit the 
-period before deleting to zone itself.
-
-Casey
+CkhpLAoKV2UncmUgaGF2aW5nIHBlcmZvcm1hbmNlIGlzc3VlcyBvbiBhIEpld2VsIDEwLjIuMiBj
+bHVzdGVyLiBJdCBzdGFydGVkIAp3aXRoIElPcyB0YWtpbmcgc2V2ZXJhbCBzZWNvbmRzIHRvIGJl
+IGFja25vd2xlZGdlZCBzbyB3ZSBkaWQgc29tZSAKYmVuY2htYXJrcy4KCldlIGNvdWxkIHJlcHJv
+ZHVjZSB3aXRoIGEgcmFkb3MgYmVuY2ggb24gbmV3IHBvb2wgc2V0IG9uIGEgc2luZ2xlIGhvc3Qg
+CihSNzMweGQgd2l0aCAyIFNTRHMgaW4gSkJPRCBhbmQgMTIgNFRCIE5MIFNBUyBpbiBSQUlEMCB3
+cml0ZWJhY2spIHdpdGggCm5vIHJlcGxpY2F0aW9uIChtaW5fc2l6ZSAxLCBzaXplXzEpLgpXZSBz
+dXNwZWN0IHRoaXMgY291bGQgYmUgcmVsYXRlZCB0byBYRlMgZmlsZXN0b3JlIHNwbGl0IG9wZXJh
+dGlvbiBvciBhbnkgCm90aGVyIGZpbGVzdG9yZSBvcGVyYXRpb24uCgpDb3VsZCBzb21lb25lIGhh
+dmUgYSBsb29rIGF0IHRoaXMgdmlkZW8gOiAKaHR0cHM6Ly95b3V0dS5iZS9KUVYzVmZwQWpiTT92
+cT1oZDEwODAKClZpZGVvIHNob3dzIDoKCi0gYWRtaW4gbm9kZSB3aXRoIGNvbW1hbmRzIGFuZCBj
+b21tZW50cyAodG9wIGxlZnQpCi0gaHRvcCAobWlkZGxlIGxlZnQpCi0gcmFkb3MgYmVuY2ggKGJv
+dHRvbSBsZWZ0KQotIGlvc3RhdCAodG9wIHJpZ2h0KQotIGdyb3dpbmcgbnVtYmVyIG9mIGRpcnMg
+aW4gYWxsIFBHcyBvZiB0aGF0IHBvb2wgb24gb3NkLjEyICgvZGV2L3NkZCkgCmFuZCBncm93aW5n
+IG51bWJlciBvZiBvYmplY3RzIGluIHRoZSBwb29sLiAoYm90dG9tIHJpZ2h0KQoKT1NEIGRlYnVn
+IGxvZywgcGVyZiByZXBvcnQgYW5kIG9zZCBwYXJhbXMgOgoKY2VwaC1vc2QuMTIubG9nIChodHRw
+Oi8vdTJsLmZyL2NlcGgtb3NkLTEyLWxvZy10Z3opIHdpdGggZnVsbCBkZWJ1ZyBsb2cgCm9uIGZy
+b20gMTI6MDA6MjYgdG8gMTI6MDA6MzYuIE9uIHRoZSB2aWRlbyBhdCAxNycyNiIgd2UgY2FuIHNl
+ZSB0aGF0IApvc2QuMTIgKC9kZXYvc2RkKSBpcyAxMDAlIGJ1c3kgYXQgMTI6MDA6MjYuCnRlc3Rf
+cGVyZl9yZXBvcnQudHh0IChodHRwOi8vdTJsLmZyL3Rlc3QtcGVyZi1yZXBvcnQtdHh0KSBiYXNl
+ZCBvbiAKcGVyZi5kYXRhIGZyb20gMTI6MDI6NTAgdG8gMTI6MDM6NDQuCm1vbTAyaDA2X29zZC4x
+Ml9jb25maWdfc2hvdy50eHQgKGh0dHA6Ly91MmwuZnIvb3NkLTEyLWNvbmZpZy1zaG93KQptb20w
+MmgwNl9vc2QuMTJfY29uZmlnX2RpZmYudHh0IChodHRwOi8vdTJsLmZyL29zZC0xMi1jb25maWct
+ZGlmZikKY2VwaC1jb25mLW9zZC1wYXJhbXMudHh0IChodHRwOi8vdTJsLmZyL2NlcGgtY29uZi1v
+c2QtcGFyYW1zKQoKUmVnYXJkcywKCi0tIAoKRnLDqWTDqXJpYyBOYXNzCgpTb3VzLWRpcmVjdGlv
+biBJbmZyYXN0cnVjdHVyZXMKRGlyZWN0aW9uIGR1IE51bcOpcmlxdWUKVW5pdmVyc2l0w6kgZGUg
+TG9ycmFpbmUKClTDqWwgOiArMzMgMyA3MiA3NCAxMSAzNQoKX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11
+c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2Nl
+cGgtdXNlcnMtY2VwaC5jb20K
