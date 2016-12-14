@@ -1,41 +1,87 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: Is Hammer end of life now?
-Date: Tue, 13 Dec 2016 17:45:11 -0800
-Message-ID: <CADRKj5TNf7uKq+de3arRP3iFOaenE6k5yrhZ4HnY8CH0OkZn8A@mail.gmail.com>
-References: <CALqRxCxMvAZTgA5sO4cJzFhzVjL=0xYnXrLO2n57VZf21R3b9Q@mail.gmail.com>
- <71343bb5-fb1f-a389-3e8c-bbb38a42496e@suse.cz> <CADRKj5SJ4C57HSG4Ys3eC0LUWGXid=E7oCGRNjbsV0pKaaT3Eg@mail.gmail.com>
- <32f8de21-677f-812f-dfae-3dc4b4ebb42b@suse.cz>
+From: Dong Wu <archer.wudong@gmail.com>
+Subject: Re: How to release Hammer osd RAM when compiled with jemalloc
+Date: Wed, 14 Dec 2016 11:32:50 +0800
+Message-ID: <CAAL-TMeN4NZnWNOyPU=DfJhm5CDEEaF=eH3-2f2wc2O+WuVA+g@mail.gmail.com>
+References: <CAAL-TMcjJi7dQrOHiBUwQCgJ5R2cWDeLBB3XzKAogvaAR7yUxg@mail.gmail.com>
+ <alpine.DEB.2.11.1612131238260.32565@piezo.novalocal> <CAAL-TMdqQiLExSB+tTrGvnOiMxNgSZmM6KYEPyYCHJDouWfM4g@mail.gmail.com>
+ <alpine.DEB.2.11.1612140144360.32565@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f45.google.com ([209.85.213.45]:35694 "EHLO
-        mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751550AbcLNBxt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2016 20:53:49 -0500
-Received: by mail-vk0-f45.google.com with SMTP id w194so7623650vkw.2
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2016 17:53:48 -0800 (PST)
-In-Reply-To: <32f8de21-677f-812f-dfae-3dc4b4ebb42b@suse.cz>
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:33410 "EHLO
+        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752840AbcLNDcv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2016 22:32:51 -0500
+Received: by mail-qk0-f174.google.com with SMTP id x190so7131028qkb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2016 19:32:51 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1612140144360.32565@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Ken Dreyer <kdreyer@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-On Tue, Dec 13, 2016 at 12:31 AM, Nathan Cutler <ncutler@suse.cz> wrote:
-> Hi Yehuda:
+2016-12-14 9:46 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Wed, 14 Dec 2016, Dong Wu wrote:
+>> Thanks for your response.
+>>
+>> 2016-12-13 20:40 GMT+08:00 Sage Weil <sage@newdream.net>:
+>> > On Tue, 13 Dec 2016, Dong Wu wrote:
+>> >> Hi, all
+>> >>    I have a cluster with nearly 1000 osds, and each osd already
+>> >> occupied 2.5G physical memory on average, which cause each host 90%
+>> >> memory useage. when use tcmalloc, we can use "ceph tell osd.* release"
+>> >> to release unused memory, but in my cluster, ceph is build with
+>> >> jemalloc, so can't use "ceph tell osd.* release", is there any methods
+>> >> to release some memory?
+>> >
+>> > We explicitly call into tcmalloc to release memory with that command, but
+>> > unless you've patched something in yourself there is no integration with
+>> > jemalloc's release API.
+>>
+>> Are there any methods to know detail memory usage of OSD, if we have a
+>> memory allocator recording detail memory usage, will this be helpful?
+>> Is it on the schedule?
 >
->> Need to have 18187 and 17985 backported.
->
->
-> Both of those are already staged. I will schedule another round of tests
-> today.
->
-> I see you marked http://tracker.ceph.com/issues/16122 for backport to
-> hammer. I gave it a try, but it is beyond my capabilities. Depending on if
-> this backport is a "must-have" or a "nice-to-have", either someone other
-> than me would have to do it or we could just omit it.
->
+> Kraken has a new mempool infrastructure and some of the OSD pieces have
+> been moved into it, but only some.  There's quite a bit of opportunity to
+> further categorize allocations to get better visibility here.
 
-We'd still want to see it in, so maybe someone else can pick it up.
+Looking forward.
 
-Thanks,
-Yehuda
+>
+> Barring that, your best bet is to use either tcmalloc's heap profiling or
+> valgrind massif.  Both slow down execution by a lot (5-10x).  Massif has
+> better detail, but is somewhat slower.
+
+I'll first use these tools in my test cluster to see memory usage.
+But in our product cluster, can I just use ceph tell osd.* injectargs
+'--osd_map_max_advance 50 --osd_map_cache_size 100
+--osd_map_message_max 50 --osd_map_share_max_epochs 50' to lower osd's
+memory?
+Or should I change ceph.conf and then restart OSDs?
+
+>
+> sage
+>
+>
+>>
+>> >
+>> >> another question:
+>> >> can I decrease the following config value which used for cached osdmap
+>> >>  to lower osd's memory?
+>> >>
+>> >> "mon_min_osdmap_epochs": "500"
+>> >> "osd_map_max_advance": "200",
+>> >> "osd_map_cache_size": "500",
+>> >> "osd_map_message_max": "100",
+>> >> "osd_map_share_max_epochs": "100"
+>> >
+>> > Yeah.  You should be fine with 500, 50, 100, 50, 50.
+>>
+>> >
+>> > sage
+>>
+>> Thanks.
+>> Regards.
+>>
+>>
