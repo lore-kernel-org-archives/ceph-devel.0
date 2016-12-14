@@ -1,32 +1,65 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: kraken rc is out, and kraken is branched!
-Date: Tue, 13 Dec 2016 23:51:04 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612132349030.343@piezo.novalocal>
+From: Victor Denisov <vdenisov@mirantis.com>
+Subject: Re: Cinder doesn't work with the current rados python bindings
+Date: Tue, 13 Dec 2016 16:10:58 -0800
+Message-ID: <CA+hcxJTBWk0VXYBdL7zLxWJTU6VfrT8RWL7W3e53ycHYUwqXyQ@mail.gmail.com>
+References: <CA+hcxJS_wKucTUetNxPrHTn2j0V6vDUjCwKUTxp176xoCmSmVw@mail.gmail.com>
+ <CA+aFP1Bz_=HPVnJTJa29NJMmvzX7_gSA3EEB2n5VZLctBU4tKA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57556 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751621AbcLMXvP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Dec 2016 18:51:15 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id ACA6C3B3E7
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2016 23:51:09 +0000 (UTC)
-Received: from ovpn-200-86.brq.redhat.com (ovpn-200-86.brq.redhat.com [10.40.200.86])
-        by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uBDNp46p018604
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2016 18:51:08 -0500
+Received: from mail-vk0-f43.google.com ([209.85.213.43]:35447 "EHLO
+        mail-vk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751913AbcLNALA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2016 19:11:00 -0500
+Received: by mail-vk0-f43.google.com with SMTP id w194so4900462vkw.2
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2016 16:10:59 -0800 (PST)
+In-Reply-To: <CA+aFP1Bz_=HPVnJTJa29NJMmvzX7_gSA3EEB2n5VZLctBU4tKA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Please continue to target PRs at master; we will cherry-pick -x them to 
-kraken.  This isn't quite what we usually do (if there is a "usually" 
-here), but for RBD we are reverting some half-completed features and we 
-don't want those to get merged back into master.
+Yes. This is exactly the line I mean.
+Is there any chance I can do it myself?
+What kind of change is required?
+I can unblock the cinder guy as well as contribute.
+Let me know if I can be useful.
 
-Thanks!
-sage
+Thanks.
+V.
 
+On Tue, Dec 13, 2016 at 1:38 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+> Are you referring to rbd_default_features [1]? If so, that was a
+> change with unintentional consequences in the master branch that I
+> will need to fix before the final Kraken release.
+>
+> [1] https://github.com/openstack/cinder/blob/9fcb3bf1ad00913654872858d0cec839a6a2f0c8/cinder/volume/drivers/rbd.py#L152
+>
+> On Tue, Dec 13, 2016 at 3:29 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>> Hello,
+>>
+>> Who knows where pybind/rados/rados.pyx came from?
+>> I talked to a guy in the cinder development team - he tried to build
+>> his code against the latest python bindings from master.
+>> It looks like the api's changed. Rados.conf_get('features') used to
+>> return an integer.
+>> It returns a string right now.
+>>
+>> I looked into the git history and I see that pybind.pyx has been where
+>> it's right now only since February this year. I presume cinder's using
+>> an older version.
+>>
+>> Can someone advise me on how I can track down the changes in python bindings.
+>>
+>> Thank you in advance.
+>>
+>> Victor.
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Jason
