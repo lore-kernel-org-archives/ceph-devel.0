@@ -1,69 +1,59 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: question about backfill on erasure pool
-Date: Wed, 14 Dec 2016 09:37:58 +0800
-Message-ID: <CABAwU-bGLN25kY_kmSA-2jWx0V0wEiRTWK+iZWVxvBeaNGp_GQ@mail.gmail.com>
-References: <CABAwU-b6m6xfLXvLwfR4DXMxW4kwzyvVYpKPm_NzRxzDWoROVA@mail.gmail.com>
- <alpine.DEB.2.11.1612131247350.32565@piezo.novalocal> <CAN=+7FWNccmp32oWy9sHhONBqdyf989Kq2ydSd_Ah3K_UydY6w@mail.gmail.com>
- <CABAwU-Y5mo_WefKozn6zLxBH3Vnb8OSaH2N30ExoHSm_fCEzSw@mail.gmail.com>
+From: Dong Wu <archer.wudong@gmail.com>
+Subject: Re: How to release Hammer osd RAM when compiled with jemalloc
+Date: Wed, 14 Dec 2016 09:39:47 +0800
+Message-ID: <CAAL-TMdqQiLExSB+tTrGvnOiMxNgSZmM6KYEPyYCHJDouWfM4g@mail.gmail.com>
+References: <CAAL-TMcjJi7dQrOHiBUwQCgJ5R2cWDeLBB3XzKAogvaAR7yUxg@mail.gmail.com>
+ <alpine.DEB.2.11.1612131238260.32565@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f173.google.com ([209.85.216.173]:36214 "EHLO
-        mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753149AbcLNBh7 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2016 20:37:59 -0500
-Received: by mail-qt0-f173.google.com with SMTP id w33so4588487qtc.3
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2016 17:37:59 -0800 (PST)
-In-Reply-To: <CABAwU-Y5mo_WefKozn6zLxBH3Vnb8OSaH2N30ExoHSm_fCEzSw@mail.gmail.com>
+Received: from mail-qk0-f181.google.com ([209.85.220.181]:32780 "EHLO
+        mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751985AbcLNBjs (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2016 20:39:48 -0500
+Received: by mail-qk0-f181.google.com with SMTP id x190so5181739qkb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2016 17:39:48 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1612131238260.32565@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-after check the osd log and ECBackend.cc source code,
-when doing backfill, the osd.1 will read the parity chunk from osd.3,
-and then push it to osd.4,
-don't need to read data chunks from osd.1 and osd.2, and decode, then
-send osd.4 parity chunk,
-my former understanding is wrong.
+Thanks for your response.
 
-thanks.
+2016-12-13 20:40 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Tue, 13 Dec 2016, Dong Wu wrote:
+>> Hi, all
+>>    I have a cluster with nearly 1000 osds, and each osd already
+>> occupied 2.5G physical memory on average, which cause each host 90%
+>> memory useage. when use tcmalloc, we can use "ceph tell osd.* release"
+>> to release unused memory, but in my cluster, ceph is build with
+>> jemalloc, so can't use "ceph tell osd.* release", is there any methods
+>> to release some memory?
+>
+> We explicitly call into tcmalloc to release memory with that command, but
+> unless you've patched something in yourself there is no integration with
+> jemalloc's release API.
 
-2016-12-14 9:01 GMT+08:00 huang jun <hjwsm1989@gmail.com>:
-> 2016-12-13 23:42 GMT+08:00 Samuel Just <sjust@redhat.com>:
->> Actually, I'm not sure it wouldn't read the parity chunk from osd.3,
->> I'd have to check.  However, the data would still go through the
->> primary.
-> you reminder me, i will check the osd log,
-> it is expected if the osd1 read the parity chunk from osd.3(shard 2)
-> and then push it to osd.4?
->> -Sam
+Are there any methods to know detail memory usage of OSD, if we have a
+memory allocator recording detail memory usage, will this be helpful?
+Is it on the schedule?
+
+>
+>> another question:
+>> can I decrease the following config value which used for cached osdmap
+>>  to lower osd's memory?
 >>
->> On Tue, Dec 13, 2016 at 4:48 AM, Sage Weil <sage@newdream.net> wrote:
->>> On Tue, 13 Dec 2016, huang jun wrote:
->>>> hi,all
->>>> i have a question about pg backfill on erasure pool.
->>>> pg0 in erasure pool, which k:m=2:1,
->>>> at first, pg0 on osd [1,2,3], after osd.4 added,
->>>> the pg0 is now distribute to osd [1,2,4],
->>>> for replicated pool, it will do backfill from primary(osd.1) to osd.4,
->>>> for erasure code pool, the primary osd.1 needs to read the data chunks
->>>> from osd.1 and osd.2,
->>>> then decode and push the parity chunk to osd.4,
->>>> in the above case, the osd.3 is up and contain the parity chunk,
->>>> why dont let osd.3 push the parity chunk to osd.4?
->>>
->>> I don't think there is any reason why we couldn't... it just hasn't been
->>> implemented.  Sam?
->>>
->>> sage
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> "mon_min_osdmap_epochs": "500"
+>> "osd_map_max_advance": "200",
+>> "osd_map_cache_size": "500",
+>> "osd_map_message_max": "100",
+>> "osd_map_share_max_epochs": "100"
 >
+> Yeah.  You should be fine with 500, 50, 100, 50, 50.
+
 >
->
-> --
-> Thank you!
-> HuangJun
+> sage
+
+Thanks.
+Regards.
