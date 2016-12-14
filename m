@@ -1,87 +1,193 @@
-From: Dong Wu <archer.wudong@gmail.com>
-Subject: Re: How to release Hammer osd RAM when compiled with jemalloc
-Date: Wed, 14 Dec 2016 11:32:50 +0800
-Message-ID: <CAAL-TMeN4NZnWNOyPU=DfJhm5CDEEaF=eH3-2f2wc2O+WuVA+g@mail.gmail.com>
-References: <CAAL-TMcjJi7dQrOHiBUwQCgJ5R2cWDeLBB3XzKAogvaAR7yUxg@mail.gmail.com>
- <alpine.DEB.2.11.1612131238260.32565@piezo.novalocal> <CAAL-TMdqQiLExSB+tTrGvnOiMxNgSZmM6KYEPyYCHJDouWfM4g@mail.gmail.com>
- <alpine.DEB.2.11.1612140144360.32565@piezo.novalocal>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH 1/3] ceph: clean up unsafe d_parent access in __choose_mds
+Date: Wed, 14 Dec 2016 16:58:06 +0800
+Message-ID: <F06027A9-01F7-44C4-AC3F-8168464DA6DE@redhat.com>
+References: <1481652253-14780-1-git-send-email-jlayton@redhat.com>
+ <1481652253-14780-2-git-send-email-jlayton@redhat.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.1 \(3251\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f174.google.com ([209.85.220.174]:33410 "EHLO
-        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752840AbcLNDcv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2016 22:32:51 -0500
-Received: by mail-qk0-f174.google.com with SMTP id x190so7131028qkb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2016 19:32:51 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1612140144360.32565@piezo.novalocal>
+Received: from mx1.redhat.com ([209.132.183.28]:42982 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753190AbcLNI72 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Dec 2016 03:59:28 -0500
+In-Reply-To: <1481652253-14780-2-git-send-email-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: Jeff Layton <jlayton@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, David Howells <dhowells@redhat.com>, viro@ZenIV.linux.org.uk
 
-2016-12-14 9:46 GMT+08:00 Sage Weil <sage@newdream.net>:
-> On Wed, 14 Dec 2016, Dong Wu wrote:
->> Thanks for your response.
->>
->> 2016-12-13 20:40 GMT+08:00 Sage Weil <sage@newdream.net>:
->> > On Tue, 13 Dec 2016, Dong Wu wrote:
->> >> Hi, all
->> >>    I have a cluster with nearly 1000 osds, and each osd already
->> >> occupied 2.5G physical memory on average, which cause each host 90%
->> >> memory useage. when use tcmalloc, we can use "ceph tell osd.* release"
->> >> to release unused memory, but in my cluster, ceph is build with
->> >> jemalloc, so can't use "ceph tell osd.* release", is there any methods
->> >> to release some memory?
->> >
->> > We explicitly call into tcmalloc to release memory with that command, but
->> > unless you've patched something in yourself there is no integration with
->> > jemalloc's release API.
->>
->> Are there any methods to know detail memory usage of OSD, if we have a
->> memory allocator recording detail memory usage, will this be helpful?
->> Is it on the schedule?
->
-> Kraken has a new mempool infrastructure and some of the OSD pieces have
-> been moved into it, but only some.  There's quite a bit of opportunity to
-> further categorize allocations to get better visibility here.
 
-Looking forward.
+> On 14 Dec 2016, at 02:04, Jeff Layton <jlayton@redhat.com> wrote:
+> 
+> __choose_mds exists to pick an MDS to use when issuing a call. Doing
+> that typically involves picking an inode and using the authoritative
+> MDS for it. In most cases, that's pretty straightforward, as we are
+> using an inode to which we hold a reference (usually represented by
+> r_dentry or r_inode in the request).
+> 
+> In the case of a snapshotted directory however, we need to fetch
+> the non-snapped parent, which involves walking back up the parents
+> in the tree. The dentries in the snapshot dir are effectively frozen
+> but the overall parent is _not_, and could change if a concurrent
+> rename were to occur.
+> 
+> Clean this code up and take special care to ensure the validity of
+> the entries we're working with. First, hold the rcu_read_lock so we
+> can ensure that any d_parent we find won't go away.
+> 
+> Change get_nonsnap_parent to return an inode, and take a reference to
+> that inode before returning (if any). Change the other places where we
+> set "inode" in __choose_mds to also take a reference, and then call iput
+> on that inode before exiting the function.
+> 
+> Link: http://tracker.ceph.com/issues/18148
+> Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> ---
+> fs/ceph/mds_client.c | 59 ++++++++++++++++++++++++++++++++++------------------
+> 1 file changed, 39 insertions(+), 20 deletions(-)
+> 
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 815acd1a56d4..d51cfd2c6def 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -667,6 +667,27 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
+> }
+> 
+> /*
+> + * Walk back up the dentry tree until we hit a dentry representing a
+> + * non-snapshot inode. We do this using the rcu_read_lock (which must be held
+> + * when calling this) to ensure that the objects won't disappear while we're
+> + * working with them. Once we hit a candidate dentry, we attempt to take a
+> + * reference to it, and return that as the result.
+> + */
+> +static struct inode *get_nonsnap_parent(struct dentry *dentry) { struct inode
+> +	*inode = NULL;
+> +
+> +	while (dentry && !IS_ROOT(dentry)) {
+> +		inode = d_inode_rcu(dentry);
+> +		if (!inode || ceph_snap(inode) == CEPH_NOSNAP)
+> +			break;
+> +		dentry = dentry->d_parent;
+> +	}
+> +	if (inode)
+> +		inode = igrab(inode);
+> +	return inode;
+> +}
+> +
+> +/*
+>  * Choose mds to send request to next.  If there is a hint set in the
+>  * request (e.g., due to a prior forward hint from the mds), use that.
+>  * Otherwise, consult frag tree and/or caps to identify the
+> @@ -674,19 +695,6 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
+>  *
+>  * Called under mdsc->mutex.
+>  */
+> -static struct dentry *get_nonsnap_parent(struct dentry *dentry)
+> -{
+> -	/*
+> -	 * we don't need to worry about protecting the d_parent access
+> -	 * here because we never renaming inside the snapped namespace
+> -	 * except to resplice to another snapdir, and either the old or new
+> -	 * result is a valid result.
+> -	 */
+> -	while (!IS_ROOT(dentry) && ceph_snap(d_inode(dentry)) != CEPH_NOSNAP)
+> -		dentry = dentry->d_parent;
+> -	return dentry;
+> -}
+> -
+> static int __choose_mds(struct ceph_mds_client *mdsc,
+> 			struct ceph_mds_request *req)
+> {
+> @@ -716,30 +724,38 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+> 	inode = NULL;
+> 	if (req->r_inode) {
+> 		inode = req->r_inode;
+> +		ihold(inode);
+> 	} else if (req->r_dentry) {
+> 		/* ignore race with rename; old or new d_parent is okay */
+> -		struct dentry *parent = req->r_dentry->d_parent;
+> -		struct inode *dir = d_inode(parent);
+> +		struct dentry *parent;
+> +		struct inode *dir;
+> +
+> +		rcu_read_lock();
+> +		parent = req->r_dentry->d_parent;
+> +		dir = d_inode_rcu(parent);
 
->
-> Barring that, your best bet is to use either tcmalloc's heap profiling or
-> valgrind massif.  Both slow down execution by a lot (5-10x).  Massif has
-> better detail, but is somewhat slower.
+d_inode_rcu(parent) can return null in theory. I think we should use req->r_locked_dir when it’s not null.
+If both r_locked_dir and d_inode_rcu(parent) are nulls, return an error return the request sender.
 
-I'll first use these tools in my test cluster to see memory usage.
-But in our product cluster, can I just use ceph tell osd.* injectargs
-'--osd_map_max_advance 50 --osd_map_cache_size 100
---osd_map_message_max 50 --osd_map_share_max_epochs 50' to lower osd's
-memory?
-Or should I change ceph.conf and then restart OSDs?
+Regards
+Yan, Zheng 
 
->
-> sage
->
->
->>
->> >
->> >> another question:
->> >> can I decrease the following config value which used for cached osdmap
->> >>  to lower osd's memory?
->> >>
->> >> "mon_min_osdmap_epochs": "500"
->> >> "osd_map_max_advance": "200",
->> >> "osd_map_cache_size": "500",
->> >> "osd_map_message_max": "100",
->> >> "osd_map_share_max_epochs": "100"
->> >
->> > Yeah.  You should be fine with 500, 50, 100, 50, 50.
->>
->> >
->> > sage
->>
->> Thanks.
->> Regards.
->>
->>
+
+> 
+> 		if (dir->i_sb != mdsc->fsc->sb) {
+> 			/* not this fs! */
+> 			inode = d_inode(req->r_dentry);
+> +			ihold(inode);
+> 		} else if (ceph_snap(dir) != CEPH_NOSNAP) {
+> 			/* direct snapped/virtual snapdir requests
+> 			 * based on parent dir inode */
+> -			struct dentry *dn = get_nonsnap_parent(parent);
+> -			inode = d_inode(dn);
+> +			inode = get_nonsnap_parent(parent);
+> 			dout("__choose_mds using nonsnap parent %p\n", inode);
+> 		} else {
+> 			/* dentry target */
+> 			inode = d_inode(req->r_dentry);
+> 			if (!inode || mode == USE_AUTH_MDS) {
+> 				/* dir + name */
+> -				inode = dir;
+> +				inode = igrab(dir);
+> 				hash = ceph_dentry_hash(dir, req->r_dentry);
+> 				is_hash = true;
+> +			} else {
+> +				ihold(inode);
+> 			}
+> 		}
+> +		rcu_read_unlock();
+> 	}
+> 
+> 	dout("__choose_mds %p is_hash=%d (%d) mode %d\n", inode, (int)is_hash,
+> @@ -768,7 +784,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+> 				     (int)r, frag.ndist);
+> 				if (ceph_mdsmap_get_state(mdsc->mdsmap, mds) >=
+> 				    CEPH_MDS_STATE_ACTIVE)
+> -					return mds;
+> +					goto out;
+> 			}
+> 
+> 			/* since this file/dir wasn't known to be
+> @@ -783,7 +799,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+> 				     inode, ceph_vinop(inode), frag.frag, mds);
+> 				if (ceph_mdsmap_get_state(mdsc->mdsmap, mds) >=
+> 				    CEPH_MDS_STATE_ACTIVE)
+> -					return mds;
+> +					goto out;
+> 			}
+> 		}
+> 	}
+> @@ -796,6 +812,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+> 		cap = rb_entry(rb_first(&ci->i_caps), struct ceph_cap, ci_node);
+> 	if (!cap) {
+> 		spin_unlock(&ci->i_ceph_lock);
+> +		iput(inode);
+> 		goto random;
+> 	}
+> 	mds = cap->session->s_mds;
+> @@ -803,6 +820,8 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+> 	     inode, ceph_vinop(inode), mds,
+> 	     cap == ci->i_auth_cap ? "auth " : "", cap);
+> 	spin_unlock(&ci->i_ceph_lock);
+> +out:
+> +	iput(inode);
+> 	return mds;
+> 
+> random:
+> -- 
+> 2.7.4
+> 
+
