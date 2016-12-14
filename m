@@ -1,49 +1,65 @@
-From: =?UTF-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org>
-Subject: Performance issues on Jewel 10.2.2.
-Date: Wed, 14 Dec 2016 15:33:36 +0100
-Message-ID: <8e12168e-46fd-313a-e399-fc7624a40739@univ-lorraine.fr>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: kraken rc is out, and kraken is branched!
+Date: Wed, 14 Dec 2016 14:43:56 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612141442570.10615@piezo.novalocal>
+References: <alpine.DEB.2.11.1612132349030.343@piezo.novalocal> <CAGkCoNKdkOnV8+aDdwcuo6ah36Ddy3EC=gxyZiJf8V8f9+FcPA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:16921 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754768AbcLNOoE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Dec 2016 09:44:04 -0500
+In-Reply-To: <CAGkCoNKdkOnV8+aDdwcuo6ah36Ddy3EC=gxyZiJf8V8f9+FcPA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Zhi Zhang <zhang.david2011@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-CkhpLAoKV2UncmUgaGF2aW5nIHBlcmZvcm1hbmNlIGlzc3VlcyBvbiBhIEpld2VsIDEwLjIuMiBj
-bHVzdGVyLiBJdCBzdGFydGVkIAp3aXRoIElPcyB0YWtpbmcgc2V2ZXJhbCBzZWNvbmRzIHRvIGJl
-IGFja25vd2xlZGdlZCBzbyB3ZSBkaWQgc29tZSAKYmVuY2htYXJrcy4KCldlIGNvdWxkIHJlcHJv
-ZHVjZSB3aXRoIGEgcmFkb3MgYmVuY2ggb24gbmV3IHBvb2wgc2V0IG9uIGEgc2luZ2xlIGhvc3Qg
-CihSNzMweGQgd2l0aCAyIFNTRHMgaW4gSkJPRCBhbmQgMTIgNFRCIE5MIFNBUyBpbiBSQUlEMCB3
-cml0ZWJhY2spIHdpdGggCm5vIHJlcGxpY2F0aW9uIChtaW5fc2l6ZSAxLCBzaXplXzEpLgpXZSBz
-dXNwZWN0IHRoaXMgY291bGQgYmUgcmVsYXRlZCB0byBYRlMgZmlsZXN0b3JlIHNwbGl0IG9wZXJh
-dGlvbiBvciBhbnkgCm90aGVyIGZpbGVzdG9yZSBvcGVyYXRpb24uCgpDb3VsZCBzb21lb25lIGhh
-dmUgYSBsb29rIGF0IHRoaXMgdmlkZW8gOiAKaHR0cHM6Ly95b3V0dS5iZS9KUVYzVmZwQWpiTT92
-cT1oZDEwODAKClZpZGVvIHNob3dzIDoKCi0gYWRtaW4gbm9kZSB3aXRoIGNvbW1hbmRzIGFuZCBj
-b21tZW50cyAodG9wIGxlZnQpCi0gaHRvcCAobWlkZGxlIGxlZnQpCi0gcmFkb3MgYmVuY2ggKGJv
-dHRvbSBsZWZ0KQotIGlvc3RhdCAodG9wIHJpZ2h0KQotIGdyb3dpbmcgbnVtYmVyIG9mIGRpcnMg
-aW4gYWxsIFBHcyBvZiB0aGF0IHBvb2wgb24gb3NkLjEyICgvZGV2L3NkZCkgCmFuZCBncm93aW5n
-IG51bWJlciBvZiBvYmplY3RzIGluIHRoZSBwb29sLiAoYm90dG9tIHJpZ2h0KQoKT1NEIGRlYnVn
-IGxvZywgcGVyZiByZXBvcnQgYW5kIG9zZCBwYXJhbXMgOgoKY2VwaC1vc2QuMTIubG9nIChodHRw
-Oi8vdTJsLmZyL2NlcGgtb3NkLTEyLWxvZy10Z3opIHdpdGggZnVsbCBkZWJ1ZyBsb2cgCm9uIGZy
-b20gMTI6MDA6MjYgdG8gMTI6MDA6MzYuIE9uIHRoZSB2aWRlbyBhdCAxNycyNiIgd2UgY2FuIHNl
-ZSB0aGF0IApvc2QuMTIgKC9kZXYvc2RkKSBpcyAxMDAlIGJ1c3kgYXQgMTI6MDA6MjYuCnRlc3Rf
-cGVyZl9yZXBvcnQudHh0IChodHRwOi8vdTJsLmZyL3Rlc3QtcGVyZi1yZXBvcnQtdHh0KSBiYXNl
-ZCBvbiAKcGVyZi5kYXRhIGZyb20gMTI6MDI6NTAgdG8gMTI6MDM6NDQuCm1vbTAyaDA2X29zZC4x
-Ml9jb25maWdfc2hvdy50eHQgKGh0dHA6Ly91MmwuZnIvb3NkLTEyLWNvbmZpZy1zaG93KQptb20w
-MmgwNl9vc2QuMTJfY29uZmlnX2RpZmYudHh0IChodHRwOi8vdTJsLmZyL29zZC0xMi1jb25maWct
-ZGlmZikKY2VwaC1jb25mLW9zZC1wYXJhbXMudHh0IChodHRwOi8vdTJsLmZyL2NlcGgtY29uZi1v
-c2QtcGFyYW1zKQoKUmVnYXJkcywKCi0tIAoKRnLDqWTDqXJpYyBOYXNzCgpTb3VzLWRpcmVjdGlv
-biBJbmZyYXN0cnVjdHVyZXMKRGlyZWN0aW9uIGR1IE51bcOpcmlxdWUKVW5pdmVyc2l0w6kgZGUg
-TG9ycmFpbmUKClTDqWwgOiArMzMgMyA3MiA3NCAxMSAzNQoKX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11
-c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2Nl
-cGgtdXNlcnMtY2VwaC5jb20K
+On Wed, 14 Dec 2016, Zhi Zhang wrote:
+> Hi Sage, or others,
+> 
+> Just a quick question. Which ceph version will be the next long term
+> support after Hammer? Jewel or Kraken or both?
+
+Jewel.  The next LTS after that will be Luminous, which is due out in the 
+spring.
+
+You can find this information here:
+
+	http://docs.ceph.com/docs/master/releases/
+
+sage
+
+> We are using Hammer on production, but still met some bugs which have
+> been fixed in higher ceph version. And some of the bug fixes are
+> really not easy to backport because of the code base those fixes
+> depend on, so we have to fix them or workaround them in our internal
+> code base. We would like to try avoiding such things later after we
+> choose a higher version to upgrade. So want to ask for some
+> suggestions here with stability, compatibility and long-term
+> supporting into consideration.
+> 
+> Thanks a lot.
+> 
+> Regards,
+> Zhi Zhang (David)
+> Contact: zhang.david2011@gmail.com
+>               zhangz.david@outlook.com
+> 
+> 
+> On Wed, Dec 14, 2016 at 7:51 AM, Sage Weil <sweil@redhat.com> wrote:
+> > Please continue to target PRs at master; we will cherry-pick -x them to
+> > kraken.  This isn't quite what we usually do (if there is a "usually"
+> > here), but for RBD we are reverting some half-completed features and we
+> > don't want those to get merged back into master.
+> >
+> > Thanks!
+> > sage
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
