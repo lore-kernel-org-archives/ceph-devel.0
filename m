@@ -1,65 +1,48 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: kraken rc is out, and kraken is branched!
-Date: Wed, 14 Dec 2016 14:43:56 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612141442570.10615@piezo.novalocal>
-References: <alpine.DEB.2.11.1612132349030.343@piezo.novalocal> <CAGkCoNKdkOnV8+aDdwcuo6ah36Ddy3EC=gxyZiJf8V8f9+FcPA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Jeff Layton <jlayton@redhat.com>
+Subject: [PATCH v3 0/5] ceph: clean up some unsafe dentry->d_parent accesses
+Date: Wed, 14 Dec 2016 09:54:25 -0500
+Message-ID: <1481727270-12666-1-git-send-email-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:16921 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:53416 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754768AbcLNOoE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 14 Dec 2016 09:44:04 -0500
-In-Reply-To: <CAGkCoNKdkOnV8+aDdwcuo6ah36Ddy3EC=gxyZiJf8V8f9+FcPA@mail.gmail.com>
+        id S932299AbcLNOyd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Dec 2016 09:54:33 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Zhi Zhang <zhang.david2011@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, linux-fsdevel@vger.kernel.org, dhowells@redhat.com, viro@ZenIV.linux.org.uk
 
-On Wed, 14 Dec 2016, Zhi Zhang wrote:
-> Hi Sage, or others,
-> 
-> Just a quick question. Which ceph version will be the next long term
-> support after Hammer? Jewel or Kraken or both?
+v3: use parent inode information more widely when we have it
 
-Jewel.  The next LTS after that will be Luminous, which is due out in the 
-spring.
+v2: use r_locked_dir in __choose_mds if it's available
+    handle NULL d_inode_rcu(parent) properly
 
-You can find this information here:
+In several places, the kcephfs client accesses dentry->d_parent without
+holding appropriate locking. This is not safe, as you can race with
+renames that can morph the tree such that is changes and dentries found
+previously can end up freed. This patchset fixes these places to access
+the parent(s) safely, mostly using the rcu_read_lock().
 
-	http://docs.ceph.com/docs/master/releases/
+Note that I'm not aware of any specific bug reports in this area --
+these were just discovered by inspection (mostly by Zheng). This passes
+xfstests at least up to test generic/095, where we hit an unrelated
+softlockup in the splice write code (http://tracker.ceph.com/issues/18130).
 
-sage
+Tracker bug link: http://tracker.ceph.com/issues/18148
 
-> We are using Hammer on production, but still met some bugs which have
-> been fixed in higher ceph version. And some of the bug fixes are
-> really not easy to backport because of the code base those fixes
-> depend on, so we have to fix them or workaround them in our internal
-> code base. We would like to try avoiding such things later after we
-> choose a higher version to upgrade. So want to ask for some
-> suggestions here with stability, compatibility and long-term
-> supporting into consideration.
-> 
-> Thanks a lot.
-> 
-> Regards,
-> Zhi Zhang (David)
-> Contact: zhang.david2011@gmail.com
->               zhangz.david@outlook.com
-> 
-> 
-> On Wed, Dec 14, 2016 at 7:51 AM, Sage Weil <sweil@redhat.com> wrote:
-> > Please continue to target PRs at master; we will cherry-pick -x them to
-> > kraken.  This isn't quite what we usually do (if there is a "usually"
-> > here), but for RBD we are reverting some half-completed features and we
-> > don't want those to get merged back into master.
-> >
-> > Thanks!
-> > sage
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Jeff Layton (5):
+  ceph: clean up unsafe d_parent access in __choose_mds
+  ceph: clean up unsafe d_parent accesses in build_dentry_path
+  ceph: pass parent dir ino info to build_dentry_path
+  ceph: fix unsafe dcache access in ceph_encode_dentry_release
+  ceph: pass parent inode info to ceph_encode_dentry_release if we have
+    it
+
+ fs/ceph/caps.c       |  8 ++++-
+ fs/ceph/mds_client.c | 94 +++++++++++++++++++++++++++++++++++-----------------
+ fs/ceph/super.h      |  1 +
+ 3 files changed, 71 insertions(+), 32 deletions(-)
+
+-- 
+2.7.4
+
