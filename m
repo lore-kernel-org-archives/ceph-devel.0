@@ -1,56 +1,41 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v3 2/5] ceph: clean up unsafe d_parent accesses in build_dentry_path
-Date: Wed, 14 Dec 2016 09:54:27 -0500
-Message-ID: <1481727270-12666-3-git-send-email-jlayton@redhat.com>
-References: <1481727270-12666-1-git-send-email-jlayton@redhat.com>
+From: liuchang0812 <liuchang0812@gmail.com>
+Subject: Re: how to delete a zone in rgw?
+Date: Wed, 14 Dec 2016 22:56:29 +0800
+Message-ID: <CACKY0b8XUpT5yjBFQ9B-v29HSiCiZ44xh-FPX0dxkzxg5MxvvA@mail.gmail.com>
+References: <CACKY0b8JR0ytBcp7NC+J7k8rvZ2TCXxP8xhTA2jt0MvrBJmSCA@mail.gmail.com>
+ <326e0d82-6ca7-a1fd-37da-0dd820a8c5c4@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42580 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932609AbcLNOyf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 14 Dec 2016 09:54:35 -0500
-In-Reply-To: <1481727270-12666-1-git-send-email-jlayton@redhat.com>
+Received: from mail-qk0-f195.google.com ([209.85.220.195]:33365 "EHLO
+        mail-qk0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756216AbcLNO4k (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Dec 2016 09:56:40 -0500
+Received: by mail-qk0-f195.google.com with SMTP id x190so3366732qkb.0
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Dec 2016 06:56:30 -0800 (PST)
+In-Reply-To: <326e0d82-6ca7-a1fd-37da-0dd820a8c5c4@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, linux-fsdevel@vger.kernel.org, dhowells@redhat.com, viro@ZenIV.linux.org.uk
+To: Casey Bodley <cbodley@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-While we hold a reference to the dentry when build_dentry_path is
-called, we could end up racing with a rename that changes d_parent.
-Handle that situation correctly, by using the rcu_read_lock to
-ensure that the parent dentry and inode stick around long enough
-to safely check ceph_snap and ceph_ino.
+Oh, sorry, I'm using 0.94. Thanks for your response
 
-Link: http://tracker.ceph.com/issues/18148
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
----
- fs/ceph/mds_client.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
-
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index e62b566d3817..2cd9e6b04e29 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -1802,13 +1802,18 @@ static int build_dentry_path(struct dentry *dentry,
- 			     int *pfreepath)
- {
- 	char *path;
-+	struct inode *dir;
- 
--	if (ceph_snap(d_inode(dentry->d_parent)) == CEPH_NOSNAP) {
--		*pino = ceph_ino(d_inode(dentry->d_parent));
-+	rcu_read_lock();
-+	dir = d_inode_rcu(dentry->d_parent);
-+	if (dir && ceph_snap(dir) == CEPH_NOSNAP) {
-+		*pino = ceph_ino(dir);
-+		rcu_read_unlock();
- 		*ppath = dentry->d_name.name;
- 		*ppathlen = dentry->d_name.len;
- 		return 0;
- 	}
-+	rcu_read_unlock();
- 	path = ceph_mdsc_build_path(dentry, ppathlen, pino, 1);
- 	if (IS_ERR(path))
- 		return PTR_ERR(path);
--- 
-2.7.4
-
+2016-12-14 22:32 GMT+08:00 Casey Bodley <cbodley@redhat.com>:
+>
+> On 12/14/2016 08:42 AM, liuchang0812 wrote:
+>>
+>> radosgw-admin provides zone list/get/set only. Should we implement delete?
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+> There is a 'zone delete' command in radosgw-admin that does this.
+>
+> Note that if the zone is still part of a zonegroup in the current period,
+> you should remove it with 'zonegroup remove' and commit the period before
+> deleting to zone itself.
+>
+> Casey
