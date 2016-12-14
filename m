@@ -1,144 +1,218 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: A way to reduce BlueStore KV traffic
-Date: Wed, 14 Dec 2016 18:14:30 +0300
-Message-ID: <0861af49-7828-fc7f-7f9a-71285063f379@mirantis.com>
-References: <es4in77lf83vwmserwh0urhs.1481225501151@email.android.com>
- <dc12e490-1c62-93a1-e65a-8e8fb423b8f7@mirantis.com>
- <9b74c666-0ce6-e80d-76a0-141f70cdf821@redhat.com>
- <BY2PR02MB39675198B8FDE6594F9BACDF49B0@BY2PR02MB396.namprd02.prod.outlook.com>
- <alpine.DEB.2.11.1612131811450.32565@piezo.novalocal>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Suggestion for deduplication
+Date: Wed, 14 Dec 2016 15:20:58 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612141456100.10615@piezo.novalocal>
+References: <CAFNt83b8gSKxBG0c+aeW0-X7sT765NoQMZO8J2Nhtmp_=gDa-A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-712950696-1481728861=:10615"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yb0-f178.google.com ([209.85.213.178]:35763 "EHLO
-        mail-yb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756213AbcLNPOj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Dec 2016 10:14:39 -0500
-Received: by mail-yb0-f178.google.com with SMTP id d128so17831278ybh.2
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Dec 2016 07:14:33 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1612131811450.32565@piezo.novalocal>
+Received: from cobra.newdream.net ([66.33.216.30]:37433 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755534AbcLNPVD (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Dec 2016 10:21:03 -0500
+In-Reply-To: <CAFNt83b8gSKxBG0c+aeW0-X7sT765NoQMZO8J2Nhtmp_=gDa-A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Somnath Roy <Somnath.Roy@sandisk.com>
-Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: myoungwon oh <ohmyoungwon@gmail.com>
+Cc: ceph-devel@vger.kernel.org, =?EUC-KR?B?v8C47b/4?= <omwmw@sk.com>
 
-Mark, Somnath, Sage, Allen,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-I highly appreciate your comments.
+--8323329-712950696-1481728861=:10615
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 
+Hi Myoungwon,
 
-Will probably spend a bit more time on the POC, tune it a bit a bit and 
-share some performance results.
+I'm excited to see someone working on this.  We've discussed approaches in 
+the past but until now nobody has had time to devote to the project.  If 
+you haven't already, you might be interested in
 
+Apr 6 CDM discussion
+	http://tracker.ceph.com/projects/ceph/wiki/CDM_06-APR-2016
+	http://pad.ceph.com/p/dedup
+	https://youtu.be/3CABed6o_o4
 
-Thanks,
+On Wed, 14 Dec 2016, myoungwon oh wrote:
+> Hi sage, ceph developers
+> 
+> I am a system software engineer working at SK telecom.
+> We are developing Data deduplication in Ceph, based on discussions of
+> Ceph community and our own research.
+> Current status is as below, we implemented prototype, and we want to
+> share our result to Ceph community and want to get your feedback.
+> 
+> 1. Motivation
+> We studied which structure deduplication is suitable for Ceph, the
+> distributed file system of shared-nothing architecture. As a result,
+> it seems the most reasonable method is to utilize data distribution
+> using hash value, which is used in Shared-nothing architecture and
+> tiering.
+> The reason is as follows
+> 1- There is no change in current structure, and there is no big
+> additional change.
+> 2- There is no need to develop and configure a separated deduplication
+> metadata server.
+> 3- EC and Replication can be selected and used. That is, since
+> deduplication is performed in cache tier, existing features of below
+> layer can be utilized as it is.
+> 4- Don't need to consider data placement, load balancing and recovery.
+> Because existing structure is used, features mentioned above will be
+> handled as in original Ceph. So only the metadata part need to be
+> handled.
+> 
+> 2. Design concept
+> Main design concept is double CRUSH + cache tier. (http://imgur.com/9F3jQA6)
+> 
+> "double CRUSH"
+> Hash the incoming data to an OID, and assign that hash value as a new OID.
+> For example, OID : DATA -->(hash)--> FP_OID : DATA
+> 
+> "cache tier"
+> Redirection is required for new OID(hash value). If we use cache tier
+> which is currently implemented, we can receive request at Cache tier
+> first and then, can redirecting the request to the actual storage
+> tier.
+> Currently inline processing is possible using the proxy mode of cache
+> tier. And also inline+post processing is possible using the writeback
+> mode of cache tier.
 
-Igor
+The way I've been thinking about this so far is as a two-tier system of 
+rados pools.  The first pool has objects with their "real" names, but 
+instead of the data content, they have a manifest of CAS objects: objects 
+named by their fingerprint (e.g., sha1) and a map from logical offset to 
+cas object name.  Then a second pool stores the cas objects with actual 
+data and reference counts.
 
+> 3. Design detail
+> (http://imgur.com/qUQ5e44)
+> 
+> "I/O flow (inline mode)
+> Write : write request -> fingerprint calculation -> search lookup
+> table(OID <-> Fingerprint(FP) OID mapping) ->
+>  (If data exist) for old FP_OID, decrease reference count through
+> setattr of Objecter -> Increase reference count
+>  through setxattr with new FP_OID -> update lookup table – complete
+> 
+> Read : read request -> search lookup table -> (If data exist) Request
+> data with mapped FP_OID
 
-On 13.12.2016 21:31, Sage Weil wrote:
-> On Tue, 13 Dec 2016, Somnath Roy wrote:
->> Igor,
->> This is nice but I am not yet ready to give up on DBs yet :-) This is adding extra complexity on deployment  as well. Not sure about the extra read/write impact on slower devices as well , your benchmark should reveal that.
->> There are lot of effort going on to reduce db traffic, optimize kvs etc. and hopefully that will resolve the matter. Otherwise, we need to go with this route probably.
-> I tend to agree.  I don't think the kv interface is not to blame here, but
-> the implementation behind it.  It gives you efficient lookups and space
-> utilization, locality, ordered object enumeration, and atomic
-> transactions.  The current set of tradeoffs in rocksdb is proving to be
-> less than ideal, but I think that's something that can be fixed either
-> within rocksdb or by swapping in another kv db.
->
-> Managing onodes on disk manually means we have to implement the ordered
-> lookup, or keep using kv just for the name -> onode block translation.
-> And then deal with space reclamaition, etc.  I don't think it's just a
-> complexity trade-off, though, where doing it ourselves means doing it
-> better.. the same can be done by teh kv store itself.  For example, on
-> flash, if we don't need locality, we could keep the name -> onode (nid?)
-> mapping inline and put the metadata itself elsewhere.  Some kv db's do
-> that, including LSM-based ones: they put all the keys in one set of sst
-> files and the data/values in another set, and show pretty impressive gains
-> (esp when, say, putting hte key data on ssd and value data on hdd).
->
-> I would be inclined to look at rocksdb alternatives like ZS or maybe
-> tokudb (https://github.com/percona/PerconaFT) before scrapping the kv
-> store entirely...
->
-> I also think there's opportunity to improve the pg log kv behavior with a
-> time-series friendly column family or similar.  The current rocksdb
-> compaction strategies aren't quite right, but i don't think they're too
-> far off from something that will avoid any compaction of pg log data in
-> the general case.
->
-> I'll take a look a mull this over some more...
->
->> On 12/13/2016 10:21 AM, Igor Fedotov wrote:
->>> Hey cephers!
->>>
->>> We are fighting for KV traffic reduction in BlueStore for a while.
->>> We're pushing huge amount of data to KV (object meta data,  write
->>> ahead log, block device allocation map etc ) and this impacts the
->>> performance dramatically. Below I'm trying to fix that by storing most
->>> of object meta data to block device directly. Actually we should use a
->>> second
->>> (fast) block device that can be physically co-located with DB or WAL
->>> devices.
->> Indeed!  KV traffic (specifically Rocksdb compaction) is probably my #1 concern right now for Bluestore.  Based on what we saw when separating data out into different column families, about 2/3 of the compaction traffic was for object metadata and the other 1/3 for pglog.  WAL writes, at least in my setup, were leaking very minimally into the higher levels and was less of a concern.
->>
->>> Let's start from onode meta data only for the sake of simplicity.
->>> We have somewhat 4K - 64K and even more meta data per single onode for
->>> 4M object.  That includes user attrs, csum info, logical to physical
->>> extent mappings etc. This information is updated (partially or
->>> totally) on each write. The idea is to save that info to fast block
->>> device by direct use of an additional BlockDevice instance. E.g. one
->>> can allocate additional partition sharing the same physical device with DB for that.
->> The big problem we have right now is the combination of all of that per-IO metadata compounded with the write-amp / compaction overhead in RocksDB.  I think it's going to take a concerted effort to further audit what we are writing out (like determining if we really need things like the per-blob header info as Varada mentioned) along with getting that data out of rocksdb.  Whether that means simply switching to something like zetascale, or the idea you are proposing here I'm not sure.
->> Hopefully I will be testing Somnath's zetascale branch soon.
->>
->>> Instead of full onode representation KV DB will contain allocated
->>> physical extents layout for this meta data similar to blob pextents
->>> vector on per-onode basis - i.e. some indexing info.  Plus some minor
->>> data too if needed. Additionally KV to hold free space tracking info
->>> from the second FreeList manager for fast block device.
->>> When saving onode bluestore has to allocate required space at fast
->>> device, mark old extents for release, write both onode and user data
->>> to block devices (in parallel) and update a db with space allocations. I.e.
->>> meta data overwrite procedure starts to resemble user data overwrite.
->>>
->>> Similar idea can be applied for WAL - one can store user data to fast
->>> device directly and update indexing information in KV only.
->> I don't think the WAL is actually hurting us much right now fwiw.
->>
->>> Indexing information is pretty short and perhaps one should read it
->>> into memory on store mount and do not retrieve from DB during the operation.
-> Any strategy that assumes we put everything in RAM is going to be
-> problematic for some workloads.  We can't assume objects are 4MB.  RGW
-> users, for example, are free to upload nothing for 4K objects if they
-> like.
->
->>> This way DB traffic is reduced considerably and hence compaction will
->>> happen less frequently. Moreover we might probably remove var encoding
->>> stuff since we can be less careful about serialized onode size from now on.
->> I think your proposal is heading in the right direction if we intend to stick with rocksdb.  If we decide to move toward zetascale, we'll need to think about some kind of WAL solution, but I'm less sure if we need to move data out of the KV store.  Maybe Somnath or Allen will comment.
->> I agree regarding varint encoding regardless of what we do, I'd much rather at least batch into prefixVarint or even just focus on compression of the 0/1 case.
->>
->>> There is some POC code located at
->>> https://github.com/ifed01/ceph/tree/wip_bluestore_minimize_db
->>> POC code lacks WAL support, index retrieval on startup, var encoding
->>> elimination at the moment.
->>> Performance testing are still in progress.
->>>
->>> Any thoughts/comments?
->> I'd be happy to take it for a test drive once I've got some of the zetascale testing done.  There's plenty of merit for trying it at least.
->>
->>> Thanks,
->>> Igor
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo@vger.kernel.org More majordomo
->>> info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->> N?????r??y??????X??ǧv???)޺{.n?????z?]z????ay?ʇڙ??j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
+I would s/lookup table/base pool/.  Our main idea is that you can treat
+a deduped object as a special case of a regular object or a tiered object.  
+e.g., foo might be stored normally.  bar might be a redirect that says 
+"bar is stored in this cold rados pool over there."  And baz's 
+object_info_t might say "i'm composed of these logical chunks at these 
+offsets stored in this cas rados pool over there."
+ 
+> "I/O flow (inline+post processing)
+> Write : flush event occur -> Request COPY_FROM by dividing object into
+> fixed size chunk -> update lookup table
 
+I've mostly ignored the inline case just to keep an initial version 
+simple, although in principle I'm not sure one is actually needed.  If we 
+just chunk as soon as we have enough data the op to the CAS pool can we 
+"write this data or, if the object already exists, just increment the ref 
+count".
+
+> Read : promote_object requests a COPY_GET, with chunk as unit.
+> 
+> "chunking"
+> Currently, 4K, 128K, 256K, and 512K chunk size are available as fixed
+> chunk size.
+
+This is fine for a prototype, although eventually I think we'll want to do 
+some form of Rabin fingerprinting to pick chunk boundaries.
+
+> "Lookup table"
+> Lookup table manages the OID and fingerprint mapping and status(number
+> of chunks, state) of deduped object.
+> The matching of OID, offset and fingerprint for each request is
+> processed through this table.
+
+Our main idea is to think of the index as the rados pool (which is already 
+scalable, elastic, can be mapped to SSDs, etc.).  I think this is what 
+you're saying as well but I'm not sure from your choice of words!
+
+> "metadata recovery & replication"
+> Data recovery is done by the existing Ceph structure. Therefore,
+> additional implementation is needed for deduplication metadata
+> management. Newly added data structure is only a lookup table.
+> We can secure the reliability by using existing replication
+> structure.(When lookup table updated, request it to another OSDs, that
+> having same  replicated table in them for syncing of entries)
+> 
+> "metadata cache"
+> Metadata & data cache is one of the important structures that
+> determine the performance of deduplication. Currently it is
+> implemented through simple LRU and Level-DB,but we are planning to
+> develop additional improved algorithms and data structures.
+
+If we consider the first tier (which contains the redirects) as a regular 
+pool, I think caching becomes a normal-ish case of cache tiering, and can 
+reuse the infrastructure that rados cache tiering already uses (or replace 
+it with something better).  A 'writeback' caching behavior would just be
+offline (not inline) dedup.  If we see many reads on a deduped object, 
+we'd just promote it into the base tier (just like we do with cache 
+tiering).  And the tiering agent can walk the tier PGs demoting (deduping) 
+objects that appear cold based on pool usage thresholds.
+
+> 4. Prototype evaluation (inline mode, 512K chunk, RBD, Seq. write)
+> 
+> "Experiment 1 (http://imgur.com/Fdq7mWr)”
+> 
+> X axis represents the number of stored OS images, and the Y axis
+> represents the total storage capacity as the X axis value increases.
+> (Images are based on Cent OS 7.0) In addition to being able to remove
+> the same block from the same image
+> (if the OS image number is 1), can see only an additional 50MB is
+> stored if stores similar image.
+> 
+> "Experiment 2 (http://imgur.com/wHGVNMq)"
+> 
+> The actual data rate, is the data stored in the ceph cluster / data
+> stored by the client. In case of Dedup ratio 20, the actual storage
+> ratio is slightly higher because of ceph and dedup metadata, but in
+> the remaining cases we can see it is close to ideal value.
+> In performance perspective, we can see the performance become half,
+> because of additional computations of Proxy structure and
+> deduplication.(current implementation (inline) must redirect write
+> message to storage tier. dedupe is done at storage tier. This can be
+> fixed later)
+
+Cool!
+
+Do my comments above align with what you have in mind?  I'd love to 
+discuss this here (and follow up at the next CDM) so we can converge on an 
+approach and set milestones.  I suspect those are probably something like 
+the below, but I don't fully understand what you're proposing above, so 
+take this with a grain of salt!
+
+- build standard approach for a CAS rados pool with refcounted objects 
+named by their hash.  (Probably a rados cls?)
+
+- add a basic redirect mechanism so that a rados object can store no data, 
+just a object_info_t placeholder, with a new field/component that says 
+"data is over there in this other pool."  That 'redirect' structure should 
+be modular/pluggable so that we can extend it later for other types of 
+backends and mappings of logical extents to CAS dedup objects.
+
+- implement read path for above (basically proxy read)
+- promote path for above
+- trivial demote path (push entire object to other tier)
+
+(At this point we have something very similar to the current cache 
+tiering, but more flexible.)
+
+- plug in dedup logic (chunk object, push all chunks to cas pool, write 
+complicated manifest).
+
+There are lots of lingering issues about how we should implement this, 
+though.  In particular, we want to revisit many of the choices we made 
+doing cache tiering and (probably) implement things differently here.  
+The upshot, though, is that if we do this right I think dedup can just be 
+a special case of tiering in general, and we can address a bunch of other 
+tiering scenarios at the same time.
+
+sage
+--8323329-712950696-1481728861=:10615--
