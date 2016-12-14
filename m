@@ -1,100 +1,69 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: use ceph-ci.git to get repositories out of dev branches
-Date: Wed, 14 Dec 2016 01:31:55 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612140128290.32565@piezo.novalocal>
-References: <CAC-Np1y=2DY7Rve+ao73i7EtKrFY1K_jnDR86Yhhgt9XF7gsQw@mail.gmail.com> <CAC-Np1wgRYptDTeF7=MSmWMW1B1tP_=RNp8EtTGkSy+ZqrP-rA@mail.gmail.com> <ca932c0f-3108-f786-6c72-a546359efbaf@suse.cz>
+From: huang jun <hjwsm1989@gmail.com>
+Subject: Re: question about backfill on erasure pool
+Date: Wed, 14 Dec 2016 09:37:58 +0800
+Message-ID: <CABAwU-bGLN25kY_kmSA-2jWx0V0wEiRTWK+iZWVxvBeaNGp_GQ@mail.gmail.com>
+References: <CABAwU-b6m6xfLXvLwfR4DXMxW4kwzyvVYpKPm_NzRxzDWoROVA@mail.gmail.com>
+ <alpine.DEB.2.11.1612131247350.32565@piezo.novalocal> <CAN=+7FWNccmp32oWy9sHhONBqdyf989Kq2ydSd_Ah3K_UydY6w@mail.gmail.com>
+ <CABAwU-Y5mo_WefKozn6zLxBH3Vnb8OSaH2N30ExoHSm_fCEzSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60048 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752111AbcLNBdz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Dec 2016 20:33:55 -0500
-In-Reply-To: <ca932c0f-3108-f786-6c72-a546359efbaf@suse.cz>
+Received: from mail-qt0-f173.google.com ([209.85.216.173]:36214 "EHLO
+        mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753149AbcLNBh7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Dec 2016 20:37:59 -0500
+Received: by mail-qt0-f173.google.com with SMTP id w33so4588487qtc.3
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Dec 2016 17:37:59 -0800 (PST)
+In-Reply-To: <CABAwU-Y5mo_WefKozn6zLxBH3Vnb8OSaH2N30ExoHSm_fCEzSw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Alfredo Deza <adeza@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Andrew Schoen <aschoen@redhat.com>
+To: Samuel Just <sjust@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 13 Dec 2016, Nathan Cutler wrote:
-> Hi Alfredo:
-> 
-> I'm trying to build a "wip-hammer-backports" integration branch to test the
-> 0.94.10 release, but shaman doesn't like it for some reason:
-> 
-> https://jenkins.ceph.com/job/ceph-dev-setup/4002//consoleFull
-> 
-> The same branch passes gitbuilder. Could you take a look?
+after check the osd log and ECBackend.cc source code,
+when doing backfill, the osd.1 will read the parity chunk from osd.3,
+and then push it to osd.4,
+don't need to read data chunks from osd.1 and osd.2, and decode, then
+send osd.4 parity chunk,
+my former understanding is wrong.
 
-There is a new teuthology-suite option, --ceph-repo, that you can pass the 
-repo name to.  So, for example,
+thanks.
 
- teuthology-suite -s rados -c wip-foo --ceph-repo https://github.com/ceph/ceph-ci.git
-
-Soon we'll switch the default around so that ceph-ci.git will be the 
-default and you'll need to tell teuthology-suite if you're scheduling 
-against a branch in ceph.git (this will mostly just be the cron jobs).
-
-Also, starting very soon (tomorrow), --suite-repo will also pick up this 
-value, so that it is (by default) assumed that the *tests* will come out 
-of this repo too.  That is, the default for --suite-repo will be whatever 
---ceph-repo is, and --suite-relpath will default to 'qa' (the suite yaml 
-files will soon be merged into ceph.git qa/suite/*).  --suite-branch 
-will continue to default to whatever the -c ceph branch is (like they do 
-already), although it will seem a bit less magic than before since it's 
-generally the same branch in the same repo.
-
-sage
-
-
-
-> 
-> Thanks,
-> Nathan
-> 
-> On 12/12/2016 01:48 PM, Alfredo Deza wrote:
-> > **REMINDER**
-> > 
-> > Please, push development branches to ceph-ci.git to get
-> > repositories/binaries built.
-> > 
-> > We are scheduled to restrict permissions to ceph.git in a few days.
-> > 
-> > Thanks!
-> > 
-> > On Wed, Dec 7, 2016 at 7:34 AM, Alfredo Deza <adeza@redhat.com> wrote:
-> > > As announced on November 23rd, please start pushing development
-> > > branches to ceph-ci.git (https://github.com/ceph/ceph-ci) to get
-> > > repositories.
-> > > 
-> > > This doesn't change reporting in https://shaman.ceph.com and it
-> > > shouldn't affect testing via teuthology.
-> > > 
-> > > The ceph.git repository will continue to build binaries and
-> > > repositories for another week to help transitioning.
-> > > 
-> > > If you have any issues, please mention them in the #sepia or
-> > > #ceph-devel channels to me (alfredodeza) or Andrew Schoen
-> > > (andrewschoen).
-> > > 
-> > > Thanks!
-> > > 
-> > > 
-> > > -Alfredo
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
-> -- 
-> Nathan Cutler
-> Software Engineer Distributed Storage
-> SUSE LINUX, s.r.o.
-> Tel.: +420 284 084 037
+2016-12-14 9:01 GMT+08:00 huang jun <hjwsm1989@gmail.com>:
+> 2016-12-13 23:42 GMT+08:00 Samuel Just <sjust@redhat.com>:
+>> Actually, I'm not sure it wouldn't read the parity chunk from osd.3,
+>> I'd have to check.  However, the data would still go through the
+>> primary.
+> you reminder me, i will check the osd log,
+> it is expected if the osd1 read the parity chunk from osd.3(shard 2)
+> and then push it to osd.4?
+>> -Sam
+>>
+>> On Tue, Dec 13, 2016 at 4:48 AM, Sage Weil <sage@newdream.net> wrote:
+>>> On Tue, 13 Dec 2016, huang jun wrote:
+>>>> hi,all
+>>>> i have a question about pg backfill on erasure pool.
+>>>> pg0 in erasure pool, which k:m=2:1,
+>>>> at first, pg0 on osd [1,2,3], after osd.4 added,
+>>>> the pg0 is now distribute to osd [1,2,4],
+>>>> for replicated pool, it will do backfill from primary(osd.1) to osd.4,
+>>>> for erasure code pool, the primary osd.1 needs to read the data chunks
+>>>> from osd.1 and osd.2,
+>>>> then decode and push the parity chunk to osd.4,
+>>>> in the above case, the osd.3 is up and contain the parity chunk,
+>>>> why dont let osd.3 push the parity chunk to osd.4?
+>>>
+>>> I don't think there is any reason why we couldn't... it just hasn't been
+>>> implemented.  Sam?
+>>>
+>>> sage
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> Thank you!
+> HuangJun
