@@ -1,152 +1,65 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: use ceph-ci.git to get repositories out of dev branches
-Date: Wed, 14 Dec 2016 16:00:18 -0500
-Message-ID: <CAC-Np1wsfAo6LtOaitSs3u6q1PSy7vd3giYfE5Roj+g30RypWw@mail.gmail.com>
-References: <CAC-Np1y=2DY7Rve+ao73i7EtKrFY1K_jnDR86Yhhgt9XF7gsQw@mail.gmail.com>
- <CAC-Np1wgRYptDTeF7=MSmWMW1B1tP_=RNp8EtTGkSy+ZqrP-rA@mail.gmail.com>
- <ca932c0f-3108-f786-6c72-a546359efbaf@suse.cz> <alpine.DEB.2.11.1612140128290.32565@piezo.novalocal>
- <f66b4496-0111-190b-8d82-46df928668aa@suse.cz>
+From: Sage Weil <sweil@redhat.com>
+Subject: how to use teuthology-suite in the new world
+Date: Wed, 14 Dec 2016 22:22:31 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612142211440.10615@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f170.google.com ([209.85.220.170]:36573 "EHLO
-        mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752851AbcLNVAU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Dec 2016 16:00:20 -0500
-Received: by mail-qk0-f170.google.com with SMTP id n21so35191988qka.3
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Dec 2016 13:00:20 -0800 (PST)
-In-Reply-To: <f66b4496-0111-190b-8d82-46df928668aa@suse.cz>
+Received: from mx1.redhat.com ([209.132.183.28]:48490 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933500AbcLNWWh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Dec 2016 17:22:37 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Andrew Schoen <aschoen@redhat.com>
+To: ceph-devel@vger.kernel.org, "sepia@ceph.com" <sepia@ceph.com>
 
-On Wed, Dec 14, 2016 at 1:15 PM, Nathan Cutler <ncutler@suse.cz> wrote:
-> Thanks, Sage. I am eager to use the new stuff, but ATM it appears that
-> Shaman does not build hammer at all.
->
-> See https://jenkins.ceph.com/job/ceph-dev-setup/4055//consoleFull
->
-> Right after configure it appears to do "git diff" and not like what it sees.
-> All hammer-based branches (including hammer itself) fail in the same way.
->
-> Needless to say, in gitbuilder they build fine.
->
-> This is blocking work on the 0.94.10 release.
+Please read carefully if you use teuthology:
 
-After some digging (mostly Dan Mick) we found that autogen.sh does
-some calls to aclocal which can copy system installed macros
-into the ceph source.
+ceph-qa-suite.git is no more.  All tests are now in qa/tasks, qa/suite, 
+and so on.  The directory structure is the same (but now prefixed with 
+qa/) and the git history is intact.
 
-This wasn't an issue before because the copy of the macro (ltsugar.m4)
-ceph has in hammer was the same version as the one in the system, but
-with the newer distros (e.g. Xenial in this case) it had some changes
-that when copied over it caused the `git diff` check we have to get
-triggered
-and failed the build.
+If you have any pull requests outstanding against ceph-qa-suite, you'll 
+need to redo them as a pull-request against ceph.git.
 
-The check has been moved earlier in the script so that this doesn't
-hit Hammer and Hammer-based branches.
+Jenkins + shaman will build packages for both ceph.git and ceph-ci.git.
 
+You should only push official branches (master, kraken, jewel, etc.) to 
+ceph.git.
 
->
-> Nathan
->
->
-> On 12/14/2016 02:31 AM, Sage Weil wrote:
->>
->> On Tue, 13 Dec 2016, Nathan Cutler wrote:
->>>
->>> Hi Alfredo:
->>>
->>> I'm trying to build a "wip-hammer-backports" integration branch to test
->>> the
->>> 0.94.10 release, but shaman doesn't like it for some reason:
->>>
->>> https://jenkins.ceph.com/job/ceph-dev-setup/4002//consoleFull
->>>
->>> The same branch passes gitbuilder. Could you take a look?
->>
->>
->> There is a new teuthology-suite option, --ceph-repo, that you can pass the
->> repo name to.  So, for example,
->>
->>  teuthology-suite -s rados -c wip-foo --ceph-repo
->> https://github.com/ceph/ceph-ci.git
->>
->> Soon we'll switch the default around so that ceph-ci.git will be the
->> default and you'll need to tell teuthology-suite if you're scheduling
->> against a branch in ceph.git (this will mostly just be the cron jobs).
->>
->> Also, starting very soon (tomorrow), --suite-repo will also pick up this
->> value, so that it is (by default) assumed that the *tests* will come out
->> of this repo too.  That is, the default for --suite-repo will be whatever
->> --ceph-repo is, and --suite-relpath will default to 'qa' (the suite yaml
->> files will soon be merged into ceph.git qa/suite/*).  --suite-branch
->> will continue to default to whatever the -c ceph branch is (like they do
->> already), although it will seem a bit less magic than before since it's
->> generally the same branch in the same repo.
->>
->> sage
->>
->>
->>
->>>
->>> Thanks,
->>> Nathan
->>>
->>> On 12/12/2016 01:48 PM, Alfredo Deza wrote:
->>>>
->>>> **REMINDER**
->>>>
->>>> Please, push development branches to ceph-ci.git to get
->>>> repositories/binaries built.
->>>>
->>>> We are scheduled to restrict permissions to ceph.git in a few days.
->>>>
->>>> Thanks!
->>>>
->>>> On Wed, Dec 7, 2016 at 7:34 AM, Alfredo Deza <adeza@redhat.com> wrote:
->>>>>
->>>>> As announced on November 23rd, please start pushing development
->>>>> branches to ceph-ci.git (https://github.com/ceph/ceph-ci) to get
->>>>> repositories.
->>>>>
->>>>> This doesn't change reporting in https://shaman.ceph.com and it
->>>>> shouldn't affect testing via teuthology.
->>>>>
->>>>> The ceph.git repository will continue to build binaries and
->>>>> repositories for another week to help transitioning.
->>>>>
->>>>> If you have any issues, please mention them in the #sepia or
->>>>> #ceph-devel channels to me (alfredodeza) or Andrew Schoen
->>>>> (andrewschoen).
->>>>>
->>>>> Thanks!
->>>>>
->>>>>
->>>>> -Alfredo
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>
->>> --
->>> Nathan Cutler
->>> Software Engineer Distributed Storage
->>> SUSE LINUX, s.r.o.
->>> Tel.: +420 284 084 037
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->
-> --
-> Nathan Cutler
-> Software Engineer Distributed Storage
-> SUSE LINUX, s.r.o.
-> Tel.: +420 284 084 037
+You should only push a branch to ceph-ci.git if you need packages built.  
+I suggest
+
+  git remote add ci git@github.com:ceph/ceph-ci
+
+Teuthology now defaults to https://github.com/ceph/ceph-ci.git instead of 
+ceph.git.
+
+To schedule a test against something in ceph-ci.git,
+
+  teuthology-suite -s rados -c wip-foo
+
+To schedule against something in ceph.git (e.g., master),
+
+  teuthology-suite -s rados -c master --ceph-repo https://github.com/ceph/ceph.git
+
+In both of these cases, the tests (tasks/ and suite/ yamls) are taken from 
+the same repo and branch that we used to resolve your branch name to a 
+sha1 (shaman builds are identified by sha1).
+
+To schedule a test against a suite branch that is different from the ceph 
+branch you can use --suite-repo and --suite-branch.  For example,
+
+  teuthology-suite -s rados -c wip-mybuild \
+	--suite-repo https://github.com/liewegas/ceph.git \
+	--suite-branch wip-my-updated-test-case
+
+This is not new, but if you want teuthology-suite to find the most recent 
+build for a branch (useful when master is moving quickly but you just need 
+a recent build) you can use -n <max # commits to backtrack>:
+
+  teuthology-suite -s rados -c master \
+	--ceph-repo https://github.com/ceph/ceph.git \
+	-n 10
+
+sage
