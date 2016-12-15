@@ -1,50 +1,92 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: [PATCH 7/9] jbd2: make the whole kjournald2 kthread NOFS safe
-Date: Thu, 15 Dec 2016 15:07:13 +0100
-Message-ID: <20161215140715.12732-8-mhocko@kernel.org>
-References: <20161215140715.12732-1-mhocko@kernel.org>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20161215140715.12732-1-mhocko@kernel.org>
-Sender: owner-linux-mm@kvack.org
-To: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org
-Cc: Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+From: Mykola Golub <to.my.trociny@gmail.com>
+Subject: Re: [sepia] how to use teuthology-suite in the new world
+Date: Thu, 15 Dec 2016 16:51:44 +0200
+Message-ID: <20161215145143.GA1451@gmail.com>
+References: <alpine.DEB.2.11.1612142211440.10615@piezo.novalocal>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:38799 "EHLO
+        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758382AbcLOOvr (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Dec 2016 09:51:47 -0500
+Received: by mail-wm0-f54.google.com with SMTP id f82so49619362wmf.1
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Dec 2016 06:51:46 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.11.1612142211440.10615@piezo.novalocal>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel@vger.kernel.org, "sepia@ceph.com" <sepia@ceph.com>
 
-From: Michal Hocko <mhocko@suse.com>
+Hi, Sage,
 
-kjournald2 is central to the transaction commit processing. As such any
-potential allocation from this kernel thread has to be GFP_NOFS. Make
-sure to mark the whole kernel thread GFP_NOFS by the memalloc_nofs_save.
+It looks like we still need to push testing branches to ceph.git for
+things like below?
 
-Suggested-by: Jan Kara <jack@suse.cz>
-Signed-off-by: Michal Hocko <mhocko@suse.com>
----
- fs/jbd2/journal.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+qa/workunits/rbd/test_librbd_python.sh:
 
-diff --git a/fs/jbd2/journal.c b/fs/jbd2/journal.c
-index 8ed971eeab44..6dad8c5d6ddf 100644
---- a/fs/jbd2/journal.c
-+++ b/fs/jbd2/journal.c
-@@ -206,6 +206,13 @@ static int kjournald2(void *arg)
- 	wake_up(&journal->j_wait_done_commit);
- 
- 	/*
-+	 * Make sure that no allocations from this kernel thread will ever recurse
-+	 * to the fs layer because we are responsible for the transaction commit
-+	 * and any fs involvement might get stuck waiting for the trasn. commit.
-+	 */
-+	memalloc_nofs_save();
-+
-+	/*
- 	 * And now, wait forever for commit wakeup events.
- 	 */
- 	write_lock(&journal->j_state_lock);
+wget -O test_rbd.py "https://git.ceph.com/?p=ceph.git;a=blob_plain;hb=$CEPH_REF;f=src/test/pybind/test_rbd.py" || \
+    wget -O test_rbd.py "https://git.ceph.com/?p=ceph.git;a=blob_plain;hb=ref/heads/$CEPH_REF;f=src/test/pybind/test_rbd.py"
+
+Do we have some env variable (CEPH_REPO?) we could use simirlaly to
+CEPH_REF here?
+
+On Wed, Dec 14, 2016 at 10:22:31PM +0000, Sage Weil wrote:
+> Please read carefully if you use teuthology:
+> 
+> ceph-qa-suite.git is no more.  All tests are now in qa/tasks, qa/suite, 
+> and so on.  The directory structure is the same (but now prefixed with 
+> qa/) and the git history is intact.
+> 
+> If you have any pull requests outstanding against ceph-qa-suite, you'll 
+> need to redo them as a pull-request against ceph.git.
+> 
+> Jenkins + shaman will build packages for both ceph.git and ceph-ci.git.
+> 
+> You should only push official branches (master, kraken, jewel, etc.) to 
+> ceph.git.
+> 
+> You should only push a branch to ceph-ci.git if you need packages built.  
+> I suggest
+> 
+>   git remote add ci git@github.com:ceph/ceph-ci
+> 
+> Teuthology now defaults to https://github.com/ceph/ceph-ci.git instead of 
+> ceph.git.
+> 
+> To schedule a test against something in ceph-ci.git,
+> 
+>   teuthology-suite -s rados -c wip-foo
+> 
+> To schedule against something in ceph.git (e.g., master),
+> 
+>   teuthology-suite -s rados -c master --ceph-repo https://github.com/ceph/ceph.git
+> 
+> In both of these cases, the tests (tasks/ and suite/ yamls) are taken from 
+> the same repo and branch that we used to resolve your branch name to a 
+> sha1 (shaman builds are identified by sha1).
+> 
+> To schedule a test against a suite branch that is different from the ceph 
+> branch you can use --suite-repo and --suite-branch.  For example,
+> 
+>   teuthology-suite -s rados -c wip-mybuild \
+> 	--suite-repo https://github.com/liewegas/ceph.git \
+> 	--suite-branch wip-my-updated-test-case
+> 
+> This is not new, but if you want teuthology-suite to find the most recent 
+> build for a branch (useful when master is moving quickly but you just need 
+> a recent build) you can use -n <max # commits to backtrack>:
+> 
+>   teuthology-suite -s rados -c master \
+> 	--ceph-repo https://github.com/ceph/ceph.git \
+> 	-n 10
+> 
+> sage
+> _______________________________________________
+> Sepia mailing list
+> Sepia@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/sepia-ceph.com
+
 -- 
-2.10.2
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Mykola Golub
