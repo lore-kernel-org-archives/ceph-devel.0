@@ -1,56 +1,57 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v4 2/5] ceph: clean up unsafe d_parent accesses in build_dentry_path
-Date: Thu, 15 Dec 2016 06:34:26 -0500
-Message-ID: <1481801669-4916-3-git-send-email-jlayton@redhat.com>
+Subject: [PATCH v4 4/5] ceph: fix unsafe dcache access in ceph_encode_dentry_release
+Date: Thu, 15 Dec 2016 06:34:28 -0500
+Message-ID: <1481801669-4916-5-git-send-email-jlayton@redhat.com>
 References: <1481801669-4916-1-git-send-email-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36894 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:32830 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755789AbcLOLmt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 15 Dec 2016 06:42:49 -0500
+        id S1757477AbcLOLoY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 15 Dec 2016 06:44:24 -0500
 In-Reply-To: <1481801669-4916-1-git-send-email-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, linux-fsdevel@vger.kernel.org, dhowells@redhat.com, viro@ZenIV.linux.org.uk
 
-While we hold a reference to the dentry when build_dentry_path is
-called, we could end up racing with a rename that changes d_parent.
-Handle that situation correctly, by using the rcu_read_lock to
-ensure that the parent dentry and inode stick around long enough
-to safely check ceph_snap and ceph_ino.
+Accessing d_parent requires some sort of locking or it could vanish
+out from under us. Since we take the d_lock anyway, use that to fetch
+d_parent and take a reference to it, and then use that reference to
+call ceph_encode_inode_release.
 
 Link: http://tracker.ceph.com/issues/18148
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- fs/ceph/mds_client.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+ fs/ceph/caps.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 20b241aafcee..03c82953ac68 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -1799,13 +1799,18 @@ static int build_dentry_path(struct dentry *dentry,
- 			     int *pfreepath)
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 16e6ded0b7f2..6bc5c1efbb26 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -3834,7 +3834,7 @@ int ceph_encode_inode_release(void **p, struct inode *inode,
+ int ceph_encode_dentry_release(void **p, struct dentry *dentry,
+ 			       int mds, int drop, int unless)
  {
- 	char *path;
-+	struct inode *dir;
+-	struct inode *dir = d_inode(dentry->d_parent);
++	struct dentry *parent;
+ 	struct ceph_mds_request_release *rel = *p;
+ 	struct ceph_dentry_info *di = ceph_dentry(dentry);
+ 	int force = 0;
+@@ -3849,9 +3849,12 @@ int ceph_encode_dentry_release(void **p, struct dentry *dentry,
+ 	spin_lock(&dentry->d_lock);
+ 	if (di->lease_session && di->lease_session->s_mds == mds)
+ 		force = 1;
++	parent = dget(dentry->d_parent);
+ 	spin_unlock(&dentry->d_lock);
  
--	if (ceph_snap(d_inode(dentry->d_parent)) == CEPH_NOSNAP) {
--		*pino = ceph_ino(d_inode(dentry->d_parent));
-+	rcu_read_lock();
-+	dir = d_inode_rcu(dentry->d_parent);
-+	if (dir && ceph_snap(dir) == CEPH_NOSNAP) {
-+		*pino = ceph_ino(dir);
-+		rcu_read_unlock();
- 		*ppath = dentry->d_name.name;
- 		*ppathlen = dentry->d_name.len;
- 		return 0;
- 	}
-+	rcu_read_unlock();
- 	path = ceph_mdsc_build_path(dentry, ppathlen, pino, 1);
- 	if (IS_ERR(path))
- 		return PTR_ERR(path);
+-	ret = ceph_encode_inode_release(p, dir, mds, drop, unless, force);
++	ret = ceph_encode_inode_release(p, d_inode(parent), mds, drop,
++					unless, force);
++	dput(parent);
+ 
+ 	spin_lock(&dentry->d_lock);
+ 	if (ret && di->lease_session && di->lease_session->s_mds == mds) {
 -- 
 2.7.4
 
