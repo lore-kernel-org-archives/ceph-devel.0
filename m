@@ -1,84 +1,77 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: Metadata vs UserData caching in BlueStore
-Date: Thu, 15 Dec 2016 21:12:18 +0300
-Message-ID: <8f961d2d-4b96-65ed-1003-b028fea0de63@mirantis.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: Metadata vs UserData caching in BlueStore
+Date: Thu, 15 Dec 2016 18:04:55 +0000
+Message-ID: <5E3E05AED7F0F044904275810D0CB465038878@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 References: <ce95a133-7fae-34fc-b493-fbabdc272c55@mirantis.com>
  <7b337443-f6bc-d005-a17b-43bd11481f04@redhat.com>
  <3bd1c476-c00c-2783-1ac7-7eb98e0785b6@mirantis.com>
- <5E3E05AED7F0F044904275810D0CB465038878@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yb0-f178.google.com ([209.85.213.178]:36840 "EHLO
-        mail-yb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752208AbcLOSUU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Dec 2016 13:20:20 -0500
-Received: by mail-yb0-f178.google.com with SMTP id v78so32177668ybe.3
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Dec 2016 10:20:20 -0800 (PST)
-In-Reply-To: <5E3E05AED7F0F044904275810D0CB465038878@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+Received: from mail-sn1nam01on0042.outbound.protection.outlook.com ([104.47.32.42]:48182
+        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1755660AbcLOSU7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 15 Dec 2016 13:20:59 -0500
+In-Reply-To: <3bd1c476-c00c-2783-1ac7-7eb98e0785b6@mirantis.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-
-
-On 15.12.2016 21:04, Somnath Roy wrote:
-> I don't think Kernel is caching anything as we are using O_DIRECT writes.
-And what's about reading? Does it cache anything?
-> I think for random there is no point of caching data but for sequential if we are planning to implement read_ahead in bluestore , data cache should help.
-Yeah, I agree that caching is needed for read ahead. But now it's not 
-their so what are we caching user data for?
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Igor Fedotov
-> Sent: Thursday, December 15, 2016 9:45 AM
-> To: Mark Nelson; ceph-devel
-> Subject: Re: Metadata vs UserData caching in BlueStore
->
-> On 15.12.2016 20:34, Mark Nelson wrote:
->>
->> On 12/15/2016 11:24 AM, Igor Fedotov wrote:
->>> Sage et al,
->>>
->>> shouldn't we have bluestore_cache_metadata_ratio set to 1 by default?
->>> To concentrate on metadata caching..
->> I would contend that it should be high (we've already bumped it up,
->> I'd go higher still), but isn't 1 a little excessive? Ultimately this
->> should all be automatic based on heuristics imho.
->>
-> Well, Mark - what's the use case for user data caching? It means that user either retrieves just written data or reads them repeatedly or in an unaligned manner. Or there are multiple users working with the same object.
-> Any of that is IMHO a corner case... That can be handled by using that ratio setting if needed.
->
->>> IMHO Onode caching is much more important and profitable than user
->>> data one. It's rather a client misbehavior to cause cache hit when
->>> accessing user data but it's  highly expected for onode metadata.
->> We should take care not to run into the same problem the kernel does.
->> With too many cached entries things can get slow.  It's another
->> trade-off we need to watch out for.  There may need to be a (hopefully
->> automatically generated) soft limit, and potentially a hard limit.
-> Doesn't our cache size limit server that purpose?
->>> Moreover user data caching is probably already exists at block device
->>> level hence we rather duplicate disk cache....
->>>
->>> What do you think?
->>>
->>> Thanks,
->>>
->>> Igor
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo@vger.kernel.org More majordomo
->>> info at http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> ________________________________
->
-> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->
-
+SSBkb24ndCB0aGluayBLZXJuZWwgaXMgY2FjaGluZyBhbnl0aGluZyBhcyB3ZSBhcmUgdXNpbmcg
+T19ESVJFQ1Qgd3JpdGVzLg0KSSB0aGluayBmb3IgcmFuZG9tIHRoZXJlIGlzIG5vIHBvaW50IG9m
+IGNhY2hpbmcgZGF0YSBidXQgZm9yIHNlcXVlbnRpYWwgaWYgd2UgYXJlIHBsYW5uaW5nIHRvIGlt
+cGxlbWVudCByZWFkX2FoZWFkIGluIGJsdWVzdG9yZSAsIGRhdGEgY2FjaGUgc2hvdWxkIGhlbHAu
+DQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
+LS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1k
+ZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBJZ29yIEZlZG90b3YNClNl
+bnQ6IFRodXJzZGF5LCBEZWNlbWJlciAxNSwgMjAxNiA5OjQ1IEFNDQpUbzogTWFyayBOZWxzb247
+IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBNZXRhZGF0YSB2cyBVc2VyRGF0YSBjYWNoaW5nIGlu
+IEJsdWVTdG9yZQ0KDQpPbiAxNS4xMi4yMDE2IDIwOjM0LCBNYXJrIE5lbHNvbiB3cm90ZToNCj4N
+Cj4NCj4gT24gMTIvMTUvMjAxNiAxMToyNCBBTSwgSWdvciBGZWRvdG92IHdyb3RlOg0KPj4gU2Fn
+ZSBldCBhbCwNCj4+DQo+PiBzaG91bGRuJ3Qgd2UgaGF2ZSBibHVlc3RvcmVfY2FjaGVfbWV0YWRh
+dGFfcmF0aW8gc2V0IHRvIDEgYnkgZGVmYXVsdD8NCj4+IFRvIGNvbmNlbnRyYXRlIG9uIG1ldGFk
+YXRhIGNhY2hpbmcuLg0KPg0KPiBJIHdvdWxkIGNvbnRlbmQgdGhhdCBpdCBzaG91bGQgYmUgaGln
+aCAod2UndmUgYWxyZWFkeSBidW1wZWQgaXQgdXAsDQo+IEknZCBnbyBoaWdoZXIgc3RpbGwpLCBi
+dXQgaXNuJ3QgMSBhIGxpdHRsZSBleGNlc3NpdmU/IFVsdGltYXRlbHkgdGhpcw0KPiBzaG91bGQg
+YWxsIGJlIGF1dG9tYXRpYyBiYXNlZCBvbiBoZXVyaXN0aWNzIGltaG8uDQo+DQpXZWxsLCBNYXJr
+IC0gd2hhdCdzIHRoZSB1c2UgY2FzZSBmb3IgdXNlciBkYXRhIGNhY2hpbmc/IEl0IG1lYW5zIHRo
+YXQgdXNlciBlaXRoZXIgcmV0cmlldmVzIGp1c3Qgd3JpdHRlbiBkYXRhIG9yIHJlYWRzIHRoZW0g
+cmVwZWF0ZWRseSBvciBpbiBhbiB1bmFsaWduZWQgbWFubmVyLiBPciB0aGVyZSBhcmUgbXVsdGlw
+bGUgdXNlcnMgd29ya2luZyB3aXRoIHRoZSBzYW1lIG9iamVjdC4NCkFueSBvZiB0aGF0IGlzIElN
+SE8gYSBjb3JuZXIgY2FzZS4uLiBUaGF0IGNhbiBiZSBoYW5kbGVkIGJ5IHVzaW5nIHRoYXQgcmF0
+aW8gc2V0dGluZyBpZiBuZWVkZWQuDQoNCj4+DQo+PiBJTUhPIE9ub2RlIGNhY2hpbmcgaXMgbXVj
+aCBtb3JlIGltcG9ydGFudCBhbmQgcHJvZml0YWJsZSB0aGFuIHVzZXINCj4+IGRhdGEgb25lLiBJ
+dCdzIHJhdGhlciBhIGNsaWVudCBtaXNiZWhhdmlvciB0byBjYXVzZSBjYWNoZSBoaXQgd2hlbg0K
+Pj4gYWNjZXNzaW5nIHVzZXIgZGF0YSBidXQgaXQncyAgaGlnaGx5IGV4cGVjdGVkIGZvciBvbm9k
+ZSBtZXRhZGF0YS4NCj4NCj4gV2Ugc2hvdWxkIHRha2UgY2FyZSBub3QgdG8gcnVuIGludG8gdGhl
+IHNhbWUgcHJvYmxlbSB0aGUga2VybmVsIGRvZXMuDQo+IFdpdGggdG9vIG1hbnkgY2FjaGVkIGVu
+dHJpZXMgdGhpbmdzIGNhbiBnZXQgc2xvdy4gIEl0J3MgYW5vdGhlcg0KPiB0cmFkZS1vZmYgd2Ug
+bmVlZCB0byB3YXRjaCBvdXQgZm9yLiAgVGhlcmUgbWF5IG5lZWQgdG8gYmUgYSAoaG9wZWZ1bGx5
+DQo+IGF1dG9tYXRpY2FsbHkgZ2VuZXJhdGVkKSBzb2Z0IGxpbWl0LCBhbmQgcG90ZW50aWFsbHkg
+YSBoYXJkIGxpbWl0Lg0KRG9lc24ndCBvdXIgY2FjaGUgc2l6ZSBsaW1pdCBzZXJ2ZXIgdGhhdCBw
+dXJwb3NlPw0KPg0KPj4NCj4+IE1vcmVvdmVyIHVzZXIgZGF0YSBjYWNoaW5nIGlzIHByb2JhYmx5
+IGFscmVhZHkgZXhpc3RzIGF0IGJsb2NrIGRldmljZQ0KPj4gbGV2ZWwgaGVuY2Ugd2UgcmF0aGVy
+IGR1cGxpY2F0ZSBkaXNrIGNhY2hlLi4uLg0KPj4NCj4+IFdoYXQgZG8geW91IHRoaW5rPw0KPj4N
+Cj4+IFRoYW5rcywNCj4+DQo+PiBJZ29yDQo+Pg0KPj4gLS0NCj4+IFRvIHVuc3Vic2NyaWJlIGZy
+b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPj4g
+aW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9y
+ZSBtYWpvcmRvbW8NCj4+IGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
+aW5mby5odG1sDQoNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUg
+bGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRv
+IG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDov
+L3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQoNCl9fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fDQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVk
+IGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhl
+IHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSBy
+ZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3Ug
+YXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBp
+biBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24s
+IG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlv
+dSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlm
+eSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1l
+ZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGlu
+IHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBz
+dG9yZWQgY29waWVzKS4NCg0K
