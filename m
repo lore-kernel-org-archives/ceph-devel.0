@@ -1,31 +1,68 @@
-From: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
-Subject: rgw multi-tenancy and bucket linking
-Date: Thu, 15 Dec 2016 11:20:06 +0000
-Message-ID: <156DAD87-C02D-4D65-BD05-FB17C60B8407@walmartlabs.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH v4 0/5] ceph: clean up some unsafe dentry->d_parent
+ accesses
+Date: Thu, 15 Dec 2016 21:35:31 +0800
+Message-ID: <DDF707AC-B5DA-4B90-AF01-FDB71E7D5E56@redhat.com>
+References: <1481801669-4916-1-git-send-email-jlayton@redhat.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.1 \(3251\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from homgw006.wal-mart.com ([161.165.225.35]:42709 "EHLO
-        ppes-mail-e4.wal-mart.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1752426AbcLOMkI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 15 Dec 2016 07:40:08 -0500
-Received: from pps.filterd (ppes-mail-e4.wal-mart.com [127.0.0.1])
-        by ppes-mail-e4.wal-mart.com (8.16.0.17/8.16.0.17) with SMTP id uBFBN8o0048818
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Dec 2016 05:24:42 -0600
-Received: from honts3565.homeoffice.wal-mart.com ([161.165.225.1])
-        by ppes-mail-e4.wal-mart.com with ESMTP id 27bdpyakem-1
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Dec 2016 05:24:42 -0600
-Content-Language: en-US
-Content-ID: <70E9224F42AD074DB5ED5827044EF4EB@NAMP100.PROD.OUTLOOK.COM>
+Received: from mx1.redhat.com ([209.132.183.28]:51695 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757753AbcLONpF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 15 Dec 2016 08:45:05 -0500
+In-Reply-To: <1481801669-4916-1-git-send-email-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jeff Layton <jlayton@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, David Howells <dhowells@redhat.com>, viro@ZenIV.linux.org.uk
 
-SSByZWFsaXplIGZyb20gY29kZSB0aGF0IGJ1Y2tldCBsaW5raW5nIGRvZXNu4oCZdCBzZWVtIHRv
-IGJlIHN1cHBvcnRlZCBhY3Jvc3MgdGVuYW50cy4gV2FzIHRoYXQgaW50ZW50aW9uYWwsIGFuZCBp
-ZiBzbyB3YXMgdGhhdCBiZWNhdXNlIGJ1Y2tldHMgbmVlZCBub3QgYmUgdW5pcXVlIGFjcm9zcyB0
-ZW5hbnRzPw0KDQpDb3VsZG7igJl0IGdldCBhbnkgaW5zaWdodHMgZnJvbSB0aGUgYXJjaGl2ZXMg
-b24gdGhpcywgYW55IGhlbHAgaXMgYXBwcmVjaWF0ZWQuIA0KDQpUaGFua3MsDQotUGF2YW4uDQoN
-Cg==
+
+> On 15 Dec 2016, at 19:34, Jeff Layton <jlayton@redhat.com> wrote:
+> 
+> v4: handle r_locked_dir correctly in __choose_mds
+>    rename rdirino to rdiri
+> 
+> v3: use parent inode information more widely when we have it
+> 
+> v2: use r_locked_dir in __choose_mds if it's available
+>    handle NULL d_inode_rcu(parent) properly
+> 
+> In several places, the kcephfs client accesses dentry->d_parent without
+> holding appropriate locking. This is not safe, as you can race with
+> renames that can morph the tree such that is changes and dentries found
+> previously can end up freed. This patchset fixes these places to access
+> the parent(s) safely, mostly using the rcu_read_lock().
+> 
+> Note that I'm not aware of any specific bug reports in this area --
+> these were just discovered by inspection (mostly by Zheng). This passes
+> xfstests at least up to test generic/095, where we hit an unrelated
+> softlockup in the splice write code (http://tracker.ceph.com/issues/18130).
+> 
+> Tracker bug link: http://tracker.ceph.com/issues/18148
+> 
+> 
+> *** BLURB HERE ***
+> 
+> clone of "ceph-4.10"
+> 
+> Jeff Layton (5):
+>  ceph: clean up unsafe d_parent access in __choose_mds
+>  ceph: clean up unsafe d_parent accesses in build_dentry_path
+>  ceph: pass parent dir ino info to build_dentry_path
+>  ceph: fix unsafe dcache access in ceph_encode_dentry_release
+>  ceph: pass parent inode info to ceph_encode_dentry_release if we have
+>    it
+> 
+> fs/ceph/caps.c       |  8 ++++-
+> fs/ceph/mds_client.c | 92 ++++++++++++++++++++++++++++++++++------------------
+> fs/ceph/super.h      |  1 +
+> 3 files changed, 69 insertions(+), 32 deletions(-)
+> 
+
+Reviewed-by: "Yan, Zheng" <zyan@redhat.com>
+> -- 
+> 2.7.4
+> 
+
