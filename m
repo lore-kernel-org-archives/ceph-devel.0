@@ -1,77 +1,86 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Metadata vs UserData caching in BlueStore
-Date: Thu, 15 Dec 2016 18:04:55 +0000
-Message-ID: <5E3E05AED7F0F044904275810D0CB465038878@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
-References: <ce95a133-7fae-34fc-b493-fbabdc272c55@mirantis.com>
- <7b337443-f6bc-d005-a17b-43bd11481f04@redhat.com>
- <3bd1c476-c00c-2783-1ac7-7eb98e0785b6@mirantis.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: Metadata vs UserData caching in BlueStore
+Date: Thu, 15 Dec 2016 19:12:28 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612151911120.10615@piezo.novalocal>
+References: <1ay8egnm4o8nt6xsykro2124.1481828743103@email.android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-355860281-1481829154=:10615"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0042.outbound.protection.outlook.com ([104.47.32.42]:48182
-        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1755660AbcLOSU7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 15 Dec 2016 13:20:59 -0500
-In-Reply-To: <3bd1c476-c00c-2783-1ac7-7eb98e0785b6@mirantis.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:51762 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752067AbcLOTMf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 15 Dec 2016 14:12:35 -0500
+In-Reply-To: <1ay8egnm4o8nt6xsykro2124.1481828743103@email.android.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>, Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Igor Fedotov <ifedotov@mirantis.com>
+Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SSBkb24ndCB0aGluayBLZXJuZWwgaXMgY2FjaGluZyBhbnl0aGluZyBhcyB3ZSBhcmUgdXNpbmcg
-T19ESVJFQ1Qgd3JpdGVzLg0KSSB0aGluayBmb3IgcmFuZG9tIHRoZXJlIGlzIG5vIHBvaW50IG9m
-IGNhY2hpbmcgZGF0YSBidXQgZm9yIHNlcXVlbnRpYWwgaWYgd2UgYXJlIHBsYW5uaW5nIHRvIGlt
-cGxlbWVudCByZWFkX2FoZWFkIGluIGJsdWVzdG9yZSAsIGRhdGEgY2FjaGUgc2hvdWxkIGhlbHAu
-DQoNClRoYW5rcyAmIFJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
-LS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1k
-ZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBJZ29yIEZlZG90b3YNClNl
-bnQ6IFRodXJzZGF5LCBEZWNlbWJlciAxNSwgMjAxNiA5OjQ1IEFNDQpUbzogTWFyayBOZWxzb247
-IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBNZXRhZGF0YSB2cyBVc2VyRGF0YSBjYWNoaW5nIGlu
-IEJsdWVTdG9yZQ0KDQpPbiAxNS4xMi4yMDE2IDIwOjM0LCBNYXJrIE5lbHNvbiB3cm90ZToNCj4N
-Cj4NCj4gT24gMTIvMTUvMjAxNiAxMToyNCBBTSwgSWdvciBGZWRvdG92IHdyb3RlOg0KPj4gU2Fn
-ZSBldCBhbCwNCj4+DQo+PiBzaG91bGRuJ3Qgd2UgaGF2ZSBibHVlc3RvcmVfY2FjaGVfbWV0YWRh
-dGFfcmF0aW8gc2V0IHRvIDEgYnkgZGVmYXVsdD8NCj4+IFRvIGNvbmNlbnRyYXRlIG9uIG1ldGFk
-YXRhIGNhY2hpbmcuLg0KPg0KPiBJIHdvdWxkIGNvbnRlbmQgdGhhdCBpdCBzaG91bGQgYmUgaGln
-aCAod2UndmUgYWxyZWFkeSBidW1wZWQgaXQgdXAsDQo+IEknZCBnbyBoaWdoZXIgc3RpbGwpLCBi
-dXQgaXNuJ3QgMSBhIGxpdHRsZSBleGNlc3NpdmU/IFVsdGltYXRlbHkgdGhpcw0KPiBzaG91bGQg
-YWxsIGJlIGF1dG9tYXRpYyBiYXNlZCBvbiBoZXVyaXN0aWNzIGltaG8uDQo+DQpXZWxsLCBNYXJr
-IC0gd2hhdCdzIHRoZSB1c2UgY2FzZSBmb3IgdXNlciBkYXRhIGNhY2hpbmc/IEl0IG1lYW5zIHRo
-YXQgdXNlciBlaXRoZXIgcmV0cmlldmVzIGp1c3Qgd3JpdHRlbiBkYXRhIG9yIHJlYWRzIHRoZW0g
-cmVwZWF0ZWRseSBvciBpbiBhbiB1bmFsaWduZWQgbWFubmVyLiBPciB0aGVyZSBhcmUgbXVsdGlw
-bGUgdXNlcnMgd29ya2luZyB3aXRoIHRoZSBzYW1lIG9iamVjdC4NCkFueSBvZiB0aGF0IGlzIElN
-SE8gYSBjb3JuZXIgY2FzZS4uLiBUaGF0IGNhbiBiZSBoYW5kbGVkIGJ5IHVzaW5nIHRoYXQgcmF0
-aW8gc2V0dGluZyBpZiBuZWVkZWQuDQoNCj4+DQo+PiBJTUhPIE9ub2RlIGNhY2hpbmcgaXMgbXVj
-aCBtb3JlIGltcG9ydGFudCBhbmQgcHJvZml0YWJsZSB0aGFuIHVzZXINCj4+IGRhdGEgb25lLiBJ
-dCdzIHJhdGhlciBhIGNsaWVudCBtaXNiZWhhdmlvciB0byBjYXVzZSBjYWNoZSBoaXQgd2hlbg0K
-Pj4gYWNjZXNzaW5nIHVzZXIgZGF0YSBidXQgaXQncyAgaGlnaGx5IGV4cGVjdGVkIGZvciBvbm9k
-ZSBtZXRhZGF0YS4NCj4NCj4gV2Ugc2hvdWxkIHRha2UgY2FyZSBub3QgdG8gcnVuIGludG8gdGhl
-IHNhbWUgcHJvYmxlbSB0aGUga2VybmVsIGRvZXMuDQo+IFdpdGggdG9vIG1hbnkgY2FjaGVkIGVu
-dHJpZXMgdGhpbmdzIGNhbiBnZXQgc2xvdy4gIEl0J3MgYW5vdGhlcg0KPiB0cmFkZS1vZmYgd2Ug
-bmVlZCB0byB3YXRjaCBvdXQgZm9yLiAgVGhlcmUgbWF5IG5lZWQgdG8gYmUgYSAoaG9wZWZ1bGx5
-DQo+IGF1dG9tYXRpY2FsbHkgZ2VuZXJhdGVkKSBzb2Z0IGxpbWl0LCBhbmQgcG90ZW50aWFsbHkg
-YSBoYXJkIGxpbWl0Lg0KRG9lc24ndCBvdXIgY2FjaGUgc2l6ZSBsaW1pdCBzZXJ2ZXIgdGhhdCBw
-dXJwb3NlPw0KPg0KPj4NCj4+IE1vcmVvdmVyIHVzZXIgZGF0YSBjYWNoaW5nIGlzIHByb2JhYmx5
-IGFscmVhZHkgZXhpc3RzIGF0IGJsb2NrIGRldmljZQ0KPj4gbGV2ZWwgaGVuY2Ugd2UgcmF0aGVy
-IGR1cGxpY2F0ZSBkaXNrIGNhY2hlLi4uLg0KPj4NCj4+IFdoYXQgZG8geW91IHRoaW5rPw0KPj4N
-Cj4+IFRoYW5rcywNCj4+DQo+PiBJZ29yDQo+Pg0KPj4gLS0NCj4+IFRvIHVuc3Vic2NyaWJlIGZy
-b20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPj4g
-aW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9y
-ZSBtYWpvcmRvbW8NCj4+IGluZm8gYXQgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
-aW5mby5odG1sDQoNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUg
-bGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRv
-IG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDov
-L3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQoNCl9fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fDQoNClBMRUFTRSBOT1RFOiBUaGUgaW5mb3JtYXRpb24gY29udGFpbmVk
-IGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2UgaXMgaW50ZW5kZWQgb25seSBmb3IgdGhl
-IHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQocykgbmFtZWQgYWJvdmUuIElmIHRoZSBy
-ZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50LCB5b3Ug
-YXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBp
-biBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNzZW1pbmF0aW9uLCBkaXN0cmlidXRpb24s
-IG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0cmljdGx5IHByb2hpYml0ZWQuIElmIHlv
-dSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlvbiBpbiBlcnJvciwgcGxlYXNlIG5vdGlm
-eSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1haWwgKGFzIHNob3duIGFib3ZlKSBpbW1l
-ZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBjb3BpZXMgb2YgdGhpcyBtZXNzYWdlIGlu
-IHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNvcGllcyBvciBlbGVjdHJvbmljYWxseSBz
-dG9yZWQgY29waWVzKS4NCg0K
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-355860281-1481829154=:10615
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+
+On Thu, 15 Dec 2016, Igor Fedotov wrote:
+> Yeah, 0.9 is much better than 0.5.
+> Another/additional option to consider might be forcing clients that need
+> caching to request that explicitly. E.g. by specifying a need_cache flag for
+> reads. And doesn't do it by default.
+
+This is pretty close to what happens now.  There are 
+bluestore_defautl_buffered_{read,write} options that default to true for 
+read and false for write.
+
+sage
+
+> 
+> 
+> 
+> 
+> Sent from Samsung tablet.
+> 
+> 
+> -------- Original message --------
+> From: Sage Weil
+> Date:2016/12/15 21:11 (GMT+03:00)
+> To: Igor Fedotov
+> Cc: Mark Nelson ,ceph-devel
+> Subject: Re: Metadata vs UserData caching in BlueStore
+> 
+> On Thu, 15 Dec 2016, Igor Fedotov wrote:
+> > On 15.12.2016 20:34, Mark Nelson wrote:
+> > >
+> > >
+> > > On 12/15/2016 11:24 AM, Igor Fedotov wrote:
+> > > > Sage et al,
+> > > >
+> > > > shouldn't we have bluestore_cache_metadata_ratio set to 1 by default?
+> To
+> > > > concentrate on metadata caching..
+> > >
+> > > I would contend that it should be high (we've already bumped it up, I'd
+> go
+> > > higher still), but isn't 1 a little excessive? Ultimately this should
+> all be
+> > > automatic based on heuristics imho.
+> > >
+> > Well, Mark - what's the use case for user data caching? It means that user
+> > either retrieves just written data or reads them repeatedly or in an
+> unaligned
+> > manner. Or there are multiple users working with the same object.
+> > Any of that is IMHO a corner case... That can be handled by using that
+> ratio
+> > setting if needed.
+> 
+> The main one is RGW.  The gateways don't do their own caching, and even
+> if they did you often have several of them.  CephFS multiclient
+> scenarios can exercise the cache too.
+> 
+> I agree, though.  How about .8 or .9?
+> 
+> sage
+> 
+> 
+--8323329-355860281-1481829154=:10615--
