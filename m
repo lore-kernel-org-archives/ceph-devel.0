@@ -1,121 +1,224 @@
 From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] libceph: wake up sync waiter when unregistering request
-Date: Thu, 15 Dec 2016 15:58:24 +0800
-Message-ID: <A49B0F26-2877-4F92-A2EB-E468FB5D2B5F@redhat.com>
-References: <20161129114921.62964-1-zyan@redhat.com>
- <CAOi1vP8ieneOG-UhTysHNoOvoZ3_kcV_x7zqw9p3BSUpMLK_9Q@mail.gmail.com>
- <B93E1ED2-557B-4414-AABC-42A47569D405@redhat.com>
- <CAOi1vP-mhjC+jxYcxt+q642Dm7Oc4jyWvR0J3FjxP=DF1ZuL+Q@mail.gmail.com>
- <20559259-27E6-4A70-85CE-FD3F09DAB27D@redhat.com>
- <CAOi1vP9JoPFYSpWSYDON6da9dOW0jRAzOvHXVT+Zd4fyQfPAvA@mail.gmail.com>
- <CAAM7YAkreRGsX2HaiYu+dDdiJC+TLsgpbvAmvZX__8njDKcwrQ@mail.gmail.com>
- <CAOi1vP9JskuNeOX5dk7gU62=6knhfGX46mkK1nt0rB7FY+11nw@mail.gmail.com>
- <0507F2C5-0455-4616-900D-4E7FAFB665D0@redhat.com>
- <CAOi1vP8F5jhYha=b+JO9LTrLXB+fPYG-_URLshvKfS__jci-pw@mail.gmail.com>
+Subject: Re: [PATCH v3 1/5] ceph: clean up unsafe d_parent access in
+ __choose_mds
+Date: Thu, 15 Dec 2016 17:08:52 +0800
+Message-ID: <C469B5CD-1854-4826-8E99-B401A751B50B@redhat.com>
+References: <1481727270-12666-1-git-send-email-jlayton@redhat.com>
+ <1481727270-12666-2-git-send-email-jlayton@redhat.com>
 Mime-Version: 1.0 (Mac OS X Mail 10.1 \(3251\))
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59372 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755142AbcLOH7B (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 15 Dec 2016 02:59:01 -0500
-In-Reply-To: <CAOi1vP8F5jhYha=b+JO9LTrLXB+fPYG-_URLshvKfS__jci-pw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <1481727270-12666-2-git-send-email-jlayton@redhat.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Jeff Layton <jlayton@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, David Howells <dhowells@redhat.com>, viro@ZenIV.linux.org.uk
+List-Id: ceph-devel.vger.kernel.org
 
 
-> On 15 Dec 2016, at 05:58, Ilya Dryomov <idryomov@gmail.com> wrote:
+> On 14 Dec 2016, at 22:54, Jeff Layton <jlayton@redhat.com> wrote:
 > 
-> On Wed, Nov 30, 2016 at 11:02 AM, Yan, Zheng <zyan@redhat.com> wrote:
->> 
->>> On 30 Nov 2016, at 17:06, Ilya Dryomov <idryomov@gmail.com> wrote:
->>> 
->>> On Wed, Nov 30, 2016 at 1:30 AM, Yan, Zheng <ukernel@gmail.com> wrote:
->>>> On Tue, Nov 29, 2016 at 11:29 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
->>>>> On Tue, Nov 29, 2016 at 4:03 PM, Yan, Zheng <zyan@redhat.com> wrote:
->>>>>> 
->>>>>>> On 29 Nov 2016, at 22:58, Ilya Dryomov <idryomov@gmail.com> wrote:
->>>>>>> 
->>>>>>> On Tue, Nov 29, 2016 at 2:59 PM, Yan, Zheng <zyan@redhat.com> wrote:
->>>>>>>> 
->>>>>>>>> On 29 Nov 2016, at 21:54, Ilya Dryomov <idryomov@gmail.com> wrote:
->>>>>>>>> 
->>>>>>>>> On Tue, Nov 29, 2016 at 12:49 PM, Yan, Zheng <zyan@redhat.com> wrote:
->>>>>>>>>> Current code does not wake up sync waiter if osd replies error
->>>>>>>>>> or the request does not want ondisk ack.
->>>>>>>>> 
->>>>>>>>> Hi Zheng,
->>>>>>>>> 
->>>>>>>>> Did you mean to write "and" instead of "or" - "if osd replies error
->>>>>>>>> *and* the request does not want ondisk ack”?
->>>>>>>> 
->>>>>>>> I mean ‘or’.  The code does not wake up sync waiter in either of these two cases.
->>>>>>> 
->>>>>>> It does wake the sync waiter (r_safe_completion) on error, but only
->>>>>>> if ondisk ack was requested.  If ondisk ack wasn't requested, it's not
->>>>>>> woken up, success or error.
->>>>>>> 
->>>>>>> By not setting CEPH_OSD_FLAG_ONDISK, the submitter is indicating that
->>>>>>> *any* reply is fine.  Blocking on the safe reply instead of any reply
->>>>>>> in the !CEPH_OSD_FLAG_ONDISK case sounds wrong.
->>>>>>> 
->>>>>>> What is the motivation for this patch?
->>>>>> 
->>>>>> I saw fsstress hang at ceph_osdc_sync several times.
->>>>>> 
->>>>>> [52310.533483] sysrq: SysRq : Show Blocked State
->>>>>> [52310.534057]   task                        PC stack   pid father
->>>>>> [52310.534653] fsstress        D14656  2836   2834 0x00000000
->>>>>> [52310.535568]  ffff880036cff200 ffff88003e2dac80 0000000000002fa3 ffff88003e3142c0
->>>>>> [52310.536529]  ffff88003fd18318 ffffc900038b7d48 ffffffff819354cc ffffffff00000000
->>>>>> [52310.537464]  000000013e314ae0 ffff88003e314890 ffff88003fd18318 ffff88003fd18300
->>>>>> [52310.538396] Call Trace:
->>>>>> [52310.538762]  [<ffffffff819354cc>] ? __schedule+0x6ac/0x880
->>>>>> [52310.539326]  [<ffffffff81935713>] schedule+0x73/0x90
->>>>>> [52310.539840]  [<ffffffff81939d21>] schedule_timeout+0x31/0x5d0
->>>>>> [52310.540425]  [<ffffffff810ac4a6>] ? mark_held_locks+0x76/0x90
->>>>>> [52310.540980]  [<ffffffff8193b447>] ? _raw_spin_unlock_irq+0x27/0x50
->>>>>> [52310.541582]  [<ffffffff810ac64d>] ? trace_hardirqs_on_caller+0x18d/0x1c0
->>>>>> [52310.542217]  [<ffffffff81936a1b>] wait_for_completion+0x8b/0x100
->>>>>> [52310.542788]  [<ffffffff8108dc10>] ? wake_up_q+0x70/0x70
->>>>>> [52310.543380]  [<ffffffffa00116b8>] ceph_osdc_sync+0xc8/0x150 [libceph]
->>>>>> [52310.543990]  [<ffffffff811eaed0>] ? SyS_tee+0x3b0/0x3b0
->>>>>> [52310.544569]  [<ffffffffa005c3ea>] ceph_sync_fs+0x3a/0xb0 [ceph]
->>>>>> [52310.545158]  [<ffffffff811eaeeb>] sync_fs_one_sb+0x1b/0x20
->>>>>> [52310.545699]  [<ffffffff811b931e>] iterate_supers+0x7e/0xe0
->>>>>> [52310.546258]  [<ffffffff811eb1e0>] sys_sync+0x50/0x80
->>>>>> [52310.546849]  [<ffffffff8193bb6a>] entry_SYSCALL_64_fastpath+0x18/0xad
->>>>> 
->>>>> Did you happen to capture /osdc?  It's probably the pool perm check
->>>>> thing
->>>> 
->>>> osdc is complete empty.
->>> 
->>> If you haven't already done so while investigating, could you please
->>> dump the offending @req fields?  I want to make sure it's the pool perm
->>> check request…
->> 
->> Sorry, I have already rebooted that machine.
+> __choose_mds exists to pick an MDS to use when issuing a call. Doing
+> that typically involves picking an inode and using the authoritative
+> MDS for it. In most cases, that's pretty straightforward, as we are
+> using an inode to which we hold a reference (usually represented by
+> r_dentry or r_inode in the request).
 > 
-> Hi Zheng,
+> In the case of a snapshotted directory however, we need to fetch
+> the non-snapped parent, which involves walking back up the parents
+> in the tree. The dentries in the snapshot dir are effectively frozen
+> but the overall parent is _not_, and could vanish if a concurrent
+> rename were to occur.
 > 
-> I took it a step further and also fixed libceph cancellation code:
+> Clean this code up and take special care to ensure the validity of
+> the entries we're working with. First, try to use the inode in
+> r_locked_dir if one exists. If not and all we have is r_dentry,
+> then we have to walk back up the tree. Use the rcu_read_lock for
+> this so we can ensure that any d_parent we find won't go away, and
+> take extra care to deal with the possibility that the dentries could
+> go negative.
 > 
-> https://github.com/ceph/ceph-client/commit/c297eb42690b904fb5b78dd9ad001bafe25f49ec
+> Change get_nonsnap_parent to return an inode, and take a reference to
+> that inode before returning (if any). Change all of the other places
+> where we set "inode" in __choose_mds to also take a reference, and then
+> call iput on that inode before exiting the function.
 > 
+> Link: http://tracker.ceph.com/issues/18148
+> Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> ---
+> fs/ceph/mds_client.c | 67 +++++++++++++++++++++++++++++++++++-----------------
+> 1 file changed, 45 insertions(+), 22 deletions(-)
+> 
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 815acd1a56d4..e62b566d3817 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -667,6 +667,27 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
+> }
+> 
+> /*
+> + * Walk back up the dentry tree until we hit a dentry representing a
+> + * non-snapshot inode. We do this using the rcu_read_lock (which must be held
+> + * when calling this) to ensure that the objects won't disappear while we're
+> + * working with them. Once we hit a candidate dentry, we attempt to take a
+> + * reference to it, and return that as the result.
+> + */
+> +static struct inode *get_nonsnap_parent(struct dentry *dentry) { struct inode
+> +	*inode = NULL;
+> +
+> +	while (dentry && !IS_ROOT(dentry)) {
+> +		inode = d_inode_rcu(dentry);
+> +		if (!inode || ceph_snap(inode) == CEPH_NOSNAP)
+> +			break;
+> +		dentry = dentry->d_parent;
+> +	}
+> +	if (inode)
+> +		inode = igrab(inode);
+> +	return inode;
+> +}
+> +
+> +/*
+>  * Choose mds to send request to next.  If there is a hint set in the
+>  * request (e.g., due to a prior forward hint from the mds), use that.
+>  * Otherwise, consult frag tree and/or caps to identify the
+> @@ -674,19 +695,6 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
+>  *
+>  * Called under mdsc->mutex.
+>  */
+> -static struct dentry *get_nonsnap_parent(struct dentry *dentry)
+> -{
+> -	/*
+> -	 * we don't need to worry about protecting the d_parent access
+> -	 * here because we never renaming inside the snapped namespace
+> -	 * except to resplice to another snapdir, and either the old or new
+> -	 * result is a valid result.
+> -	 */
+> -	while (!IS_ROOT(dentry) && ceph_snap(d_inode(dentry)) != CEPH_NOSNAP)
+> -		dentry = dentry->d_parent;
+> -	return dentry;
+> -}
+> -
+> static int __choose_mds(struct ceph_mds_client *mdsc,
+> 			struct ceph_mds_request *req)
+> {
+> @@ -716,30 +724,42 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+> 	inode = NULL;
+> 	if (req->r_inode) {
+> 		inode = req->r_inode;
+> +		ihold(inode);
+> +	} else if (req->r_locked_dir) {
+> +		inode = req->r_locked_dir;
+> +		ihold(inode);
 
-looks good
 
+this seems incorrect. how about following incremental patch
+
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index c834d7d..4abc85f 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -725,9 +725,6 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+        if (req->r_inode) {
+                inode = req->r_inode;
+                ihold(inode);
+-       } else if (req->r_locked_dir) {
+-               inode = req->r_locked_dir;
+-               ihold(inode);
+        } else if (req->r_dentry) {
+                /* ignore race with rename; old or new d_parent is okay */
+                struct dentry *parent;
+@@ -735,7 +732,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+ 
+                rcu_read_lock();
+                parent = req->r_dentry->d_parent;
+-               dir = d_inode_rcu(parent);
++               dir = req->r_locked_dir ? : d_inode_rcu(parent);
+ 
+                if (!dir || dir->i_sb != mdsc->fsc->sb) {
+                        /*  not this fs or parent went negative */
+
+
+Regards
 Yan, Zheng
 
-
-> I squashed your patch to reduce rename churn.  Let me know if that's OK
-> with you.
+> 	} else if (req->r_dentry) {
+> 		/* ignore race with rename; old or new d_parent is okay */
+> -		struct dentry *parent = req->r_dentry->d_parent;
+> -		struct inode *dir = d_inode(parent);
+> +		struct dentry *parent;
+> +		struct inode *dir;
+> +
+> +		rcu_read_lock();
+> +		parent = req->r_dentry->d_parent;
+> +		dir = d_inode_rcu(parent);
 > 
-> Thanks,
+> -		if (dir->i_sb != mdsc->fsc->sb) {
+> -			/* not this fs! */
+> +		if (!dir || dir->i_sb != mdsc->fsc->sb) {
+> +			/*  not this fs or parent went negative */
+> 			inode = d_inode(req->r_dentry);
+> +			if (inode)
+> +				ihold(inode);
+> 		} else if (ceph_snap(dir) != CEPH_NOSNAP) {
+> 			/* direct snapped/virtual snapdir requests
+> 			 * based on parent dir inode */
+> -			struct dentry *dn = get_nonsnap_parent(parent);
+> -			inode = d_inode(dn);
+> +			inode = get_nonsnap_parent(parent);
+> 			dout("__choose_mds using nonsnap parent %p\n", inode);
+> 		} else {
+> 			/* dentry target */
+> 			inode = d_inode(req->r_dentry);
+> 			if (!inode || mode == USE_AUTH_MDS) {
+> 				/* dir + name */
+> -				inode = dir;
+> +				inode = igrab(dir);
+> 				hash = ceph_dentry_hash(dir, req->r_dentry);
+> 				is_hash = true;
+> +			} else {
+> +				ihold(inode);
+> 			}
+> 		}
+> +		rcu_read_unlock();
+> 	}
 > 
->               Ilya
+> 	dout("__choose_mds %p is_hash=%d (%d) mode %d\n", inode, (int)is_hash,
+> @@ -768,7 +788,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+> 				     (int)r, frag.ndist);
+> 				if (ceph_mdsmap_get_state(mdsc->mdsmap, mds) >=
+> 				    CEPH_MDS_STATE_ACTIVE)
+> -					return mds;
+> +					goto out;
+> 			}
+> 
+> 			/* since this file/dir wasn't known to be
+> @@ -783,7 +803,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+> 				     inode, ceph_vinop(inode), frag.frag, mds);
+> 				if (ceph_mdsmap_get_state(mdsc->mdsmap, mds) >=
+> 				    CEPH_MDS_STATE_ACTIVE)
+> -					return mds;
+> +					goto out;
+> 			}
+> 		}
+> 	}
+> @@ -796,6 +816,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+> 		cap = rb_entry(rb_first(&ci->i_caps), struct ceph_cap, ci_node);
+> 	if (!cap) {
+> 		spin_unlock(&ci->i_ceph_lock);
+> +		iput(inode);
+> 		goto random;
+> 	}
+> 	mds = cap->session->s_mds;
+> @@ -803,6 +824,8 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
+> 	     inode, ceph_vinop(inode), mds,
+> 	     cap == ci->i_auth_cap ? "auth " : "", cap);
+> 	spin_unlock(&ci->i_ceph_lock);
+> +out:
+> +	iput(inode);
+> 	return mds;
+> 
+> random:
+> -- 
+> 2.7.4
+> 
 
