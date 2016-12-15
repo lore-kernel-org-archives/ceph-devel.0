@@ -1,184 +1,91 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v4 1/5] ceph: clean up unsafe d_parent access in __choose_mds
-Date: Thu, 15 Dec 2016 06:34:25 -0500
-Message-ID: <1481801669-4916-2-git-send-email-jlayton@redhat.com>
+Subject: [PATCH v4 5/5] ceph: pass parent inode info to ceph_encode_dentry_release if we have it
+Date: Thu, 15 Dec 2016 06:34:29 -0500
+Message-ID: <1481801669-4916-6-git-send-email-jlayton@redhat.com>
 References: <1481801669-4916-1-git-send-email-jlayton@redhat.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34224 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752693AbcLOLok (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 15 Dec 2016 06:44:40 -0500
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 In-Reply-To: <1481801669-4916-1-git-send-email-jlayton@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
 To: ceph-devel@vger.kernel.org
 Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, linux-fsdevel@vger.kernel.org, dhowells@redhat.com, viro@ZenIV.linux.org.uk
+List-Id: ceph-devel.vger.kernel.org
 
-__choose_mds exists to pick an MDS to use when issuing a call. Doing
-that typically involves picking an inode and using the authoritative
-MDS for it. In most cases, that's pretty straightforward, as we are
-using an inode to which we hold a reference (usually represented by
-r_dentry or r_inode in the request).
-
-In the case of a snapshotted directory however, we need to fetch
-the non-snapped parent, which involves walking back up the parents
-in the tree. The dentries in the snapshot dir are effectively frozen
-but the overall parent is _not_, and could vanish if a concurrent
-rename were to occur.
-
-Clean this code up and take special care to ensure the validity of
-the entries we're working with. First, try to use the inode in
-r_locked_dir if one exists. If not and all we have is r_dentry,
-then we have to walk back up the tree. Use the rcu_read_lock for
-this so we can ensure that any d_parent we find won't go away, and
-take extra care to deal with the possibility that the dentries could
-go negative.
-
-Change get_nonsnap_parent to return an inode, and take a reference to
-that inode before returning (if any). Change all of the other places
-where we set "inode" in __choose_mds to also take a reference, and then
-call iput on that inode before exiting the function.
+If we have a parent inode reference already, then we don't need to
+go back up the directory tree to find one.
 
 Link: http://tracker.ceph.com/issues/18148
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- fs/ceph/mds_client.c | 64 ++++++++++++++++++++++++++++++++++------------------
- 1 file changed, 42 insertions(+), 22 deletions(-)
+ fs/ceph/caps.c       | 11 +++++++----
+ fs/ceph/mds_client.c |  7 +++++--
+ fs/ceph/super.h      |  1 +
+ 3 files changed, 13 insertions(+), 6 deletions(-)
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 815acd1a56d4..20b241aafcee 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -667,6 +667,27 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 6bc5c1efbb26..e960b51dcae1 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -3832,9 +3832,10 @@ int ceph_encode_inode_release(void **p, struct inode *inode,
  }
  
- /*
-+ * Walk back up the dentry tree until we hit a dentry representing a
-+ * non-snapshot inode. We do this using the rcu_read_lock (which must be held
-+ * when calling this) to ensure that the objects won't disappear while we're
-+ * working with them. Once we hit a candidate dentry, we attempt to take a
-+ * reference to it, and return that as the result.
-+ */
-+static struct inode *get_nonsnap_parent(struct dentry *dentry) { struct inode
-+	*inode = NULL;
-+
-+	while (dentry && !IS_ROOT(dentry)) {
-+		inode = d_inode_rcu(dentry);
-+		if (!inode || ceph_snap(inode) == CEPH_NOSNAP)
-+			break;
-+		dentry = dentry->d_parent;
-+	}
-+	if (inode)
-+		inode = igrab(inode);
-+	return inode;
-+}
-+
-+/*
-  * Choose mds to send request to next.  If there is a hint set in the
-  * request (e.g., due to a prior forward hint from the mds), use that.
-  * Otherwise, consult frag tree and/or caps to identify the
-@@ -674,19 +695,6 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
-  *
-  * Called under mdsc->mutex.
-  */
--static struct dentry *get_nonsnap_parent(struct dentry *dentry)
--{
--	/*
--	 * we don't need to worry about protecting the d_parent access
--	 * here because we never renaming inside the snapped namespace
--	 * except to resplice to another snapdir, and either the old or new
--	 * result is a valid result.
--	 */
--	while (!IS_ROOT(dentry) && ceph_snap(d_inode(dentry)) != CEPH_NOSNAP)
--		dentry = dentry->d_parent;
--	return dentry;
--}
--
- static int __choose_mds(struct ceph_mds_client *mdsc,
- 			struct ceph_mds_request *req)
+ int ceph_encode_dentry_release(void **p, struct dentry *dentry,
++			       struct inode *dir,
+ 			       int mds, int drop, int unless)
  {
-@@ -716,30 +724,39 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
- 	inode = NULL;
- 	if (req->r_inode) {
- 		inode = req->r_inode;
-+		ihold(inode);
- 	} else if (req->r_dentry) {
- 		/* ignore race with rename; old or new d_parent is okay */
--		struct dentry *parent = req->r_dentry->d_parent;
--		struct inode *dir = d_inode(parent);
-+		struct dentry *parent;
-+		struct inode *dir;
-+
-+		rcu_read_lock();
-+		parent = req->r_dentry->d_parent;
-+		dir = req->r_locked_dir ? : d_inode_rcu(parent);
+-	struct dentry *parent;
++	struct dentry *parent = NULL;
+ 	struct ceph_mds_request_release *rel = *p;
+ 	struct ceph_dentry_info *di = ceph_dentry(dentry);
+ 	int force = 0;
+@@ -3849,11 +3850,13 @@ int ceph_encode_dentry_release(void **p, struct dentry *dentry,
+ 	spin_lock(&dentry->d_lock);
+ 	if (di->lease_session && di->lease_session->s_mds == mds)
+ 		force = 1;
+-	parent = dget(dentry->d_parent);
++	if (!dir) {
++		parent = dget(dentry->d_parent);
++		dir = d_inode(parent);
++	}
+ 	spin_unlock(&dentry->d_lock);
  
--		if (dir->i_sb != mdsc->fsc->sb) {
--			/* not this fs! */
-+		if (!dir || dir->i_sb != mdsc->fsc->sb) {
-+			/*  not this fs or parent went negative */
- 			inode = d_inode(req->r_dentry);
-+			if (inode)
-+				ihold(inode);
- 		} else if (ceph_snap(dir) != CEPH_NOSNAP) {
- 			/* direct snapped/virtual snapdir requests
- 			 * based on parent dir inode */
--			struct dentry *dn = get_nonsnap_parent(parent);
--			inode = d_inode(dn);
-+			inode = get_nonsnap_parent(parent);
- 			dout("__choose_mds using nonsnap parent %p\n", inode);
- 		} else {
- 			/* dentry target */
- 			inode = d_inode(req->r_dentry);
- 			if (!inode || mode == USE_AUTH_MDS) {
- 				/* dir + name */
--				inode = dir;
-+				inode = igrab(dir);
- 				hash = ceph_dentry_hash(dir, req->r_dentry);
- 				is_hash = true;
-+			} else {
-+				ihold(inode);
- 			}
- 		}
-+		rcu_read_unlock();
- 	}
+-	ret = ceph_encode_inode_release(p, d_inode(parent), mds, drop,
+-					unless, force);
++	ret = ceph_encode_inode_release(p, dir, mds, drop, unless, force);
+ 	dput(parent);
  
- 	dout("__choose_mds %p is_hash=%d (%d) mode %d\n", inode, (int)is_hash,
-@@ -768,7 +785,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
- 				     (int)r, frag.ndist);
- 				if (ceph_mdsmap_get_state(mdsc->mdsmap, mds) >=
- 				    CEPH_MDS_STATE_ACTIVE)
--					return mds;
-+					goto out;
- 			}
+ 	spin_lock(&dentry->d_lock);
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 9fe5a56122f0..a29997ce982b 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1953,10 +1953,13 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
+ 		      mds, req->r_inode_drop, req->r_inode_unless, 0);
+ 	if (req->r_dentry_drop)
+ 		releases += ceph_encode_dentry_release(&p, req->r_dentry,
+-		       mds, req->r_dentry_drop, req->r_dentry_unless);
++				req->r_locked_dir, mds, req->r_dentry_drop,
++				req->r_dentry_unless);
+ 	if (req->r_old_dentry_drop)
+ 		releases += ceph_encode_dentry_release(&p, req->r_old_dentry,
+-		       mds, req->r_old_dentry_drop, req->r_old_dentry_unless);
++				req->r_old_dentry_dir, mds,
++				req->r_old_dentry_drop,
++				req->r_old_dentry_unless);
+ 	if (req->r_old_inode_drop)
+ 		releases += ceph_encode_inode_release(&p,
+ 		      d_inode(req->r_old_dentry),
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 3e3fa9163059..e4ca0b718b6f 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -901,6 +901,7 @@ extern void ceph_flush_dirty_caps(struct ceph_mds_client *mdsc);
+ extern int ceph_encode_inode_release(void **p, struct inode *inode,
+ 				     int mds, int drop, int unless, int force);
+ extern int ceph_encode_dentry_release(void **p, struct dentry *dn,
++				      struct inode *dir,
+ 				      int mds, int drop, int unless);
  
- 			/* since this file/dir wasn't known to be
-@@ -783,7 +800,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
- 				     inode, ceph_vinop(inode), frag.frag, mds);
- 				if (ceph_mdsmap_get_state(mdsc->mdsmap, mds) >=
- 				    CEPH_MDS_STATE_ACTIVE)
--					return mds;
-+					goto out;
- 			}
- 		}
- 	}
-@@ -796,6 +813,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
- 		cap = rb_entry(rb_first(&ci->i_caps), struct ceph_cap, ci_node);
- 	if (!cap) {
- 		spin_unlock(&ci->i_ceph_lock);
-+		iput(inode);
- 		goto random;
- 	}
- 	mds = cap->session->s_mds;
-@@ -803,6 +821,8 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
- 	     inode, ceph_vinop(inode), mds,
- 	     cap == ci->i_auth_cap ? "auth " : "", cap);
- 	spin_unlock(&ci->i_ceph_lock);
-+out:
-+	iput(inode);
- 	return mds;
- 
- random:
+ extern int ceph_get_caps(struct ceph_inode_info *ci, int need, int want,
 -- 
 2.7.4
 
