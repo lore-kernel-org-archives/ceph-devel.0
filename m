@@ -1,104 +1,72 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: BlueStore in-memory Onode footprint
-Date: Fri, 16 Dec 2016 22:08:47 +0000
-Message-ID: <EB02EE10422E4A40A1EE787A4AC27FBE0321CB@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
-References: <34ee2613-8db3-646e-4470-b3e8fa8855e0@mirantis.com>
- <alpine.DEB.2.11.1612161518570.10615@piezo.novalocal>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: Computation in the storage
+Date: Fri, 16 Dec 2016 22:46:58 +0000
+Message-ID: <69A873FA-DBEF-4081-9305-EA86B63572DE@Teradata.com>
+References: <26283_1480676624_58415510_26283_122_1_EBBC07637B509B40B2E594A11E62C54F022DA808@OPEXCLILM32.corporate.adroot.infra.ftgroup>
+ <d8129d7a-af37-ad74-38c8-f5a9d59f183b@suse.de>
+ <CAF-wwdHPXaX3fe+dk9ovdAfc00N5xQrzj2TaRAuBOjH77L4yDg@mail.gmail.com>
+ <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com>
+ <CAB2gnbVn0U_G12L8XV=hbznB2i_TMo40TpC5cVzJZKOr_MAQ7Q@mail.gmail.com>
+ <64D605E0-8851-4F60-B0AB-864CBDA7B3F7@Teradata.com>
+ <208C08FF-0104-425C-B7AA-B0930A76F46E@Teradata.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0060.outbound.protection.outlook.com ([104.47.32.60]:60236
-        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932987AbcLPWmy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 16 Dec 2016 17:42:54 -0500
-In-Reply-To: <alpine.DEB.2.11.1612161518570.10615@piezo.novalocal>
+Received: from nat13.teradata.com ([153.65.16.13]:32871 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S933629AbcLPWrB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2016 17:47:01 -0500
+In-Reply-To: <208C08FF-0104-425C-B7AA-B0930A76F46E@Teradata.com>
 Content-Language: en-US
+Content-ID: <FE4BBD377FB30542B6FA246413524154@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Igor Fedotov <ifedotov@mirantis.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Noah Watkins <noahwatkins@gmail.com>
+Cc: Brad Hubbard <bhubbard@redhat.com>, Joao Eduardo Luis <joao@suse.de>, "nebil.benmabrouk@orange.com" <nebil.benmabrouk@orange.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I'm not sure what the conclusion from this is.
+Hi Noah,
+Is this the functionality [2] to use osd-local lua object classes in ceph upstream now?
 
-The point of the sharding exercise was to eliminate the need to serialize/d=
-eserialize all 1024 Extents/Blobs/SharedBlobs on each I/O transaction.
+If yes, which release it went in?
 
-This shows that a fully populated oNode with ALL of the shards present is a=
- large number. But that ought to be a rare occurrence.
+Thanks,
+Nitin
 
-This test shows that each Blob is 248 bytes and that each SharedBlob is 216=
- bytes. That matches the sizeof(...), so the MemPool logic got the right an=
-swer! Yay!
+[2] http://noahdesu.github.io/2015/12/06/load-lua-rados-plugin-from-fs.html
 
-Looking at the Blob I see:
+> On Dec 16, 2016, at 10:00 AM, Kamble, Nitin A <Nitin.Kamble@Teradata.com> wrote:
+> 
+> Hi Noah,
+> 
+> I looked at your blog [0] about implementing RADOS object classes using Lua scripts. The
+> link [1] to the source code in ceph repository is missing. Seems like this support has been
+> removed from upstream ceph, and it is not supported by the ceph releases as of now.
+> Can you confirm?
+> 
+> 
+> [0] http://noahdesu.github.io/2015/12/14/towards-rados-object-class-management.html
+> [1] https://github.com/ceph/ceph/tree/cls-lua
+> 
+> Thanks,
+> Nitin
+> 
+> 
+>> On Dec 5, 2016, at 3:08 PM, Kamble, Nitin A <Nitin.Kamble@Teradata.com> wrote:
+>> 
+>> 
+>>> On Dec 4, 2016, at 3:02 PM, Noah Watkins <noahwatkins@gmail.com> wrote:
+>>> 
+>>> On Fri, Dec 2, 2016 at 3:04 PM, Kamble, Nitin A
+>>> <Nitin.Kamble@teradata.com> wrote:
+>>>> 
+>>>> Is anybody using real RADOS object classes on ceph clusters? Any of them on github?
+>>>> I would like to look at some of the real world examples if it is there.
+>>>> And more documentation of this feature would definitely help too.
+>>> 
+>>> We use object classes [0] for a distributed shared log [1] on Ceph.
+>>> 
+>>> [0]: https://github.com/noahdesu/ceph/blob/zlog/jewel/src/cls/zlog/cls_zlog.cc
+>>> [1]: https://github.com/noahdesu/zlog
+> 
 
-Bluestore_blob_t 72 bytes
-Bufferlist 88 bytes
-Extentrefmap 64 bytes
-
-That's most the 248. I suspect that trying to fix this will require a new s=
-trategy, etc.
-
-Allen Samuels
-SanDisk |a Western Digital brand
-2880 Junction Avenue, San Jose, CA 95134
-T: +1 408 801 7030| M: +1 408 780 6416
-allen.samuels@SanDisk.com
-
-
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
-> owner@vger.kernel.org] On Behalf Of Sage Weil
-> Sent: Friday, December 16, 2016 7:20 AM
-> To: Igor Fedotov <ifedotov@mirantis.com>
-> Cc: ceph-devel <ceph-devel@vger.kernel.org>
-> Subject: Re: BlueStore in-memory Onode footprint
->=20
-> On Fri, 16 Dec 2016, Igor Fedotov wrote:
-> > Hey All!
-> >
-> > Recently I realized that I'm unable to fit all my onodes ( 32768
-> > objects/4Mb each/4K alloc unit/no csum) in 15G RAM cache.
-> >
-> > Hence decided to estimate Onode in-memory size.
-> >
-> > At first I filled 4Mb object with a single 4M write - mempools
-> > indicate ~5K mem usage for total onode metadata. Good enough.
-> >
-> > Secondly I refill that object with 4K writes. Resulting memusage =3D 57=
-4K!!!
-> > Onode itself 704 bytes in 1 object.  And 4120 other metadata items
-> > occupies all other space.
-> >
-> > Then I removed SharedBlob from mempools. Resulting mem usage =3D 355K.
-> > The same Onode size. And 3096 other metadata objects. Hence we had
-> > 1024 SharedBlob instances thata took ~ 220K.
-> >
-> >
-> > And finally I removed Blob instances from measurements. Resulting mem
-> > usage =3D 99K. And 2072 other objects. Hence Blob instances take anothe=
-r
-> > ~250K
->=20
-> Yikes!
->=20
-> BTW you can get a full breakdown by type with 'mempool debug =3D true' in
-> ceph.conf (-o 'mempool debug =3D true' on vstart.sh command line) without
-> having to recompile.  Do you mind repeating the test and including the fu=
-ll
-> breakdown?
->=20
-> > Yeah, that's the worst case( actually csum enable will give even more
-> > mem use) but shouldn't we revisit some Onode internals due to such
-> numbers?
->=20
-> Yep!
->=20
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in =
-the
-> body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
