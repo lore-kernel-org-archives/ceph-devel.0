@@ -1,205 +1,111 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: [DEBUG PATCH 1/2] mm, debug: report when GFP_NO{FS,IO} is used explicitly from memalloc_no{fs,io}_{save,restore} context
-Date: Fri, 16 Dec 2016 13:46:27 +0100
-Message-ID: <20161216124628.26846-2-mhocko@kernel.org>
-References: <20161215140715.12732-1-mhocko@kernel.org>
- <20161216124628.26846-1-mhocko@kernel.org>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20161216124628.26846-1-mhocko@kernel.org>
-Sender: owner-linux-mm@kvack.org
-To: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org
-Cc: Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+From: David Byte <dbyte@suse.com>
+Subject: Re: Ceph connections with TLS
+Date: Fri, 16 Dec 2016 13:49:30 +0000
+Message-ID: <1A95AEBC-13A4-49D1-B903-4469DC45DDFD@suse.com>
+References: <7a01ab71-66eb-46d2-3990-c325f8d36a16@m-privacy.de>
+ <417867875.4693.1481886637522@ox.pcextreme.nl>
+ <5c5a54bc-4527-6e95-7d24-e7ce1200f0d7@m-privacy.de>,<274802089.4698.1481891426375@ox.pcextreme.nl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from prvmx02.microfocus.com ([130.57.1.217]:1035 "EHLO
+        prvmx02.microfocus.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932517AbcLPOEd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2016 09:04:33 -0500
+In-Reply-To: <274802089.4698.1481891426375@ox.pcextreme.nl>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Amon Ott <a.ott@m-privacy.de>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
-From: Michal Hocko <mhocko@suse.com>
+There are also NICS and switches that do the encryption at the hardware level. That is probably worth investigating. 
 
-THIS PATCH IS FOR TESTING ONLY AND NOT MEANT TO HIT LINUS TREE
+David Byte
+Sr. Technical Strategist
+IHV Alliances and Embedded
+SUSE
 
-It is desirable to reduce the direct GFP_NO{FS,IO} usage at minimum and
-prefer scope usage defined by memalloc_no{fs,io}_{save,restore} API.
+Sent from my iPhone. Typos are Apple's fault. 
 
-Let's help this process and add a debugging tool to catch when an
-explicit allocation request for GFP_NO{FS,IO} is done from the scope
-context. The printed stacktrace should help to identify the caller
-and evaluate whether it can be changed to use a wider context or whether
-it is called from another potentially dangerous context which needs
-a scope protection as well.
-
-The checks have to be enabled explicitly by debug_scope_gfp kernel
-command line parameter.
-
-Signed-off-by: Michal Hocko <mhocko@suse.com>
----
- include/linux/sched.h | 14 +++++++++++--
- include/linux/slab.h  |  3 +++
- mm/page_alloc.c       | 58 +++++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 73 insertions(+), 2 deletions(-)
-
-diff --git a/include/linux/sched.h b/include/linux/sched.h
-index 1c9fbcbcfcc8..288946bfc326 100644
---- a/include/linux/sched.h
-+++ b/include/linux/sched.h
-@@ -1988,6 +1988,8 @@ struct task_struct {
- 	/* A live task holds one reference. */
- 	atomic_t stack_refcount;
- #endif
-+	unsigned long nofs_caller;
-+	unsigned long noio_caller;
- /* CPU-specific state of this task */
- 	struct thread_struct thread;
- /*
-@@ -2345,6 +2347,8 @@ extern void thread_group_cputime_adjusted(struct task_struct *p, cputime_t *ut,
- #define tsk_used_math(p) ((p)->flags & PF_USED_MATH)
- #define used_math() tsk_used_math(current)
- 
-+extern void debug_scope_gfp_context(gfp_t gfp_mask);
-+
- /*
-  * Applies per-task gfp context to the given allocation flags.
-  * PF_MEMALLOC_NOIO implies GFP_NOIO
-@@ -2363,25 +2367,31 @@ static inline gfp_t current_gfp_context(gfp_t flags)
- 	return flags;
- }
- 
--static inline unsigned int memalloc_noio_save(void)
-+static inline unsigned int __memalloc_noio_save(unsigned long caller)
- {
- 	unsigned int flags = current->flags & PF_MEMALLOC_NOIO;
- 	current->flags |= PF_MEMALLOC_NOIO;
-+	current->noio_caller = caller;
- 	return flags;
- }
- 
-+#define memalloc_noio_save()	__memalloc_noio_save(_RET_IP_)
-+
- static inline void memalloc_noio_restore(unsigned int flags)
- {
- 	current->flags = (current->flags & ~PF_MEMALLOC_NOIO) | flags;
- }
- 
--static inline unsigned int memalloc_nofs_save(void)
-+static inline unsigned int __memalloc_nofs_save(unsigned long caller)
- {
- 	unsigned int flags = current->flags & PF_MEMALLOC_NOFS;
- 	current->flags |= PF_MEMALLOC_NOFS;
-+	current->nofs_caller = caller;
- 	return flags;
- }
- 
-+#define memalloc_nofs_save()	__memalloc_nofs_save(_RET_IP_)
-+
- static inline void memalloc_nofs_restore(unsigned int flags)
- {
- 	current->flags = (current->flags & ~PF_MEMALLOC_NOFS) | flags;
-diff --git a/include/linux/slab.h b/include/linux/slab.h
-index 084b12bad198..6559668e29db 100644
---- a/include/linux/slab.h
-+++ b/include/linux/slab.h
-@@ -477,6 +477,7 @@ static __always_inline void *kmalloc_large(size_t size, gfp_t flags)
-  */
- static __always_inline void *kmalloc(size_t size, gfp_t flags)
- {
-+	debug_scope_gfp_context(flags);
- 	if (__builtin_constant_p(size)) {
- 		if (size > KMALLOC_MAX_CACHE_SIZE)
- 			return kmalloc_large(size, flags);
-@@ -517,6 +518,7 @@ static __always_inline int kmalloc_size(int n)
- 
- static __always_inline void *kmalloc_node(size_t size, gfp_t flags, int node)
- {
-+	debug_scope_gfp_context(flags);
- #ifndef CONFIG_SLOB
- 	if (__builtin_constant_p(size) &&
- 		size <= KMALLOC_MAX_CACHE_SIZE && !(flags & GFP_DMA)) {
-@@ -575,6 +577,7 @@ int memcg_update_all_caches(int num_memcgs);
-  */
- static inline void *kmalloc_array(size_t n, size_t size, gfp_t flags)
- {
-+	debug_scope_gfp_context(flags);
- 	if (size != 0 && n > SIZE_MAX / size)
- 		return NULL;
- 	if (__builtin_constant_p(n) && __builtin_constant_p(size))
-diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-index e701be6b930a..9e35fb2a8681 100644
---- a/mm/page_alloc.c
-+++ b/mm/page_alloc.c
-@@ -3734,6 +3734,63 @@ __alloc_pages_slowpath(gfp_t gfp_mask, unsigned int order,
- 	return page;
- }
- 
-+static bool debug_scope_gfp;
-+
-+static int __init enable_debug_scope_gfp(char *unused)
-+{
-+	debug_scope_gfp = true;
-+	return 0;
-+}
-+
-+/*
-+ * spit the stack trace if the given gfp_mask clears flags which are context
-+ * wide cleared. Such a caller can remove special flags clearing and rely on
-+ * the context wide mask.
-+ */
-+void debug_scope_gfp_context(gfp_t gfp_mask)
-+{
-+	gfp_t restrict_mask;
-+
-+	if (likely(!debug_scope_gfp))
-+		return;
-+
-+	/* both NOFS, NOIO are irrelevant when direct reclaim is disabled */
-+	if (!(gfp_mask & __GFP_DIRECT_RECLAIM))
-+		return;
-+
-+	if (current->flags & PF_MEMALLOC_NOIO)
-+		restrict_mask = __GFP_IO;
-+	else if ((current->flags & PF_MEMALLOC_NOFS) && (gfp_mask & __GFP_IO))
-+		restrict_mask = __GFP_FS;
-+	else
-+		return;
-+
-+	if ((gfp_mask & restrict_mask) != restrict_mask) {
-+		/*
-+		 * If you see this this warning then the code does:
-+		 * memalloc_no{fs,io}_save()
-+		 * ...
-+		 *    foo()
-+		 *      alloc_page(GFP_NO{FS,IO})
-+		 * ...
-+		 * memalloc_no{fs,io}_restore()
-+		 *
-+		 * allocation which is unnecessary because the scope gfp
-+		 * context will do that for all allocation requests already.
-+		 * If foo() is called from multiple contexts then make sure other
-+		 * contexts are safe wrt. GFP_NO{FS,IO} semantic and either add
-+		 * scope protection into particular paths or change the gfp mask
-+		 * to GFP_KERNEL.
-+		 */
-+		pr_info("Unnecesarily specific gfp mask:%#x(%pGg) for the %s task wide context from %ps\n", gfp_mask, &gfp_mask,
-+				(current->flags & PF_MEMALLOC_NOIO)?"NOIO":"NOFS",
-+				(void*)((current->flags & PF_MEMALLOC_NOIO)?current->noio_caller:current->nofs_caller));
-+		dump_stack();
-+	}
-+}
-+EXPORT_SYMBOL(debug_scope_gfp_context);
-+early_param("debug_scope_gfp", enable_debug_scope_gfp);
-+
- /*
-  * This is the 'heart' of the zoned buddy allocator.
-  */
-@@ -3798,6 +3855,7 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order,
- 	}
- 
- 	/* First allocation attempt */
-+	debug_scope_gfp_context(gfp_mask);
- 	page = get_page_from_freelist(alloc_mask, order, alloc_flags, &ac);
- 	if (likely(page))
- 		goto out;
--- 
-2.10.2
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+> On Dec 16, 2016, at 6:31 AM, Wido den Hollander <wido@42on.com> wrote:
+> 
+> 
+>> Op 16 december 2016 om 12:39 schreef Amon Ott <a.ott@m-privacy.de>:
+>> 
+>> 
+>>> Am 16.12.2016 um 12:10 schrieb Wido den Hollander:
+>>> 
+>>>> Op 16 december 2016 om 11:15 schreef Amon Ott <a.ott@m-privacy.de>:
+>>>> for a customer we are currently designing a ceph cluster, which shall be
+>>>> spread over two data centers. Data in the Ceph cluster is slightly
+>>>> confidential, so we would like to encrypt at least all Ceph traffic over
+>>>> the fast data center connection link.
+>>>> 
+>>> 
+>>> Fast as in low latency? Writes in Ceph are synchronous, so keep in mind that any increase in latency will decrease the write performance/latency on your Ceph cluster.
+>> 
+>> Yes, we expect low latency and high bandwidth, but a connection shared
+>> with other services. Having locality for accesses by clients would of
+>> course help, too.
+>> 
+> 
+> You can play a bit with primary affinity or modify CRUSH in such a way that the primary OSDs are always in the local DC.
+> 
+>>>> AFAICS, Ceph does not support data encryption at connection level yet,
+>>>> so we would have to setup VPN links between the two cluster networks.
+>>>> This means extra configuration, maintenance and overhead.
+>>>> 
+>>>> How far away is TLS support or something similar for the Ceph
+>>>> connections? AFAIK, TLS support should not be hard to implement, but I
+>>>> am not too familiar with Ceph internals.
+>>>> 
+>>> 
+>>> Afaik there is no work currently in progress.
+>> 
+>> I feared so.
+>> 
+>>> You might implement IPSec on the nodes itself. You might call that a VPN obviously, but IPSec can also just encrypt packets between nodes.
+>> 
+>> Having quite a bit of experience with OpenVPN, we would rather use that
+>> than IPSec, and we would do it right on the Ceph nodes. Still, TLS in
+>> the connections would be better for lower latency.
+>> 
+>> Also, we then need VPN connections between all nodes as well as from all
+>> clients to all nodes in the other location. The latter could be routed
+>> through local Ceph nodes, but that would give even more latency.
+>> 
+> 
+> True. Isn't the a possibility to encrypt the data before it goes into Ceph? I don't know what the use-case is, but if it is RBD why not encrypt the whole RBD device with LUKS / dm-crypt?
+> 
+> Just an idea though.
+> 
+> Wido
+> 
+>> Thanks for your answer,
+>> 
+>> Amon.
+>> -- 
+>> Dr. Amon Ott
+>> m-privacy GmbH           Tel: +49 30 24342334
+>> Werner-Voß-Damm 62       Fax: +49 30 99296856
+>> 12101 Berlin             http://www.m-privacy.de
+>> 
+>> Amtsgericht Charlottenburg, HRB 84946
+>> 
+>> Geschäftsführer:
+>> Dipl.-Kfm. Holger Maczkowsky,
+>> Roman Maczkowsky
+>> 
+>> GnuPG-Key-ID: 0x2DD3A649
+>> 
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
