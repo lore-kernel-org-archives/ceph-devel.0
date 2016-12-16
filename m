@@ -1,153 +1,65 @@
-From: =?UTF-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass@univ-lorraine.fr>
-Subject: Re: Re : Performance issues on Jewel 10.2.2
-Date: Fri, 16 Dec 2016 10:37:44 +0100
-Message-ID: <33981ae8-4c7a-b053-39ca-a9f2324486b1@univ-lorraine.fr>
-References: <CAL2-6bJ9RkB5rdSzauxtLZWwv5_hv9=7LKEAiiR1KTbRZ9tcFQ@mail.gmail.com>
+From: Amon Ott <a.ott@m-privacy.de>
+Subject: Ceph connections with TLS
+Date: Fri, 16 Dec 2016 11:15:22 +0100
+Message-ID: <7a01ab71-66eb-46d2-3990-c325f8d36a16@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mta-outslow2.mel.univ-lorraine.fr ([193.54.32.12]:38000 "EHLO
-        mta-outslow2.mel.univ-lorraine.fr" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1754990AbcLPJhs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 16 Dec 2016 04:37:48 -0500
-In-Reply-To: <CAL2-6bJ9RkB5rdSzauxtLZWwv5_hv9=7LKEAiiR1KTbRZ9tcFQ@mail.gmail.com>
+Received: from www1.m-privacy.de ([85.214.254.135]:48858 "EHLO
+        www1.m-privacy.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753951AbcLPKbV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2016 05:31:21 -0500
+Received: from localhost (localhost [127.0.0.1])
+        by www1.m-privacy.de (Postfix) with ESMTP id 5CE7524009E
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Dec 2016 11:15:30 +0100 (CET)
+Received: from www1.m-privacy.de ([127.0.0.1])
+ by localhost (www1.m-privacy.de [127.0.0.1]) (maiad, port 10024) with ESMTP
+ id 28489-09 for <ceph-devel@vger.kernel.org>;
+ Fri, 16 Dec 2016 11:15:24 +0100 (CET)
+Received: from gw.compuniverse.de (x4e33e80e.dyn.telefonica.de [78.51.232.14])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (Client CN "gw.compuniverse.de", Issuer "gw.compuniverse.de" (not verified))
+        by www1.m-privacy.de (Postfix) with ESMTPSA id 68635240098
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Dec 2016 11:15:24 +0100 (CET)
+Received: from [192.168.201.30] (tgham.compuniverse.de [192.168.201.30])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+        (Client did not present a certificate)
+        by gw.compuniverse.de (Postfix) with ESMTPS id 76277872E2
+        for <ceph-devel@vger.kernel.org>; Fri, 16 Dec 2016 11:15:23 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vincent Godin <vince.mlist@gmail.com>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>
 
-Hi,
+Hello Ceph,
 
-1 - rados or rbd bug ? We're using rados bench.
+for a customer we are currently designing a ceph cluster, which shall be
+spread over two data centers. Data in the Ceph cluster is slightly
+confidential, so we would like to encrypt at least all Ceph traffic over
+the fast data center connection link.
 
-2 - This is not bandwith related. If it was, it should happen almost 
-instantly and not 15 minutes after I start to write to the pool.
-Once it has happened on the pool, I can then reproduce with a fewer 
---concurrent-ios, like 12 or even 1.
+AFAICS, Ceph does not support data encryption at connection level yet,
+so we would have to setup VPN links between the two cluster networks.
+This means extra configuration, maintenance and overhead.
 
-This happens with :
-OSDs journals on SSDs with the SAS drives in Raid0 writeback with XFS 
-and split/merge threshold 10/2 (default)
-OSDs journals on SSDs with the SAS drives in Raid0 writeback with XFS 
-and split/merge threshold 40/8
-OSDs journals on SSDs with the SAS drives in Raid0 writeback with btrfs 
-and split/merge threshold 10/2 (default)
-OSDs journals on SAS drives (not using the SSDs) in Raid0 writeback with 
-XFS and split/merge threshold 10/2 (default)
-OSDs journals on SAS drives (not using the SSDs) in Raid0 write-through 
-with XFS and split/merge threshold 10/2 (default). PERC H730p mini is 
-not the culprit apparently.
+How far away is TLS support or something similar for the Ceph
+connections? AFAIK, TLS support should not be hard to implement, but I
+am not too familiar with Ceph internals.
 
-I tried with bluestore but OSDs wouldn't launch (even with an 
-experimental ... = * set. I suppose its disabled within RHCS 2.0) so I 
-couldn't tell if this is filestore related.
+Thoughts?
 
-When the rados bench stops writing, we can see slow requests, and one or 
-more SAS drives hitting 100% iostat usage, even with --concurrent-ios=1. 
-With full debug on this particular OSD, we don't see any filestore 
-operation anymore.
-Just some recurring sched_scrub task and then some :
+Amon Ott
+-- 
+Dr. Amon Ott
+m-privacy GmbH           Tel: +49 30 24342334
+Werner-Voß-Damm 62       Fax: +49 30 99296856
+12101 Berlin             http://www.m-privacy.de
 
-    -25> 2016-12-16 10:08:41.891756 7f8855051700  1 heartbeat_map 
-is_healthy 'FileStore::op_tp thread 0x7f8865903700' had timed out after 60
-    -24> 2016-12-16 10:08:41.891758 7f8855051700  1 heartbeat_map 
-is_healthy 'FileStore::op_tp thread 0x7f8866104700' had timed out after 60
-    -23> 2016-12-16 10:08:41.891759 7f8855051700  1 heartbeat_map 
-is_healthy 'FileStore::op_tp thread 0x7f885f0f6700' had timed out after 60
-    -22> 2016-12-16 10:08:41.891772 7f8856b57700  1 heartbeat_map 
-is_healthy 'OSD::osd_op_tp thread 0x7f8842f10700' had timed out after 15
-    -21> 2016-12-16 10:08:41.891775 7f8856b57700  1 heartbeat_map 
-is_healthy 'OSD::osd_op_tp thread 0x7f884641b700' had timed out after 15
-    -20> 2016-12-16 10:08:41.891777 7f8856b57700  1 heartbeat_map 
-is_healthy 'FileStore::op_tp thread 0x7f885f8f7700' had timed out after 60
-    -19> 2016-12-16 10:08:41.891779 7f8856b57700  1 heartbeat_map 
-is_healthy 'FileStore::op_tp thread 0x7f88600f8700' had timed out after 60
+Amtsgericht Charlottenburg, HRB 84946
 
-then the OSD hit the suicide timeout :
+Geschäftsführer:
+ Dipl.-Kfm. Holger Maczkowsky,
+ Roman Maczkowsky
 
-      0> 2016-12-16 10:08:42.031740 7f8856b57700 -1 
-common/HeartbeatMap.cc: In function 'bool 
-ceph::HeartbeatMap::_check(const ceph::heartbeat_handle_d*, const char*, 
-time_t)' thread 7f8856b57700 time 2016-12-16 10:08:42.029391
-common/HeartbeatMap.cc: 86: FAILED assert(0 == "hit suicide timeout")
-
-  ceph version 10.2.2-41.el7cp (1ac1c364ca12fa985072174e75339bfb1f50e9ee)
-  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char 
-const*)+0x85) [0x7f887873be25]
-  2: (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d const*, char 
-const*, long)+0x2e1) [0x7f88786783a1]
-  3: (ceph::HeartbeatMap::is_healthy()+0xde) [0x7f8878678bfe]
-  4: (OSD::handle_osd_ping(MOSDPing*)+0x93f) [0x7f88780b206f]
-  5: (OSD::heartbeat_dispatch(Message*)+0x3cb) [0x7f88780b329b]
-  6: (DispatchQueue::entry()+0x78a) [0x7f88787fcd0a]
-  7: (DispatchQueue::DispatchThread::entry()+0xd) [0x7f887871761d]
-  8: (()+0x7dc5) [0x7f887666adc5]
-  9: (clone()+0x6d) [0x7f8874cf673d]
-  NOTE: a copy of the executable, or `objdump -rdS <executable>` is 
-needed to interpret this.
-
---- logging levels ---
-    0/ 5 none
-    0/ 1 lockdep
-    0/ 1 context
-    1/ 1 crush
-    1/ 5 mds
-    1/ 5 mds_balancer
-    1/ 5 mds_locker
-[...]
-    1/ 5 kstore
-    4/ 5 rocksdb
-    4/ 5 leveldb
-    1/ 5 kinetic
-    1/ 5 fuse
-   -2/-2 (syslog threshold)
-   -1/-1 (stderr threshold)
-   max_recent     10000
-   max_new         1000
-   log_file /var/log/ceph/ceph-osd.16.log
---- end dump of recent events ---
-
-and comes back to life on its own 2'42" later.
-
-We use ceph version 10.2.2-41.el7cp 
-(1ac1c364ca12fa985072174e75339bfb1f50e9ee) (RHCS 2.0).
-
-We're hitting something here.
-
-Regards,
-
-Frederic.
-
-
-Le 15/12/2016 à 21:04, Vincent Godin a écrit :
-> Hello,
->
-> I didn't look at your video but i already can tell you some tracks :
->
-> 1 - there is a bug in 10.2.2 which make the client cache not working. 
-> The client cache works as it never recieved a flush so it will stay in 
-> writethrough mode. This bug is clear in 10.2.3
->
-> 2 - 2 SSDs in JBOD and 12 x 4TB NL SAS in RAID0 are not very well 
-> optimized if your workload is based on write. You will perform in 
-> write at the max speed of your two SSD only. I don't know the real 
-> speed of your SSD nor your SAS disks but let's say:
->
-> your SSD can reach a 400 MB/s in write throughput
-> your SAS can reach a 130 MB/s in write throughput
->
-> i suppose that you use 1 SSD to host the journals of 6 SAS
-> Your max throughput in write will be 2 x 400 MB/s so 800 MB/s compare 
-> to the 12 x 130 MB/s = 1560 MB/s of your SAS
->
-> if you had 4 SSD for the journal, 1 SSD for 3 SAS
-> Your max throughput would be 4 x 400 MB/s so 1600 MB/s very near of 
-> the 1560 MB/s of your SAS
->
-> Of course, you need to adjust that with the real throughput of your 
-> SSD ans SAS disks
->
-> Vincent
+GnuPG-Key-ID: 0x2DD3A649
 
