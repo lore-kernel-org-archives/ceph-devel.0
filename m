@@ -1,46 +1,62 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: Bluestore performance bottleneck
-Date: Fri, 16 Dec 2016 03:30:03 +0000
-Message-ID: <5E3E05AED7F0F044904275810D0CB465038CEA@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+From: xxhdx1985126 <xxhdx1985126@163.com>
+Subject: Re:Re:Re: Question about write op processing of OSD
+Date: Fri, 16 Dec 2016 12:28:39 +0800 (CST)
+Message-ID: <2f0ccbf6.5a9d.15905e39a3e.Coremail.xxhdx1985126@163.com>
+References: <1d497a83.c1b.15904fdf41e.Coremail.xxhdx1985126@163.com>
+ <CAJ4mKGaQ0UYWOnLshUJob1rdjTc2f_K1_qagGp4mh0x_ZjgNDA@mail.gmail.com>
+ <1ea7f271.2e1c.15905649b64.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam03on0047.outbound.protection.outlook.com ([104.47.42.47]:51904
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1756829AbcLPDaJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 15 Dec 2016 22:30:09 -0500
-Content-Language: en-US
+Received: from m13-20.163.com ([220.181.13.20]:26601 "EHLO m13-20.163.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1756613AbcLPE2t (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 15 Dec 2016 23:28:49 -0500
+In-Reply-To: <1ea7f271.2e1c.15905649b64.Coremail.xxhdx1985126@163.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Sage,
-Today morning I was talking about 2x performance drop for Bluestore without=
- data/db writes for 1G vs 60G volumes and it turn out the decode_some() is =
-the culprit for that. Presently, I am drilling down that function to identi=
-fy what exactly causing this issue, but, most probably it is blob decode an=
-d le->blob->get_ref() combination. Will confirm that soon. If we can fix th=
-at we should be able to considerably bump up end-to-end pick performance wi=
-th rocks/ZS on faster NVME. Slower devices most likely we will not be able =
-to see any benefits other than saving some cpu cost.
-
-Thanks & Regards
-Somnath
-
-
-
-________________________________
-
-PLEASE NOTE: The information contained in this electronic mail message is i=
-ntended only for the use of the designated recipient(s) named above. If the=
- reader of this message is not the intended recipient, you are hereby notif=
-ied that you have received this message in error and that any review, disse=
-mination, distribution, or copying of this message is strictly prohibited. =
-If you have received this communication in error, please notify the sender =
-by telephone or e-mail (as shown above) immediately and destroy any and all=
- copies of this message in your possession (whether hard copies or electron=
-ically stored copies).
-
+ClNvcnJ5LCBJIGNvcnJlY3QgbXkgcXVlc3Rpb24uCgpJIHJlYWQgdGhlICJhbHJlYWR5X2NvbXBs
+ZXRlIiBtZXRob2QuIEl0IHJldHVybnMgdHJ1ZSBpZiBpdCBjYW4ndCBhbGwgb3AgZWFsaWVyIHRo
+YXQgTSBpcyAiYWxsX2NvbW1pdHRlZCIgaW4gcmVwb3BfcXVldWUsIHNvIGluIG91ciBzY2VuYXJp
+bywgaXQgd2lsbCBhbHdheXMgcmV0dXJuIHRydWUsIHNpbmNlIE9TRC5YIHdhcyBub3QgYWN0aW5n
+IHByaW1hcnkgb2YgdGhlIHRhcmdldCBwZy4gVGhlbiwgd2hhdCBpZiB3aGVuIHRoZSByZXN1Ym1p
+dHRlZCBNIGFycml2ZXMgd2hlbiB0aGUgcHJldmlvdXMgTSBoYXMgbm90IGJlZW4gY29tbWl0dGVk
+PyBJZiB3ZSBhY2sgdGhlIGNsaWVudCBub3QgY29uc2lkZXJpbmcgaWYgdGhlIHJlcSBoYXMgYWxy
+ZWFkeSBiZWVuIGNvbW1pdHRlZCwgd291bGRuJ3QgdGhlcmUgYmUgYSBwb3NzaWJpbGl0eSB0aGF0
+IHRoaW5ncyBnbyB3cm9uZz8gRm9yIGV4YW1wbGUsIHdoYXQgaWYgYWZ0ZXIgT1NELlggYWNrIHRo
+ZSBjbGllbnQsIHRoZSBhY3R1YWwgY29tbWl0IG9mIE0gZmFpbHM/CgpUaGFuayB5b3U6LSkKCgoK
+CgoKCgpBdCAyMDE2LTEyLTE2IDEwOjA5OjU2LCAieHhoZHgxOTg1MTI2IiA8eHhoZHgxOTg1MTI2
+QDE2My5jb20+IHdyb3RlOgo+Cj5UaGFua3MgZm9yIHRoZSBxdWljayByZXBseTotKQo+Cj5JcyBp
+dCBwb3NzaWJsZSB0aGF0IHRoZSBjbGllbnQgcmVzdWJtaXQgTSBhZnRlciB0aGUgbmV3ICJQZWVy
+aW5nIiBwcm9jZXNzIGNvbXBsZXRlcyBidXQgYmVmb3JlIHRoZSBwcm9jZXNzaW5nIG9mIE0gaXMg
+Y29tcGxldGVkIG9uIE9TRC5YPyBJJ20gYXNraW5nIHRoaXMgYmVjYXVzZSBhcyBmYXIgYXMgSSB1
+bmRlcnN0YW5kLCBpZiB0aGUgImR1cCIgcmVxIGlzIG5vdCBhbHJlYWR5IGNvbXBsZXRlZCwgdGhl
+IE9TRCB3aWxsIHB1dCBpdCBpbiB0aGUgIndhaXRpbmdnX2Zvcl9vbmRpc2siIGFuZCAid2FpdGlu
+Z19mb3JfYWNrIiBxdWV1ZSB3aGljaCBhcmUgb25seSBhY2Nlc3NlZCB3aGVuIHRoZSBwcmV2aW91
+cyByZXBvcCBjb21wbGV0ZXMgImNvbW1pdCIgYW5kICJhcHBseSIgcHJvY2VzcyBhbmQgYXJlIG5v
+dCBhY2Nlc3NlZCBpbiB0aGlzIHNjZW5hcmlvIHNpbmNlIHRoZXJlIGlzIG5vIHN1Y2ggInByZXZp
+b3VzIHJlcG9wIi4KPgo+VGhhbmtzOi0pCj4KPkF0IDIwMTYtMTItMTYgMDg6MzU6MTUsICJHcmVn
+b3J5IEZhcm51bSIgPGdmYXJudW1AcmVkaGF0LmNvbT4gd3JvdGU6Cj4+T24gVGh1LCBEZWMgMTUs
+IDIwMTYgYXQgNDoxNyBQTSwgeHhoZHgxOTg1MTI2IDx4eGhkeDE5ODUxMjZAMTYzLmNvbT4gd3Jv
+dGU6Cj4+Pgo+Pj4gSGksIGV2ZXJ5b25lLgo+Pj4KPj4+Cj4+PiBXaGF0IHdpbGwgdGhlIE9TRCBk
+byBpbiB0aGUgZm9sbG93aW5nIHNjZW5hcmlvPwo+Pj4KPj4+ICAgICAgICBTYXksIGEgTU9TRFJl
+cG9wIE0gdGhhdCBpcyBpbml0aWF0ZWQgYXQgY2xpZW50IEEgaXMgYmVpbmcgcHJvY2Vzc2VkIG9u
+IGFuIE9TRC5YLCBkdXJpbmcgd2hpY2ggdGhlIGFjdGluZyBwcmltYXJ5IHR1cm4gImRvd24iIGR1
+ZSB0byBzb21lIGVycm9yIGFuZCBPU0QuWCBpcyBjaG9zZW4gdG8gYmUgdGhlIG5ldyBhY3Rpbmcg
+cHJpbWFyeS4gU2luY2UgT1NELlggaXMgYSByZXBsaWNhIE9TRCBmb3IgTU9TRFJlcE9wIE0sIGhv
+dyBjYW4gY2xpZW50IEEgYmUgYWNrZWQgYWZ0ZXIgT1NELlggZmluaXNoZWQgdGhlIHByb2Nlc3Np
+bmcgb2YgTT8gT3IgZG9lcyBBIGJlIGFja2VkIGF0IGFsbCBpbiB0aGlzIGtpbmQgb2YgY2lyY3Vt
+c3RhbmNlcz8KPj4KPj5UaGUgY2xpZW50IGlzIG5vdCBhY2tlZCBieSBPU0QuWCwgYnV0IHdoZW4g
+dGhlIGNsaWVudCBzZWVzIHRoZSBPU0RNYXAKPj5tYXJraW5nIGRvd24gdGhlIHByZXZpb3VzIHBy
+aW1hcnksIGl0IHdpbGwgcmVzdWJtaXQgTU9TRE9wTSB0byBPU0QuWAo+PihhbmQgaW5jcmVtZW50
+IHRoZSByZXRyeSBjb3VudGVyKS4gT1NELlggd2lsbCBub3RpY2UgdGhhdCBNT1NET3BNIGhhcwo+
+PmFscmVhZHkgYmVlbiBjb21wbGV0ZWQgYW5kIHJlcGx5IHdpdGggdGhlIHNhbWUgYW5zd2VyIGl0
+IGdhdmUKPj5wcmV2aW91c2x5LlsxXQo+Pi1HcmVnCj4+WzFdOiBCYXJyaW5nIHByb3RvY29sIG9y
+IGltcGxlbWVudGF0aW9uIGJ1Z3MuIFRoZXJlIGhhdmUgaGlzdG9yaWNhbGx5Cj4+YmVlbiBzb21l
+IGlzc3VlcyB3aXRoIHRoaW5ncyBsaWtlIChzdWNjZXNzZnVsKSBkZWxldGVzIHJldHVybmluZwo+
+PkVOT0VOVCBpbnN0ZWFkIG9mIDA7IEkgZG9uJ3QgcmVtZW1iZXIgaWYgYWxsIHRoZSBrbm93biBv
+bmVzIGhhdmUgYmVlbgo+PnNxdWFzaGVkIG9yIG5vdC4K
