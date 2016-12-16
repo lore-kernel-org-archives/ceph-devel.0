@@ -1,177 +1,201 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [sepia] how to use teuthology-suite in the new world
-Date: Thu, 15 Dec 2016 22:32:54 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612152231190.10615@piezo.novalocal>
-References: <alpine.DEB.2.11.1612142211440.10615@piezo.novalocal> <20161215145143.GA1451@gmail.com> <20161215150026.GB1451@gmail.com> <CALe9h7dSLTd7QnBwmQU_wmC7NVQxPwGpxeJknOcWvOtfbHv0-A@mail.gmail.com> <CA+aFP1AwpdYrU+YKoh0p0CRVceYHmHxCZoxyuf=fTEge2sjdVg@mail.gmail.com>
- <CALe9h7dZ-WYhWbQeOVVhNVi8Ds-wRaUTd_nzoKmOrFB_JDv_7g@mail.gmail.com> <CA+aFP1DP98bgv_XDkB6y1RunkpShHRjdpjjBPcWhU3WxS-92bg@mail.gmail.com> <CALe9h7fXGBwcWE0hpk5Bvw6RSpKtqRdUQiUOBf-SXGjrc0L+fg@mail.gmail.com>
+From: Victor Denisov <vdenisov@mirantis.com>
+Subject: Re: Snapshots of consistency groups
+Date: Thu, 15 Dec 2016 16:05:36 -0800
+Message-ID: <CA+hcxJTsR2N4RhW4PVAcV+Y=K3yLYEKukcbAtFD_329ZJebe6g@mail.gmail.com>
+References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
+ <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
+ <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
+ <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
+ <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
+ <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
+ <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
+ <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
+ <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
+ <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
+ <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
+ <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
+ <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
+ <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
+ <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
+ <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
+ <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
+ <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
+ <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com>
+ <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com>
+ <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
+ <CA+hcxJS-3Y-3QTgpU1NwQmg8znrg5Jo+jHH9f7T5n7x_+NcvyQ@mail.gmail.com>
+ <CA+aFP1A4YYDG0HSJ52R__DPKBc_Y7p62Ec4tzhdXt+UPkC=vNw@mail.gmail.com>
+ <CA+hcxJR6S8AZQ0mY5MTKiBwjf0bQYswWoL16WBJgfrOzzQ40zg@mail.gmail.com>
+ <CA+hcxJS4JDHBc-GYqwjXjHTiVBeq_YZhcvRfG5SRZMhTGZt-FA@mail.gmail.com>
+ <CA+aFP1Dg0Tc8CDumoL7hJPD62itu+RqZaKcjnuEnvZwrHdZZ=w@mail.gmail.com>
+ <CA+hcxJQC1eJLRYxDMD1_XDsD5vKtvcVXyxQwM-OuSEmNTXnHRg@mail.gmail.com>
+ <CA+aFP1ARgWp71xgqicF6vgx6Rd6kzYd-2mn1WPD9XtpQfO75=w@mail.gmail.com>
+ <CA+aFP1D46xgNffUux5cGKeg2cJQeQ4nWh+_wgLgVystL74HhGg@mail.gmail.com>
+ <CA+hcxJSW3M6DYbpaqLcDtcP393t4GCEMKS=5x+CHCbJS6iSQdg@mail.gmail.com> <CA+aFP1A+tYfqc2B+w2sOMCAk9UgK5zKbgA9VijLRpkjmUkWrAA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1730427558-1481841181=:10615"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60660 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754171AbcLOWd2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 15 Dec 2016 17:33:28 -0500
-In-Reply-To: <CALe9h7fXGBwcWE0hpk5Bvw6RSpKtqRdUQiUOBf-SXGjrc0L+fg@mail.gmail.com>
+Received: from mail-ua0-f171.google.com ([209.85.217.171]:32987 "EHLO
+        mail-ua0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756929AbcLPAHN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Dec 2016 19:07:13 -0500
+Received: by mail-ua0-f171.google.com with SMTP id 20so23322604uak.0
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Dec 2016 16:05:37 -0800 (PST)
+In-Reply-To: <CA+aFP1A+tYfqc2B+w2sOMCAk9UgK5zKbgA9VijLRpkjmUkWrAA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: "Dillaman, Jason" <dillaman@redhat.com>, Mykola Golub <trociny@freebsd.org>, Ceph Development <ceph-devel@vger.kernel.org>, "sepia@ceph.com" <sepia@ceph.com>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Yes, but if image's snapshot is renamed then I'm not able to find this
+snapshot having only group's snapshot in an inconsistent state for
+example.
 
---8323329-1730427558-1481841181=:10615
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+V.
 
-On Thu, 15 Dec 2016, John Spray wrote:
-> On 15 Dec 2016 16:12, "Jason Dillaman" <jdillama@redhat.com> wrote:
->       The issue is that this is an example of a workunit pulling
->       support
->       files. You are suggesting that the workunit task now support
->       listing
->       dependent scripts that the teuthology worker task should also
->       download
->       and copy over to the test host? If so, it would definitely need
->       to be
->       done in such a way that we can still run these workunits locally
->       (outside of teuthology).
-> 
-> 
-> Ah, I see what you mean.
-> 
-> In this particular case the ultimate solution is perhaps to skip the
-> indirection of having a workunit that downloads and runs a test script, and
-> instead have a teuthology task that just executes the test explicitly (skip
-> the bash part)
-> 
-> However I haven't checked exactly how many tests might need reworking that
-> way so if its a lot then we might need a CEPH_REPO var into work units to go
-> with the CEPH_REF
-
-This category of tests are fixed by 
-https://github.com/ceph/ceph/pull/12511.  The workunit task already does a 
-git checkout.  The fix is to run the workunits directly out of the 
-checkout directory, and to fix the tests to use relative paths.
-
-CEPH_BASE is also set to the base dir of the checkout, in case that's 
-useful.
-
-I'm not sure we need CEPH_REPO since the checkout is already there..
-
-If there are other tests that are still broken, let me know!
-sage
-
-
- > 
-> John
-> 
-> 
->       On Thu, Dec 15, 2016 at 11:04 AM, John Spray <jspray@redhat.com>
->       wrote:
->       > On Thu, Dec 15, 2016 at 3:54 PM, Jason Dillaman
->       <jdillama@redhat.com> wrote:
->       >> Correct me if I am wrong, but since we are just installing
->       RPMs, I
->       >> wouldn't expect the full source tree to be available on the
->       test host.
->       >> The test scripts would still need to pull the correct scripts
->       from
->       >> git. Preferably, it would be nice if we can get a new
->       environment
->       >> variable that includes the full git url with the branch/sha1
->       already
->       >> embedded. That would allow testing any script changes on
->       teuthology
->       >> w/o forcing a push to ceph-ci and creating an unnecessary
->       build.
->       >
->       > I'm thinking that rather than teuthology (the process
->       executing
->       > workunit.py) calling a git command on the test host, it would
->       take its
->       > local copy of the script (i.e. relative to workunit.py
->       > ../../../qa/workunits etc) and send that directly.
->       >
->       > I think we can already avoid pushing test-only changes to
->       ceph-ci,
->       > because there are separate options for ceph vs. suite branches
->       (even
->       > though both point at ceph.git forks).  So when I want to test
->       a
->       > qa-suite change, I would use --suite-repo <github /jcsp/ path>
->       > --suite-branch wip-whatever.  That would get the workunits
->       from
->       > wip-whatever.
->       >
->       > John
->       >
->       >>
->       >> On Thu, Dec 15, 2016 at 10:46 AM, John Spray
->       <jspray@redhat.com> wrote:
->       >>> On Thu, Dec 15, 2016 at 3:00 PM, Mykola Golub
->       <trociny@freebsd.org> wrote:
->       >>>> On Thu, Dec 15, 2016 at 04:51:44PM +0200, Mikolaj Golub
->       wrote:
->       >>>>> Hi, Sage,
->       >>>>>
->       >>>>> It looks like we still need to push testing branches to
->       ceph.git for
->       >>>>> things like below?
->       >>>>>
->       >>>>> qa/workunits/rbd/test_librbd_python.sh:
->       >>>>>
->       >>>>> wget -O test_rbd.py"https://git.ceph.com/?p=ceph.git;a=blob_plain;hb=$CEPH_REF;f=src/test/pybi
->       nd/test_rbd.py" || \
->       >>>>>     wget -O test_rbd.py"https://git.ceph.com/?p=ceph.git;a=blob_plain;hb=ref/heads/$CEPH_REF;f=src
->       /test/pybind/test_rbd.py"
->       >>>>>
->       >>>>> Do we have some env variable (CEPH_REPO?) we could use
->       simirlaly to
->       >>>>> CEPH_REF here?
->       >>>>
->       >>>> Or rather may be now we can avoid such hacks at all?
->       >>>
->       >>> Exactly - as you notice bits like that, let's convert them
->       to just
->       >>> read their files locally instead of trying to fetch them
->       from git.  I
->       >>> guess the workunit task will be the major one here, if
->       nobody already
->       >>> adjusted it.
->       >>>
->       >>> John
->       >>>
->       >>>> --
->       >>>> Mykola Golub
->       >>>> --
->       >>>> To unsubscribe from this list: send the line "unsubscribe
->       ceph-devel" in
->       >>>> the body of a message to majordomo@vger.kernel.org
->       >>>> More majordomo info at 
->       http://vger.kernel.org/majordomo-info.html
->       >>> _______________________________________________
->       >>> Sepia mailing list
->       >>> Sepia@lists.ceph.com
->       >>> http://lists.ceph.com/listinfo.cgi/sepia-ceph.com
->       >>
->       >>
->       >>
->       >> --
->       >> Jason
->       > --
->       > To unsubscribe from this list: send the line "unsubscribe
->       ceph-devel" in
->       > the body of a message to majordomo@vger.kernel.org
->       > More majordomo info at 
->       http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
+On Thu, Dec 15, 2016 at 7:10 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+> I think I might be confused. When creating a group snapshot, we have
+> the ConsistencyGroupSnapshot that allows you to store the necessary
+> linkage between the image's snapshot and its associated group snapshot
+> [1]. Why not just name the image's snapshots to the same name as the
+> parent group snapshot name and search the snapshot's metadata to get
+> the linkage?
+>
+> [1] https://github.com/ceph/ceph/blob/master/src/cls/rbd/cls_rbd_types.h#L255
+>
+> On Tue, Dec 13, 2016 at 8:03 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>> Jason,
+>>
+>> My current implementation of consistency group snapshot feature names
+>> image snapshots like: <group_pool>_<group_id>_<group_snap_id>
+>> I rely on this fact when I need to remove a consistency group. It's
+>> necessary because if some of image snapshots were created, but the
+>> whole group snapshot operation failed,
+>> then the only way to find those dangling image snapshots is by this name.
+>>
+>> It means that we should forbid renaming snapshots from
+>> ConsistencyGroupSnapshot namespace.
+>>
+>> Another option is to allocate image snapshot ids during the creation
+>> of group snapshot, but this requires a major rewrite of the whole
+>> process of snapshot creation for images.
+>>
+>> What is your opinion on this?
+>>
+>> Thanks,
+>> V.
+>>
+>>
+>> On Tue, Nov 1, 2016 at 8:01 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>> I chatted with Xing on IRC this morning re: Cinder generic groups. It
+>>> sounds like RBD will need to support preserving the image's
+>>> consistency group snapshots even if the image is removed from the
+>>> group. In the OpenStack case, you won't have to worry about the image
+>>> being deleted while it still has associated group snapshots.
+>>>
+>>> We will also want to support being able to clone child images from a
+>>> group snapshot to ensure that we can thin provision new groups volumes
+>>> when creating a new group from a group snapshot. This means that the
+>>> group snapshots should be able to be protected/unprotected just like
+>>> standard user snapshots.
+>>>
+>>> On Mon, Oct 31, 2016 at 9:07 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>> Looking at the Cinder codebase, I don't see any such restriction that
+>>>> would prevent you from removing a volume from a consistency group that
+>>>> has associated snapshots. I would double-check on the OpenStack
+>>>> development mailing list if this is correct and is the intent. Worst
+>>>> case, the RBD driver could raise an exception if there are still
+>>>> consistency group snapshots associated to the image.
+>>>>
+>>>>
+>>>> On Fri, Oct 28, 2016 at 6:41 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>> Another thing that bothers me. When we remove an image from a consistency group.
+>>>>> Should we remove all snapshots of this image that were created as part
+>>>>> of a consistency group snapshot?
+>>>>>
+>>>>> The easiest solution would be to remove all snapshots that are in
+>>>>> GroupSnapshotNamespace and reference this consistency group.
+>>>>> I looked into cinder docs for this feature:
+>>>>> http://docs.openstack.org/admin-guide/blockstorage-consistency-groups.html
+>>>>>
+>>>>> But it's not clear to me which behavior cinder expects.
+>>>>>
+>>>>> Thanks,
+>>>>> V.
+>>>>>
+>>>>> On Wed, Oct 26, 2016 at 6:16 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>>> In a perfect world, it would be nice to add a new optional to "rbd
+>>>>>> snap ls" to show all snapshots (with a new column to indicate the
+>>>>>> associated namespace).
+>>>>>>
+>>>>>> On Tue, Oct 25, 2016 at 11:07 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>> Question. When we print out snapshots of an image, should the group
+>>>>>>> snapshots be listed, or should they be marked as special snapshots?
+>>>>>>>
+>>>>>>> Thanks,
+>>>>>>> V.
+>>>>>>>
+>>>>>>> On Mon, Oct 10, 2016 at 3:14 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>> Ok. I didn't have any intention to throw exceptions.
+>>>>>>>> I was more concerned about whether it's ok to allocate and delete
+>>>>>>>> objects or I should use smart pointers.
+>>>>>>>>
+>>>>>>>> On Mon, Oct 10, 2016 at 7:18 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>>>>>> The only place exceptions are routinely used is within the "::decode"
+>>>>>>>>> functions. I would prefer to see the code not throwing new exceptions
+>>>>>>>>> on purpose.
+>>>>>>>>>
+>>>>>>>>> On Fri, Oct 7, 2016 at 2:26 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>>>> Are any exceptions used in librbd code? Should the code be exception safe?
+>>>>>>>>>>
+>>>>>>>>>> Thanks,
+>>>>>>>>>> V.
+>>>>>>>>>>
+>>>>>>>>>> On Fri, Sep 16, 2016 at 10:37 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>>>>>>>> On Thu, Sep 15, 2016 at 7:17 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>>>>>> if (struct_v >= 5) {
+>>>>>>>>>>>>       ::decode(snapshot_namespace, p);
+>>>>>>>>>>>>     } else {
+>>>>>>>>>>>>       snapshot_namespace = cls::rbd::UserSnapshotNamespace();
+>>>>>>>>>>>>     }
+>>>>>>>>>>>>
+>>>>>>>>>>>> then code for ::encode function of cls_rbd_snap would change accordingly:
+>>>>>>>>>>>>
+>>>>>>>>>>>> instead of
+>>>>>>>>>>>>
+>>>>>>>>>>>> boost::apply_visitor(cls::rbd::EncodeSnapshotTypeVisitor(bl),
+>>>>>>>>>>>> snapshot_namespace);
+>>>>>>>>>>>>
+>>>>>>>>>>>> I would do:
+>>>>>>>>>>>> ::encode(snapshot_namespace, bl);
+>>>>>>>>>>>
+>>>>>>>>>>>
+>>>>>>>>>>> +1 -- looks good to me
+>>>>>>>>>>>
+>>>>>>>>>>> --
+>>>>>>>>>>> Jason
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> --
+>>>>>>>>> Jason
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> --
+>>>>>> Jason
+>>>>
+>>>>
+>>>>
+>>>> --
+>>>> Jason
+>>>
+>>>
+>>>
+>>> --
+>>> Jason
+>
+>
+>
 > --
 > Jason
-> 
-> 
-> 
-> 
---8323329-1730427558-1481841181=:10615--
