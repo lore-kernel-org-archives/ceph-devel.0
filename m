@@ -1,87 +1,58 @@
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH 5/9] xfs: use memalloc_nofs_{save,restore} instead of
- memalloc_noio*
-Date: Fri, 16 Dec 2016 11:38:11 -0500
-Message-ID: <20161216163811.GG8447@bfoster.bfoster>
-References: <20161215140715.12732-1-mhocko@kernel.org>
- <20161215140715.12732-6-mhocko@kernel.org>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: Computation in the storage
+Date: Fri, 16 Dec 2016 18:00:49 +0000
+Message-ID: <208C08FF-0104-425C-B7AA-B0930A76F46E@Teradata.com>
+References: <26283_1480676624_58415510_26283_122_1_EBBC07637B509B40B2E594A11E62C54F022DA808@OPEXCLILM32.corporate.adroot.infra.ftgroup>
+ <d8129d7a-af37-ad74-38c8-f5a9d59f183b@suse.de>
+ <CAF-wwdHPXaX3fe+dk9ovdAfc00N5xQrzj2TaRAuBOjH77L4yDg@mail.gmail.com>
+ <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com>
+ <CAB2gnbVn0U_G12L8XV=hbznB2i_TMo40TpC5cVzJZKOr_MAQ7Q@mail.gmail.com>
+ <64D605E0-8851-4F60-B0AB-864CBDA7B3F7@Teradata.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20161215140715.12732-6-mhocko@kernel.org>
-Sender: owner-linux-mm@kvack.org
-To: Michal Hocko <mhocko@kernel.org>
-Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from nat13.teradata.com ([153.65.16.13]:32695 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1756313AbcLPSAv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2016 13:00:51 -0500
+In-Reply-To: <64D605E0-8851-4F60-B0AB-864CBDA7B3F7@Teradata.com>
+Content-Language: en-US
+Content-ID: <A4B138E6E927F74893BA0F810977A1EB@TD.Teradata.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Noah Watkins <noahwatkins@gmail.com>
+Cc: Brad Hubbard <bhubbard@redhat.com>, Joao Eduardo Luis <joao@suse.de>, "nebil.benmabrouk@orange.com" <nebil.benmabrouk@orange.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Dec 15, 2016 at 03:07:11PM +0100, Michal Hocko wrote:
-> From: Michal Hocko <mhocko@suse.com>
+Hi Noah,
+
+I looked at your blog [0] about implementing RADOS object classes using Lua scripts. The
+link [1] to the source code in ceph repository is missing. Seems like this support has been
+removed from upstream ceph, and it is not supported by the ceph releases as of now.
+Can you confirm?
+
+
+[0] http://noahdesu.github.io/2015/12/14/towards-rados-object-class-management.html
+[1] https://github.com/ceph/ceph/tree/cls-lua
+
+Thanks,
+Nitin
+
+
+> On Dec 5, 2016, at 3:08 PM, Kamble, Nitin A <Nitin.Kamble@Teradata.com> wrote:
 > 
-> kmem_zalloc_large and _xfs_buf_map_pages use memalloc_noio_{save,restore}
-> API to prevent from reclaim recursion into the fs because vmalloc can
-> invoke unconditional GFP_KERNEL allocations and these functions might be
-> called from the NOFS contexts. The memalloc_noio_save will enforce
-> GFP_NOIO context which is even weaker than GFP_NOFS and that seems to be
-> unnecessary. Let's use memalloc_nofs_{save,restore} instead as it should
-> provide exactly what we need here - implicit GFP_NOFS context.
 > 
-> Signed-off-by: Michal Hocko <mhocko@suse.com>
-> ---
->  fs/xfs/kmem.c    | 10 +++++-----
->  fs/xfs/xfs_buf.c |  8 ++++----
->  2 files changed, 9 insertions(+), 9 deletions(-)
-> 
-...
-> diff --git a/fs/xfs/xfs_buf.c b/fs/xfs/xfs_buf.c
-> index f31ae592dcae..5c6f9bd4d8be 100644
-> --- a/fs/xfs/xfs_buf.c
-> +++ b/fs/xfs/xfs_buf.c
-> @@ -441,17 +441,17 @@ _xfs_buf_map_pages(
->  		bp->b_addr = NULL;
->  	} else {
->  		int retried = 0;
-> -		unsigned noio_flag;
-> +		unsigned nofs_flag;
->  
->  		/*
->  		 * vm_map_ram() will allocate auxillary structures (e.g.
->  		 * pagetables) with GFP_KERNEL, yet we are likely to be under
->  		 * GFP_NOFS context here. Hence we need to tell memory reclaim
-> -		 * that we are in such a context via PF_MEMALLOC_NOIO to prevent
-> +		 * that we are in such a context via PF_MEMALLOC_NOFS to prevent
->  		 * memory reclaim re-entering the filesystem here and
->  		 * potentially deadlocking.
->  		 */
-> -		noio_flag = memalloc_noio_save();
-> +		nofs_flag = memalloc_nofs_save();
->  		do {
->  			bp->b_addr = vm_map_ram(bp->b_pages, bp->b_page_count,
->  						-1, PAGE_KERNEL);
-> @@ -459,7 +459,7 @@ _xfs_buf_map_pages(
->  				break;
->  			vm_unmap_aliases();
->  		} while (retried++ <= 1);
-> -		memalloc_noio_restore(noio_flag);
-> +		memalloc_noio_restore(nofs_flag);
+>> On Dec 4, 2016, at 3:02 PM, Noah Watkins <noahwatkins@gmail.com> wrote:
+>> 
+>> On Fri, Dec 2, 2016 at 3:04 PM, Kamble, Nitin A
+>> <Nitin.Kamble@teradata.com> wrote:
+>>> 
+>>> Is anybody using real RADOS object classes on ceph clusters? Any of them on github?
+>>> I would like to look at some of the real world examples if it is there.
+>>> And more documentation of this feature would definitely help too.
+>> 
+>> We use object classes [0] for a distributed shared log [1] on Ceph.
+>> 
+>> [0]: https://github.com/noahdesu/ceph/blob/zlog/jewel/src/cls/zlog/cls_zlog.cc
+>> [1]: https://github.com/noahdesu/zlog
 
-memalloc_nofs_restore() ?
-
-Brian
-
->  
->  		if (!bp->b_addr)
->  			return -ENOMEM;
-> -- 
-> 2.10.2
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
