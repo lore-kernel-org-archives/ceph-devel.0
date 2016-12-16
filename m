@@ -1,58 +1,167 @@
-From: xxhdx1985126 <xxhdx1985126@163.com>
-Subject: Fw:Re:Re:Re: Question about write op processing of OSD
-Date: Fri, 16 Dec 2016 12:29:43 +0800 (CST)
-Message-ID: <56ec2444.5ac4.15905e49671.Coremail.xxhdx1985126@163.com>
+From: sw zhang <zhangsw1001@gmail.com>
+Subject: Re: Consistency problem with multiple rgws
+Date: Fri, 16 Dec 2016 15:36:03 +0800
+Message-ID: <CAHjSqib6CQUK0RuBaPBPS75jpG7CzOmOQ3zw+zraDxziqZQcFg@mail.gmail.com>
+References: <2b1658523debcec-00007.Richmail.00098135627749810422@139.com> <9193cf3c-3970-56d9-759a-c160626fb27a@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GBK
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mproxyhzb2.163.com ([123.58.178.202]:37542 "EHLO
-        mproxyhzb2.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751664AbcLPGMD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2016 01:12:03 -0500
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:34866 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751664AbcLPHgp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2016 02:36:45 -0500
+Received: by mail-wm0-f68.google.com with SMTP id a20so3471463wme.2
+        for <ceph-devel@vger.kernel.org>; Thu, 15 Dec 2016 23:36:05 -0800 (PST)
+In-Reply-To: <9193cf3c-3970-56d9-759a-c160626fb27a@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Casey Bodley <cbodley@redhat.com>
+Cc: yehuda <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, =?UTF-8?B?6YOt5Y2g5Lic?= <guozhandong@cmss.chinamobile.com>, lvshuhua <lvshuhua@cmss.chinamobile.com>
 
-ClNvcnJ5LCBJIGNvcnJlY3QgbXkgcXVlc3Rpb24uCgpJIHJlYWQgdGhlICJhbHJlYWR5X2NvbXBs
-ZXRlIiBtZXRob2QuIEl0IHJldHVybnMgdHJ1ZSBpZiBpdCBhbGwgb3AgZWFsaWVyIHRoYW4gTSBp
-cyAiYWxsX2NvbW1pdHRlZCIgaW4gcmVwb3BfcXVldWUsIHNvIGluIG91ciBzY2VuYXJpbywgaXQg
-d2lsbCBhbHdheXMgcmV0dXJuIHRydWUsIHNpbmNlIE9TRC5YIHdhcyBub3QgYWN0aW5nIHByaW1h
-cnkgb2YgdGhlIHRhcmdldCBwZy4gVGhlbiwgd2hhdCBpZiB3aGVuIHRoZSByZXN1Ym1pdHRlZCBN
-IGFycml2ZXMgd2hlbiB0aGUgcHJldmlvdXMgTSBoYXMgbm90IGJlZW4gY29tbWl0dGVkPyBJZiB3
-ZSBhY2sgdGhlIGNsaWVudCBub3QgY29uc2lkZXJpbmcgaWYgdGhlIHJlcSBoYXMgYWxyZWFkeSBi
-ZWVuIGNvbW1pdHRlZCwgd291bGRuJ3QgdGhlcmUgYmUgYSBwb3NzaWJpbGl0eSB0aGF0IHRoaW5n
-cyBnbyB3cm9uZz8gRm9yIGV4YW1wbGUsIHdoYXQgaWYgYWZ0ZXIgT1NELlggYWNrIHRoZSBjbGll
-bnQsIHRoZSBhY3R1YWwgY29tbWl0IG9mIE0gZmFpbHM/CgpUaGFuayB5b3U6LSkKCgoKQXQgMjAx
-Ni0xMi0xNiAxMDowOTo1NiwgInh4aGR4MTk4NTEyNiIgPHh4aGR4MTk4NTEyNkAxNjMuY29tPiB3
-cm90ZToKPgo+VGhhbmtzIGZvciB0aGUgcXVpY2sgcmVwbHk6LSkKPgo+SXMgaXQgcG9zc2libGUg
-dGhhdCB0aGUgY2xpZW50IHJlc3VibWl0IE0gYWZ0ZXIgdGhlIG5ldyAiUGVlcmluZyIgcHJvY2Vz
-cyBjb21wbGV0ZXMgYnV0IGJlZm9yZSB0aGUgcHJvY2Vzc2luZyBvZiBNIGlzIGNvbXBsZXRlZCBv
-biBPU0QuWD8gSSdtIGFza2luZyB0aGlzIGJlY2F1c2UgYXMgZmFyIGFzIEkgdW5kZXJzdGFuZCwg
-aWYgdGhlICJkdXAiIHJlcSBpcyBub3QgYWxyZWFkeSBjb21wbGV0ZWQsIHRoZSBPU0Qgd2lsbCBw
-dXQgaXQgaW4gdGhlICJ3YWl0aW5nZ19mb3Jfb25kaXNrIiBhbmQgIndhaXRpbmdfZm9yX2FjayIg
-cXVldWUgd2hpY2ggYXJlIG9ubHkgYWNjZXNzZWQgd2hlbiB0aGUgcHJldmlvdXMgcmVwb3AgY29t
-cGxldGVzICJjb21taXQiIGFuZCAiYXBwbHkiIHByb2Nlc3MgYW5kIGFyZSBub3QgYWNjZXNzZWQg
-aW4gdGhpcyBzY2VuYXJpbyBzaW5jZSB0aGVyZSBpcyBubyBzdWNoICJwcmV2aW91cyByZXBvcCIu
-Cj4KPlRoYW5rczotKQo+Cj5BdCAyMDE2LTEyLTE2IDA4OjM1OjE1LCAiR3JlZ29yeSBGYXJudW0i
-IDxnZmFybnVtQHJlZGhhdC5jb20+IHdyb3RlOgo+Pk9uIFRodSwgRGVjIDE1LCAyMDE2IGF0IDQ6
-MTcgUE0sIHh4aGR4MTk4NTEyNiA8eHhoZHgxOTg1MTI2QDE2My5jb20+IHdyb3RlOgo+Pj4KPj4+
-IEhpLCBldmVyeW9uZS4KPj4+Cj4+Pgo+Pj4gV2hhdCB3aWxsIHRoZSBPU0QgZG8gaW4gdGhlIGZv
-bGxvd2luZyBzY2VuYXJpbz8KPj4+Cj4+PiAgICAgICAgU2F5LCBhIE1PU0RSZXBvcCBNIHRoYXQg
-aXMgaW5pdGlhdGVkIGF0IGNsaWVudCBBIGlzIGJlaW5nIHByb2Nlc3NlZCBvbiBhbiBPU0QuWCwg
-ZHVyaW5nIHdoaWNoIHRoZSBhY3RpbmcgcHJpbWFyeSB0dXJuICJkb3duIiBkdWUgdG8gc29tZSBl
-cnJvciBhbmQgT1NELlggaXMgY2hvc2VuIHRvIGJlIHRoZSBuZXcgYWN0aW5nIHByaW1hcnkuIFNp
-bmNlIE9TRC5YIGlzIGEgcmVwbGljYSBPU0QgZm9yIE1PU0RSZXBPcCBNLCBob3cgY2FuIGNsaWVu
-dCBBIGJlIGFja2VkIGFmdGVyIE9TRC5YIGZpbmlzaGVkIHRoZSBwcm9jZXNzaW5nIG9mIE0/IE9y
-IGRvZXMgQSBiZSBhY2tlZCBhdCBhbGwgaW4gdGhpcyBraW5kIG9mIGNpcmN1bXN0YW5jZXM/Cj4+
-Cj4+VGhlIGNsaWVudCBpcyBub3QgYWNrZWQgYnkgT1NELlgsIGJ1dCB3aGVuIHRoZSBjbGllbnQg
-c2VlcyB0aGUgT1NETWFwCj4+bWFya2luZyBkb3duIHRoZSBwcmV2aW91cyBwcmltYXJ5LCBpdCB3
-aWxsIHJlc3VibWl0IE1PU0RPcE0gdG8gT1NELlgKPj4oYW5kIGluY3JlbWVudCB0aGUgcmV0cnkg
-Y291bnRlcikuIE9TRC5YIHdpbGwgbm90aWNlIHRoYXQgTU9TRE9wTSBoYXMKPj5hbHJlYWR5IGJl
-ZW4gY29tcGxldGVkIGFuZCByZXBseSB3aXRoIHRoZSBzYW1lIGFuc3dlciBpdCBnYXZlCj4+cHJl
-dmlvdXNseS5bMV0KPj4tR3JlZwo+PlsxXTogQmFycmluZyBwcm90b2NvbCBvciBpbXBsZW1lbnRh
-dGlvbiBidWdzLiBUaGVyZSBoYXZlIGhpc3RvcmljYWxseQo+PmJlZW4gc29tZSBpc3N1ZXMgd2l0
-aCB0aGluZ3MgbGlrZSAoc3VjY2Vzc2Z1bCkgZGVsZXRlcyByZXR1cm5pbmcKPj5FTk9FTlQgaW5z
-dGVhZCBvZiAwOyBJIGRvbid0IHJlbWVtYmVyIGlmIGFsbCB0aGUga25vd24gb25lcyBoYXZlIGJl
-ZW4KPj5zcXVhc2hlZCBvciBub3QuCg==
+Hi,
+I test it again today that each zone has one RGW with config
+'rgw_num_rados_handles=2'. I use cosbench to  upload 50,000 object ,
+each object is 4M,
+the number of workers is 10.
+After the data sync is finished(I use the command 'radosgw-admin
+bucket sync status --bucket=<name>' and 'radosgw-admin sync status' to
+check that)
+Below is the bucket stats result:
+
+Master zone:
+[root@ceph36 ~]# radosgw-admin bucket stats --bucket=shard23
+{
+    "bucket": "shard23",
+    "pool": "master.rgw.buckets.data",
+    "index_pool": "master.rgw.buckets.index",
+    "id": "cc3594b6-6282-421a-a3d5-3f7f3fa7efd0.702243.1",
+    "marker": "cc3594b6-6282-421a-a3d5-3f7f3fa7efd0.702243.1",
+    "owner": "zsw-test",
+    "ver": "0#50039,1#49964",
+    "master_ver": "0#0,1#0",
+    "mtime": "2016-12-16 10:58:56.174049",
+    "max_marker": "0#00000050038.56144.3,1#00000049963.56109.3",
+    "usage": {
+        "rgw.main": {
+            "size_kb": 195300782,
+            "size_kb_actual": 195388276,
+            "num_objects": 50000
+        }
+    },
+    "bucket_quota": {
+        "enabled": false,
+        "max_size_kb": -1,
+        "max_objects": -1
+    }
+}
+
+Slave zone:
+[root@ceph05 ~]# radosgw-admin bucket stats --bucket=shard23
+{
+    "bucket": "shard23",
+    "pool": "slave.rgw.buckets.data",
+    "index_pool": "slave.rgw.buckets.index",
+    "id": "cc3594b6-6282-421a-a3d5-3f7f3fa7efd0.702243.1",
+    "marker": "cc3594b6-6282-421a-a3d5-3f7f3fa7efd0.702243.1",
+    "owner": "zsw-test",
+    "ver": "0#51172,1#51070",
+    "master_ver": "0#0,1#0",
+    "mtime": "2016-12-16 10:58:56.174049",
+    "max_marker": "0#00000051171.112193.3,1#00000051069.79607.3",
+    "usage": {
+        "rgw.main": {
+            "size_kb": 194769532,
+            "size_kb_actual": 194856788,
+            "num_objects": 49861
+        }
+    },
+    "bucket_quota": {
+        "enabled": false,
+        "max_size_kb": -1,
+        "max_objects": -1
+    }
+}
+
+We can see that in slave zone, object number in bucket stats is less
+than master. But if I use s3cmd to list the bucket in slave zone, the
+result is right:
+[root@ceph05 ~]# s3cmd ls s3://shard23 | wc -l
+50000
+
+And after I list the bucket with s3cmd, I use the bucket stats in
+slave zone again:
+[root@ceph05 ~]# radosgw-admin bucket stats --bucket=shard23
+{
+    "bucket": "shard23",
+    "pool": "slave.rgw.buckets.data",
+    "index_pool": "slave.rgw.buckets.index",
+    "id": "cc3594b6-6282-421a-a3d5-3f7f3fa7efd0.702243.1",
+    "marker": "cc3594b6-6282-421a-a3d5-3f7f3fa7efd0.702243.1",
+    "owner": "zsw-test",
+    "ver": "0#51182,1#51079",
+    "master_ver": "0#0,1#0",
+    "mtime": "2016-12-16 10:58:56.174049",
+    "max_marker": "0#00000051181.112203.9,1#00000051078.79616.9",
+    "usage": {
+        "rgw.main": {
+            "size_kb": 194769532,
+            "size_kb_actual": 194856788,
+            "num_objects": 50000
+        }
+    },
+    "bucket_quota": {
+        "enabled": false,
+        "max_size_kb": -1,
+        "max_objects": -1
+    }
+}
+
+We can see that the num_objects is right now. (According to the code ,
+list bucket will send the 'dir_suggest_changes' request to the osd. I
+think this is why the number is right now.)
+If each zone have two rgw with config 'rgw_num_rados_handles=1', the
+difference between the bucket stats is smaller, from 10 to 40.
+If each zone have one rgw with config 'rgw_num_rados_handles=1', the
+bucket stats are same.
+My colleague and I have tested that multi times in two different
+clusters(Ceph version is jewel), and this problem nearly occurs every
+time.
+
+
+2016-12-16 0:05 GMT+08:00 Casey Bodley <cbodley@redhat.com>:
+> Hi,
+>
+> On 12/15/2016 02:55 AM, 18896724396 wrote:
+>
+> Hi,
+> We have two RGWs in master zone and two RGWs in slave zone. We use cosbench
+> to upload 50,000 objs to a single bucket. After the data sync is finished,
+> the bucket stats is not the same between master and slave zone.
+>
+> The data sync may take a while with that many objects. How are you verifying
+> that data sync finished? Have you tried 'radosgw-admin bucket sync status
+> --bucket=<name>'?
+>
+> Then we test the same case with one RGW in master zone and slave zone, the
+> stats is also not same. At last we test with one RGW and modify the config
+> rgw_num_rados_handles to 1(we set it 2 before), and this time the stats is
+> same and correct. Though multiple RGWs still have the problem.
+> According to the code, I find that when we update bucket index, rgw will
+> call cls_rgw_bucket_complete_op to update the bucket stats and at last osd
+> will call rgw_bucket_complete_op. In this function, osd first read the
+> bucket header, and then update the stats, last it write the head back. So I
+> think two concurrent request to update the stats may lead to the consistency
+> problem. And maybe some other operation also have the same problem. How
+> could we solve the consistency problem?
+>
+> The osd guarantees that two operations in the same placement group won't run
+> concurrently, so this kind of logic in cls should be safe. How far off are
+> the bucket stats? Can you share some example output?
+>
+>
+> Best regards.
+> Zhang Shaowen
+>
+>
+> Thanks,
+> Casey
