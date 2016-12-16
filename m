@@ -1,58 +1,107 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH 2/9 v2] xfs: introduce and use KM_NOLOCKDEP to silence
- reclaim lockdep false positives
-Date: Fri, 16 Dec 2016 23:01:21 +0100
-Message-ID: <20161216220121.GC7645@dhcp22.suse.cz>
-References: <20161215140715.12732-1-mhocko@kernel.org>
- <20161215140715.12732-3-mhocko@kernel.org>
- <20161216154041.GA7645@dhcp22.suse.cz>
- <20161216163749.GE8447@bfoster.bfoster>
+From: Sage Weil <sage@newdream.net>
+Subject: RE: BlueStore in-memory Onode footprint
+Date: Fri, 16 Dec 2016 22:32:42 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612162231370.10615@piezo.novalocal>
+References: <34ee2613-8db3-646e-4470-b3e8fa8855e0@mirantis.com> <alpine.DEB.2.11.1612161518570.10615@piezo.novalocal> <EB02EE10422E4A40A1EE787A4AC27FBE0321CB@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20161216163749.GE8447@bfoster.bfoster>
-Sender: owner-linux-mm@kvack.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:54288 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755398AbcLPWcq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2016 17:32:46 -0500
+In-Reply-To: <EB02EE10422E4A40A1EE787A4AC27FBE0321CB@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>
+Cc: Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri 16-12-16 11:37:50, Brian Foster wrote:
-> On Fri, Dec 16, 2016 at 04:40:41PM +0100, Michal Hocko wrote:
-> > Updated patch after Mike noticed a BUG_ON when KM_NOLOCKDEP is used.
-> > ---
-> > From 1497e713e11639157aef21cae29052cb3dc7ab44 Mon Sep 17 00:00:00 2001
-> > From: Michal Hocko <mhocko@suse.com>
-> > Date: Thu, 15 Dec 2016 13:06:43 +0100
-> > Subject: [PATCH] xfs: introduce and use KM_NOLOCKDEP to silence reclaim
-> >  lockdep false positives
-> > 
-> > Now that the page allocator offers __GFP_NOLOCKDEP let's introduce
-> > KM_NOLOCKDEP alias for the xfs allocation APIs. While we are at it
-> > also change KM_NOFS users introduced by b17cb364dbbb ("xfs: fix missing
-> > KM_NOFS tags to keep lockdep happy") and use the new flag for them
-> > instead. There is really no reason to make these allocations contexts
-> > weaker just because of the lockdep which even might not be enabled
-> > in most cases.
-> > 
+On Fri, 16 Dec 2016, Allen Samuels wrote:
+> I'm not sure what the conclusion from this is.
 > 
-> Hi Michal,
+> The point of the sharding exercise was to eliminate the need to 
+> serialize/deserialize all 1024 Extents/Blobs/SharedBlobs on each I/O 
+> transaction.
 > 
-> I haven't gone back to fully grok b17cb364dbbb ("xfs: fix missing
-> KM_NOFS tags to keep lockdep happy"), so I'm not really familiar with
-> the original problem. FWIW, there was another KM_NOFS instance added by
-> that commit in xlog_cil_prepare_log_vecs() that is now in
-> xlog_cil_alloc_shadow_bufs(). Perhaps Dave can confirm whether the
-> original issue still applies..?
+> This shows that a fully populated oNode with ALL of the shards present 
+> is a large number. But that ought to be a rare occurrence.
+> 
+> This test shows that each Blob is 248 bytes and that each SharedBlob is 
+> 216 bytes. That matches the sizeof(...), so the MemPool logic got the 
+> right answer! Yay!
+> 
+> Looking at the Blob I see:
+> 
+> Bluestore_blob_t 72 bytes
+> Bufferlist 88 bytes
+> Extentrefmap 64 bytes
+> 
+> That's most the 248. I suspect that trying to fix this will require a 
+> new strategy, etc.
 
-Yes, I've noticed that but the reworked code looked sufficiently
-different that I didn't dare to simply convert it.
--- 
-Michal Hocko
-SUSE Labs
+Well, one thing we might consider: right now the prune cache content at 
+the granularity of onode.  We might want to put the shards in an LRU too 
+and prune old shards...
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+sage
+
+ > 
+> Allen Samuels
+> SanDisk |a Western Digital brand
+> 2880 Junction Avenue, San Jose, CA 95134
+> T: +1 408 801 7030| M: +1 408 780 6416
+> allen.samuels@SanDisk.com
+> 
+> 
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> > owner@vger.kernel.org] On Behalf Of Sage Weil
+> > Sent: Friday, December 16, 2016 7:20 AM
+> > To: Igor Fedotov <ifedotov@mirantis.com>
+> > Cc: ceph-devel <ceph-devel@vger.kernel.org>
+> > Subject: Re: BlueStore in-memory Onode footprint
+> > 
+> > On Fri, 16 Dec 2016, Igor Fedotov wrote:
+> > > Hey All!
+> > >
+> > > Recently I realized that I'm unable to fit all my onodes ( 32768
+> > > objects/4Mb each/4K alloc unit/no csum) in 15G RAM cache.
+> > >
+> > > Hence decided to estimate Onode in-memory size.
+> > >
+> > > At first I filled 4Mb object with a single 4M write - mempools
+> > > indicate ~5K mem usage for total onode metadata. Good enough.
+> > >
+> > > Secondly I refill that object with 4K writes. Resulting memusage = 574K!!!
+> > > Onode itself 704 bytes in 1 object.  And 4120 other metadata items
+> > > occupies all other space.
+> > >
+> > > Then I removed SharedBlob from mempools. Resulting mem usage = 355K.
+> > > The same Onode size. And 3096 other metadata objects. Hence we had
+> > > 1024 SharedBlob instances thata took ~ 220K.
+> > >
+> > >
+> > > And finally I removed Blob instances from measurements. Resulting mem
+> > > usage = 99K. And 2072 other objects. Hence Blob instances take another
+> > > ~250K
+> > 
+> > Yikes!
+> > 
+> > BTW you can get a full breakdown by type with 'mempool debug = true' in
+> > ceph.conf (-o 'mempool debug = true' on vstart.sh command line) without
+> > having to recompile.  Do you mind repeating the test and including the full
+> > breakdown?
+> > 
+> > > Yeah, that's the worst case( actually csum enable will give even more
+> > > mem use) but shouldn't we revisit some Onode internals due to such
+> > numbers?
+> > 
+> > Yep!
+> > 
+> > sage
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
+> > body of a message to majordomo@vger.kernel.org More majordomo info at
+> > http://vger.kernel.org/majordomo-info.html
+> 
+> 
