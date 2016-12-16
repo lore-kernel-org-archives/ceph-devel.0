@@ -1,80 +1,45 @@
-From: Noah Watkins <noahwatkins@gmail.com>
-Subject: Re: Computation in the storage
-Date: Fri, 16 Dec 2016 15:11:29 -0800
-Message-ID: <CAB2gnbVwzisH+DD9kVXX6F5HhfLU-E5Kvt9i=UtxgjbP1aXOgQ@mail.gmail.com>
-References: <26283_1480676624_58415510_26283_122_1_EBBC07637B509B40B2E594A11E62C54F022DA808@OPEXCLILM32.corporate.adroot.infra.ftgroup>
- <d8129d7a-af37-ad74-38c8-f5a9d59f183b@suse.de> <CAF-wwdHPXaX3fe+dk9ovdAfc00N5xQrzj2TaRAuBOjH77L4yDg@mail.gmail.com>
- <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com> <CAB2gnbVn0U_G12L8XV=hbznB2i_TMo40TpC5cVzJZKOr_MAQ7Q@mail.gmail.com>
- <64D605E0-8851-4F60-B0AB-864CBDA7B3F7@Teradata.com> <208C08FF-0104-425C-B7AA-B0930A76F46E@Teradata.com>
- <69A873FA-DBEF-4081-9305-EA86B63572DE@Teradata.com>
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: CentOS Storage SIG
+Date: Fri, 16 Dec 2016 18:55:38 -0500
+Message-ID: <CAAZbbf0WGM_6ERpRu5NrrP2jaMR2cSdZx60mRDLL6Lf9Mxqq9g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f41.google.com ([209.85.218.41]:36062 "EHLO
-        mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757187AbcLPXLa (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2016 18:11:30 -0500
-Received: by mail-oi0-f41.google.com with SMTP id v84so92836548oie.3
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Dec 2016 15:11:30 -0800 (PST)
-In-Reply-To: <69A873FA-DBEF-4081-9305-EA86B63572DE@Teradata.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
-Cc: Brad Hubbard <bhubbard@redhat.com>, Joao Eduardo Luis <joao@suse.de>, "nebil.benmabrouk@orange.com" <nebil.benmabrouk@orange.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Lua object classes are supported in Kraken [0], which allows one to
-send a Lua script to be run in the OSD locally [1]. The link you
-referenced is to a feature that is not in Kraken which will load Lua
-scripts from disk rather than requiring them to be attached to each
-request (e.g. using Lua scripts in /usr/share/ceph etc...)
+Hey cephers,
 
-[0]: http://ceph.com/releases/kraken-11-0-2-released/
-[1]: http://noahdesu.github.io/2014/01/22/dynamic-rados-object-interfaces.html
+Just wanted to put this out there in case there were any
+package-maintenance wizards itching to contribute. The CentOS storage
+SIG has worked hard to make sure that Ceph builds make it through
+their own build system and have published two releases based on Jewel
+and Hammer.
 
-On Fri, Dec 16, 2016 at 2:46 PM, Kamble, Nitin A
-<Nitin.Kamble@teradata.com> wrote:
-> Hi Noah,
-> Is this the functionality [2] to use osd-local lua object classes in ceph upstream now?
->
-> If yes, which release it went in?
->
-> Thanks,
-> Nitin
->
-> [2] http://noahdesu.github.io/2015/12/06/load-lua-rados-plugin-from-fs.html
->
->> On Dec 16, 2016, at 10:00 AM, Kamble, Nitin A <Nitin.Kamble@Teradata.com> wrote:
->>
->> Hi Noah,
->>
->> I looked at your blog [0] about implementing RADOS object classes using Lua scripts. The
->> link [1] to the source code in ceph repository is missing. Seems like this support has been
->> removed from upstream ceph, and it is not supported by the ceph releases as of now.
->> Can you confirm?
->>
->>
->> [0] http://noahdesu.github.io/2015/12/14/towards-rados-object-class-management.html
->> [1] https://github.com/ceph/ceph/tree/cls-lua
->>
->> Thanks,
->> Nitin
->>
->>
->>> On Dec 5, 2016, at 3:08 PM, Kamble, Nitin A <Nitin.Kamble@Teradata.com> wrote:
->>>
->>>
->>>> On Dec 4, 2016, at 3:02 PM, Noah Watkins <noahwatkins@gmail.com> wrote:
->>>>
->>>> On Fri, Dec 2, 2016 at 3:04 PM, Kamble, Nitin A
->>>> <Nitin.Kamble@teradata.com> wrote:
->>>>>
->>>>> Is anybody using real RADOS object classes on ceph clusters? Any of them on github?
->>>>> I would like to look at some of the real world examples if it is there.
->>>>> And more documentation of this feature would definitely help too.
->>>>
->>>> We use object classes [0] for a distributed shared log [1] on Ceph.
->>>>
->>>> [0]: https://github.com/noahdesu/ceph/blob/zlog/jewel/src/cls/zlog/cls_zlog.cc
->>>> [1]: https://github.com/noahdesu/zlog
->>
->
+The current maintainer is looking for a bit of co-maintainer help to
+augment his efforts when things like travel cause interruptions. If
+anyone is interested in potentially stepping up into this role please
+let me know and I'll help get you connected.
+
+Ideal applicants would need to have some git, koji/cbs and packaging
+experience as the current maintainer cannot mentor at this time. Thanks.
+
+
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
