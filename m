@@ -1,93 +1,34 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Ceph connections with TLS
-Date: Fri, 16 Dec 2016 13:30:26 +0100 (CET)
-Message-ID: <274802089.4698.1481891426375@ox.pcextreme.nl>
-References: <7a01ab71-66eb-46d2-3990-c325f8d36a16@m-privacy.de>
- <417867875.4693.1481886637522@ox.pcextreme.nl>
- <5c5a54bc-4527-6e95-7d24-e7ce1200f0d7@m-privacy.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:45367 "EHLO
-        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755835AbcLPMac (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2016 07:30:32 -0500
-In-Reply-To: <5c5a54bc-4527-6e95-7d24-e7ce1200f0d7@m-privacy.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Amon Ott <a.ott@m-privacy.de>, Ceph Devel <ceph-devel@vger.kernel.org>
+From: Michal Hocko <mhocko@kernel.org>
+Subject: [DEBUG PATCH 0/2] debug explicit GFP_NO{FS,IO} usage from the scope context
+Date: Fri, 16 Dec 2016 13:46:26 +0100
+Message-ID: <20161216124628.26846-1-mhocko@kernel.org>
+References: <20161215140715.12732-1-mhocko@kernel.org>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20161215140715.12732-1-mhocko@kernel.org>
+Sender: owner-linux-mm@kvack.org
+To: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org
+Cc: Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
+Hi,
+I've forgot to add the following two patches which should help to
+identify explicit GFP_NO{FS,IO} usage from withing a scope context. Such
+a usage can be changed to the full GFP_KERNEL because all the calls
+from within the NO{FS,IO} scope will drop the __GFP_FS resp. __GFP_IO
+automatically and if the function is called outside of the scope then
+we do not need to restrict it to NOFS/NOIO as long as all the reclaim
+recursion unsafe contexts are marked properly. This means that each
+such a reported allocation site has to be checked before converted.
 
-> Op 16 december 2016 om 12:39 schreef Amon Ott <a.ott@m-privacy.de>:
-> 
-> 
-> Am 16.12.2016 um 12:10 schrieb Wido den Hollander:
-> > 
-> >> Op 16 december 2016 om 11:15 schreef Amon Ott <a.ott@m-privacy.de>:
-> >> for a customer we are currently designing a ceph cluster, which shall be
-> >> spread over two data centers. Data in the Ceph cluster is slightly
-> >> confidential, so we would like to encrypt at least all Ceph traffic over
-> >> the fast data center connection link.
-> >>
-> > 
-> > Fast as in low latency? Writes in Ceph are synchronous, so keep in mind that any increase in latency will decrease the write performance/latency on your Ceph cluster.
-> 
-> Yes, we expect low latency and high bandwidth, but a connection shared
-> with other services. Having locality for accesses by clients would of
-> course help, too.
-> 
+The debugging has to be enabled explicitly by a kernel command line
+parameter and then it reports the stack trace of the allocation and
+also the function which has started the current scope.
 
-You can play a bit with primary affinity or modify CRUSH in such a way that the primary OSDs are always in the local DC.
+These two patches are _not_ intended to be merged and they are only
+aimed at debugging.
 
-> >> AFAICS, Ceph does not support data encryption at connection level yet,
-> >> so we would have to setup VPN links between the two cluster networks.
-> >> This means extra configuration, maintenance and overhead.
-> >>
-> >> How far away is TLS support or something similar for the Ceph
-> >> connections? AFAIK, TLS support should not be hard to implement, but I
-> >> am not too familiar with Ceph internals.
-> >>
-> > 
-> > Afaik there is no work currently in progress.
-> 
-> I feared so.
-> 
-> > You might implement IPSec on the nodes itself. You might call that a VPN obviously, but IPSec can also just encrypt packets between nodes.
-> 
-> Having quite a bit of experience with OpenVPN, we would rather use that
-> than IPSec, and we would do it right on the Ceph nodes. Still, TLS in
-> the connections would be better for lower latency.
-> 
-> Also, we then need VPN connections between all nodes as well as from all
-> clients to all nodes in the other location. The latter could be routed
-> through local Ceph nodes, but that would give even more latency.
-> 
-
-True. Isn't the a possibility to encrypt the data before it goes into Ceph? I don't know what the use-case is, but if it is RBD why not encrypt the whole RBD device with LUKS / dm-crypt?
-
-Just an idea though.
-
-Wido
-
-> Thanks for your answer,
-> 
-> Amon.
-> -- 
-> Dr. Amon Ott
-> m-privacy GmbH           Tel: +49 30 24342334
-> Werner-Voß-Damm 62       Fax: +49 30 99296856
-> 12101 Berlin             http://www.m-privacy.de
-> 
-> Amtsgericht Charlottenburg, HRB 84946
-> 
-> Geschäftsführer:
->  Dipl.-Kfm. Holger Maczkowsky,
->  Roman Maczkowsky
-> 
-> GnuPG-Key-ID: 0x2DD3A649
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
