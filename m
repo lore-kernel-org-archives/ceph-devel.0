@@ -1,212 +1,98 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Snapshots of consistency groups
-Date: Fri, 16 Dec 2016 09:53:16 -0500
-Message-ID: <CA+aFP1AcL418Ai1tuoLKOG5BHFLYeonKBcZm5LK-9m+Vmjr7CA@mail.gmail.com>
-References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
- <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
- <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
- <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
- <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
- <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
- <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
- <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
- <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
- <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
- <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
- <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
- <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
- <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
- <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
- <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
- <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
- <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
- <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com>
- <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com>
- <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
- <CA+hcxJS-3Y-3QTgpU1NwQmg8znrg5Jo+jHH9f7T5n7x_+NcvyQ@mail.gmail.com>
- <CA+aFP1A4YYDG0HSJ52R__DPKBc_Y7p62Ec4tzhdXt+UPkC=vNw@mail.gmail.com>
- <CA+hcxJR6S8AZQ0mY5MTKiBwjf0bQYswWoL16WBJgfrOzzQ40zg@mail.gmail.com>
- <CA+hcxJS4JDHBc-GYqwjXjHTiVBeq_YZhcvRfG5SRZMhTGZt-FA@mail.gmail.com>
- <CA+aFP1Dg0Tc8CDumoL7hJPD62itu+RqZaKcjnuEnvZwrHdZZ=w@mail.gmail.com>
- <CA+hcxJQC1eJLRYxDMD1_XDsD5vKtvcVXyxQwM-OuSEmNTXnHRg@mail.gmail.com>
- <CA+aFP1ARgWp71xgqicF6vgx6Rd6kzYd-2mn1WPD9XtpQfO75=w@mail.gmail.com>
- <CA+aFP1D46xgNffUux5cGKeg2cJQeQ4nWh+_wgLgVystL74HhGg@mail.gmail.com>
- <CA+hcxJSW3M6DYbpaqLcDtcP393t4GCEMKS=5x+CHCbJS6iSQdg@mail.gmail.com>
- <CA+aFP1A+tYfqc2B+w2sOMCAk9UgK5zKbgA9VijLRpkjmUkWrAA@mail.gmail.com> <CA+hcxJTsR2N4RhW4PVAcV+Y=K3yLYEKukcbAtFD_329ZJebe6g@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Mike Galbraith <umgwanakikbuti@gmail.com>
+Subject: Re: [PATCH 0/9 v2] scope GFP_NOFS api
+Date: Fri, 16 Dec 2016 16:05:58 +0100
+Message-ID: <1481900758.31172.20.camel@gmail.com>
+References: <20161215140715.12732-1-mhocko@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f41.google.com ([209.85.215.41]:33726 "EHLO
-        mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754718AbcLPOxd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2016 09:53:33 -0500
-Received: by mail-lf0-f41.google.com with SMTP id c13so9738108lfg.0
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Dec 2016 06:53:18 -0800 (PST)
-In-Reply-To: <CA+hcxJTsR2N4RhW4PVAcV+Y=K3yLYEKukcbAtFD_329ZJebe6g@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Victor Denisov <vdenisov@mirantis.com>
-Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20161215140715.12732-1-mhocko@kernel.org>
+Sender: owner-linux-mm@kvack.org
+To: Michal Hocko <mhocko@kernel.org>, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org
+Cc: Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>, "Peter
+ Zijlstra (Intel)" <peterz@infradead.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Can you give a little background on this specific inconsistent case
-you are referring to?
+On Thu, 2016-12-15 at 15:07 +0100, Michal Hocko wrote:
+> Hi,
+> I have posted the previous version here [1]. Since then I have added a
+> support to suppress reclaim lockdep warnings (__GFP_NOLOCKDEP) to allow
+> removing GFP_NOFS usage motivated by the lockdep false positives. On top
+> of that I've tried to convert few KM_NOFS usages to use the new flag in
+> the xfs code base. This would need a review from somebody familiar with
+> xfs of course.
 
-On Thu, Dec 15, 2016 at 7:05 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
-> Yes, but if image's snapshot is renamed then I'm not able to find this
-> snapshot having only group's snapshot in an inconsistent state for
-> example.
->
-> V.
->
-> On Thu, Dec 15, 2016 at 7:10 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->> I think I might be confused. When creating a group snapshot, we have
->> the ConsistencyGroupSnapshot that allows you to store the necessary
->> linkage between the image's snapshot and its associated group snapshot
->> [1]. Why not just name the image's snapshots to the same name as the
->> parent group snapshot name and search the snapshot's metadata to get
->> the linkage?
->>
->> [1] https://github.com/ceph/ceph/blob/master/src/cls/rbd/cls_rbd_types.h#L255
->>
->> On Tue, Dec 13, 2016 at 8:03 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>> Jason,
->>>
->>> My current implementation of consistency group snapshot feature names
->>> image snapshots like: <group_pool>_<group_id>_<group_snap_id>
->>> I rely on this fact when I need to remove a consistency group. It's
->>> necessary because if some of image snapshots were created, but the
->>> whole group snapshot operation failed,
->>> then the only way to find those dangling image snapshots is by this name.
->>>
->>> It means that we should forbid renaming snapshots from
->>> ConsistencyGroupSnapshot namespace.
->>>
->>> Another option is to allocate image snapshot ids during the creation
->>> of group snapshot, but this requires a major rewrite of the whole
->>> process of snapshot creation for images.
->>>
->>> What is your opinion on this?
->>>
->>> Thanks,
->>> V.
->>>
->>>
->>> On Tue, Nov 1, 2016 at 8:01 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->>>> I chatted with Xing on IRC this morning re: Cinder generic groups. It
->>>> sounds like RBD will need to support preserving the image's
->>>> consistency group snapshots even if the image is removed from the
->>>> group. In the OpenStack case, you won't have to worry about the image
->>>> being deleted while it still has associated group snapshots.
->>>>
->>>> We will also want to support being able to clone child images from a
->>>> group snapshot to ensure that we can thin provision new groups volumes
->>>> when creating a new group from a group snapshot. This means that the
->>>> group snapshots should be able to be protected/unprotected just like
->>>> standard user snapshots.
->>>>
->>>> On Mon, Oct 31, 2016 at 9:07 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->>>>> Looking at the Cinder codebase, I don't see any such restriction that
->>>>> would prevent you from removing a volume from a consistency group that
->>>>> has associated snapshots. I would double-check on the OpenStack
->>>>> development mailing list if this is correct and is the intent. Worst
->>>>> case, the RBD driver could raise an exception if there are still
->>>>> consistency group snapshots associated to the image.
->>>>>
->>>>>
->>>>> On Fri, Oct 28, 2016 at 6:41 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>>>> Another thing that bothers me. When we remove an image from a consistency group.
->>>>>> Should we remove all snapshots of this image that were created as part
->>>>>> of a consistency group snapshot?
->>>>>>
->>>>>> The easiest solution would be to remove all snapshots that are in
->>>>>> GroupSnapshotNamespace and reference this consistency group.
->>>>>> I looked into cinder docs for this feature:
->>>>>> http://docs.openstack.org/admin-guide/blockstorage-consistency-groups.html
->>>>>>
->>>>>> But it's not clear to me which behavior cinder expects.
->>>>>>
->>>>>> Thanks,
->>>>>> V.
->>>>>>
->>>>>> On Wed, Oct 26, 2016 at 6:16 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->>>>>>> In a perfect world, it would be nice to add a new optional to "rbd
->>>>>>> snap ls" to show all snapshots (with a new column to indicate the
->>>>>>> associated namespace).
->>>>>>>
->>>>>>> On Tue, Oct 25, 2016 at 11:07 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>>>>>> Question. When we print out snapshots of an image, should the group
->>>>>>>> snapshots be listed, or should they be marked as special snapshots?
->>>>>>>>
->>>>>>>> Thanks,
->>>>>>>> V.
->>>>>>>>
->>>>>>>> On Mon, Oct 10, 2016 at 3:14 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>>>>>>> Ok. I didn't have any intention to throw exceptions.
->>>>>>>>> I was more concerned about whether it's ok to allocate and delete
->>>>>>>>> objects or I should use smart pointers.
->>>>>>>>>
->>>>>>>>> On Mon, Oct 10, 2016 at 7:18 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->>>>>>>>>> The only place exceptions are routinely used is within the "::decode"
->>>>>>>>>> functions. I would prefer to see the code not throwing new exceptions
->>>>>>>>>> on purpose.
->>>>>>>>>>
->>>>>>>>>> On Fri, Oct 7, 2016 at 2:26 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>>>>>>>>> Are any exceptions used in librbd code? Should the code be exception safe?
->>>>>>>>>>>
->>>>>>>>>>> Thanks,
->>>>>>>>>>> V.
->>>>>>>>>>>
->>>>>>>>>>> On Fri, Sep 16, 2016 at 10:37 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->>>>>>>>>>>> On Thu, Sep 15, 2016 at 7:17 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
->>>>>>>>>>>>> if (struct_v >= 5) {
->>>>>>>>>>>>>       ::decode(snapshot_namespace, p);
->>>>>>>>>>>>>     } else {
->>>>>>>>>>>>>       snapshot_namespace = cls::rbd::UserSnapshotNamespace();
->>>>>>>>>>>>>     }
->>>>>>>>>>>>>
->>>>>>>>>>>>> then code for ::encode function of cls_rbd_snap would change accordingly:
->>>>>>>>>>>>>
->>>>>>>>>>>>> instead of
->>>>>>>>>>>>>
->>>>>>>>>>>>> boost::apply_visitor(cls::rbd::EncodeSnapshotTypeVisitor(bl),
->>>>>>>>>>>>> snapshot_namespace);
->>>>>>>>>>>>>
->>>>>>>>>>>>> I would do:
->>>>>>>>>>>>> ::encode(snapshot_namespace, bl);
->>>>>>>>>>>>
->>>>>>>>>>>>
->>>>>>>>>>>> +1 -- looks good to me
->>>>>>>>>>>>
->>>>>>>>>>>> --
->>>>>>>>>>>> Jason
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>> --
->>>>>>>>>> Jason
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> --
->>>>>>> Jason
->>>>>
->>>>>
->>>>>
->>>>> --
->>>>> Jason
->>>>
->>>>
->>>>
->>>> --
->>>> Jason
->>
->>
->>
->> --
->> Jason
+The wild ass guess below prevents the xfs explosion below when running
+ltp zram tests.
 
+---
+ fs/xfs/kmem.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
+--- a/fs/xfs/kmem.h
++++ b/fs/xfs/kmem.h
+@@ -45,7 +45,7 @@ kmem_flags_convert(xfs_km_flags_t flags)
+ {
+ 	gfp_t	lflags;
+ 
+-	BUG_ON(flags & ~(KM_SLEEP|KM_NOSLEEP|KM_NOFS|KM_MAYFAIL|KM_ZERO));
++	BUG_ON(flags & ~(KM_SLEEP|KM_NOSLEEP|KM_NOFS|KM_MAYFAIL|KM_ZERO|KM_NOLOCKDEP));
+ 
+ 	if (flags & KM_NOSLEEP) {
+ 		lflags = GFP_ATOMIC | __GFP_NOWARN;
 
--- 
-Jason
+[  108.775501] ------------[ cut here ]------------
+[  108.775503] kernel BUG at fs/xfs/kmem.h:48!
+[  108.775504] invalid opcode: 0000 [#1] SMP
+[  108.775505] Dumping ftrace buffer:
+[  108.775508]    (ftrace buffer empty)
+[  108.775508] Modules linked in: xfs(E) libcrc32c(E) btrfs(E) xor(E) raid6_pq(E) zram(E) ebtable_filter(E) ebtables(E) fuse(E) bridge(E) stp(E) llc(E) iscsi_ibft(E) iscsi_boot_sysfs(E) ip6t_REJECT(E) xt_tcpudp(E) nf_conntrack_ipv6(E) nf_defrag_ipv6(E) ip6table_raw(E) ipt_REJECT(E) iptable_raw(E) iptable_filter(E) ip6table_mangle(E) nf_conntrack_netbios_ns(E) nf_conntrack_broadcast(E) nf_conntrack_ipv4(E) nf_defrag_ipv4(E) ip_tables(E) xt_conntrack(E) nf_conntrack(E) ip6table_filter(E) ip6_tables(E) x_tables(E) nls_iso8859_1(E) nls_cp437(E) x86_pkg_temp_thermal(E) intel_powerclamp(E) coretemp(E) kvm_intel(E) nfsd(E) kvm(E) auth_rpcgss(E) nfs_acl(E) lockd(E) snd_hda_codec_realtek(E) snd_hda_codec_hdmi(E) pl2303(E) grace(E) snd_hda_codec_generic(E) usbserial(E) irqbypass(E) snd_hda_intel(E) 
+ snd_hda_codec(E)
+[  108.775523]  snd_hwdep(E) sunrpc(E) snd_hda_core(E) crct10dif_pclmul(E) mei_me(E) mei(E) serio_raw(E) snd_pcm(E) crc32_pclmul(E) snd_timer(E) crc32c_intel(E) aesni_intel(E) aes_x86_64(E) crypto_simd(E) iTCO_wdt(E) iTCO_vendor_support(E) lpc_ich(E) mfd_core(E) snd(E) soundcore(E) joydev(E) fan(E) shpchp(E) tpm_infineon(E) cryptd(E) battery(E) thermal(E) pcspkr(E) glue_helper(E) usblp(E) intel_smartconnect(E) i2c_i801(E) efivarfs(E) hid_logitech_hidpp(E) hid_logitech_dj(E) hid_generic(E) usbhid(E) nouveau(E) wmi(E) i2c_algo_bit(E) ahci(E) libahci(E) drm_kms_helper(E) syscopyarea(E) sysfillrect(E) sysimgblt(E) fb_sys_fops(E) ehci_pci(E) xhci_pci(E) ttm(E) ehci_hcd(E) xhci_hcd(E) r8169(E) libata(E) mii(E) drm(E) usbcore(E) fjes(E) video(E) button(E) af_packet(E) sd_mod(E) vfat(E) fat(E) ext
+ 4(E) crc16(E)
+[  108.775540]  jbd2(E) mbcache(E) dm_mod(E) loop(E) sg(E) scsi_mod(E) autofs4(E)
+[  108.775544] CPU: 5 PID: 4495 Comm: mount Tainted: G            E   4.10.0-master #4
+[  108.775545] Hardware name: MEDION MS-7848/MS-7848, BIOS M7848W08.20C 09/23/2013
+[  108.775546] task: ffff8803f9e54e00 task.stack: ffffc900018fc000
+[  108.775565] RIP: 0010:kmem_flags_convert.part.0+0x4/0x6 [xfs]
+[  108.775565] RSP: 0018:ffffc900018ffcd8 EFLAGS: 00010202
+[  108.775566] RAX: ffff8803f630a800 RBX: ffff8803f6b20000 RCX: 0000000000001000
+[  108.775567] RDX: 0000000000001000 RSI: 0000000000000031 RDI: 00000000000000b0
+[  108.775568] RBP: ffffc900018ffcd8 R08: 0000000000019fe0 R09: ffff8803f6b20000
+[  108.775568] R10: 0000000000000005 R11: 0000000000010641 R12: ffff88041e21ea00
+[  108.775569] R13: ffff8803f6b20000 R14: 0000000000000000 R15: 00000000fffffff4
+[  108.775570] FS:  00007f1cbee9e840(0000) GS:ffff88041ed40000(0000) knlGS:0000000000000000
+[  108.775571] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[  108.775571] CR2: 00007f5d4b6ed000 CR3: 00000003fbf13000 CR4: 00000000001406e0
+[  108.775572] Call Trace:
+[  108.775588]  kmem_alloc+0x100/0x100 [xfs]
+[  108.775591]  ? kstrndup+0x49/0x60
+[  108.775605]  xfs_alloc_buftarg+0x23/0xd0 [xfs]
+[  108.775619]  xfs_open_devices+0x8c/0x170 [xfs]
+[  108.775621]  ? sb_set_blocksize+0x1d/0x50
+[  108.775633]  xfs_fs_fill_super+0x234/0x580 [xfs]
+[  108.775635]  mount_bdev+0x184/0x1c0
+[  108.775647]  ? xfs_test_remount_options.isra.15+0x60/0x60 [xfs]
+[  108.775658]  xfs_fs_mount+0x15/0x20 [xfs]
+[  108.775659]  mount_fs+0x15/0x90
+[  108.775661]  vfs_kern_mount+0x67/0x130
+[  108.775663]  do_mount+0x190/0xbd0
+[  108.775664]  ? memdup_user+0x42/0x60
+[  108.775665]  SyS_mount+0x83/0xd0
+[  108.775668]  entry_SYSCALL_64_fastpath+0x1a/0xa9
+[  108.775669] RIP: 0033:0x7f1cbe7bf78a
+[  108.775669] RSP: 002b:00007ffc99215198 EFLAGS: 00000202 ORIG_RAX: 00000000000000a5
+[  108.775670] RAX: ffffffffffffffda RBX: 00007f1cbeabb3b8 RCX: 00007f1cbe7bf78a
+[  108.775671] RDX: 000055715a611690 RSI: 000055715a60d270 RDI: 000055715a60d2d0
+[  108.775671] RBP: 000055715a60d120 R08: 0000000000000000 R09: 00007f1cbea7c678
+[  108.775672] R10: 00000000c0ed0000 R11: 0000000000000202 R12: 00007f1cbecc8e78
+[  108.775672] R13: 00000000ffffffff R14: 0000000000000000 R15: 000055715a60d060
+[  108.775673] Code: ff 74 05 e8 c2 17 64 e0 48 8b 3d 6b ec 03 00 48 85 ff 74 05 e8 b1 17 64 e0 48 8b 3d 32 ec 03 00 e8 25 a6 74 e0 5d c3 55 48 89 e5 <0f> 0b 55 48 89 e5 e8 f4 53 ff ff 48 c7 c7 40 78 b7 a0 e8 18 01 
+[  108.775700] RIP: kmem_flags_convert.part.0+0x4/0x6 [xfs] RSP: ffffc900018ffcd8
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
