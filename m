@@ -1,61 +1,56 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: BlueStore in-memory Onode footprint
-Date: Fri, 16 Dec 2016 09:20:40 -0600
-Message-ID: <dd3aab0d-3ac8-63cb-309c-3848153e23e2@redhat.com>
-References: <34ee2613-8db3-646e-4470-b3e8fa8855e0@mirantis.com>
+From: Michal Hocko <mhocko@kernel.org>
+Subject: Re: [PATCH 0/9 v2] scope GFP_NOFS api
+Date: Fri, 16 Dec 2016 16:35:02 +0100
+Message-ID: <20161216153502.GP13940@dhcp22.suse.cz>
+References: <20161215140715.12732-1-mhocko@kernel.org>
+ <1481900758.31172.20.camel@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37580 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1760229AbcLPP3Y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 16 Dec 2016 10:29:24 -0500
-In-Reply-To: <34ee2613-8db3-646e-4470-b3e8fa8855e0@mirantis.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <1481900758.31172.20.camel@gmail.com>
+Sender: owner-linux-mm@kvack.org
+To: Mike Galbraith <umgwanakikbuti@gmail.com>
+Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, "Peter Zijlstra (Intel)" <peterz@infradead.org>
+List-Id: ceph-devel.vger.kernel.org
 
+On Fri 16-12-16 16:05:58, Mike Galbraith wrote:
+> On Thu, 2016-12-15 at 15:07 +0100, Michal Hocko wrote:
+> > Hi,
+> > I have posted the previous version here [1]. Since then I have added a
+> > support to suppress reclaim lockdep warnings (__GFP_NOLOCKDEP) to allow
+> > removing GFP_NOFS usage motivated by the lockdep false positives. On top
+> > of that I've tried to convert few KM_NOFS usages to use the new flag in
+> > the xfs code base. This would need a review from somebody familiar with
+> > xfs of course.
+> 
+> The wild ass guess below prevents the xfs explosion below when running
+> ltp zram tests.
 
+Yes this looks correct. Thanks for noticing. I will fold it to the
+patch2. Thanks for testing Mike!
+> 
+> ---
+>  fs/xfs/kmem.h |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> --- a/fs/xfs/kmem.h
+> +++ b/fs/xfs/kmem.h
+> @@ -45,7 +45,7 @@ kmem_flags_convert(xfs_km_flags_t flags)
+>  {
+>  	gfp_t	lflags;
+>  
+> -	BUG_ON(flags & ~(KM_SLEEP|KM_NOSLEEP|KM_NOFS|KM_MAYFAIL|KM_ZERO));
+> +	BUG_ON(flags & ~(KM_SLEEP|KM_NOSLEEP|KM_NOFS|KM_MAYFAIL|KM_ZERO|KM_NOLOCKDEP));
+>  
+>  	if (flags & KM_NOSLEEP) {
+>  		lflags = GFP_ATOMIC | __GFP_NOWARN;
+-- 
+Michal Hocko
+SUSE Labs
 
-On 12/16/2016 09:04 AM, Igor Fedotov wrote:
-> Hey All!
->
-> Recently I realized that I'm unable to fit all my onodes ( 32768
-> objects/4Mb each/4K alloc unit/no csum) in 15G RAM cache.
->
-> Hence decided to estimate Onode in-memory size.
->
-> At first I filled 4Mb object with a single 4M write - mempools indicate
-> ~5K mem usage for total onode metadata. Good enough.
->
-> Secondly I refill that object with 4K writes. Resulting memusage =
-> 574K!!! Onode itself 704 bytes in 1 object.  And 4120 other metadata
-> items occupies all other space.
->
-> Then I removed SharedBlob from mempools. Resulting mem usage = 355K. The
-> same Onode size. And 3096 other metadata objects. Hence we had 1024
-> SharedBlob instances thata took ~ 220K.
->
->
-> And finally I removed Blob instances from measurements. Resulting mem
-> usage = 99K. And 2072 other objects. Hence Blob instances take another
-> ~250K
->
-> Yeah, that's the worst case( actually csum enable will give even more
-> mem use) but shouldn't we revisit some Onode internals due to such numbers?
-
-Hrm, that's quite a bit higher than it was last time I looked.  Can you 
-dump the hex for one of those during your run?
-
->
->
-> Thanks,
->
-> Igor
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
