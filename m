@@ -1,40 +1,49 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Question about write op processing of OSD
-Date: Thu, 15 Dec 2016 16:35:15 -0800
-Message-ID: <CAJ4mKGaQ0UYWOnLshUJob1rdjTc2f_K1_qagGp4mh0x_ZjgNDA@mail.gmail.com>
+From: xxhdx1985126 <xxhdx1985126@163.com>
+Subject: Re:Re: Question about write op processing of OSD
+Date: Fri, 16 Dec 2016 10:09:56 +0800 (CST)
+Message-ID: <1ea7f271.2e1c.15905649b64.Coremail.xxhdx1985126@163.com>
 References: <1d497a83.c1b.15904fdf41e.Coremail.xxhdx1985126@163.com>
+ <CAJ4mKGaQ0UYWOnLshUJob1rdjTc2f_K1_qagGp4mh0x_ZjgNDA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f182.google.com ([209.85.223.182]:33728 "EHLO
-        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755113AbcLPAl1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Dec 2016 19:41:27 -0500
-Received: by mail-io0-f182.google.com with SMTP id d9so84949124ioe.0
-        for <ceph-devel@vger.kernel.org>; Thu, 15 Dec 2016 16:41:27 -0800 (PST)
-In-Reply-To: <1d497a83.c1b.15904fdf41e.Coremail.xxhdx1985126@163.com>
+Received: from mproxyhzb2.163.com ([123.58.178.202]:53641 "EHLO
+        mproxyhzb2.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758904AbcLPC2I (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Dec 2016 21:28:08 -0500
+In-Reply-To: <CAJ4mKGaQ0UYWOnLshUJob1rdjTc2f_K1_qagGp4mh0x_ZjgNDA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: xxhdx1985126 <xxhdx1985126@163.com>
+To: Gregory Farnum <gfarnum@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Dec 15, 2016 at 4:17 PM, xxhdx1985126 <xxhdx1985126@163.com> wrote:
->
-> Hi, everyone.
->
->
-> What will the OSD do in the following scenario?
->
->        Say, a MOSDRepop M that is initiated at client A is being processed on an OSD.X, during which the acting primary turn "down" due to some error and OSD.X is chosen to be the new acting primary. Since OSD.X is a replica OSD for MOSDRepOp M, how can client A be acked after OSD.X finished the processing of M? Or does A be acked at all in this kind of circumstances?
-
-The client is not acked by OSD.X, but when the client sees the OSDMap
-marking down the previous primary, it will resubmit MOSDOpM to OSD.X
-(and increment the retry counter). OSD.X will notice that MOSDOpM has
-already been completed and reply with the same answer it gave
-previously.[1]
--Greg
-[1]: Barring protocol or implementation bugs. There have historically
-been some issues with things like (successful) deletes returning
-ENOENT instead of 0; I don't remember if all the known ones have been
-squashed or not.
+ClRoYW5rcyBmb3IgdGhlIHF1aWNrIHJlcGx5Oi0pCgpJcyBpdCBwb3NzaWJsZSB0aGF0IHRoZSBj
+bGllbnQgcmVzdWJtaXQgTSBhZnRlciB0aGUgbmV3ICJQZWVyaW5nIiBwcm9jZXNzIGNvbXBsZXRl
+cyBidXQgYmVmb3JlIHRoZSBwcm9jZXNzaW5nIG9mIE0gaXMgY29tcGxldGVkIG9uIE9TRC5YPyBJ
+J20gYXNraW5nIHRoaXMgYmVjYXVzZSBhcyBmYXIgYXMgSSB1bmRlcnN0YW5kLCBpZiB0aGUgImR1
+cCIgcmVxIGlzIG5vdCBhbHJlYWR5IGNvbXBsZXRlZCwgdGhlIE9TRCB3aWxsIHB1dCBpdCBpbiB0
+aGUgIndhaXRpbmdnX2Zvcl9vbmRpc2siIGFuZCAid2FpdGluZ19mb3JfYWNrIiBxdWV1ZSB3aGlj
+aCBhcmUgb25seSBhY2Nlc3NlZCB3aGVuIHRoZSBwcmV2aW91cyByZXBvcCBjb21wbGV0ZXMgImNv
+bW1pdCIgYW5kICJhcHBseSIgcHJvY2VzcyBhbmQgYXJlIG5vdCBhY2Nlc3NlZCBpbiB0aGlzIHNj
+ZW5hcmlvIHNpbmNlIHRoZXJlIGlzIG5vIHN1Y2ggInByZXZpb3VzIHJlcG9wIi4KClRoYW5rczot
+KQoKQXQgMjAxNi0xMi0xNiAwODozNToxNSwgIkdyZWdvcnkgRmFybnVtIiA8Z2Zhcm51bUByZWRo
+YXQuY29tPiB3cm90ZToKPk9uIFRodSwgRGVjIDE1LCAyMDE2IGF0IDQ6MTcgUE0sIHh4aGR4MTk4
+NTEyNiA8eHhoZHgxOTg1MTI2QDE2My5jb20+IHdyb3RlOgo+Pgo+PiBIaSwgZXZlcnlvbmUuCj4+
+Cj4+Cj4+IFdoYXQgd2lsbCB0aGUgT1NEIGRvIGluIHRoZSBmb2xsb3dpbmcgc2NlbmFyaW8/Cj4+
+Cj4+ICAgICAgICBTYXksIGEgTU9TRFJlcG9wIE0gdGhhdCBpcyBpbml0aWF0ZWQgYXQgY2xpZW50
+IEEgaXMgYmVpbmcgcHJvY2Vzc2VkIG9uIGFuIE9TRC5YLCBkdXJpbmcgd2hpY2ggdGhlIGFjdGlu
+ZyBwcmltYXJ5IHR1cm4gImRvd24iIGR1ZSB0byBzb21lIGVycm9yIGFuZCBPU0QuWCBpcyBjaG9z
+ZW4gdG8gYmUgdGhlIG5ldyBhY3RpbmcgcHJpbWFyeS4gU2luY2UgT1NELlggaXMgYSByZXBsaWNh
+IE9TRCBmb3IgTU9TRFJlcE9wIE0sIGhvdyBjYW4gY2xpZW50IEEgYmUgYWNrZWQgYWZ0ZXIgT1NE
+LlggZmluaXNoZWQgdGhlIHByb2Nlc3Npbmcgb2YgTT8gT3IgZG9lcyBBIGJlIGFja2VkIGF0IGFs
+bCBpbiB0aGlzIGtpbmQgb2YgY2lyY3Vtc3RhbmNlcz8KPgo+VGhlIGNsaWVudCBpcyBub3QgYWNr
+ZWQgYnkgT1NELlgsIGJ1dCB3aGVuIHRoZSBjbGllbnQgc2VlcyB0aGUgT1NETWFwCj5tYXJraW5n
+IGRvd24gdGhlIHByZXZpb3VzIHByaW1hcnksIGl0IHdpbGwgcmVzdWJtaXQgTU9TRE9wTSB0byBP
+U0QuWAo+KGFuZCBpbmNyZW1lbnQgdGhlIHJldHJ5IGNvdW50ZXIpLiBPU0QuWCB3aWxsIG5vdGlj
+ZSB0aGF0IE1PU0RPcE0gaGFzCj5hbHJlYWR5IGJlZW4gY29tcGxldGVkIGFuZCByZXBseSB3aXRo
+IHRoZSBzYW1lIGFuc3dlciBpdCBnYXZlCj5wcmV2aW91c2x5LlsxXQo+LUdyZWcKPlsxXTogQmFy
+cmluZyBwcm90b2NvbCBvciBpbXBsZW1lbnRhdGlvbiBidWdzLiBUaGVyZSBoYXZlIGhpc3Rvcmlj
+YWxseQo+YmVlbiBzb21lIGlzc3VlcyB3aXRoIHRoaW5ncyBsaWtlIChzdWNjZXNzZnVsKSBkZWxl
+dGVzIHJldHVybmluZwo+RU5PRU5UIGluc3RlYWQgb2YgMDsgSSBkb24ndCByZW1lbWJlciBpZiBh
+bGwgdGhlIGtub3duIG9uZXMgaGF2ZSBiZWVuCj5zcXVhc2hlZCBvciBub3QuCg==
