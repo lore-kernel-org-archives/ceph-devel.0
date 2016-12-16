@@ -1,49 +1,46 @@
-From: xxhdx1985126 <xxhdx1985126@163.com>
-Subject: Re:Re: Question about write op processing of OSD
-Date: Fri, 16 Dec 2016 10:09:56 +0800 (CST)
-Message-ID: <1ea7f271.2e1c.15905649b64.Coremail.xxhdx1985126@163.com>
-References: <1d497a83.c1b.15904fdf41e.Coremail.xxhdx1985126@163.com>
- <CAJ4mKGaQ0UYWOnLshUJob1rdjTc2f_K1_qagGp4mh0x_ZjgNDA@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: Bluestore performance bottleneck
+Date: Fri, 16 Dec 2016 03:30:03 +0000
+Message-ID: <5E3E05AED7F0F044904275810D0CB465038CEA@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GBK
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mproxyhzb2.163.com ([123.58.178.202]:53641 "EHLO
-        mproxyhzb2.163.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758904AbcLPC2I (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 15 Dec 2016 21:28:08 -0500
-In-Reply-To: <CAJ4mKGaQ0UYWOnLshUJob1rdjTc2f_K1_qagGp4mh0x_ZjgNDA@mail.gmail.com>
+Received: from mail-by2nam03on0047.outbound.protection.outlook.com ([104.47.42.47]:51904
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1756829AbcLPDaJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 15 Dec 2016 22:30:09 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-ClRoYW5rcyBmb3IgdGhlIHF1aWNrIHJlcGx5Oi0pCgpJcyBpdCBwb3NzaWJsZSB0aGF0IHRoZSBj
-bGllbnQgcmVzdWJtaXQgTSBhZnRlciB0aGUgbmV3ICJQZWVyaW5nIiBwcm9jZXNzIGNvbXBsZXRl
-cyBidXQgYmVmb3JlIHRoZSBwcm9jZXNzaW5nIG9mIE0gaXMgY29tcGxldGVkIG9uIE9TRC5YPyBJ
-J20gYXNraW5nIHRoaXMgYmVjYXVzZSBhcyBmYXIgYXMgSSB1bmRlcnN0YW5kLCBpZiB0aGUgImR1
-cCIgcmVxIGlzIG5vdCBhbHJlYWR5IGNvbXBsZXRlZCwgdGhlIE9TRCB3aWxsIHB1dCBpdCBpbiB0
-aGUgIndhaXRpbmdnX2Zvcl9vbmRpc2siIGFuZCAid2FpdGluZ19mb3JfYWNrIiBxdWV1ZSB3aGlj
-aCBhcmUgb25seSBhY2Nlc3NlZCB3aGVuIHRoZSBwcmV2aW91cyByZXBvcCBjb21wbGV0ZXMgImNv
-bW1pdCIgYW5kICJhcHBseSIgcHJvY2VzcyBhbmQgYXJlIG5vdCBhY2Nlc3NlZCBpbiB0aGlzIHNj
-ZW5hcmlvIHNpbmNlIHRoZXJlIGlzIG5vIHN1Y2ggInByZXZpb3VzIHJlcG9wIi4KClRoYW5rczot
-KQoKQXQgMjAxNi0xMi0xNiAwODozNToxNSwgIkdyZWdvcnkgRmFybnVtIiA8Z2Zhcm51bUByZWRo
-YXQuY29tPiB3cm90ZToKPk9uIFRodSwgRGVjIDE1LCAyMDE2IGF0IDQ6MTcgUE0sIHh4aGR4MTk4
-NTEyNiA8eHhoZHgxOTg1MTI2QDE2My5jb20+IHdyb3RlOgo+Pgo+PiBIaSwgZXZlcnlvbmUuCj4+
-Cj4+Cj4+IFdoYXQgd2lsbCB0aGUgT1NEIGRvIGluIHRoZSBmb2xsb3dpbmcgc2NlbmFyaW8/Cj4+
-Cj4+ICAgICAgICBTYXksIGEgTU9TRFJlcG9wIE0gdGhhdCBpcyBpbml0aWF0ZWQgYXQgY2xpZW50
-IEEgaXMgYmVpbmcgcHJvY2Vzc2VkIG9uIGFuIE9TRC5YLCBkdXJpbmcgd2hpY2ggdGhlIGFjdGlu
-ZyBwcmltYXJ5IHR1cm4gImRvd24iIGR1ZSB0byBzb21lIGVycm9yIGFuZCBPU0QuWCBpcyBjaG9z
-ZW4gdG8gYmUgdGhlIG5ldyBhY3RpbmcgcHJpbWFyeS4gU2luY2UgT1NELlggaXMgYSByZXBsaWNh
-IE9TRCBmb3IgTU9TRFJlcE9wIE0sIGhvdyBjYW4gY2xpZW50IEEgYmUgYWNrZWQgYWZ0ZXIgT1NE
-LlggZmluaXNoZWQgdGhlIHByb2Nlc3Npbmcgb2YgTT8gT3IgZG9lcyBBIGJlIGFja2VkIGF0IGFs
-bCBpbiB0aGlzIGtpbmQgb2YgY2lyY3Vtc3RhbmNlcz8KPgo+VGhlIGNsaWVudCBpcyBub3QgYWNr
-ZWQgYnkgT1NELlgsIGJ1dCB3aGVuIHRoZSBjbGllbnQgc2VlcyB0aGUgT1NETWFwCj5tYXJraW5n
-IGRvd24gdGhlIHByZXZpb3VzIHByaW1hcnksIGl0IHdpbGwgcmVzdWJtaXQgTU9TRE9wTSB0byBP
-U0QuWAo+KGFuZCBpbmNyZW1lbnQgdGhlIHJldHJ5IGNvdW50ZXIpLiBPU0QuWCB3aWxsIG5vdGlj
-ZSB0aGF0IE1PU0RPcE0gaGFzCj5hbHJlYWR5IGJlZW4gY29tcGxldGVkIGFuZCByZXBseSB3aXRo
-IHRoZSBzYW1lIGFuc3dlciBpdCBnYXZlCj5wcmV2aW91c2x5LlsxXQo+LUdyZWcKPlsxXTogQmFy
-cmluZyBwcm90b2NvbCBvciBpbXBsZW1lbnRhdGlvbiBidWdzLiBUaGVyZSBoYXZlIGhpc3Rvcmlj
-YWxseQo+YmVlbiBzb21lIGlzc3VlcyB3aXRoIHRoaW5ncyBsaWtlIChzdWNjZXNzZnVsKSBkZWxl
-dGVzIHJldHVybmluZwo+RU5PRU5UIGluc3RlYWQgb2YgMDsgSSBkb24ndCByZW1lbWJlciBpZiBh
-bGwgdGhlIGtub3duIG9uZXMgaGF2ZSBiZWVuCj5zcXVhc2hlZCBvciBub3QuCg==
+Sage,
+Today morning I was talking about 2x performance drop for Bluestore without=
+ data/db writes for 1G vs 60G volumes and it turn out the decode_some() is =
+the culprit for that. Presently, I am drilling down that function to identi=
+fy what exactly causing this issue, but, most probably it is blob decode an=
+d le->blob->get_ref() combination. Will confirm that soon. If we can fix th=
+at we should be able to considerably bump up end-to-end pick performance wi=
+th rocks/ZS on faster NVME. Slower devices most likely we will not be able =
+to see any benefits other than saving some cpu cost.
+
+Thanks & Regards
+Somnath
+
+
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
+
