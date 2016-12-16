@@ -1,74 +1,93 @@
-From: Amon Ott <a.ott@m-privacy.de>
+From: Wido den Hollander <wido@42on.com>
 Subject: Re: Ceph connections with TLS
-Date: Fri, 16 Dec 2016 12:39:15 +0100
-Message-ID: <5c5a54bc-4527-6e95-7d24-e7ce1200f0d7@m-privacy.de>
+Date: Fri, 16 Dec 2016 13:30:26 +0100 (CET)
+Message-ID: <274802089.4698.1481891426375@ox.pcextreme.nl>
 References: <7a01ab71-66eb-46d2-3990-c325f8d36a16@m-privacy.de>
  <417867875.4693.1481886637522@ox.pcextreme.nl>
+ <5c5a54bc-4527-6e95-7d24-e7ce1200f0d7@m-privacy.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www1.m-privacy.de ([85.214.254.135]:50684 "EHLO
-        www1.m-privacy.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1759600AbcLPLjZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2016 06:39:25 -0500
-In-Reply-To: <417867875.4693.1481886637522@ox.pcextreme.nl>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:45367 "EHLO
+        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755835AbcLPMac (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Dec 2016 07:30:32 -0500
+In-Reply-To: <5c5a54bc-4527-6e95-7d24-e7ce1200f0d7@m-privacy.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: Amon Ott <a.ott@m-privacy.de>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Am 16.12.2016 um 12:10 schrieb Wido den Hollander:
+
+> Op 16 december 2016 om 12:39 schreef Amon Ott <a.ott@m-privacy.de>:
 > 
->> Op 16 december 2016 om 11:15 schreef Amon Ott <a.ott@m-privacy.de>:
->> for a customer we are currently designing a ceph cluster, which shall be
->> spread over two data centers. Data in the Ceph cluster is slightly
->> confidential, so we would like to encrypt at least all Ceph traffic over
->> the fast data center connection link.
->>
 > 
-> Fast as in low latency? Writes in Ceph are synchronous, so keep in mind that any increase in latency will decrease the write performance/latency on your Ceph cluster.
-
-Yes, we expect low latency and high bandwidth, but a connection shared
-with other services. Having locality for accesses by clients would of
-course help, too.
-
->> AFAICS, Ceph does not support data encryption at connection level yet,
->> so we would have to setup VPN links between the two cluster networks.
->> This means extra configuration, maintenance and overhead.
->>
->> How far away is TLS support or something similar for the Ceph
->> connections? AFAIK, TLS support should not be hard to implement, but I
->> am not too familiar with Ceph internals.
->>
+> Am 16.12.2016 um 12:10 schrieb Wido den Hollander:
+> > 
+> >> Op 16 december 2016 om 11:15 schreef Amon Ott <a.ott@m-privacy.de>:
+> >> for a customer we are currently designing a ceph cluster, which shall be
+> >> spread over two data centers. Data in the Ceph cluster is slightly
+> >> confidential, so we would like to encrypt at least all Ceph traffic over
+> >> the fast data center connection link.
+> >>
+> > 
+> > Fast as in low latency? Writes in Ceph are synchronous, so keep in mind that any increase in latency will decrease the write performance/latency on your Ceph cluster.
 > 
-> Afaik there is no work currently in progress.
+> Yes, we expect low latency and high bandwidth, but a connection shared
+> with other services. Having locality for accesses by clients would of
+> course help, too.
+> 
 
-I feared so.
+You can play a bit with primary affinity or modify CRUSH in such a way that the primary OSDs are always in the local DC.
 
-> You might implement IPSec on the nodes itself. You might call that a VPN obviously, but IPSec can also just encrypt packets between nodes.
+> >> AFAICS, Ceph does not support data encryption at connection level yet,
+> >> so we would have to setup VPN links between the two cluster networks.
+> >> This means extra configuration, maintenance and overhead.
+> >>
+> >> How far away is TLS support or something similar for the Ceph
+> >> connections? AFAIK, TLS support should not be hard to implement, but I
+> >> am not too familiar with Ceph internals.
+> >>
+> > 
+> > Afaik there is no work currently in progress.
+> 
+> I feared so.
+> 
+> > You might implement IPSec on the nodes itself. You might call that a VPN obviously, but IPSec can also just encrypt packets between nodes.
+> 
+> Having quite a bit of experience with OpenVPN, we would rather use that
+> than IPSec, and we would do it right on the Ceph nodes. Still, TLS in
+> the connections would be better for lower latency.
+> 
+> Also, we then need VPN connections between all nodes as well as from all
+> clients to all nodes in the other location. The latter could be routed
+> through local Ceph nodes, but that would give even more latency.
+> 
 
-Having quite a bit of experience with OpenVPN, we would rather use that
-than IPSec, and we would do it right on the Ceph nodes. Still, TLS in
-the connections would be better for lower latency.
+True. Isn't the a possibility to encrypt the data before it goes into Ceph? I don't know what the use-case is, but if it is RBD why not encrypt the whole RBD device with LUKS / dm-crypt?
 
-Also, we then need VPN connections between all nodes as well as from all
-clients to all nodes in the other location. The latter could be routed
-through local Ceph nodes, but that would give even more latency.
+Just an idea though.
 
-Thanks for your answer,
+Wido
 
-Amon.
--- 
-Dr. Amon Ott
-m-privacy GmbH           Tel: +49 30 24342334
-Werner-Voß-Damm 62       Fax: +49 30 99296856
-12101 Berlin             http://www.m-privacy.de
-
-Amtsgericht Charlottenburg, HRB 84946
-
-Geschäftsführer:
- Dipl.-Kfm. Holger Maczkowsky,
- Roman Maczkowsky
-
-GnuPG-Key-ID: 0x2DD3A649
-
+> Thanks for your answer,
+> 
+> Amon.
+> -- 
+> Dr. Amon Ott
+> m-privacy GmbH           Tel: +49 30 24342334
+> Werner-Voß-Damm 62       Fax: +49 30 99296856
+> 12101 Berlin             http://www.m-privacy.de
+> 
+> Amtsgericht Charlottenburg, HRB 84946
+> 
+> Geschäftsführer:
+>  Dipl.-Kfm. Holger Maczkowsky,
+>  Roman Maczkowsky
+> 
+> GnuPG-Key-ID: 0x2DD3A649
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
