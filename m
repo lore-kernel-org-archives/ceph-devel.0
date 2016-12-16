@@ -1,441 +1,153 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Fri, 16 Dec 2016 00:54:45 -0800
-Message-ID: <5853abd51227f_1a4cde333479531@ss1435.mail>
+From: =?UTF-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass@univ-lorraine.fr>
+Subject: Re: Re : Performance issues on Jewel 10.2.2
+Date: Fri, 16 Dec 2016 10:37:44 +0100
+Message-ID: <33981ae8-4c7a-b053-39ca-a9f2324486b1@univ-lorraine.fr>
+References: <CAL2-6bJ9RkB5rdSzauxtLZWwv5_hv9=7LKEAiiR1KTbRZ9tcFQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from o5.24nn.shared.sendgrid.net ([50.31.63.1]:55203 "EHLO
-        o5.24nn.shared.sendgrid.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S932284AbcLPIzV (ORCPT
+Received: from mta-outslow2.mel.univ-lorraine.fr ([193.54.32.12]:38000 "EHLO
+        mta-outslow2.mel.univ-lorraine.fr" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1754990AbcLPJhs (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 16 Dec 2016 03:55:21 -0500
-Received: from coverity.com (static-208.69.177.245.nephosdns.com [208.69.177.245])
-        by ismtpd0004p1sjc2.sendgrid.net (SG) with ESMTP id waCPmVFzS8Catx1cA8pubA
-        for <ceph-devel@vger.kernel.org>; Fri, 16 Dec 2016 08:54:45.111 +0000 (UTC)
+        Fri, 16 Dec 2016 04:37:48 -0500
+In-Reply-To: <CAL2-6bJ9RkB5rdSzauxtLZWwv5_hv9=7LKEAiiR1KTbRZ9tcFQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
+To: Vincent Godin <vince.mlist@gmail.com>
+Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
 Hi,
 
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+1 - rados or rbd bug ? We're using rados bench.
 
-13 new defect(s) introduced to ceph found with Coverity Scan.
-10 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+2 - This is not bandwith related. If it was, it should happen almost 
+instantly and not 15 minutes after I start to write to the pool.
+Once it has happened on the pool, I can then reproduce with a fewer 
+--concurrent-ios, like 12 or even 1.
 
-New defect(s) Reported-by: Coverity Scan
-Showing 13 of 13 defect(s)
+This happens with :
+OSDs journals on SSDs with the SAS drives in Raid0 writeback with XFS 
+and split/merge threshold 10/2 (default)
+OSDs journals on SSDs with the SAS drives in Raid0 writeback with XFS 
+and split/merge threshold 40/8
+OSDs journals on SSDs with the SAS drives in Raid0 writeback with btrfs 
+and split/merge threshold 10/2 (default)
+OSDs journals on SAS drives (not using the SSDs) in Raid0 writeback with 
+XFS and split/merge threshold 10/2 (default)
+OSDs journals on SAS drives (not using the SSDs) in Raid0 write-through 
+with XFS and split/merge threshold 10/2 (default). PERC H730p mini is 
+not the culprit apparently.
 
+I tried with bluestore but OSDs wouldn't launch (even with an 
+experimental ... = * set. I suppose its disabled within RHCS 2.0) so I 
+couldn't tell if this is filestore related.
 
-** CID 1397254:  Security best practices violations  (DC.WEAK_CRYPTO)
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 11969 in PrimaryLogPG::agent_setup()()
+When the rados bench stops writing, we can see slow requests, and one or 
+more SAS drives hitting 100% iostat usage, even with --concurrent-ios=1. 
+With full debug on this particular OSD, we don't see any filestore 
+operation anymore.
+Just some recurring sched_scrub task and then some :
 
+    -25> 2016-12-16 10:08:41.891756 7f8855051700  1 heartbeat_map 
+is_healthy 'FileStore::op_tp thread 0x7f8865903700' had timed out after 60
+    -24> 2016-12-16 10:08:41.891758 7f8855051700  1 heartbeat_map 
+is_healthy 'FileStore::op_tp thread 0x7f8866104700' had timed out after 60
+    -23> 2016-12-16 10:08:41.891759 7f8855051700  1 heartbeat_map 
+is_healthy 'FileStore::op_tp thread 0x7f885f0f6700' had timed out after 60
+    -22> 2016-12-16 10:08:41.891772 7f8856b57700  1 heartbeat_map 
+is_healthy 'OSD::osd_op_tp thread 0x7f8842f10700' had timed out after 15
+    -21> 2016-12-16 10:08:41.891775 7f8856b57700  1 heartbeat_map 
+is_healthy 'OSD::osd_op_tp thread 0x7f884641b700' had timed out after 15
+    -20> 2016-12-16 10:08:41.891777 7f8856b57700  1 heartbeat_map 
+is_healthy 'FileStore::op_tp thread 0x7f885f8f7700' had timed out after 60
+    -19> 2016-12-16 10:08:41.891779 7f8856b57700  1 heartbeat_map 
+is_healthy 'FileStore::op_tp thread 0x7f88600f8700' had timed out after 60
 
-________________________________________________________________________________________________________
-*** CID 1397254:  Security best practices violations  (DC.WEAK_CRYPTO)
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 11969 in PrimaryLogPG::agent_setup()()
-11963     
-11964         // choose random starting position
-11965         agent_state->position = hobject_t();
-11966         agent_state->position.pool = info.pgid.pool();
-11967         agent_state->position.set_hash(pool.info.get_random_pg_position(
-11968           info.pgid.pgid,
->>>     CID 1397254:  Security best practices violations  (DC.WEAK_CRYPTO)
->>>     "rand" should not be used for security related applications, as linear congruential algorithms are too easy to break.
-11969           rand()));
-11970         agent_state->start = agent_state->position;
-11971     
-11972         dout(10) << __func__ << " allocated new state, position "
-11973     	     << agent_state->position << dendl;
-11974       } else {
+then the OSD hit the suicide timeout :
 
-** CID 1397255:  Incorrect expression  (DIVIDE_BY_ZERO)
-/home/brad/working/src/ceph/src/osd/OSDMap.cc: 2995 in OSDMap::summarize_mapping_stats(OSDMap*, const std::set<long, std::less<long>, std::allocator<long>> *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> *, ceph::Formatter *) const()
+      0> 2016-12-16 10:08:42.031740 7f8856b57700 -1 
+common/HeartbeatMap.cc: In function 'bool 
+ceph::HeartbeatMap::_check(const ceph::heartbeat_handle_d*, const char*, 
+time_t)' thread 7f8856b57700 time 2016-12-16 10:08:42.029391
+common/HeartbeatMap.cc: 86: FAILED assert(0 == "hit suicide timeout")
 
+  ceph version 10.2.2-41.el7cp (1ac1c364ca12fa985072174e75339bfb1f50e9ee)
+  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char 
+const*)+0x85) [0x7f887873be25]
+  2: (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d const*, char 
+const*, long)+0x2e1) [0x7f88786783a1]
+  3: (ceph::HeartbeatMap::is_healthy()+0xde) [0x7f8878678bfe]
+  4: (OSD::handle_osd_ping(MOSDPing*)+0x93f) [0x7f88780b206f]
+  5: (OSD::heartbeat_dispatch(Message*)+0x3cb) [0x7f88780b329b]
+  6: (DispatchQueue::entry()+0x78a) [0x7f88787fcd0a]
+  7: (DispatchQueue::DispatchThread::entry()+0xd) [0x7f887871761d]
+  8: (()+0x7dc5) [0x7f887666adc5]
+  9: (clone()+0x6d) [0x7f8874cf673d]
+  NOTE: a copy of the executable, or `objdump -rdS <executable>` is 
+needed to interpret this.
 
-________________________________________________________________________________________________________
-*** CID 1397255:  Incorrect expression  (DIVIDE_BY_ZERO)
-/home/brad/working/src/ceph/src/osd/OSDMap.cc: 2995 in OSDMap::summarize_mapping_stats(OSDMap*, const std::set<long, std::less<long>, std::allocator<long>> *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> *, ceph::Formatter *) const()
-2989         f->open_object_section("utilization");
-2990       if (newmap) {
-2991         if (f) {
-2992           f->dump_unsigned("moved_pgs", moved_pg);
-2993           f->dump_unsigned("total_pgs", total_pg);
-2994         } else {
->>>     CID 1397255:  Incorrect expression  (DIVIDE_BY_ZERO)
->>>     In expression "(float)moved_pg * 100. / (float)total_pg", division by expression "total_pg" which may be zero has undefined behavior.
-2995           ss << "moved " << moved_pg << " / " << total_pg
-2996     	 << " (" << ((float)moved_pg * 100.0 / (float)total_pg) << "%)\n";
-2997         }
-2998       }
-2999       if (f) {
-3000         f->dump_float("avg_pgs", avg_pg);
+--- logging levels ---
+    0/ 5 none
+    0/ 1 lockdep
+    0/ 1 context
+    1/ 1 crush
+    1/ 5 mds
+    1/ 5 mds_balancer
+    1/ 5 mds_locker
+[...]
+    1/ 5 kstore
+    4/ 5 rocksdb
+    4/ 5 leveldb
+    1/ 5 kinetic
+    1/ 5 fuse
+   -2/-2 (syslog threshold)
+   -1/-1 (stderr threshold)
+   max_recent     10000
+   max_new         1000
+   log_file /var/log/ceph/ceph-osd.16.log
+--- end dump of recent events ---
 
-** CID 1397256:    (INVALIDATE_ITERATOR)
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1153 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1158 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1152 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1162 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1340 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1345 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1339 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1349 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
+and comes back to life on its own 2'42" later.
 
+We use ceph version 10.2.2-41.el7cp 
+(1ac1c364ca12fa985072174e75339bfb1f50e9ee) (RHCS 2.0).
 
-________________________________________________________________________________________________________
-*** CID 1397256:    (INVALIDATE_ITERATOR)
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1153 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-1147     
-1148     	  hobject_t candidate;
-1149     	  if (mcand == lcand) {
-1150     	    candidate = mcand;
-1151     	    if (!mcand.is_max()) {
-1152     	      ++ls_iter;
->>>     CID 1397256:    (INVALIDATE_ITERATOR)
->>>     Incrementing iterator "missing_iter" though it is already past the end of its container.
-1153     	      ++missing_iter;
-1154     	    }
-1155     	  } else if (cmp(mcand, lcand, get_sort_bitwise()) < 0) {
-1156     	    candidate = mcand;
-1157     	    assert(!mcand.is_max());
-1158     	    ++missing_iter;
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1158 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-1152     	      ++ls_iter;
-1153     	      ++missing_iter;
-1154     	    }
-1155     	  } else if (cmp(mcand, lcand, get_sort_bitwise()) < 0) {
-1156     	    candidate = mcand;
-1157     	    assert(!mcand.is_max());
->>>     CID 1397256:    (INVALIDATE_ITERATOR)
->>>     Incrementing iterator "missing_iter" though it is already past the end of its container.
-1158     	    ++missing_iter;
-1159     	  } else {
-1160     	    candidate = lcand;
-1161     	    assert(!lcand.is_max());
-1162     	    ++ls_iter;
-1163     	  }
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1152 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-1146     	    *ls_iter;
-1147     
-1148     	  hobject_t candidate;
-1149     	  if (mcand == lcand) {
-1150     	    candidate = mcand;
-1151     	    if (!mcand.is_max()) {
->>>     CID 1397256:    (INVALIDATE_ITERATOR)
->>>     Incrementing iterator "ls_iter" though it is already past the end of its container.
-1152     	      ++ls_iter;
-1153     	      ++missing_iter;
-1154     	    }
-1155     	  } else if (cmp(mcand, lcand, get_sort_bitwise()) < 0) {
-1156     	    candidate = mcand;
-1157     	    assert(!mcand.is_max());
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1162 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-1156     	    candidate = mcand;
-1157     	    assert(!mcand.is_max());
-1158     	    ++missing_iter;
-1159     	  } else {
-1160     	    candidate = lcand;
-1161     	    assert(!lcand.is_max());
->>>     CID 1397256:    (INVALIDATE_ITERATOR)
->>>     Incrementing iterator "ls_iter" though it is already past the end of its container.
-1162     	    ++ls_iter;
-1163     	  }
-1164     
-1165               dout(10) << " pgnls candidate 0x" << std::hex << candidate.get_hash()
-1166                 << " vs lower bound 0x" << lower_bound.get_hash() << dendl;
-1167     
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1340 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-1334     
-1335     	  hobject_t candidate;
-1336     	  if (mcand == lcand) {
-1337     	    candidate = mcand;
-1338     	    if (!mcand.is_max()) {
-1339     	      ++ls_iter;
->>>     CID 1397256:    (INVALIDATE_ITERATOR)
->>>     Incrementing iterator "missing_iter" though it is already past the end of its container.
-1340     	      ++missing_iter;
-1341     	    }
-1342     	  } else if (cmp(mcand, lcand, get_sort_bitwise()) < 0) {
-1343     	    candidate = mcand;
-1344     	    assert(!mcand.is_max());
-1345     	    ++missing_iter;
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1345 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-1339     	      ++ls_iter;
-1340     	      ++missing_iter;
-1341     	    }
-1342     	  } else if (cmp(mcand, lcand, get_sort_bitwise()) < 0) {
-1343     	    candidate = mcand;
-1344     	    assert(!mcand.is_max());
->>>     CID 1397256:    (INVALIDATE_ITERATOR)
->>>     Incrementing iterator "missing_iter" though it is already past the end of its container.
-1345     	    ++missing_iter;
-1346     	  } else {
-1347     	    candidate = lcand;
-1348     	    assert(!lcand.is_max());
-1349     	    ++ls_iter;
-1350     	  }
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1339 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-1333     	    *ls_iter;
-1334     
-1335     	  hobject_t candidate;
-1336     	  if (mcand == lcand) {
-1337     	    candidate = mcand;
-1338     	    if (!mcand.is_max()) {
->>>     CID 1397256:    (INVALIDATE_ITERATOR)
->>>     Incrementing iterator "ls_iter" though it is already past the end of its container.
-1339     	      ++ls_iter;
-1340     	      ++missing_iter;
-1341     	    }
-1342     	  } else if (cmp(mcand, lcand, get_sort_bitwise()) < 0) {
-1343     	    candidate = mcand;
-1344     	    assert(!mcand.is_max());
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 1349 in PrimaryLogPG::do_pg_op(std::shared_ptr<OpRequest>)()
-1343     	    candidate = mcand;
-1344     	    assert(!mcand.is_max());
-1345     	    ++missing_iter;
-1346     	  } else {
-1347     	    candidate = lcand;
-1348     	    assert(!lcand.is_max());
->>>     CID 1397256:    (INVALIDATE_ITERATOR)
->>>     Incrementing iterator "ls_iter" though it is already past the end of its container.
-1349     	    ++ls_iter;
-1350     	  }
-1351     
-1352     	  if (cmp(candidate, next, get_sort_bitwise()) >= 0) {
-1353     	    break;
-1354     	  }
+We're hitting something here.
 
-** CID 1397257:  Control flow issues  (MISSING_BREAK)
-/src/pybind/cephfs/cephfs.c: 13276 in __pyx_pw_6cephfs_9LibCephFS_77readlink()
+Regards,
+
+Frederic.
 
 
-________________________________________________________________________________________________________
-*** CID 1397257:  Control flow issues  (MISSING_BREAK)
-/src/pybind/cephfs/cephfs.c: 13276 in __pyx_pw_6cephfs_9LibCephFS_77readlink()
-13270           }
-13271           kw_args = PyDict_Size(__pyx_kwds);
-13272           switch (pos_args) {
-13273             case  0:
-13274             if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_path)) != 0)) kw_args--;
-13275             else goto __pyx_L5_argtuple_error;
->>>     CID 1397257:  Control flow issues  (MISSING_BREAK)
->>>     The above case falls through to this one.
-13276             case  1:
-13277             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_size)) != 0)) kw_args--;
-13278             else {
-13279               __Pyx_RaiseArgtupleInvalid("readlink", 1, 2, 2, 1); __PYX_ERR(0, 868, __pyx_L3_error)
-13280             }
-13281           }
-
-** CID 1397258:  Control flow issues  (MISSING_BREAK)
-/src/pybind/cephfs/cephfs.c: 14157 in __pyx_pw_6cephfs_9LibCephFS_83mds_command()
-
-
-________________________________________________________________________________________________________
-*** CID 1397258:  Control flow issues  (MISSING_BREAK)
-/src/pybind/cephfs/cephfs.c: 14157 in __pyx_pw_6cephfs_9LibCephFS_83mds_command()
-14151           }
-14152           kw_args = PyDict_Size(__pyx_kwds);
-14153           switch (pos_args) {
-14154             case  0:
-14155             if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_mds_spec)) != 0)) kw_args--;
-14156             else goto __pyx_L5_argtuple_error;
->>>     CID 1397258:  Control flow issues  (MISSING_BREAK)
->>>     The above case falls through to this one.
-14157             case  1:
-14158             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_args)) != 0)) kw_args--;
-14159             else {
-14160               __Pyx_RaiseArgtupleInvalid("mds_command", 1, 3, 3, 1); __PYX_ERR(0, 911, __pyx_L3_error)
-14161             }
-14162             case  2:
-
-** CID 1397259:  Control flow issues  (MISSING_BREAK)
-/src/pybind/cephfs/cephfs.c: 13844 in __pyx_pw_6cephfs_9LibCephFS_81rename()
-
-
-________________________________________________________________________________________________________
-*** CID 1397259:  Control flow issues  (MISSING_BREAK)
-/src/pybind/cephfs/cephfs.c: 13844 in __pyx_pw_6cephfs_9LibCephFS_81rename()
-13838           }
-13839           kw_args = PyDict_Size(__pyx_kwds);
-13840           switch (pos_args) {
-13841             case  0:
-13842             if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_src)) != 0)) kw_args--;
-13843             else goto __pyx_L5_argtuple_error;
->>>     CID 1397259:  Control flow issues  (MISSING_BREAK)
->>>     The above case falls through to this one.
-13844             case  1:
-13845             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dst)) != 0)) kw_args--;
-13846             else {
-13847               __Pyx_RaiseArgtupleInvalid("rename", 1, 2, 2, 1); __PYX_ERR(0, 896, __pyx_L3_error)
-13848             }
-13849           }
-
-** CID 1397260:  Control flow issues  (MISSING_BREAK)
-/src/pybind/cephfs/cephfs.c: 14162 in __pyx_pw_6cephfs_9LibCephFS_83mds_command()
-
-
-________________________________________________________________________________________________________
-*** CID 1397260:  Control flow issues  (MISSING_BREAK)
-/src/pybind/cephfs/cephfs.c: 14162 in __pyx_pw_6cephfs_9LibCephFS_83mds_command()
-14156             else goto __pyx_L5_argtuple_error;
-14157             case  1:
-14158             if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_args)) != 0)) kw_args--;
-14159             else {
-14160               __Pyx_RaiseArgtupleInvalid("mds_command", 1, 3, 3, 1); __PYX_ERR(0, 911, __pyx_L3_error)
-14161             }
->>>     CID 1397260:  Control flow issues  (MISSING_BREAK)
->>>     The above case falls through to this one.
-14162             case  2:
-14163             if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_input_data)) != 0)) kw_args--;
-14164             else {
-14165               __Pyx_RaiseArgtupleInvalid("mds_command", 1, 3, 3, 2); __PYX_ERR(0, 911, __pyx_L3_error)
-14166             }
-14167           }
-
-** CID 1397261:  Integer handling issues  (NEGATIVE_RETURNS)
-/src/pybind/cephfs/cephfs.c: 13408 in __pyx_pf_6cephfs_9LibCephFS_76readlink()
-
-
-________________________________________________________________________________________________________
-*** CID 1397261:  Integer handling issues  (NEGATIVE_RETURNS)
-/src/pybind/cephfs/cephfs.c: 13408 in __pyx_pf_6cephfs_9LibCephFS_76readlink()
-13402      *             char* _path = path
-13403      *             int64_t _size = size             # <<<<<<<<<<<<<<
-13404      *             char *buf = NULL
-13405      * 
-13406      */
-13407       __pyx_t_7 = __Pyx_PyInt_As_int64_t(__pyx_v_size); if (unlikely((__pyx_t_7 == (int64_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 874, __pyx_L1_error)
->>>     CID 1397261:  Integer handling issues  (NEGATIVE_RETURNS)
->>>     Assigning: signed variable "__pyx_v__size" = "__pyx_t_7".
-13408       __pyx_v__size = __pyx_t_7;
-13409     
-13410       /* "cephfs.pyx":875
-13411      *             char* _path = path
-13412      *             int64_t _size = size
-13413      *             char *buf = NULL             # <<<<<<<<<<<<<<
-
-** CID 1397262:  Resource leaks  (RESOURCE_LEAK)
-/src/pybind/cephfs/cephfs.c: 14709 in __pyx_pf_6cephfs_9LibCephFS_82mds_command()
-
-
-________________________________________________________________________________________________________
-*** CID 1397262:  Resource leaks  (RESOURCE_LEAK)
-/src/pybind/cephfs/cephfs.c: 14709 in __pyx_pf_6cephfs_9LibCephFS_82mds_command()
-14703       __Pyx_XDECREF(__pyx_v_my_outbuf);
-14704       __Pyx_XDECREF(__pyx_v_mds_spec);
-14705       __Pyx_XDECREF(__pyx_v_args);
-14706       __Pyx_XDECREF(__pyx_v_input_data);
-14707       __Pyx_XGIVEREF(__pyx_r);
-14708       __Pyx_RefNannyFinishContext();
->>>     CID 1397262:  Resource leaks  (RESOURCE_LEAK)
->>>     Variable "__pyx_v__cmd" going out of scope leaks the storage it points to.
-14709       return __pyx_r;
-14710     }
-14711     
-14712     /* "cephfs.pyx":318
-14713      *     """libcephfs python wrapper"""
-14714      * 
-
-** CID 1397263:  Error handling issues  (UNCAUGHT_EXCEPT)
-/home/brad/working/src/ceph/src/rgw/rgw_main.cc: 194 in main()
-
-
-________________________________________________________________________________________________________
-*** CID 1397263:  Error handling issues  (UNCAUGHT_EXCEPT)
-/home/brad/working/src/ceph/src/rgw/rgw_main.cc: 194 in main()
-188     }
-189     
-190     
-191     /*
-192      * start up the RADOS connection and then handle HTTP messages as they come in
-193      */
->>>     CID 1397263:  Error handling issues  (UNCAUGHT_EXCEPT)
->>>     In function "main(int, char const **)" an exception of type "std::length_error" is thrown and never caught.
-194     int main(int argc, const char **argv)
-195     {
-196       // dout() messages will be sent to stderr, but FCGX wants messages on stdout
-197       // Redirect stderr to stdout.
-198       TEMP_FAILURE_RETRY(close(STDERR_FILENO));
-199       if (TEMP_FAILURE_RETRY(dup2(STDOUT_FILENO, STDERR_FILENO) < 0)) {
-
-** CID 1397264:  Uninitialized members  (UNINIT_CTOR)
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.h: 607 in PrimaryLogPG::OpContext::OpContext(std::shared_ptr<OpRequest>, osd_reqid_t, std::vector<OSDOp, std::allocator<OSDOp>> &, PrimaryLogPG*)()
-
-
-________________________________________________________________________________________________________
-*** CID 1397264:  Uninitialized members  (UNINIT_CTOR)
-/home/brad/working/src/ceph/src/osd/PrimaryLogPG.h: 607 in PrimaryLogPG::OpContext::OpContext(std::shared_ptr<OpRequest>, osd_reqid_t, std::vector<OSDOp, std::allocator<OSDOp>> &, PrimaryLogPG*)()
-601           data_off(0), reply(NULL), pg(_pg),
-602           num_read(0),
-603           num_write(0),
-604           copy_cb(NULL),
-605           async_read_result(0),
-606           inflightreads(0),
->>>     CID 1397264:  Uninitialized members  (UNINIT_CTOR)
->>>     Non-static class member "sent_disk" is not initialized in this constructor nor in any functions that it calls.
-607           lock_type(ObjectContext::RWState::RWNONE) {}
-608         void reset_obs(ObjectContextRef obc) {
-609           new_obs = ObjectState(obc->obs.oi, obc->obs.exists);
-610           if (obc->ssc) {
-611     	new_snapset = obc->ssc->snapset;
-612     	snapset = &obc->ssc->snapset;
-
-** CID 1397265:  Control flow issues  (UNREACHABLE)
-/src/pybind/cephfs/cephfs.c: 13537 in __pyx_pf_6cephfs_9LibCephFS_76readlink()
-
-
-________________________________________________________________________________________________________
-*** CID 1397265:  Control flow issues  (UNREACHABLE)
-/src/pybind/cephfs/cephfs.c: 13537 in __pyx_pf_6cephfs_9LibCephFS_76readlink()
-13531      *             return buf
-13532      *         finally:
-13533      *             free(buf)             # <<<<<<<<<<<<<<
-13534      * 
-13535      *     def unlink(self, path):
-13536      */
->>>     CID 1397265:  Control flow issues  (UNREACHABLE)
->>>     This code cannot be reached: "{
-  {
-    PyThreadState *__...".
-13537       /*finally:*/ {
-13538         /*exception exit:*/{
-13539           __Pyx_PyThreadState_declare
-13540           __pyx_L4_error:;
-13541           __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0;
-13542           __Pyx_PyThreadState_assign
-
-** CID 1397266:  Control flow issues  (UNREACHABLE)
-/src/pybind/cephfs/cephfs.c: 14636 in __pyx_pf_6cephfs_9LibCephFS_82mds_command()
-
-
-________________________________________________________________________________________________________
-*** CID 1397266:  Control flow issues  (UNREACHABLE)
-/src/pybind/cephfs/cephfs.c: 14636 in __pyx_pf_6cephfs_9LibCephFS_82mds_command()
-14630     
-14631       /* "cephfs.pyx":950
-14632      *                 return (ret, b"", "")
-14633      *         finally:
-14634      *             free(_cmd)             # <<<<<<<<<<<<<<
-14635      */
->>>     CID 1397266:  Control flow issues  (UNREACHABLE)
->>>     This code cannot be reached: "{
-  {
-    PyThreadState *__...".
-14636       /*finally:*/ {
-14637         /*exception exit:*/{
-14638           __Pyx_PyThreadState_declare
-14639           __pyx_L4_error:;
-14640           __pyx_t_12 = 0; __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0;
-14641           __Pyx_PyThreadState_assign
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRaGCnxtQO9E3gxlB2GxVsWFENryh7bC5hIb-2FQBVM85YLQ-3D-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8EV4BzaJIlzRXqRxG3hN3Fxx-2FvUji7A24kBoNYghIuggPgSu6Km0-2FLuYD2BMcdWsPcqIFkzDferUw0a6cf0mAg0kF8PWAMsux2sv64NiMXcyyBwGkwGeFT7uxKwdpoW81Pk4BsBydBMY9QrFy5bBBNxPCMFFJ5wePNN5wN4T5xSws4PdxVCrXn5ITdCr6STldk-3D
-
-To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRbVDbis712qZDP-2FA8y06Nq4Bco8jcmzhh7FSyvoR0E3-2BDgRcBCQ6OuthHBtaTCGNq9zoLsiw8NWrIF2zsdhfTt-2FbHjZ2ToL3Et9v1-2BrDLungAOjHpQtOY-2BsyLiTVCQEUCU-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8EV4BzaJIlzRXqRxG3hN3Fxx-2FvUji7A24kBoNYghIuggCmCxC-2B57BvUu9wAxEmfWblEJ1K-2BJrbewJW10hK11l4T0Jgd9TNNTEiO2f-2FfGzFg5ZKc13LuMQ-2Bn9FG5wLgaffgOisReLi9Y-2FBS4Q8hroRU7SccRqnpT7H9PwFyHrSPvVAZ7dX-2Fljt2MLA3-2FywlY-2FCY-3D
+Le 15/12/2016 à 21:04, Vincent Godin a écrit :
+> Hello,
+>
+> I didn't look at your video but i already can tell you some tracks :
+>
+> 1 - there is a bug in 10.2.2 which make the client cache not working. 
+> The client cache works as it never recieved a flush so it will stay in 
+> writethrough mode. This bug is clear in 10.2.3
+>
+> 2 - 2 SSDs in JBOD and 12 x 4TB NL SAS in RAID0 are not very well 
+> optimized if your workload is based on write. You will perform in 
+> write at the max speed of your two SSD only. I don't know the real 
+> speed of your SSD nor your SAS disks but let's say:
+>
+> your SSD can reach a 400 MB/s in write throughput
+> your SAS can reach a 130 MB/s in write throughput
+>
+> i suppose that you use 1 SSD to host the journals of 6 SAS
+> Your max throughput in write will be 2 x 400 MB/s so 800 MB/s compare 
+> to the 12 x 130 MB/s = 1560 MB/s of your SAS
+>
+> if you had 4 SSD for the journal, 1 SSD for 3 SAS
+> Your max throughput would be 4 x 400 MB/s so 1600 MB/s very near of 
+> the 1560 MB/s of your SAS
+>
+> Of course, you need to adjust that with the real throughput of your 
+> SSD ans SAS disks
+>
+> Vincent
 
