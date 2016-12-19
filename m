@@ -1,101 +1,29 @@
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH 6/9] jbd2: mark the transaction context with the scope
- GFP_NOFS context
-Date: Fri, 16 Dec 2016 09:39:35 +0100
-Message-ID: <20161216083935.GD26608@quack2.suse.cz>
-References: <20161215140715.12732-1-mhocko@kernel.org>
- <20161215140715.12732-7-mhocko@kernel.org>
+From: liuchang0812 <liuchang0812@gmail.com>
+Subject: question about cache-tier tool
+Date: Mon, 19 Dec 2016 20:25:25 +0800
+Message-ID: <CACKY0b-6+RxCyqRy-FKbXY88-n4Yt4mGBhVB_CUk5OzALmuLPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20161215140715.12732-7-mhocko@kernel.org>
-Sender: owner-linux-mm@kvack.org
-To: Michal Hocko <mhocko@kernel.org>
-Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qt0-f173.google.com ([209.85.216.173]:34035 "EHLO
+        mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751673AbcLSMZ1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Dec 2016 07:25:27 -0500
+Received: by mail-qt0-f173.google.com with SMTP id n6so145237192qtd.1
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Dec 2016 04:25:26 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu 15-12-16 15:07:12, Michal Hocko wrote:
-> From: Michal Hocko <mhocko@suse.com>
-> 
-> now that we have memalloc_nofs_{save,restore} api we can mark the whole
-> transaction context as implicitly GFP_NOFS. All allocations will
-> automatically inherit GFP_NOFS this way. This means that we do not have
-> to mark any of those requests with GFP_NOFS and moreover all the
-> ext4_kv[mz]alloc(GFP_NOFS) are also safe now because even the hardcoded
-> GFP_KERNEL allocations deep inside the vmalloc will be NOFS now.
-> 
-> Signed-off-by: Michal Hocko <mhocko@suse.com>
+hi, all
 
-Looks good to me. You can add:
+We have a tool called "rados", and provides following  functions:
 
-Reviewed-by: Jan Kara <jack@suse.cz>
+"CACHE POOLS: (for testing/development only)\n"
+" cache-flush <obj-name> flush cache pool object (blocking)\n"
+" cache-try-flush <obj-name> flush cache pool object (non-blocking)\n"
+" cache-evict <obj-name> evict cache pool object\n"
+" cache-flush-evict-all flush+evict all objects\n"
+" cache-try-flush-evict-all try-flush+evict all objects\n"
 
-								Honza
-
-> ---
->  fs/jbd2/transaction.c | 11 +++++++++++
->  include/linux/jbd2.h  |  2 ++
->  2 files changed, 13 insertions(+)
-> 
-> diff --git a/fs/jbd2/transaction.c b/fs/jbd2/transaction.c
-> index e1652665bd93..35a5d3d76182 100644
-> --- a/fs/jbd2/transaction.c
-> +++ b/fs/jbd2/transaction.c
-> @@ -388,6 +388,11 @@ static int start_this_handle(journal_t *journal, handle_t *handle,
->  
->  	rwsem_acquire_read(&journal->j_trans_commit_map, 0, 0, _THIS_IP_);
->  	jbd2_journal_free_transaction(new_transaction);
-> +	/*
-> +	 * Make sure that no allocations done while the transaction is
-> +	 * open is going to recurse back to the fs layer.
-> +	 */
-> +	handle->saved_alloc_context = memalloc_nofs_save();
->  	return 0;
->  }
->  
-> @@ -466,6 +471,7 @@ handle_t *jbd2__journal_start(journal_t *journal, int nblocks, int rsv_blocks,
->  	trace_jbd2_handle_start(journal->j_fs_dev->bd_dev,
->  				handle->h_transaction->t_tid, type,
->  				line_no, nblocks);
-> +
->  	return handle;
->  }
->  EXPORT_SYMBOL(jbd2__journal_start);
-> @@ -1760,6 +1766,11 @@ int jbd2_journal_stop(handle_t *handle)
->  	if (handle->h_rsv_handle)
->  		jbd2_journal_free_reserved(handle->h_rsv_handle);
->  free_and_exit:
-> +	/*
-> +	 * scope of th GFP_NOFS context is over here and so we can
-> +	 * restore the original alloc context.
-> +	 */
-> +	memalloc_nofs_restore(handle->saved_alloc_context);
->  	jbd2_free_handle(handle);
->  	return err;
->  }
-> diff --git a/include/linux/jbd2.h b/include/linux/jbd2.h
-> index dfaa1f4dcb0c..606b6bce3a5b 100644
-> --- a/include/linux/jbd2.h
-> +++ b/include/linux/jbd2.h
-> @@ -491,6 +491,8 @@ struct jbd2_journal_handle
->  
->  	unsigned long		h_start_jiffies;
->  	unsigned int		h_requested_credits;
-> +
-> +	unsigned int		saved_alloc_context;
->  };
->  
->  
-> -- 
-> 2.10.2
-> 
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Why doesn't it provide cache-try-evict and cache-flush-evict?
