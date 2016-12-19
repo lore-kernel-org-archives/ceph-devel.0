@@ -1,159 +1,158 @@
-From: ceph branch robot <nobody@ceph.com>
-Subject: ceph branch status
-Date: Mon, 19 Dec 2016 08:00:08 -0800 (PST)
-Message-ID: <20161219160008.9184428038D@teuthology.front.sepia.ceph.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: BlueStore in-memory Onode footprint
+Date: Mon, 19 Dec 2016 16:16:21 +0000
+Message-ID: <EB02EE10422E4A40A1EE787A4AC27FBE040861@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
+References: <34ee2613-8db3-646e-4470-b3e8fa8855e0@mirantis.com>
+ <alpine.DEB.2.11.1612161518570.10615@piezo.novalocal>
+ <EB02EE10422E4A40A1EE787A4AC27FBE0321CB@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
+ <b0c715a3-9577-93cf-d634-499eb52cb87c@mirantis.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [8.43.84.3] ([8.43.84.3]:60836 "EHLO
-        teuthology.front.sepia.ceph.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1753222AbcLSQAJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 19 Dec 2016 11:00:09 -0500
+Received: from mail-by2nam01on0050.outbound.protection.outlook.com ([104.47.34.50]:52096
+        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1755380AbcLSQca (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 19 Dec 2016 11:32:30 -0500
+In-Reply-To: <b0c715a3-9577-93cf-d634-499eb52cb87c@mirantis.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Igor Fedotov <ifedotov@mirantis.com>, Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
--- All Branches --
+FWIW, the actual memory cost is higher than the numbers we've quoted -- pos=
+sibly considerably higher. That's because it principally consists of a larg=
+e number of small allocations and there's been no attempt to adjust for the=
+ allocator overhead itself.
 
-Abhishek Lekshmanan <abhishek@suse.com>
-	2016-11-28 23:44:35 +0100   jewel-10-2-4
-	2016-11-28 23:44:35 +0100   wip-jewel-10-2-4
-	2016-12-01 15:07:18 +0100   wip-jewel-10-2-4-rc
+I'm not that concerned with the amount of memory consumed by a decoded oNod=
+e/Shard. That's because I don't expect to have a lot of them around. Realis=
+tically, I only see a benefit in caching decoded oNode/Shards that are bein=
+g sequentially used. I doubt that we need more than 2 or 3 of these per cli=
+ent connection (hundreds in total?). For random accessed oNode/Shards, you'=
+ll be better off trying to cache them in the encoded format within the KV s=
+ubsystem itself.
 
-Alfredo Deza <adeza@redhat.com>
-	2016-12-09 07:52:25 -0500   wip-16125
+Hence I care A LOT about the time needed to serialize/deserialize the oNode=
+/Shard. We should be focused on that part of the problem.
 
-Ali Maredia <amaredia@redhat.com>
-	2016-12-16 13:23:09 -0500   wip-rgw-multisite-teuthology
+I believe that as we optimize the TIME required to serialize/deserialize we=
+ will end up also shrinking the SPACE required as an unintended consequence=
+.
 
-Casey Bodley <cbodley@redhat.com>
-	2016-12-05 11:21:12 -0500   wip-cbodley-testing
+Allen Samuels
+SanDisk |a Western Digital brand
+2880 Junction Avenue, Milpitas, CA 95134
+T: +1 408 801 7030| M: +1 408 780 6416
+allen.samuels@SanDisk.com
 
-Dan Lambright <dlambrig@redhat.com>
-	2016-12-08 17:56:20 -0500   wip-lockless-queue
-	2016-12-09 15:17:08 -0500   rcu
-	2016-12-14 14:51:13 -0500   wip-lockless-queue-op
+> -----Original Message-----
+> From: Igor Fedotov [mailto:ifedotov@mirantis.com]
+> Sent: Monday, December 19, 2016 6:46 AM
+> To: Allen Samuels <Allen.Samuels@sandisk.com>; Sage Weil
+> <sage@newdream.net>
+> Cc: ceph-devel <ceph-devel@vger.kernel.org>
+> Subject: Re: BlueStore in-memory Onode footprint
+>=20
+>=20
+>=20
+> On 17.12.2016 1:08, Allen Samuels wrote:
+> > I'm not sure what the conclusion from this is.
+> IMHO the numbers I shared are pretty high and we should consider some
+> ways to reduce them.
+> >
+> > The point of the sharding exercise was to eliminate the need to
+> serialize/deserialize all 1024 Extents/Blobs/SharedBlobs on each I/O
+> transaction.
+> >
+> > This shows that a fully populated oNode with ALL of the shards present =
+is a
+> large number. But that ought to be a rare occurrence.
+> Actually we have pretty high number for each Blob entry. And this means
+> that  cache effectiveness is badly affected in general case since we're a=
+ble to
+> cache less entries in total.
+> >
+> > This test shows that each Blob is 248 bytes and that each SharedBlob is=
+ 216
+> bytes. That matches the sizeof(...), so the MemPool logic got the right
+> answer! Yay!
+> >
+> > Looking at the Blob I see:
+> >
+> > Bluestore_blob_t 72 bytes
+> > Bufferlist 88 bytes
+> > Extentrefmap 64 bytes
+> >
+> > That's most the 248. I suspect that trying to fix this will require a n=
+ew
+> strategy, etc.
+> >
+> > Allen Samuels
+> > SanDisk |a Western Digital brand
+> > 2880 Junction Avenue, San Jose, CA 95134
+> > T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
+> >
+> >
+> >> -----Original Message-----
+> >> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> >> owner@vger.kernel.org] On Behalf Of Sage Weil
+> >> Sent: Friday, December 16, 2016 7:20 AM
+> >> To: Igor Fedotov <ifedotov@mirantis.com>
+> >> Cc: ceph-devel <ceph-devel@vger.kernel.org>
+> >> Subject: Re: BlueStore in-memory Onode footprint
+> >>
+> >> On Fri, 16 Dec 2016, Igor Fedotov wrote:
+> >>> Hey All!
+> >>>
+> >>> Recently I realized that I'm unable to fit all my onodes ( 32768
+> >>> objects/4Mb each/4K alloc unit/no csum) in 15G RAM cache.
+> >>>
+> >>> Hence decided to estimate Onode in-memory size.
+> >>>
+> >>> At first I filled 4Mb object with a single 4M write - mempools
+> >>> indicate ~5K mem usage for total onode metadata. Good enough.
+> >>>
+> >>> Secondly I refill that object with 4K writes. Resulting memusage =3D =
+574K!!!
+> >>> Onode itself 704 bytes in 1 object.  And 4120 other metadata items
+> >>> occupies all other space.
+> >>>
+> >>> Then I removed SharedBlob from mempools. Resulting mem usage =3D
+> 355K.
+> >>> The same Onode size. And 3096 other metadata objects. Hence we had
+> >>> 1024 SharedBlob instances thata took ~ 220K.
+> >>>
+> >>>
+> >>> And finally I removed Blob instances from measurements. Resulting
+> mem
+> >>> usage =3D 99K. And 2072 other objects. Hence Blob instances take anot=
+her
+> >>> ~250K
+> >> Yikes!
+> >>
+> >> BTW you can get a full breakdown by type with 'mempool debug =3D true'=
+ in
+> >> ceph.conf (-o 'mempool debug =3D true' on vstart.sh command line)
+> without
+> >> having to recompile.  Do you mind repeating the test and including the=
+ full
+> >> breakdown?
+> >>
+> >>> Yeah, that's the worst case( actually csum enable will give even more
+> >>> mem use) but shouldn't we revisit some Onode internals due to such
+> >> numbers?
+> >>
+> >> Yep!
+> >>
+> >> sage
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+> the
+> >> body of a message to majordomo@vger.kernel.org More majordomo info
+> at
+> >> http://vger.kernel.org/majordomo-info.html
 
-David Disseldorp <ddiss@suse.de>
-	2016-11-28 17:55:39 +0100   wip-pr-12200
-
-David Zafman <dzafman@redhat.com>
-	2016-12-05 10:01:41 -0800   wip-zafman-testing-jewel
-
-Erwan Velu <erwan@redhat.com>
-	2016-11-25 16:03:00 +0100   evelu-18043
-
-GitHub <noreply@github.com>
-	2016-11-02 08:42:35 +0200   infernalis
-	2016-11-29 22:16:34 +0100   wip-hammer
-	2016-12-01 07:41:13 -0800   wip-rgw-multisite-teuthology-runs-ali
-	2016-12-08 11:22:16 -0800   jewel-next
-	2016-12-14 11:39:56 -0600   jewel
-	2016-12-14 11:40:08 -0600   hammer
-	2016-12-14 11:40:17 -0600   firefly
-	2016-12-19 08:44:27 -0600   kraken
-
-Greg Farnum <gfarnum@redhat.com>
-	2016-12-08 16:16:52 -0800   revert-6971-jewel-14120
-
-J. Eric Ivancich <ivancich@redhat.com>
-	2016-12-05 15:09:23 -0500   wip_dmclock2
-	2016-12-07 10:25:15 -0500   wip_dmc2_mod_weights_tracing
-
-Jason Dillaman <dillaman@redhat.com>
-	2016-12-08 18:28:30 -0500   wip-rbd-mirror-ha
-	2016-12-14 21:24:17 -0500   wip-mgolub-testing-kraken
-
-Jeff Layton <jlayton@redhat.com>
-	2016-12-08 16:17:08 -0500   wip-jlayton-suid
-	2016-12-16 07:16:22 -0500   wip-jlayton-submount
-
-John Spray <john.spray@redhat.com>
-	2016-11-16 21:16:51 +0000   wip-17705-jewel
-	2016-11-28 00:01:54 +0000   wip-jcsp-testing-20161128
-	2016-11-29 11:57:27 +0000   wip-17837-jewel
-	2016-12-06 12:24:22 +0000   wip-jcsp-testing-20161206
-	2016-12-13 11:55:23 +0000   wip-jcsp-testing-20161213
-
-Kefu Chai <kchai@redhat.com>
-	2016-12-10 19:06:50 +0800   wip-kefu-testing
-
-Loic Dachary <ldachary@redhat.com>
-	2015-03-23 17:44:12 +0100   dumpling
-	2016-11-16 17:16:39 +0100   wip-17849-bootstrap-osd
-	2016-11-17 00:51:35 +0100   wip-17926-jewel
-	2016-12-01 17:05:33 +0100   wip-17889-systemd-order
-
-Loic Dachary <loic@dachary.org>
-	2015-10-17 00:38:34 +0200   giant
-	2016-11-23 09:38:17 +0100   jewel-backports
-	2016-11-23 09:38:17 +0100   wip-jewel-backports
-	2016-12-05 18:26:16 +0100   wip-jewel-backports-loic
-
-Marcus Watts <mwatts@redhat.com>
-	2016-10-19 05:05:50 -0400   wip-master-rgw-0lenfix1
-	2016-11-11 01:22:10 -0500   wip-xml-string-wrap
-	2016-11-11 01:25:55 -0500   wip-json-smarter-escapes
-	2016-11-11 01:29:56 -0500   wip-buildfix-python-out-of-tree
-	2016-12-16 01:15:27 -0500   wip-rgw-openssl-7
-
-Matt Benjamin <mbenjamin@redhat.com>
-	2016-11-29 14:49:50 -0500   wip-rgw-sfind
-	2016-12-05 10:44:23 -0500   rzarzynski-wip-bulkdel-fix-new
-	2016-12-05 13:19:09 -0500   wip-rgw-formpost-11179
-
-Mykola Golub <mgolub@mirantis.com>
-	2016-11-28 12:21:46 +0200   wip-mgolub-testing-jewel
-	2016-12-13 10:24:42 +0200   wip-mgolub-testing-hammer
-	2016-12-15 16:31:36 +0200   wip-mgolub-testing
-	2016-12-19 08:44:22 +0200   wip-jd-testing
-
-Nathan Cutler <ncutler@suse.com>
-	2016-11-18 16:33:47 +0100   hammer-backports-12071
-	2016-11-25 19:20:06 +0100   hammer-backports-14716
-	2016-12-03 22:57:08 +0100   wip-18133-jewel
-	2016-12-13 11:37:18 +0100   hammer-backports
-	2016-12-14 23:23:59 +0100   wip-hammer-backports
-
-Orit Wasserman <owasserm@redhat.com>
-	2016-11-21 19:16:56 +0100   wip-orit-testing
-	2016-12-02 15:46:15 +0100   wip-orit-resharding-hammer
-
-Patrick Donnelly <pdonnell@redhat.com>
-	2016-12-02 13:03:27 -0500   wip-multimds-tests
-
-Pritha Srivastava <prsrivas@redhat.com>
-	2016-12-16 18:31:52 +0530   wip-rgw-polymorphic-errors
-
-Radoslaw Zarzynski <rzarzynski@mirantis.com>
-	2016-11-18 14:06:52 +0100   wip-rgw-unconditional-asio
-
-Sage Weil <sage@inktank.com>
-	2013-04-18 13:51:36 -0700   argonaut
-
-Sage Weil <sage@redhat.com>
-	2015-01-12 08:30:40 -0800   emperor
-	2016-11-17 12:55:42 -0600   wip-jewel-osdmap
-	2016-11-29 16:46:47 -0600   qa-suite-master
-	2016-12-07 16:55:32 -0600   wip-msgr-jewel-fix
-	2016-12-07 17:36:43 -0600   wip-msgr-jewel-fix2
-
-Samuel Just <sjust@redhat.com>
-	2016-11-18 17:38:15 -0800   wip-sam-working
-
-Venky Shankar <vshankar@redhat.com>
-	2016-11-19 23:24:05 +0530   wip-ec-partial-overwrites
-	2016-12-10 16:44:46 +0530   wip-15028
-
-Vishal Kanaujia <Vishal.Kanaujia@sandisk.com>
-	2016-11-30 14:58:48 +0530   wip_12132
-
-Yehuda Sadeh <yehuda@inktank.com>
-	2014-01-28 09:38:19 -0800   bobtail
-	2014-01-28 09:40:18 -0800   cuttlefish
-
-Yehuda Sadeh <yehuda@redhat.com>
-	2016-10-03 16:51:40 -0700   dnm-dang-reshard
-
-
-
-Grouped by committer, ordered by commit time stamp.
