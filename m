@@ -1,39 +1,34 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: Status of static analysis
-Date: Mon, 19 Dec 2016 09:30:06 -0800
-Message-ID: <CAN=+7FV0ofLTufVNE2pVtPqS=zK3w7FrkdVdn8pup+NEBXcdbw@mail.gmail.com>
-References: <20161219024554.GA6396@rskikr.localdomain>
+From: David Galloway <dgallowa@redhat.com>
+Subject: Re: tracker.ceph.com
+Date: Mon, 19 Dec 2016 14:57:08 -0500
+Message-ID: <c6a0103f-5f03-b3f6-7a87-80e73e9d49ef@redhat.com>
+References: <8421d2fe-067f-97c0-4a79-083c37baee35@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:36750 "EHLO
-        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755531AbcLSRaH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Dec 2016 12:30:07 -0500
-Received: by mail-qk0-f176.google.com with SMTP id n21so16968653qka.3
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Dec 2016 09:30:07 -0800 (PST)
-In-Reply-To: <20161219024554.GA6396@rskikr.localdomain>
+Received: from mx1.redhat.com ([209.132.183.28]:39888 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1756369AbcLST5K (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 19 Dec 2016 14:57:10 -0500
+In-Reply-To: <8421d2fe-067f-97c0-4a79-083c37baee35@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users@lists.ceph.com
 
-Very cool!
--Sam
 
-On Sun, Dec 18, 2016 at 6:45 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
-> As you would have noticed in recent weeks we have returned to  running a
-> Coverity test over the source tree on a weekly basis. In addition, I have been
-> running Clang Static Analyzer and Cppcheck scans. Until we can find a better
-> home for these and include at least one of them in our CI processes I will be
-> hosting them at http://people.redhat.com/bhubbard/
+On 12/17/2016 05:25 PM, Dan Mick wrote:
+> tracker.ceph.com is having issues. I'm looking at it.
 >
 > --
-> Cheers,
-> Brad
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+
+The Tracker VM's disk was corrupted during an Openstack live migration.
+
+A new VM was created and the Tracker data has been restored from a 
+backup dated 12-17-2016 07:30 UTC.  Any changes made to bugs after that 
+time are gone.
+
+The Agile plugin has been restored and file attachments have been 
+rsynced to the new VM.
+
+Please let me know if you notice anything is amiss.
