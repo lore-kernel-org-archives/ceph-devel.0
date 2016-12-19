@@ -1,34 +1,51 @@
-From: David Galloway <dgallowa@redhat.com>
-Subject: Re: tracker.ceph.com
-Date: Mon, 19 Dec 2016 14:57:08 -0500
-Message-ID: <c6a0103f-5f03-b3f6-7a87-80e73e9d49ef@redhat.com>
-References: <8421d2fe-067f-97c0-4a79-083c37baee35@redhat.com>
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 2/9] xfs: introduce and use KM_NOLOCKDEP to silence
+ reclaim lockdep false positives
+Date: Tue, 20 Dec 2016 08:24:13 +1100
+Message-ID: <20161219212413.GN4326@dastard>
+References: <20161215140715.12732-1-mhocko@kernel.org>
+ <20161215140715.12732-3-mhocko@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:39888 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756369AbcLST5K (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 19 Dec 2016 14:57:10 -0500
-In-Reply-To: <8421d2fe-067f-97c0-4a79-083c37baee35@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users@lists.ceph.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20161215140715.12732-3-mhocko@kernel.org>
+Sender: owner-linux-mm@kvack.org
+To: Michal Hocko <mhocko@kernel.org>
+Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
+List-Id: ceph-devel.vger.kernel.org
 
+On Thu, Dec 15, 2016 at 03:07:08PM +0100, Michal Hocko wrote:
+> From: Michal Hocko <mhocko@suse.com>
+> 
+> Now that the page allocator offers __GFP_NOLOCKDEP let's introduce
+> KM_NOLOCKDEP alias for the xfs allocation APIs. While we are at it
+> also change KM_NOFS users introduced by b17cb364dbbb ("xfs: fix missing
+> KM_NOFS tags to keep lockdep happy") and use the new flag for them
+> instead. There is really no reason to make these allocations contexts
+> weaker just because of the lockdep which even might not be enabled
+> in most cases.
+> 
+> Signed-off-by: Michal Hocko <mhocko@suse.com>
 
-On 12/17/2016 05:25 PM, Dan Mick wrote:
-> tracker.ceph.com is having issues. I'm looking at it.
->
-> --
+I'd suggest that it might be better to drop this patch for now -
+it's not necessary for the context flag changeover but does
+introduce a risk of regressions if the conversion is wrong.
 
-The Tracker VM's disk was corrupted during an Openstack live migration.
+Hence I think this is better as a completely separate series
+which audits and changes all the unnecessary KM_NOFS allocations
+in one go. I've never liked whack-a-mole style changes like this -
+do it once, do it properly....
 
-A new VM was created and the Tracker data has been restored from a 
-backup dated 12-17-2016 07:30 UTC.  Any changes made to bugs after that 
-time are gone.
+Cheers,
 
-The Agile plugin has been restored and file attachments have been 
-rsynced to the new VM.
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
 
-Please let me know if you notice anything is amiss.
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
