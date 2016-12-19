@@ -1,104 +1,115 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: BlueStore in-memory Onode footprint
-Date: Mon, 19 Dec 2016 17:45:45 +0300
-Message-ID: <b0c715a3-9577-93cf-d634-499eb52cb87c@mirantis.com>
-References: <34ee2613-8db3-646e-4470-b3e8fa8855e0@mirantis.com>
- <alpine.DEB.2.11.1612161518570.10615@piezo.novalocal>
- <EB02EE10422E4A40A1EE787A4AC27FBE0321CB@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
+From: Yoann Moulin <yoann.moulin-p8DiymsW2f8@public.gmane.org>
+Subject: Re: Jewel + kernel 4.4 Massive performance regression
+	(-50%)
+Date: Mon, 19 Dec 2016 16:17:26 +0100
+Message-ID: <48d7fe00-88cd-4187-e56b-aea73ce6aaf1@epfl.ch>
+References: <14aea50c-f708-1d99-8d61-c79bec2029e0@epfl.ch>
+	<CAFonxSwyGOC9OGjEwBOmewhvtH_vBRKxT4eyoTkdFAxJmg6jZw@mail.gmail.com>
+	<29443c6d-1a13-477a-6844-6f1b31e86d2d@epfl.ch>
+	<CAFonxSzvPTpPsxLvcWame4vLwnJMcbxqsYHXXuO3--Dibt2t-Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yb0-f180.google.com ([209.85.213.180]:34243 "EHLO
-        mail-yb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755767AbcLSOps (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Dec 2016 09:45:48 -0500
-Received: by mail-yb0-f180.google.com with SMTP id d59so57745485ybi.1
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Dec 2016 06:45:48 -0800 (PST)
-In-Reply-To: <EB02EE10422E4A40A1EE787A4AC27FBE0321CB@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>, Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAFonxSzvPTpPsxLvcWame4vLwnJMcbxqsYHXXuO3--Dibt2t-Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-
-
-On 17.12.2016 1:08, Allen Samuels wrote:
-> I'm not sure what the conclusion from this is.
-IMHO the numbers I shared are pretty high and we should consider some 
-ways to reduce them.
->
-> The point of the sharding exercise was to eliminate the need to serialize/deserialize all 1024 Extents/Blobs/SharedBlobs on each I/O transaction.
->
-> This shows that a fully populated oNode with ALL of the shards present is a large number. But that ought to be a rare occurrence.
-Actually we have pretty high number for each Blob entry. And this means 
-that  cache effectiveness is badly affected in general case since we're 
-able to cache less entries in total.
->
-> This test shows that each Blob is 248 bytes and that each SharedBlob is 216 bytes. That matches the sizeof(...), so the MemPool logic got the right answer! Yay!
->
-> Looking at the Blob I see:
->
-> Bluestore_blob_t 72 bytes
-> Bufferlist 88 bytes
-> Extentrefmap 64 bytes
->
-> That's most the 248. I suspect that trying to fix this will require a new strategy, etc.
->
-> Allen Samuels
-> SanDisk |a Western Digital brand
-> 2880 Junction Avenue, San Jose, CA 95134
-> T: +1 408 801 7030| M: +1 408 780 6416
-> allen.samuels@SanDisk.com
->
->
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
->> owner@vger.kernel.org] On Behalf Of Sage Weil
->> Sent: Friday, December 16, 2016 7:20 AM
->> To: Igor Fedotov <ifedotov@mirantis.com>
->> Cc: ceph-devel <ceph-devel@vger.kernel.org>
->> Subject: Re: BlueStore in-memory Onode footprint
->>
->> On Fri, 16 Dec 2016, Igor Fedotov wrote:
->>> Hey All!
->>>
->>> Recently I realized that I'm unable to fit all my onodes ( 32768
->>> objects/4Mb each/4K alloc unit/no csum) in 15G RAM cache.
->>>
->>> Hence decided to estimate Onode in-memory size.
->>>
->>> At first I filled 4Mb object with a single 4M write - mempools
->>> indicate ~5K mem usage for total onode metadata. Good enough.
->>>
->>> Secondly I refill that object with 4K writes. Resulting memusage = 574K!!!
->>> Onode itself 704 bytes in 1 object.  And 4120 other metadata items
->>> occupies all other space.
->>>
->>> Then I removed SharedBlob from mempools. Resulting mem usage = 355K.
->>> The same Onode size. And 3096 other metadata objects. Hence we had
->>> 1024 SharedBlob instances thata took ~ 220K.
->>>
->>>
->>> And finally I removed Blob instances from measurements. Resulting mem
->>> usage = 99K. And 2072 other objects. Hence Blob instances take another
->>> ~250K
->> Yikes!
->>
->> BTW you can get a full breakdown by type with 'mempool debug = true' in
->> ceph.conf (-o 'mempool debug = true' on vstart.sh command line) without
->> having to recompile.  Do you mind repeating the test and including the full
->> breakdown?
->>
->>> Yeah, that's the worst case( actually csum enable will give even more
->>> mem use) but shouldn't we revisit some Onode internals due to such
->> numbers?
->>
->> Yep!
->>
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
->> body of a message to majordomo@vger.kernel.org More majordomo info at
->> http://vger.kernel.org/majordomo-info.html
-
+SGVsbG8sCgpGaW5hbGx5LCBJIGZvdW5kIHRpbWUgdG8gZG8gc29tZSBuZXcgYmVuY2htYXJrcyB3
+aXRoIHRoZSBsYXRlc3QgamV3ZWwgcmVsZWFzZSAoMTAuMi41KSBvbiA0IG5vZGVzLiBFYWNoIG5v
+ZGUgaGFzIDEwIE9TRHMuCgpJIHJhbiAyIHRpbWVzICJjZXBoIHRlbGwgb3NkLiogYmVuY2giIG92
+ZXIgNDAgT1NEcywgaGVyZSB0aGUgYXZlcmFnZSBzcGVlZCA6Cgo0LjIuMC00Mi1nZW5lcmljICAg
+ICAgOTcuNDUgTUIvcwo0LjQuMC01My1nZW5lcmljICAgICAgNTUuNzMgTUIvcwo0LjguMTUtMDQw
+ODE1LWdlbmVyaWMgNjIuNDEgTUIvcwo0LjkuMC0wNDA5MDAtZ2VuZXJpYyAgNjAuODggTUIvcwoK
+SSBoYXZlIHRoZSBzYW1lIGJlaGF2aW91ciB3aXRoIGF0IGxlYXN0IDM1IHRvIDQwJSBwZXJmb3Jt
+YW5jZSBkcm9wIGJldHdlZW4ga2VybmVsIDQuMiBhbmQga2VybmVsID4gNC40CgpJIGNhbiBkbyBm
+dXJ0aGVyIGJlbmNoZXMgaWYgbmVlZGVkLgoKWW9hbm4KCkxlIDI2LzA3LzIwMTYgw6AgMDk6MDks
+IExvbWF5YW5pIFMuIExhaXplciBhIMOpY3JpdCA6Cj4gSGVsbG8sCj4gZG8geW91IGhhdmUgam91
+cm5hbCBvbiBkaXNrIHRvbyA/Cj4gCj4gWWVzIGFtIGhhdmluZyBqb3VybmFsIG9uIHNhbWUgaGFy
+ZCBkaXNrLgo+IAo+IG9rIGFuZCBjb3VsZCB5b3UgZG8gYmVuY2ggd2l0aCBrZXJuZWwgNC4yID8g
+anVzdCB0byBzZWUgaWYgeW91IGhhdmUgYmV0dGVyCj4gdGhyb3VnaHB1dC4gVGhhbmtzCj4gCj4g
+SW4gdWJ1bnR1IDE0IEkgd2FzIHJ1bm5pbmcgNC4yIGtlcm5lbC4gdGhlIHRocm91Z2hwdXQgd2Fz
+IHRoZSBzYW1lIGFyb3VuZCA4MC05ME1CL3MgcGVyIG9zZC4gSSBjYW50IHRlbGwgdGhlIGRpZmZl
+cmVuY2UgYmVjYXVzZSBlYWNoIHRlc3QgZ2l2ZXMKPiB0aGUgc3BlZWRzIG9uIHNhbWUgcmFuZ2Uu
+IEkgZGlkIG5vdCB0ZXN0IGtlcm5lbCA0LjQgaW4gdWJ1bnR1IDE0Cj4gCj4gCj4gLS0KPiBMb21h
+eWFuaQo+IAo+IE9uIFR1ZSwgSnVsIDI2LCAyMDE2IGF0IDk6MzkgQU0sIFlvYW5uIE1vdWxpbiA8
+eW9hbm4ubW91bGluQGVwZmwuY2ggPG1haWx0bzp5b2Fubi5tb3VsaW5AZXBmbC5jaD4+IHdyb3Rl
+Ogo+IAo+ICAgICBIZWxsbywKPiAKPiAgICAgPiBBbSBydW5uaW5nIHVidW50dSAxNiB3aXRoIGtl
+cm5lbCA0LjQtMC4zMS1nZW5lcmljIGFuZCBteSBzcGVlZCBhcmUgc2ltaWxhci4KPiAKPiAgICAg
+ZG8geW91IGhhdmUgam91cm5hbCBvbiBkaXNrIHRvbyA/Cj4gCj4gICAgID4gSSBkaWQgdGVzdHMg
+b24gdWJ1bnR1IDE0IGFuZCBVYnVudHUgMTYgYW5kIHRoZSBzcGVlZCBpcyBzaW1pbGFyLiBJIGhh
+dmUgYXJvdW5kCj4gICAgID4gODAtOTBNQi9zIG9mIE9TRCBzcGVlZHMgaW4gYm90aCBvcGVyYXRp
+bmcgc3lzdGVtcwo+IAo+ICAgICBvayBhbmQgY291bGQgeW91IGRvIGJlbmNoIHdpdGgga2VybmVs
+IDQuMiA/IGp1c3QgdG8gc2VlIGlmIHlvdSBoYXZlIGJldHRlcgo+ICAgICB0aHJvdWdocHV0LiBU
+aGFua3MKPiAKPiAgICAgPiBPbmx5IGlzc3VlIGFtIG9ic2VydmluZyBub3cgd2l0aCB1YnVudHUg
+MTYgaXMgc29tZXRpbWUgb3NkIGZhaWxzIG9uIHJlYm9vdGluZwo+ICAgICA+IHVudGlsIGkgc3Rh
+cnQgdGhlbSBtYW51YWxseSBvciBhZGRpbmcgc3RhcnRpbmcgY29tbWFuZHMgaW4gcmMubG9jYWwu
+Cj4gCj4gICAgIGluIG15IGNhc2UsIGl0J3MgYSB0ZXN0IGVudmlyb25tZW50LCBzbyBJIGRvbid0
+IGhhdmUgbm90aWNlIHRob3NlIGJlaGF2aW91cnMKPiAKPiAgICAgLS0KPiAgICAgWW9hbm4KPiAK
+PiAgICAgPiBPbiBNb24sIEp1bCAyNSwgMjAxNiBhdCA2OjQ1IFBNLCBZb2FubiBNb3VsaW4gPHlv
+YW5uLm1vdWxpbkBlcGZsLmNoIDxtYWlsdG86eW9hbm4ubW91bGluQGVwZmwuY2g+Cj4gICAgID4g
+PG1haWx0bzp5b2Fubi5tb3VsaW5AZXBmbC5jaCA8bWFpbHRvOnlvYW5uLm1vdWxpbkBlcGZsLmNo
+Pj4+IHdyb3RlOgo+ICAgICA+Cj4gICAgID4gICAgIEhlbGxvLAo+ICAgICA+Cj4gICAgID4gICAg
+ICh0aGlzIGlzIGEgcmVwb3N0LCBteSBwcmV2aW91cyBtZXNzYWdlIHNlZW1zIHRvIGJlIHNsaXBw
+aW5nIHVuZGVyIHRoZSByYWRhcikKPiAgICAgPgo+ICAgICA+ICAgICBEb2VzIGFueW9uZSBnZXQg
+YSBzaW1pbGFyIGJlaGF2aW91ciB0byB0aGUgb25lIGRlc2NyaWJlZCBiZWxvdyA/Cj4gICAgID4K
+PiAgICAgPiAgICAgSSBmb3VuZCBhIGJpZyBwZXJmb3JtYW5jZSBkcm9wIGJldHdlZW4ga2VybmVs
+IDMuMTMuMC04OCAoZGVmYXVsdCBrZXJuZWwgb24KPiAgICAgPiAgICAgVWJ1bnR1IFRydXN0eSAx
+NC4wNCkgb3Iga2VybmVsIDQuMi4wIGFuZCBrZXJuZWwgNC40LjAuMjQuMTQgKGRlZmF1bHQga2Vy
+bmVsIG9uCj4gICAgID4gICAgIFVidW50dSBYZW5pYWwgMTYuMDQpCj4gICAgID4KPiAgICAgPiAg
+ICAgLSBjZXBoIHZlcnNpb24gaXMgSmV3ZWwgKDEwLjIuMikuCj4gICAgID4gICAgIC0gQWxsIHRl
+c3RzIGhhdmUgYmVlbiBkb25lIHVuZGVyIFVidW50dSAxNC4wNCBvbgo+ICAgICA+ICAgICAtIEVh
+Y2ggY2x1c3RlciBoYXMgNSBub2RlcyBzdHJpY3RseSBpZGVudGljYWwuCj4gICAgID4gICAgIC0g
+RWFjaCBub2RlIGhhcyAxMCBPU0RzLgo+ICAgICA+ICAgICAtIEpvdXJuYWxzIGFyZSBvbiB0aGUg
+ZGlzay4KPiAgICAgPgo+ICAgICA+ICAgICBLZXJuZWwgNC40IGhhcyBhIGRyb3Agb2YgbW9yZSB0
+aGFuIDUwJSBjb21wYXJlZCB0byA0LjIKPiAgICAgPiAgICAgS2VybmVsIDQuNCBoYXMgYSBkcm9w
+IG9mIDQwJSBjb21wYXJlZCB0byAzLjEzCj4gICAgID4KPiAgICAgPiAgICAgZGV0YWlscyBiZWxv
+dyA6Cj4gICAgID4KPiAgICAgPiAgICAgV2l0aCB0aGUgMyBrZXJuZWwgSSBoYXZlIHRoZSBzYW1l
+IHBlcmZvcm1hbmNlIG9uIGRpc2tzIDoKPiAgICAgPgo+ICAgICA+ICAgICBSYXcgYmVuY2htYXJr
+Ogo+ICAgICA+ICAgICBkZCBpZj0vZGV2L3plcm8gb2Y9L2Rldi9zZFggYnM9MU0gY291bnQ9MTAy
+NCBvZmxhZz1kaXJlY3QgICAgPT4gYXZlcmFnZSB+MjMwTUIvcwo+ICAgICA+ICAgICBkZCBpZj0v
+ZGV2L3plcm8gb2Y9L2Rldi9zZFggYnM9MUcgY291bnQ9MSBvZmxhZz1kaXJlY3QgICAgICAgPT4g
+YXZlcmFnZSB+MjIwTUIvcwo+ICAgICA+Cj4gICAgID4gICAgIEZpbGVzeXN0ZW0gbW91bnRlZCBi
+ZW5jaG1hcms6Cj4gICAgID4gICAgIGRkIGlmPS9kZXYvemVybyBvZj0vc2RYMS90ZXN0LmltZyBi
+cz0xRyBjb3VudD0xICAgICAgICAgICAgICA9PiBhdmVyYWdlIH4yMDVNQi9zCj4gICAgID4gICAg
+IGRkIGlmPS9kZXYvemVybyBvZj0vc2RYMS90ZXN0LmltZyBicz0xRyBjb3VudD0xIG9mbGFnPWRp
+cmVjdCA9PiBhdmVyYWdlIH4yMTRNQi9zCj4gICAgID4gICAgIGRkIGlmPS9kZXYvemVybyBvZj0v
+c2RYMS90ZXN0LmltZyBicz0xRyBjb3VudD0xIG9mbGFnPXN5bmMgICA9PiBhdmVyYWdlIH4xOTBN
+Qi9zCj4gICAgID4KPiAgICAgPiAgICAgQ2VwaCBvc2QgQmVuY2htYXJrOgo+ICAgICA+ICAgICBL
+ZXJuZWwgMy4xMy4wLTg4LWdlbmVyaWMgOiBjZXBoIHRlbGwgb3NkLklEIGJlbmNoID0+IGF2ZXJh
+Z2UgIH44MU1CL3MKPiAgICAgPiAgICAgS2VybmVsIDQuMi4wLTM4LWdlbmVyaWMgIDogY2VwaCB0
+ZWxsIG9zZC5JRCBiZW5jaCA9PiBhdmVyYWdlIH4xMDlNQi9zCj4gICAgID4gICAgIEtlcm5lbCA0
+LjQuMC0yNC1nZW5lcmljICA6IGNlcGggdGVsbCBvc2QuSUQgYmVuY2ggPT4gYXZlcmFnZSAgfjUw
+TUIvcwo+ICAgICA+Cj4gICAgID4gICAgIEkgZGlkIG5ldyBiZW5jaG1hcmtzIHRoZW4gb24gMyBu
+ZXcgZnJlc2ggY2x1c3RlcnMuCj4gICAgID4KPiAgICAgPiAgICAgLSBFYWNoIGNsdXN0ZXIgaGFz
+IDMgbm9kZXMgc3RyaWN0bHkgaWRlbnRpY2FsLgo+ICAgICA+ICAgICAtIEVhY2ggbm9kZSBoYXMg
+MTAgT1NEcy4KPiAgICAgPiAgICAgLSBKb3VybmFscyBhcmUgb24gdGhlIGRpc2suCj4gICAgID4K
+PiAgICAgPiAgICAgYmVuY2g1IDogVWJ1bnR1IDE0LjA0IC8gQ2VwaCBJbmZlcm5hbGlzCj4gICAg
+ID4gICAgIGJlbmNoNiA6IFVidW50dSAxNC4wNCAvIENlcGggSmV3ZWwKPiAgICAgPiAgICAgYmVu
+Y2g3IDogVWJ1bnR1IDE2LjA0IC8gQ2VwaCBqZXdlbAo+ICAgICA+Cj4gICAgID4gICAgIHRoaXMg
+aXMgdGhlIGF2ZXJhZ2Ugb2YgMiBydW5zIG9mICJjZXBoIHRlbGwgb3NkLiogYmVuY2giIG9uIGVh
+Y2ggY2x1c3RlciAoMiB4IDMwCj4gICAgID4gICAgIE9TRHMpCj4gICAgID4KPiAgICAgPiAgICAg
+YmVuY2g1IC8gMTQuMDQgLyBJbmZlcm5hbGlzIC8ga2VybmVsIDMuMTMgOiAgNTQuMzUgTUIvcwo+
+ICAgICA+ICAgICBiZW5jaDYgLyAxNC4wNCAvIEpld2VsICAgICAgLyBrZXJuZWwgMy4xMyA6ICA4
+Ni40NyBNQi9zCj4gICAgID4KPiAgICAgPiAgICAgYmVuY2g1IC8gMTQuMDQgLyBJbmZlcm5hbGlz
+IC8ga2VybmVsIDQuMiAgOiAgNjMuMzggTUIvcwo+ICAgICA+ICAgICBiZW5jaDYgLyAxNC4wNCAv
+IEpld2VsICAgICAgLyBrZXJuZWwgNC4yICA6IDEwNy43NSBNQi9zCj4gICAgID4gICAgIGJlbmNo
+NyAvIDE2LjA0IC8gSmV3ZWwgICAgICAvIGtlcm5lbCA0LjIgIDogMTAxLjU0IE1CL3MKPiAgICAg
+Pgo+ICAgICA+ICAgICBiZW5jaDUgLyAxNC4wNCAvIEluZmVybmFsaXMgLyBrZXJuZWwgNC40ICA6
+ICA1My42MSBNQi9zCj4gICAgID4gICAgIGJlbmNoNiAvIDE0LjA0IC8gSmV3ZWwgICAgICAvIGtl
+cm5lbCA0LjQgIDogIDY1LjgyIE1CL3MKPiAgICAgPiAgICAgYmVuY2g3IC8gMTYuMDQgLyBKZXdl
+bCAgICAgIC8ga2VybmVsIDQuNCAgOiAgNjEuNTcgTUIvcwo+ICAgICA+Cj4gICAgID4gICAgIElm
+IG5lZWRlZCwgSSBoYXZlIHRoZSByYXcgb3V0cHV0IG9mICJjZXBoIHRlbGwgb3NkLiogYmVuY2gi
+Cj4gICAgID4KPiAgICAgPiAgICAgQmVzdCByZWdhcmRzCj4gCj4gCgoKLS0gCllvYW5uIE1vdWxp
+bgpFUEZMIElDLUlUCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0
+cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
