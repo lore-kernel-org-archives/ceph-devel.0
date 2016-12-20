@@ -1,140 +1,56 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: OSD rebind connects to ports of other OSDs
-Date: Tue, 20 Dec 2016 19:48:02 +0100
-Message-ID: <fb7577e8-01cc-ff90-16fa-79d5172b0142@digiware.nl>
-References: <2b061067-e839-054e-5166-619deecfae5e@digiware.nl>
- <42cd4fbb-6539-fe43-2b45-45d7958ddcce@digiware.nl>
- <alpine.DEB.2.11.1612201521120.10615@piezo.novalocal>
- <5e69eb3a-9c9d-9876-f4c5-81dccaafb171@digiware.nl>
- <alpine.DEB.2.11.1612201842440.10615@piezo.novalocal>
+From: David Galloway <dgallowa@redhat.com>
+Subject: Re: [ceph-users] tracker.ceph.com
+Date: Tue, 20 Dec 2016 14:24:55 -0500
+Message-ID: <6c6c5e67-f9bb-2595-f884-089a93d3be1d@redhat.com>
+References: <8421d2fe-067f-97c0-4a79-083c37baee35@redhat.com>
+ <c6a0103f-5f03-b3f6-7a87-80e73e9d49ef@redhat.com>
+ <84d80a96-93d4-4425-ebb5-58b3050687ae@suse.cz>
+ <bac5442d-95fc-ad5f-7879-6a7f5ae9baa0@redhat.com>
+ <cdf1b050-6b7d-d2e2-f05a-2b6d84d0089e@suse.cz>
+ <135821945.5017.1482252480516@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:25553 "EHLO smtp.digiware.nl"
+Received: from mx1.redhat.com ([209.132.183.28]:54954 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752035AbcLTSsJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 20 Dec 2016 13:48:09 -0500
-In-Reply-To: <alpine.DEB.2.11.1612201842440.10615@piezo.novalocal>
+        id S965378AbcLTTZD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 20 Dec 2016 14:25:03 -0500
+In-Reply-To: <135821945.5017.1482252480516@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: Nathan Cutler <ncutler@suse.cz>, ceph-users@lists.ceph.com, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 20-12-2016 19:43, Sage Weil wrote:
-> On Tue, 20 Dec 2016, Willem Jan Withagen wrote:
->> On 20-12-2016 16:23, Sage Weil wrote:
->>> On Tue, 20 Dec 2016, Willem Jan Withagen wrote:
->>>> On 20-12-2016 11:21, Willem Jan Withagen wrote:
->>>>> Hi,
->>>>>
->>>>> I've been banging my head against the wall for some time now.
->>>>> But rebinding OSD.0 (in cephtool-test-mon.sh) does not quite work.
->>>>>
->>>>> When rebinding it connects to the ports of OSD.1 because those ports are
->>>>> the first not in the avoid_list. That should be refused since these
->>>>> sockets belong to a different process.
->>>>> UNLESS SO_REUSEPORT is set:
->>>>>  SO_REUSEPORT allows completely duplicate bindings by multiple processes
->>>>>  if they all set SO_REUSEPORT before binding the port.  This option
->>>>>  permits multiple instances of a program to each receive UDP/IP
->>>>>  multicast or broadcast datagrams destined for the bound port.
->>>>>
->>>>> Which seems that that happens.
->>>>> Output from sockstat in this state:
->>>>> wjw      ceph-osd-0   43305 14 tcp4   *:6800                *:*
->>>>> wjw      ceph-osd-0   43305 15 tcp4   127.0.0.1:6804        *:*
->>>>> wjw      ceph-osd-0   43305 16 tcp4   127.0.0.1:6805        *:*
->>>>> wjw      ceph-osd-0   43305 45 tcp4   127.0.0.1:6806        *:*
->>>>> wjw      ceph-osd-1   43318 14 tcp4   *:6804                *:*
->>>>> wjw      ceph-osd-1   43318 15 tcp4   *:6805                *:*
->>>>> wjw      ceph-osd-1   43318 16 tcp4   *:6806                *:*
->>>>> wjw      ceph-osd-1   43318 17 tcp4   *:6807                *:*
->>>>>
->>>>> Which clearly demonstrates the mess.
->>>>> How ever that option is nowhere set in the ceph-code, neither is it a
->>>>> setting that "just" gets set.
->>>>>
->>>>> Any suggestions where to look for this option to get set in an
->>>>> incidental/bug way would be much appreciated.
->>>>> Or a suggestion on how to easily debug this.
->>>>
->>>> Right,
->>>>
->>>> Compatibility in this area is rather thin. :)
->>>>
->>>> For the question skip to the end.
->>>>
->>>> So I'm going to need some functional description, to see if I can get it
->>>> right.
->>>>
->>>> Osd starts and build a few messengers with SO_REUSEADDR on the socket.
->>>>         On Linux used ports are being reported in use.
->>>> 	As on FreeBSD during startup. Ports are nicely iterated thru
->>>> 	and sequential ports are selected.
->>>> So that is how it should be.
->>>>
->>>> Now when the osd has gone down and comes up, it reports:
->>>>   log_channel(cluster) log [WRN] : map e18 wrongly marked me down
->>>> on ./src/osd/OSD.cc:7120
->>>>
->>>> Then it starts rebinding on its messenger connections:
->>>>         int r = cluster_messenger->rebind(avoid_ports)
->>>> on ./src/osd/OSD.cc:7192.
->>>> It calls shutdown_connections() to shutdown all of its connections.
->>>>
->>>> Somewhere down the line is SO_REUSEADDR set again on the socket and the
->>>> socket is bound.
->>>>  - Linux grabs the next available ports at the end, because its own
->>>>    channels are to be avoided and the rest is taken.
->>>>
->>>>  - On FreeBSD the first port available is taken. If that is 6800,
->>>>    than that is taken. Even if the socket is owned by a different
->>>>    process. Which (per man-page) would require SO_REUSEPORT.
->>>>
->>>> If I disable SO_REUSEADDR in NetHandler::create_socket()
->>>> ====
->>>>   /* Make sure connection-intensive things like the benchmark
->>>>    * will be able to close/open sockets a zillion of times */
->>>>   if (reuse_addr) {
->>>>     if (::setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on,sizeof(on))==-1){
->>>>       lderr(cct) << __func__ << " setsockopt SO_REUSEADDR failed: "
->>>>                  << strerror(errno) << dendl;
->>>>       close(s);
->>>>       return -errno;
->>>>     }
->>>>   }
->>>> ====
->>>> Then things start to work "as expected" and ports are refused when it
->>>> has a listener connected.
->>>>
->>>> Doing this has the disadvantage that it is not possible to immediately
->>>> kill and restart the OSD because the ports are not yet release in the
->>>> netstat table.... But that is an overseeable issue, and that time can be
->>>> shorted by setting a sysctl.
->>>>
->>>> So the question is:
->>>>  - how much rebinding is required.....
->>>
->>> I think it's just for tests.  My recollection is that we did this just 
->>> because we can run out of ports since we can't reuse one until the tcp 
->>> finwait2 (or whatever) timeout expires.
->>>
->>>>  - And why do we set SO_REUSEADDR if we are going to add the ports to
->>>>  	avoid_ports. And thus a complete new port is required.
->>>
->>> I suspect it's safe to drop the option if the Linux vs FreeBSD semantics 
->>> are in fact different.
+
+On 12/20/2016 11:48 AM, Wido den Hollander wrote:
+>
+>> Op 20 december 2016 om 17:31 schreef Nathan Cutler <ncutler@suse.cz>:
 >>
->> When I exclude the SO_REUSEADDR my Jenkins goes back to normal.
->> Will submit a PR.
-> 
-> Please #ifdef it so it's only excluded for FreeBSD.
+>>
+>>> Looks like it was trying to send mail over IPv6 and failing.
+>>>
+>>> I switched back to postfix, disabled IPv6, and show a message was
+>>> recently queued for delivery to you.  Please confirm you got it.
+>>
+>> Got it. Thanks for the fix!
+>>
+>
+> I wouldn't call it a fix. In 2016 (almost 2017) IPv6 should be enabled, no questions asked.
+>
+> After the recent migrations both ceph.com and tracker.ceph.com lost their IPv6. To me that's broken connectivity.
+>
+> When is this coming back?
+>
 
-Yup,
+Tracker never had an IPv6 record as far as I'm aware.  Nevertheless, I 
+added its AAAA record to DNS.  We don't manage the reverse DNS for it, 
+however, so outgoing mail to gmail addresses still fails because the 
+IPv6 address lacks a PTR record.
 
-in #12593
+www.ceph.com lost its IPv6 record because it is using a floating IP 
+after its move to the new DreamCompute cluster.  IPv6 isn't functional 
+for floating IPs in that cluster yet.
 
---WjW
-
-
+The new ceph.com host isn't using a floating IP and will have an IPv6 
+record when we switch over.
