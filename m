@@ -1,49 +1,119 @@
-From: Ruben Kerkhof <ruben@rubenkerkhof.com>
-Subject: Re: Feeding pool utilization data to time series for trending
-Date: Tue, 20 Dec 2016 12:43:51 +0100
-Message-ID: <CAPed3OEP+v3z=+u03TyPq6NpvUSKjQjxz71z3bZtVLNSipP7jQ@mail.gmail.com>
-References: <0dafd5ff-1ed6-cb05-05d3-dff3afb43c44@redhat.com>
- <c0ef7893-2bd2-d11f-b008-db566145ce84@redhat.com> <aa72804e-767e-aaba-a2a8-e6df0e0a0536@redhat.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: OSD rebind connects to ports of other OSDs
+Date: Tue, 20 Dec 2016 16:00:23 +0100
+Message-ID: <42cd4fbb-6539-fe43-2b45-45d7958ddcce@digiware.nl>
+References: <2b061067-e839-054e-5166-619deecfae5e@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f172.google.com ([209.85.217.172]:33063 "EHLO
-        mail-ua0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751399AbcLTLoM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Dec 2016 06:44:12 -0500
-Received: by mail-ua0-f172.google.com with SMTP id b56so13987206uaa.0
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Dec 2016 03:44:12 -0800 (PST)
-In-Reply-To: <aa72804e-767e-aaba-a2a8-e6df0e0a0536@redhat.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:31224 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1761049AbcLTPAb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 20 Dec 2016 10:00:31 -0500
+Received: from [192.168.10.67] (opteron [192.168.10.67])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id 7C26833584
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Dec 2016 16:00:25 +0100 (CET)
+In-Reply-To: <2b061067-e839-054e-5166-619deecfae5e@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Shubhendu Tripathi <shtripat@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Dec 20, 2016 at 5:19 AM, Shubhendu Tripathi <shtripat@redhat.com> wrote:
-> Hi Team,
->
-> Our team is currently working on project named "tendrl" [1][2].
-> Tendrl is a management platform for software defined storage system like
-> Ceph, Gluster etc.
->
-> As part of tendrl we are integrating with collectd to collect performance
-> data and we maintain the time series data in graphite.
->
-> I have a question at this juncture regarding pool utilization data.
-> As our thought process goes, we think of using output from command "ceph df"
-> and parse it to figure out pool utilization data and push it to graphite
-> using collectd.
-> The question here is what is/would be performance impact of running "ceph
-> df" command on ceph nodes. We should be running this command only on mon
-> nodes I feel.
->
-> Wanted to verify with the team here if this thought process is in right
-> direction and if so what ideally should be frequency of running the command
-> "ceph df" from collectd.
+On 20-12-2016 11:21, Willem Jan Withagen wrote:
+> Hi,
+> 
+> I've been banging my head against the wall for some time now.
+> But rebinding OSD.0 (in cephtool-test-mon.sh) does not quite work.
+> 
+> When rebinding it connects to the ports of OSD.1 because those ports are
+> the first not in the avoid_list. That should be refused since these
+> sockets belong to a different process.
+> UNLESS SO_REUSEPORT is set:
+>  SO_REUSEPORT allows completely duplicate bindings by multiple processes
+>  if they all set SO_REUSEPORT before binding the port.  This option
+>  permits multiple instances of a program to each receive UDP/IP
+>  multicast or broadcast datagrams destined for the bound port.
+> 
+> Which seems that that happens.
+> Output from sockstat in this state:
+> wjw      ceph-osd-0   43305 14 tcp4   *:6800                *:*
+> wjw      ceph-osd-0   43305 15 tcp4   127.0.0.1:6804        *:*
+> wjw      ceph-osd-0   43305 16 tcp4   127.0.0.1:6805        *:*
+> wjw      ceph-osd-0   43305 45 tcp4   127.0.0.1:6806        *:*
+> wjw      ceph-osd-1   43318 14 tcp4   *:6804                *:*
+> wjw      ceph-osd-1   43318 15 tcp4   *:6805                *:*
+> wjw      ceph-osd-1   43318 16 tcp4   *:6806                *:*
+> wjw      ceph-osd-1   43318 17 tcp4   *:6807                *:*
+> 
+> Which clearly demonstrates the mess.
+> How ever that option is nowhere set in the ceph-code, neither is it a
+> setting that "just" gets set.
+> 
+> Any suggestions where to look for this option to get set in an
+> incidental/bug way would be much appreciated.
+> Or a suggestion on how to easily debug this.
 
-Have you looked at Collectd's Ceph plugin
-(https://collectd.org/documentation/manpages/collectd.conf.5.shtml#plugin_ceph)
+Right,
 
-Kind regards,
+Compatibility in this area is rather thin. :)
 
-Ruben Kerkhof
+For the question skip to the end.
+
+So I'm going to need some functional description, to see if I can get it
+right.
+
+Osd starts and build a few messengers with SO_REUSEADDR on the socket.
+        On Linux used ports are being reported in use.
+	As on FreeBSD during startup. Ports are nicely iterated thru
+	and sequential ports are selected.
+So that is how it should be.
+
+Now when the osd has gone down and comes up, it reports:
+  log_channel(cluster) log [WRN] : map e18 wrongly marked me down
+on ./src/osd/OSD.cc:7120
+
+Then it starts rebinding on its messenger connections:
+        int r = cluster_messenger->rebind(avoid_ports)
+on ./src/osd/OSD.cc:7192.
+It calls shutdown_connections() to shutdown all of its connections.
+
+Somewhere down the line is SO_REUSEADDR set again on the socket and the
+socket is bound.
+ - Linux grabs the next available ports at the end, because its own
+   channels are to be avoided and the rest is taken.
+
+ - On FreeBSD the first port available is taken. If that is 6800,
+   than that is taken. Even if the socket is owned by a different
+   process. Which (per man-page) would require SO_REUSEPORT.
+
+If I disable SO_REUSEADDR in NetHandler::create_socket()
+====
+  /* Make sure connection-intensive things like the benchmark
+   * will be able to close/open sockets a zillion of times */
+  if (reuse_addr) {
+    if (::setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on,sizeof(on))==-1){
+      lderr(cct) << __func__ << " setsockopt SO_REUSEADDR failed: "
+                 << strerror(errno) << dendl;
+      close(s);
+      return -errno;
+    }
+  }
+====
+Then things start to work "as expected" and ports are refused when it
+has a listener connected.
+
+Doing this has the disadvantage that it is not possible to immediately
+kill and restart the OSD because the ports are not yet release in the
+netstat table.... But that is an overseeable issue, and that time can be
+shorted by setting a sysctl.
+
+So the question is:
+ - how much rebinding is required.....
+ - And why do we set SO_REUSEADDR if we are going to add the ports to
+ 	avoid_ports. And thus a complete new port is required.
+
+--WjW
+
+
