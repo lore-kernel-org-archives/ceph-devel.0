@@ -1,64 +1,58 @@
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 2/9] xfs: introduce and use KM_NOLOCKDEP to silence
- reclaim lockdep false positives
-Date: Mon, 19 Dec 2016 14:06:19 -0800
-Message-ID: <20161219220619.GA7296@birch.djwong.org>
-References: <20161215140715.12732-1-mhocko@kernel.org>
- <20161215140715.12732-3-mhocko@kernel.org>
- <20161219212413.GN4326@dastard>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: Computation in the storage
+Date: Tue, 20 Dec 2016 01:19:22 +0000
+Message-ID: <552D04CE-8030-4340-ADDD-BCAB6A51C161@Teradata.com>
+References: <26283_1480676624_58415510_26283_122_1_EBBC07637B509B40B2E594A11E62C54F022DA808@OPEXCLILM32.corporate.adroot.infra.ftgroup>
+ <d8129d7a-af37-ad74-38c8-f5a9d59f183b@suse.de>
+ <CAF-wwdHPXaX3fe+dk9ovdAfc00N5xQrzj2TaRAuBOjH77L4yDg@mail.gmail.com>
+ <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com>
+ <CAB2gnbVn0U_G12L8XV=hbznB2i_TMo40TpC5cVzJZKOr_MAQ7Q@mail.gmail.com>
+ <64D605E0-8851-4F60-B0AB-864CBDA7B3F7@Teradata.com>
+ <208C08FF-0104-425C-B7AA-B0930A76F46E@Teradata.com>
+ <CAB2gnbUEeS6AynJ0AjdpJ+MbiGSq_HUkBS-KdnXrke1wiJYsyA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20161219212413.GN4326@dastard>
-Sender: owner-linux-mm@kvack.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Michal Hocko <mhocko@kernel.org>, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from nat13.teradata.com ([153.65.16.13]:33562 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S932110AbcLTBTZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Dec 2016 20:19:25 -0500
+In-Reply-To: <CAB2gnbUEeS6AynJ0AjdpJ+MbiGSq_HUkBS-KdnXrke1wiJYsyA@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <B713D319738AFA44AFC317D48C1E9BC0@TD.Teradata.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Noah Watkins <noahwatkins@gmail.com>
+Cc: Brad Hubbard <bhubbard@redhat.com>, Joao Eduardo Luis <joao@suse.de>, "nebil.benmabrouk@orange.com" <nebil.benmabrouk@orange.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Dec 20, 2016 at 08:24:13AM +1100, Dave Chinner wrote:
-> On Thu, Dec 15, 2016 at 03:07:08PM +0100, Michal Hocko wrote:
-> > From: Michal Hocko <mhocko@suse.com>
-> > 
-> > Now that the page allocator offers __GFP_NOLOCKDEP let's introduce
-> > KM_NOLOCKDEP alias for the xfs allocation APIs. While we are at it
-> > also change KM_NOFS users introduced by b17cb364dbbb ("xfs: fix missing
-> > KM_NOFS tags to keep lockdep happy") and use the new flag for them
-> > instead. There is really no reason to make these allocations contexts
-> > weaker just because of the lockdep which even might not be enabled
-> > in most cases.
-> > 
-> > Signed-off-by: Michal Hocko <mhocko@suse.com>
-> 
-> I'd suggest that it might be better to drop this patch for now -
-> it's not necessary for the context flag changeover but does
-> introduce a risk of regressions if the conversion is wrong.
-
-I was just about to write in that while I didn't see anything obviously
-wrong with the NOFS removals, I also don't know for sure that we can't
-end up recursively in those code paths (specifically the directory
-traversal thing).
-
---D
-
-> Hence I think this is better as a completely separate series
-> which audits and changes all the unnecessary KM_NOFS allocations
-> in one go. I've never liked whack-a-mole style changes like this -
-> do it once, do it properly....
-> 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-ext4" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+SGkgTm9haCwNCg0KVGhhdOKAmXMgZ3JlYXQgdG8ga25vdy4gVGhhbmtzIGZvciB0aGUgcHJvbXB0
+IHJlc3BvbnNlLg0KDQpOaXRpbg0KDQo+IE9uIERlYyAxNiwgMjAxNiwgYXQgMTA6MjIgQU0sIE5v
+YWggV2F0a2lucyA8bm9haHdhdGtpbnNAZ21haWwuY29tPiB3cm90ZToNCj4gDQo+IE5pdGluLA0K
+PiANCj4gVGhlIGxpbmtzIG9uIHRoZSBibG9nIGFyZSBvdXQgb2YgZGF0ZS4gTHVhIHN1cHBvcnQg
+aGFzIGJlZW4gbWVyZ2VkLg0KPiBTZWUgaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC90cmVl
+L21hc3Rlci9zcmMvY2xzL2x1YQ0KPiANCj4gLSBOb2FoDQo+IA0KPiBPbiBGcmksIERlYyAxNiwg
+MjAxNiBhdCAxMDowMCBBTSwgS2FtYmxlLCBOaXRpbiBBDQo+IDxOaXRpbi5LYW1ibGVAdGVyYWRh
+dGEuY29tPiB3cm90ZToNCj4+IEhpIE5vYWgsDQo+PiANCj4+IEkgbG9va2VkIGF0IHlvdXIgYmxv
+ZyBbMF0gYWJvdXQgaW1wbGVtZW50aW5nIFJBRE9TIG9iamVjdCBjbGFzc2VzIHVzaW5nIEx1YSBz
+Y3JpcHRzLiBUaGUNCj4+IGxpbmsgWzFdIHRvIHRoZSBzb3VyY2UgY29kZSBpbiBjZXBoIHJlcG9z
+aXRvcnkgaXMgbWlzc2luZy4gU2VlbXMgbGlrZSB0aGlzIHN1cHBvcnQgaGFzIGJlZW4NCj4+IHJl
+bW92ZWQgZnJvbSB1cHN0cmVhbSBjZXBoLCBhbmQgaXQgaXMgbm90IHN1cHBvcnRlZCBieSB0aGUg
+Y2VwaCByZWxlYXNlcyBhcyBvZiBub3cuDQo+PiBDYW4geW91IGNvbmZpcm0/DQo+PiANCj4+IA0K
+Pj4gWzBdIGh0dHA6Ly9ub2FoZGVzdS5naXRodWIuaW8vMjAxNS8xMi8xNC90b3dhcmRzLXJhZG9z
+LW9iamVjdC1jbGFzcy1tYW5hZ2VtZW50Lmh0bWwNCj4+IFsxXSBodHRwczovL2dpdGh1Yi5jb20v
+Y2VwaC9jZXBoL3RyZWUvY2xzLWx1YQ0KPj4gDQo+PiBUaGFua3MsDQo+PiBOaXRpbg0KPj4gDQo+
+PiANCj4+PiBPbiBEZWMgNSwgMjAxNiwgYXQgMzowOCBQTSwgS2FtYmxlLCBOaXRpbiBBIDxOaXRp
+bi5LYW1ibGVAVGVyYWRhdGEuY29tPiB3cm90ZToNCj4+PiANCj4+PiANCj4+Pj4gT24gRGVjIDQs
+IDIwMTYsIGF0IDM6MDIgUE0sIE5vYWggV2F0a2lucyA8bm9haHdhdGtpbnNAZ21haWwuY29tPiB3
+cm90ZToNCj4+Pj4gDQo+Pj4+IE9uIEZyaSwgRGVjIDIsIDIwMTYgYXQgMzowNCBQTSwgS2FtYmxl
+LCBOaXRpbiBBDQo+Pj4+IDxOaXRpbi5LYW1ibGVAdGVyYWRhdGEuY29tPiB3cm90ZToNCj4+Pj4+
+IA0KPj4+Pj4gSXMgYW55Ym9keSB1c2luZyByZWFsIFJBRE9TIG9iamVjdCBjbGFzc2VzIG9uIGNl
+cGggY2x1c3RlcnM/IEFueSBvZiB0aGVtIG9uIGdpdGh1Yj8NCj4+Pj4+IEkgd291bGQgbGlrZSB0
+byBsb29rIGF0IHNvbWUgb2YgdGhlIHJlYWwgd29ybGQgZXhhbXBsZXMgaWYgaXQgaXMgdGhlcmUu
+DQo+Pj4+PiBBbmQgbW9yZSBkb2N1bWVudGF0aW9uIG9mIHRoaXMgZmVhdHVyZSB3b3VsZCBkZWZp
+bml0ZWx5IGhlbHAgdG9vLg0KPj4+PiANCj4+Pj4gV2UgdXNlIG9iamVjdCBjbGFzc2VzIFswXSBm
+b3IgYSBkaXN0cmlidXRlZCBzaGFyZWQgbG9nIFsxXSBvbiBDZXBoLg0KPj4+PiANCj4+Pj4gWzBd
+OiBodHRwczovL2dpdGh1Yi5jb20vbm9haGRlc3UvY2VwaC9ibG9iL3psb2cvamV3ZWwvc3JjL2Ns
+cy96bG9nL2Nsc196bG9nLmNjDQo+Pj4+IFsxXTogaHR0cHM6Ly9naXRodWIuY29tL25vYWhkZXN1
+L3psb2cNCj4+IA0KDQo=
