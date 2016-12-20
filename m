@@ -1,59 +1,80 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH 2/9] xfs: introduce and use KM_NOLOCKDEP to silence
- reclaim lockdep false positives
-Date: Tue, 20 Dec 2016 09:38:18 +0100
-Message-ID: <20161220083818.GB3769@dhcp22.suse.cz>
-References: <20161215140715.12732-1-mhocko@kernel.org>
- <20161215140715.12732-3-mhocko@kernel.org>
- <20161219212413.GN4326@dastard>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Feeding pool utilization data to time series for trending
+Date: Tue, 20 Dec 2016 09:59:43 +0100 (CET)
+Message-ID: <640241856.4849.1482224383452@ox.pcextreme.nl>
+References: <0dafd5ff-1ed6-cb05-05d3-dff3afb43c44@redhat.com>
+ <c0ef7893-2bd2-d11f-b008-db566145ce84@redhat.com>
+ <aa72804e-767e-aaba-a2a8-e6df0e0a0536@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20161219212413.GN4326@dastard>
-Sender: owner-linux-mm@kvack.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:33287 "EHLO
+        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755648AbcLTJAF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Dec 2016 04:00:05 -0500
+In-Reply-To: <aa72804e-767e-aaba-a2a8-e6df0e0a0536@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, Shubhendu Tripathi <shtripat@redhat.com>
 
-On Tue 20-12-16 08:24:13, Dave Chinner wrote:
-> On Thu, Dec 15, 2016 at 03:07:08PM +0100, Michal Hocko wrote:
-> > From: Michal Hocko <mhocko@suse.com>
-> > 
-> > Now that the page allocator offers __GFP_NOLOCKDEP let's introduce
-> > KM_NOLOCKDEP alias for the xfs allocation APIs. While we are at it
-> > also change KM_NOFS users introduced by b17cb364dbbb ("xfs: fix missing
-> > KM_NOFS tags to keep lockdep happy") and use the new flag for them
-> > instead. There is really no reason to make these allocations contexts
-> > weaker just because of the lockdep which even might not be enabled
-> > in most cases.
-> > 
-> > Signed-off-by: Michal Hocko <mhocko@suse.com>
+
+> Op 20 december 2016 om 5:19 schreef Shubhendu Tripathi <shtripat@redhat.com>:
 > 
-> I'd suggest that it might be better to drop this patch for now -
-> it's not necessary for the context flag changeover but does
-> introduce a risk of regressions if the conversion is wrong.
 > 
-> Hence I think this is better as a completely separate series
-> which audits and changes all the unnecessary KM_NOFS allocations
-> in one go. I've never liked whack-a-mole style changes like this -
-> do it once, do it properly....
+> Hi Team,
+> 
+> Our team is currently working on project named "tendrl" [1][2].
+> Tendrl is a management platform for software defined storage system like 
+> Ceph, Gluster etc.
+> 
+> As part of tendrl we are integrating with collectd to collect 
+> performance data and we maintain the time series data in graphite.
+> 
+> I have a question at this juncture regarding pool utilization data.
+> As our thought process goes, we think of using output from command "ceph 
+> df" and parse it to figure out pool utilization data and push it to 
+> graphite using collectd.
+> The question here is what is/would be performance impact of running 
+> "ceph df" command on ceph nodes. We should be running this command only 
+> on mon nodes I feel.
+> 
 
-OK, fair enough. I thought it might be better to have an example user so
-that others can follow but as you say, the risk of regression is really
-there and these kind of changes definitely need a throughout review.
+Correct, that data comes from the MONs and is not that heavy.
 
-I am not sure I will be able to post more of those changes because that
-requires an intimate knowledge of the fs so I hope somebody can take
-over there and follow up.
+> Wanted to verify with the team here if this thought process is in right 
+> direction and if so what ideally should be frequency of running the 
+> command "ceph df" from collectd.
+> 
 
-Thanks!
--- 
-Michal Hocko
-SUSE Labs
+Running the command means forking a process every time and also going through the whole cephx authentication and client <> MON process.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+> This is just from our point of view and we are open to any other 
+> foolproof solution (if any).
+
+The best would be to keep a open connection to a MON and run the 'df' command directly on the MONs in a loop.
+
+I wrote something like that in Python a while ago for 'ceph status': https://gist.github.com/wido/ac53ae01d661dd57f4a8
+
+cmd = {"prefix":"status", "format":"json"}
+
+If you change that to:
+
+cmd = {"prefix":"df", "format":"json"}
+
+You ask the MON for 'df' and get back a JSON. Run that in a loop where you sleep every 1 or 5 seconds and you should have very real-time information.
+
+Wido
+
+> 
+> Kindly guide us.
+> 
+> Regards,
+> Shubhendu Tripathi
+> 
+> [1] http://tendrl.org/
+> [2] https://github.com/tendrl/
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
