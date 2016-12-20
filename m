@@ -1,132 +1,91 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: OSD rebind connects to ports of other OSDs
-Date: Tue, 20 Dec 2016 16:50:15 +0100
-Message-ID: <821e3991-b0b1-8646-9fb0-135192115450@digiware.nl>
-References: <2b061067-e839-054e-5166-619deecfae5e@digiware.nl>
- <42cd4fbb-6539-fe43-2b45-45d7958ddcce@digiware.nl>
- <alpine.DEB.2.11.1612201521120.10615@piezo.novalocal>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Bug in mempool::map?
+Date: Tue, 20 Dec 2016 18:56:12 +0300
+Message-ID: <015736b6-a7b0-90bf-fb74-e218cb07cd0a@mirantis.com>
+References: <36219e00-6114-7b9e-f7ca-5190cb545c93@mirantis.com>
+ <alpine.DEB.2.11.1612201524400.10615@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:42116 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S934989AbcLTPu2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 20 Dec 2016 10:50:28 -0500
-In-Reply-To: <alpine.DEB.2.11.1612201521120.10615@piezo.novalocal>
+Received: from mail-yb0-f180.google.com ([209.85.213.180]:33209 "EHLO
+        mail-yb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757514AbcLTP4Q (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Dec 2016 10:56:16 -0500
+Received: by mail-yb0-f180.google.com with SMTP id v132so66990169yba.0
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Dec 2016 07:56:16 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1612201524400.10615@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 20-12-2016 16:23, Sage Weil wrote:
-> On Tue, 20 Dec 2016, Willem Jan Withagen wrote:
->> On 20-12-2016 11:21, Willem Jan Withagen wrote:
->>> Hi,
->>>
->>> I've been banging my head against the wall for some time now.
->>> But rebinding OSD.0 (in cephtool-test-mon.sh) does not quite work.
->>>
->>> When rebinding it connects to the ports of OSD.1 because those ports are
->>> the first not in the avoid_list. That should be refused since these
->>> sockets belong to a different process.
->>> UNLESS SO_REUSEPORT is set:
->>>  SO_REUSEPORT allows completely duplicate bindings by multiple processes
->>>  if they all set SO_REUSEPORT before binding the port.  This option
->>>  permits multiple instances of a program to each receive UDP/IP
->>>  multicast or broadcast datagrams destined for the bound port.
->>>
->>> Which seems that that happens.
->>> Output from sockstat in this state:
->>> wjw      ceph-osd-0   43305 14 tcp4   *:6800                *:*
->>> wjw      ceph-osd-0   43305 15 tcp4   127.0.0.1:6804        *:*
->>> wjw      ceph-osd-0   43305 16 tcp4   127.0.0.1:6805        *:*
->>> wjw      ceph-osd-0   43305 45 tcp4   127.0.0.1:6806        *:*
->>> wjw      ceph-osd-1   43318 14 tcp4   *:6804                *:*
->>> wjw      ceph-osd-1   43318 15 tcp4   *:6805                *:*
->>> wjw      ceph-osd-1   43318 16 tcp4   *:6806                *:*
->>> wjw      ceph-osd-1   43318 17 tcp4   *:6807                *:*
->>>
->>> Which clearly demonstrates the mess.
->>> How ever that option is nowhere set in the ceph-code, neither is it a
->>> setting that "just" gets set.
->>>
->>> Any suggestions where to look for this option to get set in an
->>> incidental/bug way would be much appreciated.
->>> Or a suggestion on how to easily debug this.
+Yeah, indeed. Thanks!
+
+
+On 20.12.2016 18:25, Sage Weil wrote:
+> On Tue, 20 Dec 2016, Igor Fedotov wrote:
+>> Hi Allen,
 >>
->> Right,
+>> It looks like mempools don't measure maps allocations properly.
 >>
->> Compatibility in this area is rather thin. :)
+>> I extended unittest_mempool in the following way but corresponding output is
+>> always 0 for both 'before' and 'after' values:
 >>
->> For the question skip to the end.
 >>
->> So I'm going to need some functional description, to see if I can get it
->> right.
->>
->> Osd starts and build a few messengers with SO_REUSEADDR on the socket.
->>         On Linux used ports are being reported in use.
->> 	As on FreeBSD during startup. Ports are nicely iterated thru
->> 	and sequential ports are selected.
->> So that is how it should be.
->>
->> Now when the osd has gone down and comes up, it reports:
->>   log_channel(cluster) log [WRN] : map e18 wrongly marked me down
->> on ./src/osd/OSD.cc:7120
->>
->> Then it starts rebinding on its messenger connections:
->>         int r = cluster_messenger->rebind(avoid_ports)
->> on ./src/osd/OSD.cc:7192.
->> It calls shutdown_connections() to shutdown all of its connections.
->>
->> Somewhere down the line is SO_REUSEADDR set again on the socket and the
->> socket is bound.
->>  - Linux grabs the next available ports at the end, because its own
->>    channels are to be avoided and the rest is taken.
->>
->>  - On FreeBSD the first port available is taken. If that is 6800,
->>    than that is taken. Even if the socket is owned by a different
->>    process. Which (per man-page) would require SO_REUSEPORT.
->>
->> If I disable SO_REUSEADDR in NetHandler::create_socket()
->> ====
->>   /* Make sure connection-intensive things like the benchmark
->>    * will be able to close/open sockets a zillion of times */
->>   if (reuse_addr) {
->>     if (::setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on,sizeof(on))==-1){
->>       lderr(cct) << __func__ << " setsockopt SO_REUSEADDR failed: "
->>                  << strerror(errno) << dendl;
->>       close(s);
->>       return -errno;
+>> diff --git a/src/test/test_mempool.cc b/src/test/test_mempool.cc
+>> index 4113c53..b38a356 100644
+>> --- a/src/test/test_mempool.cc
+>> +++ b/src/test/test_mempool.cc
+>> @@ -232,9 +232,19 @@ TEST(mempool, set)
+>>   TEST(mempool, map)
+>>   {
+>>     {
+>> -    mempool::unittest_1::map<int,int> v;
+>> -    v[1] = 2;
+>> -    v[3] = 4;
+>> +    size_t before = mempool::buffer_data::allocated_bytes();
+> I think it's just that you're measuring the buffer_data pool...
+>
+>> +    mempool::unittest_1::map<int,int>* v = new mempool::unittest_1::map<int,int>;
+> but the map is in the unittest_1 pool?
+>
+>> +    (*v)[1] = 2;
+>> +    (*v)[3] = 4;
+>> +    size_t after = mempool::buffer_data::allocated_bytes();
+>> +    cout << "before " << before << " after " << after << std::endl;
+>> +    delete v;
+>> +    before = after;
+>> +    mempool::unittest_1::map<int64_t,int64_t> v2;
+>> +    v2[1] = 2;
+>> +    v2[3] = 4;
+>> +    after = mempool::buffer_data::allocated_bytes();
+>> +    cout << " before " << before << " after " << after << std::endl;
 >>     }
->>   }
->> ====
->> Then things start to work "as expected" and ports are refused when it
->> has a listener connected.
+>>     {
+>>       mempool::unittest_2::map<int,obj> v;
 >>
->> Doing this has the disadvantage that it is not possible to immediately
->> kill and restart the OSD because the ports are not yet release in the
->> netstat table.... But that is an overseeable issue, and that time can be
->> shorted by setting a sysctl.
 >>
->> So the question is:
->>  - how much rebinding is required.....
-> 
-> I think it's just for tests.  My recollection is that we did this just 
-> because we can run out of ports since we can't reuse one until the tcp 
-> finwait2 (or whatever) timeout expires.
-> 
->>  - And why do we set SO_REUSEADDR if we are going to add the ports to
->>  	avoid_ports. And thus a complete new port is required.
-> 
-> I suspect it's safe to drop the option if the Linux vs FreeBSD semantics 
-> are in fact different.
-
-That would be great, since it'll allow me to read up on this during the
-Xmas. And I'll commit a PR just excluding the code for now.
-That way the FreeBSD jenkins will correctly start building master again.
-(With the patches I have outstanding, and are seperatly applied)
-
---WjW
-
+>> Output:
+>>
+>> [ RUN      ] mempool.map
+>> before 0 after 0
+>>   before 0 after 0
+>> [       OK ] mempool.map (0 ms)
+>>
+>> It looks like we do not measure ref_map for BlueStore Blob and SharedBlob
+>> classes too.
+>>
+>> Any ideas?
+>>
+>> Thanks,
+>>
+>> Igor
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
 
