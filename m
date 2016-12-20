@@ -1,72 +1,81 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Bug in mempool::map?
-Date: Tue, 20 Dec 2016 18:04:00 +0300
-Message-ID: <36219e00-6114-7b9e-f7ca-5190cb545c93@mirantis.com>
+From: Mykola Golub <to.my.trociny@gmail.com>
+Subject: Re: OSD rebind connects to ports of other OSDs
+Date: Tue, 20 Dec 2016 17:06:38 +0200
+Message-ID: <20161220150636.GA1510@gmail.com>
+References: <2b061067-e839-054e-5166-619deecfae5e@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f172.google.com ([209.85.161.172]:36811 "EHLO
-        mail-yw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751359AbcLTPEL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Dec 2016 10:04:11 -0500
-Received: by mail-yw0-f172.google.com with SMTP id a10so83201104ywa.3
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Dec 2016 07:04:10 -0800 (PST)
+Received: from mail-lf0-f46.google.com ([209.85.215.46]:35219 "EHLO
+        mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935856AbcLTPGq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Dec 2016 10:06:46 -0500
+Received: by mail-lf0-f46.google.com with SMTP id b14so77934960lfg.2
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Dec 2016 07:06:45 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <2b061067-e839-054e-5166-619deecfae5e@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Allen Samuels <Allen.Samuels@sandisk.com>Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Allen,
+This is due to SO_REUSEADDR (not SO_REUSEPORT) socket option set. You
+should have mentioned that you were talking about FreeBSD.
 
-It looks like mempools don't measure maps allocations properly.
+Note, although osd-0 and osd-1 processes are bound to the same port,
+they have different addresses: wildcard (*) for osd-1, and 127.0.0.1
+for rebound osd-0. On FreeBSD if SO_REUSEADDR is set, it fails to bind
+only when both address and port are the same, and wildcard is
+considered as a different address here. On Linux bind fails in such
+case.
 
-I extended unittest_mempool in the following way but corresponding 
-output is always 0 for both 'before' and 'after' values:
+See, for example this for more details:
 
+http://stackoverflow.com/questions/14388706/socket-options-so-reuseaddr-and-so-reuseport-how-do-they-differ-do-they-mean-t
 
-diff --git a/src/test/test_mempool.cc b/src/test/test_mempool.cc
-index 4113c53..b38a356 100644
---- a/src/test/test_mempool.cc
-+++ b/src/test/test_mempool.cc
-@@ -232,9 +232,19 @@ TEST(mempool, set)
-  TEST(mempool, map)
-  {
-    {
--    mempool::unittest_1::map<int,int> v;
--    v[1] = 2;
--    v[3] = 4;
-+    size_t before = mempool::buffer_data::allocated_bytes();
-+    mempool::unittest_1::map<int,int>* v = new 
-mempool::unittest_1::map<int,int>;
-+    (*v)[1] = 2;
-+    (*v)[3] = 4;
-+    size_t after = mempool::buffer_data::allocated_bytes();
-+    cout << "before " << before << " after " << after << std::endl;
-+    delete v;
-+    before = after;
-+    mempool::unittest_1::map<int64_t,int64_t> v2;
-+    v2[1] = 2;
-+    v2[3] = 4;
-+    after = mempool::buffer_data::allocated_bytes();
-+    cout << " before " << before << " after " << after << std::endl;
-    }
-    {
-      mempool::unittest_2::map<int,obj> v;
+The question is though why it rebinds to 127.0.0.1, and not to '*'? I
+suppose this is wrong. How does it behave on Linux?
 
+On Tue, Dec 20, 2016 at 11:21:19AM +0100, Willem Jan Withagen wrote:
+> Hi,
+> 
+> I've been banging my head against the wall for some time now.
+> But rebinding OSD.0 (in cephtool-test-mon.sh) does not quite work.
+> 
+> When rebinding it connects to the ports of OSD.1 because those ports are
+> the first not in the avoid_list. That should be refused since these
+> sockets belong to a different process.
+> UNLESS SO_REUSEPORT is set:
+>  SO_REUSEPORT allows completely duplicate bindings by multiple processes
+>  if they all set SO_REUSEPORT before binding the port.  This option
+>  permits multiple instances of a program to each receive UDP/IP
+>  multicast or broadcast datagrams destined for the bound port.
+> 
+> Which seems that that happens.
+> Output from sockstat in this state:
+> wjw      ceph-osd-0   43305 14 tcp4   *:6800                *:*
+> wjw      ceph-osd-0   43305 15 tcp4   127.0.0.1:6804        *:*
+> wjw      ceph-osd-0   43305 16 tcp4   127.0.0.1:6805        *:*
+> wjw      ceph-osd-0   43305 45 tcp4   127.0.0.1:6806        *:*
+> wjw      ceph-osd-1   43318 14 tcp4   *:6804                *:*
+> wjw      ceph-osd-1   43318 15 tcp4   *:6805                *:*
+> wjw      ceph-osd-1   43318 16 tcp4   *:6806                *:*
+> wjw      ceph-osd-1   43318 17 tcp4   *:6807                *:*
+> 
+> Which clearly demonstrates the mess.
+> How ever that option is nowhere set in the ceph-code, neither is it a
+> setting that "just" gets set.
+> 
+> Any suggestions where to look for this option to get set in an
+> incidental/bug way would be much appreciated.
+> Or a suggestion on how to easily debug this.
+> 
+> Thanx,
+> --WjW
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Output:
-
-[ RUN      ] mempool.map
-before 0 after 0
-  before 0 after 0
-[       OK ] mempool.map (0 ms)
-
-It looks like we do not measure ref_map for BlueStore Blob and 
-SharedBlob classes too.
-
-Any ideas?
-
-Thanks,
-
-Igor
-
+-- 
+Mykola Golub
