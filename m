@@ -1,56 +1,151 @@
-From: David Galloway <dgallowa@redhat.com>
-Subject: Re: [ceph-users] tracker.ceph.com
-Date: Tue, 20 Dec 2016 14:24:55 -0500
-Message-ID: <6c6c5e67-f9bb-2595-f884-089a93d3be1d@redhat.com>
-References: <8421d2fe-067f-97c0-4a79-083c37baee35@redhat.com>
- <c6a0103f-5f03-b3f6-7a87-80e73e9d49ef@redhat.com>
- <84d80a96-93d4-4425-ebb5-58b3050687ae@suse.cz>
- <bac5442d-95fc-ad5f-7879-6a7f5ae9baa0@redhat.com>
- <cdf1b050-6b7d-d2e2-f05a-2b6d84d0089e@suse.cz>
- <135821945.5017.1482252480516@ox.pcextreme.nl>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Bug in mempool::map?
+Date: Tue, 20 Dec 2016 23:05:38 +0300
+Message-ID: <aa0fa487-ffed-cc4a-eae0-226ef038f1d4@mirantis.com>
+References: <36219e00-6114-7b9e-f7ca-5190cb545c93@mirantis.com>
+ <alpine.DEB.2.11.1612201524400.10615@piezo.novalocal>
+ <3117e8a5-e8dd-f323-25ef-dc6756ebb8f0@mirantis.com>
+ <alpine.DEB.2.11.1612201824140.10615@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54954 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S965378AbcLTTZD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 20 Dec 2016 14:25:03 -0500
-In-Reply-To: <135821945.5017.1482252480516@ox.pcextreme.nl>
+Received: from mail-lf0-f48.google.com ([209.85.215.48]:34293 "EHLO
+        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752305AbcLTUFl (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Dec 2016 15:05:41 -0500
+Received: by mail-lf0-f48.google.com with SMTP id y21so83608622lfa.1
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Dec 2016 12:05:40 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1612201824140.10615@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Nathan Cutler <ncutler@suse.cz>, ceph-users@lists.ceph.com, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+
+I think I have a better idea.
+
+We can simply track amount of bytes referenced in the blob. E.g. some 
+extent has length 100 - this increments the counter by 100 accordingly. 
+Removing/punching an extent  decrements the counter.
+
+If we want tp be able to deallocate specific unused pextent within a 
+blob as we currently do then we just need to track that amount on 
+per-pextent basis. Hence just a few ints per blob... And no need for map 
+lookups.
+
+If that's OK I can start implementing it tomorrow.
 
 
-On 12/20/2016 11:48 AM, Wido den Hollander wrote:
+Thanks,
+
+Igor
+
+
+The same idea can be probably applied to SharedBlob too.
+
+On 12/20/2016 9:26 PM, Sage Weil wrote:
+> On Tue, 20 Dec 2016, Igor Fedotov wrote:
+>> Some update on map<uint64_t, uint32_t> mem usage.
+>>
+>> It looks like single entry map takes 48 bytes. And 40 bytes for
+>> map<uint32_t,uint32_t>.
+>>
+>> Hence 1024 trivial ref_maps for 1024 blobs takes >48K!
+>>
+>> These are my results taken from mempools. And they look pretty similar to
+>> what's been said in the following article:
+>>
+>> http://lemire.me/blog/2016/09/15/the-memory-usage-of-stl-containers-can-be-surprising/
+>>
+>>
+>> Sage, you mentioned that you're planning to do something with ref maps during
+>> the standup but I missed the details. Is that something about their mem use or
+>> anything else?
+> I mentioned btree_map<> and flat_map<> (new in boost).  Probably the thing
+> to do here is to make extent_ref_map_t handle the common case of 1 (or
+> maybe 2?) extents done inline, and when we go beyond that allocate another
+> structure on the heap.  That other structure could be std::map<>, but I
+> think one of the other choices would be better: one larger allocation and
+> better performance in general for small maps.  This structure will
+> only get big for very big blobs, which shouldn't be terribly common, I
+> think.
 >
->> Op 20 december 2016 om 17:31 schreef Nathan Cutler <ncutler@suse.cz>:
+> sage
+>
+>
+>>
+>> Thanks,
+>>
+>> Igor
 >>
 >>
->>> Looks like it was trying to send mail over IPv6 and failing.
+>>
+>> On 20.12.2016 18:25, Sage Weil wrote:
+>>> On Tue, 20 Dec 2016, Igor Fedotov wrote:
+>>>> Hi Allen,
+>>>>
+>>>> It looks like mempools don't measure maps allocations properly.
+>>>>
+>>>> I extended unittest_mempool in the following way but corresponding output
+>>>> is
+>>>> always 0 for both 'before' and 'after' values:
+>>>>
+>>>>
+>>>> diff --git a/src/test/test_mempool.cc b/src/test/test_mempool.cc
+>>>> index 4113c53..b38a356 100644
+>>>> --- a/src/test/test_mempool.cc
+>>>> +++ b/src/test/test_mempool.cc
+>>>> @@ -232,9 +232,19 @@ TEST(mempool, set)
+>>>>    TEST(mempool, map)
+>>>>    {
+>>>>      {
+>>>> -    mempool::unittest_1::map<int,int> v;
+>>>> -    v[1] = 2;
+>>>> -    v[3] = 4;
+>>>> +    size_t before = mempool::buffer_data::allocated_bytes();
+>>> I think it's just that you're measuring the buffer_data pool...
 >>>
->>> I switched back to postfix, disabled IPv6, and show a message was
->>> recently queued for delivery to you.  Please confirm you got it.
+>>>> +    mempool::unittest_1::map<int,int>* v = new
+>>>> mempool::unittest_1::map<int,int>;
+>>> but the map is in the unittest_1 pool?
+>>>
+>>>> +    (*v)[1] = 2;
+>>>> +    (*v)[3] = 4;
+>>>> +    size_t after = mempool::buffer_data::allocated_bytes();
+>>>> +    cout << "before " << before << " after " << after << std::endl;
+>>>> +    delete v;
+>>>> +    before = after;
+>>>> +    mempool::unittest_1::map<int64_t,int64_t> v2;
+>>>> +    v2[1] = 2;
+>>>> +    v2[3] = 4;
+>>>> +    after = mempool::buffer_data::allocated_bytes();
+>>>> +    cout << " before " << before << " after " << after << std::endl;
+>>>>      }
+>>>>      {
+>>>>        mempool::unittest_2::map<int,obj> v;
+>>>>
+>>>>
+>>>> Output:
+>>>>
+>>>> [ RUN      ] mempool.map
+>>>> before 0 after 0
+>>>>    before 0 after 0
+>>>> [       OK ] mempool.map (0 ms)
+>>>>
+>>>> It looks like we do not measure ref_map for BlueStore Blob and SharedBlob
+>>>> classes too.
+>>>>
+>>>> Any ideas?
+>>>>
+>>>> Thanks,
+>>>>
+>>>> Igor
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
 >>
->> Got it. Thanks for the fix!
->>
->
-> I wouldn't call it a fix. In 2016 (almost 2017) IPv6 should be enabled, no questions asked.
->
-> After the recent migrations both ceph.com and tracker.ceph.com lost their IPv6. To me that's broken connectivity.
->
-> When is this coming back?
->
 
-Tracker never had an IPv6 record as far as I'm aware.  Nevertheless, I 
-added its AAAA record to DNS.  We don't manage the reverse DNS for it, 
-however, so outgoing mail to gmail addresses still fails because the 
-IPv6 address lacks a PTR record.
-
-www.ceph.com lost its IPv6 record because it is using a floating IP 
-after its move to the new DreamCompute cluster.  IPv6 isn't functional 
-for floating IPs in that cluster yet.
-
-The new ceph.com host isn't using a floating IP and will have an IPv6 
-record when we switch over.
