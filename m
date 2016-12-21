@@ -1,176 +1,86 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: Consistency problem with multiple rgws
-Date: Wed, 21 Dec 2016 11:48:13 -0500
-Message-ID: <a880457a-54a1-e296-a164-94e252841e7f@redhat.com>
-References: <2b1658523debcec-00007.Richmail.00098135627749810422@139.com>
- <9193cf3c-3970-56d9-759a-c160626fb27a@redhat.com>
- <CAHjSqib6CQUK0RuBaPBPS75jpG7CzOmOQ3zw+zraDxziqZQcFg@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Bug in mempool::map?
+Date: Wed, 21 Dec 2016 21:43:39 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612212055110.10615@piezo.novalocal>
+References: <36219e00-6114-7b9e-f7ca-5190cb545c93@mirantis.com> <alpine.DEB.2.11.1612201524400.10615@piezo.novalocal> <3117e8a5-e8dd-f323-25ef-dc6756ebb8f0@mirantis.com> <alpine.DEB.2.11.1612201824140.10615@piezo.novalocal> <aa0fa487-ffed-cc4a-eae0-226ef038f1d4@mirantis.com>
+ <alpine.DEB.2.11.1612202010280.10615@piezo.novalocal> <00754a82-e01d-09d8-f879-991c3faca025@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f178.google.com ([209.85.216.178]:32776 "EHLO
-        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751506AbcLUQsR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Dec 2016 11:48:17 -0500
-Received: by mail-qt0-f178.google.com with SMTP id p16so208706648qta.0
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Dec 2016 08:48:16 -0800 (PST)
-In-Reply-To: <CAHjSqib6CQUK0RuBaPBPS75jpG7CzOmOQ3zw+zraDxziqZQcFg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:39095 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750818AbcLUVwY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Dec 2016 16:52:24 -0500
+In-Reply-To: <00754a82-e01d-09d8-f879-991c3faca025@mirantis.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sw zhang <zhangsw1001@gmail.com>
-Cc: yehuda <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, =?UTF-8?B?6YOt5Y2g5Lic?= <guozhandong@cmss.chinamobile.com>, lvshuhua <lvshuhua@cmss.chinamobile.com>
+To: Igor Fedotov <ifedotov@mirantis.com>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+
+On Wed, 21 Dec 2016, Igor Fedotov wrote:
+> On 12/20/2016 11:15 PM, Sage Weil wrote:
+> > It seems like we have a few common cases...
+> > 
+> > 1) big blob, single ref (e.g., immutable large object, and then the entire
+> > thing is referenced, modulo the last block).
+> > 
+> > 2) tiny blob, single alloc unit.  a counter is sufficient.
+> > 
+> > 3) everything else in between...
+> > 
+> > We could probably get away with special-case efficient representations of
+> > just 1 and 2?
+> I'd say 1) = entire blob is referenced just once. And 2) = single alloc unit
+> and partially referenced.
+> 
+> Then we need at minimum a bit flag for 1), 'int' for 2) and vector<int> for
+> 3).
+> 
+> Possible implementations are
+> A.{
+> int standalone_counter;  //this covers 1 & 2, value greater than alloc unit
+> means 1)
+> vector<int> per_au_counters; // and this one for 3 with the first counter
+> stored in standalone_counter
+> }
+> vs.
+> B.{
+> //reuse some blob flag for 1)
+> vector<int> per_au_counters; //for 2) and 3)
+> }
+> vs.
+> C.{
+> vector<int> per_au_counters; //for all cases
+> }
+> 
+> A. Saves one allocation for 1 & 2, wastes 4 bytes for 1. Plus requires some
+> simple tricks to use both standalone counter and vector.
+> B. Saves 1 allocation and 4 bytes for 1. Unified counter vector processing but
+> some minor tricks with a flag.
+> C. Needs +1 allocation for 1 & 2. And wastes 4 bytes for 1. Unified counter
+> processing
+> 
+> I'd rather prefer B. implementation.
+
+vector<int> is 24 bytes.  So if we're worried about memory, I think we 
+want to have an alternative strategy.  Something like:
+
+ uint8_t au_order;  ///< size of allocation unit (min_alloc_size may change)
+ union {
+   long *ref_by_au;  ///< dynamically allocated array of bytes per au
+   long ref_in_single_au;  ///< refs if blob is a single au (au_order=0?)
+ }
+
+Something simple like that?
+
+I suspect get_ref/put_ref will get quite a bit simpler and more efficient 
+with per-au buckets.
+
+Also, for compressed blobs, we can use the ref_in_single_au mode since we 
+can't deallocate it piecewise anyway...
+
+sage
 
 
-On 12/16/2016 02:36 AM, sw zhang wrote:
-> Hi,
-> I test it again today that each zone has one RGW with config
-> 'rgw_num_rados_handles=2'. I use cosbench to  upload 50,000 object ,
-> each object is 4M,
-> the number of workers is 10.
-> After the data sync is finished(I use the command 'radosgw-admin
-> bucket sync status --bucket=<name>' and 'radosgw-admin sync status' to
-> check that)
-> Below is the bucket stats result:
->
-> Master zone:
-> [root@ceph36 ~]# radosgw-admin bucket stats --bucket=shard23
-> {
->      "bucket": "shard23",
->      "pool": "master.rgw.buckets.data",
->      "index_pool": "master.rgw.buckets.index",
->      "id": "cc3594b6-6282-421a-a3d5-3f7f3fa7efd0.702243.1",
->      "marker": "cc3594b6-6282-421a-a3d5-3f7f3fa7efd0.702243.1",
->      "owner": "zsw-test",
->      "ver": "0#50039,1#49964",
->      "master_ver": "0#0,1#0",
->      "mtime": "2016-12-16 10:58:56.174049",
->      "max_marker": "0#00000050038.56144.3,1#00000049963.56109.3",
->      "usage": {
->          "rgw.main": {
->              "size_kb": 195300782,
->              "size_kb_actual": 195388276,
->              "num_objects": 50000
->          }
->      },
->      "bucket_quota": {
->          "enabled": false,
->          "max_size_kb": -1,
->          "max_objects": -1
->      }
-> }
->
-> Slave zone:
-> [root@ceph05 ~]# radosgw-admin bucket stats --bucket=shard23
-> {
->      "bucket": "shard23",
->      "pool": "slave.rgw.buckets.data",
->      "index_pool": "slave.rgw.buckets.index",
->      "id": "cc3594b6-6282-421a-a3d5-3f7f3fa7efd0.702243.1",
->      "marker": "cc3594b6-6282-421a-a3d5-3f7f3fa7efd0.702243.1",
->      "owner": "zsw-test",
->      "ver": "0#51172,1#51070",
->      "master_ver": "0#0,1#0",
->      "mtime": "2016-12-16 10:58:56.174049",
->      "max_marker": "0#00000051171.112193.3,1#00000051069.79607.3",
->      "usage": {
->          "rgw.main": {
->              "size_kb": 194769532,
->              "size_kb_actual": 194856788,
->              "num_objects": 49861
->          }
->      },
->      "bucket_quota": {
->          "enabled": false,
->          "max_size_kb": -1,
->          "max_objects": -1
->      }
-> }
->
-> We can see that in slave zone, object number in bucket stats is less
-> than master. But if I use s3cmd to list the bucket in slave zone, the
-> result is right:
-> [root@ceph05 ~]# s3cmd ls s3://shard23 | wc -l
-> 50000
->
-> And after I list the bucket with s3cmd, I use the bucket stats in
-> slave zone again:
-> [root@ceph05 ~]# radosgw-admin bucket stats --bucket=shard23
-> {
->      "bucket": "shard23",
->      "pool": "slave.rgw.buckets.data",
->      "index_pool": "slave.rgw.buckets.index",
->      "id": "cc3594b6-6282-421a-a3d5-3f7f3fa7efd0.702243.1",
->      "marker": "cc3594b6-6282-421a-a3d5-3f7f3fa7efd0.702243.1",
->      "owner": "zsw-test",
->      "ver": "0#51182,1#51079",
->      "master_ver": "0#0,1#0",
->      "mtime": "2016-12-16 10:58:56.174049",
->      "max_marker": "0#00000051181.112203.9,1#00000051078.79616.9",
->      "usage": {
->          "rgw.main": {
->              "size_kb": 194769532,
->              "size_kb_actual": 194856788,
->              "num_objects": 50000
->          }
->      },
->      "bucket_quota": {
->          "enabled": false,
->          "max_size_kb": -1,
->          "max_objects": -1
->      }
-> }
->
-> We can see that the num_objects is right now. (According to the code ,
-> list bucket will send the 'dir_suggest_changes' request to the osd. I
-> think this is why the number is right now.)
-> If each zone have two rgw with config 'rgw_num_rados_handles=1', the
-> difference between the bucket stats is smaller, from 10 to 40.
-> If each zone have one rgw with config 'rgw_num_rados_handles=1', the
-> bucket stats are same.
-> My colleague and I have tested that multi times in two different
-> clusters(Ceph version is jewel), and this problem nearly occurs every
-> time.
->
-Thanks for the extra info, I'll look into this. Could you please open a 
-ticket at http://tracker.ceph.com/projects/rgw/issues/new and include 
-this output?
 
-> 2016-12-16 0:05 GMT+08:00 Casey Bodley <cbodley@redhat.com>:
->> Hi,
->>
->> On 12/15/2016 02:55 AM, 18896724396 wrote:
->>
->> Hi,
->> We have two RGWs in master zone and two RGWs in slave zone. We use cosbench
->> to upload 50,000 objs to a single bucket. After the data sync is finished,
->> the bucket stats is not the same between master and slave zone.
->>
->> The data sync may take a while with that many objects. How are you verifying
->> that data sync finished? Have you tried 'radosgw-admin bucket sync status
->> --bucket=<name>'?
->>
->> Then we test the same case with one RGW in master zone and slave zone, the
->> stats is also not same. At last we test with one RGW and modify the config
->> rgw_num_rados_handles to 1(we set it 2 before), and this time the stats is
->> same and correct. Though multiple RGWs still have the problem.
->> According to the code, I find that when we update bucket index, rgw will
->> call cls_rgw_bucket_complete_op to update the bucket stats and at last osd
->> will call rgw_bucket_complete_op. In this function, osd first read the
->> bucket header, and then update the stats, last it write the head back. So I
->> think two concurrent request to update the stats may lead to the consistency
->> problem. And maybe some other operation also have the same problem. How
->> could we solve the consistency problem?
->>
->> The osd guarantees that two operations in the same placement group won't run
->> concurrently, so this kind of logic in cls should be safe. How far off are
->> the bucket stats? Can you share some example output?
->>
->>
->> Best regards.
->> Zhang Shaowen
->>
->>
->> Thanks,
->> Casey
 
