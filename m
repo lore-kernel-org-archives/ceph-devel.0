@@ -1,143 +1,94 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: An empty vptr in an raw object
-Date: Thu, 22 Dec 2016 20:44:43 +0100
-Message-ID: <bfe430e9-eee1-9a6a-7878-b87c7853021f@digiware.nl>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: An empty vptr in an raw object
+Date: Thu, 22 Dec 2016 22:01:44 +0000
+Message-ID: <EB02EE10422E4A40A1EE787A4AC27FBE045604@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
 References: <4aeb9ff1-367c-f31e-fc0c-5f08dcdcfe0e@digiware.nl>
  <7754eadf-5f8c-ade3-1634-486fff240adf@digiware.nl>
  <EB02EE10422E4A40A1EE787A4AC27FBE044D2A@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
  <e1bdab0b-ec02-819e-e6fe-4e07baa235be@digiware.nl>
- <alpine.DEB.2.11.1612221840330.10615@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:12463 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1766015AbcLVTow (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 22 Dec 2016 14:44:52 -0500
-In-Reply-To: <alpine.DEB.2.11.1612221840330.10615@piezo.novalocal>
+Received: from mail-sn1nam01on0081.outbound.protection.outlook.com ([104.47.32.81]:55904
+        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S941610AbcLVWB5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 22 Dec 2016 17:01:57 -0500
+In-Reply-To: <e1bdab0b-ec02-819e-e6fe-4e07baa235be@digiware.nl>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 22-12-2016 19:41, Sage Weil wrote:
-> Oh.. if unittest_desc is the only culprit, it is probably easier to find.  
-> Which test case fails?  Do you have a full backtrace?
-
-Yes,
-that was my idea as well. Could even try it without gtest stuff, but in
-a main(). And reduce the number of threads.
-
-I is also only in the maps test:
-TEST(denc, map)
-{
-  {
-    cout << "map<string,foo_t>" << std::endl;
-    std::map<string,foo_t> s;
-    s["foo"] = foo_t();
-    s["bar"] = foo_t();
-    s["baz"] = foo_t();
-    test_denc(s);
-  }
-}
-
-The backtrace is: (sorry for all the wrapping in 78chars)
-
-#0  0x0000000804b9d16a in thr_kill () from /lib/libc.so.7
-#1  0x0000000804b9d13b in __raise (s=6) at
-/usr/srcs/head/src/lib/libc/gen/raise.c:52
-#2  0x0000000804b9d0a9 in abort () at
-/usr/srcs/head/src/lib/libc/stdlib/abort.c:65
-#3  0x000000000052a3d6 in ceph::__ceph_assert_fail (assertion=0x5d3f52
-"*((int*)*(&_raw))",
-    file=0x5d3efb "/usr/srcs/Ceph/work/ceph/src/include/buffer.h", line=258,
-    func=0x5d3f29 "bool ceph::buffer::ptr::have_raw() const") at
-/usr/srcs/Ceph/work/ceph/src/common/assert.cc:78
-#4  0x000000000049abc6 in ceph::buffer::ptr::have_raw (this=0x7fffffffd958)
-    at /usr/srcs/Ceph/work/ceph/src/include/buffer.h:258
-#5  0x00000000004945af in
-ceph::buffer::list::contiguous_appender::~contiguous_appender
-(this=0x7fffffffd948)
-    at /usr/srcs/Ceph/work/ceph/src/include/buffer.h:525
-#6  0x0000000000490fc2 in
-test_denc<std::__1::map<std::__1::basic_string<char,
-std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
-std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
-std::__1::allocator<char> > >,
-std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
-std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
-> > (v=...) at /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:50
-#7  0x00000000004904e0 in denc_map_Test::TestBody (this=0x1038030) at
-/usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:206
-#8  0x000000000050476a in
-testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test,
-void> (object=0x1038030,
-    method=&virtual testing::Test::TestBody(), location=0x5d561c "the
-test body")
-    at /usr/srcs/Ceph/work/ceph/src/googletest/googletest/src/gtest.cc:2402
-#9  0x00000000004e8b07 in
-testing::internal::HandleExceptionsInMethodIfSupported<testing::Test,
-void> (object=0x1038030,
-    method=&virtual testing::Test::TestBody(), location=0x5d561c "the
-test body")
-    at /usr/srcs/Ceph/work/ceph/src/googletest/googletest/src/gtest.cc:2438
-#10 0x00000000004b7b25 in testing::Test::Run (this=0x1038030)
-    at /usr/srcs/Ceph/work/ceph/src/googletest/googletest/src/gtest.cc:2474
-#11 0x00000000004b9008 in testing::TestInfo::Run (this=0x1040000)
-    at /usr/srcs/Ceph/work/ceph/src/googletest/googletest/src/gtest.cc:2656
-#12 0x00000000004b9b87 in testing::TestCase::Run (this=0x10400d0)
-    at /usr/srcs/Ceph/work/ceph/src/googletest/googletest/src/gtest.cc:2774
-#13 0x00000000004c779c in testing::internal::UnitTestImpl::RunAllTests
-(this=0x1044000)
-    at /usr/srcs/Ceph/work/ceph/src/googletest/googletest/src/gtest.cc:4649
-#14 0x00000000005081ba in
-testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl,
-bool> (
-    object=0x1044000,
-    method=(bool
-(testing::internal::UnitTestImpl::*)(testing::internal::UnitTestImpl *
-const)) 0x4c7400 <testing::internal::UnitTestImpl::RunAllTests()>,
-location=0x5d5ca2 "auxiliary test code (environments or event listeners)")
-    at /usr/srcs/Ceph/work/ceph/src/googletest/googletest/src/gtest.cc:2402
-#15 0x00000000004eb397 in
-testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl,
-bool> (
-    object=0x1044000,
-    method=(bool
-(testing::internal::UnitTestImpl::*)(testing::internal::UnitTestImpl *
-const)) 0x4c7400 <testing::internal::UnitTestImpl::RunAllTests()>,
-location=0x5d5ca2 "auxiliary test code (environments or event listeners)")
-    at /usr/srcs/Ceph/work/ceph/src/googletest/googletest/src/gtest.cc:2438
-
-And it traps on the fact that _raw has a null _vptr$raw.
-In the mean time I have extended the asserts in buffer.{cc,h} with an
-assert on **_raw (being the _vptr). But the point of traps has not
-changed significantly (yet).
-
-(gdb) p (*_raw)
-$3 = {_vptr$raw = 0x0, data = 0x1052000 "\003", len = 72, nref = {val =
-1}, crc_spinlock = 0, crc_map = {__tree_ = {__begin_node
-      __pair1_ =
-{<std::__1::__libcpp_compressed_pair_imp<std::__1::__tree_end_node<std::__1::__tree_node_base<void*>*>,
-std::__lue_type<std::__1::pair<unsigned long, unsigned long>,
-std::__1::pair<unsigned int, unsigned int> >, void*> >, 2>> =
-{<std::__1:e_type<std::__1::pair<unsigned long, unsigned long>,
-std::__1::pair<unsigned int, unsigned int> >, void*> >> = {<No data fields>
-            __left_ = 0x0}}, <No data fields>},
-      __pair3_ = {<std::__1::__libcpp_compressed_pair_imp<unsigned long,
-std::__1::__map_value_compare<std::__1::pair<unsigned
-l__1::pair<unsigned long, unsigned long>, std::__1::pair<unsigned int,
-unsigned int> >, std::__1::less<std::__1::pair<unsigned
-lomap_value_compare<std::__1::pair<unsigned long, unsigned long>,
-std::__1::__value_type<std::__1::pair<unsigned long, unsigned lo,
-std::__1::less<std::__1::pair<unsigned long, unsigned long> >, true>> =
-{<std::__1::less<std::__1::pair<unsigned long, unsigne::pair<unsigned
-long, unsigned long>, std::__1::pair<unsigned long, unsigned long>,
-bool>> = {<No data fields>}, <No data fields
-          __first_ = 0}, <No data fields>}}}}
-
-
-If more data is needed, just let me know.
-
---WjW
+SSBiZWxpZXZlIEkgbWlzLXJlYWQgdGhlIGRhdGEuIFdoYXQgSSd2ZSBzZWVuIGJlZm9yZSBkb2Vz
+bid0IGZpdCB0aGlzIGRhdGEuDQoNCklmIGl0IGZhaWxzIGluIHVuaXQgdGVzdCwgaXQgc2hvdWxk
+bid0IGJlIGhhcmQgdG8ganVzdCBzZXQgYSBIVyBicmVha3BvaW50IG9uIHRoZSB2cHRyIGFuZCBz
+ZWUgd2hvIHRoZSBjdWxwcml0IGlzLg0KDQoNCkFsbGVuIFNhbXVlbHMNClNhbkRpc2sgfGEgV2Vz
+dGVybiBEaWdpdGFsIGJyYW5kDQoyODgwIEp1bmN0aW9uIEF2ZW51ZSwgU2FuIEpvc2UsIENBIDk1
+MTM0DQpUOiArMSA0MDggODAxIDcwMzB8IE06ICsxIDQwOCA3ODAgNjQxNg0KYWxsZW4uc2FtdWVs
+c0BTYW5EaXNrLmNvbQ0KDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTog
+V2lsbGVtIEphbiBXaXRoYWdlbiBbbWFpbHRvOndqd0BkaWdpd2FyZS5ubF0NCj4gU2VudDogVGh1
+cnNkYXksIERlY2VtYmVyIDIyLCAyMDE2IDEwOjM3IEFNDQo+IFRvOiBBbGxlbiBTYW11ZWxzIDxB
+bGxlbi5TYW11ZWxzQHNhbmRpc2suY29tPjsgQ2VwaCBEZXZlbG9wbWVudA0KPiA8Y2VwaC1kZXZl
+bEB2Z2VyLmtlcm5lbC5vcmc+DQo+IFN1YmplY3Q6IFJlOiBBbiBlbXB0eSB2cHRyIGluIGFuIHJh
+dyBvYmplY3QNCj4gDQo+IE9uIDIyLTEyLTIwMTYgMTk6MDIsIEFsbGVuIFNhbXVlbHMgd3JvdGU6
+DQo+ID4gSSBoYXZlIHNlZW4gY2FzZXMgb2YgbnVsbCB2cHRyIGR1ZSB0byBhbiBpbmNvbXBsZXRl
+bHkgY29uc3RydWN0ZWQgb2JqZWN0LA0KPiBpLmUuLCBhbiBvYmplY3QgdGhhdCdzIGluIHRoZSBt
+aWRkbGUgb2YgYmVpbmcgY29uc3RydWN0ZWQuDQo+IA0KPiBJIGdvaW5nIHRvIGJlbGlldmUgeW91
+IHJpZ2h0IGF3YXkuDQo+IEJ1dCBJJ20gaGF2aW5nIGEgaGFyZCB0aW1lIGltYWdpbmluZyBzdWNo
+IGEgY2FzZS4NCj4gDQo+IEFyZSB5b3Ugc3VnZ2VzdGluZyBhIG9iamVjdCBpcyByZWZlcmVuY2Vk
+LCB3aGlsZXN0IGl0IGlzIG5vdCB5ZXQgY29tcGxldGUuIHdobw0KPiBkb2VzIHRoZSByZWZlcmVu
+Y2luZyB0aGVuPyBkdWUgdG8gdGhyZWFkaW5nPw0KPiBUaGF0IHdvdWxkIGJlIGV2ZW4gaGFyZGVy
+IHRvIGZpbmQuDQo+IA0KPiAtLVdqVw0KPiANCj4gDQo+ID4gQWxsZW4gU2FtdWVscw0KPiA+IFNh
+bkRpc2sgfGEgV2VzdGVybiBEaWdpdGFsIGJyYW5kDQo+ID4gOTUxIFNhbkRpc2sgRHJpdmUsIE1p
+bHBpdGFzLCBDQSA5NTAzNQ0KPiA+IFQ6ICsxIDQwOCA4MDEgNzAzMHwgTTogKzEgNDA4IDc4MCA2
+NDE2IGFsbGVuLnNhbXVlbHNAU2FuRGlzay5jb20NCj4gPg0KPiA+DQo+ID4+IC0tLS0tT3JpZ2lu
+YWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwu
+b3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gPj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBC
+ZWhhbGYgT2YgV2lsbGVtIEphbiBXaXRoYWdlbg0KPiA+PiBTZW50OiBUaHVyc2RheSwgRGVjZW1i
+ZXIgMjIsIDIwMTYgOTo0MSBBTQ0KPiA+PiBUbzogQ2VwaCBEZXZlbG9wbWVudCA8Y2VwaC1kZXZl
+bEB2Z2VyLmtlcm5lbC5vcmc+DQo+ID4+IFN1YmplY3Q6IEFuIGVtcHR5IHZwdHIgaW4gYW4gcmF3
+IG9iamVjdA0KPiA+Pg0KPiA+Pj4gSSBoYXZlIGEgcGllY2Ugb2YgY29kZSB0aGF0IGFjdHVhbGx5
+IHNlZW0gdG8gY3Jhc2ggYmVjYXVzZSB0aGUgdnB0cg0KPiA+Pj4gaXMgbm90IHNldDoNCj4gPj4+
+IChnZGIpIHAgKl9yYXcNCj4gPj4+ICQyID0ge192cHRyJHJhdyA9IDB4MCwgZGF0YSA9IDB4MTBj
+YzAwMCAiXDAwMyIsIGxlbiA9IDcyLCBucmVmID0NCj4gPj4+IHt2YWwgPSAxfSwgY3JjX3NwaW5s
+b2NrID0gMCwgY3JjX21hcCA9IHtfX3RyZWVfID0gew0KPiA+Pj4gICAgICAgX19iZWdpbl9ub2Rl
+XyA9IDB4MTBjYzA3OCwNCj4gPj4+ICAgICAgIF9fcGFpcjFfID0NCj4gPj4+DQo+ID4+DQo+IHs8
+c3RkOjpfXzE6Ol9fbGliY3BwX2NvbXByZXNzZWRfcGFpcl9pbXA8c3RkOjpfXzE6Ol9fdHJlZV9l
+bmRfbm9kZTxzdA0KPiA+PiBkOjpfXzE6Ol9fdHJlZV9ub2RlX2Jhc2U8dm9pZCo+Kj4sDQo+ID4+
+Pg0KPiA+PiBzdGQ6Ol9fMTo6YWxsb2NhdG9yPHN0ZDo6X18xOjpfX3RyZWVfbm9kZTxzdGQ6Ol9f
+MTo6X192YWx1ZV90eXBlPHN0ZDoNCj4gPj4gOl9fMQ0KPiA+PiA6OnBhaXI8dW5zaWduZWQNCj4g
+Pj4+IGxvbmcsIHVuc2lnbmVkIGxvbmc+LCBzdGQ6Ol9fMTo6cGFpcjx1bnNpZ25lZCBpbnQsIHVu
+c2lnbmVkIGludD4gPiwNCj4gPj4+IHZvaWQqPiA+LCAyPj4gPQ0KPiA+Pj4NCj4gPj4gezxzdGQ6
+Ol9fMTo6YWxsb2NhdG9yPHN0ZDo6X18xOjpfX3RyZWVfbm9kZTxzdGQ6Ol9fMTo6X192YWx1ZV90
+eXBlPHN0DQo+ID4+IGQ6Ol8NCj4gPj4gXzE6OnBhaXI8dW5zaWduZWQNCj4gPj4+IGxvbmcsIHVu
+c2lnbmVkIGxvbmc+LCBzdGQ6Ol9fMTo6cGFpcjx1bnNpZ25lZCBpbnQsIHVuc2lnbmVkIGludD4g
+PiwNCj4gPj4+IHZvaWQqPiA+PiA9IHs8Tm8gZGF0YSBmaWVsZHM+fSwgX19maXJzdF8gPSB7DQo+
+ID4+PiAgICAgICAgICAgICBfX2xlZnRfID0gMHgwfX0sIDxObyBkYXRhIGZpZWxkcz59LA0KPiA+
+Pj4NCj4gPj4+IFRoZSBmdW5jdGlvbiB0aGF0IGNyYXNoZXM6DQo+ID4+PiAgY2hhciAqYnVmZmVy
+OjpwdHI6OmNfc3RyKCkgew0KPiA+Pj4gICAgIGFzc2VydChfcmF3KTsNCj4gPj4+ICAgICBpZiAo
+YnVmZmVyX3RyYWNrX2Nfc3RyKQ0KPiA+Pj4gICAgICAgYnVmZmVyX2Nfc3RyX2FjY2Vzc2VzLmlu
+YygpOw0KPiA+Pj4gICAgIGNoYXIgKnAgPSAgX3Jhdy0+Z2V0X2RhdGEoKTsNCj4gPj4+ICAgICBy
+ZXR1cm4gcCArIF9vZmY7DQo+ID4+PiAgIH0NCj4gPj4+DQo+ID4+PiBBbmQgY3Jhc2ggaXMgYWN0
+dWFsbHkgb24gdGhlIHJldHVybiBsaW5lLg0KPiA+Pj4NCj4gPj4+IEFueSBpZGVhcyBhcyBob3cg
+dGhlIHZwdHIgY2FuIGJlIGVtcHR5Pw0KPiA+Pg0KPiA+PiBOb3cgdGhlIF92cHRyJHJhdyBwb2lu
+dCBpcyBwYXJ0IG9mIHRoZSBpbnRlcm5hbCBjb2RlIG9mIHRoZSBjbGFuZw0KPiA+PiBjbGFzcyBm
+dW5jdGlvbiB0YWJsZS9jb25zdHJ1Y3Rvci4gT3ZlcndyaXRpbmcgdGhhdCBtZWFucyB0aGF0DQo+
+ID4+IGNsYXNzLWZ1bmN0aW9uIHJlZmVyZW5jZXMgYXJlIHByb2JsZW1hdGljIHRvIHNheSB0aGUg
+bGVhc3QuIChpbiB0aGlzDQo+IGV4YW1wbGUgZ2V0X2RhdGEoKSkuDQo+ID4+DQo+ID4+IFRoZSBt
+YWpvciByZWFzb24gd2h5IHRoaXMgb2NjdXJzIGlzIGJlY2F1c2UgYW4gb2JqZWN0IGlzIGJlaW5n
+IHplcm9lZA0KPiA+PiBpbiBDLXN0eWxlIHdheTogbWVtc2V0KCAmb2JqLCAwLCBzaXplb2Yob2Jq
+KSkgQW5kIHRodXMgb3ZlcndyaXRpbmcNCj4gPj4gdGhlIF92cHRyLg0KPiA+Pg0KPiA+PiBOb3Rl
+IHRoYXQgdGhpcyBkb2VzIG5vdCBiaXRlIHRoZSBGcmVlQlNEIGNvbXBpbGF0aW9uLCBidXQgYWxz
+byBhbnkNCj4gPj4gb3RoZXIgYXR0ZW1wdHMgdG8gYnVpbGQgQ2VwaCB3aXRoIGNsYW5nLg0KPiA+
+Pg0KPiA+PiBOb3cgdGhlIHN0cmFuZ2UgdGhpbmcgaXMgdGhhdCB0aGlzIGRvZXMgbm90IGJpdGUg
+Q2xhbmcgY29tcGlsYXRpb24NCj4gPj4gbXVjaCBtb3JlLiBCdXQgdGhlIG9ubHkgdGVzdCB0aGF0
+IGZhaWxzIGlzIHVuaXR0ZXN0X2RlbmMuIFNvIEkgZ3Vlc3MNCj4gPj4gdGhhdCBtb3N0IG9mIHRo
+ZSBjb2RlIGlzIHJhdGhlciB3ZWxsIGJlaGF2ZWQuDQo+ID4+DQo+ID4+IEFuZCBJJ20gb2ZmIG9u
+IGEgc2VhcmNoIHRvIGZpbmQgdGhlIGN1bHByaXQuDQo+ID4+DQo+ID4+IC0tV2pXDQo+ID4+DQo+
+ID4+DQo+ID4+DQo+ID4+IC0tDQo+ID4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBz
+ZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+PiBpbiB0aGUgYm9keSBv
+ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlDQo+IG1ham9yZG9t
+bw0KPiA+PiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
+bWwNCg0K
