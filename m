@@ -1,24 +1,52 @@
 From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Bluestore performance bottleneck
-Date: Thu, 22 Dec 2016 00:39:02 +0000
-Message-ID: <5E3E05AED7F0F044904275810D0CB46504C301@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+Date: Thu, 22 Dec 2016 01:02:15 +0000
+Message-ID: <5E3E05AED7F0F044904275810D0CB46504C315@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 References: <5E3E05AED7F0F044904275810D0CB46504C290@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
  <alpine.DEB.2.11.1612220018390.10615@piezo.novalocal>
+ <5E3E05AED7F0F044904275810D0CB46504C301@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-dm3nam03on0063.outbound.protection.outlook.com ([104.47.41.63]:50624
-        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+Received: from mail-cys01nam02on0051.outbound.protection.outlook.com ([104.47.37.51]:62368
+        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750745AbcLVAjJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 21 Dec 2016 19:39:09 -0500
-In-Reply-To: <alpine.DEB.2.11.1612220018390.10615@piezo.novalocal>
+        id S933633AbcLVBC0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 21 Dec 2016 20:02:26 -0500
+In-Reply-To: <5E3E05AED7F0F044904275810D0CB46504C301@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
+
+Ok, *205 bytes* reduction per IO by removing extents.. Thanks !
+
+2016-12-21 20:00:07.701845 7fcff8412700 30 submit_transaction Rocksdb trans=
+action:
+Put( Prefix =3D M key =3D 0x00000000000006fc'.0000000009.000000000000000010=
+51' Value size =3D 182)
+Put( Prefix =3D M key =3D 0x00000000000006fc'._fastinfo' Value size =3D 186=
+)
+Put( Prefix =3D O key =3D 0x7f8000000000000001b56f21ae217262'd_data.10046b8=
+b4567.00000000000028c6!=3D'0xfffffffffffffffeffffffffffffffff6f0005f000'x' =
+Value size =3D 45)
+Put( Prefix =3D O key =3D 0x7f8000000000000001b56f21ae217262'd_data.10046b8=
+b4567.00000000000028c6!=3D'0xfffffffffffffffeffffffffffffffff'o' Value size=
+ =3D 1300)
+Merge( Prefix =3D b key =3D 0x0000000c8cd00000 Value size =3D 16)
+Merge( Prefix =3D b key =3D 0x0000001067700000 Value size =3D 16)
+
+
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel=
+.org] On Behalf Of Somnath Roy
+Sent: Wednesday, December 21, 2016 4:39 PM
+To: Sage Weil
+Cc: ceph-devel
+Subject: RE: Bluestore performance bottleneck
 
 Yeah, make sense I missed it..I will remove extents and see how much we can=
  save.
@@ -29,7 +57,7 @@ Thanks & Regards
 Somnath
 
 -----Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com]=20
+From: Sage Weil [mailto:sweil@redhat.com]
 Sent: Wednesday, December 21, 2016 4:21 PM
 To: Somnath Roy
 Cc: ceph-devel
@@ -101,7 +129,7 @@ e the per io metadata overhead for onode/shard is with smaller shard is ~30=
 >=20
 > 2016-12-21 17:22:31.693503 7f18aa7c1700 30 submit_transaction Rocksdb tra=
 nsaction:
-> Put( Prefix =3D M key =3D=20
+> Put( Prefix =3D M key =3D
 > 0x000000000000048a'.0000000009.00000000000000019093' Value size =3D 182)=
 =20
 > Put( Prefix =3D M key =3D 0x000000000000048a'._fastinfo' Value size =3D 1=
@@ -114,7 +142,7 @@ nsaction:
 > 0x7f8000000000000001dc3f23'`!rbd_data.10046b8b4567.00000000000024b1!=3D'
 > 0xfffffffffffffffeffffffffffffffff'o' Value size =3D 462) Merge( Prefix=20
 > =3D b key =3D 0x000000069ae00000 Value size =3D 16) Merge( Prefix =3D b k=
-ey =3D=20
+ey =3D
 > 0x0000001330d00000 Value size =3D 16)
 >=20
 >=20
@@ -123,20 +151,20 @@ ey =3D=20
 >=20
 > 2016-12-21 18:52:18.564423 7f3e5d167700 30 submit_transaction Rocksdb tra=
 nsaction:
-> Put( Prefix =3D M key =3D=20
+> Put( Prefix =3D M key =3D
 > 0x0000000000000691'.0000000009.00000000000000057248' Value size =3D 182)=
 =20
 > Put( Prefix =3D M key =3D 0x0000000000000691'._fastinfo' Value size =3D 1=
 86)=20
-> Put( Prefix =3D O key =3D=20
+> Put( Prefix =3D O key =3D
 > 0x7f8000000000000001427b9fe9217262'd_data.10046b8b4567.000000000000348
 > f!=3D'0xfffffffffffffffeffffffffffffffff6f00195000'x' Value size =3D 45)=
 =20
-> Put( Prefix =3D O key =3D=20
+> Put( Prefix =3D O key =3D
 > 0x7f8000000000000001427b9fe9217262'd_data.10046b8b4567.000000000000348
 > f!=3D'0xfffffffffffffffeffffffffffffffff6f0019a000'x' Value size =3D 45)=
 =20
-> Put( Prefix =3D O key =3D=20
+> Put( Prefix =3D O key =3D
 > 0x7f8000000000000001427b9fe9217262'd_data.10046b8b4567.000000000000348
 > f!=3D'0xfffffffffffffffeffffffffffffffff'o' Value size =3D 1505) Merge(=20
 > Prefix =3D b key =3D 0x00000006b9780000 Value size =3D 16) Merge( Prefix =
@@ -243,8 +271,12 @@ ll copies of this message in your possession (whether hard copies or electr=
 onically stored copies).
 >=20
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=20
+> in the body of a message to majordomo@vger.kernel.org More majordomo=20
+> info at  http://vger.kernel.org/majordomo-info.html
 >=20
 >=20
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in th=
+e body of a message to majordomo@vger.kernel.org More majordomo info at  ht=
+tp://vger.kernel.org/majordomo-info.html
