@@ -1,36 +1,59 @@
 From: Sage Weil <sweil@redhat.com>
 Subject: RE: Bluestore performance bottleneck
-Date: Thu, 22 Dec 2016 01:26:58 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612220126240.10615@piezo.novalocal>
+Date: Thu, 22 Dec 2016 01:30:02 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612220129050.10615@piezo.novalocal>
 References: <5E3E05AED7F0F044904275810D0CB46504C290@ULS-OP-MBXIP03.sdcorp.global.sandisk.com> <alpine.DEB.2.11.1612220018390.10615@piezo.novalocal> <5E3E05AED7F0F044904275810D0CB46504C301@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <5E3E05AED7F0F044904275810D0CB46504C315@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38822 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:47164 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751568AbcLVB1F (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 21 Dec 2016 20:27:05 -0500
-In-Reply-To: <5E3E05AED7F0F044904275810D0CB46504C301@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+        id S1758813AbcLVBaJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 21 Dec 2016 20:30:09 -0500
+In-Reply-To: <5E3E05AED7F0F044904275810D0CB46504C315@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Somnath Roy <Somnath.Roy@sandisk.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 22 Dec 2016, Somnath Roy wrote:
-> Yeah, make sense I missed it..I will remove extents and see how much we can save.
-> But, why a 4K length/offset is started touching 2 shards now if shard is smaller  is still unclear to me ? 
+How many blobs are in each shard, and how many shards are there?
 
-Hmm.  Yeah, that part I'm not sure about...
+If we go this route, I think we'll want a larger threshold for the inline 
+blobs (stored in the onode key) so that "normal" objects without a zillion 
+blobs still fit in one key...
 
 sage
 
+On Thu, 22 Dec 2016, Somnath Roy wrote:
 
+> Ok, *205 bytes* reduction per IO by removing extents.. Thanks !
+> 
+> 2016-12-21 20:00:07.701845 7fcff8412700 30 submit_transaction Rocksdb transaction:
+> Put( Prefix = M key = 0x00000000000006fc'.0000000009.00000000000000001051' Value size = 182)
+> Put( Prefix = M key = 0x00000000000006fc'._fastinfo' Value size = 186)
+> Put( Prefix = O key = 0x7f8000000000000001b56f21ae217262'd_data.10046b8b4567.00000000000028c6!='0xfffffffffffffffeffffffffffffffff6f0005f000'x' Value size = 45)
+> Put( Prefix = O key = 0x7f8000000000000001b56f21ae217262'd_data.10046b8b4567.00000000000028c6!='0xfffffffffffffffeffffffffffffffff'o' Value size = 1300)
+> Merge( Prefix = b key = 0x0000000c8cd00000 Value size = 16)
+> Merge( Prefix = b key = 0x0000001067700000 Value size = 16)
+> 
+> 
+> 
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Somnath Roy
+> Sent: Wednesday, December 21, 2016 4:39 PM
+> To: Sage Weil
+> Cc: ceph-devel
+> Subject: RE: Bluestore performance bottleneck
+> 
+> Yeah, make sense I missed it..I will remove extents and see how much we can save.
+> But, why a 4K length/offset is started touching 2 shards now if shard is smaller  is still unclear to me ? 
 > 
 > Thanks & Regards
 > Somnath
 > 
 > -----Original Message-----
-> From: Sage Weil [mailto:sweil@redhat.com] 
+> From: Sage Weil [mailto:sweil@redhat.com]
 > Sent: Wednesday, December 21, 2016 4:21 PM
 > To: Somnath Roy
 > Cc: ceph-devel
@@ -85,7 +108,7 @@ sage
 > > ----------
 > > 
 > > 2016-12-21 17:22:31.693503 7f18aa7c1700 30 submit_transaction Rocksdb transaction:
-> > Put( Prefix = M key = 
+> > Put( Prefix = M key =
 > > 0x000000000000048a'.0000000009.00000000000000019093' Value size = 182) 
 > > Put( Prefix = M key = 0x000000000000048a'._fastinfo' Value size = 186) 
 > > Put( Prefix = O key = 
@@ -94,7 +117,7 @@ sage
 > > Prefix = O key = 
 > > 0x7f8000000000000001dc3f23'`!rbd_data.10046b8b4567.00000000000024b1!='
 > > 0xfffffffffffffffeffffffffffffffff'o' Value size = 462) Merge( Prefix 
-> > = b key = 0x000000069ae00000 Value size = 16) Merge( Prefix = b key = 
+> > = b key = 0x000000069ae00000 Value size = 16) Merge( Prefix = b key =
 > > 0x0000001330d00000 Value size = 16)
 > > 
 > > 
@@ -102,16 +125,16 @@ sage
 > > -----------------
 > > 
 > > 2016-12-21 18:52:18.564423 7f3e5d167700 30 submit_transaction Rocksdb transaction:
-> > Put( Prefix = M key = 
+> > Put( Prefix = M key =
 > > 0x0000000000000691'.0000000009.00000000000000057248' Value size = 182) 
 > > Put( Prefix = M key = 0x0000000000000691'._fastinfo' Value size = 186) 
-> > Put( Prefix = O key = 
+> > Put( Prefix = O key =
 > > 0x7f8000000000000001427b9fe9217262'd_data.10046b8b4567.000000000000348
 > > f!='0xfffffffffffffffeffffffffffffffff6f00195000'x' Value size = 45) 
-> > Put( Prefix = O key = 
+> > Put( Prefix = O key =
 > > 0x7f8000000000000001427b9fe9217262'd_data.10046b8b4567.000000000000348
 > > f!='0xfffffffffffffffeffffffffffffffff6f0019a000'x' Value size = 45) 
-> > Put( Prefix = O key = 
+> > Put( Prefix = O key =
 > > 0x7f8000000000000001427b9fe9217262'd_data.10046b8b4567.000000000000348
 > > f!='0xfffffffffffffffeffffffffffffffff'o' Value size = 1505) Merge( 
 > > Prefix = b key = 0x00000006b9780000 Value size = 16) Merge( Prefix = b 
@@ -185,10 +208,12 @@ sage
 > > PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
 > > 
 > > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+> > in the body of a message to majordomo@vger.kernel.org More majordomo 
+> > info at  http://vger.kernel.org/majordomo-info.html
 > > 
 > > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
