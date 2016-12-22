@@ -1,94 +1,42 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
-Subject: RE: An empty vptr in an raw object
-Date: Thu, 22 Dec 2016 22:01:44 +0000
-Message-ID: <EB02EE10422E4A40A1EE787A4AC27FBE045604@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
-References: <4aeb9ff1-367c-f31e-fc0c-5f08dcdcfe0e@digiware.nl>
- <7754eadf-5f8c-ade3-1634-486fff240adf@digiware.nl>
- <EB02EE10422E4A40A1EE787A4AC27FBE044D2A@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
- <e1bdab0b-ec02-819e-e6fe-4e07baa235be@digiware.nl>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: how to use teuthology-suite in the new world
+Date: Thu, 22 Dec 2016 23:12:38 +0100
+Message-ID: <9ea71ad4-b933-a55c-f92c-c2716e6c4645@suse.cz>
+References: <alpine.DEB.2.11.1612142211440.10615@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-sn1nam01on0081.outbound.protection.outlook.com ([104.47.32.81]:55904
-        "EHLO NAM01-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S941610AbcLVWB5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 22 Dec 2016 17:01:57 -0500
-In-Reply-To: <e1bdab0b-ec02-819e-e6fe-4e07baa235be@digiware.nl>
-Content-Language: en-US
+Received: from mx2.suse.de ([195.135.220.15]:46470 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757200AbcLVWMl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 22 Dec 2016 17:12:41 -0500
+In-Reply-To: <alpine.DEB.2.11.1612142211440.10615@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org, "sepia@ceph.com" <sepia@ceph.com>
 
-SSBiZWxpZXZlIEkgbWlzLXJlYWQgdGhlIGRhdGEuIFdoYXQgSSd2ZSBzZWVuIGJlZm9yZSBkb2Vz
-bid0IGZpdCB0aGlzIGRhdGEuDQoNCklmIGl0IGZhaWxzIGluIHVuaXQgdGVzdCwgaXQgc2hvdWxk
-bid0IGJlIGhhcmQgdG8ganVzdCBzZXQgYSBIVyBicmVha3BvaW50IG9uIHRoZSB2cHRyIGFuZCBz
-ZWUgd2hvIHRoZSBjdWxwcml0IGlzLg0KDQoNCkFsbGVuIFNhbXVlbHMNClNhbkRpc2sgfGEgV2Vz
-dGVybiBEaWdpdGFsIGJyYW5kDQoyODgwIEp1bmN0aW9uIEF2ZW51ZSwgU2FuIEpvc2UsIENBIDk1
-MTM0DQpUOiArMSA0MDggODAxIDcwMzB8IE06ICsxIDQwOCA3ODAgNjQxNg0KYWxsZW4uc2FtdWVs
-c0BTYW5EaXNrLmNvbQ0KDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTog
-V2lsbGVtIEphbiBXaXRoYWdlbiBbbWFpbHRvOndqd0BkaWdpd2FyZS5ubF0NCj4gU2VudDogVGh1
-cnNkYXksIERlY2VtYmVyIDIyLCAyMDE2IDEwOjM3IEFNDQo+IFRvOiBBbGxlbiBTYW11ZWxzIDxB
-bGxlbi5TYW11ZWxzQHNhbmRpc2suY29tPjsgQ2VwaCBEZXZlbG9wbWVudA0KPiA8Y2VwaC1kZXZl
-bEB2Z2VyLmtlcm5lbC5vcmc+DQo+IFN1YmplY3Q6IFJlOiBBbiBlbXB0eSB2cHRyIGluIGFuIHJh
-dyBvYmplY3QNCj4gDQo+IE9uIDIyLTEyLTIwMTYgMTk6MDIsIEFsbGVuIFNhbXVlbHMgd3JvdGU6
-DQo+ID4gSSBoYXZlIHNlZW4gY2FzZXMgb2YgbnVsbCB2cHRyIGR1ZSB0byBhbiBpbmNvbXBsZXRl
-bHkgY29uc3RydWN0ZWQgb2JqZWN0LA0KPiBpLmUuLCBhbiBvYmplY3QgdGhhdCdzIGluIHRoZSBt
-aWRkbGUgb2YgYmVpbmcgY29uc3RydWN0ZWQuDQo+IA0KPiBJIGdvaW5nIHRvIGJlbGlldmUgeW91
-IHJpZ2h0IGF3YXkuDQo+IEJ1dCBJJ20gaGF2aW5nIGEgaGFyZCB0aW1lIGltYWdpbmluZyBzdWNo
-IGEgY2FzZS4NCj4gDQo+IEFyZSB5b3Ugc3VnZ2VzdGluZyBhIG9iamVjdCBpcyByZWZlcmVuY2Vk
-LCB3aGlsZXN0IGl0IGlzIG5vdCB5ZXQgY29tcGxldGUuIHdobw0KPiBkb2VzIHRoZSByZWZlcmVu
-Y2luZyB0aGVuPyBkdWUgdG8gdGhyZWFkaW5nPw0KPiBUaGF0IHdvdWxkIGJlIGV2ZW4gaGFyZGVy
-IHRvIGZpbmQuDQo+IA0KPiAtLVdqVw0KPiANCj4gDQo+ID4gQWxsZW4gU2FtdWVscw0KPiA+IFNh
-bkRpc2sgfGEgV2VzdGVybiBEaWdpdGFsIGJyYW5kDQo+ID4gOTUxIFNhbkRpc2sgRHJpdmUsIE1p
-bHBpdGFzLCBDQSA5NTAzNQ0KPiA+IFQ6ICsxIDQwOCA4MDEgNzAzMHwgTTogKzEgNDA4IDc4MCA2
-NDE2IGFsbGVuLnNhbXVlbHNAU2FuRGlzay5jb20NCj4gPg0KPiA+DQo+ID4+IC0tLS0tT3JpZ2lu
-YWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwu
-b3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gPj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBC
-ZWhhbGYgT2YgV2lsbGVtIEphbiBXaXRoYWdlbg0KPiA+PiBTZW50OiBUaHVyc2RheSwgRGVjZW1i
-ZXIgMjIsIDIwMTYgOTo0MSBBTQ0KPiA+PiBUbzogQ2VwaCBEZXZlbG9wbWVudCA8Y2VwaC1kZXZl
-bEB2Z2VyLmtlcm5lbC5vcmc+DQo+ID4+IFN1YmplY3Q6IEFuIGVtcHR5IHZwdHIgaW4gYW4gcmF3
-IG9iamVjdA0KPiA+Pg0KPiA+Pj4gSSBoYXZlIGEgcGllY2Ugb2YgY29kZSB0aGF0IGFjdHVhbGx5
-IHNlZW0gdG8gY3Jhc2ggYmVjYXVzZSB0aGUgdnB0cg0KPiA+Pj4gaXMgbm90IHNldDoNCj4gPj4+
-IChnZGIpIHAgKl9yYXcNCj4gPj4+ICQyID0ge192cHRyJHJhdyA9IDB4MCwgZGF0YSA9IDB4MTBj
-YzAwMCAiXDAwMyIsIGxlbiA9IDcyLCBucmVmID0NCj4gPj4+IHt2YWwgPSAxfSwgY3JjX3NwaW5s
-b2NrID0gMCwgY3JjX21hcCA9IHtfX3RyZWVfID0gew0KPiA+Pj4gICAgICAgX19iZWdpbl9ub2Rl
-XyA9IDB4MTBjYzA3OCwNCj4gPj4+ICAgICAgIF9fcGFpcjFfID0NCj4gPj4+DQo+ID4+DQo+IHs8
-c3RkOjpfXzE6Ol9fbGliY3BwX2NvbXByZXNzZWRfcGFpcl9pbXA8c3RkOjpfXzE6Ol9fdHJlZV9l
-bmRfbm9kZTxzdA0KPiA+PiBkOjpfXzE6Ol9fdHJlZV9ub2RlX2Jhc2U8dm9pZCo+Kj4sDQo+ID4+
-Pg0KPiA+PiBzdGQ6Ol9fMTo6YWxsb2NhdG9yPHN0ZDo6X18xOjpfX3RyZWVfbm9kZTxzdGQ6Ol9f
-MTo6X192YWx1ZV90eXBlPHN0ZDoNCj4gPj4gOl9fMQ0KPiA+PiA6OnBhaXI8dW5zaWduZWQNCj4g
-Pj4+IGxvbmcsIHVuc2lnbmVkIGxvbmc+LCBzdGQ6Ol9fMTo6cGFpcjx1bnNpZ25lZCBpbnQsIHVu
-c2lnbmVkIGludD4gPiwNCj4gPj4+IHZvaWQqPiA+LCAyPj4gPQ0KPiA+Pj4NCj4gPj4gezxzdGQ6
-Ol9fMTo6YWxsb2NhdG9yPHN0ZDo6X18xOjpfX3RyZWVfbm9kZTxzdGQ6Ol9fMTo6X192YWx1ZV90
-eXBlPHN0DQo+ID4+IGQ6Ol8NCj4gPj4gXzE6OnBhaXI8dW5zaWduZWQNCj4gPj4+IGxvbmcsIHVu
-c2lnbmVkIGxvbmc+LCBzdGQ6Ol9fMTo6cGFpcjx1bnNpZ25lZCBpbnQsIHVuc2lnbmVkIGludD4g
-PiwNCj4gPj4+IHZvaWQqPiA+PiA9IHs8Tm8gZGF0YSBmaWVsZHM+fSwgX19maXJzdF8gPSB7DQo+
-ID4+PiAgICAgICAgICAgICBfX2xlZnRfID0gMHgwfX0sIDxObyBkYXRhIGZpZWxkcz59LA0KPiA+
-Pj4NCj4gPj4+IFRoZSBmdW5jdGlvbiB0aGF0IGNyYXNoZXM6DQo+ID4+PiAgY2hhciAqYnVmZmVy
-OjpwdHI6OmNfc3RyKCkgew0KPiA+Pj4gICAgIGFzc2VydChfcmF3KTsNCj4gPj4+ICAgICBpZiAo
-YnVmZmVyX3RyYWNrX2Nfc3RyKQ0KPiA+Pj4gICAgICAgYnVmZmVyX2Nfc3RyX2FjY2Vzc2VzLmlu
-YygpOw0KPiA+Pj4gICAgIGNoYXIgKnAgPSAgX3Jhdy0+Z2V0X2RhdGEoKTsNCj4gPj4+ICAgICBy
-ZXR1cm4gcCArIF9vZmY7DQo+ID4+PiAgIH0NCj4gPj4+DQo+ID4+PiBBbmQgY3Jhc2ggaXMgYWN0
-dWFsbHkgb24gdGhlIHJldHVybiBsaW5lLg0KPiA+Pj4NCj4gPj4+IEFueSBpZGVhcyBhcyBob3cg
-dGhlIHZwdHIgY2FuIGJlIGVtcHR5Pw0KPiA+Pg0KPiA+PiBOb3cgdGhlIF92cHRyJHJhdyBwb2lu
-dCBpcyBwYXJ0IG9mIHRoZSBpbnRlcm5hbCBjb2RlIG9mIHRoZSBjbGFuZw0KPiA+PiBjbGFzcyBm
-dW5jdGlvbiB0YWJsZS9jb25zdHJ1Y3Rvci4gT3ZlcndyaXRpbmcgdGhhdCBtZWFucyB0aGF0DQo+
-ID4+IGNsYXNzLWZ1bmN0aW9uIHJlZmVyZW5jZXMgYXJlIHByb2JsZW1hdGljIHRvIHNheSB0aGUg
-bGVhc3QuIChpbiB0aGlzDQo+IGV4YW1wbGUgZ2V0X2RhdGEoKSkuDQo+ID4+DQo+ID4+IFRoZSBt
-YWpvciByZWFzb24gd2h5IHRoaXMgb2NjdXJzIGlzIGJlY2F1c2UgYW4gb2JqZWN0IGlzIGJlaW5n
-IHplcm9lZA0KPiA+PiBpbiBDLXN0eWxlIHdheTogbWVtc2V0KCAmb2JqLCAwLCBzaXplb2Yob2Jq
-KSkgQW5kIHRodXMgb3ZlcndyaXRpbmcNCj4gPj4gdGhlIF92cHRyLg0KPiA+Pg0KPiA+PiBOb3Rl
-IHRoYXQgdGhpcyBkb2VzIG5vdCBiaXRlIHRoZSBGcmVlQlNEIGNvbXBpbGF0aW9uLCBidXQgYWxz
-byBhbnkNCj4gPj4gb3RoZXIgYXR0ZW1wdHMgdG8gYnVpbGQgQ2VwaCB3aXRoIGNsYW5nLg0KPiA+
-Pg0KPiA+PiBOb3cgdGhlIHN0cmFuZ2UgdGhpbmcgaXMgdGhhdCB0aGlzIGRvZXMgbm90IGJpdGUg
-Q2xhbmcgY29tcGlsYXRpb24NCj4gPj4gbXVjaCBtb3JlLiBCdXQgdGhlIG9ubHkgdGVzdCB0aGF0
-IGZhaWxzIGlzIHVuaXR0ZXN0X2RlbmMuIFNvIEkgZ3Vlc3MNCj4gPj4gdGhhdCBtb3N0IG9mIHRo
-ZSBjb2RlIGlzIHJhdGhlciB3ZWxsIGJlaGF2ZWQuDQo+ID4+DQo+ID4+IEFuZCBJJ20gb2ZmIG9u
-IGEgc2VhcmNoIHRvIGZpbmQgdGhlIGN1bHByaXQuDQo+ID4+DQo+ID4+IC0tV2pXDQo+ID4+DQo+
-ID4+DQo+ID4+DQo+ID4+IC0tDQo+ID4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBz
-ZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPiA+PiBpbiB0aGUgYm9keSBv
-ZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlDQo+IG1ham9yZG9t
-bw0KPiA+PiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
-bWwNCg0K
+> Teuthology now defaults to https://github.com/ceph/ceph-ci.git instead of
+> ceph.git.
+>
+> To schedule a test against something in ceph-ci.git,
+>
+>   teuthology-suite -s rados -c wip-foo
+>
+> To schedule against something in ceph.git (e.g., master),
+>
+>   teuthology-suite -s rados -c master --ceph-repo https://github.com/ceph/ceph.git
+
+Understood, but this does not seem to work. In latest teuthology, when I 
+specify "--ceph-repo https://github.com/ceph/ceph.git", the option is 
+ignored.
+
+Maybe I'm just doing something ignorant and/or stupid.
+
+For details, see http://tracker.ceph.com/issues/18342
+
+-- 
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
