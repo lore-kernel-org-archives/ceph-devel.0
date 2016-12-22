@@ -1,16 +1,15 @@
-From: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?=
-	<bartlomiej.swiecki-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: Clone data inconsistency in hammer
-Date: Thu, 22 Dec 2016 13:33:41 +0100
-Message-ID: <20161222133341.0f4a3976@desk613732.desk.int.gns.ovh.net>
+Date: Thu, 22 Dec 2016 13:21:40 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612221319400.10615@piezo.novalocal>
 References: <20161221125712.7074b217@desk613732.desk.int.gns.ovh.net>
 	<CA+aFP1Dx9mzYmtNNqTUifpT2JGMsDKECLt69mZBmerm+a=db5A@mail.gmail.com>
 	<20161222101009.32e14565@desk613732.desk.int.gns.ovh.net>
+	<20161222133341.0f4a3976@desk613732.desk.int.gns.ovh.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-2115469208-1482412907=:10615"
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <20161222101009.32e14565-Q8zpDM2kqfNz3UrvHfEF4cXErentcBXJSavXxUIaH7I@public.gmane.org>
+In-Reply-To: <20161222133341.0f4a3976-Q8zpDM2kqfNz3UrvHfEF4cXErentcBXJSavXxUIaH7I@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -20,106 +19,155 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: =?ISO-8859-2?Q?Bart=B3omiej_=A6wi=EAcki?= <bartlomiej.swiecki-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
 Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-SGksCgpJIGhhdmUgcHJvYmxlbXMgcnVubmlnbiBLcmFrZW4gdG9vbHMgb24gSGFtbWVyL0pld2Vs
-IGNsdXN0ZXIgKG9mZmljaWFsIDExLjEuMCBkZWJzKSwKaXQgYXNzZXJ0czoKCi9idWlsZC9jZXBo
-LTExLjEuMC9zcmMvbW9uL01vbk1hcC5jYzogSW4gZnVuY3Rpb24gJ3ZvaWQgTW9uTWFwOjpzYW5p
-dGl6ZV9tb25zKHN0ZDo6bWFwPHN0ZDo6YmFzaWNfc3RyaW5nPGNoYXI+LCBlbnRpdHlfYWRkcl90
-PiYpJyB0aHJlYWQgN2ZmZmQzN2ZlNzAwIHRpbWUgMjAxNi0xMi0yMiAxMjoyNjoyMy40NTcwNTgK
-L2J1aWxkL2NlcGgtMTEuMS4wL3NyYy9tb24vTW9uTWFwLmNjOiA3MDogRkFJTEVEIGFzc2VydCht
-b25faW5mby5jb3VudChwLmZpcnN0KSkKCkkgdHJpZWQgdG8gZGVidWcgaXQgYSBiaXQgYW5kIGl0
-IGxvb2tzIGxpa2UgbW9uX2luZm8gaGFzIHRlbXBvcmFyeSBtb24gbmFtZXM6CgooZ2RiKSBwIG1v
-bl9pbmZvCiQxID0gc3RkOjptYXAgd2l0aCAzIGVsZW1lbnRzID0ge1sibm9uYW1lLWEiXSA9IHtu
-YW1lID0gIm5vbmFtZS1hIiwgLi4uLi4KCndoaWxlIGl0IGNoZWNrcyBmb3IgYSBjb3JyZWN0IG9u
-ZToKCihnZGIpIHAgcAokMiA9IHtmaXJzdCA9ICJtb24tMDEtNjkwZDM4YzAtMjU2Ny00NDdiLWJk
-ZmItMGVkZDEzNzE4M2RiIiwgLi4uLgoKCkFueXdheSwgSSB3YXMgdGhpbmtpbmcgYWJvdXQgdGhl
-IG1pc3NpbmcgaW1hZ2UgcHJvYmxlbSAtIG1heWJlIGl0IHdvdWxkIGJlIGVhc2llcgp0byByZWNy
-ZWF0ZSByZW1vdmVkIGltYWdlPyBXb3VsZCByZXN0b3JpbmcgcmJkX2hlYWRlciBvYmplY3QgYmUg
-ZW5vdWdoPwoKClAuUy4gQWRkaW5nIGNlcGgtZGV2ZWwKCk9uIFRodSwgMjIgRGVjIDIwMTYgMTA6
-MTA6MDkgKzAxMDAKQmFydMWCb21pZWogxZp3acSZY2tpIDxiYXJ0bG9taWVqLnN3aWVja2lAY29y
-cC5vdmguY29tPiB3cm90ZToKCj4gSGkgSmFzb24sCj4gCj4gSSdsbCB0ZXN0IGtyYWtlbiB0b29s
-cyBzaW5jZSBpdCBoYXBwZW5lZCBvbiBwcm9kdWN0aW9uLCBldmVyeXRoaW5nIHdvcmtzIHRoZXJl
-Cj4gc2luY2UgdGhlIGNsb25lIGlzIGZsYXR0ZW5lZCBhZnRlciBiZWluZyBjcmVhdGVkIGFuZCB0
-aGUgcHJvZHVjdGlvbiBlcXVpdmFsZW50Cj4gb2YgInRlc3QiIHVzZXIgY2FuIGFjY2VzcyB0aGUg
-aW1hZ2Ugb25seSBhZnRlciBpdCBoYXMgYmVlbiBmbGF0dGVuZWQuCj4gCj4gVGhlIGlzc3VlIGhh
-cHBlbmVkIHdoZW4gc29tZW9uZSBhY2NpZGVudGFsbHkgcmVtb3ZlZCBub3QteWV0LWZsYXR0ZW5l
-ZCBpbWFnZQo+IHVzaW5nIHRoZSB1c2VyIHdpdGggd2Vha2VyIHBlcm1pc3Npb25zLiBHb29kIHRv
-IGhlYXIgdGhpcyBoYXMgYmVlbiBzcG90dGVkCj4gYWxyZWFkeS4KPiAKPiBUaGFua3MgZm9yIGhl
-bHAsCj4gQmFydGVrCj4gCj4gCj4gCj4gT24gV2VkLCAyMSBEZWMgMjAxNiAxMTo1Mzo1NyAtMDUw
-MAo+IEphc29uIERpbGxhbWFuIDxqZGlsbGFtYUByZWRoYXQuY29tPiB3cm90ZToKPiAKPiA+IFlv
-dSBhcmUgdW5mb3J0dW5hdGVseSB0aGUgc2Vjb25kIHBlcnNvbiB0b2RheSB0byBoaXQgYW4gaXNz
-dWUgd2hlcmUKPiA+ICJyYmQgcmVtb3ZlIiBpbmNvcnJlY3RseSBwcm9jZWVkcyB3aGVuIGl0IGhp
-dHMgYSBjb3JuZXItY2FzZSBlcnJvci4KPiA+IAo+ID4gRmlyc3QgdGhpbmdzIGZpcnN0LCB3aGVu
-IHlvdSBjb25maWd1cmUgeW91ciBuZXcgdXNlciwgeW91IG5lZWRlZCB0bwo+ID4gZ2l2ZSBpdCAi
-cngiIHBlcm1pc3Npb25zIHRvIHRoZSBwYXJlbnQgaW1hZ2UncyBwb29sLiBJZiB5b3UgYXR0ZW1w
-dGVkCj4gPiB0aGUgY2xvbmUgb3BlcmF0aW9uIHVzaW5nIHRoZSAidGVzdCIgdXNlciwgdGhlIGNs
-b25lIHdvdWxkIGhhdmUKPiA+IGltbWVkaWF0ZWx5IGZhaWxlZCBkdWUgdG8gdGhpcyBpc3N1ZS4K
-PiA+IAo+ID4gU2Vjb25kLCB1bmxlc3MgdGhpcyBpcyBhIHRlc3QgY2x1c3RlciB3aGVyZSB5b3Ug
-Y2FuIGRlbGV0ZSB0aGUKPiA+ICJyYmRfY2hpbGRyZW4iIG9iamVjdCBpbiB0aGUgInJiZCIgcG9v
-bCAoaS5lLiB5b3UgZG9uJ3QgaGF2ZSBhbnkKPiA+IGFkZGl0aW9uYWwgY2xvbmVzIGluIHRoZSBy
-YmQgcG9vbCkgdmlhIHRoZSByYWRvcyBDTEksIHlvdSB3aWxsIG5lZWQgdG8KPiA+IHVzZSB0aGUg
-S3Jha2VuIHJlbGVhc2UgY2FuZGlkYXRlIChvciBtYXN0ZXIgYnJhbmNoKSB2ZXJzaW9uIG9mIHRo
-ZQo+ID4gcmFkb3MgQ0xJIHRvIG1hbnVhbGx5IG1hbmlwdWxhdGUgdGhlICJyYmRfY2hpbGRyZW4i
-IG9iamVjdCB0byByZW1vdmUKPiA+IHRoZSBkYW5nbGluZyByZWZlcmVuY2UgdG8gdGhlIGRlbGV0
-ZWQgaW1hZ2UuCj4gPiAKPiA+IE9uIFdlZCwgRGVjIDIxLCAyMDE2IGF0IDY6NTcgQU0sIEJhcnTF
-gm9taWVqIMWad2nEmWNraQo+ID4gPGJhcnRsb21pZWouc3dpZWNraUBjb3JwLm92aC5jb20+IHdy
-b3RlOgo+ID4gPiBIaSwKPiA+ID4KPiA+ID4gSSdtIGN1cnJlbnRseSBpbnZlc3RpZ2F0aW5nIGEg
-Y2FzZSB3aGVyZSBDZXBoIGNsdXN0ZXIgZW5kZWQgdXAgd2l0aCBpbmNvbnNpc3RlbnQgY2xvbmUg
-aW5mb3JtYXRpb24uCj4gPiA+Cj4gPiA+IEhlcmUncyBhIHdoYXQgSSBkaWQgdG8gcXVpY2tseSBy
-ZXByb2R1Y2U6Cj4gPiA+ICogQ3JlYXRlZCBuZXcgY2x1c3RlciAodGVzdGVkIGluIGhhbW1lciAw
-Ljk0LjYgYW5kIGpld2VsIDEwLjIuMykKPiA+ID4gKiBDcmVhdGVkIHR3byBwb29sczogdGVzdCBh
-bmQgcmJkCj4gPiA+ICogQ3JlYXRlZCBiYXNlIGltYWdlIGluIHBvb2wgdGVzdCwgY3JlYXRlZCBz
-bmFwc2hvdCwgcHJvdGVjdGVkIGl0IGFuZCBjcmVhdGVkIGNsb25lIG9mIHRoaXMgc25hcHNob3Qg
-aW4gcG9vbCByYmQ6Cj4gPiA+ICAgICAgICAgIyByYmQgLXAgdGVzdCBjcmVhdGUgLS1zaXplIDEw
-IC0taW1hZ2UtZm9ybWF0IDIgYmFzZQo+ID4gPiAgICAgICAgICMgcmJkIC1wIHRlc3Qgc25hcCBj
-cmVhdGUgYmFzZUBiYXNlCj4gPiA+ICAgICAgICAgIyByYmQgLXAgdGVzdCBzbmFwIHByb3RlY3Qg
-YmFzZUBiYXNlCj4gPiA+ICAgICAgICAgIyByYmQgY2xvbmUgdGVzdC9iYXNlQGJhc2UgcmJkL2Rl
-c3RpbmF0aW9uCj4gPiA+ICogQ3JlYXRlZCBuZXcgdXNlciBjYWxsZWQgInRlc3QiIHdpdGggcnd4
-IHBlcm1pc3Npb25zIHRvIHJiZCBwb29sIG9ubHk6Cj4gPiA+ICAgICAgICAgY2FwczogW21vbl0g
-YWxsb3cgcgo+ID4gPiAgICAgICAgIGNhcHM6IFtvc2RdIGFsbG93IGNsYXNzLXJlYWQgb2JqZWN0
-X3ByZWZpeCByYmRfY2hpbGRyZW4sIGFsbG93IHJ3eCBwb29sPXJiZAo+ID4gPiAqIFVzaW5nIHRo
-aXMgbmV3bHkgY3JldGVkIHVzZXIgSSByZW1vdmVkIHRoZSBjbG9uZWQgaW1hZ2UgaW4gcmJkIHBv
-b2wsIGhhZCBlcnJvcnMgYnV0IGZpbmFsbHkgcmVtb3ZlZCB0aGUgaW1hZ2U6Cj4gPiA+ICAgICAg
-ICAgIyByYmQgLS1pZCB0ZXN0IC1wIHJiZCBybSBkZXN0aW5hdGlvbgo+ID4gPiAgICAgICAgIDIw
-MTYtMTItMjEgMTE6NTA6MDMuNzU4MjIxIDdmMzJiNzQ1OTcwMCAtMSBsaWJyYmQ6OmltYWdlOjpP
-cGVuUmVxdWVzdDogZmFpbGVkIHRvIHJldHJlaXZlIG5hbWU6ICgxKSBPcGVyYXRpb24gbm90IHBl
-cm1pdHRlZAo+ID4gPiAgICAgICAgIDIwMTYtMTItMjEgMTE6NTA6MDMuNzU4Mjg4IDdmMzJiNmM1
-ODcwMCAtMSBsaWJyYmQ6OmltYWdlOjpSZWZyZXNoUGFyZW50UmVxdWVzdDogZmFpbGVkIHRvIG9w
-ZW4gcGFyZW50IGltYWdlOiAoMSkgT3BlcmF0aW9uIG5vdCBwZXJtaXR0ZWQKPiA+ID4gICAgICAg
-ICAyMDE2LTEyLTIxIDExOjUwOjAzLjc1ODMxMiA3ZjMyYjZjNTg3MDAgLTEgbGlicmJkOjppbWFn
-ZTo6UmVmcmVzaFJlcXVlc3Q6IGZhaWxlZCB0byByZWZyZXNoIHBhcmVudCBpbWFnZTogKDEpIE9w
-ZXJhdGlvbiBub3QgcGVybWl0dGVkCj4gPiA+ICAgICAgICAgMjAxNi0xMi0yMSAxMTo1MDowMy43
-NTgzMzMgN2YzMmI2YzU4NzAwIC0xIGxpYnJiZDo6aW1hZ2U6Ok9wZW5SZXF1ZXN0OiBmYWlsZWQg
-dG8gcmVmcmVzaCBpbWFnZTogKDEpIE9wZXJhdGlvbiBub3QgcGVybWl0dGVkCj4gPiA+ICAgICAg
-ICAgMjAxNi0xMi0yMSAxMTo1MDowMy43NTkzNjYgN2YzMmI2YzU4NzAwIC0xIGxpYnJiZDo6SW1h
-Z2VTdGF0ZTogZmFpbGVkIHRvIG9wZW4gaW1hZ2U6ICgxKSBPcGVyYXRpb24gbm90IHBlcm1pdHRl
-ZAo+ID4gPiAgICAgICAgIFJlbW92aW5nIGltYWdlOiAxMDAlIGNvbXBsZXRlLi4uZG9uZS4KPiA+
-ID4KPiA+ID4gQXQgdGhpcyBwb2ludCB0aGVyZSdzIG5vIGNsb25lZCBpbWFnZSBidXQgdGhlIG9y
-aWdpbmFsIHNuYXBzaG90IHN0aWxsIGhhcyByZWZlcmVuY2UgdG8gaXQ6Cj4gPiA+Cj4gPiA+ICMg
-cmJkIC1wIHRlc3Qgc25hcCB1bnByb3RlY3QgYmFzZUBiYXNlCj4gPiA+IDIwMTYtMTItMjEgMTE6
-NTM6NDcuMzU5MDYwIDdmZWUwMzdmZTcwMCAtMSBsaWJyYmQ6OlNuYXBzaG90VW5wcm90ZWN0UmVx
-dWVzdDogY2Fubm90IHVucHJvdGVjdDogYXQgbGVhc3QgMSBjaGlsZChyZW4pIFsyOWIwMjM4ZTFm
-MjldIGluIHBvb2wgJ3JiZCcKPiA+ID4gMjAxNi0xMi0yMSAxMTo1Mzo0Ny4zNTk2NzggN2ZlZTAz
-N2ZlNzAwIC0xIGxpYnJiZDo6U25hcHNob3RVbnByb3RlY3RSZXF1ZXN0OiBlbmNvdW50ZXJlZCBl
-cnJvcjogKDE2KSBEZXZpY2Ugb3IgcmVzb3VyY2UgYnVzeQo+ID4gPiAyMDE2LTEyLTIxIDExOjUz
-OjQ3LjM1OTY5MSA3ZmVlMDM3ZmU3MDAgLTEgbGlicmJkOjpTbmFwc2hvdFVucHJvdGVjdFJlcXVl
-c3Q6IDB4N2ZlZTM5YWU5MzQwIHNob3VsZF9jb21wbGV0ZV9lcnJvcjogcmV0X3ZhbD0tMTYKPiA+
-ID4gMjAxNi0xMi0yMSAxMTo1Mzo0Ny4zNjA2MjcgN2ZlZTAzN2ZlNzAwIC0xIGxpYnJiZDo6U25h
-cHNob3RVbnByb3RlY3RSZXF1ZXN0OiAweDdmZWUzOWFlOTM0MCBzaG91bGRfY29tcGxldGVfZXJy
-b3I6IHJldF92YWw9LTE2Cj4gPiA+IHJiZDogdW5wcm90ZWN0aW5nIHNuYXAgZmFpbGVkOiAoMTYp
-IERldmljZSBvciByZXNvdXJjZSBidXN5Cj4gPiA+Cj4gPiA+ICMgcmJkIC1wIHRlc3QgY2hpbGRy
-ZW4gYmFzZUBiYXNlCj4gPiA+IHJiZDogbGlzdGluZyBjaGlsZHJlbiBmYWlsZWQ6ICgyKSBObyBz
-dWNoIGZpbGUgb3IgZGlyZWN0b3J5MjAxNi0xMi0yMQo+ID4gPiAxMTo1MzowOC43MTY5ODcgN2Zm
-MmIyZWFhZDgwIC0xIGxpYnJiZDogRXJyb3IgbG9va2luZyB1cCBuYW1lIGZvciBpbWFnZQo+ID4g
-PiBpZCAyOWIwMjM4ZTFmMjkgaW4gcG9vbCByYmQKPiA+ID4KPiA+ID4KPiA+ID4gQW55IGlkZWFz
-IG9uIGhvdyB0aGlzIGNvdWxkIGJlIGZpeGVkPwo+ID4gPgo+ID4gPgo+ID4gPiBUaGFua3MsCj4g
-PiA+IEJhcnRlawo+ID4gPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fXwo+ID4gPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+ID4gPiBjZXBoLXVzZXJzQGxp
-c3RzLmNlcGguY29tCj4gPiA+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2Vw
-aC11c2Vycy1jZXBoLmNvbQo+ID4gCj4gPiAKPiA+IAo+ID4gLS0gCj4gPiBKYXNvbgpfX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxp
-bmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9s
-aXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-2115469208-1482412907=:10615
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+
+On Thu, 22 Dec 2016, Bartłomiej Święcki wrote:
+> Hi,
+> 
+> I have problems runnign Kraken tools on Hammer/Jewel cluster (official 11.1.0 debs),
+> it asserts:
+> 
+> /build/ceph-11.1.0/src/mon/MonMap.cc: In function 'void MonMap::sanitize_mons(std::map<std::basic_string<char>, entity_addr_t>&)' thread 7fffd37fe700 time 2016-12-22 12:26:23.457058
+> /build/ceph-11.1.0/src/mon/MonMap.cc: 70: FAILED assert(mon_info.count(p.first))
+
+See http://tracker.ceph.com/issues/18265 and 
+https://github.com/ceph/ceph/pull/12611
+
+sage
+
+
+> I tried to debug it a bit and it looks like mon_info has temporary mon names:
+> 
+> (gdb) p mon_info
+> $1 = std::map with 3 elements = {["noname-a"] = {name = "noname-a", .....
+> 
+> while it checks for a correct one:
+> 
+> (gdb) p p
+> $2 = {first = "mon-01-690d38c0-2567-447b-bdfb-0edd137183db", ....
+> 
+> 
+> Anyway, I was thinking about the missing image problem - maybe it would be easier
+> to recreate removed image? Would restoring rbd_header object be enough?
+> 
+> 
+> P.S. Adding ceph-devel
+> 
+> On Thu, 22 Dec 2016 10:10:09 +0100
+> Bartłomiej Święcki <bartlomiej.swiecki-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org> wrote:
+> 
+> > Hi Jason,
+> > 
+> > I'll test kraken tools since it happened on production, everything works there
+> > since the clone is flattened after being created and the production equivalent
+> > of "test" user can access the image only after it has been flattened.
+> > 
+> > The issue happened when someone accidentally removed not-yet-flattened image
+> > using the user with weaker permissions. Good to hear this has been spotted
+> > already.
+> > 
+> > Thanks for help,
+> > Bartek
+> > 
+> > 
+> > 
+> > On Wed, 21 Dec 2016 11:53:57 -0500
+> > Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> > 
+> > > You are unfortunately the second person today to hit an issue where
+> > > "rbd remove" incorrectly proceeds when it hits a corner-case error.
+> > > 
+> > > First things first, when you configure your new user, you needed to
+> > > give it "rx" permissions to the parent image's pool. If you attempted
+> > > the clone operation using the "test" user, the clone would have
+> > > immediately failed due to this issue.
+> > > 
+> > > Second, unless this is a test cluster where you can delete the
+> > > "rbd_children" object in the "rbd" pool (i.e. you don't have any
+> > > additional clones in the rbd pool) via the rados CLI, you will need to
+> > > use the Kraken release candidate (or master branch) version of the
+> > > rados CLI to manually manipulate the "rbd_children" object to remove
+> > > the dangling reference to the deleted image.
+> > > 
+> > > On Wed, Dec 21, 2016 at 6:57 AM, Bartłomiej Święcki
+> > > <bartlomiej.swiecki-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org> wrote:
+> > > > Hi,
+> > > >
+> > > > I'm currently investigating a case where Ceph cluster ended up with inconsistent clone information.
+> > > >
+> > > > Here's a what I did to quickly reproduce:
+> > > > * Created new cluster (tested in hammer 0.94.6 and jewel 10.2.3)
+> > > > * Created two pools: test and rbd
+> > > > * Created base image in pool test, created snapshot, protected it and created clone of this snapshot in pool rbd:
+> > > >         # rbd -p test create --size 10 --image-format 2 base
+> > > >         # rbd -p test snap create base@base
+> > > >         # rbd -p test snap protect base@base
+> > > >         # rbd clone test/base@base rbd/destination
+> > > > * Created new user called "test" with rwx permissions to rbd pool only:
+> > > >         caps: [mon] allow r
+> > > >         caps: [osd] allow class-read object_prefix rbd_children, allow rwx pool=rbd
+> > > > * Using this newly creted user I removed the cloned image in rbd pool, had errors but finally removed the image:
+> > > >         # rbd --id test -p rbd rm destination
+> > > >         2016-12-21 11:50:03.758221 7f32b7459700 -1 librbd::image::OpenRequest: failed to retreive name: (1) Operation not permitted
+> > > >         2016-12-21 11:50:03.758288 7f32b6c58700 -1 librbd::image::RefreshParentRequest: failed to open parent image: (1) Operation not permitted
+> > > >         2016-12-21 11:50:03.758312 7f32b6c58700 -1 librbd::image::RefreshRequest: failed to refresh parent image: (1) Operation not permitted
+> > > >         2016-12-21 11:50:03.758333 7f32b6c58700 -1 librbd::image::OpenRequest: failed to refresh image: (1) Operation not permitted
+> > > >         2016-12-21 11:50:03.759366 7f32b6c58700 -1 librbd::ImageState: failed to open image: (1) Operation not permitted
+> > > >         Removing image: 100% complete...done.
+> > > >
+> > > > At this point there's no cloned image but the original snapshot still has reference to it:
+> > > >
+> > > > # rbd -p test snap unprotect base@base
+> > > > 2016-12-21 11:53:47.359060 7fee037fe700 -1 librbd::SnapshotUnprotectRequest: cannot unprotect: at least 1 child(ren) [29b0238e1f29] in pool 'rbd'
+> > > > 2016-12-21 11:53:47.359678 7fee037fe700 -1 librbd::SnapshotUnprotectRequest: encountered error: (16) Device or resource busy
+> > > > 2016-12-21 11:53:47.359691 7fee037fe700 -1 librbd::SnapshotUnprotectRequest: 0x7fee39ae9340 should_complete_error: ret_val=-16
+> > > > 2016-12-21 11:53:47.360627 7fee037fe700 -1 librbd::SnapshotUnprotectRequest: 0x7fee39ae9340 should_complete_error: ret_val=-16
+> > > > rbd: unprotecting snap failed: (16) Device or resource busy
+> > > >
+> > > > # rbd -p test children base@base
+> > > > rbd: listing children failed: (2) No such file or directory2016-12-21
+> > > > 11:53:08.716987 7ff2b2eaad80 -1 librbd: Error looking up name for image
+> > > > id 29b0238e1f29 in pool rbd
+> > > >
+> > > >
+> > > > Any ideas on how this could be fixed?
+> > > >
+> > > >
+> > > > Thanks,
+> > > > Bartek
+> > > > _______________________________________________
+> > > > ceph-users mailing list
+> > > > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > > > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> > > 
+> > > 
+> > > 
+> > > -- 
+> > > Jason
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+--8323329-2115469208-1482412907=:10615
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--8323329-2115469208-1482412907=:10615--
