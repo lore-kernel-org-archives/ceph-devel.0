@@ -1,288 +1,167 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Fri, 23 Dec 2016 01:16:59 -0800
-Message-ID: <585ceb8b7224b_6d63de3334795d5@ss1435.mail>
+From: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?=
+	<bartlomiej.swiecki-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Subject: Re: Clone data inconsistency in hammer
+Date: Fri, 23 Dec 2016 14:25:27 +0100
+Message-ID: <20161223142527.682da7d3@desk613732.desk.int.gns.ovh.net>
+References: <20161221125712.7074b217@desk613732.desk.int.gns.ovh.net>
+	<CA+aFP1Dx9mzYmtNNqTUifpT2JGMsDKECLt69mZBmerm+a=db5A@mail.gmail.com>
+	<20161222101009.32e14565@desk613732.desk.int.gns.ovh.net>
+	<20161222133341.0f4a3976@desk613732.desk.int.gns.ovh.net>
+	<alpine.DEB.2.11.1612221319400.10615@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from o2.lv1e.shared.sendgrid.net ([167.89.100.174]:42567 "EHLO
-        o2.lv1e.shared.sendgrid.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750781AbcLWJWl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 23 Dec 2016 04:22:41 -0500
-Received: from coverity.com (static-208.69.177.245.nephosdns.com [208.69.177.245])
-        by ismtpd0002p1sjc2.sendgrid.net (SG) with ESMTP id vZTmnI3OSGSWtJ5F6ECQ8Q
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Dec 2016 09:16:59.523 +0000 (UTC)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1612221319400.10615-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-
-Hi,
-
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
-
-8 new defect(s) introduced to ceph found with Coverity Scan.
-8 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
-
-New defect(s) Reported-by: Coverity Scan
-Showing 8 of 8 defect(s)
-
-
-** CID 1397726:  Integer handling issues  (BAD_SHIFT)
-/home/brad/working/src/ceph/src/test/objectstore/BitAllocator_test.cc: 323 in BitAllocator_test_zone_alloc_Test::TestBody()()
-
-
-________________________________________________________________________________________________________
-*** CID 1397726:  Integer handling issues  (BAD_SHIFT)
-/home/brad/working/src/ceph/src/test/objectstore/BitAllocator_test.cc: 323 in BitAllocator_test_zone_alloc_Test::TestBody()()
-317       {
-318         int64_t blk_size = 1;
-319         AllocExtentVector extents = AllocExtentVector
-320           (zone->size() / 2, AllocExtent(-1, -1));
-321     
-322         for (int i = 1; i <= total_blocks - BmapEntry::size(); i = i << 1) {
->>>     CID 1397726:  Integer handling issues  (BAD_SHIFT)
->>>     In expression "1 << j", left shifting by more than 31 bits has undefined behavior.  The shift amount, "j", is as much as 64.
-323           for (int64_t j = 0; j <= BmapEntry::size(); j = 1 << j) {
-324             ExtentList *block_list = new ExtentList(&extents, blk_size);
-325             zone = new BitMapZone(total_blocks, 0);
-326             lock = zone->lock_excl_try();
-327             bmap_test_assert(lock);
-328     
-
-** CID 1397727:  Security best practices violations  (DC.WEAK_CRYPTO)
-/home/brad/working/src/ceph/src/os/bluestore/StupidAllocator.cc: 163 in StupidAllocator::allocate_int(unsigned long, unsigned long, long, unsigned long *, unsigned int *)()
-
-
-________________________________________________________________________________________________________
-*** CID 1397727:  Security best practices violations  (DC.WEAK_CRYPTO)
-/home/brad/working/src/ceph/src/os/bluestore/StupidAllocator.cc: 163 in StupidAllocator::allocate_int(unsigned long, unsigned long, long, unsigned long *, unsigned int *)()
-157       if (skew)
-158         skew = alloc_unit - skew;
-159       *offset = p.get_start() + skew;
-160       *length = MIN(MAX(alloc_unit, want_size), p.get_len() - skew);
-161       if (g_conf->bluestore_debug_small_allocations) {
-162         uint64_t max =
->>>     CID 1397727:  Security best practices violations  (DC.WEAK_CRYPTO)
->>>     "rand" should not be used for security related applications, as linear congruential algorithms are too easy to break.
-163           alloc_unit * (rand() % g_conf->bluestore_debug_small_allocations);
-164         if (max && *length > max) {
-165           dout(10) << __func__ << " shortening allocation of 0x" << std::hex
-166     	       << *length << " -> 0x"
-167     	       << max << " due to debug_small_allocations" << std::dec << dendl;
-168           *length = max;
-
-** CID 1397728:    (DIVIDE_BY_ZERO)
-/home/brad/working/src/ceph/src/os/bluestore/StupidAllocator.cc: 156 in StupidAllocator::allocate_int(unsigned long, unsigned long, long, unsigned long *, unsigned int *)()
-/home/brad/working/src/ceph/src/os/bluestore/StupidAllocator.cc: 156 in StupidAllocator::allocate_int(unsigned long, unsigned long, long, unsigned long *, unsigned int *)()
-
-
-________________________________________________________________________________________________________
-*** CID 1397728:    (DIVIDE_BY_ZERO)
-/home/brad/working/src/ceph/src/os/bluestore/StupidAllocator.cc: 156 in StupidAllocator::allocate_int(unsigned long, unsigned long, long, unsigned long *, unsigned int *)()
-150         }
-151       }
-152     
-153       return -ENOSPC;
-154     
-155      found:
->>>     CID 1397728:    (DIVIDE_BY_ZERO)
->>>     In expression "p.get_start() % alloc_unit", modulo by expression "alloc_unit" which may be zero has undefined behavior.
-156       uint64_t skew = p.get_start() % alloc_unit;
-157       if (skew)
-158         skew = alloc_unit - skew;
-159       *offset = p.get_start() + skew;
-160       *length = MIN(MAX(alloc_unit, want_size), p.get_len() - skew);
-161       if (g_conf->bluestore_debug_small_allocations) {
-/home/brad/working/src/ceph/src/os/bluestore/StupidAllocator.cc: 156 in StupidAllocator::allocate_int(unsigned long, unsigned long, long, unsigned long *, unsigned int *)()
-150         }
-151       }
-152     
-153       return -ENOSPC;
-154     
-155      found:
->>>     CID 1397728:    (DIVIDE_BY_ZERO)
->>>     In expression "p.get_start() % alloc_unit", modulo by expression "alloc_unit" which may be zero has undefined behavior.
-156       uint64_t skew = p.get_start() % alloc_unit;
-157       if (skew)
-158         skew = alloc_unit - skew;
-159       *offset = p.get_start() + skew;
-160       *length = MIN(MAX(alloc_unit, want_size), p.get_len() - skew);
-161       if (g_conf->bluestore_debug_small_allocations) {
-
-** CID 1397729:  Null pointer dereferences  (FORWARD_NULL)
-/home/brad/working/src/ceph/src/rgw/rgw_rest_s3.cc: 3653 in RGW_Auth_S3::authorize_v4(RGWRados *, req_state *, bool)()
-
-
-________________________________________________________________________________________________________
-*** CID 1397729:  Null pointer dereferences  (FORWARD_NULL)
-/home/brad/working/src/ceph/src/rgw/rgw_rest_s3.cc: 3653 in RGW_Auth_S3::authorize_v4(RGWRados *, req_state *, bool)()
-3647         const char *d = s->info.env->get("HTTP_X_AMZ_DATE");
-3648         struct tm t;
-3649         if (!parse_iso8601(d, &t, NULL, false)) {
-3650           dout(10) << "error reading date via http_x_amz_date" << dendl;
-3651           return -EACCES;
-3652         }
->>>     CID 1397729:  Null pointer dereferences  (FORWARD_NULL)
->>>     Passing null pointer "d" to "operator =", which dereferences it. [Note: The source code implementation of the function has been overridden by a builtin model.]
-3653         s->aws4_auth->date = d;
-3654       }
-3655     
-3656       /* AKIAIVKTAZLOCF43WNQD/AAAAMMDD/region/host/aws4_request */
-3657       dout(10) << "v4 credential format = " << s->aws4_auth->credential << dendl;
-3658     
-
-** CID 1397730:  Program hangs  (ORDER_REVERSAL)
-
-
-________________________________________________________________________________________________________
-*** CID 1397730:  Program hangs  (ORDER_REVERSAL)
-/home/brad/working/src/ceph/src/common/ceph_context.h: 134 in CephContext::lookup_or_create_singleton_object<<unnamed>::MempoolObs>(T1 *&, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &)()
-128     		  bufferlist *out);
-129     
-130       template<typename T>
-131       void lookup_or_create_singleton_object(T*& p, const std::string &name) {
-132         ceph_spin_lock(&_associated_objs_lock);
-133         if (!_associated_objs.count(name)) {
->>>     CID 1397730:  Program hangs  (ORDER_REVERSAL)
->>>     Calling "MempoolObs" acquires lock "Mutex._m" while holding lock "ceph_spinlock_t.lock" (count: 1 / 20).
-134           p = new T(this);
-135           _associated_objs[name] = new TypedSingletonWrapper<T>(p);
-136         } else {
-137           TypedSingletonWrapper<T> *wrapper =
-138             dynamic_cast<TypedSingletonWrapper<T> *>(_associated_objs[name]);
-139           assert(wrapper != NULL);
-
-** CID 1397731:  Integer handling issues  (OVERFLOW_BEFORE_WIDEN)
-/home/brad/working/src/ceph/src/test/objectstore/BitAllocator_test.cc: 323 in BitAllocator_test_zone_alloc_Test::TestBody()()
-
-
-________________________________________________________________________________________________________
-*** CID 1397731:  Integer handling issues  (OVERFLOW_BEFORE_WIDEN)
-/home/brad/working/src/ceph/src/test/objectstore/BitAllocator_test.cc: 323 in BitAllocator_test_zone_alloc_Test::TestBody()()
-317       {
-318         int64_t blk_size = 1;
-319         AllocExtentVector extents = AllocExtentVector
-320           (zone->size() / 2, AllocExtent(-1, -1));
-321     
-322         for (int i = 1; i <= total_blocks - BmapEntry::size(); i = i << 1) {
->>>     CID 1397731:  Integer handling issues  (OVERFLOW_BEFORE_WIDEN)
->>>     Potentially overflowing expression "1 << j" with type "int" (32 bits, signed) is evaluated using 32-bit arithmetic, and then used in a context that expects an expression of type "int64_t" (64 bits, signed).
-323           for (int64_t j = 0; j <= BmapEntry::size(); j = 1 << j) {
-324             ExtentList *block_list = new ExtentList(&extents, blk_size);
-325             zone = new BitMapZone(total_blocks, 0);
-326             lock = zone->lock_excl_try();
-327             bmap_test_assert(lock);
-328     
-
-** CID 1397732:    (PARSE_ERROR)
-/home/brad/working/src/ceph/src/common/config_opts.h: 195 in ()
-/home/brad/working/src/ceph/src/common/config_opts.h: 196 in ()
-/home/brad/working/src/ceph/src/common/config_opts.h: 197 in ()
-/home/brad/working/src/ceph/src/common/config_opts.h: 198 in ()
-/home/brad/working/src/ceph/src/common/config_opts.h: 199 in ()
-
-
-________________________________________________________________________________________________________
-*** CID 1397732:    (PARSE_ERROR)
-/home/brad/working/src/ceph/src/common/config_opts.h: 195 in ()
-189     OPTION(ms_die_on_skipped_message, OPT_BOOL, false)  // assert if we skip a seq (kernel client does this intentionally)
-190     OPTION(ms_dispatch_throttle_bytes, OPT_U64, 100 << 20)
-191     OPTION(ms_bind_ipv6, OPT_BOOL, false)
-192     OPTION(ms_bind_port_min, OPT_INT, 6800)
-193     OPTION(ms_bind_port_max, OPT_INT, 7300)
-194     OPTION(ms_bind_retry_count, OPT_INT, 3) // If binding fails, how many times do we retry to bind
->>>     CID 1397732:    (PARSE_ERROR)
->>>     detected during instantiation of "std::enable_if<std::is_destructible<T>::value, md_config_t::validator_t>::type <unnamed>::create_validator<T>() [with T=md_config_t::option_ms_bind_retry_delay_t]" at line 195 of "/home/brad/working/src/ceph/src/common/config_opts.h"
-195     OPTION(ms_bind_retry_delay, OPT_INT, 5) // Delay between attemps to bind
-196     OPTION(ms_rwthread_stack_bytes, OPT_U64, 1024 << 10)
-197     OPTION(ms_tcp_read_timeout, OPT_U64, 900)
-198     OPTION(ms_pq_max_tokens_per_priority, OPT_U64, 16777216)
-199     OPTION(ms_pq_min_cost, OPT_U64, 65536)
-200     OPTION(ms_inject_socket_failures, OPT_U64, 0)
-/home/brad/working/src/ceph/src/common/config_opts.h: 196 in ()
-190     OPTION(ms_dispatch_throttle_bytes, OPT_U64, 100 << 20)
-191     OPTION(ms_bind_ipv6, OPT_BOOL, false)
-192     OPTION(ms_bind_port_min, OPT_INT, 6800)
-193     OPTION(ms_bind_port_max, OPT_INT, 7300)
-194     OPTION(ms_bind_retry_count, OPT_INT, 3) // If binding fails, how many times do we retry to bind
-195     OPTION(ms_bind_retry_delay, OPT_INT, 5) // Delay between attemps to bind
->>>     CID 1397732:    (PARSE_ERROR)
->>>     detected during instantiation of "std::enable_if<std::is_destructible<T>::value, md_config_t::validator_t>::type <unnamed>::create_validator<T>() [with T=md_config_t::option_ms_rwthread_stack_bytes_t]" at line 196 of "/home/brad/working/src/ceph/src/common/config_opts.h"
-196     OPTION(ms_rwthread_stack_bytes, OPT_U64, 1024 << 10)
-197     OPTION(ms_tcp_read_timeout, OPT_U64, 900)
-198     OPTION(ms_pq_max_tokens_per_priority, OPT_U64, 16777216)
-199     OPTION(ms_pq_min_cost, OPT_U64, 65536)
-200     OPTION(ms_inject_socket_failures, OPT_U64, 0)
-201     OPTION(ms_inject_delay_type, OPT_STR, "")          // "osd mds mon client" allowed
-/home/brad/working/src/ceph/src/common/config_opts.h: 197 in ()
-191     OPTION(ms_bind_ipv6, OPT_BOOL, false)
-192     OPTION(ms_bind_port_min, OPT_INT, 6800)
-193     OPTION(ms_bind_port_max, OPT_INT, 7300)
-194     OPTION(ms_bind_retry_count, OPT_INT, 3) // If binding fails, how many times do we retry to bind
-195     OPTION(ms_bind_retry_delay, OPT_INT, 5) // Delay between attemps to bind
-196     OPTION(ms_rwthread_stack_bytes, OPT_U64, 1024 << 10)
->>>     CID 1397732:    (PARSE_ERROR)
->>>     detected during instantiation of "std::enable_if<std::is_destructible<T>::value, md_config_t::validator_t>::type <unnamed>::create_validator<T>() [with T=md_config_t::option_ms_tcp_read_timeout_t]" at line 197 of "/home/brad/working/src/ceph/src/common/config_opts.h"
-197     OPTION(ms_tcp_read_timeout, OPT_U64, 900)
-198     OPTION(ms_pq_max_tokens_per_priority, OPT_U64, 16777216)
-199     OPTION(ms_pq_min_cost, OPT_U64, 65536)
-200     OPTION(ms_inject_socket_failures, OPT_U64, 0)
-201     OPTION(ms_inject_delay_type, OPT_STR, "")          // "osd mds mon client" allowed
-202     OPTION(ms_inject_delay_msg_type, OPT_STR, "")      // the type of message to delay, as returned by Message::get_type_name(). This is an additional restriction on the general type filter ms_inject_delay_type.
-/home/brad/working/src/ceph/src/common/config_opts.h: 198 in ()
-192     OPTION(ms_bind_port_min, OPT_INT, 6800)
-193     OPTION(ms_bind_port_max, OPT_INT, 7300)
-194     OPTION(ms_bind_retry_count, OPT_INT, 3) // If binding fails, how many times do we retry to bind
-195     OPTION(ms_bind_retry_delay, OPT_INT, 5) // Delay between attemps to bind
-196     OPTION(ms_rwthread_stack_bytes, OPT_U64, 1024 << 10)
-197     OPTION(ms_tcp_read_timeout, OPT_U64, 900)
->>>     CID 1397732:    (PARSE_ERROR)
->>>     detected during instantiation of "std::enable_if<std::is_destructible<T>::value, md_config_t::validator_t>::type <unnamed>::create_validator<T>() [with T=md_config_t::option_ms_pq_max_tokens_per_priority_t]" at line 198 of "/home/brad/working/src/ceph/src/common/config_opts.h"
-198     OPTION(ms_pq_max_tokens_per_priority, OPT_U64, 16777216)
-199     OPTION(ms_pq_min_cost, OPT_U64, 65536)
-200     OPTION(ms_inject_socket_failures, OPT_U64, 0)
-201     OPTION(ms_inject_delay_type, OPT_STR, "")          // "osd mds mon client" allowed
-202     OPTION(ms_inject_delay_msg_type, OPT_STR, "")      // the type of message to delay, as returned by Message::get_type_name(). This is an additional restriction on the general type filter ms_inject_delay_type.
-203     OPTION(ms_inject_delay_max, OPT_DOUBLE, 1)         // seconds
-/home/brad/working/src/ceph/src/common/config_opts.h: 199 in ()
-193     OPTION(ms_bind_port_max, OPT_INT, 7300)
-194     OPTION(ms_bind_retry_count, OPT_INT, 3) // If binding fails, how many times do we retry to bind
-195     OPTION(ms_bind_retry_delay, OPT_INT, 5) // Delay between attemps to bind
-196     OPTION(ms_rwthread_stack_bytes, OPT_U64, 1024 << 10)
-197     OPTION(ms_tcp_read_timeout, OPT_U64, 900)
-198     OPTION(ms_pq_max_tokens_per_priority, OPT_U64, 16777216)
->>>     CID 1397732:    (PARSE_ERROR)
->>>     detected during instantiation of "std::enable_if<std::is_destructible<T>::value, md_config_t::validator_t>::type <unnamed>::create_validator<T>() [with T=md_config_t::option_ms_pq_min_cost_t]" at line 199 of "/home/brad/working/src/ceph/src/common/config_opts.h"
-199     OPTION(ms_pq_min_cost, OPT_U64, 65536)
-200     OPTION(ms_inject_socket_failures, OPT_U64, 0)
-201     OPTION(ms_inject_delay_type, OPT_STR, "")          // "osd mds mon client" allowed
-202     OPTION(ms_inject_delay_msg_type, OPT_STR, "")      // the type of message to delay, as returned by Message::get_type_name(). This is an additional restriction on the general type filter ms_inject_delay_type.
-203     OPTION(ms_inject_delay_max, OPT_DOUBLE, 1)         // seconds
-204     OPTION(ms_inject_delay_probability, OPT_DOUBLE, 0) // range [0, 1]
-
-** CID 1397733:  Resource leaks  (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/common/TracepointProvider.cc: 43 in TracepointProvider::verify_config(const md_config_t *)()
-
-
-________________________________________________________________________________________________________
-*** CID 1397733:  Resource leaks  (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/common/TracepointProvider.cc: 43 in TracepointProvider::verify_config(const md_config_t *)()
-37       }
-38     
-39       void *handle = dlopen(m_library.c_str(), RTLD_NOW);
-40       if (handle != NULL) {
-41         m_enabled = true;
-42       }
->>>     CID 1397733:  Resource leaks  (RESOURCE_LEAK)
->>>     Variable "handle" going out of scope leaks the storage it points to.
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRaGCnxtQO9E3gxlB2GxVsWFENryh7bC5hIb-2FQBVM85YLQ-3D-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8HpCKeLP9IQPF5VGstDbQFyNFVW-2FjZ9agwE3-2B7uh79rStpGx854Z3iAf7QRK5e-2FocrxwNdXtnUWRkYJNg8OImTtizI2M3y6VZUHc6GnLOpBiQf1LS2fea-2BgHRrMhamqn2eXfC2GGxLY0ZWRR9su4GhfjiCnYNE8YUO3UrIwihUIcMxmN7sI22YVzg-2FevKXhbcU-3D
-
-To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRbVDbis712qZDP-2FA8y06Nq4Bco8jcmzhh7FSyvoR0E3-2BDgRcBCQ6OuthHBtaTCGNq9zoLsiw8NWrIF2zsdhfTt-2FbHjZ2ToL3Et9v1-2BrDLungAOjHpQtOY-2BsyLiTVCQEUCU-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8HpCKeLP9IQPF5VGstDbQFyNFVW-2FjZ9agwE3-2B7uh79rStChJCKES3IofNj8jInXP3Zelvy-2F1Eh72Yfb4C3TPn0SIzaI8C4-2Bw4oNBXW4HNsuOOkrS0oVnKHwdDmiD5iBn4YEYWvWbuSFx4XzsAhAB1p-2BEIF8Dk1MBrFCnpbcVlX9EjRN6ydpQrPxkCxYX-2BSYId0-3D
-
+SGksCgpJIHVzZWQga3Jha2VuIDExLjEuMSBmcm9tIG9mZmljaWFsIGRlYiByZXBvIHdoaWNoIGhh
+cyB0aGUgbWVudGlvbmVkIHBhdGNoIG1lcmdlZCBpbiwgd29ya2VkIHdpdGhvdXQgcHJvYmxlbXMu
+CgoKRm9yIHJlZmVyZW5jZSwgaGVyZSBhcmUgdGhlIHN0ZXBzIEkgbWFkZSB0byBmaXggdGhlIGNs
+dXN0ZXI6CgoxKSBTZXR1cCBjZXBoIGNsaWVudCB3aXRoIG5ld2VzdCBrcmFrZW4gdmVyc2lvbiwg
+ZW5zdXJlIGl0IGNhbiBjb25uZWN0IHRvIHRoZSBjbHVzdGVyCjIpIEdldCB0aGUgYnJva2VuIGlt
+YWdlIGlkOgogIAogICAgIyByYmQgY2hpbGRyZW4gJEJBU0VfUE9PTC8kQkFTRV9JTUFHRUAkU05B
+UF9OQU1FCiAgICAyMDE2LTEyLTIzIDEyOjUwOjE2LjgyNTAzNCA3ZmE4ZDMyNzEwMDAgLTEgbGli
+cmJkOiBFcnJvciBsb29raW5nIHVwIG5hbWUgZm9yIGltYWdlIGlkIGY1OTk5YTg3YTgwYWYzMCBp
+biBwb29sICRDTE9ORV9QT09MCgogICAgSGVyZSB0aGUgaWQgaXM6IGY1OTk5YTg3YTgwYWYzMAoK
+MykgZmluZCB0aGUga2V5IGluIHJiZF9jaGlsZHJlbiBvbWFwIGVudHJpZXMgdXNlZCB0byBtYWtl
+IHRoZSBjaGlsZCByZWxhdGlvbnNoaXAsIHNlYXJjaCBmb3IgdGhlIGltYWdlIGlkIGluIG91dHB1
+dCBvZjoKCiAgICAjIHJhZG9zIC1wICRDTE9ORV9QT09MIGxpc3RvbWFwdmFscyByYmRfY2hpbGRy
+ZW4KCiAgICBUaGUgcHJlY2VlZGluZyBrZXkgd2lsbCBiZSB0aGUgb25lIHdlJ3JlIGxvb2tpbmcg
+Zm9yLCBkdW1wIGtleSBieXRlcyB0byBhIGZpbGU6CiAgICAjIGVjaG8gLW5lICJceDAzXHgwMFx4
+MDBceDAwXHgwMFx4MDBceDAwXHgwMFx4MGZceDAwXHgwMFx4MDBceDYyXHg2NVx4MzBceDMxXHgz
+OFx4MzVceDM3XHgzNVx4NjZceDM2XHg2NVx4NjdceDMwXHg2MVx4MzVceGY3XHg1M1x4MDBceDAw
+XHgwMFx4MDBceDAwXHgwMCIgPiAvdG1wL2tleS5iaW4gCgogICAgRG91YmxlIGNoZWNrIHdlJ3Zl
+IGdvdCB0aGUgcmlnaHQga2V5IGRhdGEsIG91dHB1dCBzaG91bGQgY29udGFpbiBicm9rZW4gaW1h
+Z2UgaWQ6CiAgICAjIHJhZG9zIC1wICRDTE9ORV9QT09MIGdldG9tYXB2YWwgcmJkX2NoaWxkcmVu
+IC0tb21hcC1rZXktZmlsZSAvdG1wL2tleS5iaW4KCjQpIFJlbW92ZSB0aGUgYnJva2VuIGNoaWxk
+IHJlbGF0aW9uCiAgICAKICAgICMgcmFkb3MgLXAgJENMT05FX1BPT0wgcm1vbWFwa2V5IHJiZF9j
+aGlsZHJlbiAtLW9tYXAta2V5LWZpbGUgL3RtcC9rZXkuYmluCgpBZnRlciB0aGF0IEkgaGFkIG5v
+IHByb2JsZW1zIHRvIHVucHJvdGVjdCBhbmQgcmVtb3ZlIHRoZSBzbmFwc2hvdC4KCgpUaGFua3Mg
+YWxsIGZvciBoZWxwLCBvbmUgbW9yZSBwcm9kdWN0aW9uIGNsdXN0ZXIgZml4ZWQgdG9kYXkgOikK
+CkJhcnRlawoKCk9uIFRodSwgMjIgRGVjIDIwMTYgMTM6MjE6NDAgKzAwMDAKU2FnZSBXZWlsIDxz
+d2VpbEByZWRoYXQuY29tPiB3cm90ZToKCj4gT24gVGh1LCAyMiBEZWMgMjAxNiwgQmFydMWCb21p
+ZWogxZp3acSZY2tpIHdyb3RlOgo+ID4gSGksCj4gPiAKPiA+IEkgaGF2ZSBwcm9ibGVtcyBydW5u
+aWduIEtyYWtlbiB0b29scyBvbiBIYW1tZXIvSmV3ZWwgY2x1c3RlciAob2ZmaWNpYWwgMTEuMS4w
+IGRlYnMpLAo+ID4gaXQgYXNzZXJ0czoKPiA+IAo+ID4gL2J1aWxkL2NlcGgtMTEuMS4wL3NyYy9t
+b24vTW9uTWFwLmNjOiBJbiBmdW5jdGlvbiAndm9pZCBNb25NYXA6OnNhbml0aXplX21vbnMoc3Rk
+OjptYXA8c3RkOjpiYXNpY19zdHJpbmc8Y2hhcj4sIGVudGl0eV9hZGRyX3Q+JiknIHRocmVhZCA3
+ZmZmZDM3ZmU3MDAgdGltZSAyMDE2LTEyLTIyIDEyOjI2OjIzLjQ1NzA1OAo+ID4gL2J1aWxkL2Nl
+cGgtMTEuMS4wL3NyYy9tb24vTW9uTWFwLmNjOiA3MDogRkFJTEVEIGFzc2VydChtb25faW5mby5j
+b3VudChwLmZpcnN0KSkKPiAKPiBTZWUgaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzE4
+MjY1IGFuZCAKPiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMTI2MTEKPiAKPiBz
+YWdlCj4gCj4gCj4gPiBJIHRyaWVkIHRvIGRlYnVnIGl0IGEgYml0IGFuZCBpdCBsb29rcyBsaWtl
+IG1vbl9pbmZvIGhhcyB0ZW1wb3JhcnkgbW9uIG5hbWVzOgo+ID4gCj4gPiAoZ2RiKSBwIG1vbl9p
+bmZvCj4gPiAkMSA9IHN0ZDo6bWFwIHdpdGggMyBlbGVtZW50cyA9IHtbIm5vbmFtZS1hIl0gPSB7
+bmFtZSA9ICJub25hbWUtYSIsIC4uLi4uCj4gPiAKPiA+IHdoaWxlIGl0IGNoZWNrcyBmb3IgYSBj
+b3JyZWN0IG9uZToKPiA+IAo+ID4gKGdkYikgcCBwCj4gPiAkMiA9IHtmaXJzdCA9ICJtb24tMDEt
+NjkwZDM4YzAtMjU2Ny00NDdiLWJkZmItMGVkZDEzNzE4M2RiIiwgLi4uLgo+ID4gCj4gPiAKPiA+
+IEFueXdheSwgSSB3YXMgdGhpbmtpbmcgYWJvdXQgdGhlIG1pc3NpbmcgaW1hZ2UgcHJvYmxlbSAt
+IG1heWJlIGl0IHdvdWxkIGJlIGVhc2llcgo+ID4gdG8gcmVjcmVhdGUgcmVtb3ZlZCBpbWFnZT8g
+V291bGQgcmVzdG9yaW5nIHJiZF9oZWFkZXIgb2JqZWN0IGJlIGVub3VnaD8KPiA+IAo+ID4gCj4g
+PiBQLlMuIEFkZGluZyBjZXBoLWRldmVsCj4gPiAKPiA+IE9uIFRodSwgMjIgRGVjIDIwMTYgMTA6
+MTA6MDkgKzAxMDAKPiA+IEJhcnTFgm9taWVqIMWad2nEmWNraSA8YmFydGxvbWllai5zd2llY2tp
+QGNvcnAub3ZoLmNvbT4gd3JvdGU6Cj4gPiAKPiA+ID4gSGkgSmFzb24sCj4gPiA+IAo+ID4gPiBJ
+J2xsIHRlc3Qga3Jha2VuIHRvb2xzIHNpbmNlIGl0IGhhcHBlbmVkIG9uIHByb2R1Y3Rpb24sIGV2
+ZXJ5dGhpbmcgd29ya3MgdGhlcmUKPiA+ID4gc2luY2UgdGhlIGNsb25lIGlzIGZsYXR0ZW5lZCBh
+ZnRlciBiZWluZyBjcmVhdGVkIGFuZCB0aGUgcHJvZHVjdGlvbiBlcXVpdmFsZW50Cj4gPiA+IG9m
+ICJ0ZXN0IiB1c2VyIGNhbiBhY2Nlc3MgdGhlIGltYWdlIG9ubHkgYWZ0ZXIgaXQgaGFzIGJlZW4g
+ZmxhdHRlbmVkLgo+ID4gPiAKPiA+ID4gVGhlIGlzc3VlIGhhcHBlbmVkIHdoZW4gc29tZW9uZSBh
+Y2NpZGVudGFsbHkgcmVtb3ZlZCBub3QteWV0LWZsYXR0ZW5lZCBpbWFnZQo+ID4gPiB1c2luZyB0
+aGUgdXNlciB3aXRoIHdlYWtlciBwZXJtaXNzaW9ucy4gR29vZCB0byBoZWFyIHRoaXMgaGFzIGJl
+ZW4gc3BvdHRlZAo+ID4gPiBhbHJlYWR5Lgo+ID4gPiAKPiA+ID4gVGhhbmtzIGZvciBoZWxwLAo+
+ID4gPiBCYXJ0ZWsKPiA+ID4gCj4gPiA+IAo+ID4gPiAKPiA+ID4gT24gV2VkLCAyMSBEZWMgMjAx
+NiAxMTo1Mzo1NyAtMDUwMAo+ID4gPiBKYXNvbiBEaWxsYW1hbiA8amRpbGxhbWFAcmVkaGF0LmNv
+bT4gd3JvdGU6Cj4gPiA+IAo+ID4gPiA+IFlvdSBhcmUgdW5mb3J0dW5hdGVseSB0aGUgc2Vjb25k
+IHBlcnNvbiB0b2RheSB0byBoaXQgYW4gaXNzdWUgd2hlcmUKPiA+ID4gPiAicmJkIHJlbW92ZSIg
+aW5jb3JyZWN0bHkgcHJvY2VlZHMgd2hlbiBpdCBoaXRzIGEgY29ybmVyLWNhc2UgZXJyb3IuCj4g
+PiA+ID4gCj4gPiA+ID4gRmlyc3QgdGhpbmdzIGZpcnN0LCB3aGVuIHlvdSBjb25maWd1cmUgeW91
+ciBuZXcgdXNlciwgeW91IG5lZWRlZCB0bwo+ID4gPiA+IGdpdmUgaXQgInJ4IiBwZXJtaXNzaW9u
+cyB0byB0aGUgcGFyZW50IGltYWdlJ3MgcG9vbC4gSWYgeW91IGF0dGVtcHRlZAo+ID4gPiA+IHRo
+ZSBjbG9uZSBvcGVyYXRpb24gdXNpbmcgdGhlICJ0ZXN0IiB1c2VyLCB0aGUgY2xvbmUgd291bGQg
+aGF2ZQo+ID4gPiA+IGltbWVkaWF0ZWx5IGZhaWxlZCBkdWUgdG8gdGhpcyBpc3N1ZS4KPiA+ID4g
+PiAKPiA+ID4gPiBTZWNvbmQsIHVubGVzcyB0aGlzIGlzIGEgdGVzdCBjbHVzdGVyIHdoZXJlIHlv
+dSBjYW4gZGVsZXRlIHRoZQo+ID4gPiA+ICJyYmRfY2hpbGRyZW4iIG9iamVjdCBpbiB0aGUgInJi
+ZCIgcG9vbCAoaS5lLiB5b3UgZG9uJ3QgaGF2ZSBhbnkKPiA+ID4gPiBhZGRpdGlvbmFsIGNsb25l
+cyBpbiB0aGUgcmJkIHBvb2wpIHZpYSB0aGUgcmFkb3MgQ0xJLCB5b3Ugd2lsbCBuZWVkIHRvCj4g
+PiA+ID4gdXNlIHRoZSBLcmFrZW4gcmVsZWFzZSBjYW5kaWRhdGUgKG9yIG1hc3RlciBicmFuY2gp
+IHZlcnNpb24gb2YgdGhlCj4gPiA+ID4gcmFkb3MgQ0xJIHRvIG1hbnVhbGx5IG1hbmlwdWxhdGUg
+dGhlICJyYmRfY2hpbGRyZW4iIG9iamVjdCB0byByZW1vdmUKPiA+ID4gPiB0aGUgZGFuZ2xpbmcg
+cmVmZXJlbmNlIHRvIHRoZSBkZWxldGVkIGltYWdlLgo+ID4gPiA+IAo+ID4gPiA+IE9uIFdlZCwg
+RGVjIDIxLCAyMDE2IGF0IDY6NTcgQU0sIEJhcnTFgm9taWVqIMWad2nEmWNraQo+ID4gPiA+IDxi
+YXJ0bG9taWVqLnN3aWVja2lAY29ycC5vdmguY29tPiB3cm90ZToKPiA+ID4gPiA+IEhpLAo+ID4g
+PiA+ID4KPiA+ID4gPiA+IEknbSBjdXJyZW50bHkgaW52ZXN0aWdhdGluZyBhIGNhc2Ugd2hlcmUg
+Q2VwaCBjbHVzdGVyIGVuZGVkIHVwIHdpdGggaW5jb25zaXN0ZW50IGNsb25lIGluZm9ybWF0aW9u
+Lgo+ID4gPiA+ID4KPiA+ID4gPiA+IEhlcmUncyBhIHdoYXQgSSBkaWQgdG8gcXVpY2tseSByZXBy
+b2R1Y2U6Cj4gPiA+ID4gPiAqIENyZWF0ZWQgbmV3IGNsdXN0ZXIgKHRlc3RlZCBpbiBoYW1tZXIg
+MC45NC42IGFuZCBqZXdlbCAxMC4yLjMpCj4gPiA+ID4gPiAqIENyZWF0ZWQgdHdvIHBvb2xzOiB0
+ZXN0IGFuZCByYmQKPiA+ID4gPiA+ICogQ3JlYXRlZCBiYXNlIGltYWdlIGluIHBvb2wgdGVzdCwg
+Y3JlYXRlZCBzbmFwc2hvdCwgcHJvdGVjdGVkIGl0IGFuZCBjcmVhdGVkIGNsb25lIG9mIHRoaXMg
+c25hcHNob3QgaW4gcG9vbCByYmQ6Cj4gPiA+ID4gPiAgICAgICAgICMgcmJkIC1wIHRlc3QgY3Jl
+YXRlIC0tc2l6ZSAxMCAtLWltYWdlLWZvcm1hdCAyIGJhc2UKPiA+ID4gPiA+ICAgICAgICAgIyBy
+YmQgLXAgdGVzdCBzbmFwIGNyZWF0ZSBiYXNlQGJhc2UKPiA+ID4gPiA+ICAgICAgICAgIyByYmQg
+LXAgdGVzdCBzbmFwIHByb3RlY3QgYmFzZUBiYXNlCj4gPiA+ID4gPiAgICAgICAgICMgcmJkIGNs
+b25lIHRlc3QvYmFzZUBiYXNlIHJiZC9kZXN0aW5hdGlvbgo+ID4gPiA+ID4gKiBDcmVhdGVkIG5l
+dyB1c2VyIGNhbGxlZCAidGVzdCIgd2l0aCByd3ggcGVybWlzc2lvbnMgdG8gcmJkIHBvb2wgb25s
+eToKPiA+ID4gPiA+ICAgICAgICAgY2FwczogW21vbl0gYWxsb3cgcgo+ID4gPiA+ID4gICAgICAg
+ICBjYXBzOiBbb3NkXSBhbGxvdyBjbGFzcy1yZWFkIG9iamVjdF9wcmVmaXggcmJkX2NoaWxkcmVu
+LCBhbGxvdyByd3ggcG9vbD1yYmQKPiA+ID4gPiA+ICogVXNpbmcgdGhpcyBuZXdseSBjcmV0ZWQg
+dXNlciBJIHJlbW92ZWQgdGhlIGNsb25lZCBpbWFnZSBpbiByYmQgcG9vbCwgaGFkIGVycm9ycyBi
+dXQgZmluYWxseSByZW1vdmVkIHRoZSBpbWFnZToKPiA+ID4gPiA+ICAgICAgICAgIyByYmQgLS1p
+ZCB0ZXN0IC1wIHJiZCBybSBkZXN0aW5hdGlvbgo+ID4gPiA+ID4gICAgICAgICAyMDE2LTEyLTIx
+IDExOjUwOjAzLjc1ODIyMSA3ZjMyYjc0NTk3MDAgLTEgbGlicmJkOjppbWFnZTo6T3BlblJlcXVl
+c3Q6IGZhaWxlZCB0byByZXRyZWl2ZSBuYW1lOiAoMSkgT3BlcmF0aW9uIG5vdCBwZXJtaXR0ZWQK
+PiA+ID4gPiA+ICAgICAgICAgMjAxNi0xMi0yMSAxMTo1MDowMy43NTgyODggN2YzMmI2YzU4NzAw
+IC0xIGxpYnJiZDo6aW1hZ2U6OlJlZnJlc2hQYXJlbnRSZXF1ZXN0OiBmYWlsZWQgdG8gb3BlbiBw
+YXJlbnQgaW1hZ2U6ICgxKSBPcGVyYXRpb24gbm90IHBlcm1pdHRlZAo+ID4gPiA+ID4gICAgICAg
+ICAyMDE2LTEyLTIxIDExOjUwOjAzLjc1ODMxMiA3ZjMyYjZjNTg3MDAgLTEgbGlicmJkOjppbWFn
+ZTo6UmVmcmVzaFJlcXVlc3Q6IGZhaWxlZCB0byByZWZyZXNoIHBhcmVudCBpbWFnZTogKDEpIE9w
+ZXJhdGlvbiBub3QgcGVybWl0dGVkCj4gPiA+ID4gPiAgICAgICAgIDIwMTYtMTItMjEgMTE6NTA6
+MDMuNzU4MzMzIDdmMzJiNmM1ODcwMCAtMSBsaWJyYmQ6OmltYWdlOjpPcGVuUmVxdWVzdDogZmFp
+bGVkIHRvIHJlZnJlc2ggaW1hZ2U6ICgxKSBPcGVyYXRpb24gbm90IHBlcm1pdHRlZAo+ID4gPiA+
+ID4gICAgICAgICAyMDE2LTEyLTIxIDExOjUwOjAzLjc1OTM2NiA3ZjMyYjZjNTg3MDAgLTEgbGli
+cmJkOjpJbWFnZVN0YXRlOiBmYWlsZWQgdG8gb3BlbiBpbWFnZTogKDEpIE9wZXJhdGlvbiBub3Qg
+cGVybWl0dGVkCj4gPiA+ID4gPiAgICAgICAgIFJlbW92aW5nIGltYWdlOiAxMDAlIGNvbXBsZXRl
+Li4uZG9uZS4KPiA+ID4gPiA+Cj4gPiA+ID4gPiBBdCB0aGlzIHBvaW50IHRoZXJlJ3Mgbm8gY2xv
+bmVkIGltYWdlIGJ1dCB0aGUgb3JpZ2luYWwgc25hcHNob3Qgc3RpbGwgaGFzIHJlZmVyZW5jZSB0
+byBpdDoKPiA+ID4gPiA+Cj4gPiA+ID4gPiAjIHJiZCAtcCB0ZXN0IHNuYXAgdW5wcm90ZWN0IGJh
+c2VAYmFzZQo+ID4gPiA+ID4gMjAxNi0xMi0yMSAxMTo1Mzo0Ny4zNTkwNjAgN2ZlZTAzN2ZlNzAw
+IC0xIGxpYnJiZDo6U25hcHNob3RVbnByb3RlY3RSZXF1ZXN0OiBjYW5ub3QgdW5wcm90ZWN0OiBh
+dCBsZWFzdCAxIGNoaWxkKHJlbikgWzI5YjAyMzhlMWYyOV0gaW4gcG9vbCAncmJkJwo+ID4gPiA+
+ID4gMjAxNi0xMi0yMSAxMTo1Mzo0Ny4zNTk2NzggN2ZlZTAzN2ZlNzAwIC0xIGxpYnJiZDo6U25h
+cHNob3RVbnByb3RlY3RSZXF1ZXN0OiBlbmNvdW50ZXJlZCBlcnJvcjogKDE2KSBEZXZpY2Ugb3Ig
+cmVzb3VyY2UgYnVzeQo+ID4gPiA+ID4gMjAxNi0xMi0yMSAxMTo1Mzo0Ny4zNTk2OTEgN2ZlZTAz
+N2ZlNzAwIC0xIGxpYnJiZDo6U25hcHNob3RVbnByb3RlY3RSZXF1ZXN0OiAweDdmZWUzOWFlOTM0
+MCBzaG91bGRfY29tcGxldGVfZXJyb3I6IHJldF92YWw9LTE2Cj4gPiA+ID4gPiAyMDE2LTEyLTIx
+IDExOjUzOjQ3LjM2MDYyNyA3ZmVlMDM3ZmU3MDAgLTEgbGlicmJkOjpTbmFwc2hvdFVucHJvdGVj
+dFJlcXVlc3Q6IDB4N2ZlZTM5YWU5MzQwIHNob3VsZF9jb21wbGV0ZV9lcnJvcjogcmV0X3ZhbD0t
+MTYKPiA+ID4gPiA+IHJiZDogdW5wcm90ZWN0aW5nIHNuYXAgZmFpbGVkOiAoMTYpIERldmljZSBv
+ciByZXNvdXJjZSBidXN5Cj4gPiA+ID4gPgo+ID4gPiA+ID4gIyByYmQgLXAgdGVzdCBjaGlsZHJl
+biBiYXNlQGJhc2UKPiA+ID4gPiA+IHJiZDogbGlzdGluZyBjaGlsZHJlbiBmYWlsZWQ6ICgyKSBO
+byBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5MjAxNi0xMi0yMQo+ID4gPiA+ID4gMTE6NTM6MDguNzE2
+OTg3IDdmZjJiMmVhYWQ4MCAtMSBsaWJyYmQ6IEVycm9yIGxvb2tpbmcgdXAgbmFtZSBmb3IgaW1h
+Z2UKPiA+ID4gPiA+IGlkIDI5YjAyMzhlMWYyOSBpbiBwb29sIHJiZAo+ID4gPiA+ID4KPiA+ID4g
+PiA+Cj4gPiA+ID4gPiBBbnkgaWRlYXMgb24gaG93IHRoaXMgY291bGQgYmUgZml4ZWQ/Cj4gPiA+
+ID4gPgo+ID4gPiA+ID4KPiA+ID4gPiA+IFRoYW5rcywKPiA+ID4gPiA+IEJhcnRlawo+ID4gPiA+
+ID4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPiA+ID4g
+PiA+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4gPiA+ID4gPiBjZXBoLXVzZXJzQGxpc3RzLmNl
+cGguY29tCj4gPiA+ID4gPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgt
+dXNlcnMtY2VwaC5jb20KPiA+ID4gPiAKPiA+ID4gPiAKPiA+ID4gPiAKPiA+ID4gPiAtLSAKPiA+
+ID4gPiBKYXNvbgo+ID4gLS0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
+IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+ID4gdGhlIGJvZHkgb2YgYSBt
+ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPiA+IE1vcmUgbWFqb3Jkb21vIGlu
+Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo+ID4gCj4g
+PiAKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11
+c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMu
+Y2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
