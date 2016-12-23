@@ -1,167 +1,215 @@
-From: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?=
-	<bartlomiej.swiecki-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
-Subject: Re: Clone data inconsistency in hammer
-Date: Fri, 23 Dec 2016 14:25:27 +0100
-Message-ID: <20161223142527.682da7d3@desk613732.desk.int.gns.ovh.net>
-References: <20161221125712.7074b217@desk613732.desk.int.gns.ovh.net>
-	<CA+aFP1Dx9mzYmtNNqTUifpT2JGMsDKECLt69mZBmerm+a=db5A@mail.gmail.com>
-	<20161222101009.32e14565@desk613732.desk.int.gns.ovh.net>
-	<20161222133341.0f4a3976@desk613732.desk.int.gns.ovh.net>
-	<alpine.DEB.2.11.1612221319400.10615@piezo.novalocal>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: An empty vptr in an raw object
+Date: Fri, 23 Dec 2016 14:26:10 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612231418570.10615@piezo.novalocal>
+References: <4aeb9ff1-367c-f31e-fc0c-5f08dcdcfe0e@digiware.nl> <7754eadf-5f8c-ade3-1634-486fff240adf@digiware.nl> <EB02EE10422E4A40A1EE787A4AC27FBE044D2A@ULS-OP-MBXIP02.sdcorp.global.sandisk.com> <e1bdab0b-ec02-819e-e6fe-4e07baa235be@digiware.nl>
+ <EB02EE10422E4A40A1EE787A4AC27FBE045604@ULS-OP-MBXIP02.sdcorp.global.sandisk.com> <dd12b176-2294-72cd-c2b7-6fff709d44c6@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1612221319400.10615-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:49512 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S941098AbcLWO0O (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Dec 2016 09:26:14 -0500
+In-Reply-To: <dd12b176-2294-72cd-c2b7-6fff709d44c6@digiware.nl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-SGksCgpJIHVzZWQga3Jha2VuIDExLjEuMSBmcm9tIG9mZmljaWFsIGRlYiByZXBvIHdoaWNoIGhh
-cyB0aGUgbWVudGlvbmVkIHBhdGNoIG1lcmdlZCBpbiwgd29ya2VkIHdpdGhvdXQgcHJvYmxlbXMu
-CgoKRm9yIHJlZmVyZW5jZSwgaGVyZSBhcmUgdGhlIHN0ZXBzIEkgbWFkZSB0byBmaXggdGhlIGNs
-dXN0ZXI6CgoxKSBTZXR1cCBjZXBoIGNsaWVudCB3aXRoIG5ld2VzdCBrcmFrZW4gdmVyc2lvbiwg
-ZW5zdXJlIGl0IGNhbiBjb25uZWN0IHRvIHRoZSBjbHVzdGVyCjIpIEdldCB0aGUgYnJva2VuIGlt
-YWdlIGlkOgogIAogICAgIyByYmQgY2hpbGRyZW4gJEJBU0VfUE9PTC8kQkFTRV9JTUFHRUAkU05B
-UF9OQU1FCiAgICAyMDE2LTEyLTIzIDEyOjUwOjE2LjgyNTAzNCA3ZmE4ZDMyNzEwMDAgLTEgbGli
-cmJkOiBFcnJvciBsb29raW5nIHVwIG5hbWUgZm9yIGltYWdlIGlkIGY1OTk5YTg3YTgwYWYzMCBp
-biBwb29sICRDTE9ORV9QT09MCgogICAgSGVyZSB0aGUgaWQgaXM6IGY1OTk5YTg3YTgwYWYzMAoK
-MykgZmluZCB0aGUga2V5IGluIHJiZF9jaGlsZHJlbiBvbWFwIGVudHJpZXMgdXNlZCB0byBtYWtl
-IHRoZSBjaGlsZCByZWxhdGlvbnNoaXAsIHNlYXJjaCBmb3IgdGhlIGltYWdlIGlkIGluIG91dHB1
-dCBvZjoKCiAgICAjIHJhZG9zIC1wICRDTE9ORV9QT09MIGxpc3RvbWFwdmFscyByYmRfY2hpbGRy
-ZW4KCiAgICBUaGUgcHJlY2VlZGluZyBrZXkgd2lsbCBiZSB0aGUgb25lIHdlJ3JlIGxvb2tpbmcg
-Zm9yLCBkdW1wIGtleSBieXRlcyB0byBhIGZpbGU6CiAgICAjIGVjaG8gLW5lICJceDAzXHgwMFx4
-MDBceDAwXHgwMFx4MDBceDAwXHgwMFx4MGZceDAwXHgwMFx4MDBceDYyXHg2NVx4MzBceDMxXHgz
-OFx4MzVceDM3XHgzNVx4NjZceDM2XHg2NVx4NjdceDMwXHg2MVx4MzVceGY3XHg1M1x4MDBceDAw
-XHgwMFx4MDBceDAwXHgwMCIgPiAvdG1wL2tleS5iaW4gCgogICAgRG91YmxlIGNoZWNrIHdlJ3Zl
-IGdvdCB0aGUgcmlnaHQga2V5IGRhdGEsIG91dHB1dCBzaG91bGQgY29udGFpbiBicm9rZW4gaW1h
-Z2UgaWQ6CiAgICAjIHJhZG9zIC1wICRDTE9ORV9QT09MIGdldG9tYXB2YWwgcmJkX2NoaWxkcmVu
-IC0tb21hcC1rZXktZmlsZSAvdG1wL2tleS5iaW4KCjQpIFJlbW92ZSB0aGUgYnJva2VuIGNoaWxk
-IHJlbGF0aW9uCiAgICAKICAgICMgcmFkb3MgLXAgJENMT05FX1BPT0wgcm1vbWFwa2V5IHJiZF9j
-aGlsZHJlbiAtLW9tYXAta2V5LWZpbGUgL3RtcC9rZXkuYmluCgpBZnRlciB0aGF0IEkgaGFkIG5v
-IHByb2JsZW1zIHRvIHVucHJvdGVjdCBhbmQgcmVtb3ZlIHRoZSBzbmFwc2hvdC4KCgpUaGFua3Mg
-YWxsIGZvciBoZWxwLCBvbmUgbW9yZSBwcm9kdWN0aW9uIGNsdXN0ZXIgZml4ZWQgdG9kYXkgOikK
-CkJhcnRlawoKCk9uIFRodSwgMjIgRGVjIDIwMTYgMTM6MjE6NDAgKzAwMDAKU2FnZSBXZWlsIDxz
-d2VpbEByZWRoYXQuY29tPiB3cm90ZToKCj4gT24gVGh1LCAyMiBEZWMgMjAxNiwgQmFydMWCb21p
-ZWogxZp3acSZY2tpIHdyb3RlOgo+ID4gSGksCj4gPiAKPiA+IEkgaGF2ZSBwcm9ibGVtcyBydW5u
-aWduIEtyYWtlbiB0b29scyBvbiBIYW1tZXIvSmV3ZWwgY2x1c3RlciAob2ZmaWNpYWwgMTEuMS4w
-IGRlYnMpLAo+ID4gaXQgYXNzZXJ0czoKPiA+IAo+ID4gL2J1aWxkL2NlcGgtMTEuMS4wL3NyYy9t
-b24vTW9uTWFwLmNjOiBJbiBmdW5jdGlvbiAndm9pZCBNb25NYXA6OnNhbml0aXplX21vbnMoc3Rk
-OjptYXA8c3RkOjpiYXNpY19zdHJpbmc8Y2hhcj4sIGVudGl0eV9hZGRyX3Q+JiknIHRocmVhZCA3
-ZmZmZDM3ZmU3MDAgdGltZSAyMDE2LTEyLTIyIDEyOjI2OjIzLjQ1NzA1OAo+ID4gL2J1aWxkL2Nl
-cGgtMTEuMS4wL3NyYy9tb24vTW9uTWFwLmNjOiA3MDogRkFJTEVEIGFzc2VydChtb25faW5mby5j
-b3VudChwLmZpcnN0KSkKPiAKPiBTZWUgaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzE4
-MjY1IGFuZCAKPiBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMTI2MTEKPiAKPiBz
-YWdlCj4gCj4gCj4gPiBJIHRyaWVkIHRvIGRlYnVnIGl0IGEgYml0IGFuZCBpdCBsb29rcyBsaWtl
-IG1vbl9pbmZvIGhhcyB0ZW1wb3JhcnkgbW9uIG5hbWVzOgo+ID4gCj4gPiAoZ2RiKSBwIG1vbl9p
-bmZvCj4gPiAkMSA9IHN0ZDo6bWFwIHdpdGggMyBlbGVtZW50cyA9IHtbIm5vbmFtZS1hIl0gPSB7
-bmFtZSA9ICJub25hbWUtYSIsIC4uLi4uCj4gPiAKPiA+IHdoaWxlIGl0IGNoZWNrcyBmb3IgYSBj
-b3JyZWN0IG9uZToKPiA+IAo+ID4gKGdkYikgcCBwCj4gPiAkMiA9IHtmaXJzdCA9ICJtb24tMDEt
-NjkwZDM4YzAtMjU2Ny00NDdiLWJkZmItMGVkZDEzNzE4M2RiIiwgLi4uLgo+ID4gCj4gPiAKPiA+
-IEFueXdheSwgSSB3YXMgdGhpbmtpbmcgYWJvdXQgdGhlIG1pc3NpbmcgaW1hZ2UgcHJvYmxlbSAt
-IG1heWJlIGl0IHdvdWxkIGJlIGVhc2llcgo+ID4gdG8gcmVjcmVhdGUgcmVtb3ZlZCBpbWFnZT8g
-V291bGQgcmVzdG9yaW5nIHJiZF9oZWFkZXIgb2JqZWN0IGJlIGVub3VnaD8KPiA+IAo+ID4gCj4g
-PiBQLlMuIEFkZGluZyBjZXBoLWRldmVsCj4gPiAKPiA+IE9uIFRodSwgMjIgRGVjIDIwMTYgMTA6
-MTA6MDkgKzAxMDAKPiA+IEJhcnTFgm9taWVqIMWad2nEmWNraSA8YmFydGxvbWllai5zd2llY2tp
-QGNvcnAub3ZoLmNvbT4gd3JvdGU6Cj4gPiAKPiA+ID4gSGkgSmFzb24sCj4gPiA+IAo+ID4gPiBJ
-J2xsIHRlc3Qga3Jha2VuIHRvb2xzIHNpbmNlIGl0IGhhcHBlbmVkIG9uIHByb2R1Y3Rpb24sIGV2
-ZXJ5dGhpbmcgd29ya3MgdGhlcmUKPiA+ID4gc2luY2UgdGhlIGNsb25lIGlzIGZsYXR0ZW5lZCBh
-ZnRlciBiZWluZyBjcmVhdGVkIGFuZCB0aGUgcHJvZHVjdGlvbiBlcXVpdmFsZW50Cj4gPiA+IG9m
-ICJ0ZXN0IiB1c2VyIGNhbiBhY2Nlc3MgdGhlIGltYWdlIG9ubHkgYWZ0ZXIgaXQgaGFzIGJlZW4g
-ZmxhdHRlbmVkLgo+ID4gPiAKPiA+ID4gVGhlIGlzc3VlIGhhcHBlbmVkIHdoZW4gc29tZW9uZSBh
-Y2NpZGVudGFsbHkgcmVtb3ZlZCBub3QteWV0LWZsYXR0ZW5lZCBpbWFnZQo+ID4gPiB1c2luZyB0
-aGUgdXNlciB3aXRoIHdlYWtlciBwZXJtaXNzaW9ucy4gR29vZCB0byBoZWFyIHRoaXMgaGFzIGJl
-ZW4gc3BvdHRlZAo+ID4gPiBhbHJlYWR5Lgo+ID4gPiAKPiA+ID4gVGhhbmtzIGZvciBoZWxwLAo+
-ID4gPiBCYXJ0ZWsKPiA+ID4gCj4gPiA+IAo+ID4gPiAKPiA+ID4gT24gV2VkLCAyMSBEZWMgMjAx
-NiAxMTo1Mzo1NyAtMDUwMAo+ID4gPiBKYXNvbiBEaWxsYW1hbiA8amRpbGxhbWFAcmVkaGF0LmNv
-bT4gd3JvdGU6Cj4gPiA+IAo+ID4gPiA+IFlvdSBhcmUgdW5mb3J0dW5hdGVseSB0aGUgc2Vjb25k
-IHBlcnNvbiB0b2RheSB0byBoaXQgYW4gaXNzdWUgd2hlcmUKPiA+ID4gPiAicmJkIHJlbW92ZSIg
-aW5jb3JyZWN0bHkgcHJvY2VlZHMgd2hlbiBpdCBoaXRzIGEgY29ybmVyLWNhc2UgZXJyb3IuCj4g
-PiA+ID4gCj4gPiA+ID4gRmlyc3QgdGhpbmdzIGZpcnN0LCB3aGVuIHlvdSBjb25maWd1cmUgeW91
-ciBuZXcgdXNlciwgeW91IG5lZWRlZCB0bwo+ID4gPiA+IGdpdmUgaXQgInJ4IiBwZXJtaXNzaW9u
-cyB0byB0aGUgcGFyZW50IGltYWdlJ3MgcG9vbC4gSWYgeW91IGF0dGVtcHRlZAo+ID4gPiA+IHRo
-ZSBjbG9uZSBvcGVyYXRpb24gdXNpbmcgdGhlICJ0ZXN0IiB1c2VyLCB0aGUgY2xvbmUgd291bGQg
-aGF2ZQo+ID4gPiA+IGltbWVkaWF0ZWx5IGZhaWxlZCBkdWUgdG8gdGhpcyBpc3N1ZS4KPiA+ID4g
-PiAKPiA+ID4gPiBTZWNvbmQsIHVubGVzcyB0aGlzIGlzIGEgdGVzdCBjbHVzdGVyIHdoZXJlIHlv
-dSBjYW4gZGVsZXRlIHRoZQo+ID4gPiA+ICJyYmRfY2hpbGRyZW4iIG9iamVjdCBpbiB0aGUgInJi
-ZCIgcG9vbCAoaS5lLiB5b3UgZG9uJ3QgaGF2ZSBhbnkKPiA+ID4gPiBhZGRpdGlvbmFsIGNsb25l
-cyBpbiB0aGUgcmJkIHBvb2wpIHZpYSB0aGUgcmFkb3MgQ0xJLCB5b3Ugd2lsbCBuZWVkIHRvCj4g
-PiA+ID4gdXNlIHRoZSBLcmFrZW4gcmVsZWFzZSBjYW5kaWRhdGUgKG9yIG1hc3RlciBicmFuY2gp
-IHZlcnNpb24gb2YgdGhlCj4gPiA+ID4gcmFkb3MgQ0xJIHRvIG1hbnVhbGx5IG1hbmlwdWxhdGUg
-dGhlICJyYmRfY2hpbGRyZW4iIG9iamVjdCB0byByZW1vdmUKPiA+ID4gPiB0aGUgZGFuZ2xpbmcg
-cmVmZXJlbmNlIHRvIHRoZSBkZWxldGVkIGltYWdlLgo+ID4gPiA+IAo+ID4gPiA+IE9uIFdlZCwg
-RGVjIDIxLCAyMDE2IGF0IDY6NTcgQU0sIEJhcnTFgm9taWVqIMWad2nEmWNraQo+ID4gPiA+IDxi
-YXJ0bG9taWVqLnN3aWVja2lAY29ycC5vdmguY29tPiB3cm90ZToKPiA+ID4gPiA+IEhpLAo+ID4g
-PiA+ID4KPiA+ID4gPiA+IEknbSBjdXJyZW50bHkgaW52ZXN0aWdhdGluZyBhIGNhc2Ugd2hlcmUg
-Q2VwaCBjbHVzdGVyIGVuZGVkIHVwIHdpdGggaW5jb25zaXN0ZW50IGNsb25lIGluZm9ybWF0aW9u
-Lgo+ID4gPiA+ID4KPiA+ID4gPiA+IEhlcmUncyBhIHdoYXQgSSBkaWQgdG8gcXVpY2tseSByZXBy
-b2R1Y2U6Cj4gPiA+ID4gPiAqIENyZWF0ZWQgbmV3IGNsdXN0ZXIgKHRlc3RlZCBpbiBoYW1tZXIg
-MC45NC42IGFuZCBqZXdlbCAxMC4yLjMpCj4gPiA+ID4gPiAqIENyZWF0ZWQgdHdvIHBvb2xzOiB0
-ZXN0IGFuZCByYmQKPiA+ID4gPiA+ICogQ3JlYXRlZCBiYXNlIGltYWdlIGluIHBvb2wgdGVzdCwg
-Y3JlYXRlZCBzbmFwc2hvdCwgcHJvdGVjdGVkIGl0IGFuZCBjcmVhdGVkIGNsb25lIG9mIHRoaXMg
-c25hcHNob3QgaW4gcG9vbCByYmQ6Cj4gPiA+ID4gPiAgICAgICAgICMgcmJkIC1wIHRlc3QgY3Jl
-YXRlIC0tc2l6ZSAxMCAtLWltYWdlLWZvcm1hdCAyIGJhc2UKPiA+ID4gPiA+ICAgICAgICAgIyBy
-YmQgLXAgdGVzdCBzbmFwIGNyZWF0ZSBiYXNlQGJhc2UKPiA+ID4gPiA+ICAgICAgICAgIyByYmQg
-LXAgdGVzdCBzbmFwIHByb3RlY3QgYmFzZUBiYXNlCj4gPiA+ID4gPiAgICAgICAgICMgcmJkIGNs
-b25lIHRlc3QvYmFzZUBiYXNlIHJiZC9kZXN0aW5hdGlvbgo+ID4gPiA+ID4gKiBDcmVhdGVkIG5l
-dyB1c2VyIGNhbGxlZCAidGVzdCIgd2l0aCByd3ggcGVybWlzc2lvbnMgdG8gcmJkIHBvb2wgb25s
-eToKPiA+ID4gPiA+ICAgICAgICAgY2FwczogW21vbl0gYWxsb3cgcgo+ID4gPiA+ID4gICAgICAg
-ICBjYXBzOiBbb3NkXSBhbGxvdyBjbGFzcy1yZWFkIG9iamVjdF9wcmVmaXggcmJkX2NoaWxkcmVu
-LCBhbGxvdyByd3ggcG9vbD1yYmQKPiA+ID4gPiA+ICogVXNpbmcgdGhpcyBuZXdseSBjcmV0ZWQg
-dXNlciBJIHJlbW92ZWQgdGhlIGNsb25lZCBpbWFnZSBpbiByYmQgcG9vbCwgaGFkIGVycm9ycyBi
-dXQgZmluYWxseSByZW1vdmVkIHRoZSBpbWFnZToKPiA+ID4gPiA+ICAgICAgICAgIyByYmQgLS1p
-ZCB0ZXN0IC1wIHJiZCBybSBkZXN0aW5hdGlvbgo+ID4gPiA+ID4gICAgICAgICAyMDE2LTEyLTIx
-IDExOjUwOjAzLjc1ODIyMSA3ZjMyYjc0NTk3MDAgLTEgbGlicmJkOjppbWFnZTo6T3BlblJlcXVl
-c3Q6IGZhaWxlZCB0byByZXRyZWl2ZSBuYW1lOiAoMSkgT3BlcmF0aW9uIG5vdCBwZXJtaXR0ZWQK
-PiA+ID4gPiA+ICAgICAgICAgMjAxNi0xMi0yMSAxMTo1MDowMy43NTgyODggN2YzMmI2YzU4NzAw
-IC0xIGxpYnJiZDo6aW1hZ2U6OlJlZnJlc2hQYXJlbnRSZXF1ZXN0OiBmYWlsZWQgdG8gb3BlbiBw
-YXJlbnQgaW1hZ2U6ICgxKSBPcGVyYXRpb24gbm90IHBlcm1pdHRlZAo+ID4gPiA+ID4gICAgICAg
-ICAyMDE2LTEyLTIxIDExOjUwOjAzLjc1ODMxMiA3ZjMyYjZjNTg3MDAgLTEgbGlicmJkOjppbWFn
-ZTo6UmVmcmVzaFJlcXVlc3Q6IGZhaWxlZCB0byByZWZyZXNoIHBhcmVudCBpbWFnZTogKDEpIE9w
-ZXJhdGlvbiBub3QgcGVybWl0dGVkCj4gPiA+ID4gPiAgICAgICAgIDIwMTYtMTItMjEgMTE6NTA6
-MDMuNzU4MzMzIDdmMzJiNmM1ODcwMCAtMSBsaWJyYmQ6OmltYWdlOjpPcGVuUmVxdWVzdDogZmFp
-bGVkIHRvIHJlZnJlc2ggaW1hZ2U6ICgxKSBPcGVyYXRpb24gbm90IHBlcm1pdHRlZAo+ID4gPiA+
-ID4gICAgICAgICAyMDE2LTEyLTIxIDExOjUwOjAzLjc1OTM2NiA3ZjMyYjZjNTg3MDAgLTEgbGli
-cmJkOjpJbWFnZVN0YXRlOiBmYWlsZWQgdG8gb3BlbiBpbWFnZTogKDEpIE9wZXJhdGlvbiBub3Qg
-cGVybWl0dGVkCj4gPiA+ID4gPiAgICAgICAgIFJlbW92aW5nIGltYWdlOiAxMDAlIGNvbXBsZXRl
-Li4uZG9uZS4KPiA+ID4gPiA+Cj4gPiA+ID4gPiBBdCB0aGlzIHBvaW50IHRoZXJlJ3Mgbm8gY2xv
-bmVkIGltYWdlIGJ1dCB0aGUgb3JpZ2luYWwgc25hcHNob3Qgc3RpbGwgaGFzIHJlZmVyZW5jZSB0
-byBpdDoKPiA+ID4gPiA+Cj4gPiA+ID4gPiAjIHJiZCAtcCB0ZXN0IHNuYXAgdW5wcm90ZWN0IGJh
-c2VAYmFzZQo+ID4gPiA+ID4gMjAxNi0xMi0yMSAxMTo1Mzo0Ny4zNTkwNjAgN2ZlZTAzN2ZlNzAw
-IC0xIGxpYnJiZDo6U25hcHNob3RVbnByb3RlY3RSZXF1ZXN0OiBjYW5ub3QgdW5wcm90ZWN0OiBh
-dCBsZWFzdCAxIGNoaWxkKHJlbikgWzI5YjAyMzhlMWYyOV0gaW4gcG9vbCAncmJkJwo+ID4gPiA+
-ID4gMjAxNi0xMi0yMSAxMTo1Mzo0Ny4zNTk2NzggN2ZlZTAzN2ZlNzAwIC0xIGxpYnJiZDo6U25h
-cHNob3RVbnByb3RlY3RSZXF1ZXN0OiBlbmNvdW50ZXJlZCBlcnJvcjogKDE2KSBEZXZpY2Ugb3Ig
-cmVzb3VyY2UgYnVzeQo+ID4gPiA+ID4gMjAxNi0xMi0yMSAxMTo1Mzo0Ny4zNTk2OTEgN2ZlZTAz
-N2ZlNzAwIC0xIGxpYnJiZDo6U25hcHNob3RVbnByb3RlY3RSZXF1ZXN0OiAweDdmZWUzOWFlOTM0
-MCBzaG91bGRfY29tcGxldGVfZXJyb3I6IHJldF92YWw9LTE2Cj4gPiA+ID4gPiAyMDE2LTEyLTIx
-IDExOjUzOjQ3LjM2MDYyNyA3ZmVlMDM3ZmU3MDAgLTEgbGlicmJkOjpTbmFwc2hvdFVucHJvdGVj
-dFJlcXVlc3Q6IDB4N2ZlZTM5YWU5MzQwIHNob3VsZF9jb21wbGV0ZV9lcnJvcjogcmV0X3ZhbD0t
-MTYKPiA+ID4gPiA+IHJiZDogdW5wcm90ZWN0aW5nIHNuYXAgZmFpbGVkOiAoMTYpIERldmljZSBv
-ciByZXNvdXJjZSBidXN5Cj4gPiA+ID4gPgo+ID4gPiA+ID4gIyByYmQgLXAgdGVzdCBjaGlsZHJl
-biBiYXNlQGJhc2UKPiA+ID4gPiA+IHJiZDogbGlzdGluZyBjaGlsZHJlbiBmYWlsZWQ6ICgyKSBO
-byBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5MjAxNi0xMi0yMQo+ID4gPiA+ID4gMTE6NTM6MDguNzE2
-OTg3IDdmZjJiMmVhYWQ4MCAtMSBsaWJyYmQ6IEVycm9yIGxvb2tpbmcgdXAgbmFtZSBmb3IgaW1h
-Z2UKPiA+ID4gPiA+IGlkIDI5YjAyMzhlMWYyOSBpbiBwb29sIHJiZAo+ID4gPiA+ID4KPiA+ID4g
-PiA+Cj4gPiA+ID4gPiBBbnkgaWRlYXMgb24gaG93IHRoaXMgY291bGQgYmUgZml4ZWQ/Cj4gPiA+
-ID4gPgo+ID4gPiA+ID4KPiA+ID4gPiA+IFRoYW5rcywKPiA+ID4gPiA+IEJhcnRlawo+ID4gPiA+
-ID4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPiA+ID4g
-PiA+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4gPiA+ID4gPiBjZXBoLXVzZXJzQGxpc3RzLmNl
-cGguY29tCj4gPiA+ID4gPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgt
-dXNlcnMtY2VwaC5jb20KPiA+ID4gPiAKPiA+ID4gPiAKPiA+ID4gPiAKPiA+ID4gPiAtLSAKPiA+
-ID4gPiBKYXNvbgo+ID4gLS0KPiA+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
-IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+ID4gdGhlIGJvZHkgb2YgYSBt
-ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPiA+IE1vcmUgbWFqb3Jkb21vIGlu
-Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo+ID4gCj4g
-PiAKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11
-c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMu
-Y2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+On Fri, 23 Dec 2016, Willem Jan Withagen wrote:
+> On 22-12-2016 23:01, Allen Samuels wrote:
+> > I believe I mis-read the data. What I've seen before doesn't fit this data.
+> > 
+> > If it fails in unit test, it shouldn't be hard to just set a HW breakpoint on the vptr and see who the culprit is.
+> 
+> Well the _raw class is properly initialised:
+> $8 = {_vptr$raw = 0x817578 <vtable for ceph::buffer::raw+16>,
+> 
+> And is "upgraded" to a different class:
+> 	ceph::buffer::raw_combined
+> 
+> But here is the problem...
+> 
+> Hardware watchpoint 5: *0x1054048
+> 
+> Old value = 8484744
+> New value = 0
+> 0x000000000049ab29 in denc_traits<unsigned long, void>::encode
+> (o=@0x10501d0: 123, p=..., f=0) at
+> /usr/srcs/Ceph/work/ceph/src/include/denc.h:228
+> 228     WRITE_INT_DENC(uint64_t, __le64);
+
+Ah, okay, this is making a bit more sense now.
+
+raw_combined is trying to be clever.  It has a static create() method to
+
+- allocate an aligned buffer of size len + sizeof(raw_combined) (with some 
+rounding up), call it *ptr
+- in-place initiailize raw_combined at ptr + len (rounded up), call it *this
+- store the the actual data at ptr
+- return the raw_combined *this
+
+It has an overloaded delete operator to free the entire allocate 
+(roughly this - len) to make this work.
+
+It sounds a bit like the write into raw_combined's data portion (ptr) is 
+clobbering vptr.  Which probably suggests we wrote too much into the 
+buffer.  Can you print the contents of the raw_combined class and the 
+appender?
+
+sage
+
+
+> 
+> The traceback:
+> #0  0x000000000049ab29 in denc_traits<unsigned long, void>::encode
+> (o=@0x10501d0: 123, p=..., f=0) at
+> /usr/srcs/Ceph/work/ceph/src/include/denc.h:228
+> #1  0x000000000049a7a8 in denc<unsigned long, denc_traits<unsigned long,
+> void> > (o=@0x10501d0: 123, p=..., features=0) at
+> /usr/srcs/Ceph/work/ceph/src/include/denc.h:479
+> #2  0x000000000049a6a5 in _denc_friend<foo_t const,
+> ceph::buffer::list::contiguous_appender> (v=..., p=...) at
+> /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:155
+> #3  0x000000000049a62d in foo_t::encode (this=0x10501c8, p=...) at
+> /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:152
+> #4  0x000000000049a601 in denc_traits<foo_t, void>::encode (v=...,
+> p=..., f=0) at /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:163
+> #5  0x000000000049a188 in denc<foo_t, denc_traits<foo_t, void> > (o=...,
+> p=..., features=0) at /usr/srcs/Ceph/work/ceph/src/include/denc.h:479
+> #6  0x000000000049a0ac in
+> denc_traits<std::__1::map<std::__1::basic_string<char,
+> std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
+> std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
+> std::__1::allocator<char> > >,
+> std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
+> std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
+> >, void>::encode<std::__1::basic_string<char,
+> std::__1::char_traits<char>, std::__1::allocator<char> > > (v=..., p=...)
+>     at /usr/srcs/Ceph/work/ceph/src/include/denc.h:1010
+> #7  0x0000000000494581 in
+> denc<std::__1::map<std::__1::basic_string<char,
+> std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
+> std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
+> std::__1::allocator<char> > >,
+> std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
+> std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
+> >, denc_traits<std::__1::map<std::__1::basic_string<char,
+> std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
+> std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
+> std::__1::allocator<char> > >,
+> std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
+> std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
+> >, void> > (o=..., p=..., features=0) at
+> /usr/srcs/Ceph/work/ceph/src/include/denc.h:479
+> #8  0x0000000000490fb1 in
+> test_denc<std::__1::map<std::__1::basic_string<char,
+> std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
+> std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
+> std::__1::allocator<char> > >,
+> std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
+> std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
+> > > (v=...) at /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:49
+> #9  0x00000000004904e0 in denc_map_Test::TestBody (this=0x1038030) at
+> /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:206
+> 
+> (gdb) p p
+> $10 = (ceph::buffer::list::contiguous_appender &) @0x7fffffffd948: {pbl
+> = 0x7fffffffd978, pos = 0x105404f "", bp = {_raw = 0x1054048, _off = 0,
+> _len = 72}, deep = false,
+>   out_of_band_offset = 0}
+> (gdb) p *p.bp._raw
+> $17 = {_vptr$raw = 0x0, data = 0x1054000 "\003", len = 72, nref = {val =
+> 1}, crc_spinlock = 0, crc_map = {__tree_ = {__begin_node_ = 0x1054078,
+>       __pair1_ =
+> {<std::__1::__libcpp_compressed_pair_imp<std::__1::__tree_end_node<std::__1::__tree_node_base<void*>*>,
+> std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<std::__1::pair<unsigned
+> long, unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
+> void*> >, 2>> =
+> {<std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<std::__1::pair<unsigned
+> long, unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
+> void*> >> = {<No data fields>}, __first_ = {
+>             __left_ = 0x0}}, <No data fields>},
+>       __pair3_ = {<std::__1::__libcpp_compressed_pair_imp<unsigned long,
+> std::__1::__map_value_compare<std::__1::pair<unsigned long, unsigned
+> long>, std::__1::__value_type<std::__1::pair<unsigned long, unsigned
+> long>, std::__1::pair<unsigned int, unsigned int> >,
+> std::__1::less<std::__1::pair<unsigned long, unsigned long> >, true>,
+> 2>> = {<std::__1::__map_value_compare<std::__1::pair<unsigned long,
+> unsigned long>, std::__1::__value_type<std::__1::pair<unsigned long,
+> unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
+> std::__1::less<std::__1::pair<unsigned long, unsigned long> >, true>> =
+> {<std::__1::less<std::__1::pair<unsigned long, unsigned long> >> =
+> {<std::__1::binary_function<std::__1::pair<unsigned long, unsigned
+> long>, std::__1::pair<unsigned long, unsigned long>, bool>> = {<No data
+> fields>}, <No data fields>}, <No data fields>},
+>           __first_ = 0}, <No data fields>}}}}
+> 
+> (gdb) disassemble
+> Dump of assembler code for function denc_traits<unsigned long,
+> void>::encode(unsigned long const&,
+> ceph::buffer::list::contiguous_appender&, unsigned long):
+>    0x000000000049aaf0 <+0>:     push   %rbp
+>    0x000000000049aaf1 <+1>:     mov    %rsp,%rbp
+>    0x000000000049aaf4 <+4>:     sub    $0x20,%rsp
+>    0x000000000049aaf8 <+8>:     mov    $0x8,%eax
+>    0x000000000049aafd <+13>:    mov    %eax,%ecx
+>    0x000000000049aaff <+15>:    mov    %rdi,-0x8(%rbp)
+>    0x000000000049ab03 <+19>:    mov    %rsi,-0x10(%rbp)
+>    0x000000000049ab07 <+23>:    mov    %rdx,-0x18(%rbp)
+>    0x000000000049ab0b <+27>:    mov    -0x8(%rbp),%rdx
+>    0x000000000049ab0f <+31>:    mov    (%rdx),%rdx
+>    0x000000000049ab12 <+34>:    mov    -0x10(%rbp),%rdi
+>    0x000000000049ab16 <+38>:    mov    %rcx,%rsi
+>    0x000000000049ab19 <+41>:    mov    %rdx,-0x20(%rbp)
+>    0x000000000049ab1d <+45>:    callq  0x49a1d0
+> <ceph::buffer::list::contiguous_appender::get_pos_add(unsigned long)>
+>    0x000000000049ab22 <+50>:    mov    -0x20(%rbp),%rcx
+>    0x000000000049ab26 <+54>:    mov    %rcx,(%rax)
+> => 0x000000000049ab29 <+57>:    add    $0x20,%rsp
+>    0x000000000049ab2d <+61>:    pop    %rbp
+>    0x000000000049ab2e <+62>:    retq
+> End of assembler dump.
+> 
+> (gdb) info registers
+> rax            0x1054047        17121351
+> rbx            0x0      0
+> rcx            0x7b     123
+> rdx            0x7b     123
+> rsi            0x7fffffffd948   140737488345416
+> rdi            0x105404f        17121359
+> rbp            0x7fffffffd4f0   0x7fffffffd4f0
+> rsp            0x7fffffffd4d0   0x7fffffffd4d0
+> r8             0x0      0
+> r9             0x0      0
+> r10            0x0      0
+> r11            0x829100 8556800
+> r12            0x7fffffffe910   140737488349456
+> r13            0x7fffffffe928   140737488349480
+> r14            0x7fffffffe918   140737488349464
+> r15            0x1      1
+> rip            0x49ab29 0x49ab29 <denc_traits<unsigned long,
+> void>::encode(unsigned long const&,
+> ceph::buffer::list::contiguous_appender&, unsigned long)+57>
+> 
+> And this is wierd:
+> 	%rax contains  0x1054047
+> 	_raw is  0x1054048
+> 
+> So writing %rcx to (%rax) is definitly going to overwrite the larger
+> part of _raw.
+> 
+> So now the question transforms into:
+>     Why does %rax hold this wierd value ??
+>     or Why does get_pos_add(sizeof(etype)) a negative offset ??
+> 
+> Got to go and do real dayjob work.
+> 
+> --WjW
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
