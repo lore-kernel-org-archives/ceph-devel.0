@@ -1,7 +1,7 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
 Subject: Re: An empty vptr in an raw object
-Date: Fri, 23 Dec 2016 17:50:12 +0100
-Message-ID: <fa328019-f3c0-f6fa-94bf-c173df0326ec@digiware.nl>
+Date: Fri, 23 Dec 2016 17:54:41 +0100
+Message-ID: <4a510a2f-1079-07d6-778c-90769f6434db@digiware.nl>
 References: <4aeb9ff1-367c-f31e-fc0c-5f08dcdcfe0e@digiware.nl>
  <7754eadf-5f8c-ade3-1634-486fff240adf@digiware.nl>
  <EB02EE10422E4A40A1EE787A4AC27FBE044D2A@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
@@ -15,10 +15,10 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:22253 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([176.74.240.9]:23300 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1757003AbcLWQuR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 23 Dec 2016 11:50:17 -0500
+        id S1753631AbcLWQyz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 23 Dec 2016 11:54:55 -0500
 In-Reply-To: <alpine.DEB.2.11.1612231643450.10615@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -85,23 +85,42 @@ On 23-12-2016 17:46, Sage Weil wrote:
 > 
 > which is clearly not the code you're running.
 
-Ah, no I deleted all the tests that did work, to make the testset as
-small as possible
+'mmm, the version I have is already at '*3'
 
-206 is actually
-TEST(denc, map)
-{
+template<typename T>
+void test_denc(T v) {
+  // estimate
+  size_t s = 0;
+  denc(v, s);
+  ASSERT_NE(s, 0u);
+
+  // encode
+  bufferlist bl;
   {
-    cout << "map<string,foo_t>" << std::endl;
-    std::map<string,foo_t> s;
-    s["foo"] = foo_t();
-    s["bar"] = foo_t();
-    s["baz"] = foo_t();
-206:>>    test_denc(s);
+    auto a = bl.get_contiguous_appender(sizeof(T) * 3);
+    denc(v, a);
   }
+  ASSERT_LE(bl.length(), s);
+
+  // decode
+  bl.rebuild();
+  T out;
+  auto bpi = bl.front().begin();
+  denc(out, bpi);
+  ASSERT_EQ(v, out);
+  ASSERT_EQ(bpi.get_pos(), bl.c_str() + bl.length());
+
+  // test glue
+  test_encode_decode(v);
 }
 
+BTW: I'm off to home. CET = 18:00, and I still have to do my shopping
+for the backing pies and deserts for X-mas Eve.
+So I'll be on and off-line on irregular basis, as I guess most will be.
+
+Happy hollidays,
 --WjW
+
 
 > 
 > sage
