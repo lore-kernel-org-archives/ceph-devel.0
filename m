@@ -1,58 +1,94 @@
-From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
-Subject: Re: Computation in the storage
-Date: Fri, 23 Dec 2016 19:03:16 +0000
-Message-ID: <E41C6528-D51D-4165-87D5-0DBBDF6B9F5F@Teradata.com>
-References: <26283_1480676624_58415510_26283_122_1_EBBC07637B509B40B2E594A11E62C54F022DA808@OPEXCLILM32.corporate.adroot.infra.ftgroup>
- <d8129d7a-af37-ad74-38c8-f5a9d59f183b@suse.de>
- <CAF-wwdHPXaX3fe+dk9ovdAfc00N5xQrzj2TaRAuBOjH77L4yDg@mail.gmail.com>
- <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com>
- <CAB2gnbVn0U_G12L8XV=hbznB2i_TMo40TpC5cVzJZKOr_MAQ7Q@mail.gmail.com>
- <64D605E0-8851-4F60-B0AB-864CBDA7B3F7@Teradata.com>
- <208C08FF-0104-425C-B7AA-B0930A76F46E@Teradata.com>
- <CAB2gnbUEeS6AynJ0AjdpJ+MbiGSq_HUkBS-KdnXrke1wiJYsyA@mail.gmail.com>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: Bluestore performance bottleneck
+Date: Fri, 23 Dec 2016 19:24:48 +0000
+Message-ID: <EB02EE10422E4A40A1EE787A4AC27FBE04654D@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
+References: <5E3E05AED7F0F044904275810D0CB46504C290@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.11.1612220018390.10615@piezo.novalocal>
+ <5E3E05AED7F0F044904275810D0CB46504C301@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <5E3E05AED7F0F044904275810D0CB46504C315@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.11.1612220129050.10615@piezo.novalocal>
+ <5E3E05AED7F0F044904275810D0CB46504C355@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <62d79c2e-bf7b-9c09-883d-615fedf152b8@redhat.com>
+ <alpine.DEB.2.11.1612222226210.10615@piezo.novalocal>
+ <aa787f6c-1b0c-fefe-5f82-b749fd0a4ae3@redhat.com>
+ <64caf3cd-5717-dfe1-214f-eb391bb72071@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nat13.teradata.com ([153.65.16.13]:33347 "EHLO
-        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S965069AbcLWTDS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Dec 2016 14:03:18 -0500
-In-Reply-To: <CAB2gnbUEeS6AynJ0AjdpJ+MbiGSq_HUkBS-KdnXrke1wiJYsyA@mail.gmail.com>
+Received: from mail-bn3nam01on0067.outbound.protection.outlook.com ([104.47.33.67]:11173
+        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752995AbcLWTY5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 23 Dec 2016 14:24:57 -0500
+In-Reply-To: <64caf3cd-5717-dfe1-214f-eb391bb72071@redhat.com>
 Content-Language: en-US
-Content-ID: <8DED4D52C0842B4DB2C0B641E832F363@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noahwatkins@gmail.com>
-Cc: Brad Hubbard <bhubbard@redhat.com>, Joao Eduardo Luis <joao@suse.de>, "nebil.benmabrouk@orange.com" <nebil.benmabrouk@orange.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, Sage Weil <sweil@redhat.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgTm9haCwNCg0KVGhhdOKAmXMgZ3JlYXQgdG8ga25vdy4gVGhhbmtzIGZvciB0aGUgcHJvbXB0
-IHJlc3BvbnNlLg0KDQpOaXRpbg0KDQo+IE9uIERlYyAxNiwgMjAxNiwgYXQgMTA6MjIgQU0sIE5v
-YWggV2F0a2lucyA8bm9haHdhdGtpbnNAZ21haWwuY29tPiB3cm90ZToNCj4gDQo+IE5pdGluLA0K
-PiANCj4gVGhlIGxpbmtzIG9uIHRoZSBibG9nIGFyZSBvdXQgb2YgZGF0ZS4gTHVhIHN1cHBvcnQg
-aGFzIGJlZW4gbWVyZ2VkLg0KPiBTZWUgaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC90cmVl
-L21hc3Rlci9zcmMvY2xzL2x1YQ0KPiANCj4gLSBOb2FoDQo+IA0KPiBPbiBGcmksIERlYyAxNiwg
-MjAxNiBhdCAxMDowMCBBTSwgS2FtYmxlLCBOaXRpbiBBDQo+IDxOaXRpbi5LYW1ibGVAdGVyYWRh
-dGEuY29tPiB3cm90ZToNCj4+IEhpIE5vYWgsDQo+PiANCj4+IEkgbG9va2VkIGF0IHlvdXIgYmxv
-ZyBbMF0gYWJvdXQgaW1wbGVtZW50aW5nIFJBRE9TIG9iamVjdCBjbGFzc2VzIHVzaW5nIEx1YSBz
-Y3JpcHRzLiBUaGUNCj4+IGxpbmsgWzFdIHRvIHRoZSBzb3VyY2UgY29kZSBpbiBjZXBoIHJlcG9z
-aXRvcnkgaXMgbWlzc2luZy4gU2VlbXMgbGlrZSB0aGlzIHN1cHBvcnQgaGFzIGJlZW4NCj4+IHJl
-bW92ZWQgZnJvbSB1cHN0cmVhbSBjZXBoLCBhbmQgaXQgaXMgbm90IHN1cHBvcnRlZCBieSB0aGUg
-Y2VwaCByZWxlYXNlcyBhcyBvZiBub3cuDQo+PiBDYW4geW91IGNvbmZpcm0/DQo+PiANCj4+IA0K
-Pj4gWzBdIGh0dHA6Ly9ub2FoZGVzdS5naXRodWIuaW8vMjAxNS8xMi8xNC90b3dhcmRzLXJhZG9z
-LW9iamVjdC1jbGFzcy1tYW5hZ2VtZW50Lmh0bWwNCj4+IFsxXSBodHRwczovL2dpdGh1Yi5jb20v
-Y2VwaC9jZXBoL3RyZWUvY2xzLWx1YQ0KPj4gDQo+PiBUaGFua3MsDQo+PiBOaXRpbg0KPj4gDQo+
-PiANCj4+PiBPbiBEZWMgNSwgMjAxNiwgYXQgMzowOCBQTSwgS2FtYmxlLCBOaXRpbiBBIDxOaXRp
-bi5LYW1ibGVAVGVyYWRhdGEuY29tPiB3cm90ZToNCj4+PiANCj4+PiANCj4+Pj4gT24gRGVjIDQs
-IDIwMTYsIGF0IDM6MDIgUE0sIE5vYWggV2F0a2lucyA8bm9haHdhdGtpbnNAZ21haWwuY29tPiB3
-cm90ZToNCj4+Pj4gDQo+Pj4+IE9uIEZyaSwgRGVjIDIsIDIwMTYgYXQgMzowNCBQTSwgS2FtYmxl
-LCBOaXRpbiBBDQo+Pj4+IDxOaXRpbi5LYW1ibGVAdGVyYWRhdGEuY29tPiB3cm90ZToNCj4+Pj4+
-IA0KPj4+Pj4gSXMgYW55Ym9keSB1c2luZyByZWFsIFJBRE9TIG9iamVjdCBjbGFzc2VzIG9uIGNl
-cGggY2x1c3RlcnM/IEFueSBvZiB0aGVtIG9uIGdpdGh1Yj8NCj4+Pj4+IEkgd291bGQgbGlrZSB0
-byBsb29rIGF0IHNvbWUgb2YgdGhlIHJlYWwgd29ybGQgZXhhbXBsZXMgaWYgaXQgaXMgdGhlcmUu
-DQo+Pj4+PiBBbmQgbW9yZSBkb2N1bWVudGF0aW9uIG9mIHRoaXMgZmVhdHVyZSB3b3VsZCBkZWZp
-bml0ZWx5IGhlbHAgdG9vLg0KPj4+PiANCj4+Pj4gV2UgdXNlIG9iamVjdCBjbGFzc2VzIFswXSBm
-b3IgYSBkaXN0cmlidXRlZCBzaGFyZWQgbG9nIFsxXSBvbiBDZXBoLg0KPj4+PiANCj4+Pj4gWzBd
-OiBodHRwczovL2dpdGh1Yi5jb20vbm9haGRlc3UvY2VwaC9ibG9iL3psb2cvamV3ZWwvc3JjL2Ns
-cy96bG9nL2Nsc196bG9nLmNjDQo+Pj4+IFsxXTogaHR0cHM6Ly9naXRodWIuY29tL25vYWhkZXN1
-L3psb2cNCj4+IA0KDQo=
+Be careful assuming that 100/200 is the permanent "right" setting. If all y=
+ou're doing is random IOPS, then the best setting ought to be "1". What you=
+'re seeing is diminishing returns, which can only be seen in context of the=
+ full code-path. Thus if there's a significant acceleration of the other pa=
+rts of the code path, then you'll find that reducing the 100/200 will again=
+ yield significant performance benfits.
+
+
+Allen Samuels
+SanDisk |a Western Digital brand
+2880 Junction Avenue, San Jose, CA 95134
+T: +1 408 801 7030| M: +1 408 780 6416
+allen.samuels@SanDisk.com
+
+
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> owner@vger.kernel.org] On Behalf Of Mark Nelson
+> Sent: Friday, December 23, 2016 9:09 AM
+> To: Sage Weil <sweil@redhat.com>
+> Cc: Somnath Roy <Somnath.Roy@sandisk.com>; ceph-devel <ceph-
+> devel@vger.kernel.org>
+> Subject: Re: Bluestore performance bottleneck
+>=20
+> >> Try this?
+> >>     https://github.com/ceph/ceph/pull/12634
+> >
+> > Looks like this is most likely reducing the memory usage and
+> > increasing performance quite a bit with smaller shard target/max
+> > values.  With
+> > 25/50 I'm seeing more like 2.6GB RSS memory usage and around 13K iops
+> > typically with some (likely rocksdb) stalls.  I'll run through the
+> > tests again.
+> >
+> > Mark
+> >
+>=20
+> Ok, Ran through tests with both 4k and 16k min_alloc/max_alloc/blob sizes
+> using master+12629+12634:
+>=20
+> https://drive.google.com/uc?export=3Ddownload&id=3D0B2gTBZrkrnpZQzdRU3B
+> 1SGZUbDQ
+>=20
+> Performance is up in all tests and memory consumption is down (especially=
+ in
+> the smaller target/max tests).  It looks like 100/200 is probably the cur=
+rent
+> optimal configuration on my test setup.  4K min_alloc tests hover around
+> 22.5K IOPS with ~1300% CPU usage, and 16K min_alloc tests hover around
+> 25K IOPs with ~1000% CPU usage.  I think it will be worth spending some t=
+ime
+> looking at locking in the bitmap allocator given the perf traces.  Beyond=
+ that,
+> I'm seeing rocksdb show up quite a bit in the top CPU consuming functions
+> now, especially CRC32.
+>=20
+> Mark
+>=20
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in =
+the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
