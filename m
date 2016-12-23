@@ -1,242 +1,56 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: An empty vptr in an raw object
-Date: Fri, 23 Dec 2016 17:06:21 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612231704420.10615@piezo.novalocal>
-References: <4aeb9ff1-367c-f31e-fc0c-5f08dcdcfe0e@digiware.nl> <7754eadf-5f8c-ade3-1634-486fff240adf@digiware.nl> <EB02EE10422E4A40A1EE787A4AC27FBE044D2A@ULS-OP-MBXIP02.sdcorp.global.sandisk.com> <e1bdab0b-ec02-819e-e6fe-4e07baa235be@digiware.nl>
- <EB02EE10422E4A40A1EE787A4AC27FBE045604@ULS-OP-MBXIP02.sdcorp.global.sandisk.com> <dd12b176-2294-72cd-c2b7-6fff709d44c6@digiware.nl> <alpine.DEB.2.11.1612231418570.10615@piezo.novalocal> <alpine.DEB.2.11.1612231616060.10615@piezo.novalocal>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: Bluestore performance bottleneck
+Date: Fri, 23 Dec 2016 11:08:50 -0600
+Message-ID: <64caf3cd-5717-dfe1-214f-eb391bb72071@redhat.com>
+References: <5E3E05AED7F0F044904275810D0CB46504C290@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.11.1612220018390.10615@piezo.novalocal>
+ <5E3E05AED7F0F044904275810D0CB46504C301@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <5E3E05AED7F0F044904275810D0CB46504C315@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <alpine.DEB.2.11.1612220129050.10615@piezo.novalocal>
+ <5E3E05AED7F0F044904275810D0CB46504C355@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <62d79c2e-bf7b-9c09-883d-615fedf152b8@redhat.com>
+ <alpine.DEB.2.11.1612222226210.10615@piezo.novalocal>
+ <aa787f6c-1b0c-fefe-5f82-b749fd0a4ae3@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50177 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753347AbcLWRGZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Dec 2016 12:06:25 -0500
-In-Reply-To: <alpine.DEB.2.11.1612231616060.10615@piezo.novalocal>
+Received: from mx1.redhat.com ([209.132.183.28]:53626 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1756234AbcLWRIv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 23 Dec 2016 12:08:51 -0500
+In-Reply-To: <aa787f6c-1b0c-fefe-5f82-b749fd0a4ae3@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 23 Dec 2016, Sage Weil wrote:
-> On Fri, 23 Dec 2016, Sage Weil wrote:
-> > On Fri, 23 Dec 2016, Willem Jan Withagen wrote:
-> > > On 22-12-2016 23:01, Allen Samuels wrote:
-> > > > I believe I mis-read the data. What I've seen before doesn't fit this data.
-> > > > 
-> > > > If it fails in unit test, it shouldn't be hard to just set a HW breakpoint on the vptr and see who the culprit is.
-> > > 
-> > > Well the _raw class is properly initialised:
-> > > $8 = {_vptr$raw = 0x817578 <vtable for ceph::buffer::raw+16>,
-> > > 
-> > > And is "upgraded" to a different class:
-> > > 	ceph::buffer::raw_combined
-> > > 
-> > > But here is the problem...
-> > > 
-> > > Hardware watchpoint 5: *0x1054048
-> > > 
-> > > Old value = 8484744
-> > > New value = 0
-> > > 0x000000000049ab29 in denc_traits<unsigned long, void>::encode
-> > > (o=@0x10501d0: 123, p=..., f=0) at
-> > > /usr/srcs/Ceph/work/ceph/src/include/denc.h:228
-> > > 228     WRITE_INT_DENC(uint64_t, __le64);
-> > 
-> > Ah, okay, this is making a bit more sense now.
-> > 
-> > raw_combined is trying to be clever.  It has a static create() method to
-> > 
-> > - allocate an aligned buffer of size len + sizeof(raw_combined) (with some 
-> > rounding up), call it *ptr
-> > - in-place initiailize raw_combined at ptr + len (rounded up), call it *this
-> > - store the the actual data at ptr
-> > - return the raw_combined *this
-> > 
-> > It has an overloaded delete operator to free the entire allocate 
-> > (roughly this - len) to make this work.
-> > 
-> > It sounds a bit like the write into raw_combined's data portion (ptr) is 
-> > clobbering vptr.  Which probably suggests we wrote too much into the 
-> > buffer.  Can you print the contents of the raw_combined class and the 
-> > appender?
-> 
-> Hmm, I jumped to a much older commit and the valgrind warnigns go away; I 
-> think it's related to the buffer mempools.  Bisecting.
+>> Try this?
+>>     https://github.com/ceph/ceph/pull/12634
+>
+> Looks like this is most likely reducing the memory usage and increasing
+> performance quite a bit with smaller shard target/max values.  With
+> 25/50 I'm seeing more like 2.6GB RSS memory usage and around 13K iops
+> typically with some (likely rocksdb) stalls.  I'll run through the tests
+> again.
+>
+> Mark
+>
 
-Weird.  The valgrind warnings are caused by 
-e630d74c6457a7f1fe71fb4ed2f15a7ef9114fe8, which makes unittest_denc 
-link against tcmalloc and libunwind.  I'm not really sure why that would 
-affect valgrind's delete vs delete[] detection... :/  It seems like that 
-would be intercepted and checked above tcmalloc.
+Ok, Ran through tests with both 4k and 16k min_alloc/max_alloc/blob 
+sizes using master+12629+12634:
 
-sage
+https://drive.google.com/uc?export=download&id=0B2gTBZrkrnpZQzdRU3B1SGZUbDQ
 
-> 
-> 
-> 
-> 
-> > 
-> > > 
-> > > The traceback:
-> > > #0  0x000000000049ab29 in denc_traits<unsigned long, void>::encode
-> > > (o=@0x10501d0: 123, p=..., f=0) at
-> > > /usr/srcs/Ceph/work/ceph/src/include/denc.h:228
-> > > #1  0x000000000049a7a8 in denc<unsigned long, denc_traits<unsigned long,
-> > > void> > (o=@0x10501d0: 123, p=..., features=0) at
-> > > /usr/srcs/Ceph/work/ceph/src/include/denc.h:479
-> > > #2  0x000000000049a6a5 in _denc_friend<foo_t const,
-> > > ceph::buffer::list::contiguous_appender> (v=..., p=...) at
-> > > /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:155
-> > > #3  0x000000000049a62d in foo_t::encode (this=0x10501c8, p=...) at
-> > > /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:152
-> > > #4  0x000000000049a601 in denc_traits<foo_t, void>::encode (v=...,
-> > > p=..., f=0) at /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:163
-> > > #5  0x000000000049a188 in denc<foo_t, denc_traits<foo_t, void> > (o=...,
-> > > p=..., features=0) at /usr/srcs/Ceph/work/ceph/src/include/denc.h:479
-> > > #6  0x000000000049a0ac in
-> > > denc_traits<std::__1::map<std::__1::basic_string<char,
-> > > std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
-> > > std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
-> > > std::__1::allocator<char> > >,
-> > > std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
-> > > std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
-> > > >, void>::encode<std::__1::basic_string<char,
-> > > std::__1::char_traits<char>, std::__1::allocator<char> > > (v=..., p=...)
-> > >     at /usr/srcs/Ceph/work/ceph/src/include/denc.h:1010
-> > > #7  0x0000000000494581 in
-> > > denc<std::__1::map<std::__1::basic_string<char,
-> > > std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
-> > > std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
-> > > std::__1::allocator<char> > >,
-> > > std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
-> > > std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
-> > > >, denc_traits<std::__1::map<std::__1::basic_string<char,
-> > > std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
-> > > std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
-> > > std::__1::allocator<char> > >,
-> > > std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
-> > > std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
-> > > >, void> > (o=..., p=..., features=0) at
-> > > /usr/srcs/Ceph/work/ceph/src/include/denc.h:479
-> > > #8  0x0000000000490fb1 in
-> > > test_denc<std::__1::map<std::__1::basic_string<char,
-> > > std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
-> > > std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
-> > > std::__1::allocator<char> > >,
-> > > std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
-> > > std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
-> > > > > (v=...) at /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:49
-> > > #9  0x00000000004904e0 in denc_map_Test::TestBody (this=0x1038030) at
-> > > /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:206
-> > > 
-> > > (gdb) p p
-> > > $10 = (ceph::buffer::list::contiguous_appender &) @0x7fffffffd948: {pbl
-> > > = 0x7fffffffd978, pos = 0x105404f "", bp = {_raw = 0x1054048, _off = 0,
-> > > _len = 72}, deep = false,
-> > >   out_of_band_offset = 0}
-> > > (gdb) p *p.bp._raw
-> > > $17 = {_vptr$raw = 0x0, data = 0x1054000 "\003", len = 72, nref = {val =
-> > > 1}, crc_spinlock = 0, crc_map = {__tree_ = {__begin_node_ = 0x1054078,
-> > >       __pair1_ =
-> > > {<std::__1::__libcpp_compressed_pair_imp<std::__1::__tree_end_node<std::__1::__tree_node_base<void*>*>,
-> > > std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<std::__1::pair<unsigned
-> > > long, unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
-> > > void*> >, 2>> =
-> > > {<std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<std::__1::pair<unsigned
-> > > long, unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
-> > > void*> >> = {<No data fields>}, __first_ = {
-> > >             __left_ = 0x0}}, <No data fields>},
-> > >       __pair3_ = {<std::__1::__libcpp_compressed_pair_imp<unsigned long,
-> > > std::__1::__map_value_compare<std::__1::pair<unsigned long, unsigned
-> > > long>, std::__1::__value_type<std::__1::pair<unsigned long, unsigned
-> > > long>, std::__1::pair<unsigned int, unsigned int> >,
-> > > std::__1::less<std::__1::pair<unsigned long, unsigned long> >, true>,
-> > > 2>> = {<std::__1::__map_value_compare<std::__1::pair<unsigned long,
-> > > unsigned long>, std::__1::__value_type<std::__1::pair<unsigned long,
-> > > unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
-> > > std::__1::less<std::__1::pair<unsigned long, unsigned long> >, true>> =
-> > > {<std::__1::less<std::__1::pair<unsigned long, unsigned long> >> =
-> > > {<std::__1::binary_function<std::__1::pair<unsigned long, unsigned
-> > > long>, std::__1::pair<unsigned long, unsigned long>, bool>> = {<No data
-> > > fields>}, <No data fields>}, <No data fields>},
-> > >           __first_ = 0}, <No data fields>}}}}
-> > > 
-> > > (gdb) disassemble
-> > > Dump of assembler code for function denc_traits<unsigned long,
-> > > void>::encode(unsigned long const&,
-> > > ceph::buffer::list::contiguous_appender&, unsigned long):
-> > >    0x000000000049aaf0 <+0>:     push   %rbp
-> > >    0x000000000049aaf1 <+1>:     mov    %rsp,%rbp
-> > >    0x000000000049aaf4 <+4>:     sub    $0x20,%rsp
-> > >    0x000000000049aaf8 <+8>:     mov    $0x8,%eax
-> > >    0x000000000049aafd <+13>:    mov    %eax,%ecx
-> > >    0x000000000049aaff <+15>:    mov    %rdi,-0x8(%rbp)
-> > >    0x000000000049ab03 <+19>:    mov    %rsi,-0x10(%rbp)
-> > >    0x000000000049ab07 <+23>:    mov    %rdx,-0x18(%rbp)
-> > >    0x000000000049ab0b <+27>:    mov    -0x8(%rbp),%rdx
-> > >    0x000000000049ab0f <+31>:    mov    (%rdx),%rdx
-> > >    0x000000000049ab12 <+34>:    mov    -0x10(%rbp),%rdi
-> > >    0x000000000049ab16 <+38>:    mov    %rcx,%rsi
-> > >    0x000000000049ab19 <+41>:    mov    %rdx,-0x20(%rbp)
-> > >    0x000000000049ab1d <+45>:    callq  0x49a1d0
-> > > <ceph::buffer::list::contiguous_appender::get_pos_add(unsigned long)>
-> > >    0x000000000049ab22 <+50>:    mov    -0x20(%rbp),%rcx
-> > >    0x000000000049ab26 <+54>:    mov    %rcx,(%rax)
-> > > => 0x000000000049ab29 <+57>:    add    $0x20,%rsp
-> > >    0x000000000049ab2d <+61>:    pop    %rbp
-> > >    0x000000000049ab2e <+62>:    retq
-> > > End of assembler dump.
-> > > 
-> > > (gdb) info registers
-> > > rax            0x1054047        17121351
-> > > rbx            0x0      0
-> > > rcx            0x7b     123
-> > > rdx            0x7b     123
-> > > rsi            0x7fffffffd948   140737488345416
-> > > rdi            0x105404f        17121359
-> > > rbp            0x7fffffffd4f0   0x7fffffffd4f0
-> > > rsp            0x7fffffffd4d0   0x7fffffffd4d0
-> > > r8             0x0      0
-> > > r9             0x0      0
-> > > r10            0x0      0
-> > > r11            0x829100 8556800
-> > > r12            0x7fffffffe910   140737488349456
-> > > r13            0x7fffffffe928   140737488349480
-> > > r14            0x7fffffffe918   140737488349464
-> > > r15            0x1      1
-> > > rip            0x49ab29 0x49ab29 <denc_traits<unsigned long,
-> > > void>::encode(unsigned long const&,
-> > > ceph::buffer::list::contiguous_appender&, unsigned long)+57>
-> > > 
-> > > And this is wierd:
-> > > 	%rax contains  0x1054047
-> > > 	_raw is  0x1054048
-> > > 
-> > > So writing %rcx to (%rax) is definitly going to overwrite the larger
-> > > part of _raw.
-> > > 
-> > > So now the question transforms into:
-> > >     Why does %rax hold this wierd value ??
-> > >     or Why does get_pos_add(sizeof(etype)) a negative offset ??
-> > > 
-> > > Got to go and do real dayjob work.
-> > > 
-> > > --WjW
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > 
-> > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Performance is up in all tests and memory consumption is down 
+(especially in the smaller target/max tests).  It looks like 100/200 is 
+probably the current optimal configuration on my test setup.  4K 
+min_alloc tests hover around 22.5K IOPS with ~1300% CPU usage, and 16K 
+min_alloc tests hover around 25K IOPs with ~1000% CPU usage.  I think it 
+will be worth spending some time looking at locking in the bitmap 
+allocator given the perf traces.  Beyond that, I'm seeing rocksdb show 
+up quite a bit in the top CPU consuming functions now, especially CRC32.
+
+Mark
+
+
