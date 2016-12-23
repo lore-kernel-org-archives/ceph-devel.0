@@ -1,281 +1,294 @@
 From: Brad Hubbard <bhubbard@redhat.com>
 Subject: Re: An empty vptr in an raw object
-Date: Sat, 24 Dec 2016 08:00:45 +1000
-Message-ID: <CAF-wwdHSPvTqLKxe3sxcvcnPaKsQCnVyoWsMMR5L41w3=Z8dZw@mail.gmail.com>
+Date: Sat, 24 Dec 2016 08:28:38 +1000
+Message-ID: <CAF-wwdF9+F28ZFs9pYWnjaX86j8Ffi+TDQCXdn-qiK9uic-r-Q@mail.gmail.com>
 References: <4aeb9ff1-367c-f31e-fc0c-5f08dcdcfe0e@digiware.nl>
  <7754eadf-5f8c-ade3-1634-486fff240adf@digiware.nl> <EB02EE10422E4A40A1EE787A4AC27FBE044D2A@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
  <e1bdab0b-ec02-819e-e6fe-4e07baa235be@digiware.nl> <EB02EE10422E4A40A1EE787A4AC27FBE045604@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
  <dd12b176-2294-72cd-c2b7-6fff709d44c6@digiware.nl> <alpine.DEB.2.11.1612231418570.10615@piezo.novalocal>
  <alpine.DEB.2.11.1612231616060.10615@piezo.novalocal> <alpine.DEB.2.11.1612231704420.10615@piezo.novalocal>
+ <CAF-wwdHSPvTqLKxe3sxcvcnPaKsQCnVyoWsMMR5L41w3=Z8dZw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wj0-f175.google.com ([209.85.210.175]:33659 "EHLO
-        mail-wj0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753817AbcLWWAs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Dec 2016 17:00:48 -0500
-Received: by mail-wj0-f175.google.com with SMTP id tq7so24066855wjb.0
-        for <ceph-devel@vger.kernel.org>; Fri, 23 Dec 2016 14:00:47 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1612231704420.10615@piezo.novalocal>
+Received: from mail-wj0-f177.google.com ([209.85.210.177]:35559 "EHLO
+        mail-wj0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755646AbcLWW2l (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 23 Dec 2016 17:28:41 -0500
+Received: by mail-wj0-f177.google.com with SMTP id v7so262172502wjy.2
+        for <ceph-devel@vger.kernel.org>; Fri, 23 Dec 2016 14:28:40 -0800 (PST)
+In-Reply-To: <CAF-wwdHSPvTqLKxe3sxcvcnPaKsQCnVyoWsMMR5L41w3=Z8dZw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
 Cc: Willem Jan Withagen <wjw@digiware.nl>, Allen Samuels <Allen.Samuels@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sat, Dec 24, 2016 at 3:06 AM, Sage Weil <sage@newdream.net> wrote:
-> On Fri, 23 Dec 2016, Sage Weil wrote:
+Looks like the valgrind errors are being caused primarily by this, or
+something very similar.
+
+https://github.com/gperftools/gperftools/issues/792
+
+On Sat, Dec 24, 2016 at 8:00 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
+> On Sat, Dec 24, 2016 at 3:06 AM, Sage Weil <sage@newdream.net> wrote:
 >> On Fri, 23 Dec 2016, Sage Weil wrote:
->> > On Fri, 23 Dec 2016, Willem Jan Withagen wrote:
->> > > On 22-12-2016 23:01, Allen Samuels wrote:
->> > > > I believe I mis-read the data. What I've seen before doesn't fit this data.
->> > > >
->> > > > If it fails in unit test, it shouldn't be hard to just set a HW breakpoint on the vptr and see who the culprit is.
->> > >
->> > > Well the _raw class is properly initialised:
->> > > $8 = {_vptr$raw = 0x817578 <vtable for ceph::buffer::raw+16>,
->> > >
->> > > And is "upgraded" to a different class:
->> > >   ceph::buffer::raw_combined
->> > >
->> > > But here is the problem...
->> > >
->> > > Hardware watchpoint 5: *0x1054048
->> > >
->> > > Old value = 8484744
->> > > New value = 0
->> > > 0x000000000049ab29 in denc_traits<unsigned long, void>::encode
->> > > (o=@0x10501d0: 123, p=..., f=0) at
->> > > /usr/srcs/Ceph/work/ceph/src/include/denc.h:228
->> > > 228     WRITE_INT_DENC(uint64_t, __le64);
->> >
->> > Ah, okay, this is making a bit more sense now.
->> >
->> > raw_combined is trying to be clever.  It has a static create() method to
->> >
->> > - allocate an aligned buffer of size len + sizeof(raw_combined) (with some
->> > rounding up), call it *ptr
->> > - in-place initiailize raw_combined at ptr + len (rounded up), call it *this
->> > - store the the actual data at ptr
->> > - return the raw_combined *this
->> >
->> > It has an overloaded delete operator to free the entire allocate
->> > (roughly this - len) to make this work.
->> >
->> > It sounds a bit like the write into raw_combined's data portion (ptr) is
->> > clobbering vptr.  Which probably suggests we wrote too much into the
->> > buffer.  Can you print the contents of the raw_combined class and the
->> > appender?
+>>> On Fri, 23 Dec 2016, Sage Weil wrote:
+>>> > On Fri, 23 Dec 2016, Willem Jan Withagen wrote:
+>>> > > On 22-12-2016 23:01, Allen Samuels wrote:
+>>> > > > I believe I mis-read the data. What I've seen before doesn't fit this data.
+>>> > > >
+>>> > > > If it fails in unit test, it shouldn't be hard to just set a HW breakpoint on the vptr and see who the culprit is.
+>>> > >
+>>> > > Well the _raw class is properly initialised:
+>>> > > $8 = {_vptr$raw = 0x817578 <vtable for ceph::buffer::raw+16>,
+>>> > >
+>>> > > And is "upgraded" to a different class:
+>>> > >   ceph::buffer::raw_combined
+>>> > >
+>>> > > But here is the problem...
+>>> > >
+>>> > > Hardware watchpoint 5: *0x1054048
+>>> > >
+>>> > > Old value = 8484744
+>>> > > New value = 0
+>>> > > 0x000000000049ab29 in denc_traits<unsigned long, void>::encode
+>>> > > (o=@0x10501d0: 123, p=..., f=0) at
+>>> > > /usr/srcs/Ceph/work/ceph/src/include/denc.h:228
+>>> > > 228     WRITE_INT_DENC(uint64_t, __le64);
+>>> >
+>>> > Ah, okay, this is making a bit more sense now.
+>>> >
+>>> > raw_combined is trying to be clever.  It has a static create() method to
+>>> >
+>>> > - allocate an aligned buffer of size len + sizeof(raw_combined) (with some
+>>> > rounding up), call it *ptr
+>>> > - in-place initiailize raw_combined at ptr + len (rounded up), call it *this
+>>> > - store the the actual data at ptr
+>>> > - return the raw_combined *this
+>>> >
+>>> > It has an overloaded delete operator to free the entire allocate
+>>> > (roughly this - len) to make this work.
+>>> >
+>>> > It sounds a bit like the write into raw_combined's data portion (ptr) is
+>>> > clobbering vptr.  Which probably suggests we wrote too much into the
+>>> > buffer.  Can you print the contents of the raw_combined class and the
+>>> > appender?
+>>>
+>>> Hmm, I jumped to a much older commit and the valgrind warnigns go away; I
+>>> think it's related to the buffer mempools.  Bisecting.
 >>
->> Hmm, I jumped to a much older commit and the valgrind warnigns go away; I
->> think it's related to the buffer mempools.  Bisecting.
+>> Weird.  The valgrind warnings are caused by
+>> e630d74c6457a7f1fe71fb4ed2f15a7ef9114fe8, which makes unittest_denc
+>> link against tcmalloc and libunwind.  I'm not really sure why that would
+>> affect valgrind's delete vs delete[] detection... :/  It seems like that
+>> would be intercepted and checked above tcmalloc.
 >
-> Weird.  The valgrind warnings are caused by
-> e630d74c6457a7f1fe71fb4ed2f15a7ef9114fe8, which makes unittest_denc
-> link against tcmalloc and libunwind.  I'm not really sure why that would
-> affect valgrind's delete vs delete[] detection... :/  It seems like that
-> would be intercepted and checked above tcmalloc.
-
-From research I've been doing it seems this may be a false positive
-caused by inlining. Passing "--read-inline-info=yes" to valgrind shows
-some inlining in the stacks and the theory is this confuses valgrind.
-
-I think the following may be the core of the problem.
-
-==12443== Mismatched free() / delete / delete []
-==12443==    at 0x4C2ED4A: free (vg_replace_malloc.c:530)
-==12443==    by 0x590A474: ??? (in /usr/lib64/libtcmalloc.so.4.3.0)
-==12443==    by 0x40109C9: call_init.part.0 (dl-init.c:72)
-==12443==    by 0x4010ADA: call_init (dl-init.c:30)
-==12443==    by 0x4010ADA: _dl_init (dl-init.c:120)
-==12443==    by 0x4000D09: ??? (in /usr/lib64/ld-2.24.so)
-==12443==  Address 0x8aadd20 is 0 bytes inside a block of size 4 alloc'd
-==12443==    at 0x4C2E8E9: operator new[](unsigned long)
-(vg_replace_malloc.c:423)
-==12443==    by 0x590A467: ??? (in /usr/lib64/libtcmalloc.so.4.3.0)
-==12443==    by 0x40109C9: call_init.part.0 (dl-init.c:72)
-==12443==    by 0x4010ADA: call_init (dl-init.c:30)
-==12443==    by 0x4010ADA: _dl_init (dl-init.c:120)
-==12443==    by 0x4000D09: ??? (in /usr/lib64/ld-2.24.so)
-
-Having said that it's not clear atm why these aren't showing up all
-over the place.
-
+> From research I've been doing it seems this may be a false positive
+> caused by inlining. Passing "--read-inline-info=yes" to valgrind shows
+> some inlining in the stacks and the theory is this confuses valgrind.
 >
-> sage
+> I think the following may be the core of the problem.
+>
+> ==12443== Mismatched free() / delete / delete []
+> ==12443==    at 0x4C2ED4A: free (vg_replace_malloc.c:530)
+> ==12443==    by 0x590A474: ??? (in /usr/lib64/libtcmalloc.so.4.3.0)
+> ==12443==    by 0x40109C9: call_init.part.0 (dl-init.c:72)
+> ==12443==    by 0x4010ADA: call_init (dl-init.c:30)
+> ==12443==    by 0x4010ADA: _dl_init (dl-init.c:120)
+> ==12443==    by 0x4000D09: ??? (in /usr/lib64/ld-2.24.so)
+> ==12443==  Address 0x8aadd20 is 0 bytes inside a block of size 4 alloc'd
+> ==12443==    at 0x4C2E8E9: operator new[](unsigned long)
+> (vg_replace_malloc.c:423)
+> ==12443==    by 0x590A467: ??? (in /usr/lib64/libtcmalloc.so.4.3.0)
+> ==12443==    by 0x40109C9: call_init.part.0 (dl-init.c:72)
+> ==12443==    by 0x4010ADA: call_init (dl-init.c:30)
+> ==12443==    by 0x4010ADA: _dl_init (dl-init.c:120)
+> ==12443==    by 0x4000D09: ??? (in /usr/lib64/ld-2.24.so)
+>
+> Having said that it's not clear atm why these aren't showing up all
+> over the place.
 >
 >>
+>> sage
 >>
->>
->>
->> >
->> > >
->> > > The traceback:
->> > > #0  0x000000000049ab29 in denc_traits<unsigned long, void>::encode
->> > > (o=@0x10501d0: 123, p=..., f=0) at
->> > > /usr/srcs/Ceph/work/ceph/src/include/denc.h:228
->> > > #1  0x000000000049a7a8 in denc<unsigned long, denc_traits<unsigned long,
->> > > void> > (o=@0x10501d0: 123, p=..., features=0) at
->> > > /usr/srcs/Ceph/work/ceph/src/include/denc.h:479
->> > > #2  0x000000000049a6a5 in _denc_friend<foo_t const,
->> > > ceph::buffer::list::contiguous_appender> (v=..., p=...) at
->> > > /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:155
->> > > #3  0x000000000049a62d in foo_t::encode (this=0x10501c8, p=...) at
->> > > /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:152
->> > > #4  0x000000000049a601 in denc_traits<foo_t, void>::encode (v=...,
->> > > p=..., f=0) at /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:163
->> > > #5  0x000000000049a188 in denc<foo_t, denc_traits<foo_t, void> > (o=...,
->> > > p=..., features=0) at /usr/srcs/Ceph/work/ceph/src/include/denc.h:479
->> > > #6  0x000000000049a0ac in
->> > > denc_traits<std::__1::map<std::__1::basic_string<char,
->> > > std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
->> > > std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
->> > > std::__1::allocator<char> > >,
->> > > std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
->> > > std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
->> > > >, void>::encode<std::__1::basic_string<char,
->> > > std::__1::char_traits<char>, std::__1::allocator<char> > > (v=..., p=...)
->> > >     at /usr/srcs/Ceph/work/ceph/src/include/denc.h:1010
->> > > #7  0x0000000000494581 in
->> > > denc<std::__1::map<std::__1::basic_string<char,
->> > > std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
->> > > std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
->> > > std::__1::allocator<char> > >,
->> > > std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
->> > > std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
->> > > >, denc_traits<std::__1::map<std::__1::basic_string<char,
->> > > std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
->> > > std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
->> > > std::__1::allocator<char> > >,
->> > > std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
->> > > std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
->> > > >, void> > (o=..., p=..., features=0) at
->> > > /usr/srcs/Ceph/work/ceph/src/include/denc.h:479
->> > > #8  0x0000000000490fb1 in
->> > > test_denc<std::__1::map<std::__1::basic_string<char,
->> > > std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
->> > > std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
->> > > std::__1::allocator<char> > >,
->> > > std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
->> > > std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
->> > > > > (v=...) at /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:49
->> > > #9  0x00000000004904e0 in denc_map_Test::TestBody (this=0x1038030) at
->> > > /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:206
->> > >
->> > > (gdb) p p
->> > > $10 = (ceph::buffer::list::contiguous_appender &) @0x7fffffffd948: {pbl
->> > > = 0x7fffffffd978, pos = 0x105404f "", bp = {_raw = 0x1054048, _off = 0,
->> > > _len = 72}, deep = false,
->> > >   out_of_band_offset = 0}
->> > > (gdb) p *p.bp._raw
->> > > $17 = {_vptr$raw = 0x0, data = 0x1054000 "\003", len = 72, nref = {val =
->> > > 1}, crc_spinlock = 0, crc_map = {__tree_ = {__begin_node_ = 0x1054078,
->> > >       __pair1_ =
->> > > {<std::__1::__libcpp_compressed_pair_imp<std::__1::__tree_end_node<std::__1::__tree_node_base<void*>*>,
->> > > std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<std::__1::pair<unsigned
->> > > long, unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
->> > > void*> >, 2>> =
->> > > {<std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<std::__1::pair<unsigned
->> > > long, unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
->> > > void*> >> = {<No data fields>}, __first_ = {
->> > >             __left_ = 0x0}}, <No data fields>},
->> > >       __pair3_ = {<std::__1::__libcpp_compressed_pair_imp<unsigned long,
->> > > std::__1::__map_value_compare<std::__1::pair<unsigned long, unsigned
->> > > long>, std::__1::__value_type<std::__1::pair<unsigned long, unsigned
->> > > long>, std::__1::pair<unsigned int, unsigned int> >,
->> > > std::__1::less<std::__1::pair<unsigned long, unsigned long> >, true>,
->> > > 2>> = {<std::__1::__map_value_compare<std::__1::pair<unsigned long,
->> > > unsigned long>, std::__1::__value_type<std::__1::pair<unsigned long,
->> > > unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
->> > > std::__1::less<std::__1::pair<unsigned long, unsigned long> >, true>> =
->> > > {<std::__1::less<std::__1::pair<unsigned long, unsigned long> >> =
->> > > {<std::__1::binary_function<std::__1::pair<unsigned long, unsigned
->> > > long>, std::__1::pair<unsigned long, unsigned long>, bool>> = {<No data
->> > > fields>}, <No data fields>}, <No data fields>},
->> > >           __first_ = 0}, <No data fields>}}}}
->> > >
->> > > (gdb) disassemble
->> > > Dump of assembler code for function denc_traits<unsigned long,
->> > > void>::encode(unsigned long const&,
->> > > ceph::buffer::list::contiguous_appender&, unsigned long):
->> > >    0x000000000049aaf0 <+0>:     push   %rbp
->> > >    0x000000000049aaf1 <+1>:     mov    %rsp,%rbp
->> > >    0x000000000049aaf4 <+4>:     sub    $0x20,%rsp
->> > >    0x000000000049aaf8 <+8>:     mov    $0x8,%eax
->> > >    0x000000000049aafd <+13>:    mov    %eax,%ecx
->> > >    0x000000000049aaff <+15>:    mov    %rdi,-0x8(%rbp)
->> > >    0x000000000049ab03 <+19>:    mov    %rsi,-0x10(%rbp)
->> > >    0x000000000049ab07 <+23>:    mov    %rdx,-0x18(%rbp)
->> > >    0x000000000049ab0b <+27>:    mov    -0x8(%rbp),%rdx
->> > >    0x000000000049ab0f <+31>:    mov    (%rdx),%rdx
->> > >    0x000000000049ab12 <+34>:    mov    -0x10(%rbp),%rdi
->> > >    0x000000000049ab16 <+38>:    mov    %rcx,%rsi
->> > >    0x000000000049ab19 <+41>:    mov    %rdx,-0x20(%rbp)
->> > >    0x000000000049ab1d <+45>:    callq  0x49a1d0
->> > > <ceph::buffer::list::contiguous_appender::get_pos_add(unsigned long)>
->> > >    0x000000000049ab22 <+50>:    mov    -0x20(%rbp),%rcx
->> > >    0x000000000049ab26 <+54>:    mov    %rcx,(%rax)
->> > > => 0x000000000049ab29 <+57>:    add    $0x20,%rsp
->> > >    0x000000000049ab2d <+61>:    pop    %rbp
->> > >    0x000000000049ab2e <+62>:    retq
->> > > End of assembler dump.
->> > >
->> > > (gdb) info registers
->> > > rax            0x1054047        17121351
->> > > rbx            0x0      0
->> > > rcx            0x7b     123
->> > > rdx            0x7b     123
->> > > rsi            0x7fffffffd948   140737488345416
->> > > rdi            0x105404f        17121359
->> > > rbp            0x7fffffffd4f0   0x7fffffffd4f0
->> > > rsp            0x7fffffffd4d0   0x7fffffffd4d0
->> > > r8             0x0      0
->> > > r9             0x0      0
->> > > r10            0x0      0
->> > > r11            0x829100 8556800
->> > > r12            0x7fffffffe910   140737488349456
->> > > r13            0x7fffffffe928   140737488349480
->> > > r14            0x7fffffffe918   140737488349464
->> > > r15            0x1      1
->> > > rip            0x49ab29 0x49ab29 <denc_traits<unsigned long,
->> > > void>::encode(unsigned long const&,
->> > > ceph::buffer::list::contiguous_appender&, unsigned long)+57>
->> > >
->> > > And this is wierd:
->> > >   %rax contains  0x1054047
->> > >   _raw is  0x1054048
->> > >
->> > > So writing %rcx to (%rax) is definitly going to overwrite the larger
->> > > part of _raw.
->> > >
->> > > So now the question transforms into:
->> > >     Why does %rax hold this wierd value ??
->> > >     or Why does get_pos_add(sizeof(etype)) a negative offset ??
->> > >
->> > > Got to go and do real dayjob work.
->> > >
->> > > --WjW
->> > > --
->> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> > > the body of a message to majordomo@vger.kernel.org
->> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> > >
->> > >
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >
->> >
+>>>
+>>>
+>>>
+>>>
+>>> >
+>>> > >
+>>> > > The traceback:
+>>> > > #0  0x000000000049ab29 in denc_traits<unsigned long, void>::encode
+>>> > > (o=@0x10501d0: 123, p=..., f=0) at
+>>> > > /usr/srcs/Ceph/work/ceph/src/include/denc.h:228
+>>> > > #1  0x000000000049a7a8 in denc<unsigned long, denc_traits<unsigned long,
+>>> > > void> > (o=@0x10501d0: 123, p=..., features=0) at
+>>> > > /usr/srcs/Ceph/work/ceph/src/include/denc.h:479
+>>> > > #2  0x000000000049a6a5 in _denc_friend<foo_t const,
+>>> > > ceph::buffer::list::contiguous_appender> (v=..., p=...) at
+>>> > > /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:155
+>>> > > #3  0x000000000049a62d in foo_t::encode (this=0x10501c8, p=...) at
+>>> > > /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:152
+>>> > > #4  0x000000000049a601 in denc_traits<foo_t, void>::encode (v=...,
+>>> > > p=..., f=0) at /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:163
+>>> > > #5  0x000000000049a188 in denc<foo_t, denc_traits<foo_t, void> > (o=...,
+>>> > > p=..., features=0) at /usr/srcs/Ceph/work/ceph/src/include/denc.h:479
+>>> > > #6  0x000000000049a0ac in
+>>> > > denc_traits<std::__1::map<std::__1::basic_string<char,
+>>> > > std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
+>>> > > std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
+>>> > > std::__1::allocator<char> > >,
+>>> > > std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
+>>> > > std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
+>>> > > >, void>::encode<std::__1::basic_string<char,
+>>> > > std::__1::char_traits<char>, std::__1::allocator<char> > > (v=..., p=...)
+>>> > >     at /usr/srcs/Ceph/work/ceph/src/include/denc.h:1010
+>>> > > #7  0x0000000000494581 in
+>>> > > denc<std::__1::map<std::__1::basic_string<char,
+>>> > > std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
+>>> > > std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
+>>> > > std::__1::allocator<char> > >,
+>>> > > std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
+>>> > > std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
+>>> > > >, denc_traits<std::__1::map<std::__1::basic_string<char,
+>>> > > std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
+>>> > > std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
+>>> > > std::__1::allocator<char> > >,
+>>> > > std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
+>>> > > std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
+>>> > > >, void> > (o=..., p=..., features=0) at
+>>> > > /usr/srcs/Ceph/work/ceph/src/include/denc.h:479
+>>> > > #8  0x0000000000490fb1 in
+>>> > > test_denc<std::__1::map<std::__1::basic_string<char,
+>>> > > std::__1::char_traits<char>, std::__1::allocator<char> >, foo_t,
+>>> > > std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>,
+>>> > > std::__1::allocator<char> > >,
+>>> > > std::__1::allocator<std::__1::pair<std::__1::basic_string<char,
+>>> > > std::__1::char_traits<char>, std::__1::allocator<char> > const, foo_t> >
+>>> > > > > (v=...) at /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:49
+>>> > > #9  0x00000000004904e0 in denc_map_Test::TestBody (this=0x1038030) at
+>>> > > /usr/srcs/Ceph/work/ceph/src/test/test_denc.cc:206
+>>> > >
+>>> > > (gdb) p p
+>>> > > $10 = (ceph::buffer::list::contiguous_appender &) @0x7fffffffd948: {pbl
+>>> > > = 0x7fffffffd978, pos = 0x105404f "", bp = {_raw = 0x1054048, _off = 0,
+>>> > > _len = 72}, deep = false,
+>>> > >   out_of_band_offset = 0}
+>>> > > (gdb) p *p.bp._raw
+>>> > > $17 = {_vptr$raw = 0x0, data = 0x1054000 "\003", len = 72, nref = {val =
+>>> > > 1}, crc_spinlock = 0, crc_map = {__tree_ = {__begin_node_ = 0x1054078,
+>>> > >       __pair1_ =
+>>> > > {<std::__1::__libcpp_compressed_pair_imp<std::__1::__tree_end_node<std::__1::__tree_node_base<void*>*>,
+>>> > > std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<std::__1::pair<unsigned
+>>> > > long, unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
+>>> > > void*> >, 2>> =
+>>> > > {<std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<std::__1::pair<unsigned
+>>> > > long, unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
+>>> > > void*> >> = {<No data fields>}, __first_ = {
+>>> > >             __left_ = 0x0}}, <No data fields>},
+>>> > >       __pair3_ = {<std::__1::__libcpp_compressed_pair_imp<unsigned long,
+>>> > > std::__1::__map_value_compare<std::__1::pair<unsigned long, unsigned
+>>> > > long>, std::__1::__value_type<std::__1::pair<unsigned long, unsigned
+>>> > > long>, std::__1::pair<unsigned int, unsigned int> >,
+>>> > > std::__1::less<std::__1::pair<unsigned long, unsigned long> >, true>,
+>>> > > 2>> = {<std::__1::__map_value_compare<std::__1::pair<unsigned long,
+>>> > > unsigned long>, std::__1::__value_type<std::__1::pair<unsigned long,
+>>> > > unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
+>>> > > std::__1::less<std::__1::pair<unsigned long, unsigned long> >, true>> =
+>>> > > {<std::__1::less<std::__1::pair<unsigned long, unsigned long> >> =
+>>> > > {<std::__1::binary_function<std::__1::pair<unsigned long, unsigned
+>>> > > long>, std::__1::pair<unsigned long, unsigned long>, bool>> = {<No data
+>>> > > fields>}, <No data fields>}, <No data fields>},
+>>> > >           __first_ = 0}, <No data fields>}}}}
+>>> > >
+>>> > > (gdb) disassemble
+>>> > > Dump of assembler code for function denc_traits<unsigned long,
+>>> > > void>::encode(unsigned long const&,
+>>> > > ceph::buffer::list::contiguous_appender&, unsigned long):
+>>> > >    0x000000000049aaf0 <+0>:     push   %rbp
+>>> > >    0x000000000049aaf1 <+1>:     mov    %rsp,%rbp
+>>> > >    0x000000000049aaf4 <+4>:     sub    $0x20,%rsp
+>>> > >    0x000000000049aaf8 <+8>:     mov    $0x8,%eax
+>>> > >    0x000000000049aafd <+13>:    mov    %eax,%ecx
+>>> > >    0x000000000049aaff <+15>:    mov    %rdi,-0x8(%rbp)
+>>> > >    0x000000000049ab03 <+19>:    mov    %rsi,-0x10(%rbp)
+>>> > >    0x000000000049ab07 <+23>:    mov    %rdx,-0x18(%rbp)
+>>> > >    0x000000000049ab0b <+27>:    mov    -0x8(%rbp),%rdx
+>>> > >    0x000000000049ab0f <+31>:    mov    (%rdx),%rdx
+>>> > >    0x000000000049ab12 <+34>:    mov    -0x10(%rbp),%rdi
+>>> > >    0x000000000049ab16 <+38>:    mov    %rcx,%rsi
+>>> > >    0x000000000049ab19 <+41>:    mov    %rdx,-0x20(%rbp)
+>>> > >    0x000000000049ab1d <+45>:    callq  0x49a1d0
+>>> > > <ceph::buffer::list::contiguous_appender::get_pos_add(unsigned long)>
+>>> > >    0x000000000049ab22 <+50>:    mov    -0x20(%rbp),%rcx
+>>> > >    0x000000000049ab26 <+54>:    mov    %rcx,(%rax)
+>>> > > => 0x000000000049ab29 <+57>:    add    $0x20,%rsp
+>>> > >    0x000000000049ab2d <+61>:    pop    %rbp
+>>> > >    0x000000000049ab2e <+62>:    retq
+>>> > > End of assembler dump.
+>>> > >
+>>> > > (gdb) info registers
+>>> > > rax            0x1054047        17121351
+>>> > > rbx            0x0      0
+>>> > > rcx            0x7b     123
+>>> > > rdx            0x7b     123
+>>> > > rsi            0x7fffffffd948   140737488345416
+>>> > > rdi            0x105404f        17121359
+>>> > > rbp            0x7fffffffd4f0   0x7fffffffd4f0
+>>> > > rsp            0x7fffffffd4d0   0x7fffffffd4d0
+>>> > > r8             0x0      0
+>>> > > r9             0x0      0
+>>> > > r10            0x0      0
+>>> > > r11            0x829100 8556800
+>>> > > r12            0x7fffffffe910   140737488349456
+>>> > > r13            0x7fffffffe928   140737488349480
+>>> > > r14            0x7fffffffe918   140737488349464
+>>> > > r15            0x1      1
+>>> > > rip            0x49ab29 0x49ab29 <denc_traits<unsigned long,
+>>> > > void>::encode(unsigned long const&,
+>>> > > ceph::buffer::list::contiguous_appender&, unsigned long)+57>
+>>> > >
+>>> > > And this is wierd:
+>>> > >   %rax contains  0x1054047
+>>> > >   _raw is  0x1054048
+>>> > >
+>>> > > So writing %rcx to (%rax) is definitly going to overwrite the larger
+>>> > > part of _raw.
+>>> > >
+>>> > > So now the question transforms into:
+>>> > >     Why does %rax hold this wierd value ??
+>>> > >     or Why does get_pos_add(sizeof(etype)) a negative offset ??
+>>> > >
+>>> > > Got to go and do real dayjob work.
+>>> > >
+>>> > > --WjW
+>>> > > --
+>>> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> > > the body of a message to majordomo@vger.kernel.org
+>>> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> > >
+>>> > >
+>>> > --
+>>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> > the body of a message to majordomo@vger.kernel.org
+>>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> >
+>>> >
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+>
+>
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Cheers,
+> Brad
 
 
 
