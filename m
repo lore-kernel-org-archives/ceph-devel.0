@@ -1,155 +1,123 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: An empty vptr in an raw object
-Date: Fri, 23 Dec 2016 01:48:12 +0100
-Message-ID: <e82e4fa1-ff54-64ae-30c7-5a711ea444bb@digiware.nl>
+From: Allen Samuels <Allen.Samuels@sandisk.com>
+Subject: RE: An empty vptr in an raw object
+Date: Fri, 23 Dec 2016 00:49:20 +0000
+Message-ID: <EB02EE10422E4A40A1EE787A4AC27FBE04582E@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
 References: <4aeb9ff1-367c-f31e-fc0c-5f08dcdcfe0e@digiware.nl>
  <7754eadf-5f8c-ade3-1634-486fff240adf@digiware.nl>
  <EB02EE10422E4A40A1EE787A4AC27FBE044D2A@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
  <e1bdab0b-ec02-819e-e6fe-4e07baa235be@digiware.nl>
  <EB02EE10422E4A40A1EE787A4AC27FBE045604@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
  <CAF-wwdHbSejTSYGDvRdYcu03Dz=22wMP619cWfCcO1sx9h+wTw@mail.gmail.com>
+ <e82e4fa1-ff54-64ae-30c7-5a711ea444bb@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:25570 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755506AbcLWAsV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 22 Dec 2016 19:48:21 -0500
-In-Reply-To: <CAF-wwdHbSejTSYGDvRdYcu03Dz=22wMP619cWfCcO1sx9h+wTw@mail.gmail.com>
+Received: from mail-by2nam01on0050.outbound.protection.outlook.com ([104.47.34.50]:7824
+        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754810AbcLWAta (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 22 Dec 2016 19:49:30 -0500
+In-Reply-To: <e82e4fa1-ff54-64ae-30c7-5a711ea444bb@digiware.nl>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>, Allen Samuels <Allen.Samuels@sandisk.com>
+To: Willem Jan Withagen <wjw@digiware.nl>, Brad Hubbard <bhubbard@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 23-12-2016 01:19, Brad Hubbard wrote:
-> Any clue from Valgrind?
-> 
-> Did you say this only happens with clang or doesn't happen with clang?
-
-I have to comment this piece of code to get unittest_denc to pass.
-And with GCC this does not happen.
-
-But I'm not sure how GCC does its class function table stuff.
-And whether that also involves a vptr?
-
---WjW
-
-> On Fri, Dec 23, 2016 at 8:01 AM, Allen Samuels
-> <Allen.Samuels@sandisk.com> wrote:
->> I believe I mis-read the data. What I've seen before doesn't fit this data.
->>
->> If it fails in unit test, it shouldn't be hard to just set a HW breakpoint on the vptr and see who the culprit is.
->>
->>
->> Allen Samuels
->> SanDisk |a Western Digital brand
->> 2880 Junction Avenue, San Jose, CA 95134
->> T: +1 408 801 7030| M: +1 408 780 6416
->> allen.samuels@SanDisk.com
->>
->>
->>> -----Original Message-----
->>> From: Willem Jan Withagen [mailto:wjw@digiware.nl]
->>> Sent: Thursday, December 22, 2016 10:37 AM
->>> To: Allen Samuels <Allen.Samuels@sandisk.com>; Ceph Development
->>> <ceph-devel@vger.kernel.org>
->>> Subject: Re: An empty vptr in an raw object
->>>
->>> On 22-12-2016 19:02, Allen Samuels wrote:
->>>> I have seen cases of null vptr due to an incompletely constructed object,
->>> i.e., an object that's in the middle of being constructed.
->>>
->>> I going to believe you right away.
->>> But I'm having a hard time imagining such a case.
->>>
->>> Are you suggesting a object is referenced, whilest it is not yet complete. who
->>> does the referencing then? due to threading?
->>> That would be even harder to find.
->>>
->>> --WjW
->>>
->>>
->>>> Allen Samuels
->>>> SanDisk |a Western Digital brand
->>>> 951 SanDisk Drive, Milpitas, CA 95035
->>>> T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
->>>>
->>>>
->>>>> -----Original Message-----
->>>>> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
->>>>> owner@vger.kernel.org] On Behalf Of Willem Jan Withagen
->>>>> Sent: Thursday, December 22, 2016 9:41 AM
->>>>> To: Ceph Development <ceph-devel@vger.kernel.org>
->>>>> Subject: An empty vptr in an raw object
->>>>>
->>>>>> I have a piece of code that actually seem to crash because the vptr
->>>>>> is not set:
->>>>>> (gdb) p *_raw
->>>>>> $2 = {_vptr$raw = 0x0, data = 0x10cc000 "\003", len = 72, nref =
->>>>>> {val = 1}, crc_spinlock = 0, crc_map = {__tree_ = {
->>>>>>       __begin_node_ = 0x10cc078,
->>>>>>       __pair1_ =
->>>>>>
->>>>>
->>> {<std::__1::__libcpp_compressed_pair_imp<std::__1::__tree_end_node<st
->>>>> d::__1::__tree_node_base<void*>*>,
->>>>>>
->>>>> std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<std:
->>>>> :__1
->>>>> ::pair<unsigned
->>>>>> long, unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
->>>>>> void*> >, 2>> =
->>>>>>
->>>>> {<std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<st
->>>>> d::_
->>>>> _1::pair<unsigned
->>>>>> long, unsigned long>, std::__1::pair<unsigned int, unsigned int> >,
->>>>>> void*> >> = {<No data fields>}, __first_ = {
->>>>>>             __left_ = 0x0}}, <No data fields>},
->>>>>>
->>>>>> The function that crashes:
->>>>>>  char *buffer::ptr::c_str() {
->>>>>>     assert(_raw);
->>>>>>     if (buffer_track_c_str)
->>>>>>       buffer_c_str_accesses.inc();
->>>>>>     char *p =  _raw->get_data();
->>>>>>     return p + _off;
->>>>>>   }
->>>>>>
->>>>>> And crash is actually on the return line.
->>>>>>
->>>>>> Any ideas as how the vptr can be empty?
->>>>>
->>>>> Now the _vptr$raw point is part of the internal code of the clang
->>>>> class function table/constructor. Overwriting that means that
->>>>> class-function references are problematic to say the least. (in this
->>> example get_data()).
->>>>>
->>>>> The major reason why this occurs is because an object is being zeroed
->>>>> in C-style way: memset( &obj, 0, sizeof(obj)) And thus overwriting
->>>>> the _vptr.
->>>>>
->>>>> Note that this does not bite the FreeBSD compilation, but also any
->>>>> other attempts to build Ceph with clang.
->>>>>
->>>>> Now the strange thing is that this does not bite Clang compilation
->>>>> much more. But the only test that fails is unittest_denc. So I guess
->>>>> that most of the code is rather well behaved.
->>>>>
->>>>> And I'm off on a search to find the culprit.
->>>>>
->>>>> --WjW
->>>>>
->>>>>
->>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>> in the body of a message to majordomo@vger.kernel.org More
->>> majordomo
->>>>> info at  http://vger.kernel.org/majordomo-info.html
->>
-> 
-> 
-> 
-
+VXNhZ2Ugb2YgdnB0ciBzaG91bGRuJ3QgYmUgdmVyeSBkaWZmZXJlbnQgYmV0d2VlbiB0aGVtLg0K
+DQoNCkFsbGVuIFNhbXVlbHMNClNhbkRpc2sgfGEgV2VzdGVybiBEaWdpdGFsIGJyYW5kDQoyODgw
+IEp1bmN0aW9uIEF2ZW51ZSwgU2FuIEpvc2UsIENBIDk1MTM0DQpUOiArMSA0MDggODAxIDcwMzB8
+IE06ICsxIDQwOCA3ODAgNjQxNg0KYWxsZW4uc2FtdWVsc0BTYW5EaXNrLmNvbQ0KDQoNCj4gLS0t
+LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogV2lsbGVtIEphbiBXaXRoYWdlbiBbbWFp
+bHRvOndqd0BkaWdpd2FyZS5ubF0NCj4gU2VudDogVGh1cnNkYXksIERlY2VtYmVyIDIyLCAyMDE2
+IDQ6NDggUE0NCj4gVG86IEJyYWQgSHViYmFyZCA8Ymh1YmJhcmRAcmVkaGF0LmNvbT47IEFsbGVu
+IFNhbXVlbHMNCj4gPEFsbGVuLlNhbXVlbHNAc2FuZGlzay5jb20+DQo+IENjOiBDZXBoIERldmVs
+b3BtZW50IDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IEFuIGVt
+cHR5IHZwdHIgaW4gYW4gcmF3IG9iamVjdA0KPiANCj4gT24gMjMtMTItMjAxNiAwMToxOSwgQnJh
+ZCBIdWJiYXJkIHdyb3RlOg0KPiA+IEFueSBjbHVlIGZyb20gVmFsZ3JpbmQ/DQo+ID4NCj4gPiBE
+aWQgeW91IHNheSB0aGlzIG9ubHkgaGFwcGVucyB3aXRoIGNsYW5nIG9yIGRvZXNuJ3QgaGFwcGVu
+IHdpdGggY2xhbmc/DQo+IA0KPiBJIGhhdmUgdG8gY29tbWVudCB0aGlzIHBpZWNlIG9mIGNvZGUg
+dG8gZ2V0IHVuaXR0ZXN0X2RlbmMgdG8gcGFzcy4NCj4gQW5kIHdpdGggR0NDIHRoaXMgZG9lcyBu
+b3QgaGFwcGVuLg0KPiANCj4gQnV0IEknbSBub3Qgc3VyZSBob3cgR0NDIGRvZXMgaXRzIGNsYXNz
+IGZ1bmN0aW9uIHRhYmxlIHN0dWZmLg0KPiBBbmQgd2hldGhlciB0aGF0IGFsc28gaW52b2x2ZXMg
+YSB2cHRyPw0KPiANCj4gLS1XalcNCj4gDQo+ID4gT24gRnJpLCBEZWMgMjMsIDIwMTYgYXQgODow
+MSBBTSwgQWxsZW4gU2FtdWVscw0KPiA+IDxBbGxlbi5TYW11ZWxzQHNhbmRpc2suY29tPiB3cm90
+ZToNCj4gPj4gSSBiZWxpZXZlIEkgbWlzLXJlYWQgdGhlIGRhdGEuIFdoYXQgSSd2ZSBzZWVuIGJl
+Zm9yZSBkb2Vzbid0IGZpdCB0aGlzIGRhdGEuDQo+ID4+DQo+ID4+IElmIGl0IGZhaWxzIGluIHVu
+aXQgdGVzdCwgaXQgc2hvdWxkbid0IGJlIGhhcmQgdG8ganVzdCBzZXQgYSBIVyBicmVha3BvaW50
+IG9uDQo+IHRoZSB2cHRyIGFuZCBzZWUgd2hvIHRoZSBjdWxwcml0IGlzLg0KPiA+Pg0KPiA+Pg0K
+PiA+PiBBbGxlbiBTYW11ZWxzDQo+ID4+IFNhbkRpc2sgfGEgV2VzdGVybiBEaWdpdGFsIGJyYW5k
+DQo+ID4+IDI4ODAgSnVuY3Rpb24gQXZlbnVlLCBTYW4gSm9zZSwgQ0EgOTUxMzQNCj4gPj4gVDog
+KzEgNDA4IDgwMSA3MDMwfCBNOiArMSA0MDggNzgwIDY0MTYgYWxsZW4uc2FtdWVsc0BTYW5EaXNr
+LmNvbQ0KPiA+Pg0KPiA+Pg0KPiA+Pj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPj4+
+IEZyb206IFdpbGxlbSBKYW4gV2l0aGFnZW4gW21haWx0bzp3andAZGlnaXdhcmUubmxdDQo+ID4+
+PiBTZW50OiBUaHVyc2RheSwgRGVjZW1iZXIgMjIsIDIwMTYgMTA6MzcgQU0NCj4gPj4+IFRvOiBB
+bGxlbiBTYW11ZWxzIDxBbGxlbi5TYW11ZWxzQHNhbmRpc2suY29tPjsgQ2VwaCBEZXZlbG9wbWVu
+dA0KPiA+Pj4gPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KPiA+Pj4gU3ViamVjdDogUmU6
+IEFuIGVtcHR5IHZwdHIgaW4gYW4gcmF3IG9iamVjdA0KPiA+Pj4NCj4gPj4+IE9uIDIyLTEyLTIw
+MTYgMTk6MDIsIEFsbGVuIFNhbXVlbHMgd3JvdGU6DQo+ID4+Pj4gSSBoYXZlIHNlZW4gY2FzZXMg
+b2YgbnVsbCB2cHRyIGR1ZSB0byBhbiBpbmNvbXBsZXRlbHkgY29uc3RydWN0ZWQNCj4gb2JqZWN0
+LA0KPiA+Pj4gaS5lLiwgYW4gb2JqZWN0IHRoYXQncyBpbiB0aGUgbWlkZGxlIG9mIGJlaW5nIGNv
+bnN0cnVjdGVkLg0KPiA+Pj4NCj4gPj4+IEkgZ29pbmcgdG8gYmVsaWV2ZSB5b3UgcmlnaHQgYXdh
+eS4NCj4gPj4+IEJ1dCBJJ20gaGF2aW5nIGEgaGFyZCB0aW1lIGltYWdpbmluZyBzdWNoIGEgY2Fz
+ZS4NCj4gPj4+DQo+ID4+PiBBcmUgeW91IHN1Z2dlc3RpbmcgYSBvYmplY3QgaXMgcmVmZXJlbmNl
+ZCwgd2hpbGVzdCBpdCBpcyBub3QgeWV0IGNvbXBsZXRlLg0KPiB3aG8NCj4gPj4+IGRvZXMgdGhl
+IHJlZmVyZW5jaW5nIHRoZW4/IGR1ZSB0byB0aHJlYWRpbmc/DQo+ID4+PiBUaGF0IHdvdWxkIGJl
+IGV2ZW4gaGFyZGVyIHRvIGZpbmQuDQo+ID4+Pg0KPiA+Pj4gLS1XalcNCj4gPj4+DQo+ID4+Pg0K
+PiA+Pj4+IEFsbGVuIFNhbXVlbHMNCj4gPj4+PiBTYW5EaXNrIHxhIFdlc3Rlcm4gRGlnaXRhbCBi
+cmFuZA0KPiA+Pj4+IDk1MSBTYW5EaXNrIERyaXZlLCBNaWxwaXRhcywgQ0EgOTUwMzUNCj4gPj4+
+PiBUOiArMSA0MDggODAxIDcwMzB8IE06ICsxIDQwOCA3ODAgNjQxNiBhbGxlbi5zYW11ZWxzQFNh
+bkRpc2suY29tDQo+ID4+Pj4NCj4gPj4+Pg0KPiA+Pj4+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
+LS0tLQ0KPiA+Pj4+PiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFp
+bHRvOmNlcGgtZGV2ZWwtDQo+ID4+Pj4+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxm
+IE9mIFdpbGxlbSBKYW4gV2l0aGFnZW4NCj4gPj4+Pj4gU2VudDogVGh1cnNkYXksIERlY2VtYmVy
+IDIyLCAyMDE2IDk6NDEgQU0NCj4gPj4+Pj4gVG86IENlcGggRGV2ZWxvcG1lbnQgPGNlcGgtZGV2
+ZWxAdmdlci5rZXJuZWwub3JnPg0KPiA+Pj4+PiBTdWJqZWN0OiBBbiBlbXB0eSB2cHRyIGluIGFu
+IHJhdyBvYmplY3QNCj4gPj4+Pj4NCj4gPj4+Pj4+IEkgaGF2ZSBhIHBpZWNlIG9mIGNvZGUgdGhh
+dCBhY3R1YWxseSBzZWVtIHRvIGNyYXNoIGJlY2F1c2UgdGhlIHZwdHINCj4gPj4+Pj4+IGlzIG5v
+dCBzZXQ6DQo+ID4+Pj4+PiAoZ2RiKSBwICpfcmF3DQo+ID4+Pj4+PiAkMiA9IHtfdnB0ciRyYXcg
+PSAweDAsIGRhdGEgPSAweDEwY2MwMDAgIlwwMDMiLCBsZW4gPSA3MiwgbnJlZiA9DQo+ID4+Pj4+
+PiB7dmFsID0gMX0sIGNyY19zcGlubG9jayA9IDAsIGNyY19tYXAgPSB7X190cmVlXyA9IHsNCj4g
+Pj4+Pj4+ICAgICAgIF9fYmVnaW5fbm9kZV8gPSAweDEwY2MwNzgsDQo+ID4+Pj4+PiAgICAgICBf
+X3BhaXIxXyA9DQo+ID4+Pj4+Pg0KPiA+Pj4+Pg0KPiA+Pj4NCj4gezxzdGQ6Ol9fMTo6X19saWJj
+cHBfY29tcHJlc3NlZF9wYWlyX2ltcDxzdGQ6Ol9fMTo6X190cmVlX2VuZF9ub2RlPHN0DQo+ID4+
+Pj4+IGQ6Ol9fMTo6X190cmVlX25vZGVfYmFzZTx2b2lkKj4qPiwNCj4gPj4+Pj4+DQo+ID4+Pj4+
+DQo+IHN0ZDo6X18xOjphbGxvY2F0b3I8c3RkOjpfXzE6Ol9fdHJlZV9ub2RlPHN0ZDo6X18xOjpf
+X3ZhbHVlX3R5cGU8c3RkOg0KPiA+Pj4+PiA6X18xDQo+ID4+Pj4+IDo6cGFpcjx1bnNpZ25lZA0K
+PiA+Pj4+Pj4gbG9uZywgdW5zaWduZWQgbG9uZz4sIHN0ZDo6X18xOjpwYWlyPHVuc2lnbmVkIGlu
+dCwgdW5zaWduZWQgaW50PiA+LA0KPiA+Pj4+Pj4gdm9pZCo+ID4sIDI+PiA9DQo+ID4+Pj4+Pg0K
+PiA+Pj4+Pg0KPiB7PHN0ZDo6X18xOjphbGxvY2F0b3I8c3RkOjpfXzE6Ol9fdHJlZV9ub2RlPHN0
+ZDo6X18xOjpfX3ZhbHVlX3R5cGU8c3QNCj4gPj4+Pj4gZDo6Xw0KPiA+Pj4+PiBfMTo6cGFpcjx1
+bnNpZ25lZA0KPiA+Pj4+Pj4gbG9uZywgdW5zaWduZWQgbG9uZz4sIHN0ZDo6X18xOjpwYWlyPHVu
+c2lnbmVkIGludCwgdW5zaWduZWQgaW50PiA+LA0KPiA+Pj4+Pj4gdm9pZCo+ID4+ID0gezxObyBk
+YXRhIGZpZWxkcz59LCBfX2ZpcnN0XyA9IHsNCj4gPj4+Pj4+ICAgICAgICAgICAgIF9fbGVmdF8g
+PSAweDB9fSwgPE5vIGRhdGEgZmllbGRzPn0sDQo+ID4+Pj4+Pg0KPiA+Pj4+Pj4gVGhlIGZ1bmN0
+aW9uIHRoYXQgY3Jhc2hlczoNCj4gPj4+Pj4+ICBjaGFyICpidWZmZXI6OnB0cjo6Y19zdHIoKSB7
+DQo+ID4+Pj4+PiAgICAgYXNzZXJ0KF9yYXcpOw0KPiA+Pj4+Pj4gICAgIGlmIChidWZmZXJfdHJh
+Y2tfY19zdHIpDQo+ID4+Pj4+PiAgICAgICBidWZmZXJfY19zdHJfYWNjZXNzZXMuaW5jKCk7DQo+
+ID4+Pj4+PiAgICAgY2hhciAqcCA9ICBfcmF3LT5nZXRfZGF0YSgpOw0KPiA+Pj4+Pj4gICAgIHJl
+dHVybiBwICsgX29mZjsNCj4gPj4+Pj4+ICAgfQ0KPiA+Pj4+Pj4NCj4gPj4+Pj4+IEFuZCBjcmFz
+aCBpcyBhY3R1YWxseSBvbiB0aGUgcmV0dXJuIGxpbmUuDQo+ID4+Pj4+Pg0KPiA+Pj4+Pj4gQW55
+IGlkZWFzIGFzIGhvdyB0aGUgdnB0ciBjYW4gYmUgZW1wdHk/DQo+ID4+Pj4+DQo+ID4+Pj4+IE5v
+dyB0aGUgX3ZwdHIkcmF3IHBvaW50IGlzIHBhcnQgb2YgdGhlIGludGVybmFsIGNvZGUgb2YgdGhl
+IGNsYW5nDQo+ID4+Pj4+IGNsYXNzIGZ1bmN0aW9uIHRhYmxlL2NvbnN0cnVjdG9yLiBPdmVyd3Jp
+dGluZyB0aGF0IG1lYW5zIHRoYXQNCj4gPj4+Pj4gY2xhc3MtZnVuY3Rpb24gcmVmZXJlbmNlcyBh
+cmUgcHJvYmxlbWF0aWMgdG8gc2F5IHRoZSBsZWFzdC4gKGluIHRoaXMNCj4gPj4+IGV4YW1wbGUg
+Z2V0X2RhdGEoKSkuDQo+ID4+Pj4+DQo+ID4+Pj4+IFRoZSBtYWpvciByZWFzb24gd2h5IHRoaXMg
+b2NjdXJzIGlzIGJlY2F1c2UgYW4gb2JqZWN0IGlzIGJlaW5nIHplcm9lZA0KPiA+Pj4+PiBpbiBD
+LXN0eWxlIHdheTogbWVtc2V0KCAmb2JqLCAwLCBzaXplb2Yob2JqKSkgQW5kIHRodXMgb3Zlcndy
+aXRpbmcNCj4gPj4+Pj4gdGhlIF92cHRyLg0KPiA+Pj4+Pg0KPiA+Pj4+PiBOb3RlIHRoYXQgdGhp
+cyBkb2VzIG5vdCBiaXRlIHRoZSBGcmVlQlNEIGNvbXBpbGF0aW9uLCBidXQgYWxzbyBhbnkNCj4g
+Pj4+Pj4gb3RoZXIgYXR0ZW1wdHMgdG8gYnVpbGQgQ2VwaCB3aXRoIGNsYW5nLg0KPiA+Pj4+Pg0K
+PiA+Pj4+PiBOb3cgdGhlIHN0cmFuZ2UgdGhpbmcgaXMgdGhhdCB0aGlzIGRvZXMgbm90IGJpdGUg
+Q2xhbmcgY29tcGlsYXRpb24NCj4gPj4+Pj4gbXVjaCBtb3JlLiBCdXQgdGhlIG9ubHkgdGVzdCB0
+aGF0IGZhaWxzIGlzIHVuaXR0ZXN0X2RlbmMuIFNvIEkgZ3Vlc3MNCj4gPj4+Pj4gdGhhdCBtb3N0
+IG9mIHRoZSBjb2RlIGlzIHJhdGhlciB3ZWxsIGJlaGF2ZWQuDQo+ID4+Pj4+DQo+ID4+Pj4+IEFu
+ZCBJJ20gb2ZmIG9uIGEgc2VhcmNoIHRvIGZpbmQgdGhlIGN1bHByaXQuDQo+ID4+Pj4+DQo+ID4+
+Pj4+IC0tV2pXDQo+ID4+Pj4+DQo+ID4+Pj4+DQo+ID4+Pj4+DQo+ID4+Pj4+IC0tDQo+ID4+Pj4+
+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
+ZSBjZXBoLWRldmVsIg0KPiA+Pj4+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jk
+b21vQHZnZXIua2VybmVsLm9yZyBNb3JlDQo+ID4+PiBtYWpvcmRvbW8NCj4gPj4+Pj4gaW5mbyBh
+dCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4+DQo+ID4N
+Cj4gPg0KPiA+DQoNCg==
