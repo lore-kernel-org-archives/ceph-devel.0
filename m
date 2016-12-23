@@ -1,7 +1,7 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
 Subject: Re: An empty vptr in an raw object
-Date: Fri, 23 Dec 2016 02:23:13 +0100
-Message-ID: <fa76db8f-1e2a-28b3-1a7f-7514d9f01ea0@digiware.nl>
+Date: Fri, 23 Dec 2016 02:20:16 +0100
+Message-ID: <1270ac0b-9501-1550-03fc-f6f43523b492@digiware.nl>
 References: <4aeb9ff1-367c-f31e-fc0c-5f08dcdcfe0e@digiware.nl>
  <7754eadf-5f8c-ade3-1634-486fff240adf@digiware.nl>
  <EB02EE10422E4A40A1EE787A4AC27FBE044D2A@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
@@ -13,33 +13,28 @@ References: <4aeb9ff1-367c-f31e-fc0c-5f08dcdcfe0e@digiware.nl>
  <CAF-wwdEhQL+rBQCqRdqTgdYCXWqDTVcJBPH8jHG5eiXn8-KRHA@mail.gmail.com>
  <80d484c5-acf3-6bc9-17f6-dddbae8d3ca5@digiware.nl>
  <20161223011510.GA6408@rskikr.localdomain>
+ <EB02EE10422E4A40A1EE787A4AC27FBE045A04@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:33582 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([176.74.240.9]:32876 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S938967AbcLWBXT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 22 Dec 2016 20:23:19 -0500
-In-Reply-To: <20161223011510.GA6408@rskikr.localdomain>
+        id S1761529AbcLWBVE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 22 Dec 2016 20:21:04 -0500
+In-Reply-To: <EB02EE10422E4A40A1EE787A4AC27FBE045A04@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: Allen Samuels <Allen.Samuels@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Allen Samuels <Allen.Samuels@sandisk.com>, Brad Hubbard <bhubbard@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 23-12-2016 02:15, Brad Hubbard wrote:
-> The valgrind output I posted seems to indicate an issue in the stl, which is
-> unlikely and probably a false positive. Strange coincidence though...
-> 
-> Another option for attacking this might be sanitizers?
+On 23-12-2016 02:16, Allen Samuels wrote:
+> Does the unit test run or does it actually fault out or does it just report an error?
 
-Not sure if all Clang sanitizers are available, and I have to read up on
-those as well.
-
-Valgrind does build with Clang, but running it gives me a non killable
-process. So that is not easily going to work.
+It crashes with a seg-fail.
+It tries to use a vptr that is null to reference a get_data() function
+in the raw class
 
 --WjW
 
-PS: Off to bed, it is way pas midnight here.
 
