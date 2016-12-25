@@ -1,24 +1,37 @@
-From: Allen Samuels <Allen.Samuels@sandisk.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
 Subject: RE: Bluestore performance bottleneck REVISITED
-Date: Sun, 25 Dec 2016 20:08:09 +0000
-Message-ID: <EB02EE10422E4A40A1EE787A4AC27FBE047880@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
+Date: Sun, 25 Dec 2016 20:30:23 +0000
+Message-ID: <5E3E05AED7F0F044904275810D0CB46504D7B4@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 References: <EB02EE10422E4A40A1EE787A4AC27FBE047516@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
  <5E3E05AED7F0F044904275810D0CB46504D793@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <EB02EE10422E4A40A1EE787A4AC27FBE047880@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam01on0046.outbound.protection.outlook.com ([104.47.34.46]:54395
-        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+Received: from mail-dm3nam03on0052.outbound.protection.outlook.com ([104.47.41.52]:24400
+        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752075AbcLYUX1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 25 Dec 2016 15:23:27 -0500
-In-Reply-To: <5E3E05AED7F0F044904275810D0CB46504D793@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+        id S1753305AbcLYUac (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 25 Dec 2016 15:30:32 -0500
+In-Reply-To: <EB02EE10422E4A40A1EE787A4AC27FBE047880@ULS-OP-MBXIP02.sdcorp.global.sandisk.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, Mark Nelson <mnelson@redhat.com>, Sage Weil <sweil@redhat.com>
+To: Allen Samuels <Allen.Samuels@sandisk.com>, Mark Nelson <mnelson@redhat.com>, Sage Weil <sweil@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
+
+Yes, all are fitting into inline_bl (no shard) in case of 16K min alloc if =
+I can remember and that's why decode_some() overhead is less. Also, 4 times=
+ less extent and that makes overhead less. I will generate some stats on th=
+is and share.
+
+-----Original Message-----
+From: Allen Samuels
+Sent: Sunday, December 25, 2016 12:08 PM
+To: Somnath Roy; Mark Nelson; Sage Weil
+Cc: ceph-devel
+Subject: RE: Bluestore performance bottleneck REVISITED
 
 Decode_some won't care how many shards there are, it will only care about t=
 he size of a shard. But if the number of shards is small enough to be inlin=
@@ -41,83 +54,67 @@ allen.samuels@SanDisk.com
 > <mnelson@redhat.com>; Sage Weil <sweil@redhat.com>
 > Cc: ceph-devel <ceph-devel@vger.kernel.org>
 > Subject: RE: Bluestore performance bottleneck REVISITED
->=20
-> I think one of the reason 16K is doing better is the very less decode_som=
-e()
-> overhead in case of 16K because in case of 16K min_alloc there is hardly =
-any
-> shard.
-> Also, what I am seeing (and digging more) that read overhead (onode, shar=
-d)
-> during write is now having an impact and it is even more while compaction=
- is
-> on. For 16K, there will be one read (only onode) vs 4K min_alloc where th=
-ere
-> will be two reads (onode, shard).
->=20
+>
+> I think one of the reason 16K is doing better is the very less
+> decode_some() overhead in case of 16K because in case of 16K min_alloc
+> there is hardly any shard.
+> Also, what I am seeing (and digging more) that read overhead (onode,
+> shard) during write is now having an impact and it is even more while
+> compaction is on. For 16K, there will be one read (only onode) vs 4K
+> min_alloc where there will be two reads (onode, shard).
+>
 > Thanks & Regards
 > Somnath
->=20
->=20
+>
+>
 > -----Original Message-----
 > From: Allen Samuels
 > Sent: Saturday, December 24, 2016 11:45 PM
 > To: Mark Nelson; Sage Weil
 > Cc: Somnath Roy; ceph-devel
 > Subject: RE: Bluestore performance bottleneck REVISITED
->=20
-> (This is the first time, I've dug into the details of the RocksDB stats, =
-so it's
-> possible I'm misinterpreting)
->=20
+>
+> (This is the first time, I've dug into the details of the RocksDB
+> stats, so it's possible I'm misinterpreting)
+>
 > Even more interesting.
->=20
-> The 4K and 16K runs both have the same total amount of compaction traffic=
-. I
-> look at the "sum" row and the Read(GB) and Write(GB) columns and I note
-> that they're almost exactly the same for the 4K and 16K runs.
->=20
-> If this is correct, then the hypothesis that the 16K Minalloc is faster d=
-ue to
-> the reduced cost of the compaction because of smaller metadata size is
-> simply false.
->=20
-> It is true that the static size of the metadata is much smaller for the 4=
-K run
+>
+> The 4K and 16K runs both have the same total amount of compaction
+> traffic. I look at the "sum" row and the Read(GB) and Write(GB)
+> columns and I note that they're almost exactly the same for the 4K and 16=
+K runs.
+>
+> If this is correct, then the hypothesis that the 16K Minalloc is
+> faster due to the reduced cost of the compaction because of smaller
+> metadata size is simply false.
+>
+> It is true that the static size of the metadata is much smaller for
+> the 4K run
 > (8.3 GB vs. 2.5GB), but this simply doesn't explain the observed results.
->=20
+>
 > When you factor into the equation the higher ingest for the 16K case
-> [ingesting the data and the extra transaction to undo it]  (91GB vs 190GB=
-)
-> with the same amount of compaction (~145GB) traffic, then we need to star=
-t
-> thinking about another explanation for the observed data.
->=20
-> I'm still digging into the numbers, but I do notice that the # of writes =
-/ sync
-> are radically different (4.5 writes/sync vs. 31.2 writes/sync), I assume =
-this is
-> effectively the same as the I/O size. I believe that somehow the system i=
-s
-> doing a much better job of batching the transactions for 16K vs 4K and wh=
-at
-> we're really seeing as the performance delta between them is related to t=
-his.
->=20
-> Mark --> Can we look at the Linux iostat data for this, in particular can=
- you
-> look at the average write I/O size? And the # of interrupts / front-end I=
-/O
-> operation?
->=20
->=20
+> [ingesting the data and the extra transaction to undo it]  (91GB vs
+> 190GB) with the same amount of compaction (~145GB) traffic, then we
+> need to start thinking about another explanation for the observed data.
+>
+> I'm still digging into the numbers, but I do notice that the # of
+> writes / sync are radically different (4.5 writes/sync vs. 31.2
+> writes/sync), I assume this is effectively the same as the I/O size. I
+> believe that somehow the system is doing a much better job of batching
+> the transactions for 16K vs 4K and what we're really seeing as the perfor=
+mance delta between them is related to this.
+>
+> Mark --> Can we look at the Linux iostat data for this, in particular
+> can you look at the average write I/O size? And the # of interrupts /
+> front-end I/O operation?
+>
+>
 > Allen Samuels
 > SanDisk |a Western Digital brand
 > 2880 Junction Avenue, San Jose, CA 95134
-> T: +1 408 801 7030| M: +1 408 780 6416
-> allen.samuels@SanDisk.com
->=20
->=20
+> T: +1 408 801 7030| M: +1 408 780 6416 allen.samuels@SanDisk.com
+>
+>
 > > -----Original Message-----
 > > From: Mark Nelson [mailto:mnelson@redhat.com]
 > > Sent: Friday, December 23, 2016 12:05 PM
@@ -132,16 +129,17 @@ his.
 > > On 12/23/2016 01:33 PM, Allen Samuels wrote:
 > > > The two data points you mention (4K / 16K MinAlloc) yield
 > > > interesting
-> > numbers. For 4K, you're seeing 22.5K IOPS at 1300% CPU or 1.7K IOPS /
+> > numbers. For 4K, you're seeing 22.5K IOPS at 1300% CPU or 1.7K IOPS
+> > /
 > core.
 > > Yet for 16K you're seeing 25K IOPS at 1000% CPU or 2.5 K IOPS/Core.
-> > Yet, we know that in the main I/O path that the 16K is doing more work
-> > (since it's double-writing the data), but is yielding better CPU usage
-> > overall. We do know that there will be a reduction of compaction for
-> > the 16K case which will save SOME CPU, but I wouldn't have thought
-> > that this would be substantial since the data is all processed
-> > sequentially in rather large blocks (i.e., the CPU cost of compaction s=
-eems
+> > Yet, we know that in the main I/O path that the 16K is doing more
+> > work (since it's double-writing the data), but is yielding better
+> > CPU usage overall. We do know that there will be a reduction of
+> > compaction for the 16K case which will save SOME CPU, but I wouldn't
+> > have thought that this would be substantial since the data is all
+> > processed sequentially in rather large blocks (i.e., the CPU cost of
+> > compaction seems
 > to be larger than expected).
 > > >
 > > > Do we know that you're actually capturing a few compaction cycles
@@ -154,14 +152,15 @@ eems
 > >
 > > 4k min_alloc:
 > >
-> > > 2016-12-22 19:33:49.722025 7fb188f21700  3 rocksdb: ------- DUMPING
-> > > STATS -------
+> > > 2016-12-22 19:33:49.722025 7fb188f21700  3 rocksdb: -------
+> > > DUMPING STATS -------
 > > > 2016-12-22 19:33:49.722029 7fb188f21700  3 rocksdb:
 > > > ** Compaction Stats [default] **
 > > > Level    Files   Size(MB} Score Read(GB}  Rn(GB} Rnp1(GB} Write(GB}
 > > Wnew(GB} Moved(GB} W-Amp Rd(MB/s} Wr(MB/s} Comp(sec} Comp(cnt}
 > > Avg(sec} KeyIn KeyDrop
-> > > --------------------------------------------------------------------
+> > > ------------------------------------------------------------------
+> > > --
 > > > -----------------------
 > > ---------------------------------------------------------------
 > > >   L0      8/0    1440.37   2.0      0.0     0.0      0.0      63.1   =
@@ -189,7 +188,8 @@ eems
 > > > cumulative 0, interval 0
 > > > AddFile(L0 Files): cumulative 0, interval 0
 > > > AddFile(Keys): cumulative 0, interval 0 Cumulative compaction:
-> > > 146.26 GB write, 76.67 MB/s write, 138.13 GB read, 72.41 MB/s read,
+> > > 146.26 GB write, 76.67 MB/s write, 138.13 GB read, 72.41 MB/s
+> > > read,
 > > > 2060.5 seconds Interval compaction: 65.64 GB write, 34.41 MB/s
 > > > write, 66.16 GB read, 34.68 MB/s read, 774.4 seconds
 > > > Stalls(count): 11 level0_slowdown, 11
@@ -216,14 +216,15 @@ eems
 > >
 > > 16k min_alloc:
 > >
-> > > 2016-12-23 10:20:03.926747 7fef2993d700  3 rocksdb: ------- DUMPING
-> > > STATS -------
+> > > 2016-12-23 10:20:03.926747 7fef2993d700  3 rocksdb: -------
+> > > DUMPING STATS -------
 > > > 2016-12-23 10:20:03.926754 7fef2993d700  3 rocksdb:
 > > > ** Compaction Stats [default] **
 > > > Level    Files   Size(MB} Score Read(GB}  Rn(GB} Rnp1(GB} Write(GB}
 > > Wnew(GB} Moved(GB} W-Amp Rd(MB/s} Wr(MB/s} Comp(sec} Comp(cnt}
 > > Avg(sec} KeyIn KeyDrop
-> > > --------------------------------------------------------------------
+> > > ------------------------------------------------------------------
+> > > --
 > > > -----------------------
 > > ---------------------------------------------------------------
 > > >   L0      3/0     186.38   0.8      0.0     0.0      0.0      49.4   =
@@ -248,10 +249,12 @@ eems
 > > > cumulative 0, interval 0
 > > > AddFile(L0 Files): cumulative 0, interval 0
 > > > AddFile(Keys): cumulative 0, interval 0 Cumulative compaction:
-> > > 145.30 GB write, 76.25 MB/s write, 142.90 GB read, 74.99 MB/s read,
+> > > 145.30 GB write, 76.25 MB/s write, 142.90 GB read, 74.99 MB/s
+> > > read,
 > > > 1760.2 seconds Interval compaction: 61.47 GB write, 32.26 MB/s
 > > > write, 61.59 GB read, 32.32 MB/s read, 720.0 seconds
-> > > Stalls(count): 0 level0_slowdown, 0 level0_slowdown_with_compaction,
+> > > Stalls(count): 0 level0_slowdown, 0
+> > > level0_slowdown_with_compaction,
 > > > 0 level0_numfiles, 0 level0_numfiles_with_compaction, 0 stop for
 > > > pending_compaction_bytes, 0 slowdown for
 > pending_compaction_bytes,
@@ -266,8 +269,8 @@ eems
 > > > 31.20 writes per sync, written: 190.02 GB, 99.72 MB/s Cumulative
 > > > stall: 00:00:0.000 H:M:S, 0.0 percent Interval writes: 14M writes,
 > > > 99M keys, 14M commit groups, 1.0 writes per commit group, ingest:
-> > > 84136.97 MB, 139.20 MB/s Interval WAL: 14M writes, 268K syncs, 52.14
-> > > writes per sync, written: 82.17 MB, 139.20 MB/s Interval stall:
+> > > 84136.97 MB, 139.20 MB/s Interval WAL: 14M writes, 268K syncs,
+> > > 52.14 writes per sync, written: 82.17 MB, 139.20 MB/s Interval stall:
 > > > 00:00:0.000 H:M:S, 0.0 percent
 > >
 > > Mark
@@ -302,7 +305,8 @@ eems
 > > >>> Mark
 > > >>>
 > > >>
-> > >> Ok, Ran through tests with both 4k and 16k min_alloc/max_alloc/blob
+> > >> Ok, Ran through tests with both 4k and 16k
+> > >> min_alloc/max_alloc/blob
 > > sizes
 > > >> using master+12629+12634:
 > > >>
@@ -342,3 +346,16 @@ eems
 > > > ceph-devel" in the body of a message to majordomo@vger.kernel.org
 > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > > >
+
+________________________________
+
+PLEASE NOTE: The information contained in this electronic mail message is i=
+ntended only for the use of the designated recipient(s) named above. If the=
+ reader of this message is not the intended recipient, you are hereby notif=
+ied that you have received this message in error and that any review, disse=
+mination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender =
+by telephone or e-mail (as shown above) immediately and destroy any and all=
+ copies of this message in your possession (whether hard copies or electron=
+ically stored copies).
+
