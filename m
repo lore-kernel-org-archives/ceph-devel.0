@@ -1,57 +1,88 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: async shutdown
-Date: Tue, 27 Dec 2016 21:55:15 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612272154540.10615@piezo.novalocal>
-References: <alpine.DEB.2.11.1612272146160.10033@piezo.novalocal>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Clangs is complaining about type evaluations in test_mempool.cc
+Date: Wed, 28 Dec 2016 00:29:17 +0100
+Message-ID: <d8b38e75-71fc-42e0-6095-5c89994ed2ea@digiware.nl>
+References: <a5128b5c-072c-6d86-63db-a54928bb8d9e@digiware.nl>
+ <20161227161914.GA19064@ultraspiritum.eng.arb.redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:44824 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752294AbcL0WCq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Dec 2016 17:02:46 -0500
-In-Reply-To: <alpine.DEB.2.11.1612272146160.10033@piezo.novalocal>
+Received: from smtp.digiware.nl ([176.74.240.9]:49053 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753332AbcL0XkR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 27 Dec 2016 18:40:17 -0500
+Received: from [192.168.10.10] (asus [192.168.10.10])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id 2D08B34034
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Dec 2016 00:29:18 +0100 (CET)
+In-Reply-To: <20161227161914.GA19064@ultraspiritum.eng.arb.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: haomai@xsky.com
-Cc: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 27 Dec 2016, Sage Weil wrote:
-> I'm chasing a pretty reproducible crash of the rocksdb librados 
-> env backend where it asserts on crypto shutdown with this PR applied:
+On 27-12-2016 17:19, Adam C. Emerson wrote:
+> On 27/12/2016, Willem Jan Withagen wrote:
+>> Perhaps somebody has a suggestion on how to fix this??
 > 
-> 	https://github.com/ceph/ceph/pull/12624
+> I suspect that the container changes in
+> https://github.com/ceph/ceph/pull/12626 will fix it. The denc container
+> encodings in master always assume the default compare and allocator
+> parameters.
 > 
-> This is generally caused by a memory leak of some crypto object (e.g., 
-> CryptoKey).  If it run the test in a loop with ms type = simple it's fine, 
-> but with async it crashes after about 10 minutes.  On one run valgrind 
-> reported a leak from AsyncConnection, although it didn't make any 
-> sense (recv_buf?).  But my suspicion is that the 
-> AsyncMessenger::shutdown() call to stack->drain() isn't sufficient to make 
-> sure all of the connections have actually been destroyed, which means the 
-> cct and crypto shutdown asserts sometimes.
-> 
-> Does that theory make sense?  Any suggestions how to make sure that 
-> the AsyncConnections are reliably reaped during librados shutdown?
 
-...and as soon as I hit send my msg/simple run in a loop also 
-crashed.  Nevermind!
+Eh, nope,....
 
-sage
+Clang still complains about the same thing.
+It is still complaining about a type comparison, and type not being
+compatible.
 
+--WjW
 
-> 
-> Thanks!
-> sage
-> 
-> 
-> BTW here's an example of the crash, although it's not particularly 
-> informative in and of itself:
-> 
-> http://pulpito.ceph.com/sage-2016-12-27_18:31:32-rados-wip-sage-testing---basic-smithi/670919
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+/usr/bin/CC   -DCEPH_LIBDIR=\"/usr/local/lib\"
+-DCEPH_PKGLIBDIR=\"/usr/local/lib/ceph\"
+-I/usr/srcs/Ceph/work/ceph/build/src/include
+-I/usr/srcs/Ceph/work/ceph/src -isystem /usr/local/include -isystem
+/usr/srcs/Ceph/work/ceph/build/include
+-I/usr/srcs/Ceph/work/ceph/src/xxHash
+-I/usr/srcs/Ceph/work/ceph/src/googletest/googlemock/include
+-I/usr/srcs/Ceph/work/ceph/src/googletest/googletest/include  -Wall
+-Wtype-limits -Wignored-qualifiers -Winit-self -Wpointer-arith
+-Werror=format-security -fno-strict-aliasing -fsigned-char
+-Wno-unused-function -Wno-unused-local-typedef -Wno-varargs
+-Wno-gnu-designator -Wno-missing-braces -Wno-parentheses
+-Wno-deprecated-register  -ftemplate-depth-1024 -Wno-invalid-offsetof
+-Wnon-virtual-dtor -Wno-inconsistent-missing-override
+-Wno-mismatched-tags -Wno-unused-private-field -fdiagnostics-color=auto
+-I/usr/local/include/nss/nss -I/usr/local/include/nspr
+-fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc
+-fno-builtin-free -Wno-null-dereference -O0 -g -fPIE   -DHAVE_CONFIG_H
+-D__CEPH__ -D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS
+-I/usr/srcs/Ceph/work/ceph/src/googletest/googlemock/include
+-I/usr/srcs/Ceph/work/ceph/build/src/googletest/googlemock/include
+-I/usr/srcs/Ceph/work/ceph/src/googletest/googletest/include
+-I/usr/srcs/Ceph/work/ceph/build/src/googletest/googletest/include
+-fno-strict-aliasing -std=c++11 -o
+CMakeFiles/unittest_mempool.dir/test_mempool.cc.o -c
+/usr/srcs/Ceph/work/ceph/src/test/test_mempool.cc
+In file included from /usr/srcs/Ceph/work/ceph/src/test/test_mempool.cc:20:
+In file included from
+/usr/srcs/Ceph/work/ceph/src/common/ceph_argparse.h:31:
+In file included from /usr/srcs/Ceph/work/ceph/src/common/entity_name.h:22:
+In file included from /usr/srcs/Ceph/work/ceph/src/include/encoding.h:25:
+In file included from /usr/srcs/Ceph/work/ceph/src/include/denc.h:29:
+/usr/include/c++/v1/map:837:5: error: static_assert failed
+"Allocator::value_type must be same type as value_type"
+    static_assert((is_same<typename allocator_type::value_type,
+value_type>::value),
+    ^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/srcs/Ceph/work/ceph/src/test/test_mempool.cc:235:39: note: in
+instantiation of template class 'std::__1::map<int, int,
+std::__1::less<int>,
+mempool::pool_allocator<mempool::pool_index_t::mempool_unittest_1,
+std::__1::pair<int, int> > >' requested here
+    mempool::unittest_1::map<int,int> v;
+                                      ^
+
