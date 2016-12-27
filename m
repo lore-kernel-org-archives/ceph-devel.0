@@ -1,296 +1,233 @@
-From: Haomai Wang <haomaiwang@gmail.com>
-Subject: Re: How to use async with rdma
-Date: Tue, 27 Dec 2016 18:27:37 +0800
-Message-ID: <CACJqLybEzH+OZqicwsOkSo5Sm3aWX1Hk8Y+0ZxtWWmSK6pWP9w@mail.gmail.com>
-References: <CAAL-TMcLoFUHNo7UUTdj-7NRsedgBaC3wxa5H79h_pk-P9yrcQ@mail.gmail.com>
- <CAAL-TMezoXd0yXb2pysp5gMx9d5XVVchBMCHQJR1kh1Quy3zzw@mail.gmail.com> <CACJqLyYUckuDGo+Bz5mhsMA7aBO6xU5dsfBohK=v2aPyX0Y_rg@mail.gmail.com>
+From: Abhishek L <abhishek.lekshmanan-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: v11.1.1 Kraken rc released
+Date: Tue, 27 Dec 2016 21:43:43 +0530
+Message-ID: <CAEw75dNNv751tDeC2VRNhmVnUg-=_QhA0Lp0OcBmtxZBFZfO7w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:32969 "EHLO
-        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752581AbcL0K1k (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Dec 2016 05:27:40 -0500
-Received: by mail-lf0-f49.google.com with SMTP id c13so185422290lfg.0
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Dec 2016 02:27:39 -0800 (PST)
-In-Reply-To: <CACJqLyYUckuDGo+Bz5mhsMA7aBO6xU5dsfBohK=v2aPyX0Y_rg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Dong Wu <archer.wudong@gmail.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-resend
-
-On Tue, Dec 27, 2016 at 6:27 PM, Haomai Wang <haomaiwang@gmail.com> wrote:
->
-> rdma doesn't support daemonize... we may need to push https://github.com/ceph/ceph/pull/10600 to make it.
->
-> if you want to deploy rdma now, you need to do it manually
->
-> On Tue, Dec 27, 2016 at 5:02 PM, Dong Wu <archer.wudong@gmail.com> wrote:
->>
->> Sorry for my mistake to send an empty email before, here is the content:
->>
->> Hi, Haomai
->>     I want to test async messenger with rdma, but when i ceph-deploy a
->> cluster with the following conf, it failed.
->>
->> ##ceph.conf##
->> [global]
->> fsid = d841b987-c6d6-4267-923a-2ad3e30a6e9b
->> mon_initial_members = ceph21
->> mon_host = 192.168.1.2
->> auth_cluster_required = cephx
->> auth_service_required = cephx
->> auth_client_required = cephx
->>
->> ms_type = async
->> ms_async_transport_type = rdma
->> ms_async_rdma_device_name = mlx4_0
->> ms_async_rdma_port_num = 1
->>
->> osd_crush_chooseleaf_type = 0
->> osd_pool_default_size = 1
->> rbd_default_features = 1
->>
->> ##here is ceph-deploy failed info##
->> cepher@ceph21:~/ceph_deploy$ ceph-deploy mon create-initial
->> [ceph_deploy.conf][DEBUG ] found configuration file at:
->> /home/cepher/.cephdeploy.conf
->> [ceph_deploy.cli][INFO  ] Invoked (1.5.35): /usr/bin/ceph-deploy mon
->> create-initial
->> [ceph_deploy.cli][INFO  ] ceph-deploy options:
->> [ceph_deploy.cli][INFO  ]  username                      : None
->> [ceph_deploy.cli][INFO  ]  verbose                       : False
->> [ceph_deploy.cli][INFO  ]  overwrite_conf                : False
->> [ceph_deploy.cli][INFO  ]  subcommand                    : create-initial
->> [ceph_deploy.cli][INFO  ]  quiet                         : False
->> [ceph_deploy.cli][INFO  ]  cd_conf                       :
->> <ceph_deploy.conf.cephdeploy.Conf instance at 0x7fe9ab01bbd8>
->> [ceph_deploy.cli][INFO  ]  cluster                       : ceph
->> [ceph_deploy.cli][INFO  ]  func                          : <function
->> mon at 0x7fe9ab490140>
->> [ceph_deploy.cli][INFO  ]  ceph_conf                     : None
->> [ceph_deploy.cli][INFO  ]  keyrings                      : None
->> [ceph_deploy.cli][INFO  ]  default_release               : False
->> [ceph_deploy.mon][DEBUG ] Deploying mon, cluster ceph hosts ceph21
->> [ceph_deploy.mon][DEBUG ] detecting platform for host ceph21 ...
->> [ceph21][DEBUG ] connection detected need for sudo
->> [ceph21][DEBUG ] connected to host: ceph21
->> [ceph21][DEBUG ] detect platform information from remote host
->> [ceph21][DEBUG ] detect machine type
->> [ceph21][DEBUG ] find the location of an executable
->> [ceph_deploy.mon][INFO  ] distro info: debian 8.5 jessie
->> [ceph21][DEBUG ] determining if provided host has same hostname in remote
->> [ceph21][DEBUG ] get remote short hostname
->> [ceph21][DEBUG ] deploying mon to ceph21
->> [ceph21][DEBUG ] get remote short hostname
->> [ceph21][DEBUG ] remote hostname: ceph21
->> [ceph21][DEBUG ] write cluster configuration to /etc/ceph/{cluster}.conf
->> [ceph21][DEBUG ] create the mon path if it does not exist
->> [ceph21][DEBUG ] checking for done path: /var/lib/ceph/mon/ceph-ceph21/done
->> [ceph21][DEBUG ] done path does not exist: /var/lib/ceph/mon/ceph-ceph21/done
->> [ceph21][INFO  ] creating keyring file:
->> /var/lib/ceph/tmp/ceph-ceph21.mon.keyring
->> [ceph21][DEBUG ] create the monitor keyring file
->> [ceph21][INFO  ] Running command: sudo ceph-mon --cluster ceph --mkfs
->> -i ceph21 --keyring /var/lib/ceph/tmp/ceph-ceph21.mon.keyring
->> --setuser 64045 --setgroup 64045
->> [ceph21][DEBUG ] ceph-mon: mon.noname-a 192.168.1.2:6789/0 is local,
->> renaming to mon.ceph21
->> [ceph21][DEBUG ] ceph-mon: set fsid to d841b987-c6d6-4267-923a-2ad3e30a6e9b
->> [ceph21][DEBUG ] ceph-mon: created monfs at
->> /var/lib/ceph/mon/ceph-ceph21 for mon.ceph21
->> [ceph21][INFO  ] unlinking keyring file
->> /var/lib/ceph/tmp/ceph-ceph21.mon.keyring
->> [ceph21][DEBUG ] create a done file to avoid re-doing the mon deployment
->> [ceph21][DEBUG ] create the init path if it does not exist
->> [ceph21][INFO  ] Running command: sudo systemctl enable ceph.target
->> [ceph21][INFO  ] Running command: sudo systemctl enable ceph-mon@ceph21
->> [ceph21][INFO  ] Running command: sudo systemctl start ceph-mon@ceph21
->> [ceph21][INFO  ] Running command: sudo ceph --cluster=ceph
->> --admin-daemon /var/run/ceph/ceph-mon.ceph21.asok mon_status
->> [ceph21][ERROR ] admin_socket: exception getting command descriptions:
->> [Errno 111] Connection refused
->> [ceph21][WARNIN] monitor: mon.ceph21, might not be running yet
->> [ceph21][INFO  ] Running command: sudo ceph --cluster=ceph
->> --admin-daemon /var/run/ceph/ceph-mon.ceph21.asok mon_status
->> [ceph21][ERROR ] admin_socket: exception getting command descriptions:
->> [Errno 111] Connection refused
->> [ceph21][WARNIN] monitor ceph21 does not exist in monmap
->> [ceph21][WARNIN] neither `public_addr` nor `public_network` keys are
->> defined for monitors
->> [ceph21][WARNIN] monitors may not be able to form quorum
->> [ceph_deploy.mon][INFO  ] processing monitor mon.ceph21
->> [ceph21][DEBUG ] connection detected need for sudo
->> [ceph21][DEBUG ] connected to host: ceph21
->> [ceph21][DEBUG ] detect platform information from remote host
->> [ceph21][DEBUG ] detect machine type
->> [ceph21][DEBUG ] find the location of an executable
->> [ceph21][INFO  ] Running command: sudo ceph --cluster=ceph
->> --admin-daemon /var/run/ceph/ceph-mon.ceph21.asok mon_status
->> [ceph21][ERROR ] admin_socket: exception getting command descriptions:
->> [Errno 111] Connection refused
->> [ceph_deploy.mon][WARNIN] mon.ceph21 monitor is not yet in quorum, tries left: 5
->> [ceph_deploy.mon][WARNIN] waiting 5 seconds before retrying
->> [ceph21][INFO  ] Running command: sudo ceph --cluster=ceph
->> --admin-daemon /var/run/ceph/ceph-mon.ceph21.asok mon_status
->> [ceph21][ERROR ] admin_socket: exception getting command descriptions:
->> [Errno 111] Connection refused
->> [ceph_deploy.mon][WARNIN] mon.ceph21 monitor is not yet in quorum, tries left: 4
->> [ceph_deploy.mon][WARNIN] waiting 10 seconds before retrying
->>
->>
->> when I just use async posix to deploy a cluster, and then change
->> ceph.conf to use rdma, and then restart ceph-mon , mon crashed.
->> ##first use the ceph.conf to deploy a cluster##
->> [global]
->> fsid = d841b987-c6d6-4267-923a-2ad3e30a6e9b
->> mon_initial_members = ceph21
->> mon_host = 192.168.1.2
->> auth_cluster_required = cephx
->> auth_service_required = cephx
->> auth_client_required = cephx
->>
->> ms_type = async
->>
->> osd_crush_chooseleaf_type = 0
->> osd_pool_default_size = 1
->> rbd_default_features = 1
->>
->> ##then change ceph.conf##
->> ms_async_transport_type = rdma
->> ms_async_rdma_device_name = mlx4_0
->> ms_async_rdma_port_num = 1
->>
->> ##then restart ceph-mon, and mon crash##
->> 2016-12-27 13:16:00.834116 7fd245de67c0  0 set uid:gid to 64045:64045
->> (ceph:ceph)
->> 2016-12-27 13:16:00.834136 7fd245de67c0  0 ceph version 11.1.1
->> (87597971b371d7f497d7eabad3545d72d18dd755), process ceph-mon, pid
->> 56904
->> 2016-12-27 13:16:00.834202 7fd245de67c0  0 pidfile_write: ignore empty
->> --pid-file
->> 2016-12-27 13:16:00.846997 7fd245de67c0  0 load: jerasure load: lrc load: isa
->> 2016-12-27 13:16:00.847275 7fd245de67c0  1 leveldb: Recovering log #3
->> 2016-12-27 13:16:00.847326 7fd245de67c0  1 leveldb: Level-0 table #5: started
->> 2016-12-27 13:16:00.872185 7fd245de67c0  1 leveldb: Level-0 table #5:
->> 574 bytes OK
->> 2016-12-27 13:16:00.918333 7fd245de67c0  1 leveldb: Delete type=0 #3
->>
->> 2016-12-27 13:16:00.918379 7fd245de67c0  1 leveldb: Delete type=3 #2
->>
->> 2016-12-27 13:16:00.919215 7fd245de67c0 -1 *** Caught signal
->> (Segmentation fault) **
->>  in thread 7fd245de67c0 thread_name:ceph-mon
->>
->>  ceph version 11.1.1 (87597971b371d7f497d7eabad3545d72d18dd755)
->>  1: (()+0x722bc7) [0x7fd24587bbc7]
->>  2: (()+0xf8d0) [0x7fd2439d48d0]
->>  3: (pthread_spin_lock()+0) [0x7fd2439d1bd0]
->>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->> needed to interpret this.
->>
->> --- begin dump of recent events ---
->>    -32> 2016-12-27 13:16:00.826676 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command perfcounters_dump hook
->> 0x7fd24eac0030
->>    -31> 2016-12-27 13:16:00.826690 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command 1 hook 0x7fd24eac0030
->>    -30> 2016-12-27 13:16:00.826694 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command perf dump hook 0x7fd24eac0030
->>    -29> 2016-12-27 13:16:00.826731 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command perfcounters_schema hook
->> 0x7fd24eac0030
->>    -28> 2016-12-27 13:16:00.826734 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command 2 hook 0x7fd24eac0030
->>    -27> 2016-12-27 13:16:00.826745 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command perf schema hook 0x7fd24eac0030
->>    -26> 2016-12-27 13:16:00.826749 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command perf reset hook 0x7fd24eac0030
->>    -25> 2016-12-27 13:16:00.826757 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command config show hook 0x7fd24eac0030
->>    -24> 2016-12-27 13:16:00.826767 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command config set hook 0x7fd24eac0030
->>    -23> 2016-12-27 13:16:00.826771 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command config get hook 0x7fd24eac0030
->>    -22> 2016-12-27 13:16:00.826774 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command config diff hook 0x7fd24eac0030
->>    -21> 2016-12-27 13:16:00.826784 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command log flush hook 0x7fd24eac0030
->>    -20> 2016-12-27 13:16:00.826787 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command log dump hook 0x7fd24eac0030
->>    -19> 2016-12-27 13:16:00.826796 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command log reopen hook 0x7fd24eac0030
->>    -18> 2016-12-27 13:16:00.826808 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command dump_mempools hook
->> 0x7fd24ebc1548
->>    -17> 2016-12-27 13:16:00.834116 7fd245de67c0  0 set uid:gid to
->> 64045:64045 (ceph:ceph)
->>    -16> 2016-12-27 13:16:00.834136 7fd245de67c0  0 ceph version 11.1.1
->> (87597971b371d7f497d7eabad3545d72d18dd755), process ceph-mon, pid
->> 56904
->>    -15> 2016-12-27 13:16:00.834202 7fd245de67c0  0 pidfile_write:
->> ignore empty --pid-file
->>    -14> 2016-12-27 13:16:00.836477 7fd245de67c0  5
->> asok(0x7fd24ebfc000) init /var/run/ceph/ceph-mon.ceph21.asok
->>    -13> 2016-12-27 13:16:00.836489 7fd245de67c0  5
->> asok(0x7fd24ebfc000) bind_and_listen
->> /var/run/ceph/ceph-mon.ceph21.asok
->>    -12> 2016-12-27 13:16:00.836518 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command 0 hook 0x7fd24eabe0c8
->>    -11> 2016-12-27 13:16:00.836531 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command version hook 0x7fd24eabe0c8
->>    -10> 2016-12-27 13:16:00.836535 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command git_version hook 0x7fd24eabe0c8
->>     -9> 2016-12-27 13:16:00.836545 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command help hook 0x7fd24eac01e0
->>     -8> 2016-12-27 13:16:00.836550 7fd245de67c0  5
->> asok(0x7fd24ebfc000) register_command get_command_descriptions hook
->> 0x7fd24eac01f0
->>     -7> 2016-12-27 13:16:00.836606 7fd23f576700  5
->> asok(0x7fd24ebfc000) entry start
->>     -6> 2016-12-27 13:16:00.846997 7fd245de67c0  0 load: jerasure
->> load: lrc load: isa
->>     -5> 2016-12-27 13:16:00.847275 7fd245de67c0  1 leveldb: Recovering log #3
->>     -4> 2016-12-27 13:16:00.847326 7fd245de67c0  1 leveldb: Level-0
->> table #5: started
->>     -3> 2016-12-27 13:16:00.872185 7fd245de67c0  1 leveldb: Level-0
->> table #5: 574 bytes OK
->>     -2> 2016-12-27 13:16:00.918333 7fd245de67c0  1 leveldb: Delete type=0 #3
->>
->>     -1> 2016-12-27 13:16:00.918379 7fd245de67c0  1 leveldb: Delete type=3 #2
->>
->>      0> 2016-12-27 13:16:00.919215 7fd245de67c0 -1 *** Caught signal
->> (Segmentation fault) **
->>  in thread 7fd245de67c0 thread_name:ceph-mon
->>
->>  ceph version 11.1.1 (87597971b371d7f497d7eabad3545d72d18dd755)
->>  1: (()+0x722bc7) [0x7fd24587bbc7]
->>  2: (()+0xf8d0) [0x7fd2439d48d0]
->>  3: (pthread_spin_lock()+0) [0x7fd2439d1bd0]
->>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->> needed to interpret this.
->>
->>
->>
->> 2016-12-27 16:52 GMT+08:00 Dong Wu <archer.wudong@gmail.com>:
->> > HI, Haomai
->
->
->
->
-> --
->
-> Best Regards,
->
-> Wheat
-
-
-
-
--- 
-
-Best Regards,
-
-Wheat
+SGkgZXZlcnlvbmUsCgpUaGlzIGlzIHRoZSBzZWNvbmQgcmVsZWFzZSBjYW5kaWRhdGUgZm9yIGty
+YWtlbiwgdGhlIG5leHQgc3RhYmxlIHJlbGVhc2Ugc2VyaWVzLgoKTWFqb3IgQ2hhbmdlcyBmcm9t
+IEpld2VsCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQotICpSQURPUyo6CgogICogVGhlIG5ldyAq
+Qmx1ZVN0b3JlKiBiYWNrZW5kIG5vdyBoYXMgYSBjaGFuZ2UgaW4gdGhlIG9uLWRpc2sKICAgIGZv
+cm1hdCwgZnJvbSB0aGUgcHJldmlvdXMgcmVsZWFzZSBjYW5kaWRhdGUgMTEuMS4wIGFuZCB0aGVy
+ZSBtaWdodAogICAgcG9zc2libHkgYmUgYSBjaGFuZ2UgYmVmb3JlIHRoZSBmaW5hbCByZWxlYXNl
+IGlzIGN1dAoKCk5vdGFibGUgQ2hhbmdlczoKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQoqIGJs
+dWVzdG9yZTogY2VwaC1kaXNrOiBhZGp1c3QgYmx1ZXN0b3JlIGRlZmF1bHQgZGV2aWNlIHNpemVz
+CihwciMxMjUzMCwgU2FnZSBXZWlsKQoqIGJsdWVzdG9yZTogb3MvYmx1ZXN0b3JlOiBhdm9pZCBy
+ZXNoYXJkaW5nIGlmIHRoZSBsYXN0IHNoYXJkIHNpemUKZmFsbCBiZWxvdyBzaGFy4oCmIChwciMx
+MjQ0NywgSWdvciBGZWRvdG92KQoqIGJsdWVzdG9yZTogb3MvYmx1ZXN0b3JlOiBjbGVhciBvbWFw
+IGZsYWcgaWYgcGFyZW50IGhhcyBub25lCihwciMxMjM1MSwgeGllIHhpbmdndW8pCiogYmx1ZXN0
+b3JlOiBvcy9ibHVlc3RvcmU6IGRvbuKAmXQgaW1wbGljaXRseSBjcmVhdGUgdGhlIHNvdXJjZSBv
+YmplY3QKZm9yIGNsb25lIChwciMxMjM1MywgeGllIHhpbmdndW8pCiogYmx1ZXN0b3JlOiBvcy9i
+bHVlc3RvcmU6IGZpeCBvbmRpc2sgZW5jb2RpbmcgZm9yIGJsb2JzIChwciMxMjQ4OCwKVmFyYWRh
+IEthcmksIFNhZ2UgV2VpbCkKKiBibHVlc3RvcmU6IG9zL2JsdWVzdG9yZTogZml4IHBvdGVudGlh
+bCBjc3VtX29yZGVyIG92ZXJmbG93CihwciMxMjMzMywgeGllIHhpbmdndW8pCiogYmx1ZXN0b3Jl
+OiBvcy9ibHVlc3RvcmU6IGZpeCB0YXJnZXRfYnVmZmVyIHZhbHVlIG92ZXJmbG93IGluCkNhY2hl
+Ojp0cmltKCkgKHByIzEyNTA3LCBJZ29yIEZlZG90b3YpCiogYmx1ZXN0b3JlOiBvcy9ibHVlc3Rv
+cmU6IGluY2x1ZGUgbW9kaWZpZWQgb2JqZWN0cyBpbiBmbHVzaCBsaXN0IGV2ZW4KaWYgb25vZGUg
+dW5jaGFuZ2VkIChwciMxMjU0MSwgU2FnZSBXZWlsKQoqIGJsdWVzdG9yZTogb3MvYmx1ZXN0b3Jl
+OiBwcmVzZXJ2ZSBzb3VyY2UgY29sbGVjdGlvbiBjYWNoZSBkdXJpbmcKc3BsaXQgKHByIzEyNTc0
+LCBTYWdlIFdlaWwpCiogYmx1ZXN0b3JlOiBvcy9ibHVlc3RvcmU6IHJlbW92ZSDigJhleHRlbnRz
+4oCZIGZyb20gc2hhcmRfaW5mbyAocHIjMTI2MjksClNhZ2UgV2VpbCkKKiBibHVlc3RvcmU6IG9z
+L2JsdWVzdG9yZTogc2ltcGxpZmllZCBhbGxvY2F0b3IgaW50ZXJmYWNlcyB0byBzaW5nbGUKYXBp
+cyAocHIjMTIzNTUsIFJhbWVzaCBDaGFuZGVyKQoqIGJsdWVzdG9yZTogb3MvYmx1ZXN0b3JlOiBz
+aW1wbGlmeSBhbGxvY2F0b3IgcmVsZWFzZSBmbG93IChwciMxMjM0MywgU2FnZSBXZWlsKQoqIGJ1
+aWxkL29wcyxjb21tb246IGNvbW1vbi9zdHJfbGlzdC5oOiBmaXggY2xhbmcgd2FybmluZyBhYm91
+dApzdGQ6Om1vdmUgKHByIzEyNTcwLCBXaWxsZW0gSmFuIFdpdGhhZ2VuKQoqIGJ1aWxkL29wczog
+Q01ha2VMaXN0czogYWRkIHZzdGFydC1iYXNlIHRhcmdldCAocHIjMTI0NzYsIFNhZ2UgV2VpbCkK
+KiBidWlsZC9vcHM6IHN5c3RlbWQ6IEZpeCBzdGFydHVwIG9mIGNlcGgtbWdyIG9uIERlYmlhbiA4
+IChwciMxMjU1NSwKTWFyayBLb3JlbmJlcmcpCiogYnVpbGQvb3BzOiB1cHN0YXJ0OiBmaXggY2Vw
+aC1jcnVzaC1sb2NhdGlvbiBkZWZhdWx0IChpc3N1ZSM2Njk4LApwciM4MDMsIEphc29uIERpbGxh
+bWFuKQoqIGNlcGhmcyxjbGVhbnVwOiBjZXBoLWZ1c2U6IHN0YXJ0IHVwIGxvZyBvbiBwYXJlbnQg
+cHJvY2VzcyBiZWZvcmUKc2h1dGRvd24gKGlzc3VlIzE4MTU3LCBwciMxMjM1OCwgS2VmdSBDaGFp
+KQoqIGNlcGhmczogY2xpZW50L21kczogQ2xlYXIgc2V0dWlkIGJpdHMgd2hlbiB3cml0aW5nIG9y
+IHRydW5jYXRpbmcKKGlzc3VlIzE4MTMxLCBwciMxMjQxMiwgSmVmZiBMYXl0b24pCiogY2VwaGZz
+OiBjbGllbnQ6IGZpeCBtdXRleCBuYW1lIHR5cG9zIChwciMxMjQwMSwgWXVuY2h1YW4KV2VuKWNl
+cGgtZGV2ZWwgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPiwKY2VwaC11c2VycyA8Y2VwaC11
+c2Vyc0BjZXBoLmNvbT4sCmNlcGgtbWFpbnRhaW5lcnNAY2VwaC5jb20sCmNlcGgtYW5ub3VuY2VA
+Y2VwaC5jb20KKiBjZXBoZnM6IGNsaWVudDogc2V0IG1ldGFkYXRhW+KAnHJvb3TigJ1dIGZyb20g
+bW91bnQgbWV0aG9kIHdoZW4gaXTigJlzCmNhbGxlZCB3aXRoIOKApiAocHIjMTI1MDUsIEplZmYg
+TGF5dG9uKQoqIGNlcGhmczogZ2V0IG5ldyBmc21hcCBhZnRlciBtYXJraW5nIGNsdXN0ZXJzIGRv
+d24gKGlzc3VlIzcyNzEsCmlzc3VlIzE3ODk0LCBwciMxMjYyLCBQYXRyaWNrIERvbm5lbGx5KQoq
+IGNlcGhmczogbGliY2VwaGZzOiBhZGQgcmVhZGxpbmsgZnVuY3Rpb24gaW4gY2VwaGZzLnB5eCAo
+cHIjMTIzODQsIGh1YW53ZW4gcmVuKQoqIGNlcGhmczogbW9uL01EU01vbml0b3I6IGZpeCBpdGVy
+YXRpbmcgb3ZlciBtdXRhdGVkIG1hcCAoaXNzdWUjMTgxNjYsCnByIzEyMzk1LCBKb2huIFNwcmF5
+KQoqIGNlcGhmczogc3lzdGVtZDogYWRkIGNlcGgtZnVzZSBzZXJ2aWNlIGZpbGUgKHByIzExNTQy
+LCBQYXRyaWNrIERvbm5lbGx5KQoqIGNlcGhmczogdGVzdCBmcmFnbWVudCBzaXplIGxpbWl0IChp
+c3N1ZSMxNjE2NCwgcHIjMTA2OSwgUGF0cmljayBEb25uZWxseSkKKiBjZXBoZnM6IHRlc3QgcmVh
+ZGFoZWFkIGlzIHdvcmtpbmcgKGlzc3VlIzE2MDI0LCBwciMxMDQ2LCBQYXRyaWNrIERvbm5lbGx5
+KQoqIGNlcGhmczogdXBkYXRlIHRlc3RzIHRvIGVuYWJsZSBtdWx0aW1kcyB3aGVuIG5lZWRlZCAo
+cHIjOTMzLCBHcmVnIEZhcm51bSkKKiBjZXBoZnM6IFBvcnQvYm9vdHN0cmFwIChwciM4MjcsIFlh
+biwgWmhlbmcpCiogY2xlYW51cCxjb21tb246IGNvbW1vbi9ibGtkZXY6IHVzZSByZWFscGF0aCBp
+bnN0ZWFkIG9mIHJlYWRsaW5rIHRvCnJlc29sdmUgdGhlIHJlY3Vyc+KApiAocHIjMTI0NjIsIFhp
+bnplIENoaSkKKiBjbGVhbnVwLHJiZDogam91cm5hbDogYXZvaWQgbG9nZ2luZyBhbiBlcnJvciB3
+aGVuIGEgd2F0Y2ggaXMKYmxhY2tsaXN0ZWQgKGlzc3VlIzE4MjQzLCBwciMxMjQ3MywgSmFzb24g
+RGlsbGFtYW4pCiogY2xlYW51cCxyYmQ6IGpvdXJuYWw6IHByZXZlbnQgcmVwZXRpdGl2ZSBlcnJv
+ciBtZXNzYWdlcyBhZnRlciBiZWluZwpibGFja2xpc3RlZCAoaXNzdWUjMTgyNDMsIHByIzEyNDk3
+LCBKYXNvbiBEaWxsYW1hbikKKiBjbGVhbnVwOiBXaXAgY3R5cG9zIChwciMxMjQ5NSwgeGlhbnhp
+YXhpYW8pCiogY2xlYW51cDogZml4IHR5cG9zIChwciMxMjUwMiwgeGlhbnhpYXhpYW8pCiogY2xl
+YW51cDogcmVtb3ZlIHVudXNlZCBkZWNsYXJhdGlvbiAocHIjMTI0NjYsIExpIFdhbmcsIFl1bmNo
+dWFuIFdlbikKKiBjb21tb246IGZpeCBjbGFuZyBjb21waWxhdGlvbiBlcnJvciAocHIjMTI1NjUs
+IE15a29sYSBHb2x1YikKKiBjb21tb246IG9zZC9vc2RtYXA6IGZpeCBkaXZpZGUgYnkgemVybyBl
+cnJvciAocHIjMTI1MjEsIFl1bmNodWFuIFdlbikKKiBjb21tb246IGNsaWVudC9DbGllbnQuY2M6
+IGZpeC9zaWxlbmNlIOKAnGxvZ2ljYWxseSBkZWFkIGNvZGXigJ0KQ0lELUVycm9yIChwciMyOTEs
+IFllaHVkYSBTYWRlaCkKKiBjb3JlLGNsZWFudXA6IGNlcGgtZGlzazogZG8gbm90IGNyZWF0ZSBi
+bHVlc3RvcmUgd2FsL2RiIHBhcnRpdGlvbnMKYnkgZGVmYXVsdCAoaXNzdWUjMTgyOTEsIHByIzEy
+NTMxLCBMb2ljIERhY2hhcnkpCiogY29yZSxjbGVhbnVwOiBvc2QvUmVwbGljYXRlZFBHOiByZW1v
+dmUgcmVkdW5kYW50IGNoZWNrIGZvcgpiYWxhbmNlL2xvY2FsaXplIHJlYWQgKHByIzEwMjA5LCBy
+dW5zaXNpKQoqIGNvcmUsY2xlYW51cDogc3JjOiByZW5hbWUgUmVwbGljYXRlZFBHIHRvIFByaW1h
+cnlMb2dQRyAocHIjMTI0ODcsIFNhbXVlbCBKdXN0KQoqIGNvcmUscGVyZm9ybWFuY2U6IG9zZC9Q
+cmltYXJ5TG9nUEc6IGRvbuKAmXQgdHJ1bmNhdGUgaWYgd2UgZG9u4oCZdCBoYXZlCnRvIGZvciBX
+UklURUZVTEwgKHByIzEyNTM0LCBTYW11ZWwgSnVzdCkKKiBjb3JlLHRlc3RzOiB0ZXN0L3JhZG9z
+L2xpc3QuY2M6IE1lbW9yeSBsZWFrIGluCmNlcGhfdGVzdF9yYWRvc19hcGlfbGlzdCAoaXNzdWUj
+MTgyNTAsIHByIzEyNDc5LCBCcmFkIEh1YmJhcmQpCiogY29yZTogbW9uOiBtYWtlIGl0IG1vcmUg
+Y2xlYXJseSB0byBkZWJ1ZyBmb3IgcGF4b3Mgc3RhdGUgKHByIzEyNDM4LApzb25nIGJhaXNlbikK
+KiBjb3JlOiBGcmVlQlNEL09TRC5jYzogYWRkIGNsaWVudF9tZXNzZW5nZXIgdG8gdGhlIGF2b2lk
+X3BvcnRzIHNldC4KKHByIzEyNDYzLCBXaWxsZW0gSmFuIFdpdGhhZ2VuKQoqIGNvcmU6IGNlcGgu
+aW46IGFsbG93IOKAmGZsYWdz4oCZIHRvIG5vdCBiZSBwcmVzZW50IGluIGNtZGRlc2NzCihpc3N1
+ZSMxODI5NywgcHIjMTI1NDAsIERhbiBNaWNrKQoqIGNvcmU6IGVyYXN1cmUtY29kZTogc3luY2hy
+b25pemUgd2l0aCB1cHN0cmVhbSBnZi1jb21wbGV0ZQooaXNzdWUjMTgwOTIsIHByIzEyMzgyLCBM
+b2ljIERhY2hhcnkpCiogY29yZTogb3NkL1BHOiBhZGQg4oCcZG93buKAnSBwZyBzdGF0ZSAoZGlz
+dGluY3QgZnJvbSBkb3duK3BlZXJpbmcpCihwciMxMjI4OSwgU2FnZSBXZWlsKQoqIGNvcmU6IG9z
+ZC9SZXBsaWNhdGVkUEc6OnJlY29yZF93cml0ZV9lcnJvcjogZG9u4oCZdCBsZWFrIG9yaWdfcmVw
+bHkgb24KY2FuY2VsIChpc3N1ZSMxODE4MCwgcHIjMTI0NTAsIFNhbXVlbCBKdXN0KQoqIGNvcmU6
+IHJlbW92ZSBzcHVyaW91cyBleGVjdXRhYmxlIHBlcm1pc3Npb25zIG9uIHNvdXJjZSBjb2RlIGZp
+bGVzCihwciMxMDYxLCBTYW11ZWwgSnVzdCkKKiBkb2M6IGRvYy9kZXYvb3NkX2ludGVybmFsczog
+YWRkIHBncG9vbC5yc3QgKHByIzEyNTAwLCBCcmFkIEh1YmJhcmQpCiogZG9jOiBkb2N1bWVudCBv
+c2QgdGVsbCBiZW5jaCAoaXNzdWUjNTQzMSwgcHIjMTYsIFNhZ2UgV2VpbCkKKiBkb2M6IGV4cGxh
+aW4gcmd3X2ZjZ2lfc29ja2V0X2JhY2tsb2cgaW4gcmd3L2NvbmZpZy1yZWYucnN0CihwciMxMjU0
+OCwgbGl1Y2hhbmcwODEyKQoqIGRvYzogZmluYWwgYWRkaXRpb25zIHRvIDExLjEuMC1yYyByZWxl
+YXNlIG5vdGVzIChwciMxMjQ0OCwgQWJoaXNoZWsKTGVrc2htYW5hbikKKiBkb2M6IG1lbnRpb24g
+Y29ycmVzcG9uZGluZyBsaWJ2aXJ0IHNlY3Rpb24gaW4gbm92YS5jb25mIChwciMxMjU4NCwKTWFy
+YyBLb2RlcmVyKQoqIGZzOiBhZGQgc25hcHNob3QgdGVzdHMgdG8gbWRzIHRocmFzaGluZyAocHIj
+MTA3MywgWWFuLCBaaGVuZykKKiBmczogZW5hYmxlIGNlcGgtZnVzZSBwZXJtaXNzaW9uIGNoZWNr
+aW5nIGZvciBhbGwgcGpkIHN1aXRlcwoocHIjMTE4NywgR3JlZyBGYXJudW0pCiogZnM6IGZpeCB0
+d28gZnJhZ19lbmFibGUgZnJhZ21lbnRzIChpc3N1ZSM2MTQzLCBwciM2NTYsIFNhZ2UgV2VpbCkK
+KiBmczogZml4IHVwIGRkIHRlc3RpbmcgYWdhaW4gKGlzc3VlIzEwODYxLCBwciMzNzMsIEdyZWcg
+RmFybnVtKQoqIGZzOiBmdXNlX2RlZmF1bHRfcGVybWlzc2lvbnMgPSAwIGZvciBrZXJuZWwgYnVp
+bGQgdGVzdCAocHIjMTEwOSwKUGF0cmljayBEb25uZWxseSkKKiBmczogdW5pZnkgY29tbW9uIHBh
+cnRzIG9mIHN1Yi1zdWl0ZXMgKGlzc3VlIzE3MzcsIHByIzEyODIsIFBhdHJpY2sgRG9ubmVsbHkp
+CiogbGlicmFkb3M6IE1lbW9yeSBsZWFrcyBpbiBvYmplY3RfbGlzdF9iZWdpbiBhbmQgb2JqZWN0
+X2xpc3RfZW5kCihpc3N1ZSMxODI1MiwgcHIjMTI0ODIsIEJyYWQgSHViYmFyZCkKKiBsaWJyYmQ6
+IGlnbm9yZSBlcnJvciB3aGVuIG9iamVjdCBtYXAgaXMgYWxyZWFkeSBsb2NrZWQgYnkgY3VycmVu
+dApjbGllbnQgKGlzc3VlIzE2MTc5LCBwciMxMjQ4NCwgcnVuc2lzaSkKKiBsaWJyYmQ6IGtlZXAg
+cmJkX2RlZmF1bHRfZmVhdHVyZXMgc2V0dGluZyBhcyBiaXRtYXNrIChpc3N1ZSMxODI0NywKcHIj
+MTI0ODYsIEphc29uIERpbGxhbWFuKQoqIGxpYnJiZDogcHJvcGVybHkgb3JkZXIgY29uY3VycmVu
+dCB1cGRhdGVzIHRvIHRoZSBvYmplY3QgbWFwCihpc3N1ZSMxNjE3NiwgcHIjMTI0MjAsIEphc29u
+IERpbGxhbWFuKQoqIGxpYnJiZDogcmVtb3ZlIGltYWdlIGhlYWRlciBsb2NrIGFzc2VydGlvbnMg
+KGlzc3VlIzE4MjQ0LCBwciMxMjQ3MiwKSmFzb24gRGlsbGFtYW4pCiogbGlicmJkOiB1c2UgcHJv
+cGVyIHNuYXBzaG90IHdoZW4gY29tcHV0aW5nIGRpZmYgcGFyZW50IG92ZXJsYXAKKGlzc3VlIzE4
+MjAwLCBwciMxMjM5NiwgWGlhb3hpIENoZW4pCiogbWRzOiBhZGQgdGVzdHMgZm9yIG1hbnRsZSAo
+cHJvZ3JhbW1hYmxlIGJhbGFuY2VyKSAocHIjMTE0NSwgTWljaGFlbCBTZXZpbGxhKQoqIG1kczog
+cmVsZWFzZSBwb29sIGFsbG9jYXRvciBtZW1vcnkgYWZ0ZXIgZXhjZWVkaW5nIHNpemUgbGltaXQK
+KGlzc3VlIzE4MjI1LCBwciMxMjQ0MywgSm9obiBTcHJheSkKKiBvc2Q6IEZpeCBtYXAgZ2FwcyBh
+Z2FpbiAoYnVnIDE1OTQzKSAoaXNzdWUjMTU5NDMsIHByIzEyNTcxLCBTYW11ZWwgSnVzdCkKKiBv
+c2Q6IEluY3JlYXNlIHByaW9yaXR5IGZvciBpbmFjdGl2ZSBQR3MgYmFja2ZpbGwgKHByIzEyMzg5
+LApCYXJ0xYJvbWllaiDFmndpxJlja2kpCiogb3NkOiBXaGVuIGRlZXAtc2NydWIgZXJyb3JzIHBy
+ZXNlbnQgdXBncmFkZSByZWd1bGFyIHNjcnVicwoocHIjMTIyNjgsIERhdmlkIFphZm1hbikKKiBv
+c2Q6IGRlZmF1bHQgb3NkX3NjcnViX2R1cmluZ19yZWNvdmVyeT1mYWxzZSAocHIjMTI0MDIsIFNh
+Z2UgV2VpbCkKKiBvc2Q6IGVuaGFuY2UgbG9nZ2luZyBmb3Igb3NkIG5ldHdvcmsgZXJyb3IgKHBy
+IzEyNDU4LCBsaXVjaGFuZzA4MTIpCiogb3NkOiBmaXggQ0VQSF9PU0RfRkxBR19SV09SREVSRUQg
+KHByIzEyNjAzLCBTYWdlIFdlaWwpCiogb3NkOiBmb3JjZSB3YXRjaCBQSU5HIHRvIGJlIHdyaXRl
+IG9yZGVyZWQgKGlzc3VlIzE4MzEwLCBwciMxMjU5MCwKU2FtdWVsIEp1c3QpY2VwaC1kZXZlbCA8
+Y2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmc+LApjZXBoLXVzZXJzIDxjZXBoLXVzZXJzQGNlcGgu
+Y29tPiwKY2VwaC1tYWludGFpbmVyc0BjZXBoLmNvbSwKY2VwaC1hbm5vdW5jZUBjZXBoLmNvbQoq
+IG9zZDogbWFyayBxdWV1ZWQgZmxhZyBmb3Igb3AgKHByIzEyMzUyLCBZdW5jaHVhbiBXZW4pCiog
+b3NkOiByZW1vdmUgdGhlIGxvY2sgaGVhcnRiZWF0X3VwZGF0ZV9sb2NrLCBhbmQgY2hhbmdlCmhl
+YXRiZWF0X25lZWRf4oCmIChwciMxMjQ2MSwgUGFuIExpdSkKKiBvc2Q6IG9zZC9PU0RNb25pdG9y
+OiBhY2NlcHQg4oCYb3NkIHBvb2wgc2V0IC4uLuKAmSB2YWx1ZSBhcyBzdHJpbmcKKHByIzkxMSwg
+RGF2aWQgWmFmbWFuKQoqIG9zZDogUmVwbGljYXRlZFBHOiBkb27igJl0IGJsZXNzIENfT1NEX1Nl
+bmRNZXNzYWdlT25Db25uIChpc3N1ZSMxMzMwNCwKcHIjNjY5LCBKYXNvbiBEaWxsYW1hbikKKiBv
+c2Q6IFBHTG9nOiBpbml0aWFsaXplIHdyaXRlb3V0X2Zyb20gaW4gUEdMb2cgY29uc3RydWN0b3IK
+KGlzc3VlIzEyOTczLCBwciM1NTgsIFNhZ2UgV2VpbCkKKiBwZXJmb3JtYW5jZSxibHVlc3RvcmU6
+IG9zL2JsdWVzdG9yZTogcmVkdWNlIE9ub2RlIGluLW1lbW9yeQpmb290cHJpbnQgKHByIzEyNTY4
+LCBJZ29yIEZlZG90b3YpCiogcGVyZm9ybWFuY2UsY29tbW9uOiBvc2QvT1NETWFwOiBpbXByb3Zl
+IHRoZSBwZXJmb3JtYW5jZSBvZgpjZXBoLWRldmVsIDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9y
+Zz4sCmNlcGgtdXNlcnMgPGNlcGgtdXNlcnNAY2VwaC5jb20+LApjZXBoLW1haW50YWluZXJzQGNl
+cGguY29tLApjZXBoLWFubm91bmNlQGNlcGguY29tcGdfdG9fYWN0aW5nX29zZHMgKHByIzEyMTkw
+LCBQYW4gTGl1KQoqIHJiZCx0b29sczogcmJkIDogbWFrZSBvcHRpb24g4oCTc3RyaXBlLXVuaXQg
+dy8gQi9LL00gd29yayAocHIjMTI0MDcsCkppYW5wZW5nIE1hKQoqIHJiZDogYWRkIGZzeCBqb3Vy
+bmFsIHJlcGxheSB0ZXN0IGNhc2UgKHByIzgyMSwgSmFzb24gRGlsbGFtYW4pCiogcmJkOiBhZGQg
+c2luZ2xldG9uIHRvIGFzc2VydCBubyByYmRtYXAgcmVncmVzc2lvbiAoaXNzdWUjMTQ5ODQsCnBy
+IzkwMiwgTmF0aGFuIEN1dGxlcikKKiByYmQ6IGFkZCBzb21lIG1pc3Npbmcgd29ya3VuaXRzIChw
+ciM4NzAsIEpvc2ggRHVyZ2luKQoqIHJiZDogYWRkZWQgcmJkLW5iZCBmc3ggdGVzdCBjYXNlIChw
+ciMxMDQ5LCBKYXNvbiBEaWxsYW1hbikKKiByYmQ6IGZpeCBqc29uIGZvcm1hdHRpbmcgZm9yIGlt
+YWdlIGFuZCBqb3VybmFsIHN0YXR1cyBvdXRwdXQKKGlzc3VlIzE4MjYxLCBwciMxMjUyNSwgTXlr
+b2xhIEdvbHViKQoqIHJiZDogbW92ZSBuYmQgdGVzdCB3b3JrbG9hZCB0byBzZXBhcmF0ZSBjbGll
+bnQgaG9zdCBmcm9tIE9TRHMKKHByIzExNzAsIEphc29uIERpbGxhbWFuKQoqIHJiZDogcHJvdmlz
+aW9uIHZvbHVtZXMgdG8gZm9ybWF0IGFzIFhGUyAoaXNzdWUjNjY5MywgcHIjMTAyOCwgTG9pYyBE
+YWNoYXJ5KQoqIHJiZDogcmJkLW5iZDogaW52YWxpZCBlcnJvciBjb2RlIGZvciDigJxmYWlsZWQg
+dG8gcmVhZCBuYmQgcmVxdWVzdOKAnQptZXNzYWdlcyAoaXNzdWUjMTgyNDIsIHByIzEyNDgzLCBN
+eWtvbGEgR29sdWIpCiogcmJkOiB0ZXN0cyB3aXRoIHJiZF9za2lwX3BhcnRpYWxfZGlzY2FyZCBv
+cHRpb24gZW5hYmxlZCAocHIjMTA3NywKTXlrb2xhIEdvbHViKQoqIHJiZDogdXBkYXRlZCB0ZXN0
+cyB0byB1c2UgbmV3IHJiZCBkZWZhdWx0IGZlYXR1cmUgc2V0IChwciM4NDIsIEphc29uIERpbGxh
+bWFuKQoqIHJndzogYWRkIGRlZmF1bHQgem9uZSBuYW1lIChpc3N1ZSM3MDA5LCBwciM5NTQsIE9y
+aXQgV2Fzc2VybWFuKQoqIHJndzogYWRkIG9wdGlvbiB0byBsb2cgY3VzdG9tIEhUVFAgaGVhZGVy
+cyAocmd3X2xvZ19odHRwX2hlYWRlcnMpCihwciM3NjM5LCBNYXR0IEJlbmphbWluKQoqIHJndzog
+YWRkIHNsZWVwIHRvIGxldCB0aGUgc3luYyBhZ2VudCBpbml0IChwciMxMTM2LCBPcml0IFdhc3Nl
+cm1hbikKKiByZ3c6IGFsbG93IGZhc3RjZ2kgaWRsZSB0aW1lb3V0IHRvIGJlIGFkanVzdGVkIChw
+ciMyMzAsIFNhZ2UgV2VpbCkKKiByZ3c6IGF3czQ6IGFkZCBwcmVzaWduZWQgdXJsIGJ1Z2ZpeCBp
+biBydW50aW1lIChpc3N1ZSMxNjQ2MywKcHIjMTAxNjAsIEphdmllciBNLiBNZWxsaWQpCiogcmd3
+OiBkYXRhX2V4dHJhX3Bvb2wgaXMgdW5pcXVlIHBlciB6b25lIChpc3N1ZSMxNzAyNSwgcHIjMTEx
+OSwgT3JpdCBXYXNzZXJtYW4pCiogcmd3OiBkbyBub3QgZW5hYmxlIGJvdGggdGNwIGFuZCB1ZHMg
+Zm9yIGZhc3RjZ2kgKGlzc3VlIzU3OTcsIHByIzQ3OSwKQW5kcmV3IFNjaG9lbikKKiByZ3c6IGRv
+IHF1b3RhIHRlc3RzIG9uIHVidW50dSAoaXNzdWUjNjM4MiwgcHIjNjM1LCBTYWdlIFdlaWwpCiog
+cmd3OiBkb27igJl0IGVycm9yIG91dCBvbiBlbXB0eSBvd25lciB3aGVuIHNldHRpbmcgYWNscyAo
+aXNzdWUjNjg5MiwKcHIjODc3LCBMb2ljIERhY2hhcnksIE5hdGhhbiBDdXRsZXIpCiogcmd3OiBm
+aXggZXRhZyBpbiBtdWx0aXBhcnQgY29tcGxldGUgKGlzc3VlIzE3Nzk0LCBpc3N1ZSM2ODMwLApp
+c3N1ZSMxNjEyOSwgaXNzdWUjMTc4NzIsIHByIzEyNjksIENhc2V5IEJvZGxleSwgT3JpdCBXYXNz
+ZXJtYW4pCiogcmd3OiBmaXggaW5kZW50YXRpb24gZm9yIGNhY2hlX3Bvb2xzIChpc3N1ZSM4Mjk1
+LCBwciMyNTEsIFNhZ2UgV2VpbCkKKiByZ3c6IG1vdmUgeGZzIHRvIGEgc2VwZXJhdGUgZGlyZWN0
+b3J5IChwciM5NjksIE9yaXQgV2Fzc2VybWFuKQoqIHJndzogcG9saWN5IGFjbCBmb3JtYXQgc2hv
+dWxkIGJlIHhtbCAocHIjOTQ2LCBPcml0IFdhc3Nlcm1hbikKKiByZ3c6IHNwbGl0IG9zZOKAmXMg
+aW4gMiBub2RlcyAoaXNzdWUjMTU2MTIsIHByIzEwMTksIFZhc3UgS3Vsa2FybmkpCiogcmd3OiB1
+c2UgY2l2ZXR3ZWIgaWYgbm8gZnJvbnRlbmQgd2FzIGNvbmZpZ3VyZWQgKHByIzk1OCwgT3JpdCBX
+YXNzZXJtYW4pCiogcmd3OiB1c2UgZXhwbGljaXQgZmxhZyB0byBjYW5jZWwgUkdXQ29yb3V0aW5l
+c01hbmFnZXI6OnJ1bigpCihpc3N1ZSMxNzQ2NSwgcHIjMTI0NTIsIENhc2V5IEJvZGxleSkKKiBy
+Z3c6IHdlIGRvbuKAmXQgc3VwcG9ydCBidHJmcyBhbnkgbW9yZSAocHIjMTEzMiwgT3JpdCBXYXNz
+ZXJtYW4pCiogdGVzdHMsYmx1ZXN0b3JlOiBvcy9ibHVlc3RvcmU6IGFkZCBVVCBmb3IgYW4gZXN0
+aW1hdGlvbiBvZiBPbm9kZQppbi1tZW1vcnkgc2l6ZSAocHIjMTI1MzIsIElnb3IgRmVkb3RvdikK
+KiB0ZXN0cyxyYmQ6IHFhL3dvcmt1bml0cy9yYmQ6IGZpeCAoaXNzdWUjMTgyNzEsIHByIzEyNTEx
+LCBTYWdlIFdlaWwpCiogdGVzdHM6IHFhL3Rhc2tzL2FkbWluX3NvY2tldDogc3Vic3QgaW4gcmVw
+byBuYW1lIChwciMxMjUwOCwgU2FnZSBXZWlsKQoqIHRlc3RzOiBxYS90YXNrcy9jZXBoX2RlcGxv
+eTogdXNlIGRldiBvcHRpb24gaW5zdGVhZCBvZiBkZXYtY29tbWl0CihwciMxMjUxNCwgVmFzdSBL
+dWxrYXJuaSkKKiB0ZXN0czogcWEvdGFza3Mvb3NkX2JhY2tmaWxsLnB5OiB3YWl0IGZvciBvc2Qu
+WzEyXSB0byBzdGFydAooaXNzdWUjMTgzMDMsIHByIzEyNTc3LCBTYWdlIFdlaWwpCiogdGVzdHM6
+IHFhL3dvcmt1bml0czogaW5jbHVkZSBleHRlbnNpb24gZm9yIG5vc2UgdGVzdHMgKHByIzEyNTcy
+LCBTYWdlIFdlaWwpCiogdGVzdHM6IHFhOiBmaXhlZCBzY3JpcHQgdG8gc2NoZWR1bGUgcmFkb3Mg
+YW5kIG90aGVyIHN1aXRlcyB3aXRoCuKAk3N1YnNldCBvcHRpb24gKHByIzEyNTg3LCBZdXJpIFdl
+aW5zdGVpbikKKiB0ZXN0czogdW5pdHRlc3RfdGhyb3R0bGUgYXZvaWQgQVNTRVJUX0RFQVRIIChp
+c3N1ZSMxODAzNiwgcHIjMTIzOTMsCkxvaWMgRGFjaGFyeSkKKiB0ZXN0czogbWVyZ2UgY2VwaC1x
+YS1zdWl0ZQoqIHRlc3RzOiBwYXhvcyBmaXhlcyAoaXNzdWUjMTE5MTMsIHByIzQ1NywgSm9obiBT
+cHJheSkKKiB0b29sczogY2xlYW51cCBwaGFzZSBvZiBjZXBoZnMtZGF0YS1zY2FuIChwciMxMjMz
+NywgVmlzaGFsIEthbmF1amlhKQoqIHRvb2xzOiBvc2RtYXB0b29sOiBmaXggZGl2aWRlIGJ5IHpl
+cm8gZXJyb3IgKHByIzEyNTYxLCBZdW5jaHVhbiBXZW4pCiogdG9vbHM6IHJhZG9zOiBvcHRpb25h
+bGx5IHN1cHBvcnQgcmVhZGluZyBvbWFwIGtleSBmcm9tIGZpbGUKKGlzc3VlIzE4MTIzLCBwciMx
+MjI4NiwgSmFzb24gRGlsbGFtYW4pCiogdG9vbHM6IGNlcGgtcG9zdC1maWxlOiBzaW5nbGUgY29t
+bWFuZCB0byB1cGxvYWQgYSBmaWxlIHRvIGNlcGhkcm9wCihwciM1MDUsIERhbiBNaWNrLCBUcmF2
+aXMgUmhvZGVuKQoqIHRvb2xzOiBvc2RtYXB0b29sOiBhZGRpdGlvbmFsIHRlc3RzIChwciMxMTk2
+LCBTYWdlIFdlaWwpCgpUaGUgZGViaWFuIGFuZCBycG0gcGFja2FnZXMgYXJlIGF2YWlsYWJsZSBh
+dCB0aGUgdXN1YWwgbG9jYXRpb25zIGF0Cmh0dHA6Ly9kb3dubG9hZC5jZXBoLmNvbS9kZWJpYW4t
+a3Jha2VuLyBhbmQKaHR0cDovL2Rvd25sb2FkLmNlcGguY29tL3JwbS1rcmFrZW4gcmVzcGVjdGl2
+ZWx5LiBGb3IgbW9yZSBkZXRhaWxzIHJlZmVyCmJlbG93LgoKR2V0dGluZyBDZXBoCi0tLS0tLS0t
+LS0tLS0tLS0tLS0KCiogR2l0IGF0IGdpdDovL2dpdGh1Yi5jb20vY2VwaC9jZXBoLmdpdAoqIEZv
+ciBwYWNrYWdlcywgc2VlIGh0dHA6Ly9jZXBoLmNvbS9kb2NzL21hc3Rlci9pbnN0YWxsL2dldC1w
+YWNrYWdlcwoqIEZvciBjZXBoLWRlcGxveSwgc2VlIGh0dHA6Ly9jZXBoLmNvbS9kb2NzL21hc3Rl
+ci9pbnN0YWxsL2luc3RhbGwtY2VwaC1kZXBsb3kKClRoYW5rcyBldmVyeSBvbmUgZm9yIGNvbnRy
+aWJ1dGluZyB0byB0aGlzIHJlbGVhc2UgJiBoYXZlIGEgZ3JlYXQgeWVhciBhaGVhZCEKCkJlc3Qs
+CkFiaGlzaGVrCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+CmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDov
+L2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
