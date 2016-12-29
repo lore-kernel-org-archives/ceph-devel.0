@@ -1,17 +1,17 @@
 From: Sage Weil <sage@newdream.net>
 Subject: Re: problem with removing osd
-Date: Thu, 29 Dec 2016 21:41:01 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612292137550.10615@piezo.novalocal>
-References: <16310616780.20161229160718@tlen.pl>     <alpine.DEB.2.11.1612291908472.10615@piezo.novalocal>   <109878557.20161229212030@tlen.pl>   <alpine.DEB.2.11.1612292025280.10615@piezo.novalocal>  <1498014063.20161229214621@tlen.pl>
- <alpine.DEB.2.11.1612292048580.10615@piezo.novalocal> <1039341611.20161229215518@tlen.pl>
+Date: Thu, 29 Dec 2016 22:18:02 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1612292216160.10615@piezo.novalocal>
+References: <16310616780.20161229160718@tlen.pl>       <alpine.DEB.2.11.1612291908472.10615@piezo.novalocal>    <109878557.20161229212030@tlen.pl>    <alpine.DEB.2.11.1612292025280.10615@piezo.novalocal>   <1498014063.20161229214621@tlen.pl>  
+ <alpine.DEB.2.11.1612292048580.10615@piezo.novalocal>  <1039341611.20161229215518@tlen.pl>  <alpine.DEB.2.11.1612292137550.10615@piezo.novalocal> <10710520745.20161229230211@tlen.pl>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-855939003-1483047664=:10615"
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-715822131-1483049884=:10615"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56763 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:56893 "EHLO
         cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751418AbcL2VlF (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Dec 2016 16:41:05 -0500
-In-Reply-To: <1039341611.20161229215518@tlen.pl>
+        with ESMTP id S1751164AbcL2WSF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Dec 2016 17:18:05 -0500
+In-Reply-To: <10710520745.20161229230211@tlen.pl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: =?ISO-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
@@ -20,139 +20,47 @@ Cc: ceph-devel@vger.kernel.org
   This message is in MIME format.  The first part should be readable text,
   while the remaining parts are likely unreadable without MIME-aware tools.
 
---8323329-855939003-1483047664=:10615
+--8323329-715822131-1483049884=:10615
 Content-Type: TEXT/PLAIN; charset=iso-8859-2
 Content-Transfer-Encoding: 8BIT
 
 On Thu, 29 Dec 2016, £ukasz Chrustek wrote:
-> Cze¶æ,
+> Hi,
 > 
+> Thank  You  very  much for analize and the file ! I had similar :) but
+> wasn't sure if it wan't distroy something in cluster.
 > 
-> >> >> 
-> >> >> here i press ctrl+c
-> >> >> 
-> >> >> 2016-12-28 17:38:10.055239 7f4576d7a700  0 monclient: hunting for new mon
-> >> >> 2016-12-28 17:38:10.055582 7f4574233700  0 -- 192.168.128.1:0/1201679761 >> 192.168.128.2:6789/0 pipe(0x7f456c023190 sd=3 :0 s=1 pgs=0 cs=0 l=1 c=0x7f456c024470).fault
-> >> >> 2016-12-28 17:38:30.550622 7f4574233700  0 -- 192.168.128.1:0/1201679761 >> 192.168.128.1:6789/0 pipe(0x7f45600008c0 sd=3 :0 s=1 pgs=0 cs=0 l=1 c=0x7f4560001df0).fault
-> >> >> 2016-12-28 17:38:54.551031 7f4574474700  0 -- 192.168.128.1:0/1201679761 >> 192.168.128.2:6789/0 pipe(0x7f45600046c0 sd=4 :0 s=1 pgs=0 cs=0 l=1 c=0x7f45600042b0).fault
-> >> 
-> >> > What version is this?
-> >> 
-> >> infernalis
-> >> 
-> >> > Can you attach the crush map too?  (ceph osd crush dump -f json-pretty)
-> >> 
-> >> I can't - ceph-mons are crushing on diffrent ceph-mon hosts:
-> >> 
-> >> ]# ceph osd crush dump -f json-pretty
+> > The encoded tree bucket -11 had bad values.  I don't really trust the tree
+> > bucket code in crush... it's not well tested (and is a poor balance 
+> > computation and efficiency anyway).  We should probably try to remove tree
+> > entirely.
 > 
-> > Hmm, in that case, 'ceph osd getcrushmap -o cm' and post that somewhere?
+> > I've attached a fixed map that you can inject with
 > 
-> In attachment.
+> >  ceph osd setcrushmap -i <filename>
+> 
+> Now it works, and also ceph osd crush dump -f json-pretty runs OK.
 
-The encoded tree bucket -11 had bad values.  I don't really trust the tree 
-bucket code in crush... it's not well tested (and is a poor balance 
-computation and efficiency anyway).  We should probably try to remove tree 
-entirely.
+Great news!
+ 
+> > Bucket -11 is now empty; not sure what was supposed to be in it.
+> 
+> this server will be reinstalled, there where three osds.
+> 
+> > I suggest switching all of your tree buckets over to straw2 as soon as
+> > possible.  Note that this will result in some rebalancing.  You could do
+> > it one bucket a time if that's concerning.
+> 
+> OK,  changing  alg  to straw2 will rebalance ale PGs on all nodes ?
 
-I've attached a fixed map that you can inject with
+For any bucket you change from tree -> straw2, you'll see PGs shuffle 
+between the children of that bucket.  So for hosts, you'll see data move 
+between the disks.  And fixing ssd-intel-s3700 will shuffle data between 
+hosts.
 
- ceph osd setcrushmap -i <filename>
-
-Bucket -11 is now empty; not sure what was supposed to be in it.
-
-I suggest switching all of your tree buckets over to straw2 as soon as 
-possible.  Note that this will result in some rebalancing.  You could do 
-it one bucket a time if that's concerning.
+I'd also switch the straw buckets to straw2, although that will move a 
+comparatively small amount of data.
 
 sage
---8323329-855939003-1483047664=:10615
-Content-Type: APPLICATION/octet-stream; name=cmx2
-Content-Transfer-Encoding: BASE64
-Content-ID: <alpine.DEB.2.11.1612292141010.10615@piezo.novalocal>
-Content-Description: 
-Content-Disposition: attachment; filename=cmx2
 
-AAABABAAAAADAAAAZAAAAAQAAAD/////CgAEADZ0cgAHAAAA/v////3////8
-////+/////r////y////8P///wrXFQApaAIARdYVACVoAgBF1hUAJWgCAArX
-FQApaAIAmRkAAAAAAQBmZg4AezsCAJmZDADJLgIABAAAAP7///8BAAQABNcV
-AAwAAAAAAAAAAQAAAAIAAAADAAAABAAAAAUAAAAGAAAABwAAAAgAAAAJAAAA
-CgAAAAsAAADr0QEAAAABAOvRAQAAAAEA69EBAAAAAQDr0QEAAAABAOvRAQAA
-AAEA69EBAAAAAQDr0QEAAAABAOvRAQAAAAEA69EBAAAAAQDr0QEAAAABAOvR
-AQAAAAEA69EBAAAAAQAEAAAA/f///wEABAA/1hUADAAAAAwAAAANAAAADgAA
-AA8AAAAQAAAAEQAAABIAAAATAAAAFAAAABUAAAAXAAAAFgAAAOvRAQAJAAEA
-69EBAAkAAQDr0QEACQABAOvRAQAJAAEA69EBAAkAAQDr0QEACQABAOvRAQAJ
-AAEA69EBAAkAAQDr0QEACQABAOvRAQAJAAEA69EBAAkAAQAm0QEAAAABAAQA
-AAD8////AQAEAD/WFQAMAAAAGAAAABkAAAAaAAAAGwAAABwAAAAdAAAAHgAA
-AB8AAAAgAAAAIQAAACIAAAAjAAAA69EBAAkAAQDr0QEACQABAOvRAQAJAAEA
-69EBAAkAAQDr0QEACQABAOvRAQAJAAEA69EBAAkAAQDr0QEACQABAOvRAQAJ
-AAEA69EBAAkAAQDr0QEACQABACbRAQAAAAEABAAAAPv///8BAAQABNcVAAwA
-AAAkAAAAJQAAACYAAAAnAAAAKAAAACkAAAAqAAAAKwAAACwAAAAtAAAALgAA
-AC8AAADr0QEAAAABAOvRAQAAAAEA69EBAAAAAQDr0QEAAAABAOvRAQAAAAEA
-69EBAAAAAQDr0QEAAAABAOvRAQAAAAEA69EBAAAAAQDr0QEAAAABAOvRAQAA
-AAEA69EBAAAAAQAEAAAA+v///wEABACZGQAACAAAADAAAAAxAAAAMgAAADMA
-AAA0AAAANQAAADYAAAA3AAAAmRkAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAD5////
-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
-c2QuNDEqAAAABgAAAG9zZC40MisAAAAGAAAAb3NkLjQzLAAAAAYAAABvc2Qu
-NDQtAAAABgAAAG9zZC40NS4AAAAGAAAAb3NkLjQ2LwAAAAYAAABvc2QuNDcw
-AAAABgAAAG9zZC40ODEAAAAGAAAAb3NkLjQ5MgAAAAYAAABvc2QuNTAzAAAA
-BgAAAG9zZC41MTQAAAAGAAAAb3NkLjUyNQAAAAYAAABvc2QuNTM2AAAABgAA
-AG9zZC41NDcAAAAGAAAAb3NkLjU1OAAAAAgAAABkZXZpY2U1NjkAAAAIAAAA
-ZGV2aWNlNTc6AAAACAAAAGRldmljZTU4OwAAAAgAAABkZXZpY2U1OTwAAAAG
-AAAAb3NkLjYwPQAAAAYAAABvc2QuNjE+AAAABgAAAG9zZC42Mj8AAAAGAAAA
-b3NkLjYzQAAAAAYAAABvc2QuNjRBAAAABgAAAG9zZC42NUIAAAAGAAAAb3Nk
-LjY2QwAAAAYAAABvc2QuNjdEAAAABgAAAG9zZC42OEUAAAAIAAAAZGV2aWNl
-NjlGAAAACAAAAGRldmljZTcwRwAAAAYAAABvc2QuNzFIAAAABgAAAG9zZC43
-MkkAAAAGAAAAb3NkLjczSgAAAAYAAABvc2QuNzRLAAAABgAAAG9zZC43NUwA
-AAAGAAAAb3NkLjc2TQAAAAYAAABvc2QuNzdOAAAABgAAAG9zZC43OE8AAAAG
-AAAAb3NkLjc5UAAAAAYAAABvc2QuODBRAAAACAAAAGRldmljZTgxUgAAAAYA
-AABvc2QuODJTAAAABgAAAG9zZC44M1QAAAAGAAAAb3NkLjg0VQAAAAYAAABv
-c2QuODVWAAAABgAAAG9zZC44NlcAAAAGAAAAb3NkLjg3WAAAAAYAAABvc2Qu
-ODhZAAAABgAAAG9zZC44OVoAAAAGAAAAb3NkLjkwWwAAAAYAAABvc2QuOTFc
-AAAABgAAAG9zZC45Ml0AAAAGAAAAb3NkLjkzXgAAAAYAAABvc2QuOTRfAAAA
-BgAAAG9zZC45NWAAAAAGAAAAb3NkLjk2YQAAAAYAAABvc2QuOTdiAAAABgAA
-AG9zZC45OGMAAAAGAAAAb3NkLjk5AwAAAAAAAAASAAAAcmVwbGljYXRlZF9y
-dWxlc2V0AQAAAA8AAABzc2QtaW50ZWwtczM3MDACAAAADAAAAGVyYXN1cmUt
-Y29kZQAAAAAAAAAAMgAAAAEAAAABATYAAAAA
-
---8323329-855939003-1483047664=:10615--
+--8323329-715822131-1483049884=:10615--
