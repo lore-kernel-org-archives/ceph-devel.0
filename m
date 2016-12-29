@@ -1,106 +1,144 @@
-From: Sage Weil <sage@newdream.net>
+From: =?iso-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
 Subject: Re: problem with removing osd
-Date: Thu, 29 Dec 2016 20:49:19 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612292048580.10615@piezo.novalocal>
-References: <16310616780.20161229160718@tlen.pl>   <alpine.DEB.2.11.1612291908472.10615@piezo.novalocal>  <109878557.20161229212030@tlen.pl>  <alpine.DEB.2.11.1612292025280.10615@piezo.novalocal> <1498014063.20161229214621@tlen.pl>
+Date: Thu, 29 Dec 2016 21:55:18 +0100
+Message-ID: <1039341611.20161229215518@tlen.pl>
+References: <16310616780.20161229160718@tlen.pl>   
+  <alpine.DEB.2.11.1612291908472.10615@piezo.novalocal>
+  <109878557.20161229212030@tlen.pl>
+  <alpine.DEB.2.11.1612292025280.10615@piezo.novalocal>
+  <1498014063.20161229214621@tlen.pl>
+  <alpine.DEB.2.11.1612292048580.10615@piezo.novalocal>
+Reply-To: =?iso-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1541610147-1483044562=:10615"
+Content-Type: multipart/mixed;
+ boundary="----------08709F25003903978"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56531 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750768AbcL2UtX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Dec 2016 15:49:23 -0500
-In-Reply-To: <1498014063.20161229214621@tlen.pl>
+Received: from mx-out.tlen.pl ([193.222.135.158]:32113 "EHLO mx-out.tlen.pl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750927AbcL2Uz4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 29 Dec 2016 15:55:56 -0500
+In-Reply-To: <alpine.DEB.2.11.1612292048580.10615@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+------------08709F25003903978
+Content-Type: text/plain; charset=iso-8859-2
+Content-Transfer-Encoding: quoted-printable
 
---8323329-1541610147-1483044562=:10615
-Content-Type: TEXT/PLAIN; charset=iso-8859-2
-Content-Transfer-Encoding: 8BIT
+Cze=B6=E6,
 
-On Thu, 29 Dec 2016, £ukasz Chrustek wrote:
-> Cze¶æ,
-> 
-> > On Thu, 29 Dec 2016, £ukasz Chrustek wrote:
-> >> Hi,
-> >> 
-> >> 
-> >> >> 
-> >> >> # ceph osd tree
-> >> >> ID        WEIGHT    TYPE NAME             UP/DOWN REWEIGHT PRIMARY-AFFINITY
-> >> >>        -7  16.89590 root ssd-disks
-> >> >>       -11         0     host ssd1
-> >> >> 598798032         0         osd.598798032     DNE        0
-> >> 
-> >> > Yikes!
-> >> 
-> >> Yes... indeed, I don't like this number too...
-> >> 
-> >> >>     21940         0         osd.21940         DNE        0
-> >> >>        71         0         osd.71            DNE        0
-> >> >> 
-> >> >> My question is how to delete this osds without direct editing crushmap
-> >> >> ? It is production system, I can't affort any service interruption :(,
-> >> >> when I try to ceph osd crush remove then ceph-mon crushes....
-> >> >> 
-> >> >> I  dumped  crushmap,  but it took 19G (!!) after decompiling (compiled
-> >> >> file  is  very small). So, I cleaned this file with perl (it take very
-> >> >> long  time), and I have now small txt crushmap, which I edited. But is
-> >> >> there  any  chance  that ceph will still remember somewhere about this
-> >> >> huge  numbers  for osds ? Is it safe to apply this cleaned crushmap to
-> >> >> cluster ?
-> >> 
-> >> > It sounds like the problem is the OSDMap, not CRUSH per se.  Can you 
-> >> > attach the output from 'ceph osd dump -f json-pretty'?
-> >> 
-> >> It's quite big so I put it on pastebin:
-> >> 
-> >> http://pastebin.com/Unkk2Pa7
-> >> 
-> >> > Do you know how osd.598798032 got created?  Or osd.21940 for that matter.
-> >> > OSD ids should be small since they are stored internally by OSDMap as a
-> >> > vector.  This is probably why your mon is crashing.
-> >> 
-> >> [root@cc1 /etc/ceph]# ceph osd tree
-> >> ID  WEIGHT    TYPE NAME            UP/DOWN REWEIGHT PRIMARY-AFFINITY
-> >>  -7  16.89590 root ssd-intel-s3700
-> >> -11         0     host ssd-stor1
-> >>  69         0         osd.69          down        0          1.00000
-> >>  70         0         osd.70          down        0          1.00000
-> >>  71         0         osd.71          down        0          1.00000
-> >> 
-> >> 
-> >> This the moment, when it happend:
-> >> ]# for i in `seq 69 71`;do ceph osd crush remove osd.$i;done
-> >> removed item id 69 name 'osd.69' from crush map
-> >> 
-> >> 
-> >> removed item id 70 name 'osd.70' from crush map
-> >> 
-> >> here i press ctrl+c
-> >> 
-> >> 2016-12-28 17:38:10.055239 7f4576d7a700  0 monclient: hunting for new mon
-> >> 2016-12-28 17:38:10.055582 7f4574233700  0 -- 192.168.128.1:0/1201679761 >> 192.168.128.2:6789/0 pipe(0x7f456c023190 sd=3 :0 s=1 pgs=0 cs=0 l=1 c=0x7f456c024470).fault
-> >> 2016-12-28 17:38:30.550622 7f4574233700  0 -- 192.168.128.1:0/1201679761 >> 192.168.128.1:6789/0 pipe(0x7f45600008c0 sd=3 :0 s=1 pgs=0 cs=0 l=1 c=0x7f4560001df0).fault
-> >> 2016-12-28 17:38:54.551031 7f4574474700  0 -- 192.168.128.1:0/1201679761 >> 192.168.128.2:6789/0 pipe(0x7f45600046c0 sd=4 :0 s=1 pgs=0 cs=0 l=1 c=0x7f45600042b0).fault
-> 
-> > What version is this?
-> 
-> infernalis
-> 
-> > Can you attach the crush map too?  (ceph osd crush dump -f json-pretty)
-> 
-> I can't - ceph-mons are crushing on diffrent ceph-mon hosts:
-> 
-> ]# ceph osd crush dump -f json-pretty
 
-Hmm, in that case, 'ceph osd getcrushmap -o cm' and post that somewhere?
+>> >>=20
+>> >> here i press ctrl+c
+>> >>=20
+>> >> 2016-12-28 17:38:10.055239 7f4576d7a700  0 monclient: hunting for new=
+ mon
+>> >> 2016-12-28 17:38:10.055582 7f4574233700  0 -- 192.168.128.1:0/1201679=
+761 >> 192.168.128.2:6789/0 pipe(0x7f456c023190 sd=3D3 :0 s=3D1 pgs=3D0 cs=
+=3D0 l=3D1 c=3D0x7f456c024470).fault
+>> >> 2016-12-28 17:38:30.550622 7f4574233700  0 -- 192.168.128.1:0/1201679=
+761 >> 192.168.128.1:6789/0 pipe(0x7f45600008c0 sd=3D3 :0 s=3D1 pgs=3D0 cs=
+=3D0 l=3D1 c=3D0x7f4560001df0).fault
+>> >> 2016-12-28 17:38:54.551031 7f4574474700  0 -- 192.168.128.1:0/1201679=
+761 >> 192.168.128.2:6789/0 pipe(0x7f45600046c0 sd=3D4 :0 s=3D1 pgs=3D0 cs=
+=3D0 l=3D1 c=3D0x7f45600042b0).fault
+>>=20
+>> > What version is this?
+>>=20
+>> infernalis
+>>=20
+>> > Can you attach the crush map too?  (ceph osd crush dump -f json-pretty)
+>>=20
+>> I can't - ceph-mons are crushing on diffrent ceph-mon hosts:
+>>=20
+>> ]# ceph osd crush dump -f json-pretty
 
-sage
+> Hmm, in that case, 'ceph osd getcrushmap -o cm' and post that somewhere?
 
---8323329-1541610147-1483044562=:10615--
+In attachment.
+
+
+> sage
+
+
+
+--=20
+Regards
+Luk
+------------08709F25003903978
+Content-Type: application/octet-stream;
+ name=cm
+Content-transfer-encoding: base64
+Content-Disposition: attachment;
+ filename=cm
+
+AAABABAAAAADAAAA0e6wIwQAAAD/////CgAEACt0cgAHAAAA/v////3////8////+/////r/
+///y////8P///wrXFQAqaAIARdYVACVoAgBF1hUAJWgCAArXFQAqaAIAmRkAAAAAAQBgZg4A
+ezsCAJSZDADJLgIABAAAAP7///8BAAQABNcVAAwAAAAAAAAAAQAAAAIAAAADAAAABAAAAAUA
+AAAGAAAABwAAAAgAAAAJAAAACgAAAAsAAADr0QEAAAABAOvRAQAAAAEA69EBAAAAAQDr0QEA
+AAABAOvRAQAAAAEA69EBAAAAAQDr0QEAAAABAOvRAQAAAAEA69EBAAAAAQDr0QEAAAABAOvR
+AQAAAAEA69EBAAAAAQAEAAAA/f///wEABAA/1hUADAAAAAwAAAANAAAADgAAAA8AAAAQAAAA
+EQAAABIAAAATAAAAFAAAABUAAAAXAAAAFgAAAOvRAQAJAAEA69EBAAkAAQDr0QEACQABAOvR
+AQAJAAEA69EBAAkAAQDr0QEACQABAOvRAQAJAAEA69EBAAkAAQDr0QEACQABAOvRAQAJAAEA
+69EBAAkAAQAm0QEAAAABAAQAAAD8////AQAEAD/WFQAMAAAAGAAAABkAAAAaAAAAGwAAABwA
+AAAdAAAAHgAAAB8AAAAgAAAAIQAAACIAAAAjAAAA69EBAAkAAQDr0QEACQABAOvRAQAJAAEA
+69EBAAkAAQDr0QEACQABAOvRAQAJAAEA69EBAAkAAQDr0QEACQABAOvRAQAJAAEA69EBAAkA
+AQDr0QEACQABACbRAQAAAAEABAAAAPv///8BAAQABNcVAAwAAAAkAAAAJQAAACYAAAAnAAAA
+KAAAACkAAAAqAAAAKwAAACwAAAAtAAAALgAAAC8AAADr0QEAAAABAOvRAQAAAAEA69EBAAAA
+AQDr0QEAAAABAOvRAQAAAAEA69EBAAAAAQDr0QEAAAABAOvRAQAAAAEA69EBAAAAAQDr0QEA
+AAABAOvRAQAAAAEA69EBAAAAAQAEAAAA+v///wEABACZGQAACAAAADAAAAAxAAAAMgAAADMA
+AAA0AAAANQAAADYAAAA3AAAAmRkAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAD5////CgADAFrlEAAHAAAA9f////f/
+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
+AAAAb3NkLjQyKwAAAAYAAABvc2QuNDMsAAAABgAAAG9zZC40NC0AAAAGAAAAb3NkLjQ1LgAA
+AAYAAABvc2QuNDYvAAAABgAAAG9zZC40NzAAAAAGAAAAb3NkLjQ4MQAAAAYAAABvc2QuNDky
+AAAABgAAAG9zZC41MDMAAAAGAAAAb3NkLjUxNAAAAAYAAABvc2QuNTI1AAAABgAAAG9zZC41
+MzYAAAAGAAAAb3NkLjU0NwAAAAYAAABvc2QuNTU8AAAABgAAAG9zZC42MD0AAAAGAAAAb3Nk
+LjYxPgAAAAYAAABvc2QuNjI/AAAABgAAAG9zZC42M0AAAAAGAAAAb3NkLjY0QQAAAAYAAABv
+c2QuNjVCAAAABgAAAG9zZC42NkMAAAAGAAAAb3NkLjY3RAAAAAYAAABvc2QuNjhHAAAABgAA
+AG9zZC43MUgAAAAGAAAAb3NkLjcySQAAAAYAAABvc2QuNzNKAAAABgAAAG9zZC43NEsAAAAG
+AAAAb3NkLjc1TAAAAAYAAABvc2QuNzZNAAAABgAAAG9zZC43N04AAAAGAAAAb3NkLjc4TwAA
+AAYAAABvc2QuNzlQAAAABgAAAG9zZC44MFIAAAAGAAAAb3NkLjgyUwAAAAYAAABvc2QuODNU
+AAAABgAAAG9zZC44NFUAAAAGAAAAb3NkLjg1VgAAAAYAAABvc2QuODZXAAAABgAAAG9zZC44
+N1gAAAAGAAAAb3NkLjg4WQAAAAYAAABvc2QuODlaAAAABgAAAG9zZC45MFsAAAAGAAAAb3Nk
+LjkxXAAAAAYAAABvc2QuOTJdAAAABgAAAG9zZC45M14AAAAGAAAAb3NkLjk0XwAAAAYAAABv
+c2QuOTVgAAAABgAAAG9zZC45NmEAAAAGAAAAb3NkLjk3YgAAAAYAAABvc2QuOThjAAAABgAA
+AG9zZC45OQMAAAAAAAAAEgAAAHJlcGxpY2F0ZWRfcnVsZXNldAEAAAAPAAAAc3NkLWludGVs
+LXMzNzAwAgAAAAwAAABlcmFzdXJlLWNvZGUAAAAAAAAAADIAAAABAAAAAQE2AAAAAA==
+------------08709F25003903978--
+
