@@ -1,144 +1,87 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: cleanup ACCESS_ONCE -> READ_ONCE
-Date: Thu, 29 Dec 2016 11:16:32 +0800
-Message-ID: <EA4769D9-EBA3-4419-841B-0563BF3F93E9@redhat.com>
-References: <20161226092634.8206-1-kirkseraph@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.2 \(3259\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20161226092634.8206-1-kirkseraph@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Seraphime Kirkovski <kirkseraph@gmail.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: Ceph installation packages on Ubuntu
+Date: Thu, 29 Dec 2016 14:55:47 +0800
+Message-ID: <CAJE9aOP1NAu1GFgV_4hLNx-UZmyO1h+W-Q5t0c_nYxtVYBp+mw@mail.gmail.com>
+References: <CAOCf4An8SHRYgeKQ-t9h1TjGU9k8GCc0GGmZRCt0dikUG3Azeg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wj0-f181.google.com ([209.85.210.181]:34654 "EHLO
+        mail-wj0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751158AbcL2Gzt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Dec 2016 01:55:49 -0500
+Received: by mail-wj0-f181.google.com with SMTP id sd9so166964369wjb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Dec 2016 22:55:49 -0800 (PST)
+In-Reply-To: <CAOCf4An8SHRYgeKQ-t9h1TjGU9k8GCc0GGmZRCt0dikUG3Azeg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Tone Zhang <tone.zhang@linaro.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
+
+On Wed, Dec 21, 2016 at 4:21 PM, Tone Zhang <tone.zhang@linaro.org> wrote:
+> Hi Cephers,
+>
+> In recent, I tried to deploy Ceph cluster on Ubuntu 16.04 on ARM
+> platform via "ceph-deploy".
+>
+> When I ran "ceph-deploy install" command, I got "cannot find ceph-osd"
+> and "ceph-mon". I checked the ceph download center for Ubuntu on ARM
+> (https://download.ceph.com/debian-jewel/pool/main/c/ceph/), it seems
+> since Ceph 10.2.4, there is no deb packages for ARM any more. What's
+> happened? Does it mean ceph jewel delivery on ARM platform will be
+> stopped?
 
 
-> On 26 Dec 2016, at 17:26, Seraphime Kirkovski <kirkseraph@gmail.com> wrote:
-> 
-> This removes the uses of ACCESS_ONCE in favor of READ_ONCE
-> 
-> Signed-off-by: Seraphime Kirkovski <kirkseraph@gmail.com>
-> ---
-> fs/ceph/addr.c       |  4 ++--
-> fs/ceph/caps.c       |  2 +-
-> fs/ceph/dir.c        |  2 +-
-> fs/ceph/inode.c      |  2 +-
-> fs/ceph/mds_client.c | 10 +++++-----
-> 5 files changed, 10 insertions(+), 10 deletions(-)
-> 
-> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> index 9cd0c0e..e61bc3f 100644
-> --- a/fs/ceph/addr.c
-> +++ b/fs/ceph/addr.c
-> @@ -771,7 +771,7 @@ static int ceph_writepages_start(struct address_space *mapping,
-> 	     wbc->sync_mode == WB_SYNC_NONE ? "NONE" :
-> 	     (wbc->sync_mode == WB_SYNC_ALL ? "ALL" : "HOLD"));
-> 
-> -	if (ACCESS_ONCE(fsc->mount_state) == CEPH_MOUNT_SHUTDOWN) {
-> +	if (READ_ONCE(fsc->mount_state) == CEPH_MOUNT_SHUTDOWN) {
-> 		if (ci->i_wrbuffer_ref > 0) {
-> 			pr_warn_ratelimited(
-> 				"writepage_start %p %lld forced umount\n",
-> @@ -1194,7 +1194,7 @@ static int ceph_update_writeable_page(struct file *file,
-> 	int r;
-> 	struct ceph_snap_context *snapc, *oldest;
-> 
-> -	if (ACCESS_ONCE(fsc->mount_state) == CEPH_MOUNT_SHUTDOWN) {
-> +	if (READ_ONCE(fsc->mount_state) == CEPH_MOUNT_SHUTDOWN) {
-> 		dout(" page %p forced umount\n", page);
-> 		unlock_page(page);
-> 		return -EIO;
-> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> index baea866..193ba82 100644
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -2477,7 +2477,7 @@ static int try_get_cap_refs(struct ceph_inode_info *ci, int need, int want,
-> 
-> 		if (ci->i_ceph_flags & CEPH_I_CAP_DROPPED) {
-> 			int mds_wanted;
-> -			if (ACCESS_ONCE(mdsc->fsc->mount_state) ==
-> +			if (READ_ONCE(mdsc->fsc->mount_state) ==
-> 			    CEPH_MOUNT_SHUTDOWN) {
-> 				dout("get_cap_refs %p forced umount\n", inode);
-> 				*err = -EIO;
-> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> index d7a9369..cd99b26 100644
-> --- a/fs/ceph/dir.c
-> +++ b/fs/ceph/dir.c
-> @@ -1194,7 +1194,7 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
-> 	struct inode *dir;
-> 
-> 	if (flags & LOOKUP_RCU) {
-> -		parent = ACCESS_ONCE(dentry->d_parent);
-> +		parent = READ_ONCE(dentry->d_parent);
-> 		dir = d_inode_rcu(parent);
-> 		if (!dir)
-> 			return -ECHILD;
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index 398e532..1476f54 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -1719,7 +1719,7 @@ static void ceph_invalidate_work(struct work_struct *work)
-> 
-> 	mutex_lock(&ci->i_truncate_mutex);
-> 
-> -	if (ACCESS_ONCE(fsc->mount_state) == CEPH_MOUNT_SHUTDOWN) {
-> +	if (READ_ONCE(fsc->mount_state) == CEPH_MOUNT_SHUTDOWN) {
-> 		pr_warn_ratelimited("invalidate_pages %p %lld forced umount\n",
-> 				    inode, ceph_ino(inode));
-> 		mapping_set_error(inode->i_mapping, -EIO);
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 4f49253..df90794 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -1145,7 +1145,7 @@ static int remove_session_caps_cb(struct inode *inode, struct ceph_cap *cap,
-> 		ci->i_ceph_flags |= CEPH_I_CAP_DROPPED;
-> 
-> 		if (ci->i_wrbuffer_ref > 0 &&
-> -		    ACCESS_ONCE(fsc->mount_state) == CEPH_MOUNT_SHUTDOWN)
-> +		    READ_ONCE(fsc->mount_state) == CEPH_MOUNT_SHUTDOWN)
-> 			invalidate = true;
-> 
-> 		while (!list_empty(&ci->i_cap_flush_list)) {
-> @@ -2095,12 +2095,12 @@ static int __do_request(struct ceph_mds_client *mdsc,
-> 		err = -EIO;
-> 		goto finish;
-> 	}
-> -	if (ACCESS_ONCE(mdsc->fsc->mount_state) == CEPH_MOUNT_SHUTDOWN) {
-> +	if (READ_ONCE(mdsc->fsc->mount_state) == CEPH_MOUNT_SHUTDOWN) {
-> 		dout("do_request forced umount\n");
-> 		err = -EIO;
-> 		goto finish;
-> 	}
-> -	if (ACCESS_ONCE(mdsc->fsc->mount_state) == CEPH_MOUNT_MOUNTING) {
-> +	if (READ_ONCE(mdsc->fsc->mount_state) == CEPH_MOUNT_MOUNTING) {
-> 		if (mdsc->mdsmap_err) {
-> 			err = mdsc->mdsmap_err;
-> 			dout("do_request mdsmap err %d\n", err);
-> @@ -3550,7 +3550,7 @@ void ceph_mdsc_sync(struct ceph_mds_client *mdsc)
-> {
-> 	u64 want_tid, want_flush;
-> 
-> -	if (ACCESS_ONCE(mdsc->fsc->mount_state) == CEPH_MOUNT_SHUTDOWN)
-> +	if (READ_ONCE(mdsc->fsc->mount_state) == CEPH_MOUNT_SHUTDOWN)
-> 		return;
-> 
-> 	dout("sync\n");
-> @@ -3581,7 +3581,7 @@ void ceph_mdsc_sync(struct ceph_mds_client *mdsc)
->  */
-> static bool done_closing_sessions(struct ceph_mds_client *mdsc, int skipped)
-> {
-> -	if (ACCESS_ONCE(mdsc->fsc->mount_state) == CEPH_MOUNT_SHUTDOWN)
-> +	if (READ_ONCE(mdsc->fsc->mount_state) == CEPH_MOUNT_SHUTDOWN)
-> 		return true;
-> 	return atomic_read(&mdsc->num_sessions) <= skipped;
-> }
+also i noticed that the aarch64 gitbuilder has been failing since v10.2.3. but
+the reason of failure is still unknown. @Tone can you reproduce this in your
+environment? if not, it's very likely environmental issues in our gitbuilder.
 
-Applied, Thanks
+quote from http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-xenial-aarch64-basic/log.cgi?log=ecc23778eb545d8dd55e2e4735b53cc93f92e65b
+<quote>
+dpkg-deb: building package 'libcephfs-jni' in
+'../libcephfs-jni_10.2.3-1xenial_arm64.deb'.
 
-Yan, Zheng
+make: *** wait: No child processes. Stop.
 
-> -- 
-> 2.10.2
-> 
+make: *** Waiting for unfinished jobs....
+
+make: *** wait: No child processes. Stop.
+</quote>
+so v10.2.3 build on aarch64 failed.
+
+quote from http://gitbuilder.sepia.ceph.com/gitbuilder-ceph-deb-xenial-aarch64-basic/log.cgi?log=9411351cc8ce9ee03fbd46225102fe3d28ddf611
+
+<quote>
+dpkg-deb: building package 'python-rbd' in
+'../python-rbd_10.2.4-1xenial_arm64.deb'.
+dpkg-deb --build debian/python-cephfs ..
+dpkg-deb: building package 'python-cephfs' in
+'../python-cephfs_10.2.4-1xenial_arm64.deb'.
+dpkg-deb --build debian/libcephfs-jni ..
+dpkg-deb: building package 'libcephfs-jni' in
+'../libcephfs-jni_10.2.4-1xenial_arm64.deb'.
+debian/rules:112: recipe for target 'binary-arch' failed
+</quote>
+so v10.2.4 build on aarch64 failed also.
+
+
+
+>
+> If I want to deploy Ceph jewel 10.2.2 via ceph-deploy, how shall I do?
+> Except download all the deb packaged for 10.2.2 and install ceph
+> manually, is there an easier way?
+>
+> Thanks a lot!
+>
+> Br,
+> Tone
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Regards
+Kefu Chai
