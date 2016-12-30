@@ -1,166 +1,415 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: Bluestore with ZetaScale
-Date: Fri, 30 Dec 2016 08:19:02 +0000
-Message-ID: <5E3E05AED7F0F044904275810D0CB46504DD60@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
-References: <FC753468179C1C4EB15768F212C46AF23651F82F@shsmsx102.ccr.corp.intel.com>
+From: scan-admin@coverity.com
+Subject: New Defects reported by Coverity Scan for ceph
+Date: Fri, 30 Dec 2016 00:33:50 -0800
+Message-ID: <58661bee7a734_604cde333479520@ss1435.mail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-cys01nam02on0088.outbound.protection.outlook.com ([104.47.37.88]:12137
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752059AbcL3ITK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 30 Dec 2016 03:19:10 -0500
-In-Reply-To: <FC753468179C1C4EB15768F212C46AF23651F82F@shsmsx102.ccr.corp.intel.com>
-Content-Language: en-US
+Received: from o5.24nn.shared.sendgrid.net ([50.31.63.1]:18294 "EHLO
+        o5.24nn.shared.sendgrid.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751653AbcL3Idw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 30 Dec 2016 03:33:52 -0500
+Received: from coverity.com (static-208.69.177.245.nephosdns.com [208.69.177.245])
+        by ismtpd0003p1sjc2.sendgrid.net (SG) with ESMTP id rgi8WjZjT7CS-OMW77y8wQ
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Dec 2016 08:33:50.542 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Tang, Haodong" <haodong.tang@intel.com>, "mnelson@redhat.com" <mnelson@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-VGhhbmtzIEhhb2RvbmcgZm9yIHRyeWluZy4gUGxlYXNlIHNlZSBteSByZXNwb25zZSBpbmxpbmUu
-DQoNClJlZ2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206
-IFRhbmcsIEhhb2RvbmcgW21haWx0bzpoYW9kb25nLnRhbmdAaW50ZWwuY29tXQ0KU2VudDogVGh1
-cnNkYXksIERlY2VtYmVyIDI5LCAyMDE2IDExOjMzIFBNDQpUbzogbW5lbHNvbkByZWRoYXQuY29t
-OyBTb21uYXRoIFJveQ0KQ2M6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBC
-bHVlc3RvcmUgd2l0aCBaZXRhU2NhbGUNCg0KIEhpLCBTb21uYXRoLCBNYXJrDQoNCkknbSB0cnlp
-bmcgdG8gZ2V0IHlvdXIgcGF0Y2goaHR0cHM6Ly9naXRodWIuY29tL3NvbW5hdGhyL2NlcGgvdHJl
-ZS93aXAtYmx1ZXN0b3JlLW11bHRpLWt2LXN5bmMtdGhyZWFkKSBpbnN0YWxsZWQgYW5kIHRlc3Qg
-Qmx1ZVN0b3JlIHBlcmZvcm1hbmNlIHdpdGggWmV0YVNjYWxlLiBIb3dldmVyIGdldHRpbmcgdHdv
-IGVycm9ycy4NCg0KV2hlbiBJIHJlc3RhcnRlZCBjZXBoLW9zZCBwcm9jZXNzLCB1c2luZyAia2ls
-bGFsbCBjZXBoLW9zZCIgYW5kICJjZXBoLW9zZCAtaSAke3Byb2Nlc3NfaWR9IC0tcGlkLWZpbGU9
-L3Zhci9ydW4vY2VwaC9vc2QuJHtwcm9jZXNzX2lkfS5waWQiLCBJIGdvdCB0aGlzIGVycm9yLg0K
-DQpbU29tbmF0aF0gVW5mb3J0dW5hdGVseSwgd2UgaGF2ZSBzb21lIGtub3duIGJ1ZyBpbiB0aGUg
-WlMgc2hpbSBhbmQgcmVzdGFydCBpcyBub3QgeWV0IHN1cHBvcnRlZC4gV0UgYXJlIHdvcmtpbmcg
-b24gdGhpcyB0byBmaXggQVNBUC4NCg0KMjAxNi0xMi0yNyAxMzoyMToxMC4zODQ4MDkgN2YzMTQ5
-ZWUzYTAwIDMwIGJsdWVzdG9yZS5Pbm9kZVNwYWNlKDB4N2YzMzhiMDU1N2Q4IGluIDB4N2YzMTU0
-NzI1MzQwKSBsb29rdXANCjIwMTYtMTItMjcgMTM6MjE6MTAuMzg0ODEwIDdmMzE0OWVlM2EwMCAz
-MCBibHVlc3RvcmUuT25vZGVTcGFjZSgweDdmMzM4YjA1NTdkOCBpbiAweDdmMzE1NDcyNTM0MCkg
-bG9va3VwICMwOjRjMDAwMDAwOjo6OmhlYWQjIGhpdCAweDdmMzE1NDc1YjY4MA0KMjAxNi0xMi0y
-NyAxMzoyMToxMC4zODQ4MTIgN2YzMTQ5ZWUzYTAwIDIwIGJsdWVzdG9yZS5vbm9kZSgweDdmMzE1
-NDc1YjY4MCkgZmx1c2gNCjIwMTYtMTItMjcgMTM6MjE6MTAuMzg0ODEyIDdmMzE0OWVlM2EwMCAy
-MCBibHVlc3RvcmUub25vZGUoMHg3ZjMxNTQ3NWI2ODApIGZsdXNoIGRvbmUNCjIwMTYtMTItMjcg
-MTM6MjE6MTAuMzg0ODE0IDdmMzE0OWVlM2EwMCAzMCB6czogX2dldDo4NDQgWlNSZWFkT2JqZWN0
-OiBbTTAwMDAwMDAwMDAwMDAwMDZjNi5fYmlnaW5mb10NCjIwMTYtMTItMjcgMTM6MjE6MTAuMzg0
-ODI1IDdmMzE0OWVlM2EwMCAzMCB6czogX2dldDo4NjkgWlNSZWFkT2JqZWN0IGxvZ2dpbmc6IFsx
-XTExMA0KMjAxNi0xMi0yNyAxMzoyMToxMC4zODQ4MjggN2YzMTQ5ZWUzYTAwIDMwIGJsdWVzdG9y
-ZSgvdmFyL2xpYi9jZXBoL21udC9vc2QtZGV2aWNlLTU4LWRhdGEpIG9tYXBfZ2V0X3ZhbHVlcyAg
-Z290IDB4MDAwMDAwMDAwMDAwMDZjNicuX2JpZ2luZm8nIC0+IF9iaWdpbmZvDQoyMDE2LTEyLTI3
-IDEzOjIxOjEwLjM4NDgzMSA3ZjMxNDllZTNhMDAgMzAgenM6IGlzX2xvZ2dpbmc6MTIwICBNIDAw
-MDAwMDAwMDAwMDA2YzYuX2Zhc3RpbmZvRWvDv14/KDE4KQ0KMjAxNi0xMi0yNyAxMzoyMToxMC4z
-ODQ4MzUgN2YzMTQ5ZWUzYTAwIDMwIHpzOiBhcHBlbmRfbG9nZ2luZ19wcmVmaXg6MTA0ICAyXzE3
-MzRfKDcpDQoyMDE2LTEyLTI3IDEzOjIxOjEwLjM4NDgzNyA3ZjMxNDllZTNhMDAgMzAgenM6IF9n
-ZXQ6ODQ0IFpTUmVhZE9iamVjdDogWzJfMTczNF9NMDAwMDAwMDAwMDAwMDAwNmM2Ll9mYXN0aW5m
-b10NCjIwMTYtMTItMjcgMTM6MjE6MTAuMzg0ODU0IDdmMzE0OWVlM2EwMCAzMCB6czogX2dldDo4
-NTcgWlNSZWFkT2JqZWN0IGxvZ2dpbmc6IFsxMl0xMTANCjIwMTYtMTItMjcgMTM6MjE6MTAuMzg0
-ODU3IDdmMzE0OWVlM2EwMCAzMCB6czogaXNfbG9nZ2luZzoxMjAgIE0gMDAwMDAwMDAwMDAwMDZj
-Ni5faW5mbygxNCkNCjIwMTYtMTItMjcgMTM6MjE6MTAuMzg0ODYwIDdmMzE0OWVlM2EwMCAzMCB6
-czogYXBwZW5kX2xvZ2dpbmdfcHJlZml4OjEwNCAgMl8xNzM0Xyg3KQ0KMjAxNi0xMi0yNyAxMzoy
-MToxMC4zODQ4NjggN2YzMTQ5ZWUzYTAwIDMwIHpzOiBfZ2V0Ojg0NCBaU1JlYWRPYmplY3Q6IFsy
-XzE3MzRfTTAwMDAwMDAwMDAwMDAwMDZjNi5faW5mb10NCjIwMTYtMTItMjcgMTM6MjE6MTAuMzg0
-ODcyIDdmMzE0OWVlM2EwMCAzMCB6czogX2dldDo4NTcgWlNSZWFkT2JqZWN0IGxvZ2dpbmc6IFsx
-Ml0xMTANCjIwMTYtMTItMjcgMTM6MjE6MTAuMzg0ODc0IDdmMzE0OWVlM2EwMCAzMCB6czogX2dl
-dDo4NDQgWlNSZWFkT2JqZWN0OiBbTTAwMDAwMDAwMDAwMDAwMDZjNi5faW5mb3ZlcmluZm9dDQoy
-MDE2LTEyLTI3IDEzOjIxOjEwLjM4NDg3OSA3ZjMxNDllZTNhMDAgMzAgenM6IF9nZXQ6ODY5IFpT
-UmVhZE9iamVjdCBsb2dnaW5nOiBbMV0xDQoyMDE2LTEyLTI3IDEzOjIxOjEwLjM4NDg4OSA3ZjMx
-NDllZTNhMDAgMzAgYmx1ZXN0b3JlKC92YXIvbGliL2NlcGgvbW50L29zZC1kZXZpY2UtNTgtZGF0
-YSkgb21hcF9nZXRfdmFsdWVzICBnb3QgMHgwMDAwMDAwMDAwMDAwNmM2Jy5faW5mb3ZlcicgLT4g
-X2luZm92ZXINCjIwMTYtMTItMjcgMTM6MjE6MTAuMzg0ODkyIDdmMzE0OWVlM2EwMCAxMCBibHVl
-c3RvcmUoL3Zhci9saWIvY2VwaC9tbnQvb3NkLWRldmljZS01OC1kYXRhKSBvbWFwX2dldF92YWx1
-ZXMgMC4zMl9oZWFkIG9pZCAjMDo0YzAwMDAwMDo6OjpoZWFkIyA9IDANCjIwMTYtMTItMjcgMTM6
-MjE6MTAuMzg2ODY4IDdmMzE0OWVlM2EwMCAtMSAvcm9vdC9jZXBoL3NyYy9vc2QvUEcuY2M6IElu
-IGZ1bmN0aW9uICdzdGF0aWMgaW50IFBHOjpyZWFkX2luZm8oT2JqZWN0U3RvcmUqLCBzcGdfdCwg
-Y29uc3QgY29sbF90JiwgY2VwaDo6YnVmZmVybGlzdCYsIHBnX2luZm9fdCYsIHN0ZDo6bWFwPHVu
-c2lnbmVkIGludCwgcGdfaW50ZXJ2YWxfdD4mLCBfX3U4JiknIHRocmVhZCA3ZjMxNDllZTNhMDAg
-dGltZSAyMDE2LTEyLTI3IDEzOjIxOjEwLjM4NDg5Ny9yb290L2NlcGgvc3JjL29zZC9QRy5jYzog
-MzE0MjogRkFJTEVEIGFzc2VydCh2YWx1ZXMuc2l6ZSgpID09IDMgfHwgdmFsdWVzLnNpemUoKSA9
-PSA0KQ0KDQogY2VwaCB2ZXJzaW9uIDExLjAuMi0yMzMyLWdkNWQ3MzRjIChkNWQ3MzRjZTE2YWI3
-YzA3NzBhMDA5NzI0NzhjMzllMDdkYjRhZWQwKQ0KIDE6IChjZXBoOjpfX2NlcGhfYXNzZXJ0X2Zh
-aWwoY2hhciBjb25zdCosIGNoYXIgY29uc3QqLCBpbnQsIGNoYXIgY29uc3QqKSsweDhiKSBbMHg3
-ZjMxNGE5YWExZGJdDQogMjogKFBHOjpyZWFkX2luZm8oT2JqZWN0U3RvcmUqLCBzcGdfdCwgY29s
-bF90IGNvbnN0JiwgY2VwaDo6YnVmZmVyOjpsaXN0JiwgcGdfaW5mb190Jiwgc3RkOjptYXA8dW5z
-aWduZWQgaW50LCBwZ19pbnRlcnZhbF90LCBzdGQ6Omxlc3M8dW5zaWduZWQgaW50Piwgc3RkOjph
-bGxvY2F0b3I8c3RkOjpwYWlyPHVuc2lnbmVkIGludCBjb25zdCwgcGdfaW50ZXJ2YWxfdD4gPiA+
-JiwgdW5zaWduZWQgY2hhciYpKzB4MTc0KSBbMHg3ZjMxNGE0MDFkNTRdIDM6IChQRzo6cmVhZF9z
-dGF0ZShPYmplY3RTdG9yZSosIGNlcGg6OmJ1ZmZlcjo6bGlzdCYpKzB4NzYpIFsweDdmMzE0YTQw
-Mjg1Nl0NCiA0OiAoT1NEOjpsb2FkX3BncygpKzB4OWI0KSBbMHg3ZjMxNGEzNTgwZTRdDQogNTog
-KE9TRDo6aW5pdCgpKzB4MjAyNikgWzB4N2YzMTRhMzY2Yzc2XQ0KIDY6IChtYWluKCkrMHgyYTdl
-KSBbMHg3ZjMxNGEyOWNmMWVdDQogNzogKF9fbGliY19zdGFydF9tYWluKCkrMHhmNSkgWzB4N2Yz
-MTQ3NjI4ZjQ1XQ0KIDg6ICgoKSsweDQxMzRhNikgWzB4N2YzMTRhMzE2NGE2XQ0KIE5PVEU6IGEg
-Y29weSBvZiB0aGUgZXhlY3V0YWJsZSwgb3IgYG9iamR1bXAgLXJkUyA8ZXhlY3V0YWJsZT5gIGlz
-IG5lZWRlZCB0byBpbnRlcnByZXQgdGhpcy4NCg0KDQpXaGVuIHJhbiA0ayByYW5kb20gd3JpdGUg
-dGVzdCwgSSB3b3VsZCBoaXQgJ3RyYW5zYWN0aW9uIHN1Ym1pdCBzeW5jJyBlcnJvciBhZnRlciBh
-Ym91dCAxMDBzLCBhcyBzaG93biBiZWxvdy4NCg0KW1NvbW5hdGhdIHdoYXQgaXMgeW91ciBkYiBw
-YXJ0aXRpb24gc2l6ZSA/IFVubGlrZSByb2NrcyArIGJsdWVzdG9yZSAsIHdlIGFyZSB5ZXQgdG8g
-aW1wbGVtZW50IHRoZSBkYXRhIHBhcnRpdGlvbiBzaGFyaW5nIHdpdGggWlMuIEFsc28sIHRoZXJl
-IGlzIGEga25vd24gYnVnIGluIHNoaW0gdGhhdCBpcyBub3QgaGFuZGxpbmcgcGdsb2cgdHJpbSBw
-cm9wZXJseSBhbmQgZW5kIHVwIGxlYWtpbmcgc3BhY2UuIFRoZSBmaXggd2lsbCBiZSBhdmFpbGFi
-bGUgc29vbi4gSW4gdGhlIG1lYW50aW1lLCBJIHdvdWxkIHNheSB0cnkgd2l0aCAxMDBHIGRiIHBh
-cnRpdGlvbiBvciBzbyAsIHlvdSBzaG91bGQgYmUgYWJsZSB0byBydW4gaXQgfjFob3VyIGZvciBz
-YXkgNjAwRyBpbWFnZSBzaXplLiBTaW5jZSwgYWxsIG9mIHVzIHdvcmtpbmcgb24gdG8gc2VlIHBl
-cmZvcm1hbmNlIGdhaW4gd2l0aCBaUyBmaXJzdCB0aGVzZSBhcmUgYmVjb21pbmcgYSBiaXQgbG93
-ZXIgcHJpb3JpdHkuIEJ1dCwgaG9wZWZ1bGx5LCBieSAxc3Qgd2VlayBvZiBKYW4gSSBzaG91bGQg
-YmUgYWJsZSB0byB1cGxvYWQgYSBtb3JlIHJvYnVzdCBhbmQgb3B0aW1pemVkIHZlcnNpb24uDQoN
-Cg0KMjAxNi0xMi0yOCAxNTo1MDoxMy4wMDExODUgN2ZmODEwMjYxNzAwIC0xIC9yb290L2NlcGgv
-c3JjL29zL2JsdWVzdG9yZS9CbHVlU3RvcmUuY2M6IEluIGZ1bmN0aW9uICd2b2lkIEJsdWVTdG9y
-ZTo6X2t2X3N5bmNfdGhyZWFkKHVpbnQzMl90KScgdGhyZWFkIDdmZjgxMDI2MTcwMCB0aW1lIDIw
-MTYtMTItMjggMTU6NTA6MTIuOTk5Nzk5DQovcm9vdC9jZXBoL3NyYy9vcy9ibHVlc3RvcmUvQmx1
-ZVN0b3JlLmNjOiA2OTc4OiBGQUlMRUQgYXNzZXJ0KHIgPT0gMCkNCg0KIGNlcGggdmVyc2lvbiAx
-MS4wLjItMjMzMi1nZDVkNzM0YyAoZDVkNzM0Y2UxNmFiN2MwNzcwYTAwOTcyNDc4YzM5ZTA3ZGI0
-YWVkMCkNCiAxOiAoY2VwaDo6X19jZXBoX2Fzc2VydF9mYWlsKGNoYXIgY29uc3QqLCBjaGFyIGNv
-bnN0KiwgaW50LCBjaGFyIGNvbnN0KikrMHg4YikgWzB4N2ZmODQwYWQzMWRiXQ0KIDI6IChCbHVl
-U3RvcmU6Ol9rdl9zeW5jX3RocmVhZCh1bnNpZ25lZCBpbnQpKzB4Mjk1ZikgWzB4N2ZmODQwODRi
-ZTNmXQ0KIDM6IChCbHVlU3RvcmU6OktWU3luY1RocmVhZDo6ZW50cnkoKSsweDEwKSBbMHg3ZmY4
-NDA4NmQ5NzBdDQogNDogKCgpKzB4ODE4NCkgWzB4N2ZmODNmMGQ2MTg0XQ0KIDU6IChjbG9uZSgp
-KzB4NmQpIFsweDdmZjgzZDgyYTM3ZF0NCiBOT1RFOiBhIGNvcHkgb2YgdGhlIGV4ZWN1dGFibGUs
-IG9yIGBvYmpkdW1wIC1yZFMgPGV4ZWN1dGFibGU+YCBpcyBuZWVkZWQgdG8gaW50ZXJwcmV0IHRo
-aXMuDQoNCk5vbmV0aGVsZXNzLCB3ZSBnZXQgbW9yZSBzdGFibGUgcGVyZm9ybWFuY2UgZHVyaW5n
-IDEwMHMgdGVzdCB3aXRoIFpTIGNvbXBhcmVkIHdpdGggUm9ja3NEQi4gUm9ja3MgY2FuIHByb3Zp
-ZGUgaGlnaGVyIHBlYWsgcGVyZm9ybWFuY2UgYnV0IG9uY2UgY29tcGFjdGlvbiBiZWNhbWUgZnJl
-cXVlbnQsIHRoZXJlIHdvdWxkIGJlIGEgZ3JlYXQgbWFueSBvZiByZWFkIG9wcyBmcm9tIGNvbXBh
-Y3Rpb24sIHdoaWNoIHRocm90dGxlcyBSb2NrcyB0aG91cmdocHV0IGEgbG90LiBCbHVlU3RvcmUg
-d2l0aCBSb2NrcyBhbmQgWlMgYnJvdWdodCBhbGwgbW9zdCB0aGUgc2FtZSBwZXJmb3JtYW5jZSBv
-biBhdmVyYWdlLiBGdXJ0aGVybW9yZSB3ZSB0b29rIHNvbWUgdHVuaW5ncyBvbiBSb2NrcyB3aGls
-ZSB3aXRob3V0IGFueSB0dW5pbmcgZm9yIFpTLiBNaW4gYWxsb2Mgc2l6ZSBmb3IgYm90aCB0ZXN0
-IGlzIDY0Sy4gTW9yZSBkZXRhaWxlZCBjb25maWd1cmF0aW9uIGFzIGZvbGxvd3MuDQoNCk9TRCBz
-aWRlOg0KImJsdWVzdG9yZV9taW5fYWxsb2Nfc2l6ZSI6IDY1NTM2DQoib3NkX29wX251bV90aHJl
-YWRzX3Blcl9zaGFyZCI6ICIyIg0KIm9zZF9vcF9udW1fc2hhcmRzIjogIjgiDQoNCkZvciBSb2Nr
-czoNCnNlcGFyYXRlZCBwYXJ0aXRpb24oNDBHLCBQMzcwMCkgZm9yIGRiJndhbA0KImJsdWVzdG9y
-ZV9yb2Nrc2RiX29wdGlvbnMiOiAibWF4X3dyaXRlX2J1ZmZlcl9udW1iZXI9NjQsbWluX3dyaXRl
-X2J1ZmZlcl9udW1iZXJfdG9fbWVyZ2U9MixyZWN5Y2xlX2xvZ19maWxlX251bT02NCxjb21wYWN0
-aW9uX3N0eWxlPWtDb21wYWN0aW9uU3R5bGVMZXZlbCxjb21wcmVzc2lvbj1rTm9Db21wcmVzc2lv
-bix3cml0ZV9idWZmZXJfc2l6ZT0xMzQyMTc3MjgsdGFyZ2V0X2ZpbGVfc2l6ZV9iYXNlPTEzNDIx
-NzcyOCxtYXhfYmFja2dyb3VuZF9jb21wYWN0aW9ucz0zMixsZXZlbDBfZmlsZV9udW1fY29tcGFj
-dGlvbl90cmlnZ2VyPTgsbGV2ZWwwX3Nsb3dkb3duX3dyaXRlc190cmlnZ2VyPTMyLGxldmVsMF9z
-dG9wX3dyaXRlc190cmlnZ2VyPTY0LG51bV9sZXZlbHM9NSxtYXhfYnl0ZXNfZm9yX2xldmVsX2Jh
-c2U9MTA3Mzc0MTgyNCxtYXhfYnl0ZXNfZm9yX2xldmVsX211bHRpcGxpZXI9OCxjb21wYWN0aW9u
-X3RocmVhZHM9MzIsZmx1c2hlcl90aHJlYWRzPTgiDQoNCkZvciBaUzoNCnNlcGFyYXRlZCBwYXJ0
-aXRpb24oMjBHLCBQMzcwMCkgZm9yIGRiDQoiYmx1ZXN0b3JlX2t2YmFja2VuZCI6IHpzDQoiYmx1
-ZXN0b3JlX3N5bmNfc3VibWl0X3RyYW5zYWN0aW9uIjogZmFsc2UNCg0KU29tbmF0aCwgYW55IHN1
-Z2dlc3Rpb25zIGZvciBzdXBlcmlvciB6cyBjb25maWd1cmF0aW9uPw0KDQpbU29tbmF0aF0gVW5m
-b3J0dW5hdGVseSwgNjRLIG1pbiBhbGxvYyBzaXplIHdpbGwgaW5kdWNlIGxvdCBvZiBXQSBmb3Ig
-WlMuIFVzZSB0aGVzZSBzZXR0aW5ncyBmb3IgNEsgUlcgdGVzdC4NCg0KYmx1ZXN0b3JlX21pbl9h
-bGxvY19zaXplID0gNDA5Ng0KYmx1ZXN0b3JlX251bV9rdl9zeW5jX3RocmVhZHMgPSA0DQpibHVl
-c3RvcmVfenNfb3B0aW9ucz0iWlNfTE9HX0xFVkVMPWluZm8sWlNfQlRSRUVfTDFDQUNIRV9TSVpF
-PTMwNzM3NDE4MjQsWlNfU0NBVkVOR0VSX0VOQUJMRT0wLFpTX1NDQVZFTkdFUl9USFJFQURTPTAs
-WlNfT19ESVJFQ1Q9MCINCg0KSWYgeW91IGFyZSBtZW1vcnkgY29uc3RyYWluZWQsIGRvbid0IHVz
-ZSBaU19CVFJFRV9MMUNBQ0hFX1NJWkU9PGNhY2hlLXNpemUtaW4tYnl0ZXM+ICwgZGVmYXVsdCAx
-Rw0KDQpBbHNvLCBob3BlIHlvdSBhcmUgZm9sbG93aW5nIG91ciBkaXNjdXNzaW9uIG9mIGRlY29k
-ZV9zb21lKCkgb3ZlcmhlYWQgYW5kIHNoYXJkIHNpemUgdHdlYWtpbmcgaW1wcm92aW5nIH40MCUg
-cGVyZm9ybWFuY2UgaW1wcm92ZW1lbnQgYm90aCBmb3Igcm9ja3MvWlMuIFVzZSB0aG9zZSBzaGFy
-ZCBzaXplIHNldHRpbmdzLiBUaGUgbXVsdGkga3YgYnJhbmNoIGlzIHF1aXRlIG91dGRhdGVkLCBJ
-IHdpbGwgdXBsb2FkIGEgbmV3IG9uZSB0b21vcnJvdyBzeW5jZWQgd2l0aCBsYXRlc3QgbWFzdGVy
-IHRoYXQgaGFzIHNvbWUgaW1wcm92ZW1lbnQgb24gdGhhdCBsaW5lLg0KDQoNClRoYW5rcywNCkhh
-b2RvbmcNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KUExFQVNFIE5PVEU6
-IFRoZSBpbmZvcm1hdGlvbiBjb250YWluZWQgaW4gdGhpcyBlbGVjdHJvbmljIG1haWwgbWVzc2Fn
-ZSBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgdXNlIG9mIHRoZSBkZXNpZ25hdGVkIHJlY2lwaWVu
-dChzKSBuYW1lZCBhYm92ZS4gSWYgdGhlIHJlYWRlciBvZiB0aGlzIG1lc3NhZ2UgaXMgbm90IHRo
-ZSBpbnRlbmRlZCByZWNpcGllbnQsIHlvdSBhcmUgaGVyZWJ5IG5vdGlmaWVkIHRoYXQgeW91IGhh
-dmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIGFuZCB0aGF0IGFueSByZXZpZXcsIGRp
-c3NlbWluYXRpb24sIGRpc3RyaWJ1dGlvbiwgb3IgY29weWluZyBvZiB0aGlzIG1lc3NhZ2UgaXMg
-c3RyaWN0bHkgcHJvaGliaXRlZC4gSWYgeW91IGhhdmUgcmVjZWl2ZWQgdGhpcyBjb21tdW5pY2F0
-aW9uIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgdGVsZXBob25lIG9yIGUt
-bWFpbCAoYXMgc2hvd24gYWJvdmUpIGltbWVkaWF0ZWx5IGFuZCBkZXN0cm95IGFueSBhbmQgYWxs
-IGNvcGllcyBvZiB0aGlzIG1lc3NhZ2UgaW4geW91ciBwb3NzZXNzaW9uICh3aGV0aGVyIGhhcmQg
-Y29waWVzIG9yIGVsZWN0cm9uaWNhbGx5IHN0b3JlZCBjb3BpZXMpLg0KDQo=
+
+Hi,
+
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+
+16 new defect(s) introduced to ceph found with Coverity Scan.
+12 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+
+New defect(s) Reported-by: Coverity Scan
+Showing 16 of 16 defect(s)
+
+
+** CID 1213584:  Program hangs  (ORDER_REVERSAL)
+
+
+________________________________________________________________________________________________________
+*** CID 1213584:  Program hangs  (ORDER_REVERSAL)
+/home/brad/working/src/ceph/src/osd/OSD.cc: 9042 in C_CompleteSplits::finish(int)()
+9036           return;
+9037         PG::RecoveryCtx rctx = osd->create_context();
+9038         for (set<boost::intrusive_ptr<PG> >::iterator i = pgs.begin();
+9039     	 i != pgs.end();
+9040     	 ++i) {
+9041           osd->pg_map_lock.get_write();
+>>>     CID 1213584:  Program hangs  (ORDER_REVERSAL)
+>>>     Calling "lock" acquires lock "Mutex._m" while holding lock "RWLock.L" (count: 5 / 11).
+9042           (*i)->lock();
+9043           osd->add_newly_split_pg(&**i, &rctx);
+9044           if (!((*i)->deleting)) {
+9045             set<spg_t> to_complete;
+9046             to_complete.insert((*i)->info.pgid);
+9047             osd->service.complete_split(to_complete);
+
+** CID 1351530:  Program hangs  (ORDER_REVERSAL)
+
+
+________________________________________________________________________________________________________
+*** CID 1351530:  Program hangs  (ORDER_REVERSAL)
+/home/brad/working/src/ceph/src/osd/OSD.cc: 5117 in OSD::queue_want_up_thru(unsigned int)()
+5111     }
+5112     
+5113     void OSD::queue_want_up_thru(epoch_t want)
+5114     {
+5115       map_lock.get_read();
+5116       epoch_t cur = osdmap->get_up_thru(whoami);
+>>>     CID 1351530:  Program hangs  (ORDER_REVERSAL)
+>>>     Calling "Locker" acquires lock "Mutex._m" while holding lock "RWLock.L" (count: 5 / 11).
+5117       Mutex::Locker l(mon_report_lock);
+5118       if (want > up_thru_wanted) {
+5119         dout(10) << "queue_want_up_thru now " << want << " (was " << up_thru_wanted << ")"
+5120     	     << ", currently " << cur
+5121     	     << dendl;
+5122         up_thru_wanted = want;
+
+** CID 1351531:  Program hangs  (ORDER_REVERSAL)
+
+
+________________________________________________________________________________________________________
+*** CID 1351531:  Program hangs  (ORDER_REVERSAL)
+/home/brad/working/src/ceph/src/osd/OSD.cc: 4820 in OSD::ms_handle_connect(Connection *)()
+4814         if (is_preboot()) {
+4815           start_boot();
+4816         } else if (is_booting()) {
+4817           _send_boot();       // resend boot message
+4818         } else {
+4819           map_lock.get_read();
+>>>     CID 1351531:  Program hangs  (ORDER_REVERSAL)
+>>>     Calling "Locker" acquires lock "Mutex._m" while holding lock "RWLock.L" (count: 5 / 11).
+4820           Mutex::Locker l2(mon_report_lock);
+4821     
+4822           utime_t now = ceph_clock_now();
+4823           last_mon_report = now;
+4824     
+4825           // resend everything, it's a new session
+
+** CID 1351532:    (ORDER_REVERSAL)
+
+
+________________________________________________________________________________________________________
+*** CID 1351532:    (ORDER_REVERSAL)
+/home/brad/working/src/ceph/src/osd/OSD.cc: 4411 in OSD::tick_without_osd_lock()()
+4405       if (is_active() || is_waiting_for_healthy()) {
+4406         heartbeat_lock.Lock();
+4407         heartbeat_check();
+4408         heartbeat_lock.Unlock();
+4409     
+4410         map_lock.get_read();
+>>>     CID 1351532:    (ORDER_REVERSAL)
+>>>     Calling "Locker" acquires lock "Mutex._m" while holding lock "RWLock.L" (count: 5 / 11).
+4411         Mutex::Locker l(mon_report_lock);
+4412     
+4413         // mon report?
+4414         bool reset = false;
+4415         bool report = false;
+4416         utime_t now = ceph_clock_now();
+/home/brad/working/src/ceph/src/osd/OSD.cc: 4417 in OSD::tick_without_osd_lock()()
+4411         Mutex::Locker l(mon_report_lock);
+4412     
+4413         // mon report?
+4414         bool reset = false;
+4415         bool report = false;
+4416         utime_t now = ceph_clock_now();
+>>>     CID 1351532:    (ORDER_REVERSAL)
+>>>     Calling "Lock" acquires lock "Mutex._m" while holding lock "RWLock.L" (count: 5 / 11).
+4417         pg_stat_queue_lock.Lock();
+4418         double backoff = stats_ack_timeout / cct->_conf->osd_mon_ack_timeout;
+4419         double adjusted_min = cct->_conf->osd_mon_report_interval_min * backoff;
+4420         // note: we shouldn't adjust max because it must remain < the
+4421         // mon's mon_osd_report_timeout (which defaults to 1.5x our
+4422         // value).
+
+** CID 1398195:  Resource leaks  (CTOR_DTOR_LEAK)
+/home/brad/working/src/ceph/src/os/bluestore/BitAllocator.cc: 798 in BitMapAreaIN::BitMapAreaIN(CephContext *, long, long)()
+
+
+________________________________________________________________________________________________________
+*** CID 1398195:  Resource leaks  (CTOR_DTOR_LEAK)
+/home/brad/working/src/ceph/src/os/bluestore/BitAllocator.cc: 798 in BitMapAreaIN::BitMapAreaIN(CephContext *, long, long)()
+792     }
+793     
+794     BitMapAreaIN::BitMapAreaIN(CephContext* cct,int64_t total_blocks,
+795     			   int64_t area_idx)
+796       : BitMapArea(cct)
+797     {
+>>>     CID 1398195:  Resource leaks  (CTOR_DTOR_LEAK)
+>>>     The constructor allocates field "m_child_list" of "BitMapAreaIN" but the destructor and whatever functions it calls do not free it.
+798       init(total_blocks, area_idx, false);
+799     }
+800     
+801     BitMapAreaIN::BitMapAreaIN(CephContext* cct, int64_t total_blocks,
+802     			   int64_t area_idx, bool def)
+803       : BitMapArea(cct)
+
+** CID 1398196:  Security best practices violations  (DC.WEAK_CRYPTO)
+/home/brad/working/src/ceph/src/osd/OSD.cc: 6537 in OSDService::ScrubJob::ScrubJob(CephContext *, const spg_t &, const utime_t &, double, double, bool)()
+
+
+________________________________________________________________________________________________________
+*** CID 1398196:  Security best practices violations  (DC.WEAK_CRYPTO)
+/home/brad/working/src/ceph/src/osd/OSD.cc: 6537 in OSDService::ScrubJob::ScrubJob(CephContext *, const spg_t &, const utime_t &, double, double, bool)()
+6531         double scrub_min_interval = pool_scrub_min_interval > 0 ?
+6532           pool_scrub_min_interval : cct->_conf->osd_scrub_min_interval;
+6533         double scrub_max_interval = pool_scrub_max_interval > 0 ?
+6534           pool_scrub_max_interval : cct->_conf->osd_scrub_max_interval;
+6535     
+6536         sched_time += scrub_min_interval;
+>>>     CID 1398196:  Security best practices violations  (DC.WEAK_CRYPTO)
+>>>     "rand" should not be used for security related applications, as linear congruential algorithms are too easy to break.
+6537         double r = rand() / (double)RAND_MAX;
+6538         sched_time +=
+6539           scrub_min_interval * cct->_conf->osd_scrub_interval_randomize_ratio * r;
+6540         deadline += scrub_max_interval;
+6541       }
+6542     }
+
+** CID 1398197:  Program hangs  (ORDER_REVERSAL)
+
+
+________________________________________________________________________________________________________
+*** CID 1398197:  Program hangs  (ORDER_REVERSAL)
+/home/brad/working/src/ceph/src/osd/OSD.cc: 7035 in OSD::_committed_osd_maps(unsigned int, unsigned int, MOSDMap *)()
+7029     	  osdmap->is_up(*p) && // in old map
+7030     	  newmap->is_down(*p)) {    // but not the new one
+7031             if (!waited_for_reservations) {
+7032               service.await_reserved_maps();
+7033               waited_for_reservations = true;
+7034             }
+>>>     CID 1398197:  Program hangs  (ORDER_REVERSAL)
+>>>     Calling "note_down_osd" acquires lock "Mutex._m" while holding lock "RWLock.L" (count: 5 / 11).
+7035     	note_down_osd(*p);
+7036           } else if (*p != whoami &&
+7037                     osdmap->is_down(*p) &&
+7038                     newmap->is_up(*p)) {
+7039             note_up_osd(*p);
+7040           }
+
+** CID 1398198:    (TAINTED_SCALAR)
+
+
+________________________________________________________________________________________________________
+*** CID 1398198:    (TAINTED_SCALAR)
+/home/brad/working/src/ceph/src/os/kstore/KStore.cc: 295 in get_object_key(CephContext *, const ghobject_t &, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> *)()
+289       // sanity check
+290       if (true) {
+291         ghobject_t t;
+292         int r = get_key_object(*key, &t);
+293         if (r || t != oid) {
+294           derr << "  r " << r << dendl;
+>>>     CID 1398198:    (TAINTED_SCALAR)
+>>>     Passing tainted variable "key" to a tainted sink.
+295           derr << "key " << pretty_binary_string(*key) << dendl;
+296           derr << "oid " << oid << dendl;
+297           derr << "  t " << t << dendl;
+298           assert(t == oid);
+299         }
+300       }
+/home/brad/working/src/ceph/src/os/bluestore/BlueStore.cc: 328 in get_object_key(CephContext *, const ghobject_t &, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> *)()
+322       // sanity check
+323       if (true) {
+324         ghobject_t t;
+325         int r = get_key_object(*key, &t);
+326         if (r || t != oid) {
+327           derr << "  r " << r << dendl;
+>>>     CID 1398198:    (TAINTED_SCALAR)
+>>>     Passing tainted variable "key" to a tainted sink.
+328           derr << "key " << pretty_binary_string(*key) << dendl;
+329           derr << "oid " << oid << dendl;
+330           derr << "  t " << t << dendl;
+331           assert(r == 0 && t == oid);
+332         }
+333       }
+
+** CID 1398199:  Insecure data handling  (TAINTED_STRING)
+/home/brad/working/src/ceph/src/test/admin_socket.cc: 113 in AdminSocket_SendTooLongRequest_Test::TestBody()()
+
+
+________________________________________________________________________________________________________
+*** CID 1398199:  Insecure data handling  (TAINTED_STRING)
+/home/brad/working/src/ceph/src/test/admin_socket.cc: 113 in AdminSocket_SendTooLongRequest_Test::TestBody()()
+107     
+108     TEST(AdminSocket, SendTooLongRequest) {
+109       std::unique_ptr<AdminSocket>
+110           asokc(new AdminSocket(g_ceph_context));
+111       AdminSocketTest asoct(asokc.get());
+112       ASSERT_EQ(true, asoct.shutdown());
+>>>     CID 1398199:  Insecure data handling  (TAINTED_STRING)
+>>>     Call to function "basic_string" with tainted argument "get_rand_socket_path()" transitively taints "<temporary>". [Note: The source code implementation of the function has been overridden by a builtin model.]
+113       ASSERT_EQ(true, asoct.init(get_rand_socket_path()));
+114       AdminSocketClient client(get_rand_socket_path());
+115       string version;
+116       string request(16384, 'a');
+117       //if admin_socket cannot handle it, segfault will happened.
+118       ASSERT_NE("", client.do_request(request, &version));
+
+** CID 1398200:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/os/kstore/KStore.h: 87 in KStore::Onode::Onode(CephContext *, const ghobject_t &, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &)()
+
+
+________________________________________________________________________________________________________
+*** CID 1398200:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/os/kstore/KStore.h: 87 in KStore::Onode::Onode(CephContext *, const ghobject_t &, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &)()
+81           : cct(cct),
+82     	nref(0),
+83     	oid(o),
+84     	key(k),
+85     	dirty(false),
+86     	exists(false) {
+>>>     CID 1398200:  Uninitialized members  (UNINIT_CTOR)
+>>>     Non-static class member "tail_offset" is not initialized in this constructor nor in any functions that it calls.
+87         }
+88     
+89         void flush();
+90         void get() {
+91           ++nref;
+92         }
+
+** CID 1398201:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 78 in PGLSFilter::PGLSFilter()()
+
+
+________________________________________________________________________________________________________
+*** CID 1398201:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 78 in PGLSFilter::PGLSFilter()()
+72     #include <errno.h>
+73     
+74     MEMPOOL_DEFINE_OBJECT_FACTORY(PrimaryLogPG, replicatedpg, osd);
+75     
+76     PGLSFilter::PGLSFilter()
+77     {
+>>>     CID 1398201:  Uninitialized members  (UNINIT_CTOR)
+>>>     Non-static class member "cct" is not initialized in this constructor nor in any functions that it calls.
+78     }
+79     
+80     PGLSFilter::~PGLSFilter()
+81     {
+82     }
+83     
+
+** CID 1398202:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/os/bluestore/BlueStore.h: 846 in BlueStore::Cache::Cache(CephContext *)()
+
+
+________________________________________________________________________________________________________
+*** CID 1398202:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/os/bluestore/BlueStore.h: 846 in BlueStore::Cache::Cache(CephContext *)()
+840         std::atomic<uint64_t> num_blobs = {0};
+841     
+842         size_t last_trim_seq = 0;
+843     
+844         static Cache *create(CephContext* cct, string type, PerfCounters *logger);
+845     
+>>>     CID 1398202:  Uninitialized members  (UNINIT_CTOR)
+>>>     Non-static class member "logger" is not initialized in this constructor nor in any functions that it calls.
+846         Cache(CephContext* cct) : cct(cct) {}
+847         virtual ~Cache() {}
+848     
+849         virtual void _add_onode(OnodeRef& o, int level) = 0;
+850         virtual void _rm_onode(OnodeRef& o) = 0;
+851         virtual void _touch_onode(OnodeRef& o) = 0;
+
+** CID 1398203:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/osd/OSD.h: 641 in OSDService::ScrubJob::ScrubJob()()
+
+
+________________________________________________________________________________________________________
+*** CID 1398203:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/osd/OSD.h: 641 in OSDService::ScrubJob::ScrubJob()()
+635         spg_t pgid;
+636         /// a time scheduled for scrub. but the scrub could be delayed if system
+637         /// load is too high or it fails to fall in the scrub hours
+638         utime_t sched_time;
+639         /// the hard upper bound of scrub time
+640         utime_t deadline;
+>>>     CID 1398203:  Uninitialized members  (UNINIT_CTOR)
+>>>     Non-static class member "cct" is not initialized in this constructor nor in any functions that it calls.
+641         ScrubJob() {}
+642         explicit ScrubJob(CephContext* cct, const spg_t& pg,
+643     		      const utime_t& timestamp,
+644     		      double pool_scrub_min_interval = 0,
+645     		      double pool_scrub_max_interval = 0, bool must = true);
+646         /// order the jobs by sched_time
+
+** CID 1398204:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/os/bluestore/BitAllocator.cc: 746 in BitMapAreaIN::BitMapAreaIN(CephContext *)()
+
+
+________________________________________________________________________________________________________
+*** CID 1398204:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/os/bluestore/BitAllocator.cc: 746 in BitMapAreaIN::BitMapAreaIN(CephContext *)()
+740      * BitMapArea Leaf and Internal
+741      */
+742     BitMapAreaIN::BitMapAreaIN(CephContext* cct)
+743       : BitMapArea(cct)
+744     {
+745       // nothing
+>>>     CID 1398204:  Uninitialized members  (UNINIT_CTOR)
+>>>     Non-static class member "m_child_list" is not initialized in this constructor nor in any functions that it calls.
+746     }
+747     
+748     void BitMapAreaIN::init_common(int64_t total_blocks, int64_t area_idx, bool def)
+749     {
+750       m_area_index = area_idx;
+751       m_total_blocks = total_blocks;
+
+** CID 1398205:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/os/bluestore/BitmapFreelistManager.cc: 58 in BitmapFreelistManager::BitmapFreelistManager(CephContext *, KeyValueDB *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>)()
+
+
+________________________________________________________________________________________________________
+*** CID 1398205:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/os/bluestore/BitmapFreelistManager.cc: 58 in BitmapFreelistManager::BitmapFreelistManager(CephContext *, KeyValueDB *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>)()
+52     					     string bitmap_prefix)
+53       : FreelistManager(cct),
+54         meta_prefix(meta_prefix),
+55         bitmap_prefix(bitmap_prefix),
+56         kvdb(db)
+57     {
+>>>     CID 1398205:  Uninitialized members  (UNINIT_CTOR)
+>>>     Non-static class member "enumerate_bl_pos" is not initialized in this constructor nor in any functions that it calls.
+58     }
+59     
+60     int BitmapFreelistManager::create(uint64_t new_size, KeyValueDB::Transaction txn)
+61     {
+62       bytes_per_block = cct->_conf->bdev_block_size;
+63       assert(ISP2(bytes_per_block));
+
+** CID 1398206:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/os/bluestore/BitAllocator.h: 266 in BitMapArea::BitMapArea(CephContext *)()
+
+
+________________________________________________________________________________________________________
+*** CID 1398206:  Uninitialized members  (UNINIT_CTOR)
+/home/brad/working/src/ceph/src/os/bluestore/BitAllocator.h: 266 in BitMapArea::BitMapArea(CephContext *)()
+260     
+261       int64_t child_count();
+262       int64_t get_index();
+263       int64_t get_level();
+264       bmap_area_type_t get_type();
+265       virtual void dump_state(int& count) = 0;
+>>>     CID 1398206:  Uninitialized members  (UNINIT_CTOR)
+>>>     Non-static class member "m_type" is not initialized in this constructor nor in any functions that it calls.
+266       BitMapArea(CephContext* cct) : cct(cct) {}
+267       virtual ~BitMapArea() { }
+268     };
+269     
+270     class BitMapAreaList {
+271     
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRaGCnxtQO9E3gxlB2GxVsWFENryh7bC5hIb-2FQBVM85YLQ-3D-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8GeYWMm9JqZsVcnFzXBYjl53tnd5pIjk0s2bDmef6l12PA7mZ7O9u5r3WS-2BU3nibfzbSSWxRXF3CZD1O4IZ9CZYtv-2FsavwISp6O0FsgdG8snJ7me-2B4d1eZSdqn9S7HthXiVLJWoX8OsRvQXeAdbQ4m7DDH85yQviZceNEMjx5tcUyh597nVhmeB8FEkQQfeZwA-3D
+
+To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRbVDbis712qZDP-2FA8y06Nq4Bco8jcmzhh7FSyvoR0E3-2BDgRcBCQ6OuthHBtaTCGNq9zoLsiw8NWrIF2zsdhfTt-2FbHjZ2ToL3Et9v1-2BrDLungAOjHpQtOY-2BsyLiTVCQEUCU-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8GeYWMm9JqZsVcnFzXBYjl53tnd5pIjk0s2bDmef6l12AlBVifsKopcZFxig-2FYB1QcaVQn30ZzwOE-2B-2FOCWPo9qtbNW2ALu-2FHmoJvjmXc1ndtDwk7gPI5BLVislPd0cPn9BQisiica1dsFH8g5Ijtrdge4V2iuP6rtUhoIcfCkbrsbyXZ-2FABfRva5R8z5Gw7vh0-3D
+
