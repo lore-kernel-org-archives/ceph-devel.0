@@ -1,126 +1,76 @@
-From: Sage Weil <sage@redhat.com>
-Subject: kraken status
-Date: Fri, 30 Dec 2016 21:44:55 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1612302128020.19993@piezo.novalocal>
+From: Brad Hubbard <bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: installation docs
+Date: Sat, 31 Dec 2016 08:51:25 +1000
+Message-ID: <CAF-wwdEVLWswf4xDMFM-vJJkxUn9ZDx8mC3MA6hA4DJvUqwSVg@mail.gmail.com>
+References: <9D8A2486E35F0941A60430473E29F15BCED3C51F@MXDB2.ad.garvan.unsw.edu.au>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33434 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753631AbcL3Vo5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Dec 2016 16:44:57 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-        by cobra.newdream.net (Postfix) with ESMTP id A93FD813C8
-        for <ceph-devel@vger.kernel.org>; Fri, 30 Dec 2016 13:44:56 -0800 (PST)
-Received: from localhost.localdomain (unknown [64.111.99.127])
-        by cobra.newdream.net (Postfix) with ESMTPSA id 791E081398
-        for <ceph-devel@vger.kernel.org>; Fri, 30 Dec 2016 13:44:56 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <9D8A2486E35F0941A60430473E29F15BCED3C51F-IhG7OETfVo1CLNna4DnVtiHh/+Pj5vT/unOrhLTifxA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Manuel Sopena Ballesteros <manuel.sb-WwWqvNR902a3Zbb/xt2tYQ@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-rest, hadoop, knfs, kcephfs all green!
-
-Most of the failures below have 'immediate' tickets open. I didn't open 
-new tickets for the rbd or cephfs failures, though.  I'm not sure which 
-ones are blockers.
-
-	http://tracker.ceph.com/projects/ceph/issues?query_id=27
-
-I'm on vacation next week (Jan 1 - Jan 8).
-
-
-ceph-disk:
-
-- fails to install ceph-radosgw on centos
-
-	http://tracker.ceph.com/issues/18374
-
-
-rados:
-
-I think these are blockers:
-
-- bluestore reclaim broken
-
-	http://tracker.ceph.com/issues/18368
-	https://github.com/ceph/ceph/pull/12725
-
-- ceph-disk bug seen on xenial
-
-	http://tracker.ceph.com/issues/18371
-
-- bluestore + one failure injection test generates a core
-
-	http://tracker.ceph.com/issues/18372
-	https://github.com/ceph/ceph/pull/12726
-
-These are either old or environmental noise:
-
-- several failures with time skew. usually this is environmental but it's 
-weird that we haven't seen until recently.  maybe ntp isn't configured on 
-the new nodes properly?
-
-	http://tracker.ceph.com/issues/18370
-
-- ENOENT on clone suggests bug.  This pops up infrequently but I think I 
-have a root cause this time!
-
-	http://tracker.ceph.com/issues/18373
-
-- still seeing deadlocks from gperftools vs dlopen on xenial (lead to dead 
-runs)
-
-There are also 2 issues that came up on the lab cluster.  These are 
-probably related to old corruptions, but they lead to OSD crashes, so we 
-should fix that much at least:
-
-- failed_push does not update missing set, breaking mark_unfound_lost
-
-	http://tracker.ceph.com/issues/18365
-
-- scrub is still disabled as it lead to a crash last week.  we should make 
-sure it can complete fully..
-
-
-rgw:
-
-http://pulpito.ceph.com/teuthology-2016-12-29_11:05:01-rgw-kraken-distro-basic-smithi
-
-All valgrind failures:
-
-- invalid read of size 4
-
-	http://tracker.ceph.com/issues/18071
-
-- leaks
-
-	http://tracker.ceph.com/issues/18300
-
-
-rbd:
-
-http://pulpito.ceph.com/teuthology-2016-12-29_11:00:03-rbd-kraken-distro-basic-smithi
-http://pulpito.ceph.com/teuthology-2016-12-29_11:00:03-rbd-kraken-distro-basic-smithi/
-
-3 failures across those runs,
-
-- test_lock_fence.sh (both)
-- rbd_mirror.sh
-- fsx nbd
-
-
-fs:
-
-http://pulpito.ceph.com/teuthology-2016-12-29_11:10:01-fs-kraken---basic-smithi
-
-- TestVolumeClient
-- TestSessionMap 
-
-
-samba:
-
-http://pulpito.ceph.com/teuthology-2016-12-29_11:35:02-samba-kraken---basic-mira/
-
-many failures.. gitbuilder vs shaman issue?
-
+K2NlcGgtZGV2ZWwKCk9uIEZyaSwgRGVjIDMwLCAyMDE2IGF0IDY6MDIgUE0sIE1hbnVlbCBTb3Bl
+bmEgQmFsbGVzdGVyb3MKPG1hbnVlbC5zYkBnYXJ2YW4ub3JnLmF1PiB3cm90ZToKPiBIaSwKPgo+
+Cj4KPiBJIGp1c3Qgd291bGQgbGlrZSB0byBwb2ludCBhIGNvdXBsZSBvZiBpc3N1ZXMgSSBoYXZl
+IGZvbGxvd2luZyB0aGUKPiBJTlNUQUxMQVRJT04gKFFVSUNLKSBkb2N1bWVudC4KPgo+Cj4KPiAx
+LiAgICAgICBUaGUgb3JkZXIgdG8gY2xlYW4gY2VwaCBkZXBsb3ltZW50IGlzOgo+Cj4gYS4gICAg
+ICAgQ2VwaC1kZXBsb3kgcHVyZ2Uge2NlcGgtbm9kZX0gW3tjZXBoLW5vZGV9XQo+Cj4gYi4gICAg
+ICBDZXBoLWRlcGxveSBwdXJnZWRhdGEge2NlcGgtbm9kZX0gW3tjZXBoLW5vZGV9XQo+Cj4KPgo+
+IDIuICAgICAgIEkgcnVuIGNlcGggamV3ZWwgMTAuMi41IGFuZCDigJxlcGgtZGVwbG95IHByZWFw
+cmXigJ0gYWxzbyBhY3RpdmF0ZXMgdGhlCj4gT1NELCB0aGlzIGlzIHNvbWV0aGluZyB0aGF0IGNv
+bmZ1c2VkIG1lIGJlY2F1c2UgSSBjb3VsZCBub3QgdW5kZXJzdGFuZCB3aHkKPiB0aGVyZSB3YXMg
+MyBjb21tYW5kcyAocHJlcGFyZV9hY3RpdmF0ZSBvciBjcmVhdGUpIHRvIGRvIHRoaXMgd2hlbiBv
+bmx5IDEgaXMKPiBuZWVkZWQgKHJpZ2h0IG5vdyBJIGRvbuKAmXQga25vdyB0aGUgZGlmZmVyZW5j
+ZSBiZXR3ZWVuIHByZXBhcmUgYW5kIGNyZWF0ZSBhcwo+IGZvciBtZSBib3RoIGRvIHRoZSBzYW1l
+KQo+Cj4KPgo+IDMuICAgICAgIFJpZ2h0IGFmdGVyIHRoZSBpbnN0YWxsYXRpb24gdGhlIHN0YXR1
+cyBvZiB0aGUgY2VwaCBjbHVzdGVyIGlzCj4g4oCcSEVBTFRIX1dBUk4gdG9vIGZldyBQR3MgcGVy
+IE9TRCAoMTAgPCBtaW4gMzAp4oCdIGFuZCBub3Qg4oCcYWN0aXZlICsgY2xlYW7igJ0gYXMKPiB0
+aGUgZG9jdW1lbnRhdGlvbiBzYXlzLgo+Cj4KPgo+IDQuICAgICAgIEl0IHdvdWxkIGJlIGdvb2Qg
+dG8gYWRkIGEgc21hbGwgZ3VpZGUgZm9yIHRyb3VibGVzaG9vdGluZyBsaWtlCj4gY2hlY2sgaWYg
+dGhlIG1vbml0b3JzIGFyZSB3b3JraW5nLCBob3cgdG8gcmVzdGFydCB0aGUgbW9uaXRvciBwcm9j
+ZXNzZXMsCj4gY2hlY2sgY29tbXVuaWNhdGlvbiBiZXR3ZWVuIHRoZSBPU0RzIHByb2Nlc3NlcyBh
+bmQgdGhlIG1vbml0b3JzLCBydW4KPiBjb21tYW5kcyBvbiB0aGUgbG9jYWwgbm9kZXMgdG8gc2Vl
+IGluIG1vcmUgZGV0YWlscyB3aGF0IGlzIGZhaWxpbmcsIGV0Yy4KPgo+Cj4KPiA1LiAgICAgICBB
+bHNvIEkgc3BlbnQgYSBsb3Qgb2YgdGltZSBmcm9tIHRoZSBJUkMgY2hhbm5lbCB0cnlpbmcgdG8K
+PiB1bmRlcnN0YW5kIHdoeSBjZXBoLWRlcGxveSBhbmQgdGhlIHByb2JsZW0gd2FzIHRoZSBkaXNr
+cyB3ZXJlIGFscmVhZHkKPiBtb3VudGVkLiBJIGNvdWxkIG5vdCBzZWUgaW4gcnVubmluZyBkZiDi
+gJNoIGJ1dCBsc2JsaywgdGhpcyBpcyBhbHNvIHNvbWV0aGluZwo+IHRoYXQgaW4gbXkgb3Bpbmlv
+biB3b3VsZCBiZSBnb29kIHRvIGhhdmUuIFNwZWNpYWwgdGhhbmtzIHRvIEl2dmUgYW5kIGJhZG9u
+ZQo+IHdobyBoZWxwZWQgbWUgdG8gZmluZCBvdXQgd2hhdCB0aGUgaXNzdWUgd2FzLgo+Cj4KPgo+
+IDYuICAgICAgIExhc3QgdGhpbmcsIHdvdWxkIGJlIGdvb2QgdG8gbWVudGlvbiB0aGF0IGluc3Rh
+bGxpbmcgY2VwaCB0aHJvdWdoCj4gQW5zaWJsZSBpcyBhbHNvIGFuIG9wdGlvbgo+Cj4KPgo+IE90
+aGVyIHRoYW4gdGhhdCBjb25ncmF0dWxhdGlvbiB0byB0aGUgY29tbXVuaXR5IGZvciB5b3VyIGVm
+Zm9ydCBhbmQga2VlcCBpdAo+IGdvaW5nIQo+Cj4KPgo+Cj4KPiBNYW51ZWwgU29wZW5hIEJhbGxl
+c3Rlcm9zIHwgQmlnIGRhdGEgRW5naW5lZXIKPiBHYXJ2YW4gSW5zdGl0dXRlIG9mIE1lZGljYWwg
+UmVzZWFyY2gKPiBUaGUgS2luZ2hvcm4gQ2FuY2VyIENlbnRyZSwgMzcwIFZpY3RvcmlhIFN0cmVl
+dCwgRGFybGluZ2h1cnN0LCBOU1cgMjAxMAo+IFQ6ICsgNjEgKDApMiA5MzU1IDU3NjAgfCBGOiAr
+NjEgKDApMiA5Mjk1IDg1MDcgfCBFOiBtYW51ZWwuc2JAZ2FydmFuLm9yZy5hdQo+Cj4KPgo+IE5P
+VElDRQo+IFBsZWFzZSBjb25zaWRlciB0aGUgZW52aXJvbm1lbnQgYmVmb3JlIHByaW50aW5nIHRo
+aXMgZW1haWwuIFRoaXMgbWVzc2FnZSBhbmQKPiBhbnkgYXR0YWNobWVudHMgYXJlIGludGVuZGVk
+IGZvciB0aGUgYWRkcmVzc2VlIG5hbWVkIGFuZCBtYXkgY29udGFpbiBsZWdhbGx5Cj4gcHJpdmls
+ZWdlZC9jb25maWRlbnRpYWwvY29weXJpZ2h0IGluZm9ybWF0aW9uLiBJZiB5b3UgYXJlIG5vdCB0
+aGUgaW50ZW5kZWQKPiByZWNpcGllbnQsIHlvdSBzaG91bGQgbm90IHJlYWQsIHVzZSwgZGlzY2xv
+c2UsIGNvcHkgb3IgZGlzdHJpYnV0ZSB0aGlzCj4gY29tbXVuaWNhdGlvbi4gSWYgeW91IGhhdmUg
+cmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIHBsZWFzZSBub3RpZnkgdXMKPiBhdCBvbmNl
+IGJ5IHJldHVybiBlbWFpbCBhbmQgdGhlbiBkZWxldGUgYm90aCBtZXNzYWdlcy4gV2UgYWNjZXB0
+IG5vCj4gbGlhYmlsaXR5IGZvciB0aGUgZGlzdHJpYnV0aW9uIG9mIHZpcnVzZXMgb3Igc2ltaWxh
+ciBpbiBlbGVjdHJvbmljCj4gY29tbXVuaWNhdGlvbnMuIFRoaXMgbm90aWNlIHNob3VsZCBub3Qg
+YmUgcmVtb3ZlZC4KPgo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fCj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGgu
+Y29tCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGgu
+Y29tCj4KCgoKLS0gCkNoZWVycywKQnJhZApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3Rz
+LmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1j
+ZXBoLmNvbQo=
