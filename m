@@ -1,76 +1,22 @@
-From: Brad Hubbard <bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: installation docs
-Date: Sat, 31 Dec 2016 08:51:25 +1000
-Message-ID: <CAF-wwdEVLWswf4xDMFM-vJJkxUn9ZDx8mC3MA6hA4DJvUqwSVg@mail.gmail.com>
-References: <9D8A2486E35F0941A60430473E29F15BCED3C51F@MXDB2.ad.garvan.unsw.edu.au>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Static analysis
+Date: Sat, 31 Dec 2016 10:22:33 +1000
+Message-ID: <CAF-wwdGa=rTPSLkhHA6vJ6VNkUXowXRoxvO48m5ztas=+nbANQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <9D8A2486E35F0941A60430473E29F15BCED3C51F-IhG7OETfVo1CLNna4DnVtiHh/+Pj5vT/unOrhLTifxA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Manuel Sopena Ballesteros <manuel.sb-WwWqvNR902a3Zbb/xt2tYQ@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:37280 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754259AbcLaAWf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Dec 2016 19:22:35 -0500
+Received: by mail-wm0-f41.google.com with SMTP id t79so366109213wmt.0
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Dec 2016 16:22:34 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-K2NlcGgtZGV2ZWwKCk9uIEZyaSwgRGVjIDMwLCAyMDE2IGF0IDY6MDIgUE0sIE1hbnVlbCBTb3Bl
-bmEgQmFsbGVzdGVyb3MKPG1hbnVlbC5zYkBnYXJ2YW4ub3JnLmF1PiB3cm90ZToKPiBIaSwKPgo+
-Cj4KPiBJIGp1c3Qgd291bGQgbGlrZSB0byBwb2ludCBhIGNvdXBsZSBvZiBpc3N1ZXMgSSBoYXZl
-IGZvbGxvd2luZyB0aGUKPiBJTlNUQUxMQVRJT04gKFFVSUNLKSBkb2N1bWVudC4KPgo+Cj4KPiAx
-LiAgICAgICBUaGUgb3JkZXIgdG8gY2xlYW4gY2VwaCBkZXBsb3ltZW50IGlzOgo+Cj4gYS4gICAg
-ICAgQ2VwaC1kZXBsb3kgcHVyZ2Uge2NlcGgtbm9kZX0gW3tjZXBoLW5vZGV9XQo+Cj4gYi4gICAg
-ICBDZXBoLWRlcGxveSBwdXJnZWRhdGEge2NlcGgtbm9kZX0gW3tjZXBoLW5vZGV9XQo+Cj4KPgo+
-IDIuICAgICAgIEkgcnVuIGNlcGggamV3ZWwgMTAuMi41IGFuZCDigJxlcGgtZGVwbG95IHByZWFw
-cmXigJ0gYWxzbyBhY3RpdmF0ZXMgdGhlCj4gT1NELCB0aGlzIGlzIHNvbWV0aGluZyB0aGF0IGNv
-bmZ1c2VkIG1lIGJlY2F1c2UgSSBjb3VsZCBub3QgdW5kZXJzdGFuZCB3aHkKPiB0aGVyZSB3YXMg
-MyBjb21tYW5kcyAocHJlcGFyZV9hY3RpdmF0ZSBvciBjcmVhdGUpIHRvIGRvIHRoaXMgd2hlbiBv
-bmx5IDEgaXMKPiBuZWVkZWQgKHJpZ2h0IG5vdyBJIGRvbuKAmXQga25vdyB0aGUgZGlmZmVyZW5j
-ZSBiZXR3ZWVuIHByZXBhcmUgYW5kIGNyZWF0ZSBhcwo+IGZvciBtZSBib3RoIGRvIHRoZSBzYW1l
-KQo+Cj4KPgo+IDMuICAgICAgIFJpZ2h0IGFmdGVyIHRoZSBpbnN0YWxsYXRpb24gdGhlIHN0YXR1
-cyBvZiB0aGUgY2VwaCBjbHVzdGVyIGlzCj4g4oCcSEVBTFRIX1dBUk4gdG9vIGZldyBQR3MgcGVy
-IE9TRCAoMTAgPCBtaW4gMzAp4oCdIGFuZCBub3Qg4oCcYWN0aXZlICsgY2xlYW7igJ0gYXMKPiB0
-aGUgZG9jdW1lbnRhdGlvbiBzYXlzLgo+Cj4KPgo+IDQuICAgICAgIEl0IHdvdWxkIGJlIGdvb2Qg
-dG8gYWRkIGEgc21hbGwgZ3VpZGUgZm9yIHRyb3VibGVzaG9vdGluZyBsaWtlCj4gY2hlY2sgaWYg
-dGhlIG1vbml0b3JzIGFyZSB3b3JraW5nLCBob3cgdG8gcmVzdGFydCB0aGUgbW9uaXRvciBwcm9j
-ZXNzZXMsCj4gY2hlY2sgY29tbXVuaWNhdGlvbiBiZXR3ZWVuIHRoZSBPU0RzIHByb2Nlc3NlcyBh
-bmQgdGhlIG1vbml0b3JzLCBydW4KPiBjb21tYW5kcyBvbiB0aGUgbG9jYWwgbm9kZXMgdG8gc2Vl
-IGluIG1vcmUgZGV0YWlscyB3aGF0IGlzIGZhaWxpbmcsIGV0Yy4KPgo+Cj4KPiA1LiAgICAgICBB
-bHNvIEkgc3BlbnQgYSBsb3Qgb2YgdGltZSBmcm9tIHRoZSBJUkMgY2hhbm5lbCB0cnlpbmcgdG8K
-PiB1bmRlcnN0YW5kIHdoeSBjZXBoLWRlcGxveSBhbmQgdGhlIHByb2JsZW0gd2FzIHRoZSBkaXNr
-cyB3ZXJlIGFscmVhZHkKPiBtb3VudGVkLiBJIGNvdWxkIG5vdCBzZWUgaW4gcnVubmluZyBkZiDi
-gJNoIGJ1dCBsc2JsaywgdGhpcyBpcyBhbHNvIHNvbWV0aGluZwo+IHRoYXQgaW4gbXkgb3Bpbmlv
-biB3b3VsZCBiZSBnb29kIHRvIGhhdmUuIFNwZWNpYWwgdGhhbmtzIHRvIEl2dmUgYW5kIGJhZG9u
-ZQo+IHdobyBoZWxwZWQgbWUgdG8gZmluZCBvdXQgd2hhdCB0aGUgaXNzdWUgd2FzLgo+Cj4KPgo+
-IDYuICAgICAgIExhc3QgdGhpbmcsIHdvdWxkIGJlIGdvb2QgdG8gbWVudGlvbiB0aGF0IGluc3Rh
-bGxpbmcgY2VwaCB0aHJvdWdoCj4gQW5zaWJsZSBpcyBhbHNvIGFuIG9wdGlvbgo+Cj4KPgo+IE90
-aGVyIHRoYW4gdGhhdCBjb25ncmF0dWxhdGlvbiB0byB0aGUgY29tbXVuaXR5IGZvciB5b3VyIGVm
-Zm9ydCBhbmQga2VlcCBpdAo+IGdvaW5nIQo+Cj4KPgo+Cj4KPiBNYW51ZWwgU29wZW5hIEJhbGxl
-c3Rlcm9zIHwgQmlnIGRhdGEgRW5naW5lZXIKPiBHYXJ2YW4gSW5zdGl0dXRlIG9mIE1lZGljYWwg
-UmVzZWFyY2gKPiBUaGUgS2luZ2hvcm4gQ2FuY2VyIENlbnRyZSwgMzcwIFZpY3RvcmlhIFN0cmVl
-dCwgRGFybGluZ2h1cnN0LCBOU1cgMjAxMAo+IFQ6ICsgNjEgKDApMiA5MzU1IDU3NjAgfCBGOiAr
-NjEgKDApMiA5Mjk1IDg1MDcgfCBFOiBtYW51ZWwuc2JAZ2FydmFuLm9yZy5hdQo+Cj4KPgo+IE5P
-VElDRQo+IFBsZWFzZSBjb25zaWRlciB0aGUgZW52aXJvbm1lbnQgYmVmb3JlIHByaW50aW5nIHRo
-aXMgZW1haWwuIFRoaXMgbWVzc2FnZSBhbmQKPiBhbnkgYXR0YWNobWVudHMgYXJlIGludGVuZGVk
-IGZvciB0aGUgYWRkcmVzc2VlIG5hbWVkIGFuZCBtYXkgY29udGFpbiBsZWdhbGx5Cj4gcHJpdmls
-ZWdlZC9jb25maWRlbnRpYWwvY29weXJpZ2h0IGluZm9ybWF0aW9uLiBJZiB5b3UgYXJlIG5vdCB0
-aGUgaW50ZW5kZWQKPiByZWNpcGllbnQsIHlvdSBzaG91bGQgbm90IHJlYWQsIHVzZSwgZGlzY2xv
-c2UsIGNvcHkgb3IgZGlzdHJpYnV0ZSB0aGlzCj4gY29tbXVuaWNhdGlvbi4gSWYgeW91IGhhdmUg
-cmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIHBsZWFzZSBub3RpZnkgdXMKPiBhdCBvbmNl
-IGJ5IHJldHVybiBlbWFpbCBhbmQgdGhlbiBkZWxldGUgYm90aCBtZXNzYWdlcy4gV2UgYWNjZXB0
-IG5vCj4gbGlhYmlsaXR5IGZvciB0aGUgZGlzdHJpYnV0aW9uIG9mIHZpcnVzZXMgb3Igc2ltaWxh
-ciBpbiBlbGVjdHJvbmljCj4gY29tbXVuaWNhdGlvbnMuIFRoaXMgbm90aWNlIHNob3VsZCBub3Qg
-YmUgcmVtb3ZlZC4KPgo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fCj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJzQGxpc3RzLmNlcGgu
-Y29tCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGgu
-Y29tCj4KCgoKLS0gCkNoZWVycywKQnJhZApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3Rz
-LmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1j
-ZXBoLmNvbQo=
+This weeks static analyser results are up on  http://people.redhat.com/bhubbard/
+
+-- 
+Cheers,
+Brad
