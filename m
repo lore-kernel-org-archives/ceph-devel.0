@@ -1,30 +1,48 @@
-From: liuchang0812 <liuchang0812@gmail.com>
-Subject: Re: Has http://ceph.com/docs problems?
-Date: Sun, 1 Jan 2017 14:24:28 +0800
-Message-ID: <CACKY0b-Fr3X8jmbCD_J=Kat0+jfqi0SnuhD5t+Lx6V5Jq69QvQ@mail.gmail.com>
+From: Manuel Sopena Ballesteros <manuel.sb@garvan.org.au>
+Subject: RE: Has http://ceph.com/docs problems?
+Date: Sun, 1 Jan 2017 06:25:22 +0000
+Message-ID: <9D8A2486E35F0941A60430473E29F15BCED3E76B@MXDB2.ad.garvan.unsw.edu.au>
 References: <CACKY0b96L31_L=KugUYQwdfU2CSkD167fgU5N495rpye1Toj3A@mail.gmail.com>
+ <CACKY0b-Fr3X8jmbCD_J=Kat0+jfqi0SnuhD5t+Lx6V5Jq69QvQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f173.google.com ([209.85.216.173]:36400 "EHLO
-        mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753689AbdAAGY3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Jan 2017 01:24:29 -0500
-Received: by mail-qt0-f173.google.com with SMTP id k15so183479107qtg.3
-        for <ceph-devel@vger.kernel.org>; Sat, 31 Dec 2016 22:24:29 -0800 (PST)
-In-Reply-To: <CACKY0b96L31_L=KugUYQwdfU2CSkD167fgU5N495rpye1Toj3A@mail.gmail.com>
+Received: from esa2.garvan.iphmx.com ([68.232.149.188]:40600 "EHLO
+        esa2.garvan.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750791AbdAAGfD (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Jan 2017 01:35:03 -0500
+In-Reply-To: <CACKY0b-Fr3X8jmbCD_J=Kat0+jfqi0SnuhD5t+Lx6V5Jq69QvQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-I have tried with both my PC and a DigitalOcean VPS. Doc website down
-definitely.
-
-*   Trying 208.113.135.117...
-* connect to 208.113.135.117 port 80 failed: Connection timed out
-* Failed to connect to docs.ceph.com port 80: Connection timed out
-* Closing connection 0
-curl: (7) Failed to connect to docs.ceph.com port 80: Connection timed out
-
-2017-01-01 14:11 GMT+08:00 liuchang0812 <liuchang0812@gmail.com>:
-> I can't open http://ceph.com/docs, i seems that website is down.
+WWVzIGhhcyBiZWVuIGRvd24gZm9yIGEgZmV3IGhvdXJzIG5vdw0KDQpNYW51ZWwNCg0KDQotLS0t
+LU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5l
+bC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxm
+IE9mIGxpdWNoYW5nMDgxMg0KU2VudDogU3VuZGF5LCBKYW51YXJ5IDEsIDIwMTcgNToyNCBQTQ0K
+VG86IGNlcGgtZGV2ZWwNClN1YmplY3Q6IFJlOiBIYXMgaHR0cDovL2NlcGguY29tL2RvY3MgcHJv
+YmxlbXM/DQoNCkkgaGF2ZSB0cmllZCB3aXRoIGJvdGggbXkgUEMgYW5kIGEgRGlnaXRhbE9jZWFu
+IFZQUy4gRG9jIHdlYnNpdGUgZG93biBkZWZpbml0ZWx5Lg0KDQoqICAgVHJ5aW5nIDIwOC4xMTMu
+MTM1LjExNy4uLg0KKiBjb25uZWN0IHRvIDIwOC4xMTMuMTM1LjExNyBwb3J0IDgwIGZhaWxlZDog
+Q29ubmVjdGlvbiB0aW1lZCBvdXQNCiogRmFpbGVkIHRvIGNvbm5lY3QgdG8gZG9jcy5jZXBoLmNv
+bSBwb3J0IDgwOiBDb25uZWN0aW9uIHRpbWVkIG91dA0KKiBDbG9zaW5nIGNvbm5lY3Rpb24gMA0K
+Y3VybDogKDcpIEZhaWxlZCB0byBjb25uZWN0IHRvIGRvY3MuY2VwaC5jb20gcG9ydCA4MDogQ29u
+bmVjdGlvbiB0aW1lZCBvdXQNCg0KMjAxNy0wMS0wMSAxNDoxMSBHTVQrMDg6MDAgbGl1Y2hhbmcw
+ODEyIDxsaXVjaGFuZzA4MTJAZ21haWwuY29tPjoNCj4gSSBjYW4ndCBvcGVuIGh0dHA6Ly9jZXBo
+LmNvbS9kb2NzLCBpIHNlZW1zIHRoYXQgd2Vic2l0ZSBpcyBkb3duLg0KLS0NClRvIHVuc3Vic2Ny
+aWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVs
+IiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBN
+b3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
+bmZvLmh0bWwNCk5PVElDRQ0KUGxlYXNlIGNvbnNpZGVyIHRoZSBlbnZpcm9ubWVudCBiZWZvcmUg
+cHJpbnRpbmcgdGhpcyBlbWFpbC4gVGhpcyBtZXNzYWdlIGFuZCBhbnkgYXR0YWNobWVudHMgYXJl
+IGludGVuZGVkIGZvciB0aGUgYWRkcmVzc2VlIG5hbWVkIGFuZCBtYXkgY29udGFpbiBsZWdhbGx5
+IHByaXZpbGVnZWQvY29uZmlkZW50aWFsL2NvcHlyaWdodCBpbmZvcm1hdGlvbi4gSWYgeW91IGFy
+ZSBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IHNob3VsZCBub3QgcmVhZCwgdXNlLCBk
+aXNjbG9zZSwgY29weSBvciBkaXN0cmlidXRlIHRoaXMgY29tbXVuaWNhdGlvbi4gSWYgeW91IGhh
+dmUgcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGluIGVycm9yIHBsZWFzZSBub3RpZnkgdXMgYXQgb25j
+ZSBieSByZXR1cm4gZW1haWwgYW5kIHRoZW4gZGVsZXRlIGJvdGggbWVzc2FnZXMuIFdlIGFjY2Vw
+dCBubyBsaWFiaWxpdHkgZm9yIHRoZSBkaXN0cmlidXRpb24gb2YgdmlydXNlcyBvciBzaW1pbGFy
+IGluIGVsZWN0cm9uaWMgY29tbXVuaWNhdGlvbnMuIFRoaXMgbm90aWNlIHNob3VsZCBub3QgYmUg
+cmVtb3ZlZC4NCg==
