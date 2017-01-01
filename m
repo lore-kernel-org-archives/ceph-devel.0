@@ -1,22 +1,18 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Static analysis
-Date: Sat, 31 Dec 2016 10:22:33 +1000
-Message-ID: <CAF-wwdGa=rTPSLkhHA6vJ6VNkUXowXRoxvO48m5ztas=+nbANQ@mail.gmail.com>
+From: liuchang0812 <liuchang0812@gmail.com>
+Subject: Has http://ceph.com/docs problems?
+Date: Sun, 1 Jan 2017 14:11:58 +0800
+Message-ID: <CACKY0b96L31_L=KugUYQwdfU2CSkD167fgU5N495rpye1Toj3A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:37280 "EHLO
-        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754259AbcLaAWf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Dec 2016 19:22:35 -0500
-Received: by mail-wm0-f41.google.com with SMTP id t79so366109213wmt.0
-        for <ceph-devel@vger.kernel.org>; Fri, 30 Dec 2016 16:22:34 -0800 (PST)
+Received: from mail-qk0-f178.google.com ([209.85.220.178]:34210 "EHLO
+        mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750726AbdAAGL7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 1 Jan 2017 01:11:59 -0500
+Received: by mail-qk0-f178.google.com with SMTP id h201so189432732qke.1
+        for <ceph-devel@vger.kernel.org>; Sat, 31 Dec 2016 22:11:59 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-This weeks static analyser results are up on  http://people.redhat.com/bhubbard/
-
--- 
-Cheers,
-Brad
+I can't open http://ceph.com/docs, i seems that website is down.
