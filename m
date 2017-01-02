@@ -1,84 +1,59 @@
-From: Junwang Zhao <zhjwpku@gmail.com>
-Subject: Re: Has http://ceph.com/docs problems?
-Date: Mon, 2 Jan 2017 18:30:05 +0800
-Message-ID: <CAEG8a3LSyzvMRj_1-b5Pnqvn_mkOgG2M65Q8Ztg+VFeONOzE-g@mail.gmail.com>
-References: <CACKY0b96L31_L=KugUYQwdfU2CSkD167fgU5N495rpye1Toj3A@mail.gmail.com>
- <CACKY0b-Fr3X8jmbCD_J=Kat0+jfqi0SnuhD5t+Lx6V5Jq69QvQ@mail.gmail.com>
- <9D8A2486E35F0941A60430473E29F15BCED3E76B@MXDB2.ad.garvan.unsw.edu.au> <CACKY0b_y2uFb0JHLPPhMd1kLx+9G0yXdXqw2QPsAi+LLZ8uVqQ@mail.gmail.com>
+From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: performance with/without dmcrypt OSD
+Date: Mon, 2 Jan 2017 19:54:48 +0530
+Message-ID: <CANA9Uk4MyL5PwDxpDKguiGk7zWJuHkBBoEoM2-UHm+_rV7imuQ@mail.gmail.com>
 Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============0715352718=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
+
+--===============0715352718==
+Content-Type: multipart/alternative; boundary=001a1141fd3c6afe6d05451d5010
+
+--001a1141fd3c6afe6d05451d5010
 Content-Type: text/plain; charset=UTF-8
+
+Hello,
+Any one ran with and without dmcrypt OSD performance tests?
+For ex: I plan to build a ceph cluster with 1 PB raw size. and also plan to
+use dmcrypt for all OSD. Can you please clarify, if this dmcrypt will
+reduce/impact the ceph clsuter perofmrance?
+
+Thanks
+Swami
+
+--001a1141fd3c6afe6d05451d5010
+Content-Type: text/html; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f182.google.com ([209.85.217.182]:35465 "EHLO
-        mail-ua0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932074AbdABKaG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Jan 2017 05:30:06 -0500
-Received: by mail-ua0-f182.google.com with SMTP id v2so123358744uac.2
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Jan 2017 02:30:06 -0800 (PST)
-In-Reply-To: <CACKY0b_y2uFb0JHLPPhMd1kLx+9G0yXdXqw2QPsAi+LLZ8uVqQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: liuchang0812 <liuchang0812@gmail.com>
-Cc: Manuel Sopena Ballesteros <manuel.sb@garvan.org.au>, ceph-devel <ceph-devel@vger.kernel.org>
 
-If you in hurry, you can build it on your machine and start a server
-by yourself, AFAIK, all the documents are in the git repo.
+<div dir=3D"ltr">Hello,<div>Any one ran with and without dmcrypt=C2=A0OSD p=
+erformance tests?</div><div>For ex: I plan to build a ceph cluster with 1 P=
+B raw size. and also plan to use dmcrypt=C2=A0for all OSD. Can you please c=
+larify, if this dmcrypt=C2=A0will reduce/impact the ceph=C2=A0clsuter perof=
+mrance?</div><div><br></div><div>Thanks</div><div>Swami</div></div>
 
-run:
-admin/build_doc
-admin/serve_doc
+--001a1141fd3c6afe6d05451d5010--
 
-after this, you may access the document on <ip>:8080
+--===============0715352718==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-Your should run this on ubuntu, if you use Centos, you may got some
-problem(no ditaa package available and maybe libxml2-devel?).
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-On Mon, Jan 2, 2017 at 2:10 PM, liuchang0812 <liuchang0812@gmail.com> wrote=
-:
-> still down.
->
->
->
-> 2017-01-01 14:25 GMT+08:00 Manuel Sopena Ballesteros <manuel.sb@garvan.or=
-g.au>:
->> Yes has been down for a few hours now
->>
->> Manuel
->>
->>
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.ker=
-nel.org] On Behalf Of liuchang0812
->> Sent: Sunday, January 1, 2017 5:24 PM
->> To: ceph-devel
->> Subject: Re: Has http://ceph.com/docs problems?
->>
->> I have tried with both my PC and a DigitalOcean VPS. Doc website down de=
-finitely.
->>
->> *   Trying 208.113.135.117...
->> * connect to 208.113.135.117 port 80 failed: Connection timed out
->> * Failed to connect to docs.ceph.com port 80: Connection timed out
->> * Closing connection 0
->> curl: (7) Failed to connect to docs.ceph.com port 80: Connection timed o=
-ut
->>
->> 2017-01-01 14:11 GMT+08:00 liuchang0812 <liuchang0812@gmail.com>:
->>> I can't open http://ceph.com/docs, i seems that website is down.
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in=
- the body of a message to majordomo@vger.kernel.org More majordomo info at =
- http://vger.kernel.org/majordomo-info.html
->> NOTICE
->> Please consider the environment before printing this email. This message=
- and any attachments are intended for the addressee named and may contain l=
-egally privileged/confidential/copyright information. If you are not the in=
-tended recipient, you should not read, use, disclose, copy or distribute th=
-is communication. If you have received this message in error please notify =
-us at once by return email and then delete both messages. We accept no liab=
-ility for the distribution of viruses or similar in electronic communicatio=
-ns. This notice should not be removed.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--===============0715352718==--
