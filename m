@@ -1,292 +1,320 @@
-From: Orit Wasserman <owasserm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: radosgw setup issue
-Date: Wed, 4 Jan 2017 20:12:58 +0200
-Message-ID: <CABo9giSMa3U5VHWdj4Qccx+q-osRPP54jESiCPqZ+To25n+m8w@mail.gmail.com>
-References: <A52F455C-9B88-4B90-9703-50F50D99B53A@Teradata.com>
-	<CABo9giQ7cEU9uuvBWQL_t-t6NhbG718k3S3t0bRfSQx73qDJFA@mail.gmail.com>
-	<EA0DF2D0-82D9-4ACB-AB57-EB41B1F3296C@Teradata.com>
-	<CAANaFCxfKp3CTdBYxJjY7TnfZkzNkYuw6nBv2YYg5i0GjSKSYg@mail.gmail.com>
+From: Victor Denisov <vdenisov@mirantis.com>
+Subject: Re: Snapshots of consistency groups
+Date: Wed, 4 Jan 2017 10:29:37 -0800
+Message-ID: <CA+hcxJRFbAwGg7dX3u8vGE4uxGm6YYZT1HS99iOq3nR0fHbr2Q@mail.gmail.com>
+References: <CA+hcxJS8sbBUjYieM3+86XG5KX9ouP8dO+9iFwtsHoO+v=9KWA@mail.gmail.com>
+ <CA+aFP1BAw7yzPYT5z6D6Wq6tPvd-Y9meDxfgqcVi0GBg0eR3+g@mail.gmail.com>
+ <CA+aFP1BZPHhiBan4r5N7x0LfHofmkrUWgLPD0MrS-uV6WrF4Kg@mail.gmail.com>
+ <CA+hcxJSO8TXSRV4bgTZVkrFsjX1wpW3DYFKqaDnWhA3+7gE_eg@mail.gmail.com>
+ <CA+aFP1BMK1=daZpUFdNDJ+i8+nfQt42ahCXVaxy9fWdAY-kXwA@mail.gmail.com>
+ <CA+hcxJT9JdVz-ZQz_SXwAPbbHoNegNSVfPk6h8kzmDo0xs0BJQ@mail.gmail.com>
+ <20160819124813.GB17630@gmail.com> <CA+hcxJQs_t2u5PWiJNzJO1LPdH3HAh21VoB63w5pOdWk0+ih1Q@mail.gmail.com>
+ <20160820162713.GA5997@gmail.com> <CA+hcxJTwVEJz5__s6pqivUN61X0xCccKHJ=0_o+1g8+Zu+wkDQ@mail.gmail.com>
+ <CA+aFP1CqjyTVpzJNLiyuEg8ydOh_vXjF2ESFjwqESY6O7NhVfA@mail.gmail.com>
+ <CA+hcxJQ1RBKbHam8tq2KL=pphLEmtvvacjD1qUvvpqs8NgkCcA@mail.gmail.com>
+ <CA+hcxJQ80g_aROrb0+AVaXij1w_pqwRCxC+cHF7j+gXfGyW=Rw@mail.gmail.com>
+ <CA+aFP1Dkv_vMMxfnyOE3MfaFP4CV=Z0atT-=bDTjSrRx-quNSw@mail.gmail.com>
+ <CA+hcxJTxfT1BO5uuXARsUo8oyHwQxJgymzUTAM8KV1=ciJG20w@mail.gmail.com>
+ <CA+aFP1BY67WbVWT-Wb3fHsS_-jUJBJ4FM3NO3VsqFO9+iRGNRg@mail.gmail.com>
+ <CA+hcxJRbmnfUeZbnCkvZf52-0H_Du0tGeFb=h_GJryabv0Ng8A@mail.gmail.com>
+ <CA+hcxJRptWbrh5R5v5s1YjD-1wuDLUmbGoF6+J=sv+BnrnAzWg@mail.gmail.com>
+ <CA+hcxJROQ-xkxNpn5-SZo5abShntVu_mSUhX7ZwmCGuM+6PLVg@mail.gmail.com>
+ <CA+aFP1A9-XcxZK---L8iYLVgKUR2ULzHrAVp9=fGbrDaQd3Zyw@mail.gmail.com>
+ <CA+hcxJSQdxjxjeVy47AWMJ_-bVRh9NjcHr0h-FkHkJgymCrfUw@mail.gmail.com>
+ <CA+hcxJQm4Z+ODFZbf_4Z9uNOez+amgA1bxLcAQtM5HVo7Qq_pw@mail.gmail.com>
+ <CA+aFP1ABzFvX8HUyQBm4eFyAPDv7K5Qo7NyGogeHuuAaoLqNNw@mail.gmail.com>
+ <CA+hcxJS-3Y-3QTgpU1NwQmg8znrg5Jo+jHH9f7T5n7x_+NcvyQ@mail.gmail.com>
+ <CA+aFP1A4YYDG0HSJ52R__DPKBc_Y7p62Ec4tzhdXt+UPkC=vNw@mail.gmail.com>
+ <CA+hcxJR6S8AZQ0mY5MTKiBwjf0bQYswWoL16WBJgfrOzzQ40zg@mail.gmail.com>
+ <CA+hcxJS4JDHBc-GYqwjXjHTiVBeq_YZhcvRfG5SRZMhTGZt-FA@mail.gmail.com>
+ <CA+aFP1Dg0Tc8CDumoL7hJPD62itu+RqZaKcjnuEnvZwrHdZZ=w@mail.gmail.com>
+ <CA+hcxJQC1eJLRYxDMD1_XDsD5vKtvcVXyxQwM-OuSEmNTXnHRg@mail.gmail.com>
+ <CA+aFP1ARgWp71xgqicF6vgx6Rd6kzYd-2mn1WPD9XtpQfO75=w@mail.gmail.com>
+ <CA+aFP1D46xgNffUux5cGKeg2cJQeQ4nWh+_wgLgVystL74HhGg@mail.gmail.com>
+ <CA+hcxJSW3M6DYbpaqLcDtcP393t4GCEMKS=5x+CHCbJS6iSQdg@mail.gmail.com>
+ <CA+aFP1A+tYfqc2B+w2sOMCAk9UgK5zKbgA9VijLRpkjmUkWrAA@mail.gmail.com>
+ <CA+hcxJTsR2N4RhW4PVAcV+Y=K3yLYEKukcbAtFD_329ZJebe6g@mail.gmail.com>
+ <CA+aFP1AcL418Ai1tuoLKOG5BHFLYeonKBcZm5LK-9m+Vmjr7CA@mail.gmail.com>
+ <CA+hcxJQmFyjNb1p3MMxTT-_QNP0hr_9-snYDzha-puFCCRwkNA@mail.gmail.com> <CA+aFP1B1NZ9v+t5h2s0AvMi4Ev5xsdE8GWHRw1=sxvqYVNcmaQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAANaFCxfKp3CTdBYxJjY7TnfZkzNkYuw6nBv2YYg5i0GjSKSYg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Brian Andrus <brian.andrus-OZUH0SiS3Izby3iVrkZq2A@public.gmane.org>
-Cc: Squid Cybernetic <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ua0-f180.google.com ([209.85.217.180]:34222 "EHLO
+        mail-ua0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S966417AbdADS3j (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jan 2017 13:29:39 -0500
+Received: by mail-ua0-f180.google.com with SMTP id 34so317874014uac.1
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Jan 2017 10:29:39 -0800 (PST)
+In-Reply-To: <CA+aFP1B1NZ9v+t5h2s0AvMi4Ev5xsdE8GWHRw1=sxvqYVNcmaQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: Mykola Golub <mgolub@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 4, 2017 at 7:08 PM, Brian Andrus <brian.andrus-OZUH0SiS3Izby3iVrkZq2A@public.gmane.org> wrote:
-> Regardless of whether it worked before, have you verified your RadosGWs have
-> write access to monitors? They will need it if you want the RadosGW to
-> create its own pools.
->
-> ceph auth get <client.radosgwID>
->
+It looks like next CDM is only next month. Let's try to figure it out in email.
 
-I agree, it could be permissions issue
+> Since you know which images are linked to the group and you know which
+> snapshots are in the group and which group snapshots are in the image,
+> you can reconcile any issues using the details in the
+> GroupSnapshotNamespace -- there shouldn't be any need to depend on the
+> actual snapshot name (it could technically just be a randomly assigned
+> UUID).
 
-> On Wed, Jan 4, 2017 at 8:59 AM, Kamble, Nitin A <Nitin.Kamble-f0WWck5Ay29Wk0Htik3J/w@public.gmane.org>
-> wrote:
->>
->>
->> > On Dec 26, 2016, at 2:48 AM, Orit Wasserman <owasserm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> >
->> > On Fri, Dec 23, 2016 at 3:42 AM, Kamble, Nitin A
->> > <Nitin.Kamble-f0WWck5Ay29Wk0Htik3J/w@public.gmane.org> wrote:
->> >> I am trying to setup radosgw on a ceph cluster, and I am seeing some
->> >> issues where google is not helping. I hope some of the developers would be
->> >> able to help here.
->> >>
->> >>
->> >> I tried to create radosgw as mentioned here [0] on a jewel cluster. And
->> >> it gives the following error in log file after starting radosgw.
->> >>
->> >>
->> >> 2016-12-22 17:36:46.755786 7f084beeb9c0  0 set uid:gid to 167:167
->> >> (ceph:ceph)
->> >> 2016-12-22 17:36:46.755849 7f084beeb9c0  0 ceph version
->> >> 10.2.2-118-g894a5f8 (894a5f8d878d4b267f80b90a4bffce157f2b4ba7), process
->> >> radosgw, pid 10092
->> >> 2016-12-22 17:36:46.763821 7f084beeb9c0  1 -- :/0 messenger.start
->> >> 2016-12-22 17:36:46.764731 7f084beeb9c0  1 -- :/1011033520 -->
->> >> 39.0.16.7:6789/0 -- auth(proto 0 40 bytes epoch 0) v1 -- ?+0 0x7f084c8e9f60
->> >> con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.765055 7f084beda700  1 -- 39.0.16.9:0/1011033520
->> >> learned my addr 39.0.16.9:0/1011033520
->> >> 2016-12-22 17:36:46.765492 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 1 ==== mon_map magic: 0 v1 ==== 195+0+0
->> >> (146652916 0 0) 0x7f0814000a60 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.765562 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 2 ==== auth_reply(proto 2 0 (0) Success) v1 ====
->> >> 33+0+0 (1206278719 0 0) 0x7f0814000ee0 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.765697 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- auth(proto 2 32 bytes epoch 0) v1 -- ?+0
->> >> 0x7f08180013b0 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.765968 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 3 ==== auth_reply(proto 2 0 (0) Success) v1 ====
->> >> 222+0+0 (4230455906 0 0) 0x7f0814000ee0 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.766053 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- auth(proto 2 181 bytes epoch 0) v1 -- ?+0
->> >> 0x7f0818001830 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.766315 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 4 ==== auth_reply(proto 2 0 (0) Success) v1 ====
->> >> 425+0+0 (3179848142 0 0) 0x7f0814001180 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.766383 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- mon_subscribe({monmap=0+}) v2 -- ?+0 0x7f084c8ea440
->> >> con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.766452 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- mon_subscribe({osdmap=0}) v2 -- ?+0 0x7f084c8ea440
->> >> con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.766518 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 5 ==== mon_map magic: 0 v1 ==== 195+0+0
->> >> (146652916 0 0) 0x7f0814001110 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.766671 7f08227fc700  2
->> >> RGWDataChangesLog::ChangesRenewThread: start
->> >> 2016-12-22 17:36:46.766691 7f084beeb9c0 20 get_system_obj_state:
->> >> rctx=0x7ffec2850d00 obj=.rgw.root:default.realm state=0x7f084c8efdf8
->> >> s->prefetch_data=0
->> >> 2016-12-22 17:36:46.766750 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 6 ==== osd_map(9506..9506 src has 8863..9506) v3
->> >> ==== 66915+0+0 (689048617 0 0) 0x7f0814011680 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.767029 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- mon_get_version(what=osdmap handle=1) v1 -- ?+0
->> >> 0x7f084c8f05f0 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.767163 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 7 ==== mon_get_version_reply(handle=1
->> >> version=9506) v2 ==== 24+0+0 (2817198406 0 0) 0x7f0814001110 con
->> >> 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.767214 7f084beeb9c0 20 get_system_obj_state:
->> >> rctx=0x7ffec2850210 obj=.rgw.root:default.realm state=0x7f084c8efdf8
->> >> s->prefetch_data=0
->> >> 2016-12-22 17:36:46.767231 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- mon_get_version(what=osdmap handle=2) v1 -- ?+0
->> >> 0x7f084c8f0ac0 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.767341 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 8 ==== mon_get_version_reply(handle=2
->> >> version=9506) v2 ==== 24+0+0 (1826043941 0 0) 0x7f0814001110 con
->> >> 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.767367 7f084beeb9c0 10 could not read realm id: (2)
->> >> No such file or directory
->> >> 2016-12-22 17:36:46.767390 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- mon_get_version(what=osdmap handle=3) v1 -- ?+0
->> >> 0x7f084c8efe50 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.767496 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 9 ==== mon_get_version_reply(handle=3
->> >> version=9506) v2 ==== 24+0+0 (3600349867 0 0) 0x7f0814001110 con
->> >> 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.767518 7f084beeb9c0 10 failed to list objects
->> >> pool_iterate_begin() returned r=-2
->> >> 2016-12-22 17:36:46.767542 7f084beeb9c0 20 get_system_obj_state:
->> >> rctx=0x7ffec2850420 obj=.rgw.root:zone_names.default state=0x7f084c8f0f38
->> >> s->prefetch_data=0
->> >> 2016-12-22 17:36:46.767554 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- mon_get_version(what=osdmap handle=4) v1 -- ?+0
->> >> 0x7f084c8f1630 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.767660 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 10 ==== mon_get_version_reply(handle=4
->> >> version=9506) v2 ==== 24+0+0 (4282592274 0 0) 0x7f0814001110 con
->> >> 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.767685 7f084beeb9c0  0 error in read_id for id  :
->> >> (2) No such file or directory
->> >> 2016-12-22 17:36:46.767700 7f084beeb9c0 20 get_system_obj_state:
->> >> rctx=0x7ffec2850ed0 obj=.rgw.root:region_map state=0x7f084c8f0f38
->> >> s->prefetch_data=0
->> >> 2016-12-22 17:36:46.767715 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- mon_get_version(what=osdmap handle=5) v1 -- ?+0
->> >> 0x7f084c8f1c10 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.767830 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 11 ==== mon_get_version_reply(handle=5
->> >> version=9506) v2 ==== 24+0+0 (1158475420 0 0) 0x7f0814001110 con
->> >> 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.767855 7f084beeb9c0 10  cannot find current period
->> >> zonegroup using local zonegroup
->> >> 2016-12-22 17:36:46.767868 7f084beeb9c0 20 get_system_obj_state:
->> >> rctx=0x7ffec2850880 obj=.rgw.root:default.realm state=0x7f084c8f0f38
->> >> s->prefetch_data=0
->> >> 2016-12-22 17:36:46.767880 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- mon_get_version(what=osdmap handle=6) v1 -- ?+0
->> >> 0x7f084c8f21f0 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.767983 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 12 ==== mon_get_version_reply(handle=6
->> >> version=9506) v2 ==== 24+0+0 (2385567743 0 0) 0x7f0814001110 con
->> >> 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.768007 7f084beeb9c0 10 could not read realm id: (2)
->> >> No such file or directory
->> >> 2016-12-22 17:36:46.768014 7f084beeb9c0 10 Creating default zonegroup
->> >> 2016-12-22 17:36:46.768034 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- mon_get_version(what=osdmap handle=7) v1 -- ?+0
->> >> 0x7f084c8f1080 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.768142 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 13 ==== mon_get_version_reply(handle=7
->> >> version=9506) v2 ==== 24+0+0 (880745841 0 0) 0x7f0814001110 con
->> >> 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.768167 7f084beeb9c0 10 couldn't find old data
->> >> placement pools config, setting up new ones for the zone
->> >> 2016-12-22 17:36:46.768190 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- mon_get_version(what=osdmap handle=8) v1 -- ?+0
->> >> 0x7f084c8f26c0 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.768293 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 14 ==== mon_get_version_reply(handle=8
->> >> version=9506) v2 ==== 24+0+0 (3716641421 0 0) 0x7f0814001110 con
->> >> 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.768314 7f084beeb9c0 10 failed to list objects
->> >> pool_iterate_begin() returned r=-2
->> >> 2016-12-22 17:36:46.768320 7f084beeb9c0 10 WARNING: store->list_zones()
->> >> returned r=-2
->> >> 2016-12-22 17:36:46.768346 7f084beeb9c0 20 get_system_obj_state:
->> >> rctx=0x7ffec2850400 obj=.rgw.root:zone_names.default state=0x7f084c8f2b38
->> >> s->prefetch_data=0
->> >> 2016-12-22 17:36:46.768362 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- mon_get_version(what=osdmap handle=9) v1 -- ?+0
->> >> 0x7f084c8f3140 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.768463 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 15 ==== mon_get_version_reply(handle=9
->> >> version=9506) v2 ==== 24+0+0 (1741205507 0 0) 0x7f0814001110 con
->> >> 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.768578 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- mon_get_version(what=osdmap handle=10) v1 -- ?+0
->> >> 0x7f084c8f2aa0 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.768681 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 16 ==== mon_get_version_reply(handle=10
->> >> version=9506) v2 ==== 24+0+0 (2901705056 0 0) 0x7f0814001110 con
->> >> 0x7f084c8e9480
->> >> 2016-12-22 17:36:46.768724 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- pool_op(create pool 0 auid 0 tid 1 name .rgw.root
->> >> v0) v4 -- ?+0 0x7f084c8f4520 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:47.052029 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 17 ==== pool_op_reply(tid 1 (34) Numerical result
->> >> out of range v9507) v1 ==== 43+0+0 (366377631 0 0) 0x7f0814001110 con
->> >> 0x7f084c8e9480
->> >
->>
->> Thanks for the response Orit.
->>
->> > what filesystem are you using? we longer support ext4
->>
->> OSDs are using XFS for Filestore.
->>
->> > Another option is version mismatch between rgw and the ods.
->>
->> Exact same version of ceph binaries are installed on OSD, MON and RGW
->> nodes.
->>
->> Is there anything useful in the error messages?
->>
->> 2016-12-22 17:36:46.768314 7f084beeb9c0 10 failed to list objects
->> pool_iterate_begin() returned r=-2
->> 2016-12-22 17:36:46.768320 7f084beeb9c0 10 WARNING: store->list_zones()
->> returned r=-2
->>
->> Is this the point where the failure has begun?
->>
->> As I see, the basic issue is, RGW is not able to create the needed pools
->> on demand. I wish there was more detailed output regarding the Numerical
->> result out of range issue.
->> I am suspecting it may be related to the set of defaults used while
->> creating pools automatically. Possibly the default crush rule.
->>
->> Thanks,
->> Nitin
->>
->> >
->> > Orit
->> >
->> >> 2016-12-22 17:36:47.052067 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> --> 39.0.16.7:6789/0 -- mon_subscribe({osdmap=9507}) v2 -- ?+0
->> >> 0x7f0818022bb0 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:47.055809 7f082a7fc700  1 -- 39.0.16.9:0/1011033520
->> >> <== mon.0 39.0.16.7:6789/0 18 ==== osd_map(9507..9507 src has 8863..9507) v3
->> >> ==== 214+0+0 (1829214220 0 0) 0x7f0814001110 con 0x7f084c8e9480
->> >> 2016-12-22 17:36:47.055858 7f084beeb9c0  0 ERROR:  storing info for
->> >> 84f3cdd9-71d9-4d74-a6ba-c0e87d776a2b: (34) Numerical result out of range
->> >> 2016-12-22 17:36:47.055869 7f084beeb9c0  0 create_default: error in
->> >> create_default  zone params: (34) Numerical result out of range
->> >> 2016-12-22 17:36:47.055876 7f084beeb9c0  0 failure in zonegroup
->> >> create_default: ret -34 (34) Numerical result out of range
->> >> 2016-12-22 17:36:47.055970 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> mark_down 0x7f084c8e9480 -- 0x7f084c8ec0f0
->> >> 2016-12-22 17:36:47.056169 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> mark_down_all
->> >> 2016-12-22 17:36:47.056263 7f084beeb9c0  1 -- 39.0.16.9:0/1011033520
->> >> shutdown complete.
->> >> 2016-12-22 17:36:47.056426 7f084beeb9c0 -1 Couldn't init storage
->> >> provider (RADOS)
->> >>
->> >>
->> >>
->> >> I did not create the pools for rgw, as they get created automatically.
->> >> few weeks back, I could setup RGW on jewel successfully. But this time I am
->> >> not able to see any obvious issues which I can fix.
->> >>
->> >>
->> >> [0] http://docs.ceph.com/docs/jewel/radosgw/config/
->> >>
->> >> Thanks in advance,
->> >> Nitin
->> >>
->> >> _______________________________________________
->> >> ceph-users mailing list
->> >> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->>
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Let's say I have a consistency group and a snapshot of this group: CG
+and CGSNAP.
+Images in this snapshot I'll define as:
+CG.images[0] - image1
+CG.images[1] - image2
+CG.images[2] - image3
+
+Image snapshots in cg snapshot will be:
+CG.CGSNAP.snaps[0] - reference to snapshot of image 1
+CG.CGSNAP.snaps[1] - reference to snapshot of image 2
+
+Imagine that this snapshot was created, but wasn't finalized.
+CG.CGSNAP.state == PENDING.
+CG.CGSNAP.snaps.length == 0;
+I'll be writing in pseudo code.
+
+Now, let's say we want to remove this pending CGSNAP. This is the code
+how it's currently implemented:
+
+for (image: CG.images) {
+  snap_name = image.id + "_" + CG.CGSNAP.id + "_" + CG.id // This name
+is unique because of uniqueness of the tuple (image.id, CG.CGSNAP.id,
+CG.id)
+  remove_image_snapshot(snap_name);
+}
+remove_cg_snap(CGSNAP);
+
+However, if we don't rely on the name then this is how I envision the code:
+
+for (image: CG.images) {
+  for (snap: image.snaps) {
+    if (snap.namespace.cg_id == CG.id && snap.namespace.cg_snap_id ==
+CG.CGSNAP.id) { // this is our snapshot
+      remove_image_snapshot(snap.name);
+    }
+  }
+}
+remove_cg_snap(CGSNAP);
+
+In this solution I don't like the internal loop.
+What do you think?
+
+Thanks,
+Victor.
+
+
+On Tue, Jan 3, 2017 at 6:56 PM, Jason Dillaman <jdillama@redhat.com> wrote:
+> After starting the process of creating a group snapshot, you will
+> already have all the necessary data for the group snapshot namespace
+> [1] (group pool, group id, and group snapshot id) and the group
+> snapshot should be persistently recorded to disk as
+> GROUP_SNAPSHOT_STATE_PENDING.
 >
+> Looking at the snapshot create state machine [2], I don't see any
+> place that a crash (or similar failure) would matter before the actual
+> image snapshot record is created atomically. You would pass the fully
+> populated GroupSnapshotNamespace to snap_create, and if the snapshot
+> is created, it's linked to the group via that namespace and any
+> failures afterwards don't matter since they are linked -- if the
+> snapshot fails to be created, it isn't linked to the group but the
+> snapshot doesn't exist either so there isn't anything to clean up.
+>
+> Since you know which images are linked to the group and you know which
+> snapshots are in the group and which group snapshots are in the image,
+> you can reconcile any issues using the details in the
+> GroupSnapshotNamespace -- there shouldn't be any need to depend on the
+> actual snapshot name (it could technically just be a randomly assigned
+> UUID).
+>
+> Perhaps we could talk about this at a future RBD standup meeting that
+> you are able to join (or the next CDM).
+>
+> [1] https://github.com/ceph/ceph/blob/master/src/cls/rbd/cls_rbd_types.h#L249
+> [2] https://github.com/ceph/ceph/blob/master/src/librbd/operation/SnapshotCreateRequest.h#L28
+>
+> On Tue, Jan 3, 2017 at 7:40 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>> Let's say we start creating a group snapshot.
+>> We invoke async snap_create method in Operations class.
+>> When we invoke this method we provide it with the snapshot name.
+>>
+>> While we are wating for the response we can be aborted.
+>> As a result we will be able to find the exact image snapshot using only its name
+>> as this was the only information we had at the time of running
+>> snap_create method.
+>>
+>> If snap_create was successful we will be able to find the snapshot
+>> otherwise we will not.
+>> However if we allow renaming snapshots from GroupSnapshotNamespace
+>> then we may not find the snapshot even if it
+>> was created successfully.
+>>
+>> On Fri, Dec 16, 2016 at 6:53 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>> Can you give a little background on this specific inconsistent case
+>>> you are referring to?
+>>>
+>>> On Thu, Dec 15, 2016 at 7:05 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>> Yes, but if image's snapshot is renamed then I'm not able to find this
+>>>> snapshot having only group's snapshot in an inconsistent state for
+>>>> example.
+>>>>
+>>>> V.
+>>>>
+>>>> On Thu, Dec 15, 2016 at 7:10 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>> I think I might be confused. When creating a group snapshot, we have
+>>>>> the ConsistencyGroupSnapshot that allows you to store the necessary
+>>>>> linkage between the image's snapshot and its associated group snapshot
+>>>>> [1]. Why not just name the image's snapshots to the same name as the
+>>>>> parent group snapshot name and search the snapshot's metadata to get
+>>>>> the linkage?
+>>>>>
+>>>>> [1] https://github.com/ceph/ceph/blob/master/src/cls/rbd/cls_rbd_types.h#L255
+>>>>>
+>>>>> On Tue, Dec 13, 2016 at 8:03 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>> Jason,
+>>>>>>
+>>>>>> My current implementation of consistency group snapshot feature names
+>>>>>> image snapshots like: <group_pool>_<group_id>_<group_snap_id>
+>>>>>> I rely on this fact when I need to remove a consistency group. It's
+>>>>>> necessary because if some of image snapshots were created, but the
+>>>>>> whole group snapshot operation failed,
+>>>>>> then the only way to find those dangling image snapshots is by this name.
+>>>>>>
+>>>>>> It means that we should forbid renaming snapshots from
+>>>>>> ConsistencyGroupSnapshot namespace.
+>>>>>>
+>>>>>> Another option is to allocate image snapshot ids during the creation
+>>>>>> of group snapshot, but this requires a major rewrite of the whole
+>>>>>> process of snapshot creation for images.
+>>>>>>
+>>>>>> What is your opinion on this?
+>>>>>>
+>>>>>> Thanks,
+>>>>>> V.
+>>>>>>
+>>>>>>
+>>>>>> On Tue, Nov 1, 2016 at 8:01 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>>>> I chatted with Xing on IRC this morning re: Cinder generic groups. It
+>>>>>>> sounds like RBD will need to support preserving the image's
+>>>>>>> consistency group snapshots even if the image is removed from the
+>>>>>>> group. In the OpenStack case, you won't have to worry about the image
+>>>>>>> being deleted while it still has associated group snapshots.
+>>>>>>>
+>>>>>>> We will also want to support being able to clone child images from a
+>>>>>>> group snapshot to ensure that we can thin provision new groups volumes
+>>>>>>> when creating a new group from a group snapshot. This means that the
+>>>>>>> group snapshots should be able to be protected/unprotected just like
+>>>>>>> standard user snapshots.
+>>>>>>>
+>>>>>>> On Mon, Oct 31, 2016 at 9:07 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>>>>> Looking at the Cinder codebase, I don't see any such restriction that
+>>>>>>>> would prevent you from removing a volume from a consistency group that
+>>>>>>>> has associated snapshots. I would double-check on the OpenStack
+>>>>>>>> development mailing list if this is correct and is the intent. Worst
+>>>>>>>> case, the RBD driver could raise an exception if there are still
+>>>>>>>> consistency group snapshots associated to the image.
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> On Fri, Oct 28, 2016 at 6:41 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>>> Another thing that bothers me. When we remove an image from a consistency group.
+>>>>>>>>> Should we remove all snapshots of this image that were created as part
+>>>>>>>>> of a consistency group snapshot?
+>>>>>>>>>
+>>>>>>>>> The easiest solution would be to remove all snapshots that are in
+>>>>>>>>> GroupSnapshotNamespace and reference this consistency group.
+>>>>>>>>> I looked into cinder docs for this feature:
+>>>>>>>>> http://docs.openstack.org/admin-guide/blockstorage-consistency-groups.html
+>>>>>>>>>
+>>>>>>>>> But it's not clear to me which behavior cinder expects.
+>>>>>>>>>
+>>>>>>>>> Thanks,
+>>>>>>>>> V.
+>>>>>>>>>
+>>>>>>>>> On Wed, Oct 26, 2016 at 6:16 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>>>>>>> In a perfect world, it would be nice to add a new optional to "rbd
+>>>>>>>>>> snap ls" to show all snapshots (with a new column to indicate the
+>>>>>>>>>> associated namespace).
+>>>>>>>>>>
+>>>>>>>>>> On Tue, Oct 25, 2016 at 11:07 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>>>>> Question. When we print out snapshots of an image, should the group
+>>>>>>>>>>> snapshots be listed, or should they be marked as special snapshots?
+>>>>>>>>>>>
+>>>>>>>>>>> Thanks,
+>>>>>>>>>>> V.
+>>>>>>>>>>>
+>>>>>>>>>>> On Mon, Oct 10, 2016 at 3:14 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>>>>>> Ok. I didn't have any intention to throw exceptions.
+>>>>>>>>>>>> I was more concerned about whether it's ok to allocate and delete
+>>>>>>>>>>>> objects or I should use smart pointers.
+>>>>>>>>>>>>
+>>>>>>>>>>>> On Mon, Oct 10, 2016 at 7:18 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>>>>>>>>>> The only place exceptions are routinely used is within the "::decode"
+>>>>>>>>>>>>> functions. I would prefer to see the code not throwing new exceptions
+>>>>>>>>>>>>> on purpose.
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> On Fri, Oct 7, 2016 at 2:26 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>>>>>>>> Are any exceptions used in librbd code? Should the code be exception safe?
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Thanks,
+>>>>>>>>>>>>>> V.
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> On Fri, Sep 16, 2016 at 10:37 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+>>>>>>>>>>>>>>> On Thu, Sep 15, 2016 at 7:17 PM, Victor Denisov <vdenisov@mirantis.com> wrote:
+>>>>>>>>>>>>>>>> if (struct_v >= 5) {
+>>>>>>>>>>>>>>>>       ::decode(snapshot_namespace, p);
+>>>>>>>>>>>>>>>>     } else {
+>>>>>>>>>>>>>>>>       snapshot_namespace = cls::rbd::UserSnapshotNamespace();
+>>>>>>>>>>>>>>>>     }
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> then code for ::encode function of cls_rbd_snap would change accordingly:
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> instead of
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> boost::apply_visitor(cls::rbd::EncodeSnapshotTypeVisitor(bl),
+>>>>>>>>>>>>>>>> snapshot_namespace);
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> I would do:
+>>>>>>>>>>>>>>>> ::encode(snapshot_namespace, bl);
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> +1 -- looks good to me
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> --
+>>>>>>>>>>>>>>> Jason
+>>>>>>>>>>>>>
+>>>>>>>>>>>>>
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> --
+>>>>>>>>>>>>> Jason
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> --
+>>>>>>>>>> Jason
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> --
+>>>>>>>> Jason
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>> --
+>>>>>>> Jason
+>>>>>
+>>>>>
+>>>>>
+>>>>> --
+>>>>> Jason
+>>>
+>>>
+>>>
+>>> --
+>>> Jason
 >
 >
 >
 > --
-> Brian Andrus
-> Cloud Systems Engineer
-> DreamHost, LLC
+> Jason
