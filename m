@@ -1,42 +1,56 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Status of static analysis
-Date: Tue, 3 Jan 2017 16:30:13 -0800
-Message-ID: <CAJ4mKGbge38C_EqefK1Mm7Tn6CadC2iy_MBF1FHWJtw1Rc3A0w@mail.gmail.com>
-References: <20161219024554.GA6396@rskikr.localdomain>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: Re: ceph python crash dumps
+Date: Tue, 3 Jan 2017 16:22:15 -0800
+Message-ID: <c6ee5174-f1af-0416-220e-6400bc475609@redhat.com>
+References: <CAGbvivK+Rec86bxhW_Sq6tOR0fJpLRcZqVpkNXAkq_MvTMQipA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f175.google.com ([209.85.223.175]:33147 "EHLO
-        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1760030AbdADAbU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jan 2017 19:31:20 -0500
-Received: by mail-io0-f175.google.com with SMTP id d9so443166229ioe.0
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Jan 2017 16:30:15 -0800 (PST)
-In-Reply-To: <20161219024554.GA6396@rskikr.localdomain>
+Received: from mx1.redhat.com ([209.132.183.28]:57316 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S966896AbdADAWP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 3 Jan 2017 19:22:15 -0500
+In-Reply-To: <CAGbvivK+Rec86bxhW_Sq6tOR0fJpLRcZqVpkNXAkq_MvTMQipA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Sun, Dec 18, 2016 at 6:45 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
-> As you would have noticed in recent weeks we have returned to  running a
-> Coverity test over the source tree on a weekly basis. In addition, I have been
-> running Clang Static Analyzer and Cppcheck scans. Until we can find a better
-> home for these and include at least one of them in our CI processes I will be
-> hosting them at http://people.redhat.com/bhubbard/
-
-So...is there some way for people to feed back into that as we
-evaluate stuff? For instance I looked at one of the use-after-free
-reports[1] and it's incorrect and I think there's a way to tell
-Coverity so, but I've no idea how.
--Greg
-
-[1]: http://people.redhat.com/bhubbard/scan-build.16-12-30/report-46bfed.html#EndPath
+On 01/03/2017 01:39 PM, Wyllys Ingersoll wrote:
+> I have a python based WSGI application running inside Apache that uses the
+> ceph python bindings to perform some operations.  Recently its been
+> throwing exceptions when trying to make ceph connections, but I can't
+> figure out what is really causing the issue here.
 >
-> --
-> Cheers,
-> Brad
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Running ceph 10.2.5 with latest python-ceph packages.
+
+This looks like http://tracker.ceph.com/issues/14115 - in your case
+likely due to a bug in librados.
+
+> Anyone seen this sort of thing before or have any idea how to prevent it?
+
+You might be able to avoid it by using a single Rados instance per
+process, to avoid re-initializing crypto_context within librados.
+
+If you have a short script that reproduces it, or can run under
+valgrind's memcheck tool we can see if your case would be fixed by
+
+https://github.com/ceph/ceph/pull/12624
+
+or if there are other leaks to fix.
+
+Josh
+
+> The following error appears in the Apache error logs:
+>
+> common/ceph_crypto.cc: In function 'void ceph::crypto::init(CephContext*)'
+> thread 7fb1ca8c4700 time 2017-01-03 16:25:31.334606
+> common/ceph_crypto.cc: 77: FAILED assert(crypto_context != __null)
+>  ceph version 10.2.5 (c461ee19ecbc0c5c330aca20f7392c9a00730367)
+>  1: (()+0x169b7b) [0x7fb1b1b82b7b]
+>  2: (()+0x1b88c0) [0x7fb1b1bd18c0]
+>  3: (()+0x184615) [0x7fb1b1b9d615]
+>  4: (()+0x181800) [0x7fb1b1b9a800]
+>  5: (()+0x95f2d) [0x7fb1b1aaef2d]
+>  6: (rados_connect()+0x1c) [0x7fb1b1a7dadc]
+
