@@ -1,82 +1,77 @@
-From: Shilpa Manjarabad Jagannath <smanjara@redhat.com>
-Subject: Re: rgw: refactoring test_multi.py for teuthology
-Date: Wed, 4 Jan 2017 06:19:42 -0500 (EST)
-Message-ID: <435027817.7434134.1483528782550.JavaMail.zimbra@redhat.com>
-References: <02431f0e-d420-b76f-fcfe-d240334be26f@redhat.com>
+From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Subject: Re: ceph python crash dumps
+Date: Wed, 4 Jan 2017 10:20:38 -0500
+Message-ID: <CAGbvivKu6hXg6SG6aqSmPVo+XVikZj_skqSDDwbrYtyXXKCpvA@mail.gmail.com>
+References: <CAGbvivK+Rec86bxhW_Sq6tOR0fJpLRcZqVpkNXAkq_MvTMQipA@mail.gmail.com>
+ <c6ee5174-f1af-0416-220e-6400bc475609@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:60073 "EHLO
-        mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S966401AbdADLTm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jan 2017 06:19:42 -0500
-In-Reply-To: <02431f0e-d420-b76f-fcfe-d240334be26f@redhat.com>
+Received: from mail-it0-f52.google.com ([209.85.214.52]:38426 "EHLO
+        mail-it0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S968418AbdADPUk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jan 2017 10:20:40 -0500
+Received: by mail-it0-f52.google.com with SMTP id x2so323581014itf.1
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Jan 2017 07:20:39 -0800 (PST)
+In-Reply-To: <c6ee5174-f1af-0416-220e-6400bc475609@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>
-Cc: Ali Maredia <amaredia@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Josh Durgin <jdurgin@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
+Im pretty certain that is the same bug that we are hitting,
+unfortunately I don't have a simple script to recreate it.  It happens
+as part of a WSGI application in Apache running with 30 threads and
+multiple processes.  If I tune it down to fewer threads and processes,
+it becomes harder to trigger.
 
+If this fix is accepted and integrated, please backport fix to the
+next Jewel update (10.2.6).
 
------ Original Message -----
-> From: "Casey Bodley" <cbodley@redhat.com>
-> To: "Shilpa Manjarabad Jagannath" <smanjara@redhat.com>
-> Cc: "Ali Maredia" <amaredia@redhat.com>, "The Sacred Order of the Squid Cybernetic" <ceph-devel@vger.kernel.org>
-> Sent: Wednesday, January 4, 2017 2:12:50 AM
-> Subject: rgw: refactoring test_multi.py for teuthology
-> 
-> Hi Shilpa, Ali, and list,
-> 
-> The rgw multisite tests are currently running out of
-> src/test/rgw/test_multi.py, and use shell scripts to set up multiple
-> vstart clusters. We'd like to adapt these tests so they can run inside
-> of teuthology as well (while preserving the ability to run them
-> manually). Running inside of teuthology means using an existing
-> multisite configuration, rather than building one up with the shell scripts.
-> 
-> The python script currently has classes for RGWRealm, RGWCluster, and
-> RGWMulti. The RGWMulti.setup() method creates an RGWRealm and builds an
-> array of RGWClusters. RGWCluster.start() calls the mstart.sh script to
-> create a vstart cluster in a subdirectory. RGWRealm.init_zone() is then
-> running all of the radosgw-admin commands to configure that
-> zonegroup/zone/etc.
-> 
-> These seem like good base classes for this abstraction. For example, we
-> can derive VRealm/VCluster/VMulti to represent the existing vstart
-> implementation, and TRealm/TCluster/TMulti to represent their teuthology
-> counterparts.
-> 
-> The existing unit tests only need to know the realm, which they access
-> as a global variable. We can turn the generic part (the test_* functions
-> and their helper functions like check_*) into a separate module like
-> src/test/rgw/rgw_multi.py, and add a set_realm() function to set this
-> global variable.
-> 
-> Then the vstart version of the test (src/test/rgw/test_multi.py) can
-> import rgw_multi, instantiate its VRealm/etc to run the cluster
-> creation/configuration, then pass its realm to set_realm() for the unit
-> tests. In order for nosetests to find and run the test_* functions in
-> rgw_multi.py, test_multi.py needs to use 'from rgw_multi import *'.
-> 
-> A separate python script, probably under qa/tasks/, would implement the
-> TRealm/etc subclasses by making the appropriate calls into teuthology.
-> Instead of creating the cluster during initialization, it would read the
-> existing multisite configuration - either by interpreting the teuthology
-> 'config', or by running radosgw-admin commands like 'period get'.
-> 
-> It seems like a good first step would be to split out the generic code
-> from test_multi.py into rgw_multi.py and verify that the vstart version
-> still works.
-> 
-> Casey
+-Wyllys Ingersoll
+ Keeper Technology, LLC
 
-Sounds good. Thanks Casey!
-
-
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+On Tue, Jan 3, 2017 at 7:22 PM, Josh Durgin <jdurgin@redhat.com> wrote:
+> On 01/03/2017 01:39 PM, Wyllys Ingersoll wrote:
+>>
+>> I have a python based WSGI application running inside Apache that uses the
+>> ceph python bindings to perform some operations.  Recently its been
+>> throwing exceptions when trying to make ceph connections, but I can't
+>> figure out what is really causing the issue here.
+>>
+>> Running ceph 10.2.5 with latest python-ceph packages.
+>
+>
+> This looks like http://tracker.ceph.com/issues/14115 - in your case
+> likely due to a bug in librados.
+>
+>> Anyone seen this sort of thing before or have any idea how to prevent it?
+>
+>
+> You might be able to avoid it by using a single Rados instance per
+> process, to avoid re-initializing crypto_context within librados.
+>
+> If you have a short script that reproduces it, or can run under
+> valgrind's memcheck tool we can see if your case would be fixed by
+>
+> https://github.com/ceph/ceph/pull/12624
+>
+> or if there are other leaks to fix.
+>
+> Josh
+>
+>
+>> The following error appears in the Apache error logs:
+>>
+>> common/ceph_crypto.cc: In function 'void ceph::crypto::init(CephContext*)'
+>> thread 7fb1ca8c4700 time 2017-01-03 16:25:31.334606
+>> common/ceph_crypto.cc: 77: FAILED assert(crypto_context != __null)
+>>  ceph version 10.2.5 (c461ee19ecbc0c5c330aca20f7392c9a00730367)
+>>  1: (()+0x169b7b) [0x7fb1b1b82b7b]
+>>  2: (()+0x1b88c0) [0x7fb1b1bd18c0]
+>>  3: (()+0x184615) [0x7fb1b1b9d615]
+>>  4: (()+0x181800) [0x7fb1b1b9a800]
+>>  5: (()+0x95f2d) [0x7fb1b1aaef2d]
+>>  6: (rados_connect()+0x1c) [0x7fb1b1a7dadc]
+>
+>
