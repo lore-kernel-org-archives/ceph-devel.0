@@ -1,65 +1,33 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Status of static analysis
-Date: Tue, 3 Jan 2017 16:57:43 -0800
-Message-ID: <CAJ4mKGYhMeQ60foLp_fvf7aq=WgXJnW-vEhCqOC4cbdNPSujDA@mail.gmail.com>
-References: <20161219024554.GA6396@rskikr.localdomain> <CAJ4mKGbge38C_EqefK1Mm7Tn6CadC2iy_MBF1FHWJtw1Rc3A0w@mail.gmail.com>
- <20170104004440.GA6375@rskikr.localdomain>
+Subject: Re: What really happens when a connection race happens?
+Date: Tue, 3 Jan 2017 18:29:19 -0800
+Message-ID: <CAJ4mKGbgjCaWJcZOY4Won5-sofpwH=1bewBp9SjeZLGTrLUoeA@mail.gmail.com>
+References: <7614c96b.3483.1593589146a.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:35539 "EHLO
-        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S967114AbdADA5p (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jan 2017 19:57:45 -0500
-Received: by mail-io0-f171.google.com with SMTP id n85so209851483ioi.2
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Jan 2017 16:57:44 -0800 (PST)
-In-Reply-To: <20170104004440.GA6375@rskikr.localdomain>
+Received: from mail-it0-f43.google.com ([209.85.214.43]:35509 "EHLO
+        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750846AbdADCaO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Jan 2017 21:30:14 -0500
+Received: by mail-it0-f43.google.com with SMTP id c20so297458527itb.0
+        for <ceph-devel@vger.kernel.org>; Tue, 03 Jan 2017 18:29:20 -0800 (PST)
+In-Reply-To: <7614c96b.3483.1593589146a.Coremail.xxhdx1985126@163.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: xxhdx1985126 <xxhdx1985126@163.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 3, 2017 at 4:44 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
+On Sun, Dec 25, 2016 at 2:31 AM, xxhdx1985126 <xxhdx1985126@163.com> wrote:
+> Hi, everyone.
 >
->
-> On Wed, Jan 4, 2017 at 10:30 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
->> On Sun, Dec 18, 2016 at 6:45 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
->>> As you would have noticed in recent weeks we have returned to  running a
->>> Coverity test over the source tree on a weekly basis. In addition, I have been
->>> running Clang Static Analyzer and Cppcheck scans. Until we can find a better
->>> home for these and include at least one of them in our CI processes I will be
->>> hosting them at http://people.redhat.com/bhubbard/
->>
->> So...is there some way for people to feed back into that as we
->> evaluate stuff? For instance I looked at one of the use-after-free
->> reports[1] and it's incorrect and I think there's a way to tell
->> Coverity so, but I've no idea how.
->> -Greg
->>
->> [1]: http://people.redhat.com/bhubbard/scan-build.16-12-30/report-46bfed.html#EndPath
->
-> Hi Greg,
->
-> That report is from Clang Static Analyzer (not Coverity) and I am happy to
-> coordinate feedback as best I can for now.
+> I'm reading the source code of Pipe in ceph, and I'm confused about the code for connection race processing. Suppose that the policy the two Pipe involved is lossless_peer, one of them wins and send the other pipe a CEPH_MSGR_TAG_WAIT message which makes the other Pipe's writer to cond.wait(), and then the winning pipe goes back to waiting for a ceph_msg_connect message to come. But, under this circumstance, the writer of the other pipe is waiting, and as far as I know,  unless something happens it will never send ceph_msg_connect messages, so they will wait for each other for ever........  There must be some misunderstanding here, but I don't know where, please help me. Thank you:-)
 
-D'oh, I was just substituting that everywhere in my head for some
-reason. :o Sorry and thanks.
-
->
-> There is a FAQ here, http://clang-analyzer.llvm.org/faq.html
->
->>>
->>> --
->>> Cheers,
->>> Brad
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Cheers,
-> Brad
+The point is that we have racing connect attempts here — the "winner"
+has already sent out a connection attempt which the loser will respond
+to. So neither of them needs to do anything; when the loser processes
+the winner's connection attempt, it will shut down its losing Pipe,
+start up a Pipe with the incoming attempt, and send back an
+acknowledgement to the winner.
+-Greg
