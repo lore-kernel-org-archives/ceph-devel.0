@@ -1,175 +1,149 @@
-From: =?utf-8?B?6K646Zuq5a+S?= <xuxuehan@360.cn>
-Subject: Is this a deadlock?
-Date: Thu, 5 Jan 2017 08:20:41 +0000
-Message-ID: <23B01353C2E80240BBE34865782DFE0131A24575@EX02.corp.qihoo.net>
+From: Andreas Gerstmayr <andreas.gerstmayr@catalysts.cc>
+Subject: [PATCH v2] ceph: set io_pages bdi hint
+Date: Thu, 5 Jan 2017 14:23:06 +0100
+Message-ID: <1483622696-30353-1-git-send-email-andreas.gerstmayr@catalysts.cc>
+References: <C3DA23CD-10FF-491D-BD31-0C1D8673105E@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mtabjsc2.360.cn ([123.125.82.7]:55409 "EHLO mtabjsc2.360.cn"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1033125AbdAEIUt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 5 Jan 2017 03:20:49 -0500
-Received: from CAS2.corp.qihoo.net (cas2.corp.qihoo.net [220.181.158.130])
-        (using TLSv1 with cipher AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mtabjsc2.360.cn (QHMAIL) with ESMTP id 3D8E46B097D
-        for <ceph-devel@vger.kernel.org>; Thu,  5 Jan 2017 16:20:42 +0800 (CST)
-Content-Language: zh-CN
+Received: from exchange.catalysts.cc ([81.10.172.115]:23173 "EHLO
+        mail01-vie.catalysts.cc" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S936951AbdAENZ3 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jan 2017 08:25:29 -0500
+In-Reply-To: <C3DA23CD-10FF-491D-BD31-0C1D8673105E@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: andreas.gerstmayr@gmail.com, Andreas Gerstmayr <andreas.gerstmayr@catalysts.cc>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
 
-SGksIGV2ZXJ5b25lLg0KDQpSZWNlbnRseSBpbiBvbmUgb2Ygb3VyIG9ubGluZSBjZXBoIGNsdXN0
-ZXIsIG9uZSBPU0Qgc3VpY2lkZWQgaXRzZWxmIGFmdGVyIGV4cGVyaWVuY2luZyBzb21lIG5ldHdv
-cmsgY29ubmVjdGl2aXR5IHByb2JsZW0sIGFuZCB0aGUgT1NEIGxvZyBpcyBhcyBmb2xsb3dzOg0K
-DQogIC0xNzM+IDIwMTctMDEtMDMgMjM6NDI6MTkuMTQ1NDkwIDdmNTAyMWJiYzcwMCAgMCAtLSAx
-MC4yMDUuNDkuNTU6NjgwMi8xNzc4NDUxID4+IDEwLjIwNS40OS4xNzQ6NjgwMy8xNDk5NjcxIHBp
-cGUoMHg3ZjUwZWMyY2UwMDAgc2Q9MzY5IDo1Mjg3NSBzPTIgcGdzPTEzNzUwIGNzPTI1IGw9MCBj
-PTB4N2Y1MGVjMjMyYjgwKS5mYXVsdCB3aXRoIG5vdGhpbmcgdG8gc2VuZCwgZ29pbmcgdG8gc3Rh
-bmRieQ0KICAtMTcyPiAyMDE3LTAxLTAzIDIzOjQyOjE5LjE1MzkxMCA3ZjRmODVkYjY3MDAgIDAg
-LS0gMTAuMjA1LjQ5LjU1OjY4MDIvMTc3ODQ1MSA+PiAxMC4yMDUuNTAuMjM4OjY4MDAvMTY3ODA1
-MiBwaXBlKDB4N2Y1MDcxMjlmMDAwIHNkPTU3MiA6NDI5MzYgcz0yIHBncz0xODk1NSBjcz0xMzk5
-IGw9MCBjPTB4N2Y1MGVjMDQ4YzgwKS5mYXVsdCB3aXRoIG5vdGhpbmcgdG8gc2VuZCwgZ29pbmcg
-dG8gc3RhbmRieQ0KICAtMTcxPiAyMDE3LTAxLTAzIDIzOjQyOjE5LjE5MzM4MCA3ZjUwNmQ4ZDg3
-MDAgIDAgLS0gMTAuMjA1LjQ5LjU1OjY4MDIvMTc3ODQ1MSA+PiAxMC4yMDUuNTEuNDM6NjgxNi8x
-Njc0NzczIHBpcGUoMHg3ZjRmZTE1YjEwMDAgc2Q9OTUxNCA6NjgwMiBzPTIgcGdzPTE0ODMwIGNz
-PTMzIGw9MCBjPTB4N2Y1MGVjMjMxOTgwKS5mYXVsdCB3aXRoIG5vdGhpbmcgdG8gc2VuZCwgZ29p
-bmcgdG8gc3RhbmRieQ0KICAtMTcwPiAyMDE3LTAxLTAzIDIzOjQyOjE5LjE5NDg3OSA3ZjUwYzFk
-ZmM3MDAgIDAgLS0gMTAuMjA1LjQ5LjU1OjY4MDIvMTc3ODQ1MSA+PiAxMC4yMDUuNDkuMTc2OjY4
-MDgvMTQ2NTY2NiBwaXBlKDB4N2Y1MDFhMTU2MDAwIHNkPTQ4NjcgOjY4MDIgcz0yIHBncz0xNTQx
-MCBjcz0xODkgbD0wIGM9MHg3ZjUwZWMyMzI4ODApLmZhdWx0IHdpdGggbm90aGluZyB0byBzZW5k
-LCBnb2luZyB0byBzdGFuZGJ5DQogIC0xNjk+IDIwMTctMDEtMDMgMjM6NDI6MTkuOTEzNDYzIDdm
-NTBmNzMzYjcwMCAgNSBvc2QuNjE5IDc2OTg5IHRpY2sNCiAgLTE2OD4gMjAxNy0wMS0wMyAyMzo0
-MjoyMC45MTM1NjEgN2Y1MGY3MzNiNzAwICA1IG9zZC42MTkgNzY5ODkgdGljaw0KICAtMTY3PiAy
-MDE3LTAxLTAzIDIzOjQyOjIxLjQ3MjQ5NSA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk4OSBo
-ZWFydGJlYXQ6IG9zZF9zdGF0KDc1MzQ5IE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRv
-dGFsLCBwZWVycyBbNSw0Niw0OSw1OSw2OSw4Myw4OCwxMDAsMTAyLDEwMywxMDQsMTA2LDExNywx
-MjAsMTIxLDEyNiwxMzEsMTMyLDEzMywxMzcsMTQzLDE1MCwxNjMsMTc0LDE4NSwyMDcsMjExLDIx
-NSwyMjAsMjMwLDIzMiwyNjMsMjcwLDI3MSwyODMsMjg3LDI5NywyOTksMzA2LDMxNCwzMTUsMzIw
-LDMyNywzNDgsMzUyLDM2MSw0MzUsNDQwLDQ0NCw0NDYsNDUzLDQ3Nyw0NzgsNDg5LDYxOCw2MjAs
-NjM0LDY3Niw2NzgsNjg3XS9bXSBvcCBoaXN0IFtdKQ0KICAtMTY2PiAyMDE3LTAxLTAzIDIzOjQy
-OjIxLjQ3Nzk5NSA3ZjUwZTc4ZTQ3MDAgIDMgb3NkLjYxOSA3Njk4OSBoYW5kbGVfb3NkX21hcCBl
-cG9jaHMgWzc2OTkwLDc2OTkxXSwgaSBoYXZlIDc2OTg5LCBzcmMgaGFzIFs3NjI4MSw3Njk5MV0N
-CiAgLTE2NT4gMjAxNy0wMS0wMyAyMzo0MjoyMS40OTQ1MjggN2Y1MGU3OGU0NzAwICAwIGxvZ19j
-aGFubmVsKGNsdXN0ZXIpIGxvZyBbV1JOXSA6IG1hcCBlNzY5OTEgd3JvbmdseSBtYXJrZWQgbWUg
-ZG93bg0KICAtMTY0PiAyMDE3LTAxLTAzIDIzOjQyOjIxLjQ5NDU0NSA3ZjUwZTc4ZTQ3MDAgIDEg
-b3NkLjYxOSA3Njk5MSBzdGFydF93YWl0aW5nX2Zvcl9oZWFsdGh5DQogIC0xNjM+IDIwMTctMDEt
-MDMgMjM6NDI6MjEuNDk1MjU2IDdmNTBlNjBlMTcwMCAgMSBvc2QuNjE5IDc2OTkxIG1zX2hhbmRs
-ZV9yZXNldCBjb24gMHg3ZjUwZWMwNDdjMDAgc2Vzc2lvbiAweDdmNTBiMGM2ZDA4MA0KICAtMTYy
-PiAyMDE3LTAxLTAzIDIzOjQyOjIxLjQ5NTI3OCA3ZjUwZTYwZTE3MDAgIDEgb3NkLjYxOSA3Njk5
-MSBtc19oYW5kbGVfcmVzZXQgY29uIDB4N2Y1MGU5Y2E3NDgwIHNlc3Npb24gMHg3ZjUwZDYwNmEw
-ODANCiAgLTE2MT4gMjAxNy0wMS0wMyAyMzo0MjoyMS40OTUyOTYgN2Y1MGU2MGUxNzAwICAxIG9z
-ZC42MTkgNzY5OTEgbXNfaGFuZGxlX3Jlc2V0IGNvbiAweDdmNTBlYzA0NzAwMCBzZXNzaW9uIDB4
-N2Y1MGNiMDgzMDgwDQogIC0xNjA+IDIwMTctMDEtMDMgMjM6NDI6MjEuNDk1MzAwIDdmNTBlNjBl
-MTcwMCAgMSBvc2QuNjE5IDc2OTkxIG1zX2hhbmRsZV9yZXNldCBjb24gMHg3ZjUwZWMwNDc3ODAg
-c2Vzc2lvbiAweDdmNTBjMTg0NjA4MA0KICAtMTU5PiAyMDE3LTAxLTAzIDIzOjQyOjIxLjQ5NTMx
-NSA3ZjUwZTYwZTE3MDAgIDEgb3NkLjYxOSA3Njk5MSBtc19oYW5kbGVfcmVzZXQgY29uIDB4N2Y1
-MGVjMDQ4MjAwIHNlc3Npb24gMHg3ZjUwYTZjM2IwODANCiAg4oCm4oCmLg0KICAtNTI+IDIwMTct
-MDEtMDMgMjM6NDI6MjEuNTAwMjE2IDdmNTBlNjBlMTcwMCAgMSBvc2QuNjE5IDc2OTkxIG1zX2hh
-bmRsZV9yZXNldCBjb24gMHg3ZjUwZTljYTY4ODAgc2Vzc2lvbiAweDdmNTBhMjQzNDA4MA0KICAt
-NTE+IDIwMTctMDEtMDMgMjM6NDI6MjEuNTAwMjE5IDdmNTBlNjBlMTcwMCAgMSBvc2QuNjE5IDc2
-OTkxIG1zX2hhbmRsZV9yZXNldCBjb24gMHg3ZjUwZWMyMzA0ODAgc2Vzc2lvbiAweDdmNTBiOGM2
-YzA4MA0KICAtNTA+IDIwMTctMDEtMDMgMjM6NDI6MjEuNTAwMjM1IDdmNTBlNjBlMTcwMCAgMSBv
-c2QuNjE5IDc2OTkxIG1zX2hhbmRsZV9yZXNldCBjb24gMHg3ZjUwZWMyMzA3ODAgc2Vzc2lvbiAw
-eDdmNTBiM2M5MjA4MA0KICAtNDk+IDIwMTctMDEtMDMgMjM6NDI6MjcuMzc0Nzc0IDdmNTA5NmJm
-ZjcwMCAgNSBvc2QuNjE5IDc2OTkxIGhlYXJ0YmVhdDogb3NkX3N0YXQoNzUzNTEgTUIgdXNlZCwg
-MTU2IEdCIGF2YWlsLCAyNDMgR0IgdG90YWwsIHBlZXJzIFtdL1tdIG9wIGhpc3QgW10pDQogIC00
-OD4gMjAxNy0wMS0wMyAyMzo0MjoyOC40NzQ5MjEgN2Y1MDk2YmZmNzAwICA1IG9zZC42MTkgNzY5
-OTEgaGVhcnRiZWF0OiBvc2Rfc3RhdCg3NTM1MSBNQiB1c2VkLCAxNTYgR0IgYXZhaWwsIDI0MyBH
-QiB0b3RhbCwgcGVlcnMgW10vW10gb3AgaGlzdCBbXSkNCiAgLTQ3PiAyMDE3LTAxLTAzIDIzOjQy
-OjI5LjU3NTA1OSA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5MSBoZWFydGJlYXQ6IG9zZF9z
-dGF0KDc1MzUxIE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRvdGFsLCBwZWVycyBbXS9b
-XSBvcCBoaXN0IFtdKQ0KICAtNDY+IDIwMTctMDEtMDMgMjM6NDI6MzMuMDc1MTkwIDdmNTA5NmJm
-ZjcwMCAgNSBvc2QuNjE5IDc2OTkxIGhlYXJ0YmVhdDogb3NkX3N0YXQoNzUzNTEgTUIgdXNlZCwg
-MTU2IEdCIGF2YWlsLCAyNDMgR0IgdG90YWwsIHBlZXJzIFtdL1tdIG9wIGhpc3QgW10pDQogLTQ1
-PiAyMDE3LTAxLTAzIDIzOjQyOjMzLjU3NTMzOCA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5
-MSBoZWFydGJlYXQ6IG9zZF9zdGF0KDc1MzUxIE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdC
-IHRvdGFsLCBwZWVycyBbXS9bXSBvcCBoaXN0IFtdKQ0KICAtNDQ+IDIwMTctMDEtMDMgMjM6NDI6
-MzkuNDc1NDg2IDdmNTA5NmJmZjcwMCAgNSBvc2QuNjE5IDc2OTkxIGhlYXJ0YmVhdDogb3NkX3N0
-YXQoNzUzNTEgTUIgdXNlZCwgMTU2IEdCIGF2YWlsLCAyNDMgR0IgdG90YWwsIHBlZXJzIFtdL1td
-IG9wIGhpc3QgW10pDQogIC00Mz4gMjAxNy0wMS0wMyAyMzo0Mjo0MS43NzU2MzcgN2Y1MDk2YmZm
-NzAwICA1IG9zZC42MTkgNzY5OTEgaGVhcnRiZWF0OiBvc2Rfc3RhdCg3NTM1MSBNQiB1c2VkLCAx
-NTYgR0IgYXZhaWwsIDI0MyBHQiB0b3RhbCwgcGVlcnMgW10vW10gb3AgaGlzdCBbXSkNCiAgLTQy
-PiAyMDE3LTAxLTAzIDIzOjQyOjQ1LjY4OTcwNyA3ZjUwNTJmYWY3MDAgIDAgLS0gMTAuMjA1LjQ5
-LjU1OjY4MDkvMjc3ODQ1MSA+PiAxMC4yMDUuNDkuMTczOjY4MDgvMTQ4OTgzNiBwaXBlKDB4N2Y0
-Zjk5NWQ4MDAwIHNkPTE3IDozNDkyNCBzPTIgcGdzPTE1NjE0IGNzPTEgbD0wIGM9MHg3ZjUwMmY0
-ODQ2MDApLmZhdWx0LCBpbml0aWF0aW5nIHJlY29ubmVjdA0KICAtNDE+IDIwMTctMDEtMDMgMjM6
-NDI6NDUuNjg5NzUyIDdmNTA1M2JiYjcwMCAgMCAtLSAxMC4yMDUuNDkuNTU6NjgwOS8yNzc4NDUx
-ID4+IDEwLjIwNS41MS40Mzo2ODA2LzE2NjY5MzUgcGlwZSgweDdmNGZiODlhMzAwMCBzZD0yMiA6
-NTk1NjAgcz0yIHBncz0yNTI1NyBjcz0xIGw9MCBjPTB4N2Y1MDJmNDg0NzgwKS5mYXVsdCwgaW5p
-dGlhdGluZyByZWNvbm5lY3QNCiAgLTQwPiAyMDE3LTAxLTAzIDIzOjQyOjQ1LjY5MDEzMyA3ZjUw
-NjQzNDM3MDAgIDAgLS0gMTAuMjA1LjQ5LjU1OjY4MDkvMjc3ODQ1MSA+PiAxMC4yMDUuNDkuMTcz
-OjY4MDgvMTQ4OTgzNiBwaXBlKDB4N2Y0Zjk5NWQ4MDAwIHNkPTE3IDozNDkyNiBzPTEgcGdzPTE1
-NjE0IGNzPTIgbD0wIGM9MHg3ZjUwMmY0ODQ2MDApLmNvbm5lY3QgZ290IFJFU0VUU0VTU0lPTg0K
-ICAtMzk+IDIwMTctMDEtMDMgMjM6NDI6NDUuNjkwMTU5IDdmNTA1MjNhMzcwMCAgMCAtLSAxMC4y
-MDUuNDkuNTU6NjgwOS8yNzc4NDUxID4+IDEwLjIwNS41MS40Mzo2ODA2LzE2NjY5MzUgcGlwZSgw
-eDdmNGZiODlhMzAwMCBzZD0yMiA6NTk1NjIgcz0xIHBncz0yNTI1NyBjcz0yIGw9MCBjPTB4N2Y1
-MDJmNDg0NzgwKS5jb25uZWN0IGdvdCBSRVNFVFNFU1NJT04NCiAgLTM4PiAyMDE3LTAxLTAzIDIz
-OjQyOjQ3LjQ2MzQyNyA3ZjUwNTMxYjE3MDAgIDAgLS0gMTAuMjA1LjQ5LjU1OjY4MDkvMjc3ODQ1
-MSA+PiAxMC4yMDUuNDkuMTc1OjY4MTMvMTE1MTI3OCBwaXBlKDB4N2Y0ZmI4YWM3MDAwIHNkPTM5
-IDozNjY0OCBzPTIgcGdzPTE4MDA4IGNzPTEgbD0wIGM9MHg3ZjUwMmY0ODRjMDApLmZhdWx0LCBp
-bml0aWF0aW5nIHJlY29ubmVjdA0KICAtMzc+IDIwMTctMDEtMDMgMjM6NDI6NDcuNDYzNTEzIDdm
-NTA1NDBjMDcwMCAgMCAtLSAxMC4yMDUuNDkuNTU6NjgwOS8yNzc4NDUxID4+IDEwLjIwNS40OS4x
-MDk6NjgwNi8xODE0NTUwIHBpcGUoMHg3ZjUwMmY0NjUwMDAgc2Q9NDAgOjM5NjcwIHM9MiBwZ3M9
-MjQ4OTggY3M9MSBsPTAgYz0weDdmNTAyZjQ4NGQ4MCkuZmF1bHQsIGluaXRpYXRpbmcgcmVjb25u
-ZWN0DQogIC0zNj4gMjAxNy0wMS0wMyAyMzo0Mjo0Ny40NjM4NTcgN2Y1MDYzOTM5NzAwICAwIC0t
-IDEwLjIwNS40OS41NTo2ODA5LzI3Nzg0NTEgPj4gMTAuMjA1LjQ5LjE3NTo2ODEzLzExNTEyNzgg
-cGlwZSgweDdmNGZiOGFjNzAwMCBzZD0zOSA6MzY2NTAgcz0xIHBncz0xODAwOCBjcz0yIGw9MCBj
-PTB4N2Y1MDJmNDg0YzAwKS5jb25uZWN0IGdvdCBSRVNFVFNFU1NJT04NCiAgLTM1PiAyMDE3LTAx
-LTAzIDIzOjQyOjQ3LjQ2MzkwNiA3ZjUwNTE3OTc3MDAgIDAgLS0gMTAuMjA1LjQ5LjU1OjY4MDkv
-Mjc3ODQ1MSA+PiAxMC4yMDUuNDkuMTA5OjY4MDYvMTgxNDU1MCBwaXBlKDB4N2Y1MDJmNDY1MDAw
-IHNkPTQwIDozOTY3MiBzPTEgcGdzPTI0ODk4IGNzPTIgbD0wIGM9MHg3ZjUwMmY0ODRkODApLmNv
-bm5lY3QgZ290IFJFU0VUU0VTU0lPTg0KICAtMzQ+IDIwMTctMDEtMDMgMjM6NDI6NDcuNjc1NzY4
-IDdmNTA5NmJmZjcwMCAgNSBvc2QuNjE5IDc2OTkxIGhlYXJ0YmVhdDogb3NkX3N0YXQoNzUzNTEg
-TUIgdXNlZCwgMTU2IEdCIGF2YWlsLCAyNDMgR0IgdG90YWwsIHBlZXJzIFtdL1tdIG9wIGhpc3Qg
-W10pDQogIC0zMz4gMjAxNy0wMS0wMyAyMzo0Mjo1MS4xNzU5MDYgN2Y1MDk2YmZmNzAwICA1IG9z
-ZC42MTkgNzY5OTEgaGVhcnRiZWF0OiBvc2Rfc3RhdCg3NTM1MSBNQiB1c2VkLCAxNTYgR0IgYXZh
-aWwsIDI0MyBHQiB0b3RhbCwgcGVlcnMgW10vW10gb3AgaGlzdCBbXSkNCiAgLTMyPiAyMDE3LTAx
-LTAzIDIzOjQyOjU0LjA3NjA0MiA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5MSBoZWFydGJl
-YXQ6IG9zZF9zdGF0KDc1MzUxIE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRvdGFsLCBw
-ZWVycyBbXS9bXSBvcCBoaXN0IFtdKQ0KICDigKbigKbigKYNCiAgICAgIC01PiAyMDE3LTAxLTAz
-IDIzOjQzOjU4LjU3OTgyMCA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5MSBoZWFydGJlYXQ6
-IG9zZF9zdGF0KDc1MzUxIE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRvdGFsLCBwZWVy
-cyBbXS9bXSBvcCBoaXN0IFtdKQ0KICAgIC00PiAyMDE3LTAxLTAzIDIzOjQ0OjAyLjA3OTk3NCA3
-ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5MSBoZWFydGJlYXQ6IG9zZF9zdGF0KDc1MzUxIE1C
-IHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRvdGFsLCBwZWVycyBbXS9bXSBvcCBoaXN0IFtd
-KQ0KICAgIC0zPiAyMDE3LTAxLTAzIDIzOjQ0OjA0LjM4MDExMiA3ZjUwOTZiZmY3MDAgIDUgb3Nk
-LjYxOSA3Njk5MSBoZWFydGJlYXQ6IG9zZF9zdGF0KDc1MzUxIE1CIHVzZWQsIDE1NiBHQiBhdmFp
-bCwgMjQzIEdCIHRvdGFsLCBwZWVycyBbXS9bXSBvcCBoaXN0IFtdKQ0KICAgIC0yPiAyMDE3LTAx
-LTAzIDIzOjQ0OjEwLjI4MDI1OSA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5MSBoZWFydGJl
-YXQ6IG9zZF9zdGF0KDc1MzUxIE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRvdGFsLCBw
-ZWVycyBbXS9bXSBvcCBoaXN0IFtdKQ0KICAgIC0xPiAyMDE3LTAxLTAzIDIzOjQ0OjE2LjE4MDQw
-MyA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5MSBoZWFydGJlYXQ6IG9zZF9zdGF0KDc1MzUx
-IE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRvdGFsLCBwZWVycyBbXS9bXSBvcCBoaXN0
-IFtdKQ0KICAgICAwPiAyMDE3LTAxLTAzIDIzOjQ0OjE5LjUzMjYxNiA3ZjUwZmRiZmY3MDAgLTEg
-ZXJyb3JfbXNnIGNvbW1vbi9IZWFydGJlYXRNYXAuY2M6IEluIGZ1bmN0aW9uICdib29sIGNlcGg6
-OkhlYXJ0YmVhdE1hcDo6X2NoZWNrKGNlcGg6OmhlYXJ0YmVhdF9oYW5kbGVfZCosIGNvbnN0IGNo
-YXIqLCB0aW1lX3QpJyB0aHJlYWQgN2Y1MGZkYmZmNzAwIHRpbWUgMjAxNy0wMS0wMyAyMzo0NDox
-OS41MjM4MjMNCmNvbW1vbi9IZWFydGJlYXRNYXAuY2M6IDc5OiBGQUlMRUQgYXNzZXJ0KDAgPT0g
-ImhpdCBzdWljaWRlIHRpbWVvdXQiKQ0KDQpjZXBoIHZlcnNpb24gMC45NC41LTMtMS1nODFkNGFk
-NCAoODFkNGFkNDBkMGMyYTRiNzM1MjlmZjBkYjNjOGYyMmFjZDE1YzM5OCkNCjE6IChjZXBoOjpf
-X2NlcGhfYXNzZXJ0X2ZhaWwoY2hhciBjb25zdCosIGNoYXIgY29uc3QqLCBpbnQsIGNoYXIgY29u
-c3QqKSsweDg1KSBbMHhiMjY2ZjVdDQoyOiAoY2VwaDo6SGVhcnRiZWF0TWFwOjpfY2hlY2soY2Vw
-aDo6aGVhcnRiZWF0X2hhbmRsZV9kKiwgY2hhciBjb25zdCosIGxvbmcpKzB4MmQ5KSBbMHhhNWJm
-NjldDQozOiAoY2VwaDo6SGVhcnRiZWF0TWFwOjppc19oZWFsdGh5KCkrMHhkZSkgWzB4YTVjODVl
-XQ0KNDogKGNlcGg6OkhlYXJ0YmVhdE1hcDo6Y2hlY2tfdG91Y2hfZmlsZSgpKzB4MmMpIFsweGE1
-Y2Y3Y10NCjU6IChDZXBoQ29udGV4dFNlcnZpY2VUaHJlYWQ6OmVudHJ5KCkrMHgxNWIpIFsweGIz
-NjcwYl0NCjY6ICgoKSsweDdkYzUpIFsweDdmNTEwMGE3ZmRjNV0NCjc6IChjbG9uZSgpKzB4NmQp
-IFsweDdmNTBmZjU2MWNlZF0NCg0KSW4gdGhlIGxvZ3MgYWJvdmUsIHdlIGZvdW5kIHRoYXQgdGhl
-IE9TRCB3ZW50IGRvd24gYXQgYWJvdXQg4oCcMjAxNy0wMS0wMyAyMzo0NDoxOeKAnSwgdGhlIE9T
-RDo6dGljayB3YXMgYmxvY2tlZCBmb3Igc29tZSByZWFzb24gYWZ0ZXIgdGhlIGxhc3QgdGljayBh
-dCBhYm91dCDigJwyMDE3LTAxLTAzIDIzOjQyOjIw4oCdLCBhbmQgZmluYWxseSwgYWZ0ZXIgdGhl
-IGxhc3QgaW52b2NhdGlvbiBvZiDigJxoYW5kbGVfb3NkX21hcOKAnSwgT1NEOjpoZWFydGJlYXRf
-cGVlcnMgd2FzIGVtcHR5IHRpbGwgdGhlIE9TRCBzdWljaWRlIGl0c2VsZi4NCkFmdGVyIGRvaW5n
-IHNvbWUgc291cmNlIGNvZGUgcmVhZGluZywgd2UgdGhpbmsgdGhhdCBoZWFydGJlYXRfcGVlcnMg
-c2hvdWxkIGhhdmUgYmVlbiByZXNldCBkdXJpbmcgdGhlIGV4ZWN1dGlvbiBvZiDigJxoYW5kbGVf
-b3NkX21hcOKAnSwgYnV0IGl0IHNob3VsZCBiZSByZWZpbGxlZCBhZnRlciB0aGF0IGJ5IOKAnGhh
-bmRsZV9vc2RfbWFw4oCdIG1ldGhvZCBvciB0aGUgT1NEOjp0aWNrIG1ldGhvZCwgd2hpY2ggd2Fz
-IG5ldmVyIGRvbmUuDQpJdCBzZWVtcyB0aGF0IHRoZXJlIGlzIHNvbWUga2luZCBvZiDigJxkZWFk
-bG9ja+KAnSBkdXJpbmcgdGhlIE9TRDo6dGljayBhbmQgdGhlIHBlZXJpbmcgcHJvY2Vzcy4gSXMg
-dGhpcyByaWdodD8NCg0KUGxlYXNlIGhlbHAgbWUsIHRoYW5rIHlvde+Big0KDQpBbmQgYnkgdGhl
-IHdheSwgZnJvbSB0aGUgY2VwaC5sb2cgZmlsZSwgd2UgZm91bmQgdGhhdCBhbHRob3VnaCBvc2Qu
-NjE5IHdobyBzdWljaWRlIGl0c2VsZiBsb2cgdG8gbW9uaXRvciB0aGF0IGl0IGhhZCBiZWVuICJ3
-cm9uZ2x5IG1hcmtlZCBkb3duIiwgaXQgbmV2ZXIgd2VudCAidXAiIGluIHRoZSBjbHVzdGVyLiBX
-ZSBhcmUgcmVhbGx5IGNvbmZ1c2VkLCBwbGVhc2UgaGVscCB1cy4gVGhhbmsgeW91DQoNCg0K
+This patch sets the io_pages bdi hint based on the rvsize mount option.
+Without this patch large buffered reads (request size > max readahead)
+are processed sequentially in chunks of the readahead size (i.e. read
+requests are sent out up to the readahead size, then the
+do_generic_file_read() function waits until the first page is received).
+
+With this patch read requests are sent out up to the size specified in
+the new rvsize mount option at once (default: 64 MB).
+
+Signed-off-by: Andreas Gerstmayr <andreas.gerstmayr@catalysts.cc>
+---
+
+Thanks for your review.
+On second thought, I think I should not reuse the rsize mount option
+(maximum read size per OSD request), therefore I created a new mount
+option rvsize with a default value of 64 MB (as you suggested).
+
+(Note: This patch depends on kernel version 4.10-rc1)
+
+
+ Documentation/filesystems/ceph.txt |  4 ++++
+ fs/ceph/super.c                    | 15 +++++++++++++++
+ fs/ceph/super.h                    |  8 +++++---
+ 3 files changed, 24 insertions(+), 3 deletions(-)
+
+diff --git a/Documentation/filesystems/ceph.txt b/Documentation/filesystems/ceph.txt
+index f5306ee..65171e1 100644
+--- a/Documentation/filesystems/ceph.txt
++++ b/Documentation/filesystems/ceph.txt
+@@ -104,6 +104,10 @@ Mount Options
+   rasize=X
+ 	Specify the maximum readahead.
+ 
++  rvsize=X
++	Specify the maximum volume of read requests sent out at once.
++	The default is 64 MB.
++
+   mount_timeout=X
+ 	Specify the timeout value for mount (in seconds), in the case
+ 	of a non-responsive Ceph file system.  The default is 30
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 6bd20d7..71bed5a 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -111,6 +111,7 @@ enum {
+ 	Opt_wsize,
+ 	Opt_rsize,
+ 	Opt_rasize,
++	Opt_rvsize,
+ 	Opt_caps_wanted_delay_min,
+ 	Opt_caps_wanted_delay_max,
+ 	Opt_cap_release_safety,
+@@ -149,6 +150,7 @@ enum {
+ 	{Opt_wsize, "wsize=%d"},
+ 	{Opt_rsize, "rsize=%d"},
+ 	{Opt_rasize, "rasize=%d"},
++	{Opt_rvsize, "rvsize=%d"},
+ 	{Opt_caps_wanted_delay_min, "caps_wanted_delay_min=%d"},
+ 	{Opt_caps_wanted_delay_max, "caps_wanted_delay_max=%d"},
+ 	{Opt_cap_release_safety, "cap_release_safety=%d"},
+@@ -233,6 +235,9 @@ static int parse_fsopt_token(char *c, void *private)
+ 	case Opt_rasize:
+ 		fsopt->rasize = intval;
+ 		break;
++	case Opt_rvsize:
++		fsopt->rvsize = intval;
++		break;
+ 	case Opt_caps_wanted_delay_min:
+ 		fsopt->caps_wanted_delay_min = intval;
+ 		break;
+@@ -381,6 +386,7 @@ static int parse_mount_options(struct ceph_mount_options **pfsopt,
+ 
+ 	fsopt->rsize = CEPH_RSIZE_DEFAULT;
+ 	fsopt->rasize = CEPH_RASIZE_DEFAULT;
++	fsopt->rvsize = CEPH_RVSIZE_DEFAULT;
+ 	fsopt->snapdir_name = kstrdup(CEPH_SNAPDIRNAME_DEFAULT, GFP_KERNEL);
+ 	if (!fsopt->snapdir_name) {
+ 		err = -ENOMEM;
+@@ -495,6 +501,8 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
+ 		seq_printf(m, ",rsize=%d", fsopt->rsize);
+ 	if (fsopt->rasize != CEPH_RASIZE_DEFAULT)
+ 		seq_printf(m, ",rasize=%d", fsopt->rasize);
++	if (fsopt->rvsize != CEPH_RVSIZE_DEFAULT)
++		seq_printf(m, ",rvsize=%d", fsopt->rvsize);
+ 	if (fsopt->congestion_kb != default_congestion_kb())
+ 		seq_printf(m, ",write_congestion_kb=%d", fsopt->congestion_kb);
+ 	if (fsopt->caps_wanted_delay_min != CEPH_CAPS_WANTED_DELAY_MIN_DEFAULT)
+@@ -952,6 +960,13 @@ static int ceph_register_bdi(struct super_block *sb,
+ 		fsc->backing_dev_info.ra_pages =
+ 			VM_MAX_READAHEAD * 1024 / PAGE_SIZE;
+ 
++	if (fsc->mount_options->rvsize)
++		fsc->backing_dev_info.io_pages =
++			(fsc->mount_options->rvsize + PAGE_SIZE - 1)
++			>> PAGE_SHIFT;
++	else
++		fsc->backing_dev_info.io_pages = ULONG_MAX;
++
+ 	err = bdi_register(&fsc->backing_dev_info, NULL, "ceph-%ld",
+ 			   atomic_long_inc_return(&bdi_seq));
+ 	if (!err)
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 3373b61..676ef6d 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -45,8 +45,9 @@
+ #define ceph_test_mount_opt(fsc, opt) \
+ 	(!!((fsc)->mount_options->flags & CEPH_MOUNT_OPT_##opt))
+ 
+-#define CEPH_RSIZE_DEFAULT             0           /* max read size */
+-#define CEPH_RASIZE_DEFAULT            (8192*1024) /* readahead */
++#define CEPH_RSIZE_DEFAULT              0              /* max read size per osd request */
++#define CEPH_RASIZE_DEFAULT             (8192*1024)    /* max readahead */
++#define CEPH_RVSIZE_DEFAULT             (64*1024*1024) /* max volume of read requests sent out at once */
+ #define CEPH_MAX_READDIR_DEFAULT        1024
+ #define CEPH_MAX_READDIR_BYTES_DEFAULT  (512*1024)
+ #define CEPH_SNAPDIRNAME_DEFAULT        ".snap"
+@@ -56,8 +57,9 @@ struct ceph_mount_options {
+ 	int sb_flags;
+ 
+ 	int wsize;            /* max write size */
+-	int rsize;            /* max read size */
++	int rsize;            /* max read size per osd request */
+ 	int rasize;           /* max readahead */
++	int rvsize;           /* max volume of read requests sent out at once */
+ 	int congestion_kb;    /* max writeback in flight */
+ 	int caps_wanted_delay_min, caps_wanted_delay_max;
+ 	int cap_release_safety;
+-- 
+1.8.3.1
+
