@@ -1,175 +1,175 @@
-From: Tone Zhang <tone.zhang@linaro.org>
-Subject: Re: Ceph installation packages on Ubuntu
-Date: Thu, 5 Jan 2017 09:08:40 +0800
-Message-ID: <CAOCf4A=o-BfUkbQiWXL=MqEtvEAcKHP3PcBp8XzhzR1pmH2Bwg@mail.gmail.com>
-References: <CAOCf4An8SHRYgeKQ-t9h1TjGU9k8GCc0GGmZRCt0dikUG3Azeg@mail.gmail.com>
- <CAC-Np1wLzXAPq6gdCGu_wY+safqGW0c6wGHCgm+-2Wxd-os5Sg@mail.gmail.com>
- <CAOCf4Akuk27q3Ki=LbAmjY-geUOjSgqCiRiSD5FhxV6Fw8uSAg@mail.gmail.com>
- <CAJE9aOMUDu-tLV+NeGNPEiLOJP7gCEXWCCyX3-pjdFYAQnJxSA@mail.gmail.com>
- <CAOCf4AmhchBK56+stO3tarSHG_JuByaTtXU1fqNaHGUBSuxE2g@mail.gmail.com>
- <CAC-Np1wzmd8F=kPSZL5gwES3mQ8NGyFPvRaD5Yp3rxKfP00rsQ@mail.gmail.com> <CAOCf4AmYG8Q_PqJv-GAkGJ2XrJYMhYd4JNTn0MzEVyCe+cc28g@mail.gmail.com>
+From: =?utf-8?B?6K646Zuq5a+S?= <xuxuehan@360.cn>
+Subject: Is this a deadlock?
+Date: Thu, 5 Jan 2017 08:20:41 +0000
+Message-ID: <23B01353C2E80240BBE34865782DFE0131A24575@EX02.corp.qihoo.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f180.google.com ([209.85.217.180]:33218 "EHLO
-        mail-ua0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758856AbdAEBKP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Jan 2017 20:10:15 -0500
-Received: by mail-ua0-f180.google.com with SMTP id i68so261428950uad.0
-        for <ceph-devel@vger.kernel.org>; Wed, 04 Jan 2017 17:08:41 -0800 (PST)
-In-Reply-To: <CAOCf4AmYG8Q_PqJv-GAkGJ2XrJYMhYd4JNTn0MzEVyCe+cc28g@mail.gmail.com>
+Received: from mtabjsc2.360.cn ([123.125.82.7]:55409 "EHLO mtabjsc2.360.cn"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1033125AbdAEIUt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 5 Jan 2017 03:20:49 -0500
+Received: from CAS2.corp.qihoo.net (cas2.corp.qihoo.net [220.181.158.130])
+        (using TLSv1 with cipher AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mtabjsc2.360.cn (QHMAIL) with ESMTP id 3D8E46B097D
+        for <ceph-devel@vger.kernel.org>; Thu,  5 Jan 2017 16:20:42 +0800 (CST)
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Alfredo Deza <adeza@redhat.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Kefu,
-
-With the command "dpkg-buildpackage -uc -us -j16", I can generate deb
-packages for Ceph 10.2.3 and 10.2.4 in arm machine.
-
-Everything is OK.
-
-Thanks a lot.
-
-Br,
-Tone
-
-On 5 January 2017 at 09:04, Tone Zhang <tone.zhang@linaro.org> wrote:
-> Hi Alfredo,
->
-> It is great!
->
-> I will have a try ASAP.
->
-> Thanks.
->
-> Br,
-> Tone
->
-> On 5 January 2017 at 05:00, Alfredo Deza <adeza@redhat.com> wrote:
->> On Wed, Jan 4, 2017 at 4:14 AM, Tone Zhang <tone.zhang@linaro.org> wrote:
->>> Hi Kefu,
->>>
->>> Thanks!
->>>
->>> Will try the correct command.
->>>
->>> Br,
->>> Tone
->>>
->>> On 4 January 2017 at 17:11, kefu chai <tchaikov@gmail.com> wrote:
->>>> On Wed, Jan 4, 2017 at 4:19 PM, Tone Zhang <tone.zhang@linaro.org> wrote:
->>>>> Hi Kefu and Alfredo,
->>>>>
->>>>> Sorry for the late, and thanks a lot for your kindly help.
->>>>>
->>>>> @Kefu,
->>>>> I tried to generate Ceph 10.2.3 deb packages with command
->>>>> "dpkg-buildpackage", but failed. The error is different from you
->>>>> shared.
->>>> <quote>
->>>> ubuntu@u202157:~/tone/ceph$ dpkg-buildpackage -v -uc -us -j16
->>>> ...
->>>>  dpkg-genchanges -v >../ceph_10.2.4-1_arm64.changes
->>>> dpkg-genchanges: warning: 'since' option specifies non-existing version
->>>> dpkg-genchanges: warning: use newest entry that is earlier than the
->>>> one specified
->>>> dpkg-genchanges: error:  is not a valid version
->>>> dpkg-buildpackage: error: dpkg-genchanges gave error exit status 255
->>>> </quote>
->>>>
->>>> you might want to pass a version in the -v option. or you can just use
->>>>
->>>>   dpkg-buildpackage -uc -us -j16
->>>>
->>>>
->>>>> Then I generated deb packages for Ceph 10.2.4, it failed at almost the
->>>>> last steps. I can find all the generated deb packages in the build
->>>>> machine.
->>>>>
->>>>> The issue in 10.2.3 is different from 10.2.4.
->>>>
->>>> <quote>
->>>> dpkg-shlibdeps: error: no dependency information found for
->>>> /usr/lib/libleveldb.so.1 (used by debian/ceph-mon/usr/bin/ceph-mon)
->>>> Hint: check if the library actually comes from a package.
->>>> dh_shlibdeps: dpkg-shlibdeps -Tdebian/ceph-mon.substvars
->>>> debian/ceph-mon/usr/bin/ceph-mon returned exit code 2
->>>> debian/rules:112: recipe for target 'binary-arch' failed
->>>> </quote>
->>>>
->>>> seems the libleveldb is not well packaged. a quick google returns:
->>>> http://stackoverflow.com/questions/11238134/dpkg-shlibdeps-error-no-dependency-information-found-for
->>>>
->>>>>
->>>>> @Alfredo,
->>>>> Thanks for your help. I have installed Ceph 10.2.2 via "dpkg" command.
->>>>>
->>>>> I threw the question is that I thought Ceph community will stop
->>>>> releasing Ceph version for arm platform. Obviously I am wrong. :)
->>>>>
->>>>>
->>>>> I attached the log.
->>>>>
->>>>> Thanks.
->>>>>
->>>>> Br,
->>>>> Tone
->>>>>
->>>>> On 4 January 2017 at 04:16, Alfredo Deza <adeza@redhat.com> wrote:
->>>>>> On Wed, Dec 21, 2016 at 3:21 AM, Tone Zhang <tone.zhang@linaro.org> wrote:
->>>>>>> Hi Cephers,
->>>>>>>
->>>>>>> In recent, I tried to deploy Ceph cluster on Ubuntu 16.04 on ARM
->>>>>>> platform via "ceph-deploy".
->>>>>>>
->>>>>>> When I ran "ceph-deploy install" command, I got "cannot find ceph-osd"
->>>>>>> and "ceph-mon". I checked the ceph download center for Ubuntu on ARM
->>>>>>> (https://download.ceph.com/debian-jewel/pool/main/c/ceph/), it seems
->>>>>>> since Ceph 10.2.4, there is no deb packages for ARM any more. What's
->>>>>>> happened? Does it mean ceph jewel delivery on ARM platform will be
->>>>>>> stopped?
->>
->> We have just published the 10.2.5 binaries for ARM. Let us know if you
->> get into issues.
->>
->>>>>>
->>>>>> I don't recall why we didn't ship for 10.2.4. For regular releases we
->>>>>> put the priority on the non-arm
->>>>>> versions, so it is possible we had some temporary issue at the time of 10.2.4
->>>>>>
->>>>>> I will get a build going for that version and arm64, and will update
->>>>>> this thread when that is complete (or if we find anything preventing a
->>>>>> build)
->>>>>>>
->>>>>>> If I want to deploy Ceph jewel 10.2.2 via ceph-deploy, how shall I do?
->>>>>>> Except download all the deb packaged for 10.2.2 and install ceph
->>>>>>> manually, is there an easier way?
->>>>>>
->>>>>> There isn't a way to do this with a released Ceph version, because the
->>>>>> DEB repos will not allow to provide metadata information for multiple
->>>>>> versions of the same package (the deb tooling we use just ignores the
->>>>>> older versions).
->>>>>>
->>>>>> If you can't wait, there is an unsigned repo for 10.2.2 available at:
->>>>>>
->>>>>> https://chacra.ceph.com/r/ceph/jewel/ubuntu/xenial/
->>>>>>
->>>>>> It contains the other DEB distros there as well (it isn't just xenial)
->>>>>>
->>>>>>>
->>>>>>> Thanks a lot!
->>>>>>>
->>>>>>> Br,
->>>>>>> Tone
->>>>>>> --
->>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>>>
->>>> --
->>>> Regards
->>>> Kefu Chai
+SGksIGV2ZXJ5b25lLg0KDQpSZWNlbnRseSBpbiBvbmUgb2Ygb3VyIG9ubGluZSBjZXBoIGNsdXN0
+ZXIsIG9uZSBPU0Qgc3VpY2lkZWQgaXRzZWxmIGFmdGVyIGV4cGVyaWVuY2luZyBzb21lIG5ldHdv
+cmsgY29ubmVjdGl2aXR5IHByb2JsZW0sIGFuZCB0aGUgT1NEIGxvZyBpcyBhcyBmb2xsb3dzOg0K
+DQogIC0xNzM+IDIwMTctMDEtMDMgMjM6NDI6MTkuMTQ1NDkwIDdmNTAyMWJiYzcwMCAgMCAtLSAx
+MC4yMDUuNDkuNTU6NjgwMi8xNzc4NDUxID4+IDEwLjIwNS40OS4xNzQ6NjgwMy8xNDk5NjcxIHBp
+cGUoMHg3ZjUwZWMyY2UwMDAgc2Q9MzY5IDo1Mjg3NSBzPTIgcGdzPTEzNzUwIGNzPTI1IGw9MCBj
+PTB4N2Y1MGVjMjMyYjgwKS5mYXVsdCB3aXRoIG5vdGhpbmcgdG8gc2VuZCwgZ29pbmcgdG8gc3Rh
+bmRieQ0KICAtMTcyPiAyMDE3LTAxLTAzIDIzOjQyOjE5LjE1MzkxMCA3ZjRmODVkYjY3MDAgIDAg
+LS0gMTAuMjA1LjQ5LjU1OjY4MDIvMTc3ODQ1MSA+PiAxMC4yMDUuNTAuMjM4OjY4MDAvMTY3ODA1
+MiBwaXBlKDB4N2Y1MDcxMjlmMDAwIHNkPTU3MiA6NDI5MzYgcz0yIHBncz0xODk1NSBjcz0xMzk5
+IGw9MCBjPTB4N2Y1MGVjMDQ4YzgwKS5mYXVsdCB3aXRoIG5vdGhpbmcgdG8gc2VuZCwgZ29pbmcg
+dG8gc3RhbmRieQ0KICAtMTcxPiAyMDE3LTAxLTAzIDIzOjQyOjE5LjE5MzM4MCA3ZjUwNmQ4ZDg3
+MDAgIDAgLS0gMTAuMjA1LjQ5LjU1OjY4MDIvMTc3ODQ1MSA+PiAxMC4yMDUuNTEuNDM6NjgxNi8x
+Njc0NzczIHBpcGUoMHg3ZjRmZTE1YjEwMDAgc2Q9OTUxNCA6NjgwMiBzPTIgcGdzPTE0ODMwIGNz
+PTMzIGw9MCBjPTB4N2Y1MGVjMjMxOTgwKS5mYXVsdCB3aXRoIG5vdGhpbmcgdG8gc2VuZCwgZ29p
+bmcgdG8gc3RhbmRieQ0KICAtMTcwPiAyMDE3LTAxLTAzIDIzOjQyOjE5LjE5NDg3OSA3ZjUwYzFk
+ZmM3MDAgIDAgLS0gMTAuMjA1LjQ5LjU1OjY4MDIvMTc3ODQ1MSA+PiAxMC4yMDUuNDkuMTc2OjY4
+MDgvMTQ2NTY2NiBwaXBlKDB4N2Y1MDFhMTU2MDAwIHNkPTQ4NjcgOjY4MDIgcz0yIHBncz0xNTQx
+MCBjcz0xODkgbD0wIGM9MHg3ZjUwZWMyMzI4ODApLmZhdWx0IHdpdGggbm90aGluZyB0byBzZW5k
+LCBnb2luZyB0byBzdGFuZGJ5DQogIC0xNjk+IDIwMTctMDEtMDMgMjM6NDI6MTkuOTEzNDYzIDdm
+NTBmNzMzYjcwMCAgNSBvc2QuNjE5IDc2OTg5IHRpY2sNCiAgLTE2OD4gMjAxNy0wMS0wMyAyMzo0
+MjoyMC45MTM1NjEgN2Y1MGY3MzNiNzAwICA1IG9zZC42MTkgNzY5ODkgdGljaw0KICAtMTY3PiAy
+MDE3LTAxLTAzIDIzOjQyOjIxLjQ3MjQ5NSA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk4OSBo
+ZWFydGJlYXQ6IG9zZF9zdGF0KDc1MzQ5IE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRv
+dGFsLCBwZWVycyBbNSw0Niw0OSw1OSw2OSw4Myw4OCwxMDAsMTAyLDEwMywxMDQsMTA2LDExNywx
+MjAsMTIxLDEyNiwxMzEsMTMyLDEzMywxMzcsMTQzLDE1MCwxNjMsMTc0LDE4NSwyMDcsMjExLDIx
+NSwyMjAsMjMwLDIzMiwyNjMsMjcwLDI3MSwyODMsMjg3LDI5NywyOTksMzA2LDMxNCwzMTUsMzIw
+LDMyNywzNDgsMzUyLDM2MSw0MzUsNDQwLDQ0NCw0NDYsNDUzLDQ3Nyw0NzgsNDg5LDYxOCw2MjAs
+NjM0LDY3Niw2NzgsNjg3XS9bXSBvcCBoaXN0IFtdKQ0KICAtMTY2PiAyMDE3LTAxLTAzIDIzOjQy
+OjIxLjQ3Nzk5NSA3ZjUwZTc4ZTQ3MDAgIDMgb3NkLjYxOSA3Njk4OSBoYW5kbGVfb3NkX21hcCBl
+cG9jaHMgWzc2OTkwLDc2OTkxXSwgaSBoYXZlIDc2OTg5LCBzcmMgaGFzIFs3NjI4MSw3Njk5MV0N
+CiAgLTE2NT4gMjAxNy0wMS0wMyAyMzo0MjoyMS40OTQ1MjggN2Y1MGU3OGU0NzAwICAwIGxvZ19j
+aGFubmVsKGNsdXN0ZXIpIGxvZyBbV1JOXSA6IG1hcCBlNzY5OTEgd3JvbmdseSBtYXJrZWQgbWUg
+ZG93bg0KICAtMTY0PiAyMDE3LTAxLTAzIDIzOjQyOjIxLjQ5NDU0NSA3ZjUwZTc4ZTQ3MDAgIDEg
+b3NkLjYxOSA3Njk5MSBzdGFydF93YWl0aW5nX2Zvcl9oZWFsdGh5DQogIC0xNjM+IDIwMTctMDEt
+MDMgMjM6NDI6MjEuNDk1MjU2IDdmNTBlNjBlMTcwMCAgMSBvc2QuNjE5IDc2OTkxIG1zX2hhbmRs
+ZV9yZXNldCBjb24gMHg3ZjUwZWMwNDdjMDAgc2Vzc2lvbiAweDdmNTBiMGM2ZDA4MA0KICAtMTYy
+PiAyMDE3LTAxLTAzIDIzOjQyOjIxLjQ5NTI3OCA3ZjUwZTYwZTE3MDAgIDEgb3NkLjYxOSA3Njk5
+MSBtc19oYW5kbGVfcmVzZXQgY29uIDB4N2Y1MGU5Y2E3NDgwIHNlc3Npb24gMHg3ZjUwZDYwNmEw
+ODANCiAgLTE2MT4gMjAxNy0wMS0wMyAyMzo0MjoyMS40OTUyOTYgN2Y1MGU2MGUxNzAwICAxIG9z
+ZC42MTkgNzY5OTEgbXNfaGFuZGxlX3Jlc2V0IGNvbiAweDdmNTBlYzA0NzAwMCBzZXNzaW9uIDB4
+N2Y1MGNiMDgzMDgwDQogIC0xNjA+IDIwMTctMDEtMDMgMjM6NDI6MjEuNDk1MzAwIDdmNTBlNjBl
+MTcwMCAgMSBvc2QuNjE5IDc2OTkxIG1zX2hhbmRsZV9yZXNldCBjb24gMHg3ZjUwZWMwNDc3ODAg
+c2Vzc2lvbiAweDdmNTBjMTg0NjA4MA0KICAtMTU5PiAyMDE3LTAxLTAzIDIzOjQyOjIxLjQ5NTMx
+NSA3ZjUwZTYwZTE3MDAgIDEgb3NkLjYxOSA3Njk5MSBtc19oYW5kbGVfcmVzZXQgY29uIDB4N2Y1
+MGVjMDQ4MjAwIHNlc3Npb24gMHg3ZjUwYTZjM2IwODANCiAg4oCm4oCmLg0KICAtNTI+IDIwMTct
+MDEtMDMgMjM6NDI6MjEuNTAwMjE2IDdmNTBlNjBlMTcwMCAgMSBvc2QuNjE5IDc2OTkxIG1zX2hh
+bmRsZV9yZXNldCBjb24gMHg3ZjUwZTljYTY4ODAgc2Vzc2lvbiAweDdmNTBhMjQzNDA4MA0KICAt
+NTE+IDIwMTctMDEtMDMgMjM6NDI6MjEuNTAwMjE5IDdmNTBlNjBlMTcwMCAgMSBvc2QuNjE5IDc2
+OTkxIG1zX2hhbmRsZV9yZXNldCBjb24gMHg3ZjUwZWMyMzA0ODAgc2Vzc2lvbiAweDdmNTBiOGM2
+YzA4MA0KICAtNTA+IDIwMTctMDEtMDMgMjM6NDI6MjEuNTAwMjM1IDdmNTBlNjBlMTcwMCAgMSBv
+c2QuNjE5IDc2OTkxIG1zX2hhbmRsZV9yZXNldCBjb24gMHg3ZjUwZWMyMzA3ODAgc2Vzc2lvbiAw
+eDdmNTBiM2M5MjA4MA0KICAtNDk+IDIwMTctMDEtMDMgMjM6NDI6MjcuMzc0Nzc0IDdmNTA5NmJm
+ZjcwMCAgNSBvc2QuNjE5IDc2OTkxIGhlYXJ0YmVhdDogb3NkX3N0YXQoNzUzNTEgTUIgdXNlZCwg
+MTU2IEdCIGF2YWlsLCAyNDMgR0IgdG90YWwsIHBlZXJzIFtdL1tdIG9wIGhpc3QgW10pDQogIC00
+OD4gMjAxNy0wMS0wMyAyMzo0MjoyOC40NzQ5MjEgN2Y1MDk2YmZmNzAwICA1IG9zZC42MTkgNzY5
+OTEgaGVhcnRiZWF0OiBvc2Rfc3RhdCg3NTM1MSBNQiB1c2VkLCAxNTYgR0IgYXZhaWwsIDI0MyBH
+QiB0b3RhbCwgcGVlcnMgW10vW10gb3AgaGlzdCBbXSkNCiAgLTQ3PiAyMDE3LTAxLTAzIDIzOjQy
+OjI5LjU3NTA1OSA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5MSBoZWFydGJlYXQ6IG9zZF9z
+dGF0KDc1MzUxIE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRvdGFsLCBwZWVycyBbXS9b
+XSBvcCBoaXN0IFtdKQ0KICAtNDY+IDIwMTctMDEtMDMgMjM6NDI6MzMuMDc1MTkwIDdmNTA5NmJm
+ZjcwMCAgNSBvc2QuNjE5IDc2OTkxIGhlYXJ0YmVhdDogb3NkX3N0YXQoNzUzNTEgTUIgdXNlZCwg
+MTU2IEdCIGF2YWlsLCAyNDMgR0IgdG90YWwsIHBlZXJzIFtdL1tdIG9wIGhpc3QgW10pDQogLTQ1
+PiAyMDE3LTAxLTAzIDIzOjQyOjMzLjU3NTMzOCA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5
+MSBoZWFydGJlYXQ6IG9zZF9zdGF0KDc1MzUxIE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdC
+IHRvdGFsLCBwZWVycyBbXS9bXSBvcCBoaXN0IFtdKQ0KICAtNDQ+IDIwMTctMDEtMDMgMjM6NDI6
+MzkuNDc1NDg2IDdmNTA5NmJmZjcwMCAgNSBvc2QuNjE5IDc2OTkxIGhlYXJ0YmVhdDogb3NkX3N0
+YXQoNzUzNTEgTUIgdXNlZCwgMTU2IEdCIGF2YWlsLCAyNDMgR0IgdG90YWwsIHBlZXJzIFtdL1td
+IG9wIGhpc3QgW10pDQogIC00Mz4gMjAxNy0wMS0wMyAyMzo0Mjo0MS43NzU2MzcgN2Y1MDk2YmZm
+NzAwICA1IG9zZC42MTkgNzY5OTEgaGVhcnRiZWF0OiBvc2Rfc3RhdCg3NTM1MSBNQiB1c2VkLCAx
+NTYgR0IgYXZhaWwsIDI0MyBHQiB0b3RhbCwgcGVlcnMgW10vW10gb3AgaGlzdCBbXSkNCiAgLTQy
+PiAyMDE3LTAxLTAzIDIzOjQyOjQ1LjY4OTcwNyA3ZjUwNTJmYWY3MDAgIDAgLS0gMTAuMjA1LjQ5
+LjU1OjY4MDkvMjc3ODQ1MSA+PiAxMC4yMDUuNDkuMTczOjY4MDgvMTQ4OTgzNiBwaXBlKDB4N2Y0
+Zjk5NWQ4MDAwIHNkPTE3IDozNDkyNCBzPTIgcGdzPTE1NjE0IGNzPTEgbD0wIGM9MHg3ZjUwMmY0
+ODQ2MDApLmZhdWx0LCBpbml0aWF0aW5nIHJlY29ubmVjdA0KICAtNDE+IDIwMTctMDEtMDMgMjM6
+NDI6NDUuNjg5NzUyIDdmNTA1M2JiYjcwMCAgMCAtLSAxMC4yMDUuNDkuNTU6NjgwOS8yNzc4NDUx
+ID4+IDEwLjIwNS41MS40Mzo2ODA2LzE2NjY5MzUgcGlwZSgweDdmNGZiODlhMzAwMCBzZD0yMiA6
+NTk1NjAgcz0yIHBncz0yNTI1NyBjcz0xIGw9MCBjPTB4N2Y1MDJmNDg0NzgwKS5mYXVsdCwgaW5p
+dGlhdGluZyByZWNvbm5lY3QNCiAgLTQwPiAyMDE3LTAxLTAzIDIzOjQyOjQ1LjY5MDEzMyA3ZjUw
+NjQzNDM3MDAgIDAgLS0gMTAuMjA1LjQ5LjU1OjY4MDkvMjc3ODQ1MSA+PiAxMC4yMDUuNDkuMTcz
+OjY4MDgvMTQ4OTgzNiBwaXBlKDB4N2Y0Zjk5NWQ4MDAwIHNkPTE3IDozNDkyNiBzPTEgcGdzPTE1
+NjE0IGNzPTIgbD0wIGM9MHg3ZjUwMmY0ODQ2MDApLmNvbm5lY3QgZ290IFJFU0VUU0VTU0lPTg0K
+ICAtMzk+IDIwMTctMDEtMDMgMjM6NDI6NDUuNjkwMTU5IDdmNTA1MjNhMzcwMCAgMCAtLSAxMC4y
+MDUuNDkuNTU6NjgwOS8yNzc4NDUxID4+IDEwLjIwNS41MS40Mzo2ODA2LzE2NjY5MzUgcGlwZSgw
+eDdmNGZiODlhMzAwMCBzZD0yMiA6NTk1NjIgcz0xIHBncz0yNTI1NyBjcz0yIGw9MCBjPTB4N2Y1
+MDJmNDg0NzgwKS5jb25uZWN0IGdvdCBSRVNFVFNFU1NJT04NCiAgLTM4PiAyMDE3LTAxLTAzIDIz
+OjQyOjQ3LjQ2MzQyNyA3ZjUwNTMxYjE3MDAgIDAgLS0gMTAuMjA1LjQ5LjU1OjY4MDkvMjc3ODQ1
+MSA+PiAxMC4yMDUuNDkuMTc1OjY4MTMvMTE1MTI3OCBwaXBlKDB4N2Y0ZmI4YWM3MDAwIHNkPTM5
+IDozNjY0OCBzPTIgcGdzPTE4MDA4IGNzPTEgbD0wIGM9MHg3ZjUwMmY0ODRjMDApLmZhdWx0LCBp
+bml0aWF0aW5nIHJlY29ubmVjdA0KICAtMzc+IDIwMTctMDEtMDMgMjM6NDI6NDcuNDYzNTEzIDdm
+NTA1NDBjMDcwMCAgMCAtLSAxMC4yMDUuNDkuNTU6NjgwOS8yNzc4NDUxID4+IDEwLjIwNS40OS4x
+MDk6NjgwNi8xODE0NTUwIHBpcGUoMHg3ZjUwMmY0NjUwMDAgc2Q9NDAgOjM5NjcwIHM9MiBwZ3M9
+MjQ4OTggY3M9MSBsPTAgYz0weDdmNTAyZjQ4NGQ4MCkuZmF1bHQsIGluaXRpYXRpbmcgcmVjb25u
+ZWN0DQogIC0zNj4gMjAxNy0wMS0wMyAyMzo0Mjo0Ny40NjM4NTcgN2Y1MDYzOTM5NzAwICAwIC0t
+IDEwLjIwNS40OS41NTo2ODA5LzI3Nzg0NTEgPj4gMTAuMjA1LjQ5LjE3NTo2ODEzLzExNTEyNzgg
+cGlwZSgweDdmNGZiOGFjNzAwMCBzZD0zOSA6MzY2NTAgcz0xIHBncz0xODAwOCBjcz0yIGw9MCBj
+PTB4N2Y1MDJmNDg0YzAwKS5jb25uZWN0IGdvdCBSRVNFVFNFU1NJT04NCiAgLTM1PiAyMDE3LTAx
+LTAzIDIzOjQyOjQ3LjQ2MzkwNiA3ZjUwNTE3OTc3MDAgIDAgLS0gMTAuMjA1LjQ5LjU1OjY4MDkv
+Mjc3ODQ1MSA+PiAxMC4yMDUuNDkuMTA5OjY4MDYvMTgxNDU1MCBwaXBlKDB4N2Y1MDJmNDY1MDAw
+IHNkPTQwIDozOTY3MiBzPTEgcGdzPTI0ODk4IGNzPTIgbD0wIGM9MHg3ZjUwMmY0ODRkODApLmNv
+bm5lY3QgZ290IFJFU0VUU0VTU0lPTg0KICAtMzQ+IDIwMTctMDEtMDMgMjM6NDI6NDcuNjc1NzY4
+IDdmNTA5NmJmZjcwMCAgNSBvc2QuNjE5IDc2OTkxIGhlYXJ0YmVhdDogb3NkX3N0YXQoNzUzNTEg
+TUIgdXNlZCwgMTU2IEdCIGF2YWlsLCAyNDMgR0IgdG90YWwsIHBlZXJzIFtdL1tdIG9wIGhpc3Qg
+W10pDQogIC0zMz4gMjAxNy0wMS0wMyAyMzo0Mjo1MS4xNzU5MDYgN2Y1MDk2YmZmNzAwICA1IG9z
+ZC42MTkgNzY5OTEgaGVhcnRiZWF0OiBvc2Rfc3RhdCg3NTM1MSBNQiB1c2VkLCAxNTYgR0IgYXZh
+aWwsIDI0MyBHQiB0b3RhbCwgcGVlcnMgW10vW10gb3AgaGlzdCBbXSkNCiAgLTMyPiAyMDE3LTAx
+LTAzIDIzOjQyOjU0LjA3NjA0MiA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5MSBoZWFydGJl
+YXQ6IG9zZF9zdGF0KDc1MzUxIE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRvdGFsLCBw
+ZWVycyBbXS9bXSBvcCBoaXN0IFtdKQ0KICDigKbigKbigKYNCiAgICAgIC01PiAyMDE3LTAxLTAz
+IDIzOjQzOjU4LjU3OTgyMCA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5MSBoZWFydGJlYXQ6
+IG9zZF9zdGF0KDc1MzUxIE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRvdGFsLCBwZWVy
+cyBbXS9bXSBvcCBoaXN0IFtdKQ0KICAgIC00PiAyMDE3LTAxLTAzIDIzOjQ0OjAyLjA3OTk3NCA3
+ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5MSBoZWFydGJlYXQ6IG9zZF9zdGF0KDc1MzUxIE1C
+IHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRvdGFsLCBwZWVycyBbXS9bXSBvcCBoaXN0IFtd
+KQ0KICAgIC0zPiAyMDE3LTAxLTAzIDIzOjQ0OjA0LjM4MDExMiA3ZjUwOTZiZmY3MDAgIDUgb3Nk
+LjYxOSA3Njk5MSBoZWFydGJlYXQ6IG9zZF9zdGF0KDc1MzUxIE1CIHVzZWQsIDE1NiBHQiBhdmFp
+bCwgMjQzIEdCIHRvdGFsLCBwZWVycyBbXS9bXSBvcCBoaXN0IFtdKQ0KICAgIC0yPiAyMDE3LTAx
+LTAzIDIzOjQ0OjEwLjI4MDI1OSA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5MSBoZWFydGJl
+YXQ6IG9zZF9zdGF0KDc1MzUxIE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRvdGFsLCBw
+ZWVycyBbXS9bXSBvcCBoaXN0IFtdKQ0KICAgIC0xPiAyMDE3LTAxLTAzIDIzOjQ0OjE2LjE4MDQw
+MyA3ZjUwOTZiZmY3MDAgIDUgb3NkLjYxOSA3Njk5MSBoZWFydGJlYXQ6IG9zZF9zdGF0KDc1MzUx
+IE1CIHVzZWQsIDE1NiBHQiBhdmFpbCwgMjQzIEdCIHRvdGFsLCBwZWVycyBbXS9bXSBvcCBoaXN0
+IFtdKQ0KICAgICAwPiAyMDE3LTAxLTAzIDIzOjQ0OjE5LjUzMjYxNiA3ZjUwZmRiZmY3MDAgLTEg
+ZXJyb3JfbXNnIGNvbW1vbi9IZWFydGJlYXRNYXAuY2M6IEluIGZ1bmN0aW9uICdib29sIGNlcGg6
+OkhlYXJ0YmVhdE1hcDo6X2NoZWNrKGNlcGg6OmhlYXJ0YmVhdF9oYW5kbGVfZCosIGNvbnN0IGNo
+YXIqLCB0aW1lX3QpJyB0aHJlYWQgN2Y1MGZkYmZmNzAwIHRpbWUgMjAxNy0wMS0wMyAyMzo0NDox
+OS41MjM4MjMNCmNvbW1vbi9IZWFydGJlYXRNYXAuY2M6IDc5OiBGQUlMRUQgYXNzZXJ0KDAgPT0g
+ImhpdCBzdWljaWRlIHRpbWVvdXQiKQ0KDQpjZXBoIHZlcnNpb24gMC45NC41LTMtMS1nODFkNGFk
+NCAoODFkNGFkNDBkMGMyYTRiNzM1MjlmZjBkYjNjOGYyMmFjZDE1YzM5OCkNCjE6IChjZXBoOjpf
+X2NlcGhfYXNzZXJ0X2ZhaWwoY2hhciBjb25zdCosIGNoYXIgY29uc3QqLCBpbnQsIGNoYXIgY29u
+c3QqKSsweDg1KSBbMHhiMjY2ZjVdDQoyOiAoY2VwaDo6SGVhcnRiZWF0TWFwOjpfY2hlY2soY2Vw
+aDo6aGVhcnRiZWF0X2hhbmRsZV9kKiwgY2hhciBjb25zdCosIGxvbmcpKzB4MmQ5KSBbMHhhNWJm
+NjldDQozOiAoY2VwaDo6SGVhcnRiZWF0TWFwOjppc19oZWFsdGh5KCkrMHhkZSkgWzB4YTVjODVl
+XQ0KNDogKGNlcGg6OkhlYXJ0YmVhdE1hcDo6Y2hlY2tfdG91Y2hfZmlsZSgpKzB4MmMpIFsweGE1
+Y2Y3Y10NCjU6IChDZXBoQ29udGV4dFNlcnZpY2VUaHJlYWQ6OmVudHJ5KCkrMHgxNWIpIFsweGIz
+NjcwYl0NCjY6ICgoKSsweDdkYzUpIFsweDdmNTEwMGE3ZmRjNV0NCjc6IChjbG9uZSgpKzB4NmQp
+IFsweDdmNTBmZjU2MWNlZF0NCg0KSW4gdGhlIGxvZ3MgYWJvdmUsIHdlIGZvdW5kIHRoYXQgdGhl
+IE9TRCB3ZW50IGRvd24gYXQgYWJvdXQg4oCcMjAxNy0wMS0wMyAyMzo0NDoxOeKAnSwgdGhlIE9T
+RDo6dGljayB3YXMgYmxvY2tlZCBmb3Igc29tZSByZWFzb24gYWZ0ZXIgdGhlIGxhc3QgdGljayBh
+dCBhYm91dCDigJwyMDE3LTAxLTAzIDIzOjQyOjIw4oCdLCBhbmQgZmluYWxseSwgYWZ0ZXIgdGhl
+IGxhc3QgaW52b2NhdGlvbiBvZiDigJxoYW5kbGVfb3NkX21hcOKAnSwgT1NEOjpoZWFydGJlYXRf
+cGVlcnMgd2FzIGVtcHR5IHRpbGwgdGhlIE9TRCBzdWljaWRlIGl0c2VsZi4NCkFmdGVyIGRvaW5n
+IHNvbWUgc291cmNlIGNvZGUgcmVhZGluZywgd2UgdGhpbmsgdGhhdCBoZWFydGJlYXRfcGVlcnMg
+c2hvdWxkIGhhdmUgYmVlbiByZXNldCBkdXJpbmcgdGhlIGV4ZWN1dGlvbiBvZiDigJxoYW5kbGVf
+b3NkX21hcOKAnSwgYnV0IGl0IHNob3VsZCBiZSByZWZpbGxlZCBhZnRlciB0aGF0IGJ5IOKAnGhh
+bmRsZV9vc2RfbWFw4oCdIG1ldGhvZCBvciB0aGUgT1NEOjp0aWNrIG1ldGhvZCwgd2hpY2ggd2Fz
+IG5ldmVyIGRvbmUuDQpJdCBzZWVtcyB0aGF0IHRoZXJlIGlzIHNvbWUga2luZCBvZiDigJxkZWFk
+bG9ja+KAnSBkdXJpbmcgdGhlIE9TRDo6dGljayBhbmQgdGhlIHBlZXJpbmcgcHJvY2Vzcy4gSXMg
+dGhpcyByaWdodD8NCg0KUGxlYXNlIGhlbHAgbWUsIHRoYW5rIHlvde+Big0KDQpBbmQgYnkgdGhl
+IHdheSwgZnJvbSB0aGUgY2VwaC5sb2cgZmlsZSwgd2UgZm91bmQgdGhhdCBhbHRob3VnaCBvc2Qu
+NjE5IHdobyBzdWljaWRlIGl0c2VsZiBsb2cgdG8gbW9uaXRvciB0aGF0IGl0IGhhZCBiZWVuICJ3
+cm9uZ2x5IG1hcmtlZCBkb3duIiwgaXQgbmV2ZXIgd2VudCAidXAiIGluIHRoZSBjbHVzdGVyLiBX
+ZSBhcmUgcmVhbGx5IGNvbmZ1c2VkLCBwbGVhc2UgaGVscCB1cy4gVGhhbmsgeW91DQoNCg0K
