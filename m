@@ -1,149 +1,48 @@
-From: Andreas Gerstmayr <andreas.gerstmayr@catalysts.cc>
-Subject: [PATCH v2] ceph: set io_pages bdi hint
-Date: Thu, 5 Jan 2017 14:23:06 +0100
-Message-ID: <1483622696-30353-1-git-send-email-andreas.gerstmayr@catalysts.cc>
-References: <C3DA23CD-10FF-491D-BD31-0C1D8673105E@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: question about global activate_lock in ceph-disk
+Date: Thu, 5 Jan 2017 14:49:18 +0100
+Message-ID: <f5c2def8-e34d-6942-cfe0-497b659c901f@dachary.org>
+References: <8917B54C-BCF8-40F8-BFAF-BD2A12AFA044@xsky.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from exchange.catalysts.cc ([81.10.172.115]:23173 "EHLO
-        mail01-vie.catalysts.cc" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S936951AbdAENZ3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jan 2017 08:25:29 -0500
-In-Reply-To: <C3DA23CD-10FF-491D-BD31-0C1D8673105E@redhat.com>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:58706 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933988AbdAENte (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 5 Jan 2017 08:49:34 -0500
+In-Reply-To: <8917B54C-BCF8-40F8-BFAF-BD2A12AFA044@xsky.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: andreas.gerstmayr@gmail.com, Andreas Gerstmayr <andreas.gerstmayr@catalysts.cc>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+To: guojian@xsky.com
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-This patch sets the io_pages bdi hint based on the rvsize mount option.
-Without this patch large buffered reads (request size > max readahead)
-are processed sequentially in chunks of the readahead size (i.e. read
-requests are sent out up to the readahead size, then the
-do_generic_file_read() function waits until the first page is received).
+[cc'ing ceph-devel so others can benefit from the answer]
 
-With this patch read requests are sent out up to the size specified in
-the new rvsize mount option at once (default: 64 MB).
+Hi,
 
-Signed-off-by: Andreas Gerstmayr <andreas.gerstmayr@catalysts.cc>
----
+You are correct, there is no need for a global lock for something like:
 
-Thanks for your review.
-On second thought, I think I should not reuse the rsize mount option
-(maximum read size per OSD request), therefore I created a new mount
-option rvsize with a default value of 64 MB (as you suggested).
+ceph-disk activate /dev/sda1 & ceph-disk activate /dev/sdb1
 
-(Note: This patch depends on kernel version 4.10-rc1)
+when the journal (or bluestore auxiliary partitions) are collocated with the data on the same disk. However, if both sda1 and sdb1 are using a journal on sdc, activating them in parallel means they will both operate on sdc in parallel. Although it should be fine most of the time, there may be race conditions because this has never been tested.
 
+Over the past year ceph-disk and the boot sequence has improved and all known race conditions have been diagnosed and fixed (the last one dated month ago http://tracker.ceph.com/issues/17889). Although the fix was very simple, it was tricky to diagnose.
 
- Documentation/filesystems/ceph.txt |  4 ++++
- fs/ceph/super.c                    | 15 +++++++++++++++
- fs/ceph/super.h                    |  8 +++++---
- 3 files changed, 24 insertions(+), 3 deletions(-)
+In other words, the global lock is a conservative approach to avoid race conditions and it could be replaced by a OSD specific lock in some cases. It could also be replaced by an OSD specific lock in all cases after it has been extensively tested.
 
-diff --git a/Documentation/filesystems/ceph.txt b/Documentation/filesystems/ceph.txt
-index f5306ee..65171e1 100644
---- a/Documentation/filesystems/ceph.txt
-+++ b/Documentation/filesystems/ceph.txt
-@@ -104,6 +104,10 @@ Mount Options
-   rasize=X
- 	Specify the maximum readahead.
- 
-+  rvsize=X
-+	Specify the maximum volume of read requests sent out at once.
-+	The default is 64 MB.
-+
-   mount_timeout=X
- 	Specify the timeout value for mount (in seconds), in the case
- 	of a non-responsive Ceph file system.  The default is 30
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 6bd20d7..71bed5a 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -111,6 +111,7 @@ enum {
- 	Opt_wsize,
- 	Opt_rsize,
- 	Opt_rasize,
-+	Opt_rvsize,
- 	Opt_caps_wanted_delay_min,
- 	Opt_caps_wanted_delay_max,
- 	Opt_cap_release_safety,
-@@ -149,6 +150,7 @@ enum {
- 	{Opt_wsize, "wsize=%d"},
- 	{Opt_rsize, "rsize=%d"},
- 	{Opt_rasize, "rasize=%d"},
-+	{Opt_rvsize, "rvsize=%d"},
- 	{Opt_caps_wanted_delay_min, "caps_wanted_delay_min=%d"},
- 	{Opt_caps_wanted_delay_max, "caps_wanted_delay_max=%d"},
- 	{Opt_cap_release_safety, "cap_release_safety=%d"},
-@@ -233,6 +235,9 @@ static int parse_fsopt_token(char *c, void *private)
- 	case Opt_rasize:
- 		fsopt->rasize = intval;
- 		break;
-+	case Opt_rvsize:
-+		fsopt->rvsize = intval;
-+		break;
- 	case Opt_caps_wanted_delay_min:
- 		fsopt->caps_wanted_delay_min = intval;
- 		break;
-@@ -381,6 +386,7 @@ static int parse_mount_options(struct ceph_mount_options **pfsopt,
- 
- 	fsopt->rsize = CEPH_RSIZE_DEFAULT;
- 	fsopt->rasize = CEPH_RASIZE_DEFAULT;
-+	fsopt->rvsize = CEPH_RVSIZE_DEFAULT;
- 	fsopt->snapdir_name = kstrdup(CEPH_SNAPDIRNAME_DEFAULT, GFP_KERNEL);
- 	if (!fsopt->snapdir_name) {
- 		err = -ENOMEM;
-@@ -495,6 +501,8 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
- 		seq_printf(m, ",rsize=%d", fsopt->rsize);
- 	if (fsopt->rasize != CEPH_RASIZE_DEFAULT)
- 		seq_printf(m, ",rasize=%d", fsopt->rasize);
-+	if (fsopt->rvsize != CEPH_RVSIZE_DEFAULT)
-+		seq_printf(m, ",rvsize=%d", fsopt->rvsize);
- 	if (fsopt->congestion_kb != default_congestion_kb())
- 		seq_printf(m, ",write_congestion_kb=%d", fsopt->congestion_kb);
- 	if (fsopt->caps_wanted_delay_min != CEPH_CAPS_WANTED_DELAY_MIN_DEFAULT)
-@@ -952,6 +960,13 @@ static int ceph_register_bdi(struct super_block *sb,
- 		fsc->backing_dev_info.ra_pages =
- 			VM_MAX_READAHEAD * 1024 / PAGE_SIZE;
- 
-+	if (fsc->mount_options->rvsize)
-+		fsc->backing_dev_info.io_pages =
-+			(fsc->mount_options->rvsize + PAGE_SIZE - 1)
-+			>> PAGE_SHIFT;
-+	else
-+		fsc->backing_dev_info.io_pages = ULONG_MAX;
-+
- 	err = bdi_register(&fsc->backing_dev_info, NULL, "ceph-%ld",
- 			   atomic_long_inc_return(&bdi_seq));
- 	if (!err)
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 3373b61..676ef6d 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -45,8 +45,9 @@
- #define ceph_test_mount_opt(fsc, opt) \
- 	(!!((fsc)->mount_options->flags & CEPH_MOUNT_OPT_##opt))
- 
--#define CEPH_RSIZE_DEFAULT             0           /* max read size */
--#define CEPH_RASIZE_DEFAULT            (8192*1024) /* readahead */
-+#define CEPH_RSIZE_DEFAULT              0              /* max read size per osd request */
-+#define CEPH_RASIZE_DEFAULT             (8192*1024)    /* max readahead */
-+#define CEPH_RVSIZE_DEFAULT             (64*1024*1024) /* max volume of read requests sent out at once */
- #define CEPH_MAX_READDIR_DEFAULT        1024
- #define CEPH_MAX_READDIR_BYTES_DEFAULT  (512*1024)
- #define CEPH_SNAPDIRNAME_DEFAULT        ".snap"
-@@ -56,8 +57,9 @@ struct ceph_mount_options {
- 	int sb_flags;
- 
- 	int wsize;            /* max write size */
--	int rsize;            /* max read size */
-+	int rsize;            /* max read size per osd request */
- 	int rasize;           /* max readahead */
-+	int rvsize;           /* max volume of read requests sent out at once */
- 	int congestion_kb;    /* max writeback in flight */
- 	int caps_wanted_delay_min, caps_wanted_delay_max;
- 	int cap_release_safety;
+Cheers
+
+On 01/05/2017 12:12 PM, 邵国健 wrote:
+> Hi Loic,
+> 
+> I found that there are global locks for preparing and activating osd in ceph-disk: prepare_lock, activate_lock at https://github.com/ceph/ceph/blob/master/src/ceph-disk/ceph_disk/main.py#L260
+> I can’t find out why we need global lock for all osds since it cannot make activating different osds at the same time in parallel, is it better to use lock for each osd? for example, if we have 10 osds, there are 10 activate_locks.
+> 
+> It would be appreciated if you could give some help at your convenience.
+> —————————
+> Thanks,
+> Guojian
+
 -- 
-1.8.3.1
-
+Loïc Dachary, Artisan Logiciel Libre
