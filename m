@@ -1,29 +1,56 @@
-From: Tiger Hu <hufh2004@gmail.com>
-Subject: default branch of submodule ceph-object-corpus
-Date: Fri, 6 Jan 2017 15:14:20 +0800
-Message-ID: <EE8DC277-BF3A-4D65-AF09-A5604618C9D0@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2104\))
-Content-Type: text/plain; charset=gb2312
-Content-Transfer-Encoding: quoted-printable
+From: kefu chai <tchaikov@gmail.com>
+Subject: turn libcommon into a shared library and package it
+Date: Fri, 6 Jan 2017 19:38:12 +0800
+Message-ID: <CAJE9aONgX-d7ZBBRGh3gDfCAOM6uPjGANoAue993_-Ewbrf0+w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f66.google.com ([74.125.83.66]:36144 "EHLO
-        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756284AbdAFHPt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jan 2017 02:15:49 -0500
-Received: by mail-pg0-f66.google.com with SMTP id 75so4952424pgf.3
-        for <ceph-devel@vger.kernel.org>; Thu, 05 Jan 2017 23:15:46 -0800 (PST)
-Received: from [30.27.114.18] ([205.204.117.29])
-        by smtp.gmail.com with ESMTPSA id q2sm159186542pga.8.2017.01.05.23.14.44
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Thu, 05 Jan 2017 23:15:45 -0800 (PST)
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:36939 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755106AbdAFLiO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jan 2017 06:38:14 -0500
+Received: by mail-wm0-f41.google.com with SMTP id t79so25448394wmt.0
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Jan 2017 03:38:14 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, rdias@suse.com, jlayton@redhat.com
 
-Hi all,
+hi cephers,
 
-I just noticed that the default branch of ceps-object-corpus is not =
-master, but =A1=B0foo=A1=B1. Is that correct? Thanks.
+libcommon is a convenient library and is statically linked into
+librados, librbd and libcephfs. and there are some static variables
+living in libcommon, for instance, the ones defined in lockdep.cc. so,
+we will have multiple copies of these global variables if an
+application is linked against librados and (librbd | libcephfs).  the
+"ceph" cli does link against librados and libcephfs via the their
+python bindings.
 
-Tiger=
+this incurs some problems:
+
+- cross reference each other's global variables: in my testbed, i ran
+into https://github.com/ceph/ceph/pull/12249#issuecomment-264105597.
+where libcephfs was referencing the lockdeps variables in librados
+when relinquishing a lock. when libcephfs tries to acquire this lock
+again, it found that this lock is *already* locked.
+- more memory foot print and disk space: apparently, libcommon is
+included by librados, librbd and libcephfs. so it's a waste to have
+multiple copies of libcommon if librbd and/or libcephfs are loaded
+into memory or installed onto disk.
+
+after turning libcommon into a shared library, these problems are solved.
+
+but yes, unlike librados and its friends, libcommon is not a user
+facing library, so we will not install it right under /usr/lib/.
+instead, it will be living in /usr/lib/ceph.  please note, the erasure
+plugins are installed into /usr/lib/ceph/erasure-code/ and rados
+classes are installed into /usr/lib/rados-classes/. this follows the
+related section of FHS [1].
+
+what do you think?
+
+--
+[1] http://www.pathname.com/fhs/pub/fhs-2.3.html#USRLIBLIBRARIESFORPROGRAMMINGANDPA
+
+-- 
+Regards
+Kefu Chai
