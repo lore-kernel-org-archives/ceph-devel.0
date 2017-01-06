@@ -1,70 +1,68 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: Hammer 0.94.10 release - last call
-Date: Fri, 6 Jan 2017 08:01:54 -0500
-Message-ID: <CAC-Np1yn6i=FDM16rxOX8ZjXVj=u6GatC0u2tg8w9YHRvKZ9dw@mail.gmail.com>
-References: <8c0ffdf7-a8db-5a3d-6e4b-afe31f52319f@suse.cz> <CAC-Np1yQrOBeeWzxAgy4aebXwGOi3d4i2VK7Yscn4O802-7uCA@mail.gmail.com>
- <9b4076a3-3e4a-8cd7-4db5-549d277fc4f8@suse.cz> <CAMMFjmFVYCKv=OgOjibn_tKEzQdpFGV+yhLP11VRzhxjhfNoOg@mail.gmail.com>
- <243fa727-c055-d1a0-6f51-5f5db87ed953@dachary.org>
+From: John Spray <jspray@redhat.com>
+Subject: Re: turn libcommon into a shared library and package it
+Date: Fri, 6 Jan 2017 12:36:35 +0000
+Message-ID: <CALe9h7dJwUGOnKVH+NigM_jijmHJQrwe-LhETEUMkVwV9fpdww@mail.gmail.com>
+References: <CAJE9aONgX-d7ZBBRGh3gDfCAOM6uPjGANoAue993_-Ewbrf0+w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f179.google.com ([209.85.220.179]:36132 "EHLO
-        mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S936907AbdAFNCB (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jan 2017 08:02:01 -0500
-Received: by mail-qk0-f179.google.com with SMTP id n21so463668729qka.3
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Jan 2017 05:01:55 -0800 (PST)
-In-Reply-To: <243fa727-c055-d1a0-6f51-5f5db87ed953@dachary.org>
+Received: from mail-oi0-f46.google.com ([209.85.218.46]:36376 "EHLO
+        mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1161530AbdAFNGq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jan 2017 08:06:46 -0500
+Received: by mail-oi0-f46.google.com with SMTP id u143so22890814oif.3
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Jan 2017 05:06:46 -0800 (PST)
+In-Reply-To: <CAJE9aONgX-d7ZBBRGh3gDfCAOM6uPjGANoAue993_-Ewbrf0+w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Yuri Weinstein <yweinste@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, rdias@suse.com, Jeff Layton <jlayton@redhat.com>
 
-On Thu, Jan 5, 2017 at 7:12 PM, Loic Dachary <loic@dachary.org> wrote:
+On Fri, Jan 6, 2017 at 11:38 AM, kefu chai <tchaikov@gmail.com> wrote:
+> hi cephers,
 >
-> On 01/05/2017 10:47 PM, Yuri Weinstein wrote:
->> May ceph-disk ?
->> Loic FYI
+> libcommon is a convenient library and is statically linked into
+> librados, librbd and libcephfs. and there are some static variables
+> living in libcommon, for instance, the ones defined in lockdep.cc. so,
+> we will have multiple copies of these global variables if an
+> application is linked against librados and (librbd | libcephfs).  the
+> "ceph" cli does link against librados and libcephfs via the their
+> python bindings.
 >
-> What Nathan said, unfortunately. No ceph-disk tests in hammer. And backporting tests would require changes in ceph-disk that are too extensive for a stable branch.
+> this incurs some problems:
 >
->>
->> On Thu, Jan 5, 2017 at 1:36 PM, Nathan Cutler <ncutler@suse.cz> wrote:
->>>> Is it possible to re-do this PR that went into Jewel for Hammer?
->>>>
->>>> http://tracker.ceph.com/issues/17754
->>>
->>>
->>> OK, https://github.com/ceph/ceph/pull/12805
->>>
->>> Any suggestions how to test it? I.e. do you know if there's a teuthology or
->>> ceph-qa-suite task that exercises ceph-create-keys?
+> - cross reference each other's global variables: in my testbed, i ran
+> into https://github.com/ceph/ceph/pull/12249#issuecomment-264105597.
+> where libcephfs was referencing the lockdeps variables in librados
+> when relinquishing a lock. when libcephfs tries to acquire this lock
+> again, it found that this lock is *already* locked.
+> - more memory foot print and disk space: apparently, libcommon is
+> included by librados, librbd and libcephfs. so it's a waste to have
+> multiple copies of libcommon if librbd and/or libcephfs are loaded
+> into memory or installed onto disk.
+>
+> after turning libcommon into a shared library, these problems are solved.
+>
+> but yes, unlike librados and its friends, libcommon is not a user
+> facing library, so we will not install it right under /usr/lib/.
+> instead, it will be living in /usr/lib/ceph.  please note, the erasure
+> plugins are installed into /usr/lib/ceph/erasure-code/ and rados
+> classes are installed into /usr/lib/rados-classes/. this follows the
+> related section of FHS [1].
+>
+> what do you think?
 
-The way to test this would be to create a cluster with monitors that
-can't form a quorum. For example, with 2 monitors or by giving
-bad short hostnames in the configuration. The test would need to
-verify that it doesn't hang forever, it just fails after 10 minutes.
++1
 
->>>
->>>
->>> --
->>> Nathan Cutler
->>> Software Engineer Distributed Storage
->>> SUSE LINUX, s.r.o.
->>> Tel.: +420 284 084 037
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+John
+
 >
 > --
-> Loïc Dachary, Artisan Logiciel Libre
+> [1] http://www.pathname.com/fhs/pub/fhs-2.3.html#USRLIBLIBRARIESFORPROGRAMMINGANDPA
+>
+> --
+> Regards
+> Kefu Chai
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
