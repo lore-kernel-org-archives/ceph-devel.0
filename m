@@ -1,77 +1,30 @@
-From: Brett Niver <bniver@redhat.com>
-Subject: Re: turn libcommon into a shared library and package it
-Date: Fri, 6 Jan 2017 08:40:01 -0500
-Message-ID: <CAMdDSN04=Bkum2WntmKTUHdFYrmfsdsyqnVTbmxkg_+SM-pwKw@mail.gmail.com>
-References: <CAJE9aONgX-d7ZBBRGh3gDfCAOM6uPjGANoAue993_-Ewbrf0+w@mail.gmail.com>
- <CALe9h7dJwUGOnKVH+NigM_jijmHJQrwe-LhETEUMkVwV9fpdww@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Safe maximum number of RADOS namespaces
+Date: Fri, 6 Jan 2017 14:44:03 +0100 (CET)
+Message-ID: <592054113.6138.1483710244101@ox.pcextreme.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f52.google.com ([209.85.218.52]:34292 "EHLO
-        mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S936989AbdAFNkD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jan 2017 08:40:03 -0500
-Received: by mail-oi0-f52.google.com with SMTP id 3so432342785oih.1
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Jan 2017 05:40:02 -0800 (PST)
-In-Reply-To: <CALe9h7dJwUGOnKVH+NigM_jijmHJQrwe-LhETEUMkVwV9fpdww@mail.gmail.com>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:55422 "EHLO
+        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753633AbdAFNpS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jan 2017 08:45:18 -0500
+Received: from 109.72.87.221 (ox01.pcextreme.nl [109.72.87.221])
+        by smtp02.mail.pcextreme.nl (Postfix) with ESMTPSA id 730B83FC8D
+        for <ceph-devel@vger.kernel.org>; Fri,  6 Jan 2017 14:44:04 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Ricardo Dias <rdias@suse.com>, Jeff Layton <jlayton@redhat.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-+1
+Hi,
 
-On Fri, Jan 6, 2017 at 7:36 AM, John Spray <jspray@redhat.com> wrote:
-> On Fri, Jan 6, 2017 at 11:38 AM, kefu chai <tchaikov@gmail.com> wrote:
->> hi cephers,
->>
->> libcommon is a convenient library and is statically linked into
->> librados, librbd and libcephfs. and there are some static variables
->> living in libcommon, for instance, the ones defined in lockdep.cc. so,
->> we will have multiple copies of these global variables if an
->> application is linked against librados and (librbd | libcephfs).  the
->> "ceph" cli does link against librados and libcephfs via the their
->> python bindings.
->>
->> this incurs some problems:
->>
->> - cross reference each other's global variables: in my testbed, i ran
->> into https://github.com/ceph/ceph/pull/12249#issuecomment-264105597.
->> where libcephfs was referencing the lockdeps variables in librados
->> when relinquishing a lock. when libcephfs tries to acquire this lock
->> again, it found that this lock is *already* locked.
->> - more memory foot print and disk space: apparently, libcommon is
->> included by librados, librbd and libcephfs. so it's a waste to have
->> multiple copies of libcommon if librbd and/or libcephfs are loaded
->> into memory or installed onto disk.
->>
->> after turning libcommon into a shared library, these problems are solved.
->>
->> but yes, unlike librados and its friends, libcommon is not a user
->> facing library, so we will not install it right under /usr/lib/.
->> instead, it will be living in /usr/lib/ceph.  please note, the erasure
->> plugins are installed into /usr/lib/ceph/erasure-code/ and rados
->> classes are installed into /usr/lib/rados-classes/. this follows the
->> related section of FHS [1].
->>
->> what do you think?
->
-> +1
->
-> John
->
->>
->> --
->> [1] http://www.pathname.com/fhs/pub/fhs-2.3.html#USRLIBLIBRARIESFORPROGRAMMINGANDPA
->>
->> --
->> Regards
->> Kefu Chai
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Together with a customer we are looking in to writing a application which will store a few PB of data using raw RADOS (librados C) and we are looking into using the RADOS namespaces to separate data.
+
+For each 'section' we want to use a namespace in RADOS, but that would mean we would start off with 30M namespaces and this number might grow to 50M within a few years.
+
+Is the a limitation for RADOS/FileStore/BlueStore for the amount of namespaces it can handle? (In a single pool?)
+
+I want to test this, but writing a minimal of 30M objects takes a bit of time, so I figured I'd ask first.
+
+Wido
