@@ -1,104 +1,68 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: [DEBUG PATCH 2/2] silent warnings which we cannot do anything about
-Date: Fri,  6 Jan 2017 15:18:45 +0100
-Message-ID: <20170106141845.24362-3-mhocko@kernel.org>
-References: <20170106141107.23953-1-mhocko@kernel.org>
- <20170106141845.24362-1-mhocko@kernel.org>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170106141845.24362-1-mhocko@kernel.org>
-Sender: owner-linux-mm@kvack.org
-To: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org
-Cc: Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+From: liuchang0812 <liuchang0812@gmail.com>
+Subject: Re: Question about RGW lifecycle support status
+Date: Fri, 6 Jan 2017 22:57:18 +0800
+Message-ID: <CACKY0b9qDPSSnQtGfSGqKkQDT2we2FT3t82OPDOLchrPmgwy+g@mail.gmail.com>
+References: <CACKY0b85oVx8TD8LBMO=fGw+thqjPM0N4-Wmbuv_1-reQMSrCQ@mail.gmail.com>
+ <783842436.86535799.1483712037196.JavaMail.zimbra@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yw0-f181.google.com ([209.85.161.181]:34987 "EHLO
+        mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751449AbdAFO6H (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jan 2017 09:58:07 -0500
+Received: by mail-yw0-f181.google.com with SMTP id v81so269424663ywb.2
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Jan 2017 06:57:19 -0800 (PST)
+In-Reply-To: <783842436.86535799.1483712037196.JavaMail.zimbra@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-From: Michal Hocko <mhocko@suse.com>
+thank you very much!
+ I will take a look and update document.
 
-THIS PATCH IS FOR TESTING ONLY AND NOT MEANT TO HIT LINUS TREE
-
-There are some code paths used by all the filesystems which we cannot
-change to drop the GFP_NOFS, yet they generate a lot of warnings.
-Provide {disable,enable}_scope_gfp_check to silence those.
-alloc_page_buffers and grow_dev_page are silenced right away.
-
-Signed-off-by: Michal Hocko <mhocko@suse.com>
----
- fs/buffer.c           |  4 ++++
- include/linux/sched.h | 11 +++++++++++
- mm/page_alloc.c       |  3 +++
- 3 files changed, 18 insertions(+)
-
-diff --git a/fs/buffer.c b/fs/buffer.c
-index 28484b3ebc98..dbe529e7881b 100644
---- a/fs/buffer.c
-+++ b/fs/buffer.c
-@@ -873,7 +873,9 @@ struct buffer_head *alloc_page_buffers(struct page *page, unsigned long size,
- 	head = NULL;
- 	offset = PAGE_SIZE;
- 	while ((offset -= size) >= 0) {
-+		disable_scope_gfp_check();
- 		bh = alloc_buffer_head(GFP_NOFS);
-+		enable_scope_gfp_check();
- 		if (!bh)
- 			goto no_grow;
- 
-@@ -1003,7 +1005,9 @@ grow_dev_page(struct block_device *bdev, sector_t block,
- 	 */
- 	gfp_mask |= __GFP_NOFAIL;
- 
-+	disable_scope_gfp_check();
- 	page = find_or_create_page(inode->i_mapping, index, gfp_mask);
-+	enable_scope_gfp_check();
- 	if (!page)
- 		return ret;
- 
-diff --git a/include/linux/sched.h b/include/linux/sched.h
-index 59428926e989..f60294732ed5 100644
---- a/include/linux/sched.h
-+++ b/include/linux/sched.h
-@@ -1988,6 +1988,7 @@ struct task_struct {
- 	/* A live task holds one reference. */
- 	atomic_t stack_refcount;
- #endif
-+	bool disable_scope_gfp_warn;
- 	unsigned long nofs_caller;
- 	unsigned long noio_caller;
- /* CPU-specific state of this task */
-@@ -2390,6 +2391,16 @@ static inline unsigned int __memalloc_nofs_save(unsigned long caller)
- 	return flags;
- }
- 
-+static inline void disable_scope_gfp_check(void)
-+{
-+	current->disable_scope_gfp_warn = true;
-+}
-+
-+static inline void enable_scope_gfp_check(void)
-+{
-+	current->disable_scope_gfp_warn = false;
-+}
-+
- #define memalloc_nofs_save()	__memalloc_nofs_save(_RET_IP_)
- 
- static inline void memalloc_nofs_restore(unsigned int flags)
-diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-index 87a2bb5262b2..5405278bd733 100644
---- a/mm/page_alloc.c
-+++ b/mm/page_alloc.c
-@@ -3762,6 +3762,9 @@ void debug_scope_gfp_context(gfp_t gfp_mask)
- 	if (!(gfp_mask & __GFP_DIRECT_RECLAIM))
- 		return;
- 
-+	if (current->disable_scope_gfp_warn)
-+		return;
-+
- 	if (current->flags & PF_MEMALLOC_NOIO)
- 		restrict_mask = __GFP_IO;
- 	else if ((current->flags & PF_MEMALLOC_NOFS) && (gfp_mask & __GFP_IO))
--- 
-2.11.0
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+2017-01-06 22:13 GMT+08:00 Matt Benjamin <mbenjamin@redhat.com>:
+> Hi,
+>
+> Yes, you're correct, S3 object expiration support was added along with te=
+sts to verify those lifecycle actions (abe4b1378cc0e23e0da9c76c034c6d592b81=
+b105, Ji Chen).  There's some information in the commit message and test fr=
+amework in the worst case, but documentation should be brought up-to-date.
+>
+> Regards,
+>
+> Matt
+>
+> ----- Original Message -----
+>> From: "liuchang0812" <liuchang0812@gmail.com>
+>> To: "ceph-devel" <ceph-devel@vger.kernel.org>
+>> Sent: Friday, January 6, 2017 8:17:28 AM
+>> Subject: Question about RGW lifecycle support status
+>>
+>> Hi, all
+>>
+>> Our document says that "Bucket Lifecycle Not Supported" in
+>> http://docs.ceph.com/docs/master/radosgw/s3/ . But it seems that there
+>> are a lot of code about lc in RGW. I want to confirm whether RGW
+>> supported LC.
+>>
+>> Any comments appreciated. Thanks
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+> --
+> Matt Benjamin
+> Red Hat, Inc.
+> 315 West Huron Street, Suite 140A
+> Ann Arbor, Michigan 48103
+>
+> http://www.redhat.com/en/technologies/storage
+>
+> tel.  734-821-5101
+> fax.  734-769-8938
+> cel.  734-216-5309
