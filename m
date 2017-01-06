@@ -1,208 +1,43 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH] ceph/iov_iter: fix bad iov_iter handling in ceph splice codepaths
-Date: Fri,  6 Jan 2017 13:23:36 -0500
-Message-ID: <1483727016-343-1-git-send-email-jlayton@redhat.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: Hammer 0.94.10 release - last call
+Date: Fri, 6 Jan 2017 14:56:03 -0500
+Message-ID: <CAC-Np1yHUzoMCh72g6i1Ak75OPM-n=NgyE=-8HBCEvJYQAcG8Q@mail.gmail.com>
+References: <8c0ffdf7-a8db-5a3d-6e4b-afe31f52319f@suse.cz> <CAC-Np1yQrOBeeWzxAgy4aebXwGOi3d4i2VK7Yscn4O802-7uCA@mail.gmail.com>
+ <9b4076a3-3e4a-8cd7-4db5-549d277fc4f8@suse.cz> <CAMMFjmFVYCKv=OgOjibn_tKEzQdpFGV+yhLP11VRzhxjhfNoOg@mail.gmail.com>
+ <243fa727-c055-d1a0-6f51-5f5db87ed953@dachary.org> <CAC-Np1yn6i=FDM16rxOX8ZjXVj=u6GatC0u2tg8w9YHRvKZ9dw@mail.gmail.com>
+ <ecd937e4-98df-b42e-8a57-5c8bb963fd54@suse.cz>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49368 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752244AbdAFSXj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 6 Jan 2017 13:23:39 -0500
+Received: from mail-qt0-f181.google.com ([209.85.216.181]:34876 "EHLO
+        mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S937934AbdAFT5V (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Jan 2017 14:57:21 -0500
+Received: by mail-qt0-f181.google.com with SMTP id x49so22256713qtc.2
+        for <ceph-devel@vger.kernel.org>; Fri, 06 Jan 2017 11:56:04 -0800 (PST)
+In-Reply-To: <ecd937e4-98df-b42e-8a57-5c8bb963fd54@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Al Viro <viro@ZenIV.linux.org.uk>, "Yan, Zheng" <zyan@redhat.com>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, "Zhu, Caifeng" <zhucaifeng@unissoft-nj.com>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Loic Dachary <loic@dachary.org>, Yuri Weinstein <yweinste@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-xfstest generic/095 triggers soft lockups in kcephfs. Basically it uses
-fio to drive some I/O via vmsplice ane splice. Ceph then ends trying to
-access an ITER_BVEC type iov_iter as a ITER_IOVEC one. That causes it to
-pick up a wrong offset and get stuck in an infinite loop while trying to
-populate the page array.
+On Fri, Jan 6, 2017 at 9:13 AM, Nathan Cutler <ncutler@suse.cz> wrote:
+>> The way to test this would be to create a cluster with monitors that
+>> can't form a quorum. For example, with 2 monitors or by giving
+>> bad short hostnames in the configuration. The test would need to
+>> verify that it doesn't hang forever, it just fails after 10 minutes.
+>
+>
+> Can you help with that?
 
-To fix this, add a new iov_iter helper for to determine the offset into
-the page for the current segment and have ceph call that.
+There isn't a test case for Jewel either. I don't think the lack of a
+task should prevent this from getting backported to hammer.
 
-dio_get_pagev_size has similar problems, so fix that as well by adding a
-new helper function in lib/iov_iter.c that does what it does, but for
-all iov_iter types.
-
-Since we're moving that into generic code, we can also utilize the
-iterate_all_kinds macro to handle this. That means that we need to
-rework the logic a bit since we can't advance to the next vector while
-checking the current one.
-
-Link: http://tracker.ceph.com/issues/18130
-Cc: "Zhu, Caifeng" <zhucaifeng@unissoft-nj.com>
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
----
- fs/ceph/file.c      | 28 ++------------------
- include/linux/uio.h |  2 ++
- lib/iov_iter.c      | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 77 insertions(+), 26 deletions(-)
-
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index f633165f3fdc..0cd9fc68a04e 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -35,29 +35,6 @@
-  */
- 
- /*
-- * Calculate the length sum of direct io vectors that can
-- * be combined into one page vector.
-- */
--static size_t dio_get_pagev_size(const struct iov_iter *it)
--{
--    const struct iovec *iov = it->iov;
--    const struct iovec *iovend = iov + it->nr_segs;
--    size_t size;
--
--    size = iov->iov_len - it->iov_offset;
--    /*
--     * An iov can be page vectored when both the current tail
--     * and the next base are page aligned.
--     */
--    while (PAGE_ALIGNED((iov->iov_base + iov->iov_len)) &&
--           (++iov < iovend && PAGE_ALIGNED((iov->iov_base)))) {
--        size += iov->iov_len;
--    }
--    dout("dio_get_pagevlen len = %zu\n", size);
--    return size;
--}
--
--/*
-  * Allocate a page vector based on (@it, @nbytes).
-  * The return value is the tuple describing a page vector,
-  * that is (@pages, @page_align, @num_pages).
-@@ -71,8 +48,7 @@ dio_get_pages_alloc(const struct iov_iter *it, size_t nbytes,
- 	struct page **pages;
- 	int ret = 0, idx, npages;
- 
--	align = (unsigned long)(it->iov->iov_base + it->iov_offset) &
--		(PAGE_SIZE - 1);
-+	align = iov_iter_single_seg_page_offset(it);
- 	npages = calc_pages_for(align, nbytes);
- 	pages = kmalloc(sizeof(*pages) * npages, GFP_KERNEL);
- 	if (!pages) {
-@@ -927,7 +903,7 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
- 	}
- 
- 	while (iov_iter_count(iter) > 0) {
--		u64 size = dio_get_pagev_size(iter);
-+		u64 size = iov_iter_pvec_size(iter);
- 		size_t start = 0;
- 		ssize_t len;
- 
-diff --git a/include/linux/uio.h b/include/linux/uio.h
-index 6e22b544d039..46fdfff3d7d6 100644
---- a/include/linux/uio.h
-+++ b/include/linux/uio.h
-@@ -83,6 +83,7 @@ size_t iov_iter_copy_from_user_atomic(struct page *page,
- void iov_iter_advance(struct iov_iter *i, size_t bytes);
- int iov_iter_fault_in_readable(struct iov_iter *i, size_t bytes);
- size_t iov_iter_single_seg_count(const struct iov_iter *i);
-+size_t iov_iter_single_seg_page_offset(const struct iov_iter *i);
- size_t copy_page_to_iter(struct page *page, size_t offset, size_t bytes,
- 			 struct iov_iter *i);
- size_t copy_page_from_iter(struct page *page, size_t offset, size_t bytes,
-@@ -93,6 +94,7 @@ size_t copy_from_iter_nocache(void *addr, size_t bytes, struct iov_iter *i);
- size_t iov_iter_zero(size_t bytes, struct iov_iter *);
- unsigned long iov_iter_alignment(const struct iov_iter *i);
- unsigned long iov_iter_gap_alignment(const struct iov_iter *i);
-+size_t iov_iter_pvec_size(const struct iov_iter *i);
- void iov_iter_init(struct iov_iter *i, int direction, const struct iovec *iov,
- 			unsigned long nr_segs, size_t count);
- void iov_iter_kvec(struct iov_iter *i, int direction, const struct kvec *kvec,
-diff --git a/lib/iov_iter.c b/lib/iov_iter.c
-index 6b415b5a100d..d22850bbb1e9 100644
---- a/lib/iov_iter.c
-+++ b/lib/iov_iter.c
-@@ -745,6 +745,24 @@ size_t iov_iter_single_seg_count(const struct iov_iter *i)
- }
- EXPORT_SYMBOL(iov_iter_single_seg_count);
- 
-+/* Return offset into page for current iov_iter segment */
-+size_t iov_iter_single_seg_page_offset(const struct iov_iter *i)
-+{
-+	size_t	base;
-+
-+	if (i->type & ITER_PIPE)
-+		base = i->pipe->bufs[i->idx].offset;
-+	else if (i->type & ITER_BVEC)
-+		base = i->bvec->bv_offset;
-+	else if (i->type & ITER_KVEC)
-+		base = (size_t)i->kvec->iov_base;
-+	else
-+		base = (size_t)i->iov->iov_base;
-+
-+	return (base + i->iov_offset) & (PAGE_SIZE - 1);
-+}
-+EXPORT_SYMBOL(iov_iter_single_seg_page_offset);
-+
- void iov_iter_kvec(struct iov_iter *i, int direction,
- 			const struct kvec *kvec, unsigned long nr_segs,
- 			size_t count)
-@@ -830,6 +848,61 @@ unsigned long iov_iter_gap_alignment(const struct iov_iter *i)
- }
- EXPORT_SYMBOL(iov_iter_gap_alignment);
- 
-+/**
-+ * iov_iter_pvec_size - find length of page aligned iovecs in iov_iter
-+ * @i: iov_iter to in which to find the size
-+ *
-+ * Some filesystems can stitch together multiple iovecs into a single
-+ * page vector when both the previous tail and current base are page
-+ * aligned. This function discovers the length that can fit in a single
-+ * pagevec and returns it.
-+ */
-+size_t iov_iter_pvec_size(const struct iov_iter *i)
-+{
-+	size_t size = i->count;
-+	size_t pv_size = 0;
-+	bool contig = false, first = true;
-+
-+	if (!size)
-+		return 0;
-+
-+	/* Pipes are naturally aligned for this */
-+	if (unlikely(i->type & ITER_PIPE))
-+		return size;
-+
-+	/*
-+	 * An iov can be page vectored when the current base and previous
-+	 * tail are both page aligned. Note that we don't require that the
-+	 * initial base in the first iovec also be page aligned.
-+	 */
-+	iterate_all_kinds(i, size, v,
-+		({
-+		 if (first || (contig && PAGE_ALIGNED(v.iov_base))) {
-+			pv_size += v.iov_len;
-+			first = false;
-+			contig = PAGE_ALIGNED(v.iov_base + v.iov_len);
-+		 }; 0;
-+		 }),
-+		({
-+		 if (first || (contig && v.bv_offset == 0)) {
-+			pv_size += v.bv_len;
-+			first = false;
-+			contig = PAGE_ALIGNED(v.bv_offset + v.bv_len);
-+		 }
-+		 }),
-+		({
-+		 if (first || (contig && PAGE_ALIGNED(v.iov_base))) {
-+			pv_size += v.iov_len;
-+			first = false;
-+			contig = PAGE_ALIGNED(v.iov_base + v.iov_len);
-+		 }
-+		 }))
-+
-+	pv_size -= i->iov_offset;
-+	return pv_size;
-+}
-+EXPORT_SYMBOL(iov_iter_pvec_size);
-+
- static inline size_t __pipe_get_pages(struct iov_iter *i,
- 				size_t maxsize,
- 				struct page **pages,
--- 
-2.7.4
-
+Not sure how to create one,  but could help provide any details for it
+>
+>
+> --
+> Nathan Cutler
+> Software Engineer Distributed Storage
+> SUSE LINUX, s.r.o.
+> Tel.: +420 284 084 037
