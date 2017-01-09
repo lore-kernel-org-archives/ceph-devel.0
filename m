@@ -1,75 +1,49 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Safe maximum number of RADOS namespaces
-Date: Mon, 9 Jan 2017 17:10:03 +0100 (CET)
-Message-ID: <1574188543.6346.1483978203643@ox.pcextreme.nl>
-References: <592054113.6138.1483710244101@ox.pcextreme.nl>
- <CALe9h7dgsbZiwww87DUtDUsy29LHNbwGxxNGygRhsQyz97U6dg@mail.gmail.com>
- <308159841.6179.1483720942271@ox.pcextreme.nl>
- <CAN=+7FWbLpgDhoxH1QHgPBpMuDAUL2gg3QOhWGAE_9cKt=yBBA@mail.gmail.com>
- <CA+z5DsxYf7DGZTw2QCRMztQ13zFX5NZd3Kj62xFxmwhznosNmg@mail.gmail.com>
- <1927481418.6225.1483952382193@ox.pcextreme.nl>
- <CAN=+7FU7PfEiCRWr_wRJYSk1R=CJvGuUSy2xtvZ=oAXVoUvh9A@mail.gmail.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: RADOS Object class capabilities
+Date: Mon, 9 Jan 2017 17:48:27 +0000
+Message-ID: <8119E63B-CEDA-4FA7-BFA6-38090987DCF7@Teradata.com>
+References: <26283_1480676624_58415510_26283_122_1_EBBC07637B509B40B2E594A11E62C54F022DA808@OPEXCLILM32.corporate.adroot.infra.ftgroup>
+ <d8129d7a-af37-ad74-38c8-f5a9d59f183b@suse.de>
+ <CAF-wwdHPXaX3fe+dk9ovdAfc00N5xQrzj2TaRAuBOjH77L4yDg@mail.gmail.com>
+ <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com>
+ <CAB2gnbVn0U_G12L8XV=hbznB2i_TMo40TpC5cVzJZKOr_MAQ7Q@mail.gmail.com>
+ <64D605E0-8851-4F60-B0AB-864CBDA7B3F7@Teradata.com>
+ <208C08FF-0104-425C-B7AA-B0930A76F46E@Teradata.com>
+ <CAB2gnbUEeS6AynJ0AjdpJ+MbiGSq_HUkBS-KdnXrke1wiJYsyA@mail.gmail.com>
+ <E41C6528-D51D-4165-87D5-0DBBDF6B9F5F@Teradata.com>
+ <515514A8-CE49-48FD-8939-74BE82F30FDE@Teradata.com>
+ <1004503707.6221.1483952298347@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:49179 "EHLO
-        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753713AbdAIQKK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jan 2017 11:10:10 -0500
-In-Reply-To: <CAN=+7FU7PfEiCRWr_wRJYSk1R=CJvGuUSy2xtvZ=oAXVoUvh9A@mail.gmail.com>
+Received: from nat13.teradata.com ([153.65.16.13]:33889 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S967491AbdAIRs3 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jan 2017 12:48:29 -0500
+In-Reply-To: <1004503707.6221.1483952298347@ox.pcextreme.nl>
+Content-Language: en-US
+Content-ID: <C8245F01FF3E3C4EA63190F5FC206440@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Blair Bethwaite <blair.bethwaite@gmail.com>
+To: Wido den Hollander <wido@42on.com>
+Cc: Noah Watkins <noahwatkins@gmail.com>, Joao Eduardo Luis <joao@suse.de>, "nebil.benmabrouk@orange.com" <nebil.benmabrouk@orange.com>, Brad Hubbard <bhubbard@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-
-> Op 9 januari 2017 om 17:00 schreef Samuel Just <sjust@redhat.com>:
-> 
-> 
-> 30M namespaces is not a problem since they are pretty much just object
-> name prefixes.  30M different cephx users probably would be a problem.
-
-Yes, figured so. Not going that route now. Will use namespaces to separate data from our application's users in RADOS to make it all future proof.
-
-Don't want to play with object name prefixes if RADOS already provides this.
-
-Hint: https://github.com/42on/librmb
-
-Wido
-
-> -Sam
-> 
-> On Mon, Jan 9, 2017 at 12:59 AM, Wido den Hollander <wido@42on.com> wrote:
-> >
-> >> Op 7 januari 2017 om 2:03 schreef Blair Bethwaite <blair.bethwaite@gmail.com>:
-> >>
-> >>
-> >> On 7 January 2017 at 04:04, Samuel Just <sjust@redhat.com> wrote:
-> >> > Namespaces are pretty much just a prefix, nothing tracks them.  Are
-> >> > you using them simply to avoid name conflicts?
-> >
-> > Yes, but also to be able to list objects (I know, slow!) per 'user'.
-> >
-> >>
-> >> I assumed for some sort of data and/or security segregation using
-> >> cephx? 30M pools is not exactly feasible...
-> >>
-> >
-> > Eventually yes. We have 30M users in this system now and using namespaces seems like a clean way to separate their data inside RADOS.
-> >
-> > Might use different cephx users in the future if we want to.
-> >
-> > Wido
-> >
-> >> --
-> >> Cheers,
-> >> ~Blairo
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQo+IE9uIEphbiA5LCAyMDE3LCBhdCAxMjo1OCBBTSwgV2lkbyBkZW4gSG9sbGFuZGVyIDx3aWRv
+QDQyb24uY29tPiB3cm90ZToNCj4gDQo+IA0KPj4gT3AgOSBqYW51YXJpIDIwMTcgb20gMzo1MiBz
+Y2hyZWVmICJLYW1ibGUsIE5pdGluIEEiIDxOaXRpbi5LYW1ibGVAVGVyYWRhdGEuY29tPjoNCj4+
+IA0KPj4gDQo+PiBTbyBmYXIgSSBhbSBpbXByZXNzZWQgdG8gZmluZCBvdXQgd2hhdCB0aGUgUkFE
+T1Mgb2JqZWN0IGNsYXNzIGNhbiBkby4NCj4+IElzIGl0IHBvc3NpYmxlIHRvIG92ZXJyaWRlIG9u
+ZSBvZiB0aGUgUkFET1MgYmFzaWMgZnVuY3Rpb25zIG9yIGl04oCZcyBiZWhhdmlvciBzdWNoIGFz
+IG9iamVjdCANCj4+IHJlYWQvd3JpdGUgZm9yIGFsbC9vdGhlciBjbGllbnRzLCBieSBpbXBsZW1l
+bnRpbmcgYSBSQURPUyBvYmplY3QgY2xhc3M/DQo+PiANCj4gDQo+IEFmYWlrIG5vdC4gVXNpbmcg
+cmFkb3NfZXhlYygpIHlvdSBjYW4gZXhlY3V0ZSBmdW5jdGlvbnMgZnJvbSB0aGUgb2JqZWN0IGNs
+YXNzLCBidXQgYSBvYmplY3QgY2xhc3MgZG9uJ3Qgb3ZlcnJpZGUgZXhpc3RpbmcgUkFET1MgZnVu
+Y3Rpb25hbGl0eS4NCj4gDQo+IFdpZG8NCg0KVGhhbmtzIGZvciB0aGUgcHJlY2lzZSBhbnN3ZXIu
+DQoNClJlZ2FyZHMsDQpOaXRpbg0KDQo+IA0KPj4gSXQgd2lsbCBiZSBxdWlldCBwb3dlcmZ1bCBh
+bmQgZGFuZ2Vyb3VzIGlmIGlzIHN1cHBvcnRlZC4NCj4+IA0KPj4gVGhhbmtzICYgUmVnYXJkcywN
+Cj4+IE5pdGluDQo+PiANCj4+IE7vv73vv73vv73vv73vv71y77+977+9ee+/ve+/ve+/vWLvv71Y
+77+977+9x6d277+9Xu+/vSneunsubu+/vSvvv73vv73vv71677+9XXrvv73vv73vv717YXnvv70d
+yofame+/vSxqB++/ve+/vWbvv73vv73vv71o77+977+977+9eu+/vR7vv71377+977+977+9DO+/
+ve+/ve+/vWo6K3bvv73vv73vv71377+9au+/vW3vv73vv73vv73vv70H77+977+977+977+9elor
+77+977+93aJqIu+/ve+/vSHvv71pDQoNCg==
