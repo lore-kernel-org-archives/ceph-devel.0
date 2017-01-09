@@ -1,77 +1,74 @@
-From: Samuel Just <sjust@redhat.com>
-Subject: Re: PG stuck unclean after rebalance-by-weight
-Date: Mon, 9 Jan 2017 07:59:16 -0800
-Message-ID: <CAN=+7FUfLXG2Q-9UySzRn3i+iVeBsG7Vjn6-K-VbM5tF-HPaWA@mail.gmail.com>
-References: <F6CE90086791D84F8329539EF4C81484E0241E59@GRPCPHMBX11.ramboll-group.global.network>
- <CAN=+7FX2c=SGkX2dyD78BLWYsezCTdfLX_mwiSCUtqKjtVpZdw@mail.gmail.com> <F6CE90086791D84F8329539EF4C81484E0248705@GRPCPHMBX11.ramboll-group.global.network>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+From: ceph branch robot <nobody@ceph.com>
+Subject: ceph branch status
+Date: Mon,  9 Jan 2017 08:00:04 -0800 (PST)
+Message-ID: <20170109160004.F274C28037A@teuthology.front.sepia.ceph.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f170.google.com ([209.85.220.170]:36482 "EHLO
-        mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935145AbdAIP7S (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jan 2017 10:59:18 -0500
-Received: by mail-qk0-f170.google.com with SMTP id 11so46308107qkl.3
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Jan 2017 07:59:18 -0800 (PST)
-In-Reply-To: <F6CE90086791D84F8329539EF4C81484E0248705@GRPCPHMBX11.ramboll-group.global.network>
+Received: from [8.43.84.3] ([8.43.84.3]:49481 "EHLO
+        teuthology.front.sepia.ceph.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S935246AbdAIQAF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jan 2017 11:00:05 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jens Dueholm Christensen <JEDC@ramboll.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Yep, we'd love a PR with some updates to the docs about how to avoid
-this scenario.  You are correct about why crush needs a lot of retries
-with that crushmap to output 3 replicas for all pgs.  You need
-min_size to avoid a case where you accepted a write on 1 osd, but then
-lost that 1 osd.
--Sam
+-- All Branches --
 
-On Mon, Jan 9, 2017 at 5:09 AM, Jens Dueholm Christensen
-<JEDC@ramboll.com> wrote:
-> Hi Samuel
->
-> The lack of reply and some off-list conversations had me test a few things over the weekend:
->
-> 1) Playing around with different crushmap settings with no success - every test didn't produce any bad mappings or had to retry a placement more than 50 times (I remember I saw up to 23-25 attempts)
-> 2) Lowering the OSD weight further made more PGs become stuck unclean
-> 3) Lowering the weight to 0 and/or out'ing osd.1 moved the acting OSD id to another OSD, but the PG was still stuck unclean
-> 4) Raising the OSD weight up in small increments (0.05) eventually made the PG clean+active
-> 5) Lowering another OSD's OSD weight made other PGs become stuck unclean, while raising the weight again made the PGs recover.
->
-> .. and then it dawned (and I hope I'm right..):
->
-> Since the CRUSH weight of nodes ceph4 and ceph5 is relative high compared to nodes ceph1-3, a lower OSD weight for OSDs on nodes ceph1-3 will eventually cause problems for CRUSH since I have "type host" and not "type osd" in my ruleset chooseleaf - my cluster is simply not evenly dimensioned for a "proper" reweight to be successful.
->
-> This unbalance and a lower and lower OSD weight makes it harder and harder for CRUSH to place a PG onto the 6 OSDs (osd.0-5 on nodes ceph1-3) up to a point where CRUSH had tried "choose_total_tries" times and then gives up.
->
-> This made me raise the OSD weight to 0.7 for the 6 OSDs, which in turn left 1 PG stuck unclean.
-> Then by raising choose_total_tries to 100 (I did not test 75) the PG became active+clean.
->
-> .. and that's where I am now.
->
-> I assume that I really ought to correct the imbalance in the hardware before changing the weight of any OSD again, and I take this experience as a leasson learned.
->
-> Perhaps a small writeup in the docs about not trying to correct an imbalanced cluster by reweighing is in order and as something to be avoided?
->
->
-> BTW, why should I change min_size to 2?
-> I know that default copies should never be lower than 3 to avoid some possible nasty errors, but as I understand the documentation (It's even written in the first box in the top of http://docs.ceph.com/docs/master/rados/configuration/pool-pg-config-ref/), setting it to 1 only allow writes in a severly degraded state to be accepted - ie. if only 1 node is available.
->
-> Regards,
-> Jens Dueholm Christensen
-> Rambøll Survey IT
->
-> On Friday, January 06, 2017 4:54 PM, Samuel Just <sjust@redhat.com> wrote:
->
->> You should not have min_size set to 1, set it to 2 (not related to
->> your problem, but important).
->
->> http://docs.ceph.com/docs/master/rados/operations/crush-map/ has a
->> summary of the crush map tunables.
->
->> You might try kicking tunable choose_total_tries 50 to 75.  You should
->> use osdmaptool on an osdmap grabbed from your cluster to experiment
->> with new crushmap settings without actually injecting the new
->> crushmap.
->
+Ali Maredia <amaredia@redhat.com>
+	2016-12-16 13:23:09 -0500   wip-rgw-multisite-teuthology
+
+Dan Lambright <dlambrig@redhat.com>
+	2017-01-09 10:24:25 -0500   wip-message-factory
+
+GitHub <noreply@github.com>
+	2016-11-02 08:42:35 +0200   infernalis
+	2016-12-08 11:22:16 -0800   jewel-next
+	2016-12-14 11:40:17 -0600   firefly
+	2017-01-04 00:16:47 +0100   wip-ansible-suit
+	2017-01-04 00:16:47 +0100   wip-ansible-suite
+	2017-01-08 09:26:03 +0200   hammer
+	2017-01-08 20:39:03 -0500   kraken
+
+Loic Dachary <ldachary@redhat.com>
+	2015-03-23 17:44:12 +0100   dumpling
+	2016-12-22 00:18:11 +0100   jewel
+
+Loic Dachary <loic@dachary.org>
+	2015-10-17 00:38:34 +0200   giant
+
+Marcus Watts <mwatts@redhat.com>
+	2016-10-19 05:05:50 -0400   wip-master-rgw-0lenfix1
+	2016-11-11 01:22:10 -0500   wip-xml-string-wrap
+	2016-11-11 01:25:55 -0500   wip-json-smarter-escapes
+	2016-11-11 01:29:56 -0500   wip-buildfix-python-out-of-tree
+	2016-12-20 00:37:05 -0500   wip-rgw-openssl-7
+
+Orit Wasserman <owasserm@redhat.com>
+	2017-01-02 12:13:26 +0200   wip-orit-resharding-hammer
+
+Pritha Srivastava <prsrivas@redhat.com>
+	2016-12-22 20:28:09 +0530   wip-rgw-polymorphic-errors
+	2017-01-09 12:22:21 +0530   wip-rgw-ssl-teuthology
+
+Sage Weil <sage@inktank.com>
+	2013-04-18 13:51:36 -0700   argonaut
+
+Sage Weil <sage@redhat.com>
+	2015-01-12 08:30:40 -0800   emperor
+
+Vasu Kulkarni <vasu@redhat.com>
+	2017-01-04 13:38:26 -0800   wip-centos-ver
+	2017-01-05 14:37:02 -0800   wip-ceph-deploy-workaround
+
+Wido den Hollander <wido@42on.com>
+	2017-01-03 15:36:28 +0100   osd-mark-inactive
+
+Yehuda Sadeh <yehuda@inktank.com>
+	2014-01-28 09:38:19 -0800   bobtail
+	2014-01-28 09:40:18 -0800   cuttlefish
+
+Yehuda Sadeh <yehuda@redhat.com>
+	2016-10-03 16:51:40 -0700   dnm-dang-reshard
+
+
+
+Grouped by committer, ordered by commit time stamp.
