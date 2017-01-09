@@ -1,122 +1,77 @@
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH 4/8] xfs: use memalloc_nofs_{save,restore} instead of
- memalloc_noio*
-Date: Mon, 9 Jan 2017 10:56:53 -0500
-Message-ID: <20170109155653.GD22368@bfoster.bfoster>
-References: <20170106141107.23953-1-mhocko@kernel.org>
- <20170106141107.23953-5-mhocko@kernel.org>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: PG stuck unclean after rebalance-by-weight
+Date: Mon, 9 Jan 2017 07:59:16 -0800
+Message-ID: <CAN=+7FUfLXG2Q-9UySzRn3i+iVeBsG7Vjn6-K-VbM5tF-HPaWA@mail.gmail.com>
+References: <F6CE90086791D84F8329539EF4C81484E0241E59@GRPCPHMBX11.ramboll-group.global.network>
+ <CAN=+7FX2c=SGkX2dyD78BLWYsezCTdfLX_mwiSCUtqKjtVpZdw@mail.gmail.com> <F6CE90086791D84F8329539EF4C81484E0248705@GRPCPHMBX11.ramboll-group.global.network>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170106141107.23953-5-mhocko@kernel.org>
-Sender: owner-linux-mm@kvack.org
-To: Michal Hocko <mhocko@kernel.org>
-Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qk0-f170.google.com ([209.85.220.170]:36482 "EHLO
+        mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935145AbdAIP7S (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jan 2017 10:59:18 -0500
+Received: by mail-qk0-f170.google.com with SMTP id 11so46308107qkl.3
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Jan 2017 07:59:18 -0800 (PST)
+In-Reply-To: <F6CE90086791D84F8329539EF4C81484E0248705@GRPCPHMBX11.ramboll-group.global.network>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Jens Dueholm Christensen <JEDC@ramboll.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Jan 06, 2017 at 03:11:03PM +0100, Michal Hocko wrote:
-> From: Michal Hocko <mhocko@suse.com>
-> 
-> kmem_zalloc_large and _xfs_buf_map_pages use memalloc_noio_{save,restore}
-> API to prevent from reclaim recursion into the fs because vmalloc can
-> invoke unconditional GFP_KERNEL allocations and these functions might be
-> called from the NOFS contexts. The memalloc_noio_save will enforce
-> GFP_NOIO context which is even weaker than GFP_NOFS and that seems to be
-> unnecessary. Let's use memalloc_nofs_{save,restore} instead as it should
-> provide exactly what we need here - implicit GFP_NOFS context.
-> 
-> Changes since v1
-> - s@memalloc_noio_restore@memalloc_nofs_restore@ in _xfs_buf_map_pages
->   as per Brian Foster
-> 
-> Signed-off-by: Michal Hocko <mhocko@suse.com>
-> ---
+Yep, we'd love a PR with some updates to the docs about how to avoid
+this scenario.  You are correct about why crush needs a lot of retries
+with that crushmap to output 3 replicas for all pgs.  You need
+min_size to avoid a case where you accepted a write on 1 osd, but then
+lost that 1 osd.
+-Sam
 
-Looks fine to me:
-
-Reviewed-by: Brian Foster <bfoster@redhat.com>
-
->  fs/xfs/kmem.c    | 10 +++++-----
->  fs/xfs/xfs_buf.c |  8 ++++----
->  2 files changed, 9 insertions(+), 9 deletions(-)
-> 
-> diff --git a/fs/xfs/kmem.c b/fs/xfs/kmem.c
-> index a76a05dae96b..d69ed5e76621 100644
-> --- a/fs/xfs/kmem.c
-> +++ b/fs/xfs/kmem.c
-> @@ -65,7 +65,7 @@ kmem_alloc(size_t size, xfs_km_flags_t flags)
->  void *
->  kmem_zalloc_large(size_t size, xfs_km_flags_t flags)
->  {
-> -	unsigned noio_flag = 0;
-> +	unsigned nofs_flag = 0;
->  	void	*ptr;
->  	gfp_t	lflags;
->  
-> @@ -80,14 +80,14 @@ kmem_zalloc_large(size_t size, xfs_km_flags_t flags)
->  	 * context via PF_MEMALLOC_NOIO to prevent memory reclaim re-entering
->  	 * the filesystem here and potentially deadlocking.
->  	 */
-> -	if ((current->flags & PF_MEMALLOC_NOFS) || (flags & KM_NOFS))
-> -		noio_flag = memalloc_noio_save();
-> +	if (flags & KM_NOFS)
-> +		nofs_flag = memalloc_nofs_save();
->  
->  	lflags = kmem_flags_convert(flags);
->  	ptr = __vmalloc(size, lflags | __GFP_HIGHMEM | __GFP_ZERO, PAGE_KERNEL);
->  
-> -	if ((current->flags & PF_MEMALLOC_NOFS) || (flags & KM_NOFS))
-> -		memalloc_noio_restore(noio_flag);
-> +	if (flags & KM_NOFS)
-> +		memalloc_nofs_restore(nofs_flag);
->  
->  	return ptr;
->  }
-> diff --git a/fs/xfs/xfs_buf.c b/fs/xfs/xfs_buf.c
-> index 7f0a01f7b592..8cb8dd4cdfd8 100644
-> --- a/fs/xfs/xfs_buf.c
-> +++ b/fs/xfs/xfs_buf.c
-> @@ -441,17 +441,17 @@ _xfs_buf_map_pages(
->  		bp->b_addr = NULL;
->  	} else {
->  		int retried = 0;
-> -		unsigned noio_flag;
-> +		unsigned nofs_flag;
->  
->  		/*
->  		 * vm_map_ram() will allocate auxillary structures (e.g.
->  		 * pagetables) with GFP_KERNEL, yet we are likely to be under
->  		 * GFP_NOFS context here. Hence we need to tell memory reclaim
-> -		 * that we are in such a context via PF_MEMALLOC_NOIO to prevent
-> +		 * that we are in such a context via PF_MEMALLOC_NOFS to prevent
->  		 * memory reclaim re-entering the filesystem here and
->  		 * potentially deadlocking.
->  		 */
-> -		noio_flag = memalloc_noio_save();
-> +		nofs_flag = memalloc_nofs_save();
->  		do {
->  			bp->b_addr = vm_map_ram(bp->b_pages, bp->b_page_count,
->  						-1, PAGE_KERNEL);
-> @@ -459,7 +459,7 @@ _xfs_buf_map_pages(
->  				break;
->  			vm_unmap_aliases();
->  		} while (retried++ <= 1);
-> -		memalloc_noio_restore(noio_flag);
-> +		memalloc_nofs_restore(nofs_flag);
->  
->  		if (!bp->b_addr)
->  			return -ENOMEM;
-> -- 
-> 2.11.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+On Mon, Jan 9, 2017 at 5:09 AM, Jens Dueholm Christensen
+<JEDC@ramboll.com> wrote:
+> Hi Samuel
+>
+> The lack of reply and some off-list conversations had me test a few things over the weekend:
+>
+> 1) Playing around with different crushmap settings with no success - every test didn't produce any bad mappings or had to retry a placement more than 50 times (I remember I saw up to 23-25 attempts)
+> 2) Lowering the OSD weight further made more PGs become stuck unclean
+> 3) Lowering the weight to 0 and/or out'ing osd.1 moved the acting OSD id to another OSD, but the PG was still stuck unclean
+> 4) Raising the OSD weight up in small increments (0.05) eventually made the PG clean+active
+> 5) Lowering another OSD's OSD weight made other PGs become stuck unclean, while raising the weight again made the PGs recover.
+>
+> .. and then it dawned (and I hope I'm right..):
+>
+> Since the CRUSH weight of nodes ceph4 and ceph5 is relative high compared to nodes ceph1-3, a lower OSD weight for OSDs on nodes ceph1-3 will eventually cause problems for CRUSH since I have "type host" and not "type osd" in my ruleset chooseleaf - my cluster is simply not evenly dimensioned for a "proper" reweight to be successful.
+>
+> This unbalance and a lower and lower OSD weight makes it harder and harder for CRUSH to place a PG onto the 6 OSDs (osd.0-5 on nodes ceph1-3) up to a point where CRUSH had tried "choose_total_tries" times and then gives up.
+>
+> This made me raise the OSD weight to 0.7 for the 6 OSDs, which in turn left 1 PG stuck unclean.
+> Then by raising choose_total_tries to 100 (I did not test 75) the PG became active+clean.
+>
+> .. and that's where I am now.
+>
+> I assume that I really ought to correct the imbalance in the hardware before changing the weight of any OSD again, and I take this experience as a leasson learned.
+>
+> Perhaps a small writeup in the docs about not trying to correct an imbalanced cluster by reweighing is in order and as something to be avoided?
+>
+>
+> BTW, why should I change min_size to 2?
+> I know that default copies should never be lower than 3 to avoid some possible nasty errors, but as I understand the documentation (It's even written in the first box in the top of http://docs.ceph.com/docs/master/rados/configuration/pool-pg-config-ref/), setting it to 1 only allow writes in a severly degraded state to be accepted - ie. if only 1 node is available.
+>
+> Regards,
+> Jens Dueholm Christensen
+> Rambøll Survey IT
+>
+> On Friday, January 06, 2017 4:54 PM, Samuel Just <sjust@redhat.com> wrote:
+>
+>> You should not have min_size set to 1, set it to 2 (not related to
+>> your problem, but important).
+>
+>> http://docs.ceph.com/docs/master/rados/operations/crush-map/ has a
+>> summary of the crush map tunables.
+>
+>> You might try kicking tunable choose_total_tries 50 to 75.  You should
+>> use osdmaptool on an osdmap grabbed from your cluster to experiment
+>> with new crushmap settings without actually injecting the new
+>> crushmap.
+>
