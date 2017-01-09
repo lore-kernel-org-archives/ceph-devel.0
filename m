@@ -1,81 +1,114 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Safe maximum number of RADOS namespaces
-Date: Mon, 9 Jan 2017 14:34:23 -0800
-Message-ID: <CAJ4mKGZDc2=9Jg7EyWhvtnp2uBcmSA7ULx9_tHpc=d0nrLbajg@mail.gmail.com>
-References: <592054113.6138.1483710244101@ox.pcextreme.nl> <CALe9h7dgsbZiwww87DUtDUsy29LHNbwGxxNGygRhsQyz97U6dg@mail.gmail.com>
- <308159841.6179.1483720942271@ox.pcextreme.nl> <CAN=+7FWbLpgDhoxH1QHgPBpMuDAUL2gg3QOhWGAE_9cKt=yBBA@mail.gmail.com>
- <CA+z5DsxYf7DGZTw2QCRMztQ13zFX5NZd3Kj62xFxmwhznosNmg@mail.gmail.com>
- <1927481418.6225.1483952382193@ox.pcextreme.nl> <CAN=+7FU7PfEiCRWr_wRJYSk1R=CJvGuUSy2xtvZ=oAXVoUvh9A@mail.gmail.com>
+From: David Zafman <dzafman@redhat.com>
+Subject: Re: Failure to repair an omap digest
+Date: Mon, 9 Jan 2017 15:09:21 -0800
+Message-ID: <1413698f-81d9-cf0f-fdc2-255c16a9404a@redhat.com>
+References: <85235bfc-34da-4e31-1eb3-259477445967@redhat.com>
+ <CAN=+7FW3KpaCfQKjkH71EKfOamyqwvnWuXp4KUfTFssfLpWNgw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f46.google.com ([209.85.214.46]:38755 "EHLO
-        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753271AbdAIWeZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jan 2017 17:34:25 -0500
-Received: by mail-it0-f46.google.com with SMTP id x2so74806404itf.1
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Jan 2017 14:34:24 -0800 (PST)
-In-Reply-To: <CAN=+7FU7PfEiCRWr_wRJYSk1R=CJvGuUSy2xtvZ=oAXVoUvh9A@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:36328 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750821AbdAIXJW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 9 Jan 2017 18:09:22 -0500
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 64ECB4DD5F
+        for <ceph-devel@vger.kernel.org>; Mon,  9 Jan 2017 23:09:23 +0000 (UTC)
+In-Reply-To: <CAN=+7FW3KpaCfQKjkH71EKfOamyqwvnWuXp4KUfTFssfLpWNgw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Samuel Just <sjust@redhat.com>
-Cc: Wido den Hollander <wido@42on.com>, Blair Bethwaite <blair.bethwaite@gmail.com>, John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Jan 9, 2017 at 8:00 AM, Samuel Just <sjust@redhat.com> wrote:
-> 30M namespaces is not a problem since they are pretty much just object
-> name prefixes.  30M different cephx users probably would be a problem.
+
+Look at https://github.com/ceph/ceph/pull/9032 to see pending doc 
+changes which were already in the works.
+
+David
+
+
+On 1/9/17 1:09 PM, Samuel Just wrote:
+> Sounds like this should be added to the docs!
 > -Sam
-
-This is sort of the interesting bit of the problem. If you have a
-limited number of users you want to be able to collectively read 30M
-namespaces (without wide permissions) then you need to *enumerate*
-those 30M namespaces within their keyrings, and the OSDAuthCaps
-structure is unlikely to handle that well (although we don't really
-know).
-
-Otherwise, you need a different keyring for each namespace, and that
-has two separate points of contention:
-1) If they're all online frequently, that's a whole bunch of
-independent connections to the OSDs. (I sort of assume this is not
-likely.)
-2) Storing each of those keyrings in the monitor LevelDB instances. I
-think the only analogue here is the limited throughput of very large
-RWG bucket indices; I think the situation ought to be quite a bit
-better for the monitors — but I don't have any real data about it.
--Greg
-
 >
-> On Mon, Jan 9, 2017 at 12:59 AM, Wido den Hollander <wido@42on.com> wrote:
+> On Mon, Jan 9, 2017 at 1:05 PM, David Zafman <dzafman@redhat.com> wrote:
+>> ceph version 11.1.0-6147-g12706d7 (12706d76225fa1491d00362d3bc04e0541dead73)
 >>
->>> Op 7 januari 2017 om 2:03 schreef Blair Bethwaite <blair.bethwaite@gmail.com>:
->>>
->>>
->>> On 7 January 2017 at 04:04, Samuel Just <sjust@redhat.com> wrote:
->>> > Namespaces are pretty much just a prefix, nothing tracks them.  Are
->>> > you using them simply to avoid name conflicts?
+>> A failure to repair occurred because without a digest in the object info the
+>> code doesn't attempt to decide which omap is wrong.   Here we only have an
+>> omap_digest_mismatch error.  Had the "selected_object_info" included "od"
+>> presuambly of 1fff04c0 then "omap_digest_mismatch_oi" would have been set on
+>> osd.47 and it would be repaired.
 >>
->> Yes, but also to be able to list objects (I know, slow!) per 'user'.
+>> The way to fix this particular case is to stop osd.47, remove the object
+>> with ceph-objectstore-tool, then restart osd.47 and the repair should then
+>> re-create a correct object and omap there.  As you can see the object name
+>> is 100011cf577.00000000 in pool 1 (metadata).
 >>
->>>
->>> I assumed for some sort of data and/or security segregation using
->>> cephx? 30M pools is not exactly feasible...
->>>
+>> $  sudo rados list-inconsistent-pg metadata
+>> ["1.25"]
 >>
->> Eventually yes. We have 30M users in this system now and using namespaces seems like a clean way to separate their data inside RADOS.
+>> $ sudo rados list-inconsistent-obj 1.25 --format=json-pretty
+>> {
+>>      "epoch": 767566,
+>>      "inconsistents": [
+>>          {
+>>              "object": {
+>>                  "name": "100011cf577.00000000",
+>>                  "nspace": "",
+>>                  "locator": "",
+>>                  "snap": "head",
+>>                  "version": 9023143
+>>              },
+>>              "errors": [
+>>                  "omap_digest_mismatch"
+>>              ],
+>>              "union_shard_errors": [],
+>>              "selected_object_info":
+>> "1:a7f0f16e:::100011cf577.00000000:head(768083'9023143 mds.0.94887:9732381
+>> dirty|omap|data_digest s 0 uv 9023143 dd ffffffff alloc_hint [0 0 0])",
+>>              "shards": [
+>>                  {
+>>                      "osd": 7,
+>>                      "errors": [],
+>>                      "size": 0,
+>>                      "omap_digest": "0x1fff04c0",
+>>                      "data_digest": "0xffffffff"
+>>                  },
+>>                  {
+>>                      "osd": 47,
+>>                      "errors": [],
+>>                      "size": 0,
+>>                      "omap_digest": "0xc2c5ddcd",
+>>                      "data_digest": "0xffffffff"
+>>                  },
+>>                  {
+>>                      "osd": 60,
+>>                      "errors": [],
+>>                      "size": 0,
+>>                      "omap_digest": "0x1fff04c0",
+>>                      "data_digest": "0xffffffff"
+>>                  },
+>>                  {
+>>                      "osd": 72,
+>>                      "errors": [],
+>>                      "size": 0,
+>>                      "omap_digest": "0x1fff04c0",
+>>                      "data_digest": "0xffffffff"
+>>                  }
+>>              ]
+>>          }
+>>      ]
+>> }
 >>
->> Might use different cephx users in the future if we want to.
 >>
->> Wido
+>> David
 >>
->>> --
->>> Cheers,
->>> ~Blairo
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
