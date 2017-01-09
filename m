@@ -1,47 +1,91 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: RADOS Object class capabilities
-Date: Mon, 9 Jan 2017 09:58:17 +0100 (CET)
-Message-ID: <1004503707.6221.1483952298347@ox.pcextreme.nl>
-References: <26283_1480676624_58415510_26283_122_1_EBBC07637B509B40B2E594A11E62C54F022DA808@OPEXCLILM32.corporate.adroot.infra.ftgroup>
- <d8129d7a-af37-ad74-38c8-f5a9d59f183b@suse.de>
- <CAF-wwdHPXaX3fe+dk9ovdAfc00N5xQrzj2TaRAuBOjH77L4yDg@mail.gmail.com>
- <200977EA-767F-41DA-9912-143C403D5D7B@Teradata.com>
- <CAB2gnbVn0U_G12L8XV=hbznB2i_TMo40TpC5cVzJZKOr_MAQ7Q@mail.gmail.com>
- <64D605E0-8851-4F60-B0AB-864CBDA7B3F7@Teradata.com>
- <208C08FF-0104-425C-B7AA-B0930A76F46E@Teradata.com>
- <CAB2gnbUEeS6AynJ0AjdpJ+MbiGSq_HUkBS-KdnXrke1wiJYsyA@mail.gmail.com>
- <E41C6528-D51D-4165-87D5-0DBBDF6B9F5F@Teradata.com>
- <515514A8-CE49-48FD-8939-74BE82F30FDE@Teradata.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: turn libcommon into a shared library and package it
+Date: Mon, 9 Jan 2017 16:59:16 +0800
+Message-ID: <CAJE9aOMbUjryq0ek4jhQgprY03_pSJTJC2M-ChmTp_ECkKGpFg@mail.gmail.com>
+References: <CAJE9aONgX-d7ZBBRGh3gDfCAOM6uPjGANoAue993_-Ewbrf0+w@mail.gmail.com>
+ <000e3136-5222-cdf2-6479-476f120dabc5@suse.com> <1483705239.2733.2.camel@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:51722 "EHLO
-        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757403AbdAII6Y (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jan 2017 03:58:24 -0500
-In-Reply-To: <515514A8-CE49-48FD-8939-74BE82F30FDE@Teradata.com>
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:37724 "EHLO
+        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757403AbdAII7T (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jan 2017 03:59:19 -0500
+Received: by mail-wm0-f44.google.com with SMTP id c206so21967212wme.0
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Jan 2017 00:59:18 -0800 (PST)
+In-Reply-To: <1483705239.2733.2.camel@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>, Noah Watkins <noahwatkins@gmail.com>
-Cc: Joao Eduardo Luis <joao@suse.de>, nebil.benmabrouk@orange.com, Brad Hubbard <bhubbard@redhat.com>, ceph-devel@vger.kernel.org
+To: Jeff Layton <jlayton@redhat.com>
+Cc: Ricardo Dias <rdias@suse.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+
+thanks guys. will rename it to libceph-common and package it in librados.
+
+On Fri, Jan 6, 2017 at 8:20 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> On Fri, 2017-01-06 at 11:48 +0000, Ricardo Dias wrote:
+>>
+>> On 06-01-2017 11:38, kefu chai wrote:
+>> >
+>> > hi cephers,
+>> >
+>> > libcommon is a convenient library and is statically linked into
+>> > librados, librbd and libcephfs. and there are some static variables
+>> > living in libcommon, for instance, the ones defined in lockdep.cc. so,
+>> > we will have multiple copies of these global variables if an
+>> > application is linked against librados and (librbd | libcephfs).  the
+>> > "ceph" cli does link against librados and libcephfs via the their
+>> > python bindings.
+>> >
+>> > this incurs some problems:
+>> >
+>> > - cross reference each other's global variables: in my testbed, i ran
+>> > into https://github.com/ceph/ceph/pull/12249#issuecomment-264105597.
+>> > where libcephfs was referencing the lockdeps variables in librados
+>> > when relinquishing a lock. when libcephfs tries to acquire this lock
+>> > again, it found that this lock is *already* locked.
+>> > - more memory foot print and disk space: apparently, libcommon is
+>> > included by librados, librbd and libcephfs. so it's a waste to have
+>> > multiple copies of libcommon if librbd and/or libcephfs are loaded
+>> > into memory or installed onto disk.
+>> >
+>> > after turning libcommon into a shared library, these problems are solved.
+>>
+>> I agree with this approach. In RBD we also had the same problems
+>> sometime ago, and we discussed the problem here
+>> https://github.com/ceph/ceph/pull/8537
+>>
+>> >
+>> >
+>> > but yes, unlike librados and its friends, libcommon is not a user
+>> > facing library, so we will not install it right under /usr/lib/.
+>> > instead, it will be living in /usr/lib/ceph.  please note, the erasure
+>> > plugins are installed into /usr/lib/ceph/erasure-code/ and rados
+>> > classes are installed into /usr/lib/rados-classes/. this follows the
+>> > related section of FHS [1].
+>> >
+>> > what do you think?
+>>
+>> +1 here. Please go forward with this :-)
+>>
+>> >
+>> >
+>> > --
+>> > [1] http://www.pathname.com/fhs/pub/fhs-2.3.html#USRLIBLIBRARIESFORPROGRAMMINGANDPA
+>> >
+>>
+>
+> Sounds good to me.
+>
+> It might also not hurt to rename it. libcommon as a name is awfully
+> generic and could run afoul of other libs on the machine that have
+> nothing to do with ceph (regardless of whether you install it in this
+> private location). Maybe libceph-common?
+>
+> --
+> Jeff Layton <jlayton@redhat.com>
 
 
-> Op 9 januari 2017 om 3:52 schreef "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>:
-> 
-> 
-> So far I am impressed to find out what the RADOS object class can do.
-> Is it possible to override one of the RADOS basic functions or it’s behavior such as object 
-> read/write for all/other clients, by implementing a RADOS object class?
-> 
 
-Afaik not. Using rados_exec() you can execute functions from the object class, but a object class don't override existing RADOS functionality.
-
-Wido
-
-> It will be quiet powerful and dangerous if is supported.
-> 
-> Thanks & Regards,
-> Nitin
-> 
-> N�����r��y���b�X��ǧv�^�)޺{.n�+���z�]z���{ay�ʇڙ�,j��f���h���z��w������j:+v���w�j�m��������zZ+��ݢj"��!�i
+-- 
+Regards
+Kefu Chai
