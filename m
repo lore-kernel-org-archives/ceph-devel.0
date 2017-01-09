@@ -1,72 +1,31 @@
-From: Jens Dueholm Christensen <JEDC@ramboll.com>
-Subject: RE: PG stuck unclean after rebalance-by-weight
-Date: Mon, 9 Jan 2017 13:09:35 +0000
-Message-ID: <F6CE90086791D84F8329539EF4C81484E0248705@GRPCPHMBX11.ramboll-group.global.network>
-References: <F6CE90086791D84F8329539EF4C81484E0241E59@GRPCPHMBX11.ramboll-group.global.network>
- <CAN=+7FX2c=SGkX2dyD78BLWYsezCTdfLX_mwiSCUtqKjtVpZdw@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Jenkins went offline for 13 hours (repos are affected)
+Date: Mon, 9 Jan 2017 08:09:05 -0500
+Message-ID: <CAC-Np1yMqKO7NmUaQXMfJA1D7XXUfG4tJfqwOrGuJWnO3FsscA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from wgcphexedge01.ramboll.com ([195.137.178.72]:26671 "EHLO
-        wgcphexedge01.ramboll.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S939652AbdAINJk (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jan 2017 08:09:40 -0500
-In-Reply-To: <CAN=+7FX2c=SGkX2dyD78BLWYsezCTdfLX_mwiSCUtqKjtVpZdw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-qt0-f175.google.com ([209.85.216.175]:33196 "EHLO
+        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S939793AbdAINJG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Jan 2017 08:09:06 -0500
+Received: by mail-qt0-f175.google.com with SMTP id v23so134787440qtb.0
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Jan 2017 05:09:06 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgU2FtdWVsDQoNClRoZSBsYWNrIG9mIHJlcGx5IGFuZCBzb21lIG9mZi1saXN0IGNvbnZlcnNh
-dGlvbnMgaGFkIG1lIHRlc3QgYSBmZXcgdGhpbmdzIG92ZXIgdGhlIHdlZWtlbmQ6DQoNCjEpIFBs
-YXlpbmcgYXJvdW5kIHdpdGggZGlmZmVyZW50IGNydXNobWFwIHNldHRpbmdzIHdpdGggbm8gc3Vj
-Y2VzcyAtIGV2ZXJ5IHRlc3QgZGlkbid0IHByb2R1Y2UgYW55IGJhZCBtYXBwaW5ncyBvciBoYWQg
-dG8gcmV0cnkgYSBwbGFjZW1lbnQgbW9yZSB0aGFuIDUwIHRpbWVzIChJIHJlbWVtYmVyIEkgc2F3
-IHVwIHRvIDIzLTI1IGF0dGVtcHRzKQ0KMikgTG93ZXJpbmcgdGhlIE9TRCB3ZWlnaHQgZnVydGhl
-ciBtYWRlIG1vcmUgUEdzIGJlY29tZSBzdHVjayB1bmNsZWFuDQozKSBMb3dlcmluZyB0aGUgd2Vp
-Z2h0IHRvIDAgYW5kL29yIG91dCdpbmcgb3NkLjEgbW92ZWQgdGhlIGFjdGluZyBPU0QgaWQgdG8g
-YW5vdGhlciBPU0QsIGJ1dCB0aGUgUEcgd2FzIHN0aWxsIHN0dWNrIHVuY2xlYW4NCjQpIFJhaXNp
-bmcgdGhlIE9TRCB3ZWlnaHQgdXAgaW4gc21hbGwgaW5jcmVtZW50cyAoMC4wNSkgZXZlbnR1YWxs
-eSBtYWRlIHRoZSBQRyBjbGVhbithY3RpdmUNCjUpIExvd2VyaW5nIGFub3RoZXIgT1NEJ3MgT1NE
-IHdlaWdodCBtYWRlIG90aGVyIFBHcyBiZWNvbWUgc3R1Y2sgdW5jbGVhbiwgd2hpbGUgcmFpc2lu
-ZyB0aGUgd2VpZ2h0IGFnYWluIG1hZGUgdGhlIFBHcyByZWNvdmVyLg0KDQouLiBhbmQgdGhlbiBp
-dCBkYXduZWQgKGFuZCBJIGhvcGUgSSdtIHJpZ2h0Li4pOg0KDQpTaW5jZSB0aGUgQ1JVU0ggd2Vp
-Z2h0IG9mIG5vZGVzIGNlcGg0IGFuZCBjZXBoNSBpcyByZWxhdGl2ZSBoaWdoIGNvbXBhcmVkIHRv
-IG5vZGVzIGNlcGgxLTMsIGEgbG93ZXIgT1NEIHdlaWdodCBmb3IgT1NEcyBvbiBub2RlcyBjZXBo
-MS0zIHdpbGwgZXZlbnR1YWxseSBjYXVzZSBwcm9ibGVtcyBmb3IgQ1JVU0ggc2luY2UgSSBoYXZl
-ICJ0eXBlIGhvc3QiIGFuZCBub3QgInR5cGUgb3NkIiBpbiBteSBydWxlc2V0IGNob29zZWxlYWYg
-LSBteSBjbHVzdGVyIGlzIHNpbXBseSBub3QgZXZlbmx5IGRpbWVuc2lvbmVkIGZvciBhICJwcm9w
-ZXIiIHJld2VpZ2h0IHRvIGJlIHN1Y2Nlc3NmdWwuDQoNClRoaXMgdW5iYWxhbmNlIGFuZCBhIGxv
-d2VyIGFuZCBsb3dlciBPU0Qgd2VpZ2h0IG1ha2VzIGl0IGhhcmRlciBhbmQgaGFyZGVyIGZvciBD
-UlVTSCB0byBwbGFjZSBhIFBHIG9udG8gdGhlIDYgT1NEcyAob3NkLjAtNSBvbiBub2RlcyBjZXBo
-MS0zKSB1cCB0byBhIHBvaW50IHdoZXJlIENSVVNIIGhhZCB0cmllZCAiY2hvb3NlX3RvdGFsX3Ry
-aWVzIiB0aW1lcyBhbmQgdGhlbiBnaXZlcyB1cC4NCg0KVGhpcyBtYWRlIG1lIHJhaXNlIHRoZSBP
-U0Qgd2VpZ2h0IHRvIDAuNyBmb3IgdGhlIDYgT1NEcywgd2hpY2ggaW4gdHVybiBsZWZ0IDEgUEcg
-c3R1Y2sgdW5jbGVhbi4NClRoZW4gYnkgcmFpc2luZyBjaG9vc2VfdG90YWxfdHJpZXMgdG8gMTAw
-IChJIGRpZCBub3QgdGVzdCA3NSkgdGhlIFBHIGJlY2FtZSBhY3RpdmUrY2xlYW4uDQoNCi4uIGFu
-ZCB0aGF0J3Mgd2hlcmUgSSBhbSBub3cuDQoNCkkgYXNzdW1lIHRoYXQgSSByZWFsbHkgb3VnaHQg
-dG8gY29ycmVjdCB0aGUgaW1iYWxhbmNlIGluIHRoZSBoYXJkd2FyZSBiZWZvcmUgY2hhbmdpbmcg
-dGhlIHdlaWdodCBvZiBhbnkgT1NEIGFnYWluLCBhbmQgSSB0YWtlIHRoaXMgZXhwZXJpZW5jZSBh
-cyBhIGxlYXNzb24gbGVhcm5lZC4NCg0KUGVyaGFwcyBhIHNtYWxsIHdyaXRldXAgaW4gdGhlIGRv
-Y3MgYWJvdXQgbm90IHRyeWluZyB0byBjb3JyZWN0IGFuIGltYmFsYW5jZWQgY2x1c3RlciBieSBy
-ZXdlaWdoaW5nIGlzIGluIG9yZGVyIGFuZCBhcyBzb21ldGhpbmcgdG8gYmUgYXZvaWRlZD8NCg0K
-DQpCVFcsIHdoeSBzaG91bGQgSSBjaGFuZ2UgbWluX3NpemUgdG8gMj8NCkkga25vdyB0aGF0IGRl
-ZmF1bHQgY29waWVzIHNob3VsZCBuZXZlciBiZSBsb3dlciB0aGFuIDMgdG8gYXZvaWQgc29tZSBw
-b3NzaWJsZSBuYXN0eSBlcnJvcnMsIGJ1dCBhcyBJIHVuZGVyc3RhbmQgdGhlIGRvY3VtZW50YXRp
-b24gKEl0J3MgZXZlbiB3cml0dGVuIGluIHRoZSBmaXJzdCBib3ggaW4gdGhlIHRvcCBvZiBodHRw
-Oi8vZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rlci9yYWRvcy9jb25maWd1cmF0aW9uL3Bvb2wtcGct
-Y29uZmlnLXJlZi8pLCBzZXR0aW5nIGl0IHRvIDEgb25seSBhbGxvdyB3cml0ZXMgaW4gYSBzZXZl
-cmx5IGRlZ3JhZGVkIHN0YXRlIHRvIGJlIGFjY2VwdGVkIC0gaWUuIGlmIG9ubHkgMSBub2RlIGlz
-IGF2YWlsYWJsZS4NCg0KUmVnYXJkcywNCkplbnMgRHVlaG9sbSBDaHJpc3RlbnNlbg0KUmFtYsO4
-bGwgU3VydmV5IElUDQoNCk9uIEZyaWRheSwgSmFudWFyeSAwNiwgMjAxNyA0OjU0IFBNLCBTYW11
-ZWwgSnVzdCA8c2p1c3RAcmVkaGF0LmNvbT4gd3JvdGU6DQoNCj4gWW91IHNob3VsZCBub3QgaGF2
-ZSBtaW5fc2l6ZSBzZXQgdG8gMSwgc2V0IGl0IHRvIDIgKG5vdCByZWxhdGVkIHRvDQo+IHlvdXIg
-cHJvYmxlbSwgYnV0IGltcG9ydGFudCkuDQoNCj4gaHR0cDovL2RvY3MuY2VwaC5jb20vZG9jcy9t
-YXN0ZXIvcmFkb3Mvb3BlcmF0aW9ucy9jcnVzaC1tYXAvIGhhcyBhDQo+IHN1bW1hcnkgb2YgdGhl
-IGNydXNoIG1hcCB0dW5hYmxlcy4NCg0KPiBZb3UgbWlnaHQgdHJ5IGtpY2tpbmcgdHVuYWJsZSBj
-aG9vc2VfdG90YWxfdHJpZXMgNTAgdG8gNzUuICBZb3Ugc2hvdWxkDQo+IHVzZSBvc2RtYXB0b29s
-IG9uIGFuIG9zZG1hcCBncmFiYmVkIGZyb20geW91ciBjbHVzdGVyIHRvIGV4cGVyaW1lbnQNCj4g
-d2l0aCBuZXcgY3J1c2htYXAgc2V0dGluZ3Mgd2l0aG91dCBhY3R1YWxseSBpbmplY3RpbmcgdGhl
-IG5ldw0KPiBjcnVzaG1hcC4NCg0K
+The hosting provider for Jenkins had the main Jenkins instance shut
+off late Sunday night. This was corrected today at about 1pm UTC.
+
+What this means for you:
+
+If you are waiting for repos/binaries from Sunday, it would be safer
+to rebuild them if they don't show up in shaman.ceph.com/builds/ceph
+or if what shows up doesn't correlate with the latest commits in the
+branch.
+
+Sorry for any issues this may have caused.
+
+
+-Alfredo
