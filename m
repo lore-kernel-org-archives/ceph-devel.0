@@ -1,41 +1,44 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Hammer 0.94.10 release - last call
-Date: Tue, 10 Jan 2017 14:52:07 +0100
-Message-ID: <6e55e688-49df-72d2-58c4-ce86c67eeac8@suse.cz>
-References: <8c0ffdf7-a8db-5a3d-6e4b-afe31f52319f@suse.cz>
- <CAC-Np1yQrOBeeWzxAgy4aebXwGOi3d4i2VK7Yscn4O802-7uCA@mail.gmail.com>
- <9b4076a3-3e4a-8cd7-4db5-549d277fc4f8@suse.cz>
- <CAMMFjmFVYCKv=OgOjibn_tKEzQdpFGV+yhLP11VRzhxjhfNoOg@mail.gmail.com>
- <243fa727-c055-d1a0-6f51-5f5db87ed953@dachary.org>
- <CAC-Np1yn6i=FDM16rxOX8ZjXVj=u6GatC0u2tg8w9YHRvKZ9dw@mail.gmail.com>
- <ecd937e4-98df-b42e-8a57-5c8bb963fd54@suse.cz>
- <CAC-Np1yHUzoMCh72g6i1Ak75OPM-n=NgyE=-8HBCEvJYQAcG8Q@mail.gmail.com>
- <88567e66-9404-24dc-01b2-6bcd28899864@suse.cz>
- <CAC-Np1zqjJk5GvUEbxkVGoh36dnwcqSkcbRWzz4zew30ciTg5A@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Kraken cephfs test results
+Date: Tue, 10 Jan 2017 14:04:09 +0000
+Message-ID: <CALe9h7d5D=XQ_pRwZEEjY83TRY0ZzUkZX_DZ_D6mzp1L6xN_Qg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:42714 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754388AbdAJNwK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 10 Jan 2017 08:52:10 -0500
-In-Reply-To: <CAC-Np1zqjJk5GvUEbxkVGoh36dnwcqSkcbRWzz4zew30ciTg5A@mail.gmail.com>
+Received: from mail-oi0-f46.google.com ([209.85.218.46]:36850 "EHLO
+        mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752556AbdAJOEa (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jan 2017 09:04:30 -0500
+Received: by mail-oi0-f46.google.com with SMTP id u143so138764198oif.3
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Jan 2017 06:04:30 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: Loic Dachary <loic@dachary.org>, Yuri Weinstein <yweinste@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
->> Sorry, I shouldn't have been so cryptic. I meant: if I prepare an
->> integration branch in ceph-ci and Shaman builds it, can you do a manual
->> test?
->
-> Sure thing!
+Sage,
 
-wip-hammer-backports now includes your PR and is ready for testing:
+Here are the notes on the failures on the latest cephfs tests on
+kraken.  The tldr is that there's nothing blocking in here, but I'm
+writing it out in full so that we can refer to this list to make sure
+everything's backported to get the runs green.
 
-http://tracker.ceph.com/issues/17151#note-45
-https://shaman.ceph.com/builds/ceph/wip-hammer-backports/
+Cheers,
+John
 
-Thanks,
-Nathan
+samba:
+* command failed with status 223 is PID file issue (pending backport)
+http://tracker.ceph.com/issues/18309
+* other samba failures are missing xenial packages.
+
+fs:
+* test_session_reject failure is an issue with the injection path the
+test uses (PR open) https://github.com/ceph/ceph/pull/12757
+* test_evict_client failure is the pidfile issue (pending backport)
+http://tracker.ceph.com/issues/18309
+* snaptest-snap-rm-cmp.sh failure is new issue (apparently
+intermittent), PR open https://github.com/ceph/ceph/pull/12859
+
+kcephfs:
+* failures in TestClientRecovery, probably just issues with the newly
+deployed kclient versions of the python tests (PR open)
+http://tracker.ceph.com/issues/18396
