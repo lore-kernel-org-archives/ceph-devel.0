@@ -1,207 +1,81 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v2] ceph/iov_iter: fix bad iov_iter handling in ceph splice codepaths
-Date: Tue, 10 Jan 2017 07:57:31 -0500
-Message-ID: <1484053051-23685-1-git-send-email-jlayton@redhat.com>
-References: <1483727016-343-1-git-send-email-jlayton@redhat.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1483727016-343-1-git-send-email-jlayton@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Al Viro <viro@ZenIV.linux.org.uk>, "Yan, Zheng" <zyan@redhat.com>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, "Zhu, Caifeng" <zhucaifeng@unissoft-nj.com>
-List-Id: ceph-devel.vger.kernel.org
+From: Andreas Gerstmayr <andreas.gerstmayr@catalysts.cc>
+Subject: [PATCH v3] ceph: set io_pages bdi hint
+Date: Tue, 10 Jan 2017 13:56:42 +0100
+Message-ID: <1484053078-4490-1-git-send-email-andreas.gerstmayr@catalysts.cc>
+References: <7C9D4085-7D14-4BFB-B675-8FE3C661B1C3@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from exchange.catalysts.cc ([81.10.172.115]:29572 "EHLO
+        mail01-vie.catalysts.cc" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S933163AbdAJM7d (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jan 2017 07:59:33 -0500
+In-Reply-To: <7C9D4085-7D14-4BFB-B675-8FE3C661B1C3@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: andreas.gerstmayr@gmail.com, Andreas Gerstmayr <andreas.gerstmayr@catalysts.cc>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, linux-kernel@vger.kernel.org
 
-v2: fix bug in offset handling in iov_iter_pvec_size
+This patch sets the io_pages bdi hint based on the rsize mount option.
+Without this patch large buffered reads (request size > max readahead)
+are processed sequentially in chunks of the readahead size (i.e. read
+requests are sent out up to the readahead size, then the
+do_generic_file_read() function waits until the first page is received).
 
-xfstest generic/095 triggers soft lockups in kcephfs. Basically it uses
-fio to drive some I/O via vmsplice ane splice. Ceph then ends up trying
-to access an ITER_BVEC type iov_iter as a ITER_IOVEC one. That causes it
-to pick up a wrong offset and get stuck in an infinite loop while trying
-to populate the page array. dio_get_pagev_size has a similar problem.
+With this patch read requests are sent out at once up to the size
+specified in the rsize mount option (default: 64 MB).
 
-To fix the first problem, add a new iov_iter helper to determine the
-offset into the page for the current segment and have ceph call that.
-I would just replace dio_get_pages_alloc with iov_iter_get_pages_alloc,
-but that will only return a single page at a time for ITER_BVEC and
-it's better to make larger requests when possible.
-
-For the second problem, we simply replace it with a new helper that does
-what it does, but properly for all iov_iter types.
-
-Since we're moving that into generic code, we can also utilize the
-iterate_all_kinds macro to simplify this. That means that we need to
-rework the logic a bit since we can't advance to the next vector while
-checking the current one.
-
-Link: http://tracker.ceph.com/issues/18130
-Cc: "Zhu, Caifeng" <zhucaifeng@unissoft-nj.com>
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
+Signed-off-by: Andreas Gerstmayr <andreas.gerstmayr@catalysts.cc>
 ---
- fs/ceph/file.c      | 28 ++-------------------
- include/linux/uio.h |  2 ++
- lib/iov_iter.c      | 71 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 75 insertions(+), 26 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index f633165f3fdc..0cd9fc68a04e 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -35,29 +35,6 @@
-  */
+Thanks for your input.
+
+Changes in v3:
+  - set default rsize to 64 MB
+  - sanity check of the rsize mount option
+
+
+(Note: This patch depends on kernel version 4.10-rc1)
+
+
+ fs/ceph/super.c | 8 ++++++++
+ fs/ceph/super.h | 4 ++--
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 6bd20d7..a0a0b6d 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -952,6 +952,14 @@ static int ceph_register_bdi(struct super_block *sb,
+ 		fsc->backing_dev_info.ra_pages =
+ 			VM_MAX_READAHEAD * 1024 / PAGE_SIZE;
  
- /*
-- * Calculate the length sum of direct io vectors that can
-- * be combined into one page vector.
-- */
--static size_t dio_get_pagev_size(const struct iov_iter *it)
--{
--    const struct iovec *iov = it->iov;
--    const struct iovec *iovend = iov + it->nr_segs;
--    size_t size;
--
--    size = iov->iov_len - it->iov_offset;
--    /*
--     * An iov can be page vectored when both the current tail
--     * and the next base are page aligned.
--     */
--    while (PAGE_ALIGNED((iov->iov_base + iov->iov_len)) &&
--           (++iov < iovend && PAGE_ALIGNED((iov->iov_base)))) {
--        size += iov->iov_len;
--    }
--    dout("dio_get_pagevlen len = %zu\n", size);
--    return size;
--}
--
--/*
-  * Allocate a page vector based on (@it, @nbytes).
-  * The return value is the tuple describing a page vector,
-  * that is (@pages, @page_align, @num_pages).
-@@ -71,8 +48,7 @@ dio_get_pages_alloc(const struct iov_iter *it, size_t nbytes,
- 	struct page **pages;
- 	int ret = 0, idx, npages;
++	if (fsc->mount_options->rsize > fsc->mount_options->rasize &&
++	    fsc->mount_options->rsize >= PAGE_SIZE)
++		fsc->backing_dev_info.io_pages =
++			(fsc->mount_options->rsize + PAGE_SIZE - 1)
++			>> PAGE_SHIFT;
++	else if (fsc->mount_options->rsize == 0)
++		fsc->backing_dev_info.io_pages = ULONG_MAX;
++
+ 	err = bdi_register(&fsc->backing_dev_info, NULL, "ceph-%ld",
+ 			   atomic_long_inc_return(&bdi_seq));
+ 	if (!err)
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 3373b61..88b2e6e 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -45,8 +45,8 @@
+ #define ceph_test_mount_opt(fsc, opt) \
+ 	(!!((fsc)->mount_options->flags & CEPH_MOUNT_OPT_##opt))
  
--	align = (unsigned long)(it->iov->iov_base + it->iov_offset) &
--		(PAGE_SIZE - 1);
-+	align = iov_iter_single_seg_page_offset(it);
- 	npages = calc_pages_for(align, nbytes);
- 	pages = kmalloc(sizeof(*pages) * npages, GFP_KERNEL);
- 	if (!pages) {
-@@ -927,7 +903,7 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
- 	}
- 
- 	while (iov_iter_count(iter) > 0) {
--		u64 size = dio_get_pagev_size(iter);
-+		u64 size = iov_iter_pvec_size(iter);
- 		size_t start = 0;
- 		ssize_t len;
- 
-diff --git a/include/linux/uio.h b/include/linux/uio.h
-index 6e22b544d039..46fdfff3d7d6 100644
---- a/include/linux/uio.h
-+++ b/include/linux/uio.h
-@@ -83,6 +83,7 @@ size_t iov_iter_copy_from_user_atomic(struct page *page,
- void iov_iter_advance(struct iov_iter *i, size_t bytes);
- int iov_iter_fault_in_readable(struct iov_iter *i, size_t bytes);
- size_t iov_iter_single_seg_count(const struct iov_iter *i);
-+size_t iov_iter_single_seg_page_offset(const struct iov_iter *i);
- size_t copy_page_to_iter(struct page *page, size_t offset, size_t bytes,
- 			 struct iov_iter *i);
- size_t copy_page_from_iter(struct page *page, size_t offset, size_t bytes,
-@@ -93,6 +94,7 @@ size_t copy_from_iter_nocache(void *addr, size_t bytes, struct iov_iter *i);
- size_t iov_iter_zero(size_t bytes, struct iov_iter *);
- unsigned long iov_iter_alignment(const struct iov_iter *i);
- unsigned long iov_iter_gap_alignment(const struct iov_iter *i);
-+size_t iov_iter_pvec_size(const struct iov_iter *i);
- void iov_iter_init(struct iov_iter *i, int direction, const struct iovec *iov,
- 			unsigned long nr_segs, size_t count);
- void iov_iter_kvec(struct iov_iter *i, int direction, const struct kvec *kvec,
-diff --git a/lib/iov_iter.c b/lib/iov_iter.c
-index 6b415b5a100d..b8fa377b0cef 100644
---- a/lib/iov_iter.c
-+++ b/lib/iov_iter.c
-@@ -745,6 +745,24 @@ size_t iov_iter_single_seg_count(const struct iov_iter *i)
- }
- EXPORT_SYMBOL(iov_iter_single_seg_count);
- 
-+/* Return offset into page for current iov_iter segment */
-+size_t iov_iter_single_seg_page_offset(const struct iov_iter *i)
-+{
-+	size_t	base;
-+
-+	if (i->type & ITER_PIPE)
-+		base = i->pipe->bufs[i->idx].offset;
-+	else if (i->type & ITER_BVEC)
-+		base = i->bvec->bv_offset;
-+	else if (i->type & ITER_KVEC)
-+		base = (size_t)i->kvec->iov_base;
-+	else
-+		base = (size_t)i->iov->iov_base;
-+
-+	return (base + i->iov_offset) & (PAGE_SIZE - 1);
-+}
-+EXPORT_SYMBOL(iov_iter_single_seg_page_offset);
-+
- void iov_iter_kvec(struct iov_iter *i, int direction,
- 			const struct kvec *kvec, unsigned long nr_segs,
- 			size_t count)
-@@ -830,6 +848,59 @@ unsigned long iov_iter_gap_alignment(const struct iov_iter *i)
- }
- EXPORT_SYMBOL(iov_iter_gap_alignment);
- 
-+/**
-+ * iov_iter_pvec_size - find length of page aligned iovecs in iov_iter
-+ * @i: iov_iter to in which to find the size
-+ *
-+ * Some filesystems can stitch together multiple iovecs into a single
-+ * page vector when both the previous tail and current base are page
-+ * aligned. This function discovers the length that can fit in a single
-+ * pagevec and returns it.
-+ */
-+size_t iov_iter_pvec_size(const struct iov_iter *i)
-+{
-+	size_t size = i->count;
-+	size_t pv_size = 0;
-+	bool contig = false, first = true;
-+
-+	if (!size)
-+		return 0;
-+
-+	/* Pipes are naturally aligned for this */
-+	if (unlikely(i->type & ITER_PIPE))
-+		return size;
-+
-+	/*
-+	 * An iov can be page vectored when the current base and previous
-+	 * tail are both page aligned. Note that we don't require that the
-+	 * initial base in the first iovec also be page aligned.
-+	 */
-+	iterate_all_kinds(i, size, v,
-+		({
-+		 if (first || (contig && PAGE_ALIGNED(v.iov_base))) {
-+			pv_size += v.iov_len;
-+			first = false;
-+			contig = PAGE_ALIGNED(v.iov_base + v.iov_len);
-+		 }; 0;
-+		 }),
-+		({
-+		 if (first || (contig && v.bv_offset == 0)) {
-+			pv_size += v.bv_len;
-+			first = false;
-+			contig = PAGE_ALIGNED(v.bv_offset + v.bv_len);
-+		 }
-+		 }),
-+		({
-+		 if (first || (contig && PAGE_ALIGNED(v.iov_base))) {
-+			pv_size += v.iov_len;
-+			first = false;
-+			contig = PAGE_ALIGNED(v.iov_base + v.iov_len);
-+		 }
-+		 }))
-+	return pv_size;
-+}
-+EXPORT_SYMBOL(iov_iter_pvec_size);
-+
- static inline size_t __pipe_get_pages(struct iov_iter *i,
- 				size_t maxsize,
- 				struct page **pages,
+-#define CEPH_RSIZE_DEFAULT             0           /* max read size */
+-#define CEPH_RASIZE_DEFAULT            (8192*1024) /* readahead */
++#define CEPH_RSIZE_DEFAULT              (64*1024*1024) /* max read size */
++#define CEPH_RASIZE_DEFAULT             (8192*1024)    /* max readahead */
+ #define CEPH_MAX_READDIR_DEFAULT        1024
+ #define CEPH_MAX_READDIR_BYTES_DEFAULT  (512*1024)
+ #define CEPH_SNAPDIRNAME_DEFAULT        ".snap"
 -- 
-2.7.4
+1.8.3.1
+
