@@ -1,115 +1,104 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: Hammer 0.94.10 release - last call
-Date: Tue, 10 Jan 2017 10:09:44 -0500
-Message-ID: <CAC-Np1xbc21KZgPnDyY3uU6vJPEyiU3tOhTdbtbSK93MY7nZ8A@mail.gmail.com>
-References: <8c0ffdf7-a8db-5a3d-6e4b-afe31f52319f@suse.cz> <CAC-Np1yQrOBeeWzxAgy4aebXwGOi3d4i2VK7Yscn4O802-7uCA@mail.gmail.com>
- <9b4076a3-3e4a-8cd7-4db5-549d277fc4f8@suse.cz> <CAMMFjmFVYCKv=OgOjibn_tKEzQdpFGV+yhLP11VRzhxjhfNoOg@mail.gmail.com>
- <243fa727-c055-d1a0-6f51-5f5db87ed953@dachary.org> <CAC-Np1yn6i=FDM16rxOX8ZjXVj=u6GatC0u2tg8w9YHRvKZ9dw@mail.gmail.com>
- <ecd937e4-98df-b42e-8a57-5c8bb963fd54@suse.cz> <CAC-Np1yHUzoMCh72g6i1Ak75OPM-n=NgyE=-8HBCEvJYQAcG8Q@mail.gmail.com>
- <88567e66-9404-24dc-01b2-6bcd28899864@suse.cz> <CAC-Np1zqjJk5GvUEbxkVGoh36dnwcqSkcbRWzz4zew30ciTg5A@mail.gmail.com>
- <6e55e688-49df-72d2-58c4-ce86c67eeac8@suse.cz>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: Safe maximum number of RADOS namespaces
+Date: Tue, 10 Jan 2017 07:56:06 -0800
+Message-ID: <CAN=+7FU+mWsk5B+Y3KO+G1kF69uks4ktYECLJ-ei+OBO-Rui2g@mail.gmail.com>
+References: <592054113.6138.1483710244101@ox.pcextreme.nl> <CALe9h7dgsbZiwww87DUtDUsy29LHNbwGxxNGygRhsQyz97U6dg@mail.gmail.com>
+ <308159841.6179.1483720942271@ox.pcextreme.nl> <CAN=+7FWbLpgDhoxH1QHgPBpMuDAUL2gg3QOhWGAE_9cKt=yBBA@mail.gmail.com>
+ <CA+z5DsxYf7DGZTw2QCRMztQ13zFX5NZd3Kj62xFxmwhznosNmg@mail.gmail.com>
+ <1927481418.6225.1483952382193@ox.pcextreme.nl> <CAN=+7FU7PfEiCRWr_wRJYSk1R=CJvGuUSy2xtvZ=oAXVoUvh9A@mail.gmail.com>
+ <CAJ4mKGZDc2=9Jg7EyWhvtnp2uBcmSA7ULx9_tHpc=d0nrLbajg@mail.gmail.com> <1695028895.6375.1484035196479@ox.pcextreme.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:36124 "EHLO
-        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935227AbdAJPJp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jan 2017 10:09:45 -0500
-Received: by mail-qk0-f173.google.com with SMTP id 11so78550711qkl.3
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Jan 2017 07:09:45 -0800 (PST)
-In-Reply-To: <6e55e688-49df-72d2-58c4-ce86c67eeac8@suse.cz>
+Received: from mail-qt0-f171.google.com ([209.85.216.171]:33842 "EHLO
+        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755315AbdAJP4I (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jan 2017 10:56:08 -0500
+Received: by mail-qt0-f171.google.com with SMTP id l7so120254322qtd.1
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Jan 2017 07:56:08 -0800 (PST)
+In-Reply-To: <1695028895.6375.1484035196479@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Loic Dachary <loic@dachary.org>, Yuri Weinstein <yweinste@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Blair Bethwaite <blair.bethwaite@gmail.com>
 
-On Tue, Jan 10, 2017 at 8:52 AM, Nathan Cutler <ncutler@suse.cz> wrote:
->>> Sorry, I shouldn't have been so cryptic. I meant: if I prepare an
->>> integration branch in ceph-ci and Shaman builds it, can you do a manual
->>> test?
+Notably, listing a namespace is pretty much just listing the entire
+pool and filtering out everything not in that namespace.  Similarly,
+there is no efficient way to list the set of namespaces with objects
+in them.
+-Sam
+
+On Mon, Jan 9, 2017 at 11:59 PM, Wido den Hollander <wido@42on.com> wrote:
+>
+>> Op 9 januari 2017 om 23:34 schreef Gregory Farnum <gfarnum@redhat.com>:
 >>
 >>
->> Sure thing!
+>> On Mon, Jan 9, 2017 at 8:00 AM, Samuel Just <sjust@redhat.com> wrote:
+>> > 30M namespaces is not a problem since they are pretty much just object
+>> > name prefixes.  30M different cephx users probably would be a problem.
+>> > -Sam
+>>
+>> This is sort of the interesting bit of the problem. If you have a
+>> limited number of users you want to be able to collectively read 30M
+>> namespaces (without wide permissions) then you need to *enumerate*
+>> those 30M namespaces within their keyrings, and the OSDAuthCaps
+>> structure is unlikely to handle that well (although we don't really
+>> know).
+>>
 >
+> Yes, it is. For us it is currently not a problem. We are just going to use the namespaces with a key that has access to all the data in a pool. We might do something in the future with limiting keys to a namespace, but that's not relevant right now for us.
 >
-> wip-hammer-backports now includes your PR and is ready for testing:
+> Good point though Greg.
 >
-> http://tracker.ceph.com/issues/17151#note-45
-> https://shaman.ceph.com/builds/ceph/wip-hammer-backports/
-
-To replicate, I install the latest from the backports branch onto a
-single CentOS 7 machine:
-
-$ ceph-deploy install --dev=wip-hammer-backports 1.node.a
-...
-[1.node.a][DEBUG ] Complete!
-[1.node.a][INFO  ] Running command: sudo ceph --version
-[1.node.a][DEBUG ] ceph version 0.94.9-4522-g953992f
-(953992f4b8d3c1de632cc7182412f8997052d18c)
-
-I edit the ceph.conf to have a different hostname (but still
-resolvable) than the machine:
-
-$ cat ceph.conf
-[global]
-fsid = 99070b44-f70f-4379-9a6e-1be066a37bb5
-mon_initial_members = node1
-mon_host = 192.168.111.100
-auth_cluster_required = cephx
-auth_service_required = cephx
-auth_client_required = cephx
-
-I call create-initial that will fail:
-
-$ ceph-deploy mon create-initial
-...
-[node1][WARNIN]
-********************************************************************************
-[node1][WARNIN] provided hostname must match remote hostname
-[node1][WARNIN] provided hostname: node1
-[node1][WARNIN] remote hostname: 1
-[node1][WARNIN] monitors may not reach quorum and create-keys will not complete
-[node1][WARNIN]
-********************************************************************************
-...
-[ceph_deploy.mon][ERROR ] Some monitors have still not reached quorum:
-[ceph_deploy.mon][ERROR ] node1
-
-Now I log in and check the ceph-create-keys process which is still around:
-
-
-[vagrant@1 ~] ps aux | grep create-keys
-root     12491  0.1  1.4  53292  7352 ?        S    14:41   0:00
-python /usr/sbin/ceph-create-keys --cluster ceph -i 1
-vagrant  13343  0.0  0.1 112648   956 pts/0    S+   14:44   0:00 grep
---color=auto create
-
-I call date to check how long it will be until it dies:
-
-[vagrant@1 ~]$ date
-Tue Jan 10 14:47:53 UTC 2017
-
-Then check again after 10 minutes (the maximum the code waits before exiting):
-[vagrant@1 ~]$ date
-Tue Jan 10 14:55:28 UTC 2017
-[vagrant@1 ~]$ ps aux | grep create
-vagrant  15690  0.0  0.1 112648   956 pts/0    S+   14:55   0:00 grep
---color=auto create
-
-And ceph-create-keys is no more.
-
-To double check this, I call ceph-create-keys manually with increased verbosity:
-
-[vagrant@1 ~]$ sudo python /usr/sbin/ceph-create-keys -v --cluster ceph -i 1
-INFO:ceph-create-keys:ceph-mon is not in quorum: u'probing'
-INFO:ceph-create-keys:ceph-mon is not in quorum: u'probing'
-INFO:ceph-create-keys:ceph-mon is not in quorum: u'probing'
-INFO:ceph-create-keys:ceph-mon is not in quorum: u'probing'
-...
-ceph-mon was not able to join quorum within 10 minutes
-[vagrant@1 ~]$ ceph --version
-ceph version 0.94.9-4522-g953992f (953992f4b8d3c1de632cc7182412f8997052d18c)
-
+> Wido
 >
-> Thanks,
-> Nathan
+>> Otherwise, you need a different keyring for each namespace, and that
+>> has two separate points of contention:
+>> 1) If they're all online frequently, that's a whole bunch of
+>> independent connections to the OSDs. (I sort of assume this is not
+>> likely.)
+>> 2) Storing each of those keyrings in the monitor LevelDB instances. I
+>> think the only analogue here is the limited throughput of very large
+>> RWG bucket indices; I think the situation ought to be quite a bit
+>> better for the monitors — but I don't have any real data about it.
+>> -Greg
+>>
+>> >
+>> > On Mon, Jan 9, 2017 at 12:59 AM, Wido den Hollander <wido@42on.com> wrote:
+>> >>
+>> >>> Op 7 januari 2017 om 2:03 schreef Blair Bethwaite <blair.bethwaite@gmail.com>:
+>> >>>
+>> >>>
+>> >>> On 7 January 2017 at 04:04, Samuel Just <sjust@redhat.com> wrote:
+>> >>> > Namespaces are pretty much just a prefix, nothing tracks them.  Are
+>> >>> > you using them simply to avoid name conflicts?
+>> >>
+>> >> Yes, but also to be able to list objects (I know, slow!) per 'user'.
+>> >>
+>> >>>
+>> >>> I assumed for some sort of data and/or security segregation using
+>> >>> cephx? 30M pools is not exactly feasible...
+>> >>>
+>> >>
+>> >> Eventually yes. We have 30M users in this system now and using namespaces seems like a clean way to separate their data inside RADOS.
+>> >>
+>> >> Might use different cephx users in the future if we want to.
+>> >>
+>> >> Wido
+>> >>
+>> >>> --
+>> >>> Cheers,
+>> >>> ~Blairo
+>> >>> --
+>> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >>> the body of a message to majordomo@vger.kernel.org
+>> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
