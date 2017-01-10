@@ -1,98 +1,61 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Safe maximum number of RADOS namespaces
-Date: Tue, 10 Jan 2017 08:59:56 +0100 (CET)
-Message-ID: <1695028895.6375.1484035196479@ox.pcextreme.nl>
-References: <592054113.6138.1483710244101@ox.pcextreme.nl>
- <CALe9h7dgsbZiwww87DUtDUsy29LHNbwGxxNGygRhsQyz97U6dg@mail.gmail.com>
- <308159841.6179.1483720942271@ox.pcextreme.nl>
- <CAN=+7FWbLpgDhoxH1QHgPBpMuDAUL2gg3QOhWGAE_9cKt=yBBA@mail.gmail.com>
- <CA+z5DsxYf7DGZTw2QCRMztQ13zFX5NZd3Kj62xFxmwhznosNmg@mail.gmail.com>
- <1927481418.6225.1483952382193@ox.pcextreme.nl>
- <CAN=+7FU7PfEiCRWr_wRJYSk1R=CJvGuUSy2xtvZ=oAXVoUvh9A@mail.gmail.com>
- <CAJ4mKGZDc2=9Jg7EyWhvtnp2uBcmSA7ULx9_tHpc=d0nrLbajg@mail.gmail.com>
+From: caifeng.zhu@uniswdc.com
+Subject: incorrect object stat sum in PG info after pg split
+Date: Tue, 10 Jan 2017 18:03:19 +0800
+Message-ID: <20170110100319.GA20556@T530I>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:57899 "EHLO
-        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933106AbdAJIFA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Jan 2017 03:05:00 -0500
-In-Reply-To: <CAJ4mKGZDc2=9Jg7EyWhvtnp2uBcmSA7ULx9_tHpc=d0nrLbajg@mail.gmail.com>
+Received: from smtpbgsg2.qq.com ([54.254.200.128]:38507 "EHLO smtpbgsg2.qq.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S934378AbdAJKHK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 10 Jan 2017 05:07:10 -0500
+Received: from T530I (unknown [58.213.102.114])
+        by esmtp4.qq.com (ESMTP) with SMTP id 0
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Jan 2017 18:06:14 +0800 (CST)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Samuel Just <sjust@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
-Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Blair Bethwaite <blair.bethwaite@gmail.com>
+To: ceph-devel@vger.kernel.org
+
+Hi, all
+
+We find that after the number of pgs increased, the object stat sum
+in pg info is incorrect. 
+
+The following steps can reproduce the problem.
+0 assume the object store is a filestore.
+1 create a pool 'foo' with the number of pgs such as 64.
+2 write data through clients(rbd, cephfs or rgw) into the pool 'foo'.
+3 increase the number of pgs in the pool 'foo' to such as 128.
+4 after pgs are settled, use 'ceph pg x.y query' to look at the field
+  'num_objects'
+5 find the osd shard where pg x.y resides by 'ceph pg map x.y' and
+  count the number of objects in the osd shard by command like 
+  'find /var/lib/ceph/osd/ceph-0/current/x.y_head/ -type f | wc -l'
+
+The code flow to increase the pg number is as follows:
+OSD::advance_pg
+	-> OSD::split_pgs
+		-> object_stat_sum::split
+	-> ReplicatedPG::split_colls
+		-> PG::_create
+		-> ObjectStore::Transaction::split_collection
+			/* indirectly call FileStore::_split_collection 
+			 * when applying transaction into file system.
+			 */
+	-> PG::split_into
+
+Compare object_stat_sum::split with FileStore::_split_collection, the splitting
+logic is different and makes stat.sum different from the actual number of objects
+in the collection. 
+
+The question is that should we fix this difference? If so, how to fix? 
+In current design, it seems very difficult to fix the problem.
+
+A similar bug is reported as tracker.ceph.com/issues/16671, which will occur
+if all the exitent data in pool 'foo' is deleted. 
+
+Best Regards
 
 
-> Op 9 januari 2017 om 23:34 schreef Gregory Farnum <gfarnum@redhat.com>:
-> 
-> 
-> On Mon, Jan 9, 2017 at 8:00 AM, Samuel Just <sjust@redhat.com> wrote:
-> > 30M namespaces is not a problem since they are pretty much just object
-> > name prefixes.  30M different cephx users probably would be a problem.
-> > -Sam
-> 
-> This is sort of the interesting bit of the problem. If you have a
-> limited number of users you want to be able to collectively read 30M
-> namespaces (without wide permissions) then you need to *enumerate*
-> those 30M namespaces within their keyrings, and the OSDAuthCaps
-> structure is unlikely to handle that well (although we don't really
-> know).
-> 
 
-Yes, it is. For us it is currently not a problem. We are just going to use the namespaces with a key that has access to all the data in a pool. We might do something in the future with limiting keys to a namespace, but that's not relevant right now for us.
-
-Good point though Greg.
-
-Wido
-
-> Otherwise, you need a different keyring for each namespace, and that
-> has two separate points of contention:
-> 1) If they're all online frequently, that's a whole bunch of
-> independent connections to the OSDs. (I sort of assume this is not
-> likely.)
-> 2) Storing each of those keyrings in the monitor LevelDB instances. I
-> think the only analogue here is the limited throughput of very large
-> RWG bucket indices; I think the situation ought to be quite a bit
-> better for the monitors — but I don't have any real data about it.
-> -Greg
-> 
-> >
-> > On Mon, Jan 9, 2017 at 12:59 AM, Wido den Hollander <wido@42on.com> wrote:
-> >>
-> >>> Op 7 januari 2017 om 2:03 schreef Blair Bethwaite <blair.bethwaite@gmail.com>:
-> >>>
-> >>>
-> >>> On 7 January 2017 at 04:04, Samuel Just <sjust@redhat.com> wrote:
-> >>> > Namespaces are pretty much just a prefix, nothing tracks them.  Are
-> >>> > you using them simply to avoid name conflicts?
-> >>
-> >> Yes, but also to be able to list objects (I know, slow!) per 'user'.
-> >>
-> >>>
-> >>> I assumed for some sort of data and/or security segregation using
-> >>> cephx? 30M pools is not exactly feasible...
-> >>>
-> >>
-> >> Eventually yes. We have 30M users in this system now and using namespaces seems like a clean way to separate their data inside RADOS.
-> >>
-> >> Might use different cephx users in the future if we want to.
-> >>
-> >> Wido
-> >>
-> >>> --
-> >>> Cheers,
-> >>> ~Blairo
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>> the body of a message to majordomo@vger.kernel.org
-> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
