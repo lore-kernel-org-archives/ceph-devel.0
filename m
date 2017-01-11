@@ -1,14 +1,14 @@
-From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Any librados C API users out there?
-Date: Wed, 11 Jan 2017 12:37:14 -0500
-Message-ID: <CA+aFP1B5K-cCcTmp5k4PrfRLFP3=eoVwZk4Fqa=NGd4ZhBGJWg@mail.gmail.com>
-References: <8d5e71b7-c0f2-0f6f-b38e-03e72f441051@corp.ovh.com>
-Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: RBD v1 image format ...
+Date: Wed, 11 Jan 2017 18:41:48 +0100
+Message-ID: <CAOi1vP_0U6XqVgWz2bLLV=abgrcGNY2zKCEFwq=ULYohcWJF7g@mail.gmail.com>
+References: <CA+aFP1C6Zc0Pry=bqjNBzqBMdd14zRzRMvy9yaQrM+F_SS9xBQ@mail.gmail.com>
+	<CAHX7ARuOZ=s5Vr9fHwSo7Sg6AvDq27gBpp7EGvOme8-W3C9DtQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <8d5e71b7-c0f2-0f6f-b38e-03e72f441051-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+In-Reply-To: <CAHX7ARuOZ=s5Vr9fHwSo7Sg6AvDq27gBpp7EGvOme8-W3C9DtQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,28 +18,43 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+To: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-KzEKCkknZCBiZSBoYXBweSB0byB0d2VhayB0aGUgaW50ZXJuYWxzIG9mIGxpYnJiZCB0byBzdXBw
-b3J0IHBhc3MtdGhyb3VnaApvZiBDIGJ1ZmZlcnMgYWxsIHRoZSB3YXkgdG8gbGlicmFkb3MuIGxp
-YnJiZCBjbGllbnRzIGxpa2UgUUVNVSB1c2UgdGhlCkMgQVBJIGFuZCB0aGlzIGN1cnJlbnRseSBy
-ZXN1bHRzIGluIHNldmVyYWwgZXh0cmEgY29waWVzIChpbiBsaWJyYmQKYW5kIGxpYnJhZG9zKS4K
-Ck9uIFdlZCwgSmFuIDExLCAyMDE3IGF0IDExOjQ0IEFNLCBQaW90ciBEYcWCZWsgPHBpb3RyLmRh
-bGVrQGNvcnAub3ZoLmNvbT4gd3JvdGU6Cj4gSGVsbG8sCj4KPiBBcyB0aGUgc3ViamVjdCBzYXlz
-IC0gYXJlIGhlcmUgYW55IHVzZXJzL2NvbnN1bWVycyBvZiBsaWJyYWRvcyBDIEFQST8gSSdtCj4g
-YXNraW5nIGJlY2F1c2Ugd2UncmUgcmVzZWFyY2hpbmcgaWYgdGhpcyBQUjoKPiBodHRwczovL2dp
-dGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMTIyMTYgd2lsbCBiZSBhY3R1YWxseSBiZW5lZmljaWFs
-IGZvcgo+IGxhcmdlciBncm91cCBvZiB1c2Vycy4gVGhpcyBQUiBhZGRzIGEgYnVuY2ggb2YgbmV3
-IEFQSXMgdGhhdCBwZXJmb3JtIG9iamVjdAo+IHdyaXRlcyB3aXRob3V0IGludGVybWVkaWF0ZSBk
-YXRhIGNvcHksIHdoaWNoIHdpbGwgcmVkdWNlIGNwdSBhbmQgbWVtb3J5IGxvYWQKPiBvbiBjbGll
-bnRzLiBJZiB5b3UncmUgdXNpbmcgbGlicmFkb3MgQyBBUEkgZm9yIG9iamVjdCB3cml0ZXMsIGZl
-ZWwgZnJlZSB0bwo+IGNvbW1lbnQgaGVyZSBvciBpbiB0aGUgcHVsbCByZXF1ZXN0Lgo+Cj4KPiAt
-LQo+IFBpb3RyIERhxYJlawo+Cj4KPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fXwo+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4gY2VwaC11c2Vyc0BsaXN0
-cy5jZXBoLmNvbQo+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vy
-cy1jZXBoLmNvbQoKCgotLSAKSmFzb24KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5j
-ZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2Vw
-aC5jb20K
+On Wed, Jan 11, 2017 at 6:01 PM, Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> It would be fine to not support v1 image format at all.
+>
+> But it would be probably friendly for users to provide them with more
+> understandable message when they face feature mismatch instead of just
+> displaying:
+>
+>  * rbd: map failed: (6) No such device or address
+>
+> For instance, show the following something in message:
+>
+>  * Execute rbd feature disable <image-name>
+> deep-flatten,fast-diff,object-map,exclusive-lock
+>
+>  or
+>
+>  * Set rbd default features to 3
+
+We already do that in jewel:
+
+$ sudo rbd map a
+rbd: sysfs write failed
+RBD image feature set mismatch. You can disable features unsupported
+by the kernel with "rbd feature disable".
+In some cases useful info is found in syslog - try "dmesg | tail" or so.
+rbd: map failed: (6) No such device or address
+
+Enumerating the features to be disabled is hard because that depends on
+the version of the rbd.ko module and there is no interface for querying
+the feature set.  The man page can definitely be improved though: move
+--image-feature paragraph into its own section, expand the descriptions
+and add kernel version info.  I'll put that on my TODO list...
+
+Thanks,
+
+                Ilya
