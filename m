@@ -1,60 +1,61 @@
-From: Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: RBD v1 image format ...
-Date: Wed, 11 Jan 2017 18:41:48 +0100
-Message-ID: <CAOi1vP_0U6XqVgWz2bLLV=abgrcGNY2zKCEFwq=ULYohcWJF7g@mail.gmail.com>
-References: <CA+aFP1C6Zc0Pry=bqjNBzqBMdd14zRzRMvy9yaQrM+F_SS9xBQ@mail.gmail.com>
-	<CAHX7ARuOZ=s5Vr9fHwSo7Sg6AvDq27gBpp7EGvOme8-W3C9DtQ@mail.gmail.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Re: [ceph-users] Any librados C API users out there?
+Date: Wed, 11 Jan 2017 09:42:46 -0800
+Message-ID: <CAN=+7FXy1Thu56XCoBGAoQ1MZbUL0iPHfnD_f1w50X-_h+67=g@mail.gmail.com>
+References: <8d5e71b7-c0f2-0f6f-b38e-03e72f441051@corp.ovh.com> <CA+aFP1B5K-cCcTmp5k4PrfRLFP3=eoVwZk4Fqa=NGd4ZhBGJWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAHX7ARuOZ=s5Vr9fHwSo7Sg6AvDq27gBpp7EGvOme8-W3C9DtQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:32774 "EHLO
+        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1765688AbdAKRms (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jan 2017 12:42:48 -0500
+Received: by mail-qk0-f174.google.com with SMTP id s140so193810797qke.0
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Jan 2017 09:42:47 -0800 (PST)
+In-Reply-To: <CA+aFP1B5K-cCcTmp5k4PrfRLFP3=eoVwZk4Fqa=NGd4ZhBGJWg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Dillaman, Jason" <dillaman@redhat.com>
+Cc: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek@corp.ovh.com>, ceph-users <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 11, 2017 at 6:01 PM, Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> It would be fine to not support v1 image format at all.
->
-> But it would be probably friendly for users to provide them with more
-> understandable message when they face feature mismatch instead of just
-> displaying:
->
->  * rbd: map failed: (6) No such device or address
->
-> For instance, show the following something in message:
->
->  * Execute rbd feature disable <image-name>
-> deep-flatten,fast-diff,object-map,exclusive-lock
->
->  or
->
->  * Set rbd default features to 3
+Jason: librbd itself uses the librados C++ api though, right?
+-Sam
 
-We already do that in jewel:
-
-$ sudo rbd map a
-rbd: sysfs write failed
-RBD image feature set mismatch. You can disable features unsupported
-by the kernel with "rbd feature disable".
-In some cases useful info is found in syslog - try "dmesg | tail" or so.
-rbd: map failed: (6) No such device or address
-
-Enumerating the features to be disabled is hard because that depends on
-the version of the rbd.ko module and there is no interface for querying
-the feature set.  The man page can definitely be improved though: move
---image-feature paragraph into its own section, expand the descriptions
-and add kernel version info.  I'll put that on my TODO list...
-
-Thanks,
-
-                Ilya
+On Wed, Jan 11, 2017 at 9:37 AM, Jason Dillaman <jdillama@redhat.com> wrote:
+> +1
+>
+> I'd be happy to tweak the internals of librbd to support pass-through
+> of C buffers all the way to librados. librbd clients like QEMU use the
+> C API and this currently results in several extra copies (in librbd
+> and librados).
+>
+> On Wed, Jan 11, 2017 at 11:44 AM, Piotr Dałek <piotr.dalek@corp.ovh.com> wrote:
+>> Hello,
+>>
+>> As the subject says - are here any users/consumers of librados C API? I'm
+>> asking because we're researching if this PR:
+>> https://github.com/ceph/ceph/pull/12216 will be actually beneficial for
+>> larger group of users. This PR adds a bunch of new APIs that perform object
+>> writes without intermediate data copy, which will reduce cpu and memory load
+>> on clients. If you're using librados C API for object writes, feel free to
+>> comment here or in the pull request.
+>>
+>>
+>> --
+>> Piotr Dałek
+>>
+>>
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+>
+> --
+> Jason
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
