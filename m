@@ -1,50 +1,24 @@
-From: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: RBD v1 image format ...
-Date: Thu, 12 Jan 2017 02:01:59 +0900
-Message-ID: <CAHX7ARuOZ=s5Vr9fHwSo7Sg6AvDq27gBpp7EGvOme8-W3C9DtQ@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [ceph-users] RBD v1 image format ...
+Date: Wed, 11 Jan 2017 18:17:34 +0100
+Message-ID: <CAOi1vP_K90CBOfMZ247QON+qCqk8wzRu+CiqukPvctAP=DBT-Q@mail.gmail.com>
 References: <CA+aFP1C6Zc0Pry=bqjNBzqBMdd14zRzRMvy9yaQrM+F_SS9xBQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+aFP1C6Zc0Pry=bqjNBzqBMdd14zRzRMvy9yaQrM+F_SS9xBQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Jason Dillaman <dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:37346 "EHLO
+        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934785AbdAKRRh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Jan 2017 12:17:37 -0500
+Received: by mail-wm0-f54.google.com with SMTP id c206so117745052wme.0
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Jan 2017 09:17:36 -0800 (PST)
+In-Reply-To: <CA+aFP1C6Zc0Pry=bqjNBzqBMdd14zRzRMvy9yaQrM+F_SS9xBQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Jason Dillaman <dillaman@redhat.com>
+Cc: ceph-users <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-It would be fine to not support v1 image format at all.
-
-But it would be probably friendly for users to provide them with more
-understandable message when they face feature mismatch instead of just
-displaying:
-
- * rbd: map failed: (6) No such device or address
-
-For instance, show the following something in message:
-
- * Execute rbd feature disable <image-name>
-deep-flatten,fast-diff,object-map,exclusive-lock
-
- or
-
- * Set rbd default features to 3
-
-What do you think?
-Does it make sense to you?
-
-Regards,
-
-
-On Thu, Jan 12, 2017 at 1:09 AM, Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+On Wed, Jan 11, 2017 at 5:09 PM, Jason Dillaman <jdillama@redhat.com> wrote:
 > I would like to propose that starting with the Luminous release of Ceph, RBD
 > will no longer support the creation of v1 image format images via the rbd
 > CLI and librbd.
@@ -54,12 +28,12 @@ On Thu, Jan 12, 2017 at 1:09 AM, Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA
 > support the use of v1 images by the CLI, VMs, etc for Luminous.
 >
 > Any objections or concerns?
->
-> --
-> Jason
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
+
+We need a way to create v1 images for testing purposes for as long as
+the use is supported.  I'd vote for just making it harder - hide
+--image-format 1 behind an additional (possibly undocumented) flag, if
+the maintenance burden is acceptable.
+
+Thanks,
+
+                Ilya
