@@ -1,10 +1,10 @@
-From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: RBD v1 image format ...
-Date: Wed, 11 Jan 2017 11:09:46 -0500
-Message-ID: <CA+aFP1C6Zc0Pry=bqjNBzqBMdd14zRzRMvy9yaQrM+F_SS9xBQ@mail.gmail.com>
-Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Subject: Any librados C API users out there?
+Date: Wed, 11 Jan 2017 17:44:14 +0100
+Message-ID: <8d5e71b7-c0f2-0f6f-b38e-03e72f441051@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1699911658=="
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
@@ -15,51 +15,18 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
---===============1699911658==
-Content-Type: multipart/alternative; boundary=001a113fbc445d47880545d3d4eb
-
---001a113fbc445d47880545d3d4eb
-Content-Type: text/plain; charset=UTF-8
-
-I would like to propose that starting with the Luminous release of Ceph,
-RBD will no longer support the creation of v1 image format images via the
-rbd CLI and librbd.
-
-We previously made the v2 image format the default and deprecated the v1
-format under the Jewel release. It is important to note that we would still
-support the use of v1 images by the CLI, VMs, etc for Luminous.
-
-Any objections or concerns?
-
--- 
-Jason
-
---001a113fbc445d47880545d3d4eb
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">I would like to propose that starting with the Luminous re=
-lease of Ceph, RBD will no longer support the creation of v1 image format i=
-mages via the rbd CLI and librbd.<div><br></div><div>We previously made the=
- v2 image format the default and deprecated the v1 format under the Jewel r=
-elease. It is important to note that we would still support the use of v1 i=
-mages by the CLI, VMs, etc for Luminous.=C2=A0</div><div><br></div><div>Any=
- objections or concerns?<br><br>-- <br>Jason</div></div>
-
---001a113fbc445d47880545d3d4eb--
-
---===============1699911658==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1699911658==--
+SGVsbG8sCgpBcyB0aGUgc3ViamVjdCBzYXlzIC0gYXJlIGhlcmUgYW55IHVzZXJzL2NvbnN1bWVy
+cyBvZiBsaWJyYWRvcyBDIEFQST8gSSdtIGFza2luZyBiZWNhdXNlIHdlJ3JlIHJlc2VhcmNoaW5n
+IGlmIHRoaXMgUFI6IApodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL3B1bGwvMTIyMTYgd2ls
+bCBiZSBhY3R1YWxseSBiZW5lZmljaWFsIGZvciBsYXJnZXIgZ3JvdXAgb2YgdXNlcnMuIFRoaXMg
+UFIgYWRkcyBhIGJ1bmNoIG9mIG5ldyBBUElzIHRoYXQgcGVyZm9ybSAKb2JqZWN0IHdyaXRlcyB3
+aXRob3V0IGludGVybWVkaWF0ZSBkYXRhIGNvcHksIHdoaWNoIHdpbGwgcmVkdWNlIGNwdSBhbmQg
+bWVtb3J5IGxvYWQgb24gY2xpZW50cy4gSWYgeW91J3JlIHVzaW5nIGxpYnJhZG9zIEMgQVBJIGZv
+ciBvYmplY3QgCndyaXRlcywgZmVlbCBmcmVlIHRvIGNvbW1lbnQgaGVyZSBvciBpbiB0aGUgcHVs
+bCByZXF1ZXN0LgoKCi0tIApQaW90ciBEYcWCZWsKCgpfX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJz
+QGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11
+c2Vycy1jZXBoLmNvbQo=
