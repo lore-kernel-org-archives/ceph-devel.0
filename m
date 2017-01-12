@@ -1,9 +1,8 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Matt Benjamin <mbenjamin-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: Any librados C API users out there?
-Date: Thu, 12 Jan 2017 20:34:58 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1701122034410.5745@piezo.novalocal>
+Date: Thu, 12 Jan 2017 17:14:18 -0500 (EST)
+Message-ID: <1347446993.88764846.1484259258638.JavaMail.zimbra@redhat.com>
 References: <8d5e71b7-c0f2-0f6f-b38e-03e72f441051@corp.ovh.com>
-	<CA+aFP1B5K-cCcTmp5k4PrfRLFP3=eoVwZk4Fqa=NGd4ZhBGJWg@mail.gmail.com>
 	<alpine.DEB.2.11.1701111755260.5745@piezo.novalocal>
 	<e0e85f8a-5f78-e652-9838-5aae2ef97d14@corp.ovh.com>
 	<alpine.DEB.2.11.1701121344270.5745@piezo.novalocal>
@@ -12,8 +11,8 @@ References: <8d5e71b7-c0f2-0f6f-b38e-03e72f441051@corp.ovh.com>
 	<alpine.DEB.2.11.1701122006270.5745@piezo.novalocal>
 	<CADRKj5RZOD1MuhC08n50VCWaj+qcKEOMEWtybEVcmHP3DSz+Tg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <CADRKj5RZOD1MuhC08n50VCWaj+qcKEOMEWtybEVcmHP3DSz+Tg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
@@ -26,41 +25,58 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 To: Yehuda Sadeh-Weinraub <ysadehwe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 12 Jan 2017, Yehuda Sadeh-Weinraub wrote:
-> On Thu, Jan 12, 2017 at 12:08 PM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> > On Thu, 12 Jan 2017, Gregory Farnum wrote:
-> >> On Thu, Jan 12, 2017 at 5:54 AM, Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> >> > There is option (3) which is to have a new (or modified)
-> >> > "buffer::create_static" take an optional callback to invoke when the
-> >> > buffer::raw object is destructed. The raw pointer would be destructed
-> >> > when the last buffer::ptr / buffer::list containing it is destructed,
-> >> > so you know it's no longer being referenced.
-> >> >
-> >> > You could then have the new C API methods that wrap the C buffer in a
-> >> > bufferlist and set a new flag in the librados::AioCompletion to delay
-> >> > its completion until after it's both completed and the memory is
-> >> > released. When the buffer is freed, the callback would unblock the
-> >> > librados::AioCompltion completion callback.
-> >>
-> >> I much prefer an approach like this: it's zero-copy; it's not a lot of
-> >> user overhead; but it requires them to explicitly pass memory off to
-> >> Ceph and keep it immutable until Ceph is done (at which point they are
-> >> told so explicitly).
-> >
-> > Yeah, this is simpler.  I still feel like we should provide a way to
-> > revoke buffers, though, because otherwise it's possible for calls to block
-> > semi-indefinitey if, say, an old MOSDOp is quueed for another OSD and that
-> > OSD is not reading data off the socket but has not failed (e.g., due to
-> > it's rx throttling).
-> >
-> 
-> We need to provide some way to cancel requests (at least from the
-> client's aspect), that would guarantee that buffers are not going to
-> be used (and no completion callback is going to be called).
-
-Yeah.  It's a bit more work but I think this is the best path.
-
-sage
+SGksCgotLS0tLSBPcmlnaW5hbCBNZXNzYWdlIC0tLS0tCj4gRnJvbTogIlllaHVkYSBTYWRlaC1X
+ZWlucmF1YiIgPHlzYWRlaHdlQHJlZGhhdC5jb20+Cj4gVG86ICJTYWdlIFdlaWwiIDxzd2VpbEBy
+ZWRoYXQuY29tPgo+IENjOiAiR3JlZ29yeSBGYXJudW0iIDxnZmFybnVtQHJlZGhhdC5jb20+LCAi
+SmFzb24gRGlsbGFtYW4iIDxkaWxsYW1hbkByZWRoYXQuY29tPiwgIlBpb3RyIERhxYJlayIKPiA8
+cGlvdHIuZGFsZWtAY29ycC5vdmguY29tPiwgImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIu
+a2VybmVsLm9yZz4sICJjZXBoLXVzZXJzIiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4KPiBT
+ZW50OiBUaHVyc2RheSwgSmFudWFyeSAxMiwgMjAxNyAzOjIyOjA2IFBNCj4gU3ViamVjdDogUmU6
+IFtjZXBoLXVzZXJzXSBBbnkgbGlicmFkb3MgQyBBUEkgdXNlcnMgb3V0IHRoZXJlPwo+IAo+IE9u
+IFRodSwgSmFuIDEyLCAyMDE3IGF0IDEyOjA4IFBNLCBTYWdlIFdlaWwgPHN3ZWlsQHJlZGhhdC5j
+b20+IHdyb3RlOgo+ID4gT24gVGh1LCAxMiBKYW4gMjAxNywgR3JlZ29yeSBGYXJudW0gd3JvdGU6
+Cj4gPj4gT24gVGh1LCBKYW4gMTIsIDIwMTcgYXQgNTo1NCBBTSwgSmFzb24gRGlsbGFtYW4gPGpk
+aWxsYW1hQHJlZGhhdC5jb20+Cj4gPj4gd3JvdGU6Cj4gPj4gPiBUaGVyZSBpcyBvcHRpb24gKDMp
+IHdoaWNoIGlzIHRvIGhhdmUgYSBuZXcgKG9yIG1vZGlmaWVkKQo+ID4+ID4gImJ1ZmZlcjo6Y3Jl
+YXRlX3N0YXRpYyIgdGFrZSBhbiBvcHRpb25hbCBjYWxsYmFjayB0byBpbnZva2Ugd2hlbiB0aGUK
+PiA+PiA+IGJ1ZmZlcjo6cmF3IG9iamVjdCBpcyBkZXN0cnVjdGVkLiBUaGUgcmF3IHBvaW50ZXIg
+d291bGQgYmUgZGVzdHJ1Y3RlZAo+ID4+ID4gd2hlbiB0aGUgbGFzdCBidWZmZXI6OnB0ciAvIGJ1
+ZmZlcjo6bGlzdCBjb250YWluaW5nIGl0IGlzIGRlc3RydWN0ZWQsCj4gPj4gPiBzbyB5b3Uga25v
+dyBpdCdzIG5vIGxvbmdlciBiZWluZyByZWZlcmVuY2VkLgo+ID4+ID4KPiA+PiA+IFlvdSBjb3Vs
+ZCB0aGVuIGhhdmUgdGhlIG5ldyBDIEFQSSBtZXRob2RzIHRoYXQgd3JhcCB0aGUgQyBidWZmZXIg
+aW4gYQo+ID4+ID4gYnVmZmVybGlzdCBhbmQgc2V0IGEgbmV3IGZsYWcgaW4gdGhlIGxpYnJhZG9z
+OjpBaW9Db21wbGV0aW9uIHRvIGRlbGF5Cj4gPj4gPiBpdHMgY29tcGxldGlvbiB1bnRpbCBhZnRl
+ciBpdCdzIGJvdGggY29tcGxldGVkIGFuZCB0aGUgbWVtb3J5IGlzCj4gPj4gPiByZWxlYXNlZC4g
+V2hlbiB0aGUgYnVmZmVyIGlzIGZyZWVkLCB0aGUgY2FsbGJhY2sgd291bGQgdW5ibG9jayB0aGUK
+PiA+PiA+IGxpYnJhZG9zOjpBaW9Db21wbHRpb24gY29tcGxldGlvbiBjYWxsYmFjay4KPiA+Pgo+
+ID4+IEkgbXVjaCBwcmVmZXIgYW4gYXBwcm9hY2ggbGlrZSB0aGlzOiBpdCdzIHplcm8tY29weTsg
+aXQncyBub3QgYSBsb3Qgb2YKPiA+PiB1c2VyIG92ZXJoZWFkOyBidXQgaXQgcmVxdWlyZXMgdGhl
+bSB0byBleHBsaWNpdGx5IHBhc3MgbWVtb3J5IG9mZiB0bwo+ID4+IENlcGggYW5kIGtlZXAgaXQg
+aW1tdXRhYmxlIHVudGlsIENlcGggaXMgZG9uZSAoYXQgd2hpY2ggcG9pbnQgdGhleSBhcmUKPiA+
+PiB0b2xkIHNvIGV4cGxpY2l0bHkpLgo+ID4KPiA+IFllYWgsIHRoaXMgaXMgc2ltcGxlci4gIEkg
+c3RpbGwgZmVlbCBsaWtlIHdlIHNob3VsZCBwcm92aWRlIGEgd2F5IHRvCj4gPiByZXZva2UgYnVm
+ZmVycywgdGhvdWdoLCBiZWNhdXNlIG90aGVyd2lzZSBpdCdzIHBvc3NpYmxlIGZvciBjYWxscyB0
+byBibG9jawo+ID4gc2VtaS1pbmRlZmluaXRleSBpZiwgc2F5LCBhbiBvbGQgTU9TRE9wIGlzIHF1
+dWVlZCBmb3IgYW5vdGhlciBPU0QgYW5kIHRoYXQKPiA+IE9TRCBpcyBub3QgcmVhZGluZyBkYXRh
+IG9mZiB0aGUgc29ja2V0IGJ1dCBoYXMgbm90IGZhaWxlZCAoZS5nLiwgZHVlIHRvCj4gPiBpdCdz
+IHJ4IHRocm90dGxpbmcpLgo+ID4KPiAKPiBXZSBuZWVkIHRvIHByb3ZpZGUgc29tZSB3YXkgdG8g
+Y2FuY2VsIHJlcXVlc3RzIChhdCBsZWFzdCBmcm9tIHRoZQo+IGNsaWVudCdzIGFzcGVjdCksIHRo
+YXQgd291bGQgZ3VhcmFudGVlIHRoYXQgYnVmZmVycyBhcmUgbm90IGdvaW5nIHRvCj4gYmUgdXNl
+ZCAoYW5kIG5vIGNvbXBsZXRpb24gY2FsbGJhY2sgaXMgZ29pbmcgdG8gYmUgY2FsbGVkKS4KCmlz
+IHRoZSBjbGllbnQvY29uc3VtZXIgY2FuY2VsbGF0aW9uIGFzeW5jIHdydCBjb21wbGV0aW9uPyAg
+YSBjYW5jZWxsYXRpb24gaW4gdGhhdCBjYXNlIGNvdWxkIGVuc3VyZSB0aGF0LCBpZiBpdCBzdWNj
+ZWVkcywgdGhvc2UgZ3VhcmFudGVlcyBhcmUgbWV0LCBvciBlbHNlIGZhaWxzIChiZWNhdXNlIHRo
+ZSBjYWxsYmFjayBhbmQgY29tcGxldGlvbiBoYXZlIHJhY2VkIGNhbmNlbGxhdGlvbik/CgpNYXR0
+Cgo+IAo+IFllaHVkYQo+IC0tCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQg
+dGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluCj4gdGhlIGJvZHkgb2YgYSBtZXNz
+YWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0
+ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKPiAKCi0tIApNYXR0
+IEJlbmphbWluClJlZCBIYXQsIEluYy4KMzE1IFdlc3QgSHVyb24gU3RyZWV0LCBTdWl0ZSAxNDBB
+CkFubiBBcmJvciwgTWljaGlnYW4gNDgxMDMKCmh0dHA6Ly93d3cucmVkaGF0LmNvbS9lbi90ZWNo
+bm9sb2dpZXMvc3RvcmFnZQoKdGVsLiAgNzM0LTgyMS01MTAxCmZheC4gIDczNC03NjktODkzOApj
+ZWwuICA3MzQtMjE2LTUzMDkKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
+bQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
