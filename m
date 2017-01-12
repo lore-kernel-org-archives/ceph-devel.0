@@ -1,16 +1,18 @@
-From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Any librados C API users out there?
-Date: Wed, 11 Jan 2017 13:08:04 -0500
-Message-ID: <CA+aFP1D_Acmta3vZXdGvgmJVtCLLvDbAO5FVZbG+Lh+Cx7Dg3w@mail.gmail.com>
-References: <8d5e71b7-c0f2-0f6f-b38e-03e72f441051@corp.ovh.com>
-	<CA+aFP1B5K-cCcTmp5k4PrfRLFP3=eoVwZk4Fqa=NGd4ZhBGJWg@mail.gmail.com>
-	<alpine.DEB.2.11.1701111755260.5745@piezo.novalocal>
-Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: Dan Mick <dmick-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: tracker.ceph.com
+Date: Wed, 11 Jan 2017 16:10:26 -0800
+Message-ID: <93a20730-57d3-9592-1317-0affa3656ced@redhat.com>
+References: <8421d2fe-067f-97c0-4a79-083c37baee35@redhat.com>
+	<c6a0103f-5f03-b3f6-7a87-80e73e9d49ef@redhat.com>
+	<84d80a96-93d4-4425-ebb5-58b3050687ae@suse.cz>
+	<bac5442d-95fc-ad5f-7879-6a7f5ae9baa0@redhat.com>
+	<cdf1b050-6b7d-d2e2-f05a-2b6d84d0089e@suse.cz>
+	<135821945.5017.1482252480516@ox.pcextreme.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1701111755260.5745-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+In-Reply-To: <135821945.5017.1482252480516-4q+tAGQs9zLCXE5Mi8V/gA@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -20,16 +22,14 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>, David Galloway <dgallowa-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Nathan Cutler <ncutler-AlSwsSmVLrQ@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Jan 11, 2017 at 1:01 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> Jason, where does librbd fall?
+On 12/20/2016 08:48 AM, Wido den Hollander wrote:
 
-Option (2) won't help for users like QEMU unless we can tie the
-reference counting back into the AioCompletion (i.e. delay firing
-until all references to the memory are released).
+> I wouldn't call it a fix. In 2016 (almost 2017) IPv6 should be enabled, no questions asked.
 
--- 
-Jason
+Tell that to every single one of my internet service providers.
+
+no, please, do tell them.  I'm tired of it too.
