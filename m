@@ -1,15 +1,18 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: Any librados C API users out there?
-Date: Thu, 12 Jan 2017 13:48:26 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1701121344270.5745@piezo.novalocal>
+Date: Thu, 12 Jan 2017 08:54:01 -0500
+Message-ID: <CA+aFP1Akuxx5XndUqV=-DmMb3AqwOaK+O9VESKUjpm7Goy5Hvg@mail.gmail.com>
 References: <8d5e71b7-c0f2-0f6f-b38e-03e72f441051@corp.ovh.com>
 	<CA+aFP1B5K-cCcTmp5k4PrfRLFP3=eoVwZk4Fqa=NGd4ZhBGJWg@mail.gmail.com>
 	<alpine.DEB.2.11.1701111755260.5745@piezo.novalocal>
 	<e0e85f8a-5f78-e652-9838-5aae2ef97d14@corp.ovh.com>
+	<alpine.DEB.2.11.1701121344270.5745@piezo.novalocal>
+Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-809660423-1484228908=:5745"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <e0e85f8a-5f78-e652-9838-5aae2ef97d14-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1701121344270.5745-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,124 +22,110 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: =?ISO-8859-2?Q?Piotr_Da=B3ek?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-809660423-1484228908=:5745
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-
-On Thu, 12 Jan 2017, Piotr Dałek wrote:
-> On 01/11/2017 07:01 PM, Sage Weil wrote:
-> > On Wed, 11 Jan 2017, Jason Dillaman wrote:
-> > > On Wed, Jan 11, 2017 at 11:44 AM, Piotr Dałek <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
-> > > wrote:
-> > > > As the subject says - are here any users/consumers of librados C API?
-> > > > I'm
-> > > > asking because we're researching if this PR:
-> > > > https://github.com/ceph/ceph/pull/12216 will be actually beneficial for
-> > > > larger group of users. This PR adds a bunch of new APIs that perform
-> > > > object
-> > > > writes without intermediate data copy, which will reduce cpu and memory
-> > > > load
-> > > > on clients. If you're using librados C API for object writes, feel free
-> > > > to
-> > > > comment here or in the pull request.
-> > > +1
-> > > 
-> > > I'd be happy to tweak the internals of librbd to support pass-through
-> > > of C buffers all the way to librados. librbd clients like QEMU use the
-> > > C API and this currently results in several extra copies (in librbd
-> > > and librados).
-> > 
-> > +1 from me too.
-> > 
-> > The caveat is that we have to be very careful with buffers that are
-> > provided by users.  Currently the userspace messenger code doesn't provide
-> > a way to manage the provenance of references to the buffer::raw_static
-> > buffers, which means that even if the write has completed, there may be
-> > ways for an MOSDOp to still be alive that references that memory.
-> > 
-> > Either (1) we have to audit the code to be sure that by the time the
-> > Objecter request completes we know that all messages and their bufferlists
-> > are cleared (tricky/fragile), or (2) introduce some buffer management
-> > interface in librados so that the buffer lifecycle is independent of the
-> > request.  I would prefer (2), but it means the interfaces would be
-> > something like
-> > 
-> >  rados_buffer_create(...)
-> >  copy your data into that buffer
-> >  rados_write(...) or whatever
-> >  rados_buffer_release(...)
-> > 
-> > and then rados can do the proper refcounting and only deallocate the
-> > memory when all refs have gone away.  Unfortunately, I suspect that there
-> > is a largish category of users where this isn't sufficient... e.g., if
-> > some existing C user has its own buffer and it isn't practical to
-> > allocate/release via rados_buffer_* calls instead of malloc/free (or
-> > whatever).
-> 
-> Personally I vote for (1). That way is time consuming, but may help us find
-> other ways to optimize resource consumption of API itself. In particular, if
-> librbd, as you all wrote, does several copies of user buffers, then maybe it's
-> worth spending some time on figuring out the actual lifetime of buffers?
-> Maybe, for example, buffers in MOSDOp are actually copies of already copied
-> buffers, so the extra copy done by librados is unnecessary?
-> Regardless, the idea behind my PR wasn't to make librados/librbd/libwhatever
-> 100% optimal right away, but to make one step towards it being efficient -
-> recduce cpu and memory usage a bit, have it go through testing, if nothing
-> breaks, try harder until we're close to perfection.
-> even if few percent decrease in memory consumption doesn't look interesting on
-> single-client level, few percents in large scale deployments may mean hundreds
-> of gigabytes of memory that could be put to better use.
-> 
-> (2), and particularly the requirement for API changes, along with need to put
-> user data into specific RADOS structure doesn't look good because
-> - that requires way more changes to user code, and I don't expect any of
-> current user to be interested in that (unless we force it with API change)
-> - most of devs are simply lazy and instead of using "rados_buffer_create" to
-> put their data directly into them, they'll keep using their own buffers and
-> *then* copy them into RADOS buffers, just like we're doing it right now (even
-> if behind the scenes).
-
-Yeah, I think you're right.  The bad news is just that (1) is hard.  It's 
-going to require a few things in order to address the problem of sending 
-multiple MOSDOp requests for the same operation (e.g., after peering).  I 
-think it will mean
-
-- The Message superclass is going to require a new Mutex that is taken by 
-the messenger implementation while accessing the encoded message payload 
-buffer
-
-- It will also need a revoke_buffers() method (that takes the mutex) so 
-that Objecter can yank references to buffers for any messages in flight 
-that it no longer cares about
-
-- Objecter will need to keep a ref of the in-flight request of record.  If 
-it needs to resend to a different OSD, it can use that ref to revoke the 
-buffers.
-
-- Once the operation completes, Objecter can drop it's ref to that 
-Message.
-
-Until we do that, any zero-copy changes like those in the PR will mostly 
-work but trigger use-after-free is various cases where the PG mappings are 
-changing.
-
-sage
---8323329-809660423-1484228908=:5745
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---8323329-809660423-1484228908=:5745--
+VGhlcmUgaXMgb3B0aW9uICgzKSB3aGljaCBpcyB0byBoYXZlIGEgbmV3IChvciBtb2RpZmllZCkK
+ImJ1ZmZlcjo6Y3JlYXRlX3N0YXRpYyIgdGFrZSBhbiBvcHRpb25hbCBjYWxsYmFjayB0byBpbnZv
+a2Ugd2hlbiB0aGUKYnVmZmVyOjpyYXcgb2JqZWN0IGlzIGRlc3RydWN0ZWQuIFRoZSByYXcgcG9p
+bnRlciB3b3VsZCBiZSBkZXN0cnVjdGVkCndoZW4gdGhlIGxhc3QgYnVmZmVyOjpwdHIgLyBidWZm
+ZXI6Omxpc3QgY29udGFpbmluZyBpdCBpcyBkZXN0cnVjdGVkLApzbyB5b3Uga25vdyBpdCdzIG5v
+IGxvbmdlciBiZWluZyByZWZlcmVuY2VkLgoKWW91IGNvdWxkIHRoZW4gaGF2ZSB0aGUgbmV3IEMg
+QVBJIG1ldGhvZHMgdGhhdCB3cmFwIHRoZSBDIGJ1ZmZlciBpbiBhCmJ1ZmZlcmxpc3QgYW5kIHNl
+dCBhIG5ldyBmbGFnIGluIHRoZSBsaWJyYWRvczo6QWlvQ29tcGxldGlvbiB0byBkZWxheQppdHMg
+Y29tcGxldGlvbiB1bnRpbCBhZnRlciBpdCdzIGJvdGggY29tcGxldGVkIGFuZCB0aGUgbWVtb3J5
+IGlzCnJlbGVhc2VkLiBXaGVuIHRoZSBidWZmZXIgaXMgZnJlZWQsIHRoZSBjYWxsYmFjayB3b3Vs
+ZCB1bmJsb2NrIHRoZQpsaWJyYWRvczo6QWlvQ29tcGx0aW9uIGNvbXBsZXRpb24gY2FsbGJhY2su
+CgpPbiBUaHUsIEphbiAxMiwgMjAxNyBhdCA4OjQ4IEFNLCBTYWdlIFdlaWwgPHN3ZWlsQHJlZGhh
+dC5jb20+IHdyb3RlOgo+IE9uIFRodSwgMTIgSmFuIDIwMTcsIFBpb3RyIERhxYJlayB3cm90ZToK
+Pj4gT24gMDEvMTEvMjAxNyAwNzowMSBQTSwgU2FnZSBXZWlsIHdyb3RlOgo+PiA+IE9uIFdlZCwg
+MTEgSmFuIDIwMTcsIEphc29uIERpbGxhbWFuIHdyb3RlOgo+PiA+ID4gT24gV2VkLCBKYW4gMTEs
+IDIwMTcgYXQgMTE6NDQgQU0sIFBpb3RyIERhxYJlayA8cGlvdHIuZGFsZWtAY29ycC5vdmguY29t
+Pgo+PiA+ID4gd3JvdGU6Cj4+ID4gPiA+IEFzIHRoZSBzdWJqZWN0IHNheXMgLSBhcmUgaGVyZSBh
+bnkgdXNlcnMvY29uc3VtZXJzIG9mIGxpYnJhZG9zIEMgQVBJPwo+PiA+ID4gPiBJJ20KPj4gPiA+
+ID4gYXNraW5nIGJlY2F1c2Ugd2UncmUgcmVzZWFyY2hpbmcgaWYgdGhpcyBQUjoKPj4gPiA+ID4g
+aHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9wdWxsLzEyMjE2IHdpbGwgYmUgYWN0dWFsbHkg
+YmVuZWZpY2lhbCBmb3IKPj4gPiA+ID4gbGFyZ2VyIGdyb3VwIG9mIHVzZXJzLiBUaGlzIFBSIGFk
+ZHMgYSBidW5jaCBvZiBuZXcgQVBJcyB0aGF0IHBlcmZvcm0KPj4gPiA+ID4gb2JqZWN0Cj4+ID4g
+PiA+IHdyaXRlcyB3aXRob3V0IGludGVybWVkaWF0ZSBkYXRhIGNvcHksIHdoaWNoIHdpbGwgcmVk
+dWNlIGNwdSBhbmQgbWVtb3J5Cj4+ID4gPiA+IGxvYWQKPj4gPiA+ID4gb24gY2xpZW50cy4gSWYg
+eW91J3JlIHVzaW5nIGxpYnJhZG9zIEMgQVBJIGZvciBvYmplY3Qgd3JpdGVzLCBmZWVsIGZyZWUK
+Pj4gPiA+ID4gdG8KPj4gPiA+ID4gY29tbWVudCBoZXJlIG9yIGluIHRoZSBwdWxsIHJlcXVlc3Qu
+Cj4+ID4gPiArMQo+PiA+ID4KPj4gPiA+IEknZCBiZSBoYXBweSB0byB0d2VhayB0aGUgaW50ZXJu
+YWxzIG9mIGxpYnJiZCB0byBzdXBwb3J0IHBhc3MtdGhyb3VnaAo+PiA+ID4gb2YgQyBidWZmZXJz
+IGFsbCB0aGUgd2F5IHRvIGxpYnJhZG9zLiBsaWJyYmQgY2xpZW50cyBsaWtlIFFFTVUgdXNlIHRo
+ZQo+PiA+ID4gQyBBUEkgYW5kIHRoaXMgY3VycmVudGx5IHJlc3VsdHMgaW4gc2V2ZXJhbCBleHRy
+YSBjb3BpZXMgKGluIGxpYnJiZAo+PiA+ID4gYW5kIGxpYnJhZG9zKS4KPj4gPgo+PiA+ICsxIGZy
+b20gbWUgdG9vLgo+PiA+Cj4+ID4gVGhlIGNhdmVhdCBpcyB0aGF0IHdlIGhhdmUgdG8gYmUgdmVy
+eSBjYXJlZnVsIHdpdGggYnVmZmVycyB0aGF0IGFyZQo+PiA+IHByb3ZpZGVkIGJ5IHVzZXJzLiAg
+Q3VycmVudGx5IHRoZSB1c2Vyc3BhY2UgbWVzc2VuZ2VyIGNvZGUgZG9lc24ndCBwcm92aWRlCj4+
+ID4gYSB3YXkgdG8gbWFuYWdlIHRoZSBwcm92ZW5hbmNlIG9mIHJlZmVyZW5jZXMgdG8gdGhlIGJ1
+ZmZlcjo6cmF3X3N0YXRpYwo+PiA+IGJ1ZmZlcnMsIHdoaWNoIG1lYW5zIHRoYXQgZXZlbiBpZiB0
+aGUgd3JpdGUgaGFzIGNvbXBsZXRlZCwgdGhlcmUgbWF5IGJlCj4+ID4gd2F5cyBmb3IgYW4gTU9T
+RE9wIHRvIHN0aWxsIGJlIGFsaXZlIHRoYXQgcmVmZXJlbmNlcyB0aGF0IG1lbW9yeS4KPj4gPgo+
+PiA+IEVpdGhlciAoMSkgd2UgaGF2ZSB0byBhdWRpdCB0aGUgY29kZSB0byBiZSBzdXJlIHRoYXQg
+YnkgdGhlIHRpbWUgdGhlCj4+ID4gT2JqZWN0ZXIgcmVxdWVzdCBjb21wbGV0ZXMgd2Uga25vdyB0
+aGF0IGFsbCBtZXNzYWdlcyBhbmQgdGhlaXIgYnVmZmVybGlzdHMKPj4gPiBhcmUgY2xlYXJlZCAo
+dHJpY2t5L2ZyYWdpbGUpLCBvciAoMikgaW50cm9kdWNlIHNvbWUgYnVmZmVyIG1hbmFnZW1lbnQK
+Pj4gPiBpbnRlcmZhY2UgaW4gbGlicmFkb3Mgc28gdGhhdCB0aGUgYnVmZmVyIGxpZmVjeWNsZSBp
+cyBpbmRlcGVuZGVudCBvZiB0aGUKPj4gPiByZXF1ZXN0LiAgSSB3b3VsZCBwcmVmZXIgKDIpLCBi
+dXQgaXQgbWVhbnMgdGhlIGludGVyZmFjZXMgd291bGQgYmUKPj4gPiBzb21ldGhpbmcgbGlrZQo+
+PiA+Cj4+ID4gIHJhZG9zX2J1ZmZlcl9jcmVhdGUoLi4uKQo+PiA+ICBjb3B5IHlvdXIgZGF0YSBp
+bnRvIHRoYXQgYnVmZmVyCj4+ID4gIHJhZG9zX3dyaXRlKC4uLikgb3Igd2hhdGV2ZXIKPj4gPiAg
+cmFkb3NfYnVmZmVyX3JlbGVhc2UoLi4uKQo+PiA+Cj4+ID4gYW5kIHRoZW4gcmFkb3MgY2FuIGRv
+IHRoZSBwcm9wZXIgcmVmY291bnRpbmcgYW5kIG9ubHkgZGVhbGxvY2F0ZSB0aGUKPj4gPiBtZW1v
+cnkgd2hlbiBhbGwgcmVmcyBoYXZlIGdvbmUgYXdheS4gIFVuZm9ydHVuYXRlbHksIEkgc3VzcGVj
+dCB0aGF0IHRoZXJlCj4+ID4gaXMgYSBsYXJnaXNoIGNhdGVnb3J5IG9mIHVzZXJzIHdoZXJlIHRo
+aXMgaXNuJ3Qgc3VmZmljaWVudC4uLiBlLmcuLCBpZgo+PiA+IHNvbWUgZXhpc3RpbmcgQyB1c2Vy
+IGhhcyBpdHMgb3duIGJ1ZmZlciBhbmQgaXQgaXNuJ3QgcHJhY3RpY2FsIHRvCj4+ID4gYWxsb2Nh
+dGUvcmVsZWFzZSB2aWEgcmFkb3NfYnVmZmVyXyogY2FsbHMgaW5zdGVhZCBvZiBtYWxsb2MvZnJl
+ZSAob3IKPj4gPiB3aGF0ZXZlcikuCj4+Cj4+IFBlcnNvbmFsbHkgSSB2b3RlIGZvciAoMSkuIFRo
+YXQgd2F5IGlzIHRpbWUgY29uc3VtaW5nLCBidXQgbWF5IGhlbHAgdXMgZmluZAo+PiBvdGhlciB3
+YXlzIHRvIG9wdGltaXplIHJlc291cmNlIGNvbnN1bXB0aW9uIG9mIEFQSSBpdHNlbGYuIEluIHBh
+cnRpY3VsYXIsIGlmCj4+IGxpYnJiZCwgYXMgeW91IGFsbCB3cm90ZSwgZG9lcyBzZXZlcmFsIGNv
+cGllcyBvZiB1c2VyIGJ1ZmZlcnMsIHRoZW4gbWF5YmUgaXQncwo+PiB3b3J0aCBzcGVuZGluZyBz
+b21lIHRpbWUgb24gZmlndXJpbmcgb3V0IHRoZSBhY3R1YWwgbGlmZXRpbWUgb2YgYnVmZmVycz8K
+Pj4gTWF5YmUsIGZvciBleGFtcGxlLCBidWZmZXJzIGluIE1PU0RPcCBhcmUgYWN0dWFsbHkgY29w
+aWVzIG9mIGFscmVhZHkgY29waWVkCj4+IGJ1ZmZlcnMsIHNvIHRoZSBleHRyYSBjb3B5IGRvbmUg
+YnkgbGlicmFkb3MgaXMgdW5uZWNlc3Nhcnk/Cj4+IFJlZ2FyZGxlc3MsIHRoZSBpZGVhIGJlaGlu
+ZCBteSBQUiB3YXNuJ3QgdG8gbWFrZSBsaWJyYWRvcy9saWJyYmQvbGlid2hhdGV2ZXIKPj4gMTAw
+JSBvcHRpbWFsIHJpZ2h0IGF3YXksIGJ1dCB0byBtYWtlIG9uZSBzdGVwIHRvd2FyZHMgaXQgYmVp
+bmcgZWZmaWNpZW50IC0KPj4gcmVjZHVjZSBjcHUgYW5kIG1lbW9yeSB1c2FnZSBhIGJpdCwgaGF2
+ZSBpdCBnbyB0aHJvdWdoIHRlc3RpbmcsIGlmIG5vdGhpbmcKPj4gYnJlYWtzLCB0cnkgaGFyZGVy
+IHVudGlsIHdlJ3JlIGNsb3NlIHRvIHBlcmZlY3Rpb24uCj4+IGV2ZW4gaWYgZmV3IHBlcmNlbnQg
+ZGVjcmVhc2UgaW4gbWVtb3J5IGNvbnN1bXB0aW9uIGRvZXNuJ3QgbG9vayBpbnRlcmVzdGluZyBv
+bgo+PiBzaW5nbGUtY2xpZW50IGxldmVsLCBmZXcgcGVyY2VudHMgaW4gbGFyZ2Ugc2NhbGUgZGVw
+bG95bWVudHMgbWF5IG1lYW4gaHVuZHJlZHMKPj4gb2YgZ2lnYWJ5dGVzIG9mIG1lbW9yeSB0aGF0
+IGNvdWxkIGJlIHB1dCB0byBiZXR0ZXIgdXNlLgo+Pgo+PiAoMiksIGFuZCBwYXJ0aWN1bGFybHkg
+dGhlIHJlcXVpcmVtZW50IGZvciBBUEkgY2hhbmdlcywgYWxvbmcgd2l0aCBuZWVkIHRvIHB1dAo+
+PiB1c2VyIGRhdGEgaW50byBzcGVjaWZpYyBSQURPUyBzdHJ1Y3R1cmUgZG9lc24ndCBsb29rIGdv
+b2QgYmVjYXVzZQo+PiAtIHRoYXQgcmVxdWlyZXMgd2F5IG1vcmUgY2hhbmdlcyB0byB1c2VyIGNv
+ZGUsIGFuZCBJIGRvbid0IGV4cGVjdCBhbnkgb2YKPj4gY3VycmVudCB1c2VyIHRvIGJlIGludGVy
+ZXN0ZWQgaW4gdGhhdCAodW5sZXNzIHdlIGZvcmNlIGl0IHdpdGggQVBJIGNoYW5nZSkKPj4gLSBt
+b3N0IG9mIGRldnMgYXJlIHNpbXBseSBsYXp5IGFuZCBpbnN0ZWFkIG9mIHVzaW5nICJyYWRvc19i
+dWZmZXJfY3JlYXRlIiB0bwo+PiBwdXQgdGhlaXIgZGF0YSBkaXJlY3RseSBpbnRvIHRoZW0sIHRo
+ZXknbGwga2VlcCB1c2luZyB0aGVpciBvd24gYnVmZmVycyBhbmQKPj4gKnRoZW4qIGNvcHkgdGhl
+bSBpbnRvIFJBRE9TIGJ1ZmZlcnMsIGp1c3QgbGlrZSB3ZSdyZSBkb2luZyBpdCByaWdodCBub3cg
+KGV2ZW4KPj4gaWYgYmVoaW5kIHRoZSBzY2VuZXMpLgo+Cj4gWWVhaCwgSSB0aGluayB5b3UncmUg
+cmlnaHQuICBUaGUgYmFkIG5ld3MgaXMganVzdCB0aGF0ICgxKSBpcyBoYXJkLiAgSXQncwo+IGdv
+aW5nIHRvIHJlcXVpcmUgYSBmZXcgdGhpbmdzIGluIG9yZGVyIHRvIGFkZHJlc3MgdGhlIHByb2Js
+ZW0gb2Ygc2VuZGluZwo+IG11bHRpcGxlIE1PU0RPcCByZXF1ZXN0cyBmb3IgdGhlIHNhbWUgb3Bl
+cmF0aW9uIChlLmcuLCBhZnRlciBwZWVyaW5nKS4gIEkKPiB0aGluayBpdCB3aWxsIG1lYW4KPgo+
+IC0gVGhlIE1lc3NhZ2Ugc3VwZXJjbGFzcyBpcyBnb2luZyB0byByZXF1aXJlIGEgbmV3IE11dGV4
+IHRoYXQgaXMgdGFrZW4gYnkKPiB0aGUgbWVzc2VuZ2VyIGltcGxlbWVudGF0aW9uIHdoaWxlIGFj
+Y2Vzc2luZyB0aGUgZW5jb2RlZCBtZXNzYWdlIHBheWxvYWQKPiBidWZmZXIKPgo+IC0gSXQgd2ls
+bCBhbHNvIG5lZWQgYSByZXZva2VfYnVmZmVycygpIG1ldGhvZCAodGhhdCB0YWtlcyB0aGUgbXV0
+ZXgpIHNvCj4gdGhhdCBPYmplY3RlciBjYW4geWFuayByZWZlcmVuY2VzIHRvIGJ1ZmZlcnMgZm9y
+IGFueSBtZXNzYWdlcyBpbiBmbGlnaHQKPiB0aGF0IGl0IG5vIGxvbmdlciBjYXJlcyBhYm91dAo+
+Cj4gLSBPYmplY3RlciB3aWxsIG5lZWQgdG8ga2VlcCBhIHJlZiBvZiB0aGUgaW4tZmxpZ2h0IHJl
+cXVlc3Qgb2YgcmVjb3JkLiAgSWYKPiBpdCBuZWVkcyB0byByZXNlbmQgdG8gYSBkaWZmZXJlbnQg
+T1NELCBpdCBjYW4gdXNlIHRoYXQgcmVmIHRvIHJldm9rZSB0aGUKPiBidWZmZXJzLgo+Cj4gLSBP
+bmNlIHRoZSBvcGVyYXRpb24gY29tcGxldGVzLCBPYmplY3RlciBjYW4gZHJvcCBpdCdzIHJlZiB0
+byB0aGF0Cj4gTWVzc2FnZS4KPgo+IFVudGlsIHdlIGRvIHRoYXQsIGFueSB6ZXJvLWNvcHkgY2hh
+bmdlcyBsaWtlIHRob3NlIGluIHRoZSBQUiB3aWxsIG1vc3RseQo+IHdvcmsgYnV0IHRyaWdnZXIg
+dXNlLWFmdGVyLWZyZWUgaXMgdmFyaW91cyBjYXNlcyB3aGVyZSB0aGUgUEcgbWFwcGluZ3MgYXJl
+Cj4gY2hhbmdpbmcuCj4KPiBzYWdlCgoKCi0tIApKYXNvbgpfX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVz
+ZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2Vw
+aC11c2Vycy1jZXBoLmNvbQo=
