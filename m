@@ -1,77 +1,67 @@
 From: liuchang0812 <liuchang0812@gmail.com>
-Subject: Re: Question about Logging Level
-Date: Thu, 12 Jan 2017 22:03:32 +0800
-Message-ID: <CACKY0b8SD24j7bv_Vn_AD-dA1o-fVJyjkjyXNc0-iKrbQ==jEQ@mail.gmail.com>
-References: <CACKY0b-_ZaLCVUwdW4-p6BtPeaAHQ10B-KqjmxuM+Nh5h_xj5A@mail.gmail.com>
- <CALe9h7eF77h5RA8UYGv6ryC5rLwHJewZjVf8d_eKqNoMnPg6wQ@mail.gmail.com> <alpine.DEB.2.11.1701121338090.5745@piezo.novalocal>
+Subject: Re: XmlFormatter: space isn't allowed in xml tag
+Date: Thu, 12 Jan 2017 21:56:06 +0800
+Message-ID: <CACKY0b_wChMcJYvFp+ZCCy4wCs0_TuB2sBjZb09oRoFLsYduSA@mail.gmail.com>
+References: <CACKY0b9_gPAoB3uWAiom1UiPHvDtbXAFJiCtQZN1PV+ps6P5Yw@mail.gmail.com>
+ <robbat2-20170112T091829-255678655Z@orbis-terrarum.net> <CACKY0b9=9wmNKFa1NEh=qatVHvwRTg0Xh50Xt41QPBsDyA-TWw@mail.gmail.com>
+ <alpine.DEB.2.11.1701121334460.5745@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f193.google.com ([209.85.161.193]:35709 "EHLO
-        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750746AbdALODe (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jan 2017 09:03:34 -0500
-Received: by mail-yw0-f193.google.com with SMTP id 17so1481726ywk.2
-        for <ceph-devel@vger.kernel.org>; Thu, 12 Jan 2017 06:03:33 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1701121338090.5745@piezo.novalocal>
+Received: from mail-yw0-f176.google.com ([209.85.161.176]:36581 "EHLO
+        mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750799AbdALODu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jan 2017 09:03:50 -0500
+Received: by mail-yw0-f176.google.com with SMTP id a10so12313462ywa.3
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Jan 2017 06:03:50 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1701121334460.5745@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-OK, I would like to do it.
+I'm working on it, Thanks for all comments
 
-Thanks for comments.
-
-2017-01-12 21:41 GMT+08:00 Sage Weil <sage@newdream.net>:
-> On Thu, 12 Jan 2017, John Spray wrote:
->> On Thu, Jan 12, 2017 at 8:12 AM, liuchang0812 <liuchang0812@gmail.com> w=
-rote:
->> > Hi, all
->> >
->> > In our documentation, it says that:
->> >
->> >         Ceph=E2=80=99s logging levels operate on a scale of 1 to 20, w=
-here 1
->> > is terse and 20 is verbose.
->> >
->> > http://docs.ceph.com/docs/master/rados/troubleshooting/log-and-debug/#=
-subsystem-log-and-debug-settings
->> >
->> >
->> > But, it seems that there are some logging levels 25 :
->> >
->> >
->> > mds/MDBalancer.cc:276:  dout(25) << "=3D=3D=3D got heartbeat " <<
->> > m->get_beat() << " from " << m->get_source().num() << " " <<
->> > m->get_load() << dendl;
->> > mds/CInode.cc:4189:  dout(25) << __func__ << dendl;
->> > mds/MDCache.cc:11656:    //dout(25) << "saw depth " << d << " " <<
->> > *dir << dendl;
->> > mds/MDCache.cc:11666:   //dout(25) << " saw sub " << **p << dendl;
->> > mds/journal.cc:373:      dout(25) << "EMetaBlob::add_dir_context(" <<
->> > dir << ")      maybe " <<
->> >
->> >
->> > So, shoud we update our documentation, or update logging level to 20?
->>
->> Probably neither -- the >20 log messages are intentionally obscure
->> things (although I do accept that there is a reasonable argument that
->> if we would never turn something on in a real system then we perhaps
->> should not have it in the code...)
+2017-01-12 21:35 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Thu, 12 Jan 2017, liuchang0812 wrote:
+>> ./bin/ceph daemon out/osd.0.asok dump_historic_ops -f xml
+>> <OpHistory><num to keep>20</num to keep><duration to
+>> keep>600</duration to keep><Ops></Ops></OpHistory>
 >
-> FWIW, the guideline I tend to use:
+> Any instance where a Formatter element name has a space in it (and
+> probably uppercase, for that matter) should be considered a bug and fixed
+> (for this very reason).  Please just submit a PR that adds _'s for this
+> one.
 >
->  10 - O(requests)
->  20 - O(requests) or O(internal structures).  e.g., we dump pg log entrie=
-s
-> and dump every element other ptoential large data structures at 20
->  30 - O(bytes).  several bits of code hexdump actual read/write data at
-> 30)
->
-> You could update the doc to mention that there are levels >20 in some rar=
-e
-> cases and that they are extremely verbose.
->
+> Thanks!
 > sage
+>
+>
+>>
+>> I'm not sure whether XML library could decode it, I will have a try
+>>
+>> 2017-01-12 17:20 GMT+08:00 Robin H. Johnson <robbat2@gentoo.org>:
+>> > On Thu, Jan 12, 2017 at 01:27:33PM +0800, liuchang0812 wrote:
+>> >> hi, all
+>> >>
+>> >> an XML tag cannot contains space in it. see
+>> >> https://www.w3.org/TR/2008/REC-xml-20081126/#NT-NameChar.
+>> > Where are spaces leaking into the element names?
+>> >
+>> > I did a refactor of Formatter parters when I was introducing the
+>> > HTMLFormatter used by s3website mode, and I don't recall seeing any
+>> > cases of accidental space in XML element names, at least in the RGW
+>> > side.
+>> >
+>> > --
+>> > Robin Hugh Johnson
+>> > Gentoo Linux: Dev, Infra Lead, Foundation Trustee & Treasurer
+>> > E-Mail   : robbat2@gentoo.org
+>> > GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
+>> > GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
