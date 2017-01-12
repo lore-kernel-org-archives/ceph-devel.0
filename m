@@ -1,58 +1,41 @@
-From: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: RBD v1 image format ...
-Date: Fri, 13 Jan 2017 02:14:24 +0900
-Message-ID: <CAHX7ARv61jYhwS_62OD7Dxr-2Vs+Fn8Rf19-yLcG7T-nZPn5Pg@mail.gmail.com>
-References: <CA+aFP1C6Zc0Pry=bqjNBzqBMdd14zRzRMvy9yaQrM+F_SS9xBQ@mail.gmail.com>
-	<20170112122858.04de2897@batzmaru.gol.ad.jp>
-	<CAHX7ARtB=TqykS0jxUBNBdW0+kS+=rbxXPn7kSAm4r7X+wuWoQ@mail.gmail.com>
-	<CA+aFP1BOgT4rj6LLRQyJwB-egNJU5z8kdwoy+63kyf1rL4Njdw@mail.gmail.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: [PATCH 1/4] ceph: fix endianness of getattr mask in
+ ceph_d_revalidate
+Date: Thu, 12 Jan 2017 12:16:32 -0500
+Message-ID: <1484241392.8506.4.camel@redhat.com>
+References: <1484237565-27423-1-git-send-email-jlayton@redhat.com>
+         <1484237565-27423-2-git-send-email-jlayton@redhat.com>
+         <CAOi1vP8CMkXOj_wFekA-8Az_=boMg6Oz4-Fho6C9jt6XtrVKiw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+aFP1BOgT4rj6LLRQyJwB-egNJU5z8kdwoy+63kyf1rL4Njdw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Jason Dillaman <dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qt0-f177.google.com ([209.85.216.177]:32837 "EHLO
+        mail-qt0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750863AbdALRRX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jan 2017 12:17:23 -0500
+Received: by mail-qt0-f177.google.com with SMTP id v23so24243591qtb.0
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Jan 2017 09:16:36 -0800 (PST)
+In-Reply-To: <CAOi1vP8CMkXOj_wFekA-8Az_=boMg6Oz4-Fho6C9jt6XtrVKiw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-It would be more appreciated to provide users with evaluation results
-of migration and recovery tools by QA to avoid any disaster on
-production environment, and get agreement with them
+On Thu, 2017-01-12 at 17:43 +0100, Ilya Dryomov wrote:
+> On Thu, Jan 12, 2017 at 5:12 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> >     fs/ceph/dir.c:1248:50: warning: incorrect type in assignment (different base types)
+> >     fs/ceph/dir.c:1248:50:    expected restricted __le32 [usertype] mask
+> >     fs/ceph/dir.c:1248:50:    got int [signed] [assigned] mask
+> 
+> This one is missing "sparse says" ;)
+> 
+> Thanks,
 
- e.g.,
- #1 Scenarios we test
- #2 Images spec we use
- and some
+Oops! Fixed in my tree, which is here, btw:
 
-Does it make sense, or too much?
+    git://git.samba.org/jlayton/linux.git
 
-Regards,
-
-
-On Thu, Jan 12, 2017 at 1:01 PM, Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> On Wed, Jan 11, 2017 at 10:43 PM, Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> +2
->>  * Reduce manual operation as much as possible.
->>  * A recovery tool in case that we break something which would not
->> appear to us initially.
->
-> I definitely agree that this is an overdue tool and we have an
-> upstream feature ticket for tracking a possible solution for this [1].
-> We won't remove the support for interacting with v1 images before we
-> provide a path for migration. The Ceph core development team would
-> really like to drop internal support for tmap operations, which are
-> only utilized by RBD v1.
->
-> [1] http://tracker.ceph.com/issues/18430
->
-> --
-> Jason
+...in my ceph-4.10 branch.
+-- 
+Jeff Layton <jlayton@redhat.com>
