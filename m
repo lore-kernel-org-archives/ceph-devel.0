@@ -1,39 +1,49 @@
-From: liuchang0812 <liuchang0812@gmail.com>
-Subject: Re: XmlFormatter: space isn't allowed in xml tag
-Date: Thu, 12 Jan 2017 14:15:37 +0800
-Message-ID: <CACKY0b_9aC4J7yz45u1p4pYvCDXXx5fRACjjez82X7Fuba7HgA@mail.gmail.com>
-References: <CACKY0b9_gPAoB3uWAiom1UiPHvDtbXAFJiCtQZN1PV+ps6P5Yw@mail.gmail.com>
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: Re: [PATCH v2] ceph/iov_iter: fix bad iov_iter handling in ceph
+ splice codepaths
+Date: Thu, 12 Jan 2017 07:59:46 +0000
+Message-ID: <20170112075946.GU1555@ZenIV.linux.org.uk>
+References: <1483727016-343-1-git-send-email-jlayton@redhat.com>
+ <1484053051-23685-1-git-send-email-jlayton@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f171.google.com ([209.85.161.171]:35834 "EHLO
-        mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750698AbdALGPi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jan 2017 01:15:38 -0500
-Received: by mail-yw0-f171.google.com with SMTP id l19so6162298ywc.2
-        for <ceph-devel@vger.kernel.org>; Wed, 11 Jan 2017 22:15:38 -0800 (PST)
-In-Reply-To: <CACKY0b9_gPAoB3uWAiom1UiPHvDtbXAFJiCtQZN1PV+ps6P5Yw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1484053051-23685-1-git-send-email-jlayton@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jeff Layton <jlayton@redhat.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, "Zhu, Caifeng" <zhucaifeng@unissoft-nj.com>
+List-Id: ceph-devel.vger.kernel.org
 
-sorry, Our XMLFormatter has this feature, but lowercased_underscored
-is false default.
+On Tue, Jan 10, 2017 at 07:57:31AM -0500, Jeff Layton wrote:
+> v2: fix bug in offset handling in iov_iter_pvec_size
+> 
+> xfstest generic/095 triggers soft lockups in kcephfs. Basically it uses
+> fio to drive some I/O via vmsplice ane splice. Ceph then ends up trying
+> to access an ITER_BVEC type iov_iter as a ITER_IOVEC one. That causes it
+> to pick up a wrong offset and get stuck in an infinite loop while trying
+> to populate the page array. dio_get_pagev_size has a similar problem.
+> 
+> To fix the first problem, add a new iov_iter helper to determine the
+> offset into the page for the current segment and have ceph call that.
+> I would just replace dio_get_pages_alloc with iov_iter_get_pages_alloc,
+> but that will only return a single page at a time for ITER_BVEC and
+> it's better to make larger requests when possible.
+> 
+> For the second problem, we simply replace it with a new helper that does
+> what it does, but properly for all iov_iter types.
+> 
+> Since we're moving that into generic code, we can also utilize the
+> iterate_all_kinds macro to simplify this. That means that we need to
+> rework the logic a bit since we can't advance to the next vector while
+> checking the current one.
 
+Yecchhh...  That really looks like exposing way too low-level stuff instead
+of coming up with saner primitive ;-/
 
-XMLFormatter(bool pretty = false, bool lowercased_underscored = false);
+Is page vector + offset in the first page + number of bytes really what
+ceph wants?  Would e.g. an array of bio_vec be saner?  Because _that_
+would make a lot more natural iov_iter_get_pages_alloc() analogue...
 
-2017-01-12 13:27 GMT+08:00 liuchang0812 <liuchang0812@gmail.com>:
-> hi, all
->
-> an XML tag cannot contains space in it. see
-> https://www.w3.org/TR/2008/REC-xml-20081126/#NT-NameChar.
->
-> Ceph uses `xmlformatter` to dump XML text, and there are a lot of
-> space in xml tag currently. so, need we fix this?
->
-> We could fix this as :
-> 1. simple solution: replace `space` with `_`
-> 2. urlencode: \n = &#xA; \r = &#xD; \t = &#x9; space = &#x20;
->
-> any comments are appreciated!
+And yes, I realize that you have ->pages wired into the struct ceph_osd_request;
+how painful would it be to have it switched to struct bio_vec array instead?
