@@ -1,51 +1,60 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v2] ceph/iov_iter: fix bad iov_iter handling in ceph
- splice codepaths
-Date: Thu, 12 Jan 2017 13:17:05 +0100
-Message-ID: <CAOi1vP-njp6HKScRuZxx5VY0u0iFiR-Ez7hTKpx0FSS90Kvc4g@mail.gmail.com>
-References: <1483727016-343-1-git-send-email-jlayton@redhat.com>
- <1484053051-23685-1-git-send-email-jlayton@redhat.com> <20170112075946.GU1555@ZenIV.linux.org.uk>
- <CAOi1vP_EB5Eq6eGsDzVyYQpwDRYk=3JuTnro_EJRfqTNcYKknQ@mail.gmail.com>
- <20170112113743.GX1555@ZenIV.linux.org.uk> <CAOi1vP8Gu+Gc0+y8J5G9H14qGh=8o9SuHwYHKFQJgWy3vJQr8Q@mail.gmail.com>
- <20170112115323.GY1555@ZenIV.linux.org.uk>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: XmlFormatter: space isn't allowed in xml tag
+Date: Thu, 12 Jan 2017 13:35:43 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1701121334460.5745@piezo.novalocal>
+References: <CACKY0b9_gPAoB3uWAiom1UiPHvDtbXAFJiCtQZN1PV+ps6P5Yw@mail.gmail.com> <robbat2-20170112T091829-255678655Z@orbis-terrarum.net> <CACKY0b9=9wmNKFa1NEh=qatVHvwRTg0Xh50Xt41QPBsDyA-TWw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170112115323.GY1555@ZenIV.linux.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: Jeff Layton <jlayton@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Zhu, Caifeng" <zhucaifeng@unissoft-nj.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:48687 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750755AbdALNfq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jan 2017 08:35:46 -0500
+In-Reply-To: <CACKY0b9=9wmNKFa1NEh=qatVHvwRTg0Xh50Xt41QPBsDyA-TWw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: liuchang0812 <liuchang0812@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Jan 12, 2017 at 12:53 PM, Al Viro <viro@zeniv.linux.org.uk> wrote:
-> On Thu, Jan 12, 2017 at 12:46:42PM +0100, Ilya Dryomov wrote:
->> On Thu, Jan 12, 2017 at 12:37 PM, Al Viro <viro@zeniv.linux.org.uk> wrote:
->> > On Thu, Jan 12, 2017 at 12:13:31PM +0100, Ilya Dryomov wrote:
->> >
->> >> It would be a significant and wide-reaching change, but I've been
->> >> meaning to look into switching to iov_iter for a couple of releases
->> >> now.  There is a lot of ugly code in net/ceph/messenger.c to hangle
->> >> iteration over "page vectors", "page lists" and "bio lists".  All of it
->> >> predates iov_iter proliferation and is mostly incomplete anyway: IIRC
->> >> you can send out of a pagelist but can't recv into a pagelist, etc.
->> >
->> > Wait a sec...  Is it done from the same thread that has issued a syscall?
->> > If so, we certainly could just pass iov_iter without bothering with any
->> > form of ..._get_pages(); if not, we'll need at least to get from iovec
->> > to bio_vec, since userland addresses make sense only in the caller's
->> > context...
->>
->> No, not necessarily - it's also used by rbd (all of net/ceph has two
->> users: fs/ceph and drivers/block/rbd.c).
->
-> Yes, but rbd doesn't deal with userland-pointing iovecs at all, does it?
+On Thu, 12 Jan 2017, liuchang0812 wrote:
+> ./bin/ceph daemon out/osd.0.asok dump_historic_ops -f xml
+> <OpHistory><num to keep>20</num to keep><duration to
+> keep>600</duration to keep><Ops></Ops></OpHistory>
 
-Correct.  Normal I/O is all bios + currently it uses some of that
-custom page vector/list machinery for maintenance operations (rbd
-metadata, locks, etc).  No userland pointers whatsoever for rbd, but
-the messenger (checksumming + {send,recv}{msg,page}) runs out of the
-kworker for both rbd and cephfs.
+Any instance where a Formatter element name has a space in it (and 
+probably uppercase, for that matter) should be considered a bug and fixed 
+(for this very reason).  Please just submit a PR that adds _'s for this 
+one.
 
-Thanks,
+Thanks!
+sage
 
-                Ilya
+
+> 
+> I'm not sure whether XML library could decode it, I will have a try
+> 
+> 2017-01-12 17:20 GMT+08:00 Robin H. Johnson <robbat2@gentoo.org>:
+> > On Thu, Jan 12, 2017 at 01:27:33PM +0800, liuchang0812 wrote:
+> >> hi, all
+> >>
+> >> an XML tag cannot contains space in it. see
+> >> https://www.w3.org/TR/2008/REC-xml-20081126/#NT-NameChar.
+> > Where are spaces leaking into the element names?
+> >
+> > I did a refactor of Formatter parters when I was introducing the
+> > HTMLFormatter used by s3website mode, and I don't recall seeing any
+> > cases of accidental space in XML element names, at least in the RGW
+> > side.
+> >
+> > --
+> > Robin Hugh Johnson
+> > Gentoo Linux: Dev, Infra Lead, Foundation Trustee & Treasurer
+> > E-Mail   : robbat2@gentoo.org
+> > GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
+> > GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
