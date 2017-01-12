@@ -1,43 +1,30 @@
-From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: RBD v1 image format ...
-Date: Wed, 11 Jan 2017 23:01:49 -0500
-Message-ID: <CA+aFP1BOgT4rj6LLRQyJwB-egNJU5z8kdwoy+63kyf1rL4Njdw@mail.gmail.com>
-References: <CA+aFP1C6Zc0Pry=bqjNBzqBMdd14zRzRMvy9yaQrM+F_SS9xBQ@mail.gmail.com>
-	<20170112122858.04de2897@batzmaru.gol.ad.jp>
-	<CAHX7ARtB=TqykS0jxUBNBdW0+kS+=rbxXPn7kSAm4r7X+wuWoQ@mail.gmail.com>
-Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: liuchang0812 <liuchang0812@gmail.com>
+Subject: XmlFormatter: space isn't allowed in xml tag
+Date: Thu, 12 Jan 2017 13:27:33 +0800
+Message-ID: <CACKY0b9_gPAoB3uWAiom1UiPHvDtbXAFJiCtQZN1PV+ps6P5Yw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAHX7ARtB=TqykS0jxUBNBdW0+kS+=rbxXPn7kSAm4r7X+wuWoQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yw0-f172.google.com ([209.85.161.172]:35795 "EHLO
+        mail-yw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750700AbdALF1e (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jan 2017 00:27:34 -0500
+Received: by mail-yw0-f172.google.com with SMTP id l19so5681833ywc.2
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Jan 2017 21:27:34 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Jan 11, 2017 at 10:43 PM, Shinobu Kinjo <skinjo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> +2
->  * Reduce manual operation as much as possible.
->  * A recovery tool in case that we break something which would not
-> appear to us initially.
+hi, all
 
-I definitely agree that this is an overdue tool and we have an
-upstream feature ticket for tracking a possible solution for this [1].
-We won't remove the support for interacting with v1 images before we
-provide a path for migration. The Ceph core development team would
-really like to drop internal support for tmap operations, which are
-only utilized by RBD v1.
+an XML tag cannot contains space in it. see
+https://www.w3.org/TR/2008/REC-xml-20081126/#NT-NameChar.
 
-[1] http://tracker.ceph.com/issues/18430
+Ceph uses `xmlformatter` to dump XML text, and there are a lot of
+space in xml tag currently. so, need we fix this?
 
--- 
-Jason
+We could fix this as :
+1. simple solution: replace `space` with `_`
+2. urlencode: \n = &#xA; \r = &#xD; \t = &#x9; space = &#x20;
+
+any comments are appreciated!
