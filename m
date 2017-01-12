@@ -1,82 +1,78 @@
-From: Matt Benjamin <mbenjamin-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Any librados C API users out there?
-Date: Thu, 12 Jan 2017 17:14:18 -0500 (EST)
-Message-ID: <1347446993.88764846.1484259258638.JavaMail.zimbra@redhat.com>
+From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
+Subject: Re: [ceph-users] Any librados C API users out there?
+Date: Thu, 12 Jan 2017 14:32:54 -0800
+Message-ID: <CADRKj5RavoMJdr7P3HsBqSO_Pok7N6g-5EN9mAGKYfr2DzitSw@mail.gmail.com>
 References: <8d5e71b7-c0f2-0f6f-b38e-03e72f441051@corp.ovh.com>
-	<alpine.DEB.2.11.1701111755260.5745@piezo.novalocal>
-	<e0e85f8a-5f78-e652-9838-5aae2ef97d14@corp.ovh.com>
-	<alpine.DEB.2.11.1701121344270.5745@piezo.novalocal>
-	<CA+aFP1Akuxx5XndUqV=-DmMb3AqwOaK+O9VESKUjpm7Goy5Hvg@mail.gmail.com>
-	<CAJ4mKGb4T8r2adVZHnboQpr=0_t+FkM4y7kjvnBo0gvquyQ9rQ@mail.gmail.com>
-	<alpine.DEB.2.11.1701122006270.5745@piezo.novalocal>
-	<CADRKj5RZOD1MuhC08n50VCWaj+qcKEOMEWtybEVcmHP3DSz+Tg@mail.gmail.com>
+ <alpine.DEB.2.11.1701111755260.5745@piezo.novalocal> <e0e85f8a-5f78-e652-9838-5aae2ef97d14@corp.ovh.com>
+ <alpine.DEB.2.11.1701121344270.5745@piezo.novalocal> <CA+aFP1Akuxx5XndUqV=-DmMb3AqwOaK+O9VESKUjpm7Goy5Hvg@mail.gmail.com>
+ <CAJ4mKGb4T8r2adVZHnboQpr=0_t+FkM4y7kjvnBo0gvquyQ9rQ@mail.gmail.com>
+ <alpine.DEB.2.11.1701122006270.5745@piezo.novalocal> <CADRKj5RZOD1MuhC08n50VCWaj+qcKEOMEWtybEVcmHP3DSz+Tg@mail.gmail.com>
+ <1347446993.88764846.1484259258638.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CADRKj5RZOD1MuhC08n50VCWaj+qcKEOMEWtybEVcmHP3DSz+Tg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Yehuda Sadeh-Weinraub <ysadehwe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f48.google.com ([209.85.213.48]:36019 "EHLO
+        mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750850AbdALWdp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jan 2017 17:33:45 -0500
+Received: by mail-vk0-f48.google.com with SMTP id t8so22323950vke.3
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Jan 2017 14:32:55 -0800 (PST)
+In-Reply-To: <1347446993.88764846.1484259258638.JavaMail.zimbra@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Jason Dillaman <dillaman@redhat.com>, =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek@corp.ovh.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
-SGksCgotLS0tLSBPcmlnaW5hbCBNZXNzYWdlIC0tLS0tCj4gRnJvbTogIlllaHVkYSBTYWRlaC1X
-ZWlucmF1YiIgPHlzYWRlaHdlQHJlZGhhdC5jb20+Cj4gVG86ICJTYWdlIFdlaWwiIDxzd2VpbEBy
-ZWRoYXQuY29tPgo+IENjOiAiR3JlZ29yeSBGYXJudW0iIDxnZmFybnVtQHJlZGhhdC5jb20+LCAi
-SmFzb24gRGlsbGFtYW4iIDxkaWxsYW1hbkByZWRoYXQuY29tPiwgIlBpb3RyIERhxYJlayIKPiA8
-cGlvdHIuZGFsZWtAY29ycC5vdmguY29tPiwgImNlcGgtZGV2ZWwiIDxjZXBoLWRldmVsQHZnZXIu
-a2VybmVsLm9yZz4sICJjZXBoLXVzZXJzIiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbT4KPiBT
-ZW50OiBUaHVyc2RheSwgSmFudWFyeSAxMiwgMjAxNyAzOjIyOjA2IFBNCj4gU3ViamVjdDogUmU6
-IFtjZXBoLXVzZXJzXSBBbnkgbGlicmFkb3MgQyBBUEkgdXNlcnMgb3V0IHRoZXJlPwo+IAo+IE9u
-IFRodSwgSmFuIDEyLCAyMDE3IGF0IDEyOjA4IFBNLCBTYWdlIFdlaWwgPHN3ZWlsQHJlZGhhdC5j
-b20+IHdyb3RlOgo+ID4gT24gVGh1LCAxMiBKYW4gMjAxNywgR3JlZ29yeSBGYXJudW0gd3JvdGU6
-Cj4gPj4gT24gVGh1LCBKYW4gMTIsIDIwMTcgYXQgNTo1NCBBTSwgSmFzb24gRGlsbGFtYW4gPGpk
-aWxsYW1hQHJlZGhhdC5jb20+Cj4gPj4gd3JvdGU6Cj4gPj4gPiBUaGVyZSBpcyBvcHRpb24gKDMp
-IHdoaWNoIGlzIHRvIGhhdmUgYSBuZXcgKG9yIG1vZGlmaWVkKQo+ID4+ID4gImJ1ZmZlcjo6Y3Jl
-YXRlX3N0YXRpYyIgdGFrZSBhbiBvcHRpb25hbCBjYWxsYmFjayB0byBpbnZva2Ugd2hlbiB0aGUK
-PiA+PiA+IGJ1ZmZlcjo6cmF3IG9iamVjdCBpcyBkZXN0cnVjdGVkLiBUaGUgcmF3IHBvaW50ZXIg
-d291bGQgYmUgZGVzdHJ1Y3RlZAo+ID4+ID4gd2hlbiB0aGUgbGFzdCBidWZmZXI6OnB0ciAvIGJ1
-ZmZlcjo6bGlzdCBjb250YWluaW5nIGl0IGlzIGRlc3RydWN0ZWQsCj4gPj4gPiBzbyB5b3Uga25v
-dyBpdCdzIG5vIGxvbmdlciBiZWluZyByZWZlcmVuY2VkLgo+ID4+ID4KPiA+PiA+IFlvdSBjb3Vs
-ZCB0aGVuIGhhdmUgdGhlIG5ldyBDIEFQSSBtZXRob2RzIHRoYXQgd3JhcCB0aGUgQyBidWZmZXIg
-aW4gYQo+ID4+ID4gYnVmZmVybGlzdCBhbmQgc2V0IGEgbmV3IGZsYWcgaW4gdGhlIGxpYnJhZG9z
-OjpBaW9Db21wbGV0aW9uIHRvIGRlbGF5Cj4gPj4gPiBpdHMgY29tcGxldGlvbiB1bnRpbCBhZnRl
-ciBpdCdzIGJvdGggY29tcGxldGVkIGFuZCB0aGUgbWVtb3J5IGlzCj4gPj4gPiByZWxlYXNlZC4g
-V2hlbiB0aGUgYnVmZmVyIGlzIGZyZWVkLCB0aGUgY2FsbGJhY2sgd291bGQgdW5ibG9jayB0aGUK
-PiA+PiA+IGxpYnJhZG9zOjpBaW9Db21wbHRpb24gY29tcGxldGlvbiBjYWxsYmFjay4KPiA+Pgo+
-ID4+IEkgbXVjaCBwcmVmZXIgYW4gYXBwcm9hY2ggbGlrZSB0aGlzOiBpdCdzIHplcm8tY29weTsg
-aXQncyBub3QgYSBsb3Qgb2YKPiA+PiB1c2VyIG92ZXJoZWFkOyBidXQgaXQgcmVxdWlyZXMgdGhl
-bSB0byBleHBsaWNpdGx5IHBhc3MgbWVtb3J5IG9mZiB0bwo+ID4+IENlcGggYW5kIGtlZXAgaXQg
-aW1tdXRhYmxlIHVudGlsIENlcGggaXMgZG9uZSAoYXQgd2hpY2ggcG9pbnQgdGhleSBhcmUKPiA+
-PiB0b2xkIHNvIGV4cGxpY2l0bHkpLgo+ID4KPiA+IFllYWgsIHRoaXMgaXMgc2ltcGxlci4gIEkg
-c3RpbGwgZmVlbCBsaWtlIHdlIHNob3VsZCBwcm92aWRlIGEgd2F5IHRvCj4gPiByZXZva2UgYnVm
-ZmVycywgdGhvdWdoLCBiZWNhdXNlIG90aGVyd2lzZSBpdCdzIHBvc3NpYmxlIGZvciBjYWxscyB0
-byBibG9jawo+ID4gc2VtaS1pbmRlZmluaXRleSBpZiwgc2F5LCBhbiBvbGQgTU9TRE9wIGlzIHF1
-dWVlZCBmb3IgYW5vdGhlciBPU0QgYW5kIHRoYXQKPiA+IE9TRCBpcyBub3QgcmVhZGluZyBkYXRh
-IG9mZiB0aGUgc29ja2V0IGJ1dCBoYXMgbm90IGZhaWxlZCAoZS5nLiwgZHVlIHRvCj4gPiBpdCdz
-IHJ4IHRocm90dGxpbmcpLgo+ID4KPiAKPiBXZSBuZWVkIHRvIHByb3ZpZGUgc29tZSB3YXkgdG8g
-Y2FuY2VsIHJlcXVlc3RzIChhdCBsZWFzdCBmcm9tIHRoZQo+IGNsaWVudCdzIGFzcGVjdCksIHRo
-YXQgd291bGQgZ3VhcmFudGVlIHRoYXQgYnVmZmVycyBhcmUgbm90IGdvaW5nIHRvCj4gYmUgdXNl
-ZCAoYW5kIG5vIGNvbXBsZXRpb24gY2FsbGJhY2sgaXMgZ29pbmcgdG8gYmUgY2FsbGVkKS4KCmlz
-IHRoZSBjbGllbnQvY29uc3VtZXIgY2FuY2VsbGF0aW9uIGFzeW5jIHdydCBjb21wbGV0aW9uPyAg
-YSBjYW5jZWxsYXRpb24gaW4gdGhhdCBjYXNlIGNvdWxkIGVuc3VyZSB0aGF0LCBpZiBpdCBzdWNj
-ZWVkcywgdGhvc2UgZ3VhcmFudGVlcyBhcmUgbWV0LCBvciBlbHNlIGZhaWxzIChiZWNhdXNlIHRo
-ZSBjYWxsYmFjayBhbmQgY29tcGxldGlvbiBoYXZlIHJhY2VkIGNhbmNlbGxhdGlvbik/CgpNYXR0
-Cgo+IAo+IFllaHVkYQo+IC0tCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQg
-dGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluCj4gdGhlIGJvZHkgb2YgYSBtZXNz
-YWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0
-ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwKPiAKCi0tIApNYXR0
-IEJlbmphbWluClJlZCBIYXQsIEluYy4KMzE1IFdlc3QgSHVyb24gU3RyZWV0LCBTdWl0ZSAxNDBB
-CkFubiBBcmJvciwgTWljaGlnYW4gNDgxMDMKCmh0dHA6Ly93d3cucmVkaGF0LmNvbS9lbi90ZWNo
-bm9sb2dpZXMvc3RvcmFnZQoKdGVsLiAgNzM0LTgyMS01MTAxCmZheC4gIDczNC03NjktODkzOApj
-ZWwuICA3MzQtMjE2LTUzMDkKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNv
-bQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+On Thu, Jan 12, 2017 at 2:14 PM, Matt Benjamin <mbenjamin@redhat.com> wrote:
+> Hi,
+>
+> ----- Original Message -----
+>> From: "Yehuda Sadeh-Weinraub" <ysadehwe@redhat.com>
+>> To: "Sage Weil" <sweil@redhat.com>
+>> Cc: "Gregory Farnum" <gfarnum@redhat.com>, "Jason Dillaman" <dillaman@redhat.com>, "Piotr Dałek"
+>> <piotr.dalek@corp.ovh.com>, "ceph-devel" <ceph-devel@vger.kernel.org>, "ceph-users" <ceph-users@lists.ceph.com>
+>> Sent: Thursday, January 12, 2017 3:22:06 PM
+>> Subject: Re: [ceph-users] Any librados C API users out there?
+>>
+>> On Thu, Jan 12, 2017 at 12:08 PM, Sage Weil <sweil@redhat.com> wrote:
+>> > On Thu, 12 Jan 2017, Gregory Farnum wrote:
+>> >> On Thu, Jan 12, 2017 at 5:54 AM, Jason Dillaman <jdillama@redhat.com>
+>> >> wrote:
+>> >> > There is option (3) which is to have a new (or modified)
+>> >> > "buffer::create_static" take an optional callback to invoke when the
+>> >> > buffer::raw object is destructed. The raw pointer would be destructed
+>> >> > when the last buffer::ptr / buffer::list containing it is destructed,
+>> >> > so you know it's no longer being referenced.
+>> >> >
+>> >> > You could then have the new C API methods that wrap the C buffer in a
+>> >> > bufferlist and set a new flag in the librados::AioCompletion to delay
+>> >> > its completion until after it's both completed and the memory is
+>> >> > released. When the buffer is freed, the callback would unblock the
+>> >> > librados::AioCompltion completion callback.
+>> >>
+>> >> I much prefer an approach like this: it's zero-copy; it's not a lot of
+>> >> user overhead; but it requires them to explicitly pass memory off to
+>> >> Ceph and keep it immutable until Ceph is done (at which point they are
+>> >> told so explicitly).
+>> >
+>> > Yeah, this is simpler.  I still feel like we should provide a way to
+>> > revoke buffers, though, because otherwise it's possible for calls to block
+>> > semi-indefinitey if, say, an old MOSDOp is quueed for another OSD and that
+>> > OSD is not reading data off the socket but has not failed (e.g., due to
+>> > it's rx throttling).
+>> >
+>>
+>> We need to provide some way to cancel requests (at least from the
+>> client's aspect), that would guarantee that buffers are not going to
+>> be used (and no completion callback is going to be called).
+>
+> is the client/consumer cancellation async wrt completion?  a cancellation in that case could ensure that, if it succeeds, those guarantees are met, or else fails (because the callback and completion have raced cancellation)?
+>
+
+A cancellation succeeding would mean that no completion callback is
+triggering, nor will it trigger. This means that in order for the
+cancellation to complete, any ongoing completions will need to finish.
+So either it waits on the completion to finish or abort cancellation.
+
+Yehuda
