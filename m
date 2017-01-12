@@ -1,216 +1,216 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: resharding behavior in bluestore
-Date: Thu, 12 Jan 2017 11:54:55 -0600
-Message-ID: <fbbb0649-d540-a208-c38d-f0d4e1349969@redhat.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: resharding behavior in bluestore
+Date: Thu, 12 Jan 2017 18:09:53 +0000
+Message-ID: <5E3E05AED7F0F044904275810D0CB465054CBF@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 References: <d7927e46-c340-0f41-7a83-a290aa628944@redhat.com>
  <5E3E05AED7F0F044904275810D0CB465054C6A@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
  <40920eb1-6cd6-ada4-01a4-17b9daa9d14c@redhat.com>
  <5E3E05AED7F0F044904275810D0CB465054C9F@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <fbbb0649-d540-a208-c38d-f0d4e1349969@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36538 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751454AbdALRzP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 12 Jan 2017 12:55:15 -0500
-In-Reply-To: <5E3E05AED7F0F044904275810D0CB465054C9F@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+Received: from mail-sn1nam02on0068.outbound.protection.outlook.com ([104.47.36.68]:59392
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750812AbdALSKD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 12 Jan 2017 13:10:03 -0500
+In-Reply-To: <fbbb0649-d540-a208-c38d-f0d4e1349969@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-
-
-On 01/12/2017 11:39 AM, Somnath Roy wrote:
-> Other two places are from extentmap::update().
-> It is called from here within _txc_write_nodes()
->
->     if (!reshard) {
->       reshard = o->extent_map.update(t, false);
->     }
->
-> Most likely, reshard is triggered from update() unless you changed the extent size , for ex : if you are trying with different fio block sizes.
-
-
-Ah, I see.  We are only using needs_reshard to populate the local 
-reshard variable in _txc_write_nodes() but may modify it as a result of 
-the first update attempt (and modify it again later, but only for 
-debugging since it goes out of scope).
-
-Yes, I agree that this is likely being triggered from update(), 
-especially in the 16k min_alloc case.
-
-Mark
-
->
-> Thanks & Regards
-> Somnath
-> -----Original Message-----
-> From: Mark Nelson [mailto:mnelson@redhat.com]
-> Sent: Thursday, January 12, 2017 9:26 AM
-> To: Somnath Roy; ceph-devel
-> Subject: Re: resharding behavior in bluestore
->
->
->
-> On 01/12/2017 10:37 AM, Somnath Roy wrote:
->> Mark,
->> Could you check what condition it is triggering reshard for you ?
->> Under following circumstances it could trigger reshard.
->>
->> 1. Shard size > bluestore_extent_map_shard_max_size
->>
->> 2. Shard size < bluestore_extent_map_shard_min_size and non-last shard
->>
->> 3. And from BlueStore::Extent *BlueStore::ExtentMap::set_lextent() if
->> extents spans shard
->
->  From the code, it looks to me like the only place where needs_reshard gets set to true is in set_lextent() when spans_shard is true:
->
-> if (!needs_reshard && spans_shard(logical_offset, length)) {
->    needs_reshard = true;
-> }
->
-> spans_shard basically just looks for the shard at the given offset, the checks that the offset+length doesn't overlap with the next shard's offset.
->
-> Mark
->
->>
->> Thanks & Regards
->> Somnath
->>
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org
->> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
->> Sent: Thursday, January 12, 2017 7:32 AM
->> To: ceph-devel
->> Subject: resharding behavior in bluestore
->>
->> Hi All,
->>
->> I spent some time this week digging into the resharding code in bluestore.  I confess I still don't totally understand how it is supposed to work with regard to min_alloc_size, however I suspect that the current behavior is likely not expected.  To determine this, I added logging to dump the shard_info vector before and after the swap in BlueStore::ExtentMap::reshard.
->>
->> No matter what settings I tested with, the initial reshard always goes from 0 shards to 8, always with the exact same offsets ala:
->>
->>> 2017-01-11 16:44:39.359340 7f92d6cbe700  6
->>> bluestore.onode(0x5644152dfb80) *** old shards ***
->>> 2017-01-11 16:44:39.359356 7f92d6cbe700  6
->>> bluestore.onode(0x5644152dfb80) *** new shards ***
->>> 2017-01-11 16:44:39.359358 7f92d6cbe700  1
->>> bluestore.onode(0x5644152dfb80) shard: 0, offset: 0, bytes: 0
->>> 2017-01-11 16:44:39.359360 7f92d6cbe700  1
->>> bluestore.onode(0x5644152dfb80) shard: 1, offset: 524288, bytes: 0
->>> 2017-01-11 16:44:39.359362 7f92d6cbe700  1
->>> bluestore.onode(0x5644152dfb80) shard: 2, offset: 1048576, bytes: 0
->>> 2017-01-11 16:44:39.359364 7f92d6cbe700  1
->>> bluestore.onode(0x5644152dfb80) shard: 3, offset: 1572864, bytes: 0
->>> 2017-01-11 16:44:39.359365 7f92d6cbe700  1
->>> bluestore.onode(0x5644152dfb80) shard: 4, offset: 2097152, bytes: 0
->>> 2017-01-11 16:44:39.359366 7f92d6cbe700  1
->>> bluestore.onode(0x5644152dfb80) shard: 5, offset: 2621440, bytes: 0
->>> 2017-01-11 16:44:39.359367 7f92d6cbe700  1
->>> bluestore.onode(0x5644152dfb80) shard: 6, offset: 3145728, bytes: 0
->>> 2017-01-11 16:44:39.359368 7f92d6cbe700  1
->>> bluestore.onode(0x5644152dfb80) shard: 7, offset: 3670016, bytes: 0
->>
->> When a 16k min_alloc size is used, subsequent reshards always reshard into 8 shards with the same offsets:
->>
->>> 2017-01-11 17:00:00.000835 7f92d54bb700  6
->>> bluestore.onode(0x56446937ef80) *** old shards ***
->>> 2017-01-11 17:00:00.000839 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 0, offset: 0, bytes: 529
->>> 2017-01-11 17:00:00.000841 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 1, offset: 524288, bytes: 531
->>> 2017-01-11 17:00:00.000843 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 2, offset: 1048576, bytes: 531
->>> 2017-01-11 17:00:00.000844 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 3, offset: 1572864, bytes: 531
->>> 2017-01-11 17:00:00.000846 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 4, offset: 2097152, bytes: 531
->>> 2017-01-11 17:00:00.000847 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 5, offset: 2621440, bytes: 531
->>> 2017-01-11 17:00:00.000849 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 6, offset: 3145728, bytes: 531
->>> 2017-01-11 17:00:00.000850 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 7, offset: 3670016, bytes: 531
->>> 2017-01-11 17:00:00.000852 7f92d54bb700  6
->>> bluestore.onode(0x56446937ef80) *** new shards ***
->>> 2017-01-11 17:00:00.000853 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 0, offset: 0, bytes: 0
->>> 2017-01-11 17:00:00.000855 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 1, offset: 524288, bytes: 0
->>> 2017-01-11 17:00:00.000856 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 2, offset: 1048576, bytes: 0
->>> 2017-01-11 17:00:00.000858 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 3, offset: 1572864, bytes: 0
->>> 2017-01-11 17:00:00.000859 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 4, offset: 2097152, bytes: 0
->>> 2017-01-11 17:00:00.000860 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 5, offset: 2621440, bytes: 0
->>> 2017-01-11 17:00:00.000862 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 6, offset: 3145728, bytes: 0
->>> 2017-01-11 17:00:00.000863 7f92d54bb700  1
->>> bluestore.onode(0x56446937ef80) shard: 7, offset: 3670016, bytes: 0
->>>
->>
->> This is true no matter what the ExtentMap max/target shard sizes are.
->> However with smaller sizes, this reshard process happens far more often.
->>   With 4K min_alloc_size, the initial reshard still goes from 0 to 8, but subsequent reshards are more as expected:
->>
->>> 2017-01-12 09:35:41.923467 7ff4e4e28700  6
->>> bluestore.onode(0x55fcc45e8a00) *** old shards ***
->>> 2017-01-12 09:35:41.923484 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 0, offset: 0, bytes: 529
->>> 2017-01-12 09:35:41.923487 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 1, offset: 524288, bytes: 531
->>> 2017-01-12 09:35:41.923488 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 2, offset: 1048576, bytes: 531
->>> 2017-01-12 09:35:41.923489 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 3, offset: 1572864, bytes: 531
->>> 2017-01-12 09:35:41.923491 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 4, offset: 2097152, bytes: 531
->>> 2017-01-12 09:35:41.923491 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 5, offset: 2621440, bytes: 531
->>> 2017-01-12 09:35:41.923495 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 6, offset: 3145728, bytes: 531
->>> 2017-01-12 09:35:41.923496 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 7, offset: 3670016, bytes: 531
->>> 2017-01-12 09:35:41.923499 7ff4e4e28700  6
->>> bluestore.onode(0x55fcc45e8a00) *** new shards ***
->>> 2017-01-12 09:35:41.923500 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 0, offset: 0, bytes: 0
->>> 2017-01-12 09:35:41.923501 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 1, offset: 520192, bytes: 0
->>> 2017-01-12 09:35:41.923501 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 2, offset: 528384, bytes: 0
->>> 2017-01-12 09:35:41.923502 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 3, offset: 1048576, bytes: 0
->>> 2017-01-12 09:35:41.923503 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 4, offset: 1572864, bytes: 0
->>> 2017-01-12 09:35:41.923504 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 5, offset: 2097152, bytes: 0
->>> 2017-01-12 09:35:41.923505 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 6, offset: 2621440, bytes: 0
->>> 2017-01-12 09:35:41.923506 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 7, offset: 3145728, bytes: 0
->>> 2017-01-12 09:35:41.923507 7ff4e4e28700  1
->>> bluestore.onode(0x55fcc45e8a00) shard: 8, offset: 3670016, bytes: 0
->>
->> larger extentmap shard target/max sizes result in much fewer reshards, while smaller values result in very rapid resharding and much larger shard counts as expected.  Also, you can see here that each reshard only produces marginally different offsets.  Leaving the old offsets in place and inserting new shards in the middle (or having a tree structure) I think would result in far higher reshard performance as Sage suggested.
->>
->> This is what I've got right now.  More to come.
->>
->> Mark
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->>
->> ________________________________
->>
->> PLEASE NOTE: The information contained in this electronic mail message is intended only for the use of the designated recipient(s) named above. If the reader of this message is not the intended recipient, you are hereby notified that you have received this message in error and that any review, dissemination, distribution, or copying of this message is strictly prohibited. If you have received this communication in error, please notify the sender by telephone or e-mail (as shown above) immediately and destroy any and all copies of this message in your possession (whether hard copies or electronically stored copies).
->>
->> N     r  y   b X  ǧv ^ )޺{.n +   z ]z   {ay ʇڙ ,j   f   h   z  w
->    j:+v   w j m         zZ+     ݢj"  !tml=
->>
+VGhlcmUgd2FzIGEgYnVnIGFzIGl0IHdhcyB0cmlnZ2VyaW5nIHJlc2hhcmQgbW9yZSBvZnRlbiBk
+dWUgdG8gc2hhcmQgc2l6ZSB3YXMgZmFsbGluZyBiZWxvdyBibHVlc3RvcmVfZXh0ZW50X21hcF9z
+aGFyZF9taW5fc2l6ZS4gVGhhdCdzIGhvcGVmdWxseSBiZWVuIGZpeGVkIGJ5IGVsaW1pbmF0aW5n
+IGxhc3Qgc2hhcmQgZnJvbSB0aGF0IGNvbXBhcmlzb24uIElmIG90aGVyIHNoYXJkcyBhcmUgb2Z0
+ZW4gZ29pbmcgYmVsb3cgdGhpcyB0aHJlc2hvbGQgdGhlIHByb2JsZW0gd2lsbCBiZSBzdGlsbCB0
+aGVyZS4NCkNoZWNrIHRoYXQgaWYgeW91IGFyZSBoaXR0aW5nIHRoYXQgb3Igbm90LiBJbiBteSBz
+ZXR1cCwgSSB1c2VkIHRvIHNldCBibHVlc3RvcmVfZXh0ZW50X21hcF9zaGFyZF9taW5fc2l6ZSA9
+IDEgYmVmb3JlIEkgcmVwb3J0ZWQgdGhpcyBwcm9ibGVtIGFuZCBzYWRseSBpdCBpcyBzdGlsbCB0
+aGVyZSA6LSkuIFNvLCBJIGFtIG5vdCBoaXR0aW5nIHRoYXQuLiANCg0KLS0tLS1PcmlnaW5hbCBN
+ZXNzYWdlLS0tLS0NCkZyb206IE1hcmsgTmVsc29uIFttYWlsdG86bW5lbHNvbkByZWRoYXQuY29t
+XSANClNlbnQ6IFRodXJzZGF5LCBKYW51YXJ5IDEyLCAyMDE3IDk6NTUgQU0NClRvOiBTb21uYXRo
+IFJveTsgY2VwaC1kZXZlbA0KU3ViamVjdDogUmU6IHJlc2hhcmRpbmcgYmVoYXZpb3IgaW4gYmx1
+ZXN0b3JlDQoNCg0KDQpPbiAwMS8xMi8yMDE3IDExOjM5IEFNLCBTb21uYXRoIFJveSB3cm90ZToN
+Cj4gT3RoZXIgdHdvIHBsYWNlcyBhcmUgZnJvbSBleHRlbnRtYXA6OnVwZGF0ZSgpLg0KPiBJdCBp
+cyBjYWxsZWQgZnJvbSBoZXJlIHdpdGhpbiBfdHhjX3dyaXRlX25vZGVzKCkNCj4NCj4gICAgIGlm
+ICghcmVzaGFyZCkgew0KPiAgICAgICByZXNoYXJkID0gby0+ZXh0ZW50X21hcC51cGRhdGUodCwg
+ZmFsc2UpOw0KPiAgICAgfQ0KPg0KPiBNb3N0IGxpa2VseSwgcmVzaGFyZCBpcyB0cmlnZ2VyZWQg
+ZnJvbSB1cGRhdGUoKSB1bmxlc3MgeW91IGNoYW5nZWQgdGhlIGV4dGVudCBzaXplICwgZm9yIGV4
+IDogaWYgeW91IGFyZSB0cnlpbmcgd2l0aCBkaWZmZXJlbnQgZmlvIGJsb2NrIHNpemVzLg0KDQoN
+CkFoLCBJIHNlZS4gIFdlIGFyZSBvbmx5IHVzaW5nIG5lZWRzX3Jlc2hhcmQgdG8gcG9wdWxhdGUg
+dGhlIGxvY2FsIHJlc2hhcmQgdmFyaWFibGUgaW4gX3R4Y193cml0ZV9ub2RlcygpIGJ1dCBtYXkg
+bW9kaWZ5IGl0IGFzIGEgcmVzdWx0IG9mIHRoZSBmaXJzdCB1cGRhdGUgYXR0ZW1wdCAoYW5kIG1v
+ZGlmeSBpdCBhZ2FpbiBsYXRlciwgYnV0IG9ubHkgZm9yIGRlYnVnZ2luZyBzaW5jZSBpdCBnb2Vz
+IG91dCBvZiBzY29wZSkuDQoNClllcywgSSBhZ3JlZSB0aGF0IHRoaXMgaXMgbGlrZWx5IGJlaW5n
+IHRyaWdnZXJlZCBmcm9tIHVwZGF0ZSgpLCBlc3BlY2lhbGx5IGluIHRoZSAxNmsgbWluX2FsbG9j
+IGNhc2UuDQoNCk1hcmsNCg0KPg0KPiBUaGFua3MgJiBSZWdhcmRzDQo+IFNvbW5hdGgNCj4gLS0t
+LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWFyayBOZWxzb24gW21haWx0bzptbmVs
+c29uQHJlZGhhdC5jb21dDQo+IFNlbnQ6IFRodXJzZGF5LCBKYW51YXJ5IDEyLCAyMDE3IDk6MjYg
+QU0NCj4gVG86IFNvbW5hdGggUm95OyBjZXBoLWRldmVsDQo+IFN1YmplY3Q6IFJlOiByZXNoYXJk
+aW5nIGJlaGF2aW9yIGluIGJsdWVzdG9yZQ0KPg0KPg0KPg0KPiBPbiAwMS8xMi8yMDE3IDEwOjM3
+IEFNLCBTb21uYXRoIFJveSB3cm90ZToNCj4+IE1hcmssDQo+PiBDb3VsZCB5b3UgY2hlY2sgd2hh
+dCBjb25kaXRpb24gaXQgaXMgdHJpZ2dlcmluZyByZXNoYXJkIGZvciB5b3UgPw0KPj4gVW5kZXIg
+Zm9sbG93aW5nIGNpcmN1bXN0YW5jZXMgaXQgY291bGQgdHJpZ2dlciByZXNoYXJkLg0KPj4NCj4+
+IDEuIFNoYXJkIHNpemUgPiBibHVlc3RvcmVfZXh0ZW50X21hcF9zaGFyZF9tYXhfc2l6ZQ0KPj4N
+Cj4+IDIuIFNoYXJkIHNpemUgPCBibHVlc3RvcmVfZXh0ZW50X21hcF9zaGFyZF9taW5fc2l6ZSBh
+bmQgbm9uLWxhc3QgDQo+PiBzaGFyZA0KPj4NCj4+IDMuIEFuZCBmcm9tIEJsdWVTdG9yZTo6RXh0
+ZW50ICpCbHVlU3RvcmU6OkV4dGVudE1hcDo6c2V0X2xleHRlbnQoKSBpZiANCj4+IGV4dGVudHMg
+c3BhbnMgc2hhcmQNCj4NCj4gIEZyb20gdGhlIGNvZGUsIGl0IGxvb2tzIHRvIG1lIGxpa2UgdGhl
+IG9ubHkgcGxhY2Ugd2hlcmUgbmVlZHNfcmVzaGFyZCBnZXRzIHNldCB0byB0cnVlIGlzIGluIHNl
+dF9sZXh0ZW50KCkgd2hlbiBzcGFuc19zaGFyZCBpcyB0cnVlOg0KPg0KPiBpZiAoIW5lZWRzX3Jl
+c2hhcmQgJiYgc3BhbnNfc2hhcmQobG9naWNhbF9vZmZzZXQsIGxlbmd0aCkpIHsNCj4gICAgbmVl
+ZHNfcmVzaGFyZCA9IHRydWU7DQo+IH0NCj4NCj4gc3BhbnNfc2hhcmQgYmFzaWNhbGx5IGp1c3Qg
+bG9va3MgZm9yIHRoZSBzaGFyZCBhdCB0aGUgZ2l2ZW4gb2Zmc2V0LCB0aGUgY2hlY2tzIHRoYXQg
+dGhlIG9mZnNldCtsZW5ndGggZG9lc24ndCBvdmVybGFwIHdpdGggdGhlIG5leHQgc2hhcmQncyBv
+ZmZzZXQuDQo+DQo+IE1hcmsNCj4NCj4+DQo+PiBUaGFua3MgJiBSZWdhcmRzDQo+PiBTb21uYXRo
+DQo+Pg0KPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+IEZyb206IGNlcGgtZGV2ZWwt
+b3duZXJAdmdlci5rZXJuZWwub3JnIA0KPj4gW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIu
+a2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIE1hcmsgTmVsc29uDQo+PiBTZW50OiBUaHVyc2RheSwg
+SmFudWFyeSAxMiwgMjAxNyA3OjMyIEFNDQo+PiBUbzogY2VwaC1kZXZlbA0KPj4gU3ViamVjdDog
+cmVzaGFyZGluZyBiZWhhdmlvciBpbiBibHVlc3RvcmUNCj4+DQo+PiBIaSBBbGwsDQo+Pg0KPj4g
+SSBzcGVudCBzb21lIHRpbWUgdGhpcyB3ZWVrIGRpZ2dpbmcgaW50byB0aGUgcmVzaGFyZGluZyBj
+b2RlIGluIGJsdWVzdG9yZS4gIEkgY29uZmVzcyBJIHN0aWxsIGRvbid0IHRvdGFsbHkgdW5kZXJz
+dGFuZCBob3cgaXQgaXMgc3VwcG9zZWQgdG8gd29yayB3aXRoIHJlZ2FyZCB0byBtaW5fYWxsb2Nf
+c2l6ZSwgaG93ZXZlciBJIHN1c3BlY3QgdGhhdCB0aGUgY3VycmVudCBiZWhhdmlvciBpcyBsaWtl
+bHkgbm90IGV4cGVjdGVkLiAgVG8gZGV0ZXJtaW5lIHRoaXMsIEkgYWRkZWQgbG9nZ2luZyB0byBk
+dW1wIHRoZSBzaGFyZF9pbmZvIHZlY3RvciBiZWZvcmUgYW5kIGFmdGVyIHRoZSBzd2FwIGluIEJs
+dWVTdG9yZTo6RXh0ZW50TWFwOjpyZXNoYXJkLg0KPj4NCj4+IE5vIG1hdHRlciB3aGF0IHNldHRp
+bmdzIEkgdGVzdGVkIHdpdGgsIHRoZSBpbml0aWFsIHJlc2hhcmQgYWx3YXlzIGdvZXMgZnJvbSAw
+IHNoYXJkcyB0byA4LCBhbHdheXMgd2l0aCB0aGUgZXhhY3Qgc2FtZSBvZmZzZXRzIGFsYToNCj4+
+DQo+Pj4gMjAxNy0wMS0xMSAxNjo0NDozOS4zNTkzNDAgN2Y5MmQ2Y2JlNzAwICA2DQo+Pj4gYmx1
+ZXN0b3JlLm9ub2RlKDB4NTY0NDE1MmRmYjgwKSAqKiogb2xkIHNoYXJkcyAqKioNCj4+PiAyMDE3
+LTAxLTExIDE2OjQ0OjM5LjM1OTM1NiA3ZjkyZDZjYmU3MDAgIDYNCj4+PiBibHVlc3RvcmUub25v
+ZGUoMHg1NjQ0MTUyZGZiODApICoqKiBuZXcgc2hhcmRzICoqKg0KPj4+IDIwMTctMDEtMTEgMTY6
+NDQ6MzkuMzU5MzU4IDdmOTJkNmNiZTcwMCAgMQ0KPj4+IGJsdWVzdG9yZS5vbm9kZSgweDU2NDQx
+NTJkZmI4MCkgc2hhcmQ6IDAsIG9mZnNldDogMCwgYnl0ZXM6IDANCj4+PiAyMDE3LTAxLTExIDE2
+OjQ0OjM5LjM1OTM2MCA3ZjkyZDZjYmU3MDAgIDENCj4+PiBibHVlc3RvcmUub25vZGUoMHg1NjQ0
+MTUyZGZiODApIHNoYXJkOiAxLCBvZmZzZXQ6IDUyNDI4OCwgYnl0ZXM6IDANCj4+PiAyMDE3LTAx
+LTExIDE2OjQ0OjM5LjM1OTM2MiA3ZjkyZDZjYmU3MDAgIDENCj4+PiBibHVlc3RvcmUub25vZGUo
+MHg1NjQ0MTUyZGZiODApIHNoYXJkOiAyLCBvZmZzZXQ6IDEwNDg1NzYsIGJ5dGVzOiAwDQo+Pj4g
+MjAxNy0wMS0xMSAxNjo0NDozOS4zNTkzNjQgN2Y5MmQ2Y2JlNzAwICAxDQo+Pj4gYmx1ZXN0b3Jl
+Lm9ub2RlKDB4NTY0NDE1MmRmYjgwKSBzaGFyZDogMywgb2Zmc2V0OiAxNTcyODY0LCBieXRlczog
+MA0KPj4+IDIwMTctMDEtMTEgMTY6NDQ6MzkuMzU5MzY1IDdmOTJkNmNiZTcwMCAgMQ0KPj4+IGJs
+dWVzdG9yZS5vbm9kZSgweDU2NDQxNTJkZmI4MCkgc2hhcmQ6IDQsIG9mZnNldDogMjA5NzE1Miwg
+Ynl0ZXM6IDANCj4+PiAyMDE3LTAxLTExIDE2OjQ0OjM5LjM1OTM2NiA3ZjkyZDZjYmU3MDAgIDEN
+Cj4+PiBibHVlc3RvcmUub25vZGUoMHg1NjQ0MTUyZGZiODApIHNoYXJkOiA1LCBvZmZzZXQ6IDI2
+MjE0NDAsIGJ5dGVzOiAwDQo+Pj4gMjAxNy0wMS0xMSAxNjo0NDozOS4zNTkzNjcgN2Y5MmQ2Y2Jl
+NzAwICAxDQo+Pj4gYmx1ZXN0b3JlLm9ub2RlKDB4NTY0NDE1MmRmYjgwKSBzaGFyZDogNiwgb2Zm
+c2V0OiAzMTQ1NzI4LCBieXRlczogMA0KPj4+IDIwMTctMDEtMTEgMTY6NDQ6MzkuMzU5MzY4IDdm
+OTJkNmNiZTcwMCAgMQ0KPj4+IGJsdWVzdG9yZS5vbm9kZSgweDU2NDQxNTJkZmI4MCkgc2hhcmQ6
+IDcsIG9mZnNldDogMzY3MDAxNiwgYnl0ZXM6IDANCj4+DQo+PiBXaGVuIGEgMTZrIG1pbl9hbGxv
+YyBzaXplIGlzIHVzZWQsIHN1YnNlcXVlbnQgcmVzaGFyZHMgYWx3YXlzIHJlc2hhcmQgaW50byA4
+IHNoYXJkcyB3aXRoIHRoZSBzYW1lIG9mZnNldHM6DQo+Pg0KPj4+IDIwMTctMDEtMTEgMTc6MDA6
+MDAuMDAwODM1IDdmOTJkNTRiYjcwMCAgNg0KPj4+IGJsdWVzdG9yZS5vbm9kZSgweDU2NDQ2OTM3
+ZWY4MCkgKioqIG9sZCBzaGFyZHMgKioqDQo+Pj4gMjAxNy0wMS0xMSAxNzowMDowMC4wMDA4Mzkg
+N2Y5MmQ1NGJiNzAwICAxDQo+Pj4gYmx1ZXN0b3JlLm9ub2RlKDB4NTY0NDY5MzdlZjgwKSBzaGFy
+ZDogMCwgb2Zmc2V0OiAwLCBieXRlczogNTI5DQo+Pj4gMjAxNy0wMS0xMSAxNzowMDowMC4wMDA4
+NDEgN2Y5MmQ1NGJiNzAwICAxDQo+Pj4gYmx1ZXN0b3JlLm9ub2RlKDB4NTY0NDY5MzdlZjgwKSBz
+aGFyZDogMSwgb2Zmc2V0OiA1MjQyODgsIGJ5dGVzOiA1MzENCj4+PiAyMDE3LTAxLTExIDE3OjAw
+OjAwLjAwMDg0MyA3ZjkyZDU0YmI3MDAgIDENCj4+PiBibHVlc3RvcmUub25vZGUoMHg1NjQ0Njkz
+N2VmODApIHNoYXJkOiAyLCBvZmZzZXQ6IDEwNDg1NzYsIGJ5dGVzOiANCj4+PiA1MzENCj4+PiAy
+MDE3LTAxLTExIDE3OjAwOjAwLjAwMDg0NCA3ZjkyZDU0YmI3MDAgIDENCj4+PiBibHVlc3RvcmUu
+b25vZGUoMHg1NjQ0NjkzN2VmODApIHNoYXJkOiAzLCBvZmZzZXQ6IDE1NzI4NjQsIGJ5dGVzOiAN
+Cj4+PiA1MzENCj4+PiAyMDE3LTAxLTExIDE3OjAwOjAwLjAwMDg0NiA3ZjkyZDU0YmI3MDAgIDEN
+Cj4+PiBibHVlc3RvcmUub25vZGUoMHg1NjQ0NjkzN2VmODApIHNoYXJkOiA0LCBvZmZzZXQ6IDIw
+OTcxNTIsIGJ5dGVzOiANCj4+PiA1MzENCj4+PiAyMDE3LTAxLTExIDE3OjAwOjAwLjAwMDg0NyA3
+ZjkyZDU0YmI3MDAgIDENCj4+PiBibHVlc3RvcmUub25vZGUoMHg1NjQ0NjkzN2VmODApIHNoYXJk
+OiA1LCBvZmZzZXQ6IDI2MjE0NDAsIGJ5dGVzOiANCj4+PiA1MzENCj4+PiAyMDE3LTAxLTExIDE3
+OjAwOjAwLjAwMDg0OSA3ZjkyZDU0YmI3MDAgIDENCj4+PiBibHVlc3RvcmUub25vZGUoMHg1NjQ0
+NjkzN2VmODApIHNoYXJkOiA2LCBvZmZzZXQ6IDMxNDU3MjgsIGJ5dGVzOiANCj4+PiA1MzENCj4+
+PiAyMDE3LTAxLTExIDE3OjAwOjAwLjAwMDg1MCA3ZjkyZDU0YmI3MDAgIDENCj4+PiBibHVlc3Rv
+cmUub25vZGUoMHg1NjQ0NjkzN2VmODApIHNoYXJkOiA3LCBvZmZzZXQ6IDM2NzAwMTYsIGJ5dGVz
+OiANCj4+PiA1MzENCj4+PiAyMDE3LTAxLTExIDE3OjAwOjAwLjAwMDg1MiA3ZjkyZDU0YmI3MDAg
+IDYNCj4+PiBibHVlc3RvcmUub25vZGUoMHg1NjQ0NjkzN2VmODApICoqKiBuZXcgc2hhcmRzICoq
+Kg0KPj4+IDIwMTctMDEtMTEgMTc6MDA6MDAuMDAwODUzIDdmOTJkNTRiYjcwMCAgMQ0KPj4+IGJs
+dWVzdG9yZS5vbm9kZSgweDU2NDQ2OTM3ZWY4MCkgc2hhcmQ6IDAsIG9mZnNldDogMCwgYnl0ZXM6
+IDANCj4+PiAyMDE3LTAxLTExIDE3OjAwOjAwLjAwMDg1NSA3ZjkyZDU0YmI3MDAgIDENCj4+PiBi
+bHVlc3RvcmUub25vZGUoMHg1NjQ0NjkzN2VmODApIHNoYXJkOiAxLCBvZmZzZXQ6IDUyNDI4OCwg
+Ynl0ZXM6IDANCj4+PiAyMDE3LTAxLTExIDE3OjAwOjAwLjAwMDg1NiA3ZjkyZDU0YmI3MDAgIDEN
+Cj4+PiBibHVlc3RvcmUub25vZGUoMHg1NjQ0NjkzN2VmODApIHNoYXJkOiAyLCBvZmZzZXQ6IDEw
+NDg1NzYsIGJ5dGVzOiAwDQo+Pj4gMjAxNy0wMS0xMSAxNzowMDowMC4wMDA4NTggN2Y5MmQ1NGJi
+NzAwICAxDQo+Pj4gYmx1ZXN0b3JlLm9ub2RlKDB4NTY0NDY5MzdlZjgwKSBzaGFyZDogMywgb2Zm
+c2V0OiAxNTcyODY0LCBieXRlczogMA0KPj4+IDIwMTctMDEtMTEgMTc6MDA6MDAuMDAwODU5IDdm
+OTJkNTRiYjcwMCAgMQ0KPj4+IGJsdWVzdG9yZS5vbm9kZSgweDU2NDQ2OTM3ZWY4MCkgc2hhcmQ6
+IDQsIG9mZnNldDogMjA5NzE1MiwgYnl0ZXM6IDANCj4+PiAyMDE3LTAxLTExIDE3OjAwOjAwLjAw
+MDg2MCA3ZjkyZDU0YmI3MDAgIDENCj4+PiBibHVlc3RvcmUub25vZGUoMHg1NjQ0NjkzN2VmODAp
+IHNoYXJkOiA1LCBvZmZzZXQ6IDI2MjE0NDAsIGJ5dGVzOiAwDQo+Pj4gMjAxNy0wMS0xMSAxNzow
+MDowMC4wMDA4NjIgN2Y5MmQ1NGJiNzAwICAxDQo+Pj4gYmx1ZXN0b3JlLm9ub2RlKDB4NTY0NDY5
+MzdlZjgwKSBzaGFyZDogNiwgb2Zmc2V0OiAzMTQ1NzI4LCBieXRlczogMA0KPj4+IDIwMTctMDEt
+MTEgMTc6MDA6MDAuMDAwODYzIDdmOTJkNTRiYjcwMCAgMQ0KPj4+IGJsdWVzdG9yZS5vbm9kZSgw
+eDU2NDQ2OTM3ZWY4MCkgc2hhcmQ6IDcsIG9mZnNldDogMzY3MDAxNiwgYnl0ZXM6IDANCj4+Pg0K
+Pj4NCj4+IFRoaXMgaXMgdHJ1ZSBubyBtYXR0ZXIgd2hhdCB0aGUgRXh0ZW50TWFwIG1heC90YXJn
+ZXQgc2hhcmQgc2l6ZXMgYXJlLg0KPj4gSG93ZXZlciB3aXRoIHNtYWxsZXIgc2l6ZXMsIHRoaXMg
+cmVzaGFyZCBwcm9jZXNzIGhhcHBlbnMgZmFyIG1vcmUgb2Z0ZW4uDQo+PiAgIFdpdGggNEsgbWlu
+X2FsbG9jX3NpemUsIHRoZSBpbml0aWFsIHJlc2hhcmQgc3RpbGwgZ29lcyBmcm9tIDAgdG8gOCwg
+YnV0IHN1YnNlcXVlbnQgcmVzaGFyZHMgYXJlIG1vcmUgYXMgZXhwZWN0ZWQ6DQo+Pg0KPj4+IDIw
+MTctMDEtMTIgMDk6MzU6NDEuOTIzNDY3IDdmZjRlNGUyODcwMCAgNg0KPj4+IGJsdWVzdG9yZS5v
+bm9kZSgweDU1ZmNjNDVlOGEwMCkgKioqIG9sZCBzaGFyZHMgKioqDQo+Pj4gMjAxNy0wMS0xMiAw
+OTozNTo0MS45MjM0ODQgN2ZmNGU0ZTI4NzAwICAxDQo+Pj4gYmx1ZXN0b3JlLm9ub2RlKDB4NTVm
+Y2M0NWU4YTAwKSBzaGFyZDogMCwgb2Zmc2V0OiAwLCBieXRlczogNTI5DQo+Pj4gMjAxNy0wMS0x
+MiAwOTozNTo0MS45MjM0ODcgN2ZmNGU0ZTI4NzAwICAxDQo+Pj4gYmx1ZXN0b3JlLm9ub2RlKDB4
+NTVmY2M0NWU4YTAwKSBzaGFyZDogMSwgb2Zmc2V0OiA1MjQyODgsIGJ5dGVzOiA1MzENCj4+PiAy
+MDE3LTAxLTEyIDA5OjM1OjQxLjkyMzQ4OCA3ZmY0ZTRlMjg3MDAgIDENCj4+PiBibHVlc3RvcmUu
+b25vZGUoMHg1NWZjYzQ1ZThhMDApIHNoYXJkOiAyLCBvZmZzZXQ6IDEwNDg1NzYsIGJ5dGVzOiAN
+Cj4+PiA1MzENCj4+PiAyMDE3LTAxLTEyIDA5OjM1OjQxLjkyMzQ4OSA3ZmY0ZTRlMjg3MDAgIDEN
+Cj4+PiBibHVlc3RvcmUub25vZGUoMHg1NWZjYzQ1ZThhMDApIHNoYXJkOiAzLCBvZmZzZXQ6IDE1
+NzI4NjQsIGJ5dGVzOiANCj4+PiA1MzENCj4+PiAyMDE3LTAxLTEyIDA5OjM1OjQxLjkyMzQ5MSA3
+ZmY0ZTRlMjg3MDAgIDENCj4+PiBibHVlc3RvcmUub25vZGUoMHg1NWZjYzQ1ZThhMDApIHNoYXJk
+OiA0LCBvZmZzZXQ6IDIwOTcxNTIsIGJ5dGVzOiANCj4+PiA1MzENCj4+PiAyMDE3LTAxLTEyIDA5
+OjM1OjQxLjkyMzQ5MSA3ZmY0ZTRlMjg3MDAgIDENCj4+PiBibHVlc3RvcmUub25vZGUoMHg1NWZj
+YzQ1ZThhMDApIHNoYXJkOiA1LCBvZmZzZXQ6IDI2MjE0NDAsIGJ5dGVzOiANCj4+PiA1MzENCj4+
+PiAyMDE3LTAxLTEyIDA5OjM1OjQxLjkyMzQ5NSA3ZmY0ZTRlMjg3MDAgIDENCj4+PiBibHVlc3Rv
+cmUub25vZGUoMHg1NWZjYzQ1ZThhMDApIHNoYXJkOiA2LCBvZmZzZXQ6IDMxNDU3MjgsIGJ5dGVz
+OiANCj4+PiA1MzENCj4+PiAyMDE3LTAxLTEyIDA5OjM1OjQxLjkyMzQ5NiA3ZmY0ZTRlMjg3MDAg
+IDENCj4+PiBibHVlc3RvcmUub25vZGUoMHg1NWZjYzQ1ZThhMDApIHNoYXJkOiA3LCBvZmZzZXQ6
+IDM2NzAwMTYsIGJ5dGVzOiANCj4+PiA1MzENCj4+PiAyMDE3LTAxLTEyIDA5OjM1OjQxLjkyMzQ5
+OSA3ZmY0ZTRlMjg3MDAgIDYNCj4+PiBibHVlc3RvcmUub25vZGUoMHg1NWZjYzQ1ZThhMDApICoq
+KiBuZXcgc2hhcmRzICoqKg0KPj4+IDIwMTctMDEtMTIgMDk6MzU6NDEuOTIzNTAwIDdmZjRlNGUy
+ODcwMCAgMQ0KPj4+IGJsdWVzdG9yZS5vbm9kZSgweDU1ZmNjNDVlOGEwMCkgc2hhcmQ6IDAsIG9m
+ZnNldDogMCwgYnl0ZXM6IDANCj4+PiAyMDE3LTAxLTEyIDA5OjM1OjQxLjkyMzUwMSA3ZmY0ZTRl
+Mjg3MDAgIDENCj4+PiBibHVlc3RvcmUub25vZGUoMHg1NWZjYzQ1ZThhMDApIHNoYXJkOiAxLCBv
+ZmZzZXQ6IDUyMDE5MiwgYnl0ZXM6IDANCj4+PiAyMDE3LTAxLTEyIDA5OjM1OjQxLjkyMzUwMSA3
+ZmY0ZTRlMjg3MDAgIDENCj4+PiBibHVlc3RvcmUub25vZGUoMHg1NWZjYzQ1ZThhMDApIHNoYXJk
+OiAyLCBvZmZzZXQ6IDUyODM4NCwgYnl0ZXM6IDANCj4+PiAyMDE3LTAxLTEyIDA5OjM1OjQxLjky
+MzUwMiA3ZmY0ZTRlMjg3MDAgIDENCj4+PiBibHVlc3RvcmUub25vZGUoMHg1NWZjYzQ1ZThhMDAp
+IHNoYXJkOiAzLCBvZmZzZXQ6IDEwNDg1NzYsIGJ5dGVzOiAwDQo+Pj4gMjAxNy0wMS0xMiAwOToz
+NTo0MS45MjM1MDMgN2ZmNGU0ZTI4NzAwICAxDQo+Pj4gYmx1ZXN0b3JlLm9ub2RlKDB4NTVmY2M0
+NWU4YTAwKSBzaGFyZDogNCwgb2Zmc2V0OiAxNTcyODY0LCBieXRlczogMA0KPj4+IDIwMTctMDEt
+MTIgMDk6MzU6NDEuOTIzNTA0IDdmZjRlNGUyODcwMCAgMQ0KPj4+IGJsdWVzdG9yZS5vbm9kZSgw
+eDU1ZmNjNDVlOGEwMCkgc2hhcmQ6IDUsIG9mZnNldDogMjA5NzE1MiwgYnl0ZXM6IDANCj4+PiAy
+MDE3LTAxLTEyIDA5OjM1OjQxLjkyMzUwNSA3ZmY0ZTRlMjg3MDAgIDENCj4+PiBibHVlc3RvcmUu
+b25vZGUoMHg1NWZjYzQ1ZThhMDApIHNoYXJkOiA2LCBvZmZzZXQ6IDI2MjE0NDAsIGJ5dGVzOiAw
+DQo+Pj4gMjAxNy0wMS0xMiAwOTozNTo0MS45MjM1MDYgN2ZmNGU0ZTI4NzAwICAxDQo+Pj4gYmx1
+ZXN0b3JlLm9ub2RlKDB4NTVmY2M0NWU4YTAwKSBzaGFyZDogNywgb2Zmc2V0OiAzMTQ1NzI4LCBi
+eXRlczogMA0KPj4+IDIwMTctMDEtMTIgMDk6MzU6NDEuOTIzNTA3IDdmZjRlNGUyODcwMCAgMQ0K
+Pj4+IGJsdWVzdG9yZS5vbm9kZSgweDU1ZmNjNDVlOGEwMCkgc2hhcmQ6IDgsIG9mZnNldDogMzY3
+MDAxNiwgYnl0ZXM6IDANCj4+DQo+PiBsYXJnZXIgZXh0ZW50bWFwIHNoYXJkIHRhcmdldC9tYXgg
+c2l6ZXMgcmVzdWx0IGluIG11Y2ggZmV3ZXIgcmVzaGFyZHMsIHdoaWxlIHNtYWxsZXIgdmFsdWVz
+IHJlc3VsdCBpbiB2ZXJ5IHJhcGlkIHJlc2hhcmRpbmcgYW5kIG11Y2ggbGFyZ2VyIHNoYXJkIGNv
+dW50cyBhcyBleHBlY3RlZC4gIEFsc28sIHlvdSBjYW4gc2VlIGhlcmUgdGhhdCBlYWNoIHJlc2hh
+cmQgb25seSBwcm9kdWNlcyBtYXJnaW5hbGx5IGRpZmZlcmVudCBvZmZzZXRzLiAgTGVhdmluZyB0
+aGUgb2xkIG9mZnNldHMgaW4gcGxhY2UgYW5kIGluc2VydGluZyBuZXcgc2hhcmRzIGluIHRoZSBt
+aWRkbGUgKG9yIGhhdmluZyBhIHRyZWUgc3RydWN0dXJlKSBJIHRoaW5rIHdvdWxkIHJlc3VsdCBp
+biBmYXIgaGlnaGVyIHJlc2hhcmQgcGVyZm9ybWFuY2UgYXMgU2FnZSBzdWdnZXN0ZWQuDQo+Pg0K
+Pj4gVGhpcyBpcyB3aGF0IEkndmUgZ290IHJpZ2h0IG5vdy4gIE1vcmUgdG8gY29tZS4NCj4+DQo+
+PiBNYXJrDQo+Pg0KPj4gLS0NCj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
+IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0KPj4gaW4gdGhlIGJvZHkgb2YgYSBt
+ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+PiBp
+bmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+DQo+
+PiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KPj4NCj4+IFBMRUFTRSBOT1RFOiBU
+aGUgaW5mb3JtYXRpb24gY29udGFpbmVkIGluIHRoaXMgZWxlY3Ryb25pYyBtYWlsIG1lc3NhZ2Ug
+aXMgaW50ZW5kZWQgb25seSBmb3IgdGhlIHVzZSBvZiB0aGUgZGVzaWduYXRlZCByZWNpcGllbnQo
+cykgbmFtZWQgYWJvdmUuIElmIHRoZSByZWFkZXIgb2YgdGhpcyBtZXNzYWdlIGlzIG5vdCB0aGUg
+aW50ZW5kZWQgcmVjaXBpZW50LCB5b3UgYXJlIGhlcmVieSBub3RpZmllZCB0aGF0IHlvdSBoYXZl
+IHJlY2VpdmVkIHRoaXMgbWVzc2FnZSBpbiBlcnJvciBhbmQgdGhhdCBhbnkgcmV2aWV3LCBkaXNz
+ZW1pbmF0aW9uLCBkaXN0cmlidXRpb24sIG9yIGNvcHlpbmcgb2YgdGhpcyBtZXNzYWdlIGlzIHN0
+cmljdGx5IHByb2hpYml0ZWQuIElmIHlvdSBoYXZlIHJlY2VpdmVkIHRoaXMgY29tbXVuaWNhdGlv
+biBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHRlbGVwaG9uZSBvciBlLW1h
+aWwgKGFzIHNob3duIGFib3ZlKSBpbW1lZGlhdGVseSBhbmQgZGVzdHJveSBhbnkgYW5kIGFsbCBj
+b3BpZXMgb2YgdGhpcyBtZXNzYWdlIGluIHlvdXIgcG9zc2Vzc2lvbiAod2hldGhlciBoYXJkIGNv
+cGllcyBvciBlbGVjdHJvbmljYWxseSBzdG9yZWQgY29waWVzKS4NCj4+DQo+PiBOICAgICByICB5
+ICAgYiBYICDHp3YgXiAp3rp7Lm4gKyAgIHogXXogICB7YXkgHcqH2pkgLGogICBmICAgaCAgIHog
+HiB3DQo+ICAgIGo6K3YgICB3IGogbSAgICAgICAgIHpaKyAgICAg3aJqIiAgIXRtbD0NCj4+DQo=
