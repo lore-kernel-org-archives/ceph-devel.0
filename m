@@ -1,49 +1,45 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: [PATCH v2] ceph/iov_iter: fix bad iov_iter handling in ceph
- splice codepaths
-Date: Thu, 12 Jan 2017 07:59:46 +0000
-Message-ID: <20170112075946.GU1555@ZenIV.linux.org.uk>
-References: <1483727016-343-1-git-send-email-jlayton@redhat.com>
- <1484053051-23685-1-git-send-email-jlayton@redhat.com>
+From: liuchang0812 <liuchang0812@gmail.com>
+Subject: Question about Logging Level
+Date: Thu, 12 Jan 2017 16:12:10 +0800
+Message-ID: <CACKY0b-_ZaLCVUwdW4-p6BtPeaAHQ10B-KqjmxuM+Nh5h_xj5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1484053051-23685-1-git-send-email-jlayton@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jeff Layton <jlayton@redhat.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, "Zhu, Caifeng" <zhucaifeng@unissoft-nj.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yb0-f177.google.com ([209.85.213.177]:35323 "EHLO
+        mail-yb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751008AbdALIML (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Jan 2017 03:12:11 -0500
+Received: by mail-yb0-f177.google.com with SMTP id l23so3565420ybj.2
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Jan 2017 00:12:11 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Jan 10, 2017 at 07:57:31AM -0500, Jeff Layton wrote:
-> v2: fix bug in offset handling in iov_iter_pvec_size
-> 
-> xfstest generic/095 triggers soft lockups in kcephfs. Basically it uses
-> fio to drive some I/O via vmsplice ane splice. Ceph then ends up trying
-> to access an ITER_BVEC type iov_iter as a ITER_IOVEC one. That causes it
-> to pick up a wrong offset and get stuck in an infinite loop while trying
-> to populate the page array. dio_get_pagev_size has a similar problem.
-> 
-> To fix the first problem, add a new iov_iter helper to determine the
-> offset into the page for the current segment and have ceph call that.
-> I would just replace dio_get_pages_alloc with iov_iter_get_pages_alloc,
-> but that will only return a single page at a time for ITER_BVEC and
-> it's better to make larger requests when possible.
-> 
-> For the second problem, we simply replace it with a new helper that does
-> what it does, but properly for all iov_iter types.
-> 
-> Since we're moving that into generic code, we can also utilize the
-> iterate_all_kinds macro to simplify this. That means that we need to
-> rework the logic a bit since we can't advance to the next vector while
-> checking the current one.
+Hi, all
 
-Yecchhh...  That really looks like exposing way too low-level stuff instead
-of coming up with saner primitive ;-/
+In our documentation, it says that:
 
-Is page vector + offset in the first page + number of bytes really what
-ceph wants?  Would e.g. an array of bio_vec be saner?  Because _that_
-would make a lot more natural iov_iter_get_pages_alloc() analogue...
+        Ceph=E2=80=99s logging levels operate on a scale of 1 to 20, where =
+1
+is terse and 20 is verbose.
 
-And yes, I realize that you have ->pages wired into the struct ceph_osd_request;
-how painful would it be to have it switched to struct bio_vec array instead?
+http://docs.ceph.com/docs/master/rados/troubleshooting/log-and-debug/#subsy=
+stem-log-and-debug-settings
+
+
+But, it seems that there are some logging levels 25 :
+
+
+mds/MDBalancer.cc:276:  dout(25) << "=3D=3D=3D got heartbeat " <<
+m->get_beat() << " from " << m->get_source().num() << " " <<
+m->get_load() << dendl;
+mds/CInode.cc:4189:  dout(25) << __func__ << dendl;
+mds/MDCache.cc:11656:    //dout(25) << "saw depth " << d << " " <<
+*dir << dendl;
+mds/MDCache.cc:11666:   //dout(25) << " saw sub " << **p << dendl;
+mds/journal.cc:373:      dout(25) << "EMetaBlob::add_dir_context(" <<
+dir << ")      maybe " <<
+
+
+So, shoud we update our documentation, or update logging level to 20?
