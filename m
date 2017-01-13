@@ -1,74 +1,92 @@
-From: liuchang0812 <liuchang0812@gmail.com>
-Subject: Re: XmlFormatter: space isn't allowed in xml tag
-Date: Fri, 13 Jan 2017 16:04:29 +0800
-Message-ID: <CACKY0b9PXB-tOii+3K_yGT9OUQiznu5e_==rkVcuRxCZmfK2Vw@mail.gmail.com>
-References: <CACKY0b9_gPAoB3uWAiom1UiPHvDtbXAFJiCtQZN1PV+ps6P5Yw@mail.gmail.com>
- <robbat2-20170112T091829-255678655Z@orbis-terrarum.net> <CACKY0b9=9wmNKFa1NEh=qatVHvwRTg0Xh50Xt41QPBsDyA-TWw@mail.gmail.com>
- <alpine.DEB.2.11.1701121334460.5745@piezo.novalocal> <CACKY0b_wChMcJYvFp+ZCCy4wCs0_TuB2sBjZb09oRoFLsYduSA@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Fwd: [ceph-users] Inherent insecurity of OSD daemons when using only
+ a "public network"
+Date: Fri, 13 Jan 2017 09:32:29 +0100
+Message-ID: <591750c9-2ac5-d995-7f95-a045e0ad7b9f@digiware.nl>
+References: <20170113170713.12837f19@batzmaru.gol.ad.jp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yb0-f179.google.com ([209.85.213.179]:35720 "EHLO
-        mail-yb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751174AbdAMIEs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jan 2017 03:04:48 -0500
-Received: by mail-yb0-f179.google.com with SMTP id l23so12970133ybj.2
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Jan 2017 00:04:30 -0800 (PST)
-In-Reply-To: <CACKY0b_wChMcJYvFp+ZCCy4wCs0_TuB2sBjZb09oRoFLsYduSA@mail.gmail.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:30961 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751168AbdAMIdE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 13 Jan 2017 03:33:04 -0500
+In-Reply-To: <20170113170713.12837f19@batzmaru.gol.ad.jp>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>, chibi@gol.com
 
-Hi, all
+Hi,
 
-https://github.com/ceph/ceph/pull/12916
+This is an observation on the user-list.
+And I do agree with it whole hartedly.
 
-Please take a look
+And it stems from the first binding where 0.0.0.0 is used to bind.
+From the top of my head somewhere in msg/async. It starts out with
+0.0.0.0 but on rebinds it binds to an actual ipnr.
 
-2017-01-12 21:56 GMT+08:00 liuchang0812 <liuchang0812@gmail.com>:
-> I'm working on it, Thanks for all comments
->
-> 2017-01-12 21:35 GMT+08:00 Sage Weil <sage@newdream.net>:
->> On Thu, 12 Jan 2017, liuchang0812 wrote:
->>> ./bin/ceph daemon out/osd.0.asok dump_historic_ops -f xml
->>> <OpHistory><num to keep>20</num to keep><duration to
->>> keep>600</duration to keep><Ops></Ops></OpHistory>
->>
->> Any instance where a Formatter element name has a space in it (and
->> probably uppercase, for that matter) should be considered a bug and fixed
->> (for this very reason).  Please just submit a PR that adds _'s for this
->> one.
->>
->> Thanks!
->> sage
->>
->>
->>>
->>> I'm not sure whether XML library could decode it, I will have a try
->>>
->>> 2017-01-12 17:20 GMT+08:00 Robin H. Johnson <robbat2@gentoo.org>:
->>> > On Thu, Jan 12, 2017 at 01:27:33PM +0800, liuchang0812 wrote:
->>> >> hi, all
->>> >>
->>> >> an XML tag cannot contains space in it. see
->>> >> https://www.w3.org/TR/2008/REC-xml-20081126/#NT-NameChar.
->>> > Where are spaces leaking into the element names?
->>> >
->>> > I did a refactor of Formatter parters when I was introducing the
->>> > HTMLFormatter used by s3website mode, and I don't recall seeing any
->>> > cases of accidental space in XML element names, at least in the RGW
->>> > side.
->>> >
->>> > --
->>> > Robin Hugh Johnson
->>> > Gentoo Linux: Dev, Infra Lead, Foundation Trustee & Treasurer
->>> > E-Mail   : robbat2@gentoo.org
->>> > GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
->>> > GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
+If the idea here is that we need to bind to either private/public IP, I
+can look into that.
+
+--WjW
+
+
+-------- Forwarded Message --------
+Subject: [ceph-users] Inherent insecurity of OSD daemons when using only
+a "public network"
+Date: Fri, 13 Jan 2017 17:07:13 +0900
+From: Christian Balzer <chibi@gol.com>
+Organization: FusionGOL
+To: ceph-users <ceph-users@lists.ceph.com>
+
+
+Hello,
+
+Something I came across a while agao, but the recent discussion here
+jolted my memory.
+
+If you have a cluster configured with just a "public network" and that
+network being in RFC space like 10.0.0.0/8, you'd think you'd be "safe",
+wouldn't you?
+
+Alas you're not:
+---
+root@ceph-01:~# netstat -atn |grep LIST |grep 68
+tcp        0      0 0.0.0.0:6813            0.0.0.0:*
+LISTEN     tcp        0      0 0.0.0.0:6814            0.0.0.0:*
+      LISTEN     tcp        0      0 10.0.0.11:6815          0.0.0.0:*
+            LISTEN     tcp        0      0 10.0.0.11:6800
+0.0.0.0:*               LISTEN     tcp        0      0 0.0.0.0:6801
+      0.0.0.0:*               LISTEN     tcp        0      0
+0.0.0.0:6802            0.0.0.0:*               LISTEN     etc..
+---
+
+Something that people most certainly would NOT expect to be the default
+behavior.
+
+Solution, define a complete redundant "cluster network" that's identical
+to the public one and voila:
+---
+root@ceph-02:~# netstat -atn |grep LIST |grep 68
+tcp        0      0 10.0.0.12:6816          0.0.0.0:*
+LISTEN     tcp        0      0 10.0.0.12:6817          0.0.0.0:*
+      LISTEN     tcp        0      0 10.0.0.12:6818          0.0.0.0:*
+            LISTEN     etc.
+---
+
+I'd call that a security bug, simply because any other daemon on the
+planet will bloody bind to the IP it's been told to in its respective
+configuration.
+
+The above is with Hammer, any version.
+
+Christian
+-- 
+Christian Balzer        Network/Systems Engineer
+chibi@gol.com   	Global OnLine Japan/Rakuten Communications
+http://www.gol.com/
+_______________________________________________
+ceph-users mailing list
+ceph-users@lists.ceph.com
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
