@@ -1,49 +1,49 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH 0/4] ceph: endianness fixes and sparse warning fixes
-Date: Fri, 13 Jan 2017 07:36:05 -0500
-Message-ID: <1484310965.2616.7.camel@redhat.com>
-References: <1484237565-27423-1-git-send-email-jlayton@redhat.com>
-         <alpine.DEB.2.11.1701121623290.5745@piezo.novalocal>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: Shaman build fails with "reference is not a tree"
+Date: Fri, 13 Jan 2017 14:18:11 +0100
+Message-ID: <6002374e-e889-ab23-b2f6-c9aad7de6db1@suse.cz>
+References: <0dc16c42-995c-8623-f2e6-5b69868f8e15@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:34381 "EHLO
-        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751406AbdAMMgL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jan 2017 07:36:11 -0500
-Received: by mail-qk0-f173.google.com with SMTP id a20so52540806qkc.1
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Jan 2017 04:36:10 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1701121623290.5745@piezo.novalocal>
+Received: from mx2.suse.de ([195.135.220.15]:41529 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751721AbdAMNSO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 13 Jan 2017 08:18:14 -0500
+In-Reply-To: <0dc16c42-995c-8623-f2e6-5b69868f8e15@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+To: Alfredo Deza <adeza@redhat.com>, "Mick, Dan" <dmick@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 2017-01-12 at 16:23 +0000, Sage Weil wrote:
-> On Thu, 12 Jan 2017, Jeff Layton wrote:
-> > Just a small set of patches to fix some stuff that sparse was
-> > complaining about. Some of these look like real bugs however for
-> > anyone trying to use ceph on a big endian arch.
-> > 
-> > Jeff Layton (4):
-> >   ceph: fix endianness of getattr mask in ceph_d_revalidate
-> >   ceph: fix endianness bug in frag_tree_split_cmp
-> >   ceph: fix bogus endianness change in ceph_ioctl_set_layout
-> >   ceph: fix bad endianness handling in parse_reply_info_extra
-> > 
-> >  fs/ceph/dir.c        | 5 +++--
-> >  fs/ceph/inode.c      | 3 ++-
-> >  fs/ceph/ioctl.c      | 4 ++--
-> >  fs/ceph/mds_client.c | 9 +++++----
-> >  4 files changed, 12 insertions(+), 9 deletions(-)
-> 
-> Reviewed-by: Sage Weil <sage@redhat.com>
+The error is reproducible by running the following commands:
 
-Thanks. Should we send this series to stable? I'm not sure how common
-kcephfs mounts are on BE arches, but these bugs would likely prevent it
-from working.
+git clone http://github.com/ceph/ceph
+git checkout hammer
+git submodule update --init
 
-Thanks,
+So it's not a Shaman issue. Looks more like a git repo issue.
+
+On 01/13/2017 12:36 PM, Nathan Cutler wrote:
+> Is it me, or is Shaman is acting weird? wip-hammer-backports build
+> suddenly fails because:
+>
+> Submodule 'src/rocksdb' (https://github.com/ceph/rocksdb) registered for
+> path 'src/rocksdb'
+> Cloning into 'src/rocksdb'...
+> fatal: reference is not a tree: 422e26633267b25c225975b456a9f4fc40091a2e
+> Unable to checkout '422e26633267b25c225975b456a9f4fc40091a2e' in
+> submodule path 'src/rocksdb'
+>
+> Some googling suggests the following might help:
+>
+> git submodule sync
+> git submodule update
+>
+
 -- 
-Jeff Layton <jlayton@redhat.com>
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
