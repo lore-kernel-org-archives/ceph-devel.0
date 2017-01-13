@@ -1,92 +1,88 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Shaman build fails with "reference is not a tree"
-Date: Fri, 13 Jan 2017 22:05:45 +0100
-Message-ID: <b0731b3d-87fb-f232-331e-c5072c7b3ee0@suse.cz>
-References: <0dc16c42-995c-8623-f2e6-5b69868f8e15@suse.cz>
- <6002374e-e889-ab23-b2f6-c9aad7de6db1@suse.cz>
- <alpine.DEB.2.11.1701131435390.1911@piezo.novalocal>
- <f7625cc6-2fd7-3ace-31ad-c10dcef66e52@dachary.org>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Re: [ceph-users] Your company listed as a user / contributor on ceph.com
+Date: Fri, 13 Jan 2017 16:26:26 -0500
+Message-ID: <CAAZbbf2RUHV24CNXga-y=67vGEgXHtdM_cQD-6CERUCS7tRv0Q@mail.gmail.com>
+References: <CAAZbbf113ouB8QdS91HDx7njVdkppqpWhSUoFpAx-YpZoLB5Xw@mail.gmail.com>
+ <D49E855B.5841%Nitin.Kamble@TERADATA.COM>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:60612 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751153AbdAMVFt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 13 Jan 2017 16:05:49 -0500
-In-Reply-To: <f7625cc6-2fd7-3ace-31ad-c10dcef66e52@dachary.org>
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:36770 "EHLO
+        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751107AbdAMV0c (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jan 2017 16:26:32 -0500
+Received: by mail-qk0-f173.google.com with SMTP id 11so67436636qkl.3
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Jan 2017 13:26:27 -0800 (PST)
+In-Reply-To: <D49E855B.5841%Nitin.Kamble@TERADATA.COM>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Sage Weil <sweil@redhat.com>
-Cc: Alfredo Deza <adeza@redhat.com>, "Mick, Dan" <dmick@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
-Hm, master seems to have the same problem as hammer:
+Hey Nitin,
 
-Unable to checkout '3d899da2f005f72e1682f0e000aa41b82dbd2fde' in 
-submodule path 'src/rocksdb'
+Sure, just use #8E8E8E for the color, have a transparent background,
+and have it be at least 200px wide. Thanks!
 
-On 01/13/2017 04:11 PM, Loic Dachary wrote:
+
+On Fri, Jan 13, 2017 at 4:24 PM, Kamble, Nitin A
+<Nitin.Kamble@teradata.com> wrote:
+> Hi Patrick,
+>   Teradata can add log here. Do you have guidelines on converting the
+> logos to required greyscale format?
+>
+> Thanks,
+> Nitin
 >
 >
-> On 01/13/2017 03:36 PM, Sage Weil wrote:
->> On Fri, 13 Jan 2017, Nathan Cutler wrote:
->>> The error is reproducible by running the following commands:
->>>
->>> git clone http://github.com/ceph/ceph
->>> git checkout hammer
->>> git submodule update --init
->>>
->>> So it's not a Shaman issue. Looks more like a git repo issue.
+> On 1/10/17, 9:20 AM, "ceph-users on behalf of Patrick McGarry"
+> <ceph-users-bounces@lists.ceph.com on behalf of pmcgarry@redhat.com> wrote:
+>
+>>Hey cephers,
 >>
->> I just tried this and it's working for me...
->> 422e26633267b25c225975b456a9f4fc40091a2e is the precious-v0.94.9 branch in
->> rocksdb.git.
->
-> I just pushed it ;-) http://tracker.ceph.com/issues/18521 tracks the problem. I have no clue what caused it in the first place.
->
+>>Now that we're getting ready to launch the new ceph.com site, I'd like
+>>to open it up to anyone that would like to have their company logo
+>>listed as either a "ceph user" or "ceph contributor" with a hyperlink
+>>to your site.
 >>
->> sage
->
->
+>>In order to do this I'll need you to send me a logo that is at least
+>>300x300px and in the correct greyscale format:
 >>
->>>
->>> On 01/13/2017 12:36 PM, Nathan Cutler wrote:
->>>> Is it me, or is Shaman is acting weird? wip-hammer-backports build
->>>> suddenly fails because:
->>>>
->>>> Submodule 'src/rocksdb' (https://github.com/ceph/rocksdb) registered for
->>>> path 'src/rocksdb'
->>>> Cloning into 'src/rocksdb'...
->>>> fatal: reference is not a tree: 422e26633267b25c225975b456a9f4fc40091a2e
->>>> Unable to checkout '422e26633267b25c225975b456a9f4fc40091a2e' in
->>>> submodule path 'src/rocksdb'
->>>>
->>>> Some googling suggests the following might help:
->>>>
->>>> git submodule sync
->>>> git submodule update
->>>>
->>>
->>> --
->>> Nathan Cutler
->>> Software Engineer Distributed Storage
->>> SUSE LINUX, s.r.o.
->>> Tel.: +420 284 084 037
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>Ceph User - #8E8E8E (or something very similar, can also be multi-hue
+>>if you need it)
 >>
+>>Ceph contributor - #697176
+>>
+>>
+>>If you would like to see examples, the staging site is still live and
+>>available for review:
+>>
+>>http://stage.ceph.com
+>>
+>>
+>>Thanks!
+>>
+>>--
+>>
+>>Best Regards,
+>>
+>>Patrick McGarry
+>>Director Ceph Community || Red Hat
+>>http://ceph.com  ||  http://community.redhat.com
+>>@scuttlemonkey || @ceph
+>>_______________________________________________
+>>ceph-users mailing list
+>>ceph-users@lists.ceph.com
+>>http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 >
+
+
 
 -- 
-Nathan Cutler
-Software Engineer Distributed Storage
-SUSE LINUX, s.r.o.
-Tel.: +420 284 084 037
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
