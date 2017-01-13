@@ -1,38 +1,92 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 4.10-rc4
-Date: Fri, 13 Jan 2017 18:37:55 +0100
-Message-ID: <1484329075-18435-1-git-send-email-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: Shaman build fails with "reference is not a tree"
+Date: Fri, 13 Jan 2017 22:05:45 +0100
+Message-ID: <b0731b3d-87fb-f232-331e-c5072c7b3ee0@suse.cz>
+References: <0dc16c42-995c-8623-f2e6-5b69868f8e15@suse.cz>
+ <6002374e-e889-ab23-b2f6-c9aad7de6db1@suse.cz>
+ <alpine.DEB.2.11.1701131435390.1911@piezo.novalocal>
+ <f7625cc6-2fd7-3ace-31ad-c10dcef66e52@dachary.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:60612 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751153AbdAMVFt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 13 Jan 2017 16:05:49 -0500
+In-Reply-To: <f7625cc6-2fd7-3ace-31ad-c10dcef66e52@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>, Sage Weil <sweil@redhat.com>
+Cc: Alfredo Deza <adeza@redhat.com>, "Mick, Dan" <dmick@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Linus,
+Hm, master seems to have the same problem as hammer:
 
-The following changes since commit a121103c922847ba5010819a3f250f1f7fc84ab8:
+Unable to checkout '3d899da2f005f72e1682f0e000aa41b82dbd2fde' in 
+submodule path 'src/rocksdb'
 
-  Linux 4.10-rc3 (2017-01-08 14:18:17 -0800)
+On 01/13/2017 04:11 PM, Loic Dachary wrote:
+>
+>
+> On 01/13/2017 03:36 PM, Sage Weil wrote:
+>> On Fri, 13 Jan 2017, Nathan Cutler wrote:
+>>> The error is reproducible by running the following commands:
+>>>
+>>> git clone http://github.com/ceph/ceph
+>>> git checkout hammer
+>>> git submodule update --init
+>>>
+>>> So it's not a Shaman issue. Looks more like a git repo issue.
+>>
+>> I just tried this and it's working for me...
+>> 422e26633267b25c225975b456a9f4fc40091a2e is the precious-v0.94.9 branch in
+>> rocksdb.git.
+>
+> I just pushed it ;-) http://tracker.ceph.com/issues/18521 tracks the problem. I have no clue what caused it in the first place.
+>
+>>
+>> sage
+>
+>
+>>
+>>>
+>>> On 01/13/2017 12:36 PM, Nathan Cutler wrote:
+>>>> Is it me, or is Shaman is acting weird? wip-hammer-backports build
+>>>> suddenly fails because:
+>>>>
+>>>> Submodule 'src/rocksdb' (https://github.com/ceph/rocksdb) registered for
+>>>> path 'src/rocksdb'
+>>>> Cloning into 'src/rocksdb'...
+>>>> fatal: reference is not a tree: 422e26633267b25c225975b456a9f4fc40091a2e
+>>>> Unable to checkout '422e26633267b25c225975b456a9f4fc40091a2e' in
+>>>> submodule path 'src/rocksdb'
+>>>>
+>>>> Some googling suggests the following might help:
+>>>>
+>>>> git submodule sync
+>>>> git submodule update
+>>>>
+>>>
+>>> --
+>>> Nathan Cutler
+>>> Software Engineer Distributed Storage
+>>> SUSE LINUX, s.r.o.
+>>> Tel.: +420 284 084 037
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
 
-are available in the git repository at:
-
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.10-rc4
-
-for you to fetch changes up to 84fcc2d2bd6cbf621e49e1d0f7eaef2e3c666b40:
-
-  ceph: fix get_oldest_context() (2017-01-12 19:31:01 +0100)
-
-----------------------------------------------------------------
-Two small fixups for the filesystem changes that went into this merge
-window.
-
-----------------------------------------------------------------
-Geng, Jichao (1):
-      ceph: fix get_oldest_context()
-
-Yan, Zheng (1):
-      ceph: fix mds cluster availability check
-
- fs/ceph/addr.c       | 4 ++--
- fs/ceph/mds_client.c | 5 +++++
- 2 files changed, 7 insertions(+), 2 deletions(-)
+-- 
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
