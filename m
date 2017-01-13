@@ -1,67 +1,70 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Kraken cephfs test results
-Date: Fri, 13 Jan 2017 10:11:22 -0500
-Message-ID: <CA+aFP1AWGfRyv-RQu3f+pu7NfxpbNWzgsDEw_9KyZ0HJhUJssA@mail.gmail.com>
-References: <CALe9h7d5D=XQ_pRwZEEjY83TRY0ZzUkZX_DZ_D6mzp1L6xN_Qg@mail.gmail.com>
- <alpine.DEB.2.11.1701131453120.1911@piezo.novalocal>
-Reply-To: dillaman@redhat.com
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Shaman build fails with "reference is not a tree"
+Date: Fri, 13 Jan 2017 16:11:55 +0100
+Message-ID: <f7625cc6-2fd7-3ace-31ad-c10dcef66e52@dachary.org>
+References: <0dc16c42-995c-8623-f2e6-5b69868f8e15@suse.cz>
+ <6002374e-e889-ab23-b2f6-c9aad7de6db1@suse.cz>
+ <alpine.DEB.2.11.1701131435390.1911@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f51.google.com ([209.85.215.51]:33682 "EHLO
-        mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751841AbdAMPL0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jan 2017 10:11:26 -0500
-Received: by mail-lf0-f51.google.com with SMTP id k86so39885888lfi.0
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Jan 2017 07:11:25 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1701131453120.1911@piezo.novalocal>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:56049 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751841AbdAMPMC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jan 2017 10:12:02 -0500
+In-Reply-To: <alpine.DEB.2.11.1701131435390.1911@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Nathan Cutler <ncutler@suse.cz>
+Cc: Alfredo Deza <adeza@redhat.com>, "Mick, Dan" <dmick@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-RBD still sees random failures -- I haven't been able to track it down
-but I don't think it's coming from librbd nor the rbd CLI directly. I
-am assuming it's just some thread race during shut down.
 
-On Fri, Jan 13, 2017 at 9:53 AM, Sage Weil <sweil@redhat.com> wrote:
-> Thanks, John!
->
-> Sam, Jason, Matt, where are we at with the other subsystems?
->
-> Thanks!
+
+On 01/13/2017 03:36 PM, Sage Weil wrote:
+> On Fri, 13 Jan 2017, Nathan Cutler wrote:
+>> The error is reproducible by running the following commands:
+>>
+>> git clone http://github.com/ceph/ceph
+>> git checkout hammer
+>> git submodule update --init
+>>
+>> So it's not a Shaman issue. Looks more like a git repo issue.
+> 
+> I just tried this and it's working for me...  
+> 422e26633267b25c225975b456a9f4fc40091a2e is the precious-v0.94.9 branch in 
+> rocksdb.git.
+
+I just pushed it ;-) http://tracker.ceph.com/issues/18521 tracks the problem. I have no clue what caused it in the first place.
+
+> 
 > sage
->
->
-> On Tue, 10 Jan 2017, John Spray wrote:
->
->> Sage,
+
+
+> 
 >>
->> Here are the notes on the failures on the latest cephfs tests on
->> kraken.  The tldr is that there's nothing blocking in here, but I'm
->> writing it out in full so that we can refer to this list to make sure
->> everything's backported to get the runs green.
+>> On 01/13/2017 12:36 PM, Nathan Cutler wrote:
+>>> Is it me, or is Shaman is acting weird? wip-hammer-backports build
+>>> suddenly fails because:
+>>>
+>>> Submodule 'src/rocksdb' (https://github.com/ceph/rocksdb) registered for
+>>> path 'src/rocksdb'
+>>> Cloning into 'src/rocksdb'...
+>>> fatal: reference is not a tree: 422e26633267b25c225975b456a9f4fc40091a2e
+>>> Unable to checkout '422e26633267b25c225975b456a9f4fc40091a2e' in
+>>> submodule path 'src/rocksdb'
+>>>
+>>> Some googling suggests the following might help:
+>>>
+>>> git submodule sync
+>>> git submodule update
+>>>
 >>
->> Cheers,
->> John
->>
->> samba:
->> * command failed with status 223 is PID file issue (pending backport)
->> http://tracker.ceph.com/issues/18309
->> * other samba failures are missing xenial packages.
->>
->> fs:
->> * test_session_reject failure is an issue with the injection path the
->> test uses (PR open) https://github.com/ceph/ceph/pull/12757
->> * test_evict_client failure is the pidfile issue (pending backport)
->> http://tracker.ceph.com/issues/18309
->> * snaptest-snap-rm-cmp.sh failure is new issue (apparently
->> intermittent), PR open https://github.com/ceph/ceph/pull/12859
->>
->> kcephfs:
->> * failures in TestClientRecovery, probably just issues with the newly
->> deployed kclient versions of the python tests (PR open)
->> http://tracker.ceph.com/issues/18396
+>> -- 
+>> Nathan Cutler
+>> Software Engineer Distributed Storage
+>> SUSE LINUX, s.r.o.
+>> Tel.: +420 284 084 037
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
@@ -72,8 +75,7 @@ On Fri, Jan 13, 2017 at 9:53 AM, Sage Weil <sweil@redhat.com> wrote:
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
+> 
 
 -- 
-Jason
+Loïc Dachary, Artisan Logiciel Libre
