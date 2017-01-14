@@ -1,125 +1,128 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Fwd: [ceph-users] Inherent insecurity of OSD daemons when using
- only a "public network"
-Date: Sat, 14 Jan 2017 01:19:01 +0100
-Message-ID: <095feda9-fccd-91b3-796b-20c255792c9e@digiware.nl>
-References: <20170113170713.12837f19@batzmaru.gol.ad.jp>
- <591750c9-2ac5-d995-7f95-a045e0ad7b9f@digiware.nl>
- <alpine.DEB.2.11.1701131425170.1911@piezo.novalocal>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: Shaman build fails with "reference is not a tree"
+Date: Sat, 14 Jan 2017 12:59:31 +0800
+Message-ID: <CAJE9aOPmBtLBPmETixOtwTjqMO4t92JG6yVTAV4BUknEUEO+Nw@mail.gmail.com>
+References: <0dc16c42-995c-8623-f2e6-5b69868f8e15@suse.cz> <6002374e-e889-ab23-b2f6-c9aad7de6db1@suse.cz>
+ <alpine.DEB.2.11.1701131435390.1911@piezo.novalocal> <f7625cc6-2fd7-3ace-31ad-c10dcef66e52@dachary.org>
+ <b0731b3d-87fb-f232-331e-c5072c7b3ee0@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:64583 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750713AbdANATI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 13 Jan 2017 19:19:08 -0500
-In-Reply-To: <alpine.DEB.2.11.1701131425170.1911@piezo.novalocal>
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:33324 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751086AbdANE7d (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Jan 2017 23:59:33 -0500
+Received: by mail-wm0-f67.google.com with SMTP id r144so16201984wme.0
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Jan 2017 20:59:33 -0800 (PST)
+In-Reply-To: <b0731b3d-87fb-f232-331e-c5072c7b3ee0@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, chibi@gol.com
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Loic Dachary <loic@dachary.org>, Sage Weil <sweil@redhat.com>, Alfredo Deza <adeza@redhat.com>, "Mick, Dan" <dmick@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 13-1-2017 15:26, Sage Weil wrote:
-> In order to make this happen, we'd probably want to make 
-> cluster_network default to public_network if it is empty.  That is a 
-> little odd on the face of it, but I can't think of a situation where 
-> someone would want to define a specific public network and *not* define a 
-> private one, so...
-> 
-> Is that reasonable?
+On Sat, Jan 14, 2017 at 5:05 AM, Nathan Cutler <ncutler@suse.cz> wrote:
+> Hm, master seems to have the same problem as hammer:
+>
+> Unable to checkout '3d899da2f005f72e1682f0e000aa41b82dbd2fde' in submodule
+> path 'src/rocksdb'
 
-Perhaps something like PR #12929
 
---WjW
+$ git show --format=oneline 3d899da2f005f72e1682f0e000aa41b82dbd2fde
+3d899da2f005f72e1682f0e000aa41b82dbd2fde util/thread_local.h: silence
+a clang-build warning
 
-> sage
-> 
-> 
-> On Fri, 13 Jan 2017, Willem Jan Withagen wrote:
-> 
->> Hi,
->>
->> This is an observation on the user-list.
->> And I do agree with it whole hartedly.
->>
->> And it stems from the first binding where 0.0.0.0 is used to bind.
->> From the top of my head somewhere in msg/async. It starts out with
->> 0.0.0.0 but on rebinds it binds to an actual ipnr.
->>
->> If the idea here is that we need to bind to either private/public IP, I
->> can look into that.
->>
->> --WjW
+Nathan, this submodule reference is not in master yet. it's a a very
+recent commit in https://github.com/ceph/rocksdb/commits/wip-rocksdb,
+it is included in the PR of https://github.com/ceph/ceph/pull/12908.
+as i planned to retire that branch after the upstream accepts my PRs.
+it is not pushed to "master" or a non "wip" branch.
+
+
+>
+>
+> On 01/13/2017 04:11 PM, Loic Dachary wrote:
 >>
 >>
->> -------- Forwarded Message --------
->> Subject: [ceph-users] Inherent insecurity of OSD daemons when using only
->> a "public network"
->> Date: Fri, 13 Jan 2017 17:07:13 +0900
->> From: Christian Balzer <chibi@gol.com>
->> Organization: FusionGOL
->> To: ceph-users <ceph-users@lists.ceph.com>
+>>
+>> On 01/13/2017 03:36 PM, Sage Weil wrote:
+>>>
+>>> On Fri, 13 Jan 2017, Nathan Cutler wrote:
+>>>>
+>>>> The error is reproducible by running the following commands:
+>>>>
+>>>> git clone http://github.com/ceph/ceph
+>>>> git checkout hammer
+>>>> git submodule update --init
+>>>>
+>>>> So it's not a Shaman issue. Looks more like a git repo issue.
+>>>
+>>>
+>>> I just tried this and it's working for me...
+>>> 422e26633267b25c225975b456a9f4fc40091a2e is the precious-v0.94.9 branch
+>>> in
+>>> rocksdb.git.
 >>
 >>
->> Hello,
+>> I just pushed it ;-) http://tracker.ceph.com/issues/18521 tracks the
+>> problem. I have no clue what caused it in the first place.
 >>
->> Something I came across a while agao, but the recent discussion here
->> jolted my memory.
->>
->> If you have a cluster configured with just a "public network" and that
->> network being in RFC space like 10.0.0.0/8, you'd think you'd be "safe",
->> wouldn't you?
->>
->> Alas you're not:
->> ---
->> root@ceph-01:~# netstat -atn |grep LIST |grep 68
->> tcp        0      0 0.0.0.0:6813            0.0.0.0:*
->> LISTEN     tcp        0      0 0.0.0.0:6814            0.0.0.0:*
->>       LISTEN     tcp        0      0 10.0.0.11:6815          0.0.0.0:*
->>             LISTEN     tcp        0      0 10.0.0.11:6800
->> 0.0.0.0:*               LISTEN     tcp        0      0 0.0.0.0:6801
->>       0.0.0.0:*               LISTEN     tcp        0      0
->> 0.0.0.0:6802            0.0.0.0:*               LISTEN     etc..
->> ---
->>
->> Something that people most certainly would NOT expect to be the default
->> behavior.
->>
->> Solution, define a complete redundant "cluster network" that's identical
->> to the public one and voila:
->> ---
->> root@ceph-02:~# netstat -atn |grep LIST |grep 68
->> tcp        0      0 10.0.0.12:6816          0.0.0.0:*
->> LISTEN     tcp        0      0 10.0.0.12:6817          0.0.0.0:*
->>       LISTEN     tcp        0      0 10.0.0.12:6818          0.0.0.0:*
->>             LISTEN     etc.
->> ---
->>
->> I'd call that a security bug, simply because any other daemon on the
->> planet will bloody bind to the IP it's been told to in its respective
->> configuration.
->>
->> The above is with Hammer, any version.
->>
->> Christian
->> -- 
->> Christian Balzer        Network/Systems Engineer
->> chibi@gol.com   	Global OnLine Japan/Rakuten Communications
->> http://www.gol.com/
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>> sage
 >>
 >>
+>>
+>>>
+>>>>
+>>>> On 01/13/2017 12:36 PM, Nathan Cutler wrote:
+>>>>>
+>>>>> Is it me, or is Shaman is acting weird? wip-hammer-backports build
+>>>>> suddenly fails because:
+>>>>>
+>>>>> Submodule 'src/rocksdb' (https://github.com/ceph/rocksdb) registered
+>>>>> for
+>>>>> path 'src/rocksdb'
+>>>>> Cloning into 'src/rocksdb'...
+>>>>> fatal: reference is not a tree:
+>>>>> 422e26633267b25c225975b456a9f4fc40091a2e
+>>>>> Unable to checkout '422e26633267b25c225975b456a9f4fc40091a2e' in
+>>>>> submodule path 'src/rocksdb'
+>>>>>
+>>>>> Some googling suggests the following might help:
+>>>>>
+>>>>> git submodule sync
+>>>>> git submodule update
+>>>>>
+>>>>
+>>>> --
+>>>> Nathan Cutler
+>>>> Software Engineer Distributed Storage
+>>>> SUSE LINUX, s.r.o.
+>>>> Tel.: +420 284 084 037
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+>
+> --
+> Nathan Cutler
+> Software Engineer Distributed Storage
+> SUSE LINUX, s.r.o.
+> Tel.: +420 284 084 037
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
 
+
+
+-- 
+Regards
+Kefu Chai
