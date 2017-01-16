@@ -1,52 +1,46 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Request for advice on ceph compile time.
-Date: Mon, 16 Jan 2017 23:05:46 +0100
-Message-ID: <1e7dee33-5d6d-4610-0a7e-dcb1d626b014@digiware.nl>
-References: <CA+hcxJR65Ux2J+nUyFAXz08aZkrWVBKrSKeH-kH-Rqd-FLXNqg@mail.gmail.com>
- <85210ecc-191d-ac31-7d0b-ee9be562c83c@mirantis.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+From: Federico Lucifredi <flucifre@redhat.com>
+Subject: Re: Josh is the new core tech lead!
+Date: Mon, 16 Jan 2017 17:15:17 -0500
+Message-ID: <-5251283313391105406@unknownmsgid>
+References: <CAN=+7FX15D11zF814tW3gdeRbcat8nXjUNUCEuGJMKrd4zaxBg@mail.gmail.com>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:17697 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750927AbdAPWFw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 16 Jan 2017 17:05:52 -0500
-In-Reply-To: <85210ecc-191d-ac31-7d0b-ee9be562c83c@mirantis.com>
+Received: from mail-qt0-f178.google.com ([209.85.216.178]:35392 "EHLO
+        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751160AbdAPWPU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jan 2017 17:15:20 -0500
+Received: by mail-qt0-f178.google.com with SMTP id x49so124598446qtc.2
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Jan 2017 14:15:20 -0800 (PST)
+In-Reply-To: <CAN=+7FX15D11zF814tW3gdeRbcat8nXjUNUCEuGJMKrd4zaxBg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>, Victor Denisov <vdenisov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 16-1-2017 20:51, Igor Fedotov wrote:
-> My best choices are:
-> 
-> 1) Use  -j switch for make
-> 
-> 2) Make specific target(s) only, e.g. some UT for the code I'm working
-> on and proceed with the full build when most of the patch is ready.
+Thanks for all your efforts Sam — it was good working with you, and I
+do hope our paths cross again.
 
-Right,
+Congrats Josh!
 
-My most favourite command by now is:
-	( cd build; gmake -j8 VERBOSE=1 )
-or dedicated makes:
-	( cd build ; gmake -j8 bin/ceph-osd )
-Running with  8 cores.
-ccache with about 5Gb of cache on a fast disk (ssd)
-
-Only trash the whole build if you have very large and invasive changes,
-by doing rm -rf build...
-
-When running tests, these are the favourites:
-	(cd build; ctest -j8 --output-on-failure )
-	(cd build; ctest -j8  --rerun-failed --output-on-failure )
-	(cd build; ctest -V -R <regex matching tests> )
-
-or testing for faults cases:
-	(cd build; ctest -j8  --repeat-until-fail <n> )
-
---WjW
+Best-F
 
 
-
-
+> On Jan 16, 2017, at 1:25 PM, Samuel Just <sjust@redhat.com> wrote:
+>
+> Hello!  After 6 years of working on Ceph, I've decided to move on from Red Hat
+> to another oportunity not working on Ceph.
+>
+> I've had an extraordinary time working with the Ceph community as we've grown
+> from where we were in 2010 to where we are now, and I really want to thank all
+> of you for making this an incredibly rewarding experience.
+>
+> Josh Durgin will be taking over as tech lead for core.  He did an excellent job
+> as the RBD tech lead, and he's been doing great work on improving RADOS.  I'm
+> certain that he'll do an amazing job as Ceph heads into 2017 and beyond.
+> -Sam
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
