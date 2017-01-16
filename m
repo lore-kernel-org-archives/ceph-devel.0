@@ -1,85 +1,28 @@
-From: "McFarland, Bruce" <Bruce.McFarland-Iz5qeGvAONRWk0Htik3J/w@public.gmane.org>
-Subject: Re: ceph.com outages
-Date: Mon, 16 Jan 2017 17:15:15 +0000
-Message-ID: <D4A23F60.5812%bruce.mcfarland@teradata.com>
-References: <CAAZbbf3=5zDCorkeXPxBRRp+zMXSwdypWEdotpBKY9mYZL2hNg@mail.gmail.com>
-	<CAAZbbf29bkJ6SfAkVyMEXLjF85ATygoepSt9-tseSMOnESy+sg@mail.gmail.com>
-	<D4A23E08.5807%bruce.mcfarland@teradata.com>
+From: Samuel Just <sjust@redhat.com>
+Subject: Josh is the new core tech lead!
+Date: Mon, 16 Jan 2017 10:25:22 -0800
+Message-ID: <CAN=+7FX15D11zF814tW3gdeRbcat8nXjUNUCEuGJMKrd4zaxBg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <D4A23E08.5807%bruce.mcfarland-f0WWck5Ay29Wk0Htik3J/w@public.gmane.org>
-Content-Language: en-US
-Content-ID: <0A1B09A60BA3E646A401E98C09505173-4zKsZ4M6+sdEKMMhf/gKZA@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "McFarland, Bruce" <Bruce.McFarland-Iz5qeGvAONRWk0Htik3J/w@public.gmane.org>, Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qt0-f179.google.com ([209.85.216.179]:36478 "EHLO
+        mail-qt0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750781AbdAPSZX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jan 2017 13:25:23 -0500
+Received: by mail-qt0-f179.google.com with SMTP id k15so114540867qtg.3
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Jan 2017 10:25:23 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SWdub3JlIHRoYXQgbGFzdCBwb3N0LiBBZnRlciBhbm90aGVyIHRyeSBvciAyIEkgZ290IHRvIHRo
-ZSBuZXcgc2l0ZSB3aXRoDQp0aGUgdXBkYXRlcyBhcyBkZXNjcmliZWQuIExvb2tzIGdyZWF0IQ0K
-DQpPbiAxLzE2LzE3LCA5OjEyIEFNLCAiY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
-b24gYmVoYWxmIG9mDQpNY0ZhcmxhbmQsIEJydWNlIiA8Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtl
-cm5lbC5vcmcgb24gYmVoYWxmIG9mDQpCcnVjZS5NY0ZhcmxhbmRAVGVyYWRhdGEuY29tPiB3cm90
-ZToNCg0KPlBhdHJpY2ssDQo+SeKAmW0gcHJvYmFibHkgb3Zlcmxvb2tpbmcgc29tZXRoaW5nLCBi
-dXQgd2hlbiBJIGZvbGxvdyB0aGUgY2VwaCBkYXlzIGxpbmsNCj50aGVyZSBhcmUgbm8gMjAxNyBl
-dmVudHMgb25seSBwYXN0LiBUaGUgY2VwaGFsb2NvbiBsaW5rIGdvZXMgdG8gYSA0MDQgcGFnZQ0K
-Pm5vdCBmb3VuZC4NCj4NCj5CcnVjZQ0KPg0KPk9uIDEvMTYvMTcsIDc6MDMgQU0sICJjZXBoLWRl
-dmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2YNCj5QYXRyaWNrIE1jR2Fycnki
-IDxjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2YNCj5wbWNnYXJy
-eUByZWRoYXQuY29tPiB3cm90ZToNCj4NCj4+T2ssIHRoZSBuZXcgd2Vic2l0ZSBzaG91bGQgYmUg
-dXAgYW5kIGZ1bmN0aW9uYWwuIFNob3V0IGlmIHlvdSBzZWUNCj4+YW55dGhpbmcgdGhhdCBpcyBz
-dGlsbCBicm9rZW4uDQo+Pg0KPj5BcyBmb3IgdGhlIHNpdGUgaXRzZWxmLCBJJ2QgbGlrZSB0byBo
-aWdobGlnaHQgYSBmZXcgdGhpbmdzIHdvcnRoIGNoZWNraW5nDQo+Pm91dDoNCj4+DQo+PiogQ2Vw
-aCBEYXlzIC0tIFRoZSBmaXJzdCB0d28gQ2VwaCBEYXlzIGhhdmUgYmVlbiBwb3N0ZWQsIGFzIHdl
-bGwgYXMNCj4+dGhlIGhpc3RvcmljYWwgZXZlbnRzIGZvciBhbGwgb2YgbGFzdCB5ZWFyLg0KPj5o
-dHRwOi8vY2VwaC5jb20vY2VwaGRheXMvDQo+Pg0KPj4qIENlcGhhbG9jb24gLS0gT3VyIGluYXVn
-dXJhbCBjb25mZXJlbmNlIGlzIGhhcHBlbmluZyBpbiBBdWcuIElmIHlvdQ0KPj53b3VsZCBsaWtl
-IHRvIGtub3cgbW9yZSwgb3IgYXJlIGludGVyZXN0ZWQgaW4gc3BvbnNvcmluZywgcGxlYXNlIHRh
-a2UNCj4+YSBsb29rLg0KPj5odHRwOi8vY2VwaC5jb20vY2VwaGFsb2NvbjIwMTcvDQo+Pg0KPj4q
-IFJlc291cmNlcyAtLSBBIHdob2xlIGhvc3Qgb2YgbmV3IHJlc291cmNlcyBoYXZlIGJlZW4gYWdn
-cmVnYXRlZCBvbg0KPj50aGUgbmV3IHJlc291cmNlcyBwYWdlLiBUaGlzIGluY2x1ZGVzIGxpbmtz
-IHRvIHVzZSBjYXNlcywgcGVyZm9ybWFuY2UsDQo+PmFuIHVwZGF0ZWQgcGdjYWxjIHRvb2wsIGNl
-cGggdGVjaCB0YWxrcywgcHVibGljYXRpb25zIGFuZCBvdGhlcnMuDQo+Pmh0dHA6Ly9jZXBoLmNv
-bS9yZXNvdXJjZXMvDQo+Pg0KPj4qIEZlYXR1cmVkIERldmVsb3BlcnMgLS0gVGhpcyBzZWN0aW9u
-IHdpbGwgbm93IGZlYXR1cmUgYSBjb21tdW5pdHkNCj4+ZGV2ZWxvcGVyIGZvciBlYWNoIG9mIG91
-ciBuYW1lZCByZWxlYXNlcywgc3RhcnRpbmcgd2l0aCBLcmFrZW4uDQo+PkNvbmdyYXR1bGF0aW9u
-cyB0byBIYW9tYWkgb24gYmVpbmcgb3VyIGZpcnN0IGZlYXR1cmVkIGRldmVsb3BlciENCj4+aHR0
-cDovL2NlcGguY29tL2NvbW11bml0eS9mZWF0dXJlZC1kZXZlbG9wZXJzLw0KPj4NCj4+KiBMb2dv
-cyAtLSBOb3cgd2UgaGF2ZSByZWFzb25hYmx5LWhpZy1yZXMgbG9nb3MgdGhhdCB5b3UgY2FuIHVz
-ZSBmb3INCj4+eW91ciB3ZWJzaXRlcywgcHJlc2VudGF0aW9ucywgYW5kIG90aGVyIGFzc2V0cy4g
-SWYgeW91IG5lZWQgc29tZXRoaW5nDQo+Pm5vdCBmZWF0dXJlZCBoZXJlLCBkcm9wIHVzIGEgbGlu
-ZS4NCj4+aHR0cDovL2NlcGguY29tL2xvZ29zLw0KPj4NCj4+DQo+PlRob3NlIG1heSBiZSB0aGUg
-aGlnaCBwb2ludHMsIGJ1dCBkZWZpbml0ZWx5IHRha2UgYSBmZXcgbWludXRlcyB0bw0KPj5jcmF3
-bCB0aHJvdWdoIHRoZSBzaXRlIGlmIHlvdSBnZXQgYSBjaGFuY2UsIGxvdHMgb2YgZ29vZGllcyBh
-d2FpdCB5b3UuDQo+PkFzIGFsd2F5cywgaWYgeW91IHNlZSBzb21ldGhpbmcgYW1pc3MsIHBsZWFz
-ZSBsZXQgbWUga25vdy4gVGhhbmtzIQ0KPj4NCj4+DQo+Pk9uIE1vbiwgSmFuIDE2LCAyMDE3IGF0
-IDk6MDcgQU0sIFBhdHJpY2sgTWNHYXJyeSA8cG1jZ2FycnlAcmVkaGF0LmNvbT4NCj4+d3JvdGU6
-DQo+Pj4gSGV5IGNlcGhlcnMsDQo+Pj4NCj4+PiBQbGVhc2UgYmVhciB3aXRoIHVzIGFzIHdlIG1p
-Z3JhdGUgY2VwaC5jb20gYXMgdGhlcmUgbWF5IGJlIHNvbWUNCj4+PiBvdXRhZ2VzLiBUaGV5IHNo
-b3VsZCBiZSBxdWljayBhbmQgb3ZlciBzb29uLiBUaGFua3MhDQo+Pj4NCj4+Pg0KPj4+IC0tDQo+
-Pj4NCj4+PiBCZXN0IFJlZ2FyZHMsDQo+Pj4NCj4+PiBQYXRyaWNrIE1jR2FycnkNCj4+PiBEaXJl
-Y3RvciBDZXBoIENvbW11bml0eSB8fCBSZWQgSGF0DQo+Pj4gaHR0cDovL2NlcGguY29tICB8fCAg
-aHR0cDovL2NvbW11bml0eS5yZWRoYXQuY29tDQo+Pj4gQHNjdXR0bGVtb25rZXkgfHwgQGNlcGgN
-Cj4+DQo+Pg0KPj4NCj4+LS0gDQo+Pg0KPj5CZXN0IFJlZ2FyZHMsDQo+Pg0KPj5QYXRyaWNrIE1j
-R2FycnkNCj4+RGlyZWN0b3IgQ2VwaCBDb21tdW5pdHkgfHwgUmVkIEhhdA0KPj5odHRwOi8vY2Vw
-aC5jb20gIHx8ICBodHRwOi8vY29tbXVuaXR5LnJlZGhhdC5jb20NCj4+QHNjdXR0bGVtb25rZXkg
-fHwgQGNlcGgNCj4+LS0NCj4+VG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
-IGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQo+PnRoZSBib2R5IG9mIGEgbWVzc2Fn
-ZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQo+Pk1vcmUgbWFqb3Jkb21vIGluZm8gYXQg
-IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPg0KPj/vv73vv73s
-ubs/77+9Ju+/vX7vv70m77+9P++/ve+/vSst77+977+93bY/77+977+9d++/ve+/vcub77+977+9
-77+9be+/vT/vv70/Xu+/ve+/vWLvv73vv71ebu+/vXLvv73vv73vv71677+9P++/ve+/vWjvv73v
-v73vv73vv70m77+977+9P++/vUfvv73vv73vv71o77+9Pyjvv73pmo4NCj7vv73domoi77+977+9
-P++/vT9t77+977+977+977+977+9eu+/vd6W77+977+977+9Zu+/ve+/ve+/vWjvv73vv73vv71+
-77+9be+/vQ0KDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-XwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6
-Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+Hello!  After 6 years of working on Ceph, I've decided to move on from Red Hat
+to another oportunity not working on Ceph.
+
+I've had an extraordinary time working with the Ceph community as we've grown
+from where we were in 2010 to where we are now, and I really want to thank all
+of you for making this an incredibly rewarding experience.
+
+Josh Durgin will be taking over as tech lead for core.  He did an excellent job
+as the RBD tech lead, and he's been doing great work on improving RADOS.  I'm
+certain that he'll do an amazing job as Ceph heads into 2017 and beyond.
+-Sam
