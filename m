@@ -1,71 +1,93 @@
-From: Alexey Sheplyakov <asheplyakov@mirantis.com>
-Subject: Re: Wrong crush map after all OSDs down
-Date: Mon, 16 Jan 2017 13:15:11 +0400
-Message-ID: <CAC7t81bNHMryNxnKEos+-kPJ4aR-gwUynyqR-T1n6191qFcsVA@mail.gmail.com>
-References: <CAGRcXKaE8LDzbAvwOBy1uWsaDRd_phOdA8Ek6NNMQ8spJvs_PA@mail.gmail.com>
+From: caifeng.zhu@uniswdc.com
+Subject: Re: bad crc in data caused by a race condtion in
+ write_partial_message_data
+Date: Mon, 16 Jan 2017 18:09:04 +0800
+Message-ID: <20170116100904.GA38449@T530I>
+References: <20170115074525.GA35305@T530I>
+ <CAOi1vP9KzamvwLa5BtqXYdvKWM=fGqZqXX_6aEbdEsOxFfMW0Q@mail.gmail.com>
+ <20170116032412.GB37679@T530I>
+ <CAOi1vP9-Rwo5Mc-DzogTQSBFy3Hbcy=gKehG-xsYDP5fFm3PBg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f177.google.com ([209.85.161.177]:36346 "EHLO
-        mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751146AbdAPJPM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jan 2017 04:15:12 -0500
-Received: by mail-yw0-f177.google.com with SMTP id a10so64911089ywa.3
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Jan 2017 01:15:12 -0800 (PST)
-In-Reply-To: <CAGRcXKaE8LDzbAvwOBy1uWsaDRd_phOdA8Ek6NNMQ8spJvs_PA@mail.gmail.com>
+Received: from smtpbg65.qq.com ([103.7.28.233]:58331 "EHLO smtpbg65.qq.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750901AbdAPKNA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 16 Jan 2017 05:13:00 -0500
+Content-Disposition: inline
+In-Reply-To: <CAOi1vP9-Rwo5Mc-DzogTQSBFy3Hbcy=gKehG-xsYDP5fFm3PBg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jin Cai <caijin.laurence@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+On Mon, Jan 16, 2017 at 09:42:25AM +0100, Ilya Dryomov wrote:
+> On Mon, Jan 16, 2017 at 4:24 AM,  <caifeng.zhu@uniswdc.com> wrote:
+> > On Sun, Jan 15, 2017 at 06:01:05PM +0100, Ilya Dryomov wrote:
+> >> On Sun, Jan 15, 2017 at 8:45 AM,  <caifeng.zhu@uniswdc.com> wrote:
+> >> > Hi, all
+> >> >
+> >> > Let's look at the problem first. We have a lot of 'bad crc in data'
+> >> > warnings at OSDs, like below:
+> >> >     2017-01-14 23:25:54.671599 7f67201b3700  0 bad crc in data 1480547403 != exp 3751318843
+> >> >     2017-01-14 23:25:54.681146 7f67201b3700  0 bad crc in data 3044715775 != exp 3018112170
+> >> >     2017-01-14 23:25:54.681822 7f67201b3700  0 bad crc in data 2815383560 != exp 1455746011
+> >> >     2017-01-14 23:25:54.686106 7f67205da700  0 bad crc in data 1781929234 != exp 498105391
+> >> >     2017-01-14 23:25:54.688092 7f67205da700  0 bad crc in data 1845054835 != exp 3337474350
+> >> >     2017-01-14 23:25:54.693225 7f67205da700  0 bad crc in data 1518733907 != exp 3781627678
+> >> >     2017-01-14 23:25:54.755653 7f6724115700  0 bad crc in data 1173337243 != exp 3759627242
+> >> >     ...
+> >> > This problem occurs when we are testing(by fio) an NFS client, whose NFS server is
+> >> > built on an XFS + RBD combination. The bad effect of the problem is that: OSD will close
+> >> > the connection of crc error and drop all reply messages sent through the connection.
+> >> > But the kernel rbd client will hold the requests and wait for the already dropped
+> >> > replies which will never come. A deadlock occurs.
+> >> >
+> >> > After some analysis, we suspect write_partial_message_data may have a race condtion.
+> >> > (Code below is got from gitbub.)
+> >> >     1562                page = ceph_msg_data_next(cursor, &page_offset, &length,
+> >> >     1563                                          &last_piece);
+> >> >     1564                ret = ceph_tcp_sendpage(con->sock, page, page_offset,
+> >> >     1565                                        length, !last_piece);
+> >> >     ...
+> >> >     1572                if (do_datacrc && cursor->need_crc)
+> >> >     1573                        crc = ceph_crc32c_page(crc, page, page_offset, length);
+> >> > At line 1564 ~ 1572, a worker thread of libceph workquue may send the page out by TCP
+> >> > and compute the CRC. But simultaneously, at the VFS/XFS level, there may be another thread
+> >> > writing to file position cached by the sending-out page. If page sending and crc compution
+> >> > is interleaved by data writing, bad CRC will be complained by the receiving OSD.
+> >> >
+> >> > To verify our suspection, we add the debug patch below:
+> >> > (Code below is based on our linux version.)
+> >>
+> >> ... which is based on?  This should be fixed in 4.3+ and all recent stable
+> >> kernels.
+> >>
+> >
+> > We are using CentOS 7.1, with kernel as
+> > kernel.osrelease = 3.10.0-229.14.1.el7.1.x86_64.
+> > With patches added by CentOS, the ceph kernel client is roughly about 4.0~.
+> 
+> No, it's not ~4.0.  A lot of important fixes are missing from that
+> kernel and I'd strognly encourage you to upgrade to the 7.3 kernel.
+> 
 
-Actually down/slow OSDs are detected by other OSDs.  OSDs exchange
-heartbeats every few seconds.
-When an OSD haven't received a reply from its neighbor within the
-grace period (default: 20 seconds),
-the OSD (which has sent the heartbeat) considers its neighbor down and
-reports this to a monitor.
-After receiving 3 such messages in a row the monitor marks the OSD in
-question as down.
+Thanks for your suggestion. We'll try it.
 
-Also OSDs report their status directly to monitors every few (~2)
-minutes (to avoid flooding monitors).
-If the monitor haven't received any status reports from an OSD within
-a grace period (~15 minutes)
-the OSD in question is considered down.
+> >
+> > Is there any info or doc about the fixes in 4.3+?
+> 
+> This is the fix, trivial to cherry-pick and try out:
+> 
+> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=bae818ee1577c27356093901a0ea48f672eda514
+> 
 
-If all OSDs are down there is no OSD which could have reported its
-neighbors are down. Thus monitor
-will consider all OSDs as up until the OSD report grace period (~15
-minutes) expires.
+This patch makes sense for me. It is the elegant soltuion, 
+much (much ...) better than my proposal. Thanks for your help!
 
-See http://docs.ceph.com/docs/giant/rados/configuration/mon-osd-interaction/#configuring-monitor-osd-interaction
-for more details.
-
-Best regards,
-     Alexey
+> Thanks,
+> 
+>                 Ilya
+> 
 
 
-On Sat, Jan 14, 2017 at 7:59 PM, Jin Cai <caijin.laurence@gmail.com> wrote:
-> Hi all,
-> I deployed a ceph cluster with jewel in four physical machines.
-> Three physical machines were used for OSD and each of them had eight
-> OSDs. The left one was used to serve as a monitor.
-> At first, everything worked well.
-> By the reason of test, I stopped all the OSD daemon and double checked
-> no OSD process running.
-> After that, I executed ceph -s and got the following output:
->  osdmap e164: 24 osds: 7 up, 7 in
-> No matter how much time elapsed, the output didn't change.
->
-> The expected output should be:
-> osdmap e164: 24 osds: 0 up, 0 in
->
-> I think it is the matter of synchronisation between OSDs and monitor
-> Would you like you explain this strange phenomenon for me.
-> Thanks a bunch in advance.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
