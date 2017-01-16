@@ -1,47 +1,31 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] ceph: use BUG() instead of BUG_ON(1)
-Date: Mon, 16 Jan 2017 14:33:59 +0100
-Message-ID: <CAOi1vP_+fABpNS+NCNDcHqsRPB11_Qm2AY0_9+BJ5+aPzrh45Q@mail.gmail.com>
-References: <20170116110622.3870494-1-arnd@arndb.de>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: ceph.com outages
+Date: Mon, 16 Jan 2017 09:07:25 -0500
+Message-ID: <CAAZbbf3=5zDCorkeXPxBRRp+zMXSwdypWEdotpBKY9mYZL2hNg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170116110622.3870494-1-arnd@arndb.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qt0-f178.google.com ([209.85.216.178]:33196 "EHLO
+        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750742AbdAPOH1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jan 2017 09:07:27 -0500
+Received: by mail-qt0-f178.google.com with SMTP id v23so104718054qtb.0
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Jan 2017 06:07:26 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-On Mon, Jan 16, 2017 at 12:06 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> I ran into this compile warning, which is the result of BUG_ON(1)
-> not always leading to the compiler treating the code path as
-> unreachable:
->
-> include/linux/ceph/osdmap.h: In function 'ceph_can_shift_osds':
-> include/linux/ceph/osdmap.h:62:1: error: control reaches end of non-void function [-Werror=return-type]
->
-> Using BUG() here avoids the warning.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> ---
->  include/linux/ceph/osdmap.h | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/include/linux/ceph/osdmap.h b/include/linux/ceph/osdmap.h
-> index 9a9041784dcf..412906609954 100644
-> --- a/include/linux/ceph/osdmap.h
-> +++ b/include/linux/ceph/osdmap.h
-> @@ -57,7 +57,7 @@ static inline bool ceph_can_shift_osds(struct ceph_pg_pool_info *pool)
->         case CEPH_POOL_TYPE_EC:
->                 return false;
->         default:
-> -               BUG_ON(1);
-> +               BUG();
->         }
->  }
+Hey cephers,
 
-Applied.
+Please bear with us as we migrate ceph.com as there may be some
+outages. They should be quick and over soon. Thanks!
 
-Thanks,
 
-                Ilya
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
