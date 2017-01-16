@@ -1,77 +1,67 @@
-From: ceph branch robot <nobody@ceph.com>
-Subject: ceph branch status
-Date: Mon, 16 Jan 2017 08:00:04 -0800 (PST)
-Message-ID: <20170116160004.B9A7428037A@teuthology.front.sepia.ceph.com>
+From: "McFarland, Bruce" <Bruce.McFarland@Teradata.com>
+Subject: Re: ceph.com outages
+Date: Mon, 16 Jan 2017 17:12:08 +0000
+Message-ID: <D4A23E08.5807%bruce.mcfarland@teradata.com>
+References: <CAAZbbf3=5zDCorkeXPxBRRp+zMXSwdypWEdotpBKY9mYZL2hNg@mail.gmail.com>
+ <CAAZbbf29bkJ6SfAkVyMEXLjF85ATygoepSt9-tseSMOnESy+sg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [8.43.84.3] ([8.43.84.3]:59723 "EHLO
-        teuthology.front.sepia.ceph.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1750855AbdAPQAE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 16 Jan 2017 11:00:04 -0500
+Received: from nat13.teradata.com ([153.65.16.13]:33857 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1750992AbdAPRMK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jan 2017 12:12:10 -0500
+In-Reply-To: <CAAZbbf29bkJ6SfAkVyMEXLjF85ATygoepSt9-tseSMOnESy+sg@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <13CD1EA616494F41A0F7815900B6A92A@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Patrick McGarry <pmcgarry@redhat.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
--- All Branches --
-
-Ali Maredia <amaredia@redhat.com>
-	2016-12-16 13:23:09 -0500   wip-rgw-multisite-teuthology
-
-Dan Lambright <dlambrig@redhat.com>
-	2017-01-09 17:47:19 -0500   wip-message-factory
-	2017-01-16 10:04:44 -0500   wip-osd-ioinject
-
-GitHub <noreply@github.com>
-	2016-11-02 08:42:35 +0200   infernalis
-	2016-12-08 11:22:16 -0800   jewel-next
-	2016-12-14 11:40:17 -0600   firefly
-	2017-01-04 00:16:47 +0100   wip-ansible-suit
-	2017-01-04 00:16:47 +0100   wip-ansible-suite
-	2017-01-08 09:26:03 +0200   hammer
-	2017-01-13 11:10:39 +0100   jewel
-	2017-01-13 11:10:39 +0100   tags/v0.94.3
-	2017-01-13 23:40:46 +0200   wip-ansible-fs-suit
-	2017-01-13 23:40:46 +0200   wip-ansible-fs-suite
-	2017-01-14 09:57:38 -0500   kraken
-
-Loic Dachary <ldachary@redhat.com>
-	2015-03-23 17:44:12 +0100   dumpling
-
-Loic Dachary <loic@dachary.org>
-	2015-10-17 00:38:34 +0200   giant
-
-Marcus Watts <mwatts@redhat.com>
-	2016-10-19 05:05:50 -0400   wip-master-rgw-0lenfix1
-	2016-11-11 01:22:10 -0500   wip-xml-string-wrap
-	2016-11-11 01:25:55 -0500   wip-json-smarter-escapes
-	2016-11-11 01:29:56 -0500   wip-buildfix-python-out-of-tree
-
-Orit Wasserman <owasserm@redhat.com>
-	2017-01-02 12:13:26 +0200   wip-orit-resharding-hammer
-
-Pritha Srivastava <prsrivas@redhat.com>
-	2016-12-22 20:28:09 +0530   wip-rgw-polymorphic-errors
-	2017-01-16 11:36:24 +0530   wip-rgw-ssl-teuthology
-
-Radoslaw Zarzynski <rzarzynski@mirantis.com>
-	2017-01-16 15:19:58 +0100   wip-rgw-18476
-
-Sage Weil <sage@inktank.com>
-	2013-04-18 13:51:36 -0700   argonaut
-
-Sage Weil <sage@redhat.com>
-	2015-01-12 08:30:40 -0800   emperor
-
-Wido den Hollander <wido@42on.com>
-	2017-01-03 15:36:28 +0100   osd-mark-inactive
-
-Yehuda Sadeh <yehuda@inktank.com>
-	2014-01-28 09:38:19 -0800   bobtail
-	2014-01-28 09:40:18 -0800   cuttlefish
-
-Yehuda Sadeh <yehuda@redhat.com>
-	2016-10-03 16:51:40 -0700   dnm-dang-reshard
-
-
-
-Grouped by committer, ordered by commit time stamp.
+UGF0cmljaywNCknigJltIHByb2JhYmx5IG92ZXJsb29raW5nIHNvbWV0aGluZywgYnV0IHdoZW4g
+SSBmb2xsb3cgdGhlIGNlcGggZGF5cyBsaW5rDQp0aGVyZSBhcmUgbm8gMjAxNyBldmVudHMgb25s
+eSBwYXN0LiBUaGUgY2VwaGFsb2NvbiBsaW5rIGdvZXMgdG8gYSA0MDQgcGFnZQ0Kbm90IGZvdW5k
+Lg0KDQpCcnVjZQ0KDQpPbiAxLzE2LzE3LCA3OjAzIEFNLCAiY2VwaC1kZXZlbC1vd25lckB2Z2Vy
+Lmtlcm5lbC5vcmcgb24gYmVoYWxmIG9mDQpQYXRyaWNrIE1jR2FycnkiIDxjZXBoLWRldmVsLW93
+bmVyQHZnZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2YNCnBtY2dhcnJ5QHJlZGhhdC5jb20+IHdy
+b3RlOg0KDQo+T2ssIHRoZSBuZXcgd2Vic2l0ZSBzaG91bGQgYmUgdXAgYW5kIGZ1bmN0aW9uYWwu
+IFNob3V0IGlmIHlvdSBzZWUNCj5hbnl0aGluZyB0aGF0IGlzIHN0aWxsIGJyb2tlbi4NCj4NCj5B
+cyBmb3IgdGhlIHNpdGUgaXRzZWxmLCBJJ2QgbGlrZSB0byBoaWdobGlnaHQgYSBmZXcgdGhpbmdz
+IHdvcnRoIGNoZWNraW5nDQo+b3V0Og0KPg0KPiogQ2VwaCBEYXlzIC0tIFRoZSBmaXJzdCB0d28g
+Q2VwaCBEYXlzIGhhdmUgYmVlbiBwb3N0ZWQsIGFzIHdlbGwgYXMNCj50aGUgaGlzdG9yaWNhbCBl
+dmVudHMgZm9yIGFsbCBvZiBsYXN0IHllYXIuDQo+aHR0cDovL2NlcGguY29tL2NlcGhkYXlzLw0K
+Pg0KPiogQ2VwaGFsb2NvbiAtLSBPdXIgaW5hdWd1cmFsIGNvbmZlcmVuY2UgaXMgaGFwcGVuaW5n
+IGluIEF1Zy4gSWYgeW91DQo+d291bGQgbGlrZSB0byBrbm93IG1vcmUsIG9yIGFyZSBpbnRlcmVz
+dGVkIGluIHNwb25zb3JpbmcsIHBsZWFzZSB0YWtlDQo+YSBsb29rLg0KPmh0dHA6Ly9jZXBoLmNv
+bS9jZXBoYWxvY29uMjAxNy8NCj4NCj4qIFJlc291cmNlcyAtLSBBIHdob2xlIGhvc3Qgb2YgbmV3
+IHJlc291cmNlcyBoYXZlIGJlZW4gYWdncmVnYXRlZCBvbg0KPnRoZSBuZXcgcmVzb3VyY2VzIHBh
+Z2UuIFRoaXMgaW5jbHVkZXMgbGlua3MgdG8gdXNlIGNhc2VzLCBwZXJmb3JtYW5jZSwNCj5hbiB1
+cGRhdGVkIHBnY2FsYyB0b29sLCBjZXBoIHRlY2ggdGFsa3MsIHB1YmxpY2F0aW9ucyBhbmQgb3Ro
+ZXJzLg0KPmh0dHA6Ly9jZXBoLmNvbS9yZXNvdXJjZXMvDQo+DQo+KiBGZWF0dXJlZCBEZXZlbG9w
+ZXJzIC0tIFRoaXMgc2VjdGlvbiB3aWxsIG5vdyBmZWF0dXJlIGEgY29tbXVuaXR5DQo+ZGV2ZWxv
+cGVyIGZvciBlYWNoIG9mIG91ciBuYW1lZCByZWxlYXNlcywgc3RhcnRpbmcgd2l0aCBLcmFrZW4u
+DQo+Q29uZ3JhdHVsYXRpb25zIHRvIEhhb21haSBvbiBiZWluZyBvdXIgZmlyc3QgZmVhdHVyZWQg
+ZGV2ZWxvcGVyIQ0KPmh0dHA6Ly9jZXBoLmNvbS9jb21tdW5pdHkvZmVhdHVyZWQtZGV2ZWxvcGVy
+cy8NCj4NCj4qIExvZ29zIC0tIE5vdyB3ZSBoYXZlIHJlYXNvbmFibHktaGlnLXJlcyBsb2dvcyB0
+aGF0IHlvdSBjYW4gdXNlIGZvcg0KPnlvdXIgd2Vic2l0ZXMsIHByZXNlbnRhdGlvbnMsIGFuZCBv
+dGhlciBhc3NldHMuIElmIHlvdSBuZWVkIHNvbWV0aGluZw0KPm5vdCBmZWF0dXJlZCBoZXJlLCBk
+cm9wIHVzIGEgbGluZS4NCj5odHRwOi8vY2VwaC5jb20vbG9nb3MvDQo+DQo+DQo+VGhvc2UgbWF5
+IGJlIHRoZSBoaWdoIHBvaW50cywgYnV0IGRlZmluaXRlbHkgdGFrZSBhIGZldyBtaW51dGVzIHRv
+DQo+Y3Jhd2wgdGhyb3VnaCB0aGUgc2l0ZSBpZiB5b3UgZ2V0IGEgY2hhbmNlLCBsb3RzIG9mIGdv
+b2RpZXMgYXdhaXQgeW91Lg0KPkFzIGFsd2F5cywgaWYgeW91IHNlZSBzb21ldGhpbmcgYW1pc3Ms
+IHBsZWFzZSBsZXQgbWUga25vdy4gVGhhbmtzIQ0KPg0KPg0KPk9uIE1vbiwgSmFuIDE2LCAyMDE3
+IGF0IDk6MDcgQU0sIFBhdHJpY2sgTWNHYXJyeSA8cG1jZ2FycnlAcmVkaGF0LmNvbT4NCj53cm90
+ZToNCj4+IEhleSBjZXBoZXJzLA0KPj4NCj4+IFBsZWFzZSBiZWFyIHdpdGggdXMgYXMgd2UgbWln
+cmF0ZSBjZXBoLmNvbSBhcyB0aGVyZSBtYXkgYmUgc29tZQ0KPj4gb3V0YWdlcy4gVGhleSBzaG91
+bGQgYmUgcXVpY2sgYW5kIG92ZXIgc29vbi4gVGhhbmtzIQ0KPj4NCj4+DQo+PiAtLQ0KPj4NCj4+
+IEJlc3QgUmVnYXJkcywNCj4+DQo+PiBQYXRyaWNrIE1jR2FycnkNCj4+IERpcmVjdG9yIENlcGgg
+Q29tbXVuaXR5IHx8IFJlZCBIYXQNCj4+IGh0dHA6Ly9jZXBoLmNvbSAgfHwgIGh0dHA6Ly9jb21t
+dW5pdHkucmVkaGF0LmNvbQ0KPj4gQHNjdXR0bGVtb25rZXkgfHwgQGNlcGgNCj4NCj4NCj4NCj4t
+LSANCj4NCj5CZXN0IFJlZ2FyZHMsDQo+DQo+UGF0cmljayBNY0dhcnJ5DQo+RGlyZWN0b3IgQ2Vw
+aCBDb21tdW5pdHkgfHwgUmVkIEhhdA0KPmh0dHA6Ly9jZXBoLmNvbSAgfHwgIGh0dHA6Ly9jb21t
+dW5pdHkucmVkaGF0LmNvbQ0KPkBzY3V0dGxlbW9ua2V5IHx8IEBjZXBoDQo+LS0NCj5UbyB1bnN1
+YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1k
+ZXZlbCIgaW4NCj50aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
+Lm9yZw0KPk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
+b3Jkb21vLWluZm8uaHRtbA0KDQo=
