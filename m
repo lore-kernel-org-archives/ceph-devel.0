@@ -1,28 +1,45 @@
-From: Victor Denisov <vdenisov@mirantis.com>
-Subject: Request for advice on ceph compile time.
-Date: Mon, 16 Jan 2017 11:19:37 -0800
-Message-ID: <CA+hcxJR65Ux2J+nUyFAXz08aZkrWVBKrSKeH-kH-Rqd-FLXNqg@mail.gmail.com>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: Re: Request for advice on ceph compile time.
+Date: Mon, 16 Jan 2017 22:51:02 +0300
+Message-ID: <85210ecc-191d-ac31-7d0b-ee9be562c83c@mirantis.com>
+References: <CA+hcxJR65Ux2J+nUyFAXz08aZkrWVBKrSKeH-kH-Rqd-FLXNqg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f173.google.com ([209.85.217.173]:33302 "EHLO
-        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750917AbdAPT2m (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jan 2017 14:28:42 -0500
-Received: by mail-ua0-f173.google.com with SMTP id i68so88013745uad.0
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Jan 2017 11:28:41 -0800 (PST)
+Received: from mail-lf0-f51.google.com ([209.85.215.51]:33332 "EHLO
+        mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751267AbdAPT7B (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jan 2017 14:59:01 -0500
+Received: by mail-lf0-f51.google.com with SMTP id k86so91640943lfi.0
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Jan 2017 11:59:01 -0800 (PST)
+In-Reply-To: <CA+hcxJR65Ux2J+nUyFAXz08aZkrWVBKrSKeH-kH-Rqd-FLXNqg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Victor Denisov <vdenisov@mirantis.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Cephers,
+My best choices are:
 
-Could you please give me some advice on how to have a faster turn
-around for change - compile process. Currently I usually do a change
-and then compile which often takes quite a while and gets in the way
-of being in the flow. I'm trying to mitigate it by changing as big
-chunks as possible before compiling, but it's not a very pleasant
-experience. So, I thought may be you could share your experience.
+1) Use  -j switch for make
 
-Thanks in advance.
-Victor.
+2) Make specific target(s) only, e.g. some UT for the code I'm working 
+on and proceed with the full build when most of the patch is ready.
+
+
+On 1/16/2017 10:19 PM, Victor Denisov wrote:
+> Cephers,
+>
+> Could you please give me some advice on how to have a faster turn
+> around for change - compile process. Currently I usually do a change
+> and then compile which often takes quite a while and gets in the way
+> of being in the flow. I'm trying to mitigate it by changing as big
+> chunks as possible before compiling, but it's not a very pleasant
+> experience. So, I thought may be you could share your experience.
+>
+> Thanks in advance.
+> Victor.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
