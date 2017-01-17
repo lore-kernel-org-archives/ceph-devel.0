@@ -1,63 +1,31 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH 8/8] Revert "ext4: fix wrong gfp type under transaction"
-Date: Tue, 17 Jan 2017 09:24:26 +0100
-Message-ID: <20170117082425.GD19699@dhcp22.suse.cz>
-References: <20170106141107.23953-1-mhocko@kernel.org>
- <20170106141107.23953-9-mhocko@kernel.org>
- <20170117025607.frrcdbduthhutrzj@thunk.org>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
+Subject: Issue with upgrade from 0.94.9 to 10.2.5
+Date: Tue, 17 Jan 2017 12:52:34 +0100
+Message-ID: <9fd022a0-d09e-b3ff-ce5c-f55d5b2d1167@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170117025607.frrcdbduthhutrzj@thunk.org>
-Sender: owner-linux-mm@kvack.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from 10.mo302.mail-out.ovh.net ([137.74.110.83]:47043 "EHLO
+        10.mo302.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750803AbdAQLwk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Jan 2017 06:52:40 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
-On Mon 16-01-17 21:56:07, Theodore Ts'o wrote:
-> On Fri, Jan 06, 2017 at 03:11:07PM +0100, Michal Hocko wrote:
-> > From: Michal Hocko <mhocko@suse.com>
-> > 
-> > This reverts commit 216553c4b7f3e3e2beb4981cddca9b2027523928. Now that
-> > the transaction context uses memalloc_nofs_save and all allocations
-> > within the this context inherit GFP_NOFS automatically, there is no
-> > reason to mark specific allocations explicitly.
-> > 
-> > This patch should not introduce any functional change. The main point
-> > of this change is to reduce explicit GFP_NOFS usage inside ext4 code
-> > to make the review of the remaining usage easier.
-> > 
-> > Signed-off-by: Michal Hocko <mhocko@suse.com>
-> > Reviewed-by: Jan Kara <jack@suse.cz>
-> 
-> Changes in the jbd2 layer aren't going to guarantee that
-> memalloc_nofs_save() will be executed if we are running ext4 without a
-> journal (aka in no journal mode).  And this is a *very* common
-> configuration; it's how ext4 is used inside Google in our production
-> servers.
+Hello,
 
-OK, I wasn't aware of that.
+During our testing we found out that during upgrade from 0.94.9 to 10.2.5 
+we're hitting issue http://tracker.ceph.com/issues/17386 ("Upgrading 0.94.6 
+-> 0.94.9 saturating mon node networking"). Apparently, there's a few 
+commits for both hammer and jewel which are supposed to fix this issue for 
+upgrades from 0.94.6 to 0.94.9 (and possibly for others), but we're still 
+seeing this upgrading to Jewel, and symptoms are exactly same - after 
+upgrading MONs, each not yet upgraded OSD takes full OSDMap from monitors 
+after failing the CRC check. Anyone else encountered this?
 
-> So that means the earlier patches will probably need to be changed so
-> the nOFS scope is done in the ext4_journal_{start,stop} functions in
-> fs/ext4/ext4_jbd2.c.
-
-I could definitely appreciated some help here. The call paths are rather
-complex and I am not familiar with the code enough. On of the biggest
-problem I have currently is that there doesn't seem to be an easy place
-to store the old allocation context. The original patch had it inside
-the journal handle. I was thinking about putting it into superblock but
-ext4_journal_stop doesn't seem to have access to the sb if there is no
-handle. Now, if ext4_journal_start is never called from a nested context
-then this is not a big deal but there are just too many caller to
-check...
 -- 
-Michal Hocko
-SUSE Labs
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Piotr Dałek
+piotr.dalek@corp.ovh.com
+https://www.ovh.com/us/
