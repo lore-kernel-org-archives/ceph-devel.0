@@ -1,82 +1,64 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: bluestore: extend/reuse blob on write rather than create a new
- one
-Date: Tue, 17 Jan 2017 15:31:51 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1701171529390.1661@piezo.novalocal>
-References: <b377a4a8-d9b8-cee0-175f-200f50d3c1dc@mirantis.com>
+From: Theodore Ts'o <tytso@mit.edu>
+Subject: Re: [PATCH 8/8] Revert "ext4: fix wrong gfp type under transaction"
+Date: Tue, 17 Jan 2017 10:59:16 -0500
+Message-ID: <20170117155916.dcizr65bwa6behe7@thunk.org>
+References: <20170106141107.23953-1-mhocko@kernel.org>
+ <20170106141107.23953-9-mhocko@kernel.org>
+ <20170117025607.frrcdbduthhutrzj@thunk.org>
+ <20170117082425.GD19699@dhcp22.suse.cz>
+ <20170117151817.GR19699@dhcp22.suse.cz>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48840 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750892AbdAQPki (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 17 Jan 2017 10:40:38 -0500
-In-Reply-To: <b377a4a8-d9b8-cee0-175f-200f50d3c1dc@mirantis.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170117151817.GR19699@dhcp22.suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: Michal Hocko <mhocko@kernel.org>
+Cc: Jan Kara <jack@suse.cz>, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, 17 Jan 2017, Igor Fedotov wrote:
-> Hi All,
+On Tue, Jan 17, 2017 at 04:18:17PM +0100, Michal Hocko wrote:
 > 
-> Let me share some thoughts on another one approach that might help to reduce
-> BlueStore Onode size (both in-memory and serialized).
-> 
-> Brief example showing current write algorithm functioning below first:
-> - min_alloc_size = 0x10000
-> 
-> 1) write 0x0~10000
-> At this step we have following Onode/extent/blob structure:
->   Extent1 0x0~10000 -> Blob1(size=0x10000) -> 1 * 0x10000 pextent
-> 2) Append: write 0x10000~20000
-> Onode/extent/blob structure:
->   Extent1 0x0~10000 -> Blob1(size=0x10000) -> 1 * 0x10000 pextent
->   Extent2 0x10000~20000 -> Blob2(size=0x20000) -> 2 * 0x10000 pextents
-> 
-> 3) Partially Overwrite Extent2: write 0x10000~10000
-> Onode/extent/blob structure:
->   Extent1 0x0~10000 -> Blob1(size=0x10000) -> 1 * 0x10000 pextent
->   Extent2 0x10000~10000 -> Blob3(size=0x10000) -> 1 * 0x10000 pextents
->   Extent3 0x20000~10000 -> Blob2(size=0x10000) -> 1 * 0x10000 pextents
-> 
->   So one can see that we have increased Onode structure at step 3 while object
-> content layout is unchanged: 0~30000.
->   Moreover at step 2) we could avoid Extent2 creation and extend Extent1/Blob1
-> instead.
-> 
->   Hence my suggestion is to consider an approach that will allow existing
-> extents/blobs reuse and blob internals(pextent+csum vectors) update only
-> whenever possible (i.e. big aligned writes/appends).
->   As a result Onode structure becomes more static and Blob's pextent vector
-> grows rather than ExtentMap. Surely some limit for Blob growth to be
-> introduced.
-> 
-> 
-> 
->   IMHO as we have reduced Onode metadata this approach might impact BlueStore
-> performance comparable to the results we achieved by the cases with
-> min_alloc_size increased.
->   AFAIR Mark did some tests for 16K MAS and they showed better results. But we
-> wouldn't suffer from storage space loss caused by increased granularity this
-> way.
->   Onode in-memory representation is positively affected this way too hence
-> BlueStore caching becomes more efective.
-> 
-> The cost for this change is the need for more dynamic behavior of Blob's
-> pextent & csum containers - currently their size are 'semi-dynamic' (entry
-> count decrease is possible sometimes but no increase is possible)
-> 
-> Any comments/thoughts?
+> OK, so I've been staring into the code and AFAIU current->journal_info
+> can contain my stored information. I could either hijack part of the
+> word as the ref counting is only consuming low 12b. But that looks too
+> ugly to live. Or I can allocate some placeholder.
 
-Yep, I think this makes sense.  We should just try to limit the paths that 
-adjsut Blobs in this way to manage the complexity.  The main one I'm 
-worried/hopefully about is appends: we definitely want to allow Blobs 
-to grow with new extents on the end.  Growing on the 'left' (with earlier 
-extents) will be much more difficult as the BufferSpace and all of its 
-offsets would need to be updated and there is a lot more opportunity 
-for bugs there.
+Yeah, I was looking at something similar.  Can you guarantee that the
+context will only take one or two bits?  (Looks like it only needs one
+bit ATM, even though at the moment you're storing the whole GFP mask,
+correct?)
 
-We'll probably have to avoid changing blobs that are shared, too.
+> But before going to play with that I am really wondering whether we need
+> all this with no journal at all. AFAIU what Jack told me it is the
+> journal lock(s) which is the biggest problem from the reclaim recursion
+> point of view. What would cause a deadlock in no journal mode?
 
-sage
+We still have the original problem for why we need GFP_NOFS even in
+ext2.  If we are in a writeback path, and we need to allocate memory,
+we don't want to recurse back into the file system's writeback path.
+Certainly not for the same inode, and while we could make it work if
+the mm was writing back another inode, or another superblock, there
+are also stack depth considerations that would make this be a bad
+idea.  So we do need to be able to assert GFP_NOFS even in no journal
+mode, and for any file system including ext2, for that matter.
+
+Because of the fact that we're going to have to play games with
+current->journal_info, maybe this is something that I should take
+responsibility for, and to go through the the ext4 tree after the main
+patch series go through?  Maybe you could use xfs and ext2 as sample
+(simple) implementations?
+
+My only ask is that the memalloc nofs context be a well defined N
+bits, where N < 16, and I'll find some place to put them (probably
+journal_info).
+
+Thanks,
+
+					- Ted
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
