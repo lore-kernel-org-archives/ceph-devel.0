@@ -1,69 +1,71 @@
-From: Michal Hocko <mhocko-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 8/8] Revert "ext4: fix wrong gfp type under transaction"
-Date: Tue, 17 Jan 2017 16:18:17 +0100
-Message-ID: <20170117151817.GR19699@dhcp22.suse.cz>
-References: <20170106141107.23953-1-mhocko@kernel.org>
- <20170106141107.23953-9-mhocko@kernel.org>
- <20170117025607.frrcdbduthhutrzj@thunk.org>
- <20170117082425.GD19699@dhcp22.suse.cz>
+From: Igor Fedotov <ifedotov@mirantis.com>
+Subject: bluestore: extend/reuse blob on write rather than create a new one
+Date: Tue, 17 Jan 2017 18:27:18 +0300
+Message-ID: <b377a4a8-d9b8-cee0-175f-200f50d3c1dc@mirantis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170117082425.GD19699-2MMpYkNvuYDjFM9bn6wA6Q@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>
-Cc: linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Dave Chinner <david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org>, djwong-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Chris Mason <clm-b10kYP2dOMg@public.gmane.org>, David Sterba <dsterba-AlSwsSmVLrQ@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, logfs-PCqxUs/MD9bYtjvyW6yDsg@public.gmane.org, linux-xfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, reiserfs-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ntfs-dev-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qt0-f170.google.com ([209.85.216.170]:36791 "EHLO
+        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751288AbdAQP10 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Jan 2017 10:27:26 -0500
+Received: by mail-qt0-f170.google.com with SMTP id k15so163014652qtg.3
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Jan 2017 07:27:26 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
 
-On Tue 17-01-17 09:24:25, Michal Hocko wrote:
-> On Mon 16-01-17 21:56:07, Theodore Ts'o wrote:
-> > On Fri, Jan 06, 2017 at 03:11:07PM +0100, Michal Hocko wrote:
-> > > From: Michal Hocko <mhocko-IBi9RG/b67k@public.gmane.org>
-> > > 
-> > > This reverts commit 216553c4b7f3e3e2beb4981cddca9b2027523928. Now that
-> > > the transaction context uses memalloc_nofs_save and all allocations
-> > > within the this context inherit GFP_NOFS automatically, there is no
-> > > reason to mark specific allocations explicitly.
-> > > 
-> > > This patch should not introduce any functional change. The main point
-> > > of this change is to reduce explicit GFP_NOFS usage inside ext4 code
-> > > to make the review of the remaining usage easier.
-> > > 
-> > > Signed-off-by: Michal Hocko <mhocko-IBi9RG/b67k@public.gmane.org>
-> > > Reviewed-by: Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>
-> > 
-> > Changes in the jbd2 layer aren't going to guarantee that
-> > memalloc_nofs_save() will be executed if we are running ext4 without a
-> > journal (aka in no journal mode).  And this is a *very* common
-> > configuration; it's how ext4 is used inside Google in our production
-> > servers.
-> 
-> OK, I wasn't aware of that.
-> 
-> > So that means the earlier patches will probably need to be changed so
-> > the nOFS scope is done in the ext4_journal_{start,stop} functions in
-> > fs/ext4/ext4_jbd2.c.
-> 
-> I could definitely appreciated some help here. The call paths are rather
-> complex and I am not familiar with the code enough. On of the biggest
-> problem I have currently is that there doesn't seem to be an easy place
-> to store the old allocation context. 
+Hi All,
 
-OK, so I've been staring into the code and AFAIU current->journal_info
-can contain my stored information. I could either hijack part of the
-word as the ref counting is only consuming low 12b. But that looks too
-ugly to live. Or I can allocate some placeholder.
+Let me share some thoughts on another one approach that might help to 
+reduce BlueStore Onode size (both in-memory and serialized).
 
-But before going to play with that I am really wondering whether we need
-all this with no journal at all. AFAIU what Jack told me it is the
-journal lock(s) which is the biggest problem from the reclaim recursion
-point of view. What would cause a deadlock in no journal mode?
+Brief example showing current write algorithm functioning below first:
+- min_alloc_size = 0x10000
 
--- 
-Michal Hocko
-SUSE Labs
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+1) write 0x0~10000
+At this step we have following Onode/extent/blob structure:
+   Extent1 0x0~10000 -> Blob1(size=0x10000) -> 1 * 0x10000 pextent
+2) Append: write 0x10000~20000
+Onode/extent/blob structure:
+   Extent1 0x0~10000 -> Blob1(size=0x10000) -> 1 * 0x10000 pextent
+   Extent2 0x10000~20000 -> Blob2(size=0x20000) -> 2 * 0x10000 pextents
+
+3) Partially Overwrite Extent2: write 0x10000~10000
+Onode/extent/blob structure:
+   Extent1 0x0~10000 -> Blob1(size=0x10000) -> 1 * 0x10000 pextent
+   Extent2 0x10000~10000 -> Blob3(size=0x10000) -> 1 * 0x10000 pextents
+   Extent3 0x20000~10000 -> Blob2(size=0x10000) -> 1 * 0x10000 pextents
+
+   So one can see that we have increased Onode structure at step 3 while 
+object content layout is unchanged: 0~30000.
+   Moreover at step 2) we could avoid Extent2 creation and extend 
+Extent1/Blob1 instead.
+
+   Hence my suggestion is to consider an approach that will allow 
+existing extents/blobs reuse and blob internals(pextent+csum vectors) 
+update only whenever possible (i.e. big aligned writes/appends).
+   As a result Onode structure becomes more static and Blob's pextent 
+vector grows rather than ExtentMap. Surely some limit for Blob growth to 
+be introduced.
+
+
+
+   IMHO as we have reduced Onode metadata this approach might impact 
+BlueStore performance comparable to the results we achieved by the cases 
+with min_alloc_size increased.
+   AFAIR Mark did some tests for 16K MAS and they showed better results. 
+But we wouldn't suffer from storage space loss caused by increased 
+granularity this way.
+   Onode in-memory representation is positively affected this way too 
+hence BlueStore caching becomes more efective.
+
+The cost for this change is the need for more dynamic behavior of Blob's 
+pextent & csum containers - currently their size are 'semi-dynamic' 
+(entry count decrease is possible sometimes but no increase is possible)
+
+Any comments/thoughts?
+
+Thanks,
+Igor
