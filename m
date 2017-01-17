@@ -1,99 +1,89 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Assert in Pipe.cc in Hammer 0.94.7
-Date: Mon, 16 Jan 2017 15:27:00 -0800
-Message-ID: <CAJ4mKGYrJL1JXwRDRQHg_iJPqsQN_ppRzLAVs0rt9PyLSRnnHw@mail.gmail.com>
-References: <CAC+4SSg2EM_7sWvOrkUNCzZ9_tf5ew2MKqw30Db1c-LFEbNrLg@mail.gmail.com>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: Wrong crush map after all OSDs down
+Date: Tue, 17 Jan 2017 11:08:41 +1000
+Message-ID: <CAF-wwdH08DJnpwCKwpuBj=uBaHqO-0jJNwsWpW94pN91bqO1qA@mail.gmail.com>
+References: <CAGRcXKaE8LDzbAvwOBy1uWsaDRd_phOdA8Ek6NNMQ8spJvs_PA@mail.gmail.com>
+ <CAC7t81bNHMryNxnKEos+-kPJ4aR-gwUynyqR-T1n6191qFcsVA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f179.google.com ([209.85.223.179]:33244 "EHLO
-        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750990AbdAPX1v (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jan 2017 18:27:51 -0500
-Received: by mail-io0-f179.google.com with SMTP id v96so102695887ioi.0
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Jan 2017 15:27:04 -0800 (PST)
-In-Reply-To: <CAC+4SSg2EM_7sWvOrkUNCzZ9_tf5ew2MKqw30Db1c-LFEbNrLg@mail.gmail.com>
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:38797 "EHLO
+        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750782AbdAQBJq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jan 2017 20:09:46 -0500
+Received: by mail-wm0-f51.google.com with SMTP id r144so199673592wme.1
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Jan 2017 17:08:42 -0800 (PST)
+In-Reply-To: <CAC7t81bNHMryNxnKEos+-kPJ4aR-gwUynyqR-T1n6191qFcsVA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Padmanabh Ratnakar <padmanabh.ratnakar@snapdeal.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Alexey Sheplyakov <asheplyakov@mirantis.com>
+Cc: Jin Cai <caijin.laurence@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Jan 16, 2017 at 5:23 AM, Padmanabh Ratnakar
-<padmanabh.ratnakar@snapdeal.com> wrote:
+On Mon, Jan 16, 2017 at 7:15 PM, Alexey Sheplyakov
+<asheplyakov@mirantis.com> wrote:
 > Hi,
->            We are seeing following assert in Pipe.cc when we hit some
-> network glitch in our setup.
 >
-> msg/simple/Pipe.cc: In function 'int Pipe::connect()' thread
-> 7f0124800700 time 2016-12-28 20:43:00.057696
-> msg/simple/Pipe.cc: 1156: FAILED assert(m)
->  ceph version 0.94.7 (d56bdf93ced6b80b07397d57e3fa68fe68304432)
->  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-> const*)+0x8b) [0xbb1fab]
->  2: (Pipe::connect()+0x380a) [0xc8985a]
->  3: (Pipe::writer()+0x4ca) [0xc8acca]
->  4: (Pipe::Writer::entry()+0xd) [0xc95b1d]
->  5: (()+0x8182) [0x7f01e1b8f182]
->  6: (clone()+0x6d) [0x7f01e00fa47d]
+> Actually down/slow OSDs are detected by other OSDs.  OSDs exchange
+> heartbeats every few seconds.
+> When an OSD haven't received a reply from its neighbor within the
+> grace period (default: 20 seconds),
+> the OSD (which has sent the heartbeat) considers its neighbor down and
+> reports this to a monitor.
+> After receiving 3 such messages in a row the monitor marks the OSD in
+> question as down.
 >
-> (gdb) bt
-> #0  0x00007f01e1b9720b in raise (sig=6) at
-> ../nptl/sysdeps/unix/sysv/linux/pt-raise.c:37
-> #1  0x0000000000ab70dd in reraise_fatal (signum=6) at
-> global/signal_handler.cc:59
-> #2  handle_fatal_signal (signum=6) at global/signal_handler.cc:109
-> #3  <signal handler called>
-> #4  0x00007f01e0036cc9 in __GI_raise (sig=sig@entry=6) at
-> ../nptl/sysdeps/unix/sysv/linux/raise.c:56
-> #5  0x00007f01e003a0d8 in __GI_abort () at abort.c:89
-> #6  0x00007f01e0941535 in __gnu_cxx::__verbose_terminate_handler() ()
-> from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-> #7  0x00007f01e093f6d6 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-> #8  0x00007f01e093f703 in std::terminate() () from
-> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-> #9  0x00007f01e093f922 in __cxa_throw () from
-> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-> #10 0x0000000000bb2198 in ceph::__ceph_assert_fail
-> (assertion=assertion@entry=0xd8bc4f "m", file=file@entry=0xd928b8
-> "msg/simple/Pipe.cc",
->     line=line@entry=1156, func=func@entry=0xd94210
-> <Pipe::connect()::__PRETTY_FUNCTION__> "int Pipe::connect()") at
-> common/assert.cc:77
-> #11 0x0000000000c8985a in Pipe::connect (this=this@entry=0x32030000)
-> at msg/simple/Pipe.cc:1156
-> #12 0x0000000000c8acca in Pipe::writer (this=0x32030000) at
-> msg/simple/Pipe.cc:1703
-> #13 0x0000000000c95b1d in Pipe::Writer::entry (this=<optimized out>)
-> at msg/simple/Pipe.h:62
-> #14 0x00007f01e1b8f182 in start_thread (arg=0x7f0124800700) at
-> pthread_create.c:312
-> #15 0x00007f01e00fa47d in clone () at
-> ../sysdeps/unix/sysv/linux/x86_64/clone.S:111
+> Also OSDs report their status directly to monitors every few (~2)
+> minutes (to avoid flooding monitors).
+> If the monitor haven't received any status reports from an OSD within
+> a grace period (~15 minutes)
+> the OSD in question is considered down.
 >
-> Is this a known issue? I searched for it and could not find anyone hitting this.
-
-I don't think so.
-
+> If all OSDs are down there is no OSD which could have reported its
+> neighbors are down. Thus monitor
+> will consider all OSDs as up until the OSD report grace period (~15
+> minutes) expires.
 >
-> Looking at the 0.94.7 code, looks like pipe_lock is released in line
-> 886 in the beginning of connect() routine.
-> It is again taken later. But there is update to state member variable
-> without checking current state in code below.
+> See http://docs.ceph.com/docs/giant/rados/configuration/mon-osd-interaction/#configuring-monitor-osd-interaction
 
-Where exactly?
+http://docs.ceph.com/docs/master/rados/configuration/mon-osd-interaction/#configuring-monitor-osd-interaction
 
-> If pipe is moved to STATE_CLOSED in the interval when lock was released,
-> there is a chance that it can get overwritten when
-> CEPH_MSGR_TAG_WAIT(STATE_WAIT) comes as reply or
-> directly to STATE_OPEN in line 1172.
+Giant is getting very old.
 
-I'm not following your referents here. The out_seq can get
-overwritten? Something else?
+> for more details.
+>
+> Best regards,
+>      Alexey
+>
+>
+> On Sat, Jan 14, 2017 at 7:59 PM, Jin Cai <caijin.laurence@gmail.com> wrote:
+>> Hi all,
+>> I deployed a ceph cluster with jewel in four physical machines.
+>> Three physical machines were used for OSD and each of them had eight
+>> OSDs. The left one was used to serve as a monitor.
+>> At first, everything worked well.
+>> By the reason of test, I stopped all the OSD daemon and double checked
+>> no OSD process running.
+>> After that, I executed ceph -s and got the following output:
+>>  osdmap e164: 24 osds: 7 up, 7 in
+>> No matter how much time elapsed, the output didn't change.
+>>
+>> The expected output should be:
+>> osdmap e164: 24 osds: 0 up, 0 in
+>>
+>> I think it is the matter of synchronisation between OSDs and monitor
+>> Would you like you explain this strange phenomenon for me.
+>> Thanks a bunch in advance.
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-> I feel this may cause assert seen above but only if many other things
-> also happen.
 
-We had some vaguely similar issues in the time after CEPH_MSGR_TAG_SEQ
-was introduced, but I think it's been a while. You might have spotted
-another rare one.
--Greg
+
+-- 
+Cheers,
+Brad
