@@ -1,63 +1,48 @@
-From: huang jun <hjwsm1989@gmail.com>
-Subject: Re: Josh is the new core tech lead!
-Date: Tue, 17 Jan 2017 09:34:07 +0800
-Message-ID: <CABAwU-aRgjUE3=M=UVS8HkrFNSjBF8a7QddznZB=So2JHQ81nw@mail.gmail.com>
-References: <CAN=+7FX15D11zF814tW3gdeRbcat8nXjUNUCEuGJMKrd4zaxBg@mail.gmail.com>
- <-5251283313391105406@unknownmsgid>
+From: Theodore Ts'o <tytso@mit.edu>
+Subject: Re: [PATCH 8/8] Revert "ext4: fix wrong gfp type under transaction"
+Date: Mon, 16 Jan 2017 21:56:07 -0500
+Message-ID: <20170117025607.frrcdbduthhutrzj@thunk.org>
+References: <20170106141107.23953-1-mhocko@kernel.org>
+ <20170106141107.23953-9-mhocko@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f195.google.com ([209.85.216.195]:36079 "EHLO
-        mail-qt0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750893AbdAQBeI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Jan 2017 20:34:08 -0500
-Received: by mail-qt0-f195.google.com with SMTP id l7so18126071qtd.3
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Jan 2017 17:34:08 -0800 (PST)
-In-Reply-To: <-5251283313391105406@unknownmsgid>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Federico Lucifredi <flucifre@redhat.com>
-Cc: Samuel Just <sjust@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170106141107.23953-9-mhocko@kernel.org>
+Sender: owner-linux-mm@kvack.org
+To: Michal Hocko <mhocko@kernel.org>
+Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi, Sam.
-Thank you for all your have done on ceph/rados in the last 6 years!
-We truly appreciated it!
-Best Regards!
+On Fri, Jan 06, 2017 at 03:11:07PM +0100, Michal Hocko wrote:
+> From: Michal Hocko <mhocko@suse.com>
+> 
+> This reverts commit 216553c4b7f3e3e2beb4981cddca9b2027523928. Now that
+> the transaction context uses memalloc_nofs_save and all allocations
+> within the this context inherit GFP_NOFS automatically, there is no
+> reason to mark specific allocations explicitly.
+> 
+> This patch should not introduce any functional change. The main point
+> of this change is to reduce explicit GFP_NOFS usage inside ext4 code
+> to make the review of the remaining usage easier.
+> 
+> Signed-off-by: Michal Hocko <mhocko@suse.com>
+> Reviewed-by: Jan Kara <jack@suse.cz>
 
-2017-01-17 6:15 GMT+08:00 Federico Lucifredi <flucifre@redhat.com>:
-> Thanks for all your efforts Sam =E2=80=94 it was good working with you, a=
-nd I
-> do hope our paths cross again.
->
-> Congrats Josh!
->
-> Best-F
->
->
->> On Jan 16, 2017, at 1:25 PM, Samuel Just <sjust@redhat.com> wrote:
->>
->> Hello!  After 6 years of working on Ceph, I've decided to move on from R=
-ed Hat
->> to another oportunity not working on Ceph.
->>
->> I've had an extraordinary time working with the Ceph community as we've =
-grown
->> from where we were in 2010 to where we are now, and I really want to tha=
-nk all
->> of you for making this an incredibly rewarding experience.
->>
->> Josh Durgin will be taking over as tech lead for core.  He did an excell=
-ent job
->> as the RBD tech lead, and he's been doing great work on improving RADOS.=
-  I'm
->> certain that he'll do an amazing job as Ceph heads into 2017 and beyond.
->> -Sam
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Changes in the jbd2 layer aren't going to guarantee that
+memalloc_nofs_save() will be executed if we are running ext4 without a
+journal (aka in no journal mode).  And this is a *very* common
+configuration; it's how ext4 is used inside Google in our production
+servers.
+
+So that means the earlier patches will probably need to be changed so
+the nOFS scope is done in the ext4_journal_{start,stop} functions in
+fs/ext4/ext4_jbd2.c.
+
+					- Ted
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
