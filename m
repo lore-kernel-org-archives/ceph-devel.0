@@ -1,45 +1,37 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: IMPORTANT: removing clone_range, assert_src_version, src_cmpxattr
-Date: Tue, 17 Jan 2017 18:23:03 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1701171819060.1661@piezo.novalocal>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 0/4] ceph: endianness fixes and sparse warning fixes
+Date: Tue, 17 Jan 2017 19:28:45 +0100
+Message-ID: <CAOi1vP8dYx_m3CH+pTejGHETH_AB+edOo=WFuvXgeukAPN-BKA@mail.gmail.com>
+References: <1484237565-27423-1-git-send-email-jlayton@redhat.com>
+ <alpine.DEB.2.11.1701121623290.5745@piezo.novalocal> <1484310965.2616.7.camel@redhat.com>
+ <20170117192605.144022a7@suse.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54900 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751042AbdAQSas (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 17 Jan 2017 13:30:48 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id C71C288E60
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Jan 2017 18:23:05 +0000 (UTC)
-Received: from ovpn-112-25.rdu2.redhat.com (ovpn-112-25.rdu2.redhat.com [10.10.112.25])
-        by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id v0HIN4oj000626
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Jan 2017 13:23:05 -0500
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:38911 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750830AbdAQS3b (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Jan 2017 13:29:31 -0500
+Received: by mail-wm0-f50.google.com with SMTP id r144so236183127wme.1
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Jan 2017 10:28:47 -0800 (PST)
+In-Reply-To: <20170117192605.144022a7@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: David Disseldorp <ddiss@suse.de>
+Cc: Jeff Layton <jlayton@redhat.com>, Sage Weil <sweil@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-We plan to remove the librados clone_range, assert_src_version, and 
-src_cmpxattr operations.  These operations were introduced in 
-distant past in order to support an early design of RGW, but are not 
-longer used by anything in the tree, are largely untested, and are 
-difficult to continue to support.  These are the only operations that allo 
-a single librados operation to operate on multiple objects.
+On Tue, Jan 17, 2017 at 7:26 PM, David Disseldorp <ddiss@suse.de> wrote:
+> On Fri, 13 Jan 2017 07:36:05 -0500, Jeff Layton wrote:
+>
+>> Thanks. Should we send this series to stable? I'm not sure how common
+>> kcephfs mounts are on BE arches, but these bugs would likely prevent it
+>> from working.
+>
+> Please do, Jeff. I hit the [PATCH 4/4] bug on first CephFS I/O with
+> s390x (BE):
+> [ 2691.805255] ceph: mds parse_reply err -5
+> [ 2691.805256] ceph: mdsc_handle_reply got corrupt reply mds0(tid:5)
 
-I think it is pretty unlikely that there are any users for these 
-operations, but if you are out there, speak up now!
+I'll pick these up.  Thanks for confirming,
 
-Note that there is a proposed rados extension that adds support for 
-multi-object transactions.  These are *much* more powerful than this older 
-capability, which is fragile and hard to use.  The proposed extension has 
-a PR that is open for review, but it is still not clear whether this is 
-the design path we want to take (or whether it is worth the cost of 
-complexity in the OSD to support it at all).  Any librados API user 
-feedback would be helpful.
-
-Thanks!
-sage
-
+                Ilya
