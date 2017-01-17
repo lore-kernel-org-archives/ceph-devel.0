@@ -1,33 +1,51 @@
-From: David Disseldorp <ddiss@suse.de>
-Subject: Re: [PATCH 0/4] ceph: endianness fixes and sparse warning fixes
-Date: Tue, 17 Jan 2017 19:26:05 +0100
-Message-ID: <20170117192605.144022a7@suse.de>
-References: <1484237565-27423-1-git-send-email-jlayton@redhat.com>
-        <alpine.DEB.2.11.1701121623290.5745@piezo.novalocal>
-        <1484310965.2616.7.camel@redhat.com>
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Ceph Day Speakers (San Jose / Boston)
+Date: Tue, 17 Jan 2017 15:04:00 -0500
+Message-ID: <CAAZbbf2B--gt5xmBLDbksZPJ8n02tkS3hz90--00sQBNDpQ6ow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:60433 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750888AbdAQTDr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 17 Jan 2017 14:03:47 -0500
-In-Reply-To: <1484310965.2616.7.camel@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 13 Jan 2017 07:36:05 -0500, Jeff Layton wrote:
+Hey cephers,
 
-> Thanks. Should we send this series to stable? I'm not sure how common
-> kcephfs mounts are on BE arches, but these bugs would likely prevent it
-> from working.
+Now that we are starting to nail down Ceph Days for 2017, I'm going to
+be needing community speakers to fill those slots. The first events we
+have on the docket are:
 
-Please do, Jeff. I hit the [PATCH 4/4] bug on first CephFS I/O with
-s390x (BE):
-[ 2691.805255] ceph: mds parse_reply err -5
-[ 2691.805256] ceph: mdsc_handle_reply got corrupt reply mds0(tid:5)
+1) San Jose, CA - 17 Mar 2017
 
-Cheers, David
+2) Boston, MA - OpenStack Summit (exact date not solidified yet, but
+we will have a full day of content programming one of the days during
+OpenStack Boston, 8-11 May)
+
+If you would like to be a speaker at one of these events, please send
+me the following:
+
+* Speaker Name
+* Speaker Org
+* Talk title
+* Talk abstract
+
+Talks should be approx 45 min including Q&A. Thanks.
+
+
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
