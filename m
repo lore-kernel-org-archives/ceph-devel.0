@@ -1,66 +1,80 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 01/18/2017 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 18 Jan 2017 09:10:05 -0600
-Message-ID: <68a27234-d86b-7cd7-7499-7f1a2fe54437@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: failed to mount CephFS sub directory: permission denied or I/O error
+Date: Wed, 18 Jan 2017 10:38:37 -0800
+Message-ID: <CAJ4mKGbAb5GA_t3+wAUd+0iOgN8-w+-ANXmPnnfcJGsR7gx+Hw@mail.gmail.com>
+References: <CAD-gW=mFgSxAcn9xh2ny3zxxydL85D1gqOoF31t1dFFzFHmGng@mail.gmail.com>
+ <CAD-gW=mR1DJRQLJVwMPv6Fju0uTbo3uoU7kYGC=PgtPLJPK_aQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52678 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751399AbdARPKl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 18 Jan 2017 10:10:41 -0500
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 24110D1FF3
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2017 15:10:07 +0000 (UTC)
-Received: from [10.3.117.69] (ovpn-117-69.phx2.redhat.com [10.3.117.69])
-        by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id v0IFA6Nm009488
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2017 10:10:06 -0500
+Received: from mail-it0-f54.google.com ([209.85.214.54]:37061 "EHLO
+        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751914AbdARSij (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 18 Jan 2017 13:38:39 -0500
+Received: by mail-it0-f54.google.com with SMTP id r185so17228140ita.0
+        for <ceph-devel@vger.kernel.org>; Wed, 18 Jan 2017 10:38:39 -0800 (PST)
+In-Reply-To: <CAD-gW=mR1DJRQLJVwMPv6Fju0uTbo3uoU7kYGC=PgtPLJPK_aQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Huamin Chen <hchen@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Guys,
+I updated your ticket http://tracker.ceph.com/issues/18589 with what I
+think is going on here. Note that adding "mds allow r" grants read
+capabilities on *everything*, which you probably don't want.
+-Greg
 
-Ben England is going to be presenting today about Ceph/Openstack scale 
-testing on the 300 OSD ceph test cluster at Red Hat!  8AM PST as usual. 
-Link to the slides for those interested:
-
-https://s3.amazonaws.com/ben.england/Ceph-and-OpenStack-at-scale-2017-01-18.pdf
-
-Here's the links:
-
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
-
-To join the Meeting:
-https://bluejeans.com/268261044
-
-To join via Browser:
-https://bluejeans.com/268261044/browser
-
-To join with Lync:
-https://bluejeans.com/268261044/lync
-
-
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
-
-To join via Phone:
-1) Dial:
-                    +1 408 740 7256
-                    +1 888 240 2560(US Toll Free)
-                    +1 408 317 9253(Alternate Number)
-                    (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Wed, Jan 18, 2017 at 9:35 AM, Huamin Chen <hchen@redhat.com> wrote:
+> Adding "mds caps allow r" fixes the problem.
+>
+> On Wed, Jan 18, 2017 at 11:38 AM, Huamin Chen <hchen@redhat.com> wrote:
+>>
+>> Hi
+>>
+>> I have trouble mounting a ceph fs sub directory. I am using ceph jewel.
+>> [root@rootfs-dev cephfs]# ceph version
+>> ceph version 10.2.5 (c461ee19ecbc0c5c330aca20f7392c9a00730367)
+>>
+>>
+>> First I got permission denied with the following caps:
+>>
+>> [root@rootfs-dev cephfs]# ceph auth get client.bar
+>> exported keyring for client.bar
+>> [client.bar]
+>> key = AQA+ln9Yfm6DKhAA10k7QkdkfIAKqmM6xeCsxA==
+>> caps mds = "allow rw path=/volumes/kubernetes/test1"
+>> caps mon = "allow *"
+>> caps osd = "allow rwx pool=fs_data"
+>> [root@rootfs-dev cephfs]# mount -t ceph
+>> 172.24.0.4:6789:/volumes/kubernetes/test1 /tmp/mnt -o
+>> name=bar,secret=AQA+ln9Yfm6DKhAA10k7QkdkfIAKqmM6xeCsxA==
+>> mount error 13 = Permission denied
+>>
+>>
+>> Then I modified caps, this time I got I/O error.
+>>
+>> [root@rootfs-dev cephfs]# ceph auth caps client.bar mon 'allow *' mds
+>> 'allow *' osd 'allow  *'
+>> updated caps for client.bar
+>> [root@rootfs-dev cephfs]# mount -t ceph
+>> 172.24.0.4:6789:/volumes/kubernetes/test1 /tmp/mnt -o
+>> name=bar,secret=AQA+ln9Yfm6DKhAA10k7QkdkfIAKqmM6xeCsxA==
+>> mount error 5 = Input/output error
+>>
+>>
+>> However ceph-fuse can mount the sub directory, using the same credential.
+>>
+>> [root@rootfs-dev cephfs]# ceph-fuse /mnt/test --id=bar
+>> --client-mountpoint=/volumes/kubernetes/test1
+>> ceph-fuse[41114]: starting ceph client
+>> 2017-01-18 16:30:07.400280 7f83f2f27ec0 -1 init, newargv = 0x7f83fd126780
+>> newargc=11
+>> ceph-fuse[41114]: starting fuse
+>>
+>> Help appreciated.
+>>
+>> Thanks
+>>
+>> Huamin
+>
+>
