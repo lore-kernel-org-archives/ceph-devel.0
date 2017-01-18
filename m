@@ -1,38 +1,98 @@
-From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
-Subject: Re: Issue with upgrade from 0.94.9 to 10.2.5
-Date: Wed, 18 Jan 2017 12:25:25 +0100
-Message-ID: <b51dfc8f-eae7-8dc5-6e68-dcaa47f64f0e@corp.ovh.com>
-References: <9fd022a0-d09e-b3ff-ce5c-f55d5b2d1167@corp.ovh.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: [PATCH v2] ceph/iov_iter: fix bad iov_iter handling in ceph
+ splice codepaths
+Date: Wed, 18 Jan 2017 07:14:48 -0500
+Message-ID: <1484741688.2669.3.camel@redhat.com>
+References: <1483727016-343-1-git-send-email-jlayton@redhat.com>
+         <1484053051-23685-1-git-send-email-jlayton@redhat.com>
+         <20170112075946.GU1555@ZenIV.linux.org.uk>
+         <1484220421.2970.20.camel@redhat.com>
+         <CAOi1vP8bqHAt_ZfTxTuqk7gxiia-Q=X+V4b409jCdW_y=kAJOg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <9fd022a0-d09e-b3ff-ce5c-f55d5b2d1167-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAOi1vP8bqHAt_ZfTxTuqk7gxiia-Q=X+V4b409jCdW_y=kAJOg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Al Viro <viro@zeniv.linux.org.uk>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Zhu, Caifeng" <zhucaifeng@unissoft-nj.com>
 List-Id: ceph-devel.vger.kernel.org
 
-T24gMDEvMTcvMjAxNyAxMjo1MiBQTSwgUGlvdHIgRGHFgmVrIHdyb3RlOgo+IER1cmluZyBvdXIg
-dGVzdGluZyB3ZSBmb3VuZCBvdXQgdGhhdCBkdXJpbmcgdXBncmFkZSBmcm9tIDAuOTQuOSB0byAx
-MC4yLjUKPiB3ZSdyZSBoaXR0aW5nIGlzc3VlIGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vl
-cy8xNzM4NiAoIlVwZ3JhZGluZyAwLjk0LjYKPiAtPiAwLjk0Ljkgc2F0dXJhdGluZyBtb24gbm9k
-ZSBuZXR3b3JraW5nIikuIEFwcGFyZW50bHksIHRoZXJlJ3MgYSBmZXcKPiBjb21taXRzIGZvciBi
-b3RoIGhhbW1lciBhbmQgamV3ZWwgd2hpY2ggYXJlIHN1cHBvc2VkIHRvIGZpeCB0aGlzIGlzc3Vl
-IGZvcgo+IHVwZ3JhZGVzIGZyb20gMC45NC42IHRvIDAuOTQuOSAoYW5kIHBvc3NpYmx5IGZvciBv
-dGhlcnMpLCBidXQgd2UncmUgc3RpbGwKPiBzZWVpbmcgdGhpcyB1cGdyYWRpbmcgdG8gSmV3ZWws
-IGFuZCBzeW1wdG9tcyBhcmUgZXhhY3RseSBzYW1lIC0gYWZ0ZXIKPiB1cGdyYWRpbmcgTU9Ocywg
-ZWFjaCBub3QgeWV0IHVwZ3JhZGVkIE9TRCB0YWtlcyBmdWxsIE9TRE1hcCBmcm9tIG1vbml0b3Jz
-Cj4gYWZ0ZXIgZmFpbGluZyB0aGUgQ1JDIGNoZWNrLiBBbnlvbmUgZWxzZSBlbmNvdW50ZXJlZCB0
-aGlzPwoKaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzE4NTgyCgotLSAKUGlvdHIgRGHF
-gmVrCnBpb3RyLmRhbGVrQGNvcnAub3ZoLmNvbQpodHRwczovL3d3dy5vdmguY29tL3VzLwpfX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1h
-aWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNv
-bS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Thu, 2017-01-12 at 12:37 +0100, Ilya Dryomov wrote:
+> On Thu, Jan 12, 2017 at 12:27 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> > On Thu, 2017-01-12 at 07:59 +0000, Al Viro wrote:
+> > > On Tue, Jan 10, 2017 at 07:57:31AM -0500, Jeff Layton wrote:
+> > > > 
+> > > > v2: fix bug in offset handling in iov_iter_pvec_size
+> > > > 
+> > > > xfstest generic/095 triggers soft lockups in kcephfs. Basically it uses
+> > > > fio to drive some I/O via vmsplice ane splice. Ceph then ends up trying
+> > > > to access an ITER_BVEC type iov_iter as a ITER_IOVEC one. That causes it
+> > > > to pick up a wrong offset and get stuck in an infinite loop while trying
+> > > > to populate the page array. dio_get_pagev_size has a similar problem.
+> > > > 
+> > > > To fix the first problem, add a new iov_iter helper to determine the
+> > > > offset into the page for the current segment and have ceph call that.
+> > > > I would just replace dio_get_pages_alloc with iov_iter_get_pages_alloc,
+> > > > but that will only return a single page at a time for ITER_BVEC and
+> > > > it's better to make larger requests when possible.
+> > > > 
+> > > > For the second problem, we simply replace it with a new helper that does
+> > > > what it does, but properly for all iov_iter types.
+> > > > 
+> > > > Since we're moving that into generic code, we can also utilize the
+> > > > iterate_all_kinds macro to simplify this. That means that we need to
+> > > > rework the logic a bit since we can't advance to the next vector while
+> > > > checking the current one.
+> > > 
+> > > Yecchhh...  That really looks like exposing way too low-level stuff instead
+> > > of coming up with saner primitive ;-/
+> > > 
+> > 
+> > Fair point. That said, I'm not terribly thrilled with how
+> > iov_iter_get_pages* works right now.
+> > 
+> > Note that it only ever touches the first vector. Would it not be better
+> > to keep getting page references if the bvec/iov elements are aligned
+> > properly? It seems quite plausible that they often would be, and being
+> > able to hand back a larger list of pages in most cases would be
+> > advantageous.
+> > 
+> > IOW, should we have iov_iter_get_pages basically do what
+> > dio_get_pages_alloc does -- try to build as long an array of pages as
+> > possible before returning, provided that the alignment works out?
+> > 
+> > The NFS DIO code, for instance, could also benefit there. I know we've
+> > had reports there in the past that sending down a bunch of small iovecs
+> > causes a lot of small-sized requests on the wire.
+> > 
+> > > Is page vector + offset in the first page + number of bytes really what
+> > > ceph wants?  Would e.g. an array of bio_vec be saner?  Because _that_
+> > > would make a lot more natural iov_iter_get_pages_alloc() analogue...
+> > > 
+> > > And yes, I realize that you have ->pages wired into the struct ceph_osd_request;
+> > > how painful would it be to have it switched to struct bio_vec array instead?
+> > 
+> > Actually...it looks like that might not be too hard. The low-level OSD
+> > handling code can already handle bio_vec arrays in order to service RBD.
+> > It looks like we could switch cephfs to use
+> > osd_req_op_extent_osd_data_bio instead of
+> > osd_req_op_extent_osd_data_pages. That would add a dependency in cephfs
+> > on CONFIG_BLOCK, but I think we could probably live with that.
+> 
+> Ah, just that part might be easy enough ;)
+> 
+> 
+
+Yeah, that part doesn't look too bad. Regardless though, I think we need
+to get a fix in for this sooner rather than later as it's trivial to get
+the kernel stuck in this loop today, by any user with write access to a
+ceph mount.
+
+Al, when you mentioned switching this over to a bio_vec based interface,
+were you planning to roll up the iov_iter->bio_vec array helper for
+this, or should I be looking into doing that?
+
+Thanks,
+-- 
+Jeff Layton <jlayton@redhat.com>
