@@ -1,99 +1,21 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH 8/8] Revert "ext4: fix wrong gfp type under transaction"
-Date: Thu, 19 Jan 2017 10:44:05 +0100
-Message-ID: <20170119094405.GK30786@dhcp22.suse.cz>
-References: <20170106141107.23953-1-mhocko@kernel.org>
- <20170106141107.23953-9-mhocko@kernel.org>
- <20170117025607.frrcdbduthhutrzj@thunk.org>
- <20170117082425.GD19699@dhcp22.suse.cz>
- <20170117151817.GR19699@dhcp22.suse.cz>
- <20170117155916.dcizr65bwa6behe7@thunk.org>
- <20170117161618.GT19699@dhcp22.suse.cz>
- <20170117172925.GA2486@quack2.suse.cz>
- <20170119083956.GE30786@dhcp22.suse.cz>
- <20170119092236.GC2565@quack2.suse.cz>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Kraken backports
+Date: Thu, 19 Jan 2017 11:03:09 +0100
+Message-ID: <4784e66d-9466-b5fd-d32b-9116788fc297@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170119092236.GC2565@quack2.suse.cz>
-Sender: owner-linux-mm@kvack.org
-To: Jan Kara <jack@suse.cz>
-Cc: Theodore Ts'o <tytso@mit.edu>, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:37207 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751858AbdASKDM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 19 Jan 2017 05:03:12 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Dachary, Loic" <loic@dachary.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu 19-01-17 10:22:36, Jan Kara wrote:
-> On Thu 19-01-17 09:39:56, Michal Hocko wrote:
-> > On Tue 17-01-17 18:29:25, Jan Kara wrote:
-> > > On Tue 17-01-17 17:16:19, Michal Hocko wrote:
-> > > > > > But before going to play with that I am really wondering whether we need
-> > > > > > all this with no journal at all. AFAIU what Jack told me it is the
-> > > > > > journal lock(s) which is the biggest problem from the reclaim recursion
-> > > > > > point of view. What would cause a deadlock in no journal mode?
-> > > > > 
-> > > > > We still have the original problem for why we need GFP_NOFS even in
-> > > > > ext2.  If we are in a writeback path, and we need to allocate memory,
-> > > > > we don't want to recurse back into the file system's writeback path.
-> > > > 
-> > > > But we do not enter the writeback path from the direct reclaim. Or do
-> > > > you mean something other than pageout()'s mapping->a_ops->writepage?
-> > > > There is only try_to_release_page where we get back to the filesystems
-> > > > but I do not see any NOFS protection in ext4_releasepage.
-> > > 
-> > > Maybe to expand a bit: These days, direct reclaim can call ->releasepage()
-> > > callback, ->evict_inode() callback (and only for inodes with i_nlink > 0),
-> > > shrinkers. That's it. So the recursion possibilities are rather more limited
-> > > than they used to be several years ago and we likely do not need as much
-> > > GFP_NOFS protection as we used to.
-> > 
-> > Thanks for making my remark more clear Jack! I would just want to add
-> > that I was playing with the patch below (it is basically
-> > GFP_NOFS->GFP_KERNEL for all allocations which trigger warning from the
-> > debugging patch which means they are called from within transaction) and
-> > it didn't hit the lockdep when running xfstests both with or without the
-> > enabled journal.
-> > 
-> > So am I still missing something or the nojournal mode is safe and the
-> > current series is OK wrt. ext*?
-> 
-> I'm convinced the current series is OK, only real life will tell us whether
-> we missed something or not ;)
+JFYI, I added the "Backports: kraken" and "Backports: kraken (pending)" 
+custom queries to the Ceph project in http://tracker.ceph.com.
 
-I would like to extend the changelog of "jbd2: mark the transaction
-context with the scope GFP_NOFS context".
-
-"
-Please note that setups without journal do not suffer from potential
-recursion problems and so they do not need the scope protection because
-neither ->releasepage nor ->evict_inode (which are the only fs entry
-points from the direct reclaim) can reenter a locked context which is
-doing the allocation currently.
-"
- 
-> > The following patch in its current form is WIP and needs a proper review
-> > before I post it.
-> 
-> So jbd2 changes look confusing (although technically correct) to me - we
-> *always* should run in NOFS context in those place so having GFP_KERNEL
-> there looks like it is unnecessarily hiding what is going on. So in those
-> places I'd prefer to keep GFP_NOFS or somehow else make it very clear these
-> allocations are expected to be GFP_NOFS (and assert that). Otherwise the
-> changes look good to me.
-
-I would really like to get rid most of NOFS direct usage and only
-dictate it via the scope API otherwise I suspect we will just grow more
-users and end up in the same situation as we are now currently over time.
-In principle only the context which changes the reclaim reentrancy policy
-should care about NOFS and everybody else should just pretend nothing
-like that exists. There might be few exceptions of course, I am not yet
-sure whether jbd2 is that case. But I am not proposing this change yet
-(thanks for checking anyway)...
--- 
-Michal Hocko
-SUSE Labs
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Nathan
