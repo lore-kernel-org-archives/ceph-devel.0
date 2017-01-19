@@ -1,36 +1,42 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Kraken backports
-Date: Thu, 19 Jan 2017 11:45:39 +0100
-Message-ID: <0da88701-3322-cef3-cfa2-6a5cf646796a@dachary.org>
-References: <4784e66d-9466-b5fd-d32b-9116788fc297@suse.cz>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Cephalocon Registration Now Open!
+Date: Thu, 19 Jan 2017 15:20:23 -0500
+Message-ID: <CAAZbbf38V542MAq=pDsRq_LpStMJWaibPf3FYYneHj6VH2RmMQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from slow1-d.mail.gandi.net ([217.70.178.86]:38518 "EHLO
-        slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751955AbdASLJF (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jan 2017 06:09:05 -0500
-Received: from relay5-d.mail.gandi.net (relay5-d.mail.gandi.net [217.70.183.197])
-        by slow1-d.mail.gandi.net (Postfix) with ESMTP id 6C57C47F318
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Jan 2017 11:46:44 +0100 (CET)
-In-Reply-To: <4784e66d-9466-b5fd-d32b-9116788fc297@suse.cz>
+Received: from mail-yw0-f179.google.com ([209.85.161.179]:36029 "EHLO
+        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754001AbdASUUY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Jan 2017 15:20:24 -0500
+Received: by mail-yw0-f179.google.com with SMTP id v200so48021858ywc.3
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Jan 2017 12:20:24 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-Pefect !
+Hey cephers,
 
-On 01/19/2017 11:03 AM, Nathan Cutler wrote:
-> JFYI, I added the "Backports: kraken" and "Backports: kraken (pending)" custom queries to the Ceph project in http://tracker.ceph.com.
-> 
-> Nathan
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Registration for our inaugural Ceph conference is now open!
+
+http://ceph.com/cephalocon2017/
+
+When: 23-25 August 2017
+Where: Boston, MA, USA
+Venue: Marriott Copley Place
+
+The call for papers will be open 21 Mar - 05 May, so keep your eyes
+out for details on that front.
+
+If you are interested in sponsoring, please let me know ASAP to
+discuss options. Thanks!
+
 
 -- 
-Loïc Dachary, Artisan Logiciel Libre
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
