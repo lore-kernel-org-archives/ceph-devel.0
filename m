@@ -1,161 +1,143 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v1 1/7] libceph: add ceph_osdc_cancel_writes
-Date: Fri, 20 Jan 2017 10:17:32 -0500
-Message-ID: <20170120151738.9584-2-jlayton@redhat.com>
+Subject: [PATCH v1 3/7] libceph: rename and export maybe_request_map
+Date: Fri, 20 Jan 2017 10:17:34 -0500
+Message-ID: <20170120151738.9584-4-jlayton@redhat.com>
 References: <20170120151738.9584-1-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46572 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44882 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752124AbdATPRk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 20 Jan 2017 10:17:40 -0500
+        id S1752167AbdATPRl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 20 Jan 2017 10:17:41 -0500
 In-Reply-To: <20170120151738.9584-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: jspray@redhat.com, idryomov@gmail.com, zyan@redhat.com, sage@redhat.com
 
-When a Ceph volume hits capacity, a flag is set in the OSD map to
-indicate that and a new map is sprayed around the cluster. When the
-cephfs client sees that, we want it to shut down any OSD writes that are
-in-progress with an -ENOSPC error as they'll just hang otherwise.
+We need to be able to call this with the osdc->lock already held, so
+ceph_osdc_maybe_request_map won't do. Rename and export it as
+__ceph_osdc_maybe_request_map, and turn ceph_osdc_maybe_request_map
+into a static inline helper that takes the osdc->lock and then calls
+__ceph_osdc_maybe_request_map.
 
-Add a callback to the osdc that gets called on map updates and add
-a small API to register the callback.
-
-[ jlayton: code style cleanup and adaptation to new osd msg handling ]
-
-Signed-off-by: John Spray <john.spray@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- include/linux/ceph/osd_client.h | 12 ++++++++++
- net/ceph/osd_client.c           | 50 +++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 62 insertions(+)
+ include/linux/ceph/osd_client.h |  9 ++++++++-
+ net/ceph/osd_client.c           | 25 +++++++++----------------
+ 2 files changed, 17 insertions(+), 17 deletions(-)
 
 diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index 03a6653d329a..a5298c02bde4 100644
+index 35f74c86533e..b1eeb5a86657 100644
 --- a/include/linux/ceph/osd_client.h
 +++ b/include/linux/ceph/osd_client.h
-@@ -21,6 +21,7 @@ struct ceph_osd_client;
- /*
-  * completion callback for async writepages
-  */
-+typedef void (*ceph_osdc_map_callback_t)(struct ceph_osd_client *, void *);
- typedef void (*ceph_osdc_callback_t)(struct ceph_osd_request *);
- typedef void (*ceph_osdc_unsafe_callback_t)(struct ceph_osd_request *, bool);
+@@ -403,7 +403,14 @@ extern int ceph_osdc_wait_request(struct ceph_osd_client *osdc,
+ extern void ceph_osdc_sync(struct ceph_osd_client *osdc);
  
-@@ -289,6 +290,9 @@ struct ceph_osd_client {
- 	struct ceph_msgpool	msgpool_op_reply;
- 
- 	struct workqueue_struct	*notify_wq;
+ extern void ceph_osdc_flush_notifies(struct ceph_osd_client *osdc);
+-void ceph_osdc_maybe_request_map(struct ceph_osd_client *osdc);
++void __ceph_osdc_maybe_request_map(struct ceph_osd_client *osdc);
 +
-+	ceph_osdc_map_callback_t	map_cb;
-+	void			*map_p;
- };
- 
- static inline bool ceph_osdmap_flag(struct ceph_osd_client *osdc, int flag)
-@@ -391,6 +395,7 @@ extern void ceph_osdc_put_request(struct ceph_osd_request *req);
- extern int ceph_osdc_start_request(struct ceph_osd_client *osdc,
- 				   struct ceph_osd_request *req,
- 				   bool nofail);
-+extern u32 ceph_osdc_complete_writes(struct ceph_osd_client *osdc, int r);
- extern void ceph_osdc_cancel_request(struct ceph_osd_request *req);
- extern int ceph_osdc_wait_request(struct ceph_osd_client *osdc,
- 				  struct ceph_osd_request *req);
-@@ -457,5 +462,12 @@ int ceph_osdc_list_watchers(struct ceph_osd_client *osdc,
- 			    struct ceph_object_locator *oloc,
- 			    struct ceph_watch_item **watchers,
- 			    u32 *num_watchers);
-+
-+static inline void ceph_osdc_register_map_cb(struct ceph_osd_client *osdc,
-+        ceph_osdc_map_callback_t cb, void *data)
++static inline void ceph_osdc_maybe_request_map(struct ceph_osd_client *osdc)
 +{
-+	osdc->map_cb = cb;
-+	osdc->map_p = data;
++	down_read(&osdc->lock);
++	__ceph_osdc_maybe_request_map(osdc);
++	up_read(&osdc->lock);
 +}
- #endif
  
+ int ceph_osdc_call(struct ceph_osd_client *osdc,
+ 		   struct ceph_object_id *oid,
 diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 3a2417bb6ff0..0562ea76c772 100644
+index 290968865a41..97c266f96708 100644
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -18,6 +18,7 @@
- #include <linux/ceph/decode.h>
- #include <linux/ceph/auth.h>
- #include <linux/ceph/pagelist.h>
-+#include <linux/lockdep.h>
- 
- #define OSD_OPREPLY_FRONT_LEN	512
- 
-@@ -1771,6 +1772,51 @@ static void complete_request(struct ceph_osd_request *req, int err)
- 	ceph_osdc_put_request(req);
+@@ -1608,7 +1608,7 @@ static void send_request(struct ceph_osd_request *req)
+ 	ceph_con_send(&osd->o_con, ceph_msg_get(req->r_request));
  }
  
-+/*
-+ * Drop all pending write/modify requests and complete
-+ * them with the `r` as return code.
-+ *
-+ * Returns the highest OSD map epoch of a request that was
-+ * cancelled, or 0 if none were cancelled.
-+ */
-+u32 ceph_osdc_complete_writes(struct ceph_osd_client *osdc, int r)
-+{
-+	struct ceph_osd_request *req;
-+	struct ceph_osd *osd;
-+	struct rb_node *m, *n;
-+	u32 latest_epoch = 0;
-+
-+	lockdep_assert_held(&osdc->lock);
-+
-+	dout("enter complete_writes r=%d\n", r);
-+
-+	for (n = rb_first(&osdc->osds); n; n = rb_next(n)) {
-+		osd = rb_entry(n, struct ceph_osd, o_node);
-+		m = rb_first(&osd->o_requests);
-+		mutex_lock(&osd->lock);
-+		while (m) {
-+			req = rb_entry(m, struct ceph_osd_request, r_node);
-+			m = rb_next(m);
-+
-+			if (req->r_flags & CEPH_OSD_FLAG_WRITE &&
-+			    (ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
-+			     pool_full(osdc, req->r_t.base_oloc.pool))) {
-+				u32 cur_epoch = le32_to_cpu(req->r_replay_version.epoch);
-+
-+				dout("%s: complete tid=%llu flags 0x%x\n", __func__, req->r_tid, req->r_flags);
-+				complete_request(req, r);
-+				if (cur_epoch > latest_epoch)
-+					latest_epoch = cur_epoch;
-+			}
-+		}
-+		mutex_unlock(&osd->lock);
-+	}
-+
-+	dout("return complete_writes latest_epoch=%u\n", latest_epoch);
-+	return latest_epoch;
-+}
-+EXPORT_SYMBOL(ceph_osdc_complete_writes);
-+
- static void cancel_map_check(struct ceph_osd_request *req)
+-static void maybe_request_map(struct ceph_osd_client *osdc)
++void __ceph_osdc_maybe_request_map(struct ceph_osd_client *osdc)
  {
- 	struct ceph_osd_client *osdc = req->r_osdc;
-@@ -3286,6 +3332,8 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+ 	bool continuous = false;
  
- 	ceph_monc_got_map(&osdc->client->monc, CEPH_SUB_OSDMAP,
- 			  osdc->osdmap->epoch);
-+	if (osdc->map_cb)
-+		osdc->map_cb(osdc, osdc->map_p);
+@@ -1628,6 +1628,7 @@ static void maybe_request_map(struct ceph_osd_client *osdc)
+ 			       osdc->osdmap->epoch + 1, continuous))
+ 		ceph_monc_renew_subs(&osdc->client->monc);
+ }
++EXPORT_SYMBOL(__ceph_osdc_maybe_request_map);
+ 
+ static void send_map_check(struct ceph_osd_request *req);
+ 
+@@ -1657,12 +1658,12 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
+ 	    ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR)) {
+ 		dout("req %p pausewr\n", req);
+ 		req->r_t.paused = true;
+-		maybe_request_map(osdc);
++		__ceph_osdc_maybe_request_map(osdc);
+ 	} else if ((req->r_flags & CEPH_OSD_FLAG_READ) &&
+ 		   ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSERD)) {
+ 		dout("req %p pauserd\n", req);
+ 		req->r_t.paused = true;
+-		maybe_request_map(osdc);
++		__ceph_osdc_maybe_request_map(osdc);
+ 	} else if ((req->r_flags & CEPH_OSD_FLAG_WRITE) &&
+ 		   !(req->r_flags & (CEPH_OSD_FLAG_FULL_TRY |
+ 				     CEPH_OSD_FLAG_FULL_FORCE)) &&
+@@ -1671,11 +1672,11 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
+ 		dout("req %p full/pool_full\n", req);
+ 		pr_warn_ratelimited("FULL or reached pool quota\n");
+ 		req->r_t.paused = true;
+-		maybe_request_map(osdc);
++		__ceph_osdc_maybe_request_map(osdc);
+ 	} else if (!osd_homeless(osd)) {
+ 		need_send = true;
+ 	} else {
+-		maybe_request_map(osdc);
++		__ceph_osdc_maybe_request_map(osdc);
+ 	}
+ 
+ 	mutex_lock(&osd->lock);
+@@ -2587,7 +2588,7 @@ static void handle_timeout(struct work_struct *work)
+ 	}
+ 
+ 	if (atomic_read(&osdc->num_homeless) || !list_empty(&slow_osds))
+-		maybe_request_map(osdc);
++		__ceph_osdc_maybe_request_map(osdc);
+ 
+ 	while (!list_empty(&slow_osds)) {
+ 		struct ceph_osd *osd = list_first_entry(&slow_osds,
+@@ -3327,7 +3328,7 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+ 		  ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
+ 		  ceph_osdc_have_pool_full(osdc);
+ 	if (was_pauserd || was_pausewr || pauserd || pausewr)
+-		maybe_request_map(osdc);
++		__ceph_osdc_maybe_request_map(osdc);
+ 
+ 	kick_requests(osdc, &need_resend, &need_resend_linger);
+ 
+@@ -3391,7 +3392,7 @@ static void osd_fault(struct ceph_connection *con)
+ 
+ 	if (!reopen_osd(osd))
+ 		kick_osd_requests(osd);
+-	maybe_request_map(osdc);
++	__ceph_osdc_maybe_request_map(osdc);
+ 
+ out_unlock:
  	up_write(&osdc->lock);
- 	wake_up_all(&osdc->client->auth_wq);
- 	return;
-@@ -4090,6 +4138,8 @@ int ceph_osdc_init(struct ceph_osd_client *osdc, struct ceph_client *client)
- 	osdc->linger_requests = RB_ROOT;
- 	osdc->map_checks = RB_ROOT;
- 	osdc->linger_map_checks = RB_ROOT;
-+	osdc->map_cb = NULL;
-+	osdc->map_p = NULL;
- 	INIT_DELAYED_WORK(&osdc->timeout_work, handle_timeout);
- 	INIT_DELAYED_WORK(&osdc->osds_timeout_work, handle_osds_timeout);
+@@ -4060,14 +4061,6 @@ void ceph_osdc_flush_notifies(struct ceph_osd_client *osdc)
+ }
+ EXPORT_SYMBOL(ceph_osdc_flush_notifies);
  
+-void ceph_osdc_maybe_request_map(struct ceph_osd_client *osdc)
+-{
+-	down_read(&osdc->lock);
+-	maybe_request_map(osdc);
+-	up_read(&osdc->lock);
+-}
+-EXPORT_SYMBOL(ceph_osdc_maybe_request_map);
+-
+ /*
+  * Execute an OSD class method on an object.
+  *
 -- 
 2.9.3
 
