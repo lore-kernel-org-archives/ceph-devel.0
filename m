@@ -1,33 +1,39 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: hammer 0.94.10
-Date: Fri, 20 Jan 2017 23:51:29 +0100
-Message-ID: <c422802d-77a7-73ee-c703-0611c3691ec3@suse.cz>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: Re: hammer 0.94.10 approval
+Date: Fri, 20 Jan 2017 14:52:20 -0800
+Message-ID: <CADRKj5Qn0-gb249RvZNywOarrzO4h5077wsbieer8ftFRYLNkw@mail.gmail.com>
+References: <1864f77e-ab28-8d1b-97d1-a81a3ee38005@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:56069 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752110AbdATWve (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 20 Jan 2017 17:51:34 -0500
+Received: from mail-vk0-f45.google.com ([209.85.213.45]:33946 "EHLO
+        mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751125AbdATXAh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Jan 2017 18:00:37 -0500
+Received: by mail-vk0-f45.google.com with SMTP id r136so59502342vke.1
+        for <ceph-devel@vger.kernel.org>; Fri, 20 Jan 2017 15:00:36 -0800 (PST)
+In-Reply-To: <1864f77e-ab28-8d1b-97d1-a81a3ee38005@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Dillaman, Jason" <dillaman@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Orit Wasserman <owasserm@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Jason:
+Yes, looks fine.
 
-Several bugfixes have been backported to hammer and passed an rbd suite 
-- see [1] for a detailed list.
+Thanks,
+Yehuda
 
-There is one pending issue - http://tracker.ceph.com/issues/18436 - that 
-you earmarked for backport to hammer a couple days ago.
-
-Should we wait for that last issue or is hammer ready for QE to start 
-their own round of testing?
-
-Cheers,
-Nathan
-
-[1] 
-http://tracker.ceph.com/projects/rbd/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=*&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=525&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D=
+On Fri, Jan 20, 2017 at 2:43 PM, Nathan Cutler <ncutler@suse.cz> wrote:
+> Hello Yehuda:
+>
+> Several bugfixes have been backported to hammer, after passing the rgw
+> suite. See [1] for a list.
+>
+> Do you think it is ready for QE to start their own round of testing ?
+>
+> Cheers,
+> Nathan
+>
+> [1]
+> http://tracker.ceph.com/projects/rgw/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=*&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=525&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D=
