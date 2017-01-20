@@ -1,57 +1,18 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Performance results for Firelfy and Hammer
-Date: Fri, 20 Jan 2017 13:20:29 +0530
-Message-ID: <CANA9Uk46GEshTULJ+-h-0qmME9tEWCSeG_efMFr9Det6VJ-HDQ@mail.gmail.com>
+From: "Chen, Wei D" <wei.d.chen@intel.com>
+Subject: Recall: Question about user's key
+Date: Fri, 20 Jan 2017 07:55:55 +0000
+Message-ID: <C5A0092C63E939488005F15F736A81125B261412@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0128237270=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============0128237270==
-Content-Type: multipart/alternative; boundary=001a1144788a5cff55054681e7e6
-
---001a1144788a5cff55054681e7e6
-Content-Type: text/plain; charset=UTF-8
-
-Hello,
-I am looking for ceph performance results for Firefly 0.80.11 and Hammer
-0.94.9.
-
-Please share the above, if anyone has the same..
-
-Thanks
-Swami
-
---001a1144788a5cff55054681e7e6
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hello,<div>I am looking for ceph performance results=C2=A0=
-for Firefly 0.80.11 and Hammer 0.94.9.</div><div><br></div><div>Please shar=
-e the above, if anyone has the same..</div><div><br></div><div>Thanks</div>=
-<div>Swami</div></div>
-
---001a1144788a5cff55054681e7e6--
-
---===============0128237270==
 Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:59436 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751395AbdATH5D (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 20 Jan 2017 02:57:03 -0500
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Martin Palma <martin@palma.bz>, Ceph-User <ceph-users@ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0128237270==--
+Chen, Wei D would like to recall the message, "Question about user's key".
