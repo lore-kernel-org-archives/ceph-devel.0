@@ -1,46 +1,62 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 4.10-rc5
-Date: Fri, 20 Jan 2017 15:26:49 +0100
-Message-ID: <1484922409-31183-1-git-send-email-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Jeff Layton <jlayton@redhat.com>
+Subject: [PATCH v1 0/7] ceph: implement new-style ENOSPC handling in kcephfs
+Date: Fri, 20 Jan 2017 10:17:31 -0500
+Message-ID: <20170120151738.9584-1-jlayton@redhat.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:44852 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751276AbdATPRj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 20 Jan 2017 10:17:39 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: jspray@redhat.com, idryomov@gmail.com, zyan@redhat.com, sage@redhat.com
 
-Hi Linus,
+This patchset is an updated version of the patch series originally
+done by John Spray and posted here:
 
-The following changes since commit 49def1853334396f948dcb4cedb9347abb318df5:
+    http://www.spinics.net/lists/ceph-devel/msg21257.html
 
-  Linux 4.10-rc4 (2017-01-15 16:21:59 -0800)
+The patchset has undergone a number of changes since the original
+submission:
 
-are available in the git repository at:
+- updated for final version of CAPRELEASE message changes
+- protect delayed cap list with spinlock instead of mutex/rwsem
+- no need to allocate a new object to track delayed cap requests
+- rerunning delayed caps is now shuffled off to a workqueue
+- properly handle requests that come in after the "full" map comes in
+- clean out delayed cap requests on last session put
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.10-rc5
+With this, xfstests seems to work as well as before, and we get timely
+-ENOSPC returns under these conditions with O_DIRECTi writes.
 
-for you to fetch changes up to 6df8c9d80a27cb587f61b4f06b57e248d8bc3f86:
+I still need to plumb in a way to throttle the dirtying of new pages in
+buffered I/O when we are getting errors during writeback. Still, I
+figure this is a good place to pause and post the set before I implement
+that part.
 
-  ceph: fix bad endianness handling in parse_reply_info_extra (2017-01-18 17:58:45 +0100)
+Jeff Layton (7):
+  libceph: add ceph_osdc_cancel_writes
+  libceph: rename and export have_pool_full
+  libceph: rename and export maybe_request_map
+  ceph: handle new osdmap epoch updates in CLIENT_CAPS and WRITE
+    codepaths
+  ceph: update CAPRELEASE message format
+  ceph: clean out delayed caps when destroying session
+  libceph: allow requests to return immediately on full conditions if
+    caller wishes
 
-----------------------------------------------------------------
-Three filesystem endianness fixes (one goes back to the 2.6 era, all
-marked for stable) and two fixups for this merge window's patches.
+ fs/ceph/addr.c                  |  14 ++++--
+ fs/ceph/caps.c                  |  43 ++++++++++++++--
+ fs/ceph/debugfs.c               |   3 ++
+ fs/ceph/file.c                  |   8 +--
+ fs/ceph/mds_client.c            | 108 ++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/mds_client.h            |  10 +++-
+ include/linux/ceph/osd_client.h |  22 +++++++-
+ include/linux/ceph/rados.h      |   1 +
+ net/ceph/osd_client.c           |  88 +++++++++++++++++++++++++-------
+ 9 files changed, 263 insertions(+), 34 deletions(-)
 
-----------------------------------------------------------------
-Ilya Dryomov (1):
-      libceph: make sure ceph_aes_crypt() IV is aligned
+-- 
+2.9.3
 
-Jeff Layton (3):
-      ceph: fix endianness of getattr mask in ceph_d_revalidate
-      ceph: fix endianness bug in frag_tree_split_cmp
-      ceph: fix bad endianness handling in parse_reply_info_extra
-
-Yan, Zheng (1):
-      ceph: fix ceph_get_caps() interruption
-
- fs/ceph/caps.c       | 7 ++++++-
- fs/ceph/dir.c        | 5 +++--
- fs/ceph/inode.c      | 3 ++-
- fs/ceph/mds_client.c | 9 +++++----
- net/ceph/crypto.c    | 2 +-
- 5 files changed, 17 insertions(+), 9 deletions(-)
