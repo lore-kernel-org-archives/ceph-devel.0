@@ -1,63 +1,100 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v1 6/7] ceph: clean out delayed caps when destroying session
-Date: Fri, 20 Jan 2017 10:17:37 -0500
-Message-ID: <20170120151738.9584-7-jlayton@redhat.com>
+Subject: [PATCH v1 5/7] ceph: update CAPRELEASE message format
+Date: Fri, 20 Jan 2017 10:17:36 -0500
+Message-ID: <20170120151738.9584-6-jlayton@redhat.com>
 References: <20170120151738.9584-1-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44894 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:38248 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752293AbdATPRn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 20 Jan 2017 10:17:43 -0500
+        id S1751276AbdATPRm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 20 Jan 2017 10:17:42 -0500
 In-Reply-To: <20170120151738.9584-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: jspray@redhat.com, idryomov@gmail.com, zyan@redhat.com, sage@redhat.com
 
-On last session put, drop any delayed cap messages that haven't
-run yet without processing them.
+Version 2 includes the new osd epoch barrier field. This allows clients
+to inform servers that their released caps may not be used until a
+particular OSD map epoch.
 
+[ jlayton: bring up to v4.10-rc3 ]
+
+Signed-off-by: John Spray <john.spray@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- fs/ceph/mds_client.c | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+ fs/ceph/mds_client.c | 15 +++++++++++++++
+ fs/ceph/mds_client.h |  7 +++++--
+ 2 files changed, 20 insertions(+), 2 deletions(-)
 
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 28c83454e9f6..05ab69763308 100644
+index 7055b499c08b..28c83454e9f6 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -361,6 +361,23 @@ static void destroy_reply_info(struct ceph_mds_reply_info_parsed *info)
+@@ -1620,6 +1620,7 @@ void ceph_send_cap_releases(struct ceph_mds_client *mdsc,
+ 	struct ceph_cap *cap;
+ 	LIST_HEAD(tmp_list);
+ 	int num_cap_releases;
++	__le32	*cap_barrier;
+ 
+ 	spin_lock(&session->s_cap_lock);
+ again:
+@@ -1637,7 +1638,11 @@ void ceph_send_cap_releases(struct ceph_mds_client *mdsc,
+ 			head = msg->front.iov_base;
+ 			head->num = cpu_to_le32(0);
+ 			msg->front.iov_len = sizeof(*head);
++
++			msg->hdr.version = cpu_to_le16(2);
++			msg->hdr.compat_version = cpu_to_le16(1);
+ 		}
++
+ 		cap = list_first_entry(&tmp_list, struct ceph_cap,
+ 					session_caps);
+ 		list_del(&cap->session_caps);
+@@ -1655,6 +1660,11 @@ void ceph_send_cap_releases(struct ceph_mds_client *mdsc,
+ 		ceph_put_cap(mdsc, cap);
+ 
+ 		if (le32_to_cpu(head->num) == CEPH_CAPS_PER_RELEASE) {
++			// Append cap_barrier field
++			cap_barrier = msg->front.iov_base + msg->front.iov_len;
++			*cap_barrier = cpu_to_le32(mdsc->cap_epoch_barrier);
++			msg->front.iov_len += sizeof(*cap_barrier);
++
+ 			msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
+ 			dout("send_cap_releases mds%d %p\n", session->s_mds, msg);
+ 			ceph_con_send(&session->s_con, msg);
+@@ -1670,6 +1680,11 @@ void ceph_send_cap_releases(struct ceph_mds_client *mdsc,
+ 	spin_unlock(&session->s_cap_lock);
+ 
+ 	if (msg) {
++		// Append cap_barrier field
++		cap_barrier = msg->front.iov_base + msg->front.iov_len;
++		*cap_barrier = cpu_to_le32(mdsc->cap_epoch_barrier);
++		msg->front.iov_len += sizeof(*cap_barrier);
++
+ 		msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
+ 		dout("send_cap_releases mds%d %p\n", session->s_mds, msg);
+ 		ceph_con_send(&session->s_con, msg);
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index eb8144ab4995..5da41326a0fd 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -104,10 +104,13 @@ struct ceph_mds_reply_info_parsed {
+ 
  /*
-  * sessions
+  * cap releases are batched and sent to the MDS en masse.
++ *
++ * Account for per-message overhead of mds_cap_release header
++ * and __le32 for osd epoch barrier trailing field.
   */
-+static void
-+drop_delayed_caps(struct ceph_mds_session *session)
-+{
-+	LIST_HEAD(delayed);
-+
-+	spin_lock(&session->s_cap_lock);
-+	list_splice_init(&session->s_delayed_caps, &delayed);
-+	spin_unlock(&session->s_cap_lock);
-+
-+	while (!list_empty(&delayed)) {
-+		struct ceph_msg *msg = list_first_entry(&delayed,
-+						struct ceph_msg, list_head);
-+		list_del_init(&msg->list_head);
-+		ceph_msg_put(msg);
-+	}
-+}
-+
- const char *ceph_session_state_name(int s)
- {
- 	switch (s) {
-@@ -394,6 +411,7 @@ void ceph_put_mds_session(struct ceph_mds_session *s)
- 	     atomic_read(&s->s_ref), atomic_read(&s->s_ref)-1);
- 	if (atomic_dec_and_test(&s->s_ref)) {
- 		WARN_ON_ONCE(cancel_work_sync(&s->s_delayed_caps_work));
-+		drop_delayed_caps(s);
- 		if (s->s_auth.authorizer)
- 			ceph_auth_destroy_authorizer(s->s_auth.authorizer);
- 		kfree(s);
+-#define CEPH_CAPS_PER_RELEASE ((PAGE_SIZE -			\
++#define CEPH_CAPS_PER_RELEASE ((PAGE_SIZE - sizeof(u32) -		\
+ 				sizeof(struct ceph_mds_cap_release)) /	\
+-			       sizeof(struct ceph_mds_cap_item))
++			        sizeof(struct ceph_mds_cap_item))
+ 
+ 
+ /*
 -- 
 2.9.3
 
