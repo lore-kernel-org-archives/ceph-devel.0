@@ -1,70 +1,46 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: crush devices class types
-Date: Sun, 22 Jan 2017 17:44:11 +0100
-Message-ID: <e5fad669-da68-1287-7025-9c5e48d67601@dachary.org>
+From: Ning Yao <zay11022@gmail.com>
+Subject: Re: Josh is the new core tech lead!
+Date: Mon, 23 Jan 2017 01:29:21 +0800
+Message-ID: <CALZt5jyiaM8egZr-JRJit=9BfYLrMqFwdG=ngR5M4M5LmS+0EA@mail.gmail.com>
+References: <CAN=+7FX15D11zF814tW3gdeRbcat8nXjUNUCEuGJMKrd4zaxBg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:44948 "EHLO
-        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750741AbdAVQpt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Jan 2017 11:45:49 -0500
+Received: from mail-io0-f176.google.com ([209.85.223.176]:34772 "EHLO
+        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750907AbdAVR3W (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Jan 2017 12:29:22 -0500
+Received: by mail-io0-f176.google.com with SMTP id l66so95457786ioi.1
+        for <ceph-devel@vger.kernel.org>; Sun, 22 Jan 2017 09:29:22 -0800 (PST)
+In-Reply-To: <CAN=+7FX15D11zF814tW3gdeRbcat8nXjUNUCEuGJMKrd4zaxBg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Samuel Just <sjust@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+Thanks for all of works Sam has done for Ceph.
+Also, Appreciate that Sam help us a lot about understanding the design
+specific in Rados as well as those constructive comments and
+suggestions in our PRs.
+And Best wish for your next incarnation.
 
-You proposed an improvement to the crush map to address different device types (SSD, HDD, etc.)[1]. When learning how to create a crush map, I was indeed confused by the tricks required to create SSD only pools. After years of practice it feels more natural :-)
+Regards
+Ning Yao
 
-The source of my confusion was mostly because I had to use a hierarchical description to describe something that is not organized hierarchically. "The rack contains hosts that contain devices" is intuitive. "The rack contains hosts that contain ssd that contain devices" is counter intuitive. Changing:
 
-    # devices
-    device 0 osd.0
-    device 1 osd.1
-    device 2 osd.2
-    device 3 osd.3
-
-into:
-
-    # devices
-    device 0 osd.0 ssd
-    device 1 osd.1 ssd
-    device 2 osd.2 hdd
-    device 3 osd.3 hdd
-
-where ssd/hdd is the device class would be much better. However, using the device class like so:
-
-    rule ssd {
-            ruleset 1
-            type replicated
-            min_size 1
-            max_size 10
-            step take default:ssd
-            step chooseleaf firstn 0 type host
-            step emit
-    }
-
-looks arcane. Since the goal is to simplify the description for the first time user, maybe we could have something like:
-
-    rule ssd {
-            ruleset 1
-            type replicated
-            min_size 1
-            max_size 10
-            device class = ssd
-            step take default
-            step chooseleaf firstn 0 type host
-            step emit
-    }
-
-What do you think ?
-
-Cheers
-
-[1] http://pad.ceph.com/p/crush-types http://tracker.ceph.com/projects/ceph/wiki/CDM_01-FEB-2017
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
+2017-01-17 2:25 GMT+08:00 Samuel Just <sjust@redhat.com>:
+> Hello!  After 6 years of working on Ceph, I've decided to move on from Red Hat
+> to another oportunity not working on Ceph.
+>
+> I've had an extraordinary time working with the Ceph community as we've grown
+> from where we were in 2010 to where we are now, and I really want to thank all
+> of you for making this an incredibly rewarding experience.
+>
+> Josh Durgin will be taking over as tech lead for core.  He did an excellent job
+> as the RBD tech lead, and he's been doing great work on improving RADOS.  I'm
+> certain that he'll do an amazing job as Ceph heads into 2017 and beyond.
+> -Sam
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
