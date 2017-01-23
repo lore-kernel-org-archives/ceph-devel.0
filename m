@@ -1,40 +1,69 @@
-From: Joyes Dadi <"YD."@biscuit.ocn.ne.jp>
-Subject: Urgent Please,,
-Date: Mon, 23 Jan 2017 22:48:05 +0900 (JST)
-Message-ID: <1381581884.25781930.1485179285865.JavaMail.root@biscuit.ocn.ne.jp>
-Reply-To: Joyes Dadi <joyesdadi767@citromail.hu>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: Get IO request execution profile
+Date: Mon, 23 Jan 2017 08:59:33 -0500
+Message-ID: <CA+aFP1Av7jHmT4sFD4ysCeeFk_GwZSsAS2W8Zs-9nmcB3sCd4Q@mail.gmail.com>
+References: <CACxKWaxt5+9BiQEM-fG=iHkwHJsPYK9EukNoyPtPNQunq65adw@mail.gmail.com>
+ <CALe9h7ePYu5_JYTU9NppGhsvUr5FQJJMTw5kcj1yb2kyF+MXHQ@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-2022-JP
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mbkd0324.ocn.ad.jp ([153.149.236.25]:38322 "EHLO
-        mbkd0324.ocn.ad.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750703AbdAWNyX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 08:54:23 -0500
+Received: from mail-lf0-f46.google.com ([209.85.215.46]:36390 "EHLO
+        mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751004AbdAWN7g (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 08:59:36 -0500
+Received: by mail-lf0-f46.google.com with SMTP id z134so93827765lff.3
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2017 05:59:35 -0800 (PST)
+In-Reply-To: <CALe9h7ePYu5_JYTU9NppGhsvUr5FQJJMTw5kcj1yb2kyF+MXHQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Konstantin Danilov <kdanilov@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Good Day Dear,
+Have you looked at the Zipkin tracking PR [1]?
 
-My name is Ms. Joyes Dadi, I am glad you are reading this letter and I hope
-we will start our communication and I know that this message will look strange,
-surprising and probably unbelievable to you, but it is the reality. I want to
-make a donation of money to you.
+[1] https://github.com/ceph/ceph/pull/11053
 
-I contact you by the will of God. I am a firm German woman specialized in
-mining gold and diamonds in Africa. But now, I'm very sick of a cancer. My
-husband died in an accident two years ago with our two children and now I have
-cancer of the esophagus that damaged almost all the cells in my system/agencies
-and I'll die soon according to my doctor.
+On Mon, Jan 23, 2017 at 7:54 AM, John Spray <jspray@redhat.com> wrote:
+> On Mon, Jan 23, 2017 at 12:36 PM, Konstantin Danilov
+> <kdanilov@mirantis.com> wrote:
+>> Hi all,
+>>
+>> is there a way to get something like 'dump historic ops' for particular request?
+>> Probably from client side. Ideally I'd like to send a normal IO
+>> request with special
+>> flag and get execution profile in response metadata.
+>> If it's not possible right now - is this an interesting feature to
+>> implement, or I miss
+>> something and it's useless?
+>
+> Potentially interesting idea, although it's not obvious to me why it's
+> useful to have this dumped on the client rather than the server?
+> Would be it equally useful to be able to tag a specific client on the
+> server side to have its requests dumped like this?
+>
+> John
+>
+>>
+>> Thanks
+>>
+>> --
+>> Kostiantyn Danilov aka koder.ua
+>> Principal software engineer, Mirantis
+>>
+>> skype:koder.ua
+>> http://koder-ua.blogspot.com/
+>> http://mirantis.com
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-My most concern now is, we grew up in the orphanage and were married in
-orphanage. If I die this deposited fund will soon be left alone in the hand of
-the bank, and I do want to it that  way. Please, if you can be reliable and
-sincere to accept my humble proposal; I have (10.5Millions Euro) in a fixed
-deposit account; I will order the Bank to transfer the money into your account
-in your country immediately, and then you will take the fund to  your country
-and invest it to the orphanage homes Please, answer as quickly as possible.
 
-God bless you.
-Ms. Joyes Dadi
-Email: joyesdadi767@citromail.hu
+
+-- 
+Jason
