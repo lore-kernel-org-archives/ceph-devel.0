@@ -1,69 +1,83 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Get IO request execution profile
-Date: Mon, 23 Jan 2017 08:59:33 -0500
-Message-ID: <CA+aFP1Av7jHmT4sFD4ysCeeFk_GwZSsAS2W8Zs-9nmcB3sCd4Q@mail.gmail.com>
-References: <CACxKWaxt5+9BiQEM-fG=iHkwHJsPYK9EukNoyPtPNQunq65adw@mail.gmail.com>
- <CALe9h7ePYu5_JYTU9NppGhsvUr5FQJJMTw5kcj1yb2kyF+MXHQ@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: crush devices class types
+Date: Mon, 23 Jan 2017 14:12:04 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1701231410340.3654@piezo.novalocal>
+References: <e5fad669-da68-1287-7025-9c5e48d67601@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f46.google.com ([209.85.215.46]:36390 "EHLO
-        mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751004AbdAWN7g (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 08:59:36 -0500
-Received: by mail-lf0-f46.google.com with SMTP id z134so93827765lff.3
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2017 05:59:35 -0800 (PST)
-In-Reply-To: <CALe9h7ePYu5_JYTU9NppGhsvUr5FQJJMTw5kcj1yb2kyF+MXHQ@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:38822 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750718AbdAWOMm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 23 Jan 2017 09:12:42 -0500
+In-Reply-To: <e5fad669-da68-1287-7025-9c5e48d67601@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Konstantin Danilov <kdanilov@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Have you looked at the Zipkin tracking PR [1]?
+On Sun, 22 Jan 2017, Loic Dachary wrote:
+> Hi Sage,
+> 
+> You proposed an improvement to the crush map to address different device 
+> types (SSD, HDD, etc.)[1]. When learning how to create a crush map, I 
+> was indeed confused by the tricks required to create SSD only pools. 
+> After years of practice it feels more natural :-)
+> 
+> The source of my confusion was mostly because I had to use a 
+> hierarchical description to describe something that is not organized 
+> hierarchically. "The rack contains hosts that contain devices" is 
+> intuitive. "The rack contains hosts that contain ssd that contain 
+> devices" is counter intuitive. Changing:
+> 
+>     # devices
+>     device 0 osd.0
+>     device 1 osd.1
+>     device 2 osd.2
+>     device 3 osd.3
+> 
+> into:
+> 
+>     # devices
+>     device 0 osd.0 ssd
+>     device 1 osd.1 ssd
+>     device 2 osd.2 hdd
+>     device 3 osd.3 hdd
+> 
+> where ssd/hdd is the device class would be much better. However, using 
+> the device class like so:
+> 
+>     rule ssd {
+>             ruleset 1
+>             type replicated
+>             min_size 1
+>             max_size 10
+>             step take default:ssd
+>             step chooseleaf firstn 0 type host
+>             step emit
+>     }
+> 
+> looks arcane. Since the goal is to simplify the description for the 
+> first time user, maybe we could have something like:
+> 
+>     rule ssd {
+>             ruleset 1
+>             type replicated
+>             min_size 1
+>             max_size 10
+>             device class = ssd
+>             step take default
+>             step chooseleaf firstn 0 type host
+>             step emit
+>     }
+> 
+> What do you think ?
 
-[1] https://github.com/ceph/ceph/pull/11053
+Yes! Maybe adjust it to be consistent with the other directives, like
 
-On Mon, Jan 23, 2017 at 7:54 AM, John Spray <jspray@redhat.com> wrote:
-> On Mon, Jan 23, 2017 at 12:36 PM, Konstantin Danilov
-> <kdanilov@mirantis.com> wrote:
->> Hi all,
->>
->> is there a way to get something like 'dump historic ops' for particular request?
->> Probably from client side. Ideally I'd like to send a normal IO
->> request with special
->> flag and get execution profile in response metadata.
->> If it's not possible right now - is this an interesting feature to
->> implement, or I miss
->> something and it's useless?
->
-> Potentially interesting idea, although it's not obvious to me why it's
-> useful to have this dumped on the client rather than the server?
-> Would be it equally useful to be able to tag a specific client on the
-> server side to have its requests dumped like this?
->
-> John
->
->>
->> Thanks
->>
->> --
->> Kostiantyn Danilov aka koder.ua
->> Principal software engineer, Mirantis
->>
->> skype:koder.ua
->> http://koder-ua.blogspot.com/
->> http://mirantis.com
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+	device_class ssd
 
+We could also adjust the naming of the generated nodes to be something 
+like ssd@default instead of default:ssd as that reads semi-intuitively?
 
-
--- 
-Jason
+sage
