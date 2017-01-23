@@ -1,72 +1,77 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: monitor port closed
-Date: Mon, 23 Jan 2017 15:28:20 +0100
-Message-ID: <226f223c-88d6-1d94-410a-482479c54691@digiware.nl>
-References: <CAF1ivSbn_bzic_JjOEEUKnp936XOy43s2r=0V0ujzVSpv2okBw@mail.gmail.com>
- <CAJE9aON2E8zAnBxqHhmY9cT3RVr3jGaVtkYcsk-9zfxoqk2+HQ@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: crush devices class types
+Date: Mon, 23 Jan 2017 14:29:49 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1701231428190.3654@piezo.novalocal>
+References: <e5fad669-da68-1287-7025-9c5e48d67601@dachary.org> <1971303930.7861.1485178720341@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:50581 "EHLO smtp.digiware.nl"
+Received: from mx1.redhat.com ([209.132.183.28]:43680 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751083AbdAWO2Z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 23 Jan 2017 09:28:25 -0500
-In-Reply-To: <CAJE9aON2E8zAnBxqHhmY9cT3RVr3jGaVtkYcsk-9zfxoqk2+HQ@mail.gmail.com>
+        id S1750723AbdAWO3v (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 23 Jan 2017 09:29:51 -0500
+In-Reply-To: <1971303930.7861.1485178720341@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>, Ming Lin <minggr@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 23-1-2017 14:12, kefu chai wrote:
-> On Mon, Jan 23, 2017 at 1:32 PM, Ming Lin <minggr@gmail.com> wrote:
->> Hi,
->>
->> [mon]
->> mon initial members = a
->>
->> [mon.a]
->> mon addr = 192.168.0.1:7000
->>
->> jewel release with 1 monitor and 3 OSDs.
->>
->> After hours of fio rbd test, the monitor binded port(7000) was closed
->> for unknown reason.
+On Mon, 23 Jan 2017, Wido den Hollander wrote:
+> > Op 22 januari 2017 om 17:44 schreef Loic Dachary <loic@dachary.org>:
+> > 
+> > 
+> > Hi Sage,
+> > 
+> > You proposed an improvement to the crush map to address different device types (SSD, HDD, etc.)[1]. When learning how to create a crush map, I was indeed confused by the tricks required to create SSD only pools. After years of practice it feels more natural :-)
+> > 
+> > The source of my confusion was mostly because I had to use a hierarchical description to describe something that is not organized hierarchically. "The rack contains hosts that contain devices" is intuitive. "The rack contains hosts that contain ssd that contain devices" is counter intuitive. Changing:
+> > 
+> >     # devices
+> >     device 0 osd.0
+> >     device 1 osd.1
+> >     device 2 osd.2
+> >     device 3 osd.3
+> > 
+> > into:
+> > 
+> >     # devices
+> >     device 0 osd.0 ssd
+> >     device 1 osd.1 ssd
+> >     device 2 osd.2 hdd
+> >     device 3 osd.3 hdd
+> > 
+> > where ssd/hdd is the device class would be much better. However, using the device class like so:
+> > 
+> >     rule ssd {
+> >             ruleset 1
+> >             type replicated
+> >             min_size 1
+> >             max_size 10
+> >             step take default:ssd
+> >             step chooseleaf firstn 0 type host
+> >             step emit
+> >     }
+> > 
+> > looks arcane. Since the goal is to simplify the description for the first time user, maybe we could have something like:
+> > 
+> >     rule ssd {
+> >             ruleset 1
+> >             type replicated
+> >             min_size 1
+> >             max_size 10
+> >             device class = ssd
 > 
-> is this reproduciable? can you enable ms-debug=1 and attach the log?
+> Would that be sane?
 > 
->> But monitor is still running,
->>
->> # pidof ceph-mon
->> 21980
->>
->> Another strange thing is there are more than 1000 threads for the
->> ceph-mon process.
->>
->> # ls /proc/21980/task/ |wc -l
->> 1022
->>
->> Any possible reason?
+> Why not:
 > 
-> are you using the simple messenger? maybe you can use pstree to check
-> the thread names?
+> step set-class ssd
+> step take default
+> step chooseleaf firstn 0 type host
+> step emit
+> 
+> Since it's a 'step' you take, am I right?
 
-Other nice tools to help you here to see where the socket has gone:
-	sockstat
-	lsof
+Good idea... a step is a cleaner way to extend the syntax!
 
-They can tell you if the socket is somewhere else opened.
-And what the state is.
-
-Or they can tell you what other port(s) the monitor has opened.
-
-Also note that recycling thru large numbers of ports does not always
-goes well with the TCPstack. That is why there is the options:
-     SO_REUSEADDR       enables local address reuse
-     SO_REUSEPORT       enables duplicate address and port bindings
-
-But then still you might run out of ports if too many are left in a WAIT
-state.
-
---WjW
-
+sage
