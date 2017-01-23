@@ -1,75 +1,77 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: OSD metadata reporting filestore when using bluestore
-Date: Mon, 23 Jan 2017 18:20:50 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1701231820030.3660@piezo.novalocal>
-References: <1476304724.7893.1485195109298@ox.pcextreme.nl>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Restricting RADOS gateway users to specific IP subnets
+Date: Mon, 23 Jan 2017 19:21:01 +0100 (CET)
+Message-ID: <1796568889.7897.1485195661405@ox.pcextreme.nl>
+References: <992031594.7878.1485183845229@ox.pcextreme.nl>
+ <CABo9giTVDxfbpXin+0mJqa4r57ekZXH-tKsm1TdRnt_pHB=1aA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39325 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750705AbdAWSUx (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 13:20:53 -0500
-In-Reply-To: <1476304724.7893.1485195109298@ox.pcextreme.nl>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:49118 "EHLO
+        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750705AbdAWSVF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 13:21:05 -0500
+In-Reply-To: <CABo9giTVDxfbpXin+0mJqa4r57ekZXH-tKsm1TdRnt_pHB=1aA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
+To: Orit Wasserman <owasserm@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, 23 Jan 2017, Wido den Hollander wrote:
-> Hi,
-> 
-> Testing with Kraken 11.2.0 with BlueStore I noticed something regarding the OSD metadata.
-> 
-> $ ceph osd metadata 0
-> 
-> {
->     "id": 0,
->     "arch": "x86_64",
->     "back_addr": "[2001:db8::100]:6801\/3634",
->     "ceph_version": "ceph version 11.2.0 (f223e27eeb35991352ebc1f67423d4ebc252adb7)",
->     "cpu": "Intel(R) Core(TM) i5-3427U CPU @ 1.80GHz",
->     "distro": "ubuntu",
->     "distro_description": "Ubuntu 16.04.1 LTS",
->     "distro_version": "16.04",
->     "front_addr": "[2001:db8::100]:6800\/3634",
->     "hb_back_addr": "[2001:db8::100]:6802\/3634",
->     "hb_front_addr": "[2001:db8::100]:6803\/3634",
->     "hostname": "alpha",
->     "kernel_description": "#50-Ubuntu SMP Wed Jul 13 00:07:12 UTC 2016",
->     "kernel_version": "4.4.0-31-generic",
->     "mem_swap_kb": "522236",
->     "mem_total_kb": "500192",
->     "os": "Linux",
->     "osd_data": "\/var\/lib\/ceph\/osd\/ceph-0",
->     "osd_journal": "\/var\/lib\/ceph\/osd\/ceph-0\/journal",
->     "osd_objectstore": "filestore"
-> }
-> 
-> The OSD in this case is however using Bluestore:
-> 
-> root@alpha:~# df -h /var/lib/ceph/osd/ceph-0
-> Filesystem      Size  Used Avail Use% Mounted on
-> /dev/sdb1        97M  5.4M   92M   6% /var/lib/ceph/osd/ceph-0
-> root@alpha:~# cat /var/lib/ceph/osd/ceph-0/type
-> bluestore
-> root@alpha:~#
-> 
-> Looking at the code in src/osd/OSD.cc in void OSD::_collect_metadata(map<string,string> *pm):
-> 
->   // backend
->   (*pm)["osd_objectstore"] = cct->_conf->osd_objectstore;
-> 
-> It seems that osd_objectstore is set to what is defined in the configuration, but in config_opts.h this defaults to filestore:
-> 
-> OPTION(osd_objectstore, OPT_STR, "filestore")  // ObjectStore backend type
-> 
-> It however seems that this configuration option doesn't do anything.
-> 
-> Am I correct or am I missing something here?
 
-Yep, it's a bug!  The config option only controls mkfs behavior.  This 
-should look at the instantiated store, not the config.  Open a ticket 
-please?
+> Op 23 januari 2017 om 17:19 schreef Orit Wasserman <owasserm@redhat.com>:
+> 
+> 
+> On Mon, Jan 23, 2017 at 5:04 PM, Wido den Hollander <wido@42on.com> wrote:
+> > Hi,
+> >
+> > At Amazon you can set Bucket Policies [0] on a bucket where you can restrict request to be done from specific IP addresses and/or subnets.
+> >
+> > These policies are currently not supported by RGW, but that's not the use-case I'm looking for.
+> >
+> > The use-case here is that when a Access/Secret key pair is stolen one can access all data from that user. With the Access/Secret key pair you can also update the bucket policies and still access all the data.
+> >
+> > I'm thinking of a way where a IP ACL can be set for a user. All requests for that user will be matched to that ACL. That way, even if you steal the keys you still can't access the data.
+> >
+> > The system in this case is connected to the internet, so a firewall in between won't help since it needs to allow traffic from all places, but just specific users and their data need to be isolated.
+> >
+> > Does it sound sane if we have such a feature for the RGW? The JSON output from user info might look like:
+> >
+> > {
+> >   "user_id": "example",
+> >   "user_ip_acl" {
+> >     "allow" [
+> >       "192.168.0.0/24",
+> >       "2001:db8::/64
+> >     ]
+> >   }
+> > }
+> >
+> 
+> This is possible but it is not a small change to the user and
+> authentication mechanism which are being reworked at the moment.
 
-sage
+I wasn't aware of any of that work. What is going to be changed?
+
+> Cannot this be done by configuring the network?
+
+Well, in this case port 80 and 443 are open to the internet. The use-case is '2FA' where we prevent anybody from accessing the data by just getting the Access/Secret keys.
+
+Network can't do much here since we have to allow all HTTP(S) traffic.
+
+Wido
+
+> 
+> Orit
+> 
+> > Wido
+> >
+> > [0]: http://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
