@@ -1,68 +1,71 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: Standalone libcrush: call for participation
-Date: Mon, 23 Jan 2017 13:02:12 -0500
-Message-ID: <20170123180211.GB8639@ultraspiritum.eng.arb.redhat.com>
-References: <ea88fb94-f48f-0c2c-2ffb-4019bed66fc5@dachary.org>
- <20170123162905.GA8639@ultraspiritum.eng.arb.redhat.com>
- <cdb4c456-d15b-5630-2453-af94d1de0ba7@dachary.org>
+From: Wido den Hollander <wido@42on.com>
+Subject: OSD metadata reporting filestore when using bluestore
+Date: Mon, 23 Jan 2017 19:11:49 +0100 (CET)
+Message-ID: <1476304724.7893.1485195109298@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="zx4FCpZtqtKETZ7O"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48214 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750738AbdAWSEE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 23 Jan 2017 13:04:04 -0500
-Content-Disposition: inline
-In-Reply-To: <cdb4c456-d15b-5630-2453-af94d1de0ba7@dachary.org>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:46836 "EHLO
+        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750765AbdAWSLy (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 13:11:54 -0500
+Received: from 109.72.87.221 (ox01.pcextreme.nl [109.72.87.221])
+        by smtp01.mail.pcextreme.nl (Postfix) with ESMTPSA id 8669F7618E
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2017 19:11:49 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
+Hi,
 
---zx4FCpZtqtKETZ7O
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Testing with Kraken 11.2.0 with BlueStore I noticed something regarding the OSD metadata.
 
-On 23/01/2017, Loic Dachary wrote:
-> Hi Adam, I don't know :-) Unless I'm mistaken the code in the linux
-> kernel is an unmodified copy of the code from src/crush/*.[ch]. I
-> however have no clue how it is tested to work as it should in both
-> contexts. Other than running integration tests with teuthology.
->=20
-> How do you suggest we go about it ?
+$ ceph osd metadata 0
 
-I don't actually know. I just wondered, I had the vague impression
-that the CRUSH from Ceph was copied into the kernel but I didn't know
-who did it, if it was parallel development or a blanket copy or
-what.
+{
+    "id": 0,
+    "arch": "x86_64",
+    "back_addr": "[2001:db8::100]:6801\/3634",
+    "ceph_version": "ceph version 11.2.0 (f223e27eeb35991352ebc1f67423d4ebc252adb7)",
+    "cpu": "Intel(R) Core(TM) i5-3427U CPU @ 1.80GHz",
+    "distro": "ubuntu",
+    "distro_description": "Ubuntu 16.04.1 LTS",
+    "distro_version": "16.04",
+    "front_addr": "[2001:db8::100]:6800\/3634",
+    "hb_back_addr": "[2001:db8::100]:6802\/3634",
+    "hb_front_addr": "[2001:db8::100]:6803\/3634",
+    "hostname": "alpha",
+    "kernel_description": "#50-Ubuntu SMP Wed Jul 13 00:07:12 UTC 2016",
+    "kernel_version": "4.4.0-31-generic",
+    "mem_swap_kb": "522236",
+    "mem_total_kb": "500192",
+    "os": "Linux",
+    "osd_data": "\/var\/lib\/ceph\/osd\/ceph-0",
+    "osd_journal": "\/var\/lib\/ceph\/osd\/ceph-0\/journal",
+    "osd_objectstore": "filestore"
+}
 
-It /does/ mean that any changes to libcrush have to be kept as kernel
-compatible C code, which isn't bad, it's just good to make sure it's
-explicit.
+The OSD in this case is however using Bluestore:
 
---=20
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+root@alpha:~# df -h /var/lib/ceph/osd/ceph-0
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sdb1        97M  5.4M   92M   6% /var/lib/ceph/osd/ceph-0
+root@alpha:~# cat /var/lib/ceph/osd/ceph-0/type
+bluestore
+root@alpha:~#
 
---zx4FCpZtqtKETZ7O
-Content-Type: application/pgp-signature; name="signature.asc"
+Looking at the code in src/osd/OSD.cc in void OSD::_collect_metadata(map<string,string> *pm):
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+  // backend
+  (*pm)["osd_objectstore"] = cct->_conf->osd_objectstore;
 
-iQF8BAEBCgBmBQJYhkUeXxSAAAAAAC4AKGlzc3Vlci1mcHJAbm90YXRpb25zLm9w
-ZW5wZ3AuZmlmdGhob3JzZW1hbi5uZXREMUY1QjNFRjgyQTI1NjIxNkVERDQxQUNF
-OEIyRUY4QzA3NUU1RTIzAAoJEOiy74wHXl4jo4AH/A7I5AESSqZBLGnzJIrW813j
-b8XNimsNN14UoFM6n+1ppyaOxLOum+7HQ1zAAxGQ12RB8rIT7YJso+IGraKXbu+3
-k6t3cOINUPS7bm8hJgfp5iVdEFWgIATOHUq4QbfxG39y1dvMrE/5FfqPL+W+HzUt
-bKz0J4G2ywrEKy3Zap/FDczG8tgyDZKn4hdmJR9vWjUHnT5UKgMtB9heiaDimAVF
-Foruhs4Z87PSlY1ewRDKVfX+3MHD+rueqRGMjuDIHXVZkqLANj2ymqTyDfveX3tG
-RwSnS62RDw1G5Z0EJRoceANDj06LggzO9VDHhsoGFBXzUT6mNRj9NsxVqurWhEw=
-=gThN
------END PGP SIGNATURE-----
+It seems that osd_objectstore is set to what is defined in the configuration, but in config_opts.h this defaults to filestore:
 
---zx4FCpZtqtKETZ7O--
+OPTION(osd_objectstore, OPT_STR, "filestore")  // ObjectStore backend type
+
+It however seems that this configuration option doesn't do anything.
+
+Am I correct or am I missing something here?
+
+Wido
