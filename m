@@ -1,99 +1,71 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: Standalone libcrush: call for participation
-Date: Mon, 23 Jan 2017 22:27:22 +0100
-Message-ID: <CAOi1vP8xguFa2bL5t5aUS0yqUZEkK-V8+je59aQsfsgF8g13UQ@mail.gmail.com>
-References: <ea88fb94-f48f-0c2c-2ffb-4019bed66fc5@dachary.org>
- <20170123162905.GA8639@ultraspiritum.eng.arb.redhat.com> <cdb4c456-d15b-5630-2453-af94d1de0ba7@dachary.org>
- <CAOi1vP8U_YFZ18qr0PT1afcRRNT5-5P3Ei3TCQ8udWjtAQ5Ckw@mail.gmail.com> <338efc25-c016-25cb-63ac-8c224a9e4a67@dachary.org>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: monitor port closed
+Date: Mon, 23 Jan 2017 22:34:59 +0100
+Message-ID: <af9cef16-307e-8cc6-b9cb-d99d264309d6@digiware.nl>
+References: <CAF1ivSbn_bzic_JjOEEUKnp936XOy43s2r=0V0ujzVSpv2okBw@mail.gmail.com>
+ <CAJE9aON2E8zAnBxqHhmY9cT3RVr3jGaVtkYcsk-9zfxoqk2+HQ@mail.gmail.com>
+ <226f223c-88d6-1d94-410a-482479c54691@digiware.nl>
+ <CAF1ivSYsX2pOabSg3bfXQsL-VpstXxYTRsK1x2Pijhai1YOYXA@mail.gmail.com>
+ <e2c33bd7-d582-9233-6648-0c2593a32233@digiware.nl>
+ <CAF1ivSZjJZ7uThOYAkgVHW-AJni4GGbgOkaHJiaPy2A+wbS8Gw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:36786 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750957AbdAWV1Y (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 16:27:24 -0500
-Received: by mail-wm0-f42.google.com with SMTP id c85so152878825wmi.1
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2017 13:27:23 -0800 (PST)
-In-Reply-To: <338efc25-c016-25cb-63ac-8c224a9e4a67@dachary.org>
+Received: from smtp.digiware.nl ([176.74.240.9]:18231 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751355AbdAWVfG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 23 Jan 2017 16:35:06 -0500
+In-Reply-To: <CAF1ivSZjJZ7uThOYAkgVHW-AJni4GGbgOkaHJiaPy2A+wbS8Gw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ming Lin <minggr@gmail.com>
+Cc: kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Jan 23, 2017 at 9:08 PM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Ilya,
->
-> On 01/23/2017 07:43 PM, Ilya Dryomov wrote:
->> On Mon, Jan 23, 2017 at 6:00 PM, Loic Dachary <loic@dachary.org> wrote:
->>> Hi Adam,
+On 23-1-2017 22:01, Ming Lin wrote:
+> On Mon, Jan 23, 2017 at 12:38 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>> On 23-1-2017 20:08, Ming Lin wrote:
+>>> On Mon, Jan 23, 2017 at 6:28 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
 >>>
->>> On 01/23/2017 05:29 PM, Adam C. Emerson wrote:
->>>> On 21/01/2017, Loic Dachary wrote:
->>>> [snip]
->>>>> The beginning of the next ceph release cycle seems like a good time
->>>>> to initiate that effort. If someone is willing to help with the
->>>>> bootstrap, now is a good time. The library will be hosted under the
->>>>> libcrush.org domain name. But that's about the only thing that
->>>>> happened so far :-)
 >>>>
->>>> Would the Ceph git repository continue to have its own version of
->>>> CRUSH included, or would we pull in libcrush as a submodule?
+>>>> Other nice tools to help you here to see where the socket has gone:
+>>>>         sockstat
+>>>>         lsof
+>>>>
+>>>> They can tell you if the socket is somewhere else opened.
+>>>> And what the state is.
+>>>>
+>>>> Or they can tell you what other port(s) the monitor has opened.
 >>>
->>> If all goes well and libcrush becomes actively and reliably maintained =
-outside of the Ceph tree, it could either be a submodule or even a packaged=
- dependency. Before that happens things can stay the way they are. I volunt=
-eer to manually monitor and cherry-pick whatever changes in the Ceph tree o=
-nto the standalone repository ( http://libcrush.org/main/libcrush/ ) so tha=
-t it does not drift away.
->>>
->>>> Also, does this affect the relationship between userspace CRUSH and
->>>> Linux kernel CRUSH?
->>>
->>> I don't know :-) Unless I'm mistaken the code in the linux kernel is an=
- unmodified copy of the code from src/crush/*.[ch].
+>>> # netstat -putnl |grep 7000
+>>> <no output>
 >>
->> Correct.  libcrush won't impact the kernel in any way, as long as the
->> C core <-> C++ wrappers boundary stays intact, which it should ;)
->
-> Yeah :-) Just rephrasing so I'm sure I understand you correctly: the impo=
-rtant thing is that the C API stays as it is (functions & structs & constan=
-ts) and that the semantic of each function is backward compatible. As long =
-as it holds true, the kernel integration is going to be ok.
-
-Well, that's a bit too strict.  Ideally, we need to able to cut
-and-paste these files into the kernel with no or little effort.  The
-API can change -- it just needs to be possible to bring the changes
-over to the kernel client.
-
->
->> Some documentation will probably need to be added to cover things like
->> basic kernel compatibility (no floating point, stubs for asserts, etc)
->> and coding style for the C bits.
->
-> Ack.
->
->> The core algorithm is far from where
->> libcrush initial activities would be centered though, I imagine.
->
-> Indeed, more documentation & packaging right now.
->
->>> I however have no clue how it is tested to work as it should in both co=
-ntexts. Other than running integration tests with teuthology.
->>>
->>> How do you suggest we go about it ?
+>>> # netstat -putna |grep 7000
+>>> tcp        0      0 192.168.0.1:7000        192.168.122.131:53240
+>>> ESTABLISHED 21980/ceph-mon
 >>
->> I don't think we need anything special here.
->
-> When something changes in the .[ch] files, how do you ensure it's not bre=
-aking something ?
+>> Is process 21980 listening on any other ports? the normal range would be
+>> 6800-7300 (as defined in config_opts.h)
+> 
+> No, that's the only one with ESTABLISHED state.
+> 
+> # netstat -putna |grep 21980
+> tcp        0      0 192.168.0.1:7000        192.168.122.131:53240
+> ESTABLISHED 21980/ceph-mon
+> 
+>> And it would start on 6789, so quite a few rebinds have occurred.
+>> unless have configured it differently.
+> 
+> I configured with 7000 for test purpose.
+> 
+> [mon]
+> mon initial members = a
+> 
+> [mon.a]
+> mon addr = 192.168.0.1:7000
+> 
+Then the process is really broken somewhere, and you will have to refer
+to either logfiles and or gdb-debugging.
 
-Run the k* test suites, mostly.  For invasive changes (like a new
-tunable), instrument the kernel to dump the crushtool --show-mappings
-output to the console and compare it with the .t, but that's a manual
-process that requires writing some code.  Such changes happen around
-twice a year, so it hasn't been a problem.
+--WjW
 
-Thanks,
-
-                Ilya
