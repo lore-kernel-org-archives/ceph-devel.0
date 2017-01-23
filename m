@@ -1,7 +1,7 @@
-From: Mustafa Muhammad <mustafa1024m@gmail.com>
+From: Orit Wasserman <owasserm@redhat.com>
 Subject: Re: Lots of radosgw-admin commands fail after upgrade
-Date: Mon, 23 Jan 2017 12:03:22 +0300
-Message-ID: <CAFehDbDc+RGPqBMJ08xN+Tub0=SazcS7K3nU0BMSyLU3jT=6AQ@mail.gmail.com>
+Date: Mon, 23 Jan 2017 12:22:09 +0200
+Message-ID: <CABo9giTE03AOQz7hEbZEkmfZVxpVjy9xNGRD015=Qj0aMbmp9A@mail.gmail.com>
 References: <CAFehDbCTSPLmh8LY03q0cfV1v2ACzF24ZShAk+OgSXYJLVjPqg@mail.gmail.com>
  <CABo9giRVAb-+2zvKWTWhRVF4fftG=szDxgrXBXNmDpH-yQrWMw@mail.gmail.com>
  <CAFehDbC6yBsbQCPVmwE+DCod-Xmbafp1MU_r1wYZ0xd_q3Dt3Q@mail.gmail.com>
@@ -18,134 +18,146 @@ References: <CAFehDbCTSPLmh8LY03q0cfV1v2ACzF24ZShAk+OgSXYJLVjPqg@mail.gmail.com>
  <CABo9giQaYsahOM4jxcueT=DU_==KRwJBfdz2wPkT9GidN58_+g@mail.gmail.com>
  <CAFehDbCfSvvPW7Sk0_4fM5nbKuATpDyd0A=uFi4Y_+ceL8Q6yg@mail.gmail.com>
  <CABo9giQ-z99UtL7YfVmqwRVSuB5gh1tCpqvCSXvjGsVQA-CDCw@mail.gmail.com>
- <CAFehDbDmX0f8LjkFKOA=fv5Tre7L8Emx-QcLyB287pV5HoczTg@mail.gmail.com> <CABo9giS3GneAtxu5zGvo2=qq07TGPRtzW_qHOfytQ_WrxRdoow@mail.gmail.com>
+ <CAFehDbDmX0f8LjkFKOA=fv5Tre7L8Emx-QcLyB287pV5HoczTg@mail.gmail.com>
+ <CABo9giS3GneAtxu5zGvo2=qq07TGPRtzW_qHOfytQ_WrxRdoow@mail.gmail.com> <CAFehDbDc+RGPqBMJ08xN+Tub0=SazcS7K3nU0BMSyLU3jT=6AQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f172.google.com ([209.85.217.172]:36450 "EHLO
-        mail-ua0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750714AbdAWJDY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 04:03:24 -0500
-Received: by mail-ua0-f172.google.com with SMTP id 96so105129128uaq.3
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2017 01:03:23 -0800 (PST)
-In-Reply-To: <CABo9giS3GneAtxu5zGvo2=qq07TGPRtzW_qHOfytQ_WrxRdoow@mail.gmail.com>
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:36306 "EHLO
+        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750703AbdAWKWM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 05:22:12 -0500
+Received: by mail-wm0-f47.google.com with SMTP id c85so124868171wmi.1
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2017 02:22:11 -0800 (PST)
+In-Reply-To: <CAFehDbDc+RGPqBMJ08xN+Tub0=SazcS7K3nU0BMSyLU3jT=6AQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Orit Wasserman <owasserm@redhat.com>
+To: Mustafa Muhammad <mustafa1024m@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Jan 23, 2017 at 11:53 AM, Orit Wasserman <owasserm@redhat.com> wrote:
-> On Mon, Jan 23, 2017 at 10:52 AM, Mustafa Muhammad
-> <mustafa1024m@gmail.com> wrote:
->> On Mon, Jan 23, 2017 at 10:45 AM, Orit Wasserman <owasserm@redhat.com> wrote:
->>> On Mon, Jan 23, 2017 at 9:40 AM, Mustafa Muhammad
->>> <mustafa1024m@gmail.com> wrote:
->>>> On Sun, Jan 22, 2017 at 4:34 PM, Orit Wasserman <owasserm@redhat.com> wrote:
->>>>> On Sun, Jan 22, 2017 at 12:00 PM, Mustafa Muhammad
->>>>> <mustafa1024m@gmail.com> wrote:
->>>>>> On Sun, Jan 22, 2017 at 12:04 PM, Orit Wasserman <owasserm@redhat.com> wrote:
->>>>>>> On Sat, Jan 21, 2017 at 10:24 AM, Mustafa Muhammad
->>>>>>> <mustafa1024m@gmail.com> wrote:
->>>>>>>> Hello again :)
+On Mon, Jan 23, 2017 at 11:03 AM, Mustafa Muhammad
+<mustafa1024m@gmail.com> wrote:
+> On Mon, Jan 23, 2017 at 11:53 AM, Orit Wasserman <owasserm@redhat.com> wrote:
+>> On Mon, Jan 23, 2017 at 10:52 AM, Mustafa Muhammad
+>> <mustafa1024m@gmail.com> wrote:
+>>> On Mon, Jan 23, 2017 at 10:45 AM, Orit Wasserman <owasserm@redhat.com> wrote:
+>>>> On Mon, Jan 23, 2017 at 9:40 AM, Mustafa Muhammad
+>>>> <mustafa1024m@gmail.com> wrote:
+>>>>> On Sun, Jan 22, 2017 at 4:34 PM, Orit Wasserman <owasserm@redhat.com> wrote:
+>>>>>> On Sun, Jan 22, 2017 at 12:00 PM, Mustafa Muhammad
+>>>>>> <mustafa1024m@gmail.com> wrote:
+>>>>>>> On Sun, Jan 22, 2017 at 12:04 PM, Orit Wasserman <owasserm@redhat.com> wrote:
+>>>>>>>> On Sat, Jan 21, 2017 at 10:24 AM, Mustafa Muhammad
+>>>>>>>> <mustafa1024m@gmail.com> wrote:
+>>>>>>>>> Hello again :)
+>>>>>>>>>
+>>>>>>>>> It still doesn't work for me using 10.2.5:
+>>>>>>>>>
+>>>>>>>>> [root@monitor3 ~]# ceph -v
+>>>>>>>>> ceph version 10.2.5 (c461ee19ecbc0c5c330aca20f7392c9a00730367)
+>>>>>>>>> [root@monitor3 ~]# radosgw-admin period update --commit
+>>>>>>>>> 2017-01-21 11:06:20.659487 7f2ca18979c0  0 zonegroup default missing
+>>>>>>>>> zone for master_zone=
+>>>>>>>>> couldn't init storage provider
+>>>>>>>>>
+>>>>>>>>> I think I am hitting:
+>>>>>>>>> http://tracker.ceph.com/issues/17364
+>>>>>>>>>
+>>>>>>>>> So I created new RPMs with this patch:
+>>>>>>>>> https://github.com/ceph/ceph/pull/12315
+>>>>>>>>>
+>>>>>>>>> But now, it crashes when I try to update the period, I've attached the
+>>>>>>>>> output and the details of my zonegroup, I also tried the just released
+>>>>>>>>> Kraken, also crashes.
+>>>>>>>>>
 >>>>>>>>
->>>>>>>> It still doesn't work for me using 10.2.5:
+>>>>>>>> I am working on a fix.
+>>>>>>>> Will you be able to try it?
 >>>>>>>>
->>>>>>>> [root@monitor3 ~]# ceph -v
->>>>>>>> ceph version 10.2.5 (c461ee19ecbc0c5c330aca20f7392c9a00730367)
->>>>>>>> [root@monitor3 ~]# radosgw-admin period update --commit
->>>>>>>> 2017-01-21 11:06:20.659487 7f2ca18979c0  0 zonegroup default missing
->>>>>>>> zone for master_zone=
->>>>>>>> couldn't init storage provider
->>>>>>>>
->>>>>>>> I think I am hitting:
->>>>>>>> http://tracker.ceph.com/issues/17364
->>>>>>>>
->>>>>>>> So I created new RPMs with this patch:
->>>>>>>> https://github.com/ceph/ceph/pull/12315
->>>>>>>>
->>>>>>>> But now, it crashes when I try to update the period, I've attached the
->>>>>>>> output and the details of my zonegroup, I also tried the just released
->>>>>>>> Kraken, also crashes.
->>>>>>>>
->>>>>>>
->>>>>>> I am working on a fix.
->>>>>>> Will you be able to try it?
->>>>>>>
+>>>>>>
+>>>>>> https://github.com/ceph/ceph/pull/13054
+>>>>>>
+>>>>>> Good luck!
 >>>>>
->>>>> https://github.com/ceph/ceph/pull/13054
+>>>>> This *kind of* worked, it doesn't crash anymore, and zonegroup now
+>>>>> have master zone, but now I don't have my placement-targets anymore
+>>>>> I used:
 >>>>>
->>>>> Good luck!
+>>>>> radosgw-admin zone set --rgw-zone=default < new-default-zone.json
+>>>>> radosgw-admin zonegroup set --rgw-zonegroup=default < new-default-zg.json
+>>>>> radosgw-admin zonegroupmap set < new-zonegroupmap.json
+>>>>>
 >>>>
->>>> This *kind of* worked, it doesn't crash anymore, and zonegroup now
->>>> have master zone, but now I don't have my placement-targets anymore
->>>> I used:
->>>>
->>>> radosgw-admin zone set --rgw-zone=default < new-default-zone.json
->>>> radosgw-admin zonegroup set --rgw-zonegroup=default < new-default-zg.json
->>>> radosgw-admin zonegroupmap set < new-zonegroupmap.json
->>>>
+>>>> You don't need this and I suspect this it is the problem.
+>>>> Can you try without this command?
 >>>
->>> You don't need this and I suspect this it is the problem.
->>> Can you try without this command?
->>
->> It worked fine, then after restarting the RGW containers, it was lost
->> again, after some retries, I found that starting the older container
->> (10.2.2 because I couldn't use anything newer before), is causing the
->> revert.
->>
->> Now I only started 10.2.5 RGWs and everything works fine.
->>
->> Thank you very much, really appreciated.
->>
->
-> :)
->
-> Can you open a tracker issue for the zonegroupmap command problem?
-> this way it will documented.
-
-Do you mean the "radosgw-admin zonegroupmap set  <
-new-zonegroupmap.json" or the whole issue? I can't verify that it was
-the cause, the older instances might be the cause, so not sure what to
-write in the issue?
-
-Regards
-Mustafa
->
->> Regards
->> Mustafa
->>
+>>> It worked fine, then after restarting the RGW containers, it was lost
+>>> again, after some retries, I found that starting the older container
+>>> (10.2.2 because I couldn't use anything newer before), is causing the
+>>> revert.
 >>>
->>>> radosgw-admin zonegroup default --rgw-zonegroup=default
->>>> radosgw-admin zone default --rgw-zone=default
->>>> radosgw-admin period update --commit
+>>> Now I only started 10.2.5 RGWs and everything works fine.
+>>>
+>>> Thank you very much, really appreciated.
+>>>
+>>
+>> :)
+>>
+>> Can you open a tracker issue for the zonegroupmap command problem?
+>> this way it will documented.
+>
+> Do you mean the "radosgw-admin zonegroupmap set  <
+> new-zonegroupmap.json" or the whole issue? I can't verify that it was
+> the cause, the older instances might be the cause, so not sure what to
+> write in the issue?
+>
+For the crash I have already opened an issue
+http://tracker.ceph.com/issues/18631.
+I meant opening an issue for the "zonegroupmap set" that made the new
+placement configuration disappear.
+Please add in the description of the issue the commands you used and
+if you can add the jsons files.
+
+Thanks,
+Orit
+> Regards
+> Mustafa
+>>
+>>> Regards
+>>> Mustafa
+>>>
 >>>>
->>>> Is there something wrong I am doing? Can I update zonegroupmap
->>>> directly (like I did) or should I only set zone and zonegroup, tried
->>>> several things, still only getting:
->>>>
->>>>                 "placement_targets": [
->>>>                     {
->>>>                         "name": "default-placement",
->>>>                         "tags": []
->>>>                     }
->>>>                 ]
->>>>
->>>>
->>>> Regards
->>>> Mustafa
->>>>
+>>>>> radosgw-admin zonegroup default --rgw-zonegroup=default
+>>>>> radosgw-admin zone default --rgw-zone=default
+>>>>> radosgw-admin period update --commit
+>>>>>
+>>>>> Is there something wrong I am doing? Can I update zonegroupmap
+>>>>> directly (like I did) or should I only set zone and zonegroup, tried
+>>>>> several things, still only getting:
+>>>>>
+>>>>>                 "placement_targets": [
+>>>>>                     {
+>>>>>                         "name": "default-placement",
+>>>>>                         "tags": []
+>>>>>                     }
+>>>>>                 ]
+>>>>>
+>>>>>
+>>>>> Regards
+>>>>> Mustafa
 >>>>>
 >>>>>>
->>>>>> Yes, of course :)
->>>>>>
->>>>>> Thank you
->>>>>>
->>>>>> Mustafa
->>>>>>
->>>>>>> Orit
->>>>>>>> What do you think, what should I do?
->>>>>>>>
->>>>>>>> Thanks a lot in advance
->>>>>>>>
->>>>>>>> Regards
->>>>>>>> Mustafa Muhammad
+>>>>>>>
+>>>>>>> Yes, of course :)
+>>>>>>>
+>>>>>>> Thank you
+>>>>>>>
+>>>>>>> Mustafa
+>>>>>>>
+>>>>>>>> Orit
+>>>>>>>>> What do you think, what should I do?
+>>>>>>>>>
+>>>>>>>>> Thanks a lot in advance
+>>>>>>>>>
+>>>>>>>>> Regards
+>>>>>>>>> Mustafa Muhammad
