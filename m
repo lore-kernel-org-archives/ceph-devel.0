@@ -1,46 +1,81 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Restricting RADOS gateway users to specific IP subnets
-Date: Mon, 23 Jan 2017 16:04:05 +0100 (CET)
-Message-ID: <992031594.7878.1485183845229@ox.pcextreme.nl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+From: ceph branch robot <nobody@ceph.com>
+Subject: ceph branch status
+Date: Mon, 23 Jan 2017 08:00:05 -0800 (PST)
+Message-ID: <20170123160005.94EAB28037B@teuthology.front.sepia.ceph.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:49851 "EHLO
-        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750713AbdAWPFW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 10:05:22 -0500
-Received: from 109.72.87.221 (ox01.pcextreme.nl [109.72.87.221])
-        by smtp02.mail.pcextreme.nl (Postfix) with ESMTPSA id 231EA3FCE1
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2017 16:04:05 +0100 (CET)
+Received: from [8.43.84.3] ([8.43.84.3]:39038 "EHLO
+        teuthology.front.sepia.ceph.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1751032AbdAWQAF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 23 Jan 2017 11:00:05 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi,
+-- All Branches --
 
-At Amazon you can set Bucket Policies [0] on a bucket where you can restrict request to be done from specific IP addresses and/or subnets.
+Ali Maredia <amaredia@redhat.com>
+	2016-12-16 13:23:09 -0500   wip-rgw-multisite-teuthology
+	2017-01-18 15:37:03 -0500   wip-nfs-ganesha-teuthology
 
-These policies are currently not supported by RGW, but that's not the use-case I'm looking for.
+Barbora Ančincová <bancinco@redhat.com>
+	2017-01-23 16:34:55 +0100   wip-fuse-client-config-edits
 
-The use-case here is that when a Access/Secret key pair is stolen one can access all data from that user. With the Access/Secret key pair you can also update the bucket policies and still access all the data.
+Dan Lambright <dlambrig@redhat.com>
+	2017-01-09 17:47:19 -0500   wip-message-factory
+	2017-01-18 18:42:56 -0500   wip-osd-ioinject
 
-I'm thinking of a way where a IP ACL can be set for a user. All requests for that user will be matched to that ACL. That way, even if you steal the keys you still can't access the data.
+GitHub <noreply@github.com>
+	2016-11-02 08:42:35 +0200   infernalis
+	2016-12-08 11:22:16 -0800   jewel-next
+	2016-12-14 11:40:17 -0600   firefly
+	2017-01-04 00:16:47 +0100   wip-ansible-suit
+	2017-01-04 00:16:47 +0100   wip-ansible-suite
+	2017-01-13 11:10:39 +0100   tags/v0.94.3
+	2017-01-13 23:40:46 +0200   wip-ansible-fs-suit
+	2017-01-13 23:40:46 +0200   wip-ansible-fs-suite
+	2017-01-20 11:14:24 -0600   kraken
+	2017-01-20 15:50:16 +0100   jewel
+	2017-01-23 12:26:27 +0100   hammer
 
-The system in this case is connected to the internet, so a firewall in between won't help since it needs to allow traffic from all places, but just specific users and their data need to be isolated.
+Loic Dachary <ldachary@redhat.com>
+	2015-03-23 17:44:12 +0100   dumpling
 
-Does it sound sane if we have such a feature for the RGW? The JSON output from user info might look like:
+Loic Dachary <loic@dachary.org>
+	2015-10-17 00:38:34 +0200   giant
 
-{
-  "user_id": "example",
-  "user_ip_acl" {
-    "allow" [
-      "192.168.0.0/24",
-      "2001:db8::/64
-    ]
-  }
-}
+Marcus Watts <mwatts@redhat.com>
+	2016-10-19 05:05:50 -0400   wip-master-rgw-0lenfix1
+	2016-11-11 01:22:10 -0500   wip-xml-string-wrap
+	2016-11-11 01:25:55 -0500   wip-json-smarter-escapes
+	2016-11-11 01:29:56 -0500   wip-buildfix-python-out-of-tree
 
-Wido
+Orit Wasserman <owasserm@redhat.com>
+	2017-01-02 12:13:26 +0200   wip-orit-resharding-hammer
 
-[0]: http://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html
+Pritha Srivastava <prsrivas@redhat.com>
+	2016-12-22 20:28:09 +0530   wip-rgw-polymorphic-errors
+	2017-01-16 11:36:24 +0530   wip-rgw-ssl-teuthology
+
+Sage Weil <sage@inktank.com>
+	2013-04-18 13:51:36 -0700   argonaut
+
+Sage Weil <sage@redhat.com>
+	2015-01-12 08:30:40 -0800   emperor
+
+Wido den Hollander <wido@42on.com>
+	2017-01-03 15:36:28 +0100   osd-mark-inactive
+
+Yehuda Sadeh <yehuda@inktank.com>
+	2014-01-28 09:38:19 -0800   bobtail
+	2014-01-28 09:40:18 -0800   cuttlefish
+
+Yehuda Sadeh <yehuda@redhat.com>
+	2016-10-03 16:51:40 -0700   dnm-dang-reshard
+
+Yuri Weinstein <yweinste@redhat.com>
+	2017-01-18 23:52:48 +0000   wip-cherry-pick-4tamil
+
+
+
+Grouped by committer, ordered by commit time stamp.
