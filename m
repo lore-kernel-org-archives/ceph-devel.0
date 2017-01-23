@@ -1,323 +1,117 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH v1 4/7] ceph: handle new osdmap epoch updates in
- CLIENT_CAPS and WRITE codepaths
-Date: Mon, 23 Jan 2017 09:38:16 +0800
-Message-ID: <610D739A-0DDD-4967-A30A-09410A8C890E@redhat.com>
-References: <20170120151738.9584-1-jlayton@redhat.com>
- <20170120151738.9584-5-jlayton@redhat.com>
- <1CA9B32B-E3EA-47A0-8803-A4CD969737B0@redhat.com>
- <1485099534.2992.1.camel@redhat.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.2 \(3259\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
+Subject: Re: BlueStore: Multi sharded kv pull request
+Date: Mon, 23 Jan 2017 10:22:12 +0800
+Message-ID: <5E6780EC-B845-4BA8-B21F-065A80B628B1@alibaba-inc.com>
+References: <5E3E05AED7F0F044904275810D0CB465055CCA@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+Mime-Version: 1.0
+Content-Type: text/plain;
+        charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52458 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750712AbdAWBiX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 22 Jan 2017 20:38:23 -0500
-In-Reply-To: <1485099534.2992.1.camel@redhat.com>
+Received: from out0-135.mail.aliyun.com ([140.205.0.135]:40807 "EHLO
+        out0-135.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750710AbdAWCWi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Jan 2017 21:22:38 -0500
+In-Reply-To: <5E3E05AED7F0F044904275810D0CB465055CCA@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, John Spray <jspray@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>
+To: Somnath Roy <Somnath.Roy@sandisk.com>, "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>, "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
 
-> On 22 Jan 2017, at 23:38, Jeff Layton <jlayton@redhat.com> wrote:
-> 
-> On Sun, 2017-01-22 at 17:40 +0800, Yan, Zheng wrote:
->>> On 20 Jan 2017, at 23:17, Jeff Layton <jlayton@redhat.com> wrote:
->>> 
->>> This patch is heavily inspired by John Spray's earlier work, but
->>> implemented in a different way.
->>> 
->>> Create and register a new map_cb for cephfs, to allow it to handle
->>> changes to the osdmap.
->>> 
->>> In the version 5 of CLIENT_CAPS messages, the barrier field is added as an
->>> instruction to clients that they may not use the attached capabilities
->>> until they have a particular OSD map epoch.
->>> 
->>> When we get a message with such a field and don't have the requisite map
->>> epoch yet, we put that message on a list in the session, to be run when
->>> the map does come in.
->>> 
->>> When we get a new map update, the map_cb routine first checks to see
->>> whether there may be an OSD or pool full condition. If so, then we walk
->>> the list of OSD calls and kill off any writes to full OSDs or pools with
->>> -ENOSPC.  While cancelling, we store the latest OSD epoch seen in each
->>> request. This will be used later in the CAPRELEASE messages.
->>> 
->>> Then, it walks the session list and queues the workqueue job for each.
->>> When the workqueue job runs, it walks the list of delayed caps and tries
->>> to rerun each one. If the epoch is still not high enough, they just get
->>> put back on the delay queue for when the map does come in.
->>> 
->>> Suggested-by: John Spray <john.spray@redhat.com>
->>> Signed-off-by: Jeff Layton <jlayton@redhat.com>
->>> ---
->>> fs/ceph/caps.c       | 43 +++++++++++++++++++++++++++---
->>> fs/ceph/debugfs.c    |  3 +++
->>> fs/ceph/mds_client.c | 75 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->>> fs/ceph/mds_client.h |  3 +++
->>> 4 files changed, 120 insertions(+), 4 deletions(-)
->>> 
->>> diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
->>> index d941c48e8bff..f33d424b5e12 100644
->>> --- a/fs/ceph/caps.c
->>> +++ b/fs/ceph/caps.c
->>> @@ -1077,7 +1077,7 @@ static int send_cap_msg(struct cap_msg_args *arg)
->>> 	/* inline data size */
->>> 	ceph_encode_32(&p, 0);
->>> 	/* osd_epoch_barrier (version 5) */
->>> -	ceph_encode_32(&p, 0);
->>> +	ceph_encode_32(&p, arg->session->s_mdsc->cap_epoch_barrier);
->>> 	/* oldest_flush_tid (version 6) */
->>> 	ceph_encode_64(&p, arg->oldest_flush_tid);
->>> 
->>> @@ -3577,9 +3577,12 @@ void ceph_handle_caps(struct ceph_mds_session *session,
->>> 	void *snaptrace;
->>> 	size_t snaptrace_len;
->>> 	void *p, *end;
->>> +	u32 epoch_barrier = 0;
->>> 
->>> 	dout("handle_caps from mds%d\n", mds);
->>> 
->>> +	WARN_ON_ONCE(!list_empty(&msg->list_head));
->>> +
->>> 	/* decode */
->>> 	end = msg->front.iov_base + msg->front.iov_len;
->>> 	tid = le64_to_cpu(msg->hdr.tid);
->>> @@ -3625,13 +3628,45 @@ void ceph_handle_caps(struct ceph_mds_session *session,
->>> 		p += inline_len;
->>> 	}
->>> 
->>> +	if (le16_to_cpu(msg->hdr.version) >= 5) {
->>> +		struct ceph_osd_client *osdc = &mdsc->fsc->client->osdc;
->>> +
->>> +		ceph_decode_32_safe(&p, end, epoch_barrier, bad);
->>> +
->>> +		/* Do lockless check first to avoid mutex if we can */
->>> +		if (epoch_barrier > mdsc->cap_epoch_barrier) {
->>> +			mutex_lock(&mdsc->mutex);
->>> +			if (epoch_barrier > mdsc->cap_epoch_barrier)
->>> +				mdsc->cap_epoch_barrier = epoch_barrier;
->>> +			mutex_unlock(&mdsc->mutex);
->>> +		}
->>> +
->>> +		down_read(&osdc->lock);
->>> +		if (osdc->osdmap->epoch < epoch_barrier) {
->>> +			dout("handle_caps delaying message until OSD epoch %d\n", epoch_barrier);
->>> +			ceph_msg_get(msg);
->>> +			spin_lock(&session->s_cap_lock);
->>> +			list_add(&msg->list_head, &session->s_delayed_caps);
->>> +			spin_unlock(&session->s_cap_lock);
->>> +
->>> +			// Kick OSD client to get the latest map
->>> +			__ceph_osdc_maybe_request_map(osdc);
->>> +
->>> +			up_read(&osdc->lock);
->>> +			return;
->>> +		}
->> 
->> Cap messages need to be handled in the same order as they were sent. I’m worry if the delay breaks something or makes cap revoke slow. Why not use the use the same approach as user space client? pass the epoch_barrier to libceph and let libceph delay sending osd requests.
->> 
->> Regards
->> Yan, Zheng
->> 
->> 
-> 
-> 
-> Can you explain why that needs to be done, and how that ordering
-> guaranteed now? AFAICT, the libceph code seems to drop con->mutex before
-> it calls ->dispatch, and I don't see anything that would prevent two cap
-> messages from reordered at that point. 
+Hi Somnath=EF=BC=8C
+   Thanks a lot for sharing.  However, it failed as always when I tried to =
+open the excel sheet after I download it into my Mac.
+=20
+   Regards,
+   James
 
-I think the ordering is guaranteed by "single dispatch thread for each connection”.
-One example is that MDS issues caps ABC to client, then issues caps AB to client
-(revokes caps C). If the two messages get processed out of order, client does not
-release cap C to MDS, which causes operation hang.
- 
-Regards
-Yan, Zheng
+=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E5=90=AB=E6=9C=89=E9=98=BF=E9=87=8C=E5=B7=B4=E5=B7=B4=E9=9B=86=E5=9B=A2=E7=9A=84=E5=95=86=E4=B8=9A=E7=A7=98=E5=AF=86=E4=BF=A1=E6=81=AF=EF=BC=8C=E4=BB=85=E9=99=90=
+=E4=BA=8E=E5=8F=91=E9=80=81=E7=BB=99=E4=B8=8A=E9=9D=A2=E5=9C=B0=E5=9D=80=E4=B8=AD=E5=88=97=E5=87=BA=E7=9A=84=E4=B8=AA=E4=BA=BA=E5=92=8C=E7=BE=A4=E7=BB=84=EF=BC=8C=E7=A6=81=E6=AD=A2=E4=BB=BB=E4=BD=95=E5=85=B6=E4=BB=96=E4=BA=BA=E4=
+=BB=A5=E4=BB=BB=E4=BD=95=E5=BD=A2=E5=BC=8F=E4=BD=BF=E7=94=A8=EF=BC=88=E5=8C=85=E6=8B=AC=E4=BD=86=E4=B8=8D=E9=99=90=E4=BA=8E=E5=85=A8=E9=83=A8=E6=88=96=E9=83=A8=E5=88=86=E5=9C=B0=E6=B3=84=E9=9C=B2=E3=80=81=E5=A4=8D=E5=88=B6=E5=92=
+=8C=E6=95=A3=E5=8F=91=EF=BC=89=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E4=B8=AD=E7=9A=84=E4=BF=A1=E6=81=AF=EF=BC=8C=E5=A6=82=E6=9E=9C=E6=82=A8=E9=94=99=E6=94=B6=E6=9C=AC=E9=82=AE=E4=BB=B6=EF=BC=8C=E8=AF=B7=
+=E6=82=A8=E7=AB=8B=E5=8D=B3=E7=94=B5=E8=AF=9D=E6=88=96=E9=82=AE=E4=BB=B6=E9=80=9A=E7=9F=A5=E5=8F=91=E4=BB=B6=E4=BA=BA=E5=B9=B6=E5=88=A0=E9=99=A4=E6=9C=AC=E9=82=AE=E4=BB=B6=E3=80=82
+This email and its attachments contain confidential information from Alibab=
+a Group.which is intended only for the person or entity whose address is lis=
+ted above.Any use of information contained herein in any way(including,but n=
+ot limited to,total or partial disclosure,reproduction or dissemination)by p=
+ersons other than the intended recipient(s) is prohibited.If you receive thi=
+s email in error,please notify the sender by phone or email immediately and =
+delete it.
 
-> 
-> That said, plumbing an epoch barrier into libceph does sound better.
-> I'll have a look at that approach this week.
-> 
-> Thanks,
-> Jeff
-> 
->>> +
->>> +		dout("handle_caps barrier %d already satisfied (%d)\n", epoch_barrier, osdc->osdmap->epoch);
->>> +		up_read(&osdc->lock);
->>> +	}
->>> +
->>> +	dout("handle_caps v=%d barrier=%d\n", le16_to_cpu(msg->hdr.version), epoch_barrier);
->>> +
->>> 	if (le16_to_cpu(msg->hdr.version) >= 8) {
->>> 		u64 flush_tid;
->>> 		u32 caller_uid, caller_gid;
->>> -		u32 osd_epoch_barrier;
->>> 		u32 pool_ns_len;
->>> -		/* version >= 5 */
->>> -		ceph_decode_32_safe(&p, end, osd_epoch_barrier, bad);
->>> +
->>> 		/* version >= 6 */
->>> 		ceph_decode_64_safe(&p, end, flush_tid, bad);
->>> 		/* version >= 7 */
->>> diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
->>> index 39ff678e567f..825df757fba5 100644
->>> --- a/fs/ceph/debugfs.c
->>> +++ b/fs/ceph/debugfs.c
->>> @@ -172,6 +172,9 @@ static int mds_sessions_show(struct seq_file *s, void *ptr)
->>> 	/* The -o name mount argument */
->>> 	seq_printf(s, "name \"%s\"\n", opt->name ? opt->name : "");
->>> 
->>> +	/* The latest OSD epoch barrier known to this client */
->>> +	seq_printf(s, "osd_epoch_barrier \"%d\"\n", mdsc->cap_epoch_barrier);
->>> +
->>> 	/* The list of MDS session rank+state */
->>> 	for (mds = 0; mds < mdsc->max_sessions; mds++) {
->>> 		struct ceph_mds_session *session =
->>> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
->>> index 176512960b14..7055b499c08b 100644
->>> --- a/fs/ceph/mds_client.c
->>> +++ b/fs/ceph/mds_client.c
->>> @@ -393,6 +393,7 @@ void ceph_put_mds_session(struct ceph_mds_session *s)
->>> 	dout("mdsc put_session %p %d -> %d\n", s,
->>> 	     atomic_read(&s->s_ref), atomic_read(&s->s_ref)-1);
->>> 	if (atomic_dec_and_test(&s->s_ref)) {
->>> +		WARN_ON_ONCE(cancel_work_sync(&s->s_delayed_caps_work));
->>> 		if (s->s_auth.authorizer)
->>> 			ceph_auth_destroy_authorizer(s->s_auth.authorizer);
->>> 		kfree(s);
->>> @@ -432,6 +433,74 @@ static int __verify_registered_session(struct ceph_mds_client *mdsc,
->>> 	return 0;
->>> }
->>> 
->>> +static void handle_osd_map(struct ceph_osd_client *osdc, void *p)
->>> +{
->>> +	struct ceph_mds_client *mdsc = (struct ceph_mds_client*)p;
->>> +	u32 cancelled_epoch = 0;
->>> +	int mds_id;
->>> +
->>> +	lockdep_assert_held(&osdc->lock);
->>> +
->>> +	if ((osdc->osdmap->flags & CEPH_OSDMAP_FULL) ||
->>> +	    ceph_osdc_have_pool_full(osdc))
->>> +		cancelled_epoch = ceph_osdc_complete_writes(osdc, -ENOSPC);
->>> +
->>> +	dout("handle_osd_map: epoch=%d\n", osdc->osdmap->epoch);
->>> +
->>> +	mutex_lock(&mdsc->mutex);
->>> +	if (cancelled_epoch)
->>> +		mdsc->cap_epoch_barrier = max(cancelled_epoch + 1,
->>> +					      mdsc->cap_epoch_barrier);
->>> +
->>> +	/* Schedule the workqueue job for any sessions */
->>> +	for (mds_id = 0; mds_id < mdsc->max_sessions; ++mds_id) {
->>> +		struct ceph_mds_session *session = mdsc->sessions[mds_id];
->>> +		bool empty;
->>> +
->>> +		if (session == NULL)
->>> +			continue;
->>> +
->>> +		/* Any delayed messages? */
->>> +		spin_lock(&session->s_cap_lock);
->>> +		empty = list_empty(&session->s_delayed_caps);
->>> +		spin_unlock(&session->s_cap_lock);
->>> +		if (empty)
->>> +			continue;
->>> +
->>> +		/* take a reference -- if we can't get one, move on */
->>> +		if (!get_session(session))
->>> +			continue;
->>> +
->>> +		/*
->>> +		 * Try to schedule work. If it's already queued, then just
->>> +		 * drop the session reference.
->>> +		 */
->>> +		if (!schedule_work(&session->s_delayed_caps_work))
->>> +			ceph_put_mds_session(session);
->>> +	}
->>> +	mutex_unlock(&mdsc->mutex);
->>> +}
->>> +
->>> +static void
->>> +run_delayed_caps(struct work_struct *work)
->>> +{
->>> +	struct ceph_mds_session *session = container_of(work,
->>> +			struct ceph_mds_session, s_delayed_caps_work);
->>> +	LIST_HEAD(delayed);
->>> +
->>> +	spin_lock(&session->s_cap_lock);
->>> +	list_splice_init(&session->s_delayed_caps, &delayed);
->>> +	spin_unlock(&session->s_cap_lock);
->>> +
->>> +	while (!list_empty(&delayed)) {
->>> +		struct ceph_msg *msg = list_first_entry(&delayed,
->>> +						struct ceph_msg, list_head);
->>> +		list_del_init(&msg->list_head);
->>> +		ceph_handle_caps(session, msg);
->>> +		ceph_msg_put(msg);
->>> +	}
->>> +}
->>> +
->>> /*
->>> * create+register a new session for given mds.
->>> * called under mdsc->mutex.
->>> @@ -469,11 +538,13 @@ static struct ceph_mds_session *register_session(struct ceph_mds_client *mdsc,
->>> 	atomic_set(&s->s_ref, 1);
->>> 	INIT_LIST_HEAD(&s->s_waiting);
->>> 	INIT_LIST_HEAD(&s->s_unsafe);
->>> +	INIT_LIST_HEAD(&s->s_delayed_caps);
->>> 	s->s_num_cap_releases = 0;
->>> 	s->s_cap_reconnect = 0;
->>> 	s->s_cap_iterator = NULL;
->>> 	INIT_LIST_HEAD(&s->s_cap_releases);
->>> 	INIT_LIST_HEAD(&s->s_cap_flushing);
->>> +	INIT_WORK(&s->s_delayed_caps_work, run_delayed_caps);
->>> 
->>> 	dout("register_session mds%d\n", mds);
->>> 	if (mds >= mdsc->max_sessions) {
->>> @@ -3480,6 +3551,10 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
->>> 
->>> 	ceph_caps_init(mdsc);
->>> 	ceph_adjust_min_caps(mdsc, fsc->min_caps);
->>> +	mdsc->cap_epoch_barrier = 0;
->>> +
->>> +	ceph_osdc_register_map_cb(&fsc->client->osdc,
->>> +				  handle_osd_map, (void*)mdsc);
->>> 
->>> 	init_rwsem(&mdsc->pool_perm_rwsem);
->>> 	mdsc->pool_perm_tree = RB_ROOT;
->>> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
->>> index 3c6f77b7bb02..eb8144ab4995 100644
->>> --- a/fs/ceph/mds_client.h
->>> +++ b/fs/ceph/mds_client.h
->>> @@ -159,6 +159,8 @@ struct ceph_mds_session {
->>> 	atomic_t          s_ref;
->>> 	struct list_head  s_waiting;  /* waiting requests */
->>> 	struct list_head  s_unsafe;   /* unsafe requests */
->>> +	struct list_head	s_delayed_caps;
->>> +	struct work_struct	s_delayed_caps_work;
->>> };
->>> 
->>> /*
->>> @@ -331,6 +333,7 @@ struct ceph_mds_client {
->>> 	int               num_cap_flushing; /* # caps we are flushing */
->>> 	spinlock_t        cap_dirty_lock;   /* protects above items */
->>> 	wait_queue_head_t cap_flushing_wq;
->>> +	u32               cap_epoch_barrier;
->>> 
->>> 	/*
->>> 	 * Cap reservations
->>> -- 
->>> 2.9.3
->>> 
->> 
->> 
-> 
-> -- 
-> Jeff Layton <jlayton@redhat.com>
+On 1/21/17, 7:32 AM, "Somnath Roy" <ceph-devel-owner@vger.kernel.org on beh=
+alf of Somnath.Roy@sandisk.com> wrote:
+
+    Hi Mark/Sage,
+    Please find the different comparison data in the following document.
+   =20
+    https://drive.google.com/file/d/0B7W-S0z_ymMJUXVmOUhINU01c3c/view?usp=3Ds=
+haring
+   =20
+    Please download the doc (and open in xls) as google is not able to show=
+ the graphs properly.
+   =20
+    Setup:
+    ------
+    Single osd on 700G nvme drive and single osd on 2 700G nvme drive (LVM =
+ed)
+    48 core server, 40G link
+    Test is only for 4K RW from fio.
+   =20
+    1. The first sheet is showing iops and cpu utilization for Bluestor + r=
+ocks , Bluestore + Zs and filestore.
+    This is with small shards and with the hack we are using for preconditi=
+oning.
+    Bluestore + rocks with 16K min_alloc and ZS with 4k min_alloc
+   =20
+    WE can see Bluestore with rocks and ZS is behaving almost similarly for=
+ a 600G image and it is ~2X higher than filestore. ZS cpu utilization and WA=
+ (data not there in xls) is higher than rocks.
+   =20
+    2. Next, I created 3 LVM volumes (data/db/wal) out of 2 NVMe drives and=
+ created an image of 1TB. See in the next sheet how bluestore + rocks perfor=
+mance came down. Didn't have time for the filestore data but expectation is =
+it will remain similar to previous sheet. Now, ZS is running with 16k min_al=
+loc size here with the prototype shim implementation I was talking about in =
+the standup.
+    This is with this implementation is not fully crash safe but expectatio=
+n is when we will be done with implementing this write ahead log implementat=
+ion in ZS it should produce similar throughput.
+    This is giving ~90% benefir over rocks and ZS with 4k min_alloc (like p=
+revious sheet) is giving ~50% benefit (not plotted here). Cpu util is simila=
+r to rocks.
+   =20
+   =20
+    3. This sheet is to demonstrate the benefit of single kv sync vs multi =
+kv sync with rocks. With ZS we *need* multi kv but with rocks as you can see=
+ we are gaining (~20%) only during the peak performance.
+    Later db is getting in the way. I think peak performance is limited to =
+day by osd upstream , if in future we can optimize that and allow more traff=
+ic to come in the Bluestore (objectstore) , the benefit of multiple sharded =
+kv sync will be more. Here is the pull request for this..
+   =20
+    https://github.com/ceph/ceph/pull/13037
+   =20
+    Thanks & Regards
+    Somnath
+   =20
+    ________________________________
+   =20
+    PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above. If =
+the reader of this message is not the intended recipient, you are hereby not=
+ified that you have received this message in error and that any review, diss=
+emination, distribution, or copying of this message is strictly prohibited. =
+If you have received this communication in error, please notify the sender b=
+y telephone or e-mail (as shown above) immediately and destroy any and all c=
+opies of this message in your possession (whether hard copies or electronica=
+lly stored copies).
+   =20
+    --
+    To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+    the body of a message to majordomo@vger.kernel.org
+    More majordomo info at  http://vger.kernel.org/majordomo-info.html
+   =20
+
 
