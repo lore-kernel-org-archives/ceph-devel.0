@@ -1,28 +1,28 @@
 From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
 Subject: Re: BlueStore: Multi sharded kv pull request
-Date: Mon, 23 Jan 2017 10:22:12 +0800
-Message-ID: <5E6780EC-B845-4BA8-B21F-065A80B628B1@alibaba-inc.com>
+Date: Mon, 23 Jan 2017 11:04:11 +0800
+Message-ID: <B9070C20-620C-4CDA-8B00-5B563F150693@alibaba-inc.com>
 References: <5E3E05AED7F0F044904275810D0CB465055CCA@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
         charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from out0-135.mail.aliyun.com ([140.205.0.135]:40807 "EHLO
-        out0-135.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750710AbdAWCWi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Jan 2017 21:22:38 -0500
+Received: from out0-147.mail.aliyun.com ([140.205.0.147]:36215 "EHLO
+        out0-147.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750708AbdAWDEb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Jan 2017 22:04:31 -0500
 In-Reply-To: <5E3E05AED7F0F044904275810D0CB465055CCA@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Somnath Roy <Somnath.Roy@sandisk.com>, "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>, "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+Hi Somnath,
+   Thanks for sharing data.  We can see iops drops a lot from 40000 to ~150=
+00 as time going by . Any particular reason for ZetaScale to drop that much =
+in the time period?
 
-Hi Somnath=EF=BC=8C
-   Thanks a lot for sharing.  However, it failed as always when I tried to =
-open the excel sheet after I download it into my Mac.
-=20
    Regards,
    James
 
