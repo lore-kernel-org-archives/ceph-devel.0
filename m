@@ -1,95 +1,46 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: crush devices class types
-Date: Mon, 23 Jan 2017 15:41:31 +0100
-Message-ID: <372c7fcb-8697-28ea-0d7c-1efc29fc21cf@dachary.org>
-References: <e5fad669-da68-1287-7025-9c5e48d67601@dachary.org>
- <1971303930.7861.1485178720341@ox.pcextreme.nl>
- <alpine.DEB.2.11.1701231428190.3654@piezo.novalocal>
+From: Wido den Hollander <wido@42on.com>
+Subject: Restricting RADOS gateway users to specific IP subnets
+Date: Mon, 23 Jan 2017 16:04:05 +0100 (CET)
+Message-ID: <992031594.7878.1485183845229@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay6-d.mail.gandi.net ([217.70.183.198]:43272 "EHLO
-        relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751098AbdAWOlg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 09:41:36 -0500
-In-Reply-To: <alpine.DEB.2.11.1701231428190.3654@piezo.novalocal>
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:49851 "EHLO
+        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750713AbdAWPFW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 10:05:22 -0500
+Received: from 109.72.87.221 (ox01.pcextreme.nl [109.72.87.221])
+        by smtp02.mail.pcextreme.nl (Postfix) with ESMTPSA id 231EA3FCE1
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2017 16:04:05 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Wido,
+Hi,
 
-Updated http://pad.ceph.com/p/crush-types with your proposal for the rule syntax
+At Amazon you can set Bucket Policies [0] on a bucket where you can restrict request to be done from specific IP addresses and/or subnets.
 
-Cheers
+These policies are currently not supported by RGW, but that's not the use-case I'm looking for.
 
-On 01/23/2017 03:29 PM, Sage Weil wrote:
-> On Mon, 23 Jan 2017, Wido den Hollander wrote:
->>> Op 22 januari 2017 om 17:44 schreef Loic Dachary <loic@dachary.org>:
->>>
->>>
->>> Hi Sage,
->>>
->>> You proposed an improvement to the crush map to address different device types (SSD, HDD, etc.)[1]. When learning how to create a crush map, I was indeed confused by the tricks required to create SSD only pools. After years of practice it feels more natural :-)
->>>
->>> The source of my confusion was mostly because I had to use a hierarchical description to describe something that is not organized hierarchically. "The rack contains hosts that contain devices" is intuitive. "The rack contains hosts that contain ssd that contain devices" is counter intuitive. Changing:
->>>
->>>     # devices
->>>     device 0 osd.0
->>>     device 1 osd.1
->>>     device 2 osd.2
->>>     device 3 osd.3
->>>
->>> into:
->>>
->>>     # devices
->>>     device 0 osd.0 ssd
->>>     device 1 osd.1 ssd
->>>     device 2 osd.2 hdd
->>>     device 3 osd.3 hdd
->>>
->>> where ssd/hdd is the device class would be much better. However, using the device class like so:
->>>
->>>     rule ssd {
->>>             ruleset 1
->>>             type replicated
->>>             min_size 1
->>>             max_size 10
->>>             step take default:ssd
->>>             step chooseleaf firstn 0 type host
->>>             step emit
->>>     }
->>>
->>> looks arcane. Since the goal is to simplify the description for the first time user, maybe we could have something like:
->>>
->>>     rule ssd {
->>>             ruleset 1
->>>             type replicated
->>>             min_size 1
->>>             max_size 10
->>>             device class = ssd
->>
->> Would that be sane?
->>
->> Why not:
->>
->> step set-class ssd
->> step take default
->> step chooseleaf firstn 0 type host
->> step emit
->>
->> Since it's a 'step' you take, am I right?
-> 
-> Good idea... a step is a cleaner way to extend the syntax!
-> 
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+The use-case here is that when a Access/Secret key pair is stolen one can access all data from that user. With the Access/Secret key pair you can also update the bucket policies and still access all the data.
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+I'm thinking of a way where a IP ACL can be set for a user. All requests for that user will be matched to that ACL. That way, even if you steal the keys you still can't access the data.
+
+The system in this case is connected to the internet, so a firewall in between won't help since it needs to allow traffic from all places, but just specific users and their data need to be isolated.
+
+Does it sound sane if we have such a feature for the RGW? The JSON output from user info might look like:
+
+{
+  "user_id": "example",
+  "user_ip_acl" {
+    "allow" [
+      "192.168.0.0/24",
+      "2001:db8::/64
+    ]
+  }
+}
+
+Wido
+
+[0]: http://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html
