@@ -1,94 +1,40 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: crush devices class types
-Date: Mon, 23 Jan 2017 14:38:40 +0100 (CET)
-Message-ID: <1971303930.7861.1485178720341@ox.pcextreme.nl>
-References: <e5fad669-da68-1287-7025-9c5e48d67601@dachary.org>
+From: Joyes Dadi <"YD."@biscuit.ocn.ne.jp>
+Subject: Urgent Please,,
+Date: Mon, 23 Jan 2017 22:48:05 +0900 (JST)
+Message-ID: <1381581884.25781930.1485179285865.JavaMail.root@biscuit.ocn.ne.jp>
+Reply-To: Joyes Dadi <joyesdadi767@citromail.hu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-2022-JP
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:46553 "EHLO
-        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750723AbdAWNja (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 08:39:30 -0500
-In-Reply-To: <e5fad669-da68-1287-7025-9c5e48d67601@dachary.org>
+Received: from mbkd0324.ocn.ad.jp ([153.149.236.25]:38322 "EHLO
+        mbkd0324.ocn.ad.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750703AbdAWNyX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 08:54:23 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
+Good Day Dear,
 
-> Op 22 januari 2017 om 17:44 schreef Loic Dachary <loic@dachary.org>:
-> 
-> 
-> Hi Sage,
-> 
-> You proposed an improvement to the crush map to address different device types (SSD, HDD, etc.)[1]. When learning how to create a crush map, I was indeed confused by the tricks required to create SSD only pools. After years of practice it feels more natural :-)
-> 
-> The source of my confusion was mostly because I had to use a hierarchical description to describe something that is not organized hierarchically. "The rack contains hosts that contain devices" is intuitive. "The rack contains hosts that contain ssd that contain devices" is counter intuitive. Changing:
-> 
->     # devices
->     device 0 osd.0
->     device 1 osd.1
->     device 2 osd.2
->     device 3 osd.3
-> 
-> into:
-> 
->     # devices
->     device 0 osd.0 ssd
->     device 1 osd.1 ssd
->     device 2 osd.2 hdd
->     device 3 osd.3 hdd
-> 
-> where ssd/hdd is the device class would be much better. However, using the device class like so:
-> 
->     rule ssd {
->             ruleset 1
->             type replicated
->             min_size 1
->             max_size 10
->             step take default:ssd
->             step chooseleaf firstn 0 type host
->             step emit
->     }
-> 
-> looks arcane. Since the goal is to simplify the description for the first time user, maybe we could have something like:
-> 
->     rule ssd {
->             ruleset 1
->             type replicated
->             min_size 1
->             max_size 10
->             device class = ssd
+My name is Ms. Joyes Dadi, I am glad you are reading this letter and I hope
+we will start our communication and I know that this message will look strange,
+surprising and probably unbelievable to you, but it is the reality. I want to
+make a donation of money to you.
 
-Would that be sane?
+I contact you by the will of God. I am a firm German woman specialized in
+mining gold and diamonds in Africa. But now, I'm very sick of a cancer. My
+husband died in an accident two years ago with our two children and now I have
+cancer of the esophagus that damaged almost all the cells in my system/agencies
+and I'll die soon according to my doctor.
 
-Why not:
+My most concern now is, we grew up in the orphanage and were married in
+orphanage. If I die this deposited fund will soon be left alone in the hand of
+the bank, and I do want to it that  way. Please, if you can be reliable and
+sincere to accept my humble proposal; I have (10.5Millions Euro) in a fixed
+deposit account; I will order the Bank to transfer the money into your account
+in your country immediately, and then you will take the fund to  your country
+and invest it to the orphanage homes Please, answer as quickly as possible.
 
-step set-class ssd
-step take default
-step chooseleaf firstn 0 type host
-step emit
-
-Since it's a 'step' you take, am I right?
-
-Wido
-
->             step take default
->             step chooseleaf firstn 0 type host
->             step emit
->     }
-> 
-> What do you think ?
-> 
-> Cheers
-> 
-> [1] http://pad.ceph.com/p/crush-types http://tracker.ceph.com/projects/ceph/wiki/CDM_01-FEB-2017
-> 
-> -- 
-> Loïc Dachary, Artisan Logiciel Libre
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+God bless you.
+Ms. Joyes Dadi
+Email: joyesdadi767@citromail.hu
