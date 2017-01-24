@@ -1,45 +1,66 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: face to face meetings before vault?
-Date: Mon, 23 Jan 2017 22:38:11 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1701232231040.3654@piezo.novalocal>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Get IO request execution profile
+Date: Mon, 23 Jan 2017 16:12:16 -0800
+Message-ID: <CAJ4mKGayyuOP7FAhyoJvTR8CHBWvicfQabHfKeFW-FWfQ9F-6g@mail.gmail.com>
+References: <CACxKWaxt5+9BiQEM-fG=iHkwHJsPYK9EukNoyPtPNQunq65adw@mail.gmail.com>
+ <CALe9h7ePYu5_JYTU9NppGhsvUr5FQJJMTw5kcj1yb2kyF+MXHQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:39710 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751183AbdAWWiM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 23 Jan 2017 17:38:12 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 687898046F
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2017 22:38:13 +0000 (UTC)
-Received: from ovpn-112-25.rdu2.redhat.com (ovpn-112-25.rdu2.redhat.com [10.10.112.25])
-        by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id v0NMcCfd006195
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2017 17:38:13 -0500
+Received: from mail-it0-f49.google.com ([209.85.214.49]:33085 "EHLO
+        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750860AbdAXAMS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Jan 2017 19:12:18 -0500
+Received: by mail-it0-f49.google.com with SMTP id d9so27104528itc.0
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Jan 2017 16:12:18 -0800 (PST)
+In-Reply-To: <CALe9h7ePYu5_JYTU9NppGhsvUr5FQJJMTw5kcj1yb2kyF+MXHQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: John Spray <jspray@redhat.com>
+Cc: Konstantin Danilov <kdanilov@mirantis.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi all,
+On Mon, Jan 23, 2017 at 4:54 AM, John Spray <jspray@redhat.com> wrote:
+> On Mon, Jan 23, 2017 at 12:36 PM, Konstantin Danilov
+> <kdanilov@mirantis.com> wrote:
+>> Hi all,
+>>
+>> is there a way to get something like 'dump historic ops' for particular request?
+>> Probably from client side. Ideally I'd like to send a normal IO
+>> request with special
+>> flag and get execution profile in response metadata.
+>> If it's not possible right now - is this an interesting feature to
+>> implement, or I miss
+>> something and it's useless?
+>
+> Potentially interesting idea, although it's not obvious to me why it's
+> useful to have this dumped on the client rather than the server?
+> Would be it equally useful to be able to tag a specific client on the
+> server side to have its requests dumped like this?
 
-Many of the core developers will be at Vault, which is Boston in March:
+We don't have very good client-side op tracking yet (at least, not the
+same way we have the OpTracker server-side), but if we did that would
+let us identify from a client if server issues were making it very
+slow. Could be quite useful!
+-Greg
 
-	http://events.linuxfoundation.org/events/vault/program/schedule
-
-The Tues and/or Monday before look like a good opportunity for us to get 
-together in person to discuss the Ceph roadmap for the next year or two.  
-Who else will be attending and interested in joining?  The only real 
-requirement here is that you be an active contributor: we're looking for 
-participants, not spectators, to maximize the value of the discussion.
-
-If you're also attending Vault and would be interested in joining, please 
-sign up at
-
-	http://pad.ceph.com/p/vault17-meetings
-
-or reply to this thread with any comments etc.
-
-Thanks!
-sage
+>
+> John
+>
+>>
+>> Thanks
+>>
+>> --
+>> Kostiantyn Danilov aka koder.ua
+>> Principal software engineer, Mirantis
+>>
+>> skype:koder.ua
+>> http://koder-ua.blogspot.com/
+>> http://mirantis.com
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
