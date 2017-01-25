@@ -1,74 +1,46 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: osd_heartbeat_grace read by MON and OSD?
-Date: Wed, 25 Jan 2017 13:13:52 +0100 (CET)
-Message-ID: <506114243.8156.1485346432725@ox.pcextreme.nl>
-References: <1359383871.8147.1485341465123@ox.pcextreme.nl>
- <CALe9h7cFVCgoS-u62Y3DysdqA+Gg3tW8LmnX91TZ7S5T6XvA4A@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: =?ISO-8859-15?Q?Re=3A_When_shall=A0EC_overwrites=A0be_production-ready=3F?=
+Date: Wed, 25 Jan 2017 12:45:28 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1701251243150.3654@piezo.novalocal>
+References: <201701251515209373144@zte.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-584475254-1485348330=:3654"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:53303 "EHLO
-        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751387AbdAYMOA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jan 2017 07:14:00 -0500
-In-Reply-To: <CALe9h7cFVCgoS-u62Y3DysdqA+Gg3tW8LmnX91TZ7S5T6XvA4A@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:56720 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751386AbdAYMpb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 25 Jan 2017 07:45:31 -0500
+In-Reply-To: <201701251515209373144@zte.com.cn>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: xie.xingguo@zte.com.cn
+Cc: sjust@redhat.com, ceph-devel@vger.kernel.org
 
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-> Op 25 januari 2017 om 12:37 schreef John Spray <jspray@redhat.com>:
+--8323329-584475254-1485348330=:3654
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+
+Hi Xie,
+
+On Wed, 25 Jan 2017, xie.xingguo@zte.com.cn wrote:
 > 
+> Hi sage and sam:
 > 
-> On Wed, Jan 25, 2017 at 10:51 AM, Wido den Hollander <wido@42on.com> wrote:
-> > Hi,
-> >
-> > Looking at the code I see that the MON (mon/OSDMonitor.cc) and OSD (osd/OSD.cc) use the configuration setting osd_heartbeat_grace.
-> >
-> > The name *osd* suggest that it's only read by the OSDs, but according to the source it doesn't seem to be the case.
-> >
-> > bool OSDMonitor::check_failure(utime_t now, int target_osd, failure_info_t& fi)
-> > {
-> >   ...
-> >   utime_t orig_grace(g_conf->osd_heartbeat_grace, 0);
-> >   ...
-> > }
-> >
-> > bool OSDMonitor::prepare_failure(MonOpRequestRef op)
-> > {
-> >   ...
-> >   utime_t failed_since =
-> >     m->get_recv_stamp() -
-> >     utime_t(m->failed_for ? m->failed_for : g_conf->osd_heartbeat_grace, 0);
-> >   ...
-> > }
-> >
-> > Before I submit a PR to update the docs, am I reading the code correctly?
-> 
-> Yes -- we have a similar situation with mds_beacon_grace which is used
-> from both sides of the mon-mds code.  For now we have to live with the
-> fragility of needing these settings to be set uniformly across the
-> cluster to avoid issues (and in the long run we should be storing
-> config centrally).
-> 
+>              As the title says, I am interested to know  when EC overwrites
+> shall become production ready.
 
-Thank you for the quick answer!
+Luminous.  There were a few remaining issues with the kraken code that 
+we're working through now (checksumming and scrub), but we realized 
+last night that those should be pretty quick to resolve.
 
-Submitted a PR for this: https://github.com/ceph/ceph/pull/13098
+The big question is whether we tackle partial stripe updates for luminous.  
+That will make small updates more efficient, but will require some 
+significant work, and there are several other rados items with higher 
+priority.
 
-Wido
+sage
 
-> John
-> 
-> >
-> > Wido
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--8323329-584475254-1485348330=:3654--
