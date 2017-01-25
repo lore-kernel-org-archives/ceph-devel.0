@@ -1,140 +1,52 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v3 2/2] ceph: switch DIO code to use iov_iter_get_pages_alloc
-Date: Wed, 25 Jan 2017 08:32:05 -0500
-Message-ID: <20170125133205.21704-3-jlayton@redhat.com>
-References: <20170124212327.14517-1-jlayton@redhat.com>
- <20170125133205.21704-1-jlayton@redhat.com>
+From: Padmanabh Ratnakar <padmanabh.ratnakar@snapdeal.com>
+Subject: Re: Assert in Pipe.cc in Hammer 0.94.7
+Date: Wed, 25 Jan 2017 21:42:32 +0530
+Message-ID: <CAC+4SSj5aQJWUrxz-v=JSWzm4CqPu=kgUej2_Bs3zoqyJy0dZQ@mail.gmail.com>
+References: <CAC+4SSg2EM_7sWvOrkUNCzZ9_tf5ew2MKqw30Db1c-LFEbNrLg@mail.gmail.com>
+ <CAJ4mKGYrJL1JXwRDRQHg_iJPqsQN_ppRzLAVs0rt9PyLSRnnHw@mail.gmail.com>
+ <CAC+4SSicN8GK+09Wf=fDyOeGSfeTjO35=ZnUP987YC3W=aW7Jw@mail.gmail.com> <CAJ4mKGY-vCXobE51rU_-VAbgvKhCKpX1bSNzXeuJD3TKwE5KNw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54582 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751585AbdAYNcI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 25 Jan 2017 08:32:08 -0500
-In-Reply-To: <20170125133205.21704-1-jlayton@redhat.com>
+Received: from mail-yb0-f178.google.com ([209.85.213.178]:36003 "EHLO
+        mail-yb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751020AbdAYQMd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jan 2017 11:12:33 -0500
+Received: by mail-yb0-f178.google.com with SMTP id 123so14019677ybe.3
+        for <ceph-devel@vger.kernel.org>; Wed, 25 Jan 2017 08:12:33 -0800 (PST)
+In-Reply-To: <CAJ4mKGY-vCXobE51rU_-VAbgvKhCKpX1bSNzXeuJD3TKwE5KNw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: viro@zeniv.linux.org.uk
-Cc: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org, lustre-devel@lists.lustre.org, v9fs-developer@lists.sourceforge.net
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-xfstest generic/095 triggers soft lockups in kcephfs. It uses fio to
-drive some I/O via vmsplice ane splice. Ceph then ends up trying to
-access an ITER_BVEC type iov_iter as a ITER_IOVEC one. That causes it to
-pick up a wrong offset and get stuck in an infinite loop while trying to
-populate the page array. dio_get_pagev_size has a similar problem.
+>>     if (reply.tag == CEPH_MSGR_TAG_WAIT) {
+>>       ldout(msgr->cct,3) << "connect got WAIT (connection race)" << dendl;
+>>       state = STATE_WAIT;
+>>       goto stop_locked;
+>>     }
+>
+> You're skipping over the part where, immediately after taking the
+> pipe_lock back, we check for this case (and similar ones):
+>
+>>    pipe_lock.Lock();
+>>    if (state != STATE_CONNECTING) {
+>>      ldout(msgr->cct,0) << "connect got RESETSESSION but no longer connecting" << dendl;
+>>      goto stop_locked;
+>>    }
+>
+> https://github.com/ceph/ceph/blob/v0.94.1.7/src/msg/simple/Pipe.cc#L1078
+>
+> :)
+>
+> Obviously there's an issue somewhere or you wouldn't have hit an
+> assert, but I'm not sure where and I'm pretty sure if you ever see it
+> again, it's something fixed in later source revisions (...which we may
+> not have backported once hammer reached EoL).
+> -Greg
 
-Now that iov_iter_get_pages_alloc doesn't stop after the first vector in
-the array, we can just call it instead and dump the old code that tried
-to do the same thing.
+Sorry my bad. I missed this somehow. :)
+Thanks for clearing my doubt.
 
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
----
- fs/ceph/file.c | 75 +++-------------------------------------------------------
- 1 file changed, 3 insertions(+), 72 deletions(-)
-
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 045d30d26624..0ce79f1eabbc 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -35,75 +35,6 @@
-  */
- 
- /*
-- * Calculate the length sum of direct io vectors that can
-- * be combined into one page vector.
-- */
--static size_t dio_get_pagev_size(const struct iov_iter *it)
--{
--    const struct iovec *iov = it->iov;
--    const struct iovec *iovend = iov + it->nr_segs;
--    size_t size;
--
--    size = iov->iov_len - it->iov_offset;
--    /*
--     * An iov can be page vectored when both the current tail
--     * and the next base are page aligned.
--     */
--    while (PAGE_ALIGNED((iov->iov_base + iov->iov_len)) &&
--           (++iov < iovend && PAGE_ALIGNED((iov->iov_base)))) {
--        size += iov->iov_len;
--    }
--    dout("dio_get_pagevlen len = %zu\n", size);
--    return size;
--}
--
--/*
-- * Allocate a page vector based on (@it, @nbytes).
-- * The return value is the tuple describing a page vector,
-- * that is (@pages, @page_align, @num_pages).
-- */
--static struct page **
--dio_get_pages_alloc(const struct iov_iter *it, size_t nbytes,
--		    size_t *page_align, int *num_pages)
--{
--	struct iov_iter tmp_it = *it;
--	size_t align;
--	struct page **pages;
--	int ret = 0, idx, npages;
--
--	align = (unsigned long)(it->iov->iov_base + it->iov_offset) &
--		(PAGE_SIZE - 1);
--	npages = calc_pages_for(align, nbytes);
--	pages = kmalloc(sizeof(*pages) * npages, GFP_KERNEL);
--	if (!pages) {
--		pages = vmalloc(sizeof(*pages) * npages);
--		if (!pages)
--			return ERR_PTR(-ENOMEM);
--	}
--
--	for (idx = 0; idx < npages; ) {
--		size_t start;
--		ret = iov_iter_get_pages(&tmp_it, pages + idx, nbytes,
--					 npages - idx, &start);
--		if (ret < 0)
--			goto fail;
--
--		iov_iter_advance(&tmp_it, ret);
--		nbytes -= ret;
--		idx += (ret + start + PAGE_SIZE - 1) / PAGE_SIZE;
--	}
--
--	BUG_ON(nbytes != 0);
--	*num_pages = npages;
--	*page_align = align;
--	dout("dio_get_pages_alloc: got %d pages align %zu\n", npages, align);
--	return pages;
--fail:
--	ceph_put_page_vector(pages, idx, false);
--	return ERR_PTR(ret);
--}
--
--/*
-  * Prepare an open request.  Preallocate ceph_cap to avoid an
-  * inopportune ENOMEM later.
-  */
-@@ -923,7 +854,7 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
- 	}
- 
- 	while (iov_iter_count(iter) > 0) {
--		u64 size = dio_get_pagev_size(iter);
-+		u64 size = iov_iter_count(iter);
- 		size_t start = 0;
- 		ssize_t len;
- 
-@@ -943,13 +874,13 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
- 			break;
- 		}
- 
--		len = size;
--		pages = dio_get_pages_alloc(iter, len, &start, &num_pages);
-+		len = iov_iter_get_pages_alloc(iter, &pages, size, &start);
- 		if (IS_ERR(pages)) {
- 			ceph_osdc_put_request(req);
- 			ret = PTR_ERR(pages);
- 			break;
- 		}
-+		num_pages = DIV_ROUND_UP(len, PAGE_SIZE);
- 
- 		/*
- 		 * To simplify error handling, allow AIO when IO within i_size
--- 
-2.9.3
-
+Thanks,
+Padmanabh
