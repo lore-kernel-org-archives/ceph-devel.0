@@ -1,83 +1,73 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH 8/8] Revert "ext4: fix wrong gfp type under transaction"
-Date: Thu, 26 Jan 2017 08:44:55 +0100
-Message-ID: <20170126074455.GC8456@dhcp22.suse.cz>
-References: <20170106141107.23953-9-mhocko@kernel.org>
- <20170117025607.frrcdbduthhutrzj@thunk.org>
- <20170117082425.GD19699@dhcp22.suse.cz>
- <20170117151817.GR19699@dhcp22.suse.cz>
- <20170117155916.dcizr65bwa6behe7@thunk.org>
- <20170117161618.GT19699@dhcp22.suse.cz>
- <20170117172925.GA2486@quack2.suse.cz>
- <20170119083956.GE30786@dhcp22.suse.cz>
- <20170119092236.GC2565@quack2.suse.cz>
- <20170119094405.GK30786@dhcp22.suse.cz>
+From: myoungwon oh <ohmyoungwon@gmail.com>
+Subject: Question about writeback performance and content address obejct for deduplication
+Date: Thu, 26 Jan 2017 20:04:53 +0900
+Message-ID: <CAFNt83bds6KzCnMvxyN=vPu7dg_NyX3cHdZwgmhiQqKt4B314A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170119094405.GK30786@dhcp22.suse.cz>
-Sender: owner-linux-mm@kvack.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Jan Kara <jack@suse.cz>, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f49.google.com ([209.85.213.49]:35473 "EHLO
+        mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753162AbdAZLEy (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jan 2017 06:04:54 -0500
+Received: by mail-vk0-f49.google.com with SMTP id x75so151968442vke.2
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Jan 2017 03:04:54 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org, =?UTF-8?B?7Jik66qF7JuQ?= <omwmw@sk.com>
 
-On Thu 19-01-17 10:44:05, Michal Hocko wrote:
-> On Thu 19-01-17 10:22:36, Jan Kara wrote:
-> > On Thu 19-01-17 09:39:56, Michal Hocko wrote:
-> > > On Tue 17-01-17 18:29:25, Jan Kara wrote:
-> > > > On Tue 17-01-17 17:16:19, Michal Hocko wrote:
-> > > > > > > But before going to play with that I am really wondering whether we need
-> > > > > > > all this with no journal at all. AFAIU what Jack told me it is the
-> > > > > > > journal lock(s) which is the biggest problem from the reclaim recursion
-> > > > > > > point of view. What would cause a deadlock in no journal mode?
-> > > > > > 
-> > > > > > We still have the original problem for why we need GFP_NOFS even in
-> > > > > > ext2.  If we are in a writeback path, and we need to allocate memory,
-> > > > > > we don't want to recurse back into the file system's writeback path.
-> > > > > 
-> > > > > But we do not enter the writeback path from the direct reclaim. Or do
-> > > > > you mean something other than pageout()'s mapping->a_ops->writepage?
-> > > > > There is only try_to_release_page where we get back to the filesystems
-> > > > > but I do not see any NOFS protection in ext4_releasepage.
-> > > > 
-> > > > Maybe to expand a bit: These days, direct reclaim can call ->releasepage()
-> > > > callback, ->evict_inode() callback (and only for inodes with i_nlink > 0),
-> > > > shrinkers. That's it. So the recursion possibilities are rather more limited
-> > > > than they used to be several years ago and we likely do not need as much
-> > > > GFP_NOFS protection as we used to.
-> > > 
-> > > Thanks for making my remark more clear Jack! I would just want to add
-> > > that I was playing with the patch below (it is basically
-> > > GFP_NOFS->GFP_KERNEL for all allocations which trigger warning from the
-> > > debugging patch which means they are called from within transaction) and
-> > > it didn't hit the lockdep when running xfstests both with or without the
-> > > enabled journal.
-> > > 
-> > > So am I still missing something or the nojournal mode is safe and the
-> > > current series is OK wrt. ext*?
-> > 
-> > I'm convinced the current series is OK, only real life will tell us whether
-> > we missed something or not ;)
-> 
-> I would like to extend the changelog of "jbd2: mark the transaction
-> context with the scope GFP_NOFS context".
-> 
-> "
-> Please note that setups without journal do not suffer from potential
-> recursion problems and so they do not need the scope protection because
-> neither ->releasepage nor ->evict_inode (which are the only fs entry
-> points from the direct reclaim) can reenter a locked context which is
-> doing the allocation currently.
-> "
+I have two questions.
 
-Could you comment on this Ted, please?
--- 
-Michal Hocko
-SUSE Labs
+1. I would like to ask about CAS location. current our implementation store
+content address object in storage tier.However, If we store the CAO in the
+cache tier, we can get a performance advantage. Do you think we can create
+CAO in cachetier? or create a separate storage pool for CAS?
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+
+2. The results below are performance result for our current implementation.
+experiment setup:
+PROXY (inline dedup), WRITEBACK (lazy dedup, target_max_bytes: 50MB),
+ORIGINAL(without dedup feature and cache tier),
+fio, 512K block, seq. I/O, single thread
+
+One thing to note is that the writeback case is slower than the proxy.
+We think there are three problems as follows.
+
+A. The current implementation creates a fingerprint by reading the entire
+object when flushing. Therefore, there is a problem that read and write are
+mixed.
+
+B. When client request read, the promote_object function reads the object
+and writes it back to the cache tier, which also causes a mix of read and
+write.
+
+C. When flushing, the unchanged part is rewritten because flush operation
+perform per-object based.
+
+Do I have something wrong? or Could you give me a suggestion to improve
+performance?
+
+
+a. Write performance (KB/s)
+
+dedup_ratio  0 20 40 60 80 100
+
+PROXY  45586 47804 51120 52844 56167 55302
+
+WRITEBACK  13151 11078 9531 13010 9518 8319
+
+ORIGINAL  121209 124786 122140 121195 122540 132363
+
+
+b. Read performance (KB/s)
+
+dedup_ratio  0 20 40 60 80 100
+
+PROXY  112231 118994 118070 120071 117884 132748
+
+WRITEBACK  34040 29109 19104 26677 24756 21695
+
+ORIGINAL  285482 284398 278063 277989 271793 285094
+
+
+thanks,
+Myoungwon Oh
