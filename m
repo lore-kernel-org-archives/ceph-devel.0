@@ -1,161 +1,226 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: crush multipick anomaly
-Date: Thu, 26 Jan 2017 19:51:03 +0800
-Message-ID: <CAJE9aONSVON3Y1Uieh470qn05=K6-5rnQP9tPoF2CmPtOq9mQg@mail.gmail.com>
-References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal> <e5f376bb-925b-17df-ae6e-abc07058f67b@dachary.org>
+From: Jeff Layton <jlayton@poochiereds.net>
+Subject: Re: [PATCH v3 1/2] iov_iter: allow iov_iter_get_pages_alloc to
+ allocate more pages per call
+Date: Thu, 26 Jan 2017 07:35:06 -0500
+Message-ID: <1485434106.6547.1.camel@poochiereds.net>
+References: <20170124212327.14517-1-jlayton@redhat.com>
+         <20170125133205.21704-1-jlayton@redhat.com>
+         <20170125133205.21704-2-jlayton@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:37782 "EHLO
-        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751986AbdAZLvL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jan 2017 06:51:11 -0500
-Received: by mail-wm0-f44.google.com with SMTP id c206so79810903wme.0
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Jan 2017 03:51:10 -0800 (PST)
-In-Reply-To: <e5f376bb-925b-17df-ae6e-abc07058f67b@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Sage Weil <sage@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170125133205.21704-2-jlayton@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: viro@zeniv.linux.org.uk
+Cc: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org, lustre-devel@lists.lustre.org, v9fs-developer@lists.sourceforge.net
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Jan 26, 2017 at 7:13 PM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Sage,
->
-> Still trying to understand what you did :-) I have one question below.
->
-> On 01/26/2017 04:05 AM, Sage Weil wrote:
->> This is a longstanding bug,
->>
->>       http://tracker.ceph.com/issues/15653
->>
->> that causes low-weighted devices to get more data than they should. Loic=
-'s
->> recent activity resurrected discussion on the original PR
->>
->>       https://github.com/ceph/ceph/pull/10218
->>
->> but since it's closed and almost nobody will see it I'm moving the
->> discussion here.
->>
->> The main news is that I have a simple adjustment for the weights that
->> works (almost perfectly) for the 2nd round of placements.  The solution =
-is
->> pretty simple, although as with most probabilities it tends to make my
->> brain hurt.
->>
->> The idea is that, on the second round, the original weight for the small
->> OSD (call it P(pick small)) isn't what we should use.  Instead, we want
->> P(pick small | first pick not small).  Since P(a|b) (the probability of =
-a
->> given b) is P(a && b) / P(b),
->
-> From the record this is explained at https://en.wikipedia.org/wiki/Condit=
-ional_probability#Kolmogorov_definition
->
->>
->>  P(pick small | first pick not small)
->>  =3D P(pick small && first pick not small) / P(first pick not small)
->>
->> The last term is easy to calculate,
->>
->>  P(first pick not small) =3D (total_weight - small_weight) / total_weigh=
-t
->>
->> and the && term is the distribution we're trying to produce.
->
-> https://en.wikipedia.org/wiki/Conditional_probability describs A && B (us=
-ing a non ascii symbol...) as the "probability of the joint of events A and=
- B". I don't understand what that means. Is there a definition somewhere ?
+On Wed, 2017-01-25 at 08:32 -0500, Jeff Layton wrote:
+> Currently, iov_iter_get_pages_alloc will only ever operate on the first
+> vector that iterate_all_kinds hands back. Most of the callers however
+> would like to have as long a set of pages as possible, to allow for
+> fewer, but larger I/Os.
+> 
+> When the previous vector ends on a page boundary and the current one
+> begins on one, we can continue to add more pages.
+> 
+> Change the function to first scan the iov_iter to see how long an
+> array of pages we could create from the current position up to the
+> maxsize passed in. Then, allocate an array that large and start
+> filling in that many pages.
+> 
+> The main impetus for this patch is to rip out a swath of code in ceph
+> that tries to do this but that doesn't handle ITER_BVEC correctly.
+> 
+> NFS also uses this function and this also allows the client to do larger
+> I/Os when userland passes down an array of page-aligned iovecs in an
+> O_DIRECT request. This should also make splice writes into an O_DIRECT
+> file on NFS use larger I/Os, since that's now done by passing down an
+> ITER_BVEC representing the data to be written.
+> 
+> I believe the other callers (lustre and 9p) may also benefit from this
+> change, but I don't have a great way to verify that.
+> 
+> Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> ---
+>  lib/iov_iter.c | 142 +++++++++++++++++++++++++++++++++++++++++++++------------
+>  1 file changed, 113 insertions(+), 29 deletions(-)
+> 
+> diff --git a/lib/iov_iter.c b/lib/iov_iter.c
+> index e68604ae3ced..c87ba154371a 100644
+> --- a/lib/iov_iter.c
+> +++ b/lib/iov_iter.c
+> @@ -883,6 +883,59 @@ unsigned long iov_iter_gap_alignment(const struct iov_iter *i)
+>  }
+>  EXPORT_SYMBOL(iov_iter_gap_alignment);
+>  
+> +/**
+> + * iov_iter_pvec_size - find length of page aligned iovecs in iov_iter
+> + * @i: iov_iter to in which to find the size
+> + * @maxsize: maximum size to return
+> + *
+> + * Some filesystems can stitch together multiple iovecs into a single page
+> + * vector when both the previous tail and current base are page aligned. This
+> + * function determines how much of the remaining iov_iter can be stuffed into
+> + * a single pagevec, up to the provided maxsize value.
+> + */
+> +static size_t iov_iter_pvec_size(const struct iov_iter *i, size_t maxsize)
+> +{
+> +	size_t size = min(iov_iter_count(i), maxsize);
+> +	size_t pv_size = 0;
+> +	bool contig = false, first = true;
+> +
+> +	if (!size)
+> +		return 0;
+> +
+> +	/* Pipes are naturally aligned for this */
+> +	if (unlikely(i->type & ITER_PIPE))
+> +		return size;
+> +
+> +	/*
+> +	 * An iov can be page vectored when the current base and previous
+> +	 * tail are both page aligned. Note that we don't require that the
+> +	 * initial base in the first iovec also be page aligned.
+> +	 */
+> +	iterate_all_kinds(i, size, v,
+> +		({
+> +		 if (first || (contig && PAGE_ALIGNED(v.iov_base))) {
+> +			pv_size += v.iov_len;
+> +			first = false;
+> +			contig = PAGE_ALIGNED(v.iov_base + v.iov_len);
+> +		 }; 0;
+> +		 }),
+> +		({
+> +		 if (first || (contig && v.bv_offset == 0)) {
+> +			pv_size += v.bv_len;
+> +			first = false;
+> +			contig = PAGE_ALIGNED(v.bv_offset + v.bv_len);
+> +		 }
+> +		 }),
+> +		({
+> +		 if (first || (contig && PAGE_ALIGNED(v.iov_base))) {
+> +			pv_size += v.iov_len;
+> +			first = false;
+> +			contig = PAGE_ALIGNED(v.iov_base + v.iov_len);
+> +		 }
+> +		 }))
+> +	return pv_size;
+> +}
+> +
+>  static inline size_t __pipe_get_pages(struct iov_iter *i,
+>  				size_t maxsize,
+>  				struct page **pages,
+> @@ -1006,47 +1059,78 @@ static ssize_t pipe_get_pages_alloc(struct iov_iter *i,
+>  }
+>  
+>  ssize_t iov_iter_get_pages_alloc(struct iov_iter *i,
+> -		   struct page ***pages, size_t maxsize,
+> -		   size_t *start)
+> +		   struct page ***ppages, size_t maxsize,
+> +		   size_t *pstart)
+>  {
+> -	struct page **p;
+> -
+> -	if (maxsize > i->count)
+> -		maxsize = i->count;
+> +	struct page **p, **pc;
+> +	size_t start = 0;
+> +	ssize_t len = 0;
+> +	int npages, res = 0;
+> +	bool first = true;
+>  
+>  	if (unlikely(i->type & ITER_PIPE))
+> -		return pipe_get_pages_alloc(i, pages, maxsize, start);
+> +		return pipe_get_pages_alloc(i, ppages, maxsize, pstart);
+> +
+> +	maxsize = iov_iter_pvec_size(i, maxsize);
+> +	npages = DIV_ROUND_UP(maxsize, PAGE_SIZE);
 
-a joint events of A and B means these two events occur together. Here,
-A and B are two random variables. so, the notion of P(A && B) or
-P(A=E2=88=A9B) stands for the probability of the event A and event B happen=
-s
-together. in our case, in our case, "a" denotes the event of "first
-small", and "b" denotes "first pick not small". so P(a=E2=88=A9b) is the
-probability of the first pick is not small **and** the resulting pick
-is not small. maybe you can also reference
-https://en.wikipedia.org/wiki/Joint_probability_distribution
+Bah, the above is wrong when the offset into the first page is non-
+zero. I'll fix -- this probably also points out the need for some tests
+for this. I'll see if I can cook something up for xfstests.
 
->
->> For exmaple,
->> if small has 1/10 the weight, then we should see 1/10th of the PGs have
->> their second replica be the small OSD.  So
->>
->>  P(pick small && first pick not small) =3D small_weight / total_weight
->>
->> Putting those together,
->>
->>  P(pick small | first pick not small)
->>  =3D P(pick small && first pick not small) / P(first pick not small)
->>  =3D (small_weight / total_weight) / ((total_weight - small_weight) / to=
-tal_weight)
->>  =3D small_weight / (total_weight - small_weight)
->>
->> This is, on the second round, we should adjust the weights by the above =
-so
->> that we get the right distribution of second choices.  It turns out it
->> works to adjust *all* weights like this to get hte conditional probabili=
-ty
->> that they weren't already chosen.
->>
->> I have a branch that hacks this into straw2 and it appears to work
->
-> This is https://github.com/liewegas/ceph/commit/wip-crush-multipick
->
->> properly for num_rep =3D 2.  With a test bucket of [99 99 99 99 4], and =
-the
->> current code, you get
->>
->> $ bin/crushtool -c cm.txt --test --show-utilization --min-x 0 --max-x 40=
-000000 --num-rep 2
->> rule 0 (data), x =3D 0..40000000, numrep =3D 2..2
->> rule 0 (data) num_rep 2 result size =3D=3D 2:       40000001/40000001
->>   device 0:             19765965        [9899364,9866601]
->>   device 1:             19768033        [9899444,9868589]
->>   device 2:             19769938        [9901770,9868168]
->>   device 3:             19766918        [9898851,9868067]
->>   device 6:             929148  [400572,528576]
->>
->> which is very close for the first replica (primary), but way off for the
->> second.  With my hacky change,
->>
->> rule 0 (data), x =3D 0..40000000, numrep =3D 2..2
->> rule 0 (data) num_rep 2 result size =3D=3D 2:       40000001/40000001
->>   device 0:             19797315        [9899364,9897951]
->>   device 1:             19799199        [9899444,9899755]
->>   device 2:             19801016        [9901770,9899246]
->>   device 3:             19797906        [9898851,9899055]
->>   device 6:             804566  [400572,403994]
->>
->> which is quite close, but still skewing slightly high (by a big less tha=
-n
->> 1%).
->>
->> Next steps:
->>
->> 1- generalize this for >2 replicas
->> 2- figure out why it skews high
->> 3- make this work for multi-level hierarchical descent
->>
->> sage
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
---=20
-Regards
-Kefu Chai
+> +	p = get_pages_array(npages);
+> +	if (!p)
+> +		return -ENOMEM;
+> +
+> +	pc = p;
+>  	iterate_all_kinds(i, maxsize, v, ({
+>  		unsigned long addr = (unsigned long)v.iov_base;
+> -		size_t len = v.iov_len + (*start = addr & (PAGE_SIZE - 1));
+> +		size_t slen = v.iov_len;
+>  		int n;
+> -		int res;
+>  
+> -		addr &= ~(PAGE_SIZE - 1);
+> -		n = DIV_ROUND_UP(len, PAGE_SIZE);
+> -		p = get_pages_array(n);
+> -		if (!p)
+> -			return -ENOMEM;
+> -		res = get_user_pages_fast(addr, n, (i->type & WRITE) != WRITE, p);
+> -		if (unlikely(res < 0)) {
+> -			kvfree(p);
+> -			return res;
+> +		if (first) {
+> +			start = addr & (PAGE_SIZE - 1);
+> +			slen += start;
+> +			first = false;
+>  		}
+> -		*pages = p;
+> -		return (res == n ? len : res * PAGE_SIZE) - *start;
+> +
+> +		n = DIV_ROUND_UP(slen, PAGE_SIZE);
+> +		if (pc + n > p + npages) {
+> +			/* Did something change the iov array?!? */
+> +			res = -EFAULT;
+> +			goto out;
+> +		}
+> +		addr &= ~(PAGE_SIZE - 1);
+> +		res = get_user_pages_fast(addr, n,
+> +					  (i->type & WRITE) != WRITE, pc);
+> +		if (unlikely(res < 0))
+> +			goto out;
+> +		len += (res == n ? slen : res * PAGE_SIZE) - start;
+> +		pc += res;
+>  	0;}),({
+> -		/* can't be more than PAGE_SIZE */
+> -		*start = v.bv_offset;
+> -		*pages = p = get_pages_array(1);
+> -		if (!p)
+> -			return -ENOMEM;
+> -		get_page(*p = v.bv_page);
+> -		return v.bv_len;
+> +		/* bio_vecs are limited to a single page each */
+> +		if (first) {
+> +			start = v.bv_offset;
+> +			first = false;
+> +		}
+> +		get_page(*pc = v.bv_page);
+> +		len += v.bv_len;
+> +		++pc;
+> +		BUG_ON(pc > p + npages);
+>  	}),({
+> -		return -EFAULT;
+> +		/* FIXME: should we handle this case? */
+> +		res = -EFAULT;
+> +		goto out;
+>  	})
+>  	)
+> -	return 0;
+> +out:
+> +	if (unlikely(res < 0)) {
+> +		struct page **i;
+> +
+> +		for (i = p; i < pc; i++)
+> +			put_page(*i);
+> +		kvfree(p);
+> +		return res;
+> +	}
+> +
+> +	*ppages = p;
+> +	*pstart = start;
+> +	return len;
+>  }
+>  EXPORT_SYMBOL(iov_iter_get_pages_alloc);
+>  
