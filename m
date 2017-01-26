@@ -1,103 +1,83 @@
-From: Sage Weil <sage@redhat.com>
-Subject: crush multipick anomaly
-Date: Thu, 26 Jan 2017 03:05:54 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
+From: Michal Hocko <mhocko@kernel.org>
+Subject: Re: [PATCH 8/8] Revert "ext4: fix wrong gfp type under transaction"
+Date: Thu, 26 Jan 2017 08:44:55 +0100
+Message-ID: <20170126074455.GC8456@dhcp22.suse.cz>
+References: <20170106141107.23953-9-mhocko@kernel.org>
+ <20170117025607.frrcdbduthhutrzj@thunk.org>
+ <20170117082425.GD19699@dhcp22.suse.cz>
+ <20170117151817.GR19699@dhcp22.suse.cz>
+ <20170117155916.dcizr65bwa6behe7@thunk.org>
+ <20170117161618.GT19699@dhcp22.suse.cz>
+ <20170117172925.GA2486@quack2.suse.cz>
+ <20170119083956.GE30786@dhcp22.suse.cz>
+ <20170119092236.GC2565@quack2.suse.cz>
+ <20170119094405.GK30786@dhcp22.suse.cz>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51972 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752453AbdAZDFz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Jan 2017 22:05:55 -0500
-Received: from cobra.newdream.net (localhost [127.0.0.1])
-        by cobra.newdream.net (Postfix) with ESMTP id 2277C813F9
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Jan 2017 19:05:55 -0800 (PST)
-Received: from localhost.localdomain (unknown [64.111.99.127])
-        by cobra.newdream.net (Postfix) with ESMTPSA id 0201B8021C
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Jan 2017 19:05:54 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170119094405.GK30786@dhcp22.suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Jan Kara <jack@suse.cz>, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-This is a longstanding bug,
+On Thu 19-01-17 10:44:05, Michal Hocko wrote:
+> On Thu 19-01-17 10:22:36, Jan Kara wrote:
+> > On Thu 19-01-17 09:39:56, Michal Hocko wrote:
+> > > On Tue 17-01-17 18:29:25, Jan Kara wrote:
+> > > > On Tue 17-01-17 17:16:19, Michal Hocko wrote:
+> > > > > > > But before going to play with that I am really wondering whether we need
+> > > > > > > all this with no journal at all. AFAIU what Jack told me it is the
+> > > > > > > journal lock(s) which is the biggest problem from the reclaim recursion
+> > > > > > > point of view. What would cause a deadlock in no journal mode?
+> > > > > > 
+> > > > > > We still have the original problem for why we need GFP_NOFS even in
+> > > > > > ext2.  If we are in a writeback path, and we need to allocate memory,
+> > > > > > we don't want to recurse back into the file system's writeback path.
+> > > > > 
+> > > > > But we do not enter the writeback path from the direct reclaim. Or do
+> > > > > you mean something other than pageout()'s mapping->a_ops->writepage?
+> > > > > There is only try_to_release_page where we get back to the filesystems
+> > > > > but I do not see any NOFS protection in ext4_releasepage.
+> > > > 
+> > > > Maybe to expand a bit: These days, direct reclaim can call ->releasepage()
+> > > > callback, ->evict_inode() callback (and only for inodes with i_nlink > 0),
+> > > > shrinkers. That's it. So the recursion possibilities are rather more limited
+> > > > than they used to be several years ago and we likely do not need as much
+> > > > GFP_NOFS protection as we used to.
+> > > 
+> > > Thanks for making my remark more clear Jack! I would just want to add
+> > > that I was playing with the patch below (it is basically
+> > > GFP_NOFS->GFP_KERNEL for all allocations which trigger warning from the
+> > > debugging patch which means they are called from within transaction) and
+> > > it didn't hit the lockdep when running xfstests both with or without the
+> > > enabled journal.
+> > > 
+> > > So am I still missing something or the nojournal mode is safe and the
+> > > current series is OK wrt. ext*?
+> > 
+> > I'm convinced the current series is OK, only real life will tell us whether
+> > we missed something or not ;)
+> 
+> I would like to extend the changelog of "jbd2: mark the transaction
+> context with the scope GFP_NOFS context".
+> 
+> "
+> Please note that setups without journal do not suffer from potential
+> recursion problems and so they do not need the scope protection because
+> neither ->releasepage nor ->evict_inode (which are the only fs entry
+> points from the direct reclaim) can reenter a locked context which is
+> doing the allocation currently.
+> "
 
-	http://tracker.ceph.com/issues/15653
+Could you comment on this Ted, please?
+-- 
+Michal Hocko
+SUSE Labs
 
-that causes low-weighted devices to get more data than they should. Loic's 
-recent activity resurrected discussion on the original PR
-
-	https://github.com/ceph/ceph/pull/10218
-
-but since it's closed and almost nobody will see it I'm moving the 
-discussion here.
-
-The main news is that I have a simple adjustment for the weights that 
-works (almost perfectly) for the 2nd round of placements.  The solution is 
-pretty simple, although as with most probabilities it tends to make my 
-brain hurt.
-
-The idea is that, on the second round, the original weight for the small 
-OSD (call it P(pick small)) isn't what we should use.  Instead, we want 
-P(pick small | first pick not small).  Since P(a|b) (the probability of a 
-given b) is P(a && b) / P(b),
-
- P(pick small | first pick not small)
- = P(pick small && first pick not small) / P(first pick not small)
-
-The last term is easy to calculate,
-
- P(first pick not small) = (total_weight - small_weight) / total_weight
-
-and the && term is the distribution we're trying to produce.  For exmaple, 
-if small has 1/10 the weight, then we should see 1/10th of the PGs have 
-their second replica be the small OSD.  So
-
- P(pick small && first pick not small) = small_weight / total_weight
-
-Putting those together,
-
- P(pick small | first pick not small)
- = P(pick small && first pick not small) / P(first pick not small)
- = (small_weight / total_weight) / ((total_weight - small_weight) / total_weight)
- = small_weight / (total_weight - small_weight)
-
-This is, on the second round, we should adjust the weights by the above so 
-that we get the right distribution of second choices.  It turns out it 
-works to adjust *all* weights like this to get hte conditional probability 
-that they weren't already chosen.
-
-I have a branch that hacks this into straw2 and it appears to work 
-properly for num_rep = 2.  With a test bucket of [99 99 99 99 4], and the 
-current code, you get
-
-$ bin/crushtool -c cm.txt --test --show-utilization --min-x 0 --max-x 40000000 --num-rep 2
-rule 0 (data), x = 0..40000000, numrep = 2..2
-rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
-  device 0:             19765965        [9899364,9866601]
-  device 1:             19768033        [9899444,9868589]
-  device 2:             19769938        [9901770,9868168]
-  device 3:             19766918        [9898851,9868067]
-  device 6:             929148  [400572,528576]
-
-which is very close for the first replica (primary), but way off for the 
-second.  With my hacky change,
-
-rule 0 (data), x = 0..40000000, numrep = 2..2
-rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
-  device 0:             19797315        [9899364,9897951]
-  device 1:             19799199        [9899444,9899755]
-  device 2:             19801016        [9901770,9899246]
-  device 3:             19797906        [9898851,9899055]
-  device 6:             804566  [400572,403994]
-
-which is quite close, but still skewing slightly high (by a big less than 
-1%).
-
-Next steps:
-
-1- generalize this for >2 replicas
-2- figure out why it skews high
-3- make this work for multi-level hierarchical descent
-
-sage
-
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
