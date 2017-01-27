@@ -1,52 +1,57 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: crush: straw is dead, long live straw2
-Date: Fri, 27 Jan 2017 01:26:37 +0100
-Message-ID: <a5b1d1dc-d9b8-8916-b677-13f37afd4fb1@dachary.org>
-References: <alpine.DEB.2.00.1412081516010.18281@cobra.newdream.net>
+From: Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>
+Subject: Re: [PATCH 8/8] Revert "ext4: fix wrong gfp type under transaction"
+Date: Fri, 27 Jan 2017 01:13:18 -0500
+Message-ID: <20170127061318.xd2qxashbl4dajez@thunk.org>
+References: <20170117025607.frrcdbduthhutrzj@thunk.org>
+ <20170117082425.GD19699@dhcp22.suse.cz>
+ <20170117151817.GR19699@dhcp22.suse.cz>
+ <20170117155916.dcizr65bwa6behe7@thunk.org>
+ <20170117161618.GT19699@dhcp22.suse.cz>
+ <20170117172925.GA2486@quack2.suse.cz>
+ <20170119083956.GE30786@dhcp22.suse.cz>
+ <20170119092236.GC2565@quack2.suse.cz>
+ <20170119094405.GK30786@dhcp22.suse.cz>
+ <20170126074455.GC8456@dhcp22.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:34746 "EHLO
-        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752518AbdA0A1W (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Jan 2017 19:27:22 -0500
-In-Reply-To: <alpine.DEB.2.00.1412081516010.18281@cobra.newdream.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170126074455.GC8456-2MMpYkNvuYDjFM9bn6wA6Q@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Michal Hocko <mhocko-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Dave Chinner <david-FqsqvQoI3Ljby3iVrkZq2A@public.gmane.org>, djwong-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Chris Mason <clm-b10kYP2dOMg@public.gmane.org>, David Sterba <dsterba-AlSwsSmVLrQ@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, logfs-PCqxUs/MD9bYtjvyW6yDsg@public.gmane.org, linux-xfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ext4-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, reiserfs-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ntfs-dev-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Sage,
-
-On 12/09/2014 12:48 AM, Sage Weil wrote:
-> The new straw2 bucket works like this:
+On Thu, Jan 26, 2017 at 08:44:55AM +0100, Michal Hocko wrote:
+> > > I'm convinced the current series is OK, only real life will tell us whether
+> > > we missed something or not ;)
+> > 
+> > I would like to extend the changelog of "jbd2: mark the transaction
+> > context with the scope GFP_NOFS context".
+> > 
+> > "
+> > Please note that setups without journal do not suffer from potential
+> > recursion problems and so they do not need the scope protection because
+> > neither ->releasepage nor ->evict_inode (which are the only fs entry
+> > points from the direct reclaim) can reenter a locked context which is
+> > doing the allocation currently.
+> > "
 > 
->  max_x = -1
->  max_item = -1
->  for each item:
->     x = random value from 0..65535
->     x = ln(x / 65536) / weight
->     if x > max_x:
->        max_x = x
->        max_item = item
->  return item
-> 
-> That ln() is a natural log (well, a 16-bit fixed-point approximation of 
-> it) and as you can see it's a simple function of the weight of that item.  
-> That means that changing one item's weight won't have any effect on the 
-> straw lengths for other items, so a change will either make the item win 
-> or not win but won't change who the other winner is in the not-win case.
-> 
-> Somewhat embarassingly, I stumbled onto this solution half by accident.  
-> Sam found the underlying principle that makes it work:
-> 
->  http://en.wikipedia.org/wiki/Exponential_distribution#Distribution_of_the_minimum_of_exponential_random_variables
+> Could you comment on this Ted, please?
 
-I dont' understand what that works :-) Is there some documentation I could read to better understand the principle ?
+I guess....   so there still is one way this could screw us, and it's this reason for GFP_NOFS:
 
-Cheers
+        - to prevent from stack overflows during the reclaim because
+	          the allocation is performed from a deep context already
 
-[1] bucket_straw2_choose http://libcrush.org/main/libcrush/blob/master/crush/mapper.c#L309
+The writepages call stack can be pretty deep.  (Especially if we're
+using ext4 in no journal mode over, say, iSCSI.)
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+How much stack space can get consumed by a reclaim?
+
+						- Ted
+    		 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
