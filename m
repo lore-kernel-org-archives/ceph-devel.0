@@ -1,224 +1,178 @@
-From: Jianjian Huo <samuel.huo@gmail.com>
-Subject: Re: BlueStore: Multi sharded kv pull request
-Date: Fri, 27 Jan 2017 12:23:55 -0800
-Message-ID: <CAB=cV2Sh86awqXPQ4fTVrzza3=dtQDCo=_irunm4tR5YSPOxhw@mail.gmail.com>
+From: Somnath Roy <Somnath.Roy@sandisk.com>
+Subject: RE: BlueStore: Multi sharded kv pull request
+Date: Fri, 27 Jan 2017 20:28:17 +0000
+Message-ID: <5E3E05AED7F0F044904275810D0CB465057946@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
 References: <5E3E05AED7F0F044904275810D0CB465055CCA@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
- <B9070C20-620C-4CDA-8B00-5B563F150693@alibaba-inc.com> <5E3E05AED7F0F044904275810D0CB465055E65@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
- <588E15ED-9C9D-44D2-8F5C-4A093A3B370B@alibaba-inc.com> <5E3E05AED7F0F044904275810D0CB465055ED6@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <B9070C20-620C-4CDA-8B00-5B563F150693@alibaba-inc.com>
+ <5E3E05AED7F0F044904275810D0CB465055E65@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <588E15ED-9C9D-44D2-8F5C-4A093A3B370B@alibaba-inc.com>
+ <5E3E05AED7F0F044904275810D0CB465055ED6@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <CAB=cV2Sh86awqXPQ4fTVrzza3=dtQDCo=_irunm4tR5YSPOxhw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f66.google.com ([209.85.218.66]:32800 "EHLO
-        mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751325AbdA0UYR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Jan 2017 15:24:17 -0500
-Received: by mail-oi0-f66.google.com with SMTP id j15so21461421oih.0
-        for <ceph-devel@vger.kernel.org>; Fri, 27 Jan 2017 12:24:16 -0800 (PST)
-In-Reply-To: <5E3E05AED7F0F044904275810D0CB465055ED6@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+Received: from mail-co1nam03on0059.outbound.protection.outlook.com ([104.47.40.59]:49974
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750783AbdA0U3g (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 27 Jan 2017 15:29:36 -0500
+In-Reply-To: <CAB=cV2Sh86awqXPQ4fTVrzza3=dtQDCo=_irunm4tR5YSPOxhw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Somnath Roy <Somnath.Roy@sandisk.com>
+To: Jianjian Huo <samuel.huo@gmail.com>
 Cc: "LIU, Fei" <james.liu@alibaba-inc.com>, "Mark Nelson (mnelson@redhat.com)" <mnelson@redhat.com>, "Sage Weil (sweil@redhat.com)" <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Somnath,
-
-On Mon, Jan 23, 2017 at 12:14 AM, Somnath Roy <Somnath.Roy@sandisk.com> wro=
-te:
-> James,
-> 2X performance gain over filestore is for 600G volume but for 1G volume B=
-luestore + rocks is almost similar to filestore. For even bigger volume (pe=
-r osd) I think performance will go below filestore.
-> Expectation is the bluestore + ZS performance should not go down with big=
-ger volume size. But, even if we are seeing some drop (need to see why ?) i=
-t is much less than the drop with bluestore + rocks.
-> Yes, because of B+ Tree based architecture ZS doesn't need to do compacti=
-on and paying the cost up front , this is why with smaller volume rocks sho=
-uld outperform ZS but with bigger metadata (bigger volume) ZS should be giv=
-ing much higher throughput. Looks like cross over point is in between 600G =
-and 1TB image size / OSD.
-
-You are talking about the bluestore OSD size, not rbd image size, right?
-For the 600GB size case, bluestore rock/zs cpu utils are 2.5x~3x of
-filestore, this probably will hold back the 4KRW 2x performance gains,
-in case of limited cpu power in multiple SSD per server.
-
-Jianjian
->
-> Thanks & Regards
-> Somnath
->
-> -----Original Message-----
-> From: LIU, Fei [mailto:james.liu@alibaba-inc.com]
-> Sent: Sunday, January 22, 2017 11:32 PM
-> To: Somnath Roy; Mark Nelson (mnelson@redhat.com); Sage Weil (sweil@redha=
-t.com)
-> Cc: ceph-devel
-> Subject: Re: BlueStore: Multi sharded kv pull request
->
-> Hi Somnath=EF=BC=8C
->   The data is pretty promising . Especially we saw almost double performa=
-nce gain in 4k rw comparing to filestore. Even comparing with RocksDB, ZS h=
-ave a big performance gain  as well. That=E2=80=99s a big achievement in la=
-st several month. Can I assume ZS will have advantage in red performance co=
-mparing to RocksDB because of B+ tree used in ZS? are you guys having any p=
-erformance data like 16K RW/RR for reference?
->
->   Thanks,
->    James
-> =E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E5=90=AB=
-=E6=9C=89=E9=98=BF=E9=87=8C=E5=B7=B4=E5=B7=B4=E9=9B=86=E5=9B=A2=E7=9A=84=E5=
-=95=86=E4=B8=9A=E7=A7=98=E5=AF=86=E4=BF=A1=E6=81=AF=EF=BC=8C=E4=BB=85=E9=99=
-=90=E4=BA=8E=E5=8F=91=E9=80=81=E7=BB=99=E4=B8=8A=E9=9D=A2=E5=9C=B0=E5=9D=80=
-=E4=B8=AD=E5=88=97=E5=87=BA=E7=9A=84=E4=B8=AA=E4=BA=BA=E5=92=8C=E7=BE=A4=E7=
-=BB=84=EF=BC=8C=E7=A6=81=E6=AD=A2=E4=BB=BB=E4=BD=95=E5=85=B6=E4=BB=96=E4=BA=
-=BA=E4=BB=A5=E4=BB=BB=E4=BD=95=E5=BD=A2=E5=BC=8F=E4=BD=BF=E7=94=A8=EF=BC=88=
-=E5=8C=85=E6=8B=AC=E4=BD=86=E4=B8=8D=E9=99=90=E4=BA=8E=E5=85=A8=E9=83=A8=E6=
-=88=96=E9=83=A8=E5=88=86=E5=9C=B0=E6=B3=84=E9=9C=B2=E3=80=81=E5=A4=8D=E5=88=
-=B6=E5=92=8C=E6=95=A3=E5=8F=91=EF=BC=89=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=
-=E5=85=B6=E9=99=84=E4=BB=B6=E4=B8=AD=E7=9A=84=E4=BF=A1=E6=81=AF=EF=BC=8C=E5=
-=A6=82=E6=9E=9C=E6=82=A8=E9=94=99=E6=94=B6=E6=9C=AC=E9=82=AE=E4=BB=B6=EF=BC=
-=8C=E8=AF=B7=E6=82=A8=E7=AB=8B=E5=8D=B3=E7=94=B5=E8=AF=9D=E6=88=96=E9=82=AE=
-=E4=BB=B6=E9=80=9A=E7=9F=A5=E5=8F=91=E4=BB=B6=E4=BA=BA=E5=B9=B6=E5=88=A0=E9=
-=99=A4=E6=9C=AC=E9=82=AE=E4=BB=B6=E3=80=82
-> This email and its attachments contain confidential information from Alib=
-aba Group.which is intended only for the person or entity whose address is =
-listed above.Any use of information contained herein in any way(including,b=
-ut not limited to,total or partial disclosure,reproduction or dissemination=
-)by persons other than the intended recipient(s) is prohibited.If you recei=
-ve this email in error,please notify the sender by phone or email immediate=
-ly and delete it.
->
-> On 1/23/17, 12:40 PM, "Somnath Roy" <Somnath.Roy@sandisk.com> wrote:
->
->     Hi James,
->     Sorry, if I was not clear earlier. The 3rd sheet in the xls is with b=
-luestore + rocks (not ZS)  and sole purpose of that is to demonstrate the b=
-enefit of multi kv sync threads.
->     The test I ran here without preconditioning the image unlike sheet 1 =
-and 2. This is why we are seeing the drop and it is mostly because of rocks=
- compaction.
->
->     Thanks & Regards
->     Somnath
->
->     -----Original Message-----
->     From: LIU, Fei [mailto:james.liu@alibaba-inc.com]
->     Sent: Sunday, January 22, 2017 7:04 PM
->     To: Somnath Roy; Mark Nelson (mnelson@redhat.com); Sage Weil (sweil@r=
-edhat.com)
->     Cc: ceph-devel
->     Subject: Re: BlueStore: Multi sharded kv pull request
->
->     Hi Somnath,
->        Thanks for sharing data.  We can see iops drops a lot from 40000 t=
-o ~15000 as time going by . Any particular reason for ZetaScale to drop tha=
-t much in the time period?
->
->        Regards,
->        James
->
->     =E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E5=90=
-=AB=E6=9C=89=E9=98=BF=E9=87=8C=E5=B7=B4=E5=B7=B4=E9=9B=86=E5=9B=A2=E7=9A=84=
-=E5=95=86=E4=B8=9A=E7=A7=98=E5=AF=86=E4=BF=A1=E6=81=AF=EF=BC=8C=E4=BB=85=E9=
-=99=90=E4=BA=8E=E5=8F=91=E9=80=81=E7=BB=99=E4=B8=8A=E9=9D=A2=E5=9C=B0=E5=9D=
-=80=E4=B8=AD=E5=88=97=E5=87=BA=E7=9A=84=E4=B8=AA=E4=BA=BA=E5=92=8C=E7=BE=A4=
-=E7=BB=84=EF=BC=8C=E7=A6=81=E6=AD=A2=E4=BB=BB=E4=BD=95=E5=85=B6=E4=BB=96=E4=
-=BA=BA=E4=BB=A5=E4=BB=BB=E4=BD=95=E5=BD=A2=E5=BC=8F=E4=BD=BF=E7=94=A8=EF=BC=
-=88=E5=8C=85=E6=8B=AC=E4=BD=86=E4=B8=8D=E9=99=90=E4=BA=8E=E5=85=A8=E9=83=A8=
-=E6=88=96=E9=83=A8=E5=88=86=E5=9C=B0=E6=B3=84=E9=9C=B2=E3=80=81=E5=A4=8D=E5=
-=88=B6=E5=92=8C=E6=95=A3=E5=8F=91=EF=BC=89=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=
-=8A=E5=85=B6=E9=99=84=E4=BB=B6=E4=B8=AD=E7=9A=84=E4=BF=A1=E6=81=AF=EF=BC=8C=
-=E5=A6=82=E6=9E=9C=E6=82=A8=E9=94=99=E6=94=B6=E6=9C=AC=E9=82=AE=E4=BB=B6=EF=
-=BC=8C=E8=AF=B7=E6=82=A8=E7=AB=8B=E5=8D=B3=E7=94=B5=E8=AF=9D=E6=88=96=E9=82=
-=AE=E4=BB=B6=E9=80=9A=E7=9F=A5=E5=8F=91=E4=BB=B6=E4=BA=BA=E5=B9=B6=E5=88=A0=
-=E9=99=A4=E6=9C=AC=E9=82=AE=E4=BB=B6=E3=80=82
->     This email and its attachments contain confidential information from =
-Alibaba Group.which is intended only for the person or entity whose address=
- is listed above.Any use of information contained herein in any way(includi=
-ng,but not limited to,total or partial disclosure,reproduction or dissemina=
-tion)by persons other than the intended recipient(s) is prohibited.If you r=
-eceive this email in error,please notify the sender by phone or email immed=
-iately and delete it.
->
->     On 1/21/17, 7:32 AM, "Somnath Roy" <ceph-devel-owner@vger.kernel.org =
-on behalf of Somnath.Roy@sandisk.com> wrote:
->
->         Hi Mark/Sage,
->         Please find the different comparison data in the following docume=
-nt.
->
->         https://drive.google.com/file/d/0B7W-S0z_ymMJUXVmOUhINU01c3c/view=
-?usp=3Dsharing
->
->         Please download the doc (and open in xls) as google is not able t=
-o show the graphs properly.
->
->         Setup:
->         ------
->         Single osd on 700G nvme drive and single osd on 2 700G nvme drive=
- (LVM ed)
->         48 core server, 40G link
->         Test is only for 4K RW from fio.
->
->         1. The first sheet is showing iops and cpu utilization for Bluest=
-or + rocks , Bluestore + Zs and filestore.
->         This is with small shards and with the hack we are using for prec=
-onditioning.
->         Bluestore + rocks with 16K min_alloc and ZS with 4k min_alloc
->
->         WE can see Bluestore with rocks and ZS is behaving almost similar=
-ly for a 600G image and it is ~2X higher than filestore. ZS cpu utilization=
- and WA (data not there in xls) is higher than rocks.
->
->         2. Next, I created 3 LVM volumes (data/db/wal) out of 2 NVMe driv=
-es and created an image of 1TB. See in the next sheet how bluestore + rocks=
- performance came down. Didn't have time for the filestore data but expecta=
-tion is it will remain similar to previous sheet. Now, ZS is running with 1=
-6k min_alloc size here with the prototype shim implementation I was talking=
- about in the standup.
->         This is with this implementation is not fully crash safe but expe=
-ctation is when we will be done with implementing this write ahead log impl=
-ementation in ZS it should produce similar throughput.
->         This is giving ~90% benefir over rocks and ZS with 4k min_alloc (=
-like previous sheet) is giving ~50% benefit (not plotted here). Cpu util is=
- similar to rocks.
->
->
->         3. This sheet is to demonstrate the benefit of single kv sync vs =
-multi kv sync with rocks. With ZS we *need* multi kv but with rocks as you =
-can see we are gaining (~20%) only during the peak performance.
->         Later db is getting in the way. I think peak performance is limit=
-ed to day by osd upstream , if in future we can optimize that and allow mor=
-e traffic to come in the Bluestore (objectstore) , the benefit of multiple =
-sharded kv sync will be more. Here is the pull request for this..
->
->         https://github.com/ceph/ceph/pull/13037
->
->         Thanks & Regards
->         Somnath
->
->         ________________________________
->
->         PLEASE NOTE: The information contained in this electronic mail me=
-ssage is intended only for the use of the designated recipient(s) named abo=
-ve. If the reader of this message is not the intended recipient, you are he=
-reby notified that you have received this message in error and that any rev=
-iew, dissemination, distribution, or copying of this message is strictly pr=
-ohibited. If you have received this communication in error, please notify t=
-he sender by telephone or e-mail (as shown above) immediately and destroy a=
-ny and all copies of this message in your possession (whether hard copies o=
-r electronically stored copies).
->
->         --
->         To unsubscribe from this list: send the line "unsubscribe ceph-de=
-vel" in
->         the body of a message to majordomo@vger.kernel.org
->         More majordomo info at  http://vger.kernel.org/majordomo-info.htm=
-l
->
->
->
->
->
->
+U2luY2UgSSBhbSBydW5uaW5nIHdpdGggc2luZ2xlIG9zZCAsIHJiZCBpbWFnZSBzaXplIEkgYW0g
+Y3JlYXRpbmcgaXMgY2xvc2UgdG8gb3NkIGRpc2sgc2l6ZSBhZnRlciBwYXJ0aXRpb25pbmcgZm9y
+IGRiL3dhbC4NClllcywgaWYgeW91IGhhdmUgbGltaXRlZCBjcHUgLCB0aGUgYmVuZWZpdCB3aWxs
+IG5vdCBiZSB2aXNpYmxlIGFzIGNwdSB3aWxsIGJlIHNhdHVyYXRlZC4gDQoNClRoYW5rcyAmIFJl
+Z2FyZHMNClNvbW5hdGgNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEppYW5q
+aWFuIEh1byBbbWFpbHRvOnNhbXVlbC5odW9AZ21haWwuY29tXSANClNlbnQ6IEZyaWRheSwgSmFu
+dWFyeSAyNywgMjAxNyAxMjoyNCBQTQ0KVG86IFNvbW5hdGggUm95DQpDYzogTElVLCBGZWk7IE1h
+cmsgTmVsc29uIChtbmVsc29uQHJlZGhhdC5jb20pOyBTYWdlIFdlaWwgKHN3ZWlsQHJlZGhhdC5j
+b20pOyBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogQmx1ZVN0b3JlOiBNdWx0aSBzaGFyZGVkIGt2
+IHB1bGwgcmVxdWVzdA0KDQpIaSBTb21uYXRoLA0KDQpPbiBNb24sIEphbiAyMywgMjAxNyBhdCAx
+MjoxNCBBTSwgU29tbmF0aCBSb3kgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4g
+SmFtZXMsDQo+IDJYIHBlcmZvcm1hbmNlIGdhaW4gb3ZlciBmaWxlc3RvcmUgaXMgZm9yIDYwMEcg
+dm9sdW1lIGJ1dCBmb3IgMUcgdm9sdW1lIEJsdWVzdG9yZSArIHJvY2tzIGlzIGFsbW9zdCBzaW1p
+bGFyIHRvIGZpbGVzdG9yZS4gRm9yIGV2ZW4gYmlnZ2VyIHZvbHVtZSAocGVyIG9zZCkgSSB0aGlu
+ayBwZXJmb3JtYW5jZSB3aWxsIGdvIGJlbG93IGZpbGVzdG9yZS4NCj4gRXhwZWN0YXRpb24gaXMg
+dGhlIGJsdWVzdG9yZSArIFpTIHBlcmZvcm1hbmNlIHNob3VsZCBub3QgZ28gZG93biB3aXRoIGJp
+Z2dlciB2b2x1bWUgc2l6ZS4gQnV0LCBldmVuIGlmIHdlIGFyZSBzZWVpbmcgc29tZSBkcm9wIChu
+ZWVkIHRvIHNlZSB3aHkgPykgaXQgaXMgbXVjaCBsZXNzIHRoYW4gdGhlIGRyb3Agd2l0aCBibHVl
+c3RvcmUgKyByb2Nrcy4NCj4gWWVzLCBiZWNhdXNlIG9mIEIrIFRyZWUgYmFzZWQgYXJjaGl0ZWN0
+dXJlIFpTIGRvZXNuJ3QgbmVlZCB0byBkbyBjb21wYWN0aW9uIGFuZCBwYXlpbmcgdGhlIGNvc3Qg
+dXAgZnJvbnQgLCB0aGlzIGlzIHdoeSB3aXRoIHNtYWxsZXIgdm9sdW1lIHJvY2tzIHNob3VsZCBv
+dXRwZXJmb3JtIFpTIGJ1dCB3aXRoIGJpZ2dlciBtZXRhZGF0YSAoYmlnZ2VyIHZvbHVtZSkgWlMg
+c2hvdWxkIGJlIGdpdmluZyBtdWNoIGhpZ2hlciB0aHJvdWdocHV0LiBMb29rcyBsaWtlIGNyb3Nz
+IG92ZXIgcG9pbnQgaXMgaW4gYmV0d2VlbiA2MDBHIGFuZCAxVEIgaW1hZ2Ugc2l6ZSAvIE9TRC4N
+Cg0KWW91IGFyZSB0YWxraW5nIGFib3V0IHRoZSBibHVlc3RvcmUgT1NEIHNpemUsIG5vdCByYmQg
+aW1hZ2Ugc2l6ZSwgcmlnaHQ/DQpGb3IgdGhlIDYwMEdCIHNpemUgY2FzZSwgYmx1ZXN0b3JlIHJv
+Y2svenMgY3B1IHV0aWxzIGFyZSAyLjV4fjN4IG9mIGZpbGVzdG9yZSwgdGhpcyBwcm9iYWJseSB3
+aWxsIGhvbGQgYmFjayB0aGUgNEtSVyAyeCBwZXJmb3JtYW5jZSBnYWlucywgaW4gY2FzZSBvZiBs
+aW1pdGVkIGNwdSBwb3dlciBpbiBtdWx0aXBsZSBTU0QgcGVyIHNlcnZlci4NCg0KSmlhbmppYW4N
+Cj4NCj4gVGhhbmtzICYgUmVnYXJkcw0KPiBTb21uYXRoDQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVz
+c2FnZS0tLS0tDQo+IEZyb206IExJVSwgRmVpIFttYWlsdG86amFtZXMubGl1QGFsaWJhYmEtaW5j
+LmNvbV0NCj4gU2VudDogU3VuZGF5LCBKYW51YXJ5IDIyLCAyMDE3IDExOjMyIFBNDQo+IFRvOiBT
+b21uYXRoIFJveTsgTWFyayBOZWxzb24gKG1uZWxzb25AcmVkaGF0LmNvbSk7IFNhZ2UgV2VpbCAN
+Cj4gKHN3ZWlsQHJlZGhhdC5jb20pDQo+IENjOiBjZXBoLWRldmVsDQo+IFN1YmplY3Q6IFJlOiBC
+bHVlU3RvcmU6IE11bHRpIHNoYXJkZWQga3YgcHVsbCByZXF1ZXN0DQo+DQo+IEhpIFNvbW5hdGjv
+vIwNCj4gICBUaGUgZGF0YSBpcyBwcmV0dHkgcHJvbWlzaW5nIC4gRXNwZWNpYWxseSB3ZSBzYXcg
+YWxtb3N0IGRvdWJsZSBwZXJmb3JtYW5jZSBnYWluIGluIDRrIHJ3IGNvbXBhcmluZyB0byBmaWxl
+c3RvcmUuIEV2ZW4gY29tcGFyaW5nIHdpdGggUm9ja3NEQiwgWlMgaGF2ZSBhIGJpZyBwZXJmb3Jt
+YW5jZSBnYWluICBhcyB3ZWxsLiBUaGF04oCZcyBhIGJpZyBhY2hpZXZlbWVudCBpbiBsYXN0IHNl
+dmVyYWwgbW9udGguIENhbiBJIGFzc3VtZSBaUyB3aWxsIGhhdmUgYWR2YW50YWdlIGluIHJlZCBw
+ZXJmb3JtYW5jZSBjb21wYXJpbmcgdG8gUm9ja3NEQiBiZWNhdXNlIG9mIEIrIHRyZWUgdXNlZCBp
+biBaUz8gYXJlIHlvdSBndXlzIGhhdmluZyBhbnkgcGVyZm9ybWFuY2UgZGF0YSBsaWtlIDE2SyBS
+Vy9SUiBmb3IgcmVmZXJlbmNlPw0KPg0KPiAgIFRoYW5rcywNCj4gICAgSmFtZXMNCj4g5pys6YKu
+5Lu25Y+K5YW26ZmE5Lu25ZCr5pyJ6Zi/6YeM5be05be06ZuG5Zui55qE5ZWG5Lia56eY5a+G5L+h
+5oGv77yM5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye655qE5Liq5Lq65ZKM
+576k57uE77yM56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP5L2/55So77yI5YyF
+5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5ZywDQo+IOazhOmcsuOAgeWkjeWItuWSjOaV
+o+WPke+8ieacrOmCruS7tuWPiuWFtumZhOS7tuS4reeahOS/oeaBr++8jOWmguaenOaCqOmUmeaU
+tuacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumCruS7tumAmuefpeWPkeS7tuS6uuW5
+tuWIoOmZpOacrOmCruS7tuOAgg0KPiBUaGlzIGVtYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29u
+dGFpbiBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBBbGliYWJhIEdyb3VwLndoaWNoIGlz
+IGludGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMg
+bGlzdGVkIGFib3ZlLkFueSB1c2Ugb2YgaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBh
+bnkgd2F5KGluY2x1ZGluZyxidXQgbm90IGxpbWl0ZWQgdG8sdG90YWwgb3IgcGFydGlhbCBkaXNj
+bG9zdXJlLHJlcHJvZHVjdGlvbiBvciBkaXNzZW1pbmF0aW9uKWJ5IHBlcnNvbnMgb3RoZXIgdGhh
+biB0aGUgaW50ZW5kZWQgcmVjaXBpZW50KHMpIGlzIHByb2hpYml0ZWQuSWYgeW91IHJlY2VpdmUg
+dGhpcyBlbWFpbCBpbiBlcnJvcixwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXIgYnkgcGhvbmUgb3Ig
+ZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdC4NCj4NCj4gT24gMS8yMy8xNywgMTI6NDAg
+UE0sICJTb21uYXRoIFJveSIgPFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4NCj4g
+ICAgIEhpIEphbWVzLA0KPiAgICAgU29ycnksIGlmIEkgd2FzIG5vdCBjbGVhciBlYXJsaWVyLiBU
+aGUgM3JkIHNoZWV0IGluIHRoZSB4bHMgaXMgd2l0aCBibHVlc3RvcmUgKyByb2NrcyAobm90IFpT
+KSAgYW5kIHNvbGUgcHVycG9zZSBvZiB0aGF0IGlzIHRvIGRlbW9uc3RyYXRlIHRoZSBiZW5lZml0
+IG9mIG11bHRpIGt2IHN5bmMgdGhyZWFkcy4NCj4gICAgIFRoZSB0ZXN0IEkgcmFuIGhlcmUgd2l0
+aG91dCBwcmVjb25kaXRpb25pbmcgdGhlIGltYWdlIHVubGlrZSBzaGVldCAxIGFuZCAyLiBUaGlz
+IGlzIHdoeSB3ZSBhcmUgc2VlaW5nIHRoZSBkcm9wIGFuZCBpdCBpcyBtb3N0bHkgYmVjYXVzZSBv
+ZiByb2NrcyBjb21wYWN0aW9uLg0KPg0KPiAgICAgVGhhbmtzICYgUmVnYXJkcw0KPiAgICAgU29t
+bmF0aA0KPg0KPiAgICAgLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gICAgIEZyb206IExJ
+VSwgRmVpIFttYWlsdG86amFtZXMubGl1QGFsaWJhYmEtaW5jLmNvbV0NCj4gICAgIFNlbnQ6IFN1
+bmRheSwgSmFudWFyeSAyMiwgMjAxNyA3OjA0IFBNDQo+ICAgICBUbzogU29tbmF0aCBSb3k7IE1h
+cmsgTmVsc29uIChtbmVsc29uQHJlZGhhdC5jb20pOyBTYWdlIFdlaWwgKHN3ZWlsQHJlZGhhdC5j
+b20pDQo+ICAgICBDYzogY2VwaC1kZXZlbA0KPiAgICAgU3ViamVjdDogUmU6IEJsdWVTdG9yZTog
+TXVsdGkgc2hhcmRlZCBrdiBwdWxsIHJlcXVlc3QNCj4NCj4gICAgIEhpIFNvbW5hdGgsDQo+ICAg
+ICAgICBUaGFua3MgZm9yIHNoYXJpbmcgZGF0YS4gIFdlIGNhbiBzZWUgaW9wcyBkcm9wcyBhIGxv
+dCBmcm9tIDQwMDAwIHRvIH4xNTAwMCBhcyB0aW1lIGdvaW5nIGJ5IC4gQW55IHBhcnRpY3VsYXIg
+cmVhc29uIGZvciBaZXRhU2NhbGUgdG8gZHJvcCB0aGF0IG11Y2ggaW4gdGhlIHRpbWUgcGVyaW9k
+Pw0KPg0KPiAgICAgICAgUmVnYXJkcywNCj4gICAgICAgIEphbWVzDQo+DQo+ICAgICDmnKzpgq7k
+u7blj4rlhbbpmYTku7blkKvmnInpmL/ph4zlt7Tlt7Tpm4blm6LnmoTllYbkuJrnp5jlr4bkv6Hm
+ga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJflh7rnmoTkuKrkurrlkozn
+vqTnu4TvvIznpoHmraLku7vkvZXlhbbku5bkurrku6Xku7vkvZXlvaLlvI/kvb/nlKjvvIjljIXm
+i6zkvYbkuI3pmZDkuo7lhajpg6jmiJbpg6jliIblnLDms4TpnLLjgIHlpI3liLblkozmlaPlj5Hv
+vInmnKzpgq7ku7blj4rlhbbpmYTku7bkuK3nmoTkv6Hmga/vvIzlpoLmnpzmgqjplJnmlLbmnKzp
+gq7ku7bvvIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDp
+maTmnKzpgq7ku7bjgIINCj4gICAgIFRoaXMgZW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250
+YWluIGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIEFsaWJhYmEgR3JvdXAud2hpY2ggaXMg
+aW50ZW5kZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2UgYWRkcmVzcyBpcyBs
+aXN0ZWQgYWJvdmUuQW55IHVzZSBvZiBpbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFu
+eSB3YXkoaW5jbHVkaW5nLGJ1dCBub3QgbGltaXRlZCB0byx0b3RhbCBvciBwYXJ0aWFsIGRpc2Ns
+b3N1cmUscmVwcm9kdWN0aW9uIG9yIGRpc3NlbWluYXRpb24pYnkgcGVyc29ucyBvdGhlciB0aGFu
+IHRoZSBpbnRlbmRlZCByZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC5JZiB5b3UgcmVjZWl2ZSB0
+aGlzIGVtYWlsIGluIGVycm9yLHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSBwaG9uZSBvciBl
+bWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0Lg0KPg0KPiAgICAgT24gMS8yMS8xNywgNzoz
+MiBBTSwgIlNvbW5hdGggUm95IiA8Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgb24g
+YmVoYWxmIG9mIFNvbW5hdGguUm95QHNhbmRpc2suY29tPiB3cm90ZToNCj4NCj4gICAgICAgICBI
+aSBNYXJrL1NhZ2UsDQo+ICAgICAgICAgUGxlYXNlIGZpbmQgdGhlIGRpZmZlcmVudCBjb21wYXJp
+c29uIGRhdGEgaW4gdGhlIGZvbGxvd2luZyBkb2N1bWVudC4NCj4NCj4gICAgICAgICANCj4gaHR0
+cHM6Ly9kcml2ZS5nb29nbGUuY29tL2ZpbGUvZC8wQjdXLVMwel95bU1KVVhWbU9VaElOVTAxYzNj
+L3ZpZXc/dXNwPQ0KPiBzaGFyaW5nDQo+DQo+ICAgICAgICAgUGxlYXNlIGRvd25sb2FkIHRoZSBk
+b2MgKGFuZCBvcGVuIGluIHhscykgYXMgZ29vZ2xlIGlzIG5vdCBhYmxlIHRvIHNob3cgdGhlIGdy
+YXBocyBwcm9wZXJseS4NCj4NCj4gICAgICAgICBTZXR1cDoNCj4gICAgICAgICAtLS0tLS0NCj4g
+ICAgICAgICBTaW5nbGUgb3NkIG9uIDcwMEcgbnZtZSBkcml2ZSBhbmQgc2luZ2xlIG9zZCBvbiAy
+IDcwMEcgbnZtZSBkcml2ZSAoTFZNIGVkKQ0KPiAgICAgICAgIDQ4IGNvcmUgc2VydmVyLCA0MEcg
+bGluaw0KPiAgICAgICAgIFRlc3QgaXMgb25seSBmb3IgNEsgUlcgZnJvbSBmaW8uDQo+DQo+ICAg
+ICAgICAgMS4gVGhlIGZpcnN0IHNoZWV0IGlzIHNob3dpbmcgaW9wcyBhbmQgY3B1IHV0aWxpemF0
+aW9uIGZvciBCbHVlc3RvciArIHJvY2tzICwgQmx1ZXN0b3JlICsgWnMgYW5kIGZpbGVzdG9yZS4N
+Cj4gICAgICAgICBUaGlzIGlzIHdpdGggc21hbGwgc2hhcmRzIGFuZCB3aXRoIHRoZSBoYWNrIHdl
+IGFyZSB1c2luZyBmb3IgcHJlY29uZGl0aW9uaW5nLg0KPiAgICAgICAgIEJsdWVzdG9yZSArIHJv
+Y2tzIHdpdGggMTZLIG1pbl9hbGxvYyBhbmQgWlMgd2l0aCA0ayBtaW5fYWxsb2MNCj4NCj4gICAg
+ICAgICBXRSBjYW4gc2VlIEJsdWVzdG9yZSB3aXRoIHJvY2tzIGFuZCBaUyBpcyBiZWhhdmluZyBh
+bG1vc3Qgc2ltaWxhcmx5IGZvciBhIDYwMEcgaW1hZ2UgYW5kIGl0IGlzIH4yWCBoaWdoZXIgdGhh
+biBmaWxlc3RvcmUuIFpTIGNwdSB1dGlsaXphdGlvbiBhbmQgV0EgKGRhdGEgbm90IHRoZXJlIGlu
+IHhscykgaXMgaGlnaGVyIHRoYW4gcm9ja3MuDQo+DQo+ICAgICAgICAgMi4gTmV4dCwgSSBjcmVh
+dGVkIDMgTFZNIHZvbHVtZXMgKGRhdGEvZGIvd2FsKSBvdXQgb2YgMiBOVk1lIGRyaXZlcyBhbmQg
+Y3JlYXRlZCBhbiBpbWFnZSBvZiAxVEIuIFNlZSBpbiB0aGUgbmV4dCBzaGVldCBob3cgYmx1ZXN0
+b3JlICsgcm9ja3MgcGVyZm9ybWFuY2UgY2FtZSBkb3duLiBEaWRuJ3QgaGF2ZSB0aW1lIGZvciB0
+aGUgZmlsZXN0b3JlIGRhdGEgYnV0IGV4cGVjdGF0aW9uIGlzIGl0IHdpbGwgcmVtYWluIHNpbWls
+YXIgdG8gcHJldmlvdXMgc2hlZXQuIE5vdywgWlMgaXMgcnVubmluZyB3aXRoIDE2ayBtaW5fYWxs
+b2Mgc2l6ZSBoZXJlIHdpdGggdGhlIHByb3RvdHlwZSBzaGltIGltcGxlbWVudGF0aW9uIEkgd2Fz
+IHRhbGtpbmcgYWJvdXQgaW4gdGhlIHN0YW5kdXAuDQo+ICAgICAgICAgVGhpcyBpcyB3aXRoIHRo
+aXMgaW1wbGVtZW50YXRpb24gaXMgbm90IGZ1bGx5IGNyYXNoIHNhZmUgYnV0IGV4cGVjdGF0aW9u
+IGlzIHdoZW4gd2Ugd2lsbCBiZSBkb25lIHdpdGggaW1wbGVtZW50aW5nIHRoaXMgd3JpdGUgYWhl
+YWQgbG9nIGltcGxlbWVudGF0aW9uIGluIFpTIGl0IHNob3VsZCBwcm9kdWNlIHNpbWlsYXIgdGhy
+b3VnaHB1dC4NCj4gICAgICAgICBUaGlzIGlzIGdpdmluZyB+OTAlIGJlbmVmaXIgb3ZlciByb2Nr
+cyBhbmQgWlMgd2l0aCA0ayBtaW5fYWxsb2MgKGxpa2UgcHJldmlvdXMgc2hlZXQpIGlzIGdpdmlu
+ZyB+NTAlIGJlbmVmaXQgKG5vdCBwbG90dGVkIGhlcmUpLiBDcHUgdXRpbCBpcyBzaW1pbGFyIHRv
+IHJvY2tzLg0KPg0KPg0KPiAgICAgICAgIDMuIFRoaXMgc2hlZXQgaXMgdG8gZGVtb25zdHJhdGUg
+dGhlIGJlbmVmaXQgb2Ygc2luZ2xlIGt2IHN5bmMgdnMgbXVsdGkga3Ygc3luYyB3aXRoIHJvY2tz
+LiBXaXRoIFpTIHdlICpuZWVkKiBtdWx0aSBrdiBidXQgd2l0aCByb2NrcyBhcyB5b3UgY2FuIHNl
+ZSB3ZSBhcmUgZ2FpbmluZyAofjIwJSkgb25seSBkdXJpbmcgdGhlIHBlYWsgcGVyZm9ybWFuY2Uu
+DQo+ICAgICAgICAgTGF0ZXIgZGIgaXMgZ2V0dGluZyBpbiB0aGUgd2F5LiBJIHRoaW5rIHBlYWsg
+cGVyZm9ybWFuY2UgaXMgbGltaXRlZCB0byBkYXkgYnkgb3NkIHVwc3RyZWFtICwgaWYgaW4gZnV0
+dXJlIHdlIGNhbiBvcHRpbWl6ZSB0aGF0IGFuZCBhbGxvdyBtb3JlIHRyYWZmaWMgdG8gY29tZSBp
+biB0aGUgQmx1ZXN0b3JlIChvYmplY3RzdG9yZSkgLCB0aGUgYmVuZWZpdCBvZiBtdWx0aXBsZSBz
+aGFyZGVkIGt2IHN5bmMgd2lsbCBiZSBtb3JlLiBIZXJlIGlzIHRoZSBwdWxsIHJlcXVlc3QgZm9y
+IHRoaXMuLg0KPg0KPiAgICAgICAgIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8x
+MzAzNw0KPg0KPiAgICAgICAgIFRoYW5rcyAmIFJlZ2FyZHMNCj4gICAgICAgICBTb21uYXRoDQo+
+DQo+ICAgICAgICAgX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4NCj4gICAgICAg
+ICBQTEVBU0UgTk9URTogVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGVsZWN0cm9u
+aWMgbWFpbCBtZXNzYWdlIGlzIGludGVuZGVkIG9ubHkgZm9yIHRoZSB1c2Ugb2YgdGhlIGRlc2ln
+bmF0ZWQgcmVjaXBpZW50KHMpIG5hbWVkIGFib3ZlLiBJZiB0aGUgcmVhZGVyIG9mIHRoaXMgbWVz
+c2FnZSBpcyBub3QgdGhlIGludGVuZGVkIHJlY2lwaWVudCwgeW91IGFyZSBoZXJlYnkgbm90aWZp
+ZWQgdGhhdCB5b3UgaGF2ZSByZWNlaXZlZCB0aGlzIG1lc3NhZ2UgaW4gZXJyb3IgYW5kIHRoYXQg
+YW55IHJldmlldywgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uLCBvciBjb3B5aW5nIG9mIHRo
+aXMgbWVzc2FnZSBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLiBJZiB5b3UgaGF2ZSByZWNlaXZlZCB0
+aGlzIGNvbW11bmljYXRpb24gaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlciBieSB0
+ZWxlcGhvbmUgb3IgZS1tYWlsIChhcyBzaG93biBhYm92ZSkgaW1tZWRpYXRlbHkgYW5kIGRlc3Ry
+b3kgYW55IGFuZCBhbGwgY29waWVzIG9mIHRoaXMgbWVzc2FnZSBpbiB5b3VyIHBvc3Nlc3Npb24g
+KHdoZXRoZXIgaGFyZCBjb3BpZXMgb3IgZWxlY3Ryb25pY2FsbHkgc3RvcmVkIGNvcGllcykuDQo+
+DQo+ICAgICAgICAgLS0NCj4gICAgICAgICBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDog
+c2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4NCj4gICAgICAgICB0aGUg
+Ym9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiAgICAgICAg
+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIA0KPiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
+ZG9tby1pbmZvLmh0bWwNCj4NCj4NCj4NCj4NCj4NCj4NCg==
