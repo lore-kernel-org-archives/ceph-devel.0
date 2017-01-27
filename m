@@ -1,48 +1,82 @@
-From: Theodore Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH 8/8] Revert "ext4: fix wrong gfp type under transaction"
-Date: Fri, 27 Jan 2017 11:40:42 -0500
-Message-ID: <20170127164042.2o3bnyopihcb224g@thunk.org>
-References: <20170117151817.GR19699@dhcp22.suse.cz>
- <20170117155916.dcizr65bwa6behe7@thunk.org>
- <20170117161618.GT19699@dhcp22.suse.cz>
- <20170117172925.GA2486@quack2.suse.cz>
- <20170119083956.GE30786@dhcp22.suse.cz>
- <20170119092236.GC2565@quack2.suse.cz>
- <20170119094405.GK30786@dhcp22.suse.cz>
- <20170126074455.GC8456@dhcp22.suse.cz>
- <20170127061318.xd2qxashbl4dajez@thunk.org>
- <20170127093735.GB4143@dhcp22.suse.cz>
+From: Ming Lin <minggr@gmail.com>
+Subject: Re: code question: PGQueueable VS OpRequestRef
+Date: Fri, 27 Jan 2017 10:26:43 -0800
+Message-ID: <CAF1ivSZxHNO5SUD70_Q1Eex5tzzzuLoZZn5J9dmEoLVtDN_XyQ@mail.gmail.com>
+References: <CAF1ivSYfmH9hezSc-Vcqdd7nU6y33TDZ1E9KVHm-XJRz+1w5dw@mail.gmail.com>
+ <CACKY0b8kB3FsG-vfRDXuZW=eXUD8R+HyWUZ6dCbpuJaJno=mUA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170127093735.GB4143@dhcp22.suse.cz>
-Sender: owner-linux-mm@kvack.org
-To: Michal Hocko <mhocko@kernel.org>
-Cc: Jan Kara <jack@suse.cz>, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-it0-f51.google.com ([209.85.214.51]:34020 "EHLO
+        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750735AbdA0S0p (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Jan 2017 13:26:45 -0500
+Received: by mail-it0-f51.google.com with SMTP id k200so10728246itb.1
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Jan 2017 10:26:45 -0800 (PST)
+In-Reply-To: <CACKY0b8kB3FsG-vfRDXuZW=eXUD8R+HyWUZ6dCbpuJaJno=mUA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: liuchang0812 <liuchang0812@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Jan 27, 2017 at 10:37:35AM +0100, Michal Hocko wrote:
-> If this ever turn out to be a problem and with the vmapped stacks we
-> have good chances to get a proper stack traces on a potential overflow
-> we can add the scope API around the problematic code path with the
-> explanation why it is needed.
+On Fri, Jan 27, 2017 at 3:33 AM, liuchang0812 <liuchang0812@gmail.com> wrote:
+> Hi, Ming.
+>
+> PGQueueable class has a constructor as: `PGQueueable(OpRequestRef
+> op)`, which does not have `explicit`, so CPP compiler translates
+> OpRequestRef to PGQueueable in `
+> osd->op_wq.queue(make_pair(PGRef(this), op));`, as `
+> osd->op_wq.queue(make_pair(PGRef(this), PGQueueable(op)));`
 
-Yeah, or maybe we can automate it?  Can the reclaim code check how
-much stack space is left and do the right thing automatically?
+Hi Chang,
 
-The reason why I'm nervous is that nojournal mode is not a common
-configuration, and "wait until production systems start failing" is
-not a strategy that I or many SRE-types find.... comforting.
+Thanks for the explanation. I just verify it with below test code.
 
-So if we can assure ourselves that the right thing will happen
-automatically, or that lockdep will detect a required GFP_NOFS when
-running tests, the happier I'll be.
+class Foo {
 
-					- Ted
+};
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+class Bar {
+public:
+        Bar(Foo f)
+        {
+                cout << "Bar constructor called" << endl;
+        }
+};
+
+void test(Bar t)
+{
+}
+
+int main()
+{
+        Foo f;
+
+        test(f);
+
+        return 0;
+}
+
+>
+>
+>
+> 2017-01-27 15:41 GMT+08:00 Ming Lin <minggr@gmail.com>:
+>> void PG::queue_op(OpRequestRef& op)
+>> {
+>> ...
+>>   osd->op_wq.queue(make_pair(PGRef(this), op));
+>>
+>>
+>> class OSDService {
+>> ....
+>>   ShardedThreadPool::ShardedWQ < pair <PGRef, PGQueueable> > &op_wq;
+>>
+>> "op" is of type OpRequestRef, but op_wq second is of type PGQueueable
+>>
+>> How does this work? Is "PGQueueable" same as "OpRequestRef"?
+>>
+>> Thanks.
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
