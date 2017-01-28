@@ -1,46 +1,99 @@
-From: Mustafa Muhammad <mustafa1024m@gmail.com>
-Subject: Re: Lots of radosgw-admin commands fail after upgrade
-Date: Sat, 28 Jan 2017 15:32:30 +0300
-Message-ID: <CAFehDbCNn+N9By8NgKV-CGpse8aQSR0tw+MpdF0axUD08q789Q@mail.gmail.com>
-References: <CAFehDbCTSPLmh8LY03q0cfV1v2ACzF24ZShAk+OgSXYJLVjPqg@mail.gmail.com>
- <CABo9giRVAb-+2zvKWTWhRVF4fftG=szDxgrXBXNmDpH-yQrWMw@mail.gmail.com>
- <CAFehDbC6yBsbQCPVmwE+DCod-Xmbafp1MU_r1wYZ0xd_q3Dt3Q@mail.gmail.com>
- <CABo9giTbFUrW1uE4iO5c5=4S4sT9mtxoD+8gi1vemcLCf3RVew@mail.gmail.com>
- <CAFehDbAeF6UqhGHUVYOjvTDhE-+qDAGfLPnk==bbjEUypzeWPw@mail.gmail.com>
- <CABo9giRgopdCqURUJQX3OHCG=O_Q17ZuoJxeX-1-tc1aXpzN1g@mail.gmail.com>
- <CAFehDbDaDdMHTtxLqq8kjd5Xd9RePqDDCXtJm7_7UMCD7Q3LOg@mail.gmail.com>
- <CABo9giTWVHYGdrqpmtYP8-iDY5tM+a4MrBczwha27=g-HzmRcw@mail.gmail.com>
- <CAFehDbDDF0cMiHre0DnbSD2-sxc6cFubLVHSOs2HMTtLbkeKJA@mail.gmail.com>
- <CABo9giQWq_unoXu_qwEkmrqod9rLk8bmUh+k_jotyvAAW7L+9Q@mail.gmail.com>
- <CAFehDbBO4bsPPuWqEJ_K0L8oh3Wj=L=NscZgR_hjoJ5e=ZPvvA@mail.gmail.com>
- <CABo9giS-FajcA0gcC1PR4v+4rnVLRyph_DQKkF-bSbKM7RM47g@mail.gmail.com>
- <CAFehDbBvHcNGy61X2o_7aw+VuouL_SGRC_TFB=am69ENL81sZw@mail.gmail.com>
- <CABo9giQaYsahOM4jxcueT=DU_==KRwJBfdz2wPkT9GidN58_+g@mail.gmail.com>
- <CAFehDbCfSvvPW7Sk0_4fM5nbKuATpDyd0A=uFi4Y_+ceL8Q6yg@mail.gmail.com>
- <CABo9giQ-z99UtL7YfVmqwRVSuB5gh1tCpqvCSXvjGsVQA-CDCw@mail.gmail.com>
- <CAFehDbDmX0f8LjkFKOA=fv5Tre7L8Emx-QcLyB287pV5HoczTg@mail.gmail.com>
- <CABo9giS3GneAtxu5zGvo2=qq07TGPRtzW_qHOfytQ_WrxRdoow@mail.gmail.com>
- <CAFehDbDc+RGPqBMJ08xN+Tub0=SazcS7K3nU0BMSyLU3jT=6AQ@mail.gmail.com>
- <CABo9giTE03AOQz7hEbZEkmfZVxpVjy9xNGRD015=Qj0aMbmp9A@mail.gmail.com>
- <CAFehDbBQyg0pzven-Bvy5H--OkTf_jqXqcjv7ctNbNKSQ4o9jA@mail.gmail.com> <CABo9giTs-q+cb9Eu45jRb-cJAtJ-4fGT506-DFKsSJCryGT+XA@mail.gmail.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: End of life for Ceph Hammer 0.94.x ?
+Date: Sat, 28 Jan 2017 10:08:03 -0500
+Message-ID: <CA+aFP1AdmMPXwg9ukAo38SXKaBm+CFOY=rTf9pq36J--QeWqow@mail.gmail.com>
+References: <CAH7C+PqR_gGMp06QT3cZwND3Ju5RZPdqFreA-EnixLhn8rAHYQ@mail.gmail.com>
+ <CAMMFjmEkWx7sr_2VD+V-jDycr_0LrKEMqN0UyieR3KOTsX3K7Q@mail.gmail.com> <5d96f9ed-fcbe-10df-08ea-3bebe373ac2f@suse.cz>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f180.google.com ([209.85.217.180]:34444 "EHLO
-        mail-ua0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750893AbdA1Mcc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Jan 2017 07:32:32 -0500
-Received: by mail-ua0-f180.google.com with SMTP id 35so222958756uak.1
-        for <ceph-devel@vger.kernel.org>; Sat, 28 Jan 2017 04:32:31 -0800 (PST)
-In-Reply-To: <CABo9giTs-q+cb9Eu45jRb-cJAtJ-4fGT506-DFKsSJCryGT+XA@mail.gmail.com>
+Received: from mail-lf0-f50.google.com ([209.85.215.50]:34662 "EHLO
+        mail-lf0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751289AbdA1PIs (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 28 Jan 2017 10:08:48 -0500
+Received: by mail-lf0-f50.google.com with SMTP id v186so175470807lfa.1
+        for <ceph-devel@vger.kernel.org>; Sat, 28 Jan 2017 07:08:05 -0800 (PST)
+In-Reply-To: <5d96f9ed-fcbe-10df-08ea-3bebe373ac2f@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Orit Wasserman <owasserm@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Yuri Weinstein <yweinste@redhat.com>, David Moreau Simard <dms@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, ceph-users@lists.ceph.org
 
-I reported:
+I think the same release page states that an LTS release will continue
+to receive updates until two subsequent LTS releases are available
+(i.e. Hammer would EOL when Luminous is released).  If we are EOLing
+Hammer due to the release of Kraken (or because Jewel is a necessary
+upgrade stepping point), should the release page verbiage be tweaked
+as well?
 
-http://tracker.ceph.com/issues/18725
-http://tracker.ceph.com/issues/18726
+On Fri, Jan 27, 2017 at 6:20 PM, Nathan Cutler <ncutler@suse.cz> wrote:
+> Hi David:
+>
+> As Yuri said, 0.94.10 is currently in final testing prior to release. I have
+> a PR [1] open to set the "actual retirement" date.
+>
+> Nathan
+>
+> [1] https://github.com/ceph/ceph/pull/13069
+>
+>
+> On 01/27/2017 09:55 PM, Yuri Weinstein wrote:
+>>
+>> We are testing a RC of 0.94.10 [1], I suspect that'd be "real" EOL of
+>> hammer.
+>>
+>> [1]: http://tracker.ceph.com/issues/17151
+>>
+>> Thx
+>> YuriW
+>>
+>> On Fri, Jan 27, 2017 at 11:44 AM, David Moreau Simard <dms@redhat.com>
+>> wrote:
+>>>
+>>> Hi,
+>>>
+>>> Hammer, as per the releases page [1] was scheduled to be EOL in November
+>>> 2016.
+>>> However, there is no "actual retirement" listed for Hammer yet.
+>>>
+>>> The latest version, 0.94.9, was released at the end of August 2016.
+>>>
+>>> I'd like to know if there is a plan for a formal/official EOL of
+>>> Hammer and, if so, if there will be a final dot release (ex: 0.94.10)
+>>> to flush whatever backports/bugfixes may be in the pipe.
+>>>
+>>> Thanks,
+>>>
+>>> [1]: http://docs.ceph.com/docs/master/releases/
+>>>
+>>> David Moreau Simard
+>>> Senior Software Engineer | Openstack RDO
+>>>
+>>> dmsimard = [irc, github, twitter]
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+> --
+> Nathan Cutler
+> Software Engineer Distributed Storage
+> SUSE LINUX, s.r.o.
+> Tel.: +420 284 084 037
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Sorry for the delay :)
+
+
+-- 
+Jason
