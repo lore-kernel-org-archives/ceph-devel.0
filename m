@@ -1,40 +1,36 @@
-From: "Mahalingam, Ganesh" <ganesh.mahalingam@intel.com>
-Subject: Debugging rados for bug #18576
-Date: Sat, 28 Jan 2017 01:35:26 +0000
-Message-ID: <B209D98D8385BE41BC4DE002C072AEBE5AEB6FEA@fmsmsx118.amr.corp.intel.com>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [Cluster-devel] [PATCH 8/8] Revert "ext4: fix wrong gfp type
+ under transaction"
+Date: Fri, 27 Jan 2017 23:32:15 -0800
+Message-ID: <20170128073215.GA19424@infradead.org>
+References: <20170117155916.dcizr65bwa6behe7@thunk.org>
+ <20170117161618.GT19699@dhcp22.suse.cz>
+ <20170117172925.GA2486@quack2.suse.cz>
+ <20170119083956.GE30786@dhcp22.suse.cz>
+ <20170119092236.GC2565@quack2.suse.cz>
+ <20170119094405.GK30786@dhcp22.suse.cz>
+ <20170126074455.GC8456@dhcp22.suse.cz>
+ <20170127061318.xd2qxashbl4dajez@thunk.org>
+ <20170127093735.GB4143@dhcp22.suse.cz>
+ <20170127164042.2o3bnyopihcb224g@thunk.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:35062 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750800AbdA1Bi3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 27 Jan 2017 20:38:29 -0500
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170127164042.2o3bnyopihcb224g@thunk.org>
+Sender: owner-linux-mm@kvack.org
+To: Theodore Ts'o <tytso@mit.edu>, Michal Hocko <mhocko@kernel.org>, Jan Kara <jack@suse.cz>, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
-I have been trying to figure out the actual error for bug #18576 [0] using a vstart environment, but have been unsuccessful in generating a proper backtrace for the issue. I have enabled debugging in the build using 
-"-DCMAKE_C_FLAGS="-O0 -g3 -gdwarf-4" -DCMAKE_BUILD_TYPE=Debug". 
+On Fri, Jan 27, 2017 at 11:40:42AM -0500, Theodore Ts'o wrote:
+> The reason why I'm nervous is that nojournal mode is not a common
+> configuration, and "wait until production systems start failing" is
+> not a strategy that I or many SRE-types find.... comforting.
 
-Thanks to Nathan Cutler who identified and linked the bug to #18696 [1] which shows a proper backtrace and might be the reason for the segfault experienced in the initial bug.  
+What does SRE stand for?
 
-I have enabled all possible debug messages in ceph.conf
-
-[global]
-                debug rados = 25
-                debug client = 25
-                debug finisher = 25
-                debug rbd = 25
-
-Are there other settings I am missing which will help me generate a proper gdb trace for this issue? Appreciate all the help.
-
---Ganesh
-
-[0] http://tracker.ceph.com/issues/18576
-[1] http://tracker.ceph.com/issues/18696
-
-
-
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
