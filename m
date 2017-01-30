@@ -1,89 +1,59 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Not starting a OSD journal
-Date: Sun, 29 Jan 2017 23:45:10 +0100
-Message-ID: <d250debe-dad0-042c-c9dc-988df7218a0e@suse.cz>
-References: <30ca4a82-d51a-c190-6e4c-0ac329644d04@digiware.nl>
- <351131ca-d626-3bba-833b-c3281a5b25e1@suse.cz>
- <611a59a0-3511-079b-e2a3-691342234510@digiware.nl>
+From: Michal Hocko <mhocko@kernel.org>
+Subject: Re: [PATCH 8/8] Revert "ext4: fix wrong gfp type under transaction"
+Date: Mon, 30 Jan 2017 09:12:10 +0100
+Message-ID: <20170130081210.GD8443@dhcp22.suse.cz>
+References: <20170117155916.dcizr65bwa6behe7@thunk.org>
+ <20170117161618.GT19699@dhcp22.suse.cz>
+ <20170117172925.GA2486@quack2.suse.cz>
+ <20170119083956.GE30786@dhcp22.suse.cz>
+ <20170119092236.GC2565@quack2.suse.cz>
+ <20170119094405.GK30786@dhcp22.suse.cz>
+ <20170126074455.GC8456@dhcp22.suse.cz>
+ <20170127061318.xd2qxashbl4dajez@thunk.org>
+ <20170127093735.GB4143@dhcp22.suse.cz>
+ <20170127164042.2o3bnyopihcb224g@thunk.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:54760 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750785AbdA2XDr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 29 Jan 2017 18:03:47 -0500
-In-Reply-To: <611a59a0-3511-079b-e2a3-691342234510@digiware.nl>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170127164042.2o3bnyopihcb224g@thunk.org>
+Sender: owner-linux-mm@kvack.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Jan Kara <jack@suse.cz>, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Willem:
+On Fri 27-01-17 11:40:42, Theodore Ts'o wrote:
+> On Fri, Jan 27, 2017 at 10:37:35AM +0100, Michal Hocko wrote:
+> > If this ever turn out to be a problem and with the vmapped stacks we
+> > have good chances to get a proper stack traces on a potential overflow
+> > we can add the scope API around the problematic code path with the
+> > explanation why it is needed.
+> 
+> Yeah, or maybe we can automate it?  Can the reclaim code check how
+> much stack space is left and do the right thing automatically?
 
-Sounds like you want to put your journals in a partition, not a file. 
-Since the Ceph journal uses the journal partition directly (without any 
-underlying filesystem), you will not have ZFS to worry about there.
+I am not sure how to do that. Checking for some magic value sounds quite
+fragile to me. It also sounds a bit strange to focus only on the reclaim
+while other code paths might suffer from the same problem.
 
-Nathan
+What is actually the deepest possible call chain from the slab reclaim
+where I stopped? I have tried to follow that path but hit the callback
+wall quite early.
+ 
+> The reason why I'm nervous is that nojournal mode is not a common
+> configuration, and "wait until production systems start failing" is
+> not a strategy that I or many SRE-types find.... comforting.
 
-On 01/29/2017 09:09 PM, Willem Jan Withagen wrote:
-> On 29-1-2017 17:21, Nathan Cutler wrote:
->>> I'm rummaging thru the options, but I do not really see an option to
->>> fully disable journaling?
->>>
->>> One of the reasons for testing that is that ZFS already has very good
->>> journaling functionality. So I'd like to see what kind of performance
->>> difference that makes.
->>>
->>> Or is this like setting journal-size to 0 or the path to /dev/null?
->>
->> All writes go through the journal, so it is required. However, the
->> journal can be in a file within the OSD data partition. To deploy an OSD
->> in this configuration, it should be sufficient to *not* supply the
->> JOURNAL positional parameter to "ceph-disk prepare" [1].
->>
->> By doing this, you of course lose the option of putting the journal on a
->> separate (SSD) disk. If your data partition is on an HDD, journal-on-SSD
->> is going to give superior performance.
->>
->> [1] See "ceph-disk prepare --help" for a description of these arguments.
->
-> 'mmm,
->
-> too bad..
->
-> Now the not so bad part is again that the journal is probablu oke in a
-> file on ZFS if that ZFS-pool is backed with a ZIL (the zfs journal) and
-> L2ARC (the ZFS cache).
->
-> The disadvantage is that there will be a double write per original write:
->  (ceph) first write is to the journal-file
->     (zfs) write is stored in the write queue
->     (zfs) write to ZIL(ssd) if write is synced write
->     (zfs) async write to disk when write slot is available
->  (ceph) read from zfs-store,
->     (zfs) delivers data either arc(ram) or l2arc(ssd) or HD
->  (ceph) writes data to filestore.
->     (zfs) write is stored in the write queue
->     (zfs) write to ZIL(ssd) if write is synced write
->     (zfs) async write to disk when write slot is available
->
-> And I hoped to forgo the Ceph journal write/read cycle.
->
-> The other way to do this is to not use a ZIL in ZFS and depend on the
-> journal in Ceph. But then sync writes to ZFS without ZIL is not a real
-> sensible thing to do...
-> But then it will burn double SSD space and double write cycles.
->
-> Another division would be to create a separate ZFS pool that has both
-> ZIL and L2ARC which is only used for the journals...
-> But then it is the question if the actual writes to the store are also
-> done synchronous? Because then that would also again require a ZIL.
->
-> Now it would not be so bad because all ZILs are like 1Gb in size.
-> But in the end it will impact in the available bandwidth of the SSDs.
->
-> --WjW
->
-> 	
->
+I understand that but I would be much more happier if we did the
+decision based on the actual data rather than a fear something would
+break down.
+
+-- 
+Michal Hocko
+SUSE Labs
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
