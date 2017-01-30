@@ -1,182 +1,113 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: clone_range in BlueStore
-Date: Mon, 30 Jan 2017 14:18:20 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1701301417470.3654@piezo.novalocal>
-References: <ca59db38-bb73-991a-7a5b-1c8bd7b26789@mirantis.com>
+From: John Spray <jspray@redhat.com>
+Subject: mds: Doing fewer backtrace reads during rejoin (was: MDS flapping:
+ how to increase MDS timeouts?)
+Date: Mon, 30 Jan 2017 14:30:51 +0000
+Message-ID: <CALe9h7dCeP7yxOSTOPYkWPZ8L0WsFWFcBXW=c+z8=TWs771icA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34426 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932071AbdA3OS1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 30 Jan 2017 09:18:27 -0500
-In-Reply-To: <ca59db38-bb73-991a-7a5b-1c8bd7b26789@mirantis.com>
+Received: from mail-ot0-f174.google.com ([74.125.82.174]:35966 "EHLO
+        mail-ot0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753548AbdA3ObN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Jan 2017 09:31:13 -0500
+Received: by mail-ot0-f174.google.com with SMTP id 32so84709023oth.3
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Jan 2017 06:31:12 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>, Gregory Farnum <gfarnum@redhat.com>, Zheng Yan <ukernel@gmail.com>, Sage Weil <sweil@redhat.com>
+Cc: Burkhard Linke <Burkhard.Linke@computational.bio.uni-giessen.de>
 
-On Mon, 30 Jan 2017, Igor Fedotov wrote:
-> Hi Sage,
-> 
-> It looks like there is some bug somewhere in BlueStore/store_test/clone_range.
-> 
-> I'm occasionally hitting an assert on mismatched data in read result while
-> performing SyntheticMatrixCsumVsCompression/2 test case.
-> 
-> --- buffer mismatch between offset 0x7400 and 0xa200, total 0x19e00
-> --- expected:
-> 00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |................|
-> *
-> 
-> 00006c00  39 35 31 37 32 37 31 34  34 31 38 39 31 33 37 39 |9517271441891379|
-> 
-> <skipped>
-> 
-> 00007400  30 31 33 32 34 39 35 35  30 38 32 37 39 32 37 31 |0132495508279271|
-> 
-> 00007410  37 37 37 31 31 38 31 37  33 36 32 36 33 33 31 34 |7771181736263314|
-> 
-> --- actual:
-> 00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |................|
-> *
-> 00006c00  39 35 31 37 32 37 31 34  34 31 38 39 31 33 37 39 |9517271441891379|
-> 
-> <skipped>
-> 
-> 00007400  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |................|
-> *
-> 0000a200  32 35 32 32 38 33 31 34  35 38 37 36 34 35 36 33 |2522831458764563|
-> 
-> Multiple runs are required to hit that though...
-> 
-> I did some analysis and it seems that there are some issues with clone_range2
-> stuff.
-> 
-> First of all - do we have any limits prerequisites on src/dst offsets in this
-> request? E.g. should they be aligned similarly within alloc unit boundaries? I
-> recall some discussions on that a while ago.
-> 
-> store_test doesn't have any as far as I can see, e.g. (min_alloc_size =
-> 0x10000)
-> 
->  "ops": [
->         {
->             "op_num": 0,
->             "op_name": "clonerange2",
->             "collection": "555.0_head",
->             "src_oid":
-> "#555:3b000000:::OBJ_731aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:head#",
->             "dst_oid": "#555:c7000000:::OBJ_738:7cfc81ab#",
->             "src_offset": 107520,
-> `            "len": 78336,
->             "dst_offset": 27648
->         }
->     ]
-> 
-> This results in potentially invalid blobs for the destination objects, see
-> extent starting at 0x7400 below - it has blob offset = 0 and hence blob isn't
-> aligned with min_alloc_size:
+This case (see forwarded) is showing that our current rejoin code is
+handling situations with many capabilities quite badly -- I think we
+should try and improve this soon.
 
-Oh, right.
+One thought I have is to just throttle the number of open_inos that we
+do, so that we allow the cache to get populated with the already hit
+dirfrags before trying to load more backtraces, created a ticket for
+that here: http://tracker.ceph.com/issues/18730 (should be pretty
+simple and doable for luminous).  That would help in cases where many
+of the affected inodes were in the same directory (which I expect is
+all real workloads).
 
-Well, the good news is the OSD no longer has any callers for which the src 
-and dst clone_range offsets are different, so we could simply assert that 
-they match.  That's the simplest fix.  It's party a question of whether 
-we expect future cases where we will need to clone between offsets.  
-Perhaps we assert for now but don't clean up the interface in case 
-we need to backtrack later?
+There are probably other bigger changes we could make for this case,
+such as using the path passed in cap_reconnect_t to be smarter, or
+even adding a metadata pool structure that would provide super-fast
+lookup of backtraces for the N most recently touched ones -- not
+saying we necessarily want to go that far!
 
-Or we could do something more limited.  The problem below is less about 
-min_alloc_size and more that it's not block aligned, I think, right?  We 
-could make clone_range fall back to the read/write path if the alignment 
-does not match the block device...
+John
 
-sage
 
-> 
-> 2017-01-30 03:57:17.802440 7f0036a20700 15 bluestore(bluestore.test_temp_dir)
-> read 555.0_head #555:c7000000:::OBJ_738:7cfc81ab# 0x0~19e0
-> 0
-> 2017-01-30 03:57:17.802448 7f0036a20700 30 bluestore.OnodeSpace(0x55eb49789b78
-> in 0x55eb45dd0620) lookup
-> 2017-01-30 03:57:17.802450 7f0036a20700 30 bluestore.OnodeSpace(0x55eb49789b78
-> in 0x55eb45dd0620) lookup #555:c7000000:::OBJ_738:7cfc81a
-> b# hit 0x55eb49874700
-> 2017-01-30 03:57:17.802453 7f0036a20700 20 bluestore(bluestore.test_temp_dir)
-> _do_read 0x0~19e00 size 0x19e00 (105984)
-> 2017-01-30 03:57:17.802455 7f0036a20700 20 bluestore.onode(0x55eb49874700)
-> flush done
-> 2017-01-30 03:57:17.802456 7f0036a20700 30 bluestore.extentmap(0x55eb49874850)
-> fault_range 0x0~19e00
-> 2017-01-30 03:57:17.802457 7f0036a20700 30 bluestore(bluestore.test_temp_dir)
-> _dump_onode 0x55eb49874700 #555:c7000000:::OBJ_738:7cfc81a
-> b# nid 17377 size 0x19e00 (105984) expected_object_size 2097152
-> expected_write_size 4096 in 0 shards
-> 2017-01-30 03:57:17.802461 7f0036a20700 30 bluestore(bluestore.test_temp_dir)
-> _dump_extent_map  0x6c00~800: 0x3800~800 Blob(0x55eb5047a4
-> 60 blob([0x40190000~4000] csum+has_unused+shared crc32c/0x1000 unused=0xff)
-> ref_map(0x3800~800=1) SharedBlob(0x55eb4c2f49f0 sbid 0x3adf
-> loaded shared_blob(ref_map(0x40190000~4000=2))))
-> 2017-01-30 03:57:17.802469 7f0036a20700 30 bluestore(bluestore.test_temp_dir)
-> _dump_extent_map      csum: [0,0,f1e4ed4a,417bbe91]
-> 2017-01-30 03:57:17.802472 7f0036a20700 30 bluestore(bluestore.test_temp_dir)
-> _dump_extent_map  0x7400~12a00: 0x0~12a00 Blob(0x55eb4dc87
-> b80 blob([0x40194000~18000] csum+shared crc32c/0x1000) ref_map(0x0~12a00=1)
-> SharedBlob(0x55eb4c2f5180 sbid 0x3ae0 loaded shared_blob(ref
-> _map(0x40194000~18000=3))))
-> 2017-01-30 03:57:17.802479 7f0036a20700 30 bluestore(bluestore.test_temp_dir)
-> _dump_extent_map      csum: [d1f849c5,fbe516b8,518379f8,b8
-> b944c8,18b7be23,2b6562d5,51de5770,40988db7,bf7fd7f3,14744e41,eddcb459,639b3350,d038700c,80ffc21e,d7f4edb3,a7ae1a9,f123b379,dfb76444,8ac0
-> 3032,c1cbff33,629e4868,12d9f0ea,5d50ca8c,b7ce671d]
-> 2017-01-30 03:57:17.802484 7f0036a20700 30 bluestore(bluestore.test_temp_dir)
-> _dump_extent_map 0x0~18000 buffer(0x55eb45deb020 spa
-> ce 0x55eb4c2f51d8 0x0~18000 clean)
-> 2017-01-30 03:57:17.802487 7f0036a20700 30 bluestore(bluestore.test_temp_dir)
-> _do_read  hole 0x0~6c00
-> 2017-01-30 03:57:17.802490 7f0036a20700 20 bluestore(bluestore.test_temp_dir)
-> _do_read  blob Blob(0x55eb5047a460 blob([0x40190000~4000]
-> csum+has_unused+shared crc32c/0x1000 unused=0xff) ref_map(0x3800~800=1)
-> SharedBlob(0x55eb4c2f49f0 sbid 0x3adf loaded shared_blob(ref_map
-> (0x40190000~4000=2)))) need 0x3800~800 cache has 0x[]
-> 2017-01-30 03:57:17.802495 7f0036a20700 30 bluestore(bluestore.test_temp_dir)
-> _do_read    will read 0x6c00: 0x3800~800
-> 2017-01-30 03:57:17.802509 7f0036a20700 20 bluestore(bluestore.test_temp_dir)
-> _do_read  blob Blob(0x55eb4dc87b80 blob([0x40194000~18000]
->  csum+shared crc32c/0x1000) ref_map(0x0~12a00=1) SharedBlob(0x55eb4c2f5180
-> sbid 0x3ae0 loaded shared_blob(ref_map(0x40194000~18000=3))))
->  need 0x0~12a00 cache has 0x[0~12a00]
-> 2017-01-30 03:57:17.802515 7f0036a20700 30 bluestore(bluestore.test_temp_dir)
-> _do_read    use cache 0x7400: 0x0~12a00
-> 2017-01-30 03:57:17.802519 7f0036a20700 20 bluestore(bluestore.test_temp_dir)
-> _do_read  blob Blob(0x55eb5047a460 blob([0x40190000~4000]
-> csum+has_unused+shared crc32c/0x1000 unused=0xff) ref_map(0x3800~800=1)
-> SharedBlob(0x55eb4c2f49f0 sbid 0x3adf loaded
-> shared_blob(ref_map(0x40190000~4000=2)))) need 0x0x6c00:3800~800
-> 2017-01-30 03:57:17.802529 7f0036a20700 20 bluestore(bluestore.test_temp_dir)
-> _do_read    region 0x6c00: 0x3800~800 reading 0x3000~1000
-> 
-> I haven't unwind all the clone_range transformations that lead to this state
-> yet. In the example above source object already has the same unaligned extents
-> issue.
-> 
-> But anyway it appears that clone_range neither care nor assert on unaligned
-> input offsets...
-> 
-> I can share a couple of logs if needed..
-> 
-> Any comments?
-> 
-> Thanks,
-> 
-> Igor
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+---------- Forwarded message ----------
+From: Burkhard Linke <Burkhard.Linke@computational.bio.uni-giessen.de>
+Date: Mon, Jan 30, 2017 at 7:09 AM
+Subject: Re: [ceph-users] MDS flapping: how to increase MDS timeouts?
+To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+
+
+Hi,
+
+
+
+On 01/26/2017 03:34 PM, John Spray wrote:
+>
+> On Thu, Jan 26, 2017 at 8:18 AM, Burkhard Linke
+> <Burkhard.Linke@computational.bio.uni-giessen.de> wrote:
+>>
+>> HI,
+>>
+>>
+>> we are running two MDS servers in active/standby-replay setup. Recently we
+>> had to disconnect active MDS server, and failover to standby works as
+>> expected.
+>>
+>>
+>> The filesystem currently contains over 5 million files, so reading all the
+>> metadata information from the data pool took too long, since the information
+>> was not available on the OSD page caches. The MDS was timed out by the mons,
+>> and a failover switch to the former active MDS (which was available as
+>> standby again) happened. This MDS in turn had to read the metadata, again
+>> running into a timeout, failover, etc. I resolved the situation by disabling
+>> one of the MDS, which kept the mons from failing the now solely available
+>> MDS.
+>
+> The MDS does not re-read every inode on startup -- rather, it replays
+> its journal (the overall number of files in your system does not
+> factor into this).
+>
+>> So given a large filesystem, how do I prevent failover flapping between MDS
+>> instances that are in the rejoin state and reading the inode information?
+>
+> The monitor's decision to fail an unresponsive MDS is based on the MDS
+> not sending a beacon to the mon -- there is no limit on how long an
+> MDS is allowed to stay in a given state (such as rejoin).
+>
+> So there are two things to investigate here:
+>   * Why is the MDS taking so long to start?
+>   * Why is the MDS failing to send beacons to the monitor while it is
+> in whatever process that is taking it so long?
+
+
+Under normal operation our system has about 4.5-4.9 million active
+caps. Most of them (~ 4 millions) are associated to the machine
+running the nightly backups.
+
+I assume that during the rejoin phase, the MDS is renewing the
+clients' caps. We see massive amount of small I/O on the data pool (up
+to 30.000-40.000 IOPS) during the rejoin phase. Does the MDS need to
+access the inode information to renew a cap? This would explain the
+high number of IOPS and why the rejoin phase can take up to 20
+minutes.
+
+Not sure about the second question, since the IOPS should not prevent
+beacons from reaching the monitors. We will have to move the MDS
+servers to different racks during this week. I'll try to bump up the
+debug level before.
+
+
+Regards,
+Burkhard
+_______________________________________________
+ceph-users mailing list
+ceph-users@lists.ceph.com
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
