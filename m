@@ -1,73 +1,88 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v2 01/13] ceph: add new r_req_flags field to ceph_mds_request
-Date: Wed, 1 Feb 2017 20:10:34 +0100
-Message-ID: <CAOi1vP9BszmpzTfM-gC2+JGY4MZeJJfAZPhNh+uXYJpKKwHjqw@mail.gmail.com>
-References: <20170130161942.16537-1-jlayton@redhat.com> <20170201114914.20808-1-jlayton@redhat.com>
- <20170201114914.20808-2-jlayton@redhat.com> <CAOi1vP9hGnsqVMnZV7RO7f4AQUEFsnD0VeuAcumTOcQu2sZ8+Q@mail.gmail.com>
- <1485971230.20965.1.camel@redhat.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: hammer 0.94.10 QE status
+Date: Wed, 1 Feb 2017 19:12:57 +0000
+Message-ID: <CALe9h7d6Zf6qiW1ud2Qa_BvYia77Lg4LEKvEEq3X6g=GCLhjzQ@mail.gmail.com>
+References: <CAMMFjmHCAM6wmygytBDqwh89UOEex24_GGqrLJvXcOUS+QEg9A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:34036 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751123AbdBATKg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Feb 2017 14:10:36 -0500
-Received: by mail-wm0-f68.google.com with SMTP id c85so7619809wmi.1
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Feb 2017 11:10:35 -0800 (PST)
-In-Reply-To: <1485971230.20965.1.camel@redhat.com>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:33531 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751104AbdBATNT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Feb 2017 14:13:19 -0500
+Received: by mail-wm0-f48.google.com with SMTP id t18so31757219wmt.0
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Feb 2017 11:13:18 -0800 (PST)
+In-Reply-To: <CAMMFjmHCAM6wmygytBDqwh89UOEex24_GGqrLJvXcOUS+QEg9A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: "Development, Ceph" <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>, "Weil, Sage" <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Gregory Farnum <gfarnum@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>
 
-On Wed, Feb 1, 2017 at 6:47 PM, Jeff Layton <jlayton@redhat.com> wrote:
-> On Wed, 2017-02-01 at 15:08 +0100, Ilya Dryomov wrote:
->> On Wed, Feb 1, 2017 at 12:49 PM, Jeff Layton <jlayton@redhat.com> wrote:
->> > ...and start moving bool flags into it.
->> >
->> > Signed-off-by: Jeff Layton <jlayton@redhat.com>
->> > ---
->> >  fs/ceph/dir.c        | 2 +-
->> >  fs/ceph/mds_client.c | 2 +-
->> >  fs/ceph/mds_client.h | 4 +++-
->> >  3 files changed, 5 insertions(+), 3 deletions(-)
->> >
->> > diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
->> > index d4385563b70a..04fa4ae3deca 100644
->> > --- a/fs/ceph/dir.c
->> > +++ b/fs/ceph/dir.c
->> > @@ -371,7 +371,7 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
->> >                 /* hints to request -> mds selection code */
->> >                 req->r_direct_mode = USE_AUTH_MDS;
->> >                 req->r_direct_hash = ceph_frag_value(frag);
->> > -               req->r_direct_is_hash = true;
->> > +               set_bit(CEPH_MDS_R_DIRECT_IS_HASH, &req->r_req_flags);
->>
->> Hi Jeff,
->>
->> Just a couple of nits:
->>
->> These are atomic -- should probably mention in the commit message why
->> is atomicity needed.
->>
+On Wed, Feb 1, 2017 at 4:52 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
+> Here is snapshot of hammer 0.94.10 point release testing status.
 >
-> It's not strictly needed for most of this stuff. DIRECT_IS_HASH in
-> particular could just use __set_bit.
+> Suites were not tested on ubuntu 16.06 due to
+> http://tracker.ceph.com/issues/18382 and as a result were forced to test on
+> ubuntu 14.04 and centos 7.2 (note we don't have smithi with centos 7.3).
 >
-> The rest of the flags, I think are already protected from concurrent
-> writes by mutexes in the code. What I'm not sure of is whether they are
-> protected by the _same_ lock. That's a requirement if we mix all of the
-> flags together into the same word and don't want to use the atomic
-> *_bit macros.
+> There was an additional noise created by fact that since we tested last
+> hammer release in August 2016 we moved from gitbuilders to shaman build
+> system and it resulted in issues with some packages.
 >
-> I can look and see if that's possible. Even if it's not though, using
-> the atomic *_bit macros is generally not that expensive (particularly
-> in a situation where we're already using sleeping locks anyway).
+> Details of tests can be found here
+> http://tracker.ceph.com/issues/17151#note-61
+>
+> ======================
+> rados ubuntu - packaging issues, need approval - Josh
+> rados centos - packaging issues, need approval - Josh
+> ======================
+> rbd - PASSED
+> ======================
+> rgw ubuntu - PASSED
+> rgw centos - valgrind issues http://tracker.ceph.com/issues/18735, need
+> approval Yehuda, Sage
+> ======================
+> fs ubuntu - looks similar to v0.94.8, need Greg, John approval
+> fs centos - noise? need Greg, John review/approval
 
-Auditing for whether __set_bit, etc can be used instead is probably not
-worth it.  I'm not saying we shouldn't use atomic bitops here -- just
-wanted to get this explanation in the commit message.
+The MDL_WriteError one is the bug from when ENOSPC stuff was
+backported wrongly, the FileJournal/FileStore assertions are from
+btrfs.
 
-Thanks,
+Good to go.
 
-                Ilya
+John
+
+
+
+> ======================
+> krbd ubuntu - looks like the same in v0.94.8
+> http://tracker.ceph.com/issues/15895#note-33 need approval Jason, Ilya
+> krbd centos -  looks like the same in v0.94.8
+> http://tracker.ceph.com/issues/15895#note-33 need approval Jason, Ilya
+> ======================
+> kcephfs - PASSED
+> ======================
+> knfs - PASSED
+> ======================
+> hadoop - PASSED
+> ======================
+> samba - packaging issues, need approval - Greg, Sage
+> ======================
+> rest  - PASSED
+> ======================
+> ceph-deploy - Vasu is fixing, need approval Sage
+> ======================
+> upgrade/client-upgrade - PASSED
+> ======================
+> upgrade/firefly-x (hammer) - need Sage approval. maybe deprecate?
+> ======================
+> upgrade/hammer - PASSED
+> ======================
+> upgrade/hammer-x (jewel) - FAILED, need Sage approval. maybe deprecate?
+> ======================
+> powercycle - PASSED
+> ======================
+>
+> Thx
+> YuriW
