@@ -1,55 +1,73 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v2 13/13] ceph: do a LOOKUP in d_revalidate instead of GETATTR
-Date: Wed,  1 Feb 2017 06:49:14 -0500
-Message-ID: <20170201114914.20808-14-jlayton@redhat.com>
+Subject: [PATCH v2 06/13] ceph: move r_did_prepopulate into r_req_flags
+Date: Wed,  1 Feb 2017 06:49:07 -0500
+Message-ID: <20170201114914.20808-7-jlayton@redhat.com>
 References: <20170130161942.16537-1-jlayton@redhat.com>
  <20170201114914.20808-1-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50862 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:45964 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751389AbdBALtZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 1 Feb 2017 06:49:25 -0500
+        id S1751192AbdBALtV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 1 Feb 2017 06:49:21 -0500
 In-Reply-To: <20170201114914.20808-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com
 
-In commit c3f4688a08f (ceph: don't set req->r_locked_dir in
-ceph_d_revalidate), we changed the code to do a GETATTR instead of a
-LOOKUP as the parent info isn't strictly necessary to revalidate the
-dentry. What we missed there though is that in order to update the lease
-on the dentry after revalidating it, we _do_ need parent info.
-
-Change ceph_d_revalidate back to doing a LOOKUP instead of a GETATTR so
-that we can get the parent info in order to update the lease from
-ceph_fill_trace. Note that we set req->r_parent here, but we cannot set
-the CEPH_MDS_R_PARENT_LOCKED flag as we can't guarantee that it is.
-
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- fs/ceph/dir.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ fs/ceph/dir.c        | 2 +-
+ fs/ceph/inode.c      | 2 +-
+ fs/ceph/mds_client.h | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index b889a3b555cf..32248017e928 100644
+index 04fa4ae3deca..fba974dac48b 100644
 --- a/fs/ceph/dir.c
 +++ b/fs/ceph/dir.c
-@@ -1244,11 +1244,12 @@ static int ceph_d_revalidate(struct dentry *dentry, unsigned int flags)
- 			return -ECHILD;
+@@ -417,7 +417,7 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
+ 		fi->frag = frag;
+ 		fi->last_readdir = req;
  
- 		op = ceph_snap(dir) == CEPH_SNAPDIR ?
--			CEPH_MDS_OP_LOOKUPSNAP : CEPH_MDS_OP_GETATTR;
-+			CEPH_MDS_OP_LOOKUPSNAP : CEPH_MDS_OP_LOOKUP;
- 		req = ceph_mdsc_create_request(mdsc, op, USE_ANY_MDS);
- 		if (!IS_ERR(req)) {
- 			req->r_dentry = dget(dentry);
--			req->r_num_caps = op == CEPH_MDS_OP_GETATTR ? 1 : 2;
-+			req->r_num_caps = 2;
-+			req->r_parent = dir;
+-		if (req->r_did_prepopulate) {
++		if (test_bit(CEPH_MDS_R_DID_PREPOPULATE, &req->r_req_flags)) {
+ 			fi->readdir_cache_idx = req->r_readdir_cache_idx;
+ 			if (fi->readdir_cache_idx < 0) {
+ 				/* preclude from marking dir ordered */
+diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+index bd2e94a78057..31827f3dcef0 100644
+--- a/fs/ceph/inode.c
++++ b/fs/ceph/inode.c
+@@ -1633,7 +1633,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+ 	}
+ out:
+ 	if (err == 0 && skipped == 0) {
+-		req->r_did_prepopulate = true;
++		set_bit(CEPH_MDS_R_DID_PREPOPULATE, &req->r_req_flags);
+ 		req->r_readdir_cache_idx = cache_ctl.index;
+ 	}
+ 	ceph_readdir_cache_release(&cache_ctl);
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index bc36e2c4fe52..409b0e3c3b7a 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -210,6 +210,7 @@ struct ceph_mds_request {
+ #define CEPH_MDS_R_GOT_UNSAFE		(3) /* got an unsafe reply */
+ #define CEPH_MDS_R_GOT_SAFE		(4) /* got a safe reply */
+ #define CEPH_MDS_R_GOT_RESULT		(5) /* got a result */
++#define CEPH_MDS_R_DID_PREPOPULATE	(6) /* prepopulated readdir */
+ 	unsigned long	r_req_flags;
  
- 			mask = CEPH_STAT_CAP_INODE | CEPH_CAP_AUTH_SHARED;
- 			if (ceph_security_xattr_wanted(dir))
+ 	struct mutex r_fill_mutex;
+@@ -268,7 +269,6 @@ struct ceph_mds_request {
+ 	ceph_mds_request_wait_callback_t r_wait_for_completion;
+ 	struct list_head  r_unsafe_item;  /* per-session unsafe list item */
+ 
+-	bool              r_did_prepopulate;
+ 	long long	  r_dir_release_cnt;
+ 	long long	  r_dir_ordered_cnt;
+ 	int		  r_readdir_cache_idx;
 -- 
 2.9.3
 
