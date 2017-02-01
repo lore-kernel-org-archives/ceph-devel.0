@@ -1,29 +1,34 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: bluestore prefer wal size
-Date: Wed, 1 Feb 2017 15:34:19 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1702011533340.3660@piezo.novalocal>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Are we ready for jewel 10.2.6?
+Date: Wed, 1 Feb 2017 16:35:57 +0100
+Message-ID: <63289246-25fb-c96f-b844-dba82d7293c5@suse.cz>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56134 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:39153 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751671AbdBAPeW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 1 Feb 2017 10:34:22 -0500
+        id S1751720AbdBAPgB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 1 Feb 2017 10:36:01 -0500
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 5F232ABEA
+        for <ceph-devel@vger.kernel.org>; Wed,  1 Feb 2017 15:35:59 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: nick@fisk.me.uk
-Cc: ceph-devel@vger.kernel.org
+To: Abhishek Lekshmanan <abhishek@suse.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hey Nick,
+Hi Abhishek:
 
-I've updated/improved the prefer wal size PR (that sends small writes 
-through the wal).  See
+The stable releases and backports team has been working to prepare the 
+Jewel 10.2.6 release and so far we have merged a large number of 
+bugfixes and even some features that were judged to be worth backporting.
 
-	https://github.com/ceph/ceph/pull/13217
+I don't have a full list, yet, because I'm still merging RGW backports 
+and there a few more miscellaneous backports still in the queue. The 
+integration tests are looking better and better, and I expect these will 
+be merged within the next week or two.
 
-if you want to try it out.
+Do you think it's time to publish a 10.2.6 point release?
 
-Thanks!
-sage
-
-
+Nathan
