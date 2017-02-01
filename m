@@ -1,160 +1,109 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH v1 4/7] ceph: handle new osdmap epoch updates in
- CLIENT_CAPS and WRITE codepaths
-Date: Wed, 01 Feb 2017 15:55:29 -0500
-Message-ID: <1485982529.2559.5.camel@redhat.com>
-References: <20170120151738.9584-1-jlayton@redhat.com>
-         <20170120151738.9584-5-jlayton@redhat.com>
-         <1CA9B32B-E3EA-47A0-8803-A4CD969737B0@redhat.com>
-         <1485978618.2559.3.camel@redhat.com>
-         <CALe9h7cj_vqu-Kt2jauC0pA2Fpp-cjfg30fDQKeN7r55iXeL7A@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: bluestore prefer wal size
+Date: Wed, 1 Feb 2017 21:38:43 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1702012137240.3654@piezo.novalocal>
+References: <alpine.DEB.2.11.1702011533340.3660@piezo.novalocal> <001001d27cbd$cee2a9f0$6ca7fdd0$@fisk.me.uk> <bb0bdeb6.AEMAHeJMfMsAAAAAAAAAAFklQUsAADNJBWwAAAAAAACRXwBYklNO@mailjet.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f172.google.com ([209.85.216.172]:33791 "EHLO
-        mail-qt0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750862AbdBAUze (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Feb 2017 15:55:34 -0500
-Received: by mail-qt0-f172.google.com with SMTP id v23so285277124qtb.0
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Feb 2017 12:55:34 -0800 (PST)
-In-Reply-To: <CALe9h7cj_vqu-Kt2jauC0pA2Fpp-cjfg30fDQKeN7r55iXeL7A@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:34136 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752506AbdBAViq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 1 Feb 2017 16:38:46 -0500
+In-Reply-To: <bb0bdeb6.AEMAHeJMfMsAAAAAAAAAAFklQUsAADNJBWwAAAAAAACRXwBYklNO@mailjet.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>
+To: Nick Fisk <nick@fisk.me.uk>
+Cc: 'Mark Nelson' <mnelson@redhat.com>, ceph-devel@vger.kernel.org
 
-On Wed, 2017-02-01 at 19:55 +0000, John Spray wrote:
-> On Wed, Feb 1, 2017 at 7:50 PM, Jeff Layton <jlayton@redhat.com> wrote:
-> > On Sun, 2017-01-22 at 17:40 +0800, Yan, Zheng wrote:
-> > > > On 20 Jan 2017, at 23:17, Jeff Layton <jlayton@redhat.com> wrote:
-> > > > 
-> > > > This patch is heavily inspired by John Spray's earlier work, but
-> > > > implemented in a different way.
-> > > > 
-> > > > Create and register a new map_cb for cephfs, to allow it to handle
-> > > > changes to the osdmap.
-> > > > 
-> > > > In the version 5 of CLIENT_CAPS messages, the barrier field is added as an
-> > > > instruction to clients that they may not use the attached capabilities
-> > > > until they have a particular OSD map epoch.
-> > > > 
-> > > > When we get a message with such a field and don't have the requisite map
-> > > > epoch yet, we put that message on a list in the session, to be run when
-> > > > the map does come in.
-> > > > 
-> > > > When we get a new map update, the map_cb routine first checks to see
-> > > > whether there may be an OSD or pool full condition. If so, then we walk
-> > > > the list of OSD calls and kill off any writes to full OSDs or pools with
-> > > > -ENOSPC.  While cancelling, we store the latest OSD epoch seen in each
-> > > > request. This will be used later in the CAPRELEASE messages.
-> > > > 
-> > > > Then, it walks the session list and queues the workqueue job for each.
-> > > > When the workqueue job runs, it walks the list of delayed caps and tries
-> > > > to rerun each one. If the epoch is still not high enough, they just get
-> > > > put back on the delay queue for when the map does come in.
-> > > > 
-> > > > Suggested-by: John Spray <john.spray@redhat.com>
-> > > > Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> > > > ---
-> > > > fs/ceph/caps.c       | 43 +++++++++++++++++++++++++++---
-> > > > fs/ceph/debugfs.c    |  3 +++
-> > > > fs/ceph/mds_client.c | 75 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > > > fs/ceph/mds_client.h |  3 +++
-> > > > 4 files changed, 120 insertions(+), 4 deletions(-)
-> > > > 
-> > > > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-> > > > index d941c48e8bff..f33d424b5e12 100644
-> > > > --- a/fs/ceph/caps.c
-> > > > +++ b/fs/ceph/caps.c
-> > > > @@ -1077,7 +1077,7 @@ static int send_cap_msg(struct cap_msg_args *arg)
-> > > >     /* inline data size */
-> > > >     ceph_encode_32(&p, 0);
-> > > >     /* osd_epoch_barrier (version 5) */
-> > > > -   ceph_encode_32(&p, 0);
-> > > > +   ceph_encode_32(&p, arg->session->s_mdsc->cap_epoch_barrier);
-> > > >     /* oldest_flush_tid (version 6) */
-> > > >     ceph_encode_64(&p, arg->oldest_flush_tid);
-> > > > 
-> > > > @@ -3577,9 +3577,12 @@ void ceph_handle_caps(struct ceph_mds_session *session,
-> > > >     void *snaptrace;
-> > > >     size_t snaptrace_len;
-> > > >     void *p, *end;
-> > > > +   u32 epoch_barrier = 0;
-> > > > 
-> > > >     dout("handle_caps from mds%d\n", mds);
-> > > > 
-> > > > +   WARN_ON_ONCE(!list_empty(&msg->list_head));
-> > > > +
-> > > >     /* decode */
-> > > >     end = msg->front.iov_base + msg->front.iov_len;
-> > > >     tid = le64_to_cpu(msg->hdr.tid);
-> > > > @@ -3625,13 +3628,45 @@ void ceph_handle_caps(struct ceph_mds_session *session,
-> > > >             p += inline_len;
-> > > >     }
-> > > > 
-> > > > +   if (le16_to_cpu(msg->hdr.version) >= 5) {
-> > > > +           struct ceph_osd_client *osdc = &mdsc->fsc->client->osdc;
-> > > > +
-> > > > +           ceph_decode_32_safe(&p, end, epoch_barrier, bad);
-> > > > +
-> > > > +           /* Do lockless check first to avoid mutex if we can */
-> > > > +           if (epoch_barrier > mdsc->cap_epoch_barrier) {
-> > > > +                   mutex_lock(&mdsc->mutex);
-> > > > +                   if (epoch_barrier > mdsc->cap_epoch_barrier)
-> > > > +                           mdsc->cap_epoch_barrier = epoch_barrier;
-> > > > +                   mutex_unlock(&mdsc->mutex);
-> > > > +           }
-> > > > +
-> > > > +           down_read(&osdc->lock);
-> > > > +           if (osdc->osdmap->epoch < epoch_barrier) {
-> > > > +                   dout("handle_caps delaying message until OSD epoch %d\n", epoch_barrier);
-> > > > +                   ceph_msg_get(msg);
-> > > > +                   spin_lock(&session->s_cap_lock);
-> > > > +                   list_add(&msg->list_head, &session->s_delayed_caps);
-> > > > +                   spin_unlock(&session->s_cap_lock);
-> > > > +
-> > > > +                   // Kick OSD client to get the latest map
-> > > > +                   __ceph_osdc_maybe_request_map(osdc);
-> > > > +
-> > > > +                   up_read(&osdc->lock);
-> > > > +                   return;
-> > > > +           }
-> > > 
-> > > Cap messages need to be handled in the same order as they were sent. I’m worry if the delay breaks something or makes cap revoke slow. Why not use the use the same approach as user space client? pass the epoch_barrier to libceph and let libceph delay sending osd requests.
-> > > 
-> > > Regards
-> > > Yan, Zheng
-> > > 
-> > 
-> > Now that I've looked at this in more detail, I'm not sure I understand
-> > what you're suggesting.
-> > 
-> > In this case, we have gotten a cap message from the MDS, and we can't
-> > use any caps granted in there until the right map epoch comes in. Isn't
-> > it wrong to do all of the stuff in handle_cap_grant (for instance)
-> > before we've received that map epoch?
-> > 
-> > The userland client just seems to just idle OSD requests in the
-> > objecter layer until the right map comes in. Is that really sufficient
-> > here?
+On Wed, 1 Feb 2017, Nick Fisk wrote:
+> Further update,
 > 
-> Yes -- the key thing is that the client sees the effects of *another*
-> client's blacklisting (the client that might have previously held caps
-> on the file we're about to write/read).  So the client receiving the
-> barrier message is completely OK and entitled to the caps, he just
-> needs to make sure his OSD ops don't go out until he's seen the epoch
-> so that his operations are properly ordered with respect to the
-> blacklisting of this notional other client.
+> I set bluestore_debug_omit_block_device_write to true and this gave me 
+> near filestore performance, albeit still with very high write amp on the 
+> SSD's. So its definitely something around that part of the code waiting 
+> on the writes to the spinning disks, puzzled why the commit didn't help.
 > 
+> I also set debug logging to 20/20 for bdev,bluefs,osd,bluestore and a 
+> grep didn't reveal any of the debug in that commit eg "defering small 
+> 0x". So possibly something isn't working as expected?
 
-Ok, got it! I think that makes sense.
+Oh, yeah, the option isn't working then.  I saw the line in my debug 
+output.. are you sure you set bluestore_prefer_wal_size ?
 
-I notice that there is some plumbing in the kernel already for pausing
-requests until certain flags in the osdmap, so we might be able to
-reuse a lot of that to handle the barrier. I'll look and see what can
-be done there.
+sage
 
-Many thanks!
--- 
-Jeff Layton <jlayton@redhat.com>
+> 
+> Nick
+> 
+> -----Original Message-----
+> From: Nick Fisk [mailto:nick@fisk.me.uk] 
+> Sent: 01 February 2017 19:03
+> To: 'Sage Weil' <sweil@redhat.com>; 'Mark Nelson' <mnelson@redhat.com>
+> Cc: ceph-devel@vger.kernel.org
+> Subject: RE: bluestore prefer wal size
+> 
+> Hi Sage,
+> 
+> First results not looking good. It looks like write IO to the SSD's (sdd and sdi) is now massively amplified, by somewhere in the region of about 10x. But I'm still only getting around 100 4kb's seq write iops from the fio client. This is in comparison to 2500-3000 iops on the SSD's and ~200 iops per spinning disk (sdc,sde,sdg,sdh).
+> 
+> rbd engine: RBD version: 0.1.11
+> Jobs: 1 (f=1): [W(1)] [100.0% done] [0KB/476KB/0KB /s] [0/119/0 iops] [eta 00m:00s]
+> rbd_iodepth32: (groupid=0, jobs=1): err= 0: pid=31171: Wed Feb  1 18:56:51 2017
+>   write: io=27836KB, bw=475020B/s, iops=115, runt= 60006msec
+>     slat (usec): min=6, max=142, avg=10.98, stdev= 8.38
+>     clat (msec): min=1, max=271, avg= 8.61, stdev= 3.63
+>      lat (msec): min=1, max=271, avg= 8.62, stdev= 3.63
+>     clat percentiles (msec):
+>      |  1.00th=[    8],  5.00th=[    9], 10.00th=[    9], 20.00th=[    9],
+>      | 30.00th=[    9], 40.00th=[    9], 50.00th=[    9], 60.00th=[    9],
+>      | 70.00th=[    9], 80.00th=[    9], 90.00th=[    9], 95.00th=[    9],
+>      | 99.00th=[   17], 99.50th=[   25], 99.90th=[   33], 99.95th=[   36],
+>      | 99.99th=[  273]
+>     bw (KB  /s): min=  191, max=  480, per=100.00%, avg=464.18, stdev=34.60
+>     lat (msec) : 2=0.01%, 4=0.04%, 10=97.69%, 20=1.55%, 50=0.69%
+>     lat (msec) : 500=0.01%
+>   cpu          : usr=0.13%, sys=0.12%, ctx=7224, majf=0, minf=5
+>   IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+>      submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+>      complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+>      issued    : total=r=0/w=6959/d=0, short=r=0/w=0/d=0, drop=r=0/w=0/d=0
+>      latency   : target=0, window=0, percentile=100.00%, depth=1
+> 
+> I've checked via the admin socket and the prefer wal option is set to 8192.
+> 
+> Random capture of iostat
+> 
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+> sda               0.00    77.00    0.00    5.50     0.00   338.00   122.91     0.05   11.64    0.00   11.64   8.73   4.80
+> sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+> sdc               0.00     0.00    0.00  151.50     0.00   302.00     3.99     0.54    3.59    0.00    3.59   3.58  54.20
+> sdd               0.00     0.00    0.00 1474.00     0.00  4008.00     5.44     0.09    0.06    0.00    0.06   0.06   9.20
+> sde               0.00     0.00    0.00  217.00     0.00   434.00     4.00     0.91    4.20    0.00    4.20   4.20  91.20
+> sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+> sdg               0.00     0.00    0.00   66.50     0.00   134.00     4.03     0.18    2.68    0.00    2.68   2.68  17.80
+> sdh               0.00     0.00    0.00  217.00     0.00   434.00     4.00     0.80    3.71    0.00    3.71   3.71  80.40
+> sdi               0.00     0.00    0.00 1134.00     0.00  3082.00     5.44     0.09    0.08    0.00    0.08   0.07   8.40
+> 
+> -----Original Message-----
+> From: Sage Weil [mailto:sweil@redhat.com] 
+> Sent: 01 February 2017 15:34
+> To: nick@fisk.me.uk
+> Cc: ceph-devel@vger.kernel.org
+> Subject: bluestore prefer wal size
+> 
+> Hey Nick,
+> 
+> I've updated/improved the prefer wal size PR (that sends small writes through the wal).  See
+> 
+> 	https://github.com/ceph/ceph/pull/13217
+> 
+> if you want to try it out.
+> 
+> Thanks!
+> sage
+> 
+> 
+> 
+> 
+> 
