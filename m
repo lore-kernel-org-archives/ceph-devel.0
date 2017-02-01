@@ -1,32 +1,73 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Complete failure
-Date: Wed, 1 Feb 2017 16:59:11 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1702011658540.3660@piezo.novalocal>
-References: <00714C12C9081745920784D8E0927CCF03B87890E130@E2K7CCR.cewit.stonybrook.edu>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: hammer 0.94.10 QE status
+Date: Wed, 1 Feb 2017 08:55:23 -0800
+Message-ID: <CAMMFjmEwGeC5JT4WBe=+YFj=tC2NreQhQBhG7Au0vrvxzHZObQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:52745 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753121AbdBAQ7Q (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Feb 2017 11:59:16 -0500
-In-Reply-To: <00714C12C9081745920784D8E0927CCF03B87890E130@E2K7CCR.cewit.stonybrook.edu>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:35190 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752974AbdBAQzZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Feb 2017 11:55:25 -0500
+Received: by mail-wm0-f48.google.com with SMTP id b65so47807774wmf.0
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Feb 2017 08:55:24 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Boris Yakovich <Boris.Yakovich@cewit.stonybrook.edu>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Development, Ceph" <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>, "Weil, Sage" <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Gregory Farnum <gfarnum@redhat.com>, John Spray <jspray@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>
 
-On Wed, 1 Feb 2017, Boris Yakovich wrote:
-> Hi Guys,
-> 
-> I have a three node test environment I have been playing with. 
-> Each node has two hard drives one runs the OS, the second ceph data.
-> One node had a hard disk failure on the OS disk. I reinstalled the OS (Ubuntu 14),
-> And tried to add it back into the cluster. Now the entire cluster is failing.
-> I'm pretty new to this and completely lost how to get it back up.
-> Ceph -s just shows lines and lines of fault errors. It seems all the monitors are down. 
+Here is snapshot of hammer 0.94.10 point release testing status.
 
-If you reinstalled the OS you are probably everything in /etc/ceph 
-(ceph.conf and the keyring files).
+Suites were not tested on ubuntu 16.06 due to
+http://tracker.ceph.com/issues/18382 and as a result were forced to
+test on ubuntu 14.04 and centos 7.2 (note we don't have smithi with
+centos 7.3).
 
-s
+There was an additional noise created by fact that since we tested
+last hammer release in August 2016 we moved from gitbuilders to shaman
+build system and it resulted in issues with some packages.
+
+Details of tests can be found here http://tracker.ceph.com/issues/17151#note-61
+
+======================
+rados ubuntu - packaging issues, need approval - Josh
+rados centos - packaging issues, need approval - Josh
+======================
+rbd - PASSED
+======================
+rgw ubuntu - PASSED
+rgw centos - valgrind issues http://tracker.ceph.com/issues/18735,
+need approval Yehuda, Sage
+======================
+fs ubuntu - looks similar to v0.94.8, need Greg, John approval
+fs centos - noise? need Greg, John review/approval
+======================
+krbd ubuntu - looks like the same in v0.94.8
+http://tracker.ceph.com/issues/15895#note-33 need approval Jason, Ilya
+krbd centos -  looks like the same in v0.94.8
+http://tracker.ceph.com/issues/15895#note-33 need approval Jason, Ilya
+======================
+kcephfs - PASSED
+======================
+knfs - PASSED
+======================
+hadoop - PASSED
+======================
+samba - packaging issues, need approval - Greg, Sage
+======================
+rest  - PASSED
+======================
+ceph-deploy - Vasu is fixing, need approval Sage
+======================
+upgrade/client-upgrade - PASSED
+======================
+upgrade/firefly-x (hammer) - need Sage approval. maybe deprecate?
+======================
+upgrade/hammer - PASSED
+======================
+upgrade/hammer-x (jewel) - FAILED, need Sage approval. maybe deprecate?
+======================
+powercycle - PASSED
+======================
+
+Thx
+YuriW
