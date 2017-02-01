@@ -1,43 +1,75 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v2 10/13] ceph: don't update_dentry_lease unless we actually got one
-Date: Wed,  1 Feb 2017 06:49:11 -0500
-Message-ID: <20170201114914.20808-11-jlayton@redhat.com>
+Subject: [PATCH v2 07/13] ceph: remove "Debugging hook" from ceph_fill_trace
+Date: Wed,  1 Feb 2017 06:49:08 -0500
+Message-ID: <20170201114914.20808-8-jlayton@redhat.com>
 References: <20170130161942.16537-1-jlayton@redhat.com>
  <20170201114914.20808-1-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:33890 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:38658 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751486AbdBALtX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 1 Feb 2017 06:49:23 -0500
+        id S1751486AbdBALt0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 1 Feb 2017 06:49:26 -0500
 In-Reply-To: <20170201114914.20808-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com
 
-This if block updates the dentry lease even in the case where
-the MDS didn't grant one.
+Keeping around commented out code is just asking for it to bitrot and
+makes viewing the code under cscope more confusing.  If
+we really need this, then we can revert this patch and put it under a
+Kconfig option.
 
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- fs/ceph/inode.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ fs/ceph/inode.c | 34 ----------------------------------
+ 1 file changed, 34 deletions(-)
 
 diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index cb94ec7961d2..da6e222dff84 100644
+index 31827f3dcef0..b93e8eb3c2ee 100644
 --- a/fs/ceph/inode.c
 +++ b/fs/ceph/inode.c
-@@ -1288,8 +1288,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 				ceph_dir_clear_ordered(dir);
- 				dout("d_delete %p\n", dn);
- 				d_delete(dn);
--			} else {
--				if (have_lease && d_unhashed(dn))
-+			} else if (have_lease) {
-+				if (d_unhashed(dn))
- 					d_add(dn, NULL);
- 				update_dentry_lease(dn, rinfo->dlease,
- 						    session,
+@@ -1120,40 +1120,6 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+ 	dout("fill_trace %p is_dentry %d is_target %d\n", req,
+ 	     rinfo->head->is_dentry, rinfo->head->is_target);
+ 
+-#if 0
+-	/*
+-	 * Debugging hook:
+-	 *
+-	 * If we resend completed ops to a recovering mds, we get no
+-	 * trace.  Since that is very rare, pretend this is the case
+-	 * to ensure the 'no trace' handlers in the callers behave.
+-	 *
+-	 * Fill in inodes unconditionally to avoid breaking cap
+-	 * invariants.
+-	 */
+-	if (rinfo->head->op & CEPH_MDS_OP_WRITE) {
+-		pr_info("fill_trace faking empty trace on %lld %s\n",
+-			req->r_tid, ceph_mds_op_name(rinfo->head->op));
+-		if (rinfo->head->is_dentry) {
+-			rinfo->head->is_dentry = 0;
+-			err = fill_inode(req->r_locked_dir,
+-					 &rinfo->diri, rinfo->dirfrag,
+-					 session, req->r_request_started, -1);
+-		}
+-		if (rinfo->head->is_target) {
+-			rinfo->head->is_target = 0;
+-			ininfo = rinfo->targeti.in;
+-			vino.ino = le64_to_cpu(ininfo->ino);
+-			vino.snap = le64_to_cpu(ininfo->snapid);
+-			in = ceph_get_inode(sb, vino);
+-			err = fill_inode(in, &rinfo->targeti, NULL,
+-					 session, req->r_request_started,
+-					 req->r_fmode);
+-			iput(in);
+-		}
+-	}
+-#endif
+-
+ 	if (!rinfo->head->is_target && !rinfo->head->is_dentry) {
+ 		dout("fill_trace reply is empty!\n");
+ 		if (rinfo->head->result == 0 && req->r_locked_dir)
 -- 
 2.9.3
 
