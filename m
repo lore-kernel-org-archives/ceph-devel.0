@@ -1,70 +1,178 @@
-From: Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>
-Subject: Re: [PATCH v3 0/2] iov_iter: allow
- iov_iter_get_pages_alloc to allocate more pages per call
-Date: Thu, 2 Feb 2017 15:48:17 +0100
-Message-ID: <20170202144817.GB15545@quack2.suse.cz>
-References: <20170124212327.14517-1-jlayton@redhat.com>
-	<20170125133205.21704-1-jlayton@redhat.com>
-	<20170202095125.GF27291@ZenIV.linux.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170202095125.GF27291-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
-List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
-List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
-Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
-Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-To: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
-Cc: linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "Kirill A. Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH v2 02/13] ceph: move r_aborted flag into r_req_flags
+Date: Thu, 2 Feb 2017 23:16:54 +0800
+Message-ID: <6047293A-9B9D-4DDE-A5FE-1D8092B695F3@redhat.com>
+References: <20170130161942.16537-1-jlayton@redhat.com>
+ <20170201114914.20808-1-jlayton@redhat.com>
+ <20170201114914.20808-3-jlayton@redhat.com>
+ <D89A9727-739A-418D-83D2-B54462AE4692@redhat.com>
+ <1486034784.2812.1.camel@redhat.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.2 \(3259\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:59560 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751863AbdBBPRB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 2 Feb 2017 10:17:01 -0500
+In-Reply-To: <1486034784.2812.1.camel@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Jeff Layton <jlayton@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
 
-On Thu 02-02-17 09:51:25, Al Viro wrote:
-> I'm massaging that code (along with a lot of RTFS); the interesting questions
-> related to VM side of things are
-> 	* what are the relative costs of doing small vs. large batches?  Some
-> of get_user_pages_fast() instances have comments along the lines of "we ought
-> to limit the batch size, but then nobody's doing more than 64 pages at a time
-> anyway".
 
-Well, I believe it's only about the cost of setting up page table walk and
-walking down those several levels of page tables. It is cheaper to copy
-several PTE entries from the leaf level than doing the full walk every
-time. But I didn't ever profile it to get actual numbers.
+> On 2 Feb 2017, at 19:26, Jeff Layton <jlayton@redhat.com> wrote:
+> 
+> On Thu, 2017-02-02 at 16:06 +0800, Yan, Zheng wrote:
+>>> On 1 Feb 2017, at 19:49, Jeff Layton <jlayton@redhat.com> wrote:
+>>> 
+>>> ...and simplify the handling of it in ceph_fill_trace.
+>>> 
+>>> Signed-off-by: Jeff Layton <jlayton@redhat.com>
+>>> ---
+>>> fs/ceph/inode.c      | 17 +++++++++--------
+>>> fs/ceph/mds_client.c |  8 ++++----
+>>> fs/ceph/mds_client.h |  2 +-
+>>> 3 files changed, 14 insertions(+), 13 deletions(-)
+>>> 
+>>> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+>>> index 4926265f4223..bd2e94a78057 100644
+>>> --- a/fs/ceph/inode.c
+>>> +++ b/fs/ceph/inode.c
+>>> @@ -1233,8 +1233,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+>>> 
+>>> 		err = fill_inode(in, req->r_locked_page, &rinfo->targeti, NULL,
+>>> 				session, req->r_request_started,
+>>> -				(!req->r_aborted && rinfo->head->result == 0) ?
+>>> -				req->r_fmode : -1,
+>>> +				(!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags) &&
+>>> +				rinfo->head->result == 0) ?  req->r_fmode : -1,
+>>> 				&req->r_caps_reservation);
+>>> 		if (err < 0) {
+>>> 			pr_err("fill_inode badness %p %llx.%llx\n",
+>>> @@ -1243,12 +1243,14 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+>>> 		}
+>>> 	}
+>>> 
+>>> +	if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags))
+>>> +		goto done;
+>>> +
+>> 
+>> This seems wrong. If we got the reply, we should update inode’s caps even request is aborted.
+>> Otherwise, MDS can hang at revoking the dropped caps.
+>> 
+> 
+> FWIW, I hit that exact problem in an earlier iteration of this patchset
+> until I figured out what was going on. The caps do get updated with this
+> patch. That gets done in fill_inode, and that's called even when the
+> call was aborted.
+> 
+> None of the "move the flag into r_req_flags" patches materially change
+> the behavior of the code. In this patch, we're just moving both of the
+> subsequent !req->r_aborted flag checks into this one spot.
 
-Large batches are only a problem because of possible soft-lockups and irq
-latencies AFAIK. So the batch just should not be insanely large...
+I think you are right. Thank you for explanation
 
-> 	* Not a question: any ->fault() that returns VM_FAULT_RETRY when
-> *not* passed FAULT_FLAG_ALLOW_RETRY in flags ought to be shot.  cxlflash one
-> sure as hell is.
+Yan, Zheng
+> 
+>>> 	/*
+>>> 	 * ignore null lease/binding on snapdir ENOENT, or else we
+>>> 	 * will have trouble splicing in the virtual snapdir later
+>>> 	 */
+>>> -	if (rinfo->head->is_dentry && !req->r_aborted &&
+>>> -	    req->r_locked_dir &&
+>>> +	if (rinfo->head->is_dentry && req->r_locked_dir &&
+>>> 	    (rinfo->head->is_target || strncmp(req->r_dentry->d_name.name,
+>>> 					       fsc->mount_options->snapdir_name,
+>>> 					       req->r_dentry->d_name.len))) {
+>>> @@ -1351,9 +1353,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+>>> 			update_dentry_lease(dn, rinfo->dlease, session,
+>>> 					    req->r_request_started);
+>>> 		dout(" final dn %p\n", dn);
+>>> -	} else if (!req->r_aborted &&
+>>> -		   (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
+>>> -		    req->r_op == CEPH_MDS_OP_MKSNAP)) {
+>>> +	} else if (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
+>>> +		   req->r_op == CEPH_MDS_OP_MKSNAP) {
+>>> 		struct dentry *dn = req->r_dentry;
+>>> 		struct inode *dir = req->r_locked_dir;
+>>> 
+>>> @@ -1478,7 +1479,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
+>>> 	u32 fpos_offset;
+>>> 	struct ceph_readdir_cache_control cache_ctl = {};
+>>> 
+>>> -	if (req->r_aborted)
+>>> +	if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags))
+>>> 		return readdir_prepopulate_inodes_only(req, session);
+>>> 
+>>> 	if (rinfo->hash_order && req->r_path2) {
+>>> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+>>> index 1f2ef02832d9..a5156b6a0aed 100644
+>>> --- a/fs/ceph/mds_client.c
+>>> +++ b/fs/ceph/mds_client.c
+>>> @@ -2115,7 +2115,7 @@ static int __do_request(struct ceph_mds_client *mdsc,
+>>> 	int err = 0;
+>>> 
+>>> 	if (req->r_err || req->r_got_result) {
+>>> -		if (req->r_aborted)
+>>> +		if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags))
+>>> 			__unregister_request(mdsc, req);
+>>> 		goto out;
+>>> 	}
+>>> @@ -2331,7 +2331,7 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
+>>> 		 */
+>>> 		mutex_lock(&req->r_fill_mutex);
+>>> 		req->r_err = err;
+>>> -		req->r_aborted = true;
+>>> +		set_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags);
+>>> 		mutex_unlock(&req->r_fill_mutex);
+>>> 
+>>> 		if (req->r_locked_dir &&
+>>> @@ -2538,7 +2538,7 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
+>>> 	}
+>>> out_err:
+>>> 	mutex_lock(&mdsc->mutex);
+>>> -	if (!req->r_aborted) {
+>>> +	if (!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
+>>> 		if (err) {
+>>> 			req->r_err = err;
+>>> 		} else {
+>>> @@ -2587,7 +2587,7 @@ static void handle_forward(struct ceph_mds_client *mdsc,
+>>> 		goto out;  /* dup reply? */
+>>> 	}
+>>> 
+>>> -	if (req->r_aborted) {
+>>> +	if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
+>>> 		dout("forward tid %llu aborted, unregistering\n", tid);
+>>> 		__unregister_request(mdsc, req);
+>>> 	} else if (fwd_seq <= req->r_num_fwd) {
+>>> diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+>>> index a58cacccc986..3da20955d5e6 100644
+>>> --- a/fs/ceph/mds_client.h
+>>> +++ b/fs/ceph/mds_client.h
+>>> @@ -206,6 +206,7 @@ struct ceph_mds_request {
+>>> 	struct inode *r_target_inode;       /* resulting inode */
+>>> 
+>>> #define CEPH_MDS_R_DIRECT_IS_HASH	(1) /* r_direct_hash is valid */
+>>> +#define CEPH_MDS_R_ABORTED		(2) /* call was aborted */
+>>> 	unsigned long	r_req_flags;
+>>> 
+>>> 	struct mutex r_fill_mutex;
+>>> @@ -236,7 +237,6 @@ struct ceph_mds_request {
+>>> 	struct ceph_mds_reply_info_parsed r_reply_info;
+>>> 	struct page *r_locked_page;
+>>> 	int r_err;
+>>> -	bool r_aborted;
+>>> 
+>>> 	unsigned long r_timeout;  /* optional.  jiffies, 0 is "wait forever" */
+>>> 	unsigned long r_started;  /* start time to measure timeout against */
+>>> -- 
+>>> 2.9.3
+>>> 
+>> 
+>> 
+> 
+> -- 
+> Jeff Layton <jlayton@redhat.com>
 
-Yep.
-
-> 	* drivers/gpu/drm/vgem/vgem_drv.c:vgem_gem_fault() is bloody odd -
-> shmem_read_mapping_page() can't return -EBUSY, AFAICS.  vm_insert_page()
-> used to (and back then vgem_gem_fault() used to be broken), but these days
-> it looks like dead code...
-
-Looks like that.
-
-> 	* ->page_mkwrite() instances sometimes return VM_FAULT_RETRY; AFAICS,
-> it's only (ab)used there as 'not zero, but doesn't contain any error bits';
-> VM_FAULT_RETRY from that source does *not* reach handle_mm_fault() callers,
-> right?
-
-I can see only Lustre doing it and IMHO it is abuse. VM_FAULT_RETRY is used
-for mmap_sem latency reduction when paging in pages and so not everybody
-handles it. If a handler wants to simply retry the fault, returning
-VM_FAULT_NOPAGE is a more common way to do that...
-
-								Honza
--- 
-Jan Kara <jack-IBi9RG/b67k@public.gmane.org>
-SUSE Labs, CR
