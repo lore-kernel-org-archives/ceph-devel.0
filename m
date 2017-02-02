@@ -1,45 +1,143 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: No/wrong revdns for redmine tracker SMTP
-Date: Thu, 2 Feb 2017 09:34:15 -0800
-Message-ID: <CAJ4mKGYanEzVzg8kP1NUMmfAvevaw9=qEKEfQ0yWV17FnF69Fg@mail.gmail.com>
-References: <cd43ea70-2b4f-e043-d6e2-6e9d0a86865b@corp.ovh.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f173.google.com ([74.125.82.173]:35750 "EHLO
-        mail-ot0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751441AbdBBReR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2017 12:34:17 -0500
-Received: by mail-ot0-f173.google.com with SMTP id 65so17277262otq.2
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Feb 2017 09:34:16 -0800 (PST)
-In-Reply-To: <cd43ea70-2b4f-e043-d6e2-6e9d0a86865b@corp.ovh.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek@corp.ovh.com>, sepia@ceph.com
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH 04/24] fs: Provide infrastructure for dynamic BDIs in filesystems
+Date: Thu,  2 Feb 2017 18:34:02 +0100
+Message-ID: <20170202173422.3240-5-jack@suse.cz>
+References: <20170202173422.3240-1-jack@suse.cz>
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <20170202173422.3240-1-jack@suse.cz>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: linux-fsdevel@vger.kernel.org
+Cc: Christoph Hellwig <hch@infradead.org>, linux-block@vger.kernel.org, Jan Kara <jack@suse.cz>, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, Petr Vandrovec <petr@vandrovec.name>, linux-nilfs@vger.kernel.org, cluster-devel@redhat.com, osd-dev@open-osd.org, codalist@coda.cs.cmu.edu, linux-afs@lists.infradead.org, ecryptfs@vger.kernel.org, linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org, v9fs-developer@lists.sourceforge.net, lustre-devel@lists.lustre.org
+List-Id: ceph-devel.vger.kernel.org
 
-This probably goes to the sepia list since it's infrastructure.
-Shifting it there.
+Provide helper functions for setting up dynamically allocated
+backing_dev_info structures for filesystems and cleaning them up on
+superblock destruction.
 
-On Thu, Feb 2, 2017 at 2:51 AM, Piotr Dałek <piotr.dalek@corp.ovh.com> wrote:
-> Hello,
->
-> We're not receiving emails from Ceph's Redmine, because SMTP server that
-> sends them doesn't have proper revdns. Excerpt from our mail server log:
->
-> [******] NOQUEUE: reject: RCPT from unknown[158.69.68.89]: 450 4.7.1 Client
-> host rejected: cannot find your reverse hostname, [158.69.68.89];
-> from=<redmine@tracker.ceph.com> to=<piotr.dalek@corp.ovh.com> proto=ESMTP
-> helo=<tracker.localdomain>
->
-> Also, domain sepecified in "helo" is incorrect.
-> Who should I notifty of this? It's not the first time I'm seeing this.
->
-> --
-> Piotr Dałek
-> piotr.dalek@corp.ovh.com
-> https://www.ovh.com/us/
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+CC: linux-mtd@lists.infradead.org
+CC: linux-nfs@vger.kernel.org
+CC: Petr Vandrovec <petr@vandrovec.name>
+CC: linux-nilfs@vger.kernel.org
+CC: cluster-devel@redhat.com
+CC: osd-dev@open-osd.org
+CC: codalist@coda.cs.cmu.edu
+CC: linux-afs@lists.infradead.org
+CC: ecryptfs@vger.kernel.org
+CC: linux-cifs@vger.kernel.org
+CC: ceph-devel@vger.kernel.org
+CC: linux-btrfs@vger.kernel.org
+CC: v9fs-developer@lists.sourceforge.net
+CC: lustre-devel@lists.lustre.org
+Signed-off-by: Jan Kara <jack@suse.cz>
+---
+ fs/super.c                       | 49 ++++++++++++++++++++++++++++++++++++++++
+ include/linux/backing-dev-defs.h |  2 +-
+ include/linux/fs.h               |  6 +++++
+ 3 files changed, 56 insertions(+), 1 deletion(-)
+
+diff --git a/fs/super.c b/fs/super.c
+index ea662b0e5e78..31dc4c6450ef 100644
+--- a/fs/super.c
++++ b/fs/super.c
+@@ -446,6 +446,11 @@ void generic_shutdown_super(struct super_block *sb)
+ 	hlist_del_init(&sb->s_instances);
+ 	spin_unlock(&sb_lock);
+ 	up_write(&sb->s_umount);
++	if (sb->s_iflags & SB_I_DYNBDI) {
++		bdi_put(sb->s_bdi);
++		sb->s_bdi = &noop_backing_dev_info;
++		sb->s_iflags &= ~SB_I_DYNBDI;
++	}
+ }
+ 
+ EXPORT_SYMBOL(generic_shutdown_super);
+@@ -1249,6 +1254,50 @@ mount_fs(struct file_system_type *type, int flags, const char *name, void *data)
+ }
+ 
+ /*
++ * Setup private BDI for given superblock. I gets automatically cleaned up
++ * in generic_shutdown_super().
++ */
++int super_setup_bdi_name(struct super_block *sb, char *fmt, ...)
++{
++	struct backing_dev_info *bdi;
++	int err;
++	va_list args;
++
++	bdi = bdi_alloc(GFP_KERNEL);
++	if (!bdi)
++		return -ENOMEM;
++
++	bdi->name = sb->s_type->name;
++
++	va_start(args, fmt);
++	err = bdi_register_va(bdi, NULL, fmt, args);
++	va_end(args);
++	if (err) {
++		bdi_put(bdi);
++		return err;
++	}
++	WARN_ON(sb->s_bdi != &noop_backing_dev_info);
++	sb->s_bdi = bdi;
++	sb->s_iflags |= SB_I_DYNBDI;
++
++	return 0;
++}
++EXPORT_SYMBOL(super_setup_bdi_name);
++
++/*
++ * Setup private BDI for given superblock. I gets automatically cleaned up
++ * in generic_shutdown_super().
++ */
++int super_setup_bdi(struct super_block *sb)
++{
++	static atomic_long_t bdi_seq = ATOMIC_LONG_INIT(0);
++
++	return super_setup_bdi_name(sb, "%.28s-%ld", sb->s_type->name,
++				    atomic_long_inc_return(&bdi_seq));
++}
++EXPORT_SYMBOL(super_setup_bdi);
++
++/*
+  * This is an internal function, please use sb_end_{write,pagefault,intwrite}
+  * instead.
+  */
+diff --git a/include/linux/backing-dev-defs.h b/include/linux/backing-dev-defs.h
+index 2ecafc8a2d06..70080b4217f4 100644
+--- a/include/linux/backing-dev-defs.h
++++ b/include/linux/backing-dev-defs.h
+@@ -143,7 +143,7 @@ struct backing_dev_info {
+ 	congested_fn *congested_fn; /* Function pointer if device is md/dm */
+ 	void *congested_data;	/* Pointer to aux data for congested func */
+ 
+-	char *name;
++	const char *name;
+ 
+ 	struct kref refcnt;	/* Reference counter for the structure */
+ 	unsigned int registered:1;	/* Is bdi registered? */
+diff --git a/include/linux/fs.h b/include/linux/fs.h
+index c930cbc19342..8ed8b6d1bc54 100644
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -1267,6 +1267,9 @@ struct mm_struct;
+ /* sb->s_iflags to limit user namespace mounts */
+ #define SB_I_USERNS_VISIBLE		0x00000010 /* fstype already mounted */
+ 
++/* Temporary flag until all filesystems are converted to dynamic bdis */
++#define SB_I_DYNBDI	0x00000100
++
+ /* Possible states of 'frozen' field */
+ enum {
+ 	SB_UNFROZEN = 0,		/* FS is unfrozen */
+@@ -2103,6 +2106,9 @@ extern int vfs_ustat(dev_t, struct kstatfs *);
+ extern int freeze_super(struct super_block *super);
+ extern int thaw_super(struct super_block *super);
+ extern bool our_mnt(struct vfsmount *mnt);
++extern __printf(2, 3)
++int super_setup_bdi_name(struct super_block *sb, char *fmt, ...);
++extern int super_setup_bdi(struct super_block *sb);
+ 
+ extern int current_umask(void);
+ 
+-- 
+2.10.2
