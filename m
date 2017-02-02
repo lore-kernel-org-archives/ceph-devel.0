@@ -1,64 +1,46 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH v2 12/13] ceph: call update_dentry_lease even when
- r_locked dir is not set
-Date: Thu, 2 Feb 2017 16:34:10 +0800
-Message-ID: <9C301416-E09E-43E0-B2A3-427FB5009060@redhat.com>
-References: <20170130161942.16537-1-jlayton@redhat.com>
- <20170201114914.20808-1-jlayton@redhat.com>
- <20170201114914.20808-13-jlayton@redhat.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.2 \(3259\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
+Subject: Re: Are we ready for jewel 10.2.6?
+Date: Thu, 2 Feb 2017 10:02:12 +0100
+Message-ID: <3f8464f9-4d23-f357-71db-b0697db9938c@corp.ovh.com>
+References: <63289246-25fb-c96f-b844-dba82d7293c5@suse.cz>
+ <9e856df3-aa13-834d-457c-6592474cb198@corp.ovh.com>
+ <72d5cc9f-33f5-71f1-2965-2f75a799fb52@dachary.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46644 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750881AbdBBIeQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 2 Feb 2017 03:34:16 -0500
-In-Reply-To: <20170201114914.20808-13-jlayton@redhat.com>
+Received: from 7.mo302.mail-out.ovh.net ([137.74.110.80]:46764 "EHLO
+        7.mo302.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751014AbdBBJCP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2017 04:02:15 -0500
+In-Reply-To: <72d5cc9f-33f5-71f1-2965-2f75a799fb52@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, idryomov@gmail.com
+To: Loic Dachary <loic@dachary.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+On 02/02/2017 09:22 AM, Loic Dachary wrote:
+>>>[..]
+>>> Do you think it's time to publish a 10.2.6 point release?
+>>
+>> Any chance to have
+>> https://github.com/ceph/ceph/pull/13131
+>
+> I'll let Nathan comment on this one.
+>
+>> and
+>> https://github.com/ceph/ceph/pull/13214
+>
+> Since it is a backport of https://github.com/ceph/ceph/pull/13213 which is not yet merged in master, it is unlikely to make it to 10.2.6. Not impossible but things would have to move unusually fast for that to happen ;-)
 
-> On 1 Feb 2017, at 19:49, Jeff Layton <jlayton@redhat.com> wrote:
-> 
-> We don't really require that the parent be locked in order to update the
-> lease on a dentry. Lease info is protected by the d_lock. In the event
-> that the parent is not locked in ceph_fill_trace, and we have both
-> parent and target info, go ahead and update the dentry lease.
-> 
-> Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> ---
-> fs/ceph/inode.c | 10 ++++++++++
-> 1 file changed, 10 insertions(+)
-> 
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index 15e042a8d71f..87863f962d50 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -1345,6 +1345,16 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
-> 			goto done;
-> 		}
-> 		req->r_dentry = dn;  /* may have spliced */
-> +	} else if (rinfo->head->is_dentry && rinfo->head->is_target) {
-> +		if ((le32_to_cpu(rinfo->diri.in->cap.caps) & CEPH_CAP_FILE_SHARED) ||
-> +		    le32_to_cpu(rinfo->dlease->duration_ms)) {
-> +			vino.ino = le64_to_cpu(rinfo->diri.in->ino);
-> +			vino.snap = le64_to_cpu(rinfo->diri.in->snapid);
-> +			update_dentry_lease(req->r_dentry, rinfo->dlease,
-> +				session, req->r_request_started, &vino);
-> +		} else {
-> +			dout("%s: no dentry lease or dir cap\n", __func__);
-> +		}
-> 	}
+The last one is of particular use (for us at least) - it could help reducing 
+the time the cluster needs to recover while still serving I/O to clients -- 
+of which we have a whole lot. In the past it was the throttler which was 
+limiting us, and not the cluster itself, we could change the throttler 
+values but that required an OSD restart... which was unacceptable because 
+that would induce even more recovery.
 
-I think checking rinfo->head->is_target is not needed here, because null dentry can also have lease.
-Besides, I think we need to check if rinfo->head->is_target matches d_really_is_negative(dn) and if
-the target inode matches d_inode(dn).
-
-> 	dout("fill_trace done err=%d\n", err);
-> -- 
-> 2.9.3
-> 
-
+-- 
+Piotr Dałek
+piotr.dalek@corp.ovh.com
+https://www.ovh.com/us/
