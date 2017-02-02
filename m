@@ -1,53 +1,117 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Are we ready for jewel 10.2.6?
-Date: Thu, 2 Feb 2017 09:22:46 +0100
-Message-ID: <72d5cc9f-33f5-71f1-2965-2f75a799fb52@dachary.org>
-References: <63289246-25fb-c96f-b844-dba82d7293c5@suse.cz>
- <9e856df3-aa13-834d-457c-6592474cb198@corp.ovh.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: mgr issue with RDMA
+Date: Thu, 2 Feb 2017 16:25:35 +0800
+Message-ID: <CACJqLyY3iEH6eXP34K0+f+z-iahJrqHtUx-wrZN=OgL7x6hP0g@mail.gmail.com>
+References: <VI1PR0501MB27828E6A500097E382147C47D74A0@VI1PR0501MB2782.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:54549 "EHLO
-        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750903AbdBBIWu (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2017 03:22:50 -0500
-In-Reply-To: <9e856df3-aa13-834d-457c-6592474cb198@corp.ovh.com>
+Received: from mail-hk2apc01on0095.outbound.protection.outlook.com ([104.47.124.95]:45124
+        "EHLO APC01-HK2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750920AbdBBIZt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 2 Feb 2017 03:25:49 -0500
+Received: by mail-io0-f173.google.com with SMTP id l66so176577477ioi.1
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Feb 2017 00:25:44 -0800 (PST)
+In-Reply-To: <VI1PR0501MB27828E6A500097E382147C47D74A0@VI1PR0501MB2782.eurprd05.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Adir Lev <adirl@mellanox.com>
+Cc: Sarit Zubakov <saritz@mellanox.com>, Oren Duer <oren@mellanox.com>, Daniel Bar-On <danielbo@mellanox.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+[cc to ceph-devel]
 
-On 02/02/2017 08:06 AM, Piotr Dałek wrote:
-> On 02/01/2017 04:35 PM, Nathan Cutler wrote:
->> Hi Abhishek:
->>
->> The stable releases and backports team has been working to prepare the Jewel
->> 10.2.6 release and so far we have merged a large number of bugfixes and even
->> some features that were judged to be worth backporting.
->>
->> I don't have a full list, yet, because I'm still merging RGW backports and
->> there a few more miscellaneous backports still in the queue. The integration
->> tests are looking better and better, and I expect these will be merged
->> within the next week or two.
->>
->> Do you think it's time to publish a 10.2.6 point release?
-> 
-> Any chance to have
-> https://github.com/ceph/ceph/pull/13131
 
-I'll let Nathan comment on this one.
 
-> and
-> https://github.com/ceph/ceph/pull/13214
+On Tue, Jan 31, 2017 at 11:58 PM, Adir Lev <adirl@mellanox.com> wrote:
+> Hi Haomai
+>
+>
+>
+> For conf of:
+>
+> ms_public_type = async+posix
+>
+> ms_cluster_type = async+posix
+>
+> I can run
+>
+> systemctl start ceph-mon@r-dcs45
+>
+> and all is OK !
+>
+> [root@r-dcs45 my-cluster]# ps aux |grep ceph
+>
+> root      4136  0.0  0.0 187676  2444 pts/0    S    15:22   0:00 su ceph
+>
+> ceph      4137  0.0  0.0 115372  1940 pts/0    S    15:22   0:00 bash
+>
+> ceph     21579  5.0  0.0 338668 19008 ?        Ssl  15:46   0:00
+> /usr/bin/ceph-mon -f --cluster ceph --id r-dcs45 --setuser ceph --setgroup
+> ceph
+>
+> ceph     22595 12.0  0.0 528604 26088 ?        Ssl  15:46   0:00
+> /usr/bin/ceph-mgr -f --cluster ceph --id r-dcs45 --setuser ceph --setgroup
+> ceph
+>
+> root     22619  0.0  0.0 112644   948 pts/0    S+   15:46   0:00 grep
+> --color=auto ceph
+>
+>
+>
+> but when I move to RDMA and change the conf to
+>
+> ms_public_type = async+rdma
+>
+> ms_cluster_type = async+rdma
+>
+>
+>
+> if I  try to start again using:
+>
+> systemctl start ceph-mon@r-dcs45
+>
+>
+>
+> command is stuck. (console no return)
+>
+>
+>
+> looking at ps:
+>
+> [root@r-dcs45 my-cluster]# ps aux |grep ceph
+>
+> root      4136  0.0  0.0 187676  2444 pts/0    S    15:22   0:00 su ceph
+>
+> ceph      4137  0.0  0.0 115372  1940 pts/0    S    15:22   0:00 bash
+>
+> root     22726 19.5  0.5 940308 191156 ?       Ssl  15:48   0:00
+> /usr/bin/python2.7 /usr/bin/ceph -i /var/lib/ceph/mgr/ceph-r-dcs45/keyring
+> auth add mgr.r-dcs45 mon allow *
+> --keyring=/var/lib/ceph/mon/ceph-r-dcs45/keyring --name=mon.
 
-Since it is a backport of https://github.com/ceph/ceph/pull/13213 which is not yet merged in master, it is unlikely to make it to 10.2.6. Not impossible but things would have to move unusually fast for that to happen ;-)
+do you restart mon to use rdma firstly?
 
-> included in 10.2.6?
-
-Cheers
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
+>
+> root     22764  0.0  0.0 112644   952 pts/0    S+   15:48   0:00 grep
+> --color=auto ceph
+>
+>
+>
+> looking at vim /usr/lib/systemd/system/ceph-mgr@.service
+>
+> seems like this command:
+>
+> ExecStartPre=-/usr/bin/ceph -i /var/lib/ceph/mgr/${CLUSTER}-%i/keyring auth
+> add mgr.%i mon 'allow *' --keyring=/var/lib/ceph/mon/${CLUSTER}-%i/keyring
+> --name=mon.
+>
+> Have problem running in RDMA mode
+>
+>
+>
+> Any idea?
+>
+>
+>
+> Thanks, Adir
