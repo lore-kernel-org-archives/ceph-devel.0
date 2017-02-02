@@ -1,66 +1,100 @@
-From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
-Subject: Re: [PATCH v3 0/2] iov_iter: allow
- iov_iter_get_pages_alloc to allocate more pages per call
-Date: Thu, 2 Feb 2017 18:28:02 +0000
-Message-ID: <20170202182802.GH27291@ZenIV.linux.org.uk>
-References: <20170124212327.14517-1-jlayton@redhat.com>
-	<20170125133205.21704-1-jlayton@redhat.com>
-	<20170202095125.GF27291@ZenIV.linux.org.uk>
-	<20170202144817.GB15545@quack2.suse.cz>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: how to disable all complier optimizations
+Date: Fri, 3 Feb 2017 03:03:57 +0800
+Message-ID: <CAJE9aONHy3aJarTQY=Khyyc_cEhtgGu919BU7KcV-F74h3GHJw@mail.gmail.com>
+References: <914C48E9796C6046B6424CA69C30AB3B03BBBA@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <CACKY0b95F8GJRqG=ZOgvY2Exh6jzJ4YENOO40wfWBBF=LC+VRA@mail.gmail.com> <2097727258.99392049.1486044021323.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170202144817.GB15545-4I4JzKEfoa/jFM9bn6wA6Q@public.gmane.org>
-List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
-List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
-Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
-Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-To: Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>
-Cc: linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "Kirill A. Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ua0-f195.google.com ([209.85.217.195]:32795 "EHLO
+        mail-ua0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751038AbdBBTD6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2017 14:03:58 -0500
+Received: by mail-ua0-f195.google.com with SMTP id d5so2187418uag.0
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Feb 2017 11:03:58 -0800 (PST)
+In-Reply-To: <2097727258.99392049.1486044021323.JavaMail.zimbra@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: liuchang0812 <liuchang0812@gmail.com>, Ramesh Chander <Ramesh.Chander@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Feb 02, 2017 at 03:48:17PM +0100, Jan Kara wrote:
+On Thu, Feb 2, 2017 at 10:00 PM, Matt Benjamin <mbenjamin@redhat.com> wrote:
+> Hi,
+>
+> FWIW, I use:
+>
+>   -DCMAKE_CXX_FLAGS="-O0 -g3 -gdwarf-4" -DCMAKE_C_FLAGS="-O0 -g3 -gdwarf-4"
 
-> > 	* ->page_mkwrite() instances sometimes return VM_FAULT_RETRY; AFAICS,
-> > it's only (ab)used there as 'not zero, but doesn't contain any error bits';
-> > VM_FAULT_RETRY from that source does *not* reach handle_mm_fault() callers,
-> > right?
-> 
-> I can see only Lustre doing it and IMHO it is abuse. VM_FAULT_RETRY is used
-> for mmap_sem latency reduction when paging in pages and so not everybody
-> handles it. If a handler wants to simply retry the fault, returning
-> VM_FAULT_NOPAGE is a more common way to do that...
+we always include the ${CMAKE_C_FLAGS} in ${CMAKE_CXX_FLAGS}.
 
-/* Convert errno to return value from ->page_mkwrite() call */
-static inline int block_page_mkwrite_return(int err)
-{
-        if (err == 0)
-                return VM_FAULT_LOCKED;
-        if (err == -EFAULT)
-                return VM_FAULT_NOPAGE;
-        if (err == -ENOMEM)
-                return VM_FAULT_OOM;
-        if (err == -EAGAIN)
-                return VM_FAULT_RETRY;
-        /* -ENOSPC, -EDQUOT, -EIO ... */
-        return VM_FAULT_SIGBUS;
-}
+see https://github.com/ceph/ceph/blob/master/src/CMakeLists.txt#L52
 
-and a bunch of ->page_mkwrite() instances using that.  However, the only
-callers of ->page_mkwrite() are wp_page_shared()->do_page_mkwrite() and
-do_shared_fault()->do_page_mkwrite().  do_page_mkwrite() treates
-VM_FAULT_RETRY as "lock page and return VM_FAULT_RETRY|VM_FAULT_LOCKED".
-Both callers do the same check -
-                if (unlikely(!tmp || (tmp &
-                                      (VM_FAULT_ERROR | VM_FAULT_NOPAGE)))) {
-and the return value if that predicate is false.  FWIW, use of VM_FAULT_RETRY
-comes from your patch back in 2011 and AFAICS the same analysis used to
-apply back then, except for the open-coded method calls where we use
-do_page_mkwrite() these days...
+
+>
+> Matt
+>
+> ----- Original Message -----
+>> From: "liuchang0812" <liuchang0812@gmail.com>
+>> To: "Ramesh Chander" <Ramesh.Chander@sandisk.com>
+>> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
+>> Sent: Wednesday, February 1, 2017 12:02:34 PM
+>> Subject: Re: how to disable all complier optimizations
+>>
+>> hi, try this
+>>
+>> cmake -DCMAKE_BUILD_TYPE=Debug ..
+>>
+>> 2017-02-01 19:48 GMT+08:00 Ramesh Chander <Ramesh.Chander@sandisk.com>:
+>> > I am trying to compile ceph-osd and debug it but keep getting "optimized
+>> > out " message for local variables.
+>> >
+>> > How to I disable compiler optimization for ceph-osd ?
+>> >
+>> > Thanks in advance.
+>> >
+>> > -Ramesh
+>> >
+>> > ________________________________
+>> >
+>> > PLEASE NOTE: The information contained in this electronic mail message is
+>> > intended only for the use of the designated recipient(s) named above. If
+>> > the reader of this message is not the intended recipient, you are hereby
+>> > notified that you have received this message in error and that any review,
+>> > dissemination, distribution, or copying of this message is strictly
+>> > prohibited. If you have received this communication in error, please
+>> > notify the sender by telephone or e-mail (as shown above) immediately and
+>> > destroy any and all copies of this message in your possession (whether
+>> > hard copies or electronically stored copies).
+>> >
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+> --
+> Matt Benjamin
+> Red Hat, Inc.
+> 315 West Huron Street, Suite 140A
+> Ann Arbor, Michigan 48103
+>
+> http://www.redhat.com/en/technologies/storage
+>
+> tel.  734-821-5101
+> fax.  734-769-8938
+> cel.  734-216-5309
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Regards
+Kefu Chai
