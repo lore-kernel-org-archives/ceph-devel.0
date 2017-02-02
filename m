@@ -1,191 +1,159 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH v2 02/13] ceph: move r_aborted flag into r_req_flags
-Date: Thu, 02 Feb 2017 10:27:39 -0500
-Message-ID: <1486049259.2812.14.camel@redhat.com>
-References: <20170130161942.16537-1-jlayton@redhat.com>
-         <20170201114914.20808-1-jlayton@redhat.com>
-         <20170201114914.20808-3-jlayton@redhat.com>
-         <D89A9727-739A-418D-83D2-B54462AE4692@redhat.com>
-         <1486034784.2812.1.camel@redhat.com>
-         <6047293A-9B9D-4DDE-A5FE-1D8092B695F3@redhat.com>
+Subject: Re: [PATCH v1 4/7] ceph: handle new osdmap epoch updates in
+ CLIENT_CAPS and WRITE codepaths
+Date: Thu, 02 Feb 2017 11:07:20 -0500
+Message-ID: <1486051640.2812.16.camel@redhat.com>
+References: <20170120151738.9584-1-jlayton@redhat.com>
+         <20170120151738.9584-5-jlayton@redhat.com>
+         <1CA9B32B-E3EA-47A0-8803-A4CD969737B0@redhat.com>
+         <1485978618.2559.3.camel@redhat.com>
+         <CALe9h7cj_vqu-Kt2jauC0pA2Fpp-cjfg30fDQKeN7r55iXeL7A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f173.google.com ([209.85.161.173]:33486 "EHLO
-        mail-yw0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751500AbdBBP1m (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2017 10:27:42 -0500
-Received: by mail-yw0-f173.google.com with SMTP id u68so13600706ywg.0
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Feb 2017 07:27:42 -0800 (PST)
-In-Reply-To: <6047293A-9B9D-4DDE-A5FE-1D8092B695F3@redhat.com>
+Received: from mail-qt0-f178.google.com ([209.85.216.178]:35369 "EHLO
+        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750879AbdBBQHY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2017 11:07:24 -0500
+Received: by mail-qt0-f178.google.com with SMTP id x49so37670139qtc.2
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Feb 2017 08:07:24 -0800 (PST)
+In-Reply-To: <CALe9h7cj_vqu-Kt2jauC0pA2Fpp-cjfg30fDQKeN7r55iXeL7A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+To: John Spray <jspray@redhat.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>
 
-On Thu, 2017-02-02 at 23:16 +0800, Yan, Zheng wrote:
-> > On 2 Feb 2017, at 19:26, Jeff Layton <jlayton@redhat.com> wrote:
-> > 
-> > On Thu, 2017-02-02 at 16:06 +0800, Yan, Zheng wrote:
-> > > > On 1 Feb 2017, at 19:49, Jeff Layton <jlayton@redhat.com> wrote:
+On Wed, 2017-02-01 at 19:55 +0000, John Spray wrote:
+> On Wed, Feb 1, 2017 at 7:50 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> > On Sun, 2017-01-22 at 17:40 +0800, Yan, Zheng wrote:
+> > > > On 20 Jan 2017, at 23:17, Jeff Layton <jlayton@redhat.com> wrote:
 > > > > 
-> > > > ...and simplify the handling of it in ceph_fill_trace.
+> > > > This patch is heavily inspired by John Spray's earlier work, but
+> > > > implemented in a different way.
 > > > > 
+> > > > Create and register a new map_cb for cephfs, to allow it to handle
+> > > > changes to the osdmap.
+> > > > 
+> > > > In the version 5 of CLIENT_CAPS messages, the barrier field is added as an
+> > > > instruction to clients that they may not use the attached capabilities
+> > > > until they have a particular OSD map epoch.
+> > > > 
+> > > > When we get a message with such a field and don't have the requisite map
+> > > > epoch yet, we put that message on a list in the session, to be run when
+> > > > the map does come in.
+> > > > 
+> > > > When we get a new map update, the map_cb routine first checks to see
+> > > > whether there may be an OSD or pool full condition. If so, then we walk
+> > > > the list of OSD calls and kill off any writes to full OSDs or pools with
+> > > > -ENOSPC.  While cancelling, we store the latest OSD epoch seen in each
+> > > > request. This will be used later in the CAPRELEASE messages.
+> > > > 
+> > > > Then, it walks the session list and queues the workqueue job for each.
+> > > > When the workqueue job runs, it walks the list of delayed caps and tries
+> > > > to rerun each one. If the epoch is still not high enough, they just get
+> > > > put back on the delay queue for when the map does come in.
+> > > > 
+> > > > Suggested-by: John Spray <john.spray@redhat.com>
 > > > > Signed-off-by: Jeff Layton <jlayton@redhat.com>
 > > > > ---
-> > > > fs/ceph/inode.c      | 17 +++++++++--------
-> > > > fs/ceph/mds_client.c |  8 ++++----
-> > > > fs/ceph/mds_client.h |  2 +-
-> > > > 3 files changed, 14 insertions(+), 13 deletions(-)
+> > > > fs/ceph/caps.c       | 43 +++++++++++++++++++++++++++---
+> > > > fs/ceph/debugfs.c    |  3 +++
+> > > > fs/ceph/mds_client.c | 75 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > > > fs/ceph/mds_client.h |  3 +++
+> > > > 4 files changed, 120 insertions(+), 4 deletions(-)
 > > > > 
-> > > > diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> > > > index 4926265f4223..bd2e94a78057 100644
-> > > > --- a/fs/ceph/inode.c
-> > > > +++ b/fs/ceph/inode.c
-> > > > @@ -1233,8 +1233,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
+> > > > diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+> > > > index d941c48e8bff..f33d424b5e12 100644
+> > > > --- a/fs/ceph/caps.c
+> > > > +++ b/fs/ceph/caps.c
+> > > > @@ -1077,7 +1077,7 @@ static int send_cap_msg(struct cap_msg_args *arg)
+> > > >     /* inline data size */
+> > > >     ceph_encode_32(&p, 0);
+> > > >     /* osd_epoch_barrier (version 5) */
+> > > > -   ceph_encode_32(&p, 0);
+> > > > +   ceph_encode_32(&p, arg->session->s_mdsc->cap_epoch_barrier);
+> > > >     /* oldest_flush_tid (version 6) */
+> > > >     ceph_encode_64(&p, arg->oldest_flush_tid);
 > > > > 
-> > > > 		err = fill_inode(in, req->r_locked_page, &rinfo->targeti, NULL,
-> > > > 				session, req->r_request_started,
-> > > > -				(!req->r_aborted && rinfo->head->result == 0) ?
-> > > > -				req->r_fmode : -1,
-> > > > +				(!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags) &&
-> > > > +				rinfo->head->result == 0) ?  req->r_fmode : -1,
-> > > > 				&req->r_caps_reservation);
-> > > > 		if (err < 0) {
-> > > > 			pr_err("fill_inode badness %p %llx.%llx\n",
-> > > > @@ -1243,12 +1243,14 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
-> > > > 		}
-> > > > 	}
+> > > > @@ -3577,9 +3577,12 @@ void ceph_handle_caps(struct ceph_mds_session *session,
+> > > >     void *snaptrace;
+> > > >     size_t snaptrace_len;
+> > > >     void *p, *end;
+> > > > +   u32 epoch_barrier = 0;
 > > > > 
-> > > > +	if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags))
-> > > > +		goto done;
+> > > >     dout("handle_caps from mds%d\n", mds);
+> > > > 
+> > > > +   WARN_ON_ONCE(!list_empty(&msg->list_head));
 > > > > +
+> > > >     /* decode */
+> > > >     end = msg->front.iov_base + msg->front.iov_len;
+> > > >     tid = le64_to_cpu(msg->hdr.tid);
+> > > > @@ -3625,13 +3628,45 @@ void ceph_handle_caps(struct ceph_mds_session *session,
+> > > >             p += inline_len;
+> > > >     }
+> > > > 
+> > > > +   if (le16_to_cpu(msg->hdr.version) >= 5) {
+> > > > +           struct ceph_osd_client *osdc = &mdsc->fsc->client->osdc;
+> > > > +
+> > > > +           ceph_decode_32_safe(&p, end, epoch_barrier, bad);
+> > > > +
+> > > > +           /* Do lockless check first to avoid mutex if we can */
+> > > > +           if (epoch_barrier > mdsc->cap_epoch_barrier) {
+> > > > +                   mutex_lock(&mdsc->mutex);
+> > > > +                   if (epoch_barrier > mdsc->cap_epoch_barrier)
+> > > > +                           mdsc->cap_epoch_barrier = epoch_barrier;
+> > > > +                   mutex_unlock(&mdsc->mutex);
+> > > > +           }
+> > > > +
+> > > > +           down_read(&osdc->lock);
+> > > > +           if (osdc->osdmap->epoch < epoch_barrier) {
+> > > > +                   dout("handle_caps delaying message until OSD epoch %d\n", epoch_barrier);
+> > > > +                   ceph_msg_get(msg);
+> > > > +                   spin_lock(&session->s_cap_lock);
+> > > > +                   list_add(&msg->list_head, &session->s_delayed_caps);
+> > > > +                   spin_unlock(&session->s_cap_lock);
+> > > > +
+> > > > +                   // Kick OSD client to get the latest map
+> > > > +                   __ceph_osdc_maybe_request_map(osdc);
+> > > > +
+> > > > +                   up_read(&osdc->lock);
+> > > > +                   return;
+> > > > +           }
 > > > 
-> > > This seems wrong. If we got the reply, we should update inode’s caps even request is aborted.
-> > > Otherwise, MDS can hang at revoking the dropped caps.
+> > > Cap messages need to be handled in the same order as they were sent. I’m worry if the delay breaks something or makes cap revoke slow. Why not use the use the same approach as user space client? pass the epoch_barrier to libceph and let libceph delay sending osd requests.
+> > > 
+> > > Regards
+> > > Yan, Zheng
 > > > 
 > > 
-> > FWIW, I hit that exact problem in an earlier iteration of this patchset
-> > until I figured out what was going on. The caps do get updated with this
-> > patch. That gets done in fill_inode, and that's called even when the
-> > call was aborted.
+> > Now that I've looked at this in more detail, I'm not sure I understand
+> > what you're suggesting.
 > > 
-> > None of the "move the flag into r_req_flags" patches materially change
-> > the behavior of the code. In this patch, we're just moving both of the
-> > subsequent !req->r_aborted flag checks into this one spot.
+> > In this case, we have gotten a cap message from the MDS, and we can't
+> > use any caps granted in there until the right map epoch comes in. Isn't
+> > it wrong to do all of the stuff in handle_cap_grant (for instance)
+> > before we've received that map epoch?
+> > 
+> > The userland client just seems to just idle OSD requests in the
+> > objecter layer until the right map comes in. Is that really sufficient
+> > here?
 > 
-> I think you are right. Thank you for explanation
+> Yes -- the key thing is that the client sees the effects of *another*
+> client's blacklisting (the client that might have previously held caps
+> on the file we're about to write/read).  So the client receiving the
+> barrier message is completely OK and entitled to the caps, he just
+> needs to make sure his OSD ops don't go out until he's seen the epoch
+> so that his operations are properly ordered with respect to the
+> blacklisting of this notional other client.
 > 
-> Yan, Zheng
+> John
 
-Well...this patch doesn't break the existing code, but I think we do
-still want to update the dentry lease, even when the call was cancelled.
- With this change that won't happen. That'll be fixed in the next
-posting.
- 
-> > 
-> > > > 	/*
-> > > > 	 * ignore null lease/binding on snapdir ENOENT, or else we
-> > > > 	 * will have trouble splicing in the virtual snapdir later
-> > > > 	 */
-> > > > -	if (rinfo->head->is_dentry && !req->r_aborted &&
-> > > > -	    req->r_locked_dir &&
-> > > > +	if (rinfo->head->is_dentry && req->r_locked_dir &&
-> > > > 	    (rinfo->head->is_target || strncmp(req->r_dentry->d_name.name,
-> > > > 					       fsc->mount_options->snapdir_name,
-> > > > 					       req->r_dentry->d_name.len))) {
-> > > > @@ -1351,9 +1353,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req,
-> > > > 			update_dentry_lease(dn, rinfo->dlease, session,
-> > > > 					    req->r_request_started);
-> > > > 		dout(" final dn %p\n", dn);
-> > > > -	} else if (!req->r_aborted &&
-> > > > -		   (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
-> > > > -		    req->r_op == CEPH_MDS_OP_MKSNAP)) {
-> > > > +	} else if (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
-> > > > +		   req->r_op == CEPH_MDS_OP_MKSNAP) {
-> > > > 		struct dentry *dn = req->r_dentry;
-> > > > 		struct inode *dir = req->r_locked_dir;
-> > > > 
-> > > > @@ -1478,7 +1479,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
-> > > > 	u32 fpos_offset;
-> > > > 	struct ceph_readdir_cache_control cache_ctl = {};
-> > > > 
-> > > > -	if (req->r_aborted)
-> > > > +	if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags))
-> > > > 		return readdir_prepopulate_inodes_only(req, session);
-> > > > 
-> > > > 	if (rinfo->hash_order && req->r_path2) {
-> > > > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> > > > index 1f2ef02832d9..a5156b6a0aed 100644
-> > > > --- a/fs/ceph/mds_client.c
-> > > > +++ b/fs/ceph/mds_client.c
-> > > > @@ -2115,7 +2115,7 @@ static int __do_request(struct ceph_mds_client *mdsc,
-> > > > 	int err = 0;
-> > > > 
-> > > > 	if (req->r_err || req->r_got_result) {
-> > > > -		if (req->r_aborted)
-> > > > +		if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags))
-> > > > 			__unregister_request(mdsc, req);
-> > > > 		goto out;
-> > > > 	}
-> > > > @@ -2331,7 +2331,7 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
-> > > > 		 */
-> > > > 		mutex_lock(&req->r_fill_mutex);
-> > > > 		req->r_err = err;
-> > > > -		req->r_aborted = true;
-> > > > +		set_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags);
-> > > > 		mutex_unlock(&req->r_fill_mutex);
-> > > > 
-> > > > 		if (req->r_locked_dir &&
-> > > > @@ -2538,7 +2538,7 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
-> > > > 	}
-> > > > out_err:
-> > > > 	mutex_lock(&mdsc->mutex);
-> > > > -	if (!req->r_aborted) {
-> > > > +	if (!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
-> > > > 		if (err) {
-> > > > 			req->r_err = err;
-> > > > 		} else {
-> > > > @@ -2587,7 +2587,7 @@ static void handle_forward(struct ceph_mds_client *mdsc,
-> > > > 		goto out;  /* dup reply? */
-> > > > 	}
-> > > > 
-> > > > -	if (req->r_aborted) {
-> > > > +	if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
-> > > > 		dout("forward tid %llu aborted, unregistering\n", tid);
-> > > > 		__unregister_request(mdsc, req);
-> > > > 	} else if (fwd_seq <= req->r_num_fwd) {
-> > > > diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-> > > > index a58cacccc986..3da20955d5e6 100644
-> > > > --- a/fs/ceph/mds_client.h
-> > > > +++ b/fs/ceph/mds_client.h
-> > > > @@ -206,6 +206,7 @@ struct ceph_mds_request {
-> > > > 	struct inode *r_target_inode;       /* resulting inode */
-> > > > 
-> > > > #define CEPH_MDS_R_DIRECT_IS_HASH	(1) /* r_direct_hash is valid */
-> > > > +#define CEPH_MDS_R_ABORTED		(2) /* call was aborted */
-> > > > 	unsigned long	r_req_flags;
-> > > > 
-> > > > 	struct mutex r_fill_mutex;
-> > > > @@ -236,7 +237,6 @@ struct ceph_mds_request {
-> > > > 	struct ceph_mds_reply_info_parsed r_reply_info;
-> > > > 	struct page *r_locked_page;
-> > > > 	int r_err;
-> > > > -	bool r_aborted;
-> > > > 
-> > > > 	unsigned long r_timeout;  /* optional.  jiffies, 0 is "wait forever" */
-> > > > 	unsigned long r_started;  /* start time to measure timeout against */
-> > > > -- 
-> > > > 2.9.3
-> > > > 
-> > > 
-> > > 
-> > 
-> > -- 
-> > Jeff Layton <jlayton@redhat.com>
-> 
-> 
+One more question...how is epoch_t wraparound handled?
+
+The number is 32 bits so it seems like it could happen with enough
+clients flapping, and 0 has a bit of a special meaning here, AFAICS.
+Most of the code seems to assume that it can never occur. Could it?
 
 -- 
 Jeff Layton <jlayton@redhat.com>
