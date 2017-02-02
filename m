@@ -1,81 +1,70 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: how to disable all complier optimizations
-Date: Thu, 2 Feb 2017 09:00:21 -0500 (EST)
-Message-ID: <2097727258.99392049.1486044021323.JavaMail.zimbra@redhat.com>
-References: <914C48E9796C6046B6424CA69C30AB3B03BBBA@ULS-OP-MBXIP03.sdcorp.global.sandisk.com> <CACKY0b95F8GJRqG=ZOgvY2Exh6jzJ4YENOO40wfWBBF=LC+VRA@mail.gmail.com>
+From: Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>
+Subject: Re: [PATCH v3 0/2] iov_iter: allow
+ iov_iter_get_pages_alloc to allocate more pages per call
+Date: Thu, 2 Feb 2017 15:48:17 +0100
+Message-ID: <20170202144817.GB15545@quack2.suse.cz>
+References: <20170124212327.14517-1-jlayton@redhat.com>
+	<20170125133205.21704-1-jlayton@redhat.com>
+	<20170202095125.GF27291@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx5-phx2.redhat.com ([209.132.183.37]:54453 "EHLO
-        mx5-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750879AbdBBOAY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2017 09:00:24 -0500
-In-Reply-To: <CACKY0b95F8GJRqG=ZOgvY2Exh6jzJ4YENOO40wfWBBF=LC+VRA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: liuchang0812 <liuchang0812@gmail.com>
-Cc: Ramesh Chander <Ramesh.Chander@sandisk.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170202095125.GF27291-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
+List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
+Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+To: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+Cc: linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "Kirill A. Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+On Thu 02-02-17 09:51:25, Al Viro wrote:
+> I'm massaging that code (along with a lot of RTFS); the interesting questions
+> related to VM side of things are
+> 	* what are the relative costs of doing small vs. large batches?  Some
+> of get_user_pages_fast() instances have comments along the lines of "we ought
+> to limit the batch size, but then nobody's doing more than 64 pages at a time
+> anyway".
 
-FWIW, I use:
+Well, I believe it's only about the cost of setting up page table walk and
+walking down those several levels of page tables. It is cheaper to copy
+several PTE entries from the leaf level than doing the full walk every
+time. But I didn't ever profile it to get actual numbers.
 
-  -DCMAKE_CXX_FLAGS="-O0 -g3 -gdwarf-4" -DCMAKE_C_FLAGS="-O0 -g3 -gdwarf-4"
+Large batches are only a problem because of possible soft-lockups and irq
+latencies AFAIK. So the batch just should not be insanely large...
 
-Matt
+> 	* Not a question: any ->fault() that returns VM_FAULT_RETRY when
+> *not* passed FAULT_FLAG_ALLOW_RETRY in flags ought to be shot.  cxlflash one
+> sure as hell is.
 
------ Original Message -----
-> From: "liuchang0812" <liuchang0812@gmail.com>
-> To: "Ramesh Chander" <Ramesh.Chander@sandisk.com>
-> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
-> Sent: Wednesday, February 1, 2017 12:02:34 PM
-> Subject: Re: how to disable all complier optimizations
-> 
-> hi, try this
-> 
-> cmake -DCMAKE_BUILD_TYPE=Debug ..
-> 
-> 2017-02-01 19:48 GMT+08:00 Ramesh Chander <Ramesh.Chander@sandisk.com>:
-> > I am trying to compile ceph-osd and debug it but keep getting "optimized
-> > out " message for local variables.
-> >
-> > How to I disable compiler optimization for ceph-osd ?
-> >
-> > Thanks in advance.
-> >
-> > -Ramesh
-> >
-> > ________________________________
-> >
-> > PLEASE NOTE: The information contained in this electronic mail message is
-> > intended only for the use of the designated recipient(s) named above. If
-> > the reader of this message is not the intended recipient, you are hereby
-> > notified that you have received this message in error and that any review,
-> > dissemination, distribution, or copying of this message is strictly
-> > prohibited. If you have received this communication in error, please
-> > notify the sender by telephone or e-mail (as shown above) immediately and
-> > destroy any and all copies of this message in your possession (whether
-> > hard copies or electronically stored copies).
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Yep.
 
+> 	* drivers/gpu/drm/vgem/vgem_drv.c:vgem_gem_fault() is bloody odd -
+> shmem_read_mapping_page() can't return -EBUSY, AFAICS.  vm_insert_page()
+> used to (and back then vgem_gem_fault() used to be broken), but these days
+> it looks like dead code...
+
+Looks like that.
+
+> 	* ->page_mkwrite() instances sometimes return VM_FAULT_RETRY; AFAICS,
+> it's only (ab)used there as 'not zero, but doesn't contain any error bits';
+> VM_FAULT_RETRY from that source does *not* reach handle_mm_fault() callers,
+> right?
+
+I can see only Lustre doing it and IMHO it is abuse. VM_FAULT_RETRY is used
+for mmap_sem latency reduction when paging in pages and so not everybody
+handles it. If a handler wants to simply retry the fault, returning
+VM_FAULT_NOPAGE is a more common way to do that...
+
+								Honza
 -- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-821-5101
-fax.  734-769-8938
-cel.  734-216-5309
+Jan Kara <jack-IBi9RG/b67k@public.gmane.org>
+SUSE Labs, CR
