@@ -1,66 +1,67 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH v2 12/13] ceph: call update_dentry_lease even when
- r_locked dir is not set
-Date: Thu, 02 Feb 2017 06:27:05 -0500
-Message-ID: <1486034825.2812.2.camel@redhat.com>
-References: <20170130161942.16537-1-jlayton@redhat.com>
-         <20170201114914.20808-1-jlayton@redhat.com>
-         <20170201114914.20808-13-jlayton@redhat.com>
-         <9C301416-E09E-43E0-B2A3-427FB5009060@redhat.com>
+From: Adir Lev <adirl@mellanox.com>
+Subject: RE: mgr issue with RDMA
+Date: Thu, 2 Feb 2017 11:44:46 +0000
+Message-ID: <VI1PR0501MB2782FEEEE447E9D409713A10D74C0@VI1PR0501MB2782.eurprd05.prod.outlook.com>
+References: <VI1PR0501MB27828E6A500097E382147C47D74A0@VI1PR0501MB2782.eurprd05.prod.outlook.com>
+ <CACJqLyY3iEH6eXP34K0+f+z-iahJrqHtUx-wrZN=OgL7x6hP0g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:35029 "EHLO
-        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751189AbdBBL1H (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Feb 2017 06:27:07 -0500
-Received: by mail-qt0-f171.google.com with SMTP id x49so24164766qtc.2
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Feb 2017 03:27:07 -0800 (PST)
-In-Reply-To: <9C301416-E09E-43E0-B2A3-427FB5009060@redhat.com>
+Received: from mail-he1eur01on0079.outbound.protection.outlook.com ([104.47.0.79]:13120
+        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751019AbdBBLou (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 2 Feb 2017 06:44:50 -0500
+In-Reply-To: <CACJqLyY3iEH6eXP34K0+f+z-iahJrqHtUx-wrZN=OgL7x6hP0g@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, idryomov@gmail.com
+To: Haomai Wang <haomai@xsky.com>
+Cc: Sarit Zubakov <saritz@mellanox.com>, Oren Duer <oren@mellanox.com>, Daniel Bar-On <danielbo@mellanox.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 2017-02-02 at 16:34 +0800, Yan, Zheng wrote:
-> > On 1 Feb 2017, at 19:49, Jeff Layton <jlayton@redhat.com> wrote:
-> > 
-> > We don't really require that the parent be locked in order to update the
-> > lease on a dentry. Lease info is protected by the d_lock. In the event
-> > that the parent is not locked in ceph_fill_trace, and we have both
-> > parent and target info, go ahead and update the dentry lease.
-> > 
-> > Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> > ---
-> > fs/ceph/inode.c | 10 ++++++++++
-> > 1 file changed, 10 insertions(+)
-> > 
-> > diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> > index 15e042a8d71f..87863f962d50 100644
-> > --- a/fs/ceph/inode.c
-> > +++ b/fs/ceph/inode.c
-> > @@ -1345,6 +1345,16 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
-> > 			goto done;
-> > 		}
-> > 		req->r_dentry = dn;  /* may have spliced */
-> > +	} else if (rinfo->head->is_dentry && rinfo->head->is_target) {
-> > +		if ((le32_to_cpu(rinfo->diri.in->cap.caps) & CEPH_CAP_FILE_SHARED) ||
-> > +		    le32_to_cpu(rinfo->dlease->duration_ms)) {
-> > +			vino.ino = le64_to_cpu(rinfo->diri.in->ino);
-> > +			vino.snap = le64_to_cpu(rinfo->diri.in->snapid);
-> > +			update_dentry_lease(req->r_dentry, rinfo->dlease,
-> > +				session, req->r_request_started, &vino);
-> > +		} else {
-> > +			dout("%s: no dentry lease or dir cap\n", __func__);
-> > +		}
-> > 	}
-> 
-> I think checking rinfo->head->is_target is not needed here, because null dentry can also have lease.
-> Besides, I think we need to check if rinfo->head->is_target matches d_really_is_negative(dn) and if
-> the target inode matches d_inode(dn).
-> 
-
-Yeah, I think you're right here. I'll respin this one.
--- 
-Jeff Layton <jlayton@redhat.com>
+U2VlIGJlbG93IA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogSGFvbWFpIFdh
+bmcgW21haWx0bzpoYW9tYWlAeHNreS5jb21dIA0KU2VudDogVGh1cnNkYXksIEZlYnJ1YXJ5IDAy
+LCAyMDE3IDEwOjI2IEFNDQpUbzogQWRpciBMZXYgPGFkaXJsQG1lbGxhbm94LmNvbT4NCkNjOiBT
+YXJpdCBadWJha292IDxzYXJpdHpAbWVsbGFub3guY29tPjsgT3JlbiBEdWVyIDxvcmVuQG1lbGxh
+bm94LmNvbT47IERhbmllbCBCYXItT24gPGRhbmllbGJvQG1lbGxhbm94LmNvbT47IGNlcGgtZGV2
+ZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogbWdyIGlzc3VlIHdpdGggUkRNQQ0KDQpb
+Y2MgdG8gY2VwaC1kZXZlbF0NCg0KDQoNCk9uIFR1ZSwgSmFuIDMxLCAyMDE3IGF0IDExOjU4IFBN
+LCBBZGlyIExldiA8YWRpcmxAbWVsbGFub3guY29tPiB3cm90ZToNCj4gSGkgSGFvbWFpDQo+DQo+
+DQo+DQo+IEZvciBjb25mIG9mOg0KPg0KPiBtc19wdWJsaWNfdHlwZSA9IGFzeW5jK3Bvc2l4DQo+
+DQo+IG1zX2NsdXN0ZXJfdHlwZSA9IGFzeW5jK3Bvc2l4DQo+DQo+IEkgY2FuIHJ1bg0KPg0KPiBz
+eXN0ZW1jdGwgc3RhcnQgY2VwaC1tb25Aci1kY3M0NQ0KPg0KPiBhbmQgYWxsIGlzIE9LICENCj4N
+Cj4gW3Jvb3RAci1kY3M0NSBteS1jbHVzdGVyXSMgcHMgYXV4IHxncmVwIGNlcGgNCj4NCj4gcm9v
+dCAgICAgIDQxMzYgIDAuMCAgMC4wIDE4NzY3NiAgMjQ0NCBwdHMvMCAgICBTICAgIDE1OjIyICAg
+MDowMCBzdSBjZXBoDQo+DQo+IGNlcGggICAgICA0MTM3ICAwLjAgIDAuMCAxMTUzNzIgIDE5NDAg
+cHRzLzAgICAgUyAgICAxNToyMiAgIDA6MDAgYmFzaA0KPg0KPiBjZXBoICAgICAyMTU3OSAgNS4w
+ICAwLjAgMzM4NjY4IDE5MDA4ID8gICAgICAgIFNzbCAgMTU6NDYgICAwOjAwDQo+IC91c3IvYmlu
+L2NlcGgtbW9uIC1mIC0tY2x1c3RlciBjZXBoIC0taWQgci1kY3M0NSAtLXNldHVzZXIgY2VwaCAN
+Cj4gLS1zZXRncm91cCBjZXBoDQo+DQo+IGNlcGggICAgIDIyNTk1IDEyLjAgIDAuMCA1Mjg2MDQg
+MjYwODggPyAgICAgICAgU3NsICAxNTo0NiAgIDA6MDANCj4gL3Vzci9iaW4vY2VwaC1tZ3IgLWYg
+LS1jbHVzdGVyIGNlcGggLS1pZCByLWRjczQ1IC0tc2V0dXNlciBjZXBoIA0KPiAtLXNldGdyb3Vw
+IGNlcGgNCj4NCj4gcm9vdCAgICAgMjI2MTkgIDAuMCAgMC4wIDExMjY0NCAgIDk0OCBwdHMvMCAg
+ICBTKyAgIDE1OjQ2ICAgMDowMCBncmVwDQo+IC0tY29sb3I9YXV0byBjZXBoDQo+DQo+DQo+DQo+
+IGJ1dCB3aGVuIEkgbW92ZSB0byBSRE1BIGFuZCBjaGFuZ2UgdGhlIGNvbmYgdG8NCj4NCj4gbXNf
+cHVibGljX3R5cGUgPSBhc3luYytyZG1hDQo+DQo+IG1zX2NsdXN0ZXJfdHlwZSA9IGFzeW5jK3Jk
+bWENCj4NCj4NCj4NCj4gaWYgSSAgdHJ5IHRvIHN0YXJ0IGFnYWluIHVzaW5nOg0KPg0KPiBzeXN0
+ZW1jdGwgc3RhcnQgY2VwaC1tb25Aci1kY3M0NQ0KPg0KPg0KPg0KPiBjb21tYW5kIGlzIHN0dWNr
+LiAoY29uc29sZSBubyByZXR1cm4pDQo+DQo+DQo+DQo+IGxvb2tpbmcgYXQgcHM6DQo+DQo+IFty
+b290QHItZGNzNDUgbXktY2x1c3Rlcl0jIHBzIGF1eCB8Z3JlcCBjZXBoDQo+DQo+IHJvb3QgICAg
+ICA0MTM2ICAwLjAgIDAuMCAxODc2NzYgIDI0NDQgcHRzLzAgICAgUyAgICAxNToyMiAgIDA6MDAg
+c3UgY2VwaA0KPg0KPiBjZXBoICAgICAgNDEzNyAgMC4wICAwLjAgMTE1MzcyICAxOTQwIHB0cy8w
+ICAgIFMgICAgMTU6MjIgICAwOjAwIGJhc2gNCj4NCj4gcm9vdCAgICAgMjI3MjYgMTkuNSAgMC41
+IDk0MDMwOCAxOTExNTYgPyAgICAgICBTc2wgIDE1OjQ4ICAgMDowMA0KPiAvdXNyL2Jpbi9weXRo
+b24yLjcgL3Vzci9iaW4vY2VwaCAtaSANCj4gL3Zhci9saWIvY2VwaC9tZ3IvY2VwaC1yLWRjczQ1
+L2tleXJpbmcNCj4gYXV0aCBhZGQgbWdyLnItZGNzNDUgbW9uIGFsbG93ICoNCj4gLS1rZXlyaW5n
+PS92YXIvbGliL2NlcGgvbW9uL2NlcGgtci1kY3M0NS9rZXlyaW5nIC0tbmFtZT1tb24uDQoNCmRv
+IHlvdSByZXN0YXJ0IG1vbiB0byB1c2UgcmRtYSBmaXJzdGx5Pw0KW0FkaXIgTGV2XSB5ZXMNCg0K
+Pg0KPiByb290ICAgICAyMjc2NCAgMC4wICAwLjAgMTEyNjQ0ICAgOTUyIHB0cy8wICAgIFMrICAg
+MTU6NDggICAwOjAwIGdyZXANCj4gLS1jb2xvcj1hdXRvIGNlcGgNCj4NCj4NCj4NCj4gbG9va2lu
+ZyBhdCB2aW0gL3Vzci9saWIvc3lzdGVtZC9zeXN0ZW0vY2VwaC1tZ3JALnNlcnZpY2UNCj4NCj4g
+c2VlbXMgbGlrZSB0aGlzIGNvbW1hbmQ6DQo+DQo+IEV4ZWNTdGFydFByZT0tL3Vzci9iaW4vY2Vw
+aCAtaSAvdmFyL2xpYi9jZXBoL21nci8ke0NMVVNURVJ9LSVpL2tleXJpbmcgDQo+IGF1dGggYWRk
+IG1nci4laSBtb24gJ2FsbG93IConIA0KPiAtLWtleXJpbmc9L3Zhci9saWIvY2VwaC9tb24vJHtD
+TFVTVEVSfS0laS9rZXlyaW5nDQo+IC0tbmFtZT1tb24uDQo+DQo+IEhhdmUgcHJvYmxlbSBydW5u
+aW5nIGluIFJETUEgbW9kZQ0KPg0KPg0KPg0KPiBBbnkgaWRlYT8NCj4NCj4NCj4NCj4gVGhhbmtz
+LCBBZGlyDQo=
