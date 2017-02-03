@@ -1,31 +1,31 @@
-From: Brett Niver <bniver@redhat.com>
+From: Loic Dachary <loic@dachary.org>
 Subject: Re: crush devices class types
-Date: Fri, 3 Feb 2017 07:52:55 -0500
-Message-ID: <CAMdDSN1+ZtS45nrwaabGvi8L+3V3FWgskxcD3+zUwsKZVdp-vA@mail.gmail.com>
+Date: Fri, 3 Feb 2017 14:21:03 +0100
+Message-ID: <83ad191e-933f-83a4-c6d4-c831c1ac893f@dachary.org>
 References: <e5fad669-da68-1287-7025-9c5e48d67601@dachary.org>
- <1971303930.7861.1485178720341@ox.pcextreme.nl> <alpine.DEB.2.11.1701231428190.3654@piezo.novalocal>
- <372c7fcb-8697-28ea-0d7c-1efc29fc21cf@dachary.org> <alpine.DEB.2.11.1702022047070.3654@piezo.novalocal>
- <2e591b25-3db2-2dd2-03af-2c1ef40292ac@dachary.org> <CALe9h7ds0PpqX-QJ0Usb-OLggPMCE2KF0tLurGfKFmms89nDiA@mail.gmail.com>
+ <1971303930.7861.1485178720341@ox.pcextreme.nl>
+ <alpine.DEB.2.11.1701231428190.3654@piezo.novalocal>
+ <372c7fcb-8697-28ea-0d7c-1efc29fc21cf@dachary.org>
+ <alpine.DEB.2.11.1702022047070.3654@piezo.novalocal>
+ <2e591b25-3db2-2dd2-03af-2c1ef40292ac@dachary.org>
+ <CALe9h7ds0PpqX-QJ0Usb-OLggPMCE2KF0tLurGfKFmms89nDiA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f48.google.com ([209.85.218.48]:36024 "EHLO
-        mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752385AbdBCMw4 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2017 07:52:56 -0500
-Received: by mail-oi0-f48.google.com with SMTP id u143so10355243oif.3
-        for <ceph-devel@vger.kernel.org>; Fri, 03 Feb 2017 04:52:56 -0800 (PST)
+Received: from relay6-d.mail.gandi.net ([217.70.183.198]:50061 "EHLO
+        relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752169AbdBCNVH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2017 08:21:07 -0500
 In-Reply-To: <CALe9h7ds0PpqX-QJ0Usb-OLggPMCE2KF0tLurGfKFmms89nDiA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: John Spray <jspray@redhat.com>
-Cc: Loic Dachary <loic@dachary.org>, Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-+1
-I think there may be multiple reasons to have a generator.
 
-On Fri, Feb 3, 2017 at 7:46 AM, John Spray <jspray@redhat.com> wrote:
+
+On 02/03/2017 01:46 PM, John Spray wrote:
 > On Fri, Feb 3, 2017 at 12:22 PM, Loic Dachary <loic@dachary.org> wrote:
 >> Hi,
 >>
@@ -50,12 +50,14 @@ On Fri, Feb 3, 2017 at 7:46 AM, John Spray <jspray@redhat.com> wrote:
 >> * it can be implemented using python to lower the barrier of entry
 >>
 >> I don't think it makes the implementation of the current proposal any simpler or more complex. Worst case scenario nobody write any plugin but that does not make this one plugin less useful.
->
+> 
 > I think this is basically the alternative approach that Sam was
 > suggesting during CDM: the idea of layering a new (perhaps very
 > similar) syntax on top of the existing one, instead of extending the
 > existing one directly.
->
+
+Ha nice, not such a stupid idea then :-) I'll try to defend it a little more below then. Please bear in mind that I'm not sure this is the way to go even though I'm writing as if I am.
+
 > The main argument against doing that was the complexity, not just of
 > implementation but for users, who would now potentially have two
 > separate sets of commands, one operating on the "high level" map
@@ -63,10 +65,19 @@ On Fri, Feb 3, 2017 at 7:46 AM, John Spray <jspray@redhat.com> wrote:
 > native crush map (which would only have myhost~ssd, myhost~hdd
 > entries, and would have no concept that a thing called myhost
 > existed).
->
+
+As a user I'm not sure what is more complicated / confusing. If I'm an experienced Ceph user I'll think of this new syntax as a generator because I already know how crush works. I'll welcome the help and be relieved that I don't have to manually do that anymore. But having that as a native syntax may be a little unconfortable for me because I will want to verify the new syntax matches what I expect, which comes naturally if the transformation step is separate. I may even tweak it a little with an intermediate script to match one thing or two. If I'm a new Ceph user this is one more concept I need to learn: the device class. And to understand what it means, the documentation will have to explain that it creates an independant crush hierarchy for each device class, with weights that only tak
+ e into account the devices of that given class. I will not be exonerated from understanding the transformation step and the syntactic sugar may even make that more complicated to get.
+
+If I understand correctly, the three would co-exist: host, host~ssd, host~hdd so that you can write a rule that takes from all devices. 
+
 > As for implemetning other generators, the trouble with that is that
 > the resulting conventions would be unknown to other tools, and to any
-> commands built in to Ceph.  We *really* need a variant of "set noout"
+> commands built in to Ceph. 
+
+Yes. But do we really want to insert the concept of "device class" in Ceph ? There are recurring complaints about manually creating the crushmap required to separate ssd from hdd. But is it inconvenient in any way that Ceph is otherwise unaware of this distinction ? 
+
+> We *really* need a variant of "set noout"
 > that operates on a crush subtree (typically a host), as it's the sane
 > way to get people to temporarily mark some OSDs while they
 > reboot/upgrade a host, but to implement that command we have to have
@@ -74,11 +85,16 @@ On Fri, Feb 3, 2017 at 7:46 AM, John Spray <jspray@redhat.com> wrote:
 > belong to a host.  Whatever the convention is (myhost~ssd, myhost_ssd,
 > whatever), it needs to be defined and built into Ceph in order to be
 > interoperable.
->
+
+That goes back (above) to my understanding of Sage proposal (which I may have wrong ?) in which the host bucket still exists and still contains all devices regardless of their class.
+
+Cheers
+
+> 
 > John
->
->
->
+> 
+> 
+> 
 >> Cheers
 >>
 >> On 02/02/2017 09:57 PM, Sage Weil wrote:
@@ -202,7 +218,7 @@ On Fri, Feb 3, 2017 at 7:46 AM, John Spray <jspray@redhat.com> wrote:
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
