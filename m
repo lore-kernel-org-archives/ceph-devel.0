@@ -1,13 +1,13 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v3 3/8] ceph: convert bools in ceph_mds_request to a new r_req_flags field
-Date: Fri,  3 Feb 2017 13:03:59 -0500
-Message-ID: <20170203180404.31930-4-jlayton@redhat.com>
+Subject: [PATCH v3 4/8] ceph: add a new flag to indicate whether parent is locked
+Date: Fri,  3 Feb 2017 13:04:00 -0500
+Message-ID: <20170203180404.31930-5-jlayton@redhat.com>
 References: <20170201114914.20808-1-jlayton@redhat.com>
  <20170203180404.31930-1-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51596 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:53272 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751187AbdBCSEI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        id S1751192AbdBCSEI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
         Fri, 3 Feb 2017 13:04:08 -0500
 In-Reply-To: <20170203180404.31930-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
@@ -15,346 +15,301 @@ List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com
 
-Currently, we have a bunch of bool flags in struct ceph_mds_request. We
-need more flags though, but each bool takes (at least) a byte. Those
-add up over time.
+struct ceph_mds_request has an r_locked_dir pointer, which is set to
+indicate the parent inode and that its i_rwsem is locked.  In some
+critical places, we need to be able to indicate the parent inode to the
+request handling code, even when its i_rwsem may not be locked.
 
-Merge all of the existing bools in this struct into a single unsigned
-long, and use the set/test/clear_bit macros to manipulate them. These
-are atomic operations, but that is required here to prevent
-load/modify/store races. The existing flags are protected by different
-locks, so we can't rely on them for that purpose.
+Most of the code that operates on r_locked_dir doesn't require that the
+i_rwsem be locked. We only really need it to handle manipulation of the
+dcache. The rest (filling of the inode, updating dentry leases, etc.)
+already has its own locking.
+
+Add a new r_req_flags bit that indicates whether the parent is locked
+when doing the request, and rename the pointer to "r_parent". For now,
+all the places that set r_parent also set this flag, but that will
+change in a later patch.
 
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- fs/ceph/debugfs.c    |  2 +-
- fs/ceph/dir.c        |  4 ++--
- fs/ceph/inode.c      | 19 ++++++++++---------
- fs/ceph/mds_client.c | 47 +++++++++++++++++++++++++----------------------
- fs/ceph/mds_client.h | 12 ++++++++----
- 5 files changed, 46 insertions(+), 38 deletions(-)
+ fs/ceph/dir.c        | 21 ++++++++++++++-------
+ fs/ceph/export.c     |  3 ++-
+ fs/ceph/file.c       |  3 ++-
+ fs/ceph/inode.c      | 17 ++++++++++-------
+ fs/ceph/mds_client.c | 24 ++++++++++++------------
+ fs/ceph/mds_client.h |  3 ++-
+ 6 files changed, 42 insertions(+), 29 deletions(-)
 
-diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index 39ff678e567f..f2ae393e2c31 100644
---- a/fs/ceph/debugfs.c
-+++ b/fs/ceph/debugfs.c
-@@ -70,7 +70,7 @@ static int mdsc_show(struct seq_file *s, void *p)
- 
- 		seq_printf(s, "%s", ceph_mds_op_name(req->r_op));
- 
--		if (req->r_got_unsafe)
-+		if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags))
- 			seq_puts(s, "\t(unsafe)");
- 		else
- 			seq_puts(s, "\t");
 diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index d4385563b70a..5fb86d71220e 100644
+index 5fb86d71220e..c8562b8a8c7e 100644
 --- a/fs/ceph/dir.c
 +++ b/fs/ceph/dir.c
-@@ -371,7 +371,7 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
- 		/* hints to request -> mds selection code */
- 		req->r_direct_mode = USE_AUTH_MDS;
- 		req->r_direct_hash = ceph_frag_value(frag);
--		req->r_direct_is_hash = true;
-+		__set_bit(CEPH_MDS_R_DIRECT_IS_HASH, &req->r_req_flags);
- 		if (fi->last_name) {
- 			req->r_path2 = kstrdup(fi->last_name, GFP_KERNEL);
- 			if (!req->r_path2) {
-@@ -417,7 +417,7 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
- 		fi->frag = frag;
- 		fi->last_readdir = req;
+@@ -752,7 +752,8 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
+ 		mask |= CEPH_CAP_XATTR_SHARED;
+ 	req->r_args.getattr.mask = cpu_to_le32(mask);
  
--		if (req->r_did_prepopulate) {
-+		if (test_bit(CEPH_MDS_R_DID_PREPOPULATE, &req->r_req_flags)) {
- 			fi->readdir_cache_idx = req->r_readdir_cache_idx;
- 			if (fi->readdir_cache_idx < 0) {
- 				/* preclude from marking dir ordered */
+-	req->r_locked_dir = dir;
++	req->r_parent = dir;
++	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+ 	err = ceph_mdsc_do_request(mdsc, NULL, req);
+ 	err = ceph_handle_snapdir(req, dentry, err);
+ 	dentry = ceph_finish_lookup(req, dentry, err);
+@@ -813,7 +814,8 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
+ 	}
+ 	req->r_dentry = dget(dentry);
+ 	req->r_num_caps = 2;
+-	req->r_locked_dir = dir;
++	req->r_parent = dir;
++	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+ 	req->r_args.mknod.mode = cpu_to_le32(mode);
+ 	req->r_args.mknod.rdev = cpu_to_le32(rdev);
+ 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
+@@ -864,7 +866,8 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
+ 		ceph_mdsc_put_request(req);
+ 		goto out;
+ 	}
+-	req->r_locked_dir = dir;
++	req->r_parent = dir;
++	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+ 	req->r_dentry = dget(dentry);
+ 	req->r_num_caps = 2;
+ 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
+@@ -913,7 +916,8 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
+ 
+ 	req->r_dentry = dget(dentry);
+ 	req->r_num_caps = 2;
+-	req->r_locked_dir = dir;
++	req->r_parent = dir;
++	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+ 	req->r_args.mkdir.mode = cpu_to_le32(mode);
+ 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
+ 	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
+@@ -957,7 +961,8 @@ static int ceph_link(struct dentry *old_dentry, struct inode *dir,
+ 	req->r_dentry = dget(dentry);
+ 	req->r_num_caps = 2;
+ 	req->r_old_dentry = dget(old_dentry);
+-	req->r_locked_dir = dir;
++	req->r_parent = dir;
++	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+ 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
+ 	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
+ 	/* release LINK_SHARED on source inode (mds will lock it) */
+@@ -1023,7 +1028,8 @@ static int ceph_unlink(struct inode *dir, struct dentry *dentry)
+ 	}
+ 	req->r_dentry = dget(dentry);
+ 	req->r_num_caps = 2;
+-	req->r_locked_dir = dir;
++	req->r_parent = dir;
++	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+ 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
+ 	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
+ 	req->r_inode_drop = drop_caps_for_unlink(inode);
+@@ -1066,7 +1072,8 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
+ 	req->r_num_caps = 2;
+ 	req->r_old_dentry = dget(old_dentry);
+ 	req->r_old_dentry_dir = old_dir;
+-	req->r_locked_dir = new_dir;
++	req->r_parent = new_dir;
++	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+ 	req->r_old_dentry_drop = CEPH_CAP_FILE_SHARED;
+ 	req->r_old_dentry_unless = CEPH_CAP_FILE_EXCL;
+ 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
+diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+index 180bbef760f2..e8f11fa565c5 100644
+--- a/fs/ceph/export.c
++++ b/fs/ceph/export.c
+@@ -207,7 +207,8 @@ static int ceph_get_name(struct dentry *parent, char *name,
+ 	req->r_inode = d_inode(child);
+ 	ihold(d_inode(child));
+ 	req->r_ino2 = ceph_vino(d_inode(parent));
+-	req->r_locked_dir = d_inode(parent);
++	req->r_parent = d_inode(parent);
++	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+ 	req->r_num_caps = 2;
+ 	err = ceph_mdsc_do_request(mdsc, NULL, req);
+ 
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 19419eb87f38..a91239c4b31c 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -310,7 +310,8 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+                mask |= CEPH_CAP_XATTR_SHARED;
+        req->r_args.open.mask = cpu_to_le32(mask);
+ 
+-	req->r_locked_dir = dir;           /* caller holds dir->i_mutex */
++	req->r_parent = dir;
++	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+ 	err = ceph_mdsc_do_request(mdsc,
+ 				   (flags & (O_CREAT|O_TRUNC)) ? dir : NULL,
+ 				   req);
 diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index b18462c64cdd..e54ba03d3df7 100644
+index e54ba03d3df7..b4b61da03dbf 100644
 --- a/fs/ceph/inode.c
 +++ b/fs/ceph/inode.c
-@@ -1199,8 +1199,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+@@ -1122,13 +1122,13 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
  
- 		err = fill_inode(in, req->r_locked_page, &rinfo->targeti, NULL,
- 				session, req->r_request_started,
--				(!req->r_aborted && rinfo->head->result == 0) ?
--				req->r_fmode : -1,
-+				(!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags) &&
-+				rinfo->head->result == 0) ?  req->r_fmode : -1,
- 				&req->r_caps_reservation);
- 		if (err < 0) {
- 			pr_err("fill_inode badness %p %llx.%llx\n",
-@@ -1209,12 +1209,14 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 		}
+ 	if (!rinfo->head->is_target && !rinfo->head->is_dentry) {
+ 		dout("fill_trace reply is empty!\n");
+-		if (rinfo->head->result == 0 && req->r_locked_dir)
++		if (rinfo->head->result == 0 && req->r_parent)
+ 			ceph_invalidate_dir_request(req);
+ 		return 0;
  	}
  
-+	if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags))
-+		goto done;
-+
- 	/*
+ 	if (rinfo->head->is_dentry) {
+-		struct inode *dir = req->r_locked_dir;
++		struct inode *dir = req->r_parent;
+ 
+ 		if (dir) {
+ 			err = fill_inode(dir, NULL,
+@@ -1216,7 +1216,9 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
  	 * ignore null lease/binding on snapdir ENOENT, or else we
  	 * will have trouble splicing in the virtual snapdir later
  	 */
--	if (rinfo->head->is_dentry && !req->r_aborted &&
--	    req->r_locked_dir &&
-+	if (rinfo->head->is_dentry && req->r_locked_dir &&
+-	if (rinfo->head->is_dentry && req->r_locked_dir &&
++	if (rinfo->head->is_dentry &&
++            !test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags) &&
++	    test_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags) &&
  	    (rinfo->head->is_target || strncmp(req->r_dentry->d_name.name,
  					       fsc->mount_options->snapdir_name,
  					       req->r_dentry->d_name.len))) {
-@@ -1317,9 +1319,8 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+@@ -1225,7 +1227,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
+ 		 * mknod symlink mkdir  : null -> new inode
+ 		 * unlink               : linked -> null
+ 		 */
+-		struct inode *dir = req->r_locked_dir;
++		struct inode *dir = req->r_parent;
+ 		struct dentry *dn = req->r_dentry;
+ 		bool have_dir_cap, have_lease;
+ 
+@@ -1319,10 +1321,11 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
  			update_dentry_lease(dn, rinfo->dlease, session,
  					    req->r_request_started);
  		dout(" final dn %p\n", dn);
--	} else if (!req->r_aborted &&
--		   (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
--		    req->r_op == CEPH_MDS_OP_MKSNAP)) {
-+	} else if (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
-+		   req->r_op == CEPH_MDS_OP_MKSNAP) {
+-	} else if (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
+-		   req->r_op == CEPH_MDS_OP_MKSNAP) {
++	} else if ((req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
++		    req->r_op == CEPH_MDS_OP_MKSNAP) &&
++		   !test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
  		struct dentry *dn = req->r_dentry;
- 		struct inode *dir = req->r_locked_dir;
+-		struct inode *dir = req->r_locked_dir;
++		struct inode *dir = req->r_parent;
  
-@@ -1444,7 +1445,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
- 	u32 fpos_offset;
- 	struct ceph_readdir_cache_control cache_ctl = {};
- 
--	if (req->r_aborted)
-+	if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags))
- 		return readdir_prepopulate_inodes_only(req, session);
- 
- 	if (rinfo->hash_order && req->r_path2) {
-@@ -1598,7 +1599,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
- 	}
- out:
- 	if (err == 0 && skipped == 0) {
--		req->r_did_prepopulate = true;
-+		set_bit(CEPH_MDS_R_DID_PREPOPULATE, &req->r_req_flags);
- 		req->r_readdir_cache_idx = cache_ctl.index;
- 	}
- 	ceph_readdir_cache_release(&cache_ctl);
+ 		/* fill out a snapdir LOOKUPSNAP dentry */
+ 		BUG_ON(!dn);
 diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 4a68067a76b5..ccf75a3260e8 100644
+index ccf75a3260e8..52521f339745 100644
 --- a/fs/ceph/mds_client.c
 +++ b/fs/ceph/mds_client.c
-@@ -644,13 +644,15 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
- 
- 	erase_request(&mdsc->request_tree, req);
- 
--	if (req->r_unsafe_dir && req->r_got_unsafe) {
-+	if (req->r_unsafe_dir  &&
-+	    test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags)) {
- 		struct ceph_inode_info *ci = ceph_inode(req->r_unsafe_dir);
- 		spin_lock(&ci->i_unsafe_lock);
- 		list_del_init(&req->r_unsafe_dir_item);
- 		spin_unlock(&ci->i_unsafe_lock);
+@@ -547,8 +547,8 @@ void ceph_mdsc_release_request(struct kref *kref)
+ 		ceph_put_cap_refs(ceph_inode(req->r_inode), CEPH_CAP_PIN);
+ 		iput(req->r_inode);
  	}
--	if (req->r_target_inode && req->r_got_unsafe) {
-+	if (req->r_target_inode &&
-+	    test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags)) {
- 		struct ceph_inode_info *ci = ceph_inode(req->r_target_inode);
- 		spin_lock(&ci->i_unsafe_lock);
- 		list_del_init(&req->r_unsafe_target_item);
-@@ -705,7 +707,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
- 	int mode = req->r_direct_mode;
- 	int mds = -1;
- 	u32 hash = req->r_direct_hash;
--	bool is_hash = req->r_direct_is_hash;
-+	bool is_hash = test_bit(CEPH_MDS_R_DIRECT_IS_HASH, &req->r_req_flags);
+-	if (req->r_locked_dir)
+-		ceph_put_cap_refs(ceph_inode(req->r_locked_dir), CEPH_CAP_PIN);
++	if (req->r_parent)
++		ceph_put_cap_refs(ceph_inode(req->r_parent), CEPH_CAP_PIN);
+ 	iput(req->r_target_inode);
+ 	if (req->r_dentry)
+ 		dput(req->r_dentry);
+@@ -735,7 +735,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
  
- 	/*
- 	 * is there a specific mds we should try?  ignore hint if we have
-@@ -2042,7 +2044,7 @@ static int __prepare_send_request(struct ceph_mds_client *mdsc,
- 	dout("prepare_send_request %p tid %lld %s (attempt %d)\n", req,
- 	     req->r_tid, ceph_mds_op_name(req->r_op), req->r_attempts);
+ 		rcu_read_lock();
+ 		parent = req->r_dentry->d_parent;
+-		dir = req->r_locked_dir ? : d_inode_rcu(parent);
++		dir = req->r_parent ? : d_inode_rcu(parent);
  
--	if (req->r_got_unsafe) {
-+	if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags)) {
- 		void *p;
- 		/*
- 		 * Replay.  Do not regenerate message (and rebuild
-@@ -2091,7 +2093,7 @@ static int __prepare_send_request(struct ceph_mds_client *mdsc,
+ 		if (!dir || dir->i_sb != mdsc->fsc->sb) {
+ 			/*  not this fs or parent went negative */
+@@ -1894,7 +1894,7 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
+ 	int ret;
  
- 	rhead = msg->front.iov_base;
+ 	ret = set_request_path_attr(req->r_inode, req->r_dentry,
+-			      req->r_locked_dir, req->r_path1, req->r_ino1.ino,
++			      req->r_parent, req->r_path1, req->r_ino1.ino,
+ 			      &path1, &pathlen1, &ino1, &freepath1);
+ 	if (ret < 0) {
+ 		msg = ERR_PTR(ret);
+@@ -1956,7 +1956,7 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
+ 		      mds, req->r_inode_drop, req->r_inode_unless, 0);
+ 	if (req->r_dentry_drop)
+ 		releases += ceph_encode_dentry_release(&p, req->r_dentry,
+-				req->r_locked_dir, mds, req->r_dentry_drop,
++				req->r_parent, mds, req->r_dentry_drop,
+ 				req->r_dentry_unless);
+ 	if (req->r_old_dentry_drop)
+ 		releases += ceph_encode_dentry_release(&p, req->r_old_dentry,
+@@ -2095,14 +2095,14 @@ static int __prepare_send_request(struct ceph_mds_client *mdsc,
  	rhead->oldest_client_tid = cpu_to_le64(__get_oldest_tid(mdsc));
--	if (req->r_got_unsafe)
-+	if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags))
+ 	if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags))
  		flags |= CEPH_MDS_FLAG_REPLAY;
- 	if (req->r_locked_dir)
+-	if (req->r_locked_dir)
++	if (req->r_parent)
  		flags |= CEPH_MDS_FLAG_WANT_DENTRY;
-@@ -2114,8 +2116,8 @@ static int __do_request(struct ceph_mds_client *mdsc,
- 	int mds = -1;
- 	int err = 0;
+ 	rhead->flags = cpu_to_le32(flags);
+ 	rhead->num_fwd = req->r_num_fwd;
+ 	rhead->num_retry = req->r_attempts - 1;
+ 	rhead->ino = 0;
  
--	if (req->r_err || req->r_got_result) {
--		if (req->r_aborted)
-+	if (req->r_err || test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags)) {
-+		if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags))
- 			__unregister_request(mdsc, req);
- 		goto out;
- 	}
-@@ -2245,7 +2247,7 @@ static void kick_requests(struct ceph_mds_client *mdsc, int mds)
- 	while (p) {
- 		req = rb_entry(p, struct ceph_mds_request, r_node);
- 		p = rb_next(p);
--		if (req->r_got_unsafe)
-+		if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags))
- 			continue;
- 		if (req->r_attempts > 0)
- 			continue; /* only new requests */
-@@ -2319,7 +2321,7 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
- 	mutex_lock(&mdsc->mutex);
+-	dout(" r_locked_dir = %p\n", req->r_locked_dir);
++	dout(" r_parent = %p\n", req->r_parent);
+ 	return 0;
+ }
  
- 	/* only abort if we didn't race with a real reply */
--	if (req->r_got_result) {
-+	if (test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags)) {
- 		err = le32_to_cpu(req->r_reply_info.head->result);
- 	} else if (err < 0) {
- 		dout("aborted request %lld with %d\n", req->r_tid, err);
-@@ -2331,7 +2333,7 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
- 		 */
- 		mutex_lock(&req->r_fill_mutex);
- 		req->r_err = err;
--		req->r_aborted = true;
-+		set_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags);
+@@ -2282,11 +2282,11 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
+ 
+ 	dout("do_request on %p\n", req);
+ 
+-	/* take CAP_PIN refs for r_inode, r_locked_dir, r_old_dentry */
++	/* take CAP_PIN refs for r_inode, r_parent, r_old_dentry */
+ 	if (req->r_inode)
+ 		ceph_get_cap_refs(ceph_inode(req->r_inode), CEPH_CAP_PIN);
+-	if (req->r_locked_dir)
+-		ceph_get_cap_refs(ceph_inode(req->r_locked_dir), CEPH_CAP_PIN);
++	if (req->r_parent)
++		ceph_get_cap_refs(ceph_inode(req->r_parent), CEPH_CAP_PIN);
+ 	if (req->r_old_dentry_dir)
+ 		ceph_get_cap_refs(ceph_inode(req->r_old_dentry_dir),
+ 				  CEPH_CAP_PIN);
+@@ -2336,7 +2336,7 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
+ 		set_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags);
  		mutex_unlock(&req->r_fill_mutex);
  
- 		if (req->r_locked_dir &&
-@@ -2409,14 +2411,14 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 	}
- 
- 	/* dup? */
--	if ((req->r_got_unsafe && !head->safe) ||
--	    (req->r_got_safe && head->safe)) {
-+	if ((test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags) && !head->safe) ||
-+	    (test_bit(CEPH_MDS_R_GOT_SAFE, &req->r_req_flags) && head->safe)) {
- 		pr_warn("got a dup %s reply on %llu from mds%d\n",
- 			   head->safe ? "safe" : "unsafe", tid, mds);
- 		mutex_unlock(&mdsc->mutex);
- 		goto out;
- 	}
--	if (req->r_got_safe) {
-+	if (test_bit(CEPH_MDS_R_GOT_SAFE, &req->r_req_flags)) {
- 		pr_warn("got unsafe after safe on %llu from mds%d\n",
- 			   tid, mds);
- 		mutex_unlock(&mdsc->mutex);
-@@ -2455,10 +2457,10 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 
- 
- 	if (head->safe) {
--		req->r_got_safe = true;
-+		set_bit(CEPH_MDS_R_GOT_SAFE, &req->r_req_flags);
- 		__unregister_request(mdsc, req);
- 
--		if (req->r_got_unsafe) {
-+		if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags)) {
- 			/*
- 			 * We already handled the unsafe response, now do the
- 			 * cleanup.  No need to examine the response; the MDS
-@@ -2476,7 +2478,7 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 			goto out;
- 		}
+-		if (req->r_locked_dir &&
++		if (req->r_parent &&
+ 		    (req->r_op & CEPH_MDS_OP_WRITE))
+ 			ceph_invalidate_dir_request(req);
  	} else {
--		req->r_got_unsafe = true;
-+		set_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags);
- 		list_add_tail(&req->r_unsafe_item, &req->r_session->s_unsafe);
- 		if (req->r_unsafe_dir) {
- 			struct ceph_inode_info *ci =
-@@ -2530,7 +2532,8 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 	if (realm)
- 		ceph_put_snap_realm(mdsc, realm);
+@@ -2355,7 +2355,7 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
+  */
+ void ceph_invalidate_dir_request(struct ceph_mds_request *req)
+ {
+-	struct inode *inode = req->r_locked_dir;
++	struct inode *inode = req->r_parent;
  
--	if (err == 0 && req->r_got_unsafe && req->r_target_inode) {
-+	if (err == 0 && req->r_target_inode &&
-+	    test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags)) {
- 		struct ceph_inode_info *ci = ceph_inode(req->r_target_inode);
- 		spin_lock(&ci->i_unsafe_lock);
- 		list_add_tail(&req->r_unsafe_target_item, &ci->i_unsafe_iops);
-@@ -2538,12 +2541,12 @@ static void handle_reply(struct ceph_mds_session *session, struct ceph_msg *msg)
- 	}
- out_err:
- 	mutex_lock(&mdsc->mutex);
--	if (!req->r_aborted) {
-+	if (!test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
- 		if (err) {
- 			req->r_err = err;
- 		} else {
- 			req->r_reply =  ceph_msg_get(msg);
--			req->r_got_result = true;
-+			set_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags);
- 		}
- 	} else {
- 		dout("reply arrived after request %lld was aborted\n", tid);
-@@ -2587,7 +2590,7 @@ static void handle_forward(struct ceph_mds_client *mdsc,
- 		goto out;  /* dup reply? */
- 	}
+ 	dout("invalidate_dir_request %p (complete, lease(s))\n", inode);
  
--	if (req->r_aborted) {
-+	if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
- 		dout("forward tid %llu aborted, unregistering\n", tid);
- 		__unregister_request(mdsc, req);
- 	} else if (fwd_seq <= req->r_num_fwd) {
-@@ -2597,7 +2600,7 @@ static void handle_forward(struct ceph_mds_client *mdsc,
- 		/* resend. forward race not possible; mds would drop */
- 		dout("forward tid %llu to mds%d (we resend)\n", tid, next_mds);
- 		BUG_ON(req->r_err);
--		BUG_ON(req->r_got_result);
-+		BUG_ON(test_bit(CEPH_MDS_R_GOT_RESULT, &req->r_req_flags));
- 		req->r_attempts = 0;
- 		req->r_num_fwd = fwd_seq;
- 		req->r_resend_mds = next_mds;
-@@ -2762,7 +2765,7 @@ static void replay_unsafe_requests(struct ceph_mds_client *mdsc,
- 	while (p) {
- 		req = rb_entry(p, struct ceph_mds_request, r_node);
- 		p = rb_next(p);
--		if (req->r_got_unsafe)
-+		if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags))
- 			continue;
- 		if (req->r_attempts == 0)
- 			continue; /* only old requests */
 diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index 3c6f77b7bb02..409b0e3c3b7a 100644
+index 409b0e3c3b7a..ac0475a2daa7 100644
 --- a/fs/ceph/mds_client.h
 +++ b/fs/ceph/mds_client.h
-@@ -205,6 +205,14 @@ struct ceph_mds_request {
- 	struct inode *r_locked_dir; /* dir (if any) i_mutex locked by vfs */
+@@ -202,7 +202,7 @@ struct ceph_mds_request {
+ 	char *r_path1, *r_path2;
+ 	struct ceph_vino r_ino1, r_ino2;
+ 
+-	struct inode *r_locked_dir; /* dir (if any) i_mutex locked by vfs */
++	struct inode *r_parent;		    /* parent dir inode */
  	struct inode *r_target_inode;       /* resulting inode */
  
-+#define CEPH_MDS_R_DIRECT_IS_HASH	(1) /* r_direct_hash is valid */
-+#define CEPH_MDS_R_ABORTED		(2) /* call was aborted */
-+#define CEPH_MDS_R_GOT_UNSAFE		(3) /* got an unsafe reply */
-+#define CEPH_MDS_R_GOT_SAFE		(4) /* got a safe reply */
-+#define CEPH_MDS_R_GOT_RESULT		(5) /* got a result */
-+#define CEPH_MDS_R_DID_PREPOPULATE	(6) /* prepopulated readdir */
-+	unsigned long	r_req_flags;
-+
+ #define CEPH_MDS_R_DIRECT_IS_HASH	(1) /* r_direct_hash is valid */
+@@ -211,6 +211,7 @@ struct ceph_mds_request {
+ #define CEPH_MDS_R_GOT_SAFE		(4) /* got a safe reply */
+ #define CEPH_MDS_R_GOT_RESULT		(5) /* got a result */
+ #define CEPH_MDS_R_DID_PREPOPULATE	(6) /* prepopulated readdir */
++#define CEPH_MDS_R_PARENT_LOCKED	(7) /* is r_parent->i_rwsem wlocked? */
+ 	unsigned long	r_req_flags;
+ 
  	struct mutex r_fill_mutex;
- 
- 	union ceph_mds_request_args r_args;
-@@ -216,7 +224,6 @@ struct ceph_mds_request {
- 	/* for choosing which mds to send this request to */
- 	int r_direct_mode;
- 	u32 r_direct_hash;      /* choose dir frag based on this dentry hash */
--	bool r_direct_is_hash;  /* true if r_direct_hash is valid */
- 
- 	/* data payload is used for xattr ops */
- 	struct ceph_pagelist *r_pagelist;
-@@ -234,7 +241,6 @@ struct ceph_mds_request {
- 	struct ceph_mds_reply_info_parsed r_reply_info;
- 	struct page *r_locked_page;
- 	int r_err;
--	bool r_aborted;
- 
- 	unsigned long r_timeout;  /* optional.  jiffies, 0 is "wait forever" */
- 	unsigned long r_started;  /* start time to measure timeout against */
-@@ -262,9 +268,7 @@ struct ceph_mds_request {
- 	ceph_mds_request_callback_t r_callback;
- 	ceph_mds_request_wait_callback_t r_wait_for_completion;
- 	struct list_head  r_unsafe_item;  /* per-session unsafe list item */
--	bool		  r_got_unsafe, r_got_safe, r_got_result;
- 
--	bool              r_did_prepopulate;
- 	long long	  r_dir_release_cnt;
- 	long long	  r_dir_ordered_cnt;
- 	int		  r_readdir_cache_idx;
 -- 
 2.9.3
 
