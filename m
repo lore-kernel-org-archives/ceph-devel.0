@@ -1,62 +1,85 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH 8/8] Revert "ext4: fix wrong gfp type under transaction"
-Date: Fri, 3 Feb 2017 16:32:22 +0100
-Message-ID: <20170203153222.GH19325@dhcp22.suse.cz>
-References: <20170117161618.GT19699@dhcp22.suse.cz>
- <20170117172925.GA2486@quack2.suse.cz>
- <20170119083956.GE30786@dhcp22.suse.cz>
- <20170119092236.GC2565@quack2.suse.cz>
- <20170119094405.GK30786@dhcp22.suse.cz>
- <20170126074455.GC8456@dhcp22.suse.cz>
- <20170127061318.xd2qxashbl4dajez@thunk.org>
- <20170127093735.GB4143@dhcp22.suse.cz>
- <20170127164042.2o3bnyopihcb224g@thunk.org>
- <20170130081210.GD8443@dhcp22.suse.cz>
+From: sheng qiu <herbert1984106@gmail.com>
+Subject: Fwd: question about snapset
+Date: Fri, 3 Feb 2017 09:02:07 -0800
+Message-ID: <CAB7xdikDAtXL6UGzRjKVa6Vzv9QE6if3ixteYu-UApRfMYVOXw@mail.gmail.com>
+References: <CAB7xdi=b=HxAepvKna-Rfi9z9Wd+SAxADsbZUkYk-TuEkYJnjA@mail.gmail.com>
+ <alpine.DEB.2.11.1702031359260.3660@piezo.novalocal> <CAB7xdi=NFjC4W3XYSLPYFrs_vN18+TY-5F_UGzCe_TCweYHxdg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170130081210.GD8443@dhcp22.suse.cz>
-Sender: owner-linux-mm@kvack.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Jan Kara <jack@suse.cz>, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ua0-f175.google.com ([209.85.217.175]:34285 "EHLO
+        mail-ua0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750873AbdBCRCJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2017 12:02:09 -0500
+Received: by mail-ua0-f175.google.com with SMTP id 35so18172720uak.1
+        for <ceph-devel@vger.kernel.org>; Fri, 03 Feb 2017 09:02:08 -0800 (PST)
+In-Reply-To: <CAB7xdi=NFjC4W3XYSLPYFrs_vN18+TY-5F_UGzCe_TCweYHxdg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon 30-01-17 09:12:10, Michal Hocko wrote:
-> On Fri 27-01-17 11:40:42, Theodore Ts'o wrote:
-> > On Fri, Jan 27, 2017 at 10:37:35AM +0100, Michal Hocko wrote:
-> > > If this ever turn out to be a problem and with the vmapped stacks we
-> > > have good chances to get a proper stack traces on a potential overflow
-> > > we can add the scope API around the problematic code path with the
-> > > explanation why it is needed.
-> > 
-> > Yeah, or maybe we can automate it?  Can the reclaim code check how
-> > much stack space is left and do the right thing automatically?
-> 
-> I am not sure how to do that. Checking for some magic value sounds quite
-> fragile to me. It also sounds a bit strange to focus only on the reclaim
-> while other code paths might suffer from the same problem.
-> 
-> What is actually the deepest possible call chain from the slab reclaim
-> where I stopped? I have tried to follow that path but hit the callback
-> wall quite early.
->  
-> > The reason why I'm nervous is that nojournal mode is not a common
-> > configuration, and "wait until production systems start failing" is
-> > not a strategy that I or many SRE-types find.... comforting.
-> 
-> I understand that but I would be much more happier if we did the
-> decision based on the actual data rather than a fear something would
-> break down.
+---------- Forwarded message ----------
+From: sheng qiu <herbert1984106@gmail.com>
+Date: Fri, Feb 3, 2017 at 7:45 AM
+Subject: Re: question about snapset
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-ping on this. I would really like to move forward here and target 4.11
-merge window. Is your concern so serious to block this patch?
--- 
-Michal Hocko
-SUSE Labs
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Hi Sage,
+
+Thanks a lot for your reply. It's very helpful.
+We are trying to avoid the query for snapset object for new object
+write, we think it may save some latency. Currently when we measure
+the op prepare latency, it's around 300 us, which is quite high. Is
+this normal? In our test, we configure 64 pgs per osd and use five
+shards with two workers per shard. The test machine is a four socket
+with 40 cores and plenty of memory.
+We are thinking how to reduce this latency, do you have any suggestions?
+
+Thanks
+Sheng
+
+
+On Feb 3, 2017 6:05 AM, "Sage Weil" <sage@newdream.net> wrote:
+>
+> On Thu, 2 Feb 2017, sheng qiu wrote:
+> > Hi cephers,
+> >
+> > We are reading the codes of Ceph I/O path. We found within the
+> > do_op(), it tries to get the object context each time as well as the
+> > snapset context.
+> >
+> > may i ask what's the usage of the snapset context and what's the
+> > relationship between snapset context and the individual object? Does
+> > each object has a snapset context ? Does it stores as attribute within
+> > the onode that associated with the object?
+> > i read some articles said only head object has snapset context, may i
+> > ask what's the head object and what's the relationship between a head
+> > object and other non-head objects?
+>
+> A given logical object may be contained by several snapshots, and we'll
+> have a separate clone for each unique version of the object. The
+> head (snapid == CEPH_NOSNAP) is the latest read/write version of the
+> object.  A clone (snapid < CEPH_NOSNAP) is the version for some number of
+> snapshots.  For example, if you wrote X, took snapshot 1, write X', wrote
+> X'', took snap 2, took snap 3, then wrote X''', you'd have 3 clones with
+> something like
+>
+> X    (snapid 1) snaps=[1]
+> X''  (snapid 3) snaps=[2,3]
+> X''' (head) clones=[1,2]
+>
+> The SnapSet is attached to the head and tells us we have 2 clones (1 and
+> 3).  Each clone has a snaps vector that tells us which snaps it exists in.
+> There's some other bookkeeping in SnapSet as well that tells us what data
+> extents are identical across adjacent clones (so that they can share
+> blocks on disk efficiently).
+>
+> There's one annoying oddity that if the head doesn't logically exist we
+> create an object with snapid CEPH_SNAPDIR and attach the SnapSet to
+> that.  We hope to remove this soon (by storing SnapSet on head and marking
+> head as a whiteout) as it complicates the code.
+>
+> Hope that helps!
+> sage
