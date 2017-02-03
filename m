@@ -1,28 +1,44 @@
-From: Alexey Sheplyakov <asheplyakov@mirantis.com>
+From: Loic Dachary <loic@dachary.org>
 Subject: Re: Are we ready for jewel 10.2.6?
-Date: Fri, 3 Feb 2017 10:11:19 +0400
-Message-ID: <CAC7t81bh9xOh77e73zXpHWhvWhPiMagTiER6LqpqqGfHiMqZrg@mail.gmail.com>
+Date: Fri, 3 Feb 2017 08:02:22 +0100
+Message-ID: <c8317af2-a8a2-2f22-7083-46f24057f10a@dachary.org>
 References: <63289246-25fb-c96f-b844-dba82d7293c5@suse.cz>
+ <CAC7t81bh9xOh77e73zXpHWhvWhPiMagTiER6LqpqqGfHiMqZrg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f170.google.com ([209.85.161.170]:33776 "EHLO
-        mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752507AbdBCGLV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2017 01:11:21 -0500
-Received: by mail-yw0-f170.google.com with SMTP id u68so5989233ywg.0
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Feb 2017 22:11:21 -0800 (PST)
-In-Reply-To: <63289246-25fb-c96f-b844-dba82d7293c5@suse.cz>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:52791 "EHLO
+        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752451AbdBCHC1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2017 02:02:27 -0500
+In-Reply-To: <CAC7t81bh9xOh77e73zXpHWhvWhPiMagTiER6LqpqqGfHiMqZrg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
+To: Alexey Sheplyakov <asheplyakov@mirantis.com>, Nathan Cutler <ncutler@suse.cz>
 Cc: Abhishek Lekshmanan <abhishek@suse.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Hi Alexey,
 
-> I'm still merging RGW backports and there a few more miscellaneous backports still in the queue.
+On 02/03/2017 07:11 AM, Alexey Sheplyakov wrote:
+> Hi,
+> 
+>> I'm still merging RGW backports and there a few more miscellaneous backports still in the queue.
+> 
+> Any chance to have https://github.com/ceph/ceph/pull/13004 included in 10.2.6?
 
-Any chance to have https://github.com/ceph/ceph/pull/13004 included in 10.2.6?
+Thanks for rebasing it :-) It now needs to go through a round of testing, which may or may not happen. Note however that you can run the relevant rgw teuthology jobs to test this pull request and if they succeed it will be merged.
 
-Best regards,
-      Alexey
+Cheers
+
+> 
+> Best regards,
+>       Alexey
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
