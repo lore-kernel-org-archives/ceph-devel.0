@@ -1,44 +1,72 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Are we ready for jewel 10.2.6?
-Date: Fri, 3 Feb 2017 08:02:22 +0100
-Message-ID: <c8317af2-a8a2-2f22-7083-46f24057f10a@dachary.org>
-References: <63289246-25fb-c96f-b844-dba82d7293c5@suse.cz>
- <CAC7t81bh9xOh77e73zXpHWhvWhPiMagTiER6LqpqqGfHiMqZrg@mail.gmail.com>
+From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+Subject: Re: [PATCH v3 0/2] iov_iter: allow
+ iov_iter_get_pages_alloc to allocate more pages per call
+Date: Fri, 3 Feb 2017 07:29:52 +0000
+Message-ID: <20170203072952.GI27291@ZenIV.linux.org.uk>
+References: <20170124212327.14517-1-jlayton@redhat.com>
+	<20170125133205.21704-1-jlayton@redhat.com>
+	<20170202095125.GF27291@ZenIV.linux.org.uk>
+	<20170202105651.GA32111@infradead.org>
+	<20170202111625.GG27291@ZenIV.linux.org.uk>
+	<1486040452.2812.6.camel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:52791 "EHLO
-        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752451AbdBCHC1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2017 02:02:27 -0500
-In-Reply-To: <CAC7t81bh9xOh77e73zXpHWhvWhPiMagTiER6LqpqqGfHiMqZrg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alexey Sheplyakov <asheplyakov@mirantis.com>, Nathan Cutler <ncutler@suse.cz>
-Cc: Abhishek Lekshmanan <abhishek@suse.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1486040452.2812.6.camel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
+List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
+Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+To: Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "Kirill A. Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Alexey,
-
-On 02/03/2017 07:11 AM, Alexey Sheplyakov wrote:
-> Hi,
+On Thu, Feb 02, 2017 at 08:00:52AM -0500, Jeff Layton wrote:
+> > I'm not sure we need to touch any get_user_pages_fast() at all; let it
+> > fill a medium-sized array and use that as a buffer.  In particular,
+> > I *really* don't like the idea of having the callbacks done in an
+> > inconsistent locking environment - sometimes under ->mmap_sem, sometimes
+> > not.
+> > 
 > 
->> I'm still merging RGW backports and there a few more miscellaneous backports still in the queue.
-> 
-> Any chance to have https://github.com/ceph/ceph/pull/13004 included in 10.2.6?
+> Yeah, that might work. You could kmalloc the buffer array according to
+> the maxsize value. For small ones we could even consider using an on-
+> stack buffer.
 
-Thanks for rebasing it :-) It now needs to go through a round of testing, which may or may not happen. Note however that you can run the relevant rgw teuthology jobs to test this pull request and if they succeed it will be merged.
+Yes.  FWIW, I'm not proposing to kill iov_iter_get_pages{,_alloc}()
+immediately - the new primitive would initially use the damn thing.
+That can be backported without any problems, and conversions would be
+one-by-one.  If/when we get to the point where most of the users have
+been switched to the new helper, we could try and see if what remains
+could be dealt with; if that works, it might be possible to fold
+iov_iter_get_pages() into it.  In particular, for ITER_BVEC and
+ITER_PIPE we don't need to bother with any intermediate arrays at all, etc.
+But that's only after several cycles when everyone is asked to try and use
+the new primitive instead of iov_iter_get_pages().
 
-Cheers
+The calling conventions of iov_iter_get_pages() are ugly and I would love to
+get rid of them, but doing that in a flagday conversion is a lot of PITA
+for no good reason.
 
-> 
-> Best regards,
->       Alexey
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Speaking of get_user_pages() and conversions:
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+get_user_pages() relies upon find_extend_vma() to reject kernel
+addresses; the fast side of get_user_pages_fast() doesn't have anything
+of that sort in case e.g. HAVE_GENERIC_RCU_GUP.  Sure, usually we have
+that verified and rejected earlier anyway, but it's a fairly subtle difference
+that doesn't seem to be documented anywhere.
+
+For example, /dev/st* reads and writes (st_read()/st_write()) feed the
+address of buffer to get_user_pages_unlocked().  If somebody replaced
+those with get_user_pages_fast(), we'd be in trouble as soon as
+some code got tricked into using kernel_write() on /dev/st*.
+
+access_ok() in HAVE_GENERIC_RCU_GUP {__,}get_user_pages_fast() obviously
+doesn't help in that scenario.  What am I missing here?
