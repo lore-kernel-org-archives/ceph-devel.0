@@ -1,37 +1,58 @@
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH 04/24] fs: Provide infrastructure for dynamic BDIs in
- filesystems
-Date: Fri, 3 Feb 2017 14:50:42 +0100
-Message-ID: <20170203135042.GB5844@quack2.suse.cz>
-References: <20170202173422.3240-1-jack@suse.cz>
- <20170202173422.3240-5-jack@suse.cz>
- <20170202192827.GF6550@localhost.localdomain>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: question about snapset
+Date: Fri, 3 Feb 2017 14:05:16 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1702031359260.3660@piezo.novalocal>
+References: <CAB7xdi=b=HxAepvKna-Rfi9z9Wd+SAxADsbZUkYk-TuEkYJnjA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <ecryptfs-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170202192827.GF6550@localhost.localdomain>
-Sender: ecryptfs-owner@vger.kernel.org
-To: Liu Bo <bo.li.liu@oracle.com>
-Cc: Jan Kara <jack@suse.cz>, linux-fsdevel@vger.kernel.org, Christoph Hellwig <hch@infradead.org>, linux-block@vger.kernel.org, linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org, Petr Vandrovec <petr@vandrovec.name>, linux-nilfs@vger.kernel.org, cluster-devel@redhat.com, osd-dev@open-osd.org, codalist@TELEMANN.coda.cs.cmu.edu, linux-afs@lists.infradead.org, ecryptfs@vger.kernel.org, linux-cifs@vger.kernel.org, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org, v9fs-developer@lists.sourceforge.net, lustre-devel@lists.lustre.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:33292 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752346AbdBCOFU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2017 09:05:20 -0500
+In-Reply-To: <CAB7xdi=b=HxAepvKna-Rfi9z9Wd+SAxADsbZUkYk-TuEkYJnjA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: sheng qiu <herbert1984106@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu 02-02-17 11:28:27, Liu Bo wrote:
-> Hi,
+On Thu, 2 Feb 2017, sheng qiu wrote:
+> Hi cephers,
 > 
-> On Thu, Feb 02, 2017 at 06:34:02PM +0100, Jan Kara wrote:
-> > Provide helper functions for setting up dynamically allocated
-> > backing_dev_info structures for filesystems and cleaning them up on
-> > superblock destruction.
+> We are reading the codes of Ceph I/O path. We found within the
+> do_op(), it tries to get the object context each time as well as the
+> snapset context.
 > 
-> Just one concern, will this cause problems for multiple superblock cases
-> like nfs with nosharecache?
+> may i ask what's the usage of the snapset context and what's the
+> relationship between snapset context and the individual object? Does
+> each object has a snapset context ? Does it stores as attribute within
+> the onode that associated with the object?
+> i read some articles said only head object has snapset context, may i
+> ask what's the head object and what's the relationship between a head
+> object and other non-head objects?
 
-Can you ellaborate a bit? I've looked for a while what nfs with
-nosharecache does but I didn't see how it would influence anything with
-bdis...
+A given logical object may be contained by several snapshots, and we'll 
+have a separate clone for each unique version of the object. The 
+head (snapid == CEPH_NOSNAP) is the latest read/write version of the 
+object.  A clone (snapid < CEPH_NOSNAP) is the version for some number of 
+snapshots.  For example, if you wrote X, took snapshot 1, write X', wrote 
+X'', took snap 2, took snap 3, then wrote X''', you'd have 3 clones with 
+something like
 
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+X    (snapid 1) snaps=[1]
+X''  (snapid 3) snaps=[2,3]
+X''' (head) clones=[1,2]
+
+The SnapSet is attached to the head and tells us we have 2 clones (1 and 
+3).  Each clone has a snaps vector that tells us which snaps it exists in.  
+There's some other bookkeeping in SnapSet as well that tells us what data 
+extents are identical across adjacent clones (so that they can share 
+blocks on disk efficiently).
+
+There's one annoying oddity that if the head doesn't logically exist we 
+create an object with snapid CEPH_SNAPDIR and attach the SnapSet to 
+that.  We hope to remove this soon (by storing SnapSet on head and marking 
+head as a whiteout) as it complicates the code.
+
+Hope that helps!
+sage
