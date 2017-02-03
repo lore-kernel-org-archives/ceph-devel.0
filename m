@@ -1,46 +1,60 @@
-From: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Subject: Re: [PATCH v3 0/2] iov_iter: allow
- iov_iter_get_pages_alloc to allocate more pages per call
-Date: Fri, 3 Feb 2017 10:29:23 -0800
-Message-ID: <CA+55aFx=NPESJv9RjCNRKFH_rk9uVMov0UtFbpZH-xBsgK2h-w@mail.gmail.com>
-References: <20170124212327.14517-1-jlayton@redhat.com>
-	<20170125133205.21704-1-jlayton@redhat.com>
-	<20170202095125.GF27291@ZenIV.linux.org.uk>
-	<20170202105651.GA32111@infradead.org>
-	<20170202111625.GG27291@ZenIV.linux.org.uk>
-	<1486040452.2812.6.camel@redhat.com>
-	<20170203072952.GI27291@ZenIV.linux.org.uk>
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: Re: [PATCH 04/24] fs: Provide infrastructure for dynamic BDIs in
+ filesystems
+Date: Fri, 3 Feb 2017 10:31:56 -0800
+Message-ID: <20170203183155.GA30842@localhost.localdomain>
+References: <20170202173422.3240-1-jack@suse.cz>
+ <20170202173422.3240-5-jack@suse.cz>
+ <20170202192827.GF6550@localhost.localdomain>
+ <20170203135042.GB5844@quack2.suse.cz>
+Reply-To: bo.li.liu@oracle.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-In-Reply-To: <20170203072952.GI27291-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
-List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
-List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
-Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
-Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-To: Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
-Cc: Linux NFS Mailing List <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-fsdevel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, V9FS Developers <v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Kirill A. Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20170203135042.GB5844@quack2.suse.cz>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: Jan Kara <jack@suse.cz>
+Cc: codalist@TELEMANN.coda.cs.cmu.edu, linux-block@vger.kernel.org, linux-nfs@vger.kernel.org, linux-nilfs@vger.kernel.org, linux-cifs@vger.kernel.org, ecryptfs@vger.kernel.org, Christoph Hellwig <hch@infradead.org>, cluster-devel@redhat.com, linux-mtd@lists.infradead.org, osd-dev@open-osd.org, linux-fsdevel@vger.kernel.org, v9fs-developer@lists.sourceforge.net, ceph-devel@vger.kernel.org, Petr Vandrovec <petr@vandrovec.name>, linux-afs@lists.infradead.org, linux-btrfs@vger.kernel.org, lustre-devel@lists.lustre.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Feb 2, 2017 at 11:29 PM, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org> wrote:
->
-> get_user_pages() relies upon find_extend_vma() to reject kernel
-> addresses; the fast side of get_user_pages_fast() doesn't have anything
-> of that sort
+On Fri, Feb 03, 2017 at 02:50:42PM +0100, Jan Kara wrote:
+> On Thu 02-02-17 11:28:27, Liu Bo wrote:
+> > Hi,
+> > 
+> > On Thu, Feb 02, 2017 at 06:34:02PM +0100, Jan Kara wrote:
+> > > Provide helper functions for setting up dynamically allocated
+> > > backing_dev_info structures for filesystems and cleaning them up on
+> > > superblock destruction.
+> > 
+> > Just one concern, will this cause problems for multiple superblock cases
+> > like nfs with nosharecache?
+> 
+> Can you ellaborate a bit? I've looked for a while what nfs with
+> nosharecache does but I didn't see how it would influence anything with
+> bdis...
 
-It is *supposed* to have it.
+Oh, I missed that bdi_seq was static, then it should be fine.
 
-See pte_allows_gup(), for example. In particular, it requires the
-_PAGE_USER bit in the PTE (and the devpte case should require
-_PAGE_BIT_DEVMAP).
+(I was worried about that nfs with nosharecache would have multiple
+superblocks and if each superblock has a bdi using the same bdi name,
+nfs-xx.)
 
-So no, get_user_pages_fast() can not look up kernel pages. If it does,
-that would be a bug.
+Thanks for the reply.
 
-              Linus
+Thanks,
+
+-liubo
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
