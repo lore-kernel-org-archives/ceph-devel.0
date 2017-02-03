@@ -1,452 +1,145 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: bluestore prefer wal size
-Date: Fri, 3 Feb 2017 09:20:09 -0600
-Message-ID: <9e79a955-99d9-4cd7-df27-d18a36921a0d@redhat.com>
-References: <alpine.DEB.2.11.1702011533340.3660@piezo.novalocal>
- <001001d27cbd$cee2a9f0$6ca7fdd0$@fisk.me.uk>
- <bb0bdeb6.AEMAHeJMfMsAAAAAAAAAAFklQUsAADNJBWwAAAAAAACRXwBYklNO@mailjet.com>
- <alpine.DEB.2.11.1702012137240.3654@piezo.novalocal>
- <45ba3843.AEEAHxSt8JAAAAAAAAAAAFklQUsAADNJBWwAAAAAAACRXwBYkldP@mailjet.com>
- <alpine.DEB.2.11.1702012147430.3654@piezo.novalocal>
- <alpine.DEB.2.11.1702012211300.3654@piezo.novalocal>
- <00bb01d27d45$21a48050$64ed80f0$@fisk.me.uk>
- <d0caeb89.AEUAHScduCcAAAAAAAAAAFPDZXcAADNJBWwAAAAAAACRXwBYk0Zd@mailjet.com>
- <c46b5c16-340e-7d9c-b7d9-ad8a21b22b6f@redhat.com>
- <002101d27d99$5e266ad0$1a734070$@fisk.me.uk>
- <5ed3f3b2.ADsAAGRwZ_AAAAAAAAAAAFPDZXcAADNJBWwAAAAAAACRXwBYlFIS@mailjet.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: crush multipick anomaly
+Date: Fri, 3 Feb 2017 16:26:18 +0100
+Message-ID: <CABZ+qqn13kR+4FjSmWKgt4Fee0+8B2Gi-qJjT8MaXpu2e6=2Ew@mail.gmail.com>
+References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
+ <e5f376bb-925b-17df-ae6e-abc07058f67b@dachary.org> <6a7b52c8-a0fd-41a6-fbf1-fb2af3e347d8@dachary.org>
+ <alpine.DEB.2.11.1702031443400.3654@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35988 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750896AbdBCPUL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 3 Feb 2017 10:20:11 -0500
-In-Reply-To: <5ed3f3b2.ADsAAGRwZ_AAAAAAAAAAAFPDZXcAADNJBWwAAAAAAACRXwBYlFIS@mailjet.com>
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:37205 "EHLO
+        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750916AbdBCP1C (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2017 10:27:02 -0500
+Received: by mail-wm0-f47.google.com with SMTP id v77so33068821wmv.0
+        for <ceph-devel@vger.kernel.org>; Fri, 03 Feb 2017 07:27:01 -0800 (PST)
+Received: from mail-wj0-f171.google.com (mail-wj0-f171.google.com. [209.85.210.171])
+        by smtp.gmail.com with ESMTPSA id p49sm45366583wrb.10.2017.02.03.07.26.59
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 03 Feb 2017 07:26:59 -0800 (PST)
+Received: by mail-wj0-f171.google.com with SMTP id b20so1964387wjs.2
+        for <ceph-devel@vger.kernel.org>; Fri, 03 Feb 2017 07:26:59 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1702031443400.3654@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: nick@fisk.me.uk, 'Sage Weil' <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: Loic Dachary <loic@dachary.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Nick,
+On Fri, Feb 3, 2017 at 3:47 PM, Sage Weil <sweil@redhat.com> wrote:
+> On Fri, 3 Feb 2017, Loic Dachary wrote:
+>> On 01/26/2017 12:13 PM, Loic Dachary wrote:
+>> > Hi Sage,
+>> >
+>> > Still trying to understand what you did :-) I have one question below.
+>> >
+>> > On 01/26/2017 04:05 AM, Sage Weil wrote:
+>> >> This is a longstanding bug,
+>> >>
+>> >>    http://tracker.ceph.com/issues/15653
+>> >>
+>> >> that causes low-weighted devices to get more data than they should. Loic's
+>> >> recent activity resurrected discussion on the original PR
+>> >>
+>> >>    https://github.com/ceph/ceph/pull/10218
+>> >>
+>> >> but since it's closed and almost nobody will see it I'm moving the
+>> >> discussion here.
+>> >>
+>> >> The main news is that I have a simple adjustment for the weights that
+>> >> works (almost perfectly) for the 2nd round of placements.  The solution is
+>> >> pretty simple, although as with most probabilities it tends to make my
+>> >> brain hurt.
+>> >>
+>> >> The idea is that, on the second round, the original weight for the small
+>> >> OSD (call it P(pick small)) isn't what we should use.  Instead, we want
+>> >> P(pick small | first pick not small).  Since P(a|b) (the probability of a
+>> >> given b) is P(a && b) / P(b),
+>> >
+>> >>From the record this is explained at https://en.wikipedia.org/wiki/Conditional_probability#Kolmogorov_definition
+>> >
+>> >>
+>> >>  P(pick small | first pick not small)
+>> >>  = P(pick small && first pick not small) / P(first pick not small)
+>> >>
+>> >> The last term is easy to calculate,
+>> >>
+>> >>  P(first pick not small) = (total_weight - small_weight) / total_weight
+>> >>
+>> >> and the && term is the distribution we're trying to produce.
+>> >
+>> > https://en.wikipedia.org/wiki/Conditional_probability describs A && B (using a non ascii symbol...) as the "probability of the joint of events A and B". I don't understand what that means. Is there a definition somewhere ?
+>> >
+>> >> For exmaple,
+>> >> if small has 1/10 the weight, then we should see 1/10th of the PGs have
+>> >> their second replica be the small OSD.  So
+>> >>
+>> >>  P(pick small && first pick not small) = small_weight / total_weight
+>> >>
+>> >> Putting those together,
+>> >>
+>> >>  P(pick small | first pick not small)
+>> >>  = P(pick small && first pick not small) / P(first pick not small)
+>> >>  = (small_weight / total_weight) / ((total_weight - small_weight) / total_weight)
+>> >>  = small_weight / (total_weight - small_weight)
+>> >>
+>> >> This is, on the second round, we should adjust the weights by the above so
+>> >> that we get the right distribution of second choices.  It turns out it
+>> >> works to adjust *all* weights like this to get hte conditional probability
+>> >> that they weren't already chosen.
+>> >>
+>> >> I have a branch that hacks this into straw2 and it appears to work
+>> >
+>> > This is https://github.com/liewegas/ceph/commit/wip-crush-multipick
+>>
+>> In
+>>
+>> https://github.com/liewegas/ceph/commit/wip-crush-multipick#diff-0df13ad294f6585c322588cfe026d701R316
+>>
+>> double neww = oldw / (bucketw - oldw) * bucketw;
+>>
+>> I don't get why we need  "* bucketw" at the end ?
+>
+> It's just to keep the values within a reasonable range so that we don't
+> lose precision by dropping down into small integers.
+>
+> I futzed around with this some more last week trying to get the third
+> replica to work and ended up doubting that this piece is correct.  The
+> ratio between the big and small OSDs in my [99 99 99 99 4] example varies
+> slightly from what I would expect from first principles and what I get out
+> of this derivation by about 1%.. which would explain the bias I as seeing.
+>
+> I'm hoping we can find someone with a strong stats/probability background
+> and loads of free time who can tackle this...
+>
 
-So I'm still catching up to your testing, but last night I ran through a 
-number of tests with a single OSD, a single client, and iodepth=1 fio 
-rbd tests:
+I'm *not* that person, but I gave it a go last weekend and realized a
+few things:
 
-https://drive.google.com/uc?export=download&id=0B2gTBZrkrnpZWE85OFI3Q2xQZ00
+1. We should add the additional constraint that for all PGs assigned
+to an OSD, 1/N of them must be primary replicas, 1/N must be
+secondary, 1/N must be tertiary, etc. for N replicas/stripes. E.g. for
+a 3 replica pool, the "small" OSD should still have the property that
+1/3rd are primaries, 1/3rd are secondary, 1/3rd are tertiary.
 
-I tested HDD, HDD+NVMe, and NVMe configurations looking at filestore, 
-bluestore with 1k and 16k prefer wal sizes.  I believe I'm seeing 
-similar results to what you saw.  On NVMe we are pretty similar likely 
-due to the raw backend throughput the NVMe drives can maintain but on 
-HDD, bluestore is doing quite a bit worse than filestore for this 
-specific use case.  During the bluestore HDD tests, I watched disk 
-access and it appears we are saturating the disk with small writes 
-despite the low client performance.  I'll be digging into this more 
-today but I wanted to send out an update to let you know I believe I've 
-reproduced your results and am looking into it.
+2. I believe this is a case of the balls-into-bins problem -- we have
+colored balls and weighted bins. I didn't find a definition of the
+problem where the goal is to allow users to specify weights which must
+be respected after N rounds.
 
-Thanks!
-Mark
+3. I wrote some quick python to simulate different reweighting
+algorithms. The solution is definitely not obvious - I often thought
+I'd solved it (e.g. for simple OSD weight sets like 3, 3, 3, 1) - but
+changing the OSDs weights to e.g. 3, 3, 1, 1 completely broke things.
+I can clean up and share that python if it's can help.
 
-On 02/03/2017 03:49 AM, Nick Fisk wrote:
->
->
->> -----Original Message-----
->> From: Nick Fisk [mailto:nick@fisk.me.uk]
->> Sent: 02 February 2017 21:15
->> To: 'Mark Nelson' <mnelson@redhat.com>; 'Sage Weil' <sage@newdream.net>
->> Cc: ceph-devel@vger.kernel.org
->> Subject: RE: bluestore prefer wal size
->>
->> Hi Mark,
->>> -----Original Message-----
->>> From: Mark Nelson [mailto:mnelson@redhat.com]
->>> Sent: 02 February 2017 20:17
->>> To: nick@fisk.me.uk; 'Sage Weil' <sage@newdream.net>
->>> Cc: ceph-devel@vger.kernel.org
->>> Subject: Re: bluestore prefer wal size
->>>
->>> Hi Nick,
->>>
->>> On 02/02/2017 08:46 AM, Nick Fisk wrote:
->>>> Further update
->>>>
->>>> If I do random writes instead of sequential, I see the "defering
->>>> small write
->>> via wal" action. But from the do_alloc_write function not small write.
->>>>  Ie. log entry is:
->>>> _do_alloc_write defering small 0x1000 write via wal
->>>
->>> I just ran some tests using the branch with 4k random and sequential
->>> writes against a single OSD.  I see deferring small write via wal from
->>> do_alloc_write both for both sequential and random when
->>> bluestore_prefer_wal_size is set to be larger than the IO size.
->>> Otherwise, I don't see the messages.  I am also preconditioning with
->>> 4MB writes.
->>>
->>> So far I've just been testing on NVMe, but I should be able to do some
->>> mixed tests soon to see if there are any interesting performance implications.
->>
->> I've just looked at the RBD I ran those random tests on and I realized that it was only about 90% pre-conditioned due to me leaving the
->> time_based fio option on. After filling completely with writes, now both random and sequential are doing _do_write_small writes and
->> no deferring wal writes.
->>
->> From looking through the code today, as far as I understand it
->>
->> Write_small = write to existing object under min_allow_size Write_big = write to existing object over min_allow_size Alloc_write =
->> write to a new object
->>
->> Is that correct?
->>
->> If it is, I'm interested in why you are seeing alloc_writes, as I don't see them if the RBD is fully pre-conditioned? Unless there is
->> something changing with the min_alloc_size as you are using non rotational media, which is causing this change?
->>
->> I'm adding a few extra dout's to the write_small function to try and see what's going on, hopefully I will know more tomorrow.
->>
->
-> Morning,
->
-> So, results are in. I added some debugging before the IF statement (https://github.com/liewegas/ceph/blob/944b4d3a3869a472c1e66a4fa73c12766c7801ac/src/os/bluestore/BlueStore.cc#L7885)
->
-> So the following section now looks like below:
->
->     dout(20) << __func__ << "  before IF 0x" << std::hex << b_off << "~" << b_len << " - " << b->get_blob().get_ondisk_length() << " - " << b->get_blob().is_unused(b_off, b_len) << " - " << b->get_blob().is_allocated(b_off, b_len) << " - " << dendl;
->     if ((b_off % chunk_size == 0 && b_len % chunk_size == 0) &&
->         b->get_blob().get_ondisk_length() >= b_off + b_len &&
->         b->get_blob().is_unused(b_off, b_len) &&
->         b->get_blob().is_allocated(b_off, b_len)) {
->
-> And the output was
->
-> _do_write_small  before IF 0xf000~1000 - 10000 - 0 - 1 -
->
-> So the " b->get_blob().is_unused(b_off, b_len)" call is returning false, which stops it going into the IF block and doing the prefer wal write. Is that expected?
->
-> Nick
->
->> Nick
->>
->>>
->>> Mark
->>>
->>>>
->>>> And that’s for a 4kb random write on an RBD that has been fully
->>>> conditioned via fio 4MB writes
->>>>
->>>> So it's something in the sequential nature of the test which trips
->>>> it up as I don't see any sign of deferred writes
->>>>
->>>> From looking at the code in the small write function, I can only see
->>>> two possibilities that would stop if from reaching the prefer wal IF
->>>> statement
->>>>
->>>>   while (ep != o->extent_map.extent_map.end()) {
->>>>     if (ep->blob_start() >= end) {
->>>>       break;
->>>>
->>>> and
->>>>
->>>>   if ((b_off % chunk_size == 0 && b_len % chunk_size == 0) &&
->>>> 	b->get_blob().get_ondisk_length() >= b_off + b_len &&
->>>> 	b->get_blob().is_unused(b_off, b_len) &&
->>>> 	b->get_blob().is_allocated(b_off, b_len)) {
->>>>
->>>> Unfortunately, that’s about as far as I have got, before my
->>>> knowledge of
->>> Bluestore becomes a limitation.
->>>>
->>>> Don't know if that triggers any thoughts?
->>>>
->>>>>
->>>>> 2017-02-02 10:39:31.988782 7ff7282ff700 10
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) queue_transactions existing
->>>>> 0x56102a5a4900
->>>>> osr(9.73 0x56102a5db1a0)
->>>>> 2017-02-02 10:39:31.988786 7ff7282ff700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _txc_create osr 0x56102a5a4900
->>>>> =
->>>>> 0x56102ab4be40 seq 260
->>>>> 2017-02-02 10:39:31.988797 7ff7282ff700 15
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _setattrs 9.73_head
->>>>> #9:cff290b9:::rbd_data.36646a74b0dc51.0000000000000001:head# 2 key
->>> s
->>>>> 2017-02-02 10:39:31.988802 7ff7282ff700 10
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _setattrs 9.73_head
->>>>> #9:cff290b9:::rbd_data.36646a74b0dc51.0000000000000001:head# 2 key
->>> s
->>>>> = 0
->>>>> 2017-02-02 10:39:31.988806 7ff7282ff700 15
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _write 9.73_head
->>>>> #9:cff290b9:::rbd_data.36646a74b0dc51.0000000000000001:head#
->>> 0xfb000~
->>>>> 1000
->>>>> 2017-02-02 10:39:31.988809 7ff7282ff700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _do_write
->>>>> #9:cff290b9:::rbd_data.36646a74b0dc51.0000000000000001:head#
->>>>> 0xfb000~1000 - have 0x400000 (4194304) bytes fadvise_flags 0x0
->>>>> 2017-02-02 10:39:31.988812 7ff7282ff700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _do_write prefer csum_order 12
->>>>> target_blob_size
->>>>> 0x80000
->>>>> 2017-02-02 10:39:31.988814 7ff7282ff700 10
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _do_write_small 0xfb000~1000
->>>>> 2017-02-02 10:39:31.988816 7ff7282ff700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _do_write_small considering
->>>>> Blob(0x56102aac05a0 blob([0x256480000~80000] mutable+csum
->>>>> crc32c/0x1000) ref_map(0x0~80000=1) SharedBlob(0x56102aa76260))
->>>>> bstart 0x80000
->>>>> 2017-02-02 10:39:31.988821 7ff7282ff700 20
->>>>> bluestore.BufferSpace(0x56102aa762b8 in 0x56102a1337a0) _discard
->>>>> 0x7b000~1000
->>>>> 2017-02-02 10:39:31.988827 7ff7282ff700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _do_write_small  wal write
->>>>> 0x7b000~1000 of mutable Blob(0x56102aac05a0
->>> blob([0x256480000~80000]
->>>>> mutable+csum crc32c/0x1000) ref_map(0x0~80000=1)
->>>>> SharedBlob(0x56102aa76260)) at [0x2564fb000~1000]
->>>>> 2017-02-02 10:39:31.988832 7ff7282ff700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _do_write_small  lex
->>>>> 0xfb000~1000: 0x7b000~1000
->>>>> Blob(0x56102aac05a0 blob([0x256480000~80000] mutable+csum
->>>>> crc32c/0x1000)
->>>>> ref_map(0x0~7b000=1,0x7b000~1000=2,0x7c000~4000=1)
->>>>> SharedBlob(0x56102aa76260))
->>>>> 2017-02-02 10:39:31.988836 7ff7282ff700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _do_alloc_write txc
->>>>> 0x56102ab4be40 0 blobs
->>>>> 2017-02-02 10:39:31.988837 7ff7282ff700 10 bitmapalloc:reserve
->>>>> instance 94627427524464 num_used 345738 total 7627973
->>>>> 2017-02-02 10:39:31.988840 7ff7282ff700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _wctx_finish lex_old
->>>>> 0xfb000~1000: 0x7b000~1000
->>>>> Blob(0x56102aac05a0 blob([0x256480000~80000] mutable+csum
->>>>> crc32c/0x1000)
->>>>> ref_map(0x0~7b000=1,0x7b000~1000=2,0x7c000~4000=1)
->>>>> SharedBlob(0x56102aa76260))
->>>>> 2017-02-02 10:39:31.988844 7ff7282ff700 20
->>>>> bluestore.extentmap(0x56102a8ee3f0) compress_extent_map
->>> 0xfb000~1000
->>>>> next shard
->>>>> 0x100000 merging 0x80000~7b000: 0x0~7b000 Blob(0x56102aac05a0
->>>>> blob([0x256480000~80000] mutable+csum crc32c/0x1000)
->>>>> ref_map(0x0~80000=1) SharedBlob(0x56102aa76260)) and 0xfb000~1000:
->>>>> 0x7b000~1000 Blob(0x56102aac05a0 blob([0x256480000~80000]
->>>>> mutable+csum crc32c/0x1000) ref_map(0x0~80000=1)
->>>>> SharedBlob(0x56102aa76260))
->>>>> 2017-02-02 10:39:31.988850 7ff7282ff700 20
->>>>> bluestore.extentmap(0x56102a8ee3f0) compress_extent_map
->>> 0xfb000~1000
->>>>> next shard
->>>>> 0x100000 merging 0x80000~7c000: 0x0~7c000 Blob(0x56102aac05a0
->>>>> blob([0x256480000~80000] mutable+csum crc32c/0x1000)
->>>>> ref_map(0x0~80000=1) SharedBlob(0x56102aa76260)) and 0xfc000~4000:
->>>>> 0x7c000~4000 Blob(0x56102aac05a0 blob([0x256480000~80000]
->>>>> mutable+csum crc32c/0x1000) ref_map(0x0~80000=1)
->>>>> SharedBlob(0x56102aa76260))
->>>>> 2017-02-02 10:39:31.988868 7ff7282ff700 20
->>>>> bluestore.extentmap(0x56102a8ee3f0) dirty_range mark shard 0x80000
->>>>> dirty
->>>>> 2017-02-02 10:39:31.988870 7ff7282ff700 10
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _write 9.73_head
->>>>> #9:cff290b9:::rbd_data.36646a74b0dc51.0000000000000001:head#
->>>>> 0xfb000~1000 = 0
->>>>> 2017-02-02 10:39:31.988875 7ff7282ff700 15
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _omap_setkeys 9.73_head
->>>>> #9:ce000000::::head#
->>>>> 2017-02-02 10:39:31.988882 7ff7282ff700 10
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _omap_setkeys 9.73_head
->>>>> #9:ce000000::::head# = 0
->>>>> 2017-02-02 10:39:31.988885 7ff7282ff700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _txc_write_nodes txc
->>>>> 0x56102ab4be40 onodes
->>>>> 0x56102a8ee300 shared_blobs
->>>>> 2017-02-02 10:39:31.988894 7ff7282ff700 20
->>>>> bluestore.extentmap(0x56102a8ee3f0) update shard 0x80000 is 531
->>>>> bytes
->>> (was 531) from 1 extents
->>>>> 2017-02-02 10:39:31.988902 7ff7282ff700 20
->>> bluestore(/var/lib/ceph/osd/ceph-4)   onode
->>>>> #9:cff290b9:::rbd_data.36646a74b0dc51.0000000000000001:head# is 424
->>>>> (422 bytes onode + 2 bytes spanning blobs + 0 bytes inline
->>>>> extents)
->>>>> 2017-02-02 10:39:31.988914 7ff7282ff700 10
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _txc_state_proc txc
->>>>> 0x56102ab4be40 prepare
->>>>> 2017-02-02 10:39:31.988916 7ff7282ff700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _txc_finish_io 0x56102ab4be40
->>>>> 2017-02-02 10:39:31.988917 7ff7282ff700 10
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _txc_state_proc txc
->>>>> 0x56102ab4be40 io_done
->>>>> 2017-02-02 10:39:31.988918 7ff7282ff700 20
->>>>> bluestore.BufferSpace(0x56102aa762b8 in 0x56102a1337a0)
->>>>> finish_write
->>>>> buffer(0x56102adb1830 space 0x56102aa762b8 0x7b000~1000 writing
->>>>> nocache)
->>>>> 2017-02-02 10:39:31.988939 7ff72e30b700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _kv_sync_thread wake
->>>>> 2017-02-02 10:39:31.988941 7ff72e30b700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _kv_sync_thread committing 1
->>>>> submitting 1 cleaning 0
->>>>> 2017-02-02 10:39:31.988952 7ff72e30b700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _txc_finalize_kv txc
->>>>> 0x56102ab4be40 allocated 0x[] released 0x[]
->>>>> 2017-02-02 10:39:31.988999 7ff72e30b700 10
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _balance_bluefs_freespace
->>>>> bluefs
->>>>> 9535 M free
->>>>> (0.999896) bluestore 222 G free (0.954675), bluefs_ratio 0.0402143
->>>>> 2017-02-02 10:39:31.989400 7ff72e30b700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _kv_sync_thread committed 1
->>>>> cleaned 0 in 0.000456
->>>>> 2017-02-02 10:39:31.989405 7ff72e30b700 10
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _txc_state_proc txc
->>>>> 0x56102ab4be40 kv_submitted
->>>>> 2017-02-02 10:39:31.989407 7ff72e30b700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _txc_finish_kv txc
->>>>> 0x56102ab4be40
->>>>> 2017-02-02 10:39:31.989413 7ff72e30b700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _wal_apply txc 0x56102ab4be40
->>>>> seq
->>>>> 255
->>>>> 2017-02-02 10:39:31.989414 7ff72e30b700 20
->>>>> bluestore(/var/lib/ceph/osd/ceph-4) _do_wal_op write
->>>>> [0x2564fb000~1000]
->>>>>
->>>>>
->>>>>>
->>>>>> sage
->>>>>>
->>>>>>>
->>>>>>> sage
->>>>>>>
->>>>>>>>
->>>>>>>>>
->>>>>>>>> sage
->>>>>>>>>
->>>>>>>>>>
->>>>>>>>>> Nick
->>>>>>>>>>
->>>>>>>>>> -----Original Message-----
->>>>>>>>>> From: Nick Fisk [mailto:nick@fisk.me.uk]
->>>>>>>>>> Sent: 01 February 2017 19:03
->>>>>>>>>> To: 'Sage Weil' <sweil@redhat.com>; 'Mark Nelson'
->>>>>>>>> <mnelson@redhat.com>
->>>>>>>>>> Cc: ceph-devel@vger.kernel.org
->>>>>>>>>> Subject: RE: bluestore prefer wal size
->>>>>>>>>>
->>>>>>>>>> Hi Sage,
->>>>>>>>>>
->>>>>>>>>> First results not looking good. It looks like write IO to the
->>>>>>>>>> SSD's (sdd and sdi)
->>>>>>>>> is now massively amplified, by somewhere in the region of about
->>>>>>>>> 10x. But I'm still only getting around 100 4kb's seq write iops
->>>>>>>>> from the fio client. This is in comparison to 2500-3000 iops on
->>>>>>>>> the SSD's and ~200 iops per spinning disk (sdc,sde,sdg,sdh).
->>>>>>>>>>
->>>>>>>>>> rbd engine: RBD version: 0.1.11
->>>>>>>>>> Jobs: 1 (f=1): [W(1)] [100.0% done] [0KB/476KB/0KB /s]
->>>>>>>>>> [0/119/0 iops] [eta 00m:00s]
->>>>>>>>>> rbd_iodepth32: (groupid=0, jobs=1): err= 0: pid=31171: Wed Feb
->>>>>>>>>> 1
->>>>>>>>> 18:56:51 2017
->>>>>>>>>>   write: io=27836KB, bw=475020B/s, iops=115, runt= 60006msec
->>>>>>>>>>     slat (usec): min=6, max=142, avg=10.98, stdev= 8.38
->>>>>>>>>>     clat (msec): min=1, max=271, avg= 8.61, stdev= 3.63
->>>>>>>>>>      lat (msec): min=1, max=271, avg= 8.62, stdev= 3.63
->>>>>>>>>>     clat percentiles (msec):
->>>>>>>>>>      |  1.00th=[    8],  5.00th=[    9], 10.00th=[    9], 20.00th=[    9],
->>>>>>>>>>      | 30.00th=[    9], 40.00th=[    9], 50.00th=[    9], 60.00th=[    9],
->>>>>>>>>>      | 70.00th=[    9], 80.00th=[    9], 90.00th=[    9], 95.00th=[    9],
->>>>>>>>>>      | 99.00th=[   17], 99.50th=[   25], 99.90th=[   33], 99.95th=[   36],
->>>>>>>>>>      | 99.99th=[  273]
->>>>>>>>>>     bw (KB  /s): min=  191, max=  480, per=100.00%,
->>>>>>>>>> avg=464.18,
->>> stdev=34.60
->>>>>>>>>>     lat (msec) : 2=0.01%, 4=0.04%, 10=97.69%, 20=1.55%, 50=0.69%
->>>>>>>>>>     lat (msec) : 500=0.01%
->>>>>>>>>>   cpu          : usr=0.13%, sys=0.12%, ctx=7224, majf=0, minf=5
->>>>>>>>>>   IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%,
->>> 32=0.0%,
->>>>>>>>>> =64=0.0%
->>>>>>>>>>      submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%,
->>> 64=0.0%,
->>>>>>>>>> =64=0.0%
->>>>>>>>>>      complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%,
->>>>>>>>>> 64=0.0%, =64=0.0%
->>>>>>>>>>      issued    : total=r=0/w=6959/d=0, short=r=0/w=0/d=0,
->>>>>>>>> drop=r=0/w=0/d=0
->>>>>>>>>>      latency   : target=0, window=0, percentile=100.00%, depth=1
->>>>>>>>>>
->>>>>>>>>> I've checked via the admin socket and the prefer wal option is
->>>>>>>>>> set to
->>> 8192.
->>>>>>>>>>
->>>>>>>>>> Random capture of iostat
->>>>>>>>>>
->>>>>>>>>> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz
->>> avgqu-sz
->>>>>>>>> await r_await w_await  svctm  %util
->>>>>>>>>> sda               0.00    77.00    0.00    5.50     0.00   338.00   122.91     0.05
->>> 11.64
->>>>>>>>> 0.00   11.64   8.73   4.80
->>>>>>>>>> sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00
->>> 0.00
->>>>>>>>> 0.00    0.00   0.00   0.00
->>>>>>>>>> sdc               0.00     0.00    0.00  151.50     0.00   302.00     3.99     0.54
->>> 3.59
->>>>>>>>> 0.00    3.59   3.58  54.20
->>>>>>>>>> sdd               0.00     0.00    0.00 1474.00     0.00  4008.00     5.44     0.09
->>> 0.06
->>>>>>>>> 0.00    0.06   0.06   9.20
->>>>>>>>>> sde               0.00     0.00    0.00  217.00     0.00   434.00     4.00     0.91
->>> 4.20
->>>>>>>>> 0.00    4.20   4.20  91.20
->>>>>>>>>> sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00
->>> 0.00
->>>>>>>>> 0.00    0.00   0.00   0.00
->>>>>>>>>> sdg               0.00     0.00    0.00   66.50     0.00   134.00     4.03     0.18
->>> 2.68
->>>>>>>>> 0.00    2.68   2.68  17.80
->>>>>>>>>> sdh               0.00     0.00    0.00  217.00     0.00   434.00     4.00     0.80
->>> 3.71
->>>>>>>>> 0.00    3.71   3.71  80.40
->>>>>>>>>> sdi               0.00     0.00    0.00 1134.00     0.00  3082.00     5.44     0.09
->>> 0.08
->>>>>>>>> 0.00    0.08   0.07   8.40
->>>>>>>>>>
->>>>>>>>>> -----Original Message-----
->>>>>>>>>> From: Sage Weil [mailto:sweil@redhat.com]
->>>>>>>>>> Sent: 01 February 2017 15:34
->>>>>>>>>> To: nick@fisk.me.uk
->>>>>>>>>> Cc: ceph-devel@vger.kernel.org
->>>>>>>>>> Subject: bluestore prefer wal size
->>>>>>>>>>
->>>>>>>>>> Hey Nick,
->>>>>>>>>>
->>>>>>>>>> I've updated/improved the prefer wal size PR (that sends small
->>>>>>>>>> writes through the wal).  See
->>>>>>>>>>
->>>>>>>>>> 	https://github.com/ceph/ceph/pull/13217
->>>>>>>>>>
->>>>>>>>>> if you want to try it out.
->>>>>>>>>>
->>>>>>>>>> Thanks!
->>>>>>>>>> sage
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>> --
->>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>>>> in the body of a message to majordomo@vger.kernel.org More
->>>>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>
->>>>>>>
->>>>
->
+My gut feeling is that because CRUSH trees and rulesets can be
+arbitrarily complex, the most pragmatic & reliable way to solve this
+problem is to balance the PGs with a reweight-by-pg loop at crush
+compilation time. This is what admins should do now -- we should just
+automate it.
+
+Cheers, Dan
+
+P.S. -- maybe these guys can help: http://math.stackexchange.com/
