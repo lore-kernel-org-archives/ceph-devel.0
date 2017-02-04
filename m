@@ -1,103 +1,68 @@
-From: Max Yehorov <myehorov@skytap.com>
-Subject: Re: Possible bug in krbd (4.4.0)
-Date: Fri, 3 Feb 2017 15:20:59 -0800
-Message-ID: <CAJDfiskjz2H-D9xmanZ9opw+0pVAK=VmSPtFz1+fbcfPofOpmg@mail.gmail.com>
-References: <CAJDfiske056EADPT4g0fRUx=uh7C-F3ZzUh6A1ummfUZ6vMuTg@mail.gmail.com>
- <CAOi1vP9Jvnepv3PxFA1PO_vZnEJ-DRBsax_+U136GSWPzCc1Xw@mail.gmail.com>
+From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
+Subject: Re: understand ceph packets on the wire
+Date: Sat, 04 Feb 2017 10:02:54 +0800
+Message-ID: <F9477432-C163-44B8-A288-61557DF258F3@alibaba-inc.com>
+References: <CAF1ivSZtbb_mrSB7gdgO0sszWwZA+r95btd6_AM4VXffNyXq8A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain;
+        charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:36726 "EHLO
-        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752527AbdBCXVc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2017 18:21:32 -0500
-Received: by mail-wm0-f48.google.com with SMTP id c85so52572594wmi.1
-        for <ceph-devel@vger.kernel.org>; Fri, 03 Feb 2017 15:21:31 -0800 (PST)
-In-Reply-To: <CAOi1vP9Jvnepv3PxFA1PO_vZnEJ-DRBsax_+U136GSWPzCc1Xw@mail.gmail.com>
+Received: from out0-153.mail.aliyun.com ([140.205.0.153]:42174 "EHLO
+        out0-153.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753393AbdBDCE4 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2017 21:04:56 -0500
+In-Reply-To: <CAF1ivSZtbb_mrSB7gdgO0sszWwZA+r95btd6_AM4VXffNyXq8A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ming Lin <minggr@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-It is certainly annoying. It does not allow to umount for hours.
-> Does umount error out or hang forever?
-umount errors out. with
-umount: target is busy
-        (In some cases useful info about processes that
-         use the device is found by lsof(8) or fuser(1).)
+Hi Ming,
+   Very interesting, for some reason , we can not download the file. Wonder=
+ing what kind of data the tshark is able to capture?
 
-Maybe this will help?
+  Regards,
+  James
 
-- lsof, for the rbd device in question, shows it is in use by pid 5926
+=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E5=90=AB=E6=9C=89=E9=98=BF=E9=87=8C=E5=B7=B4=E5=B7=B4=E9=9B=86=E5=9B=A2=E7=9A=84=E5=95=86=E4=B8=9A=E7=A7=98=E5=AF=86=E4=BF=A1=E6=81=AF=EF=BC=8C=E4=BB=85=E9=99=90=
+=E4=BA=8E=E5=8F=91=E9=80=81=E7=BB=99=E4=B8=8A=E9=9D=A2=E5=9C=B0=E5=9D=80=E4=B8=AD=E5=88=97=E5=87=BA=E7=9A=84=E4=B8=AA=E4=BA=BA=E5=92=8C=E7=BE=A4=E7=BB=84=EF=BC=8C=E7=A6=81=E6=AD=A2=E4=BB=BB=E4=BD=95=E5=85=B6=E4=BB=96=E4=BA=BA=E4=
+=BB=A5=E4=BB=BB=E4=BD=95=E5=BD=A2=E5=BC=8F=E4=BD=BF=E7=94=A8=EF=BC=88=E5=8C=85=E6=8B=AC=E4=BD=86=E4=B8=8D=E9=99=90=E4=BA=8E=E5=85=A8=E9=83=A8=E6=88=96=E9=83=A8=E5=88=86=E5=9C=B0=E6=B3=84=E9=9C=B2=E3=80=81=E5=A4=8D=E5=88=B6=E5=92=
+=8C=E6=95=A3=E5=8F=91=EF=BC=89=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E4=B8=AD=E7=9A=84=E4=BF=A1=E6=81=AF=EF=BC=8C=E5=A6=82=E6=9E=9C=E6=82=A8=E9=94=99=E6=94=B6=E6=9C=AC=E9=82=AE=E4=BB=B6=EF=BC=8C=E8=AF=B7=
+=E6=82=A8=E7=AB=8B=E5=8D=B3=E7=94=B5=E8=AF=9D=E6=88=96=E9=82=AE=E4=BB=B6=E9=80=9A=E7=9F=A5=E5=8F=91=E4=BB=B6=E4=BA=BA=E5=B9=B6=E5=88=A0=E9=99=A4=E6=9C=AC=E9=82=AE=E4=BB=B6=E3=80=82
+This email and its attachments contain confidential information from Alibab=
+a Group.which is intended only for the person or entity whose address is lis=
+ted above.Any use of information contained herein in any way(including,but n=
+ot limited to,total or partial disclosure,reproduction or dissemination)by p=
+ersons other than the intended recipient(s) is prohibited.If you receive thi=
+s email in error,please notify the sender by phone or email immediately and =
+delete it.
 
-dio/rbd0  5926  root  cwd   DIR                8,5   4096          2 /
-dio/rbd0  5926  root  rtd     DIR                8,5   4096          2 /
-dio/rbd0  5926  root  txt     unknown                   /proc/5926/exe
+On 2/3/17, 3:18 PM, "Ming Lin" <ceph-devel-owner@vger.kernel.org on behalf =
+of minggr@gmail.com> wrote:
 
-- PID 5926 is dio, it seems like a kernel thread
-ps ax | grep 5926
- 5926 ?        S<     0:00 [dio/rbd0]
+    Hi,
+   =20
+    With a one monitor one OSD test setup(osd pool default size =3D 1), I
+    captured the packets with tshark.
+    pcap.out file: https://ufile.io/43c78
+   =20
+    The test I did was:
+    dd if=3Dtmp.txt bs=3D512 count=3D1 of=3D/dev/rbd0 oflag=3Ddirect
+   =20
+    About 350 packets were captured just for above simple "dd" command.
+   =20
+    If you open the file with wireshark, you'll see packet #41 is the data =
+packet.
+    "192.168.122.1" is the OSD and "192.168.122.131" is the rbd client.
+   =20
+    What are other packets?
+   =20
+    Thanks.
+    --
+    To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+    the body of a message to majordomo@vger.kernel.org
+    More majordomo info at  http://vger.kernel.org/majordomo-info.html
+   =20
 
-- Also, there is no more dio but that one
-ps ax | grep dio
- 5926 ?        S<     0:00 [dio/rbd0]
 
-
-On Sat, Jan 7, 2017 at 8:08 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> On Wed, Jan 4, 2017 at 3:13 AM, Max Yehorov <myehorov@skytap.com> wrote:
->> Hi,
->>
->> I have encountered a weird possible bug. There is an rbd image mapped
->> and mounted on a client machine. It is not possible to umount it. Both
->> lsof and fuser show no mention of neither device nor mountpoint. It is
->> not exported via nfs kernel server, so unlikely it is blocked by
->> kernel.
->>
->> There is an odd pattern in syslog, two osds are constantly loose
->> connections. A wild guess is that umount tries to contact primary osd
->> and fails?
->
-> Does umount error out or hang forever?
->
->>
->> After I enabled kernel debug I saw the following:
->>
->> [9586733.605792] libceph:  con_open ffff880748f58030 10.80.16.74:6812
->> [9586733.623876] libceph:  connect 10.80.16.74:6812
->> [9586733.625091] libceph:  connect 10.80.16.74:6812 EINPROGRESS sk_state = 2
->> [9586756.681246] libceph:  con_keepalive ffff881057d082b8
->> [9586767.713067] libceph:  fault ffff880748f59830 state 5 to peer
->> 10.80.16.78:6812
->> [9586767.713593] libceph: osd27 10.80.16.78:6812 socket closed (con state OPEN)
->> [9586767.721145] libceph:  con_close ffff880748f59830 peer 10.80.16.78:6812
->> [9586767.724440] libceph:  con_open ffff880748f59830 10.80.16.78:6812
->> [9586767.742487] libceph:  connect 10.80.16.78:6812
->> [9586767.743696] libceph:  connect 10.80.16.78:6812 EINPROGRESS sk_state = 2
->> [9587346.956812] libceph:  try_read start on ffff881057d082b8 state 5
->> [9587466.968125] libceph:  try_write start ffff881057d082b8 state 5
->> [9587634.021257] libceph:  fault ffff880748f58030 state 5 to peer
->> 10.80.16.74:6812
->> [9587634.021781] libceph: osd19 10.80.16.74:6812 socket closed (con state OPEN)
->> [9587634.029336] libceph:  con_close ffff880748f58030 peer 10.80.16.74:6812
->> [9587634.032628] libceph:  con_open ffff880748f58030 10.80.16.74:6812
->> [9587634.050677] libceph:  connect 10.80.16.74:6812
->> [9587634.051888] libceph:  connect 10.80.16.74:6812 EINPROGRESS sk_state = 2
->> [9587668.124746] libceph:  fault ffff880748f59830 state 5 to peer
->> 10.80.16.78:6812
->
-> How many rbd images were mapped on that machine at that time?  This
-> looks like two idle mappings reestablishing watch connections - if you
-> look closely, you'll notice that those "fault to peer" messages are
-> exactly 15 minutes apart.  This behaviour is annoying, but harmless.
->
-> If umount hangs, an output of
->
-> $ cat /sys/kernel/debug/ceph/<fsid>/osdc
-> $ echo w >/proc/sysrq-trigger
-> $ echo t >/proc/sysrq-trigger
->
-> might have helped.
->
-> Thanks,
->
->                 Ilya
