@@ -1,350 +1,175 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH v3 4/8] ceph: add a new flag to indicate whether parent
- is locked
-Date: Sat, 04 Feb 2017 06:40:37 -0500
-Message-ID: <1486208437.16508.3.camel@redhat.com>
-References: <20170201114914.20808-1-jlayton@redhat.com>
-         <20170203180404.31930-1-jlayton@redhat.com>
-         <20170203180404.31930-5-jlayton@redhat.com>
-         <AA245BF2-C788-4AF1-B2B2-10A76FEE30B5@redhat.com>
+From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+Subject: Re: [PATCH v3 0/2] iov_iter: allow
+ iov_iter_get_pages_alloc to allocate more pages per call
+Date: Sat, 4 Feb 2017 19:26:55 +0000
+Message-ID: <20170204192655.GA13195@ZenIV.linux.org.uk>
+References: <20170124212327.14517-1-jlayton@redhat.com>
+	<20170125133205.21704-1-jlayton@redhat.com>
+	<20170202095125.GF27291@ZenIV.linux.org.uk>
+	<20170204030842.GL27291@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:36359 "EHLO
-        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753923AbdBDLkj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 4 Feb 2017 06:40:39 -0500
-Received: by mail-qt0-f171.google.com with SMTP id k15so69243966qtg.3
-        for <ceph-devel@vger.kernel.org>; Sat, 04 Feb 2017 03:40:39 -0800 (PST)
-In-Reply-To: <AA245BF2-C788-4AF1-B2B2-10A76FEE30B5@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, idryomov@gmail.com
+Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170204030842.GL27291-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
+List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
+Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+To: Miklos Szeredi <miklos-sUDqSbJrdHQHWmgEVkV9KA@public.gmane.org>
+Cc: linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "Kirill A. Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Sat, 2017-02-04 at 11:16 +0800, Yan, Zheng wrote:
-> > On 4 Feb 2017, at 02:04, Jeff Layton <jlayton@redhat.com> wrote:
-> > 
-> > struct ceph_mds_request has an r_locked_dir pointer, which is set to
-> > indicate the parent inode and that its i_rwsem is locked.  In some
-> > critical places, we need to be able to indicate the parent inode to the
-> > request handling code, even when its i_rwsem may not be locked.
-> > 
-> > Most of the code that operates on r_locked_dir doesn't require that the
-> > i_rwsem be locked. We only really need it to handle manipulation of the
-> > dcache. The rest (filling of the inode, updating dentry leases, etc.)
-> > already has its own locking.
-> > 
-> > Add a new r_req_flags bit that indicates whether the parent is locked
-> > when doing the request, and rename the pointer to "r_parent". For now,
-> > all the places that set r_parent also set this flag, but that will
-> > change in a later patch.
-> > 
-> > Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> > ---
-> > fs/ceph/dir.c        | 21 ++++++++++++++-------
-> > fs/ceph/export.c     |  3 ++-
-> > fs/ceph/file.c       |  3 ++-
-> > fs/ceph/inode.c      | 17 ++++++++++-------
-> > fs/ceph/mds_client.c | 24 ++++++++++++------------
-> > fs/ceph/mds_client.h |  3 ++-
-> > 6 files changed, 42 insertions(+), 29 deletions(-)
-> > 
-> > diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-> > index 5fb86d71220e..c8562b8a8c7e 100644
-> > --- a/fs/ceph/dir.c
-> > +++ b/fs/ceph/dir.c
-> > @@ -752,7 +752,8 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
-> > 		mask |= CEPH_CAP_XATTR_SHARED;
-> > 	req->r_args.getattr.mask = cpu_to_le32(mask);
-> > 
-> > -	req->r_locked_dir = dir;
-> > +	req->r_parent = dir;
-> > +	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
-> > 	err = ceph_mdsc_do_request(mdsc, NULL, req);
-> > 	err = ceph_handle_snapdir(req, dentry, err);
-> > 	dentry = ceph_finish_lookup(req, dentry, err);
-> > @@ -813,7 +814,8 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
-> > 	}
-> > 	req->r_dentry = dget(dentry);
-> > 	req->r_num_caps = 2;
-> > -	req->r_locked_dir = dir;
-> > +	req->r_parent = dir;
-> > +	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
-> > 	req->r_args.mknod.mode = cpu_to_le32(mode);
-> > 	req->r_args.mknod.rdev = cpu_to_le32(rdev);
-> > 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
-> > @@ -864,7 +866,8 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
-> > 		ceph_mdsc_put_request(req);
-> > 		goto out;
-> > 	}
-> > -	req->r_locked_dir = dir;
-> > +	req->r_parent = dir;
-> > +	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
-> > 	req->r_dentry = dget(dentry);
-> > 	req->r_num_caps = 2;
-> > 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
-> > @@ -913,7 +916,8 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
-> > 
-> > 	req->r_dentry = dget(dentry);
-> > 	req->r_num_caps = 2;
-> > -	req->r_locked_dir = dir;
-> > +	req->r_parent = dir;
-> > +	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
-> > 	req->r_args.mkdir.mode = cpu_to_le32(mode);
-> > 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
-> > 	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
-> > @@ -957,7 +961,8 @@ static int ceph_link(struct dentry *old_dentry, struct inode *dir,
-> > 	req->r_dentry = dget(dentry);
-> > 	req->r_num_caps = 2;
-> > 	req->r_old_dentry = dget(old_dentry);
-> > -	req->r_locked_dir = dir;
-> > +	req->r_parent = dir;
-> > +	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
-> > 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
-> > 	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
-> > 	/* release LINK_SHARED on source inode (mds will lock it) */
-> > @@ -1023,7 +1028,8 @@ static int ceph_unlink(struct inode *dir, struct dentry *dentry)
-> > 	}
-> > 	req->r_dentry = dget(dentry);
-> > 	req->r_num_caps = 2;
-> > -	req->r_locked_dir = dir;
-> > +	req->r_parent = dir;
-> > +	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
-> > 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
-> > 	req->r_dentry_unless = CEPH_CAP_FILE_EXCL;
-> > 	req->r_inode_drop = drop_caps_for_unlink(inode);
-> > @@ -1066,7 +1072,8 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
-> > 	req->r_num_caps = 2;
-> > 	req->r_old_dentry = dget(old_dentry);
-> > 	req->r_old_dentry_dir = old_dir;
-> > -	req->r_locked_dir = new_dir;
-> > +	req->r_parent = new_dir;
-> > +	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
-> > 	req->r_old_dentry_drop = CEPH_CAP_FILE_SHARED;
-> > 	req->r_old_dentry_unless = CEPH_CAP_FILE_EXCL;
-> > 	req->r_dentry_drop = CEPH_CAP_FILE_SHARED;
-> > diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-> > index 180bbef760f2..e8f11fa565c5 100644
-> > --- a/fs/ceph/export.c
-> > +++ b/fs/ceph/export.c
-> > @@ -207,7 +207,8 @@ static int ceph_get_name(struct dentry *parent, char *name,
-> > 	req->r_inode = d_inode(child);
-> > 	ihold(d_inode(child));
-> > 	req->r_ino2 = ceph_vino(d_inode(parent));
-> > -	req->r_locked_dir = d_inode(parent);
-> > +	req->r_parent = d_inode(parent);
-> > +	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
-> > 	req->r_num_caps = 2;
-> > 	err = ceph_mdsc_do_request(mdsc, NULL, req);
-> > 
-> > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> > index 19419eb87f38..a91239c4b31c 100644
-> > --- a/fs/ceph/file.c
-> > +++ b/fs/ceph/file.c
-> > @@ -310,7 +310,8 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
-> >                mask |= CEPH_CAP_XATTR_SHARED;
-> >        req->r_args.open.mask = cpu_to_le32(mask);
-> > 
-> > -	req->r_locked_dir = dir;           /* caller holds dir->i_mutex */
-> > +	req->r_parent = dir;
-> > +	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
-> > 	err = ceph_mdsc_do_request(mdsc,
-> > 				   (flags & (O_CREAT|O_TRUNC)) ? dir : NULL,
-> > 				   req);
-> > diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> > index e54ba03d3df7..b4b61da03dbf 100644
-> > --- a/fs/ceph/inode.c
-> > +++ b/fs/ceph/inode.c
-> > @@ -1122,13 +1122,13 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
-> > 
-> > 	if (!rinfo->head->is_target && !rinfo->head->is_dentry) {
-> > 		dout("fill_trace reply is empty!\n");
-> > -		if (rinfo->head->result == 0 && req->r_locked_dir)
-> > +		if (rinfo->head->result == 0 && req->r_parent)
-> > 			ceph_invalidate_dir_request(req);
-> > 		return 0;
-> > 	}
-> > 
-> > 	if (rinfo->head->is_dentry) {
-> > -		struct inode *dir = req->r_locked_dir;
-> > +		struct inode *dir = req->r_parent;
-> > 
-> > 		if (dir) {
-> > 			err = fill_inode(dir, NULL,
-> > @@ -1216,7 +1216,9 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
-> > 	 * ignore null lease/binding on snapdir ENOENT, or else we
-> > 	 * will have trouble splicing in the virtual snapdir later
-> > 	 */
-> > -	if (rinfo->head->is_dentry && req->r_locked_dir &&
-> > +	if (rinfo->head->is_dentry &&
-> > +            !test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags) &&
+On Sat, Feb 04, 2017 at 03:08:42AM +0000, Al Viro wrote:
+> On Thu, Feb 02, 2017 at 09:51:25AM +0000, Al Viro wrote:
 > 
-> why adding the !ABORTED check back. I think previous patch add:
+> > 	* fuse_copy_fill().  I'm not at all sure that iov_iter_get_pages()
+> > is a good idea there - fuse_copy_do() could bloody well just use
+> > copy_{to,from}_iter().
 > 
-> if (test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags))
->   goto done;
+> Miklos, could you explain why does lock_request() prohibit page faults until
+> the matching unlock_request()?  All it does is setting FR_LOCKED on
+> our request and the only thing that even looks at that is fuse_abort_conn(),
+> which doesn't (AFAICS) wait for anything.
 > 
+> Where does the deadlock come from, and if it's not a deadlock - what is
+> it?  Or is that comment stale since "fuse: simplify request abort"?
 
-Oof, good catch -- I screwed that up.
+While we are at it...  How can fuse_copy_page() ever get called with
+*pagep == NULL?  AFAICS, for that to happen you need either
+	i < req->num_pages && req->pages[i] == NULL  
+or in fuse_notify_store() have
+                err = fuse_copy_page(cs, &page, offset, this_num, 0);
+reached with page == NULL.  The latter is flat-out impossible - we have
+                if (!page)
+                        goto out_iput;
 
-We want to keep the R_ABORTED checks where r_aborted is checked now, as
-that will allow us to update the dentry leases even when the task that
-spawned the call was aborted.
+                this_num = min_t(unsigned, num, PAGE_SIZE - offset);
+immediately before the call in question.  As for the former...  I don't see
+any place where we would increase ->num_pages without having all additional
+->pages[] elements guaranteed to be non-NULL.  Stores to ->num_pages are
 
-I'll fix that in the ceph-client/testing branch, but I'll not bother
-reposting unless there are other problems that need fixing in here.
+in cuse_send_init():
+	req->num_pages = 1;
+with
+        req->pages[0] = page;
+shortly before that and
+        if (!page)
+                goto err_put_req;
+earlier.
 
-> > +	    test_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags) &&
-> > 	    (rinfo->head->is_target || strncmp(req->r_dentry->d_name.name,
-> > 					       fsc->mount_options->snapdir_name,
-> > 					       req->r_dentry->d_name.len))) {
-> > @@ -1225,7 +1227,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
-> > 		 * mknod symlink mkdir  : null -> new inode
-> > 		 * unlink               : linked -> null
-> > 		 */
-> > -		struct inode *dir = req->r_locked_dir;
-> > +		struct inode *dir = req->r_parent;
-> > 		struct dentry *dn = req->r_dentry;
-> > 		bool have_dir_cap, have_lease;
-> > 
-> > @@ -1319,10 +1321,11 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
-> > 			update_dentry_lease(dn, rinfo->dlease, session,
-> > 					    req->r_request_started);
-> > 		dout(" final dn %p\n", dn);
-> > -	} else if (req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
-> > -		   req->r_op == CEPH_MDS_OP_MKSNAP) {
-> > +	} else if ((req->r_op == CEPH_MDS_OP_LOOKUPSNAP ||
-> > +		    req->r_op == CEPH_MDS_OP_MKSNAP) &&
-> > +		   !test_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags)) {
-> 
-> same here
-> 
-> > 		struct dentry *dn = req->r_dentry;
-> > -		struct inode *dir = req->r_locked_dir;
-> > +		struct inode *dir = req->r_parent;
-> > 
-> > 		/* fill out a snapdir LOOKUPSNAP dentry */
-> > 		BUG_ON(!dn);
-> > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> > index ccf75a3260e8..52521f339745 100644
-> > --- a/fs/ceph/mds_client.c
-> > +++ b/fs/ceph/mds_client.c
-> > @@ -547,8 +547,8 @@ void ceph_mdsc_release_request(struct kref *kref)
-> > 		ceph_put_cap_refs(ceph_inode(req->r_inode), CEPH_CAP_PIN);
-> > 		iput(req->r_inode);
-> > 	}
-> > -	if (req->r_locked_dir)
-> > -		ceph_put_cap_refs(ceph_inode(req->r_locked_dir), CEPH_CAP_PIN);
-> > +	if (req->r_parent)
-> > +		ceph_put_cap_refs(ceph_inode(req->r_parent), CEPH_CAP_PIN);
-> > 	iput(req->r_target_inode);
-> > 	if (req->r_dentry)
-> > 		dput(req->r_dentry);
-> > @@ -735,7 +735,7 @@ static int __choose_mds(struct ceph_mds_client *mdsc,
-> > 
-> > 		rcu_read_lock();
-> > 		parent = req->r_dentry->d_parent;
-> > -		dir = req->r_locked_dir ? : d_inode_rcu(parent);
-> > +		dir = req->r_parent ? : d_inode_rcu(parent);
-> > 
-> > 		if (!dir || dir->i_sb != mdsc->fsc->sb) {
-> > 			/*  not this fs or parent went negative */
-> > @@ -1894,7 +1894,7 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
-> > 	int ret;
-> > 
-> > 	ret = set_request_path_attr(req->r_inode, req->r_dentry,
-> > -			      req->r_locked_dir, req->r_path1, req->r_ino1.ino,
-> > +			      req->r_parent, req->r_path1, req->r_ino1.ino,
-> > 			      &path1, &pathlen1, &ino1, &freepath1);
-> > 	if (ret < 0) {
-> > 		msg = ERR_PTR(ret);
-> > @@ -1956,7 +1956,7 @@ static struct ceph_msg *create_request_message(struct ceph_mds_client *mdsc,
-> > 		      mds, req->r_inode_drop, req->r_inode_unless, 0);
-> > 	if (req->r_dentry_drop)
-> > 		releases += ceph_encode_dentry_release(&p, req->r_dentry,
-> > -				req->r_locked_dir, mds, req->r_dentry_drop,
-> > +				req->r_parent, mds, req->r_dentry_drop,
-> > 				req->r_dentry_unless);
-> > 	if (req->r_old_dentry_drop)
-> > 		releases += ceph_encode_dentry_release(&p, req->r_old_dentry,
-> > @@ -2095,14 +2095,14 @@ static int __prepare_send_request(struct ceph_mds_client *mdsc,
-> > 	rhead->oldest_client_tid = cpu_to_le64(__get_oldest_tid(mdsc));
-> > 	if (test_bit(CEPH_MDS_R_GOT_UNSAFE, &req->r_req_flags))
-> > 		flags |= CEPH_MDS_FLAG_REPLAY;
-> > -	if (req->r_locked_dir)
-> > +	if (req->r_parent)
-> > 		flags |= CEPH_MDS_FLAG_WANT_DENTRY;
-> > 	rhead->flags = cpu_to_le32(flags);
-> > 	rhead->num_fwd = req->r_num_fwd;
-> > 	rhead->num_retry = req->r_attempts - 1;
-> > 	rhead->ino = 0;
-> > 
-> > -	dout(" r_locked_dir = %p\n", req->r_locked_dir);
-> > +	dout(" r_parent = %p\n", req->r_parent);
-> > 	return 0;
-> > }
-> > 
-> > @@ -2282,11 +2282,11 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
-> > 
-> > 	dout("do_request on %p\n", req);
-> > 
-> > -	/* take CAP_PIN refs for r_inode, r_locked_dir, r_old_dentry */
-> > +	/* take CAP_PIN refs for r_inode, r_parent, r_old_dentry */
-> > 	if (req->r_inode)
-> > 		ceph_get_cap_refs(ceph_inode(req->r_inode), CEPH_CAP_PIN);
-> > -	if (req->r_locked_dir)
-> > -		ceph_get_cap_refs(ceph_inode(req->r_locked_dir), CEPH_CAP_PIN);
-> > +	if (req->r_parent)
-> > +		ceph_get_cap_refs(ceph_inode(req->r_parent), CEPH_CAP_PIN);
-> > 	if (req->r_old_dentry_dir)
-> > 		ceph_get_cap_refs(ceph_inode(req->r_old_dentry_dir),
-> > 				  CEPH_CAP_PIN);
-> > @@ -2336,7 +2336,7 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
-> > 		set_bit(CEPH_MDS_R_ABORTED, &req->r_req_flags);
-> > 		mutex_unlock(&req->r_fill_mutex);
-> > 
-> > -		if (req->r_locked_dir &&
-> > +		if (req->r_parent &&
-> > 		    (req->r_op & CEPH_MDS_OP_WRITE))
-> > 			ceph_invalidate_dir_request(req);
-> > 	} else {
-> > @@ -2355,7 +2355,7 @@ int ceph_mdsc_do_request(struct ceph_mds_client *mdsc,
-> >  */
-> > void ceph_invalidate_dir_request(struct ceph_mds_request *req)
-> > {
-> > -	struct inode *inode = req->r_locked_dir;
-> > +	struct inode *inode = req->r_parent;
-> > 
-> > 	dout("invalidate_dir_request %p (complete, lease(s))\n", inode);
-> > 
-> > diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-> > index 409b0e3c3b7a..ac0475a2daa7 100644
-> > --- a/fs/ceph/mds_client.h
-> > +++ b/fs/ceph/mds_client.h
-> > @@ -202,7 +202,7 @@ struct ceph_mds_request {
-> > 	char *r_path1, *r_path2;
-> > 	struct ceph_vino r_ino1, r_ino2;
-> > 
-> > -	struct inode *r_locked_dir; /* dir (if any) i_mutex locked by vfs */
-> > +	struct inode *r_parent;		    /* parent dir inode */
-> > 	struct inode *r_target_inode;       /* resulting inode */
-> > 
-> > #define CEPH_MDS_R_DIRECT_IS_HASH	(1) /* r_direct_hash is valid */
-> > @@ -211,6 +211,7 @@ struct ceph_mds_request {
-> > #define CEPH_MDS_R_GOT_SAFE		(4) /* got a safe reply */
-> > #define CEPH_MDS_R_GOT_RESULT		(5) /* got a result */
-> > #define CEPH_MDS_R_DID_PREPOPULATE	(6) /* prepopulated readdir */
-> > +#define CEPH_MDS_R_PARENT_LOCKED	(7) /* is r_parent->i_rwsem wlocked? */
-> > 	unsigned long	r_req_flags;
-> > 
-> > 	struct mutex r_fill_mutex;
-> > -- 
-> > 2.9.3
-> > 
-> 
-> 
+In fuse_retrieve():
+                if (!page)
+                        break;
 
--- 
-Jeff Layton <jlayton@redhat.com>
+                this_num = min_t(unsigned, num, PAGE_SIZE - offset);
+                req->pages[req->num_pages] = page;
+                req->page_descs[req->num_pages].length = this_num;
+                req->num_pages++;
+
+In fuse_readdir():
+        req->num_pages = 1;
+        req->pages[0] = page;
+with
+        if (!page) {
+                fuse_put_request(fc, req);
+                return -ENOMEM;
+        }
+several lines above.
+
+In fuse_do_readpage():
+        req->num_pages = 1;
+        req->pages[0] = page;
+with page dereferenced earlier.
+
+In fuse_fill_write_pages():
+                req->pages[req->num_pages] = page;
+                req->page_descs[req->num_pages].length = tmp;
+                req->num_pages++;
+with
+                if (!page)
+                        break;
+earlier.
+
+In fuse_get_user_pages():
+                ret = iov_iter_get_pages(ii, &req->pages[req->num_pages],
+                                        *nbytesp - nbytes, 
+                                        req->max_pages - req->num_pages,
+                                        &start);
+                if (ret < 0)
+                        break;
+
+                iov_iter_advance(ii, ret);
+                nbytes += ret;
+
+                ret += start;
+                npages = (ret + PAGE_SIZE - 1) / PAGE_SIZE;
+
+                req->page_descs[req->num_pages].offset = start;
+                fuse_page_descs_length_init(req, req->num_pages, npages);
+
+                req->num_pages += npages;
+which also shouldn't leave any NULLs in the area in question.
+
+In fuse_writepage_locked():
+        req->num_pages = 1;
+        req->pages[0] = tmp_page;
+with
+        if (!tmp_page)
+                goto err_free;
+done earlier.
+
+In fuse_writepage_in_flight():
+	req->num_pages = 1;
+with
+        BUG_ON(new_req->num_pages != 0);
+earlier and
+        req->pages[req->num_pages] = tmp_page;
+done in the caller (which passes req as new_req).  Earlier in the caller
+we have
+        if (!tmp_page)
+                goto out_unlock;
+
+In fuse_writepages_fill():
+		req->num_pages = 0;
+is obviously OK and
+        req->num_pages++;
+in the end of the same function is preceded by the same
+        req->pages[req->num_pages] = tmp_page;
+(fuse_writepages_fill() is the caller of fuse_writepage_in_flight();
+reassignment in fuse_writepage_in_flight() happens only in case when
+it returns 1 and in that case we don't reach the increment in
+fuse_writepages_fill() at all).
+
+In fuse_do_ioctl():
+        memcpy(req->pages, pages, sizeof(req->pages[0]) * num_pages);
+        req->num_pages = num_pages;
+and all increments of num_pages in there are
+                pages[num_pages] = alloc_page(GFP_KERNEL | __GFP_HIGHMEM);
+                if (!pages[num_pages])
+                        goto out;
+                num_pages++;
+so the array we copy into req->pages has the same property wrt num_pages.
+
+req->pages is assigned only in fuse_request_init(); that gets called
+in two places - one is at request allocation time, another (from
+put_reserved_req()) passes the current req->pages value, so that leaves it
+unchanged.  The contents of req->pages[] is changed only in the aforementioned
+places + fuse_request_init(), which zeros ->num_pages + fuse_copy_page()
+called from fuse_copy_pages() with &req->pages[i] as argument.  The last
+one can modify the damn thing, but only if it hits
+                                err = fuse_try_move_page(cs, pagep);
+and that sucker never stores a NULL in there -
+                *pagep = newpage;
+with get_page(newpage) upstream from that point.
+
+What am I missing here?  Looks like those checks in fuse_copy_page() are
+dead code...  They had been there since the initial merge, but AFAICS
+they were just as useless in 2.6.14.  Rudiments of some prehistorical stuff
+that never had been cleaned out, perhaps?
