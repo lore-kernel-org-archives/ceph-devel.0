@@ -1,68 +1,40 @@
-From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
-Subject: Re: understand ceph packets on the wire
-Date: Sat, 04 Feb 2017 10:02:54 +0800
-Message-ID: <F9477432-C163-44B8-A288-61557DF258F3@alibaba-inc.com>
-References: <CAF1ivSZtbb_mrSB7gdgO0sszWwZA+r95btd6_AM4VXffNyXq8A@mail.gmail.com>
+From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+Subject: Re: [PATCH v3 0/2] iov_iter: allow
+ iov_iter_get_pages_alloc to allocate more pages per call
+Date: Sat, 4 Feb 2017 03:08:42 +0000
+Message-ID: <20170204030842.GL27291@ZenIV.linux.org.uk>
+References: <20170124212327.14517-1-jlayton@redhat.com>
+	<20170125133205.21704-1-jlayton@redhat.com>
+	<20170202095125.GF27291@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from out0-153.mail.aliyun.com ([140.205.0.153]:42174 "EHLO
-        out0-153.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753393AbdBDCE4 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Feb 2017 21:04:56 -0500
-In-Reply-To: <CAF1ivSZtbb_mrSB7gdgO0sszWwZA+r95btd6_AM4VXffNyXq8A@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ming Lin <minggr@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170202095125.GF27291-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
+List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
+Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+To: Miklos Szeredi <miklos-sUDqSbJrdHQHWmgEVkV9KA@public.gmane.org>
+Cc: linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "Kirill A. Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Ming,
-   Very interesting, for some reason , we can not download the file. Wonder=
-ing what kind of data the tshark is able to capture?
+On Thu, Feb 02, 2017 at 09:51:25AM +0000, Al Viro wrote:
 
-  Regards,
-  James
+> 	* fuse_copy_fill().  I'm not at all sure that iov_iter_get_pages()
+> is a good idea there - fuse_copy_do() could bloody well just use
+> copy_{to,from}_iter().
 
-=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E5=90=AB=E6=9C=89=E9=98=BF=E9=87=8C=E5=B7=B4=E5=B7=B4=E9=9B=86=E5=9B=A2=E7=9A=84=E5=95=86=E4=B8=9A=E7=A7=98=E5=AF=86=E4=BF=A1=E6=81=AF=EF=BC=8C=E4=BB=85=E9=99=90=
-=E4=BA=8E=E5=8F=91=E9=80=81=E7=BB=99=E4=B8=8A=E9=9D=A2=E5=9C=B0=E5=9D=80=E4=B8=AD=E5=88=97=E5=87=BA=E7=9A=84=E4=B8=AA=E4=BA=BA=E5=92=8C=E7=BE=A4=E7=BB=84=EF=BC=8C=E7=A6=81=E6=AD=A2=E4=BB=BB=E4=BD=95=E5=85=B6=E4=BB=96=E4=BA=BA=E4=
-=BB=A5=E4=BB=BB=E4=BD=95=E5=BD=A2=E5=BC=8F=E4=BD=BF=E7=94=A8=EF=BC=88=E5=8C=85=E6=8B=AC=E4=BD=86=E4=B8=8D=E9=99=90=E4=BA=8E=E5=85=A8=E9=83=A8=E6=88=96=E9=83=A8=E5=88=86=E5=9C=B0=E6=B3=84=E9=9C=B2=E3=80=81=E5=A4=8D=E5=88=B6=E5=92=
-=8C=E6=95=A3=E5=8F=91=EF=BC=89=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E4=B8=AD=E7=9A=84=E4=BF=A1=E6=81=AF=EF=BC=8C=E5=A6=82=E6=9E=9C=E6=82=A8=E9=94=99=E6=94=B6=E6=9C=AC=E9=82=AE=E4=BB=B6=EF=BC=8C=E8=AF=B7=
-=E6=82=A8=E7=AB=8B=E5=8D=B3=E7=94=B5=E8=AF=9D=E6=88=96=E9=82=AE=E4=BB=B6=E9=80=9A=E7=9F=A5=E5=8F=91=E4=BB=B6=E4=BA=BA=E5=B9=B6=E5=88=A0=E9=99=A4=E6=9C=AC=E9=82=AE=E4=BB=B6=E3=80=82
-This email and its attachments contain confidential information from Alibab=
-a Group.which is intended only for the person or entity whose address is lis=
-ted above.Any use of information contained herein in any way(including,but n=
-ot limited to,total or partial disclosure,reproduction or dissemination)by p=
-ersons other than the intended recipient(s) is prohibited.If you receive thi=
-s email in error,please notify the sender by phone or email immediately and =
-delete it.
+Miklos, could you explain why does lock_request() prohibit page faults until
+the matching unlock_request()?  All it does is setting FR_LOCKED on
+our request and the only thing that even looks at that is fuse_abort_conn(),
+which doesn't (AFAICS) wait for anything.
 
-On 2/3/17, 3:18 PM, "Ming Lin" <ceph-devel-owner@vger.kernel.org on behalf =
-of minggr@gmail.com> wrote:
-
-    Hi,
-   =20
-    With a one monitor one OSD test setup(osd pool default size =3D 1), I
-    captured the packets with tshark.
-    pcap.out file: https://ufile.io/43c78
-   =20
-    The test I did was:
-    dd if=3Dtmp.txt bs=3D512 count=3D1 of=3D/dev/rbd0 oflag=3Ddirect
-   =20
-    About 350 packets were captured just for above simple "dd" command.
-   =20
-    If you open the file with wireshark, you'll see packet #41 is the data =
-packet.
-    "192.168.122.1" is the OSD and "192.168.122.131" is the rbd client.
-   =20
-    What are other packets?
-   =20
-    Thanks.
-    --
-    To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-    the body of a message to majordomo@vger.kernel.org
-    More majordomo info at  http://vger.kernel.org/majordomo-info.html
-   =20
-
-
+Where does the deadlock come from, and if it's not a deadlock - what is
+it?  Or is that comment stale since "fuse: simplify request abort"?
