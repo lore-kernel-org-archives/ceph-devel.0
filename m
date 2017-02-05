@@ -1,85 +1,73 @@
-From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
-Subject: Re: [PATCH v3 0/2] iov_iter: allow iov_iter_get_pages_alloc to
- allocate more pages per call
-Date: Sun, 5 Feb 2017 22:04:45 +0000
-Message-ID: <20170205220445.GE13195@ZenIV.linux.org.uk>
-References: <20170124212327.14517-1-jlayton@redhat.com>
- <20170125133205.21704-1-jlayton@redhat.com>
- <20170202095125.GF27291@ZenIV.linux.org.uk>
- <20170204030842.GL27291@ZenIV.linux.org.uk>
- <CAJfpegtVb8PKNnKe5wGMd0u0WzgLpjpVtVpqDScbrBJShLAfGw@mail.gmail.com>
- <20170205015145.GB13195@ZenIV.linux.org.uk>
- <CAJfpegv=r9J8Mqax_ZAB2h5QbRgJMHwyVMENTpYZ8u3_pqNfJw@mail.gmail.com>
- <20170205210151.GD13195@ZenIV.linux.org.uk>
- <CAJfpeguzOgX9d+5XCNJcmXW5KkrGbnWB5aZSP1-0q3a6i6uk2w@mail.gmail.com>
+From: Ming Lin <minggr@gmail.com>
+Subject: Re: Fwd: question about snapset
+Date: Sun, 5 Feb 2017 15:28:41 -0800
+Message-ID: <CAF1ivSZ4Bke6zHZGZs9BSpcZAGzpSHAwnFpXQoHSrJSEBzNkjg@mail.gmail.com>
+References: <CAB7xdi=b=HxAepvKna-Rfi9z9Wd+SAxADsbZUkYk-TuEkYJnjA@mail.gmail.com>
+ <alpine.DEB.2.11.1702031359260.3660@piezo.novalocal> <CAB7xdi=NFjC4W3XYSLPYFrs_vN18+TY-5F_UGzCe_TCweYHxdg@mail.gmail.com>
+ <CAB7xdikDAtXL6UGzRjKVa6Vzv9QE6if3ixteYu-UApRfMYVOXw@mail.gmail.com> <alpine.DEB.2.11.1702031803520.3654@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAJfpeguzOgX9d+5XCNJcmXW5KkrGbnWB5aZSP1-0q3a6i6uk2w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Miklos Szeredi <miklos-sUDqSbJrdHQHWmgEVkV9KA@public.gmane.org>
-Cc: linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux NFS list <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, "Kirill A. Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-it0-f68.google.com ([209.85.214.68]:36173 "EHLO
+        mail-it0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751931AbdBEX2n (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Feb 2017 18:28:43 -0500
+Received: by mail-it0-f68.google.com with SMTP id f200so7001487itf.3
+        for <ceph-devel@vger.kernel.org>; Sun, 05 Feb 2017 15:28:43 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1702031803520.3654@piezo.novalocal>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: sheng qiu <herbert1984106@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Sun, Feb 05, 2017 at 10:19:20PM +0100, Miklos Szeredi wrote:
+On Fri, Feb 3, 2017 at 10:07 AM, Sage Weil <sage@newdream.net> wrote:
+> On Fri, 3 Feb 2017, sheng qiu wrote:
+>> ---------- Forwarded message ----------
+>> From: sheng qiu <herbert1984106@gmail.com>
+>> Date: Fri, Feb 3, 2017 at 7:45 AM
+>> Subject: Re: question about snapset
+>> To: Sage Weil <sage@newdream.net>
+>> Cc: ceph-devel <ceph-devel@vger.kernel.org>
+>>
+>>
+>> Hi Sage,
+>>
+>> Thanks a lot for your reply. It's very helpful.
+>> We are trying to avoid the query for snapset object for new object
+>> write, we think it may save some latency. Currently when we measure
+>> the op prepare latency, it's around 300 us, which is quite high. Is
+>> this normal? In our test, we configure 64 pgs per osd and use five
+>> shards with two workers per shard. The test machine is a four socket
+>> with 40 cores and plenty of memory.
+>> We are thinking how to reduce this latency, do you have any suggestions?
+>
+> There are several sources, and this is an active area of
+> investigation and optimization.  I'm not sure that the snapset
+> specifically is probably a big part of the problem.. it's like the overall
+> work involved with get_object_context(), which will fetch the
+> attributes from the object.  The snapset will be a small part of this.
+>
+> I suggest joining the weekly performance call if you can.  Or we can
+> discuss some of the specific efforts on the list.  The main efforts here
+> are
+>
+> - simplifying ms_fast_dispatch so that incoming messages get queued more
+> quickly
 
-> Then we can't break out of that deadlock: we wait until
-> fuse_dev_do_write() is done until calling request_end() which
-> ultimately results in unlocking page.  But fuse_dev_do_write() won't
-> complete until the page is unlocked.
+Look at below call stack.
+Could you share more detail which parts to simplify?
 
-Wait a sec.  What happens if
-
-process A: fuse_lookup()
-		struct fuse_entry_out outarg on stack
-		...
-		fuse_request_send() with req->out.args[0].value = &outarg
-			sleep in request_wait_answer() on req->waitq
-server: read the request, write reply
-	fuse_dev_do_write()
-		copy_out_args()
-			fuse_copy_args()
-				fuse_copy_one()
-					FR_LOCKED is guaranteed to be set
-					fuse_copy_do()
-process C on another CPU: umount -f
-	fuse_conn_abort()
-		end_requests()
-			request_end()
-				set FR_FINISHED
-				wake A up (via req->waitq)
-process A: regain CPU
-	bugger off from request_wait_answer(), through __fuse_request_send(),
-	fuse_request_send(), fuse_simple_request(), fuse_lookup_name(),
-	fuse_lookup() and out of fuse_lookup().
-
-In the meanwhile, server in fuse_copy_do() does memcpy() to what used to
-be outarg, corrupting the stack of process A.
-
-Sure, you need to hit a fairly narrow window, especially if you are to
-cause damage in A, but AFAICS it's not impossible.  Consider e.g. the
-situation when you lose CPU on preempt on the way to memcpy(); in that
-case server might come back when A has incremented its stack footprint
-again.  Or A might end up taking a hardware interrupt and handling it
-on the normal kernel stack, etc.
-
-Looks like *any* scenario where fuse_conn_abort() manages to run during
-that memcpy() has potential for that kind of trouble; any SMP box appears
-to be vulnerable, along with preempt UP...
-
-Am I missing something that prevents that kind of problem?
-
-> The only way out that I see is to have a refcount on all pages in
-> args.  Which means copying everything not already in refcountable page
-> (i.e. args on stack) to a page array.   It's definitely doable, but
-> needs time to sort out, and I'm definitely lacking that (overlayfs
-> currently trumps fuse).
-
-Hrm...  Then maybe I'll have to try and cook something along those lines;
-AFAICS the current mainline is vulnerable...
---
-To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+(gdb) bt
+#0  PG::queue_op ()
+#1  OSD::enqueue_op ()
+#2  OSD::handle_op ()
+#3  OSD::dispatch_op_fast ()
+#4  OSD::dispatch_session_waiting ()
+#5  OSD::ms_fast_dispatch ()
+#6  Messenger::ms_fast_dispatch ()
+#7  DispatchQueue::fast_dispatch ()
+#8  AsyncConnection::process ()
+#9  EventCenter::process_events ()
+#10 NetworkStack::<lambda()>::operator()
+#12 start_thread ()
+#13 clone ()
