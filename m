@@ -1,287 +1,107 @@
-From: Dan van der Ster <dan@vanderster.com>
-Subject: Re: crush multipick anomaly
-Date: Mon, 6 Feb 2017 10:13:34 +0100
-Message-ID: <CABZ+qq=E783Uma3jvBoDKP_ni6q09XcyZjK3jNOcu+BzEo+eoQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
- <e5f376bb-925b-17df-ae6e-abc07058f67b@dachary.org> <6a7b52c8-a0fd-41a6-fbf1-fb2af3e347d8@dachary.org>
- <alpine.DEB.2.11.1702031443400.3654@piezo.novalocal> <CABZ+qqn13kR+4FjSmWKgt4Fee0+8B2Gi-qJjT8MaXpu2e6=2Ew@mail.gmail.com>
- <CABZ+qqnHh+iJFbaLE7b-Kn4VSidHrDT8LuW4oB5wDD3=c=QG3Q@mail.gmail.com> <267c8448-a3f0-e21e-f5e6-dffb3ffdf836@dachary.org>
+From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+Subject: Re: [PATCH v3 0/2] iov_iter: allow
+ iov_iter_get_pages_alloc to allocate more pages per call
+Date: Mon, 6 Feb 2017 09:57:07 +0000
+Message-ID: <20170206095706.GG13195@ZenIV.linux.org.uk>
+References: <20170202095125.GF27291@ZenIV.linux.org.uk>
+	<20170204030842.GL27291@ZenIV.linux.org.uk>
+	<CAJfpegtVb8PKNnKe5wGMd0u0WzgLpjpVtVpqDScbrBJShLAfGw@mail.gmail.com>
+	<20170205015145.GB13195@ZenIV.linux.org.uk>
+	<CAJfpegv=r9J8Mqax_ZAB2h5QbRgJMHwyVMENTpYZ8u3_pqNfJw@mail.gmail.com>
+	<20170205210151.GD13195@ZenIV.linux.org.uk>
+	<CAJfpeguzOgX9d+5XCNJcmXW5KkrGbnWB5aZSP1-0q3a6i6uk2w@mail.gmail.com>
+	<20170205220445.GE13195@ZenIV.linux.org.uk>
+	<20170206030532.GF13195@ZenIV.linux.org.uk>
+	<CAJfpegv5ZGd2gzSbQvgk4uX5q06AijY+TNg2jdrPBSjbFoXMfg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:37191 "EHLO
-        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751544AbdBFJOS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2017 04:14:18 -0500
-Received: by mail-wm0-f41.google.com with SMTP id v77so105983826wmv.0
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Feb 2017 01:14:18 -0800 (PST)
-Received: from mail-wm0-f41.google.com (mail-wm0-f41.google.com. [74.125.82.41])
-        by smtp.gmail.com with ESMTPSA id w70sm207604wrc.47.2017.02.06.01.14.15
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 06 Feb 2017 01:14:15 -0800 (PST)
-Received: by mail-wm0-f41.google.com with SMTP id c85so110818329wmi.1
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Feb 2017 01:14:15 -0800 (PST)
-In-Reply-To: <267c8448-a3f0-e21e-f5e6-dffb3ffdf836@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Szymon Datko <szymon.datko@gmail.com>, Tomasz Kuzemko <tomasz@kuzemko.net>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAJfpegv5ZGd2gzSbQvgk4uX5q06AijY+TNg2jdrPBSjbFoXMfg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
+List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
+Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+To: Miklos Szeredi <miklos-sUDqSbJrdHQHWmgEVkV9KA@public.gmane.org>
+Cc: Linux NFS list <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "Kirill A. Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Loic,
+On Mon, Feb 06, 2017 at 10:08:06AM +0100, Miklos Szeredi wrote:
 
-Here's my current understanding of the problem. (Below I work with the
-example having four OSDs with weights 3, 3, 3, 1, respectively).
+> Yes, I think only page lock can be used to deadlock inside
+> fuse_dev_read/write().  So requests that don't have locked pages
+> should be okay  with just waiting until copy_to/from_user() finishes
+> and only then proceeding with the abort.
 
-I'm elaborating on the observation that for every replication "round",
-the PG ratios for each and every OSD must be equal to the "target" or
-goal weight of that OSD. So, for an OSD that should get 10% of PGs,
-that OSD gets 10% in round 1, 10% in round 2, etc... But we need to
-multiply each of these ratios by the probability that this OSD is
-still available in Round r.
+Actually, looking at that some more, this might be not true.  Anything
+that takes ->mmap_sem exclusive and *not* killable makes for another
+source of deadlock.
 
-Hence I believe we have this loop invariant:
+Initial page fault takes ->mmap_sem shared.  OK, request sent to
+server and server tries to read() it.  In the meanwhile, something
+has closed userfaultfd for the same mm_struct.  We have userfaultfd_release()
+block on attempt to take ->mmap_sem exclusive and from now on any attempt
+to grab ->mmap_sem shared will deadlock.  And get_user_pages(), as well
+as copy_to_user(), etc. can end up doing just that.  It doesn't have to
+be an mmap of the same file, BTW - any page fault would do.
 
-   P(OSD.x still available in Round r) * (Weight of OSD.x in Round r)
-/ (Total sum of all weights in Round r) =3D=3D (Original "target" Weight
-of OSD.x) / (Total sum of all target weights)
+All you really need is to have server sharing address space with the
+process that steps into original page fault, plus an evicted page
+of any nature (anon mmap, whatever) being used as a destination of
+read() in server.
 
-I simplify all these terms:
-  P(OSD.x still available for Round r) =3D P_x_r
-  Weight of OSD.x in Round r =3D W_x_r
-  Total sum of all weights in Round r =3D T_r
-  Original "target" Weight of OSD.x =3D W_x
-  Total sum of all target weights =3D T
+down_read() inside down_read() is fine, unless there had been down_write()
+in between.  And there are unkillable down_write() on ->mmap_sem -
+userfaultfd_release() being one example of such.  Many of those can and
+probably should become down_write_killable(), but this one can't - there
+might be nothing to deliver the signal to, if the final close() happens
+e.g. from exit(2).
 
-So rewriting the equation, we have:
+Warning: the above might be completely bogus - I'm on way too large
+uptime at the moment and most of the last day had been spent digging
+through various convoluted code, so take the above with a cartload of
+salt.  _If_ it's true, that kind of deadlock won't be possible to
+break with killing anything or doing umount -f, though.
 
-  P_x_r * W_x_r / T_r =3D=3D W_x / T
+> 
+> Those that have locked pages must be able to be aborted during
+> copy_to/from_user() because the copy itself may try to acquire the
+> page lock.
+> 
+> So yes, if we want to switch to copy_to/from_user(), then we can just
+> fix the page refcounting for read and write requests and handle the
+> two cases differently.
+> 
+> >         So how about this:
+> >
+> > * explicit FR_END_IMMEDIATELY on read/write-related requests
+> > * no FR_LOCKED flipping in lock_request()/unlock_request()
+> > * modifying the call of end_requests() in fuse_abort_conn() so that it
+> > would skip request_end() for everything that isn't marked FR_END_IMMEDIATELY
+> > * make fuse_copy_pages() grab page references around the actual
+> > fuse_copy_page() - grab req->waitq.lock, check FR_ABORTED, grab a page
+> > reference in case it's not, drop req->waitq.lock and bugger off if FR_ABORTED
+> > was set.  Adjust fuse_try_move_page() accordingly.
+> >
+> > Do you see any problems with that approach for minimal fix?  If all requests
+> > in need of FR_END_IMMEDIATELY turn out to have non-page part of args already
+> > embedded into req->misc, it looks like this ought to suffice.  I probably
+> > could post something along those lines tomorrow, if you see any serious
+> > problems with that - please yell...
+> 
+> See previous mail, I don't think there's an issue with the current
+> code.  Other than being convoluted as hell.
 
-We then calculate the needed weight of OSD.x in Round r. W_x_r is what
-we're trying to solve for!!
+OK - I'm an idiot and I've managed to misread fuse_abort_conn() despite having
+reread it many times last couple of days.  And yes, state transitions of
+requests are convoluted as hell ;-/
 
-  W_x_r =3D W_x / T  *  T_r / P_x_r
-
-The first term W_x / T is a constant and easy to compute. (For my
-example small OSD, W_x / T =3D 0.1)
-
-P_x_r is also -- I believe -- simple to compute. P_x_r gets smaller
-for each round and is a function of what happened in the previous
-round:
-
-  Round 1: P_x_1 =3D 1.0
-  Round 2: P_x_2 =3D P_x_1 * (1 - W_x_1 / T_1)
-  Round 3: P_x_3 =3D P_x_2 * (1 - W_x_2 / T_2)
-  ...
-
-But T_r is a challenge -- T_r is the sum of W_x_r for all x in round
-r. Hence, the problem is that we don't know T_r until *after* we
-compute all W_x_r's for that round. I tried various ways to estimate
-T_r but didn't make any progress.
-
-Do you think this formulation is correct? Any clever ideas where to go next=
-?
-
-Cheers, Dan
-
-
-
-
-On Mon, Feb 6, 2017 at 9:31 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Dan,
->
-> Your script turns out to be a nice self contained problem statement :-) T=
-omasz & Szymon discussed it today @ FOSDEM and I was enlightened by the way=
- Szymon described how to calculate P(E|A) using a probability tree (see the=
- picture at http://dachary.org/loic/crush-probability-schema.jpg).
->
-> Cheers
->
-> On 02/03/2017 06:37 PM, Dan van der Ster wrote:
->> Anyway, here's my simple simulation. It might be helpful for testing
->> ideas quickly: https://gist.github.com/anonymous/929d799d5f80794b293783a=
-cb9108992
->>
->> Below is the output using the P(pick small | first pick not small)
->> observation, using OSDs having weights 3, 3, 3, & 1 respectively. It
->> seems to *almost* work, but only when we have just one small OSD.
->>
->> See the end of the script for other various ideas.
->>
->> -- Dan
->>
->>> python mpa.py
->> OSDs (id: weight): {0: 3, 1: 3, 2: 3, 3: 1}
->>
->> Expected PGs per OSD:       {0: 90000, 1: 90000, 2: 90000, 3: 30000}
->>
->> Simulating with existing CRUSH
->>
->> Observed:                   {0: 85944, 1: 85810, 2: 85984, 3: 42262}
->> Observed for Nth replica:   [{0: 29936, 1: 30045, 2: 30061, 3: 9958},
->> {0: 29037, 1: 29073, 2: 29041, 3: 12849}, {0: 26971, 1: 26692, 2:
->> 26882, 3: 19455}]
->>
->> Now trying your new algorithm
->>
->> Observed:                   {0: 89423, 1: 89443, 2: 89476, 3: 31658}
->> Observed for Nth replica:   [{0: 30103, 1: 30132, 2: 29805, 3: 9960},
->> {0: 29936, 1: 29964, 2: 29796, 3: 10304}, {0: 29384, 1: 29347, 2:
->> 29875, 3: 11394}]
->>
->>
->> On Fri, Feb 3, 2017 at 4:26 PM, Dan van der Ster <dan@vanderster.com> wr=
-ote:
->>> On Fri, Feb 3, 2017 at 3:47 PM, Sage Weil <sweil@redhat.com> wrote:
->>>> On Fri, 3 Feb 2017, Loic Dachary wrote:
->>>>> On 01/26/2017 12:13 PM, Loic Dachary wrote:
->>>>>> Hi Sage,
->>>>>>
->>>>>> Still trying to understand what you did :-) I have one question belo=
-w.
->>>>>>
->>>>>> On 01/26/2017 04:05 AM, Sage Weil wrote:
->>>>>>> This is a longstanding bug,
->>>>>>>
->>>>>>>    http://tracker.ceph.com/issues/15653
->>>>>>>
->>>>>>> that causes low-weighted devices to get more data than they should.=
- Loic's
->>>>>>> recent activity resurrected discussion on the original PR
->>>>>>>
->>>>>>>    https://github.com/ceph/ceph/pull/10218
->>>>>>>
->>>>>>> but since it's closed and almost nobody will see it I'm moving the
->>>>>>> discussion here.
->>>>>>>
->>>>>>> The main news is that I have a simple adjustment for the weights th=
-at
->>>>>>> works (almost perfectly) for the 2nd round of placements.  The solu=
-tion is
->>>>>>> pretty simple, although as with most probabilities it tends to make=
- my
->>>>>>> brain hurt.
->>>>>>>
->>>>>>> The idea is that, on the second round, the original weight for the =
-small
->>>>>>> OSD (call it P(pick small)) isn't what we should use.  Instead, we =
-want
->>>>>>> P(pick small | first pick not small).  Since P(a|b) (the probabilit=
-y of a
->>>>>>> given b) is P(a && b) / P(b),
->>>>>>
->>>>>> >From the record this is explained at https://en.wikipedia.org/wiki/=
-Conditional_probability#Kolmogorov_definition
->>>>>>
->>>>>>>
->>>>>>>  P(pick small | first pick not small)
->>>>>>>  =3D P(pick small && first pick not small) / P(first pick not small=
-)
->>>>>>>
->>>>>>> The last term is easy to calculate,
->>>>>>>
->>>>>>>  P(first pick not small) =3D (total_weight - small_weight) / total_=
-weight
->>>>>>>
->>>>>>> and the && term is the distribution we're trying to produce.
->>>>>>
->>>>>> https://en.wikipedia.org/wiki/Conditional_probability describs A && =
-B (using a non ascii symbol...) as the "probability of the joint of events =
-A and B". I don't understand what that means. Is there a definition somewhe=
-re ?
->>>>>>
->>>>>>> For exmaple,
->>>>>>> if small has 1/10 the weight, then we should see 1/10th of the PGs =
-have
->>>>>>> their second replica be the small OSD.  So
->>>>>>>
->>>>>>>  P(pick small && first pick not small) =3D small_weight / total_wei=
-ght
->>>>>>>
->>>>>>> Putting those together,
->>>>>>>
->>>>>>>  P(pick small | first pick not small)
->>>>>>>  =3D P(pick small && first pick not small) / P(first pick not small=
-)
->>>>>>>  =3D (small_weight / total_weight) / ((total_weight - small_weight)=
- / total_weight)
->>>>>>>  =3D small_weight / (total_weight - small_weight)
->>>>>>>
->>>>>>> This is, on the second round, we should adjust the weights by the a=
-bove so
->>>>>>> that we get the right distribution of second choices.  It turns out=
- it
->>>>>>> works to adjust *all* weights like this to get hte conditional prob=
-ability
->>>>>>> that they weren't already chosen.
->>>>>>>
->>>>>>> I have a branch that hacks this into straw2 and it appears to work
->>>>>>
->>>>>> This is https://github.com/liewegas/ceph/commit/wip-crush-multipick
->>>>>
->>>>> In
->>>>>
->>>>> https://github.com/liewegas/ceph/commit/wip-crush-multipick#diff-0df1=
-3ad294f6585c322588cfe026d701R316
->>>>>
->>>>> double neww =3D oldw / (bucketw - oldw) * bucketw;
->>>>>
->>>>> I don't get why we need  "* bucketw" at the end ?
->>>>
->>>> It's just to keep the values within a reasonable range so that we don'=
-t
->>>> lose precision by dropping down into small integers.
->>>>
->>>> I futzed around with this some more last week trying to get the third
->>>> replica to work and ended up doubting that this piece is correct.  The
->>>> ratio between the big and small OSDs in my [99 99 99 99 4] example var=
-ies
->>>> slightly from what I would expect from first principles and what I get=
- out
->>>> of this derivation by about 1%.. which would explain the bias I as see=
-ing.
->>>>
->>>> I'm hoping we can find someone with a strong stats/probability backgro=
-und
->>>> and loads of free time who can tackle this...
->>>>
->>>
->>> I'm *not* that person, but I gave it a go last weekend and realized a
->>> few things:
->>>
->>> 1. We should add the additional constraint that for all PGs assigned
->>> to an OSD, 1/N of them must be primary replicas, 1/N must be
->>> secondary, 1/N must be tertiary, etc. for N replicas/stripes. E.g. for
->>> a 3 replica pool, the "small" OSD should still have the property that
->>> 1/3rd are primaries, 1/3rd are secondary, 1/3rd are tertiary.
->>>
->>> 2. I believe this is a case of the balls-into-bins problem -- we have
->>> colored balls and weighted bins. I didn't find a definition of the
->>> problem where the goal is to allow users to specify weights which must
->>> be respected after N rounds.
->>>
->>> 3. I wrote some quick python to simulate different reweighting
->>> algorithms. The solution is definitely not obvious - I often thought
->>> I'd solved it (e.g. for simple OSD weight sets like 3, 3, 3, 1) - but
->>> changing the OSDs weights to e.g. 3, 3, 1, 1 completely broke things.
->>> I can clean up and share that python if it's can help.
->>>
->>> My gut feeling is that because CRUSH trees and rulesets can be
->>> arbitrarily complex, the most pragmatic & reliable way to solve this
->>> problem is to balance the PGs with a reweight-by-pg loop at crush
->>> compilation time. This is what admins should do now -- we should just
->>> automate it.
->>>
->>> Cheers, Dan
->>>
->>> P.S. -- maybe these guys can help: http://math.stackexchange.com/
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->
+Anyway, bedtime for me.  With any luck the scare above re ->mmap_sem *is*
+bogus and I'll find "Al, you are an idiot - deadlock on ->mmap_sem can't
+happen for <reasons>" from somebody in the mailbox when I get up...
