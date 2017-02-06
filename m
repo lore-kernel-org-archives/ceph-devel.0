@@ -1,79 +1,104 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH 4/6] xfs: use memalloc_nofs_{save,restore} instead of
- memalloc_noio*
-Date: Mon, 6 Feb 2017 18:44:15 +0100
-Message-ID: <20170206174415.GA20731@dhcp22.suse.cz>
-References: <20170206140718.16222-1-mhocko@kernel.org>
- <20170206140718.16222-5-mhocko@kernel.org>
- <20170206153923.GL2267@bombadil.infradead.org>
+From: Max Yehorov <myehorov@skytap.com>
+Subject: Re: Possible bug in krbd (4.4.0)
+Date: Mon, 6 Feb 2017 10:26:55 -0800
+Message-ID: <CAJDfisku2Ld3F5hOAPjBqqnjV3gUWwC2kVXs3t2D+i=6waMmtQ@mail.gmail.com>
+References: <CAJDfiske056EADPT4g0fRUx=uh7C-F3ZzUh6A1ummfUZ6vMuTg@mail.gmail.com>
+ <CAOi1vP9Jvnepv3PxFA1PO_vZnEJ-DRBsax_+U136GSWPzCc1Xw@mail.gmail.com>
+ <CAJDfiskjz2H-D9xmanZ9opw+0pVAK=VmSPtFz1+fbcfPofOpmg@mail.gmail.com> <CAOi1vP9y2rSC=ZKQom0n+0RSHREpaPJ60497qpjYMGywTATJQA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170206153923.GL2267@bombadil.infradead.org>
-Sender: owner-linux-mm@kvack.org
-To: Matthew Wilcox <willy@infradead.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:37687 "EHLO
+        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751517AbdBFS11 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2017 13:27:27 -0500
+Received: by mail-wm0-f52.google.com with SMTP id v77so126897762wmv.0
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Feb 2017 10:27:26 -0800 (PST)
+In-Reply-To: <CAOi1vP9y2rSC=ZKQom0n+0RSHREpaPJ60497qpjYMGywTATJQA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon 06-02-17 07:39:23, Matthew Wilcox wrote:
-> On Mon, Feb 06, 2017 at 03:07:16PM +0100, Michal Hocko wrote:
-> > +++ b/fs/xfs/xfs_buf.c
-> > @@ -442,17 +442,17 @@ _xfs_buf_map_pages(
-> >  		bp->b_addr = NULL;
-> >  	} else {
-> >  		int retried = 0;
-> > -		unsigned noio_flag;
-> > +		unsigned nofs_flag;
-> >  
-> >  		/*
-> >  		 * vm_map_ram() will allocate auxillary structures (e.g.
-> >  		 * pagetables) with GFP_KERNEL, yet we are likely to be under
-> >  		 * GFP_NOFS context here. Hence we need to tell memory reclaim
-> > -		 * that we are in such a context via PF_MEMALLOC_NOIO to prevent
-> > +		 * that we are in such a context via PF_MEMALLOC_NOFS to prevent
-> >  		 * memory reclaim re-entering the filesystem here and
-> >  		 * potentially deadlocking.
-> >  		 */
-> 
-> This comment feels out of date ... how about:
+> For hours?  Does it succeed after X number of hours?
+Still mounted from Feb 6. There is an attempt to unmount every 10 minutes.
 
-which part is out of date?
+> This doesn't say that /dev/rbd0 is in use by pid 5926.  It says that
+> there is a process with the name "dio/rbd0", that's all.
+>
+> I'm guessing you ran plain "lsof" with no arguments here.  Were there
+> other */rbd0 matches, like jbd2/rbd0?
 
-> 
-> 		/*
-> 		 * vm_map_ram will allocate auxiliary structures (eg page
-> 		 * tables) with GFP_KERNEL.  If that tries to reclaim memory
-> 		 * by calling back into this filesystem, we may deadlock.
-> 		 * Prevent that by setting the NOFS flag.
-> 		 */
+The entire output
 
-dunno, the previous wording seems clear enough to me. Maybe little bit
-more chatty than yours but I am not sure this is worth changing.
+:~# lsof | grep rbd
 
-> 
-> > -		noio_flag = memalloc_noio_save();
-> > +		nofs_flag = memalloc_nofs_save();
-> >  		do {
-> >  			bp->b_addr = vm_map_ram(bp->b_pages, bp->b_page_count,
-> >  						-1, PAGE_KERNEL);
-> 
-> Also, I think it shows that this is the wrong place in XFS to be calling
-> memalloc_nofs_save().  I'm not arguing against including this patch;
-> it's a step towards where we want to be.  I also don't know XFS well
-> enough to know where to set that flag ;-)  Presumably when we start a
-> transaction ... ?
+dio/rbd0   5926             root  cwd       DIR                8,5
+    4096          2 /
+dio/rbd0   5926             root  rtd       DIR                8,5
+    4096          2 /
+dio/rbd0   5926             root  txt   unknown
+                    /proc/5926/exe
+rbd        5996             root  cwd       DIR                8,5
+    4096          2 /
+rbd        5996             root  rtd       DIR                8,5
+    4096          2 /
+rbd        5996             root  txt   unknown
+                    /proc/5996/exe
 
-Yes that is what I would like to achieve longterm. And the reason why I
-didn't want to mimic this pattern in kvmalloc as some have suggested.
-It just takes much more time to get there from the past experience and
-we should really start somewhere.
--- 
-Michal Hocko
-SUSE Labs
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+
+On Sun, Feb 5, 2017 at 4:26 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
+> On Sat, Feb 4, 2017 at 12:20 AM, Max Yehorov <myehorov@skytap.com> wrote:
+>> It is certainly annoying. It does not allow to umount for hours.
+>
+> For hours?  Does it succeed after X number of hours?
+>
+>>> Does umount error out or hang forever?
+>> umount errors out. with
+>> umount: target is busy
+>>         (In some cases useful info about processes that
+>>          use the device is found by lsof(8) or fuser(1).)
+>>
+>> Maybe this will help?
+>>
+>> - lsof, for the rbd device in question, shows it is in use by pid 5926
+>>
+>> dio/rbd0  5926  root  cwd   DIR                8,5   4096          2 /
+>> dio/rbd0  5926  root  rtd     DIR                8,5   4096          2 /
+>> dio/rbd0  5926  root  txt     unknown                   /proc/5926/exe
+>
+> This doesn't say that /dev/rbd0 is in use by pid 5926.  It says that
+> there is a process with the name "dio/rbd0", that's all.
+>
+> I'm guessing you ran plain "lsof" with no arguments here.  Were there
+> other */rbd0 matches, like jbd2/rbd0?
+>
+>>
+>> - PID 5926 is dio, it seems like a kernel thread
+>> ps ax | grep 5926
+>>  5926 ?        S<     0:00 [dio/rbd0]
+>>
+>> - Also, there is no more dio but that one
+>> ps ax | grep dio
+>>  5926 ?        S<     0:00 [dio/rbd0]
+>
+> It's a kernel workqueue, its presence itself doesn't mean much:
+>
+> $ sudo mkfs.ext4 /dev/rbd0
+> ...
+> $ sudo mount /dev/rbd0 /mnt
+> $ pgrep -a dio # nothing
+> $ sudo fio --ioengine=libaio --direct=1 --name=test
+> --filename=/mnt/test --bs=4k --size=16M --readwrite=randwrite
+> ...
+> $ pgrep -a dio
+> 1254 dio/rbd0
+> $ ps 1254
+>   PID TTY      STAT   TIME COMMAND
+>  1254 ?        S<     0:00 [dio/rbd0]
+> $ sudo umount /mnt # OK
+>
+> Thanks,
+>
+>                 Ilya
