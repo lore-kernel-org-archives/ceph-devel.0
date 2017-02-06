@@ -1,269 +1,297 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: CBT: New RGW getput benchmark and testing diary
-Date: Sun, 5 Feb 2017 23:55:20 -0600
-Message-ID: <8700753c-8440-695e-d529-e83b0fb2ba90@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: crush multipick anomaly
+Date: Mon, 6 Feb 2017 09:18:27 +0100
+Message-ID: <4c8bdc58-b227-2eaa-fa61-e5c26e1e5f0d@dachary.org>
+References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
+ <e5f376bb-925b-17df-ae6e-abc07058f67b@dachary.org>
+ <6a7b52c8-a0fd-41a6-fbf1-fb2af3e347d8@dachary.org>
+ <alpine.DEB.2.11.1702031443400.3654@piezo.novalocal>
+ <bcf2f102-cee9-4070-c027-e8baf5f428f2@dachary.org>
+ <f886cb09-3d05-f833-b411-d538afad61f6@dachary.org>
+ <CAKZcxgeyP13vOKfsSEhqZwGiP_-sLXNsf7rbPAJ0R7bJdc1-BA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary="------------5840AEB503A5A34C769408C3"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53702 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750962AbdBFFzW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 6 Feb 2017 00:55:22 -0500
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:59329 "EHLO
+        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750909AbdBFISd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2017 03:18:33 -0500
+In-Reply-To: <CAKZcxgeyP13vOKfsSEhqZwGiP_-sLXNsf7rbPAJ0R7bJdc1-BA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, "cbt@lists.ceph.com" <cbt@lists.ceph.com>
-Cc: Mark Seger <mjseger@gmail.com>, Kyle Bader <kbader@redhat.com>, Karan Singh <karan@redhat.com>, Brent Compton <bcompton@redhat.com>
+To: Jaze Lee <jazeltq@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-This is a multi-part message in MIME format.
---------------5840AEB503A5A34C769408C3
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Hi,
 
-Hi All,
+On 02/06/2017 04:08 AM, Jaze Lee wrote:
+> It is more complicated than i have expected.....
+> I viewed http://tracker.ceph.com/issues/15653, and know that if the
+> replica number is
+> bigger than the host we choose, we may meet the problem.
+> 
+> That is
+> if we have
+> host: a b c d
+> host: e f  g h
+> host: i  j  k  l
+> 
+> we only choose one from each host for replica three, and the distribution
+> is as we expected?    Right ?
+> 
+> 
+> The problem described in http://tracker.ceph.com/issues/15653, may happen
+> when
+> 1)
+>   host: a b c d e f g
+> 
+> and we choose all three replica from this host. But this is few happen
+> in production. Right?
+> 
+> 
+> May be i do not understand the problem correctly ?
 
-Over the weekend I took a stab at improving our ability to run RGW 
-performance tests in CBT.  Previously the only way to do this was to use 
-the cosbench plugin, which required a fair amount of additional
-setup and while quite powerful can be overkill in situations where you 
-want to rapidly iterate over tests looking for specific issues.  A while 
-ago Mark Seger from HP told me he had created a swift benchmark called 
-"getput" that is written in python and is much more convenient to run 
-quickly in an automated fashion.  Normally getput is used in conjunction 
-with gpsuite, a tool for coordinating benchmarking multiple getput 
-processes.  This is how you would likely use getput on a typical ceph or 
-swift cluster, but since CBT builds the cluster and has it's own way for 
-launching multiple benchmark processes, it uses getput directly.
+The problem also happens with host: a b c d e f g when you try to get three replicas that are not on the same disk. You can experiment with Dan's script
 
-Thankfully it was fairly easy to implement a CBT getput wrapper. 
-Several aspects of CBT's RGW support and user/key management were also 
-improved to make the whole process of testing RGW completely automated 
-via the CBT yaml file.  As part of the process of testing and debugging 
-the new getput wrapper, I ran through a series of benchmarks and tests 
-to investigate 4MB write performance anomalies previously reported in 
-the field.  I wrote something of a diary while doing this and thought I 
-would document it here for the community.  These were not extremely 
-scientific tests, though I believe the findings are relevant and my be 
-useful for folks.
+https://gist.github.com/anonymous/929d799d5f80794b293783acb9108992
 
-
-Test Cluster Setup
-
-The test cluster being used has 8 nodes, 4 of which are used for OSDs 
-and 4 of which are being used for RGW and clients.  Each OSD node has 
-the option to use any combination of 6 Seagate Constellation ES.2 
-7200RPM HDDs and 4 Intel 800GB P3700 NVMe drives.  These machines also 
-have dual Intel Xeon E5-2650v3 CPUs and Intel 40GbE ethernet adapters. 
-In all of these tests, 1X replication was used to eliminate it as a 
-bottleneck and put maximum pressure on RGW.  It should be noted that the 
-spinning disks in this cluster are attached through motherboard SATA2 
-ports, and may not be performing as well as if they were using a 
-dedicated SAS controller.  A copy of the cbt yaml configuration file 
-used to run the tests is attached.
+Cheers
 
 
-Some Notes
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 2017-02-04 2:54 GMT+08:00 Loic Dachary <loic@dachary.org>:
+>>
+>>
+>> On 02/03/2017 04:08 PM, Loic Dachary wrote:
+>>>
+>>>
+>>> On 02/03/2017 03:47 PM, Sage Weil wrote:
+>>>> On Fri, 3 Feb 2017, Loic Dachary wrote:
+>>>>> On 01/26/2017 12:13 PM, Loic Dachary wrote:
+>>>>>> Hi Sage,
+>>>>>>
+>>>>>> Still trying to understand what you did :-) I have one question below.
+>>>>>>
+>>>>>> On 01/26/2017 04:05 AM, Sage Weil wrote:
+>>>>>>> This is a longstanding bug,
+>>>>>>>
+>>>>>>>   http://tracker.ceph.com/issues/15653
+>>>>>>>
+>>>>>>> that causes low-weighted devices to get more data than they should. Loic's
+>>>>>>> recent activity resurrected discussion on the original PR
+>>>>>>>
+>>>>>>>   https://github.com/ceph/ceph/pull/10218
+>>>>>>>
+>>>>>>> but since it's closed and almost nobody will see it I'm moving the
+>>>>>>> discussion here.
+>>>>>>>
+>>>>>>> The main news is that I have a simple adjustment for the weights that
+>>>>>>> works (almost perfectly) for the 2nd round of placements.  The solution is
+>>>>>>> pretty simple, although as with most probabilities it tends to make my
+>>>>>>> brain hurt.
+>>>>>>>
+>>>>>>> The idea is that, on the second round, the original weight for the small
+>>>>>>> OSD (call it P(pick small)) isn't what we should use.  Instead, we want
+>>>>>>> P(pick small | first pick not small).  Since P(a|b) (the probability of a
+>>>>>>> given b) is P(a && b) / P(b),
+>>>>>>
+>>>>>> >From the record this is explained at https://en.wikipedia.org/wiki/Conditional_probability#Kolmogorov_definition
+>>>>>>
+>>>>>>>
+>>>>>>>  P(pick small | first pick not small)
+>>>>>>>  = P(pick small && first pick not small) / P(first pick not small)
+>>>>>>>
+>>>>>>> The last term is easy to calculate,
+>>>>>>>
+>>>>>>>  P(first pick not small) = (total_weight - small_weight) / total_weight
+>>>>>>>
+>>>>>>> and the && term is the distribution we're trying to produce.
+>>>>>>
+>>>>>> https://en.wikipedia.org/wiki/Conditional_probability describs A && B (using a non ascii symbol...) as the "probability of the joint of events A and B". I don't understand what that means. Is there a definition somewhere ?
+>>>>>>
+>>>>>>> For exmaple,
+>>>>>>> if small has 1/10 the weight, then we should see 1/10th of the PGs have
+>>>>>>> their second replica be the small OSD.  So
+>>>>>>>
+>>>>>>>  P(pick small && first pick not small) = small_weight / total_weight
+>>>>>>>
+>>>>>>> Putting those together,
+>>>>>>>
+>>>>>>>  P(pick small | first pick not small)
+>>>>>>>  = P(pick small && first pick not small) / P(first pick not small)
+>>>>>>>  = (small_weight / total_weight) / ((total_weight - small_weight) / total_weight)
+>>>>>>>  = small_weight / (total_weight - small_weight)
+>>>>>>>
+>>>>>>> This is, on the second round, we should adjust the weights by the above so
+>>>>>>> that we get the right distribution of second choices.  It turns out it
+>>>>>>> works to adjust *all* weights like this to get hte conditional probability
+>>>>>>> that they weren't already chosen.
+>>>>>>>
+>>>>>>> I have a branch that hacks this into straw2 and it appears to work
+>>>>>>
+>>>>>> This is https://github.com/liewegas/ceph/commit/wip-crush-multipick
+>>>>>
+>>>>> In
+>>>>>
+>>>>> https://github.com/liewegas/ceph/commit/wip-crush-multipick#diff-0df13ad294f6585c322588cfe026d701R316
+>>>>>
+>>>>> double neww = oldw / (bucketw - oldw) * bucketw;
+>>>>>
+>>>>> I don't get why we need  "* bucketw" at the end ?
+>>>>
+>>>> It's just to keep the values within a reasonable range so that we don't
+>>>> lose precision by dropping down into small integers.
+>>>>
+>>>> I futzed around with this some more last week trying to get the third
+>>>> replica to work and ended up doubting that this piece is correct.  The
+>>>> ratio between the big and small OSDs in my [99 99 99 99 4] example varies
+>>>> slightly from what I would expect from first principles and what I get out
+>>>> of this derivation by about 1%.. which would explain the bias I as seeing.
+>>>>
+>>>> I'm hoping we can find someone with a strong stats/probability background
+>>>> and loads of free time who can tackle this...
+>>>>
+>>>
+>>> It would help to formulate the problem into a self contained puzzle to present a mathematician. I tried to do it last week but failed. I'll give it another shot and submit a draft, hoping something bad could be the start of something better ;-)
+>>
+>> Here is what I have. I realize this is not good but I'm hoping someone more knowledgeable will pity me and provide something sensible. Otherwise I'm happy to keep making a fool of myself :-) In the following a bin is the device, the ball is a replica and the color is the object id.
+>>
+>> We have D bins and each bin can hold D(B) balls. All balls have the
+>> same size. There is exactly X balls of the same color. Each ball must
+>> be placed in a bin that does not already contain a ball of the same
+>> color.
+>>
+>> What distribution guarantees that, for all X, the bins are filled in
+>> the same proportion ?
+>>
+>> Details
+>> =======
+>>
+>> * One placement: all balls are the same color and we place each of them
+>>   in a bin with a probability of:
+>>
+>>     P(BIN) = BIN(B) / SUM(BINi(B) for i in [1..D])
+>>
+>>   so that bins are equally filled regardless of their capacity.
+>>
+>> * Two placements: for each ball there is exactly one other ball of the
+>>   same color.  A ball is placed as in experience 1 and the chosen bin
+>>   is set aside. The other ball of the same color is placed as in
+>>   experience 1 with the remaining bins. The probability for a ball
+>>   to be placed in a given BIN is:
+>>
+>>     P(BIN) + P(all bins but BIN | BIN)
+>>
+>> Examples
+>> ========
+>>
+>> For instance we have 5 bins, a, b, c, d, e and they can hold:
+>>
+>> a = 10 million balls
+>> b = 10 million balls
+>> c = 10 million balls
+>> d = 10 million balls
+>> e =  1 million balls
+>>
+>> In the first experience with place each ball in
+>>
+>> a with a probability of 10 / ( 10 + 10 + 10 + 10 + 1 ) = 10 / 41
+>> same for b, c, d
+>> e with a probability of 1 / 41
+>>
+>> after 100,000 placements, the bins have
+>>
+>> a = 243456
+>> b = 243624
+>> c = 244486
+>> d = 243881
+>> e = 24553
+>>
+>> they are
+>>
+>> a = 2.43 % full
+>> b = 2.43 % full
+>> c = 2.44 % full
+>> d = 2.43 % full
+>> e = 0.24 % full
+>>
+>> In the second experience
+>>
+>>
+>>>> sage
+>>>>
+>>>>
+>>>>>
+>>>>>>
+>>>>>>> properly for num_rep = 2.  With a test bucket of [99 99 99 99 4], and the
+>>>>>>> current code, you get
+>>>>>>>
+>>>>>>> $ bin/crushtool -c cm.txt --test --show-utilization --min-x 0 --max-x 40000000 --num-rep 2
+>>>>>>> rule 0 (data), x = 0..40000000, numrep = 2..2
+>>>>>>> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
+>>>>>>>   device 0:             19765965        [9899364,9866601]
+>>>>>>>   device 1:             19768033        [9899444,9868589]
+>>>>>>>   device 2:             19769938        [9901770,9868168]
+>>>>>>>   device 3:             19766918        [9898851,9868067]
+>>>>>>>   device 6:             929148  [400572,528576]
+>>>>>>>
+>>>>>>> which is very close for the first replica (primary), but way off for the
+>>>>>>> second.  With my hacky change,
+>>>>>>>
+>>>>>>> rule 0 (data), x = 0..40000000, numrep = 2..2
+>>>>>>> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
+>>>>>>>   device 0:             19797315        [9899364,9897951]
+>>>>>>>   device 1:             19799199        [9899444,9899755]
+>>>>>>>   device 2:             19801016        [9901770,9899246]
+>>>>>>>   device 3:             19797906        [9898851,9899055]
+>>>>>>>   device 6:             804566  [400572,403994]
+>>>>>>>
+>>>>>>> which is quite close, but still skewing slightly high (by a big less than
+>>>>>>> 1%).
+>>>>>>>
+>>>>>>> Next steps:
+>>>>>>>
+>>>>>>> 1- generalize this for >2 replicas
+>>>>>>> 2- figure out why it skews high
+>>>>>>> 3- make this work for multi-level hierarchical descent
+>>>>>>>
+>>>>>>> sage
+>>>>>>>
+>>>>>>> --
+>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>
+>>>>>>
+>>>>>
+>>>>> --
+>>>>> Loïc Dachary, Artisan Logiciel Libre
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>
+>>
+>> --
+>> Loïc Dachary, Artisan Logiciel Libre
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
 
-When using getput as a benchmark for RGW, it's very important to keep 
-track of the total number of getput processes and the number of RGW 
-threads.  If the runtime option in getput is used, some processes may 
-wait until RGW threads open up before they determine their runtime 
-leading to skewed results.  I believe this can be resolved in getput by 
-changing the way that donetime is calculated, however the issue can be 
-avoided by paying close attention to the RGW thread and getput process 
-counts.
-
-It's easy to create the wrong pools for RGW since the defaults changed 
-in Jewel.  Now we must create default.rgw.buckets.index and 
-default.rgw.buckets.data.  It wasn't until I looked at disk usage via 
-ceph df that I disovered that my .rgw.buckets and .rgw.buckets.index 
-pools were not being used and thus resulted in some bogus initial 
-performance data.
-
-
-RGW with HDD backed OSDs (Filestore)
-
-The first set of tests run were with a 4 node cluster configured with 24 
-HDD backed OSDs.  Immediately the first thing I noticed is that the 
-number of buckets and/or bucket hsards absolutely affects large 
-sequential write performance on HDD backed OSDs.  Using a single bucket 
-with no shards (ie the default) resulted in 220MB/s of write throughput 
-while rados bench was able to achieve 550-600MB/s.  Both of these 
-numbers are quite low, though are partially explained by the lack of SSD 
-journals and lack of dedicated controller hardware.
-
-Setting the number of bucket index shards to 8 improved the RGW write 
-throughput to 400MB/s. The highest throughput for this setup was 
-achieved by either setting the number of buckets or the number of bucket 
-index shards substantially higher than the number of OSDs.  In this 
-case, 64 appeared to be sufficient.  Three high concurrency 4MB Object 
-RGW PUT tests showed results of 602MB/s, 557MB/s and 563MB/s.  3 rados 
-bench runs using similar concurrency showed 580MB/s, 580MB/s, and 
-564MB/s respectively.  Write IO from multiple clients appeared to cause 
-a slight (~5%) performance drop vs write IO from a single client.  In 
-all cases, tests were stopped prior to PG splitting.
-
-It was observed that RGW uses high amounts of CPU, especially if low 
-tcmalloc threadcache values are used.  With 32MB of threadcache, RGW 
-used around 500-600% CPU to serve 500-600MB/s of 4MB writes. 
-Occasionally it would spike into the 1000-1200% region.  Perf showed a 
-high percentage of time in tcmalloc managing civetweb threads.  With 
-128MB of thread cache, this effect was greatly diminished.  RGW appeared 
-to use around 300-400% CPU to serve the same workload, though in these 
-tests there was little performance impact as we were not CPU bound.
-
-
-PG counts and PG splitting
-
-Based on the bucket/shard results above, it may be inferred that a RGW 
-index pool with very low PG counts could significantly hurt performance. 
-  What about the case where small PG counts are used in the bucket.data 
-pool?  In this case, PG splitting behavior might actually be more 
-important than the effect of clumpiness in the random distribution due 
-to low sample counts.  To test this, a buckets.index pool was created 
-with 2048 PGs while the buckets.data pool was created with 128 PGs. 
-Initial 4MB sequential writes with both rados bench and with RGW were 
-about 20% slower than what was seen with 2048 PGs in the data pool, 
-likely due to the worse data distribution properties.
-
-While this is significant, I was more interested in the affects of PG 
-splitting in filestore.  It has been observed in the past that PG 
-splitting can have a huge performance impact, especially when SELinux is 
-enabled. Selinux reads a security xattr on every file access which 
-grealy impacts how quickly operations like link/unlink can be performed 
-during PG splits. While SELinux is not enabled on this test cluster, PG 
-splitting may still have other performance impacts due to worse dentry 
-and inode caching and kernel overhead.  Rados bench was used to hit the 
-thresholds by writing out a large number of 4K objects.
-
-After approximately 1.3M objects were written, performance of 4K writes 
-dropped by roughly an order of magnitude.  At this point rados bench and 
-RGW were used to write out 4MB objects with high levels of concurrency 
-and high numbers of bucket index shards.  In both cases, performance 
-started out slightly diminished, but quickly increased to near levels 
-observed on the fresh cluster.  At least in this setup, pg splitting in 
-the data pool did not appear to majorly affect the performance of 4MB 
-object writes, though may have affect the 4k object writes used to 
-pre-fill the data pool.
-
-
-RGW with OSDs using HDD Data and NVMe Journals (Filestore)
-
-Next, 24 OSDs were configured with the filestore data partitions on HDD 
-and journals on NVMe.  With minimal tuning rados bench delivered
-around 1350MB/s or around 56MB/s per drive.  This is lower per drive 
-than other configurations we've tested, but roughly double vs how the 
-OSDs were performing wihtout NVMe journals.  Interestingly, the 
-difference between using a single bucket with no shards and many 
-buckets/shards appeared to be minimal.  Tests against a single bucket 
-with no shards resulted in 1000-1400MB/s while a test configuration with 
-128 buckets resulted in 1200-1400MB/s over several repeated tests.  It 
-should be noted that the single RGW instance was using anywhere from 
-1000-1600% CPU to maintain these numbers even with 128MB of TCMalloc 
-threadcache!  Again a performance drop was seen when using multiple 
-clients vs a single client.
-
-
-RGW with NVMe data and journals (Filestore)
-
-The test machines in this cluster have 4 Intel P3700 NVMe drives which 
-are each capable of about 2GB/s each.  The cluster was again 
-reconfigured with 16 OSDs backed by the NVMe drives.   In this case, a 
-single client running radosbench with 128 concurrent ops could saturate 
-the network and write data at about 4600MB/s.  4 clients however appear 
-to be able to saturate the OSDs and achieve 11620MB/s.  A single getput 
-client using 128 processes to write 4MB objects to a single bucket with 
-no shards achieves 1700-1800MB/s.  Radosgw CPU usage hovered around 
-1500-1700%. Using 128 buckets (1 bucket per process) yielded a variety 
-of performance results ranging from 1700MB/s to 3500MB/s over multiple 
-tests. Radosgw CPU usage appeared to top out around 2100%.  With 4 
-clients, A single radosgw instance was able to maintain roughly 3700MB/s 
-of writes over several independent tests despite using roughly the same 
-amount of CPU as the single client tests.
-
-
-Testing 4 gateways
-
-CBT can stand up multiple rados gateways and launch tests against all of 
-them concurrently.  4 clients were configured to drive traffic to all 4 
-rados gateways and ultimately the 16 NVMe backed OSDs.  The first tests 
-run resulted in 404 keynotfound errors, apparently because multiple 
-copies of getput attempted to write into the same bucket.  This was 
-resolved by making sure that each copy of getput being run had a 
-distinct bucket (though getput processes did not require the same 
-attention).  Thus, the lowest number of buckets targeted in this test 
-was 16.  In this configuration, the aggregate write throughput across 
-all 4 gateways was 9306MB/s.  With a bucket for every process (512 
-total), the aggregate throughput increased to 9445MB/s.  This was 
-roughly 2361MB/s per gateway and 81% of the rados bench throughput.
-
-
-Next Steps and Conclusions
-
-RGW is now roughly as easy to test in CBT as rados and rbd.  It should 
-be far easier to examine bluestore performance with RGW now.  I hope we 
-should be able to do some filestore and bluestore comparisons shortly. 
-I will also note that I was quite happy with how well RGW handled large 
-object writes in these tests.  Despite using a large amount of CPU 
-overhead, I could achieve 3700MB/s with a single RGW instance and over 
-9GB/s with 4 RGW instances.  Despite this, it's clear that performance 
-is still quite dependent on bucket index update latency.  Especially on 
-spinning disks, it appears to be very important to use bucket index 
-sharding or spread write over many buckets.
-
-Mark
-
---------------5840AEB503A5A34C769408C3
-Content-Type: application/x-yaml;
- name="runtests.xfs.16.rgw.yaml"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
- filename="runtests.xfs.16.rgw.yaml"
-
-Y2x1c3RlcjoKICB1c2VyOiAndWJ1bnR1JwogIGhlYWQ6ICJpbmNlcnRhMDEuZnJvbnQuc2Vw
-aWEuY2VwaC5jb20iCiAgY2xpZW50czogWyJpbmNlcnRhMDUuZnJvbnQuc2VwaWEuY2VwaC5j
-b20iLCAiaW5jZXJ0YTA2LmZyb250LnNlcGlhLmNlcGguY29tIiwgImluY2VydGEwNy5mcm9u
-dC5zZXBpYS5jZXBoLmNvbSIsICJpbmNlcnRhMDguZnJvbnQuc2VwaWEuY2VwaC5jb20iXQog
-IG9zZHM6IFsiaW5jZXJ0YTAxLmZyb250LnNlcGlhLmNlcGguY29tIiwgImluY2VydGEwMi5m
-cm9udC5zZXBpYS5jZXBoLmNvbSIsICJpbmNlcnRhMDMuZnJvbnQuc2VwaWEuY2VwaC5jb20i
-LCAiaW5jZXJ0YTA0LmZyb250LnNlcGlhLmNlcGguY29tIl0KICBtb25zOgogICAgaW5jZXJ0
-YTAxLmZyb250LnNlcGlhLmNlcGguY29tOgogICAgICBhOiAiMTAuMC4xMC4xMDE6Njc4OSIK
-CiAgcmd3czoKICAgIGluY2VydGEwNS5mcm9udC5zZXBpYS5jZXBoLmNvbToKICAgICAgY2xp
-ZW50LnJhZG9zZ3cuZ2F0ZXdheTogCiAgICAgICAgaG9zdDogIjEwLjAuMTAuMTA1IgogICAg
-aW5jZXJ0YTA2LmZyb250LnNlcGlhLmNlcGguY29tOgogICAgICBjbGllbnQucmFkb3Nndy5n
-YXRld2F5OgogICAgICAgIGhvc3Q6ICIxMC4wLjEwLjEwNiIKICAgIGluY2VydGEwNy5mcm9u
-dC5zZXBpYS5jZXBoLmNvbToKICAgICAgY2xpZW50LnJhZG9zZ3cuZ2F0ZXdheToKICAgICAg
-ICBob3N0OiAiMTAuMC4xMC4xMDciCiAgICBpbmNlcnRhMDguZnJvbnQuc2VwaWEuY2VwaC5j
-b206CiAgICAgIGNsaWVudC5yYWRvc2d3LmdhdGV3YXk6CiAgICAgICAgaG9zdDogIjEwLjAu
-MTAuMTA4IgojICAgICAgICBwb3J0OiAiNzQ4MCIKIyAgICAgICAgc3NsX2NlcnRpZmljYXRl
-OiAiL2V0Yy9jZXBoL3ByaXZhdGUva2V5YW5kY2VydC5wZW0iCgogIG9zZHNfcGVyX25vZGU6
-IDQgCiAgZnM6ICd4ZnMnCiAgbWtmc19vcHRzOiAnLWYgLWkgc2l6ZT0yMDQ4JwogIG1vdW50
-X29wdHM6ICctbyBpbm9kZTY0LG5vYXRpbWUsbG9nYnNpemU9MjU2aycKICBpdGVyYXRpb25z
-OiAxCiAgdXNlX2V4aXN0aW5nOiBGYWxzZQogIGNsdXN0ZXJpZDogImNlcGgiCiAgdG1wX2Rp
-cjogIi90bXAvY2J0IgogIGNlcGgtb3NkX2NtZDogImVudiAtaSBUQ01BTExPQ19NQVhfVE9U
-QUxfVEhSRUFEX0NBQ0hFX0JZVEVTPTEzNDIxNzcyOCAvdXNyL2xvY2FsL2Jpbi9jZXBoLW9z
-ZCIKICBjZXBoLW1vbl9jbWQ6ICIvdXNyL2xvY2FsL2Jpbi9jZXBoLW1vbiIKICBjZXBoLXJn
-d19jbWQ6ICJlbnYgLWkgVENNQUxMT0NfTUFYX1RPVEFMX1RIUkVBRF9DQUNIRV9CWVRFUz0x
-MzQyMTc3MjggL3Vzci9sb2NhbC9iaW4vcmFkb3NndyIKICBjZXBoLXJ1bl9jbWQ6ICIvdXNy
-L2xvY2FsL2Jpbi9jZXBoLXJ1biIKICByYWRvc2d3LWFkbWluX2NtZDogIi91c3IvbG9jYWwv
-YmluL3JhZG9zZ3ctYWRtaW4iCiAgcmFkb3NfY21kOiAiL3Vzci9sb2NhbC9iaW4vcmFkb3Mi
-CiAgY2VwaF9jbWQ6ICIvdXNyL2xvY2FsL2Jpbi9jZXBoIgogIHJiZF9jbWQ6ICIvdXNyL2xv
-Y2FsL2Jpbi9yYmQiCgojIGVyYXN1cmVfcHJvZmlsZXM6CiMgICAgZWM2MjoKIyAgICAgIGVy
-YXN1cmVfazogNgojICAgICAgZXJhc3VyZV9tOiAyCgogIHBvb2xfcHJvZmlsZXM6CiAgICBy
-YWRvc2JlbmNoOgogICAgICBwZ19zaXplOiAyMDQ4CiAgICAgIHBncF9zaXplOiAyMDQ4CiAg
-ICAgIHJlcGxpY2F0aW9uOiAxCiMgICAgICByZXBsaWNhdGlvbjogJ2VyYXN1cmUnCiMgICAg
-ICBlcmFzdXJlX3Byb2ZpbGU6ICdlYzYyJyAKCiAgICByZ3dfYnVja2V0c19kYXRhOgogICAg
-ICBwZ19zaXplOiAyMDQ4IAogICAgICBwZ3Bfc2l6ZTogMjA0OAogICAgICByZXBsaWNhdGlv
-bjogMQogICAgcmd3X2J1Y2tldHNfaW5kZXg6CiAgICAgIHBnX3NpemU6IDIwNDgKICAgICAg
-cGdwX3NpemU6IDIwNDgKICAgICAgcmVwbGljYXRpb246IDEKICAgIHJiZDoKICAgICAgcGdf
-c2l6ZTogODE5MiAKICAgICAgcGdwX3NpemU6IDgxOTIKICAgICAgcmVwbGljYXRpb246IDMK
-CiAgcmd3X3Bvb2xzOgogICAgICBidWNrZXRzX2RhdGE6IHJnd19idWNrZXRzX2RhdGEKICAg
-ICAgYnVja2V0c19pbmRleDogcmd3X2J1Y2tldHNfaW5kZXgKCmJlbmNobWFya3M6CiAgZ2V0
-cHV0OgogICAgcnVudGltZTogMzAwCiAgICBvcF9zaXplOiBbNDE5NDMwNF0KICAgIHByb2Nz
-OiAzMiAKICAgIHRlc3RzOiBbJ3AnXQogICAgY21kX3BhdGg6ICcvaG9tZS91YnVudHUvc3Jj
-L21hcmtocGMvZ2V0cHV0L2dldHB1dCcKICAgIGN0eXBlOiAnYnlwcm9jJwojICAgIGxvZ29w
-czogMwojICByYWRvc2JlbmNoOgojICAgIG9wX3NpemU6IFs0MTk0MzA0XQojICAgIHdyaXRl
-X29ubHk6IFRydWUKIyAgICB0aW1lOiAzMDAKIyAgICBjb25jdXJyZW50X29wczogWzMyXQoj
-ICAgIGNvbmN1cnJlbnRfcHJvY3M6IDQgCiMgICAgb3NkX3JhOiBbNDA5Nl0KIyAgICBwb29s
-X3Byb2ZpbGU6ICdyYWRvc2JlbmNoJwo=
---------------5840AEB503A5A34C769408C3--
+-- 
+Loïc Dachary, Artisan Logiciel Libre
