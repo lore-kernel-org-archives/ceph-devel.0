@@ -1,56 +1,59 @@
-From: Matthew Wilcox <willy@infradead.org>
-Subject: Re: [PATCH 4/6] xfs: use memalloc_nofs_{save,restore} instead of
- memalloc_noio*
-Date: Mon, 6 Feb 2017 07:39:23 -0800
-Message-ID: <20170206153923.GL2267@bombadil.infradead.org>
-References: <20170206140718.16222-1-mhocko@kernel.org>
- <20170206140718.16222-5-mhocko@kernel.org>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: CBT: New RGW getput benchmark and testing diary
+Date: Mon, 6 Feb 2017 09:42:04 -0600
+Message-ID: <c95df184-aa53-a1a0-a448-0fd0085404d9@redhat.com>
+References: <8700753c-8440-695e-d529-e83b0fb2ba90@redhat.com>
+ <1143254675.101053582.1486395206606.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-ext4-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20170206140718.16222-5-mhocko@kernel.org>
-Sender: linux-ext4-owner@vger.kernel.org
-To: Michal Hocko <mhocko@kernel.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:55490 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751829AbdBFPmG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 6 Feb 2017 10:42:06 -0500
+In-Reply-To: <1143254675.101053582.1486395206606.JavaMail.zimbra@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com, Mark Seger <mjseger@gmail.com>, Kyle Bader <kbader@redhat.com>, Karan Singh <karan@redhat.com>, Brent Compton <bcompton@redhat.com>
 
-On Mon, Feb 06, 2017 at 03:07:16PM +0100, Michal Hocko wrote:
-> +++ b/fs/xfs/xfs_buf.c
-> @@ -442,17 +442,17 @@ _xfs_buf_map_pages(
->  		bp->b_addr = NULL;
->  	} else {
->  		int retried = 0;
-> -		unsigned noio_flag;
-> +		unsigned nofs_flag;
->  
->  		/*
->  		 * vm_map_ram() will allocate auxillary structures (e.g.
->  		 * pagetables) with GFP_KERNEL, yet we are likely to be under
->  		 * GFP_NOFS context here. Hence we need to tell memory reclaim
-> -		 * that we are in such a context via PF_MEMALLOC_NOIO to prevent
-> +		 * that we are in such a context via PF_MEMALLOC_NOFS to prevent
->  		 * memory reclaim re-entering the filesystem here and
->  		 * potentially deadlocking.
->  		 */
+Just based on what I saw during these tests, it looks to me like a lot 
+more time was spent dealing with civetweb's threads than RGW.  I didn't 
+look too closely, but it may be worth looking at whether there's any low 
+hanging fruit in civetweb itself.
 
-This comment feels out of date ... how about:
+Mark
 
-		/*
-		 * vm_map_ram will allocate auxiliary structures (eg page
-		 * tables) with GFP_KERNEL.  If that tries to reclaim memory
-		 * by calling back into this filesystem, we may deadlock.
-		 * Prevent that by setting the NOFS flag.
-		 */
-
-> -		noio_flag = memalloc_noio_save();
-> +		nofs_flag = memalloc_nofs_save();
->  		do {
->  			bp->b_addr = vm_map_ram(bp->b_pages, bp->b_page_count,
->  						-1, PAGE_KERNEL);
-
-Also, I think it shows that this is the wrong place in XFS to be calling
-memalloc_nofs_save().  I'm not arguing against including this patch;
-it's a step towards where we want to be.  I also don't know XFS well
-enough to know where to set that flag ;-)  Presumably when we start a
-transaction ... ?
+On 02/06/2017 09:33 AM, Matt Benjamin wrote:
+> Thanks for the detailed effort and analysis, Mark.
+>
+> As we get closer to the L time-frame, it should become relevant to look at the relative boost::asio frontend rework i/o paths, which are the open effort to reduce CPU overhead/revise threading model, in general.
+>
+> Matt
+>
+> ----- Original Message -----
+>> From: "Mark Nelson" <mnelson@redhat.com>
+>> To: "ceph-devel" <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com
+>> Cc: "Mark Seger" <mjseger@gmail.com>, "Kyle Bader" <kbader@redhat.com>, "Karan Singh" <karan@redhat.com>, "Brent
+>> Compton" <bcompton@redhat.com>
+>> Sent: Monday, February 6, 2017 12:55:20 AM
+>> Subject: CBT: New RGW getput benchmark and testing diary
+>>
+>> Hi All,
+>>
+>> Over the weekend I took a stab at improving our ability to run RGW
+>> performance tests in CBT.  Previously the only way to do this was to use
+>> the cosbench plugin, which required a fair amount of additional
+>> setup and while quite powerful can be overkill in situations where you
+>> want to rapidly iterate over tests looking for specific issues.  A while
+>> ago Mark Seger from HP told me he had created a swift benchmark called
+>> "getput" that is written in python and is much more convenient to run
+>> quickly in an automated fashion.  Normally getput is used in conjunction
+>> with gpsuite, a tool for coordinating benchmarking multiple getput
+>> processes.  This is how you would likely use getput on a typical ceph or
+>> swift cluster, but since CBT builds the cluster and has it's own way for
+>> launching multiple benchmark processes, it uses getput directly.
+>>
+>
+>
