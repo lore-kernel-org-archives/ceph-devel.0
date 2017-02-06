@@ -1,79 +1,60 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v2 3/6] libceph: rename and export have_pool_full
-Date: Mon,  6 Feb 2017 08:29:24 -0500
-Message-ID: <20170206132927.9219-4-jlayton@redhat.com>
+Subject: [PATCH v2 4/6] ceph: register map callback to handle ENOSPC conditions
+Date: Mon,  6 Feb 2017 08:29:25 -0500
+Message-ID: <20170206132927.9219-5-jlayton@redhat.com>
 References: <20170206132927.9219-1-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44686 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:34322 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752105AbdBFN3b (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 6 Feb 2017 08:29:31 -0500
+        id S1751414AbdBFN3c (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 6 Feb 2017 08:29:32 -0500
 In-Reply-To: <20170206132927.9219-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, jspray@redhat.com
 
-Cephfs needs to be able to call this as well. Rename have_pool_full to
-ceph_osdc_have_pool_full, and export it.
-
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- include/linux/ceph/osd_client.h | 1 +
- net/ceph/osd_client.c           | 7 ++++---
- 2 files changed, 5 insertions(+), 3 deletions(-)
+ fs/ceph/mds_client.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
-diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index 34010c86b307..17bf1873bb01 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -313,6 +313,7 @@ extern void ceph_osdc_handle_reply(struct ceph_osd_client *osdc,
- extern void ceph_osdc_handle_map(struct ceph_osd_client *osdc,
- 				 struct ceph_msg *msg);
- void ceph_osdc_update_epoch_barrier(struct ceph_osd_client *osdc, u32 eb);
-+extern bool ceph_osdc_have_pool_full(struct ceph_osd_client *osdc);
- 
- extern void osd_req_op_init(struct ceph_osd_request *osd_req,
- 			    unsigned int which, u16 opcode, u32 flags);
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index aeee87a0e0da..d61d7a79fdb3 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -1259,7 +1259,7 @@ static bool __pool_full(struct ceph_pg_pool_info *pi)
- 	return pi->flags & CEPH_POOL_FLAG_FULL;
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 93fc893e1930..43297c6b5a8b 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -433,6 +433,21 @@ static int __verify_registered_session(struct ceph_mds_client *mdsc,
+ 	return 0;
  }
  
--static bool have_pool_full(struct ceph_osd_client *osdc)
-+bool ceph_osdc_have_pool_full(struct ceph_osd_client *osdc)
- {
- 	struct rb_node *n;
++static void handle_osd_map(struct ceph_osd_client *osdc, void *p)
++{
++	u32 cancelled_epoch = 0;
++
++	lockdep_assert_held(&osdc->lock);
++
++	if ((osdc->osdmap->flags & CEPH_OSDMAP_FULL) ||
++	    ceph_osdc_have_pool_full(osdc))
++		cancelled_epoch = ceph_osdc_complete_writes(osdc, -ENOSPC);
++
++	if (cancelled_epoch)
++		osdc->epoch_barrier = max(cancelled_epoch + 1,
++					  osdc->epoch_barrier);
++}
++
+ /*
+  * create+register a new session for given mds.
+  * called under mdsc->mutex.
+@@ -3486,6 +3501,9 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
+ 	ceph_caps_init(mdsc);
+ 	ceph_adjust_min_caps(mdsc, fsc->min_caps);
  
-@@ -1273,6 +1273,7 @@ static bool have_pool_full(struct ceph_osd_client *osdc)
++	ceph_osdc_register_map_cb(&fsc->client->osdc,
++				  handle_osd_map, (void*)mdsc);
++
+ 	init_rwsem(&mdsc->pool_perm_rwsem);
+ 	mdsc->pool_perm_tree = RB_ROOT;
  
- 	return false;
- }
-+EXPORT_SYMBOL(ceph_osdc_have_pool_full);
- 
- static bool pool_full(struct ceph_osd_client *osdc, s64 pool_id)
- {
-@@ -3271,7 +3272,7 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
- 	was_pauserd = ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSERD);
- 	was_pausewr = ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR) ||
- 		      ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
--		      have_pool_full(osdc);
-+		      ceph_osdc_have_pool_full(osdc);
- 
- 	/* incremental maps */
- 	ceph_decode_32_safe(&p, end, nr_maps, bad);
-@@ -3335,7 +3336,7 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
- 	pauserd = ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSERD);
- 	pausewr = ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR) ||
- 		  ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
--		  have_pool_full(osdc);
-+		  ceph_osdc_have_pool_full(osdc);
- 	if (was_pauserd || was_pausewr || pauserd || pausewr ||
- 	    (osdc->epoch_barrier && osdc->osdmap->epoch < osdc->epoch_barrier))
- 		maybe_request_map(osdc);
 -- 
 2.9.3
 
