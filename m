@@ -1,85 +1,150 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: [PATCH 5/6] jbd2: mark the transaction context with the scope GFP_NOFS context
-Date: Mon,  6 Feb 2017 15:07:17 +0100
-Message-ID: <20170206140718.16222-6-mhocko@kernel.org>
-References: <20170206140718.16222-1-mhocko@kernel.org>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170206140718.16222-1-mhocko@kernel.org>
-Sender: owner-linux-mm@kvack.org
-To: Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org
-Cc: linux-mm@kvack.org, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH v2 6/6] libceph: allow requests to return immediately on
+ full conditions if caller wishes
+Date: Mon, 6 Feb 2017 15:09:00 +0100
+Message-ID: <CAOi1vP_k0q0ff-BjTWYk8faJvRs4TNFgJO+XeovebvAM9Wtxfg@mail.gmail.com>
+References: <20170206132927.9219-1-jlayton@redhat.com> <20170206132927.9219-7-jlayton@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:32868 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752381AbdBFOJH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2017 09:09:07 -0500
+Received: by mail-wm0-f67.google.com with SMTP id v77so22099372wmv.0
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Feb 2017 06:09:06 -0800 (PST)
+In-Reply-To: <20170206132927.9219-7-jlayton@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Jeff Layton <jlayton@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, John Spray <jspray@redhat.com>
 
-From: Michal Hocko <mhocko@suse.com>
+On Mon, Feb 6, 2017 at 2:29 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> Right now, cephfs will cancel any in-flight OSD write operations when a
+> new map comes in that shows the OSD or pool as full, but nothing
+> prevents new requests from stalling out after that point.
+>
+> If the caller knows that it will want an immediate error return instead
+> of blocking on a full or at-quota error condition then allow it to set a
+> flag to request that behavior. Cephfs write requests will always set
+> that flag.
+>
+> Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> ---
+>  fs/ceph/addr.c             | 14 +++++++++-----
+>  fs/ceph/file.c             |  8 +++++---
+>  include/linux/ceph/rados.h |  1 +
+>  net/ceph/osd_client.c      |  6 ++++++
+>  4 files changed, 21 insertions(+), 8 deletions(-)
+>
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index 4547bbf80e4f..577fe6351de1 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -1019,7 +1019,8 @@ static int ceph_writepages_start(struct address_space *mapping,
+>                                         offset, &len, 0, num_ops,
+>                                         CEPH_OSD_OP_WRITE,
+>                                         CEPH_OSD_FLAG_WRITE |
+> -                                       CEPH_OSD_FLAG_ONDISK,
+> +                                       CEPH_OSD_FLAG_ONDISK |
+> +                                       CEPH_OSD_FLAG_FULL_CANCEL,
+>                                         snapc, truncate_seq,
+>                                         truncate_size, false);
+>                 if (IS_ERR(req)) {
+> @@ -1030,7 +1031,8 @@ static int ceph_writepages_start(struct address_space *mapping,
+>                                                     CEPH_OSD_SLAB_OPS),
+>                                                 CEPH_OSD_OP_WRITE,
+>                                                 CEPH_OSD_FLAG_WRITE |
+> -                                               CEPH_OSD_FLAG_ONDISK,
+> +                                               CEPH_OSD_FLAG_ONDISK |
+> +                                               CEPH_OSD_FLAG_FULL_CANCEL,
+>                                                 snapc, truncate_seq,
+>                                                 truncate_size, true);
+>                         BUG_ON(IS_ERR(req));
+> @@ -1681,7 +1683,9 @@ int ceph_uninline_data(struct file *filp, struct page *locked_page)
+>         req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
+>                                     ceph_vino(inode), 0, &len, 0, 1,
+>                                     CEPH_OSD_OP_CREATE,
+> -                                   CEPH_OSD_FLAG_ONDISK | CEPH_OSD_FLAG_WRITE,
+> +                                   CEPH_OSD_FLAG_ONDISK |
+> +                                   CEPH_OSD_FLAG_WRITE |
+> +                                   CEPH_OSD_FLAG_FULL_CANCEL,
+>                                     NULL, 0, 0, false);
+>         if (IS_ERR(req)) {
+>                 err = PTR_ERR(req);
+> @@ -1699,7 +1703,7 @@ int ceph_uninline_data(struct file *filp, struct page *locked_page)
+>         req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
+>                                     ceph_vino(inode), 0, &len, 1, 3,
+>                                     CEPH_OSD_OP_WRITE,
+> -                                   CEPH_OSD_FLAG_ONDISK | CEPH_OSD_FLAG_WRITE,
+> +                                   CEPH_OSD_FLAG_ONDISK | CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_FULL_CANCEL,
+>                                     NULL, ci->i_truncate_seq,
+>                                     ci->i_truncate_size, false);
+>         if (IS_ERR(req)) {
+> @@ -1872,7 +1876,7 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
+>                 goto out_unlock;
+>         }
+>
+> -       wr_req->r_flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ACK;
+> +       wr_req->r_flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ACK | CEPH_OSD_FLAG_FULL_CANCEL;
+>         osd_req_op_init(wr_req, 0, CEPH_OSD_OP_CREATE, CEPH_OSD_OP_FLAG_EXCL);
+>         ceph_oloc_copy(&wr_req->r_base_oloc, &rd_req->r_base_oloc);
+>         ceph_oid_copy(&wr_req->r_base_oid, &rd_req->r_base_oid);
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index a91a4f1fc837..938dca02db7a 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -692,7 +692,7 @@ static void ceph_aio_retry_work(struct work_struct *work)
+>
+>         req->r_flags =  CEPH_OSD_FLAG_ORDERSNAP |
+>                         CEPH_OSD_FLAG_ONDISK |
+> -                       CEPH_OSD_FLAG_WRITE;
+> +                       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_FULL_CANCEL;
+>         ceph_oloc_copy(&req->r_base_oloc, &orig_req->r_base_oloc);
+>         ceph_oid_copy(&req->r_base_oid, &orig_req->r_base_oid);
+>
+> @@ -849,7 +849,7 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
+>
+>                 flags = CEPH_OSD_FLAG_ORDERSNAP |
+>                         CEPH_OSD_FLAG_ONDISK |
+> -                       CEPH_OSD_FLAG_WRITE;
+> +                       CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_FULL_CANCEL;
+>         } else {
+>                 flags = CEPH_OSD_FLAG_READ;
+>         }
+> @@ -1051,6 +1051,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+>         flags = CEPH_OSD_FLAG_ORDERSNAP |
+>                 CEPH_OSD_FLAG_ONDISK |
+>                 CEPH_OSD_FLAG_WRITE |
+> +               CEPH_OSD_FLAG_FULL_CANCEL |
+>                 CEPH_OSD_FLAG_ACK;
+>
+>         while ((len = iov_iter_count(from)) > 0) {
+> @@ -1549,7 +1550,8 @@ static int ceph_zero_partial_object(struct inode *inode,
+>                                         offset, length,
+>                                         0, 1, op,
+>                                         CEPH_OSD_FLAG_WRITE |
+> -                                       CEPH_OSD_FLAG_ONDISK,
+> +                                       CEPH_OSD_FLAG_ONDISK |
+> +                                       CEPH_OSD_FLAG_FULL_CANCEL,
+>                                         NULL, 0, 0, false);
+>         if (IS_ERR(req)) {
+>                 ret = PTR_ERR(req);
+> diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
+> index 5c0da61cb763..def43570a85a 100644
+> --- a/include/linux/ceph/rados.h
+> +++ b/include/linux/ceph/rados.h
+> @@ -401,6 +401,7 @@ enum {
+>         CEPH_OSD_FLAG_KNOWN_REDIR = 0x400000,  /* redirect bit is authoritative */
+>         CEPH_OSD_FLAG_FULL_TRY =    0x800000,  /* try op despite full flag */
+>         CEPH_OSD_FLAG_FULL_FORCE = 0x1000000,  /* force op despite full flag */
+> +       CEPH_OSD_FLAG_FULL_CANCEL = 0x2000000, /* cancel operation on full flag */
 
-now that we have memalloc_nofs_{save,restore} api we can mark the whole
-transaction context as implicitly GFP_NOFS. All allocations will
-automatically inherit GFP_NOFS this way. This means that we do not have
-to mark any of those requests with GFP_NOFS and moreover all the
-ext4_kv[mz]alloc(GFP_NOFS) are also safe now because even the hardcoded
-GFP_KERNEL allocations deep inside the vmalloc will be NOFS now.
+Is this a new flag?  This is the wire protocol and I don't see it in
+ceph.git.
 
-Reviewed-by: Jan Kara <jack@suse.cz>
-Signed-off-by: Michal Hocko <mhocko@suse.com>
----
- fs/jbd2/transaction.c | 11 +++++++++++
- include/linux/jbd2.h  |  2 ++
- 2 files changed, 13 insertions(+)
+I'll look at epoch_barrier and callback stuff later.
 
-diff --git a/fs/jbd2/transaction.c b/fs/jbd2/transaction.c
-index e1652665bd93..35a5d3d76182 100644
---- a/fs/jbd2/transaction.c
-+++ b/fs/jbd2/transaction.c
-@@ -388,6 +388,11 @@ static int start_this_handle(journal_t *journal, handle_t *handle,
- 
- 	rwsem_acquire_read(&journal->j_trans_commit_map, 0, 0, _THIS_IP_);
- 	jbd2_journal_free_transaction(new_transaction);
-+	/*
-+	 * Make sure that no allocations done while the transaction is
-+	 * open is going to recurse back to the fs layer.
-+	 */
-+	handle->saved_alloc_context = memalloc_nofs_save();
- 	return 0;
- }
- 
-@@ -466,6 +471,7 @@ handle_t *jbd2__journal_start(journal_t *journal, int nblocks, int rsv_blocks,
- 	trace_jbd2_handle_start(journal->j_fs_dev->bd_dev,
- 				handle->h_transaction->t_tid, type,
- 				line_no, nblocks);
-+
- 	return handle;
- }
- EXPORT_SYMBOL(jbd2__journal_start);
-@@ -1760,6 +1766,11 @@ int jbd2_journal_stop(handle_t *handle)
- 	if (handle->h_rsv_handle)
- 		jbd2_journal_free_reserved(handle->h_rsv_handle);
- free_and_exit:
-+	/*
-+	 * scope of th GFP_NOFS context is over here and so we can
-+	 * restore the original alloc context.
-+	 */
-+	memalloc_nofs_restore(handle->saved_alloc_context);
- 	jbd2_free_handle(handle);
- 	return err;
- }
-diff --git a/include/linux/jbd2.h b/include/linux/jbd2.h
-index dfaa1f4dcb0c..606b6bce3a5b 100644
---- a/include/linux/jbd2.h
-+++ b/include/linux/jbd2.h
-@@ -491,6 +491,8 @@ struct jbd2_journal_handle
- 
- 	unsigned long		h_start_jiffies;
- 	unsigned int		h_requested_credits;
-+
-+	unsigned int		saved_alloc_context;
- };
- 
- 
--- 
-2.11.0
+Thanks,
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+                Ilya
