@@ -1,104 +1,71 @@
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 4/6] xfs: use memalloc_nofs_{save,restore} instead of
- memalloc_noio*
-Date: Mon, 6 Feb 2017 11:51:11 -0800
-Message-ID: <20170206195111.GH3580@birch.djwong.org>
-References: <20170206140718.16222-1-mhocko@kernel.org>
- <20170206140718.16222-5-mhocko@kernel.org>
- <20170206153923.GL2267@bombadil.infradead.org>
- <20170206174415.GA20731@dhcp22.suse.cz>
- <20170206183237.GE3580@birch.djwong.org>
- <20170206184743.GB20731@dhcp22.suse.cz>
+From: Ming Lin <minggr@gmail.com>
+Subject: Re: understand ceph packets on the wire
+Date: Mon, 6 Feb 2017 13:14:49 -0800
+Message-ID: <CAF1ivSaR3V5ck12BPj1=TyvNO6Cb1-pug22iYoxCwOTM2-XzAg@mail.gmail.com>
+References: <CAF1ivSZtbb_mrSB7gdgO0sszWwZA+r95btd6_AM4VXffNyXq8A@mail.gmail.com>
+ <CAJE9aOO+qgU+vyusOXkwQ-3OC+9z0BYTZm_d7SmZG23PQ9nhuw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170206184743.GB20731@dhcp22.suse.cz>
-Sender: owner-linux-mm@kvack.org
-To: Michal Hocko <mhocko@kernel.org>
-Cc: Matthew Wilcox <willy@infradead.org>, Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-io0-f182.google.com ([209.85.223.182]:35454 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752037AbdBFVOv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2017 16:14:51 -0500
+Received: by mail-io0-f182.google.com with SMTP id j18so75496961ioe.2
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Feb 2017 13:14:51 -0800 (PST)
+In-Reply-To: <CAJE9aOO+qgU+vyusOXkwQ-3OC+9z0BYTZm_d7SmZG23PQ9nhuw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Feb 06, 2017 at 07:47:43PM +0100, Michal Hocko wrote:
-> On Mon 06-02-17 10:32:37, Darrick J. Wong wrote:
-> > On Mon, Feb 06, 2017 at 06:44:15PM +0100, Michal Hocko wrote:
-> > > On Mon 06-02-17 07:39:23, Matthew Wilcox wrote:
-> > > > On Mon, Feb 06, 2017 at 03:07:16PM +0100, Michal Hocko wrote:
-> > > > > +++ b/fs/xfs/xfs_buf.c
-> > > > > @@ -442,17 +442,17 @@ _xfs_buf_map_pages(
-> > > > >  		bp->b_addr = NULL;
-> > > > >  	} else {
-> > > > >  		int retried = 0;
-> > > > > -		unsigned noio_flag;
-> > > > > +		unsigned nofs_flag;
-> > > > >  
-> > > > >  		/*
-> > > > >  		 * vm_map_ram() will allocate auxillary structures (e.g.
-> > > > >  		 * pagetables) with GFP_KERNEL, yet we are likely to be under
-> > > > >  		 * GFP_NOFS context here. Hence we need to tell memory reclaim
-> > > > > -		 * that we are in such a context via PF_MEMALLOC_NOIO to prevent
-> > > > > +		 * that we are in such a context via PF_MEMALLOC_NOFS to prevent
-> > > > >  		 * memory reclaim re-entering the filesystem here and
-> > > > >  		 * potentially deadlocking.
-> > > > >  		 */
-> > > > 
-> > > > This comment feels out of date ... how about:
-> > > 
-> > > which part is out of date?
-> > > 
-> > > > 
-> > > > 		/*
-> > > > 		 * vm_map_ram will allocate auxiliary structures (eg page
-> > > > 		 * tables) with GFP_KERNEL.  If that tries to reclaim memory
-> > > > 		 * by calling back into this filesystem, we may deadlock.
-> > > > 		 * Prevent that by setting the NOFS flag.
-> > > > 		 */
-> > > 
-> > > dunno, the previous wording seems clear enough to me. Maybe little bit
-> > > more chatty than yours but I am not sure this is worth changing.
-> > 
-> > I prefer to keep the "...yet we are likely to be under GFP_NOFS..."
-> > wording of the old comment because it captures the uncertainty of
-> > whether or not we actually are already under NOFS.  If someone actually
-> > has audited this code well enough to know for sure then yes let's change
-> > the comment, but I haven't gone that far.
+On Mon, Feb 6, 2017 at 3:18 AM, kefu chai <tchaikov@gmail.com> wrote:
+> On Sat, Feb 4, 2017 at 7:18 AM, Ming Lin <minggr@gmail.com> wrote:
+>> Hi,
+>>
+>> With a one monitor one OSD test setup(osd pool default size = 1), I
+>> captured the packets with tshark.
+>> pcap.out file: https://ufile.io/43c78
+>>
+>> The test I did was:
+>> dd if=tmp.txt bs=512 count=1 of=/dev/rbd0 oflag=direct
+>>
+>> About 350 packets were captured just for above simple "dd" command.
+>>
+>> If you open the file with wireshark, you'll see packet #41 is the data packet.
+>> "192.168.122.1" is the OSD and "192.168.122.131" is the rbd client.
+>>
+>> What are other packets?
+>
+> you can set "debug-ms=1" and probably set "log_file" to a writable
+> path, then check the log.
 
-Ugh, /me hands himself another cup of coffee...
+Got it. The other packets were actually from systemd-udevd doing read
+on the background.
+I added a debug in the krbd driver. Here is the trace.
 
-Somehow I mixed up _xfs_buf_map_pages and kmem_zalloc_large in this
-discussion.  Probably because they have similar code snippets with very
-similar comments to two totally different parts of xfs.
+[   90.206486] CPU: 0 PID: 1382 Comm: systemd-udevd Tainted: G
+  OE   4.10.0-rc6+ #291
 
-The _xfs_buf_map_pages can be called inside or outside of
-transaction context, so I think we still have to memalloc_nofs_save for
-that to avoid the lockdep complaints and deadlocks referenced in the
-commit that added all that (to _xfs_buf_map_pages) in the first place.
-ae687e58b3 ("xfs: use NOIO contexts for vm_map_ram")
-
-My comments about kmem_zalloc_large still stand, even though the part
-of the patch you two were discussing was the _xfs_buf_map_pages.  I
-probably should have clarified that I think both functions actually
-/are/ doing the right thing wrt calling (or not calling)
-memalloc_nofs_save().
-
-> I believe we can drop the memalloc_nofs_save then as well because either
-> we are called from a potentially dangerous context and thus we are in
-> the nofs scope we we do not need the protection at all.
-
-Uh, now that I've muddied up the waters, which part are you referring to?
-
---D
-
-> -- 
-> Michal Hocko
-> SUSE Labs
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+[   90.206488] Call Trace:
+[   90.206493]  dump_stack+0x63/0x89
+[   90.206497]  rbd_queue_rq+0x85/0x90 [rbd]
+[   90.206499]  blk_mq_dispatch_rq_list+0xdb/0x1f0
+[   90.206500]  blk_mq_process_rq_list+0x122/0x140
+[   90.206501]  __blk_mq_run_hw_queue+0xae/0xc0
+[   90.206502]  blk_mq_run_hw_queue+0x95/0xc0
+[   90.206503]  blk_mq_insert_requests+0xdc/0x1c0
+[   90.206504]  blk_mq_flush_plug_list+0x127/0x140
+[   90.206506]  blk_flush_plug_list+0xc7/0x220
+[   90.206507]  blk_finish_plug+0x2c/0x40
+[   90.206510]  __do_page_cache_readahead+0x19c/0x240
+[   90.206511]  force_page_cache_readahead+0xa2/0x100
+[   90.206512]  page_cache_sync_readahead+0x3f/0x50
+[   90.206514]  generic_file_read_iter+0x579/0x7c0
+[   90.206517]  ? _copy_to_user+0x2d/0x40
+[   90.206519]  blkdev_read_iter+0x37/0x40
+[   90.206521]  __vfs_read+0xbd/0x110
+[   90.206522]  vfs_read+0x8c/0x130
+[   90.206524]  SyS_read+0x46/0xa0
+[   90.206525]  ? SyS_lseek+0x87/0xb0
+[   90.206528]  entry_SYSCALL_64_fastpath+0x1e/0xad
