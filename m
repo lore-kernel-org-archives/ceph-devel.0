@@ -1,45 +1,69 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 1/2] libceph: Remove unneeded stddef.h include
-Date: Mon, 6 Feb 2017 11:19:12 +0100
-Message-ID: <CAOi1vP-67FmaioEh_y9=J6Wp+G2+KmKhicy18-uKAPTy7t_1sw@mail.gmail.com>
-References: <cover.1486276931.git.shorne@gmail.com> <b49a86823ae528ff795c8931f68392535b0fccf7.1486276931.git.shorne@gmail.com>
+From: liuchang0812 <liuchang0812@gmail.com>
+Subject: need help about _ASSERT_H in dout
+Date: Mon, 6 Feb 2017 19:00:37 +0800
+Message-ID: <CACKY0b_diMsgocA=NLEG3+7mjno+w8ULcccGASYd62RamiE2VA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <b49a86823ae528ff795c8931f68392535b0fccf7.1486276931.git.shorne@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stafford Horne <shorne@gmail.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yb0-f174.google.com ([209.85.213.174]:35124 "EHLO
+        mail-yb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750953AbdBFLAj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2017 06:00:39 -0500
+Received: by mail-yb0-f174.google.com with SMTP id o65so24245919ybo.2
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Feb 2017 03:00:38 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Sun, Feb 5, 2017 at 8:07 AM, Stafford Horne <shorne@gmail.com> wrote:
-> This was causing a build failure for openrisc when using musl and
-> gcc 5.4.0 since the file is not available in the toolchain.
->
-> It doesnt seem this is needed and removing it does not cause any build
-> warnings for me.
->
-> Signed-off-by: Stafford Horne <shorne@gmail.com>
-> ---
->  net/ceph/snapshot.c | 2 --
->  1 file changed, 2 deletions(-)
->
-> diff --git a/net/ceph/snapshot.c b/net/ceph/snapshot.c
-> index 154683f..705414e 100644
-> --- a/net/ceph/snapshot.c
-> +++ b/net/ceph/snapshot.c
-> @@ -18,8 +18,6 @@
->   * 02110-1301, USA.
->   */
->
-> -#include <stddef.h>
-> -
->  #include <linux/types.h>
->  #include <linux/export.h>
->  #include <linux/ceph/libceph.h>
+hi, Sage and Cephers
 
-Applied.
+I tried to use boost::algorithm in os/bluefs.cc this afternoon. I got
+such error when i included "boost/algorithm/string.hpp".
 
-Thanks,
+/home/liuchang/WorkSpace/ceph/src/os/bluestore/BlueFS.cc: In member
+function =E2=80=98int BlueFS::add_block_device(unsigned int,
+std::__cxx11::string)=E2=80=99:
+/home/liuchang/WorkSpace/ceph/src/common/dout.h:81:12: error: base
+operand of =E2=80=98->=E2=80=99 is not a pointer
+   _ASSERT_H->_log->submit_entry(_dout_e);  \
 
-                Ilya
+
+I have found this commit[1] that includes _ASSERT_H. i can't
+understand why replace _dout_cct with _ASSERT_H and what
+boost::algorithm confilicts with _ASSERT_H=E3=80=82
+
+thanks, any comments are appreciated.
+
+
+[1]: https://github.com/ceph/ceph/commit/a30601a1b69c3f1ac5cfa592050877aec8=
+b5be9d
+
+[2]: more log as :
+
+/home/liuchang/WorkSpace/ceph/src/os/bluestore/BlueFS.cc: In member
+function =E2=80=98int BlueFS::add_block_device(unsigned int,
+std::__cxx11::string)=E2=80=99:
+/home/liuchang/WorkSpace/ceph/src/common/dout.h:81:12: error: base
+operand of =E2=80=98->=E2=80=99 is not a pointer
+   _ASSERT_H->_log->submit_entry(_dout_e);  \
+            ^
+/home/liuchang/WorkSpace/ceph/src/os/bluestore/BlueFS.cc:119:65: note:
+in expansion of macro =E2=80=98dendl=E2=80=99
+   dout(10) << __func__ << " bdev " << id << " path " << path << dendl;
+                                                                 ^
+/home/liuchang/WorkSpace/ceph/src/common/dout.h:62:18: warning: unused
+variable =E2=80=98_dout_cct=E2=80=99 [-Wunused-variable]
+     CephContext *_dout_cct =3D cct;     \
+                  ^
+/home/liuchang/WorkSpace/ceph/src/common/dout.h:66:24: note: in
+expansion of macro =E2=80=98dout_impl=E2=80=99
+ #define ldout(cct, v)  dout_impl(cct, dout_subsys, v) dout_prefix
+                        ^
+/home/liuchang/WorkSpace/ceph/src/common/debug.h:23:17: note: in
+expansion of macro =E2=80=98ldout=E2=80=99
+ #define dout(v) ldout((dout_context), v)
+                 ^
+/home/liuchang/WorkSpace/ceph/src/os/bluestore/BlueFS.cc:119:3: note:
+in expansion of macro =E2=80=98dout=E2=80=99
+   dout(10) << __func__ << " bdev " << id << " path " << path << dendl;
