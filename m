@@ -1,47 +1,61 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH 1/6] lockdep: allow to disable reclaim lockup detection
-Date: Mon, 6 Feb 2017 16:30:37 +0100
-Message-ID: <20170206153037.GG10298@dhcp22.suse.cz>
-References: <20170206140718.16222-1-mhocko@kernel.org>
- <20170206140718.16222-2-mhocko@kernel.org>
- <20170206142641.GG2267@bombadil.infradead.org>
- <20170206143449.GD10298@dhcp22.suse.cz>
- <20170206152400.GK2267@bombadil.infradead.org>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: Re: CBT: New RGW getput benchmark and testing diary
+Date: Mon, 6 Feb 2017 10:33:26 -0500 (EST)
+Message-ID: <1143254675.101053582.1486395206606.JavaMail.zimbra@redhat.com>
+References: <8700753c-8440-695e-d529-e83b0fb2ba90@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170206152400.GK2267@bombadil.infradead.org>
-Sender: owner-linux-mm@kvack.org
-To: Matthew Wilcox <willy@infradead.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:57038 "EHLO
+        mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752822AbdBFPd2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2017 10:33:28 -0500
+In-Reply-To: <8700753c-8440-695e-d529-e83b0fb2ba90@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com, Mark Seger <mjseger@gmail.com>, Kyle Bader <kbader@redhat.com>, Karan Singh <karan@redhat.com>, Brent Compton <bcompton@redhat.com>
 
-On Mon 06-02-17 07:24:00, Matthew Wilcox wrote:
-> On Mon, Feb 06, 2017 at 03:34:50PM +0100, Michal Hocko wrote:
-> > This part is not needed for the patch, strictly speaking but I wanted to
-> > make the code more future proof.
+Thanks for the detailed effort and analysis, Mark.
+
+As we get closer to the L time-frame, it should become relevant to look at the relative boost::asio frontend rework i/o paths, which are the open effort to reduce CPU overhead/revise threading model, in general.
+
+Matt
+
+----- Original Message -----
+> From: "Mark Nelson" <mnelson@redhat.com>
+> To: "ceph-devel" <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com
+> Cc: "Mark Seger" <mjseger@gmail.com>, "Kyle Bader" <kbader@redhat.com>, "Karan Singh" <karan@redhat.com>, "Brent
+> Compton" <bcompton@redhat.com>
+> Sent: Monday, February 6, 2017 12:55:20 AM
+> Subject: CBT: New RGW getput benchmark and testing diary
 > 
-> Understood.  I took an extra bit myself for marking the radix tree as
-> being used for an IDR (so the radix tree now uses 4 bits).  I see you
-> already split out the address space GFP mask from the other flags :-)
-> I would prefer not to do that with the radix tree, but I understand
-> your desire for more GFP bits.  I'm not entirely sure that an implicit
-> gfpmask makes a lot of sense for the radix tree, but it'd be a big effort
-> to change all the callers.  Anyway, I'm going to update your line here
-> for my current tree and add the build bug so we'll know if we ever hit
-> any problems.
+> Hi All,
+> 
+> Over the weekend I took a stab at improving our ability to run RGW
+> performance tests in CBT.  Previously the only way to do this was to use
+> the cosbench plugin, which required a fair amount of additional
+> setup and while quite powerful can be overkill in situations where you
+> want to rapidly iterate over tests looking for specific issues.  A while
+> ago Mark Seger from HP told me he had created a swift benchmark called
+> "getput" that is written in python and is much more convenient to run
+> quickly in an automated fashion.  Normally getput is used in conjunction
+> with gpsuite, a tool for coordinating benchmarking multiple getput
+> processes.  This is how you would likely use getput on a typical ceph or
+> swift cluster, but since CBT builds the cluster and has it's own way for
+> launching multiple benchmark processes, it uses getput directly.
+> 
 
-OK, do I get it right that the patch can stay as is and go to Andrew?
-I would really like to not rebase the patch again for something that is
-not merged yet. I really hope for getting this merged finally...
 
 -- 
-Michal Hocko
-SUSE Labs
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-821-5101
+fax.  734-769-8938
+cel.  734-216-5309
