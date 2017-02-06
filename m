@@ -1,149 +1,79 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Proposition - latency histogram
-Date: Mon, 6 Feb 2017 11:54:33 +0000
-Message-ID: <CALe9h7dyLo8QKJOG6tjL5CwS4Yoq+naidrK1iw5tJGD6yp6vbA@mail.gmail.com>
-References: <69bf4eec-3959-f021-ad8f-d1b6d3e2ceaf@corp.ovh.com>
- <b2b52f75-0e26-2dac-df6a-ea7bfd91a973@corp.ovh.com> <985bd632-be25-e281-9249-d4ef5772c821@corp.ovh.com>
- <59a75537-852a-94ad-b28d-958d7e0555f2@corp.ovh.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+From: Jeff Layton <jlayton@redhat.com>
+Subject: [PATCH v2 3/6] libceph: rename and export have_pool_full
+Date: Mon,  6 Feb 2017 08:29:24 -0500
+Message-ID: <20170206132927.9219-4-jlayton@redhat.com>
+References: <20170206132927.9219-1-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:36276 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751314AbdBFLyz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2017 06:54:55 -0500
-Received: by mail-wm0-f45.google.com with SMTP id c85so116750477wmi.1
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Feb 2017 03:54:54 -0800 (PST)
-In-Reply-To: <59a75537-852a-94ad-b28d-958d7e0555f2@corp.ovh.com>
+Received: from mx1.redhat.com ([209.132.183.28]:44686 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752105AbdBFN3b (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 6 Feb 2017 08:29:31 -0500
+In-Reply-To: <20170206132927.9219-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?= <bartlomiej.swiecki@corp.ovh.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, jspray@redhat.com
 
-On Tue, Jan 31, 2017 at 3:33 PM, Bartłomiej Święcki
-<bartlomiej.swiecki@corp.ovh.com> wrote:
-> Attached is a sample output from test python script (included in PR)
-> to display live results.
+Cephfs needs to be able to call this as well. Rename have_pool_full to
+ceph_osdc_have_pool_full, and export it.
 
-This is very cool, and inspired me to build a colored version in to a
-toy gui that I've been using to exercise ceph-mgr.
-http://imgur.com/a/TG5kc (it a super-primitive rendering using linear
-color scale on cells of a <table>)
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+---
+ include/linux/ceph/osd_client.h | 1 +
+ net/ceph/osd_client.c           | 7 ++++---
+ 2 files changed, 5 insertions(+), 3 deletions(-)
 
-I did that by exposing the perf counters via the MCommand (`tell`)
-interface on the OSD so that the UI could poll them.
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 34010c86b307..17bf1873bb01 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -313,6 +313,7 @@ extern void ceph_osdc_handle_reply(struct ceph_osd_client *osdc,
+ extern void ceph_osdc_handle_map(struct ceph_osd_client *osdc,
+ 				 struct ceph_msg *msg);
+ void ceph_osdc_update_epoch_barrier(struct ceph_osd_client *osdc, u32 eb);
++extern bool ceph_osdc_have_pool_full(struct ceph_osd_client *osdc);
+ 
+ extern void osd_req_op_init(struct ceph_osd_request *osd_req,
+ 			    unsigned int which, u16 opcode, u32 flags);
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index aeee87a0e0da..d61d7a79fdb3 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1259,7 +1259,7 @@ static bool __pool_full(struct ceph_pg_pool_info *pi)
+ 	return pi->flags & CEPH_POOL_FLAG_FULL;
+ }
+ 
+-static bool have_pool_full(struct ceph_osd_client *osdc)
++bool ceph_osdc_have_pool_full(struct ceph_osd_client *osdc)
+ {
+ 	struct rb_node *n;
+ 
+@@ -1273,6 +1273,7 @@ static bool have_pool_full(struct ceph_osd_client *osdc)
+ 
+ 	return false;
+ }
++EXPORT_SYMBOL(ceph_osdc_have_pool_full);
+ 
+ static bool pool_full(struct ceph_osd_client *osdc, s64 pool_id)
+ {
+@@ -3271,7 +3272,7 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+ 	was_pauserd = ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSERD);
+ 	was_pausewr = ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR) ||
+ 		      ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
+-		      have_pool_full(osdc);
++		      ceph_osdc_have_pool_full(osdc);
+ 
+ 	/* incremental maps */
+ 	ceph_decode_32_safe(&p, end, nr_maps, bad);
+@@ -3335,7 +3336,7 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+ 	pauserd = ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSERD);
+ 	pausewr = ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR) ||
+ 		  ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
+-		  have_pool_full(osdc);
++		  ceph_osdc_have_pool_full(osdc);
+ 	if (was_pauserd || was_pausewr || pauserd || pausewr ||
+ 	    (osdc->epoch_barrier && osdc->osdmap->epoch < osdc->epoch_barrier))
+ 		maybe_request_map(osdc);
+-- 
+2.9.3
 
-I think there are two main use cases for these plots:
- * System-wide (average of OSDs): what are my doing/experiencing?
- * Individual OSD: is this OSD healthy?  Potentially would plot this
-as a delta against the systemwide average to highlight OSDs behaving
-badly.
-
-Currently, ordinary perf counters are getting shipped back to ceph-mgr
-continuously, so we would need to decide whether we want to do the
-same for the larger histogram ones, or whether we would expose them
-via `tell` so that any interested parties could fetch them on demand.
-The main benefit to continuously sending them would be that ceph-mgr
-could maintain a continuous sum/average across all the OSDs.  The cost
-depends how widely we use this data type: if there were only a few
-histograms per osd (osd read, osd write, store read, store write),
-then I suspect we could get away with transmitting them around quite
-freely.
-
-The 2D data is awesome and I can't see us not wanting this, though
-there will also be at least some key places we want 1D data,
-especially for the MDS where metadata ops don't have a size dimension.
-
-John
-
-
->
->
-> On 01/31/2017 04:22 PM, Bartłomiej Święcki wrote:
->>
->> Hi,
->>
->> Bringing back performance histograms:
->> https://github.com/ceph/ceph/pull/12829
->> I've updated the PR, rebased on master and made internal changes less
->> aggressive.
->>
->> All ctest tests passing and I haven't seen any issues with performance
->> (and I can actually see much better what the performance characteristics
->> are
->>
->> Waiting for your comments,
->> Bartek
->>
->>
->>
->> Looking
->>
->> On 01/09/2017 12:27 PM, Bartłomiej Święcki wrote:
->>>
->>> Hi,
->>>
->>> I've made a simple implementation of performance histograms.
->>> Implementation is not very sophisticated
->>> but I think it could be a good start for more detailed discussion.
->>>
->>> Here's the PR: https://github.com/ceph/ceph/pull/12829
->>>
->>>
->>> Regards,
->>> Bartek
->>>
->>>
->>> On 11/28/2016 05:22 PM, Bartłomiej Święcki wrote:
->>>>
->>>> Hi,
->>>>
->>>>
->>>> Currently we can query OSD for op latency but it's given as an average.
->>>> Average may not give
->>>> the bets information in this case - i.e. spikes can easily get hidden
->>>> there.
->>>>
->>>> Instead of an average we could easily do a simple histogram - quantize
->>>> the latency into
->>>> predefined set of time intervals, for each of them have a simple
->>>> performance counter,
->>>> at each op increase one of them. Since those are per OSD, we could have
->>>> pretty high resolution
->>>> with fractional memory usage, performance impact should be negligible
->>>> since only one (two if split
->>>> into read and write) of those counters would be incremented per one osd
->>>> op.
->>>>
->>>> In addition we could also do this in 2D - each counter matching given
->>>> latency range and op size range.
->>>> having such 2D table would show both latency histogram, request size
->>>> histogram and combinations of those
->>>> (i.e. latency histogram of ~4k ops only).
->>>>
->>>> What do you think about this idea? I can prepare some code - a simple
->>>> proof of concept looks really
->>>> straightforward to implement.
->>>>
->>>>
->>>> Bartek
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
