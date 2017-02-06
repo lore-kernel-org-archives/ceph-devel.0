@@ -1,75 +1,104 @@
-From: Max Yehorov <myehorov@skytap.com>
-Subject: Re: Possible bug in krbd (4.4.0)
-Date: Mon, 6 Feb 2017 11:29:06 -0800
-Message-ID: <CAJDfismn0c5D0yxpE__vBtC8oXQUo9eEWD4rB1yuOK6UbodesQ@mail.gmail.com>
-References: <CAJDfiske056EADPT4g0fRUx=uh7C-F3ZzUh6A1ummfUZ6vMuTg@mail.gmail.com>
- <CAOi1vP9Jvnepv3PxFA1PO_vZnEJ-DRBsax_+U136GSWPzCc1Xw@mail.gmail.com>
- <CAJDfiskjz2H-D9xmanZ9opw+0pVAK=VmSPtFz1+fbcfPofOpmg@mail.gmail.com>
- <CAOi1vP9y2rSC=ZKQom0n+0RSHREpaPJ60497qpjYMGywTATJQA@mail.gmail.com>
- <CAJDfisku2Ld3F5hOAPjBqqnjV3gUWwC2kVXs3t2D+i=6waMmtQ@mail.gmail.com> <CAOi1vP-NvU3adKdrZURfuyM4sb8F1b_xCReC3OM9tez8qxMRCw@mail.gmail.com>
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 4/6] xfs: use memalloc_nofs_{save,restore} instead of
+ memalloc_noio*
+Date: Mon, 6 Feb 2017 11:51:11 -0800
+Message-ID: <20170206195111.GH3580@birch.djwong.org>
+References: <20170206140718.16222-1-mhocko@kernel.org>
+ <20170206140718.16222-5-mhocko@kernel.org>
+ <20170206153923.GL2267@bombadil.infradead.org>
+ <20170206174415.GA20731@dhcp22.suse.cz>
+ <20170206183237.GE3580@birch.djwong.org>
+ <20170206184743.GB20731@dhcp22.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f174.google.com ([209.85.128.174]:32931 "EHLO
-        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751810AbdBFT3i (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2017 14:29:38 -0500
-Received: by mail-wr0-f174.google.com with SMTP id i10so26325635wrb.0
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Feb 2017 11:29:38 -0800 (PST)
-In-Reply-To: <CAOi1vP-NvU3adKdrZURfuyM4sb8F1b_xCReC3OM9tez8qxMRCw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170206184743.GB20731@dhcp22.suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: Michal Hocko <mhocko@kernel.org>
+Cc: Matthew Wilcox <willy@infradead.org>, Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-It is XFS.
+On Mon, Feb 06, 2017 at 07:47:43PM +0100, Michal Hocko wrote:
+> On Mon 06-02-17 10:32:37, Darrick J. Wong wrote:
+> > On Mon, Feb 06, 2017 at 06:44:15PM +0100, Michal Hocko wrote:
+> > > On Mon 06-02-17 07:39:23, Matthew Wilcox wrote:
+> > > > On Mon, Feb 06, 2017 at 03:07:16PM +0100, Michal Hocko wrote:
+> > > > > +++ b/fs/xfs/xfs_buf.c
+> > > > > @@ -442,17 +442,17 @@ _xfs_buf_map_pages(
+> > > > >  		bp->b_addr = NULL;
+> > > > >  	} else {
+> > > > >  		int retried = 0;
+> > > > > -		unsigned noio_flag;
+> > > > > +		unsigned nofs_flag;
+> > > > >  
+> > > > >  		/*
+> > > > >  		 * vm_map_ram() will allocate auxillary structures (e.g.
+> > > > >  		 * pagetables) with GFP_KERNEL, yet we are likely to be under
+> > > > >  		 * GFP_NOFS context here. Hence we need to tell memory reclaim
+> > > > > -		 * that we are in such a context via PF_MEMALLOC_NOIO to prevent
+> > > > > +		 * that we are in such a context via PF_MEMALLOC_NOFS to prevent
+> > > > >  		 * memory reclaim re-entering the filesystem here and
+> > > > >  		 * potentially deadlocking.
+> > > > >  		 */
+> > > > 
+> > > > This comment feels out of date ... how about:
+> > > 
+> > > which part is out of date?
+> > > 
+> > > > 
+> > > > 		/*
+> > > > 		 * vm_map_ram will allocate auxiliary structures (eg page
+> > > > 		 * tables) with GFP_KERNEL.  If that tries to reclaim memory
+> > > > 		 * by calling back into this filesystem, we may deadlock.
+> > > > 		 * Prevent that by setting the NOFS flag.
+> > > > 		 */
+> > > 
+> > > dunno, the previous wording seems clear enough to me. Maybe little bit
+> > > more chatty than yours but I am not sure this is worth changing.
+> > 
+> > I prefer to keep the "...yet we are likely to be under GFP_NOFS..."
+> > wording of the old comment because it captures the uncertainty of
+> > whether or not we actually are already under NOFS.  If someone actually
+> > has audited this code well enough to know for sure then yes let's change
+> > the comment, but I haven't gone that far.
 
-nothing interesting in dmesg
+Ugh, /me hands himself another cup of coffee...
 
-rbd showmapped + trimmed sysrq (-t -w)
-http://pastebin.com/s68Sqia4
+Somehow I mixed up _xfs_buf_map_pages and kmem_zalloc_large in this
+discussion.  Probably because they have similar code snippets with very
+similar comments to two totally different parts of xfs.
 
+The _xfs_buf_map_pages can be called inside or outside of
+transaction context, so I think we still have to memalloc_nofs_save for
+that to avoid the lockdep complaints and deadlocks referenced in the
+commit that added all that (to _xfs_buf_map_pages) in the first place.
+ae687e58b3 ("xfs: use NOIO contexts for vm_map_ram")
 
-On Mon, Feb 6, 2017 at 10:40 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> On Mon, Feb 6, 2017 at 7:26 PM, Max Yehorov <myehorov@skytap.com> wrote:
->>> For hours?  Does it succeed after X number of hours?
->> Still mounted from Feb 6. There is an attempt to unmount every 10 minutes.
->>
->>> This doesn't say that /dev/rbd0 is in use by pid 5926.  It says that
->>> there is a process with the name "dio/rbd0", that's all.
->>>
->>> I'm guessing you ran plain "lsof" with no arguments here.  Were there
->>> other */rbd0 matches, like jbd2/rbd0?
->>
->> The entire output
->>
->> :~# lsof | grep rbd
->>
->> dio/rbd0   5926             root  cwd       DIR                8,5
->>     4096          2 /
->> dio/rbd0   5926             root  rtd       DIR                8,5
->>     4096          2 /
->> dio/rbd0   5926             root  txt   unknown
->>                     /proc/5926/exe
->> rbd        5996             root  cwd       DIR                8,5
->>     4096          2 /
->> rbd        5996             root  rtd       DIR                8,5
->>     4096          2 /
->> rbd        5996             root  txt   unknown
->>                     /proc/5996/exe
->
-> Is this xfs or ext4?
->
-> What is the output of "rbd showmapped"?
->
-> Is there anything in dmesg?  Can you provide a snippet?
->
-> Can you provide the output I requested in my first reply?
->
-> $ cat /sys/kernel/debug/ceph/<fsid>/osdc
-> $ echo w >/proc/sysrq-trigger
-> $ echo t >/proc/sysrq-trigger
->
-> Thanks,
->
->                 Ilya
+My comments about kmem_zalloc_large still stand, even though the part
+of the patch you two were discussing was the _xfs_buf_map_pages.  I
+probably should have clarified that I think both functions actually
+/are/ doing the right thing wrt calling (or not calling)
+memalloc_nofs_save().
+
+> I believe we can drop the memalloc_nofs_save then as well because either
+> we are called from a potentially dangerous context and thus we are in
+> the nofs scope we we do not need the protection at all.
+
+Uh, now that I've muddied up the waters, which part are you referring to?
+
+--D
+
+> -- 
+> Michal Hocko
+> SUSE Labs
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
