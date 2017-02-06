@@ -1,239 +1,341 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v2 6/6] libceph: allow requests to return immediately on
- full conditions if caller wishes
-Date: Mon, 6 Feb 2017 18:05:40 +0100
-Message-ID: <CAOi1vP89_m95T-NSknJckKjnhv6V6CKnTcr3K4=pyFkKO9H_aQ@mail.gmail.com>
-References: <20170206132927.9219-1-jlayton@redhat.com> <20170206132927.9219-7-jlayton@redhat.com>
- <CAOi1vP_k0q0ff-BjTWYk8faJvRs4TNFgJO+XeovebvAM9Wtxfg@mail.gmail.com>
- <1486396192.2712.4.camel@redhat.com> <CAOi1vP8UaS8z7-zX+Wkaifc24tp0yACdNompj93BQTiau7ekgw@mail.gmail.com>
- <1486398961.2712.7.camel@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: crush multipick anomaly
+Date: Mon, 6 Feb 2017 18:07:05 +0100
+Message-ID: <0d66b191-e90d-ce6b-b833-44869f8d0ad7@dachary.org>
+References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
+ <e5f376bb-925b-17df-ae6e-abc07058f67b@dachary.org>
+ <6a7b52c8-a0fd-41a6-fbf1-fb2af3e347d8@dachary.org>
+ <alpine.DEB.2.11.1702031443400.3654@piezo.novalocal>
+ <bcf2f102-cee9-4070-c027-e8baf5f428f2@dachary.org>
+ <f886cb09-3d05-f833-b411-d538afad61f6@dachary.org>
+ <CAKZcxgeyP13vOKfsSEhqZwGiP_-sLXNsf7rbPAJ0R7bJdc1-BA@mail.gmail.com>
+ <4c8bdc58-b227-2eaa-fa61-e5c26e1e5f0d@dachary.org>
+ <CAKZcxgeo3Y=uCZ5rFmG5ULcBw1D+V2=ar1hqHYHCt_E_HcPgTA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:35746 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751001AbdBFRFm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2017 12:05:42 -0500
-Received: by mail-wm0-f67.google.com with SMTP id u63so23045517wmu.2
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Feb 2017 09:05:41 -0800 (PST)
-In-Reply-To: <1486398961.2712.7.camel@redhat.com>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:33188 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751690AbdBFRHK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Feb 2017 12:07:10 -0500
+In-Reply-To: <CAKZcxgeo3Y=uCZ5rFmG5ULcBw1D+V2=ar1hqHYHCt_E_HcPgTA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, John Spray <jspray@redhat.com>
+To: Jaze Lee <jazeltq@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Mon, Feb 6, 2017 at 5:36 PM, Jeff Layton <jlayton@redhat.com> wrote:
-> On Mon, 2017-02-06 at 17:27 +0100, Ilya Dryomov wrote:
->> On Mon, Feb 6, 2017 at 4:49 PM, Jeff Layton <jlayton@redhat.com> wrote:
->> > On Mon, 2017-02-06 at 15:09 +0100, Ilya Dryomov wrote:
->> >
->> > [...]
->> >
->> > > > diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
->> > > > index 5c0da61cb763..def43570a85a 100644
->> > > > --- a/include/linux/ceph/rados.h
->> > > > +++ b/include/linux/ceph/rados.h
->> > > > @@ -401,6 +401,7 @@ enum {
->> > > >         CEPH_OSD_FLAG_KNOWN_REDIR = 0x400000,  /* redirect bit is authoritative */
->> > > >         CEPH_OSD_FLAG_FULL_TRY =    0x800000,  /* try op despite full flag */
->> > > >         CEPH_OSD_FLAG_FULL_FORCE = 0x1000000,  /* force op despite full flag */
->> > > > +       CEPH_OSD_FLAG_FULL_CANCEL = 0x2000000, /* cancel operation on full flag */
->> > >
->> > > Is this a new flag?  This is the wire protocol and I don't see it in
->> > > ceph.git.
->> > >
->> > > I'll look at epoch_barrier and callback stuff later.
->> > >
->> > > Thanks,
->> > >
->> > >                 Ilya
->> >
->> > Here's a respun version of the last patch in the set. This should avoid
->> > adding an on the wire flag. I just added a new bool and changed the
->> > code to set and look at that to indicate the desire for an immediate
->> > error return in this case. Compiles but is otherwise untested. I'll give
->> > it a go in a bit.
->> >
->> > -----------------------------8<------------------------------
->> >
->> > libceph: allow requests to return immediately on full
->> >  conditions if caller wishes
->> >
->> > Right now, cephfs will cancel any in-flight OSD write operations when a
->> > new map comes in that shows the OSD or pool as full, but nothing
->> > prevents new requests from stalling out after that point.
->> >
->> > If the caller knows that it will want an immediate error return instead
->> > of blocking on a full or at-quota error condition then allow it to set a
->> > flag to request that behavior. Cephfs write requests will always set
->> > that flag.
->> >
->> > Signed-off-by: Jeff Layton <jlayton@redhat.com>
->> > ---
->> >  fs/ceph/addr.c                  | 4 ++++
->> >  fs/ceph/file.c                  | 4 ++++
->> >  include/linux/ceph/osd_client.h | 1 +
->> >  net/ceph/osd_client.c           | 6 ++++++
->> >  4 files changed, 15 insertions(+)
->> >
->> > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
->> > index 4547bbf80e4f..ef9c9bae7460 100644
->> > --- a/fs/ceph/addr.c
->> > +++ b/fs/ceph/addr.c
->> > @@ -1040,6 +1040,7 @@ static int ceph_writepages_start(struct address_space *mapping,
->> >
->> >                 req->r_callback = writepages_finish;
->> >                 req->r_inode = inode;
->> > +               req->r_enospc_on_full = true;
->> >
->> >                 /* Format the osd request message and submit the write */
->> >                 len = 0;
->> > @@ -1689,6 +1690,7 @@ int ceph_uninline_data(struct file *filp, struct page *locked_page)
->> >         }
->> >
->> >         req->r_mtime = inode->i_mtime;
->> > +       req->r_enospc_on_full = true;
->> >         err = ceph_osdc_start_request(&fsc->client->osdc, req, false);
->> >         if (!err)
->> >                 err = ceph_osdc_wait_request(&fsc->client->osdc, req);
->> > @@ -1732,6 +1734,7 @@ int ceph_uninline_data(struct file *filp, struct page *locked_page)
->> >         }
->> >
->> >         req->r_mtime = inode->i_mtime;
->> > +       req->r_enospc_on_full = true;
->> >         err = ceph_osdc_start_request(&fsc->client->osdc, req, false);
->> >         if (!err)
->> >                 err = ceph_osdc_wait_request(&fsc->client->osdc, req);
->> > @@ -1893,6 +1896,7 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
->> >         err = ceph_osdc_start_request(&fsc->client->osdc, rd_req, false);
->> >
->> >         wr_req->r_mtime = ci->vfs_inode.i_mtime;
->> > +       wr_req->r_enospc_on_full = true;
->> >         err2 = ceph_osdc_start_request(&fsc->client->osdc, wr_req, false);
->> >
->> >         if (!err)
->> > diff --git a/fs/ceph/file.c b/fs/ceph/file.c
->> > index a91a4f1fc837..eaed17f90d5f 100644
->> > --- a/fs/ceph/file.c
->> > +++ b/fs/ceph/file.c
->> > @@ -714,6 +714,7 @@ static void ceph_aio_retry_work(struct work_struct *work)
->> >         req->r_callback = ceph_aio_complete_req;
->> >         req->r_inode = inode;
->> >         req->r_priv = aio_req;
->> > +       req->r_enospc_on_full = true;
->> >
->> >         ret = ceph_osdc_start_request(req->r_osdc, req, false);
->> >  out:
->> > @@ -912,6 +913,7 @@ ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
->> >
->> >                         osd_req_op_init(req, 1, CEPH_OSD_OP_STARTSYNC, 0);
->> >                         req->r_mtime = mtime;
->> > +                       req->r_enospc_on_full = true;
->> >                 }
->> >
->> >                 osd_req_op_extent_osd_data_pages(req, 0, pages, len, start,
->> > @@ -1105,6 +1107,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
->> >                                                 false, true);
->> >
->> >                 req->r_mtime = mtime;
->> > +               req->r_enospc_on_full = true;
->> >                 ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
->> >                 if (!ret)
->> >                         ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
->> > @@ -1557,6 +1560,7 @@ static int ceph_zero_partial_object(struct inode *inode,
->> >         }
->> >
->> >         req->r_mtime = inode->i_mtime;
->> > +       req->r_enospc_on_full = true;
->> >         ret = ceph_osdc_start_request(&fsc->client->osdc, req, false);
->> >         if (!ret) {
->> >                 ret = ceph_osdc_wait_request(&fsc->client->osdc, req);
->> > diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
->> > index 17bf1873bb01..f01e93ff03d5 100644
->> > --- a/include/linux/ceph/osd_client.h
->> > +++ b/include/linux/ceph/osd_client.h
->> > @@ -172,6 +172,7 @@ struct ceph_osd_request {
->> >
->> >         int               r_result;
->> >         bool              r_got_reply;
->> > +       bool              r_enospc_on_full; /* return ENOSPC when full */
->> >
->> >         struct ceph_osd_client *r_osdc;
->> >         struct kref       r_kref;
->> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
->> > index d61d7a79fdb3..9f40d11b3c68 100644
->> > --- a/net/ceph/osd_client.c
->> > +++ b/net/ceph/osd_client.c
->> > @@ -50,6 +50,7 @@ static void link_linger(struct ceph_osd *osd,
->> >                         struct ceph_osd_linger_request *lreq);
->> >  static void unlink_linger(struct ceph_osd *osd,
->> >                           struct ceph_osd_linger_request *lreq);
->> > +static void complete_request(struct ceph_osd_request *req, int err);
->> >
->> >  #if 1
->> >  static inline bool rwsem_is_wrlocked(struct rw_semaphore *sem)
->> > @@ -1643,6 +1644,7 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
->> >         enum calc_target_result ct_res;
->> >         bool need_send = false;
->> >         bool promoted = false;
->> > +       int ret = 0;
->> >
->> >         WARN_ON(req->r_tid || req->r_got_reply);
->> >         dout("%s req %p wrlocked %d\n", __func__, req, wrlocked);
->> > @@ -1683,6 +1685,8 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
->> >                 pr_warn_ratelimited("FULL or reached pool quota\n");
->> >                 req->r_t.paused = true;
->> >                 maybe_request_map(osdc);
->> > +               if (req->r_enospc_on_full)
->> > +                       ret = -ENOSPC;
->> >         } else if (!osd_homeless(osd)) {
->> >                 need_send = true;
->> >         } else {
->> > @@ -1699,6 +1703,8 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
->> >         link_request(osd, req);
->> >         if (need_send)
->> >                 send_request(req);
->> > +       else if (ret)
->> > +               complete_request(req, ret);
+
+
+On 02/06/2017 03:11 PM, Jaze Lee wrote:
+> 2017-02-06 16:18 GMT+08:00 Loic Dachary <loic@dachary.org>:
+>> Hi,
 >>
->> How is this handled in the userspace client?  I don't see a similar
->> check in Objecter.
+>> On 02/06/2017 04:08 AM, Jaze Lee wrote:
+>>> It is more complicated than i have expected.....
+>>> I viewed http://tracker.ceph.com/issues/15653, and know that if the
+>>> replica number is
+>>> bigger than the host we choose, we may meet the problem.
+>>>
+>>> That is
+>>> if we have
+>>> host: a b c d
+>>> host: e f  g h
+>>> host: i  j  k  l
+>>>
+>>> we only choose one from each host for replica three, and the distribution
+>>> is as we expected?    Right ?
+>>>
+>>>
+>>> The problem described in http://tracker.ceph.com/issues/15653, may happen
+>>> when
+>>> 1)
+>>>   host: a b c d e f g
+>>>
+>>> and we choose all three replica from this host. But this is few happen
+>>> in production. Right?
+>>>
+>>>
+>>> May be i do not understand the problem correctly ?
 >>
->> Thanks,
+>> The problem also happens with host: a b c d e f g when you try to get three replicas that are not on the same disk. You can experiment with Dan's script
+> 
+> Yes, I mean why we choose three from one host ? 
+
+Because it should work in this specific case. And also because this is a problem that shows in every situation, not just this specific situation.
+
+Cheers
+
+
+> In production the host
+> number is ALWAYS
+> more than replica number.....
+> 
+> root
+>    rack-0
+>       host A
+>       host B
+>    rack-1
+>       host C
+>       host D
+>    rack -2
+>        host E
+>        host F
+> 
+> when choose pg 1.1 for osd, it will always choose one from rack-0, one
+> from rack-1, one from rack-2.
+> any pg will cause one be choosed from rack-0, rack-1, rack-2.
+> 
+> The problem is happened when we want to choose more than one osd from
+> a bucket for a pg, right ?
+> 
+> 
+> 
 >>
->>                 Ilya
->
-> It seems to be handled at a much higher layer in libcephfs. In _write(),
-> for instance, we have:
->
->   if (objecter->osdmap_pool_full(in->layout.pool_id)) {
->     return -ENOSPC;
->   }
->
-> ...and there's also some EDQUOT handling a little below there as well.
->
-> I don't think we can reasonably follow that model in the kernel client
-> though. The way it's done in userland seems to require the big client
-> mutex be held over large swaths of the code, and that's not the case in
-> the kernel client (thankfully).
+>> https://gist.github.com/anonymous/929d799d5f80794b293783acb9108992
+>>
+>> Cheers
+>>
+>>
+>>>
+>>>
+>>>
+>>>
+>>>
+>>>
+>>>
+>>>
+>>>
+>>>
+>>> 2017-02-04 2:54 GMT+08:00 Loic Dachary <loic@dachary.org>:
+>>>>
+>>>>
+>>>> On 02/03/2017 04:08 PM, Loic Dachary wrote:
+>>>>>
+>>>>>
+>>>>> On 02/03/2017 03:47 PM, Sage Weil wrote:
+>>>>>> On Fri, 3 Feb 2017, Loic Dachary wrote:
+>>>>>>> On 01/26/2017 12:13 PM, Loic Dachary wrote:
+>>>>>>>> Hi Sage,
+>>>>>>>>
+>>>>>>>> Still trying to understand what you did :-) I have one question below.
+>>>>>>>>
+>>>>>>>> On 01/26/2017 04:05 AM, Sage Weil wrote:
+>>>>>>>>> This is a longstanding bug,
+>>>>>>>>>
+>>>>>>>>>   http://tracker.ceph.com/issues/15653
+>>>>>>>>>
+>>>>>>>>> that causes low-weighted devices to get more data than they should. Loic's
+>>>>>>>>> recent activity resurrected discussion on the original PR
+>>>>>>>>>
+>>>>>>>>>   https://github.com/ceph/ceph/pull/10218
+>>>>>>>>>
+>>>>>>>>> but since it's closed and almost nobody will see it I'm moving the
+>>>>>>>>> discussion here.
+>>>>>>>>>
+>>>>>>>>> The main news is that I have a simple adjustment for the weights that
+>>>>>>>>> works (almost perfectly) for the 2nd round of placements.  The solution is
+>>>>>>>>> pretty simple, although as with most probabilities it tends to make my
+>>>>>>>>> brain hurt.
+>>>>>>>>>
+>>>>>>>>> The idea is that, on the second round, the original weight for the small
+>>>>>>>>> OSD (call it P(pick small)) isn't what we should use.  Instead, we want
+>>>>>>>>> P(pick small | first pick not small).  Since P(a|b) (the probability of a
+>>>>>>>>> given b) is P(a && b) / P(b),
+>>>>>>>>
+>>>>>>>> >From the record this is explained at https://en.wikipedia.org/wiki/Conditional_probability#Kolmogorov_definition
+>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>  P(pick small | first pick not small)
+>>>>>>>>>  = P(pick small && first pick not small) / P(first pick not small)
+>>>>>>>>>
+>>>>>>>>> The last term is easy to calculate,
+>>>>>>>>>
+>>>>>>>>>  P(first pick not small) = (total_weight - small_weight) / total_weight
+>>>>>>>>>
+>>>>>>>>> and the && term is the distribution we're trying to produce.
+>>>>>>>>
+>>>>>>>> https://en.wikipedia.org/wiki/Conditional_probability describs A && B (using a non ascii symbol...) as the "probability of the joint of events A and B". I don't understand what that means. Is there a definition somewhere ?
+>>>>>>>>
+>>>>>>>>> For exmaple,
+>>>>>>>>> if small has 1/10 the weight, then we should see 1/10th of the PGs have
+>>>>>>>>> their second replica be the small OSD.  So
+>>>>>>>>>
+>>>>>>>>>  P(pick small && first pick not small) = small_weight / total_weight
+>>>>>>>>>
+>>>>>>>>> Putting those together,
+>>>>>>>>>
+>>>>>>>>>  P(pick small | first pick not small)
+>>>>>>>>>  = P(pick small && first pick not small) / P(first pick not small)
+>>>>>>>>>  = (small_weight / total_weight) / ((total_weight - small_weight) / total_weight)
+>>>>>>>>>  = small_weight / (total_weight - small_weight)
+>>>>>>>>>
+>>>>>>>>> This is, on the second round, we should adjust the weights by the above so
+>>>>>>>>> that we get the right distribution of second choices.  It turns out it
+>>>>>>>>> works to adjust *all* weights like this to get hte conditional probability
+>>>>>>>>> that they weren't already chosen.
+>>>>>>>>>
+>>>>>>>>> I have a branch that hacks this into straw2 and it appears to work
+>>>>>>>>
+>>>>>>>> This is https://github.com/liewegas/ceph/commit/wip-crush-multipick
+>>>>>>>
+>>>>>>> In
+>>>>>>>
+>>>>>>> https://github.com/liewegas/ceph/commit/wip-crush-multipick#diff-0df13ad294f6585c322588cfe026d701R316
+>>>>>>>
+>>>>>>> double neww = oldw / (bucketw - oldw) * bucketw;
+>>>>>>>
+>>>>>>> I don't get why we need  "* bucketw" at the end ?
+>>>>>>
+>>>>>> It's just to keep the values within a reasonable range so that we don't
+>>>>>> lose precision by dropping down into small integers.
+>>>>>>
+>>>>>> I futzed around with this some more last week trying to get the third
+>>>>>> replica to work and ended up doubting that this piece is correct.  The
+>>>>>> ratio between the big and small OSDs in my [99 99 99 99 4] example varies
+>>>>>> slightly from what I would expect from first principles and what I get out
+>>>>>> of this derivation by about 1%.. which would explain the bias I as seeing.
+>>>>>>
+>>>>>> I'm hoping we can find someone with a strong stats/probability background
+>>>>>> and loads of free time who can tackle this...
+>>>>>>
+>>>>>
+>>>>> It would help to formulate the problem into a self contained puzzle to present a mathematician. I tried to do it last week but failed. I'll give it another shot and submit a draft, hoping something bad could be the start of something better ;-)
+>>>>
+>>>> Here is what I have. I realize this is not good but I'm hoping someone more knowledgeable will pity me and provide something sensible. Otherwise I'm happy to keep making a fool of myself :-) In the following a bin is the device, the ball is a replica and the color is the object id.
+>>>>
+>>>> We have D bins and each bin can hold D(B) balls. All balls have the
+>>>> same size. There is exactly X balls of the same color. Each ball must
+>>>> be placed in a bin that does not already contain a ball of the same
+>>>> color.
+>>>>
+>>>> What distribution guarantees that, for all X, the bins are filled in
+>>>> the same proportion ?
+>>>>
+>>>> Details
+>>>> =======
+>>>>
+>>>> * One placement: all balls are the same color and we place each of them
+>>>>   in a bin with a probability of:
+>>>>
+>>>>     P(BIN) = BIN(B) / SUM(BINi(B) for i in [1..D])
+>>>>
+>>>>   so that bins are equally filled regardless of their capacity.
+>>>>
+>>>> * Two placements: for each ball there is exactly one other ball of the
+>>>>   same color.  A ball is placed as in experience 1 and the chosen bin
+>>>>   is set aside. The other ball of the same color is placed as in
+>>>>   experience 1 with the remaining bins. The probability for a ball
+>>>>   to be placed in a given BIN is:
+>>>>
+>>>>     P(BIN) + P(all bins but BIN | BIN)
+>>>>
+>>>> Examples
+>>>> ========
+>>>>
+>>>> For instance we have 5 bins, a, b, c, d, e and they can hold:
+>>>>
+>>>> a = 10 million balls
+>>>> b = 10 million balls
+>>>> c = 10 million balls
+>>>> d = 10 million balls
+>>>> e =  1 million balls
+>>>>
+>>>> In the first experience with place each ball in
+>>>>
+>>>> a with a probability of 10 / ( 10 + 10 + 10 + 10 + 1 ) = 10 / 41
+>>>> same for b, c, d
+>>>> e with a probability of 1 / 41
+>>>>
+>>>> after 100,000 placements, the bins have
+>>>>
+>>>> a = 243456
+>>>> b = 243624
+>>>> c = 244486
+>>>> d = 243881
+>>>> e = 24553
+>>>>
+>>>> they are
+>>>>
+>>>> a = 2.43 % full
+>>>> b = 2.43 % full
+>>>> c = 2.44 % full
+>>>> d = 2.43 % full
+>>>> e = 0.24 % full
+>>>>
+>>>> In the second experience
+>>>>
+>>>>
+>>>>>> sage
+>>>>>>
+>>>>>>
+>>>>>>>
+>>>>>>>>
+>>>>>>>>> properly for num_rep = 2.  With a test bucket of [99 99 99 99 4], and the
+>>>>>>>>> current code, you get
+>>>>>>>>>
+>>>>>>>>> $ bin/crushtool -c cm.txt --test --show-utilization --min-x 0 --max-x 40000000 --num-rep 2
+>>>>>>>>> rule 0 (data), x = 0..40000000, numrep = 2..2
+>>>>>>>>> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
+>>>>>>>>>   device 0:             19765965        [9899364,9866601]
+>>>>>>>>>   device 1:             19768033        [9899444,9868589]
+>>>>>>>>>   device 2:             19769938        [9901770,9868168]
+>>>>>>>>>   device 3:             19766918        [9898851,9868067]
+>>>>>>>>>   device 6:             929148  [400572,528576]
+>>>>>>>>>
+>>>>>>>>> which is very close for the first replica (primary), but way off for the
+>>>>>>>>> second.  With my hacky change,
+>>>>>>>>>
+>>>>>>>>> rule 0 (data), x = 0..40000000, numrep = 2..2
+>>>>>>>>> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
+>>>>>>>>>   device 0:             19797315        [9899364,9897951]
+>>>>>>>>>   device 1:             19799199        [9899444,9899755]
+>>>>>>>>>   device 2:             19801016        [9901770,9899246]
+>>>>>>>>>   device 3:             19797906        [9898851,9899055]
+>>>>>>>>>   device 6:             804566  [400572,403994]
+>>>>>>>>>
+>>>>>>>>> which is quite close, but still skewing slightly high (by a big less than
+>>>>>>>>> 1%).
+>>>>>>>>>
+>>>>>>>>> Next steps:
+>>>>>>>>>
+>>>>>>>>> 1- generalize this for >2 replicas
+>>>>>>>>> 2- figure out why it skews high
+>>>>>>>>> 3- make this work for multi-level hierarchical descent
+>>>>>>>>>
+>>>>>>>>> sage
+>>>>>>>>>
+>>>>>>>>> --
+>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>
+>>>>>>> --
+>>>>>>> Loïc Dachary, Artisan Logiciel Libre
+>>>>>>> --
+>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>
+>>>>>
+>>>>
+>>>> --
+>>>> Loïc Dachary, Artisan Logiciel Libre
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>>
+>>
+>> --
+>> Loïc Dachary, Artisan Logiciel Libre
+> 
+> 
+> 
 
-All it's doing is checking a flag under a lock; the same lock is taken
-in ceph_osdc_start_request().  Why would exporting
-
-bool ceph_osdc_pool_full(osdc, pool_id)
-{
-    bool ret;
-
-    down_read(&osdc->lock);
-    ret = ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
-                                   pool_full(osdc, pool_id);
-    up_read(&osdc->lock);
-    return ret;
-}
-
-not work?  IOW why special case request handling code if you know in
-advance that the request is a goner?
-
-Thanks,
-
-                Ilya
+-- 
+Loïc Dachary, Artisan Logiciel Libre
