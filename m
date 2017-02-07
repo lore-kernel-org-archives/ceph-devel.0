@@ -1,117 +1,142 @@
-From: myoungwon oh <ohmyoungwon@gmail.com>
-Subject: Re: Question about writeback performance and content address obejct
- for deduplication
-Date: Tue, 7 Feb 2017 20:03:37 +0900
-Message-ID: <CAFNt83Z1+n+uEGo_58DmrXYxfNQe_GzG4iTYtBdDnt6PEYvdHQ@mail.gmail.com>
-References: <CAFNt83bds6KzCnMvxyN=vPu7dg_NyX3cHdZwgmhiQqKt4B314A@mail.gmail.com>
- <alpine.DEB.2.11.1701311420210.3654@piezo.novalocal>
+From: Miklos Szeredi <miklos-sUDqSbJrdHQHWmgEVkV9KA@public.gmane.org>
+Subject: Re: [PATCH v3 0/2] iov_iter: allow iov_iter_get_pages_alloc to
+ allocate more pages per call
+Date: Tue, 7 Feb 2017 12:35:54 +0100
+Message-ID: <20170207113554.GA30656@veci.piliscsaba.szeredi.hu>
+References: <20170205015145.GB13195@ZenIV.linux.org.uk>
+ <CAJfpegv=r9J8Mqax_ZAB2h5QbRgJMHwyVMENTpYZ8u3_pqNfJw@mail.gmail.com>
+ <20170205210151.GD13195@ZenIV.linux.org.uk>
+ <CAJfpeguzOgX9d+5XCNJcmXW5KkrGbnWB5aZSP1-0q3a6i6uk2w@mail.gmail.com>
+ <20170205220445.GE13195@ZenIV.linux.org.uk>
+ <20170206030532.GF13195@ZenIV.linux.org.uk>
+ <CAJfpegv5ZGd2gzSbQvgk4uX5q06AijY+TNg2jdrPBSjbFoXMfg@mail.gmail.com>
+ <20170206095706.GG13195@ZenIV.linux.org.uk>
+ <CAJfpegv-ePQE9pNwZe6O+0LjJdq2aVk3bnhxeZ=y7P+iFq72XA@mail.gmail.com>
+ <20170207071909.GI13195@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f178.google.com ([209.85.217.178]:34501 "EHLO
-        mail-ua0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752437AbdBGLDi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Feb 2017 06:03:38 -0500
-Received: by mail-ua0-f178.google.com with SMTP id 35so81761864uak.1
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Feb 2017 03:03:38 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1701311420210.3654@piezo.novalocal>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, sweil@redhat.com, =?UTF-8?B?7Jik66qF7JuQ?= <omwmw@sk.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170207071909.GI13195-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+Cc: linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux NFS list <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, "Kirill A. Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi sage.
+On Tue, Feb 07, 2017 at 07:19:09AM +0000, Al Viro wrote:
 
-I uploaded the document which describe my overall appoach.
-please see it and give me feedback.
-slide: https://www.slideshare.net/secret/JZcy3yYEDIHPyg
+> Speaking of refcounting - what's going on with fuse_file one?  My reading
+> of that code is that you have 4 states of that thing:
+> 	* new (just created, fallback request allocated, use fuse_file_free()
+> to kill).  Refcount is 0.
+> 	* intermediate - in fact it's already opened, but still not
+> put into ->private_data.  Refcount is still 0.  Use fuse_sync_release() to kill.
+> 	* live - normal refcounting (fuse_file_get()/fuse_file_put()).
+> 	* shutdown - refcount has reached 0.  Can't happen until ->release()
+> (obviously - ->private_data holds a counting reference), some pieces of
+> fuse_sync_release() correspond to some stuff in fuse_release_common(), some -
+> to final fuse_file_put().
+> 
+> To make it even more convoluted, cuse is using fuse_sync_release() and
+> apparently relies upon no references being grabbed after fuse_do_open(),
+> so that thing can be called with refcount 0 *or* refcount 1.
 
-thanks
+Indeed, ugly.  Following should clean that up somewhat.  The states remain what
+they are but refcounting is at least consistent now.  This also fixes a missing
+FR_FORCE in the sync case.
+ 
+> Another thing: what guarantees that places in writepages-related paths
+> where we store a reference into req->ff won't hit a request with already
+> non-NULL ->ff?
 
+Well, it is set before being sent (queued onto queued_writes or queued on the
+fuse device), but not when queued as secondary request onto an already in-flight
+one.  It looks okay to me.
 
-2017-01-31 23:24 GMT+09:00 Sage Weil <sage@newdream.net>:
-> On Thu, 26 Jan 2017, myoungwon oh wrote:
->> I have two questions.
->>
->> 1. I would like to ask about CAS location. current our implementation store
->> content address object in storage tier.However, If we store the CAO in the
->> cache tier, we can get a performance advantage. Do you think we can create
->> CAO in cachetier? or create a separate storage pool for CAS?
->
-> It depends on the design.  If the you are naming the objects at the
-> librados client side, then you can use the rados cluster itself
-> unmodified (with or without a cache tier).  This is roughly how I have
-> anticipated implementing the CAS storage portion.  If you are doing the
-> chunking hashing and within the OSD itself, then you can't do the CAS
-> at the first tier because the requests won't be directed at the right OSD.
->
->> 2. The results below are performance result for our current implementation.
->> experiment setup:
->> PROXY (inline dedup), WRITEBACK (lazy dedup, target_max_bytes: 50MB),
->> ORIGINAL(without dedup feature and cache tier),
->> fio, 512K block, seq. I/O, single thread
->>
->> One thing to note is that the writeback case is slower than the proxy.
->> We think there are three problems as follows.
->>
->> A. The current implementation creates a fingerprint by reading the entire
->> object when flushing. Therefore, there is a problem that read and write are
->> mixed.
->
-> I expect this is a small factor compared to the fact that in writeback
-> mode you have to *write* to the cache tier, which is 3x replicated,
-> whereas in proxy mode those writes don't happen at all.
->
->> B. When client request read, the promote_object function reads the object
->> and writes it back to the cache tier, which also causes a mix of read and
->> write.
->
-> This can be mitigated by setting the min_read_recency_for_promote pool
-> property to something >1.  Then reads will be proxied unless the object
-> appears to be hot (because it has been touched over multiple
-> hitset intervals).
->
->> C. When flushing, the unchanged part is rewritten because flush operation
->> perform per-object based.
->
-> Yes.
->
-> Is there a description of your overall approach somewhere?
->
-> sage
->
->
->>
->> Do I have something wrong? or Could you give me a suggestion to improve
->> performance?
->>
->>
->> a. Write performance (KB/s)
->>
->> dedup_ratio  0 20 40 60 80 100
->>
->> PROXY  45586 47804 51120 52844 56167 55302
->>
->> WRITEBACK  13151 11078 9531 13010 9518 8319
->>
->> ORIGINAL  121209 124786 122140 121195 122540 132363
->>
->>
->> b. Read performance (KB/s)
->>
->> dedup_ratio  0 20 40 60 80 100
->>
->> PROXY  112231 118994 118070 120071 117884 132748
->>
->> WRITEBACK  34040 29109 19104 26677 24756 21695
->>
->> ORIGINAL  285482 284398 278063 277989 271793 285094
->>
->>
->> thanks,
->> Myoungwon Oh
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+Thanks,
+Miklos
+
+diff --git a/fs/fuse/dir.c b/fs/fuse/dir.c
+index 811fd8929a18..e816166ce42f 100644
+--- a/fs/fuse/dir.c
++++ b/fs/fuse/dir.c
+@@ -473,7 +473,7 @@ static int fuse_create_open(struct inode *dir, struct dentry *entry,
+ 	if (err) {
+ 		fuse_sync_release(ff, flags);
+ 	} else {
+-		file->private_data = fuse_file_get(ff);
++		file->private_data = ff;
+ 		fuse_finish_open(inode, file);
+ 	}
+ 	return err;
+diff --git a/fs/fuse/file.c b/fs/fuse/file.c
+index 2401c5dabb2a..94cc4ab01f9a 100644
+--- a/fs/fuse/file.c
++++ b/fs/fuse/file.c
+@@ -58,7 +58,7 @@ struct fuse_file *fuse_file_alloc(struct fuse_conn *fc)
+ 	}
+ 
+ 	INIT_LIST_HEAD(&ff->write_entry);
+-	atomic_set(&ff->count, 0);
++	atomic_set(&ff->count, 1);
+ 	RB_CLEAR_NODE(&ff->polled_node);
+ 	init_waitqueue_head(&ff->poll_wait);
+ 
+@@ -75,7 +75,7 @@ void fuse_file_free(struct fuse_file *ff)
+ 	kfree(ff);
+ }
+ 
+-struct fuse_file *fuse_file_get(struct fuse_file *ff)
++static struct fuse_file *fuse_file_get(struct fuse_file *ff)
+ {
+ 	atomic_inc(&ff->count);
+ 	return ff;
+@@ -100,6 +100,7 @@ static void fuse_file_put(struct fuse_file *ff, bool sync)
+ 			iput(req->misc.release.inode);
+ 			fuse_put_request(ff->fc, req);
+ 		} else if (sync) {
++			__set_bit(FR_FORCE, &req->flags);
+ 			__clear_bit(FR_BACKGROUND, &req->flags);
+ 			fuse_request_send(ff->fc, req);
+ 			iput(req->misc.release.inode);
+@@ -146,7 +147,7 @@ int fuse_do_open(struct fuse_conn *fc, u64 nodeid, struct file *file,
+ 		ff->open_flags &= ~FOPEN_DIRECT_IO;
+ 
+ 	ff->nodeid = nodeid;
+-	file->private_data = fuse_file_get(ff);
++	file->private_data = ff;
+ 
+ 	return 0;
+ }
+@@ -297,13 +298,9 @@ static int fuse_release(struct inode *inode, struct file *file)
+ 
+ void fuse_sync_release(struct fuse_file *ff, int flags)
+ {
+-	WARN_ON(atomic_read(&ff->count) > 1);
++	WARN_ON(atomic_read(&ff->count) != 1);
+ 	fuse_prepare_release(ff, flags, FUSE_RELEASE);
+-	__set_bit(FR_FORCE, &ff->reserved_req->flags);
+-	__clear_bit(FR_BACKGROUND, &ff->reserved_req->flags);
+-	fuse_request_send(ff->fc, ff->reserved_req);
+-	fuse_put_request(ff->fc, ff->reserved_req);
+-	kfree(ff);
++	fuse_file_put(ff, true);
+ }
+ EXPORT_SYMBOL_GPL(fuse_sync_release);
+ 
+diff --git a/fs/fuse/fuse_i.h b/fs/fuse/fuse_i.h
+index 91307940c8ac..83f797271aef 100644
+--- a/fs/fuse/fuse_i.h
++++ b/fs/fuse/fuse_i.h
+@@ -732,7 +732,6 @@ void fuse_read_fill(struct fuse_req *req, struct file *file,
+ int fuse_open_common(struct inode *inode, struct file *file, bool isdir);
+ 
+ struct fuse_file *fuse_file_alloc(struct fuse_conn *fc);
+-struct fuse_file *fuse_file_get(struct fuse_file *ff);
+ void fuse_file_free(struct fuse_file *ff);
+ void fuse_finish_open(struct inode *inode, struct file *file);
+ 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
