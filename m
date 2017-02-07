@@ -1,25 +1,30 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: switch "ms bind ipv6" default to "true"?
-Date: Tue, 7 Feb 2017 12:33:28 -0700
-Message-ID: <CALqRxCxqUP6V0enicL4EM=aeH1Qt5G0vvmcrqQrmAa9TirpLoQ@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: ceph branch status
+Date: Tue, 7 Feb 2017 11:40:11 -0800
+Message-ID: <CAJ4mKGY7cAU2L_+x2EwL9mg_ZM9vrs3wzpNFtCsKhhXnLn3AEg@mail.gmail.com>
+References: <20170206160006.7191428037F@teuthology.front.sepia.ceph.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f170.google.com ([209.85.217.170]:33865 "EHLO
-        mail-ua0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754509AbdBGTd3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Feb 2017 14:33:29 -0500
-Received: by mail-ua0-f170.google.com with SMTP id 35so92633037uak.1
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Feb 2017 11:33:29 -0800 (PST)
+Received: from mail-ot0-f172.google.com ([74.125.82.172]:33249 "EHLO
+        mail-ot0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755103AbdBGTkc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Feb 2017 14:40:32 -0500
+Received: by mail-ot0-f172.google.com with SMTP id 73so94480297otj.0
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Feb 2017 11:40:13 -0800 (PST)
+In-Reply-To: <20170206160006.7191428037F@teuthology.front.sepia.ceph.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-In ceph-ansible we have to determine whether the user wants to bind to
-IPv6 or not, and set "ms bind ipv6 = true".
+I presume this is now only reporting what's left in ceph.git.
 
-Could we make this easier for users and simply have this as the
-default option in Ceph? What is the downside to defaulting ms bind
-ipv6 to true?
+Do we want to clean up ceph-ci.git as well, or is that not a concern
+because only the test building infrastructure needs to handle its
+objects?
+-Greg
 
-- Ken
+On Mon, Feb 6, 2017 at 8:00 AM, ceph branch robot <nobody@ceph.com> wrote:
+> -- All Branches --
+
+<snip>
