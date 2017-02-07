@@ -1,54 +1,55 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v3 0/5] ceph: implement new-style ENOSPC handling in kcephfs
-Date: Tue,  7 Feb 2017 07:28:23 -0500
-Message-ID: <20170207122828.5550-1-jlayton@redhat.com>
+Subject: [PATCH v3 4/5] ceph: register map callback to handle ENOSPC conditions
+Date: Tue,  7 Feb 2017 07:28:27 -0500
+Message-ID: <20170207122828.5550-5-jlayton@redhat.com>
+References: <20170207122828.5550-1-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:34576 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49086 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753591AbdBGM2a (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 7 Feb 2017 07:28:30 -0500
+        id S1753591AbdBGM2c (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 7 Feb 2017 07:28:32 -0500
+In-Reply-To: <20170207122828.5550-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, jspray@redhat.com
 
-v3: track "abort_on_full" behavior with a new bool in osd request
-instead of a protocol flag. Remove some extraneous arguments from
-various functions. Don't export have_pool_full, call it from the
-abort_on_full callback instead.
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+---
+ fs/ceph/mds_client.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-v2: teach libcephfs how to hold on to requests until the right map
-epoch appears, instead of delaying cap handling in the cephfs layer.
-
-This patchset is an updated version of the patch series originally
-done by John Spray and posted here:
-
-    http://www.spinics.net/lists/ceph-devel/msg21257.html
-
-This version incorporates changes based on Ilya's cursory review
-yesterday. It also cleans up the handling of requests that should
-be aborted on a full condition. The patch that exports have_pool_full
-has also been dropped since it's no longer needed.
-
-Jeff Layton (4):
-  libceph: allow requests to return immediately on full conditions if
-    caller wishes
-  libceph: add an epoch_barrier field to struct ceph_osd_client
-  ceph: register map callback to handle ENOSPC conditions
-  ceph: handle epoch barriers in cap messages
-
-John Spray (1):
-  libceph: add ceph_osdc_abort_on_full
-
- fs/ceph/addr.c                  |   4 ++
- fs/ceph/caps.c                  |  17 +++++--
- fs/ceph/file.c                  |   4 ++
- fs/ceph/mds_client.c            |  33 +++++++++++++
- fs/ceph/mds_client.h            |   7 ++-
- include/linux/ceph/osd_client.h |   7 +++
- net/ceph/osd_client.c           | 100 ++++++++++++++++++++++++++++++++++++----
- 7 files changed, 158 insertions(+), 14 deletions(-)
-
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index 93fc893e1930..fcf1e5313c16 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -433,6 +433,18 @@ static int __verify_registered_session(struct ceph_mds_client *mdsc,
+ 	return 0;
+ }
+ 
++static void handle_osd_map(struct ceph_osd_client *osdc)
++{
++	u32 cancelled_epoch;
++
++	lockdep_assert_held(&osdc->lock);
++
++	cancelled_epoch = ceph_osdc_abort_on_full(osdc);
++	if (cancelled_epoch)
++		osdc->epoch_barrier = max(cancelled_epoch + 1,
++					  osdc->epoch_barrier);
++}
++
+ /*
+  * create+register a new session for given mds.
+  * called under mdsc->mutex.
+@@ -3485,6 +3497,7 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
+ 
+ 	ceph_caps_init(mdsc);
+ 	ceph_adjust_min_caps(mdsc, fsc->min_caps);
++	fsc->client->osdc.map_cb = handle_osd_map;
+ 
+ 	init_rwsem(&mdsc->pool_perm_rwsem);
+ 	mdsc->pool_perm_tree = RB_ROOT;
 -- 
 2.9.3
 
