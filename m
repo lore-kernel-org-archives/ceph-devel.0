@@ -1,243 +1,168 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: CBT: New RGW getput benchmark and testing diary
-Date: Tue, 7 Feb 2017 10:11:14 -0600
-Message-ID: <cafd01c4-9f0f-84f9-73a7-1efc81d814df@redhat.com>
-References: <8700753c-8440-695e-d529-e83b0fb2ba90@redhat.com>
- <968924677.101057209.1486395840825.JavaMail.zimbra@redhat.com>
- <CABo9giR1f1SvSjd=A35UkcxAr-Z8iAjNSn16ek6NnTPLfn3MyA@mail.gmail.com>
- <01840430-ea0a-733c-a26b-39432506f3ba@redhat.com>
- <CABo9giQbFi5qyr4nSX8hYrRjUh+HeBxm7COJ-ukzeVuYyZinBA@mail.gmail.com>
- <c36d54f8-ea14-5fd1-3636-c5b7808325cc@redhat.com>
- <CABo9giQB6dk+jxuz+b7GGJvcEwM+3KqRBNBGmexb3ED9MMZGeA@mail.gmail.com>
- <bb135081-1251-7c37-1000-2ca48564e82b@redhat.com>
- <1635738483.101691681.1486483364550.JavaMail.zimbra@redhat.com>
+From: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?=
+        <bartlomiej.swiecki@corp.ovh.com>
+Subject: Re: Proposition - latency histogram
+Date: Tue, 7 Feb 2017 17:30:39 +0100
+Message-ID: <372caf99-4fc4-f6a9-6620-5dfacdbfa758@corp.ovh.com>
+References: <69bf4eec-3959-f021-ad8f-d1b6d3e2ceaf@corp.ovh.com>
+ <b2b52f75-0e26-2dac-df6a-ea7bfd91a973@corp.ovh.com>
+ <985bd632-be25-e281-9249-d4ef5772c821@corp.ovh.com>
+ <59a75537-852a-94ad-b28d-958d7e0555f2@corp.ovh.com>
+ <CALe9h7dyLo8QKJOG6tjL5CwS4Yoq+naidrK1iw5tJGD6yp6vbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40038 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755101AbdBGQLQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 7 Feb 2017 11:11:16 -0500
-In-Reply-To: <1635738483.101691681.1486483364550.JavaMail.zimbra@redhat.com>
+Received: from 10.mo302.mail-out.ovh.net ([137.74.110.83]:48792 "EHLO
+        10.mo302.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755083AbdBGQat (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Feb 2017 11:30:49 -0500
+In-Reply-To: <CALe9h7dyLo8QKJOG6tjL5CwS4Yoq+naidrK1iw5tJGD6yp6vbA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Benjamin <mbenjamin@redhat.com>
-Cc: Orit Wasserman <owasserm@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com, Mark Seger <mjseger@gmail.com>, Kyle Bader <kbader@redhat.com>, Karan Singh <karan@redhat.com>, Brent Compton <bcompton@redhat.com>
+To: John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Thanks Matt!
+Hi John,
 
-Just so I understand, how does the byte throttling impact the number of 
-threads used under a heavy client connection scenario?  IE if you have 
-2000 threads and 2000 clients connect (1 thread per client?), What 
-ensures that additional threads are available for bucket index lookups?
+This looks awesome! I really hope to see this kind of tools in ceph-mgr.
 
-Sorry for the weedy questions, just trying to make sure I understand how 
-this all works since I've never really looked closely at it and I'm 
-seeing some strange behavior.
+Actually the idea of adding histograms came up after some nasty performance
+issues we investigated in one of our production clusters where this kind
+of tool would help us identify the issue much quicker.
 
-Mark
+What I think would be really helpful is to
+  1) be able to automatically detect anomalies - in case of this 2D 
+histogram
+     it could be as simple as splitting the whole square into set of regions
+     (i.e. regions with meaning: OK, WARN, ERROR) and check if there's 
+activity
+     inside of them
+  2) if there's an anomaly, provide manual tools to "zoom" into the issue so
+     that the cause can be precisely investigated
 
-On 02/07/2017 10:02 AM, Matt Benjamin wrote:
-> Hi Mark,
+ From what I understood so far, ceph-mgr is going exactly into that 
+direction.
+
+Regards,
+Bartek
+
+On 02/06/2017 12:54 PM, John Spray wrote:
+> On Tue, Jan 31, 2017 at 3:33 PM, Bartłomiej Święcki
+> <bartlomiej.swiecki@corp.ovh.com> wrote:
+>> Attached is a sample output from test python script (included in PR)
+>> to display live results.
+> This is very cool, and inspired me to build a colored version in to a
+> toy gui that I've been using to exercise ceph-mgr.
+> http://imgur.com/a/TG5kc (it a super-primitive rendering using linear
+> color scale on cells of a <table>)
 >
-> There are rgw and rados-level throttling parameters.  There are known issues of fairness.  The only scenario we know of where something like the "deadlock" you're theorizing can happen is possible only when byte-throttling is incorrectly configured.
+> I did that by exposing the perf counters via the MCommand (`tell`)
+> interface on the OSD so that the UI could poll them.
 >
-> Matt
+> I think there are two main use cases for these plots:
+>   * System-wide (average of OSDs): what are my doing/experiencing?
+>   * Individual OSD: is this OSD healthy?  Potentially would plot this
+> as a delta against the systemwide average to highlight OSDs behaving
+> badly.
 >
-> ----- Original Message -----
->> From: "Mark Nelson" <mnelson@redhat.com>
->> To: "Orit Wasserman" <owasserm@redhat.com>
->> Cc: "Matt Benjamin" <mbenjamin@redhat.com>, "ceph-devel" <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com, "Mark
->> Seger" <mjseger@gmail.com>, "Kyle Bader" <kbader@redhat.com>, "Karan Singh" <karan@redhat.com>, "Brent Compton"
->> <bcompton@redhat.com>
->> Sent: Tuesday, February 7, 2017 10:23:05 AM
->> Subject: Re: CBT: New RGW getput benchmark and testing diary
+> Currently, ordinary perf counters are getting shipped back to ceph-mgr
+> continuously, so we would need to decide whether we want to do the
+> same for the larger histogram ones, or whether we would expose them
+> via `tell` so that any interested parties could fetch them on demand.
+> The main benefit to continuously sending them would be that ceph-mgr
+> could maintain a continuous sum/average across all the OSDs.  The cost
+> depends how widely we use this data type: if there were only a few
+> histograms per osd (osd read, osd write, store read, store write),
+> then I suspect we could get away with transmitting them around quite
+> freely.
+>
+> The 2D data is awesome and I can't see us not wanting this, though
+> there will also be at least some key places we want 1D data,
+> especially for the MDS where metadata ops don't have a size dimension.
+>
+> John
+>
+>
 >>
->>
->>
->> On 02/07/2017 09:03 AM, Orit Wasserman wrote:
->>> On Tue, Feb 7, 2017 at 4:47 PM, Mark Nelson <mnelson@redhat.com> wrote:
->>>> Hi Orit,
->>>>
->>>> This was a pull from master over the weekend:
->>>> 5bf39156d8312d65ef77822fbede73fd9454591f
->>>>
->>>> Btw, I've been noticing that it appears when bucket index sharding is
->>>> used,
->>>> there's a higher likelyhood that client connection attempts are delayed or
->>>> starved out entirely under high concurrency.  I haven't looked at the code
->>>> yet, does this match with what you'd expect to happen?  I assume the
->>>> threadpool is shared?
->>>>
->>> yes it is shared.
->>
->> Ok, so that probably explains the behavior I'm seeing.  Perhaps a more
->> serious issue:  Do we have anything in place to stop a herd of clients
->> from connecting, starving out bucket index lookups, and making
->> everything deadlock?
->>
+>> On 01/31/2017 04:22 PM, Bartłomiej Święcki wrote:
+>>> Hi,
 >>>
->>>> Mark
+>>> Bringing back performance histograms:
+>>> https://github.com/ceph/ceph/pull/12829
+>>> I've updated the PR, rebased on master and made internal changes less
+>>> aggressive.
+>>>
+>>> All ctest tests passing and I haven't seen any issues with performance
+>>> (and I can actually see much better what the performance characteristics
+>>> are
+>>>
+>>> Waiting for your comments,
+>>> Bartek
+>>>
+>>>
+>>>
+>>> Looking
+>>>
+>>> On 01/09/2017 12:27 PM, Bartłomiej Święcki wrote:
+>>>> Hi,
+>>>>
+>>>> I've made a simple implementation of performance histograms.
+>>>> Implementation is not very sophisticated
+>>>> but I think it could be a good start for more detailed discussion.
+>>>>
+>>>> Here's the PR: https://github.com/ceph/ceph/pull/12829
 >>>>
 >>>>
->>>> On 02/07/2017 07:50 AM, Orit Wasserman wrote:
+>>>> Regards,
+>>>> Bartek
+>>>>
+>>>>
+>>>> On 11/28/2016 05:22 PM, Bartłomiej Święcki wrote:
+>>>>> Hi,
 >>>>>
->>>>> Mark,
->>>>> On what version did you run the tests?
 >>>>>
->>>>> Orit
+>>>>> Currently we can query OSD for op latency but it's given as an average.
+>>>>> Average may not give
+>>>>> the bets information in this case - i.e. spikes can easily get hidden
+>>>>> there.
 >>>>>
->>>>> On Mon, Feb 6, 2017 at 7:07 PM, Mark Nelson <mnelson@redhat.com> wrote:
->>>>>>
->>>>>>
->>>>>>
->>>>>> On 02/06/2017 11:02 AM, Orit Wasserman wrote:
->>>>>>>
->>>>>>>
->>>>>>> On Mon, Feb 6, 2017 at 5:44 PM, Matt Benjamin <mbenjamin@redhat.com>
->>>>>>> wrote:
->>>>>>>>
->>>>>>>>
->>>>>>>> Keep in mind, RGW does most of its request processing work in civetweb
->>>>>>>> threads, so high utilization there does not necessarily imply
->>>>>>>> civetweb-internal processing.
->>>>>>>>
->>>>>>>
->>>>>>> True but the request processing is not a CPU intensive operation.
->>>>>>> It does seems to indicate that the civetweb threading model simply
->>>>>>> doesn't scale (we already noticed it already) or maybe it can point to
->>>>>>> some locking issue. We need to run a profiler to understand what is
->>>>>>> consuming CPU.
->>>>>>> It maybe a simple fix until we move to asynchronous frontend.
->>>>>>> It worth investigating as the CPU usage mark is seeing  is really high.
->>>>>>
->>>>>>
->>>>>>
->>>>>> The initial profiling I did definitely showed a lot of tcmalloc
->>>>>> threading
->>>>>> activity, which diminshed after increasing threadcache.  This is quite
->>>>>> similar to what we saw in simplemessenger with low threadcache values,
->>>>>> though likely is less true with async messenger.  Sadly a profiler like
->>>>>> perf
->>>>>> probably isn't going to help much with debugging lock contention.
->>>>>> grabbing
->>>>>> GDB stack traces might help, or lttng.
->>>>>>
->>>>>>>
->>>>>>> Mark,
->>>>>>> How many concurrent request were handled?
->>>>>>
->>>>>>
->>>>>>
->>>>>> Most of the tests had 128 concurrent IOs per radosgw daemon.  The max
->>>>>> thread
->>>>>> count was increased to 512.  It was very obvious when exceeding the
->>>>>> thread
->>>>>> count since some getput processes will end up stalling and doing their
->>>>>> writes after others, leading to bogus performance data.
->>>>>>
->>>>>>
->>>>>>>
->>>>>>> Orit
->>>>>>>
->>>>>>>> Matt
->>>>>>>>
->>>>>>>> ----- Original Message -----
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> From: "Mark Nelson" <mnelson@redhat.com>
->>>>>>>>> To: "Matt Benjamin" <mbenjamin@redhat.com>
->>>>>>>>> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com,
->>>>>>>>> "Mark
->>>>>>>>> Seger" <mjseger@gmail.com>, "Kyle Bader"
->>>>>>>>> <kbader@redhat.com>, "Karan Singh" <karan@redhat.com>, "Brent
->>>>>>>>> Compton"
->>>>>>>>> <bcompton@redhat.com>
->>>>>>>>> Sent: Monday, February 6, 2017 10:42:04 AM
->>>>>>>>> Subject: Re: CBT: New RGW getput benchmark and testing diary
->>>>>>>>>
->>>>>>>>> Just based on what I saw during these tests, it looks to me like a
->>>>>>>>> lot
->>>>>>>>> more time was spent dealing with civetweb's threads than RGW.  I
->>>>>>>>> didn't
->>>>>>>>> look too closely, but it may be worth looking at whether there's any
->>>>>>>>> low
->>>>>>>>> hanging fruit in civetweb itself.
->>>>>>>>>
->>>>>>>>> Mark
->>>>>>>>>
->>>>>>>>> On 02/06/2017 09:33 AM, Matt Benjamin wrote:
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>> Thanks for the detailed effort and analysis, Mark.
->>>>>>>>>>
->>>>>>>>>> As we get closer to the L time-frame, it should become relevant to
->>>>>>>>>> look
->>>>>>>>>> at
->>>>>>>>>> the relative boost::asio frontend rework i/o paths, which are the
->>>>>>>>>> open
->>>>>>>>>> effort to reduce CPU overhead/revise threading model, in general.
->>>>>>>>>>
->>>>>>>>>> Matt
->>>>>>>>>>
->>>>>>>>>> ----- Original Message -----
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>> From: "Mark Nelson" <mnelson@redhat.com>
->>>>>>>>>>> To: "ceph-devel" <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com
->>>>>>>>>>> Cc: "Mark Seger" <mjseger@gmail.com>, "Kyle Bader"
->>>>>>>>>>> <kbader@redhat.com>,
->>>>>>>>>>> "Karan Singh" <karan@redhat.com>, "Brent
->>>>>>>>>>> Compton" <bcompton@redhat.com>
->>>>>>>>>>> Sent: Monday, February 6, 2017 12:55:20 AM
->>>>>>>>>>> Subject: CBT: New RGW getput benchmark and testing diary
->>>>>>>>>>>
->>>>>>>>>>> Hi All,
->>>>>>>>>>>
->>>>>>>>>>> Over the weekend I took a stab at improving our ability to run RGW
->>>>>>>>>>> performance tests in CBT.  Previously the only way to do this was
->>>>>>>>>>> to
->>>>>>>>>>> use
->>>>>>>>>>> the cosbench plugin, which required a fair amount of additional
->>>>>>>>>>> setup and while quite powerful can be overkill in situations where
->>>>>>>>>>> you
->>>>>>>>>>> want to rapidly iterate over tests looking for specific issues.  A
->>>>>>>>>>> while
->>>>>>>>>>> ago Mark Seger from HP told me he had created a swift benchmark
->>>>>>>>>>> called
->>>>>>>>>>> "getput" that is written in python and is much more convenient to
->>>>>>>>>>> run
->>>>>>>>>>> quickly in an automated fashion.  Normally getput is used in
->>>>>>>>>>> conjunction
->>>>>>>>>>> with gpsuite, a tool for coordinating benchmarking multiple getput
->>>>>>>>>>> processes.  This is how you would likely use getput on a typical
->>>>>>>>>>> ceph
->>>>>>>>>>> or
->>>>>>>>>>> swift cluster, but since CBT builds the cluster and has it's own
->>>>>>>>>>> way
->>>>>>>>>>> for
->>>>>>>>>>> launching multiple benchmark processes, it uses getput directly.
->>>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>
->>>>>>>>
->>>>>>>> --
->>>>>>>> Matt Benjamin
->>>>>>>> Red Hat, Inc.
->>>>>>>> 315 West Huron Street, Suite 140A
->>>>>>>> Ann Arbor, Michigan 48103
->>>>>>>>
->>>>>>>> http://www.redhat.com/en/technologies/storage
->>>>>>>>
->>>>>>>> tel.  734-821-5101
->>>>>>>> fax.  734-769-8938
->>>>>>>> cel.  734-216-5309
->>>>>>>> --
->>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>>>>> in
->>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>> Instead of an average we could easily do a simple histogram - quantize
+>>>>> the latency into
+>>>>> predefined set of time intervals, for each of them have a simple
+>>>>> performance counter,
+>>>>> at each op increase one of them. Since those are per OSD, we could have
+>>>>> pretty high resolution
+>>>>> with fractional memory usage, performance impact should be negligible
+>>>>> since only one (two if split
+>>>>> into read and write) of those counters would be incremented per one osd
+>>>>> op.
+>>>>>
+>>>>> In addition we could also do this in 2D - each counter matching given
+>>>>> latency range and op size range.
+>>>>> having such 2D table would show both latency histogram, request size
+>>>>> histogram and combinations of those
+>>>>> (i.e. latency histogram of ~4k ops only).
+>>>>>
+>>>>> What do you think about this idea? I can prepare some code - a simple
+>>>>> proof of concept looks really
+>>>>> straightforward to implement.
+>>>>>
+>>>>>
+>>>>> Bartek
+>>>>>
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>
->
+
