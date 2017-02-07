@@ -1,30 +1,305 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: ceph branch status
-Date: Tue, 7 Feb 2017 11:40:11 -0800
-Message-ID: <CAJ4mKGY7cAU2L_+x2EwL9mg_ZM9vrs3wzpNFtCsKhhXnLn3AEg@mail.gmail.com>
-References: <20170206160006.7191428037F@teuthology.front.sepia.ceph.com>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: CBT: New RGW getput benchmark and testing diary
+Date: Tue, 7 Feb 2017 15:01:13 -0500
+Message-ID: <ef3f887c-0aa9-4ace-c301-1cc663d595aa@redhat.com>
+References: <8700753c-8440-695e-d529-e83b0fb2ba90@redhat.com>
+ <968924677.101057209.1486395840825.JavaMail.zimbra@redhat.com>
+ <CABo9giR1f1SvSjd=A35UkcxAr-Z8iAjNSn16ek6NnTPLfn3MyA@mail.gmail.com>
+ <01840430-ea0a-733c-a26b-39432506f3ba@redhat.com>
+ <CABo9giQbFi5qyr4nSX8hYrRjUh+HeBxm7COJ-ukzeVuYyZinBA@mail.gmail.com>
+ <c36d54f8-ea14-5fd1-3636-c5b7808325cc@redhat.com>
+ <CABo9giQB6dk+jxuz+b7GGJvcEwM+3KqRBNBGmexb3ED9MMZGeA@mail.gmail.com>
+ <bb135081-1251-7c37-1000-2ca48564e82b@redhat.com>
+ <1635738483.101691681.1486483364550.JavaMail.zimbra@redhat.com>
+ <cafd01c4-9f0f-84f9-73a7-1efc81d814df@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f172.google.com ([74.125.82.172]:33249 "EHLO
-        mail-ot0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755103AbdBGTkc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Feb 2017 14:40:32 -0500
-Received: by mail-ot0-f172.google.com with SMTP id 73so94480297otj.0
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Feb 2017 11:40:13 -0800 (PST)
-In-Reply-To: <20170206160006.7191428037F@teuthology.front.sepia.ceph.com>
+Received: from mail-qt0-f176.google.com ([209.85.216.176]:36501 "EHLO
+        mail-qt0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752563AbdBGUBQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Feb 2017 15:01:16 -0500
+Received: by mail-qt0-f176.google.com with SMTP id k15so145715344qtg.3
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Feb 2017 12:01:15 -0800 (PST)
+In-Reply-To: <cafd01c4-9f0f-84f9-73a7-1efc81d814df@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>
+Cc: Orit Wasserman <owasserm@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com, Mark Seger <mjseger@gmail.com>, Kyle Bader <kbader@redhat.com>, Karan Singh <karan@redhat.com>, Brent Compton <bcompton@redhat.com>
 
-I presume this is now only reporting what's left in ceph.git.
 
-Do we want to clean up ceph-ci.git as well, or is that not a concern
-because only the test building infrastructure needs to handle its
-objects?
--Greg
 
-On Mon, Feb 6, 2017 at 8:00 AM, ceph branch robot <nobody@ceph.com> wrote:
-> -- All Branches --
+On 02/07/2017 11:11 AM, Mark Nelson wrote:
+> Thanks Matt!
+>
+> Just so I understand, how does the byte throttling impact the number 
+> of threads used under a heavy client connection scenario? IE if you 
+> have 2000 threads and 2000 clients connect (1 thread per client?), 
+> What ensures that additional threads are available for bucket index 
+> lookups?
 
-<snip>
+Hi Mark,
+
+You're correct that civetweb is 1 thread per client connection. These 
+frontend threads are owned by civetweb, and they call our 
+process_request() function synchronously. Any rados operations required 
+to satisfy a request (bucket index or otherwise) are also synchronous. 
+We're not scheduling other work on frontend threads, so there isn't any 
+potential for deadlock there.
+
+Casey
+
+>
+> Sorry for the weedy questions, just trying to make sure I understand 
+> how this all works since I've never really looked closely at it and 
+> I'm seeing some strange behavior.
+>
+> Mark
+>
+> On 02/07/2017 10:02 AM, Matt Benjamin wrote:
+>> Hi Mark,
+>>
+>> There are rgw and rados-level throttling parameters.  There are known 
+>> issues of fairness.  The only scenario we know of where something 
+>> like the "deadlock" you're theorizing can happen is possible only 
+>> when byte-throttling is incorrectly configured.
+>>
+>> Matt
+>>
+>> ----- Original Message -----
+>>> From: "Mark Nelson" <mnelson@redhat.com>
+>>> To: "Orit Wasserman" <owasserm@redhat.com>
+>>> Cc: "Matt Benjamin" <mbenjamin@redhat.com>, "ceph-devel" 
+>>> <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com, "Mark
+>>> Seger" <mjseger@gmail.com>, "Kyle Bader" <kbader@redhat.com>, "Karan 
+>>> Singh" <karan@redhat.com>, "Brent Compton"
+>>> <bcompton@redhat.com>
+>>> Sent: Tuesday, February 7, 2017 10:23:05 AM
+>>> Subject: Re: CBT: New RGW getput benchmark and testing diary
+>>>
+>>>
+>>>
+>>> On 02/07/2017 09:03 AM, Orit Wasserman wrote:
+>>>> On Tue, Feb 7, 2017 at 4:47 PM, Mark Nelson <mnelson@redhat.com> 
+>>>> wrote:
+>>>>> Hi Orit,
+>>>>>
+>>>>> This was a pull from master over the weekend:
+>>>>> 5bf39156d8312d65ef77822fbede73fd9454591f
+>>>>>
+>>>>> Btw, I've been noticing that it appears when bucket index sharding is
+>>>>> used,
+>>>>> there's a higher likelyhood that client connection attempts are 
+>>>>> delayed or
+>>>>> starved out entirely under high concurrency.  I haven't looked at 
+>>>>> the code
+>>>>> yet, does this match with what you'd expect to happen?  I assume the
+>>>>> threadpool is shared?
+>>>>>
+>>>> yes it is shared.
+>>>
+>>> Ok, so that probably explains the behavior I'm seeing. Perhaps a more
+>>> serious issue:  Do we have anything in place to stop a herd of clients
+>>> from connecting, starving out bucket index lookups, and making
+>>> everything deadlock?
+>>>
+>>>>
+>>>>> Mark
+>>>>>
+>>>>>
+>>>>> On 02/07/2017 07:50 AM, Orit Wasserman wrote:
+>>>>>>
+>>>>>> Mark,
+>>>>>> On what version did you run the tests?
+>>>>>>
+>>>>>> Orit
+>>>>>>
+>>>>>> On Mon, Feb 6, 2017 at 7:07 PM, Mark Nelson <mnelson@redhat.com> 
+>>>>>> wrote:
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>> On 02/06/2017 11:02 AM, Orit Wasserman wrote:
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> On Mon, Feb 6, 2017 at 5:44 PM, Matt Benjamin 
+>>>>>>>> <mbenjamin@redhat.com>
+>>>>>>>> wrote:
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> Keep in mind, RGW does most of its request processing work in 
+>>>>>>>>> civetweb
+>>>>>>>>> threads, so high utilization there does not necessarily imply
+>>>>>>>>> civetweb-internal processing.
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>> True but the request processing is not a CPU intensive operation.
+>>>>>>>> It does seems to indicate that the civetweb threading model simply
+>>>>>>>> doesn't scale (we already noticed it already) or maybe it can 
+>>>>>>>> point to
+>>>>>>>> some locking issue. We need to run a profiler to understand 
+>>>>>>>> what is
+>>>>>>>> consuming CPU.
+>>>>>>>> It maybe a simple fix until we move to asynchronous frontend.
+>>>>>>>> It worth investigating as the CPU usage mark is seeing  is 
+>>>>>>>> really high.
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>> The initial profiling I did definitely showed a lot of tcmalloc
+>>>>>>> threading
+>>>>>>> activity, which diminshed after increasing threadcache.  This is 
+>>>>>>> quite
+>>>>>>> similar to what we saw in simplemessenger with low threadcache 
+>>>>>>> values,
+>>>>>>> though likely is less true with async messenger. Sadly a 
+>>>>>>> profiler like
+>>>>>>> perf
+>>>>>>> probably isn't going to help much with debugging lock contention.
+>>>>>>> grabbing
+>>>>>>> GDB stack traces might help, or lttng.
+>>>>>>>
+>>>>>>>>
+>>>>>>>> Mark,
+>>>>>>>> How many concurrent request were handled?
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>> Most of the tests had 128 concurrent IOs per radosgw daemon.  
+>>>>>>> The max
+>>>>>>> thread
+>>>>>>> count was increased to 512.  It was very obvious when exceeding the
+>>>>>>> thread
+>>>>>>> count since some getput processes will end up stalling and doing 
+>>>>>>> their
+>>>>>>> writes after others, leading to bogus performance data.
+>>>>>>>
+>>>>>>>
+>>>>>>>>
+>>>>>>>> Orit
+>>>>>>>>
+>>>>>>>>> Matt
+>>>>>>>>>
+>>>>>>>>> ----- Original Message -----
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> From: "Mark Nelson" <mnelson@redhat.com>
+>>>>>>>>>> To: "Matt Benjamin" <mbenjamin@redhat.com>
+>>>>>>>>>> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, 
+>>>>>>>>>> cbt@lists.ceph.com,
+>>>>>>>>>> "Mark
+>>>>>>>>>> Seger" <mjseger@gmail.com>, "Kyle Bader"
+>>>>>>>>>> <kbader@redhat.com>, "Karan Singh" <karan@redhat.com>, "Brent
+>>>>>>>>>> Compton"
+>>>>>>>>>> <bcompton@redhat.com>
+>>>>>>>>>> Sent: Monday, February 6, 2017 10:42:04 AM
+>>>>>>>>>> Subject: Re: CBT: New RGW getput benchmark and testing diary
+>>>>>>>>>>
+>>>>>>>>>> Just based on what I saw during these tests, it looks to me 
+>>>>>>>>>> like a
+>>>>>>>>>> lot
+>>>>>>>>>> more time was spent dealing with civetweb's threads than RGW.  I
+>>>>>>>>>> didn't
+>>>>>>>>>> look too closely, but it may be worth looking at whether 
+>>>>>>>>>> there's any
+>>>>>>>>>> low
+>>>>>>>>>> hanging fruit in civetweb itself.
+>>>>>>>>>>
+>>>>>>>>>> Mark
+>>>>>>>>>>
+>>>>>>>>>> On 02/06/2017 09:33 AM, Matt Benjamin wrote:
+>>>>>>>>>>>
+>>>>>>>>>>>
+>>>>>>>>>>> Thanks for the detailed effort and analysis, Mark.
+>>>>>>>>>>>
+>>>>>>>>>>> As we get closer to the L time-frame, it should become 
+>>>>>>>>>>> relevant to
+>>>>>>>>>>> look
+>>>>>>>>>>> at
+>>>>>>>>>>> the relative boost::asio frontend rework i/o paths, which 
+>>>>>>>>>>> are the
+>>>>>>>>>>> open
+>>>>>>>>>>> effort to reduce CPU overhead/revise threading model, in 
+>>>>>>>>>>> general.
+>>>>>>>>>>>
+>>>>>>>>>>> Matt
+>>>>>>>>>>>
+>>>>>>>>>>> ----- Original Message -----
+>>>>>>>>>>>>
+>>>>>>>>>>>>
+>>>>>>>>>>>> From: "Mark Nelson" <mnelson@redhat.com>
+>>>>>>>>>>>> To: "ceph-devel" <ceph-devel@vger.kernel.org>, 
+>>>>>>>>>>>> cbt@lists.ceph.com
+>>>>>>>>>>>> Cc: "Mark Seger" <mjseger@gmail.com>, "Kyle Bader"
+>>>>>>>>>>>> <kbader@redhat.com>,
+>>>>>>>>>>>> "Karan Singh" <karan@redhat.com>, "Brent
+>>>>>>>>>>>> Compton" <bcompton@redhat.com>
+>>>>>>>>>>>> Sent: Monday, February 6, 2017 12:55:20 AM
+>>>>>>>>>>>> Subject: CBT: New RGW getput benchmark and testing diary
+>>>>>>>>>>>>
+>>>>>>>>>>>> Hi All,
+>>>>>>>>>>>>
+>>>>>>>>>>>> Over the weekend I took a stab at improving our ability to 
+>>>>>>>>>>>> run RGW
+>>>>>>>>>>>> performance tests in CBT.  Previously the only way to do 
+>>>>>>>>>>>> this was
+>>>>>>>>>>>> to
+>>>>>>>>>>>> use
+>>>>>>>>>>>> the cosbench plugin, which required a fair amount of 
+>>>>>>>>>>>> additional
+>>>>>>>>>>>> setup and while quite powerful can be overkill in 
+>>>>>>>>>>>> situations where
+>>>>>>>>>>>> you
+>>>>>>>>>>>> want to rapidly iterate over tests looking for specific 
+>>>>>>>>>>>> issues.  A
+>>>>>>>>>>>> while
+>>>>>>>>>>>> ago Mark Seger from HP told me he had created a swift 
+>>>>>>>>>>>> benchmark
+>>>>>>>>>>>> called
+>>>>>>>>>>>> "getput" that is written in python and is much more 
+>>>>>>>>>>>> convenient to
+>>>>>>>>>>>> run
+>>>>>>>>>>>> quickly in an automated fashion.  Normally getput is used in
+>>>>>>>>>>>> conjunction
+>>>>>>>>>>>> with gpsuite, a tool for coordinating benchmarking multiple 
+>>>>>>>>>>>> getput
+>>>>>>>>>>>> processes.  This is how you would likely use getput on a 
+>>>>>>>>>>>> typical
+>>>>>>>>>>>> ceph
+>>>>>>>>>>>> or
+>>>>>>>>>>>> swift cluster, but since CBT builds the cluster and has 
+>>>>>>>>>>>> it's own
+>>>>>>>>>>>> way
+>>>>>>>>>>>> for
+>>>>>>>>>>>> launching multiple benchmark processes, it uses getput 
+>>>>>>>>>>>> directly.
+>>>>>>>>>>>>
+>>>>>>>>>>>
+>>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> -- 
+>>>>>>>>> Matt Benjamin
+>>>>>>>>> Red Hat, Inc.
+>>>>>>>>> 315 West Huron Street, Suite 140A
+>>>>>>>>> Ann Arbor, Michigan 48103
+>>>>>>>>>
+>>>>>>>>> http://www.redhat.com/en/technologies/storage
+>>>>>>>>>
+>>>>>>>>> tel.  734-821-5101
+>>>>>>>>> fax.  734-769-8938
+>>>>>>>>> cel.  734-216-5309
+>>>>>>>>> -- 
+>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe 
+>>>>>>>>> ceph-devel"
+>>>>>>>>> in
+>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
