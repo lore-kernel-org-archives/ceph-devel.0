@@ -1,168 +1,161 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: CBT: New RGW getput benchmark and testing diary
-Date: Tue, 7 Feb 2017 08:47:49 -0600
-Message-ID: <c36d54f8-ea14-5fd1-3636-c5b7808325cc@redhat.com>
-References: <8700753c-8440-695e-d529-e83b0fb2ba90@redhat.com>
- <1143254675.101053582.1486395206606.JavaMail.zimbra@redhat.com>
- <c95df184-aa53-a1a0-a448-0fd0085404d9@redhat.com>
- <968924677.101057209.1486395840825.JavaMail.zimbra@redhat.com>
- <CABo9giR1f1SvSjd=A35UkcxAr-Z8iAjNSn16ek6NnTPLfn3MyA@mail.gmail.com>
- <01840430-ea0a-733c-a26b-39432506f3ba@redhat.com>
- <CABo9giQbFi5qyr4nSX8hYrRjUh+HeBxm7COJ-ukzeVuYyZinBA@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: Question about writeback performance and content address obejct
+ for deduplication
+Date: Tue, 7 Feb 2017 14:50:30 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1702071442411.3654@piezo.novalocal>
+References: <CAFNt83bds6KzCnMvxyN=vPu7dg_NyX3cHdZwgmhiQqKt4B314A@mail.gmail.com> <alpine.DEB.2.11.1701311420210.3654@piezo.novalocal> <CAFNt83Z1+n+uEGo_58DmrXYxfNQe_GzG4iTYtBdDnt6PEYvdHQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43158 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:56654 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753345AbdBGOrv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 7 Feb 2017 09:47:51 -0500
-In-Reply-To: <CABo9giQbFi5qyr4nSX8hYrRjUh+HeBxm7COJ-ukzeVuYyZinBA@mail.gmail.com>
+        id S1753888AbdBGOud (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 7 Feb 2017 09:50:33 -0500
+In-Reply-To: <CAFNt83Z1+n+uEGo_58DmrXYxfNQe_GzG4iTYtBdDnt6PEYvdHQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Orit Wasserman <owasserm@redhat.com>
-Cc: Matt Benjamin <mbenjamin@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com, Mark Seger <mjseger@gmail.com>, Kyle Bader <kbader@redhat.com>, Karan Singh <karan@redhat.com>, Brent Compton <bcompton@redhat.com>
+To: myoungwon oh <ohmyoungwon@gmail.com>
+Cc: ceph-devel@vger.kernel.org, =?EUC-KR?B?v8C47b/4?= <omwmw@sk.com>
 
-Hi Orit,
+On Tue, 7 Feb 2017, myoungwon oh wrote:
+> Hi sage.
+> 
+> I uploaded the document which describe my overall appoach.
+> please see it and give me feedback.
+> slide: https://www.slideshare.net/secret/JZcy3yYEDIHPyg
 
-This was a pull from master over the weekend:
-5bf39156d8312d65ef77822fbede73fd9454591f
+This approach looks pretty close to what we have been planning.  A few 
+comments:
 
-Btw, I've been noticing that it appears when bucket index sharding is 
-used, there's a higher likelyhood that client connection attempts are 
-delayed or starved out entirely under high concurrency.  I haven't 
-looked at the code yet, does this match with what you'd expect to 
-happen?  I assume the threadpool is shared?
+1) I think it may be better to view the tier/pool that has the object 
+metadata as the "base" pool, and the CAS pool with the refcounted 
+object chunks as as tier below that.
 
-Mark
+2) I think we can use an object class or a handful of new native rados 
+operations to make the CAS pool read/write operations more efficient.  In 
+your slides you describe a process something like
 
-On 02/07/2017 07:50 AM, Orit Wasserman wrote:
-> Mark,
-> On what version did you run the tests?
->
-> Orit
->
-> On Mon, Feb 6, 2017 at 7:07 PM, Mark Nelson <mnelson@redhat.com> wrote:
->>
->>
->> On 02/06/2017 11:02 AM, Orit Wasserman wrote:
->>>
->>> On Mon, Feb 6, 2017 at 5:44 PM, Matt Benjamin <mbenjamin@redhat.com>
->>> wrote:
->>>>
->>>> Keep in mind, RGW does most of its request processing work in civetweb
->>>> threads, so high utilization there does not necessarily imply
->>>> civetweb-internal processing.
->>>>
->>>
->>> True but the request processing is not a CPU intensive operation.
->>> It does seems to indicate that the civetweb threading model simply
->>> doesn't scale (we already noticed it already) or maybe it can point to
->>> some locking issue. We need to run a profiler to understand what is
->>> consuming CPU.
->>> It maybe a simple fix until we move to asynchronous frontend.
->>> It worth investigating as the CPU usage mark is seeing  is really high.
->>
->>
->> The initial profiling I did definitely showed a lot of tcmalloc threading
->> activity, which diminshed after increasing threadcache.  This is quite
->> similar to what we saw in simplemessenger with low threadcache values,
->> though likely is less true with async messenger.  Sadly a profiler like perf
->> probably isn't going to help much with debugging lock contention.  grabbing
->> GDB stack traces might help, or lttng.
->>
->>>
->>> Mark,
->>> How many concurrent request were handled?
->>
->>
->> Most of the tests had 128 concurrent IOs per radosgw daemon.  The max thread
->> count was increased to 512.  It was very obvious when exceeding the thread
->> count since some getput processes will end up stalling and doing their
->> writes after others, leading to bogus performance data.
->>
->>
->>>
->>> Orit
->>>
->>>> Matt
->>>>
->>>> ----- Original Message -----
->>>>>
->>>>> From: "Mark Nelson" <mnelson@redhat.com>
->>>>> To: "Matt Benjamin" <mbenjamin@redhat.com>
->>>>> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com, "Mark
->>>>> Seger" <mjseger@gmail.com>, "Kyle Bader"
->>>>> <kbader@redhat.com>, "Karan Singh" <karan@redhat.com>, "Brent Compton"
->>>>> <bcompton@redhat.com>
->>>>> Sent: Monday, February 6, 2017 10:42:04 AM
->>>>> Subject: Re: CBT: New RGW getput benchmark and testing diary
->>>>>
->>>>> Just based on what I saw during these tests, it looks to me like a lot
->>>>> more time was spent dealing with civetweb's threads than RGW.  I didn't
->>>>> look too closely, but it may be worth looking at whether there's any low
->>>>> hanging fruit in civetweb itself.
->>>>>
->>>>> Mark
->>>>>
->>>>> On 02/06/2017 09:33 AM, Matt Benjamin wrote:
->>>>>>
->>>>>> Thanks for the detailed effort and analysis, Mark.
->>>>>>
->>>>>> As we get closer to the L time-frame, it should become relevant to look
->>>>>> at
->>>>>> the relative boost::asio frontend rework i/o paths, which are the open
->>>>>> effort to reduce CPU overhead/revise threading model, in general.
->>>>>>
->>>>>> Matt
->>>>>>
->>>>>> ----- Original Message -----
->>>>>>>
->>>>>>> From: "Mark Nelson" <mnelson@redhat.com>
->>>>>>> To: "ceph-devel" <ceph-devel@vger.kernel.org>, cbt@lists.ceph.com
->>>>>>> Cc: "Mark Seger" <mjseger@gmail.com>, "Kyle Bader"
->>>>>>> <kbader@redhat.com>,
->>>>>>> "Karan Singh" <karan@redhat.com>, "Brent
->>>>>>> Compton" <bcompton@redhat.com>
->>>>>>> Sent: Monday, February 6, 2017 12:55:20 AM
->>>>>>> Subject: CBT: New RGW getput benchmark and testing diary
->>>>>>>
->>>>>>> Hi All,
->>>>>>>
->>>>>>> Over the weekend I took a stab at improving our ability to run RGW
->>>>>>> performance tests in CBT.  Previously the only way to do this was to
->>>>>>> use
->>>>>>> the cosbench plugin, which required a fair amount of additional
->>>>>>> setup and while quite powerful can be overkill in situations where you
->>>>>>> want to rapidly iterate over tests looking for specific issues.  A
->>>>>>> while
->>>>>>> ago Mark Seger from HP told me he had created a swift benchmark called
->>>>>>> "getput" that is written in python and is much more convenient to run
->>>>>>> quickly in an automated fashion.  Normally getput is used in
->>>>>>> conjunction
->>>>>>> with gpsuite, a tool for coordinating benchmarking multiple getput
->>>>>>> processes.  This is how you would likely use getput on a typical ceph
->>>>>>> or
->>>>>>> swift cluster, but since CBT builds the cluster and has it's own way
->>>>>>> for
->>>>>>> launching multiple benchmark processes, it uses getput directly.
->>>>>>>
->>>>>>
->>>>>>
->>>>>
->>>>
->>>> --
->>>> Matt Benjamin
->>>> Red Hat, Inc.
->>>> 315 West Huron Street, Suite 140A
->>>> Ann Arbor, Michigan 48103
->>>>
->>>> http://www.redhat.com/en/technologies/storage
->>>>
->>>> tel.  734-821-5101
->>>> fax.  734-769-8938
->>>> cel.  734-216-5309
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  rados(getattr)
+  if exists
+     rados(increment ref count)
+  else
+     rados(write object and set ref count to 1)
+
+This could be collapsed into a single optimistic operation that sends the 
+data and a command that says "create or increment ref count" so that the 
+conditional behavior is handled at the OSD.  This will be more efficient 
+for small chunks.  (For large chunks, or in cases where we have some 
+confidence that the chunk probably already exists, the pessimistic 
+approach might still make sense.)  Either way, we should probably support 
+both.
+
+3) We'd like to generalize the first pool behavior so that it is just a 
+special case of the new tiering functionality.  The idea is that an 
+object_info_t can have a 'manifest' that described where and how the 
+object is really stored instead of the object data itself (much like it 
+can already be a whiteout, etc.).  In the simplest case, the manifest 
+would just say "this object is stored in pool X" (simple tiering).  In 
+this case, the manifest would a structure like
+
+  map<offset, tuple<length, cas object, pool>>
+
+I think it'll be worth the effort to build a general struture here that we 
+can use for basic tiering (not just dedup).
+
+sage
+
+
+
+> 
+> thanks
+> 
+> 
+> 2017-01-31 23:24 GMT+09:00 Sage Weil <sage@newdream.net>:
+> > On Thu, 26 Jan 2017, myoungwon oh wrote:
+> >> I have two questions.
+> >>
+> >> 1. I would like to ask about CAS location. current our implementation store
+> >> content address object in storage tier.However, If we store the CAO in the
+> >> cache tier, we can get a performance advantage. Do you think we can create
+> >> CAO in cachetier? or create a separate storage pool for CAS?
+> >
+> > It depends on the design.  If the you are naming the objects at the
+> > librados client side, then you can use the rados cluster itself
+> > unmodified (with or without a cache tier).  This is roughly how I have
+> > anticipated implementing the CAS storage portion.  If you are doing the
+> > chunking hashing and within the OSD itself, then you can't do the CAS
+> > at the first tier because the requests won't be directed at the right OSD.
+> >
+> >> 2. The results below are performance result for our current implementation.
+> >> experiment setup:
+> >> PROXY (inline dedup), WRITEBACK (lazy dedup, target_max_bytes: 50MB),
+> >> ORIGINAL(without dedup feature and cache tier),
+> >> fio, 512K block, seq. I/O, single thread
+> >>
+> >> One thing to note is that the writeback case is slower than the proxy.
+> >> We think there are three problems as follows.
+> >>
+> >> A. The current implementation creates a fingerprint by reading the entire
+> >> object when flushing. Therefore, there is a problem that read and write are
+> >> mixed.
+> >
+> > I expect this is a small factor compared to the fact that in writeback
+> > mode you have to *write* to the cache tier, which is 3x replicated,
+> > whereas in proxy mode those writes don't happen at all.
+> >
+> >> B. When client request read, the promote_object function reads the object
+> >> and writes it back to the cache tier, which also causes a mix of read and
+> >> write.
+> >
+> > This can be mitigated by setting the min_read_recency_for_promote pool
+> > property to something >1.  Then reads will be proxied unless the object
+> > appears to be hot (because it has been touched over multiple
+> > hitset intervals).
+> >
+> >> C. When flushing, the unchanged part is rewritten because flush operation
+> >> perform per-object based.
+> >
+> > Yes.
+> >
+> > Is there a description of your overall approach somewhere?
+> >
+> > sage
+> >
+> >
+> >>
+> >> Do I have something wrong? or Could you give me a suggestion to improve
+> >> performance?
+> >>
+> >>
+> >> a. Write performance (KB/s)
+> >>
+> >> dedup_ratio  0 20 40 60 80 100
+> >>
+> >> PROXY  45586 47804 51120 52844 56167 55302
+> >>
+> >> WRITEBACK  13151 11078 9531 13010 9518 8319
+> >>
+> >> ORIGINAL  121209 124786 122140 121195 122540 132363
+> >>
+> >>
+> >> b. Read performance (KB/s)
+> >>
+> >> dedup_ratio  0 20 40 60 80 100
+> >>
+> >> PROXY  112231 118994 118070 120071 117884 132748
+> >>
+> >> WRITEBACK  34040 29109 19104 26677 24756 21695
+> >>
+> >> ORIGINAL  285482 284398 278063 277989 271793 285094
+> >>
+> >>
+> >> thanks,
+> >> Myoungwon Oh
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> 
+> 
