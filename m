@@ -1,47 +1,70 @@
-From: Stafford Horne <shorne@gmail.com>
-Subject: Re: [PATCH 1/2] libceph: Remove unneeded stddef.h include
-Date: Tue, 7 Feb 2017 11:45:45 +0900
-Message-ID: <20170207024545.GH32144@lianli.shorne-pla.net>
-References: <cover.1486276931.git.shorne@gmail.com>
- <b49a86823ae528ff795c8931f68392535b0fccf7.1486276931.git.shorne@gmail.com>
- <063D6719AE5E284EB5DD2968C1650D6DB027CAAA@AcuExch.aculab.com>
+From: Michal Hocko <mhocko@kernel.org>
+Subject: Re: [PATCH 4/6] xfs: use memalloc_nofs_{save,restore} instead of
+ memalloc_noio*
+Date: Tue, 7 Feb 2017 08:17:25 +0100
+Message-ID: <20170207071724.GA3022@dhcp22.suse.cz>
+References: <20170206140718.16222-1-mhocko@kernel.org>
+ <20170206140718.16222-5-mhocko@kernel.org>
+ <20170206153923.GL2267@bombadil.infradead.org>
+ <20170206174415.GA20731@dhcp22.suse.cz>
+ <20170206183237.GE3580@birch.djwong.org>
+ <20170206184743.GB20731@dhcp22.suse.cz>
+ <20170206225150.GB12125@dastard>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <063D6719AE5E284EB5DD2968C1650D6DB027CAAA@AcuExch.aculab.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: David Laight <David.Laight@ACULAB.COM>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>
+In-Reply-To: <20170206225150.GB12125@dastard>
+Sender: owner-linux-mm@kvack.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, Matthew Wilcox <willy@infradead.org>, Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Feb 06, 2017 at 04:16:55PM +0000, David Laight wrote:
-> From: Stafford Horne
-> > Sent: 05 February 2017 07:08
-> > This was causing a build failure for openrisc when using musl and
-> > gcc 5.4.0 since the file is not available in the toolchain.
+On Tue 07-02-17 09:51:50, Dave Chinner wrote:
+> On Mon, Feb 06, 2017 at 07:47:43PM +0100, Michal Hocko wrote:
+> > On Mon 06-02-17 10:32:37, Darrick J. Wong wrote:
+[...]
+> > > I prefer to keep the "...yet we are likely to be under GFP_NOFS..."
+> > > wording of the old comment because it captures the uncertainty of
+> > > whether or not we actually are already under NOFS.  If someone actually
+> > > has audited this code well enough to know for sure then yes let's change
+> > > the comment, but I haven't gone that far.
 > > 
-> > It doesnt seem this is needed and removing it does not cause any build
-> > warnings for me.
+> > I believe we can drop the memalloc_nofs_save then as well because either
+> > we are called from a potentially dangerous context and thus we are in
+> > the nofs scope we we do not need the protection at all.
 > 
-> Hmmm... stddef.h is part of the SuS v2.
-> Required to get definitions for NULL, offsetof(), ptrdiff_t and size_t.
+> No, absolutely not. "Belief" is not a sufficient justification for
+> removing low level deadlock avoidance infrastructure. This code
+> needs to remain in _xfs_buf_map_pages() until a full audit of the
+> caller paths is done and we're 100% certain that there are no
+> lurking deadlocks.
+
+Exactly. I was actually refering to "If someone actually has audited
+this code" above... So I definitely do not want to justify anything
+based on the belief
+
+> For example, I'm pretty sure we can call into _xfs_buf_map_pages()
+> outside of a transaction context but with an inode ILOCK held
+> exclusively. If we then recurse into memory reclaim and try to run a
+> transaction during reclaim, we have an inverted ILOCK vs transaction
+> locking order. i.e. we are not allowed to call xfs_trans_reserve()
+> with an ILOCK held as that can deadlock the log:  log full, locked
+> inode pins tail of log, inode cannot be flushed because ILOCK is
+> held by caller waiting for log space to become available....
 > 
-> So any system that is pretending to by unix-like ought to have one.
+> i.e. there are certain situations where holding a ILOCK is a
+> deadlock vector. See xfs_lock_inodes() for an example of the lengths
+> we go to avoid ILOCK based log deadlocks like this...
 
-Hello,
-I agree, and also I can see that musl and gcc both do provide it.  I am
-not sure why its not getting included for kernel builds, I didnt look
-into it much because on the other hand...
+Thanks for the reference. This is really helpful!
 
-Linux also provides it in 'linux/stddef.h'.  In this case vchiq_shim.c
-includes "vchiq_util.h".
-  which includes "linux/string.h"
-    which includes "linux/stddef.h"
+-- 
+Michal Hocko
+SUSE Labs
 
-So the requirement seems satisfied.
-
-I am fine to send a patch to change the include to <linux/stddef.h> as I
-mentioned in the cover letter.  But I dont think its really needed.
-
--Stafford
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
