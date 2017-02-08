@@ -1,11 +1,13 @@
 From: Tim Serong <tserong-IBi9RG/b67k@public.gmane.org>
-Subject: New mailing list: opensuse-ceph-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org
-Date: Wed, 8 Feb 2017 13:36:37 +1100
-Message-ID: <3d46fd06-31fd-3abe-5e54-f43adb1a9292@suse.com>
+Subject: Re: New mailing list: opensuse-ceph-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org
+Date: Wed, 8 Feb 2017 13:40:35 +1100
+Message-ID: <366f4786-c05d-e256-0e2c-61908e747ec9@suse.com>
+References: <3d46fd06-31fd-3abe-5e54-f43adb1a9292@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <3d46fd06-31fd-3abe-5e54-f43adb1a9292-IBi9RG/b67k@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,26 +20,30 @@ Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, opensuse-ceph-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi All,
+On 02/08/2017 01:36 PM, Tim Serong wrote:
+> Hi All,
+> 
+> We've just created a new opensuse-ceph-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org mailing list.  The
+> purpose of this list is discussion of Ceph specifically on openSUSE.
+> For example, topics such as the following would all be welcome:
+> 
+> * Maintainership of projects on OBS under
+>   https://build.opensuse.org/project/show/filesystems:ceph
+> 
+> * Feedback on our hopefully helpful wiki page at
+>   https://en.opensuse.org/openSUSE:Ceph
+> 
+> * Issues with Ceph packages shipped with openSUSE Leap and Tumbleweed
+> 
+> * Ceph deployment tools on openSUSE
+> 
+> If general or non-distro specific Ceph-related topics come up, we'll
+> provide direction back to the appropriate upstream list :-)
 
-We've just created a new opensuse-ceph-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org mailing list.  The
-purpose of this list is discussion of Ceph specifically on openSUSE.
-For example, topics such as the following would all be welcome:
+Subscription instructions would probably be helpful, too.  If you'd like
+to subscribe, send an email to opensuse-ceph+subscribe-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org
 
-* Maintainership of projects on OBS under
-  https://build.opensuse.org/project/show/filesystems:ceph
-
-* Feedback on our hopefully helpful wiki page at
-  https://en.opensuse.org/openSUSE:Ceph
-
-* Issues with Ceph packages shipped with openSUSE Leap and Tumbleweed
-
-* Ceph deployment tools on openSUSE
-
-If general or non-distro specific Ceph-related topics come up, we'll
-provide direction back to the appropriate upstream list :-)
-
-Regards,
+Cheers,
 
 Tim
 -- 
