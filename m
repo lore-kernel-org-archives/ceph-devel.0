@@ -1,75 +1,37 @@
-From: Miklos Szeredi <miklos@szeredi.hu>
-Subject: Re: [PATCH v3 0/2] iov_iter: allow iov_iter_get_pages_alloc to
- allocate more pages per call
-Date: Wed, 8 Feb 2017 10:53:26 +0100
-Message-ID: <CAJfpegtXfDbM7YhE6JY==f_mGLwE3BUHR1rX8YbaEr=OHQGQnQ@mail.gmail.com>
-References: <CAJfpegv=r9J8Mqax_ZAB2h5QbRgJMHwyVMENTpYZ8u3_pqNfJw@mail.gmail.com>
- <20170205210151.GD13195@ZenIV.linux.org.uk> <CAJfpeguzOgX9d+5XCNJcmXW5KkrGbnWB5aZSP1-0q3a6i6uk2w@mail.gmail.com>
- <20170205220445.GE13195@ZenIV.linux.org.uk> <20170206030532.GF13195@ZenIV.linux.org.uk>
- <CAJfpegv5ZGd2gzSbQvgk4uX5q06AijY+TNg2jdrPBSjbFoXMfg@mail.gmail.com>
- <20170206095706.GG13195@ZenIV.linux.org.uk> <CAJfpegv-ePQE9pNwZe6O+0LjJdq2aVk3bnhxeZ=y7P+iFq72XA@mail.gmail.com>
- <20170207071909.GI13195@ZenIV.linux.org.uk> <20170207113554.GA30656@veci.piliscsaba.szeredi.hu>
- <20170208055431.GJ13195@ZenIV.linux.org.uk>
+From: John Spray <jspray@redhat.com>
+Subject: noout equivalent for temporary OSD rm?
+Date: Wed, 8 Feb 2017 12:26:09 +0000
+Message-ID: <CALe9h7d6ftL__1S-mJd6y3GAfDJST1zN+scgqm4gC6T3_qbOiw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <20170208055431.GJ13195@ZenIV.linux.org.uk>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, Linux NFS list <linux-nfs@vger.kernel.org>, ceph-devel@vger.kernel.org, lustre-devel@lists.lustre.org, v9fs-developer@lists.sourceforge.net, Linus Torvalds <torvalds@linux-foundation.org>, Jan Kara <jack@suse.cz>, Chris Wilson <chris@chris-wilson.co.uk>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Jeff Layton <jlayton@redhat.com>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:36750 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753221AbdBHMfH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Feb 2017 07:35:07 -0500
+Received: by mail-wm0-f41.google.com with SMTP id c85so195447147wmi.1
+        for <ceph-devel@vger.kernel.org>; Wed, 08 Feb 2017 04:34:13 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Feb 8, 2017 at 6:54 AM, Al Viro <viro@zeniv.linux.org.uk> wrote:
-> On Tue, Feb 07, 2017 at 12:35:54PM +0100, Miklos Szeredi wrote:
->> > Another thing: what guarantees that places in writepages-related paths
->> > where we store a reference into req->ff won't hit a request with already
->> > non-NULL ->ff?
->>
->> Well, it is set before being sent (queued onto queued_writes or queued on the
->> fuse device), but not when queued as secondary request onto an already in-flight
->> one.  It looks okay to me.
->
->>  void fuse_sync_release(struct fuse_file *ff, int flags)
->>  {
->> -     WARN_ON(atomic_read(&ff->count) > 1);
->> +     WARN_ON(atomic_read(&ff->count) != 1);
->>       fuse_prepare_release(ff, flags, FUSE_RELEASE);
->> -     __set_bit(FR_FORCE, &ff->reserved_req->flags);
->> -     __clear_bit(FR_BACKGROUND, &ff->reserved_req->flags);
->> -     fuse_request_send(ff->fc, ff->reserved_req);
->> -     fuse_put_request(ff->fc, ff->reserved_req);
->> -     kfree(ff);
->> +     fuse_file_put(ff, true);
->
-> Umm...  At the very least, that deserves a comment re "iput(NULL) is a no-op
-> and since the refcount is 1 and everything's synchronous, we are fine with
-> not doing igrab/iput here".  There's enough mysteries in that code as it is...
+So I've just finished upgrading my home cluster OSDs to bluestore by
+killing them one by one and then letting backfill happen to "new" OSDs
+on the same drives.  Hooray!
 
-Added comment.
+One slightly awkward thing I ran into was that even though I had noout
+set throughout, during the period between removing the old OSD and
+adding the "new" one, some PGs would of course get remapped (and start
+generating backfill IO to third party OSDs).  This does make sense
+when you think about it (noout doesn't make the cluster magically
+remember OSDs that have been removed), but is still an undesirable
+behaviour.
 
->         Speaking of mysteries - how can ->private_data ever be NULL in
-> fuse_release_common()?  AFAICS, it's only called from ->release() instances
-> and those are only called after ->open() or ->atomic_open() on that struct file
-> has returned 0.  On the ->open() side, it means fuse_do_open() having returned
-> 0; on ->atomic_open() one - fuse_create_open() having done the same.  Neither
-> is possible with ->private_data remaining NULL, and I don't see any places
-> that would modify it afterwards...
+A) Do we currently have a mechanism to tell the cluster "even though I
+removed this OSD, don't go moving PGs around just yet"?  Should we add
+one?
+B) Was there a way for me to avoid this by e.g. skipping the "osd rm
+X" and "osd crush rm osd.X" that I'm currently doing before adding the
+new OSD that will take the old OSD's ID?
 
-Goes back to v2.6.15 (commit fd72faac95d7 "[PATCH] FUSE: atomic
-create+open").  Didn't make sense back then, and it doesn't now.
-Fixed.
-
->         Another thing: am I right assuming that ff->nodeid will be the same
-> for all ff over given inode (== get_node_id(inode))?
-
-Yes.  Except for cuse, where it's zero.
-
->  What about ff->fh?
-> Is that a per-open thing, or will it be identical for all opens of the same
-> inode?
-
-A per-open thing (opaque identifier used by userspace fs to identify
-the open file)
-
-Thanks,
-Miklos
+John
