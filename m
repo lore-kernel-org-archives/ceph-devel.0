@@ -1,30 +1,39 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: new meeting URL for perf meeting
-Date: Wed, 8 Feb 2017 10:06:20 -0600
-Message-ID: <2055d18e-f6d5-a68d-e6ea-5bbaf6e3c8a4@redhat.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: switch "ms bind ipv6" default to "true"?
+Date: Wed, 8 Feb 2017 17:24:10 +0100 (CET)
+Message-ID: <1330200336.9468.1486571050945@ox.pcextreme.nl>
+References: <CALqRxCxqUP6V0enicL4EM=aeH1Qt5G0vvmcrqQrmAa9TirpLoQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38484 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751809AbdBHQY0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 8 Feb 2017 11:24:26 -0500
-Received: from smtp.corp.redhat.com (int-mx16.intmail.prod.int.phx2.redhat.com [10.5.11.28])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 565FA7FB7B
-        for <ceph-devel@vger.kernel.org>; Wed,  8 Feb 2017 16:06:22 +0000 (UTC)
-Received: from [10.3.116.113] (ovpn-116-113.phx2.redhat.com [10.3.116.113])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 2B12D685DE
-        for <ceph-devel@vger.kernel.org>; Wed,  8 Feb 2017 16:06:22 +0000 (UTC)
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:37176 "EHLO
+        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752035AbdBHQY1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Feb 2017 11:24:27 -0500
+In-Reply-To: <CALqRxCxqUP6V0enicL4EM=aeH1Qt5G0vvmcrqQrmAa9TirpLoQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ken Dreyer <kdreyer@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Please use this url:
 
-https://bluejeans.com/944567299
+> Op 7 februari 2017 om 20:33 schreef Ken Dreyer <kdreyer@redhat.com>:
+> 
+> 
+> In ceph-ansible we have to determine whether the user wants to bind to
+> IPv6 or not, and set "ms bind ipv6 = true".
+> 
 
-Thank you!
-Mark
+Isn't it possible that this causes troubles when explicitly setting public and/or cluster network?
+
+Wido
+
+> Could we make this easier for users and simply have this as the
+> default option in Ceph? What is the downside to defaulting ms bind
+> ipv6 to true?
+> 
+> - Ken
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
