@@ -1,97 +1,67 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Pgs distribution evenly across osds
-Date: Tue, 7 Feb 2017 20:48:15 -0600
-Message-ID: <32478390-b790-226f-59aa-15f76d1c247e@redhat.com>
-References: <731B4B00-3D93-4E2B-9A32-5F50BDF84177@alibaba-inc.com>
+From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+Subject: Re: [PATCH v3 0/2] iov_iter: allow iov_iter_get_pages_alloc to
+ allocate more pages per call
+Date: Wed, 8 Feb 2017 05:54:32 +0000
+Message-ID: <20170208055431.GJ13195@ZenIV.linux.org.uk>
+References: <CAJfpegv=r9J8Mqax_ZAB2h5QbRgJMHwyVMENTpYZ8u3_pqNfJw@mail.gmail.com>
+ <20170205210151.GD13195@ZenIV.linux.org.uk>
+ <CAJfpeguzOgX9d+5XCNJcmXW5KkrGbnWB5aZSP1-0q3a6i6uk2w@mail.gmail.com>
+ <20170205220445.GE13195@ZenIV.linux.org.uk>
+ <20170206030532.GF13195@ZenIV.linux.org.uk>
+ <CAJfpegv5ZGd2gzSbQvgk4uX5q06AijY+TNg2jdrPBSjbFoXMfg@mail.gmail.com>
+ <20170206095706.GG13195@ZenIV.linux.org.uk>
+ <CAJfpegv-ePQE9pNwZe6O+0LjJdq2aVk3bnhxeZ=y7P+iFq72XA@mail.gmail.com>
+ <20170207071909.GI13195@ZenIV.linux.org.uk>
+ <20170207113554.GA30656@veci.piliscsaba.szeredi.hu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45170 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752968AbdBHCsQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 7 Feb 2017 21:48:16 -0500
-In-Reply-To: <731B4B00-3D93-4E2B-9A32-5F50BDF84177@alibaba-inc.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "LIU, Fei" <james.liu@alibaba-inc.com>, Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170207113554.GA30656-6fGP+1Jn+PcQFMt52x3flrFA6kmya3R0B1poBFZFfSg@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Miklos Szeredi <miklos-sUDqSbJrdHQHWmgEVkV9KA@public.gmane.org>
+Cc: linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux NFS list <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, "Kirill A. Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi James,
+On Tue, Feb 07, 2017 at 12:35:54PM +0100, Miklos Szeredi wrote:
+> > Another thing: what guarantees that places in writepages-related paths
+> > where we store a reference into req->ff won't hit a request with already
+> > non-NULL ->ff?
+> 
+> Well, it is set before being sent (queued onto queued_writes or queued on the
+> fuse device), but not when queued as secondary request onto an already in-flight
+> one.  It looks okay to me.
 
-I'm not sage, but I'll chime in since I spent some time thinking about 
-this stuff a while back when I was playing around with halton 
-distributions for PG placement.  It's very difficult to get even 
-distributions using random sampling unless you have a *very* high number 
-of samples.  The following equations give you a reasonable expectation 
-of what the min/max should be assuming an evenly weighted random 
-distribution:
+>  void fuse_sync_release(struct fuse_file *ff, int flags)
+>  {
+> -	WARN_ON(atomic_read(&ff->count) > 1);
+> +	WARN_ON(atomic_read(&ff->count) != 1);
+>  	fuse_prepare_release(ff, flags, FUSE_RELEASE);
+> -	__set_bit(FR_FORCE, &ff->reserved_req->flags);
+> -	__clear_bit(FR_BACKGROUND, &ff->reserved_req->flags);
+> -	fuse_request_send(ff->fc, ff->reserved_req);
+> -	fuse_put_request(ff->fc, ff->reserved_req);
+> -	kfree(ff);
+> +	fuse_file_put(ff, true);
 
-min = (pgs / osds) - sqrt(2*pgs*log(osds)/osds)
-max = (pgs / osds) + sqrt(2*pgs*log(osds)/osds)
+Umm...  At the very least, that deserves a comment re "iput(NULL) is a no-op
+and since the refcount is 1 and everything's synchronous, we are fine with
+not doing igrab/iput here".  There's enough mysteries in that code as it is...
 
-In your case that's:
+	Speaking of mysteries - how can ->private_data ever be NULL in
+fuse_release_common()?  AFAICS, it's only called from ->release() instances
+and those are only called after ->open() or ->atomic_open() on that struct file
+has returned 0.  On the ->open() side, it means fuse_do_open() having returned
+0; on ->atomic_open() one - fuse_create_open() having done the same.  Neither
+is possible with ->private_data remaining NULL, and I don't see any places
+that would modify it afterwards...
 
-min = 49152/168 - sqrt(2*49152*log(168)/168) = 256
-max = 49152/168 + sqrt(2*49152*log(168)/168) = 329
+	Another thing: am I right assuming that ff->nodeid will be the same
+for all ff over given inode (== get_node_id(inode))?  What about ff->fh?
+Is that a per-open thing, or will it be identical for all opens of the same
+inode?
 
-In terms of performance potential and data distribution evenness, I'd 
-argue you really want to know how bad your worst oversubscribed PG is vs 
-the average:
-
-Expected: (49152/168)/329 = ~88.9%
-Actual: (49152/168)/333 = = ~87.9%
-
-Your numbers are a little worse, though typically I see our 
-distributions hover right around expected or just slightly better.  This 
-particular roll of the dice might have just been a little worse.
-
-If you jumped up to say 100K PGs:
-
-min = 1000000/168 - sqrt(2*1000000*log(168)/168) = 544
-max = 1000000/168 + sqrt(2*1000000*log(168)/168) = 647
-
-Expected: (100000/168)/647 = ~92%
-
-Now if you jumped up to 1 million PGs:
-
-min = 1000000/168 - sqrt(2*1000000*log(168)/168) = 5790
-max = 1000000/168 + sqrt(2*1000000*log(168)/168) = 6115
-
-Expected: (1000000/168)/6115 = ~97.3%
-
-Thanks,
-Mark
-
-On 02/07/2017 06:14 PM, LIU, Fei wrote:
-> Hi Sage,
->   We are trying to distribute pgs evenly across osds. However, after certain tunes, we still got 30% difference among max pgs  and min pg  of OSDs (OSD 9 has 13.8% more pgs than average and OSD 86 has 15.2% less pgs than average).  Any good suggestions to make PGs distributed evenly across OSDs?
->
->   Thanks,
->   James
->
->
-> SUM :   49152   |
-> Osd :   168     |
-> AVE :   292.57  |
-> Max :   333     |
-> Osdid : osd.9   |
-> per:    13.8%   |
-> ------------------------
-> min :   248     |
-> osdid : osd.86  |
-> per:    -15.2%  |
->
-> [james.liu@a18d13422.eu13 /home/james.liu]
-> $
->
->
-> 本邮件及其附件含有阿里巴巴集团的商业秘密信息，仅限于发送给上面地址中列出的个人和群组，禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制和散发）本邮件及其附件中的信息，如果您错收本邮件，请您立即电话或邮件通知发件人并删除本邮件。
-> This email and its attachments contain confidential information from Alibaba Group.which is intended only for the person or entity whose address is listed above.Any use of information contained herein in any way(including,but not limited to,total or partial disclosure,reproduction or dissemination)by persons other than the intended recipient(s) is prohibited.If you receive this email in error,please notify the sender by phone or email immediately and delete it.
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+--
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
