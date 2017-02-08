@@ -1,57 +1,176 @@
-From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
-Subject: Pgs distribution evenly across osds
-Date: Wed, 08 Feb 2017 08:14:49 +0800
-Message-ID: <731B4B00-3D93-4E2B-9A32-5F50BDF84177@alibaba-inc.com>
+From: "Dilger, Andreas" <andreas.dilger-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 04/24] fs: Provide infrastructure for
+ dynamic	BDIs in filesystems
+Date: Wed, 8 Feb 2017 00:38:17 +0000
+Message-ID: <C01BF300-AD67-4A3E-810F-AAB2EEB90B97@intel.com>
+References: <20170202173422.3240-1-jack@suse.cz>
+	<20170202173422.3240-5-jack@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from out0-154.mail.aliyun.com ([140.205.0.154]:46642 "EHLO
-        out0-154.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751060AbdBHAPN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Feb 2017 19:15:13 -0500
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+In-Reply-To: <20170202173422.3240-5-jack-AlSwsSmVLrQ@public.gmane.org>
+Content-Language: en-US
+Content-ID: <12E5AAE438FFD045A134C624E0411E7E-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
+List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
+Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+To: Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>
+Cc: "linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-nilfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-nilfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "ecryptfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ecryptfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "codalist-/uMB558Y47wP4a1z8dhFYw@public.gmane.org" <codalist-/uMB558Y47wP4a1z8dhFYw@public.gmane.org>, "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "osd-dev-yNzVSZO3znNg9hUCZPvPmw@public.gmane.org" <osd-dev-yNzVSZO3znNg9hUCZPvPmw@public.gmane.org>, "linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Petr Vandrovec <petr-vPk2MGR0e28uaRcfnNAh7A@public.gmane.org>, "linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-btrfs-fy+rA21nqHI@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Sage,
-  We are trying to distribute pgs evenly across osds. However, after certai=
-n tunes, we still got 30% difference among max pgs  and min pg  of OSDs (OSD=
- 9 has 13.8% more pgs than average and OSD 86 has 15.2% less pgs than averag=
-e).  Any good suggestions to make PGs distributed evenly across OSDs?
- =20
-  Thanks,
-  James
-   =20
+On Feb 2, 2017, at 10:34, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org> wrote:
+> 
+> Provide helper functions for setting up dynamically allocated
+> backing_dev_info structures for filesystems and cleaning them up on
+> superblock destruction.
+> 
+> CC: linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> CC: linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> CC: Petr Vandrovec <petr-vPk2MGR0e28uaRcfnNAh7A@public.gmane.org>
+> CC: linux-nilfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> CC: cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+> CC: osd-dev-yNzVSZO3znNg9hUCZPvPmw@public.gmane.org
+> CC: codalist-/uMB558Y47wP4a1z8dhFYw@public.gmane.org
+> CC: linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> CC: ecryptfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> CC: linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> CC: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> CC: linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> CC: v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+> CC: lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+> Signed-off-by: Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>
+> ---
+> fs/super.c                       | 49 ++++++++++++++++++++++++++++++++++++++++
+> include/linux/backing-dev-defs.h |  2 +-
+> include/linux/fs.h               |  6 +++++
+> 3 files changed, 56 insertions(+), 1 deletion(-)
+> 
+> diff --git a/fs/super.c b/fs/super.c
+> index ea662b0e5e78..31dc4c6450ef 100644
+> --- a/fs/super.c
+> +++ b/fs/super.c
+> @@ -446,6 +446,11 @@ void generic_shutdown_super(struct super_block *sb)
+> 	hlist_del_init(&sb->s_instances);
+> 	spin_unlock(&sb_lock);
+> 	up_write(&sb->s_umount);
+> +	if (sb->s_iflags & SB_I_DYNBDI) {
+> +		bdi_put(sb->s_bdi);
+> +		sb->s_bdi = &noop_backing_dev_info;
+> +		sb->s_iflags &= ~SB_I_DYNBDI;
+> +	}
+> }
+> 
+> EXPORT_SYMBOL(generic_shutdown_super);
+> @@ -1249,6 +1254,50 @@ mount_fs(struct file_system_type *type, int flags, const char *name, void *data)
+> }
+> 
+> /*
+> + * Setup private BDI for given superblock. I gets automatically cleaned up
 
-SUM :   49152   |
-Osd :   168     |
-AVE :   292.57  |
-Max :   333     |
-Osdid : osd.9   |
-per:    13.8%   |
-------------------------
-min :   248     |
-osdid : osd.86  |
-per:    -15.2%  |
+(typo) s/I/It/
 
-[james.liu@a18d13422.eu13 /home/james.liu]
-$
+Looks fine otherwise.
 
+> + * in generic_shutdown_super().
+> + */
+> +int super_setup_bdi_name(struct super_block *sb, char *fmt, ...)
+> +{
+> +	struct backing_dev_info *bdi;
+> +	int err;
+> +	va_list args;
+> +
+> +	bdi = bdi_alloc(GFP_KERNEL);
+> +	if (!bdi)
+> +		return -ENOMEM;
+> +
+> +	bdi->name = sb->s_type->name;
+> +
+> +	va_start(args, fmt);
+> +	err = bdi_register_va(bdi, NULL, fmt, args);
+> +	va_end(args);
+> +	if (err) {
+> +		bdi_put(bdi);
+> +		return err;
+> +	}
+> +	WARN_ON(sb->s_bdi != &noop_backing_dev_info);
+> +	sb->s_bdi = bdi;
+> +	sb->s_iflags |= SB_I_DYNBDI;
+> +
+> +	return 0;
+> +}
+> +EXPORT_SYMBOL(super_setup_bdi_name);
+> +
+> +/*
+> + * Setup private BDI for given superblock. I gets automatically cleaned up
+> + * in generic_shutdown_super().
+> + */
+> +int super_setup_bdi(struct super_block *sb)
+> +{
+> +	static atomic_long_t bdi_seq = ATOMIC_LONG_INIT(0);
+> +
+> +	return super_setup_bdi_name(sb, "%.28s-%ld", sb->s_type->name,
+> +				    atomic_long_inc_return(&bdi_seq));
+> +}
+> +EXPORT_SYMBOL(super_setup_bdi);
+> +
+> +/*
+>  * This is an internal function, please use sb_end_{write,pagefault,intwrite}
+>  * instead.
+>  */
+> diff --git a/include/linux/backing-dev-defs.h b/include/linux/backing-dev-defs.h
+> index 2ecafc8a2d06..70080b4217f4 100644
+> --- a/include/linux/backing-dev-defs.h
+> +++ b/include/linux/backing-dev-defs.h
+> @@ -143,7 +143,7 @@ struct backing_dev_info {
+> 	congested_fn *congested_fn; /* Function pointer if device is md/dm */
+> 	void *congested_data;	/* Pointer to aux data for congested func */
+> 
+> -	char *name;
+> +	const char *name;
+> 
+> 	struct kref refcnt;	/* Reference counter for the structure */
+> 	unsigned int registered:1;	/* Is bdi registered? */
+> diff --git a/include/linux/fs.h b/include/linux/fs.h
+> index c930cbc19342..8ed8b6d1bc54 100644
+> --- a/include/linux/fs.h
+> +++ b/include/linux/fs.h
+> @@ -1267,6 +1267,9 @@ struct mm_struct;
+> /* sb->s_iflags to limit user namespace mounts */
+> #define SB_I_USERNS_VISIBLE		0x00000010 /* fstype already mounted */
+> 
+> +/* Temporary flag until all filesystems are converted to dynamic bdis */
+> +#define SB_I_DYNBDI	0x00000100
+> +
+> /* Possible states of 'frozen' field */
+> enum {
+> 	SB_UNFROZEN = 0,		/* FS is unfrozen */
+> @@ -2103,6 +2106,9 @@ extern int vfs_ustat(dev_t, struct kstatfs *);
+> extern int freeze_super(struct super_block *super);
+> extern int thaw_super(struct super_block *super);
+> extern bool our_mnt(struct vfsmount *mnt);
+> +extern __printf(2, 3)
+> +int super_setup_bdi_name(struct super_block *sb, char *fmt, ...);
+> +extern int super_setup_bdi(struct super_block *sb);
+> 
+> extern int current_umask(void);
+> 
+> -- 
+> 2.10.2
+> 
+> _______________________________________________
+> lustre-devel mailing list
+> lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+> http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org
 
-=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E5=90=AB=E6=9C=89=E9=98=BF=E9=87=8C=E5=B7=B4=E5=B7=B4=E9=9B=86=E5=9B=A2=E7=9A=84=E5=95=86=E4=B8=9A=E7=A7=98=E5=AF=86=E4=BF=A1=E6=81=AF=EF=BC=8C=E4=BB=85=E9=99=90=
-=E4=BA=8E=E5=8F=91=E9=80=81=E7=BB=99=E4=B8=8A=E9=9D=A2=E5=9C=B0=E5=9D=80=E4=B8=AD=E5=88=97=E5=87=BA=E7=9A=84=E4=B8=AA=E4=BA=BA=E5=92=8C=E7=BE=A4=E7=BB=84=EF=BC=8C=E7=A6=81=E6=AD=A2=E4=BB=BB=E4=BD=95=E5=85=B6=E4=BB=96=E4=BA=BA=E4=
-=BB=A5=E4=BB=BB=E4=BD=95=E5=BD=A2=E5=BC=8F=E4=BD=BF=E7=94=A8=EF=BC=88=E5=8C=85=E6=8B=AC=E4=BD=86=E4=B8=8D=E9=99=90=E4=BA=8E=E5=85=A8=E9=83=A8=E6=88=96=E9=83=A8=E5=88=86=E5=9C=B0=E6=B3=84=E9=9C=B2=E3=80=81=E5=A4=8D=E5=88=B6=E5=92=
-=8C=E6=95=A3=E5=8F=91=EF=BC=89=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E4=B8=AD=E7=9A=84=E4=BF=A1=E6=81=AF=EF=BC=8C=E5=A6=82=E6=9E=9C=E6=82=A8=E9=94=99=E6=94=B6=E6=9C=AC=E9=82=AE=E4=BB=B6=EF=BC=8C=E8=AF=B7=
-=E6=82=A8=E7=AB=8B=E5=8D=B3=E7=94=B5=E8=AF=9D=E6=88=96=E9=82=AE=E4=BB=B6=E9=80=9A=E7=9F=A5=E5=8F=91=E4=BB=B6=E4=BA=BA=E5=B9=B6=E5=88=A0=E9=99=A4=E6=9C=AC=E9=82=AE=E4=BB=B6=E3=80=82
-This email and its attachments contain confidential information from Alibab=
-a Group.which is intended only for the person or entity whose address is lis=
-ted above.Any use of information contained herein in any way(including,but n=
-ot limited to,total or partial disclosure,reproduction or dissemination)by p=
-ersons other than the intended recipient(s) is prohibited.If you receive thi=
-s email in error,please notify the sender by phone or email immediately and =
-delete it.
-
-
+Cheers, Andreas
+--
+Andreas Dilger
+Lustre Principal Architect
+Intel Corporation
