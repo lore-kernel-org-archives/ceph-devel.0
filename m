@@ -1,69 +1,57 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Manpages install location
-Date: Tue, 7 Feb 2017 23:18:36 +0100
-Message-ID: <7e1572a0-2df2-85c0-dd1a-68c35f895ff3@digiware.nl>
-References: <2d9ab045-26cf-d178-79af-7f389d2f3b8b@digiware.nl>
- <CAJE9aOMQKaWfzNteKxHFnMSJUJayvATKyR4vj_qmGKSz_owFmA@mail.gmail.com>
+From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
+Subject: Pgs distribution evenly across osds
+Date: Wed, 08 Feb 2017 08:14:49 +0800
+Message-ID: <731B4B00-3D93-4E2B-9A32-5F50BDF84177@alibaba-inc.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+        charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:63284 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932101AbdBGWSn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 7 Feb 2017 17:18:43 -0500
-In-Reply-To: <CAJE9aOMQKaWfzNteKxHFnMSJUJayvATKyR4vj_qmGKSz_owFmA@mail.gmail.com>
+Received: from out0-154.mail.aliyun.com ([140.205.0.154]:46642 "EHLO
+        out0-154.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751060AbdBHAPN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Feb 2017 19:15:13 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 7-2-2017 19:11, kefu chai wrote:
-> + ceph-devel
-> 
-> On Tue, Feb 7, 2017 at 5:41 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> Hi Kefu,
->>
->> Do you have a hint on where to modify the install location for the
->> manpages...
->>
->> They now end in /usr/local/man/man8 ...
+Hi Sage,
+  We are trying to distribute pgs evenly across osds. However, after certai=
+n tunes, we still got 30% difference among max pgs  and min pg  of OSDs (OSD=
+ 9 has 13.8% more pgs than average and OSD 86 has 15.2% less pgs than averag=
+e).  Any good suggestions to make PGs distributed evenly across OSDs?
+ =20
+  Thanks,
+  James
+   =20
 
-I meant to write /usr/local/share/man/man8. Which is an odd mix of what
-goes under Linux and FreeBSD packages.
+SUM :   49152   |
+Osd :   168     |
+AVE :   292.57  |
+Max :   333     |
+Osdid : osd.9   |
+per:    13.8%   |
+------------------------
+min :   248     |
+osdid : osd.86  |
+per:    -15.2%  |
 
-> 
-> doc/man/8/CMakeLists.txt
-> 
-> ```
->   install(FILES ${sphinx_output_dir}/${cmd}.8
->     DESTINATION ${CEPH_MAN_DIR}/man8)
-> ```
+[james.liu@a18d13422.eu13 /home/james.liu]
+$
 
-Ah, I looked there, but obviously not deep enough in the tree.
 
-> you need to conditionalize the DESTINATION arg.
-> 
->> And FreeBSD has the packages man pages in /usr/local/man/
->
-> i think the manpages of section#8 installed by ports should go to
-> /usr/local/man/man8. see
-> https://www.freebsd.org/cgi/man.cgi?query=hier&apropos=0&sektion=0&manpath=FreeBSD+12-current&arch=default&format=html.
-> for example, wget's manpage is located at
-> /usr/local/man/man1/wget.1.gz
+=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E5=90=AB=E6=9C=89=E9=98=BF=E9=87=8C=E5=B7=B4=E5=B7=B4=E9=9B=86=E5=9B=A2=E7=9A=84=E5=95=86=E4=B8=9A=E7=A7=98=E5=AF=86=E4=BF=A1=E6=81=AF=EF=BC=8C=E4=BB=85=E9=99=90=
+=E4=BA=8E=E5=8F=91=E9=80=81=E7=BB=99=E4=B8=8A=E9=9D=A2=E5=9C=B0=E5=9D=80=E4=B8=AD=E5=88=97=E5=87=BA=E7=9A=84=E4=B8=AA=E4=BA=BA=E5=92=8C=E7=BE=A4=E7=BB=84=EF=BC=8C=E7=A6=81=E6=AD=A2=E4=BB=BB=E4=BD=95=E5=85=B6=E4=BB=96=E4=BA=BA=E4=
+=BB=A5=E4=BB=BB=E4=BD=95=E5=BD=A2=E5=BC=8F=E4=BD=BF=E7=94=A8=EF=BC=88=E5=8C=85=E6=8B=AC=E4=BD=86=E4=B8=8D=E9=99=90=E4=BA=8E=E5=85=A8=E9=83=A8=E6=88=96=E9=83=A8=E5=88=86=E5=9C=B0=E6=B3=84=E9=9C=B2=E3=80=81=E5=A4=8D=E5=88=B6=E5=92=
+=8C=E6=95=A3=E5=8F=91=EF=BC=89=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E4=B8=AD=E7=9A=84=E4=BF=A1=E6=81=AF=EF=BC=8C=E5=A6=82=E6=9E=9C=E6=82=A8=E9=94=99=E6=94=B6=E6=9C=AC=E9=82=AE=E4=BB=B6=EF=BC=8C=E8=AF=B7=
+=E6=82=A8=E7=AB=8B=E5=8D=B3=E7=94=B5=E8=AF=9D=E6=88=96=E9=82=AE=E4=BB=B6=E9=80=9A=E7=9F=A5=E5=8F=91=E4=BB=B6=E4=BA=BA=E5=B9=B6=E5=88=A0=E9=99=A4=E6=9C=AC=E9=82=AE=E4=BB=B6=E3=80=82
+This email and its attachments contain confidential information from Alibab=
+a Group.which is intended only for the person or entity whose address is lis=
+ted above.Any use of information contained herein in any way(including,but n=
+ot limited to,total or partial disclosure,reproduction or dissemination)by p=
+ersons other than the intended recipient(s) is prohibited.If you receive thi=
+s email in error,please notify the sender by phone or email immediately and =
+delete it.
 
-Yup, that is where I copy them right now in the ports Makefile.
 
->>
->> 2nd thing is that I prefer to gzip them, but that is not super
->> essential. But most of the others are compressed.
-> 
-> 
-> you might need to add an add_custom_command() and conditionalize the
-> install() function to the loop of "foreach(man ${man_srcs})" to
-> install the gzipped man pages for FreeBSD. please be sure to
-> `find_program(GZIP gzip)` before using "gzip".
-
-I'll have a shot at it.
-
-Thanx,
---WjW
