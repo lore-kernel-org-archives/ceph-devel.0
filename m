@@ -1,63 +1,48 @@
-From: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?=
-        <bartlomiej.swiecki@corp.ovh.com>
+From: Bassam Tabbara <Bassam.Tabbara@quantum.com>
 Subject: Re: Breakage in Clang compile....
-Date: Thu, 9 Feb 2017 17:31:08 +0100
-Message-ID: <385cdacb-741c-c0b5-ed62-a2b3f49cca37@corp.ovh.com>
+Date: Thu, 9 Feb 2017 16:18:41 +0000
+Message-ID: <E5D4D9AF-0529-424A-9C75-759906A4C65D@quantum.com>
 References: <a5a35bfc-57b2-bf28-9788-04127654e23a@digiware.nl>
- <2445ae3c-ff1e-2894-bfe3-9891070189c8@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 6.mo301.mail-out.ovh.net ([137.74.110.69]:54063 "EHLO
-        6.mo301.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752464AbdBIQbY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Feb 2017 11:31:24 -0500
-In-Reply-To: <2445ae3c-ff1e-2894-bfe3-9891070189c8@corp.ovh.com>
+Received: from mx0b-000ceb01.pphosted.com ([67.231.152.126]:35923 "EHLO
+        mx0b-000ceb01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1753745AbdBIQlf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Feb 2017 11:41:35 -0500
+In-Reply-To: <a5a35bfc-57b2-bf28-9788-04127654e23a@digiware.nl>
+Content-Language: en-US
+Content-ID: <8405874E44048E419568FE5BA48949C7@QUANTUM.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Willem Jan Withagen <wjw@digiware.nl>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Here's the fix:
-
-https://github.com/ceph/ceph/pull/13335
-
-
-On 02/09/2017 04:46 PM, Bartłomiej Święcki wrote:
-> Hi,
->
-> Looking at this right now.
->
-> Bartek
->
-> On 02/09/2017 04:35 PM, Willem Jan Withagen wrote:
->> Hi,
->>
->> I think this is a recent addition to the game?
->> And Clang does not really like it.
->>
->> In file included from
->> /home/jenkins/workspace/ceph-master/src/common/perf_counters.h:21:
->> /home/jenkins/workspace/ceph-master/src/common/perf_histogram.h:80:9:
->> error: array initializer must be an initializer list
->>        : m_axes_config(other.m_axes_config) {
->>          ^
->> /home/jenkins/workspace/ceph-master/src/common/perf_counters.h:98:29:
->> note: in instantiation of member function
->> 'PerfHistogram<2>::PerfHistogram' requested here
->>          histogram.reset(new PerfHistogram<>(*other.histogram));
->>                              ^
->> 1 error generated.
->>
->> --WjW
->> -- 
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at http://vger.kernel.org/majordomo-info.html
->
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+SGksDQoNCknigJltIGN1cmlvdXMgYXJlIHRoZXJlIHNwZWNpZmljIGFkdmFudGFnZXMgdG8gY29t
+cGlsaW5nIENlcGggd2l0aCBjbGFuZyB2cy4gZ2NjPyBJIHVuZGVyc3RhbmQgdGhhdCBjbGFuZyB1
+c2VzIGxlc3MgbWVtb3J5LCBjb21waWxlcyBmYXN0ZXIsIGFuZCBoYXMgYmV0dGVyIGVycm9ycy9k
+aWFnbm9zdGljcywgYnV0IGFzIGl0IHJlbGF0ZXMgdG8gQ2VwaCBpcyB0aGVyZSBhbnkgc3BlY2lm
+aWMgYWR2YW50YWdlcz8NCg0KSXMgdGhlcmUgYSBwbGFuIHRvIHN3aXRjaGluZyB0byBjbGFuZz8N
+Cg0KVGhhbmtzIQ0KQmFzc2FtDQoNCj4gT24gRmViIDksIDIwMTcsIGF0IDc6MzUgQU0sIFdpbGxl
+bSBKYW4gV2l0aGFnZW4gPHdqd0BkaWdpd2FyZS5ubD4gd3JvdGU6DQo+IA0KPiBIaSwNCj4gDQo+
+IEkgdGhpbmsgdGhpcyBpcyBhIHJlY2VudCBhZGRpdGlvbiB0byB0aGUgZ2FtZT8NCj4gQW5kIENs
+YW5nIGRvZXMgbm90IHJlYWxseSBsaWtlIGl0Lg0KPiANCj4gSW4gZmlsZSBpbmNsdWRlZCBmcm9t
+DQo+IC9ob21lL2plbmtpbnMvd29ya3NwYWNlL2NlcGgtbWFzdGVyL3NyYy9jb21tb24vcGVyZl9j
+b3VudGVycy5oOjIxOg0KPiAvaG9tZS9qZW5raW5zL3dvcmtzcGFjZS9jZXBoLW1hc3Rlci9zcmMv
+Y29tbW9uL3BlcmZfaGlzdG9ncmFtLmg6ODA6OToNCj4gZXJyb3I6IGFycmF5IGluaXRpYWxpemVy
+IG11c3QgYmUgYW4gaW5pdGlhbGl6ZXIgbGlzdA0KPiAgICAgIDogbV9heGVzX2NvbmZpZyhvdGhl
+ci5tX2F4ZXNfY29uZmlnKSB7DQo+ICAgICAgICBeDQo+IC9ob21lL2plbmtpbnMvd29ya3NwYWNl
+L2NlcGgtbWFzdGVyL3NyYy9jb21tb24vcGVyZl9jb3VudGVycy5oOjk4OjI5Og0KPiBub3RlOiBp
+biBpbnN0YW50aWF0aW9uIG9mIG1lbWJlciBmdW5jdGlvbg0KPiAnUGVyZkhpc3RvZ3JhbTwyPjo6
+UGVyZkhpc3RvZ3JhbScgcmVxdWVzdGVkIGhlcmUNCj4gICAgICAgIGhpc3RvZ3JhbS5yZXNldChu
+ZXcgUGVyZkhpc3RvZ3JhbTw+KCpvdGhlci5oaXN0b2dyYW0pKTsNCj4gICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgXg0KPiAxIGVycm9yIGdlbmVyYXRlZC4NCj4gDQo+IC0tV2pXDQo+IC0tDQo+
+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
+ZSBjZXBoLWRldmVsIiBpbg0KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
+ZXIua2VybmVsLm9yZw0KPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwczovL3VybGRlZmVu
+c2UucHJvb2Zwb2ludC5jb20vdjIvdXJsP3U9aHR0cC0zQV9fdmdlci5rZXJuZWwub3JnX21ham9y
+ZG9tby0yRGluZm8uaHRtbCZkPUR3SUNhUSZjPThTNWlkamxPX24yOEtvM2xnNmxza1RNd25lU0Mt
+V3FaNUVCVEVFdkRsa2cmcj1CVE1kMkFOY0RsNVBfblRrRWFtNXp6eXdXZEdqSG9hb1h5NEpNR195
+SFBBJm09UHpDbDJVN0JINTJteWNEdzNQaUM3TGFDYkdDQ1Rld01OQlVxdThnR0tJUSZzPWdSNHhY
+S0hnNEFGY3dFY2NySXMtS29NN2JqR3cwYUw5Q25WRl9QUUVfZm8mZT0gDQoNCg==
