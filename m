@@ -1,15 +1,16 @@
-From: David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Brian Andrus <brian.andrus-OZUH0SiS3Izby3iVrkZq2A@public.gmane.org>
 Subject: Re: would people mind a slow osd restart during
 	luminous upgrade?
-Date: Thu, 09 Feb 2017 17:12:09 +0000
-Message-ID: <CAN-GepLfgY-D6UaN+ZLt9Kdo20F4gOUnFPSOpjuNZzy=9bbKQw@mail.gmail.com>
+Date: Thu, 9 Feb 2017 09:24:05 -0800
+Message-ID: <CAANaFCyVw4n3NNJZ+Koz5dOZxgcBRUH=6xOVq6qO6+qcZYzegw@mail.gmail.com>
 References: <alpine.DEB.2.11.1702090302470.7782@piezo.novalocal>
 	<CAN-Gep+5wDxpab3b5AN_i1m2uNHVvhWkjMWjmd7Rmi6Xbnciuw@mail.gmail.com>
 	<alpine.DEB.2.11.1702091426500.7782@piezo.novalocal>
+	<CAN-GepLfgY-D6UaN+ZLt9Kdo20F4gOUnFPSOpjuNZzy=9bbKQw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0304297001=="
+Content-Type: multipart/mixed; boundary="===============0633869993=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1702091426500.7782-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+In-Reply-To: <CAN-GepLfgY-D6UaN+ZLt9Kdo20F4gOUnFPSOpjuNZzy=9bbKQw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,69 +20,97 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+To: David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Squid Cybernetic <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============0304297001==
-Content-Type: multipart/alternative; boundary=001a114697b07ca0fc05481c1522
+--===============0633869993==
+Content-Type: multipart/alternative; boundary=94eb2c08b8a68f324505481c3ff2
 
---001a114697b07ca0fc05481c1522
+--94eb2c08b8a68f324505481c3ff2
 Content-Type: text/plain; charset=UTF-8
 
-When we upgraded to Jewel 10.2.3 from Hammer 0.94.7 in our QA cluster we
-had issues with client incompatibility.  We first tried upgrading our
-clients before upgrading the cluster.  This broke creating RBDs, cloning
-RBDs, and probably many other things.  We quickly called that test a wash
-and redeployed the cluster back to 0.94.7 and redid the upgrade by
-partially upgrading the cluster, testing, fully upgrading the cluster,
-testing, and finally upgraded the clients to Jewel.  This worked with no
-issues creating RBDs, cloning, snapshots, deleting, etc.
+On Thu, Feb 9, 2017 at 9:12 AM, David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
 
-I'm not sure if there was a previous reason that we decided to always
-upgrade the clients first.  It might have had to do with the upgrade from
-Firefly to Hammer.  It's just something we always test now, especially with
-full version upgrades.  That being said, making sure that there is a client
-that was regression tested throughout the cluster upgrade would be great to
-have in the release notes.
-
-On Thu, Feb 9, 2017 at 7:29 AM Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-
-> On Thu, 9 Feb 2017, David Turner wrote:
-> > The only issue I can think of is if there isn't a version of the clients
-> > fully tested to work with a partially upgraded cluster or a documented
-> > incompatibility requiring downtime. We've had upgrades where we had to
-> > upgrade clients first and others that we had to do the clients last due
-> to
-> > issues with how the clients interacted with an older cluster, partially
-> > upgraded cluster, or newer cluster.
+> When we upgraded to Jewel 10.2.3 from Hammer 0.94.7 in our QA cluster we
+> had issues with client incompatibility.  We first tried upgrading our
+> clients before upgrading the cluster.  This broke creating RBDs, cloning
+> RBDs, and probably many other things.  We quickly called that test a wash
+> and redeployed the cluster back to 0.94.7 and redid the upgrade by
+> partially upgrading the cluster, testing, fully upgrading the cluster,
+> testing, and finally upgraded the clients to Jewel.  This worked with no
+> issues creating RBDs, cloning, snapshots, deleting, etc.
 >
-> We maintain client compatibiltity across *many* releases and several
-> years.  In general this under the control of the administrator via their
-> choice of CRUSH tunables, which effectively let you choose the oldest
-> client you'd like to support.
->
-> I'm curious which upgrade you had problems with?  Generally speaking the
-> only "client" upgrade ordering issue is with the radosgw clients, which
-> need to be upgraded after the OSDs.
->
-> > If the FileStore is changing this much, I can imagine a Jewel client
-> having
-> > a hard time locating the objects it needs from a Luminous cluster.
->
-> In this case the change would be internal to a single OSD and have no
-> effect on the client/osd interaction or placement of objects.
->
-> sage
+> I'm not sure if there was a previous reason that we decided to always
+> upgrade the clients first.  It might have had to do with the upgrade from
+> Firefly to Hammer.  It's just something we always test now, especially with
+> full version upgrades.  That being said, making sure that there is a client
+> that was regression tested throughout the cluster upgrade would be great to
+> have in the release notes.
 >
 
---001a114697b07ca0fc05481c1522
+I agree - it would have been nice to have this in the release notes,
+however we only hit it because we're hyperconverged (clients using Jewel
+against a Hammer cluster that hasn't yet had daemons restarted). We are
+fixing it by setting rbd_default_features = 3 in our upcoming upgrade. We
+will then unset it once the cluster is running Jewel.
+
+
+>
+> On Thu, Feb 9, 2017 at 7:29 AM Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>
+>> On Thu, 9 Feb 2017, David Turner wrote:
+>> > The only issue I can think of is if there isn't a version of the clients
+>> > fully tested to work with a partially upgraded cluster or a documented
+>> > incompatibility requiring downtime. We've had upgrades where we had to
+>> > upgrade clients first and others that we had to do the clients last due
+>> to
+>> > issues with how the clients interacted with an older cluster, partially
+>> > upgraded cluster, or newer cluster.
+>>
+>> We maintain client compatibiltity across *many* releases and several
+>> years.  In general this under the control of the administrator via their
+>> choice of CRUSH tunables, which effectively let you choose the oldest
+>> client you'd like to support.
+>>
+>> I'm curious which upgrade you had problems with?  Generally speaking the
+>> only "client" upgrade ordering issue is with the radosgw clients, which
+>> need to be upgraded after the OSDs.
+>>
+>> > If the FileStore is changing this much, I can imagine a Jewel client
+>> having
+>> > a hard time locating the objects it needs from a Luminous cluster.
+>>
+>> In this case the change would be internal to a single OSD and have no
+>> effect on the client/osd interaction or placement of objects.
+>>
+>> sage
+>>
+>
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+
+
+-- 
+Brian Andrus | Cloud Systems Engineer | DreamHost
+brian.andrus-1Zbx3wZeAm3by3iVrkZq2A@public.gmane.org | www.dreamhost.com
+
+--94eb2c08b8a68f324505481c3ff2
 Content-Type: text/html; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-<div dir=3D"ltr"><font size=3D"2" face=3D"Calibri"><span style=3D"font-size=
-:10pt">When we upgraded to Jewel 10.2.3 from Hammer 0.94.7 in our QA cluste=
-r we had issues with client incompatibility.=C2=A0 We first=20
+<div dir=3D"ltr"><br><div class=3D"gmail_extra"><br><div class=3D"gmail_quo=
+te">On Thu, Feb 9, 2017 at 9:12 AM, David Turner <span dir=3D"ltr">&lt;<a h=
+ref=3D"mailto:drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" target=3D"_blank">drakonstein-Re5JQEeQqe8@public.gmane.org=
+m</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_quote" style=3D"margi=
+n:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex=
+"><div dir=3D"ltr"><font size=3D"2" face=3D"Calibri"><span style=3D"font-si=
+ze:10pt">When we upgraded to Jewel 10.2.3 from Hammer 0.94.7 in our QA clus=
+ter we had issues with client incompatibility.=C2=A0 We first=20
 tried upgrading our clients before upgrading the cluster.=C2=A0 This broke =
 creating RBDs, cloning RBDs, and probably many other=20
 things.=C2=A0 We quickly called that test a wash and redeployed the cluster=
@@ -97,54 +126,78 @@ f there was a previous reason that we decided to always upgrade the clients=
 er.=C2=A0 It&#39;s just something we always test now, especially with full =
 version upgrades.=C2=A0 That being said, making sure that there is a client=
  that was regression tested throughout the cluster upgrade would be great t=
-o have in the release notes.</span></font></div></div><br><div class=3D"gma=
-il_quote"><div dir=3D"ltr">On Thu, Feb 9, 2017 at 7:29 AM Sage Weil &lt;<a =
-href=3D"mailto:sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:<br></div><=
-blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px=
- #ccc solid;padding-left:1ex">On Thu, 9 Feb 2017, David Turner wrote:<br cl=
-ass=3D"gmail_msg">
+o have in the release notes.</span></font></div></div></blockquote><div><br=
+></div><div>I agree - it would have been nice to have this in the release n=
+otes, however we only hit it because we&#39;re hyperconverged (clients usin=
+g Jewel against a Hammer cluster that hasn&#39;t yet had daemons restarted)=
+. We are fixing it by setting=C2=A0rbd_default_features =3D 3 in our upcomi=
+ng upgrade. We will then unset it once the cluster is running Jewel.</div><=
+div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0=
+px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><div clas=
+s=3D"gmail-HOEnZb"><div class=3D"gmail-h5"><br><div class=3D"gmail_quote"><=
+div dir=3D"ltr">On Thu, Feb 9, 2017 at 7:29 AM Sage Weil &lt;<a href=3D"mai=
+lto:sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" target=3D"_blank">sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:<br>=
+</div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;b=
+order-left:1px solid rgb(204,204,204);padding-left:1ex">On Thu, 9 Feb 2017,=
+ David Turner wrote:<br class=3D"gmail-m_-1585151138802769136gmail_msg">
 &gt; The only issue I can think of is if there isn&#39;t a version of the c=
-lients<br class=3D"gmail_msg">
+lients<br class=3D"gmail-m_-1585151138802769136gmail_msg">
 &gt; fully tested to work with a partially upgraded cluster or a documented=
-<br class=3D"gmail_msg">
+<br class=3D"gmail-m_-1585151138802769136gmail_msg">
 &gt; incompatibility requiring downtime. We&#39;ve had upgrades where we ha=
-d to<br class=3D"gmail_msg">
+d to<br class=3D"gmail-m_-1585151138802769136gmail_msg">
 &gt; upgrade clients first and others that we had to do the clients last du=
-e to<br class=3D"gmail_msg">
+e to<br class=3D"gmail-m_-1585151138802769136gmail_msg">
 &gt; issues with how the clients interacted with an older cluster, partiall=
-y<br class=3D"gmail_msg">
-&gt; upgraded cluster, or newer cluster.<br class=3D"gmail_msg">
-<br class=3D"gmail_msg">
+y<br class=3D"gmail-m_-1585151138802769136gmail_msg">
+&gt; upgraded cluster, or newer cluster.<br class=3D"gmail-m_-1585151138802=
+769136gmail_msg">
+<br class=3D"gmail-m_-1585151138802769136gmail_msg">
 We maintain client compatibiltity across *many* releases and several<br cla=
-ss=3D"gmail_msg">
+ss=3D"gmail-m_-1585151138802769136gmail_msg">
 years.=C2=A0 In general this under the control of the administrator via the=
-ir<br class=3D"gmail_msg">
+ir<br class=3D"gmail-m_-1585151138802769136gmail_msg">
 choice of CRUSH tunables, which effectively let you choose the oldest<br cl=
-ass=3D"gmail_msg">
-client you&#39;d like to support.<br class=3D"gmail_msg">
-<br class=3D"gmail_msg">
-I&#39;m curious which upgrade you had problems with?=C2=A0 Generally speaki=
-ng the<br class=3D"gmail_msg">
-only &quot;client&quot; upgrade ordering issue is with the radosgw clients,=
- which<br class=3D"gmail_msg">
-need to be upgraded after the OSDs.<br class=3D"gmail_msg">
-<br class=3D"gmail_msg">
-&gt; If the FileStore is changing this much, I can imagine a Jewel client h=
-aving<br class=3D"gmail_msg">
-&gt; a hard time locating the objects it needs from a Luminous cluster.<br =
-class=3D"gmail_msg">
-<br class=3D"gmail_msg">
-In this case the change would be internal to a single OSD and have no<br cl=
-ass=3D"gmail_msg">
-effect on the client/osd interaction or placement of objects.<br class=3D"g=
+ass=3D"gmail-m_-1585151138802769136gmail_msg">
+client you&#39;d like to support.<br class=3D"gmail-m_-1585151138802769136g=
 mail_msg">
-<br class=3D"gmail_msg">
-sage<br class=3D"gmail_msg">
+<br class=3D"gmail-m_-1585151138802769136gmail_msg">
+I&#39;m curious which upgrade you had problems with?=C2=A0 Generally speaki=
+ng the<br class=3D"gmail-m_-1585151138802769136gmail_msg">
+only &quot;client&quot; upgrade ordering issue is with the radosgw clients,=
+ which<br class=3D"gmail-m_-1585151138802769136gmail_msg">
+need to be upgraded after the OSDs.<br class=3D"gmail-m_-158515113880276913=
+6gmail_msg">
+<br class=3D"gmail-m_-1585151138802769136gmail_msg">
+&gt; If the FileStore is changing this much, I can imagine a Jewel client h=
+aving<br class=3D"gmail-m_-1585151138802769136gmail_msg">
+&gt; a hard time locating the objects it needs from a Luminous cluster.<br =
+class=3D"gmail-m_-1585151138802769136gmail_msg">
+<br class=3D"gmail-m_-1585151138802769136gmail_msg">
+In this case the change would be internal to a single OSD and have no<br cl=
+ass=3D"gmail-m_-1585151138802769136gmail_msg">
+effect on the client/osd interaction or placement of objects.<br class=3D"g=
+mail-m_-1585151138802769136gmail_msg">
+<br class=3D"gmail-m_-1585151138802769136gmail_msg">
+sage<br class=3D"gmail-m_-1585151138802769136gmail_msg">
 </blockquote></div>
+</div></div><br>______________________________<wbr>_________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
+br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
+oreferrer" target=3D"_blank">http://lists.ceph.com/<wbr>listinfo.cgi/ceph-u=
+sers-ceph.<wbr>com</a><br>
+<br></blockquote></div><br><br clear=3D"all"><div><br></div>-- <br><div cla=
+ss=3D"gmail_signature"><div dir=3D"ltr"><div class=3D"gmail_signature"><div=
+ dir=3D"ltr"><div dir=3D"ltr">Brian Andrus | Cloud Systems Engineer | Dream=
+Host</div><div dir=3D"ltr">brian.andrus-1Zbx3wZeAm3by3iVrkZq2A@public.gmane.org | <a href=3D"http://w=
+ww.dreamhost.com">www.dreamhost.com</a></div></div></div></div></div>
+</div></div>
 
---001a114697b07ca0fc05481c1522--
+--94eb2c08b8a68f324505481c3ff2--
 
---===============0304297001==
+--===============0633869993==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -155,4 +208,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============0304297001==--
+--===============0633869993==--
