@@ -1,95 +1,71 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v4 2/6] libceph: abort already submitted but abortable requests when map or pool goes full
-Date: Thu,  9 Feb 2017 09:48:32 -0500
-Message-ID: <20170209144836.12525-3-jlayton@redhat.com>
+Subject: [PATCH v4 5/6] Revert "ceph: SetPageError() for writeback pages if writepages fails"
+Date: Thu,  9 Feb 2017 09:48:35 -0500
+Message-ID: <20170209144836.12525-6-jlayton@redhat.com>
 References: <20170209144836.12525-1-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48148 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:43282 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752764AbdBIOso (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 9 Feb 2017 09:48:44 -0500
+        id S1752764AbdBIOsq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 9 Feb 2017 09:48:46 -0500
 In-Reply-To: <20170209144836.12525-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, jspray@redhat.com
 
-When a Ceph volume hits capacity, a flag is set in the OSD map to
-indicate that, and a new map is sprayed around the cluster. With cephfs
-we want it to shut down any abortable requests that are in progress with
-an -ENOSPC error as they'd just hang otherwise.
+This reverts commit b109eec6f4332bd517e2f41e207037c4b9065094.
 
-Add a new ceph_osdc_abort_on_full helper function to handle this. It
-will first check whether there is an out-of-space condition in the
-cluster. It will then walk the tree and abort any request that has
-r_abort_on_full set with an ENOSPC error. Call this new function
-directly whenever we get a new OSD map.
+If I'm filling up a filesystem with this sort of command:
+
+    $ dd if=/dev/urandom of=/mnt/cephfs/fillfile bs=2M oflag=sync
+
+...then I'll eventually get back EIO on a write. Further calls
+will give us ENOSPC.
+
+I'm not sure what prompted this change, but I don't think it's what we
+want to do. If writepages failed, we will have already set the mapping
+error appropriately, and that's what gets reported by fsync() or
+close().
+
+__filemap_fdatawait_range however, does this:
+
+	wait_on_page_writeback(page);
+	if (TestClearPageError(page))
+		ret = -EIO;
+
+...and that -EIO ends up trumping the mapping's error if one exists.
+
+When writepages fails, we only want to set the error in the mapping,
+and not flag the individual pages.
 
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- net/ceph/osd_client.c | 42 ++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 42 insertions(+)
+ fs/ceph/addr.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index f68bb42da240..cdb0b58c4c99 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -1777,6 +1777,47 @@ static void complete_request(struct ceph_osd_request *req, int err)
- 	ceph_osdc_put_request(req);
- }
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 308787eeee2c..040d05c8f4a2 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -668,6 +668,7 @@ static void writepages_finish(struct ceph_osd_request *req)
+ 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
+ 	bool remove_page;
  
-+/*
-+ * Drop all pending requests that are stalled waiting on a full condition to
-+ * clear, and complete them with ENOSPC as the return code.
-+ */
-+static void ceph_osdc_abort_on_full(struct ceph_osd_client *osdc)
-+{
-+	struct ceph_osd_request *req;
-+	struct ceph_osd *osd;
-+	struct rb_node *m, *n;
-+	u32 latest_epoch = 0;
-+	bool osdmap_full = ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL);
 +
-+	dout("enter abort_on_full\n");
-+
-+	if (!osdmap_full && !have_pool_full(osdc))
-+		goto out;
-+
-+	for (n = rb_first(&osdc->osds); n; n = rb_next(n)) {
-+		osd = rb_entry(n, struct ceph_osd, o_node);
-+		mutex_lock(&osd->lock);
-+		m = rb_first(&osd->o_requests);
-+		while (m) {
-+			req = rb_entry(m, struct ceph_osd_request, r_node);
-+			m = rb_next(m);
-+
-+			if (req->r_abort_on_full &&
-+			    (osdmap_full || pool_full(osdc, req->r_t.base_oloc.pool))) {
-+				u32 cur_epoch = le32_to_cpu(req->r_replay_version.epoch);
-+
-+				dout("%s: abort tid=%llu flags 0x%x\n", __func__, req->r_tid, req->r_flags);
-+				complete_request(req, -ENOSPC);
-+				if (cur_epoch > latest_epoch)
-+					latest_epoch = cur_epoch;
-+			}
-+		}
-+		mutex_unlock(&osd->lock);
-+	}
-+out:
-+	dout("return abort_on_full latest_epoch=%u\n", latest_epoch);
-+}
-+
- static void cancel_map_check(struct ceph_osd_request *req)
- {
- 	struct ceph_osd_client *osdc = req->r_osdc;
-@@ -3292,6 +3333,7 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+ 	dout("writepages_finish %p rc %d\n", inode, rc);
+ 	if (rc < 0)
+ 		mapping_set_error(mapping, rc);
+@@ -702,9 +703,6 @@ static void writepages_finish(struct ceph_osd_request *req)
+ 				clear_bdi_congested(&fsc->backing_dev_info,
+ 						    BLK_RW_ASYNC);
  
- 	ceph_monc_got_map(&osdc->client->monc, CEPH_SUB_OSDMAP,
- 			  osdc->osdmap->epoch);
-+	ceph_osdc_abort_on_full(osdc);
- 	up_write(&osdc->lock);
- 	wake_up_all(&osdc->client->auth_wq);
- 	return;
+-			if (rc < 0)
+-				SetPageError(page);
+-
+ 			ceph_put_snap_context(page_snap_context(page));
+ 			page->private = 0;
+ 			ClearPagePrivate(page);
 -- 
 2.9.3
 
