@@ -1,47 +1,43 @@
-From: Dave Holland <dh3-5fLPn3lgkryFxr2TtlUqVg@public.gmane.org>
-Subject: Re: would people mind a slow osd restart during
- luminous upgrade?
-Date: Thu, 9 Feb 2017 11:36:19 +0000
-Message-ID: <20170209113618.GU10317@sanger.ac.uk>
-References: <alpine.DEB.2.11.1702090302470.7782@piezo.novalocal>
-	<24cb8bc3-bda5-467c-b2cb-e9d77ba24679@kirneh.eu>
+From: Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>
+Subject: Re: [PATCH 04/24] fs: Provide infrastructure for
+ dynamic	BDIs in filesystems
+Date: Thu, 9 Feb 2017 13:12:12 +0100
+Message-ID: <20170209121212.GD16825@quack2.suse.cz>
+References: <20170202173422.3240-1-jack@suse.cz>
+	<20170202173422.3240-5-jack@suse.cz>
+	<C01BF300-AD67-4A3E-810F-AAB2EEB90B97@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <24cb8bc3-bda5-467c-b2cb-e9d77ba24679-eal8BvkdEKCHXe+LvDLADg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Henrik Korkuc <lists-eal8BvkdEKCHXe+LvDLADg@public.gmane.org>
-Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+In-Reply-To: <C01BF300-AD67-4A3E-810F-AAB2EEB90B97-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
+List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
+Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+To: "Dilger, Andreas" <andreas.dilger-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-nilfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-nilfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "ecryptfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ecryptfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "codalist-/uMB558Y47wP4a1z8dhFYw@public.gmane.org" <codalist-/uMB558Y47wP4a1z8dhFYw@public.gmane.org>, "linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-block-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "osd-dev-yNzVSZO3znNg9hUCZPvPmw@public.gmane.org" <osd-dev-yNzVSZO3znNg9hUCZPvPmw@public.gmane.org>, "linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Petr Vandrovec <petr-vPk2MGR0e28uaRcfnNAh7A@public.gmane.org>, "linux-afs-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-afs-IAPFreCvJWM7uuMidbF8XcXa4x6EXUF0@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu, Feb 09, 2017 at 10:41:44AM +0200, Henrik Korkuc wrote:
-> On 17-02-09 05:09, Sage Weil wrote:
-> >Does this concern anyone?  It probably means the upgrades will take longer
-> >if you're going host by host since the time per host will go up.
-> In my opinion if this is clearly communicated (release notes + OSD logs)
+> > @@ -1249,6 +1254,50 @@ mount_fs(struct file_system_type *type, int flags, const char *name, void *data)
+> > }
+> > 
+> > /*
+> > + * Setup private BDI for given superblock. I gets automatically cleaned up
+> 
+> (typo) s/I/It/
+> 
+> Looks fine otherwise.
 
-+1 for having the OSD log something when it starts the upgrade
-process, so the sysadmin who goes looking will see what's happening.
+Thanks, fixed.
 
-Cheers,
-Dave
+								Honza
 -- 
-** Dave Holland ** Systems Support -- Informatics Systems Group **
-** 01223 496923 ** The Sanger Institute, Hinxton, Cambridge, UK **
-
-
--- 
- The Wellcome Trust Sanger Institute is operated by Genome Research 
- Limited, a charity registered in England with number 1021457 and a 
- company registered in England with number 2742969, whose registered 
- office is 215 Euston Road, London, NW1 2BE. 
+Jan Kara <jack-IBi9RG/b67k@public.gmane.org>
+SUSE Labs, CR
