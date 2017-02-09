@@ -1,59 +1,59 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: Are we ready for jewel 10.2.6?
-Date: Thu, 9 Feb 2017 15:10:09 +1000
-Message-ID: <CAF-wwdEb_afYCQgjH5XpBbvk3J+dzg+CJ-agK6KsFajzu2gA1w@mail.gmail.com>
-References: <63289246-25fb-c96f-b844-dba82d7293c5@suse.cz> <CAC7t81bh9xOh77e73zXpHWhvWhPiMagTiER6LqpqqGfHiMqZrg@mail.gmail.com>
- <c8317af2-a8a2-2f22-7083-46f24057f10a@dachary.org>
+From: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
+Subject: Re: would people mind a slow osd restart during
+ luminous upgrade?
+Date: Thu, 9 Feb 2017 06:57:27 +0100 (CET)
+Message-ID: <66796779.9484.1486619847762@ox.pcextreme.nl>
+References: <alpine.DEB.2.11.1702090302470.7782@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f177.google.com ([209.85.223.177]:33509 "EHLO
-        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751423AbdBIFKL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Feb 2017 00:10:11 -0500
-Received: by mail-io0-f177.google.com with SMTP id v96so8708637ioi.0
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Feb 2017 21:10:11 -0800 (PST)
-In-Reply-To: <c8317af2-a8a2-2f22-7083-46f24057f10a@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Alexey Sheplyakov <asheplyakov@mirantis.com>, Nathan Cutler <ncutler@suse.cz>, Abhishek Lekshmanan <abhishek@suse.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-
-https://github.com/ceph/ceph/pull/11410 maybe?
-
-On Fri, Feb 3, 2017 at 5:02 PM, Loic Dachary <loic@dachary.org> wrote:
-> Hi Alexey,
->
-> On 02/03/2017 07:11 AM, Alexey Sheplyakov wrote:
->> Hi,
->>
->>> I'm still merging RGW backports and there a few more miscellaneous backports still in the queue.
->>
->> Any chance to have https://github.com/ceph/ceph/pull/13004 included in 10.2.6?
->
-> Thanks for rebasing it :-) It now needs to go through a round of testing, which may or may not happen. Note however that you can run the relevant rgw teuthology jobs to test this pull request and if they succeed it will be merged.
->
-> Cheers
->
->>
->> Best regards,
->>       Alexey
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> --
-> Loïc Dachary, Artisan Logiciel Libre
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1702090302470.7782-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-Qp0mS5GaXlQ@public.gmane.org, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
 
+> Op 9 februari 2017 om 4:09 schreef Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+> 
+> 
+> Hello, ceph operators...
+> 
+> Several times in the past we've had to do some ondisk format conversion 
+> during upgrade which mean that the first time the ceph-osd daemon started 
+> after upgrade it had to spend a few minutes fixing up it's ondisk files.  
+> We haven't had to recently, though, and generally try to avoid such 
+> things.
+> 
+> However, there's a change we'd like to make in FileStore for luminous (*) 
+> and it would save us a lot of time and complexity if it was a one-shot 
+> update during the upgrade.  I would probably take in the neighborhood of 
+> 1-5 minutes for a 4-6TB HDD.  That means that when restarting the daemon 
+> during the upgrade the OSD would stay down for that period (vs the usual 
+> <1 restart time).
+> 
+> Does this concern anyone?  It probably means the upgrades will take longer 
+> if you're going host by host since the time per host will go up.
+> 
 
--- 
-Cheers,
-Brad
+Not really. When going to Jewel data had to be chowned to ceph:ceph as well. As long as we make sure it's in the Release Notes very clearly we should be OK.
+
+Wido
+
+> sage
+> 
+> 
+> * eliminate 'snapdir' objects, replacing them with a head object + 
+> whiteout.
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
