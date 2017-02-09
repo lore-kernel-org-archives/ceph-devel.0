@@ -1,29 +1,44 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: ondisk_read/write lock
-Date: Wed, 8 Feb 2017 16:10:24 -0800
-Message-ID: <CAB7xdin7da09+NC5qjXu7Yoz6wmGCVFztDDUmtUXPSk5+m=eJg@mail.gmail.com>
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: would people mind a slow osd restart during luminous
+	upgrade?
+Date: Thu, 9 Feb 2017 03:09:14 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1702090302470.7782@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f169.google.com ([209.85.217.169]:35653 "EHLO
-        mail-ua0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752096AbdBIAKZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Feb 2017 19:10:25 -0500
-Received: by mail-ua0-f169.google.com with SMTP id y9so122898853uae.2
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Feb 2017 16:10:25 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi cepher,
+Hello, ceph operators...
 
-I noticed that when PG worker is processing the op, it may acquire
-obc->ondisk_read_lock or obc->ondisk_write_lock. it's used to protect
-concurrent read and write to same object.
+Several times in the past we've had to do some ondisk format conversion 
+during upgrade which mean that the first time the ceph-osd daemon started 
+after upgrade it had to spend a few minutes fixing up it's ondisk files.  
+We haven't had to recently, though, and generally try to avoid such 
+things.
 
-But to my understanding, the PG lock is held while worker is
-processing op which already prevent concurrent access for the same
-object. Does that mean those locks are not actually needed?
+However, there's a change we'd like to make in FileStore for luminous (*) 
+and it would save us a lot of time and complexity if it was a one-shot 
+update during the upgrade.  I would probably take in the neighborhood of 
+1-5 minutes for a 4-6TB HDD.  That means that when restarting the daemon 
+during the upgrade the OSD would stay down for that period (vs the usual 
+<1 restart time).
 
-Thanks,
-Sheng
+Does this concern anyone?  It probably means the upgrades will take longer 
+if you're going host by host since the time per host will go up.
+
+sage
+
+
+* eliminate 'snapdir' objects, replacing them with a head object + 
+whiteout.
