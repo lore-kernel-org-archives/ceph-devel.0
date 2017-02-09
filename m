@@ -1,141 +1,59 @@
-From: David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: would people mind a slow osd restart during
-	luminous upgrade?
-Date: Thu, 09 Feb 2017 04:19:05 +0000
-Message-ID: <CAN-Gep+5wDxpab3b5AN_i1m2uNHVvhWkjMWjmd7Rmi6Xbnciuw@mail.gmail.com>
-References: <alpine.DEB.2.11.1702090302470.7782@piezo.novalocal>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: Are we ready for jewel 10.2.6?
+Date: Thu, 9 Feb 2017 15:10:09 +1000
+Message-ID: <CAF-wwdEb_afYCQgjH5XpBbvk3J+dzg+CJ-agK6KsFajzu2gA1w@mail.gmail.com>
+References: <63289246-25fb-c96f-b844-dba82d7293c5@suse.cz> <CAC7t81bh9xOh77e73zXpHWhvWhPiMagTiER6LqpqqGfHiMqZrg@mail.gmail.com>
+ <c8317af2-a8a2-2f22-7083-46f24057f10a@dachary.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0649860484=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1702090302470.7782-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
---===============0649860484==
-Content-Type: multipart/alternative; boundary=001a114355a6c9755d05481148a0
-
---001a114355a6c9755d05481148a0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-io0-f177.google.com ([209.85.223.177]:33509 "EHLO
+        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751423AbdBIFKL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Feb 2017 00:10:11 -0500
+Received: by mail-io0-f177.google.com with SMTP id v96so8708637ioi.0
+        for <ceph-devel@vger.kernel.org>; Wed, 08 Feb 2017 21:10:11 -0800 (PST)
+In-Reply-To: <c8317af2-a8a2-2f22-7083-46f24057f10a@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Alexey Sheplyakov <asheplyakov@mirantis.com>, Nathan Cutler <ncutler@suse.cz>, Abhishek Lekshmanan <abhishek@suse.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The only issue I can think of is if there isn't a version of the clients
-fully tested to work with a partially upgraded cluster or a documented
-incompatibility requiring downtime. We've had upgrades where we had to
-upgrade clients first and others that we had to do the clients last due to
-issues with how the clients interacted with an older cluster, partially
-upgraded cluster, or newer cluster.
+https://github.com/ceph/ceph/pull/11410 maybe?
 
-If the FileStore is changing this much, I can imagine a Jewel client having
-a hard time locating the objects it needs from a Luminous cluster.
-On Wed, Feb 8, 2017 at 8:09 PM Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-
-> Hello, ceph operators...
+On Fri, Feb 3, 2017 at 5:02 PM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Alexey,
 >
-> Several times in the past we've had to do some ondisk format conversion
-> during upgrade which mean that the first time the ceph-osd daemon started
-> after upgrade it had to spend a few minutes fixing up it's ondisk files.
-> We haven't had to recently, though, and generally try to avoid such
-> things.
+> On 02/03/2017 07:11 AM, Alexey Sheplyakov wrote:
+>> Hi,
+>>
+>>> I'm still merging RGW backports and there a few more miscellaneous backports still in the queue.
+>>
+>> Any chance to have https://github.com/ceph/ceph/pull/13004 included in 10.2.6?
 >
-> However, there's a change we'd like to make in FileStore for luminous (*)
-> and it would save us a lot of time and complexity if it was a one-shot
-> update during the upgrade.  I would probably take in the neighborhood of
-> 1-5 minutes for a 4-6TB HDD.  That means that when restarting the daemon
-> during the upgrade the OSD would stay down for that period (vs the usual
-> <1 restart time).
+> Thanks for rebasing it :-) It now needs to go through a round of testing, which may or may not happen. Note however that you can run the relevant rgw teuthology jobs to test this pull request and if they succeed it will be merged.
 >
-> Does this concern anyone?  It probably means the upgrades will take longer
-> if you're going host by host since the time per host will go up.
+> Cheers
 >
-> sage
+>>
+>> Best regards,
+>>       Alexey
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 >
->
-> * eliminate 'snapdir' objects, replacing them with a head object +
-> whiteout.
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
+> --
+> Loïc Dachary, Artisan Logiciel Libre
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
---001a114355a6c9755d05481148a0
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
 
-The only issue I can think of is if there isn&#39;t a version of the client=
-s fully tested to work with a partially upgraded cluster or a documented in=
-compatibility requiring downtime. We&#39;ve had upgrades where we had to up=
-grade clients first and others that we had to do the clients last due to is=
-sues with how the clients interacted with an older cluster, partially upgra=
-ded cluster, or newer cluster.<br><br>If the FileStore is changing this muc=
-h, I can imagine a Jewel client having a hard time locating the objects it =
-needs from a Luminous cluster.<br><div class=3D"gmail_quote"><div dir=3D"lt=
-r">On Wed, Feb 8, 2017 at 8:09 PM Sage Weil &lt;<a href=3D"mailto:sweil@red=
-hat.com">sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:<br></div><blockquote class=3D"gmai=
-l_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left=
-:1ex">Hello, ceph operators...<br class=3D"gmail_msg">
-<br class=3D"gmail_msg">
-Several times in the past we&#39;ve had to do some ondisk format conversion=
-<br class=3D"gmail_msg">
-during upgrade which mean that the first time the ceph-osd daemon started<b=
-r class=3D"gmail_msg">
-after upgrade it had to spend a few minutes fixing up it&#39;s ondisk files=
-.<br class=3D"gmail_msg">
-We haven&#39;t had to recently, though, and generally try to avoid such<br =
-class=3D"gmail_msg">
-things.<br class=3D"gmail_msg">
-<br class=3D"gmail_msg">
-However, there&#39;s a change we&#39;d like to make in FileStore for lumino=
-us (*)<br class=3D"gmail_msg">
-and it would save us a lot of time and complexity if it was a one-shot<br c=
-lass=3D"gmail_msg">
-update during the upgrade.=C2=A0 I would probably take in the neighborhood =
-of<br class=3D"gmail_msg">
-1-5 minutes for a 4-6TB HDD.=C2=A0 That means that when restarting the daem=
-on<br class=3D"gmail_msg">
-during the upgrade the OSD would stay down for that period (vs the usual<br=
- class=3D"gmail_msg">
-&lt;1 restart time).<br class=3D"gmail_msg">
-<br class=3D"gmail_msg">
-Does this concern anyone?=C2=A0 It probably means the upgrades will take lo=
-nger<br class=3D"gmail_msg">
-if you&#39;re going host by host since the time per host will go up.<br cla=
-ss=3D"gmail_msg">
-<br class=3D"gmail_msg">
-sage<br class=3D"gmail_msg">
-<br class=3D"gmail_msg">
-<br class=3D"gmail_msg">
-* eliminate &#39;snapdir&#39; objects, replacing them with a head object +<=
-br class=3D"gmail_msg">
-whiteout.<br class=3D"gmail_msg">
-_______________________________________________<br class=3D"gmail_msg">
-ceph-users mailing list<br class=3D"gmail_msg">
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" class=3D"gmail_msg" target=3D"=
-_blank">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br class=3D"gmail_msg">
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
-oreferrer" class=3D"gmail_msg" target=3D"_blank">http://lists.ceph.com/list=
-info.cgi/ceph-users-ceph.com</a><br class=3D"gmail_msg">
-</blockquote></div>
 
---001a114355a6c9755d05481148a0--
-
---===============0649860484==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0649860484==--
+-- 
+Cheers,
+Brad
