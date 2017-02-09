@@ -1,49 +1,95 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: would people mind a slow osd restart during
- luminous upgrade?
-Date: Thu, 9 Feb 2017 14:29:45 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1702091426500.7782@piezo.novalocal>
-References: <alpine.DEB.2.11.1702090302470.7782@piezo.novalocal>
-	<CAN-Gep+5wDxpab3b5AN_i1m2uNHVvhWkjMWjmd7Rmi6Xbnciuw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAN-Gep+5wDxpab3b5AN_i1m2uNHVvhWkjMWjmd7Rmi6Xbnciuw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+From: Jeff Layton <jlayton@redhat.com>
+Subject: [PATCH v4 2/6] libceph: abort already submitted but abortable requests when map or pool goes full
+Date: Thu,  9 Feb 2017 09:48:32 -0500
+Message-ID: <20170209144836.12525-3-jlayton@redhat.com>
+References: <20170209144836.12525-1-jlayton@redhat.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:48148 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752764AbdBIOso (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 9 Feb 2017 09:48:44 -0500
+In-Reply-To: <20170209144836.12525-1-jlayton@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, jspray@redhat.com
 
-On Thu, 9 Feb 2017, David Turner wrote:
-> The only issue I can think of is if there isn't a version of the clients
-> fully tested to work with a partially upgraded cluster or a documented
-> incompatibility requiring downtime. We've had upgrades where we had to
-> upgrade clients first and others that we had to do the clients last due to
-> issues with how the clients interacted with an older cluster, partially
-> upgraded cluster, or newer cluster.
+When a Ceph volume hits capacity, a flag is set in the OSD map to
+indicate that, and a new map is sprayed around the cluster. With cephfs
+we want it to shut down any abortable requests that are in progress with
+an -ENOSPC error as they'd just hang otherwise.
 
-We maintain client compatibiltity across *many* releases and several 
-years.  In general this under the control of the administrator via their 
-choice of CRUSH tunables, which effectively let you choose the oldest 
-client you'd like to support.
+Add a new ceph_osdc_abort_on_full helper function to handle this. It
+will first check whether there is an out-of-space condition in the
+cluster. It will then walk the tree and abort any request that has
+r_abort_on_full set with an ENOSPC error. Call this new function
+directly whenever we get a new OSD map.
 
-I'm curious which upgrade you had problems with?  Generally speaking the 
-only "client" upgrade ordering issue is with the radosgw clients, which 
-need to be upgraded after the OSDs.
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+---
+ net/ceph/osd_client.c | 42 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)
 
-> If the FileStore is changing this much, I can imagine a Jewel client having
-> a hard time locating the objects it needs from a Luminous cluster.
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index f68bb42da240..cdb0b58c4c99 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1777,6 +1777,47 @@ static void complete_request(struct ceph_osd_request *req, int err)
+ 	ceph_osdc_put_request(req);
+ }
+ 
++/*
++ * Drop all pending requests that are stalled waiting on a full condition to
++ * clear, and complete them with ENOSPC as the return code.
++ */
++static void ceph_osdc_abort_on_full(struct ceph_osd_client *osdc)
++{
++	struct ceph_osd_request *req;
++	struct ceph_osd *osd;
++	struct rb_node *m, *n;
++	u32 latest_epoch = 0;
++	bool osdmap_full = ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL);
++
++	dout("enter abort_on_full\n");
++
++	if (!osdmap_full && !have_pool_full(osdc))
++		goto out;
++
++	for (n = rb_first(&osdc->osds); n; n = rb_next(n)) {
++		osd = rb_entry(n, struct ceph_osd, o_node);
++		mutex_lock(&osd->lock);
++		m = rb_first(&osd->o_requests);
++		while (m) {
++			req = rb_entry(m, struct ceph_osd_request, r_node);
++			m = rb_next(m);
++
++			if (req->r_abort_on_full &&
++			    (osdmap_full || pool_full(osdc, req->r_t.base_oloc.pool))) {
++				u32 cur_epoch = le32_to_cpu(req->r_replay_version.epoch);
++
++				dout("%s: abort tid=%llu flags 0x%x\n", __func__, req->r_tid, req->r_flags);
++				complete_request(req, -ENOSPC);
++				if (cur_epoch > latest_epoch)
++					latest_epoch = cur_epoch;
++			}
++		}
++		mutex_unlock(&osd->lock);
++	}
++out:
++	dout("return abort_on_full latest_epoch=%u\n", latest_epoch);
++}
++
+ static void cancel_map_check(struct ceph_osd_request *req)
+ {
+ 	struct ceph_osd_client *osdc = req->r_osdc;
+@@ -3292,6 +3333,7 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+ 
+ 	ceph_monc_got_map(&osdc->client->monc, CEPH_SUB_OSDMAP,
+ 			  osdc->osdmap->epoch);
++	ceph_osdc_abort_on_full(osdc);
+ 	up_write(&osdc->lock);
+ 	wake_up_all(&osdc->client->auth_wq);
+ 	return;
+-- 
+2.9.3
 
-In this case the change would be internal to a single OSD and have no 
-effect on the client/osd interaction or placement of objects.
-
-sage
