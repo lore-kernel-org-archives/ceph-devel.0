@@ -1,219 +1,62 @@
-From: Artur Molchanov <artur.molchanov@synesis.ru>
-Subject: [PATCH] libceph: Complete stuck requests to OSD with EIO
-Date: Thu, 9 Feb 2017 16:04:11 +0300
-Message-ID: <4e080919-2df5-1b75-3c8a-3ae95eb8f08d@synesis.ru>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+From: George Mihaiescu <lmihaiescu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: would people mind a slow osd restart during
+	luminous upgrade?
+Date: Thu, 9 Feb 2017 08:30:12 -0500
+Message-ID: <C490FBFB-7A7E-49FE-8283-A59C1205557F@gmail.com>
+References: <alpine.DEB.2.11.1702090302470.7782@piezo.novalocal>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f66.google.com ([209.85.215.66]:33222 "EHLO
-        mail-lf0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751590AbdBINMJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Feb 2017 08:12:09 -0500
-Received: by mail-lf0-f66.google.com with SMTP id x1so319071lff.0
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Feb 2017 05:11:23 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1702090302470.7782-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-From: Artur Molchanov <artur.molchanov@synesis.ru>
+Hi Sage,
 
-Complete stuck requests to OSD with error EIO after osd_request_timeout expired.
-If osd_request_timeout equals to 0 (default value) then do nothing with
-hung requests (keep default behavior).
+Is the update running in parallel for all OSDs being restarted? 
 
-Create RBD map option osd_request_timeout to set timeout in seconds. Set
-osd_request_timeout to 0 by default.
+Because 5 min per server is different than 150 min when there are 30 OSDs there..
 
-Signed-off-by: Artur Molchanov <artur.molchanov@synesis.ru>
----
-  include/linux/ceph/libceph.h    |  8 +++--
-  include/linux/ceph/osd_client.h |  1 +
-  net/ceph/ceph_common.c          | 12 +++++++
-  net/ceph/osd_client.c           | 72 +++++++++++++++++++++++++++++++++++++++++
-  4 files changed, 90 insertions(+), 3 deletions(-)
+Thank you,
+George 
 
-diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-index 1816c5e..10d8acb 100644
---- a/include/linux/ceph/libceph.h
-+++ b/include/linux/ceph/libceph.h
-@@ -48,6 +48,7 @@ struct ceph_options {
-  	unsigned long mount_timeout;		/* jiffies */
-  	unsigned long osd_idle_ttl;		/* jiffies */
-  	unsigned long osd_keepalive_timeout;	/* jiffies */
-+	unsigned long osd_request_timeout;	/* jiffies */
-
-  	/*
-  	 * any type that can't be simply compared or doesn't need need
-@@ -65,9 +66,10 @@ struct ceph_options {
-  /*
-   * defaults
-   */
--#define CEPH_MOUNT_TIMEOUT_DEFAULT	msecs_to_jiffies(60 * 1000)
--#define CEPH_OSD_KEEPALIVE_DEFAULT	msecs_to_jiffies(5 * 1000)
--#define CEPH_OSD_IDLE_TTL_DEFAULT	msecs_to_jiffies(60 * 1000)
-+#define CEPH_MOUNT_TIMEOUT_DEFAULT		msecs_to_jiffies(60 * 1000)
-+#define CEPH_OSD_KEEPALIVE_DEFAULT		msecs_to_jiffies(5 * 1000)
-+#define CEPH_OSD_IDLE_TTL_DEFAULT		msecs_to_jiffies(60 * 1000)
-+#define CEPH_OSD_REQUEST_TIMEOUT_DEFAULT	msecs_to_jiffies(0 * 1000)
-
-  #define CEPH_MONC_HUNT_INTERVAL		msecs_to_jiffies(3 * 1000)
-  #define CEPH_MONC_PING_INTERVAL		msecs_to_jiffies(10 * 1000)
-diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index 03a6653..e45cba0 100644
---- a/include/linux/ceph/osd_client.h
-+++ b/include/linux/ceph/osd_client.h
-@@ -279,6 +279,7 @@ struct ceph_osd_client {
-  	atomic_t               num_homeless;
-  	struct delayed_work    timeout_work;
-  	struct delayed_work    osds_timeout_work;
-+	struct delayed_work    osd_request_timeout_work;
-  #ifdef CONFIG_DEBUG_FS
-  	struct dentry 	       *debugfs_file;
-  #endif
-diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-index 464e885..81876c8 100644
---- a/net/ceph/ceph_common.c
-+++ b/net/ceph/ceph_common.c
-@@ -230,6 +230,7 @@ enum {
-  	Opt_osdkeepalivetimeout,
-  	Opt_mount_timeout,
-  	Opt_osd_idle_ttl,
-+	Opt_osd_request_timeout,
-  	Opt_last_int,
-  	/* int args above */
-  	Opt_fsid,
-@@ -256,6 +257,7 @@ static match_table_t opt_tokens = {
-  	{Opt_osdkeepalivetimeout, "osdkeepalive=%d"},
-  	{Opt_mount_timeout, "mount_timeout=%d"},
-  	{Opt_osd_idle_ttl, "osd_idle_ttl=%d"},
-+	{Opt_osd_request_timeout, "osd_request_timeout=%d"},
-  	/* int args above */
-  	{Opt_fsid, "fsid=%s"},
-  	{Opt_name, "name=%s"},
-@@ -361,6 +363,7 @@ ceph_parse_options(char *options, const char *dev_name,
-  	opt->osd_keepalive_timeout = CEPH_OSD_KEEPALIVE_DEFAULT;
-  	opt->mount_timeout = CEPH_MOUNT_TIMEOUT_DEFAULT;
-  	opt->osd_idle_ttl = CEPH_OSD_IDLE_TTL_DEFAULT;
-+	opt->osd_request_timeout = CEPH_OSD_REQUEST_TIMEOUT_DEFAULT;
-
-  	/* get mon ip(s) */
-  	/* ip1[:port1][,ip2[:port2]...] */
-@@ -473,6 +476,15 @@ ceph_parse_options(char *options, const char *dev_name,
-  			}
-  			opt->mount_timeout = msecs_to_jiffies(intval * 1000);
-  			break;
-+		case Opt_osd_request_timeout:
-+			/* 0 is "wait forever" (i.e. infinite timeout) */
-+			if (intval < 0 || intval > INT_MAX / 1000) {
-+				pr_err("osd_request_timeout out of range\n");
-+				err = -EINVAL;
-+				goto out;
-+			}
-+			opt->osd_request_timeout = msecs_to_jiffies(intval * 1000);
-+			break;
-
-  		case Opt_share:
-  			opt->flags &= ~CEPH_OPT_NOSHARE;
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 842f049..2f5a024 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -2554,6 +2554,75 @@ static void handle_timeout(struct work_struct *work)
-  			      osdc->client->options->osd_keepalive_timeout);
-  }
-
-+/*
-+ * Complete request to OSD with error err if it started before cutoff.
-+ */
-+static void complete_osd_stuck_request(struct ceph_osd_request *req,
-+				       unsigned long cutoff,
-+				       int err)
-+{
-+	if (!time_before(req->r_stamp, cutoff))
-+		return;
-+
-+	pr_warn_ratelimited("osd req on osd%d timeout expired\n",
-+			    req->r_osd->o_osd);
-+
-+	complete_request(req, err);
-+}
-+
-+/*
-+ * Complete all requests to OSD that has been active for more than timeout.
-+ */
-+static void complete_osd_stuck_requests(struct ceph_osd *osd,
-+					unsigned long timeout,
-+					int err)
-+{
-+	struct ceph_osd_request *req, *n;
-+	const unsigned long cutoff = jiffies - timeout;
-+
-+	rbtree_postorder_for_each_entry_safe(req, n, &osd->o_requests, r_node) {
-+		complete_osd_stuck_request(req, cutoff, -EIO);
-+	}
-+}
-+
-+/*
-+ * Timeout callback, called every N seconds. When 1 or more OSD
-+ * requests that has been active for more than N seconds,
-+ * we complete it with error EIO.
-+ */
-+static void handle_osd_request_timeout(struct work_struct *work)
-+{
-+	struct ceph_osd_client *osdc =
-+		container_of(work, struct ceph_osd_client,
-+			     osd_request_timeout_work.work);
-+	struct ceph_osd *osd, *n;
-+	struct ceph_options *opts = osdc->client->options;
-+	const unsigned long timeout = opts->osd_request_timeout;
-+
-+	dout("%s osdc %p\n", __func__, osdc);
-+
-+	if (!timeout)
-+		return;
-+
-+	down_write(&osdc->lock);
-+
-+	rbtree_postorder_for_each_entry_safe(osd, n, &osdc->osds, o_node) {
-+		complete_osd_stuck_requests(osd, timeout, -EIO);
-+	}
-+
-+	up_write(&osdc->lock);
-+
-+	if (!atomic_read(&osdc->num_homeless))
-+		goto out;
-+
-+	down_write(&osdc->lock);
-+	complete_osd_stuck_requests(&osdc->homeless_osd, timeout, -EIO);
-+	up_write(&osdc->lock);
-+
-+out:
-+	schedule_delayed_work(&osdc->osd_request_timeout_work, timeout);
-+}
-+
-  static void handle_osds_timeout(struct work_struct *work)
-  {
-  	struct ceph_osd_client *osdc =
-@@ -4091,6 +4160,7 @@ int ceph_osdc_init(struct ceph_osd_client *osdc, struct 
-ceph_client *client)
-  	osdc->linger_map_checks = RB_ROOT;
-  	INIT_DELAYED_WORK(&osdc->timeout_work, handle_timeout);
-  	INIT_DELAYED_WORK(&osdc->osds_timeout_work, handle_osds_timeout);
-+	INIT_DELAYED_WORK(&osdc->osd_request_timeout_work, handle_osd_request_timeout);
-
-  	err = -ENOMEM;
-  	osdc->osdmap = ceph_osdmap_alloc();
-@@ -4120,6 +4190,8 @@ int ceph_osdc_init(struct ceph_osd_client *osdc, struct 
-ceph_client *client)
-  			      osdc->client->options->osd_keepalive_timeout);
-  	schedule_delayed_work(&osdc->osds_timeout_work,
-  	    round_jiffies_relative(osdc->client->options->osd_idle_ttl));
-+	schedule_delayed_work(&osdc->osd_request_timeout_work,
-+	    round_jiffies_relative(osdc->client->options->osd_request_timeout));
-
-  	return 0;
-
--- 
-2.7.4
+> On Feb 8, 2017, at 22:09, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> 
+> Hello, ceph operators...
+> 
+> Several times in the past we've had to do some ondisk format conversion 
+> during upgrade which mean that the first time the ceph-osd daemon started 
+> after upgrade it had to spend a few minutes fixing up it's ondisk files.  
+> We haven't had to recently, though, and generally try to avoid such 
+> things.
+> 
+> However, there's a change we'd like to make in FileStore for luminous (*) 
+> and it would save us a lot of time and complexity if it was a one-shot 
+> update during the upgrade.  I would probably take in the neighborhood of 
+> 1-5 minutes for a 4-6TB HDD.  That means that when restarting the daemon 
+> during the upgrade the OSD would stay down for that period (vs the usual 
+> <1 restart time).
+> 
+> Does this concern anyone?  It probably means the upgrades will take longer 
+> if you're going host by host since the time per host will go up.
+> 
+> sage
+> 
+> 
+> * eliminate 'snapdir' objects, replacing them with a head object + 
+> whiteout.
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
