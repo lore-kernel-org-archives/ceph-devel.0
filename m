@@ -1,44 +1,45 @@
-From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: would people mind a slow osd restart during luminous
-	upgrade?
-Date: Thu, 9 Feb 2017 03:09:14 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1702090302470.7782@piezo.novalocal>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: ondisk_read/write lock
+Date: Thu, 9 Feb 2017 02:41:49 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1702090238450.7782@piezo.novalocal>
+References: <CAB7xdin7da09+NC5qjXu7Yoz6wmGCVFztDDUmtUXPSk5+m=eJg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:57086 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751459AbdBIDgk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Feb 2017 22:36:40 -0500
+In-Reply-To: <CAB7xdin7da09+NC5qjXu7Yoz6wmGCVFztDDUmtUXPSk5+m=eJg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: sheng qiu <herbert1984106@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello, ceph operators...
+On Wed, 8 Feb 2017, sheng qiu wrote:
+> Hi cepher,
+> 
+> I noticed that when PG worker is processing the op, it may acquire
+> obc->ondisk_read_lock or obc->ondisk_write_lock. it's used to protect
+> concurrent read and write to same object.
+> 
+> But to my understanding, the PG lock is held while worker is
+> processing op which already prevent concurrent access for the same
+> object. Does that mean those locks are not actually needed?
 
-Several times in the past we've had to do some ondisk format conversion 
-during upgrade which mean that the first time the ceph-osd daemon started 
-after upgrade it had to spend a few minutes fixing up it's ondisk files.  
-We haven't had to recently, though, and generally try to avoid such 
-things.
+This is an artifact of the somewhat weird FileStore write behavior.  The 
+OSD takes the lock, queues a write, and a callback called when the write 
+completes releases the lock.  This ensures that if there is a read it will 
+block until the write is applied.
 
-However, there's a change we'd like to make in FileStore for luminous (*) 
-and it would save us a lot of time and complexity if it was a one-shot 
-update during the upgrade.  I would probably take in the neighborhood of 
-1-5 minutes for a 4-6TB HDD.  That means that when restarting the daemon 
-during the upgrade the OSD would stay down for that period (vs the usual 
-<1 restart time).
+FileStore is a bit strange in that the lock isn't released until the write 
+is readable, which is actually *after* the write is committed.  That's 
+because it's doing write-ahead journaling, which commits the transaction 
+to the journal before actually writing it to the file system (where it can 
+be read back).
 
-Does this concern anyone?  It probably means the upgrades will take longer 
-if you're going host by host since the time per host will go up.
+BlueStore doesn't behave this way, but unfortunately it would take a lot 
+of work to remove the need for the FileStore callback releasing 
+ondisk_write_lock so that it could be removed.  :(
 
 sage
-
-
-* eliminate 'snapdir' objects, replacing them with a head object + 
-whiteout.
