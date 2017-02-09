@@ -1,61 +1,66 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: remove req from unsafe list before calling
- __unregister_request
-Date: Thu, 9 Feb 2017 21:32:26 +0800
-Message-ID: <747B8E9C-B3AB-4646-86CF-0DD7DE6483FC@redhat.com>
-References: <20170209121815.4244-1-jlayton@redhat.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.2 \(3259\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: [ceph-users] would people mind a slow osd restart during luminous
+ upgrade?
+Date: Thu, 9 Feb 2017 14:25:42 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1702091425310.7782@piezo.novalocal>
+References: <alpine.DEB.2.11.1702090302470.7782@piezo.novalocal> <C490FBFB-7A7E-49FE-8283-A59C1205557F@gmail.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59470 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37144 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752712AbdBINdY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 9 Feb 2017 08:33:24 -0500
-In-Reply-To: <20170209121815.4244-1-jlayton@redhat.com>
+        id S1753117AbdBIOZo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 9 Feb 2017 09:25:44 -0500
+In-Reply-To: <C490FBFB-7A7E-49FE-8283-A59C1205557F@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, idryomov@gmail.com
+To: George Mihaiescu <lmihaiescu@gmail.com>
+Cc: ceph-users@ceph.com, ceph-devel@vger.kernel.org
 
+On Thu, 9 Feb 2017, George Mihaiescu wrote:
+> Hi Sage,
+> 
+> Is the update running in parallel for all OSDs being restarted? 
+> 
+> Because 5 min per server is different than 150 min when there are 30 
+> OSDs there..
 
-> On 9 Feb 2017, at 20:18, Jeff Layton <jlayton@redhat.com> wrote:
-> 
-> ...and while we're at it, let's ensure that no one inadvertantly
-> leaves this thing on the unsafe list. There's no reason it should
-> ever be on a s_unsafe list but not in the request tree.
-> 
-> Cc: stable@vger.kernel.org
-> Link: http://tracker.ceph.com/issues/18474
-> Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> ---
-> fs/ceph/mds_client.c | 3 +++
-> 1 file changed, 3 insertions(+)
-> 
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 52521f339745..b47e97680a66 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -628,6 +628,8 @@ static void __unregister_request(struct ceph_mds_client *mdsc,
-> {
-> 	dout("__unregister_request %p tid %lld\n", req, req->r_tid);
-> 
-> +	WARN_ON_ONCE(!list_empty(&req->r_unsafe_item));
-> +
-> 	if (req->r_tid == mdsc->oldest_tid) {
-> 		struct rb_node *p = rb_next(&req->r_node);
-> 		mdsc->oldest_tid = 0;
-> @@ -3512,6 +3514,7 @@ static void wait_requests(struct ceph_mds_client *mdsc)
-> 		while ((req = __get_oldest_req(mdsc))) {
-> 			dout("wait_requests timed out on tid %llu\n",
-> 			     req->r_tid);
-> +			list_del_init(&req->r_unsafe_item);
-> 			__unregister_request(mdsc, req);
-> 		}
-> 	}
+In parallel.
 
-Reviewed-by: Yan, Zheng <zyan@redhat.com>
-> -- 
-> 2.9.3
-> 
+sage
 
+> 
+> Thank you,
+> George 
+> 
+> > On Feb 8, 2017, at 22:09, Sage Weil <sweil@redhat.com> wrote:
+> > 
+> > Hello, ceph operators...
+> > 
+> > Several times in the past we've had to do some ondisk format conversion 
+> > during upgrade which mean that the first time the ceph-osd daemon started 
+> > after upgrade it had to spend a few minutes fixing up it's ondisk files.  
+> > We haven't had to recently, though, and generally try to avoid such 
+> > things.
+> > 
+> > However, there's a change we'd like to make in FileStore for luminous (*) 
+> > and it would save us a lot of time and complexity if it was a one-shot 
+> > update during the upgrade.  I would probably take in the neighborhood of 
+> > 1-5 minutes for a 4-6TB HDD.  That means that when restarting the daemon 
+> > during the upgrade the OSD would stay down for that period (vs the usual 
+> > <1 restart time).
+> > 
+> > Does this concern anyone?  It probably means the upgrades will take longer 
+> > if you're going host by host since the time per host will go up.
+> > 
+> > sage
+> > 
+> > 
+> > * eliminate 'snapdir' objects, replacing them with a head object + 
+> > whiteout.
+> > _______________________________________________
+> > ceph-users mailing list
+> > ceph-users@lists.ceph.com
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> 
