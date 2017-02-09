@@ -1,44 +1,63 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: [PATCH] libceph: Complete stuck requests to OSD with EIO
-Date: Thu, 9 Feb 2017 17:11:32 +0100 (CET)
-Message-ID: <553533223.9594.1486656692332@ox.pcextreme.nl>
-References: <4e080919-2df5-1b75-3c8a-3ae95eb8f08d@synesis.ru>
- <CAOi1vP-7hcHAaVcqvLAcu9vL4ohQW4u9XoGdg-d5AuaX7E19Dw@mail.gmail.com>
- <cfa74b42-b6d6-e658-9095-8e1cddf008fc@synesis.ru>
+From: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?=
+        <bartlomiej.swiecki@corp.ovh.com>
+Subject: Re: Breakage in Clang compile....
+Date: Thu, 9 Feb 2017 17:31:08 +0100
+Message-ID: <385cdacb-741c-c0b5-ed62-a2b3f49cca37@corp.ovh.com>
+References: <a5a35bfc-57b2-bf28-9788-04127654e23a@digiware.nl>
+ <2445ae3c-ff1e-2894-bfe3-9891070189c8@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:48417 "EHLO
-        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751030AbdBIQLn (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Feb 2017 11:11:43 -0500
-In-Reply-To: <cfa74b42-b6d6-e658-9095-8e1cddf008fc@synesis.ru>
+Received: from 6.mo301.mail-out.ovh.net ([137.74.110.69]:54063 "EHLO
+        6.mo301.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752464AbdBIQbY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Feb 2017 11:31:24 -0500
+In-Reply-To: <2445ae3c-ff1e-2894-bfe3-9891070189c8@corp.ovh.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Artur Molchanov <artur.molchanov@synesis.ru>, Ilya Dryomov <idryomov@gmail.com>
+To: Willem Jan Withagen <wjw@digiware.nl>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
+Here's the fix:
 
-> Op 9 februari 2017 om 16:51 schreef Artur Molchanov <artur.molchanov@synesis.ru>:
-> 
-> 
-> Hi Ilya,
-> 
-> Currently we're working on moving our product to kubernetes / ceph stack. We're 
-> actively tuning ceph configuration and ceph cluster often need to be redeployed. 
-> We have to warm reboot all machines with mounted RBDs as a result. This patch 
-> allows us to remap and remount RBDs without time consuming reboot.
-> 
+https://github.com/ceph/ceph/pull/13335
 
-I understand the usecase. You don't always want to block, sometimes you want to timeout after some time.
 
-Wido
-
-> On 02/09/2017 05:27 PM, Ilya Dryomov wrote:
-> > What is the use case?  What do you expect this timeout to be in your
-> > environment?
-> --
+On 02/09/2017 04:46 PM, Bartłomiej Święcki wrote:
+> Hi,
+>
+> Looking at this right now.
+>
+> Bartek
+>
+> On 02/09/2017 04:35 PM, Willem Jan Withagen wrote:
+>> Hi,
+>>
+>> I think this is a recent addition to the game?
+>> And Clang does not really like it.
+>>
+>> In file included from
+>> /home/jenkins/workspace/ceph-master/src/common/perf_counters.h:21:
+>> /home/jenkins/workspace/ceph-master/src/common/perf_histogram.h:80:9:
+>> error: array initializer must be an initializer list
+>>        : m_axes_config(other.m_axes_config) {
+>>          ^
+>> /home/jenkins/workspace/ceph-master/src/common/perf_counters.h:98:29:
+>> note: in instantiation of member function
+>> 'PerfHistogram<2>::PerfHistogram' requested here
+>>          histogram.reset(new PerfHistogram<>(*other.histogram));
+>>                              ^
+>> 1 error generated.
+>>
+>> --WjW
+>> -- 
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>
+> -- 
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
