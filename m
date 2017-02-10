@@ -1,111 +1,49 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH v4 1/6] libceph: allow requests to return immediately on
- full conditions if caller wishes
-Date: Fri, 10 Feb 2017 07:44:50 -0500
-Message-ID: <1486730690.4233.12.camel@redhat.com>
-References: <20170209144836.12525-1-jlayton@redhat.com>
-         <20170209144836.12525-2-jlayton@redhat.com>
-         <D09ADECB-B744-4456-B174-2DFDA16D0A0E@redhat.com>
-         <1486727549.4233.7.camel@redhat.com>
-         <CAOi1vP9G5x+A1xxYJ=G5V4gnWbGJ2g-qN0J9v9fo86VJqvrwzw@mail.gmail.com>
+From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
+Subject: rbd performance drop a lot with objectmap
+Date: Fri, 10 Feb 2017 22:53:10 +0800
+Message-ID: <6FBBE12E-1305-4E82-A0E7-5683CC56A776@alibaba-inc.com>
+References: <3CB74463-3795-4FC2-B6BC-989C1EABE9EA@alibaba-inc.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+        charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f175.google.com ([209.85.216.175]:36707 "EHLO
-        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752334AbdBJObU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Feb 2017 09:31:20 -0500
-Received: by mail-qt0-f175.google.com with SMTP id k15so35947124qtg.3
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Feb 2017 06:31:20 -0800 (PST)
-In-Reply-To: <CAOi1vP9G5x+A1xxYJ=G5V4gnWbGJ2g-qN0J9v9fo86VJqvrwzw@mail.gmail.com>
+Received: from out0-129.mail.aliyun.com ([140.205.0.129]:47047 "EHLO
+        out0-129.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751866AbdBJOyT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Feb 2017 09:54:19 -0500
+In-Reply-To: <3CB74463-3795-4FC2-B6BC-989C1EABE9EA@alibaba-inc.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, John Spray <jspray@redhat.com>
+To: Jason Dillaman <jdillama@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 2017-02-10 at 13:37 +0100, Ilya Dryomov wrote:
-> On Fri, Feb 10, 2017 at 12:52 PM, Jeff Layton <jlayton@redhat.com> wrote:
-> > On Fri, 2017-02-10 at 19:41 +0800, Yan, Zheng wrote:
-> > > > On 9 Feb 2017, at 22:48, Jeff Layton <jlayton@redhat.com> wrote:
-> > > > 
-> > > > Usually, when the osd map is flagged as full or the pool is at quota,
-> > > > write requests just hang. This is not what we want for cephfs, where
-> > > > it would be better to simply report -ENOSPC back to userland instead
-> > > > of stalling.
-> > > > 
-> > > > If the caller knows that it will want an immediate error return instead
-> > > > of blocking on a full or at-quota error condition then allow it to set a
-> > > > flag to request that behavior. Cephfs write requests will always set
-> > > > that flag.
-> > > > 
-> > > > A later patch will deal with requests that were submitted before the new
-> > > > map showing the full condition came in.
-> > > > 
-> > > > Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> > > > ---
-> > > > fs/ceph/addr.c                  | 4 ++++
-> > > > fs/ceph/file.c                  | 4 ++++
-> > > > include/linux/ceph/osd_client.h | 1 +
-> > > > net/ceph/osd_client.c           | 6 ++++++
-> > > > 4 files changed, 15 insertions(+)
-> > > > 
-> > > > diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-> > > > index 4547bbf80e4f..308787eeee2c 100644
-> > > > --- a/fs/ceph/addr.c
-> > > > +++ b/fs/ceph/addr.c
-> > > > @@ -1040,6 +1040,7 @@ static int ceph_writepages_start(struct address_space *mapping,
-> > > > 
-> > > >             req->r_callback = writepages_finish;
-> > > >             req->r_inode = inode;
-> > > > +           req->r_abort_on_full = true;
-> > > > 
-> > > >             /* Format the osd request message and submit the write */
-> > > >             len = 0;
-> > > > @@ -1689,6 +1690,7 @@ int ceph_uninline_data(struct file *filp, struct page *locked_page)
-> > > >     }
-> > > > 
-> > > >     req->r_mtime = inode->i_mtime;
-> > > > +   req->r_abort_on_full = true;
-> > > >     err = ceph_osdc_start_request(&fsc->client->osdc, req, false);
-> > > >     if (!err)
-> > > >             err = ceph_osdc_wait_request(&fsc->client->osdc, req);
-> > > > @@ -1732,6 +1734,7 @@ int ceph_uninline_data(struct file *filp, struct page *locked_page)
-> > > >     }
-> > > > 
-> > > >     req->r_mtime = inode->i_mtime;
-> > > > +   req->r_abort_on_full = true;
-> > > >     err = ceph_osdc_start_request(&fsc->client->osdc, req, false);
-> > > >     if (!err)
-> > > >             err = ceph_osdc_wait_request(&fsc->client->osdc, req);
-> > > > @@ -1893,6 +1896,7 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
-> > > >     err = ceph_osdc_start_request(&fsc->client->osdc, rd_req, false);
-> > > > 
-> > > >     wr_req->r_mtime = ci->vfs_inode.i_mtime;
-> > > > +   wr_req->r_abort_on_full = true;
-> > > >     err2 = ceph_osdc_start_request(&fsc->client->osdc, wr_req, false);
-> > > > 
-> > > >     if (!err)
-> > > 
-> > > do you ignore writepage_nounlock() case intentionally?
-> > > 
-> > > 
-> > > 
-> > 
-> > No. Hmmm...writepage_nounlock calls ceph_osdc_writepages, and it's the
-> > only caller so I guess we'll need to set this there. Maybe we should
-> > just lift ceph_osdc_writepages into ceph.ko since there are no callers
-> > in libceph?
-> 
-> Set it in ceph_osdc_new_request() -- it's only user is ceph.ko.  It
-> should cover all filesystem OSD requests, except for pool check and
-> ceph_aio_retry_work().
-> 
+Hi Jason,
+  We for sure got lots of benefits with enabling objectmap for mkfs, df, im=
+age remove features=E2=80=A6=E2=80=A6 However, we also found IO performance in terms of =
+latency and IOPS when we enable objectmap comparing objectmap disabled. With=
+ FIO single job queue depth 1(W/ vs W/O) =C2=A0, IOPS drop 3 times and latency i=
+ncreased 3 times. as with more jobs, the IOPS drops more and latency increas=
+e higher and higher.=C2=A0=20
+  The objectmap_locker in pre and post and objectmap update per IO really h=
+urt performance. Lockless queue and new way to caching objectmap? Any though=
+ts?
+  =C2=A0  =C2=A0
+  Regards,
+  James
+=C2=A0
+=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E5=90=AB=E6=9C=89=E9=98=BF=E9=87=8C=E5=B7=B4=E5=B7=B4=E9=9B=86=E5=9B=A2=E7=9A=84=E5=95=86=E4=B8=9A=E7=A7=98=E5=AF=86=E4=BF=A1=E6=81=AF=EF=BC=8C=E4=BB=85=E9=99=90=
+=E4=BA=8E=E5=8F=91=E9=80=81=E7=BB=99=E4=B8=8A=E9=9D=A2=E5=9C=B0=E5=9D=80=E4=B8=AD=E5=88=97=E5=87=BA=E7=9A=84=E4=B8=AA=E4=BA=BA=E5=92=8C=E7=BE=A4=E7=BB=84=EF=BC=8C=E7=A6=81=E6=AD=A2=E4=BB=BB=E4=BD=95=E5=85=B6=E4=BB=96=E4=BA=BA=E4=
+=BB=A5=E4=BB=BB=E4=BD=95=E5=BD=A2=E5=BC=8F=E4=BD=BF=E7=94=A8=EF=BC=88=E5=8C=85=E6=8B=AC=E4=BD=86=E4=B8=8D=E9=99=90=E4=BA=8E=E5=85=A8=E9=83=A8=E6=88=96=E9=83=A8=E5=88=86=E5=9C=B0=E6=B3=84=E9=9C=B2=E3=80=81=E5=A4=8D=E5=88=B6=E5=92=
+=8C=E6=95=A3=E5=8F=91=EF=BC=89=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E4=B8=AD=E7=9A=84=E4=BF=A1=E6=81=AF=EF=BC=8C=E5=A6=82=E6=9E=9C=E6=82=A8=E9=94=99=E6=94=B6=E6=9C=AC=E9=82=AE=E4=BB=B6=EF=BC=8C=E8=AF=B7=
+=E6=82=A8=E7=AB=8B=E5=8D=B3=E7=94=B5=E8=AF=9D=E6=88=96=E9=82=AE=E4=BB=B6=E9=80=9A=E7=9F=A5=E5=8F=91=E4=BB=B6=E4=BA=BA=E5=B9=B6=E5=88=A0=E9=99=A4=E6=9C=AC=E9=82=AE=E4=BB=B6=E3=80=82
+This email and its attachments contain confidential information from Alibab=
+a Group.which is intended only for the person or entity whose address is lis=
+ted above.Any use of information contained herein in any way(including,but n=
+ot limited to,total or partial disclosure,reproduction or dissemination)by p=
+ersons other than the intended recipient(s) is prohibited.If you receive thi=
+s email in error,please notify the sender by phone or email immediately and =
+delete it.
 
-Ok. The flag will end up being set on reads as well, but we don't
-actually do anything with the flag on a read request so that should be
-fine. I'll do that.
 
-Thanks,
--- 
-Jeff Layton <jlayton@redhat.com>
+
