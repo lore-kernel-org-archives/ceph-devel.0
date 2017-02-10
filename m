@@ -1,87 +1,99 @@
-From: "J. Eric Ivancich" <ivancich@redhat.com>
-Subject: bluestore latency modeling, throughput plots
-Date: Fri, 10 Feb 2017 10:05:10 -0500
-Message-ID: <09470f07-819f-b457-37cc-bd4b898464c2@redhat.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH v4 2/6] libceph: abort already submitted but abortable
+ requests when map or pool goes full
+Date: Fri, 10 Feb 2017 13:59:41 +0100
+Message-ID: <CAOi1vP_6jYb2x+EjUjL7OCsy050VaSecyUtUWNsOh+=Z7+x+Ew@mail.gmail.com>
+References: <20170209144836.12525-1-jlayton@redhat.com> <20170209144836.12525-3-jlayton@redhat.com>
+ <285D1D56-D4CD-4B4F-BF51-F915560F28C2@redhat.com> <1486728422.4233.10.camel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53988 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751238AbdBJPXw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 10 Feb 2017 10:23:52 -0500
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id BFE6461D19
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Feb 2017 15:05:12 +0000 (UTC)
+Received: from mail-vk0-f66.google.com ([209.85.213.66]:33276 "EHLO
+        mail-vk0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751555AbdBJRRE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Feb 2017 12:17:04 -0500
+Received: by mail-vk0-f66.google.com with SMTP id t8so3135028vke.0
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Feb 2017 09:17:04 -0800 (PST)
+In-Reply-To: <1486728422.4233.10.camel@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Samuel Just <sjust@redhat.com>, Mark Nelson <mnelson@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Jeff Layton <jlayton@redhat.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, John Spray <jspray@redhat.com>
 
-So I looked at the throughput of a kv-sync batch. The bytes in throttle
-are the number of bytes that were in the throttle (no throttling is
-actually taking place, however the data that would be controlling the
-throttle is noted) when the earliest TransContext of the block was
-created (in other words, the # of bytes in the batch aren't added to
-this). The time is calculated as the difference in when the kv-sync
-batch was synced and the time that the earliest TransContext in the
-batch was created. And the bytes is the total number of bytes in the
-kv-sync batch.
+On Fri, Feb 10, 2017 at 1:07 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> On Fri, 2017-02-10 at 20:01 +0800, Yan, Zheng wrote:
+>> > On 9 Feb 2017, at 22:48, Jeff Layton <jlayton@redhat.com> wrote:
+>> >
+>> > When a Ceph volume hits capacity, a flag is set in the OSD map to
+>> > indicate that, and a new map is sprayed around the cluster. With cephfs
+>> > we want it to shut down any abortable requests that are in progress with
+>> > an -ENOSPC error as they'd just hang otherwise.
+>> >
+>> > Add a new ceph_osdc_abort_on_full helper function to handle this. It
+>> > will first check whether there is an out-of-space condition in the
+>> > cluster. It will then walk the tree and abort any request that has
+>> > r_abort_on_full set with an ENOSPC error. Call this new function
+>> > directly whenever we get a new OSD map.
+>> >
+>> > Signed-off-by: Jeff Layton <jlayton@redhat.com>
+>> > ---
+>> > net/ceph/osd_client.c | 42 ++++++++++++++++++++++++++++++++++++++++++
+>> > 1 file changed, 42 insertions(+)
+>> >
+>> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+>> > index f68bb42da240..cdb0b58c4c99 100644
+>> > --- a/net/ceph/osd_client.c
+>> > +++ b/net/ceph/osd_client.c
+>> > @@ -1777,6 +1777,47 @@ static void complete_request(struct ceph_osd_request *req, int err)
+>> >     ceph_osdc_put_request(req);
+>> > }
+>> >
+>> > +/*
+>> > + * Drop all pending requests that are stalled waiting on a full condition to
+>> > + * clear, and complete them with ENOSPC as the return code.
+>> > + */
+>> > +static void ceph_osdc_abort_on_full(struct ceph_osd_client *osdc)
+>> > +{
+>> > +   struct ceph_osd_request *req;
+>> > +   struct ceph_osd *osd;
+>> > +   struct rb_node *m, *n;
+>> > +   u32 latest_epoch = 0;
+>> > +   bool osdmap_full = ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL);
+>> > +
+>> > +   dout("enter abort_on_full\n");
+>> > +
+>> > +   if (!osdmap_full && !have_pool_full(osdc))
+>> > +           goto out;
+>> > +
+>> > +   for (n = rb_first(&osdc->osds); n; n = rb_next(n)) {
+>> > +           osd = rb_entry(n, struct ceph_osd, o_node);
+>> > +           mutex_lock(&osd->lock);
+>> > +           m = rb_first(&osd->o_requests);
+>> > +           while (m) {
+>> > +                   req = rb_entry(m, struct ceph_osd_request, r_node);
+>> > +                   m = rb_next(m);
+>> > +
+>>
+>> For requests that have already got unsafe reply, we should ignore them or call req->r_unsafe_callback() to clean them up
+>>
+>>
+>> Regards
+>> Yan, Zheng
+>
+> Ok, yeah. I had to stare at the r_unsafe_callback code a bit the other
+> day to handle the ERROR_WRITE flag and what you say makes sense.
+>
+> Honestly what we really need is a function like complete_request that
+> hides all of these fiddly details about the request state. Maybe it
+> would be simpler to just have complete_request handle the case where
+> we've gotten an unsafe reply as well?
+>
+> I'll see what I can come up with there.
 
-The data is generated using bluestore on a hard disk.
+This is exactly what I meant in my reply to Artur yesterday.  Note that
+ceph_osdc_cancel_request() is explicit about not completing the request.
+It shouldn't be hard to mend it though -- let me look into it.
 
-Here are the plots with work generated by rados bench with varying
-number of concurrent ops. Please note that the scales on the axes can vary.
+Thanks,
 
-
-throughput @ concurrency=16
-http://tracker.ceph.com/attachments/download/2707/regbench-m-t16-kv-sync-throughput.pdf
-
-throughput @ concurrency=32
-http://tracker.ceph.com/attachments/download/2708/regbench-m-t32-kv-sync-throughput.pdf
-
-throughput @ concurrency=64
-http://tracker.ceph.com/attachments/download/2709/regbench-m-t64-kv-sync-throughput.pdf
-
-throughput @ concurrency=128
-http://tracker.ceph.com/attachments/download/2710/regbench-m-t128-kv-sync-throughput.pdf
-
-throughput @ concurrency=all-overlaid
-http://tracker.ceph.com/attachments/download/2711/regbench-m-tmulti-kv-sync-throughput.pdf
-
-
-I don't think the data is too surprising. With fewer bytes in the
-throttle we have some high throughput numbers, but throughput quickly
-settles into the 400000-500000 bytes/nanosecond range at the peak. The
-peak then starts to descend as the number of bytes in the throttle
-increases.
-
-Since except for a few stragglers, the most dense area of points is
-below the 600000 bytes/ns area, here are the same four graphs where we
-limit the vertical axis to 600000. The scales on the horizontal axes can
-still vary.
-
-
-throughput @ concurrency=16
-http://tracker.ceph.com/attachments/download/2712/regbench-m-t16-kv-sync-throughput-pin.pdf
-
-throughput @ concurrency=32
-http://tracker.ceph.com/attachments/download/2713/regbench-m-t32-kv-sync-throughput-pin.pdf
-
-throughput @ concurrency=64
-http://tracker.ceph.com/attachments/download/2714/regbench-m-t64-kv-sync-throughput-pin.pdf
-
-throughput @ concurrency=128
-http://tracker.ceph.com/attachments/download/2715/regbench-m-t128-kv-sync-throughput-pin.pdf
-
-throughput @ concurrency=all-overlaid
-http://tracker.ceph.com/attachments/download/2716/regbench-m-tmulti-kv-sync-throughput-pin.pdf
-
-
-And the downward trend in throughput as the bytes that would be in the
-throttle gets larger is even more pronounced. I'm going to fit
-polynomial curves to this data next.
-
-Eric
+                Ilya
