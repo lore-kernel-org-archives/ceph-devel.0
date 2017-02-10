@@ -1,35 +1,39 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: GPG signing of upstream release tags
-Date: Thu, 9 Feb 2017 21:42:55 -0700
-Message-ID: <CALqRxCxW3EfmGqZNBXfUoDjLLMecsEcDNKRAHOv3pa=ry8Mp=A@mail.gmail.com>
-References: <20170209160345.1cf38e78@suse.de> <87inojxfzp.fsf@suse.com>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
+Subject: Re: ceph-workbench 1.5.15 released
+Date: Fri, 10 Feb 2017 08:52:41 +0100
+Message-ID: <5e3251af-bb98-c940-b0fe-cbc4742b1597@corp.ovh.com>
+References: <01fcc394-8f9b-17eb-a169-0102ec0a3e17@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f182.google.com ([209.85.217.182]:36478 "EHLO
-        mail-ua0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751026AbdBJEtj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Feb 2017 23:49:39 -0500
-Received: by mail-ua0-f182.google.com with SMTP id 96so19885187uaq.3
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Feb 2017 20:49:27 -0800 (PST)
-In-Reply-To: <87inojxfzp.fsf@suse.com>
+Received: from 4.mo301.mail-out.ovh.net ([137.74.110.67]:60441 "EHLO
+        4.mo301.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752490AbdBJHwt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Feb 2017 02:52:49 -0500
+In-Reply-To: <01fcc394-8f9b-17eb-a169-0102ec0a3e17@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek L <abhishek@suse.com>
-Cc: David Disseldorp <ddiss@suse.de>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Feb 9, 2017 at 1:32 PM, Abhishek L <abhishek@suse.com> wrote:
-> Since v11.0.0/v10.0.5/v0.94.3,
->> these tags have not been GPG signed, so downstream consumers have no
->> reliable way of verifying that the source they have matches the reviewed
->> and tested upstream release source.
+On 02/10/2017 12:00 AM, Loic Dachary wrote:
+> Hi Piotr,
+>
+> Now that teuthology-openstack is fixed and uses the latest teuthology master branch [1], I took this opportunity to publish a new version of ceph-workbench[2]. It should work out of the box with an OVH tenant. You can run a teuthology suite with something like:
+>
+>    ceph-workbench ceph-qa-suite --verbose --suite rados --ceph kraken
+>
+> and collect the results from the teuthology cluster it creates, like with the basic example that ran today at http://158.69.82.163:8081/
+>
+> Cheers
+>
+> [1] https://github.com/ceph/teuthology/pull/1028
+> [2] http://ceph-workbench.readthedocs.io/en/latest/
 
-The old ceph.com GPG key had been copied to too many places, including
-some of the Jenkins slaves, which was bad. Today there is a central
-signer box behind a firewall with very restricted access.
+Awesome, thanks! I'm going to check it out soon.
 
-I'll talk with Andrew and Alfredo about GPG signing Git tags and
-source tarballs going forward, because I think we can script something
-here to make it easier. I agree that it's important.
-
-- Ken
+-- 
+Piotr Dałek
+piotr.dalek@corp.ovh.com
+https://www.ovh.com/us/
