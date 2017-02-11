@@ -1,205 +1,81 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Kerberos authentication support
-Date: Sat, 11 Feb 2017 17:58:06 +0100 (CET)
-Message-ID: <54012857.9708.1486832286441@ox.pcextreme.nl>
-References: <21559934-9BF9-4B59-8D60-F492D233AB90@vmware.com>
- <alpine.DEB.2.11.1702111553070.7782@piezo.novalocal>
+From: Artur Molchanov <artur.molchanov@synesis.ru>
+Subject: Re: [PATCH] libceph: Complete stuck requests to OSD with EIO
+Date: Sat, 11 Feb 2017 23:30:02 +0300
+Message-ID: <000f7e99-d074-d2a6-5e8a-f115106a913d@synesis.ru>
+References: <4e080919-2df5-1b75-3c8a-3ae95eb8f08d@synesis.ru>
+ <1486726280.4233.1.camel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:41191 "EHLO
-        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750882AbdBKQ6M (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 11 Feb 2017 11:58:12 -0500
-In-Reply-To: <alpine.DEB.2.11.1702111553070.7782@piezo.novalocal>
+Received: from mail-lf0-f68.google.com ([209.85.215.68]:35587 "EHLO
+        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750778AbdBKUaF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 11 Feb 2017 15:30:05 -0500
+Received: by mail-lf0-f68.google.com with SMTP id v186so5465792lfa.2
+        for <ceph-devel@vger.kernel.org>; Sat, 11 Feb 2017 12:30:04 -0800 (PST)
+In-Reply-To: <1486726280.4233.1.camel@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Jonathan Brown <brownj@vmware.com>
+To: Jeff Layton <jlayton@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
 Cc: ceph-devel@vger.kernel.org
 
+Hi Jef,
 
-> Op 11 februari 2017 om 16:57 schreef Sage Weil <sage@newdream.net>:
-> 
-> 
-> On Fri, 10 Feb 2017, Jonathan Brown wrote:
-> > Hi,
-> > 
-> > I and my colleague Dheeraj Shetty are interested in adding support for 
-> > Kerberos authentication to Ceph.  Although new to Ceph, I have worked 
-> > with Kerberos before and have recently been investigating how to 
-> > implement this feature.  The Ceph notes in this link discuss some goals 
-> > and issues for possible Kerberos authentication support:
-> > 
-> > http://pad.ceph.com/p/kerberos
-> > 
-> > This looks like a good plan of attack and so we have started down that 
-> > path and now have the authentication exchange working using GSSAPI 
-> > library calls.
-> > 
-> > Some comments…
-> > 
-> > >> The ceph cluster mons would share a single principal,
-> > >>  e.g. ceph/mycluster.foo.com
-> > 
-> > Normally Kerberos service principals have the format 
-> > <service>/<hostname>@<realm>.  For my initial testing I am using a name 
-> > like "ceph-mon/myhost.foo.com" for the separate mon services on 
-> > different machines.  Is there a reason to share a single principal 
-> > instead of the normal Kerberos convention?
-> 
-> I think so.  The mons operate as a cluster and are collectively available 
-> even when one or more has failed.  I would suggest a convention in which 
-> the domain is a logical cluster name (e.g., a dns name with an A/AAAA 
-> record for each monitor).
+On Fri, 2017-02-10 at 14:31, Jeff Layton wrote:
+> On Thu, 2017-02-09 at 16:04 +0300, Artur Molchanov wrote:
+>> From: Artur Molchanov <artur.molchanov@synesis.ru>
+>>
+>> Complete stuck requests to OSD with error EIO after osd_request_timeout expired.
+>> If osd_request_timeout equals to 0 (default value) then do nothing with
+>> hung requests (keep default behavior).
+>>
+>> Create RBD map option osd_request_timeout to set timeout in seconds. Set
+>> osd_request_timeout to 0 by default.
+>>
+> Also, what exactly are the requests blocked on when this occurs? Is the
+> ceph_osd_request_target ending up paused? I wonder if we might be better
+> off with something that returns a hard error under the circumstances
+> where you're hanging, rather than depending on timeouts.
 
-Not really a Kerberos expert, but just chiming in here. Can we maybe combine this with the new feature where the Ceph Mons can now be detected by clients/daemons using DNS SRV records?
+I wonder that it is better to complete requests only after timeout expired, just 
+because a request can fail due to temporary network issues (e.g. router 
+restarted) or restarting machine/services.
 
-http://docs.ceph.com/docs/master/rados/configuration/mon-lookup-dns/
+> Having a job that has to wake up every second or so isn't ideal. Perhaps
+> you would be better off scheduling the delayed work in the request
+> submission codepath, and only rearm it when the tree isn't empty after
+> calling complete_osd_stuck_requests?
 
-Wido
+Would you please tell me more about rearming work only if the tree is not empty 
+after calling complete_osd_stuck_requests? From what code we should call 
+complete_osd_stuck_requests?
 
-> 
-> > >> let's use the mit library. :)
-> > 
-> > Agreed, although I think it would be best to use the GSSAPI C-language 
-> > bindings instead of the MIT krb5 library APIs directly.
-> > 
-> > >> - define new auth type (krb5)
-> > 
-> > Should the new auth type be named “gssapi” instead?  Note that if the 
-> > code uses GSSAPI bindings, then this auth type could potentially be used 
-> > for mechanisms other than just krb5 by adding plugin libraries.
-> 
-> Sure
-> 
-> > >> - if negotiated, client would use kerberos lib to get the ticket
-> > 
-> > Yes, the user would use a command line tool such as kinit to get the 
-> > initial ticket from the KDC and store it in the credentials cache.  
-> > During the authentication exchange the GSSAPI/krb5 libraries would get 
-> > the service ticket and place it in the same cache.  Subsequent calls 
-> > would not need to connect to the KDC again until the tickets expire.
-> > 
-> > >> - client passes ticket to mon
-> > 
-> > This is accomplished by gss_init_sec_context() on the client side and 
-> > gss_accept_sec_context() on the server side.  These functions generate 
-> > GSS tokens containing the krb5 tickets which are then encoded by the 
-> > Ceph client and server into messages sent to their peer.
-> 
-> Sounds good!
-> 
-> > >> - mon uses kerberosv primitives to authenticate, extract principal 
-> > >> name, etc.
-> > 
-> > Yes, but with the GSSAPI library the Ceph code would not need to use 
-> > Kerberos primitives much if at all.
-> 
-> +1
-> 
-> > >> - establish which capabilities to use:
-> > >>   - mon maps principal name onto a client id, generates a cephx ticket
-> > >>   - ldap maps principal to a group/role, which is defined in ceph auth db  <-- what users probably want to do
-> > >>   - mon passes cephx ticket (session key etc) back to client
-> > >>   - client uses cephx thereafter
-> > 
-> > We’ll look at how to best accomplish these and other issues next.  But I 
-> > think we have a good start on how to implement this feature and look 
-> > forward to contributing to Ceph project.  Please let me know if you have 
-> > any advice on how you would like to see this feature implemented.  As we 
-> > gain more experience with Ceph I’m sure we’ll understand the issues 
-> > better.  Thanks!
-> 
-> Great!  Thank for you taking this one!  The auth code is a bit crufty, 
-> especially with the mon integration, so please reach out here on 
-> ceph-devel or in #ceph-devel with any questions.
-> 
-> sage
-> 
-> 
-> 
-> > 
-> > Jonathan Brown
-> > brownj@vmware.com
-> > 
-> > Dheeraj Shetty
-> > dheerajs@vmware.com
-> > 
-> > 
-> > 
-> > What follows are some example of commands run from my dev environment.  I have configured a krb5.conf file to point to an MIT kdc, and service principal keys have been extracted to krb5.keytab.  My ceph.conf included these global config entries:
-> > 
-> >         auth cluster required = cephx
-> >         auth service required = gssapi
-> >         auth client required = gssapi
-> > 
-> > 
-> > EXAMPLE: running “ceph health” without a Kerberos TGT:
-> > 
-> > brownj@ceph-dev:~/ceph/build$ kdestroy
-> > brownj@ceph-dev:~/ceph/build$ bin/ceph health
-> > *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
-> > 2017-02-10 15:46:55.038277 7ff8654d4700 -1 WARNING: all dangerous and experimental features are enabled.
-> > 2017-02-10 15:46:55.046886 7ff8654d4700 -1 WARNING: all dangerous and experimental features are enabled.
-> > 2017-02-10 15:46:55.093679 7ff85ca9f700  0 gssapi client: Unspecified GSS failure.  Minor code may provide more information
-> > 2017-02-10 15:46:55.093836 7ff8654d4700  0 librados: client.admin authentication error (1) Operation not permitted
-> > Error connecting to cluster: PermissionError
-> > brownj@ceph-dev:~/ceph/build$
-> > 
-> > 
-> > EXAMPLE: running “ceph health" with an expired TGT:
-> > 
-> > brownj@ceph-dev:~/ceph/build$ kinit -l 2
-> > Password for client.admin@CEPHTEST.LOCAL:
-> > brownj@ceph-dev:~/ceph/build$ klist
-> > Ticket cache: FILE:/tmp/krb5cc_1000
-> > Default principal: client.admin@CEPHTEST.LOCAL
-> > 
-> > Valid starting     Expires            Service principal
-> > 02/10/17 15:47:46  02/10/17 15:47:44  krbtgt/CEPHTEST.LOCAL@CEPHTEST.LOCAL
-> > brownj@ceph-dev:~/ceph/build$ bin/ceph health
-> > *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
-> > 2017-02-10 15:47:57.273595 7facdd15e700 -1 WARNING: all dangerous and experimental features are enabled.
-> > 2017-02-10 15:47:57.282475 7facdd15e700 -1 WARNING: all dangerous and experimental features are enabled.
-> > 2017-02-10 15:47:57.298276 7facd485d700  0 gssapi client: The referenced credential has expired
-> > 2017-02-10 15:47:57.298387 7facdd15e700  0 librados: client.admin authentication error (1) Operation not permitted
-> > Error connecting to cluster: PermissionError
-> > brownj@ceph-dev:~/ceph/build$
-> > 
-> > 
-> > EXAMPLE: running “ceph health” with a valid TGT:
-> > 
-> > brownj@ceph-dev:~/ceph/build$ kinit
-> > Password for client.admin@CEPHTEST.LOCAL:
-> > brownj@ceph-dev:~/ceph/build$ klist
-> > Ticket cache: FILE:/tmp/krb5cc_1000
-> > Default principal: client.admin@CEPHTEST.LOCAL
-> > 
-> > Valid starting     Expires            Service principal
-> > 02/10/17 15:49:13  02/11/17 01:49:13  krbtgt/CEPHTEST.LOCAL@CEPHTEST.LOCAL
-> >         renew until 02/11/17 15:49:09
-> > brownj@ceph-dev:~/ceph/build$ bin/ceph health
-> > *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
-> > 2017-02-10 15:49:21.057358 7fcd09af8700 -1 WARNING: all dangerous and experimental features are enabled.
-> > 2017-02-10 15:49:21.064644 7fcd08ab6700 -1 WARNING: all dangerous and experimental features are enabled.
-> > HEALTH_OK
-> > brownj@ceph-dev:~/ceph/build$ klist
-> > Ticket cache: FILE:/tmp/krb5cc_1000
-> > Default principal: client.admin@CEPHTEST.LOCAL
-> > 
-> > Valid starting     Expires            Service principal
-> > 02/10/17 15:49:13  02/11/17 01:49:13  krbtgt/CEPHTEST.LOCAL@CEPHTEST.LOCAL
-> >         renew until 02/11/17 15:49:09
-> > 02/10/17 15:49:21  02/11/17 01:49:13  ceph-mon/ceph-dev@
-> >         renew until 02/11/17 15:49:09
-> > 02/10/17 15:49:21  02/11/17 01:49:13  ceph-mon/ceph-dev@CEPHTEST.LOCAL
-> >         renew until 02/11/17 15:49:09
-> > brownj@ceph-dev:~/ceph/build$
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> >
+As I understood, there are two primary cases:
+1 - Requests to OSD failed, but monitors do not return new osdmap (because all 
+monitors are offline or monitors did not update osdmap yet).
+In this case requests are retried by cyclic calling ceph_con_workfn -> con_fault 
+-> ceph_con_workfn. We can check request timestamp and does not call con_fault 
+but complete it.
+
+2 - Monitors return new osdmap which does not have any OSD for RBD.
+In this case all requests to the last ready OSD will be linked on "homeless" OSD 
+and will not be retried until new osdmap with appropriate OSD received. I think 
+that we need additional periodic checking timestamp such requests.
+
+Yes, there is already existing job handle_timeout. But the responsibility of 
+this job is to sending keepalive requests to slow OSD. I'm not sure that it is a 
+good idea to perform additional actions inside this job.
+I decided that creating specific job handle_osd_request_timeout is more applicable.
+
+This job will be run only once with a default value of osd_request_timeout (0).
+At the same time, I think that user will not use too small value for this 
+parameter. I wonder that typical value will be about 1 minute or greater.
+
+> Also, I don't see where this job is ever cancelled when the osdc is torn
+> down. That needs to occur or you'll cause a use-after-free oops...
+
+It is my fault, thanks for the correction.
+
+-- 
+Artur
