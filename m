@@ -1,92 +1,364 @@
-From: liuchang0812 <liuchang0812@gmail.com>
-Subject: Re: libcrush 1.0.0 published
-Date: Sun, 12 Feb 2017 15:31:09 +0800
-Message-ID: <CACKY0b_F4fAPjDYf-2gHpT9HbtWQL4jgx2Z+VutsC8Sut5huWQ@mail.gmail.com>
-References: <7b12f52c-0a79-b153-7ec8-1e398a16d925@dachary.org>
+From: Orit Wasserman <owasserm@redhat.com>
+Subject: Re: rgw: multiple zonegroups in single realm
+Date: Sun, 12 Feb 2017 12:07:02 +0200
+Message-ID: <CABo9giQ798Hvbm9EznFtK9UXVxArmfaCGxy3Ad_6zSA81ua1yw@mail.gmail.com>
+References: <bda40210-ac21-365e-d589-45360fca1920@jp.fujitsu.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yb0-f173.google.com ([209.85.213.173]:33873 "EHLO
-        mail-yb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750780AbdBLHbL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 12 Feb 2017 02:31:11 -0500
-Received: by mail-yb0-f173.google.com with SMTP id j82so21018441ybg.1
-        for <ceph-devel@vger.kernel.org>; Sat, 11 Feb 2017 23:31:11 -0800 (PST)
-In-Reply-To: <7b12f52c-0a79-b153-7ec8-1e398a16d925@dachary.org>
+Received: from mail-lf0-f42.google.com ([209.85.215.42]:35107 "EHLO
+        mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751111AbdBLKHF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 12 Feb 2017 05:07:05 -0500
+Received: by mail-lf0-f42.google.com with SMTP id n124so39721472lfd.2
+        for <ceph-devel@vger.kernel.org>; Sun, 12 Feb 2017 02:07:04 -0800 (PST)
+In-Reply-To: <bda40210-ac21-365e-d589-45360fca1920@jp.fujitsu.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: KIMURA Osamu <kimura.osamu@jp.fujitsu.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Awesome work!!
+On Fri, Feb 10, 2017 at 10:21 AM, KIMURA Osamu
+<kimura.osamu@jp.fujitsu.com> wrote:
+> Hi Cephers,
+>
+> I'm trying to configure RGWs with multiple zonegroups within single realm.
+> The intention is that some buckets to be replicated and others to stay
+> locally.
 
-2017-02-11 20:06 GMT+08:00 Loic Dachary <loic@dachary.org>:
-> Hi,
+If you are not replicating than you don't need to create any zone configuration,
+a default zonegroup and zone are created automatically
+
+> e.g.:
+>  realm: fj
+>   zonegroup east: zone tokyo (not replicated)
+no need if not replicated
+>   zonegroup west: zone osaka (not replicated)
+same here
+>   zonegroup jp:   zone jp-east + jp-west (replicated)
 >
-> tl;dr: libcrush first release with API documentation, packaged for Fedora=
- and Debian GNU/Linux
+> To evaluate such configuration, I tentatively built multiple zonegroups
+> (east, west) on a ceph cluster. I barely succeed to configure it, but
+> some concerns exist.
 >
-> libcrush is a standalone library containing the C files from the Ceph cru=
-sh directory. We hope it will be useful in contexts other than Ceph and tha=
-t new ideas and robust code will emerge as a result.
+I think you just need one zonegroup with two zones the other are not needed
+Also each gateway can handle only a single zone (rgw_zone
+configuration parameter)
+
+> a) User accounts are not synced among zonegroups
 >
-> The code in this first version of libcrush[0] is an exact copy of the cod=
-e in Ceph. The API documentation[1] was added in the files so that it is cl=
-oser to the code and easier to update when it changes. While writing the do=
-cumentation with Adam Emerson, Sage Weil & Nathan Cutler, a few minor incon=
-sistencies were discovered[5] but not fixed. The goal was to package and do=
-cument; fixing bugs at the same time would have delayed the release. Ilya D=
-ryomov reviewed the documentation changes to verify they would not be too m=
-uch of an inconvenience when copying the files over in the next linux kerne=
-l release. Except for the API, the libcrush documentation is in a wiki [9].=
- Sahid Ferdjaoui helped draft a one-page introduction[9] explaining the pur=
-pose of CRUSH which is handy to answer the developer asking: "how can libcr=
-ush help me ? what does it do ?".
+> I'm not sure if this is a issue, but the blueprint [1] stated a master
+> zonegroup manages user accounts as metadata like buckets.
 >
-> The packaging part was made easy thanks to Nathan Cutler for the .spec fi=
-le[4] and Nicolas Dandrimont for Debian GNU/Linux[3]. To stay close to what=
- Ceph does, cmake was used for compilation and tests with help from Kefu Ch=
-ai. libcrush also uses the same tool as Ceph for building the release tarba=
-ll[2]: git-archive-all.sh.
+You have a lot of confusion with the zones and zonegroups.
+A zonegroup is just a group of zones that are sharing the same data
+(i.e. replication between them)
+A zone represent a geographical location (i.e. one ceph cluster)
+
+We have a meta master zone (the master zone in the master zonegroup),
+this meta master is responible on
+replicating users and byckets meta operations.
+
 >
-> There are no unit tests in Ceph for the C part of crush, although there a=
-re many for the C++ wrapper around it. A few were written, using googletest=
-s to stay close to Ceph, and they are run on every build by the GitLab CI w=
-henever a merge request is submitted. They are also run when the packages a=
-re built, either for Fedora or Debian GNU/Linux. The integration tests are =
-extremely simple for a C library: they consist of an example C program[8] w=
-hich is compiled and run after the package is installed. They are in the De=
-bian GNU/Linux package because there is CI infrastructure available for tha=
-t purpose[7].
+> b) Bucket creation is rejected if master zonegroup doesn't have the account
 >
-> If you are inclined to help with libcrush, here are a few action items:
+> e.g.:
+>   1) Configure east zonegroup as master.
+you need a master zoen
+>   2) Create a user "nishi" on west zonegroup (osaka zone) using
+> radosgw-admin.
+>   3) Try to create a bucket on west zonegroup by user nishi.
+>      -> ERROR: S3 error: 404 (NoSuchKey)
+>   4) Create user nishi on east zonegroup with same key.
+>   5) Succeed to create a bucket on west zonegroup by user nishi.
 >
-> * use libcrush in an existing storage project (or non-storage if relevant=
- ?)
-> * proofreading the API documenation
-> * improving the wiki[9]
-> * writing unit tests to get more coverage
-> * adding coverage reports using lcov
+
+You are confusing zonegroup and zone here again ...
+
+you should notice that when you are using radosgw-admin command
+without providing zonegorup and/or zone info (--rgw-zonegroup=<zg> and
+--rgw-zone=<zone>) it will use the default zonegroup and zone.
+
+User is stored per zone and you need to create an admin users in both zones
+for more documentation see: http://docs.ceph.com/docs/master/radosgw/multisite/
+
 >
-> This week-end I'll look into sheepdog to see if libcrush could be useful =
-there and report progress at http://libcrush.org/main/libcrush/issues/16.
+> c) How to restrict to place buckets on specific zonegroups?
 >
-> Cheers
+
+you probably mean zone.
+There is ongoing work to enable/disable sync per bucket
+https://github.com/ceph/ceph/pull/10995
+with this you can create a bucket on a specific zone and it won't be
+replicated to another zone
+
+> If user accounts would synced future as the blueprint, all the zonegroups
+> contain same account information. It means any user can create buckets on
+> any zonegroups. If we want to permit to place buckets on a replicated
+> zonegroup for specific users, how to configure?
 >
-> [0] http://libcrush.org/main/libcrush
-> [1] API documentation http://doc.libcrush.org/master/group___a_p_i.html
-> [2] http://download.libcrush.org/libcrush/releases/libcrush-1.0.0.tar.gz
-> [3] https://tracker.debian.org/pkg/libcrush
-> [4] https://bugzilla.redhat.com/show_bug.cgi?id=3D1421245
-> [5] http://libcrush.org/main/libcrush/issues
-> [6] https://github.com/meitar/git-archive-all.sh
-> [7] https://ci.debian.net/
-> [8] http://libcrush.org/main/libcrush-debian/tree/debian/sid/debian/tests
-> [9] http://libcrush.org/main/libcrush/wikis/home
+> If user accounts will not synced as current behavior, we can restrict
+> to place buckets on specific zonegroups. But I cannot find best way to
+> configure the master zonegroup.
+>
+>
+> d) Operations for other zonegroup are not redirected
+>
+> e.g.:
+>   1) Create bucket4 on west zonegroup by nishi.
+>   2) Try to access bucket4 from endpoint on east zonegroup.
+>      -> Respond "301 (Moved Permanently)",
+>         but no redirected Location header is returned.
+>
+
+It could be a bug please open a tracker issue for that in
+tracker.ceph.com for RGW component with all the configuration
+information,
+logs and the version of ceph and radosgw you are using.
+
+> It seems current RGW doesn't follows S3 specification [2].
+> To implement this feature, probably we need to define another endpoint
+> on each zonegroup for client accessible URL. RGW may placed behind proxy,
+> thus the URL may be different from endpoint URLs for replication.
+>
+
+The zone and zonegroup endpoints are not used directly by the user with a proxy.
+The user get a URL pointing to the proxy and the proxy will need to be
+configured to point the rgw urls/IPs , you can have several radosgw
+running.
+See more https://access.redhat.com/documentation/en/red-hat-ceph-storage/2/paged/object-gateway-guide-for-red-hat-enterprise-linux/chapter-2-configuration
+
+Regrads,
+Orit
+>
+> Any thoughts?
+
+>
+> [1]
+> http://tracker.ceph.com/projects/ceph/wiki/Rgw_new_multisite_configuration
+> [2] http://docs.aws.amazon.com/AmazonS3/latest/dev/Redirects.html
+>
+> ------ FYI ------
+> [environments]
+> Ceph cluster: RHCS 2.0
+> RGW: RHEL 7.2 + RGW v10.2.5
+>
+> zonegroup east: master
+>  zone tokyo
+>   endpoint http://node5:80
+>   system user: sync-user
+>   user azuma (+ nishi)
+>
+> zonegroup west: (not master)
+>   zone osaka
+>   endpoint http://node5:8081
+>   system user: sync-user (created with same key as zone tokyo)
+>   user nishi
+>
+>
+> [detail of "b)"]
+>
+> $ s3cmd -c s3nishi.cfg ls
+> $ s3cmd -c s3nishi.cfg mb s3://bucket3
+> ERROR: S3 error: 404 (NoSuchKey)
+>
+> ---- rgw.osaka log:
+> 2017-02-10 11:54:13.290653 7feac3f7f700  1 ====== starting new request
+> req=0x7feac3f79710 =====
+> 2017-02-10 11:54:13.290709 7feac3f7f700  2 req 50:0.000057::PUT
+> /bucket3/::initializing for trans_id =
+> tx000000000000000000032-00589d2b55-14a2-osaka
+> 2017-02-10 11:54:13.290720 7feac3f7f700 10 rgw api priority: s3=5
+> s3website=4
+> 2017-02-10 11:54:13.290722 7feac3f7f700 10 host=node5
+> 2017-02-10 11:54:13.290733 7feac3f7f700 10 meta>> HTTP_X_AMZ_CONTENT_SHA256
+> 2017-02-10 11:54:13.290750 7feac3f7f700 10 meta>> HTTP_X_AMZ_DATE
+> 2017-02-10 11:54:13.290753 7feac3f7f700 10 x>>
+> x-amz-content-sha256:d8f96fbdf666b991d183a7f5cc7fcf6eaa10934786f67575bda3f734a772464a
+> 2017-02-10 11:54:13.290755 7feac3f7f700 10 x>> x-amz-date:20170210T025413Z
+> 2017-02-10 11:54:13.290774 7feac3f7f700 10
+> handler=25RGWHandler_REST_Bucket_S3
+> 2017-02-10 11:54:13.290775 7feac3f7f700  2 req 50:0.000124:s3:PUT
+> /bucket3/::getting op 1
+> 2017-02-10 11:54:13.290781 7feac3f7f700 10 op=27RGWCreateBucket_ObjStore_S3
+> 2017-02-10 11:54:13.290782 7feac3f7f700  2 req 50:0.000130:s3:PUT
+> /bucket3/:create_bucket:authorizing
+> 2017-02-10 11:54:13.290798 7feac3f7f700 10 v4 signature format =
+> 989404f270efd800843cb19183c53dc457cf96b9ea2393ba5d554a42ffc22f76
+> 2017-02-10 11:54:13.290804 7feac3f7f700 10 v4 credential format =
+> ZY6EJUVB38SCOWBELERQ/20170210/west/s3/aws4_request
+> 2017-02-10 11:54:13.290806 7feac3f7f700 10 access key id =
+> ZY6EJUVB38SCOWBELERQ
+> 2017-02-10 11:54:13.290814 7feac3f7f700 10 credential scope =
+> 20170210/west/s3/aws4_request
+> 2017-02-10 11:54:13.290834 7feac3f7f700 10 canonical headers format =
+> host:node5:8081
+> x-amz-content-sha256:d8f96fbdf666b991d183a7f5cc7fcf6eaa10934786f67575bda3f734a772464a
+> x-amz-date:20170210T025413Z
+>
+> 2017-02-10 11:54:13.290836 7feac3f7f700 10 delaying v4 auth
+> 2017-02-10 11:54:13.290839 7feac3f7f700  2 req 50:0.000187:s3:PUT
+> /bucket3/:create_bucket:normalizing buckets and tenants
+> 2017-02-10 11:54:13.290841 7feac3f7f700 10 s->object=<NULL>
+> s->bucket=bucket3
+> 2017-02-10 11:54:13.290843 7feac3f7f700  2 req 50:0.000191:s3:PUT
+> /bucket3/:create_bucket:init permissions
+> 2017-02-10 11:54:13.290844 7feac3f7f700  2 req 50:0.000192:s3:PUT
+> /bucket3/:create_bucket:recalculating target
+> 2017-02-10 11:54:13.290845 7feac3f7f700  2 req 50:0.000193:s3:PUT
+> /bucket3/:create_bucket:reading permissions
+> 2017-02-10 11:54:13.290846 7feac3f7f700  2 req 50:0.000195:s3:PUT
+> /bucket3/:create_bucket:init op
+> 2017-02-10 11:54:13.290847 7feac3f7f700  2 req 50:0.000196:s3:PUT
+> /bucket3/:create_bucket:verifying op mask
+> 2017-02-10 11:54:13.290849 7feac3f7f700  2 req 50:0.000197:s3:PUT
+> /bucket3/:create_bucket:verifying op permissions
+> 2017-02-10 11:54:13.292027 7feac3f7f700  2 req 50:0.001374:s3:PUT
+> /bucket3/:create_bucket:verifying op params
+> 2017-02-10 11:54:13.292035 7feac3f7f700  2 req 50:0.001383:s3:PUT
+> /bucket3/:create_bucket:pre-executing
+> 2017-02-10 11:54:13.292037 7feac3f7f700  2 req 50:0.001385:s3:PUT
+> /bucket3/:create_bucket:executing
+> 2017-02-10 11:54:13.292072 7feac3f7f700 10 payload request hash =
+> d8f96fbdf666b991d183a7f5cc7fcf6eaa10934786f67575bda3f734a772464a
+> 2017-02-10 11:54:13.292083 7feac3f7f700 10 canonical request = PUT
+> /bucket3/
+>
+> host:node5:8081
+> x-amz-content-sha256:d8f96fbdf666b991d183a7f5cc7fcf6eaa10934786f67575bda3f734a772464a
+> x-amz-date:20170210T025413Z
+>
+> host;x-amz-content-sha256;x-amz-date
+> d8f96fbdf666b991d183a7f5cc7fcf6eaa10934786f67575bda3f734a772464a
+> 2017-02-10 11:54:13.292084 7feac3f7f700 10 canonical request hash =
+> 8faa5ec57f69dd7b54baa72c157b6d63f8c7db309a34a1e2a10ad6f2f585cd02
+> 2017-02-10 11:54:13.292087 7feac3f7f700 10 string to sign = AWS4-HMAC-SHA256
+> 20170210T025413Z
+> 20170210/west/s3/aws4_request
+> 8faa5ec57f69dd7b54baa72c157b6d63f8c7db309a34a1e2a10ad6f2f585cd02
+> 2017-02-10 11:54:13.292118 7feac3f7f700 10 date_k        =
+> 454f3ad73c095e73d2482809d7a6ec8af3c4e900bc83e0a9663ea5fc336cad95
+> 2017-02-10 11:54:13.292131 7feac3f7f700 10 region_k      =
+> e0caaddbb30ebc25840b6aaac3979d1881a14b8e9a0dfea43d8a006c8e0e504d
+> 2017-02-10 11:54:13.292144 7feac3f7f700 10 service_k     =
+> 59d6c9158e9e3c6a1aa97ee15859d2ef9ad9c64209b63f093109844f0c7f6c04
+> 2017-02-10 11:54:13.292171 7feac3f7f700 10 signing_k     =
+> 4dcbccd9c3da779d32758a645644c66a56f64d642eaeb39eec8e0b2facba7805
+> 2017-02-10 11:54:13.292197 7feac3f7f700 10 signature_k   =
+> 989404f270efd800843cb19183c53dc457cf96b9ea2393ba5d554a42ffc22f76
+> 2017-02-10 11:54:13.292198 7feac3f7f700 10 new signature =
+> 989404f270efd800843cb19183c53dc457cf96b9ea2393ba5d554a42ffc22f76
+> 2017-02-10 11:54:13.292199 7feac3f7f700 10 -----------------------------
+> Verifying signatures
+> 2017-02-10 11:54:13.292199 7feac3f7f700 10 Signature     =
+> 989404f270efd800843cb19183c53dc457cf96b9ea2393ba5d554a42ffc22f76
+> 2017-02-10 11:54:13.292200 7feac3f7f700 10 New Signature =
+> 989404f270efd800843cb19183c53dc457cf96b9ea2393ba5d554a42ffc22f76
+> 2017-02-10 11:54:13.292200 7feac3f7f700 10 -----------------------------
+> 2017-02-10 11:54:13.292202 7feac3f7f700 10 v4 auth ok
+> 2017-02-10 11:54:13.292238 7feac3f7f700 10 create bucket location
+> constraint: west
+> 2017-02-10 11:54:13.292256 7feac3f7f700 10 cache get:
+> name=osaka.rgw.data.root+bucket3 : type miss (requested=22, cached=0)
+> 2017-02-10 11:54:13.293369 7feac3f7f700 10 cache put:
+> name=osaka.rgw.data.root+bucket3 info.flags=0
+> 2017-02-10 11:54:13.293374 7feac3f7f700 10 moving
+> osaka.rgw.data.root+bucket3 to cache LRU end
+> 2017-02-10 11:54:13.293380 7feac3f7f700  0 sending create_bucket request to
+> master zonegroup
+> 2017-02-10 11:54:13.293401 7feac3f7f700 10 get_canon_resource():
+> dest=/bucket3/
+> 2017-02-10 11:54:13.293403 7feac3f7f700 10 generated canonical header: PUT
+>
+>
+> Fri Feb 10 02:54:13 2017
+> x-amz-content-sha256:d8f96fbdf666b991d183a7f5cc7fcf6eaa10934786f67575bda3f734a772464a
+> /bucket3/
+> 2017-02-10 11:54:13.299113 7feac3f7f700 10 receive_http_header
+> 2017-02-10 11:54:13.299117 7feac3f7f700 10 received header:HTTP/1.1 404 Not
+> Found
+> 2017-02-10 11:54:13.299119 7feac3f7f700 10 receive_http_header
+> 2017-02-10 11:54:13.299120 7feac3f7f700 10 received header:x-amz-request-id:
+> tx000000000000000000005-00589d2b55-1416-tokyo
+> 2017-02-10 11:54:13.299130 7feac3f7f700 10 receive_http_header
+> 2017-02-10 11:54:13.299131 7feac3f7f700 10 received header:Content-Length:
+> 175
+> 2017-02-10 11:54:13.299133 7feac3f7f700 10 receive_http_header
+> 2017-02-10 11:54:13.299133 7feac3f7f700 10 received header:Accept-Ranges:
+> bytes
+> 2017-02-10 11:54:13.299148 7feac3f7f700 10 receive_http_header
+> 2017-02-10 11:54:13.299149 7feac3f7f700 10 received header:Content-Type:
+> application/xml
+> 2017-02-10 11:54:13.299150 7feac3f7f700 10 receive_http_header
+> 2017-02-10 11:54:13.299150 7feac3f7f700 10 received header:Date: Fri, 10 Feb
+> 2017 02:54:13 GMT
+> 2017-02-10 11:54:13.299152 7feac3f7f700 10 receive_http_header
+> 2017-02-10 11:54:13.299152 7feac3f7f700 10 received header:
+> 2017-02-10 11:54:13.299248 7feac3f7f700  2 req 50:0.008596:s3:PUT
+> /bucket3/:create_bucket:completing
+> 2017-02-10 11:54:13.299319 7feac3f7f700  2 req 50:0.008667:s3:PUT
+> /bucket3/:create_bucket:op status=-2
+> 2017-02-10 11:54:13.299321 7feac3f7f700  2 req 50:0.008670:s3:PUT
+> /bucket3/:create_bucket:http status=404
+> 2017-02-10 11:54:13.299324 7feac3f7f700  1 ====== req done
+> req=0x7feac3f79710 op status=-2 http_status=404 ======
+> 2017-02-10 11:54:13.299349 7feac3f7f700  1 civetweb: 0x7feb2c02d340:
+> 192.168.20.15 - - [10/Feb/2017:11:54:13 +0900] "PUT /bucket3/ HTTP/1.1" 404
+> 0 - -
+>
+>
+> ---- rgw.tokyo log:
+> 2017-02-10 11:54:13.297852 7f56076c6700  1 ====== starting new request
+> req=0x7f56076c0710 =====
+> 2017-02-10 11:54:13.297887 7f56076c6700  2 req 5:0.000035::PUT
+> /bucket3/::initializing for trans_id =
+> tx000000000000000000005-00589d2b55-1416-tokyo
+> 2017-02-10 11:54:13.297895 7f56076c6700 10 rgw api priority: s3=5
+> s3website=4
+> 2017-02-10 11:54:13.297897 7f56076c6700 10 host=node5
+> 2017-02-10 11:54:13.297906 7f56076c6700 10 meta>> HTTP_X_AMZ_CONTENT_SHA256
+> 2017-02-10 11:54:13.297912 7f56076c6700 10 x>>
+> x-amz-content-sha256:d8f96fbdf666b991d183a7f5cc7fcf6eaa10934786f67575bda3f734a772464a
+> 2017-02-10 11:54:13.297929 7f56076c6700 10
+> handler=25RGWHandler_REST_Bucket_S3
+> 2017-02-10 11:54:13.297937 7f56076c6700  2 req 5:0.000086:s3:PUT
+> /bucket3/::getting op 1
+> 2017-02-10 11:54:13.297946 7f56076c6700 10 op=27RGWCreateBucket_ObjStore_S3
+> 2017-02-10 11:54:13.297947 7f56076c6700  2 req 5:0.000096:s3:PUT
+> /bucket3/:create_bucket:authorizing
+> 2017-02-10 11:54:13.297969 7f56076c6700 10 get_canon_resource():
+> dest=/bucket3/
+> 2017-02-10 11:54:13.297976 7f56076c6700 10 auth_hdr:
+> PUT
+>
+>
+> Fri Feb 10 02:54:13 2017
+> x-amz-content-sha256:d8f96fbdf666b991d183a7f5cc7fcf6eaa10934786f67575bda3f734a772464a
+> /bucket3/
+> 2017-02-10 11:54:13.298023 7f56076c6700 10 cache get:
+> name=default.rgw.users.uid+nishi : type miss (requested=6, cached=0)
+> 2017-02-10 11:54:13.298975 7f56076c6700 10 cache put:
+> name=default.rgw.users.uid+nishi info.flags=0
+> 2017-02-10 11:54:13.298986 7f56076c6700 10 moving
+> default.rgw.users.uid+nishi to cache LRU end
+> 2017-02-10 11:54:13.298991 7f56076c6700  0 User lookup failed!
+> 2017-02-10 11:54:13.298993 7f56076c6700 10 failed to authorize request
+> 2017-02-10 11:54:13.299077 7f56076c6700  2 req 5:0.001225:s3:PUT
+> /bucket3/:create_bucket:op status=0
+> 2017-02-10 11:54:13.299086 7f56076c6700  2 req 5:0.001235:s3:PUT
+> /bucket3/:create_bucket:http status=404
+> 2017-02-10 11:54:13.299089 7f56076c6700  1 ====== req done
+> req=0x7f56076c0710 op status=0 http_status=404 ======
+> 2017-02-10 11:54:13.299426 7f56076c6700  1 civetweb: 0x7f56200048c0:
+> 192.168.20.15 - - [10/Feb/2017:11:54:13 +0900] "PUT /bucket3/ HTTP/1.1" 404
+> 0 - -
+>
 >
 > --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+> KIMURA Osamu / 木村 修
+> Engineering Department, Storage Development Division,
+> Data Center Platform Business Unit, FUJITSU LIMITED
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
