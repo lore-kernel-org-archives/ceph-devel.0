@@ -1,252 +1,139 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Pgs distribution evenly across osds
-Date: Mon, 13 Feb 2017 17:34:12 -0600
-Message-ID: <9e117a01-6f97-af27-0db0-34e2f2f4ce1a@redhat.com>
-References: <731B4B00-3D93-4E2B-9A32-5F50BDF84177@alibaba-inc.com>
- <32478390-b790-226f-59aa-15f76d1c247e@redhat.com>
- <36A35D18-3331-4B49-88C6-C7A181F12FC5@alibaba-inc.com>
- <753C3729-DF1E-4FEB-9448-4CEDF74D9195@alibaba-inc.com>
- <5de83f94-aab0-70ed-7b76-a41e047361c0@redhat.com>
- <CAAT80S67huScoCov-QttVQ6sH-7tt5zpB_K0t0T+C78tGqNKrA@mail.gmail.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: rbd performance drop a lot with objectmap
+Date: Mon, 13 Feb 2017 18:47:01 -0500
+Message-ID: <CA+aFP1Dqjx7ipGZWTuqy=+y=U_bV7xZAQWRanf7Y7ktVTFo04g@mail.gmail.com>
+References: <B30C48EF-D72E-471C-808F-02E666347EAB@alibaba-inc.com>
+ <CA+aFP1DpPYm1t2+wzgEOzciYAmkemTkuzabsArZCZF6OXzhO2g@mail.gmail.com>
+ <A4A0B62C-3155-4625-8954-3CCB482F95D2@alibaba-inc.com> <5E3E05AED7F0F044904275810D0CB46505E715@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
+ <D1FAA42E-CA98-4DFA-81CE-7608652FCBA4@alibaba-inc.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49476 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751143AbdBMXeO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 13 Feb 2017 18:34:14 -0500
-In-Reply-To: <CAAT80S67huScoCov-QttVQ6sH-7tt5zpB_K0t0T+C78tGqNKrA@mail.gmail.com>
+Received: from mail-lf0-f48.google.com ([209.85.215.48]:32915 "EHLO
+        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751250AbdBMXrE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Feb 2017 18:47:04 -0500
+Received: by mail-lf0-f48.google.com with SMTP id x1so58597523lff.0
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Feb 2017 15:47:03 -0800 (PST)
+In-Reply-To: <D1FAA42E-CA98-4DFA-81CE-7608652FCBA4@alibaba-inc.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: hufh <hufh2004@gmail.com>
-Cc: "LIU, Fei" <james.liu@alibaba-inc.com>, Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "LIU, Fei" <james.liu@alibaba-inc.com>
+Cc: Somnath Roy <Somnath.Roy@sandisk.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-You could do tricks like recreate a distribution until an OSD is 
-associated with the number of PGs you want, and you could even do it 
-until all OSDs match some pre-specified values, but you can't make it 
-persist beyond a topology change (well, you could, but it'd become 
-prohibitively expensive very quickly for all possible changes).
+You have an application that is directly interfacing with librbd to write
+to an image? Or do you have the same image mapped under multiple VMs? In
+either case, you should just disable the exclusive lock when creating the
+image (via the --image-shared CLI option) since, as the name "exclusive"
+implies, the image shouldn't be used concurrently by multiple clients at
+the same time.
 
-I still wonder if we should be throwing away really poor initial 
-distributions just as a quality-of-life thing, but we've never done it.
-
-Mark
-
-On 02/13/2017 05:29 PM, hufh wrote:
-> Hi Mark,
+On Mon, Feb 13, 2017 at 6:27 PM, LIU, Fei <james.liu@alibaba-inc.com> wrote:
+> Hi Somnath,
+>    Thanks,  Very good point. However, one of cloud applications  in our data center will have multiple threads(Java code) to flush their data to one image at same time. There are two lock involved in the process , one is image exclusive_lock , another one is object_map lock.    I am afraid there is a lot performance hurt by these two locks with multiple threads application.
 >
-> Do you think it's possible to directly specify how many PGs a osd could
-> host? Thanks.
->
-> Tiger
->
-> 2017年2月14日星期二，Mark Nelson <mnelson@redhat.com
-> <mailto:mnelson@redhat.com>> 写道：
->
->     Hi James,
->
->     Yes, it's not surprising.  Especially if you are primarily targeting
->     a single pool and can reweight to achieve optimal distribution
->     specifically for that pool.  It's much harder to do this if you have
->     lots of pools that are all used equally though.
->
->     I'm glad to hear that reweighting improved things!  I still am
->     hopeful that some day we can find a way to distribute pgs/data/etc
->     evenly with something crush-like that does better than random
->     distributions, but I suspect it will be very difficult.  Crush is
->     already very clever at what it does.  We may have to trade away
->     something to get something.
->
->     Mark
->
->     On 02/13/2017 04:48 PM, LIU, Fei wrote:
->
->         Hi Mark,
->            After we periodically even out the pg distribution with
->         reweight-by-pgs ,we can see our cluster performance(IOPS and
->         bandwidth ) up almost 25%~40% and latency drop almost 25%.  It
->         somehow prove pg distribution affect the whole cluster
->         performance a lot.
->
->           Regards,
->           James
->
->         本邮件及其附件含有阿里巴巴集团的商业秘密信息，仅限于发送给上面地
->         址中列出的个人和群组，禁止任何其他人以任何形式使用（包括但不限于
->         全部或部分地泄露、复制和散发）本邮件及其附件中的信息，如果您错收
->         本邮件，请您立即电话或邮件通知发件人并删除本邮件。
->         This email and its attachments contain confidential information
->         from Alibaba Group.which is intended only for the person or
->         entity whose address is listed above.Any use of information
->         contained herein in any way(including,but not limited to,total
->         or partial disclosure,reproduction or dissemination)by persons
->         other than the intended recipient(s) is prohibited.If you
->         receive this email in error,please notify the sender by phone or
->         email immediately and delete it.
->
->         On 2/8/17, 4:57 AM, "LIU, Fei" <ceph-devel-owner@vger.kernel.org
->         on behalf of james.liu@alibaba-inc.com> wrote:
->
->             Hi Mark,
->                Thanks very much for sharing. We found as we tested more
->         , somehow the oversubscribed OSD node perform worse than other
->         OSD node with less PGs ,However , the CPU utilization even in
->         worst oversubscribed OSD node is around ~50%. We also observed
->         the apply latency and commit latency are pretty high comparing
->         to others with less PGs. The networking traffic is reasonable .
->         The disk utilization sometime is around 99%.but most of time is
->         around 60%. We see latency spike from time to time caused by the
->         oversubscribed OSD we guess. Any suggestions?
->
->             Regards,
->             James
+>   Regards,
+>   James
 >
 >
->             本邮件及其附件含有阿里巴巴集团的商业秘密信息，仅限于发送给上
->         面地址中列出的个人和群组，禁止任何其他人以任何形式使用（包括但不
->         限于全部或部分地泄露、复制和散发）本邮件及其附件中的信息，如果您
->         错收本邮件，请您立即电话或邮件通知发件人并删除本邮件。
->             This email and its attachments contain confidential
->         information from Alibaba Group.which is intended only for the
->         person or entity whose address is listed above.Any use of
->         information contained herein in any way(including,but not
->         limited to,total or partial disclosure,reproduction or
->         dissemination)by persons other than the intended recipient(s) is
->         prohibited.If you receive this email in error,please notify the
->         sender by phone or email immediately and delete it.
+> 本邮件及其附件含有阿里巴巴集团的商业秘密信息，仅限于发送给上面地址中列出的个人和群组，禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制和散发）本邮件及其附件中的信息，如果您错收本邮件，请您立即电话或邮件通知发件人并删除本邮件。
+> This email and its attachments contain confidential information from Alibaba Group.which is intended only for the person or entity whose address is listed above.Any use of information contained herein in any way(including,but not limited to,total or partial disclosure,reproduction or dissemination)by persons other than the intended recipient(s) is prohibited.If you receive this email in error,please notify the sender by phone or email immediately and delete it.
 >
->             On 2/7/17, 6:48 PM, "Mark Nelson" <mnelson@redhat.com> wrote:
+> On 2/13/17, 3:00 PM, "Somnath Roy" <Somnath.Roy@sandisk.com> wrote:
 >
->                 Hi James,
+>     James,
+>     It was discussed earlier in the ceph-devel that with exclusive lock enabled , multi thread (job) performance will be hurting. You should increase QD to increase parallelism but not the threads.
+>     I brought that up sometimes back but couldn't provide an use case where multiple client will be accessing an image in parallel , it will be great if you have one. Exporting rbd for the data base use case could be the one (?).
 >
->                 I'm not sage, but I'll chime in since I spent some time
->         thinking about
->                 this stuff a while back when I was playing around with
->         halton
->                 distributions for PG placement.  It's very difficult to
->         get even
->                 distributions using random sampling unless you have a
->         *very* high number
->                 of samples.  The following equations give you a
->         reasonable expectation
->                 of what the min/max should be assuming an evenly
->         weighted random
->                 distribution:
+>     Thanks & Regards
+>     Somnath
 >
->                 min = (pgs / osds) - sqrt(2*pgs*log(osds)/osds)
->                 max = (pgs / osds) + sqrt(2*pgs*log(osds)/osds)
+>     -----Original Message-----
+>     From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of LIU, Fei
+>     Sent: Monday, February 13, 2017 2:37 PM
+>     To: dillaman@redhat.com
+>     Cc: Ceph Development
+>     Subject: Re: rbd performance drop a lot with objectmap
 >
->                 In your case that's:
+>     Hi Jason,
+>        It makes sense .By the way, we do a random write with qd=1 initially .The performance drops almost 3 times.
+>       We also tested 10  times fio write test in one image using below fio configuration with each fio write taking 30 seconds.
+>     [global]
+>     ioengine=rbd
+>     clientname=admin
+>     pool=test-pool
+>     rbdname= image-with-objmap
+>     rw=write
+>     bs=16k
+>     direct=1
+>     runtime=1200
+>     ramp_time=30
+>     group_reporting
+>     time_based
+>     [with_objectmap_rbd_iodepth1_numjobs1]
+>     iodepth=128
+>     numjobs=1
 >
->                 min = 49152/168 - sqrt(2*49152*log(168)/168) = 256
->                 max = 49152/168 + sqrt(2*49152*log(168)/168) = 329
+>       IOPS increases from 180 to 1200 in the end after 10 times fio rbd write. Once objectmap is warming up , it lowers the latency a lot  and increase IOPS accordingly.
 >
->                 In terms of performance potential and data distribution
->         evenness, I'd
->                 argue you really want to know how bad your worst
->         oversubscribed PG is vs
->                 the average:
+>     However, we also tested the rand write with rbd-bench ,we found the performance almost drop 10 times with more contention involved:
 >
->                 Expected: (49152/168)/329 = ~88.9%
->                 Actual: (49152/168)/333 = = ~87.9%
+>     1.  rbd create test-pool/no-map-image --size 100G --object-size 16K --image-format 2 --image-feature layering
+>     2.  rbd create test-pool/with-map-image --size 100G --object-size 16K --image-format 2 --image-feature layering --image-feature exclusive-lock --image-feature object-map
 >
->                 Your numbers are a little worse, though typically I see our
->                 distributions hover right around expected or just
->         slightly better.  This
->                 particular roll of the dice might have just been a
->         little worse.
+>             Using rbd bench to write 1G data randomly：
+>              rbd bench-write -p test-pool --image no-map-image --io-size 16K --io-threads 16 --io-total 1G --io-pattern rand
 >
->                 If you jumped up to say 100K PGs:
->
->                 min = 1000000/168 - sqrt(2*1000000*log(168)/168) = 544
->                 max = 1000000/168 + sqrt(2*1000000*log(168)/168) = 647
->
->                 Expected: (100000/168)/647 = ~92%
->
->                 Now if you jumped up to 1 million PGs:
->
->                 min = 1000000/168 - sqrt(2*1000000*log(168)/168) = 5790
->                 max = 1000000/168 + sqrt(2*1000000*log(168)/168) = 6115
->
->                 Expected: (1000000/168)/6115 = ~97.3%
->
->                 Thanks,
->                 Mark
->
->                 On 02/07/2017 06:14 PM, LIU, Fei wrote:
->                 > Hi Sage,
->                 >   We are trying to distribute pgs evenly across osds.
->         However, after certain tunes, we still got 30% difference among
->         max pgs  and min pg  of OSDs (OSD 9 has 13.8% more pgs than
->         average and OSD 86 has 15.2% less pgs than average).  Any good
->         suggestions to make PGs distributed evenly across OSDs?
->                 >
->                 >   Thanks,
->                 >   James
->                 >
->                 >
->                 > SUM :   49152   |
->                 > Osd :   168     |
->                 > AVE :   292.57  |
->                 > Max :   333     |
->                 > Osdid : osd.9   |
->                 > per:    13.8%   |
->                 > ------------------------
->                 > min :   248     |
->                 > osdid : osd.86  |
->                 > per:    -15.2%  |
->                 >
->                 > [james.liu@a18d13422.eu13 /home/james.liu]
->                 > $
->                 >
->                 >
->                 > 本邮件及其附件含有阿里巴巴集团的商业秘密信息，仅限于发
->         送给上面地址中列出的个人和群组，禁止任何其他人以任何形式使用（包
->         括但不限于全部或部分地泄露、复制和散发）本邮件及其附件中的信息，
->         如果您错收本邮件，请您立即电话或邮件通知发件人并删除本邮件。
->                 > This email and its attachments contain confidential
->         information from Alibaba Group.which is intended only for the
->         person or entity whose address is listed above.Any use of
->         information contained herein in any way(including,but not
->         limited to,total or partial disclosure,reproduction or
->         dissemination)by persons other than the intended recipient(s) is
->         prohibited.If you receive this email in error,please notify the
->         sender by phone or email immediately and delete it.
->                 >
->                 >
->                 > --
->                 > To unsubscribe from this list: send the line
->         "unsubscribe ceph-devel" in
->                 > the body of a message to majordomo@vger.kernel.org
->                 > More majordomo info at
->         http://vger.kernel.org/majordomo-info.html
->         <http://vger.kernel.org/majordomo-info.html>
->                 >
+>      We found the performance drop almost 10 times in terms of IOPS. It shows the performance is getting worse with more jobs. It make us wondering whether the lock is killing factor. Any thoughts?
 >
 >
+>        Regards,
+>        James
 >
->             --
->             To unsubscribe from this list: send the line "unsubscribe
->         ceph-devel" in
->             the body of a message to majordomo@vger.kernel.org
->             More majordomo info at
->         http://vger.kernel.org/majordomo-info.html
->         <http://vger.kernel.org/majordomo-info.html>
+>     本邮件及其附件含有阿里巴巴集团的商业秘密信息，仅限于发送给上面地址中列出的个人和群组，禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制和散发）本邮件及其附件中的信息，如果您错收本邮件，请您立即电话或邮件通知发件人并删除本邮件。
+>     This email and its attachments contain confidential information from Alibaba Group.which is intended only for the person or entity whose address is listed above.Any use of information contained herein in any way(including,but not limited to,total or partial disclosure,reproduction or dissemination)by persons other than the intended recipient(s) is prohibited.If you receive this email in error,please notify the sender by phone or email immediately and delete it.
 >
+>     On 2/12/17, 9:59 AM, "Jason Dillaman" <jdillama@redhat.com> wrote:
 >
+>         On Fri, Feb 10, 2017 at 9:50 AM, LIU, Fei <james.liu@alibaba-inc.com> wrote:
+>         > With FIO single job queue depth 1(W/ vs W/O)  , IOPS drop 3 times and
+>         > latency increased 3 times. As with more jobs, the IOPS drops more and
+>         > latency increase higher and higher.
+>
+>         Assuming you have a random write workload, within a QD=1, it is
+>         entirely expected for the first write to the object to incur a
+>         performance penalty since it requires an additional round-trip
+>         operation to the backing OSDs. Since you only hit this penalty for the
+>         very first write to the object, its cost is amortized over future
+>         writes. This is similar to cloned images and the amortized cost of
+>         copying up the backing parent object to the clone on the first write.
+>
+>         > The objectmap_locker in pre and post and objectmap update per IO really hurt
+>         > performance. Lockless queue and new way to caching objectmap? Any thoughts?
+>
+>         By definition, with a QD=1, there is zero contention on that lock. The
+>         lock is really only held for a minuscule amount of time and is dropped
+>         while the OSD operation is in-progress. Do you actually have any
+>         performance metrics to back up this claim? Note that the post state is
+>         only hit when you issue a remove / trim / discard operation.
 >
 >         --
->         To unsubscribe from this list: send the line "unsubscribe
->         ceph-devel" in
->         the body of a message to majordomo@vger.kernel.org
->         More majordomo info at
->         http://vger.kernel.org/majordomo-info.html
->         <http://vger.kernel.org/majordomo-info.html>
+>         Jason
+>
+>
 >
 >     --
->     To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->     the body of a message to majordomo@vger.kernel.org
->     More majordomo info at  http://vger.kernel.org/majordomo-info.html
->     <http://vger.kernel.org/majordomo-info.html>
+>     To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>     Western Digital Corporation (and its subsidiaries) E-mail Confidentiality Notice & Disclaimer:
 >
+>     This e-mail and any files transmitted with it may contain confidential or legally privileged information of WDC and/or its affiliates, and are intended solely for the use of the individual or entity to which they are addressed. If you are not the intended recipient, any disclosure, copying, distribution or any action taken or omitted to be taken in reliance on it, is prohibited. If you have received this e-mail in error, please notify the sender immediately and delete the e-mail in its entirety from your system.
+>
+>
+>
+
+
+
+-- 
+Jason
