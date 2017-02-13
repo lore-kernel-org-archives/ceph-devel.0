@@ -1,53 +1,26 @@
-From: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Subject: Re: [PATCH v3 0/2] iov_iter: allow
- iov_iter_get_pages_alloc to allocate more pages per call
-Date: Mon, 13 Feb 2017 13:40:52 -0800
-Message-ID: <CA+55aFz2UjH-Lz=Zoi1he3-FfHEkh3kqP8PfeOP-u_Br9=BQAw@mail.gmail.com>
-References: <20170124212327.14517-1-jlayton@redhat.com>
-	<20170125133205.21704-1-jlayton@redhat.com>
-	<20170202095125.GF27291@ZenIV.linux.org.uk>
-	<20170202105651.GA32111@infradead.org>
-	<20170202111625.GG27291@ZenIV.linux.org.uk>
-	<1486040452.2812.6.camel@redhat.com>
-	<20170203072952.GI27291@ZenIV.linux.org.uk>
-	<CA+55aFx=NPESJv9RjCNRKFH_rk9uVMov0UtFbpZH-xBsgK2h-w@mail.gmail.com>
-	<20170203190816.GK27291@ZenIV.linux.org.uk>
-	<CA+55aFwXKPUoZ3R4ey03L6ksXCmGLNS=16aQ7gRO1=VXCMZx-A@mail.gmail.com>
-	<20170213095616.GA18053@linaro.org>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Proposal to rename ceph-qa-suite project in tracker.ceph.com
+Date: Mon, 13 Feb 2017 22:43:20 +0100
+Message-ID: <d7e1ef80-56ad-63f9-cbf8-a4ef1ada8be8@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-In-Reply-To: <20170213095616.GA18053-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
-List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
-Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
-Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-To: Steve Capper <steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Linux NFS Mailing List <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Hugh Dickins <hughd-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, linux-fsdevel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, V9FS Developers <v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Kirill A. Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:44438 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752127AbdBMVnY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 13 Feb 2017 16:43:24 -0500
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 8E885ADAE
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Feb 2017 21:43:22 +0000 (UTC)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Feb 13, 2017 at 1:56 AM, Steve Capper <steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->
-> Okay so looking at what we have for access_ok(.) on arm64, my
-> understanding is that we perform a 65-bit add/compare (in assembler) to
-> see whether or not the range is below the current_thread_info->addr_limit.
-> So I think this is a roundabout way of checking for no-wrap around and <= TASK_SIZE.
+Now that ceph-qa-suite has been assimilated into ceph/ceph.git, shall we 
+rename http://tracker.ceph.com/projects/ceph-qa-suite ?
 
-No, that's the problem. It's *not* testing against TASK_SIZE.
+If nobody objects, I'd like to rename it to "tests" so it would cover 
+both teuthology tests and make check tests.
 
-Because add_limit is not always TASK_SIZE. When you do
-set_fs(KERNEL_DS), you set addr_limit to infinity.
-
-And yes, the kernel does read and write calls too. Seldom, but it
-happens. And walking the page tables with kernel addresses is not
-supposed to work (sometimes it happens to work by mistake). So if
-somebody finds a path that gets from that kind of situation into the
-get_user_pages() interface, bad things happen.
-
-                 Linus
+Nathan
