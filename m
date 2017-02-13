@@ -1,47 +1,53 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: crush multipick anomaly
-Date: Mon, 13 Feb 2017 21:26:00 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1702132125450.7782@piezo.novalocal>
-References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal> <3554101b-4d10-e46b-93b0-f74794258f2e@dachary.org> <alpine.DEB.2.11.1702131417070.7782@piezo.novalocal> <3486c5b8-1d50-5762-c84a-8d1fcecaa775@dachary.org> <alpine.DEB.2.11.1702131913070.7782@piezo.novalocal>
- <365bb618-3718-cd8b-1383-d6f5d51a20cb@dachary.org> <49b7e4ae-dae7-ed51-b5b3-96da5cf37129@dachary.org> <alpine.DEB.2.11.1702132111140.7782@piezo.novalocal> <CAJ4mKGZER6SJyjM-=iOZwyKxHBXHc4qMvRSdnO2mTVH_HvZYFQ@mail.gmail.com>
+From: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Subject: Re: [PATCH v3 0/2] iov_iter: allow
+ iov_iter_get_pages_alloc to allocate more pages per call
+Date: Mon, 13 Feb 2017 13:40:52 -0800
+Message-ID: <CA+55aFz2UjH-Lz=Zoi1he3-FfHEkh3kqP8PfeOP-u_Br9=BQAw@mail.gmail.com>
+References: <20170124212327.14517-1-jlayton@redhat.com>
+	<20170125133205.21704-1-jlayton@redhat.com>
+	<20170202095125.GF27291@ZenIV.linux.org.uk>
+	<20170202105651.GA32111@infradead.org>
+	<20170202111625.GG27291@ZenIV.linux.org.uk>
+	<1486040452.2812.6.camel@redhat.com>
+	<20170203072952.GI27291@ZenIV.linux.org.uk>
+	<CA+55aFx=NPESJv9RjCNRKFH_rk9uVMov0UtFbpZH-xBsgK2h-w@mail.gmail.com>
+	<20170203190816.GK27291@ZenIV.linux.org.uk>
+	<CA+55aFwXKPUoZ3R4ey03L6ksXCmGLNS=16aQ7gRO1=VXCMZx-A@mail.gmail.com>
+	<20170213095616.GA18053@linaro.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37718 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752199AbdBMV0D (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 13 Feb 2017 16:26:03 -0500
-In-Reply-To: <CAJ4mKGZER6SJyjM-=iOZwyKxHBXHc4qMvRSdnO2mTVH_HvZYFQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Loic Dachary <loic@dachary.org>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+In-Reply-To: <20170213095616.GA18053-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
+List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
+Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+To: Steve Capper <steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Linux NFS Mailing List <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jan Kara <jack-AlSwsSmVLrQ@public.gmane.org>, Jeff Layton <jlayton-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Hugh Dickins <hughd-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Wilson <chris-Y6uKTt2uX1cEflXRtASbqLVCufUGDwFn@public.gmane.org>, Christoph Hellwig <hch-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, linux-fsdevel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, V9FS Developers <v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Kirill A. Shutemov" <kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 13 Feb 2017, Gregory Farnum wrote:
-> On Mon, Feb 13, 2017 at 1:15 PM, Sage Weil <sweil@redhat.com> wrote:
-> > On Mon, 13 Feb 2017, Loic Dachary wrote:
-> >> I get the expected behavior for replica 1 (which is what
-> >> CRUSH.straw2_reweight does). The movement between buckets observered
-> >> below is for replica 2.
-> >
-> > Oh, right, now I remember.  The movement for the second replica is
-> > unavoidable (as far as I can see).  For the second replica, sometimes we
-> > end up picking a dup (the same thing we got for the first
-> > replica) and trying again; any change in the behavior of the first choice
-> > may mean that we have more or less "second tries."  Although any given try
-> > will behave as we like (only moving to or from the reweighted item),
-> > adding new tries will pick uniformly.  In your example below, I think all
-> > of the second replicas that moved to osds 0-9 were objects that originally
-> > picked a dup for the second try and, once 10 was added, did not--because
-> > the first replica was now on the new osd 10.
-> 
-> Just to be clear, that's within a bucket, right?
+On Mon, Feb 13, 2017 at 1:56 AM, Steve Capper <steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>
+> Okay so looking at what we have for access_ok(.) on arm64, my
+> understanding is that we perform a 65-bit add/compare (in assembler) to
+> see whether or not the range is below the current_thread_info->addr_limit.
+> So I think this is a roundabout way of checking for no-wrap around and <= TASK_SIZE.
 
-Right, within a (straw2) bucket.
+No, that's the problem. It's *not* testing against TASK_SIZE.
 
-> Because obviously changing bucket weights in the CRUSH hierarchy will
-> move new data to them, not all of which ends up on the new disk.
+Because add_limit is not always TASK_SIZE. When you do
+set_fs(KERNEL_DS), you set addr_limit to infinity.
 
-Yep!
+And yes, the kernel does read and write calls too. Seldom, but it
+happens. And walking the page tables with kernel addresses is not
+supposed to work (sometimes it happens to work by mistake). So if
+somebody finds a path that gets from that kind of situation into the
+get_user_pages() interface, bad things happen.
 
-sage
+                 Linus
