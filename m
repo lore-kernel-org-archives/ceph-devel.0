@@ -1,105 +1,154 @@
-From: Somnath Roy <Somnath.Roy@sandisk.com>
-Subject: RE: rbd performance drop a lot with objectmap
-Date: Mon, 13 Feb 2017 23:00:09 +0000
-Message-ID: <5E3E05AED7F0F044904275810D0CB46505E715@ULS-OP-MBXIP03.sdcorp.global.sandisk.com>
-References: <B30C48EF-D72E-471C-808F-02E666347EAB@alibaba-inc.com>
- <CA+aFP1DpPYm1t2+wzgEOzciYAmkemTkuzabsArZCZF6OXzhO2g@mail.gmail.com>
- <A4A0B62C-3155-4625-8954-3CCB482F95D2@alibaba-inc.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: Pgs distribution evenly across osds
+Date: Mon, 13 Feb 2017 17:21:41 -0600
+Message-ID: <5de83f94-aab0-70ed-7b76-a41e047361c0@redhat.com>
+References: <731B4B00-3D93-4E2B-9A32-5F50BDF84177@alibaba-inc.com>
+ <32478390-b790-226f-59aa-15f76d1c247e@redhat.com>
+ <36A35D18-3331-4B49-88C6-C7A181F12FC5@alibaba-inc.com>
+ <753C3729-DF1E-4FEB-9448-4CEDF74D9195@alibaba-inc.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from esa2.hgst.iphmx.com ([68.232.143.124]:5904 "EHLO
-        esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751066AbdBMXBC (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Feb 2017 18:01:02 -0500
-In-Reply-To: <A4A0B62C-3155-4625-8954-3CCB482F95D2@alibaba-inc.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:54316 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751250AbdBMXVn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 13 Feb 2017 18:21:43 -0500
+In-Reply-To: <753C3729-DF1E-4FEB-9448-4CEDF74D9195@alibaba-inc.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "LIU, Fei" <james.liu@alibaba-inc.com>, "dillaman@redhat.com" <dillaman@redhat.com>
+To: "LIU, Fei" <james.liu@alibaba-inc.com>, Sage Weil <sweil@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-SmFtZXMsDQpJdCB3YXMgZGlzY3Vzc2VkIGVhcmxpZXIgaW4gdGhlIGNlcGgtZGV2ZWwgdGhhdCB3
-aXRoIGV4Y2x1c2l2ZSBsb2NrIGVuYWJsZWQgLCBtdWx0aSB0aHJlYWQgKGpvYikgcGVyZm9ybWFu
-Y2Ugd2lsbCBiZSBodXJ0aW5nLiBZb3Ugc2hvdWxkIGluY3JlYXNlIFFEIHRvIGluY3JlYXNlIHBh
-cmFsbGVsaXNtIGJ1dCBub3QgdGhlIHRocmVhZHMuDQpJIGJyb3VnaHQgdGhhdCB1cCBzb21ldGlt
-ZXMgYmFjayBidXQgY291bGRuJ3QgcHJvdmlkZSBhbiB1c2UgY2FzZSB3aGVyZSBtdWx0aXBsZSBj
-bGllbnQgd2lsbCBiZSBhY2Nlc3NpbmcgYW4gaW1hZ2UgaW4gcGFyYWxsZWwgLCBpdCB3aWxsIGJl
-IGdyZWF0IGlmIHlvdSBoYXZlIG9uZS4gRXhwb3J0aW5nIHJiZCBmb3IgdGhlIGRhdGEgYmFzZSB1
-c2UgY2FzZSBjb3VsZCBiZSB0aGUgb25lICg/KS4NCg0KVGhhbmtzICYgUmVnYXJkcw0KU29tbmF0
-aA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1vd25lckB2
-Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZ10g
-T24gQmVoYWxmIE9mIExJVSwgRmVpDQpTZW50OiBNb25kYXksIEZlYnJ1YXJ5IDEzLCAyMDE3IDI6
-MzcgUE0NClRvOiBkaWxsYW1hbkByZWRoYXQuY29tDQpDYzogQ2VwaCBEZXZlbG9wbWVudA0KU3Vi
-amVjdDogUmU6IHJiZCBwZXJmb3JtYW5jZSBkcm9wIGEgbG90IHdpdGggb2JqZWN0bWFwDQoNCkhp
-IEphc29uLA0KICAgSXQgbWFrZXMgc2Vuc2UgLkJ5IHRoZSB3YXksIHdlIGRvIGEgcmFuZG9tIHdy
-aXRlIHdpdGggcWQ9MSBpbml0aWFsbHkgLlRoZSBwZXJmb3JtYW5jZSBkcm9wcyBhbG1vc3QgMyB0
-aW1lcy4NCiAgV2UgYWxzbyB0ZXN0ZWQgMTAgIHRpbWVzIGZpbyB3cml0ZSB0ZXN0IGluIG9uZSBp
-bWFnZSB1c2luZyBiZWxvdyBmaW8gY29uZmlndXJhdGlvbiB3aXRoIGVhY2ggZmlvIHdyaXRlIHRh
-a2luZyAzMCBzZWNvbmRzLiAgDQpbZ2xvYmFsXQ0KaW9lbmdpbmU9cmJkDQpjbGllbnRuYW1lPWFk
-bWluDQpwb29sPXRlc3QtcG9vbA0KcmJkbmFtZT0gaW1hZ2Utd2l0aC1vYmptYXANCnJ3PXdyaXRl
-DQpicz0xNmsNCmRpcmVjdD0xDQpydW50aW1lPTEyMDANCnJhbXBfdGltZT0zMA0KZ3JvdXBfcmVw
-b3J0aW5nDQp0aW1lX2Jhc2VkDQpbd2l0aF9vYmplY3RtYXBfcmJkX2lvZGVwdGgxX251bWpvYnMx
-XQ0KaW9kZXB0aD0xMjgNCm51bWpvYnM9MQ0KDQogIElPUFMgaW5jcmVhc2VzIGZyb20gMTgwIHRv
-IDEyMDAgaW4gdGhlIGVuZCBhZnRlciAxMCB0aW1lcyBmaW8gcmJkIHdyaXRlLiBPbmNlIG9iamVj
-dG1hcCBpcyB3YXJtaW5nIHVwICwgaXQgbG93ZXJzIHRoZSBsYXRlbmN5IGEgbG90ICBhbmQgaW5j
-cmVhc2UgSU9QUyBhY2NvcmRpbmdseS4gDQogIA0KSG93ZXZlciwgd2UgYWxzbyB0ZXN0ZWQgdGhl
-IHJhbmQgd3JpdGUgd2l0aCByYmQtYmVuY2ggLHdlIGZvdW5kIHRoZSBwZXJmb3JtYW5jZSBhbG1v
-c3QgZHJvcCAxMCB0aW1lcyB3aXRoIG1vcmUgY29udGVudGlvbiBpbnZvbHZlZDoNCg0KMS4JcmJk
-IGNyZWF0ZSB0ZXN0LXBvb2wvbm8tbWFwLWltYWdlIC0tc2l6ZSAxMDBHIC0tb2JqZWN0LXNpemUg
-MTZLIC0taW1hZ2UtZm9ybWF0IDIgLS1pbWFnZS1mZWF0dXJlIGxheWVyaW5nICANCjIuCXJiZCBj
-cmVhdGUgdGVzdC1wb29sL3dpdGgtbWFwLWltYWdlIC0tc2l6ZSAxMDBHIC0tb2JqZWN0LXNpemUg
-MTZLIC0taW1hZ2UtZm9ybWF0IDIgLS1pbWFnZS1mZWF0dXJlIGxheWVyaW5nIC0taW1hZ2UtZmVh
-dHVyZSBleGNsdXNpdmUtbG9jayAtLWltYWdlLWZlYXR1cmUgb2JqZWN0LW1hcA0KICAgICAgDQog
-ICAgICAgIFVzaW5nIHJiZCBiZW5jaCB0byB3cml0ZSAxRyBkYXRhIHJhbmRvbWx577yaDQogICAg
-ICAgICByYmQgYmVuY2gtd3JpdGUgLXAgdGVzdC1wb29sIC0taW1hZ2Ugbm8tbWFwLWltYWdlIC0t
-aW8tc2l6ZSAxNksgLS1pby10aHJlYWRzIDE2IC0taW8tdG90YWwgMUcgLS1pby1wYXR0ZXJuIHJh
-bmQNCiAgICAgICAgDQogV2UgZm91bmQgdGhlIHBlcmZvcm1hbmNlIGRyb3AgYWxtb3N0IDEwIHRp
-bWVzIGluIHRlcm1zIG9mIElPUFMuIEl0IHNob3dzIHRoZSBwZXJmb3JtYW5jZSBpcyBnZXR0aW5n
-IHdvcnNlIHdpdGggbW9yZSBqb2JzLiBJdCBtYWtlIHVzIHdvbmRlcmluZyB3aGV0aGVyIHRoZSBs
-b2NrIGlzIGtpbGxpbmcgZmFjdG9yLiBBbnkgdGhvdWdodHM/DQoNCg0KICAgUmVnYXJkcywNCiAg
-IEphbWVzDQoNCuacrOmCruS7tuWPiuWFtumZhOS7tuWQq+aciemYv+mHjOW3tOW3tOmbhuWbouea
-hOWVhuS4muenmOWvhuS/oeaBr++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4reWI
-l+WHuueahOS4quS6uuWSjOe+pOe7hO+8jOemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9
-ouW8j+S9v+eUqO+8iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOA
-geWkjeWItuWSjOaVo+WPke+8ieacrOmCruS7tuWPiuWFtumZhOS7tuS4reeahOS/oeaBr++8jOWm
-guaenOaCqOmUmeaUtuacrOmCruS7tu+8jOivt+aCqOeri+WNs+eUteivneaIlumCruS7tumAmuef
-peWPkeS7tuS6uuW5tuWIoOmZpOacrOmCruS7tuOAgg0KVGhpcyBlbWFpbCBhbmQgaXRzIGF0dGFj
-aG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZyb20gQWxpYmFiYSBHcm91
-cC53aGljaCBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBh
-ZGRyZXNzIGlzIGxpc3RlZCBhYm92ZS5BbnkgdXNlIG9mIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBo
-ZXJlaW4gaW4gYW55IHdheShpbmNsdWRpbmcsYnV0IG5vdCBsaW1pdGVkIHRvLHRvdGFsIG9yIHBh
-cnRpYWwgZGlzY2xvc3VyZSxyZXByb2R1Y3Rpb24gb3IgZGlzc2VtaW5hdGlvbilieSBwZXJzb25z
-IG90aGVyIHRoYW4gdGhlIGludGVuZGVkIHJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLklmIHlv
-dSByZWNlaXZlIHRoaXMgZW1haWwgaW4gZXJyb3IscGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5
-IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQuDQoNCk9uIDIvMTIvMTcs
-IDk6NTkgQU0sICJKYXNvbiBEaWxsYW1hbiIgPGpkaWxsYW1hQHJlZGhhdC5jb20+IHdyb3RlOg0K
-DQogICAgT24gRnJpLCBGZWIgMTAsIDIwMTcgYXQgOTo1MCBBTSwgTElVLCBGZWkgPGphbWVzLmxp
-dUBhbGliYWJhLWluYy5jb20+IHdyb3RlOg0KICAgID4gV2l0aCBGSU8gc2luZ2xlIGpvYiBxdWV1
-ZSBkZXB0aCAxKFcvIHZzIFcvTykgICwgSU9QUyBkcm9wIDMgdGltZXMgYW5kDQogICAgPiBsYXRl
-bmN5IGluY3JlYXNlZCAzIHRpbWVzLiBBcyB3aXRoIG1vcmUgam9icywgdGhlIElPUFMgZHJvcHMg
-bW9yZSBhbmQNCiAgICA+IGxhdGVuY3kgaW5jcmVhc2UgaGlnaGVyIGFuZCBoaWdoZXIuDQogICAg
-DQogICAgQXNzdW1pbmcgeW91IGhhdmUgYSByYW5kb20gd3JpdGUgd29ya2xvYWQsIHdpdGhpbiBh
-IFFEPTEsIGl0IGlzDQogICAgZW50aXJlbHkgZXhwZWN0ZWQgZm9yIHRoZSBmaXJzdCB3cml0ZSB0
-byB0aGUgb2JqZWN0IHRvIGluY3VyIGENCiAgICBwZXJmb3JtYW5jZSBwZW5hbHR5IHNpbmNlIGl0
-IHJlcXVpcmVzIGFuIGFkZGl0aW9uYWwgcm91bmQtdHJpcA0KICAgIG9wZXJhdGlvbiB0byB0aGUg
-YmFja2luZyBPU0RzLiBTaW5jZSB5b3Ugb25seSBoaXQgdGhpcyBwZW5hbHR5IGZvciB0aGUNCiAg
-ICB2ZXJ5IGZpcnN0IHdyaXRlIHRvIHRoZSBvYmplY3QsIGl0cyBjb3N0IGlzIGFtb3J0aXplZCBv
-dmVyIGZ1dHVyZQ0KICAgIHdyaXRlcy4gVGhpcyBpcyBzaW1pbGFyIHRvIGNsb25lZCBpbWFnZXMg
-YW5kIHRoZSBhbW9ydGl6ZWQgY29zdCBvZg0KICAgIGNvcHlpbmcgdXAgdGhlIGJhY2tpbmcgcGFy
-ZW50IG9iamVjdCB0byB0aGUgY2xvbmUgb24gdGhlIGZpcnN0IHdyaXRlLg0KICAgIA0KICAgID4g
-VGhlIG9iamVjdG1hcF9sb2NrZXIgaW4gcHJlIGFuZCBwb3N0IGFuZCBvYmplY3RtYXAgdXBkYXRl
-IHBlciBJTyByZWFsbHkgaHVydA0KICAgID4gcGVyZm9ybWFuY2UuIExvY2tsZXNzIHF1ZXVlIGFu
-ZCBuZXcgd2F5IHRvIGNhY2hpbmcgb2JqZWN0bWFwPyBBbnkgdGhvdWdodHM/DQogICAgDQogICAg
-QnkgZGVmaW5pdGlvbiwgd2l0aCBhIFFEPTEsIHRoZXJlIGlzIHplcm8gY29udGVudGlvbiBvbiB0
-aGF0IGxvY2suIFRoZQ0KICAgIGxvY2sgaXMgcmVhbGx5IG9ubHkgaGVsZCBmb3IgYSBtaW51c2N1
-bGUgYW1vdW50IG9mIHRpbWUgYW5kIGlzIGRyb3BwZWQNCiAgICB3aGlsZSB0aGUgT1NEIG9wZXJh
-dGlvbiBpcyBpbi1wcm9ncmVzcy4gRG8geW91IGFjdHVhbGx5IGhhdmUgYW55DQogICAgcGVyZm9y
-bWFuY2UgbWV0cmljcyB0byBiYWNrIHVwIHRoaXMgY2xhaW0/IE5vdGUgdGhhdCB0aGUgcG9zdCBz
-dGF0ZSBpcw0KICAgIG9ubHkgaGl0IHdoZW4geW91IGlzc3VlIGEgcmVtb3ZlIC8gdHJpbSAvIGRp
-c2NhcmQgb3BlcmF0aW9uLg0KICAgIA0KICAgIC0tIA0KICAgIEphc29uDQogICAgDQoNCg0KLS0N
-ClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
-ZSBjZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIu
-a2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3Jn
-L21ham9yZG9tby1pbmZvLmh0bWwNCg==
+Hi James,
+
+Yes, it's not surprising.  Especially if you are primarily targeting a 
+single pool and can reweight to achieve optimal distribution 
+specifically for that pool.  It's much harder to do this if you have 
+lots of pools that are all used equally though.
+
+I'm glad to hear that reweighting improved things!  I still am hopeful 
+that some day we can find a way to distribute pgs/data/etc evenly with 
+something crush-like that does better than random distributions, but I 
+suspect it will be very difficult.  Crush is already very clever at what 
+it does.  We may have to trade away something to get something.
+
+Mark
+
+On 02/13/2017 04:48 PM, LIU, Fei wrote:
+> Hi Mark,
+>    After we periodically even out the pg distribution with reweight-by-pgs ,we can see our cluster performance(IOPS and bandwidth ) up almost 25%~40% and latency drop almost 25%.  It somehow prove pg distribution affect the whole cluster performance a lot.
+>
+>   Regards,
+>   James
+>
+> 本邮件及其附件含有阿里巴巴集团的商业秘密信息，仅限于发送给上面地址中列出的个人和群组，禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制和散发）本邮件及其附件中的信息，如果您错收本邮件，请您立即电话或邮件通知发件人并删除本邮件。
+> This email and its attachments contain confidential information from Alibaba Group.which is intended only for the person or entity whose address is listed above.Any use of information contained herein in any way(including,but not limited to,total or partial disclosure,reproduction or dissemination)by persons other than the intended recipient(s) is prohibited.If you receive this email in error,please notify the sender by phone or email immediately and delete it.
+>
+> On 2/8/17, 4:57 AM, "LIU, Fei" <ceph-devel-owner@vger.kernel.org on behalf of james.liu@alibaba-inc.com> wrote:
+>
+>     Hi Mark,
+>        Thanks very much for sharing. We found as we tested more , somehow the oversubscribed OSD node perform worse than other OSD node with less PGs ,However , the CPU utilization even in worst oversubscribed OSD node is around ~50%. We also observed the apply latency and commit latency are pretty high comparing to others with less PGs. The networking traffic is reasonable . The disk utilization sometime is around 99%.but most of time is around 60%. We see latency spike from time to time caused by the oversubscribed OSD we guess. Any suggestions?
+>
+>     Regards,
+>     James
+>
+>
+>     本邮件及其附件含有阿里巴巴集团的商业秘密信息，仅限于发送给上面地址中列出的个人和群组，禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制和散发）本邮件及其附件中的信息，如果您错收本邮件，请您立即电话或邮件通知发件人并删除本邮件。
+>     This email and its attachments contain confidential information from Alibaba Group.which is intended only for the person or entity whose address is listed above.Any use of information contained herein in any way(including,but not limited to,total or partial disclosure,reproduction or dissemination)by persons other than the intended recipient(s) is prohibited.If you receive this email in error,please notify the sender by phone or email immediately and delete it.
+>
+>     On 2/7/17, 6:48 PM, "Mark Nelson" <mnelson@redhat.com> wrote:
+>
+>         Hi James,
+>
+>         I'm not sage, but I'll chime in since I spent some time thinking about
+>         this stuff a while back when I was playing around with halton
+>         distributions for PG placement.  It's very difficult to get even
+>         distributions using random sampling unless you have a *very* high number
+>         of samples.  The following equations give you a reasonable expectation
+>         of what the min/max should be assuming an evenly weighted random
+>         distribution:
+>
+>         min = (pgs / osds) - sqrt(2*pgs*log(osds)/osds)
+>         max = (pgs / osds) + sqrt(2*pgs*log(osds)/osds)
+>
+>         In your case that's:
+>
+>         min = 49152/168 - sqrt(2*49152*log(168)/168) = 256
+>         max = 49152/168 + sqrt(2*49152*log(168)/168) = 329
+>
+>         In terms of performance potential and data distribution evenness, I'd
+>         argue you really want to know how bad your worst oversubscribed PG is vs
+>         the average:
+>
+>         Expected: (49152/168)/329 = ~88.9%
+>         Actual: (49152/168)/333 = = ~87.9%
+>
+>         Your numbers are a little worse, though typically I see our
+>         distributions hover right around expected or just slightly better.  This
+>         particular roll of the dice might have just been a little worse.
+>
+>         If you jumped up to say 100K PGs:
+>
+>         min = 1000000/168 - sqrt(2*1000000*log(168)/168) = 544
+>         max = 1000000/168 + sqrt(2*1000000*log(168)/168) = 647
+>
+>         Expected: (100000/168)/647 = ~92%
+>
+>         Now if you jumped up to 1 million PGs:
+>
+>         min = 1000000/168 - sqrt(2*1000000*log(168)/168) = 5790
+>         max = 1000000/168 + sqrt(2*1000000*log(168)/168) = 6115
+>
+>         Expected: (1000000/168)/6115 = ~97.3%
+>
+>         Thanks,
+>         Mark
+>
+>         On 02/07/2017 06:14 PM, LIU, Fei wrote:
+>         > Hi Sage,
+>         >   We are trying to distribute pgs evenly across osds. However, after certain tunes, we still got 30% difference among max pgs  and min pg  of OSDs (OSD 9 has 13.8% more pgs than average and OSD 86 has 15.2% less pgs than average).  Any good suggestions to make PGs distributed evenly across OSDs?
+>         >
+>         >   Thanks,
+>         >   James
+>         >
+>         >
+>         > SUM :   49152   |
+>         > Osd :   168     |
+>         > AVE :   292.57  |
+>         > Max :   333     |
+>         > Osdid : osd.9   |
+>         > per:    13.8%   |
+>         > ------------------------
+>         > min :   248     |
+>         > osdid : osd.86  |
+>         > per:    -15.2%  |
+>         >
+>         > [james.liu@a18d13422.eu13 /home/james.liu]
+>         > $
+>         >
+>         >
+>         > 本邮件及其附件含有阿里巴巴集团的商业秘密信息，仅限于发送给上面地址中列出的个人和群组，禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制和散发）本邮件及其附件中的信息，如果您错收本邮件，请您立即电话或邮件通知发件人并删除本邮件。
+>         > This email and its attachments contain confidential information from Alibaba Group.which is intended only for the person or entity whose address is listed above.Any use of information contained herein in any way(including,but not limited to,total or partial disclosure,reproduction or dissemination)by persons other than the intended recipient(s) is prohibited.If you receive this email in error,please notify the sender by phone or email immediately and delete it.
+>         >
+>         >
+>         > --
+>         > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>         > the body of a message to majordomo@vger.kernel.org
+>         > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>         >
+>
+>
+>
+>     --
+>     To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>     the body of a message to majordomo@vger.kernel.org
+>     More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
