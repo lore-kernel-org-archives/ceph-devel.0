@@ -1,32 +1,32 @@
-From: Nathan Cutler <ncutler@suse.cz>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: Proposal to rename ceph-qa-suite project in tracker.ceph.com
-Date: Mon, 13 Feb 2017 23:19:18 +0100
-Message-ID: <ea073ca0-d439-aa6d-2b4b-f85b7cda7c06@suse.cz>
+Date: Mon, 13 Feb 2017 22:25:18 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1702132224320.7782@piezo.novalocal>
 References: <d7e1ef80-56ad-63f9-cbf8-a4ef1ada8be8@suse.cz>
- <CAMMFjmGbCxdHtU5red8_VtOBd9KQE52b81RB-rwuab978yuysA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:46408 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750831AbdBMWTV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 13 Feb 2017 17:19:21 -0500
-In-Reply-To: <CAMMFjmGbCxdHtU5red8_VtOBd9KQE52b81RB-rwuab978yuysA@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:54438 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750975AbdBMWZV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Feb 2017 17:25:21 -0500
+In-Reply-To: <d7e1ef80-56ad-63f9-cbf8-a4ef1ada8be8@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>, Tamilarasi Muthamizhan <tmuthami@redhat.com>
+To: Nathan Cutler <ncutler@suse.cz>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-> how do we identify make check tests  now?
+On Mon, 13 Feb 2017, Nathan Cutler wrote:
+> Now that ceph-qa-suite has been assimilated into ceph/ceph.git, shall we
+> rename http://tracker.ceph.com/projects/ceph-qa-suite ?
+> 
+> If nobody objects, I'd like to rename it to "tests" so it would cover both
+> teuthology tests and make check tests.
 
-Presumably, bugs in "make check" tests are currently filed under the 
-appropriate project (Ceph, fs, rbd, rgw, etc.) for the code they are 
-testing. In my mind, however, test bugs fall into a fundamentally 
-different category than bugs in the code being tested.
+Go for it.  I'd say that many of the tests can actually go in the relevant 
+projects directly, though; we can use 'tests' for the underlying 
+infrastructure (like ceph.py, ceph_manager.py, an so on)?
 
-> I have no objection, just FYI it maybe more complicated for downstream
-> QE to easily separate make tests from "functional" tests.
+sage
 
-We could of course make two projects, one for teuthology tests and 
-another for make check tests, but that seems like overkill.
+
