@@ -1,43 +1,55 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Submitted the freebsd port
-Date: Mon, 13 Feb 2017 12:08:09 +0100
-Message-ID: <184f8f43-30bf-c949-f70d-367c6ce4eb6d@digiware.nl>
-References: <e5b98957-3cce-1ae2-512c-0f09c6a45ac6@digiware.nl>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH] libceph: Complete stuck requests to OSD with EIO
+Date: Mon, 13 Feb 2017 15:15:41 +0100
+Message-ID: <CAOi1vP--uJ8Lg6h68ZC9AY2fp1D=uxPe7zguM1gSsEWSdYrqjw@mail.gmail.com>
+References: <4e080919-2df5-1b75-3c8a-3ae95eb8f08d@synesis.ru>
+ <1486726280.4233.1.camel@redhat.com> <CAOi1vP_SJD7Vh97WBU2=EsYfWruXqQe06BND+uaq10=V7ZGH1g@mail.gmail.com>
+ <CAOi1vP-1EPasYZUPoqwh1Ykgq59xEAf1oeGZH5Y8Kpo9ooQMow@mail.gmail.com> <e2a7b8c7-a1e7-e280-2ef3-e412c2df9848@synesis.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:28191 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752552AbdBMLIZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 13 Feb 2017 06:08:25 -0500
-Received: from [192.168.10.67] (opteron [192.168.10.67])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by smtp.digiware.nl (Postfix) with ESMTPSA id 162EB37013
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Feb 2017 12:08:16 +0100 (CET)
-In-Reply-To: <e5b98957-3cce-1ae2-512c-0f09c6a45ac6@digiware.nl>
+Received: from mail-ua0-f173.google.com ([209.85.217.173]:33480 "EHLO
+        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753129AbdBMOPn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Feb 2017 09:15:43 -0500
+Received: by mail-ua0-f173.google.com with SMTP id i68so66096782uad.0
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Feb 2017 06:15:42 -0800 (PST)
+In-Reply-To: <e2a7b8c7-a1e7-e280-2ef3-e412c2df9848@synesis.ru>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Artur Molchanov <artur.molchanov@synesis.ru>
+Cc: Jeff Layton <jlayton@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
+On Mon, Feb 13, 2017 at 10:54 AM, Artur Molchanov
+<artur.molchanov@synesis.ru> wrote:
+> Hi Ilya,
+>
+> On 02/13/2017 12:11 PM, Ilya Dryomov wrote:
+>>
+>> Hi Artur,
+>>
+>> How about the attached patch?  handle_timeout() is going to iterate
+>> over all but the homeless OSD anyway; all it costs us is a couple of
+>> tests, so I don't think a separate work is needed.
+>>
+>> abort_request() is a simple wrapper around complete_request(), making
+>> it safe to call at any time -- replace it with complete_request() for
+>> now if you want to try this out.
+>
+>
+> Using one job for sending keepalive requests and completing stuck requests
+> brings us to the need to check that osd_keepalive_timeout is not larger then
+> osd_request_timeout. So we should not forget to say about it in the
+> documentation.
 
-Hi all,
+I'll make a note to mention that it is osd_keepalive_timeout-precise.
 
-For those that are interested: I've submitted a first attempt of a
-FreeBSD port to the ports-system.
+> Is it worth creating a correlation between osd_keepalive_timeout and
+> osd_request_timeout?
 
-https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=217046
-Now lets see what feedback I'll be getting.
+No, probably not.  osd_keepalive_timeout and osd_idle_ttl are similarly
+related and we don't have any.
 
-It is based on all my wip.FreeBSD code.
-Once Luminous is out, I'll also make a ceph version that follows
-the official Ceph releases.
+Thanks,
 
-I you feel like trying, please do, and let me know about just anything
-you find, see, like, don't like.....
-
-Thanx,
---WjW
-
-
+                Ilya
