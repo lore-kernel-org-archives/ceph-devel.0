@@ -1,166 +1,117 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Breakage in Clang compile....
-Date: Mon, 13 Feb 2017 11:20:41 +0100
-Message-ID: <4cb44f22-9c7e-1266-df20-b53f11e377ec@digiware.nl>
-References: <a5a35bfc-57b2-bf28-9788-04127654e23a@digiware.nl>
- <E5D4D9AF-0529-424A-9C75-759906A4C65D@quantum.com>
- <28691041-11fc-bd69-2d0b-1986fa798aca@digiware.nl>
- <CACKY0b_pZXyJO1fQn9hrqJw5JYT_x932YkCYZv3miFZOks9vJw@mail.gmail.com>
- <CAF-wwdFushwATp88GxKAJfZpiB+ZSf6Q7iQa5mAKjKeEetMO0g@mail.gmail.com>
- <32db5fd3-a02a-1f4d-9e28-674280fa071c@corp.ovh.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: crush multipick anomaly
+Date: Mon, 13 Feb 2017 11:36:00 +0100
+Message-ID: <3554101b-4d10-e46b-93b0-f74794258f2e@dachary.org>
+References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:37658 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751480AbdBMKVG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 13 Feb 2017 05:21:06 -0500
-In-Reply-To: <32db5fd3-a02a-1f4d-9e28-674280fa071c@corp.ovh.com>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:47068 "EHLO
+        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751808AbdBMKgE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Feb 2017 05:36:04 -0500
+In-Reply-To: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?= <bartlomiej.swiecki@corp.ovh.com>, Brad Hubbard <bhubbard@redhat.com>, liuchang0812 <liuchang0812@gmail.com>
-Cc: Bassam Tabbara <Bassam.Tabbara@quantum.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@redhat.com>, ceph-devel@vger.kernel.org
 
-On 13-2-2017 10:26, BartÅ‚omiej ÅšwiÄ™cki wrote:
-> Hi,
+Hi,
+
+Dan van der Ster reached out to colleagues and friends and Pedro López-Adeva Fernández-Layos came up with a well written analysis of the problem and a tentative solution which he described at : https://github.com/plafl/notebooks/blob/master/replication.ipynb
+
+Unless I'm reading the document incorrectly (very possible ;) it also means that the probability of each disk needs to take in account the weight of all disks. Which means that whenever a disk is added / removed or its weight is changed, this has an impact on the probability of all disks in the cluster and objects are likely to move everywhere. Am I mistaken ?
+
+Cheers
+
+On 01/26/2017 04:05 AM, Sage Weil wrote:
+> This is a longstanding bug,
 > 
-> What I usually hear in gcc vs comparisons is that clang does not yet
-> optimize the code as good gcc
-> (fun fact: sometimes that's because it's more standards conformant).
-> Nevertheless, it's always
-> a good idea to compile the code with as many compilers as possible -
-> that way more meaningful warnings
-> could be found. An example - when I was compiling the patch, clang has
-> found this:
+> 	http://tracker.ceph.com/issues/15653
 > 
-> /builds/ceph-histograms/src/include/denc.h:1160:10: warning: binding
-> dereferenced null pointer to reference has undefined behavior
-> [-Wnull-dereference]
->     denc(*(bool *)nullptr, p);
->          ^~~~~~~~~~~~~~~~
+> that causes low-weighted devices to get more data than they should. Loic's 
+> recent activity resurrected discussion on the original PR
 > 
-> And I strongly believe we should get rid of it - dereferencing null
-> pointer in C++ is undefined
-> behavior so the compiler can do whatever he wants there. Even if it
-> works with current gcc,
-> more aggressive optimizations added to compilers in the future could
-> make this totally broken.
+> 	https://github.com/ceph/ceph/pull/10218
 > 
-> I've observed it's a common practice in many companies to develop using
-> clang (to get
-> best diagnostic and tools) but do the final release using gcc (to get
-> the best performance).
-> I also like clang for the number of tools built on top of clang - static
-> analyzers, sanitizers,
-> code formatting etc. Chandler Carruth from Goggle has given some nice
-> talks about this:
-> https://youtu.be/cX_GhJ6BuWI, https://youtu.be/E36BUcTWo50.
-
-Hi Bartek,
-
-What you found is also what I found. And I agree with the fact that it
-needs fixing.... Am not even sure what a dereferenced null-pointer
-should actually generate as value?
-
-We have fixed similar issues at several places already where it
-generated errors. Here it is a warning, so I can sort of live with it
-because I can continue my porting/testing work.
-
-So if you have suggestions, I very sure that they will get happily
-accepted. And I can and will test and support getting these fixes in.
-
-Using GCC on FreeBSD is no longer the preferred way of doing things.
-Also are all packages compiled with Clang, so best to use those with the
-Clang compiler.
-And modern releases of GCC are all in ports and are not free of pesky
-conflicts with the installed base.
-
-Thanx,
---WjW
-
+> but since it's closed and almost nobody will see it I'm moving the 
+> discussion here.
 > 
-> Regards,
-> Bartek
+> The main news is that I have a simple adjustment for the weights that 
+> works (almost perfectly) for the 2nd round of placements.  The solution is 
+> pretty simple, although as with most probabilities it tends to make my 
+> brain hurt.
 > 
+> The idea is that, on the second round, the original weight for the small 
+> OSD (call it P(pick small)) isn't what we should use.  Instead, we want 
+> P(pick small | first pick not small).  Since P(a|b) (the probability of a 
+> given b) is P(a && b) / P(b),
 > 
-> On 02/10/2017 10:31 AM, Brad Hubbard wrote:
->> Whilst I agree clang has some advantages I also understand from
->> watching recent videos that it has some disadvantages/shortcomings as
->> well (can't remember the specifics atm). Whilst I don't agree we
->> should be switching to clang I do suggest we should be compiling with
->> it regularly since it can pick up problems that gcc may not.
->>
->> My 2c.
->>
->>
->> On Fri, Feb 10, 2017 at 12:46 PM, liuchang0812
->> <liuchang0812@gmail.com> wrote:
->>> clang's compile warn is clearer than gcc
->>>
->>> 2017-02-10 2:10 GMT+08:00 Willem Jan Withagen <wjw@digiware.nl>:
->>>> On 9-2-2017 17:18, Bassam Tabbara wrote:
->>>>> Hi,
->>>>>
->>>>> Iâ€™m curious are there specific advantages to compiling Ceph with
->>>>> clang vs. gcc? I understand that clang uses less memory, compiles
->>>>> faster, and has better errors/diagnostics, but as it relates to Ceph
->>>>> is there any specific advantages?
->>>>>
->>>>> Is there a plan to switching to clang?
->>>> There are a few reasons for also using Clang:
->>>>   - Clang finds other types of issues in the code.
->>>>          I think the speed, mem-footprint advantages you mention are
->>>> not
->>>>          (yet) the case.
->>>>   - FreeBSD has Clang as native compiler, and I'm preparing a Ceph port
->>>>     to FreeBSD.
->>>>
->>>> Thanx for fixing this, I saw the PR fly by.
->>>>
->>>> --WjW
->>>>
->>>>> Thanks! Bassam
->>>>>
->>>>>> On Feb 9, 2017, at 7:35 AM, Willem Jan Withagen <wjw@digiware.nl>
->>>>>> wrote:
->>>>>>
->>>>>> Hi,
->>>>>>
->>>>>> I think this is a recent addition to the game? And Clang does not
->>>>>> really like it.
->>>>>>
->>>>>> In file included from
->>>>>> /home/jenkins/workspace/ceph-master/src/common/perf_counters.h:21:
->>>>>> /home/jenkins/workspace/ceph-master/src/common/perf_histogram.h:80:9:
->>>>>>
->>>>>>
->>>> error: array initializer must be an initializer list
->>>>>> : m_axes_config(other.m_axes_config) { ^
->>>>>> /home/jenkins/workspace/ceph-master/src/common/perf_counters.h:98:29:
->>>>>>
->>>>>>
->>>> note: in instantiation of member function
->>>>>> 'PerfHistogram<2>::PerfHistogram' requested here
->>>>>> histogram.reset(new PerfHistogram<>(*other.histogram)); ^ 1 error
->>>>>> generated.
->>>>>>
->>>>>> --WjW -- To unsubscribe from this list: send the line "unsubscribe
->>>>>> ceph-devel" in the body of a message to majordomo@vger.kernel.org
->>>>>> More majordomo info at
->>>>>> https://urldefense.proofpoint.com/v2/url?u=http-3A__vger.kernel.org_majordomo-2Dinfo.html&d=DwICaQ&c=8S5idjlO_n28Ko3lg6lskTMwneSC-WqZ5EBTEEvDlkg&r=BTMd2ANcDl5P_nTkEam5zzywWdGjHoaoXy4JMG_yHPA&m=PzCl2U7BH52mycDw3PiC7LaCbGCCTewMNBUqu8gGKIQ&s=gR4xXKHg4AFcwEccrIs-KoM7bjGw0aL9CnVF_PQE_fo&e=
->>>>>>
->>>>>>
->>>> -- 
->>>> To unsubscribe from this list: send the line "unsubscribe
->>>> ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> -- 
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+>  P(pick small | first pick not small)
+>  = P(pick small && first pick not small) / P(first pick not small)
+> 
+> The last term is easy to calculate,
+> 
+>  P(first pick not small) = (total_weight - small_weight) / total_weight
+> 
+> and the && term is the distribution we're trying to produce.  For exmaple, 
+> if small has 1/10 the weight, then we should see 1/10th of the PGs have 
+> their second replica be the small OSD.  So
+> 
+>  P(pick small && first pick not small) = small_weight / total_weight
+> 
+> Putting those together,
+> 
+>  P(pick small | first pick not small)
+>  = P(pick small && first pick not small) / P(first pick not small)
+>  = (small_weight / total_weight) / ((total_weight - small_weight) / total_weight)
+>  = small_weight / (total_weight - small_weight)
+> 
+> This is, on the second round, we should adjust the weights by the above so 
+> that we get the right distribution of second choices.  It turns out it 
+> works to adjust *all* weights like this to get hte conditional probability 
+> that they weren't already chosen.
+> 
+> I have a branch that hacks this into straw2 and it appears to work 
+> properly for num_rep = 2.  With a test bucket of [99 99 99 99 4], and the 
+> current code, you get
+> 
+> $ bin/crushtool -c cm.txt --test --show-utilization --min-x 0 --max-x 40000000 --num-rep 2
+> rule 0 (data), x = 0..40000000, numrep = 2..2
+> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
+>   device 0:             19765965        [9899364,9866601]
+>   device 1:             19768033        [9899444,9868589]
+>   device 2:             19769938        [9901770,9868168]
+>   device 3:             19766918        [9898851,9868067]
+>   device 6:             929148  [400572,528576]
+> 
+> which is very close for the first replica (primary), but way off for the 
+> second.  With my hacky change,
+> 
+> rule 0 (data), x = 0..40000000, numrep = 2..2
+> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
+>   device 0:             19797315        [9899364,9897951]
+>   device 1:             19799199        [9899444,9899755]
+>   device 2:             19801016        [9901770,9899246]
+>   device 3:             19797906        [9898851,9899055]
+>   device 6:             804566  [400572,403994]
+> 
+> which is quite close, but still skewing slightly high (by a big less than 
+> 1%).
+> 
+> Next steps:
+> 
+> 1- generalize this for >2 replicas
+> 2- figure out why it skews high
+> 3- make this work for multi-level hierarchical descent
+> 
+> sage
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 
+-- 
+Loïc Dachary, Artisan Logiciel Libre
