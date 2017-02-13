@@ -1,45 +1,83 @@
-From: Artur Molchanov <artur.molchanov@synesis.ru>
-Subject: Re: [PATCH] libceph: Complete stuck requests to OSD with EIO
-Date: Mon, 13 Feb 2017 12:54:07 +0300
-Message-ID: <e2a7b8c7-a1e7-e280-2ef3-e412c2df9848@synesis.ru>
-References: <4e080919-2df5-1b75-3c8a-3ae95eb8f08d@synesis.ru>
- <1486726280.4233.1.camel@redhat.com>
- <CAOi1vP_SJD7Vh97WBU2=EsYfWruXqQe06BND+uaq10=V7ZGH1g@mail.gmail.com>
- <CAOi1vP-1EPasYZUPoqwh1Ykgq59xEAf1oeGZH5Y8Kpo9ooQMow@mail.gmail.com>
+From: Steve Capper <steve.capper@linaro.org>
+Subject: Re: [PATCH v3 0/2] iov_iter: allow iov_iter_get_pages_alloc to
+ allocate more pages per call
+Date: Mon, 13 Feb 2017 09:56:18 +0000
+Message-ID: <20170213095616.GA18053@linaro.org>
+References: <20170124212327.14517-1-jlayton@redhat.com>
+ <20170125133205.21704-1-jlayton@redhat.com>
+ <20170202095125.GF27291@ZenIV.linux.org.uk>
+ <20170202105651.GA32111@infradead.org>
+ <20170202111625.GG27291@ZenIV.linux.org.uk>
+ <1486040452.2812.6.camel@redhat.com>
+ <20170203072952.GI27291@ZenIV.linux.org.uk>
+ <CA+55aFx=NPESJv9RjCNRKFH_rk9uVMov0UtFbpZH-xBsgK2h-w@mail.gmail.com>
+ <20170203190816.GK27291@ZenIV.linux.org.uk>
+ <CA+55aFwXKPUoZ3R4ey03L6ksXCmGLNS=16aQ7gRO1=VXCMZx-A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f68.google.com ([209.85.215.68]:35400 "EHLO
-        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751793AbdBMJyK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Feb 2017 04:54:10 -0500
-Received: by mail-lf0-f68.google.com with SMTP id v186so7893377lfa.2
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Feb 2017 01:54:09 -0800 (PST)
-In-Reply-To: <CAOi1vP-1EPasYZUPoqwh1Ykgq59xEAf1oeGZH5Y8Kpo9ooQMow@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, Jeff Layton <jlayton@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CA+55aFwXKPUoZ3R4ey03L6ksXCmGLNS=16aQ7gRO1=VXCMZx-A@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Al Viro <viro@zeniv.linux.org.uk>, Catalin Marinas <catalin.marinas@arm.com>, Hugh Dickins <hughd@google.com>, Peter Zijlstra <peterz@infradead.org>, Ingo Molnar <mingo@kernel.org>, Jeff Layton <jlayton@redhat.com>, Christoph Hellwig <hch@infradead.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux NFS Mailing List <linux-nfs@vger.kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, lustre-devel@lists.lustre.org, V9FS Developers <v9fs-developer@lists.sourceforge.net>, Jan Kara <jack@suse.cz>, Chris Wilson <chris@chris-wilson.co.uk>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Ilya,
+On Fri, Feb 03, 2017 at 11:28:48AM -0800, Linus Torvalds wrote:
+> On Fri, Feb 3, 2017 at 11:08 AM, Al Viro <viro@zeniv.linux.org.uk> wrote:
+> >
+> > On x86 it does.  I don't see anything equivalent in mm/gup.c one, and the
+> > only kinda-sorta similar thing (access_ok() in __get_user_pages_fast()
+> > there) is vulnerable to e.g. access via kernel_write().
+> 
+> Yeah, access_ok() is bogus. It needs to just check against TASK_SIZE
+> or whatever.
+> 
+> > doesn't look promising - access_ok() is never sufficient.  Something like
+> > _PAGE_USER tests in x86 one solves that problem, but if anything similar
+> > works for HAVE_GENERIC_RCU_GUP I don't see it.  Thus the question re
+> > what am I missing here...
+> 
+> Ok, I definitely agree that it looks like __get_user_pages_fast() just
+> needs to get rid of the access_ok() and replace it with a proper check
+> for the user address space range.
+> 
+> Looks like arm[64] and powerpc.are the current users. Adding in some
+> people involved with the original submission a few years ago.
 
-On 02/13/2017 12:11 PM, Ilya Dryomov wrote:
-> Hi Artur,
->
-> How about the attached patch?  handle_timeout() is going to iterate
-> over all but the homeless OSD anyway; all it costs us is a couple of
-> tests, so I don't think a separate work is needed.
->
-> abort_request() is a simple wrapper around complete_request(), making
-> it safe to call at any time -- replace it with complete_request() for
-> now if you want to try this out.
+Hi,
 
-Using one job for sending keepalive requests and completing stuck requests 
-brings us to the need to check that osd_keepalive_timeout is not larger then 
-osd_request_timeout. So we should not forget to say about it in the documentation.
-Is it worth creating a correlation between osd_keepalive_timeout and 
-osd_request_timeout?
+[ Apologies for my late reply, I was on vacation then catchup... ]
 
+> 
+> I do note that the x86 __get_user_pages_fast() thing looks dodgy too.
+> 
+> In particular, we do it right in the *real* get_user_pages_fast(), see
+> commit 7f8189068726 ("x86: don't use 'access_ok()' as a range check in
+> get_user_pages_fast()"). But then the same bug was re-introduced when
+> the "irq safe" version was merged. As well as in the GENERIC_RCU_GUP
+> version.
+> 
+> Gaah. Apparently PeterZ copied the old buggy version before the fix
+> when he added __get_user_pages_fast() in commit 465a454f254e ("x86,
+> mm: Add __get_user_pages_fast()").
+> 
+> I guess it could be considered a merge error (both happened during the
+> 2.6.31 merge window).
+> 
+
+Okay so looking at what we have for access_ok(.) on arm64, my
+understanding is that we perform a 65-bit add/compare (in assembler) to
+see whether or not the range is below the current_thread_info->addr_limit.
+So I think this is a roundabout way of checking for no-wrap around and <= TASK_SIZE.
+
+Looking at powerpc, I see it's a little different...
+
+So if it sounds reasonable to folk I was going to send a patch to
+replace the call to access_ok(.) with a wraparound + TASK_SIZE check
+written explicitly in C? (and remove some of the comments talking about
+access_ok(.)).
+
+Cheers,
 -- 
-Artur
+Steve
