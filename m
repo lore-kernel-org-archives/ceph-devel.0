@@ -1,73 +1,92 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: debug coredump on teuthology
-Date: Tue, 14 Feb 2017 00:07:00 +0800
-Message-ID: <CAJE9aOPuR=Sc12jHZ2-vM862i8LrgQkfG2FN=-JnF7FOYy=0aQ@mail.gmail.com>
-References: <CAJE9aOOy503R8HAjhqOKA0RCfZA9y67h0JQfFzcXaFSZr6Fs5g@mail.gmail.com>
- <alpine.DEB.2.11.1611041319550.20331@piezo.us.to> <CAJE9aOOQSuO2Wmu0dasUxJ1mht1gcrUcckfNcsHDEKQ6ubG5wg@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: hammer 0.94.10 QE status
+Date: Mon, 13 Feb 2017 16:24:47 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1702131624230.7782@piezo.novalocal>
+References: <CAMMFjmHCAM6wmygytBDqwh89UOEex24_GGqrLJvXcOUS+QEg9A@mail.gmail.com> <CAOi1vP9rX_r3Rg2ZiXzS3QrEC3piM4hwhxBqHqDTU=zpCy3uwQ@mail.gmail.com> <CAOi1vP9FQJJxzE_SnaJ3QLFJ6NiZGqozswyT8scMUmqjZkbjRw@mail.gmail.com> <90f9fb1d-74fa-3ae0-e5b7-186e5d1b2638@suse.cz>
+ <CAMMFjmH-+w8H7V0WjDUPStT5+3=doBH2OsWD5DNE3ij=zS7wzA@mail.gmail.com> <CAMMFjmHd1kJfBfjE7b8jOcXUZp74hi5Gbh-bQmOStPJoZ397UQ@mail.gmail.com> <CAObvjwPb_PosEnGOXP2tV4aWjnTyed7-275svyK+vu4uxYdTzQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1767764175-1487003090=:7782"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f171.google.com ([209.85.217.171]:33716 "EHLO
-        mail-ua0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752385AbdBMQHB (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Feb 2017 11:07:01 -0500
-Received: by mail-ua0-f171.google.com with SMTP id i68so68380999uad.0
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Feb 2017 08:07:01 -0800 (PST)
-In-Reply-To: <CAJE9aOOQSuO2Wmu0dasUxJ1mht1gcrUcckfNcsHDEKQ6ubG5wg@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:57074 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751472AbdBMQYu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 13 Feb 2017 11:24:50 -0500
+In-Reply-To: <CAObvjwPb_PosEnGOXP2tV4aWjnTyed7-275svyK+vu4uxYdTzQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Brad Hubbard <bhubbard@redhat.com>
+To: Tamilarasi Muthamizhan <tmuthami@redhat.com>
+Cc: Yuri Weinstein <yweinste@redhat.com>, Nathan Cutler <ncutler@suse.cz>, Ilya Dryomov <idryomov@gmail.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Durgin, Josh" <jdurgin@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, John Spray <jspray@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>
 
-hey cephers who use gdb on teuthology,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-i just gave the sepia_bt.sh[0] an overhaul. now it can accept only one
-parameter -- the absolute path to the core-file[1]. and it will take
-care of the rest to setup the gdb. if you want to check the backtrace
-and poke around the coredump with gdb on teuthology, i'd recommend
-sepia_bt.sh to you.
+--8323329-1767764175-1487003090=:7782
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 
----
-[0] https://github.com/ceph/ceph/blob/master/src/script/sepia_bt.sh
-[1] like
-$ sepia_bt.sh -c
-/a/kchai-2017-02-07_18:40:28-rados-wip-16091-monc-in-parallel---basic-mira/=
-796457/remote/mira051/coredump/*
+Let's ignore samba here too.
 
+The rgw failures are all valgrind... can Matt or Yehuda take a look and 
+make sure they're not new/problematic?
 
+Thanks!
+sage
 
-On Mon, Nov 7, 2016 at 8:31 PM, kefu chai <tchaikov@gmail.com> wrote:
-> On Fri, Nov 4, 2016 at 9:22 PM, Sage Weil <sweil@redhat.com> wrote:
->> On Fri, 4 Nov 2016, kefu chai wrote:
->>> hi ceph developers,
->>>
->>> i just pulled together a simple script at
->>> https://github.com/tchaikov/sepia-bt/blob/master/bt.sh for debugging
->>> the coredump on teuthology. what it does is
->>>
->>> 1. download the ceph packages
->>> 2. extract them so we have the debugged executable and symbols
->>> 3. launch gdb and set the necessary paths
->>>
->>> et voil=C3=A0!
->>>
->>> the idea of this script comes from badone (Brad). i just translate it
->>> into a shell script.
->>>
->>> pull requests welcomed!
->>
->> This is great!  Maybe we should put it in ceph.git/src/scripts?
->
-> sure, will do.
->
->
-> --
-> Regards
-> Kefu Chai
+On Thu, 9 Feb 2017, Tamilarasi Muthamizhan wrote:
 
-
-
---=20
-Regards
-Kefu Chai
+> Yuri, lets skip firefly-x upgrade issue. 
+> 
+> On Wed, Feb 8, 2017 at 1:14 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
+>       upgrade/hammer-x (jewel) PASSED now!
+> 
+>       Outstanding suites requiring approval:
+> 
+>       rgw
+>       samba
+>       upgrade/firefly-x (hammer)
+> 
+>       Sage?
+> 
+>       Thx
+>       YuriW
+> 
+>       On Tue, Feb 7, 2017 at 1:47 PM, Yuri Weinstein
+>       <yweinste@redhat.com> wrote:
+>       > See updated status with approvals
+>       http://tracker.ceph.com/issues/17151#note-61
+>       >
+>       > Outstanding suites requiring approval:
+>       >
+>       > rgw
+>       > samba
+>       > upgrade/firefly-x (hammer)
+>       > upgrade/hammer-x (jewel)
+>       >
+>       > Thx
+>       > YuriW
+>       >
+>       > On Thu, Feb 2, 2017 at 3:17 AM, Nathan Cutler
+>       <ncutler@suse.cz> wrote:
+>       >>> Turned out to be a buggy test -- hammer is missing an
+>       infernalis
+>       >>> commit f217865cf7c4 ("test_librbd_fsx: invalidate before
+>       discard in
+>       >>> krbd mode").
+>       >>
+>       >>
+>       >> I gave it a try; please take a look:
+>       >>
+>       >> * https://github.com/ceph/ceph/pull/13230
+>       >>
+>       >> Nathan
+>       --
+>       To unsubscribe from this list: send the line "unsubscribe
+>       ceph-devel" in
+>       the body of a message to majordomo@vger.kernel.org
+>       More majordomo info at 
+>       http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
+> 
+--8323329-1767764175-1487003090=:7782--
