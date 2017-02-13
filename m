@@ -1,135 +1,66 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: crush multipick anomaly
-Date: Mon, 13 Feb 2017 06:53:20 -0800
-Message-ID: <CAJ4mKGZ8J5VYhsyo5cWT0qRtrh=2jbREixPBUwRCsCX1qY-odw@mail.gmail.com>
-References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal> <3554101b-4d10-e46b-93b0-f74794258f2e@dachary.org>
+From: Artur Molchanov <artur.molchanov@synesis.ru>
+Subject: Re: [PATCH] libceph: Complete stuck requests to OSD with EIO
+Date: Mon, 13 Feb 2017 18:23:24 +0300
+Message-ID: <ed2e5e79-25a9-7ae9-640a-69dfcca9c01b@synesis.ru>
+References: <4e080919-2df5-1b75-3c8a-3ae95eb8f08d@synesis.ru>
+ <1486726280.4233.1.camel@redhat.com>
+ <CAOi1vP_SJD7Vh97WBU2=EsYfWruXqQe06BND+uaq10=V7ZGH1g@mail.gmail.com>
+ <CAOi1vP-1EPasYZUPoqwh1Ykgq59xEAf1oeGZH5Y8Kpo9ooQMow@mail.gmail.com>
+ <e2a7b8c7-a1e7-e280-2ef3-e412c2df9848@synesis.ru>
+ <CAOi1vP--uJ8Lg6h68ZC9AY2fp1D=uxPe7zguM1gSsEWSdYrqjw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f50.google.com ([209.85.218.50]:36247 "EHLO
-        mail-oi0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751693AbdBMOxX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Feb 2017 09:53:23 -0500
-Received: by mail-oi0-f50.google.com with SMTP id u143so50752002oif.3
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Feb 2017 06:53:22 -0800 (PST)
-In-Reply-To: <3554101b-4d10-e46b-93b0-f74794258f2e@dachary.org>
+Received: from mail-lf0-f68.google.com ([209.85.215.68]:36527 "EHLO
+        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750975AbdBMPX2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Feb 2017 10:23:28 -0500
+Received: by mail-lf0-f68.google.com with SMTP id h65so8790560lfi.3
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Feb 2017 07:23:27 -0800 (PST)
+In-Reply-To: <CAOi1vP--uJ8Lg6h68ZC9AY2fp1D=uxPe7zguM1gSsEWSdYrqjw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Sage Weil <sage@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Jeff Layton <jlayton@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Feb 13, 2017 at 2:36 AM, Loic Dachary <loic@dachary.org> wrote:
-> Hi,
+On 02/13/2017 05:15 PM, Ilya Dryomov wrote:
+> On Mon, Feb 13, 2017 at 10:54 AM, Artur Molchanov
+> <artur.molchanov@synesis.ru> wrote:
+>> Hi Ilya,
+>>
+>> On 02/13/2017 12:11 PM, Ilya Dryomov wrote:
+>>>
+>>> Hi Artur,
+>>>
+>>> How about the attached patch?  handle_timeout() is going to iterate
+>>> over all but the homeless OSD anyway; all it costs us is a couple of
+>>> tests, so I don't think a separate work is needed.
+>>>
+>>> abort_request() is a simple wrapper around complete_request(), making
+>>> it safe to call at any time -- replace it with complete_request() for
+>>> now if you want to try this out.
+>>
+>>
+>> Using one job for sending keepalive requests and completing stuck requests
+>> brings us to the need to check that osd_keepalive_timeout is not larger then
+>> osd_request_timeout. So we should not forget to say about it in the
+>> documentation.
 >
-> Dan van der Ster reached out to colleagues and friends and Pedro López-Adeva Fernández-Layos came up with a well written analysis of the problem and a tentative solution which he described at : https://github.com/plafl/notebooks/blob/master/replication.ipynb
+> I'll make a note to mention that it is osd_keepalive_timeout-precise.
 >
-> Unless I'm reading the document incorrectly (very possible ;) it also means that the probability of each disk needs to take in account the weight of all disks. Which means that whenever a disk is added / removed or its weight is changed, this has an impact on the probability of all disks in the cluster and objects are likely to move everywhere. Am I mistaken ?
+>> Is it worth creating a correlation between osd_keepalive_timeout and
+>> osd_request_timeout?
+>
+> No, probably not.  osd_keepalive_timeout and osd_idle_ttl are similarly
+> related and we don't have any.
 
-Keep in mind that in the math presented, "all disks" for our purposes
-really means "all items within a CRUSH bucket" (at least, best I can
-tell). So if you reweight a disk, you have to recalculate weights
-within its bucket and within each parent bucket, but each bucket has a
-bounded size N so the calculation should remain feasible. I didn't
-step through the more complicated math at the end but it made
-intuitive sense as far as I went.
--Greg
+Your variant of patch works.
+As I said, using job handle_timeout to send keepalive requests and aborting 
+stuck requests is not the perfect choice, but OK, it works.
 
->
-> Cheers
->
-> On 01/26/2017 04:05 AM, Sage Weil wrote:
->> This is a longstanding bug,
->>
->>       http://tracker.ceph.com/issues/15653
->>
->> that causes low-weighted devices to get more data than they should. Loic's
->> recent activity resurrected discussion on the original PR
->>
->>       https://github.com/ceph/ceph/pull/10218
->>
->> but since it's closed and almost nobody will see it I'm moving the
->> discussion here.
->>
->> The main news is that I have a simple adjustment for the weights that
->> works (almost perfectly) for the 2nd round of placements.  The solution is
->> pretty simple, although as with most probabilities it tends to make my
->> brain hurt.
->>
->> The idea is that, on the second round, the original weight for the small
->> OSD (call it P(pick small)) isn't what we should use.  Instead, we want
->> P(pick small | first pick not small).  Since P(a|b) (the probability of a
->> given b) is P(a && b) / P(b),
->>
->>  P(pick small | first pick not small)
->>  = P(pick small && first pick not small) / P(first pick not small)
->>
->> The last term is easy to calculate,
->>
->>  P(first pick not small) = (total_weight - small_weight) / total_weight
->>
->> and the && term is the distribution we're trying to produce.  For exmaple,
->> if small has 1/10 the weight, then we should see 1/10th of the PGs have
->> their second replica be the small OSD.  So
->>
->>  P(pick small && first pick not small) = small_weight / total_weight
->>
->> Putting those together,
->>
->>  P(pick small | first pick not small)
->>  = P(pick small && first pick not small) / P(first pick not small)
->>  = (small_weight / total_weight) / ((total_weight - small_weight) / total_weight)
->>  = small_weight / (total_weight - small_weight)
->>
->> This is, on the second round, we should adjust the weights by the above so
->> that we get the right distribution of second choices.  It turns out it
->> works to adjust *all* weights like this to get hte conditional probability
->> that they weren't already chosen.
->>
->> I have a branch that hacks this into straw2 and it appears to work
->> properly for num_rep = 2.  With a test bucket of [99 99 99 99 4], and the
->> current code, you get
->>
->> $ bin/crushtool -c cm.txt --test --show-utilization --min-x 0 --max-x 40000000 --num-rep 2
->> rule 0 (data), x = 0..40000000, numrep = 2..2
->> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
->>   device 0:             19765965        [9899364,9866601]
->>   device 1:             19768033        [9899444,9868589]
->>   device 2:             19769938        [9901770,9868168]
->>   device 3:             19766918        [9898851,9868067]
->>   device 6:             929148  [400572,528576]
->>
->> which is very close for the first replica (primary), but way off for the
->> second.  With my hacky change,
->>
->> rule 0 (data), x = 0..40000000, numrep = 2..2
->> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
->>   device 0:             19797315        [9899364,9897951]
->>   device 1:             19799199        [9899444,9899755]
->>   device 2:             19801016        [9901770,9899246]
->>   device 3:             19797906        [9898851,9899055]
->>   device 6:             804566  [400572,403994]
->>
->> which is quite close, but still skewing slightly high (by a big less than
->> 1%).
->>
->> Next steps:
->>
->> 1- generalize this for >2 replicas
->> 2- figure out why it skews high
->> 3- make this work for multi-level hierarchical descent
->>
->> sage
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> --
-> Loïc Dachary, Artisan Logiciel Libre
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+What should I do to make this patch merged to upstream?
+
+-- 
+Artur
+
