@@ -1,154 +1,113 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Pgs distribution evenly across osds
-Date: Mon, 13 Feb 2017 17:21:41 -0600
-Message-ID: <5de83f94-aab0-70ed-7b76-a41e047361c0@redhat.com>
-References: <731B4B00-3D93-4E2B-9A32-5F50BDF84177@alibaba-inc.com>
- <32478390-b790-226f-59aa-15f76d1c247e@redhat.com>
- <36A35D18-3331-4B49-88C6-C7A181F12FC5@alibaba-inc.com>
- <753C3729-DF1E-4FEB-9448-4CEDF74D9195@alibaba-inc.com>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: Breakage in Clang compile....
+Date: Tue, 14 Feb 2017 09:26:47 +1000
+Message-ID: <CAF-wwdHHdkskk_R61usBUGYOtCcS1-kJ8pL0bfJMdWrJyrxz3w@mail.gmail.com>
+References: <a5a35bfc-57b2-bf28-9788-04127654e23a@digiware.nl>
+ <E5D4D9AF-0529-424A-9C75-759906A4C65D@quantum.com> <28691041-11fc-bd69-2d0b-1986fa798aca@digiware.nl>
+ <CACKY0b_pZXyJO1fQn9hrqJw5JYT_x932YkCYZv3miFZOks9vJw@mail.gmail.com>
+ <CAF-wwdFushwATp88GxKAJfZpiB+ZSf6Q7iQa5mAKjKeEetMO0g@mail.gmail.com>
+ <32db5fd3-a02a-1f4d-9e28-674280fa071c@corp.ovh.com> <4cb44f22-9c7e-1266-df20-b53f11e377ec@digiware.nl>
+ <8483843f-0b6d-54f3-9265-8fc7c9bebfe3@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54316 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751250AbdBMXVn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 13 Feb 2017 18:21:43 -0500
-In-Reply-To: <753C3729-DF1E-4FEB-9448-4CEDF74D9195@alibaba-inc.com>
+Received: from mail-it0-f42.google.com ([209.85.214.42]:36369 "EHLO
+        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751079AbdBMX0t (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Feb 2017 18:26:49 -0500
+Received: by mail-it0-f42.google.com with SMTP id c7so8741521itd.1
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Feb 2017 15:26:48 -0800 (PST)
+In-Reply-To: <8483843f-0b6d-54f3-9265-8fc7c9bebfe3@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "LIU, Fei" <james.liu@alibaba-inc.com>, Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "J. Eric Ivancich" <ivancich@redhat.com>
+Cc: Willem Jan Withagen <wjw@digiware.nl>, Bassam Tabbara <bassam.tabbara@quantum.com>, Ceph Development <ceph-devel@vger.kernel.org>, =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?= <bartlomiej.swiecki@corp.ovh.com>, liuchang0812 <liuchang0812@gmail.com>, Adam Emerson <aemerson@redhat.com>, Kefu Chai <kchai@redhat.com>
 
-Hi James,
++Adam +Kefu for further review and input.
 
-Yes, it's not surprising.  Especially if you are primarily targeting a 
-single pool and can reweight to achieve optimal distribution 
-specifically for that pool.  It's much harder to do this if you have 
-lots of pools that are all used equally though.
+On Tue, Feb 14, 2017 at 6:55 AM, J. Eric Ivancich <ivancich@redhat.com> wrote:
+> On 02/13/2017 05:20 AM, Willem Jan Withagen wrote:
+>> On 13-2-2017 10:26, Bartłomiej Święcki wrote:
+>> > Hi,
+>> >
+>> > What I usually hear in gcc vs comparisons is that clang does not yet
+>> > optimize the code as good gcc
+>> > (fun fact: sometimes that's because it's more standards conformant).
+>> > Nevertheless, it's always
+>> > a good idea to compile the code with as many compilers as possible -
+>> > that way more meaningful warnings
+>> > could be found. An example - when I was compiling the patch, clang has
+>> > found this:
+>> >
+>> > /builds/ceph-histograms/src/include/denc.h:1160:10: warning: binding
+>> > dereferenced null pointer to reference has undefined behavior
+>> > [-Wnull-dereference]
+>> >     denc(*(bool *)nullptr, p);
+>> >          ^~~~~~~~~~~~~~~~
+>> >
+>> > And I strongly believe we should get rid of it - dereferencing null
+>> > pointer in C++ is undefined
+>> > behavior so the compiler can do whatever he wants there. Even if it
+>> > works with current gcc,
+>> > more aggressive optimizations added to compilers in the future could
+>> > make this totally broken.
+>> >
+>> > I've observed it's a common practice in many companies to develop using
+>> > clang (to get
+>> > best diagnostic and tools) but do the final release using gcc (to get
+>> > the best performance).
+>> > I also like clang for the number of tools built on top of clang - static
+>> > analyzers, sanitizers,
+>> > code formatting etc. Chandler Carruth from Goggle has given some nice
+>> > talks about this:
+>> > https://youtu.be/cX_GhJ6BuWI, https://youtu.be/E36BUcTWo50.
+>>
+>> Hi Bartek,
+>>
+>> What you found is also what I found. And I agree with the fact that it
+>> needs fixing.... Am not even sure what a dereferenced null-pointer
+>> should actually generate as value?
+>>
+>> We have fixed similar issues at several places already where it
+>> generated errors. Here it is a warning, so I can sort of live with it
+>> because I can continue my porting/testing work.
+>>
+>> So if you have suggestions, I very sure that they will get happily
+>> accepted. And I can and will test and support getting these fixes in.
+>>
+>> Using GCC on FreeBSD is no longer the preferred way of doing things.
+>> Also are all packages compiled with Clang, so best to use those with the
+>> Clang compiler.
+>> And modern releases of GCC are all in ports and are not free of pesky
+>> conflicts with the installed base.
+>>
+>> Thanx,
+>> --WjW
+>
+> That issue has two PRs devoted to two spots in the code where it comes up:
+>
+>         https://github.com/ceph/ceph/pull/12796
+>         https://github.com/ceph/ceph/pull/12931
+>
+> gcc with a high enough optimization level (1 is sufficient, I think)
+> takes that code out if it's never referenced, as it should not be. But
+> when optimizations are turned off (-O0) it results in a runtime error.
+> That makes it difficult to run under gdb with optimizations off.
+>
+> That code is there to generate a runtime error, much like an assert,
+> when other code is doing something it should not. But it depends on
+> optimization for it to work correctly under gcc.
+>
+> It seems that PR 12796 is a workaround that undermines the attempt to
+> flag bad code.
+>
+> I'm encouraged by Adam Emerson's PR (12931), though.
+>
+> Eric
 
-I'm glad to hear that reweighting improved things!  I still am hopeful 
-that some day we can find a way to distribute pgs/data/etc evenly with 
-something crush-like that does better than random distributions, but I 
-suspect it will be very difficult.  Crush is already very clever at what 
-it does.  We may have to trade away something to get something.
 
-Mark
 
-On 02/13/2017 04:48 PM, LIU, Fei wrote:
-> Hi Mark,
->    After we periodically even out the pg distribution with reweight-by-pgs ,we can see our cluster performance(IOPS and bandwidth ) up almost 25%~40% and latency drop almost 25%.  It somehow prove pg distribution affect the whole cluster performance a lot.
->
->   Regards,
->   James
->
-> 本邮件及其附件含有阿里巴巴集团的商业秘密信息，仅限于发送给上面地址中列出的个人和群组，禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制和散发）本邮件及其附件中的信息，如果您错收本邮件，请您立即电话或邮件通知发件人并删除本邮件。
-> This email and its attachments contain confidential information from Alibaba Group.which is intended only for the person or entity whose address is listed above.Any use of information contained herein in any way(including,but not limited to,total or partial disclosure,reproduction or dissemination)by persons other than the intended recipient(s) is prohibited.If you receive this email in error,please notify the sender by phone or email immediately and delete it.
->
-> On 2/8/17, 4:57 AM, "LIU, Fei" <ceph-devel-owner@vger.kernel.org on behalf of james.liu@alibaba-inc.com> wrote:
->
->     Hi Mark,
->        Thanks very much for sharing. We found as we tested more , somehow the oversubscribed OSD node perform worse than other OSD node with less PGs ,However , the CPU utilization even in worst oversubscribed OSD node is around ~50%. We also observed the apply latency and commit latency are pretty high comparing to others with less PGs. The networking traffic is reasonable . The disk utilization sometime is around 99%.but most of time is around 60%. We see latency spike from time to time caused by the oversubscribed OSD we guess. Any suggestions?
->
->     Regards,
->     James
->
->
->     本邮件及其附件含有阿里巴巴集团的商业秘密信息，仅限于发送给上面地址中列出的个人和群组，禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制和散发）本邮件及其附件中的信息，如果您错收本邮件，请您立即电话或邮件通知发件人并删除本邮件。
->     This email and its attachments contain confidential information from Alibaba Group.which is intended only for the person or entity whose address is listed above.Any use of information contained herein in any way(including,but not limited to,total or partial disclosure,reproduction or dissemination)by persons other than the intended recipient(s) is prohibited.If you receive this email in error,please notify the sender by phone or email immediately and delete it.
->
->     On 2/7/17, 6:48 PM, "Mark Nelson" <mnelson@redhat.com> wrote:
->
->         Hi James,
->
->         I'm not sage, but I'll chime in since I spent some time thinking about
->         this stuff a while back when I was playing around with halton
->         distributions for PG placement.  It's very difficult to get even
->         distributions using random sampling unless you have a *very* high number
->         of samples.  The following equations give you a reasonable expectation
->         of what the min/max should be assuming an evenly weighted random
->         distribution:
->
->         min = (pgs / osds) - sqrt(2*pgs*log(osds)/osds)
->         max = (pgs / osds) + sqrt(2*pgs*log(osds)/osds)
->
->         In your case that's:
->
->         min = 49152/168 - sqrt(2*49152*log(168)/168) = 256
->         max = 49152/168 + sqrt(2*49152*log(168)/168) = 329
->
->         In terms of performance potential and data distribution evenness, I'd
->         argue you really want to know how bad your worst oversubscribed PG is vs
->         the average:
->
->         Expected: (49152/168)/329 = ~88.9%
->         Actual: (49152/168)/333 = = ~87.9%
->
->         Your numbers are a little worse, though typically I see our
->         distributions hover right around expected or just slightly better.  This
->         particular roll of the dice might have just been a little worse.
->
->         If you jumped up to say 100K PGs:
->
->         min = 1000000/168 - sqrt(2*1000000*log(168)/168) = 544
->         max = 1000000/168 + sqrt(2*1000000*log(168)/168) = 647
->
->         Expected: (100000/168)/647 = ~92%
->
->         Now if you jumped up to 1 million PGs:
->
->         min = 1000000/168 - sqrt(2*1000000*log(168)/168) = 5790
->         max = 1000000/168 + sqrt(2*1000000*log(168)/168) = 6115
->
->         Expected: (1000000/168)/6115 = ~97.3%
->
->         Thanks,
->         Mark
->
->         On 02/07/2017 06:14 PM, LIU, Fei wrote:
->         > Hi Sage,
->         >   We are trying to distribute pgs evenly across osds. However, after certain tunes, we still got 30% difference among max pgs  and min pg  of OSDs (OSD 9 has 13.8% more pgs than average and OSD 86 has 15.2% less pgs than average).  Any good suggestions to make PGs distributed evenly across OSDs?
->         >
->         >   Thanks,
->         >   James
->         >
->         >
->         > SUM :   49152   |
->         > Osd :   168     |
->         > AVE :   292.57  |
->         > Max :   333     |
->         > Osdid : osd.9   |
->         > per:    13.8%   |
->         > ------------------------
->         > min :   248     |
->         > osdid : osd.86  |
->         > per:    -15.2%  |
->         >
->         > [james.liu@a18d13422.eu13 /home/james.liu]
->         > $
->         >
->         >
->         > 本邮件及其附件含有阿里巴巴集团的商业秘密信息，仅限于发送给上面地址中列出的个人和群组，禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制和散发）本邮件及其附件中的信息，如果您错收本邮件，请您立即电话或邮件通知发件人并删除本邮件。
->         > This email and its attachments contain confidential information from Alibaba Group.which is intended only for the person or entity whose address is listed above.Any use of information contained herein in any way(including,but not limited to,total or partial disclosure,reproduction or dissemination)by persons other than the intended recipient(s) is prohibited.If you receive this email in error,please notify the sender by phone or email immediately and delete it.
->         >
->         >
->         > --
->         > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->         > the body of a message to majordomo@vger.kernel.org
->         > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->         >
->
->
->
->     --
->     To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->     the body of a message to majordomo@vger.kernel.org
->     More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+-- 
+Cheers,
+Brad
