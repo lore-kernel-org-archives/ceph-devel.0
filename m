@@ -1,261 +1,211 @@
-From: Jonathan Brown <brownj@vmware.com>
-Subject: Re: Kerberos authentication support
-Date: Mon, 13 Feb 2017 11:59:52 -0800
-Message-ID: <34B59BAC-6460-467B-B7F9-44E957C2DF87@vmware.com>
-References: <21559934-9BF9-4B59-8D60-F492D233AB90@vmware.com> <1487009801.7620.12.camel@suse.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: crush multipick anomaly
+Date: Mon, 13 Feb 2017 21:18:42 +0100
+Message-ID: <365bb618-3718-cd8b-1383-d6f5d51a20cb@dachary.org>
+References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
+ <3554101b-4d10-e46b-93b0-f74794258f2e@dachary.org>
+ <alpine.DEB.2.11.1702131417070.7782@piezo.novalocal>
+ <3486c5b8-1d50-5762-c84a-8d1fcecaa775@dachary.org>
+ <alpine.DEB.2.11.1702131913070.7782@piezo.novalocal>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam03on0079.outbound.protection.outlook.com ([104.47.42.79]:30304
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753039AbdBMTz7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 13 Feb 2017 14:55:59 -0500
-In-Reply-To: <1487009801.7620.12.camel@suse.com>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:42394 "EHLO
+        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752485AbdBMUSr (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Feb 2017 15:18:47 -0500
+In-Reply-To: <alpine.DEB.2.11.1702131913070.7782@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Daniel Oliveira <doliveira@suse.com>
+To: Sage Weil <sweil@redhat.com>
 Cc: ceph-devel@vger.kernel.org
 
-Hi Daniel,
 
-Great!  I would be happy to work together with you on this. Please let =
-me know how I can help.
 
-Jonathan
+On 02/13/2017 08:16 PM, Sage Weil wrote:
+> On Mon, 13 Feb 2017, Loic Dachary wrote:
+>> Hi Sage,
+>>
+>> I wrote a little program to show where objects are moving when a new disk is added (disk 10 below) and it looks like this:
+>>
+>>         00     01     02     03     04     05     06     07     08     09     10 
+>> 00:      0     14     17     14     19     23     13     22     21     20   1800 
+>> 01:     12      0     11     13     19     19     15     10     16     17   1841 
+>> 02:     17     27      0     17     15     15     13     19     18     11   1813 
+>> 03:     14     17     15      0     23     11     20     15     23     17   1792 
+>> 04:     14     18     16     25      0     27     13      8     15     16   1771 
+>> 05:     19     16     22     25     13      0      9     19     21     21   1813 
+>> 06:     18     15     21     17     10     18      0     10     18     11   1873 
+>> 07:     13     17     22     13     16     17     14      0     25     12   1719 
+>> 08:     23     20     16     17     19     18     11     12      0     18   1830 
+>> 09:     14     20     15     17     12     16     17     11     13      0   1828 
+>> 10:      0      0      0      0      0      0      0      0      0      0      0 
+>>
+>> before:  20164  19990  19863  19959  19977  20004  19926  20133  20041  19943      0 
+>> after:   18345  18181  18053  18170  18200  18190  18040  18391  18227  18123  18080 
+>>
+>>
+>> Each line shows how many objects moved from a given disk to the others 
+>> after disk 10 was added. Most objects go to the new disk and around 1% 
+>> go to each other disks. The before and after lines show how many objects 
+>> are mapped to each disk. They all have the same weight and it's using 
+>> replica 2 and straw2. Does that look right ?
+> 
+> Hmm, that doesn't look right.  This is what the CRUSH.straw2_reweight unit 
+> test is there to validate: that data on moves to or from the device whose 
+> weight changed.
 
-> On Feb 13, 2017, at 10:16 AM, Daniel Oliveira <doliveira@suse.com> =
-wrote:
->=20
-> Team,=20
->=20
-> We have been working on that for the last few weeks and would be more
-> than glad to have some help/brainstorm on this topic.=20
-> As of now, I am using both LDAP/Kerberos for authentication and =
-already
-> have a draft that I was supposed to send out last week.=20
-> At time point, we have a simple tree with dc=3Dcephcluster,dc=3Dcom =
-and=20
-> some sub-containers for later user authentication and later
-> integration with CephFS (ou=3Dusers,dc=3Dcephcluster,dc=3Dcom), groups =
-(ou=3Dgr
-> oups,dc=3Dcephcluster,dc=3Dcom) and all cluster nodes being =
-represented (ou
-> =3Dusers,dc=3Dcephcluster,dc=3Dcom) as server objects (after extending =
-LDAP
-> schema). Of course, this tree structure could be changed later.=20
->=20
-> The setup needed to get LDAP/Kerberos with GSSAPIs and SASL mechanism
-> (along with TLS so we have it all encrypted) was the part that took
-> some time/work, but we are now in the process of running a few tests
-> with KRB5 APIs (MIT) and then start adding code to get some ideas =
-going
-> on.=20
->=20
-> It would be great to have some more people to work on this as well.=20
->=20
-> Thanks,
-> -Daniel=20
->=20
->=20
-> On Fri, 2017-02-10 at 16:59 -0800, Jonathan Brown wrote:
->> Hi,
->>=20
->> I and my colleague Dheeraj Shetty are interested in adding support
->> for Kerberos authentication to Ceph.  Although new to Ceph, I have
->> worked with Kerberos before and have recently been investigating how
->> to implement this feature.  The Ceph notes in this link discuss some
->> goals and issues for possible Kerberos authentication support:
->>=20
->> =
-https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__pad.ceph.com_p_kerbe=
-ros&d=3DDwIDaQ&c=3DuilaK90D4TOVoH58JNXRgQ&r=3D9JpL_PPbYk8fhbjUYVOfRoj1Yf9o=
-qcTvfmy_8Eq7yqw&m=3DUIHzULmLANrtmpzTH2FgbeDBQyRMxljmjvk8B99pa34&s=3DY6irxV=
-m3yslQOzqfhhJGH0jtxtBaQkiY0ddEd5vypKI&e=3D=20
->>=20
->> This looks like a good plan of attack and so we have started down
->> that path and now have the authentication exchange working using
->> GSSAPI library calls.
->>=20
->> Some comments=E2=80=A6
->>=20
->>>> The ceph cluster mons would share a single principal,
->>>> e.g. ceph/mycluster.foo.com
->>=20
->> Normally Kerberos service principals have the format
->> <service>/<hostname>@<realm>.  For my initial testing I am using a
->> name
->> like "ceph-mon/myhost.foo.com" for the separate mon services on
->> different machines.  Is there a reason to share a single principal
->> instead of the normal Kerberos convention?
->>=20
->>>> let's use the mit library. :)
->>=20
->> Agreed, although I think it would be best to use the GSSAPI C
->> -language bindings instead of the MIT krb5 library APIs directly.
->>=20
->>>> - define new auth type (krb5)
->>=20
->> Should the new auth type be named =E2=80=9Cgssapi=E2=80=9D instead?   =
-Note that if
->> the code uses GSSAPI bindings, then this auth type could potentially
->> be used for mechanisms other than just krb5 by adding plugin
->> libraries.
->>=20
->>>> - if negotiated, client would use kerberos lib to get the ticket
->>=20
->> Yes, the user would use a command line tool such as kinit to get the
->> initial ticket from the KDC and store it in the credentials cache.=20
->> During the authentication exchange the GSSAPI/krb5 libraries would
->> get the service ticket and place it in the same cache.  Subsequent
->> calls would not need to connect to the KDC again until the tickets
->> expire.
->>=20
->>>> - client passes ticket to mon
->>=20
->> This is accomplished by gss_init_sec_context() on the client side and
->> gss_accept_sec_context() on the server side.  These functions
->> generate GSS tokens containing the krb5 tickets which are then
->> encoded by the Ceph client and server into messages sent to their
->> peer.
->>=20
->>>> - mon uses kerberosv primitives to authenticate, extract
->>>> principal name, etc.
->>=20
->> Yes, but with the GSSAPI library the Ceph code would not need to use
->> Kerberos primitives much if at all.
->>=20
->>>> - establish which capabilities to use:
->>>>  - mon maps principal name onto a client id, generates a cephx
->>>> ticket
->>>>  - ldap maps principal to a group/role, which is defined in ceph
->>>> auth db  <-- what users probably want to do
->>>>  - mon passes cephx ticket (session key etc) back to client
->>>>  - client uses cephx thereafter
->>=20
->> We=E2=80=99ll look at how to best accomplish these and other issues =
-next.=20
->> But I think we have a good start on how to implement this feature
->> and look forward to contributing to Ceph project.  Please let me know
->> if you have any advice on how you would like to see this feature
->> implemented.  As we gain more experience with Ceph I=E2=80=99m sure =
-we=E2=80=99ll
->> understand the issues better.  Thanks!
->>=20
->> Jonathan Brown
->> brownj@vmware.com
->>=20
->> Dheeraj Shetty
->> dheerajs@vmware.com
->>=20
->>=20
->>=20
->> What follows are some example of commands run from my dev
->> environment.  I have configured a krb5.conf file to point to an MIT
->> kdc, and service principal keys have been extracted to krb5.keytab.=20=
+In the above, the bucket size changes: it has a new item. And the bucket size plays a role in bucket_straw2_choose because it loops on all items. In CRUSH.straw2_reweight only the weights change. I'm not entirely sure how that would explain the results I get though...
 
->> My ceph.conf included these global config entries:
->>=20
->>        auth cluster required =3D cephx
->>        auth service required =3D gssapi
->>        auth client required =3D gssapi
->>=20
->>=20
->> EXAMPLE: running =E2=80=9Cceph health=E2=80=9D without a Kerberos =
-TGT:
->>=20
->> brownj@ceph-dev:~/ceph/build$ kdestroy
->> brownj@ceph-dev:~/ceph/build$ bin/ceph health
->> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
->> 2017-02-10 15:46:55.038277 7ff8654d4700 -1 WARNING: all dangerous and
->> experimental features are enabled.
->> 2017-02-10 15:46:55.046886 7ff8654d4700 -1 WARNING: all dangerous and
->> experimental features are enabled.
->> 2017-02-10 15:46:55.093679 7ff85ca9f700  0 gssapi client: Unspecified
->> GSS failure.  Minor code may provide more information
->> 2017-02-10 15:46:55.093836 7ff8654d4700  0 librados: client.admin
->> authentication error (1) Operation not permitted
->> Error connecting to cluster: PermissionError
->> brownj@ceph-dev:~/ceph/build$
->>=20
->>=20
->> EXAMPLE: running =E2=80=9Cceph health" with an expired TGT:
->>=20
->> brownj@ceph-dev:~/ceph/build$ kinit -l 2
->> Password for client.admin@CEPHTEST.LOCAL:
->> brownj@ceph-dev:~/ceph/build$ klist
->> Ticket cache: FILE:/tmp/krb5cc_1000
->> Default principal: client.admin@CEPHTEST.LOCAL
->>=20
->> Valid starting     Expires            Service principal
->> 02/10/17 15:47:46  02/10/17 15:47:44 =20
->> krbtgt/CEPHTEST.LOCAL@CEPHTEST.LOCAL
->> brownj@ceph-dev:~/ceph/build$ bin/ceph health
->> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
->> 2017-02-10 15:47:57.273595 7facdd15e700 -1 WARNING: all dangerous and
->> experimental features are enabled.
->> 2017-02-10 15:47:57.282475 7facdd15e700 -1 WARNING: all dangerous and
->> experimental features are enabled.
->> 2017-02-10 15:47:57.298276 7facd485d700  0 gssapi client: The
->> referenced credential has expired
->> 2017-02-10 15:47:57.298387 7facdd15e700  0 librados: client.admin
->> authentication error (1) Operation not permitted
->> Error connecting to cluster: PermissionError
->> brownj@ceph-dev:~/ceph/build$
->>=20
->>=20
->> EXAMPLE: running =E2=80=9Cceph health=E2=80=9D with a valid TGT:
->>=20
->> brownj@ceph-dev:~/ceph/build$ kinit
->> Password for client.admin@CEPHTEST.LOCAL:
->> brownj@ceph-dev:~/ceph/build$ klist
->> Ticket cache: FILE:/tmp/krb5cc_1000
->> Default principal: client.admin@CEPHTEST.LOCAL
->>=20
->> Valid starting     Expires            Service principal
->> 02/10/17 15:49:13  02/11/17 01:49:13 =20
->> krbtgt/CEPHTEST.LOCAL@CEPHTEST.LOCAL
->>        renew until 02/11/17 15:49:09
->> brownj@ceph-dev:~/ceph/build$ bin/ceph health
->> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
->> 2017-02-10 15:49:21.057358 7fcd09af8700 -1 WARNING: all dangerous and
->> experimental features are enabled.
->> 2017-02-10 15:49:21.064644 7fcd08ab6700 -1 WARNING: all dangerous and
->> experimental features are enabled.
->> HEALTH_OK
->> brownj@ceph-dev:~/ceph/build$ klist
->> Ticket cache: FILE:/tmp/krb5cc_1000
->> Default principal: client.admin@CEPHTEST.LOCAL
->>=20
->> Valid starting     Expires            Service principal
->> 02/10/17 15:49:13  02/11/17 01:49:13 =20
->> krbtgt/CEPHTEST.LOCAL@CEPHTEST.LOCAL
->>        renew until 02/11/17 15:49:09
->> 02/10/17 15:49:21  02/11/17 01:49:13  ceph-mon/ceph-dev@
->>        renew until 02/11/17 15:49:09
->> 02/10/17 15:49:21  02/11/17 01:49:13 =20
->> ceph-mon/ceph-dev@CEPHTEST.LOCAL
->>        renew until 02/11/17 15:49:09
->> brownj@ceph-dev:~/ceph/build$
->>=20
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  =
-https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__vger.kernel.org_majo=
-rdomo-2Dinfo.html&d=3DDwIDaQ&c=3DuilaK90D4TOVoH58JNXRgQ&r=3D9JpL_PPbYk8fhb=
-jUYVOfRoj1Yf9oqcTvfmy_8Eq7yqw&m=3DUIHzULmLANrtmpzTH2FgbeDBQyRMxljmjvk8B99p=
-a34&s=3DnRmpFhPWTsza_g7eQnrso0Sz7SklSpsDWzZ9_OozC8c&e=3D=20
->>=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  =
-https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__vger.kernel.org_majo=
-rdomo-2Dinfo.html&d=3DDwIDaQ&c=3DuilaK90D4TOVoH58JNXRgQ&r=3D9JpL_PPbYk8fhb=
-jUYVOfRoj1Yf9oqcTvfmy_8Eq7yqw&m=3DUIHzULmLANrtmpzTH2FgbeDBQyRMxljmjvk8B99p=
-a34&s=3DnRmpFhPWTsza_g7eQnrso0Sz7SklSpsDWzZ9_OozC8c&e=3D=20
+> It also follows from the straw2 algorithm itself: each possible choice 
+> gets a 'straw' length derived only from that item's weight (and other 
+> fixed factors, like the item id and the bucket id), and we select the max 
+> across all items.  Two devices whose weights didn't change will have the 
+> same straw lengths, and the max between them will not change.  It's only 
+> possible that the changed item's straw length changed and wasn't max and 
+> now is (got longer) or was max and now isn't (got shorter).
 
+That's a crystal clear explanation, cool :-)
+
+Cheers
+
+> sage
+> 
+> 
+>>
+>> Cheers
+>>
+>> On 02/13/2017 03:21 PM, Sage Weil wrote:
+>>> On Mon, 13 Feb 2017, Loic Dachary wrote:
+>>>> Hi,
+>>>>
+>>>> Dan van der Ster reached out to colleagues and friends and Pedro 
+>>>> López-Adeva Fernández-Layos came up with a well written analysis of the 
+>>>> problem and a tentative solution which he described at : 
+>>>> https://github.com/plafl/notebooks/blob/master/replication.ipynb
+>>>>
+>>>> Unless I'm reading the document incorrectly (very possible ;) it also 
+>>>> means that the probability of each disk needs to take in account the 
+>>>> weight of all disks. Which means that whenever a disk is added / removed 
+>>>> or its weight is changed, this has an impact on the probability of all 
+>>>> disks in the cluster and objects are likely to move everywhere. Am I 
+>>>> mistaken ?
+>>>
+>>> Maybe (I haven't looked closely at the above yet).  But for comparison, in 
+>>> the normal straw2 case, adding or removing a disk also changes the 
+>>> probabilities for everything else (e.g., removing one out of 10 identical 
+>>> disks changes the probability from 1/10 to 1/9).  The key property that 
+>>> straw2 *is* able to handle is that as long as the relative probabilities 
+>>> between two unmodified disks does not change, then straw2 will avoid 
+>>> moving any objects between them (i.e., all data movement is to or from 
+>>> the disk that is reweighted).
+>>>
+>>> sage
+>>>
+>>>
+>>>>
+>>>> Cheers
+>>>>
+>>>> On 01/26/2017 04:05 AM, Sage Weil wrote:
+>>>>> This is a longstanding bug,
+>>>>>
+>>>>> 	http://tracker.ceph.com/issues/15653
+>>>>>
+>>>>> that causes low-weighted devices to get more data than they should. Loic's 
+>>>>> recent activity resurrected discussion on the original PR
+>>>>>
+>>>>> 	https://github.com/ceph/ceph/pull/10218
+>>>>>
+>>>>> but since it's closed and almost nobody will see it I'm moving the 
+>>>>> discussion here.
+>>>>>
+>>>>> The main news is that I have a simple adjustment for the weights that 
+>>>>> works (almost perfectly) for the 2nd round of placements.  The solution is 
+>>>>> pretty simple, although as with most probabilities it tends to make my 
+>>>>> brain hurt.
+>>>>>
+>>>>> The idea is that, on the second round, the original weight for the small 
+>>>>> OSD (call it P(pick small)) isn't what we should use.  Instead, we want 
+>>>>> P(pick small | first pick not small).  Since P(a|b) (the probability of a 
+>>>>> given b) is P(a && b) / P(b),
+>>>>>
+>>>>>  P(pick small | first pick not small)
+>>>>>  = P(pick small && first pick not small) / P(first pick not small)
+>>>>>
+>>>>> The last term is easy to calculate,
+>>>>>
+>>>>>  P(first pick not small) = (total_weight - small_weight) / total_weight
+>>>>>
+>>>>> and the && term is the distribution we're trying to produce.  For exmaple, 
+>>>>> if small has 1/10 the weight, then we should see 1/10th of the PGs have 
+>>>>> their second replica be the small OSD.  So
+>>>>>
+>>>>>  P(pick small && first pick not small) = small_weight / total_weight
+>>>>>
+>>>>> Putting those together,
+>>>>>
+>>>>>  P(pick small | first pick not small)
+>>>>>  = P(pick small && first pick not small) / P(first pick not small)
+>>>>>  = (small_weight / total_weight) / ((total_weight - small_weight) / total_weight)
+>>>>>  = small_weight / (total_weight - small_weight)
+>>>>>
+>>>>> This is, on the second round, we should adjust the weights by the above so 
+>>>>> that we get the right distribution of second choices.  It turns out it 
+>>>>> works to adjust *all* weights like this to get hte conditional probability 
+>>>>> that they weren't already chosen.
+>>>>>
+>>>>> I have a branch that hacks this into straw2 and it appears to work 
+>>>>> properly for num_rep = 2.  With a test bucket of [99 99 99 99 4], and the 
+>>>>> current code, you get
+>>>>>
+>>>>> $ bin/crushtool -c cm.txt --test --show-utilization --min-x 0 --max-x 40000000 --num-rep 2
+>>>>> rule 0 (data), x = 0..40000000, numrep = 2..2
+>>>>> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
+>>>>>   device 0:             19765965        [9899364,9866601]
+>>>>>   device 1:             19768033        [9899444,9868589]
+>>>>>   device 2:             19769938        [9901770,9868168]
+>>>>>   device 3:             19766918        [9898851,9868067]
+>>>>>   device 6:             929148  [400572,528576]
+>>>>>
+>>>>> which is very close for the first replica (primary), but way off for the 
+>>>>> second.  With my hacky change,
+>>>>>
+>>>>> rule 0 (data), x = 0..40000000, numrep = 2..2
+>>>>> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
+>>>>>   device 0:             19797315        [9899364,9897951]
+>>>>>   device 1:             19799199        [9899444,9899755]
+>>>>>   device 2:             19801016        [9901770,9899246]
+>>>>>   device 3:             19797906        [9898851,9899055]
+>>>>>   device 6:             804566  [400572,403994]
+>>>>>
+>>>>> which is quite close, but still skewing slightly high (by a big less than 
+>>>>> 1%).
+>>>>>
+>>>>> Next steps:
+>>>>>
+>>>>> 1- generalize this for >2 replicas
+>>>>> 2- figure out why it skews high
+>>>>> 3- make this work for multi-level hierarchical descent
+>>>>>
+>>>>> sage
+>>>>>
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>
+>>>> -- 
+>>>> Loïc Dachary, Artisan Logiciel Libre
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>
+>> -- 
+>> Loïc Dachary, Artisan Logiciel Libre
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
