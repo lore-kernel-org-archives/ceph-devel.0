@@ -1,54 +1,52 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 00/15] rbd: support for data-pool + obj_request->object_no
-Date: Tue, 14 Feb 2017 21:11:49 +0100
-Message-ID: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 03/15] rbd: initialize rbd_dev->header_oloc early
+Date: Tue, 14 Feb 2017 21:11:52 +0100
+Message-ID: <1487103124-2974-4-git-send-email-idryomov@gmail.com>
+References: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f193.google.com ([209.85.216.193]:35855 "EHLO
-        mail-qt0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754730AbdBNUM3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:29 -0500
-Received: by mail-qt0-f193.google.com with SMTP id h53so18733332qth.3
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:29 -0800 (PST)
+Received: from mail-qk0-f194.google.com ([209.85.220.194]:34850 "EHLO
+        mail-qk0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754915AbdBNUMd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:33 -0500
+Received: by mail-qk0-f194.google.com with SMTP id u25so20603163qki.2
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:33 -0800 (PST)
+In-Reply-To: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Alex Elder <elder@ieee.org>
 
-Hello,
+No reason to delay it until image_id is known.  This will be required
+by some rbd_obj_method_sync() callers, after rbd_obj_method_sync() is
+changed to take oloc.
 
-There are two pieces here: support for RBD_FEATURE_DATA_POOL (patches
-1-10) and a couple of cleanups / minor optimizations that build on it
-and allow us to get rid of rbd_segment_name_cache (patches 11 - 15).
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ drivers/block/rbd.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
-Thanks,
-
-                Ilya
-
-
-Ilya Dryomov (15):
-  rbd: use kstrndup() in rbd_header_from_disk()
-  rbd: kill rbd_image_header::{crypt_type,comp_type}
-  rbd: initialize rbd_dev->header_oloc early
-  rbd: do away with obj_request in rbd_obj_read_sync()
-  libceph: pass reply buffer length through ceph_osdc_call()
-  rbd: switch rbd_obj_method_sync() to ceph_osdc_call()
-  rbd: remove now unused rbd_obj_request_wait() and helpers
-  rbd: use rbd_obj_bytes() more
-  rbd: introduce rbd_init_layout()
-  rbd: support for data-pool feature
-  rbd: set offset and length outside of rbd_obj_request_create()
-  rbd: factor out __rbd_osd_req_create()
-  rbd: RBD_V{1,2}_DATA_FORMAT macros
-  rbd: store and use obj_request->object_no
-  rbd: kill obj_request->object_name and rbd_segment_name_cache
-
- drivers/block/rbd.c         | 601 +++++++++++++++++---------------------------
- drivers/block/rbd_types.h   |  10 +-
- include/linux/ceph/osdmap.h |   7 -
- net/ceph/cls_lock_client.c  |   2 +-
- net/ceph/osd_client.c       |   7 +-
- 5 files changed, 238 insertions(+), 389 deletions(-)
-
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index a6ad714c85ac..24e8116d3431 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -4863,7 +4863,7 @@ static struct rbd_device *__rbd_dev_create(struct rbd_client *rbdc,
+ 	init_rwsem(&rbd_dev->header_rwsem);
+ 
+ 	ceph_oid_init(&rbd_dev->header_oid);
+-	ceph_oloc_init(&rbd_dev->header_oloc);
++	rbd_dev->header_oloc.pool = spec->pool_id;
+ 
+ 	mutex_init(&rbd_dev->watch_mutex);
+ 	rbd_dev->watch_state = RBD_WATCH_STATE_UNREGISTERED;
+@@ -6062,8 +6062,6 @@ static int rbd_dev_header_name(struct rbd_device *rbd_dev)
+ 	/* Record the header object name for this rbd image. */
+ 
+ 	rbd_assert(rbd_image_format_valid(rbd_dev->image_format));
+-
+-	rbd_dev->header_oloc.pool = rbd_dev->layout.pool_id;
+ 	if (rbd_dev->image_format == 1)
+ 		ret = ceph_oid_aprintf(&rbd_dev->header_oid, GFP_KERNEL, "%s%s",
+ 				       spec->image_name, RBD_SUFFIX);
 -- 
 2.4.3
 
