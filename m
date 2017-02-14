@@ -1,117 +1,109 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 14/15] rbd: store and use obj_request->object_no
-Date: Tue, 14 Feb 2017 21:12:03 +0100
-Message-ID: <1487103124-2974-15-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 11/15] rbd: set offset and length outside of rbd_obj_request_create()
+Date: Tue, 14 Feb 2017 21:12:00 +0100
+Message-ID: <1487103124-2974-12-git-send-email-idryomov@gmail.com>
 References: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f194.google.com ([209.85.216.194]:35935 "EHLO
-        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754983AbdBNUMt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:49 -0500
-Received: by mail-qt0-f194.google.com with SMTP id h53so18733987qth.3
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:49 -0800 (PST)
+Received: from mail-qt0-f195.google.com ([209.85.216.195]:35515 "EHLO
+        mail-qt0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754994AbdBNUMv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:51 -0500
+Received: by mail-qt0-f195.google.com with SMTP id s58so18789594qtc.2
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:46 -0800 (PST)
 In-Reply-To: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Alex Elder <elder@ieee.org>
 
-object_no can be trivially formatted into an object name.  We already
-store object names in OSD requests with special care to avoid dynamic
-allocations for short names.  Storing a name in obj_request, obtained
-as below (!), is a waste and will be removed in the next commit.
-
-    name = kmem_cache_alloc(rbd_segment_name_cache, ...);
-    snprintf(name, ...);
-    obj_request->object_name = kstrdup(name);
-    kmem_cache_free(rbd_segment_name_cache, name);
-    ...
-    ceph_oid_aprintf(..., "%s", obj_request->object_name);
+The allocation doesn't depend on offset and length.  Both offset and
+length can be changed after obj_request is allocated, too.
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- drivers/block/rbd.c | 19 +++++++++++++------
- 1 file changed, 13 insertions(+), 6 deletions(-)
+ drivers/block/rbd.c | 26 +++++++++++---------------
+ 1 file changed, 11 insertions(+), 15 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 3bc84afe5b50..3133bb66ce18 100644
+index f01dfdfa5645..ea60d238ca55 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -232,6 +232,7 @@ enum obj_req_flags {
- 
- struct rbd_obj_request {
- 	const char		*object_name;
-+	u64			object_no;
- 	u64			offset;		/* object start byte */
- 	u64			length;		/* bytes from offset */
- 	unsigned long		flags;
-@@ -1629,8 +1630,8 @@ static void rbd_obj_request_submit(struct rbd_obj_request *obj_request)
+@@ -1631,7 +1631,9 @@ static void rbd_obj_request_submit(struct rbd_obj_request *obj_request)
  {
  	struct ceph_osd_request *osd_req = obj_request->osd_req;
  
--	dout("%s %p \"%s\" %llu~%llu osd_req %p\n", __func__,
--	     obj_request, obj_request->object_name, obj_request->offset,
-+	dout("%s %p object_no %016llx %llu~%llu osd_req %p\n", __func__,
-+	     obj_request, obj_request->object_no, obj_request->offset,
- 	     obj_request->length, osd_req);
+-	dout("%s %p osd_req %p\n", __func__, obj_request, osd_req);
++	dout("%s %p \"%s\" %llu~%llu osd_req %p\n", __func__,
++	     obj_request, obj_request->object_name, obj_request->offset,
++	     obj_request->length, osd_req);
  	if (obj_request_img_data_test(obj_request)) {
  		WARN_ON(obj_request->callback != rbd_img_obj_callback);
-@@ -1925,8 +1926,8 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req)
- 		rbd_osd_call_callback(obj_request);
- 		break;
- 	default:
--		rbd_warn(NULL, "%s: unsupported op %hu",
--			obj_request->object_name, (unsigned short) opcode);
-+		rbd_warn(NULL, "unexpected OSD op: object_no %016llx opcode %d",
-+			 obj_request->object_no, opcode);
- 		break;
+ 		rbd_img_request_get(obj_request->img_request);
+@@ -2073,7 +2075,6 @@ static void rbd_osd_req_destroy(struct ceph_osd_request *osd_req)
+ /* object_name is assumed to be a non-null pointer and NUL-terminated */
+ 
+ static struct rbd_obj_request *rbd_obj_request_create(const char *object_name,
+-						u64 offset, u64 length,
+ 						enum obj_request_type type)
+ {
+ 	struct rbd_obj_request *obj_request;
+@@ -2094,18 +2095,13 @@ static struct rbd_obj_request *rbd_obj_request_create(const char *object_name,
  	}
  
-@@ -1958,6 +1959,8 @@ __rbd_osd_req_create(struct rbd_device *rbd_dev,
- {
- 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
- 	struct ceph_osd_request *req;
-+	const char *name_format = rbd_dev->image_format == 1 ?
-+				      RBD_V1_DATA_FORMAT : RBD_V2_DATA_FORMAT;
+ 	obj_request->object_name = memcpy(name, object_name, size);
+-	obj_request->offset = offset;
+-	obj_request->length = length;
+-	obj_request->flags = 0;
+ 	obj_request->which = BAD_WHICH;
+ 	obj_request->type = type;
+ 	INIT_LIST_HEAD(&obj_request->links);
+ 	init_completion(&obj_request->completion);
+ 	kref_init(&obj_request->kref);
  
- 	req = ceph_osdc_alloc_request(osdc, snapc, num_ops, false, GFP_NOIO);
- 	if (!req)
-@@ -1968,8 +1971,8 @@ __rbd_osd_req_create(struct rbd_device *rbd_dev,
- 	req->r_priv = obj_request;
+-	dout("%s: \"%s\" %llu/%llu %d -> obj %p\n", __func__, object_name,
+-		offset, length, (int)type, obj_request);
+-
++	dout("%s %p\n", __func__, obj_request);
+ 	return obj_request;
+ }
  
- 	req->r_base_oloc.pool = rbd_dev->layout.pool_id;
--	if (ceph_oid_aprintf(&req->r_base_oid, GFP_NOIO, "%s",
--			     obj_request->object_name))
-+	if (ceph_oid_aprintf(&req->r_base_oid, GFP_NOIO, name_format,
-+			rbd_dev->header.object_prefix, obj_request->object_no))
- 		goto err_req;
- 
- 	if (ceph_osdc_alloc_messages(req, GFP_NOIO))
-@@ -2488,6 +2491,7 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
+@@ -2517,21 +2513,21 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
  	while (resid) {
  		struct ceph_osd_request *osd_req;
  		const char *object_name;
-+		u64 object_no = img_offset >> rbd_dev->header.obj_order;
- 		u64 offset = rbd_segment_offset(rbd_dev, img_offset);
- 		u64 length = rbd_segment_length(rbd_dev, img_offset, resid);
+-		u64 offset;
+-		u64 length;
++		u64 offset = rbd_segment_offset(rbd_dev, img_offset);
++		u64 length = rbd_segment_length(rbd_dev, img_offset, resid);
  
-@@ -2500,6 +2504,7 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
+ 		object_name = rbd_segment_name(rbd_dev, img_offset);
+ 		if (!object_name)
+ 			goto out_unwind;
+-		offset = rbd_segment_offset(rbd_dev, img_offset);
+-		length = rbd_segment_length(rbd_dev, img_offset, resid);
+-		obj_request = rbd_obj_request_create(object_name,
+-						offset, length, type);
++		obj_request = rbd_obj_request_create(object_name, type);
+ 		/* object request has its own copy of the object name */
+ 		rbd_segment_name_free(object_name);
  		if (!obj_request)
  			goto out_unwind;
  
-+		obj_request->object_no = object_no;
- 		obj_request->offset = offset;
- 		obj_request->length = length;
++		obj_request->offset = offset;
++		obj_request->length = length;
++
+ 		/*
+ 		 * set obj_request->img_request before creating the
+ 		 * osd_request so that it gets the right snapc
+@@ -2870,7 +2866,7 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
+ 	size_t size;
+ 	int ret;
  
-@@ -2846,6 +2851,8 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
+-	stat_request = rbd_obj_request_create(obj_request->object_name, 0, 0,
++	stat_request = rbd_obj_request_create(obj_request->object_name,
+ 					      OBJ_REQUEST_PAGES);
  	if (!stat_request)
  		return -ENOMEM;
- 
-+	stat_request->object_no = obj_request->object_no;
-+
- 	stat_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_READ, 1,
- 						   stat_request);
- 	if (!stat_request->osd_req) {
 -- 
 2.4.3
 
