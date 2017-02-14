@@ -1,44 +1,42 @@
-From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
-Subject: LibRBD QoS feature
-Date: Wed, 15 Feb 2017 01:36:41 +0800
-Message-ID: <A6B67B11-89A5-438E-B9BF-4FEE4F6A8F1C@alibaba-inc.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: hammer 0.94.10 QE status
+Date: Tue, 14 Feb 2017 09:46:42 -0800
+Message-ID: <CAMMFjmFtrwGMaVweDt9eefWta22UdjgmdVg0it1t0SwWma_FXg@mail.gmail.com>
+References: <CAMMFjmHCAM6wmygytBDqwh89UOEex24_GGqrLJvXcOUS+QEg9A@mail.gmail.com>
+ <CAOi1vP9rX_r3Rg2ZiXzS3QrEC3piM4hwhxBqHqDTU=zpCy3uwQ@mail.gmail.com>
+ <CAOi1vP9FQJJxzE_SnaJ3QLFJ6NiZGqozswyT8scMUmqjZkbjRw@mail.gmail.com>
+ <90f9fb1d-74fa-3ae0-e5b7-186e5d1b2638@suse.cz> <CAMMFjmH-+w8H7V0WjDUPStT5+3=doBH2OsWD5DNE3ij=zS7wzA@mail.gmail.com>
+ <CAMMFjmHd1kJfBfjE7b8jOcXUZp74hi5Gbh-bQmOStPJoZ397UQ@mail.gmail.com>
+ <CAObvjwPb_PosEnGOXP2tV4aWjnTyed7-275svyK+vu4uxYdTzQ@mail.gmail.com>
+ <alpine.DEB.2.11.1702131624230.7782@piezo.novalocal> <CABo9giShGk2sdYyoJmuF9J-4kqDHmfzTrWq8H02aCCEJAa7tFA@mail.gmail.com>
+ <22868a53-b99e-0686-e7e1-a288558aed27@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from out0-144.mail.aliyun.com ([140.205.0.144]:59554 "EHLO
-        out0-144.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932115AbdBNRhT (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 12:37:19 -0500
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:35613 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932320AbdBNRqq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 12:46:46 -0500
+Received: by mail-wm0-f46.google.com with SMTP id v186so23999515wmd.0
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 09:46:44 -0800 (PST)
+In-Reply-To: <22868a53-b99e-0686-e7e1-a288558aed27@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Orit Wasserman <owasserm@redhat.com>, Sage Weil <sweil@redhat.com>, Tamilarasi Muthamizhan <tmuthami@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Durgin, Josh" <jdurgin@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, John Spray <jspray@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>
 
-Hi Sage and Mark,
-   As mentioned in last Ceph weekly performance meeting, we are going to ha=
-ve a plan to have QoS with LibRBD (Not qemu QoS) if I remember right , corre=
-ct?
-Here is the background,  we are going to have lots of clients to access the=
-ir own images in a pool of Ceph cluster, we don=E2=80=99t want to have performance=
- impact among the clients. Thanks for your input in advance.
+I am running tests and so far they are still showing the same rgw issues
 
-  Regards,
-  James =20
+http://pulpito.ceph.com/teuthology-2017-02-14_16:21:46-rgw-hammer-distro-basic-smithi/
 
 
-=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E5=90=AB=E6=9C=89=E9=98=BF=E9=87=8C=E5=B7=B4=E5=B7=B4=E9=9B=86=E5=9B=A2=E7=9A=84=E5=95=86=E4=B8=9A=E7=A7=98=E5=AF=86=E4=BF=A1=E6=81=AF=EF=BC=8C=E4=BB=85=E9=99=90=
-=E4=BA=8E=E5=8F=91=E9=80=81=E7=BB=99=E4=B8=8A=E9=9D=A2=E5=9C=B0=E5=9D=80=E4=B8=AD=E5=88=97=E5=87=BA=E7=9A=84=E4=B8=AA=E4=BA=BA=E5=92=8C=E7=BE=A4=E7=BB=84=EF=BC=8C=E7=A6=81=E6=AD=A2=E4=BB=BB=E4=BD=95=E5=85=B6=E4=BB=96=E4=BA=BA=E4=
-=BB=A5=E4=BB=BB=E4=BD=95=E5=BD=A2=E5=BC=8F=E4=BD=BF=E7=94=A8=EF=BC=88=E5=8C=85=E6=8B=AC=E4=BD=86=E4=B8=8D=E9=99=90=E4=BA=8E=E5=85=A8=E9=83=A8=E6=88=96=E9=83=A8=E5=88=86=E5=9C=B0=E6=B3=84=E9=9C=B2=E3=80=81=E5=A4=8D=E5=88=B6=E5=92=
-=8C=E6=95=A3=E5=8F=91=EF=BC=89=E6=9C=AC=E9=82=AE=E4=BB=B6=E5=8F=8A=E5=85=B6=E9=99=84=E4=BB=B6=E4=B8=AD=E7=9A=84=E4=BF=A1=E6=81=AF=EF=BC=8C=E5=A6=82=E6=9E=9C=E6=82=A8=E9=94=99=E6=94=B6=E6=9C=AC=E9=82=AE=E4=BB=B6=EF=BC=8C=E8=AF=B7=
-=E6=82=A8=E7=AB=8B=E5=8D=B3=E7=94=B5=E8=AF=9D=E6=88=96=E9=82=AE=E4=BB=B6=E9=80=9A=E7=9F=A5=E5=8F=91=E4=BB=B6=E4=BA=BA=E5=B9=B6=E5=88=A0=E9=99=A4=E6=9C=AC=E9=82=AE=E4=BB=B6=E3=80=82
-This email and its attachments contain confidential information from Alibab=
-a Group.which is intended only for the person or entity whose address is lis=
-ted above.Any use of information contained herein in any way(including,but n=
-ot limited to,total or partial disclosure,reproduction or dissemination)by p=
-ersons other than the intended recipient(s) is prohibited.If you receive thi=
-s email in error,please notify the sender by phone or email immediately and =
-delete it.
-
-
+On Tue, Feb 14, 2017 at 7:04 AM, Nathan Cutler <ncutler@suse.cz> wrote:
+>> They are all resulting of linking with tcmalloc in notcmalloc builds
+>> that valgrind doesn't like.
+>> There is an open tracker issue: http://tracker.ceph.com/issues/18744
+>
+>
+> Note that these failures would probably disappear on re-run, because Dan
+> fixed the underlying build issue.
+>
+> Nathan
