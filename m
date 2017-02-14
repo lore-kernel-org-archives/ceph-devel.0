@@ -1,321 +1,173 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 06/15] rbd: switch rbd_obj_method_sync() to ceph_osdc_call()
-Date: Tue, 14 Feb 2017 21:11:55 +0100
-Message-ID: <1487103124-2974-7-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 12/15] rbd: factor out __rbd_osd_req_create()
+Date: Tue, 14 Feb 2017 21:12:01 +0100
+Message-ID: <1487103124-2974-13-git-send-email-idryomov@gmail.com>
 References: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f194.google.com ([209.85.220.194]:33466 "EHLO
-        mail-qk0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754971AbdBNUMp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:45 -0500
-Received: by mail-qk0-f194.google.com with SMTP id 11so20554727qkl.0
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:44 -0800 (PST)
+Received: from mail-qt0-f193.google.com ([209.85.216.193]:34579 "EHLO
+        mail-qt0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754997AbdBNUMw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:52 -0500
+Received: by mail-qt0-f193.google.com with SMTP id w20so18631849qtb.1
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:46 -0800 (PST)
 In-Reply-To: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Alex Elder <elder@ieee.org>
 
-As explained in the previous commit, rbd_obj_request machinery (and
-rbd_osd_req_create() in particular) shouldn't be used for working with
-metadata objects.
-
-Switch to the recently added ceph_osdc_call().  It assumes single pages
-for outbound and inbound buffers, but that's OK - none of the callers
-need more than that.  These pages need to be allocated (messenger is in
-dire need of proper iterator interface!), but we are swapping for
-pages[] and pagelist allocations in the existing code.
-
-Kill class_name argument - all rbd methods are under "rbd".
+Factor OSD request allocation and initialization code out into
+__rbd_osd_req_create().
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- drivers/block/rbd.c | 162 ++++++++++++++++++++++------------------------------
- 1 file changed, 67 insertions(+), 95 deletions(-)
+ drivers/block/rbd.c | 103 ++++++++++++++++++++--------------------------------
+ 1 file changed, 40 insertions(+), 63 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index e55e26f7e4d8..2967b50b48fc 100644
+index ea60d238ca55..47cfd5d89e69 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -3971,17 +3971,17 @@ static void rbd_reregister_watch(struct work_struct *work)
-  * returned in the outbound buffer, or a negative error code.
-  */
- static int rbd_obj_method_sync(struct rbd_device *rbd_dev,
--			     const char *object_name,
--			     const char *class_name,
-+			     struct ceph_object_id *oid,
-+			     struct ceph_object_locator *oloc,
- 			     const char *method_name,
- 			     const void *outbound,
- 			     size_t outbound_size,
- 			     void *inbound,
- 			     size_t inbound_size)
- {
--	struct rbd_obj_request *obj_request;
--	struct page **pages;
--	u32 page_count;
+@@ -1952,6 +1952,38 @@ static void rbd_osd_req_format_write(struct rbd_obj_request *obj_request)
+ 	osd_req->r_data_offset = obj_request->offset;
+ }
+ 
++static struct ceph_osd_request *
++__rbd_osd_req_create(struct rbd_device *rbd_dev,
++		     struct ceph_snap_context *snapc,
++		     int num_ops, unsigned int flags,
++		     struct rbd_obj_request *obj_request)
++{
 +	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
-+	struct page *req_page = NULL;
-+	struct page *reply_page;
- 	int ret;
- 
- 	/*
-@@ -3991,61 +3991,35 @@ static int rbd_obj_method_sync(struct rbd_device *rbd_dev,
- 	 * method.  Currently if this is present it will be a
- 	 * snapshot id.
- 	 */
--	page_count = (u32)calc_pages_for(0, inbound_size);
--	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
--	if (IS_ERR(pages))
--		return PTR_ERR(pages);
-+	if (outbound) {
-+		if (outbound_size > PAGE_SIZE)
-+			return -E2BIG;
- 
--	ret = -ENOMEM;
--	obj_request = rbd_obj_request_create(object_name, 0, inbound_size,
--							OBJ_REQUEST_PAGES);
--	if (!obj_request)
--		goto out;
--
--	obj_request->pages = pages;
--	obj_request->page_count = page_count;
--
--	obj_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_READ, 1,
--						  obj_request);
--	if (!obj_request->osd_req)
--		goto out;
--
--	osd_req_op_cls_init(obj_request->osd_req, 0, CEPH_OSD_OP_CALL,
--					class_name, method_name);
--	if (outbound_size) {
--		struct ceph_pagelist *pagelist;
--
--		pagelist = kmalloc(sizeof (*pagelist), GFP_NOFS);
--		if (!pagelist)
--			goto out;
-+		req_page = alloc_page(GFP_KERNEL);
-+		if (!req_page)
-+			return -ENOMEM;
- 
--		ceph_pagelist_init(pagelist);
--		ceph_pagelist_append(pagelist, outbound, outbound_size);
--		osd_req_op_cls_request_data_pagelist(obj_request->osd_req, 0,
--						pagelist);
-+		memcpy(page_address(req_page), outbound, outbound_size);
- 	}
--	osd_req_op_cls_response_data_pages(obj_request->osd_req, 0,
--					obj_request->pages, inbound_size,
--					0, false, false);
- 
--	rbd_obj_request_submit(obj_request);
--	ret = rbd_obj_request_wait(obj_request);
--	if (ret)
--		goto out;
--
--	ret = obj_request->result;
--	if (ret < 0)
--		goto out;
-+	reply_page = alloc_page(GFP_KERNEL);
-+	if (!reply_page) {
-+		if (req_page)
-+			__free_page(req_page);
-+		return -ENOMEM;
-+	}
- 
--	rbd_assert(obj_request->xferred < (u64)INT_MAX);
--	ret = (int)obj_request->xferred;
--	ceph_copy_from_page_vector(pages, inbound, 0, obj_request->xferred);
--out:
--	if (obj_request)
--		rbd_obj_request_put(obj_request);
--	else
--		ceph_release_page_vector(pages, page_count);
-+	ret = ceph_osdc_call(osdc, oid, oloc, RBD_DRV_NAME, method_name,
-+			     CEPH_OSD_FLAG_READ, req_page, outbound_size,
-+			     reply_page, &inbound_size);
-+	if (!ret) {
-+		memcpy(inbound, page_address(reply_page), inbound_size);
-+		ret = inbound_size;
-+	}
- 
-+	if (req_page)
-+		__free_page(req_page);
-+	__free_page(reply_page);
- 	return ret;
- }
- 
-@@ -4939,10 +4913,10 @@ static int _rbd_dev_v2_snap_size(struct rbd_device *rbd_dev, u64 snap_id,
- 		__le64 size;
- 	} __attribute__ ((packed)) size_buf = { 0 };
- 
--	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_oid.name,
--				"rbd", "get_size",
--				&snapid, sizeof (snapid),
--				&size_buf, sizeof (size_buf));
-+	ret = rbd_obj_method_sync(rbd_dev, &rbd_dev->header_oid,
-+				  &rbd_dev->header_oloc, "get_size",
-+				  &snapid, sizeof(snapid),
-+				  &size_buf, sizeof(size_buf));
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
- 	if (ret < 0)
- 		return ret;
-@@ -4979,9 +4953,9 @@ static int rbd_dev_v2_object_prefix(struct rbd_device *rbd_dev)
- 	if (!reply_buf)
- 		return -ENOMEM;
- 
--	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_oid.name,
--				"rbd", "get_object_prefix", NULL, 0,
--				reply_buf, RBD_OBJ_PREFIX_LEN_MAX);
-+	ret = rbd_obj_method_sync(rbd_dev, &rbd_dev->header_oid,
-+				  &rbd_dev->header_oloc, "get_object_prefix",
-+				  NULL, 0, reply_buf, RBD_OBJ_PREFIX_LEN_MAX);
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
- 	if (ret < 0)
- 		goto out;
-@@ -5014,10 +4988,10 @@ static int _rbd_dev_v2_snap_features(struct rbd_device *rbd_dev, u64 snap_id,
- 	u64 unsup;
- 	int ret;
- 
--	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_oid.name,
--				"rbd", "get_features",
--				&snapid, sizeof (snapid),
--				&features_buf, sizeof (features_buf));
-+	ret = rbd_obj_method_sync(rbd_dev, &rbd_dev->header_oid,
-+				  &rbd_dev->header_oloc, "get_features",
-+				  &snapid, sizeof(snapid),
-+				  &features_buf, sizeof(features_buf));
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
- 	if (ret < 0)
- 		return ret;
-@@ -5076,10 +5050,9 @@ static int rbd_dev_v2_parent_info(struct rbd_device *rbd_dev)
- 	}
- 
- 	snapid = cpu_to_le64(rbd_dev->spec->snap_id);
--	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_oid.name,
--				"rbd", "get_parent",
--				&snapid, sizeof (snapid),
--				reply_buf, size);
-+	ret = rbd_obj_method_sync(rbd_dev, &rbd_dev->header_oid,
-+				  &rbd_dev->header_oloc, "get_parent",
-+				  &snapid, sizeof(snapid), reply_buf, size);
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
- 	if (ret < 0)
- 		goto out_err;
-@@ -5179,9 +5152,9 @@ static int rbd_dev_v2_striping_info(struct rbd_device *rbd_dev)
- 	u64 stripe_count;
- 	int ret;
- 
--	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_oid.name,
--				"rbd", "get_stripe_unit_count", NULL, 0,
--				(char *)&striping_info_buf, size);
-+	ret = rbd_obj_method_sync(rbd_dev, &rbd_dev->header_oid,
-+				&rbd_dev->header_oloc, "get_stripe_unit_count",
-+				NULL, 0, &striping_info_buf, size);
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
- 	if (ret < 0)
- 		return ret;
-@@ -5218,6 +5191,7 @@ static int rbd_dev_v2_striping_info(struct rbd_device *rbd_dev)
- 
- static char *rbd_dev_image_name(struct rbd_device *rbd_dev)
- {
-+	CEPH_DEFINE_OID_ONSTACK(oid);
- 	size_t image_id_size;
- 	char *image_id;
- 	void *p;
-@@ -5245,10 +5219,10 @@ static char *rbd_dev_image_name(struct rbd_device *rbd_dev)
- 	if (!reply_buf)
- 		goto out;
- 
--	ret = rbd_obj_method_sync(rbd_dev, RBD_DIRECTORY,
--				"rbd", "dir_get_name",
--				image_id, image_id_size,
--				reply_buf, size);
-+	ceph_oid_printf(&oid, "%s", RBD_DIRECTORY);
-+	ret = rbd_obj_method_sync(rbd_dev, &oid, &rbd_dev->header_oloc,
-+				  "dir_get_name", image_id, image_id_size,
-+				  reply_buf, size);
- 	if (ret < 0)
- 		goto out;
- 	p = reply_buf;
-@@ -5427,9 +5401,9 @@ static int rbd_dev_v2_snap_context(struct rbd_device *rbd_dev)
- 	if (!reply_buf)
- 		return -ENOMEM;
- 
--	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_oid.name,
--				"rbd", "get_snapcontext", NULL, 0,
--				reply_buf, size);
-+	ret = rbd_obj_method_sync(rbd_dev, &rbd_dev->header_oid,
-+				  &rbd_dev->header_oloc, "get_snapcontext",
-+				  NULL, 0, reply_buf, size);
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
- 	if (ret < 0)
- 		goto out;
-@@ -5492,10 +5466,9 @@ static const char *rbd_dev_v2_snap_name(struct rbd_device *rbd_dev,
- 		return ERR_PTR(-ENOMEM);
- 
- 	snapid = cpu_to_le64(snap_id);
--	ret = rbd_obj_method_sync(rbd_dev, rbd_dev->header_oid.name,
--				"rbd", "get_snapshot_name",
--				&snapid, sizeof (snapid),
--				reply_buf, size);
-+	ret = rbd_obj_method_sync(rbd_dev, &rbd_dev->header_oid,
-+				  &rbd_dev->header_oloc, "get_snapshot_name",
-+				  &snapid, sizeof(snapid), reply_buf, size);
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
- 	if (ret < 0) {
- 		snap_name = ERR_PTR(ret);
-@@ -5802,7 +5775,7 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
- {
- 	int ret;
- 	size_t size;
--	char *object_name;
-+	CEPH_DEFINE_OID_ONSTACK(oid);
- 	void *response;
- 	char *image_id;
- 
-@@ -5822,12 +5795,12 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
- 	 * First, see if the format 2 image id file exists, and if
- 	 * so, get the image's persistent id from it.
- 	 */
--	size = sizeof (RBD_ID_PREFIX) + strlen(rbd_dev->spec->image_name);
--	object_name = kmalloc(size, GFP_NOIO);
--	if (!object_name)
--		return -ENOMEM;
--	sprintf(object_name, "%s%s", RBD_ID_PREFIX, rbd_dev->spec->image_name);
--	dout("rbd id object name is %s\n", object_name);
-+	ret = ceph_oid_aprintf(&oid, GFP_KERNEL, "%s%s", RBD_ID_PREFIX,
-+			       rbd_dev->spec->image_name);
-+	if (ret)
-+		return ret;
++	struct ceph_osd_request *req;
 +
-+	dout("rbd id object name is %s\n", oid.name);
++	req = ceph_osdc_alloc_request(osdc, snapc, num_ops, false, GFP_NOIO);
++	if (!req)
++		return NULL;
++
++	req->r_flags = flags;
++	req->r_callback = rbd_osd_req_callback;
++	req->r_priv = obj_request;
++
++	req->r_base_oloc.pool = rbd_dev->layout.pool_id;
++	if (ceph_oid_aprintf(&req->r_base_oid, GFP_NOIO, "%s",
++			     obj_request->object_name))
++		goto err_req;
++
++	if (ceph_osdc_alloc_messages(req, GFP_NOIO))
++		goto err_req;
++
++	return req;
++
++err_req:
++	ceph_osdc_put_request(req);
++	return NULL;
++}
++
+ /*
+  * Create an osd request.  A read request has one osd op (read).
+  * A write request has either one (watch) or two (hint+write) osd ops.
+@@ -1965,8 +1997,6 @@ static struct ceph_osd_request *rbd_osd_req_create(
+ 					struct rbd_obj_request *obj_request)
+ {
+ 	struct ceph_snap_context *snapc = NULL;
+-	struct ceph_osd_client *osdc;
+-	struct ceph_osd_request *osd_req;
  
- 	/* Response will be an encoded string, which includes a length */
+ 	if (obj_request_img_data_test(obj_request) &&
+ 		(op_type == OBJ_OP_DISCARD || op_type == OBJ_OP_WRITE)) {
+@@ -1981,35 +2011,10 @@ static struct ceph_osd_request *rbd_osd_req_create(
  
-@@ -5840,9 +5813,9 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
+ 	rbd_assert(num_ops == 1 || ((op_type == OBJ_OP_WRITE) && num_ops == 2));
  
- 	/* If it doesn't exist we'll assume it's a format 1 image */
- 
--	ret = rbd_obj_method_sync(rbd_dev, object_name,
--				"rbd", "get_id", NULL, 0,
--				response, RBD_IMAGE_ID_LEN_MAX);
-+	ret = rbd_obj_method_sync(rbd_dev, &oid, &rbd_dev->header_oloc,
-+				  "get_id", NULL, 0,
-+				  response, RBD_IMAGE_ID_LEN_MAX);
- 	dout("%s: rbd_obj_method_sync returned %d\n", __func__, ret);
- 	if (ret == -ENOENT) {
- 		image_id = kstrdup("", GFP_KERNEL);
-@@ -5865,8 +5838,7 @@ static int rbd_dev_image_id(struct rbd_device *rbd_dev)
- 	}
- out:
- 	kfree(response);
--	kfree(object_name);
+-	/* Allocate and initialize the request, for the num_ops ops */
 -
-+	ceph_oid_destroy(&oid);
- 	return ret;
+-	osdc = &rbd_dev->rbd_client->client->osdc;
+-	osd_req = ceph_osdc_alloc_request(osdc, snapc, num_ops, false,
+-					  GFP_NOIO);
+-	if (!osd_req)
+-		goto fail;
+-
+-	if (op_type == OBJ_OP_WRITE || op_type == OBJ_OP_DISCARD)
+-		osd_req->r_flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK;
+-	else
+-		osd_req->r_flags = CEPH_OSD_FLAG_READ;
+-
+-	osd_req->r_callback = rbd_osd_req_callback;
+-	osd_req->r_priv = obj_request;
+-
+-	osd_req->r_base_oloc.pool = rbd_dev->layout.pool_id;
+-	if (ceph_oid_aprintf(&osd_req->r_base_oid, GFP_NOIO, "%s",
+-			     obj_request->object_name))
+-		goto fail;
+-
+-	if (ceph_osdc_alloc_messages(osd_req, GFP_NOIO))
+-		goto fail;
+-
+-	return osd_req;
+-
+-fail:
+-	ceph_osdc_put_request(osd_req);
+-	return NULL;
++	return __rbd_osd_req_create(rbd_dev, snapc, num_ops,
++	    (op_type == OBJ_OP_WRITE || op_type == OBJ_OP_DISCARD) ?
++	    CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK : CEPH_OSD_FLAG_READ,
++	    obj_request);
  }
  
+ /*
+@@ -2022,10 +2027,6 @@ static struct ceph_osd_request *
+ rbd_osd_req_create_copyup(struct rbd_obj_request *obj_request)
+ {
+ 	struct rbd_img_request *img_request;
+-	struct ceph_snap_context *snapc;
+-	struct rbd_device *rbd_dev;
+-	struct ceph_osd_client *osdc;
+-	struct ceph_osd_request *osd_req;
+ 	int num_osd_ops = 3;
+ 
+ 	rbd_assert(obj_request_img_data_test(obj_request));
+@@ -2037,36 +2038,12 @@ rbd_osd_req_create_copyup(struct rbd_obj_request *obj_request)
+ 	if (img_request_discard_test(img_request))
+ 		num_osd_ops = 2;
+ 
+-	/* Allocate and initialize the request, for all the ops */
+-
+-	snapc = img_request->snapc;
+-	rbd_dev = img_request->rbd_dev;
+-	osdc = &rbd_dev->rbd_client->client->osdc;
+-	osd_req = ceph_osdc_alloc_request(osdc, snapc, num_osd_ops,
+-						false, GFP_NOIO);
+-	if (!osd_req)
+-		goto fail;
+-
+-	osd_req->r_flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK;
+-	osd_req->r_callback = rbd_osd_req_callback;
+-	osd_req->r_priv = obj_request;
+-
+-	osd_req->r_base_oloc.pool = rbd_dev->layout.pool_id;
+-	if (ceph_oid_aprintf(&osd_req->r_base_oid, GFP_NOIO, "%s",
+-			     obj_request->object_name))
+-		goto fail;
+-
+-	if (ceph_osdc_alloc_messages(osd_req, GFP_NOIO))
+-		goto fail;
+-
+-	return osd_req;
+-
+-fail:
+-	ceph_osdc_put_request(osd_req);
+-	return NULL;
++	return __rbd_osd_req_create(img_request->rbd_dev,
++				    img_request->snapc, num_osd_ops,
++				    CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK,
++				    obj_request);
+ }
+ 
+-
+ static void rbd_osd_req_destroy(struct ceph_osd_request *osd_req)
+ {
+ 	ceph_osdc_put_request(osd_req);
 -- 
 2.4.3
 
