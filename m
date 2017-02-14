@@ -1,86 +1,117 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 13/15] rbd: RBD_V{1,2}_DATA_FORMAT macros
-Date: Tue, 14 Feb 2017 21:12:02 +0100
-Message-ID: <1487103124-2974-14-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 14/15] rbd: store and use obj_request->object_no
+Date: Tue, 14 Feb 2017 21:12:03 +0100
+Message-ID: <1487103124-2974-15-git-send-email-idryomov@gmail.com>
 References: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f196.google.com ([209.85.220.196]:33483 "EHLO
-        mail-qk0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754979AbdBNUMs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:48 -0500
-Received: by mail-qk0-f196.google.com with SMTP id 11so20554900qkl.0
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:47 -0800 (PST)
+Received: from mail-qt0-f194.google.com ([209.85.216.194]:35935 "EHLO
+        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754983AbdBNUMt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:49 -0500
+Received: by mail-qt0-f194.google.com with SMTP id h53so18733987qth.3
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:49 -0800 (PST)
 In-Reply-To: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Alex Elder <elder@ieee.org>
 
-... and also fix up the comment -- format 1 data objects have always
-been 12 hex digits long.
+object_no can be trivially formatted into an object name.  We already
+store object names in OSD requests with special care to avoid dynamic
+allocations for short names.  Storing a name in obj_request, obtained
+as below (!), is a waste and will be removed in the next commit.
+
+    name = kmem_cache_alloc(rbd_segment_name_cache, ...);
+    snprintf(name, ...);
+    obj_request->object_name = kstrdup(name);
+    kmem_cache_free(rbd_segment_name_cache, name);
+    ...
+    ceph_oid_aprintf(..., "%s", obj_request->object_name);
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- drivers/block/rbd.c       | 6 ++----
- drivers/block/rbd_types.h | 7 ++++---
- 2 files changed, 6 insertions(+), 7 deletions(-)
+ drivers/block/rbd.c | 19 +++++++++++++------
+ 1 file changed, 13 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 47cfd5d89e69..3bc84afe5b50 100644
+index 3bc84afe5b50..3133bb66ce18 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -1257,18 +1257,16 @@ static void rbd_segment_name_free(const char *name)
+@@ -232,6 +232,7 @@ enum obj_req_flags {
  
- static const char *rbd_segment_name(struct rbd_device *rbd_dev, u64 offset)
+ struct rbd_obj_request {
+ 	const char		*object_name;
++	u64			object_no;
+ 	u64			offset;		/* object start byte */
+ 	u64			length;		/* bytes from offset */
+ 	unsigned long		flags;
+@@ -1629,8 +1630,8 @@ static void rbd_obj_request_submit(struct rbd_obj_request *obj_request)
  {
+ 	struct ceph_osd_request *osd_req = obj_request->osd_req;
+ 
+-	dout("%s %p \"%s\" %llu~%llu osd_req %p\n", __func__,
+-	     obj_request, obj_request->object_name, obj_request->offset,
++	dout("%s %p object_no %016llx %llu~%llu osd_req %p\n", __func__,
++	     obj_request, obj_request->object_no, obj_request->offset,
+ 	     obj_request->length, osd_req);
+ 	if (obj_request_img_data_test(obj_request)) {
+ 		WARN_ON(obj_request->callback != rbd_img_obj_callback);
+@@ -1925,8 +1926,8 @@ static void rbd_osd_req_callback(struct ceph_osd_request *osd_req)
+ 		rbd_osd_call_callback(obj_request);
+ 		break;
+ 	default:
+-		rbd_warn(NULL, "%s: unsupported op %hu",
+-			obj_request->object_name, (unsigned short) opcode);
++		rbd_warn(NULL, "unexpected OSD op: object_no %016llx opcode %d",
++			 obj_request->object_no, opcode);
+ 		break;
+ 	}
+ 
+@@ -1958,6 +1959,8 @@ __rbd_osd_req_create(struct rbd_device *rbd_dev,
+ {
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	struct ceph_osd_request *req;
 +	const char *name_format = rbd_dev->image_format == 1 ?
 +				      RBD_V1_DATA_FORMAT : RBD_V2_DATA_FORMAT;
- 	char *name;
- 	u64 segment;
- 	int ret;
--	char *name_format;
  
- 	name = kmem_cache_alloc(rbd_segment_name_cache, GFP_NOIO);
- 	if (!name)
- 		return NULL;
- 	segment = offset >> rbd_dev->header.obj_order;
--	name_format = "%s.%012llx";
--	if (rbd_dev->image_format == 2)
--		name_format = "%s.%016llx";
- 	ret = snprintf(name, CEPH_MAX_OID_NAME_LEN + 1, name_format,
- 			rbd_dev->header.object_prefix, segment);
- 	if (ret < 0 || ret > CEPH_MAX_OID_NAME_LEN) {
-diff --git a/drivers/block/rbd_types.h b/drivers/block/rbd_types.h
-index be9c76d292f5..0a15ca3aa0f1 100644
---- a/drivers/block/rbd_types.h
-+++ b/drivers/block/rbd_types.h
-@@ -25,8 +25,8 @@
-  */
+ 	req = ceph_osdc_alloc_request(osdc, snapc, num_ops, false, GFP_NOIO);
+ 	if (!req)
+@@ -1968,8 +1971,8 @@ __rbd_osd_req_create(struct rbd_device *rbd_dev,
+ 	req->r_priv = obj_request;
  
- #define RBD_HEADER_PREFIX      "rbd_header."
--#define RBD_DATA_PREFIX        "rbd_data."
- #define RBD_ID_PREFIX          "rbd_id."
-+#define RBD_V2_DATA_FORMAT     "%s.%016llx"
+ 	req->r_base_oloc.pool = rbd_dev->layout.pool_id;
+-	if (ceph_oid_aprintf(&req->r_base_oid, GFP_NOIO, "%s",
+-			     obj_request->object_name))
++	if (ceph_oid_aprintf(&req->r_base_oid, GFP_NOIO, name_format,
++			rbd_dev->header.object_prefix, obj_request->object_no))
+ 		goto err_req;
  
- #define RBD_LOCK_NAME          "rbd_lock"
- #define RBD_LOCK_TAG           "internal"
-@@ -42,13 +42,14 @@ enum rbd_notify_op {
- /*
-  * For format version 1, rbd image 'foo' consists of objects
-  *   foo.rbd		- image metadata
-- *   rb.<idhi>.<idlo>.00000000
-- *   rb.<idhi>.<idlo>.00000001
-+ *   rb.<idhi>.<idlo>.000000000000
-+ *   rb.<idhi>.<idlo>.000000000001
-  *   ...		- data
-  * There is no notion of a persistent image id in rbd format 1.
-  */
+ 	if (ceph_osdc_alloc_messages(req, GFP_NOIO))
+@@ -2488,6 +2491,7 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
+ 	while (resid) {
+ 		struct ceph_osd_request *osd_req;
+ 		const char *object_name;
++		u64 object_no = img_offset >> rbd_dev->header.obj_order;
+ 		u64 offset = rbd_segment_offset(rbd_dev, img_offset);
+ 		u64 length = rbd_segment_length(rbd_dev, img_offset, resid);
  
- #define RBD_SUFFIX		".rbd"
-+#define RBD_V1_DATA_FORMAT	"%s.%012llx"
+@@ -2500,6 +2504,7 @@ static int rbd_img_request_fill(struct rbd_img_request *img_request,
+ 		if (!obj_request)
+ 			goto out_unwind;
  
- #define RBD_DIRECTORY           "rbd_directory"
- #define RBD_INFO                "rbd_info"
++		obj_request->object_no = object_no;
+ 		obj_request->offset = offset;
+ 		obj_request->length = length;
+ 
+@@ -2846,6 +2851,8 @@ static int rbd_img_obj_exists_submit(struct rbd_obj_request *obj_request)
+ 	if (!stat_request)
+ 		return -ENOMEM;
+ 
++	stat_request->object_no = obj_request->object_no;
++
+ 	stat_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_READ, 1,
+ 						   stat_request);
+ 	if (!stat_request->osd_req) {
 -- 
 2.4.3
 
