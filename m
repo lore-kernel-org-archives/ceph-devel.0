@@ -1,142 +1,76 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 04/15] rbd: do away with obj_request in rbd_obj_read_sync()
-Date: Tue, 14 Feb 2017 21:11:53 +0100
-Message-ID: <1487103124-2974-5-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 05/15] libceph: pass reply buffer length through ceph_osdc_call()
+Date: Tue, 14 Feb 2017 21:11:54 +0100
+Message-ID: <1487103124-2974-6-git-send-email-idryomov@gmail.com>
 References: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f194.google.com ([209.85.216.194]:35875 "EHLO
-        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754923AbdBNUMe (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:34 -0500
-Received: by mail-qt0-f194.google.com with SMTP id h53so18733499qth.3
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:34 -0800 (PST)
+Received: from mail-qt0-f195.google.com ([209.85.216.195]:35879 "EHLO
+        mail-qt0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754953AbdBNUMk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:40 -0500
+Received: by mail-qt0-f195.google.com with SMTP id h53so18733528qth.3
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:40 -0800 (PST)
 In-Reply-To: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Alex Elder <elder@ieee.org>
 
-rbd_obj_request machinery is completely unnecessary here; all that's
-being done is fetching a metadata object - no striping, cloning, etc.
-More importantly, rbd_osd_req_create() grabs pool id from layout and
-that is becoming a data pool id.
-
-Kill offset argument - all metadata objects are small and read in full.
+To spare checking for "this reply fits into a page, but does it fit
+into my buffer?" in some callers, osd_req_op_cls_response_data_pages()
+needs to know how big it is.
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- drivers/block/rbd.c | 81 +++++++++++++++++++++--------------------------------
- 1 file changed, 32 insertions(+), 49 deletions(-)
+ net/ceph/cls_lock_client.c | 2 +-
+ net/ceph/osd_client.c      | 7 +++++--
+ 2 files changed, 6 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 24e8116d3431..e55e26f7e4d8 100644
---- a/drivers/block/rbd.c
-+++ b/drivers/block/rbd.c
-@@ -4242,63 +4242,46 @@ static void rbd_free_disk(struct rbd_device *rbd_dev)
- }
- 
- static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
--				const char *object_name,
--				u64 offset, u64 length, void *buf)
-+			     struct ceph_object_id *oid,
-+			     struct ceph_object_locator *oloc,
-+			     void *buf, int buf_len)
- 
- {
--	struct rbd_obj_request *obj_request;
--	struct page **pages = NULL;
--	u32 page_count;
--	size_t size;
-+	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
-+	struct ceph_osd_request *req;
-+	struct page **pages;
-+	int num_pages = calc_pages_for(0, buf_len);
+diff --git a/net/ceph/cls_lock_client.c b/net/ceph/cls_lock_client.c
+index 50f040fdb2a9..f13a1ea87459 100644
+--- a/net/ceph/cls_lock_client.c
++++ b/net/ceph/cls_lock_client.c
+@@ -278,7 +278,7 @@ int ceph_cls_lock_info(struct ceph_osd_client *osdc,
+ 	int get_info_op_buf_size;
+ 	int name_len = strlen(lock_name);
+ 	struct page *get_info_op_page, *reply_page;
+-	size_t reply_len;
++	size_t reply_len = PAGE_SIZE;
+ 	void *p, *end;
  	int ret;
  
--	page_count = (u32) calc_pages_for(offset, length);
--	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
--	if (IS_ERR(pages))
--		return PTR_ERR(pages);
--
--	ret = -ENOMEM;
--	obj_request = rbd_obj_request_create(object_name, offset, length,
--							OBJ_REQUEST_PAGES);
--	if (!obj_request)
--		goto out;
--
--	obj_request->pages = pages;
--	obj_request->page_count = page_count;
--
--	obj_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_READ, 1,
--						  obj_request);
--	if (!obj_request->osd_req)
--		goto out;
-+	req = ceph_osdc_alloc_request(osdc, NULL, 1, false, GFP_KERNEL);
-+	if (!req)
-+		return -ENOMEM;
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 3a2417bb6ff0..ac4753421d0c 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -4023,7 +4023,7 @@ EXPORT_SYMBOL(ceph_osdc_maybe_request_map);
+  * Execute an OSD class method on an object.
+  *
+  * @flags: CEPH_OSD_FLAG_*
+- * @resp_len: out param for reply length
++ * @resp_len: in/out param for reply length
+  */
+ int ceph_osdc_call(struct ceph_osd_client *osdc,
+ 		   struct ceph_object_id *oid,
+@@ -4036,6 +4036,9 @@ int ceph_osdc_call(struct ceph_osd_client *osdc,
+ 	struct ceph_osd_request *req;
+ 	int ret;
  
--	osd_req_op_extent_init(obj_request->osd_req, 0, CEPH_OSD_OP_READ,
--					offset, length, 0, 0);
--	osd_req_op_extent_osd_data_pages(obj_request->osd_req, 0,
--					obj_request->pages,
--					obj_request->length,
--					obj_request->offset & ~PAGE_MASK,
--					false, false);
-+	ceph_oid_copy(&req->r_base_oid, oid);
-+	ceph_oloc_copy(&req->r_base_oloc, oloc);
-+	req->r_flags = CEPH_OSD_FLAG_READ;
- 
--	rbd_obj_request_submit(obj_request);
--	ret = rbd_obj_request_wait(obj_request);
-+	ret = ceph_osdc_alloc_messages(req, GFP_KERNEL);
- 	if (ret)
--		goto out;
-+		goto out_req;
- 
--	ret = obj_request->result;
--	if (ret < 0)
--		goto out;
-+	pages = ceph_alloc_page_vector(num_pages, GFP_KERNEL);
-+	if (IS_ERR(pages)) {
-+		ret = PTR_ERR(pages);
-+		goto out_req;
-+	}
- 
--	rbd_assert(obj_request->xferred <= (u64) SIZE_MAX);
--	size = (size_t) obj_request->xferred;
--	ceph_copy_from_page_vector(pages, buf, 0, size);
--	rbd_assert(size <= (size_t)INT_MAX);
--	ret = (int)size;
--out:
--	if (obj_request)
--		rbd_obj_request_put(obj_request);
--	else
--		ceph_release_page_vector(pages, page_count);
-+	osd_req_op_extent_init(req, 0, CEPH_OSD_OP_READ, 0, buf_len, 0, 0);
-+	osd_req_op_extent_osd_data_pages(req, 0, pages, buf_len, 0, false,
-+					 true);
++	if (req_len > PAGE_SIZE || (resp_page && *resp_len > PAGE_SIZE))
++		return -E2BIG;
 +
-+	ceph_osdc_start_request(osdc, req, false);
-+	ret = ceph_osdc_wait_request(osdc, req);
-+	if (ret >= 0)
-+		ceph_copy_from_page_vector(pages, buf, 0, ret);
+ 	req = ceph_osdc_alloc_request(osdc, NULL, 1, false, GFP_NOIO);
+ 	if (!req)
+ 		return -ENOMEM;
+@@ -4054,7 +4057,7 @@ int ceph_osdc_call(struct ceph_osd_client *osdc,
+ 						  0, false, false);
+ 	if (resp_page)
+ 		osd_req_op_cls_response_data_pages(req, 0, &resp_page,
+-						   PAGE_SIZE, 0, false, false);
++						   *resp_len, 0, false, false);
  
-+out_req:
-+	ceph_osdc_put_request(req);
- 	return ret;
- }
- 
-@@ -4334,8 +4317,8 @@ static int rbd_dev_v1_header_info(struct rbd_device *rbd_dev)
- 		if (!ondisk)
- 			return -ENOMEM;
- 
--		ret = rbd_obj_read_sync(rbd_dev, rbd_dev->header_oid.name,
--				       0, size, ondisk);
-+		ret = rbd_obj_read_sync(rbd_dev, &rbd_dev->header_oid,
-+					&rbd_dev->header_oloc, ondisk, size);
- 		if (ret < 0)
- 			goto out;
- 		if ((size_t)ret < size) {
+ 	ceph_osdc_start_request(osdc, req, false);
+ 	ret = ceph_osdc_wait_request(osdc, req);
 -- 
 2.4.3
 
