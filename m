@@ -1,38 +1,41 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: OSD has the store locked???
-Date: Tue, 14 Feb 2017 14:56:06 +0100
-Message-ID: <557f1d59-33c5-3da3-926e-f87160da272b@digiware.nl>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: cleanup: add override where possible when implementing an
+ interface
+Date: Tue, 14 Feb 2017 14:11:57 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1702141410190.7782@piezo.novalocal>
+References: <CACKY0b8Xy5JNC-5Y8BcQEW8QDrHq85Qa7=nC9DjB3H+VmbarNQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:21396 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752804AbdBNN4U (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 14 Feb 2017 08:56:20 -0500
-Received: from [192.168.10.67] (opteron [192.168.10.67])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by smtp.digiware.nl (Postfix) with ESMTPSA id 3F275384E8
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 14:56:15 +0100 (CET)
+Received: from cobra.newdream.net ([66.33.216.30]:58503 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753259AbdBNOMB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 09:12:01 -0500
+In-Reply-To: <CACKY0b8Xy5JNC-5Y8BcQEW8QDrHq85Qa7=nC9DjB3H+VmbarNQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: liuchang0812 <liuchang0812@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+On Tue, 14 Feb 2017, liuchang0812 wrote:
+> Hi, Sage and Cephers:
+> 
+> I saw a issue "add override where possible when implementing an
+> interface". So I used a LLVM tool called clang-tidy to do it
+> automatically. .
+> 
+> I have made a big changes:
+> 
+>       246 files changed, 1305 insertions(+), 1305 deletions(-)
+> 
+> I could build it successfully, should I make a Pull-Request?
 
-Running ceph_objectstore_tool.py just about all command get the
-complaint that "OSD has the store locked".
+Yeah sure!  If you could break it up by subsystem (rgw, osd, rbd, mds, 
+everything else) that would help.  Thanks!
+ 
+> BTW, I am pleasure to write a simple documentation about this tool if
+> we need this.
 
-Like:
-Test --op list variants
-OSD has the store locked
-ERROR:Bad exit status 1 from
-/home/jenkins/workspace/ceph-master/build/bin/ceph-objectstore-tool
---data-path /home/jenkins/workspace/ceph-master/build/cot_dir/dev/osd0
---op list --format json
+Sure!  Something in doc/dev, or even just an email to the list?
 
-Why would I get "the store locked"??
-
-Thanx,
---WjW
+sage
