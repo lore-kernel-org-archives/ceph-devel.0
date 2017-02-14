@@ -1,49 +1,142 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 01/15] rbd: use kstrndup() in rbd_header_from_disk()
-Date: Tue, 14 Feb 2017 21:11:50 +0100
-Message-ID: <1487103124-2974-2-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 04/15] rbd: do away with obj_request in rbd_obj_read_sync()
+Date: Tue, 14 Feb 2017 21:11:53 +0100
+Message-ID: <1487103124-2974-5-git-send-email-idryomov@gmail.com>
 References: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f193.google.com ([209.85.220.193]:36129 "EHLO
-        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754915AbdBNUMb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:31 -0500
-Received: by mail-qk0-f193.google.com with SMTP id p22so12928956qka.3
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:30 -0800 (PST)
+Received: from mail-qt0-f194.google.com ([209.85.216.194]:35875 "EHLO
+        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754923AbdBNUMe (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:34 -0500
+Received: by mail-qt0-f194.google.com with SMTP id h53so18733499qth.3
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:34 -0800 (PST)
 In-Reply-To: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Alex Elder <elder@ieee.org>
 
+rbd_obj_request machinery is completely unnecessary here; all that's
+being done is fetching a metadata object - no striping, cloning, etc.
+More importantly, rbd_osd_req_create() grabs pool id from layout and
+that is becoming a data pool id.
+
+Kill offset argument - all metadata objects are small and read in full.
+
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- drivers/block/rbd.c | 10 +++-------
- 1 file changed, 3 insertions(+), 7 deletions(-)
+ drivers/block/rbd.c | 81 +++++++++++++++++++++--------------------------------
+ 1 file changed, 32 insertions(+), 49 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 40a15ae354ce..76e538c3378e 100644
+index 24e8116d3431..e55e26f7e4d8 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -992,15 +992,11 @@ static int rbd_header_from_disk(struct rbd_device *rbd_dev,
- 	/* Allocate this now to avoid having to handle failure below */
+@@ -4242,63 +4242,46 @@ static void rbd_free_disk(struct rbd_device *rbd_dev)
+ }
  
- 	if (first_time) {
--		size_t len;
+ static int rbd_obj_read_sync(struct rbd_device *rbd_dev,
+-				const char *object_name,
+-				u64 offset, u64 length, void *buf)
++			     struct ceph_object_id *oid,
++			     struct ceph_object_locator *oloc,
++			     void *buf, int buf_len)
+ 
+ {
+-	struct rbd_obj_request *obj_request;
+-	struct page **pages = NULL;
+-	u32 page_count;
+-	size_t size;
++	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
++	struct ceph_osd_request *req;
++	struct page **pages;
++	int num_pages = calc_pages_for(0, buf_len);
+ 	int ret;
+ 
+-	page_count = (u32) calc_pages_for(offset, length);
+-	pages = ceph_alloc_page_vector(page_count, GFP_KERNEL);
+-	if (IS_ERR(pages))
+-		return PTR_ERR(pages);
 -
--		len = strnlen(ondisk->object_prefix,
--				sizeof (ondisk->object_prefix));
--		object_prefix = kmalloc(len + 1, GFP_KERNEL);
-+		object_prefix = kstrndup(ondisk->object_prefix,
-+					 sizeof(ondisk->object_prefix),
-+					 GFP_KERNEL);
- 		if (!object_prefix)
- 			return -ENOMEM;
--		memcpy(object_prefix, ondisk->object_prefix, len);
--		object_prefix[len] = '\0';
- 	}
+-	ret = -ENOMEM;
+-	obj_request = rbd_obj_request_create(object_name, offset, length,
+-							OBJ_REQUEST_PAGES);
+-	if (!obj_request)
+-		goto out;
+-
+-	obj_request->pages = pages;
+-	obj_request->page_count = page_count;
+-
+-	obj_request->osd_req = rbd_osd_req_create(rbd_dev, OBJ_OP_READ, 1,
+-						  obj_request);
+-	if (!obj_request->osd_req)
+-		goto out;
++	req = ceph_osdc_alloc_request(osdc, NULL, 1, false, GFP_KERNEL);
++	if (!req)
++		return -ENOMEM;
  
- 	/* Allocate the snapshot context and fill it in */
+-	osd_req_op_extent_init(obj_request->osd_req, 0, CEPH_OSD_OP_READ,
+-					offset, length, 0, 0);
+-	osd_req_op_extent_osd_data_pages(obj_request->osd_req, 0,
+-					obj_request->pages,
+-					obj_request->length,
+-					obj_request->offset & ~PAGE_MASK,
+-					false, false);
++	ceph_oid_copy(&req->r_base_oid, oid);
++	ceph_oloc_copy(&req->r_base_oloc, oloc);
++	req->r_flags = CEPH_OSD_FLAG_READ;
+ 
+-	rbd_obj_request_submit(obj_request);
+-	ret = rbd_obj_request_wait(obj_request);
++	ret = ceph_osdc_alloc_messages(req, GFP_KERNEL);
+ 	if (ret)
+-		goto out;
++		goto out_req;
+ 
+-	ret = obj_request->result;
+-	if (ret < 0)
+-		goto out;
++	pages = ceph_alloc_page_vector(num_pages, GFP_KERNEL);
++	if (IS_ERR(pages)) {
++		ret = PTR_ERR(pages);
++		goto out_req;
++	}
+ 
+-	rbd_assert(obj_request->xferred <= (u64) SIZE_MAX);
+-	size = (size_t) obj_request->xferred;
+-	ceph_copy_from_page_vector(pages, buf, 0, size);
+-	rbd_assert(size <= (size_t)INT_MAX);
+-	ret = (int)size;
+-out:
+-	if (obj_request)
+-		rbd_obj_request_put(obj_request);
+-	else
+-		ceph_release_page_vector(pages, page_count);
++	osd_req_op_extent_init(req, 0, CEPH_OSD_OP_READ, 0, buf_len, 0, 0);
++	osd_req_op_extent_osd_data_pages(req, 0, pages, buf_len, 0, false,
++					 true);
++
++	ceph_osdc_start_request(osdc, req, false);
++	ret = ceph_osdc_wait_request(osdc, req);
++	if (ret >= 0)
++		ceph_copy_from_page_vector(pages, buf, 0, ret);
+ 
++out_req:
++	ceph_osdc_put_request(req);
+ 	return ret;
+ }
+ 
+@@ -4334,8 +4317,8 @@ static int rbd_dev_v1_header_info(struct rbd_device *rbd_dev)
+ 		if (!ondisk)
+ 			return -ENOMEM;
+ 
+-		ret = rbd_obj_read_sync(rbd_dev, rbd_dev->header_oid.name,
+-				       0, size, ondisk);
++		ret = rbd_obj_read_sync(rbd_dev, &rbd_dev->header_oid,
++					&rbd_dev->header_oloc, ondisk, size);
+ 		if (ret < 0)
+ 			goto out;
+ 		if ((size_t)ret < size) {
 -- 
 2.4.3
 
