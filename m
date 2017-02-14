@@ -1,52 +1,79 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 03/15] rbd: initialize rbd_dev->header_oloc early
-Date: Tue, 14 Feb 2017 21:11:52 +0100
-Message-ID: <1487103124-2974-4-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 02/15] rbd: kill rbd_image_header::{crypt_type,comp_type}
+Date: Tue, 14 Feb 2017 21:11:51 +0100
+Message-ID: <1487103124-2974-3-git-send-email-idryomov@gmail.com>
 References: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f194.google.com ([209.85.220.194]:34850 "EHLO
-        mail-qk0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754915AbdBNUMd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:33 -0500
-Received: by mail-qk0-f194.google.com with SMTP id u25so20603163qki.2
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:33 -0800 (PST)
+Received: from mail-qk0-f195.google.com ([209.85.220.195]:36133 "EHLO
+        mail-qk0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754730AbdBNUMc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 15:12:32 -0500
+Received: by mail-qk0-f195.google.com with SMTP id p22so12928996qka.3
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 12:12:31 -0800 (PST)
 In-Reply-To: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Alex Elder <elder@ieee.org>
 
-No reason to delay it until image_id is known.  This will be required
-by some rbd_obj_method_sync() callers, after rbd_obj_method_sync() is
-changed to take oloc.
+Image format 1 is deprecated and format 2 doesn't have these.  Also,
+__rbd_dev_create() takes care of zeroing (or otherwise initializing)
+format 2 specific fields.
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- drivers/block/rbd.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ drivers/block/rbd.c       | 9 ---------
+ drivers/block/rbd_types.h | 3 ---
+ 2 files changed, 12 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index a6ad714c85ac..24e8116d3431 100644
+index 76e538c3378e..a6ad714c85ac 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -4863,7 +4863,7 @@ static struct rbd_device *__rbd_dev_create(struct rbd_client *rbdc,
- 	init_rwsem(&rbd_dev->header_rwsem);
+@@ -144,8 +144,6 @@ struct rbd_image_header {
+ 	/* These six fields never change for a given rbd image */
+ 	char *object_prefix;
+ 	__u8 obj_order;
+-	__u8 crypt_type;
+-	__u8 comp_type;
+ 	u64 stripe_unit;
+ 	u64 stripe_count;
+ 	u64 features;		/* Might be changeable someday? */
+@@ -1047,12 +1045,6 @@ static int rbd_header_from_disk(struct rbd_device *rbd_dev,
+ 	if (first_time) {
+ 		header->object_prefix = object_prefix;
+ 		header->obj_order = ondisk->options.order;
+-		header->crypt_type = ondisk->options.crypt_type;
+-		header->comp_type = ondisk->options.comp_type;
+-		/* The rest aren't used for format 1 images */
+-		header->stripe_unit = 0;
+-		header->stripe_count = 0;
+-		header->features = 0;
+ 	} else {
+ 		ceph_put_snap_context(header->snapc);
+ 		kfree(header->snap_names);
+@@ -5938,7 +5930,6 @@ static int rbd_dev_v2_header_onetime(struct rbd_device *rbd_dev)
+ 		if (ret < 0)
+ 			goto out_err;
+ 	}
+-	/* No support for crypto and compression type format 2 images */
  
- 	ceph_oid_init(&rbd_dev->header_oid);
--	ceph_oloc_init(&rbd_dev->header_oloc);
-+	rbd_dev->header_oloc.pool = spec->pool_id;
+ 	return 0;
+ out_err:
+diff --git a/drivers/block/rbd_types.h b/drivers/block/rbd_types.h
+index 94f367db27b0..be9c76d292f5 100644
+--- a/drivers/block/rbd_types.h
++++ b/drivers/block/rbd_types.h
+@@ -57,9 +57,6 @@ enum rbd_notify_op {
+ #define RBD_MIN_OBJ_ORDER       16
+ #define RBD_MAX_OBJ_ORDER       30
  
- 	mutex_init(&rbd_dev->watch_mutex);
- 	rbd_dev->watch_state = RBD_WATCH_STATE_UNREGISTERED;
-@@ -6062,8 +6062,6 @@ static int rbd_dev_header_name(struct rbd_device *rbd_dev)
- 	/* Record the header object name for this rbd image. */
- 
- 	rbd_assert(rbd_image_format_valid(rbd_dev->image_format));
+-#define RBD_COMP_NONE		0
+-#define RBD_CRYPT_NONE		0
 -
--	rbd_dev->header_oloc.pool = rbd_dev->layout.pool_id;
- 	if (rbd_dev->image_format == 1)
- 		ret = ceph_oid_aprintf(&rbd_dev->header_oid, GFP_KERNEL, "%s%s",
- 				       spec->image_name, RBD_SUFFIX);
+ #define RBD_HEADER_TEXT		"<<< Rados Block Device Image >>>\n"
+ #define RBD_HEADER_SIGNATURE	"RBD"
+ #define RBD_HEADER_VERSION	"001.005"
 -- 
 2.4.3
 
