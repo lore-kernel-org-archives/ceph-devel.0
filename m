@@ -1,35 +1,78 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: hammer 0.94.10 QE status
-Date: Tue, 14 Feb 2017 09:05:55 -0800
-Message-ID: <CAMMFjmFoAZYC22zbsKKsqT2xmG4hQh=Df=Y_TpmOBjnyQcRjBA@mail.gmail.com>
-References: <CAMMFjmHCAM6wmygytBDqwh89UOEex24_GGqrLJvXcOUS+QEg9A@mail.gmail.com>
- <CAOi1vP9rX_r3Rg2ZiXzS3QrEC3piM4hwhxBqHqDTU=zpCy3uwQ@mail.gmail.com>
- <CAOi1vP9FQJJxzE_SnaJ3QLFJ6NiZGqozswyT8scMUmqjZkbjRw@mail.gmail.com> <90f9fb1d-74fa-3ae0-e5b7-186e5d1b2638@suse.cz>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: OSD has the store locked???
+Date: Wed, 15 Feb 2017 01:11:21 +0800
+Message-ID: <CAJE9aOOOPrQjphwTkj6+hZ7M8dEw=+5crB_KgOnU2tyXJd9ZKw@mail.gmail.com>
+References: <557f1d59-33c5-3da3-926e-f87160da272b@digiware.nl>
+ <598746059.1724.1487085785680.JavaMail.open-xchange@ox03.mail.pcextreme.nl> <7c322e3d-1c6b-7369-d196-52106dd114e6@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f174.google.com ([209.85.128.174]:35386 "EHLO
-        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755120AbdBNRF6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 12:05:58 -0500
-Received: by mail-wr0-f174.google.com with SMTP id c4so16604155wrd.2
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 09:05:57 -0800 (PST)
-In-Reply-To: <90f9fb1d-74fa-3ae0-e5b7-186e5d1b2638@suse.cz>
+Received: from mail-ua0-f173.google.com ([209.85.217.173]:33889 "EHLO
+        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754315AbdBNRLX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 12:11:23 -0500
+Received: by mail-ua0-f173.google.com with SMTP id 35so90297346uak.1
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 09:11:22 -0800 (PST)
+In-Reply-To: <7c322e3d-1c6b-7369-d196-52106dd114e6@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Ilya Dryomov <idryomov@gmail.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, John Spray <jspray@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: "wido@42on.com" <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Let's retest !
+On Tue, Feb 14, 2017 at 11:55 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> On 14-2-2017 16:23, wido@42on.com wrote:
+>>
+>>
+>>> Op 14 feb. 2017 om 14:57 heeft Willem Jan Withagen <wjw@digiware.nl> het volgende geschreven:
+>>>
+>>> Hi,
+>>>
+>>> Running ceph_objectstore_tool.py just about all command get the
+>>> complaint that "OSD has the store locked".
+>>>
+>>
+>> Is the OSD still running? If so, stop it first.
+>>
+>> Wido
+>>
+>>> Like:
+>>> Test --op list variants
+>>> OSD has the store locked
+>>> ERROR:Bad exit status 1 from
+>>> /home/jenkins/workspace/ceph-master/build/bin/ceph-objectstore-tool
+>>> --data-path /home/jenkins/workspace/ceph-master/build/cot_dir/dev/osd0
+>>> --op list --format json
+>>>
+>>> Why would I get "the store locked"??
+>
+> Hi Wido,
+>
+> A usual I have to apologize for not supplying all the details.
+>
+> This is from my FreeBSD ceph-master jenkins testbot, that runs into this
+> problem over, over and over.
+> The tests are serialized, so I'd expect to have no OSDs leftover before
+> a new test is running.
+>
+> ATM there are no OSDs running.
+>
+> Who is generating this error:
+>         ceph_objectstore_tool itself
+> or      the OSD via one of the com-channels
+>
 
-On Thu, Feb 2, 2017 at 3:17 AM, Nathan Cutler <ncutler@suse.cz> wrote:
->> Turned out to be a buggy test -- hammer is missing an infernalis
->> commit f217865cf7c4 ("test_librbd_fsx: invalidate before discard in
->> krbd mode").
+Willem, this issue is spotted in the jenkins run on github also.
+
+> --WjW
 >
 >
-> I gave it a try; please take a look:
->
-> * https://github.com/ceph/ceph/pull/13230
->
-> Nathan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Regards
+Kefu Chai
