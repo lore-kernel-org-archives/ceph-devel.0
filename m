@@ -1,30 +1,34 @@
-From: Dongsheng Yang <dongsheng.yang-zgCPCz31fAiwd6j6Zg/5ug@public.gmane.org>
-Subject: bcache vs flashcache vs cache tiering
-Date: Tue, 14 Feb 2017 17:00:30 +0800
-Message-ID: <58A2C72E.6090200@easystack.cn>
+From: liuchang0812 <liuchang0812@gmail.com>
+Subject: cleanup: add override where possible when implementing an interface
+Date: Tue, 14 Feb 2017 17:08:37 +0800
+Message-ID: <CACKY0b8Xy5JNC-5Y8BcQEW8QDrHq85Qa7=nC9DjB3H+VmbarNQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <notifications-9UaJU3cA/F/QT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yw0-f171.google.com ([209.85.161.171]:33458 "EHLO
+        mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750859AbdBNJIi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Feb 2017 04:08:38 -0500
+Received: by mail-yw0-f171.google.com with SMTP id u68so62839881ywg.0
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Feb 2017 01:08:38 -0800 (PST)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Sage and all,
-     We are going to use SSDs for cache in ceph. But I am not sure which 
-one is the best solution, bcache? flashcache? or cache tier?
+Hi, Sage and Cephers:
 
-I found there are some CAUTION in ceph.com about cache tiering. Is cache 
-tiering is already production ready? especially for rbd.
+I saw a issue "add override where possible when implementing an
+interface". So I used a LLVM tool called clang-tidy to do it
+automatically. .
 
-thanx in advance.
-Yang
+I have made a big changes:
+
+      246 files changed, 1305 insertions(+), 1305 deletions(-)
+
+I could build it successfully, should I make a Pull-Request?
+
+BTW, I am pleasure to write a simple documentation about this tool if
+we need this.
+
+
+thanks.
