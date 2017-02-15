@@ -1,58 +1,33 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 01/15] rbd: use kstrndup() in rbd_header_from_disk()
-Date: Wed, 15 Feb 2017 09:52:30 -0600
-Message-ID: <4a3a3218-9628-e901-f707-68bd88959aeb@ieee.org>
-References: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
- <1487103124-2974-2-git-send-email-idryomov@gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: perf meeting: new URL reminder
+Date: Wed, 15 Feb 2017 10:03:47 -0600
+Message-ID: <c871f087-f8af-9c43-327c-34cf9fdf70dd@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f54.google.com ([209.85.214.54]:37516 "EHLO
-        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751175AbdBOPwc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Feb 2017 10:52:32 -0500
-Received: by mail-it0-f54.google.com with SMTP id x75so65488499itb.0
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Feb 2017 07:52:32 -0800 (PST)
-In-Reply-To: <1487103124-2974-2-git-send-email-idryomov@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:59106 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750806AbdBOQDs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 15 Feb 2017 11:03:48 -0500
+Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 1370EC051663
+        for <ceph-devel@vger.kernel.org>; Wed, 15 Feb 2017 16:03:49 +0000 (UTC)
+Received: from [10.3.117.101] (ovpn-117-101.phx2.redhat.com [10.3.117.101])
+        by int-mx11.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id v1FG3mkG017708
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+        for <ceph-devel@vger.kernel.org>; Wed, 15 Feb 2017 11:03:48 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 02/14/2017 02:11 PM, Ilya Dryomov wrote:
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+Hi Guys,
 
-Looks good.
+Just a reminder to please use the new meeting URL:
 
-Reviewed-by: Alex Elder <elder@linaro.org>
+https://bluejeans.com/944567299
 
-
-> ---
->  drivers/block/rbd.c | 10 +++-------
->  1 file changed, 3 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 40a15ae354ce..76e538c3378e 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -992,15 +992,11 @@ static int rbd_header_from_disk(struct rbd_device *rbd_dev,
->  	/* Allocate this now to avoid having to handle failure below */
->  
->  	if (first_time) {
-> -		size_t len;
-> -
-> -		len = strnlen(ondisk->object_prefix,
-> -				sizeof (ondisk->object_prefix));
-> -		object_prefix = kmalloc(len + 1, GFP_KERNEL);
-> +		object_prefix = kstrndup(ondisk->object_prefix,
-> +					 sizeof(ondisk->object_prefix),
-> +					 GFP_KERNEL);
->  		if (!object_prefix)
->  			return -ENOMEM;
-> -		memcpy(object_prefix, ondisk->object_prefix, len);
-> -		object_prefix[len] = '\0';
->  	}
->  
->  	/* Allocate the snapshot context and fill it in */
-> 
-
+Thanks!
+Mark
