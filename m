@@ -1,19 +1,19 @@
 From: Alex Elder <elder@ieee.org>
 Subject: Re: [PATCH 01/15] rbd: use kstrndup() in rbd_header_from_disk()
-Date: Wed, 15 Feb 2017 09:52:14 -0600
-Message-ID: <f23ab023-cb4e-f605-ada5-0480a174c9d7@ieee.org>
+Date: Wed, 15 Feb 2017 09:52:30 -0600
+Message-ID: <4a3a3218-9628-e901-f707-68bd88959aeb@ieee.org>
 References: <1487103124-2974-1-git-send-email-idryomov@gmail.com>
  <1487103124-2974-2-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f49.google.com ([209.85.214.49]:35503 "EHLO
-        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750905AbdBOPwR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Feb 2017 10:52:17 -0500
-Received: by mail-it0-f49.google.com with SMTP id 203so67080516ith.0
-        for <ceph-devel@vger.kernel.org>; Wed, 15 Feb 2017 07:52:16 -0800 (PST)
+Received: from mail-it0-f54.google.com ([209.85.214.54]:37516 "EHLO
+        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751175AbdBOPwc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Feb 2017 10:52:32 -0500
+Received: by mail-it0-f54.google.com with SMTP id x75so65488499itb.0
+        for <ceph-devel@vger.kernel.org>; Wed, 15 Feb 2017 07:52:32 -0800 (PST)
 In-Reply-To: <1487103124-2974-2-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
