@@ -1,51 +1,212 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH v3 0/2] iov_iter: allow iov_iter_get_pages_alloc to
- allocate more pages per call
-Date: Thu, 16 Feb 2017 08:10:27 -0500
-Message-ID: <1487250627.3661.1.camel@redhat.com>
-References: <20170124212327.14517-1-jlayton@redhat.com>
-         <20170125133205.21704-1-jlayton@redhat.com>
-         <20170202095125.GF27291@ZenIV.linux.org.uk>
+From: Jaze Lee <jazeltq@gmail.com>
+Subject: Re: [RFC v5] RBD: Add support readv,writev for rbd
+Date: Thu, 16 Feb 2017 22:03:52 +0800
+Message-ID: <CAKZcxgfA6YvAOZfngyf0QC5iF1WwGK86DcXPJPwBOr_XFfzMuA@mail.gmail.com>
+References: <20170216084318.11122-1-jazeltq@gmail.com> <20170216090002.12511-1-jazeltq@gmail.com>
+ <D7075812-8210-4092-8ED4-BB6FAC4E612C@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170202095125.GF27291@ZenIV.linux.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Al Viro <viro@ZenIV.linux.org.uk>
-Cc: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org, lustre-devel@lists.lustre.org, v9fs-developer@lists.sourceforge.net, Linus Torvalds <torvalds@linux-foundation.org>, Jan Kara <jack@suse.cz>, Chris Wilson <chris@chris-wilson.co.uk>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-it0-f67.google.com ([209.85.214.67]:35621 "EHLO
+        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754616AbdBPODy (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 09:03:54 -0500
+Received: by mail-it0-f67.google.com with SMTP id 203so4129393ith.2
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Feb 2017 06:03:53 -0800 (PST)
+In-Reply-To: <D7075812-8210-4092-8ED4-BB6FAC4E612C@gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Tiger Hu <hufh2004@gmail.com>
+Cc: Josh Durgin <jdurgin@redhat.com>, jcody@redhat.com, Jason Dillaman <dillaman@redhat.com>, kwolf@redhat.com, mreitz@redhat.com, qemu-block@nongnu.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, tianqing <tianqing@unitedstack.com>
 
-On Thu, 2017-02-02 at 09:51 +0000, Al Viro wrote:
-> On Wed, Jan 25, 2017 at 08:32:03AM -0500, Jeff Layton wrote:
-> > Small respin of the patch that I sent yesterday for the same thing.
-> > 
-> > This moves the maxsize handling into iov_iter_pvec_size, so that we don't
-> > end up iterating past the max size we'll use anyway when trying to
-> > determine the pagevec length.
-> > 
-> > Also, a respun patch to make ceph use iov_iter_get_pages_alloc instead of
-> > trying to do it via its own routine.
-> > 
-> > Al, if these look ok, do you want to pick these up or shall I ask
-> > Ilya to merge them via the ceph tree?
-> 
-> I'd rather have that kind of work go through the vfs tree; said that,
-> I really wonder if this is the right approach.  Most of the users of
-> iov_iter_get_pages()/iov_iter_get_pages_alloc() look like they want
-> something like
-> 	iov_iter_for_each_page(iter, size, f, data)
-> with int (*f)(struct page *page, size_t from, size_t size, void *data)
-> passed as callback.  Not everything fits that model, but there's a whole
-> lot of things that do.
-> 
+No yet. I just test on one qemu-kvm vm. It works fine.
+The performance may need more time.
+Any one can test on this patch if you do fast....
 
-While I do like the above proposal better than what I originally had,
-I'm guessing it won't be ready in time for v4.11.
+2017-02-16 20:07 GMT+08:00 Tiger Hu <hufh2004@gmail.com>:
+> Tianqing,
+>
+> Do we have any performance data for this patch? Thanks.
+>
+> Tiger
+>> =E5=9C=A8 2017=E5=B9=B42=E6=9C=8816=E6=97=A5=EF=BC=8C=E4=B8=8B=E5=8D=885=
+:00=EF=BC=8Cjazeltq@gmail.com =E5=86=99=E9=81=93=EF=BC=9A
+>>
+>> From: tianqing <tianqing@unitedstack.com>
+>>
+>> Rbd can do readv and writev directly, so wo do not need to transform
+>> iov to buf or vice versa any more.
+>>
+>> Signed-off-by: tianqing <tianqing@unitedstack.com>
+>> ---
+>> block/rbd.c | 49 ++++++++++++++++++++++++++++++++++++++++++-------
+>> 1 file changed, 42 insertions(+), 7 deletions(-)
+>>
+>> diff --git a/block/rbd.c b/block/rbd.c
+>> index a57b3e3..75ae1d6 100644
+>> --- a/block/rbd.c
+>> +++ b/block/rbd.c
+>> @@ -47,7 +47,7 @@
+>>  */
+>>
+>> /* rbd_aio_discard added in 0.1.2 */
+>> -#if LIBRBD_VERSION_CODE >=3D LIBRBD_VERSION(0, 1, 2)
+>> +#if LIBRBD_VERSION_CODE >=3D LIBRBD_VERSION(12, 0, 0)
+>> #define LIBRBD_SUPPORTS_DISCARD
+>> #else
+>> #undef LIBRBD_SUPPORTS_DISCARD
+>> @@ -73,7 +73,12 @@ typedef struct RBDAIOCB {
+>>     BlockAIOCB common;
+>>     int64_t ret;
+>>     QEMUIOVector *qiov;
+>> +/* Note:
+>> + * The LIBRBD_SUPPORTS_IOVEC is defined in librbd.h.
+>> + */
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>>     char *bounce;
+>> +#endif
+>>     RBDAIOCmd cmd;
+>>     int error;
+>>     struct BDRVRBDState *s;
+>> @@ -83,7 +88,9 @@ typedef struct RADOSCB {
+>>     RBDAIOCB *acb;
+>>     struct BDRVRBDState *s;
+>>     int64_t size;
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>>     char *buf;
+>> +#endif
+>>     int64_t ret;
+>> } RADOSCB;
+>>
+>> @@ -426,11 +433,21 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
+>>         }
+>>     } else {
+>>         if (r < 0) {
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>>             memset(rcb->buf, 0, rcb->size);
+>> +#else
+>> +            iov_memset(acb->qiov->iov, acb->qiov->niov, 0, 0, acb->qiov=
+->size);
+>> +#endif
+>>             acb->ret =3D r;
+>>             acb->error =3D 1;
+>>         } else if (r < rcb->size) {
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>>             memset(rcb->buf + r, 0, rcb->size - r);
+>> +#else
+>> +            iov_memset(acb->qiov->iov, acb->qiov->niov,
+>> +                       r, 0, acb->qiov->size - r);
+>> +#endif
+>> +
+>>             if (!acb->error) {
+>>                 acb->ret =3D rcb->size;
+>>             }
+>> @@ -441,10 +458,12 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
+>>
+>>     g_free(rcb);
+>>
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>>     if (acb->cmd =3D=3D RBD_AIO_READ) {
+>>         qemu_iovec_from_buf(acb->qiov, 0, acb->bounce, acb->qiov->size);
+>>     }
+>>     qemu_vfree(acb->bounce);
+>> +#endif
+>>     acb->common.cb(acb->common.opaque, (acb->ret > 0 ? 0 : acb->ret));
+>>
+>>     qemu_aio_unref(acb);
+>> @@ -655,8 +674,10 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *=
+bs,
+>>     RBDAIOCB *acb;
+>>     RADOSCB *rcb =3D NULL;
+>>     rbd_completion_t c;
+>> -    char *buf;
+>>     int r;
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>> +    char *buf =3D NULL;
+>> +#endif
+>>
+>>     BDRVRBDState *s =3D bs->opaque;
+>>
+>> @@ -664,6 +685,8 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *b=
+s,
+>>     acb->cmd =3D cmd;
+>>     acb->qiov =3D qiov;
+>>     assert(!qiov || qiov->size =3D=3D size);
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>> +
+>>     if (cmd =3D=3D RBD_AIO_DISCARD || cmd =3D=3D RBD_AIO_FLUSH) {
+>>         acb->bounce =3D NULL;
+>>     } else {
+>> @@ -672,19 +695,21 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState =
+*bs,
+>>             goto failed;
+>>         }
+>>     }
+>> -    acb->ret =3D 0;
+>> -    acb->error =3D 0;
+>> -    acb->s =3D s;
+>> -
+>>     if (cmd =3D=3D RBD_AIO_WRITE) {
+>>         qemu_iovec_to_buf(acb->qiov, 0, acb->bounce, qiov->size);
+>>     }
+>> -
+>>     buf =3D acb->bounce;
+>> +#endif
+>> +    acb->ret =3D 0;
+>> +    acb->error =3D 0;
+>> +    acb->s =3D s;
+>>
+>>     rcb =3D g_new(RADOSCB, 1);
+>> +
+>>     rcb->acb =3D acb;
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>>     rcb->buf =3D buf;
+>> +#endif
+>>     rcb->s =3D acb->s;
+>>     rcb->size =3D size;
+>>     r =3D rbd_aio_create_completion(rcb, (rbd_callback_t) rbd_finish_aio=
+cb, &c);
+>> @@ -694,10 +719,18 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState =
+*bs,
+>>
+>>     switch (cmd) {
+>>     case RBD_AIO_WRITE:
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>>         r =3D rbd_aio_write(s->image, off, size, buf, c);
+>> +#else
+>> +        r =3D rbd_aio_writev(s->image, qiov->iov, qiov->niov, off, c);
+>> +#endif
+>>         break;
+>>     case RBD_AIO_READ:
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>>         r =3D rbd_aio_read(s->image, off, size, buf, c);
+>> +#else
+>> +        r =3D rbd_aio_readv(s->image, qiov->iov, qiov->niov, off, c);
+>> +#endif
+>>         break;
+>>     case RBD_AIO_DISCARD:
+>>         r =3D rbd_aio_discard_wrapper(s->image, off, size, c);
+>> @@ -719,7 +752,9 @@ failed_completion:
+>>     rbd_aio_release(c);
+>> failed:
+>>     g_free(rcb);
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>>     qemu_vfree(acb->bounce);
+>> +#endif
+>>     qemu_aio_unref(acb);
+>>     return NULL;
+>> }
+>> --
+>> 2.10.2
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-Would it be reasonable to take the patch I proposed for v4.11 as an
-interim fix? It does fix a rather easy-to-trigger softlockup in the ceph
-code that xfstests can reliably hit.
 
--- 
-Jeff Layton <jlayton@redhat.com>
+
+--=20
+=E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
