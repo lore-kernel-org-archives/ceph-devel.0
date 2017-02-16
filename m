@@ -1,151 +1,65 @@
-From: Noah Watkins <noahwatkins@gmail.com>
-Subject: Re: Passing LUA script via python rados execute
-Date: Thu, 16 Feb 2017 13:00:53 -0800
-Message-ID: <CAB2gnbVXVUiCgBFK2Q4+8N=RVf6KLGjH=_oibb+BJxx0B_FmtA@mail.gmail.com>
-References: <1fa1fa7d.AEEAIBzI4F8AAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYpMPz@mailjet.com>
- <CAB2gnbXykgX42up7ZzT-e5UvZrRkpyzAnGP_D4CnH-AgFRW8qg@mail.gmail.com> <3177d648.AEQAH1DOmSwAAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYphEb@mailjet.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: Proposal to rename ceph-qa-suite project in tracker.ceph.com
+Date: Thu, 16 Feb 2017 22:50:21 +0100
+Message-ID: <14347117-bd77-96af-950a-c3bea0b6df7d@suse.cz>
+References: <d7e1ef80-56ad-63f9-cbf8-a4ef1ada8be8@suse.cz>
+ <alpine.DEB.2.11.1702132224320.7782@piezo.novalocal>
+ <CALe9h7cNKpPUq0iLk9UOj1tgXkSY7NKADCkaZibTY5Y4OR1ZhA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f171.google.com ([74.125.82.171]:33976 "EHLO
-        mail-ot0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933142AbdBPVAz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 16:00:55 -0500
-Received: by mail-ot0-f171.google.com with SMTP id t47so19651974ota.1
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Feb 2017 13:00:55 -0800 (PST)
-In-Reply-To: <3177d648.AEQAH1DOmSwAAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYphEb@mailjet.com>
+Received: from mx2.suse.de ([195.135.220.15]:35940 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933157AbdBPVuY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 16 Feb 2017 16:50:24 -0500
+In-Reply-To: <CALe9h7cNKpPUq0iLk9UOj1tgXkSY7NKADCkaZibTY5Y4OR1ZhA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Fisk <nick@fisk.me.uk>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>, Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-It looks like you might be using a script / example that was written
-before the code was merged into Ceph and might be a little out of
-date. Use `objclass.register` instead of `cls.register`. There is a
-test script at the top of
-https://github.com/ceph/ceph/blob/master/src/test/cls_lua/test_cls_lua.cc
-that you can use as a reference. If the test programs are installed
-you should also have the executable `ceph_test_cls_lua` which will run
-the cls_lua unit tests.
+I haven't done anything on this yet, because it didn't quite feel right, 
+and today I realized what was missing - the "devops" project. What is 
+that for, and can it be merged with the "testing infrastructure" 
+project? I.e., do we need two?
 
-On Thu, Feb 16, 2017 at 12:52 PM, Nick Fisk <nick@fisk.me.uk> wrote:
-> Hi Noah,
->
-> Thanks for the response.
->
-> You were right about the need to enable the class in the ceph.conf. I did=
- see that note in the Kraken release notes, but assumed that as the LUA cla=
-ss is in the Ceph source tree now, that it would have been included with al=
-l the others in that directory. Anyway slap on the wrist for me not checkin=
-g that.
->
-> However, although that got me a bit further, I'm now getting a read error
->
-> rados.IOError: Ioctx.read(rbd): failed to read test
->
-> Which is a bit puzzling. As there is definitely an object called test on =
-the rbd pool and if I issue a ioctx.read right before the execute call, it =
-returns successfully with the objects contents. So I'm guessing this is act=
-ually the lua class/script bombing out and not a read error?
->
-> I also get this error in the OSD log
->
-> 2017-02-16 20:41:45.065617 7f08da336700  0 <cls> /tmp/buildd/ceph-11.2.0/=
-src/cls/lua/cls_lua.cc:1004: error: [string "..."]:7: attempt to index a ni=
-l value (global 'cls')
->
-> Don't know if that rings any bells?
->
-> Nick
->
->> -----Original Message-----
->> From: Noah Watkins [mailto:noahwatkins@gmail.com]
->> Sent: 15 February 2017 23:43
->> To: nick@fisk.me.uk
->> Cc: ceph-devel <ceph-devel@vger.kernel.org>
->> Subject: Re: Passing LUA script via python rados execute
+And, while we're in "spring cleaning" mode/mood, what about the 
+"phprados" and "rados-java" projects?
+
+On 02/14/2017 01:10 AM, John Spray wrote:
+> On Mon, Feb 13, 2017 at 10:25 PM, Sage Weil <sage@newdream.net> wrote:
+>> On Mon, 13 Feb 2017, Nathan Cutler wrote:
+>>> Now that ceph-qa-suite has been assimilated into ceph/ceph.git, shall we
+>>> rename http://tracker.ceph.com/projects/ceph-qa-suite ?
+>>>
+>>> If nobody objects, I'd like to rename it to "tests" so it would cover both
+>>> teuthology tests and make check tests.
 >>
->> Hi Nick,
->>
->> First thing to note is that in Kraken that object classes not whiteliste=
-d need to
->> be enabled explicitly. This is in the Kraken release notes
->> (http://docs.ceph.com/docs/master/release-notes/):
->>
->> tldr: add 'osd class load list =3D *' and 'osd class default list =3D *'
->> to ceph.conf.
->>
->> - The =E2=80=98osd class load list=E2=80=99 config option is a list of o=
-bject class names that the
->> OSD is permitted to load (or =E2=80=98*=E2=80=99 for all classes). By de=
-fault it contains all
->> existing in-tree classes for backwards compatibility.
->>
->> - The =E2=80=98osd class default list=E2=80=99 config option is a list o=
-f object class names (or =E2=80=98*=E2=80=99
->> for all classes) that clients may invoke having only the =E2=80=98*=E2=
-=80=99, =E2=80=98x=E2=80=99, =E2=80=98class-read=E2=80=99, or
->> =E2=80=98class-write=E2=80=99 capabilities. By default it contains all e=
-xisting in-tree classes for
->> backwards compatibility.
->> Invoking classes not listed in =E2=80=98osd class default list=E2=80=99 =
-requires a capability
->> naming the class (e.g. =E2=80=98allow class foo=E2=80=99).
->>
->> I suspect that will resolve the issue.
->>
->> If you've done that and it still doesn't work then the next thing I'd su=
-ggest is
->> creating the target object before running the command.
->> Operations on objects that don't exist sometimes seem non-intuitive to m=
-e.
->>
->> Let me know if that doesn't work and we can look at debugging further.
->>
->> Thanks,
->> - Noah
->>
->> On Wed, Feb 15, 2017 at 1:11 PM, Nick Fisk <nick@fisk.me.uk> wrote:
->> > Hi Noah,
->> >
->> > I'm trying to follow your example where you can pass a LUA script as
->> > json when calling the rados execute function in Python. However I'm
->> > getting a rados permission denied error saying its failed to read the
->> > test object I have placed on the pool.
->> >
->> > I have also tried calling the cls_hello object class and this works,
->> > so I believe its something to do with the LUA functionality that's
->> > causing it to bomb out. This is running on Kraken.
->> >
->> > Any ideas would be gratefully received.
->> >
->> > Nick
->> >
->> > Ie
->> > print json.dumps(cmd)
->> > ret, data =3D ioctx.execute('test', 'lua', 'eval_json', json.dumps(cmd=
-))
->> >
->> > Outputs
->> > python radoslua.py --object-name=3Dtest --pool=3Drbd
->> > {"handler": "upper", "script": "\n      function upper(input, output)\=
-n
->> > input_str =3D input:str()\n        upper_str =3D string.upper(input_st=
-r)\n
->> > output:append(upper_str)\n      end\n      cls.register(upper)\n  "}
->> > Traceback (most recent call last):
->> >   File "radoslua.py", line 47, in <module>
->> >     ret, data =3D ioctx.execute('test', 'lua', 'eval_json', json.dumps=
-(cmd))
->> >   File "rados.pyx", line 451, in rados.requires.wrapper.validate_func
->> > (/tmp/buildd/ceph-11.2.0/obj-x86_64-linux-gnu/src/pybind/rados/pyrex/r
->> > ados.c
->> > :4439)
->> >   File "rados.pyx", line 2657, in rados.Ioctx.execute
->> > (/tmp/buildd/ceph-11.2.0/obj-x86_64-linux-gnu/src/pybind/rados/pyrex/r
->> > ados.c
->> > :34056)
->> > rados.PermissionError: Ioctx.read(rbd): failed to read test
->> >
+>> Go for it.  I'd say that many of the tests can actually go in the relevant
+>> projects directly, though; we can use 'tests' for the underlying
+>> infrastructure (like ceph.py, ceph_manager.py, an so on)?
 >
+> Yes -- for actual test cases we have the relevant category/component
+> fields within e.g. the 'fs' subproject.
+>
+> Maybe the rename should be to "test infrastructure" or something like
+> that, so that anyone looking at it doesn't think they're looking at
+> all test-related stuff.
+>
+> John
+>
+>>
+>> sage
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+-- 
+Nathan Cutler
+Software Engineer Distributed Storage
+SUSE LINUX, s.r.o.
+Tel.: +420 284 084 037
