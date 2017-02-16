@@ -1,220 +1,279 @@
-From: Kostis Fardelas <dante1234@gmail.com>
-Subject: Re: Jewel + kernel 4.4 Massive performance regression (-50%)
-Date: Thu, 16 Feb 2017 17:51:18 +0200
-Message-ID: <CAN3wisVj7BAjJtDd4mEa4XOOcViz-qs5j71na2e=2c3SCO_HeA@mail.gmail.com>
-References: <14aea50c-f708-1d99-8d61-c79bec2029e0@epfl.ch> <CAFonxSwyGOC9OGjEwBOmewhvtH_vBRKxT4eyoTkdFAxJmg6jZw@mail.gmail.com>
- <29443c6d-1a13-477a-6844-6f1b31e86d2d@epfl.ch> <CAFonxSzvPTpPsxLvcWame4vLwnJMcbxqsYHXXuO3--Dibt2t-Q@mail.gmail.com>
- <48d7fe00-88cd-4187-e56b-aea73ce6aaf1@epfl.ch>
+From: Jeff Cody <jcody@redhat.com>
+Subject: Re: [RFC v5] RBD: Add support readv,writev for rbd
+Date: Thu, 16 Feb 2017 10:51:59 -0500
+Message-ID: <20170216155159.GE8801@localhost.localdomain>
+References: <20170216084318.11122-1-jazeltq@gmail.com>
+ <20170216090002.12511-1-jazeltq@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f169.google.com ([209.85.128.169]:36835 "EHLO
-        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932423AbdBPPvV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 10:51:21 -0500
-Received: by mail-wr0-f169.google.com with SMTP id 89so9993388wrr.3
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Feb 2017 07:51:20 -0800 (PST)
-In-Reply-To: <48d7fe00-88cd-4187-e56b-aea73ce6aaf1@epfl.ch>
+Received: from mx1.redhat.com ([209.132.183.28]:53196 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932459AbdBPPwB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 16 Feb 2017 10:52:01 -0500
+Content-Disposition: inline
+In-Reply-To: <20170216090002.12511-1-jazeltq@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yoann Moulin <yoann.moulin@epfl.ch>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: jazeltq@gmail.com
+Cc: jdurgin@redhat.com, dillaman@redhat.com, kwolf@redhat.com, mreitz@redhat.com, qemu-block@nongnu.org, qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, eblake@redhat.com, tianqing <tianqing@unitedstack.com>
 
-Hello,
-we are on Debian Jessie and Hammer 0.94.9 and recently we decided to
-upgrade our kernel from 3.16 to 4.9 (jessie-backports). We experience
-the same regression but with some shiny points
--- ceph tell osd average across the cluster --
-3.16.39-1: 204MB/s
-4.9.0-0    : 158MB/s
+On Thu, Feb 16, 2017 at 05:00:02PM +0800, jazeltq@gmail.com wrote:
+> From: tianqing <tianqing@unitedstack.com>
+> 
+> Rbd can do readv and writev directly, so wo do not need to transform
+> iov to buf or vice versa any more.
+> 
+> Signed-off-by: tianqing <tianqing@unitedstack.com>
+> ---
+>  block/rbd.c | 49 ++++++++++++++++++++++++++++++++++++++++++-------
+>  1 file changed, 42 insertions(+), 7 deletions(-)
+> 
+> diff --git a/block/rbd.c b/block/rbd.c
+> index a57b3e3..75ae1d6 100644
+> --- a/block/rbd.c
+> +++ b/block/rbd.c
+> @@ -47,7 +47,7 @@
+>   */
+>  
+>  /* rbd_aio_discard added in 0.1.2 */
+> -#if LIBRBD_VERSION_CODE >= LIBRBD_VERSION(0, 1, 2)
+> +#if LIBRBD_VERSION_CODE >= LIBRBD_VERSION(12, 0, 0)
+>  #define LIBRBD_SUPPORTS_DISCARD
+>  #else
+>  #undef LIBRBD_SUPPORTS_DISCARD
+> @@ -73,7 +73,12 @@ typedef struct RBDAIOCB {
+>      BlockAIOCB common;
+>      int64_t ret;
+>      QEMUIOVector *qiov;
+> +/* Note:
+> + * The LIBRBD_SUPPORTS_IOVEC is defined in librbd.h.
+> + */
 
--- 1 rados bench client 4K 2048 threads avg IOPS --
-3.16.39-1: 1604
-4.9.0-0    : 451
+I understand that since this feature relies on new symbols in the library,
+the ifdef can't be entirely avoided.  However, there are a few changes that
+can make the code much more readable, and greatly reduce the use of ifdefs
+through the code.
 
--- 1 rados bench client 64K 512 threads avg BW MB/s--
-3.16.39-1: 78
-4.9.0-0    : 31
 
-The shiny points are on the following tests:
-1 rados bench client 4K 512 threads avg IOPS
-1 rados bench client 64K 2048 threads avg BW MB/s
+For instance, you could have helper constants:
 
-where machines with kernel 4.9 seem to perform slightly better. The
-overall impression though is that there is a serious regression or
-something that should be tuned to get the same performance out of the
-cluster.
+#ifdef LIBRBD_SUPPORTS_IOVEC
+#define LIBRBD_USE_IOVEC    1
+#else
+#define LIBRBD_USE_IOVEC    0
+#endif
 
-Our demo cluster is 4 nodes X 12 OSDs, separate journal on SSD,
-firefly tunables and everything else default considering our Ceph
-installation and Debian OS. Each rados bench run 5 times to get an
-average and caches were dropped before each test.
+Now that can be used for a more natural code, with minimal ifdefs.  The
+compiler optimizations should still remove the code, as well.
 
-I wonder if anyone has discovered the culprit so far? Any hints from
-others to focus our investigation on?
 
-Best regards,
-Kostis
+A helper function for memset will also keep things simpler:
 
-On 19 December 2016 at 17:17, Yoann Moulin <yoann.moulin@epfl.ch> wrote:
-> Hello,
+static void qemu_rbd_memset(RADOSCB *rcb, int64_t offs)
+{
+    if (LIBRBD_USE_IOVEC) {
+        RBDAIOCB *acb = rcb->acb;
+        iov_memset(acb->qiov->iov, acb->qiov->niov, offs, 0,
+                   acb->qiov->size - offs);
+    } else {
+        memset(rcb->buf + offs, 0, rcb->size - offs);
+    }
+}
+            
+
+
+> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>      char *bounce;
+> +#endif
+
+This conditional can go away (see [1]).
+
+>      RBDAIOCmd cmd;
+>      int error;
+>      struct BDRVRBDState *s;
+> @@ -83,7 +88,9 @@ typedef struct RADOSCB {
+>      RBDAIOCB *acb;
+>      struct BDRVRBDState *s;
+>      int64_t size;
+> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>      char *buf;
+> +#endif
+
+As can this.
+
+>      int64_t ret;
+>  } RADOSCB;
+>  
+> @@ -426,11 +433,21 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
+>          }
+>      } else {
+>          if (r < 0) {
+> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>              memset(rcb->buf, 0, rcb->size);
+> +#else
+> +            iov_memset(acb->qiov->iov, acb->qiov->niov, 0, 0, acb->qiov->size);
+> +#endif
+
+This just becomes:
+
+qemu_rbd_memset(rcb, 0);
+
+>              acb->ret = r;
+>              acb->error = 1;
+>          } else if (r < rcb->size) {
+> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>              memset(rcb->buf + r, 0, rcb->size - r);
+> +#else
+> +            iov_memset(acb->qiov->iov, acb->qiov->niov,
+> +                       r, 0, acb->qiov->size - r);
+> +#endif
+> +
+
+Same here:
+
+qemu_rbd_memset(rcb, r);
+
+
+>              if (!acb->error) {
+>                  acb->ret = rcb->size;
+>              }
+> @@ -441,10 +458,12 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
+>  
+>      g_free(rcb);
+>  
+> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>      if (acb->cmd == RBD_AIO_READ) {
+>          qemu_iovec_from_buf(acb->qiov, 0, acb->bounce, acb->qiov->size);
+>      }
+>      qemu_vfree(acb->bounce);
+> +#endif
+
+[1]
+
+Instead of a conditional, you can now use the constant with an if statement:
+
+if (!LIBRBD_USE_IOVEC) {
+      if (acb->cmd == RBD_AIO_READ) {
+          qemu_iovec_from_buf(acb->qiov, 0, acb->bounce, acb->qiov->size);
+      }
+      qemu_vfree(acb->bounce);
+}
+
+
+>      acb->common.cb(acb->common.opaque, (acb->ret > 0 ? 0 : acb->ret));
+>  
+>      qemu_aio_unref(acb);
+> @@ -655,8 +674,10 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
+>      RBDAIOCB *acb;
+>      RADOSCB *rcb = NULL;
+>      rbd_completion_t c;
+> -    char *buf;
+>      int r;
+> +#ifndef LIBRBD_SUPPORTS_IOVEC
+> +    char *buf = NULL;
+> +#endif
+
+This variable can completely go away with some code re-arrangement (below)
+
+>  
+>      BDRVRBDState *s = bs->opaque;
 >
-> Finally, I found time to do some new benchmarks with the latest jewel rel=
-ease (10.2.5) on 4 nodes. Each node has 10 OSDs.
->
-> I ran 2 times "ceph tell osd.* bench" over 40 OSDs, here the average spee=
-d :
->
-> 4.2.0-42-generic      97.45 MB/s
-> 4.4.0-53-generic      55.73 MB/s
-> 4.8.15-040815-generic 62.41 MB/s
-> 4.9.0-040900-generic  60.88 MB/s
->
-> I have the same behaviour with at least 35 to 40% performance drop betwee=
-n kernel 4.2 and kernel > 4.4
->
-> I can do further benches if needed.
->
-> Yoann
->
-> Le 26/07/2016 =C3=A0 09:09, Lomayani S. Laizer a =C3=A9crit :
->> Hello,
->> do you have journal on disk too ?
->>
->> Yes am having journal on same hard disk.
->>
->> ok and could you do bench with kernel 4.2 ? just to see if you have bett=
-er
->> throughput. Thanks
->>
->> In ubuntu 14 I was running 4.2 kernel. the throughput was the same aroun=
-d 80-90MB/s per osd. I cant tell the difference because each test gives
->> the speeds on same range. I did not test kernel 4.4 in ubuntu 14
->>
->>
->> --
->> Lomayani
->>
->> On Tue, Jul 26, 2016 at 9:39 AM, Yoann Moulin <yoann.moulin@epfl.ch <mai=
-lto:yoann.moulin@epfl.ch>> wrote:
->>
->>     Hello,
->>
->>     > Am running ubuntu 16 with kernel 4.4-0.31-generic and my speed are=
- similar.
->>
->>     do you have journal on disk too ?
->>
->>     > I did tests on ubuntu 14 and Ubuntu 16 and the speed is similar. I=
- have around
->>     > 80-90MB/s of OSD speeds in both operating systems
->>
->>     ok and could you do bench with kernel 4.2 ? just to see if you have =
-better
->>     throughput. Thanks
->>
->>     > Only issue am observing now with ubuntu 16 is sometime osd fails o=
-n rebooting
->>     > until i start them manually or adding starting commands in rc.loca=
-l.
->>
->>     in my case, it's a test environment, so I don't have notice those be=
-haviours
->>
->>     --
->>     Yoann
->>
->>     > On Mon, Jul 25, 2016 at 6:45 PM, Yoann Moulin <yoann.moulin@epfl.c=
-h <mailto:yoann.moulin@epfl.ch>
->>     > <mailto:yoann.moulin@epfl.ch <mailto:yoann.moulin@epfl.ch>>> wrote=
-:
->>     >
->>     >     Hello,
->>     >
->>     >     (this is a repost, my previous message seems to be slipping un=
-der the radar)
->>     >
->>     >     Does anyone get a similar behaviour to the one described below=
- ?
->>     >
->>     >     I found a big performance drop between kernel 3.13.0-88 (defau=
-lt kernel on
->>     >     Ubuntu Trusty 14.04) or kernel 4.2.0 and kernel 4.4.0.24.14 (d=
-efault kernel on
->>     >     Ubuntu Xenial 16.04)
->>     >
->>     >     - ceph version is Jewel (10.2.2).
->>     >     - All tests have been done under Ubuntu 14.04 on
->>     >     - Each cluster has 5 nodes strictly identical.
->>     >     - Each node has 10 OSDs.
->>     >     - Journals are on the disk.
->>     >
->>     >     Kernel 4.4 has a drop of more than 50% compared to 4.2
->>     >     Kernel 4.4 has a drop of 40% compared to 3.13
->>     >
->>     >     details below :
->>     >
->>     >     With the 3 kernel I have the same performance on disks :
->>     >
->>     >     Raw benchmark:
->>     >     dd if=3D/dev/zero of=3D/dev/sdX bs=3D1M count=3D1024 oflag=3Dd=
-irect    =3D> average ~230MB/s
->>     >     dd if=3D/dev/zero of=3D/dev/sdX bs=3D1G count=3D1 oflag=3Ddire=
-ct       =3D> average ~220MB/s
->>     >
->>     >     Filesystem mounted benchmark:
->>     >     dd if=3D/dev/zero of=3D/sdX1/test.img bs=3D1G count=3D1       =
-       =3D> average ~205MB/s
->>     >     dd if=3D/dev/zero of=3D/sdX1/test.img bs=3D1G count=3D1 oflag=
-=3Ddirect =3D> average ~214MB/s
->>     >     dd if=3D/dev/zero of=3D/sdX1/test.img bs=3D1G count=3D1 oflag=
-=3Dsync   =3D> average ~190MB/s
->>     >
->>     >     Ceph osd Benchmark:
->>     >     Kernel 3.13.0-88-generic : ceph tell osd.ID bench =3D> average=
-  ~81MB/s
->>     >     Kernel 4.2.0-38-generic  : ceph tell osd.ID bench =3D> average=
- ~109MB/s
->>     >     Kernel 4.4.0-24-generic  : ceph tell osd.ID bench =3D> average=
-  ~50MB/s
->>     >
->>     >     I did new benchmarks then on 3 new fresh clusters.
->>     >
->>     >     - Each cluster has 3 nodes strictly identical.
->>     >     - Each node has 10 OSDs.
->>     >     - Journals are on the disk.
->>     >
->>     >     bench5 : Ubuntu 14.04 / Ceph Infernalis
->>     >     bench6 : Ubuntu 14.04 / Ceph Jewel
->>     >     bench7 : Ubuntu 16.04 / Ceph jewel
->>     >
->>     >     this is the average of 2 runs of "ceph tell osd.* bench" on ea=
-ch cluster (2 x 30
->>     >     OSDs)
->>     >
->>     >     bench5 / 14.04 / Infernalis / kernel 3.13 :  54.35 MB/s
->>     >     bench6 / 14.04 / Jewel      / kernel 3.13 :  86.47 MB/s
->>     >
->>     >     bench5 / 14.04 / Infernalis / kernel 4.2  :  63.38 MB/s
->>     >     bench6 / 14.04 / Jewel      / kernel 4.2  : 107.75 MB/s
->>     >     bench7 / 16.04 / Jewel      / kernel 4.2  : 101.54 MB/s
->>     >
->>     >     bench5 / 14.04 / Infernalis / kernel 4.4  :  53.61 MB/s
->>     >     bench6 / 14.04 / Jewel      / kernel 4.4  :  65.82 MB/s
->>     >     bench7 / 16.04 / Jewel      / kernel 4.4  :  61.57 MB/s
->>     >
->>     >     If needed, I have the raw output of "ceph tell osd.* bench"
->>     >
->>     >     Best regards
->>
->>
->
->
-> --
-> Yoann Moulin
-> EPFL IC-IT
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> @@ -664,6 +685,8 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
+>      acb->cmd = cmd;
+>      acb->qiov = qiov;
+>      assert(!qiov || qiov->size == size);
+
+[2]
+
+Allocate rcb here
+
+> +#ifndef LIBRBD_SUPPORTS_IOVEC
+> +
+
+You can use if(!LIBRBD_USE_IOVEC) here then.
+
+>      if (cmd == RBD_AIO_DISCARD || cmd == RBD_AIO_FLUSH) {
+>          acb->bounce = NULL;
+>      } else {
+> @@ -672,19 +695,21 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
+>              goto failed;
+>          }
+>      }
+> -    acb->ret = 0;
+> -    acb->error = 0;
+> -    acb->s = s;
+> -
+>      if (cmd == RBD_AIO_WRITE) {
+>          qemu_iovec_to_buf(acb->qiov, 0, acb->bounce, qiov->size);
+>      }
+> -
+>      buf = acb->bounce;
+
+This can just become rcb->buf = acb->bounce
+
+> +#endif
+
+> +    acb->ret = 0;
+> +    acb->error = 0;
+> +    acb->s = s;
+>  
+>      rcb = g_new(RADOSCB, 1);
+
+Move this to [2]
+
+> +
+>      rcb->acb = acb;
+> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>      rcb->buf = buf;
+> +#endif
+
+These 3 lines can then go away
+
+>      rcb->s = acb->s;
+>      rcb->size = size;
+>      r = rbd_aio_create_completion(rcb, (rbd_callback_t) rbd_finish_aiocb, &c);
+> @@ -694,10 +719,18 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
+>  
+>      switch (cmd) {
+>      case RBD_AIO_WRITE:
+> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>          r = rbd_aio_write(s->image, off, size, buf, c);
+
+If you use rcb->buf here, that allows buf to go away completely.
+
+> +#else
+> +        r = rbd_aio_writev(s->image, qiov->iov, qiov->niov, off, c);
+> +#endif
+>          break;
+>      case RBD_AIO_READ:
+> +#ifndef LIBRBD_SUPPORTS_IOVEC
+>          r = rbd_aio_read(s->image, off, size, buf, c);
+
+Same
+
+> +#else
+> +        r = rbd_aio_readv(s->image, qiov->iov, qiov->niov, off, c);
+> +#endif
+>          break;
+>      case RBD_AIO_DISCARD:
+>          r = rbd_aio_discard_wrapper(s->image, off, size, c);
+> @@ -719,7 +752,9 @@ failed_completion:
+>      rbd_aio_release(c);
+>  failed:
+>      g_free(rcb);
+> +#ifndef LIBRBD_SUPPORTS_IOVEC
+
+And use the if(!LIBRBD_USE_IOVEC) here too.
+
+>      qemu_vfree(acb->bounce);
+> +#endif
+>      qemu_aio_unref(acb);
+>      return NULL;
+>  }
+> -- 
+> 2.10.2
+> 
+
+-Jeff
+
