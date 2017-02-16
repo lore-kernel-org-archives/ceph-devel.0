@@ -1,16 +1,16 @@
 From: jazeltq@gmail.com
-Subject: [RFC v4] RBD: Add support readv,writev for rbd
-Date: Thu, 16 Feb 2017 16:43:18 +0800
-Message-ID: <20170216084318.11122-1-jazeltq@gmail.com>
-References: <20170121131909.17230-1-jazeltq@gmail.com>
+Subject: [RFC v5] RBD: Add support readv,writev for rbd
+Date: Thu, 16 Feb 2017 17:00:02 +0800
+Message-ID: <20170216090002.12511-1-jazeltq@gmail.com>
+References: <20170216084318.11122-1-jazeltq@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:36394 "EHLO
+Received: from mail-pg0-f67.google.com ([74.125.83.67]:36458 "EHLO
         mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753256AbdBPInX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 03:43:23 -0500
-Received: by mail-pg0-f67.google.com with SMTP id 13so478784pgd.3
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Feb 2017 00:43:23 -0800 (PST)
-In-Reply-To: <20170121131909.17230-1-jazeltq@gmail.com>
+        with ESMTP id S1752649AbdBPI6w (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 03:58:52 -0500
+Received: by mail-pg0-f67.google.com with SMTP id 13so514687pgd.3
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Feb 2017 00:58:52 -0800 (PST)
+In-Reply-To: <20170216084318.11122-1-jazeltq@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: jdurgin@redhat.com, jcody@redhat.com, dillaman@redhat.com, kwolf@redhat.com, mreitz@redhat.com, qemu-block@nongnu.org
@@ -23,13 +23,22 @@ iov to buf or vice versa any more.
 
 Signed-off-by: tianqing <tianqing@unitedstack.com>
 ---
- block/rbd.c | 47 +++++++++++++++++++++++++++++++++++++++++------
- 1 file changed, 41 insertions(+), 6 deletions(-)
+ block/rbd.c | 49 ++++++++++++++++++++++++++++++++++++++++++-------
+ 1 file changed, 42 insertions(+), 7 deletions(-)
 
 diff --git a/block/rbd.c b/block/rbd.c
-index a57b3e3..0cbd9e3 100644
+index a57b3e3..75ae1d6 100644
 --- a/block/rbd.c
 +++ b/block/rbd.c
+@@ -47,7 +47,7 @@
+  */
+ 
+ /* rbd_aio_discard added in 0.1.2 */
+-#if LIBRBD_VERSION_CODE >= LIBRBD_VERSION(0, 1, 2)
++#if LIBRBD_VERSION_CODE >= LIBRBD_VERSION(12, 0, 0)
+ #define LIBRBD_SUPPORTS_DISCARD
+ #else
+ #undef LIBRBD_SUPPORTS_DISCARD
 @@ -73,7 +73,12 @@ typedef struct RBDAIOCB {
      BlockAIOCB common;
      int64_t ret;
