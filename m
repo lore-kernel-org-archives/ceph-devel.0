@@ -1,115 +1,224 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Supplying ID to ceph-disk when creating OSD
-Date: Thu, 16 Feb 2017 16:14:00 +0100 (CET)
-Message-ID: <250864845.10165.1487258041091@ox.pcextreme.nl>
-References: <1907009558.10080.1487177956475@ox.pcextreme.nl>
- <alpine.DEB.2.11.1702151712530.7782@piezo.novalocal>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: [RFC v5] RBD: Add support readv,writev for rbd
+Date: Thu, 16 Feb 2017 16:13:41 +0100 (CET)
+Message-ID: <887093105.8854266.1487258021988.JavaMail.zimbra@oxygem.tv>
+References: <20170216084318.11122-1-jazeltq@gmail.com> <20170216090002.12511-1-jazeltq@gmail.com> <D7075812-8210-4092-8ED4-BB6FAC4E612C@gmail.com> <CAKZcxgfA6YvAOZfngyf0QC5iF1WwGK86DcXPJPwBOr_XFfzMuA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:46070 "EHLO
-        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932178AbdBPPOE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 10:14:04 -0500
-In-Reply-To: <alpine.DEB.2.11.1702151712530.7782@piezo.novalocal>
+Received: from mailpro.odiso.net ([89.248.211.110]:41612 "EHLO
+        mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932188AbdBPPW3 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 10:22:29 -0500
+In-Reply-To: <CAKZcxgfA6YvAOZfngyf0QC5iF1WwGK86DcXPJPwBOr_XFfzMuA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: jazeltq <jazeltq@gmail.com>
+Cc: Tiger Hu <hufh2004@gmail.com>, Josh Durgin <jdurgin@redhat.com>, Jeff Cody <jcody@redhat.com>, dillaman <dillaman@redhat.com>, Kevin Wolf <kwolf@redhat.com>, mreitz@redhat.com, qemu-block@nongnu.org, qemu-devel <qemu-devel@nongnu.org>, ceph-devel <ceph-devel@vger.kernel.org>, tianqing <tianqing@unitedstack.com>
+
+>>No yet. I just test on one qemu-kvm vm. It works fine. 
+>>The performance may need more time. 
+>>Any one can test on this patch if you do fast.... 
+
+Hi, I would like to bench it with small 4k read/write.
+
+On the ceph side,do we need this PR ? :
+https://github.com/ceph/ceph/pull/13447
 
 
-> Op 15 februari 2017 om 18:14 schreef Sage Weil <sage@newdream.net>:
+----- Mail original -----
+De: "jazeltq" <jazeltq@gmail.com>
+À: "Tiger Hu" <hufh2004@gmail.com>
+Cc: "Josh Durgin" <jdurgin@redhat.com>, "Jeff Cody" <jcody@redhat.com>, "dillaman" <dillaman@redhat.com>, "Kevin Wolf" <kwolf@redhat.com>, mreitz@redhat.com, qemu-block@nongnu.org, "qemu-devel" <qemu-devel@nongnu.org>, "ceph-devel" <ceph-devel@vger.kernel.org>, "tianqing" <tianqing@unitedstack.com>
+Envoyé: Jeudi 16 Février 2017 15:03:52
+Objet: Re: [RFC v5] RBD: Add support readv,writev for rbd
+
+No yet. I just test on one qemu-kvm vm. It works fine. 
+The performance may need more time. 
+Any one can test on this patch if you do fast.... 
+
+2017-02-16 20:07 GMT+08:00 Tiger Hu <hufh2004@gmail.com>: 
+> Tianqing, 
 > 
+> Do we have any performance data for this patch? Thanks. 
 > 
-> On Wed, 15 Feb 2017, Wido den Hollander wrote:
-> > Hi,
-> > 
-> > Currently we can supply a OSD UUID to 'ceph-disk prepare', but we can't 
-> > provide a OSD ID.
-> > 
-> > With BlueStore coming I think the use-case for this is becoming very 
-> > valid:
-> > 
-> > 1. Stop OSD
-> > 2. Zap disk
-> > 3. Re-create OSD with same ID and UUID (with BlueStore)
-> > 4. Start OSD
-> > 
-> > This allows for a in-place update of the OSD without modifying the 
-> > CRUSHMap. For the cluster's point of view the OSD goes down and comes 
-> > back up empty.
-> > 
-> > There were some drawbacks around this and some dangers, so before I 
-> > start working on a PR for this, any gotcaches which might be a problem?
-> > 
-> > The idea is that users have a very simple way to re-format a OSD 
-> > in-place while keeping the same CRUSH location, ID and UUID.
+> Tiger 
+>> 在 2017年2月16日，下午5:00，jazeltq@gmail.com 写道： 
+>> 
+>> From: tianqing <tianqing@unitedstack.com> 
+>> 
+>> Rbd can do readv and writev directly, so wo do not need to transform 
+>> iov to buf or vice versa any more. 
+>> 
+>> Signed-off-by: tianqing <tianqing@unitedstack.com> 
+>> --- 
+>> block/rbd.c | 49 ++++++++++++++++++++++++++++++++++++++++++------- 
+>> 1 file changed, 42 insertions(+), 7 deletions(-) 
+>> 
+>> diff --git a/block/rbd.c b/block/rbd.c 
+>> index a57b3e3..75ae1d6 100644 
+>> --- a/block/rbd.c 
+>> +++ b/block/rbd.c 
+>> @@ -47,7 +47,7 @@ 
+>> */ 
+>> 
+>> /* rbd_aio_discard added in 0.1.2 */ 
+>> -#if LIBRBD_VERSION_CODE >= LIBRBD_VERSION(0, 1, 2) 
+>> +#if LIBRBD_VERSION_CODE >= LIBRBD_VERSION(12, 0, 0) 
+>> #define LIBRBD_SUPPORTS_DISCARD 
+>> #else 
+>> #undef LIBRBD_SUPPORTS_DISCARD 
+>> @@ -73,7 +73,12 @@ typedef struct RBDAIOCB { 
+>> BlockAIOCB common; 
+>> int64_t ret; 
+>> QEMUIOVector *qiov; 
+>> +/* Note: 
+>> + * The LIBRBD_SUPPORTS_IOVEC is defined in librbd.h. 
+>> + */ 
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC 
+>> char *bounce; 
+>> +#endif 
+>> RBDAIOCmd cmd; 
+>> int error; 
+>> struct BDRVRBDState *s; 
+>> @@ -83,7 +88,9 @@ typedef struct RADOSCB { 
+>> RBDAIOCB *acb; 
+>> struct BDRVRBDState *s; 
+>> int64_t size; 
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC 
+>> char *buf; 
+>> +#endif 
+>> int64_t ret; 
+>> } RADOSCB; 
+>> 
+>> @@ -426,11 +433,21 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb) 
+>> } 
+>> } else { 
+>> if (r < 0) { 
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC 
+>> memset(rcb->buf, 0, rcb->size); 
+>> +#else 
+>> + iov_memset(acb->qiov->iov, acb->qiov->niov, 0, 0, acb->qiov->size); 
+>> +#endif 
+>> acb->ret = r; 
+>> acb->error = 1; 
+>> } else if (r < rcb->size) { 
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC 
+>> memset(rcb->buf + r, 0, rcb->size - r); 
+>> +#else 
+>> + iov_memset(acb->qiov->iov, acb->qiov->niov, 
+>> + r, 0, acb->qiov->size - r); 
+>> +#endif 
+>> + 
+>> if (!acb->error) { 
+>> acb->ret = rcb->size; 
+>> } 
+>> @@ -441,10 +458,12 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb) 
+>> 
+>> g_free(rcb); 
+>> 
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC 
+>> if (acb->cmd == RBD_AIO_READ) { 
+>> qemu_iovec_from_buf(acb->qiov, 0, acb->bounce, acb->qiov->size); 
+>> } 
+>> qemu_vfree(acb->bounce); 
+>> +#endif 
+>> acb->common.cb(acb->common.opaque, (acb->ret > 0 ? 0 : acb->ret)); 
+>> 
+>> qemu_aio_unref(acb); 
+>> @@ -655,8 +674,10 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs, 
+>> RBDAIOCB *acb; 
+>> RADOSCB *rcb = NULL; 
+>> rbd_completion_t c; 
+>> - char *buf; 
+>> int r; 
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC 
+>> + char *buf = NULL; 
+>> +#endif 
+>> 
+>> BDRVRBDState *s = bs->opaque; 
+>> 
+>> @@ -664,6 +685,8 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs, 
+>> acb->cmd = cmd; 
+>> acb->qiov = qiov; 
+>> assert(!qiov || qiov->size == size); 
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC 
+>> + 
+>> if (cmd == RBD_AIO_DISCARD || cmd == RBD_AIO_FLUSH) { 
+>> acb->bounce = NULL; 
+>> } else { 
+>> @@ -672,19 +695,21 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs, 
+>> goto failed; 
+>> } 
+>> } 
+>> - acb->ret = 0; 
+>> - acb->error = 0; 
+>> - acb->s = s; 
+>> - 
+>> if (cmd == RBD_AIO_WRITE) { 
+>> qemu_iovec_to_buf(acb->qiov, 0, acb->bounce, qiov->size); 
+>> } 
+>> - 
+>> buf = acb->bounce; 
+>> +#endif 
+>> + acb->ret = 0; 
+>> + acb->error = 0; 
+>> + acb->s = s; 
+>> 
+>> rcb = g_new(RADOSCB, 1); 
+>> + 
+>> rcb->acb = acb; 
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC 
+>> rcb->buf = buf; 
+>> +#endif 
+>> rcb->s = acb->s; 
+>> rcb->size = size; 
+>> r = rbd_aio_create_completion(rcb, (rbd_callback_t) rbd_finish_aiocb, &c); 
+>> @@ -694,10 +719,18 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs, 
+>> 
+>> switch (cmd) { 
+>> case RBD_AIO_WRITE: 
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC 
+>> r = rbd_aio_write(s->image, off, size, buf, c); 
+>> +#else 
+>> + r = rbd_aio_writev(s->image, qiov->iov, qiov->niov, off, c); 
+>> +#endif 
+>> break; 
+>> case RBD_AIO_READ: 
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC 
+>> r = rbd_aio_read(s->image, off, size, buf, c); 
+>> +#else 
+>> + r = rbd_aio_readv(s->image, qiov->iov, qiov->niov, off, c); 
+>> +#endif 
+>> break; 
+>> case RBD_AIO_DISCARD: 
+>> r = rbd_aio_discard_wrapper(s->image, off, size, c); 
+>> @@ -719,7 +752,9 @@ failed_completion: 
+>> rbd_aio_release(c); 
+>> failed: 
+>> g_free(rcb); 
+>> +#ifndef LIBRBD_SUPPORTS_IOVEC 
+>> qemu_vfree(acb->bounce); 
+>> +#endif 
+>> qemu_aio_unref(acb); 
+>> return NULL; 
+>> } 
+>> -- 
+>> 2.10.2 
+>> 
+>> -- 
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in 
+>> the body of a message to majordomo@vger.kernel.org 
+>> More majordomo info at http://vger.kernel.org/majordomo-info.html 
 > 
-> +1
-> 
-> However, I don't think we need to specify the osd id.. just the uuid.  If 
-> you pass an existing uuid to 'osd create' it will give you back the 
-> existing osd id.  Please test to confirm, but I *think* it is sufficient 
-> to just give ceph-disk prepare the old osd's uuid.
-> 
 
-Ok, so there were a few things going on here:
 
-- My memory which told me it wasn't possible
-- Old Journal data
-- Cephx issues
 
-What it boils down to is that this is not sufficient:
+-- 
+谦谦君子 
+-- 
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in 
+the body of a message to majordomo@vger.kernel.org 
+More majordomo info at http://vger.kernel.org/majordomo-info.html 
 
-$ systemctl stop ceph-osd@4
-$ cat /var/lib/ceph/osd/ceph-4/fsid
-$ umount
-$ ceph-disk prepare --zap-disk --osd-uuid 8f3b58f4-ded3-4b50-836e-72745405f482 /dev/sdb
-
-What needs to be done:
-
-$ systemctl stop ceph-osd@4
-$ ceph auth del osd.4
-$ cat /var/lib/ceph/osd/ceph-4/fsid
-$ umount
-$ dd if=/dev/zero of=/dev/sdb2 bs=1M count=100
-$ ceph-disk prepare --zap-disk --osd-uuid 8f3b58f4-ded3-4b50-836e-72745405f482 /dev/sdb
-
-Zapping a disk only removes the GPT structures and your XFS (filestore's case) will overwrite the previous system.
-
-However, if the partition layout is the same as before the Journal will not be emptied and the OSD will crash during start.
-
-If you go to BlueStore this is not a problem since you overwrite the whole disk:
-
-$ ceph-disk prepare --zap-disk --osd-uuid 8f3b58f4-ded3-4b50-836e-72745405f482 --bluestore /dev/sdb
-
-Also, the old Cephx is not re-used but a new one is registered, so you have to remove the old one first.
-
-> Maybe the thing to do is create a streamlined command to do this: 
-> 'ceph-disk prepare --zap-and-reformat' or something that grabs the old 
-> uuid for you, does the zap, and then feeds it to prepare?
-
-Probably a good idea, we just need to figure out how to remove the old key. The bootstrap key isn't allowed to do that:
-
-root@echo:~# ceph --id bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring auth list
-Error EACCES: access denied
-root@echo:~#
-
-The steps it should take:
-
-1. Get OSD UUID
-2. Try to unmount the disk (fails if OSD is still running)
-3. Remove old Cephx key (how to do so?)
-4. Zap the disk
-5. Prepare disk with same UUID
-6. Add new cephx key
-7. Start the OSD
-
-I am not sure on how to do step #3 from a client with the bootstrap-osd keyring though.
-
-Wido
-
-> 
-> sage
->
