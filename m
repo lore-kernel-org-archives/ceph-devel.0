@@ -1,75 +1,151 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Supplying ID to ceph-disk when creating OSD
-Date: Thu, 16 Feb 2017 16:20:47 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1702161615510.7782@piezo.novalocal>
-References: <1907009558.10080.1487177956475@ox.pcextreme.nl> <alpine.DEB.2.11.1702151712530.7782@piezo.novalocal> <250864845.10165.1487258041091@ox.pcextreme.nl> <alpine.DEB.2.11.1702161524490.7782@piezo.novalocal>
+From: Noah Watkins <noahwatkins@gmail.com>
+Subject: Re: Passing LUA script via python rados execute
+Date: Thu, 16 Feb 2017 13:00:53 -0800
+Message-ID: <CAB2gnbVXVUiCgBFK2Q4+8N=RVf6KLGjH=_oibb+BJxx0B_FmtA@mail.gmail.com>
+References: <1fa1fa7d.AEEAIBzI4F8AAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYpMPz@mailjet.com>
+ <CAB2gnbXykgX42up7ZzT-e5UvZrRkpyzAnGP_D4CnH-AgFRW8qg@mail.gmail.com> <3177d648.AEQAH1DOmSwAAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYphEb@mailjet.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42216 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932386AbdBPQUv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 11:20:51 -0500
-In-Reply-To: <alpine.DEB.2.11.1702161524490.7782@piezo.novalocal>
+Received: from mail-ot0-f171.google.com ([74.125.82.171]:33976 "EHLO
+        mail-ot0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933142AbdBPVAz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 16:00:55 -0500
+Received: by mail-ot0-f171.google.com with SMTP id t47so19651974ota.1
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Feb 2017 13:00:55 -0800 (PST)
+In-Reply-To: <3177d648.AEQAH1DOmSwAAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYphEb@mailjet.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
+To: Nick Fisk <nick@fisk.me.uk>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 16 Feb 2017, Sage Weil wrote:
-> There is another step here (see my other email) where we should mark the 
-> osd as lost before we allow it to be replaced.  So,
-> 
-> 0. 'ceph osd lost NNN' from a client.admin node
-> 
-> Assuming that is done, then I think the rest of the procedure would be
-> 
-> 2. Try to unmount the disk (fails if OSD is still running)
-> 3. zap the disk
-> 4. ceph-disk prepare --replace-osd-id NNN
-> 
-> This would do 'ceph osd replace <osd-id> <new-uuid>' instead of 'ceph 
-> osd create <uuid>'.  The new mon command would verify that (1) the osd is 
-> marked as lost (safety check that makes bootstraps ability to do this 
-> reasonably secure) and (2) change the uuid to new-uuid.  It could also (3) 
-> remove old cephx keys.  Note that we had a thread about making create do 
-> this a month or two ago; this might be a good time to fix that too.  The 
-> idea was that the boostrap permissions are super wonky because they have 
-> to allow creating new cephx keys and so on.  Instead, we should make a 
-> single command that does everything (including creating the cephx keys) 
-> and returns the whole result to ceph-disk in a blob of json (new osd id + 
-> cephx key).  The replace command could work the same way (including the 
-> step of removing the old key), and then the allowed commands for 
-> the bootstrap key would be just 'osd create' and 'osd replace', period.
+It looks like you might be using a script / example that was written
+before the code was merged into Ceph and might be a little out of
+date. Use `objclass.register` instead of `cls.register`. There is a
+test script at the top of
+https://github.com/ceph/ceph/blob/master/src/test/cls_lua/test_cls_lua.cc
+that you can use as a reference. If the test programs are installed
+you should also have the executable `ceph_test_cls_lua` which will run
+the cls_lua unit tests.
 
-Okay, I found the other thread:
-
-	http://marc.info/?t=147913846400007&r=1&w=2
-
-which is about the additional work of setting up the lockbox keys for 
-dm-crypt as part of osd creation/bootstrap.  I think the way to do this 
-properly is to just bite the bullet and make a new command, let's call it 
-'osd bootstrap', and have it take all the various [optional] arguments for 
-setting up a new osd, including the osd we want to replace (if any).  It 
-can do all the right things as far as setting up (or replacing) cephx 
-keys, and be a single atomic and idempotent operation so that ceph-disk is 
-super simple and the osd-bootstrap key can actually be secure.
-
-This has totally blown up in scope...are you up for it?  In the meantime, 
-the zap fix is small and simple and unrelated to the rest.
-
-sage
-
-
-> 
-> 5. Start the OSD
-> 
-> What do you think?
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-
+On Thu, Feb 16, 2017 at 12:52 PM, Nick Fisk <nick@fisk.me.uk> wrote:
+> Hi Noah,
+>
+> Thanks for the response.
+>
+> You were right about the need to enable the class in the ceph.conf. I did=
+ see that note in the Kraken release notes, but assumed that as the LUA cla=
+ss is in the Ceph source tree now, that it would have been included with al=
+l the others in that directory. Anyway slap on the wrist for me not checkin=
+g that.
+>
+> However, although that got me a bit further, I'm now getting a read error
+>
+> rados.IOError: Ioctx.read(rbd): failed to read test
+>
+> Which is a bit puzzling. As there is definitely an object called test on =
+the rbd pool and if I issue a ioctx.read right before the execute call, it =
+returns successfully with the objects contents. So I'm guessing this is act=
+ually the lua class/script bombing out and not a read error?
+>
+> I also get this error in the OSD log
+>
+> 2017-02-16 20:41:45.065617 7f08da336700  0 <cls> /tmp/buildd/ceph-11.2.0/=
+src/cls/lua/cls_lua.cc:1004: error: [string "..."]:7: attempt to index a ni=
+l value (global 'cls')
+>
+> Don't know if that rings any bells?
+>
+> Nick
+>
+>> -----Original Message-----
+>> From: Noah Watkins [mailto:noahwatkins@gmail.com]
+>> Sent: 15 February 2017 23:43
+>> To: nick@fisk.me.uk
+>> Cc: ceph-devel <ceph-devel@vger.kernel.org>
+>> Subject: Re: Passing LUA script via python rados execute
+>>
+>> Hi Nick,
+>>
+>> First thing to note is that in Kraken that object classes not whiteliste=
+d need to
+>> be enabled explicitly. This is in the Kraken release notes
+>> (http://docs.ceph.com/docs/master/release-notes/):
+>>
+>> tldr: add 'osd class load list =3D *' and 'osd class default list =3D *'
+>> to ceph.conf.
+>>
+>> - The =E2=80=98osd class load list=E2=80=99 config option is a list of o=
+bject class names that the
+>> OSD is permitted to load (or =E2=80=98*=E2=80=99 for all classes). By de=
+fault it contains all
+>> existing in-tree classes for backwards compatibility.
+>>
+>> - The =E2=80=98osd class default list=E2=80=99 config option is a list o=
+f object class names (or =E2=80=98*=E2=80=99
+>> for all classes) that clients may invoke having only the =E2=80=98*=E2=
+=80=99, =E2=80=98x=E2=80=99, =E2=80=98class-read=E2=80=99, or
+>> =E2=80=98class-write=E2=80=99 capabilities. By default it contains all e=
+xisting in-tree classes for
+>> backwards compatibility.
+>> Invoking classes not listed in =E2=80=98osd class default list=E2=80=99 =
+requires a capability
+>> naming the class (e.g. =E2=80=98allow class foo=E2=80=99).
+>>
+>> I suspect that will resolve the issue.
+>>
+>> If you've done that and it still doesn't work then the next thing I'd su=
+ggest is
+>> creating the target object before running the command.
+>> Operations on objects that don't exist sometimes seem non-intuitive to m=
+e.
+>>
+>> Let me know if that doesn't work and we can look at debugging further.
+>>
+>> Thanks,
+>> - Noah
+>>
+>> On Wed, Feb 15, 2017 at 1:11 PM, Nick Fisk <nick@fisk.me.uk> wrote:
+>> > Hi Noah,
+>> >
+>> > I'm trying to follow your example where you can pass a LUA script as
+>> > json when calling the rados execute function in Python. However I'm
+>> > getting a rados permission denied error saying its failed to read the
+>> > test object I have placed on the pool.
+>> >
+>> > I have also tried calling the cls_hello object class and this works,
+>> > so I believe its something to do with the LUA functionality that's
+>> > causing it to bomb out. This is running on Kraken.
+>> >
+>> > Any ideas would be gratefully received.
+>> >
+>> > Nick
+>> >
+>> > Ie
+>> > print json.dumps(cmd)
+>> > ret, data =3D ioctx.execute('test', 'lua', 'eval_json', json.dumps(cmd=
+))
+>> >
+>> > Outputs
+>> > python radoslua.py --object-name=3Dtest --pool=3Drbd
+>> > {"handler": "upper", "script": "\n      function upper(input, output)\=
+n
+>> > input_str =3D input:str()\n        upper_str =3D string.upper(input_st=
+r)\n
+>> > output:append(upper_str)\n      end\n      cls.register(upper)\n  "}
+>> > Traceback (most recent call last):
+>> >   File "radoslua.py", line 47, in <module>
+>> >     ret, data =3D ioctx.execute('test', 'lua', 'eval_json', json.dumps=
+(cmd))
+>> >   File "rados.pyx", line 451, in rados.requires.wrapper.validate_func
+>> > (/tmp/buildd/ceph-11.2.0/obj-x86_64-linux-gnu/src/pybind/rados/pyrex/r
+>> > ados.c
+>> > :4439)
+>> >   File "rados.pyx", line 2657, in rados.Ioctx.execute
+>> > (/tmp/buildd/ceph-11.2.0/obj-x86_64-linux-gnu/src/pybind/rados/pyrex/r
+>> > ados.c
+>> > :34056)
+>> > rados.PermissionError: Ioctx.read(rbd): failed to read test
+>> >
+>
