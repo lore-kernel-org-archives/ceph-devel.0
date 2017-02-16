@@ -1,179 +1,40 @@
-From: jazeltq@gmail.com
-Subject: [RFC v5] RBD: Add support readv,writev for rbd
-Date: Thu, 16 Feb 2017 17:00:02 +0800
-Message-ID: <20170216090002.12511-1-jazeltq@gmail.com>
-References: <20170216084318.11122-1-jazeltq@gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Staggered failing of OSDs and mon_osd_down_out_subtree_limit
+Date: Thu, 16 Feb 2017 11:20:12 +0100 (CET)
+Message-ID: <432482903.10105.1487240412669@ox.pcextreme.nl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:36458 "EHLO
-        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752649AbdBPI6w (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 03:58:52 -0500
-Received: by mail-pg0-f67.google.com with SMTP id 13so514687pgd.3
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Feb 2017 00:58:52 -0800 (PST)
-In-Reply-To: <20170216084318.11122-1-jazeltq@gmail.com>
+Received: from smtp01.mail.pcextreme.nl ([109.72.87.137]:48571 "EHLO
+        smtp01.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753497AbdBPKUR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 05:20:17 -0500
+Received: from 109.72.87.221 (ox01.pcextreme.nl [109.72.87.221])
+        by smtp01.mail.pcextreme.nl (Postfix) with ESMTPSA id E4DAA762EA
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Feb 2017 11:20:12 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: jdurgin@redhat.com, jcody@redhat.com, dillaman@redhat.com, kwolf@redhat.com, mreitz@redhat.com, qemu-block@nongnu.org
-Cc: qemu-devel@nongnu.org, ceph-devel@vger.kernel.org, jazeltq@gmail.com, tianqing <tianqing@unitedstack.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-From: tianqing <tianqing@unitedstack.com>
+Hi,
 
-Rbd can do readv and writev directly, so wo do not need to transform
-iov to buf or vice versa any more.
+I'm looking to implement a additional config setting which goes together with mon_osd_down_out_subtree_limit.
 
-Signed-off-by: tianqing <tianqing@unitedstack.com>
----
- block/rbd.c | 49 ++++++++++++++++++++++++++++++++++++++++++-------
- 1 file changed, 42 insertions(+), 7 deletions(-)
+In this case I have 'mon_osd_down_out_subtree_limit' set to 'host' to prevent a whole host from being marked as out when it fails.
 
-diff --git a/block/rbd.c b/block/rbd.c
-index a57b3e3..75ae1d6 100644
---- a/block/rbd.c
-+++ b/block/rbd.c
-@@ -47,7 +47,7 @@
-  */
- 
- /* rbd_aio_discard added in 0.1.2 */
--#if LIBRBD_VERSION_CODE >= LIBRBD_VERSION(0, 1, 2)
-+#if LIBRBD_VERSION_CODE >= LIBRBD_VERSION(12, 0, 0)
- #define LIBRBD_SUPPORTS_DISCARD
- #else
- #undef LIBRBD_SUPPORTS_DISCARD
-@@ -73,7 +73,12 @@ typedef struct RBDAIOCB {
-     BlockAIOCB common;
-     int64_t ret;
-     QEMUIOVector *qiov;
-+/* Note:
-+ * The LIBRBD_SUPPORTS_IOVEC is defined in librbd.h.
-+ */
-+#ifndef LIBRBD_SUPPORTS_IOVEC
-     char *bounce;
-+#endif
-     RBDAIOCmd cmd;
-     int error;
-     struct BDRVRBDState *s;
-@@ -83,7 +88,9 @@ typedef struct RADOSCB {
-     RBDAIOCB *acb;
-     struct BDRVRBDState *s;
-     int64_t size;
-+#ifndef LIBRBD_SUPPORTS_IOVEC
-     char *buf;
-+#endif
-     int64_t ret;
- } RADOSCB;
- 
-@@ -426,11 +433,21 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
-         }
-     } else {
-         if (r < 0) {
-+#ifndef LIBRBD_SUPPORTS_IOVEC
-             memset(rcb->buf, 0, rcb->size);
-+#else
-+            iov_memset(acb->qiov->iov, acb->qiov->niov, 0, 0, acb->qiov->size);
-+#endif
-             acb->ret = r;
-             acb->error = 1;
-         } else if (r < rcb->size) {
-+#ifndef LIBRBD_SUPPORTS_IOVEC
-             memset(rcb->buf + r, 0, rcb->size - r);
-+#else
-+            iov_memset(acb->qiov->iov, acb->qiov->niov,
-+                       r, 0, acb->qiov->size - r);
-+#endif
-+
-             if (!acb->error) {
-                 acb->ret = rcb->size;
-             }
-@@ -441,10 +458,12 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
- 
-     g_free(rcb);
- 
-+#ifndef LIBRBD_SUPPORTS_IOVEC
-     if (acb->cmd == RBD_AIO_READ) {
-         qemu_iovec_from_buf(acb->qiov, 0, acb->bounce, acb->qiov->size);
-     }
-     qemu_vfree(acb->bounce);
-+#endif
-     acb->common.cb(acb->common.opaque, (acb->ret > 0 ? 0 : acb->ret));
- 
-     qemu_aio_unref(acb);
-@@ -655,8 +674,10 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
-     RBDAIOCB *acb;
-     RADOSCB *rcb = NULL;
-     rbd_completion_t c;
--    char *buf;
-     int r;
-+#ifndef LIBRBD_SUPPORTS_IOVEC
-+    char *buf = NULL;
-+#endif
- 
-     BDRVRBDState *s = bs->opaque;
- 
-@@ -664,6 +685,8 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
-     acb->cmd = cmd;
-     acb->qiov = qiov;
-     assert(!qiov || qiov->size == size);
-+#ifndef LIBRBD_SUPPORTS_IOVEC
-+
-     if (cmd == RBD_AIO_DISCARD || cmd == RBD_AIO_FLUSH) {
-         acb->bounce = NULL;
-     } else {
-@@ -672,19 +695,21 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
-             goto failed;
-         }
-     }
--    acb->ret = 0;
--    acb->error = 0;
--    acb->s = s;
--
-     if (cmd == RBD_AIO_WRITE) {
-         qemu_iovec_to_buf(acb->qiov, 0, acb->bounce, qiov->size);
-     }
--
-     buf = acb->bounce;
-+#endif
-+    acb->ret = 0;
-+    acb->error = 0;
-+    acb->s = s;
- 
-     rcb = g_new(RADOSCB, 1);
-+
-     rcb->acb = acb;
-+#ifndef LIBRBD_SUPPORTS_IOVEC
-     rcb->buf = buf;
-+#endif
-     rcb->s = acb->s;
-     rcb->size = size;
-     r = rbd_aio_create_completion(rcb, (rbd_callback_t) rbd_finish_aiocb, &c);
-@@ -694,10 +719,18 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
- 
-     switch (cmd) {
-     case RBD_AIO_WRITE:
-+#ifndef LIBRBD_SUPPORTS_IOVEC
-         r = rbd_aio_write(s->image, off, size, buf, c);
-+#else
-+        r = rbd_aio_writev(s->image, qiov->iov, qiov->niov, off, c);
-+#endif
-         break;
-     case RBD_AIO_READ:
-+#ifndef LIBRBD_SUPPORTS_IOVEC
-         r = rbd_aio_read(s->image, off, size, buf, c);
-+#else
-+        r = rbd_aio_readv(s->image, qiov->iov, qiov->niov, off, c);
-+#endif
-         break;
-     case RBD_AIO_DISCARD:
-         r = rbd_aio_discard_wrapper(s->image, off, size, c);
-@@ -719,7 +752,9 @@ failed_completion:
-     rbd_aio_release(c);
- failed:
-     g_free(rcb);
-+#ifndef LIBRBD_SUPPORTS_IOVEC
-     qemu_vfree(acb->bounce);
-+#endif
-     qemu_aio_unref(acb);
-     return NULL;
- }
--- 
-2.10.2
+I ran in to the situation where not all OSDs failed at the same time, but staggered. The disk controller was giving issues and slowly on OSD after the other started to fail. This meant that they were not all being marked as out in the same window of mon_osd_down_out_interval (3600), but after that.
 
+When the whole host fails at once none of the OSDs are marked as out. This is very easy to reproduce on VMs. Just stop the OSDs on by one with a interval in between.
+
+Only the last OSD was not marked as out since that meant the whole subtree would be marked as out.
+
+I am thinking of mon_osd_down_out_subtree_max_osd
+
+The default would be zero, but anything greater then zero would mean the MON would check if there are not already X OSDs out in the same subtree before marking it as out.
+
+It would log to clog with a WRN message saying it will not mark these OSDs as out since it would go over the limit of OSDs inside that subtree.
+
+Does this sound like a sane thing to implement?
+
+Wido
