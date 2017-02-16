@@ -1,83 +1,137 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: OSD has the store locked???
-Date: Wed, 15 Feb 2017 08:56:24 +0100
-Message-ID: <9cd67b2c-50d1-3daa-3d85-eeffeeed3920@digiware.nl>
-References: <557f1d59-33c5-3da3-926e-f87160da272b@digiware.nl>
- <598746059.1724.1487085785680.JavaMail.open-xchange@ox03.mail.pcextreme.nl>
- <7c322e3d-1c6b-7369-d196-52106dd114e6@digiware.nl>
- <CAJE9aOOOPrQjphwTkj6+hZ7M8dEw=+5crB_KgOnU2tyXJd9ZKw@mail.gmail.com>
- <1932d5fb-6e0c-6797-7e02-c11cda618dab@digiware.nl>
- <CAJE9aOMN4T_E2TekdtrJ5YXwcQFRH=bxLSjnUBdsJHbPesoTiQ@mail.gmail.com>
+Subject: Clang on FreeBSD jenkins unhappy
+Date: Thu, 16 Feb 2017 17:06:18 +0100
+Message-ID: <4817fe9a-8831-4986-59ec-ed2c334271d1@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:43336 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([176.74.240.9]:43334 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751925AbdBTAke (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 19 Feb 2017 19:40:34 -0500
-In-Reply-To: <CAJE9aOMN4T_E2TekdtrJ5YXwcQFRH=bxLSjnUBdsJHbPesoTiQ@mail.gmail.com>
+        id S1751930AbdBTAkf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 19 Feb 2017 19:40:35 -0500
+Received: from [192.168.101.50] (vpn.ecoracks.nl [176.74.240.1])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id F26F9375FD
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Feb 2017 17:06:23 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: "wido@42on.com" <wido@42on.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 15-2-2017 03:51, kefu chai wrote:
-> On Wed, Feb 15, 2017 at 6:58 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> On 14-2-2017 18:11, kefu chai wrote:
->>> On Tue, Feb 14, 2017 at 11:55 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>>> On 14-2-2017 16:23, wido@42on.com wrote:
->>>>>
->>>>>
->>>>>> Op 14 feb. 2017 om 14:57 heeft Willem Jan Withagen <wjw@digiware.nl> het volgende geschreven:
->>>>>>
->>>>>> Hi,
->>>>>>
->>>>>> Running ceph_objectstore_tool.py just about all command get the
->>>>>> complaint that "OSD has the store locked".
->>>>>>
->>>>>
->>>>> Is the OSD still running? If so, stop it first.
->>>>>
->>>>> Wido
->>>>>
->>>>>> Like:
->>>>>> Test --op list variants
->>>>>> OSD has the store locked
->>>>>> ERROR:Bad exit status 1 from
->>>>>> /home/jenkins/workspace/ceph-master/build/bin/ceph-objectstore-tool
->>>>>> --data-path /home/jenkins/workspace/ceph-master/build/cot_dir/dev/osd0
->>>>>> --op list --format json
->>>>>>
->>>>>> Why would I get "the store locked"??
->>>>
->>>> Hi Wido,
->>>>
->>>> A usual I have to apologize for not supplying all the details.
->>>>
->>>> This is from my FreeBSD ceph-master jenkins testbot, that runs into this
->>>> problem over, over and over.
->>>> The tests are serialized, so I'd expect to have no OSDs leftover before
->>>> a new test is running.
->>>>
->>>> ATM there are no OSDs running.
->>>>
->>>> Who is generating this error:
->>>>         ceph_objectstore_tool itself
->>>> or      the OSD via one of the com-channels
->>>>
->>>
->>> Willem, this issue is spotted in the jenkins run on github also.
->>
->> Any fix in sight?
->> Or things I can do to help figure it out?
-> 
-> it's already fixed by https://github.com/ceph/ceph/pull/13419.
+Hi,
 
-My FreeBSD Jenkins agrees:
-Jenkins build is back to normal : ceph-master #291
+My FreeBSD jenkins build complains on 2 things I think.
 
-Thanx,
+Below part of the error output.
+
+1) A typing problem, could be likely in bluestore includes.
+
+2) Some bluestore code is unconditionally included into ceph_test_rados
+code. And FreeBSD does not do Bluestore yet, because of AIO
+incompatabilities.
+
+Appriciated if somebody could have a look at it.
+
+Thanx
 --WjW
 
 
+[ 75%] Building CXX object
+src/test/osd/CMakeFiles/ceph_test_rados.dir/TestRados.cc.o
+cd /home/jenkins/workspace/ceph-master/build/src/test/osd && ccache
+/usr/bin/CC   -DCEPH_LIBDIR=\"/usr/local/lib\"
+-DCEPH_PKGLIBDIR=\"/usr/local/lib/ceph\"
+-I/home/jenkins/workspace/ceph-master/build/src/include
+-I/home/jenkins/workspace/ceph-master/src -isystem /usr/local/include
+-isystem /home/jenkins/workspace/ceph-master/build/include
+-I/home/jenkins/workspace/ceph-master/src/xxHash  -Wall -Wtype-limits
+-Wignored-qualifiers -Winit-self -Wpointer-arith -Werror=format-security
+-fno-strict-aliasing -fsigned-char -Wno-unused-function
+-Wno-unused-local-typedef -Wno-varargs -Wno-gnu-designator
+-Wno-missing-braces -Wno-parentheses -Wno-deprecated-register
+-ftemplate-depth-1024 -Wno-invalid-offsetof -Wnon-virtual-dtor
+-Wno-inconsistent-missing-override -Wno-mismatched-tags
+-Wno-unused-private-field -fdiagnostics-color=auto
+-I/usr/local/include/nss/nss -I/usr/local/include/nspr
+-fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc
+-fno-builtin-free -Wno-null-dereference -Wno-expansion-to-defined -O0 -g
+-fPIE   -DHAVE_CONFIG_H -D__CEPH__ -D_REENTRANT -D_THREAD_SAFE
+-D__STDC_FORMAT_MACROS -std=c++11 -o
+CMakeFiles/ceph_test_rados.dir/TestRados.cc.o -c
+/home/jenkins/workspace/ceph-master/src/test/osd/TestRados.cc
+In file included from
+/home/jenkins/workspace/ceph-master/src/test/objectstore/store_test.cc:21:
+In file included from
+/home/jenkins/workspace/ceph-master/src/os/ObjectStore.h:17:
+In file included from
+/home/jenkins/workspace/ceph-master/src/include/Context.h:19:
+In file included from
+/home/jenkins/workspace/ceph-master/src/common/dout.h:20:
+In file included from
+/home/jenkins/workspace/ceph-master/src/common/config.h:21:
+/usr/include/c++/v1/map:820:5: error: static_assert failed
+"Allocator::value_type must be same type as value_type"
+    static_assert((is_same<typename allocator_type::value_type,
+value_type>::value),
+    ^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/jenkins/workspace/ceph-master/src/os/bluestore/bluestore_types.h:204:9:
+note: in instantiation of template class 'std::__1::map<unsigned long,
+bluestore_extent_ref_map_t::record_t, std::__1::less<unsigned long>,
+mempool::pool_allocator<mempool::pool_index_t::mempool_bluestore_meta_other,
+std::__1::pair<unsigned long, bluestore_extent_ref_map_t::record_t> > >'
+requested here
+  map_t ref_map;
+        ^
+/home/jenkins/workspace/ceph-master/src/os/bluestore/bluestore_types.h:207:26:
+error: no type named 'iterator' in 'std::__1::map<unsigned long,
+bluestore_extent_ref_map_t::record_t, std::__1::less<unsigned long>,
+mempool::pool_allocator<mempool::pool_index_t::mempool_bluestore_meta_other,
+std::__1::pair<unsigned long, bluestore_extent_ref_map_t::record_t> >
+>'; did you mean 'KeyValueDB::Iterator'?
+  void _maybe_merge_left(map_t::iterator& p);
+                         ^~~~~~~~~~~~~~~
+                         KeyValueDB::Iterator
+/home/jenkins/workspace/ceph-master/src/kv/KeyValueDB.h:286:44: note:
+'KeyValueDB::Iterator' declared here
+  typedef ceph::shared_ptr< IteratorImpl > Iterator;
+                                           ^
+In file included from
+/home/jenkins/workspace/ceph-master/src/test/objectstore/store_test.cc:23:
+In file included from
+/home/jenkins/workspace/ceph-master/src/os/bluestore/BlueStore.h:42:
+/home/jenkins/workspace/ceph-master/src/os/bluestore/BlockDevice.h:41:12:
+error: no member named 'aio_t' in 'FS'
+  list<FS::aio_t> pending_aios;    ///< not yet submitted
+       ~~~~^
+/home/jenkins/workspace/ceph-master/src/os/bluestore/BlockDevice.h:42:12:
+error: no member named 'aio_t' in 'FS'
+  list<FS::aio_t> running_aios;    ///< submitting or submitted
+       ~~~~^
+In file included from
+/home/jenkins/workspace/ceph-master/src/test/objectstore/store_test.cc:21:
+In file included from
+/home/jenkins/workspace/ceph-master/src/os/ObjectStore.h:17:
+In file included from
+/home/jenkins/workspace/ceph-master/src/include/Context.h:19:
+In file included from
+/home/jenkins/workspace/ceph-master/src/common/dout.h:20:
+In file included from
+/home/jenkins/workspace/ceph-master/src/common/config.h:21:
+/usr/include/c++/v1/map:820:5: error: static_assert failed
+"Allocator::value_type must be same type as value_type"
+    static_assert((is_same<typename allocator_type::value_type,
+value_type>::value),
+    ^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/jenkins/workspace/ceph-master/src/os/bluestore/BlueStore.h:231:7:
+note: in instantiation of template class 'std::__1::map<unsigned int,
+std::__1::unique_ptr<BlueStore::Buffer,
+std::__1::default_delete<BlueStore::Buffer> >, std::__1::less<unsigned
+int>,
+mempool::pool_allocator<mempool::pool_index_t::mempool_bluestore_meta_other,
+std::__1::pair<unsigned int, std::__1::unique_ptr<BlueStore::Buffer,
+std::__1::default_delete<BlueStore::Buffer> > > > >' requested here
+      buffer_map;
+      ^
