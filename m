@@ -1,30 +1,35 @@
-From: Qin's Yanjun <Qin.Yanjun@null.net>
-Subject: (unknown)
-Date: Fri, 17 Feb 2017 01:59:15 +0500
-Message-ID: <cf18f51d0500af8d8e8089d2c4d19acb__48534.1954081834$1487284576$gmane$org@mail.aknet.kz>
-Reply-To: Qin's Yanjun <Qin.Yanjun@null.net>
+From: John Spray <jspray@redhat.com>
+Subject: Permuting only some things with teuthology-suite --subset
+Date: Thu, 16 Feb 2017 23:11:03 +0000
+Message-ID: <CALe9h7dmdBKgc6DXdycRC1wXgRDMH560=RuK_ZYKzhJKvFQFKg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.aknet.kz ([88.151.176.20]:45157 "EHLO aknet.kz"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933175AbdBPWgI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 16 Feb 2017 17:36:08 -0500
-Subject: 
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:36848 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933157AbdBPXLZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 18:11:25 -0500
+Received: by mail-wm0-f49.google.com with SMTP id c85so77678603wmi.1
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Feb 2017 15:11:25 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
+Evening all,
 
-How are you today and your family? I'm Qin Yanjun, Tak-lam, SBS, JP, and
-Chief Executive of (HKMA). I have a concealed business suggestion for you,
-It require your attention and honest co-operation.
+I'm wondering if this is something that's buried in the existing code,
+or if others have thought about it -- I'd like to be able to do the
+--subset sampling, but only on some aspects of a suite.  Specifically,
+in the fs suite we have some RADOS-level options like xfs vs.
+bluestore, forthcoming EC vs. replication, and I'd like to sample
+those, while still running all the cephfs-specific permutations
+exhaustively.
 
-Regards,
-Mr. Qin Yanjun
+So if this doesn't already exist I guess it could look something like
+--suite fs --subset=1/3, --subset-filter=rados_* (e.g. if I adopted a
+naming convention where dirs/files controlling the rados-ish bits wre
+named like that).
 
+Any thoughts?
 
-______________________________
-
-Sky Silk, http://aknet.kz
-
+John
