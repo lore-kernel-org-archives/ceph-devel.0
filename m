@@ -1,26 +1,26 @@
-From: John Spray <jspray@redhat.com>
+From: Yuri Weinstein <yweinste@redhat.com>
 Subject: Re: Permuting only some things with teuthology-suite --subset
-Date: Thu, 16 Feb 2017 23:38:17 +0000
-Message-ID: <CALe9h7dQ6ZNNYmwSjebBc2xwmcCADWkyoa3p_dAGonZCUA30Kw@mail.gmail.com>
+Date: Thu, 16 Feb 2017 16:00:00 -0800
+Message-ID: <CAMMFjmGcrxG5sopv7PtnhMvynru1F8Xz+b-HYDCDc7EAEnVD+g@mail.gmail.com>
 References: <CALe9h7dmdBKgc6DXdycRC1wXgRDMH560=RuK_ZYKzhJKvFQFKg@mail.gmail.com>
  <CAMMFjmH8Rhv1nUTVocyQz+JoaOKN9-L_GBim4CJLQwULVT8RJQ@mail.gmail.com>
  <CALe9h7fHkEd0_KC+hu0_Q-3AujD9dJbqKdDkraGmov5YEf-SUg@mail.gmail.com> <alpine.DEB.2.11.1702162332330.7782@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:35661 "EHLO
-        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933463AbdBPXik (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 18:38:40 -0500
-Received: by mail-wm0-f54.google.com with SMTP id v186so77919308wmd.0
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Feb 2017 15:38:39 -0800 (PST)
+Received: from mail-wr0-f170.google.com ([209.85.128.170]:35348 "EHLO
+        mail-wr0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751191AbdBQAAC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Feb 2017 19:00:02 -0500
+Received: by mail-wr0-f170.google.com with SMTP id c4so21512357wrd.2
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Feb 2017 16:00:01 -0800 (PST)
 In-Reply-To: <alpine.DEB.2.11.1702162332330.7782@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
-Cc: Yuri Weinstein <yweinste@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Feb 16, 2017 at 11:35 PM, Sage Weil <sweil@redhat.com> wrote:
+On Thu, Feb 16, 2017 at 3:35 PM, Sage Weil <sweil@redhat.com> wrote:
 > On Thu, 16 Feb 2017, John Spray wrote:
 >> On Thu, Feb 16, 2017 at 11:14 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
 >> > I can't say I understand details on what you want to achieve, but I'd
@@ -49,6 +49,14 @@ On Thu, Feb 16, 2017 at 11:35 PM, Sage Weil <sweil@redhat.com> wrote:
 >> passing something like --subset=1/4, but for it to work the way I want
 >> I need a way to tell teuthology-suite to only do the subset part on
 >> the rados bits, and leave the cephfs bits alone.
+
+I'd love that.
+From QE standpoint it'd be valuable if we can run suites with jobs
+tagged "nightlies" and then maybe tagged "all" and maybe
+"point_release", etc. as we define tags.
+
+It would also allow us to manage sepia lab load better !
+
 >
 > +1
 >
@@ -60,14 +68,7 @@ On Thu, Feb 16, 2017 at 11:35 PM, Sage Weil <sweil@redhat.com> wrote:
 > permutations would *always* sample.  There are lots of cases where I want
 > to mix in additional variables but I don't expect them to corelate
 > with anything else, but end up blowing up the test count anyway.
-
-It did cross my mind to add some other magic char as a peer of '%' and
-'+', that would mean "this folder is a list of permutations but when
---subset is applied, don't do sampling on this".  That stuff is
-already a little arcane though!
-
-John
-
+>
 > sage
 >
 >
