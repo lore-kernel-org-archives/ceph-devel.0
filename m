@@ -1,56 +1,68 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: hammer 0.94.10 QE status
-Date: Fri, 17 Feb 2017 20:52:58 +0100
-Message-ID: <9c713c1b-b01b-ed10-dc06-6ffc5e9f0aa6@suse.cz>
-References: <CAMMFjmHCAM6wmygytBDqwh89UOEex24_GGqrLJvXcOUS+QEg9A@mail.gmail.com>
- <CAOi1vP9rX_r3Rg2ZiXzS3QrEC3piM4hwhxBqHqDTU=zpCy3uwQ@mail.gmail.com>
- <CAOi1vP9FQJJxzE_SnaJ3QLFJ6NiZGqozswyT8scMUmqjZkbjRw@mail.gmail.com>
- <90f9fb1d-74fa-3ae0-e5b7-186e5d1b2638@suse.cz>
- <CAMMFjmH-+w8H7V0WjDUPStT5+3=doBH2OsWD5DNE3ij=zS7wzA@mail.gmail.com>
- <CAMMFjmHd1kJfBfjE7b8jOcXUZp74hi5Gbh-bQmOStPJoZ397UQ@mail.gmail.com>
- <CAObvjwPb_PosEnGOXP2tV4aWjnTyed7-275svyK+vu4uxYdTzQ@mail.gmail.com>
- <alpine.DEB.2.11.1702131624230.7782@piezo.novalocal>
- <CABo9giShGk2sdYyoJmuF9J-4kqDHmfzTrWq8H02aCCEJAa7tFA@mail.gmail.com>
- <22868a53-b99e-0686-e7e1-a288558aed27@suse.cz>
- <CAMMFjmFtrwGMaVweDt9eefWta22UdjgmdVg0it1t0SwWma_FXg@mail.gmail.com>
- <473edf7d-c46a-be4c-bc8a-35be4c095b2b@suse.cz>
- <CAJ4mKGaM2cO7QjAcYgmnTKWE8Bq+WTKi_Pd5+h4gkpOKeN0kCg@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: bluestore SMR update?
+Date: Fri, 17 Feb 2017 19:59:05 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1702171953280.21487@piezo.novalocal>
+References: <04EA9170BFDB1B4BB5C8DF4AA2815C11BE932837@KNEX2.knc.local> <04EA9170BFDB1B4BB5C8DF4AA2815C11BE932B5D@KNEX2.knc.local> <04EA9170BFDB1B4BB5C8DF4AA2815C11BE932B8F@KNEX2.knc.local> <alpine.DEB.2.11.1611091407370.29278@piezo.us.to>
+ <20170217195249.mxgbbfjbgg75d36b@b635a87d083f65bdd9c43521>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:51364 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932606AbdBQTxE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 17 Feb 2017 14:53:04 -0500
-In-Reply-To: <CAJ4mKGaM2cO7QjAcYgmnTKWE8Bq+WTKi_Pd5+h4gkpOKeN0kCg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:48667 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934995AbdBQT7I (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Feb 2017 14:59:08 -0500
+In-Reply-To: <20170217195249.mxgbbfjbgg75d36b@b635a87d083f65bdd9c43521>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Yuri Weinstein <yweinste@redhat.com>, Orit Wasserman <owasserm@redhat.com>, Sage Weil <sweil@redhat.com>, Tamilarasi Muthamizhan <tmuthami@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, John Spray <jspray@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Martin Millnert <martin@millnert.se>
+Cc: Darrell Enns <darrelle@knowledge.ca>, "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
 
-> I've no idea what's broken there, so eg more valgrind failures are not
-> a big deal, but if the upgrade itself is failing in some way that's
-> going to be a problem. o_O
+On Fri, 17 Feb 2017, Martin Millnert wrote:
+> Sage,
+> 
+> are there any further changes since the last update on November 9?
 
-Hi Greg,
+Nope!
 
-Let me try to clarify :-)
+There is some new work in ext4 for SMR that showns that pretty modest 
+changes can make things perform pretty reasonably on a drive-managed SMR 
+disk.  There's an upcoming paper about it in FAST (see 
+https://www.usenix.org/conference/fast17/technical-sessions 'Evolving ext4 
+for shingled disks') and the patches are pending for ext4 upstream.
 
-If someone reports problems upgrading their firefly cluster to hammer, 
-and the problem is in firefly, will we publish a new firefly release?
+To me this suggests that bluestore will probably reasonbly well as is on 
+drive-managed SMR disks for RGW workloads (which write larger objects in 
+their entirely).  Different drives have different approaches to managing 
+the 'scratch space', though; with a bit of testing we can probably 
+recommend which ones will work best (my guess is those that demonstrate 
+fixed overhead instead allowing a large amount of deferred work to 
+accumulate).
 
-If someone reports problems upgrading their dumpling cluster to firefly, 
-and the problem is in dumpling, will we publish a new dumpling release?
+Longer term, I think it may still be best to have bluestore manage it's 
+overwrites more carefully, but depending on how well the drive-managed 
+ones work it may not be worth the investment.
 
-I don't know the answer to those questions, but such a release -- if 
-published -- would be "out-of-band" with regard to what is written in 
-https://github.com/ceph/ceph/blob/master/doc/releases.rst#understanding-the-release-cycle 
-- in particular this:
+sage
 
-"Every other stable releases is a LTS (Long Term Stable) and will 
-receive updates until two LTS are published. For instance Dumpling is 
-retired when Hammer is published, Firefly is retired when Jewel is 
-published etc."
 
-Nathan
+> 
+> Best,
+> Martin
+> 
+> On Wed, Nov 09, 2016 at 02:08:25PM +0000, Sage Weil wrote:
+> > On Wed, 9 Nov 2016, Darrell Enns wrote:
+> > > Is there any update on the GSOC Bluestore SMR project? It seems that the 
+> > > progress report wiki page has not been updated since May. I'm very 
+> > > interested in the findings and what (if anything) has yet to be done to 
+> > > improve bluestore SMR support.
+> > 
+> > We didn't complete the project, and work here as stalled while we focus on 
+> > higher priority issues.  If you're interested in picking the work back 
+> > up, we'd love to talk about it!
+> > 
+> > sage
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
