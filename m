@@ -1,7 +1,7 @@
 From: Nathan Cutler <ncutler@suse.cz>
 Subject: Re: hammer 0.94.10 QE status
-Date: Sat, 18 Feb 2017 09:19:11 +0100
-Message-ID: <23126e7c-8064-9fa4-961d-faec8c513166@suse.cz>
+Date: Sat, 18 Feb 2017 09:39:16 +0100
+Message-ID: <5d25394f-b9e6-177c-548c-6714467c2760@suse.cz>
 References: <CAMMFjmHCAM6wmygytBDqwh89UOEex24_GGqrLJvXcOUS+QEg9A@mail.gmail.com>
  <CAOi1vP9rX_r3Rg2ZiXzS3QrEC3piM4hwhxBqHqDTU=zpCy3uwQ@mail.gmail.com>
  <CAOi1vP9FQJJxzE_SnaJ3QLFJ6NiZGqozswyT8scMUmqjZkbjRw@mail.gmail.com>
@@ -17,50 +17,36 @@ References: <CAMMFjmHCAM6wmygytBDqwh89UOEex24_GGqrLJvXcOUS+QEg9A@mail.gmail.com>
  <CAJ4mKGaM2cO7QjAcYgmnTKWE8Bq+WTKi_Pd5+h4gkpOKeN0kCg@mail.gmail.com>
  <9c713c1b-b01b-ed10-dc06-6ffc5e9f0aa6@suse.cz>
  <CAJ4mKGY=J8r0txTLwzVb5OWkmJ=rLV0uf5z45mUS49+y0RzjxA@mail.gmail.com>
+ <23126e7c-8064-9fa4-961d-faec8c513166@suse.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:51450 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:52148 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750825AbdBRIT6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 18 Feb 2017 03:19:58 -0500
-In-Reply-To: <CAJ4mKGY=J8r0txTLwzVb5OWkmJ=rLV0uf5z45mUS49+y0RzjxA@mail.gmail.com>
+        id S1750805AbdBRIjW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 18 Feb 2017 03:39:22 -0500
+In-Reply-To: <23126e7c-8064-9fa4-961d-faec8c513166@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Gregory Farnum <gfarnum@redhat.com>
 Cc: Yuri Weinstein <yweinste@redhat.com>, Orit Wasserman <owasserm@redhat.com>, Sage Weil <sweil@redhat.com>, Tamilarasi Muthamizhan <tmuthami@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Just, Samuel" <sjust@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, John Spray <jspray@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
->> If someone reports problems upgrading their firefly cluster to hammer, and
->> the problem is in firefly, will we publish a new firefly release?
->>
->> If someone reports problems upgrading their dumpling cluster to firefly, and
->> the problem is in dumpling, will we publish a new dumpling release?
+> Several people have looked at the upgrade/firefly-x (hammer) failures
+> and nobody has found anything that wasn't an issue with the tests
+> themselves. Maybe you could take a look, too?
 >
-> Probably not. But, we do know that upgrades work now and so any new
-> failures must be a failure of the new version of Hammer. That, we
-> would hopefully avoid releasing, and would definitely issue a fix
-> release for. :) We can't strand users!
+> http://pulpito.ceph.com/teuthology-2017-01-30_20:52:09-upgrade:firefly-x-hammer-distro-basic-vps/
 
-Several people have looked at the upgrade/firefly-x (hammer) failures 
-and nobody has found anything that wasn't an issue with the tests 
-themselves. Maybe you could take a look, too?
+There are two failed and three dead jobs. The two failures are
 
-http://pulpito.ceph.com/teuthology-2017-01-30_20:52:09-upgrade:firefly-x-hammer-distro-basic-vps/
+ceph-objectstore-tool apply-layout-settings failed with 1
 
-Note that this QE run was done against the old gitbuilder build system.
-Yuri has some special technique for achieving that ;-)
+My totally untested theory: the client is not getting upgraded from 
+firefly to hammer, and as of 
+https://github.com/ceph/ceph/commit/e4038a0c ceph_manager.py has the 
+client running the "apply-layout-settings" subcommand of 
+ceph-objectstore-tool which is missing in firefly.
 
-This is because the old builds that are needed to run the tests were/are 
-missing in the new build system. Injecting the old gitbuilder builds 
-into the new system is apparently possible, but a manual hit-or-miss 
-process. See http://tracker.ceph.com/issues/18089
-
-(David Galloway has been _very_ helpful there, but the issues persist.)
-
-This issue is affecting the jewel rados suite, even, since that suite 
-includes a couple tests that install various dumpling and firefly 
-releases and then upgrade them.
-
-Thanks,
-Nathan
+PR with fix for review: https://github.com/ceph/ceph/pull/13513 (against 
+hammer for now, but the same code is jewel, kraken, and master as well)
