@@ -1,87 +1,61 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: UID/GID for ceph user and group
-Date: Mon, 20 Feb 2017 21:20:44 +1000
-Message-ID: <CAF-wwdE5cijs+tVopq4k3wxG6M7DF=i2=iwiT_gLY=eUatS0Bw@mail.gmail.com>
-References: <24f3a600-fe0f-05ba-7404-f30db486a9e1@digiware.nl>
- <CAF-wwdEQckkwGu1ooUeAv70DwP9Vm0+kOzwUVLEsbp14ubL0Xg@mail.gmail.com>
- <77115ad3-c903-ff7d-4d36-fc34c0f89e7a@digiware.nl> <CAF-wwdEhot7H6Oua5bNX66=xay8y5CAp3w4i5LVYDE9ALdJbPQ@mail.gmail.com>
- <ec3a4383-fb69-c13c-58d8-baa00ed24aa3@digiware.nl>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: Are we ready for jewel 10.2.6?
+Date: Mon, 20 Feb 2017 15:57:45 +0100
+Message-ID: <539012eb-30d5-e490-2a64-d0ad485d7878@suse.cz>
+References: <63289246-25fb-c96f-b844-dba82d7293c5@suse.cz>
+ <CAC7t81bh9xOh77e73zXpHWhvWhPiMagTiER6LqpqqGfHiMqZrg@mail.gmail.com>
+ <c8317af2-a8a2-2f22-7083-46f24057f10a@dachary.org>
+ <CAF-wwdEb_afYCQgjH5XpBbvk3J+dzg+CJ-agK6KsFajzu2gA1w@mail.gmail.com>
+ <CABZ+qqm5z=dxpvFZchuFGWVfWgnq3CVCCY9srckFg8P7BKhumA@mail.gmail.com>
+ <469562479.10114.1487242836607@ox.pcextreme.nl>
+ <20170217201313.GA49190@Vaibhavs-MacBook-Air.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f43.google.com ([209.85.214.43]:33057 "EHLO
-        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751402AbdBTLUp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Feb 2017 06:20:45 -0500
-Received: by mail-it0-f43.google.com with SMTP id d9so24369871itc.0
-        for <ceph-devel@vger.kernel.org>; Mon, 20 Feb 2017 03:20:45 -0800 (PST)
-In-Reply-To: <ec3a4383-fb69-c13c-58d8-baa00ed24aa3@digiware.nl>
+Received: from mx2.suse.de ([195.135.220.15]:59995 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753249AbdBTPdu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 20 Feb 2017 10:33:50 -0500
+In-Reply-To: <20170217201313.GA49190@Vaibhavs-MacBook-Air.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "Durgin, Josh" <jdurgin@redhat.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, John Spray <jspray@redhat.com>
+Cc: Loic Dachary <loic@dachary.org>, Yuri Weinstein <yweinste@redhat.com>, Abhishek Lekshmanan <abhishek@suse.com>, ceph-devel@vger.kernel.org, Sage Weil <sweil@redhat.com>
 
-On Mon, Feb 20, 2017 at 9:12 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
-> On 20-2-2017 11:49, Brad Hubbard wrote:
->>>> On my centos7 box they are not defined when I installed the ceph package?
->>
->> It was this statement that concerned me. Wondering why the ceph
->> user/group wasn't created during your CentOS install?
->
-> Good argument, but now you put your thumb on it.
->
-> Ceph is not installed on that CentOS VM, it is just for builds when I
+Hi Jason, John, Josh, Yehuda:
 
-Haha, well that would certainly explain it! :)
+The following PRs and issues have been requested as "last-minute" items 
+for 10.2.6 - see their current status below. Should any of these be 
+considered blockers for 10.2.6? That said, if you're ready to give a 
+green light for 10.2.6 now, please don't hesitate to do so.
 
-> can not figure out why Jenkins is giving me pains with a PR.
-> And to avoid pollution in the info, ceph is natively not installed in
-> the VM.
-> But then again on our cluster running Ubuntu 14.04.5 LTS it isn't there
-> either. But I'd have to ask the administrators as to why that is.
-> Seems daemons are running as root.
->
-> --WjW
->
->
->> On Mon, Feb 20, 2017 at 7:53 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>> On 20-2-2017 07:07, Brad Hubbard wrote:
->>>> On Fri, Feb 17, 2017 at 1:46 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>>>> Hi,
->>>>>
->>>>> Is there a typical uid/gid that is selected on oterh platforms to assign
->>>>> to ceph:ceph?
->>>>
->>>> https://github.com/ceph/ceph/blob/master/ceph.spec.in#L970
->>>>
->>>> I wonder if that should be "%if 0%{?rhel} || 0%{?fedora} || 0%{?centos}" ?
->>>>
->>>> Seems odd you'd be the first to notice though?????
->>>>
->>>>>
->>>>> On my centos7 box they are not defined when I installed the ceph package?
->>>
->>> This is/was for my FreeBSD ceph port....
->>> And it seems that there is a bit of consensus on 167 IF IDs need to be <
->>> 1000. Which is the case for preassigned UID/GIDs on FreeBSD.
->>>
->>> So for now I took 167:167, which was still free.
->>>
->>> Thanx,
->>> --WjW
->>>
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->>
->
+RGW
+- http://tracker.ceph.com/issues/18258 (no backport PR yet)
+- http://tracker.ceph.com/issues/18331 
+(https://github.com/ceph/ceph/pull/13358 - merged, will be in 10.2.6)
+- http://tracker.ceph.com/issues/18563 
+(https://github.com/ceph/ceph/pull/13004 - waiting for Yehuda's approval)
+- http://tracker.ceph.com/issues/17756 - bucket resharding feature 
+(https://github.com/ceph/ceph/pull/13341 - waiting for Yehuda's approval)
 
+CORE/COMMON
+- http://tracker.ceph.com/issues/14115 (no backport PR yet, master PR 
+still open)
+- http://tracker.ceph.com/issues/18582 
+(https://github.com/ceph/ceph/pull/13131 - backport PR pending; affects 
+upgrade, so will be included in 10.2.6)
+- http://tracker.ceph.com/issues/18791 
+(https://github.com/ceph/ceph/pull/13214 - in testing)
+- http://tracker.ceph.com/issues/18794 
+(https://github.com/ceph/ceph/pull/13232 - conflict)
+- http://tracker.ceph.com/issues/18812 
+(https://github.com/ceph/ceph/pull/13270 - conflict)
+- http://tracker.ceph.com/issues/17334 
+(https://github.com/ceph/ceph/pull/11410 - merged, will be in 10.2.6)
+- http://tracker.ceph.com/issues/17821 
+(https://github.com/ceph/ceph/pull/13496 - in testing)
 
-
--- 
-Cheers,
-Brad
+CEPHFS
+- http://tracker.ceph.com/issues/18708 
+(https://github.com/ceph/ceph/pull/13459 - in testing)
