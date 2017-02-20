@@ -1,61 +1,92 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Are we ready for jewel 10.2.6?
-Date: Mon, 20 Feb 2017 15:57:45 +0100
-Message-ID: <539012eb-30d5-e490-2a64-d0ad485d7878@suse.cz>
-References: <63289246-25fb-c96f-b844-dba82d7293c5@suse.cz>
- <CAC7t81bh9xOh77e73zXpHWhvWhPiMagTiER6LqpqqGfHiMqZrg@mail.gmail.com>
- <c8317af2-a8a2-2f22-7083-46f24057f10a@dachary.org>
- <CAF-wwdEb_afYCQgjH5XpBbvk3J+dzg+CJ-agK6KsFajzu2gA1w@mail.gmail.com>
- <CABZ+qqm5z=dxpvFZchuFGWVfWgnq3CVCCY9srckFg8P7BKhumA@mail.gmail.com>
- <469562479.10114.1487242836607@ox.pcextreme.nl>
- <20170217201313.GA49190@Vaibhavs-MacBook-Air.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+From: ceph branch robot <nobody@ceph.com>
+Subject: ceph branch status
+Date: Mon, 20 Feb 2017 08:00:06 -0800 (PST)
+Message-ID: <20170220160006.043EC28037F@teuthology.front.sepia.ceph.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:59995 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753249AbdBTPdu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 20 Feb 2017 10:33:50 -0500
-In-Reply-To: <20170217201313.GA49190@Vaibhavs-MacBook-Air.local>
+Received: from [8.43.84.3] ([8.43.84.3]:37614 "EHLO
+        teuthology.front.sepia.ceph.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1752707AbdBTQAG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 20 Feb 2017 11:00:06 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Durgin, Josh" <jdurgin@redhat.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, John Spray <jspray@redhat.com>
-Cc: Loic Dachary <loic@dachary.org>, Yuri Weinstein <yweinste@redhat.com>, Abhishek Lekshmanan <abhishek@suse.com>, ceph-devel@vger.kernel.org, Sage Weil <sweil@redhat.com>
+To: ceph-devel@vger.kernel.org
 
-Hi Jason, John, Josh, Yehuda:
+-- All Branches --
 
-The following PRs and issues have been requested as "last-minute" items 
-for 10.2.6 - see their current status below. Should any of these be 
-considered blockers for 10.2.6? That said, if you're ready to give a 
-green light for 10.2.6 now, please don't hesitate to do so.
+Ali Maredia <amaredia@redhat.com>
+	2017-01-18 15:37:03 -0500   wip-nfs-ganesha-teuthology
+	2017-02-16 13:28:36 -0500   wip-rgw-multisite-teuthology
 
-RGW
-- http://tracker.ceph.com/issues/18258 (no backport PR yet)
-- http://tracker.ceph.com/issues/18331 
-(https://github.com/ceph/ceph/pull/13358 - merged, will be in 10.2.6)
-- http://tracker.ceph.com/issues/18563 
-(https://github.com/ceph/ceph/pull/13004 - waiting for Yehuda's approval)
-- http://tracker.ceph.com/issues/17756 - bucket resharding feature 
-(https://github.com/ceph/ceph/pull/13341 - waiting for Yehuda's approval)
+Boris Ranto <branto@redhat.com>
+	2017-02-16 11:34:31 +0100   wip-ceph-disk-fix
 
-CORE/COMMON
-- http://tracker.ceph.com/issues/14115 (no backport PR yet, master PR 
-still open)
-- http://tracker.ceph.com/issues/18582 
-(https://github.com/ceph/ceph/pull/13131 - backport PR pending; affects 
-upgrade, so will be included in 10.2.6)
-- http://tracker.ceph.com/issues/18791 
-(https://github.com/ceph/ceph/pull/13214 - in testing)
-- http://tracker.ceph.com/issues/18794 
-(https://github.com/ceph/ceph/pull/13232 - conflict)
-- http://tracker.ceph.com/issues/18812 
-(https://github.com/ceph/ceph/pull/13270 - conflict)
-- http://tracker.ceph.com/issues/17334 
-(https://github.com/ceph/ceph/pull/11410 - merged, will be in 10.2.6)
-- http://tracker.ceph.com/issues/17821 
-(https://github.com/ceph/ceph/pull/13496 - in testing)
+Casey Bodley <cbodley@redhat.com>
+	2017-02-17 13:48:29 -0500   wip-rgw-encryption-doc
 
-CEPHFS
-- http://tracker.ceph.com/issues/18708 
-(https://github.com/ceph/ceph/pull/13459 - in testing)
+Dan Lambright <dlambrig@redhat.com>
+	2017-01-09 17:47:19 -0500   wip-message-factory
+	2017-02-03 14:24:04 -0500   wip-osd-ioinject
+
+GitHub <noreply@github.com>
+	2016-11-02 08:42:35 +0200   infernalis
+	2016-12-14 11:40:17 -0600   firefly
+	2017-01-13 11:10:39 +0100   tags/v0.94.3
+	2017-01-23 17:49:54 +0100   hammer
+	2017-01-23 17:49:54 +0100   hammer-next
+	2017-02-01 23:28:22 +0100   jewel-next
+	2017-02-13 08:19:36 +0100   kraken
+	2017-02-14 13:03:03 -0800   wip-cherrypick-4tamil
+	2017-02-20 16:42:59 +0100   jewel
+
+Jenkins Build Slave User <ceph-release-team@redhat.com>
+	2017-02-08 13:57:33 +0000   luminous
+
+Loic Dachary <ldachary@redhat.com>
+	2015-03-23 17:44:12 +0100   dumpling
+
+Loic Dachary <loic@dachary.org>
+	2015-10-17 00:38:34 +0200   giant
+
+Marcus Watts <mwatts@redhat.com>
+	2016-10-19 05:05:50 -0400   wip-master-rgw-0lenfix1
+	2016-11-11 01:22:10 -0500   wip-xml-string-wrap
+	2016-11-11 01:25:55 -0500   wip-json-smarter-escapes
+	2016-11-11 01:29:56 -0500   wip-buildfix-python-out-of-tree
+
+Orit Wasserman <owasserm@redhat.com>
+	2017-01-02 12:13:26 +0200   wip-orit-resharding-hammer
+
+Pritha Srivastava <prsrivas@redhat.com>
+	2016-12-22 20:28:09 +0530   wip-rgw-polymorphic-errors
+	2017-01-16 11:36:24 +0530   wip-rgw-ssl-teuthology
+
+Sage Weil <sage@inktank.com>
+	2013-04-18 13:51:36 -0700   argonaut
+
+Sage Weil <sage@redhat.com>
+	2015-01-12 08:30:40 -0800   emperor
+
+Vasu Kulkarni <vasu@redhat.com>
+	2017-01-30 14:13:10 -0800   wip-cd-dev-option
+	2017-01-30 14:32:18 -0800   wip-cd-hammer
+	2017-01-30 22:03:08 -0800   wip-qemu-redir
+	2017-02-09 16:06:07 -0800   wip-use-only-dev
+	2017-02-19 09:51:02 -0800   rh-jewel
+
+Wido den Hollander <wido@42on.com>
+	2017-01-03 15:36:28 +0100   osd-mark-inactive
+
+Yehuda Sadeh <yehuda@inktank.com>
+	2014-01-28 09:38:19 -0800   bobtail
+	2014-01-28 09:40:18 -0800   cuttlefish
+
+Yehuda Sadeh <yehuda@redhat.com>
+	2016-10-03 16:51:40 -0700   dnm-dang-reshard
+
+Yuri Weinstein <yweinste@redhat.com>
+	2017-02-13 12:42:34 -0800   wip-15752-master_ceph
+
+
+
+Grouped by committer, ordered by commit time stamp.
