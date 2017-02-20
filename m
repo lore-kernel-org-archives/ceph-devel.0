@@ -1,70 +1,177 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: Passing LUA script via python rados execute
-Date: Mon, 20 Feb 2017 00:43:52 -0800
-Message-ID: <10499347-8c11-83fb-9778-e95049668c6c@redhat.com>
-References: <1fa1fa7d.AEEAIBzI4F8AAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYpMPz@mailjet.com>
- <CAB2gnbXykgX42up7ZzT-e5UvZrRkpyzAnGP_D4CnH-AgFRW8qg@mail.gmail.com>
- <3177d648.AEQAH1DOmSwAAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYphEb@mailjet.com>
- <CAB2gnbVXVUiCgBFK2Q4+8N=RVf6KLGjH=_oibb+BJxx0B_FmtA@mail.gmail.com>
- <1cadb44c.ADsAAGb8C0gAAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYphQY@mailjet.com>
- <CAB2gnbW1_TLmYsszA7KTD18NdNhW5HR44bvCknTs9rqX007s7Q@mail.gmail.com>
- <3a5eb209.AEEAIECau6cAAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYp3rL@mailjet.com>
- <CAB2gnbWXWcj=O1LKKMGCn2X6h_T46x9Ypaupy2u7wQHdBV2CJA@mail.gmail.com>
- <CA+2bHPYgFkRbNwc8b1aLcTX+0-=DecM1m3BV5ssjKFmBYBmo2w@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: crush multipick anomaly
+Date: Mon, 20 Feb 2017 09:47:07 +0100
+Message-ID: <695d7ea8-b9e6-11ab-c356-6f935d59bb51@dachary.org>
+References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
+ <3554101b-4d10-e46b-93b0-f74794258f2e@dachary.org>
+ <CAJ4mKGZ8J5VYhsyo5cWT0qRtrh=2jbREixPBUwRCsCX1qY-odw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46406 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751041AbdBTIn4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 20 Feb 2017 03:43:56 -0500
-In-Reply-To: <CA+2bHPYgFkRbNwc8b1aLcTX+0-=DecM1m3BV5ssjKFmBYBmo2w@mail.gmail.com>
+Received: from relay6-d.mail.gandi.net ([217.70.183.198]:38945 "EHLO
+        relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751041AbdBTIrN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Feb 2017 03:47:13 -0500
+In-Reply-To: <CAJ4mKGZ8J5VYhsyo5cWT0qRtrh=2jbREixPBUwRCsCX1qY-odw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick Donnelly <pdonnell@redhat.com>, Noah Watkins <noahwatkins@gmail.com>
-Cc: Nick Fisk <nick@fisk.me.uk>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 02/19/2017 12:15 PM, Patrick Donnelly wrote:
-> On Sat, Feb 18, 2017 at 2:55 PM, Noah Watkins <noahwatkins@gmail.com> wrote:
->> The least intrusive solution is to simply change the sandbox to allow
->> the standard file system module loading function as expected. Then any
->> user would need to make sure that every OSD had consistent versions of
->> dependencies installed using something like LuaRocks. This is simple,
->> but could make debugging and deployment a major headache.
->
-> A locked down require which doesn't load C bindings (i.e. only load
-> .lua files) would probably be alright.
->
->> A more ambitious version would be to create an interface for users to
->> upload scripts and dependencies into objects, and support referencing
->> those objects as standard dependencies in Lua scripts as if they were
->> standard modules on the file system. Each OSD could then cache scripts
->> and dependencies, allowing applications to use references to scripts
->> instead of sending a script with every request.
->
-> This is very doable. I imagine we'd just put all of the Lua modules in
-> a flattened hierarchy under a RADOS namespace? The potentially
-> annoying nit in this is writing some kind of mechanism for installing
-> a Lua module tree into RADOS. Users would install locally and then
-> upload the tree through some tool.
 
-Using rados objects for this is not really feasible. It would be
-incredibly complex within the osd - it involves multiple objects, cache
-invalidation, and has all kinds of potential issues with consistent
-versioning and atomic updates across objects.
 
-The simple solution of loading modules from the local fs sounds
-way better to me. Putting modules on all osds and reloading the modules
-or restarting the osds seems like a pretty simple deployment model with
-any configuration management system.
+On 02/13/2017 03:53 PM, Gregory Farnum wrote:
+> On Mon, Feb 13, 2017 at 2:36 AM, Loic Dachary <loic@dachary.org> wrote:
+>> Hi,
+>>
+>> Dan van der Ster reached out to colleagues and friends and Pedro López-Adeva Fernández-Layos came up with a well written analysis of the problem and a tentative solution which he described at : https://github.com/plafl/notebooks/blob/master/replication.ipynb
+>>
+>> Unless I'm reading the document incorrectly (very possible ;) it also means that the probability of each disk needs to take in account the weight of all disks. Which means that whenever a disk is added / removed or its weight is changed, this has an impact on the probability of all disks in the cluster and objects are likely to move everywhere. Am I mistaken ?
+> 
+> Keep in mind that in the math presented, "all disks" for our purposes
+> really means "all items within a CRUSH bucket" (at least, best I can
+> tell). So if you reweight a disk, you have to recalculate weights
+> within its bucket and within each parent bucket, but each bucket has a
+> bounded size N so the calculation should remain feasible. I didn't
+> step through the more complicated math at the end but it made
+> intuitive sense as far as I went.
 
-That said, for research purposes you could resurrect something like the
-ability to load modules into the cluster from a client - just store
-them on the local fs of each osd, not in rados objects. This was
-removed back in 2011:
+When crush chooses the second replica it ensures it does not land on the same host, rack etc. depending on the step CHOOSE* argument of the rule. When looking for the best weights (in the updated https://github.com/plafl/notebooks/blob/master/converted/replication.pdf versions) I think we would focus on the host weights (assuming the failure domain is the host) and not the disk weights. When drawing disks after the host was selected, the probabilities of each disk should not need to be modified because there will never be a rejection at that level (i.e. no conditional probability).
 
-https://github.com/ceph/ceph/commit/7c04f81ca16d11fc5a592992a4462b34ccb199dc
-https://github.com/ceph/ceph/commit/964a0a6e1326d4f773c547655ebb2a5c97794268
+If the failure domain is the host I think the crush map should be something like:
 
-Josh
+root:
+   host1:
+     disk1
+     disk2
+   host2:
+     disk3
+     disk4
+   host3:
+     disk5
+     disk6
+
+Introducing racks such as in:
+
+root:
+ rack0:
+   host1:
+     disk1
+     disk2
+   host2:
+     disk3
+     disk4
+ rack1:
+   host3:
+     disk5
+     disk6
+
+Is going to complicate the problem further, for no good reason other than a pretty display / architecture reminder. Since rejecting a second replica on host3 means it will land in rack0 instead of rack1, I think the probability distribution of the racks will need to be adjusted in the same way the probabilty distribution of the failure domain buckets need to.
+
+Does that make sense ?
+
+> -Greg
+> 
+>>
+>> Cheers
+>>
+>> On 01/26/2017 04:05 AM, Sage Weil wrote:
+>>> This is a longstanding bug,
+>>>
+>>>       http://tracker.ceph.com/issues/15653
+>>>
+>>> that causes low-weighted devices to get more data than they should. Loic's
+>>> recent activity resurrected discussion on the original PR
+>>>
+>>>       https://github.com/ceph/ceph/pull/10218
+>>>
+>>> but since it's closed and almost nobody will see it I'm moving the
+>>> discussion here.
+>>>
+>>> The main news is that I have a simple adjustment for the weights that
+>>> works (almost perfectly) for the 2nd round of placements.  The solution is
+>>> pretty simple, although as with most probabilities it tends to make my
+>>> brain hurt.
+>>>
+>>> The idea is that, on the second round, the original weight for the small
+>>> OSD (call it P(pick small)) isn't what we should use.  Instead, we want
+>>> P(pick small | first pick not small).  Since P(a|b) (the probability of a
+>>> given b) is P(a && b) / P(b),
+>>>
+>>>  P(pick small | first pick not small)
+>>>  = P(pick small && first pick not small) / P(first pick not small)
+>>>
+>>> The last term is easy to calculate,
+>>>
+>>>  P(first pick not small) = (total_weight - small_weight) / total_weight
+>>>
+>>> and the && term is the distribution we're trying to produce.  For exmaple,
+>>> if small has 1/10 the weight, then we should see 1/10th of the PGs have
+>>> their second replica be the small OSD.  So
+>>>
+>>>  P(pick small && first pick not small) = small_weight / total_weight
+>>>
+>>> Putting those together,
+>>>
+>>>  P(pick small | first pick not small)
+>>>  = P(pick small && first pick not small) / P(first pick not small)
+>>>  = (small_weight / total_weight) / ((total_weight - small_weight) / total_weight)
+>>>  = small_weight / (total_weight - small_weight)
+>>>
+>>> This is, on the second round, we should adjust the weights by the above so
+>>> that we get the right distribution of second choices.  It turns out it
+>>> works to adjust *all* weights like this to get hte conditional probability
+>>> that they weren't already chosen.
+>>>
+>>> I have a branch that hacks this into straw2 and it appears to work
+>>> properly for num_rep = 2.  With a test bucket of [99 99 99 99 4], and the
+>>> current code, you get
+>>>
+>>> $ bin/crushtool -c cm.txt --test --show-utilization --min-x 0 --max-x 40000000 --num-rep 2
+>>> rule 0 (data), x = 0..40000000, numrep = 2..2
+>>> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
+>>>   device 0:             19765965        [9899364,9866601]
+>>>   device 1:             19768033        [9899444,9868589]
+>>>   device 2:             19769938        [9901770,9868168]
+>>>   device 3:             19766918        [9898851,9868067]
+>>>   device 6:             929148  [400572,528576]
+>>>
+>>> which is very close for the first replica (primary), but way off for the
+>>> second.  With my hacky change,
+>>>
+>>> rule 0 (data), x = 0..40000000, numrep = 2..2
+>>> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
+>>>   device 0:             19797315        [9899364,9897951]
+>>>   device 1:             19799199        [9899444,9899755]
+>>>   device 2:             19801016        [9901770,9899246]
+>>>   device 3:             19797906        [9898851,9899055]
+>>>   device 6:             804566  [400572,403994]
+>>>
+>>> which is quite close, but still skewing slightly high (by a big less than
+>>> 1%).
+>>>
+>>> Next steps:
+>>>
+>>> 1- generalize this for >2 replicas
+>>> 2- figure out why it skews high
+>>> 3- make this work for multi-level hierarchical descent
+>>>
+>>> sage
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+>> --
+>> Loïc Dachary, Artisan Logiciel Libre
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
