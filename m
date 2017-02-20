@@ -1,43 +1,41 @@
-From: Sage Weil <sweil@redhat.com>
+From: Gregory Farnum <gfarnum@redhat.com>
 Subject: Re: quota change restriction
-Date: Mon, 20 Feb 2017 16:47:31 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1702201646490.7782@piezo.novalocal>
-References: <461205975.109214419.1487599948474.JavaMail.zimbra@redhat.com> <1228164616.109276923.1487608022780.JavaMail.zimbra@redhat.com> <CALe9h7dmU3c10rSnD-Ux4dB3bFXYko6uvcw1f8-RrJ=7f5NKWg@mail.gmail.com>
+Date: Mon, 20 Feb 2017 09:13:39 -0800
+Message-ID: <CAJ4mKGbeZapFaygONBmMyguz-Q0h8Wj3=0xkn55UYV4WJ4Tm2g@mail.gmail.com>
+References: <461205975.109214419.1487599948474.JavaMail.zimbra@redhat.com>
+ <1228164616.109276923.1487608022780.JavaMail.zimbra@redhat.com> <CALe9h7dmU3c10rSnD-Ux4dB3bFXYko6uvcw1f8-RrJ=7f5NKWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56088 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752846AbdBTQre (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 20 Feb 2017 11:47:34 -0500
-Received: from int-mx11.intmail.prod.int.phx2.redhat.com (int-mx11.intmail.prod.int.phx2.redhat.com [10.5.11.24])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 944BF7E9DB
-        for <ceph-devel@vger.kernel.org>; Mon, 20 Feb 2017 16:47:34 +0000 (UTC)
+Received: from mail-yw0-f178.google.com ([209.85.161.178]:36068 "EHLO
+        mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753401AbdBTROV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Feb 2017 12:14:21 -0500
+Received: by mail-yw0-f178.google.com with SMTP id v200so52760869ywc.3
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Feb 2017 09:13:41 -0800 (PST)
 In-Reply-To: <CALe9h7dmU3c10rSnD-Ux4dB3bFXYko6uvcw1f8-RrJ=7f5NKWg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: John Spray <jspray@redhat.com>
 Cc: Ramana Raja <rraja@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 20 Feb 2017, John Spray wrote:
+On Mon, Feb 20, 2017 at 8:43 AM, John Spray <jspray@redhat.com> wrote:
 > (taking to ceph-devel)
-> 
+>
 > On Mon, Feb 20, 2017 at 4:27 PM, Ramana Raja <rraja@redhat.com> wrote:
-> > Would it be possible or make sense to disallow clients having
-> > path restricted caps (OpenStack clients) from modifying quota
-> > (change share size) of the root of the exported subtree (manila share)?
-> >
-> > Currently, an OpenStack client can mount a share and modify
-> > its size, by modifying the quota xattr value at the mount point,
-> > without Manila service knowing about the size change.
-> 
+>> Would it be possible or make sense to disallow clients having
+>> path restricted caps (OpenStack clients) from modifying quota
+>> (change share size) of the root of the exported subtree (manila share)?
+>>
+>> Currently, an OpenStack client can mount a share and modify
+>> its size, by modifying the quota xattr value at the mount point,
+>> without Manila service knowing about the size change.
+>
 > Right, I think this came up before at some point.  I think I didn't
 > think hard about it because it wouldn't be an issue so much with NFS
 > clients, but we should at least decide what direction we want to go
 > in.
-> 
+>
 > We had kind of the same issue with layouts, which is why the 'p' part
 > of 'allow rwp' MDS auth caps was introduced.  A few options spring to
 > mind:
@@ -52,12 +50,13 @@ On Mon, 20 Feb 2017, John Spray wrote:
 >  C) Introduce another flag to the mds auth caps that controls ability
 > to set quota.  Downside: additional complexity in the auth caps.
 >  D) Do nothing
-> 
+>
 > Anyone have other thoughts on this, and/or a preference from those
 > options?  I'm leaning towards A but just because I can't readily
 > imagine use cases where you want to permit layout changes but ban
 > quotas, doesn't mean they don't exist.
 
-I like A too.
-
-s
+I like A but it does restrict the ability of tenants to have a "tenant
+admin" restricting the size of certain of their clients. Not sure if
+we care about that use case or not.
+-Greg
