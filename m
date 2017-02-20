@@ -1,62 +1,92 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: quota change restriction
-Date: Mon, 20 Feb 2017 09:13:39 -0800
-Message-ID: <CAJ4mKGbeZapFaygONBmMyguz-Q0h8Wj3=0xkn55UYV4WJ4Tm2g@mail.gmail.com>
-References: <461205975.109214419.1487599948474.JavaMail.zimbra@redhat.com>
- <1228164616.109276923.1487608022780.JavaMail.zimbra@redhat.com> <CALe9h7dmU3c10rSnD-Ux4dB3bFXYko6uvcw1f8-RrJ=7f5NKWg@mail.gmail.com>
+Subject: Re: crush multipick anomaly
+Date: Mon, 20 Feb 2017 09:32:56 -0800
+Message-ID: <CAJ4mKGb8ZKsq9-24uy8E=GC3M_P9OaaqewUzwMsfw7YBGd598w@mail.gmail.com>
+References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
+ <3554101b-4d10-e46b-93b0-f74794258f2e@dachary.org> <CAJ4mKGZ8J5VYhsyo5cWT0qRtrh=2jbREixPBUwRCsCX1qY-odw@mail.gmail.com>
+ <695d7ea8-b9e6-11ab-c356-6f935d59bb51@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f178.google.com ([209.85.161.178]:36068 "EHLO
-        mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753401AbdBTROV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Feb 2017 12:14:21 -0500
-Received: by mail-yw0-f178.google.com with SMTP id v200so52760869ywc.3
-        for <ceph-devel@vger.kernel.org>; Mon, 20 Feb 2017 09:13:41 -0800 (PST)
-In-Reply-To: <CALe9h7dmU3c10rSnD-Ux4dB3bFXYko6uvcw1f8-RrJ=7f5NKWg@mail.gmail.com>
+Received: from mail-yw0-f180.google.com ([209.85.161.180]:35607 "EHLO
+        mail-yw0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753513AbdBTRdB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Feb 2017 12:33:01 -0500
+Received: by mail-yw0-f180.google.com with SMTP id l19so53068011ywc.2
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Feb 2017 09:32:58 -0800 (PST)
+In-Reply-To: <695d7ea8-b9e6-11ab-c356-6f935d59bb51@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ramana Raja <rraja@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Feb 20, 2017 at 8:43 AM, John Spray <jspray@redhat.com> wrote:
-> (taking to ceph-devel)
+On Mon, Feb 20, 2017 at 12:47 AM, Loic Dachary <loic@dachary.org> wrote:
 >
-> On Mon, Feb 20, 2017 at 4:27 PM, Ramana Raja <rraja@redhat.com> wrote:
->> Would it be possible or make sense to disallow clients having
->> path restricted caps (OpenStack clients) from modifying quota
->> (change share size) of the root of the exported subtree (manila share)?
+>
+> On 02/13/2017 03:53 PM, Gregory Farnum wrote:
+>> On Mon, Feb 13, 2017 at 2:36 AM, Loic Dachary <loic@dachary.org> wrote:
+>>> Hi,
+>>>
+>>> Dan van der Ster reached out to colleagues and friends and Pedro López-Adeva Fernández-Layos came up with a well written analysis of the problem and a tentative solution which he described at : https://github.com/plafl/notebooks/blob/master/replication.ipynb
+>>>
+>>> Unless I'm reading the document incorrectly (very possible ;) it also means that the probability of each disk needs to take in account the weight of all disks. Which means that whenever a disk is added / removed or its weight is changed, this has an impact on the probability of all disks in the cluster and objects are likely to move everywhere. Am I mistaken ?
 >>
->> Currently, an OpenStack client can mount a share and modify
->> its size, by modifying the quota xattr value at the mount point,
->> without Manila service knowing about the size change.
+>> Keep in mind that in the math presented, "all disks" for our purposes
+>> really means "all items within a CRUSH bucket" (at least, best I can
+>> tell). So if you reweight a disk, you have to recalculate weights
+>> within its bucket and within each parent bucket, but each bucket has a
+>> bounded size N so the calculation should remain feasible. I didn't
+>> step through the more complicated math at the end but it made
+>> intuitive sense as far as I went.
 >
-> Right, I think this came up before at some point.  I think I didn't
-> think hard about it because it wouldn't be an issue so much with NFS
-> clients, but we should at least decide what direction we want to go
-> in.
->
-> We had kind of the same issue with layouts, which is why the 'p' part
-> of 'allow rwp' MDS auth caps was introduced.  A few options spring to
-> mind:
->  A) Apply the 'p' flag rules quotas as well as layouts: generalise it
-> into a "this is a client that isn't allowed to modify the special
-> ceph.* attrs".  Is this too Manila-specific?  Not sure.
->  B) Special case the client's mount root, and never let it modify the
-> quotas on its own root.  This is probably reasonable in practice as I
-> would expect someone to only be mounting a subpath at the point they
-> had configured their quotas elsewhere, but it seems like quite a
-> quirky move.
->  C) Introduce another flag to the mds auth caps that controls ability
-> to set quota.  Downside: additional complexity in the auth caps.
->  D) Do nothing
->
-> Anyone have other thoughts on this, and/or a preference from those
-> options?  I'm leaning towards A but just because I can't readily
-> imagine use cases where you want to permit layout changes but ban
-> quotas, doesn't mean they don't exist.
+> When crush chooses the second replica it ensures it does not land on the same host, rack etc. depending on the step CHOOSE* argument of the rule. When looking for the best weights (in the updated https://github.com/plafl/notebooks/blob/master/converted/replication.pdf versions) I think we would focus on the host weights (assuming the failure domain is the host) and not the disk weights. When drawing disks after the host was selected, the probabilities of each disk should not need to be modified because there will never be a rejection at that level (i.e. no conditional probability).
 
-I like A but it does restrict the ability of tenants to have a "tenant
-admin" restricting the size of certain of their clients. Not sure if
-we care about that use case or not.
+Well, you'd have changed the number of disks, so you'd need to
+recalculate within the host that got a new disk added. And then you'd
+need to recalculate the host and its peer buckets, and if it was in a
+rack then the rack and its peer buckets, and on up the chain.
+
+>
+> If the failure domain is the host I think the crush map should be something like:
+>
+> root:
+>    host1:
+>      disk1
+>      disk2
+>    host2:
+>      disk3
+>      disk4
+>    host3:
+>      disk5
+>      disk6
+>
+> Introducing racks such as in:
+>
+> root:
+>  rack0:
+>    host1:
+>      disk1
+>      disk2
+>    host2:
+>      disk3
+>      disk4
+>  rack1:
+>    host3:
+>      disk5
+>      disk6
+>
+> Is going to complicate the problem further, for no good reason other than a pretty display / architecture reminder.
+
+Well, there's not much point if you're replicating across hosts, since
+the rack layer is very unbalanced here. But that's essentially a
+misconfiguration which is going to cause problems with any CRUSH-like
+system.
+
+
+> Since rejecting a second replica on host3 means it will land in rack0 instead of rack1, I think the probability distribution of the racks will need to be adjusted in the same way the probabilty distribution of the failure domain buckets need to.
+
+I think maybe you're saying what I did before? "All disks" for our
+purposes really means "all items within a CRUSH bucket". The racks are
+CRUSH items within the root bucket.
 -Greg
