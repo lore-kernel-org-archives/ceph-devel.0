@@ -1,28 +1,28 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Seeking approval for 10.2.6 - RBD
-Date: Mon, 20 Feb 2017 22:59:10 +0100
-Message-ID: <c112cd62-7ed4-3505-69e1-ba91c0d1e721@suse.cz>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: Seeking approval for 10.2.6 - RBD
+Date: Mon, 20 Feb 2017 17:28:27 -0500
+Message-ID: <CA+aFP1A3RrOu0E69Bs8n1hkyWdiCawSmbmgrE5K6DvPoyMzYeQ@mail.gmail.com>
+References: <c112cd62-7ed4-3505-69e1-ba91c0d1e721@suse.cz>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:59065 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750928AbdBTV7N (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 20 Feb 2017 16:59:13 -0500
+Received: from mail-lf0-f46.google.com ([209.85.215.46]:34739 "EHLO
+        mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750827AbdBTW2a (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Feb 2017 17:28:30 -0500
+Received: by mail-lf0-f46.google.com with SMTP id g134so12608158lfe.1
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Feb 2017 14:28:29 -0800 (PST)
+In-Reply-To: <c112cd62-7ed4-3505-69e1-ba91c0d1e721@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Dillaman, Jason" <dillaman@redhat.com>
+To: Nathan Cutler <ncutler@suse.cz>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Jason:
+On Mon, Feb 20, 2017 at 4:59 PM, Nathan Cutler <ncutler@suse.cz> wrote:
+> Do you think 10.2.6 can go to QE for further testing ahead of release?
 
-A number of RBD backports have been merged into jewel in preparation for 
-the 10.2.6 release. For a list, see:
++1 -- yes, please!
 
-http://tracker.ceph.com/projects/rbd/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=*&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=529&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D=
-
-Do you think 10.2.6 can go to QE for further testing ahead of release?
-
-Thanks,
-Nathan
+-- 
+Jason
