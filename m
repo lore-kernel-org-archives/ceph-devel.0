@@ -1,92 +1,66 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: crush multipick anomaly
-Date: Mon, 20 Feb 2017 09:32:56 -0800
-Message-ID: <CAJ4mKGb8ZKsq9-24uy8E=GC3M_P9OaaqewUzwMsfw7YBGd598w@mail.gmail.com>
-References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
- <3554101b-4d10-e46b-93b0-f74794258f2e@dachary.org> <CAJ4mKGZ8J5VYhsyo5cWT0qRtrh=2jbREixPBUwRCsCX1qY-odw@mail.gmail.com>
- <695d7ea8-b9e6-11ab-c356-6f935d59bb51@dachary.org>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: Re: Are we ready for jewel 10.2.6?
+Date: Mon, 20 Feb 2017 10:20:28 -0800
+Message-ID: <4d8aa9d8-2b59-6cf1-86b2-2f0793121efb@redhat.com>
+References: <63289246-25fb-c96f-b844-dba82d7293c5@suse.cz>
+ <CAC7t81bh9xOh77e73zXpHWhvWhPiMagTiER6LqpqqGfHiMqZrg@mail.gmail.com>
+ <c8317af2-a8a2-2f22-7083-46f24057f10a@dachary.org>
+ <CAF-wwdEb_afYCQgjH5XpBbvk3J+dzg+CJ-agK6KsFajzu2gA1w@mail.gmail.com>
+ <CABZ+qqm5z=dxpvFZchuFGWVfWgnq3CVCCY9srckFg8P7BKhumA@mail.gmail.com>
+ <469562479.10114.1487242836607@ox.pcextreme.nl>
+ <20170217201313.GA49190@Vaibhavs-MacBook-Air.local>
+ <539012eb-30d5-e490-2a64-d0ad485d7878@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f180.google.com ([209.85.161.180]:35607 "EHLO
-        mail-yw0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753513AbdBTRdB (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Feb 2017 12:33:01 -0500
-Received: by mail-yw0-f180.google.com with SMTP id l19so53068011ywc.2
-        for <ceph-devel@vger.kernel.org>; Mon, 20 Feb 2017 09:32:58 -0800 (PST)
-In-Reply-To: <695d7ea8-b9e6-11ab-c356-6f935d59bb51@dachary.org>
+Received: from mx1.redhat.com ([209.132.183.28]:53578 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751253AbdBTSUc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 20 Feb 2017 13:20:32 -0500
+In-Reply-To: <539012eb-30d5-e490-2a64-d0ad485d7878@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, John Spray <jspray@redhat.com>
+Cc: Loic Dachary <loic@dachary.org>, Yuri Weinstein <yweinste@redhat.com>, Abhishek Lekshmanan <abhishek@suse.com>, ceph-devel@vger.kernel.org, Sage Weil <sweil@redhat.com>
 
-On Mon, Feb 20, 2017 at 12:47 AM, Loic Dachary <loic@dachary.org> wrote:
+On 02/20/2017 06:57 AM, Nathan Cutler wrote:
+> Hi Jason, John, Josh, Yehuda:
 >
+> The following PRs and issues have been requested as "last-minute" items
+> for 10.2.6 - see their current status below. Should any of these be
+> considered blockers for 10.2.6? That said, if you're ready to give a
+> green light for 10.2.6 now, please don't hesitate to do so.
 >
-> On 02/13/2017 03:53 PM, Gregory Farnum wrote:
->> On Mon, Feb 13, 2017 at 2:36 AM, Loic Dachary <loic@dachary.org> wrote:
->>> Hi,
->>>
->>> Dan van der Ster reached out to colleagues and friends and Pedro López-Adeva Fernández-Layos came up with a well written analysis of the problem and a tentative solution which he described at : https://github.com/plafl/notebooks/blob/master/replication.ipynb
->>>
->>> Unless I'm reading the document incorrectly (very possible ;) it also means that the probability of each disk needs to take in account the weight of all disks. Which means that whenever a disk is added / removed or its weight is changed, this has an impact on the probability of all disks in the cluster and objects are likely to move everywhere. Am I mistaken ?
->>
->> Keep in mind that in the math presented, "all disks" for our purposes
->> really means "all items within a CRUSH bucket" (at least, best I can
->> tell). So if you reweight a disk, you have to recalculate weights
->> within its bucket and within each parent bucket, but each bucket has a
->> bounded size N so the calculation should remain feasible. I didn't
->> step through the more complicated math at the end but it made
->> intuitive sense as far as I went.
->
-> When crush chooses the second replica it ensures it does not land on the same host, rack etc. depending on the step CHOOSE* argument of the rule. When looking for the best weights (in the updated https://github.com/plafl/notebooks/blob/master/converted/replication.pdf versions) I think we would focus on the host weights (assuming the failure domain is the host) and not the disk weights. When drawing disks after the host was selected, the probabilities of each disk should not need to be modified because there will never be a rejection at that level (i.e. no conditional probability).
+> CORE/COMMON
+> - http://tracker.ceph.com/issues/14115 (no backport PR yet, master PR
+> still open)
 
-Well, you'd have changed the number of disks, so you'd need to
-recalculate within the host that got a new disk added. And then you'd
-need to recalculate the host and its peer buckets, and if it was in a
-rack then the rack and its peer buckets, and on up the chain.
+This is just diagnostics still - the underlying issue isn't fixed by
+that PR.
 
->
-> If the failure domain is the host I think the crush map should be something like:
->
-> root:
->    host1:
->      disk1
->      disk2
->    host2:
->      disk3
->      disk4
->    host3:
->      disk5
->      disk6
->
-> Introducing racks such as in:
->
-> root:
->  rack0:
->    host1:
->      disk1
->      disk2
->    host2:
->      disk3
->      disk4
->  rack1:
->    host3:
->      disk5
->      disk6
->
-> Is going to complicate the problem further, for no good reason other than a pretty display / architecture reminder.
+> - http://tracker.ceph.com/issues/18582
+> (https://github.com/ceph/ceph/pull/13131 - backport PR pending; affects
+> upgrade, so will be included in 10.2.6)
 
-Well, there's not much point if you're replicating across hosts, since
-the rack layer is very unbalanced here. But that's essentially a
-misconfiguration which is going to cause problems with any CRUSH-like
-system.
+Sounds good.
 
+> - http://tracker.ceph.com/issues/18791
+> (https://github.com/ceph/ceph/pull/13214 - in testing)
+> - http://tracker.ceph.com/issues/18794
+> (https://github.com/ceph/ceph/pull/13232 - conflict)
+> - http://tracker.ceph.com/issues/18812
+> (https://github.com/ceph/ceph/pull/13270 - conflict)
 
-> Since rejecting a second replica on host3 means it will land in rack0 instead of rack1, I think the probability distribution of the racks will need to be adjusted in the same way the probabilty distribution of the failure domain buckets need to.
+This one is a blocker - it's a severe upgrade issue for hammer clients
+under some circumstances.
 
-I think maybe you're saying what I did before? "All disks" for our
-purposes really means "all items within a CRUSH bucket". The racks are
-CRUSH items within the root bucket.
--Greg
+> - http://tracker.ceph.com/issues/17334
+> (https://github.com/ceph/ceph/pull/11410 - merged, will be in 10.2.6)
+> - http://tracker.ceph.com/issues/17821
+> (https://github.com/ceph/ceph/pull/13496 - in testing)
+
+I think the rest are less critical and can wait for 10.2.7.
+
+Thanks!
+Josh
