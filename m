@@ -1,59 +1,32 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: migrating dmcrypt keys ?
-Date: Mon, 20 Feb 2017 22:12:40 +0100
-Message-ID: <48410a16-1abd-34ff-2136-06fb8c35f396@dachary.org>
-References: <CAGbvivJVPkqdMhWuf=5Lx6DSi9UR9aYnAGtqT7K23NO31y_bPg@mail.gmail.com>
- <dd16ff32-75e9-3f58-b0cc-50a162774d0a@dachary.org>
- <CAGbviv+5PvSYJCxrGWY5-TcDOTEu-h_z_-qbgdzuqk4zSN0V1w@mail.gmail.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: UID/GID for ceph user and group
+Date: Mon, 20 Feb 2017 22:15:06 +0100
+Message-ID: <ea16c75d-28cd-565d-b831-090fe323ea87@suse.cz>
+References: <24f3a600-fe0f-05ba-7404-f30db486a9e1@digiware.nl>
+ <CAF-wwdEQckkwGu1ooUeAv70DwP9Vm0+kOzwUVLEsbp14ubL0Xg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:38411 "EHLO
-        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750829AbdBTVMq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Feb 2017 16:12:46 -0500
-In-Reply-To: <CAGbviv+5PvSYJCxrGWY5-TcDOTEu-h_z_-qbgdzuqk4zSN0V1w@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:58328 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750893AbdBTVds (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 20 Feb 2017 16:33:48 -0500
+In-Reply-To: <CAF-wwdEQckkwGu1ooUeAv70DwP9Vm0+kOzwUVLEsbp14ubL0Xg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+To: Brad Hubbard <bhubbard@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
+Hi Brad:
 
+> https://github.com/ceph/ceph/blob/master/ceph.spec.in#L970
+>
+> I wonder if that should be "%if 0%{?rhel} || 0%{?fedora} || 0%{?centos}" ?
+>
+> Seems odd you'd be the first to notice though?????
 
-On 02/20/2017 09:17 PM, Wyllys Ingersoll wrote:
-> Can you elaborate - specifically what would I look for in ceph-disk?
-> I would be interested in writing the migration tool if I knew where to
-> start digging.
+No, because 0%{?rhel} evaluates to true on CentOS.
 
-The keyword to look for is lockbox, starting from here https://github.com/ceph/ceph/blob/master/src/ceph-disk/ceph_disk/main.py#L1193 looking at the pull requests that merged this, you should have some valuable context.
-
-Cheers
-
-
-> 
-> thanks!
-> 
-> On Mon, Feb 20, 2017 at 2:56 PM, Loic Dachary <loic@dachary.org> wrote:
->> Hi,
->>
->> On 02/20/2017 08:49 PM, Wyllys Ingersoll wrote:
->>> Is it possible to migrate a legacy (i..e pre-Jewel) osd device that
->>> was originally setup with dmcrypt keys in /etc/ceph/dmcrypt-keys to
->>> use the newer osd-lockbox scheme without having to destroy the osd and
->>> re-prepare it?
->>
->> You can do it manually by mimicing what ceph-disk does. It would be nice to have a tool to do that.
->>
->> Cheers
->>
->>>
->>> Thanks
->>>
->>
->> --
->> Loïc Dachary, Artisan Logiciel Libre
-> 
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
+Regards.
+Nathan
