@@ -1,190 +1,31 @@
-From: jazeltq@gmail.com
-Subject: [RFC v6] RBD: Add support readv,writev for rbd
-Date: Tue, 21 Feb 2017 14:50:03 +0800
-Message-ID: <20170221065003.26103-1-jazeltq@gmail.com>
-Return-path: <qemu-block-bounces+gceqb-qemu-block=m.gmane.org@nongnu.org>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-block>,
-	<mailto:qemu-block-request@nongnu.org?subject=unsubscribe>
-List-Archive: <http://lists.nongnu.org/archive/html/qemu-block/>
-List-Post: <mailto:qemu-block@nongnu.org>
-List-Help: <mailto:qemu-block-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-block>,
-	<mailto:qemu-block-request@nongnu.org?subject=subscribe>
-Errors-To: qemu-block-bounces+gceqb-qemu-block=m.gmane.org@nongnu.org
-Sender: "Qemu-block"
-	<qemu-block-bounces+gceqb-qemu-block=m.gmane.org@nongnu.org>
-To: jdurgin@redhat.com, jcody@redhat.com, dillaman@redhat.com, kwolf@redhat.com, mreitz@redhat.com, qemu-block@nongnu.org
-Cc: tianqing <tianqing@unitedstack.com>, ceph-devel@vger.kernel.org, jazeltq@gmail.com, qemu-devel@nongnu.org
-List-Id: ceph-devel.vger.kernel.org
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Seeking approval for 10.2.6 - CephFS
+Date: Tue, 21 Feb 2017 12:41:34 +0100
+Message-ID: <3049e8c4-d207-0c62-c6cb-6a7c1d5f871e@suse.cz>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:55994 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751637AbdBULli (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 21 Feb 2017 06:41:38 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-From: tianqing <tianqing@unitedstack.com>
+Hi John:
 
-Rbd can do readv and writev directly, so wo do not need to transform
-iov to buf or vice versa any more.
+A number of CephFS backports have been merged into jewel in preparation 
+for the 10.2.6 release. For a list, see:
 
-Signed-off-by: tianqing <tianqing@unitedstack.com>
----
- block/rbd.c | 80 ++++++++++++++++++++++++++++++++++++++++++-------------------
- 1 file changed, 56 insertions(+), 24 deletions(-)
+http://tracker.ceph.com/projects/cephfs/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=*&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=529&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D=
 
-diff --git a/block/rbd.c b/block/rbd.c
-index a57b3e3..22e8e69 100644
---- a/block/rbd.c
-+++ b/block/rbd.c
-@@ -62,6 +62,13 @@
- #define RBD_MAX_SNAP_NAME_SIZE 128
- #define RBD_MAX_SNAPS 100
- 
-+/* The LIBRBD_SUPPORTS_IOVEC is defined in librbd.h */
-+#ifdef LIBRBD_SUPPORTS_IOVEC
-+#define LIBRBD_USE_IOVEC 1
-+#else
-+#define LIBRBD_USE_IOVEC 0
-+#endif
-+
- typedef enum {
-     RBD_AIO_READ,
-     RBD_AIO_WRITE,
-@@ -310,6 +317,17 @@ static int qemu_rbd_set_conf(rados_t cluster, const char *conf,
-     return ret;
- }
- 
-+static void qemu_rbd_memset(RADOSCB *rcb, int64_t offs)
-+{
-+    if (LIBRBD_USE_IOVEC) {
-+        RBDAIOCB *acb = rcb->acb;
-+        iov_memset(acb->qiov->iov, acb->qiov->niov, offs, 0,
-+                   acb->qiov->size - offs);
-+    } else {
-+        memset(rcb->buf + offs, 0, rcb->size - offs);
-+    }
-+}
-+
- static int qemu_rbd_create(const char *filename, QemuOpts *opts, Error **errp)
- {
-     Error *local_err = NULL;
-@@ -426,11 +444,11 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
-         }
-     } else {
-         if (r < 0) {
--            memset(rcb->buf, 0, rcb->size);
-+            qemu_rbd_memset(rcb, 0);
-             acb->ret = r;
-             acb->error = 1;
-         } else if (r < rcb->size) {
--            memset(rcb->buf + r, 0, rcb->size - r);
-+            qemu_rbd_memset(rcb, r);
-             if (!acb->error) {
-                 acb->ret = rcb->size;
-             }
-@@ -441,10 +459,13 @@ static void qemu_rbd_complete_aio(RADOSCB *rcb)
- 
-     g_free(rcb);
- 
--    if (acb->cmd == RBD_AIO_READ) {
--        qemu_iovec_from_buf(acb->qiov, 0, acb->bounce, acb->qiov->size);
-+    if (!LIBRBD_USE_IOVEC) {
-+        if (acb->cmd == RBD_AIO_READ) {
-+            qemu_iovec_from_buf(acb->qiov, 0, acb->bounce, acb->qiov->size);
-+        }
-+        qemu_vfree(acb->bounce);
-     }
--    qemu_vfree(acb->bounce);
-+
-     acb->common.cb(acb->common.opaque, (acb->ret > 0 ? 0 : acb->ret));
- 
-     qemu_aio_unref(acb);
-@@ -655,7 +676,6 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
-     RBDAIOCB *acb;
-     RADOSCB *rcb = NULL;
-     rbd_completion_t c;
--    char *buf;
-     int r;
- 
-     BDRVRBDState *s = bs->opaque;
-@@ -664,27 +684,29 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
-     acb->cmd = cmd;
-     acb->qiov = qiov;
-     assert(!qiov || qiov->size == size);
--    if (cmd == RBD_AIO_DISCARD || cmd == RBD_AIO_FLUSH) {
--        acb->bounce = NULL;
--    } else {
--        acb->bounce = qemu_try_blockalign(bs, qiov->size);
--        if (acb->bounce == NULL) {
--            goto failed;
-+
-+    rcb = g_new(RADOSCB, 1);
-+
-+    if (!LIBRBD_USE_IOVEC) {
-+        if (cmd == RBD_AIO_DISCARD || cmd == RBD_AIO_FLUSH) {
-+            acb->bounce = NULL;
-+        } else {
-+            acb->bounce = qemu_try_blockalign(bs, qiov->size);
-+            if (acb->bounce == NULL) {
-+                goto failed;
-+            }
-         }
-+        if (cmd == RBD_AIO_WRITE) {
-+            qemu_iovec_to_buf(acb->qiov, 0, acb->bounce, qiov->size);
-+        }
-+        rcb->buf = acb->bounce;
-     }
-+
-     acb->ret = 0;
-     acb->error = 0;
-     acb->s = s;
- 
--    if (cmd == RBD_AIO_WRITE) {
--        qemu_iovec_to_buf(acb->qiov, 0, acb->bounce, qiov->size);
--    }
--
--    buf = acb->bounce;
--
--    rcb = g_new(RADOSCB, 1);
-     rcb->acb = acb;
--    rcb->buf = buf;
-     rcb->s = acb->s;
-     rcb->size = size;
-     r = rbd_aio_create_completion(rcb, (rbd_callback_t) rbd_finish_aiocb, &c);
-@@ -694,10 +716,18 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
- 
-     switch (cmd) {
-     case RBD_AIO_WRITE:
--        r = rbd_aio_write(s->image, off, size, buf, c);
-+#ifdef LIBRBD_SUPPORTS_IOVEC
-+            r = rbd_aio_writev(s->image, qiov->iov, qiov->niov, off, c);
-+#else
-+            r = rbd_aio_write(s->image, off, size, rcb->buf, c);
-+#endif
-         break;
-     case RBD_AIO_READ:
--        r = rbd_aio_read(s->image, off, size, buf, c);
-+#ifdef LIBRBD_SUPPORTS_IOVEC
-+            r = rbd_aio_readv(s->image, qiov->iov, qiov->niov, off, c);
-+#else
-+            r = rbd_aio_read(s->image, off, size, rcb->buf, c);
-+#endif
-         break;
-     case RBD_AIO_DISCARD:
-         r = rbd_aio_discard_wrapper(s->image, off, size, c);
-@@ -712,14 +742,16 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
-     if (r < 0) {
-         goto failed_completion;
-     }
--
-     return &acb->common;
- 
- failed_completion:
-     rbd_aio_release(c);
- failed:
-     g_free(rcb);
--    qemu_vfree(acb->bounce);
-+    if (!LIBRBD_USE_IOVEC) {
-+        qemu_vfree(acb->bounce);
-+    }
-+
-     qemu_aio_unref(acb);
-     return NULL;
- }
--- 
-2.10.2
+These include http://tracker.ceph.com/issues/18708 which you mentioned 
+was a blocker.
+
+Do you think 10.2.6 can now go to QE for further testing ahead of release?
+
+Thanks,
+Nathan
