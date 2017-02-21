@@ -1,34 +1,36 @@
-From: Weiming Shi <swmtrc@gmail.com>
-Subject: Question on the limit of the number of buckets and the number of
- objects per bucket of Ceph object store
-Date: Tue, 21 Feb 2017 13:39:33 -0500
-Message-ID: <CAHS-Gt0bt7jt5KAOMGOJut2FztU9L=VVnOnG0HMRd-MdoVbSOA@mail.gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: BlueStore and maximum number of objects per PG
+Date: Tue, 21 Feb 2017 21:04:32 +0100 (CET)
+Message-ID: <1002796178.10638.1487707472256@ox.pcextreme.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f181.google.com ([209.85.220.181]:36076 "EHLO
-        mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754226AbdBUSji (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Feb 2017 13:39:38 -0500
-Received: by mail-qk0-f181.google.com with SMTP id x71so64674412qkb.3
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Feb 2017 10:39:37 -0800 (PST)
+Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:35616 "EHLO
+        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753998AbdBUUEh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Feb 2017 15:04:37 -0500
+Received: from 109.72.87.221 (ox01.pcextreme.nl [109.72.87.221])
+        by smtp02.mail.pcextreme.nl (Postfix) with ESMTPSA id 79E503FE4F
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Feb 2017 21:04:32 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users@ceph.com, ceph-devel@vger.kernel.org
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Dear Ceph users and developers,
+Hi,
 
-I am trying to understand the limit on the number of buckets and the
-number of objects per bucket for Ceph object store. Which factors
-determine the limits on these two dimensions?
+I'm about to start a test where I'll be putting a lot of objects into BlueStore and see how it holds.
 
-If I would like to store 100 million files in a Ceph cluster,  what
-would be the recommended data partition scheme in terms of the number
-of buckets, number of objects per bucket? Are the information found in
-an old discussion
-http://lists.ceph.com/pipermail/ceph-users-ceph.com/2013-March/030002.html
-still relevant ?
+The reasoning behind is that I have a customer which has 165M objects in it's cluster which results in some PGs having 900k objects.
 
-Thanks
+For FileStore with XFS this is quite heavy. A simple scrub takes ages.
 
-Weiming
+The problem is that we can't simply increase the number of PGs since that will overload the OSDs as well.
+
+On the other hand we could add hardware, but that also takes time.
+
+So just for the sake of testing I'm looking at trying to replicate this situation using BlueStore from master.
+
+Is there anything I should take into account? I'll probably be just creating a lot (millions) of 100 byte objects in the cluster with just a few PGs.
+
+Wido
