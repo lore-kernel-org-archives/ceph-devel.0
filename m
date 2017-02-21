@@ -1,81 +1,35 @@
-From: Jeff Cody <jcody@redhat.com>
-Subject: Re: [RFC v6] RBD: Add support readv,writev for rbd
-Date: Mon, 20 Feb 2017 23:50:21 -0500
-Message-ID: <20170221045021.GN19045@localhost.localdomain>
-References: <20170221034336.10097-1-jazeltq@gmail.com>
+From: Administrator <kasub-akdm@fttm.itb.ac.id>
+Subject: Penting Pesan
+Date: Tue, 21 Feb 2017 11:59:00 +0700 (WIT)
+Message-ID: <187090942.419362.1487653140935.JavaMail.zimbra@fttm.itb.ac.id>
+Reply-To: Sistemass_Adminss@mail2world.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <qemu-block-bounces+gceqb-qemu-block=m.gmane.org@nongnu.org>
-Content-Disposition: inline
-In-Reply-To: <20170221034336.10097-1-jazeltq@gmail.com>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-block>,
-	<mailto:qemu-block-request@nongnu.org?subject=unsubscribe>
-List-Archive: <http://lists.nongnu.org/archive/html/qemu-block/>
-List-Post: <mailto:qemu-block@nongnu.org>
-List-Help: <mailto:qemu-block-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-block>,
-	<mailto:qemu-block-request@nongnu.org?subject=subscribe>
-Errors-To: qemu-block-bounces+gceqb-qemu-block=m.gmane.org@nongnu.org
-Sender: "Qemu-block"
-	<qemu-block-bounces+gceqb-qemu-block=m.gmane.org@nongnu.org>
-To: jazeltq@gmail.com
-Cc: kwolf@redhat.com, qemu-block@nongnu.org, qemu-devel@nongnu.org, mreitz@redhat.com, tianqing <tianqing@unitedstack.com>, ceph-devel@vger.kernel.org, dillaman@redhat.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx4.itb.ac.id ([167.205.1.69]:52715 "EHLO mx4.itb.ac.id"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751460AbdBUE41 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 20 Feb 2017 23:56:27 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 
-On Tue, Feb 21, 2017 at 11:43:36AM +0800, jazeltq@gmail.com wrote:
-> From: tianqing <tianqing@unitedstack.com>
-> 
-> Rbd can do readv and writev directly, so wo do not need to transform
-> iov to buf or vice versa any more.
-> 
-> Signed-off-by: tianqing <tianqing@unitedstack.com>
-> ---
->  block/rbd.c | 79 ++++++++++++++++++++++++++++++++++++++++++-------------------
->  1 file changed, 54 insertions(+), 25 deletions(-)
-> 
+PERHATIAN
 
+Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali memvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, kirim informasi berikut di bawah ini:
 
-[...]
+Nama: 
+Username:
+sandi: 
+Konfirmasi sandi: 
+E-mail: 
+telepon: 
 
->      case RBD_AIO_WRITE:
-> -        r = rbd_aio_write(s->image, off, size, buf, c);
-> +        if(!LIBRBD_USE_IOVEC)
-> +            r = rbd_aio_write(s->image, off, size, rcb->buf, c);
-> +        else
-> +            r = rbd_aio_writev(s->image, qiov->iov, qiov->niov, off, c);
->          break;
->      case RBD_AIO_READ:
-> -        r = rbd_aio_read(s->image, off, size, buf, c);
-> +        if(!LIBRBD_USE_IOVEC)
-> +            r = rbd_aio_read(s->image, off, size, rcb->buf, c);
-> +        else
-> +            r = rbd_aio_readv(s->image, qiov->iov, qiov->niov, off, c);
+Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda akan dinonaktifkan!
 
-These will need to stay #ifdef's since they are new symbols.
+Maaf atas ketidaknyamanan ini.
+Kode verifikasi: en:dfr53667hxn0,zkl..2017
+Surat Dukungan Teknis ©2017
 
->          break;
->      case RBD_AIO_DISCARD:
->          r = rbd_aio_discard_wrapper(s->image, off, size, c);
-> @@ -712,14 +740,15 @@ static BlockAIOCB *rbd_start_aio(BlockDriverState *bs,
->      if (r < 0) {
->          goto failed_completion;
->      }
-> -
->      return &acb->common;
->  
->  failed_completion:
->      rbd_aio_release(c);
->  failed:
->      g_free(rcb);
-> -    qemu_vfree(acb->bounce);
-> +    if(!LIBRBD_USE_IOVEC)
-> +        qemu_vfree(acb->bounce);
-> +
->      qemu_aio_unref(acb);
->      return NULL;
->  }
-> -- 
-> 2.10.2
->
-
-(Also code formatting as pointed out by patchew)
+terima kasih
+Sistem Administrator
