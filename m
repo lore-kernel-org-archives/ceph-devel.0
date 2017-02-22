@@ -1,66 +1,126 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: 02/22/2017 Weekly Ceph Performance Meeting IS ON!
-Date: Wed, 22 Feb 2017 09:53:04 -0600
-Message-ID: <559f075f-d235-0289-6d07-fd6ab9414e7f@redhat.com>
-Reply-To: mnelson@redhat.com
+From: Adir Lev <adirl-VPRAkNaXOzVWk0Htik3J/w@public.gmane.org>
+Subject: Update regarding Ceph RDMA
+Date: Wed, 22 Feb 2017 18:18:43 +0000
+Message-ID: <VI1PR0501MB2782E58A954F40859BC5D196D7500@VI1PR0501MB2782.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: multipart/mixed; boundary="===============1554226133=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
+
+--===============1554226133==
+Content-Language: en-US
+Content-Type: multipart/alternative;
+	boundary="_000_VI1PR0501MB2782E58A954F40859BC5D196D7500VI1PR0501MB2782_"
+
+--_000_VI1PR0501MB2782E58A954F40859BC5D196D7500VI1PR0501MB2782_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+Following a change done in set_priority() from yesterday ceph RDMA is broke=
+n at latest master
+We are working on a fix,
+Please use version prior to eb0f62421dd9722055b3a87bfbe129d1325a723f
+
+Thanks
+
+Adir Lev
+Mellanox
+
+--_000_VI1PR0501MB2782E58A954F40859BC5D196D7500VI1PR0501MB2782_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+>
+<meta name=3D"Generator" content=3D"Microsoft Word 15 (filtered medium)">
+<style><!--
+/* Font Definitions */
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-priority:99;
+	color:#954F72;
+	text-decoration:underline;}
+span.EmailStyle17
+	{mso-style-type:personal-compose;
+	font-family:"Calibri",sans-serif;
+	color:windowtext;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-family:"Calibri",sans-serif;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"EN-US" link=3D"#0563C1" vlink=3D"#954F72">
+<div class=3D"WordSection1">
+<p class=3D"MsoNormal">Hi, <o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">Following a change done in set_priority() from yeste=
+rday ceph RDMA is broken at latest master<o:p></o:p></p>
+<p class=3D"MsoNormal">We are working on a fix,<o:p></o:p></p>
+<p class=3D"MsoNormal">Please use version prior to <span style=3D"color:#99=
+3366">eb0f62421dd9722055b3a87bfbe129d1325a723f<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">Thanks<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">Adir Lev<o:p></o:p></p>
+<p class=3D"MsoNormal">Mellanox<o:p></o:p></p>
+</div>
+</body>
+</html>
+
+--_000_VI1PR0501MB2782E58A954F40859BC5D196D7500VI1PR0501MB2782_--
+
+--===============1554226133==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55002 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932452AbdBVPxF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 22 Feb 2017 10:53:05 -0500
-Received: from smtp.corp.redhat.com (int-mx16.intmail.prod.int.phx2.redhat.com [10.5.11.28])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 3D9FD61B91
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Feb 2017 15:53:06 +0000 (UTC)
-Received: from [10.3.116.41] (ovpn-116-41.phx2.redhat.com [10.3.116.41])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 15E7597C82
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Feb 2017 15:53:05 +0000 (UTC)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Disposition: inline
 
-Hi Guys,
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-Reminder: New URL for the meeting!  Please update your bookmarks to use:
-
-https://bluejeans.com/944567299
-
-8AM PST as usual.  Today we will talk about RGW performance testing and 
-various other performance results from Mark and Nick Fisk.
-
-Here's the links:
-
-Etherpad URL:
-http://pad.ceph.com/p/performance_weekly
-
-To join the Meeting:
-https://bluejeans.com/944567299
-
-To join via Browser:
-https://bluejeans.com/944567299/browser
-
-To join with Lync:
-https://bluejeans.com/944567299/lync
-
-
-To join via Room System:
-Video Conferencing System: bjn.vc -or- 199.48.152.152
-Meeting ID: 268261044
-
-To join via Phone:
-1) Dial:
-                      +1 408 740 7256
-                      +1 888 240 2560(US Toll Free)
-                      +1 408 317 9253(Alternate Number)
-                      (see all numbers - http://bluejeans.com/numbers)
-2) Enter Conference ID: 268261044
-
-Mark
---
-To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--===============1554226133==--
