@@ -1,38 +1,64 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: Passing LUA script via python rados execute
-Date: Tue, 21 Feb 2017 16:59:09 -0500
-Message-ID: <CA+2bHPbYt4G=PmAWYRFJbhpMMx8A+WxNk=Q=moz3kn8xxySx0A@mail.gmail.com>
-References: <1fa1fa7d.AEEAIBzI4F8AAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYpMPz@mailjet.com>
- <CAB2gnbXykgX42up7ZzT-e5UvZrRkpyzAnGP_D4CnH-AgFRW8qg@mail.gmail.com>
- <3177d648.AEQAH1DOmSwAAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYphEb@mailjet.com>
- <CAB2gnbVXVUiCgBFK2Q4+8N=RVf6KLGjH=_oibb+BJxx0B_FmtA@mail.gmail.com>
- <1cadb44c.ADsAAGb8C0gAAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYphQY@mailjet.com>
- <CAB2gnbW1_TLmYsszA7KTD18NdNhW5HR44bvCknTs9rqX007s7Q@mail.gmail.com>
- <3a5eb209.AEEAIECau6cAAAAAAAAAAF3gdzcAADNJBWwAAAAAAACRXwBYp3rL@mailjet.com>
- <CAB2gnbWXWcj=O1LKKMGCn2X6h_T46x9Ypaupy2u7wQHdBV2CJA@mail.gmail.com>
- <CA+2bHPYgFkRbNwc8b1aLcTX+0-=DecM1m3BV5ssjKFmBYBmo2w@mail.gmail.com>
- <10499347-8c11-83fb-9778-e95049668c6c@redhat.com> <c36e222c.AEEAIIaNAn4AAAAAAAAAAF3gdzkAADNJBWwAAAAAAACRXwBYrLT9@mailjet.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: BlueStore and maximum number of objects per PG
+Date: Tue, 21 Feb 2017 20:53:33 -0600
+Message-ID: <7d98cbf5-97e5-f09a-9b1e-b4fa6668c104@redhat.com>
+References: <1002796178.10638.1487707472256@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f176.google.com ([209.85.223.176]:36049 "EHLO
-        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751363AbdBUV7l (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Feb 2017 16:59:41 -0500
-Received: by mail-io0-f176.google.com with SMTP id j13so32162867iod.3
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Feb 2017 13:59:40 -0800 (PST)
-In-Reply-To: <c36e222c.AEEAIIaNAn4AAAAAAAAAAF3gdzkAADNJBWwAAAAAAACRXwBYrLT9@mailjet.com>
+Received: from mx1.redhat.com ([209.132.183.28]:46422 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752850AbdBVCxk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 21 Feb 2017 21:53:40 -0500
+In-Reply-To: <1002796178.10638.1487707472256@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nick Fisk <nick@fisk.me.uk>
-Cc: Josh Durgin <jdurgin@redhat.com>, Noah Watkins <noahwatkins@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Feb 21, 2017 at 4:45 PM, Nick Fisk <nick@fisk.me.uk> wrote:
-> I'm trying to put some examples together for a book and so wanted to try and come up with a more out of the box experience someone could follow. I'm guessing some basic examples in LUA and then come custom rados classes in C++ might be the best approach for this for now?
+Hi Wido,
 
-FYI, since you are writing a book: Lua is not an acronym:
-https://www.lua.org/about.html#name
+On 02/21/2017 02:04 PM, Wido den Hollander wrote:
+> Hi,
+>
+> I'm about to start a test where I'll be putting a lot of objects into BlueStore and see how it holds.
+>
+> The reasoning behind is that I have a customer which has 165M objects in it's cluster which results in some PGs having 900k objects.
+>
+> For FileStore with XFS this is quite heavy. A simple scrub takes ages.
+>
+> The problem is that we can't simply increase the number of PGs since that will overload the OSDs as well.
+>
+> On the other hand we could add hardware, but that also takes time.
+>
+> So just for the sake of testing I'm looking at trying to replicate this situation using BlueStore from master.
+>
+> Is there anything I should take into account? I'll probably be just creating a lot (millions) of 100 byte objects in the cluster with just a few PGs.
 
--- 
-Patrick Donnelly
+Couple of general things:
+
+I don't anticipate you'll run into the same kind of pg splitting 
+slowdowns that you see with filestore, but you still may see some 
+slowdown as the object count increases since rocksdb will have more 
+key/value pairs to deal with.  I expect you'll see a lot of metadata 
+movement between levels as it tries to keep things organized.  One thing 
+to note is that it's possible you may see rocksdb bottlenecks as the OSD 
+volume size increases.  This is one of the things the guys at Sandisk 
+were trying to tackle with Zetascale.
+
+If you can put the rocksdb DB and WAL on SSDs that will likely help, but 
+you'll want to be mindful of how full the SSDs are getting.  I'll be 
+very curious to see how your tests go, it's been a while since we've 
+thrown that many objects on a bluestore cluster (back around the 
+newstore timeframe we filled bluestore with many 10s of millions of 
+objects and from what I remember it did pretty well).
+
+Mark
+
+>
+> Wido
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
