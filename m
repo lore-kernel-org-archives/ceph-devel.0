@@ -1,64 +1,51 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: BlueStore and maximum number of objects per PG
-Date: Tue, 21 Feb 2017 20:53:33 -0600
-Message-ID: <7d98cbf5-97e5-f09a-9b1e-b4fa6668c104@redhat.com>
-References: <1002796178.10638.1487707472256@ox.pcextreme.nl>
+From: "Martin K. Petersen" <martin.petersen@oracle.com>
+Subject: Re: blk_integrity_revalidate() clears BDI_CAP_STABLE_WRITES
+Date: Tue, 21 Feb 2017 23:41:09 -0500
+Message-ID: <yq1efyq25y2.fsf@oracle.com>
+References: <CAOi1vP8M91kiF-FnT=EoJgTxfstMEsC-nhLY5KtRkrKROjWPWA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46422 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752850AbdBVCxk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 21 Feb 2017 21:53:40 -0500
-In-Reply-To: <1002796178.10638.1487707472256@ox.pcextreme.nl>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CAOi1vP8M91kiF-FnT=EoJgTxfstMEsC-nhLY5KtRkrKROjWPWA@mail.gmail.com>
+        (Ilya Dryomov's message of "Mon, 20 Feb 2017 19:45:42 +0100")
+Sender: linux-block-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "Martin K. Petersen" <martin.petersen@oracle.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-block@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Christoph Hellwig <hch@lst.de>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Wido,
+>>>>> "Ilya" == Ilya Dryomov <idryomov@gmail.com> writes:
 
-On 02/21/2017 02:04 PM, Wido den Hollander wrote:
-> Hi,
->
-> I'm about to start a test where I'll be putting a lot of objects into BlueStore and see how it holds.
->
-> The reasoning behind is that I have a customer which has 165M objects in it's cluster which results in some PGs having 900k objects.
->
-> For FileStore with XFS this is quite heavy. A simple scrub takes ages.
->
-> The problem is that we can't simply increase the number of PGs since that will overload the OSDs as well.
->
-> On the other hand we could add hardware, but that also takes time.
->
-> So just for the sake of testing I'm looking at trying to replicate this situation using BlueStore from master.
->
-> Is there anything I should take into account? I'll probably be just creating a lot (millions) of 100 byte objects in the cluster with just a few PGs.
+Ilya,
 
-Couple of general things:
+Ilya> could you please explain blk_integrity_revalidate() and
+Ilya> its GENHD_FL_UP check in particular?  We have the queue,
+Ilya> bi->profile can't be NULL after blk_integrity_register(), and
+Ilya> since the latter "must" be used for registering the profile with
+Ilya> the block layer, wouldn't the following be sufficient for
+Ilya> blk_integrity users?
 
-I don't anticipate you'll run into the same kind of pg splitting 
-slowdowns that you see with filestore, but you still may see some 
-slowdown as the object count increases since rocksdb will have more 
-key/value pairs to deal with.  I expect you'll see a lot of metadata 
-movement between levels as it tries to keep things organized.  One thing 
-to note is that it's possible you may see rocksdb bottlenecks as the OSD 
-volume size increases.  This is one of the things the guys at Sandisk 
-were trying to tackle with Zetascale.
+IIrc, the FL_UP check fixed a registration problem in the nvme driver.
 
-If you can put the rocksdb DB and WAL on SSDs that will likely help, but 
-you'll want to be mindful of how full the SSDs are getting.  I'll be 
-very curious to see how your tests go, it's been a while since we've 
-thrown that many objects on a bluestore cluster (back around the 
-newstore timeframe we filled bluestore with many 10s of millions of 
-objects and from what I remember it did pretty well).
+The rationale behind revalidate was that we need to handle devices which
+lose the integrity capability at runtime (i.e. a integrity-enabled DM
+device is extended with a non-cable drive forcing the feature to be
+turned off). The clearing of the integrity profile is more important in
+that case than zapping the stable pages flag. But that was the original
+reason for not just ORing BDI_CAP_STABLE_WRITES.
 
-Mark
+I don't have a huge problem with keeping stable pages on if a device
+suddenly stops being integrity capable. However, I'd like to understand
+your use case a bit better.
 
->
-> Wido
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Ilya> The alternative seems to be to set up a bogus
+Ilya> blk_integrity_profile (nop_profile won't do -- this one would have
+Ilya> to be truly bogus w/ NULL *_fn) under BLK_DEV_INTEGRITY ifdefs and
+Ilya> hope that nothing breaks.
+
+Can you point me to the relevant code on your end?
+
+Thanks,
+Martin
+
+-- 
+Martin K. Petersen	Oracle Linux Engineering
