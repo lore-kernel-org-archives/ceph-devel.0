@@ -1,252 +1,245 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: crush multipick anomaly
-Date: Wed, 22 Feb 2017 08:52:51 +0100
-Message-ID: <4dbab28a-220b-2cef-fcbc-aca4dd17ab3b@dachary.org>
-References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
- <3554101b-4d10-e46b-93b0-f74794258f2e@dachary.org>
- <alpine.DEB.2.11.1702131417070.7782@piezo.novalocal>
- <CAFdhnje5hJMsU8ZCSL8mFj=d4UH6b41=nnddNvcfemhyWXg6aw@mail.gmail.com>
+From: Abhishek L <abhishek-IBi9RG/b67k@public.gmane.org>
+Subject: v0.94.10 Hammer released
+Date: Wed, 22 Feb 2017 11:43:24 +0100
+Message-ID: <87ino2y08j.fsf@suse.com>
 Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============1378875394=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
+
+--===============1378875394==
+Content-Type: multipart/signed; boundary="=-=-=";
+	micalg=pgp-sha1; protocol="application/pgp-signature"
+
+--=-=-=
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:46542 "EHLO
-        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753297AbdBVHw7 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Feb 2017 02:52:59 -0500
-In-Reply-To: <CAFdhnje5hJMsU8ZCSL8mFj=d4UH6b41=nnddNvcfemhyWXg6aw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Pedro_L=c3=b3pez-Adeva?= <plopezadeva@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
 
-Hi Pedro,
+This Hammer point release fixes several bugs and adds a couple of new
+features.
 
-On 02/16/2017 11:04 PM, Pedro López-Adeva wrote:
-> I have updated the algorithm to handle an arbitrary number of replicas
-> and arbitrary constraints.
-> 
-> Notebook: https://github.com/plafl/notebooks/blob/master/replication.ipynb
-> PDF: https://github.com/plafl/notebooks/blob/master/converted/replication.pdf
+We recommend that all hammer v0.94.x users upgrade.
 
-I'm very impressed :-) Thanks to friends who helped with the maths parts that were unknown to me I think I now get the spirit of the solution you found. Here it is, in my own words. 
+Please note that Hammer will be retired when Luminous is released later
+during the spring of this year. Until then, the focus will be primarily
+on bugs that would hinder upgrades to Jewel.
 
-You wrote a family of functions describing the desired outcome: equally filled disks when distributing objects replicas with a constraint. It's not a formula we can use to figure out which probability to assign to each disk, there are two many unknowns. But you also proposed a function to measure, for a given set of probabilities, how far from the best probabilities they are. That's the loss function[1].
+New Features
+=2D-----------
 
-You implemented an abstract python interface to look for the best solution, using this loss function. Trying things at random would take way too much time. Instead you use the gradient[2] of the function to figure out in which direction the values should be modified (that's where the jacobian[3] helps).
+* ceph-objectstore-tool and ceph-monstore-tool now enable user to
+rebuild the monitor database from OSDs. (This feature is especially useful =
+when
+all monitors fail to boot due to leveldb corruption.)
 
-This is part one of your document and in part two you focus on one constraints: no two replica on the same disk. And with an implementation of the abstract interface you show with a few examples that after iterating a number of times you get a set of probabilities that are close enough to the solution. Not the ideal solution but less that 0.001 away from it.
+* In RADOS Gateway, it is now possible to reshard an existing bucket's index
+using an off-line tool.
 
-[1] https://en.wikipedia.org/wiki/Loss_function
-[2] https://en.wikipedia.org/wiki/Gradient
-[3] https://en.wikipedia.org/wiki/Jacobi_elliptic_functions#Jacobi_elliptic_functions_as_solutions_of_nonlinear_ordinary_differential_equations
+Usage:
 
-From the above you can hopefully see how far off my understanding is. And I have one question below.
+$ radosgw-admin bucket reshard --bucket=3D<bucket_name> --num_shards=3D<num=
+_shards>
 
-> (Note: GitHub's renderization of the notebook and the PDF is quite
-> deficient, I recommend downloading/cloning)
-> 
-> 
-> In the following by policy I mean the concrete set of probabilities of
-> selecting the first replica, the second replica, etc...
-> In practical terms there are several problems:
-> 
-> - It's not practical for a high number of disks or replicas.
-> 
-> Possible solution: approximate summation over all possible disk
-> selections with a Monte Carlo method.
-> the algorithm would be: we start with a candidate solution, we run a
-> simulation and based on the results
-> we update the probabilities. Repeat until we are happy with the result.
-> 
-> Other solution: cluster similar disks together.
-> 
-> - Since it's a non-linear optimization problem I'm not sure right now
-> about it's convergence properties.
-> Does it converge to a global optimum? How fast does it converge?
-> 
-> Possible solution: the algorithm always converges, but it can converge
-> to a locally optimum policy. I see
-> no escape except by carefully designing the policy. All solutions to
-> the problem are going to be non linear
-> since we must condition current probabilities on previous disk selections.
-> 
-> - Although it can handle arbitrary constraints it does so by rejecting
-> disks selections that violate at least one constraint.
-> This means that for bad policies it can spend all the time rejecting
-> invalid disks selection candidates.
-> 
-> Possible solution: the policy cannot be designed independently of the
-> constraints. I don't know what constraints
-> are typical use cases but having a look should be the first step. The
-> constraints must be an input to the policy.
-> 
-> 
-> I hope it's of some use. Quite frankly I'm not a ceph user, I just
-> found the problem an interesting puzzle.
-> Anyway I will try to have a look at the CRUSH paper this weekend.
+This will create a new linked bucket instance that points to the newly crea=
+ted
+index objects. The old bucket instance still exists and currently it's up to
+the user to manually remove the old bucket index objects. (Note that bucket
+resharding currently requires that all IO (especially writes) to the specif=
+ic
+bucket is quiesced.)
 
-In Sage's paper[1] as well as in the Ceph implementation[2] minimizing data movement when a disk is added / removed is an important goal. When looking for a disk to place an object, a mixture of hashing, recursive exploration of a hierarchy describing the racks/hosts/disks and higher probabilities for bigger disks are used. 
+Other Notable Changes
+=2D--------------------
 
-[1] http://www.crss.ucsc.edu/media/papers/weil-sc06.pdf
-[2] https://github.com/ceph/ceph/tree/master/src/crush
+* build/ops: ceph-create-keys loops forever (issue#17753, pr#12805,  Alfred=
+o Deza)
+* build/ops: improve ceph.in error message (issue#11101,  pr#10905,  Kefu C=
+hai)
+* build/ops: make stop.sh more portable (issue#16918, pr#10569,  Mykola Gol=
+ub)
+* build/ops: remove SYSTEMD_RUN from initscript (issue#16440, issue#7627, p=
+r#9873,  Vladislav Odintsov)
+* cephx: Fix multiple segfaults due to attempts to encrypt or decrypt (issu=
+e#16266, pr#11930,  Brad Hubbard)
+* common: SIGABRT in TrackedOp::dump() via dump_ops_in_flight() (issue#8885=
+, pr#12121,  Jianpeng Ma, Zhiqiang Wang, David Zafman)
+* common: os/ObjectStore: fix _update_op for split dest_cid (issue#15345, p=
+r#12071,  Sage Weil)
+* crush: reset bucket->h.items[i] when removing tree item (issue#16525, pr#=
+10724,  Kefu Chai)
+* doc: add "Upgrading to Hammer" section (issue#17386, pr#11372,  Kefu Chai)
+* doc: add orphan options to radosgw-admin --help and man page (issue#17281=
+, issue#17280, pr#11140,  Abhishek Lekshmanan, Casey Bodley, Ken Dreyer, Th=
+omas Serlin)
+* doc: clarify that RGW bucket object versioning is supported (issue#16574,=
+ pr#10437,  Yuan Zhou, shawn chen)
+* librados: bad flags can crash the osd (issue#16012, pr#11936,  Jianpeng M=
+a, Sage Weil)
+* librbd: ceph 10.2.2 rbd status on image format 2 returns "(2) No such fil=
+e or directory" (issue#16887, pr#10987,  Jason Dillaman)
+* librbd: diffs to clone's first snapshot should include parent diffs (issu=
+e#18068, pr#12446,  Jason Dillaman)
+* librbd: image.stat() call in librbdpy fails sometimes (issue#17310, pr#11=
+949,  Jason Dillaman)
+* librbd: request exclusive lock if current owner cannot execute op (issue#=
+16171, pr#12018,  Mykola Golub)
+* mds: fix cephfs-java ftruncate unit test failure (issue#11258, pr#11939, =
+ Yan, Zheng)
+* mon: %USED of ceph df is wrong (issue#16933, pr#11934,  Kefu Chai)
+* mon: MonmapMonitor should return success when MON will be removed (issue#=
+17725, pr#12006,  Joao Eduardo Luis)
+* mon: OSDMonitor: Missing nearfull flag set (issue#17390, pr#11273,  Igor =
+Podoski)
+* mon: OSDs marked OUT wrongly after monitor failover (issue#17719, pr#1194=
+6,  Dong Wu)
+* mon: fix memory leak in prepare_beacon (issue#17285, pr#10238,  Igor Podo=
+ski)
+* mon: osd flag health message is misleading (issue#18175, pr#12687,  Sage =
+Weil)
+* mon: prepare_pgtemp needs to only update up_thru if newer than the existi=
+ng one (issue#16185, pr#11937,  Samuel Just)
+* mon: return size_t from MonitorDBStore::Transaction::size() (issue#14217,=
+ pr#10904,  Kefu Chai)
+* mon: send updated monmap to its subscribers (issue#17558, pr#11457,  Kefu=
+ Chai)
+* msgr: OpTracker needs to release the message throttle in _unregistered (i=
+ssue#14248, pr#11938,  Samuel Just)
+* msgr: simple/Pipe: error decoding addr (issue#18072, pr#12266,  Sage Weil)
+* osd: PG::_update_calc_stats wrong for CRUSH_ITEM_NONE up set items (issue=
+#16998, pr#11933,  Samuel Just)
+* osd: PG::choose_acting valgrind error or ./common/hobject.h: 182: FAILED =
+assert(!max || (*this =3D=3D hobject_t(hobject_t::get_max()))) (issue#13967=
+, pr#11932,  Tao Chang)
+* osd: ReplicatedBackend::build_push_op: add a second config to limit omap =
+entries/chunk independently of object data (issue#16128, pr#12417,  Wanlong=
+ Gao)
+* osd: crash on EIO during deep-scrubbing (issue#16034, pr#11935,  Nathan C=
+utler)
+* osd: filestore: FALLOC_FL_PUNCH_HOLE must be used with FALLOC_FL_KEEP_SIZ=
+E (issue#18446, pr#13041,  xinxin shu)
+* osd: fix cached_removed_snaps bug in PGPool::update after map gap (issue#=
+18628, issue#15943, pr#12906,  Samuel Just)
+* osd: fix collection_list shadow return value (issue#17713, pr#11927,  Hao=
+mai Wang)
+* osd: fix fiemap issue in xfs when #extents > 1364 (issue#17610, pr#11615,=
+  Kefu Chai, Ning Yao)
+* osd: update PGPool to detect map gaps and reset cached_removed_snaps (iss=
+ue#15943, pr#11676,  Samuel Just)
+* rbd: export diff should open image as read-only (issue#17671, pr#11948,  =
+liyankun)
+* rbd: fix parameter check (issue#18237, pr#12312,  Yankun Li)
+* rbd: fix possible rbd data corruption (issue#16002, pr#11618,  Yan, Zheng=
+, Greg Farnum)
+* rgw: Anonymous user is able to read bucket with authenticated read ACL(is=
+sue#13207, pr#11045,  rahul aggarwal-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org)
+* rgw: COPY broke multipart files uploaded under dumpling (issue#16435, pr#=
+11950,  Yehuda Sadeh)
+* rgw: TempURL in radosgw behaves now like its Swift's counterpart.  (issue=
+#18316, pr#12619,  Radoslaw Zarzynski)
+* rgw: default quota fixes (issue#16410, pr#10839,  Pavan Rallabhandi, Dani=
+el Gryniewicz)
+* rgw: do not abort when accept a CORS request with short origin (issue#181=
+87, pr#12398,  LiuYang)
+* rgw: do not omap_getvals with (u64)-1 max (issue#17985, pr#12418,  Yehuda=
+ Sadeh, Sage Weil)
+* rgw: fix crash when client posts object with null condition (issue#17635,=
+ pr#11809,  Yehuda Sadeh)
+* rgw: fix inconsistent uid/email handling in radosgw-admin (issue#13598, p=
+r#11952,  Matt Benjamin)
+* rgw: implement offline resharding command (issue#17745, pr#12227,  Yehuda=
+ Sadeh, Orit Wasserman, weiqiaomiao)
+* rgw: swift: ranged request on a DLO provides wrong values in Content-Rang=
+e HTTP header (issue#13452, pr#11951,  Radoslaw Zarzynski)
+* rgw: the value of total_time is wrong in the result of 'radosgw-admin log=
+ show' opt (issue#17598, pr#11899,  weiqiaomiao)
+* tests: Cannot clone ceph/s3-tests.git (missing branch) (issue#18384, pr#1=
+2744,  Orit Wasserman)
+* tests: Cannot reserve CentOS 7.2 smithi machines (issue#18401, pr#12762, =
+ Nathan Cutler)
+* tests: OSDs commit suicide in rbd suite when testing on btrfs (issue#1839=
+7, pr#12758,  Nathan Cutler)
+* tests: Workunits needlessly wget from git.ceph.com (issue#18336, issue#18=
+271, issue#18388, pr#12685,  Sage Weil, Nathan Cutler)
+* tests: cephfs test failures (ceph.com/qa is broken, should be download.ce=
+ph.com/qa) (issue#18574, pr#13022,  John Spray)
+* tests: merge ceph-qa-suite (pr#12455,  Sage Weil)
+* tests: objecter_requests workunit fails on wip branches (issue#18393, pr#=
+12759,  Sage Weil)
+* tests: populate mnt_point in qa/tasks/ceph.py (issue#18383, pr#12743,  Na=
+than Cutler)
+* tests: qemu/tests/qemu-iotests/077 fails in dumpling, hammer, and jewel (=
+issue#10773, pr#12423,  Jason Dillaman)
+* tests: run fs/thrash on xfs instead of btrfs (issue#17151, pr#13039,  Nat=
+han Cutler)
+* tests: update Ubuntu image url after ceph.com refactor (issue#18542, pr#1=
+2957,  Jason Dillaman)
+* tests: update rbd/singleton/all/formatted-output.yaml to support ceph-ci =
+* (issue#18440, pr#12824 *,  Venky Shankar, Nathan Cutler)
+* tools: add a tool to rebuild mon store from OSD (issue#17179, issue#17400=
+, pr#11125,  Kefu Chai, xie xingguo)
+* tools: ceph-objectstore-tool crashes if --journal-path <a-directory> (iss=
+ue#17307, pr#11929,  Kefu Chai)
+* tools: ceph-objectstore-tool: add a way to split filestore directories of=
+fline (issue#17220, pr#11253,  Josh Durgin)
+* tools: crushtool --compile generates output despite missing item (issue#1=
+7306, pr#11931,  Kefu Chai)
 
-Here is an example[1] showing how data move around with the current implementation when adding one disk to a 10 disk host (all disks have the same probability of being chosen but no two copies of the same object can be on the same disk) with 100,000 objects and replica 2. The first line reads like this: 14 objects moved from disk 00 to disk 01, 17 objects moved from disk 00 to disk 02 ... 1800 objects moved from disk 00 to disk 10. The "before:" line shows how many objects were in each disk before the new one was added, the "after:" line shows the distribution after the disk was added and objects moved from the existing disks to the new disk.
+For more detailed information, read the release notes[1] & download the cha=
+ngelog[2]
 
-        00     01     02     03     04     05     06     07     08     09     10 
-00:      0     14     17     14     19     23     13     22     21     20   1800 
-01:     12      0     11     13     19     19     15     10     16     17   1841 
-02:     17     27      0     17     15     15     13     19     18     11   1813 
-03:     14     17     15      0     23     11     20     15     23     17   1792 
-04:     14     18     16     25      0     27     13      8     15     16   1771 
-05:     19     16     22     25     13      0      9     19     21     21   1813 
-06:     18     15     21     17     10     18      0     10     18     11   1873 
-07:     13     17     22     13     16     17     14      0     25     12   1719 
-08:     23     20     16     17     19     18     11     12      0     18   1830 
-09:     14     20     15     17     12     16     17     11     13      0   1828 
-10:      0      0      0      0      0      0      0      0      0      0      0 
-before:  20164  19990  19863  19959  19977  20004  19926  20133  20041  19943      0 
-after:   18345  18181  18053  18170  18200  18190  18040  18391  18227  18123  18080 
+Getting Ceph
+=2D-----------
 
-About 1% of the data movement happens between existing disks and serve no useful purpose but the rest are objects moving from existing disks to the new one which is what we need.
+* Git at git://github.com/ceph/ceph.git
+* Tarball at http://download.ceph.com/tarballs/ceph-0.94.10.tar.gz
+* For packages, see http://docs.ceph.com/docs/master/install/get-packages
+* For ceph-deploy, see http://docs.ceph.com/docs/master/install/install-cep=
+h-deploy
+* Release sha1: b1e0532418e4631af01acbc0cedd426f1905f4af
 
-[1] http://libcrush.org/dachary/libcrush/blob/wip-sheepdog/compare.c
+[1]: http://ceph.com/releases/v0-94-10-hammer-released
+[2]: http://docs.ceph.com/docs/master/_downloads/v0.94.10.txt
 
-Would it be possible to somehow reconcile the two goals: equally filled disks (which your solution does) and minimizing data movement (which crush does) ?
+=2D-
+Abhishek Lekshmanan
+SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton, =
+HRB 21284 (AG N=C3=BCrnberg)
 
-Cheers
+--=-=-=
+Content-Type: application/pgp-signature; name="signature.asc"
 
-> 
-> 
-> 2017-02-13 15:21 GMT+01:00 Sage Weil <sweil@redhat.com>:
->> On Mon, 13 Feb 2017, Loic Dachary wrote:
->>> Hi,
->>>
->>> Dan van der Ster reached out to colleagues and friends and Pedro
->>> López-Adeva Fernández-Layos came up with a well written analysis of the
->>> problem and a tentative solution which he described at :
->>> https://github.com/plafl/notebooks/blob/master/replication.ipynb
->>>
->>> Unless I'm reading the document incorrectly (very possible ;) it also
->>> means that the probability of each disk needs to take in account the
->>> weight of all disks. Which means that whenever a disk is added / removed
->>> or its weight is changed, this has an impact on the probability of all
->>> disks in the cluster and objects are likely to move everywhere. Am I
->>> mistaken ?
->>
->> Maybe (I haven't looked closely at the above yet).  But for comparison, in
->> the normal straw2 case, adding or removing a disk also changes the
->> probabilities for everything else (e.g., removing one out of 10 identical
->> disks changes the probability from 1/10 to 1/9).  The key property that
->> straw2 *is* able to handle is that as long as the relative probabilities
->> between two unmodified disks does not change, then straw2 will avoid
->> moving any objects between them (i.e., all data movement is to or from
->> the disk that is reweighted).
->>
->> sage
->>
->>
->>>
->>> Cheers
->>>
->>> On 01/26/2017 04:05 AM, Sage Weil wrote:
->>>> This is a longstanding bug,
->>>>
->>>>     http://tracker.ceph.com/issues/15653
->>>>
->>>> that causes low-weighted devices to get more data than they should. Loic's
->>>> recent activity resurrected discussion on the original PR
->>>>
->>>>     https://github.com/ceph/ceph/pull/10218
->>>>
->>>> but since it's closed and almost nobody will see it I'm moving the
->>>> discussion here.
->>>>
->>>> The main news is that I have a simple adjustment for the weights that
->>>> works (almost perfectly) for the 2nd round of placements.  The solution is
->>>> pretty simple, although as with most probabilities it tends to make my
->>>> brain hurt.
->>>>
->>>> The idea is that, on the second round, the original weight for the small
->>>> OSD (call it P(pick small)) isn't what we should use.  Instead, we want
->>>> P(pick small | first pick not small).  Since P(a|b) (the probability of a
->>>> given b) is P(a && b) / P(b),
->>>>
->>>>  P(pick small | first pick not small)
->>>>  = P(pick small && first pick not small) / P(first pick not small)
->>>>
->>>> The last term is easy to calculate,
->>>>
->>>>  P(first pick not small) = (total_weight - small_weight) / total_weight
->>>>
->>>> and the && term is the distribution we're trying to produce.  For exmaple,
->>>> if small has 1/10 the weight, then we should see 1/10th of the PGs have
->>>> their second replica be the small OSD.  So
->>>>
->>>>  P(pick small && first pick not small) = small_weight / total_weight
->>>>
->>>> Putting those together,
->>>>
->>>>  P(pick small | first pick not small)
->>>>  = P(pick small && first pick not small) / P(first pick not small)
->>>>  = (small_weight / total_weight) / ((total_weight - small_weight) / total_weight)
->>>>  = small_weight / (total_weight - small_weight)
->>>>
->>>> This is, on the second round, we should adjust the weights by the above so
->>>> that we get the right distribution of second choices.  It turns out it
->>>> works to adjust *all* weights like this to get hte conditional probability
->>>> that they weren't already chosen.
->>>>
->>>> I have a branch that hacks this into straw2 and it appears to work
->>>> properly for num_rep = 2.  With a test bucket of [99 99 99 99 4], and the
->>>> current code, you get
->>>>
->>>> $ bin/crushtool -c cm.txt --test --show-utilization --min-x 0 --max-x 40000000 --num-rep 2
->>>> rule 0 (data), x = 0..40000000, numrep = 2..2
->>>> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
->>>>   device 0:             19765965        [9899364,9866601]
->>>>   device 1:             19768033        [9899444,9868589]
->>>>   device 2:             19769938        [9901770,9868168]
->>>>   device 3:             19766918        [9898851,9868067]
->>>>   device 6:             929148  [400572,528576]
->>>>
->>>> which is very close for the first replica (primary), but way off for the
->>>> second.  With my hacky change,
->>>>
->>>> rule 0 (data), x = 0..40000000, numrep = 2..2
->>>> rule 0 (data) num_rep 2 result size == 2:       40000001/40000001
->>>>   device 0:             19797315        [9899364,9897951]
->>>>   device 1:             19799199        [9899444,9899755]
->>>>   device 2:             19801016        [9901770,9899246]
->>>>   device 3:             19797906        [9898851,9899055]
->>>>   device 6:             804566  [400572,403994]
->>>>
->>>> which is quite close, but still skewing slightly high (by a big less than
->>>> 1%).
->>>>
->>>> Next steps:
->>>>
->>>> 1- generalize this for >2 replicas
->>>> 2- figure out why it skews high
->>>> 3- make this work for multi-level hierarchical descent
->>>>
->>>> sage
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>
->>> --
->>> Loïc Dachary, Artisan Logiciel Libre
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
-> 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+iQEcBAEBAgAGBQJYrWtYAAoJEPnwZB8bZe1fQl0H/2//QNXeX10BPTpVCIlDUAAQ
+Q353YqSjXZEvwZ5SCx0bJzieo2oB9mHtAMQmikbX9Q3AepL0SHFEYpyoZ/oX0slU
+4arpsgykk4BZKC//iLgTfKEORAV9JUXvo/i+/Cv4MveOg3ua7UeL2x8Ribiok/U2
+KkAIRxlr++Md06/HZMbVB0gywKdH+VB46EiWlePffj0G7Fwy1736QMO2Y2kyvLwz
+hu/imfCmkYbzUSwsMY5zl2eG0X+8LA80JrQvyuVSlKMirBkz26WgFu96HIg56NVG
+9Cod8WxV0RLfIXOnpHuY1gVcRXac4qRSaFhEXAmYoM/9TDivWrswiJLCbNH+cJU=
+=QZqH
+-----END PGP SIGNATURE-----
+--=-=-=--
+
+--===============1378875394==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1378875394==--
