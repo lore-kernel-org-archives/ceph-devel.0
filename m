@@ -1,82 +1,72 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: blacklisting etc
-Date: Wed, 22 Feb 2017 11:51:03 +0000
-Message-ID: <CALe9h7e1fnnYw+_b68hm=XhdVXXMNY30WkcHk-geRBXqh7jbjQ@mail.gmail.com>
-References: <CALe9h7c8YtA3YPUkwtOQzvqu-DTQpFXAHxvjUOdd-Ywx_9ccNg@mail.gmail.com>
- <1487763001.2886.1.camel@redhat.com>
+From: "Ammerlaan, A.J.G." <A.J.G.Ammerlaan@umcutrecht.nl>
+Subject: mgr active s01 reboot
+Date: Wed, 22 Feb 2017 12:22:15 +0000
+Message-ID: <A671B5D84A17214ABF7CD65106A733B212488A87@EXMB2501.ds.umcutrecht.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f179.google.com ([209.85.128.179]:36397 "EHLO
-        mail-wr0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932402AbdBVLvZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Feb 2017 06:51:25 -0500
-Received: by mail-wr0-f179.google.com with SMTP id 89so86176wrr.3
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Feb 2017 03:51:24 -0800 (PST)
-In-Reply-To: <1487763001.2886.1.camel@redhat.com>
+Received: from sfs1501out.umcutrecht.nl ([143.121.241.19]:50815 "EHLO
+        sfs1501.umcutrecht.nl" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752788AbdBVMwZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Feb 2017 07:52:25 -0500
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-community@ceph.com" <ceph-community@ceph.com>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
 
-On Wed, Feb 22, 2017 at 11:30 AM, Jeff Layton <jlayton@redhat.com> wrote:
-> On Wed, 2017-02-22 at 10:57 +0000, John Spray wrote:
->> I meant to mention yesterday, I have a branch with the
->> mds-obeys-blacklist behaviour here:
->> https://github.com/jcsp/ceph/tree/wip-17980
->>
->
-> Thanks, I'll take a look.
->
->> For the other side (blacklisting clients from the MDS), I also
->> remembered that we currently we have a precedent for special-casing an
->> mds->OSDMonitor operation, in the form of the MRemoveSnaps message.
->>
->> I think the options we currently have for blacklisting clients from the MDS are:
->>  A) Add a new MBlacklist message a la MRemoveSnaps
->>  B) Send a MMonCommand and special case the auth on the mon side to
->> allow any mds.* entity to run "osd blacklist add" without needing the
->> usual caps
->>  C) Send a MMonCommand and ask users/scripts setting up Ceph to
->> explicitly include the mon cap to run the blacklist command.
->>  D) Piggy-back a list of clients to evict on MMDSBeacon, where the MDS
->> daemon would trim that list once it saw that the blacklist had been
->> updated to include those clients.
->>
->> D is a bit circuitous, but I think it could be interesting as it would
->> let the mon exercise some discretion on whether to do the client
->> blacklisting or not, rather than giving the MDSs such power.
->>
->>
->
-> Ugh...I had started working on an approach similar to B/C above, but
-> missed the fact that the mds.* user would need the mon cap. That is a
-> potential problem.
->
-> A sounds fairly straightforward, and since all of this would require an
-> updated MDS and monitor anyway, it might be the best approach.
->
-> D sounds clever, but "fiddly". Under what circumstances would you want
-> the monitor to ignore a request from an MDS to blacklist a client?
+Hello All,
 
-Not sure, potentially things like implementing a "noevict" flag or
-something that would let admins temporarily put any evictions on hold
-when they know they're about to e.g. bounce a network switch --
-obviously that would have to mean that MDSs were using the blacklist
-as the only path for eviction, rather than evicting in SessionMap and
-then also blacklisting.  It would also be possible to implement that
-by just having the MDS daemons respect a flag in the MDS map though,
-so maybe not the strongest case.
+We are running prod. now. We have configured our Ceph cluster as by guide. 
+When our active mgr, also monitoring server s01 will be shutdown, than our ceph filesystems will disappear.
+We have 3x monitor servers.
 
-Or maybe we could have some configuration that allowed admins to
-selectively protect certain privileged clients from being
-auto-evicted, that checked targets for eviction/blacklist against that
-map.  However, again, if we stored that list in the MDSMap then there
-is nothing preventing implementing that logic MDS side too.
+Can we do something about this, like a redundant mgr server?
 
-Come to think of it though, I'm being silly, because in case A we
-could also have that message handled by mdsmonitor if we ever wanted
-to have any special logic around handling it, so any special logic
-would really be orthogonal to an A vs. D choice anyway.
 
-John
+ ceph --watch-error
+    cluster 62b32e0b-90e2-4285-87f9-8dd874d3ac8f
+     health HEALTH_WARN
+            147 pgs degraded
+            11 pgs recovering
+            136 pgs recovery_wait
+            147 pgs stuck degraded
+            147 pgs stuck unclean
+            recovery 56000/2009180 objects degraded (2.787%)
+     monmap e4: 3 mons at {s01=172.30.0.1:6789/0,s02=172.30.0.2:6789/0,s03=172.30.0.3:6789/0}
+            election epoch 74, quorum 0,1,2 s01,s02,s03
+      fsmap e64: 1/1/1 up {0=s01=up:active}
+        mgr active: s01 
+     osdmap e1972: 110 osds: 110 up, 110 in
+            flags sortbitwise,require_jewel_osds,require_kraken_osds
+      pgmap v5998490: 6370 pgs, 10 pools, 3591 GB data, 981 kobjects
+            7324 GB used, 342 TB / 349 TB avail
+            56000/2009180 objects degraded (2.787%)
+                6223 active+clean
+                 136 active+recovery_wait+degraded
+                  11 active+recovering+degraded
+recovery io 204 MB/s, 95 keys/s, 59 objects/s
+
+Regards, Arnoud.
+
+------------------------------------------------------------------------------
+
+De informatie opgenomen in dit bericht kan vertrouwelijk zijn en is
+uitsluitend bestemd voor de geadresseerde. Indien u dit bericht onterecht
+ontvangt, wordt u verzocht de inhoud niet te gebruiken en de afzender direct
+te informeren door het bericht te retourneren. Het Universitair Medisch
+Centrum Utrecht is een publiekrechtelijke rechtspersoon in de zin van de W.H.W.
+(Wet Hoger Onderwijs en Wetenschappelijk Onderzoek) en staat geregistreerd bij
+de Kamer van Koophandel voor Midden-Nederland onder nr. 30244197.
+
+Denk s.v.p aan het milieu voor u deze e-mail afdrukt.
+
+------------------------------------------------------------------------------
+
+This message may contain confidential information and is intended exclusively
+for the addressee. If you receive this message unintentionally, please do not
+use the contents but notify the sender immediately by return e-mail. University
+Medical Center Utrecht is a legal person by public law and is registered at
+the Chamber of Commerce for Midden-Nederland under no. 30244197.
+
+Please consider the environment before printing this e-mail.
