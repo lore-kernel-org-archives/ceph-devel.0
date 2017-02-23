@@ -1,245 +1,265 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 1/3] ceph: remove special ack vs commit behavior
-Date: Thu, 23 Feb 2017 21:59:19 +0100
-Message-ID: <1487883561-32001-2-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 2/3] libceph: get rid of ack vs commit
+Date: Thu, 23 Feb 2017 21:59:20 +0100
+Message-ID: <1487883561-32001-3-git-send-email-idryomov@gmail.com>
 References: <1487883561-32001-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:35453 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751222AbdBWVHx (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Feb 2017 16:07:53 -0500
-Received: by mail-wm0-f65.google.com with SMTP id u63so1932006wmu.2
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Feb 2017 13:07:52 -0800 (PST)
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:35021 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751201AbdBWVJH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Feb 2017 16:09:07 -0500
+Received: by mail-wr0-f196.google.com with SMTP id q39so308711wrb.2
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Feb 2017 13:09:06 -0800 (PST)
 In-Reply-To: <1487883561-32001-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 Cc: Sage Weil <sweil@redhat.com>, Zheng Yan <zyan@redhat.com>
 
-- ask for a commit reply instead of an ack reply in
-  __ceph_pool_perm_get()
-- don't ask for both ack and commit replies in ceph_sync_write()
-- since just only one reply is requested now, i_unsafe_writes list
-  will always be empty -- kill ceph_sync_write_wait() and go back to
-  a standard ->evict_inode()
+- CEPH_OSD_FLAG_ACK shouldn't be set anymore, so assert on it
+- remove support for handling ack replies (OSDs will send ack replies
+  only if clients request them)
+- drop the "do lingering callbacks under osd->lock" logic from
+  handle_reply() -- lreq->lock is sufficient in all three cases
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- fs/ceph/addr.c  |  2 +-
- fs/ceph/caps.c  |  2 --
- fs/ceph/file.c  | 88 +--------------------------------------------------------
- fs/ceph/inode.c |  9 ------
- fs/ceph/super.c |  1 -
- fs/ceph/super.h |  4 +--
- 6 files changed, 3 insertions(+), 103 deletions(-)
+ include/linux/ceph/osd_client.h |   6 +--
+ net/ceph/osd_client.c           | 113 +++++++++-------------------------------
+ 2 files changed, 27 insertions(+), 92 deletions(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 4547bbf80e4f..3f0474c55f05 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -1872,7 +1872,7 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
- 		goto out_unlock;
- 	}
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 03a6653d329a..f2ce9cd5ede6 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -22,7 +22,6 @@ struct ceph_osd_client;
+  * completion callback for async writepages
+  */
+ typedef void (*ceph_osdc_callback_t)(struct ceph_osd_request *);
+-typedef void (*ceph_osdc_unsafe_callback_t)(struct ceph_osd_request *, bool);
  
--	wr_req->r_flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ACK;
-+	wr_req->r_flags = CEPH_OSD_FLAG_WRITE | CEPH_OSD_FLAG_ONDISK;
- 	osd_req_op_init(wr_req, 0, CEPH_OSD_OP_CREATE, CEPH_OSD_OP_FLAG_EXCL);
- 	ceph_oloc_copy(&wr_req->r_base_oloc, &rd_req->r_base_oloc);
- 	ceph_oid_copy(&wr_req->r_base_oid, &rd_req->r_base_oid);
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 3c2dfd72e5b2..cd966f276a8d 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -2091,8 +2091,6 @@ int ceph_fsync(struct file *file, loff_t start, loff_t end, int datasync)
+ #define CEPH_HOMELESS_OSD	-1
  
- 	dout("fsync %p%s\n", inode, datasync ? " datasync" : "");
+@@ -170,15 +169,12 @@ struct ceph_osd_request {
+ 	unsigned int		r_num_ops;
  
--	ceph_sync_write_wait(inode);
--
- 	ret = filemap_write_and_wait_range(inode->i_mapping, start, end);
- 	if (ret < 0)
- 		goto out;
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index a91a4f1fc837..ae9f8999fc07 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -726,89 +726,6 @@ static void ceph_aio_retry_work(struct work_struct *work)
- 	kfree(aio_work);
- }
+ 	int               r_result;
+-	bool              r_got_reply;
  
--/*
-- * Write commit request unsafe callback, called to tell us when a
-- * request is unsafe (that is, in flight--has been handed to the
-- * messenger to send to its target osd).  It is called again when
-- * we've received a response message indicating the request is
-- * "safe" (its CEPH_OSD_FLAG_ONDISK flag is set), or when a request
-- * is completed early (and unsuccessfully) due to a timeout or
-- * interrupt.
-- *
-- * This is used if we requested both an ACK and ONDISK commit reply
-- * from the OSD.
-- */
--static void ceph_sync_write_unsafe(struct ceph_osd_request *req, bool unsafe)
--{
--	struct ceph_inode_info *ci = ceph_inode(req->r_inode);
--
--	dout("%s %p tid %llu %ssafe\n", __func__, req, req->r_tid,
--		unsafe ? "un" : "");
--	if (unsafe) {
--		ceph_get_cap_refs(ci, CEPH_CAP_FILE_WR);
--		spin_lock(&ci->i_unsafe_lock);
--		list_add_tail(&req->r_unsafe_item,
--			      &ci->i_unsafe_writes);
--		spin_unlock(&ci->i_unsafe_lock);
--
--		complete_all(&req->r_completion);
--	} else {
--		spin_lock(&ci->i_unsafe_lock);
--		list_del_init(&req->r_unsafe_item);
--		spin_unlock(&ci->i_unsafe_lock);
--		ceph_put_cap_refs(ci, CEPH_CAP_FILE_WR);
--	}
--}
--
--/*
-- * Wait on any unsafe replies for the given inode.  First wait on the
-- * newest request, and make that the upper bound.  Then, if there are
-- * more requests, keep waiting on the oldest as long as it is still older
-- * than the original request.
-- */
--void ceph_sync_write_wait(struct inode *inode)
--{
--	struct ceph_inode_info *ci = ceph_inode(inode);
--	struct list_head *head = &ci->i_unsafe_writes;
--	struct ceph_osd_request *req;
--	u64 last_tid;
--
--	if (!S_ISREG(inode->i_mode))
--		return;
--
--	spin_lock(&ci->i_unsafe_lock);
--	if (list_empty(head))
--		goto out;
--
--	/* set upper bound as _last_ entry in chain */
--
--	req = list_last_entry(head, struct ceph_osd_request,
--			      r_unsafe_item);
--	last_tid = req->r_tid;
--
--	do {
--		ceph_osdc_get_request(req);
--		spin_unlock(&ci->i_unsafe_lock);
--
--		dout("sync_write_wait on tid %llu (until %llu)\n",
--		     req->r_tid, last_tid);
--		wait_for_completion(&req->r_done_completion);
--		ceph_osdc_put_request(req);
--
--		spin_lock(&ci->i_unsafe_lock);
--		/*
--		 * from here on look at first entry in chain, since we
--		 * only want to wait for anything older than last_tid
--		 */
--		if (list_empty(head))
--			break;
--		req = list_first_entry(head, struct ceph_osd_request,
--				       r_unsafe_item);
--	} while (req->r_tid < last_tid);
--out:
--	spin_unlock(&ci->i_unsafe_lock);
--}
--
- static ssize_t
- ceph_direct_read_write(struct kiocb *iocb, struct iov_iter *iter,
- 		       struct ceph_snap_context *snapc,
-@@ -1050,8 +967,7 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 	struct ceph_osd_client *r_osdc;
+ 	struct kref       r_kref;
+ 	bool              r_mempool;
+-	struct completion r_completion;
+-	struct completion r_done_completion;  /* fsync waiter */
++	struct completion r_completion;       /* fsync waiter */
+ 	ceph_osdc_callback_t r_callback;
+-	ceph_osdc_unsafe_callback_t r_unsafe_callback;
+ 	struct list_head  r_unsafe_item;
  
- 	flags = CEPH_OSD_FLAG_ORDERSNAP |
- 		CEPH_OSD_FLAG_ONDISK |
--		CEPH_OSD_FLAG_WRITE |
--		CEPH_OSD_FLAG_ACK;
-+		CEPH_OSD_FLAG_WRITE;
+ 	struct inode *r_inode;         	      /* for use by callbacks */
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index ac4753421d0c..e1c6c2b4a295 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -460,7 +460,6 @@ static void request_init(struct ceph_osd_request *req)
  
- 	while ((len = iov_iter_count(from)) > 0) {
- 		size_t left;
-@@ -1097,8 +1013,6 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
- 			goto out;
- 		}
+ 	kref_init(&req->r_kref);
+ 	init_completion(&req->r_completion);
+-	init_completion(&req->r_done_completion);
+ 	RB_CLEAR_NODE(&req->r_node);
+ 	RB_CLEAR_NODE(&req->r_mc_node);
+ 	INIT_LIST_HEAD(&req->r_unsafe_item);
+@@ -1637,7 +1636,7 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
+ 	bool need_send = false;
+ 	bool promoted = false;
  
--		/* get a second commit callback */
--		req->r_unsafe_callback = ceph_sync_write_unsafe;
- 		req->r_inode = inode;
+-	WARN_ON(req->r_tid || req->r_got_reply);
++	WARN_ON(req->r_tid);
+ 	dout("%s req %p wrlocked %d\n", __func__, req, wrlocked);
  
- 		osd_req_op_extent_osd_data_pages(req, 0, pages, len, 0,
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 68f46132b157..fd8f771f99b7 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -499,7 +499,6 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
- 	ci->i_rdcache_gen = 0;
- 	ci->i_rdcache_revoking = 0;
+ again:
+@@ -1705,17 +1704,10 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
  
--	INIT_LIST_HEAD(&ci->i_unsafe_writes);
- 	INIT_LIST_HEAD(&ci->i_unsafe_dirops);
- 	INIT_LIST_HEAD(&ci->i_unsafe_iops);
- 	spin_lock_init(&ci->i_unsafe_lock);
-@@ -583,14 +582,6 @@ int ceph_drop_inode(struct inode *inode)
- 	return 1;
- }
- 
--void ceph_evict_inode(struct inode *inode)
--{
--	/* wait unsafe sync writes */
--	ceph_sync_write_wait(inode);
--	truncate_inode_pages_final(&inode->i_data);
--	clear_inode(inode);
--}
--
- static inline blkcnt_t calc_inode_blocks(u64 size)
+ static void account_request(struct ceph_osd_request *req)
  {
- 	return (size + (1<<9) - 1) >> 9;
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index a0a0b6d02f89..0ec8d0114e57 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -757,7 +757,6 @@ static const struct super_operations ceph_super_ops = {
- 	.destroy_inode	= ceph_destroy_inode,
- 	.write_inode    = ceph_write_inode,
- 	.drop_inode	= ceph_drop_inode,
--	.evict_inode	= ceph_evict_inode,
- 	.sync_fs        = ceph_sync_fs,
- 	.put_super	= ceph_put_super,
- 	.show_options   = ceph_show_options,
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 950170136be9..e9410bcf4113 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -343,7 +343,6 @@ struct ceph_inode_info {
- 	u32 i_rdcache_gen;      /* incremented each time we get FILE_CACHE. */
- 	u32 i_rdcache_revoking; /* RDCACHE gen to async invalidate, if any */
+-	unsigned int mask = CEPH_OSD_FLAG_ACK | CEPH_OSD_FLAG_ONDISK;
++	WARN_ON(req->r_flags & CEPH_OSD_FLAG_ACK);
++	WARN_ON(!(req->r_flags & (CEPH_OSD_FLAG_READ | CEPH_OSD_FLAG_WRITE)));
  
--	struct list_head i_unsafe_writes; /* uncommitted sync writes */
- 	struct list_head i_unsafe_dirops; /* uncommitted mds dir ops */
- 	struct list_head i_unsafe_iops;   /* uncommitted mds inode ops */
- 	spinlock_t i_unsafe_lock;
-@@ -753,7 +752,6 @@ extern const struct inode_operations ceph_file_iops;
- extern struct inode *ceph_alloc_inode(struct super_block *sb);
- extern void ceph_destroy_inode(struct inode *inode);
- extern int ceph_drop_inode(struct inode *inode);
--extern void ceph_evict_inode(struct inode *inode);
+-	if (req->r_flags & CEPH_OSD_FLAG_READ) {
+-		WARN_ON(req->r_flags & mask);
+-		req->r_flags |= CEPH_OSD_FLAG_ACK;
+-	} else if (req->r_flags & CEPH_OSD_FLAG_WRITE)
+-		WARN_ON(!(req->r_flags & mask));
+-	else
+-		WARN_ON(1);
+-
+-	WARN_ON(req->r_unsafe_callback && (req->r_flags & mask) != mask);
++	req->r_flags |= CEPH_OSD_FLAG_ONDISK;
+ 	atomic_inc(&req->r_osdc->num_requests);
+ }
  
- extern struct inode *ceph_get_inode(struct super_block *sb,
- 				    struct ceph_vino vino);
-@@ -933,7 +931,7 @@ extern int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- extern int ceph_release(struct inode *inode, struct file *filp);
- extern void ceph_fill_inline_data(struct inode *inode, struct page *locked_page,
- 				  char *data, size_t len);
--extern void ceph_sync_write_wait(struct inode *inode);
-+
- /* dir.c */
- extern const struct file_operations ceph_dir_fops;
- extern const struct file_operations ceph_snapdir_fops;
+@@ -1750,15 +1742,15 @@ static void finish_request(struct ceph_osd_request *req)
+ 
+ static void __complete_request(struct ceph_osd_request *req)
+ {
+-	if (req->r_callback)
++	if (req->r_callback) {
++		dout("%s req %p tid %llu cb %pf result %d\n", __func__, req,
++		     req->r_tid, req->r_callback, req->r_result);
+ 		req->r_callback(req);
+-	else
+-		complete_all(&req->r_completion);
++	}
+ }
+ 
+ /*
+- * Note that this is open-coded in handle_reply(), which has to deal
+- * with ack vs commit, dup acks, etc.
++ * This is open-coded in handle_reply().
+  */
+ static void complete_request(struct ceph_osd_request *req, int err)
+ {
+@@ -1767,7 +1759,7 @@ static void complete_request(struct ceph_osd_request *req, int err)
+ 	req->r_result = err;
+ 	finish_request(req);
+ 	__complete_request(req);
+-	complete_all(&req->r_done_completion);
++	complete_all(&req->r_completion);
+ 	ceph_osdc_put_request(req);
+ }
+ 
+@@ -1793,7 +1785,7 @@ static void cancel_request(struct ceph_osd_request *req)
+ 
+ 	cancel_map_check(req);
+ 	finish_request(req);
+-	complete_all(&req->r_done_completion);
++	complete_all(&req->r_completion);
+ 	ceph_osdc_put_request(req);
+ }
+ 
+@@ -2170,7 +2162,6 @@ static void linger_commit_cb(struct ceph_osd_request *req)
+ 	mutex_lock(&lreq->lock);
+ 	dout("%s lreq %p linger_id %llu result %d\n", __func__, lreq,
+ 	     lreq->linger_id, req->r_result);
+-	WARN_ON(!__linger_registered(lreq));
+ 	linger_reg_commit_complete(lreq, req->r_result);
+ 	lreq->committed = true;
+ 
+@@ -2786,31 +2777,8 @@ static int decode_MOSDOpReply(const struct ceph_msg *msg, struct MOSDOpReply *m)
+ }
+ 
+ /*
+- * We are done with @req if
+- *   - @m is a safe reply, or
+- *   - @m is an unsafe reply and we didn't want a safe one
+- */
+-static bool done_request(const struct ceph_osd_request *req,
+-			 const struct MOSDOpReply *m)
+-{
+-	return (m->result < 0 ||
+-		(m->flags & CEPH_OSD_FLAG_ONDISK) ||
+-		!(req->r_flags & CEPH_OSD_FLAG_ONDISK));
+-}
+-
+-/*
+- * handle osd op reply.  either call the callback if it is specified,
+- * or do the completion to wake up the waiting thread.
+- *
+- * ->r_unsafe_callback is set?	yes			no
+- *
+- * first reply is OK (needed	r_cb/r_completion,	r_cb/r_completion,
+- * any or needed/got safe)	r_done_completion	r_done_completion
+- *
+- * first reply is unsafe	r_unsafe_cb(true)	(nothing)
+- *
+- * when we get the safe reply	r_unsafe_cb(false),	r_cb/r_completion,
+- *				r_done_completion	r_done_completion
++ * Handle MOSDOpReply.  Set ->r_result and call the callback if it is
++ * specified.
+  */
+ static void handle_reply(struct ceph_osd *osd, struct ceph_msg *msg)
+ {
+@@ -2819,7 +2787,6 @@ static void handle_reply(struct ceph_osd *osd, struct ceph_msg *msg)
+ 	struct MOSDOpReply m;
+ 	u64 tid = le64_to_cpu(msg->hdr.tid);
+ 	u32 data_len = 0;
+-	bool already_acked;
+ 	int ret;
+ 	int i;
+ 
+@@ -2898,50 +2865,22 @@ static void handle_reply(struct ceph_osd *osd, struct ceph_msg *msg)
+ 		       le32_to_cpu(msg->hdr.data_len), req->r_tid);
+ 		goto fail_request;
+ 	}
+-	dout("%s req %p tid %llu acked %d result %d data_len %u\n", __func__,
+-	     req, req->r_tid, req->r_got_reply, m.result, data_len);
+-
+-	already_acked = req->r_got_reply;
+-	if (!already_acked) {
+-		req->r_result = m.result ?: data_len;
+-		req->r_replay_version = m.replay_version; /* struct */
+-		req->r_got_reply = true;
+-	} else if (!(m.flags & CEPH_OSD_FLAG_ONDISK)) {
+-		dout("req %p tid %llu dup ack\n", req, req->r_tid);
+-		goto out_unlock_session;
+-	}
+-
+-	if (done_request(req, &m)) {
+-		finish_request(req);
+-		if (req->r_linger) {
+-			WARN_ON(req->r_unsafe_callback);
+-			dout("req %p tid %llu cb (locked)\n", req, req->r_tid);
+-			__complete_request(req);
+-		}
+-	}
++	dout("%s req %p tid %llu result %d data_len %u\n", __func__,
++	     req, req->r_tid, m.result, data_len);
+ 
++	/*
++	 * Since we only ever request ONDISK, we should only ever get
++	 * one (type of) reply back.
++	 */
++	WARN_ON(!(m.flags & CEPH_OSD_FLAG_ONDISK));
++	req->r_result = m.result ?: data_len;
++	finish_request(req);
+ 	mutex_unlock(&osd->lock);
+ 	up_read(&osdc->lock);
+ 
+-	if (done_request(req, &m)) {
+-		if (already_acked && req->r_unsafe_callback) {
+-			dout("req %p tid %llu safe-cb\n", req, req->r_tid);
+-			req->r_unsafe_callback(req, false);
+-		} else if (!req->r_linger) {
+-			dout("req %p tid %llu cb\n", req, req->r_tid);
+-			__complete_request(req);
+-		}
+-		complete_all(&req->r_done_completion);
+-		ceph_osdc_put_request(req);
+-	} else {
+-		if (req->r_unsafe_callback) {
+-			dout("req %p tid %llu unsafe-cb\n", req, req->r_tid);
+-			req->r_unsafe_callback(req, true);
+-		} else {
+-			WARN_ON(1);
+-		}
+-	}
+-
++	__complete_request(req);
++	complete_all(&req->r_completion);
++	ceph_osdc_put_request(req);
+ 	return;
+ 
+ fail_request:
+@@ -3541,7 +3480,7 @@ void ceph_osdc_sync(struct ceph_osd_client *osdc)
+ 			up_read(&osdc->lock);
+ 			dout("%s waiting on req %p tid %llu last_tid %llu\n",
+ 			     __func__, req, req->r_tid, last_tid);
+-			wait_for_completion(&req->r_done_completion);
++			wait_for_completion(&req->r_completion);
+ 			ceph_osdc_put_request(req);
+ 			goto again;
+ 		}
 -- 
 2.4.3
 
