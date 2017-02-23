@@ -1,17 +1,16 @@
 From: tao chang <changtao381@gmail.com>
-Subject: (unknown)
-Date: Thu, 23 Feb 2017 22:31:39 +0800
-Message-ID: <CAKT23OLssO7Vnq-H+ehpBo3C=xtcSQeaE23baRCkDsYCcZ81Ng@mail.gmail.com>
+Subject: Bug maybe: osdmap failed undecoded
+Date: Thu, 23 Feb 2017 22:33:01 +0800
+Message-ID: <CAKT23OLXnsikbXHRiffX43kWEOeMb327QbAnmt0uZV4LXLm9gg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f181.google.com ([209.85.128.181]:34164 "EHLO
-        mail-wr0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751099AbdBWObl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Feb 2017 09:31:41 -0500
-Received: by mail-wr0-f181.google.com with SMTP id z61so22799168wrc.1
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Feb 2017 06:31:41 -0800 (PST)
-Subject: 
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:38687 "EHLO
+        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751127AbdBWOdY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Feb 2017 09:33:24 -0500
+Received: by mail-wm0-f47.google.com with SMTP id r141so811751wmg.1
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Feb 2017 06:33:02 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
@@ -66,7 +65,7 @@ e=<optimized out>, this=<optimized out>) at osd/OSD.h:884
 #15 0x000055555585eea5 in main (argc=<optimized out>, argv=<optimized
 out>) at ceph_osd.cc:605
 
-it was caused by failed decoded of osdmap structure from osdmap
+it was caused by failed undecoded of osdmap structure from osdmap
 file(/var/lib/ceph/osd/ceph-0/current/meta/osdmap.76__0_64173F9C__none)
 .
 And by comparing the same file on osd.1, It make sure the osdmap file
