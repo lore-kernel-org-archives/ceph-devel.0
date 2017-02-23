@@ -1,282 +1,39 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH 2/3] libceph: get rid of ack vs commit
-Date: Thu, 23 Feb 2017 18:14:03 -0500
-Message-ID: <1487891643.10904.10.camel@redhat.com>
-References: <1487883561-32001-1-git-send-email-idryomov@gmail.com>
-         <1487883561-32001-3-git-send-email-idryomov@gmail.com>
+From: "Martin K. Petersen" <martin.petersen@oracle.com>
+Subject: Re: blk_integrity_revalidate() clears BDI_CAP_STABLE_WRITES
+Date: Thu, 23 Feb 2017 18:49:01 -0500
+Message-ID: <yq1fuj44geq.fsf@oracle.com>
+References: <CAOi1vP8M91kiF-FnT=EoJgTxfstMEsC-nhLY5KtRkrKROjWPWA@mail.gmail.com>
+        <yq1efyq25y2.fsf@oracle.com>
+        <CAOi1vP-amFyFHbPV3FhG3F1Tp+df6V7a4mcP8LLWY0GZx+JsFw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f179.google.com ([209.85.220.179]:36422 "EHLO
-        mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751564AbdBWXXL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Feb 2017 18:23:11 -0500
-Received: by mail-qk0-f179.google.com with SMTP id x71so5891657qkb.3
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Feb 2017 15:23:10 -0800 (PST)
-In-Reply-To: <1487883561-32001-3-git-send-email-idryomov@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
-Cc: Sage Weil <sweil@redhat.com>, Zheng Yan <zyan@redhat.com>
+Content-Type: text/plain
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <CAOi1vP-amFyFHbPV3FhG3F1Tp+df6V7a4mcP8LLWY0GZx+JsFw@mail.gmail.com>
+        (Ilya Dryomov's message of "Wed, 22 Feb 2017 15:41:43 +0100")
+Sender: linux-block-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "Martin K. Petersen" <martin.petersen@oracle.com>, Ceph Development <ceph-devel@vger.kernel.org>, linux-block@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Christoph Hellwig <hch@lst.de>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 2017-02-23 at 21:59 +0100, Ilya Dryomov wrote:
-> - CEPH_OSD_FLAG_ACK shouldn't be set anymore, so assert on it
-> - remove support for handling ack replies (OSDs will send ack replies
->   only if clients request them)
-> - drop the "do lingering callbacks under osd->lock" logic from
->   handle_reply() -- lreq->lock is sufficient in all three cases
-> 
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->  include/linux/ceph/osd_client.h |   6 +--
->  net/ceph/osd_client.c           | 113 +++++++++-------------------------------
->  2 files changed, 27 insertions(+), 92 deletions(-)
-> 
-> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-> index 03a6653d329a..f2ce9cd5ede6 100644
-> --- a/include/linux/ceph/osd_client.h
-> +++ b/include/linux/ceph/osd_client.h
-> @@ -22,7 +22,6 @@ struct ceph_osd_client;
->   * completion callback for async writepages
->   */
->  typedef void (*ceph_osdc_callback_t)(struct ceph_osd_request *);
-> -typedef void (*ceph_osdc_unsafe_callback_t)(struct ceph_osd_request *, bool);
->  
->  #define CEPH_HOMELESS_OSD	-1
->  
-> @@ -170,15 +169,12 @@ struct ceph_osd_request {
->  	unsigned int		r_num_ops;
->  
->  	int               r_result;
-> -	bool              r_got_reply;
->  
->  	struct ceph_osd_client *r_osdc;
->  	struct kref       r_kref;
->  	bool              r_mempool;
-> -	struct completion r_completion;
-> -	struct completion r_done_completion;  /* fsync waiter */
-> +	struct completion r_completion;       /* fsync waiter */
+>>>>> "Ilya" == Ilya Dryomov <idryomov@gmail.com> writes:
 
-Minor nit: surely we also wait on that for things other than fsync?
+Ilya,
 
->  	ceph_osdc_callback_t r_callback;
-> -	ceph_osdc_unsafe_callback_t r_unsafe_callback;
->  	struct list_head  r_unsafe_item;
->  
->  	struct inode *r_inode;         	      /* for use by callbacks */
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index ac4753421d0c..e1c6c2b4a295 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -460,7 +460,6 @@ static void request_init(struct ceph_osd_request *req)
->  
->  	kref_init(&req->r_kref);
->  	init_completion(&req->r_completion);
-> -	init_completion(&req->r_done_completion);
->  	RB_CLEAR_NODE(&req->r_node);
->  	RB_CLEAR_NODE(&req->r_mc_node);
->  	INIT_LIST_HEAD(&req->r_unsafe_item);
-> @@ -1637,7 +1636,7 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
->  	bool need_send = false;
->  	bool promoted = false;
->  
-> -	WARN_ON(req->r_tid || req->r_got_reply);
-> +	WARN_ON(req->r_tid);
->  	dout("%s req %p wrlocked %d\n", __func__, req, wrlocked);
->  
->  again:
-> @@ -1705,17 +1704,10 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
->  
->  static void account_request(struct ceph_osd_request *req)
->  {
-> -	unsigned int mask = CEPH_OSD_FLAG_ACK | CEPH_OSD_FLAG_ONDISK;
-> +	WARN_ON(req->r_flags & CEPH_OSD_FLAG_ACK);
-> +	WARN_ON(!(req->r_flags & (CEPH_OSD_FLAG_READ | CEPH_OSD_FLAG_WRITE)));
+Ilya> Well, blk_integrity_revalidate() doesn't clear the profile, it
+Ilya> just clears the stable pages flag.  Whoever calls
+Ilya> blk_integrity_unregister() to clear the profile can also clear the
+Ilya> stable pages flag -- why not let blk_integrity_unregister() clear
+Ilya> the flag like I suggested?
 
-nit: Those should probably be WARN_ON_ONCE. This gets called fairly
-frequently, and one stack trace is probably enough to point out the
-problem.
+That's what it used to do.
 
->  
-> -	if (req->r_flags & CEPH_OSD_FLAG_READ) {
-> -		WARN_ON(req->r_flags & mask);
-> -		req->r_flags |= CEPH_OSD_FLAG_ACK;
-> -	} else if (req->r_flags & CEPH_OSD_FLAG_WRITE)
-> -		WARN_ON(!(req->r_flags & mask));
-> -	else
-> -		WARN_ON(1);
-> -
-> -	WARN_ON(req->r_unsafe_callback && (req->r_flags & mask) != mask);
-> +	req->r_flags |= CEPH_OSD_FLAG_ONDISK;
->  	atomic_inc(&req->r_osdc->num_requests);
->  }
->  
-> @@ -1750,15 +1742,15 @@ static void finish_request(struct ceph_osd_request *req)
->  
->  static void __complete_request(struct ceph_osd_request *req)
->  {
-> -	if (req->r_callback)
-> +	if (req->r_callback) {
-> +		dout("%s req %p tid %llu cb %pf result %d\n", __func__, req,
-> +		     req->r_tid, req->r_callback, req->r_result);
->  		req->r_callback(req);
-> -	else
-> -		complete_all(&req->r_completion);
-> +	}
->  }
->  
->  /*
-> - * Note that this is open-coded in handle_reply(), which has to deal
-> - * with ack vs commit, dup acks, etc.
-> + * This is open-coded in handle_reply().
->   */
->  static void complete_request(struct ceph_osd_request *req, int err)
->  {
-> @@ -1767,7 +1759,7 @@ static void complete_request(struct ceph_osd_request *req, int err)
->  	req->r_result = err;
->  	finish_request(req);
->  	__complete_request(req);
-> -	complete_all(&req->r_done_completion);
-> +	complete_all(&req->r_completion);
->  	ceph_osdc_put_request(req);
->  }
->  
-> @@ -1793,7 +1785,7 @@ static void cancel_request(struct ceph_osd_request *req)
->  
->  	cancel_map_check(req);
->  	finish_request(req);
-> -	complete_all(&req->r_done_completion);
-> +	complete_all(&req->r_completion);
->  	ceph_osdc_put_request(req);
->  }
->  
-> @@ -2170,7 +2162,6 @@ static void linger_commit_cb(struct ceph_osd_request *req)
->  	mutex_lock(&lreq->lock);
->  	dout("%s lreq %p linger_id %llu result %d\n", __func__, lreq,
->  	     lreq->linger_id, req->r_result);
-> -	WARN_ON(!__linger_registered(lreq));
->  	linger_reg_commit_complete(lreq, req->r_result);
->  	lreq->committed = true;
->  
-> @@ -2786,31 +2777,8 @@ static int decode_MOSDOpReply(const struct ceph_msg *msg, struct MOSDOpReply *m)
->  }
->  
->  /*
-> - * We are done with @req if
-> - *   - @m is a safe reply, or
-> - *   - @m is an unsafe reply and we didn't want a safe one
-> - */
-> -static bool done_request(const struct ceph_osd_request *req,
-> -			 const struct MOSDOpReply *m)
-> -{
-> -	return (m->result < 0 ||
-> -		(m->flags & CEPH_OSD_FLAG_ONDISK) ||
-> -		!(req->r_flags & CEPH_OSD_FLAG_ONDISK));
-> -}
-> -
-> -/*
-> - * handle osd op reply.  either call the callback if it is specified,
-> - * or do the completion to wake up the waiting thread.
-> - *
-> - * ->r_unsafe_callback is set?	yes			no
-> - *
-> - * first reply is OK (needed	r_cb/r_completion,	r_cb/r_completion,
-> - * any or needed/got safe)	r_done_completion	r_done_completion
-> - *
-> - * first reply is unsafe	r_unsafe_cb(true)	(nothing)
-> - *
-> - * when we get the safe reply	r_unsafe_cb(false),	r_cb/r_completion,
-> - *				r_done_completion	r_done_completion
-> + * Handle MOSDOpReply.  Set ->r_result and call the callback if it is
-> + * specified.
->   */
->  static void handle_reply(struct ceph_osd *osd, struct ceph_msg *msg)
->  {
-> @@ -2819,7 +2787,6 @@ static void handle_reply(struct ceph_osd *osd, struct ceph_msg *msg)
->  	struct MOSDOpReply m;
->  	u64 tid = le64_to_cpu(msg->hdr.tid);
->  	u32 data_len = 0;
-> -	bool already_acked;
->  	int ret;
->  	int i;
->  
-> @@ -2898,50 +2865,22 @@ static void handle_reply(struct ceph_osd *osd, struct ceph_msg *msg)
->  		       le32_to_cpu(msg->hdr.data_len), req->r_tid);
->  		goto fail_request;
->  	}
-> -	dout("%s req %p tid %llu acked %d result %d data_len %u\n", __func__,
-> -	     req, req->r_tid, req->r_got_reply, m.result, data_len);
-> -
-> -	already_acked = req->r_got_reply;
-> -	if (!already_acked) {
-> -		req->r_result = m.result ?: data_len;
-> -		req->r_replay_version = m.replay_version; /* struct */
-> -		req->r_got_reply = true;
-> -	} else if (!(m.flags & CEPH_OSD_FLAG_ONDISK)) {
-> -		dout("req %p tid %llu dup ack\n", req, req->r_tid);
-> -		goto out_unlock_session;
-> -	}
-> -
-> -	if (done_request(req, &m)) {
-> -		finish_request(req);
-> -		if (req->r_linger) {
-> -			WARN_ON(req->r_unsafe_callback);
-> -			dout("req %p tid %llu cb (locked)\n", req, req->r_tid);
-> -			__complete_request(req);
-> -		}
-> -	}
-> +	dout("%s req %p tid %llu result %d data_len %u\n", __func__,
-> +	     req, req->r_tid, m.result, data_len);
->  
-> +	/*
-> +	 * Since we only ever request ONDISK, we should only ever get
-> +	 * one (type of) reply back.
-> +	 */
-> +	WARN_ON(!(m.flags & CEPH_OSD_FLAG_ONDISK));
+blk_integrity_revalidate() was obviously introduced to overcome some
+problem. Unfortunately, I can't recall what that was and Google isn't
+being particularly helpful. I suspect it was either in the NVDIMM or
+NVMe camps since that's where the churn was.
 
-Again, maybe a WARN_ON_ONCE here too.
+I don't have a problem with your patch as long as we're sure there are
+no regressions. I would carry the gendisk check over, though.
 
-> +	req->r_result = m.result ?: data_len;
-> +	finish_request(req);
->  	mutex_unlock(&osd->lock);
->  	up_read(&osdc->lock);
->  
-> -	if (done_request(req, &m)) {
-> -		if (already_acked && req->r_unsafe_callback) {
-> -			dout("req %p tid %llu safe-cb\n", req, req->r_tid);
-> -			req->r_unsafe_callback(req, false);
-> -		} else if (!req->r_linger) {
-> -			dout("req %p tid %llu cb\n", req, req->r_tid);
-> -			__complete_request(req);
-> -		}
-> -		complete_all(&req->r_done_completion);
-> -		ceph_osdc_put_request(req);
-> -	} else {
-> -		if (req->r_unsafe_callback) {
-> -			dout("req %p tid %llu unsafe-cb\n", req, req->r_tid);
-> -			req->r_unsafe_callback(req, true);
-> -		} else {
-> -			WARN_ON(1);
-> -		}
-> -	}
-> -
-> +	__complete_request(req);
-> +	complete_all(&req->r_completion);
-> +	ceph_osdc_put_request(req);
->  	return;
->  
->  fail_request:
-> @@ -3541,7 +3480,7 @@ void ceph_osdc_sync(struct ceph_osd_client *osdc)
->  			up_read(&osdc->lock);
->  			dout("%s waiting on req %p tid %llu last_tid %llu\n",
->  			     __func__, req, req->r_tid, last_tid);
-> -			wait_for_completion(&req->r_done_completion);
-> +			wait_for_completion(&req->r_completion);
->  			ceph_osdc_put_request(req);
->  			goto again;
->  		}
-
-Other than that minor stuff, this looks like a nice cleanup.
-
-Reviewed-by: Jeff Layton <jlayton@redhat.com>
+-- 
+Martin K. Petersen	Oracle Linux Engineering
