@@ -1,93 +1,39 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Ceph unit test help
-Date: Fri, 24 Feb 2017 19:07:38 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1702241907090.7782@piezo.novalocal>
-References: <CAK=B8ybPatezCJvb_5kYWKEQbPVyJAU12KP0rCkdjafC4+s6LA@mail.gmail.com>
+From: Patrick Donnelly <pdonnell@redhat.com>
+Subject: Re: running ceph cluster (built from source) from multiple machines
+Date: Fri, 24 Feb 2017 14:16:21 -0500
+Message-ID: <CA+2bHPZWp9LmPcJd2gZ7X1Vt5RvGUgz0=T3WBk03QTnTSOLxzA@mail.gmail.com>
+References: <CAG0LsznANAmgEZJxQv+Gw6Vj=Fyzy-i0-eVCozYkN4UWfviagQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:50898 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751296AbdBXTHm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Feb 2017 14:07:42 -0500
-In-Reply-To: <CAK=B8ybPatezCJvb_5kYWKEQbPVyJAU12KP0rCkdjafC4+s6LA@mail.gmail.com>
+Received: from mail-wr0-f169.google.com ([209.85.128.169]:33058 "EHLO
+        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750995AbdBXTRg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Feb 2017 14:17:36 -0500
+Received: by mail-wr0-f169.google.com with SMTP id u47so19229494wrb.0
+        for <ceph-devel@vger.kernel.org>; Fri, 24 Feb 2017 11:16:52 -0800 (PST)
+In-Reply-To: <CAG0LsznANAmgEZJxQv+Gw6Vj=Fyzy-i0-eVCozYkN4UWfviagQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Muminul Islam Russell <misla011@fiu.edu>
+To: Sugang Li <sugangli@winlab.rutgers.edu>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 24 Feb 2017, Muminul Islam Russell wrote:
-> Hello cephers,
-> 
-> 
-> I am new this ceph development although have been using it for long
-> time. At first I started building and followed the same steps
-> described the the github.
-> 
-> ./do_cmake.sh
-> cd build
-> make
-> 
-> I changed some code in ceph-detect init and added proper test cases as
-> well but the test cased failed.
-> 
-> Could you please suggest me what is going wrong here?
+Hello Sugang,
 
-I think the python pieces are somewhat special.  You might try 'make 
-tests' and then try it again?
+On Fri, Feb 24, 2017 at 10:24 AM, Sugang Li <sugangli@winlab.rutgers.edu> wrote:
+> Recently I modified the source code a little bit and I am trying to test
+> its benchmark performance on multiple machines (one VM for client, one VM
+> for mon, three VMs for OSDs). I realized that vstart.sh script seems only
+> runs cluster on the local machine, so I am wondering is there a way I can
+> do it on multiple ones, which is similar to ceph-deploy?
 
-sage
+The recommended way to deploy ceph to a cluster is by using
+ceph-ansible: https://github.com/ceph/ceph-ansible
 
+You may also find it helpful to look at a script I use to start and
+configure Linode VMs for testing Ceph:
 
-> 
-> sudo ctest --output-on-failure -R run-tox-ceph-detect-init
-> Test project /home/muislam/ceph_upstream/ceph/build
->     Start 15: run-tox-ceph-detect-init
-> 1/1 Test #15: run-tox-ceph-detect-init .........***Failed    0.25 sec
-> /home/muislam/ceph_upstream/ceph/src/ceph-detect-init/run-tox.sh: line
-> 30: /tmp/ceph-detect-init-virtualenv/bin/activate: No such file or
-> directory
-> Traceback (most recent call last):
->   File "/bin/tox", line 9, in <module>
->     load_entry_point('tox==1.4.2', 'console_scripts', 'tox')()
->   File "/usr/lib/python2.7/site-packages/tox/_cmdline.py", line 24, in main
->     config = parseconfig(args, 'tox')
->   File "/usr/lib/python2.7/site-packages/tox/_config.py", line 23, in
-> parseconfig
->     parseini(config)
->   File "/usr/lib/python2.7/site-packages/tox/_config.py", line 170, in __init__
->     config)
->   File "/usr/lib/python2.7/site-packages/tox/_config.py", line 223, in
-> _makeenvconfig
->     for depline in reader.getlist(section, "deps"):
->   File "/usr/lib/python2.7/site-packages/tox/_config.py", line 296, in getlist
->     s = self.getdefault(section, name, None)
->   File "/usr/lib/python2.7/site-packages/tox/_config.py", line 389, in
-> getdefault
->     x = self._replace(x)
->   File "/usr/lib/python2.7/site-packages/tox/_config.py", line 489, in _replace
->     return rexpattern.sub(self._sub, x)
->   File "/usr/lib/python2.7/site-packages/tox/_config.py", line 402, in _sub
->     (key, envkey))
-> tox.ConfigError: ConfigError: substitution 'env:NO_INDEX:':
-> 'NO_INDEX:' not found in environment
-> 
-> 
-> 0% tests passed, 1 tests failed out of 1
-> 
-> Total Test time (real) =   0.31 sec
-> 
-> The following tests FAILED:
->      15 - run-tox-ceph-detect-init (Failed)
-> Errors while running CTest
-> 
-> Thanks in advance.
-> 
-> Best,
-> Muminul
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+https://github.com/batrick/ceph-ansible/blob/95c72ec6880d95063c87060cf2c895f0c11bcc4a/test.sh
+
+-- 
+Patrick Donnelly
