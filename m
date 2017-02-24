@@ -1,32 +1,40 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: systemd and RDMA
-Date: Fri, 24 Feb 2017 05:50:37 +0100
-Message-ID: <d09496ec-f575-e62a-5088-4865916100aa@suse.cz>
-References: <VI1PR0501MB278205C007302409F70B10B2D7530@VI1PR0501MB2782.eurprd05.prod.outlook.com>
- <alpine.DEB.2.11.1702231425150.7782@piezo.novalocal>
+From: Jaze Lee <jazeltq@gmail.com>
+Subject: Re: [RFC v6] RBD: Add support readv,writev for rbd
+Date: Fri, 24 Feb 2017 14:09:31 +0800
+Message-ID: <CAKZcxgcWpz5g-WdeFNu8Ad_4PQZMPHoJDmn_1HENntVLLZG_Jg@mail.gmail.com>
+References: <20170221065003.26103-1-jazeltq@gmail.com> <20170224035236.GB2613@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:33508 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750873AbdBXFXm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 24 Feb 2017 00:23:42 -0500
-In-Reply-To: <alpine.DEB.2.11.1702231425150.7782@piezo.novalocal>
+Received: from mail-it0-f54.google.com ([209.85.214.54]:37603 "EHLO
+        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750873AbdBXGJd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Feb 2017 01:09:33 -0500
+Received: by mail-it0-f54.google.com with SMTP id 203so11776838ith.0
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Feb 2017 22:09:32 -0800 (PST)
+In-Reply-To: <20170224035236.GB2613@localhost.localdomain>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Adir Lev <adirl@mellanox.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, kefu chai <tchaikov@gmail.com>
+To: Jeff Cody <jcody@redhat.com>
+Cc: Josh Durgin <jdurgin@redhat.com>, Jason Dillaman <dillaman@redhat.com>, Kevin Wolf <kwolf@redhat.com>, Max Reitz <mreitz@redhat.com>, qemu-block@nongnu.org, qemu-devel@nongnu.org, ceph-devel <ceph-devel@vger.kernel.org>, tianqing <tianqing@unitedstack.com>
 
->> Any suggestion on how to check messenger type and set PrivateDevices and
->> LimitMEMLOCK accordingly?
+2017-02-24 11:52 GMT+08:00 Jeff Cody <jcody@redhat.com>:
+> On Tue, Feb 21, 2017 at 02:50:03PM +0800, jazeltq@gmail.com wrote:
+>> From: tianqing <tianqing@unitedstack.com>
+>>
+>> Rbd can do readv and writev directly, so wo do not need to transform
+>> iov to buf or vice versa any more.
+>>
+>> Signed-off-by: tianqing <tianqing@unitedstack.com>
+>> ---
 >
-> Hmm, is it possible to make them conditional on something in
-> /etc/{sysconfig,default}/ceph?  Then an RDMA user would just need to
-> comment in a line like ENABLE_RDMA=1 or something...
+>
+> This is marked as an RFC still - is this a series you would like to see i=
+n
+> 2.9?
 
-+1
+Yes.   What should i do if i like it in 2.9
 
-Can you open a tracker issue for this request?
-
-Nathan
+--=20
+=E8=B0=A6=E8=B0=A6=E5=90=9B=E5=AD=90
