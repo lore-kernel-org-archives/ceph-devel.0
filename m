@@ -1,117 +1,100 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 2/3] libceph: get rid of ack vs commit
-Date: Fri, 24 Feb 2017 12:19:00 +0100
-Message-ID: <CAOi1vP-YeptK4bEj-=nwXy80kgKDOXQ6HEb5podmiPBTX=4pJw@mail.gmail.com>
-References: <1487883561-32001-1-git-send-email-idryomov@gmail.com>
- <1487883561-32001-3-git-send-email-idryomov@gmail.com> <1487891643.10904.10.camel@redhat.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: blacklisting etc
+Date: Fri, 24 Feb 2017 11:28:13 +0000
+Message-ID: <CALe9h7cb33S1K212GWmnBGxVHZpq=wckBO8rRGr_YePvYxGH2w@mail.gmail.com>
+References: <CALe9h7c8YtA3YPUkwtOQzvqu-DTQpFXAHxvjUOdd-Ywx_9ccNg@mail.gmail.com>
+ <1487763001.2886.1.camel@redhat.com> <CALe9h7e1fnnYw+_b68hm=XhdVXXMNY30WkcHk-geRBXqh7jbjQ@mail.gmail.com>
+ <alpine.DEB.2.11.1702222056210.15623@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f193.google.com ([209.85.217.193]:35993 "EHLO
-        mail-ua0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751082AbdBXLTy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Feb 2017 06:19:54 -0500
-Received: by mail-ua0-f193.google.com with SMTP id j56so1346716uaa.3
-        for <ceph-devel@vger.kernel.org>; Fri, 24 Feb 2017 03:19:01 -0800 (PST)
-In-Reply-To: <1487891643.10904.10.camel@redhat.com>
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:36053 "EHLO
+        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751082AbdBXL2g (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Feb 2017 06:28:36 -0500
+Received: by mail-wm0-f51.google.com with SMTP id v77so12091370wmv.1
+        for <ceph-devel@vger.kernel.org>; Fri, 24 Feb 2017 03:28:35 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1702222056210.15623@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, Zheng Yan <zyan@redhat.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: Jeff Layton <jlayton@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Feb 24, 2017 at 12:14 AM, Jeff Layton <jlayton@redhat.com> wrote:
-> On Thu, 2017-02-23 at 21:59 +0100, Ilya Dryomov wrote:
->> - CEPH_OSD_FLAG_ACK shouldn't be set anymore, so assert on it
->> - remove support for handling ack replies (OSDs will send ack replies
->>   only if clients request them)
->> - drop the "do lingering callbacks under osd->lock" logic from
->>   handle_reply() -- lreq->lock is sufficient in all three cases
+On Wed, Feb 22, 2017 at 8:57 PM, Sage Weil <sweil@redhat.com> wrote:
+> On Wed, 22 Feb 2017, John Spray wrote:
+>> On Wed, Feb 22, 2017 at 11:30 AM, Jeff Layton <jlayton@redhat.com> wrote:
+>> > On Wed, 2017-02-22 at 10:57 +0000, John Spray wrote:
+>> >> I meant to mention yesterday, I have a branch with the
+>> >> mds-obeys-blacklist behaviour here:
+>> >> https://github.com/jcsp/ceph/tree/wip-17980
+>> >>
+>> >
+>> > Thanks, I'll take a look.
+>> >
+>> >> For the other side (blacklisting clients from the MDS), I also
+>> >> remembered that we currently we have a precedent for special-casing an
+>> >> mds->OSDMonitor operation, in the form of the MRemoveSnaps message.
+>> >>
+>> >> I think the options we currently have for blacklisting clients from the MDS are:
+>> >>  A) Add a new MBlacklist message a la MRemoveSnaps
+>> >>  B) Send a MMonCommand and special case the auth on the mon side to
+>> >> allow any mds.* entity to run "osd blacklist add" without needing the
+>> >> usual caps
+>> >>  C) Send a MMonCommand and ask users/scripts setting up Ceph to
+>> >> explicitly include the mon cap to run the blacklist command.
+>> >>  D) Piggy-back a list of clients to evict on MMDSBeacon, where the MDS
+>> >> daemon would trim that list once it saw that the blacklist had been
+>> >> updated to include those clients.
+>> >>
+>> >> D is a bit circuitous, but I think it could be interesting as it would
+>> >> let the mon exercise some discretion on whether to do the client
+>> >> blacklisting or not, rather than giving the MDSs such power.
+>> >>
+>> >>
+>> >
+>> > Ugh...I had started working on an approach similar to B/C above, but
+>> > missed the fact that the mds.* user would need the mon cap. That is a
+>> > potential problem.
+>> >
+>> > A sounds fairly straightforward, and since all of this would require an
+>> > updated MDS and monitor anyway, it might be the best approach.
+>> >
+>> > D sounds clever, but "fiddly". Under what circumstances would you want
+>> > the monitor to ignore a request from an MDS to blacklist a client?
 >>
->> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
->> ---
->>  include/linux/ceph/osd_client.h |   6 +--
->>  net/ceph/osd_client.c           | 113 +++++++++-------------------------------
->>  2 files changed, 27 insertions(+), 92 deletions(-)
+>> Not sure, potentially things like implementing a "noevict" flag or
+>> something that would let admins temporarily put any evictions on hold
+>> when they know they're about to e.g. bounce a network switch --
+>> obviously that would have to mean that MDSs were using the blacklist
+>> as the only path for eviction, rather than evicting in SessionMap and
+>> then also blacklisting.  It would also be possible to implement that
+>> by just having the MDS daemons respect a flag in the MDS map though,
+>> so maybe not the strongest case.
 >>
->> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
->> index 03a6653d329a..f2ce9cd5ede6 100644
->> --- a/include/linux/ceph/osd_client.h
->> +++ b/include/linux/ceph/osd_client.h
->> @@ -22,7 +22,6 @@ struct ceph_osd_client;
->>   * completion callback for async writepages
->>   */
->>  typedef void (*ceph_osdc_callback_t)(struct ceph_osd_request *);
->> -typedef void (*ceph_osdc_unsafe_callback_t)(struct ceph_osd_request *, bool);
+>> Or maybe we could have some configuration that allowed admins to
+>> selectively protect certain privileged clients from being
+>> auto-evicted, that checked targets for eviction/blacklist against that
+>> map.  However, again, if we stored that list in the MDSMap then there
+>> is nothing preventing implementing that logic MDS side too.
 >>
->>  #define CEPH_HOMELESS_OSD    -1
->>
->> @@ -170,15 +169,12 @@ struct ceph_osd_request {
->>       unsigned int            r_num_ops;
->>
->>       int               r_result;
->> -     bool              r_got_reply;
->>
->>       struct ceph_osd_client *r_osdc;
->>       struct kref       r_kref;
->>       bool              r_mempool;
->> -     struct completion r_completion;
->> -     struct completion r_done_completion;  /* fsync waiter */
->> +     struct completion r_completion;       /* fsync waiter */
+>> Come to think of it though, I'm being silly, because in case A we
+>> could also have that message handled by mdsmonitor if we ever wanted
+>> to have any special logic around handling it, so any special logic
+>> would really be orthogonal to an A vs. D choice anyway.
 >
-> Minor nit: surely we also wait on that for things other than fsync?
-
-Of course, ceph_osdc_wait_request() waits on it.  I left the comment in
-to stress that r_completion is now also used for syncfs.
-
-The difference between r_completion and r_done_completion was that you
-were allowed to complete r_completion whenever, while r_done_completion
-was used for syncfs, private to osd_client.c.
-
-It's basically meant to convey that you shouldn't mess with it.  I can
-change it to "private to osd_client.c" or so, if that's better.
-
+> Yeah, I'd go with A.
 >
->>       ceph_osdc_callback_t r_callback;
->> -     ceph_osdc_unsafe_callback_t r_unsafe_callback;
->>       struct list_head  r_unsafe_item;
->>
->>       struct inode *r_inode;                /* for use by callbacks */
->> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
->> index ac4753421d0c..e1c6c2b4a295 100644
->> --- a/net/ceph/osd_client.c
->> +++ b/net/ceph/osd_client.c
->> @@ -460,7 +460,6 @@ static void request_init(struct ceph_osd_request *req)
->>
->>       kref_init(&req->r_kref);
->>       init_completion(&req->r_completion);
->> -     init_completion(&req->r_done_completion);
->>       RB_CLEAR_NODE(&req->r_node);
->>       RB_CLEAR_NODE(&req->r_mc_node);
->>       INIT_LIST_HEAD(&req->r_unsafe_item);
->> @@ -1637,7 +1636,7 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
->>       bool need_send = false;
->>       bool promoted = false;
->>
->> -     WARN_ON(req->r_tid || req->r_got_reply);
->> +     WARN_ON(req->r_tid);
->>       dout("%s req %p wrlocked %d\n", __func__, req, wrlocked);
->>
->>  again:
->> @@ -1705,17 +1704,10 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
->>
->>  static void account_request(struct ceph_osd_request *req)
->>  {
->> -     unsigned int mask = CEPH_OSD_FLAG_ACK | CEPH_OSD_FLAG_ONDISK;
->> +     WARN_ON(req->r_flags & CEPH_OSD_FLAG_ACK);
->> +     WARN_ON(!(req->r_flags & (CEPH_OSD_FLAG_READ | CEPH_OSD_FLAG_WRITE)));
->
-> nit: Those should probably be WARN_ON_ONCE. This gets called fairly
-> frequently, and one stack trace is probably enough to point out the
-> problem.
+> And for the 'noevict' case, that logic could also live in the MDS instead
+> of the mon.
 
-I usually use WARN_ONs to make sure they are noticed.  We are slowly
-transitioning from BUG_ONs -- baby steps... ;)
+So on closer inspection I realised that adding a new message class
+wasn't as neat as it first seemed -- the MRemoveSnaps is reliable
+because it gets resent on new osdmaps if it hadn't taken effect, so
+doesn't need normal resend logic.  Also, MRemoveSnaps was already
+authenticating using an "osd pool rmsnap" MonCap, so it's
+straightforward to grant the equivalent cap for blacklists, and then
+send a normal MonCommand to get the resend logic for free.
 
-Thanks,
+Work in progress is here: https://github.com/jcsp/ceph/commits/wip-17980
 
-                Ilya
+John
