@@ -1,95 +1,155 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v5 2/6] libceph: abort already submitted but abortable requests when map or pool goes full
-Date: Sat, 25 Feb 2017 12:43:19 -0500
-Message-ID: <20170225174323.20289-3-jlayton@redhat.com>
+Subject: [PATCH v5 4/6] ceph: handle epoch barriers in cap messages
+Date: Sat, 25 Feb 2017 12:43:21 -0500
+Message-ID: <20170225174323.20289-5-jlayton@redhat.com>
 References: <20170225174323.20289-1-jlayton@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49970 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:34804 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751428AbdBYRn1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 25 Feb 2017 12:43:27 -0500
+        id S1751869AbdBYRn3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 25 Feb 2017 12:43:29 -0500
 In-Reply-To: <20170225174323.20289-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com
 Cc: jspray@redhat.com, ceph-devel@vger.kernel.org
 
-When a Ceph volume hits capacity, a flag is set in the OSD map to
-indicate that, and a new map is sprayed around the cluster. With cephfs
-we want it to shut down any abortable requests that are in progress with
-an -ENOSPC error as they'd just hang otherwise.
+Have the client store and update the osdc epoch_barrier when a cap
+message comes in with one.
 
-Add a new ceph_osdc_abort_on_full helper function to handle this. It
-will first check whether there is an out-of-space condition in the
-cluster. It will then walk the tree and abort any request that has
-r_abort_on_full set with an ENOSPC error. Call this new function
-directly whenever we get a new OSD map.
+When sending cap messages, send the epoch barrier as well. This allows
+clients to inform servers that their released caps may not be used until
+a particular OSD map epoch.
 
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- net/ceph/osd_client.c | 42 ++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 42 insertions(+)
+ fs/ceph/caps.c       | 17 +++++++++++++----
+ fs/ceph/mds_client.c | 20 ++++++++++++++++++++
+ fs/ceph/mds_client.h |  7 +++++--
+ 3 files changed, 38 insertions(+), 6 deletions(-)
 
-diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 8fc0ccc7126f..b286ff6dec29 100644
---- a/net/ceph/osd_client.c
-+++ b/net/ceph/osd_client.c
-@@ -1770,6 +1770,47 @@ static void complete_request(struct ceph_osd_request *req, int err)
- 	ceph_osdc_put_request(req);
- }
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index cd966f276a8d..e5e50e673a80 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -1015,6 +1015,7 @@ static int send_cap_msg(struct cap_msg_args *arg)
+ 	void *p;
+ 	size_t extra_len;
+ 	struct timespec zerotime = {0};
++	struct ceph_osd_client *osdc = &arg->session->s_mdsc->fsc->client->osdc;
  
-+/*
-+ * Drop all pending requests that are stalled waiting on a full condition to
-+ * clear, and complete them with ENOSPC as the return code.
-+ */
-+static void ceph_osdc_abort_on_full(struct ceph_osd_client *osdc)
-+{
-+	struct ceph_osd_request *req;
-+	struct ceph_osd *osd;
-+	struct rb_node *m, *n;
-+	u32 latest_epoch = 0;
-+	bool osdmap_full = ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL);
+ 	dout("send_cap_msg %s %llx %llx caps %s wanted %s dirty %s"
+ 	     " seq %u/%u tid %llu/%llu mseq %u follows %lld size %llu/%llu"
+@@ -1077,7 +1078,9 @@ static int send_cap_msg(struct cap_msg_args *arg)
+ 	/* inline data size */
+ 	ceph_encode_32(&p, 0);
+ 	/* osd_epoch_barrier (version 5) */
+-	ceph_encode_32(&p, 0);
++	down_read(&osdc->lock);
++	ceph_encode_32(&p, osdc->epoch_barrier);
++	up_read(&osdc->lock);
+ 	/* oldest_flush_tid (version 6) */
+ 	ceph_encode_64(&p, arg->oldest_flush_tid);
+ 
+@@ -3633,13 +3636,19 @@ void ceph_handle_caps(struct ceph_mds_session *session,
+ 		p += inline_len;
+ 	}
+ 
++	if (le16_to_cpu(msg->hdr.version) >= 5) {
++		struct ceph_osd_client	*osdc = &mdsc->fsc->client->osdc;
++		u32			epoch_barrier;
 +
-+	dout("enter abort_on_full\n");
-+
-+	if (!osdmap_full && !have_pool_full(osdc))
-+		goto out;
-+
-+	for (n = rb_first(&osdc->osds); n; n = rb_next(n)) {
-+		osd = rb_entry(n, struct ceph_osd, o_node);
-+		mutex_lock(&osd->lock);
-+		m = rb_first(&osd->o_requests);
-+		while (m) {
-+			req = rb_entry(m, struct ceph_osd_request, r_node);
-+			m = rb_next(m);
-+
-+			if (req->r_abort_on_full &&
-+			    (osdmap_full || pool_full(osdc, req->r_t.base_oloc.pool))) {
-+				u32 cur_epoch = le32_to_cpu(req->r_replay_version.epoch);
-+
-+				dout("%s: abort tid=%llu flags 0x%x\n", __func__, req->r_tid, req->r_flags);
-+				complete_request(req, -ENOSPC);
-+				if (cur_epoch > latest_epoch)
-+					latest_epoch = cur_epoch;
-+			}
-+		}
-+		mutex_unlock(&osd->lock);
++		ceph_decode_32_safe(&p, end, epoch_barrier, bad);
++		ceph_osdc_update_epoch_barrier(osdc, epoch_barrier);
 +	}
-+out:
-+	dout("return abort_on_full latest_epoch=%u\n", latest_epoch);
-+}
 +
- static void cancel_map_check(struct ceph_osd_request *req)
- {
- 	struct ceph_osd_client *osdc = req->r_osdc;
-@@ -3232,6 +3273,7 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+ 	if (le16_to_cpu(msg->hdr.version) >= 8) {
+ 		u64 flush_tid;
+ 		u32 caller_uid, caller_gid;
+-		u32 osd_epoch_barrier;
+ 		u32 pool_ns_len;
+-		/* version >= 5 */
+-		ceph_decode_32_safe(&p, end, osd_epoch_barrier, bad);
++
+ 		/* version >= 6 */
+ 		ceph_decode_64_safe(&p, end, flush_tid, bad);
+ 		/* version >= 7 */
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index c681762d76e6..842b18b6d20e 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -1551,9 +1551,15 @@ void ceph_send_cap_releases(struct ceph_mds_client *mdsc,
+ 	struct ceph_msg *msg = NULL;
+ 	struct ceph_mds_cap_release *head;
+ 	struct ceph_mds_cap_item *item;
++	struct ceph_osd_client *osdc = &mdsc->fsc->client->osdc;
+ 	struct ceph_cap *cap;
+ 	LIST_HEAD(tmp_list);
+ 	int num_cap_releases;
++	__le32	barrier, *cap_barrier;
++
++	down_read(&osdc->lock);
++	barrier = cpu_to_le32(osdc->epoch_barrier);
++	up_read(&osdc->lock);
  
- 	ceph_monc_got_map(&osdc->client->monc, CEPH_SUB_OSDMAP,
- 			  osdc->osdmap->epoch);
-+	ceph_osdc_abort_on_full(osdc);
- 	up_write(&osdc->lock);
- 	wake_up_all(&osdc->client->auth_wq);
- 	return;
+ 	spin_lock(&session->s_cap_lock);
+ again:
+@@ -1571,7 +1577,11 @@ void ceph_send_cap_releases(struct ceph_mds_client *mdsc,
+ 			head = msg->front.iov_base;
+ 			head->num = cpu_to_le32(0);
+ 			msg->front.iov_len = sizeof(*head);
++
++			msg->hdr.version = cpu_to_le16(2);
++			msg->hdr.compat_version = cpu_to_le16(1);
+ 		}
++
+ 		cap = list_first_entry(&tmp_list, struct ceph_cap,
+ 					session_caps);
+ 		list_del(&cap->session_caps);
+@@ -1589,6 +1599,11 @@ void ceph_send_cap_releases(struct ceph_mds_client *mdsc,
+ 		ceph_put_cap(mdsc, cap);
+ 
+ 		if (le32_to_cpu(head->num) == CEPH_CAPS_PER_RELEASE) {
++			// Append cap_barrier field
++			cap_barrier = msg->front.iov_base + msg->front.iov_len;
++			*cap_barrier = barrier;
++			msg->front.iov_len += sizeof(*cap_barrier);
++
+ 			msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
+ 			dout("send_cap_releases mds%d %p\n", session->s_mds, msg);
+ 			ceph_con_send(&session->s_con, msg);
+@@ -1604,6 +1619,11 @@ void ceph_send_cap_releases(struct ceph_mds_client *mdsc,
+ 	spin_unlock(&session->s_cap_lock);
+ 
+ 	if (msg) {
++		// Append cap_barrier field
++		cap_barrier = msg->front.iov_base + msg->front.iov_len;
++		*cap_barrier = barrier;
++		msg->front.iov_len += sizeof(*cap_barrier);
++
+ 		msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
+ 		dout("send_cap_releases mds%d %p\n", session->s_mds, msg);
+ 		ceph_con_send(&session->s_con, msg);
+diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
+index ac0475a2daa7..517684c7c5f0 100644
+--- a/fs/ceph/mds_client.h
++++ b/fs/ceph/mds_client.h
+@@ -104,10 +104,13 @@ struct ceph_mds_reply_info_parsed {
+ 
+ /*
+  * cap releases are batched and sent to the MDS en masse.
++ *
++ * Account for per-message overhead of mds_cap_release header
++ * and __le32 for osd epoch barrier trailing field.
+  */
+-#define CEPH_CAPS_PER_RELEASE ((PAGE_SIZE -			\
++#define CEPH_CAPS_PER_RELEASE ((PAGE_SIZE - sizeof(u32) -		\
+ 				sizeof(struct ceph_mds_cap_release)) /	\
+-			       sizeof(struct ceph_mds_cap_item))
++			        sizeof(struct ceph_mds_cap_item))
+ 
+ 
+ /*
 -- 
 2.9.3
 
