@@ -1,19 +1,17 @@
-From: Jan Fajerski <jan-fajerski@gmx.net>
+From: Jan Fajerski <jfajerski@suse.com>
 Subject: Re: crushmap visualisation
-Date: Sun, 26 Feb 2017 11:40:05 +0100
-Message-ID: <20170226104005.epmmjwvcfeccuvcq@jf_suse_laptop>
+Date: Sun, 26 Feb 2017 11:48:08 +0100
+Message-ID: <20170226104808.2qexvszwtmhm4koj@jf_suse_laptop>
 References: <b2a72da4-b8aa-4d64-4bd2-374f25aeb681@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-15; format=flowed
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mout.gmx.net ([212.227.17.21]:63489 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752046AbdBZKrM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 26 Feb 2017 05:47:12 -0500
-Received: from localhost ([79.210.124.253]) by mail.gmx.com (mrgmx102
- [212.227.17.168]) with ESMTPSA (Nemesis) id 0Lx5hl-1cFVLa0iHh-016ejv for
- <ceph-devel@vger.kernel.org>; Sun, 26 Feb 2017 11:40:07 +0100
+Received: from smtp.nue.novell.com ([195.135.221.5]:55123 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752007AbdBZKt0 (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Sun, 26 Feb 2017 05:49:26 -0500
 Content-Disposition: inline
 In-Reply-To: <b2a72da4-b8aa-4d64-4bd2-374f25aeb681@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
@@ -26,12 +24,12 @@ On Sun, Feb 26, 2017 at 10:51:12AM +0100, Loic Dachary wrote:
 >Is there something to visualize a crushmap ? It looks like balloon trees and hierarchical bundling (see fig 13a in http://www.aviz.fr/wiki/uploads/Teaching2014/bundles_infovis.pdf) would be a good match. It could show, for instance, where objects move when the crushmap changes. But I've never thought about it before and maybe someone already has an answer to the question ;-)
 >
 >Cheers
-
 Hi Loic,
-Openattic has a crushmap visualisation. See an example here 
-https://demo.openattic.org/openattic/#/ceph/crushmap.
-Its called editor now but I'm not certain of the editors status.
-
+Openattic has a crushmap visualisation. For an example see the demo instance 
+(credentials are openattic/openattic): 
+https://demo.openattic.org/openattic/#/ceph/crushmap
+Its called editor in the demo but I'm not certain about the status of the 
+editing capabilities.
 >-- 
 >Loïc Dachary, Artisan Logiciel Libre
 >--
