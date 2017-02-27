@@ -1,43 +1,34 @@
-From: Sistem Administrator <bahrudin@agenfirsttravel.co.id>
-Subject: Penting Pesan
-Date: Mon, 27 Feb 2017 15:34:24 +0530
-Message-ID: <20170227100609.B6A1E406A5E7@mail.agenfirsttravel.co.id>
-Reply-To: Sistemass_Adminss@mail2world.com
+From: Sagar Sarange <sagar.sarange9@gmail.com>
+Subject: Ceph Contribution
+Date: Mon, 27 Feb 2017 18:42:01 +0530
+Message-ID: <58B425A1.2000204@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 117-102-253-125.padinet.com ([117.102.253.125]:50020 "EHLO
-        mail.agenfirsttravel.co.id" rhost-flags-OK-FAIL-OK-OK)
-        by vger.kernel.org with ESMTP id S1751646AbdB0Kbo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 27 Feb 2017 05:31:44 -0500
-Content-Description: Mail message body
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:33774 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751356AbdB0NVI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Feb 2017 08:21:08 -0500
+Received: by mail-pg0-f65.google.com with SMTP id x17so1026098pgi.0
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Feb 2017 05:19:39 -0800 (PST)
+Received: from [192.168.0.101] ([103.81.36.182])
+        by smtp.gmail.com with ESMTPSA id 129sm30838220pgj.59.2017.02.27.05.12.10
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 27 Feb 2017 05:12:11 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <bahrudin@agenfirsttravel.co.id>
+To: ceph-devel@vger.kernel.org
 
-PERHATIAN
+Hello everyone,
+I am Computer Science Undergraduate student .I am good in C,C++ and Python.
+I am eager to do contribution in Ceph.I also go through Ceph 
+repository,but I didn't understand where to start.
+I appreciate any feedback and guideline you could give so I can be a 
+Ceph contributor.
+I am also interested to be a part of Ceph GSoC 2017.
 
-Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang =
-didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda =
-mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali m=
-emvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, ki=
-rim informasi berikut di bawah ini:
+Thank you,
+Sagar Sarange
 
-Nama:
-Username:
-sandi:
-Konfirmasi sandi:
-E-mail:
-telepon:
-
-Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda =
-akan dinonaktifkan!
-
-Maaf atas ketidaknyamanan ini.
-Kode verifikasi: en:Aa12mmm.kjoidid34l....id....0,zkl.web.id.2017
-Surat Dukungan Teknis =A92017
-
-terima kasih
-Sistem Administrator
