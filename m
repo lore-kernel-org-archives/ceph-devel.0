@@ -1,92 +1,164 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: Fixed URL for latest branch shaman build?
-Date: Mon, 27 Feb 2017 11:13:57 -0700
-Message-ID: <CALqRxCxv31_=CnomH_eDTdjBuz4Vi5JUE23DnLA5LQyz6xGfTg@mail.gmail.com>
-References: <CABZ+qqk+ni5ACoRaRqTd75G77sDMvXnzuSQT7pwyiM8z0tsnMQ@mail.gmail.com>
- <CAEPMp+7VMR8VCUs5hN+109wRKy16x7L_=W2dTY7Q50rdgVnwxQ@mail.gmail.com> <CABZ+qqmcyQ_kJZP9XJiaW26eiQCZN4sfJwZXHPP9qBsVgY9h_w@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: [PATCH] ceph-detect-init: Adds Oracle Linux Server and Oracle VM
+ Server detection
+Date: Mon, 27 Feb 2017 19:25:14 +0100
+Message-ID: <24250ac1-e3fb-f68a-9ecd-fd0763178c74@dachary.org>
+References: <1488218767-14618-1-git-send-email-nikita.gerasimov@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f169.google.com ([209.85.217.169]:33238 "EHLO
-        mail-ua0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751352AbdB0SXL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Feb 2017 13:23:11 -0500
-Received: by mail-ua0-f169.google.com with SMTP id e4so31725734uae.0
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Feb 2017 10:22:38 -0800 (PST)
-In-Reply-To: <CABZ+qqmcyQ_kJZP9XJiaW26eiQCZN4sfJwZXHPP9qBsVgY9h_w@mail.gmail.com>
+Received: from relay5-d.mail.gandi.net ([217.70.183.197]:49947 "EHLO
+        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751677AbdB0SZU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Feb 2017 13:25:20 -0500
+In-Reply-To: <1488218767-14618-1-git-send-email-nikita.gerasimov@oracle.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>
-Cc: Andrew Schoen <aschoen@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>
+To: nikita.gerasimov@oracle.com, ceph-devel@vger.kernel.org
 
-Dan if you have ideas for how we could best expose this in the UI,
-please comment in https://github.com/ceph/shaman/issues/88 !
+Hi,
 
-- Ken
+Do you confirm it passes make check ?
 
-On Mon, Feb 27, 2017 at 9:42 AM, Dan van der Ster <dan@vanderster.com> wrote:
-> On Mon, Feb 27, 2017 at 5:32 PM, Andrew Schoen <aschoen@redhat.com> wrote:
->> On Mon, Feb 27, 2017 at 8:21 AM, Dan van der Ster <dan@vanderster.com> wrote:
->>> Hi all,
->>>
->>> tl;dr: Is there a fixed URL which points to the latest jewel build on shaman?
->>
->> There is, but it doesn't work exactly like how this has worked in the
->> past with the gitbuilders. The new system uses multiple repo builder
->> nodes (chacra) and reports those back to shaman.ceph.com. Because of
->> this, the latest repo for jewel might not always exist on the same
->> chacra node.
->>
->> We've setup an API endpoint on shaman.ceph.com that will redirect you
->> to a repo file definition for the 'latest' built repo of your choice.
->>
->> For example, this url will always redirect to an endpoint that will
->> print out plain text that looks like either a deb or rpm repo.
->>
->> $ curl -L https://shaman.ceph.com/api/repos/ceph/jewel/latest/centos/7/repo/
->> [ceph]
->> name=ceph packages for \$basearch
->> baseurl=https://1.chacra.ceph.com/r/ceph/jewel/ac3ba2adcd21ac011ad556ac4506623e61fbe696/centos/7/flavors/default/\$basearch
->> enabled=1
->> gpgcheck=0
->> type=rpm-md
->>
->> [ceph-noarch]
->> name=ceph noarch packages
->> baseurl=https://1.chacra.ceph.com/r/ceph/jewel/ac3ba2adcd21ac011ad556ac4506623e61fbe696/centos/7/flavors/default/noarch
->> enabled=1
->> gpgcheck=0
->> type=rpm-md
->>
->> [ceph-source]
->> name=ceph source packages
->> baseurl=https://1.chacra.ceph.com/r/ceph/jewel/ac3ba2adcd21ac011ad556ac4506623e61fbe696/centos/7/flavors/default/SRPMS
->> enabled=1
->> gpgcheck=0
->> type=rpm-md
->>
->> You can modify that url to change the branch, release, distro and
->> distro version values for the repo you want. Using 'latest' in the
->> sha1 position will always give you the latest sha1 built that shaman
->> knows about.
->>
->> I realize this is a bit more work for any CI system that used to pull
->> down the latest from gitbuilder, but it's the best we have currently
->> to deal with a variable amount of chacra builders for these repos.
->
-> Thanks -- this should work for us.
->
-> Is there a way to be specific about which flavor? We don't want the
-> notcmalloc jewel builds, for example.
->
-> --
-> Dan
->
->
->>
->> Thanks,
->> Andrew
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks !
+
+On 02/27/2017 07:06 PM, nikita.gerasimov@oracle.com wrote:
+> From: Nikita Gerasimov <nikita.gerasimov@oracle.com>
+> 
+> Oracle Linux Server is API/ABI compatible with RHEL/CentOS Linux distro.
+> Oracle VM Server is Xen based VM server. Which modern versions Dom0 is based on Oracle Linux 6
+> 
+> Signed-off-by: Nikita Gerasimov <nikita.gerasimov@oracle.com>
+> ---
+>  src/ceph-detect-init/ceph_detect_init/__init__.py      | 18 ++++++++++++++++--
+>  .../ceph_detect_init/oraclevm/__init__.py              | 11 +++++++++++
+>  src/ceph-detect-init/tests/test_all.py                 |  8 ++++++++
+>  3 files changed, 35 insertions(+), 2 deletions(-)
+>  create mode 100644 src/ceph-detect-init/ceph_detect_init/oraclevm/__init__.py
+> 
+> diff --git a/src/ceph-detect-init/ceph_detect_init/__init__.py b/src/ceph-detect-init/ceph_detect_init/__init__.py
+> index aad3eee..c057409 100644
+> --- a/src/ceph-detect-init/ceph_detect_init/__init__.py
+> +++ b/src/ceph-detect-init/ceph_detect_init/__init__.py
+> @@ -24,6 +24,7 @@ from ceph_detect_init import suse
+>  from ceph_detect_init import gentoo
+>  from ceph_detect_init import freebsd
+>  from ceph_detect_init import docker
+> +from ceph_detect_init import oraclevm
+>  import os
+>  import logging
+>  import platform
+> @@ -44,7 +45,8 @@ def get(use_rhceph=False):
+>      module.normalized_name = _normalized_distro_name(distro_name)
+>      module.distro = module.normalized_name
+>      module.is_el = module.normalized_name in ['redhat', 'centos',
+> -                                              'fedora', 'scientific']
+> +                                              'fedora', 'scientific',
+> +                                              'oraclel']
+>      module.release = release
+>      module.codename = codename
+>      module.init = module.choose_init()
+> @@ -64,6 +66,8 @@ def _get_distro(distro, use_rhceph=False):
+>          'linuxmint': debian,
+>          'centos': centos,
+>          'scientific': centos,
+> +        'oraclel': centos,
+> +        'oraclevm': oraclevm,
+>          'redhat': centos,
+>          'fedora': fedora,
+>          'suse': suse,
+> @@ -90,6 +94,10 @@ def _normalized_distro_name(distro):
+>          return 'suse'
+>      elif distro.startswith('centos'):
+>          return 'centos'
+> +    elif distro.startswith('oracle linux'):
+> +        return 'oraclel'
+> +    elif distro.startswith('oracle vm'):
+> +        return 'oraclevm'
+>      elif distro.startswith(('gentoo', 'funtoo', 'exherbo')):
+>          return 'gentoo'
+>      return distro
+> @@ -128,7 +136,8 @@ def platform_information():
+>          raise exc.UnsupportedPlatform(platform.system(), '', '')
+>  
+>      # this could be an empty string in Debian
+> -    if not codename and 'debian' in distro.lower():
+> +    distro_lower = distro.lower()
+> +    if not codename and 'debian' in distro_lower:
+>          debian_codenames = {
+>              '8': 'jessie',
+>              '7': 'wheezy',
+> @@ -136,6 +145,11 @@ def platform_information():
+>          }
+>          major_version = release.split('.')[0]
+>          codename = debian_codenames.get(major_version, '')
+> +    # this is an empty string in Oracle
+> +    elif distro_lower.startswith('oracle linux'):
+> +        codename = 'OL' + release
+> +    elif distro_lower.startswith('oracle vm'):
+> +        codename = 'OVM' + release
+>  
+>          # In order to support newer jessie/sid or wheezy/sid strings
+>          # we test this if sid is buried in the minor, we should use
+> diff --git a/src/ceph-detect-init/ceph_detect_init/oraclevm/__init__.py b/src/ceph-detect-init/ceph_detect_init/oraclevm/__init__.py
+> new file mode 100644
+> index 0000000..f7bf85b
+> --- /dev/null
+> +++ b/src/ceph-detect-init/ceph_detect_init/oraclevm/__init__.py
+> @@ -0,0 +1,11 @@
+> +distro = None
+> +release = None
+> +codename = None
+> +
+> +
+> +def choose_init():
+> +    """Select a init system
+> +
+> +    Returns the name of a init system (upstart, sysvinit ...).
+> +    """
+> +    return 'sysvinit'
+> diff --git a/src/ceph-detect-init/tests/test_all.py b/src/ceph-detect-init/tests/test_all.py
+> index d2733c3..d621943 100644
+> --- a/src/ceph-detect-init/tests/test_all.py
+> +++ b/src/ceph-detect-init/tests/test_all.py
+> @@ -35,6 +35,7 @@ from ceph_detect_init import suse
+>  from ceph_detect_init import gentoo
+>  from ceph_detect_init import freebsd
+>  from ceph_detect_init import docker
+> +from ceph_detect_init import oraclevm
+>  
+>  logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
+>                      level=logging.DEBUG)
+> @@ -54,6 +55,9 @@ class TestCephDetectInit(testtools.TestCase):
+>      def test_docker(self):
+>          self.assertEqual('none', docker.choose_init())
+>  
+> +    def test_oraclevm(self):
+> +        self.assertEqual('sysvinit', oraclevm.choose_init())
+> +
+>      def test_centos(self):
+>          with mock.patch('ceph_detect_init.centos.release',
+>                          '7.0'):
+> @@ -207,6 +211,8 @@ class TestCephDetectInit(testtools.TestCase):
+>          self.assertEqual(debian, g('ubuntu'))
+>          self.assertEqual(centos, g('centos'))
+>          self.assertEqual(centos, g('scientific'))
+> +        self.assertEqual(centos, g('Oracle Linux Server'))
+> +        self.assertEqual(oraclevm, g('Oracle VM server'))
+>          self.assertEqual(fedora, g('fedora'))
+>          self.assertEqual(suse, g('suse'))
+>          self.assertEqual(rhel, g('redhat', use_rhceph=True))
+> @@ -222,6 +228,8 @@ class TestCephDetectInit(testtools.TestCase):
+>          self.assertEqual('scientific', n('Scientific'))
+>          self.assertEqual('scientific', n('Scientific Linux'))
+>          self.assertEqual('scientific', n('scientific linux'))
+> +        self.assertEqual('oraclel', n('Oracle Linux Server'))
+> +        self.assertEqual('oraclevm', n('Oracle VM server'))
+>          self.assertEqual('suse', n('SUSE'))
+>          self.assertEqual('suse', n('suse'))
+>          self.assertEqual('suse', n('openSUSE'))
+> 
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
