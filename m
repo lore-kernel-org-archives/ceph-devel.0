@@ -1,45 +1,68 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Ceph Contribution
-Date: Mon, 27 Feb 2017 14:36:29 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1702271434450.7782@piezo.novalocal>
-References: <58B425A1.2000204@gmail.com>
+From: Andrew Schoen <aschoen-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: v0.94.10 Hammer release rpm signature issue
+Date: Mon, 27 Feb 2017 13:12:30 -0600
+Message-ID: <CAEPMp+67M1PYXBGN6oepm7e=5j2tWYKhx_YzQFBDKuVnw-_z3g@mail.gmail.com>
+References: <1580591456.339414.1488205827058.JavaMail.zimbra@csc.fi>
+	<CAEPMp+6HHJ+=Xt=32y_7ZHKgJTsGo7vG05a5LZ-95Z5T=zyPrA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:33832 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751685AbdB0SlJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Feb 2017 13:41:09 -0500
-In-Reply-To: <58B425A1.2000204@gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sagar Sarange <sagar.sarange9@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAEPMp+6HHJ+=Xt=32y_7ZHKgJTsGo7vG05a5LZ-95Z5T=zyPrA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: =?UTF-8?Q?Pietari_Hyv=C3=A4rinen?= <pietari.hyvarinen-Gn+qtVAUx6s@public.gmane.org>, "Development, Ceph" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, 27 Feb 2017, Sagar Sarange wrote:
-> Hello everyone,
-> I am Computer Science Undergraduate student .I am good in C,C++ and Python.
-> I am eager to do contribution in Ceph.I also go through Ceph repository,but I
-> didn't understand where to start.
-> I appreciate any feedback and guideline you could give so I can be a Ceph
-> contributor.
-> I am also interested to be a part of Ceph GSoC 2017.
-
-Hi Sagar,
-
-A good place to stat might be to look at the trello board at
-
-	https://trello.com/b/ugTc2QFH/ceph-backlog
-
-which has several smaller items under the cleanup list and elsewhere.  
-Cards marked in green or orange are small to medium-sized.  There is also 
-the tracker at
-
-	http://tracker.ceph.com/projects/ceph/issues
-
-which has lots of bugs and features.  In both cases you'll probably need 
-to talk to folks in #ceph-devel or here on the mailing list to get more 
-context.
-
-Thanks!
-sage
+U29ycnkgYWJvdXQgdGhpcywgd2UgZGlkIGhhdmUgc2lnbmVkIHJwbSByZXBvcyB1cCBidXQgYSBt
+aXN0YWtlIGJ5Cm15c2VsZiBvdmVyd3JvdGUgdGhvc2Ugd2l0aCB0aGUgdW5zaWduZWQgb25lcy4g
+VGhpcyBzaG91bGQgYmUgZml4ZWQKbm93LiBMZXQgbWUga25vdyBpZiB5b3UgaGF2ZSBhbnltb3Jl
+IGlzc3VlcyB3aXRoIHRoZSByZXBvcy4KClRoYW5rcywKIEFuZHJldwoKPgo+IE9uIE1vbiwgRmVi
+IDI3LCAyMDE3IGF0IDg6MzAgQU0sIFBpZXRhcmkgSHl2w6RyaW5lbgo+IDxwaWV0YXJpLmh5dmFy
+aW5lbkBjc2MuZmk+IHdyb3RlOgo+PiBIaSEKPj4KPj4gSSBoYXZlIHN0aWxsIHNvbWUgc2VydmVy
+cyBydW5uaW5nIGhhbW1lciByZWxlYXNlIGFuZCBub3cgbmV3IHBhY2thZ2VzIGFyZSBub3Qgc2ln
+bmVkIGF0IGFsbC4geXVtIHVwZGF0ZSB3aWxsIGZhaWwgb24gdGhlc2UgbmV3IHBhY2thZ2VzLiBJ
+IGhhdmUgc2VlbiBhdHRhY2sgdmVjdG9ycyBhZ2FpbnN0IHN5c3RlbXMgd2l0aCBub25zaWduZWQg
+cGFja2FnZXMuCj4+Cj4+ICBycG0gLXFwIC0tcXVlcnlmb3JtYXQgJXtTSUdQR1B9IGh0dHA6Ly9k
+b3dubG9hZC5jZXBoLmNvbS9ycG0taGFtbWVyL2VsNy94ODZfNjQvY2VwaC0wLjk0LjEwLTAuZWw3
+Lng4Nl82NC5ycG0KPj4gKG5vbmUpCj4+Cj4+IFByZXZpb3VzIGhhbW1lciBwYWNrYWdlcyBhcmUg
+c2lnbmVkLgo+Pgo+PiBycG0gLXFwIC0tcXVlcnlmb3JtYXQgJXtTSUdQR1B9IGh0dHA6Ly9kb3du
+bG9hZC5jZXBoLmNvbS9ycG0taGFtbWVyL2VsNy94ODZfNjQvY2VwaC0wLjk0LjktMC5lbDcueDg2
+XzY0LnJwbQo+PiB3YXJuaW5nOiBodHRwOi8vZG93bmxvYWQuY2VwaC5jb20vcnBtLWhhbW1lci9l
+bDcveDg2XzY0L2NlcGgtMC45NC45LTAuZWw3Lng4Nl82NC5ycG06IE90c2lra28gVjQgUlNBL1NI
+QTEgU2lnbmF0dXJlLCBrZXkgSUQgNDYwZjM5OTQ6IE5PS0VZCj4+IDg5MDIxYzA0MDAwMTAyMDAw
+NjA1MDI1N2M1YjlhYjAwMGEwOTEwZTg0YWMyYzA0NjBmMzk5NDNmNWIwZmZlMzdhYWRhMGIzZWMz
+NDRkYWM5YTJmYzBkODU5ZDFkMTUxZTI0M2Y1MTU5MjIxMjMyN2EyOTQ2M2QzMjlkODE1NjgzMGNm
+Y2EyYmQ1M2Q2OWJkYzgyNDFkNDY2OTc3MjhiNGIwYTQ5NmU3MDdhYTg5NWI4OTMwZGEwNmI4NDll
+ZGUxYTljZDEyZDYwYmMzZDcwZTc3YTg4YmE0ZWRiNDI5Y2QwZjVlNTY3ODY0Y2IxZTA1YzdiOTli
+NzdjYzBiNjBkMjU2NDJjYTUyMmYzN2ZlY2JmYWU1NjJmN2FkYmVkMGZhNWUxNzgwNTE1NzkwYzBh
+M2ZhM2E2YWQ0ZWEwNTc4MTNhYzFjZTI4YWExNjExNTc4NjY1MjQ0YmUwY2I4YjRmNmU4ZjRjMzRm
+MjkwMDNkNGExYmMyYTJmMTYxYTM1N2RkNmJiYTdhYzA3ODNiYWFlODk3Yzc0ZmRkZDhjNjViNWRk
+OWFjNzYzYzY1MzRmMmFhNDQ4NWRiYmJkNDY1NDViMWY0ZDZjZjg5MGU3MTg1NDYwYWFiNjNiYzlm
+MzE4ZGRhNmI2NmI2MzIyNTQzODZiOTVmZTMzODU4M2M2MmI3ZmJlNjQ0NDQ5NjZkZDM3MjJmNDE2
+ZWYzY2E4YzRlMTA1NTVmYTUwYWM4OGRhNDk3NmFjZWE2ZDQzMTcwMjA5NzRmYmQ1NTBhNGU5MzYx
+MjE0NDkwZDVkZjEzYWQ3ZTMwNjZkMTQ2YTczM2RlNmM2ODRmYzU5NmM1OGM4ZjUwZDlmZTcyZmJl
+OWY1ODRkNWViNDliNTcwMmE5NmJjOGZiNzFkOTIxNDRjNTRhOWQ2YzE2MDA4YjRjN2UyMzI2ZjIz
+MzZhMDJkYzRhYWM4ZTc4ODcxNmYxOTZmOTU1NTYyZWM5OWQ0YzkxMDcyY2VlOGYwMjc3OWQwOWI2
+MGU1OTkyNDIwNDE5ODc1ZmY2NTVlZmUwMmUwMTQ1OGQ0NjM3MDU1YmUzNDRlMzc3ZjU5NDMyOWE2
+NDMyNGUwY2I3M2IwZWVlMGI3MTM1NDMzYTFkMzEzYjY0M2Y3MWVmZjk4ODk5NTk5M2YzMDBlZTEw
+YmMyMDc2ZjQ0YjY2M2QyOGE1MzZhNWI2YmEzYzFiMGE5NDBhOTI0YWY5YzdiNzUwOGU1ZjJkMGRl
+YmU3NDQ1MjgwZDM5NzM3YmUxODgwNmQ1ZmM3MTBlMjQxY2MyZTkzYTRkNmEwODQ4MWI4ZDA1NGU1
+YWM0IQo+PiAgOWEwODc2ZGNlCj4+ICBlYjIzM2M4YzAyYzJkZDAxMmVhNWQ3OWU4YjBiNWJjYWU4
+YjdlMTFkMDhkYTk5OWRjYzY5ZTlhYjE5YjM0ZjgwZTdhMGRhODE4MjU0MzlkMDhmYTEwZThkCj4+
+Cj4+IHBzLiBTSEExLi4uCj4+Cj4+IC0tCj4+IFBpZXRhcmkgSHl2w6RyaW5lbgo+PiBTdG9yYWdl
+IFBsYXRmb3Jtcwo+PiBDU0MgLSBJVCBDZW50ZXIgZm9yIFNjaWVuY2UgTHRkLgo+PiAtLQo+PiBU
+byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUg
+Y2VwaC1kZXZlbCIgaW4KPj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2Vy
+Lmtlcm5lbC5vcmcKPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVs
+Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMu
+Y2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNl
+cGguY29tCg==
