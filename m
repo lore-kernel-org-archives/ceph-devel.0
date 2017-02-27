@@ -1,45 +1,94 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Fixed URL for latest branch shaman build?
-Date: Mon, 27 Feb 2017 07:20:23 -0800
-Message-ID: <CAJ4mKGZwH+mq9xtF1hy_rB1jKGVUqen3fOGd6my=o5r4=7jr+Q@mail.gmail.com>
-References: <CABZ+qqk+ni5ACoRaRqTd75G77sDMvXnzuSQT7pwyiM8z0tsnMQ@mail.gmail.com>
+Subject: Re: OSD crashing in ~Job()
+Date: Mon, 27 Feb 2017 07:24:01 -0800
+Message-ID: <CAJ4mKGa5Ufgpksa+AtOeCQ_DELwnmeBWeF=6GFSKpGoc3UtwxQ@mail.gmail.com>
+References: <fc507396-656c-c2a5-8995-cf142ec01636@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f41.google.com ([209.85.218.41]:33228 "EHLO
-        mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752109AbdB0PUZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Feb 2017 10:20:25 -0500
-Received: by mail-oi0-f41.google.com with SMTP id 2so40029666oif.0
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Feb 2017 07:20:24 -0800 (PST)
-In-Reply-To: <CABZ+qqk+ni5ACoRaRqTd75G77sDMvXnzuSQT7pwyiM8z0tsnMQ@mail.gmail.com>
+Received: from mail-oi0-f51.google.com ([209.85.218.51]:35271 "EHLO
+        mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751538AbdB0PYg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Feb 2017 10:24:36 -0500
+Received: by mail-oi0-f51.google.com with SMTP id 62so40162012oih.2
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Feb 2017 07:24:02 -0800 (PST)
+In-Reply-To: <fc507396-656c-c2a5-8995-cf142ec01636@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>, Andrew Schoen <aschoen@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Dan van der Ster <dan@vanderster.com>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Feb 27, 2017 at 6:21 AM, Dan van der Ster <dan@vanderster.com> wrote:
-> Hi all,
+On Mon, Feb 27, 2017 at 6:37 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> Hi,
 >
-> tl;dr: Is there a fixed URL which points to the latest jewel build on shaman?
+> Once every 10 runs  test-erasure-code.sh is terminated with a timeout
+> during my FreeBSD tests.
 >
-> We used to use gitbuilder.ceph.com (via a caching proxy) to
-> occasionally run the latest build for a given branch. This was
-> convenient -- we'd just set a yum repo with url
+> It receives an assert in:
+> /usr/srcs/Ceph/work/ceph/src/osd/OSDMapMapping.h:31
+> class ParallelPGMapper {
+> public:
+>   struct Job {
+> ....
+>     virtual ~Job() {
+>       assert(shards == 0);
+>     }
+> } }
 >
->    http://gitbuilder.ceph.com/ceph-rpm-centos7-x86_64-basic/ref/jewel/x86_64/
->
-> And it would always point to the build for the latest commit.
->
-> Now with shaman, unless I'm mistaken, we have a unique repo for each
-> build. E.g. here's the latest build's repo:
->
-> https://1.chacra.ceph.com/r/ceph/jewel/ac3ba2adcd21ac011ad556ac4506623e61fbe696/centos/7/flavors/default/x86_64/
->
-> So I think what I'm asking for is a symlink 'latest' which we can use like this:
->
->   https://1.chacra.ceph.com/r/ceph/jewel/latest/centos/7/flavors/default/x86_64/
->
-> Is there someway to do this with shaman?
+> Anydody any suggestions on what this can be, and/or how to start
+> debugging this?
 
-+Alfredo,Andrew
+Sounds like maybe
+1) your test hardware is slower than what we mostly use, in this
+particular job, and
+2) the OSDMapMapping code doesn't shut down cleanly when it gets a
+TERM signal. :/
+
+So, extend the timeout or fix the OSDMapMapping, I guess?
+-Greg
+
+>
+> --WjW
+>
+>
+> 2017-02-27 14:15:28.034683 b134480 -1
+> /usr/srcs/Ceph/work/ceph/src/osd/OSDMapMapping.h: In function 'virtual
+> ParallelPGMapper::Job::~Job()' thread b134480 time 2017
+> -02-27 14:15:27.975342
+> /usr/srcs/Ceph/work/ceph/src/osd/OSDMapMapping.h: 31: FAILED
+> assert(shards == 0)
+>
+>  ceph version Development (no_version)
+>  1: <ceph::__ceph_assert_fail(char const*, char const, int, char
+> const)+0xb21> at /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
+>  2: <ParallelPGMapper::Job::~Job(void)+0x50> at
+> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
+>  3: <OSDMapMapping::MappingJob::~MappingJob(void)+0x15> at
+> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
+>  4: <OSDMapMapping::MappingJob::~MappingJob(void)+0x19> at
+> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
+>  5:
+> <OSDMonitor::encode_pending(std::__1::shared_ptr<MonitorDBStore::Transaction>)+0xefd>
+> at /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
+>  6: <PaxosService::propose_pending(void)+0x91d> at
+> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
+>  7:
+> <PaxosService::dispatch(boost::intrusive_ptr<MonOpRequest>)::C_Propose::finish(int)+0x3a>
+> at /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
+>  8: <Context::complete(int)+0x22> at
+> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
+>  9: <SafeTimer::timer_thread(void)+0x8d7> at
+> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
+>  10: <SafeTimerThread::entry(void)+0x19> at
+> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
+>  11: <Thread::entry_wrapper(void)+0xc6> at
+> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
+>  12: <Thread::_entry_func(void*)+0x15> at
+> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
