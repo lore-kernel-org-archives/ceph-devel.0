@@ -1,89 +1,86 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: OSD crashing in ~Job()
-Date: Mon, 27 Feb 2017 14:54:11 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1702271452560.7782@piezo.novalocal>
-References: <fc507396-656c-c2a5-8995-cf142ec01636@digiware.nl>
+From: Lenz Grimmer <lenz@grimmer.com>
+Subject: Re: Ceph Contribution
+Date: Mon, 27 Feb 2017 16:27:17 +0100
+Message-ID: <b88825f7-1483-3d45-a6dd-dc4472a8a3a0@grimmer.com>
+References: <58B425A1.2000204@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="w7KKIJ6fGRekrgIiH7R0WCJnE5507WQ0Q"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60943 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751409AbdB0Pcv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Feb 2017 10:32:51 -0500
-In-Reply-To: <fc507396-656c-c2a5-8995-cf142ec01636@digiware.nl>
+Received: from mx1.mailbox.org ([80.241.60.212]:42054 "EHLO mx1.mailbox.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751676AbdB0Pga (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 27 Feb 2017 10:36:30 -0500
+Received: from smtp1.mailbox.org (smtp1.mailbox.org [80.241.60.240])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.mailbox.org (Postfix) with ESMTPS id 7DB1545561
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Feb 2017 16:27:38 +0100 (CET)
+Received: from smtp1.mailbox.org ([80.241.60.240])
+        by gerste.heinlein-support.de (gerste.heinlein-support.de [91.198.250.173]) (amavisd-new, port 10030)
+        with ESMTP id n2ncWxFNfsxa for <ceph-devel@vger.kernel.org>;
+        Mon, 27 Feb 2017 16:27:22 +0100 (CET)
+In-Reply-To: <58B425A1.2000204@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, 27 Feb 2017, Willem Jan Withagen wrote:
-> Hi,
-> 
-> Once every 10 runs  test-erasure-code.sh is terminated with a timeout
-> during my FreeBSD tests.
-> 
-> It receives an assert in:
-> /usr/srcs/Ceph/work/ceph/src/osd/OSDMapMapping.h:31
-> class ParallelPGMapper {
-> public:
->   struct Job {
-> ....
->     virtual ~Job() {
->       assert(shards == 0);
->     }
-> } }
-> 
-> Anydody any suggestions on what this can be, and/or how to start
-> debugging this?
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--w7KKIJ6fGRekrgIiH7R0WCJnE5507WQ0Q
+Content-Type: multipart/mixed; boundary="J3M0P1UMWwfXEJTMfnsJ8rH4PQ68uHils";
+ protected-headers="v1"
+From: Lenz Grimmer <lenz@grimmer.com>
+To: ceph-devel@vger.kernel.org
+Message-ID: <b88825f7-1483-3d45-a6dd-dc4472a8a3a0@grimmer.com>
+Subject: Re: Ceph Contribution
+References: <58B425A1.2000204@gmail.com>
+In-Reply-To: <58B425A1.2000204@gmail.com>
 
-I'm guessing this fixes it: https://github.com/ceph/ceph/pull/13574
+--J3M0P1UMWwfXEJTMfnsJ8rH4PQ68uHils
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-sage
+Hi Sagar,
 
-> 
-> --WjW
-> 
-> 
-> 2017-02-27 14:15:28.034683 b134480 -1
-> /usr/srcs/Ceph/work/ceph/src/osd/OSDMapMapping.h: In function 'virtual
-> ParallelPGMapper::Job::~Job()' thread b134480 time 2017
-> -02-27 14:15:27.975342
-> /usr/srcs/Ceph/work/ceph/src/osd/OSDMapMapping.h: 31: FAILED
-> assert(shards == 0)
-> 
->  ceph version Development (no_version)
->  1: <ceph::__ceph_assert_fail(char const*, char const, int, char
-> const)+0xb21> at /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->  2: <ParallelPGMapper::Job::~Job(void)+0x50> at
-> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->  3: <OSDMapMapping::MappingJob::~MappingJob(void)+0x15> at
-> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->  4: <OSDMapMapping::MappingJob::~MappingJob(void)+0x19> at
-> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->  5:
-> <OSDMonitor::encode_pending(std::__1::shared_ptr<MonitorDBStore::Transaction>)+0xefd>
-> at /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->  6: <PaxosService::propose_pending(void)+0x91d> at
-> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->  7:
-> <PaxosService::dispatch(boost::intrusive_ptr<MonOpRequest>)::C_Propose::finish(int)+0x3a>
-> at /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->  8: <Context::complete(int)+0x22> at
-> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->  9: <SafeTimer::timer_thread(void)+0x8d7> at
-> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->  10: <SafeTimerThread::entry(void)+0x19> at
-> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->  11: <Thread::entry_wrapper(void)+0xc6> at
-> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->  12: <Thread::_entry_func(void*)+0x15> at
-> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On 02/27/2017 02:12 PM, Sagar Sarange wrote:
+
+> I am Computer Science Undergraduate student .I am good in C,C++ and Pyt=
+hon.
+> I am eager to do contribution in Ceph.I also go through Ceph
+> repository,but I didn't understand where to start.
+> I appreciate any feedback and guideline you could give so I can be a
+> Ceph contributor.
+> I am also interested to be a part of Ceph GSoC 2017.
+
+What Mark wrote - Ceph is pretty big an consists of multiple projects.
+
+If you'd like to do some Python development, the openATTIC project [1]
+is working on further extending it's Ceph management/monitoring
+capabilities. See the "Getting involved" page for some details on how to
+get in touch and started. We also maintain a list of low-hanging fruit
+tasks to get started.
+
+Thanks,
+
+Lenz
+
+[1] New web site, still WIP: http://openatticblog.netlify.com/
+
+
+--J3M0P1UMWwfXEJTMfnsJ8rH4PQ68uHils--
+
+--w7KKIJ6fGRekrgIiH7R0WCJnE5507WQ0Q
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iFgEARECABgFAli0RVkRHGxlbnpAZ3JpbW1lci5jb20ACgkQSVDhKrJykfJMrQCf
+TQETk8Z9QHHTC/9CWQ3S8xC4VewAn00lN6O7hUfLy/dv4QOrgnh4BEow
+=GwrL
+-----END PGP SIGNATURE-----
+
+--w7KKIJ6fGRekrgIiH7R0WCJnE5507WQ0Q--
