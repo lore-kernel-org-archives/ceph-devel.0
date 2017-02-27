@@ -1,44 +1,45 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: Ceph Contribution
-Date: Mon, 27 Feb 2017 09:19:12 -0600
-Message-ID: <a91ce056-c23f-511f-777c-e7f4625c71a4@redhat.com>
-References: <58B425A1.2000204@gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Fixed URL for latest branch shaman build?
+Date: Mon, 27 Feb 2017 07:20:23 -0800
+Message-ID: <CAJ4mKGZwH+mq9xtF1hy_rB1jKGVUqen3fOGd6my=o5r4=7jr+Q@mail.gmail.com>
+References: <CABZ+qqk+ni5ACoRaRqTd75G77sDMvXnzuSQT7pwyiM8z0tsnMQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:21341 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751778AbdB0PTP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 27 Feb 2017 10:19:15 -0500
-In-Reply-To: <58B425A1.2000204@gmail.com>
+Received: from mail-oi0-f41.google.com ([209.85.218.41]:33228 "EHLO
+        mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752109AbdB0PUZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Feb 2017 10:20:25 -0500
+Received: by mail-oi0-f41.google.com with SMTP id 2so40029666oif.0
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Feb 2017 07:20:24 -0800 (PST)
+In-Reply-To: <CABZ+qqk+ni5ACoRaRqTd75G77sDMvXnzuSQT7pwyiM8z0tsnMQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sagar Sarange <sagar.sarange9@gmail.com>, ceph-devel@vger.kernel.org
+To: Alfredo Deza <adeza@redhat.com>, Andrew Schoen <aschoen@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Dan van der Ster <dan@vanderster.com>
 
-Hi Sager,
-
-Ceph is pretty big, so I'd suggest thinking about what areas you are 
-interested in and starting small.  The src tree is a bit intimidating at 
-first but you'll get the hang of it once you've got some time with it. 
-Depending what you are interested in, folks can probably give you better 
-feedback regarding what kinds of projects would be worth considering.
-
-Mark
-
-On 02/27/2017 07:12 AM, Sagar Sarange wrote:
-> Hello everyone,
-> I am Computer Science Undergraduate student .I am good in C,C++ and Python.
-> I am eager to do contribution in Ceph.I also go through Ceph
-> repository,but I didn't understand where to start.
-> I appreciate any feedback and guideline you could give so I can be a
-> Ceph contributor.
-> I am also interested to be a part of Ceph GSoC 2017.
+On Mon, Feb 27, 2017 at 6:21 AM, Dan van der Ster <dan@vanderster.com> wrote:
+> Hi all,
 >
-> Thank you,
-> Sagar Sarange
+> tl;dr: Is there a fixed URL which points to the latest jewel build on shaman?
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> We used to use gitbuilder.ceph.com (via a caching proxy) to
+> occasionally run the latest build for a given branch. This was
+> convenient -- we'd just set a yum repo with url
+>
+>    http://gitbuilder.ceph.com/ceph-rpm-centos7-x86_64-basic/ref/jewel/x86_64/
+>
+> And it would always point to the build for the latest commit.
+>
+> Now with shaman, unless I'm mistaken, we have a unique repo for each
+> build. E.g. here's the latest build's repo:
+>
+> https://1.chacra.ceph.com/r/ceph/jewel/ac3ba2adcd21ac011ad556ac4506623e61fbe696/centos/7/flavors/default/x86_64/
+>
+> So I think what I'm asking for is a symlink 'latest' which we can use like this:
+>
+>   https://1.chacra.ceph.com/r/ceph/jewel/latest/centos/7/flavors/default/x86_64/
+>
+> Is there someway to do this with shaman?
+
++Alfredo,Andrew
