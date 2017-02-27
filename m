@@ -1,61 +1,48 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Extend list of known distributions?
-Date: Mon, 27 Feb 2017 14:25:30 +0000
-Message-ID: <CALe9h7eqQ7CN8dXhs+7DvFwLZXCGx+w=0SbY69yxYYdeLDL3aA@mail.gmail.com>
-References: <409b9481-4928-c5ea-8b00-ddb739f8ff96@oracle.com>
- <CALe9h7exfzURB7WpbZtxAX8Ae36CtcC7e16ZicXa0W5aOo5qdQ@mail.gmail.com> <17825d47-3081-fd78-ba7e-b5b724efccea@oracle.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Fixed URL for latest branch shaman build?
+Date: Mon, 27 Feb 2017 15:21:13 +0100
+Message-ID: <CABZ+qqk+ni5ACoRaRqTd75G77sDMvXnzuSQT7pwyiM8z0tsnMQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:36731 "EHLO
-        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751422AbdB0OZw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Feb 2017 09:25:52 -0500
-Received: by mail-wm0-f43.google.com with SMTP id v77so62289342wmv.1
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Feb 2017 06:25:51 -0800 (PST)
-In-Reply-To: <17825d47-3081-fd78-ba7e-b5b724efccea@oracle.com>
+Received: from mail-wr0-f177.google.com ([209.85.128.177]:33795 "EHLO
+        mail-wr0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751356AbdB0O2b (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Feb 2017 09:28:31 -0500
+Received: by mail-wr0-f177.google.com with SMTP id l37so9340279wrc.1
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Feb 2017 06:28:30 -0800 (PST)
+Received: from mail-wr0-f178.google.com (mail-wr0-f178.google.com. [209.85.128.178])
+        by smtp.gmail.com with ESMTPSA id q12sm14525358wmd.8.2017.02.27.06.21.54
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 27 Feb 2017 06:21:54 -0800 (PST)
+Received: by mail-wr0-f178.google.com with SMTP id u108so23322026wrb.3
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Feb 2017 06:21:54 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nikita Gerasimov <nikita.gerasimov@oracle.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Feb 27, 2017 at 2:16 PM, Nikita Gerasimov
-<nikita.gerasimov@oracle.com> wrote:
-> On 27.02.2017 17:02, John Spray wrote:
->>
->> On Mon, Feb 27, 2017 at 1:40 PM, Nikita Gerasimov
->> <nikita.gerasimov@oracle.com> wrote:
->>>
->>> Hi All,
->>>
->>> Is it possible to add Oracle Linux[1] into list of Ceph known
->>> distributions?
->>> If so what is correct procedure to do it?
->>
->> Which list in particular are you asking about?  Something on a
->> website, or something in the code?
->
-> I hope both, but main concern are places like
-> https://github.com/ceph/ceph/blob/master/src/ceph-detect-init/ceph_detect_init/__init__.py#L59
+Hi all,
 
-That would just be a normal code update: send a pull request:
-https://github.com/ceph/ceph/blob/master/SubmittingPatches.rst
+tl;dr: Is there a fixed URL which points to the latest jewel build on shaman?
 
-John
+We used to use gitbuilder.ceph.com (via a caching proxy) to
+occasionally run the latest build for a given branch. This was
+convenient -- we'd just set a yum repo with url
 
->>
->> John
->>
->>> Oracle Linux provide API/ABI compatibility with RHEL so not many changes
->>> required. Mostly in right distro detection.
->>>
->>> [1]https://linux.oracle.com
->>>
->>> WBR, Nikita.
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+   http://gitbuilder.ceph.com/ceph-rpm-centos7-x86_64-basic/ref/jewel/x86_64/
+
+And it would always point to the build for the latest commit.
+
+Now with shaman, unless I'm mistaken, we have a unique repo for each
+build. E.g. here's the latest build's repo:
+
+https://1.chacra.ceph.com/r/ceph/jewel/ac3ba2adcd21ac011ad556ac4506623e61fbe696/centos/7/flavors/default/x86_64/
+
+So I think what I'm asking for is a symlink 'latest' which we can use like this:
+
+  https://1.chacra.ceph.com/r/ceph/jewel/latest/centos/7/flavors/default/x86_64/
+
+Is there someway to do this with shaman?
+
+Cheers, Dan
