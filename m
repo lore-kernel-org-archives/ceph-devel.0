@@ -1,86 +1,97 @@
-From: Lenz Grimmer <lenz@grimmer.com>
-Subject: Re: Ceph Contribution
-Date: Mon, 27 Feb 2017 16:27:17 +0100
-Message-ID: <b88825f7-1483-3d45-a6dd-dc4472a8a3a0@grimmer.com>
-References: <58B425A1.2000204@gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="w7KKIJ6fGRekrgIiH7R0WCJnE5507WQ0Q"
+From: ceph branch robot <nobody@ceph.com>
+Subject: ceph branch status
+Date: Mon, 27 Feb 2017 08:00:05 -0800 (PST)
+Message-ID: <20170227160005.34559280381@teuthology.front.sepia.ceph.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.mailbox.org ([80.241.60.212]:42054 "EHLO mx1.mailbox.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751676AbdB0Pga (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 27 Feb 2017 10:36:30 -0500
-Received: from smtp1.mailbox.org (smtp1.mailbox.org [80.241.60.240])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.mailbox.org (Postfix) with ESMTPS id 7DB1545561
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Feb 2017 16:27:38 +0100 (CET)
-Received: from smtp1.mailbox.org ([80.241.60.240])
-        by gerste.heinlein-support.de (gerste.heinlein-support.de [91.198.250.173]) (amavisd-new, port 10030)
-        with ESMTP id n2ncWxFNfsxa for <ceph-devel@vger.kernel.org>;
-        Mon, 27 Feb 2017 16:27:22 +0100 (CET)
-In-Reply-To: <58B425A1.2000204@gmail.com>
+Received: from [8.43.84.3] ([8.43.84.3]:42336 "EHLO
+        teuthology.front.sepia.ceph.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1751409AbdB0QRi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 27 Feb 2017 11:17:38 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---w7KKIJ6fGRekrgIiH7R0WCJnE5507WQ0Q
-Content-Type: multipart/mixed; boundary="J3M0P1UMWwfXEJTMfnsJ8rH4PQ68uHils";
- protected-headers="v1"
-From: Lenz Grimmer <lenz@grimmer.com>
-To: ceph-devel@vger.kernel.org
-Message-ID: <b88825f7-1483-3d45-a6dd-dc4472a8a3a0@grimmer.com>
-Subject: Re: Ceph Contribution
-References: <58B425A1.2000204@gmail.com>
-In-Reply-To: <58B425A1.2000204@gmail.com>
+-- All Branches --
 
---J3M0P1UMWwfXEJTMfnsJ8rH4PQ68uHils
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Ali Maredia <amaredia@redhat.com>
+	2017-01-18 15:37:03 -0500   wip-nfs-ganesha-teuthology
+	2017-02-16 13:28:36 -0500   wip-rgw-multisite-teuthology
 
-Hi Sagar,
+Boris Ranto <branto@redhat.com>
+	2017-02-16 11:34:31 +0100   wip-ceph-disk-fix
 
-On 02/27/2017 02:12 PM, Sagar Sarange wrote:
+Casey Bodley <cbodley@redhat.com>
+	2017-02-22 15:53:07 -0500   wip-rgw-encryption-doc
 
-> I am Computer Science Undergraduate student .I am good in C,C++ and Pyt=
-hon.
-> I am eager to do contribution in Ceph.I also go through Ceph
-> repository,but I didn't understand where to start.
-> I appreciate any feedback and guideline you could give so I can be a
-> Ceph contributor.
-> I am also interested to be a part of Ceph GSoC 2017.
+Dan Lambright <dlambrig@redhat.com>
+	2017-01-09 17:47:19 -0500   wip-message-factory
+	2017-02-03 14:24:04 -0500   wip-osd-ioinject
 
-What Mark wrote - Ceph is pretty big an consists of multiple projects.
+Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+	2017-02-21 17:38:26 +0100   wip-dalgaaf-sca-20170220
 
-If you'd like to do some Python development, the openATTIC project [1]
-is working on further extending it's Ceph management/monitoring
-capabilities. See the "Getting involved" page for some details on how to
-get in touch and started. We also maintain a list of low-hanging fruit
-tasks to get started.
+GitHub <noreply@github.com>
+	2016-11-02 08:42:35 +0200   infernalis
+	2016-12-14 11:40:17 -0600   firefly
+	2017-01-23 17:49:54 +0100   hammer-next
+	2017-02-01 23:28:22 +0100   jewel-next
+	2017-02-14 13:03:03 -0800   wip-cherrypick-4tamil
+	2017-02-24 17:22:17 -0700   jewel
+	2017-02-26 09:23:43 +1000   kraken
 
-Thanks,
+Jenkins Build Slave User <ceph-release-team@redhat.com>
+	2017-02-08 13:57:33 +0000   luminous
+	2017-02-21 15:12:34 +0000   hammer
 
-Lenz
+Loic Dachary <ldachary@redhat.com>
+	2015-03-23 17:44:12 +0100   dumpling
 
-[1] New web site, still WIP: http://openatticblog.netlify.com/
+Loic Dachary <loic@dachary.org>
+	2015-10-17 00:38:34 +0200   giant
+
+Marcus Watts <mwatts@redhat.com>
+	2016-10-19 05:05:50 -0400   wip-master-rgw-0lenfix1
+	2016-11-11 01:22:10 -0500   wip-xml-string-wrap
+	2016-11-11 01:25:55 -0500   wip-json-smarter-escapes
+	2016-11-11 01:29:56 -0500   wip-buildfix-python-out-of-tree
+
+Orit Wasserman <owasserm@redhat.com>
+	2017-01-02 12:13:26 +0200   wip-orit-resharding-hammer
+
+Pritha Srivastava <prsrivas@redhat.com>
+	2016-12-22 20:28:09 +0530   wip-rgw-polymorphic-errors
+	2017-01-16 11:36:24 +0530   wip-rgw-ssl-teuthology
+
+Sage Weil <sage@inktank.com>
+	2013-04-18 13:51:36 -0700   argonaut
+
+Sage Weil <sage@redhat.com>
+	2015-01-12 08:30:40 -0800   emperor
+
+Samuel Just <sjust@redhat.com>
+	2017-02-20 21:24:33 -0800   wip-snap-trim-sleep
+
+Vasu Kulkarni <vasu@redhat.com>
+	2017-01-30 14:13:10 -0800   wip-cd-dev-option
+	2017-01-30 14:32:18 -0800   wip-cd-hammer
+	2017-01-30 22:03:08 -0800   wip-qemu-redir
+	2017-02-09 16:06:07 -0800   wip-use-only-dev
+	2017-02-25 10:33:40 -0800   rh-jewel
+
+Wido den Hollander <wido@42on.com>
+	2017-01-03 15:36:28 +0100   osd-mark-inactive
+
+Yehuda Sadeh <yehuda@inktank.com>
+	2014-01-28 09:38:19 -0800   bobtail
+	2014-01-28 09:40:18 -0800   cuttlefish
+
+Yehuda Sadeh <yehuda@redhat.com>
+	2016-10-03 16:51:40 -0700   dnm-dang-reshard
+
+Yuri Weinstein <yweinste@redhat.com>
+	2017-02-13 12:42:34 -0800   wip-15752-master_ceph
 
 
---J3M0P1UMWwfXEJTMfnsJ8rH4PQ68uHils--
 
---w7KKIJ6fGRekrgIiH7R0WCJnE5507WQ0Q
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iFgEARECABgFAli0RVkRHGxlbnpAZ3JpbW1lci5jb20ACgkQSVDhKrJykfJMrQCf
-TQETk8Z9QHHTC/9CWQ3S8xC4VewAn00lN6O7hUfLy/dv4QOrgnh4BEow
-=GwrL
------END PGP SIGNATURE-----
-
---w7KKIJ6fGRekrgIiH7R0WCJnE5507WQ0Q--
+Grouped by committer, ordered by commit time stamp.
