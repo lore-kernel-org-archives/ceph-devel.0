@@ -1,149 +1,72 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph updates for 4.11-rc1
-Date: Tue, 28 Feb 2017 16:24:59 +0100
-Message-ID: <1488295499-30426-1-git-send-email-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Willem Jan Withagen <wjw@medusa.nl>
+Subject: Illegal memory access in rados...
+Date: Tue, 28 Feb 2017 17:07:52 +0100
+Message-ID: <58728700-ebf2-cade-d501-d6ccddde4a7d@medusa.nl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.medusa.nl ([176.74.240.8]:10857 "EHLO smtp.medusa.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751431AbdB1QbE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 28 Feb 2017 11:31:04 -0500
+Received: from router.medusa.nl (localhost [127.0.0.1])
+        by smtp.medusa.nl (Postfix) with ESMTP id EBF4E22805
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2017 17:07:55 +0100 (CET)
+Received: from smtp.medusa.nl ([127.0.0.1])
+        by router.medusa.nl (smtp.medusa.nl [127.0.0.1]) (amavisd-new, port 10024)
+        with ESMTP id 1TPdSFl8PDk0 for <ceph-devel@vger.kernel.org>;
+        Tue, 28 Feb 2017 17:07:53 +0100 (CET)
+Received: from [192.168.10.67] (smtp.digiware.nl [176.74.240.9])
+        by smtp.medusa.nl (Postfix) with ESMTPA id DCB4F22804
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2017 17:07:53 +0100 (CET)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Linus,
 
-The following changes since commit c470abd4fde40ea6a0846a2beab642a578c0b8cd:
+I wonder whether this is known? (running FreeBSD)
 
-  Linux 4.10 (2017-02-19 14:34:00 -0800)
+When running:
+ceph_objectstore_tool.py
 
-are available in the git repository at:
+I keep getting:
+3: Wait for health_ok...DONE
+3: Created Replicated pool #1
+3: Created Erasure coded pool #2
+3: Creating 4 objects in replicated pool
+3: CRITICAL:Rados put command failed with -11
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.11-rc1
+gdb gives me:
+#0  0x000000080df5bdaa in thr_kill () from /lib/libc.so.7
+#1  0x000000080df5bd7b in __raise (s=11) at /usr/src/lib/libc/gen/raise.c:52
+#2  0x00000000004eec36 in reraise_fatal (signum=11) at
+/home/jenkins/workspace/ceph-master/src/global/signal_handler.cc:74
+#3  0x00000000004edca9 in handle_fatal_signal (signum=11) at
+/home/jenkins/workspace/ceph-master/src/global/signal_handler.cc:138
+#4  0x000000080c140754 in handle_signal (actp=0x7fffdf7ee990, sig=11,
+info=0x7fffdf7eed80, ucp=0x7fffdf7eea10) at
+/usr/src/lib/libthr/thread/thr_sig.c:246
+#5  0x000000080c13fdbf in thr_sighandler (sig=11, info=0x7fffdf7eed80,
+_ucp=0x7fffdf7eea10) at /usr/src/lib/libthr/thread/thr_sig.c:189
+#6  <signal handler called>
+#7  MonClient::build_authorizer (this=0x80f92b060, service_id=16) at
+memory:2733
+#8  0x0000000800afdc28 in librados::RadosClient::ms_get_authorizer
+(this=0x80f92b000, dest_type=16, authorizer=0x7fffdf7eefc8, force_new=false)
+    at /home/jenkins/workspace/ceph-master/src/librados/RadosClient.cc:63
+#9  0x000000080233b731 in Messenger::ms_deliver_get_authorizer
+(this=0x80f908600, peer_type=16, force_new=false) at Messenger.h:722
+#10 0x000000080237cc1a in AsyncMessenger::get_authorizer
+(this=0x80f908600, peer_type=16, force_new=false) at AsyncMessenger.h:365
+#11 0x0000000802359dc2 in AsyncConnection::_process_connection
+(this=0x81124b800) at
+/home/jenkins/workspace/ceph-master/src/msg/async/AsyncConnection.cc:1024
 
-for you to fetch changes up to 54ea0046b6fe36ec18e82d282a29a18da6cdea0f:
+#7  MonClient::build_authorizer (this=0x80f92b060, service_id=16) at
+memory:2733
+2733            {return __ptr_.first() != nullptr;}
 
-  libceph, rbd, ceph: WRITE | ONDISK -> WRITE (2017-02-24 19:04:57 +0100)
+But __ptr_ is optimized out. So cehking anything is hard.
 
-----------------------------------------------------------------
-This time around we have:
 
-- support for rbd data-pool feature, which enables rbd images on
-  erasure-coded pools (myself).  CEPH_PG_MAX_SIZE has been bumped to
-  allow erasure-coded profiles with k+m up to 32.
-
-- a patch for ceph_d_revalidate() performance regression introduced in
-  4.9, along with some cleanups in the area (Jeff Layton)
-
-- a set of fixes for unsafe ->d_parent accesses in CephFS (Jeff Layton)
-
-- buffered reads are now processed in rsize windows instead of rasize
-  windows (Andreas Gerstmayr).  The new default for rsize mount option
-  is 64M.
-
-- ack vs commit distinction is gone, greatly simplifying ->fsync() and
-  MOSDOpReply handling code (myself)
-
-Also a few filesystem bug fixes from Zheng, a CRUSH sync up (CRUSH
-computations are still serialized though) and several minor fixes and
-cleanups all over.
-
-----------------------------------------------------------------
-Andreas Gerstmayr (1):
-      ceph: set io_pages bdi hint
-
-Arnd Bergmann (1):
-      libceph: use BUG() instead of BUG_ON(1)
-
-Bhumika Goyal (1):
-      rbd: constify device_type structure
-
-Colin Ian King (1):
-      ceph: fix spelling mistake: "enabing" -> "enabling"
-
-Dan Carpenter (1):
-      ceph: tidy some white space in get_nonsnap_parent()
-
-Ilya Dryomov (26):
-      libceph: include linux/sched.h into crypto.c directly
-      libceph: add osdmap_set_crush() helper
-      crush: remove mutable part of CRUSH map
-      crush: merge working data and scratch
-      libceph: don't go through with the mapping if the PG is too wide
-      libceph: bump CEPH_PG_MAX_SIZE to 32
-      rbd: use kstrndup() in rbd_header_from_disk()
-      rbd: kill rbd_image_header::{crypt_type,comp_type}
-      rbd: initialize rbd_dev->header_oloc early
-      rbd: do away with obj_request in rbd_obj_read_sync()
-      libceph: pass reply buffer length through ceph_osdc_call()
-      rbd: switch rbd_obj_method_sync() to ceph_osdc_call()
-      rbd: remove now unused rbd_obj_request_wait() and helpers
-      rbd: use rbd_obj_bytes() more
-      rbd: introduce rbd_init_layout()
-      rbd: support for data-pool feature
-      rbd: set offset and length outside of rbd_obj_request_create()
-      rbd: factor out __rbd_osd_req_create()
-      rbd: RBD_V{1,2}_DATA_FORMAT macros
-      rbd: store and use obj_request->object_no
-      rbd: kill obj_request->object_name and rbd_segment_name_cache
-      crush: do is_out test only if we do not collide
-      crush: fix dprintk compilation
-      ceph: remove special ack vs commit behavior
-      libceph: get rid of ack vs commit
-      libceph, rbd, ceph: WRITE | ONDISK -> WRITE
-
-Jeff Layton (15):
-      ceph: clean up unsafe d_parent access in __choose_mds
-      ceph: clean up unsafe d_parent accesses in build_dentry_path
-      ceph: pass parent dir ino info to build_dentry_path
-      ceph: fix unsafe dcache access in ceph_encode_dentry_release
-      ceph: pass parent inode info to ceph_encode_dentry_release if we have it
-      ceph: fix bogus endianness change in ceph_ioctl_set_layout
-      ceph: remove "Debugging hook" from ceph_fill_trace
-      ceph: drop session argument to ceph_fill_trace
-      ceph: convert bools in ceph_mds_request to a new r_req_flags field
-      ceph: add a new flag to indicate whether parent is locked
-      ceph: don't update_dentry_lease unless we actually got one
-      ceph: vet the target and parent inodes before updating dentry lease
-      ceph: call update_dentry_lease even when r_locked dir is not set
-      ceph: do a LOOKUP in d_revalidate instead of GETATTR
-      ceph: remove req from unsafe list when unregistering it
-
-Seraphime Kirkovski (1):
-      ceph: cleanup ACCESS_ONCE -> READ_ONCE
-
-Stafford Horne (1):
-      libceph: remove unneeded stddef.h include
-
-Yan, Zheng (4):
-      ceph: avoid updating mds_wanted too frequently
-      ceph: update readpages osd request according to size of pages
-      ceph: make sure flushing inode in proper session's cap_flushing list
-      ceph: avoid calling ceph_renew_caps() infinitely
-
- Documentation/filesystems/ceph.txt |   5 +-
- drivers/block/rbd.c                | 601 ++++++++++++++-----------------------
- drivers/block/rbd_types.h          |  10 +-
- fs/ceph/addr.c                     |  19 +-
- fs/ceph/cache.c                    |   2 +-
- fs/ceph/caps.c                     |  40 ++-
- fs/ceph/debugfs.c                  |   2 +-
- fs/ceph/dir.c                      |  32 +-
- fs/ceph/export.c                   |   3 +-
- fs/ceph/file.c                     | 106 +------
- fs/ceph/inode.c                    | 172 +++++------
- fs/ceph/ioctl.c                    |   4 +-
- fs/ceph/mds_client.c               | 175 ++++++-----
- fs/ceph/mds_client.h               |  15 +-
- fs/ceph/super.c                    |   9 +-
- fs/ceph/super.h                    |  14 +-
- include/linux/ceph/osd_client.h    |   6 +-
- include/linux/ceph/osdmap.h        |  13 +-
- include/linux/ceph/rados.h         |   2 +-
- include/linux/crush/crush.h        |  41 ++-
- include/linux/crush/mapper.h       |  16 +-
- net/ceph/cls_lock_client.c         |  14 +-
- net/ceph/crush/crush.c             |   5 -
- net/ceph/crush/mapper.c            | 227 +++++++++-----
- net/ceph/crypto.c                  |   1 +
- net/ceph/osd_client.c              | 130 +++-----
- net/ceph/osdmap.c                  | 101 +++++--
- net/ceph/snapshot.c                |   2 -
- 28 files changed, 835 insertions(+), 932 deletions(-)
