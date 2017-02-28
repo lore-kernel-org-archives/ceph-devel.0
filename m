@@ -1,40 +1,31 @@
 From: Nikita Gerasimov <nikita.gerasimov@oracle.com>
 Subject: Re: [PATCH] ceph-detect-init: Adds Oracle Linux Server and Oracle VM
  Server detection
-Date: Tue, 28 Feb 2017 19:35:35 +0300
-Message-ID: <91452243-7cb1-21b0-3254-48ab39d6cfb8@oracle.com>
+Date: Tue, 28 Feb 2017 19:41:38 +0300
+Message-ID: <5b5999c5-6edb-7836-8052-1c8eaddfc3d7@oracle.com>
 References: <1488218767-14618-1-git-send-email-nikita.gerasimov@oracle.com>
- <24250ac1-e3fb-f68a-9ecd-fd0763178c74@dachary.org>
+ <alpine.DEB.2.11.1702271828430.21487@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from userp1050.oracle.com ([156.151.31.82]:48211 "EHLO
+Received: from userp1050.oracle.com ([156.151.31.82]:48189 "EHLO
         userp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751387AbdB1SI4 (ORCPT
+        with ESMTP id S1751323AbdB1SI4 (ORCPT
         <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2017 13:08:56 -0500
 Received: from userp1040.oracle.com (userp1040.oracle.com [156.151.31.81])
-        by userp1050.oracle.com (Sentrion-MTA-4.3.2/Sentrion-MTA-4.3.2) with ESMTP id v1SGarKE021796
+        by userp1050.oracle.com (Sentrion-MTA-4.3.2/Sentrion-MTA-4.3.2) with ESMTP id v1SGh4uq024719
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2017 16:36:54 GMT
-In-Reply-To: <24250ac1-e3fb-f68a-9ecd-fd0763178c74@dachary.org>
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2017 16:43:04 GMT
+In-Reply-To: <alpine.DEB.2.11.1702271828430.21487@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, ceph-devel@vger.kernel.org
-
-Hi,
-
-Nope, this patch contain an error, will send another.
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
 
-On 27.02.2017 21:25, Loic Dachary wrote:
-> Hi,
->
-> Do you confirm it passes make check ?
->
-> Thanks !
->
-> On 02/27/2017 07:06 PM, nikita.gerasimov@oracle.com wrote:
+On 27.02.2017 21:30, Sage Weil wrote:
+> On Mon, 27 Feb 2017, nikita.gerasimov@oracle.com wrote:
 >> From: Nikita Gerasimov <nikita.gerasimov@oracle.com>
 >>
 >> Oracle Linux Server is API/ABI compatible with RHEL/CentOS Linux distro.
@@ -129,6 +120,14 @@ On 27.02.2017 21:25, Loic Dachary wrote:
 >> +    Returns the name of a init system (upstart, sysvinit ...).
 >> +    """
 >> +    return 'sysvinit'
+> I thought Oracle Linux was a RHEL clone.  Shouldn't this be systemd?  We
+> don't support el6 (the last version that was sysvinit-based) or older.
+>
+> sage
+>
+This is module for "Oracle VM Server for x86" which is standalone 
+system, not a EL compatible but use it as base.
+"Oracle Linux" as a RHEL clone relay on centos module.
 >> diff --git a/src/ceph-detect-init/tests/test_all.py b/src/ceph-detect-init/tests/test_all.py
 >> index d2733c3..d621943 100644
 >> --- a/src/ceph-detect-init/tests/test_all.py
@@ -169,5 +168,13 @@ On 27.02.2017 21:25, Loic Dachary wrote:
 >>           self.assertEqual('suse', n('SUSE'))
 >>           self.assertEqual('suse', n('suse'))
 >>           self.assertEqual('suse', n('openSUSE'))
+>> -- 
+>> 1.8.3.1
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 >>
 
