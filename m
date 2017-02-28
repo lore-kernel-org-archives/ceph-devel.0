@@ -1,103 +1,74 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: OSD crashing in ~Job()
-Date: Tue, 28 Feb 2017 09:03:59 +0100
-Message-ID: <f1342a1c-159c-a14f-ace7-cd41ecced803@digiware.nl>
-References: <fc507396-656c-c2a5-8995-cf142ec01636@digiware.nl>
- <CAJ4mKGa5Ufgpksa+AtOeCQ_DELwnmeBWeF=6GFSKpGoc3UtwxQ@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: blk_integrity_revalidate() clears BDI_CAP_STABLE_WRITES
+Date: Tue, 28 Feb 2017 09:19:14 +0100
+Message-ID: <CAOi1vP_g-MMe9XvWDgkVL4R6UjckMQVC_CDF9+hQEpZbxwx0Jw@mail.gmail.com>
+References: <CAOi1vP8M91kiF-FnT=EoJgTxfstMEsC-nhLY5KtRkrKROjWPWA@mail.gmail.com>
+ <yq1efyq25y2.fsf@oracle.com> <CAOi1vP-amFyFHbPV3FhG3F1Tp+df6V7a4mcP8LLWY0GZx+JsFw@mail.gmail.com>
+ <yq1fuj44geq.fsf@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:42039 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751026AbdB1IMA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 28 Feb 2017 03:12:00 -0500
-In-Reply-To: <CAJ4mKGa5Ufgpksa+AtOeCQ_DELwnmeBWeF=6GFSKpGoc3UtwxQ@mail.gmail.com>
+Received: from mail-ua0-f170.google.com ([209.85.217.170]:36113 "EHLO
+        mail-ua0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751781AbdB1IZk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2017 03:25:40 -0500
+In-Reply-To: <yq1fuj44geq.fsf@oracle.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "Martin K. Petersen" <martin.petersen@oracle.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, linux-block@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>, Christoph Hellwig <hch@lst.de>, Sagi Grimberg <sagi@grimberg.me>, Mike Snitzer <snitzer@redhat.com>, Jens Axboe <axboe@fb.com>, linux-nvme@lists.infradead.org
 
-On 27-2-2017 16:24, Gregory Farnum wrote:
-> On Mon, Feb 27, 2017 at 6:37 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> Hi,
->>
->> Once every 10 runs  test-erasure-code.sh is terminated with a timeout
->> during my FreeBSD tests.
->>
->> It receives an assert in:
->> /usr/srcs/Ceph/work/ceph/src/osd/OSDMapMapping.h:31
->> class ParallelPGMapper {
->> public:
->>   struct Job {
->> ....
->>     virtual ~Job() {
->>       assert(shards == 0);
->>     }
->> } }
->>
->> Anydody any suggestions on what this can be, and/or how to start
->> debugging this?
-> 
-> Sounds like maybe
-> 1) your test hardware is slower than what we mostly use, in this
-> particular job, and
-> 2) the OSDMapMapping code doesn't shut down cleanly when it gets a
-> TERM signal. :/
-> 
-> So, extend the timeout or fix the OSDMapMapping, I guess?
+On Fri, Feb 24, 2017 at 12:49 AM, Martin K. Petersen
+<martin.petersen@oracle.com> wrote:
+>>>>>> "Ilya" == Ilya Dryomov <idryomov@gmail.com> writes:
+>
+> Ilya,
+>
+> Ilya> Well, blk_integrity_revalidate() doesn't clear the profile, it
+> Ilya> just clears the stable pages flag.  Whoever calls
+> Ilya> blk_integrity_unregister() to clear the profile can also clear the
+> Ilya> stable pages flag -- why not let blk_integrity_unregister() clear
+> Ilya> the flag like I suggested?
+>
+> That's what it used to do.
+>
+> blk_integrity_revalidate() was obviously introduced to overcome some
+> problem. Unfortunately, I can't recall what that was and Google isn't
+> being particularly helpful. I suspect it was either in the NVDIMM or
+> NVMe camps since that's where the churn was.
 
-Got a fix-PR from Sage, and now it complets 100 testruns wiithout any
-trouble. Timeouts were due to the test started only one mon, and that
-made the next rados command hang and ctest timeout.
+Adding more people from 25520d55cdb6 -- does anyone remember the story
+behind blk_integrity_revalidate()?
 
---WjW
+>
+> I don't have a problem with your patch as long as we're sure there are
+> no regressions. I would carry the gendisk check over, though.
 
-> -Greg
-> 
->>
->> --WjW
->>
->>
->> 2017-02-27 14:15:28.034683 b134480 -1
->> /usr/srcs/Ceph/work/ceph/src/osd/OSDMapMapping.h: In function 'virtual
->> ParallelPGMapper::Job::~Job()' thread b134480 time 2017
->> -02-27 14:15:27.975342
->> /usr/srcs/Ceph/work/ceph/src/osd/OSDMapMapping.h: 31: FAILED
->> assert(shards == 0)
->>
->>  ceph version Development (no_version)
->>  1: <ceph::__ceph_assert_fail(char const*, char const, int, char
->> const)+0xb21> at /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->>  2: <ParallelPGMapper::Job::~Job(void)+0x50> at
->> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->>  3: <OSDMapMapping::MappingJob::~MappingJob(void)+0x15> at
->> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->>  4: <OSDMapMapping::MappingJob::~MappingJob(void)+0x19> at
->> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->>  5:
->> <OSDMonitor::encode_pending(std::__1::shared_ptr<MonitorDBStore::Transaction>)+0xefd>
->> at /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->>  6: <PaxosService::propose_pending(void)+0x91d> at
->> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->>  7:
->> <PaxosService::dispatch(boost::intrusive_ptr<MonOpRequest>)::C_Propose::finish(int)+0x3a>
->> at /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->>  8: <Context::complete(int)+0x22> at
->> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->>  9: <SafeTimer::timer_thread(void)+0x8d7> at
->> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->>  10: <SafeTimerThread::entry(void)+0x19> at
->> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->>  11: <Thread::entry_wrapper(void)+0xc6> at
->> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->>  12: <Thread::_entry_func(void*)+0x15> at
->> /usr/srcs/Ceph/work/ceph/build/bin/ceph-mon
->>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->> needed to interpret this.
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I spent quite some time trying to do basic tests on nvme, since it uses
+both nop_profile and real integrity profiles.  Unfortunately I don't
+have access to an nvme card with separate-metadata capability and
+upstream qemu driver doesn't support any metadata capabilities at all,
+so I turned to https://github.com/OpenChannelSSD/qemu-nvme.  It lets
+you configure mc and multiple lbafs, but
 
+    commit ff646a5841f743fdd9cfef138ac6be1f0ba4fbfb
+    Author: Keith Busch <keith.busch@intel.com> Thu Oct 23 20:02:44 2014
+
+    As part of this, I am removing all meta-data support. It's not well
+    supported in any immediatly available operating system, so the code
+    is not well tested.
+
+In the end I got it into a semi-working state by checking out an old
+version and dropping some sanity checks.  I formatted the namespace in
+a number of ways -- bdi/stable_pages_required and integrity/format
+behaved as expected ("none", "nop", "T10-DIF-TYPE1-CRC").
+
+Given the above, I'm not sure what the baseline is -- blk_integrity
+code isn't invoked for data-only lbafs.  Could nvme folks please look
+at this?  rbd regression caused by integrity revalidate change goes
+back to 4.4 and I'd really like to get it fixed.  The proposed patch
+is attached to my earlier reply on linux-block.
+
+Thanks,
+
+                Ilya
