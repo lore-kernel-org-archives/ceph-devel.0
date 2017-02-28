@@ -1,55 +1,53 @@
-From: Adir Lev <adirl@mellanox.com>
-Subject: RE: systemd and RDMA
-Date: Tue, 28 Feb 2017 15:29:26 +0000
-Message-ID: <VI1PR0501MB2782C556BF49AB4D95AC824ED7560@VI1PR0501MB2782.eurprd05.prod.outlook.com>
-References: <VI1PR0501MB278205C007302409F70B10B2D7530@VI1PR0501MB2782.eurprd05.prod.outlook.com>
- <alpine.DEB.2.11.1702231425150.7782@piezo.novalocal>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Re: CDM Tomorrow @ 9p EST
+Date: Tue, 28 Feb 2017 16:05:04 -0500
+Message-ID: <CAAZbbf1w4nCFj=MctjibYmBPEjJCzsNVPAVwQTkh5bbFce8p9g@mail.gmail.com>
+References: <CAAZbbf1bEBfFfpZG-29hZ_UG03UoMtqOFyB82DhKDNoiVyVeMg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-he1eur01on0049.outbound.protection.outlook.com ([104.47.0.49]:13792
-        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751122AbdB1UJj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 28 Feb 2017 15:09:39 -0500
-In-Reply-To: <alpine.DEB.2.11.1702231425150.7782@piezo.novalocal>
-Content-Language: en-US
+Received: from mail-qk0-f181.google.com ([209.85.220.181]:33556 "EHLO
+        mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751485AbdB1VQG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2017 16:16:06 -0500
+Received: by mail-qk0-f181.google.com with SMTP id n127so39315775qkf.0
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2017 13:14:25 -0800 (PST)
+In-Reply-To: <CAAZbbf1bEBfFfpZG-29hZ_UG03UoMtqOFyB82DhKDNoiVyVeMg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, kefu chai <tchaikov@gmail.com>
+To: Ceph Devel <ceph-devel@vger.kernel.org>
 
-Thank you the helpful response,
-Looks like we have all info to create this change
-I will push new PR soon=20
+(continued, hit send too fast)
 
-Adir
+http://wiki.ceph.com/Planning
 
------Original Message-----
-From: Sage Weil [mailto:sage@newdream.net]=20
-Sent: Thursday, February 23, 2017 4:26 PM
-To: Adir Lev <adirl@mellanox.com>
-Cc: ceph-devel@vger.kernel.org; kefu chai <tchaikov@gmail.com>
-Subject: Re: systemd and RDMA
 
-On Thu, 23 Feb 2017, Adir Lev wrote:
-> Hi Cephers,
->=20
-> In order to use systemctl with RDMA messenger we need to make few=20
-> changes to /etc/systemd/system/ 1. Set PrivateDevices=3Dno 2. Set=20
-> LimitMEMLOCK=3Dinfinity see PR: https://github.com/ceph/ceph/pull/13305
->=20
-> I got few rejects suggesting to change those params only when actually us=
-ing RDMA.
-> Since systemd scripts are the first to run we cannot check it in ceph cod=
-e.
->=20
-> Any suggestion on how to check messenger type and set PrivateDevices=20
-> and LimitMEMLOCK accordingly?
 
-Hmm, is it possible to make them conditional on something in /etc/{sysconfi=
-g,default}/ceph?  Then an RDMA user would just need to comment in a line li=
-ke ENABLE_RDMA=3D1 or something...
+On Tue, Feb 28, 2017 at 4:04 PM, Patrick McGarry <pmcgarry@redhat.com> wrote:
+> Hey cephers,
+>
+> Tomorrow is CDM and I don't have any topics to be discussed. Please,
+> if you are working on Ceph development (feature, performance, major
+> backport, etc) please fill in a one line description so we can have a
+> short discussion on tomorrow night's call.
+>
+>
+> --
+>
+> Best Regards,
+>
+> Patrick McGarry
+> Director Ceph Community || Red Hat
+> http://ceph.com  ||  http://community.redhat.com
+> @scuttlemonkey || @ceph
 
-sage
+
+
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
