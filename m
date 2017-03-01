@@ -1,64 +1,59 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Jewel 10.2.6 QE validation status
-Date: Tue, 28 Feb 2017 14:09:58 -0800
-Message-ID: <CAMMFjmHgp5NSAxtdEVVPggjqUL7a8p9T7AEztb4Zzxdocjg7xg@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: documenting crush tunables & rule step set_*
+Date: Wed, 1 Mar 2017 00:38:15 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1703010031490.25760@piezo.novalocal>
+References: <5d566eae-660d-8975-453b-c8c9cac820b0@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f178.google.com ([209.85.128.178]:35977 "EHLO
-        mail-wr0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751657AbdCAAMo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2017 19:12:44 -0500
-Received: by mail-wr0-f178.google.com with SMTP id u108so19453975wrb.3
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2017 16:12:42 -0800 (PST)
+Received: from mx1.redhat.com ([209.132.183.28]:46960 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751446AbdCAAij (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 28 Feb 2017 19:38:39 -0500
+In-Reply-To: <5d566eae-660d-8975-453b-c8c9cac820b0@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Development, Ceph" <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>, "Weil, Sage" <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Gregory Farnum <gfarnum@redhat.com>, John Spray <jspray@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "gmeno@redhat.com" <gmeno@redhat.com>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Detailed summary of the QE Validation can be found here
-http://tracker.ceph.com/issues/17851#note-92
+On Wed, 1 Mar 2017, Loic Dachary wrote:
+> Hi Sage,
+> 
+> While reading the implementation and the commits related to crush 
+> tunables & rule step set_* I got the impression that vary_r[1] 
+> introduced early 2014 is a better solution than local_fallback_tries 
+> etc. [2] introduced around 2012. Both are helping to select an 
+> alternative item when there is a collision.
 
-The following suites were in scope of this point release validation:
+Yeah, although if memory serves local_fallback_tries was part of the 
+original CRUSH code. The problem with the local retry was that it skews 
+data toward drives that are close to an 'out' drive in the hierarchy.  
+I.e., if you have 12-drive server and mark one of them out, the other 11 
+get most of the data instead.  That's clearly not optimal, which is why 
+that local retries now defaults to 0.  (Caleb figured this out when he was 
+doing his analysis back in 2012 or 2013.)
+ 
+> If that's not the case I'll try to research the motivation to set 
+> local_fallback_retries = 1 instead of the default value 0 it has in 
+> tunables since bobtail[3]. And although nothing forbids using 
+> local_fallback_tries = 1 & vary_r = 1, it looks like the vary_r 
+> implementation did not take into account that combination.
 
-rados (subset 35/50 228 jobs)
-rbd
-rgw
-fs
-krbd
-kcephfs
-knfs
-rest
-hadoop
-samba
-ceph-deploy
-ceph-disk
-upgrade/client-upgrade
-upgrade/hammer-x (jewel)
-upgrade/jewel-x/point-to-point-x
-powercycle
+Yeah; the assumption is that local fallback tries should never be used 
+except for compatibility with old maps with old tunables.
 
-(please let me know if any suites are missing from this ^ list)
+I honestly don't remember exactly what motivated me to do the local 
+fallback.. I think it seemed intuitive at the time, but in retrospect is 
+not a good idea.
 
-==============================
-(overall pretty clean validation cycle, kudos to @Nathan and the
-backporting team !)
+The vary_r was added to address a different specific issue: when using 
+chooseleaf, we do the first level choice (say, a rack) and then 
+recursively pick a disk nested beneath it.  The problem was that we'd 
+collide in the second choice (disk), increment r, and try again... but if 
+we picked the same rack the recursive call to choose a disk would use the 
+original r value and inevitabl collide again.
 
-Issue http://tracker.ceph.com/issues/18089 resulted in several
-failures, but is infrastructure related.
+Chooseleaf was introduced after fallback_local_tries, so the motivation 
+was different...
 
-Issues requiring approval/decision:
-
-rados - one job failed, http://tracker.ceph.com/issues/18089, need Josh approval
-
-krbd - http://tracker.ceph.com/issues/17221, need Ilya's approval/fix
-
-samba- http://tracker.ceph.com/issues/19101, need John's approval/fix
-
-upgrade/client-upgrade - http://tracker.ceph.com/issues/19080, need
-Jason, Nathan approval/and or backport
-
-upgrade/hammer-x (jewel) - http://tracker.ceph.com/issues/18089, can
-be approved for release, Sage?
-
-Thx
-YuriW
+sage
