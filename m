@@ -1,48 +1,96 @@
-From: George Papadrosou <gpapadrosou@gmail.com>
-Subject: GSOC - Local File Backend for RGW
-Date: Wed, 1 Mar 2017 22:44:00 +0200
-Message-ID: <475C67DE-1837-4084-B308-2BCB5B505857@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: explicitly mapping pgs in OSDMap
+Date: Wed, 1 Mar 2017 22:10:51 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1703012204460.651@piezo.novalocal>
+References: <alpine.DEB.2.11.1703011932530.651@piezo.novalocal> <CABZ+qqn3f2+eGfSP=fuB-eGSAyrK6eCJ2XjWiBAWyourfyrpGA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:34554 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751387AbdCAWY5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Mar 2017 17:24:57 -0500
-Received: by mail-wr0-f193.google.com with SMTP id u48so7284361wrc.1
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Mar 2017 14:24:23 -0800 (PST)
-Received: from [192.168.1.4] (adsl-207.109.242.12.tellas.gr. [109.242.12.207])
-        by smtp.gmail.com with ESMTPSA id m83sm24184099wmc.33.2017.03.01.12.44.01
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1 cipher=ECDHE-RSA-AES128-SHA bits=128/128);
-        Wed, 01 Mar 2017 12:44:01 -0800 (PST)
+Received: from mx1.redhat.com ([209.132.183.28]:59984 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750707AbdCAWnI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 1 Mar 2017 17:43:08 -0500
+In-Reply-To: <CABZ+qqn3f2+eGfSP=fuB-eGSAyrK6eCJ2XjWiBAWyourfyrpGA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Dan van der Ster <dan@vanderster.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hello,=20
+On Wed, 1 Mar 2017, Dan van der Ster wrote:
+> On Wed, Mar 1, 2017 at 8:44 PM, Sage Weil <sweil@redhat.com> wrote:
+> > There's been a longstanding desire to improve the balance of PGs and data
+> > across OSDs to better utilize storage and balance workload.  We had a few
+> > ideas about this in a meeting last week and I wrote up a summary/proposal
+> > here:
+> >
+> >         http://pad.ceph.com/p/osdmap-explicit-mapping
+> >
+> > The basic idea is to have the ability to explicitly map individual PGs
+> > to certain OSDs so that we can move PGs from overfull to underfull
+> > devices.  The idea is that the mon or mgr would do this based on some
+> > heuristics or policy and should result in a better distribution than teh
+> > current osd weight adjustments we make now with reweight-by-utilization.
+> >
+> > The other key property is that one reason why we need as many PGs as we do
+> > now is to get a good balance; if we can remap some of them explicitly, we
+> > can get a better balance with fewer.  In essense, CRUSH gives an
+> > approximate distribution, and then we correct to make it perfect (or close
+> > to it).
+> >
+> > The main challenge is less about figuring out when/how to remap PGs to
+> > correct balance, but figuring out when to remove those remappings after
+> > CRUSH map changes.  Some simple greedy strategies are obvious starting
+> > points (e.g., to move PGs off OSD X, first adjust or remove existing remap
+> > entries targetting OSD X before adding new ones), but there are a few
+> > ways we could structure the remap entries themselves so that they
+> > more gracefully disappear after a change.
+> >
+> > For example, a remap entry might move a PG from OSD A to B if it maps to
+> > A; if the CRUSH topology changes and the PG no longer maps to A, the entry
+> > would be removed or ignored.  There are a few ways to do this in the pad;
+> > I'm sure there are other options.
+> >
+> > I put this on the agenda for CDM tonight.  If anyone has any other ideas
+> > about this we'd love to hear them!
+> >
+> 
+> Hi Sage. This would be awesome! Seriously, it would let us run multi
+> PB clusters closer to being full -- 1% of imbalance on a 100 PB
+> cluster is *expensive* !!
+> 
+> I can't join the meeting, but here are my first thoughts on the implementation.
+> 
+> First, since this is a new feature, it would be cool if it supported
+> non-trivial topologies from the beginning -- i.e. the trivial topology
+> is when all OSDs should have equal PGs/weight. A non-trivial topology
+> is where only OSDs beneath a user-defined crush bucket are balanced.
+> 
+> And something I didn't understand about the remap format options --
+> when the cluster topology changes, couldn't we just remove all
+> remappings and start again? If you use some consistent method for the
+> remaps, shouldn't the result anyway remain similar after incremental
+> topology changes?
+> 
+> In the worst case, remaps will only form maybe 10-20% of PGs. Clearly
+> we don't want to shuffle those for small topology changes, but for
+> larger changes perhaps we can accept those to move.
 
-my name is George Papadrosou and I am interested in submitting a =
-proposal for the "Local File Backend for RGW=E2=80=9D project for the =
-Google Summer of Code 2017.
+If there is a small change, then we don't want to toss the mappings.. but 
+if there is a large change you do; which ones you toss should 
+probably depend on whether the original mapping they were overriding 
+changed.
 
-Currently, I am a graduate CS student at Georgia Institute of =
-Technology. I have 3+ years of professional experience, mainly in web =
-applications and servers. By May, I will have completed my first two =
-master=E2=80=99s courses, Operating Systems and High Performance =
-Computing.
+The other hard part of this, now that I think about it, is that you have 
+placement constraints encoded into the CRUSH rules (e.g., separate 
+replicas across racks).  Whatever is installing new mappings needs to 
+understand those constraints so tha the remap entries also respect the 
+policy.  That means either we need to (1) understand the CRUSH rule 
+constraints, or (2) encode the (simplified?) set of placement constraints 
+in the Ceph OSDMap and auto-generate the CRUSH rule from that.
 
-I have not used Ceph before, however, I am planning on making my first =
-contributions the next days, so I will be somewhat familiar with Ceph =
-soon enough.
+For (1), I bet we can make a simple "CRUSH rule intepreter" that, instead 
+of making pseudorandom choices, pick each child based on the minimum 
+utilization (or the original mapping value) in order to generate the remap 
+entries...
 
-Looking forward to learn more about the RGW local file backend project =
-and prepare a complete application.=20
-I notice that Ceph already uses RocksDB and LevelDB, so I would like to =
-know some more details about GSOC the project.
-
-Also, if anyone has in mind any issue/task that is relevant to this =
-project, I would appreciate telling me so I can work on it.
-
-Thank you!=
+sage
