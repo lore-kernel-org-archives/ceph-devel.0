@@ -1,81 +1,33 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Jewel 10.2.6 QE validation status
-Date: Tue, 28 Feb 2017 21:25:52 -0500
-Message-ID: <CA+aFP1AheVWf+Gragi7qXYfva-3dPPkg-Mp22zq_Eqh+FB_CVw@mail.gmail.com>
-References: <CAMMFjmHgp5NSAxtdEVVPggjqUL7a8p9T7AEztb4Zzxdocjg7xg@mail.gmail.com>
- <alpine.DEB.2.11.1703010039050.25760@piezo.novalocal>
-Reply-To: dillaman@redhat.com
+From: Loic Dachary <loic@dachary.org>
+Subject: documenting crush tunables & rule step set_*
+Date: Wed, 1 Mar 2017 01:25:47 +0100
+Message-ID: <5d566eae-660d-8975-453b-c8c9cac820b0@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f47.google.com ([209.85.215.47]:34029 "EHLO
-        mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751468AbdCACdd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2017 21:33:33 -0500
-Received: by mail-lf0-f47.google.com with SMTP id k202so13393632lfe.1
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Feb 2017 18:32:40 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1703010039050.25760@piezo.novalocal>
+Received: from slow1-d.mail.gandi.net ([217.70.178.86]:37883 "EHLO
+        slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751435AbdCADR7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Feb 2017 22:17:59 -0500
+Received: from relay3-d.mail.gandi.net (relay3-d.mail.gandi.net [217.70.183.195])
+        by slow1-d.mail.gandi.net (Postfix) with ESMTP id 9ACC747E805
+        for <ceph-devel@vger.kernel.org>; Wed,  1 Mar 2017 01:26:55 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
-Cc: Yuri Weinstein <yweinste@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>, "Durgin, Josh" <jdurgin@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Gregory Farnum <gfarnum@redhat.com>, John Spray <jspray@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "gmeno@redhat.com" <gmeno@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Feb 28, 2017 at 7:39 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Tue, 28 Feb 2017, Yuri Weinstein wrote:
->> Detailed summary of the QE Validation can be found here
->> http://tracker.ceph.com/issues/17851#note-92
->>
->> The following suites were in scope of this point release validation:
->>
->> rados (subset 35/50 228 jobs)
->> rbd
->> rgw
->> fs
->> krbd
->> kcephfs
->> knfs
->> rest
->> hadoop
->> samba
->> ceph-deploy
->> ceph-disk
->> upgrade/client-upgrade
->> upgrade/hammer-x (jewel)
->> upgrade/jewel-x/point-to-point-x
->> powercycle
->>
->> (please let me know if any suites are missing from this ^ list)
->>
->> ==============================
->> (overall pretty clean validation cycle, kudos to @Nathan and the
->> backporting team !)
->>
->> Issue http://tracker.ceph.com/issues/18089 resulted in several
->> failures, but is infrastructure related.
->>
->> Issues requiring approval/decision:
->>
->> rados - one job failed, http://tracker.ceph.com/issues/18089, need Josh approval
->>
->> krbd - http://tracker.ceph.com/issues/17221, need Ilya's approval/fix
->>
->> samba- http://tracker.ceph.com/issues/19101, need John's approval/fix
->>
->> upgrade/client-upgrade - http://tracker.ceph.com/issues/19080, need
->> Jason, Nathan approval/and or backport
+Hi Sage,
 
-Ignore -- it's not worth the effort to fix the test since we won't be
-cutting a new Infernalis build.
+While reading the implementation and the commits related to crush tunables & rule step set_* I got the impression that vary_r[1] introduced early 2014 is a better solution than local_fallback_tries etc. [2] introduced around 2012. Both are helping to select an alternative item when there is a collision.
 
->> upgrade/hammer-x (jewel) - http://tracker.ceph.com/issues/18089, can
->> be approved for release, Sage?
->
-> If you mean it's just hte xenial nodes failing on the package install,
-> yeah, ignore those failures!
->
-> sage
+If that's not the case I'll try to research the motivation to set local_fallback_retries = 1 instead of the default value 0 it has in tunables since bobtail[3]. And although nothing forbids using local_fallback_tries = 1 & vary_r = 1, it looks like the vary_r implementation did not take into account that combination.
 
+Cheers
 
-
+[1] vary_r https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L470
+[2] local_fallback_tries https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L479
+[3] bobtail tunables https://github.com/ceph/ceph/blob/master/src/crush/CrushWrapper.h#L113
 -- 
-Jason
+Loïc Dachary, Artisan Logiciel Libre
