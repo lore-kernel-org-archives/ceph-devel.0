@@ -1,56 +1,74 @@
-From: Ali Maredia <amaredia@redhat.com>
-Subject: Re: GSOC - Local File Backend for RGW
-Date: Thu, 2 Mar 2017 11:06:30 -0500 (EST)
-Message-ID: <1244809712.113384975.1488470790518.JavaMail.zimbra@redhat.com>
-References: <475C67DE-1837-4084-B308-2BCB5B505857@gmail.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: explicitly mapping pgs in OSDMap
+Date: Thu, 2 Mar 2017 17:33:45 +0000
+Message-ID: <362CBE0D-E1C6-4068-92AE-62CF5EDD836D@TERADATA.COM>
+References: <alpine.DEB.2.11.1703011932530.651@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx4-phx2.redhat.com ([209.132.183.25]:44266 "EHLO
-        mx4-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752202AbdCBRdG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Mar 2017 12:33:06 -0500
-In-Reply-To: <475C67DE-1837-4084-B308-2BCB5B505857@gmail.com>
+Received: from nat13.teradata.com ([153.65.16.13]:38465 "EHLO
+        rpc7279.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1753852AbdCBRdt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Mar 2017 12:33:49 -0500
+In-Reply-To: <alpine.DEB.2.11.1703011932530.651@piezo.novalocal>
+Content-Language: en-US
+Content-ID: <FE83FB158E1F6340BC416696F45A0A26@TD.Teradata.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: George Papadrosou <gpapadrosou@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Ack'd
-
--Ali
-
------ Original Message -----
-> From: "George Papadrosou" <gpapadrosou@gmail.com>
-> To: ceph-devel@vger.kernel.org
-> Sent: Wednesday, March 1, 2017 3:44:00 PM
-> Subject: GSOC - Local File Backend for RGW
-> 
-> Hello,
-> 
-> my name is George Papadrosou and I am interested in submitting a proposal for
-> the "Local File Backend for RGW” project for the Google Summer of Code 2017.
-> 
-> Currently, I am a graduate CS student at Georgia Institute of Technology. I
-> have 3+ years of professional experience, mainly in web applications and
-> servers. By May, I will have completed my first two master’s courses,
-> Operating Systems and High Performance Computing.
-> 
-> I have not used Ceph before, however, I am planning on making my first
-> contributions the next days, so I will be somewhat familiar with Ceph soon
-> enough.
-> 
-> Looking forward to learn more about the RGW local file backend project and
-> prepare a complete application.
-> I notice that Ceph already uses RocksDB and LevelDB, so I would like to know
-> some more details about GSOC the project.
-> 
-> Also, if anyone has in mind any issue/task that is relevant to this project,
-> I would appreciate telling me so I can work on it.
-> 
-> Thank you!--
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+SGkgU2FnZSwNCiAgVGhlIGNydXNoIGFsZ29yaXRobSBoYW5kbGVzIG1hcHBpbmcgb2YgcGdzLCBh
+bmQgaXQgd2lsbCBldmVuIHdpdGggdGhlDQphZGRpdGlvbiBvZiBleHBsaWNpdCBtYXBwaW5ncy4g
+SSBwcmVzdW1lLCBmaW5kaW5nIHdoaWNoIHBncyBiZWxvbmcgdG8NCndoaWNoIE9TRHMgd2lsbCBp
+bnZvbHZlIGFkZGl0aW9uIGNvbXB1dGF0aW9uIGZvciBlYWNoIGFkZGl0aW9uYWwNCmV4cGxpY2l0
+IG1hcHBpbmcuIA0KDQpXaGF0IHdvdWxkIGJlIHBlbmFsdHkgb2YgdGhpcyBhZGRpdGlvbmFsIGNv
+bXB1dGF0aW9uPyANCg0KRm9yIHNtYWxsIG51bWJlciBvZiBleHBsaWNpdCBtYXBwaW5ncyBzdWNo
+IHBlbmFsdHkgd291bGQgYmUgc21hbGwsIA0KSU1PIGl0IGNhbiBnZXQgcXVpdGUgZXhwZW5zaXZl
+IHdpdGggbGFyZ2UgbnVtYmVyIG9mIGV4cGxpY2l0IG1hcHBpbmdzLg0KVGhlIGltcGxlbWVudGF0
+aW9uIHdpbGwgbmVlZCB0byBtYW5hZ2UgdGhlIGNvdW50IG9mIGV4cGxpY2l0IG1hcHBpbmdzLA0K
+YnkgcmV2ZXJ0aW5nIHNvbWUgb2YgdGhlIGV4cGxpY2l0IG1hcHBpbmdzIGFzIHRoZSBkaXN0cmli
+dXRpb24gY2hhbmdlcy4NClRoZSB1bmRlcnN0YW5kaW5nIG9mIGFkZGl0aW9uYWwgb3ZlcmhlYWQg
+b2YgdGhlIGV4cGxpY2l0IG1hcHBpbmdzIHdvdWxkDQpoYWQgZ3JlYXQgaW5mbHVlbmNlIG9uIHRo
+ZSBpbXBsZW1lbnRhdGlvbi4NCg0KTml0aW4NCg0KDQoNCg0KT24gMy8xLzE3LCAxMTo0NCBBTSwg
+ImNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBTYWdlIFdlaWwi
+IDxjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2Ygc3dlaWxAcmVk
+aGF0LmNvbT4gd3JvdGU6DQoNCiAgICBUaGVyZSdzIGJlZW4gYSBsb25nc3RhbmRpbmcgZGVzaXJl
+IHRvIGltcHJvdmUgdGhlIGJhbGFuY2Ugb2YgUEdzIGFuZCBkYXRhIA0KICAgIGFjcm9zcyBPU0Rz
+IHRvIGJldHRlciB1dGlsaXplIHN0b3JhZ2UgYW5kIGJhbGFuY2Ugd29ya2xvYWQuICBXZSBoYWQg
+YSBmZXcgDQogICAgaWRlYXMgYWJvdXQgdGhpcyBpbiBhIG1lZXRpbmcgbGFzdCB3ZWVrIGFuZCBJ
+IHdyb3RlIHVwIGEgc3VtbWFyeS9wcm9wb3NhbCANCiAgICBoZXJlOg0KICAgIA0KICAgIAlodHRw
+Oi8vcGFkLmNlcGguY29tL3Avb3NkbWFwLWV4cGxpY2l0LW1hcHBpbmcNCiAgICANCiAgICBUaGUg
+YmFzaWMgaWRlYSBpcyB0byBoYXZlIHRoZSBhYmlsaXR5IHRvIGV4cGxpY2l0bHkgbWFwIGluZGl2
+aWR1YWwgUEdzIA0KICAgIHRvIGNlcnRhaW4gT1NEcyBzbyB0aGF0IHdlIGNhbiBtb3ZlIFBHcyBm
+cm9tIG92ZXJmdWxsIHRvIHVuZGVyZnVsbCANCiAgICBkZXZpY2VzLiAgVGhlIGlkZWEgaXMgdGhh
+dCB0aGUgbW9uIG9yIG1nciB3b3VsZCBkbyB0aGlzIGJhc2VkIG9uIHNvbWUgDQogICAgaGV1cmlz
+dGljcyBvciBwb2xpY3kgYW5kIHNob3VsZCByZXN1bHQgaW4gYSBiZXR0ZXIgZGlzdHJpYnV0aW9u
+IHRoYW4gdGVoIA0KICAgIGN1cnJlbnQgb3NkIHdlaWdodCBhZGp1c3RtZW50cyB3ZSBtYWtlIG5v
+dyB3aXRoIHJld2VpZ2h0LWJ5LXV0aWxpemF0aW9uLg0KICAgIA0KICAgIFRoZSBvdGhlciBrZXkg
+cHJvcGVydHkgaXMgdGhhdCBvbmUgcmVhc29uIHdoeSB3ZSBuZWVkIGFzIG1hbnkgUEdzIGFzIHdl
+IGRvIA0KICAgIG5vdyBpcyB0byBnZXQgYSBnb29kIGJhbGFuY2U7IGlmIHdlIGNhbiByZW1hcCBz
+b21lIG9mIHRoZW0gZXhwbGljaXRseSwgd2UgDQogICAgY2FuIGdldCBhIGJldHRlciBiYWxhbmNl
+IHdpdGggZmV3ZXIuICBJbiBlc3NlbnNlLCBDUlVTSCBnaXZlcyBhbiANCiAgICBhcHByb3hpbWF0
+ZSBkaXN0cmlidXRpb24sIGFuZCB0aGVuIHdlIGNvcnJlY3QgdG8gbWFrZSBpdCBwZXJmZWN0IChv
+ciBjbG9zZSANCiAgICB0byBpdCkuDQogICAgDQogICAgVGhlIG1haW4gY2hhbGxlbmdlIGlzIGxl
+c3MgYWJvdXQgZmlndXJpbmcgb3V0IHdoZW4vaG93IHRvIHJlbWFwIFBHcyB0byANCiAgICBjb3Jy
+ZWN0IGJhbGFuY2UsIGJ1dCBmaWd1cmluZyBvdXQgd2hlbiB0byByZW1vdmUgdGhvc2UgcmVtYXBw
+aW5ncyBhZnRlciANCiAgICBDUlVTSCBtYXAgY2hhbmdlcy4gIFNvbWUgc2ltcGxlIGdyZWVkeSBz
+dHJhdGVnaWVzIGFyZSBvYnZpb3VzIHN0YXJ0aW5nIA0KICAgIHBvaW50cyAoZS5nLiwgdG8gbW92
+ZSBQR3Mgb2ZmIE9TRCBYLCBmaXJzdCBhZGp1c3Qgb3IgcmVtb3ZlIGV4aXN0aW5nIHJlbWFwIA0K
+ICAgIGVudHJpZXMgdGFyZ2V0dGluZyBPU0QgWCBiZWZvcmUgYWRkaW5nIG5ldyBvbmVzKSwgYnV0
+IHRoZXJlIGFyZSBhIGZldyANCiAgICB3YXlzIHdlIGNvdWxkIHN0cnVjdHVyZSB0aGUgcmVtYXAg
+ZW50cmllcyB0aGVtc2VsdmVzIHNvIHRoYXQgdGhleSANCiAgICBtb3JlIGdyYWNlZnVsbHkgZGlz
+YXBwZWFyIGFmdGVyIGEgY2hhbmdlLg0KICAgIA0KICAgIEZvciBleGFtcGxlLCBhIHJlbWFwIGVu
+dHJ5IG1pZ2h0IG1vdmUgYSBQRyBmcm9tIE9TRCBBIHRvIEIgaWYgaXQgbWFwcyB0byANCiAgICBB
+OyBpZiB0aGUgQ1JVU0ggdG9wb2xvZ3kgY2hhbmdlcyBhbmQgdGhlIFBHIG5vIGxvbmdlciBtYXBz
+IHRvIEEsIHRoZSBlbnRyeSANCiAgICB3b3VsZCBiZSByZW1vdmVkIG9yIGlnbm9yZWQuICBUaGVy
+ZSBhcmUgYSBmZXcgd2F5cyB0byBkbyB0aGlzIGluIHRoZSBwYWQ7IA0KICAgIEknbSBzdXJlIHRo
+ZXJlIGFyZSBvdGhlciBvcHRpb25zLg0KICAgIA0KICAgIEkgcHV0IHRoaXMgb24gdGhlIGFnZW5k
+YSBmb3IgQ0RNIHRvbmlnaHQuICBJZiBhbnlvbmUgaGFzIGFueSBvdGhlciBpZGVhcyANCiAgICBh
+Ym91dCB0aGlzIHdlJ2QgbG92ZSB0byBoZWFyIHRoZW0hDQogICAgDQogICAgc2FnZQ0KICAgIC0t
+DQogICAgVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vi
+c2NyaWJlIGNlcGgtZGV2ZWwiIGluDQogICAgdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9y
+ZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCiAgICBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8v
+dmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCiAgICANCg0K
