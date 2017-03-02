@@ -1,43 +1,29 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Document about ceph object class APIs
-Date: Thu, 2 Mar 2017 15:27:31 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1703021523380.651@piezo.novalocal>
-References: <CY4PR10MB159188A69CC453D4D1337CEBE4280@CY4PR10MB1591.namprd10.prod.outlook.com>
+From: Brett Niver <bniver@redhat.com>
+Subject: Testing with Bluestore and Filestore
+Date: Thu, 2 Mar 2017 11:36:34 -0500
+Message-ID: <CAMdDSN2xU=eRCxEDrq3qP0zmXxxTLAZrSboHcB8N4EH2ZhU8PQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49041 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753120AbdCBPwA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Mar 2017 10:52:00 -0500
-In-Reply-To: <CY4PR10MB159188A69CC453D4D1337CEBE4280@CY4PR10MB1591.namprd10.prod.outlook.com>
+Received: from mail-ot0-f171.google.com ([74.125.82.171]:35091 "EHLO
+        mail-ot0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751141AbdCBQhz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Mar 2017 11:37:55 -0500
+Received: by mail-ot0-f171.google.com with SMTP id x37so11206130ota.2
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Mar 2017 08:36:35 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Wang, Zhiye" <Zhiye.Wang@Arcserve.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Jason Dillaman <jdillama@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 2 Mar 2017, Wang, Zhiye wrote:
-> Dear all,
-> 
-> Where can I find document about how to extend ceph?
-> 
-> The only doc I can see is here:
-> http://docs.ceph.com/docs/master/architecture/#extending-ceph
-> 
-> And some examples in https://github.com/ceph/ceph/tree/master/src/cls
->
-> Where can I get document for those APIs? And are those APIs kept stable 
-> from release to release?
+Sage,
 
-The example classes are the best documentation currently.  The APIs are 
-quite stable, although in principle they could change.  The class plugins 
-need to be compiled against a specific build of ceph anyway, so you would 
-discover any future change at build time.  The storage calls (reads and 
-writes) roughly correspond to the RADOS operations defined in 
-include/rados.h (they map to the operations interpreted by do_osd_ops() in 
-PrimaryLogPG.cc), and those rados operations maintain compatibility across 
-many Ceph releases as they are normally originating from clients 
-connecting to the system that could be running other versions.
+Perhaps this has already been discussed, but Jason had a good idea,
+that perhaps instead of testing both BS and FS upstream independently,
+ and doubling our testing, we might have teuthology randomly pick
+which to use.
 
-Hope that helps!
-sage
+That would potentially reduce TCs and also give us the testing that
+would help prepare for working thru the migration/transition once BS
+is ready.
+
+Brett
