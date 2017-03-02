@@ -1,74 +1,32 @@
-From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
-Subject: Re: explicitly mapping pgs in OSDMap
-Date: Thu, 2 Mar 2017 17:33:45 +0000
-Message-ID: <362CBE0D-E1C6-4068-92AE-62CF5EDD836D@TERADATA.COM>
-References: <alpine.DEB.2.11.1703011932530.651@piezo.novalocal>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: nikita.gerasimov@oracle.com
+Subject: (unknown)
+Date: Thu,  2 Mar 2017 18:55:56 +0300
+Message-ID: <1488470157-1419-1-git-send-email-nikita.gerasimov@oracle.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nat13.teradata.com ([153.65.16.13]:38465 "EHLO
-        rpc7279.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1753852AbdCBRdt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Mar 2017 12:33:49 -0500
-In-Reply-To: <alpine.DEB.2.11.1703011932530.651@piezo.novalocal>
-Content-Language: en-US
-Content-ID: <FE83FB158E1F6340BC416696F45A0A26@TD.Teradata.com>
+Received: from aserp1050.oracle.com ([141.146.126.70]:33624 "EHLO
+        aserp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753966AbdCBReH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Mar 2017 12:34:07 -0500
+Received: from aserp1040.oracle.com (aserp1040.oracle.com [141.146.126.69])
+        by aserp1050.oracle.com (Sentrion-MTA-4.3.2/Sentrion-MTA-4.3.2) with ESMTP id v22FvQRQ019604
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
+        for <ceph-devel@vger.kernel.org>; Thu, 2 Mar 2017 15:57:26 GMT
+Received: from aserv0022.oracle.com (aserv0022.oracle.com [141.146.126.234])
+        by aserp1040.oracle.com (Sentrion-MTA-4.3.2/Sentrion-MTA-4.3.2) with ESMTP id v22FuOxb029646
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
+        for <ceph-devel@vger.kernel.org>; Thu, 2 Mar 2017 15:56:25 GMT
+Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
+        by aserv0022.oracle.com (8.14.4/8.14.4) with ESMTP id v22FuOa9027181
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
+        for <ceph-devel@vger.kernel.org>; Thu, 2 Mar 2017 15:56:24 GMT
+Received: from abhmp0014.oracle.com (abhmp0014.oracle.com [141.146.116.20])
+        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id v22FuOTL000697
+        for <ceph-devel@vger.kernel.org>; Thu, 2 Mar 2017 15:56:24 GMT
+Subject: 
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-SGkgU2FnZSwNCiAgVGhlIGNydXNoIGFsZ29yaXRobSBoYW5kbGVzIG1hcHBpbmcgb2YgcGdzLCBh
-bmQgaXQgd2lsbCBldmVuIHdpdGggdGhlDQphZGRpdGlvbiBvZiBleHBsaWNpdCBtYXBwaW5ncy4g
-SSBwcmVzdW1lLCBmaW5kaW5nIHdoaWNoIHBncyBiZWxvbmcgdG8NCndoaWNoIE9TRHMgd2lsbCBp
-bnZvbHZlIGFkZGl0aW9uIGNvbXB1dGF0aW9uIGZvciBlYWNoIGFkZGl0aW9uYWwNCmV4cGxpY2l0
-IG1hcHBpbmcuIA0KDQpXaGF0IHdvdWxkIGJlIHBlbmFsdHkgb2YgdGhpcyBhZGRpdGlvbmFsIGNv
-bXB1dGF0aW9uPyANCg0KRm9yIHNtYWxsIG51bWJlciBvZiBleHBsaWNpdCBtYXBwaW5ncyBzdWNo
-IHBlbmFsdHkgd291bGQgYmUgc21hbGwsIA0KSU1PIGl0IGNhbiBnZXQgcXVpdGUgZXhwZW5zaXZl
-IHdpdGggbGFyZ2UgbnVtYmVyIG9mIGV4cGxpY2l0IG1hcHBpbmdzLg0KVGhlIGltcGxlbWVudGF0
-aW9uIHdpbGwgbmVlZCB0byBtYW5hZ2UgdGhlIGNvdW50IG9mIGV4cGxpY2l0IG1hcHBpbmdzLA0K
-YnkgcmV2ZXJ0aW5nIHNvbWUgb2YgdGhlIGV4cGxpY2l0IG1hcHBpbmdzIGFzIHRoZSBkaXN0cmli
-dXRpb24gY2hhbmdlcy4NClRoZSB1bmRlcnN0YW5kaW5nIG9mIGFkZGl0aW9uYWwgb3ZlcmhlYWQg
-b2YgdGhlIGV4cGxpY2l0IG1hcHBpbmdzIHdvdWxkDQpoYWQgZ3JlYXQgaW5mbHVlbmNlIG9uIHRo
-ZSBpbXBsZW1lbnRhdGlvbi4NCg0KTml0aW4NCg0KDQoNCg0KT24gMy8xLzE3LCAxMTo0NCBBTSwg
-ImNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBTYWdlIFdlaWwi
-IDxjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2Ygc3dlaWxAcmVk
-aGF0LmNvbT4gd3JvdGU6DQoNCiAgICBUaGVyZSdzIGJlZW4gYSBsb25nc3RhbmRpbmcgZGVzaXJl
-IHRvIGltcHJvdmUgdGhlIGJhbGFuY2Ugb2YgUEdzIGFuZCBkYXRhIA0KICAgIGFjcm9zcyBPU0Rz
-IHRvIGJldHRlciB1dGlsaXplIHN0b3JhZ2UgYW5kIGJhbGFuY2Ugd29ya2xvYWQuICBXZSBoYWQg
-YSBmZXcgDQogICAgaWRlYXMgYWJvdXQgdGhpcyBpbiBhIG1lZXRpbmcgbGFzdCB3ZWVrIGFuZCBJ
-IHdyb3RlIHVwIGEgc3VtbWFyeS9wcm9wb3NhbCANCiAgICBoZXJlOg0KICAgIA0KICAgIAlodHRw
-Oi8vcGFkLmNlcGguY29tL3Avb3NkbWFwLWV4cGxpY2l0LW1hcHBpbmcNCiAgICANCiAgICBUaGUg
-YmFzaWMgaWRlYSBpcyB0byBoYXZlIHRoZSBhYmlsaXR5IHRvIGV4cGxpY2l0bHkgbWFwIGluZGl2
-aWR1YWwgUEdzIA0KICAgIHRvIGNlcnRhaW4gT1NEcyBzbyB0aGF0IHdlIGNhbiBtb3ZlIFBHcyBm
-cm9tIG92ZXJmdWxsIHRvIHVuZGVyZnVsbCANCiAgICBkZXZpY2VzLiAgVGhlIGlkZWEgaXMgdGhh
-dCB0aGUgbW9uIG9yIG1nciB3b3VsZCBkbyB0aGlzIGJhc2VkIG9uIHNvbWUgDQogICAgaGV1cmlz
-dGljcyBvciBwb2xpY3kgYW5kIHNob3VsZCByZXN1bHQgaW4gYSBiZXR0ZXIgZGlzdHJpYnV0aW9u
-IHRoYW4gdGVoIA0KICAgIGN1cnJlbnQgb3NkIHdlaWdodCBhZGp1c3RtZW50cyB3ZSBtYWtlIG5v
-dyB3aXRoIHJld2VpZ2h0LWJ5LXV0aWxpemF0aW9uLg0KICAgIA0KICAgIFRoZSBvdGhlciBrZXkg
-cHJvcGVydHkgaXMgdGhhdCBvbmUgcmVhc29uIHdoeSB3ZSBuZWVkIGFzIG1hbnkgUEdzIGFzIHdl
-IGRvIA0KICAgIG5vdyBpcyB0byBnZXQgYSBnb29kIGJhbGFuY2U7IGlmIHdlIGNhbiByZW1hcCBz
-b21lIG9mIHRoZW0gZXhwbGljaXRseSwgd2UgDQogICAgY2FuIGdldCBhIGJldHRlciBiYWxhbmNl
-IHdpdGggZmV3ZXIuICBJbiBlc3NlbnNlLCBDUlVTSCBnaXZlcyBhbiANCiAgICBhcHByb3hpbWF0
-ZSBkaXN0cmlidXRpb24sIGFuZCB0aGVuIHdlIGNvcnJlY3QgdG8gbWFrZSBpdCBwZXJmZWN0IChv
-ciBjbG9zZSANCiAgICB0byBpdCkuDQogICAgDQogICAgVGhlIG1haW4gY2hhbGxlbmdlIGlzIGxl
-c3MgYWJvdXQgZmlndXJpbmcgb3V0IHdoZW4vaG93IHRvIHJlbWFwIFBHcyB0byANCiAgICBjb3Jy
-ZWN0IGJhbGFuY2UsIGJ1dCBmaWd1cmluZyBvdXQgd2hlbiB0byByZW1vdmUgdGhvc2UgcmVtYXBw
-aW5ncyBhZnRlciANCiAgICBDUlVTSCBtYXAgY2hhbmdlcy4gIFNvbWUgc2ltcGxlIGdyZWVkeSBz
-dHJhdGVnaWVzIGFyZSBvYnZpb3VzIHN0YXJ0aW5nIA0KICAgIHBvaW50cyAoZS5nLiwgdG8gbW92
-ZSBQR3Mgb2ZmIE9TRCBYLCBmaXJzdCBhZGp1c3Qgb3IgcmVtb3ZlIGV4aXN0aW5nIHJlbWFwIA0K
-ICAgIGVudHJpZXMgdGFyZ2V0dGluZyBPU0QgWCBiZWZvcmUgYWRkaW5nIG5ldyBvbmVzKSwgYnV0
-IHRoZXJlIGFyZSBhIGZldyANCiAgICB3YXlzIHdlIGNvdWxkIHN0cnVjdHVyZSB0aGUgcmVtYXAg
-ZW50cmllcyB0aGVtc2VsdmVzIHNvIHRoYXQgdGhleSANCiAgICBtb3JlIGdyYWNlZnVsbHkgZGlz
-YXBwZWFyIGFmdGVyIGEgY2hhbmdlLg0KICAgIA0KICAgIEZvciBleGFtcGxlLCBhIHJlbWFwIGVu
-dHJ5IG1pZ2h0IG1vdmUgYSBQRyBmcm9tIE9TRCBBIHRvIEIgaWYgaXQgbWFwcyB0byANCiAgICBB
-OyBpZiB0aGUgQ1JVU0ggdG9wb2xvZ3kgY2hhbmdlcyBhbmQgdGhlIFBHIG5vIGxvbmdlciBtYXBz
-IHRvIEEsIHRoZSBlbnRyeSANCiAgICB3b3VsZCBiZSByZW1vdmVkIG9yIGlnbm9yZWQuICBUaGVy
-ZSBhcmUgYSBmZXcgd2F5cyB0byBkbyB0aGlzIGluIHRoZSBwYWQ7IA0KICAgIEknbSBzdXJlIHRo
-ZXJlIGFyZSBvdGhlciBvcHRpb25zLg0KICAgIA0KICAgIEkgcHV0IHRoaXMgb24gdGhlIGFnZW5k
-YSBmb3IgQ0RNIHRvbmlnaHQuICBJZiBhbnlvbmUgaGFzIGFueSBvdGhlciBpZGVhcyANCiAgICBh
-Ym91dCB0aGlzIHdlJ2QgbG92ZSB0byBoZWFyIHRoZW0hDQogICAgDQogICAgc2FnZQ0KICAgIC0t
-DQogICAgVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vi
-c2NyaWJlIGNlcGgtZGV2ZWwiIGluDQogICAgdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9y
-ZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCiAgICBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8v
-dmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCiAgICANCg0K
+run-make-check.sh SUCCESS: http://paste.ubuntu.com/24096418/
+
+WBR, Nikita.
