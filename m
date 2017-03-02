@@ -1,97 +1,194 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: explicitly mapping pgs in OSDMap
-Date: Thu, 2 Mar 2017 17:40:36 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1703021737440.651@piezo.novalocal>
-References: <alpine.DEB.2.11.1703011932530.651@piezo.novalocal> <362CBE0D-E1C6-4068-92AE-62CF5EDD836D@TERADATA.COM>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: [PATCH] ceph-detect-init: Adds Oracle Linux Server and Oracle VM
+ Server detection
+Date: Thu, 2 Mar 2017 19:16:36 +0100
+Message-ID: <c25a3567-c135-b63c-a9c6-af0e854362de@dachary.org>
+References: <1488473512-4374-1-git-send-email-nikita.gerasimov@oracle.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47846 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753217AbdCBRuQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 2 Mar 2017 12:50:16 -0500
-In-Reply-To: <362CBE0D-E1C6-4068-92AE-62CF5EDD836D@TERADATA.COM>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:35919 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754448AbdCBSQp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Mar 2017 13:16:45 -0500
+In-Reply-To: <1488473512-4374-1-git-send-email-nikita.gerasimov@oracle.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: nikita.gerasimov@oracle.com, ceph-devel@vger.kernel.org
 
-On Thu, 2 Mar 2017, Kamble, Nitin A wrote:
-> Hi Sage,
->   The crush algorithm handles mapping of pgs, and it will even with the
-> addition of explicit mappings. I presume, finding which pgs belong to
-> which OSDs will involve addition computation for each additional
-> explicit mapping. 
-> 
-> What would be penalty of this additional computation? 
-> 
-> For small number of explicit mappings such penalty would be small, 
-> IMO it can get quite expensive with large number of explicit mappings.
-> The implementation will need to manage the count of explicit mappings,
-> by reverting some of the explicit mappings as the distribution changes.
-> The understanding of additional overhead of the explicit mappings would
-> had great influence on the implementation.
+Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
-Yeah, we'll want to be careful with the implementation, e.g., by using an 
-unordered_map (hash table) for looking up the mappings (an rbtree won't 
-scale particularly well).
+On 03/02/2017 05:51 PM, nikita.gerasimov@oracle.com wrote:
+> From: Nikita Gerasimov <nikita.gerasimov@oracle.com>
+> 
+> Oracle Linux Server is API/ABI compatible with RHEL/CentOS Linux distro.
+> Oracle VM Server is Xen based VM server. Which modern versions Dom0 is based on el6
+> 
+> Signed-off-by: Nikita Gerasimov <nikita.gerasimov@oracle.com>
+> 
+> run-make-check.sh: http://paste.ubuntu.com/24096418/
+> ---
+>  install-deps.sh                                        |  2 +-
+>  src/ceph-detect-init/ceph_detect_init/__init__.py      | 18 ++++++++++++++++--
+>  .../ceph_detect_init/oraclevms/__init__.py             | 11 +++++++++++
+>  src/ceph-detect-init/tests/test_all.py                 | 18 ++++++++++++++++++
+>  4 files changed, 46 insertions(+), 3 deletions(-)
+>  create mode 100644 src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+> 
+> diff --git a/install-deps.sh b/install-deps.sh
+> index 41d393d..e1e8722 100755
+> --- a/install-deps.sh
+> +++ b/install-deps.sh
+> @@ -88,7 +88,7 @@ else
+>  	$SUDO env DEBIAN_FRONTEND=noninteractive apt-get -y remove ceph-build-deps
+>  	if [ -n "$backports" ] ; then rm $control; fi
+>          ;;
+> -    centos|fedora|rhel)
+> +    centos|fedora|rhel|ol)
+>          yumdnf="yum"
+>          builddepcmd="yum-builddep -y"
+>          if test "$(echo "$VERSION_ID >= 22" | bc)" -ne 0; then
+> diff --git a/src/ceph-detect-init/ceph_detect_init/__init__.py b/src/ceph-detect-init/ceph_detect_init/__init__.py
+> index aad3eee..9abc421 100644
+> --- a/src/ceph-detect-init/ceph_detect_init/__init__.py
+> +++ b/src/ceph-detect-init/ceph_detect_init/__init__.py
+> @@ -24,6 +24,7 @@ from ceph_detect_init import suse
+>  from ceph_detect_init import gentoo
+>  from ceph_detect_init import freebsd
+>  from ceph_detect_init import docker
+> +from ceph_detect_init import oraclevms
+>  import os
+>  import logging
+>  import platform
+> @@ -44,7 +45,8 @@ def get(use_rhceph=False):
+>      module.normalized_name = _normalized_distro_name(distro_name)
+>      module.distro = module.normalized_name
+>      module.is_el = module.normalized_name in ['redhat', 'centos',
+> -                                              'fedora', 'scientific']
+> +                                              'fedora', 'scientific',
+> +                                              'oraclel']
+>      module.release = release
+>      module.codename = codename
+>      module.init = module.choose_init()
+> @@ -64,6 +66,8 @@ def _get_distro(distro, use_rhceph=False):
+>          'linuxmint': debian,
+>          'centos': centos,
+>          'scientific': centos,
+> +        'oraclel': centos,
+> +        'oraclevms': oraclevms,
+>          'redhat': centos,
+>          'fedora': fedora,
+>          'suse': suse,
+> @@ -90,6 +94,10 @@ def _normalized_distro_name(distro):
+>          return 'suse'
+>      elif distro.startswith('centos'):
+>          return 'centos'
+> +    elif distro.startswith('oracle linux'):
+> +        return 'oraclel'
+> +    elif distro.startswith('oracle vm'):
+> +        return 'oraclevms'
+>      elif distro.startswith(('gentoo', 'funtoo', 'exherbo')):
+>          return 'gentoo'
+>      return distro
+> @@ -127,8 +135,9 @@ def platform_information():
+>      else:
+>          raise exc.UnsupportedPlatform(platform.system(), '', '')
+>  
+> +    distro_lower = distro.lower()
+>      # this could be an empty string in Debian
+> -    if not codename and 'debian' in distro.lower():
+> +    if not codename and 'debian' in distro_lower:
+>          debian_codenames = {
+>              '8': 'jessie',
+>              '7': 'wheezy',
+> @@ -146,6 +155,11 @@ def platform_information():
+>                  codename = minor
+>              else:
+>                  codename = major
+> +    # this is an empty string in Oracle
+> +    elif distro_lower.startswith('oracle linux'):
+> +        codename = 'OL' + release
+> +    elif distro_lower.startswith('oracle vm'):
+> +        codename = 'OVS' + release
+>  
+>      return (
+>          str(distro).rstrip(),
+> diff --git a/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py b/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+> new file mode 100644
+> index 0000000..f7bf85b
+> --- /dev/null
+> +++ b/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+> @@ -0,0 +1,11 @@
+> +distro = None
+> +release = None
+> +codename = None
+> +
+> +
+> +def choose_init():
+> +    """Select a init system
+> +
+> +    Returns the name of a init system (upstart, sysvinit ...).
+> +    """
+> +    return 'sysvinit'
+> diff --git a/src/ceph-detect-init/tests/test_all.py b/src/ceph-detect-init/tests/test_all.py
+> index d2733c3..eb48bb4 100644
+> --- a/src/ceph-detect-init/tests/test_all.py
+> +++ b/src/ceph-detect-init/tests/test_all.py
+> @@ -35,6 +35,7 @@ from ceph_detect_init import suse
+>  from ceph_detect_init import gentoo
+>  from ceph_detect_init import freebsd
+>  from ceph_detect_init import docker
+> +from ceph_detect_init import oraclevms
+>  
+>  logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
+>                      level=logging.DEBUG)
+> @@ -54,6 +55,9 @@ class TestCephDetectInit(testtools.TestCase):
+>      def test_docker(self):
+>          self.assertEqual('none', docker.choose_init())
+>  
+> +    def test_oraclevms(self):
+> +        self.assertEqual('sysvinit', oraclevms.choose_init())
+> +
+>      def test_centos(self):
+>          with mock.patch('ceph_detect_init.centos.release',
+>                          '7.0'):
+> @@ -207,6 +211,8 @@ class TestCephDetectInit(testtools.TestCase):
+>          self.assertEqual(debian, g('ubuntu'))
+>          self.assertEqual(centos, g('centos'))
+>          self.assertEqual(centos, g('scientific'))
+> +        self.assertEqual(centos, g('Oracle Linux Server'))
+> +        self.assertEqual(oraclevms, g('Oracle VM server'))
+>          self.assertEqual(fedora, g('fedora'))
+>          self.assertEqual(suse, g('suse'))
+>          self.assertEqual(rhel, g('redhat', use_rhceph=True))
+> @@ -222,6 +228,8 @@ class TestCephDetectInit(testtools.TestCase):
+>          self.assertEqual('scientific', n('Scientific'))
+>          self.assertEqual('scientific', n('Scientific Linux'))
+>          self.assertEqual('scientific', n('scientific linux'))
+> +        self.assertEqual('oraclel', n('Oracle Linux Server'))
+> +        self.assertEqual('oraclevms', n('Oracle VM server'))
+>          self.assertEqual('suse', n('SUSE'))
+>          self.assertEqual('suse', n('suse'))
+>          self.assertEqual('suse', n('openSUSE'))
+> @@ -266,6 +274,16 @@ class TestCephDetectInit(testtools.TestCase):
+>              self.assertEqual(('debian', 'sid/jessie', 'sid'),
+>                               ceph_detect_init.platform_information())
+>  
+> +        with mock.patch('platform.linux_distribution',
+> +                        lambda **kwargs: (('Oracle Linux Server', '7.3', ''))):
+> +            self.assertEqual(('Oracle Linux Server', '7.3', 'OL7.3'),
+> +                             ceph_detect_init.platform_information())
+> +
+> +        with mock.patch('platform.linux_distribution',
+> +                        lambda **kwargs: (('Oracle VM server', '3.4.2', ''))):
+> +            self.assertEqual(('Oracle VM server', '3.4.2', 'OVS3.4.2'),
+> +                             ceph_detect_init.platform_information())
+> +
+>      @mock.patch('platform.linux_distribution')
+>      def test_platform_information_container(self, mock_linux_dist):
+>          import sys
+> 
 
-Note that pg_temp is already a map<pg_t,vector<int>> and can get big when 
-you're doing a lot of rebalancing, resulting on O(log n) lookups.  If we 
-do something optimized here we should use the same strategy for pg_temp 
-too.
-
-sage
-
-
-> 
-> Nitin
-> 
-> 
-> 
-> 
-> On 3/1/17, 11:44 AM, "ceph-devel-owner@vger.kernel.org on behalf of Sage Weil" <ceph-devel-owner@vger.kernel.org on behalf of sweil@redhat.com> wrote:
-> 
->     There's been a longstanding desire to improve the balance of PGs and data 
->     across OSDs to better utilize storage and balance workload.  We had a few 
->     ideas about this in a meeting last week and I wrote up a summary/proposal 
->     here:
->     
->     	http://pad.ceph.com/p/osdmap-explicit-mapping
->     
->     The basic idea is to have the ability to explicitly map individual PGs 
->     to certain OSDs so that we can move PGs from overfull to underfull 
->     devices.  The idea is that the mon or mgr would do this based on some 
->     heuristics or policy and should result in a better distribution than teh 
->     current osd weight adjustments we make now with reweight-by-utilization.
->     
->     The other key property is that one reason why we need as many PGs as we do 
->     now is to get a good balance; if we can remap some of them explicitly, we 
->     can get a better balance with fewer.  In essense, CRUSH gives an 
->     approximate distribution, and then we correct to make it perfect (or close 
->     to it).
->     
->     The main challenge is less about figuring out when/how to remap PGs to 
->     correct balance, but figuring out when to remove those remappings after 
->     CRUSH map changes.  Some simple greedy strategies are obvious starting 
->     points (e.g., to move PGs off OSD X, first adjust or remove existing remap 
->     entries targetting OSD X before adding new ones), but there are a few 
->     ways we could structure the remap entries themselves so that they 
->     more gracefully disappear after a change.
->     
->     For example, a remap entry might move a PG from OSD A to B if it maps to 
->     A; if the CRUSH topology changes and the PG no longer maps to A, the entry 
->     would be removed or ignored.  There are a few ways to do this in the pad; 
->     I'm sure there are other options.
->     
->     I put this on the agenda for CDM tonight.  If anyone has any other ideas 
->     about this we'd love to hear them!
->     
->     sage
->     --
->     To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->     the body of a message to majordomo@vger.kernel.org
->     More majordomo info at  http://vger.kernel.org/majordomo-info.html
->     
-> 
-> 
+-- 
+Loïc Dachary, Artisan Logiciel Libre
