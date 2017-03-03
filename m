@@ -1,44 +1,27 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Jewel 10.2.6 ready for release
-Date: Thu, 2 Mar 2017 07:40:25 -0800
-Message-ID: <CAMMFjmECRzE3WNK=dQtOhuo_+6s2xHFuZvx-dkzFBHjCPSetPQ@mail.gmail.com>
+From: Alex Litvak <alexander.v.litvak@gmail.com>
+Subject: Hammer Update for EL6 is missing
+Date: Thu, 2 Mar 2017 19:06:25 -0600
+Message-ID: <03d4fca3-6eae-e84f-9ac9-675e749d90d4@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:35927 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751149AbdCBWwb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Mar 2017 17:52:31 -0500
-Received: by mail-wm0-f53.google.com with SMTP id n11so2980913wma.1
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Mar 2017 14:51:17 -0800 (PST)
+Received: from mail-io0-f171.google.com ([209.85.223.171]:35912 "EHLO
+        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751153AbdCCBIH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Mar 2017 20:08:07 -0500
+Received: by mail-io0-f171.google.com with SMTP id l7so65684708ioe.3
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Mar 2017 17:06:27 -0800 (PST)
+Received: from [10.10.10.50] (75-145-154-225-Illinois.hfc.comcastbusiness.net. [75.145.154.225])
+        by smtp.gmail.com with ESMTPSA id v1sm4077135iof.52.2017.03.02.17.06.26
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 02 Mar 2017 17:06:26 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Development, Ceph" <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>, "Weil, Sage" <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Gregory Farnum <gfarnum@redhat.com>, John Spray <jspray@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "gmeno@redhat.com" <gmeno@redhat.com>, "Schoen, Andrew" <andrew.schoen@gmail.com>, Abhishek Lekshmanan <abhishek@suse.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-QE validation is completed and Jewel 10.2.6 is ready for release.
+I am sorry to cross post but 0.94.10 update for Hammer rpm has not been 
+released for EL6, it was released for EL7.  As far as I know Hammer is 
+still supported for EL6. Could you please build RPMS?
 
-Detailed summary of the QE Validation can be found here
-http://tracker.ceph.com/issues/17851#note-92
-
-The following suites were in scope of this point release validation:
-
-rados (subset 35/50 228 jobs)
-rbd
-rgw
-fs
-krbd
-kcephfs
-knfs
-rest
-hadoop
-samba
-ceph-deploy
-ceph-disk
-upgrade/client-upgrade
-upgrade/hammer-x (jewel)
-upgrade/jewel-x/point-to-point-x
-powercycle
-ceph-ansible
-
-Thx
-YuriW
