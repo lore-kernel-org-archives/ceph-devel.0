@@ -1,243 +1,185 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: explicitly mapping pgs in OSDMap
-Date: Fri, 3 Mar 2017 14:55:49 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1703031453300.651@piezo.novalocal>
-References: <alpine.DEB.2.11.1703011932530.651@piezo.novalocal> <362CBE0D-E1C6-4068-92AE-62CF5EDD836D@TERADATA.COM> <alpine.DEB.2.11.1703021737440.651@piezo.novalocal> <F6F90D3B-5362-48D1-B786-2191E5B98331@gmail.com> <alpine.DEB.2.11.1703021804520.651@piezo.novalocal>
- <f32962ee-3502-6bf9-683a-c1afce3c9c47@corp.ovh.com>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: osds crashing during hit_set_trim and
+	hit_set_remove_all
+Date: Fri, 3 Mar 2017 15:40:05 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1703031536480.651@piezo.novalocal>
+References: <CAK9wOaDWaX5QGwh07wNSaU9ormyin4WhFzmNqOi+7sN2_=V4JQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-2062165894-1488552951=:651"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54526 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752029AbdCCPUP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 3 Mar 2017 10:20:15 -0500
-In-Reply-To: <f32962ee-3502-6bf9-683a-c1afce3c9c47@corp.ovh.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?Bart=B3omiej_=A6wi=EAcki?= <bartlomiej.swiecki@corp.ovh.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-924152236-1488555831=:651"
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAK9wOaDWaX5QGwh07wNSaU9ormyin4WhFzmNqOi+7sN2_=V4JQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mike Lovell <mike.lovell-Kvon/JIRTjNl57MIdRCFDg@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
   This message is in MIME format.  The first part should be readable text,
   while the remaining parts are likely unreadable without MIME-aware tools.
 
---8323329-2062165894-1488552951=:651
+--8323329-924152236-1488555831=:651
 Content-Type: TEXT/PLAIN; charset=UTF-8
 Content-Transfer-Encoding: 8BIT
 
-On Fri, 3 Mar 2017, Bartłomiej Święcki wrote:
-> Hi Sage,
+On Fri, 3 Mar 2017, Mike Lovell wrote:
+> i started an upgrade process to go from 0.94.7 to 10.2.5 on a production
+> cluster that is using cache tiering. this cluster has 3 monitors, 28 storage
+> nodes, around 370 osds. the upgrade of the monitors completed without issue.
+> i then upgraded 2 of the storage nodes, and after the restarts, the osds
+> started crashing during hit_set_trim. here is some of the output from the
+> log.
+> 2017-03-02 22:41:32.338290 7f8bfd6d7700 -1 osd/ReplicatedPG.cc: In function
+> 'void ReplicatedPG::hit_set_trim(ReplicatedPG::RepGather*, unsigned int)'
+> thread 7f8bfd6d7700 time 2017-03-02 22:41:32.335020
+> osd/ReplicatedPG.cc: 10514: FAILED assert(obc)
 > 
-> The more I think about explicit-only mapping (so clients and OSDs
-> not doing CRUSH computations anymore) the more interesting
-> use cases I can see, better balance being only one of them.
+>  ceph version 0.94.7 (d56bdf93ced6b80b07397d57e3fa68fe68304432)
+>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> const*)+0x85) [0xbddac5]
+>  2: (ReplicatedPG::hit_set_trim(ReplicatedPG::RepGather*, unsigned
+> int)+0x75f) [0x87e48f]
+>  3: (ReplicatedPG::hit_set_persist()+0xedb) [0x87f4ab]
+>  4: (ReplicatedPG::do_op(std::tr1::shared_ptr<OpRequest>&)+0xe3a) [0x8a0d1a]
+>  5: (ReplicatedPG::do_request(std::tr1::shared_ptr<OpRequest>&,
+> ThreadPool::TPHandle&)+0x68a) [0x83be4a]
+>  6: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+> std::tr1::shared_ptr<OpRequest>, ThreadPool::TPHandle&)+0x405) [0x69a5c5]
+>  7: (OSD::ShardedOpWQ::_process(unsigned int,
+> ceph::heartbeat_handle_d*)+0x333) [0x69ab33]
+>  8: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x86f)
+> [0xbcd1cf]
+>  9: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0xbcf300]
+>  10: (()+0x7dc5) [0x7f8c1c209dc5]
+>  11: (clone()+0x6d) [0x7f8c1aceaced]
 > 
-> Other major advantage I see is that Client would become independent
-> of internal CRUSH calculation changes (straw->straw2 was a bit
-> problematic on our production for example) which I believe would
-> also simplify keeping backward compatibility, especially for the
-> kernel stuff. Also it looks like the code would simplify.
+> it started on just one osd and then spread to others until most of the osds
+> that are part of the cache tier were crashing. that was happening on both
+> the osds that were running jewel and on the ones running hammer. in the
+> process of trying to sort this out, the use_gmt_hitset option was set to
+> true and all of the osds were upgraded to hammer. we still have not been
+> able to determine a cause or a fix.
 > 
-> Such explicit mapping could also help with all kinds of cluster
-> reconfiguration stuff - i.e. growing cluster by significant amount of
-> OSDs could be spread over time to reduce backfill impact, same with
-> increasing pgp_num. I also believe peering could gain here too
-> because mon/mgr could ensure only limited number of PGs is blocked
-> peering at the same time.
+> it looks like when hit_set_trim and hit_set_remove_all are being called,
+> they are calling hit_set_archive_object() to generate a name based on a
+> timestamp and then calling get_object_context() which then returns nothing
+> and triggers an assert.
+> 
+> i raised the debug_osd to 10/10 and then analyzed the logs after the crash.
+> i found the following in the ceph osd log afterwards.
+> 
+> 2017-03-03 03:10:31.918470 7f218c842700 10 osd.146 pg_epoch: 266043
+> pg[19.5d4( v 264786'61233923 (262173'61230715,264786'61233923]
+> local-les=266043 n=393 ec=83762 les/c/f 266043/264767/0
+> 266042/266042/266042) [146,116,179] r=0 lpr=266042
+>  pi=264766-266041/431 crt=262323'61233250 lcod 0'0 mlcod 0'0 active+degraded
+> NIBBLEWISE] get_object_context: no obc for soid
+> 19:2ba00000:.ceph-internal::hit_set_19.5d4_archive_2017-03-03
+> 05%3a55%3a58.459084Z_2017-03-03 05%3a56%3a58.98101
+> 6Z:head and !can_create
+> 2017-03-03 03:10:31.921064 7f2194051700 10 osd.146 266043 do_waiters --
+> start
+> 2017-03-03 03:10:31.921072 7f2194051700 10 osd.146 266043 do_waiters --
+> finish
+> 2017-03-03 03:10:31.921076 7f2194051700  7 osd.146 266043 handle_pg_notify
+> from osd.255
+> 2017-03-03 03:10:31.921096 7f2194051700 10 osd.146 266043 do_waiters --
+> start
+> 2017-03-03 03:10:31.921099 7f2194051700 10 osd.146 266043 do_waiters --
+> finish
+> 2017-03-03 03:10:31.925858 7f218c041700 -1 osd/ReplicatedPG.cc: In function
+> 'void ReplicatedPG::hit_set_remove_all()' thread 7f218c041700 time
+> 2017-03-03 03:10:31.918201
+> osd/ReplicatedPG.cc: 11494: FAILED assert(obc)
+> 
+>  ceph version 10.2.5 (c461ee19ecbc0c5c330aca20f7392c9a00730367)
+>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> const*)+0x85) [0x7f21acee9425]
+>  2: (ReplicatedPG::hit_set_remove_all()+0x412) [0x7f21ac9cba92]
+>  3: (ReplicatedPG::on_activate()+0x6dd) [0x7f21ac9f73fd]
+>  4: (PG::RecoveryState::Active::react(PG::AllReplicasActivated const&)+0xac)
+> [0x7f21ac916adc]
+>  5: (boost::statechart::simple_state<PG::RecoveryState::Active,
+> PG::RecoveryState::Primary, PG::RecoveryState::Activating,(boost::statechart::history_mode)0>::react_impl(boost::statechart::event_ba
+> se const&, void const*)+0x179) [0x7f21a
+> c974909]
+>  6: (boost::statechart::simple_state<PG::RecoveryState::Activating,
+> PG::RecoveryState::Active, boost::mpl::list<mpl_::na, mpl_::na, mpl_::na,
+> mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na,
+> mpl_::na, mpl_::na, mpl_:
+> :na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na, mpl_::na>,(boost::statechart::history_mode)0>::react_impl(boost::statechart::event_ba
+> se const&, void const*)+0xcd) [0x7f21ac977ccd]
+>  7: (boost::statechart::state_machine<PG::RecoveryState::RecoveryMachine,
+> PG::RecoveryState::Initial, std::allocator<void>,boost::statechart::null_exception_translator>::send_event(boost::statechart
+> ::event_base const&)+0x6b) [0x7f21ac95
+> d9cb]
+>  8: (PG::handle_peering_event(std::shared_ptr<PG::CephPeeringEvt>,
+> PG::RecoveryCtx*)+0x1f4) [0x7f21ac924d24]
+>  9: (OSD::process_peering_events(std::list<PG*, std::allocator<PG*> >
+> const&, ThreadPool::TPHandle&)+0x259) [0x7f21ac87de99]
+>  10: (OSD::PeeringWQ::_process(std::list<PG*, std::allocator<PG*> > const&,
+> ThreadPool::TPHandle&)+0x12) [0x7f21ac8c8552]
+>  11: (ThreadPool::worker(ThreadPool::WorkThread*)+0xa7e) [0x7f21aceda46e]
+>  12: (ThreadPool::WorkThread::entry()+0x10) [0x7f21acedb350]
+>  13: (()+0x7dc5) [0x7f21aac04dc5]
+>  14: (clone()+0x6d) [0x7f21a928f73d]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to
+> interpret this.
+> 
+> it looks like it was looking for a hit_set with a timestamp
+> of 05:55:58.459084Z but the timestamp on the log lines is for
+> 3:10:31.921096. we have tried various options of the hit_set_count and
+> hit_set_period but the osds are still trying to find objects for timestamps
+> that don't exist. i've looked through the osd pg directories (i.e.
+> /var/lib/ceph/osd/ceph-##/current/<pg.id>_head) and found hit_set objects
+> but with wildly different timestamps.
+> 
+> there are a few bugs on tracker that look like their related but we haven't
+> been able to find a fix from them yet. http://tracker.ceph.com/issues/13185
+> is the closest one but it hasn't given us a hint on a fix
+> yet. http://tracker.ceph.com/issues/14399
+> and http://tracker.ceph.com/issues/9732 also seem related but also haven't
+> helped. we have verified that all nodes are using the same timezone and have
+> consistent timestamps. we're currently looking at options to edit the
+> hit_set_setup() code to skip the hit_set_remove() call and the failing code.
+> this will give us empty hit sets and the thought is that we will then flush
+> the cache tier and remove it then add one back. still not sure if its going
+> to work.
+> 
+> does anyone else have any other thoughts about how to handle this or why
+> this is happening? or what else we could do to get the osds back online?
+> this has crashed almost all of the cache tier osds and the cluster is
+> unusable at the moment.
 
-Yeah
- 
-> About memory overhead - I agree that it is the most important factor to
-> consider. I don't know ceph internals that much yet to be authoritative
-> here but I believe that in case of cluster rebalance, the amount of data
-> that has to be maintained can already grow way beyond whatexplicit
-> mapping would need. Is it possible that such explicit map would also
-> store list of potential OSDs as long as the PG is not fully recovered?
-> That would mean the osdmap history could be trimmed much faster, it
-> would be easier to predict mon resource requirements and monitors would
-> sync much faster during recovery.
+This looks like it's a variation on the earlier bug, but I'm not sure why 
+you're hitting it an others haven't.  In the meantime, to get your cluster 
+up, you just need to skip teh hitsets that won't load obc's.   This will 
+leave the objects behind but it's not a big deal and can be cleaned up 
+later.
 
-Keeping the old osdmaps around is a somewhat orthogonal problem, and if we 
-address that I suspect it'd be a different solution.  There is a 'past 
-intervals' PR in flight that makes the OSDs tracking of this more 
-efficient, and I suspect we could come up with something that would let us 
-trim sooner than we currently do.  It'll take some careful planning, 
-though!
+See github.com/liewegas/ceph/commit/wip-jewel-nocrash-gmt.  You can build 
+that or you should see some (completely untested!) packages appear at 
+shaman.ceph.com in an hour or so.
+
+Maybe Kefu knows why this might have triggered?
 
 sage
 
+--8323329-924152236-1488555831=:651
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-> 
-> Regards,
-> Bartek
-> 
-> 
-> W dniu 02.03.2017 o 19:09, Sage Weil pisze:
-> > On Fri, 3 Mar 2017, Tiger Hu wrote:
-> > > Hi Sage,
-> > > I am very glad to know you raised this issue. In some cases, user may want
-> > > to accurately control the PG numbers in every OSDs. Is it possible to
-> > > add/implement a new policy to support fixed-mapping? This may be useful
-> > > for
-> > > performance tuning or test purpose. Thanks.
-> > In principle this could be used to map every pg explicitly without regard
-> > for CRUSH.  In think in practice, though, we can have CRUSH map 80-90% of
-> > the PGs, and then have explicit mappings for 10-20% in order to achieve
-> > the same "perfect" balance of PGs.
-> > 
-> > The result is a smaller OSDMap.  It might not matter that much for small
-> > clusters, but for large clusters, it is helpful to keep the OSDMap small.
-> > 
-> > OTOH, maybe through all of this we end up in a place where the OSDMap is
-> > just an explicit map and the mgr agent that's managing it is using CRUSH
-> > to generate it; who knows!  That might make for faster mappings on the
-> > clients since it's a table lookup instead of a mapping calculation.
-> > 
-> > I'm thinking that if we implement the ability to have the explicit
-> > mappings in the OSDMap we open up both possibilities.  The hard part is
-> > always getting the mapping compatbility into the client, so if we do that
-> > right, luminous+ clients will support explicit mapping (overrides) in
-> > OSDMap and would be able to work with future versions that go all-in on
-> > explicit...
-> > 
-> > sage
-> > 
-> > 
-> >   >
-> > > Tiger
-> > >        在 2017年3月3日，上午1:40，Sage Weil <sweil@redhat.com> 写道：
-> > > 
-> > > On Thu, 2 Mar 2017, Kamble, Nitin A wrote:
-> > >        Hi Sage,
-> > >         The crush algorithm handles mapping of pgs, and it will
-> > >        even with the
-> > >        addition of explicit mappings. I presume, finding which
-> > >        pgs belong to
-> > >        which OSDs will involve addition computation for each
-> > >        additional
-> > >        explicit mapping.
-> > > 
-> > >        What would be penalty of this additional computation?
-> > > 
-> > >        For small number of explicit mappings such penalty would
-> > >        be small,
-> > >        IMO it can get quite expensive with large number of
-> > >        explicit mappings.
-> > >        The implementation will need to manage the count of
-> > >        explicit mappings,
-> > >        by reverting some of the explicit mappings as the
-> > >        distribution changes.
-> > >        The understanding of additional overhead of the explicit
-> > >        mappings would
-> > >        had great influence on the implementation.
-> > > 
-> > > 
-> > > Yeah, we'll want to be careful with the implementation, e.g., by using
-> > > an
-> > > unordered_map (hash table) for looking up the mappings (an rbtree
-> > > won't
-> > > scale particularly well).
-> > > 
-> > > Note that pg_temp is already a map<pg_t,vector<int>> and can get big
-> > > when
-> > > you're doing a lot of rebalancing, resulting on O(log n) lookups.  If
-> > > we
-> > > do something optimized here we should use the same strategy for
-> > > pg_temp
-> > > too.
-> > > 
-> > > sage
-> > > 
-> > > 
-> > > 
-> > >        Nitin
-> > > 
-> > > 
-> > > 
-> > > 
-> > >        On 3/1/17, 11:44 AM, "ceph-devel-owner@vger.kernel.org on
-> > >        behalf of Sage Weil" <ceph-devel-owner@vger.kernel.org on
-> > >        behalf of sweil@redhat.com> wrote:
-> > > 
-> > >           There's been a longstanding desire to improve the
-> > >        balance of PGs and data
-> > >           across OSDs to better utilize storage and balance
-> > >        workload.  We had a few
-> > >           ideas about this in a meeting last week and I wrote up
-> > >        a summary/proposal
-> > >           here:
-> > > 
-> > >            http://pad.ceph.com/p/osdmap-explicit-mapping
-> > > 
-> > >           The basic idea is to have the ability to explicitly map
-> > >        individual PGs
-> > >           to certain OSDs so that we can move PGs from overfull
-> > >        to underfull
-> > >           devices.  The idea is that the mon or mgr would do this
-> > >        based on some
-> > >           heuristics or policy and should result in a better
-> > >        distribution than teh
-> > >           current osd weight adjustments we make now with
-> > >        reweight-by-utilization.
-> > > 
-> > >           The other key property is that one reason why we need
-> > >        as many PGs as we do
-> > >           now is to get a good balance; if we can remap some of
-> > >        them explicitly, we
-> > >           can get a better balance with fewer.  In essense, CRUSH
-> > >        gives an
-> > >           approximate distribution, and then we correct to make
-> > >        it perfect (or close
-> > >           to it).
-> > > 
-> > >           The main challenge is less about figuring out when/how
-> > >        to remap PGs to
-> > >           correct balance, but figuring out when to remove those
-> > >        remappings after
-> > >           CRUSH map changes.  Some simple greedy strategies are
-> > >        obvious starting
-> > >           points (e.g., to move PGs off OSD X, first adjust or
-> > >        remove existing remap
-> > >           entries targetting OSD X before adding new ones), but
-> > >        there are a few
-> > >           ways we could structure the remap entries themselves so
-> > >        that they
-> > >           more gracefully disappear after a change.
-> > > 
-> > >           For example, a remap entry might move a PG from OSD A
-> > >        to B if it maps to
-> > >           A; if the CRUSH topology changes and the PG no longer
-> > >        maps to A, the entry
-> > >           would be removed or ignored.  There are a few ways to
-> > >        do this in the pad;
-> > >           I'm sure there are other options.
-> > > 
-> > >           I put this on the agenda for CDM tonight.  If anyone
-> > >        has any other ideas
-> > >           about this we'd love to hear them!
-> > > 
-> > >           sage
-> > >           --
-> > >           To unsubscribe from this list: send the line
-> > >        "unsubscribe ceph-devel" in
-> > >           the body of a message to majordomo@vger.kernel.org
-> > >           More majordomo info at
-> > >         http://vger.kernel.org/majordomo-info.html
-> > > 
-> > > 
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel"
-> > > in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > 
-> > > 
-> > > 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---8323329-2062165894-1488552951=:651--
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--8323329-924152236-1488555831=:651--
