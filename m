@@ -1,95 +1,219 @@
-From: Elena Reshetova <elena.reshetova@intel.com>
-Subject: [PATCH 2/2] fs, ceph: convert ceph_cap_snap.nref from atomic_t to refcount_t
-Date: Fri,  3 Mar 2017 11:15:07 +0200
-Message-ID: <1488532507-27863-3-git-send-email-elena.reshetova@intel.com>
-References: <1488532507-27863-1-git-send-email-elena.reshetova@intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1488532507-27863-1-git-send-email-elena.reshetova@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: ceph-devel@vger.kernel.org, peterz@infradead.org, gregkh@linuxfoundation.org, zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, Elena Reshetova <elena.reshetova@intel.com>, Hans Liljestrand <ishkamiel@gmail.com>, Kees Cook <keescook@chromium.org>, David Windsor <dwindsor@gmail.com>
-List-Id: ceph-devel.vger.kernel.org
+From: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?=
+        <bartlomiej.swiecki@corp.ovh.com>
+Subject: Re: explicitly mapping pgs in OSDMap
+Date: Fri, 3 Mar 2017 10:20:51 +0100
+Message-ID: <f32962ee-3502-6bf9-683a-c1afce3c9c47@corp.ovh.com>
+References: <alpine.DEB.2.11.1703011932530.651@piezo.novalocal>
+ <362CBE0D-E1C6-4068-92AE-62CF5EDD836D@TERADATA.COM>
+ <alpine.DEB.2.11.1703021737440.651@piezo.novalocal>
+ <F6F90D3B-5362-48D1-B786-2191E5B98331@gmail.com>
+ <alpine.DEB.2.11.1703021804520.651@piezo.novalocal>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from 6.mo301.mail-out.ovh.net ([137.74.110.69]:47907 "EHLO
+        6.mo301.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751074AbdCCJWb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Mar 2017 04:22:31 -0500
+In-Reply-To: <alpine.DEB.2.11.1703021804520.651@piezo.novalocal>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-refcount_t type and corresponding API should be
-used instead of atomic_t when the variable is used as
-a reference counter. This allows to avoid accidental
-refcounter overflows that might lead to use-after-free
-situations.
+Hi Sage,
 
-Signed-off-by: Elena Reshetova <elena.reshetova@intel.com>
-Signed-off-by: Hans Liljestrand <ishkamiel@gmail.com>
-Signed-off-by: Kees Cook <keescook@chromium.org>
-Signed-off-by: David Windsor <dwindsor@gmail.com>
----
- fs/ceph/caps.c  | 4 ++--
- fs/ceph/snap.c  | 2 +-
- fs/ceph/super.h | 5 +++--
- 3 files changed, 6 insertions(+), 5 deletions(-)
+The more I think about explicit-only mapping (so clients and OSDs
+not doing CRUSH computations anymore) the more interesting
+use cases I can see, better balance being only one of them.
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index cd966f2..99a77c2c 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1389,7 +1389,7 @@ static void __ceph_flush_snaps(struct ceph_inode_info *ci,
- 		first_tid = cf->tid + 1;
- 
- 		capsnap = container_of(cf, struct ceph_cap_snap, cap_flush);
--		atomic_inc(&capsnap->nref);
-+		refcount_inc(&capsnap->nref);
- 		spin_unlock(&ci->i_ceph_lock);
- 
- 		dout("__flush_snaps %p capsnap %p tid %llu %s\n",
-@@ -2202,7 +2202,7 @@ static void __kick_flushing_caps(struct ceph_mds_client *mdsc,
- 			     inode, capsnap, cf->tid,
- 			     ceph_cap_string(capsnap->dirty));
- 
--			atomic_inc(&capsnap->nref);
-+			refcount_inc(&capsnap->nref);
- 			spin_unlock(&ci->i_ceph_lock);
- 
- 			ret = __send_flush_snap(inode, session, capsnap, cap->mseq,
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index 8f8b41c..dab5d67 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -519,7 +519,7 @@ void ceph_queue_cap_snap(struct ceph_inode_info *ci)
- 	     capsnap->need_flush ? "" : "no_flush");
- 	ihold(inode);
- 
--	atomic_set(&capsnap->nref, 1);
-+	refcount_set(&capsnap->nref, 1);
- 	INIT_LIST_HEAD(&capsnap->ci_item);
- 
- 	capsnap->follows = old_snapc->seq;
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index fe6b9cf..c68e6a0 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -14,6 +14,7 @@
- #include <linux/writeback.h>
- #include <linux/slab.h>
- #include <linux/posix_acl.h>
-+#include <linux/refcount.h>
- 
- #include <linux/ceph/libceph.h>
- 
-@@ -162,7 +163,7 @@ struct ceph_cap_flush {
-  * data before flushing the snapped state (tracked here) back to the MDS.
-  */
- struct ceph_cap_snap {
--	atomic_t nref;
-+	refcount_t nref;
- 	struct list_head ci_item;
- 
- 	struct ceph_cap_flush cap_flush;
-@@ -191,7 +192,7 @@ struct ceph_cap_snap {
- 
- static inline void ceph_put_cap_snap(struct ceph_cap_snap *capsnap)
- {
--	if (atomic_dec_and_test(&capsnap->nref)) {
-+	if (refcount_dec_and_test(&capsnap->nref)) {
- 		if (capsnap->xattr_blob)
- 			ceph_buffer_put(capsnap->xattr_blob);
- 		kfree(capsnap);
--- 
-2.7.4
+Other major advantage I see is that Client would become independent
+of internal CRUSH calculation changes (straw->straw2 was a bit
+problematic on our production for example) which I believe would
+also simplify keeping backward compatibility, especially for the
+kernel stuff. Also it looks like the code would simplify.
+
+Such explicit mapping could also help with all kinds of cluster
+reconfiguration stuff - i.e. growing cluster by significant amount of
+OSDs could be spread over time to reduce backfill impact, same with
+increasing pgp_num. I also believe peering could gain here too
+because mon/mgr could ensure only limited number of PGs is blocked
+peering at the same time.
+
+About memory overhead - I agree that it is the most important factor to
+consider. I don't know ceph internals that much yet to be authoritative
+here but I believe that in case of cluster rebalance, the amount of data
+that has to be maintained can already grow way beyond whatexplicit
+mapping would need. Is it possible that such explicit map would also
+store list of potential OSDs as long as the PG is not fully recovered?
+That would mean the osdmap history could be trimmed much faster, it
+would be easier to predict mon resource requirements and monitors would
+sync much faster during recovery.
+
+Regards,
+Bartek
+
+
+W dniu 02.03.2017 o 19:09, Sage Weil pisze:
+> On Fri, 3 Mar 2017, Tiger Hu wrote:
+>> Hi Sage,
+>> I am very glad to know you raised this issue. In some cases, user may want
+>> to accurately control the PG numbers in every OSDs. Is it possible to
+>> add/implement a new policy to support fixed-mapping? This may be useful for
+>> performance tuning or test purpose. Thanks.
+> In principle this could be used to map every pg explicitly without regard
+> for CRUSH.  In think in practice, though, we can have CRUSH map 80-90% of
+> the PGs, and then have explicit mappings for 10-20% in order to achieve
+> the same "perfect" balance of PGs.
+>
+> The result is a smaller OSDMap.  It might not matter that much for small
+> clusters, but for large clusters, it is helpful to keep the OSDMap small.
+>
+> OTOH, maybe through all of this we end up in a place where the OSDMap is
+> just an explicit map and the mgr agent that's managing it is using CRUSH
+> to generate it; who knows!  That might make for faster mappings on the
+> clients since it's a table lookup instead of a mapping calculation.
+>
+> I'm thinking that if we implement the ability to have the explicit
+> mappings in the OSDMap we open up both possibilities.  The hard part is
+> always getting the mapping compatbility into the client, so if we do that
+> right, luminous+ clients will support explicit mapping (overrides) in
+> OSDMap and would be able to work with future versions that go all-in on
+> explicit...
+>
+> sage
+>
+>
+>   >
+>> Tiger
+>>        在 2017年3月3日，上午1:40，Sage Weil <sweil@redhat.com> 写道：
+>>
+>> On Thu, 2 Mar 2017, Kamble, Nitin A wrote:
+>>        Hi Sage,
+>>         The crush algorithm handles mapping of pgs, and it will
+>>        even with the
+>>        addition of explicit mappings. I presume, finding which
+>>        pgs belong to
+>>        which OSDs will involve addition computation for each
+>>        additional
+>>        explicit mapping.
+>>
+>>        What would be penalty of this additional computation?
+>>
+>>        For small number of explicit mappings such penalty would
+>>        be small,
+>>        IMO it can get quite expensive with large number of
+>>        explicit mappings.
+>>        The implementation will need to manage the count of
+>>        explicit mappings,
+>>        by reverting some of the explicit mappings as the
+>>        distribution changes.
+>>        The understanding of additional overhead of the explicit
+>>        mappings would
+>>        had great influence on the implementation.
+>>
+>>
+>> Yeah, we'll want to be careful with the implementation, e.g., by using
+>> an
+>> unordered_map (hash table) for looking up the mappings (an rbtree
+>> won't
+>> scale particularly well).
+>>
+>> Note that pg_temp is already a map<pg_t,vector<int>> and can get big
+>> when
+>> you're doing a lot of rebalancing, resulting on O(log n) lookups.  If
+>> we
+>> do something optimized here we should use the same strategy for
+>> pg_temp
+>> too.
+>>
+>> sage
+>>
+>>
+>>
+>>        Nitin
+>>
+>>
+>>
+>>
+>>        On 3/1/17, 11:44 AM, "ceph-devel-owner@vger.kernel.org on
+>>        behalf of Sage Weil" <ceph-devel-owner@vger.kernel.org on
+>>        behalf of sweil@redhat.com> wrote:
+>>
+>>           There's been a longstanding desire to improve the
+>>        balance of PGs and data
+>>           across OSDs to better utilize storage and balance
+>>        workload.  We had a few
+>>           ideas about this in a meeting last week and I wrote up
+>>        a summary/proposal
+>>           here:
+>>
+>>            http://pad.ceph.com/p/osdmap-explicit-mapping
+>>
+>>           The basic idea is to have the ability to explicitly map
+>>        individual PGs
+>>           to certain OSDs so that we can move PGs from overfull
+>>        to underfull
+>>           devices.  The idea is that the mon or mgr would do this
+>>        based on some
+>>           heuristics or policy and should result in a better
+>>        distribution than teh
+>>           current osd weight adjustments we make now with
+>>        reweight-by-utilization.
+>>
+>>           The other key property is that one reason why we need
+>>        as many PGs as we do
+>>           now is to get a good balance; if we can remap some of
+>>        them explicitly, we
+>>           can get a better balance with fewer.  In essense, CRUSH
+>>        gives an
+>>           approximate distribution, and then we correct to make
+>>        it perfect (or close
+>>           to it).
+>>
+>>           The main challenge is less about figuring out when/how
+>>        to remap PGs to
+>>           correct balance, but figuring out when to remove those
+>>        remappings after
+>>           CRUSH map changes.  Some simple greedy strategies are
+>>        obvious starting
+>>           points (e.g., to move PGs off OSD X, first adjust or
+>>        remove existing remap
+>>           entries targetting OSD X before adding new ones), but
+>>        there are a few
+>>           ways we could structure the remap entries themselves so
+>>        that they
+>>           more gracefully disappear after a change.
+>>
+>>           For example, a remap entry might move a PG from OSD A
+>>        to B if it maps to
+>>           A; if the CRUSH topology changes and the PG no longer
+>>        maps to A, the entry
+>>           would be removed or ignored.  There are a few ways to
+>>        do this in the pad;
+>>           I'm sure there are other options.
+>>
+>>           I put this on the agenda for CDM tonight.  If anyone
+>>        has any other ideas
+>>           about this we'd love to hear them!
+>>
+>>           sage
+>>           --
+>>           To unsubscribe from this list: send the line
+>>        "unsubscribe ceph-devel" in
+>>           the body of a message to majordomo@vger.kernel.org
+>>           More majordomo info at
+>>         http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+
