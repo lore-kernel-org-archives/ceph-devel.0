@@ -1,47 +1,72 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: python-crush to experiment with crush
-Date: Sun, 5 Mar 2017 08:49:00 +0100
-Message-ID: <601e709f-cbfc-a1e6-830e-7edf007470da@dachary.org>
+From: John Spray <jspray@redhat.com>
+Subject: Re: "Tags" for Ceph pools?
+Date: Sun, 5 Mar 2017 23:54:56 +0000
+Message-ID: <CALe9h7cQZz=oaQfTfoXYmdqWHdr76bWHs0HjxYiEJk2E-qjonQ@mail.gmail.com>
+References: <20160628195427.bu2idrr25apcundv@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:51479 "EHLO
-        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750904AbdCEHtG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Mar 2017 02:49:06 -0500
-Received: from mfilter14-d.gandi.net (mfilter14-d.gandi.net [217.70.178.142])
-        by relay3-d.mail.gandi.net (Postfix) with ESMTP id 7074FA80C4
-        for <ceph-devel@vger.kernel.org>; Sun,  5 Mar 2017 08:49:03 +0100 (CET)
-Received: from relay3-d.mail.gandi.net ([IPv6:::ffff:217.70.183.195])
-        by mfilter14-d.gandi.net (mfilter14-d.gandi.net [::ffff:10.0.15.180]) (amavisd-new, port 10024)
-        with ESMTP id opAq2zqLwCgt for <ceph-devel@vger.kernel.org>;
-        Sun,  5 Mar 2017 08:49:01 +0100 (CET)
-Received: from [192.168.1.8] (65.78.31.93.rev.sfr.net [93.31.78.65])
-        (Authenticated sender: loic@dachary.org)
-        by relay3-d.mail.gandi.net (Postfix) with ESMTPSA id A47A3A80C7
-        for <ceph-devel@vger.kernel.org>; Sun,  5 Mar 2017 08:49:01 +0100 (CET)
+Received: from mail-wr0-f177.google.com ([209.85.128.177]:35971 "EHLO
+        mail-wr0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752442AbdCEXzS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Mar 2017 18:55:18 -0500
+Received: by mail-wr0-f177.google.com with SMTP id u108so105602205wrb.3
+        for <ceph-devel@vger.kernel.org>; Sun, 05 Mar 2017 15:55:17 -0800 (PST)
+In-Reply-To: <20160628195427.bu2idrr25apcundv@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Lars Marowsky-Bree <lmb@suse.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+On Tue, Jun 28, 2016 at 8:54 PM, Lars Marowsky-Bree <lmb@suse.com> wrote:
+> Hi all,
+>
+> silly question time. From a UX perspective, we sometimes need to know
+> what a specific pool does. We can't always figure it out directly by
+> looking at the pool - is this used for RBDs? A MDS metadata pool? RGW
+> buckets?
+>
+> Right now, that is all bundled into the naming scheme. Is that the way
+> to proceed? Is there a recommended/standard naming scheme that tools
+> could attach to, then?
+>
+> We though of storing it in an object in the pool, but, uh, that
+> obviously doesn't work so well for cache-tiered pools ;-)
+>
+> Or should we have metadata about our Ceph entities maintained outside
+> Ceph, in a separate tooling database?
+>
+> Or would there be the chance to somehow store some description
+> somewhere, like a few k/v, free-form? x-... parameters maybe?
 
-While researching the crush multipick anomaly[1], Pedro López-Adeva Fernández-Layos came up with a problem statement and a python implementation[2]. It is work in progress and it seemed useful to have a python module implementing crush to help with experimentations. The python-crush[3] module was written for that purpose last week and published on PyPI. It proposes an API with two functions (parse the crushmap & map an object). The crushmap is a python object and is fully documented[4].
+(/me perfoms arcane ritual to bring this thread back from the grave)
 
-Although python-crush is usable as it is, noone should depend on it right now because two important aspects need to be discussed:
+I'm wondering if Lars or anyone else went further with the pool
+metadata topic at all?
 
-  - should the API be different ?
-  - is the crushmap format ok ?
+Aside from the integration with external tools, I'm finding that I
+would also use this for sanity-checking pool selection within Ceph
+itself.  e.g. I would like rbd pools to be marked as such, so that if
+I'm offering the user a list of pools to use with cephfs then I can
+exclude the rbd ones, and the same for rgw.
 
-In other words, the current python-crush module is a basis for discussion and there is a good chance both the API and the crushmap are completely different in a few weeks.
+John
 
-Cheers
 
-[1] crush multipick anomaly http://marc.info/?l=ceph-devel&m=148539995928656&w=2
-[2] https://github.com/plafl/notebooks/blob/master/converted/replication.pdf
-[3] python-crush http://crush.readthedocs.io/
-[4] crushmap documentation http://crush.readthedocs.io/en/latest/api.html#crush.Crush.parse
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+> (Tool suppliers could then agree on common tags, hopefully.)
+>
+>
+>
+> Regards
+>     Lars
+>
+> --
+> SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+> "Experience is the name everyone gives to their mistakes." -- Oscar Wilde
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
