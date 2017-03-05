@@ -1,43 +1,47 @@
-From: Abhishek Varshney <abhishek.varshney@flipkart.com>
-Subject: Upgrading from debian7/hammer to debian8/jewel : rgw logrotate fails
- on the way
-Date: Sat, 4 Mar 2017 22:21:19 +0530
-Message-ID: <CAP3mxSx8+yuvz8=pt8h6=oNwqQ7fuTv66ZmnfjnQ8fJk0eU7JA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: python-crush to experiment with crush
+Date: Sun, 5 Mar 2017 08:49:00 +0100
+Message-ID: <601e709f-cbfc-a1e6-830e-7edf007470da@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f180.google.com ([209.85.161.180]:35184 "EHLO
-        mail-yw0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752112AbdCDQvV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 4 Mar 2017 11:51:21 -0500
-Received: by mail-yw0-f180.google.com with SMTP id v198so12358004ywc.2
-        for <ceph-devel@vger.kernel.org>; Sat, 04 Mar 2017 08:51:20 -0800 (PST)
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:51479 "EHLO
+        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750904AbdCEHtG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Mar 2017 02:49:06 -0500
+Received: from mfilter14-d.gandi.net (mfilter14-d.gandi.net [217.70.178.142])
+        by relay3-d.mail.gandi.net (Postfix) with ESMTP id 7074FA80C4
+        for <ceph-devel@vger.kernel.org>; Sun,  5 Mar 2017 08:49:03 +0100 (CET)
+Received: from relay3-d.mail.gandi.net ([IPv6:::ffff:217.70.183.195])
+        by mfilter14-d.gandi.net (mfilter14-d.gandi.net [::ffff:10.0.15.180]) (amavisd-new, port 10024)
+        with ESMTP id opAq2zqLwCgt for <ceph-devel@vger.kernel.org>;
+        Sun,  5 Mar 2017 08:49:01 +0100 (CET)
+Received: from [192.168.1.8] (65.78.31.93.rev.sfr.net [93.31.78.65])
+        (Authenticated sender: loic@dachary.org)
+        by relay3-d.mail.gandi.net (Postfix) with ESMTPSA id A47A3A80C7
+        for <ceph-devel@vger.kernel.org>; Sun,  5 Mar 2017 08:49:01 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ceph Development <ceph-devel@vger.kernel.org>
 
 Hi,
 
-As part of upgrading from v0.94.2 on debian wheezy to v0.94.6 on
-debian jessie and ultimately to jewel, it was found that logrotate for
-radosgw fails on ceph v0.94.3 and later, for debian-based distros with
-systemd. This probably happens because the radosgw service name has
-been renamed to ceph-radosgw with this PR [1].
-As far as I understand, systemd support for debian is not present in
-hammer and was only introduced in infernalis [2]. But for RHEL-based
-distros, hammer does seem to support systemd.
+While researching the crush multipick anomaly[1], Pedro López-Adeva Fernández-Layos came up with a problem statement and a python implementation[2]. It is work in progress and it seemed useful to have a python module implementing crush to help with experimentations. The python-crush[3] module was written for that purpose last week and published on PyPI. It proposes an API with two functions (parse the crushmap & map an object). The crushmap is a python object and is fully documented[4].
 
-Are there any other gotchas that could be expected with debian jessie
-(systemd) + hammer mix? I am aware that hammer is not supported on
-debian jessie [3], but this is unavoidable for us to be able to
-upgrade from (debian wheezy + hammer) to (debian jessie + jewel).
+Although python-crush is usable as it is, noone should depend on it right now because two important aspects need to be discussed:
 
-In case, PRs are still being accepted for hammer, here is the proposed
-fix to this particular issue: https://github.com/ceph/ceph/pull/13793.
+  - should the API be different ?
+  - is the crushmap format ok ?
 
-[1] https://github.com/ceph/ceph/pull/3953
-[2] https://github.com/ceph/ceph/pull/5446
-[3] http://docs.ceph.com/docs/master/start/os-recommendations/
+In other words, the current python-crush module is a basis for discussion and there is a good chance both the API and the crushmap are completely different in a few weeks.
 
-Thanks
-Abhishek
+Cheers
+
+[1] crush multipick anomaly http://marc.info/?l=ceph-devel&m=148539995928656&w=2
+[2] https://github.com/plafl/notebooks/blob/master/converted/replication.pdf
+[3] python-crush http://crush.readthedocs.io/
+[4] crushmap documentation http://crush.readthedocs.io/en/latest/api.html#crush.Crush.parse
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
