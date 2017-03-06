@@ -1,157 +1,139 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: Proposing strategies for debuginfo size reduction
-Date: Mon, 6 Mar 2017 17:31:29 +0800
-Message-ID: <CAJE9aOPBkXETOTW6QgZTJVuW65wLv=UrENHADvd_r6VNwvHqHA@mail.gmail.com>
-References: <CAF-wwdHTkEAGchaPD=qV0tuVNtrevhG0=ny1SdDz7-vbTXE3BQ@mail.gmail.com>
+From: "Wang, Zhiye" <Zhiye.Wang@Arcserve.com>
+Subject: RE: Document about ceph object class APIs
+Date: Mon, 6 Mar 2017 09:03:08 +0000
+Message-ID: <CY4PR10MB159138A6BB5D4EB2A311968EE42C0@CY4PR10MB1591.namprd10.prod.outlook.com>
+References: <CY4PR10MB159188A69CC453D4D1337CEBE4280@CY4PR10MB1591.namprd10.prod.outlook.com>
+ <alpine.DEB.2.11.1703021523380.651@piezo.novalocal>
+ <CY4PR10MB1591EAE795A3091A2A4597D3E42B0@CY4PR10MB1591.namprd10.prod.outlook.com>
+ <alpine.DEB.2.11.1703031446020.651@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f177.google.com ([209.85.217.177]:33538 "EHLO
-        mail-ua0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754035AbdCFJbb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Mar 2017 04:31:31 -0500
-Received: by mail-ua0-f177.google.com with SMTP id u30so28513362uau.0
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Mar 2017 01:31:30 -0800 (PST)
-In-Reply-To: <CAF-wwdHTkEAGchaPD=qV0tuVNtrevhG0=ny1SdDz7-vbTXE3BQ@mail.gmail.com>
+Received: from mail-co1nam03on0124.outbound.protection.outlook.com ([104.47.40.124]:53120
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1753186AbdCFKjM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 6 Mar 2017 05:39:12 -0500
+In-Reply-To: <alpine.DEB.2.11.1703031446020.651@piezo.novalocal>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Mar 6, 2017 at 3:00 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
-> Recently there was some discussion about the size of the ceph
-> debuginfo package so I thought I would do a little investigation into
-> the size and what, if anything, we can do about it.
->
-> A recent master build shows the following.
->
-> ceph-debuginfo-12.0.0-812.gc73d8b4.el7.x86_64.rpm  06-Mar-2017 03:46
->         911856132
->
-> So about 900M (note that an equivalent kernel debuginfo package is
-> under 350M). This will increase as we have just disabled dwz
-> compression in master.
->
-> Once extracted that is...
->
-> $ du ./usr/ --max-depth=0
-> 3472348 ./usr/
->
-> So about 3.4G on disk. That's a lot of debuginfo.
->
-> First I went looking for an easy win and I believe there may be one to
-> be had in the fact that we include debuginfo for the ceph_test_*
-> binaries. Do we need to produce debuginfo for them? They currently
-> represent about 800+M on disk so could represent a quick and easy way
-> to reduce the size of the debuginfo we ship.
+Hi Sage,
 
-we do, so we can perform post-mortem debugging with the coredump if any
-of them crashes in the qa run. but maybe their debuginfo is not necessary
-for the builds intended be used by our users. but we still need to patch
-rpm[1]. and looks like the upstream does not like this idea[2]. as discussed
-over IRC, maybe we need to understand the "underlying problem", i.e.
-who/what is the biggest contributor of the 800+M debuginfo before going
-any further.
+You are correct.
 
->
-> Another option that has been discussed may be to split the debuginfo
-> package into various sub-packages that align somewhat with the
-> sub-packages we currently generate. I believe this already happens to
-> some degree in the deb packaging. Unfortunately, this is not
-> straight-forward to achieve with rpm based distros although I note
-> that OpenSUSE have gone down this path.A the problem with these two
-> approaches IMHO is that they don't directly address the issue of why
+I was trying to find certain IO plugin architecture so that I get a chance =
+to insert my code/module to change read/write operations' behavior.
 
-please see http://tracker.ceph.com/issues/19099#note-16.
+I'd suggest such kind of plugin architecture to ceph. It will make it easy =
+to add new function to ceph.
+
+A good example is MS Windows IO Manager, it's designed to give user chance =
+to insert code/modules at every layers of IO path. It's helpful for enlargi=
+ng its ecosystem.
+
+Of course, it's much complicated for a distributed storage system.
 
 
-> the debuginfo package is so large.
->
-> I then looked at compiler options that may help.
->
-> With the addition of the following line to CMakeLists.txt we see a
-> significant reduction in the size of the debuginfo.
->
-> set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -femit-struct-debug-reduced")
->
-> ceph-debuginfo-12.0.0-812.g60fccb2.el7.x86_64.rpm  06-Mar-2017 01:08
->         661507672
->
-> Changing that CMakeLists.txt line to the following reduces it further.
->
-> set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -femit-struct-debug-baseonly")
->
-> ceph-debuginfo-12.0.0-812.gac37464.el7.x86_64.rpm  06-Mar-2017 02:37
->         513097340
->
-> These flags seem to be the only ones that make a significant difference [1].
->
-> The scary part here is that these flags result in some loss of
-> debuginfo, how much and how that would affect debugging I'm still
-> trying to determine. There are strategies to include debuginfo that
-> may be omitted [2]. I'd suggest thought that this option would need a
-> lot more research and some testing.
->
-> The final suggestion is based on speculation and therefore requires
-> further investigation, discussion, planning and testing before moving
-> forward. I *suspect* that the reason our debuginfo package is so large
-> is due to all the static linking we do and I would suggest that
-> reducing the amount of static linking would go a long way to reduce
-> the size of the debuginfo. Currently we statically link rocksdb,
-> boost, civetweb, zstd, and isa-l at least as well as libceph-common
-> and possibly others on a per-binary basis but these are the main ones.
+Thanks
+Zhiye
 
-this is not accurate. currently, libceph-common statically links against
-these libraries. and our tests and client side tools are linked against
-libceph-common, so they are not duplicated among them.
 
-but because this library is included by librados2 which is not depended
-by the daemons, like, ceph-osd, ceph-mon. and these daemons have
-their own copy of these libraries. so if we want to dedup the shared
-code/debuginfo further, we should create a dedicated package so
-both client/tests and daemons can depend on it. because i don't think
-that the ceph-osd and its friends should depend on librados, which
-is a client side library/package.
+-----Original Message-----
+From: Sage Weil [mailto:sage@newdream.net]=20
+Sent: Friday, March 3, 2017 10:51 PM
+To: Wang, Zhiye <Zhiye.Wang@Arcserve.com>
+Cc: ceph-devel@vger.kernel.org
+Subject: RE: Document about ceph object class APIs
 
-> One possible solution to this may be to build our own shared objects
-> and dynamically link to them (libcephboost_system.so,
-> libcephboost_program_options.so, libcephrocksdb.so, etc.) We would
-> then, of course, have to package these but I suspect it would actually
-> lead to a smaller on-disk footprint. If my suspicion is right this
-> will significantly reduce the size of the debuginfo we package but, of
-> course, this would need to be validated and I welcome the thoughts and
-> opinions of others about the merit of this approach as well as the
-> others mentioned.
+On Fri, 3 Mar 2017, Wang, Zhiye wrote:
+> Thank you Sage.
+>=20
+> Yes, I am looking at the example code. " cls_register_cxx_method"=20
+> seems pretty clear. Especially, there is a good blog
+> (http://ceph.com/rados/dynamic-object-interfaces-with-lua/) which=20
+> explains it well.
+>=20
+> I am interested in function "cls_register_cxx_filter". What is exactly=20
+> the function, and what is a PGLS filter? I will look into more code,=20
+> but I will appreciate if you can give it an introduction.
 
-i don't think the downstreams would be in favor of this solution. as the only
-point of splitting them is to have smaller debuginfo. these so will be only
-used by libceph-common. even if we go this way, we still have problem
-for packaging the debuginfo of them: we cannot do this without patching
-the rpm, see
+The filter is for PGLS, which lists objects.  It lets you define a selectio=
+n function so that onyl certain objects are included in the result.  It's u=
+sed for cephfs repair when it is searching for unlinked objects/files (roug=
+hly speaking).
+=20
+> Actually, I am looking for something like this: (data comes from=20
+> CephFS), before OSD writes file data to underlying storage, my filter=20
+> code get a chance to modify the data content, and then write to the=20
+> current object in current pool, or write to another object in another=20
+> pool. I guess this somehow can be achieved using=20
+> "cls_register_cxx_method" related methods, but I don't want to change=20
+> anything on client side (because it's difficult to=20
+> modify/incorporate/distribute modify code to all clients).
 
----
-[1] SuSE's patch of rpm for splitting debuginfo into subpackage,
-    https://build.opensuse.org/package/view_file?file=debugsubpkg.diff&package=rpm&project=openSUSE%3AFactory.
-[2] https://bugzilla.redhat.com/show_bug.cgi?id=185590
+Ah, this unfortunatey isn't possible with the cls mechanism.  The class met=
+hods are intended to work like methods on objects (in teh OOP sense) in tha=
+t they only operate on a single object and must operate in isolation withou=
+t blocking.  (This lets us bury it into a complex request processing and re=
+plication pipeline with transactional semantics.)  Also, since CephFS is is=
+suing the requests, you'd have to change the client to issue a different ty=
+pe of op if you wanted to do something other than write.
 
->
-> Looking forward to people's thoughts on this.
->
->
-> [1] https://gcc.gnu.org/onlinedocs/gcc/Debugging-Options.html
-> [2] http://opengrok.baylibre.com/source/history/linux/lib/debug_info.c
->
->
+I'm guessing you're trying to do some sort of tiering or dedup here?  That =
+won't be something that cls ops can do... it needs to be built into RADOS.
+
+HTH!
+sage
+
+> Is "cls_register_cxx_filter" what I am looking for?
+>=20
+>=20
+> Thanks
+> Mike
+>=20
+>=20
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@newdream.net]
+> Sent: Thursday, March 2, 2017 11:28 PM
+> To: Wang, Zhiye <Zhiye.Wang@Arcserve.com>
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: Document about ceph object class APIs
+>=20
+> On Thu, 2 Mar 2017, Wang, Zhiye wrote:
+> > Dear all,
+> >=20
+> > Where can I find document about how to extend ceph?
+> >=20
+> > The only doc I can see is here:
+> > http://docs.ceph.com/docs/master/architecture/#extending-ceph
+> >=20
+> > And some examples in=20
+> > https://github.com/ceph/ceph/tree/master/src/cls
+> >
+> > Where can I get document for those APIs? And are those APIs kept=20
+> > stable from release to release?
+>=20
+> The example classes are the best documentation currently.  The APIs=20
+> are quite stable, although in principle they could change.  The class=20
+> plugins need to be compiled against a specific build of ceph anyway,=20
+> so you would discover any future change at build time.  The storage=20
+> calls (reads and
+> writes) roughly correspond to the RADOS operations defined in include/rad=
+os.h (they map to the operations interpreted by do_osd_ops() in PrimaryLogP=
+G.cc), and those rados operations maintain compatibility across many Ceph r=
+eleases as they are normally originating from clients connecting to the sys=
+tem that could be running other versions.
+>=20
+> Hope that helps!
+> sage
 > --
-> Cheers,
-> Brad
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Regards
-Kefu Chai
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=20
+> in the body of a message to majordomo@vger.kernel.org More majordomo=20
+> info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
