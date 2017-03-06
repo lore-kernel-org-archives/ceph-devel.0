@@ -1,59 +1,47 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: [PATCH 7/7] jbd2: make the whole kjournald2 kthread NOFS safe
-Date: Mon,  6 Mar 2017 14:14:08 +0100
-Message-ID: <20170306131408.9828-8-mhocko@kernel.org>
-References: <20170306131408.9828-1-mhocko@kernel.org>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170306131408.9828-1-mhocko@kernel.org>
-Sender: owner-linux-mm@kvack.org
-To: Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org
-Cc: linux-mm@kvack.org, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+From: "peng.hse" <peng.hse@xtaotech.com>
+Subject: problems to protect rbd from mutiple simultaneous mapping
+Date: Mon, 6 Mar 2017 22:08:51 +0800
+Message-ID: <58BD6D73.6040200@xtaotech.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mr213139.mail.yeah.net ([223.252.213.139]:17389 "EHLO
+        mr213139.mail.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751378AbdCFOP7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Mar 2017 09:15:59 -0500
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, jdurgin@redhat.com, ceph-devel@vger.kernel.org
 
-From: Michal Hocko <mhocko@suse.com>
+Hi Sage,
 
-kjournald2 is central to the transaction commit processing. As such any
-potential allocation from this kernel thread has to be GFP_NOFS. Make
-sure to mark the whole kernel thread GFP_NOFS by the memalloc_nofs_save.
+the recommended way to protect rbd from multiple simultaneous mapping is 
+just as the follows:
 
-Suggested-by: Jan Kara <jack@suse.cz>
-Reviewed-by: Jan Kara <jack@suse.cz>
-Signed-off-by: Michal Hocko <mhocko@suse.com>
----
- fs/jbd2/journal.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+- identify old rbd lock holder
+- blacklist old owner
+- break the old rbd lock through "rbd lock remove"
+- map rbd image on new host
 
-diff --git a/fs/jbd2/journal.c b/fs/jbd2/journal.c
-index a1a359bfcc9c..78433ce1db40 100644
---- a/fs/jbd2/journal.c
-+++ b/fs/jbd2/journal.c
-@@ -43,6 +43,7 @@
- #include <linux/backing-dev.h>
- #include <linux/bitops.h>
- #include <linux/ratelimit.h>
-+#include <linux/sched/mm.h>
- 
- #define CREATE_TRACE_POINTS
- #include <trace/events/jbd2.h>
-@@ -206,6 +207,13 @@ static int kjournald2(void *arg)
- 	wake_up(&journal->j_wait_done_commit);
- 
- 	/*
-+	 * Make sure that no allocations from this kernel thread will ever recurse
-+	 * to the fs layer because we are responsible for the transaction commit
-+	 * and any fs involvement might get stuck waiting for the trasn. commit.
-+	 */
-+	memalloc_nofs_save();
-+
-+	/*
- 	 * And now, wait forever for commit wakeup events.
- 	 */
- 	write_lock(&journal->j_state_lock);
--- 
-2.11.0
+However, i am wondering how do we handle the situation as the below 
+timeline sequences:
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+  1. node1 locks the rbd image, doing the IO request, the IO is 
+outstanding in the osds and
+      not commit and reply to client yet
+
+  2. node2 takes over the corresponding IO service due to some network 
+partition issue,
+      add node1 into the blacklist to all osds successfully and resume 
+the IO.
+
+3. assuming the step-1 outstanding IO and step-2 IO targeted the same 
+area of the fs metadata
+     on the rbd devices. step-2 successfully persist the data and reply 
+to client.
+     then, the following laggy IO from step-1 might override and corrupt 
+what we have written in step-2.
+
+so, how do we prevent this kind of corruption happening?
+
