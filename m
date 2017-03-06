@@ -1,96 +1,83 @@
-From: ceph branch robot <nobody@ceph.com>
-Subject: ceph branch status
-Date: Mon,  6 Mar 2017 08:00:05 -0800 (PST)
-Message-ID: <20170306160005.F3685280381@teuthology.front.sepia.ceph.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [PATCH] rbd: supported_features bus attribute
+Date: Mon, 6 Mar 2017 16:10:12 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1703061610030.24356@piezo.novalocal>
+References: <1488813845-4201-1-git-send-email-idryomov@gmail.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from [8.43.84.3] ([8.43.84.3]:63478 "EHLO
-        teuthology.front.sepia.ceph.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1753947AbdCFQAG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Mar 2017 11:00:06 -0500
+Received: from cobra.newdream.net ([66.33.216.30]:37153 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753356AbdCFQQi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Mar 2017 11:16:38 -0500
+In-Reply-To: <1488813845-4201-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
--- All Branches --
+On Mon, 6 Mar 2017, Ilya Dryomov wrote:
+> ... so that userspace can generate meaningful error messages and spell
+> out unsupported features that need to be disabled.
+> 
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 
-Ali Maredia <amaredia@redhat.com>
-	2017-01-18 15:37:03 -0500   wip-nfs-ganesha-teuthology
-	2017-02-16 13:28:36 -0500   wip-rgw-multisite-teuthology
+Reviewed-by: Sage Weil <sage@redhat.com>
 
-Boris Ranto <branto@redhat.com>
-	2017-02-16 11:34:31 +0100   wip-ceph-disk-fix
-
-Casey Bodley <cbodley@redhat.com>
-	2017-02-27 16:00:43 -0500   wip-rgw-encryption-doc
-
-Dan Lambright <dlambrig@redhat.com>
-	2017-01-09 17:47:19 -0500   wip-message-factory
-	2017-02-03 14:24:04 -0500   wip-osd-ioinject
-
-Danny Al-Gaaf <danny.al-gaaf@bisect.de>
-	2017-02-21 17:38:26 +0100   wip-dalgaaf-sca-20170220
-
-GitHub <noreply@github.com>
-	2016-11-02 08:42:35 +0200   infernalis
-	2016-12-14 11:40:17 -0600   firefly
-	2017-01-23 17:49:54 +0100   hammer-next
-	2017-02-01 23:28:22 +0100   jewel-next
-	2017-02-14 13:03:03 -0800   wip-cherrypick-4tamil
-	2017-03-02 14:00:13 -0700   jewel
-	2017-03-04 11:22:44 -0600   kraken
-
-Jenkins Build Slave User <ceph-release-team@redhat.com>
-	2017-02-08 13:57:33 +0000   luminous
-	2017-02-21 15:12:34 +0000   hammer
-
-Loic Dachary <ldachary@redhat.com>
-	2015-03-23 17:44:12 +0100   dumpling
-
-Loic Dachary <loic@dachary.org>
-	2015-10-17 00:38:34 +0200   giant
-
-Marcus Watts <mwatts@redhat.com>
-	2016-10-19 05:05:50 -0400   wip-master-rgw-0lenfix1
-	2016-11-11 01:22:10 -0500   wip-xml-string-wrap
-	2016-11-11 01:25:55 -0500   wip-json-smarter-escapes
-	2016-11-11 01:29:56 -0500   wip-buildfix-python-out-of-tree
-
-Orit Wasserman <owasserm@redhat.com>
-	2017-01-02 12:13:26 +0200   wip-orit-resharding-hammer
-
-Pritha Srivastava <prsrivas@redhat.com>
-	2016-12-22 20:28:09 +0530   wip-rgw-polymorphic-errors
-	2017-01-16 11:36:24 +0530   wip-rgw-ssl-teuthology
-
-Sage Weil <sage@inktank.com>
-	2013-04-18 13:51:36 -0700   argonaut
-
-Sage Weil <sage@redhat.com>
-	2015-01-12 08:30:40 -0800   emperor
-
-Samuel Just <sjust@redhat.com>
-	2017-02-20 21:24:33 -0800   wip-snap-trim-sleep
-
-Vasu Kulkarni <vasu@redhat.com>
-	2017-01-30 14:13:10 -0800   wip-cd-dev-option
-	2017-01-30 14:32:18 -0800   wip-cd-hammer
-	2017-01-30 22:03:08 -0800   wip-qemu-redir
-	2017-02-09 16:06:07 -0800   wip-use-only-dev
-	2017-03-03 16:42:47 -0800   rh-jewel
-
-Wido den Hollander <wido@42on.com>
-	2017-01-03 15:36:28 +0100   osd-mark-inactive
-
-Yehuda Sadeh <yehuda@inktank.com>
-	2014-01-28 09:38:19 -0800   bobtail
-	2014-01-28 09:40:18 -0800   cuttlefish
-
-Yehuda Sadeh <yehuda@redhat.com>
-	2016-10-03 16:51:40 -0700   dnm-dang-reshard
-
-Yuri Weinstein <yweinste@redhat.com>
-	2017-02-13 12:42:34 -0800   wip-15752-master_ceph
-
-
-
-Grouped by committer, ordered by commit time stamp.
+> ---
+>  drivers/block/rbd.c | 16 ++++++++++++----
+>  1 file changed, 12 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 4138ed8565c6..8cfbac1e815e 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -120,10 +120,11 @@ static int atomic_dec_return_safe(atomic_t *v)
+>  
+>  /* Feature bits */
+>  
+> -#define RBD_FEATURE_LAYERING	(1<<0)
+> -#define RBD_FEATURE_STRIPINGV2	(1<<1)
+> -#define RBD_FEATURE_EXCLUSIVE_LOCK (1<<2)
+> -#define RBD_FEATURE_DATA_POOL (1<<7)
+> +#define RBD_FEATURE_LAYERING		(1ULL<<0)
+> +#define RBD_FEATURE_STRIPINGV2		(1ULL<<1)
+> +#define RBD_FEATURE_EXCLUSIVE_LOCK	(1ULL<<2)
+> +#define RBD_FEATURE_DATA_POOL		(1ULL<<7)
+> +
+>  #define RBD_FEATURES_ALL	(RBD_FEATURE_LAYERING |		\
+>  				 RBD_FEATURE_STRIPINGV2 |	\
+>  				 RBD_FEATURE_EXCLUSIVE_LOCK |	\
+> @@ -499,16 +500,23 @@ static bool rbd_is_lock_owner(struct rbd_device *rbd_dev)
+>  	return is_lock_owner;
+>  }
+>  
+> +static ssize_t rbd_supported_features_show(struct bus_type *bus, char *buf)
+> +{
+> +	return sprintf(buf, "0x%llx\n", RBD_FEATURES_SUPPORTED);
+> +}
+> +
+>  static BUS_ATTR(add, S_IWUSR, NULL, rbd_add);
+>  static BUS_ATTR(remove, S_IWUSR, NULL, rbd_remove);
+>  static BUS_ATTR(add_single_major, S_IWUSR, NULL, rbd_add_single_major);
+>  static BUS_ATTR(remove_single_major, S_IWUSR, NULL, rbd_remove_single_major);
+> +static BUS_ATTR(supported_features, S_IRUGO, rbd_supported_features_show, NULL);
+>  
+>  static struct attribute *rbd_bus_attrs[] = {
+>  	&bus_attr_add.attr,
+>  	&bus_attr_remove.attr,
+>  	&bus_attr_add_single_major.attr,
+>  	&bus_attr_remove_single_major.attr,
+> +	&bus_attr_supported_features.attr,
+>  	NULL,
+>  };
+>  
+> -- 
+> 2.4.3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
