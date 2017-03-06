@@ -1,74 +1,95 @@
-From: Vaibhav Bhembre <vaibhav@digitalocean.com>
-Subject: Re: RGW: Bucket Policies support
-Date: Mon, 6 Mar 2017 16:09:42 -0500
-Message-ID: <CADJota876prdk8d1wtDT0QdVdeptJwx-ZWD-iK-0H0BJoT73_A@mail.gmail.com>
-References: <CADJota8vRLhZL8n9ofw_fn9t=XmiKALUQacqBWAwBw9aKy9g1A@mail.gmail.com>
- <20170306200038.GB11472@ultraspiritum.eng.arb.redhat.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH 4/7] mm: introduce memalloc_nofs_{save,restore} API
+Date: Mon, 6 Mar 2017 13:22:14 -0800
+Message-ID: <20170306132214.1769368301d9e671e1bc68be@linux-foundation.org>
+References: <20170306131408.9828-1-mhocko@kernel.org>
+	<20170306131408.9828-5-mhocko@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f175.google.com ([74.125.82.175]:34981 "EHLO
-        mail-ot0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753160AbdCFVS6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Mar 2017 16:18:58 -0500
-Received: by mail-ot0-f175.google.com with SMTP id x37so77924965ota.2
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Mar 2017 13:18:57 -0800 (PST)
-In-Reply-To: <20170306200038.GB11472@ultraspiritum.eng.arb.redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Vaibhav Bhembre <vaibhav@digitalocean.com>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20170306131408.9828-5-mhocko@kernel.org>
+Sender: owner-linux-mm@kvack.org
+To: Michal Hocko <mhocko@kernel.org>
+Cc: linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Michal Hocko <mhocko@suse.com>, Vlastimil Babka <vbabka@suse.cz>
+List-Id: ceph-devel.vger.kernel.org
 
-That's fantastic Adam! Waiting eagerly for the next dev or RC release
-of Luminous where we can test this functionality out in our setup.
+On Mon,  6 Mar 2017 14:14:05 +0100 Michal Hocko <mhocko@kernel.org> wrote:
 
-Thank you!
+> From: Michal Hocko <mhocko@suse.com>
+> 
+> GFP_NOFS context is used for the following 5 reasons currently
+> 	- to prevent from deadlocks when the lock held by the allocation
+> 	  context would be needed during the memory reclaim
+> 	- to prevent from stack overflows during the reclaim because
+> 	  the allocation is performed from a deep context already
+> 	- to prevent lockups when the allocation context depends on
+> 	  other reclaimers to make a forward progress indirectly
+> 	- just in case because this would be safe from the fs POV
+> 	- silence lockdep false positives
+> 
+> Unfortunately overuse of this allocation context brings some problems
+> to the MM. Memory reclaim is much weaker (especially during heavy FS
+> metadata workloads), OOM killer cannot be invoked because the MM layer
+> doesn't have enough information about how much memory is freeable by the
+> FS layer.
+> 
+> In many cases it is far from clear why the weaker context is even used
+> and so it might be used unnecessarily. We would like to get rid of
+> those as much as possible. One way to do that is to use the flag in
+> scopes rather than isolated cases. Such a scope is declared when really
+> necessary, tracked per task and all the allocation requests from within
+> the context will simply inherit the GFP_NOFS semantic.
+> 
+> Not only this is easier to understand and maintain because there are
+> much less problematic contexts than specific allocation requests, this
+> also helps code paths where FS layer interacts with other layers (e.g.
+> crypto, security modules, MM etc...) and there is no easy way to convey
+> the allocation context between the layers.
+> 
+> Introduce memalloc_nofs_{save,restore} API to control the scope
+> of GFP_NOFS allocation context. This is basically copying
+> memalloc_noio_{save,restore} API we have for other restricted allocation
+> context GFP_NOIO. The PF_MEMALLOC_NOFS flag already exists and it is
+> just an alias for PF_FSTRANS which has been xfs specific until recently.
+> There are no more PF_FSTRANS users anymore so let's just drop it.
+> 
+> PF_MEMALLOC_NOFS is now checked in the MM layer and drops __GFP_FS
+> implicitly same as PF_MEMALLOC_NOIO drops __GFP_IO. memalloc_noio_flags
+> is renamed to current_gfp_context because it now cares about both
+> PF_MEMALLOC_NOFS and PF_MEMALLOC_NOIO contexts. Xfs code paths preserve
+> their semantic. kmem_flags_convert() doesn't need to evaluate the flag
+> anymore.
+> 
+> This patch shouldn't introduce any functional changes.
+> 
+> Let's hope that filesystems will drop direct GFP_NOFS (resp. ~__GFP_FS)
+> usage as much as possible and only use a properly documented
+> memalloc_nofs_{save,restore} checkpoints where they are appropriate.
+> 
+> ....
+>
+> --- a/include/linux/gfp.h
+> +++ b/include/linux/gfp.h
+> @@ -210,8 +210,16 @@ struct vm_area_struct;
+>   *
+>   * GFP_NOIO will use direct reclaim to discard clean pages or slab pages
+>   *   that do not require the starting of any physical IO.
+> + *   Please try to avoid using this flag directly and instead use
+> + *   memalloc_noio_{save,restore} to mark the whole scope which cannot
+> + *   perform any IO with a short explanation why. All allocation requests
+> + *   will inherit GFP_NOIO implicitly.
+>   *
+>   * GFP_NOFS will use direct reclaim but will not use any filesystem interfaces.
+> + *   Please try to avoid using this flag directly and instead use
+> + *   memalloc_nofs_{save,restore} to mark the whole scope which cannot/shouldn't
+> + *   recurse into the FS layer with a short explanation why. All allocation
+> + *   requests will inherit GFP_NOFS implicitly.
 
-Regards,
-Vaibhav
+I wonder if these are worth a checkpatch rule.
 
-On Mon, Mar 6, 2017 at 3:00 PM, Adam C. Emerson <aemerson@redhat.com> wrote:
-> On 06/03/2017, Vaibhav Bhembre wrote:
->> Hello Cephers!
->>
->> We know there is ongoing work that implements a certain subset of AWS
->> Security Token Service for RGW endpoints and were curious to know if it'd
->> include the ability to apply bucket-wide constraints as follows:
->>
->> {  "Version":"2012-10-17",
->>    "Statement":[
->>     {
->>        "Sid":"AddCannedAcl",
->>        "Effect":"Allow",
->>        "Principal": {"AWS":
->> ["arn:aws:iam::111122223333:root","arn:aws:iam::444455556666:root"]},
->>        "Action":["s3:PutObject","s3:PutObjectAcl"],
->>        "Resource":["arn:aws:s3:::examplebucket/*"],
->>     }
->>    ]
->> }
->>
->> In lieu of such facility, presently the only way to update permissions of
->> all objects within a bucket is to apply those permissions on each object
->> individually, which isn't always practical.
->>
->> It'd be quite helpful to have this feature in Luminous, if possible!
->
-> Yes. That functionality SHOULD work. There's a bug at present where it
-> doesn't now, but I traced that back to it being blocked by the owner
-> check and I'm fixing that up.
->
-> Once I make sure the we can add policies through REST and the
-> radosgw_admin tool, I'll hammer on test and debug. We should have
-> everything ready for luminus fairly soon.
->
-> At the moment, the account ID is just the tenant name. Sometime in the
-> future we'll be reifying tenants to some degree so you can make sure
-> they have an account number that matches up with your AWS ID if you
-> want to do mirroring, but I don't think that's necessary for the
-> initial rollout/preview functionality.
->
->
-> --
-> Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-> IRC: Aemerson@{RedHat, OFTC}
-> 0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
