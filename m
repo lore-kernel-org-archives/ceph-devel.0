@@ -1,46 +1,64 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Proposing strategies for debuginfo size reduction
-Date: Mon, 6 Mar 2017 12:37:01 +0100
-Message-ID: <ab890167-1612-6975-8925-1adfbd90c5d5@suse.cz>
-References: <CAF-wwdHTkEAGchaPD=qV0tuVNtrevhG0=ny1SdDz7-vbTXE3BQ@mail.gmail.com>
- <CAJE9aOPBkXETOTW6QgZTJVuW65wLv=UrENHADvd_r6VNwvHqHA@mail.gmail.com>
+From: Michal Hocko <mhocko@kernel.org>
+Subject: Re: [PATCH 7/8] Revert "ext4: avoid deadlocks in the writeback path
+ by using sb_getblk_gfp"
+Date: Mon, 6 Mar 2017 12:59:15 +0100
+Message-ID: <20170306115915.GB27953@dhcp22.suse.cz>
+References: <20170106141107.23953-1-mhocko@kernel.org>
+ <20170106141107.23953-8-mhocko@kernel.org>
+ <20170117030118.727jqyamjhojzajb@thunk.org>
+ <20170117075450.GC19699@dhcp22.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:49927 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753596AbdCFLiY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 6 Mar 2017 06:38:24 -0500
-In-Reply-To: <CAJE9aOPBkXETOTW6QgZTJVuW65wLv=UrENHADvd_r6VNwvHqHA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>, Brad Hubbard <bhubbard@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170117075450.GC19699@dhcp22.suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
->> First I went looking for an easy win and I believe there may be one to
->> be had in the fact that we include debuginfo for the ceph_test_*
->> binaries. Do we need to produce debuginfo for them? They currently
->> represent about 800+M on disk so could represent a quick and easy way
->> to reduce the size of the debuginfo we ship.
->
-> we do, so we can perform post-mortem debugging with the coredump if any
-> of them crashes in the qa run. but maybe their debuginfo is not necessary
-> for the builds intended be used by our users. but we still need to patch
-> rpm[1]. and looks like the upstream does not like this idea[2]. as discussed
-> over IRC, maybe we need to understand the "underlying problem", i.e.
-> who/what is the biggest contributor of the 800+M debuginfo before going
-> any further.
+On Tue 17-01-17 08:54:50, Michal Hocko wrote:
+> On Mon 16-01-17 22:01:18, Theodore Ts'o wrote:
+> > On Fri, Jan 06, 2017 at 03:11:06PM +0100, Michal Hocko wrote:
+> > > From: Michal Hocko <mhocko@suse.com>
+> > > 
+> > > This reverts commit c45653c341f5c8a0ce19c8f0ad4678640849cb86 because
+> > > sb_getblk_gfp is not really needed as
+> > > sb_getblk
+> > >   __getblk_gfp
+> > >     __getblk_slow
+> > >       grow_buffers
+> > >         grow_dev_page
+> > > 	  gfp_mask = mapping_gfp_constraint(inode->i_mapping, ~__GFP_FS) | gfp
+> > > 
+> > > so __GFP_FS is cleared unconditionally and therefore the above commit
+> > > didn't have any real effect in fact.
+> > > 
+> > > This patch should not introduce any functional change. The main point
+> > > of this change is to reduce explicit GFP_NOFS usage inside ext4 code to
+> > > make the review of the remaining usage easier.
+> > > 
+> > > Signed-off-by: Michal Hocko <mhocko@suse.com>
+> > > Reviewed-by: Jan Kara <jack@suse.cz>
+> > 
+> > If I'm not mistaken, this patch is not dependent on any of the other
+> > patches in this series (and the other patches are not dependent on
+> > this one).  Hence, I could take this patch via the ext4 tree, correct?
+> 
+> Yes, that is correct
 
-We looked into this some time ago with the conclusion that the ceph-test 
-package contains a rather large number of binaries (like 50), each of 
-which have a lot of the same library code statically linked. This, IIRC, 
-is the single biggest cause of the debuginfo bloat.
+Hi Ted,
+this doesn't seem to be in any of the branches [1]. I plan to resend the
+whole scope nofs series, should I add this to the pile or you are going
+to route it via your tree?
 
-Kefu recently converted libcommon (statically linked) into the 
-libceph-common shared object (dynamically linked). That brought a major 
-reduction in the ceph-test debuginfo size (and build time/resource 
-utilization) but I guess there's still room for improvement in this area.
+[1] git://git.kernel.org/pub/scm/linux/kernel/git/tytso/ext4.git
+-- 
+Michal Hocko
+SUSE Labs
 
-Regards,
-Nathan
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
