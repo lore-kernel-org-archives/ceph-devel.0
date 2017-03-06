@@ -1,143 +1,82 @@
-From: Igor Fedotov <ifedotov@mirantis.com>
-Subject: Re: mem use doubles due to buffer::create_page_aligned + bluestore
- obj content caching
-Date: Tue, 7 Mar 2017 00:47:26 +0300
-Message-ID: <e746f38b-d870-49d3-7f37-722b03a01005@mirantis.com>
-References: <6b06369d-6b18-f4f0-b7ae-0c0114288e41@mirantis.com>
- <CAJ4mKGYnbTAXA16vsKkDoj8LaddtxDD7-yghqODsnBJ9qMz6_g@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Supplying ID to ceph-disk when creating OSD
+Date: Mon, 6 Mar 2017 21:52:42 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1703010124000.25760@piezo.novalocal>
+References: <1907009558.10080.1487177956475@ox.pcextreme.nl> <alpine.DEB.2.11.1702151712530.7782@piezo.novalocal> <250864845.10165.1487258041091@ox.pcextreme.nl> <alpine.DEB.2.11.1702161524490.7782@piezo.novalocal> <alpine.DEB.2.11.1702161615510.7782@piezo.novalocal>
+ <737073087.10191.1487282208893@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f41.google.com ([209.85.215.41]:36654 "EHLO
-        mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752726AbdCFVs6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Mar 2017 16:48:58 -0500
-Received: by mail-lf0-f41.google.com with SMTP id y193so78713158lfd.3
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Mar 2017 13:47:29 -0800 (PST)
-In-Reply-To: <CAJ4mKGYnbTAXA16vsKkDoj8LaddtxDD7-yghqODsnBJ9qMz6_g@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:38882 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754536AbdCFVwq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Mar 2017 16:52:46 -0500
+In-Reply-To: <737073087.10191.1487282208893@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
+To: Wido den Hollander <wido@42on.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+On Thu, 16 Feb 2017, Wido den Hollander wrote:
+> > Op 16 februari 2017 om 17:20 schreef Sage Weil <sage@newdream.net>:
+> > 
+> > On Thu, 16 Feb 2017, Sage Weil wrote:
+> > > There is another step here (see my other email) where we should mark the 
+> > > osd as lost before we allow it to be replaced.  So,
+> > > 
+> > > 0. 'ceph osd lost NNN' from a client.admin node
+> > > 
+> > > Assuming that is done, then I think the rest of the procedure would be
+> > > 
+> > > 2. Try to unmount the disk (fails if OSD is still running)
+> > > 3. zap the disk
+> > > 4. ceph-disk prepare --replace-osd-id NNN
+> > > 
+> > > This would do 'ceph osd replace <osd-id> <new-uuid>' instead of 'ceph 
+> > > osd create <uuid>'.  The new mon command would verify that (1) the osd is 
+> > > marked as lost (safety check that makes bootstraps ability to do this 
+> > > reasonably secure) and (2) change the uuid to new-uuid.  It could also (3) 
+> > > remove old cephx keys.  Note that we had a thread about making create do 
+> > > this a month or two ago; this might be a good time to fix that too.  The 
+> > > idea was that the boostrap permissions are super wonky because they have 
+> > > to allow creating new cephx keys and so on.  Instead, we should make a 
+> > > single command that does everything (including creating the cephx keys) 
+> > > and returns the whole result to ceph-disk in a blob of json (new osd id + 
+> > > cephx key).  The replace command could work the same way (including the 
+> > > step of removing the old key), and then the allowed commands for 
+> > > the bootstrap key would be just 'osd create' and 'osd replace', period.
+> > 
+> > Okay, I found the other thread:
+> > 
+> > 	http://marc.info/?t=147913846400007&r=1&w=2
+> > 
+> > which is about the additional work of setting up the lockbox keys for 
+> > dm-crypt as part of osd creation/bootstrap.  I think the way to do this 
+> > properly is to just bite the bullet and make a new command, let's call it 
+> > 'osd bootstrap', and have it take all the various [optional] arguments for 
+> > setting up a new osd, including the osd we want to replace (if any).  It 
+> > can do all the right things as far as setting up (or replacing) cephx 
+> > keys, and be a single atomic and idempotent operation so that ceph-disk is 
+> > super simple and the osd-bootstrap key can actually be secure.
+> > 
+> > This has totally blown up in scope...are you up for it?  In the meantime, 
+> > the zap fix is small and simple and unrelated to the rest.
+> > 
+> 
+> Well, yes, that's a bit more work :) I've never worked on that part of 
+> the code in the MONs, so that will be new for me. Could be a good thing 
+> to try and learn from.
 
-On 3/6/2017 9:44 PM, Gregory Farnum wrote:
-> On Mon, Mar 6, 2017 at 9:35 AM, Igor Fedotov <ifedotov@mirantis.com> wrote:
->> Hi Cephers,
->>
->> I've just created a ticket related to bluestore object content caching in
->> particular and buffer::create_page_aligned in general.
->>
->> But I'd like to additionally share this information here as well since the
->> root cause seems to be pretty global.
->>
->> Ticker URL:
->>
->> http://tracker.ceph.com/issues/19198
->>
->> Description:
->>
->> When caching object content BlueStore uses twice as much memory than it
->> really needs for that data amount.
->>
->> The root cause seems to be in buffer::create_page_aligned implementation.
->> Actually it results in
->> new raw_posix_aligned()
->>
->>    calling mempool::buffer_data::alloc_char.allocate_aligned(len, align);
->>
->>        calling  posix_memalign((void**)(void*)&ptr, align, total);
->>
->> sequence that in fact does 2 allocations:
->>
->> 1) for raw_posix_aligned struct
->> 2) for data itself (4096 bytes).
->>
->> It looks like this sequence causes 2 * 4096 bytes allocation instead of
->> sizeof(raw_posix_aligned) + alignment + 4096.
->> The additional trick is that mempool stuff is unable to estimate such an
->> overhead and hence BlueStore cache cleanup doesn't work properly.
->>
->> It's not clear for me why allocator(s) behave that inefficiently for such a
->> pattern though.
->>
->> The issue is reproducible under Ubuntu 16.04.1 LTS for both jemalloc and
->> tcmalloc builds.
->>
->>
->> The ticket contains the patch to reproduce the issue and one can see that
->> for 16Gb content system mem usage tend to be ~32Gb.
->>
->> Patch firstly allocates 4K pages 0x400000 times using:
->>
->> ...
->>
->> +  size_t alloc_count = 0x400000; // allocate 16 Gb total
->> +  allocs.resize(alloc_count);
->> +  for( auto i = 0u; i < alloc_count; ++i) {
->> +    bufferptr p = buffer::create_page_aligned(bsize);
->> +    bufferlist* bl = new bufferlist;
->> +    bl->append(p);
->> +    *(bl->c_str()) = 0; // touch the page to increment system mem use
->>
->> ...
->>
->> then do the same reproducing  create_page_aligned() implementation:
->>
->> +  struct fake_raw_posix_aligned{
->> +    char stub[8];
->> +    void* data;
->> +    fake_raw_posix_aligned() {
->> +      ::posix_memalign(&data, 0x1000, 0x1000);
->> //mempool::buffer_data::alloc_char.allocate_aligned(0x1000, 0x1000);
->> +      *((char*)data) = 0; // touch the page
->> +    }
->> +    ~fake_raw_posix_aligned() {
->> +      ::free(data);
->> +    }
->> +  };
->> +  vector <fake_raw_posix_aligned*> allocs2;
->>
->> +  allocs2.resize(alloc_count);
->> +  for( auto i = 0u; i < alloc_count; ++i) {
->> +    allocs2[i] = new fake_raw_posix_aligned();
->> ...
->>
->> Output shows 32Gb usage in both cases.
->>
->> Mem before: VmRSS: 45232 kB
->> Mem after: VmRSS: 33599524 kB
->> Mem actually used: 33554292 kB
->> Mem pool reports: 16777216 kB
->> Mem before2: VmRSS: 2161412 kB
->> Mem after2: VmRSS: 33632268 kB
->> Mem actually used: 32226156544 bytes
->>
->>
->> In general there are two issues here:
->> 1) Doubled memory usage
->> 2) mempool is unaware of such an overhead and miscalculates the actual mem
->> usage.
->>
->> There is probably a way to resolve 2) by forcing raw_combined::create() use
->> in buffer::create_page_aligned and tuning mempool calculation to take page
->> alignment into account. But I'd like to get some comments/thoughts first....
-> Is this memory being allocated and then freed, so it's "just" imposing
-> extra work on malloc? Or are we leaking the old unaligned page as
-> well?
-I don't see any issues after free call. I'm mostly about unexpectedly 
-high memory usage while data block is allocated.
-And mempool miscalculation related to that.
-Surely this is more critical for long-living allocations, e.g. data 
-blocks in BlueStore cache.
->
-> I think we have (prior to BlueStore) only used these functions when
-> sending data over the wire or speaking to certain kinds of disks
-> (though I could be totally misremembering), at which point it's going
-> to be freed really quickly. That might explain why it's not come up
-> before; I hope we can just massage the implementation or interfaces
-> rather than this bubbling up way beyond the bufferlist internals...
-Yeah, that explains the case a bit.
-> -Greg
+I wrote up some notes on an etherpad:
 
+	http://pad.ceph.com/p/osd-replacement
+
+A few changes:
+
+- I think 'ceph osd rm' would make more sense than 'ceph osd lost' for the 
+safety gate.
+- The 'osd create' replacement command has some notes.  It includes the 
+ability to set some arbitrary config-key values so that it can be used for 
+the dmcrypt lockbox (or hopefully future things too).
+
+sage
