@@ -1,116 +1,48 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: denc nullptr issue
-Date: Wed, 8 Mar 2017 00:54:16 +0100
-Message-ID: <f2aa4fc4-8bb8-7c53-d792-2f7b341eb985@digiware.nl>
-References: <alpine.DEB.2.11.1703072243100.24356@piezo.novalocal>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Untested PRs merged to jewel before 10.2.6 release?
+Date: Tue, 7 Mar 2017 22:38:52 +0100
+Message-ID: <713de223-60a8-7def-5e59-c6c09b52dc06@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:57111 "EHLO smtp.digiware.nl"
+Received: from mx2.suse.de ([195.135.220.15]:58747 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751155AbdCHAB7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 7 Mar 2017 19:01:59 -0500
-In-Reply-To: <alpine.DEB.2.11.1703072243100.24356@piezo.novalocal>
+        id S933439AbdCHBOw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 7 Mar 2017 20:14:52 -0500
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id DA3B9ABCD
+        for <ceph-devel@vger.kernel.org>; Tue,  7 Mar 2017 21:38:53 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 7-3-2017 23:48, Sage Weil wrote:
-> We have three competing PRs to address the crashes when -O0 is used:
-> 
-> lixiaoy1	https://github.com/ceph/ceph/pull/12796
-> kefu		https://github.com/ceph/ceph/pull/13819
-> adam		https://github.com/ceph/ceph/pull/12931
-> 
-> Adam's is appealing because it will ensure the bounded encodes are in fact 
-> constant at compile time.  Unfortunately, it requires you to define DENC 
-> twice, like so:
-> 
-> -  DENC_FEATURED(bar_t, v, p, f) {
-> +  DENC_FEATURED_BOUNDED(bar_t, v, p, f) {
->      ::denc(v.a, p, f);
->      ::denc(v.b, p, f);
->    }
-> +  DENC_FEATURED_BOUND_ENCODE(bar_t, p, f) {
-> +    DENC_START(1, 1, p);
-> +    ::denc(bounded_t<decltype(bar_t::a)>{}, p, f);
-> +    ::denc(bounded_t<decltype(bar_t::b)>{}, p, f);
-> +    DENC_FINISH(p);
-> +  }
-> 
-> which feels like a deal-killer to me... I think I'd rather just drop the 
-> check entirely and rely on the developer to be careful.
-> 
-> The other two PRs fix up the handful of type(s) that were actually causing 
-> failures to manually define bound (again making the single DENC macro 
-> unusable).
-> 
-> What about instead changing all of the instances of
-> 
->       denc(*(const T*)nullptr, elem_size);
-> 
-> with a macro that will either do the above "*(const T*)nullptr" -or-, if 
-> it looks like this is a debug build or compiler optimizations are off or 
-> some other compiler environment indicates it won't work, replace it with 
-> "T()"?  That avoids crashes in the -O0 case, but still lets us keep some 
-> safeguard for other builds?
-> 
-> Any other ideas?
+I noticed that the v10.2.6 tag was added today and, as far as I can 
+tell, it was added to the tip of the jewel branch. That would be fine, 
+except that the tip of the jewel branch at the time the tag was added 
+(420a9a0796e327676cb704bc18b2020f9941d7b6) is several PRs ahead of the 
+jewel SHA1 that underwent integration testing 
+(d9eaab456ff45ae88e83bd633f0c4efb5902bf07).
 
-Hi Sage,
+$ git log --oneline --no-merges 
+d9eaab456ff45ae88e83bd633f0c4efb5902bf07..420a9a0796e327676cb704bc18b2020f9941d7b6
+88f4895 qa/suites/upgrade/hammer-x: Add some volumes
+0c242d1 qa/suites/ceph-deploy: Drop OpenStack volume count
+ccd0265 qa: replace centos 7.2 with centos 7.3
+2cbec5b Removed dumplin test 13234.yaml as not needed anymore
+771e1d9 qa/suites/rest: Openstack volumes
+a18640f qa/suites/ceph-ansible: Openstack volumes
+841688b qa/suites/fs: Add openstack volume configuration
+9778743 qa/suites/samba: Openstack volume configuration
+cd1e8ef qa/suites/hadoop: Openstack volume configuration
+ac7add1 qa/suites/knfs: Add openstack volume configuration
+ba35859 qa/suites/kcephfs: Openstack volume configuration
+aced718 qa/suites/krbd: Add openstack volume configuration
+94d5888 qa/suites/rgw: Add openstack volume configuration
 
-Clang is already complaining about the current construction, and any fix
-would be nice to not have Clang complain.
-I have not yet run into crashes (even when compiling with -O0), but that
-might be because the current crash is in Bluestore I think. And I do not
-build that for FreeBSD.
+Am I seeing that right? If so, that appears to potentially defeat the 
+purpose of the integration testing we do. Maybe I'm overstating the 
+danger here -- the commits look innocuous enough -- but it seems to set 
+a rather dangerous precedent.
 
-Why would 2 defines be a deal breaker, if otherwise the burden also is
-the the developer that needs to take care of possible pitfalls.
-
-And I would expect to have your second option to still run into warnings
-with Clang if not compiling with -O0 and we still compile "*(const
-T*)nullptr"
-
---WjW
-
-
-/home/jenkins/workspace/ceph-master/src/include/denc.h:1162:10: warning:
-binding dereferenced null pointer to reference has undefined behavior
-[-Wnull-dereference]
-    denc(*(bool *)nullptr, p);
-         ^~~~~~~~~~~~~~~~
-/home/jenkins/workspace/ceph-master/src/include/denc.h:1169:10: warning:
-binding dereferenced null pointer to reference has undefined behavior
-[-Wnull-dereference]
-    denc(*(bool *)nullptr, p);
-         ^~~~~~~~~~~~~~~~
-/home/jenkins/workspace/ceph-master/src/include/denc.h:1236:10: warning:
-binding dereferenced null pointer to reference has undefined behavior
-[-Wnull-dereference]
-    denc(*(bool *)nullptr, p);
-         ^~~~~~~~~~~~~~~~
-/home/jenkins/workspace/ceph-master/src/include/denc.h:682:12: warning:
-binding dereferenced null pointer to reference has undefined behavior
-[-Wnull-dereference]
-      denc(*(const T*)nullptr, elem_size);
-           ^~~~~~~~~~~~~~~~~~
-/home/jenkins/workspace/ceph-master/src/include/denc.h:1304:11: note: in
-instantiation of function template specialization
-'_denc::container_base<std::vector,
-_denc::pushback_details<std::__1::vector<snapid_t,
-std::__1::allocator<snapid_t> > >, snapid_t,
-std::__1::allocator<snapid_t> >::bound_encode<snapid_t>' requested here
-
-  traits::bound_encode(o, len);
-          ^
-/home/jenkins/workspace/ceph-master/src/common/snap_types.h:58:7: note:
-in instantiation of function template specialization
-'encode<std::__1::vector<snapid_t, std::__1::allocator<snapid_t> >,
-denc_traits<std::__1::vector<snapid_t, std::__1::allocator<snapid_t> >,
-void> >' requested here
-    ::encode(snaps, bl);
-      ^
-
-
+Nathan
