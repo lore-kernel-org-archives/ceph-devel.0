@@ -1,42 +1,54 @@
-From: "peng.hse" <peng.hse@xtaotech.com>
-Subject: Re: problems to protect rbd from mutiple simultaneous mapping
-Date: Tue, 7 Mar 2017 10:16:11 +0800
-Message-ID: <58BE17EB.1050105@xtaotech.com>
-References: <58BD6D73.6040200@xtaotech.com>
- <CA+aFP1AO1DkYEVSfzHLk=dHSn8cSPE1c3+aWNAzQwwmsOuBsvA@mail.gmail.com>
+From: Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Much more dentries than inodes, is that normal?
+Date: Tue, 7 Mar 2017 17:17:54 +0800
+Message-ID: <CAEYCsVL-_JihR5RcDPzajNhZk52sGdwHOxU1Xmsbb==fhMh39Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mr213139.mail.yeah.net ([223.252.213.139]:61259 "EHLO
-        mr213139.mail.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755217AbdCGIwV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Mar 2017 03:52:21 -0500
-In-Reply-To: <CA+aFP1AO1DkYEVSfzHLk=dHSn8cSPE1c3+aWNAzQwwmsOuBsvA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: dillaman@redhat.com
-Cc: Sage Weil <sweil@redhat.com>, Josh Durgin <jdurgin@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-what i mean is : the step-1's IO from node1 was received by the OSDs 
-before the blacklist barrier,
-however, still under progress after the blacklist barrier, which might 
-overwrite the data by node2 and
-corrupt our data.
-How do we avoid this situation?
+Hi,
 
-On 2017年03月07日 07:47, Jason Dillaman wrote:
-> On Mon, Mar 6, 2017 at 9:08 AM, peng.hse <peng.hse@xtaotech.com> wrote:
->> 3. assuming the step-1 outstanding IO and step-2 IO targeted the same area
->> of the fs metadata
->>      on the rbd devices. step-2 successfully persist the data and reply to
->> client.
->>      then, the following laggy IO from step-1 might override and corrupt what
->> we have written in step-2.
->>
->> so, how do we prevent this kind of corruption happening?
-> ... but in step (2) you successfully blacklisted the client on node1
-> (i.e. it is not allowed to talk to the OSDs). Therefore, node1 cannot
-> overwrite any data written by node2.
->
+      From the admin socket of mds, I got following data on our
+production cephfs env, roughly we have 585K inodes and almost same
+amount of caps, but we have>2x dentries than inodes.
 
+      I am pretty sure we dont use hard link intensively (if any).
+And the #ino match with "rados ls --pool $my_data_pool}.
+
+      Thanks for any explanations, appreciate it.
+
+
+"mds_mem": {
+        "ino": 584974,
+        "ino+": 1290944,
+        "ino-": 705970,
+        "dir": 25750,
+        "dir+": 25750,
+        "dir-": 0,
+        "dn": 1291393,
+        "dn+": 1997517,
+        "dn-": 706124,
+        "cap": 584560,
+        "cap+": 2657008,
+        "cap-": 2072448,
+        "rss": 24599976,
+        "heap": 166284,
+        "malloc": 18446744073708721289,
+        "buf": 0
+    },
+
+
+
+Xiaoxi
