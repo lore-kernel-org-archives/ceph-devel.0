@@ -1,65 +1,35 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: Much more dentries than inodes, is that normal?
-Date: Tue, 7 Mar 2017 22:48:47 +0800
-Message-ID: <CAAM7YA=+vR4bO9SSonu=Srh_g9XTLO4uBsSQ6EgdgTvnBwyJzQ@mail.gmail.com>
-References: <CAEYCsVL-_JihR5RcDPzajNhZk52sGdwHOxU1Xmsbb==fhMh39Q@mail.gmail.com>
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [bug report] block: Move bdi_unregister() to del_gendisk()
+Date: Tue, 7 Mar 2017 11:54:56 +0100
+Message-ID: <20170307105456.GD2578@quack2.suse.cz>
+References: <20170307001322.GA28752@mwanda>
+ <20170307102401.GA4120@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f175.google.com ([209.85.217.175]:35999 "EHLO
-        mail-ua0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932788AbdCGOsu (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Mar 2017 09:48:50 -0500
-Received: by mail-ua0-f175.google.com with SMTP id 72so6136607uaf.3
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Mar 2017 06:48:49 -0800 (PST)
-In-Reply-To: <CAEYCsVL-_JihR5RcDPzajNhZk52sGdwHOxU1Xmsbb==fhMh39Q@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:35287 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755153AbdCGOns (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 7 Mar 2017 09:43:48 -0500
+Content-Disposition: inline
+In-Reply-To: <20170307102401.GA4120@mwanda>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xiaoxi Chen <superdebuger@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: jack@suse.cz, ceph-devel@vger.kernel.org
 
-On Tue, Mar 7, 2017 at 5:17 PM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
-> Hi,
->
->       From the admin socket of mds, I got following data on our
-> production cephfs env, roughly we have 585K inodes and almost same
-> amount of caps, but we have>2x dentries than inodes.
->
->       I am pretty sure we dont use hard link intensively (if any).
-> And the #ino match with "rados ls --pool $my_data_pool}.
->
->       Thanks for any explanations, appreciate it.
->
->
-> "mds_mem": {
->         "ino": 584974,
->         "ino+": 1290944,
->         "ino-": 705970,
->         "dir": 25750,
->         "dir+": 25750,
->         "dir-": 0,
->         "dn": 1291393,
->         "dn+": 1997517,
->         "dn-": 706124,
->         "cap": 584560,
->         "cap+": 2657008,
->         "cap-": 2072448,
->         "rss": 24599976,
->         "heap": 166284,
->         "malloc": 18446744073708721289,
->         "buf": 0
->     },
->
+On Tue 07-03-17 13:24:55, Dan Carpenter wrote:
+> Also:
+> 
+>     arch/powerpc/sysdev/axonram.c:277 axon_ram_probe()
+>     error: we previously assumed 'bank->disk->queue' could be null (see line 231)
 
-Maybe they are dirty null dentries. try flushing mds's journal and check again.
+So this is real however the error path of axon_ram_probe() looks hosed. You
+are not supposed to call del_gendisk() if you did not call
+device_add_disk() before and axon_ram_probe() leaks the gendisk structure
+because it forgets to call put_disk(). I'll look into fixing this.
 
-Regards
-Yan, Zheng
-
->
->
-> Xiaoxi
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+								Honza
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
