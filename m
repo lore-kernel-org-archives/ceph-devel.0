@@ -1,100 +1,65 @@
-From: Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Much more dentries than inodes, is that normal?
-Date: Tue, 7 Mar 2017 23:05:17 +0800
-Message-ID: <CAEYCsVKkT488SJTOqnQwjthjppJK5MTo7GnzTO3dRGKU94MP6g@mail.gmail.com>
-References: <CAEYCsVL-_JihR5RcDPzajNhZk52sGdwHOxU1Xmsbb==fhMh39Q@mail.gmail.com>
-	<CALe9h7d2CJzYDX9LWz9KqiGZXwCXj80ATXVeWHnS=p9SOVtKmQ@mail.gmail.com>
+From: Michal Hocko <mhocko@kernel.org>
+Subject: Re: [PATCH 4/7] mm: introduce memalloc_nofs_{save,restore} API
+Date: Tue, 7 Mar 2017 16:09:56 +0100
+Message-ID: <20170307150956.GM28642@dhcp22.suse.cz>
+References: <20170306131408.9828-1-mhocko@kernel.org>
+ <20170306131408.9828-5-mhocko@kernel.org>
+ <20170306132214.1769368301d9e671e1bc68be@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CALe9h7d2CJzYDX9LWz9KqiGZXwCXj80ATXVeWHnS=p9SOVtKmQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170306132214.1769368301d9e671e1bc68be@linux-foundation.org>
+Sender: owner-linux-mm@kvack.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Vlastimil Babka <vbabka@suse.cz>
 List-Id: ceph-devel.vger.kernel.org
 
-Thanks John.
+On Mon 06-03-17 13:22:14, Andrew Morton wrote:
+> On Mon,  6 Mar 2017 14:14:05 +0100 Michal Hocko <mhocko@kernel.org> wrote:
+[...]
+> > --- a/include/linux/gfp.h
+> > +++ b/include/linux/gfp.h
+> > @@ -210,8 +210,16 @@ struct vm_area_struct;
+> >   *
+> >   * GFP_NOIO will use direct reclaim to discard clean pages or slab pages
+> >   *   that do not require the starting of any physical IO.
+> > + *   Please try to avoid using this flag directly and instead use
+> > + *   memalloc_noio_{save,restore} to mark the whole scope which cannot
+> > + *   perform any IO with a short explanation why. All allocation requests
+> > + *   will inherit GFP_NOIO implicitly.
+> >   *
+> >   * GFP_NOFS will use direct reclaim but will not use any filesystem interfaces.
+> > + *   Please try to avoid using this flag directly and instead use
+> > + *   memalloc_nofs_{save,restore} to mark the whole scope which cannot/shouldn't
+> > + *   recurse into the FS layer with a short explanation why. All allocation
+> > + *   requests will inherit GFP_NOFS implicitly.
+> 
+> I wonder if these are worth a checkpatch rule.
 
-Very likely, note that mds_mem::ino + mds_cache::strays_created ~=
-mds::inodes, plus the MDS was the active-standby one, and become
-active days ago due to failover.
+I am not really sure, to be honest. This may easilly end up people
+replacing
 
-mds": {
-        "inodes": 1291393,
-}
-"mds_cache": {
-        "num_strays": 3559,
-        "strays_created": 706120,
-        "strays_purged": 702561
-}
-"mds_mem": {
-        "ino": 584974,
-}
+do_alloc(GFP_NOFS)
 
-I do have a cache dump from the mds via admin socket,  is there
-anything I can get from it  to make 100% percent sure?
+with
 
+memalloc_nofs_save()
+do_alloc(GFP_KERNEL)
+memalloc_nofs_restore()
 
-Xiaoxi
+which doesn't make any sense of course. From my experience, people tend
+to do stupid things just to silent checkpatch warnings very often.
+Moreover I believe we need to do the transition to the new api first
+before we can push back on the explicit GFP_NOFS usage. Maybe then we
+can think about the a checkpatch warning.
 
-2017-03-07 22:20 GMT+08:00 John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
-> On Tue, Mar 7, 2017 at 9:17 AM, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> Hi,
->>
->>       From the admin socket of mds, I got following data on our
->> production cephfs env, roughly we have 585K inodes and almost same
->> amount of caps, but we have>2x dentries than inodes.
->>
->>       I am pretty sure we dont use hard link intensively (if any).
->> And the #ino match with "rados ls --pool $my_data_pool}.
->>
->>       Thanks for any explanations, appreciate it.
->>
->>
->> "mds_mem": {
->>         "ino": 584974,
->>         "ino+": 1290944,
->>         "ino-": 705970,
->>         "dir": 25750,
->>         "dir+": 25750,
->>         "dir-": 0,
->>         "dn": 1291393,
->>         "dn+": 1997517,
->>         "dn-": 706124,
->>         "cap": 584560,
->>         "cap+": 2657008,
->>         "cap-": 2072448,
->>         "rss": 24599976,
->>         "heap": 166284,
->>         "malloc": 18446744073708721289,
->>         "buf": 0
->>     },
->>
->
-> One possibility is that you have many "null" dentries, which are
-> created when we do a lookup and a file is not found -- we create a
-> special dentry to remember that that filename does not exist, so that
-> we can return ENOENT quickly next time.  On pre-Kraken versions, null
-> dentries can also be left behind after file deletions when the
-> deletion is replayed on a standbyreplay MDS
-> (http://tracker.ceph.com/issues/16919)
->
-> John
->
->
->
->>
->> Xiaoxi
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+-- 
+Michal Hocko
+SUSE Labs
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
