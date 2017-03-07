@@ -1,67 +1,56 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: problems to protect rbd from mutiple simultaneous mapping
-Date: Mon, 6 Mar 2017 21:26:12 -0500
-Message-ID: <CA+aFP1BfJCT-HNcm8CXHc62CHF_cji19k0p7ZafKUzw3yW+Rhw@mail.gmail.com>
-References: <58BD6D73.6040200@xtaotech.com> <CA+aFP1AO1DkYEVSfzHLk=dHSn8cSPE1c3+aWNAzQwwmsOuBsvA@mail.gmail.com>
- <58BE17EB.1050105@xtaotech.com>
-Reply-To: dillaman@redhat.com
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: [bug report] block: Move bdi_unregister() to del_gendisk()
+Date: Tue, 7 Mar 2017 03:13:22 +0300
+Message-ID: <20170307001322.GA28752@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f46.google.com ([209.85.215.46]:33245 "EHLO
-        mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753958AbdCGCfw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Mar 2017 21:35:52 -0500
-Received: by mail-lf0-f46.google.com with SMTP id a6so80837721lfa.0
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Mar 2017 18:35:07 -0800 (PST)
-In-Reply-To: <58BE17EB.1050105@xtaotech.com>
+Received: from userp1050.oracle.com ([156.151.31.82]:43030 "EHLO
+        userp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754281AbdCGElp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Mar 2017 23:41:45 -0500
+Received: from userp1040.oracle.com (userp1040.oracle.com [156.151.31.81])
+        by userp1050.oracle.com (Sentrion-MTA-4.3.2/Sentrion-MTA-4.3.2) with ESMTP id v270EhO3014770
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
+        for <ceph-devel@vger.kernel.org>; Tue, 7 Mar 2017 00:14:44 GMT
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "peng.hse" <peng.hse@xtaotech.com>
-Cc: Sage Weil <sweil@redhat.com>, Josh Durgin <jdurgin@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: jack@suse.cz
+Cc: ceph-devel@vger.kernel.org
 
-Each object is "owned" by a PG and each PG operates on each object
-in-order within a transaction. Therefore, if the OSDs had received a
-write op from node1 before the blacklist from node2, by definition
-they would be completed before node2's write ops for the same object
-could be started. If it's the reverse scenario, where the write op
-from node1 was in-flight on the network and somehow arrived after
-node2's blacklist and write op, I would hope and expect that the OSD
-properly handled the blacklist and dropped the op.
+Hello Jan Kara,
 
-On Mon, Mar 6, 2017 at 9:16 PM, peng.hse <peng.hse@xtaotech.com> wrote:
-> what i mean is : the step-1's IO from node1 was received by the OSDs before
-> the blacklist barrier,
-> however, still under progress after the blacklist barrier, which might
-> overwrite the data by node2 and
-> corrupt our data.
-> How do we avoid this situation?
->
->
-> On 2017年03月07日 07:47, Jason Dillaman wrote:
->>
->> On Mon, Mar 6, 2017 at 9:08 AM, peng.hse <peng.hse@xtaotech.com> wrote:
->>>
->>> 3. assuming the step-1 outstanding IO and step-2 IO targeted the same
->>> area
->>> of the fs metadata
->>>      on the rbd devices. step-2 successfully persist the data and reply
->>> to
->>> client.
->>>      then, the following laggy IO from step-1 might override and corrupt
->>> what
->>> we have written in step-2.
->>>
->>> so, how do we prevent this kind of corruption happening?
->>
->> ... but in step (2) you successfully blacklisted the client on node1
->> (i.e. it is not allowed to talk to the OSDs). Therefore, node1 cannot
->> overwrite any data written by node2.
->>
->
+The patch 165a5e22fafb: "block: Move bdi_unregister() to
+del_gendisk()" from Feb 8, 2017, leads to the following static
+checker warning:
 
+	drivers/block/rbd.c:4117 rbd_free_disk()
+	warn: variable dereferenced before check 'disk->queue' (see line 4116)
 
+drivers/block/rbd.c
+  4107  static void rbd_free_disk(struct rbd_device *rbd_dev)
+  4108  {
+  4109          struct gendisk *disk = rbd_dev->disk;
+  4110  
+  4111          if (!disk)
+  4112                  return;
+  4113  
+  4114          rbd_dev->disk = NULL;
+  4115          if (disk->flags & GENHD_FL_UP) {
+  4116                  del_gendisk(disk);
+                        ^^^^^^^^^^^^^^^^^
+The patch introduces a new dereference inside this function call.
 
--- 
-Jason
+  4117                  if (disk->queue)
+                            ^^^^^^^^^^^
+Check is too late.
+
+  4118                          blk_cleanup_queue(disk->queue);
+  4119                  blk_mq_free_tag_set(&rbd_dev->tag_set);
+  4120          }
+  4121          put_disk(disk);
+  4122  }
+
+regards,
+dan carpenter
