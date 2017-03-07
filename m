@@ -1,65 +1,42 @@
-From: Michal Hocko <mhocko@kernel.org>
-Subject: Re: [PATCH 4/7] mm: introduce memalloc_nofs_{save,restore} API
-Date: Tue, 7 Mar 2017 16:09:56 +0100
-Message-ID: <20170307150956.GM28642@dhcp22.suse.cz>
-References: <20170306131408.9828-1-mhocko@kernel.org>
- <20170306131408.9828-5-mhocko@kernel.org>
- <20170306132214.1769368301d9e671e1bc68be@linux-foundation.org>
+From: Sistem Administrator <bahrudin@agenfirsttravel.co.id>
+Subject: Penting Pesan
+Date: Tue, 07 Mar 2017 14:39:34 +0530
+Message-ID: <20170307091041.D065A475892A@mail.agenfirsttravel.co.id>
+Reply-To: Sistemass_Adminss@mail2world.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170306132214.1769368301d9e671e1bc68be@linux-foundation.org>
-Sender: owner-linux-mm@kvack.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Vlastimil Babka <vbabka@suse.cz>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from 117-102-253-125.padinet.com ([117.102.253.125]:37964 "EHLO
+        mail.agenfirsttravel.co.id" rhost-flags-OK-FAIL-OK-OK)
+        by vger.kernel.org with ESMTP id S933091AbdCGQoS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Mar 2017 11:44:18 -0500
+Content-Description: Mail message body
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Recipients <bahrudin@agenfirsttravel.co.id>
 
-On Mon 06-03-17 13:22:14, Andrew Morton wrote:
-> On Mon,  6 Mar 2017 14:14:05 +0100 Michal Hocko <mhocko@kernel.org> wrote:
-[...]
-> > --- a/include/linux/gfp.h
-> > +++ b/include/linux/gfp.h
-> > @@ -210,8 +210,16 @@ struct vm_area_struct;
-> >   *
-> >   * GFP_NOIO will use direct reclaim to discard clean pages or slab pages
-> >   *   that do not require the starting of any physical IO.
-> > + *   Please try to avoid using this flag directly and instead use
-> > + *   memalloc_noio_{save,restore} to mark the whole scope which cannot
-> > + *   perform any IO with a short explanation why. All allocation requests
-> > + *   will inherit GFP_NOIO implicitly.
-> >   *
-> >   * GFP_NOFS will use direct reclaim but will not use any filesystem interfaces.
-> > + *   Please try to avoid using this flag directly and instead use
-> > + *   memalloc_nofs_{save,restore} to mark the whole scope which cannot/shouldn't
-> > + *   recurse into the FS layer with a short explanation why. All allocation
-> > + *   requests will inherit GFP_NOFS implicitly.
-> 
-> I wonder if these are worth a checkpatch rule.
+PERHATIAN
 
-I am not really sure, to be honest. This may easilly end up people
-replacing
+Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang =
+didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda =
+mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali m=
+emvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, ki=
+rim informasi berikut di bawah ini:
 
-do_alloc(GFP_NOFS)
+Nama:
+Username:
+sandi:
+Konfirmasi sandi:
+E-mail:
+telepon:
 
-with
+Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda =
+akan dinonaktifkan!
 
-memalloc_nofs_save()
-do_alloc(GFP_KERNEL)
-memalloc_nofs_restore()
+Maaf atas ketidaknyamanan ini.
+Kode verifikasi: en:Aa12mmm.kjoidid34l....id....0,zkl.web.id.2017
+Surat Dukungan Teknis =A92017
 
-which doesn't make any sense of course. From my experience, people tend
-to do stupid things just to silent checkpatch warnings very often.
-Moreover I believe we need to do the transition to the new api first
-before we can push back on the explicit GFP_NOFS usage. Maybe then we
-can think about the a checkpatch warning.
-
--- 
-Michal Hocko
-SUSE Labs
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+terima kasih
+Sistem Administrator
