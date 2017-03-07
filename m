@@ -1,27 +1,24 @@
-From: John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: "Yan, Zheng" <ukernel@gmail.com>
 Subject: Re: Much more dentries than inodes, is that normal?
-Date: Tue, 7 Mar 2017 14:20:26 +0000
-Message-ID: <CALe9h7d2CJzYDX9LWz9KqiGZXwCXj80ATXVeWHnS=p9SOVtKmQ@mail.gmail.com>
+Date: Tue, 7 Mar 2017 22:48:47 +0800
+Message-ID: <CAAM7YA=+vR4bO9SSonu=Srh_g9XTLO4uBsSQ6EgdgTvnBwyJzQ@mail.gmail.com>
 References: <CAEYCsVL-_JihR5RcDPzajNhZk52sGdwHOxU1Xmsbb==fhMh39Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAEYCsVL-_JihR5RcDPzajNhZk52sGdwHOxU1Xmsbb==fhMh39Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ua0-f175.google.com ([209.85.217.175]:35999 "EHLO
+        mail-ua0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932788AbdCGOsu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Mar 2017 09:48:50 -0500
+Received: by mail-ua0-f175.google.com with SMTP id 72so6136607uaf.3
+        for <ceph-devel@vger.kernel.org>; Tue, 07 Mar 2017 06:48:49 -0800 (PST)
+In-Reply-To: <CAEYCsVL-_JihR5RcDPzajNhZk52sGdwHOxU1Xmsbb==fhMh39Q@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Xiaoxi Chen <superdebuger@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
-On Tue, Mar 7, 2017 at 9:17 AM, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+On Tue, Mar 7, 2017 at 5:17 PM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
 > Hi,
 >
 >       From the admin socket of mds, I got following data on our
@@ -54,21 +51,15 @@ On Tue, Mar 7, 2017 at 9:17 AM, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w
 >     },
 >
 
-One possibility is that you have many "null" dentries, which are
-created when we do a lookup and a file is not found -- we create a
-special dentry to remember that that filename does not exist, so that
-we can return ENOENT quickly next time.  On pre-Kraken versions, null
-dentries can also be left behind after file deletions when the
-deletion is replayed on a standbyreplay MDS
-(http://tracker.ceph.com/issues/16919)
+Maybe they are dirty null dentries. try flushing mds's journal and check again.
 
-John
-
-
+Regards
+Yan, Zheng
 
 >
+>
 > Xiaoxi
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
