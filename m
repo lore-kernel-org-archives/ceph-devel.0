@@ -1,97 +1,100 @@
-From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
-Subject: Re: RGW: Implement S3 bucket logging feature
-Date: Wed, 8 Mar 2017 10:09:03 -0800
-Message-ID: <CADRKj5S4V+WQxODHMPY4XVtJoFqbdL+Qtj_s0mfGV1UvrfU_sg@mail.gmail.com>
-References: <CAF8OO3P3UiP+23CLUY0doYJLJNroAm2m5fu5zap6ctr3uP9wtw@mail.gmail.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: denc nullptr issue
+Date: Wed, 8 Mar 2017 13:04:24 -0500
+Message-ID: <20170308180342.GE1780@ultraspiritum.eng.arb.redhat.com>
+References: <alpine.DEB.2.11.1703072243100.24356@piezo.novalocal>
+ <20170308172209.GC1780@ultraspiritum.eng.arb.redhat.com>
+ <alpine.DEB.2.11.1703081725510.10776@piezo.novalocal>
+ <20170308174422.GD1780@ultraspiritum.eng.arb.redhat.com>
+ <CAJ4mKGZ1RSKR6_39r9bMd1=Dm_m2y7ZoNH6LkEoum-J-33fizg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f48.google.com ([209.85.215.48]:34690 "EHLO
-        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753827AbdCHSJQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Mar 2017 13:09:16 -0500
-Received: by mail-lf0-f48.google.com with SMTP id k202so18043640lfe.1
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Mar 2017 10:09:05 -0800 (PST)
-In-Reply-To: <CAF8OO3P3UiP+23CLUY0doYJLJNroAm2m5fu5zap6ctr3uP9wtw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39380 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752699AbdCHSMg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 8 Mar 2017 13:12:36 -0500
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id E7046C04BD29
+        for <ceph-devel@vger.kernel.org>; Wed,  8 Mar 2017 18:04:25 +0000 (UTC)
+Received: from ultraspiritum.eng.arb.redhat.com ([10.17.150.166])
+        by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id v28I4POU011960
+        for <ceph-devel@vger.kernel.org>; Wed, 8 Mar 2017 13:04:25 -0500
+Content-Disposition: inline
+In-Reply-To: <CAJ4mKGZ1RSKR6_39r9bMd1=Dm_m2y7ZoNH6LkEoum-J-33fizg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jiaying Ren <mikulely@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 8, 2017 at 12:21 AM, Jiaying Ren <mikulely@gmail.com> wrote:
-> Hi~ Yehuda and Ceph developers:
->
-> We're trying to implement S3 feature bucket
-> logging (http://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html).
->
-> Currently RGW didn't support bucket
-> logging(http://tracker.ceph.com/issues/3225),but has similar
-> functionality called opslog.
->
-> RGW opslog has its own CLI API,opslog can be accessed only by
-> radosgw-admin CLI API(radosgw-admin log list/show). In order to
-> compatible with S3, we're trying to adapt current opslog to support
-> S3 bucket logging HTTP API via RGW s3 endpoint. Does this make sense
-> for RGW? Caz I've found we tried to impl ops log HTTP API via admin
-> endpoint(https://github.com/ceph/ceph/pull/7859)
+On 08/03/2017, Gregory Farnum wrote:
+> I haven't followed this discussion closely, but when I saw your macro
+> usage the thing that struck me was the lack of versioning, which is
+> what I assume Sage is referring to. If there's a good way to define
+> versioned encoding that would probably be fine?
+> Unless the nullptr issue strikes more complicated structures — we need
+> to hand-write the OSDMap encoder for instance, and clever macros will
+> never be clever enough for that.
+> -Greg
 
-Yes, I think these two efforts could be orthogonal.
+At least as far as I'm aware the only way we could output different
+versions would be in response to feature bits, since bounded objects
+are only allowed to depend on the type and the set of feature bits for
+the size.
 
->
-> If the answer is yes,we'd like to share our plan.The basic idea to
-> impl bucket logging takes two steps:
->
-> 1) Reuse current ops log (rgw_ops_log_rados)impl as a temp&durable
->    storage(ops log be stored as a rados-object)
-> 2) Add a new thread periodically upload opslog rados-object as rgw-object
+I think doing something based on feature bits is doable, though it
+might be slightly baroque and tempt a combinatorial explosion for
+something that is bounded and features and varies quite a bit with a
+lot of bits.
 
-Pretty much. Keep in mind that old ops log still needs to work the
-same way though.
+To be honest while this might be fun to write, it's probably more of a
+compile-time-DSL than the value of the check warrants, so I think I'd
+advocate just taking 'bounded' as an annotation by the author of a
+class and leaving it up to him to make sure his class actually is
+bounded.
 
->
-> more detailed steps:
->
-> 1) impl bucket logging HTTP config API
->    + GET bucket logging
->    + PUT bucket logging
->      + store bucket logging config into bucket attribute
->      + add new entry(<bucket_name,bucket_logging_status>) to a sharded
->        <bucket_logging.X> rados-object's omap in <.rgw.bl> pool
->        (<bucket_logging.X>'s omap head store a marker to track
->        progress)
-I know I was the one to bring up storing this in omap in earlier
-discussion, but maybe instead we could just keep it as data on rados
-objects, and just append it. There's no need to do a random access to
-specific log entries, everything is just being read and written
-serially. The thread that generates the rgw objects will consume the
-entire rados objects, and there will be some kind of prefix that will
-designate the current set of objects that log data is being written
-to. The thread will change that prefix before starting to create the
-rgw objects, making sure that new log entries are written to new rados
-objects (needs to have some kind of locking mechanism, it's racy).
-
->    + ACL support Log Delivery Group
-> 2) impl ops log deliver logic
->    + upload rados-object as rgw-object(or to avoid extra data
->      transfer,can we map a rados-obj to a rgw-object by editing its
->      manifiest?)
-don't think this optimization is feasible / viable.
-
->    + (optional) trim opslog
-
-remove all the objects that have any older prefix.
-
-> 3) impl bucket logging CLI API
->    + radosgw-admin bl list // list all bucket logging progress
->    + radosgw-admin bl deliver  // manually deliver ops log
->
-
-
-Sounds good.
-
-Yehuda
-
-> Any comments are appreciated.Thx.
->
+> >
+> >> I'm inclined to just drop the trick and pass T() everywhere
+> >> instead... at least until we have something better.  Objections?
+> >
+> > Two potential ones. On the one hand that would require everything
+> > dencable to be default constructible. That isn't a problem now but
+> > it's something I'd like to not have be the case forever. (But that
+> > bridge can be crossable in the Idealized Future.)
+> >
+> > The more pressing objection might be that if the current idea is to
+> > make sure bounded objects really /are/ bounded, passing T() might be
+> > the worst of all worlds. If caught at compile time the problem goes
+> > away. If caught at runtime with the nullptr it at least gives a
+> > definite error in a useful place. If we pass T() then an object that
+> > claims to be bounded but /isn't/ could calculate the wrong bound and
+> > then we'd have to debug overruns or underruns or something.
+> >
+> > Given that, I think if we're going to give up on this feature for now,
+> > the 'least bad' alternative would be to just document the requirements
+> > for an object that claims to be bounded but pass the supplied object
+> > reference in all cases. We might have poorer performance from someone
+> > violating the guarantee, but not outright incorrectness. Also errors
+> > of this sort seem as if they should be easily eyeballed. One need only
+> > look for objects that claim to be bounded and see how they implement
+> > their bound_encode method.
+> >
+> > --
+> > Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+> > IRC: Aemerson@{RedHat, OFTC}
+> > 0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
-> mikuley
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
