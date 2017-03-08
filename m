@@ -1,64 +1,109 @@
-From: Jiaying Ren <mikulely@gmail.com>
-Subject: RGW: Implement S3 bucket logging feature
-Date: Wed, 8 Mar 2017 16:21:18 +0800
-Message-ID: <CAF8OO3P3UiP+23CLUY0doYJLJNroAm2m5fu5zap6ctr3uP9wtw@mail.gmail.com>
+From: John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Much more dentries than inodes, is that normal?
+Date: Wed, 8 Mar 2017 09:58:07 +0000
+Message-ID: <CALe9h7ck1__jQ_0bSMeKBDLv=GkeiLuynQ2s2D2+z9GAQscwHw@mail.gmail.com>
+References: <CAEYCsVL-_JihR5RcDPzajNhZk52sGdwHOxU1Xmsbb==fhMh39Q@mail.gmail.com>
+	<CALe9h7d2CJzYDX9LWz9KqiGZXwCXj80ATXVeWHnS=p9SOVtKmQ@mail.gmail.com>
+	<CAEYCsVKkT488SJTOqnQwjthjppJK5MTo7GnzTO3dRGKU94MP6g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f174.google.com ([209.85.220.174]:35487 "EHLO
-        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750729AbdCHIWI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Mar 2017 03:22:08 -0500
-Received: by mail-qk0-f174.google.com with SMTP id v125so51378814qkh.2
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Mar 2017 00:21:19 -0800 (PST)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ysadehwe@redhat.com, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAEYCsVKkT488SJTOqnQwjthjppJK5MTo7GnzTO3dRGKU94MP6g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi~ Yehuda and Ceph developers:
+On Tue, Mar 7, 2017 at 3:05 PM, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> Thanks John.
+>
+> Very likely, note that mds_mem::ino + mds_cache::strays_created ~=
+> mds::inodes, plus the MDS was the active-standby one, and become
+> active days ago due to failover.
+>
+> mds": {
+>         "inodes": 1291393,
+> }
+> "mds_cache": {
+>         "num_strays": 3559,
+>         "strays_created": 706120,
+>         "strays_purged": 702561
+> }
+> "mds_mem": {
+>         "ino": 584974,
+> }
+>
+> I do have a cache dump from the mds via admin socket,  is there
+> anything I can get from it  to make 100% percent sure?
 
-We're trying to implement S3 feature bucket
-logging (http://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html).
+You could go through that dump and look for the dentries with no inode
+number set, but honestly if this is a previously-standby-replay daemon
+and you're running pre-Kraken code I'd be pretty sure it's the known
+issue.
 
-Currently RGW didn't support bucket
-logging(http://tracker.ceph.com/issues/3225),but has similar
-functionality called opslog.
+John
 
-RGW opslog has its own CLI API,opslog can be accessed only by
-radosgw-admin CLI API(radosgw-admin log list/show). In order to
-compatible with S3, we're trying to adapt current opslog to support
-S3 bucket logging HTTP API via RGW s3 endpoint. Does this make sense
-for RGW? Caz I've found we tried to impl ops log HTTP API via admin
-endpoint(https://github.com/ceph/ceph/pull/7859)
-
-If the answer is yes,we'd like to share our plan.The basic idea to
-impl bucket logging takes two steps:
-
-1) Reuse current ops log (rgw_ops_log_rados)impl as a temp&durable
-   storage(ops log be stored as a rados-object)
-2) Add a new thread periodically upload opslog rados-object as rgw-object
-
-more detailed steps:
-
-1) impl bucket logging HTTP config API
-   + GET bucket logging
-   + PUT bucket logging
-     + store bucket logging config into bucket attribute
-     + add new entry(<bucket_name,bucket_logging_status>) to a sharded
-       <bucket_logging.X> rados-object's omap in <.rgw.bl> pool
-       (<bucket_logging.X>'s omap head store a marker to track
-       progress)
-   + ACL support Log Delivery Group
-2) impl ops log deliver logic
-   + upload rados-object as rgw-object(or to avoid extra data
-     transfer,can we map a rados-obj to a rgw-object by editing its
-     manifiest?)
-   + (optional) trim opslog
-3) impl bucket logging CLI API
-   + radosgw-admin bl list // list all bucket logging progress
-   + radosgw-admin bl deliver  // manually deliver ops log
-
-Any comments are appreciated.Thx.
-
---
-mikuley
+>
+> Xiaoxi
+>
+> 2017-03-07 22:20 GMT+08:00 John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+>> On Tue, Mar 7, 2017 at 9:17 AM, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>>> Hi,
+>>>
+>>>       From the admin socket of mds, I got following data on our
+>>> production cephfs env, roughly we have 585K inodes and almost same
+>>> amount of caps, but we have>2x dentries than inodes.
+>>>
+>>>       I am pretty sure we dont use hard link intensively (if any).
+>>> And the #ino match with "rados ls --pool $my_data_pool}.
+>>>
+>>>       Thanks for any explanations, appreciate it.
+>>>
+>>>
+>>> "mds_mem": {
+>>>         "ino": 584974,
+>>>         "ino+": 1290944,
+>>>         "ino-": 705970,
+>>>         "dir": 25750,
+>>>         "dir+": 25750,
+>>>         "dir-": 0,
+>>>         "dn": 1291393,
+>>>         "dn+": 1997517,
+>>>         "dn-": 706124,
+>>>         "cap": 584560,
+>>>         "cap+": 2657008,
+>>>         "cap-": 2072448,
+>>>         "rss": 24599976,
+>>>         "heap": 166284,
+>>>         "malloc": 18446744073708721289,
+>>>         "buf": 0
+>>>     },
+>>>
+>>
+>> One possibility is that you have many "null" dentries, which are
+>> created when we do a lookup and a file is not found -- we create a
+>> special dentry to remember that that filename does not exist, so that
+>> we can return ENOENT quickly next time.  On pre-Kraken versions, null
+>> dentries can also be left behind after file deletions when the
+>> deletion is replayed on a standbyreplay MDS
+>> (http://tracker.ceph.com/issues/16919)
+>>
+>> John
+>>
+>>
+>>
+>>>
+>>> Xiaoxi
+>>> _______________________________________________
+>>> ceph-users mailing list
+>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
