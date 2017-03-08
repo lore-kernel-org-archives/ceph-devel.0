@@ -1,133 +1,486 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Fwd: tendrl stragegy for ceph cluster map hierarchy
-Date: Wed, 8 Mar 2017 14:52:25 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1703081442540.1727@piezo.novalocal>
-References: <bf3c1e56-5355-7b68-69ac-e2082089542b@redhat.com> <85cfd1d7-d808-69a4-4258-44acf8ae1be9@redhat.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: crush devices class types
+Date: Wed, 8 Mar 2017 16:55:53 +0100
+Message-ID: <CABZ+qq=jL14uYNWo_VQ3aSX3ewEz5c-uXJ+qsTaeQVaV0b_uZg@mail.gmail.com>
+References: <e5fad669-da68-1287-7025-9c5e48d67601@dachary.org>
+ <1971303930.7861.1485178720341@ox.pcextreme.nl> <alpine.DEB.2.11.1701231428190.3654@piezo.novalocal>
+ <372c7fcb-8697-28ea-0d7c-1efc29fc21cf@dachary.org> <alpine.DEB.2.11.1702022047070.3654@piezo.novalocal>
+ <2e591b25-3db2-2dd2-03af-2c1ef40292ac@dachary.org> <CALe9h7ds0PpqX-QJ0Usb-OLggPMCE2KF0tLurGfKFmms89nDiA@mail.gmail.com>
+ <83ad191e-933f-83a4-c6d4-c831c1ac893f@dachary.org> <CALe9h7e-uOvQdO1GqNo6xpJ=QgoLyJ_ycgyP9c_Z_sXptHUJjg@mail.gmail.com>
+ <8bf1e90e-20ca-e4e9-d3dd-3535b6a7d781@dachary.org> <CABZ+qqkNb8rAr27oKL3txJfY-OFjpF5vKXFCyRywEVvkzNXbgg@mail.gmail.com>
+ <alpine.DEB.2.11.1703081432150.1727@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:48251 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751079AbdCHPCj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Mar 2017 10:02:39 -0500
-In-Reply-To: <85cfd1d7-d808-69a4-4258-44acf8ae1be9@redhat.com>
+Received: from mail-wr0-f171.google.com ([209.85.128.171]:34961 "EHLO
+        mail-wr0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751394AbdCHQDp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Mar 2017 11:03:45 -0500
+Received: by mail-wr0-f171.google.com with SMTP id g10so26540972wrg.2
+        for <ceph-devel@vger.kernel.org>; Wed, 08 Mar 2017 08:03:44 -0800 (PST)
+Received: from mail-wm0-f51.google.com (mail-wm0-f51.google.com. [74.125.82.51])
+        by smtp.gmail.com with ESMTPSA id c58sm4696594wrc.9.2017.03.08.07.56.35
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 08 Mar 2017 07:56:35 -0800 (PST)
+Received: by mail-wm0-f51.google.com with SMTP id n11so118431626wma.1
+        for <ceph-devel@vger.kernel.org>; Wed, 08 Mar 2017 07:56:35 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1703081432150.1727@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Martin Bukatovic <mbukatov@redhat.com>
-Cc: ceph-devel@vger.kernel.org, tendrl-devel@redhat.com
+To: Sage Weil <sage@newdream.net>
+Cc: Loic Dachary <loic@dachary.org>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Martin,
+On Wed, Mar 8, 2017 at 3:39 PM, Sage Weil <sage@newdream.net> wrote:
+> On Wed, 8 Mar 2017, Dan van der Ster wrote:
+>> Hi Loic,
+>>
+>> Did you already have a plan for how an operator would declare the
+>> device class of each OSD?
+>> Would this be a new --device-class option to ceph-disk prepare, which
+>> would perhaps create a device-class file in the root of the OSD's xfs
+>> dir?
+>> Then osd crush create-or-move in ceph-osd-prestart.sh would be a
+>> combination of ceph.conf's "crush location" and this per-OSD file.
+>
+> Hmm we haven't talked about this part yet.  I see a few options...
+>
+> 1) explicit ceph-disk argument, recorded as a file in osd_data
+>
+> 2) osd can autodetect this based on the 'rotational' flag in sysfs.  The
+> trick here, I think, is to come up with suitable defaults.  We might have
+> NVMe, SATA/SAS SSDs, HDD, or a combination (with journal and data (and
+> db) spread across multiple types).   Perhaps those could break down into
+> classes like
+>
+>         hdd
+>         ssd
+>         nvme
+>         hdd+ssd-journal
+>         hdd+nvme-jouranl
+>         hdd+ssd-db+nvme-jouranl
+>
+> which is probably sufficient for most users.  And if the admin likes they
+> can override.
+>
+> - Then the osd adjusts device-class on startup, just like it does with th=
+e
+> crush map position.  (Note that this will have no real effect until the
+> CRUSH rule(s) are changed to use device class.)
+>
+> - We'll need an 'osd crush set-device-class <osd.NNN> <class>' command.
+> The only danger I see here is that if you set it to something other than
+> what the OSD autodetects above, it'll get clobbered on the next OSD
+> restart.  Maybe the autodetection *only* sets the device class if it isn'=
+t
+> already set?
 
-On Wed, 8 Mar 2017, Martin Bukatovic wrote:
-> Dear Ceph community,
-> 
-> I'm trying to understand how ceph cluster hierarchy feature relates
-> and affects Tendrl project (http://tendrl.org/), which tries to
-> provide web UI and API for ceph (and gluster) management.
-> 
-> The problem is that my understanding is based solely on reading
-> Sage's thesis, documentation and playing around with toy sized
-> clusters. So I would definitely appreciated someone with better
-> understanding of ceph to check my thinking here. I'm forwarding
-> my tendrl post below.
-> 
-> Btw: Tendrl project definitely welcomes you to show your
-> opinions about tendrl plans/ides on tendrl-devel list :)
+This is the same issue we have with crush locations, hence the osd
+crush update on start option, right?
 
-Joined!
+>
+> - We need to adjust the crush rule commands to allow a device class.
+> Currently we have
+>
+> osd crush rule create-erasure <name>     create crush rule <name> for era=
+sure
+>  {<profile>}                              coded pool created with <profil=
+e> (
+>                                           default default)
+> osd crush rule create-simple <name>      create crush rule <name> to star=
+t from
+>  <root> <type> {firstn|indep}             <root>, replicate across bucket=
+s of
+>                                           type <type>, using a choose mod=
+e of
+>                                           <firstn|indep> (default firstn;=
+ indep
+>                                           best for erasure pools)
+>
+> ...so we could add another optional arg at the end for the device class.
+>
 
-> -------- Forwarded Message --------
-> Subject: tendrl stragegy for ceph cluster map hierarchy
-> Date: Wed, 8 Mar 2017 11:08:23 +0100
-> From: Martin Bukatovic <mbukatov@redhat.com>
-> Organization: Red Hat
-> To: tendrl-devel@redhat.com
-> 
-> Dear Tendrl community,
-> 
-> I recently reviewed chapter 5 "Data Distribution" from Sage's Ceph
-> thesis[1],
-> (since I try to improve my understanding of Ceph in general) and noticed the
-> importance of "cluster map hierarchy" (aka CRUSH Map Bucket Hierarchy[2]).
-> 
-> In short, it's a tree structure in which:
-> 
-> * nodes are called "buckets"
-> * leaf nodes represent OSDs
-> * inner (non leaf) nodes has a "bucket type", which influences efficiency
->   and performance of cluster operations on OSDs and data stored there
-> 
-> Design of this structure is important for performance, planned usage 
-> patterns, cluster expansion and failure domains (which means that poorly 
-> designed hierarchy could result in data loss which could be prevented if 
-> proper design had been used instead).
-> 
-> Eg. one could define bucket node for each rack, which would make 
-> possible to define crash rules to make sure that at least one replica is 
-> placed in different rack to prevent data loss when particular rack is 
-> down/lost. Without proper cluster hierarchy, it's not possible to 
-> achieve that.
-> 
-> If you are not familiar with the concept and are working or interested 
-> in features dealing with cluster import or creation, I would suggest to 
-> definitely check either mentioned chapter from the thesis or ceph 
-> documentation.
-> 
-> So the big question here is *how is Tendrl planning to work with this 
-> feature*?
-> 
-> We definitely can't ignore this now. Tendrl needs to have a clear 
-> strategy here from the beginning as this is something which can't be 
-> added or changed later easily.
-> 
-> Since this is core low level feature, there is no particular use case JIRA
-> for it. That said handling of cluster hierarchy is imho core part of the
-> following JIRAs:
-> 
-> * TEN-2 Install Ceph 2.x Cluster
-> * TEN-4 Import a Ceph 2.x Cluster
-> * TEN-164 UX: Create Ceph Cluster Design
-> * TEN-190 Create Ceph cluster via UI
-> 
-> My opinion is that we need to be able at least:
-> 
-> * import any valid/supported cluster cluster with it's hierarchy, without
->   breaking ceph or tendrl
-> * communicate clearly with tendrl admin user how the cluster hierarchy created
->   during ceph cluster creation would look like
-> * make it possible for admin to define cluster hierarchy manually if he decides
->   that what tendrl provides doesn't fit his needs
-> * design the tendrl architecture/code so that it's possible to add additional
->   cluster map setup features, validation later without significant refactoring
->   of tendrl code
+How far along in the implementation are you? Still time for discussing
+the basic idea?
 
-The "master" copy of the cluster hierarchy (datacenters, rows, racks, 
-hosts, devices) is the CRUSH map.  Ceph makes this easily accessible in 
-JSON form, and provides a series of commands that let you adjust the 
-hierachy (moving nodes of the tree around), so I think this is primarily a 
-UI issue.
+I wonder if you all had thought about using device classes like we use
+buckets (i.e. to choose across device types)? Suppose I have two
+brands of ssds: I want to define two classes ssd-a and ssd-b. And I
+want to replicate across these classes (and across, say, hosts as
+well). I think I'd need a choose step to choose 2 from classtype ssd
+(out of ssd-a, ssd-b, etc...), and then chooseleaf across hosts.
+IOW, device classes could be an orthogonal, but similarly flexible,
+structure to crush buckets: device classes would have a hierarchy.
 
-Usually the OSDs know enough to put the devices under the correct host, 
-but usually hosts don't know where they exist within the larger cluster.  
-(There are hooks to do this on the host, but it currently relies on 
-something like ansible or chef or puppet to put this somewhere in /etc so 
-that we can tell which rack etc the host lives in.)  That means it's 
-usually the admin who ensure the hosts are positioned properly in the 
-overall hierarchy.  So probably teh first thing would be to make the GUI 
-let you create racks/rows/datacenters/whatever and drag parts of the tree 
-around.
+So we could still have:
 
-As far as visualizing the cluster, the key thing I think we should address 
-from the get-go is how to do it in a way that will scale gracefully to 
-clusters with 100s, 1000s, and 10000s of OSDs.  The most promising 
-thing I've seen (and admittedly I haven't seen much) was from a 
-paper someone (Loic?) sent around a few weeks ago:
+device 0 osd.0 class ssd-a
+device 1 osd.1 class ssd-b
+device 2 osd.2 class hdd-c
+device 3 osd.3 class hdd-d
 
-	http://www.aviz.fr/wiki/uploads/Teaching2014/bundles_infovis.pdf
+but then we define the class-types and their hierarchy like we already
+do for osds. Shown in a "class tree" we could have, for example:
 
-See, for example Fig 1 and Fig 13a.  The circle grouping can scale down as 
-the cluster scales up (or you zoom in/out).  (And the actual subject 
-of the paper--data flows--can be applied to show things like data movement 
-during rebalancing/recovery or proposed CRUSH changes.)
+TYPE               NAME
+root                  default
+    classtype    hdd
+        class        hdd-c
+        class        hdd-d
+    classtype    ssd
+        class        ssd-a
+        class        ssd-b
 
-sage
+Sorry to bring this up late in the thread.
+
+Cheers, Dan
+
+
+> sage
+>
+>
+>
+>
+>
+>>
+>> Cheers, Dan
+>>
+>>
+>>
+>> On Wed, Feb 15, 2017 at 1:14 PM, Loic Dachary <loic@dachary.org> wrote:
+>> > Hi John,
+>> >
+>> > Thanks for the discussion :-) I'll start implementing the proposal as =
+described originally.
+>> >
+>> > Cheers
+>> >
+>> > On 02/15/2017 12:57 PM, John Spray wrote:
+>> >> On Fri, Feb 3, 2017 at 1:21 PM, Loic Dachary <loic@dachary.org> wrote=
+:
+>> >>>
+>> >>>
+>> >>> On 02/03/2017 01:46 PM, John Spray wrote:
+>> >>>> On Fri, Feb 3, 2017 at 12:22 PM, Loic Dachary <loic@dachary.org> wr=
+ote:
+>> >>>>> Hi,
+>> >>>>>
+>> >>>>> Reading Wido & John comments I thought of something, not sure if t=
+hat's a good idea or not. Here it is anyway ;-)
+>> >>>>>
+>> >>>>> The device class problem we're trying to solve is one instance of =
+a more general need to produce crush tables that implement a given use case=
+. The SSD / HDD use case is so frequent that it would make sense to modify =
+the crush format for this. But maybe we could instead implement that to be =
+a crush table generator.
+>> >>>>>
+>> >>>>> Let say you want help to create the hierarchies to implement the s=
+sd/hdd separation, you write your crushmap using the proposed syntax. But i=
+nstead of feeding it directly to crushtool -c, you would do something like:
+>> >>>>>
+>> >>>>>    crushtool --plugin 'device-class' --transform < mycrushmap.txt =
+| crushtool -c - -o mycrushmap
+>> >>>>>
+>> >>>>> The 'device-class' transformation documents the naming conventions=
+ so the user knows root will generate root_ssd and root_hdd. And the users =
+can also check by themselves the generated crushmap.
+>> >>>>>
+>> >>>>> Cons:
+>> >>>>>
+>> >>>>> * the users need to be aware of the transformation step and be abl=
+e to read and understand the generated result.
+>> >>>>> * it could look like it's not part of the standard way of doing th=
+ings, that it's a hack.
+>> >>>>>
+>> >>>>> Pros:
+>> >>>>>
+>> >>>>> * it can inspire people to implement other crushmap transformation=
+ / generators (an alternative, simpler, syntax comes to mind ;-)
+>> >>>>> * it can be implemented using python to lower the barrier of entry
+>> >>>>>
+>> >>>>> I don't think it makes the implementation of the current proposal =
+any simpler or more complex. Worst case scenario nobody write any plugin bu=
+t that does not make this one plugin less useful.
+>> >>>>
+>> >>>> I think this is basically the alternative approach that Sam was
+>> >>>> suggesting during CDM: the idea of layering a new (perhaps very
+>> >>>> similar) syntax on top of the existing one, instead of extending th=
+e
+>> >>>> existing one directly.
+>> >>>
+>> >>> Ha nice, not such a stupid idea then :-) I'll try to defend it a lit=
+tle more below then. Please bear in mind that I'm not sure this is the way =
+to go even though I'm writing as if I am.
+>> >>>
+>> >>>> The main argument against doing that was the complexity, not just o=
+f
+>> >>>> implementation but for users, who would now potentially have two
+>> >>>> separate sets of commands, one operating on the "high level" map
+>> >>>> (which would have a "myhost" object in it), and one operating on th=
+e
+>> >>>> native crush map (which would only have myhost~ssd, myhost~hdd
+>> >>>> entries, and would have no concept that a thing called myhost
+>> >>>> existed).
+>> >>>
+>> >>> As a user I'm not sure what is more complicated / confusing. If I'm =
+an experienced Ceph user I'll think of this new syntax as a generator becau=
+se I already know how crush works. I'll welcome the help and be relieved th=
+at I don't have to manually do that anymore. But having that as a native sy=
+ntax may be a little unconfortable for me because I will want to verify the=
+ new syntax matches what I expect, which comes naturally if the transformat=
+ion step is separate. I may even tweak it a little with an intermediate scr=
+ipt to match one thing or two. If I'm a new Ceph user this is one more conc=
+ept I need to learn: the device class. And to understand what it means, the=
+ documentation will have to explain that it creates an independant crush hi=
+erarchy for each device class, with weights that only take into account the=
+ devices of that given class. I will not be exonerated from understanding t=
+he transformation step and the syntactic sugar may even make that more comp=
+licated to get.
+>> >>>
+>> >>> If I understand correctly, the three would co-exist: host, host~ssd,=
+ host~hdd so that you can write a rule that takes from all devices.
+>> >>
+>> >> (Sorry this response is so late)
+>> >>
+>> >> I think the extra work is not so much in the formats, as it is
+>> >> exposing that syntax via all the commands that we have, and/or new
+>> >> commands.  We would either need two lots of commands, or we would nee=
+d
+>> >> to pick one layer (the 'generator' or the native one) for the
+>> >> commands, and treat the other layer as a hidden thing.
+>> >>
+>> >> It's also not just the extra work of implementing the commands/syntax=
+,
+>> >> it's the extra complexity that ends up being exposed to users.
+>> >>
+>> >>>
+>> >>>> As for implemetning other generators, the trouble with that is that
+>> >>>> the resulting conventions would be unknown to other tools, and to a=
+ny
+>> >>>> commands built in to Ceph.
+>> >>>
+>> >>> Yes. But do we really want to insert the concept of "device class" i=
+n Ceph ? There are recurring complaints about manually creating the crushma=
+p required to separate ssd from hdd. But is it inconvenient in any way that=
+ Ceph is otherwise unaware of this distinction ?
+>> >>
+>> >> Currently, if someone has done the manual stuff to set up SSD/HDD
+>> >> crush trees, any external tool has no way of knowing that two hosts
+>> >> (one ssd, one hdd) are actually the same host.  That's the key thing
+>> >> here for me -- the time saving during setup is a nice side effect, bu=
+t
+>> >> the primary value of having a Ceph-defined way to do this is that
+>> >> every tool building on Ceph can rely on it.
+>> >>
+>> >>
+>> >>
+>> >>>> We *really* need a variant of "set noout"
+>> >>>> that operates on a crush subtree (typically a host), as it's the sa=
+ne
+>> >>>> way to get people to temporarily mark some OSDs while they
+>> >>>> reboot/upgrade a host, but to implement that command we have to hav=
+e
+>> >>>> an unambiguous way of identifying which buckets in the crush map
+>> >>>> belong to a host.  Whatever the convention is (myhost~ssd, myhost_s=
+sd,
+>> >>>> whatever), it needs to be defined and built into Ceph in order to b=
+e
+>> >>>> interoperable.
+>> >>>
+>> >>> That goes back (above) to my understanding of Sage proposal (which I=
+ may have wrong ?) in which the host bucket still exists and still contains=
+ all devices regardless of their class.
+>> >>
+>> >> In Sage's proposal as I understand it, there's an underlying native
+>> >> crush map that uses today's format (i.e. clients need no upgrade),
+>> >> which is generated in response to either commands that edit the map,
+>> >> or the user inputting a modified map in the text format.  That
+>> >> conversion would follow pretty simple rules (assuming a host 'myhost'
+>> >> with ssd and hdd devices):
+>> >>  * On the way in, bucket 'myhost' generates 'myhost~ssd', 'myhost~hdd=
+' buckets
+>> >>  * On the way out, buckets 'myhost~ssd', 'myhost~hdd' get merged into=
+ 'myhost'
+>> >>  * When running a CLI command, something targeting 'myhost' will
+>> >> target both 'myhost~hdd' and 'myhost~ssd'
+>> >>
+>> >> It's that last part that probably isn't captured properly by somethin=
+g
+>> >> external that does a syntax conversion during import/export.
+>> >>
+>> >> John
+>> >>
+>> >>> Cheers
+>> >>>
+>> >>>>
+>> >>>> John
+>> >>>>
+>> >>>>
+>> >>>>
+>> >>>>> Cheers
+>> >>>>>
+>> >>>>> On 02/02/2017 09:57 PM, Sage Weil wrote:
+>> >>>>>> Hi everyone,
+>> >>>>>>
+>> >>>>>> I made more updates to http://pad.ceph.com/p/crush-types after th=
+e CDM
+>> >>>>>> discussion yesterday:
+>> >>>>>>
+>> >>>>>> - consolidated notes into a single proposal
+>> >>>>>> - use otherwise illegal character (e.g., ~) as separater for gene=
+rated
+>> >>>>>> buckets.  This avoids ambiguity with user-defined buckets.
+>> >>>>>> - class-id $class $id properties for each bucket.  This allows us=
+ to
+>> >>>>>> preserve the derivative bucket ids across a decompile->compile cy=
+cle so
+>> >>>>>> that data does not move (the bucket id is one of many inputs into=
+ crush's
+>> >>>>>> hash during placement).
+>> >>>>>> - simpler rule syntax:
+>> >>>>>>
+>> >>>>>>     rule ssd {
+>> >>>>>>             ruleset 1
+>> >>>>>>             step take default class ssd
+>> >>>>>>             step chooseleaf firstn 0 type host
+>> >>>>>>             step emit
+>> >>>>>>     }
+>> >>>>>>
+>> >>>>>> My rationale here is that we don't want to make this a separate '=
+step'
+>> >>>>>> call since steps map to underlying crush rule step ops, and this =
+is a
+>> >>>>>> directive only to the compiler.  Making it an optional step argum=
+ent seems
+>> >>>>>> like the cleanest way to do that.
+>> >>>>>>
+>> >>>>>> Any other comments before we kick this off?
+>> >>>>>>
+>> >>>>>> Thanks!
+>> >>>>>> sage
+>> >>>>>>
+>> >>>>>>
+>> >>>>>> On Mon, 23 Jan 2017, Loic Dachary wrote:
+>> >>>>>>
+>> >>>>>>> Hi Wido,
+>> >>>>>>>
+>> >>>>>>> Updated http://pad.ceph.com/p/crush-types with your proposal for=
+ the rule syntax
+>> >>>>>>>
+>> >>>>>>> Cheers
+>> >>>>>>>
+>> >>>>>>> On 01/23/2017 03:29 PM, Sage Weil wrote:
+>> >>>>>>>> On Mon, 23 Jan 2017, Wido den Hollander wrote:
+>> >>>>>>>>>> Op 22 januari 2017 om 17:44 schreef Loic Dachary <loic@dachar=
+y.org>:
+>> >>>>>>>>>>
+>> >>>>>>>>>>
+>> >>>>>>>>>> Hi Sage,
+>> >>>>>>>>>>
+>> >>>>>>>>>> You proposed an improvement to the crush map to address diffe=
+rent device types (SSD, HDD, etc.)[1]. When learning how to create a crush =
+map, I was indeed confused by the tricks required to create SSD only pools.=
+ After years of practice it feels more natural :-)
+>> >>>>>>>>>>
+>> >>>>>>>>>> The source of my confusion was mostly because I had to use a =
+hierarchical description to describe something that is not organized hierar=
+chically. "The rack contains hosts that contain devices" is intuitive. "The=
+ rack contains hosts that contain ssd that contain devices" is counter intu=
+itive. Changing:
+>> >>>>>>>>>>
+>> >>>>>>>>>>     # devices
+>> >>>>>>>>>>     device 0 osd.0
+>> >>>>>>>>>>     device 1 osd.1
+>> >>>>>>>>>>     device 2 osd.2
+>> >>>>>>>>>>     device 3 osd.3
+>> >>>>>>>>>>
+>> >>>>>>>>>> into:
+>> >>>>>>>>>>
+>> >>>>>>>>>>     # devices
+>> >>>>>>>>>>     device 0 osd.0 ssd
+>> >>>>>>>>>>     device 1 osd.1 ssd
+>> >>>>>>>>>>     device 2 osd.2 hdd
+>> >>>>>>>>>>     device 3 osd.3 hdd
+>> >>>>>>>>>>
+>> >>>>>>>>>> where ssd/hdd is the device class would be much better. Howev=
+er, using the device class like so:
+>> >>>>>>>>>>
+>> >>>>>>>>>>     rule ssd {
+>> >>>>>>>>>>             ruleset 1
+>> >>>>>>>>>>             type replicated
+>> >>>>>>>>>>             min_size 1
+>> >>>>>>>>>>             max_size 10
+>> >>>>>>>>>>             step take default:ssd
+>> >>>>>>>>>>             step chooseleaf firstn 0 type host
+>> >>>>>>>>>>             step emit
+>> >>>>>>>>>>     }
+>> >>>>>>>>>>
+>> >>>>>>>>>> looks arcane. Since the goal is to simplify the description f=
+or the first time user, maybe we could have something like:
+>> >>>>>>>>>>
+>> >>>>>>>>>>     rule ssd {
+>> >>>>>>>>>>             ruleset 1
+>> >>>>>>>>>>             type replicated
+>> >>>>>>>>>>             min_size 1
+>> >>>>>>>>>>             max_size 10
+>> >>>>>>>>>>             device class =3D ssd
+>> >>>>>>>>>
+>> >>>>>>>>> Would that be sane?
+>> >>>>>>>>>
+>> >>>>>>>>> Why not:
+>> >>>>>>>>>
+>> >>>>>>>>> step set-class ssd
+>> >>>>>>>>> step take default
+>> >>>>>>>>> step chooseleaf firstn 0 type host
+>> >>>>>>>>> step emit
+>> >>>>>>>>>
+>> >>>>>>>>> Since it's a 'step' you take, am I right?
+>> >>>>>>>>
+>> >>>>>>>> Good idea... a step is a cleaner way to extend the syntax!
+>> >>>>>>>>
+>> >>>>>>>> sage
+>> >>>>>>>> --
+>> >>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-=
+devel" in
+>> >>>>>>>> the body of a message to majordomo@vger.kernel.org
+>> >>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.h=
+tml
+>> >>>>>>>>
+>> >>>>>>>
+>> >>>>>>> --
+>> >>>>>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>> >>>>>>> --
+>> >>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-d=
+evel" in
+>> >>>>>>> the body of a message to majordomo@vger.kernel.org
+>> >>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.ht=
+ml
+>> >>>>>>>
+>> >>>>>
+>> >>>>> --
+>> >>>>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>> >>>>> --
+>> >>>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
+el" in
+>> >>>>> the body of a message to majordomo@vger.kernel.org
+>> >>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>>>
+>> >>>
+>> >>> --
+>> >>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>> >>
+>> >
+>> > --
+>> > Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
