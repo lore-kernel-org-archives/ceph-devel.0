@@ -1,45 +1,85 @@
-From: Henrik Korkuc <lists@kirneh.eu>
-Subject: Re: rbd-nbd 2T limit
-Date: Thu, 9 Mar 2017 09:14:53 +0200
-Message-ID: <975af97d-849e-6e65-d617-e0dc16672da4@kirneh.eu>
-References: <CAJDfisnEsBkYUXkVMnGPy9vu6DWYC3PZHFW7jOYm5bc_Dv-56w@mail.gmail.com>
+From: =?UTF-8?B?UGVkcm8gTMOzcGV6LUFkZXZh?= <plopezadeva@gmail.com>
+Subject: Re: crush multipick anomaly
+Date: Thu, 9 Mar 2017 09:47:44 +0100
+Message-ID: <CAFdhnjeAdCgqS3N7yvZXEanEc8c_q2hR_HciUD2gdFGcRyaZXQ@mail.gmail.com>
+References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
+ <3554101b-4d10-e46b-93b0-f74794258f2e@dachary.org> <alpine.DEB.2.11.1702131417070.7782@piezo.novalocal>
+ <CAFdhnje5hJMsU8ZCSL8mFj=d4UH6b41=nnddNvcfemhyWXg6aw@mail.gmail.com>
+ <4dbab28a-220b-2cef-fcbc-aca4dd17ab3b@dachary.org> <CAFdhnjf=WPmC+CEwX1QWe_v1HXmZu2cv7983zHGG4muKR_G0jw@mail.gmail.com>
+ <43736207-9e38-9389-4b99-d246716092ed@dachary.org> <CAFdhnjfGKdmOFnT-imHo55O7LLPCdOV=_pbU50ruxo1x9C3NDA@mail.gmail.com>
+ <cbcf592e-a0c0-bc5b-0f2a-11c4a110d485@dachary.org> <CAFdhnjcDfUG6Dzm2R_Fu16d7rT1z_h+mFy6ngYLUcLtURn_pVA@mail.gmail.com>
+ <63256e6b-ec48-e369-afc3-6d65eb5230f8@dachary.org> <eca40695-44b3-6843-b1c3-8359231e4d87@dachary.org>
+ <CAFdhnjfYK43=ZdQ-cPG0k8KzKnTZ=T5VNoYdfdSdPH8gRG_i+A@mail.gmail.com> <alpine.DEB.2.11.1703072259520.24356@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from alpha.syseng.pro ([37.48.90.241]:35638 "EHLO alpha.syseng.pro"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750793AbdCIHPo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 9 Mar 2017 02:15:44 -0500
-In-Reply-To: <CAJDfisnEsBkYUXkVMnGPy9vu6DWYC3PZHFW7jOYm5bc_Dv-56w@mail.gmail.com>
+Received: from mail-qk0-f170.google.com ([209.85.220.170]:35263 "EHLO
+        mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753727AbdCIIrr (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Mar 2017 03:47:47 -0500
+Received: by mail-qk0-f170.google.com with SMTP id v125so106631952qkh.2
+        for <ceph-devel@vger.kernel.org>; Thu, 09 Mar 2017 00:47:45 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1703072259520.24356@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Max Yehorov <myehorov@skytap.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Loic Dachary <loic@dachary.org>, ceph-devel@vger.kernel.org
 
-On 17-03-09 05:38, Max Yehorov wrote:
-> I was reading through release notes for 10.2.6 and there was a ticket
->
-> rbd: rbd-nbd: disallow mapping images >2TB in size (issue#17219,
-> pr#11870, Mykola Golub)
->
-> default nbd block size is 1k, valid values are from 512 to PAGE_SIZE
->
-> rbd_nbd.cc sets blocksize to 512 here:
-> https://github.com/ceph/ceph/blob/master/src/tools/rbd_nbd/rbd-nbd.cc#L635
->
-> Why 512 was chosen for rbd_nbd?
-> krbd also uses 512 sector size. Is there a reason to use 512 block
-> size vs 4k AF?
-I am also interested in >2TB NBD support and was disapointed when I 
-couldn't mount 10TB images.
+Great, thanks for the clarifications.
+I also think that the most natural way is to keep just a set of
+weights in the CRUSH map and update them inside the algorithm.
 
-Based on issue in that commit for me it seems to be clear why it was 
-done - some (most?) kernels in the wild do not support larger sizes. But 
-it looks like support on unaffected kernels is already in master (not 
-sure if it got backported to current releases). For reference:
-http://tracker.ceph.com/issues/17219 -> 
-https://github.com/ceph/ceph/pull/11741 -> 
-http://tracker.ceph.com/issues/18335 -> 
-https://github.com/ceph/ceph/pull/13229
+I keep working on it.
 
 
+2017-03-08 0:06 GMT+01:00 Sage Weil <sage@newdream.net>:
+> Hi Pedro,
+>
+> Thanks for taking a look at this!  It's a frustrating problem and we
+> haven't made much headway.
+>
+> On Thu, 2 Mar 2017, Pedro L=C3=B3pez-Adeva wrote:
+>> Hi,
+>>
+>> I will have a look. BTW, I have not progressed that much but I have
+>> been thinking about it. In order to adapt the previous algorithm in
+>> the python notebook I need to substitute the iteration over all
+>> possible devices permutations to iteration over all the possible
+>> selections that crush would make. That is the main thing I need to
+>> work on.
+>>
+>> The other thing is of course that weights change for each replica.
+>> That is, they cannot be really fixed in the crush map. So the
+>> algorithm inside libcrush, not only the weights in the map, need to be
+>> changed. The weights in the crush map should reflect then, maybe, the
+>> desired usage frequencies. Or maybe each replica should have their own
+>> crush map, but then the information about the previous selection
+>> should be passed to the next replica placement run so it avoids
+>> selecting the same one again.
+>
+> My suspicion is that the best solution here (whatever that means!)
+> leaves the CRUSH weights intact with the desired distribution, and
+> then generates a set of derivative weights--probably one set for each
+> round/replica/rank.
+>
+> One nice property of this is that once the support is added to encode
+> multiple sets of weights, the algorithm used to generate them is free to
+> change and evolve independently.  (In most cases any change is
+> CRUSH's mapping behavior is difficult to roll out because all
+> parties participating in the cluster have to support any new behavior
+> before it is enabled or used.)
+>
+>> I have a question also. Is there any significant difference between
+>> the device selection algorithm description in the paper and its final
+>> implementation?
+>
+> The main difference is the "retry_bucket" behavior was found to be a bad
+> idea; any collision or failed()/overload() case triggers the
+> retry_descent.
+>
+> There are other changes, of course, but I don't think they'll impact any
+> solution we come with here (or at least any solution can be suitably
+> adapted)!
+>
+> sage
