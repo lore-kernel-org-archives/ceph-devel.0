@@ -1,85 +1,115 @@
-From: =?UTF-8?B?UGVkcm8gTMOzcGV6LUFkZXZh?= <plopezadeva@gmail.com>
-Subject: Re: crush multipick anomaly
-Date: Thu, 9 Mar 2017 09:47:44 +0100
-Message-ID: <CAFdhnjeAdCgqS3N7yvZXEanEc8c_q2hR_HciUD2gdFGcRyaZXQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
- <3554101b-4d10-e46b-93b0-f74794258f2e@dachary.org> <alpine.DEB.2.11.1702131417070.7782@piezo.novalocal>
- <CAFdhnje5hJMsU8ZCSL8mFj=d4UH6b41=nnddNvcfemhyWXg6aw@mail.gmail.com>
- <4dbab28a-220b-2cef-fcbc-aca4dd17ab3b@dachary.org> <CAFdhnjf=WPmC+CEwX1QWe_v1HXmZu2cv7983zHGG4muKR_G0jw@mail.gmail.com>
- <43736207-9e38-9389-4b99-d246716092ed@dachary.org> <CAFdhnjfGKdmOFnT-imHo55O7LLPCdOV=_pbU50ruxo1x9C3NDA@mail.gmail.com>
- <cbcf592e-a0c0-bc5b-0f2a-11c4a110d485@dachary.org> <CAFdhnjcDfUG6Dzm2R_Fu16d7rT1z_h+mFy6ngYLUcLtURn_pVA@mail.gmail.com>
- <63256e6b-ec48-e369-afc3-6d65eb5230f8@dachary.org> <eca40695-44b3-6843-b1c3-8359231e4d87@dachary.org>
- <CAFdhnjfYK43=ZdQ-cPG0k8KzKnTZ=T5VNoYdfdSdPH8gRG_i+A@mail.gmail.com> <alpine.DEB.2.11.1703072259520.24356@piezo.novalocal>
+From: Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Much more dentries than inodes, is that normal?
+Date: Thu, 9 Mar 2017 17:00:09 +0800
+Message-ID: <CAEYCsVKbiS+KYAgZtucoCL8Vs5kLHVBP_+tLC1cb8YrtXoGc9A@mail.gmail.com>
+References: <CAEYCsVL-_JihR5RcDPzajNhZk52sGdwHOxU1Xmsbb==fhMh39Q@mail.gmail.com>
+	<CALe9h7d2CJzYDX9LWz9KqiGZXwCXj80ATXVeWHnS=p9SOVtKmQ@mail.gmail.com>
+	<CAEYCsVKkT488SJTOqnQwjthjppJK5MTo7GnzTO3dRGKU94MP6g@mail.gmail.com>
+	<CALe9h7ck1__jQ_0bSMeKBDLv=GkeiLuynQ2s2D2+z9GAQscwHw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f170.google.com ([209.85.220.170]:35263 "EHLO
-        mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753727AbdCIIrr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Mar 2017 03:47:47 -0500
-Received: by mail-qk0-f170.google.com with SMTP id v125so106631952qkh.2
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Mar 2017 00:47:45 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1703072259520.24356@piezo.novalocal>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Loic Dachary <loic@dachary.org>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CALe9h7ck1__jQ_0bSMeKBDLv=GkeiLuynQ2s2D2+z9GAQscwHw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Great, thanks for the clarifications.
-I also think that the most natural way is to keep just a set of
-weights in the CRUSH map and update them inside the algorithm.
+Yeah I checked the dump  , it it truely the known issue.
 
-I keep working on it.
+Thanks
 
-
-2017-03-08 0:06 GMT+01:00 Sage Weil <sage@newdream.net>:
-> Hi Pedro,
->
-> Thanks for taking a look at this!  It's a frustrating problem and we
-> haven't made much headway.
->
-> On Thu, 2 Mar 2017, Pedro L=C3=B3pez-Adeva wrote:
->> Hi,
+2017-03-08 17:58 GMT+08:00 John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+> On Tue, Mar 7, 2017 at 3:05 PM, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>> Thanks John.
 >>
->> I will have a look. BTW, I have not progressed that much but I have
->> been thinking about it. In order to adapt the previous algorithm in
->> the python notebook I need to substitute the iteration over all
->> possible devices permutations to iteration over all the possible
->> selections that crush would make. That is the main thing I need to
->> work on.
+>> Very likely, note that mds_mem::ino + mds_cache::strays_created ~=
+>> mds::inodes, plus the MDS was the active-standby one, and become
+>> active days ago due to failover.
 >>
->> The other thing is of course that weights change for each replica.
->> That is, they cannot be really fixed in the crush map. So the
->> algorithm inside libcrush, not only the weights in the map, need to be
->> changed. The weights in the crush map should reflect then, maybe, the
->> desired usage frequencies. Or maybe each replica should have their own
->> crush map, but then the information about the previous selection
->> should be passed to the next replica placement run so it avoids
->> selecting the same one again.
+>> mds": {
+>>         "inodes": 1291393,
+>> }
+>> "mds_cache": {
+>>         "num_strays": 3559,
+>>         "strays_created": 706120,
+>>         "strays_purged": 702561
+>> }
+>> "mds_mem": {
+>>         "ino": 584974,
+>> }
+>>
+>> I do have a cache dump from the mds via admin socket,  is there
+>> anything I can get from it  to make 100% percent sure?
 >
-> My suspicion is that the best solution here (whatever that means!)
-> leaves the CRUSH weights intact with the desired distribution, and
-> then generates a set of derivative weights--probably one set for each
-> round/replica/rank.
+> You could go through that dump and look for the dentries with no inode
+> number set, but honestly if this is a previously-standby-replay daemon
+> and you're running pre-Kraken code I'd be pretty sure it's the known
+> issue.
 >
-> One nice property of this is that once the support is added to encode
-> multiple sets of weights, the algorithm used to generate them is free to
-> change and evolve independently.  (In most cases any change is
-> CRUSH's mapping behavior is difficult to roll out because all
-> parties participating in the cluster have to support any new behavior
-> before it is enabled or used.)
+> John
 >
->> I have a question also. Is there any significant difference between
->> the device selection algorithm description in the paper and its final
->> implementation?
->
-> The main difference is the "retry_bucket" behavior was found to be a bad
-> idea; any collision or failed()/overload() case triggers the
-> retry_descent.
->
-> There are other changes, of course, but I don't think they'll impact any
-> solution we come with here (or at least any solution can be suitably
-> adapted)!
->
-> sage
+>>
+>> Xiaoxi
+>>
+>> 2017-03-07 22:20 GMT+08:00 John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+>>> On Tue, Mar 7, 2017 at 9:17 AM, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>>>> Hi,
+>>>>
+>>>>       From the admin socket of mds, I got following data on our
+>>>> production cephfs env, roughly we have 585K inodes and almost same
+>>>> amount of caps, but we have>2x dentries than inodes.
+>>>>
+>>>>       I am pretty sure we dont use hard link intensively (if any).
+>>>> And the #ino match with "rados ls --pool $my_data_pool}.
+>>>>
+>>>>       Thanks for any explanations, appreciate it.
+>>>>
+>>>>
+>>>> "mds_mem": {
+>>>>         "ino": 584974,
+>>>>         "ino+": 1290944,
+>>>>         "ino-": 705970,
+>>>>         "dir": 25750,
+>>>>         "dir+": 25750,
+>>>>         "dir-": 0,
+>>>>         "dn": 1291393,
+>>>>         "dn+": 1997517,
+>>>>         "dn-": 706124,
+>>>>         "cap": 584560,
+>>>>         "cap+": 2657008,
+>>>>         "cap-": 2072448,
+>>>>         "rss": 24599976,
+>>>>         "heap": 166284,
+>>>>         "malloc": 18446744073708721289,
+>>>>         "buf": 0
+>>>>     },
+>>>>
+>>>
+>>> One possibility is that you have many "null" dentries, which are
+>>> created when we do a lookup and a file is not found -- we create a
+>>> special dentry to remember that that filename does not exist, so that
+>>> we can return ENOENT quickly next time.  On pre-Kraken versions, null
+>>> dentries can also be left behind after file deletions when the
+>>> deletion is replayed on a standbyreplay MDS
+>>> (http://tracker.ceph.com/issues/16919)
+>>>
+>>> John
+>>>
+>>>
+>>>
+>>>>
+>>>> Xiaoxi
+>>>> _______________________________________________
+>>>> ceph-users mailing list
+>>>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
