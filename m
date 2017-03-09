@@ -1,38 +1,36 @@
-From: vivek kukreja <vivekkukreja5@gmail.com>
-Subject: Interested in GSoC 2017 Project: Commands for CephFS client Auth Caps creation.
-Date: Fri, 10 Mar 2017 01:43:15 +0530
-Message-ID: <CAN1pxDa9ZYoBgM7iz3WTXeRLxVKqW4PNqT_5_q9=5p8mi7yjNA@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: FreeBSD/Clang reports a missing function during linking
+Date: Thu, 9 Mar 2017 22:00:33 +0100
+Message-ID: <fd678506-4fa6-05c5-fb19-445a9cd38e7a@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f172.google.com ([209.85.223.172]:34569 "EHLO
-        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750789AbdCIUOf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Mar 2017 15:14:35 -0500
-Received: by mail-io0-f172.google.com with SMTP id g6so35843758ioj.1
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Mar 2017 12:13:16 -0800 (PST)
+Received: from smtp.digiware.nl ([176.74.240.9]:37976 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750880AbdCIVAi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 9 Mar 2017 16:00:38 -0500
+Received: from [192.168.10.10] (asus [192.168.10.10])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id D88583B79D
+        for <ceph-devel@vger.kernel.org>; Thu,  9 Mar 2017 22:00:32 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hello developers,
+Hi,
 
-I'm Vivek Kukreja pursuing masters at IIT Dhanbad India. I'm
-interested in contributing to Ceph under GSoC this year as a student.
-I'm new to Ceph and i'm going through the basic documentation now. I
-am interested in the following project idea:
-Ceph-mgr: Commands for cephfs client authentication capabilities creation.
+FreBSD Jenkins complains:
 
-For better understanding, I'm trying to set up a basic cluster with 5
-VM's to eventually be able to create a ceph filesystem. I'm following
-this link: http://tracker.ceph.com/projects/ceph/wiki/Ceph_Vagrant_Setup
-I'm running Ubuntu 16.04 with 8GB RAM which may not be sufficient for
-the purpose. If there is any other preffered method to set up a test
-cluster for running cephfs please suggest.
+../../../lib/librbd_internal.a(GetStatusRequest.cc.o): In function
+`librbd::mirror::GetStatusRequest<librbd::ImageCtx>::send()':
+/home/jenkins/workspace/ceph-master/src/librbd/mirror/GetStatusRequest.cc:(.text._ZN6librbd6mirror16GetStatusRequestINS_8ImageCtxEE4sendEv[_ZN6librbd6mirror16GetStatusRequestINS_8ImageCtxEE4sendEv]+0xcc):
+undefined reference to `cls::rbd::MirrorImageStatus::~MirrorImageStatus()'
 
-Also, please suggest any docs i should read or tasks prerequisite to
-applying for GSoC. If there is another group for GSoC related queries,
-please redirect me to it.
+c++: error: linker command failed with exit code 1 (use -v to see
+invocation)
 
-Regards,
-Vivek
+Not sure why Clang creates this reference and then on how to fix this.
+
+--WjW
