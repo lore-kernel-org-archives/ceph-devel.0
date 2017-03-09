@@ -1,67 +1,214 @@
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: [PATCH 4/7] mm: introduce memalloc_nofs_{save,restore} API
-Date: Thu, 9 Mar 2017 12:42:53 +0100
-Message-ID: <20170309114253.GA14605@twin.jikos.cz>
-References: <20170306131408.9828-1-mhocko@kernel.org>
- <20170306131408.9828-5-mhocko@kernel.org>
- <20170306132214.1769368301d9e671e1bc68be@linux-foundation.org>
- <20170307150956.GM28642@dhcp22.suse.cz>
-Reply-To: dsterba@suse.cz
+From: Nikita Gerasimov <nikita.gerasimov@oracle.com>
+Subject: Re: [PATCH] ceph-detect-init: Adds Oracle Linux Server and Oracle VM
+ Server detection
+Date: Thu, 9 Mar 2017 14:03:41 +0300
+Message-ID: <bffcf580-6763-cdc3-3f0c-d045812a2512@oracle.com>
+References: <1488473512-4374-1-git-send-email-nikita.gerasimov@oracle.com>
+ <c25a3567-c135-b63c-a9c6-af0e854362de@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170307150956.GM28642@dhcp22.suse.cz>
-Sender: owner-linux-mm@kvack.org
-To: Michal Hocko <mhocko@kernel.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-fsdevel@vger.kernel.org, linux-mm@kvack.org, Dave Chinner <david@fromorbit.com>, djwong@kernel.org, Theodore Ts'o <tytso@mit.edu>, Chris Mason <clm@fb.com>, David Sterba <dsterba@suse.cz>, Jan Kara <jack@suse.cz>, ceph-devel@vger.kernel.org, cluster-devel@redhat.com, linux-nfs@vger.kernel.org, logfs@logfs.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org, linux-btrfs@vger.kernel.org, linux-mtd@lists.infradead.org, reiserfs-devel@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net, linux-f2fs-devel@lists.sourceforge.net, linux-afs@lists.infradead.org, LKML <linux-kernel@vger.kernel.org>, Vlastimil Babka <vbabka@suse.cz>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from userp1050.oracle.com ([156.151.31.82]:48959 "EHLO
+        userp1050.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754648AbdCIM0E (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 9 Mar 2017 07:26:04 -0500
+Received: from userp1040.oracle.com (userp1040.oracle.com [156.151.31.81])
+        by userp1050.oracle.com (Sentrion-MTA-4.3.2/Sentrion-MTA-4.3.2) with ESMTP id v29B4pCl024378
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
+        for <ceph-devel@vger.kernel.org>; Thu, 9 Mar 2017 11:04:51 GMT
+Received: from aserv0021.oracle.com (aserv0021.oracle.com [141.146.126.233])
+        by userp1040.oracle.com (Sentrion-MTA-4.3.2/Sentrion-MTA-4.3.2) with ESMTP id v29B3n7g026100
+        (version=TLSv1 cipher=DHE-RSA-AES256-SHA bits=256 verify=OK)
+        for <ceph-devel@vger.kernel.org>; Thu, 9 Mar 2017 11:03:50 GMT
+Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
+        by aserv0021.oracle.com (8.13.8/8.14.4) with ESMTP id v29B3nYS024750
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=OK)
+        for <ceph-devel@vger.kernel.org>; Thu, 9 Mar 2017 11:03:49 GMT
+Received: from abhmp0010.oracle.com (abhmp0010.oracle.com [141.146.116.16])
+        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id v29B3mEn020830
+        for <ceph-devel@vger.kernel.org>; Thu, 9 Mar 2017 11:03:48 GMT
+In-Reply-To: <c25a3567-c135-b63c-a9c6-af0e854362de@dachary.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Tue, Mar 07, 2017 at 04:09:56PM +0100, Michal Hocko wrote:
-> On Mon 06-03-17 13:22:14, Andrew Morton wrote:
-> > On Mon,  6 Mar 2017 14:14:05 +0100 Michal Hocko <mhocko@kernel.org> wrote:
-> [...]
-> > > --- a/include/linux/gfp.h
-> > > +++ b/include/linux/gfp.h
-> > > @@ -210,8 +210,16 @@ struct vm_area_struct;
-> > >   *
-> > >   * GFP_NOIO will use direct reclaim to discard clean pages or slab pages
-> > >   *   that do not require the starting of any physical IO.
-> > > + *   Please try to avoid using this flag directly and instead use
-> > > + *   memalloc_noio_{save,restore} to mark the whole scope which cannot
-> > > + *   perform any IO with a short explanation why. All allocation requests
-> > > + *   will inherit GFP_NOIO implicitly.
-> > >   *
-> > >   * GFP_NOFS will use direct reclaim but will not use any filesystem interfaces.
-> > > + *   Please try to avoid using this flag directly and instead use
-> > > + *   memalloc_nofs_{save,restore} to mark the whole scope which cannot/shouldn't
-> > > + *   recurse into the FS layer with a short explanation why. All allocation
-> > > + *   requests will inherit GFP_NOFS implicitly.
-> > 
-> > I wonder if these are worth a checkpatch rule.
-> 
-> I am not really sure, to be honest. This may easilly end up people
-> replacing
-> 
-> do_alloc(GFP_NOFS)
-> 
-> with
-> 
-> memalloc_nofs_save()
-> do_alloc(GFP_KERNEL)
-> memalloc_nofs_restore()
-> 
-> which doesn't make any sense of course. From my experience, people tend
-> to do stupid things just to silent checkpatch warnings very often.
-> Moreover I believe we need to do the transition to the new api first
-> before we can push back on the explicit GFP_NOFS usage. Maybe then we
-> can think about the a checkpatch warning.
+Hi All,
 
-I agree will all your objections against adding that to checkpatch, at
-this point it's less harmful to use GFP_NOFS.
+What are the next steps for this patch?
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+
+On 02.03.2017 21:16, Loic Dachary wrote:
+> Reviewed-by: Loic Dachary <ldachary@redhat.com>
+>
+> On 03/02/2017 05:51 PM, nikita.gerasimov@oracle.com wrote:
+>> From: Nikita Gerasimov <nikita.gerasimov@oracle.com>
+>>
+>> Oracle Linux Server is API/ABI compatible with RHEL/CentOS Linux distro.
+>> Oracle VM Server is Xen based VM server. Which modern versions Dom0 is based on el6
+>>
+>> Signed-off-by: Nikita Gerasimov <nikita.gerasimov@oracle.com>
+>>
+>> run-make-check.sh: http://paste.ubuntu.com/24096418/
+>> ---
+>>   install-deps.sh                                        |  2 +-
+>>   src/ceph-detect-init/ceph_detect_init/__init__.py      | 18 ++++++++++++++++--
+>>   .../ceph_detect_init/oraclevms/__init__.py             | 11 +++++++++++
+>>   src/ceph-detect-init/tests/test_all.py                 | 18 ++++++++++++++++++
+>>   4 files changed, 46 insertions(+), 3 deletions(-)
+>>   create mode 100644 src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+>>
+>> diff --git a/install-deps.sh b/install-deps.sh
+>> index 41d393d..e1e8722 100755
+>> --- a/install-deps.sh
+>> +++ b/install-deps.sh
+>> @@ -88,7 +88,7 @@ else
+>>   	$SUDO env DEBIAN_FRONTEND=noninteractive apt-get -y remove ceph-build-deps
+>>   	if [ -n "$backports" ] ; then rm $control; fi
+>>           ;;
+>> -    centos|fedora|rhel)
+>> +    centos|fedora|rhel|ol)
+>>           yumdnf="yum"
+>>           builddepcmd="yum-builddep -y"
+>>           if test "$(echo "$VERSION_ID >= 22" | bc)" -ne 0; then
+>> diff --git a/src/ceph-detect-init/ceph_detect_init/__init__.py b/src/ceph-detect-init/ceph_detect_init/__init__.py
+>> index aad3eee..9abc421 100644
+>> --- a/src/ceph-detect-init/ceph_detect_init/__init__.py
+>> +++ b/src/ceph-detect-init/ceph_detect_init/__init__.py
+>> @@ -24,6 +24,7 @@ from ceph_detect_init import suse
+>>   from ceph_detect_init import gentoo
+>>   from ceph_detect_init import freebsd
+>>   from ceph_detect_init import docker
+>> +from ceph_detect_init import oraclevms
+>>   import os
+>>   import logging
+>>   import platform
+>> @@ -44,7 +45,8 @@ def get(use_rhceph=False):
+>>       module.normalized_name = _normalized_distro_name(distro_name)
+>>       module.distro = module.normalized_name
+>>       module.is_el = module.normalized_name in ['redhat', 'centos',
+>> -                                              'fedora', 'scientific']
+>> +                                              'fedora', 'scientific',
+>> +                                              'oraclel']
+>>       module.release = release
+>>       module.codename = codename
+>>       module.init = module.choose_init()
+>> @@ -64,6 +66,8 @@ def _get_distro(distro, use_rhceph=False):
+>>           'linuxmint': debian,
+>>           'centos': centos,
+>>           'scientific': centos,
+>> +        'oraclel': centos,
+>> +        'oraclevms': oraclevms,
+>>           'redhat': centos,
+>>           'fedora': fedora,
+>>           'suse': suse,
+>> @@ -90,6 +94,10 @@ def _normalized_distro_name(distro):
+>>           return 'suse'
+>>       elif distro.startswith('centos'):
+>>           return 'centos'
+>> +    elif distro.startswith('oracle linux'):
+>> +        return 'oraclel'
+>> +    elif distro.startswith('oracle vm'):
+>> +        return 'oraclevms'
+>>       elif distro.startswith(('gentoo', 'funtoo', 'exherbo')):
+>>           return 'gentoo'
+>>       return distro
+>> @@ -127,8 +135,9 @@ def platform_information():
+>>       else:
+>>           raise exc.UnsupportedPlatform(platform.system(), '', '')
+>>   
+>> +    distro_lower = distro.lower()
+>>       # this could be an empty string in Debian
+>> -    if not codename and 'debian' in distro.lower():
+>> +    if not codename and 'debian' in distro_lower:
+>>           debian_codenames = {
+>>               '8': 'jessie',
+>>               '7': 'wheezy',
+>> @@ -146,6 +155,11 @@ def platform_information():
+>>                   codename = minor
+>>               else:
+>>                   codename = major
+>> +    # this is an empty string in Oracle
+>> +    elif distro_lower.startswith('oracle linux'):
+>> +        codename = 'OL' + release
+>> +    elif distro_lower.startswith('oracle vm'):
+>> +        codename = 'OVS' + release
+>>   
+>>       return (
+>>           str(distro).rstrip(),
+>> diff --git a/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py b/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+>> new file mode 100644
+>> index 0000000..f7bf85b
+>> --- /dev/null
+>> +++ b/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+>> @@ -0,0 +1,11 @@
+>> +distro = None
+>> +release = None
+>> +codename = None
+>> +
+>> +
+>> +def choose_init():
+>> +    """Select a init system
+>> +
+>> +    Returns the name of a init system (upstart, sysvinit ...).
+>> +    """
+>> +    return 'sysvinit'
+>> diff --git a/src/ceph-detect-init/tests/test_all.py b/src/ceph-detect-init/tests/test_all.py
+>> index d2733c3..eb48bb4 100644
+>> --- a/src/ceph-detect-init/tests/test_all.py
+>> +++ b/src/ceph-detect-init/tests/test_all.py
+>> @@ -35,6 +35,7 @@ from ceph_detect_init import suse
+>>   from ceph_detect_init import gentoo
+>>   from ceph_detect_init import freebsd
+>>   from ceph_detect_init import docker
+>> +from ceph_detect_init import oraclevms
+>>   
+>>   logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
+>>                       level=logging.DEBUG)
+>> @@ -54,6 +55,9 @@ class TestCephDetectInit(testtools.TestCase):
+>>       def test_docker(self):
+>>           self.assertEqual('none', docker.choose_init())
+>>   
+>> +    def test_oraclevms(self):
+>> +        self.assertEqual('sysvinit', oraclevms.choose_init())
+>> +
+>>       def test_centos(self):
+>>           with mock.patch('ceph_detect_init.centos.release',
+>>                           '7.0'):
+>> @@ -207,6 +211,8 @@ class TestCephDetectInit(testtools.TestCase):
+>>           self.assertEqual(debian, g('ubuntu'))
+>>           self.assertEqual(centos, g('centos'))
+>>           self.assertEqual(centos, g('scientific'))
+>> +        self.assertEqual(centos, g('Oracle Linux Server'))
+>> +        self.assertEqual(oraclevms, g('Oracle VM server'))
+>>           self.assertEqual(fedora, g('fedora'))
+>>           self.assertEqual(suse, g('suse'))
+>>           self.assertEqual(rhel, g('redhat', use_rhceph=True))
+>> @@ -222,6 +228,8 @@ class TestCephDetectInit(testtools.TestCase):
+>>           self.assertEqual('scientific', n('Scientific'))
+>>           self.assertEqual('scientific', n('Scientific Linux'))
+>>           self.assertEqual('scientific', n('scientific linux'))
+>> +        self.assertEqual('oraclel', n('Oracle Linux Server'))
+>> +        self.assertEqual('oraclevms', n('Oracle VM server'))
+>>           self.assertEqual('suse', n('SUSE'))
+>>           self.assertEqual('suse', n('suse'))
+>>           self.assertEqual('suse', n('openSUSE'))
+>> @@ -266,6 +274,16 @@ class TestCephDetectInit(testtools.TestCase):
+>>               self.assertEqual(('debian', 'sid/jessie', 'sid'),
+>>                                ceph_detect_init.platform_information())
+>>   
+>> +        with mock.patch('platform.linux_distribution',
+>> +                        lambda **kwargs: (('Oracle Linux Server', '7.3', ''))):
+>> +            self.assertEqual(('Oracle Linux Server', '7.3', 'OL7.3'),
+>> +                             ceph_detect_init.platform_information())
+>> +
+>> +        with mock.patch('platform.linux_distribution',
+>> +                        lambda **kwargs: (('Oracle VM server', '3.4.2', ''))):
+>> +            self.assertEqual(('Oracle VM server', '3.4.2', 'OVS3.4.2'),
+>> +                             ceph_detect_init.platform_information())
+>> +
+>>       @mock.patch('platform.linux_distribution')
+>>       def test_platform_information_container(self, mock_linux_dist):
+>>           import sys
+>>
+
