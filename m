@@ -1,141 +1,229 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: BlueStore and maximum number of objects per PG
-Date: Fri, 10 Mar 2017 11:23:37 +0100 (CET)
-Message-ID: <2012481357.12210.1489141417999@ox.pcextreme.nl>
-References: <1002796178.10638.1487707472256@ox.pcextreme.nl>
- <7d98cbf5-97e5-f09a-9b1e-b4fa6668c104@redhat.com>
- <1799658106.10696.1487760693448@ox.pcextreme.nl>
- <50637955.12140.1489066717440@ox.pcextreme.nl>
- <d8c97891-c009-7db8-64f4-045bbd751277@redhat.com>
+From: Nikita Gerasimov <nikita.gerasimov@oracle.com>
+Subject: Re: [PATCH] ceph-detect-init: Adds Oracle Linux Server and Oracle VM
+ Server detection
+Date: Fri, 10 Mar 2017 17:50:14 +0300
+Message-ID: <88850a6c-e6a2-87a9-38a4-e1d6433ec5a3@oracle.com>
+References: <1488473512-4374-1-git-send-email-nikita.gerasimov@oracle.com>
+ <c25a3567-c135-b63c-a9c6-af0e854362de@dachary.org>
+ <bffcf580-6763-cdc3-3f0c-d045812a2512@oracle.com>
+ <f8f6f0c8-8bf8-2132-7744-a1f8b028d6d3@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp02.mail.pcextreme.nl ([109.72.87.139]:41624 "EHLO
-        smtp02.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935365AbdCJKXm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Mar 2017 05:23:42 -0500
-In-Reply-To: <d8c97891-c009-7db8-64f4-045bbd751277@redhat.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:46566 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752691AbdCJOu1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Mar 2017 09:50:27 -0500
+In-Reply-To: <f8f6f0c8-8bf8-2132-7744-a1f8b028d6d3@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Dan Mick <dmick@redhat.com>, ceph-devel@vger.kernel.org
 
+github pull request: https://github.com/ceph/ceph/pull/13917
 
-> Op 9 maart 2017 om 15:10 schreef Mark Nelson <mnelson@redhat.com>:
-> 
-> 
-> 
-> 
-> On 03/09/2017 07:38 AM, Wido den Hollander wrote:
-> >
-> >> Op 22 februari 2017 om 11:51 schreef Wido den Hollander <wido@42on.com>:
-> >>
-> >>
-> >>
-> >>> Op 22 februari 2017 om 3:53 schreef Mark Nelson <mnelson@redhat.com>:
-> >>>
-> >>>
-> >>> Hi Wido,
-> >>>
-> >>> On 02/21/2017 02:04 PM, Wido den Hollander wrote:
-> >>>> Hi,
-> >>>>
-> >>>> I'm about to start a test where I'll be putting a lot of objects into BlueStore and see how it holds.
-> >>>>
-> >>>> The reasoning behind is that I have a customer which has 165M objects in it's cluster which results in some PGs having 900k objects.
-> >>>>
-> >>>> For FileStore with XFS this is quite heavy. A simple scrub takes ages.
-> >>>>
-> >>>> The problem is that we can't simply increase the number of PGs since that will overload the OSDs as well.
-> >>>>
-> >>>> On the other hand we could add hardware, but that also takes time.
-> >>>>
-> >>>> So just for the sake of testing I'm looking at trying to replicate this situation using BlueStore from master.
-> >>>>
-> >>>> Is there anything I should take into account? I'll probably be just creating a lot (millions) of 100 byte objects in the cluster with just a few PGs.
-> >>>
-> >>> Couple of general things:
-> >>>
-> >>> I don't anticipate you'll run into the same kind of pg splitting
-> >>> slowdowns that you see with filestore, but you still may see some
-> >>> slowdown as the object count increases since rocksdb will have more
-> >>> key/value pairs to deal with.  I expect you'll see a lot of metadata
-> >>> movement between levels as it tries to keep things organized.  One thing
-> >>> to note is that it's possible you may see rocksdb bottlenecks as the OSD
-> >>> volume size increases.  This is one of the things the guys at Sandisk
-> >>> were trying to tackle with Zetascale.
-> >>>
-> >>
-> >> Ah, ok!
-> >>
-> >>> If you can put the rocksdb DB and WAL on SSDs that will likely help, but
-> >>> you'll want to be mindful of how full the SSDs are getting.  I'll be
-> >>> very curious to see how your tests go, it's been a while since we've
-> >>> thrown that many objects on a bluestore cluster (back around the
-> >>> newstore timeframe we filled bluestore with many 10s of millions of
-> >>> objects and from what I remember it did pretty well).
-> >>>
-> >>
-> >> Thanks for the information! I'll try first with a few OSDs and size = 1 and just put a lot of small objects in the PG and see how it goes.
-> >>
-> >> Will time the latency for writing and reading the objects afterwards to see how it goes.
-> >
-> > First test, one OSD running inside VirtualBox with a 300GB disk and Luminous.
-> >
-> > 1 OSD, size = 1, pg_num = 8.
-> >
-> > After 2.5M objects the disk was full... but the OSD was still working fine. Didn't experience any issues. Although the OSD was using 3.4GB of RAM at that moment while I stopped doing I/O.
-> 
-> Glad to hear it continued to work well!  That's pretty much how my 
-> testing went the last time I did scaling tests.  Based on your test 
-> parameters, it sounds like you hit something like ~300-400K objects per
+But https://github.com/ceph/ceph/blob/master/SubmittingPatches.rst say 
+nothing about submission via ceph-devel@vger.kernel.org limitations.
+It wold be nice if someone correct that.
 
-Yes, about that number. I wanted to go for 1M objects in a PG to see how that holds out.
- 
-> PG?  Did you get a chance to try filestore with the same parameters? 
+On 10.03.2017 3:20, Dan Mick wrote:
+> Generally all our non-kernel submissions come in as github pull
+> requests.  Could you submit your request that way, Nikita?
+> There's a lot of documentation at
+> http://docs.ceph.com/docs/master/dev, specifically
+> http://docs.ceph.com/docs/master/dev/#github-pull-request
+>
+>
+>
+> On 03/09/2017 03:03 AM, Nikita Gerasimov wrote:
+>> Hi All,
+>>
+>> What are the next steps for this patch?
+>>
+>>
+>> On 02.03.2017 21:16, Loic Dachary wrote:
+>>> Reviewed-by: Loic Dachary <ldachary@redhat.com>
+>>>
+>>> On 03/02/2017 05:51 PM, nikita.gerasimov@oracle.com wrote:
+>>>> From: Nikita Gerasimov <nikita.gerasimov@oracle.com>
+>>>>
+>>>> Oracle Linux Server is API/ABI compatible with RHEL/CentOS Linux distro.
+>>>> Oracle VM Server is Xen based VM server. Which modern versions Dom0
+>>>> is based on el6
+>>>>
+>>>> Signed-off-by: Nikita Gerasimov <nikita.gerasimov@oracle.com>
+>>>>
+>>>> run-make-check.sh: http://paste.ubuntu.com/24096418/
+>>>> ---
+>>>>    install-deps.sh                                        |  2 +-
+>>>>    src/ceph-detect-init/ceph_detect_init/__init__.py      | 18
+>>>> ++++++++++++++++--
+>>>>    .../ceph_detect_init/oraclevms/__init__.py             | 11
+>>>> +++++++++++
+>>>>    src/ceph-detect-init/tests/test_all.py                 | 18
+>>>> ++++++++++++++++++
+>>>>    4 files changed, 46 insertions(+), 3 deletions(-)
+>>>>    create mode 100644
+>>>> src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+>>>>
+>>>> diff --git a/install-deps.sh b/install-deps.sh
+>>>> index 41d393d..e1e8722 100755
+>>>> --- a/install-deps.sh
+>>>> +++ b/install-deps.sh
+>>>> @@ -88,7 +88,7 @@ else
+>>>>        $SUDO env DEBIAN_FRONTEND=noninteractive apt-get -y remove
+>>>> ceph-build-deps
+>>>>        if [ -n "$backports" ] ; then rm $control; fi
+>>>>            ;;
+>>>> -    centos|fedora|rhel)
+>>>> +    centos|fedora|rhel|ol)
+>>>>            yumdnf="yum"
+>>>>            builddepcmd="yum-builddep -y"
+>>>>            if test "$(echo "$VERSION_ID >= 22" | bc)" -ne 0; then
+>>>> diff --git a/src/ceph-detect-init/ceph_detect_init/__init__.py
+>>>> b/src/ceph-detect-init/ceph_detect_init/__init__.py
+>>>> index aad3eee..9abc421 100644
+>>>> --- a/src/ceph-detect-init/ceph_detect_init/__init__.py
+>>>> +++ b/src/ceph-detect-init/ceph_detect_init/__init__.py
+>>>> @@ -24,6 +24,7 @@ from ceph_detect_init import suse
+>>>>    from ceph_detect_init import gentoo
+>>>>    from ceph_detect_init import freebsd
+>>>>    from ceph_detect_init import docker
+>>>> +from ceph_detect_init import oraclevms
+>>>>    import os
+>>>>    import logging
+>>>>    import platform
+>>>> @@ -44,7 +45,8 @@ def get(use_rhceph=False):
+>>>>        module.normalized_name = _normalized_distro_name(distro_name)
+>>>>        module.distro = module.normalized_name
+>>>>        module.is_el = module.normalized_name in ['redhat', 'centos',
+>>>> -                                              'fedora', 'scientific']
+>>>> +                                              'fedora', 'scientific',
+>>>> +                                              'oraclel']
+>>>>        module.release = release
+>>>>        module.codename = codename
+>>>>        module.init = module.choose_init()
+>>>> @@ -64,6 +66,8 @@ def _get_distro(distro, use_rhceph=False):
+>>>>            'linuxmint': debian,
+>>>>            'centos': centos,
+>>>>            'scientific': centos,
+>>>> +        'oraclel': centos,
+>>>> +        'oraclevms': oraclevms,
+>>>>            'redhat': centos,
+>>>>            'fedora': fedora,
+>>>>            'suse': suse,
+>>>> @@ -90,6 +94,10 @@ def _normalized_distro_name(distro):
+>>>>            return 'suse'
+>>>>        elif distro.startswith('centos'):
+>>>>            return 'centos'
+>>>> +    elif distro.startswith('oracle linux'):
+>>>> +        return 'oraclel'
+>>>> +    elif distro.startswith('oracle vm'):
+>>>> +        return 'oraclevms'
+>>>>        elif distro.startswith(('gentoo', 'funtoo', 'exherbo')):
+>>>>            return 'gentoo'
+>>>>        return distro
+>>>> @@ -127,8 +135,9 @@ def platform_information():
+>>>>        else:
+>>>>            raise exc.UnsupportedPlatform(platform.system(), '', '')
+>>>>    +    distro_lower = distro.lower()
+>>>>        # this could be an empty string in Debian
+>>>> -    if not codename and 'debian' in distro.lower():
+>>>> +    if not codename and 'debian' in distro_lower:
+>>>>            debian_codenames = {
+>>>>                '8': 'jessie',
+>>>>                '7': 'wheezy',
+>>>> @@ -146,6 +155,11 @@ def platform_information():
+>>>>                    codename = minor
+>>>>                else:
+>>>>                    codename = major
+>>>> +    # this is an empty string in Oracle
+>>>> +    elif distro_lower.startswith('oracle linux'):
+>>>> +        codename = 'OL' + release
+>>>> +    elif distro_lower.startswith('oracle vm'):
+>>>> +        codename = 'OVS' + release
+>>>>          return (
+>>>>            str(distro).rstrip(),
+>>>> diff --git
+>>>> a/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+>>>> b/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+>>>> new file mode 100644
+>>>> index 0000000..f7bf85b
+>>>> --- /dev/null
+>>>> +++ b/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+>>>> @@ -0,0 +1,11 @@
+>>>> +distro = None
+>>>> +release = None
+>>>> +codename = None
+>>>> +
+>>>> +
+>>>> +def choose_init():
+>>>> +    """Select a init system
+>>>> +
+>>>> +    Returns the name of a init system (upstart, sysvinit ...).
+>>>> +    """
+>>>> +    return 'sysvinit'
+>>>> diff --git a/src/ceph-detect-init/tests/test_all.py
+>>>> b/src/ceph-detect-init/tests/test_all.py
+>>>> index d2733c3..eb48bb4 100644
+>>>> --- a/src/ceph-detect-init/tests/test_all.py
+>>>> +++ b/src/ceph-detect-init/tests/test_all.py
+>>>> @@ -35,6 +35,7 @@ from ceph_detect_init import suse
+>>>>    from ceph_detect_init import gentoo
+>>>>    from ceph_detect_init import freebsd
+>>>>    from ceph_detect_init import docker
+>>>> +from ceph_detect_init import oraclevms
+>>>>      logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
+>>>>                        level=logging.DEBUG)
+>>>> @@ -54,6 +55,9 @@ class TestCephDetectInit(testtools.TestCase):
+>>>>        def test_docker(self):
+>>>>            self.assertEqual('none', docker.choose_init())
+>>>>    +    def test_oraclevms(self):
+>>>> +        self.assertEqual('sysvinit', oraclevms.choose_init())
+>>>> +
+>>>>        def test_centos(self):
+>>>>            with mock.patch('ceph_detect_init.centos.release',
+>>>>                            '7.0'):
+>>>> @@ -207,6 +211,8 @@ class TestCephDetectInit(testtools.TestCase):
+>>>>            self.assertEqual(debian, g('ubuntu'))
+>>>>            self.assertEqual(centos, g('centos'))
+>>>>            self.assertEqual(centos, g('scientific'))
+>>>> +        self.assertEqual(centos, g('Oracle Linux Server'))
+>>>> +        self.assertEqual(oraclevms, g('Oracle VM server'))
+>>>>            self.assertEqual(fedora, g('fedora'))
+>>>>            self.assertEqual(suse, g('suse'))
+>>>>            self.assertEqual(rhel, g('redhat', use_rhceph=True))
+>>>> @@ -222,6 +228,8 @@ class TestCephDetectInit(testtools.TestCase):
+>>>>            self.assertEqual('scientific', n('Scientific'))
+>>>>            self.assertEqual('scientific', n('Scientific Linux'))
+>>>>            self.assertEqual('scientific', n('scientific linux'))
+>>>> +        self.assertEqual('oraclel', n('Oracle Linux Server'))
+>>>> +        self.assertEqual('oraclevms', n('Oracle VM server'))
+>>>>            self.assertEqual('suse', n('SUSE'))
+>>>>            self.assertEqual('suse', n('suse'))
+>>>>            self.assertEqual('suse', n('openSUSE'))
+>>>> @@ -266,6 +274,16 @@ class TestCephDetectInit(testtools.TestCase):
+>>>>                self.assertEqual(('debian', 'sid/jessie', 'sid'),
+>>>>                                 ceph_detect_init.platform_information())
+>>>>    +        with mock.patch('platform.linux_distribution',
+>>>> +                        lambda **kwargs: (('Oracle Linux Server',
+>>>> '7.3', ''))):
+>>>> +            self.assertEqual(('Oracle Linux Server', '7.3', 'OL7.3'),
+>>>> +                             ceph_detect_init.platform_information())
+>>>> +
+>>>> +        with mock.patch('platform.linux_distribution',
+>>>> +                        lambda **kwargs: (('Oracle VM server',
+>>>> '3.4.2', ''))):
+>>>> +            self.assertEqual(('Oracle VM server', '3.4.2', 'OVS3.4.2'),
+>>>> +                             ceph_detect_init.platform_information())
+>>>> +
+>>>>        @mock.patch('platform.linux_distribution')
+>>>>        def test_platform_information_container(self, mock_linux_dist):
+>>>>            import sys
+>>>>
+>> -- 
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-No, I didn't. Just tested this on my laptop with a VM. Didn't have much time either to do a full-scale test.
-
-> The memory usage is not too surprising, bluestore uses it's own cache. 
-> We may still need to tweak the defaults a bit, though there are obvious 
-> trade-offs.  Hopefully Igor's patches should help here.
-> 
-
-Ok, understood.
-
-I will test further.
-
-Wido
-
-> >
-> > 2.5M objects of 128 bytes written to the disk.
-> >
-> > Would like to scale this test out further, but I don't have hardware available to run it on.
-> >
-> > Wido
-> >
-> >>
-> >> Wido
-> >>
-> >>> Mark
-> >>>
-> >>>>
-> >>>> Wido
-> >>>> --
-> >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>>> the body of a message to majordomo@vger.kernel.org
-> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>>
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>> the body of a message to majordomo@vger.kernel.org
-> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
