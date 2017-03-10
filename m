@@ -1,57 +1,88 @@
-From: Mykola Golub <to.my.trociny@gmail.com>
-Subject: Re: rbd-nbd 2T limit
-Date: Fri, 10 Mar 2017 09:53:59 +0200
-Message-ID: <20170310075358.GB24654@gmail.com>
-References: <CAJDfisnEsBkYUXkVMnGPy9vu6DWYC3PZHFW7jOYm5bc_Dv-56w@mail.gmail.com>
- <975af97d-849e-6e65-d617-e0dc16672da4@kirneh.eu>
+From: John Spray <jspray@redhat.com>
+Subject: Re: Interpreting ceph osd pool stats output
+Date: Fri, 10 Mar 2017 09:55:22 +0000
+Message-ID: <CALe9h7f7Mspny1fx2aMiXunS2C8GJrWFsp7YKdnmhu42+EVPmA@mail.gmail.com>
+References: <CAO=rSOsQmUYhdBxio=wEngmeXzyA7dzAJn+OG6iWMPnRVro3VQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f67.google.com ([209.85.215.67]:35262 "EHLO
-        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755062AbdCJHyI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Mar 2017 02:54:08 -0500
-Received: by mail-lf0-f67.google.com with SMTP id v2so6247625lfi.2
-        for <ceph-devel@vger.kernel.org>; Thu, 09 Mar 2017 23:54:07 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <975af97d-849e-6e65-d617-e0dc16672da4@kirneh.eu>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:38494 "EHLO
+        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933855AbdCJJzt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Mar 2017 04:55:49 -0500
+Received: by mail-wm0-f54.google.com with SMTP id t189so6596420wmt.1
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Mar 2017 01:55:48 -0800 (PST)
+In-Reply-To: <CAO=rSOsQmUYhdBxio=wEngmeXzyA7dzAJn+OG6iWMPnRVro3VQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henrik Korkuc <lists@kirneh.eu>
-Cc: Max Yehorov <myehorov@skytap.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Paul Cuzner <pcuzner@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Mar 09, 2017 at 09:14:53AM +0200, Henrik Korkuc wrote:
-> On 17-03-09 05:38, Max Yehorov wrote:
-> >I was reading through release notes for 10.2.6 and there was a ticket
-> >
-> >rbd: rbd-nbd: disallow mapping images >2TB in size (issue#17219,
-> >pr#11870, Mykola Golub)
-> >
-> >default nbd block size is 1k, valid values are from 512 to PAGE_SIZE
-> >
-> >rbd_nbd.cc sets blocksize to 512 here:
-> >https://github.com/ceph/ceph/blob/master/src/tools/rbd_nbd/rbd-nbd.cc#L635
-> >
-> >Why 512 was chosen for rbd_nbd?
-> >krbd also uses 512 sector size. Is there a reason to use 512 block
-> >size vs 4k AF?
-> I am also interested in >2TB NBD support and was disapointed when I couldn't
-> mount 10TB images.
-> 
-> Based on issue in that commit for me it seems to be clear why it was done -
-> some (most?) kernels in the wild do not support larger sizes. But it looks
-> like support on unaffected kernels is already in master (not sure if it got
-> backported to current releases). For reference:
-> http://tracker.ceph.com/issues/17219 ->
-> https://github.com/ceph/ceph/pull/11741 ->
-> http://tracker.ceph.com/issues/18335 ->
-> https://github.com/ceph/ceph/pull/13229
+The reason they're different is that they originate from separate
+internal counters:
+ * The client_io_rate bits come from
+https://github.com/ceph/ceph/blob/jewel/src/mon/PGMap.cc#L1212
+ * The recovery bits come from
+https://github.com/ceph/ceph/blob/jewel/src/mon/PGMap.cc#L1146
 
-Yes, it removes the restriction for working kernels. It is going to be
-backported to kraken and jewel:
+Not sure what you mean about bytes_sec vs objects_sec: client io and
+recovery rate both have both objects and bytes counters.
 
-http://tracker.ceph.com/issues/18910
-http://tracker.ceph.com/issues/18911
+The empty dicts are something that annoys me too, some of the output
+functions have an if() right at the start that drops the output when
+none of the deltas are nonzero.  I doubt anyone would have a big
+problem with changing these to output the zeros rather than skipping
+the fields.
 
--- 
-Mykola Golub
+BTW I'm not sure it's smart to merge these in practice: would result
+in showing users a "your cluster is doing 10GB/s" statistics while
+their workload is crawling because all that IO is really recovery.
+Confusing.
+
+John
+
+
+On Fri, Mar 10, 2017 at 2:37 AM, Paul Cuzner <pcuzner@redhat.com> wrote:
+> Hi,
+>
+> I've been putting together a collectd plugin for ceph - since the old
+> one's I could find no longer work. I'm gathering data from the mon's
+> admin socket, merged with a couple of commands I issue through the
+> rados mon_command interface.
+>
+> Nothing complicated, but the data has me a little confused
+>
+> When I run "osd pool stats" I get *two* different sets of metrics that
+> describe client i/o and recovery i/o. Since the metrics are different
+> I can't merge them to get a consistent view of what the cluster is
+> doing as a whole at any given point in time. For example, client i/o
+> reports in bytes_sec, but the recovery dict is empty and the
+> recovery_rate is in objects_sec...
+>
+> i.e.
+>
+> }, {
+> "pool_name": "rados-bench-cbt",
+> "pool_id": 86,
+> "recovery": {},
+> "recovery_rate": {
+> "recovering_objects_per_sec": 3530,
+> "recovering_bytes_per_sec": 14462655,
+> "recovering_keys_per_sec": 0,
+> "num_objects_recovered": 7148,
+> "num_bytes_recovered": 29278208,
+> "num_keys_recovered": 0
+> },
+> "client_io_rate": {}
+>
+> This is running Jewel - 10.2.5-37.el7cp
+>
+> Is this a bug or a 'feature' :)
+>
+> Cheers,
+>
+> Paul C
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
