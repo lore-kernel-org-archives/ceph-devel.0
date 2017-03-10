@@ -1,129 +1,38 @@
-From: Paul Cuzner <pcuzner@redhat.com>
-Subject: Re: Interpreting ceph osd pool stats output
-Date: Sat, 11 Mar 2017 09:52:32 +1300
-Message-ID: <CAO=rSOsftK8YAA5Q3jEpuCee16ek=tA++an+weBKHgXSL7bkNw@mail.gmail.com>
-References: <CAO=rSOsQmUYhdBxio=wEngmeXzyA7dzAJn+OG6iWMPnRVro3VQ@mail.gmail.com>
- <CALe9h7f7Mspny1fx2aMiXunS2C8GJrWFsp7YKdnmhu42+EVPmA@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Object consistent when EC overwrite rollback happen?
+Date: Fri, 10 Mar 2017 13:24:00 -0800
+Message-ID: <CAJ4mKGYk1rCSy1FLP_Lv2p0Vobm=h2RYLotKdy5j5vVPDJA+9Q@mail.gmail.com>
+References: <F0858C043E80304FBFA0A767AC8DE5E7463DA19B@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f177.google.com ([209.85.128.177]:34806 "EHLO
-        mail-wr0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932705AbdCJUwf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Mar 2017 15:52:35 -0500
-Received: by mail-wr0-f177.google.com with SMTP id l37so72030383wrc.1
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Mar 2017 12:52:33 -0800 (PST)
-In-Reply-To: <CALe9h7f7Mspny1fx2aMiXunS2C8GJrWFsp7YKdnmhu42+EVPmA@mail.gmail.com>
+Received: from mail-ot0-f175.google.com ([74.125.82.175]:33708 "EHLO
+        mail-ot0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754391AbdCJVYC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Mar 2017 16:24:02 -0500
+Received: by mail-ot0-f175.google.com with SMTP id 19so84843174oti.0
+        for <ceph-devel@vger.kernel.org>; Fri, 10 Mar 2017 13:24:01 -0800 (PST)
+In-Reply-To: <F0858C043E80304FBFA0A767AC8DE5E7463DA19B@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Wangwenfeng <wang.wenfeng@h3c.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks John
+On Fri, Mar 3, 2017 at 3:08 AM, Wangwenfeng <wang.wenfeng@h3c.com> wrote:
+> Hi, all
+>   I have a trouble with in EC overwrite. In the function ‘generate_transactions’, using the clone_range to prepare the rollback data of EC overwrite. The clone_range is clone NO_GEN data to version data, and the new date will write after it.
+> If a transaction contain the clone_range and write, and it has submit to journal, now is applying to data disk.
+> If the Host power off suddenly, the transaction has apply to data, but the journal not know this. When the Host power on, maybe journal will replay the transaction which contain clone_range and write date to data disk. If this happen, the second clone_range’ data is error, it is the write data.
+> The rollback to the object will cause the data error.
+> Would you explain this will happen or not? And the rollback to object will cause the data error or not?
 
-This is weird then. When I look at the data with client load I see the
-following;
-{
-"pool_name": "default.rgw.buckets.index",
-"pool_id": 94,
-"recovery": {},
-"recovery_rate": {},
-"client_io_rate": {
-"read_bytes_sec": 19242365,
-"write_bytes_sec": 0,
-"read_op_per_sec": 12514,
-"write_op_per_sec": 0
-}
-
-No object related counters - they're all block based. The plugin I
-have rolls-up the block metrics across all pools to provide total
-client load.
-
-And as in the prior email recovery_rate counters are object related.
-
-As far as merging the stats is concerned, I *do* believe it's useful
-info for the admin to know - and maybe even the admin's boss :)
-
-It would answer questions like - how busy is the cluster as a whole,
-and with both client and recovery metrics aligned you could then drill
-down into client/recovery components. It might also be interesting to
-derive a ratio metric of client:recovery and maybe key of that for
-automation (alerts/notifications, automated tuning etc etc)
-
-
-
-
-
-
-
-
-
-On Fri, Mar 10, 2017 at 10:55 PM, John Spray <jspray@redhat.com> wrote:
-> The reason they're different is that they originate from separate
-> internal counters:
->  * The client_io_rate bits come from
-> https://github.com/ceph/ceph/blob/jewel/src/mon/PGMap.cc#L1212
->  * The recovery bits come from
-> https://github.com/ceph/ceph/blob/jewel/src/mon/PGMap.cc#L1146
->
-> Not sure what you mean about bytes_sec vs objects_sec: client io and
-> recovery rate both have both objects and bytes counters.
->
-> The empty dicts are something that annoys me too, some of the output
-> functions have an if() right at the start that drops the output when
-> none of the deltas are nonzero.  I doubt anyone would have a big
-> problem with changing these to output the zeros rather than skipping
-> the fields.
->
-> BTW I'm not sure it's smart to merge these in practice: would result
-> in showing users a "your cluster is doing 10GB/s" statistics while
-> their workload is crawling because all that IO is really recovery.
-> Confusing.
->
-> John
->
->
-> On Fri, Mar 10, 2017 at 2:37 AM, Paul Cuzner <pcuzner@redhat.com> wrote:
->> Hi,
->>
->> I've been putting together a collectd plugin for ceph - since the old
->> one's I could find no longer work. I'm gathering data from the mon's
->> admin socket, merged with a couple of commands I issue through the
->> rados mon_command interface.
->>
->> Nothing complicated, but the data has me a little confused
->>
->> When I run "osd pool stats" I get *two* different sets of metrics that
->> describe client i/o and recovery i/o. Since the metrics are different
->> I can't merge them to get a consistent view of what the cluster is
->> doing as a whole at any given point in time. For example, client i/o
->> reports in bytes_sec, but the recovery dict is empty and the
->> recovery_rate is in objects_sec...
->>
->> i.e.
->>
->> }, {
->> "pool_name": "rados-bench-cbt",
->> "pool_id": 86,
->> "recovery": {},
->> "recovery_rate": {
->> "recovering_objects_per_sec": 3530,
->> "recovering_bytes_per_sec": 14462655,
->> "recovering_keys_per_sec": 0,
->> "num_objects_recovered": 7148,
->> "num_bytes_recovered": 29278208,
->> "num_keys_recovered": 0
->> },
->> "client_io_rate": {}
->>
->> This is running Jewel - 10.2.5-37.el7cp
->>
->> Is this a bug or a 'feature' :)
->>
->> Cheers,
->>
->> Paul C
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I don't understand the problem you're describing. If we replay the
+journal, it will clone_range from the original (i.e., untouched) data
+and just redo all the work. Where does cloning the wrong thing come
+in?
+(You can come up with more complicated scenarios that involve
+overwriting the data we originally cloned from, but that is all
+protected by versions we store in the filesystem that let us detect
+these scenarios and account for them.)
+-Greg
