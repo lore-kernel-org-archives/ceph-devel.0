@@ -1,44 +1,226 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: FreeBSD/Clang reports a missing function during linking
-Date: Fri, 10 Mar 2017 00:37:20 +0100
-Message-ID: <92b31a40-6475-ae01-13d5-714d1d6a53a1@digiware.nl>
-References: <fd678506-4fa6-05c5-fb19-445a9cd38e7a@digiware.nl>
+From: Dan Mick <dmick@redhat.com>
+Subject: Re: [PATCH] ceph-detect-init: Adds Oracle Linux Server and Oracle VM
+ Server detection
+Date: Thu, 9 Mar 2017 16:20:09 -0800
+Message-ID: <f8f6f0c8-8bf8-2132-7744-a1f8b028d6d3@redhat.com>
+References: <1488473512-4374-1-git-send-email-nikita.gerasimov@oracle.com>
+ <c25a3567-c135-b63c-a9c6-af0e854362de@dachary.org>
+ <bffcf580-6763-cdc3-3f0c-d045812a2512@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:20602 "EHLO smtp.digiware.nl"
+Received: from mx1.redhat.com ([209.132.183.28]:35004 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754618AbdCIXh3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 9 Mar 2017 18:37:29 -0500
-Received: from [192.168.10.10] (asus [192.168.10.10])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by smtp.digiware.nl (Postfix) with ESMTPSA id 8C2383BAD8
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Mar 2017 00:37:19 +0100 (CET)
-In-Reply-To: <fd678506-4fa6-05c5-fb19-445a9cd38e7a@digiware.nl>
+        id S1754468AbdCJAUK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 9 Mar 2017 19:20:10 -0500
+In-Reply-To: <bffcf580-6763-cdc3-3f0c-d045812a2512@oracle.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Nikita Gerasimov <nikita.gerasimov@oracle.com>, ceph-devel@vger.kernel.org
 
-On 9-3-2017 22:00, Willem Jan Withagen wrote:
-> Hi,
+Generally all our non-kernel submissions come in as github pull
+requests.  Could you submit your request that way, Nikita?
+There's a lot of documentation at
+http://docs.ceph.com/docs/master/dev, specifically
+http://docs.ceph.com/docs/master/dev/#github-pull-request
+
+
+
+On 03/09/2017 03:03 AM, Nikita Gerasimov wrote:
+> Hi All,
 > 
-> FreBSD Jenkins complains:
+> What are the next steps for this patch?
 > 
-> ../../../lib/librbd_internal.a(GetStatusRequest.cc.o): In function
-> `librbd::mirror::GetStatusRequest<librbd::ImageCtx>::send()':
-> /home/jenkins/workspace/ceph-master/src/librbd/mirror/GetStatusRequest.cc:(.text._ZN6librbd6mirror16GetStatusRequestINS_8ImageCtxEE4sendEv[_ZN6librbd6mirror16GetStatusRequestINS_8ImageCtxEE4sendEv]+0xcc):
-> undefined reference to `cls::rbd::MirrorImageStatus::~MirrorImageStatus()'
 > 
-> c++: error: linker command failed with exit code 1 (use -v to see
-> invocation)
+> On 02.03.2017 21:16, Loic Dachary wrote:
+>> Reviewed-by: Loic Dachary <ldachary@redhat.com>
+>>
+>> On 03/02/2017 05:51 PM, nikita.gerasimov@oracle.com wrote:
+>>> From: Nikita Gerasimov <nikita.gerasimov@oracle.com>
+>>>
+>>> Oracle Linux Server is API/ABI compatible with RHEL/CentOS Linux distro.
+>>> Oracle VM Server is Xen based VM server. Which modern versions Dom0
+>>> is based on el6
+>>>
+>>> Signed-off-by: Nikita Gerasimov <nikita.gerasimov@oracle.com>
+>>>
+>>> run-make-check.sh: http://paste.ubuntu.com/24096418/
+>>> ---
+>>>   install-deps.sh                                        |  2 +-
+>>>   src/ceph-detect-init/ceph_detect_init/__init__.py      | 18
+>>> ++++++++++++++++--
+>>>   .../ceph_detect_init/oraclevms/__init__.py             | 11
+>>> +++++++++++
+>>>   src/ceph-detect-init/tests/test_all.py                 | 18
+>>> ++++++++++++++++++
+>>>   4 files changed, 46 insertions(+), 3 deletions(-)
+>>>   create mode 100644
+>>> src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+>>>
+>>> diff --git a/install-deps.sh b/install-deps.sh
+>>> index 41d393d..e1e8722 100755
+>>> --- a/install-deps.sh
+>>> +++ b/install-deps.sh
+>>> @@ -88,7 +88,7 @@ else
+>>>       $SUDO env DEBIAN_FRONTEND=noninteractive apt-get -y remove
+>>> ceph-build-deps
+>>>       if [ -n "$backports" ] ; then rm $control; fi
+>>>           ;;
+>>> -    centos|fedora|rhel)
+>>> +    centos|fedora|rhel|ol)
+>>>           yumdnf="yum"
+>>>           builddepcmd="yum-builddep -y"
+>>>           if test "$(echo "$VERSION_ID >= 22" | bc)" -ne 0; then
+>>> diff --git a/src/ceph-detect-init/ceph_detect_init/__init__.py
+>>> b/src/ceph-detect-init/ceph_detect_init/__init__.py
+>>> index aad3eee..9abc421 100644
+>>> --- a/src/ceph-detect-init/ceph_detect_init/__init__.py
+>>> +++ b/src/ceph-detect-init/ceph_detect_init/__init__.py
+>>> @@ -24,6 +24,7 @@ from ceph_detect_init import suse
+>>>   from ceph_detect_init import gentoo
+>>>   from ceph_detect_init import freebsd
+>>>   from ceph_detect_init import docker
+>>> +from ceph_detect_init import oraclevms
+>>>   import os
+>>>   import logging
+>>>   import platform
+>>> @@ -44,7 +45,8 @@ def get(use_rhceph=False):
+>>>       module.normalized_name = _normalized_distro_name(distro_name)
+>>>       module.distro = module.normalized_name
+>>>       module.is_el = module.normalized_name in ['redhat', 'centos',
+>>> -                                              'fedora', 'scientific']
+>>> +                                              'fedora', 'scientific',
+>>> +                                              'oraclel']
+>>>       module.release = release
+>>>       module.codename = codename
+>>>       module.init = module.choose_init()
+>>> @@ -64,6 +66,8 @@ def _get_distro(distro, use_rhceph=False):
+>>>           'linuxmint': debian,
+>>>           'centos': centos,
+>>>           'scientific': centos,
+>>> +        'oraclel': centos,
+>>> +        'oraclevms': oraclevms,
+>>>           'redhat': centos,
+>>>           'fedora': fedora,
+>>>           'suse': suse,
+>>> @@ -90,6 +94,10 @@ def _normalized_distro_name(distro):
+>>>           return 'suse'
+>>>       elif distro.startswith('centos'):
+>>>           return 'centos'
+>>> +    elif distro.startswith('oracle linux'):
+>>> +        return 'oraclel'
+>>> +    elif distro.startswith('oracle vm'):
+>>> +        return 'oraclevms'
+>>>       elif distro.startswith(('gentoo', 'funtoo', 'exherbo')):
+>>>           return 'gentoo'
+>>>       return distro
+>>> @@ -127,8 +135,9 @@ def platform_information():
+>>>       else:
+>>>           raise exc.UnsupportedPlatform(platform.system(), '', '')
+>>>   +    distro_lower = distro.lower()
+>>>       # this could be an empty string in Debian
+>>> -    if not codename and 'debian' in distro.lower():
+>>> +    if not codename and 'debian' in distro_lower:
+>>>           debian_codenames = {
+>>>               '8': 'jessie',
+>>>               '7': 'wheezy',
+>>> @@ -146,6 +155,11 @@ def platform_information():
+>>>                   codename = minor
+>>>               else:
+>>>                   codename = major
+>>> +    # this is an empty string in Oracle
+>>> +    elif distro_lower.startswith('oracle linux'):
+>>> +        codename = 'OL' + release
+>>> +    elif distro_lower.startswith('oracle vm'):
+>>> +        codename = 'OVS' + release
+>>>         return (
+>>>           str(distro).rstrip(),
+>>> diff --git
+>>> a/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+>>> b/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+>>> new file mode 100644
+>>> index 0000000..f7bf85b
+>>> --- /dev/null
+>>> +++ b/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
+>>> @@ -0,0 +1,11 @@
+>>> +distro = None
+>>> +release = None
+>>> +codename = None
+>>> +
+>>> +
+>>> +def choose_init():
+>>> +    """Select a init system
+>>> +
+>>> +    Returns the name of a init system (upstart, sysvinit ...).
+>>> +    """
+>>> +    return 'sysvinit'
+>>> diff --git a/src/ceph-detect-init/tests/test_all.py
+>>> b/src/ceph-detect-init/tests/test_all.py
+>>> index d2733c3..eb48bb4 100644
+>>> --- a/src/ceph-detect-init/tests/test_all.py
+>>> +++ b/src/ceph-detect-init/tests/test_all.py
+>>> @@ -35,6 +35,7 @@ from ceph_detect_init import suse
+>>>   from ceph_detect_init import gentoo
+>>>   from ceph_detect_init import freebsd
+>>>   from ceph_detect_init import docker
+>>> +from ceph_detect_init import oraclevms
+>>>     logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
+>>>                       level=logging.DEBUG)
+>>> @@ -54,6 +55,9 @@ class TestCephDetectInit(testtools.TestCase):
+>>>       def test_docker(self):
+>>>           self.assertEqual('none', docker.choose_init())
+>>>   +    def test_oraclevms(self):
+>>> +        self.assertEqual('sysvinit', oraclevms.choose_init())
+>>> +
+>>>       def test_centos(self):
+>>>           with mock.patch('ceph_detect_init.centos.release',
+>>>                           '7.0'):
+>>> @@ -207,6 +211,8 @@ class TestCephDetectInit(testtools.TestCase):
+>>>           self.assertEqual(debian, g('ubuntu'))
+>>>           self.assertEqual(centos, g('centos'))
+>>>           self.assertEqual(centos, g('scientific'))
+>>> +        self.assertEqual(centos, g('Oracle Linux Server'))
+>>> +        self.assertEqual(oraclevms, g('Oracle VM server'))
+>>>           self.assertEqual(fedora, g('fedora'))
+>>>           self.assertEqual(suse, g('suse'))
+>>>           self.assertEqual(rhel, g('redhat', use_rhceph=True))
+>>> @@ -222,6 +228,8 @@ class TestCephDetectInit(testtools.TestCase):
+>>>           self.assertEqual('scientific', n('Scientific'))
+>>>           self.assertEqual('scientific', n('Scientific Linux'))
+>>>           self.assertEqual('scientific', n('scientific linux'))
+>>> +        self.assertEqual('oraclel', n('Oracle Linux Server'))
+>>> +        self.assertEqual('oraclevms', n('Oracle VM server'))
+>>>           self.assertEqual('suse', n('SUSE'))
+>>>           self.assertEqual('suse', n('suse'))
+>>>           self.assertEqual('suse', n('openSUSE'))
+>>> @@ -266,6 +274,16 @@ class TestCephDetectInit(testtools.TestCase):
+>>>               self.assertEqual(('debian', 'sid/jessie', 'sid'),
+>>>                                ceph_detect_init.platform_information())
+>>>   +        with mock.patch('platform.linux_distribution',
+>>> +                        lambda **kwargs: (('Oracle Linux Server',
+>>> '7.3', ''))):
+>>> +            self.assertEqual(('Oracle Linux Server', '7.3', 'OL7.3'),
+>>> +                             ceph_detect_init.platform_information())
+>>> +
+>>> +        with mock.patch('platform.linux_distribution',
+>>> +                        lambda **kwargs: (('Oracle VM server',
+>>> '3.4.2', ''))):
+>>> +            self.assertEqual(('Oracle VM server', '3.4.2', 'OVS3.4.2'),
+>>> +                             ceph_detect_init.platform_information())
+>>> +
+>>>       @mock.patch('platform.linux_distribution')
+>>>       def test_platform_information_container(self, mock_linux_dist):
+>>>           import sys
+>>>
 > 
-> Not sure why Clang creates this reference and then on how to fix this.
-
-Attempt to fix:
-    cls/rbd/cls_rbd_types.h: add missing destructor #13910
-
---WjW
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
+-- 
+Dan Mick
+Red Hat, Inc.
+Ceph docs: http://ceph.com/docs
