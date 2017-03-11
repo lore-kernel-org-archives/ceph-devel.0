@@ -1,149 +1,137 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: mem use doubles due to buffer::create_page_aligned + bluestore
- obj content caching
-Date: Fri, 10 Mar 2017 13:24:22 -0800
-Message-ID: <CAJ4mKGb0irpqukaEK4b7hufTfH-KJ4fp5260naKeQzHjnN4zNw@mail.gmail.com>
-References: <6b06369d-6b18-f4f0-b7ae-0c0114288e41@mirantis.com>
- <CAJ4mKGYnbTAXA16vsKkDoj8LaddtxDD7-yghqODsnBJ9qMz6_g@mail.gmail.com> <e746f38b-d870-49d3-7f37-722b03a01005@mirantis.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: Interpreting ceph osd pool stats output
+Date: Sat, 11 Mar 2017 20:49:05 +0000
+Message-ID: <CALe9h7dBSZM64NSKF6_S+74Wrv-mLfAtSbQbQvq-UXSSfUL8dA@mail.gmail.com>
+References: <CAO=rSOsQmUYhdBxio=wEngmeXzyA7dzAJn+OG6iWMPnRVro3VQ@mail.gmail.com>
+ <CALe9h7f7Mspny1fx2aMiXunS2C8GJrWFsp7YKdnmhu42+EVPmA@mail.gmail.com> <CAO=rSOsftK8YAA5Q3jEpuCee16ek=tA++an+weBKHgXSL7bkNw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f171.google.com ([74.125.82.171]:35792 "EHLO
-        mail-ot0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932991AbdCJVYY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Mar 2017 16:24:24 -0500
-Received: by mail-ot0-f171.google.com with SMTP id x37so84763601ota.2
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Mar 2017 13:24:23 -0800 (PST)
-In-Reply-To: <e746f38b-d870-49d3-7f37-722b03a01005@mirantis.com>
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:36224 "EHLO
+        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932683AbdCKUt2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 11 Mar 2017 15:49:28 -0500
+Received: by mail-wm0-f47.google.com with SMTP id n11so16564227wma.1
+        for <ceph-devel@vger.kernel.org>; Sat, 11 Mar 2017 12:49:27 -0800 (PST)
+In-Reply-To: <CAO=rSOsftK8YAA5Q3jEpuCee16ek=tA++an+weBKHgXSL7bkNw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Paul Cuzner <pcuzner@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Mar 6, 2017 at 1:47 PM, Igor Fedotov <ifedotov@mirantis.com> wrote:
+On Fri, Mar 10, 2017 at 8:52 PM, Paul Cuzner <pcuzner@redhat.com> wrote:
+> Thanks John
 >
-> On 3/6/2017 9:44 PM, Gregory Farnum wrote:
->>
->> On Mon, Mar 6, 2017 at 9:35 AM, Igor Fedotov <ifedotov@mirantis.com>
->> wrote:
->>>
->>> Hi Cephers,
->>>
->>> I've just created a ticket related to bluestore object content caching in
->>> particular and buffer::create_page_aligned in general.
->>>
->>> But I'd like to additionally share this information here as well since
->>> the
->>> root cause seems to be pretty global.
->>>
->>> Ticker URL:
->>>
->>> http://tracker.ceph.com/issues/19198
->>>
->>> Description:
->>>
->>> When caching object content BlueStore uses twice as much memory than it
->>> really needs for that data amount.
->>>
->>> The root cause seems to be in buffer::create_page_aligned implementation.
->>> Actually it results in
->>> new raw_posix_aligned()
->>>
->>>    calling mempool::buffer_data::alloc_char.allocate_aligned(len, align);
->>>
->>>        calling  posix_memalign((void**)(void*)&ptr, align, total);
->>>
->>> sequence that in fact does 2 allocations:
->>>
->>> 1) for raw_posix_aligned struct
->>> 2) for data itself (4096 bytes).
->>>
->>> It looks like this sequence causes 2 * 4096 bytes allocation instead of
->>> sizeof(raw_posix_aligned) + alignment + 4096.
->>> The additional trick is that mempool stuff is unable to estimate such an
->>> overhead and hence BlueStore cache cleanup doesn't work properly.
->>>
->>> It's not clear for me why allocator(s) behave that inefficiently for such
->>> a
->>> pattern though.
->>>
->>> The issue is reproducible under Ubuntu 16.04.1 LTS for both jemalloc and
->>> tcmalloc builds.
->>>
->>>
->>> The ticket contains the patch to reproduce the issue and one can see that
->>> for 16Gb content system mem usage tend to be ~32Gb.
->>>
->>> Patch firstly allocates 4K pages 0x400000 times using:
->>>
->>> ...
->>>
->>> +  size_t alloc_count = 0x400000; // allocate 16 Gb total
->>> +  allocs.resize(alloc_count);
->>> +  for( auto i = 0u; i < alloc_count; ++i) {
->>> +    bufferptr p = buffer::create_page_aligned(bsize);
->>> +    bufferlist* bl = new bufferlist;
->>> +    bl->append(p);
->>> +    *(bl->c_str()) = 0; // touch the page to increment system mem use
->>>
->>> ...
->>>
->>> then do the same reproducing  create_page_aligned() implementation:
->>>
->>> +  struct fake_raw_posix_aligned{
->>> +    char stub[8];
->>> +    void* data;
->>> +    fake_raw_posix_aligned() {
->>> +      ::posix_memalign(&data, 0x1000, 0x1000);
->>> //mempool::buffer_data::alloc_char.allocate_aligned(0x1000, 0x1000);
->>> +      *((char*)data) = 0; // touch the page
->>> +    }
->>> +    ~fake_raw_posix_aligned() {
->>> +      ::free(data);
->>> +    }
->>> +  };
->>> +  vector <fake_raw_posix_aligned*> allocs2;
->>>
->>> +  allocs2.resize(alloc_count);
->>> +  for( auto i = 0u; i < alloc_count; ++i) {
->>> +    allocs2[i] = new fake_raw_posix_aligned();
->>> ...
->>>
->>> Output shows 32Gb usage in both cases.
->>>
->>> Mem before: VmRSS: 45232 kB
->>> Mem after: VmRSS: 33599524 kB
->>> Mem actually used: 33554292 kB
->>> Mem pool reports: 16777216 kB
->>> Mem before2: VmRSS: 2161412 kB
->>> Mem after2: VmRSS: 33632268 kB
->>> Mem actually used: 32226156544 bytes
->>>
->>>
->>> In general there are two issues here:
->>> 1) Doubled memory usage
->>> 2) mempool is unaware of such an overhead and miscalculates the actual
->>> mem
->>> usage.
->>>
->>> There is probably a way to resolve 2) by forcing raw_combined::create()
->>> use
->>> in buffer::create_page_aligned and tuning mempool calculation to take
->>> page
->>> alignment into account. But I'd like to get some comments/thoughts
->>> first....
->>
->> Is this memory being allocated and then freed, so it's "just" imposing
->> extra work on malloc? Or are we leaking the old unaligned page as
->> well?
+> This is weird then. When I look at the data with client load I see the
+> following;
+> {
+> "pool_name": "default.rgw.buckets.index",
+> "pool_id": 94,
+> "recovery": {},
+> "recovery_rate": {},
+> "client_io_rate": {
+> "read_bytes_sec": 19242365,
+> "write_bytes_sec": 0,
+> "read_op_per_sec": 12514,
+> "write_op_per_sec": 0
+> }
 >
-> I don't see any issues after free call. I'm mostly about unexpectedly high
-> memory usage while data block is allocated.
-> And mempool miscalculation related to that.
-> Surely this is more critical for long-living allocations, e.g. data blocks
-> in BlueStore cache.
+> No object related counters - they're all block based. The plugin I
+> have rolls-up the block metrics across all pools to provide total
+> client load.
 
-Yeah, that's what I meant by "leak", which I realize isn't quite the
-typical usage.
+Where are you getting the idea that these counters have to do with
+block storage?  What Ceph is telling you about here is the number of
+operations (or bytes in those operations) being handled by OSDs.
 
-Do you have any proposed patches or fixes to deal with it? :)
+John
+
+> And as in the prior email recovery_rate counters are object related.
+>
+> As far as merging the stats is concerned, I *do* believe it's useful
+> info for the admin to know - and maybe even the admin's boss :)
+>
+> It would answer questions like - how busy is the cluster as a whole,
+> and with both client and recovery metrics aligned you could then drill
+> down into client/recovery components. It might also be interesting to
+> derive a ratio metric of client:recovery and maybe key of that for
+> automation (alerts/notifications, automated tuning etc etc)
+>
+>
+>
+>
+>
+>
+>
+>
+>
+>
+> On Fri, Mar 10, 2017 at 10:55 PM, John Spray <jspray@redhat.com> wrote:
+>> The reason they're different is that they originate from separate
+>> internal counters:
+>>  * The client_io_rate bits come from
+>> https://github.com/ceph/ceph/blob/jewel/src/mon/PGMap.cc#L1212
+>>  * The recovery bits come from
+>> https://github.com/ceph/ceph/blob/jewel/src/mon/PGMap.cc#L1146
+>>
+>> Not sure what you mean about bytes_sec vs objects_sec: client io and
+>> recovery rate both have both objects and bytes counters.
+>>
+>> The empty dicts are something that annoys me too, some of the output
+>> functions have an if() right at the start that drops the output when
+>> none of the deltas are nonzero.  I doubt anyone would have a big
+>> problem with changing these to output the zeros rather than skipping
+>> the fields.
+>>
+>> BTW I'm not sure it's smart to merge these in practice: would result
+>> in showing users a "your cluster is doing 10GB/s" statistics while
+>> their workload is crawling because all that IO is really recovery.
+>> Confusing.
+>>
+>> John
+>>
+>>
+>> On Fri, Mar 10, 2017 at 2:37 AM, Paul Cuzner <pcuzner@redhat.com> wrote:
+>>> Hi,
+>>>
+>>> I've been putting together a collectd plugin for ceph - since the old
+>>> one's I could find no longer work. I'm gathering data from the mon's
+>>> admin socket, merged with a couple of commands I issue through the
+>>> rados mon_command interface.
+>>>
+>>> Nothing complicated, but the data has me a little confused
+>>>
+>>> When I run "osd pool stats" I get *two* different sets of metrics that
+>>> describe client i/o and recovery i/o. Since the metrics are different
+>>> I can't merge them to get a consistent view of what the cluster is
+>>> doing as a whole at any given point in time. For example, client i/o
+>>> reports in bytes_sec, but the recovery dict is empty and the
+>>> recovery_rate is in objects_sec...
+>>>
+>>> i.e.
+>>>
+>>> }, {
+>>> "pool_name": "rados-bench-cbt",
+>>> "pool_id": 86,
+>>> "recovery": {},
+>>> "recovery_rate": {
+>>> "recovering_objects_per_sec": 3530,
+>>> "recovering_bytes_per_sec": 14462655,
+>>> "recovering_keys_per_sec": 0,
+>>> "num_objects_recovered": 7148,
+>>> "num_bytes_recovered": 29278208,
+>>> "num_keys_recovered": 0
+>>> },
+>>> "client_io_rate": {}
+>>>
+>>> This is running Jewel - 10.2.5-37.el7cp
+>>>
+>>> Is this a bug or a 'feature' :)
+>>>
+>>> Cheers,
+>>>
+>>> Paul C
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
