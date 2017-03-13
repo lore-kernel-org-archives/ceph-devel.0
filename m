@@ -1,65 +1,73 @@
-From: Martin Bukatovic <mbukatov@redhat.com>
-Subject: Re: Fwd: tendrl stragegy for ceph cluster map hierarchy
-Date: Mon, 13 Mar 2017 11:04:24 +0100
-Message-ID: <89f191fb-1561-058d-1ba4-458ccef0f45b@redhat.com>
-References: <bf3c1e56-5355-7b68-69ac-e2082089542b@redhat.com>
- <85cfd1d7-d808-69a4-4258-44acf8ae1be9@redhat.com>
- <alpine.DEB.2.11.1703081442540.1727@piezo.novalocal>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: [Ceph-community] RBD vs. librbd exclusive lock
+Date: Mon, 13 Mar 2017 08:13:22 -0400
+Message-ID: <CA+aFP1C9dUbjOy0_n4-EP5_jbawZRCRwgNQ4eX+RveBkzgdvMA@mail.gmail.com>
+References: <CAMtNT-AMwPK6Azz5ZErnWJr7oTBXUhMq-H_1im1+oi9EdnDyxA@mail.gmail.com>
+ <CAMtNT-CyN3VvXWfnvJuTgC5POtuAwJYnc6pJbFcai7UXR=7RNw@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44900 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750844AbdCMKE0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 13 Mar 2017 06:04:26 -0400
-In-Reply-To: <alpine.DEB.2.11.1703081442540.1727@piezo.novalocal>
+Received: from mail-lf0-f45.google.com ([209.85.215.45]:34101 "EHLO
+        mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751260AbdCMMNc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Mar 2017 08:13:32 -0400
+Received: by mail-lf0-f45.google.com with SMTP id z15so40631633lfd.1
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Mar 2017 05:13:24 -0700 (PDT)
+In-Reply-To: <CAMtNT-CyN3VvXWfnvJuTgC5POtuAwJYnc6pJbFcai7UXR=7RNw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org, tendrl-devel@redhat.com
+To: Lyu Jesse <jesse.js.lyu@gmail.com>
+Cc: ceph-devel@ceph.com, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 03/08/2017 03:52 PM, Sage Weil wrote:
-> Usually the OSDs know enough to put the devices under the correct host, 
-> but usually hosts don't know where they exist within the larger cluster.  
-> (There are hooks to do this on the host, but it currently relies on 
-> something like ansible or chef or puppet to put this somewhere in /etc so 
-> that we can tell which rack etc the host lives in.)  That means it's 
-> usually the admin who ensure the hosts are positioned properly in the 
-> overall hierarchy.  So probably teh first thing would be to make the GUI 
-> let you create racks/rows/datacenters/whatever and drag parts of the tree 
-> around.
+On Mon, Mar 13, 2017 at 4:06 AM, Lyu Jesse <jesse.js.lyu@gmail.com> wrote:
+> FYI.
+>
+> 2017-03-13 16:01 GMT+08:00 Lyu Jesse <jesse.js.lyu@gmail.com>:
+>>
+>> Hi guys,
+>>
+>> I tested the RBD exclusive lock and found that the exclusive lock could be
+>> acquired by the lasted new client using the nbd+librbd way.
+>>
+>> my question is that:
+>> 1. is there any difference between rbd lock add/remove CMDs and librbd
+>> exclusive lock
 
-That's a good point. Right now Tendrl is in a early stage of
-development and don't have this yet. That said, we need to consider
-this feature from the beginning.
+The rbd CLI lock add/remove commands are advisory locks. Unless you
+have additional tooling around the use of them, nothing would prevent
+multiple clients from sending concurrent IO to the image.
 
-I expect that ceph-ansible and ceph-installer provides a way to
-achieve this (for the node to know where in hierarchy it is for
-ceph to place it into correct place in the crush cluster hierarchy).
+>> 2.using the nbd+librbd，is the newest client has the highest priority to
+>> grab the exclusive lock
 
-To Tendrl team: do we have a plan for such feature?
+The clients will cooperatively exchange the exclusive lock if required
+if write IOs are issued. There is an optional "--exclusive" flag that
+will disable this coordinated lock exchange and will result in one
+client owning the lock until it quits.
 
-> As far as visualizing the cluster, the key thing I think we should address 
-> from the get-go is how to do it in a way that will scale gracefully to 
-> clusters with 100s, 1000s, and 10000s of OSDs.  The most promising 
-> thing I've seen (and admittedly I haven't seen much) was from a 
-> paper someone (Loic?) sent around a few weeks ago:
-> 
-> 	http://www.aviz.fr/wiki/uploads/Teaching2014/bundles_infovis.pdf
-> 
-> See, for example Fig 1 and Fig 13a.  The circle grouping can scale down as 
-> the cluster scales up (or you zoom in/out).  (And the actual subject 
-> of the paper--data flows--can be applied to show things like data movement 
-> during rebalancing/recovery or proposed CRUSH changes.)
+>> 3. In my test case by using the nbd+librbd，after losing the exclusive lock
+>> ,the old client can still write to the rbd
 
-Thanks for the link the the paper.
+I suspect you are seeing the coordinated lock exchange. Any reason why
+you have the image double-mapped?
 
-What is the opinion of the Tendrl design and gui people about this
-idea? We don't need to have a proper visualization of the cluster in
-1st version, but when we start working on it, having scaling to
-10000s OSDs in mind is a very good approach.
+>> we are using the nbd+librbd and mount the rbd image as ext4 filesystem.
+>>
+>>
+>> Best Regards,
+>> Jesse Lyu
+>
+>
+>
+> _______________________________________________
+> Ceph-community mailing list
+> Ceph-community@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-community-ceph.com
+>
+
+
 
 -- 
-Martin Bukatovic
-USM QE team
+Jason
