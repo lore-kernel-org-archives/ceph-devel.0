@@ -1,147 +1,98 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: mem use doubles due to buffer::create_page_aligned + bluestore
- obj content caching
-Date: Mon, 13 Mar 2017 14:17:48 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1703131413490.10776@piezo.novalocal>
-References: <6b06369d-6b18-f4f0-b7ae-0c0114288e41@mirantis.com> <CAJ4mKGYnbTAXA16vsKkDoj8LaddtxDD7-yghqODsnBJ9qMz6_g@mail.gmail.com> <e746f38b-d870-49d3-7f37-722b03a01005@mirantis.com> <CAJ4mKGb0irpqukaEK4b7hufTfH-KJ4fp5260naKeQzHjnN4zNw@mail.gmail.com>
- <5d9e0423-0719-670d-ed26-6f0a33eb6073@mirantis.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: ceph branch robot <nobody@ceph.com>
+Subject: ceph branch status
+Date: Mon, 13 Mar 2017 08:00:05 -0700 (PDT)
+Message-ID: <20170313150005.9F73E280381@teuthology.front.sepia.ceph.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:33800 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752114AbdCMOR4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 13 Mar 2017 10:17:56 -0400
-In-Reply-To: <5d9e0423-0719-670d-ed26-6f0a33eb6073@mirantis.com>
+Received: from [8.43.84.3] ([8.43.84.3]:43290 "EHLO
+        teuthology.front.sepia.ceph.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1752119AbdCMPAG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 13 Mar 2017 11:00:06 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, 13 Mar 2017, Igor Fedotov wrote:
-> On 11.03.2017 0:24, Gregory Farnum wrote:
-> > On Mon, Mar 6, 2017 at 1:47 PM, Igor Fedotov <ifedotov@mirantis.com> wrote:
-> > > On 3/6/2017 9:44 PM, Gregory Farnum wrote:
-> > > > On Mon, Mar 6, 2017 at 9:35 AM, Igor Fedotov <ifedotov@mirantis.com>
-> > > > wrote:
-> > > > > Hi Cephers,
-> > > > > 
-> > > > > I've just created a ticket related to bluestore object content caching
-> > > > > in
-> > > > > particular and buffer::create_page_aligned in general.
-> > > > > 
-> > > > > But I'd like to additionally share this information here as well since
-> > > > > the
-> > > > > root cause seems to be pretty global.
-> > > > > 
-> > > > > Ticker URL:
-> > > > > 
-> > > > > http://tracker.ceph.com/issues/19198
-> > > > > 
-> > > > > Description:
-> > > > > 
-> > > > > When caching object content BlueStore uses twice as much memory than
-> > > > > it
-> > > > > really needs for that data amount.
-> > > > > 
-> > > > > The root cause seems to be in buffer::create_page_aligned
-> > > > > implementation.
-> > > > > Actually it results in
-> > > > > new raw_posix_aligned()
-> > > > > 
-> > > > >     calling mempool::buffer_data::alloc_char.allocate_aligned(len,
-> > > > > align);
-> > > > > 
-> > > > >         calling  posix_memalign((void**)(void*)&ptr, align, total);
-> > > > > 
-> > > > > sequence that in fact does 2 allocations:
-> > > > > 
-> > > > > 1) for raw_posix_aligned struct
-> > > > > 2) for data itself (4096 bytes).
-> > > > > 
-> > > > > It looks like this sequence causes 2 * 4096 bytes allocation instead
-> > > > > of
-> > > > > sizeof(raw_posix_aligned) + alignment + 4096.
-> > > > > The additional trick is that mempool stuff is unable to estimate such
-> > > > > an
-> > > > > overhead and hence BlueStore cache cleanup doesn't work properly.
-> > > > > 
-> > > > > It's not clear for me why allocator(s) behave that inefficiently for
-> > > > > such
-> > > > > a
-> > > > > pattern though.
-> > > > > 
-> > > > > The issue is reproducible under Ubuntu 16.04.1 LTS for both jemalloc
-> > > > > and
-> > > > > tcmalloc builds.
-> > > > > 
-> > > > > 
-> > > > > The ticket contains the patch to reproduce the issue and one can see
-> > > > > that
-> > > > > for 16Gb content system mem usage tend to be ~32Gb.
-> > > > > 
-> > > > > Patch firstly allocates 4K pages 0x400000 times using:
-> > > > > 
-> > > > > ...
-> > > > > 
-> > > > > +  size_t alloc_count = 0x400000; // allocate 16 Gb total
-> > > > > +  allocs.resize(alloc_count);
-> > > > > +  for( auto i = 0u; i < alloc_count; ++i) {
-> > > > > +    bufferptr p = buffer::create_page_aligned(bsize);
-> > > > > +    bufferlist* bl = new bufferlist;
-> > > > > +    bl->append(p);
-> > > > > +    *(bl->c_str()) = 0; // touch the page to increment system mem use
-> > > > > 
-> > > > > ...
-> > > > > 
-> > > > > then do the same reproducing  create_page_aligned() implementation:
-> > > > > 
-> > > > > +  struct fake_raw_posix_aligned{
-> > > > > +    char stub[8];
-> > > > > +    void* data;
-> > > > > +    fake_raw_posix_aligned() {
-> > > > > +      ::posix_memalign(&data, 0x1000, 0x1000);
-> > > > > //mempool::buffer_data::alloc_char.allocate_aligned(0x1000, 0x1000);
-> > > > > +      *((char*)data) = 0; // touch the page
-> > > > > +    }
-> > > > > +    ~fake_raw_posix_aligned() {
-> > > > > +      ::free(data);
-> > > > > +    }
-> > > > > +  };
-> > > > > +  vector <fake_raw_posix_aligned*> allocs2;
-> > > > > 
-> > > > > +  allocs2.resize(alloc_count);
-> > > > > +  for( auto i = 0u; i < alloc_count; ++i) {
-> > > > > +    allocs2[i] = new fake_raw_posix_aligned();
-> > > > > ...
-> > > > > 
-> > > > > Output shows 32Gb usage in both cases.
+-- All Branches --
 
-This is really disconcerting.  If you take out the memalign in the 
-fake_raw_posix_aligned ctor, does it use 16gb?  Or is really just that the 
-order of the allocations (new then posix_memalign then new ...) 
-makes the allocator consume a full page for each 
-fake_raw_posix_aligned?  And/or, can you confirm that 
-fake_raw_posix_aligned pointers are on page boundaries?
+Ali Maredia <amaredia@redhat.com>
+	2017-01-18 15:37:03 -0500   wip-nfs-ganesha-teuthology
+	2017-02-16 13:28:36 -0500   wip-rgw-multisite-teuthology
+	2017-03-07 14:43:54 -0500   wip-vstart-rgw-help
 
-What if all the fake_raw_posix_aligned strutcs are allocated first, and 
-*then* the data pages?
+Boris Ranto <branto@redhat.com>
+	2017-03-08 14:18:40 +0100   wip-ceph-disk-fix
 
-> > Do you have any proposed patches or fixes to deal with it? :)
-> Just some thoughts, none of them seems ideal though...
-> 1) Get rid of bluestore *content* cache. IMO object metadata caching is much
-> more important and hence it's better to use memory for that. As a result no
-> long-living aligned page allocations...
-> 2) Do not use raw_posix_aligned in buffer::create_aligned and rollback to
-> raw_combined::create(). For the latter mempool's mechanics can be fixed to
-> measure alignment overhead properly and hence BlueStore cache will handle mem
-> limits properly. Mem use for page aligned buffers is still ineffective
-> though...
+Casey Bodley <cbodley@redhat.com>
+	2017-02-27 16:00:43 -0500   wip-rgw-encryption-doc
 
-The simple heuristic that only does raw_combined for smaller buffers is 
-based on the assumption that the allocator isn't stupid and can consume 
-less than a full page of overhead for the buffer::raw stuff.  If that's 
-truly not the case, then I think there's no reason not to unconditionally 
-use raw_combined.  That doesn't seem right, though!
+Dan Lambright <dlambrig@redhat.com>
+	2017-01-09 17:47:19 -0500   wip-message-factory
+	2017-02-03 14:24:04 -0500   wip-osd-ioinject
 
-sage
+Danny Al-Gaaf <danny.al-gaaf@bisect.de>
+	2017-03-07 17:21:02 +0100   wip-dalgaaf-sca-20170220
+
+GitHub <noreply@github.com>
+	2016-11-02 08:42:35 +0200   infernalis
+	2016-12-14 11:40:17 -0600   firefly
+	2017-01-23 17:49:54 +0100   hammer-next
+	2017-02-01 23:28:22 +0100   jewel-next
+	2017-02-14 13:03:03 -0800   wip-cherrypick-4tamil
+	2017-03-04 11:22:44 -0600   kraken
+
+Jenkins Build Slave User <ceph-release-team@redhat.com>
+	2017-02-08 13:57:33 +0000   luminous
+	2017-02-21 15:12:34 +0000   hammer
+	2017-03-07 13:29:40 +0000   jewel
+
+Loic Dachary <ldachary@redhat.com>
+	2015-03-23 17:44:12 +0100   dumpling
+
+Loic Dachary <loic@dachary.org>
+	2015-10-17 00:38:34 +0200   giant
+
+Marcus Watts <mwatts@redhat.com>
+	2016-10-19 05:05:50 -0400   wip-master-rgw-0lenfix1
+	2016-11-11 01:22:10 -0500   wip-xml-string-wrap
+	2016-11-11 01:25:55 -0500   wip-json-smarter-escapes
+	2016-11-11 01:29:56 -0500   wip-buildfix-python-out-of-tree
+
+Orit Wasserman <owasserm@redhat.com>
+	2017-01-02 12:13:26 +0200   wip-orit-resharding-hammer
+
+Pritha Srivastava <prsrivas@redhat.com>
+	2016-12-22 20:28:09 +0530   wip-rgw-polymorphic-errors
+	2017-01-16 11:36:24 +0530   wip-rgw-ssl-teuthology
+
+Sage Weil <sage@inktank.com>
+	2013-04-18 13:51:36 -0700   argonaut
+
+Sage Weil <sage@redhat.com>
+	2015-01-12 08:30:40 -0800   emperor
+
+Samuel Just <sjust@redhat.com>
+	2017-02-20 21:24:33 -0800   wip-snap-trim-sleep
+
+Vasu Kulkarni <vasu@redhat.com>
+	2017-01-30 14:13:10 -0800   wip-cd-dev-option
+	2017-01-30 14:32:18 -0800   wip-cd-hammer
+	2017-01-30 22:03:08 -0800   wip-qemu-redir
+	2017-02-09 16:06:07 -0800   wip-use-only-dev
+	2017-03-07 17:56:51 -0800   rh-jewel
+
+Wido den Hollander <wido@42on.com>
+	2017-01-03 15:36:28 +0100   osd-mark-inactive
+
+Yehuda Sadeh <yehuda@inktank.com>
+	2014-01-28 09:38:19 -0800   bobtail
+	2014-01-28 09:40:18 -0800   cuttlefish
+
+Yehuda Sadeh <yehuda@redhat.com>
+	2016-10-03 16:51:40 -0700   dnm-dang-reshard
+
+Yuri Weinstein <yweinste@redhat.com>
+	2017-02-13 12:42:34 -0800   wip-15752-master_ceph
+
+
+
+Grouped by committer, ordered by commit time stamp.
