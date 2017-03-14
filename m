@@ -1,34 +1,86 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: MDS dir split size threshold
-Date: Tue, 14 Mar 2017 15:34:39 -0400
-Message-ID: <CA+2bHPYNC+0DBw1k013_W=MjJG_1SK_1vTy=X5FJzg9BuYthKA@mail.gmail.com>
-References: <CAL-vruMC9XqFZHGwFgLN4LBaArUJa2R9gcSq-EfV1JDCg3=8QQ@mail.gmail.com>
+From: Ming Lin <minggr@gmail.com>
+Subject: File Journal O_DSYNC high latency
+Date: Tue, 14 Mar 2017 15:32:02 -0700
+Message-ID: <CAF1ivSaprXY7za=vS86NvvSfyd7a5fn8Y-259qgJaaGbm2Ow-Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f49.google.com ([74.125.83.49]:36596 "EHLO
-        mail-pg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751459AbdCNTfL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Mar 2017 15:35:11 -0400
-Received: by mail-pg0-f49.google.com with SMTP id g2so77769649pge.3
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Mar 2017 12:35:10 -0700 (PDT)
-In-Reply-To: <CAL-vruMC9XqFZHGwFgLN4LBaArUJa2R9gcSq-EfV1JDCg3=8QQ@mail.gmail.com>
+Received: from mail-io0-f176.google.com ([209.85.223.176]:33524 "EHLO
+        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751158AbdCNWcF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Mar 2017 18:32:05 -0400
+Received: by mail-io0-f176.google.com with SMTP id f84so9374948ioj.0
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Mar 2017 15:32:04 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vedant Nanda <vedant15114@iiitd.ac.in>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>, "LIU, Fei" <james.liu@alibaba-inc.com>, j.huo@alibaba-inc.com, wanjun.lp@alibaba-inc.com, caijin.caij@alibaba-inc.com
 
-On Tue, Mar 14, 2017 at 3:08 PM, Vedant Nanda <vedant15114@iiitd.ac.in> wrote:
-> I am working on this feature(http://tracker.ceph.com/issues/15835). It
-> requires me to randomize the split threshold for each OSD so that all
-> of them don't split together.
->
-> I was looking at the documentation and I found that the variable
-> 'mds_bal_split_size' sets the threshold and is defined in the MDS
-> config file. I had some doubts regarding this:
+Hi,
 
-You're looking at the wrong conf variable. I believe you want to look
-at filestore_merge_threshold and filestore_split_multiple.
+ceph version: 10.2.5, filestore, raw block device as journal.
 
--- 
-Patrick Donnelly
+Run fio randwrite test in a cluster, we saw average 5.26ms latency.
+
+Profiling data shows lots of IO wait in below kernel path when writing journal.
+
+ 0xffffffff816366f0 : schedule+0x0/0x70 [kernel]
+ 0xffffffff81634379 : schedule_timeout+0x209/0x2d0 [kernel]
+ 0xffffffff81635cbe : io_schedule_timeout+0xae/0x130 [kernel]
+ 0xffffffff81636de6 : wait_for_completion_io+0x116/0x170 [kernel]
+ 0xffffffff812cb6f4 : blkdev_issue_flush+0xb4/0x110 [kernel]
+ 0xffffffff812171d5 : blkdev_fsync+0x35/0x50 [kernel]
+ 0xffffffff8120d952 : vfs_fsync_range+0x42/0xb0 [kernel]
+ 0xffffffff8120dab1 : generic_write_sync+0x41/0x50 [kernel]
+ 0xffffffff81217e2e : blkdev_aio_write+0xae/0xd0 [kernel]
+ 0xffffffff8122dbc8 : do_io_submit+0x3b8/0x870 [kernel]
+ 0xffffffff8122e090 : SyS_io_submit+0x10/0x20 [kernel]
+ 0xffffffff8163b309 : kretprobe_trampoline+0x0/0x57 [kernel
+
+That's because journal block device is opened with O_DSYNC flag, so
+vfs_fsync_range was called to sync data for every request.
+So actually it's not "aio" any more. It's kind of sync IO.
+
+linux/fs/sync.c
+
+int generic_write_sync(struct file *file, loff_t pos, loff_t count)
+{
+        if (!(file->f_flags & O_DSYNC) && !IS_SYNC(file->f_mapping->host))
+                return 0;
+        return vfs_fsync_range(file, pos, pos + count - 1,
+                               (file->f_flags & __O_SYNC) ? 0 : 1);
+}
+
+We did same test with O_DSYNC removed,
+
+diff --git a/src/os/filestore/FileJournal.cc b/src/os/filestore/FileJournal.cc
+index 9455152..2ae31b8 100644
+--- a/src/os/filestore/FileJournal.cc
++++ b/src/os/filestore/FileJournal.cc
+@@ -56,7 +56,7 @@ int FileJournal::_open(bool forwrite, bool create)
+   if (forwrite) {
+     flags = O_RDWR;
+     if (directio)
+-      flags |= O_DIRECT | O_DSYNC;
++      flags |= O_DIRECT;
+   } else {
+     flags = O_RDONLY;
+   }
+
+Then, fio latency dropped from ~5.26ms to ~3.0ms. That's a lot!
+
+IIUC, O_DSYNC flag is used to make sure journal data is really written to disk.
+
+But let's look at the code:
+
+FileJournal::write_aio_bl() -> io_submit()
+FileJournal::write_finish_thread_entry() -> io_getevents()
+
+Since we are doing directio, when io_getevents() returns(assume it
+returns successfully), we can also make sure journal data was written
+to disk.
+Then why do we need O_DSYNC? Am I missing any obvious thing?
+
+Big question: is it safe to remove O_DSYNC here?
+
+Thanks,
+Ming
