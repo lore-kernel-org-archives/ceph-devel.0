@@ -1,25 +1,34 @@
-From: kefu chai <tchaikov@gmail.com>
+From: Daniel Gryniewicz <dang@redhat.com>
 Subject: Re: Can't compile because of -lpthreads
-Date: Tue, 14 Mar 2017 20:53:17 +0800
-Message-ID: <CAJE9aOMdgg=Y97PKPQGdxrMN1BShdVLS_QdZZA_1xx+yKgLKEg@mail.gmail.com>
+Date: Tue, 14 Mar 2017 08:54:11 -0400
+Message-ID: <162096e6-bddf-7213-fba1-982d7e88c5f6@redhat.com>
 References: <CAAXqJ+qjr5WaaR4MmanVLyd_PdWC0=8CYYP0dyTBkrEvXF4ofA@mail.gmail.com>
+Reply-To: dang@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f182.google.com ([209.85.217.182]:34958 "EHLO
-        mail-ua0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750851AbdCNMxU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Mar 2017 08:53:20 -0400
-Received: by mail-ua0-f182.google.com with SMTP id q7so153093340uaf.2
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Mar 2017 05:53:19 -0700 (PDT)
+Received: from mail-qt0-f172.google.com ([209.85.216.172]:35733 "EHLO
+        mail-qt0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750829AbdCNMyF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Mar 2017 08:54:05 -0400
+Received: by mail-qt0-f172.google.com with SMTP id x35so54452465qtc.2
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Mar 2017 05:54:04 -0700 (PDT)
 In-Reply-To: <CAAXqJ+qjr5WaaR4MmanVLyd_PdWC0=8CYYP0dyTBkrEvXF4ofA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Spandan Kumar Sahu <spandankumarsahu@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "kchai@redhat.com" <kchai@redhat.com>, amaredia@redhat.com, dang@fprintf.net, matt@linuxbox.com
+To: Spandan Kumar Sahu <spandankumarsahu@gmail.com>, ceph-devel@vger.kernel.org
 
-On Tue, Mar 14, 2017 at 6:33 PM, Spandan Kumar Sahu
-<spandankumarsahu@gmail.com> wrote:
+This appears to be a fallback compatibility check in CMake itself if it 
+can't find -lpthread (which is what all the files in Ceph use).  Likely 
+you don't have the correct development package installed for pthread. 
+I'm not an Ubuntu user, so I'm not sure which package you should 
+install.  Google seems to think it's libpthread-stubs0-dev but others on 
+the list can correct me if I'm wrong.
+
+Daniel
+
+On 03/14/2017 06:33 AM, Spandan Kumar Sahu wrote:
 > Hey everyone,
 >
 > I am interested in contributing to Ceph and thus I tried to build the
@@ -40,26 +49,10 @@ On Tue, Mar 14, 2017 at 6:33 PM, Spandan Kumar Sahu
 > in the stackoverflow results but all in vain. I am familiar with
 > Makefiles but not so familiar with CMake files and thus couldn't
 > really find a solution. I would be really glad if someone could help!
-
-what cmake version are you using? it looks like a bug in cmake's
-FindThreads module.
-it should try with -lpthread and -pthread also.
-
 >
 > Cc'ing some people who have worked with CMakeLists.txt
 >
 > [1]: http://paste.ubuntu.com/24175792/
 > [2]: http://paste.ubuntu.com/24175794/
 >
-> --
-> Spandan Kumar Sahu
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-
-
--- 
-Regards
-Kefu Chai
