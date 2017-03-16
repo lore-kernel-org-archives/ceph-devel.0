@@ -1,477 +1,420 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Thu, 16 Mar 2017 00:37:15 -0700
-Message-ID: <58ca40ab4f062_29df12f732070285@ss1435.mail>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: Question about writeback performance and content address obejct
+ for deduplication
+Date: Thu, 16 Mar 2017 13:42:53 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1703160249260.10776@piezo.novalocal>
+References: <CAFNt83bds6KzCnMvxyN=vPu7dg_NyX3cHdZwgmhiQqKt4B314A@mail.gmail.com> <alpine.DEB.2.11.1701311420210.3654@piezo.novalocal> <CAFNt83Z1+n+uEGo_58DmrXYxfNQe_GzG4iTYtBdDnt6PEYvdHQ@mail.gmail.com> <alpine.DEB.2.11.1702071442411.3654@piezo.novalocal>
+ <CAFNt83ZUHKxPZJiFO0MEbj+BNgQo6PxmfFQWdQ=E5fnq-w+Piw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from o1.24nn.shared.sendgrid.net ([167.89.100.237]:6317 "EHLO
-        o1.24nn.shared.sendgrid.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751874AbdCPHhR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 16 Mar 2017 03:37:17 -0400
-Received: from coverity.com (static-208.69.177.245.nephosdns.com [208.69.177.245])
-        by ismtpd0001p1sjc2.sendgrid.net (SG) with ESMTP id szBv7wjeRXS9vhKmQZbWkg
-        for <ceph-devel@vger.kernel.org>; Thu, 16 Mar 2017 07:37:15.411 +0000 (UTC)
+Received: from mx1.redhat.com ([209.132.183.28]:43914 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751387AbdCPNm5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 16 Mar 2017 09:42:57 -0400
+In-Reply-To: <CAFNt83ZUHKxPZJiFO0MEbj+BNgQo6PxmfFQWdQ=E5fnq-w+Piw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-
-
-Hi,
-
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
-
-38 new defect(s) introduced to ceph found with Coverity Scan.
-9 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
-
-New defect(s) Reported-by: Coverity Scan
-Showing 20 of 38 defect(s)
-
-
-** CID 1351753:  Memory - illegal accesses  (WRAPPER_ESCAPE)
-/home/brad/working/src/ceph/src/rgw/rgw_op.cc: 1238 in RGWGetObj::handle_slo_manifest(ceph::buffer::list &)()
-
-
-________________________________________________________________________________________________________
-*** CID 1351753:  Memory - illegal accesses  (WRAPPER_ESCAPE)
-/home/brad/working/src/ceph/src/rgw/rgw_op.cc: 1238 in RGWGetObj::handle_slo_manifest(ceph::buffer::list &)()
-1232             if (r < 0) {
-1233               ldout(s->cct, 0) << "failed to read bucket policy for bucket "
-1234                                << bucket << dendl;
-1235               return r;
-1236             }
-1237             buckets[bucket_name] = bucket;
->>>     CID 1351753:  Memory - illegal accesses  (WRAPPER_ESCAPE)
->>>     "bucket_policy" escapes into "policies[bucket_name]", but is a copy of an internal representation that is destroyed when it exits scope.
-1238             policies[bucket_name] = bucket_policy;
-1239           }
-1240         } else {
-1241           bucket = s->bucket;
-1242           bucket_policy = s->bucket_acl;
-1243         }
-
-** CID 1402598:  Security best practices violations  (DC.WEAK_CRYPTO)
-/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 1584 in fix_zone_pool_dup(std::set<rgw_pool, std::less<rgw_pool>, std::allocator<rgw_pool>>, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const rgw_pool &)()
-
-
-________________________________________________________________________________________________________
-*** CID 1402598:  Security best practices violations  (DC.WEAK_CRYPTO)
-/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 1584 in fix_zone_pool_dup(std::set<rgw_pool, std::less<rgw_pool>, std::allocator<rgw_pool>>, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const rgw_pool &)()
-1578       rgw_pool pool(prefix + suffix);
-1579       
-1580       if (pools.find(pool) == pools.end()) {
-1581         return pool;
-1582       } else {
-1583         while(true) {
->>>     CID 1402598:  Security best practices violations  (DC.WEAK_CRYPTO)
->>>     "rand" should not be used for security related applications, as linear congruential algorithms are too easy to break.
-1584           pool =  prefix + "_" + std::to_string(std::rand()) + suffix;
-1585           if (pools.find(pool) == pools.end()) {
-1586     	return pool;
-1587           }
-1588         }
-1589       }  
-
-** CID 1402599:  Security best practices violations  (DC.WEAK_CRYPTO)
-/home/brad/working/src/ceph/src/librbd/api/Group.cc: 39 in librbd::api::Group<librbd::ImageCtx>::create(librados::IoCtx &, const char *)()
-
-
-________________________________________________________________________________________________________
-*** CID 1402599:  Security best practices violations  (DC.WEAK_CRYPTO)
-/home/brad/working/src/ceph/src/librbd/api/Group.cc: 39 in librbd::api::Group<librbd::ImageCtx>::create(librados::IoCtx &, const char *)()
-33     {
-34       CephContext *cct = (CephContext *)io_ctx.cct();
-35     
-36       Rados rados(io_ctx);
-37       uint64_t bid = rados.get_instance_id();
-38     
->>>     CID 1402599:  Security best practices violations  (DC.WEAK_CRYPTO)
->>>     "rand" should not be used for security related applications, as linear congruential algorithms are too easy to break.
-39       uint32_t extra = rand() % 0xFFFFFFFF;
-40       ostringstream bid_ss;
-41       bid_ss << std::hex << bid << std::hex << extra;
-42       string id = bid_ss.str();
-43     
-44       ldout(cct, 2) << "adding consistency group to directory..." << dendl;
-
-** CID 1402600:  Incorrect expression  (IDENTICAL_BRANCHES)
-/home/brad/working/src/ceph/src/librbd/Journal.cc: 471 in librbd::Journal<librbd::ImageCtx>::is_tag_owner(librados::IoCtx &, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, bool *, ContextWQ *)()
-
-
-________________________________________________________________________________________________________
-*** CID 1402600:  Incorrect expression  (IDENTICAL_BRANCHES)
-/home/brad/working/src/ceph/src/librbd/Journal.cc: 471 in librbd::Journal<librbd::ImageCtx>::is_tag_owner(librados::IoCtx &, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, bool *, ContextWQ *)()
-465     int Journal<I>::is_tag_owner(librados::IoCtx& io_ctx, std::string& image_id,
-466                                  bool *is_tag_owner, ContextWQ *op_work_queue) {
-467       C_SaferCond ctx;
-468       Journal<I>::is_tag_owner(io_ctx, image_id, is_tag_owner, op_work_queue, &ctx);
-469     
-470       int r = ctx.wait();
->>>     CID 1402600:  Incorrect expression  (IDENTICAL_BRANCHES)
->>>     The same code is executed when the condition "r < 0" is true or false, because the code in the if-then branch and after the if statement is identical. Should the if statement be removed?
-471       if (r < 0) {
-472         return r;
-473       }
-474       return r;
-475     }
-476     
-
-** CID 1402601:  Memory - corruptions  (OVERRUN)
-
-
-________________________________________________________________________________________________________
-*** CID 1402601:  Memory - corruptions  (OVERRUN)
-/home/brad/working/src/ceph/src/test/rgw/test_rgw_common.h: 50 in old_rgw_bucket::encode(ceph::buffer::list &) const()
-44         marker = "";
-45       }
-46       old_rgw_bucket(const char *t, const char *n, const char *dp, const char *ip, const char *m, const char *id, const char *h) :
-47         tenant(t), name(n), data_pool(dp), index_pool(ip), marker(m), bucket_id(id) {}
-48     
-49       void encode(bufferlist& bl) const {
->>>     CID 1402601:  Memory - corruptions  (OVERRUN)
->>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
-50          ENCODE_START(8, 3, bl);
-51         ::encode(name, bl);
-52         ::encode(data_pool, bl);
-53         ::encode(marker, bl);
-54         ::encode(bucket_id, bl);
-55         ::encode(index_pool, bl);
-
-** CID 1402602:  Memory - corruptions  (OVERRUN)
-
-
-________________________________________________________________________________________________________
-*** CID 1402602:  Memory - corruptions  (OVERRUN)
-/home/brad/working/src/ceph/src/test/rgw/test_rgw_common.h: 382 in old_rgw_obj::encode(ceph::buffer::list &) const()
-376     
-377       bool is_in_extra_data() const {
-378         return in_extra_data;
-379       }
-380     
-381       void encode(bufferlist& bl) const {
->>>     CID 1402602:  Memory - corruptions  (OVERRUN)
->>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
-382         ENCODE_START(5, 3, bl);
-383         ::encode(bucket.name, bl);
-384         ::encode(loc, bl);
-385         ::encode(ns, bl);
-386         ::encode(object, bl);
-387         ::encode(bucket, bl);
-
-** CID 1402603:  Memory - corruptions  (OVERRUN)
-
-
-________________________________________________________________________________________________________
-*** CID 1402603:  Memory - corruptions  (OVERRUN)
-/home/brad/working/src/ceph/src/test/rgw/test_rgw_manifest.cc: 42 in OldObjManifestPart::encode(ceph::buffer::list &) const()
-36       uint64_t loc_ofs;  /* the offset at that object where the data is located */
-37       uint64_t size;     /* the part size */
-38     
-39       OldObjManifestPart() : loc_ofs(0), size(0) {}
-40     
-41       void encode(bufferlist& bl) const {
->>>     CID 1402603:  Memory - corruptions  (OVERRUN)
->>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
-42         ENCODE_START(2, 2, bl);
-43         ::encode(loc, bl);
-44         ::encode(loc_ofs, bl);
-45         ::encode(size, bl);
-46         ENCODE_FINISH(bl);
-47       }
-
-** CID 1402604:  Memory - corruptions  (OVERRUN)
-
-
-________________________________________________________________________________________________________
-*** CID 1402604:  Memory - corruptions  (OVERRUN)
-/home/brad/working/src/ceph/src/test/rgw/test_rgw_manifest.cc: 89 in OldObjManifest::encode(ceph::buffer::list &) const()
-83       void append(uint64_t ofs, const OldObjManifestPart& part) {
-84         objs[ofs] = part;
-85         obj_size = max(obj_size, ofs + part.size);
-86       }
-87     
-88       void encode(bufferlist& bl) const {
->>>     CID 1402604:  Memory - corruptions  (OVERRUN)
->>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
-89         ENCODE_START(2, 2, bl);
-90         ::encode(obj_size, bl);
-91         ::encode(objs, bl);
-92         ENCODE_FINISH(bl);
-93       }
-94     
-
-** CID 1402605:  Memory - corruptions  (OVERRUN)
-
-
-________________________________________________________________________________________________________
-*** CID 1402605:  Memory - corruptions  (OVERRUN)
-/home/brad/working/src/ceph/src/rgw/rgw_common.h: 768 in rgw_pool::encode(ceph::buffer::list &) const()
-762           return r;
-763         }
-764         return ns.compare(p.ns);
-765       }
-766     
-767       void encode(bufferlist& bl) const {
->>>     CID 1402605:  Memory - corruptions  (OVERRUN)
->>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
-768          ENCODE_START(10, 10, bl);
-769         ::encode(name, bl);
-770         ::encode(ns, bl);
-771         ENCODE_FINISH(bl);
-772       }
-773     
-
-** CID 1402606:  Memory - corruptions  (OVERRUN)
-
-
-________________________________________________________________________________________________________
-*** CID 1402606:  Memory - corruptions  (OVERRUN)
-/home/brad/working/src/ceph/src/rgw/rgw_common.h: 875 in rgw_raw_obj::encode(ceph::buffer::list &) const()
-869     
-870       bool empty() const {
-871         return oid.empty();
-872       }
-873     
-874       void encode(bufferlist& bl) const {
->>>     CID 1402606:  Memory - corruptions  (OVERRUN)
->>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
-875          ENCODE_START(6, 6, bl);
-876         ::encode(pool, bl);
-877         ::encode(oid, bl);
-878         ::encode(loc, bl);
-879         ENCODE_FINISH(bl);
-880       }
-
-** CID 1402607:  Performance inefficiencies  (PASS_BY_VALUE)
-/boost/include/boost/function/function_template.hpp: 605 in boost::detail::function::basic_vtable1<void, int>::assign_to<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::detail::function::function_buffer &, boost::detail::function::function_obj_tag) const()
-
-
-________________________________________________________________________________________________________
-*** CID 1402607:  Performance inefficiencies  (PASS_BY_VALUE)
-/boost/include/boost/function/function_template.hpp: 605 in boost::detail::function::basic_vtable1<void, int>::assign_to<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::detail::function::function_buffer &, boost::detail::function::function_obj_tag) const()
-599               functor_wrapper_type* new_f = static_cast<functor_wrapper_type*>(copy);
-600               functor.members.obj_ptr = new_f;
-601             }
-602     
-603             template<typename FunctionObj>
-604             bool
->>>     CID 1402607:  Performance inefficiencies  (PASS_BY_VALUE)
->>>     Passing parameter f of type "librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]" (size 224 bytes) by value.
-605             assign_to(FunctionObj f, function_buffer& functor, function_obj_tag) const
-606             {
-607               if (!boost::detail::function::has_empty_target(boost::addressof(f))) {
-608                 assign_functor(f, functor,
-609                                mpl::bool_<(function_allows_small_object_optimization<FunctionObj>::value)>());
-610                 return true;
-
-** CID 1402608:  Performance inefficiencies  (PASS_BY_VALUE)
-/boost/include/boost/function/function_template.hpp: 584 in boost::detail::function::basic_vtable1<void, int>::assign_functor<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::detail::function::function_buffer &, mpl_::bool_<(bool)0>) const()
-
-
-________________________________________________________________________________________________________
-*** CID 1402608:  Performance inefficiencies  (PASS_BY_VALUE)
-/boost/include/boost/function/function_template.hpp: 584 in boost::detail::function::basic_vtable1<void, int>::assign_functor<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::detail::function::function_buffer &, mpl_::bool_<(bool)0>) const()
-578               assign_functor(f,functor,mpl::true_());
-579             }
-580     
-581             // Assign to a function object allocated on the heap.
-582             template<typename FunctionObj>
-583             void
->>>     CID 1402608:  Performance inefficiencies  (PASS_BY_VALUE)
->>>     Passing parameter f of type "librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]" (size 224 bytes) by value.
-584             assign_functor(FunctionObj f, function_buffer& functor, mpl::false_) const
-585             {
-586               functor.members.obj_ptr = new FunctionObj(f);
-587             }
-588             template<typename FunctionObj,typename Allocator>
-589             void
-
-** CID 1402609:  Performance inefficiencies  (PASS_BY_VALUE)
-/boost/include/boost/function/function_template.hpp: 718 in boost::function1<void, int>::function1<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::enable_if_c<(!(boost::is_integral<T1>::value)), int>::type)()
-
-
-________________________________________________________________________________________________________
-*** CID 1402609:  Performance inefficiencies  (PASS_BY_VALUE)
-/boost/include/boost/function/function_template.hpp: 718 in boost::function1<void, int>::function1<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::enable_if_c<(!(boost::is_integral<T1>::value)), int>::type)()
-712     
-713         BOOST_FUNCTION_FUNCTION() : function_base() { }
-714     
-715         // MSVC chokes if the following two constructors are collapsed into
-716         // one with a default parameter.
-717         template<typename Functor>
->>>     CID 1402609:  Performance inefficiencies  (PASS_BY_VALUE)
->>>     Passing parameter f of type "librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]" (size 224 bytes) by value.
-718         BOOST_FUNCTION_FUNCTION(Functor BOOST_FUNCTION_TARGET_FIX(const &) f
-719     #ifndef BOOST_NO_SFINAE
-720                                 ,typename boost::enable_if_c<
-721                                  !(is_integral<Functor>::value),
-722                                             int>::type = 0
-723     #endif // BOOST_NO_SFINAE
-
-** CID 1402610:  Performance inefficiencies  (PASS_BY_VALUE)
-/boost/include/boost/function/function_template.hpp: 495 in boost::detail::function::basic_vtable1<void, int>::assign_to<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::detail::function::function_buffer &) const()
-
-
-________________________________________________________________________________________________________
-*** CID 1402610:  Performance inefficiencies  (PASS_BY_VALUE)
-/boost/include/boost/function/function_template.hpp: 495 in boost::detail::function::basic_vtable1<void, int>::assign_to<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::detail::function::function_buffer &) const()
-489     
-490             typedef result_type (*invoker_type)(function_buffer&
-491                                                 BOOST_FUNCTION_COMMA
-492                                                 BOOST_FUNCTION_TEMPLATE_ARGS);
-493     
-494             template<typename F>
->>>     CID 1402610:  Performance inefficiencies  (PASS_BY_VALUE)
->>>     Passing parameter f of type "librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]" (size 224 bytes) by value.
-495             bool assign_to(F f, function_buffer& functor) const
-496             {
-497               typedef typename get_function_tag<F>::type tag;
-498               return assign_to(f, functor, tag());
-499             }
-500             template<typename F,typename Allocator>
-
-** CID 1402611:  Performance inefficiencies  (PASS_BY_VALUE)
-/boost/include/boost/function/function_template.hpp: 1065 in boost::function<void (int)>::function<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::enable_if_c<(!(boost::is_integral<T1>::value)), int>::type)()
-
-
-________________________________________________________________________________________________________
-*** CID 1402611:  Performance inefficiencies  (PASS_BY_VALUE)
-/boost/include/boost/function/function_template.hpp: 1065 in boost::function<void (int)>::function<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::enable_if_c<(!(boost::is_integral<T1>::value)), int>::type)()
-1059     
-1060     public:
-1061     
-1062       function() : base_type() {}
-1063     
-1064       template<typename Functor>
->>>     CID 1402611:  Performance inefficiencies  (PASS_BY_VALUE)
->>>     Passing parameter f of type "librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]" (size 224 bytes) by value.
-1065       function(Functor f
-1066     #ifndef BOOST_NO_SFINAE
-1067                ,typename boost::enable_if_c<
-1068                               !(is_integral<Functor>::value),
-1069                            int>::type = 0
-1070     #endif
-
-** CID 1402612:  Performance inefficiencies  (PASS_BY_VALUE)
-/boost/include/boost/function/function_template.hpp: 917 in boost::function1<void, int>::assign_to<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1)()
-
-
-________________________________________________________________________________________________________
-*** CID 1402612:  Performance inefficiencies  (PASS_BY_VALUE)
-/boost/include/boost/function/function_template.hpp: 917 in boost::function1<void, int>::assign_to<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1)()
-911               get_vtable()->base.manager(f.functor, this->functor,
-912                                          boost::detail::function::clone_functor_tag);
-913           }
-914         }
-915     
-916         template<typename Functor>
->>>     CID 1402612:  Performance inefficiencies  (PASS_BY_VALUE)
->>>     Passing parameter f of type "librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]" (size 224 bytes) by value.
-917         void assign_to(Functor f)
-918         {
-919           using boost::detail::function::vtable_base;
-920     
-921           typedef typename boost::detail::function::get_function_tag<Functor>::type tag;
-922           typedef boost::detail::function::BOOST_FUNCTION_GET_INVOKER<tag> get_invoker;
-
-** CID 1402613:  Resource leaks  (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 2624 in RGWPutObjProcessor_Atomic::complete_writing_data()()
-
-
-________________________________________________________________________________________________________
-*** CID 1402613:  Resource leaks  (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 2624 in RGWPutObjProcessor_Atomic::complete_writing_data()()
-2618         bufferlist bl;
-2619         pending_data_bl.splice(0, max_write_size, &bl);
-2620         uint64_t write_len = bl.length();
-2621         int r = write_data(bl, data_ofs, &handle, &obj, false);
-2622         if (r < 0) {
-2623           ldout(store->ctx(), 0) << "ERROR: write_data() returned " << r << dendl;
->>>     CID 1402613:  Resource leaks  (RESOURCE_LEAK)
->>>     Variable "handle" going out of scope leaks the storage it points to.
-2624           return r;
-2625         }
-2626         data_ofs += write_len;
-2627         r = throttle_data(handle, obj, write_len, false);
-2628         if (r < 0) {
-2629           ldout(store->ctx(), 0) << "ERROR: throttle_data() returned " << r << dendl;
-
-** CID 1402614:  Resource leaks  (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 12966 in RGWRados::delete_raw_obj_aio(const rgw_raw_obj &, std::__cxx11::list<librados::AioCompletion *, std::allocator<librados::AioCompletion *>> &)()
-
-
-________________________________________________________________________________________________________
-*** CID 1402614:  Resource leaks  (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 12966 in RGWRados::delete_raw_obj_aio(const rgw_raw_obj &, std::__cxx11::list<librados::AioCompletion *, std::allocator<librados::AioCompletion *>> &)()
-12960       cls_rgw_remove_obj(op, prefixes);
-12961     
-12962       AioCompletion *c = librados::Rados::aio_create_completion(NULL, NULL, NULL);
-12963       ret = ref.ioctx.aio_operate(ref.oid, c, &op);
-12964       if (ret < 0) {
-12965         lderr(cct) << "ERROR: AioOperate failed with ret=" << ret << dendl;
->>>     CID 1402614:  Resource leaks  (RESOURCE_LEAK)
->>>     Variable "c" going out of scope leaks the storage it points to.
-12966         return ret;
-12967       }
-12968     
-12969       handles.push_back(c);
-12970     
-12971       return 0;
-
-** CID 1402615:  Resource leaks  (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 7692 in RGWRados::copy_obj_data(RGWObjectCtx &, RGWBucketInfo &, RGWRados::Object::Read &, long, rgw_obj &, rgw_obj &, unsigned long, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<(long)1, (long)1000000000>>> *, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<(long)1, (long)1000000000>>>, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, ceph::buffer::list, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::allocator<std::pair<const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, ceph::buffer::list>>> &, RGWObjCatego
- ry, unsigned long, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<(long)1, (long)1000000000>>>, std::__cxx11::basic_string<char, std::
- char_traits<char>, std::allocator<char>> *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> *, ceph::buffer::list *, rgw_err *)()
-
-
-________________________________________________________________________________________________________
-*** CID 1402615:  Resource leaks  (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 7692 in RGWRados::copy_obj_data(RGWObjectCtx &, RGWBucketInfo &, RGWRados::Object::Read &, long, rgw_obj &, rgw_obj &, unsigned long, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<(long)1, (long)1000000000>>> *, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<(long)1, (long)1000000000>>>, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, ceph::buffer::list, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::allocator<std::pair<const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, ceph::buffer::list>>> &, RGWObjCatego
- ry, unsigned long, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<(long)1, (long)1000000000>>>, std::__cxx11::basic_string<char, std::
- char_traits<char>, std::allocator<char>> *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> *, ceph::buffer::list *, rgw_err *)()
-7686         do {
-7687           void *handle;
-7688           rgw_raw_obj obj;
-7689     
-7690           ret = processor.handle_data(bl, ofs, &handle, &obj, &again);
-7691           if (ret < 0) {
->>>     CID 1402615:  Resource leaks  (RESOURCE_LEAK)
->>>     Variable "handle" going out of scope leaks the storage it points to.
-7692             return ret;
-7693           }
-7694           ret = processor.throttle_data(handle, obj, end - ofs + 1, false);
-7695           if (ret < 0)
-7696             return ret;
-7697         } while (again);
-
-** CID 1402616:  Resource leaks  (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 13004 in RGWRados::delete_obj_aio(const rgw_obj &, RGWBucketInfo &, RGWObjState *, std::__cxx11::list<librados::AioCompletion *, std::allocator<librados::AioCompletion *>> &, bool)()
-
-
-________________________________________________________________________________________________________
-*** CID 1402616:  Resource leaks  (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 13004 in RGWRados::delete_obj_aio(const rgw_obj &, RGWBucketInfo &, RGWObjState *, std::__cxx11::list<librados::AioCompletion *, std::allocator<librados::AioCompletion *>> &, bool)()
-12998       cls_rgw_remove_obj(op, prefixes);
-12999     
-13000       AioCompletion *c = librados::Rados::aio_create_completion(NULL, NULL, NULL);
-13001       ret = ref.ioctx.aio_operate(ref.oid, c, &op);
-13002       if (ret < 0) {
-13003         lderr(cct) << "ERROR: AioOperate failed with ret=" << ret << dendl;
->>>     CID 1402616:  Resource leaks  (RESOURCE_LEAK)
->>>     Variable "c" going out of scope leaks the storage it points to.
-13004         return ret;
-13005       }
-13006     
-13007       handles.push_back(c);
-13008     
-13009       if (keep_index_consistent) {
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRaGCnxtQO9E3gxlB2GxVsWFENryh7bC5hIb-2FQBVM85YLQ-3D-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8GfQlGh3X238-2BpQ7Ww0V7r0k3azlSCcsuKGojMCI31G8L62To8QI4ZEYPuaVuurk-2BnlICVsFSEe-2FDPfVY9jmI7AVwwvEu-2FB9pCXjaiVO3f0WfETQoLXrVRnYfpahZzj7vcmq64aAay-2FXEgvfoNRRr9BzZfRomJASScXmEtmfEgCXIULyHyjqbtLVIcKs3-2Bnss0-3D
-
-To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRbVDbis712qZDP-2FA8y06Nq4Bco8jcmzhh7FSyvoR0E3-2BDgRcBCQ6OuthHBtaTCGNq9zoLsiw8NWrIF2zsdhfTt-2FbHjZ2ToL3Et9v1-2BrDLungAOjHpQtOY-2BsyLiTVCQEUCU-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8GfQlGh3X238-2BpQ7Ww0V7r0k3azlSCcsuKGojMCI31G8CYbu057LMT92ZgDgOU5mtjJHv9AeJSUAQyUZid6i-2BsaKYvrSBiX-2FE7RS8IDMyyppvIAJsJDDJQP7DHzWeC2-2FbQfK-2FtFadDWvdO2kyVeSjL4HLci8BJACNDzL3nMDvwyswitemCTAUaKf3IGblDOpn8-3D
-
+To: myoungwon oh <ohmyoungwon@gmail.com>
+Cc: ceph-devel@vger.kernel.org, =?EUC-KR?B?v8C47b/4?= <omwmw@sk.com>
+
+Hi Myoungwon,
+
+This is quite a patch!  Sorry for the slow reply.
+
+On Tue, 14 Mar 2017, myoungwon oh wrote:
+> Hi Sage
+> 
+> 
+> I addressed all of your concerns (I applied CAS pool and dedup
+> metadata in object_info_t) and created public repository in order to
+> show the prototype implementation
+> (https://github.com/myoungwon/ceph/commit/13597f62405d1c5a4977d630e69331407ef3a07a,
+> support non-aligned I/O, but for (K)RBD). This code is based on Jewel
+> and is not cleaned well but you can see the basic flow (start_flush(),
+> maybe_handle_cache_detail() ). It would be nice if you give me some
+> comments.
+> 
+> I have some queries mentioned below on which your feedback is highly required.
+> 
+> 1. dedup metadata in object_info_t
+> 
+> You mentioned that it would be nice to make tuple in object_info_t
+> such as map<offset, tuple<length, cas object, pool>> But, I made
+> dedup_chunk_info_t in object_info_t because I need one more parameter
+> (chunk_state) and for extensibility.
+
+Yes, we definitely want an extensible approach to the state in 
+object_info_t that will support
+
+ - a simple redirect ("the object is in that other pool")
+ - a dedup object ("the object consists of these N lumps, each one 
+referencing an object named X_i in pool Y_i")
+ - an external system (extenral archive, like a backup system, external 
+object store, whatever)
+
+I think we should try to come up with a general notion, like "redirect" or 
+"object map" or something that covers other options... not just dedup!
+
+> This is because to avoid read and
+> fingerprinting during flush time. chunk_state represents three states
+> in writeback mode. First is CLEAN (data and fingerprint are not
+> modified). Second is MODIFIED (data is modified but fingerprint is not
+> calculated). Third is CALCULATED (data is modified and fingerprint is
+> also calculated). When data is stored in cache tier, chunk_state will
+> be defined. Therefore, reading data and fingerprinting can be removed
+> during flush.
+
+I'm not following this, though.  I think "clean" would just mean we are 
+storing the normal object in the pool.  "modified" would mean that the 
+FLAG_DIRTY is set.  And "calculated" would mean we have successfully 
+chunked the object, stored or taken refs on the chunks, and written the 
+chunk map into object_info_t? 
+
+
+> 2. Single Rados Operation
+> 
+> You mentioned a Rados operation which can concurrently read the
+> reference count and write data. Do you want that API in objecter
+> class? (for example, objector->read_ref_and_write())
+
+We may not need to make it a first-class rados operation.  For example, 
+cls_refcount could probably be extended with a write_or_get operation.  
+But it might also be advantageous to make it a native op.  The main thing 
+I'm worried about here is that we probably want to make the refs 
+reliable and autitable, which means backpointers (so you can look at a 
+chunk and see which dedup objects are using it).  That means that a 
+popular sequence of bytes might have a huge number of references, and that 
+will need to scale gracefully.  Or, we just use counters, accept that 
+failure conditions could make us leak dedup chunks, and make all of our 
+failure paths fail-safe.
+
+> 3. Write sequence for performance.
+> 
+> Current write sequence (proxy mode) is
+> 
+> a. Read metadata (promote_object)
+> b. Send data to OSD (in CAS pool) and send dedup metadata to OSD (in
+> original pool)
+> c. If data and metadata are stored then, proxy osd will issue message
+> to decrease the reference count (for previous chunk) to OSD (in CAS
+> pool) and update local object metadata (via simple_opc_submit)
+> d. If reference count is successful, send Ack to client
+> 
+> As you can see, the number of operations increased due to reference
+> count and metadata updates. This can degrade performance. My question
+> is that can we send ack to client at (c) above? (But I am worried
+> about inconsistent reference count state.)
+
+I'm worried that if we focus on inline dedup immediately we'll end up with 
+something that is less general and more fragile.  It's also harder.  
+Instead, we can consider the inline and async dedup separately.  Async:
+
+writeback:
+a. normal write into object.  ack client.
+...
+b. dedup agent: read object (from cache), chunk
+c. dedup agent: write/refcount chunks
+d. replace object with dedup manifest
+
+This could happen with or without a delay.  I don't think it makes sense 
+to consider "promote" here at all; it sounds like you're assuming the 
+initial dedup tier is a cache tier, and we should try not to assume that 
+(even though it might be possible).  Instead, I think a "basic" setup 
+would probably be
+
+1. base pool (all ssd; contains all metadata for all objects, and absorbs 
+   writes).
+2. dedup pool(s) contain refcounted chunks
+
+If we want to do inline dedup, it would be some complex code that combines 
+all of the steps above into one, at the expense of client latency.
+
+
+In any case, it's awesome that you have a working prototype.  However, 
+it's not going to be practical to take a huge patch(set) like this and 
+merge it all at once.  It's too much code to review, too complex, and too 
+hard to test.  Also, it's changing 5000 in ReplicatedPG.cc (since renamed 
+PrimaryLogPG.cc), which is slated for a big refactor right after luminous.
+
+The way to approach this to get it upstream is to break this down into 
+different logical components and design/review/test/merge each of them 
+indepdendently.  Having a prototype is useful in that it will be easier to 
+answer a lot of the questions we'll have deciding how each part should 
+work and what it needs to be able to handle, but don't expect that most 
+of that code will end up in the final version!
+
+I'm guessing we can break this down into a few logical components:
+
+1) How do we store chunks.  We know we want refcounted objects for each 
+chunk.  We don't know how we'll manage the refcounts, whether we want/need 
+backpointers, whether we are willing to tolerate "leaking" references in 
+failure cases (so that we fail to clean up all chunks if we e.g. delete 
+all data), whether we want to implement it as a rados class or a native 
+rados op, whether we want to support EC, compression, etc.  This whole 
+discussion one is a great place to start because it is self-contained and 
+doesn't break anything else.
+
+2) How do we do the dedup manifists (and redirects) in object_info_t.  We 
+want the solution to include or be compatible with simpler tiering, like 
+having the object_info_t simply be a pointer to a different (colder) pool.  
+In fact, I think this is the thing to do first becuase it will make us 
+fix/solve all the basic problems with flush and promote.  And extending 
+this to include dedup (object is composed of many little bits in other 
+pools) is then a matter of making that 'manifest' (or whatever we call it) 
+a generic and extensible description.  Remember we also want to support 
+pushing objects into external systems (say, glacier, or some other 
+external object store like a backup system).
+
+3) How do we chunk.  You have some classes that handle aligned chunking.  
+We'll probably eventually want content-based chunking (based on Rabin 
+fingerprinting or whatever the new hotness is).  Real users will probably 
+want adjustable policies based on what they know of the content they're 
+storing, and the system will probably want to support multiple CAS pools 
+based on which policy is being used (as that determines chunk sizes 
+etc and whether we'll actually have any dedup happening).
+
+4) How to drive the dedup process itself.  An async agent that's part of 
+the exiting tier_agent?  An external process?  Something inline in the 
+write path?  This is the hardest question to answer, and the one that is 
+most likely to collide with other planned OSD work.  It can also come 
+last, IMO!  We can start with a simple offline agent and perhaps 
+eventually do something more clever or efficient.
+
+In any case, I think #1 and #2 are the key discussions we should have now.  
+I suggest starting a pad and email thread for each (pad.ceph.com) so we 
+can brainstorm design options, weight trade-offs, and come to some 
+consensus.  (I had some thoughts, for example, on a hybrid scheme 
+somewhere between explicit backpointers and a simple refcount that could 
+consume fixed overhead but still provide information that would enable a 
+moderately efficient scrub/audit.)
+
+Thanks!
+sage
+
+
+
+
+> Write sequence (writeback mode) is
+> 
+> a.  Read object data and do fingerprinting (if data is not calculated).
+> b. Send reference count decrement message (for previous chunk) to osd
+> (in CAS pool) and updates local object metadata
+> c. Send copy_from message to osd (in CAS pool) and send copy_from
+> message (in order to copy the dedup metadata) to a osd (in original
+> pool)
+> 
+> Writeback mode also increase the number of operation. Can we reduce?
+> 
+> 
+> 
+> 4. Performance.
+> 
+> Performance is improved compared to previous results. But It still
+> seems to be improving. (512KB block, Seq. workload, fio, KRBD, single
+> thread, target_max_objects = 4)
+> 
+> Major concerns are first is fingerprint overhead and second is
+> writeback performance in cache tier. When the chunk size is large
+> (>512KB), SHA1 takes more than 3ms. (This can be reduced if we use
+> small chunk.)
+> 
+> Regarding writeback performance, Flush need two more operations than
+> proxy mode. First is "marking clean state". Second is "reading dedup
+> metadata and data from storage". Therefore, actual read and write
+> occur. These cause that flush completion is delayed.
+> 
+> Small chunk performance in the writeback mode is significantly
+> degraded because single flush thread handles multiple copy_from
+> message. It seems that we should improve basic flushing performance.
+> 
+> 
+> Write performance (MB/s)
+> 
+> Dedup ratio     0         60       100
+> 
+> Proxy             55       64       73
+> 
+> Writeback       48       50       50
+> 
+> Original           120      120      122
+> 
+> 
+> 
+> Read performance (MB/s)
+> 
+> Dedup ratio     0         60       100
+> 
+> Proxy             117      130      141
+> 
+> Writeback       198      197      200
+> 
+> Original           280      276      285
+> 
+> 
+> 
+> 
+> 5. Command to enable dedup
+> 
+> Ceph osd pool create sds-hot 1024
+> Ceph osd pool create sds-cas 1024
+> Ceph osd tier add_cas rbd sds-hot sds-cas
+> Ceph osd tier sds-hot (proxy or writeback)
+> Ceph osd tier dedup_block rbd sds-hot sds-cas (chunk size. e.g. 65536, 131072..)
+> Ceph osd tier set-overlay rbd sds-hot
+> 
+> 
+> 
+> Thanks
+> Myoungwon Oh
+> (omwmw@sk.com)
+> 
+> 2017-02-07 23:50 GMT+09:00 Sage Weil <sweil@redhat.com>:
+> > On Tue, 7 Feb 2017, myoungwon oh wrote:
+> >> Hi sage.
+> >>
+> >> I uploaded the document which describe my overall appoach.
+> >> please see it and give me feedback.
+> >> slide: https://www.slideshare.net/secret/JZcy3yYEDIHPyg
+> >
+> > This approach looks pretty close to what we have been planning.  A few
+> > comments:
+> >
+> > 1) I think it may be better to view the tier/pool that has the object
+> > metadata as the "base" pool, and the CAS pool with the refcounted
+> > object chunks as as tier below that.
+> >
+> > 2) I think we can use an object class or a handful of new native rados
+> > operations to make the CAS pool read/write operations more efficient.  In
+> > your slides you describe a process something like
+> >
+> >   rados(getattr)
+> >   if exists
+> >      rados(increment ref count)
+> >   else
+> >      rados(write object and set ref count to 1)
+> >
+> > This could be collapsed into a single optimistic operation that sends the
+> > data and a command that says "create or increment ref count" so that the
+> > conditional behavior is handled at the OSD.  This will be more efficient
+> > for small chunks.  (For large chunks, or in cases where we have some
+> > confidence that the chunk probably already exists, the pessimistic
+> > approach might still make sense.)  Either way, we should probably support
+> > both.
+> >
+> > 3) We'd like to generalize the first pool behavior so that it is just a
+> > special case of the new tiering functionality.  The idea is that an
+> > object_info_t can have a 'manifest' that described where and how the
+> > object is really stored instead of the object data itself (much like it
+> > can already be a whiteout, etc.).  In the simplest case, the manifest
+> > would just say "this object is stored in pool X" (simple tiering).  In
+> > this case, the manifest would a structure like
+> >
+> >   map<offset, tuple<length, cas object, pool>>
+> >
+> > I think it'll be worth the effort to build a general struture here that we
+> > can use for basic tiering (not just dedup).
+> >
+> > sage
+> >
+> >
+> >
+> >>
+> >> thanks
+> >>
+> >>
+> >> 2017-01-31 23:24 GMT+09:00 Sage Weil <sage@newdream.net>:
+> >> > On Thu, 26 Jan 2017, myoungwon oh wrote:
+> >> >> I have two questions.
+> >> >>
+> >> >> 1. I would like to ask about CAS location. current our implementation store
+> >> >> content address object in storage tier.However, If we store the CAO in the
+> >> >> cache tier, we can get a performance advantage. Do you think we can create
+> >> >> CAO in cachetier? or create a separate storage pool for CAS?
+> >> >
+> >> > It depends on the design.  If the you are naming the objects at the
+> >> > librados client side, then you can use the rados cluster itself
+> >> > unmodified (with or without a cache tier).  This is roughly how I have
+> >> > anticipated implementing the CAS storage portion.  If you are doing the
+> >> > chunking hashing and within the OSD itself, then you can't do the CAS
+> >> > at the first tier because the requests won't be directed at the right OSD.
+> >> >
+> >> >> 2. The results below are performance result for our current implementation.
+> >> >> experiment setup:
+> >> >> PROXY (inline dedup), WRITEBACK (lazy dedup, target_max_bytes: 50MB),
+> >> >> ORIGINAL(without dedup feature and cache tier),
+> >> >> fio, 512K block, seq. I/O, single thread
+> >> >>
+> >> >> One thing to note is that the writeback case is slower than the proxy.
+> >> >> We think there are three problems as follows.
+> >> >>
+> >> >> A. The current implementation creates a fingerprint by reading the entire
+> >> >> object when flushing. Therefore, there is a problem that read and write are
+> >> >> mixed.
+> >> >
+> >> > I expect this is a small factor compared to the fact that in writeback
+> >> > mode you have to *write* to the cache tier, which is 3x replicated,
+> >> > whereas in proxy mode those writes don't happen at all.
+> >> >
+> >> >> B. When client request read, the promote_object function reads the object
+> >> >> and writes it back to the cache tier, which also causes a mix of read and
+> >> >> write.
+> >> >
+> >> > This can be mitigated by setting the min_read_recency_for_promote pool
+> >> > property to something >1.  Then reads will be proxied unless the object
+> >> > appears to be hot (because it has been touched over multiple
+> >> > hitset intervals).
+> >> >
+> >> >> C. When flushing, the unchanged part is rewritten because flush operation
+> >> >> perform per-object based.
+> >> >
+> >> > Yes.
+> >> >
+> >> > Is there a description of your overall approach somewhere?
+> >> >
+> >> > sage
+> >> >
+> >> >
+> >> >>
+> >> >> Do I have something wrong? or Could you give me a suggestion to improve
+> >> >> performance?
+> >> >>
+> >> >>
+> >> >> a. Write performance (KB/s)
+> >> >>
+> >> >> dedup_ratio  0 20 40 60 80 100
+> >> >>
+> >> >> PROXY  45586 47804 51120 52844 56167 55302
+> >> >>
+> >> >> WRITEBACK  13151 11078 9531 13010 9518 8319
+> >> >>
+> >> >> ORIGINAL  121209 124786 122140 121195 122540 132363
+> >> >>
+> >> >>
+> >> >> b. Read performance (KB/s)
+> >> >>
+> >> >> dedup_ratio  0 20 40 60 80 100
+> >> >>
+> >> >> PROXY  112231 118994 118070 120071 117884 132748
+> >> >>
+> >> >> WRITEBACK  34040 29109 19104 26677 24756 21695
+> >> >>
+> >> >> ORIGINAL  285482 284398 278063 277989 271793 285094
+> >> >>
+> >> >>
+> >> >> thanks,
+> >> >> Myoungwon Oh
+> >> >> --
+> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> >> the body of a message to majordomo@vger.kernel.org
+> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >> >>
+> >> >>
+> >>
+> >>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
