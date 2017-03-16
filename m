@@ -1,240 +1,90 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: Log message -->
- "bdev(/var/lib/ceph/osd/ceph-x/block) aio_submit retries"
-Date: Thu, 16 Mar 2017 13:48:46 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1703161345150.10776@piezo.novalocal>
-References: <CALWuvY8dEyWiUxg9VDaMkfQGwPSsWG0adrtzvGa9k7fhNmdsGw@mail.gmail.com>
-	<CALWuvY9wY08n2AE9HMfZgZCU9ZEtk2XOwa353_stxT-7x7L30A@mail.gmail.com>
-	<CALWuvY_9uWE_DKg5UaYZrc_GchfMK1EpX1rkWrJEuAV+Y3+Uww@mail.gmail.com>
-	<CAF-wwdFvgzkYMnkheomsWMikZoZU+THyrxzovORx3bCDfPZ7Ng@mail.gmail.com>
-	<alpine.DEB.2.11.1703151422110.10776@piezo.novalocal>
-	<CALWuvY8f1j9_ccbzrchfdhZ66RYDTqRuL2A2qy9XFHTARitPBQ@mail.gmail.com>
-	<CAF-wwdGBF5yDMOpdxm0S5fXcYYt94LaEiAXw8qXT2g66pB30xg@mail.gmail.com>
-	<CALWuvY-m4JyaohTJCfzeC==CnfJ2cGK1n8P+49pS65u5n8hnfQ@mail.gmail.com>
-	<CAF-wwdGHgO6etLromGd_5-UTBFmXD1JeOAiX_eFDB8z7bXZJ6A@mail.gmail.com>
+From: Alexandre Oliva <oliva@gnu.org>
+Subject: Re: [PATCH 1/1] EC backfill retries
+Date: Thu, 16 Mar 2017 14:44:17 -0300
+Message-ID: <orwpbpf766.fsf@lxoliva.fsfla.org>
+References: <ormvcx2dr8.fsf@lxoliva.fsfla.org>
+        <06c85dc1-3318-fc05-ec1a-7f68d3aecc37@redhat.com>
+        <ork27qguwv.fsf@lxoliva.fsfla.org>
+        <52362dc8-faca-82f4-b1ac-dc7df6150afe@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAF-wwdGHgO6etLromGd_5-UTBFmXD1JeOAiX_eFDB8z7bXZJ6A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Brad Hubbard <bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from linux-libre.fsfla.org ([208.118.235.54]:35959 "EHLO
+        linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752649AbdCPRov (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 16 Mar 2017 13:44:51 -0400
+Received: from freie.home (home.lxoliva.fsfla.org [172.31.160.164])
+        by linux-libre.fsfla.org (8.14.4/8.14.4/Debian-4.1ubuntu1) with ESMTP id v2GHihKG014114
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Mar 2017 17:44:44 GMT
+In-Reply-To: <52362dc8-faca-82f4-b1ac-dc7df6150afe@redhat.com> (David Zafman's
+        message of "Wed, 15 Mar 2017 13:38:54 -0700")
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: David Zafman <dzafman@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Thu, 16 Mar 2017, Brad Hubbard wrote:
-> On Thu, Mar 16, 2017 at 4:33 PM, nokia ceph <nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> > Hello Brad,
-> >
-> > I meant for this parameter bdev_aio_max_queue_depth , Sage suggested try
-> > diff values, 128,1024 , 4096 . So my doubt how this calculation happens? Is
-> > this  related to memory?
-> 
-> The bdev_aio_max_queue_depth parameter represents the nr_events
-> argument to the libaio io_setup function.
-> 
-> int io_setup(unsigned nr_events, aio_context_t *ctx_idp);
-> 
-> From the man page for io_setup:
-> 
-> "The io_setup() system call creates an asynchronous I/O context
-> suitable for concurrently processing nr_events operations."
-> 
-> The current theory we are working with is that io_submit is returning
-> EAGAIN because nr_events is too small at the default of 32. Therefore
-> we have suggested raising this value. There is no real calculation
-> involved in the values Sage is suggesting other than they are
-> *larger*. It's a matter of playing with the value to see if, and when,
-> the error messages go away. If we know a larger value reduces or
-> eradicates the error we can then turn our focus more to *why*. Longer
-> term this can assist us in setting a more reasonable default.
+On Mar 15, 2017, David Zafman <dzafman@redhat.com> wrote:
 
-One nuance is that small values are equivalent because the kernel 
-apparently rounds up to a page size-aligned buffer full of struct iocb's 
-(or whatever the kernel equivalent is).  My guess is that we want a 
-default that equates to 2 or 4 pages instead of 1 page.
+> If it applies cleanly
 
-We do lots of testing of the same kernel in the lab; I'm adding an item to 
-my list to look for these messages in our logs too.  FWIW, as long as the 
-retry is succeeding this is pretty harmless (we're basic just limiting the 
-depth of the io queue at the kernel and device to some probably-reasoanble 
-value).  My curiousity here is somewhat academic.  :)
+It did when I created it.  As I said, I won't have time to look into
+this in the short term (that's why it took me so long to post it to
+begin with, and why I posted it in spite of known problems).
+
+> base your code off of current jewel and specify
+> any commits that needs to be cherry-picked so I can pull them in.
+
+According to my logs, the commits I cherry-picked, that I referenced by
+issue, were:
+
+82f5cc63404ce9f680d714fc85148946f2b2c376 (your patch for 13937)
+(cherry picked from commit c51d70e1e837c972e42ddd5fa66f7ca4477b95cc)
+
+b3224a18f6acc7ed54c2162b140a33b6146a16be (Kefu Chai's patch for 17857)
+
+> Otherwise, create a pull request yourself.
+
+I don't think I can do that.  The proprietary web interface with which
+these things are done doesn't work for me.
+
+> Or push it all to the main ceph repo and giving me a branch name.
+
+I don't have permission to push to the main ceph repo AFAIK, but I'd be
+glad to do that if I did.  Just probably not before the end of the
+month; I'm very pressed for time, and I'll be mostly offline, till then.
+
+I hope this is enough to get you going.
 
 Thanks!
-sage
+
+> On 3/15/17 1:13 PM, Alexandre Oliva wrote:
+>> On Mar 10, 2017, David Zafman <dzafman@redhat.com> wrote:
+>> 
+>>> I can't apply your patch because sha1 e3eb1fd isn't in the ceph
+>>> repo
+>> That's no surprise; that's the result of my cherry-picking the two
+>> patches I listed as dependencies of mine.
+>> 
+>>> and it won't apply cleanly.
+>> Do you have those two patches in the tree?  (see the first quoted
+>> paragraph below)
+>> 
+>> I recall one of them was already in jewel or jewel-next when I picked it
+>> up, some time in December or so, but the other wasn't yet.
+>> 
+>> Anyway, if you do have the two deps, maybe I'll have to rebase.  Just
+>> let me know the target and I'll try to take care of it.  I was targeting
+>> the jewel branch, but I see I failed to make that explicit in my email.
+>> Sorry about that.
+>> 
+>>> On 3/7/17 9:33 AM, Alexandre Oliva wrote:
+>>>> Having applied David Zafman's patch for 13937 and Kefu Chai's for 17857,
+>>>> I still hit the problem described in issue 18162.  This mostly fixes it.
+>>>> There are still remaining known problems:
 
 
-> 
-> >
-> > Thanks
-> >
-> >
-> >
-> >
-> > On Thu, Mar 16, 2017 at 11:53 AM, Brad Hubbard <bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> >>
-> >> On Thu, Mar 16, 2017 at 4:15 PM, nokia ceph <nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> >> wrote:
-> >> > Hello,
-> >> >
-> >> > We are running latest kernel - 3.10.0-514.2.2.el7.x86_64 { RHEL 7.3 }
-> >> >
-> >> > Sure I will try to alter this directive - bdev_aio_max_queue_depth and
-> >> > will
-> >> > share our results.
-> >> >
-> >> > Could you please explain how this calculation happens?
-> >>
-> >> What calculation are you referring to?
-> >>
-> >> > Thanks
-> >> >
-> >> >
-> >> > On Wed, Mar 15, 2017 at 7:54 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> >> >>
-> >> >> On Wed, 15 Mar 2017, Brad Hubbard wrote:
-> >> >> > +ceph-devel
-> >> >> >
-> >> >> > On Wed, Mar 15, 2017 at 5:25 PM, nokia ceph
-> >> >> > <nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> >> >> > wrote:
-> >> >> > > Hello,
-> >> >> > >
-> >> >> > > We suspect these messages not only at the time of OSD creation. But
-> >> >> > > in
-> >> >> > > idle
-> >> >> > > conditions also. May I know what is the impact of these error? Can
-> >> >> > > we
-> >> >> > > safely
-> >> >> > > ignore this? Or is there any way/config to fix this problem
-> >> >> > >
-> >> >> > > Few occurrence for these events as follows:---
-> >> >> > >
-> >> >> > > ====
-> >> >> > > 2017-03-14 17:16:09.500370 7fedeba61700  4 rocksdb: (Original Log
-> >> >> > > Time
-> >> >> > > 2017/03/14-17:16:09.453130) [default] Level-0 commit table #60
-> >> >> > > started
-> >> >> > > 2017-03-14 17:16:09.500374 7fedeba61700  4 rocksdb: (Original Log
-> >> >> > > Time
-> >> >> > > 2017/03/14-17:16:09.500273) [default] Level-0 commit table #60:
-> >> >> > > memtable #1
-> >> >> > > done
-> >> >> > > 2017-03-14 17:16:09.500376 7fedeba61700  4 rocksdb: (Original Log
-> >> >> > > Time
-> >> >> > > 2017/03/14-17:16:09.500297) EVENT_LOG_v1 {"time_micros":
-> >> >> > > 1489511769500289,
-> >> >> > > "job": 17, "event": "flush_finished", "lsm_state": [2, 4, 6, 0, 0,
-> >> >> > > 0,
-> >> >> > > 0],
-> >> >> > > "immutable_memtables": 0}
-> >> >> > > 2017-03-14 17:16:09.500382 7fedeba61700  4 rocksdb: (Original Log
-> >> >> > > Time
-> >> >> > > 2017/03/14-17:16:09.500330) [default] Level summary: base level 1
-> >> >> > > max
-> >> >> > > bytes
-> >> >> > > base 268435456 files[2 4 6 0 0 0 0] max score 0.76
-> >> >> > >
-> >> >> > > 2017-03-14 17:16:09.500390 7fedeba61700  4 rocksdb: [JOB 17] Try to
-> >> >> > > delete
-> >> >> > > WAL files size 244090350, prev total WAL file size 247331500,
-> >> >> > > number
-> >> >> > > of live
-> >> >> > > WAL files 2.
-> >> >> > >
-> >> >> > > 2017-03-14 17:34:11.610513 7fedf3a71700 -1
-> >> >> > > bdev(/var/lib/ceph/osd/ceph-73/block) aio_submit retries 6
-> >> >> >
-> >> >> > These errors come from here.
-> >> >> >
-> >> >> > void KernelDevice::aio_submit(IOContext *ioc)
-> >> >> > {
-> >> >> > ...
-> >> >> >     int r = aio_queue.submit(*cur, &retries);
-> >> >> >     if (retries)
-> >> >> >       derr << __func__ << " retries " << retries << dendl;
-> >> >> >
-> >> >> > The submit function is this one which calls libaio's io_submit
-> >> >> > function directly and increments retries if it receives EAGAIN.
-> >> >> >
-> >> >> > #if defined(HAVE_LIBAIO)
-> >> >> > int FS::aio_queue_t::submit(aio_t &aio, int *retries)
-> >> >> > {
-> >> >> >   // 2^16 * 125us = ~8 seconds, so max sleep is ~16 seconds
-> >> >> >   int attempts = 16;
-> >> >> >   int delay = 125;
-> >> >> >   iocb *piocb = &aio.iocb;
-> >> >> >   while (true) {
-> >> >> >     int r = io_submit(ctx, 1, &piocb);     <-------------NOTE
-> >> >> >     if (r < 0) {
-> >> >> >       if (r == -EAGAIN && attempts-- > 0) {     <-------------NOTE
-> >> >> >         usleep(delay);
-> >> >> >         delay *= 2;
-> >> >> >         (*retries)++;
-> >> >> >         continue;
-> >> >> >       }
-> >> >> >       return r;
-> >> >> >     }
-> >> >> >     assert(r == 1);
-> >> >> >     break;
-> >> >> >   }
-> >> >> >   return 0;
-> >> >> > }
-> >> >> >
-> >> >> >
-> >> >> > From the man page.
-> >> >> >
-> >> >> > IO_SUBMIT(2)                                   Linux Programmer's
-> >> >> > Manual                                  IO_SUBMIT(2)
-> >> >> >
-> >> >> > NAME
-> >> >> >        io_submit - submit asynchronous I/O blocks for processing
-> >> >> > ...
-> >> >> > RETURN VALUE
-> >> >> >        On success, io_submit() returns the number of iocbs submitted
-> >> >> > (which may be 0 if nr is zero).  For the  failure
-> >> >> >        return, see NOTES.
-> >> >> >
-> >> >> > ERRORS
-> >> >> >        EAGAIN Insufficient resources are available to queue any
-> >> >> > iocbs.
-> >> >> >
-> >> >> > I suspect increasing bdev_aio_max_queue_depth may help here but some
-> >> >> > of the other devs may have more/better ideas.
-> >> >>
-> >> >> Yes--try increasing bdev_aio_max_queue_depth.  It defaults to 32; try
-> >> >> changing it to 128, 1024, or 4096 and see if these errors go away.
-> >> >>
-> >> >> I've never been able to trigger this on my test boxes, but I put in the
-> >> >> warning to help ensure we pick a good default.
-> >> >>
-> >> >> What kernel version are you running?
-> >> >>
-> >> >> Thanks!
-> >> >> sage
-> >> >
-> >> >
-> >>
-> >>
-> >>
-> >> --
-> >> Cheers,
-> >> Brad
-> >
-> >
-> 
-> 
-> 
-> -- 
-> Cheers,
-> Brad
-> 
-> 
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist|Red Hat Brasil GNU Toolchain Engineer
