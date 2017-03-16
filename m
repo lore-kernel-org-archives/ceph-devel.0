@@ -1,505 +1,477 @@
-From: nokia ceph <nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Log message -->
- "bdev(/var/lib/ceph/osd/ceph-x/block) aio_submit retries"
-Date: Thu, 16 Mar 2017 12:49:50 +0530
-Message-ID: <CALWuvY8dh300sgicpfGsj57kt9nbO0teDe2cgGwjbJJ2nQYykQ@mail.gmail.com>
-References: <CALWuvY8dEyWiUxg9VDaMkfQGwPSsWG0adrtzvGa9k7fhNmdsGw@mail.gmail.com>
-	<CALWuvY9wY08n2AE9HMfZgZCU9ZEtk2XOwa353_stxT-7x7L30A@mail.gmail.com>
-	<CALWuvY_9uWE_DKg5UaYZrc_GchfMK1EpX1rkWrJEuAV+Y3+Uww@mail.gmail.com>
-	<CAF-wwdFvgzkYMnkheomsWMikZoZU+THyrxzovORx3bCDfPZ7Ng@mail.gmail.com>
-	<alpine.DEB.2.11.1703151422110.10776@piezo.novalocal>
-	<CALWuvY8f1j9_ccbzrchfdhZ66RYDTqRuL2A2qy9XFHTARitPBQ@mail.gmail.com>
-	<CAF-wwdGBF5yDMOpdxm0S5fXcYYt94LaEiAXw8qXT2g66pB30xg@mail.gmail.com>
-	<CALWuvY-m4JyaohTJCfzeC==CnfJ2cGK1n8P+49pS65u5n8hnfQ@mail.gmail.com>
-	<CAF-wwdGHgO6etLromGd_5-UTBFmXD1JeOAiX_eFDB8z7bXZJ6A@mail.gmail.com>
+From: scan-admin@coverity.com
+Subject: New Defects reported by Coverity Scan for ceph
+Date: Thu, 16 Mar 2017 00:37:15 -0700
+Message-ID: <58ca40ab4f062_29df12f732070285@ss1435.mail>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1245900204=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAF-wwdGHgO6etLromGd_5-UTBFmXD1JeOAiX_eFDB8z7bXZJ6A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Brad Hubbard <bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============1245900204==
-Content-Type: multipart/alternative; boundary=001a113d469e0929b9054ad3e30c
-
---001a113d469e0929b9054ad3e30c
-Content-Type: text/plain; charset=UTF-8
-
-Sounds good :), Brad many thanks for the explanation .
-
-On Thu, Mar 16, 2017 at 12:42 PM, Brad Hubbard <bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-
-> On Thu, Mar 16, 2017 at 4:33 PM, nokia ceph <nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> wrote:
-> > Hello Brad,
-> >
-> > I meant for this parameter bdev_aio_max_queue_depth , Sage suggested try
-> > diff values, 128,1024 , 4096 . So my doubt how this calculation happens?
-> Is
-> > this  related to memory?
->
-> The bdev_aio_max_queue_depth parameter represents the nr_events
-> argument to the libaio io_setup function.
->
-> int io_setup(unsigned nr_events, aio_context_t *ctx_idp);
->
-> From the man page for io_setup:
->
-> "The io_setup() system call creates an asynchronous I/O context
-> suitable for concurrently processing nr_events operations."
->
-> The current theory we are working with is that io_submit is returning
-> EAGAIN because nr_events is too small at the default of 32. Therefore
-> we have suggested raising this value. There is no real calculation
-> involved in the values Sage is suggesting other than they are
-> *larger*. It's a matter of playing with the value to see if, and when,
-> the error messages go away. If we know a larger value reduces or
-> eradicates the error we can then turn our focus more to *why*. Longer
-> term this can assist us in setting a more reasonable default.
->
-> >
-> > Thanks
-> >
-> >
-> >
-> >
-> > On Thu, Mar 16, 2017 at 11:53 AM, Brad Hubbard <bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> wrote:
-> >>
-> >> On Thu, Mar 16, 2017 at 4:15 PM, nokia ceph <nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> >> wrote:
-> >> > Hello,
-> >> >
-> >> > We are running latest kernel - 3.10.0-514.2.2.el7.x86_64 { RHEL 7.3 }
-> >> >
-> >> > Sure I will try to alter this directive - bdev_aio_max_queue_depth and
-> >> > will
-> >> > share our results.
-> >> >
-> >> > Could you please explain how this calculation happens?
-> >>
-> >> What calculation are you referring to?
-> >>
-> >> > Thanks
-> >> >
-> >> >
-> >> > On Wed, Mar 15, 2017 at 7:54 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> >> >>
-> >> >> On Wed, 15 Mar 2017, Brad Hubbard wrote:
-> >> >> > +ceph-devel
-> >> >> >
-> >> >> > On Wed, Mar 15, 2017 at 5:25 PM, nokia ceph
-> >> >> > <nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> >> >> > wrote:
-> >> >> > > Hello,
-> >> >> > >
-> >> >> > > We suspect these messages not only at the time of OSD creation.
-> But
-> >> >> > > in
-> >> >> > > idle
-> >> >> > > conditions also. May I know what is the impact of these error?
-> Can
-> >> >> > > we
-> >> >> > > safely
-> >> >> > > ignore this? Or is there any way/config to fix this problem
-> >> >> > >
-> >> >> > > Few occurrence for these events as follows:---
-> >> >> > >
-> >> >> > > ====
-> >> >> > > 2017-03-14 17:16:09.500370 7fedeba61700  4 rocksdb: (Original Log
-> >> >> > > Time
-> >> >> > > 2017/03/14-17:16:09.453130) [default] Level-0 commit table #60
-> >> >> > > started
-> >> >> > > 2017-03-14 17:16:09.500374 7fedeba61700  4 rocksdb: (Original Log
-> >> >> > > Time
-> >> >> > > 2017/03/14-17:16:09.500273) [default] Level-0 commit table #60:
-> >> >> > > memtable #1
-> >> >> > > done
-> >> >> > > 2017-03-14 17:16:09.500376 7fedeba61700  4 rocksdb: (Original Log
-> >> >> > > Time
-> >> >> > > 2017/03/14-17:16:09.500297) EVENT_LOG_v1 {"time_micros":
-> >> >> > > 1489511769500289,
-> >> >> > > "job": 17, "event": "flush_finished", "lsm_state": [2, 4, 6, 0,
-> 0,
-> >> >> > > 0,
-> >> >> > > 0],
-> >> >> > > "immutable_memtables": 0}
-> >> >> > > 2017-03-14 17:16:09.500382 7fedeba61700  4 rocksdb: (Original Log
-> >> >> > > Time
-> >> >> > > 2017/03/14-17:16:09.500330) [default] Level summary: base level 1
-> >> >> > > max
-> >> >> > > bytes
-> >> >> > > base 268435456 files[2 4 6 0 0 0 0] max score 0.76
-> >> >> > >
-> >> >> > > 2017-03-14 17:16:09.500390 7fedeba61700  4 rocksdb: [JOB 17] Try
-> to
-> >> >> > > delete
-> >> >> > > WAL files size 244090350, prev total WAL file size 247331500,
-> >> >> > > number
-> >> >> > > of live
-> >> >> > > WAL files 2.
-> >> >> > >
-> >> >> > > 2017-03-14 17:34:11.610513 7fedf3a71700 -1
-> >> >> > > bdev(/var/lib/ceph/osd/ceph-73/block) aio_submit retries 6
-> >> >> >
-> >> >> > These errors come from here.
-> >> >> >
-> >> >> > void KernelDevice::aio_submit(IOContext *ioc)
-> >> >> > {
-> >> >> > ...
-> >> >> >     int r = aio_queue.submit(*cur, &retries);
-> >> >> >     if (retries)
-> >> >> >       derr << __func__ << " retries " << retries << dendl;
-> >> >> >
-> >> >> > The submit function is this one which calls libaio's io_submit
-> >> >> > function directly and increments retries if it receives EAGAIN.
-> >> >> >
-> >> >> > #if defined(HAVE_LIBAIO)
-> >> >> > int FS::aio_queue_t::submit(aio_t &aio, int *retries)
-> >> >> > {
-> >> >> >   // 2^16 * 125us = ~8 seconds, so max sleep is ~16 seconds
-> >> >> >   int attempts = 16;
-> >> >> >   int delay = 125;
-> >> >> >   iocb *piocb = &aio.iocb;
-> >> >> >   while (true) {
-> >> >> >     int r = io_submit(ctx, 1, &piocb);     <-------------NOTE
-> >> >> >     if (r < 0) {
-> >> >> >       if (r == -EAGAIN && attempts-- > 0) {     <-------------NOTE
-> >> >> >         usleep(delay);
-> >> >> >         delay *= 2;
-> >> >> >         (*retries)++;
-> >> >> >         continue;
-> >> >> >       }
-> >> >> >       return r;
-> >> >> >     }
-> >> >> >     assert(r == 1);
-> >> >> >     break;
-> >> >> >   }
-> >> >> >   return 0;
-> >> >> > }
-> >> >> >
-> >> >> >
-> >> >> > From the man page.
-> >> >> >
-> >> >> > IO_SUBMIT(2)                                   Linux Programmer's
-> >> >> > Manual                                  IO_SUBMIT(2)
-> >> >> >
-> >> >> > NAME
-> >> >> >        io_submit - submit asynchronous I/O blocks for processing
-> >> >> > ...
-> >> >> > RETURN VALUE
-> >> >> >        On success, io_submit() returns the number of iocbs
-> submitted
-> >> >> > (which may be 0 if nr is zero).  For the  failure
-> >> >> >        return, see NOTES.
-> >> >> >
-> >> >> > ERRORS
-> >> >> >        EAGAIN Insufficient resources are available to queue any
-> >> >> > iocbs.
-> >> >> >
-> >> >> > I suspect increasing bdev_aio_max_queue_depth may help here but
-> some
-> >> >> > of the other devs may have more/better ideas.
-> >> >>
-> >> >> Yes--try increasing bdev_aio_max_queue_depth.  It defaults to 32; try
-> >> >> changing it to 128, 1024, or 4096 and see if these errors go away.
-> >> >>
-> >> >> I've never been able to trigger this on my test boxes, but I put in
-> the
-> >> >> warning to help ensure we pick a good default.
-> >> >>
-> >> >> What kernel version are you running?
-> >> >>
-> >> >> Thanks!
-> >> >> sage
-> >> >
-> >> >
-> >>
-> >>
-> >>
-> >> --
-> >> Cheers,
-> >> Brad
-> >
-> >
->
->
->
-> --
-> Cheers,
-> Brad
->
-
---001a113d469e0929b9054ad3e30c
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Sounds good :), Brad many thanks for the explanation .</di=
-v><div class=3D"gmail_extra"><br><div class=3D"gmail_quote">On Thu, Mar 16,=
- 2017 at 12:42 PM, Brad Hubbard <span dir=3D"ltr">&lt;<a href=3D"mailto:bhu=
-bbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" target=3D"_blank">bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;</span> wrot=
-e:<br><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-l=
-eft:1px #ccc solid;padding-left:1ex"><span class=3D"">On Thu, Mar 16, 2017 =
-at 4:33 PM, nokia ceph &lt;<a href=3D"mailto:nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">noki=
-acephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br>
-&gt; Hello Brad,<br>
-&gt;<br>
-&gt; I meant for this parameter bdev_aio_max_queue_depth , Sage suggested t=
-ry<br>
-&gt; diff values, 128,1024 , 4096 . So my doubt how this calculation happen=
-s? Is<br>
-&gt; this=C2=A0 related to memory?<br>
-<br>
-</span>The bdev_aio_max_queue_depth parameter represents the nr_events<br>
-argument to the libaio io_setup function.<br>
-<br>
-int io_setup(unsigned nr_events, aio_context_t *ctx_idp);<br>
-<br>
-From the man page for io_setup:<br>
-<br>
-&quot;The io_setup() system call creates an asynchronous I/O context<br>
-suitable for concurrently processing nr_events operations.&quot;<br>
-<br>
-The current theory we are working with is that io_submit is returning<br>
-EAGAIN because nr_events is too small at the default of 32. Therefore<br>
-we have suggested raising this value. There is no real calculation<br>
-involved in the values Sage is suggesting other than they are<br>
-*larger*. It&#39;s a matter of playing with the value to see if, and when,<=
-br>
-the error messages go away. If we know a larger value reduces or<br>
-eradicates the error we can then turn our focus more to *why*. Longer<br>
-term this can assist us in setting a more reasonable default.<br>
-<div class=3D"HOEnZb"><div class=3D"h5"><br>
-&gt;<br>
-&gt; Thanks<br>
-&gt;<br>
-&gt;<br>
-&gt;<br>
-&gt;<br>
-&gt; On Thu, Mar 16, 2017 at 11:53 AM, Brad Hubbard &lt;<a href=3D"mailto:b=
-hubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:<br>
-&gt;&gt;<br>
-&gt;&gt; On Thu, Mar 16, 2017 at 4:15 PM, nokia ceph &lt;<a href=3D"mailto:=
-nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;<br>
-&gt;&gt; wrote:<br>
-&gt;&gt; &gt; Hello,<br>
-&gt;&gt; &gt;<br>
-&gt;&gt; &gt; We are running latest kernel - 3.10.0-514.2.2.el7.x86_64 { RH=
-EL 7.3 }<br>
-&gt;&gt; &gt;<br>
-&gt;&gt; &gt; Sure I will try to alter this directive - bdev_aio_max_queue_=
-depth and<br>
-&gt;&gt; &gt; will<br>
-&gt;&gt; &gt; share our results.<br>
-&gt;&gt; &gt;<br>
-&gt;&gt; &gt; Could you please explain how this calculation happens?<br>
-&gt;&gt;<br>
-&gt;&gt; What calculation are you referring to?<br>
-&gt;&gt;<br>
-&gt;&gt; &gt; Thanks<br>
-&gt;&gt; &gt;<br>
-&gt;&gt; &gt;<br>
-&gt;&gt; &gt; On Wed, Mar 15, 2017 at 7:54 PM, Sage Weil &lt;<a href=3D"mai=
-lto:sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org">sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org</a>&gt; wrote:<br>
-&gt;&gt; &gt;&gt;<br>
-&gt;&gt; &gt;&gt; On Wed, 15 Mar 2017, Brad Hubbard wrote:<br>
-&gt;&gt; &gt;&gt; &gt; +ceph-devel<br>
-&gt;&gt; &gt;&gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; On Wed, Mar 15, 2017 at 5:25 PM, nokia ceph<br>
-&gt;&gt; &gt;&gt; &gt; &lt;<a href=3D"mailto:nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">noki=
-acephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt;<br>
-&gt;&gt; &gt;&gt; &gt; wrote:<br>
-&gt;&gt; &gt;&gt; &gt; &gt; Hello,<br>
-&gt;&gt; &gt;&gt; &gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; &gt; We suspect these messages not only at the time =
-of OSD creation. But<br>
-&gt;&gt; &gt;&gt; &gt; &gt; in<br>
-&gt;&gt; &gt;&gt; &gt; &gt; idle<br>
-&gt;&gt; &gt;&gt; &gt; &gt; conditions also. May I know what is the impact =
-of these error? Can<br>
-&gt;&gt; &gt;&gt; &gt; &gt; we<br>
-&gt;&gt; &gt;&gt; &gt; &gt; safely<br>
-&gt;&gt; &gt;&gt; &gt; &gt; ignore this? Or is there any way/config to fix =
-this problem<br>
-&gt;&gt; &gt;&gt; &gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; &gt; Few occurrence for these events as follows:---<=
-br>
-&gt;&gt; &gt;&gt; &gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; &gt; =3D=3D=3D=3D<br>
-&gt;&gt; &gt;&gt; &gt; &gt; 2017-03-14 17:16:09.500370 7fedeba61700=C2=A0 4=
- rocksdb: (Original Log<br>
-&gt;&gt; &gt;&gt; &gt; &gt; Time<br>
-&gt;&gt; &gt;&gt; &gt; &gt; 2017/03/14-17:16:09.453130) [default] Level-0 c=
-ommit table #60<br>
-&gt;&gt; &gt;&gt; &gt; &gt; started<br>
-&gt;&gt; &gt;&gt; &gt; &gt; 2017-03-14 17:16:09.500374 7fedeba61700=C2=A0 4=
- rocksdb: (Original Log<br>
-&gt;&gt; &gt;&gt; &gt; &gt; Time<br>
-&gt;&gt; &gt;&gt; &gt; &gt; 2017/03/14-17:16:09.500273) [default] Level-0 c=
-ommit table #60:<br>
-&gt;&gt; &gt;&gt; &gt; &gt; memtable #1<br>
-&gt;&gt; &gt;&gt; &gt; &gt; done<br>
-&gt;&gt; &gt;&gt; &gt; &gt; 2017-03-14 17:16:09.500376 7fedeba61700=C2=A0 4=
- rocksdb: (Original Log<br>
-&gt;&gt; &gt;&gt; &gt; &gt; Time<br>
-&gt;&gt; &gt;&gt; &gt; &gt; 2017/03/14-17:16:09.500297) EVENT_LOG_v1 {&quot=
-;time_micros&quot;:<br>
-&gt;&gt; &gt;&gt; &gt; &gt; 1489511769500289,<br>
-&gt;&gt; &gt;&gt; &gt; &gt; &quot;job&quot;: 17, &quot;event&quot;: &quot;f=
-lush_finished&quot;, &quot;lsm_state&quot;: [2, 4, 6, 0, 0,<br>
-&gt;&gt; &gt;&gt; &gt; &gt; 0,<br>
-&gt;&gt; &gt;&gt; &gt; &gt; 0],<br>
-&gt;&gt; &gt;&gt; &gt; &gt; &quot;immutable_memtables&quot;: 0}<br>
-&gt;&gt; &gt;&gt; &gt; &gt; 2017-03-14 17:16:09.500382 7fedeba61700=C2=A0 4=
- rocksdb: (Original Log<br>
-&gt;&gt; &gt;&gt; &gt; &gt; Time<br>
-&gt;&gt; &gt;&gt; &gt; &gt; 2017/03/14-17:16:09.500330) [default] Level sum=
-mary: base level 1<br>
-&gt;&gt; &gt;&gt; &gt; &gt; max<br>
-&gt;&gt; &gt;&gt; &gt; &gt; bytes<br>
-&gt;&gt; &gt;&gt; &gt; &gt; base 268435456 files[2 4 6 0 0 0 0] max score 0=
-.76<br>
-&gt;&gt; &gt;&gt; &gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; &gt; 2017-03-14 17:16:09.500390 7fedeba61700=C2=A0 4=
- rocksdb: [JOB 17] Try to<br>
-&gt;&gt; &gt;&gt; &gt; &gt; delete<br>
-&gt;&gt; &gt;&gt; &gt; &gt; WAL files size 244090350, prev total WAL file s=
-ize 247331500,<br>
-&gt;&gt; &gt;&gt; &gt; &gt; number<br>
-&gt;&gt; &gt;&gt; &gt; &gt; of live<br>
-&gt;&gt; &gt;&gt; &gt; &gt; WAL files 2.<br>
-&gt;&gt; &gt;&gt; &gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; &gt; 2017-03-14 17:34:11.610513 7fedf3a71700 -1<br>
-&gt;&gt; &gt;&gt; &gt; &gt; bdev(/var/lib/ceph/osd/ceph-<wbr>73/block) aio_=
-submit retries 6<br>
-&gt;&gt; &gt;&gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; These errors come from here.<br>
-&gt;&gt; &gt;&gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; void KernelDevice::aio_submit(<wbr>IOContext *ioc)<b=
-r>
-&gt;&gt; &gt;&gt; &gt; {<br>
-&gt;&gt; &gt;&gt; &gt; ...<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0int r =3D aio_queue.submit(*cur, =
-&amp;retries);<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0if (retries)<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0derr &lt;&lt; __func__ &lt=
-;&lt; &quot; retries &quot; &lt;&lt; retries &lt;&lt; dendl;<br>
-&gt;&gt; &gt;&gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; The submit function is this one which calls libaio&#=
-39;s io_submit<br>
-&gt;&gt; &gt;&gt; &gt; function directly and increments retries if it recei=
-ves EAGAIN.<br>
-&gt;&gt; &gt;&gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; #if defined(HAVE_LIBAIO)<br>
-&gt;&gt; &gt;&gt; &gt; int FS::aio_queue_t::submit(aio_t &amp;aio, int *ret=
-ries)<br>
-&gt;&gt; &gt;&gt; &gt; {<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0// 2^16 * 125us =3D ~8 seconds, so max s=
-leep is ~16 seconds<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0int attempts =3D 16;<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0int delay =3D 125;<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0iocb *piocb =3D &amp;aio.iocb;<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0while (true) {<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0int r =3D io_submit(ctx, 1, &amp;=
-piocb);=C2=A0 =C2=A0 =C2=A0&lt;-------------NOTE<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0if (r &lt; 0) {<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0if (r =3D=3D -EAGAIN &amp;=
-&amp; attempts-- &gt; 0) {=C2=A0 =C2=A0 =C2=A0&lt;-------------NOTE<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0usleep(delay);<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0delay *=3D 2;<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0(*retries)++;<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0continue;<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0}<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0return r;<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0}<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0assert(r =3D=3D 1);<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0break;<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0}<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0return 0;<br>
-&gt;&gt; &gt;&gt; &gt; }<br>
-&gt;&gt; &gt;&gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; From the man page.<br>
-&gt;&gt; &gt;&gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; IO_SUBMIT(2)=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
-=C2=A0 =C2=A0Linux Programmer&#39;s<br>
-&gt;&gt; &gt;&gt; &gt; Manual=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 I=
-O_SUBMIT(2)<br>
-&gt;&gt; &gt;&gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; NAME<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 io_submit - submit asynch=
-ronous I/O blocks for processing<br>
-&gt;&gt; &gt;&gt; &gt; ...<br>
-&gt;&gt; &gt;&gt; &gt; RETURN VALUE<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 On success, io_submit() r=
-eturns the number of iocbs submitted<br>
-&gt;&gt; &gt;&gt; &gt; (which may be 0 if nr is zero).=C2=A0 For the=C2=A0 =
-failure<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 return, see NOTES.<br>
-&gt;&gt; &gt;&gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; ERRORS<br>
-&gt;&gt; &gt;&gt; &gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 EAGAIN Insufficient resou=
-rces are available to queue any<br>
-&gt;&gt; &gt;&gt; &gt; iocbs.<br>
-&gt;&gt; &gt;&gt; &gt;<br>
-&gt;&gt; &gt;&gt; &gt; I suspect increasing bdev_aio_max_queue_depth may he=
-lp here but some<br>
-&gt;&gt; &gt;&gt; &gt; of the other devs may have more/better ideas.<br>
-&gt;&gt; &gt;&gt;<br>
-&gt;&gt; &gt;&gt; Yes--try increasing bdev_aio_max_queue_depth.=C2=A0 It de=
-faults to 32; try<br>
-&gt;&gt; &gt;&gt; changing it to 128, 1024, or 4096 and see if these errors=
- go away.<br>
-&gt;&gt; &gt;&gt;<br>
-&gt;&gt; &gt;&gt; I&#39;ve never been able to trigger this on my test boxes=
-, but I put in the<br>
-&gt;&gt; &gt;&gt; warning to help ensure we pick a good default.<br>
-&gt;&gt; &gt;&gt;<br>
-&gt;&gt; &gt;&gt; What kernel version are you running?<br>
-&gt;&gt; &gt;&gt;<br>
-&gt;&gt; &gt;&gt; Thanks!<br>
-&gt;&gt; &gt;&gt; sage<br>
-&gt;&gt; &gt;<br>
-&gt;&gt; &gt;<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt;<br>
-&gt;&gt; --<br>
-&gt;&gt; Cheers,<br>
-&gt;&gt; Brad<br>
-&gt;<br>
-&gt;<br>
-<br>
-<br>
-<br>
-</div></div><span class=3D"HOEnZb"><font color=3D"#888888">--<br>
-Cheers,<br>
-Brad<br>
-</font></span></blockquote></div><br></div>
-
---001a113d469e0929b9054ad3e30c--
-
---===============1245900204==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
+Content-Type: text/plain;
+ charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from o1.24nn.shared.sendgrid.net ([167.89.100.237]:6317 "EHLO
+        o1.24nn.shared.sendgrid.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751874AbdCPHhR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 16 Mar 2017 03:37:17 -0400
+Received: from coverity.com (static-208.69.177.245.nephosdns.com [208.69.177.245])
+        by ismtpd0001p1sjc2.sendgrid.net (SG) with ESMTP id szBv7wjeRXS9vhKmQZbWkg
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Mar 2017 07:37:15.411 +0000 (UTC)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============1245900204==--
+Hi,
+
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+
+38 new defect(s) introduced to ceph found with Coverity Scan.
+9 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+
+New defect(s) Reported-by: Coverity Scan
+Showing 20 of 38 defect(s)
+
+
+** CID 1351753:  Memory - illegal accesses  (WRAPPER_ESCAPE)
+/home/brad/working/src/ceph/src/rgw/rgw_op.cc: 1238 in RGWGetObj::handle_slo_manifest(ceph::buffer::list &)()
+
+
+________________________________________________________________________________________________________
+*** CID 1351753:  Memory - illegal accesses  (WRAPPER_ESCAPE)
+/home/brad/working/src/ceph/src/rgw/rgw_op.cc: 1238 in RGWGetObj::handle_slo_manifest(ceph::buffer::list &)()
+1232             if (r < 0) {
+1233               ldout(s->cct, 0) << "failed to read bucket policy for bucket "
+1234                                << bucket << dendl;
+1235               return r;
+1236             }
+1237             buckets[bucket_name] = bucket;
+>>>     CID 1351753:  Memory - illegal accesses  (WRAPPER_ESCAPE)
+>>>     "bucket_policy" escapes into "policies[bucket_name]", but is a copy of an internal representation that is destroyed when it exits scope.
+1238             policies[bucket_name] = bucket_policy;
+1239           }
+1240         } else {
+1241           bucket = s->bucket;
+1242           bucket_policy = s->bucket_acl;
+1243         }
+
+** CID 1402598:  Security best practices violations  (DC.WEAK_CRYPTO)
+/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 1584 in fix_zone_pool_dup(std::set<rgw_pool, std::less<rgw_pool>, std::allocator<rgw_pool>>, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const rgw_pool &)()
+
+
+________________________________________________________________________________________________________
+*** CID 1402598:  Security best practices violations  (DC.WEAK_CRYPTO)
+/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 1584 in fix_zone_pool_dup(std::set<rgw_pool, std::less<rgw_pool>, std::allocator<rgw_pool>>, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, const rgw_pool &)()
+1578       rgw_pool pool(prefix + suffix);
+1579       
+1580       if (pools.find(pool) == pools.end()) {
+1581         return pool;
+1582       } else {
+1583         while(true) {
+>>>     CID 1402598:  Security best practices violations  (DC.WEAK_CRYPTO)
+>>>     "rand" should not be used for security related applications, as linear congruential algorithms are too easy to break.
+1584           pool =  prefix + "_" + std::to_string(std::rand()) + suffix;
+1585           if (pools.find(pool) == pools.end()) {
+1586     	return pool;
+1587           }
+1588         }
+1589       }  
+
+** CID 1402599:  Security best practices violations  (DC.WEAK_CRYPTO)
+/home/brad/working/src/ceph/src/librbd/api/Group.cc: 39 in librbd::api::Group<librbd::ImageCtx>::create(librados::IoCtx &, const char *)()
+
+
+________________________________________________________________________________________________________
+*** CID 1402599:  Security best practices violations  (DC.WEAK_CRYPTO)
+/home/brad/working/src/ceph/src/librbd/api/Group.cc: 39 in librbd::api::Group<librbd::ImageCtx>::create(librados::IoCtx &, const char *)()
+33     {
+34       CephContext *cct = (CephContext *)io_ctx.cct();
+35     
+36       Rados rados(io_ctx);
+37       uint64_t bid = rados.get_instance_id();
+38     
+>>>     CID 1402599:  Security best practices violations  (DC.WEAK_CRYPTO)
+>>>     "rand" should not be used for security related applications, as linear congruential algorithms are too easy to break.
+39       uint32_t extra = rand() % 0xFFFFFFFF;
+40       ostringstream bid_ss;
+41       bid_ss << std::hex << bid << std::hex << extra;
+42       string id = bid_ss.str();
+43     
+44       ldout(cct, 2) << "adding consistency group to directory..." << dendl;
+
+** CID 1402600:  Incorrect expression  (IDENTICAL_BRANCHES)
+/home/brad/working/src/ceph/src/librbd/Journal.cc: 471 in librbd::Journal<librbd::ImageCtx>::is_tag_owner(librados::IoCtx &, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, bool *, ContextWQ *)()
+
+
+________________________________________________________________________________________________________
+*** CID 1402600:  Incorrect expression  (IDENTICAL_BRANCHES)
+/home/brad/working/src/ceph/src/librbd/Journal.cc: 471 in librbd::Journal<librbd::ImageCtx>::is_tag_owner(librados::IoCtx &, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, bool *, ContextWQ *)()
+465     int Journal<I>::is_tag_owner(librados::IoCtx& io_ctx, std::string& image_id,
+466                                  bool *is_tag_owner, ContextWQ *op_work_queue) {
+467       C_SaferCond ctx;
+468       Journal<I>::is_tag_owner(io_ctx, image_id, is_tag_owner, op_work_queue, &ctx);
+469     
+470       int r = ctx.wait();
+>>>     CID 1402600:  Incorrect expression  (IDENTICAL_BRANCHES)
+>>>     The same code is executed when the condition "r < 0" is true or false, because the code in the if-then branch and after the if statement is identical. Should the if statement be removed?
+471       if (r < 0) {
+472         return r;
+473       }
+474       return r;
+475     }
+476     
+
+** CID 1402601:  Memory - corruptions  (OVERRUN)
+
+
+________________________________________________________________________________________________________
+*** CID 1402601:  Memory - corruptions  (OVERRUN)
+/home/brad/working/src/ceph/src/test/rgw/test_rgw_common.h: 50 in old_rgw_bucket::encode(ceph::buffer::list &) const()
+44         marker = "";
+45       }
+46       old_rgw_bucket(const char *t, const char *n, const char *dp, const char *ip, const char *m, const char *id, const char *h) :
+47         tenant(t), name(n), data_pool(dp), index_pool(ip), marker(m), bucket_id(id) {}
+48     
+49       void encode(bufferlist& bl) const {
+>>>     CID 1402601:  Memory - corruptions  (OVERRUN)
+>>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
+50          ENCODE_START(8, 3, bl);
+51         ::encode(name, bl);
+52         ::encode(data_pool, bl);
+53         ::encode(marker, bl);
+54         ::encode(bucket_id, bl);
+55         ::encode(index_pool, bl);
+
+** CID 1402602:  Memory - corruptions  (OVERRUN)
+
+
+________________________________________________________________________________________________________
+*** CID 1402602:  Memory - corruptions  (OVERRUN)
+/home/brad/working/src/ceph/src/test/rgw/test_rgw_common.h: 382 in old_rgw_obj::encode(ceph::buffer::list &) const()
+376     
+377       bool is_in_extra_data() const {
+378         return in_extra_data;
+379       }
+380     
+381       void encode(bufferlist& bl) const {
+>>>     CID 1402602:  Memory - corruptions  (OVERRUN)
+>>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
+382         ENCODE_START(5, 3, bl);
+383         ::encode(bucket.name, bl);
+384         ::encode(loc, bl);
+385         ::encode(ns, bl);
+386         ::encode(object, bl);
+387         ::encode(bucket, bl);
+
+** CID 1402603:  Memory - corruptions  (OVERRUN)
+
+
+________________________________________________________________________________________________________
+*** CID 1402603:  Memory - corruptions  (OVERRUN)
+/home/brad/working/src/ceph/src/test/rgw/test_rgw_manifest.cc: 42 in OldObjManifestPart::encode(ceph::buffer::list &) const()
+36       uint64_t loc_ofs;  /* the offset at that object where the data is located */
+37       uint64_t size;     /* the part size */
+38     
+39       OldObjManifestPart() : loc_ofs(0), size(0) {}
+40     
+41       void encode(bufferlist& bl) const {
+>>>     CID 1402603:  Memory - corruptions  (OVERRUN)
+>>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
+42         ENCODE_START(2, 2, bl);
+43         ::encode(loc, bl);
+44         ::encode(loc_ofs, bl);
+45         ::encode(size, bl);
+46         ENCODE_FINISH(bl);
+47       }
+
+** CID 1402604:  Memory - corruptions  (OVERRUN)
+
+
+________________________________________________________________________________________________________
+*** CID 1402604:  Memory - corruptions  (OVERRUN)
+/home/brad/working/src/ceph/src/test/rgw/test_rgw_manifest.cc: 89 in OldObjManifest::encode(ceph::buffer::list &) const()
+83       void append(uint64_t ofs, const OldObjManifestPart& part) {
+84         objs[ofs] = part;
+85         obj_size = max(obj_size, ofs + part.size);
+86       }
+87     
+88       void encode(bufferlist& bl) const {
+>>>     CID 1402604:  Memory - corruptions  (OVERRUN)
+>>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
+89         ENCODE_START(2, 2, bl);
+90         ::encode(obj_size, bl);
+91         ::encode(objs, bl);
+92         ENCODE_FINISH(bl);
+93       }
+94     
+
+** CID 1402605:  Memory - corruptions  (OVERRUN)
+
+
+________________________________________________________________________________________________________
+*** CID 1402605:  Memory - corruptions  (OVERRUN)
+/home/brad/working/src/ceph/src/rgw/rgw_common.h: 768 in rgw_pool::encode(ceph::buffer::list &) const()
+762           return r;
+763         }
+764         return ns.compare(p.ns);
+765       }
+766     
+767       void encode(bufferlist& bl) const {
+>>>     CID 1402605:  Memory - corruptions  (OVERRUN)
+>>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
+768          ENCODE_START(10, 10, bl);
+769         ::encode(name, bl);
+770         ::encode(ns, bl);
+771         ENCODE_FINISH(bl);
+772       }
+773     
+
+** CID 1402606:  Memory - corruptions  (OVERRUN)
+
+
+________________________________________________________________________________________________________
+*** CID 1402606:  Memory - corruptions  (OVERRUN)
+/home/brad/working/src/ceph/src/rgw/rgw_common.h: 875 in rgw_raw_obj::encode(ceph::buffer::list &) const()
+869     
+870       bool empty() const {
+871         return oid.empty();
+872       }
+873     
+874       void encode(bufferlist& bl) const {
+>>>     CID 1402606:  Memory - corruptions  (OVERRUN)
+>>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
+875          ENCODE_START(6, 6, bl);
+876         ::encode(pool, bl);
+877         ::encode(oid, bl);
+878         ::encode(loc, bl);
+879         ENCODE_FINISH(bl);
+880       }
+
+** CID 1402607:  Performance inefficiencies  (PASS_BY_VALUE)
+/boost/include/boost/function/function_template.hpp: 605 in boost::detail::function::basic_vtable1<void, int>::assign_to<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::detail::function::function_buffer &, boost::detail::function::function_obj_tag) const()
+
+
+________________________________________________________________________________________________________
+*** CID 1402607:  Performance inefficiencies  (PASS_BY_VALUE)
+/boost/include/boost/function/function_template.hpp: 605 in boost::detail::function::basic_vtable1<void, int>::assign_to<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::detail::function::function_buffer &, boost::detail::function::function_obj_tag) const()
+599               functor_wrapper_type* new_f = static_cast<functor_wrapper_type*>(copy);
+600               functor.members.obj_ptr = new_f;
+601             }
+602     
+603             template<typename FunctionObj>
+604             bool
+>>>     CID 1402607:  Performance inefficiencies  (PASS_BY_VALUE)
+>>>     Passing parameter f of type "librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]" (size 224 bytes) by value.
+605             assign_to(FunctionObj f, function_buffer& functor, function_obj_tag) const
+606             {
+607               if (!boost::detail::function::has_empty_target(boost::addressof(f))) {
+608                 assign_functor(f, functor,
+609                                mpl::bool_<(function_allows_small_object_optimization<FunctionObj>::value)>());
+610                 return true;
+
+** CID 1402608:  Performance inefficiencies  (PASS_BY_VALUE)
+/boost/include/boost/function/function_template.hpp: 584 in boost::detail::function::basic_vtable1<void, int>::assign_functor<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::detail::function::function_buffer &, mpl_::bool_<(bool)0>) const()
+
+
+________________________________________________________________________________________________________
+*** CID 1402608:  Performance inefficiencies  (PASS_BY_VALUE)
+/boost/include/boost/function/function_template.hpp: 584 in boost::detail::function::basic_vtable1<void, int>::assign_functor<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::detail::function::function_buffer &, mpl_::bool_<(bool)0>) const()
+578               assign_functor(f,functor,mpl::true_());
+579             }
+580     
+581             // Assign to a function object allocated on the heap.
+582             template<typename FunctionObj>
+583             void
+>>>     CID 1402608:  Performance inefficiencies  (PASS_BY_VALUE)
+>>>     Passing parameter f of type "librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]" (size 224 bytes) by value.
+584             assign_functor(FunctionObj f, function_buffer& functor, mpl::false_) const
+585             {
+586               functor.members.obj_ptr = new FunctionObj(f);
+587             }
+588             template<typename FunctionObj,typename Allocator>
+589             void
+
+** CID 1402609:  Performance inefficiencies  (PASS_BY_VALUE)
+/boost/include/boost/function/function_template.hpp: 718 in boost::function1<void, int>::function1<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::enable_if_c<(!(boost::is_integral<T1>::value)), int>::type)()
+
+
+________________________________________________________________________________________________________
+*** CID 1402609:  Performance inefficiencies  (PASS_BY_VALUE)
+/boost/include/boost/function/function_template.hpp: 718 in boost::function1<void, int>::function1<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::enable_if_c<(!(boost::is_integral<T1>::value)), int>::type)()
+712     
+713         BOOST_FUNCTION_FUNCTION() : function_base() { }
+714     
+715         // MSVC chokes if the following two constructors are collapsed into
+716         // one with a default parameter.
+717         template<typename Functor>
+>>>     CID 1402609:  Performance inefficiencies  (PASS_BY_VALUE)
+>>>     Passing parameter f of type "librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]" (size 224 bytes) by value.
+718         BOOST_FUNCTION_FUNCTION(Functor BOOST_FUNCTION_TARGET_FIX(const &) f
+719     #ifndef BOOST_NO_SFINAE
+720                                 ,typename boost::enable_if_c<
+721                                  !(is_integral<Functor>::value),
+722                                             int>::type = 0
+723     #endif // BOOST_NO_SFINAE
+
+** CID 1402610:  Performance inefficiencies  (PASS_BY_VALUE)
+/boost/include/boost/function/function_template.hpp: 495 in boost::detail::function::basic_vtable1<void, int>::assign_to<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::detail::function::function_buffer &) const()
+
+
+________________________________________________________________________________________________________
+*** CID 1402610:  Performance inefficiencies  (PASS_BY_VALUE)
+/boost/include/boost/function/function_template.hpp: 495 in boost::detail::function::basic_vtable1<void, int>::assign_to<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::detail::function::function_buffer &) const()
+489     
+490             typedef result_type (*invoker_type)(function_buffer&
+491                                                 BOOST_FUNCTION_COMMA
+492                                                 BOOST_FUNCTION_TEMPLATE_ARGS);
+493     
+494             template<typename F>
+>>>     CID 1402610:  Performance inefficiencies  (PASS_BY_VALUE)
+>>>     Passing parameter f of type "librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]" (size 224 bytes) by value.
+495             bool assign_to(F f, function_buffer& functor) const
+496             {
+497               typedef typename get_function_tag<F>::type tag;
+498               return assign_to(f, functor, tag());
+499             }
+500             template<typename F,typename Allocator>
+
+** CID 1402611:  Performance inefficiencies  (PASS_BY_VALUE)
+/boost/include/boost/function/function_template.hpp: 1065 in boost::function<void (int)>::function<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::enable_if_c<(!(boost::is_integral<T1>::value)), int>::type)()
+
+
+________________________________________________________________________________________________________
+*** CID 1402611:  Performance inefficiencies  (PASS_BY_VALUE)
+/boost/include/boost/function/function_template.hpp: 1065 in boost::function<void (int)>::function<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1, boost::enable_if_c<(!(boost::is_integral<T1>::value)), int>::type)()
+1059     
+1060     public:
+1061     
+1062       function() : base_type() {}
+1063     
+1064       template<typename Functor>
+>>>     CID 1402611:  Performance inefficiencies  (PASS_BY_VALUE)
+>>>     Passing parameter f of type "librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]" (size 224 bytes) by value.
+1065       function(Functor f
+1066     #ifndef BOOST_NO_SFINAE
+1067                ,typename boost::enable_if_c<
+1068                               !(is_integral<Functor>::value),
+1069                            int>::type = 0
+1070     #endif
+
+** CID 1402612:  Performance inefficiencies  (PASS_BY_VALUE)
+/boost/include/boost/function/function_template.hpp: 917 in boost::function1<void, int>::assign_to<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1)()
+
+
+________________________________________________________________________________________________________
+*** CID 1402612:  Performance inefficiencies  (PASS_BY_VALUE)
+/boost/include/boost/function/function_template.hpp: 917 in boost::function1<void, int>::assign_to<librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]>(T1)()
+911               get_vtable()->base.manager(f.functor, this->functor,
+912                                          boost::detail::function::clone_functor_tag);
+913           }
+914         }
+915     
+916         template<typename Functor>
+>>>     CID 1402612:  Performance inefficiencies  (PASS_BY_VALUE)
+>>>     Passing parameter f of type "librados::TestWatchNotify::execute_notify(librados::TestRadosClient *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, ceph::buffer::list &, unsigned long)::[lambda(int) (instance 1)]" (size 224 bytes) by value.
+917         void assign_to(Functor f)
+918         {
+919           using boost::detail::function::vtable_base;
+920     
+921           typedef typename boost::detail::function::get_function_tag<Functor>::type tag;
+922           typedef boost::detail::function::BOOST_FUNCTION_GET_INVOKER<tag> get_invoker;
+
+** CID 1402613:  Resource leaks  (RESOURCE_LEAK)
+/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 2624 in RGWPutObjProcessor_Atomic::complete_writing_data()()
+
+
+________________________________________________________________________________________________________
+*** CID 1402613:  Resource leaks  (RESOURCE_LEAK)
+/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 2624 in RGWPutObjProcessor_Atomic::complete_writing_data()()
+2618         bufferlist bl;
+2619         pending_data_bl.splice(0, max_write_size, &bl);
+2620         uint64_t write_len = bl.length();
+2621         int r = write_data(bl, data_ofs, &handle, &obj, false);
+2622         if (r < 0) {
+2623           ldout(store->ctx(), 0) << "ERROR: write_data() returned " << r << dendl;
+>>>     CID 1402613:  Resource leaks  (RESOURCE_LEAK)
+>>>     Variable "handle" going out of scope leaks the storage it points to.
+2624           return r;
+2625         }
+2626         data_ofs += write_len;
+2627         r = throttle_data(handle, obj, write_len, false);
+2628         if (r < 0) {
+2629           ldout(store->ctx(), 0) << "ERROR: throttle_data() returned " << r << dendl;
+
+** CID 1402614:  Resource leaks  (RESOURCE_LEAK)
+/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 12966 in RGWRados::delete_raw_obj_aio(const rgw_raw_obj &, std::__cxx11::list<librados::AioCompletion *, std::allocator<librados::AioCompletion *>> &)()
+
+
+________________________________________________________________________________________________________
+*** CID 1402614:  Resource leaks  (RESOURCE_LEAK)
+/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 12966 in RGWRados::delete_raw_obj_aio(const rgw_raw_obj &, std::__cxx11::list<librados::AioCompletion *, std::allocator<librados::AioCompletion *>> &)()
+12960       cls_rgw_remove_obj(op, prefixes);
+12961     
+12962       AioCompletion *c = librados::Rados::aio_create_completion(NULL, NULL, NULL);
+12963       ret = ref.ioctx.aio_operate(ref.oid, c, &op);
+12964       if (ret < 0) {
+12965         lderr(cct) << "ERROR: AioOperate failed with ret=" << ret << dendl;
+>>>     CID 1402614:  Resource leaks  (RESOURCE_LEAK)
+>>>     Variable "c" going out of scope leaks the storage it points to.
+12966         return ret;
+12967       }
+12968     
+12969       handles.push_back(c);
+12970     
+12971       return 0;
+
+** CID 1402615:  Resource leaks  (RESOURCE_LEAK)
+/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 7692 in RGWRados::copy_obj_data(RGWObjectCtx &, RGWBucketInfo &, RGWRados::Object::Read &, long, rgw_obj &, rgw_obj &, unsigned long, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<(long)1, (long)1000000000>>> *, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<(long)1, (long)1000000000>>>, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, ceph::buffer::list, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::allocator<std::pair<const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, ceph::buffer::list>>> &, RGWObjCatego
+ ry, unsigned long, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<(long)1, (long)1000000000>>>, std::__cxx11::basic_string<char, std::
+ char_traits<char>, std::allocator<char>> *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> *, ceph::buffer::list *, rgw_err *)()
+
+
+________________________________________________________________________________________________________
+*** CID 1402615:  Resource leaks  (RESOURCE_LEAK)
+/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 7692 in RGWRados::copy_obj_data(RGWObjectCtx &, RGWBucketInfo &, RGWRados::Object::Read &, long, rgw_obj &, rgw_obj &, unsigned long, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<(long)1, (long)1000000000>>> *, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<(long)1, (long)1000000000>>>, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, ceph::buffer::list, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::allocator<std::pair<const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, ceph::buffer::list>>> &, RGWObjCatego
+ ry, unsigned long, std::chrono::time_point<ceph::time_detail::real_clock, std::chrono::duration<unsigned long, std::ratio<(long)1, (long)1000000000>>>, std::__cxx11::basic_string<char, std::
+ char_traits<char>, std::allocator<char>> *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> *, ceph::buffer::list *, rgw_err *)()
+7686         do {
+7687           void *handle;
+7688           rgw_raw_obj obj;
+7689     
+7690           ret = processor.handle_data(bl, ofs, &handle, &obj, &again);
+7691           if (ret < 0) {
+>>>     CID 1402615:  Resource leaks  (RESOURCE_LEAK)
+>>>     Variable "handle" going out of scope leaks the storage it points to.
+7692             return ret;
+7693           }
+7694           ret = processor.throttle_data(handle, obj, end - ofs + 1, false);
+7695           if (ret < 0)
+7696             return ret;
+7697         } while (again);
+
+** CID 1402616:  Resource leaks  (RESOURCE_LEAK)
+/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 13004 in RGWRados::delete_obj_aio(const rgw_obj &, RGWBucketInfo &, RGWObjState *, std::__cxx11::list<librados::AioCompletion *, std::allocator<librados::AioCompletion *>> &, bool)()
+
+
+________________________________________________________________________________________________________
+*** CID 1402616:  Resource leaks  (RESOURCE_LEAK)
+/home/brad/working/src/ceph/src/rgw/rgw_rados.cc: 13004 in RGWRados::delete_obj_aio(const rgw_obj &, RGWBucketInfo &, RGWObjState *, std::__cxx11::list<librados::AioCompletion *, std::allocator<librados::AioCompletion *>> &, bool)()
+12998       cls_rgw_remove_obj(op, prefixes);
+12999     
+13000       AioCompletion *c = librados::Rados::aio_create_completion(NULL, NULL, NULL);
+13001       ret = ref.ioctx.aio_operate(ref.oid, c, &op);
+13002       if (ret < 0) {
+13003         lderr(cct) << "ERROR: AioOperate failed with ret=" << ret << dendl;
+>>>     CID 1402616:  Resource leaks  (RESOURCE_LEAK)
+>>>     Variable "c" going out of scope leaks the storage it points to.
+13004         return ret;
+13005       }
+13006     
+13007       handles.push_back(c);
+13008     
+13009       if (keep_index_consistent) {
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRaGCnxtQO9E3gxlB2GxVsWFENryh7bC5hIb-2FQBVM85YLQ-3D-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8GfQlGh3X238-2BpQ7Ww0V7r0k3azlSCcsuKGojMCI31G8L62To8QI4ZEYPuaVuurk-2BnlICVsFSEe-2FDPfVY9jmI7AVwwvEu-2FB9pCXjaiVO3f0WfETQoLXrVRnYfpahZzj7vcmq64aAay-2FXEgvfoNRRr9BzZfRomJASScXmEtmfEgCXIULyHyjqbtLVIcKs3-2Bnss0-3D
+
+To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRbVDbis712qZDP-2FA8y06Nq4Bco8jcmzhh7FSyvoR0E3-2BDgRcBCQ6OuthHBtaTCGNq9zoLsiw8NWrIF2zsdhfTt-2FbHjZ2ToL3Et9v1-2BrDLungAOjHpQtOY-2BsyLiTVCQEUCU-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8GfQlGh3X238-2BpQ7Ww0V7r0k3azlSCcsuKGojMCI31G8CYbu057LMT92ZgDgOU5mtjJHv9AeJSUAQyUZid6i-2BsaKYvrSBiX-2FE7RS8IDMyyppvIAJsJDDJQP7DHzWeC2-2FbQfK-2FtFadDWvdO2kyVeSjL4HLci8BJACNDzL3nMDvwyswitemCTAUaKf3IGblDOpn8-3D
+
