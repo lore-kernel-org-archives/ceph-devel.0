@@ -1,257 +1,92 @@
-From: Nikita Gerasimov <nikita.gerasimov@oracle.com>
-Subject: Re: [PATCH] ceph-detect-init: Adds Oracle Linux Server and Oracle VM
- Server detection
-Date: Fri, 17 Mar 2017 16:18:12 +0300
-Message-ID: <82a406d9-f838-cce9-b97b-7e96abeab911@oracle.com>
-References: <1488473512-4374-1-git-send-email-nikita.gerasimov@oracle.com>
- <c25a3567-c135-b63c-a9c6-af0e854362de@dachary.org>
- <bffcf580-6763-cdc3-3f0c-d045812a2512@oracle.com>
- <f8f6f0c8-8bf8-2132-7744-a1f8b028d6d3@redhat.com>
- <88850a6c-e6a2-87a9-38a4-e1d6433ec5a3@oracle.com>
- <d1ff1137-45ae-e195-8b9b-37473b776e71@redhat.com>
+From: Trond Myklebust <trondmy-7I+n7zu2hftEKMMhf/gKZA@public.gmane.org>
+Subject: Re: [PATCH 01/23] net, sunrpc: convert rpc_cred.cr_count from
+ atomic_t to refcount_t
+Date: Fri, 17 Mar 2017 14:28:37 +0000
+Message-ID: <1489760913.8441.1.camel@primarydata.com>
+References: <1489752646-8749-1-git-send-email-elena.reshetova@intel.com>
+         <1489752646-8749-2-git-send-email-elena.reshetova@intel.com>
+         <1489755011.6453.1.camel@primarydata.com>
+         <1489755736.2810.10.camel@poochiereds.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:34535 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751110AbdCQNSb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Mar 2017 09:18:31 -0400
-In-Reply-To: <d1ff1137-45ae-e195-8b9b-37473b776e71@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dmick@redhat.com>, ceph-devel@vger.kernel.org, ldachary@redhat.com
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
+Return-path: <linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1489755736.2810.10.camel-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org>
+Content-Language: en-US
+Content-ID: <F84F8B06A89840478200B35132E7742D-Hry67jCOGbCcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+Sender: linux-nfs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "elena.reshetova-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <elena.reshetova-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org" <jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org>
+Cc: "herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org" <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org" <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "ralf-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org" <ralf-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>, "linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-rdma-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ishkamiel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" <ishkamiel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org" <bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org>, "steffen.klassert-opNxpl+3fjRBDgjK7y7TUQ@public.gmane.org" <steffen.klassert-opNxpl+3fjRBDgjK7y7TUQ@public.gmane.org>, "nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org" <nhorman-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, "linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-nfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jreuter-K7Hl1MveuGQ@public.gmane.org" <jreuter-K7Hl1MveuGQ@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-hams-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-hams-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "dwindsor-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" <dwindsor-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, sage@redhat.
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+T24gRnJpLCAyMDE3LTAzLTE3IGF0IDA5OjAyIC0wNDAwLCBKZWZmIExheXRvbiB3cm90ZToNCj4g
+T24gRnJpLCAyMDE3LTAzLTE3IGF0IDEyOjUwICswMDAwLCBUcm9uZCBNeWtsZWJ1c3Qgd3JvdGU6
+DQo+ID4gT24gRnJpLCAyMDE3LTAzLTE3IGF0IDE0OjEwICswMjAwLCBFbGVuYSBSZXNoZXRvdmEg
+d3JvdGU6DQo+ID4gPiByZWZjb3VudF90IHR5cGUgYW5kIGNvcnJlc3BvbmRpbmcgQVBJIHNob3Vs
+ZCBiZQ0KPiA+ID4gdXNlZCBpbnN0ZWFkIG9mIGF0b21pY190IHdoZW4gdGhlIHZhcmlhYmxlIGlz
+IHVzZWQgYXMNCj4gPiA+IGEgcmVmZXJlbmNlIGNvdW50ZXIuIFRoaXMgYWxsb3dzIHRvIGF2b2lk
+IGFjY2lkZW50YWwNCj4gPiA+IHJlZmNvdW50ZXIgb3ZlcmZsb3dzIHRoYXQgbWlnaHQgbGVhZCB0
+byB1c2UtYWZ0ZXItZnJlZQ0KPiA+ID4gc2l0dWF0aW9ucy4NCj4gPiA+IA0KPiA+ID4gU2lnbmVk
+LW9mZi1ieTogRWxlbmEgUmVzaGV0b3ZhIDxlbGVuYS5yZXNoZXRvdmFAaW50ZWwuY29tPg0KPiA+
+ID4gU2lnbmVkLW9mZi1ieTogSGFucyBMaWxqZXN0cmFuZCA8aXNoa2FtaWVsQGdtYWlsLmNvbT4N
+Cj4gPiA+IFNpZ25lZC1vZmYtYnk6IEtlZXMgQ29vayA8a2Vlc2Nvb2tAY2hyb21pdW0ub3JnPg0K
+PiA+ID4gU2lnbmVkLW9mZi1ieTogRGF2aWQgV2luZHNvciA8ZHdpbmRzb3JAZ21haWwuY29tPg0K
+PiA+ID4gLS0tDQo+ID4gPiDCoGluY2x1ZGUvbGludXgvc3VucnBjL2F1dGguaCB8wqDCoDggKysr
+Ky0tLS0NCj4gPiA+IMKgbmV0L3N1bnJwYy9hdXRoLmPCoMKgwqDCoMKgwqDCoMKgwqDCoMKgfCAx
+MiArKysrKystLS0tLS0NCj4gPiA+IMKgMiBmaWxlcyBjaGFuZ2VkLCAxMCBpbnNlcnRpb25zKCsp
+LCAxMCBkZWxldGlvbnMoLSkNCj4gPiA+IA0KPiA+ID4gZGlmZiAtLWdpdCBhL2luY2x1ZGUvbGlu
+dXgvc3VucnBjL2F1dGguaA0KPiA+ID4gYi9pbmNsdWRlL2xpbnV4L3N1bnJwYy9hdXRoLmgNCj4g
+PiA+IGluZGV4IGIxYmM2MmIuLmJkMzZlMGIgMTAwNjQ0DQo+ID4gPiAtLS0gYS9pbmNsdWRlL2xp
+bnV4L3N1bnJwYy9hdXRoLmgNCj4gPiA+ICsrKyBiL2luY2x1ZGUvbGludXgvc3VucnBjL2F1dGgu
+aA0KPiA+ID4gQEAgLTE1LDcgKzE1LDcgQEANCj4gPiA+IMKgI2luY2x1ZGUgPGxpbnV4L3N1bnJw
+Yy9tc2dfcHJvdC5oPg0KPiA+ID4gwqAjaW5jbHVkZSA8bGludXgvc3VucnBjL3hkci5oPg0KPiA+
+ID4gwqANCj4gPiA+IC0jaW5jbHVkZSA8bGludXgvYXRvbWljLmg+DQo+ID4gPiArI2luY2x1ZGUg
+PGxpbnV4L3JlZmNvdW50Lmg+DQo+ID4gPiDCoCNpbmNsdWRlIDxsaW51eC9yY3VwZGF0ZS5oPg0K
+PiA+ID4gwqAjaW5jbHVkZSA8bGludXgvdWlkZ2lkLmg+DQo+ID4gPiDCoCNpbmNsdWRlIDxsaW51
+eC91dHNuYW1lLmg+DQo+ID4gPiBAQCAtNjgsNyArNjgsNyBAQCBzdHJ1Y3QgcnBjX2NyZWQgew0K
+PiA+ID4gwqAjZW5kaWYNCj4gPiA+IMKgCXVuc2lnbmVkIGxvbmcJCWNyX2V4cGlyZTsJLyogd2hl
+bg0KPiA+ID4gdG8gZ2MNCj4gPiA+ICovDQo+ID4gPiDCoAl1bnNpZ25lZCBsb25nCQljcl9mbGFn
+czsJLyogdmFyaW91cw0KPiA+ID4gZmxhZ3MgKi8NCj4gPiA+IC0JYXRvbWljX3QJCWNyX2NvdW50
+OwkvKiByZWYgY291bnQgKi8NCj4gPiA+ICsJcmVmY291bnRfdAkJY3JfY291bnQ7CS8qIHJlZiBj
+b3VudA0KPiA+ID4gKi8NCj4gPiA+IA0KPiA+IA0KPiA+IE5BQ0suIFRoYXQncyBnb2luZyB0byBi
+ZSBoaXR0aW5nDQo+ID4gV0FSTl9PTkNFKCFyZWZjb3VudF9pbmNfbm90X3plcm8ociksDQo+ID4g
+InJlZmNvdW50X3Q6IGluY3JlbWVudCBvbiAwOyB1c2UtYWZ0ZXItZnJlZS5cbiIpIGxpa2UgdGhl
+cmUncyBubw0KPiA+IHRvbW9ycm93Li4uDQo+ID4gDQo+ID4gUGxlYXNlIHN0b3Agd2l0aCB0aGVz
+ZSBhdXRvbWF0ZWQgY29udmVyc2lvbnMuIFRoZXkgYXJlIGdvaW5nIHRvDQo+ID4gY2F1c2UgYQ0K
+PiA+IGxvdCBtb3JlIGJ1Z3MgdGhhbiB0aGV5IGZpeC4NCj4gPiANCj4gDQo+IEFncmVlZC4gVGhl
+c2UgcGF0Y2hzZXRzIGFyZSB0b3VjaGluZyBwbGFjZXMgd2hlcmUgd2UndmUgYWxyZWFkeQ0KPiBi
+YW5nZWQNCj4gb3V0IG1vc3Qgb2YgdGhlIHJlZmNvdW50aW5nIGJ1Z3MuIEknbSBhZ2FpbnN0IGRv
+aW5nIGxhcmdlIHNjYWxlDQo+IGNvbnZlcnNpb25zIGxpa2UgdGhpcyB3aXRob3V0IGEgZGFtbmVk
+IGdvb2QgcmVhc29uLg0KPiANCj4gSSB0aGluayBpdCBtYXkgYmUgYmVzdCB0byBkbyB0aGlzIHNv
+cnQgb2YgdGhpbmcgaW4gYSBtb3JlIHBpZWNlbWVhbA0KPiBmYXNoaW9uLiBQaWNrIGEgc3Vic3lz
+dGVtIG9yIHR3byBhbmQgZG8gdGhlIGNvbnZlcnNpb25zIHRoZXJlIHRvDQo+IHByb3ZlDQo+IHRo
+YXQgdGhleSdyZSBiZXR0ZXIgdGhhbiB3aGF0IHdlIGhhdmUuIElmIHRoZSBzdWJzeXN0ZW0gYWxy
+ZWFkeSBoYXMNCj4gcHJvYmxlbXMgd2l0aCBpdHMgcmVmY291bnRpbmcsIHRoZW4gc28gbXVjaCB0
+aGUgYmV0dGVyLiBQb2ludCB0byBidWdzDQo+IHRoYXQgdGhpcyBuZXcgaW5mcmFzdHJ1Y3R1cmUg
+aGVscGVkIGZpbmQuDQo+IA0KPiBFbmNvdXJhZ2UgcGVvcGxlIHRvIGFkb3B0IHlvdXIgbmV3IGlu
+ZnJhc3RydWN0dXJlIGFzIG5ldyByZWZjb3VudGVkDQo+IG9iamVjdHMgYXJlIGludHJvZHVjZWQg
+aW50byB0aGUga2VybmVsLiBZb3UgbWlnaHQgZXZlbiBjb25zaWRlciBhIExXTg0KPiBhcnRpY2xl
+IGFib3V0IHRoaXMuDQo+IA0KPiBFdmVudHVhbGx5IHdlJ2xsIGdldCBhcm91bmQgdG8gY2hhbmdp
+bmcgZXhpc3RpbmcgY29kZSB0byB1c2UgaXQsIG9uY2UNCj4gdGhlcmUgaXMgYSBzdWZmaWNpZW50
+IGFkdmFudGFnZSB0byBkb2luZyBzby4gTW9zdCBsaWtlbHkgd2hlbiB3ZSdyZQ0KPiByZXdvcmtp
+bmcgdGhlIGNvZGUgZm9yIG90aGVyIHJlYXNvbnMsIG9yIHdoZW4gd2UncmUgY2hhc2luZyBzb21l
+DQo+IGhvcnJpZA0KPiByZWZjb3VudGluZyBidWcgYW5kIHRoaW5rIHRoYXQgdGhpcyBtaWdodCBo
+ZWxwIGZpbmQgaXQuDQoNClRoZSBtYWluIGlzc3VlIGlzIHRoYXQgdGhpcyAicmVmY291bnRfdCIg
+aW1wbGVtZW50YXRpb24gYXBwZWFycyB0byBiZQ0KYXNzdW1pbmcgdGhhdCB0aGVyZSBpcyBvbmUg
+YW5kIG9ubHkgb25lIG1vZGVsIGZvciByZWZjb3VudHMgKHRoZSBvbmUNCndoZXJlIGEgdmFsdWUg
+b2YgIjAiIG1lYW5zICJmcmVlIG1lIGltbWVkaWF0ZWx5IikuDQoNClRoZSBrZXJuZWwgaGFzIGEg
+cGxldGhvcmEgb2Ygb2JqZWN0IGNhY2hpbmcgaW1wbGVtZW50YXRpb25zIHdoZXJlIHRoaXMNCmlz
+IHNpbXBseSBub3QgdGhlIGNhc2U7IHRoZSBkY2FjaGUgaXMgYSBwcmltZSBleGFtcGxlLCBhbmQg
+dGhpcyBjYWNoZQ0KaXMgYW5vdGhlci4gSW4gYm90aCB0aGVzZSBpbXBsZW1lbnRhdGlvbiwgdGhl
+IGF0b21pY190IHZhcmlhYmxlIGlzDQpiZWluZyB1c2VkIG1vcmUgYXMgYSBzZW1hcGhvcmUtc3R5
+bGUgbG9jayB0aGF0IHByZXZlbnRzIGZyZWVpbmcgb2YgdGhlDQpvYmplY3Qgd2hpbGUgaXQgaXMg
+aW4gYWN0aXZlIHVzZSBhcyBvcHBvc2VkIHRvIGJlaW5nIGZyZWVhYmxlLCBidXQNCmNhY2hlZC4g
+VGhpcyBpcyB3aHkgdGhlc2UgYXV0b21hdGVkIGNvbnZlcnNpb25zIGFyZSBhIG51aXNhbmNlIGFu
+ZCBhDQpzb3VyY2Ugb2YgYnVncy4NCg0KLS0gDQpUcm9uZCBNeWtsZWJ1c3QNCkxpbnV4IE5GUyBj
+bGllbnQgbWFpbnRhaW5lciwgUHJpbWFyeURhdGENCnRyb25kLm15a2xlYnVzdEBwcmltYXJ5ZGF0
+YS5jb20NCg==
 
-Is there any blocking for merge this? Any additional actions required?
-The PR does not contain specific comments.
-
-
-On 10.03.2017 22:15, Dan Mick wrote:
-> On 03/10/2017 06:50 AM, Nikita Gerasimov wrote:
->> github pull request: https://github.com/ceph/ceph/pull/13917
-> Thanks.
->
->> But https://github.com/ceph/ceph/blob/master/SubmittingPatches.rst say
->> nothing about submission via ceph-devel@vger.kernel.org limitations.
->> It wold be nice if someone correct that.
->    PREPARING AND SENDING PATCHES
-> 	.
-> 	.
-> 	.
->    The preferred way to submit code is by publishing your patches in
->    a branch in your github fork of the ceph repository and then
->    submitting a github pull request.
->
->
-> We *could* manage to deal with email patches, and do, for kernel, but
-> most of our developers use the 'preferred' way.  If there's some real
-> objection or limitation that prevents using github, emailed patches are
-> a fallback.
->
->> On 10.03.2017 3:20, Dan Mick wrote:
->>> Generally all our non-kernel submissions come in as github pull
->>> requests.  Could you submit your request that way, Nikita?
->>> There's a lot of documentation at
->>> http://docs.ceph.com/docs/master/dev, specifically
->>> http://docs.ceph.com/docs/master/dev/#github-pull-request
->>>
->>>
->>>
->>> On 03/09/2017 03:03 AM, Nikita Gerasimov wrote:
->>>> Hi All,
->>>>
->>>> What are the next steps for this patch?
->>>>
->>>>
->>>> On 02.03.2017 21:16, Loic Dachary wrote:
->>>>> Reviewed-by: Loic Dachary <ldachary@redhat.com>
->>>>>
->>>>> On 03/02/2017 05:51 PM, nikita.gerasimov@oracle.com wrote:
->>>>>> From: Nikita Gerasimov <nikita.gerasimov@oracle.com>
->>>>>>
->>>>>> Oracle Linux Server is API/ABI compatible with RHEL/CentOS Linux
->>>>>> distro.
->>>>>> Oracle VM Server is Xen based VM server. Which modern versions Dom0
->>>>>> is based on el6
->>>>>>
->>>>>> Signed-off-by: Nikita Gerasimov <nikita.gerasimov@oracle.com>
->>>>>>
->>>>>> run-make-check.sh: http://paste.ubuntu.com/24096418/
->>>>>> ---
->>>>>>     install-deps.sh                                        |  2 +-
->>>>>>     src/ceph-detect-init/ceph_detect_init/__init__.py      | 18
->>>>>> ++++++++++++++++--
->>>>>>     .../ceph_detect_init/oraclevms/__init__.py             | 11
->>>>>> +++++++++++
->>>>>>     src/ceph-detect-init/tests/test_all.py                 | 18
->>>>>> ++++++++++++++++++
->>>>>>     4 files changed, 46 insertions(+), 3 deletions(-)
->>>>>>     create mode 100644
->>>>>> src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
->>>>>>
->>>>>> diff --git a/install-deps.sh b/install-deps.sh
->>>>>> index 41d393d..e1e8722 100755
->>>>>> --- a/install-deps.sh
->>>>>> +++ b/install-deps.sh
->>>>>> @@ -88,7 +88,7 @@ else
->>>>>>         $SUDO env DEBIAN_FRONTEND=noninteractive apt-get -y remove
->>>>>> ceph-build-deps
->>>>>>         if [ -n "$backports" ] ; then rm $control; fi
->>>>>>             ;;
->>>>>> -    centos|fedora|rhel)
->>>>>> +    centos|fedora|rhel|ol)
->>>>>>             yumdnf="yum"
->>>>>>             builddepcmd="yum-builddep -y"
->>>>>>             if test "$(echo "$VERSION_ID >= 22" | bc)" -ne 0; then
->>>>>> diff --git a/src/ceph-detect-init/ceph_detect_init/__init__.py
->>>>>> b/src/ceph-detect-init/ceph_detect_init/__init__.py
->>>>>> index aad3eee..9abc421 100644
->>>>>> --- a/src/ceph-detect-init/ceph_detect_init/__init__.py
->>>>>> +++ b/src/ceph-detect-init/ceph_detect_init/__init__.py
->>>>>> @@ -24,6 +24,7 @@ from ceph_detect_init import suse
->>>>>>     from ceph_detect_init import gentoo
->>>>>>     from ceph_detect_init import freebsd
->>>>>>     from ceph_detect_init import docker
->>>>>> +from ceph_detect_init import oraclevms
->>>>>>     import os
->>>>>>     import logging
->>>>>>     import platform
->>>>>> @@ -44,7 +45,8 @@ def get(use_rhceph=False):
->>>>>>         module.normalized_name = _normalized_distro_name(distro_name)
->>>>>>         module.distro = module.normalized_name
->>>>>>         module.is_el = module.normalized_name in ['redhat', 'centos',
->>>>>> -                                              'fedora', 'scientific']
->>>>>> +                                              'fedora', 'scientific',
->>>>>> +                                              'oraclel']
->>>>>>         module.release = release
->>>>>>         module.codename = codename
->>>>>>         module.init = module.choose_init()
->>>>>> @@ -64,6 +66,8 @@ def _get_distro(distro, use_rhceph=False):
->>>>>>             'linuxmint': debian,
->>>>>>             'centos': centos,
->>>>>>             'scientific': centos,
->>>>>> +        'oraclel': centos,
->>>>>> +        'oraclevms': oraclevms,
->>>>>>             'redhat': centos,
->>>>>>             'fedora': fedora,
->>>>>>             'suse': suse,
->>>>>> @@ -90,6 +94,10 @@ def _normalized_distro_name(distro):
->>>>>>             return 'suse'
->>>>>>         elif distro.startswith('centos'):
->>>>>>             return 'centos'
->>>>>> +    elif distro.startswith('oracle linux'):
->>>>>> +        return 'oraclel'
->>>>>> +    elif distro.startswith('oracle vm'):
->>>>>> +        return 'oraclevms'
->>>>>>         elif distro.startswith(('gentoo', 'funtoo', 'exherbo')):
->>>>>>             return 'gentoo'
->>>>>>         return distro
->>>>>> @@ -127,8 +135,9 @@ def platform_information():
->>>>>>         else:
->>>>>>             raise exc.UnsupportedPlatform(platform.system(), '', '')
->>>>>>     +    distro_lower = distro.lower()
->>>>>>         # this could be an empty string in Debian
->>>>>> -    if not codename and 'debian' in distro.lower():
->>>>>> +    if not codename and 'debian' in distro_lower:
->>>>>>             debian_codenames = {
->>>>>>                 '8': 'jessie',
->>>>>>                 '7': 'wheezy',
->>>>>> @@ -146,6 +155,11 @@ def platform_information():
->>>>>>                     codename = minor
->>>>>>                 else:
->>>>>>                     codename = major
->>>>>> +    # this is an empty string in Oracle
->>>>>> +    elif distro_lower.startswith('oracle linux'):
->>>>>> +        codename = 'OL' + release
->>>>>> +    elif distro_lower.startswith('oracle vm'):
->>>>>> +        codename = 'OVS' + release
->>>>>>           return (
->>>>>>             str(distro).rstrip(),
->>>>>> diff --git
->>>>>> a/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
->>>>>> b/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
->>>>>> new file mode 100644
->>>>>> index 0000000..f7bf85b
->>>>>> --- /dev/null
->>>>>> +++ b/src/ceph-detect-init/ceph_detect_init/oraclevms/__init__.py
->>>>>> @@ -0,0 +1,11 @@
->>>>>> +distro = None
->>>>>> +release = None
->>>>>> +codename = None
->>>>>> +
->>>>>> +
->>>>>> +def choose_init():
->>>>>> +    """Select a init system
->>>>>> +
->>>>>> +    Returns the name of a init system (upstart, sysvinit ...).
->>>>>> +    """
->>>>>> +    return 'sysvinit'
->>>>>> diff --git a/src/ceph-detect-init/tests/test_all.py
->>>>>> b/src/ceph-detect-init/tests/test_all.py
->>>>>> index d2733c3..eb48bb4 100644
->>>>>> --- a/src/ceph-detect-init/tests/test_all.py
->>>>>> +++ b/src/ceph-detect-init/tests/test_all.py
->>>>>> @@ -35,6 +35,7 @@ from ceph_detect_init import suse
->>>>>>     from ceph_detect_init import gentoo
->>>>>>     from ceph_detect_init import freebsd
->>>>>>     from ceph_detect_init import docker
->>>>>> +from ceph_detect_init import oraclevms
->>>>>>       logging.basicConfig(format='%(asctime)s %(levelname)s
->>>>>> %(message)s',
->>>>>>                         level=logging.DEBUG)
->>>>>> @@ -54,6 +55,9 @@ class TestCephDetectInit(testtools.TestCase):
->>>>>>         def test_docker(self):
->>>>>>             self.assertEqual('none', docker.choose_init())
->>>>>>     +    def test_oraclevms(self):
->>>>>> +        self.assertEqual('sysvinit', oraclevms.choose_init())
->>>>>> +
->>>>>>         def test_centos(self):
->>>>>>             with mock.patch('ceph_detect_init.centos.release',
->>>>>>                             '7.0'):
->>>>>> @@ -207,6 +211,8 @@ class TestCephDetectInit(testtools.TestCase):
->>>>>>             self.assertEqual(debian, g('ubuntu'))
->>>>>>             self.assertEqual(centos, g('centos'))
->>>>>>             self.assertEqual(centos, g('scientific'))
->>>>>> +        self.assertEqual(centos, g('Oracle Linux Server'))
->>>>>> +        self.assertEqual(oraclevms, g('Oracle VM server'))
->>>>>>             self.assertEqual(fedora, g('fedora'))
->>>>>>             self.assertEqual(suse, g('suse'))
->>>>>>             self.assertEqual(rhel, g('redhat', use_rhceph=True))
->>>>>> @@ -222,6 +228,8 @@ class TestCephDetectInit(testtools.TestCase):
->>>>>>             self.assertEqual('scientific', n('Scientific'))
->>>>>>             self.assertEqual('scientific', n('Scientific Linux'))
->>>>>>             self.assertEqual('scientific', n('scientific linux'))
->>>>>> +        self.assertEqual('oraclel', n('Oracle Linux Server'))
->>>>>> +        self.assertEqual('oraclevms', n('Oracle VM server'))
->>>>>>             self.assertEqual('suse', n('SUSE'))
->>>>>>             self.assertEqual('suse', n('suse'))
->>>>>>             self.assertEqual('suse', n('openSUSE'))
->>>>>> @@ -266,6 +274,16 @@ class TestCephDetectInit(testtools.TestCase):
->>>>>>                 self.assertEqual(('debian', 'sid/jessie', 'sid'),
->>>>>>                                 
->>>>>> ceph_detect_init.platform_information())
->>>>>>     +        with mock.patch('platform.linux_distribution',
->>>>>> +                        lambda **kwargs: (('Oracle Linux Server',
->>>>>> '7.3', ''))):
->>>>>> +            self.assertEqual(('Oracle Linux Server', '7.3', 'OL7.3'),
->>>>>> +                             ceph_detect_init.platform_information())
->>>>>> +
->>>>>> +        with mock.patch('platform.linux_distribution',
->>>>>> +                        lambda **kwargs: (('Oracle VM server',
->>>>>> '3.4.2', ''))):
->>>>>> +            self.assertEqual(('Oracle VM server', '3.4.2',
->>>>>> 'OVS3.4.2'),
->>>>>> +                             ceph_detect_init.platform_information())
->>>>>> +
->>>>>>         @mock.patch('platform.linux_distribution')
->>>>>>         def test_platform_information_container(self, mock_linux_dist):
->>>>>>             import sys
->>>>>>
->>>> -- 
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
+--
+To unsubscribe from this list: send the line "unsubscribe linux-nfs" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
