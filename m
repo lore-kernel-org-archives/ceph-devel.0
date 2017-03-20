@@ -1,244 +1,186 @@
-From: Paul Cuzner <pcuzner@redhat.com>
-Subject: Re: Interpreting ceph osd pool stats output
-Date: Mon, 20 Mar 2017 21:40:21 +1300
-Message-ID: <CAO=rSOuF8-wV6mQR1zxykWE4RHx35kfXQnTdD5-0RAH50zhtuw@mail.gmail.com>
-References: <CALe9h7dBSZM64NSKF6_S+74Wrv-mLfAtSbQbQvq-UXSSfUL8dA@mail.gmail.com>
- <CAO=rSOtrey4NL+P8SM8fJdoiunKFwcd+ywNniViQJxkU_akh_g@mail.gmail.com>
- <CALe9h7fWgrt2CM-4u7jrpgE5Xrwm0zSVamkTjShfDieWxUpiOg@mail.gmail.com>
- <CAO=rSOvfakqcdkQ5EC-2YqjBg8VwYGWZ8qF551MajezJ2uAZJA@mail.gmail.com>
- <CALe9h7dXbhdF_-_-QDWdLJLbtOPGQ87p2-iu4u8gcmJUHMnOAQ@mail.gmail.com>
- <CALe9h7eWi5mfGLVoRfgLChW7sMY9C+NdttDrS1stTfvcD9khqA@mail.gmail.com>
- <CAO=rSOuAdz8yzRtp7YLAOToyht4Q05oJRiZJCdmHEwHLWpS5_Q@mail.gmail.com>
- <CALe9h7f53kqfKWTD3OcTODdx5PcW2UJ_UX1ZUFLmJp3HvPm5FA@mail.gmail.com>
- <alpine.DEB.2.11.1703141311110.10776@piezo.novalocal> <CAO=rSOuNBETd=V00oHqiFaBTFcU9036w39C8YGrKec4wqba6+A@mail.gmail.com>
- <CAF-wwdHZ8C5T_dDkBh-dLisj7ET9bZuQjSf3p7CFjFKpgSd+hA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: crush multipick anomaly
+Date: Mon, 20 Mar 2017 11:49:16 +0100
+Message-ID: <7f03d75d-0dc7-086e-6f43-5b2717588345@dachary.org>
+References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
+ <3554101b-4d10-e46b-93b0-f74794258f2e@dachary.org>
+ <alpine.DEB.2.11.1702131417070.7782@piezo.novalocal>
+ <CAFdhnje5hJMsU8ZCSL8mFj=d4UH6b41=nnddNvcfemhyWXg6aw@mail.gmail.com>
+ <4dbab28a-220b-2cef-fcbc-aca4dd17ab3b@dachary.org>
+ <CAFdhnjf=WPmC+CEwX1QWe_v1HXmZu2cv7983zHGG4muKR_G0jw@mail.gmail.com>
+ <43736207-9e38-9389-4b99-d246716092ed@dachary.org>
+ <CAFdhnjfGKdmOFnT-imHo55O7LLPCdOV=_pbU50ruxo1x9C3NDA@mail.gmail.com>
+ <cbcf592e-a0c0-bc5b-0f2a-11c4a110d485@dachary.org>
+ <CAFdhnjcDfUG6Dzm2R_Fu16d7rT1z_h+mFy6ngYLUcLtURn_pVA@mail.gmail.com>
+ <63256e6b-ec48-e369-afc3-6d65eb5230f8@dachary.org>
+ <eca40695-44b3-6843-b1c3-8359231e4d87@dachary.org>
+ <CAFdhnjfYK43=ZdQ-cPG0k8KzKnTZ=T5VNoYdfdSdPH8gRG_i+A@mail.gmail.com>
+ <alpine.DEB.2.11.1703072259520.24356@piezo.novalocal>
+ <CAFdhnjeAdCgqS3N7yvZXEanEc8c_q2hR_HciUD2gdFGcRyaZXQ@mail.gmail.com>
+ <649a0116-6f61-0470-69bd-41f64214ad5a@dachary.org>
+ <6b063525-eeec-bdf6-a926-af2e9276f34b@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f182.google.com ([209.85.128.182]:34172 "EHLO
-        mail-wr0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753074AbdCTIsu (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Mar 2017 04:48:50 -0400
-Received: by mail-wr0-f182.google.com with SMTP id l37so87325803wrc.1
-        for <ceph-devel@vger.kernel.org>; Mon, 20 Mar 2017 01:48:48 -0700 (PDT)
-In-Reply-To: <CAF-wwdHZ8C5T_dDkBh-dLisj7ET9bZuQjSf3p7CFjFKpgSd+hA@mail.gmail.com>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:38960 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753340AbdCTKt0 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Mar 2017 06:49:26 -0400
+In-Reply-To: <6b063525-eeec-bdf6-a926-af2e9276f34b@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+To: =?UTF-8?Q?Pedro_L=c3=b3pez-Adeva?= <plopezadeva@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-I was suggesting inventing the data collector - more about how
-(formula's etc) and what metrics we aggregate to derive meaningful
-metrics. pcp, collectd etc give us a single component - what's the
-framework that ties all those pieces together to give us the
-cluster-wide view? If there is something out there, great...I'm not a
-fan of reinventing the wheel either :)
+Hi,
+
+I modified the crush library to accept two weights (one for the first disk, the other for the remaining disks)[1]. This really is a hack for experimentation purposes only ;-) I was able to run a variation of your code[2] and got the following results which are encouraging. Do you think what I did is sensible ? Or is there a problem I don't see ?
+
+Thanks !
+
+Simulation: R=2 devices capacity [10  8  6 10  8  6 10  8  6]
+------------------------------------------------------------------------
+Before: All replicas on each hard drive
+Expected vs actual use (20000 samples)
+ disk 0: 1.39e-01 1.12e-01
+ disk 1: 1.11e-01 1.10e-01
+ disk 2: 8.33e-02 1.13e-01
+ disk 3: 1.39e-01 1.11e-01
+ disk 4: 1.11e-01 1.11e-01
+ disk 5: 8.33e-02 1.11e-01
+ disk 6: 1.39e-01 1.12e-01
+ disk 7: 1.11e-01 1.12e-01
+ disk 8: 8.33e-02 1.10e-01
+it=    1 jac norm=1.59e-01 loss=5.27e-03
+it=    2 jac norm=1.55e-01 loss=5.03e-03
+...
+it=  212 jac norm=1.02e-03 loss=2.41e-07
+it=  213 jac norm=1.00e-03 loss=2.31e-07
+Converged to desired accuracy :)
+After: All replicas on each hard drive
+Expected vs actual use (20000 samples)
+ disk 0: 1.39e-01 1.42e-01
+ disk 1: 1.11e-01 1.09e-01
+ disk 2: 8.33e-02 8.37e-02
+ disk 3: 1.39e-01 1.40e-01
+ disk 4: 1.11e-01 1.13e-01
+ disk 5: 8.33e-02 8.08e-02
+ disk 6: 1.39e-01 1.38e-01
+ disk 7: 1.11e-01 1.09e-01
+ disk 8: 8.33e-02 8.48e-02
 
 
+Simulation: R=2 devices capacity [10 10 10 10  1]
+------------------------------------------------------------------------
+Before: All replicas on each hard drive
+Expected vs actual use (20000 samples)
+ disk 0: 2.44e-01 2.36e-01
+ disk 1: 2.44e-01 2.38e-01
+ disk 2: 2.44e-01 2.34e-01
+ disk 3: 2.44e-01 2.38e-01
+ disk 4: 2.44e-02 5.37e-02
+it=    1 jac norm=2.43e-01 loss=2.98e-03
+it=    2 jac norm=2.28e-01 loss=2.47e-03
+...
+it=   37 jac norm=1.28e-03 loss=3.48e-08
+it=   38 jac norm=1.07e-03 loss=2.42e-08
+Converged to desired accuracy :)
+After: All replicas on each hard drive
+Expected vs actual use (20000 samples)
+ disk 0: 2.44e-01 2.46e-01
+ disk 1: 2.44e-01 2.44e-01
+ disk 2: 2.44e-01 2.41e-01
+ disk 3: 2.44e-01 2.45e-01
+ disk 4: 2.44e-02 2.33e-02
 
-On Mon, Mar 20, 2017 at 8:54 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
->
->
-> On Mon, Mar 20, 2017 at 1:57 PM, Paul Cuzner <pcuzner@redhat.com> wrote:
->> John/Sage, thanks for the clarification and info. At this stage, I'll
->> stick with the data I have with John's caveats.
+
+[1] crush hack http://libcrush.org/main/libcrush/commit/6efda297694392d0b07845eb98464a0dcd56fee8
+[2] python-crush hack http://libcrush.org/dachary/python-crush/commit/d9202fcd4d17cd2a82b37ec20c1bd25f8f2c4b68
+
+On 03/19/2017 11:31 PM, Loic Dachary wrote:
+> Hi Pedro,
+> 
+> It looks like trying to experiment with crush won't work as expected because crush does not distinguish the probability of selecting the first device from the probability of selecting the second or third device. Am I mistaken ?
+> 
+> Cheers
+> 
+> On 03/18/2017 10:21 AM, Loic Dachary wrote:
+>> Hi Pedro,
 >>
->> The challenge in understanding the load going on in a cluster is
->> definitely interesting since the choke points are different depending
->> on whether you look at the cluster through a hardware or software
->> 'lens'.
+>> I'm going to experiment with what you did at
 >>
->> I think the interesting question is how does a customer know how
->> 'full' their cluster is from a performance standpoint - ie. when do I
->> need to buy more or different hardware? Holy grail type stuff :)
+>> https://github.com/plafl/notebooks/blob/master/replication.ipynb
 >>
->> Is there any work going on in this space, perhaps analyzing the
->> underlying components within the cluster like cpu, ram or disk util
->> rates across the nodes?
->
-> Wouldn't this be reinventing the wheel since this is something that things like
-> pcp (collectd?) do very well already?
->
+>> and the latest python-crush published today. A comparison function was added that will help measure the data movement. I'm hoping we can release an offline tool based on your solution. Please let me know if I should wait before diving into this, in case you have unpublished drafts or new ideas.
 >>
+>> Cheers
 >>
->>
->> On Wed, Mar 15, 2017 at 2:13 AM, Sage Weil <sweil@redhat.com> wrote:
->>> On Tue, 14 Mar 2017, John Spray wrote:
->>>> On Tue, Mar 14, 2017 at 3:13 AM, Paul Cuzner <pcuzner@redhat.com> wrote:
->>>> > First of all - thanks John for your patience!
->>>> >
->>>> > I guess, I still can't get past the different metrics being used -
->>>> > client I/O is described in one way, recovery in another and yet
->>>> > fundamentally they both send ops to the OSD's right? To me, what's
->>>> > interesting is that the recovery_rate metrics from pool stats seems to
->>>> > be a higher level 'product' of lower level information - for example
->>>> > recovering_objects_per_sec : is this not a product of multiple
->>>> > read/write ops to OSD's?
->>>>
->>>> While there is data being moved around, it would be misleading to say
->>>> it's all just ops.  The path that client ops go down is different to
->>>> the path that recovery messages go down.  Recovery data is gathered up
->>>> into big vectors of object extents that are sent between OSDs, client
->>>> ops are sent individually from clients.  An OSD servicing 10 writes
->>>> from 10 different clients is not directly comparable to an OSD
->>>> servicing an MOSDPush message from another OSD that happens to contain
->>>> updates to 10 objects.
->>>>
->>>> Client ops are also a logically meaningful to consumers of the
->>>> cluster, while the recovery stuff is a total implementation detail.
->>>> The implementation of recovery could change any time, and any counter
->>>> generated from it will only be meaningful to someone who understands
->>>> how recovery works on that particular version of the ceph code.
->>>>
->>>> > Also, don't get me wrong - the recovery_rate dict is cool and it gives
->>>> > a great view of object level recovery - I was just hoping for common
->>>> > metrics for the OSD ops that are shared by client and recovery
->>>> > activity.
->>>> >
->>>> > Since this isn't the case, what's the recommended way to determine how
->>>> > busy a cluster is - across recovery and client (rbd/rgw) requests?
->>>>
->>>> I would say again that how busy a cluster is doing it's job (client
->>>> IO) is a very separate thing from how busy it is doing internal
->>>> housekeeping.  Imagine exposing this as a speedometer dial in a GUI
->>>> (as people sometimes do) -- a cluster that was killing itself with
->>>> recovery and completely blocking it's clients would look like it was
->>>> going nice and fast.  In my view, exposing two separate numbers is the
->>>> right thing to do, not a shortcoming.
->>>>
->>>> If you truly want to come up with some kind of single metric then you
->>>> can: you could take the rate of change of the objects recovered for
->>>> example.  If you wanted to, you could think of finishing recovery of
->>>> one object as an "op".  I would tend to think of this as the job of a
->>>> higher level tool though, rather than a collectd plugin.  Especially
->>>> if the collectd plugin is meant to be general purpose, it should avoid
->>>> inventing things like this.
+>> On 03/09/2017 09:47 AM, Pedro López-Adeva wrote:
+>>> Great, thanks for the clarifications.
+>>> I also think that the most natural way is to keep just a set of
+>>> weights in the CRUSH map and update them inside the algorithm.
 >>>
->>> I think the only other option is to take a measurement at a lower layer.
->>> BlueStore doesn't currently but could easily have metrics for bytes read
->>> and written.  But again, this is a secondary product of client and
->>> recovery: a client write, for example, will result in 3 writes across 3
->>> osds (in a 3x replicated pool).
->>>
->>> sage
+>>> I keep working on it.
 >>>
 >>>
->>>  >
->>>> John
+>>> 2017-03-08 0:06 GMT+01:00 Sage Weil <sage@newdream.net>:
+>>>> Hi Pedro,
 >>>>
->>>> >
->>>> >
->>>> >
->>>> >
->>>> >
->>>> >
->>>> >
->>>> >
->>>> >
->>>> > .
->>>> >
->>>> > On Tue, Mar 14, 2017 at 11:14 AM, John Spray <jspray@redhat.com> wrote:
->>>> >> On Mon, Mar 13, 2017 at 10:13 PM, John Spray <jspray@redhat.com> wrote:
->>>> >>> On Mon, Mar 13, 2017 at 9:50 PM, Paul Cuzner <pcuzner@redhat.com> wrote:
->>>> >>>> Fundamentally, the metrics that describe the IO the OSD performs in
->>>> >>>> response to a recovery operation should be the same as the metrics for
->>>> >>>> client I/O.
->>>> >>>
->>>> >>> Ah, so the key part here I think is "describe the IO that the OSD
->>>> >>> performs" -- the counters you've been looking at do not do that.  They
->>>> >>> describe the ops the OSD is servicing, *not* the (disk) IO the OSD is
->>>> >>> doing as a result.
->>>> >>>
->>>> >>> That's why you don't get an apples-to-apples comparison between client
->>>> >>> IO and recovery -- if you were looking at disk IO stats from both, it
->>>> >>> would be perfectly reasonable to combine/compare them.  When you're
->>>> >>> looking at Ceph's own counters of client ops vs. recovery activity,
->>>> >>> that no longer makes sense.
->>>> >>>
->>>> >>>> So in the context of a recovery operation, one OSD would
->>>> >>>> report a read (recovery source) and another report a write (recovery
->>>> >>>> target), together with their corresponding num_bytes. To my mind this
->>>> >>>> provides transparency, and maybe helps potential automation.
->>>> >>>
->>>> >>> Okay, so if we were talking about disk IO counters, this would
->>>> >>> probably make sense (one read wouldn't necessarily correspond to one
->>>> >>> write), but if you had a counter that was telling you how many Ceph
->>>> >>> recovery push/pull ops were "reading" (being sent) vs "writing" (being
->>>> >>> received) the totals would just be zero.
->>>> >>
->>>> >> Sorry, that should have said the totals would just be equal.
->>>> >>
->>>> >> John
->>>> >>
->>>> >>>
->>>> >>> John
->>>> >>>
->>>> >>>>
->>>> >>>
->>>> >>>>
->>>> >>>>
->>>> >>>>
->>>> >>>>
->>>> >>>>
->>>> >>>> On Mon, Mar 13, 2017 at 1:13 AM, John Spray <jspray@redhat.com> wrote:
->>>> >>>>> On Sat, Mar 11, 2017 at 9:24 PM, Paul Cuzner <pcuzner@redhat.com> wrote:
->>>> >>>>>> On Sun, Mar 12, 2017 at 9:49 AM, John Spray <jspray@redhat.com> wrote:
->>>> >>>>>>> On Fri, Mar 10, 2017 at 8:52 PM, Paul Cuzner <pcuzner@redhat.com> wrote:
->>>> >>>>>>>> Thanks John
->>>> >>>>>>>>
->>>> >>>>>>>> This is weird then. When I look at the data with client load I see the
->>>> >>>>>>>> following;
->>>> >>>>>>>> {
->>>> >>>>>>>> "pool_name": "default.rgw.buckets.index",
->>>> >>>>>>>> "pool_id": 94,
->>>> >>>>>>>> "recovery": {},
->>>> >>>>>>>> "recovery_rate": {},
->>>> >>>>>>>> "client_io_rate": {
->>>> >>>>>>>> "read_bytes_sec": 19242365,
->>>> >>>>>>>> "write_bytes_sec": 0,
->>>> >>>>>>>> "read_op_per_sec": 12514,
->>>> >>>>>>>> "write_op_per_sec": 0
->>>> >>>>>>>> }
->>>> >>>>>>>>
->>>> >>>>>>>> No object related counters - they're all block based. The plugin I
->>>> >>>>>>>> have rolls-up the block metrics across all pools to provide total
->>>> >>>>>>>> client load.
->>>> >>>>>>>
->>>> >>>>>>> Where are you getting the idea that these counters have to do with
->>>> >>>>>>> block storage?  What Ceph is telling you about here is the number of
->>>> >>>>>>> operations (or bytes in those operations) being handled by OSDs.
->>>> >>>>>>>
->>>> >>>>>>
->>>> >>>>>> Perhaps it's my poor choice of words - apologies.
->>>> >>>>>>
->>>> >>>>>> read_op_per_sec is read IOP count to the OSDs from client activity
->>>> >>>>>> against the pool
->>>> >>>>>>
->>>> >>>>>> My point is that client-io is expressed in these terms, but recovery
->>>> >>>>>> activity is not. I was hoping that both recovery and client I/O would
->>>> >>>>>> be reported in the same way so you gain a view of the activity of the
->>>> >>>>>> system as a whole. I can sum bytes_sec from client i/o with
->>>> >>>>>> recovery_rate bytes_sec, which is something, but I can't see inside
->>>> >>>>>> recovery activity to see how much is read or write, or how much IOP
->>>> >>>>>> load is coming from recovery.
->>>> >>>>>
->>>> >>>>> What would it mean to you for a recovery operation (one OSD sending
->>>> >>>>> some data to another OSD) to be read vs. write?
->>>> >>>>>
->>>> >>>>> John
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>> Thanks for taking a look at this!  It's a frustrating problem and we
+>>>> haven't made much headway.
 >>>>
+>>>> On Thu, 2 Mar 2017, Pedro López-Adeva wrote:
+>>>>> Hi,
+>>>>>
+>>>>> I will have a look. BTW, I have not progressed that much but I have
+>>>>> been thinking about it. In order to adapt the previous algorithm in
+>>>>> the python notebook I need to substitute the iteration over all
+>>>>> possible devices permutations to iteration over all the possible
+>>>>> selections that crush would make. That is the main thing I need to
+>>>>> work on.
+>>>>>
+>>>>> The other thing is of course that weights change for each replica.
+>>>>> That is, they cannot be really fixed in the crush map. So the
+>>>>> algorithm inside libcrush, not only the weights in the map, need to be
+>>>>> changed. The weights in the crush map should reflect then, maybe, the
+>>>>> desired usage frequencies. Or maybe each replica should have their own
+>>>>> crush map, but then the information about the previous selection
+>>>>> should be passed to the next replica placement run so it avoids
+>>>>> selecting the same one again.
 >>>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Cheers,
-> Brad
+>>>> My suspicion is that the best solution here (whatever that means!)
+>>>> leaves the CRUSH weights intact with the desired distribution, and
+>>>> then generates a set of derivative weights--probably one set for each
+>>>> round/replica/rank.
+>>>>
+>>>> One nice property of this is that once the support is added to encode
+>>>> multiple sets of weights, the algorithm used to generate them is free to
+>>>> change and evolve independently.  (In most cases any change is
+>>>> CRUSH's mapping behavior is difficult to roll out because all
+>>>> parties participating in the cluster have to support any new behavior
+>>>> before it is enabled or used.)
+>>>>
+>>>>> I have a question also. Is there any significant difference between
+>>>>> the device selection algorithm description in the paper and its final
+>>>>> implementation?
+>>>>
+>>>> The main difference is the "retry_bucket" behavior was found to be a bad
+>>>> idea; any collision or failed()/overload() case triggers the
+>>>> retry_descent.
+>>>>
+>>>> There are other changes, of course, but I don't think they'll impact any
+>>>> solution we come with here (or at least any solution can be suitably
+>>>> adapted)!
+>>>>
+>>>> sage
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+> 
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
