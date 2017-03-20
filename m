@@ -1,60 +1,56 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Testing fuse implementation.
-Date: Mon, 20 Mar 2017 23:24:12 +0100
-Message-ID: <52481c88-3569-f700-2048-499e5e3ab5b8@digiware.nl>
-References: <2a2aa01a-4511-1bc2-0575-051f626575ad@digiware.nl>
- <CAJ4mKGYPLYYTooHYY8KayXxCub1OtmBVXTdXgp+5MLxo7RkzMA@mail.gmail.com>
- <CAOtMX2iVwM1UcD-RcPDMYpH8UTUahkJ28kfsjdkRp9ZzCENpGg@mail.gmail.com>
- <CAJ4mKGaU_ERDXVY8x484dv5iThSTr8RsOFd4LRzkM6_7K=8fWg@mail.gmail.com>
+From: Amitt Bhardwj <bhardwjamitt@gmail.com>
+Subject: Introduction for GSOC 2017
+Date: Mon, 20 Mar 2017 19:55:06 -0400
+Message-ID: <CAK6Ouy_SHmHAm=SrOrDMkeWMxtdpCfuztS+LywdKtoX2Mx03GA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:62671 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753046AbdCTWYR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 20 Mar 2017 18:24:17 -0400
-In-Reply-To: <CAJ4mKGaU_ERDXVY8x484dv5iThSTr8RsOFd4LRzkM6_7K=8fWg@mail.gmail.com>
+Received: from mail-pg0-f53.google.com ([74.125.83.53]:34102 "EHLO
+        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753092AbdCUAEQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Mar 2017 20:04:16 -0400
+Received: by mail-pg0-f53.google.com with SMTP id 21so51713812pgg.1
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Mar 2017 17:04:15 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>, Alan Somers <asomers@freebsd.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 20-3-2017 18:38, Gregory Farnum wrote:
-> On Mon, Mar 20, 2017 at 1:35 PM, Alan Somers <asomers@freebsd.org> wrote:
->> On Mon, Mar 20, 2017 at 10:57 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
->>> On Mon, Mar 20, 2017 at 12:52 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>>> Hi,
->>>>
->>>> Compiling ceph-fuse-fs on FreeBSD seemed like a few (1)  very tiny
->>>> change, and I'll need to update the install-deps for some extra packages.
->>>> But when I run the test-set there is not much that I see that gets
->>>> tested specifically for the fuse implementation.
->>>>
->>>> So that is hidden somewhere else...
->>>> Can somebody give me a pointer?
->>>
->>> There's not really anything in make check for it; we rely on the
->>> libcephfs tests for smoking out problems there.
->>>
->>> In teuthology ceph-fuse gets all kinds of proper filesystem tests run
->>> on it. Just pick whatever's convenient on BSD? (On Linux I'd recommend
->>> the pjd filesystem test suite, but I don't know if that's
->>> BSD-compatible or not.)
->>> -Greg
->>
->> You mean this pjd filesystem test suite?  As a matter of fact, it was
->> originally written for FreeBSD.
->> https://github.com/pjd/pjdfstest
-> 
-> Yep, that's the one. D'oh.
+Greetings,
+I am graduate student in Concordia University, Montreal. I wish to
+participate in GSOC 2017 by contributing in this community. I have
+been involved with python/django for 2 years. During my under-grad
+degree I have worked on 3 projects in python/django namely
 
-Right,
-Lets see if we can get some of Teuthology run. Either manual, or by
-trying to get it running by itself.
+Librehatti - An E-Commerce cum CRM Django Application for easy, quick,
+and secure data processing that automates the tasks of Testing &
+Consultancy Cell or any other Similar office.(Python/Django)
 
-Need to get some mileage on this,
+Questionnaire - Questionnaire is designed for Ideators and
+Organisations like Incubators, Investors, Accelerators etc. This
+web-application is developed as a feature of future version of
+MyIdeaList application. This feature would enable these ideators, once
+their idea is validated, to submit their idea to incubators, angel
+investors, accelerator, VC?s, advisors and mentors.Questionnaire is
+flexible and easy to use and is designed and developed to deliver real
+conceivable benefits.(Python/Django)
 
---WjW
+Detection of Person of Interest(2 contributors) - We build an
+algorithm to identify Enron Employees who may have committed fraud
+based on the public Enron financial and email dataset. We extracted
+useful features that best represents the data, a few of the most
+commonly used machine learning algorithms (SVM, Decision Trees,
+RandomTree Classifiers, etc) today, and evaluated the performance of
+our machine learning algorithms.(Python/Sci-kit Learn)
 
+ Sports Blog (2 contributors) - In this project we create a  Blogging
+Engine  with Sports theme. The blog have functionalities like
+Registration, Login, Live Sports Feeds, Adding a Blog Post and
+Commenting, Viewing Other Users and Following them.(Python/Django)
 
+Apart from this I have also given beginner level training to 4
+students for 6 weeks on Web Development using Python/Django. Apart
+from this, I am a technology fanatic and like to be up-to-date with
+world. I would like to be a part of this community. Please add me to
+the mailing list.
+
+Regards
