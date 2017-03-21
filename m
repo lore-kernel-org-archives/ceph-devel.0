@@ -1,34 +1,39 @@
-From: Lars Marowsky-Bree <lmb@suse.com>
-Subject: Post-Luminous feature work?
-Date: Tue, 21 Mar 2017 16:03:12 +0100
-Message-ID: <20170321150312.46tphfbfotmgl3u2@suse.com>
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Cephalocon 2017 CFP Open!
+Date: Tue, 21 Mar 2017 12:11:21 -0400
+Message-ID: <CAAZbbf0SjQ6Q1m3sfrRq6wLoFJA4NdewrgfxDYNCN=_NmE47WQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:47678 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1757423AbdCUPDV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 21 Mar 2017 11:03:21 -0400
-Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 31D69AC4A
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Mar 2017 15:03:19 +0000 (UTC)
-Content-Disposition: inline
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph board <board-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi folks,
+Hey cephers,
 
-I'm doing a talk at a Unix conference talking about Ceph soon. I'm
-wondering if anyone already has an idea what M/N will bring so I can
-pretend to know the future? ;-)
+For those of you that are interested in presenting, sponsoring, or
+attending Cephalocon, all of those options are now available on the
+Ceph site.
 
+http://ceph.com/cephalocon2017/
 
-Regards,
-    Lars
+If you have any questions, comments, or difficulties, feel free to let
+me know. Thanks!
 
 -- 
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
-"Experience is the name everyone gives to their mistakes." -- Oscar Wilde
 
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
