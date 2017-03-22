@@ -1,83 +1,66 @@
-From: Brad Hubbard <bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Recompiling source code - to find exact RPM
-Date: Wed, 22 Mar 2017 10:17:59 +1000
-Message-ID: <CAF-wwdFNgsq9+Z2Y3JcBxQoWfUtvtfZ0Y8C3WWArX9fPFVzR5Q@mail.gmail.com>
-References: <CALWuvY9kyuZgSHeLFwBw86J=tDzX-xc2FPvAQ8Qq__o3s_oodw@mail.gmail.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: Introduction for GSOC 2017
+Date: Wed, 22 Mar 2017 15:32:40 +0800
+Message-ID: <CAJE9aOPTQCAcOtogz0u8+kfxCNO3k_VBRTCXAb60p1HBryBKdQ@mail.gmail.com>
+References: <CAK6Ouy_SHmHAm=SrOrDMkeWMxtdpCfuztS+LywdKtoX2Mx03GA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CALWuvY9kyuZgSHeLFwBw86J=tDzX-xc2FPvAQ8Qq__o3s_oodw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: nokia ceph <nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f42.google.com ([209.85.213.42]:35248 "EHLO
+        mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758940AbdCVHcs (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Mar 2017 03:32:48 -0400
+Received: by mail-vk0-f42.google.com with SMTP id r69so7379174vke.2
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Mar 2017 00:32:47 -0700 (PDT)
+In-Reply-To: <CAK6Ouy_SHmHAm=SrOrDMkeWMxtdpCfuztS+LywdKtoX2Mx03GA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Amitt Bhardwj <bhardwjamitt@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Based solely on the information given the only rpms with this specific commit in
-them would be here
-https://shaman.ceph.com/builds/ceph/wip-prune-past-intervals-kraken/
-(specifically
-https://4.chacra.ceph.com/r/ceph/wip-prune-past-intervals-kraken/8263140fe539f9c3241c1c0f6ee9cfadde9178c0/centos/7/flavors/default/x86_64/).
-These are test rpms, not official releases.
+On Tue, Mar 21, 2017 at 7:55 AM, Amitt Bhardwj <bhardwjamitt@gmail.com> wrote:
+> Greetings,
+> I am graduate student in Concordia University, Montreal. I wish to
+> participate in GSOC 2017 by contributing in this community. I have
+> been involved with python/django for 2 years. During my under-grad
+> degree I have worked on 3 projects in python/django namely
+>
+> Librehatti - An E-Commerce cum CRM Django Application for easy, quick,
+> and secure data processing that automates the tasks of Testing &
+> Consultancy Cell or any other Similar office.(Python/Django)
+>
+> Questionnaire - Questionnaire is designed for Ideators and
+> Organisations like Incubators, Investors, Accelerators etc. This
+> web-application is developed as a feature of future version of
+> MyIdeaList application. This feature would enable these ideators, once
+> their idea is validated, to submit their idea to incubators, angel
+> investors, accelerator, VC?s, advisors and mentors.Questionnaire is
+> flexible and easy to use and is designed and developed to deliver real
+> conceivable benefits.(Python/Django)
+>
+> Detection of Person of Interest(2 contributors) - We build an
+> algorithm to identify Enron Employees who may have committed fraud
+> based on the public Enron financial and email dataset. We extracted
+> useful features that best represents the data, a few of the most
+> commonly used machine learning algorithms (SVM, Decision Trees,
+> RandomTree Classifiers, etc) today, and evaluated the performance of
+> our machine learning algorithms.(Python/Sci-kit Learn)
+>
+>  Sports Blog (2 contributors) - In this project we create a  Blogging
+> Engine  with Sports theme. The blog have functionalities like
+> Registration, Login, Live Sports Feeds, Adding a Blog Post and
+> Commenting, Viewing Other Users and Following them.(Python/Django)
+>
+> Apart from this I have also given beginner level training to 4
+> students for 6 weeks on Web Development using Python/Django. Apart
+> from this, I am a technology fanatic and like to be up-to-date with
+> world. I would like to be a part of this community. Please add me to
+> the mailing list.
 
-Note that the branch "wip-prune-past-intervals-kraken" exists only in the
-ceph-ci repo and *not* the main ceph repo and that the particular commit above
-does not seem to have made it into the "ceph" repo.
-
-$ git log -S _simplify_past_intervals
-$ git log --grep="_simplify_past_intervals"
-$
-
-Given this commit is not in the ceph repo I would suggest we have never shipped
-an official rpm that contains this commit.
-
-It's not totally clear to me exactly what you are trying to achieve, maybe you
-could have another go at describing your objective?
-
-On Wed, Mar 22, 2017 at 12:26 AM, nokia ceph <nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Hello,
->
-> I made some changes in the below file on ceph kraken v11.2.0 source code as
-> per this article 
->
-> https://github.com/ceph/ceph-ci/commit/wip-prune-past-intervals-kraken
->
-> ..src/osd/PG.cc
-> ..src/osd/PG.h
->
-> Is there any way to find which rpm got affected by these two files. I
-> believe it should be ceph-osd-11.2.0-0.el7.x86_64.rpm . Can you confirm
-> please ?
->
-> I failed to find it from the ceph.spec file. 
->
-> Could anyone please guide me the right procedure to check this.
->
-> The main intention is that if we find the exact rpm affected by these files,
-> we can simply overwrite it with the old rpm.  
->
-> Awaiting for comments.
->
-> Thanks
->
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-
+Amitt, I think you are subscribed to this mailing list as long as you can
+receive the mails from it.
 
 
 -- 
-Cheers,
-Brad
+Regards
+Kefu Chai
