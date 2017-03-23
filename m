@@ -1,65 +1,53 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Still denc warnings in Clang
-Date: Thu, 23 Mar 2017 13:22:47 +0100
-Message-ID: <dcf913de-b514-4654-945a-0b7716d7fd3c@digiware.nl>
-References: <3793fc2c-b971-7440-6448-219500e6f2a5@digiware.nl>
- <alpine.DEB.2.11.1703231215590.30468@piezo.novalocal>
+From: John Spray <jspray@redhat.com>
+Subject: Re: Broken links in Ceph documentation
+Date: Thu, 23 Mar 2017 08:24:29 -0400
+Message-ID: <CALe9h7eSYZGApxFmg5g7Y6Cqc9j5HXsf+LnHVpxU1Z1fmmdf-g@mail.gmail.com>
+References: <CACKY0b8-rq-R0Sun9Mxfk3ogtA-YMF26HMWUJj0xEZ__9_Z9YQ@mail.gmail.com>
+ <CAJE9aONJQ7nAO3m+z8zyx_7qnkacU_cHPQcUMWq-5QLrA80xjQ@mail.gmail.com>
+ <CACKY0b8y8CFXGJEcHqjM8D+XRSBKs4Ag5k01QWwpY78ZjjU4Dw@mail.gmail.com>
+ <CAJE9aONcAndHg-TXjzWyaS=i=xw+X7uX4kRMw=PLKjUjsjXUvg@mail.gmail.com> <a81ccd21-715c-adc8-2e2f-1797a4147a18@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:56943 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932085AbdCWMXC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 23 Mar 2017 08:23:02 -0400
-In-Reply-To: <alpine.DEB.2.11.1703231215590.30468@piezo.novalocal>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:37087 "EHLO
+        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754043AbdCWMYw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2017 08:24:52 -0400
+Received: by mail-wm0-f52.google.com with SMTP id n11so61246165wma.0
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Mar 2017 05:24:51 -0700 (PDT)
+In-Reply-To: <a81ccd21-715c-adc8-2e2f-1797a4147a18@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: kefu chai <tchaikov@gmail.com>, liuchang0812 <liuchang0812@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 23-3-2017 13:16, Sage Weil wrote:
-> Oops, hasn't merged yet!
-> 
-> 	https://github.com/ceph/ceph/pull/13889
-> 
-> Needs to go through the QA suite still.
-
-Right,
-
-Haven't kept track of it, so expected it to be merged.
-But it'll get here when it gets there. :)
-
---WjW
-
-> sage
-> 
-> 
-> On Thu, 23 Mar 2017, Willem Jan Withagen wrote:
-> 
->> I thought that all these warnings were eradicated by now?
->>
->> --WjW
->>
->> /home/jenkins/workspace/ceph-master/src/include/denc.h:1162:10: warning:
->> binding dereferenced null pointer to reference has undefined behavior
->> [-Wnull-dereference]
->>     denc(*(bool *)nullptr, p);
->>          ^~~~~~~~~~~~~~~~
->> /home/jenkins/workspace/ceph-master/src/include/denc.h:1169:10: warning:
->> binding dereferenced null pointer to reference has undefined behavior
->> [-Wnull-dereference]
->>     denc(*(bool *)nullptr, p);
->>          ^~~~~~~~~~~~~~~~
->> /home/jenkins/workspace/ceph-master/src/include/denc.h:1236:10: warning:
->> binding dereferenced null pointer to reference has undefined behavior
->> [-Wnull-dereference]
->>     denc(*(bool *)nullptr, p);
->>          ^~~~~~~~~~~~~~~~
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Thu, Mar 23, 2017 at 8:21 AM, Nathan Cutler <ncutler@suse.cz> wrote:
+>>> BTW, there are a lot of `http://github.com/ceph/ceph/pull/xxxx` links.
+>>> It should be `https://github.com/ceph/ceph/pull/xxx` in our
+>>> ReleaseNotes.rst
 >>
 >>
+>> they are redirected to https://github.com/ceph/ceph/pull/xyz, so i
+>> guess it's fine?
+>
+>
+> "git clone http://github.com/ceph/ceph" also works fine.
+>
+> Also, I am not aware of any security risk that is addressed by using SSL.
+> Ceph is FLOSS, after all. Why encrypt the HTTP traffic?
 
+The point of HTTPS in this context is not to keep the code a secret,
+but to prevent modification in flight.
+
+If you pull http:// code then your government can easily modify it in
+flight to implant whatever they want.
+
+John
+
+>
+> Nathan
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
