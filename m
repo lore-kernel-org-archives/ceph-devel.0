@@ -1,154 +1,216 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: Broken links in Ceph documentation
-Date: Thu, 23 Mar 2017 19:11:32 +0800
-Message-ID: <CAJE9aONcAndHg-TXjzWyaS=i=xw+X7uX4kRMw=PLKjUjsjXUvg@mail.gmail.com>
-References: <CACKY0b8-rq-R0Sun9Mxfk3ogtA-YMF26HMWUJj0xEZ__9_Z9YQ@mail.gmail.com>
- <CAJE9aONJQ7nAO3m+z8zyx_7qnkacU_cHPQcUMWq-5QLrA80xjQ@mail.gmail.com> <CACKY0b8y8CFXGJEcHqjM8D+XRSBKs4Ag5k01QWwpY78ZjjU4Dw@mail.gmail.com>
+From: =?UTF-8?B?UGVkcm8gTMOzcGV6LUFkZXZh?= <plopezadeva@gmail.com>
+Subject: Re: crush multipick anomaly
+Date: Thu, 23 Mar 2017 12:49:53 +0100
+Message-ID: <CAFdhnjcs5sZbnDWXH6qJBge9WYR-Cr+svhr=YZ9hZJrDvo=vxg@mail.gmail.com>
+References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
+ <3554101b-4d10-e46b-93b0-f74794258f2e@dachary.org> <alpine.DEB.2.11.1702131417070.7782@piezo.novalocal>
+ <CAFdhnje5hJMsU8ZCSL8mFj=d4UH6b41=nnddNvcfemhyWXg6aw@mail.gmail.com>
+ <4dbab28a-220b-2cef-fcbc-aca4dd17ab3b@dachary.org> <CAFdhnjf=WPmC+CEwX1QWe_v1HXmZu2cv7983zHGG4muKR_G0jw@mail.gmail.com>
+ <43736207-9e38-9389-4b99-d246716092ed@dachary.org> <CAFdhnjfGKdmOFnT-imHo55O7LLPCdOV=_pbU50ruxo1x9C3NDA@mail.gmail.com>
+ <cbcf592e-a0c0-bc5b-0f2a-11c4a110d485@dachary.org> <CAFdhnjcDfUG6Dzm2R_Fu16d7rT1z_h+mFy6ngYLUcLtURn_pVA@mail.gmail.com>
+ <63256e6b-ec48-e369-afc3-6d65eb5230f8@dachary.org> <eca40695-44b3-6843-b1c3-8359231e4d87@dachary.org>
+ <CAFdhnjfYK43=ZdQ-cPG0k8KzKnTZ=T5VNoYdfdSdPH8gRG_i+A@mail.gmail.com>
+ <alpine.DEB.2.11.1703072259520.24356@piezo.novalocal> <CAFdhnjeAdCgqS3N7yvZXEanEc8c_q2hR_HciUD2gdFGcRyaZXQ@mail.gmail.com>
+ <649a0116-6f61-0470-69bd-41f64214ad5a@dachary.org> <6b063525-eeec-bdf6-a926-af2e9276f34b@dachary.org>
+ <7f03d75d-0dc7-086e-6f43-5b2717588345@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f173.google.com ([209.85.217.173]:34562 "EHLO
-        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932083AbdCWLLe (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2017 07:11:34 -0400
-Received: by mail-ua0-f173.google.com with SMTP id v22so6691753uaa.1
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Mar 2017 04:11:33 -0700 (PDT)
-In-Reply-To: <CACKY0b8y8CFXGJEcHqjM8D+XRSBKs4Ag5k01QWwpY78ZjjU4Dw@mail.gmail.com>
+Received: from mail-qt0-f178.google.com ([209.85.216.178]:36085 "EHLO
+        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751178AbdCWLtz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2017 07:49:55 -0400
+Received: by mail-qt0-f178.google.com with SMTP id r45so172567072qte.3
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Mar 2017 04:49:54 -0700 (PDT)
+In-Reply-To: <7f03d75d-0dc7-086e-6f43-5b2717588345@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: liuchang0812 <liuchang0812@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, Mar 22, 2017 at 3:55 PM, liuchang0812 <liuchang0812@gmail.com> wrote:
-> Hi, kefu
+Hi Loic,
+
+From what I see everything seems OK. The interesting thing would be to
+test on some complex mapping. The reason is that "CrushPolicyFamily"
+is right now modeling just a single straw bucket not the full CRUSH
+algorithm. That's the work that remains to be done. The only way that
+would avoid reimplementing the CRUSH algorithm and computing the
+gradient would be treating CRUSH as a black box and eliminating the
+necessity of computing the gradient either by using a gradient-free
+optimization method or making an estimation of the gradient.
+
+
+
+2017-03-20 11:49 GMT+01:00 Loic Dachary <loic@dachary.org>:
+> Hi,
 >
-> This URL: http://docutils.sourceforge.net/docs/user/rst/quickstart.html
-> is accessable. Linkcheck said that it's HTTP 502.
-
-if you are sure about it, maybe you can file a ticket against sphinx
-with a minimal reproducer?
-
+> I modified the crush library to accept two weights (one for the first dis=
+k, the other for the remaining disks)[1]. This really is a hack for experim=
+entation purposes only ;-) I was able to run a variation of your code[2] an=
+d got the following results which are encouraging. Do you think what I did =
+is sensible ? Or is there a problem I don't see ?
+>
+> Thanks !
+>
+> Simulation: R=3D2 devices capacity [10  8  6 10  8  6 10  8  6]
+> ------------------------------------------------------------------------
+> Before: All replicas on each hard drive
+> Expected vs actual use (20000 samples)
+>  disk 0: 1.39e-01 1.12e-01
+>  disk 1: 1.11e-01 1.10e-01
+>  disk 2: 8.33e-02 1.13e-01
+>  disk 3: 1.39e-01 1.11e-01
+>  disk 4: 1.11e-01 1.11e-01
+>  disk 5: 8.33e-02 1.11e-01
+>  disk 6: 1.39e-01 1.12e-01
+>  disk 7: 1.11e-01 1.12e-01
+>  disk 8: 8.33e-02 1.10e-01
+> it=3D    1 jac norm=3D1.59e-01 loss=3D5.27e-03
+> it=3D    2 jac norm=3D1.55e-01 loss=3D5.03e-03
+> ...
+> it=3D  212 jac norm=3D1.02e-03 loss=3D2.41e-07
+> it=3D  213 jac norm=3D1.00e-03 loss=3D2.31e-07
+> Converged to desired accuracy :)
+> After: All replicas on each hard drive
+> Expected vs actual use (20000 samples)
+>  disk 0: 1.39e-01 1.42e-01
+>  disk 1: 1.11e-01 1.09e-01
+>  disk 2: 8.33e-02 8.37e-02
+>  disk 3: 1.39e-01 1.40e-01
+>  disk 4: 1.11e-01 1.13e-01
+>  disk 5: 8.33e-02 8.08e-02
+>  disk 6: 1.39e-01 1.38e-01
+>  disk 7: 1.11e-01 1.09e-01
+>  disk 8: 8.33e-02 8.48e-02
 >
 >
-> BTW, there are a lot of `http://github.com/ceph/ceph/pull/xxxx` links.
-> It should be `https://github.com/ceph/ceph/pull/xxx` in our
-> ReleaseNotes.rst
-
-they are redirected to https://github.com/ceph/ceph/pull/xyz, so i
-guess it's fine?
-
+> Simulation: R=3D2 devices capacity [10 10 10 10  1]
+> ------------------------------------------------------------------------
+> Before: All replicas on each hard drive
+> Expected vs actual use (20000 samples)
+>  disk 0: 2.44e-01 2.36e-01
+>  disk 1: 2.44e-01 2.38e-01
+>  disk 2: 2.44e-01 2.34e-01
+>  disk 3: 2.44e-01 2.38e-01
+>  disk 4: 2.44e-02 5.37e-02
+> it=3D    1 jac norm=3D2.43e-01 loss=3D2.98e-03
+> it=3D    2 jac norm=3D2.28e-01 loss=3D2.47e-03
+> ...
+> it=3D   37 jac norm=3D1.28e-03 loss=3D3.48e-08
+> it=3D   38 jac norm=3D1.07e-03 loss=3D2.42e-08
+> Converged to desired accuracy :)
+> After: All replicas on each hard drive
+> Expected vs actual use (20000 samples)
+>  disk 0: 2.44e-01 2.46e-01
+>  disk 1: 2.44e-01 2.44e-01
+>  disk 2: 2.44e-01 2.41e-01
+>  disk 3: 2.44e-01 2.45e-01
+>  disk 4: 2.44e-02 2.33e-02
 >
-> 2017-03-22 15:34 GMT+08:00 kefu chai <tchaikov@gmail.com>:
->> On Tue, Mar 21, 2017 at 11:06 AM, liuchang0812 <liuchang0812@gmail.com> wrote:
->>> Hi, all
+>
+> [1] crush hack http://libcrush.org/main/libcrush/commit/6efda297694392d0b=
+07845eb98464a0dcd56fee8
+> [2] python-crush hack http://libcrush.org/dachary/python-crush/commit/d92=
+02fcd4d17cd2a82b37ec20c1bd25f8f2c4b68
+>
+> On 03/19/2017 11:31 PM, Loic Dachary wrote:
+>> Hi Pedro,
+>>
+>> It looks like trying to experiment with crush won't work as expected bec=
+ause crush does not distinguish the probability of selecting the first devi=
+ce from the probability of selecting the second or third device. Am I mista=
+ken ?
+>>
+>> Cheers
+>>
+>> On 03/18/2017 10:21 AM, Loic Dachary wrote:
+>>> Hi Pedro,
 >>>
->>> I have run `sphinx linkcheck` for our documentation. Here are all
->>> broken links(there are some non-broken urls, bug of linkcheck?) :
->>
->> i don't think it's a bug of linkcheck. they are links not reachable anymore.
->>
+>>> I'm going to experiment with what you did at
 >>>
->>> api/index.rst:39: [broken]
->>> http://ceph.com/calamari/docs/calamari_rest/index.html: HTTP Error
->>> 404: Not Found
->>> architecture.rst:108: [broken]
->>> http://ceph.com/papers/weil-crush-sc06.pdf: HTTP Error 404: Not Found
->>> cephfs/mantle.rst:38: [broken] https://sourceforge.net/projects/mdtest/: ''
->>> dev/cpu-profiler.rst:5: [broken]
->>> http://oprofile.sourceforge.net/about/: HTTP Error 502: Bad Gateway
->>> dev/development-workflow.rst:57: [broken]
->>> http://wiki.ceph.com/Planning/CDS/: HTTP Error 404: Not Found
->>> dev/development-workflow.rst:126: [broken]
->>> http://ceph.com/resources/mailing-list-irc/: HTTP Error 404: Not Found
->>> dev/documenting.rst:27: [broken]
->>> https://raw.github.com/ceph/ceph/master/doc/api/librados.rst: HTTP
->>> Error 404: Not Found
->>> dev/documenting.rst:77: [broken] http://blockdiag.com/: timed out
->>> dev/index.rst:114: [broken] http://tracker.ceph.com/account/register:
->>> HTTP Error 500: Internal Server Error
->>> dev/index.rst:136: [broken]
->>> https://ceph.com/resources/mailing-list-irc/: HTTP Error 404: Not
->>> Found
->>> dev/index.rst:148: [broken]
->>> https://ceph.com/resources/mailing-list-irc/: HTTP Error 404: Not
->>> Found
->>> dev/index.rst:429: [broken] https://github.com/mygithubaccount/ceph:
->>> HTTP Error 404: Not Found
->>> dev/index.rst:450: [broken]
->>> https://github.com/mygithubaccount/ceph.git: HTTP Error 404: Not Found
->>> dev/index.rst:716: [broken]
->>> http://ceph.com/resources/mailing-list-irc/: HTTP Error 404: Not Found
->>> dev/index.rst:1164: [broken] https://docs.docker.com/linux/: HTTP
->>> Error 403: Forbidden
->>> dev/osd_internals/erasure_coding/developer_notes.rst:190: [broken]
->>> https://github.com/ceph/ceph/blob/v0.78/src/test/osd/ErasureCodePluginExample.cc:
->>> HTTP Error 404: Not Found
->>> dev/placement-group.rst:47: [broken]
->>> http://ceph.com/wiki/Changing_the_number_of_PGs: HTTP Error 404: Not
->>> Found
->>> dev/rbd-layering.rst:92: [broken]
->>> http://marc.info/?l=ceph-devel&m=129867273303846: timed out
->>> install/get-packages.rst:148: [broken]
->>> https://download.ceph.com/packages/google-perftools/debian: HTTP Error
->>> 404: Not Found
->>> install/mirrors.rst:25: [broken] http://us-east.ceph.com/: HTTP Error
->>> 502: Bad Gateway
->>> install/mirrors.rst:18: [broken] http://au.ceph.com/: timed out
->>> rados/operations/crush-map.rst:12: [broken]
->>> http://ceph.com/papers/weil-crush-sc06.pdf: HTTP Error 404: Not Found
->>> rados/operations/crush-map.rst:408: [broken]
->>> http://ceph.com/papers/weil-crush-sc06.pdf: HTTP Error 404: Not Found
->>> rados/operations/crush-map.rst:491: [broken]
->>> http://ceph.com/papers/weil-crush-sc06.pdf: HTTP Error 404: Not Found
->>> rados/operations/erasure-code-jerasure.rst:8: [broken]
->>> https://bitbucket.org/jimplank/jerasure/: HTTP Error 404: Not Found
->>> rados/operations/operating.rst:112: [broken]
->>> http://manpages.ubuntu.com/manpages/raring/en/man8/initctl.8.html:
->>> HTTP Error 404: Not Found
->>> rados/troubleshooting/cpu-profiling.rst:5: [broken]
->>> http://oprofile.sourceforge.net/about/: HTTP Error 502: Bad Gateway
->>> rados/troubleshooting/memory-profiling.rst:63: [broken]
->>> http://google-perftools.googlecode.com/svn/trunk/doc/heapprofile.html:
->>> HTTP Error 404: Not Found
->>> radosgw/keystone.rst:24: [broken]
->>> http://docs.openstack.org/developer/keystone/configuringservices.html:
->>> HTTP Error 404: Not Found
->>> rbd/rbd-cloudstack.rst:89: [broken]
->>> http://cloudstack.apache.org/docs/en-US/Apache_CloudStack/4.2.0/html/Admin_Guide/primary-storage-add.html:
->>> HTTP Error 404: Not Found
->>> rbd/rbd-cloudstack.rst:108: [broken]
->>> http://cloudstack.apache.org/docs/en-US/Apache_CloudStack/4.2.0/html/Admin_Guide/compute-disk-service-offerings.html:
->>> HTTP Error 404: Not Found
->>> release-notes.rst:2137: [broken] https://: <urlopen error no host given>
->>> start/documenting-ceph.rst:482: [broken]
->>> http://docutils.sourceforge.net/docs/user/rst/quickstart.html: HTTP
->>> Error 502: Bad Gateway
->>> start/documenting-ceph.rst:486: [broken]
->>> http://docutils.sourceforge.net/docs/user/rst/quickstart.html: HTTP
->>> Error 502: Bad Gateway
->>> start/documenting-ceph.rst:563: [broken]
->>> http://docutils.sourceforge.net/docs/ref/rst/directives.html: HTTP
->>> Error 502: Bad Gateway
->>> start/get-involved.rst:15: [broken]
->>> http://ceph.com/community/planet-ceph/: HTTP Error 404: Not Found
->>> start/get-involved.rst:36: [broken]
->>> http://news.gmane.org/gmane.comp.file-systems.ceph.user: HTTP Error
->>> 404: Not Found
->>> start/get-involved.rst:43: [broken]
->>> http://news.gmane.org/gmane.comp.file-systems.ceph.devel: HTTP Error
->>> 404: Not Found
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> https://github.com/plafl/notebooks/blob/master/replication.ipynb
+>>>
+>>> and the latest python-crush published today. A comparison function was =
+added that will help measure the data movement. I'm hoping we can release a=
+n offline tool based on your solution. Please let me know if I should wait =
+before diving into this, in case you have unpublished drafts or new ideas.
+>>>
+>>> Cheers
+>>>
+>>> On 03/09/2017 09:47 AM, Pedro L=C3=B3pez-Adeva wrote:
+>>>> Great, thanks for the clarifications.
+>>>> I also think that the most natural way is to keep just a set of
+>>>> weights in the CRUSH map and update them inside the algorithm.
+>>>>
+>>>> I keep working on it.
+>>>>
+>>>>
+>>>> 2017-03-08 0:06 GMT+01:00 Sage Weil <sage@newdream.net>:
+>>>>> Hi Pedro,
+>>>>>
+>>>>> Thanks for taking a look at this!  It's a frustrating problem and we
+>>>>> haven't made much headway.
+>>>>>
+>>>>> On Thu, 2 Mar 2017, Pedro L=C3=B3pez-Adeva wrote:
+>>>>>> Hi,
+>>>>>>
+>>>>>> I will have a look. BTW, I have not progressed that much but I have
+>>>>>> been thinking about it. In order to adapt the previous algorithm in
+>>>>>> the python notebook I need to substitute the iteration over all
+>>>>>> possible devices permutations to iteration over all the possible
+>>>>>> selections that crush would make. That is the main thing I need to
+>>>>>> work on.
+>>>>>>
+>>>>>> The other thing is of course that weights change for each replica.
+>>>>>> That is, they cannot be really fixed in the crush map. So the
+>>>>>> algorithm inside libcrush, not only the weights in the map, need to =
+be
+>>>>>> changed. The weights in the crush map should reflect then, maybe, th=
+e
+>>>>>> desired usage frequencies. Or maybe each replica should have their o=
+wn
+>>>>>> crush map, but then the information about the previous selection
+>>>>>> should be passed to the next replica placement run so it avoids
+>>>>>> selecting the same one again.
+>>>>>
+>>>>> My suspicion is that the best solution here (whatever that means!)
+>>>>> leaves the CRUSH weights intact with the desired distribution, and
+>>>>> then generates a set of derivative weights--probably one set for each
+>>>>> round/replica/rank.
+>>>>>
+>>>>> One nice property of this is that once the support is added to encode
+>>>>> multiple sets of weights, the algorithm used to generate them is free=
+ to
+>>>>> change and evolve independently.  (In most cases any change is
+>>>>> CRUSH's mapping behavior is difficult to roll out because all
+>>>>> parties participating in the cluster have to support any new behavior
+>>>>> before it is enabled or used.)
+>>>>>
+>>>>>> I have a question also. Is there any significant difference between
+>>>>>> the device selection algorithm description in the paper and its fina=
+l
+>>>>>> implementation?
+>>>>>
+>>>>> The main difference is the "retry_bucket" behavior was found to be a =
+bad
+>>>>> idea; any collision or failed()/overload() case triggers the
+>>>>> retry_descent.
+>>>>>
+>>>>> There are other changes, of course, but I don't think they'll impact =
+any
+>>>>> solution we come with here (or at least any solution can be suitably
+>>>>> adapted)!
+>>>>>
+>>>>> sage
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>
 >>
->>
->>
->> --
->> Regards
->> Kefu Chai
-
-
-
--- 
-Regards
-Kefu Chai
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
