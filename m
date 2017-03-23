@@ -1,53 +1,34 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Still denc warnings in Clang
-Date: Thu, 23 Mar 2017 12:16:17 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1703231215590.30468@piezo.novalocal>
-References: <3793fc2c-b971-7440-6448-219500e6f2a5@digiware.nl>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: Broken links in Ceph documentation
+Date: Thu, 23 Mar 2017 13:21:29 +0100
+Message-ID: <a81ccd21-715c-adc8-2e2f-1797a4147a18@suse.cz>
+References: <CACKY0b8-rq-R0Sun9Mxfk3ogtA-YMF26HMWUJj0xEZ__9_Z9YQ@mail.gmail.com>
+ <CAJE9aONJQ7nAO3m+z8zyx_7qnkacU_cHPQcUMWq-5QLrA80xjQ@mail.gmail.com>
+ <CACKY0b8y8CFXGJEcHqjM8D+XRSBKs4Ag5k01QWwpY78ZjjU4Dw@mail.gmail.com>
+ <CAJE9aONcAndHg-TXjzWyaS=i=xw+X7uX4kRMw=PLKjUjsjXUvg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:32799 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751228AbdCWMQV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2017 08:16:21 -0400
-In-Reply-To: <3793fc2c-b971-7440-6448-219500e6f2a5@digiware.nl>
+Received: from mx2.suse.de ([195.135.220.15]:38299 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752411AbdCWMVf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 23 Mar 2017 08:21:35 -0400
+In-Reply-To: <CAJE9aONcAndHg-TXjzWyaS=i=xw+X7uX4kRMw=PLKjUjsjXUvg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>, liuchang0812 <liuchang0812@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Oops, hasn't merged yet!
+>> BTW, there are a lot of `http://github.com/ceph/ceph/pull/xxxx` links.
+>> It should be `https://github.com/ceph/ceph/pull/xxx` in our
+>> ReleaseNotes.rst
+>
+> they are redirected to https://github.com/ceph/ceph/pull/xyz, so i
+> guess it's fine?
 
-	https://github.com/ceph/ceph/pull/13889
+"git clone http://github.com/ceph/ceph" also works fine.
 
-Needs to go through the QA suite still.
-sage
+Also, I am not aware of any security risk that is addressed by using 
+SSL. Ceph is FLOSS, after all. Why encrypt the HTTP traffic?
 
-
-On Thu, 23 Mar 2017, Willem Jan Withagen wrote:
-
-> I thought that all these warnings were eradicated by now?
-> 
-> --WjW
-> 
-> /home/jenkins/workspace/ceph-master/src/include/denc.h:1162:10: warning:
-> binding dereferenced null pointer to reference has undefined behavior
-> [-Wnull-dereference]
->     denc(*(bool *)nullptr, p);
->          ^~~~~~~~~~~~~~~~
-> /home/jenkins/workspace/ceph-master/src/include/denc.h:1169:10: warning:
-> binding dereferenced null pointer to reference has undefined behavior
-> [-Wnull-dereference]
->     denc(*(bool *)nullptr, p);
->          ^~~~~~~~~~~~~~~~
-> /home/jenkins/workspace/ceph-master/src/include/denc.h:1236:10: warning:
-> binding dereferenced null pointer to reference has undefined behavior
-> [-Wnull-dereference]
->     denc(*(bool *)nullptr, p);
->          ^~~~~~~~~~~~~~~~
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Nathan
