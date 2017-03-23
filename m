@@ -1,25 +1,40 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: run-rbd-tests not in 'make check'?
-Date: Fri, 24 Mar 2017 01:10:43 +0800
-Message-ID: <CALZt5jwF4dk_ivpm1XKCYGGxGi0ZN_auiiDNz30xS+EC=gVftw@mail.gmail.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Ceph Developer Monthly - APR
+Date: Thu, 23 Mar 2017 13:45:09 -0400
+Message-ID: <CAAZbbf3hCk_aw1prt5ZsNvN9kaNDskSYBYjp+onkpf7AfAdQhQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f42.google.com ([209.85.214.42]:34865 "EHLO
-        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751851AbdCWRKp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2017 13:10:45 -0400
-Received: by mail-it0-f42.google.com with SMTP id y18so44239976itc.0
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Mar 2017 10:10:44 -0700 (PDT)
+Received: from mail-qt0-f179.google.com ([209.85.216.179]:35612 "EHLO
+        mail-qt0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752472AbdCWRpL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2017 13:45:11 -0400
+Received: by mail-qt0-f179.google.com with SMTP id x35so181697748qtc.2
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Mar 2017 10:45:10 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Hi, all
+Hey cephers,
 
-Why run-rbd-tests now is not involved into "make check" to verify the
-rbd cli now? So how could we test rbd cli now?
+Just a reminder that the next Ceph Developer Monthly meeting is coming up:
+
+http://wiki.ceph.com/Planning
+
+If you have work that you are doing that is feature work, significant
+backports, or anything you would like to discuss with the core team,
+please add it to the following page:
+
+http://wiki.ceph.com/CDM_05-APR-2017
+
+If you have questions or comments, please let me know. Thanks.
 
 
-Regards
-Ning Yao
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
