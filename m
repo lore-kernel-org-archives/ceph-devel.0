@@ -1,122 +1,153 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH] libceph: force GFP_NOIO for socket allocations
-Date: Wed, 22 Mar 2017 16:49:29 -0400
-Message-ID: <1490215769.3921.4.camel@redhat.com>
+Subject: Re: Re: [PATCH] libceph: force GFP_NOIO for socket allocations
+Date: Wed, 22 Mar 2017 22:26:11 -0400
+Message-ID: <1490235971.3921.7.camel@redhat.com>
 References: <1490181164-7822-1-git-send-email-idryomov@gmail.com>
+        ,  <1490215769.3921.4.camel@redhat.com> <201703230858170977508@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f171.google.com ([209.85.220.171]:35420 "EHLO
-        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932437AbdCVUtu (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Mar 2017 16:49:50 -0400
-Received: by mail-qk0-f171.google.com with SMTP id v127so165740107qkb.2
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Mar 2017 13:49:31 -0700 (PDT)
-In-Reply-To: <1490181164-7822-1-git-send-email-idryomov@gmail.com>
+Received: from mail-qt0-f178.google.com ([209.85.216.178]:36393 "EHLO
+        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755917AbdCWC0P (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Mar 2017 22:26:15 -0400
+Received: by mail-qt0-f178.google.com with SMTP id r45so164967611qte.3
+        for <ceph-devel@vger.kernel.org>; Wed, 22 Mar 2017 19:26:14 -0700 (PDT)
+In-Reply-To: <201703230858170977508@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+To: penglaiyxy <penglaiyxy@gmail.com>
+Cc: Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 2017-03-22 at 12:12 +0100, Ilya Dryomov wrote:
-> sock_alloc_inode() allocates socket+inode and socket_wq with
-> GFP_KERNEL, which is not allowed on the writeback path:
-> 
->     Workqueue: ceph-msgr con_work [libceph]
->     ffff8810871cb018 0000000000000046 0000000000000000 ffff881085d40000
->     0000000000012b00 ffff881025cad428 ffff8810871cbfd8 0000000000012b00
->     ffff880102fc1000 ffff881085d40000 ffff8810871cb038 ffff8810871cb148
->     Call Trace:
->     [<ffffffff816dd629>] schedule+0x29/0x70
->     [<ffffffff816e066d>] schedule_timeout+0x1bd/0x200
->     [<ffffffff81093ffc>] ? ttwu_do_wakeup+0x2c/0x120
->     [<ffffffff81094266>] ? ttwu_do_activate.constprop.135+0x66/0x70
->     [<ffffffff816deb5f>] wait_for_completion+0xbf/0x180
->     [<ffffffff81097cd0>] ? try_to_wake_up+0x390/0x390
->     [<ffffffff81086335>] flush_work+0x165/0x250
->     [<ffffffff81082940>] ? worker_detach_from_pool+0xd0/0xd0
->     [<ffffffffa03b65b1>] xlog_cil_force_lsn+0x81/0x200 [xfs]
->     [<ffffffff816d6b42>] ? __slab_free+0xee/0x234
->     [<ffffffffa03b4b1d>] _xfs_log_force_lsn+0x4d/0x2c0 [xfs]
->     [<ffffffff811adc1e>] ? lookup_page_cgroup_used+0xe/0x30
->     [<ffffffffa039a723>] ? xfs_reclaim_inode+0xa3/0x330 [xfs]
->     [<ffffffffa03b4dcf>] xfs_log_force_lsn+0x3f/0xf0 [xfs]
->     [<ffffffffa039a723>] ? xfs_reclaim_inode+0xa3/0x330 [xfs]
->     [<ffffffffa03a62c6>] xfs_iunpin_wait+0xc6/0x1a0 [xfs]
->     [<ffffffff810aa250>] ? wake_atomic_t_function+0x40/0x40
->     [<ffffffffa039a723>] xfs_reclaim_inode+0xa3/0x330 [xfs]
->     [<ffffffffa039ac07>] xfs_reclaim_inodes_ag+0x257/0x3d0 [xfs]
->     [<ffffffffa039bb13>] xfs_reclaim_inodes_nr+0x33/0x40 [xfs]
->     [<ffffffffa03ab745>] xfs_fs_free_cached_objects+0x15/0x20 [xfs]
->     [<ffffffff811c0c18>] super_cache_scan+0x178/0x180
->     [<ffffffff8115912e>] shrink_slab_node+0x14e/0x340
->     [<ffffffff811afc3b>] ? mem_cgroup_iter+0x16b/0x450
->     [<ffffffff8115af70>] shrink_slab+0x100/0x140
->     [<ffffffff8115e425>] do_try_to_free_pages+0x335/0x490
->     [<ffffffff8115e7f9>] try_to_free_pages+0xb9/0x1f0
->     [<ffffffff816d56e4>] ? __alloc_pages_direct_compact+0x69/0x1be
->     [<ffffffff81150cba>] __alloc_pages_nodemask+0x69a/0xb40
->     [<ffffffff8119743e>] alloc_pages_current+0x9e/0x110
->     [<ffffffff811a0ac5>] new_slab+0x2c5/0x390
->     [<ffffffff816d71c4>] __slab_alloc+0x33b/0x459
->     [<ffffffff815b906d>] ? sock_alloc_inode+0x2d/0xd0
->     [<ffffffff8164bda1>] ? inet_sendmsg+0x71/0xc0
->     [<ffffffff815b906d>] ? sock_alloc_inode+0x2d/0xd0
->     [<ffffffff811a21f2>] kmem_cache_alloc+0x1a2/0x1b0
->     [<ffffffff815b906d>] sock_alloc_inode+0x2d/0xd0
->     [<ffffffff811d8566>] alloc_inode+0x26/0xa0
->     [<ffffffff811da04a>] new_inode_pseudo+0x1a/0x70
->     [<ffffffff815b933e>] sock_alloc+0x1e/0x80
->     [<ffffffff815ba855>] __sock_create+0x95/0x220
->     [<ffffffff815baa04>] sock_create_kern+0x24/0x30
->     [<ffffffffa04794d9>] con_work+0xef9/0x2050 [libceph]
->     [<ffffffffa04aa9ec>] ? rbd_img_request_submit+0x4c/0x60 [rbd]
->     [<ffffffff81084c19>] process_one_work+0x159/0x4f0
->     [<ffffffff8108561b>] worker_thread+0x11b/0x530
->     [<ffffffff81085500>] ? create_worker+0x1d0/0x1d0
->     [<ffffffff8108b6f9>] kthread+0xc9/0xe0
->     [<ffffffff8108b630>] ? flush_kthread_worker+0x90/0x90
->     [<ffffffff816e1b98>] ret_from_fork+0x58/0x90
->     [<ffffffff8108b630>] ? flush_kthread_worker+0x90/0x90
-> 
-> Use memalloc_noio_{save,restore}() to temporarily force GFP_NOIO here.
-> 
-> Cc: stable@vger.kernel.org # 3.10+, needs backporting
-> Link: http://tracker.ceph.com/issues/19309
-> Reported-by: Sergey Jerusalimov <wintchester@gmail.com>
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->  net/ceph/messenger.c | 6 ++++++
->  1 file changed, 6 insertions(+)
-> 
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 38dcf1eb427d..f76bb3332613 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -7,6 +7,7 @@
->  #include <linux/kthread.h>
->  #include <linux/net.h>
->  #include <linux/nsproxy.h>
-> +#include <linux/sched/mm.h>
->  #include <linux/slab.h>
->  #include <linux/socket.h>
->  #include <linux/string.h>
-> @@ -469,11 +470,16 @@ static int ceph_tcp_connect(struct ceph_connection *con)
->  {
->  	struct sockaddr_storage *paddr = &con->peer_addr.in_addr;
->  	struct socket *sock;
-> +	unsigned int noio_flag;
->  	int ret;
->  
->  	BUG_ON(con->sock);
-> +
-> +	/* sock_create_kern() allocates with GFP_KERNEL */
-> +	noio_flag = memalloc_noio_save();
->  	ret = sock_create_kern(read_pnet(&con->msgr->net), paddr->ss_family,
->  			       SOCK_STREAM, IPPROTO_TCP, &sock);
-> +	memalloc_noio_restore(noio_flag);
->  	if (ret)
->  		return ret;
->  	sock->sk->sk_allocation = GFP_NOFS;
+I think you're correct that NOFS would have prevented the recursion
+shown in the stack trace below.
 
-Reviewed-by: Jeff Layton <jlayton@redhat.com>
+However, if you (for instance) had a userland program that was
+accessing the krbd device directly with buffered I/O, then I think you
+could still end up deadlocked here.
+
+NOIO is more restrictive than NOFS and should prevent that situation in
+addition to the one in the patch description.
+
+-- Jeff
+
+On Thu, 2017-03-23 at 08:58 +0800, penglaiyxy wrote:
+> ﻿
+> How about using GFP_NOFS instead?
+>  
+> penglaiyxy
+>  
+> From: Jeff Layton
+> Date: 2017-03-23 04:49
+> To: Ilya Dryomov; ceph-devel
+> Subject: Re: [PATCH] libceph: force GFP_NOIO for socket allocations
+> On Wed, 2017-03-22 at 12:12 +0100, Ilya Dryomov wrote:
+> > sock_alloc_inode() allocates socket+inode and socket_wq with
+> > GFP_KERNEL, which is not allowed on the writeback path:
+> > 
+> >     Workqueue: ceph-msgr con_work [libceph]
+> >     ffff8810871cb018 0000000000000046 0000000000000000 ffff881085d40000
+> >     0000000000012b00 ffff881025cad428 ffff8810871cbfd8 0000000000012b00
+> >     ffff880102fc1000 ffff881085d40000 ffff8810871cb038 ffff8810871cb148
+> >     Call Trace:
+> >     [<ffffffff816dd629>] schedule+0x29/0x70
+> >     [<ffffffff816e066d>] schedule_timeout+0x1bd/0x200
+> >     [<ffffffff81093ffc>] ? ttwu_do_wakeup+0x2c/0x120
+> >     [<ffffffff81094266>] ? ttwu_do_activate.constprop.135+0x66/0x70
+> >     [<ffffffff816deb5f>] wait_for_completion+0xbf/0x180
+> >     [<ffffffff81097cd0>] ? try_to_wake_up+0x390/0x390
+> >     [<ffffffff81086335>] flush_work+0x165/0x250
+> >     [<ffffffff81082940>] ? worker_detach_from_pool+0xd0/0xd0
+> >     [<ffffffffa03b65b1>] xlog_cil_force_lsn+0x81/0x200 [xfs]
+> >     [<ffffffff816d6b42>] ? __slab_free+0xee/0x234
+> >     [<ffffffffa03b4b1d>] _xfs_log_force_lsn+0x4d/0x2c0 [xfs]
+> >     [<ffffffff811adc1e>] ? lookup_page_cgroup_used+0xe/0x30
+> >     [<ffffffffa039a723>] ? xfs_reclaim_inode+0xa3/0x330 [xfs]
+> >     [<ffffffffa03b4dcf>] xfs_log_force_lsn+0x3f/0xf0 [xfs]
+> >     [<ffffffffa039a723>] ? xfs_reclaim_inode+0xa3/0x330 [xfs]
+> >     [<ffffffffa03a62c6>] xfs_iunpin_wait+0xc6/0x1a0 [xfs]
+> >     [<ffffffff810aa250>] ? wake_atomic_t_function+0x40/0x40
+> >     [<ffffffffa039a723>] xfs_reclaim_inode+0xa3/0x330 [xfs]
+> >     [<ffffffffa039ac07>] xfs_reclaim_inodes_ag+0x257/0x3d0 [xfs]
+> >     [<ffffffffa039bb13>] xfs_reclaim_inodes_nr+0x33/0x40 [xfs]
+> >     [<ffffffffa03ab745>] xfs_fs_free_cached_objects+0x15/0x20 [xfs]
+> >     [<ffffffff811c0c18>] super_cache_scan+0x178/0x180
+> >     [<ffffffff8115912e>] shrink_slab_node+0x14e/0x340
+> >     [<ffffffff811afc3b>] ? mem_cgroup_iter+0x16b/0x450
+> >     [<ffffffff8115af70>] shrink_slab+0x100/0x140
+> >     [<ffffffff8115e425>] do_try_to_free_pages+0x335/0x490
+> >     [<ffffffff8115e7f9>] try_to_free_pages+0xb9/0x1f0
+> >     [<ffffffff816d56e4>] ? __alloc_pages_direct_compact+0x69/0x1be
+> >     [<ffffffff81150cba>] __alloc_pages_nodemask+0x69a/0xb40
+> >     [<ffffffff8119743e>] alloc_pages_current+0x9e/0x110
+> >     [<ffffffff811a0ac5>] new_slab+0x2c5/0x390
+> >     [<ffffffff816d71c4>] __slab_alloc+0x33b/0x459
+> >     [<ffffffff815b906d>] ? sock_alloc_inode+0x2d/0xd0
+> >     [<ffffffff8164bda1>] ? inet_sendmsg+0x71/0xc0
+> >     [<ffffffff815b906d>] ? sock_alloc_inode+0x2d/0xd0
+> >     [<ffffffff811a21f2>] kmem_cache_alloc+0x1a2/0x1b0
+> >     [<ffffffff815b906d>] sock_alloc_inode+0x2d/0xd0
+> >     [<ffffffff811d8566>] alloc_inode+0x26/0xa0
+> >     [<ffffffff811da04a>] new_inode_pseudo+0x1a/0x70
+> >     [<ffffffff815b933e>] sock_alloc+0x1e/0x80
+> >     [<ffffffff815ba855>] __sock_create+0x95/0x220
+> >     [<ffffffff815baa04>] sock_create_kern+0x24/0x30
+> >     [<ffffffffa04794d9>] con_work+0xef9/0x2050 [libceph]
+> >     [<ffffffffa04aa9ec>] ? rbd_img_request_submit+0x4c/0x60 [rbd]
+> >     [<ffffffff81084c19>] process_one_work+0x159/0x4f0
+> >     [<ffffffff8108561b>] worker_thread+0x11b/0x530
+> >     [<ffffffff81085500>] ? create_worker+0x1d0/0x1d0
+> >     [<ffffffff8108b6f9>] kthread+0xc9/0xe0
+> >     [<ffffffff8108b630>] ? flush_kthread_worker+0x90/0x90
+> >     [<ffffffff816e1b98>] ret_from_fork+0x58/0x90
+> >     [<ffffffff8108b630>] ? flush_kthread_worker+0x90/0x90
+> > 
+> > Use memalloc_noio_{save,restore}() to temporarily force GFP_NOIO here.
+> > 
+> > Cc: stable@vger.kernel.org # 3.10+, needs backporting
+> > Link: http://tracker.ceph.com/issues/19309
+> > Reported-by: Sergey Jerusalimov <wintchester@gmail.com>
+> > Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> > ---
+> >  net/ceph/messenger.c | 6 ++++++
+> >  1 file changed, 6 insertions(+)
+> > 
+> > diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> > index 38dcf1eb427d..f76bb3332613 100644
+> > --- a/net/ceph/messenger.c
+> > +++ b/net/ceph/messenger.c
+> > @@ -7,6 +7,7 @@
+> >  #include <linux/kthread.h>
+> >  #include <linux/net.h>
+> >  #include <linux/nsproxy.h>
+> > +#include <linux/sched/mm.h>
+> >  #include <linux/slab.h>
+> >  #include <linux/socket.h>
+> >  #include <linux/string.h>
+> > @@ -469,11 +470,16 @@ static int ceph_tcp_connect(struct ceph_connection *con)
+> >  {
+> >   struct sockaddr_storage *paddr = &con->peer_addr.in_addr;
+> >   struct socket *sock;
+> > + unsigned int noio_flag;
+> >   int ret;
+> >  
+> >   BUG_ON(con->sock);
+> > +
+> > + /* sock_create_kern() allocates with GFP_KERNEL */
+> > + noio_flag = memalloc_noio_save();
+> >   ret = sock_create_kern(read_pnet(&con->msgr->net), paddr->ss_family,
+> >          SOCK_STREAM, IPPROTO_TCP, &sock);
+> > + memalloc_noio_restore(noio_flag);
+> >   if (ret)
+> >   return ret;
+> >   sock->sk->sk_allocation = GFP_NOFS;
+>  
+> Reviewed-by: Jeff Layton <jlayton@redhat.com>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+-- 
+Jeff Layton <jlayton@redhat.com>
