@@ -1,36 +1,26 @@
-From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Tech Talk in 20 mins
-Date: Thu, 23 Mar 2017 12:38:16 -0400
-Message-ID: <CAAZbbf3QFctPobvhe=7XKOP0QxF5HJp5QZEJ1UZVWmvaMcmyeg@mail.gmail.com>
+From: Ning Yao <zay11022@gmail.com>
+Subject: (unknown)
+Date: Fri, 24 Mar 2017 01:07:56 +0800
+Message-ID: <CALZt5jx=M-rG-xkO3sbfcyuCAYDZ3pC9LbmpjEAzaJTahYBzdQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-io0-f169.google.com ([209.85.223.169]:35290 "EHLO
+        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932085AbdCWRH6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2017 13:07:58 -0400
+Received: by mail-io0-f169.google.com with SMTP id z13so1338040iof.2
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Mar 2017 10:07:57 -0700 (PDT)
+Subject: 
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hey cephers,
+Hi, all
 
-Just a reminder that the next Ceph Tech Talk will begin in
-approximately 20 minutes. I hope you can all join us:
-
-http://ceph.com/ceph-tech-talks/
+Why run-rbd-tests now is not involved into "make check" to verify the
+rbd cli now? So how could we test rbd cli now?
 
 
--- 
-
-Best Regards,
-
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
+Regards
+Ning Yao
