@@ -1,60 +1,40 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Print error into debug log by default
-Date: Thu, 23 Mar 2017 11:59:26 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1703231158210.30468@piezo.novalocal>
-References: <CY4PR10MB15917429D6B014495D0CE42EE43F0@CY4PR10MB1591.namprd10.prod.outlook.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Still denc warnings in Clang
+Date: Thu, 23 Mar 2017 13:10:26 +0100
+Message-ID: <3793fc2c-b971-7440-6448-219500e6f2a5@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:60958 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753544AbdCWL7a (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2017 07:59:30 -0400
-In-Reply-To: <CY4PR10MB15917429D6B014495D0CE42EE43F0@CY4PR10MB1591.namprd10.prod.outlook.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:53157 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753979AbdCWMKl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 23 Mar 2017 08:10:41 -0400
+Received: from [192.168.10.67] (opteron [192.168.10.67])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id 622BF3CDF5
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Mar 2017 13:10:38 +0100 (CET)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Wang, Zhiye" <Zhiye.Wang@Arcserve.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, 23 Mar 2017, Wang, Zhiye wrote:
-> Dear all,
-> 
-> This is a small problem. I was not able to figure out the way to open an issue, so I just share it here.
-> 
-> After some wrong operation steps (run ceph-osd command using root), I was not be able to start ceph-osd anymore. I can see the following stack in debug log.
-> 
-> 
-> 2017-03-22 02:23:54.054907 7f0e87d8b940 -1 osd.0 0 failed to load OSD map for epoch 71, got 0 bytes
-> 2017-03-22 02:23:54.056361 7f0e87d8b940 -1 /home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/release/11.2.0/rpm/el7/BUILD/ceph-11.2.0/src/osd/OSD.h: In function 'OSDMapRef OSDService::get_map(epoch_t)' thread 7f0e87d8b940 time 2017-03-22 02:23:54.054921
-> /home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/release/11.2.0/rpm/el7/BUILD/ceph-11.2.0/src/osd/OSD.h: 997: FAILED assert(ret)
-> 
->  ceph version 11.2.0 (f223e27eeb35991352ebc1f67423d4ebc252adb7)
->  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x85) [0x7f0e88869b35]
->  2: (OSDService::get_map(unsigned int)+0x3d) [0x7f0e8825d13d]
->  3: (OSD::init()+0x1fd2) [0x7f0e8820a452]
->  4: (main()+0x2cda) [0x7f0e8813bf4a]
->  5: (__libc_start_main()+0xf5) [0x7f0e8460cb15]
->  6: (()+0x413da9) [0x7f0e881b7da9]
-> 
-> 
-> After dig this for problem for some time, I finally realize it should a problem of file permission (because of my previous wrong operation). The problem is that there was no tip in debug log.
-> 
-> Look at the source code, I guess it's because we do not print file open error debug log in FileStore::lfn_open by default. Please correct me if I am wrong. I'd suggest we can always print error message into debug log.
-> 
->   r = ::open((*path)->path(), flags, 0644);
->   if (r < 0) {
->     r = -errno;
->     dout(10) << "error opening file " << (*path)->path() << " with flags="
->       << flags << ": " << cpp_strerror(-r) << dendl;
->     goto fail;
->   }
+I thought that all these warnings were eradicated by now?
 
-At this layer we can get ENOENT as a normal event (some client 
-request asks for an object that doesn't exist), so it doesn't make sense 
-to log an error here.  The get_map() method should probably be modified to 
-indicate that it failed to load map epoch N (using derr) before asserting 
-or calling ceph_abort().
+--WjW
 
-Thanks!
-sage
-
+/home/jenkins/workspace/ceph-master/src/include/denc.h:1162:10: warning:
+binding dereferenced null pointer to reference has undefined behavior
+[-Wnull-dereference]
+    denc(*(bool *)nullptr, p);
+         ^~~~~~~~~~~~~~~~
+/home/jenkins/workspace/ceph-master/src/include/denc.h:1169:10: warning:
+binding dereferenced null pointer to reference has undefined behavior
+[-Wnull-dereference]
+    denc(*(bool *)nullptr, p);
+         ^~~~~~~~~~~~~~~~
+/home/jenkins/workspace/ceph-master/src/include/denc.h:1236:10: warning:
+binding dereferenced null pointer to reference has undefined behavior
+[-Wnull-dereference]
+    denc(*(bool *)nullptr, p);
+         ^~~~~~~~~~~~~~~~
