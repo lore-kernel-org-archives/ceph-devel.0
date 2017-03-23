@@ -1,232 +1,222 @@
-From: nokia ceph <nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Recompiling source code - to find exact RPM
-Date: Thu, 23 Mar 2017 18:11:55 +0530
-Message-ID: <CALWuvY_bR7BZLwE+BzCxdWFm+bw4Xx58C1GnFZMkA0JgQMzwmA@mail.gmail.com>
-References: <CALWuvY9kyuZgSHeLFwBw86J=tDzX-xc2FPvAQ8Qq__o3s_oodw@mail.gmail.com>
-	<CAF-wwdFNgsq9+Z2Y3JcBxQoWfUtvtfZ0Y8C3WWArX9fPFVzR5Q@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: crush multipick anomaly
+Date: Thu, 23 Mar 2017 15:13:18 +0100
+Message-ID: <0ad9fa05-fc1c-9bd9-d826-a1dae693b67d@dachary.org>
+References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal>
+ <4dbab28a-220b-2cef-fcbc-aca4dd17ab3b@dachary.org>
+ <CAFdhnjf=WPmC+CEwX1QWe_v1HXmZu2cv7983zHGG4muKR_G0jw@mail.gmail.com>
+ <43736207-9e38-9389-4b99-d246716092ed@dachary.org>
+ <CAFdhnjfGKdmOFnT-imHo55O7LLPCdOV=_pbU50ruxo1x9C3NDA@mail.gmail.com>
+ <cbcf592e-a0c0-bc5b-0f2a-11c4a110d485@dachary.org>
+ <CAFdhnjcDfUG6Dzm2R_Fu16d7rT1z_h+mFy6ngYLUcLtURn_pVA@mail.gmail.com>
+ <63256e6b-ec48-e369-afc3-6d65eb5230f8@dachary.org>
+ <eca40695-44b3-6843-b1c3-8359231e4d87@dachary.org>
+ <CAFdhnjfYK43=ZdQ-cPG0k8KzKnTZ=T5VNoYdfdSdPH8gRG_i+A@mail.gmail.com>
+ <alpine.DEB.2.11.1703072259520.24356@piezo.novalocal>
+ <CAFdhnjeAdCgqS3N7yvZXEanEc8c_q2hR_HciUD2gdFGcRyaZXQ@mail.gmail.com>
+ <649a0116-6f61-0470-69bd-41f64214ad5a@dachary.org>
+ <6b063525-eeec-bdf6-a926-af2e9276f34b@dachary.org>
+ <7f03d75d-0dc7-086e-6f43-5b2717588345@dachary.org>
+ <CAFdhnjcs5sZbnDWXH6qJBge9WYR-Cr+svhr=YZ9hZJrDvo=vxg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0199286409=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAF-wwdFNgsq9+Z2Y3JcBxQoWfUtvtfZ0Y8C3WWArX9fPFVzR5Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Brad Hubbard <bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:44108 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932166AbdCWONY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2017 10:13:24 -0400
+In-Reply-To: <CAFdhnjcs5sZbnDWXH6qJBge9WYR-Cr+svhr=YZ9hZJrDvo=vxg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: =?UTF-8?Q?Pedro_L=c3=b3pez-Adeva?= <plopezadeva@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
---===============0199286409==
-Content-Type: multipart/alternative; boundary=001a113ad706c53310054b6533df
+Hi Pedro,
 
---001a113ad706c53310054b6533df
-Content-Type: text/plain; charset=UTF-8
+On 03/23/2017 12:49 PM, Pedro López-Adeva wrote:
+> Hi Loic,
+> 
+>>From what I see everything seems OK. 
 
-Hey brad,
+Cool. I'll keep going in this direction then !
 
-Thanks for the info.
+> The interesting thing would be to
+> test on some complex mapping. The reason is that "CrushPolicyFamily"
+> is right now modeling just a single straw bucket not the full CRUSH
+> algorithm. 
 
-Yea we know that these are test rpm's.
+A number of use cases use a single straw bucket, maybe the majority of them. Even though it does not reflect the full range of what crush can offer, it could be useful. To be more specific, a crush map that states "place objects so that there is at most one replica per host" or "one replica per rack" is common. Such a crushmap can be reduced to a single straw bucket that contains all the hosts and by using the CrushPolicyFamily, we can change the weights of each host to fix the probabilities. The hosts themselves contain disks with varying weights but I think we can ignore that because crush will only recurse to place one object within a given host.
 
-The idea behind my question is if I made any changes in the ceph source
-code, then I recompile it. Then I need to find which is the appropriate rpm
-mapped to that changed file. If I find the exact RPM, then apply that RPM
-in our existing ceph cluster instead of applying/overwriting  all the
-compiled rpms.
+> That's the work that remains to be done. The only way that
+> would avoid reimplementing the CRUSH algorithm and computing the
+> gradient would be treating CRUSH as a black box and eliminating the
+> necessity of computing the gradient either by using a gradient-free
+> optimization method or making an estimation of the gradient.
 
-I hope this cleared your doubt.
+By gradient-free optimization you mean simulated annealing or Monte Carlo ?
 
-Thanks
+Cheers
 
-
-
-
-On Wed, Mar 22, 2017 at 5:47 AM, Brad Hubbard <bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-
-> Based solely on the information given the only rpms with this specific
-> commit in
-> them would be here
-> https://shaman.ceph.com/builds/ceph/wip-prune-past-intervals-kraken/
-> (specifically
-> https://4.chacra.ceph.com/r/ceph/wip-prune-past-intervals-kraken/
-> 8263140fe539f9c3241c1c0f6ee9cfadde9178c0/centos/7/flavors/default/x86_64/
-> ).
-> These are test rpms, not official releases.
->
-> Note that the branch "wip-prune-past-intervals-kraken" exists only in the
-> ceph-ci repo and *not* the main ceph repo and that the particular commit
-> above
-> does not seem to have made it into the "ceph" repo.
->
-> $ git log -S _simplify_past_intervals
-> $ git log --grep="_simplify_past_intervals"
-> $
->
-> Given this commit is not in the ceph repo I would suggest we have never
-> shipped
-> an official rpm that contains this commit.
->
-> It's not totally clear to me exactly what you are trying to achieve, maybe
-> you
-> could have another go at describing your objective?
->
-> On Wed, Mar 22, 2017 at 12:26 AM, nokia ceph <nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> wrote:
-> > Hello,
-> >
-> > I made some changes in the below file on ceph kraken v11.2.0 source code
-> as
-> > per this article
-> >
-> > https://github.com/ceph/ceph-ci/commit/wip-prune-past-intervals-kraken
-> >
-> > ..src/osd/PG.cc
-> > ..src/osd/PG.h
-> >
-> > Is there any way to find which rpm got affected by these two files. I
-> > believe it should be ceph-osd-11.2.0-0.el7.x86_64.rpm . Can you confirm
-> > please ?
-> >
-> > I failed to find it from the ceph.spec file.
-> >
-> > Could anyone please guide me the right procedure to check this.
-> >
-> > The main intention is that if we find the exact rpm affected by these
-> files,
-> > we can simply overwrite it with the old rpm.
-> >
-> > Awaiting for comments.
-> >
-> > Thanks
-> >
-> >
-> > _______________________________________________
-> > ceph-users mailing list
-> > ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> >
->
->
->
+> 
+> 
+> 2017-03-20 11:49 GMT+01:00 Loic Dachary <loic@dachary.org>:
+>> Hi,
+>>
+>> I modified the crush library to accept two weights (one for the first disk, the other for the remaining disks)[1]. This really is a hack for experimentation purposes only ;-) I was able to run a variation of your code[2] and got the following results which are encouraging. Do you think what I did is sensible ? Or is there a problem I don't see ?
+>>
+>> Thanks !
+>>
+>> Simulation: R=2 devices capacity [10  8  6 10  8  6 10  8  6]
+>> ------------------------------------------------------------------------
+>> Before: All replicas on each hard drive
+>> Expected vs actual use (20000 samples)
+>>  disk 0: 1.39e-01 1.12e-01
+>>  disk 1: 1.11e-01 1.10e-01
+>>  disk 2: 8.33e-02 1.13e-01
+>>  disk 3: 1.39e-01 1.11e-01
+>>  disk 4: 1.11e-01 1.11e-01
+>>  disk 5: 8.33e-02 1.11e-01
+>>  disk 6: 1.39e-01 1.12e-01
+>>  disk 7: 1.11e-01 1.12e-01
+>>  disk 8: 8.33e-02 1.10e-01
+>> it=    1 jac norm=1.59e-01 loss=5.27e-03
+>> it=    2 jac norm=1.55e-01 loss=5.03e-03
+>> ...
+>> it=  212 jac norm=1.02e-03 loss=2.41e-07
+>> it=  213 jac norm=1.00e-03 loss=2.31e-07
+>> Converged to desired accuracy :)
+>> After: All replicas on each hard drive
+>> Expected vs actual use (20000 samples)
+>>  disk 0: 1.39e-01 1.42e-01
+>>  disk 1: 1.11e-01 1.09e-01
+>>  disk 2: 8.33e-02 8.37e-02
+>>  disk 3: 1.39e-01 1.40e-01
+>>  disk 4: 1.11e-01 1.13e-01
+>>  disk 5: 8.33e-02 8.08e-02
+>>  disk 6: 1.39e-01 1.38e-01
+>>  disk 7: 1.11e-01 1.09e-01
+>>  disk 8: 8.33e-02 8.48e-02
+>>
+>>
+>> Simulation: R=2 devices capacity [10 10 10 10  1]
+>> ------------------------------------------------------------------------
+>> Before: All replicas on each hard drive
+>> Expected vs actual use (20000 samples)
+>>  disk 0: 2.44e-01 2.36e-01
+>>  disk 1: 2.44e-01 2.38e-01
+>>  disk 2: 2.44e-01 2.34e-01
+>>  disk 3: 2.44e-01 2.38e-01
+>>  disk 4: 2.44e-02 5.37e-02
+>> it=    1 jac norm=2.43e-01 loss=2.98e-03
+>> it=    2 jac norm=2.28e-01 loss=2.47e-03
+>> ...
+>> it=   37 jac norm=1.28e-03 loss=3.48e-08
+>> it=   38 jac norm=1.07e-03 loss=2.42e-08
+>> Converged to desired accuracy :)
+>> After: All replicas on each hard drive
+>> Expected vs actual use (20000 samples)
+>>  disk 0: 2.44e-01 2.46e-01
+>>  disk 1: 2.44e-01 2.44e-01
+>>  disk 2: 2.44e-01 2.41e-01
+>>  disk 3: 2.44e-01 2.45e-01
+>>  disk 4: 2.44e-02 2.33e-02
+>>
+>>
+>> [1] crush hack http://libcrush.org/main/libcrush/commit/6efda297694392d0b07845eb98464a0dcd56fee8
+>> [2] python-crush hack http://libcrush.org/dachary/python-crush/commit/d9202fcd4d17cd2a82b37ec20c1bd25f8f2c4b68
+>>
+>> On 03/19/2017 11:31 PM, Loic Dachary wrote:
+>>> Hi Pedro,
+>>>
+>>> It looks like trying to experiment with crush won't work as expected because crush does not distinguish the probability of selecting the first device from the probability of selecting the second or third device. Am I mistaken ?
+>>>
+>>> Cheers
+>>>
+>>> On 03/18/2017 10:21 AM, Loic Dachary wrote:
+>>>> Hi Pedro,
+>>>>
+>>>> I'm going to experiment with what you did at
+>>>>
+>>>> https://github.com/plafl/notebooks/blob/master/replication.ipynb
+>>>>
+>>>> and the latest python-crush published today. A comparison function was added that will help measure the data movement. I'm hoping we can release an offline tool based on your solution. Please let me know if I should wait before diving into this, in case you have unpublished drafts or new ideas.
+>>>>
+>>>> Cheers
+>>>>
+>>>> On 03/09/2017 09:47 AM, Pedro López-Adeva wrote:
+>>>>> Great, thanks for the clarifications.
+>>>>> I also think that the most natural way is to keep just a set of
+>>>>> weights in the CRUSH map and update them inside the algorithm.
+>>>>>
+>>>>> I keep working on it.
+>>>>>
+>>>>>
+>>>>> 2017-03-08 0:06 GMT+01:00 Sage Weil <sage@newdream.net>:
+>>>>>> Hi Pedro,
+>>>>>>
+>>>>>> Thanks for taking a look at this!  It's a frustrating problem and we
+>>>>>> haven't made much headway.
+>>>>>>
+>>>>>> On Thu, 2 Mar 2017, Pedro López-Adeva wrote:
+>>>>>>> Hi,
+>>>>>>>
+>>>>>>> I will have a look. BTW, I have not progressed that much but I have
+>>>>>>> been thinking about it. In order to adapt the previous algorithm in
+>>>>>>> the python notebook I need to substitute the iteration over all
+>>>>>>> possible devices permutations to iteration over all the possible
+>>>>>>> selections that crush would make. That is the main thing I need to
+>>>>>>> work on.
+>>>>>>>
+>>>>>>> The other thing is of course that weights change for each replica.
+>>>>>>> That is, they cannot be really fixed in the crush map. So the
+>>>>>>> algorithm inside libcrush, not only the weights in the map, need to be
+>>>>>>> changed. The weights in the crush map should reflect then, maybe, the
+>>>>>>> desired usage frequencies. Or maybe each replica should have their own
+>>>>>>> crush map, but then the information about the previous selection
+>>>>>>> should be passed to the next replica placement run so it avoids
+>>>>>>> selecting the same one again.
+>>>>>>
+>>>>>> My suspicion is that the best solution here (whatever that means!)
+>>>>>> leaves the CRUSH weights intact with the desired distribution, and
+>>>>>> then generates a set of derivative weights--probably one set for each
+>>>>>> round/replica/rank.
+>>>>>>
+>>>>>> One nice property of this is that once the support is added to encode
+>>>>>> multiple sets of weights, the algorithm used to generate them is free to
+>>>>>> change and evolve independently.  (In most cases any change is
+>>>>>> CRUSH's mapping behavior is difficult to roll out because all
+>>>>>> parties participating in the cluster have to support any new behavior
+>>>>>> before it is enabled or used.)
+>>>>>>
+>>>>>>> I have a question also. Is there any significant difference between
+>>>>>>> the device selection algorithm description in the paper and its final
+>>>>>>> implementation?
+>>>>>>
+>>>>>> The main difference is the "retry_bucket" behavior was found to be a bad
+>>>>>> idea; any collision or failed()/overload() case triggers the
+>>>>>> retry_descent.
+>>>>>>
+>>>>>> There are other changes, of course, but I don't think they'll impact any
+>>>>>> solution we come with here (or at least any solution can be suitably
+>>>>>> adapted)!
+>>>>>>
+>>>>>> sage
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>
+>>>
+>>
+>> --
+>> Loïc Dachary, Artisan Logiciel Libre
 > --
-> Cheers,
-> Brad
->
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
---001a113ad706c53310054b6533df
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hey brad,<div><br></div><div>Thanks for the info.=C2=A0</d=
-iv><div><br></div><div>Yea we know that these are test rpm&#39;s.=C2=A0</di=
-v><div><br></div><div>The idea behind my question is if I made any changes =
-in the ceph source code, then I recompile it. Then I need to find which is =
-the appropriate rpm mapped to that changed file. If I find the exact RPM, t=
-hen apply that RPM in our existing ceph cluster instead of applying/overwri=
-ting =C2=A0all the compiled rpms.</div><div><br></div><div>I hope this clea=
-red your doubt.</div><div><br></div><div>Thanks</div><div><br></div><div><b=
-r></div><div><br></div></div><div class=3D"gmail_extra"><br><div class=3D"g=
-mail_quote">On Wed, Mar 22, 2017 at 5:47 AM, Brad Hubbard <span dir=3D"ltr"=
->&lt;<a href=3D"mailto:bhubbard-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" target=3D"_blank">bhubbard@redh=
-at.com</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_quote" style=3D"=
-margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">Based solely=
- on the information given the only rpms with this specific commit in<br>
-them would be here<br>
-<a href=3D"https://shaman.ceph.com/builds/ceph/wip-prune-past-intervals-kra=
-ken/" rel=3D"noreferrer" target=3D"_blank">https://shaman.ceph.com/<wbr>bui=
-lds/ceph/wip-prune-past-<wbr>intervals-kraken/</a><br>
-(specifically<br>
-<a href=3D"https://4.chacra.ceph.com/r/ceph/wip-prune-past-intervals-kraken=
-/8263140fe539f9c3241c1c0f6ee9cfadde9178c0/centos/7/flavors/default/x86_64/"=
- rel=3D"noreferrer" target=3D"_blank">https://4.chacra.ceph.com/r/<wbr>ceph=
-/wip-prune-past-intervals-<wbr>kraken/<wbr>8263140fe539f9c3241c1c0f6ee9cf<w=
-br>adde9178c0/centos/7/flavors/<wbr>default/x86_64/</a>).<br>
-These are test rpms, not official releases.<br>
-<br>
-Note that the branch &quot;wip-prune-past-intervals-<wbr>kraken&quot; exist=
-s only in the<br>
-ceph-ci repo and *not* the main ceph repo and that the particular commit ab=
-ove<br>
-does not seem to have made it into the &quot;ceph&quot; repo.<br>
-<br>
-$ git log -S _simplify_past_intervals<br>
-$ git log --grep=3D&quot;_simplify_past_<wbr>intervals&quot;<br>
-$<br>
-<br>
-Given this commit is not in the ceph repo I would suggest we have never shi=
-pped<br>
-an official rpm that contains this commit.<br>
-<br>
-It&#39;s not totally clear to me exactly what you are trying to achieve, ma=
-ybe you<br>
-could have another go at describing your objective?<br>
-<div><div class=3D"h5"><br>
-On Wed, Mar 22, 2017 at 12:26 AM, nokia ceph &lt;<a href=3D"mailto:nokiacep=
-husers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org">nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org</a>&gt; wrote:<br>
-&gt; Hello,<br>
-&gt;<br>
-&gt; I made some changes in the below file on ceph kraken v11.2.0 source co=
-de as<br>
-&gt; per this article<br>
-&gt;<br>
-&gt; <a href=3D"https://github.com/ceph/ceph-ci/commit/wip-prune-past-inter=
-vals-kraken" rel=3D"noreferrer" target=3D"_blank">https://github.com/ceph/c=
-eph-<wbr>ci/commit/wip-prune-past-<wbr>intervals-kraken</a><br>
-&gt;<br>
-&gt; ..src/osd/PG.cc<br>
-&gt; ..src/osd/PG.h<br>
-&gt;<br>
-&gt; Is there any way to find which rpm got affected by these two files. I<=
-br>
-&gt; believe it should be ceph-osd-11.2.0-0.el7.x86_64.<wbr>rpm . Can you c=
-onfirm<br>
-&gt; please ?<br>
-&gt;<br>
-&gt; I failed to find it from the ceph.spec file.<br>
-&gt;<br>
-&gt; Could anyone please guide me the right procedure to check this.<br>
-&gt;<br>
-&gt; The main intention is that if we find the exact rpm affected by these =
-files,<br>
-&gt; we can simply overwrite it with the old rpm.<br>
-&gt;<br>
-&gt; Awaiting for comments.<br>
-&gt;<br>
-&gt; Thanks<br>
-&gt;<br>
-&gt;<br>
-</div></div>&gt; ______________________________<wbr>_________________<br>
-&gt; ceph-users mailing list<br>
-&gt; <a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org=
-</a><br>
-&gt; <a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=
-=3D"noreferrer" target=3D"_blank">http://lists.ceph.com/<wbr>listinfo.cgi/c=
-eph-users-ceph.<wbr>com</a><br>
-&gt;<br>
-<span class=3D"HOEnZb"><font color=3D"#888888"><br>
-<br>
-<br>
---<br>
-Cheers,<br>
-Brad<br>
-</font></span></blockquote></div><br></div>
-
---001a113ad706c53310054b6533df--
-
---===============0199286409==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0199286409==--
+-- 
+Loïc Dachary, Artisan Logiciel Libre
