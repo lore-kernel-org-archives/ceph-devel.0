@@ -1,73 +1,71 @@
-From: Jerry Lee <leisurelysw24@gmail.com>
-Subject: kernel client get stuck when the cephfs is unreachable
-Date: Thu, 23 Mar 2017 17:50:42 +0800
-Message-ID: <CAKQB+fsV_BkcGq99XH+u-4nOW6tea1wDFKXgPwdV6uJLXmJT_w@mail.gmail.com>
+From: "Wang, Zhiye" <Zhiye.Wang@Arcserve.com>
+Subject: Print error into debug log by default
+Date: Thu, 23 Mar 2017 10:02:01 +0000
+Message-ID: <CY4PR10MB15917429D6B014495D0CE42EE43F0@CY4PR10MB1591.namprd10.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f48.google.com ([209.85.215.48]:33549 "EHLO
-        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751257AbdCWJup (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Mar 2017 05:50:45 -0400
-Received: by mail-lf0-f48.google.com with SMTP id a6so79299137lfa.0
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Mar 2017 02:50:43 -0700 (PDT)
+Received: from mail-dm3nam03on0125.outbound.protection.outlook.com ([104.47.41.125]:4128
+        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751660AbdCWKCE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 23 Mar 2017 06:02:04 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+Dear all,
 
-Is there some way to inform the kernel client and to reject all the on-going
-operations when the cluster is destroyed or the CephFS is unreachable?  I find
-that many operations (e.g., df, statfs, access, ...) hang with the following
-call stack when the CephFS is unreachable:
+This is a small problem. I was not able to figure out the way to open an is=
+sue, so I just share it here.
 
- 7752 admin       844 D   umount -f -l /share/ceph_vol
- [~] # cat /proc/7752/stack
- [<ffffffffa07d02a2>] ceph_mdsc_do_request+0xf2/0x270 [ceph]
- [<ffffffffa07b47f3>] __ceph_do_getattr+0xa3/0x1b0 [ceph]
- [<ffffffffa07b4925>] ceph_permission+0x25/0x40 [ceph]
- [<ffffffff8116960b>] __qnap_inode_permission+0xbb/0x130
- [<ffffffff811696d3>] qnap_inode_permission+0x23/0x60
- [<ffffffff81169d1f>] link_path_walk+0x23f/0x510
- [<ffffffff8116a437>] path_lookupat+0x77/0x100
- [<ffffffff8116a555>] filename_lookup+0x95/0x150
- [<ffffffff8116a6b5>] user_path_at_empty+0x35/0x40
- [<ffffffff81163037>] SyS_readlink+0x47/0xf0
- [<ffffffff81a83f57>] entry_SYSCALL_64_fastpath+0x12/0x6a
- [<ffffffffffffffff>] 0xffffffffffffffff
+After some wrong operation steps (run ceph-osd command using root), I was n=
+ot be able to start ceph-osd anymore. I can see the following stack in debu=
+g log.
 
- 3520 admin       992 S   grep reboot
- [~] # cat /proc/23739/stack
- [<ffffffffa07d0fab>] ceph_mdsc_sync+0x46b/0x690 [ceph]
- [<ffffffffa07af40a>] ceph_sync_fs+0x5a/0xc0 [ceph]
- [<ffffffff8118e30b>] sync_fs_one_sb+0x1b/0x20
- [<ffffffff81161658>] iterate_supers+0xa8/0x100
- [<ffffffff8118e410>] sys_sync+0x50/0x90
- [<ffffffff81a83f57>] entry_SYSCALL_64_fastpath+0x12/0x6a
- [<ffffffffffffffff>] 0xffffffffffffffff
- 8150 admin      1000 D   /bin/df -k /share/ceph_vol
 
- [~] # cat /proc/8150/stack
- [<ffffffffa07d033c>] ceph_mdsc_do_request+0x18c/0x260 [ceph]
- [<ffffffffa07b47f3>] __ceph_do_getattr+0xa3/0x1b0 [ceph]
- [<ffffffffa07b4963>] ceph_getattr+0x23/0xf0 [ceph]
- [<ffffffff811626d7>] vfs_getattr_nosec+0x27/0x40
- [<ffffffff81162830>] vfs_fstatat+0x60/0xa0
- [<ffffffff81162c8f>] SYSC_newstat+0x1f/0x40
- [<ffffffff81162eb9>] SyS_newstat+0x9/0x10
- [<ffffffff81a83f57>] entry_SYSCALL_64_fastpath+0x12/0x6a
- [<ffffffffffffffff>] 0xffffffffffffffff
+2017-03-22 02:23:54.054907 7f0e87d8b940 -1 osd.0 0 failed to load OSD map f=
+or epoch 71, got 0 bytes
+2017-03-22 02:23:54.056361 7f0e87d8b940 -1 /home/jenkins-build/build/worksp=
+ace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIST/centos7/DIS=
+T/centos7/MACHINE_SIZE/huge/release/11.2.0/rpm/el7/BUILD/ceph-11.2.0/src/os=
+d/OSD.h: In function 'OSDMapRef OSDService::get_map(epoch_t)' thread 7f0e87=
+d8b940 time 2017-03-22 02:23:54.054921
+/home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x=
+86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/release/11.2.0/=
+rpm/el7/BUILD/ceph-11.2.0/src/osd/OSD.h: 997: FAILED assert(ret)
 
-The Ceph verion is "version v11.0.2-1-g5b7012b" and the kernel verion is
-"linux-4.2.8".  Before sending this e-mail, I find a related patch (48fec5d,
-ceph: EIO all operations after forced umount) and it does solve some problem in
-my environment.  But, sometimes, even the forced umount gets stuck forever.
-After looking into the codes, I find that the req->r_timeout is only used
-during mount operation (60 sec.) and for other operations, it will wait forever
-even when the remote cluster is dead.  Is there some consideration that the
-req->r_timeout is left as zero?
+ ceph version 11.2.0 (f223e27eeb35991352ebc1f67423d4ebc252adb7)
+ 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0=
+x85) [0x7f0e88869b35]
+ 2: (OSDService::get_map(unsigned int)+0x3d) [0x7f0e8825d13d]
+ 3: (OSD::init()+0x1fd2) [0x7f0e8820a452]
+ 4: (main()+0x2cda) [0x7f0e8813bf4a]
+ 5: (__libc_start_main()+0xf5) [0x7f0e8460cb15]
+ 6: (()+0x413da9) [0x7f0e881b7da9]
 
-Any ideas will be appreciated, thanks.
 
-- Jerry
+After dig this for problem for some time, I finally realize it should a pro=
+blem of file permission (because of my previous wrong operation). The probl=
+em is that there was no tip in debug log.
+
+Look at the source code, I guess it's because we do not print file open err=
+or debug log in FileStore::lfn_open by default. Please correct me if I am w=
+rong. I'd suggest we can always print error message into debug log.
+
+  r =3D ::open((*path)->path(), flags, 0644);
+  if (r < 0) {
+    r =3D -errno;
+    dout(10) << "error opening file " << (*path)->path() << " with flags=3D=
+"
+      << flags << ": " << cpp_strerror(-r) << dendl;
+    goto fail;
+  }
+
+
+Thanks
+Mike
+
+
