@@ -1,35 +1,47 @@
-From: "Wang, Zhiye" <Zhiye.Wang@Arcserve.com>
-Subject: CephFS: How to figure out which files are affected after a disaster
-Date: Fri, 24 Mar 2017 05:35:31 +0000
-Message-ID: <CY4PR10MB159194A6062F5ABA74AA3E9CE43E0@CY4PR10MB1591.namprd10.prod.outlook.com>
-References: <CY4PR10MB1591F37261F24E1D6F510E97E43E0@CY4PR10MB1591.namprd10.prod.outlook.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: gsoc proposal review
+Date: Fri, 24 Mar 2017 15:22:14 +0800
+Message-ID: <CAJE9aON8KMVwab6YZ2gVgG2aBprG3WzqjLiu+8mn=OY=R7Ui=Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-bn3nam01on0098.outbound.protection.outlook.com ([104.47.33.98]:45375
-        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751620AbdCXFfe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 24 Mar 2017 01:35:34 -0400
-In-Reply-To: <CY4PR10MB1591F37261F24E1D6F510E97E43E0@CY4PR10MB1591.namprd10.prod.outlook.com>
-Content-Language: en-US
+Received: from mail-vk0-f48.google.com ([209.85.213.48]:36851 "EHLO
+        mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755580AbdCXHWV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Mar 2017 03:22:21 -0400
+Received: by mail-vk0-f48.google.com with SMTP id s68so6400169vke.3
+        for <ceph-devel@vger.kernel.org>; Fri, 24 Mar 2017 00:22:16 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: vedant15114@iiitd.ac.in, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Dear all,
+hi Vedant,
 
-I store only one replica (pool size =3D 1) for my data. And I lose one OSD =
-in my cluster. Is there a way to figure out which files (in CephFS) are act=
-ually affected?
+please use the public mailing list. that will allow other developers
+to provide you help if i am not able to do so. also, it means that you
+can start interacting with the rest (large) community instead of just
+me (barely useful).
 
-"pool size =3D 1" is just an example for simple. I can also say "pool size =
-=3D 2, but lose 2 OSD", or "pool size =3D 3, but lose 3 OSD".
+i just reviewed your proposal[1], couple comments:
+
+- you need to reference your contribution to the ceph project in your
+proposal. this is required.
+- you can be more specific regarding to what metrics you could use to
+identify a slow OSD. would be better if you can list some of them.
+
+>  For example,if for all OSDs, the subdirectories split at the same time, it may lead to throttling in speeds.
+
+this is the root cause, not the metrics.
+
+some part of the M.O. overlap with
+http://ceph.com/gsoc2017-ideas/#root-cause-analysis-tool.
 
 
 
-Thanks
-Zhiye
+---
+[1] https://docs.google.com/document/d/1dPrijkn8-5l4TL6C2TCORivtz_TpeccurNTI4qnFyS0/
 
 
+-- 
+Regards
+Kefu Chai
