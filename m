@@ -1,75 +1,90 @@
-From: Spandan Kumar Sahu <spandankumarsahu@gmail.com>
-Subject: Re: [GSoC] Queries regarding the Project
-Date: Fri, 24 Mar 2017 17:38:42 +0530
-Message-ID: <CAAXqJ+pou7Fk9r8hm9FQqQOy+bFnjzLVyUXPpOZxr++U3apqkg@mail.gmail.com>
-References: <CAAXqJ+omQh-sSv06i0Wo50JEVzGsin7Zoe4zKYTW9q=Eu_QUUw@mail.gmail.com>
- <CAJE9aOMqs+KiNqq-HWp3rhahZc37664o9L0JymJANBKGOdVAwg@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 04/23] net, ceph: convert ceph_snap_context.nref from
+ atomic_t to refcount_t
+Date: Fri, 24 Mar 2017 14:20:42 +0100
+Message-ID: <CAOi1vP97Cq5UhxryxsLe2MuNi9zJZFDaY3_CT76uU=_H_sJ-Nw@mail.gmail.com>
+References: <1489752646-8749-1-git-send-email-elena.reshetova@intel.com> <1489752646-8749-5-git-send-email-elena.reshetova@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f43.google.com ([209.85.218.43]:36395 "EHLO
-        mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751554AbdCXMIn (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Mar 2017 08:08:43 -0400
-Received: by mail-oi0-f43.google.com with SMTP id r203so160928oib.3
-        for <ceph-devel@vger.kernel.org>; Fri, 24 Mar 2017 05:08:42 -0700 (PDT)
-In-Reply-To: <CAJE9aOMqs+KiNqq-HWp3rhahZc37664o9L0JymJANBKGOdVAwg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Return-path: <linux-hams-owner@vger.kernel.org>
+In-Reply-To: <1489752646-8749-5-git-send-email-elena.reshetova@intel.com>
+Sender: linux-hams-owner@vger.kernel.org
+To: Elena Reshetova <elena.reshetova@intel.com>
+Cc: netdev <netdev@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-rdma@vger.kernel.org, "David S. Miller" <davem@davemloft.net>, linux-x25@vger.kernel.org, linux-sctp@vger.kernel.org, vyasevich@gmail.com, nhorman@tuxdriver.com, linux-hams@vger.kernel.org, linux-nfs@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, bfields@fieldses.org, Jeff Layton <jlayton@poochiereds.net>, steffen.klassert@secunet.com, Herbert Xu <herbert@gondor.apana.org.au>, santosh.shilimkar@oracle.com, jreuter@yaina.de, ralf@linux-mips.org, peterz@infradead.org, Kees Cook <keescook@chromium.org>, Hans Liljestrand <ishkamiel@gmail.com>, David Windsor <dwindsor@gmail.com>
+List-Id: ceph-devel.vger.kernel.org
 
-I understand that, we can't write to objects which belong to the
-particular PG (the one having at least one full OSD). But a storage
-pool can have multiple PGs, and some of them must have only non-full
-OSDs. Through those PGs, we can write to the OSDs which are not full.
+On Fri, Mar 17, 2017 at 1:10 PM, Elena Reshetova
+<elena.reshetova@intel.com> wrote:
+> refcount_t type and corresponding API should be
+> used instead of atomic_t when the variable is used as
+> a reference counter. This allows to avoid accidental
+> refcounter overflows that might lead to use-after-free
+> situations.
+>
+> Signed-off-by: Elena Reshetova <elena.reshetova@intel.com>
+> Signed-off-by: Hans Liljestrand <ishkamiel@gmail.com>
+> Signed-off-by: Kees Cook <keescook@chromium.org>
+> Signed-off-by: David Windsor <dwindsor@gmail.com>
+> ---
+>  include/linux/ceph/libceph.h | 3 ++-
+>  net/ceph/snapshot.c          | 6 +++---
+>  2 files changed, 5 insertions(+), 4 deletions(-)
+>
+> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
+> index 1816c5e..26dc674 100644
+> --- a/include/linux/ceph/libceph.h
+> +++ b/include/linux/ceph/libceph.h
+> @@ -14,6 +14,7 @@
+>  #include <linux/wait.h>
+>  #include <linux/writeback.h>
+>  #include <linux/slab.h>
+> +#include <linux/refcount.h>
+>
+>  #include <linux/ceph/types.h>
+>  #include <linux/ceph/messenger.h>
+> @@ -159,7 +160,7 @@ struct ceph_client {
+>   * dirtied.
+>   */
+>  struct ceph_snap_context {
+> -       atomic_t nref;
+> +       refcount_t nref;
+>         u64 seq;
+>         u32 num_snaps;
+>         u64 snaps[];
+> diff --git a/net/ceph/snapshot.c b/net/ceph/snapshot.c
+> index 705414e..e14a5d0 100644
+> --- a/net/ceph/snapshot.c
+> +++ b/net/ceph/snapshot.c
+> @@ -49,7 +49,7 @@ struct ceph_snap_context *ceph_create_snap_context(u32 snap_count,
+>         if (!snapc)
+>                 return NULL;
+>
+> -       atomic_set(&snapc->nref, 1);
+> +       refcount_set(&snapc->nref, 1);
+>         snapc->num_snaps = snap_count;
+>
+>         return snapc;
+> @@ -59,7 +59,7 @@ EXPORT_SYMBOL(ceph_create_snap_context);
+>  struct ceph_snap_context *ceph_get_snap_context(struct ceph_snap_context *sc)
+>  {
+>         if (sc)
+> -               atomic_inc(&sc->nref);
+> +               refcount_inc(&sc->nref);
+>         return sc;
+>  }
+>  EXPORT_SYMBOL(ceph_get_snap_context);
+> @@ -68,7 +68,7 @@ void ceph_put_snap_context(struct ceph_snap_context *sc)
+>  {
+>         if (!sc)
+>                 return;
+> -       if (atomic_dec_and_test(&sc->nref)) {
+> +       if (refcount_dec_and_test(&sc->nref)) {
+>                 /*printk(" deleting snap_context %p\n", sc);*/
+>                 kfree(sc);
+>         }
 
-Did I understand it correctly?
+Applied.
 
+Thanks,
 
-On Fri, Mar 24, 2017 at 1:01 PM, kefu chai <tchaikov@gmail.com> wrote:
-> Hi Spandan,
->
-> Please do not email me privately, instead use the public mailing list,
-> which allows other developers to provide you help if I am unable to do
-> so. it also means that you can start interacting with the rest of the
-> community instead of only me (barely useful).
->
-> On Fri, Mar 24, 2017 at 2:38 PM, Spandan Kumar Sahu
-> <spandankumarsahu@gmail.com> wrote:
->> Hi
->>
->> I couldn't figure out, why is this happening,
->>
->> "...Because once any of the storage device assigned to a storage pool is
->> full, the whole pool is not writeable anymore, even there is abundant space
->> in other devices."
->> -- Ceph GSoC Project Ideas (Smarter reweight-by-utilisation)
->>
->> I went through this[1] paper on CRUSH, and according to what I understand,
->> CRUSH pseudo-randomly chooses a device based on weights which can reflect
->> various parameters like the amount of space available.
->
-> CRUSH is a variant of consistent hashing. Ceph cannot automatically
-> choose *another* OSD which is not chosen by CRUSH, even if that OSD is
-> not full and has abundant space.
->
->>
->> What I don't understand is, how will it stop a pool having abundant space on
->> other devices, from getting selected, if one of its devices is full? Sure,
->> the chances of getting selected might decrease, if one device is full, but
->> how does it completely prevent writing to the pool?
->
-> if a PG are served by three OSDs. if any of them is full, how can we
-> continue creating/writing to objects which belong to that PG?
->
->
-> --
-> Regards
-> Kefu Chai
-
-
-
--- 
-Spandan Kumar Sahu
-IIT Kharagpur
+                Ilya
