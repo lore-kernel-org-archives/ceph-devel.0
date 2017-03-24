@@ -1,118 +1,76 @@
-From: "Wang, Zhiye" <Zhiye.Wang@Arcserve.com>
-Subject: RE: Print error into debug log by default
-Date: Fri, 24 Mar 2017 03:01:06 +0000
-Message-ID: <CY4PR10MB159116D3B2FB5D84FA380EFCE43E0@CY4PR10MB1591.namprd10.prod.outlook.com>
-References: <CY4PR10MB15917429D6B014495D0CE42EE43F0@CY4PR10MB1591.namprd10.prod.outlook.com>
- <alpine.DEB.2.11.1703231158210.30468@piezo.novalocal>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: code review: crc32c for ppc64le architecture
+Date: Fri, 24 Mar 2017 13:16:06 +0800
+Message-ID: <CAJE9aONRZq3_oVuV1+a4ZsqOirAtDVPdoSa+0uJYiWgmdYdCUQ@mail.gmail.com>
+References: <OF3BEF520D.AEA1F984-ON002580ED.00139C83-862580ED.0015CACE@notes.na.collabserv.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam01on0138.outbound.protection.outlook.com ([104.47.34.138]:35283
-        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754298AbdCXDBL (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 23 Mar 2017 23:01:11 -0400
-In-Reply-To: <alpine.DEB.2.11.1703231158210.30468@piezo.novalocal>
-Content-Language: en-US
+Received: from mail-vk0-f48.google.com ([209.85.213.48]:34082 "EHLO
+        mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753379AbdCXFQI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Mar 2017 01:16:08 -0400
+Received: by mail-vk0-f48.google.com with SMTP id z204so4333782vkd.1
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Mar 2017 22:16:07 -0700 (PDT)
+In-Reply-To: <OF3BEF520D.AEA1F984-ON002580ED.00139C83-862580ED.0015CACE@notes.na.collabserv.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Andrew N Solomon <asolomon@us.ibm.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Thanks Sage.=20
++ ceph-devel
 
-Currently, it seems the return value of " FileStore::lfn_open" assigned to =
-a boolen variable in "OSDService::_get_map_bl". That causes upper has no kn=
-owledge why the operation was failed.=20
+On Fri, Mar 24, 2017 at 11:58 AM, Andrew N Solomon <asolomon@us.ibm.com> wrote:
+> Kefu-
+>
+> Regarding the pull request you've been reviewing:
+> https://github.com/ceph/ceph/pull/13909
+>
+> I had assumed perhaps you were on vacation since you hadn't commented in a
+> few days
 
-Maybe we can change the return value of "OSDService::_get_map_bl" to "int",=
- and then print failure reason in "OSDService::try_get_map".
+Hi Andy,
+
+i am not on vacation, just didn't get a chance to take another look at
+your updated
+PR. will do it now.
+
+> but I noticed today you are probably around since you replied to some of the
+> content on the
+> ceph-devel mailing list. Regardless, I'm sure you're busy so I appreciate
+> you taking the time
+> to review the pull request.
+>
+> This is my first contribution to the ceph project so I'm not entirely sure
+> what to expect in terms
+> of the review process, whether any other reviewers besides yourself are
+> expected to approve the
+> drop before it gets pulled in, and in general what happens next.
+
+any ceph reviewers can review the PRs, but not certain developer are expected
+to do so, unless you request him/her to review your change.
+
+in general, we will add needs-qa label on github, and pull it in a rados-qa
+suite, and if the tests look good. we will merge it.
+
+>
+> If there is anything more you need from my end on the review, please let me
+> know.
+> Do you think it is likely this will make it in time for the upcoming
+> luminous release?
+
+i think so. =)
+
+>
+> Thanks,
+> Andy
+> ---
+> Andy Solomon
+> Power Open Source Storage Software
+> asolomon@us.ibm.com
+> (512)286-8657
 
 
-bool OSDService::_get_map_bl(epoch_t e, bufferlist& bl)
-{
-  bool found =3D map_bl_cache.lookup(e, &bl);
-  if (found)
-    return true;
-  found =3D store->read(coll_t::meta(),
-		      OSD::get_osdmap_pobject_name(e), 0, 0, bl) >=3D 0;
-  if (found)
-    _add_map_bl(e, bl);
-  return found;
-}
 
-
-Thanks
-Zhiye
-
-
-
-
------Original Message-----
-From: Sage Weil [mailto:sage@newdream.net]=20
-Sent: Thursday, March 23, 2017 7:59 PM
-To: Wang, Zhiye <Zhiye.Wang@Arcserve.com>
-Cc: ceph-devel@vger.kernel.org
-Subject: Re: Print error into debug log by default
-
-On Thu, 23 Mar 2017, Wang, Zhiye wrote:
-> Dear all,
->=20
-> This is a small problem. I was not able to figure out the way to open an =
-issue, so I just share it here.
->=20
-> After some wrong operation steps (run ceph-osd command using root), I was=
- not be able to start ceph-osd anymore. I can see the following stack in de=
-bug log.
->=20
->=20
-> 2017-03-22 02:23:54.054907 7f0e87d8b940 -1 osd.0 0 failed to load OSD=20
-> map for epoch 71, got 0 bytes
-> 2017-03-22 02:23:54.056361 7f0e87d8b940 -1=20
-> /home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_A
-> RCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/relea
-> se/11.2.0/rpm/el7/BUILD/ceph-11.2.0/src/osd/OSD.h: In function=20
-> 'OSDMapRef OSDService::get_map(epoch_t)' thread 7f0e87d8b940 time=20
-> 2017-03-22 02:23:54.054921
-> /home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_A
-> RCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/relea
-> se/11.2.0/rpm/el7/BUILD/ceph-11.2.0/src/osd/OSD.h: 997: FAILED=20
-> assert(ret)
->=20
->  ceph version 11.2.0 (f223e27eeb35991352ebc1f67423d4ebc252adb7)
->  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char=20
-> const*)+0x85) [0x7f0e88869b35]
->  2: (OSDService::get_map(unsigned int)+0x3d) [0x7f0e8825d13d]
->  3: (OSD::init()+0x1fd2) [0x7f0e8820a452]
->  4: (main()+0x2cda) [0x7f0e8813bf4a]
->  5: (__libc_start_main()+0xf5) [0x7f0e8460cb15]
->  6: (()+0x413da9) [0x7f0e881b7da9]
->=20
->=20
-> After dig this for problem for some time, I finally realize it should a p=
-roblem of file permission (because of my previous wrong operation). The pro=
-blem is that there was no tip in debug log.
->=20
-> Look at the source code, I guess it's because we do not print file open e=
-rror debug log in FileStore::lfn_open by default. Please correct me if I am=
- wrong. I'd suggest we can always print error message into debug log.
->=20
->   r =3D ::open((*path)->path(), flags, 0644);
->   if (r < 0) {
->     r =3D -errno;
->     dout(10) << "error opening file " << (*path)->path() << " with flags=
-=3D"
->       << flags << ": " << cpp_strerror(-r) << dendl;
->     goto fail;
->   }
-
-At this layer we can get ENOENT as a normal event (some client request asks=
- for an object that doesn't exist), so it doesn't make sense to log an erro=
-r here.  The get_map() method should probably be modified to indicate that =
-it failed to load map epoch N (using derr) before asserting or calling ceph=
-_abort().
-
-Thanks!
-sage
-
+-- 
+Regards
+Kefu Chai
