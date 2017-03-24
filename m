@@ -1,58 +1,39 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: [GSoC] Queries regarding the Project
-Date: Fri, 24 Mar 2017 15:31:28 +0800
-Message-ID: <CAJE9aOMqs+KiNqq-HWp3rhahZc37664o9L0JymJANBKGOdVAwg@mail.gmail.com>
-References: <CAAXqJ+omQh-sSv06i0Wo50JEVzGsin7Zoe4zKYTW9q=Eu_QUUw@mail.gmail.com>
+From: Mao Cheng <chengmao2010@gmail.com>
+Subject: Re: CephFS: How to figure out which files are affected after a disaster
+Date: Fri, 24 Mar 2017 17:01:08 +0800
+Message-ID: <CAGiyNfA_BrXRTTJ9no=b3jdQoYTBk0fkwMRFx_ge1JGzSrye-A@mail.gmail.com>
+References: <CY4PR10MB1591F37261F24E1D6F510E97E43E0@CY4PR10MB1591.namprd10.prod.outlook.com>
+ <CY4PR10MB159194A6062F5ABA74AA3E9CE43E0@CY4PR10MB1591.namprd10.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f42.google.com ([209.85.213.42]:33003 "EHLO
-        mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752086AbdCXHbb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Mar 2017 03:31:31 -0400
-Received: by mail-vk0-f42.google.com with SMTP id d188so6626674vka.0
-        for <ceph-devel@vger.kernel.org>; Fri, 24 Mar 2017 00:31:30 -0700 (PDT)
-In-Reply-To: <CAAXqJ+omQh-sSv06i0Wo50JEVzGsin7Zoe4zKYTW9q=Eu_QUUw@mail.gmail.com>
+Received: from mail-io0-f172.google.com ([209.85.223.172]:35004 "EHLO
+        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751477AbdCXJBJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Mar 2017 05:01:09 -0400
+Received: by mail-io0-f172.google.com with SMTP id z13so12949709iof.2
+        for <ceph-devel@vger.kernel.org>; Fri, 24 Mar 2017 02:01:09 -0700 (PDT)
+In-Reply-To: <CY4PR10MB159194A6062F5ABA74AA3E9CE43E0@CY4PR10MB1591.namprd10.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Spandan Kumar Sahu <spandankumarsahu@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Spandan,
+cephfs-data-scan can help you.
 
-Please do not email me privately, instead use the public mailing list,
-which allows other developers to provide you help if I am unable to do
-so. it also means that you can start interacting with the rest of the
-community instead of only me (barely useful).
-
-On Fri, Mar 24, 2017 at 2:38 PM, Spandan Kumar Sahu
-<spandankumarsahu@gmail.com> wrote:
-> Hi
+2017-03-24 13:35 GMT+08:00 Wang, Zhiye <Zhiye.Wang@arcserve.com>:
+> Dear all,
 >
-> I couldn't figure out, why is this happening,
+> I store only one replica (pool size = 1) for my data. And I lose one OSD in my cluster. Is there a way to figure out which files (in CephFS) are actually affected?
 >
-> "...Because once any of the storage device assigned to a storage pool is
-> full, the whole pool is not writeable anymore, even there is abundant space
-> in other devices."
-> -- Ceph GSoC Project Ideas (Smarter reweight-by-utilisation)
+> "pool size = 1" is just an example for simple. I can also say "pool size = 2, but lose 2 OSD", or "pool size = 3, but lose 3 OSD".
 >
-> I went through this[1] paper on CRUSH, and according to what I understand,
-> CRUSH pseudo-randomly chooses a device based on weights which can reflect
-> various parameters like the amount of space available.
-
-CRUSH is a variant of consistent hashing. Ceph cannot automatically
-choose *another* OSD which is not chosen by CRUSH, even if that OSD is
-not full and has abundant space.
-
 >
-> What I don't understand is, how will it stop a pool having abundant space on
-> other devices, from getting selected, if one of its devices is full? Sure,
-> the chances of getting selected might decrease, if one device is full, but
-> how does it completely prevent writing to the pool?
-
-if a PG are served by three OSDs. if any of them is full, how can we
-continue creating/writing to objects which belong to that PG?
-
-
--- 
-Regards
-Kefu Chai
+>
+> Thanks
+> Zhiye
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
