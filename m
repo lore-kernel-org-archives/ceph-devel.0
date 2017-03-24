@@ -1,90 +1,106 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 04/23] net, ceph: convert ceph_snap_context.nref from
- atomic_t to refcount_t
-Date: Fri, 24 Mar 2017 14:20:42 +0100
-Message-ID: <CAOi1vP97Cq5UhxryxsLe2MuNi9zJZFDaY3_CT76uU=_H_sJ-Nw@mail.gmail.com>
-References: <1489752646-8749-1-git-send-email-elena.reshetova@intel.com> <1489752646-8749-5-git-send-email-elena.reshetova@intel.com>
+From: Sage Weil <sage@newdream.net>
+Subject: RE: Print error into debug log by default
+Date: Fri, 24 Mar 2017 13:20:38 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1703241320180.10776@piezo.novalocal>
+References: <CY4PR10MB15917429D6B014495D0CE42EE43F0@CY4PR10MB1591.namprd10.prod.outlook.com> <alpine.DEB.2.11.1703231158210.30468@piezo.novalocal> <CY4PR10MB159116D3B2FB5D84FA380EFCE43E0@CY4PR10MB1591.namprd10.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-hams-owner@vger.kernel.org>
-In-Reply-To: <1489752646-8749-5-git-send-email-elena.reshetova@intel.com>
-Sender: linux-hams-owner@vger.kernel.org
-To: Elena Reshetova <elena.reshetova@intel.com>
-Cc: netdev <netdev@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-rdma@vger.kernel.org, "David S. Miller" <davem@davemloft.net>, linux-x25@vger.kernel.org, linux-sctp@vger.kernel.org, vyasevich@gmail.com, nhorman@tuxdriver.com, linux-hams@vger.kernel.org, linux-nfs@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, bfields@fieldses.org, Jeff Layton <jlayton@poochiereds.net>, steffen.klassert@secunet.com, Herbert Xu <herbert@gondor.apana.org.au>, santosh.shilimkar@oracle.com, jreuter@yaina.de, ralf@linux-mips.org, peterz@infradead.org, Kees Cook <keescook@chromium.org>, Hans Liljestrand <ishkamiel@gmail.com>, David Windsor <dwindsor@gmail.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:37680 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751577AbdCXNUl (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 24 Mar 2017 09:20:41 -0400
+In-Reply-To: <CY4PR10MB159116D3B2FB5D84FA380EFCE43E0@CY4PR10MB1591.namprd10.prod.outlook.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Wang, Zhiye" <Zhiye.Wang@Arcserve.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Mar 17, 2017 at 1:10 PM, Elena Reshetova
-<elena.reshetova@intel.com> wrote:
-> refcount_t type and corresponding API should be
-> used instead of atomic_t when the variable is used as
-> a reference counter. This allows to avoid accidental
-> refcounter overflows that might lead to use-after-free
-> situations.
->
-> Signed-off-by: Elena Reshetova <elena.reshetova@intel.com>
-> Signed-off-by: Hans Liljestrand <ishkamiel@gmail.com>
-> Signed-off-by: Kees Cook <keescook@chromium.org>
-> Signed-off-by: David Windsor <dwindsor@gmail.com>
-> ---
->  include/linux/ceph/libceph.h | 3 ++-
->  net/ceph/snapshot.c          | 6 +++---
->  2 files changed, 5 insertions(+), 4 deletions(-)
->
-> diff --git a/include/linux/ceph/libceph.h b/include/linux/ceph/libceph.h
-> index 1816c5e..26dc674 100644
-> --- a/include/linux/ceph/libceph.h
-> +++ b/include/linux/ceph/libceph.h
-> @@ -14,6 +14,7 @@
->  #include <linux/wait.h>
->  #include <linux/writeback.h>
->  #include <linux/slab.h>
-> +#include <linux/refcount.h>
->
->  #include <linux/ceph/types.h>
->  #include <linux/ceph/messenger.h>
-> @@ -159,7 +160,7 @@ struct ceph_client {
->   * dirtied.
->   */
->  struct ceph_snap_context {
-> -       atomic_t nref;
-> +       refcount_t nref;
->         u64 seq;
->         u32 num_snaps;
->         u64 snaps[];
-> diff --git a/net/ceph/snapshot.c b/net/ceph/snapshot.c
-> index 705414e..e14a5d0 100644
-> --- a/net/ceph/snapshot.c
-> +++ b/net/ceph/snapshot.c
-> @@ -49,7 +49,7 @@ struct ceph_snap_context *ceph_create_snap_context(u32 snap_count,
->         if (!snapc)
->                 return NULL;
->
-> -       atomic_set(&snapc->nref, 1);
-> +       refcount_set(&snapc->nref, 1);
->         snapc->num_snaps = snap_count;
->
->         return snapc;
-> @@ -59,7 +59,7 @@ EXPORT_SYMBOL(ceph_create_snap_context);
->  struct ceph_snap_context *ceph_get_snap_context(struct ceph_snap_context *sc)
->  {
->         if (sc)
-> -               atomic_inc(&sc->nref);
-> +               refcount_inc(&sc->nref);
->         return sc;
->  }
->  EXPORT_SYMBOL(ceph_get_snap_context);
-> @@ -68,7 +68,7 @@ void ceph_put_snap_context(struct ceph_snap_context *sc)
->  {
->         if (!sc)
->                 return;
-> -       if (atomic_dec_and_test(&sc->nref)) {
-> +       if (refcount_dec_and_test(&sc->nref)) {
->                 /*printk(" deleting snap_context %p\n", sc);*/
->                 kfree(sc);
->         }
+On Fri, 24 Mar 2017, Wang, Zhiye wrote:
+> Thanks Sage. 
+> 
+> Currently, it seems the return value of " FileStore::lfn_open" assigned to a boolen variable in "OSDService::_get_map_bl". That causes upper has no knowledge why the operation was failed. 
+> 
+> Maybe we can change the return value of "OSDService::_get_map_bl" to "int", and then print failure reason in "OSDService::try_get_map".
 
-Applied.
+Yeah, that would be better!
 
-Thanks,
+sage
 
-                Ilya
+> 
+> 
+> bool OSDService::_get_map_bl(epoch_t e, bufferlist& bl)
+> {
+>   bool found = map_bl_cache.lookup(e, &bl);
+>   if (found)
+>     return true;
+>   found = store->read(coll_t::meta(),
+> 		      OSD::get_osdmap_pobject_name(e), 0, 0, bl) >= 0;
+>   if (found)
+>     _add_map_bl(e, bl);
+>   return found;
+> }
+> 
+> 
+> Thanks
+> Zhiye
+> 
+> 
+> 
+> 
+> -----Original Message-----
+> From: Sage Weil [mailto:sage@newdream.net] 
+> Sent: Thursday, March 23, 2017 7:59 PM
+> To: Wang, Zhiye <Zhiye.Wang@Arcserve.com>
+> Cc: ceph-devel@vger.kernel.org
+> Subject: Re: Print error into debug log by default
+> 
+> On Thu, 23 Mar 2017, Wang, Zhiye wrote:
+> > Dear all,
+> > 
+> > This is a small problem. I was not able to figure out the way to open an issue, so I just share it here.
+> > 
+> > After some wrong operation steps (run ceph-osd command using root), I was not be able to start ceph-osd anymore. I can see the following stack in debug log.
+> > 
+> > 
+> > 2017-03-22 02:23:54.054907 7f0e87d8b940 -1 osd.0 0 failed to load OSD 
+> > map for epoch 71, got 0 bytes
+> > 2017-03-22 02:23:54.056361 7f0e87d8b940 -1 
+> > /home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_A
+> > RCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/relea
+> > se/11.2.0/rpm/el7/BUILD/ceph-11.2.0/src/osd/OSD.h: In function 
+> > 'OSDMapRef OSDService::get_map(epoch_t)' thread 7f0e87d8b940 time 
+> > 2017-03-22 02:23:54.054921
+> > /home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_A
+> > RCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/relea
+> > se/11.2.0/rpm/el7/BUILD/ceph-11.2.0/src/osd/OSD.h: 997: FAILED 
+> > assert(ret)
+> > 
+> >  ceph version 11.2.0 (f223e27eeb35991352ebc1f67423d4ebc252adb7)
+> >  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char 
+> > const*)+0x85) [0x7f0e88869b35]
+> >  2: (OSDService::get_map(unsigned int)+0x3d) [0x7f0e8825d13d]
+> >  3: (OSD::init()+0x1fd2) [0x7f0e8820a452]
+> >  4: (main()+0x2cda) [0x7f0e8813bf4a]
+> >  5: (__libc_start_main()+0xf5) [0x7f0e8460cb15]
+> >  6: (()+0x413da9) [0x7f0e881b7da9]
+> > 
+> > 
+> > After dig this for problem for some time, I finally realize it should a problem of file permission (because of my previous wrong operation). The problem is that there was no tip in debug log.
+> > 
+> > Look at the source code, I guess it's because we do not print file open error debug log in FileStore::lfn_open by default. Please correct me if I am wrong. I'd suggest we can always print error message into debug log.
+> > 
+> >   r = ::open((*path)->path(), flags, 0644);
+> >   if (r < 0) {
+> >     r = -errno;
+> >     dout(10) << "error opening file " << (*path)->path() << " with flags="
+> >       << flags << ": " << cpp_strerror(-r) << dendl;
+> >     goto fail;
+> >   }
+> 
+> At this layer we can get ENOENT as a normal event (some client request asks for an object that doesn't exist), so it doesn't make sense to log an error here.  The get_map() method should probably be modified to indicate that it failed to load map epoch N (using derr) before asserting or calling ceph_abort().
+> 
+> Thanks!
+> sage
+> 
+> 
