@@ -1,36 +1,79 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: storing multiple weights in crush
-Date: Mon, 27 Mar 2017 18:45:46 +0200
-Message-ID: <e731d3ad-4cde-2f12-0871-962c46df698a@dachary.org>
+From: Methuku Karthik <kmeth@seas.upenn.edu>
+Subject: [GSOC] Introduction Mail : ceph-mgr: Smarter Reweight-by-Utilization
+Date: Mon, 27 Mar 2017 16:49:34 -0400
+Message-ID: <CAOnoakd7u3OfOi1-wotvtKC=Kc5zaQbNMBQtShpDHhPRa94eCA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:51160 "EHLO
-        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751318AbdC0Qp5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Mar 2017 12:45:57 -0400
+Received: from mail-qk0-f175.google.com ([209.85.220.175]:33324 "EHLO
+        mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751677AbdC0Utv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Mar 2017 16:49:51 -0400
+Received: by mail-qk0-f175.google.com with SMTP id f11so49814686qkb.0
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Mar 2017 13:49:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: mynaramana@gmail.com
 
-Hi Sage,
+Hi Everyone,
 
-I added a proposal[1] to the next CDM[2] to be able to store and use multiple weights for each item in the crushmap. 
+My name is Karthik. I am a first year graduate student in Embedded
+Systems at University of Pennsylvania. I am a avid c, c++ and python
+programmer.I have 4 years of work experience as  Software developer at
+Airbus.
 
-I'm not sure about the naming (probabilities is a long word...) but it would be good to not have a third variable named weight with yet another meaning. Although we could modify the builder functions, I'm not sure this is a good idea. They are not complete enough to hide the crush data structures and it is probably enough to document the new data members. And the caller can allocate it and fill it after creating a bucket. In practice that is going to be used by CrushWrapper or python-crush which will define an API.
+I have been working as research assistant in PRECISE lab at the
+University of Pennsylvania to evaluate the performance of the Xen's
+RTDS scheduler.
 
-It is probably best if the crush modification is the bare minimum:
+Currently, I am doing a course on distributed systems. As a part of
+that course ,I am building a small cloud platform using gRPC (Google's
+high performance , open-source RPC framework) with the following
+features:
 
-- allowing the choose function to pick a probability from a table indexed by the round instead of relying on a single weight
-- storing the probability table in each item
+(1)Webmail service (SMTP & POP3) to send, receive and forward mails
+(2)A fault-tolerant backend server that employs key-Value store
+similar to Google's Bigtable.
+(3)The entire Bigtable is distributed across multiple backend servers.
+(4)Frontend Http server to process requests from a browser, retrieve
+appropriate data from the backend server and construct the http
+response for the GUI.
+(5)Storage service (Similar to Google Drive) with support for
+navigating the directories, folder creation and uploading and
+downloading any file type.
+(6)This system will be fault tolerant with quorum based causal
+replication done across multiple nodes and load balancing done with
+dynamic distribution of users among different groups.
 
-Feel free to modify the pad if you have other ideas, this is a first draft done today and I won't be offended if it is discarded ;-)
+I compiled and hosted a small cluster to observe how ceph works in
+storing the data and how the  distribution of the data is maintained
+while ensuring fault tolerance.With the help of my friend Myna
+(cc.ed), I could come to speed and performed few experiments to
+observe how data is shuffled after bringing down one osd.
 
-Cheers
+I am currently doing literature review on crush algorithm and
+understanding the Ceph Architecture.
 
-[1] http://pad.ceph.com/p/crush-multiweight
-[2] http://tracker.ceph.com/projects/ceph/wiki/CDM_05-APR-2017
+It would be exciting to work on project "ceph-mgr: Smarter
+Reweight-by-Utilization"
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+Can you point me to any resources that guide to evaluate performace of
+storage system ?
+
+What kind of factors should one consider to evaluate performace of a
+storage system ?
+I could think of response time for reading, writing and deleting a
+file or how quickly a node is configured into a cluster or how quickly
+cluster heals after a node dies.
+
+Please suggest me some existing simple beginner bug which would give
+me a chance to explore the code.
+
+I'm very much interested in Ceph. I want to become a Ceph contributor
+in the near future.
+
+Thank you very much for your help!
+
+Best,
+Karthik
