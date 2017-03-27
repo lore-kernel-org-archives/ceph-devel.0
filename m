@@ -1,455 +1,656 @@
-From: myoungwon oh <ohmyoungwon@gmail.com>
-Subject: Re: Question about writeback performance and content address obejct
- for deduplication
-Date: Mon, 27 Mar 2017 22:46:21 +0900
-Message-ID: <CAFNt83b-X701_oio4UzDdy_-UGqrzF-zG0_MWLzzCkPajbHhSA@mail.gmail.com>
-References: <CAFNt83bds6KzCnMvxyN=vPu7dg_NyX3cHdZwgmhiQqKt4B314A@mail.gmail.com>
- <alpine.DEB.2.11.1701311420210.3654@piezo.novalocal> <CAFNt83Z1+n+uEGo_58DmrXYxfNQe_GzG4iTYtBdDnt6PEYvdHQ@mail.gmail.com>
- <alpine.DEB.2.11.1702071442411.3654@piezo.novalocal> <CAFNt83ZUHKxPZJiFO0MEbj+BNgQo6PxmfFQWdQ=E5fnq-w+Piw@mail.gmail.com>
- <alpine.DEB.2.11.1703160249260.10776@piezo.novalocal> <CAFNt83aS0hOWQuairQkKvregr_FCho1__kNqPjM5TMg85oKF5A@mail.gmail.com>
- <alpine.DEB.2.11.1703241932310.10776@piezo.novalocal>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: crush multipick anomaly
+Date: Mon, 27 Mar 2017 13:39:52 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1703271334070.10776@piezo.novalocal>
+References: <alpine.DEB.2.11.1701260122190.6539@piezo.novalocal> <CAFdhnjfYK43=ZdQ-cPG0k8KzKnTZ=T5VNoYdfdSdPH8gRG_i+A@mail.gmail.com> <alpine.DEB.2.11.1703072259520.24356@piezo.novalocal> <CAFdhnjeAdCgqS3N7yvZXEanEc8c_q2hR_HciUD2gdFGcRyaZXQ@mail.gmail.com>
+ <649a0116-6f61-0470-69bd-41f64214ad5a@dachary.org> <6b063525-eeec-bdf6-a926-af2e9276f34b@dachary.org> <7f03d75d-0dc7-086e-6f43-5b2717588345@dachary.org> <CAFdhnjcs5sZbnDWXH6qJBge9WYR-Cr+svhr=YZ9hZJrDvo=vxg@mail.gmail.com> <0ad9fa05-fc1c-9bd9-d826-a1dae693b67d@dachary.org>
+ <CAFdhnjdQSZZJJ0BUG45-QWUj6enr+0ZPpOxVjNhijzFPXL9==Q@mail.gmail.com> <alpine.DEB.2.11.1703251824460.10776@piezo.novalocal> <CAHMeWhHV=5u=QFggXFNMn2MzGLgQJ6nMnae+ZgK=MB5yYr1p9g@mail.gmail.com> <alpine.DEB.2.11.1703270228100.10776@piezo.novalocal>
+ <1fd7676c-3b5c-31d0-a038-91b08f458e40@dachary.org> <CAHMeWhGuJnu2664VTxomQ-wJewBEPjRT_VGWH+g-v5k3ka6X5Q@mail.gmail.com> <CAHMeWhH2j8Ni9b10u+KY_Xum=a-mvRnUoL2F4tJNto5o-q65+w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-930994217-1490621994=:10776"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f48.google.com ([209.85.213.48]:36238 "EHLO
-        mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752160AbdC0Nqi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Mar 2017 09:46:38 -0400
-Received: by mail-vk0-f48.google.com with SMTP id s68so51785812vke.3
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Mar 2017 06:46:32 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1703241932310.10776@piezo.novalocal>
+Received: from cobra.newdream.net ([66.33.216.30]:49344 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752432AbdC0Nke (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Mar 2017 09:40:34 -0400
+In-Reply-To: <CAHMeWhH2j8Ni9b10u+KY_Xum=a-mvRnUoL2F4tJNto5o-q65+w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel@vger.kernel.org, =?UTF-8?B?7Jik66qF7JuQ?= <omwmw@sk.com>
+To: Adam Kupczyk <akupczyk@mirantis.com>
+Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
 
-I added comments in the pad.
-I will make pads in order to discuss  #3 and #4 if you agree with #1, #2.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-thanks.
+--8323329-930994217-1490621994=:10776
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 
-2017-03-25 4:32 GMT+09:00 Sage Weil <sweil@redhat.com>:
-> On Mon, 20 Mar 2017, myoungwon oh wrote:
->> Hi sage.
->>
->> Thanks for your comments!
->> I created pads in order to brainstorm design option about #1, #2 first.
->>
->> #1 http://pad.ceph.com/p/deduplication_how_dedup_manifists
->> #2 http://pad.ceph.com/p/deduplication_how_do_we_store_chunk
+On Mon, 27 Mar 2017, Adam Kupczyk wrote:
+> Hi,
+> 
+> My understanding is that optimal tweaked weights will depend on:
+> 1) pool_id, because of rjenkins(pool_id) in crush
+> 2) number of placement groups and replication factor, as it determines
+> amount of samples
+> 
+> Therefore tweaked weights should rather be property of instantialized pool,
+> not crush placement definition.
 >
-> I made some comments in the pad!
->
-> sage
->
->>
->>
->> Thanks.
->>
->> 2017-03-16 22:42 GMT+09:00 Sage Weil <sweil@redhat.com>:
->> > Hi Myoungwon,
->> >
->> > This is quite a patch!  Sorry for the slow reply.
->> >
->> > On Tue, 14 Mar 2017, myoungwon oh wrote:
->> >> Hi Sage
->> >>
->> >>
->> >> I addressed all of your concerns (I applied CAS pool and dedup
->> >> metadata in object_info_t) and created public repository in order to
->> >> show the prototype implementation
->> >> (https://github.com/myoungwon/ceph/commit/13597f62405d1c5a4977d630e69331407ef3a07a,
->> >> support non-aligned I/O, but for (K)RBD). This code is based on Jewel
->> >> and is not cleaned well but you can see the basic flow (start_flush(),
->> >> maybe_handle_cache_detail() ). It would be nice if you give me some
->> >> comments.
->> >>
->> >> I have some queries mentioned below on which your feedback is highly required.
->> >>
->> >> 1. dedup metadata in object_info_t
->> >>
->> >> You mentioned that it would be nice to make tuple in object_info_t
->> >> such as map<offset, tuple<length, cas object, pool>> But, I made
->> >> dedup_chunk_info_t in object_info_t because I need one more parameter
->> >> (chunk_state) and for extensibility.
->> >
->> > Yes, we definitely want an extensible approach to the state in
->> > object_info_t that will support
->> >
->> >  - a simple redirect ("the object is in that other pool")
->> >  - a dedup object ("the object consists of these N lumps, each one
->> > referencing an object named X_i in pool Y_i")
->> >  - an external system (extenral archive, like a backup system, external
->> > object store, whatever)
->> >
->> > I think we should try to come up with a general notion, like "redirect" or
->> > "object map" or something that covers other options... not just dedup!
->> >
->> >> This is because to avoid read and
->> >> fingerprinting during flush time. chunk_state represents three states
->> >> in writeback mode. First is CLEAN (data and fingerprint are not
->> >> modified). Second is MODIFIED (data is modified but fingerprint is not
->> >> calculated). Third is CALCULATED (data is modified and fingerprint is
->> >> also calculated). When data is stored in cache tier, chunk_state will
->> >> be defined. Therefore, reading data and fingerprinting can be removed
->> >> during flush.
->> >
->> > I'm not following this, though.  I think "clean" would just mean we are
->> > storing the normal object in the pool.  "modified" would mean that the
->> > FLAG_DIRTY is set.  And "calculated" would mean we have successfully
->> > chunked the object, stored or taken refs on the chunks, and written the
->> > chunk map into object_info_t?
->> >
->> >
->> >> 2. Single Rados Operation
->> >>
->> >> You mentioned a Rados operation which can concurrently read the
->> >> reference count and write data. Do you want that API in objecter
->> >> class? (for example, objector->read_ref_and_write())
->> >
->> > We may not need to make it a first-class rados operation.  For example,
->> > cls_refcount could probably be extended with a write_or_get operation.
->> > But it might also be advantageous to make it a native op.  The main thing
->> > I'm worried about here is that we probably want to make the refs
->> > reliable and autitable, which means backpointers (so you can look at a
->> > chunk and see which dedup objects are using it).  That means that a
->> > popular sequence of bytes might have a huge number of references, and that
->> > will need to scale gracefully.  Or, we just use counters, accept that
->> > failure conditions could make us leak dedup chunks, and make all of our
->> > failure paths fail-safe.
->> >
->> >> 3. Write sequence for performance.
->> >>
->> >> Current write sequence (proxy mode) is
->> >>
->> >> a. Read metadata (promote_object)
->> >> b. Send data to OSD (in CAS pool) and send dedup metadata to OSD (in
->> >> original pool)
->> >> c. If data and metadata are stored then, proxy osd will issue message
->> >> to decrease the reference count (for previous chunk) to OSD (in CAS
->> >> pool) and update local object metadata (via simple_opc_submit)
->> >> d. If reference count is successful, send Ack to client
->> >>
->> >> As you can see, the number of operations increased due to reference
->> >> count and metadata updates. This can degrade performance. My question
->> >> is that can we send ack to client at (c) above? (But I am worried
->> >> about inconsistent reference count state.)
->> >
->> > I'm worried that if we focus on inline dedup immediately we'll end up with
->> > something that is less general and more fragile.  It's also harder.
->> > Instead, we can consider the inline and async dedup separately.  Async:
->> >
->> > writeback:
->> > a. normal write into object.  ack client.
->> > ...
->> > b. dedup agent: read object (from cache), chunk
->> > c. dedup agent: write/refcount chunks
->> > d. replace object with dedup manifest
->> >
->> > This could happen with or without a delay.  I don't think it makes sense
->> > to consider "promote" here at all; it sounds like you're assuming the
->> > initial dedup tier is a cache tier, and we should try not to assume that
->> > (even though it might be possible).  Instead, I think a "basic" setup
->> > would probably be
->> >
->> > 1. base pool (all ssd; contains all metadata for all objects, and absorbs
->> >    writes).
->> > 2. dedup pool(s) contain refcounted chunks
->> >
->> > If we want to do inline dedup, it would be some complex code that combines
->> > all of the steps above into one, at the expense of client latency.
->> >
->> >
->> > In any case, it's awesome that you have a working prototype.  However,
->> > it's not going to be practical to take a huge patch(set) like this and
->> > merge it all at once.  It's too much code to review, too complex, and too
->> > hard to test.  Also, it's changing 5000 in ReplicatedPG.cc (since renamed
->> > PrimaryLogPG.cc), which is slated for a big refactor right after luminous.
->> >
->> > The way to approach this to get it upstream is to break this down into
->> > different logical components and design/review/test/merge each of them
->> > indepdendently.  Having a prototype is useful in that it will be easier to
->> > answer a lot of the questions we'll have deciding how each part should
->> > work and what it needs to be able to handle, but don't expect that most
->> > of that code will end up in the final version!
->> >
->> > I'm guessing we can break this down into a few logical components:
->> >
->> > 1) How do we store chunks.  We know we want refcounted objects for each
->> > chunk.  We don't know how we'll manage the refcounts, whether we want/need
->> > backpointers, whether we are willing to tolerate "leaking" references in
->> > failure cases (so that we fail to clean up all chunks if we e.g. delete
->> > all data), whether we want to implement it as a rados class or a native
->> > rados op, whether we want to support EC, compression, etc.  This whole
->> > discussion one is a great place to start because it is self-contained and
->> > doesn't break anything else.
->> >
->> > 2) How do we do the dedup manifists (and redirects) in object_info_t.  We
->> > want the solution to include or be compatible with simpler tiering, like
->> > having the object_info_t simply be a pointer to a different (colder) pool.
->> > In fact, I think this is the thing to do first becuase it will make us
->> > fix/solve all the basic problems with flush and promote.  And extending
->> > this to include dedup (object is composed of many little bits in other
->> > pools) is then a matter of making that 'manifest' (or whatever we call it)
->> > a generic and extensible description.  Remember we also want to support
->> > pushing objects into external systems (say, glacier, or some other
->> > external object store like a backup system).
->> >
->> > 3) How do we chunk.  You have some classes that handle aligned chunking.
->> > We'll probably eventually want content-based chunking (based on Rabin
->> > fingerprinting or whatever the new hotness is).  Real users will probably
->> > want adjustable policies based on what they know of the content they're
->> > storing, and the system will probably want to support multiple CAS pools
->> > based on which policy is being used (as that determines chunk sizes
->> > etc and whether we'll actually have any dedup happening).
->> >
->> > 4) How to drive the dedup process itself.  An async agent that's part of
->> > the exiting tier_agent?  An external process?  Something inline in the
->> > write path?  This is the hardest question to answer, and the one that is
->> > most likely to collide with other planned OSD work.  It can also come
->> > last, IMO!  We can start with a simple offline agent and perhaps
->> > eventually do something more clever or efficient.
->> >
->> > In any case, I think #1 and #2 are the key discussions we should have now.
->> > I suggest starting a pad and email thread for each (pad.ceph.com) so we
->> > can brainstorm design options, weight trade-offs, and come to some
->> > consensus.  (I had some thoughts, for example, on a hybrid scheme
->> > somewhere between explicit backpointers and a simple refcount that could
->> > consume fixed overhead but still provide information that would enable a
->> > moderately efficient scrub/audit.)
->> >
->> > Thanks!
->> > sage
->> >
->> >
->> >
->> >
->> >> Write sequence (writeback mode) is
->> >>
->> >> a.  Read object data and do fingerprinting (if data is not calculated).
->> >> b. Send reference count decrement message (for previous chunk) to osd
->> >> (in CAS pool) and updates local object metadata
->> >> c. Send copy_from message to osd (in CAS pool) and send copy_from
->> >> message (in order to copy the dedup metadata) to a osd (in original
->> >> pool)
->> >>
->> >> Writeback mode also increase the number of operation. Can we reduce?
->> >>
->> >>
->> >>
->> >> 4. Performance.
->> >>
->> >> Performance is improved compared to previous results. But It still
->> >> seems to be improving. (512KB block, Seq. workload, fio, KRBD, single
->> >> thread, target_max_objects = 4)
->> >>
->> >> Major concerns are first is fingerprint overhead and second is
->> >> writeback performance in cache tier. When the chunk size is large
->> >> (>512KB), SHA1 takes more than 3ms. (This can be reduced if we use
->> >> small chunk.)
->> >>
->> >> Regarding writeback performance, Flush need two more operations than
->> >> proxy mode. First is "marking clean state". Second is "reading dedup
->> >> metadata and data from storage". Therefore, actual read and write
->> >> occur. These cause that flush completion is delayed.
->> >>
->> >> Small chunk performance in the writeback mode is significantly
->> >> degraded because single flush thread handles multiple copy_from
->> >> message. It seems that we should improve basic flushing performance.
->> >>
->> >>
->> >> Write performance (MB/s)
->> >>
->> >> Dedup ratio     0         60       100
->> >>
->> >> Proxy             55       64       73
->> >>
->> >> Writeback       48       50       50
->> >>
->> >> Original           120      120      122
->> >>
->> >>
->> >>
->> >> Read performance (MB/s)
->> >>
->> >> Dedup ratio     0         60       100
->> >>
->> >> Proxy             117      130      141
->> >>
->> >> Writeback       198      197      200
->> >>
->> >> Original           280      276      285
->> >>
->> >>
->> >>
->> >>
->> >> 5. Command to enable dedup
->> >>
->> >> Ceph osd pool create sds-hot 1024
->> >> Ceph osd pool create sds-cas 1024
->> >> Ceph osd tier add_cas rbd sds-hot sds-cas
->> >> Ceph osd tier sds-hot (proxy or writeback)
->> >> Ceph osd tier dedup_block rbd sds-hot sds-cas (chunk size. e.g. 65536, 131072..)
->> >> Ceph osd tier set-overlay rbd sds-hot
->> >>
->> >>
->> >>
->> >> Thanks
->> >> Myoungwon Oh
->> >> (omwmw@sk.com)
->> >>
->> >> 2017-02-07 23:50 GMT+09:00 Sage Weil <sweil@redhat.com>:
->> >> > On Tue, 7 Feb 2017, myoungwon oh wrote:
->> >> >> Hi sage.
->> >> >>
->> >> >> I uploaded the document which describe my overall appoach.
->> >> >> please see it and give me feedback.
->> >> >> slide: https://www.slideshare.net/secret/JZcy3yYEDIHPyg
->> >> >
->> >> > This approach looks pretty close to what we have been planning.  A few
->> >> > comments:
->> >> >
->> >> > 1) I think it may be better to view the tier/pool that has the object
->> >> > metadata as the "base" pool, and the CAS pool with the refcounted
->> >> > object chunks as as tier below that.
->> >> >
->> >> > 2) I think we can use an object class or a handful of new native rados
->> >> > operations to make the CAS pool read/write operations more efficient.  In
->> >> > your slides you describe a process something like
->> >> >
->> >> >   rados(getattr)
->> >> >   if exists
->> >> >      rados(increment ref count)
->> >> >   else
->> >> >      rados(write object and set ref count to 1)
->> >> >
->> >> > This could be collapsed into a single optimistic operation that sends the
->> >> > data and a command that says "create or increment ref count" so that the
->> >> > conditional behavior is handled at the OSD.  This will be more efficient
->> >> > for small chunks.  (For large chunks, or in cases where we have some
->> >> > confidence that the chunk probably already exists, the pessimistic
->> >> > approach might still make sense.)  Either way, we should probably support
->> >> > both.
->> >> >
->> >> > 3) We'd like to generalize the first pool behavior so that it is just a
->> >> > special case of the new tiering functionality.  The idea is that an
->> >> > object_info_t can have a 'manifest' that described where and how the
->> >> > object is really stored instead of the object data itself (much like it
->> >> > can already be a whiteout, etc.).  In the simplest case, the manifest
->> >> > would just say "this object is stored in pool X" (simple tiering).  In
->> >> > this case, the manifest would a structure like
->> >> >
->> >> >   map<offset, tuple<length, cas object, pool>>
->> >> >
->> >> > I think it'll be worth the effort to build a general struture here that we
->> >> > can use for basic tiering (not just dedup).
->> >> >
->> >> > sage
->> >> >
->> >> >
->> >> >
->> >> >>
->> >> >> thanks
->> >> >>
->> >> >>
->> >> >> 2017-01-31 23:24 GMT+09:00 Sage Weil <sage@newdream.net>:
->> >> >> > On Thu, 26 Jan 2017, myoungwon oh wrote:
->> >> >> >> I have two questions.
->> >> >> >>
->> >> >> >> 1. I would like to ask about CAS location. current our implementation store
->> >> >> >> content address object in storage tier.However, If we store the CAO in the
->> >> >> >> cache tier, we can get a performance advantage. Do you think we can create
->> >> >> >> CAO in cachetier? or create a separate storage pool for CAS?
->> >> >> >
->> >> >> > It depends on the design.  If the you are naming the objects at the
->> >> >> > librados client side, then you can use the rados cluster itself
->> >> >> > unmodified (with or without a cache tier).  This is roughly how I have
->> >> >> > anticipated implementing the CAS storage portion.  If you are doing the
->> >> >> > chunking hashing and within the OSD itself, then you can't do the CAS
->> >> >> > at the first tier because the requests won't be directed at the right OSD.
->> >> >> >
->> >> >> >> 2. The results below are performance result for our current implementation.
->> >> >> >> experiment setup:
->> >> >> >> PROXY (inline dedup), WRITEBACK (lazy dedup, target_max_bytes: 50MB),
->> >> >> >> ORIGINAL(without dedup feature and cache tier),
->> >> >> >> fio, 512K block, seq. I/O, single thread
->> >> >> >>
->> >> >> >> One thing to note is that the writeback case is slower than the proxy.
->> >> >> >> We think there are three problems as follows.
->> >> >> >>
->> >> >> >> A. The current implementation creates a fingerprint by reading the entire
->> >> >> >> object when flushing. Therefore, there is a problem that read and write are
->> >> >> >> mixed.
->> >> >> >
->> >> >> > I expect this is a small factor compared to the fact that in writeback
->> >> >> > mode you have to *write* to the cache tier, which is 3x replicated,
->> >> >> > whereas in proxy mode those writes don't happen at all.
->> >> >> >
->> >> >> >> B. When client request read, the promote_object function reads the object
->> >> >> >> and writes it back to the cache tier, which also causes a mix of read and
->> >> >> >> write.
->> >> >> >
->> >> >> > This can be mitigated by setting the min_read_recency_for_promote pool
->> >> >> > property to something >1.  Then reads will be proxied unless the object
->> >> >> > appears to be hot (because it has been touched over multiple
->> >> >> > hitset intervals).
->> >> >> >
->> >> >> >> C. When flushing, the unchanged part is rewritten because flush operation
->> >> >> >> perform per-object based.
->> >> >> >
->> >> >> > Yes.
->> >> >> >
->> >> >> > Is there a description of your overall approach somewhere?
->> >> >> >
->> >> >> > sage
->> >> >> >
->> >> >> >
->> >> >> >>
->> >> >> >> Do I have something wrong? or Could you give me a suggestion to improve
->> >> >> >> performance?
->> >> >> >>
->> >> >> >>
->> >> >> >> a. Write performance (KB/s)
->> >> >> >>
->> >> >> >> dedup_ratio  0 20 40 60 80 100
->> >> >> >>
->> >> >> >> PROXY  45586 47804 51120 52844 56167 55302
->> >> >> >>
->> >> >> >> WRITEBACK  13151 11078 9531 13010 9518 8319
->> >> >> >>
->> >> >> >> ORIGINAL  121209 124786 122140 121195 122540 132363
->> >> >> >>
->> >> >> >>
->> >> >> >> b. Read performance (KB/s)
->> >> >> >>
->> >> >> >> dedup_ratio  0 20 40 60 80 100
->> >> >> >>
->> >> >> >> PROXY  112231 118994 118070 120071 117884 132748
->> >> >> >>
->> >> >> >> WRITEBACK  34040 29109 19104 26677 24756 21695
->> >> >> >>
->> >> >> >> ORIGINAL  285482 284398 278063 277989 271793 285094
->> >> >> >>
->> >> >> >>
->> >> >> >> thanks,
->> >> >> >> Myoungwon Oh
->> >> >> >> --
->> >> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> >> >> the body of a message to majordomo@vger.kernel.org
->> >> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >> >> >>
->> >> >> >>
->> >> >>
->> >> >>
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >>
->> >>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+> If tweaked weights are to be part of crush definition, than for each
+> created pool we need to have separate list of weights.
+> Is it possible to provide clients with different weights depending on on
+> which pool they want to operate?
+
+As Loic suggested, you can create as many derivative hierarchies in the 
+crush map as you like, potentially one per pool.  Or you could treat the 
+sum total of all pgs as the interesting set, balance those, and get some 
+OSDs doing a bit more of one pool than another.  The new post-CRUSH OSD 
+remap capability can always clean this up (and turn a "good" crush 
+distribution into a perfect distribution).
+
+I guess the question is: when we add the explicit adjusted weight matrix 
+to crush should we have multiple sets of weights (perhaps one for each 
+pool), or simply have a single global set.  It might make sense to allow N 
+sets of adjusted weights so that the crush users can choose a particular 
+set of them for different pools (or whatever it is they're calculating the 
+mapping for)..
+
+sage
+
+
+> 
+> Best regards,
+> Adam
+> 
+> On Mon, Mar 27, 2017 at 10:45 AM, Adam Kupczyk <akupczyk@mirantis.com> wrote:
+> > Hi,
+> >
+> > My understanding is that optimal tweaked weights will depend on:
+> > 1) pool_id, because of rjenkins(pool_id) in crush
+> > 2) number of placement groups and replication factor, as it determines
+> > amount of samples
+> >
+> > Therefore tweaked weights should rather be property of instantialized pool,
+> > not crush placement definition.
+> >
+> > If tweaked weights are to be part of crush definition, than for each created
+> > pool we need to have separate list of weights.
+> > Is it possible to provide clients with different weights depending on on
+> > which pool they want to operate?
+> >
+> > Best regards,
+> > Adam
+> >
+> >
+> > On Mon, Mar 27, 2017 at 8:45 AM, Loic Dachary <loic@dachary.org> wrote:
+> >>
+> >>
+> >>
+> >> On 03/27/2017 04:33 AM, Sage Weil wrote:
+> >> > On Sun, 26 Mar 2017, Adam Kupczyk wrote:
+> >> >> Hello Sage, Loic, Pedro,
+> >> >>
+> >> >>
+> >> >> I am certain that almost perfect mapping can be achieved by
+> >> >> substituting weights from crush map with slightly modified weights.
+> >> >> By perfect mapping I mean we get on each OSD number of PGs exactly
+> >> >> proportional to weights specified in crush map.
+> >> >>
+> >> >> 1. Example
+> >> >> Lets think of PGs of single object pool.
+> >> >> We have OSDs with following weights:
+> >> >> [10, 10, 10, 5, 5]
+> >> >>
+> >> >> Ideally, we would like following distribution of 200PG x 3 copies = 600
+> >> >> PGcopies :
+> >> >> [150, 150, 150, 75, 75]
+> >> >>
+> >> >> However, because crush simulates random process we have:
+> >> >> [143, 152, 158, 71, 76]
+> >> >>
+> >> >> We could have obtained perfect distribution had we used weights like
+> >> >> this:
+> >> >> [10.2, 9.9, 9.6, 5.2, 4.9]
+> >> >>
+> >> >>
+> >> >> 2. Obtaining perfect mapping weights from OSD capacity weights
+> >> >>
+> >> >> When we apply crush for the first time, distribution of PGs comes as
+> >> >> random.
+> >> >> CRUSH([10, 10, 10, 5, 5]) -> [143, 152, 158, 71, 76]
+> >> >>
+> >> >> But CRUSH is not random proces at all, it behaves in numerically stable
+> >> >> way.
+> >> >> Specifically, if we increase weight on one node, we will get more PGs
+> >> >> on
+> >> >> this node and less on every other node:
+> >> >> CRUSH([10.1, 10, 10, 5, 5]) -> [146(+3), 152, 156(-2), 70(-1), 76]
+> >> >>
+> >> >> Now, finding ideal weights can be done by any numerical minimization
+> >> >> method,
+> >> >> for example NLMS.
+> >> >>
+> >> >>
+> >> >> 3. The proposal
+> >> >> For each pool, from initial weights given in crush map perfect weights
+> >> >> will
+> >> >> be derived.
+> >> >> This weights will be used to calculate PG distribution. This of course
+> >> >> will
+> >> >> be close to perfect.
+> >> >>
+> >> >> 3a: Downside when OSD is out
+> >> >> When an OSD is out, missing PG copies will be replicated elsewhere.
+> >> >> Because now weights deviate from OSD capacity, some OSDs will
+> >> >> statistically
+> >> >> get more copies then they should.
+> >> >> This unevenness in distribution is proportional to scale of deviation
+> >> >> of
+> >> >> calculated weights to capacity weights.
+> >> >>
+> >> >> 3b: Upside
+> >> >> This all can be achieved without changes to crush.
+> >> >
+> >> > Yes!
+> >> >
+> >> > And no.  You're totally right--we should use an offline optimization to
+> >> > tweak the crush input weights to get a better balance.  It won't be
+> >> > robust
+> >> > to changes to the cluster, but we can incrementally optimize after that
+> >> > happens to converge on something better.
+> >> >
+> >> > The problem with doing this with current versions of Ceph is that we
+> >> > lose
+> >> > the original "input" or "target" weights (i.e., the actual size of
+> >> > the OSD) that we want to converge on.  This is one reason why we haven't
+> >> > done something like this before.
+> >> >
+> >> > In luminous we *could* work around this by storing those canonical
+> >> > weights outside of crush using something (probably?) ugly and
+> >> > maintain backward compatibility with older clients using existing
+> >> > CRUSH behavior.
+> >>
+> >> These canonical weights could be stored in crush by creating dedicated
+> >> buckets. For instance the root-canonical bucket could be created to store
+> >> the canonical weights of the root bucket. The sysadmin needs to be aware of
+> >> the difference and know to add a new device in the host01-canonical bucket
+> >> instead of the host01 bucket. And to run an offline tool to keep the two
+> >> buckets in sync and compute the weight to use for placement derived from the
+> >> weights representing the device capacity.
+> >>
+> >> It is a little bit ugly ;-)
+> >>
+> >> > OR, (and this is my preferred route), if the multi-pick anomaly approach
+> >> > that Pedro is working on works out, we'll want to extend the CRUSH map
+> >> > to
+> >> > include a set of derivative weights used for actual placement
+> >> > calculations
+> >> > instead of the canonical target weights, and we can do what you're
+> >> > proposing *and* solve the multipick problem with one change in the crush
+> >> > map and algorithm.  (Actually choosing those derivative weights will
+> >> > be an offline process that can both improve the balance for the inputs
+> >> > we
+> >> > care about *and* adjust them based on the position to fix the skew issue
+> >> > for replicas.)  This doesn't help pre-luminous clients, but I think the
+> >> > end solution will be simpler and more elegant...
+> >> >
+> >> > What do you think?
+> >> >
+> >> > sage
+> >> >
+> >> >
+> >> >> 4. Extra
+> >> >> Some time ago I made such change to perfectly balance Thomson-Reuters
+> >> >> cluster.
+> >> >> It succeeded.
+> >> >> A solution was not accepted, because modification of OSD weights were
+> >> >> higher
+> >> >> then 50%, which was caused by fact that different placement rules
+> >> >> operated
+> >> >> on different sets of OSDs, and those sets were not disjointed.
+> >> >
+> >> >
+> >> >>
+> >> >> Best regards,
+> >> >> Adam
+> >> >>
+> >> >>
+> >> >> On Sat, Mar 25, 2017 at 7:42 PM, Sage Weil <sage@newdream.net> wrote:
+> >> >>       Hi Pedro, Loic,
+> >> >>
+> >> >>       For what it's worth, my intuition here (which has had a mixed
+> >> >>       record as
+> >> >>       far as CRUSH goes) is that this is the most promising path
+> >> >>       forward.
+> >> >>
+> >> >>       Thinking ahead a few steps, and confirming that I'm following
+> >> >>       the
+> >> >>       discussion so far, if you're able to do get black (or white) box
+> >> >>       gradient
+> >> >>       descent to work, then this will give us a set of weights for
+> >> >>       each item in
+> >> >>       the tree for each selection round, derived from the tree
+> >> >>       structure and
+> >> >>       original (target) weights.  That would basically give us a map
+> >> >>       of item id
+> >> >>       (bucket id or leave item id) to weight for each round.  i.e.,
+> >> >>
+> >> >>        map<int, map<int, float>> weight_by_position;  // position ->
+> >> >>       item -> weight
+> >> >>
+> >> >>       where the 0 round would (I think?) match the target weights, and
+> >> >>       each
+> >> >>       round after that would skew low-weighted items lower to some
+> >> >>       degree.
+> >> >>       Right?
+> >> >>
+> >> >>       The next question I have is: does this generalize from the
+> >> >>       single-bucket
+> >> >>       case to the hierarchy?  I.e., if I have a "tree" (single bucket)
+> >> >>       like
+> >> >>
+> >> >>       3.1
+> >> >>        |_____________
+> >> >>        |   \    \    \
+> >> >>       1.0  1.0  1.0  .1
+> >> >>
+> >> >>       it clearly works, but when we have a multi-level tree like
+> >> >>
+> >> >>
+> >> >>       8.4
+> >> >>        |____________________________________
+> >> >>        |                 \                  \
+> >> >>       3.1                3.1                2.2
+> >> >>        |_____________     |_____________     |_____________
+> >> >>        |   \    \    \    |   \    \    \    |   \    \    \
+> >> >>       1.0  1.0  1.0  .1   1.0  1.0  1.0  .1  1.0  1.0 .1   .1
+> >> >>
+> >> >>       and the second round weights skew the small .1 leaves lower, can
+> >> >>       we
+> >> >>       continue to build the summed-weight hierarchy, such that the
+> >> >>       adjusted
+> >> >>       weights at the higher level are appropriately adjusted to give
+> >> >>       us the
+> >> >>       right probabilities of descending into those trees?  I'm not
+> >> >>       sure if that
+> >> >>       logically follows from the above or if my intuition is
+> >> >>       oversimplifying
+> >> >>       things.
+> >> >>
+> >> >>       If this *is* how we think this will shake out, then I'm
+> >> >>       wondering if we
+> >> >>       should go ahead and build this weigh matrix into CRUSH sooner
+> >> >>       rather
+> >> >>       than later (i.e., for luminous).  As with the explicit
+> >> >>       remappings, the
+> >> >>       hard part is all done offline, and the adjustments to the CRUSH
+> >> >>       mapping
+> >> >>       calculation itself (storing and making use of the adjusted
+> >> >>       weights for
+> >> >>       each round of placement) are relatively straightforward.  And
+> >> >>       the sooner
+> >> >>       this is incorporated into a release the sooner real users will
+> >> >>       be able to
+> >> >>       roll out code to all clients and start making us of it.
+> >> >>
+> >> >>       Thanks again for looking at this problem!  I'm excited that we
+> >> >>       may be
+> >> >>       closing in on a real solution!
+> >> >>
+> >> >>       sage
+> >> >>
+> >> >>
+> >> >>
+> >> >>
+> >> >>
+> >> >>       On Thu, 23 Mar 2017, Pedro López-Adeva wrote:
+> >> >>
+> >> >>       > There are lot of gradient-free methods. I will try first to
+> >> >>       run the
+> >> >>       > ones available using just scipy
+> >> >>       >
+> >> >>
+> >> >> (https://docs.scipy.org/doc/scipy-0.18.1/reference/optimize.html).
+> >> >>       > Some of them don't require the gradient and some of them can
+> >> >>       estimate
+> >> >>       > it. The reason to go without the gradient is to run the CRUSH
+> >> >>       > algorithm as a black box. In that case this would be the
+> >> >>       pseudo-code:
+> >> >>       >
+> >> >>       > - BEGIN CODE -
+> >> >>       > def build_target(desired_freqs):
+> >> >>       >     def target(weights):
+> >> >>       >         # run a simulation of CRUSH for a number of objects
+> >> >>       >         sim_freqs = run_crush(weights)
+> >> >>       >         # Kullback-Leibler divergence between desired
+> >> >>       frequencies and
+> >> >>       > current ones
+> >> >>       >         return loss(sim_freqs, desired_freqs)
+> >> >>       >    return target
+> >> >>       >
+> >> >>       > weights = scipy.optimize.minimize(build_target(desired_freqs))
+> >> >>       > - END CODE -
+> >> >>       >
+> >> >>       > The tricky thing here is that this procedure can be slow if
+> >> >>       the
+> >> >>       > simulation (run_crush) needs to place a lot of objects to get
+> >> >>       accurate
+> >> >>       > simulated frequencies. This is true specially if the minimize
+> >> >>       method
+> >> >>       > attempts to approximate the gradient using finite differences
+> >> >>       since it
+> >> >>       > will evaluate the target function a number of times
+> >> >>       proportional to
+> >> >>       > the number of weights). Apart from the ones in scipy I would
+> >> >>       try also
+> >> >>       > optimization methods that try to perform as few evaluations as
+> >> >>       > possible like for example HyperOpt
+> >> >>       > (http://hyperopt.github.io/hyperopt/), which by the way takes
+> >> >>       into
+> >> >>       > account that the target function can be noisy.
+> >> >>       >
+> >> >>       > This black box approximation is simple to implement and makes
+> >> >>       the
+> >> >>       > computer do all the work instead of us.
+> >> >>       > I think that this black box approximation is worthy to try
+> >> >>       even if
+> >> >>       > it's not the final one because if this approximation works
+> >> >>       then we
+> >> >>       > know that a more elaborate one that computes the gradient of
+> >> >>       the CRUSH
+> >> >>       > algorithm will work for sure.
+> >> >>       >
+> >> >>       > I can try this black box approximation this weekend not on the
+> >> >>       real
+> >> >>       > CRUSH algorithm but with the simple implementation I did in
+> >> >>       python. If
+> >> >>       > it works it's just a matter of substituting one simulation
+> >> >>       with
+> >> >>       > another and see what happens.
+> >> >>       >
+> >> >>       > 2017-03-23 15:13 GMT+01:00 Loic Dachary <loic@dachary.org>:
+> >> >>       > > Hi Pedro,
+> >> >>       > >
+> >> >>       > > On 03/23/2017 12:49 PM, Pedro López-Adeva wrote:
+> >> >>       > >> Hi Loic,
+> >> >>       > >>
+> >> >>       > >>>From what I see everything seems OK.
+> >> >>       > >
+> >> >>       > > Cool. I'll keep going in this direction then !
+> >> >>       > >
+> >> >>       > >> The interesting thing would be to
+> >> >>       > >> test on some complex mapping. The reason is that
+> >> >>       "CrushPolicyFamily"
+> >> >>       > >> is right now modeling just a single straw bucket not the
+> >> >>       full CRUSH
+> >> >>       > >> algorithm.
+> >> >>       > >
+> >> >>       > > A number of use cases use a single straw bucket, maybe the
+> >> >>       majority of them. Even though it does not reflect the full range
+> >> >>       of what crush can offer, it could be useful. To be more
+> >> >>       specific, a crush map that states "place objects so that there
+> >> >>       is at most one replica per host" or "one replica per rack" is
+> >> >>       common. Such a crushmap can be reduced to a single straw bucket
+> >> >>       that contains all the hosts and by using the CrushPolicyFamily,
+> >> >>       we can change the weights of each host to fix the probabilities.
+> >> >>       The hosts themselves contain disks with varying weights but I
+> >> >>       think we can ignore that because crush will only recurse to
+> >> >>       place one object within a given host.
+> >> >>       > >
+> >> >>       > >> That's the work that remains to be done. The only way that
+> >> >>       > >> would avoid reimplementing the CRUSH algorithm and
+> >> >>       computing the
+> >> >>       > >> gradient would be treating CRUSH as a black box and
+> >> >>       eliminating the
+> >> >>       > >> necessity of computing the gradient either by using a
+> >> >>       gradient-free
+> >> >>       > >> optimization method or making an estimation of the
+> >> >>       gradient.
+> >> >>       > >
+> >> >>       > > By gradient-free optimization you mean simulated annealing
+> >> >>       or Monte Carlo ?
+> >> >>       > >
+> >> >>       > > Cheers
+> >> >>       > >
+> >> >>       > >>
+> >> >>       > >>
+> >> >>       > >> 2017-03-20 11:49 GMT+01:00 Loic Dachary <loic@dachary.org>:
+> >> >>       > >>> Hi,
+> >> >>       > >>>
+> >> >>       > >>> I modified the crush library to accept two weights (one
+> >> >>       for the first disk, the other for the remaining disks)[1]. This
+> >> >>       really is a hack for experimentation purposes only ;-) I was
+> >> >>       able to run a variation of your code[2] and got the following
+> >> >>       results which are encouraging. Do you think what I did is
+> >> >>       sensible ? Or is there a problem I don't see ?
+> >> >>       > >>>
+> >> >>       > >>> Thanks !
+> >> >>       > >>>
+> >> >>       > >>> Simulation: R=2 devices capacity [10  8  6 10  8  6 10  8
+> >> >>       6]
+> >> >>       > >>>
+> >> >>
+> >> >> ------------------------------------------------------------------------
+> >> >>       > >>> Before: All replicas on each hard drive
+> >> >>       > >>> Expected vs actual use (20000 samples)
+> >> >>       > >>>  disk 0: 1.39e-01 1.12e-01
+> >> >>       > >>>  disk 1: 1.11e-01 1.10e-01
+> >> >>       > >>>  disk 2: 8.33e-02 1.13e-01
+> >> >>       > >>>  disk 3: 1.39e-01 1.11e-01
+> >> >>       > >>>  disk 4: 1.11e-01 1.11e-01
+> >> >>       > >>>  disk 5: 8.33e-02 1.11e-01
+> >> >>       > >>>  disk 6: 1.39e-01 1.12e-01
+> >> >>       > >>>  disk 7: 1.11e-01 1.12e-01
+> >> >>       > >>>  disk 8: 8.33e-02 1.10e-01
+> >> >>       > >>> it=    1 jac norm=1.59e-01 loss=5.27e-03
+> >> >>       > >>> it=    2 jac norm=1.55e-01 loss=5.03e-03
+> >> >>       > >>> ...
+> >> >>       > >>> it=  212 jac norm=1.02e-03 loss=2.41e-07
+> >> >>       > >>> it=  213 jac norm=1.00e-03 loss=2.31e-07
+> >> >>       > >>> Converged to desired accuracy :)
+> >> >>       > >>> After: All replicas on each hard drive
+> >> >>       > >>> Expected vs actual use (20000 samples)
+> >> >>       > >>>  disk 0: 1.39e-01 1.42e-01
+> >> >>       > >>>  disk 1: 1.11e-01 1.09e-01
+> >> >>       > >>>  disk 2: 8.33e-02 8.37e-02
+> >> >>       > >>>  disk 3: 1.39e-01 1.40e-01
+> >> >>       > >>>  disk 4: 1.11e-01 1.13e-01
+> >> >>       > >>>  disk 5: 8.33e-02 8.08e-02
+> >> >>       > >>>  disk 6: 1.39e-01 1.38e-01
+> >> >>       > >>>  disk 7: 1.11e-01 1.09e-01
+> >> >>       > >>>  disk 8: 8.33e-02 8.48e-02
+> >> >>       > >>>
+> >> >>       > >>>
+> >> >>       > >>> Simulation: R=2 devices capacity [10 10 10 10  1]
+> >> >>       > >>>
+> >> >>
+> >> >> ------------------------------------------------------------------------
+> >> >>       > >>> Before: All replicas on each hard drive
+> >> >>       > >>> Expected vs actual use (20000 samples)
+> >> >>       > >>>  disk 0: 2.44e-01 2.36e-01
+> >> >>       > >>>  disk 1: 2.44e-01 2.38e-01
+> >> >>       > >>>  disk 2: 2.44e-01 2.34e-01
+> >> >>       > >>>  disk 3: 2.44e-01 2.38e-01
+> >> >>       > >>>  disk 4: 2.44e-02 5.37e-02
+> >> >>       > >>> it=    1 jac norm=2.43e-01 loss=2.98e-03
+> >> >>       > >>> it=    2 jac norm=2.28e-01 loss=2.47e-03
+> >> >>       > >>> ...
+> >> >>       > >>> it=   37 jac norm=1.28e-03 loss=3.48e-08
+> >> >>       > >>> it=   38 jac norm=1.07e-03 loss=2.42e-08
+> >> >>       > >>> Converged to desired accuracy :)
+> >> >>       > >>> After: All replicas on each hard drive
+> >> >>       > >>> Expected vs actual use (20000 samples)
+> >> >>       > >>>  disk 0: 2.44e-01 2.46e-01
+> >> >>       > >>>  disk 1: 2.44e-01 2.44e-01
+> >> >>       > >>>  disk 2: 2.44e-01 2.41e-01
+> >> >>       > >>>  disk 3: 2.44e-01 2.45e-01
+> >> >>       > >>>  disk 4: 2.44e-02 2.33e-02
+> >> >>       > >>>
+> >> >>       > >>>
+> >> >>       > >>> [1] crush
+> >> >> hackhttp://libcrush.org/main/libcrush/commit/6efda297694392d0b07845eb98464a0dcd
+> >> >>       56fee8
+> >> >>       > >>> [2] python-crush
+> >> >> hackhttp://libcrush.org/dachary/python-crush/commit/d9202fcd4d17cd2a82b37ec20c1
+> >> >>       bd25f8f2c4b68
+> >> >>       > >>>
+> >> >>       > >>> On 03/19/2017 11:31 PM, Loic Dachary wrote:
+> >> >>       > >>>> Hi Pedro,
+> >> >>       > >>>>
+> >> >>       > >>>> It looks like trying to experiment with crush won't work
+> >> >>       as expected because crush does not distinguish the probability
+> >> >>       of selecting the first device from the probability of selecting
+> >> >>       the second or third device. Am I mistaken ?
+> >> >>       > >>>>
+> >> >>       > >>>> Cheers
+> >> >>       > >>>>
+> >> >>       > >>>> On 03/18/2017 10:21 AM, Loic Dachary wrote:
+> >> >>       > >>>>> Hi Pedro,
+> >> >>       > >>>>>
+> >> >>       > >>>>> I'm going to experiment with what you did at
+> >> >>       > >>>>>
+> >> >>       > >>>>>
+> >> >>       https://github.com/plafl/notebooks/blob/master/replication.ipynb
+> >> >>       > >>>>>
+> >> >>       > >>>>> and the latest python-crush published today. A
+> >> >>       comparison function was added that will help measure the data
+> >> >>       movement. I'm hoping we can release an offline tool based on
+> >> >>       your solution. Please let me know if I should wait before diving
+> >> >>       into this, in case you have unpublished drafts or new ideas.
+> >> >>       > >>>>>
+> >> >>       > >>>>> Cheers
+> >> >>       > >>>>>
+> >> >>       > >>>>> On 03/09/2017 09:47 AM, Pedro López-Adeva wrote:
+> >> >>       > >>>>>> Great, thanks for the clarifications.
+> >> >>       > >>>>>> I also think that the most natural way is to keep just
+> >> >>       a set of
+> >> >>       > >>>>>> weights in the CRUSH map and update them inside the
+> >> >>       algorithm.
+> >> >>       > >>>>>>
+> >> >>       > >>>>>> I keep working on it.
+> >> >>       > >>>>>>
+> >> >>       > >>>>>>
+> >> >>       > >>>>>> 2017-03-08 0:06 GMT+01:00 Sage Weil
+> >> >>       <sage@newdream.net>:
+> >> >>       > >>>>>>> Hi Pedro,
+> >> >>       > >>>>>>>
+> >> >>       > >>>>>>> Thanks for taking a look at this!  It's a frustrating
+> >> >>       problem and we
+> >> >>       > >>>>>>> haven't made much headway.
+> >> >>       > >>>>>>>
+> >> >>       > >>>>>>> On Thu, 2 Mar 2017, Pedro López-Adeva wrote:
+> >> >>       > >>>>>>>> Hi,
+> >> >>       > >>>>>>>>
+> >> >>       > >>>>>>>> I will have a look. BTW, I have not progressed that
+> >> >>       much but I have
+> >> >>       > >>>>>>>> been thinking about it. In order to adapt the
+> >> >>       previous algorithm in
+> >> >>       > >>>>>>>> the python notebook I need to substitute the
+> >> >>       iteration over all
+> >> >>       > >>>>>>>> possible devices permutations to iteration over all
+> >> >>       the possible
+> >> >>       > >>>>>>>> selections that crush would make. That is the main
+> >> >>       thing I need to
+> >> >>       > >>>>>>>> work on.
+> >> >>       > >>>>>>>>
+> >> >>       > >>>>>>>> The other thing is of course that weights change for
+> >> >>       each replica.
+> >> >>       > >>>>>>>> That is, they cannot be really fixed in the crush
+> >> >>       map. So the
+> >> >>       > >>>>>>>> algorithm inside libcrush, not only the weights in
+> >> >>       the map, need to be
+> >> >>       > >>>>>>>> changed. The weights in the crush map should reflect
+> >> >>       then, maybe, the
+> >> >>       > >>>>>>>> desired usage frequencies. Or maybe each replica
+> >> >>       should have their own
+> >> >>       > >>>>>>>> crush map, but then the information about the
+> >> >>       previous selection
+> >> >>       > >>>>>>>> should be passed to the next replica placement run so
+> >> >>       it avoids
+> >> >>       > >>>>>>>> selecting the same one again.
+> >> >>       > >>>>>>>
+> >> >>       > >>>>>>> My suspicion is that the best solution here (whatever
+> >> >>       that means!)
+> >> >>       > >>>>>>> leaves the CRUSH weights intact with the desired
+> >> >>       distribution, and
+> >> >>       > >>>>>>> then generates a set of derivative weights--probably
+> >> >>       one set for each
+> >> >>       > >>>>>>> round/replica/rank.
+> >> >>       > >>>>>>>
+> >> >>       > >>>>>>> One nice property of this is that once the support is
+> >> >>       added to encode
+> >> >>       > >>>>>>> multiple sets of weights, the algorithm used to
+> >> >>       generate them is free to
+> >> >>       > >>>>>>> change and evolve independently.  (In most cases any
+> >> >>       change is
+> >> >>       > >>>>>>> CRUSH's mapping behavior is difficult to roll out
+> >> >>       because all
+> >> >>       > >>>>>>> parties participating in the cluster have to support
+> >> >>       any new behavior
+> >> >>       > >>>>>>> before it is enabled or used.)
+> >> >>       > >>>>>>>
+> >> >>       > >>>>>>>> I have a question also. Is there any significant
+> >> >>       difference between
+> >> >>       > >>>>>>>> the device selection algorithm description in the
+> >> >>       paper and its final
+> >> >>       > >>>>>>>> implementation?
+> >> >>       > >>>>>>>
+> >> >>       > >>>>>>> The main difference is the "retry_bucket" behavior was
+> >> >>       found to be a bad
+> >> >>       > >>>>>>> idea; any collision or failed()/overload() case
+> >> >>       triggers the
+> >> >>       > >>>>>>> retry_descent.
+> >> >>       > >>>>>>>
+> >> >>       > >>>>>>> There are other changes, of course, but I don't think
+> >> >>       they'll impact any
+> >> >>       > >>>>>>> solution we come with here (or at least any solution
+> >> >>       can be suitably
+> >> >>       > >>>>>>> adapted)!
+> >> >>       > >>>>>>>
+> >> >>       > >>>>>>> sage
+> >> >>       > >>>>>> --
+> >> >>       > >>>>>> To unsubscribe from this list: send the line
+> >> >>       "unsubscribe ceph-devel" in
+> >> >>       > >>>>>> the body of a message to majordomo@vger.kernel.org
+> >> >>       > >>>>>> More majordomo info at
+> >> >>       http://vger.kernel.org/majordomo-info.html
+> >> >>       > >>>>>>
+> >> >>       > >>>>>
+> >> >>       > >>>>
+> >> >>       > >>>
+> >> >>       > >>> --
+> >> >>       > >>> Loïc Dachary, Artisan Logiciel Libre
+> >> >>       > >> --
+> >> >>       > >> To unsubscribe from this list: send the line "unsubscribe
+> >> >>       ceph-devel" in
+> >> >>       > >> the body of a message to majordomo@vger.kernel.org
+> >> >>       > >> More majordomo info at
+> >> >>       http://vger.kernel.org/majordomo-info.html
+> >> >>       > >>
+> >> >>       > >
+> >> >>       > > --
+> >> >>       > > Loïc Dachary, Artisan Logiciel Libre
+> >> >>       > --
+> >> >>       > To unsubscribe from this list: send the line "unsubscribe
+> >> >>       ceph-devel" in
+> >> >>       > the body of a message to majordomo@vger.kernel.org
+> >> >>       > More majordomo info at
+> >> >>       http://vger.kernel.org/majordomo-info.html
+> >> >>       >
+> >> >>       >
+> >> >>
+> >> >>
+> >> >>
+> >>
+> >> --
+> >> Loïc Dachary, Artisan Logiciel Libre
+> >
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+--8323329-930994217-1490621994=:10776--
