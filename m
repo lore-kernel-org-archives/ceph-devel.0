@@ -1,100 +1,62 @@
-From: Spandan Kumar Sahu <spandankumarsahu@gmail.com>
-Subject: Re: [GSOC] Introduction Mail : ceph-mgr: Smarter Reweight-by-Utilization
-Date: Tue, 28 Mar 2017 10:16:45 +0530
-Message-ID: <CAAXqJ+r+ve2YS0w-26XP8xTWFrK_U-MrK6RS0bGVNLrGqpYoEA@mail.gmail.com>
-References: <CAOnoakd7u3OfOi1-wotvtKC=Kc5zaQbNMBQtShpDHhPRa94eCA@mail.gmail.com>
+From: Sagar Sarange <sagar.sarange9@gmail.com>
+Subject: Re: Ceph Contribution
+Date: Tue, 28 Mar 2017 11:42:47 +0530
+Message-ID: <fx3m6eqgjipcrogj87bsf6ne.1490680821484@email.android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f53.google.com ([209.85.218.53]:33187 "EHLO
-        mail-oi0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750830AbdC1Eqr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 00:46:47 -0400
-Received: by mail-oi0-f53.google.com with SMTP id g83so26621350oia.0
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Mar 2017 21:46:46 -0700 (PDT)
-In-Reply-To: <CAOnoakd7u3OfOi1-wotvtKC=Kc5zaQbNMBQtShpDHhPRa94eCA@mail.gmail.com>
+Received: from mail-pg0-f67.google.com ([74.125.83.67]:36146 "EHLO
+        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753705AbdC1GWd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 02:22:33 -0400
+Received: by mail-pg0-f67.google.com with SMTP id 81so18794473pgh.3
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Mar 2017 23:22:32 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Methuku Karthik <kmeth@seas.upenn.edu>
-Cc: ceph-devel@vger.kernel.org, mynaramana@gmail.com
+To: Ali <amaredia@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Karthik
+SGVsbG8gZXZlcnlvbmUsCkkgaGFkIGdvbmUgdGhyb3VnaCB0aGUgQ2VwaCBkb2N1bWVudGF0aW9u
+IGFuZCBJIGhhdmUgYSBnb29kIHVuZGVyc3RhbmRpbmcgb2YgdGhlIENlcGggYW5kIGl0J3MgYXJj
+aGl0ZWN0dXJlIGFuZCBob3cgaXQgd29ya3MuCkkgaGFkIGdvbmUgdGhyb3VnaCB0aGUgR1NvQyBp
+ZGVhcyBwYWdlIGFuZCBmaWd1cmUgb3V0IHRoZSBmb2xsb3dpbmcgcHJvamVjdCBpZGVhcy0KMS4g
+Q2VwaCBtZ3I6IFBvb2wgUEdfTlVNIGF1dG90dW5pbmcuCjIuIENlcGggbWdyOkNvbW1hbmRzIGZv
+ciBDZXBoRlMgY2xpZW50cyBBdXRoIGNhcHMgY3JlYXRpb24uCjMuIFJHVyA6IExvY2FsIGZpbGUg
+YmFjayBlbmQgZm9yIFJHVy4KClBsZWFzZSBzdWdnZXN0IG1lIGN1cnJlbnQgaXNzdWVzIHJlZ2Fy
+ZGluZyB0aGUgYWJvdmUgaWRlYXMgYW5kIG90aGVyIGluZm9ybWF0aW9uICwgc28gdGhhdCBJIHdp
+bGwgbGVhcm4gbW9yZSBhYm91dCBpdCBhbmQgY2xlYXIgbXkgdW5kZXJzdGFuZGluZyBhbmQgaXQg
+aGVscHMgbWUgb3V0IHRvIHdyaXRlIGdvb2QgcHJvcG9zYWwgZm9yIEdTb0MgMjAxNy4KClRoYW5r
+IHlvdSwKU2FnYXIKClNlbnQgdmlhIE1pY3JvbWF4CgpPbiBGZWIgMjgsIDIwMTcgMTI6NDUgQU0s
+IEFsaSBNYXJlZGlhIDxhbWFyZWRpYUByZWRoYXQuY29tPiB3cm90ZToKPgo+IFNhZ2FyLCAKPgo+
+IElmIHlvdSdyZSBpbnRlcmVzdGVkIGluIGRvaW5nIEdTb0MsIEkgd291bGQgZGVmaW5pdGVseSBl
+eHBsb3JlIHRoZSBjdXJyZW50IGlkZWFzIG9uIHRoZSBDZXBoIHdlYnNpdGUgKGh0dHA6Ly9jZXBo
+LmNvbS9nc29jMjAxNy1pZGVhcy8pIGFzIHdlbGwuIAo+Cj4gLSBBbGkgCj4KPiAtLS0tLSBPcmln
+aW5hbCBNZXNzYWdlIC0tLS0tIAo+ID4gRnJvbTogIlNhZ2UgV2VpbCIgPHNhZ2VAbmV3ZHJlYW0u
+bmV0PiAKPiA+IFRvOiAiU2FnYXIgU2FyYW5nZSIgPHNhZ2FyLnNhcmFuZ2U5QGdtYWlsLmNvbT4g
+Cj4gPiBDYzogY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcgCj4gPiBTZW50OiBNb25kYXksIEZl
+YnJ1YXJ5IDI3LCAyMDE3IDk6MzY6MjkgQU0gCj4gPiBTdWJqZWN0OiBSZTogQ2VwaCBDb250cmli
+dXRpb24gCj4gPiAKPiA+IE9uIE1vbiwgMjcgRmViIDIwMTcsIFNhZ2FyIFNhcmFuZ2Ugd3JvdGU6
+IAo+ID4gPiBIZWxsbyBldmVyeW9uZSwgCj4gPiA+IEkgYW0gQ29tcHV0ZXIgU2NpZW5jZSBVbmRl
+cmdyYWR1YXRlIHN0dWRlbnQgLkkgYW0gZ29vZCBpbiBDLEMrKyBhbmQgUHl0aG9uLiAKPiA+ID4g
+SSBhbSBlYWdlciB0byBkbyBjb250cmlidXRpb24gaW4gQ2VwaC5JIGFsc28gZ28gdGhyb3VnaCBD
+ZXBoIHJlcG9zaXRvcnksYnV0IAo+ID4gPiBJIAo+ID4gPiBkaWRuJ3QgdW5kZXJzdGFuZCB3aGVy
+ZSB0byBzdGFydC4gCj4gPiA+IEkgYXBwcmVjaWF0ZSBhbnkgZmVlZGJhY2sgYW5kIGd1aWRlbGlu
+ZSB5b3UgY291bGQgZ2l2ZSBzbyBJIGNhbiBiZSBhIENlcGggCj4gPiA+IGNvbnRyaWJ1dG9yLiAK
+PiA+ID4gSSBhbSBhbHNvIGludGVyZXN0ZWQgdG8gYmUgYSBwYXJ0IG9mIENlcGggR1NvQyAyMDE3
+LiAKPiA+IAo+ID4gSGkgU2FnYXIsIAo+ID4gCj4gPiBBIGdvb2QgcGxhY2UgdG8gc3RhdCBtaWdo
+dCBiZSB0byBsb29rIGF0IHRoZSB0cmVsbG8gYm9hcmQgYXQgCj4gPiAKPiA+IGh0dHBzOi8vdHJl
+bGxvLmNvbS9iL3VnVGMyUUZIL2NlcGgtYmFja2xvZyAKPiA+IAo+ID4gd2hpY2ggaGFzIHNldmVy
+YWwgc21hbGxlciBpdGVtcyB1bmRlciB0aGUgY2xlYW51cCBsaXN0IGFuZCBlbHNld2hlcmUuIAo+
+ID4gQ2FyZHMgbWFya2VkIGluIGdyZWVuIG9yIG9yYW5nZSBhcmUgc21hbGwgdG8gbWVkaXVtLXNp
+emVkLsKgIFRoZXJlIGlzIGFsc28gCj4gPiB0aGUgdHJhY2tlciBhdCAKPiA+IAo+ID4gaHR0cDov
+L3RyYWNrZXIuY2VwaC5jb20vcHJvamVjdHMvY2VwaC9pc3N1ZXMgCj4gPiAKPiA+IHdoaWNoIGhh
+cyBsb3RzIG9mIGJ1Z3MgYW5kIGZlYXR1cmVzLsKgIEluIGJvdGggY2FzZXMgeW91J2xsIHByb2Jh
+Ymx5IG5lZWQgCj4gPiB0byB0YWxrIHRvIGZvbGtzIGluICNjZXBoLWRldmVsIG9yIGhlcmUgb24g
+dGhlIG1haWxpbmcgbGlzdCB0byBnZXQgbW9yZSAKPiA+IGNvbnRleHQuIAo+ID4gCj4gPiBUaGFu
+a3MhIAo+ID4gc2FnZSAKPiA+IC0tIAo+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6
+IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIAo+ID4gdGhlIGJvZHkg
+b2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgCj4gPiBNb3JlIG1ham9y
+ZG9tbyBpbmZvIGF0wqAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1s
+IAo+ID4gCg==
 
-This is what Kefu Chai, the mentor of this project, suggested me :
-"you can take a
-look at http://tracker.ceph.com/issues/15653, which is already assigned
-to Loic, but by investigating on it, you can get more insight of the project
-you want to take."
-
-On Tue, Mar 28, 2017 at 2:19 AM, Methuku Karthik <kmeth@seas.upenn.edu> wrote:
-> Hi Everyone,
->
-> My name is Karthik. I am a first year graduate student in Embedded
-> Systems at University of Pennsylvania. I am a avid c, c++ and python
-> programmer.I have 4 years of work experience as  Software developer at
-> Airbus.
->
-> I have been working as research assistant in PRECISE lab at the
-> University of Pennsylvania to evaluate the performance of the Xen's
-> RTDS scheduler.
->
-> Currently, I am doing a course on distributed systems. As a part of
-> that course ,I am building a small cloud platform using gRPC (Google's
-> high performance , open-source RPC framework) with the following
-> features:
->
-> (1)Webmail service (SMTP & POP3) to send, receive and forward mails
-> (2)A fault-tolerant backend server that employs key-Value store
-> similar to Google's Bigtable.
-> (3)The entire Bigtable is distributed across multiple backend servers.
-> (4)Frontend Http server to process requests from a browser, retrieve
-> appropriate data from the backend server and construct the http
-> response for the GUI.
-> (5)Storage service (Similar to Google Drive) with support for
-> navigating the directories, folder creation and uploading and
-> downloading any file type.
-> (6)This system will be fault tolerant with quorum based causal
-> replication done across multiple nodes and load balancing done with
-> dynamic distribution of users among different groups.
->
-> I compiled and hosted a small cluster to observe how ceph works in
-> storing the data and how the  distribution of the data is maintained
-> while ensuring fault tolerance.With the help of my friend Myna
-> (cc.ed), I could come to speed and performed few experiments to
-> observe how data is shuffled after bringing down one osd.
->
-> I am currently doing literature review on crush algorithm and
-> understanding the Ceph Architecture.
->
-> It would be exciting to work on project "ceph-mgr: Smarter
-> Reweight-by-Utilization"
->
-> Can you point me to any resources that guide to evaluate performace of
-> storage system ?
->
-> What kind of factors should one consider to evaluate performace of a
-> storage system ?
-> I could think of response time for reading, writing and deleting a
-> file or how quickly a node is configured into a cluster or how quickly
-> cluster heals after a node dies.
->
-> Please suggest me some existing simple beginner bug which would give
-> me a chance to explore the code.
->
-> I'm very much interested in Ceph. I want to become a Ceph contributor
-> in the near future.
->
-> Thank you very much for your help!
->
-> Best,
-> Karthik
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Spandan Kumar Sahu
-IIT Kharagpur
