@@ -1,145 +1,93 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: storing multiple weights in crush
-Date: Tue, 28 Mar 2017 12:27:52 +0200
-Message-ID: <8049eebc-1a0d-30cb-8e94-d451919a05ae@dachary.org>
-References: <e731d3ad-4cde-2f12-0871-962c46df698a@dachary.org>
- <alpine.DEB.2.11.1703272305380.10776@piezo.novalocal>
+From: Ning Yao <zay11022@gmail.com>
+Subject: Re: fio multithreads meets Segmentation fault
+Date: Tue, 28 Mar 2017 21:03:07 +0800
+Message-ID: <CALZt5jxe62u6STjjSOCbDr+gwaGNL+io8DV43LSkYDeCbz+jLw@mail.gmail.com>
+References: <CABstBbjRwUO-DzUAhjHZ1FzfPaRa=HzOTy5WXg7CXh5UNydAOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from slow1-d.mail.gandi.net ([217.70.178.86]:58921 "EHLO
-        slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754107AbdC1Kc6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 06:32:58 -0400
-Received: from relay2-d.mail.gandi.net (relay2-d.mail.gandi.net [217.70.183.194])
-        by slow1-d.mail.gandi.net (Postfix) with ESMTP id 0F7A749651E
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 12:29:20 +0200 (CEST)
-In-Reply-To: <alpine.DEB.2.11.1703272305380.10776@piezo.novalocal>
+Received: from mail-it0-f49.google.com ([209.85.214.49]:36909 "EHLO
+        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755380AbdC1NDX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 09:03:23 -0400
+Received: by mail-it0-f49.google.com with SMTP id 190so17399951itm.0
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 06:03:08 -0700 (PDT)
+In-Reply-To: <CABstBbjRwUO-DzUAhjHZ1FzfPaRa=HzOTy5WXg7CXh5UNydAOw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: =?UTF-8?B?6Zer5Yib?= <yanchuang1994@gmail.com>, Haomai Wang <haomai@xsky.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
+
+Hi, Haomai
+
+AsyncMessenger uses threadpools to handle connection and some thread
+unsafe function such as PK11_CreateContextBySymKey in libnss causes
+the corruptions here?
+
+Regards
+Ning Yao
 
 
-
-On 03/28/2017 01:16 AM, Sage Weil wrote:
-> On Mon, 27 Mar 2017, Loic Dachary wrote:
->> Hi Sage,
->>
->> I added a proposal[1] to the next CDM[2] to be able to store and use 
->> multiple weights for each item in the crushmap.
->>
->> I'm not sure about the naming (probabilities is a long word...) but it 
->> would be good to not have a third variable named weight with yet another 
->> meaning. Although we could modify the builder functions, I'm not sure 
->> this is a good idea. They are not complete enough to hide the crush data 
->> structures and it is probably enough to document the new data members. 
->> And the caller can allocate it and fill it after creating a bucket. In 
->> practice that is going to be used by CrushWrapper or python-crush which 
->> will define an API.
->>
->> It is probably best if the crush modification is the bare minimum:
->>
->> - allowing the choose function to pick a probability from a table 
->> indexed by the round instead of relying on a single weight
->> - storing the probability table in each item
->>
->> Feel free to modify the pad if you have other ideas, this is a first 
->> draft done today and I won't be offended if it is discarded ;-)
-> 
-> What about a new concept called a "weight set" that represents an 
-> alternative set of weights for the entire map (or perhaps a subset of it, 
-> like a particular hierarchy of interest).  We allow do_rule to be called 
-> with no weight_set specified, in which case it uses the 
-> legacy/default/canonical weights.  Or if an alternative weight set is 
-> specified, those weights are used instead.
-> 
-> I think we have a couple interesting options for the representation:
-> 
-> 1) It could be as simple as
-> 
->       vector<int> bucket_weights, item_weights;
-> 
-> which would lose the current (mis?)feature where the weigth for an item 
-> may be different in different buckets.  Or,
-> 
-> 2) it could mirror the bucket item_weights (let's call it vector<int> 
-> item_weights even though it's really a C array).  Something like
-> 
->       vector<int,vector<int>> bucket_item_weights;
-> 
-> where it's indexed first by bucket id, then the position in the bucket.
-> 
-> I guess #2 is most general and mirrors what we have.  That would give us 
-> something like
-> 
-> struct weight_set {
->   vector<int,vector<int>> bucket_item_weights;
-> };
-> 
-> for a simple replacement weight. But we actually want 
-> per-position weights, so instead we can do
-> 
-> struct weight_set {
->   vector<int,vector<vector<int>>> bucket_item_position_weights;
-> };
-> 
-> where it's bucket id, item position, current position.  In reality, 
-> for each bucket, we probably want a flat 2-d array, something like
-> 
-> struct weight_set {
->   struct bucket_weights {
->     unt32_t num_positions, num_items;
->     uint32_t *data;
->   };
->   vector<int,bucket_weights> bucket_weights;
-> };
-> 
-> or whatever.
-> 
-> The last thing is that the number of per-position weights we need is 
-> a property of the crush rule we're using, not the bucket itself.  So we 
-> should probably calculate it out for however many we think we need, and if 
-> we are doing a placement past that point, keep using the last weight.  
-> That means the degenerate case of just 1 position means we'll use it for 
-> all positions, which is what we'd want in the simple case anyway.
-
-I like this. The crush_do_rule could have an additional argument, a pointer to the weight set. If NULL it falls back to what we currently have. It is then up to the caller to build such a weight set. It can be addressing only part of the bucket tree or all of it, with num_positions matching the outsize. It is better seen as an argument to crush_do_rule rather than an integral part of the crushmap.
-
-Does that sound sensible ?
-
-> 
-> The last thing I think we should do while we're making this change is 
-> also let you specify an alternative id for the bucket when doing the hash.  
-> This is currently an annoying property of crush where if the bucket id 
-> changes all data shuffles.  But we could add an int32_t id to the 
-> bucket_weights above so that you could have a new weight set using any id 
-> you want.. that'll be useful for lots of stuff I suspect.
-
-Ok.
-
-Cheers
-
-> 
-> sage
-> 
-> 
-> 
-> 
->>
->> Cheers
->>
->> [1] http://pad.ceph.com/p/crush-multiweight
->> [2] http://tracker.ceph.com/projects/ceph/wiki/CDM_05-APR-2017
->>
->> -- 
->> Loïc Dachary, Artisan Logiciel Libre
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
+2017-03-28 17:36 GMT+08:00 =E9=97=AB=E5=88=9B <yanchuang1994@gmail.com>:
+> Hi all,
+>
+> When I make a fio-rbd-test, it says segmentation fault. I reckon that
+> there may be something wrong with the usage of libnss.
+> Ceph version is 11.2.0 (f223e27eeb35991352ebc1f67423d4ebc252adb7)
+> using AsyncMessenger.
+> Is libnss3.so thread safe? or other thoughts to resolve this problem?
+>
+> Here is the output of  #gdb /usr/bin/fio corefile
+>
+> ......
+> warning: the debug information found in
+> "/usr/lib/debug/usr/lib64//librados.so.2.0.0.debug" does not match
+> "/lib64/librados.so.2" (CRC mismatch).
+> [Thread debugging using libthread_db enabled]
+> Using host libthread_db library "/lib64/libthread_db.so.1".
+> Core was generated by `fio rbd.fio --output 20G_rbd.log'.
+> Program terminated with signal 11, Segmentation fault.
+> #0  0x00007f799b7ebdbc in _int_malloc () from /lib64/libc.so.6
+> Missing separate debuginfos, use: debuginfo-install fio-2.2.8-2.el7.x86_6=
+4
+> (gdb) bt
+> #0  0x00007f799b7ebdbc in _int_malloc () from /lib64/libc.so.6
+> #1  0x00007f799b7ee26c in malloc () from /lib64/libc.so.6
+> #2  0x00007f799a75a440 in PORT_Alloc_Util () from /lib64/libnssutil3.so
+> #3  0x00007f799a758d32 in SECITEM_ArenaDupItem_Util () from
+> /lib64/libnssutil3.so
+> #4  0x00007f799a9a4238 in pk11_CreateNewContextInSlot () from /lib64/libn=
+ss3.so
+> #5  0x00007f799a9a42df in PK11_CreateContextBySymKey () from /lib64/libns=
+s3.so
+> #6  0x00007f799cd78b7f in nss_aes_operation(unsigned long, unsigned
+> long, PK11SymKeyStr*, SECItemStr*, ceph::buffer::list const&,
+> ceph::buffer::list&, std::string*) () from /lib64/librados.so.2
+> #7  0x00007f799cd7990a in
+> CryptoAESKeyHandler::encrypt(ceph::buffer::list const&,
+> ceph::buffer::list&, std::string*) const ()
+>    from /lib64/librados.so.2
+> #8  0x00007f799ce2446f in
+> CephxSessionHandler::_calc_signature(Message*, unsigned long*) () from
+> /lib64/librados.so.2
+> #9  0x00007f799ce24c0d in
+> CephxSessionHandler::check_message_signature(Message*) () from
+> /lib64/librados.so.2
+> #10 0x00007f799ce1d3ef in AsyncConnection::process() () from
+> /lib64/librados.so.2
+> #11 0x00007f799cc827e9 in EventCenter::process_events(int) () from
+> /lib64/librados.so.2
+> #12 0x00007f799cc851ea in NetworkStack::add_thread(unsigned
+> int)::{lambda()#1}::operator()() const () from /lib64/librados.so.2
+> #13 0x00007f7999eaa220 in ?? () from /lib64/libstdc++.so.6
+> #14 0x00007f799bd3bdc5 in start_thread () from /lib64/libpthread.so.0
+> #15 0x00007f799b864ced in clone () from /lib64/libc.so.6
+> (gdb)
+>
+> Regards,
+> Chuang Yan.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
