@@ -1,35 +1,42 @@
-From: David Zafman <dzafman@redhat.com>
-Subject: Kraken branch reset
-Date: Tue, 28 Mar 2017 09:28:47 -0700
-Message-ID: <14b7e0ea-ce97-4841-0baf-c9706bc8bd97@redhat.com>
+From: Vedant Nanda <vedant15114@iiitd.ac.in>
+Subject: GSoC: Queries regarding ceph-mgr: Slow OSD identification, Automated
+ cluster response
+Date: Tue, 28 Mar 2017 23:25:45 +0530
+Message-ID: <CAL-vruOv7qmGgSjEyeNvvVw3cOiRn_2qzQo7OYxZ9MckeseSHw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57224 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751957AbdC1Q27 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 28 Mar 2017 12:28:59 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id AF18D7E9FF
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 16:28:48 +0000 (UTC)
-Received: from Davids-iMac.local (ovpn-117-12.phx2.redhat.com [10.3.117.12])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 939B1189EB
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 16:28:48 +0000 (UTC)
+Received: from mail-ot0-f194.google.com ([74.125.82.194]:33891 "EHLO
+        mail-ot0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753955AbdC1Rz4 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 13:55:56 -0400
+Received: by mail-ot0-f194.google.com with SMTP id y88so10093905ota.1
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 10:55:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: kefu chai <tchaikov@gmail.com>
 
+Hi,
 
-This morning at around 8:00am PDT I merged a branch to Kraken. The 
-Kraken branch head has been reset to undo this.  Make sure your repos 
-are synced up with the ceph/ceph repo and don't include 
-b0bc359ff689e06934b8ed194bc39acb50ac1208
+I had a few doubts regarding the project:
 
+1. We need to look at the metrics that will ultimately classify an
+OSD. I'm a little confused between a metric and a root cause. Am i
+right in saying that I/O stats, Network stats, Number of placement
+groups served by an OSD, Number of objects stored in the OSD are all
+metrics profiling an OSD?
 
-Sorry for the inconvenience
+2. "The python module will also follow predefined policies to help
+administrator to address the problem."
+What do we mean by predefined policies here ? Would laying down these
+possibilities require the knowledge of the root cause of a slow OSD?
 
-David Zafman
+Clarifying these doubts will help me improve my proposal.
 
+I have a draft of the proposal
+here(https://docs.google.com/document/d/1dPrijkn8-5l4TL6C2TCORivtz_TpeccurNTI4qnFyS0/edit?usp=sharing).
+Any feedback is appreciated :)
+
+Cheers,
+Vedant
