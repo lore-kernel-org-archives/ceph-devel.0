@@ -1,129 +1,64 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v5 2/6] libceph: abort already submitted but abortable
- requests when map or pool goes full
-Date: Tue, 28 Mar 2017 16:34:37 +0200
-Message-ID: <CAOi1vP-Y2y7ikVEA9sgsZWBx3KnPpWPUNg1ZPKQfPVcQ+vdQGg@mail.gmail.com>
-References: <20170225174323.20289-1-jlayton@redhat.com> <20170225174323.20289-3-jlayton@redhat.com>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: OpenStack Swift functional tests on RGW
+Date: Tue, 28 Mar 2017 10:48:44 -0400
+Message-ID: <0a2aa303-6e29-4fad-3379-9fdfef2f5c55@redhat.com>
+References: <9b700b96-668b-5086-ce2f-b75aa0b400d5@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f68.google.com ([209.85.213.68]:33938 "EHLO
-        mail-vk0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752640AbdC1Oe7 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 10:34:59 -0400
-Received: by mail-vk0-f68.google.com with SMTP id y16so13248215vky.1
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 07:34:58 -0700 (PDT)
-In-Reply-To: <20170225174323.20289-3-jlayton@redhat.com>
+Received: from mail-qt0-f173.google.com ([209.85.216.173]:34729 "EHLO
+        mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752439AbdC1OtG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 10:49:06 -0400
+Received: by mail-qt0-f173.google.com with SMTP id n21so65958158qta.1
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 07:49:05 -0700 (PDT)
+In-Reply-To: <9b700b96-668b-5086-ce2f-b75aa0b400d5@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Rajath Shashidhara <rajath.shashidhara@gmail.com>, ceph-devel@vger.kernel.org
 
-On Sat, Feb 25, 2017 at 6:43 PM, Jeff Layton <jlayton@redhat.com> wrote:
-> When a Ceph volume hits capacity, a flag is set in the OSD map to
-> indicate that, and a new map is sprayed around the cluster. With cephfs
-> we want it to shut down any abortable requests that are in progress with
-> an -ENOSPC error as they'd just hang otherwise.
+
+On 03/28/2017 09:51 AM, Rajath Shashidhara wrote:
+> Hi,
 >
-> Add a new ceph_osdc_abort_on_full helper function to handle this. It
-> will first check whether there is an out-of-space condition in the
-> cluster. It will then walk the tree and abort any request that has
-> r_abort_on_full set with an ENOSPC error. Call this new function
-> directly whenever we get a new OSD map.
+> I am getting started with contributing to Ceph. I sent my first pull
+> request a couple of weeks ago - https://github.com/ceph/ceph/pull/13908
+> . In testing the feature, I realized that the ceph/swift repository is
+> outdated. I tweaked some relevant functional tests on the
+> openstack/swift repository to run on RadosGW.
 >
-> Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> ---
->  net/ceph/osd_client.c | 42 ++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 42 insertions(+)
+> I was thinking that may be I can port all the functional tests from
+> openstack/swift to work on RGW. This way we can test how well RGW
+> complies with the Swift REST API. I'd like to know if that would be a
+> useful contribution to ceph. Also, since ceph/stack has diverged from
+> openstack/swift (20 commits ahead and 4919 commits behind upstream -
+> openstack/swift as of today), what approach should I take to push these
+> tests ?
 >
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index 8fc0ccc7126f..b286ff6dec29 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -1770,6 +1770,47 @@ static void complete_request(struct ceph_osd_request *req, int err)
->         ceph_osdc_put_request(req);
->  }
+> Thanks,
 >
-> +/*
-> + * Drop all pending requests that are stalled waiting on a full condition to
-> + * clear, and complete them with ENOSPC as the return code.
-> + */
-> +static void ceph_osdc_abort_on_full(struct ceph_osd_client *osdc)
-> +{
-> +       struct ceph_osd_request *req;
-> +       struct ceph_osd *osd;
-
-These variables could have narrower scope.
-
-> +       struct rb_node *m, *n;
-> +       u32 latest_epoch = 0;
-> +       bool osdmap_full = ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL);
-
-This variable is redundant.
-
-> +
-> +       dout("enter abort_on_full\n");
-> +
-> +       if (!osdmap_full && !have_pool_full(osdc))
-> +               goto out;
-> +
-> +       for (n = rb_first(&osdc->osds); n; n = rb_next(n)) {
-> +               osd = rb_entry(n, struct ceph_osd, o_node);
-> +               mutex_lock(&osd->lock);
-
-No need to take osd->lock here as osdc->lock is held for write.
-
-> +               m = rb_first(&osd->o_requests);
-> +               while (m) {
-> +                       req = rb_entry(m, struct ceph_osd_request, r_node);
-> +                       m = rb_next(m);
-> +
-> +                       if (req->r_abort_on_full &&
-> +                           (osdmap_full || pool_full(osdc, req->r_t.base_oloc.pool))) {
-
-Over 80 lines and I think we need target_oloc instead of base_oloc
-here.
-
-> +                               u32 cur_epoch = le32_to_cpu(req->r_replay_version.epoch);
-
-Is replay_version used this way in the userspace client?  It is an ack
-vs commit leftover and AFAICT it is never set (i.e. always 0'0) in newer
-Objecter, so something is wrong here.
-
-> +
-> +                               dout("%s: abort tid=%llu flags 0x%x\n", __func__, req->r_tid, req->r_flags);
-
-Over 80 lines and probably unnecessary -- complete_request() has
-a similar dout.
-
-> +                               complete_request(req, -ENOSPC);
-
-This should be abort_request() (newly introduced in 4.11).
-
-> +                               if (cur_epoch > latest_epoch)
-> +                                       latest_epoch = cur_epoch;
-> +                       }
-> +               }
-> +               mutex_unlock(&osd->lock);
-> +       }
-> +out:
-> +       dout("return abort_on_full latest_epoch=%u\n", latest_epoch);
-> +}
-> +
->  static void cancel_map_check(struct ceph_osd_request *req)
->  {
->         struct ceph_osd_client *osdc = req->r_osdc;
-> @@ -3232,6 +3273,7 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+> Rajath Shashidhara
 >
->         ceph_monc_got_map(&osdc->client->monc, CEPH_SUB_OSDMAP,
->                           osdc->osdmap->epoch);
-> +       ceph_osdc_abort_on_full(osdc);
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi Rajath,
 
-Nit: swap ceph_osdc_abort_on_full() and ceph_monc_got_map() so that
-ceph_osdc_abort_on_full() follows kick_requests().  No real reason
-other than for "I processed this map" notification to go last, after
-the map is fully processed.
+Thanks for looking into this - I think it would be extremely valuable to 
+bring our swift tests up to date. Looking at our fork, it appears that 
+most of our changes fall into two categories: updating 
+dependencies/bootstrapping, and adding 'fails_on_rgw' tags to tests that 
+we know won't pass.
+
+I'm hoping that the latest openstack/swift repo has the correct 
+dependencies, so we may not need to carry all of those patches forward.
+
+Rebasing the commits that add our tags sounds tedious, but should be 
+pretty straightforward. For new upstream tests that don't pass against 
+rgw, maybe add a separate tag like 'new_fails_on_rgw' so that we can go 
+through and evaluate each of those once you finish.
 
 Thanks,
-
-                Ilya
+Casey
