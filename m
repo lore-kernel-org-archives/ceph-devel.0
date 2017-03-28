@@ -1,52 +1,43 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: some question about ceph qa case
-Date: Tue, 28 Mar 2017 13:41:25 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1703281335290.10776@piezo.novalocal>
-References: <CANE=7sUCuyDjq61wPZsEGt_XcpTHv96L-aUpsdUoy_vcJBYx4A@mail.gmail.com>
+From: Rajath Shashidhara <rajath.shashidhara@gmail.com>
+Subject: OpenStack Swift functional tests on RGW
+Date: Tue, 28 Mar 2017 19:21:18 +0530
+Message-ID: <9b700b96-668b-5086-ce2f-b75aa0b400d5@gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-2019932727-1490708488=:10776"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54311 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932470AbdC1Nls (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 09:41:48 -0400
-In-Reply-To: <CANE=7sUCuyDjq61wPZsEGt_XcpTHv96L-aUpsdUoy_vcJBYx4A@mail.gmail.com>
+Received: from mail-pg0-f49.google.com ([74.125.83.49]:34717 "EHLO
+        mail-pg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752827AbdC1Nvq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 09:51:46 -0400
+Received: by mail-pg0-f49.google.com with SMTP id 21so73381987pgg.1
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 06:51:26 -0700 (PDT)
+Received: from [192.168.0.5] ([125.99.226.166])
+        by smtp.gmail.com with ESMTPSA id 80sm7796082pfy.67.2017.03.28.06.51.18
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 28 Mar 2017 06:51:19 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?GB2312?Q?Xinze_Chi_=28=D0=C5=D4=F3=29?= <xmdxcxz@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi,
 
---8323329-2019932727-1490708488=:10776
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+I am getting started with contributing to Ceph. I sent my first pull
+request a couple of weeks ago - https://github.com/ceph/ceph/pull/13908
+. In testing the feature, I realized that the ceph/swift repository is
+outdated. I tweaked some relevant functional tests on the
+openstack/swift repository to run on RadosGW.
 
-On Tue, 28 Mar 2017, Xinze Chi (信泽) wrote:
-> hi, all:
-> 
->      Recently, I read some qa case.  I confuse about pg move case.
-> 
->      In teuthology log, I see the log "Moving pg 1.3 from osd.1 to
-> osd.5". In this case, maybe the lastest data is in osd.1. After move
-> the pg to osd.5, the lastest data is in osd.5.
-> 
->      But in peering process, we get pg info from osd.1 instead of
-> osd.5 base on osdmap. It would be wrong, right? Do I ignore some
-> important info?
-> 
->      Could anyone explain the pg move case in detail?
+I was thinking that may be I can port all the functional tests from
+openstack/swift to work on RGW. This way we can test how well RGW
+complies with the Swift REST API. I'd like to know if that would be a
+useful contribution to ceph. Also, since ceph/stack has diverged from
+openstack/swift (20 commits ahead and 4919 commits behind upstream -
+openstack/swift as of today), what approach should I take to push these
+tests ?
 
-You're exactly right.  And there is a hard-to-hit race where peering 
-will make a bad inference because of that; see
+Thanks,
 
-	http://tracker.ceph.com/issues/16003
+Rajath Shashidhara
 
-Most of the time, though, the OSD with the imported PG copy comes up and 
-notifies the new primary that it has a copy before the new primary 
-concludes that the recent PG events don't exist.  Or the test model in 
-ceph_test_rados just doesn't notice the resulting inconsistency.
-
-sage
---8323329-2019932727-1490708488=:10776--
