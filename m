@@ -1,64 +1,84 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: OpenStack Swift functional tests on RGW
-Date: Tue, 28 Mar 2017 10:48:44 -0400
-Message-ID: <0a2aa303-6e29-4fad-3379-9fdfef2f5c55@redhat.com>
-References: <9b700b96-668b-5086-ce2f-b75aa0b400d5@gmail.com>
+From: Sagar Sarange <sagar.sarange9@gmail.com>
+Subject: Re: Ceph Contribution
+Date: Tue, 28 Mar 2017 20:21:40 +0530
+Message-ID: <58DA787C.7030807@gmail.com>
+References: <58B425A1.2000204@gmail.com> <alpine.DEB.2.11.1702271434450.7782@piezo.novalocal> <67070124.111915910.1488222937080.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f173.google.com ([209.85.216.173]:34729 "EHLO
-        mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752439AbdC1OtG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 10:49:06 -0400
-Received: by mail-qt0-f173.google.com with SMTP id n21so65958158qta.1
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 07:49:05 -0700 (PDT)
-In-Reply-To: <9b700b96-668b-5086-ce2f-b75aa0b400d5@gmail.com>
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:33382 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752315AbdC1OwO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 10:52:14 -0400
+Received: by mail-pg0-f65.google.com with SMTP id 79so21977030pgf.0
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 07:52:08 -0700 (PDT)
+In-Reply-To: <67070124.111915910.1488222937080.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Rajath Shashidhara <rajath.shashidhara@gmail.com>, ceph-devel@vger.kernel.org
+To: Ali Maredia <amaredia@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
+Hello everyone,
+I had gone through the Ceph documentation and now I have a good 
+understanding of Ceph and its architecture and its working.
+I had also gone through the Ceph GSoC-2017 project ideas list and 
+figured out following ideas :
+1.Ceph mgr :Pool PG_NUM Autotuning.
+2.Ceph mgr :Commands for CephFS clients Auth Caps creation.
+3.RGW: Local file backend for RGW.
 
-On 03/28/2017 09:51 AM, Rajath Shashidhara wrote:
-> Hi,
->
-> I am getting started with contributing to Ceph. I sent my first pull
-> request a couple of weeks ago - https://github.com/ceph/ceph/pull/13908
-> . In testing the feature, I realized that the ceph/swift repository is
-> outdated. I tweaked some relevant functional tests on the
-> openstack/swift repository to run on RadosGW.
->
-> I was thinking that may be I can port all the functional tests from
-> openstack/swift to work on RGW. This way we can test how well RGW
-> complies with the Swift REST API. I'd like to know if that would be a
-> useful contribution to ceph. Also, since ceph/stack has diverged from
-> openstack/swift (20 commits ahead and 4919 commits behind upstream -
-> openstack/swift as of today), what approach should I take to push these
-> tests ?
->
-> Thanks,
->
-> Rajath Shashidhara
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-Hi Rajath,
-
-Thanks for looking into this - I think it would be extremely valuable to 
-bring our swift tests up to date. Looking at our fork, it appears that 
-most of our changes fall into two categories: updating 
-dependencies/bootstrapping, and adding 'fails_on_rgw' tags to tests that 
-we know won't pass.
-
-I'm hoping that the latest openstack/swift repo has the correct 
-dependencies, so we may not need to carry all of those patches forward.
-
-Rebasing the commits that add our tags sounds tedious, but should be 
-pretty straightforward. For new upstream tests that don't pass against 
-rgw, maybe add a separate tag like 'new_fails_on_rgw' so that we can go 
-through and evaluate each of those once you finish.
+Give me information about the above ideas and issues regarding the above 
+ideas ,so that I will solve issues regarding it and clear my understanding.
+And will right a good proposal for GSoC 2017.
 
 Thanks,
-Casey
+Sagar
+
+On Tuesday 28 February 2017 12:45 AM, Ali Maredia wrote:
+> Sagar,
+>
+> If you're interested in doing GSoC, I would definitely explore the current ideas on the Ceph website (http://ceph.com/gsoc2017-ideas/) as well.
+>
+> - Ali
+>
+> ----- Original Message -----
+>> From: "Sage Weil" <sage@newdream.net>
+>> To: "Sagar Sarange" <sagar.sarange9@gmail.com>
+>> Cc: ceph-devel@vger.kernel.org
+>> Sent: Monday, February 27, 2017 9:36:29 AM
+>> Subject: Re: Ceph Contribution
+>>
+>> On Mon, 27 Feb 2017, Sagar Sarange wrote:
+>>> Hello everyone,
+>>> I am Computer Science Undergraduate student .I am good in C,C++ and Python.
+>>> I am eager to do contribution in Ceph.I also go through Ceph repository,but
+>>> I
+>>> didn't understand where to start.
+>>> I appreciate any feedback and guideline you could give so I can be a Ceph
+>>> contributor.
+>>> I am also interested to be a part of Ceph GSoC 2017.
+>> Hi Sagar,
+>>
+>> A good place to stat might be to look at the trello board at
+>>
+>> 	https://trello.com/b/ugTc2QFH/ceph-backlog
+>>
+>> which has several smaller items under the cleanup list and elsewhere.
+>> Cards marked in green or orange are small to medium-sized.  There is also
+>> the tracker at
+>>
+>> 	http://tracker.ceph.com/projects/ceph/issues
+>>
+>> which has lots of bugs and features.  In both cases you'll probably need
+>> to talk to folks in #ceph-devel or here on the mailing list to get more
+>> context.
+>>
+>> Thanks!
+>> sage
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+
