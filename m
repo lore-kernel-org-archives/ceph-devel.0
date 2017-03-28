@@ -1,84 +1,99 @@
-From: Sagar Sarange <sagar.sarange9@gmail.com>
-Subject: Re: Ceph Contribution
-Date: Tue, 28 Mar 2017 20:21:40 +0530
-Message-ID: <58DA787C.7030807@gmail.com>
-References: <58B425A1.2000204@gmail.com> <alpine.DEB.2.11.1702271434450.7782@piezo.novalocal> <67070124.111915910.1488222937080.JavaMail.zimbra@redhat.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: fio multithreads meets Segmentation fault
+Date: Tue, 28 Mar 2017 10:19:39 -0400
+Message-ID: <CACJqLyabfDnpiGWKBYNhoF2F4XEt2H5pF52RfThc89kQMhL3Jw@mail.gmail.com>
+References: <CABstBbjRwUO-DzUAhjHZ1FzfPaRa=HzOTy5WXg7CXh5UNydAOw@mail.gmail.com>
+ <CALZt5jxe62u6STjjSOCbDr+gwaGNL+io8DV43LSkYDeCbz+jLw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f65.google.com ([74.125.83.65]:33382 "EHLO
-        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752315AbdC1OwO (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 10:52:14 -0400
-Received: by mail-pg0-f65.google.com with SMTP id 79so21977030pgf.0
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 07:52:08 -0700 (PDT)
-In-Reply-To: <67070124.111915910.1488222937080.JavaMail.zimbra@redhat.com>
+Received: from mail-pu1apc01on0101.outbound.protection.outlook.com ([104.47.126.101]:46802
+        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752371AbdC1Ozg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 28 Mar 2017 10:55:36 -0400
+Received: by mail-it0-f42.google.com with SMTP id y18so27311387itc.1
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 07:19:46 -0700 (PDT)
+In-Reply-To: <CALZt5jxe62u6STjjSOCbDr+gwaGNL+io8DV43LSkYDeCbz+jLw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ali Maredia <amaredia@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: Ning Yao <zay11022@gmail.com>
+Cc: =?UTF-8?B?6Zer5Yib?= <yanchuang1994@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hello everyone,
-I had gone through the Ceph documentation and now I have a good 
-understanding of Ceph and its architecture and its working.
-I had also gone through the Ceph GSoC-2017 project ideas list and 
-figured out following ideas :
-1.Ceph mgr :Pool PG_NUM Autotuning.
-2.Ceph mgr :Commands for CephFS clients Auth Caps creation.
-3.RGW: Local file backend for RGW.
+I haven't see this problem before. Each connection is thread locally
+so it's safe to use unsafe function without sync.
 
-Give me information about the above ideas and issues regarding the above 
-ideas ,so that I will solve issues regarding it and clear my understanding.
-And will right a good proposal for GSoC 2017.
-
-Thanks,
-Sagar
-
-On Tuesday 28 February 2017 12:45 AM, Ali Maredia wrote:
-> Sagar,
+On Tue, Mar 28, 2017 at 9:03 AM, Ning Yao <zay11022@gmail.com> wrote:
+> Hi, Haomai
 >
-> If you're interested in doing GSoC, I would definitely explore the current ideas on the Ceph website (http://ceph.com/gsoc2017-ideas/) as well.
+> AsyncMessenger uses threadpools to handle connection and some thread
+> unsafe function such as PK11_CreateContextBySymKey in libnss causes
+> the corruptions here?
 >
-> - Ali
+> Regards
+> Ning Yao
 >
-> ----- Original Message -----
->> From: "Sage Weil" <sage@newdream.net>
->> To: "Sagar Sarange" <sagar.sarange9@gmail.com>
->> Cc: ceph-devel@vger.kernel.org
->> Sent: Monday, February 27, 2017 9:36:29 AM
->> Subject: Re: Ceph Contribution
+>
+> 2017-03-28 17:36 GMT+08:00 =E9=97=AB=E5=88=9B <yanchuang1994@gmail.com>:
+>> Hi all,
 >>
->> On Mon, 27 Feb 2017, Sagar Sarange wrote:
->>> Hello everyone,
->>> I am Computer Science Undergraduate student .I am good in C,C++ and Python.
->>> I am eager to do contribution in Ceph.I also go through Ceph repository,but
->>> I
->>> didn't understand where to start.
->>> I appreciate any feedback and guideline you could give so I can be a Ceph
->>> contributor.
->>> I am also interested to be a part of Ceph GSoC 2017.
->> Hi Sagar,
+>> When I make a fio-rbd-test, it says segmentation fault. I reckon that
+>> there may be something wrong with the usage of libnss.
+>> Ceph version is 11.2.0 (f223e27eeb35991352ebc1f67423d4ebc252adb7)
+>> using AsyncMessenger.
+>> Is libnss3.so thread safe? or other thoughts to resolve this problem?
 >>
->> A good place to stat might be to look at the trello board at
+>> Here is the output of  #gdb /usr/bin/fio corefile
 >>
->> 	https://trello.com/b/ugTc2QFH/ceph-backlog
+>> ......
+>> warning: the debug information found in
+>> "/usr/lib/debug/usr/lib64//librados.so.2.0.0.debug" does not match
+>> "/lib64/librados.so.2" (CRC mismatch).
+>> [Thread debugging using libthread_db enabled]
+>> Using host libthread_db library "/lib64/libthread_db.so.1".
+>> Core was generated by `fio rbd.fio --output 20G_rbd.log'.
+>> Program terminated with signal 11, Segmentation fault.
+>> #0  0x00007f799b7ebdbc in _int_malloc () from /lib64/libc.so.6
+>> Missing separate debuginfos, use: debuginfo-install fio-2.2.8-2.el7.x86_=
+64
+>> (gdb) bt
+>> #0  0x00007f799b7ebdbc in _int_malloc () from /lib64/libc.so.6
+>> #1  0x00007f799b7ee26c in malloc () from /lib64/libc.so.6
+>> #2  0x00007f799a75a440 in PORT_Alloc_Util () from /lib64/libnssutil3.so
+>> #3  0x00007f799a758d32 in SECITEM_ArenaDupItem_Util () from
+>> /lib64/libnssutil3.so
+>> #4  0x00007f799a9a4238 in pk11_CreateNewContextInSlot () from /lib64/lib=
+nss3.so
+>> #5  0x00007f799a9a42df in PK11_CreateContextBySymKey () from /lib64/libn=
+ss3.so
+>> #6  0x00007f799cd78b7f in nss_aes_operation(unsigned long, unsigned
+>> long, PK11SymKeyStr*, SECItemStr*, ceph::buffer::list const&,
+>> ceph::buffer::list&, std::string*) () from /lib64/librados.so.2
+>> #7  0x00007f799cd7990a in
+>> CryptoAESKeyHandler::encrypt(ceph::buffer::list const&,
+>> ceph::buffer::list&, std::string*) const ()
+>>    from /lib64/librados.so.2
+>> #8  0x00007f799ce2446f in
+>> CephxSessionHandler::_calc_signature(Message*, unsigned long*) () from
+>> /lib64/librados.so.2
+>> #9  0x00007f799ce24c0d in
+>> CephxSessionHandler::check_message_signature(Message*) () from
+>> /lib64/librados.so.2
+>> #10 0x00007f799ce1d3ef in AsyncConnection::process() () from
+>> /lib64/librados.so.2
+>> #11 0x00007f799cc827e9 in EventCenter::process_events(int) () from
+>> /lib64/librados.so.2
+>> #12 0x00007f799cc851ea in NetworkStack::add_thread(unsigned
+>> int)::{lambda()#1}::operator()() const () from /lib64/librados.so.2
+>> #13 0x00007f7999eaa220 in ?? () from /lib64/libstdc++.so.6
+>> #14 0x00007f799bd3bdc5 in start_thread () from /lib64/libpthread.so.0
+>> #15 0x00007f799b864ced in clone () from /lib64/libc.so.6
+>> (gdb)
 >>
->> which has several smaller items under the cleanup list and elsewhere.
->> Cards marked in green or orange are small to medium-sized.  There is also
->> the tracker at
->>
->> 	http://tracker.ceph.com/projects/ceph/issues
->>
->> which has lots of bugs and features.  In both cases you'll probably need
->> to talk to folks in #ceph-devel or here on the mailing list to get more
->> context.
->>
->> Thanks!
->> sage
+>> Regards,
+>> Chuang Yan.
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-
