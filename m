@@ -1,155 +1,57 @@
 From: Kefu Chai <kchai@redhat.com>
-Subject: Re: Queries regarding projects in Gsoc 2017.
-Date: Tue, 28 Mar 2017 09:08:36 -0400 (EDT)
-Message-ID: <149370577.6738851.1490706516464.JavaMail.zimbra@redhat.com>
-References: <CA+TGOtkX+8CHoK1qSCTwGX=HhhEzVqGz1nUjYX1058qds=rRWQ@mail.gmail.com> <58d1eea6.4392630a.53da8.08d4@mx.google.com> <2047520927.4853285.1490169993798.JavaMail.zimbra@redhat.com> <CA+TGOtkhgoy4pg4rNT2gpiNKC1FHB4YN0t7DijMQR7DuCJ1xzg@mail.gmail.com>
+Subject: Re: Regarding projects ideas in Ceph
+Date: Tue, 28 Mar 2017 09:19:18 -0400 (EDT)
+Message-ID: <733381147.6747251.1490707158110.JavaMail.zimbra@redhat.com>
+References: <CAB649VCaiSrXkHYzMguf5H9fkZcc93-LEEqwRXOJJOG4ROahUg@mail.gmail.com> <alpine.DEB.2.11.1703251754070.10776@piezo.novalocal> <CAN_nQV59J8M6_fHZO__uaMqxSGozJ-3jqWU0-phhDjG033QOJg@mail.gmail.com> <alpine.DEB.2.11.1703261429530.10776@piezo.novalocal> <CAN_nQV6VBDywFmQ0BnCjc0naoS3yUmRs3=wWykRFV-HthOnerQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52412 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:53454 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753100AbdC1NJC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 28 Mar 2017 09:09:02 -0400
-In-Reply-To: <CA+TGOtkhgoy4pg4rNT2gpiNKC1FHB4YN0t7DijMQR7DuCJ1xzg@mail.gmail.com>
+        id S932510AbdC1NTd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 28 Mar 2017 09:19:33 -0400
+In-Reply-To: <CAN_nQV6VBDywFmQ0BnCjc0naoS3yUmRs3=wWykRFV-HthOnerQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Prajwal Bhandary <reachprajwalbhandary@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sphoorti Joglekar <scjoglek@andrew.cmu.edu>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sweil@redhat.com>, Priya Avhad <pavhad@andrew.cmu.edu>
 
 + ceph-devel
 
+
+Sphoorti, please send your questions to the ceph-devel mailing list instead of
+sending it in private. that would help you to get more help from the community.
+
 ----- Original Message -----
-> From: "Prajwal Bhandary" <reachprajwalbhandary@gmail.com>
-> To: "Kefu Chai" <kchai@redhat.com>
-> Sent: Tuesday, March 28, 2017 6:13:40 AM
-> Subject: Re: Queries regarding projects in Gsoc 2017.
+> From: "Sphoorti Joglekar" <scjoglek@andrew.cmu.edu>
+> To: "Sage Weil" <sweil@redhat.com>
+> Cc: "Priya Avhad" <pavhad@andrew.cmu.edu>, "Kefu Chai" <kchai@redhat.com>
+> Sent: Tuesday, March 28, 2017 1:30:36 AM
+> Subject: Re: Regarding projects ideas in Ceph
 > 
-> hey Chai!
+> Hi Sage,
 > 
-> I've dropped the idea to pursue the project on optimizing the crush
-> algorithm, I'd like to continue attempting for the projects on OSD
-> auto-tuning, slow OSD determination and Pool pg_num auto-tuning . I had a
-> few questions if you could clarify with me,
+> The infrastructure that we are currently using is a 4GB RAM ubuntu vm
+> running on virtualbox and we tried following the above steps but the
+> compilation is very slow and does not succeed in the end. We even tried on
+
+4GB RAM could be a little bit small for compiling Ceph. maybe we can fix the
+compilation failure if the compiling process was not killed by kernel due to
+out of memory. but you need to pastebin the error messages.
+
+> an ec2 instance but were unable to get it working there too owing to lower
+> RAM and memory constraints. (t2.micro we used as it is available on student
+> account).
 > 
-> OSD tuning of slow OSD :
-> - How would i classify if the response is slow or normal ?
+> We would be willing to do the preliminary work for auto_tuning or any other
+> smaller module and later develop on it.
 
-please see my previous reply.
-
-> - All i need to do is determine the slow OSD's and report themis it ? Or do
-> I need reassign them in some manner or something ?
-
-yes. you could do some preliminary investigation trying to root cause the slowness.
-but that would be overlapped with the idea of http://ceph.com/gsoc2017-ideas/#root-cause-analysis-tool.
-
-> 
-> Pool pg_num auto-tuning :
-> - Should i be building a module to just determine the pg_num ? ( using the
-> formula mentioned in the docs or come up with some optimized )
-
-it's supposed to be a python module hosted by ceph-mgr.
-
-> - Will i be required to include features such as returning the particular
-> hash id of the object ?
-
-it's not in the scope of this project.
+i think you could take a look at http://libcrush.org/main/python-crush, which
+allows a developer to perform experiments on CRUSH with different settings.
 
 > 
-> last question being:
-> Is there a possibility for me to apply for one of the projects and
-> implement both the above projects ?
-
-
-it's possible i guess. you can apply for both of them. and if you are enrolled,
-and there is no student being assigned to another idea, you *can* work
-on another one also like any other contributor. you will need to ask the community
-on this before starting working on it. otherwise your work could be wasted.
-
+> Best Regards,
+> Sphoorti Joglekar
 > 
-> I've done a fair amount of research on the docs and I'd love to work on
-> both projects if its possible .
 > 
-> Hoping to hear from you soon!
-> 
-> Thank you,
-> Prajwal.
-> 
-> On Wed, Mar 22, 2017 at 1:36 PM, Kefu Chai <kchai@redhat.com> wrote:
-> 
-> >
-> >
-> > ----- Original Message -----
-> > > From: "Prajwal" <reachprajwalbhandary@gmail.com>
-> > > To: kchai@redhat.com
-> > > Sent: Wednesday, March 22, 2017 11:25:26 AM
-> > > Subject: RE: Queries regarding projects in Gsoc 2017.
-> > >
-> > > Hello,
-> > >
-> > > I just wanted to check if the previous email did reach you, as im
-> > interested
-> > > in applying for the previously mentioned projects . So, I'd like a bit of
-> > > guidance on it .
-> >
-> > Hi Prajwal!
-> >
-> > sorry for the latency, i didn't get a chance to reply your mail yesterday.
-> >
-> > >
-> > > Thank you,
-> > > Prajwal
-> > >
-> > > -----Original Message-----
-> > > From: "Prajwal Bhandary" <reachprajwalbhandary@gmail.com>
-> > > Sent: ‎21-‎03-‎2017 12:19 AM
-> > > To: "kchai@redhat.com" <kchai@redhat.com>
-> > > Subject: Queries regarding projects in Gsoc 2017.
-> > >
-> > > Hey Chai,
-> > >
-> > >
-> > > I'm a student hailing from India, pursuing my undergraduate course in
-> > CSE .
-> > > I've got pretty fair knowledge in python, I've been programming with it
-> > > since a year and a half . I was really interested in the following
-> > projects
-> > > posted on your website :
-> > >
-> > >
-> > >  ceph-mgr : Smarter Reweight by Utilization
-> > >  ceph-mgr : Slow OSD Identification, Automated Cluster Response
-> >
-> > ceph comes with various tools and metrics that one can use to diagnose the
-> > performance of the storage cluster. for example,
-> >
-> > - perf counters: http://docs.ceph.com/docs/master/dev/perf_counters/
-> > - the "dump_historic_ops" subcommand
-> > - the "dump_ops_in_flight" subcommand
-> >
-> > >  ceph-mgr : Pool pg_num Autu-Tuning
-> > >
-> >
-> > you could check out http://ceph.com/pgcalc/, with the help of ceph-mgr
-> > we can integrate it in a more user friendly way.
-> >
-> > >
-> > > I would be submitting my proposal on the mentioned projects its self,
-> > but I
-> > > thought getting a more deeper understanding of the problem from you would
-> > > help me give in a better proposal . I feel I haven't really understood
-> > the
-> > > latter two projects too well, as I've found papers on the CRUSH algorithm
-> > > for starters but nothing on the other two, if you could probably point
-> > me in
-> > > the right direction on give me more of an insight if possible .
-> > >
-> > >
-> > > Hoping to hear from you soon.
-> > >
-> > >
-> > > Thank you,
-> > >
-> > >
-> > > Prajwal .
-> >
->
