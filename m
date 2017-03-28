@@ -1,42 +1,64 @@
-From: Vedant Nanda <vedant15114@iiitd.ac.in>
-Subject: GSoC: Queries regarding ceph-mgr: Slow OSD identification, Automated
- cluster response
-Date: Tue, 28 Mar 2017 23:25:45 +0530
-Message-ID: <CAL-vruOv7qmGgSjEyeNvvVw3cOiRn_2qzQo7OYxZ9MckeseSHw@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: OpenStack Swift functional tests on RGW
+Date: Tue, 28 Mar 2017 18:18:25 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1703281818150.10776@piezo.novalocal>
+References: <9b700b96-668b-5086-ce2f-b75aa0b400d5@gmail.com> <0a2aa303-6e29-4fad-3379-9fdfef2f5c55@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f194.google.com ([74.125.82.194]:33891 "EHLO
-        mail-ot0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753955AbdC1Rz4 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 13:55:56 -0400
-Received: by mail-ot0-f194.google.com with SMTP id y88so10093905ota.1
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 10:55:45 -0700 (PDT)
+Received: from cobra.newdream.net ([66.33.216.30]:55823 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753657AbdC1STH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 14:19:07 -0400
+In-Reply-To: <0a2aa303-6e29-4fad-3379-9fdfef2f5c55@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: kefu chai <tchaikov@gmail.com>
+To: Casey Bodley <cbodley@redhat.com>
+Cc: Rajath Shashidhara <rajath.shashidhara@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi,
+On Tue, 28 Mar 2017, Casey Bodley wrote:
+> On 03/28/2017 09:51 AM, Rajath Shashidhara wrote:
+> > Hi,
+> > 
+> > I am getting started with contributing to Ceph. I sent my first pull
+> > request a couple of weeks ago - https://github.com/ceph/ceph/pull/13908
+> > . In testing the feature, I realized that the ceph/swift repository is
+> > outdated. I tweaked some relevant functional tests on the
+> > openstack/swift repository to run on RadosGW.
+> > 
+> > I was thinking that may be I can port all the functional tests from
+> > openstack/swift to work on RGW. This way we can test how well RGW
+> > complies with the Swift REST API. I'd like to know if that would be a
+> > useful contribution to ceph. Also, since ceph/stack has diverged from
+> > openstack/swift (20 commits ahead and 4919 commits behind upstream -
+> > openstack/swift as of today), what approach should I take to push these
+> > tests ?
+> > 
+> > Thanks,
+> > 
+> > Rajath Shashidhara
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Hi Rajath,
+> 
+> Thanks for looking into this - I think it would be extremely valuable to bring
+> our swift tests up to date. Looking at our fork, it appears that most of our
+> changes fall into two categories: updating dependencies/bootstrapping, and
+> adding 'fails_on_rgw' tags to tests that we know won't pass.
+> 
+> I'm hoping that the latest openstack/swift repo has the correct dependencies,
+> so we may not need to carry all of those patches forward.
+> 
+> Rebasing the commits that add our tags sounds tedious, but should be pretty
+> straightforward. For new upstream tests that don't pass against rgw, maybe add
+> a separate tag like 'new_fails_on_rgw' so that we can go through and evaluate
+> each of those once you finish.
 
-I had a few doubts regarding the project:
+See also:
 
-1. We need to look at the metrics that will ultimately classify an
-OSD. I'm a little confused between a metric and a root cause. Am i
-right in saying that I/O stats, Network stats, Number of placement
-groups served by an OSD, Number of objects stored in the OSD are all
-metrics profiling an OSD?
+	https://github.com/ceph/ceph/pull/6111
 
-2. "The python module will also follow predefined policies to help
-administrator to address the problem."
-What do we mean by predefined policies here ? Would laying down these
-possibilities require the knowledge of the root cause of a slow OSD?
-
-Clarifying these doubts will help me improve my proposal.
-
-I have a draft of the proposal
-here(https://docs.google.com/document/d/1dPrijkn8-5l4TL6C2TCORivtz_TpeccurNTI4qnFyS0/edit?usp=sharing).
-Any feedback is appreciated :)
-
-Cheers,
-Vedant
+sage
