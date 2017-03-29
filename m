@@ -1,74 +1,92 @@
 From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: RGW zones and admin ops
-Date: Wed, 29 Mar 2017 09:49:03 -0400
-Message-ID: <58c1dd40-f8a6-a909-65d5-11d788aab530@redhat.com>
-References: <CAN1NP8h0h8Vo-EpjbmWSYg_L3G3KpCGfFUPBMJ=Crno3CgUW6w@mail.gmail.com>
+Subject: Re: OpenStack Swift functional tests on RGW
+Date: Wed, 29 Mar 2017 09:54:10 -0400
+Message-ID: <a5bad003-e44d-22b7-64a1-f5ca53b90ee5@redhat.com>
+References: <9b700b96-668b-5086-ce2f-b75aa0b400d5@gmail.com>
+ <0a2aa303-6e29-4fad-3379-9fdfef2f5c55@redhat.com>
+ <alpine.DEB.2.11.1703281818150.10776@piezo.novalocal>
+ <CAOCf4Am92MHxhy_ExVjsK4JvQ3=gtLFHzfLc+_-FkdQPwVT5tQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f180.google.com ([209.85.216.180]:34523 "EHLO
-        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754438AbdC2NtG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Mar 2017 09:49:06 -0400
-Received: by mail-qt0-f180.google.com with SMTP id n21so12789556qta.1
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Mar 2017 06:49:05 -0700 (PDT)
-In-Reply-To: <CAN1NP8h0h8Vo-EpjbmWSYg_L3G3KpCGfFUPBMJ=Crno3CgUW6w@mail.gmail.com>
+Received: from mail-qk0-f177.google.com ([209.85.220.177]:36367 "EHLO
+        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754568AbdC2NyN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Mar 2017 09:54:13 -0400
+Received: by mail-qk0-f177.google.com with SMTP id p22so13181496qka.3
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Mar 2017 06:54:12 -0700 (PDT)
+In-Reply-To: <CAOCf4Am92MHxhy_ExVjsK4JvQ3=gtLFHzfLc+_-FkdQPwVT5tQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Forumulator V <forumulator@gmail.com>, ceph-devel@vger.kernel.org
+To: Tone Zhang <tone.zhang@linaro.org>, Sage Weil <sage@newdream.net>
+Cc: Rajath Shashidhara <rajath.shashidhara@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
 
-On 03/29/2017 12:03 AM, Forumulator V wrote:
-> Hi,
+On 03/28/2017 10:33 PM, Tone Zhang wrote:
+> Hi all,
 >
-> I was going through the RGW code, and couldn't understand a few parts.
+> I met the same issue when I ran OpenStack tempest API test with
+> radosgw in recent. It is great if we can update swift tests up to
+> date.
 >
-> i.) Where is zones and zonegroup information stored(on the backend)?
-> Also do all RGW instances in a zone store objects on the same object
-> storage cluster?
-
-The multisite configuration (zone/zonegroup/period/realm) is stored as 
-rados objects in the rgw.root pool (see RGW_DEFAULT_ZONE_ROOT_POOL and 
-friends in rgw_rados.cc).
-
-Generally, each zone will run in a separate ceph cluster. RGW instances 
-within a zone will share the same storage.
-
-But the zone itself contains the list of pool names used for its 
-storage, so it's also possible to run multiple zones on the same ceph 
-cluster without clobbering each others data - each zone will use 
-separate pools by default.
-
-> ii.) What do zones and zonegroups really correspond to? Are they like
-> regions in S3?
-
-It's a similar concept to regions, but mostly within the context of 
-replication. The first draft of rgw multisite actually used the term 
-'region' instead of zonegroup. You can think of a zonegroup as a 
-replicated dataset - zones within a single zonegroup will replicate each 
-others object data.
-
-> iii.) Where are the users and their metadata stored? Is it also on the backend?
+> @Casey, are there special test cases in Ceph used to test Swift API?
+> Could you please share me more information?
 >
-
-Following up on point ii., users and buckets are considered 'metadata' 
-by rgw multisite, and are replicated across all zonegroups. Users are 
-stored as rados objects across several of the zone's pools (see the 
-RGWZoneParams::user_*_pool fields in rgw_rados.h).
-
-> I'm sure the answers are there in the code, I understood some of it
-> but not these parts.
+> Thanks a lot!
 >
-> Thanks,
-> Pranjal
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Br,
+> Tone
+>
+> On 29 March 2017 at 02:18, Sage Weil <sage@newdream.net> wrote:
+>> On Tue, 28 Mar 2017, Casey Bodley wrote:
+>>> On 03/28/2017 09:51 AM, Rajath Shashidhara wrote:
+>>>> Hi,
+>>>>
+>>>> I am getting started with contributing to Ceph. I sent my first pull
+>>>> request a couple of weeks ago - https://github.com/ceph/ceph/pull/13908
+>>>> . In testing the feature, I realized that the ceph/swift repository is
+>>>> outdated. I tweaked some relevant functional tests on the
+>>>> openstack/swift repository to run on RadosGW.
+>>>>
+>>>> I was thinking that may be I can port all the functional tests from
+>>>> openstack/swift to work on RGW. This way we can test how well RGW
+>>>> complies with the Swift REST API. I'd like to know if that would be a
+>>>> useful contribution to ceph. Also, since ceph/stack has diverged from
+>>>> openstack/swift (20 commits ahead and 4919 commits behind upstream -
+>>>> openstack/swift as of today), what approach should I take to push these
+>>>> tests ?
+>>>>
+>>>> Thanks,
+>>>>
+>>>> Rajath Shashidhara
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> Hi Rajath,
+>>>
+>>> Thanks for looking into this - I think it would be extremely valuable to bring
+>>> our swift tests up to date. Looking at our fork, it appears that most of our
+>>> changes fall into two categories: updating dependencies/bootstrapping, and
+>>> adding 'fails_on_rgw' tags to tests that we know won't pass.
+>>>
+>>> I'm hoping that the latest openstack/swift repo has the correct dependencies,
+>>> so we may not need to carry all of those patches forward.
+>>>
+>>> Rebasing the commits that add our tags sounds tedious, but should be pretty
+>>> straightforward. For new upstream tests that don't pass against rgw, maybe add
+>>> a separate tag like 'new_fails_on_rgw' so that we can go through and evaluate
+>>> each of those once you finish.
+>> See also:
+>>
+>>          https://github.com/ceph/ceph/pull/6111
+>>
+>> sage
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-I'm happy to answer more questions, if you have them. I also welcome 
-suggestions for improving our existing documentation at 
-http://docs.ceph.com/docs/master/radosgw/multisite/.
-
-Casey
+Hi Tone - it doesn't look like our fork has added any new test cases, no.
