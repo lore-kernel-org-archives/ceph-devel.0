@@ -1,114 +1,86 @@
-From: Methuku Karthik <kmeth@seas.upenn.edu>
-Subject: Re: [GSOC] Introduction Mail : ceph-mgr: Smarter Reweight-by-Utilization
-Date: Tue, 28 Mar 2017 19:57:39 -0400
-Message-ID: <CAOnoakfCH1rbeW42xrPWo-nuv+cwyUeM7iNySRrWhqnz9hgfUA@mail.gmail.com>
-References: <CAOnoakd7u3OfOi1-wotvtKC=Kc5zaQbNMBQtShpDHhPRa94eCA@mail.gmail.com>
- <CAAXqJ+r+ve2YS0w-26XP8xTWFrK_U-MrK6RS0bGVNLrGqpYoEA@mail.gmail.com>
+From: Tone Zhang <tone.zhang@linaro.org>
+Subject: Re: OpenStack Swift functional tests on RGW
+Date: Wed, 29 Mar 2017 10:33:23 +0800
+Message-ID: <CAOCf4Am92MHxhy_ExVjsK4JvQ3=gtLFHzfLc+_-FkdQPwVT5tQ@mail.gmail.com>
+References: <9b700b96-668b-5086-ce2f-b75aa0b400d5@gmail.com>
+ <0a2aa303-6e29-4fad-3379-9fdfef2f5c55@redhat.com> <alpine.DEB.2.11.1703281818150.10776@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:33022 "EHLO
-        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932392AbdC1X5l (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 19:57:41 -0400
-Received: by mail-qk0-f176.google.com with SMTP id f11so243675qkb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 16:57:40 -0700 (PDT)
-In-Reply-To: <CAAXqJ+r+ve2YS0w-26XP8xTWFrK_U-MrK6RS0bGVNLrGqpYoEA@mail.gmail.com>
+Received: from mail-vk0-f53.google.com ([209.85.213.53]:34580 "EHLO
+        mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751738AbdC2CdZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Mar 2017 22:33:25 -0400
+Received: by mail-vk0-f53.google.com with SMTP id z204so2966282vkd.1
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Mar 2017 19:33:24 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1703281818150.10776@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Spandan Kumar Sahu <spandankumarsahu@gmail.com>
-Cc: ceph-devel@vger.kernel.org, Myna V <mynaramana@gmail.com>
+To: Sage Weil <sage@newdream.net>
+Cc: Casey Bodley <cbodley@redhat.com>, Rajath Shashidhara <rajath.shashidhara@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Spandan,
+Hi all,
 
-Thanks for the response.
+I met the same issue when I ran OpenStack tempest API test with
+radosgw in recent. It is great if we can update swift tests up to
+date.
 
-On Tue, Mar 28, 2017 at 12:46 AM, Spandan Kumar Sahu
-<spandankumarsahu@gmail.com> wrote:
-> Hi Karthik
+@Casey, are there special test cases in Ceph used to test Swift API?
+Could you please share me more information?
+
+Thanks a lot!
+
+Br,
+Tone
+
+On 29 March 2017 at 02:18, Sage Weil <sage@newdream.net> wrote:
+> On Tue, 28 Mar 2017, Casey Bodley wrote:
+>> On 03/28/2017 09:51 AM, Rajath Shashidhara wrote:
+>> > Hi,
+>> >
+>> > I am getting started with contributing to Ceph. I sent my first pull
+>> > request a couple of weeks ago - https://github.com/ceph/ceph/pull/13908
+>> > . In testing the feature, I realized that the ceph/swift repository is
+>> > outdated. I tweaked some relevant functional tests on the
+>> > openstack/swift repository to run on RadosGW.
+>> >
+>> > I was thinking that may be I can port all the functional tests from
+>> > openstack/swift to work on RGW. This way we can test how well RGW
+>> > complies with the Swift REST API. I'd like to know if that would be a
+>> > useful contribution to ceph. Also, since ceph/stack has diverged from
+>> > openstack/swift (20 commits ahead and 4919 commits behind upstream -
+>> > openstack/swift as of today), what approach should I take to push these
+>> > tests ?
+>> >
+>> > Thanks,
+>> >
+>> > Rajath Shashidhara
+>> >
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Hi Rajath,
+>>
+>> Thanks for looking into this - I think it would be extremely valuable to bring
+>> our swift tests up to date. Looking at our fork, it appears that most of our
+>> changes fall into two categories: updating dependencies/bootstrapping, and
+>> adding 'fails_on_rgw' tags to tests that we know won't pass.
+>>
+>> I'm hoping that the latest openstack/swift repo has the correct dependencies,
+>> so we may not need to carry all of those patches forward.
+>>
+>> Rebasing the commits that add our tags sounds tedious, but should be pretty
+>> straightforward. For new upstream tests that don't pass against rgw, maybe add
+>> a separate tag like 'new_fails_on_rgw' so that we can go through and evaluate
+>> each of those once you finish.
 >
-> This is what Kefu Chai, the mentor of this project, suggested me :
-> "you can take a
-> look at http://tracker.ceph.com/issues/15653, which is already assigned
-> to Loic, but by investigating on it, you can get more insight of the project
-> you want to take."
+> See also:
 >
-
-I will look into it.
-
-
-> On Tue, Mar 28, 2017 at 2:19 AM, Methuku Karthik <kmeth@seas.upenn.edu> wrote:
->> Hi Everyone,
->>
->> My name is Karthik. I am a first year graduate student in Embedded
->> Systems at University of Pennsylvania. I am a avid c, c++ and python
->> programmer.I have 4 years of work experience as  Software developer at
->> Airbus.
->>
->> I have been working as research assistant in PRECISE lab at the
->> University of Pennsylvania to evaluate the performance of the Xen's
->> RTDS scheduler.
->>
->> Currently, I am doing a course on distributed systems. As a part of
->> that course ,I am building a small cloud platform using gRPC (Google's
->> high performance , open-source RPC framework) with the following
->> features:
->>
->> (1)Webmail service (SMTP & POP3) to send, receive and forward mails
->> (2)A fault-tolerant backend server that employs key-Value store
->> similar to Google's Bigtable.
->> (3)The entire Bigtable is distributed across multiple backend servers.
->> (4)Frontend Http server to process requests from a browser, retrieve
->> appropriate data from the backend server and construct the http
->> response for the GUI.
->> (5)Storage service (Similar to Google Drive) with support for
->> navigating the directories, folder creation and uploading and
->> downloading any file type.
->> (6)This system will be fault tolerant with quorum based causal
->> replication done across multiple nodes and load balancing done with
->> dynamic distribution of users among different groups.
->>
->> I compiled and hosted a small cluster to observe how ceph works in
->> storing the data and how the  distribution of the data is maintained
->> while ensuring fault tolerance.With the help of my friend Myna
->> (cc.ed), I could come to speed and performed few experiments to
->> observe how data is shuffled after bringing down one osd.
->>
->> I am currently doing literature review on crush algorithm and
->> understanding the Ceph Architecture.
->>
->> It would be exciting to work on project "ceph-mgr: Smarter
->> Reweight-by-Utilization"
->>
->> Can you point me to any resources that guide to evaluate performace of
->> storage system ?
->>
->> What kind of factors should one consider to evaluate performace of a
->> storage system ?
->> I could think of response time for reading, writing and deleting a
->> file or how quickly a node is configured into a cluster or how quickly
->> cluster heals after a node dies.
->>
->> Please suggest me some existing simple beginner bug which would give
->> me a chance to explore the code.
->>
->> I'm very much interested in Ceph. I want to become a Ceph contributor
->> in the near future.
->>
->> Thank you very much for your help!
->>
->> Best,
->> Karthik
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>         https://github.com/ceph/ceph/pull/6111
 >
->
->
+> sage
 > --
-> Spandan Kumar Sahu
-> IIT Kharagpur
-
-Best,
-Karthik
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
