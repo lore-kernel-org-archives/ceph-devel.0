@@ -1,182 +1,209 @@
-From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 09/25] ceph: Convert to separately allocated bdi
-Date: Wed, 29 Mar 2017 12:56:07 +0200
-Message-ID: <20170329105623.18241-10-jack@suse.cz>
-References: <20170329105623.18241-1-jack@suse.cz>
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <20170329105623.18241-1-jack@suse.cz>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: linux-fsdevel@vger.kernel.org
-Cc: linux-block@vger.kernel.org, Christoph Hellwig <hch@infradead.org>, Jan Kara <jack@suse.cz>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, ceph-devel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: [PATCH v5 3/6] libceph: add an epoch_barrier field to struct
+ ceph_osd_client
+Date: Wed, 29 Mar 2017 07:54:33 -0400
+Message-ID: <1490788473.2332.1.camel@redhat.com>
+References: <20170225174323.20289-1-jlayton@redhat.com>
+         <20170225174323.20289-4-jlayton@redhat.com>
+         <CAOi1vP-xgoxnbgve3uOfiSRN1vESh-e+jFp1QyvPTa_DXE2R2Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qt0-f178.google.com ([209.85.216.178]:34853 "EHLO
+        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932251AbdC2Lyi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Mar 2017 07:54:38 -0400
+Received: by mail-qt0-f178.google.com with SMTP id x35so9957355qtc.2
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Mar 2017 04:54:37 -0700 (PDT)
+In-Reply-To: <CAOi1vP-xgoxnbgve3uOfiSRN1vESh-e+jFp1QyvPTa_DXE2R2Q@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Allocate struct backing_dev_info separately instead of embedding it
-inside client structure. This unifies handling of bdi among users.
+On Tue, 2017-03-28 at 16:54 +0200, Ilya Dryomov wrote:
+> On Sat, Feb 25, 2017 at 6:43 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> > Cephfs can get cap update requests that contain a new epoch barrier in
+> > them. When that happens we want to pause all OSD traffic until the right
+> > map epoch arrives.
+> > 
+> > Add an epoch_barrier field to ceph_osd_client that is protected by the
+> > osdc->lock rwsem. When the barrier is set, and the current OSD map
+> > epoch is below that, pause the request target when submitting the
+> > request or when revisiting it. Add a way for upper layers (cephfs)
+> > to update the epoch_barrier as well.
+> > 
+> > If we get a new map, compare the new epoch against the barrier before
+> > kicking requests and request another map if the map epoch is still lower
+> > than the one we want.
+> > 
+> > If we end up cancelling requests because of a new map showing a full OSD
+> > or pool condition, then set the barrier higher than the highest replay
+> > epoch of all the cancelled requests.
+> > 
+> > Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> > ---
+> >  include/linux/ceph/osd_client.h |  2 ++
+> >  net/ceph/osd_client.c           | 51 +++++++++++++++++++++++++++++++++--------
+> >  2 files changed, 43 insertions(+), 10 deletions(-)
+> > 
+> > diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+> > index 55dcff2455e0..833942226560 100644
+> > --- a/include/linux/ceph/osd_client.h
+> > +++ b/include/linux/ceph/osd_client.h
+> > @@ -266,6 +266,7 @@ struct ceph_osd_client {
+> >         struct rb_root         osds;          /* osds */
+> >         struct list_head       osd_lru;       /* idle osds */
+> >         spinlock_t             osd_lru_lock;
+> > +       u32                    epoch_barrier;
+> 
+> It would be good to include it in debugfs -- osdmap_show().
+> 
 
-CC: Ilya Dryomov <idryomov@gmail.com>
-CC: "Yan, Zheng" <zyan@redhat.com>
-CC: Sage Weil <sage@redhat.com>
-CC: ceph-devel@vger.kernel.org
-Signed-off-by: Jan Kara <jack@suse.cz>
----
- fs/ceph/addr.c    |  6 +++---
- fs/ceph/debugfs.c |  2 +-
- fs/ceph/super.c   | 35 +++++++++++++----------------------
- fs/ceph/super.h   |  2 --
- 4 files changed, 17 insertions(+), 28 deletions(-)
+Ok, I'll plan to add it in there.
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 1a3e1b40799a..9ecb2fd348cb 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -578,7 +578,7 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
- 	writeback_stat = atomic_long_inc_return(&fsc->writeback_count);
- 	if (writeback_stat >
- 	    CONGESTION_ON_THRESH(fsc->mount_options->congestion_kb))
--		set_bdi_congested(&fsc->backing_dev_info, BLK_RW_ASYNC);
-+		set_bdi_congested(inode_to_bdi(inode), BLK_RW_ASYNC);
- 
- 	set_page_writeback(page);
- 	err = ceph_osdc_writepages(osdc, ceph_vino(inode),
-@@ -700,7 +700,7 @@ static void writepages_finish(struct ceph_osd_request *req)
- 			if (atomic_long_dec_return(&fsc->writeback_count) <
- 			     CONGESTION_OFF_THRESH(
- 					fsc->mount_options->congestion_kb))
--				clear_bdi_congested(&fsc->backing_dev_info,
-+				clear_bdi_congested(inode_to_bdi(inode),
- 						    BLK_RW_ASYNC);
- 
- 			if (rc < 0)
-@@ -979,7 +979,7 @@ static int ceph_writepages_start(struct address_space *mapping,
- 			if (atomic_long_inc_return(&fsc->writeback_count) >
- 			    CONGESTION_ON_THRESH(
- 				    fsc->mount_options->congestion_kb)) {
--				set_bdi_congested(&fsc->backing_dev_info,
-+				set_bdi_congested(inode_to_bdi(inode),
- 						  BLK_RW_ASYNC);
- 			}
- 
-diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index f2ae393e2c31..3ef11bc8d728 100644
---- a/fs/ceph/debugfs.c
-+++ b/fs/ceph/debugfs.c
-@@ -251,7 +251,7 @@ int ceph_fs_debugfs_init(struct ceph_fs_client *fsc)
- 		goto out;
- 
- 	snprintf(name, sizeof(name), "../../bdi/%s",
--		 dev_name(fsc->backing_dev_info.dev));
-+		 dev_name(fsc->sb->s_bdi->dev));
- 	fsc->debugfs_bdi =
- 		debugfs_create_symlink("bdi",
- 				       fsc->client->debugfs_dir,
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 0ec8d0114e57..a8c81b2052ca 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -579,10 +579,6 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
- 
- 	atomic_long_set(&fsc->writeback_count, 0);
- 
--	err = bdi_init(&fsc->backing_dev_info);
--	if (err < 0)
--		goto fail_client;
--
- 	err = -ENOMEM;
- 	/*
- 	 * The number of concurrent works can be high but they don't need
-@@ -590,7 +586,7 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
- 	 */
- 	fsc->wb_wq = alloc_workqueue("ceph-writeback", 0, 1);
- 	if (fsc->wb_wq == NULL)
--		goto fail_bdi;
-+		goto fail_client;
- 	fsc->pg_inv_wq = alloc_workqueue("ceph-pg-invalid", 0, 1);
- 	if (fsc->pg_inv_wq == NULL)
- 		goto fail_wb_wq;
-@@ -624,8 +620,6 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
- 	destroy_workqueue(fsc->pg_inv_wq);
- fail_wb_wq:
- 	destroy_workqueue(fsc->wb_wq);
--fail_bdi:
--	bdi_destroy(&fsc->backing_dev_info);
- fail_client:
- 	ceph_destroy_client(fsc->client);
- fail:
-@@ -643,8 +637,6 @@ static void destroy_fs_client(struct ceph_fs_client *fsc)
- 	destroy_workqueue(fsc->pg_inv_wq);
- 	destroy_workqueue(fsc->trunc_wq);
- 
--	bdi_destroy(&fsc->backing_dev_info);
--
- 	mempool_destroy(fsc->wb_pagevec_pool);
- 
- 	destroy_mount_options(fsc->mount_options);
-@@ -937,33 +929,32 @@ static int ceph_compare_super(struct super_block *sb, void *data)
-  */
- static atomic_long_t bdi_seq = ATOMIC_LONG_INIT(0);
- 
--static int ceph_register_bdi(struct super_block *sb,
--			     struct ceph_fs_client *fsc)
-+static int ceph_setup_bdi(struct super_block *sb, struct ceph_fs_client *fsc)
- {
- 	int err;
- 
-+	err = super_setup_bdi_name(sb, "ceph-%ld",
-+				   atomic_long_inc_return(&bdi_seq));
-+	if (err)
-+		return err;
-+
- 	/* set ra_pages based on rasize mount option? */
- 	if (fsc->mount_options->rasize >= PAGE_SIZE)
--		fsc->backing_dev_info.ra_pages =
-+		sb->s_bdi->ra_pages =
- 			(fsc->mount_options->rasize + PAGE_SIZE - 1)
- 			>> PAGE_SHIFT;
- 	else
--		fsc->backing_dev_info.ra_pages =
--			VM_MAX_READAHEAD * 1024 / PAGE_SIZE;
-+		sb->s_bdi->ra_pages = VM_MAX_READAHEAD * 1024 / PAGE_SIZE;
- 
- 	if (fsc->mount_options->rsize > fsc->mount_options->rasize &&
- 	    fsc->mount_options->rsize >= PAGE_SIZE)
--		fsc->backing_dev_info.io_pages =
-+		sb->s_bdi->io_pages =
- 			(fsc->mount_options->rsize + PAGE_SIZE - 1)
- 			>> PAGE_SHIFT;
- 	else if (fsc->mount_options->rsize == 0)
--		fsc->backing_dev_info.io_pages = ULONG_MAX;
-+		sb->s_bdi->io_pages = ULONG_MAX;
- 
--	err = bdi_register(&fsc->backing_dev_info, NULL, "ceph-%ld",
--			   atomic_long_inc_return(&bdi_seq));
--	if (!err)
--		sb->s_bdi = &fsc->backing_dev_info;
--	return err;
-+	return 0;
- }
- 
- static struct dentry *ceph_mount(struct file_system_type *fs_type,
-@@ -1018,7 +1009,7 @@ static struct dentry *ceph_mount(struct file_system_type *fs_type,
- 		dout("get_sb got existing client %p\n", fsc);
- 	} else {
- 		dout("get_sb using new client %p\n", fsc);
--		err = ceph_register_bdi(sb, fsc);
-+		err = ceph_setup_bdi(sb, fsc);
- 		if (err < 0) {
- 			res = ERR_PTR(err);
- 			goto out_splat;
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index fe6b9cfc4013..176186b12457 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -92,8 +92,6 @@ struct ceph_fs_client {
- 	struct workqueue_struct *trunc_wq;
- 	atomic_long_t writeback_count;
- 
--	struct backing_dev_info backing_dev_info;
--
- #ifdef CONFIG_DEBUG_FS
- 	struct dentry *debugfs_dentry_lru, *debugfs_caps;
- 	struct dentry *debugfs_congestion_kb;
+> >         struct ceph_osd        homeless_osd;
+> >         atomic64_t             last_tid;      /* tid of last request */
+> >         u64                    last_linger_id;
+> > @@ -304,6 +305,7 @@ extern void ceph_osdc_handle_reply(struct ceph_osd_client *osdc,
+> >                                    struct ceph_msg *msg);
+> >  extern void ceph_osdc_handle_map(struct ceph_osd_client *osdc,
+> >                                  struct ceph_msg *msg);
+> > +void ceph_osdc_update_epoch_barrier(struct ceph_osd_client *osdc, u32 eb);
+> > 
+> >  extern void osd_req_op_init(struct ceph_osd_request *osd_req,
+> >                             unsigned int which, u16 opcode, u32 flags);
+> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> > index b286ff6dec29..2e9b6211814a 100644
+> > --- a/net/ceph/osd_client.c
+> > +++ b/net/ceph/osd_client.c
+> > @@ -1299,8 +1299,10 @@ static bool target_should_be_paused(struct ceph_osd_client *osdc,
+> >                        __pool_full(pi);
+> > 
+> >         WARN_ON(pi->id != t->base_oloc.pool);
+> > -       return (t->flags & CEPH_OSD_FLAG_READ && pauserd) ||
+> > -              (t->flags & CEPH_OSD_FLAG_WRITE && pausewr);
+> > +       return ((t->flags & CEPH_OSD_FLAG_READ) && pauserd) ||
+> > +              ((t->flags & CEPH_OSD_FLAG_WRITE) && pausewr) ||
+> > +              (osdc->epoch_barrier &&
+> > +               osdc->osdmap->epoch < osdc->epoch_barrier);
+> 
+> Why the osdc->epoch_barrier != 0 check, here and everywhere else?
+> 
+
+My understanding is that we have to deal with clusters that predate the
+addition of this value. The client sets this to 0 when it's not set.
+
+> >  }
+> > 
+> >  enum calc_target_result {
+> > @@ -1610,21 +1612,24 @@ static void send_request(struct ceph_osd_request *req)
+> >  static void maybe_request_map(struct ceph_osd_client *osdc)
+> >  {
+> >         bool continuous = false;
+> > +       u32 epoch = osdc->osdmap->epoch;
+> > 
+> >         verify_osdc_locked(osdc);
+> > -       WARN_ON(!osdc->osdmap->epoch);
+> > +       WARN_ON_ONCE(epoch == 0);
+> > 
+> >         if (ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
+> >             ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSERD) ||
+> > -           ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR)) {
+> > +           ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR) ||
+> > +           (osdc->epoch_barrier && epoch < osdc->epoch_barrier)) {
+> >                 dout("%s osdc %p continuous\n", __func__, osdc);
+> >                 continuous = true;
+> >         } else {
+> >                 dout("%s osdc %p onetime\n", __func__, osdc);
+> >         }
+> > 
+> > +       ++epoch;
+> >         if (ceph_monc_want_map(&osdc->client->monc, CEPH_SUB_OSDMAP,
+> > -                              osdc->osdmap->epoch + 1, continuous))
+> > +                              epoch, continuous))
+> >                 ceph_monc_renew_subs(&osdc->client->monc);
+> >  }
+> 
+> Why was this change needed?  Wouldn't the existing call to unmodified
+> maybe_request_map() from ceph_osdc_handle_map() be sufficient?
+> 
+
+It's not strictly required, but it's more efficient to fetch the epoch
+at the beginning of the function like this and then work with it the
+value on the stack than to potentially deal with having to refetch it.
+It also looks cleaner.
+
+> > 
+> > @@ -1653,8 +1658,14 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
+> >                 goto promote;
+> >         }
+> > 
+> > -       if ((req->r_flags & CEPH_OSD_FLAG_WRITE) &&
+> > -           ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR)) {
+> > +       if (osdc->epoch_barrier &&
+> > +           osdc->osdmap->epoch < osdc->epoch_barrier) {
+> > +               dout("req %p epoch %u barrier %u\n", req, osdc->osdmap->epoch,
+> > +                    osdc->epoch_barrier);
+> > +               req->r_t.paused = true;
+> > +               maybe_request_map(osdc);
+> > +       } else if ((req->r_flags & CEPH_OSD_FLAG_WRITE) &&
+> > +                  ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR)) {
+> >                 dout("req %p pausewr\n", req);
+> >                 req->r_t.paused = true;
+> >                 maybe_request_map(osdc);
+> > @@ -1772,7 +1783,8 @@ static void complete_request(struct ceph_osd_request *req, int err)
+> > 
+> >  /*
+> >   * Drop all pending requests that are stalled waiting on a full condition to
+> > - * clear, and complete them with ENOSPC as the return code.
+> > + * clear, and complete them with ENOSPC as the return code. Set the
+> > + * osdc->epoch_barrier to the latest replay version epoch that was aborted.
+> >   */
+> >  static void ceph_osdc_abort_on_full(struct ceph_osd_client *osdc)
+> >  {
+> > @@ -1808,7 +1820,11 @@ static void ceph_osdc_abort_on_full(struct ceph_osd_client *osdc)
+> >                 mutex_unlock(&osd->lock);
+> >         }
+> >  out:
+> > -       dout("return abort_on_full latest_epoch=%u\n", latest_epoch);
+> > +       if (latest_epoch)
+> > +               osdc->epoch_barrier = max(latest_epoch + 1,
+> > +                                         osdc->epoch_barrier);
+> > +       dout("return abort_on_full latest_epoch=%u barrier=%u\n", latest_epoch,
+> > +                                       osdc->epoch_barrier);
+> >  }
+> > 
+> >  static void cancel_map_check(struct ceph_osd_request *req)
+> > @@ -3266,7 +3282,8 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+> >         pausewr = ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR) ||
+> >                   ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
+> >                   have_pool_full(osdc);
+> > -       if (was_pauserd || was_pausewr || pauserd || pausewr)
+> > +       if (was_pauserd || was_pausewr || pauserd || pausewr ||
+> > +           (osdc->epoch_barrier && osdc->osdmap->epoch < osdc->epoch_barrier))
+> >                 maybe_request_map(osdc);
+> > 
+> >         kick_requests(osdc, &need_resend, &need_resend_linger);
+> > @@ -3284,6 +3301,20 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+> >         up_write(&osdc->lock);
+> >  }
+> > 
+> > +void ceph_osdc_update_epoch_barrier(struct ceph_osd_client *osdc, u32 eb)
+> > +{
+> > +       down_read(&osdc->lock);
+> > +       if (unlikely(eb > osdc->epoch_barrier)) {
+> > +               up_read(&osdc->lock);
+> > +               down_write(&osdc->lock);
+> > +               osdc->epoch_barrier = max(eb, osdc->epoch_barrier);
+> 
+> I'd replace this with an if and add a dout for when the epoch_barrier
+> is actually updated.  We should probably do maybe_request_map() in that
+> branch is well.
+> 
+
+Ok, thanks. I'll clean that up.
+
 -- 
-2.10.2
+Jeff Layton <jlayton@redhat.com>
