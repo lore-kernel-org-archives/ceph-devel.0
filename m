@@ -1,146 +1,128 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v5 3/6] libceph: add an epoch_barrier field to struct ceph_osd_client
-Date: Wed, 29 Mar 2017 18:52:43 +0200
-Message-ID: <CAOi1vP-xyGZxTidnOAwTt=agOFrQxP6wUUyFDQFbdUtcyBjY4w@mail.gmail.com>
-References: <20170225174323.20289-1-jlayton@redhat.com> <20170225174323.20289-4-jlayton@redhat.com>
- <CAOi1vP-xgoxnbgve3uOfiSRN1vESh-e+jFp1QyvPTa_DXE2R2Q@mail.gmail.com> <1490788473.2332.1.camel@redhat.com>
+Subject: Re: [PATCH v5 2/6] libceph: abort already submitted but abortable
+ requests when map or pool goes full
+Date: Wed, 29 Mar 2017 18:56:22 +0200
+Message-ID: <CAOi1vP8hnm=wB3VHAK9AZhpMnQB0quHRW-CVCu91d=Fh5j2RWA@mail.gmail.com>
+References: <20170225174323.20289-1-jlayton@redhat.com> <20170225174323.20289-3-jlayton@redhat.com>
+ <CAOi1vP-Y2y7ikVEA9sgsZWBx3KnPpWPUNg1ZPKQfPVcQ+vdQGg@mail.gmail.com>
+ <1490796093.2332.3.camel@redhat.com> <CAOi1vP9io-UMO-a5PSeqocQ_X2nkMkCJFdifN=BtVoam8AkCxw@mail.gmail.com>
+ <1490805572.2678.2.camel@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f67.google.com ([209.85.213.67]:36731 "EHLO
+Received: from mail-vk0-f67.google.com ([209.85.213.67]:33846 "EHLO
         mail-vk0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752333AbdC2Qwp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Mar 2017 12:52:45 -0400
-Received: by mail-vk0-f67.google.com with SMTP id d188so3034718vka.3
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Mar 2017 09:52:44 -0700 (PDT)
-In-Reply-To: <1490788473.2332.1.camel@redhat.com>
+        with ESMTP id S932289AbdC2Q4Y (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Mar 2017 12:56:24 -0400
+Received: by mail-vk0-f67.google.com with SMTP id y16so3077830vky.1
+        for <ceph-devel@vger.kernel.org>; Wed, 29 Mar 2017 09:56:23 -0700 (PDT)
+In-Reply-To: <1490805572.2678.2.camel@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Jeff Layton <jlayton@redhat.com>
 Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 29, 2017 at 1:54 PM, Jeff Layton <jlayton@redhat.com> wrote:
-> On Tue, 2017-03-28 at 16:54 +0200, Ilya Dryomov wrote:
->> On Sat, Feb 25, 2017 at 6:43 PM, Jeff Layton <jlayton@redhat.com> wrote:
->> > Cephfs can get cap update requests that contain a new epoch barrier in
->> > them. When that happens we want to pause all OSD traffic until the right
->> > map epoch arrives.
+On Wed, Mar 29, 2017 at 6:39 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> On Wed, 2017-03-29 at 16:14 +0200, Ilya Dryomov wrote:
+>> On Wed, Mar 29, 2017 at 4:01 PM, Jeff Layton <jlayton@redhat.com> wrote:
+>> > On Tue, 2017-03-28 at 16:34 +0200, Ilya Dryomov wrote:
+>> > > On Sat, Feb 25, 2017 at 6:43 PM, Jeff Layton <jlayton@redhat.com> wrote:
+>> > > > When a Ceph volume hits capacity, a flag is set in the OSD map to
+>> > > > indicate that, and a new map is sprayed around the cluster. With cephfs
+>> > > > we want it to shut down any abortable requests that are in progress with
+>> > > > an -ENOSPC error as they'd just hang otherwise.
+>> > > >
+>> > > > Add a new ceph_osdc_abort_on_full helper function to handle this. It
+>> > > > will first check whether there is an out-of-space condition in the
+>> > > > cluster. It will then walk the tree and abort any request that has
+>> > > > r_abort_on_full set with an ENOSPC error. Call this new function
+>> > > > directly whenever we get a new OSD map.
+>> > > >
+>> > > > Signed-off-by: Jeff Layton <jlayton@redhat.com>
+>> > > > ---
+>> > > >  net/ceph/osd_client.c | 42 ++++++++++++++++++++++++++++++++++++++++++
+>> > > >  1 file changed, 42 insertions(+)
+>> > > >
+>> > > > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+>> > > > index 8fc0ccc7126f..b286ff6dec29 100644
+>> > > > --- a/net/ceph/osd_client.c
+>> > > > +++ b/net/ceph/osd_client.c
+>> > > > @@ -1770,6 +1770,47 @@ static void complete_request(struct ceph_osd_request *req, int err)
+>> > > >         ceph_osdc_put_request(req);
+>> > > >  }
+>> > > >
+>> > > > +/*
+>> > > > + * Drop all pending requests that are stalled waiting on a full condition to
+>> > > > + * clear, and complete them with ENOSPC as the return code.
+>> > > > + */
+>> > > > +static void ceph_osdc_abort_on_full(struct ceph_osd_client *osdc)
+>> > > > +{
+>> > > > +       struct ceph_osd_request *req;
+>> > > > +       struct ceph_osd *osd;
+>> > >
+>> > > These variables could have narrower scope.
+>> > >
+>> > > > +       struct rb_node *m, *n;
+>> > > > +       u32 latest_epoch = 0;
+>> > > > +       bool osdmap_full = ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL);
+>> > >
+>> > > This variable is redundant.
+>> > >
+>> > > > +
+>> > > > +       dout("enter abort_on_full\n");
+>> > > > +
+>> > > > +       if (!osdmap_full && !have_pool_full(osdc))
+>> > > > +               goto out;
+>> > > > +
+>> > > > +       for (n = rb_first(&osdc->osds); n; n = rb_next(n)) {
+>> > > > +               osd = rb_entry(n, struct ceph_osd, o_node);
+>> > > > +               mutex_lock(&osd->lock);
+>> > >
+>> > > No need to take osd->lock here as osdc->lock is held for write.
+>> > >
+>> > > > +               m = rb_first(&osd->o_requests);
+>> > > > +               while (m) {
+>> > > > +                       req = rb_entry(m, struct ceph_osd_request, r_node);
+>> > > > +                       m = rb_next(m);
+>> > > > +
+>> > > > +                       if (req->r_abort_on_full &&
+>> > > > +                           (osdmap_full || pool_full(osdc, req->r_t.base_oloc.pool))) {
+>> > >
+>> > > Over 80 lines and I think we need target_oloc instead of base_oloc
+>> > > here.
+>> > >
+>> > > > +                               u32 cur_epoch = le32_to_cpu(req->r_replay_version.epoch);
+>> > >
+>> > > Is replay_version used this way in the userspace client?  It is an ack
+>> > > vs commit leftover and AFAICT it is never set (i.e. always 0'0) in newer
+>> > > Objecter, so something is wrong here.
+>> > >
 >> >
->> > Add an epoch_barrier field to ceph_osd_client that is protected by the
->> > osdc->lock rwsem. When the barrier is set, and the current OSD map
->> > epoch is below that, pause the request target when submitting the
->> > request or when revisiting it. Add a way for upper layers (cephfs)
->> > to update the epoch_barrier as well.
+>> > Yeah I see what you mean now. This does look to be entirely vestigial
+>> > in the current code.
 >> >
->> > If we get a new map, compare the new epoch against the barrier before
->> > kicking requests and request another map if the map epoch is still lower
->> > than the one we want.
->> >
->> > If we end up cancelling requests because of a new map showing a full OSD
->> > or pool condition, then set the barrier higher than the highest replay
->> > epoch of all the cancelled requests.
->> >
->> > Signed-off-by: Jeff Layton <jlayton@redhat.com>
->> > ---
->> >  include/linux/ceph/osd_client.h |  2 ++
->> >  net/ceph/osd_client.c           | 51 +++++++++++++++++++++++++++++++++--------
->> >  2 files changed, 43 insertions(+), 10 deletions(-)
->> >
->> > diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
->> > index 55dcff2455e0..833942226560 100644
->> > --- a/include/linux/ceph/osd_client.h
->> > +++ b/include/linux/ceph/osd_client.h
->> > @@ -266,6 +266,7 @@ struct ceph_osd_client {
->> >         struct rb_root         osds;          /* osds */
->> >         struct list_head       osd_lru;       /* idle osds */
->> >         spinlock_t             osd_lru_lock;
->> > +       u32                    epoch_barrier;
+>> > Basically, what we want is to scan the list of outstanding requests for
+>> > this OSD, and abort any that predate the current map epoch. I suppose
+>> > this means that we need to record the current map epoch in the request
+>> > somewhere. ISTR looking and seeing that it was recorded here, but I
+>> > don't think that's the case anymore.
 >>
->> It would be good to include it in debugfs -- osdmap_show().
+>> Why only those that predate the current epoch and not simply all of
+>> those marked as r_abort_on_full?  I mean, this is triggered by a pool
+>> or an entire cluster going full, right?
+>>
 >>
 >
-> Ok, I'll plan to add it in there.
+> My mistake, you're right. We cancel based on r_abort_on_full and the
+> pool/OSD full flags.
 >
->> >         struct ceph_osd        homeless_osd;
->> >         atomic64_t             last_tid;      /* tid of last request */
->> >         u64                    last_linger_id;
->> > @@ -304,6 +305,7 @@ extern void ceph_osdc_handle_reply(struct ceph_osd_client *osdc,
->> >                                    struct ceph_msg *msg);
->> >  extern void ceph_osdc_handle_map(struct ceph_osd_client *osdc,
->> >                                  struct ceph_msg *msg);
->> > +void ceph_osdc_update_epoch_barrier(struct ceph_osd_client *osdc, u32 eb);
->> >
->> >  extern void osd_req_op_init(struct ceph_osd_request *osd_req,
->> >                             unsigned int which, u16 opcode, u32 flags);
->> > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
->> > index b286ff6dec29..2e9b6211814a 100644
->> > --- a/net/ceph/osd_client.c
->> > +++ b/net/ceph/osd_client.c
->> > @@ -1299,8 +1299,10 @@ static bool target_should_be_paused(struct ceph_osd_client *osdc,
->> >                        __pool_full(pi);
->> >
->> >         WARN_ON(pi->id != t->base_oloc.pool);
->> > -       return (t->flags & CEPH_OSD_FLAG_READ && pauserd) ||
->> > -              (t->flags & CEPH_OSD_FLAG_WRITE && pausewr);
->> > +       return ((t->flags & CEPH_OSD_FLAG_READ) && pauserd) ||
->> > +              ((t->flags & CEPH_OSD_FLAG_WRITE) && pausewr) ||
->> > +              (osdc->epoch_barrier &&
->> > +               osdc->osdmap->epoch < osdc->epoch_barrier);
->>
->> Why the osdc->epoch_barrier != 0 check, here and everywhere else?
->>
->
-> My understanding is that we have to deal with clusters that predate the
-> addition of this value. The client sets this to 0 when it's not set.
+> We do need to determine the latest cancelled map epoch though, so that
+> we can update the epoch_barrier properly when this occurs. What I'm
+> doing now is just recording the current map epoch before we link a
+> request into the tree and using that to determine this.
 
-That and initialization to 0 in ceph_create_client(), so how does this
-!= 0 check affect anything?  Won't we always return false in that case,
-thus preserving the old behavior?
-
->
->> >  }
->> >
->> >  enum calc_target_result {
->> > @@ -1610,21 +1612,24 @@ static void send_request(struct ceph_osd_request *req)
->> >  static void maybe_request_map(struct ceph_osd_client *osdc)
->> >  {
->> >         bool continuous = false;
->> > +       u32 epoch = osdc->osdmap->epoch;
->> >
->> >         verify_osdc_locked(osdc);
->> > -       WARN_ON(!osdc->osdmap->epoch);
->> > +       WARN_ON_ONCE(epoch == 0);
->> >
->> >         if (ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
->> >             ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSERD) ||
->> > -           ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR)) {
->> > +           ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR) ||
->> > +           (osdc->epoch_barrier && epoch < osdc->epoch_barrier)) {
->> >                 dout("%s osdc %p continuous\n", __func__, osdc);
->> >                 continuous = true;
->> >         } else {
->> >                 dout("%s osdc %p onetime\n", __func__, osdc);
->> >         }
->> >
->> > +       ++epoch;
->> >         if (ceph_monc_want_map(&osdc->client->monc, CEPH_SUB_OSDMAP,
->> > -                              osdc->osdmap->epoch + 1, continuous))
->> > +                              epoch, continuous))
->> >                 ceph_monc_renew_subs(&osdc->client->monc);
->> >  }
->>
->> Why was this change needed?  Wouldn't the existing call to unmodified
->> maybe_request_map() from ceph_osdc_handle_map() be sufficient?
->>
->
-> It's not strictly required, but it's more efficient to fetch the epoch
-> at the beginning of the function like this and then work with it the
-> value on the stack than to potentially deal with having to refetch it.
-> It also looks cleaner.
-
-It was more about the if condition change.  I don't see a reason for it
-and it's not present in the Objecter counterpart, so I'd rather we drop
-the entire hunk.
+I think you can get away with returning the current epoch.  It's always
+going to be the latest, by definition ;)
 
 Thanks,
 
