@@ -1,36 +1,42 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Idea for optimize an OSD rebuild
-Date: Thu, 30 Mar 2017 13:26:20 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1703301326100.10776@piezo.novalocal>
-References: <CAL2-6bJLntQ3MzYffw3_tFQXjizErDLDY5RoBG5-DyZUoCAhnQ@mail.gmail.com>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: Why can't I delete a pool
+Date: Thu, 30 Mar 2017 15:31:54 +0200
+Message-ID: <9a7e5b5a-8b3d-0547-027c-890dcf0bcf4d@suse.de>
+References: <022a7617-95fd-2a92-c7c9-274479b03778@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58640 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:42134 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933331AbdC3N0W (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 30 Mar 2017 09:26:22 -0400
-In-Reply-To: <CAL2-6bJLntQ3MzYffw3_tFQXjizErDLDY5RoBG5-DyZUoCAhnQ@mail.gmail.com>
+        id S933217AbdC3NcB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 30 Mar 2017 09:32:01 -0400
+In-Reply-To: <022a7617-95fd-2a92-c7c9-274479b03778@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vincent Godin <vince.mlist@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, 30 Mar 2017, Vincent Godin wrote:
-> When you replace a failed osd, it has to recover all of its pgs and so
-> it is pretty busy. Is it possible to tell this OSD to not become
-> primary for any of its already synchronized pgs till every pgs (of the
-> OSD) have recovered ? It should accelerate the rebuild process because
-> this OSD won't have to serve client's read requests but just sync the
-> writes request from the OSDs owning the primary pgs and recover. Is
-> there something wrong with this idea ?
+On 30/03/17 14:59, Willem Jan Withagen wrote:
+> [~] wjw@cephtest> ceph osd pool delete cephfsdata cephfsdata
+> --yes-i-really-really-mean-it
+> Error EPERM: pool deletion is disabled; you must first set the
+> mon_allow_pool_delete config option to true before you can destroy a pool
+> Exit 1
+> [~] wjw@cephtest> ceph -n mon.a --show-config | grep allow
+> ...
+> mon_allow_pool_delete = true
+> ...
 
-This is a great idea, and it's on the list of things ceph-mgr should be 
-doing to balance load across the cluster.  I've added a card for this
-at
+Looking at master, this would only happen if the daemon handling the
+request actually had mon_allow_pool_delete = false.
 
-        https://trello.com/b/ugTc2QFH/ceph-backlog
+I'm guessing you made sure mon.a is your leader, but if not, maybe check
+the leader's conf?
 
-("mgr: primary-affinity away from busy osds").
+Other than that, please open a ticket so we can figure out what's wrong.
 
-sage
+Cheers!
+
+  -Joao
+
+
