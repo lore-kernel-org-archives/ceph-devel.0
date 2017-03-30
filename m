@@ -1,160 +1,157 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v6 5/7] ceph: handle epoch barriers in cap messages
-Date: Thu, 30 Mar 2017 14:07:05 -0400
-Message-ID: <20170330180707.11137-5-jlayton@redhat.com>
+Subject: [PATCH v6 7/7] ceph: when seeing write errors on an inode, switch to sync writes
+Date: Thu, 30 Mar 2017 14:07:07 -0400
+Message-ID: <20170330180707.11137-7-jlayton@redhat.com>
 References: <20170330180546.11021-1-jlayton@redhat.com>
  <20170330180707.11137-1-jlayton@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41402 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:59740 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933150AbdC3SHO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 30 Mar 2017 14:07:14 -0400
+        id S934174AbdC3SHP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 30 Mar 2017 14:07:15 -0400
 In-Reply-To: <20170330180707.11137-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: idryomov@gmail.com, zyan@redhat.com, sage@redhat.com
 Cc: jspray@redhat.com, ceph-devel@vger.kernel.org
 
-Have the client store and update the osdc epoch_barrier when a cap
-message comes in with one.
+Currently, we don't have a real feedback mechanism in place for when we
+start seeing buffered writeback errors. If writeback is failing, there
+is nothing that prevents an application from continuing to dirty pages
+that aren't being cleaned.
 
-When sending cap messages, send the epoch barrier as well. This allows
-clients to inform servers that their released caps may not be used until
-a particular OSD map epoch.
+In the event that we're seeing write errors of any sort occur on an
+inode, have the callback set a flag to force further writes to be
+synchronous. When the next write succeeds, clear the flag to allow
+buffered writeback to continue.
+
+Since this is just a hint to the write submission mechanism, we only
+take the i_ceph_lock when a lockless check shows that the flag needs to
+be changed.
 
 Reviewed-by: "Yan, Zheng” <zyan@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- fs/ceph/caps.c       | 17 +++++++++++++----
- fs/ceph/mds_client.c | 20 ++++++++++++++++++++
- fs/ceph/mds_client.h |  7 +++++--
- 3 files changed, 38 insertions(+), 6 deletions(-)
+ fs/ceph/addr.c  |  6 +++++-
+ fs/ceph/file.c  | 31 ++++++++++++++++++-------------
+ fs/ceph/super.h | 26 ++++++++++++++++++++++++++
+ 3 files changed, 49 insertions(+), 14 deletions(-)
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 60185434162a..f2df84a8f460 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1015,6 +1015,7 @@ static int send_cap_msg(struct cap_msg_args *arg)
- 	void *p;
- 	size_t extra_len;
- 	struct timespec zerotime = {0};
-+	struct ceph_osd_client *osdc = &arg->session->s_mdsc->fsc->client->osdc;
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 6cdf94459ac4..e253102b43cd 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -670,8 +670,12 @@ static void writepages_finish(struct ceph_osd_request *req)
+ 	bool remove_page;
  
- 	dout("send_cap_msg %s %llx %llx caps %s wanted %s dirty %s"
- 	     " seq %u/%u tid %llu/%llu mseq %u follows %lld size %llu/%llu"
-@@ -1077,7 +1078,9 @@ static int send_cap_msg(struct cap_msg_args *arg)
- 	/* inline data size */
- 	ceph_encode_32(&p, 0);
- 	/* osd_epoch_barrier (version 5) */
--	ceph_encode_32(&p, 0);
-+	down_read(&osdc->lock);
-+	ceph_encode_32(&p, osdc->epoch_barrier);
-+	up_read(&osdc->lock);
- 	/* oldest_flush_tid (version 6) */
- 	ceph_encode_64(&p, arg->oldest_flush_tid);
+ 	dout("writepages_finish %p rc %d\n", inode, rc);
+-	if (rc < 0)
++	if (rc < 0) {
+ 		mapping_set_error(mapping, rc);
++		ceph_set_error_write(ci);
++	} else {
++		ceph_clear_error_write(ci);
++	}
  
-@@ -3633,13 +3636,19 @@ void ceph_handle_caps(struct ceph_mds_session *session,
- 		p += inline_len;
+ 	/*
+ 	 * We lost the cache cap, need to truncate the page before
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index cff35a1ff53c..0480492aa349 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -1020,19 +1020,22 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 
+ out:
+ 		ceph_osdc_put_request(req);
+-		if (ret == 0) {
+-			pos += len;
+-			written += len;
+-
+-			if (pos > i_size_read(inode)) {
+-				check_caps = ceph_inode_set_size(inode, pos);
+-				if (check_caps)
+-					ceph_check_caps(ceph_inode(inode),
+-							CHECK_CAPS_AUTHONLY,
+-							NULL);
+-			}
+-		} else
++		if (ret != 0) {
++			ceph_set_error_write(ci);
+ 			break;
++		}
++
++		ceph_clear_error_write(ci);
++		pos += len;
++		written += len;
++		if (pos > i_size_read(inode)) {
++			check_caps = ceph_inode_set_size(inode, pos);
++			if (check_caps)
++				ceph_check_caps(ceph_inode(inode),
++						CHECK_CAPS_AUTHONLY,
++						NULL);
++		}
++
  	}
  
-+	if (le16_to_cpu(msg->hdr.version) >= 5) {
-+		struct ceph_osd_client	*osdc = &mdsc->fsc->client->osdc;
-+		u32			epoch_barrier;
+ 	if (ret != -EOLDSNAPC && written > 0) {
+@@ -1238,6 +1241,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 	}
+ 
+ retry_snap:
++	/* FIXME: not complete since it doesn't account for being at quota */
+ 	if (ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL)) {
+ 		err = -ENOSPC;
+ 		goto out;
+@@ -1259,7 +1263,8 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
+ 	     inode, ceph_vinop(inode), pos, count, ceph_cap_string(got));
+ 
+ 	if ((got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO)) == 0 ||
+-	    (iocb->ki_flags & IOCB_DIRECT) || (fi->flags & CEPH_F_SYNC)) {
++	    (iocb->ki_flags & IOCB_DIRECT) || (fi->flags & CEPH_F_SYNC) ||
++	    (ci->i_ceph_flags & CEPH_I_ERROR_WRITE)) {
+ 		struct ceph_snap_context *snapc;
+ 		struct iov_iter data;
+ 		inode_unlock(inode);
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index c68e6a045fb9..193dc61abc4d 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -474,6 +474,32 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
+ #define CEPH_I_CAP_DROPPED	(1 << 8)  /* caps were forcibly dropped */
+ #define CEPH_I_KICK_FLUSH	(1 << 9)  /* kick flushing caps */
+ #define CEPH_I_FLUSH_SNAPS	(1 << 10) /* need flush snapss */
++#define CEPH_I_ERROR_WRITE	(1 << 11) /* have seen write errors */
 +
-+		ceph_decode_32_safe(&p, end, epoch_barrier, bad);
-+		ceph_osdc_update_epoch_barrier(osdc, epoch_barrier);
++/*
++ * We set the ERROR_WRITE bit when we start seeing write errors on an inode
++ * and then clear it when they start succeeding. Note that we do a lockless
++ * check first, and only take the lock if it looks like it needs to be changed.
++ * The write submission code just takes this as a hint, so we're not too
++ * worried if a few slip through in either direction.
++ */
++static inline void ceph_set_error_write(struct ceph_inode_info *ci)
++{
++	if (!(ci->i_ceph_flags & CEPH_I_ERROR_WRITE)) {
++		spin_lock(&ci->i_ceph_lock);
++		ci->i_ceph_flags |= CEPH_I_ERROR_WRITE;
++		spin_unlock(&ci->i_ceph_lock);
 +	}
++}
 +
- 	if (le16_to_cpu(msg->hdr.version) >= 8) {
- 		u64 flush_tid;
- 		u32 caller_uid, caller_gid;
--		u32 osd_epoch_barrier;
- 		u32 pool_ns_len;
--		/* version >= 5 */
--		ceph_decode_32_safe(&p, end, osd_epoch_barrier, bad);
-+
- 		/* version >= 6 */
- 		ceph_decode_64_safe(&p, end, flush_tid, bad);
- 		/* version >= 7 */
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index b16f1cf552a8..820bf0fb7745 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -1551,9 +1551,15 @@ void ceph_send_cap_releases(struct ceph_mds_client *mdsc,
- 	struct ceph_msg *msg = NULL;
- 	struct ceph_mds_cap_release *head;
- 	struct ceph_mds_cap_item *item;
-+	struct ceph_osd_client *osdc = &mdsc->fsc->client->osdc;
- 	struct ceph_cap *cap;
- 	LIST_HEAD(tmp_list);
- 	int num_cap_releases;
-+	__le32	barrier, *cap_barrier;
-+
-+	down_read(&osdc->lock);
-+	barrier = cpu_to_le32(osdc->epoch_barrier);
-+	up_read(&osdc->lock);
++static inline void ceph_clear_error_write(struct ceph_inode_info *ci)
++{
++	if (ci->i_ceph_flags & CEPH_I_ERROR_WRITE) {
++		spin_lock(&ci->i_ceph_lock);
++		ci->i_ceph_flags &= ~CEPH_I_ERROR_WRITE;
++		spin_unlock(&ci->i_ceph_lock);
++	}
++}
  
- 	spin_lock(&session->s_cap_lock);
- again:
-@@ -1571,7 +1577,11 @@ void ceph_send_cap_releases(struct ceph_mds_client *mdsc,
- 			head = msg->front.iov_base;
- 			head->num = cpu_to_le32(0);
- 			msg->front.iov_len = sizeof(*head);
-+
-+			msg->hdr.version = cpu_to_le16(2);
-+			msg->hdr.compat_version = cpu_to_le16(1);
- 		}
-+
- 		cap = list_first_entry(&tmp_list, struct ceph_cap,
- 					session_caps);
- 		list_del(&cap->session_caps);
-@@ -1589,6 +1599,11 @@ void ceph_send_cap_releases(struct ceph_mds_client *mdsc,
- 		ceph_put_cap(mdsc, cap);
- 
- 		if (le32_to_cpu(head->num) == CEPH_CAPS_PER_RELEASE) {
-+			// Append cap_barrier field
-+			cap_barrier = msg->front.iov_base + msg->front.iov_len;
-+			*cap_barrier = barrier;
-+			msg->front.iov_len += sizeof(*cap_barrier);
-+
- 			msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
- 			dout("send_cap_releases mds%d %p\n", session->s_mds, msg);
- 			ceph_con_send(&session->s_con, msg);
-@@ -1604,6 +1619,11 @@ void ceph_send_cap_releases(struct ceph_mds_client *mdsc,
- 	spin_unlock(&session->s_cap_lock);
- 
- 	if (msg) {
-+		// Append cap_barrier field
-+		cap_barrier = msg->front.iov_base + msg->front.iov_len;
-+		*cap_barrier = barrier;
-+		msg->front.iov_len += sizeof(*cap_barrier);
-+
- 		msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
- 		dout("send_cap_releases mds%d %p\n", session->s_mds, msg);
- 		ceph_con_send(&session->s_con, msg);
-diff --git a/fs/ceph/mds_client.h b/fs/ceph/mds_client.h
-index bbebcd55d79e..54166758093f 100644
---- a/fs/ceph/mds_client.h
-+++ b/fs/ceph/mds_client.h
-@@ -105,10 +105,13 @@ struct ceph_mds_reply_info_parsed {
- 
- /*
-  * cap releases are batched and sent to the MDS en masse.
-+ *
-+ * Account for per-message overhead of mds_cap_release header
-+ * and __le32 for osd epoch barrier trailing field.
-  */
--#define CEPH_CAPS_PER_RELEASE ((PAGE_SIZE -			\
-+#define CEPH_CAPS_PER_RELEASE ((PAGE_SIZE - sizeof(u32) -		\
- 				sizeof(struct ceph_mds_cap_release)) /	\
--			       sizeof(struct ceph_mds_cap_item))
-+			        sizeof(struct ceph_mds_cap_item))
- 
- 
- /*
+ static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
+ 					   long long release_count,
 -- 
 2.9.3
 
