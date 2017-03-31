@@ -1,25 +1,119 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Jewel 10.2.7 ready for QE
-Date: Fri, 31 Mar 2017 11:35:36 -0600
-Message-ID: <CALqRxCwC_KjSf0+VsrZLr7B7B346F=6_c7FhfazFOLc1+JonrQ@mail.gmail.com>
+From: sheng qiu <herbert1984106@gmail.com>
+Subject: Re: segmentation fault while using fio_ceph_objectstore
+Date: Fri, 31 Mar 2017 10:35:33 -0700
+Message-ID: <CAB7xdimt27RSuv6GoTNZkWt2Vhq_rmGfv-Ci_oj2=8f4r41=5Q@mail.gmail.com>
+References: <CAB7xdikeEJC9W-e9k-Kaz5=qFK84=vCTDpFoqt=w-tj9otquGw@mail.gmail.com>
+ <16f89bb4-916a-6339-e0c6-696a1a17f204@mirantis.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f43.google.com ([209.85.213.43]:34197 "EHLO
+Received: from mail-vk0-f43.google.com ([209.85.213.43]:36541 "EHLO
         mail-vk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933292AbdCaRfi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Mar 2017 13:35:38 -0400
-Received: by mail-vk0-f43.google.com with SMTP id z204so99314735vkd.1
-        for <ceph-devel@vger.kernel.org>; Fri, 31 Mar 2017 10:35:37 -0700 (PDT)
+        with ESMTP id S933292AbdCaRff (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Mar 2017 13:35:35 -0400
+Received: by mail-vk0-f43.google.com with SMTP id s68so99074634vke.3
+        for <ceph-devel@vger.kernel.org>; Fri, 31 Mar 2017 10:35:34 -0700 (PDT)
+In-Reply-To: <16f89bb4-916a-6339-e0c6-696a1a17f204@mirantis.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
+To: Igor Fedotov <ifedotov@mirantis.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Yuri,
+Hi Igor,
 
-The current jewel branch (SHA1
-a64d3e4b33e904aa6585464df8ffff6aafdec10c) is ready for QE validation.
+thanks for your suggestions. i was able to run fio + kstore built with
+tcmalloc. If you have problem with it, maybe try add
+LD_PRELOAD=/path/to/libfio_ceph_objectstore.so before your fio
+command.
+it fixed my problem with tcmalloc and propose better performance than jemalloc.
+my problem is with bluestore that produces the above segmentation fault.
+
+Sage,
+the code is cloned from ceph.git branch kraken.
+If i run fio with qd=1, it's relatively stable, but if use qd > 1,
+bluestore case frequently pop out the above segmentation fault.
 
 Thanks,
-Ken
+Sheng
+
+
+
+On Fri, Mar 31, 2017 at 9:49 AM, Igor Fedotov <ifedotov@mirantis.com> wrote:
+> Not sure it relates to your issue but I was unable to run fio + objectstore
+> plugin built with tcmalloc.
+>
+> No issues after switching to jemalloc though, please do full revuild
+> starting with
+>
+> ./do_cmake.sh -DWITH_FIO=ON -DFIO_INCLUDE_DIR=/root/fio/
+> -DALLOCATOR=jemalloc
+>
+>
+> Hope this helps,
+>
+> Igor
+>
+>
+>
+> On 31.03.2017 19:43, sheng qiu wrote:
+>>
+>> Hi,
+>>
+>> i am trying to use fio_ceph_objectstore as an external engine used by
+>> fio to directly generate IO to objectstore backend without running a
+>> ceph cluster. The purpose is to understand the performance of
+>> objectstore backend.
+>>
+>> i was able to run kstore relatively stable, however with bluestore, it
+>> frequently crash during the test.
+>> here's the crash log:
+>>
+>> *** Caught signal (Segmentation fault) **
+>>   in thread 7f6bc67f4700 thread_name:bstore_kv_sync
+>>   ceph version ccd5a2 (4ccd5a2aafa15ccb6830fa0e339d57be67a50e24)
+>>   1: (()+0x4f309e) [0x7f6bff71509e]
+>>   2: (()+0x11390) [0x7f6bed0a8390]
+>>   3: (malloc_usable_size()+0x28) [0x7f6becb4e4e8]
+>>   4: (rocksdb::Arena::AllocateNewBlock(unsigned long)+0x7c)
+>> [0x7f6bff80072c]
+>>   5: (rocksdb::Arena::AllocateFallback(unsigned long, bool)+0x45)
+>> [0x7f6bff8008a5]
+>>   6: (rocksdb::ConcurrentArena::AllocateAligned(unsigned long, unsigned
+>> long, rocksdb::Logger*)+0x16e) [0x7f6bff78a46e]
+>>   7: (()+0x5a3c0b) [0x7f6bff7c5c0b]
+>>   8: (rocksdb::MemTable::Add(unsigned long, rocksdb::ValueType,
+>> rocksdb::Slice const&, rocksdb::Slice const&, bool,
+>> rocksdb::MemTablePostProcessInfo*)+0x8d9) [0x7f6bff7871d9]
+>>   9: (rocksdb::MemTableInserter::PutCF(unsigned int, rocksdb::Slice
+>> const&, rocksdb::Slice const&)+0x30f) [0x7f6bff7c215f]
+>>   10: (rocksdb::WriteBatch::Iterate(rocksdb::WriteBatch::Handler*)
+>> const+0x53d) [0x7f6bff7bd3cd]
+>>   11:
+>> (rocksdb::WriteBatchInternal::InsertInto(rocksdb::autovector<rocksdb::WriteThread::Writer*,
+>> 8ul> const&, unsigned long, rocksdb::ColumnFamilyMemTables*,
+>> rocksdb::FlushScheduler*, bool, unsigned long, rocksdb::DB*,
+>> bool)+0x140) [0x7f6bff7bfd50]
+>>   12: (rocksdb::DBImpl::WriteImpl(rocksdb::WriteOptions const&,
+>> rocksdb::WriteBatch*, rocksdb::WriteCallback*, unsigned long*,
+>> unsigned long, bool)+0x1617) [0x7f6bff73e3c7]
+>>   13: (rocksdb::DBImpl::Write(rocksdb::WriteOptions const&,
+>> rocksdb::WriteBatch*)+0x2a) [0x7f6bff73ec5a]
+>>   14:
+>> (RocksDBStore::submit_transaction(std::shared_ptr<KeyValueDB::TransactionImpl>)+0x249)
+>> [0x7f6bff644469]
+>>   15: (BlueStore::_kv_sync_thread()+0x12a7) [0x7f6bff5e5037]
+>>   16: (BlueStore::KVSyncThread::entry()+0xd) [0x7f6bff6299ed]
+>>   17: (Thread::entry_wrapper()+0x75) [0x7f6bff923335]
+>>   18: (()+0x76ba) [0x7f6bed09e6ba]
+>>   19: (clone()+0x6d) [0x7f6becbd082d]
+>>
+>> is there any clue how to fix it? any help would be appreciated.
+>>
+>> Thanks,
+>> Sheng
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
