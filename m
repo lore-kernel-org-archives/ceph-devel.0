@@ -1,34 +1,33 @@
-From: Dan Mick <dmick@redhat.com>
-Subject: Teuthology users: you must now include at least one mgr daemon in
- your roles
-Date: Thu, 30 Mar 2017 20:18:08 -0700
-Message-ID: <e7e2fb13-83a4-5361-c038-4331066ba97a@redhat.com>
+From: Artur Molchanov <artur.molchanov@synesis.ru>
+Subject: GET bucket policy response format
+Date: Fri, 31 Mar 2017 14:35:15 +0300
+Message-ID: <57e69661-958a-7a6f-6307-c37e41e72b9d@synesis.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44524 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753528AbdCaDSJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 30 Mar 2017 23:18:09 -0400
+Received: from mail-wr0-f182.google.com ([209.85.128.182]:36662 "EHLO
+        mail-wr0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932729AbdCaLfS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 31 Mar 2017 07:35:18 -0400
+Received: by mail-wr0-f182.google.com with SMTP id w11so100798435wrc.3
+        for <ceph-devel@vger.kernel.org>; Fri, 31 Mar 2017 04:35:17 -0700 (PDT)
+Received: from [172.20.9.159] ([86.57.155.118])
+        by smtp.gmail.com with ESMTPSA id m7sm2546065wmi.34.2017.03.31.04.35.15
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 31 Mar 2017 04:35:15 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, "sepia@lists.ceph.com" <sepia@lists.ceph.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-As of
+Request GET /{bucket}/?policy returns data in XML format. However, by AWS S3 API 
+documentation response should be in JSON format.
 
-578b0f7 Merge pull request #13617 from liewegas/wip-mgr-commands
+"The response contains the (JSON) policy of the specified bucket."
+http://docs.aws.amazon.com/AmazonS3/latest/API/RESTBucketGETpolicy.html
 
-merged today, all teuthology jobs that use a ceph command (pretty much
-all teuthology jobs) need to include mgr daemons, because some of the
-key ceph commands now are handled by that daemon.
-
-If you have custom job yaml, you will need to add one or more mgr
-daemons to the roles lists.
-
-See 271a758 for how this was handled in qa/suites.
+This incompatibility, for example, makes Ansible module s3_bucket useless.
 
 -- 
-Dan Mick
-Red Hat, Inc.
-Ceph docs: http://ceph.com/docs
+Artur
