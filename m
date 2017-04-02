@@ -1,86 +1,78 @@
-From: Vedant Nanda <vedant15114@iiitd.ac.in>
-Subject: Re: gsoc proposal review
-Date: Sun, 2 Apr 2017 16:07:41 +0530
-Message-ID: <CAL-vruMWB4tHNP9q_u=mEr4-FD5L1JporzsPuw7pDJ83GeV1mw@mail.gmail.com>
-References: <CAJE9aON8KMVwab6YZ2gVgG2aBprG3WzqjLiu+8mn=OY=R7Ui=Q@mail.gmail.com>
- <CAL-vruOHvvux=Z82pcEiUD+_j1JWWbe2JGckxsQo1huDVo_fBg@mail.gmail.com>
+From: Radoslav Georgiev <rgeorgiev583@gmail.com>
+Subject: Fwd: Participation in the "Local File Backend for RGW" Ceph project
+ from the Google Summer of Code 2017
+Date: Sun, 2 Apr 2017 19:34:54 +0300
+Message-ID: <101ec5b6-5fb1-065c-ab70-735a2861ce5e@gmail.com>
+References: <4ace32f9-f82b-730f-eb19-1ccb3b9f38fc@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f41.google.com ([209.85.218.41]:36534 "EHLO
-        mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751238AbdDBKhm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 2 Apr 2017 06:37:42 -0400
-Received: by mail-oi0-f41.google.com with SMTP id r203so99819739oib.3
-        for <ceph-devel@vger.kernel.org>; Sun, 02 Apr 2017 03:37:42 -0700 (PDT)
-In-Reply-To: <CAL-vruOHvvux=Z82pcEiUD+_j1JWWbe2JGckxsQo1huDVo_fBg@mail.gmail.com>
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:34640 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750986AbdDBQe5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 2 Apr 2017 12:34:57 -0400
+Received: by mail-wr0-f193.google.com with SMTP id w43so27457134wrb.1
+        for <ceph-devel@vger.kernel.org>; Sun, 02 Apr 2017 09:34:57 -0700 (PDT)
+Received: from [192.168.1.110] ([77.70.111.135])
+        by smtp.gmail.com with ESMTPSA id l70sm14661868wrc.40.2017.04.02.09.34.55
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 02 Apr 2017 09:34:55 -0700 (PDT)
+In-Reply-To: <4ace32f9-f82b-730f-eb19-1ccb3b9f38fc@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>, kchai@redhat.com
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-I have done quite a few changes in the proposal after your review. Any
-comments before submitting the final draft to Google?
 
-Link : https://docs.google.com/document/d/1dPrijkn8-5l4TL6C2TCORivtz_TpeccurNTI4qnFyS0/edit?usp=sharing
 
-On Sat, Mar 25, 2017 at 7:07 PM, Vedant Nanda <vedant15114@iiitd.ac.in> wrote:
-> Thanks for the comments Kefu. I haved listed some metrics in the
-> proposal and changed the Modus Operandi accordingly.
-> Sure will use the mailing list from now on.
->
-> - I have referenced my contribution in the section titled
->  'Git Log'. (https://docs.google.com/document/d/1dPrijkn8-5l4TL6C2TCORivtz_TpeccurNTI4qnFyS0/edit#heading=h.m4oj0wmukbry)
->
-> - Correct me if I'm wrong, some metrics profiling an OSD could be :
->      I/O stats, Network stats, Number of placement groups served by an
-> OSD, Number of objects stored in the OSD.
->
-> Something such as high logging levels may lead to many disk writes
-> thus slowing down the OSD. High value of 'osd_recovery_max_chunk' may
-> cause throttling in network speeds. Since these settings lead to slow
-> OSDs, these are the "root causes".
->
-> Also, the project requires the python module to 'follow predefined
-> policies' to address the problem. Is the action defined based on the
-> metric (in which case knowing the root cause would be important) or Is
-> the action same irrespective of the metric classifying the OSD as
-> slow?
->
-> It'll be great if anybody else can review my GSoC proposal too. Link
-> to proposal : https://docs.google.com/document/d/1dPrijkn8-5l4TL6C2TCORivtz_TpeccurNTI4qnFyS0/edit?usp=sharing
->
-> Cheers,
-> Vedant
->
-> On Fri, Mar 24, 2017 at 12:52 PM, kefu chai <tchaikov@gmail.com> wrote:
->> hi Vedant,
->>
->> please use the public mailing list. that will allow other developers
->> to provide you help if i am not able to do so. also, it means that you
->> can start interacting with the rest (large) community instead of just
->> me (barely useful).
->>
->> i just reviewed your proposal[1], couple comments:
->>
->> - you need to reference your contribution to the ceph project in your
->> proposal. this is required.
->> - you can be more specific regarding to what metrics you could use to
->> identify a slow OSD. would be better if you can list some of them.
->>
->>>  For example,if for all OSDs, the subdirectories split at the same time, it may lead to throttling in speeds.
->>
->> this is the root cause, not the metrics.
->>
->> some part of the M.O. overlap with
->> http://ceph.com/gsoc2017-ideas/#root-cause-analysis-tool.
->>
->>
->>
->> ---
->> [1] https://docs.google.com/document/d/1dPrijkn8-5l4TL6C2TCORivtz_TpeccurNTI4qnFyS0/
->>
->>
->> --
->> Regards
->> Kefu Chai
+
+-------- Forwarded Message --------
+Subject: 	Participation in the "Local File Backend for RGW" Ceph project 
+from the Google Summer of Code 2017
+Date: 	Sun, 2 Apr 2017 18:38:32 +0300
+From: 	Radoslav Georgiev <rgeorgiev583@gmail.com>
+To: 	Ali Maredia <amaredia@redhat.com>
+
+
+
+Greetings,
+
+My name is Radoslav Georgiev and I am currently studying Computer
+Science at Sofia University.  As a passionate software developer with a
+special appreciation of free and open source software, I am interested
+in taking part in the Google Summer of Code 2017 program.  My main
+motivation to choose Ceph as my prospective mentoring organization is
+because I am interested in distributed and scalable storage in general,
+and the way Ceph does it in particular (especially its architecture: the
+RADOS concept and library, the RADOSGW, the Ceph block device, CephFS,
+and the various assorted APIs).
+
+As a matter of experience, I used to work as a systems programmer for an
+organization that employed Ceph for its data storage and scalability
+needs, writing software that interacts with Ceph's service interfaces.
+In addition, I have completed courses in the design of operating systems
+and relational databases.  I currently work using a Linux-based
+development environment and contribute C++ code to a moderately large
+code base.
+
+When I went through your organization's list of ideas, I saw that there
+is a project which involves designing and prototyping a simplified
+database backend for the Ceph Object Gateway (RGW).  This kind of
+project is a close match for my experience writing different back-ends
+and exposing consistent APIs from them.  In fact, one of the projects I
+work on abstracts the various representations of different contact
+services into a consistent and portable contact service interface.  That
+is why I think that this task would exactly suit my interests and abilities.
+
+I think my participation in this project is worthy of consideration, and
+I look forward to my acceptance.
+
+P. S.  I sent you an email because it was mentioned on Ceph's GSoC
+organization page that students willing to participate should do so to
+foster better communication with the mentors.
+
+-- 
+Regards,
+   Radoslav
+
