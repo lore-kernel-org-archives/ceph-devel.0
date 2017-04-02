@@ -1,75 +1,73 @@
 From: Radoslav Georgiev <rgeorgiev583@gmail.com>
-Subject: Fwd: Participation in the "Local File Backend for RGW" Ceph project
- from the Google Summer of Code 2017
-Date: Sun, 2 Apr 2017 19:34:54 +0300
-Message-ID: <101ec5b6-5fb1-065c-ab70-735a2861ce5e@gmail.com>
-References: <4ace32f9-f82b-730f-eb19-1ccb3b9f38fc@gmail.com>
+Subject: Google Summer of Code 2017 project proposal: implementation of RBD
+ diff checksums using a rolling checksum algorithm
+Date: Sun, 2 Apr 2017 22:36:25 +0300
+Message-ID: <590b7274-9806-e8b1-e81e-b0df9ffa9d3b@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:34640 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750986AbdDBQe5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 2 Apr 2017 12:34:57 -0400
-Received: by mail-wr0-f193.google.com with SMTP id w43so27457134wrb.1
-        for <ceph-devel@vger.kernel.org>; Sun, 02 Apr 2017 09:34:57 -0700 (PDT)
+Received: from mail-wr0-f180.google.com ([209.85.128.180]:35125 "EHLO
+        mail-wr0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751240AbdDBTg3 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 2 Apr 2017 15:36:29 -0400
+Received: by mail-wr0-f180.google.com with SMTP id k6so136845058wre.2
+        for <ceph-devel@vger.kernel.org>; Sun, 02 Apr 2017 12:36:29 -0700 (PDT)
 Received: from [192.168.1.110] ([77.70.111.135])
-        by smtp.gmail.com with ESMTPSA id l70sm14661868wrc.40.2017.04.02.09.34.55
+        by smtp.gmail.com with ESMTPSA id o66sm11341923wmg.33.2017.04.02.12.36.26
         for <ceph-devel@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 02 Apr 2017 09:34:55 -0700 (PDT)
-In-Reply-To: <4ace32f9-f82b-730f-eb19-1ccb3b9f38fc@gmail.com>
+        Sun, 02 Apr 2017 12:36:27 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
+Hello,
 
+My name is Radoslav Georgiev and I am currently studying Computer 
+Science at Sofia University.  As a passionate software developer with a 
+special appreciation of free and open source software, I am interested 
+in taking part in the Google Summer of Code 2017 program.  My main 
+motivation to choose Ceph as my prospective mentoring organization is 
+because I am interested in distributed and scalable storage in general, 
+and the way Ceph does it in particular (especially its architecture: the 
+RADOS concept and library, the RADOSGW, the Ceph block device, CephFS, 
+and the various assorted APIs).  In addition to that, I used to work as 
+a systems programmer for an organization that employed Ceph for its data 
+storage and scalability needs, writing software that interacts with 
+Ceph's service interfaces.
 
+When I went through your organization's list of ideas, I saw that there 
+is a need for verification of diffs of RADOS block device images (i.e. 
+RBD diff checksums) to be implemented. Since (as mentioned in the idea 
+description) calculating the checksum of an entire image would be too 
+slow and inefficient, I came up with the (actually pretty trivial) 
+solution to use a rolling checksum algorithm.
 
--------- Forwarded Message --------
-Subject: 	Participation in the "Local File Backend for RGW" Ceph project 
-from the Google Summer of Code 2017
-Date: 	Sun, 2 Apr 2017 18:38:32 +0300
-From: 	Radoslav Georgiev <rgeorgiev583@gmail.com>
-To: 	Ali Maredia <amaredia@redhat.com>
+As you might know, rolling hash algorithms save computation time and 
+memory.  They split the input into chunks, and calculate the hash of 
+each chunk using a simple (i.e. fast) hash algorithm.  What is important 
+to note here is that the hash for the whole string is calculated 
+incrementally, beginning from zero (or some known constant value), and 
+for each chunk added the checksum of the string including that chunk is 
+calculated using only the old checksum (of the string without the chunk) 
+and the difference between the last chunk and the currently added one. 
+(For more information on this topic, see 
+<https://en.wikipedia.org/wiki/Rolling_hash>.)
 
+Some useful rolling hash algorithms that could be implemented are the 
+Fletcher's checksum algorithms (Fletcher-16/32/64 
+<https://en.wikipedia.org/wiki/Fletcher's_checksum>), or the Adler-32 
+algorithm (which, albeit slightly modified, is used in rsync).  (Of 
+course, these algorithms do not provide particularly strong or 
+cryptographically secure hashing but, as far as I understood, it is not 
+really necessary to provide that for the purpose given.)
 
+I think my idea is worthy of consideration as a solution to the 
+presented problem, and I look forward to its acceptance.
 
-Greetings,
-
-My name is Radoslav Georgiev and I am currently studying Computer
-Science at Sofia University.  As a passionate software developer with a
-special appreciation of free and open source software, I am interested
-in taking part in the Google Summer of Code 2017 program.  My main
-motivation to choose Ceph as my prospective mentoring organization is
-because I am interested in distributed and scalable storage in general,
-and the way Ceph does it in particular (especially its architecture: the
-RADOS concept and library, the RADOSGW, the Ceph block device, CephFS,
-and the various assorted APIs).
-
-As a matter of experience, I used to work as a systems programmer for an
-organization that employed Ceph for its data storage and scalability
-needs, writing software that interacts with Ceph's service interfaces.
-In addition, I have completed courses in the design of operating systems
-and relational databases.  I currently work using a Linux-based
-development environment and contribute C++ code to a moderately large
-code base.
-
-When I went through your organization's list of ideas, I saw that there
-is a project which involves designing and prototyping a simplified
-database backend for the Ceph Object Gateway (RGW).  This kind of
-project is a close match for my experience writing different back-ends
-and exposing consistent APIs from them.  In fact, one of the projects I
-work on abstracts the various representations of different contact
-services into a consistent and portable contact service interface.  That
-is why I think that this task would exactly suit my interests and abilities.
-
-I think my participation in this project is worthy of consideration, and
-I look forward to my acceptance.
-
-P. S.  I sent you an email because it was mentioned on Ceph's GSoC
-organization page that students willing to participate should do so to
+P. S. I sent you a mail because it was mentioned on Ceph's GSoC 
+organization page that students willing to participate should do so to 
 foster better communication with the mentors.
 
 -- 
