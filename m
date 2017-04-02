@@ -1,133 +1,320 @@
-From: nokia ceph <nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: v11.2.0 OSD crashing
- "src/os/bluestore/KernelDevice.cc: 541: FAILED assert((uint64_t)r == len) "
-Date: Sun, 2 Apr 2017 00:20:45 +0530
-Message-ID: <CALWuvY9yLpqiRckzF=txCYn+Th9Y==4Q8ak_48V0KVW2ywQKhw@mail.gmail.com>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: [ceph-users] Troubleshooting incomplete PG's
+Date: Sun, 2 Apr 2017 10:11:14 +1000
+Message-ID: <CAF-wwdFB5mXhh2UzEiz7JQKhr1m8Cb=D_6eSNB5-XLuN4dRwAw@mail.gmail.com>
+References: <CALWuvY9pPr6FumF-d65pLrhbj1=HPNUEH74tKEOsfs=fAn_fbA@mail.gmail.com>
+ <CAF-wwdGXduVn8a5xYPxo2BBtHQnAFVijPG_EvDjojyL_7f0cxQ@mail.gmail.com> <CALWuvY-053dt8w8Aj5n-icf--v_TZ2dkEBrE8T7nTR8Hb3SeDg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1705022365=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============1705022365==
-Content-Type: multipart/alternative; boundary=001a113cd1f05cd9b3054c1f67cf
-
---001a113cd1f05cd9b3054c1f67cf
 Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-it0-f48.google.com ([209.85.214.48]:38428 "EHLO
+        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751974AbdDBALP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 1 Apr 2017 20:11:15 -0400
+Received: by mail-it0-f48.google.com with SMTP id y18so28007748itc.1
+        for <ceph-devel@vger.kernel.org>; Sat, 01 Apr 2017 17:11:15 -0700 (PDT)
+In-Reply-To: <CALWuvY-053dt8w8Aj5n-icf--v_TZ2dkEBrE8T7nTR8Hb3SeDg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: nokia ceph <nokiacephusers@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Ceph Users <ceph-users@lists.ceph.com>
 
-Hello,
+On Fri, Mar 31, 2017 at 5:19 AM, nokia ceph <nokiacephusers@gmail.com> wrote:
+> Hello Brad,
+>
+> Many thanks of the info :)
+>
+> ENV:-- Kracken - bluestore - EC 4+1 - 5 node cluster : RHEL7
+>
+> What is the status of the down+out osd? Only one osd osd.6 down and out from
+> cluster.
+> What role did/does it play? Mostimportantly, is it osd.6? Yes, due to
+> underlying I/O error issue we removed this device from the cluster.
+>
+> I put this parameter " osd_find_best_info_ignore_history_les = true" in
+> ceph.conf, and find those 22 PG's were changed to "down+remapped" . Now all
+> are reverted to "remapped+incomplete" state.
+>
+> #ceph pg stat 2> /dev/null
+> v2731828: 4096 pgs: 1 incomplete, 21 remapped+incomplete, 4074 active+clean;
+> 268 TB data, 371 TB used, 267 TB / 638 TB avail
+>
+> ## ceph -s
+> 2017-03-30 19:02:14.350242 7f8b0415f700 -1 WARNING: the following dangerous
+> and experimental features are enabled: bluestore,rocksdb
+> 2017-03-30 19:02:14.366545 7f8b0415f700 -1 WARNING: the following dangerous
+> and experimental features are enabled: bluestore,rocksdb
+>     cluster bd8adcd0-c36d-4367-9efe-f48f5ab5f108
+>      health HEALTH_ERR
+>             22 pgs are stuck inactive for more than 300 seconds
+>             22 pgs incomplete
+>             22 pgs stuck inactive
+>             22 pgs stuck unclean
+>      monmap e2: 5 mons at
+> {au-adelaide=10.50.21.24:6789/0,au-brisbane=10.50.21.22:6789/0,au-canberra=10.50.21.23:6789/0,au-melbourne=10.50.21.21:6789/0,au-sydney=10.50.21.20:6789/0}
+>             election epoch 180, quorum 0,1,2,3,4
 
-We are getting below trace on failed OSD's . Can you please explain from
-the below code why this issue happening. We suspect it could be because of
-underlying HW issue. We can't find anything from the syslogs. All the OSD
-disk are in healthy condition.
+Are you *actually* trying to create a cluster that is as
+geographically dispersed as these machine names indicate?
 
-Link :- https://fossies.org/linux/ceph/src/os/bluestore/KernelDevice.cc
+> au-sydney,au-melbourne,au-brisbane,au-canberra,au-adelaide
+>         mgr active: au-adelaide
+>      osdmap e6506: 117 osds: 117 up, 117 in; 21 remapped pgs
+>             flags sortbitwise,require_jewel_osds,require_kraken_osds
+>       pgmap v2731828: 4096 pgs, 1 pools, 268 TB data, 197 Mobjects
+>             371 TB used, 267 TB / 638 TB avail
+>                 4074 active+clean
+>                   21 remapped+incomplete
+>                    1 incomplete
+>
+>
+> ## ceph osd dump 2>/dev/null | grep cdvr
+> pool 1 'cdvr_ec' erasure size 5 min_size 4 crush_ruleset 1 object_hash
+> rjenkins pg_num 4096 pgp_num 4096 last_change 456 flags
+> hashpspool,nodeep-scrub stripe_width 65536
+>
+> Inspecting affected PG 1.e4b
+>
+> # ceph pg dump 2> /dev/null | grep 1.e4b
+> 1.e4b     50832                  0        0         0       0 73013340821
+> 10006    10006 remapped+incomplete 2017-03-30 14:14:26.297098 3844'161662
+> 6506:325748 [113,66,15,73,103]        113  [NONE,NONE,NONE,73,NONE]
+> 73 1643'139486 2017-03-21 04:56:16.683953             0'0 2017-02-21
+> 10:33:50.012922
+>
+> When I trigger below command.
+>
+> #ceph pg force_create_pg 1.e4b
+> pg 1.e4b now creating, ok
+>
+> As it went to creating state, no change after that. Can you explain why this
+> PG showing null values after triggering "force_create_pg",?
+>
+> ]# ceph pg dump 2> /dev/null | grep 1.e4b
+> 1.e4b         0                  0        0         0       0           0
+> 0        0            creating 2017-03-30 19:07:00.982178         0'0
+> 0:0                 []         -1                        []             -1
+> 0'0                   0.000000             0'0                   0.000000
+>
+> Then I triggered below command
+>
+> # ceph pg  repair 1.e4b
+> Error EAGAIN: pg 1.e4b has no primary osd  --<<
+>
+> Could you please provide answer for below queries.
+>
+> 1. How to fix this "incomplete+remapped" PG issue, here all OSD's were up
+> and running and affected OSD marked out and removed from the cluster.
+> 2. Will reduce min_size helps? currently it set to 4. Could you please
+> explain what is the impact if we reduce min_size for the current config EC
+> 4+1
+> 3. Is there any procedure to safely remove an affected PG? As per my
+> understanding I'm aware about this command.
+>
+> ===
+> #ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph --pgid 1.e4b --op
+> remove
+> ===
+>
+> Awaiting for your suggestions to proceed.
+>
+> Thanks
+>
+>
+>
+>
+>
+>
+> On Thu, Mar 30, 2017 at 7:32 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
+>>
+>>
+>>
+>> On Thu, Mar 30, 2017 at 4:53 AM, nokia ceph <nokiacephusers@gmail.com>
+>> wrote:
+>> > Hello,
+>> >
+>> > Env:-
+>> > 5 node, EC 4+1 bluestore kraken v11.2.0 , RHEL7.2
+>> >
+>> > As part of our resillency testing with kraken bluestore, we face more
+>> > PG's
+>> > were in incomplete+remapped state. We tried to repair each PG using
+>> > "ceph pg
+>> > repair <pgid>" still no luck. Then we planned to remove incomplete PG's
+>> > using below procedure.
+>> >
+>> >
+>> > #ceph health detail | grep  1.e4b
+>> > pg 1.e4b is remapped+incomplete, acting [2147483647,66,15,73,2147483647]
+>> > (reducing pool cdvr_ec min_size from 4 may help; search ceph.com/docs
+>> > for
+>> > 'incomplete')
+>>
+>> "Incomplete Ceph detects that a placement group is missing information
+>> about
+>> writes that may have occurred, or does not have any healthy copies. If you
+>> see
+>> this state, try to start any failed OSDs that may contain the needed
+>> information."
+>>
+>> >
+>> > Here we shutdown the OSD's 66,15 and 73 then proceeded with below
+>> > operation.
+>> >
+>> > #ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-135 --op
+>> > list-pgs
+>> > #ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-135 --pgid
+>> > 1.e4b
+>> > --op remove
+>> >
+>> > Please confirm that we are following the correct procedure to removal of
+>> > PG's
+>>
+>> There are multiple threads about that on this very list "pgs stuck
+>> inactive"
+>> recently for example.
+>>
+>> >
+>> > #ceph pg stat
+>> > v2724830: 4096 pgs: 1 active+clean+scrubbing+deep+repair, 1
+>> > down+remapped,
+>> > 21 remapped+incomplete, 4073 active+clean; 268 TB data, 371 TB used, 267
+>> > TB
+>> > / 638 TB avail
+>> >
+>> > # ceph -s
+>> > 2017-03-29 18:23:44.288508 7f8c2b8e5700 -1 WARNING: the following
+>> > dangerous
+>> > and experimental features are enabled: bluestore,rocksdb
+>> > 2017-03-29 18:23:44.304692 7f8c2b8e5700 -1 WARNING: the following
+>> > dangerous
+>> > and experimental features are enabled: bluestore,rocksdb
+>> >     cluster bd8adcd0-c36d-4367-9efe-f48f5ab5f108
+>> >      health HEALTH_ERR
+>> >             22 pgs are stuck inactive for more than 300 seconds
+>> >             1 pgs down
+>> >             21 pgs incomplete
+>> >             1 pgs repair
+>> >             22 pgs stuck inactive
+>> >             22 pgs stuck unclean
+>> >      monmap e2: 5 mons at
+>> >
+>> > {au-adelaide=10.50.21.24:6789/0,au-brisbane=10.50.21.22:6789/0,au-canberra=10.50.21.23:6789/0,au-melbourne=10.50.21.21:6789/0,au-sydney=10.50.21.20:6789/0}
+>> >             election epoch 172, quorum 0,1,2,3,4
+>> > au-sydney,au-melbourne,au-brisbane,au-canberra,au-adelaide
+>> >         mgr active: au-brisbane
+>> >      osdmap e6284: 118 osds: 117 up, 117 in; 22 remapped pgs
+>>
+>> What is the status of the down+out osd? What role did/does it play? Most
+>> importantly, is it osd.6?
+>>
+>> >             flags sortbitwise,require_jewel_osds,require_kraken_osds
+>> >       pgmap v2724830: 4096 pgs, 1 pools, 268 TB data, 197 Mobjects
+>> >             371 TB used, 267 TB / 638 TB avail
+>> >                 4073 active+clean
+>> >                   21 remapped+incomplete
+>> >                    1 down+remapped
+>> >                    1 active+clean+scrubbing+deep+repair
+>> >
+>> >
+>> > #ceph osd dump | grep pool
+>> > pool 1 'cdvr_ec' erasure size 5 min_size 4 crush_ruleset 1 object_hash
+>> > rjenkins pg_num 4096 pgp_num 4096 last_change 456 flags
+>> > hashpspool,nodeep-scrub stripe_width 65536
+>> >
+>> >
+>> >
+>> > Can you please suggest is there any way to wipe out these incomplete
+>> > PG's.
+>>
+>> See the thread previously mentioned. Take note of the force_create_pg
+>> step.
+>>
+>> > Why ceph pg repair failed in this scenerio?
+>> > How to recover incomplete PG's to active state.
+>> >
+>> > pg query for the affected PG ended with this error. Can you please
+>> > explain
+>> > what is meant by this ?
+>> > ---
+>> >                 "15(2)",
+>> >                 "66(1)",
+>> >                 "73(3)",
+>> >                 "103(4)",
+>> >                 "113(0)"
+>> >             ],
+>> >             "down_osds_we_would_probe": [
+>> >                 6
+>> >             ],
+>> >             "peering_blocked_by": [],
+>> >             "peering_blocked_by_detail": [
+>> >                 {
+>> >                     "detail": "peering_blocked_by_history_les_bound"
+>> >                 }
+>> > ----
+>>
+>> During multiple intervals osd 6 was in the up/acting set, for example;
+>>
+>>                 {
+>>                     "first": 1608,
+>>                     "last": 1645,
+>>                     "maybe_went_rw": 1,
+>>                     "up": [
+>>                         113,
+>>                         6,
+>>                         15,
+>>                         73,
+>>                         103
+>>                     ],
+>>                     "acting": [
+>>                         113,
+>>                         6,
+>>                         15,
+>>                         73,
+>>                         103
+>>                     ],
+>>                     "primary": 113,
+>>                     "up_primary": 113
+>>                 },
+>>
+>> Because we may have gone rw during that interval we need to query it and
+>> it is blocking progress.
+>>
+>>             "blocked_by": [
+>>                 6
+>>             ],
+>>
+>> Setting osd_find_best_info_ignore_history_les to true may help but then
+>> you may
+>> need to mark the missing OSD lost or perform some other trickery (and this
+>> . I
+>> suspect your min_size is too low, especially for a cluster of this size,
+>> but EC
+>> is not an area I know extensively so I can't say definitively. Some of
+>> your
+>> questions may be better suited to the ceph-devel mailing list by the way.
+>>
+>> >
+>> > Attaching "ceph pg 1.e4b query > /tmp/1.e4b-pg.txt" file with this mail.
+>> >
+>> > Thanks
+>> >
+>> > _______________________________________________
+>> > ceph-users mailing list
+>> > ceph-users@lists.ceph.com
+>> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>> >
+>>
+>>
+>>
+>> --
+>> Cheers,
+>> Brad
+>
+>
 
-===
-2017-03-31 03:51:28.262403 7f71f3ed5940 -1
-/home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/release/11.2.0/rpm/el7/BUILD/ceph-11.2.0/src/os/bluestore/
-KernelDevice.cc: In function 'virtual int KernelDevice::read(uint64_t,
-uint64_t, ceph::bufferlist*, IOContext*, bool)' thread 7f71f3ed5940 time
-2017-03-31 03:51:28.256298
-/home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/release/11.2.0/rpm/el7/BUILD/ceph-11.2.0/*src/os/bluestore/KernelDevice.cc:
-541: FAILED assert((uint64_t)r == len)  =============>>>>>>>>>>>>>>>>>>>>>*
 
-ceph version 11.2.0 (f223e27eeb35991352ebc1f67423d4ebc252adb7)
-1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x85) [0x7f71f49b6b35]
-2: (KernelDevice::read(unsigned long, unsigned long, ceph::buffer::list*,
-IOContext*, bool)+0x7a0) [0x7f71f47fdf10]
-3: (BlueFS::_read(BlueFS::FileReader*, BlueFS::FileReaderBuffer*, unsigned
-long, unsigned long, ceph::buffer::list*, char*)+0x47a) [0x7f71f47c8d4a]
-4: (BlueRocksSequentialFile::Read(unsigned long, rocksdb::Slice*,
-char*)+0x36) [0x7f71f47ecd46]
-5: (rocksdb::SequentialFileReader::Read(unsigned long, rocksdb::Slice*,
-char*)+0x16) [0x7f71f48f4136]
-6: (rocksdb::log::Reader::ReadMore(unsigned long*, int*)+0xd8)
-[0x7f71f487d658]
-7: (rocksdb::log::Reader::ReadPhysicalRecord(rocksdb::Slice*, unsigned
-long*)+0x44) [0x7f71f487d734]
-8: (rocksdb::log::Reader::ReadRecord(rocksdb::Slice*, std::string*,
-rocksdb::WALRecoveryMode)+0xe8) [0x7f71f487d9e8]
-9: (rocksdb::DBImpl::RecoverLogFiles(std::vector<unsigned long,
-std::allocator<unsigned long> > const&, unsigned long*, bool)+0xdc8)
-[0x7f71f4837a18]
-10: (rocksdb::DBImpl::Recover(std::vector<rocksdb::ColumnFamilyDescriptor,
-std::allocator<rocksdb::ColumnFamilyDescriptor> > const&, bool, bool,
-bool)+0x866) [0x7f71f4839386]
-11: (rocksdb::DB::Open(rocksdb::DBOptions const&, std::string const&, std
-===
 
-Thanks
-Jayaram
-
---001a113cd1f05cd9b3054c1f67cf
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div>Hello,</div><div><br></div><div>We are getting below =
-trace on failed OSD&#39;s . Can you please explain from the below code why =
-this issue happening. We suspect it could be because of underlying HW issue=
-. We can&#39;t find anything from the syslogs. All the OSD disk are in heal=
-thy condition.</div><div><br></div><div>Link :-=C2=A0<a href=3D"https://fos=
-sies.org/linux/ceph/src/os/bluestore/KernelDevice.cc">https://fossies.org/l=
-inux/ceph/src/os/bluestore/KernelDevice.cc</a></div><div><br></div>=3D=3D=
-=3D<br><div><div><span style=3D"text-decoration:underline">2017</span>-03-3=
-1 03:51:28.262403 7f71f3ed5940 -1 /home/jenkins-build/build/workspace/ceph-=
-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7=
-/MACHINE_SIZE/huge/release/11.2.0/rpm/el7/BUILD/ceph-11.2.0/src/os/bluestor=
-e/<span style=3D"text-decoration:underline">KernelDevice.cc</span>: In func=
-tion &#39;virtual int KernelDevice::read(uint64_t, uint64_t, ceph::bufferli=
-st*, IOContext*, bool)&#39; thread 7f71f3ed5940 time <span style=3D"text-de=
-coration:underline">2017</span>-03-31 03:51:28.256298<br>/home/jenkins-buil=
-d/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DI=
-ST/centos7/DIST/centos7/MACHINE_SIZE/huge/release/11.2.0/rpm/el7/BUILD/ceph=
--11.2.0/<b>src/os/bluestore/<span style=3D"text-decoration:underline">Kerne=
-lDevice.cc</span>: 541: FAILED assert((uint64_t)r =3D=3D len) =C2=A0=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&g=
-t;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</b><br><br> ceph version 11.2.0 =
-(f223e27eeb35991352ebc1f67423d4ebc252adb7)<br> 1: (ceph::__ceph_assert_fail=
-(char const*, char const*, int, char const*)+0x85) [0x7f71f49b6b35]<br> 2: =
-(KernelDevice::read(unsigned long, unsigned long, ceph::buffer::list*, IOCo=
-ntext*, bool)+0x7a0) [0x7f71f47fdf10]<br> 3: (BlueFS::_read(BlueFS::FileRea=
-der*, BlueFS::FileReaderBuffer*, unsigned long, unsigned long, ceph::buffer=
-::list*, char*)+0x47a) [0x7f71f47c8d4a]<br> 4: (BlueRocksSequentialFile::Re=
-ad(unsigned long, rocksdb::Slice*, char*)+0x36) [0x7f71f47ecd46]<br> 5: (ro=
-cksdb::SequentialFileReader::Read(unsigned long, rocksdb::Slice*, char*)+0x=
-16) [0x7f71f48f4136]<br> 6: (rocksdb::log::Reader::ReadMore(unsigned long*,=
- int*)+0xd8) [0x7f71f487d658]<br> 7: (rocksdb::log::Reader::ReadPhysicalRec=
-ord(rocksdb::Slice*, unsigned long*)+0x44) [0x7f71f487d734]<br> 8: (rocksdb=
-::log::Reader::ReadRecord(rocksdb::Slice*, std::string*, rocksdb::WALRecove=
-ryMode)+0xe8) [0x7f71f487d9e8]<br> 9: (rocksdb::DBImpl::RecoverLogFiles(std=
-::vector&lt;unsigned long, std::allocator&lt;unsigned long&gt; &gt; const&a=
-mp;, unsigned long*, bool)+0xdc8) [0x7f71f4837a18]<br> 10: (rocksdb::DBImpl=
-::Recover(std::vector&lt;rocksdb::ColumnFamilyDescriptor, std::allocator&lt=
-;rocksdb::ColumnFamilyDescriptor&gt; &gt; const&amp;, bool, bool, bool)+0x8=
-66) [0x7f71f4839386]<br> 11: (rocksdb::DB::Open(rocksdb::DBOptions const&am=
-p;, std::string const&amp;, std</div></div><div>=3D=3D=3D</div><div><br></d=
-iv><div>Thanks</div><div>Jayaram</div></div>
-
---001a113cd1f05cd9b3054c1f67cf--
-
---===============1705022365==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1705022365==--
+-- 
+Cheers,
+Brad
