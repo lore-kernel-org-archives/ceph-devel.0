@@ -1,47 +1,78 @@
-From: Myna V <mynaramana@gmail.com>
-Subject: Re: Coupled Layer MSR: PR 14300, ECSubRead decode fail.
-Date: Mon, 3 Apr 2017 23:43:48 +0530
-Message-ID: <CAGvpcHZQEsWWHFg57eafM7HCMOArHbMWuK9ajrhn0TE-Tgpu8A@mail.gmail.com>
-References: <CAGvpcHbbY2wU+vMxooxg=JC41c1DRaAKj86fw3ybGvFcNfWhLw@mail.gmail.com>
- <CAJ4mKGY79sgNSuEHWdje=6vm+p=omsJGNbKBzaj+o-sHYrP=8g@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: FreeBSD Fwd: Build failed in Jenkins: ceph-master #491
+Date: Mon, 3 Apr 2017 22:48:39 +0100
+Message-ID: <d6856db4-bbdf-426a-67be-9590d15831ce@digiware.nl>
+References: <1496578540.11.1491070646102.JavaMail.jenkins@cephdev.digiware.nl>
+ <28d0fff1-89d1-e6fb-dd25-c45e67b5a8fa@digiware.nl>
+ <OFEBB086A9.04CBF66E-ON002580F7.00549C80-862580F7.0057E911@notes.na.collabserv.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f51.google.com ([74.125.83.51]:36718 "EHLO
-        mail-pg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753423AbdDCSO3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Apr 2017 14:14:29 -0400
-Received: by mail-pg0-f51.google.com with SMTP id g2so126325952pge.3
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Apr 2017 11:14:29 -0700 (PDT)
-In-Reply-To: <CAJ4mKGY79sgNSuEHWdje=6vm+p=omsJGNbKBzaj+o-sHYrP=8g@mail.gmail.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:36932 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751580AbdDCUsw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 3 Apr 2017 16:48:52 -0400
+In-Reply-To: <OFEBB086A9.04CBF66E-ON002580F7.00549C80-862580F7.0057E911@notes.na.collabserv.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Elita Lobo <loboelita@gmail.com>, Bhagyashree Puranik <bhagya.puranik@gmail.com>, Birenjith Sasidharan <birenjith@gmail.com>, Ganesh Kini <kiniganesh94@gmail.com>, Vinayak Ramkumar <vinram93@gmail.com>
+To: Andrew N Solomon <asolomon@us.ibm.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Thanks Greg. We will do that!
+On 3-4-2017 17:00, Andrew N Solomon wrote:
+> Willem-
+> 
+> I think I see the problem and have a fix in mind for this. I will put it
+> up asap.
+> Sorry for the trouble. Since you seemingly have available access to FreeBSD
+> more easily than I do perhaps you could help with testing my fix once it
+> is up?
+> 
+> We should be able to just move the #include <sys/auxv.h> line (ie line
+> 16 of src/arch/ppc.c)
+> under the #if __linux__ && __powerpc64__ (on line 18).
+> 
+> The call to getauxval is already under that same #if __linux__ &&
+> __powerpc64__ directive. The
+> reason auxv.h is included is to provide the declaration for the
+> getauxval function, which is seemingly
+> present in linux but not FreeBSD.
+> 
+> Thanks,
+> Andy Solomon
+> 
+> 
+> Inactive hide details for Willem Jan Withagen ---04/01/2017 04:11:24
+> PM---From: Willem Jan Withagen <wjw@digiware.nl> To: AndreWillem Jan
+> Withagen ---04/01/2017 04:11:24 PM---From: Willem Jan Withagen
+> <wjw@digiware.nl> To: Andrew N Solomon/Austin/IBM@IBMUS, Ceph
+> Development <ceph-devel@vger.kernel.org
+> 
+> From: Willem Jan Withagen <wjw@digiware.nl>
+> To: Andrew N Solomon/Austin/IBM@IBMUS, Ceph Development
+> <ceph-devel@vger.kernel.org>
+> Date: 04/01/2017 04:11 PM
+> Subject: FreeBSD Fwd: Build failed in Jenkins: ceph-master #491
+> 
+> ------------------------------------------------------------------------
+> 
+> 
+> 
+> Currently my FreeBSD build fails due to inclusion of a file
+> that does not exist on FreeBSD.
+> Next to the fact that I'm not really certain that everything will build
+> and run on PPC with FreeBSD. :)
+> 
+> Perhaps we can conditionalise PPC code just as we did with ARM code?
+> Or perhaps even exclude pp.cc in CMakeLists.txt without upsetting the
+> balance of order.
 
-On Mon, Apr 3, 2017 at 11:37 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> On Mon, Apr 3, 2017 at 11:02 AM, Myna V <mynaramana@gmail.com> wrote:
->> Hello All,
->>
->> This is regarding the make check error in readable.sh
->>
->> https://jenkins.ceph.com/job/ceph-pull-requests/21319/
->>
->> We have added additional fields to the ECSubRead message type and
->> updated the encode, decode of ECSubRead message to incorporate the
->> newly added fields. The failure seems to happen when the object (older
->> ECSubRead) is being decoded with the new decode function as it is
->> expecting a larger buffer length.
->>
->> How do we update the test objects in ceph-object-corpus with these
->> added fields ?
->
-> You don't! ceph-object-corpus exists to make sure that newer code can
-> read older objects. You need to update the versions used in
-> ENCODE_START/DECODE_START and branch internally based on the encoded
-> object's struct_v member. I'm not sure if there are good examples of
-> this in the EC utility functions yet, but if not you can check out
-> osd_types.[h|cc] and the encoding.h macros being invoked. :)
-> -Greg
+Hi Andrew,
+
+Currently there is PR (#14289) of Kefu in the works that tries to fix
+this in a rather structural way.
+You might want to take a look at it.
+
+--WjW
+
+
