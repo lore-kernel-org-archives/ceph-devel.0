@@ -1,112 +1,61 @@
-From: Myna V <mynaramana@gmail.com>
-Subject: Re: How to update ceph/jerasure.git
-Date: Mon, 3 Apr 2017 22:28:22 +0530
-Message-ID: <CAGvpcHYhLqPBGueFK4srh7LLKka4F6A_Nq39Hj5nsyWwYb-Eow@mail.gmail.com>
-References: <CAGvpcHYQqUcBWC6cCQkXPczNCkUjoC8T3qsMi_LBzocnL3HVcA@mail.gmail.com>
- <5349a3af-3eed-e42b-11cc-d64e64037da6@dachary.org> <CAGvpcHY3+uAOyqweaA_F_TwAEq9uqdcEZQCTnNcXoVLhFDQ-rQ@mail.gmail.com>
- <8e6f622f-ce9b-83ed-9016-33435b84dbd1@dachary.org>
+From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: deep-scrubbing
+Date: Mon, 3 Apr 2017 22:31:00 +0530
+Message-ID: <CANA9Uk6zQ-LDaiFzWt_GVE+Hg0_Yqzuj+Y_X5e3w4z9=h2m6wQ@mail.gmail.com>
+References: <CANA9Uk5W8AhOjRnxmdQXQL1g5KmP6_eDLYuhMEL_=50npW=x4A@mail.gmail.com>
+	<CANA9Uk55ca+U1LFxmrSF_ZBqiH1ifi9kaUpDUoarR10+B-6EPQ@mail.gmail.com>
+	<alpine.DEB.2.11.1704031327440.12988@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f52.google.com ([74.125.83.52]:34020 "EHLO
-        mail-pg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750855AbdDCQ7D (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Apr 2017 12:59:03 -0400
-Received: by mail-pg0-f52.google.com with SMTP id 21so126154669pgg.1
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Apr 2017 09:59:03 -0700 (PDT)
-In-Reply-To: <8e6f622f-ce9b-83ed-9016-33435b84dbd1@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: ceph-devel@vger.kernel.org, Birenjith Sasidharan <birenjith@gmail.com>, Elita Lobo <loboelita@gmail.com>, Bhagyashree Puranik <bhagya.puranik@gmail.com>, Ganesh Kini <kiniganesh94@gmail.com>, Vinayak Ramkumar <vinram93@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1704031327440.12988-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-hi Loic,
+Thanks Sage.
+We have older version Ceph (Firefly version), where I could not see
+this behavior (is on Saturday, after enabling the deep-scrub @ 7AM
+hours, I could not see the deep-scrub started for Friday's PG
+deep-scrub)).
+Is the deep-scrub's performed based on the time-stamp? For ex: a PG
+deep-scrubbed on Friday 10AM and if its not deep-scrubed on the next
+Friday 10AM, then Saturday 10AM its will be performed (assumed that
+Saturday 7AM deep-scrub enabled).
 
-I did not receive any email with confirmation instructions from jerasure.or=
-g.
+Thanks
+Swami
 
-Thanks,
-Myna
-
-On Mon, Apr 3, 2017 at 10:20 PM, Loic Dachary <loic@dachary.org> wrote:
-> Hi,
+On Mon, Apr 3, 2017 at 6:57 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
+> On Mon, 3 Apr 2017, M Ranga Swami Reddy wrote:
+>> + ceph-devel
+>>
+>> On Mon, Feb 27, 2017 at 3:54 PM, M Ranga Swami Reddy
+>> <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>> > Hello,
+>> > I use a ceph cluster and its show the deeps scrub's PG distribution as below
+>> > from "ceph pg dump" command:
+>> >
+>> >   ====
+>> >    2000 Friday
+>> >    1000 Saturday
+>> >    4000  Sunday
+>> > ==
+>> >
+>> > On Friday, I have disabled the deep-scrub due to some reason. If this case,
+>> > all Friday's PG deep-scrub will be performed on Saturday or is it will be
+>> > done on Next Friday?
 >
+> Saturday.
 >
-> On 04/03/2017 06:42 PM, Myna V wrote:
->> Hi Loic,
->>
->> Thanks a lot for the reply. It somehow ended up in my spam. I tried
->> signing up on the jerasure upstream code page. But couldn't get any
->> response.
->
-> Do you mean jerasure.org was down ?
->
-> Cheers
->
->>
->> We are working on implementing coupled layer MSR code (issue 19278).
->> It is an MDS array code with optimal(minimal most) network, disk
->> traffic use during chunk repair.
->>
->> Please look at our pull request (
->> https://github.com/ceph/ceph/pull/14300 ) when you get a chance. We
->> introduced two new functions jerasure_matrix_decode_substripe,
->> jerasure_matrix_dotprod_substripe as private functions in
->> ErasureCodeJerasureCLMSR.
->>
->> Consider that an object is divided in to 4 parts(chunk 0, 1, 2, 3) and
->> encoded to get 2 parts (chunk 4,5). We introduce a notion of subchunk,
->> substripe, where in a chunk is divided in to 8 sub chunks below. Each
->> column in the below picture corresponds to a substripe and the 4 rows
->> together correspond to data coming from a stripe.
->>
->> |--|--|--|--|--|--|--|--| --> chunk 0 with 8 subchunks.
->> |--|--|--|--|--|--|--|--| --> chunk 1
->> |--|--|--|--|--|--|--|--| --> chunk 2
->> |--|--|--|--|--|--|--|--| --> chunk 3
->> |--|--|--|--|--|--|--|--| --> chunk 4
->> |--|--|--|--|--|--|--|--| --> chunk 5
->>
->> The new api's restrict the operations to a particular substripe. We
->> would like to know your comments on including these functions as part
->> of ErasureCodeJerasureCLMSR instead of them being included in
->> jerasure.h.
->>
->> Thanks,
->> Myna
->>
->>
->> On Mon, Mar 27, 2017 at 10:17 PM, Loic Dachary <loic@dachary.org> wrote:
->>> Hi Myna,
->>>
->>> On 03/27/2017 06:19 PM, Myna V wrote:
->>>> Hello All,
->>>>
->>>> How do I push changes to ceph/jerasure.git ? Is it the same as the
->>>> procedure needed for ceph/ceph.git ?
->>>
->>> The upstream for jerasure is at http://jerasure.org/groups/jerasure
->>>
->>> Cheers
->>>
->>>>
->>>> Thanks,
->>>> Myna.
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>
->>> --
->>> Lo=C3=AFc Dachary, Artisan Logiciel Libre
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+> ks
