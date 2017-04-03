@@ -1,46 +1,29 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: deep-scrubbing
-Date: Mon, 3 Apr 2017 13:27:50 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1704031327440.12988@piezo.novalocal>
-References: <CANA9Uk5W8AhOjRnxmdQXQL1g5KmP6_eDLYuhMEL_=50npW=x4A@mail.gmail.com>
-	<CANA9Uk55ca+U1LFxmrSF_ZBqiH1ifi9kaUpDUoarR10+B-6EPQ@mail.gmail.com>
+From: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
+Subject: rgw keystone revocation thread
+Date: Mon, 3 Apr 2017 13:20:33 +0000
+Message-ID: <668A58E4-2994-4FFC-A96F-1B145094BCF0@walmartlabs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANA9Uk55ca+U1LFxmrSF_ZBqiH1ifi9kaUpDUoarR10+B-6EPQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from ppes-mail-n5.wal-mart.com ([161.168.133.165]:42849 "EHLO
+        ppes-mail-n5.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752109AbdDCNhX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Apr 2017 09:37:23 -0400
+Received: from pps.filterd (ppes-mail-n5.wal-mart.com [127.0.0.1])
+        by ppes-mail-n5.wal-mart.com (8.16.0.17/8.16.0.17) with SMTP id v33DJWir042942
+        for <ceph-devel@vger.kernel.org>; Mon, 3 Apr 2017 08:20:36 -0500
+Received: from honts35004.homeoffice.wal-mart.com (oser500437.wal-mart.com [10.24.131.30])
+        by ppes-mail-n5.wal-mart.com with ESMTP id 29j66r27xe-1
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Apr 2017 08:20:36 -0500
+Content-Language: en-US
+Content-ID: <A175227A2F4A6C4BB00B4D548015A694@NAMP100.PROD.OUTLOOK.COM>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, 3 Apr 2017, M Ranga Swami Reddy wrote:
-> + ceph-devel
-> 
-> On Mon, Feb 27, 2017 at 3:54 PM, M Ranga Swami Reddy
-> <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> > Hello,
-> > I use a ceph cluster and its show the deeps scrub's PG distribution as below
-> > from "ceph pg dump" command:
-> >
-> >   ====
-> >    2000 Friday
-> >    1000 Saturday
-> >    4000  Sunday
-> > ==
-> >
-> > On Friday, I have disabled the deep-scrub due to some reason. If this case,
-> > all Friday's PG deep-scrub will be performed on Saturday or is it will be
-> > done on Next Friday?
-
-Saturday.
-
-ks
+SW4gb25lIG9mIG91ciBpbnN0YWxsYXRpb25zLCB3ZSBhcmUgdXNpbmcgRmVybmV0IHRva2VucyB3
+aXRoIEtleXN0b25lIFYzLiBJbiB0aGF0IGNvbnRleHQsIEkgd2FzIHdvbmRlcmluZyBpZiB3ZSBu
+ZWVkIHRoZSBrZXlzdG9uZSByZXZvY2F0aW9uIHRocmVhZCBpbiBSR1cgdG8gcnVuIGJ5IGRlZmF1
+bHQuIA0KDQpBbnkgcmVhc29ucyBhcyB0byB3aHkgd2UgbmVlZCB0aGUgcmV2b2NhdGlvbiB0aHJl
+YWQgd2l0aCBGZXJuZXQgdG9rZW5zPw0KDQpUaGFua3MsDQotUGF2YW4uDQoNCg==
