@@ -1,29 +1,84 @@
-From: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
-Subject: rgw keystone revocation thread
-Date: Mon, 3 Apr 2017 13:20:33 +0000
-Message-ID: <668A58E4-2994-4FFC-A96F-1B145094BCF0@walmartlabs.com>
+From: Myna V <mynaramana@gmail.com>
+Subject: Re: How to update ceph/jerasure.git
+Date: Mon, 3 Apr 2017 22:12:03 +0530
+Message-ID: <CAGvpcHY3+uAOyqweaA_F_TwAEq9uqdcEZQCTnNcXoVLhFDQ-rQ@mail.gmail.com>
+References: <CAGvpcHYQqUcBWC6cCQkXPczNCkUjoC8T3qsMi_LBzocnL3HVcA@mail.gmail.com>
+ <5349a3af-3eed-e42b-11cc-d64e64037da6@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ppes-mail-n5.wal-mart.com ([161.168.133.165]:42849 "EHLO
-        ppes-mail-n5.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752109AbdDCNhX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Apr 2017 09:37:23 -0400
-Received: from pps.filterd (ppes-mail-n5.wal-mart.com [127.0.0.1])
-        by ppes-mail-n5.wal-mart.com (8.16.0.17/8.16.0.17) with SMTP id v33DJWir042942
-        for <ceph-devel@vger.kernel.org>; Mon, 3 Apr 2017 08:20:36 -0500
-Received: from honts35004.homeoffice.wal-mart.com (oser500437.wal-mart.com [10.24.131.30])
-        by ppes-mail-n5.wal-mart.com with ESMTP id 29j66r27xe-1
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Apr 2017 08:20:36 -0500
-Content-Language: en-US
-Content-ID: <A175227A2F4A6C4BB00B4D548015A694@NAMP100.PROD.OUTLOOK.COM>
+Received: from mail-pg0-f47.google.com ([74.125.83.47]:36240 "EHLO
+        mail-pg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754007AbdDCQmo (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Apr 2017 12:42:44 -0400
+Received: by mail-pg0-f47.google.com with SMTP id g2so124091996pge.3
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Apr 2017 09:42:44 -0700 (PDT)
+In-Reply-To: <5349a3af-3eed-e42b-11cc-d64e64037da6@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: ceph-devel@vger.kernel.org, Birenjith Sasidharan <birenjith@gmail.com>, Elita Lobo <loboelita@gmail.com>, Bhagyashree Puranik <bhagya.puranik@gmail.com>, Ganesh Kini <kiniganesh94@gmail.com>, Vinayak Ramkumar <vinram93@gmail.com>
 
-SW4gb25lIG9mIG91ciBpbnN0YWxsYXRpb25zLCB3ZSBhcmUgdXNpbmcgRmVybmV0IHRva2VucyB3
-aXRoIEtleXN0b25lIFYzLiBJbiB0aGF0IGNvbnRleHQsIEkgd2FzIHdvbmRlcmluZyBpZiB3ZSBu
-ZWVkIHRoZSBrZXlzdG9uZSByZXZvY2F0aW9uIHRocmVhZCBpbiBSR1cgdG8gcnVuIGJ5IGRlZmF1
-bHQuIA0KDQpBbnkgcmVhc29ucyBhcyB0byB3aHkgd2UgbmVlZCB0aGUgcmV2b2NhdGlvbiB0aHJl
-YWQgd2l0aCBGZXJuZXQgdG9rZW5zPw0KDQpUaGFua3MsDQotUGF2YW4uDQoNCg==
+Hi Loic,
+
+Thanks a lot for the reply. It somehow ended up in my spam. I tried
+signing up on the jerasure upstream code page. But couldn't get any
+response.
+
+We are working on implementing coupled layer MSR code (issue 19278).
+It is an MDS array code with optimal(minimal most) network, disk
+traffic use during chunk repair.
+
+Please look at our pull request (
+https://github.com/ceph/ceph/pull/14300 ) when you get a chance. We
+introduced two new functions jerasure_matrix_decode_substripe,
+jerasure_matrix_dotprod_substripe as private functions in
+ErasureCodeJerasureCLMSR.
+
+Consider that an object is divided in to 4 parts(chunk 0, 1, 2, 3) and
+encoded to get 2 parts (chunk 4,5). We introduce a notion of subchunk,
+substripe, where in a chunk is divided in to 8 sub chunks below. Each
+column in the below picture corresponds to a substripe and the 4 rows
+together correspond to data coming from a stripe.
+
+|--|--|--|--|--|--|--|--| --> chunk 0 with 8 subchunks.
+|--|--|--|--|--|--|--|--| --> chunk 1
+|--|--|--|--|--|--|--|--| --> chunk 2
+|--|--|--|--|--|--|--|--| --> chunk 3
+|--|--|--|--|--|--|--|--| --> chunk 4
+|--|--|--|--|--|--|--|--| --> chunk 5
+
+The new api's restrict the operations to a particular substripe. We
+would like to know your comments on including these functions as part
+of ErasureCodeJerasureCLMSR instead of them being included in
+jerasure.h.
+
+Thanks,
+Myna
+
+
+On Mon, Mar 27, 2017 at 10:17 PM, Loic Dachary <loic@dachary.org> wrote:
+> Hi Myna,
+>
+> On 03/27/2017 06:19 PM, Myna V wrote:
+>> Hello All,
+>>
+>> How do I push changes to ceph/jerasure.git ? Is it the same as the
+>> procedure needed for ceph/ceph.git ?
+>
+> The upstream for jerasure is at http://jerasure.org/groups/jerasure
+>
+> Cheers
+>
+>>
+>> Thanks,
+>> Myna.
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
