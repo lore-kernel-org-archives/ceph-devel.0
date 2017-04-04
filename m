@@ -1,35 +1,36 @@
-From: Myna V <mynaramana@gmail.com>
-Subject: CDM: Discussion on Coupled Layer Code.
-Date: Tue, 4 Apr 2017 21:22:14 +0530
-Message-ID: <CAGvpcHYpXWKuJfRK2vzotKzeGn5+JKUb=RrBJCcnU+eS8OM3Dg@mail.gmail.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
+Subject: Re: How best to integrate dmClock QoS library into ceph codebase
+Date: Tue, 4 Apr 2017 12:00:59 -0400
+Message-ID: <20170404160059.GB22266@ultraspiritum.eng.arb.redhat.com>
+References: <6D8EA95A-572E-4C71-A6AF-6BB8A6E8B26C@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f45.google.com ([74.125.83.45]:33381 "EHLO
-        mail-pg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754137AbdDDPw4 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Apr 2017 11:52:56 -0400
-Received: by mail-pg0-f45.google.com with SMTP id x125so156268626pgb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Apr 2017 08:52:55 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:42756 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753759AbdDDQBE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 4 Apr 2017 12:01:04 -0400
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 7BA7D3DBDF
+        for <ceph-devel@vger.kernel.org>; Tue,  4 Apr 2017 16:01:04 +0000 (UTC)
+Content-Disposition: inline
+In-Reply-To: <6D8EA95A-572E-4C71-A6AF-6BB8A6E8B26C@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: Bhagyashree Puranik <bhagya.puranik@gmail.com>, Ganesh Kini <kiniganesh94@gmail.com>, Vinayak Ramkumar <vinram93@gmail.com>, Elita Lobo <loboelita@gmail.com>, Birenjith Sasidharan <birenjith@gmail.com>, Vijay <pvk1729@gmail.com>
+To: "J. Eric Ivancich" <ivancich@redhat.com>
+Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Hi Sage, Loic & all:
+On 04/04/2017, J. Eric Ivancich wrote:
+> An argument for making it a submodule is that ceph already uses submodules and ceph developers are familiar with working with (and around) them.
 
-We have updated CDM_05-APR-2017 with a link to Coupled Layer code
-feature description.
+I think this would be the overriding argument. If both submodules and
+subtrees have their own set of drawbacks, it seems like a bad idea for
+Ceph as a project to have to deal with /both/ sets of drawbacks
+instead of just one.
 
-Here are the relevant links:
-
-1. pad.ceph.com/p/CL-MSR
-2. Slides that descibe Coupled Layer Code:
-http://ece.iisc.ernet.in/~vijay/pdfs/CDM_April_CL_MSR.pdf
-3. Pull Request: https://github.com/ceph/ceph/pull/14300
-
-We will be happy to discuss about this feature and know more on
-contributing to ceph in tomorrow's CDM.
-
-Thanks,
-Myna.
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
