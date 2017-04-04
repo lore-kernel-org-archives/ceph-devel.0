@@ -1,53 +1,93 @@
-From: "J. Eric Ivancich" <ivancich@redhat.com>
-Subject: How best to integrate dmClock QoS library into ceph codebase
-Date: Tue, 4 Apr 2017 09:32:35 -0400
-Message-ID: <6D8EA95A-572E-4C71-A6AF-6BB8A6E8B26C@redhat.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+From: Sage Weil <sage@newdream.net>
+Subject: Re: OSDMap / osd_state questions
+Date: Tue, 4 Apr 2017 14:12:07 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1704041408290.2999@piezo.novalocal>
+References: <alpine.LSU.2.20.1704030511540.12566@ancalagon.suse.de>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60578 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753080AbdDDNc4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 4 Apr 2017 09:32:56 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id A185C80F8F
-        for <ceph-devel@vger.kernel.org>; Tue,  4 Apr 2017 13:32:55 +0000 (UTC)
-Received: from ovpn-116-163.phx2.redhat.com (ovpn-116-163.phx2.redhat.com [10.3.116.163])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 9723A7EE66
-        for <ceph-devel@vger.kernel.org>; Tue,  4 Apr 2017 13:32:52 +0000 (UTC)
+Received: from cobra.newdream.net ([66.33.216.30]:55611 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754167AbdDDOML (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Apr 2017 10:12:11 -0400
+In-Reply-To: <alpine.LSU.2.20.1704030511540.12566@ancalagon.suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Jesse Williamson <jwilliamson@suse.de>
+Cc: Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-In our work to improve QoS with ceph, we implemented the dmClock algorithm (see: https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Gulati.pdf).
+On Tue, 4 Apr 2017, Jesse Williamson wrote:
+> Hello,
+> 
+> I have a couple of questions about OSDMap.
+> 
+> OSDMap has:
+>   int num_osd;         // not saved; see calc_num_osds
+>   int num_up_osd;      // not saved; see calc_num_osds
+>   int num_in_osd;      // not saved; see calc_num_osds
+> 
+>   int32_t max_osd;
+>   vector<uint8_t> osd_state;
+> 
+>   int calc_num_osds();
+> 
+> calc_num_osds() does this:
+> int OSDMap::calc_num_osds()
+> {
+>   num_osd = 0;
+>   num_up_osd = 0;
+>   num_in_osd = 0;
+>   for (int i=0; i<max_osd; i++) {
+>     if (osd_state[i] & CEPH_OSD_EXISTS) {
+>       ++num_osd;
+>       if (osd_state[i] & CEPH_OSD_UP) {
+>     ++num_up_osd;
+>       }
+>       if (get_weight(i) != CEPH_OSD_OUT) {
+>     ++num_in_osd;
+>       }
+>     }
+>   }
+>   return num_osd;
+> }
+> 
+> ...is there some condition where an osd id will appear in osd_state and yet
+> CEPH_OSD_EXISTS be false? 
 
-The algorithm is implemented as a general library that could be used in ceph and in other projects unrelated to ceph. To do this the dmClock library code makes use of C++ templates. On the server side, the key class takes template parameters to describe the type of a request and the type of a client identifier. On the client side, the key class takes a template parameter for the type of a server identifier.
+Yes
 
-You can find the library here:
+> It looks like the other two conditions, UP and OUT[1] depend on that 
+> being true.
 
-   https://github.com/ceph/dmclock
+Those bits are ignored if the OSD doesn't exist.
 
-The question is how best to integrate this library with ceph code in our git repo into the future.
+> First question: Can we get away with returning osd_state.size()?
 
-There are three obvious options:
+Nope!
+ 
+> Second, should the cached/memoized member variables set as a side-effect of
+> calc_num_osds() /ever/ be trusted if we don't call the method first?
 
-   1. Keep dmClock as a separate repo and incorporate it into ceph as a git submodule.
-   2. Keep dmClock as a separate repo and incorporate it into ceph as a git subtree.
-   3. Move the code into the ceph tree and stop maintaining as a generalized library.
+Nope!  We're careful to call it after decode() and apply_incremental(), 
+which are basically the only two paths that modify OSDMap.
 
-Both git submodules and git subtrees have their own set of challenges; neither is perfect. Many have weighed in their relative advantages and disadvantages (https://www.google.com/search?q=git+submodule+subtree).
+> Finally, if we have to go through this loop anyway, perhaps in addition to the
+> size we'll want to know the OSD ids as well? I see several places where we
+> wind up looping through osd_state /again/ to get extra information (for
+> example, OSDMonitor::get_health()).
+> 
+> Perhaps a method basically doing this would be useful, along these lines?
+> 
+> partition_copy(begin(osd_state), end(osd_state),
+>                begin(up_osds), begin(down_osds),
+>                [&osdmap](const int32_t osd_id) { return osdmap.is_up(osd_id);
+> });
 
-I’m inclined to keep it separate (option 1 or 2) so that others might use it in other projects.
+Maybe!  Since osd_state is a vector its all very fast.  Not sure that we 
+are bulding a set<int> of up or down often enough to justify 
+prebuilding it.  (It also consumes memory, and on big clusters 
+we have lots of big OSDMaps in a cache that can't consume too much 
+memory.)
 
-When I started the integration, Sam recommended that it be maintained as a subtree. So that’s how it’s implemented in my not-yet-merged branch. The key challenges have been with rebases that include the commit in which the subtree was added and with pushing code changes back to the library. Since relatively few would likely be doing these types of ops, perhaps option 2 might be easiest. Currently our git PR process has an automated check for "Unmodifed Submodules". I’m guessing we’d likely want a similar check for changes in subtree code.
+sage
 
-An argument for making it a submodule is that ceph already uses submodules and ceph developers are familiar with working with (and around) them.
-
-But perhaps others would like to weigh in.
-
-Thanks,
-
-Eric
