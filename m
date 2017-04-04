@@ -1,122 +1,88 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: OSDMap / osd_state questions
-Date: Tue, 4 Apr 2017 14:16:00 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1704041412130.2999@piezo.novalocal>
-References: <alpine.LSU.2.20.1704030511540.12566@ancalagon.suse.de> <alpine.LSU.2.20.1704040511310.19913@ancalagon.suse.de>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH v6 1/7] libceph: remove req->r_replay_version
+Date: Tue, 4 Apr 2017 16:55:05 +0200
+Message-ID: <CAOi1vP9WUsyrfx8UxWEU-KFfwjTVQD8T60=5vzE2dD6x4sFRCw@mail.gmail.com>
+References: <20170330180546.11021-1-jlayton@redhat.com> <20170330180707.11137-1-jlayton@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:55626 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753239AbdDDOQD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Apr 2017 10:16:03 -0400
-In-Reply-To: <alpine.LSU.2.20.1704040511310.19913@ancalagon.suse.de>
+Received: from mail-vk0-f66.google.com ([209.85.213.66]:34192 "EHLO
+        mail-vk0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752922AbdDDOzH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Apr 2017 10:55:07 -0400
+Received: by mail-vk0-f66.google.com with SMTP id y16so23197158vky.1
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Apr 2017 07:55:07 -0700 (PDT)
+In-Reply-To: <20170330180707.11137-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jesse Williamson <jwilliamson@suse.de>
-Cc: Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Jeff Layton <jlayton@redhat.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 4 Apr 2017, Jesse Williamson wrote:
-> On Tue, 4 Apr 2017, Jesse Williamson wrote:
-> 
-> Ok, sorry to add extra traffic, but a partial answer to my own question leads
-> to more questions:
-> 
-> > ...is there some condition where an osd id will appear in osd_state and yet
-> > CEPH_OSD_EXISTS be false? It looks like the other two conditions, UP and
-> > OUT[1] depend on that being true.
-> 
-> OSDMonitor::get_health() appears to circumvent the is_up()/is_down() methods
-> from OSDMap, instead checking manually-- and slightly differently[1].
-> 
-> One of the checks is:
->       if (!osdmap.exists(i)) {
->         if (osdmap.crush->item_exists(i)) {
->           down_osds.insert(i);
->         }
-> 
-> ...so, to be "down", something must NOT exist in the osd_state AND must exist
-> in the CRUSH map. Looking at definition of OSDMap::exists() and
-> OSDMap::is_down(), they differ in that get_health() is checking the CRUSH map.
-> Who's right..?
+On Thu, Mar 30, 2017 at 8:07 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> Nothing uses this anymore with the removal of the ack vs. commit code.
+> Remove the field and just encode zeroes into place in the request
+> encoding.
+>
+> Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> ---
+>  include/linux/ceph/osd_client.h | 1 -
+>  net/ceph/debugfs.c              | 4 +---
+>  net/ceph/osd_client.c           | 6 +++---
+>  3 files changed, 4 insertions(+), 7 deletions(-)
+>
+> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+> index d6a625e75040..3fc9e7754a9b 100644
+> --- a/include/linux/ceph/osd_client.h
+> +++ b/include/linux/ceph/osd_client.h
+> @@ -192,7 +192,6 @@ struct ceph_osd_request {
+>         unsigned long r_stamp;                /* jiffies, send or check time */
+>         unsigned long r_start_stamp;          /* jiffies */
+>         int r_attempts;
+> -       struct ceph_eversion r_replay_version; /* aka reassert_version */
+>         u32 r_last_force_resend;
+>         u32 r_map_dne_bound;
+>
+> diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+> index c62b2b029a6e..d7e63a4f5578 100644
+> --- a/net/ceph/debugfs.c
+> +++ b/net/ceph/debugfs.c
+> @@ -177,9 +177,7 @@ static void dump_request(struct seq_file *s, struct ceph_osd_request *req)
+>         seq_printf(s, "%llu\t", req->r_tid);
+>         dump_target(s, &req->r_t);
+>
+> -       seq_printf(s, "\t%d\t%u'%llu", req->r_attempts,
+> -                  le32_to_cpu(req->r_replay_version.epoch),
+> -                  le64_to_cpu(req->r_replay_version.version));
+> +       seq_printf(s, "\t%d", req->r_attempts);
+>
+>         for (i = 0; i < req->r_num_ops; i++) {
+>                 struct ceph_osd_req_op *op = &req->r_ops[i];
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index b4500a8ab8b3..27f14ae69eb7 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -1503,9 +1503,9 @@ static void encode_request(struct ceph_osd_request *req, struct ceph_msg *msg)
+>         ceph_encode_32(&p, req->r_flags);
+>         ceph_encode_timespec(p, &req->r_mtime);
+>         p += sizeof(struct ceph_timespec);
+> -       /* aka reassert_version */
+> -       memcpy(p, &req->r_replay_version, sizeof(req->r_replay_version));
+> -       p += sizeof(req->r_replay_version);
+> +       /* replay version field */
+> +       memset(p, 0, sizeof(struct ceph_eversion));
+> +       p += sizeof(struct ceph_eversion);
 
-Not sure what eversion of the code you're looking at.  On master, it's
+It's called reassert_version in userspace.  Don't change the comment,
+just drop the "aka":
 
-    set<int> osds;
-    for (int i = 0; i < osdmap.get_max_osd(); i++) {
-      if (!osdmap.exists(i)) {
-        if (osdmap.crush->item_exists(i)) {
-          osds.insert(i);
-        }
-	continue;
-      } 
-      ...
-    }
-    ...
-    if (!osds.empty()) {
-      ostringstream ss;
-      ss << "osds were removed from osdmap, but still kept in crushmap";
-      summary.push_back(make_pair(HEALTH_WARN, ss.str()));
-      if (detail) {
-        ss << " osds: [" << osds << "]";
-        detail->push_back(make_pair(HEALTH_WARN, ss.str()));
-      }
-    }
+    /* reassert_version */
+    memset(p, 0, sizeof(struct ceph_eversion));
+    p += sizeof(struct ceph_eversion);
 
-> It also looks like in get_health() when something's added to down_osds,
-> num_down_in_osds isn't incremented. Is this intentional?
+With that,
 
-The code in master makes sense there too.  What are you looking at?
+Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
 
-Thanks!
-sage
+Thanks,
 
-
-
-> 
-> Thanks again,
-> 
-> -Jesse
-> 
-> 1. From OSDMonitor::get_health():
-> 
->     int num_in_osds = 0;
->     set<int> down_osds;
->     for (int i = 0; i < osdmap.get_max_osd(); i++) {
->       if (!osdmap.exists(i)) {
->         if (osdmap.crush->item_exists(i)) {
->           down_osds.insert(i);
->         }
->      continue;
->       }
->       if (osdmap.is_out(i))
->         continue;
->       ++num_in_osds;
->       if (!osdmap.is_up(i)) {
->     ++num_down_in_osds;
-> 
-> 2. exists(), etc.:
-> 
->   bool exists(int osd) const {
->     //assert(osd >= 0);
->     return osd >= 0 && osd < max_osd && (osd_state[osd] & CEPH_OSD_EXISTS);
->   }
-> 
->   bool is_up(int osd) const {
->     return exists(osd) && (osd_state[osd] & CEPH_OSD_UP);
->   }
-> 
->   bool has_been_up_since(int osd, epoch_t epoch) const {
->     return is_up(osd) && get_up_from(osd) <= epoch;
->   }
-> 
->   bool is_down(int osd) const {
->     return !is_up(osd);
->   }
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+                Ilya
