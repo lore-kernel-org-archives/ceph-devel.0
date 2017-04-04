@@ -1,88 +1,57 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH v6 1/7] libceph: remove req->r_replay_version
-Date: Tue, 4 Apr 2017 16:55:05 +0200
-Message-ID: <CAOi1vP9WUsyrfx8UxWEU-KFfwjTVQD8T60=5vzE2dD6x4sFRCw@mail.gmail.com>
-References: <20170330180546.11021-1-jlayton@redhat.com> <20170330180707.11137-1-jlayton@redhat.com>
+From: Jesse Williamson <jwilliamson@suse.de>
+Subject: Re: OSDMap / osd_state questions
+Date: Tue, 4 Apr 2017 07:55:50 -0700 (PDT)
+Message-ID: <alpine.LSU.2.20.1704040749250.19913@ancalagon.suse.de>
+References: <alpine.LSU.2.20.1704030511540.12566@ancalagon.suse.de> <alpine.DEB.2.11.1704041408290.2999@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; format=flowed; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f66.google.com ([209.85.213.66]:34192 "EHLO
-        mail-vk0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752922AbdDDOzH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Apr 2017 10:55:07 -0400
-Received: by mail-vk0-f66.google.com with SMTP id y16so23197158vky.1
-        for <ceph-devel@vger.kernel.org>; Tue, 04 Apr 2017 07:55:07 -0700 (PDT)
-In-Reply-To: <20170330180707.11137-1-jlayton@redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:41322 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753465AbdDDOzw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 4 Apr 2017 10:55:52 -0400
+In-Reply-To: <alpine.DEB.2.11.1704041408290.2999@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@redhat.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Thu, Mar 30, 2017 at 8:07 PM, Jeff Layton <jlayton@redhat.com> wrote:
-> Nothing uses this anymore with the removal of the ack vs. commit code.
-> Remove the field and just encode zeroes into place in the request
-> encoding.
+On Tue, 4 Apr 2017, Sage Weil wrote:
+
+>> First question: Can we get away with returning osd_state.size()?
 >
-> Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> ---
->  include/linux/ceph/osd_client.h | 1 -
->  net/ceph/debugfs.c              | 4 +---
->  net/ceph/osd_client.c           | 6 +++---
->  3 files changed, 4 insertions(+), 7 deletions(-)
+> Nope!
+
+Ok, that settles that! :-) Thanks!
+
+>> Second, should the cached/memoized member variables set as a side-effect of
+>> calc_num_osds() /ever/ be trusted if we don't call the method first?
 >
-> diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-> index d6a625e75040..3fc9e7754a9b 100644
-> --- a/include/linux/ceph/osd_client.h
-> +++ b/include/linux/ceph/osd_client.h
-> @@ -192,7 +192,6 @@ struct ceph_osd_request {
->         unsigned long r_stamp;                /* jiffies, send or check time */
->         unsigned long r_start_stamp;          /* jiffies */
->         int r_attempts;
-> -       struct ceph_eversion r_replay_version; /* aka reassert_version */
->         u32 r_last_force_resend;
->         u32 r_map_dne_bound;
->
-> diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
-> index c62b2b029a6e..d7e63a4f5578 100644
-> --- a/net/ceph/debugfs.c
-> +++ b/net/ceph/debugfs.c
-> @@ -177,9 +177,7 @@ static void dump_request(struct seq_file *s, struct ceph_osd_request *req)
->         seq_printf(s, "%llu\t", req->r_tid);
->         dump_target(s, &req->r_t);
->
-> -       seq_printf(s, "\t%d\t%u'%llu", req->r_attempts,
-> -                  le32_to_cpu(req->r_replay_version.epoch),
-> -                  le64_to_cpu(req->r_replay_version.version));
-> +       seq_printf(s, "\t%d", req->r_attempts);
->
->         for (i = 0; i < req->r_num_ops; i++) {
->                 struct ceph_osd_req_op *op = &req->r_ops[i];
-> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-> index b4500a8ab8b3..27f14ae69eb7 100644
-> --- a/net/ceph/osd_client.c
-> +++ b/net/ceph/osd_client.c
-> @@ -1503,9 +1503,9 @@ static void encode_request(struct ceph_osd_request *req, struct ceph_msg *msg)
->         ceph_encode_32(&p, req->r_flags);
->         ceph_encode_timespec(p, &req->r_mtime);
->         p += sizeof(struct ceph_timespec);
-> -       /* aka reassert_version */
-> -       memcpy(p, &req->r_replay_version, sizeof(req->r_replay_version));
-> -       p += sizeof(req->r_replay_version);
-> +       /* replay version field */
-> +       memset(p, 0, sizeof(struct ceph_eversion));
-> +       p += sizeof(struct ceph_eversion);
+> Nope!  We're careful to call it after decode() and apply_incremental(),
+> which are basically the only two paths that modify OSDMap.
 
-It's called reassert_version in userspace.  Don't change the comment,
-just drop the "aka":
+Thanks, good to know!
 
-    /* reassert_version */
-    memset(p, 0, sizeof(struct ceph_eversion));
-    p += sizeof(struct ceph_eversion);
+>> Perhaps a method basically doing this would be useful, along these lines?
 
-With that,
+[...]
 
-Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
+> Maybe!  Since osd_state is a vector its all very fast.  Not sure that we
+> are bulding a set<int> of up or down often enough to justify
+> prebuilding it.  (It also consumes memory, and on big clusters
+> we have lots of big OSDMaps in a cache that can't consume too much
+> memory.)
 
-Thanks,
+Yes, it would definitely use quite a bit of extra memory, at least the 
+size of the osd_state over again since we're making a copy. Maybe the only 
+way that would make sense would be to track them seperately from "go", but 
+then all the code touching osd_state would have to get more complicated. 
+I'm just poking around in mon's status reporting, so it makes sense to to 
+keep it local. Thanks!
 
-                Ilya
+WRT my other email, I'm indeed looking in a weird branch-- confusion 
+unconfusifificated!
+
+Appreciatively,
+
+-Jesse
