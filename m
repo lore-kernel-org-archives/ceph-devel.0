@@ -1,156 +1,186 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v7 7/7] ceph: when seeing write errors on an inode, switch to sync writes
-Date: Wed,  5 Apr 2017 13:14:17 -0400
-Message-ID: <20170405171417.25187-8-jlayton@redhat.com>
+Subject: [PATCH v7 4/7] libceph: add an epoch_barrier field to struct ceph_osd_client
+Date: Wed,  5 Apr 2017 13:14:14 -0400
+Message-ID: <20170405171417.25187-5-jlayton@redhat.com>
 References: <20170405171417.25187-1-jlayton@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58676 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:55352 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933766AbdDERO1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 5 Apr 2017 13:14:27 -0400
+        id S933668AbdDEROY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 5 Apr 2017 13:14:24 -0400
 In-Reply-To: <20170405171417.25187-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: idryomov@gmail.com, zyan@redhat.com, sage@redhat.com
 Cc: jspray@redhat.com, ceph-devel@vger.kernel.org
 
-Currently, we don't have a real feedback mechanism in place for when we
-start seeing buffered writeback errors. If writeback is failing, there
-is nothing that prevents an application from continuing to dirty pages
-that aren't being cleaned.
+Cephfs can get cap update requests that contain a new epoch barrier in
+them. When that happens we want to pause all OSD traffic until the right
+map epoch arrives.
 
-In the event that we're seeing write errors of any sort occur on an
-inode, have the callback set a flag to force further writes to be
-synchronous. When the next write succeeds, clear the flag to allow
-buffered writeback to continue.
+Add an epoch_barrier field to ceph_osd_client that is protected by the
+osdc->lock rwsem. When the barrier is set, and the current OSD map
+epoch is below that, pause the request target when submitting the
+request or when revisiting it. Add a way for upper layers (cephfs)
+to update the epoch_barrier as well.
 
-Since this is just a hint to the write submission mechanism, we only
-take the i_ceph_lock when a lockless check shows that the flag needs to
-be changed.
+If we get a new map, compare the new epoch against the barrier before
+kicking requests and request another map if the map epoch is still lower
+than the one we want.
+
+If we get a map with a full pool, or at quota condition, then set the
+barrier to the current epoch value.
 
 Reviewed-by: "Yan, Zheng” <zyan@redhat.com>
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
+Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- fs/ceph/addr.c  |  6 +++++-
- fs/ceph/file.c  | 31 ++++++++++++++++++-------------
- fs/ceph/super.h | 26 ++++++++++++++++++++++++++
- 3 files changed, 49 insertions(+), 14 deletions(-)
+ include/linux/ceph/osd_client.h |  2 ++
+ net/ceph/debugfs.c              |  3 ++-
+ net/ceph/osd_client.c           | 50 ++++++++++++++++++++++++++++++++++-------
+ 3 files changed, 46 insertions(+), 9 deletions(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 6cdf94459ac4..e253102b43cd 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -670,8 +670,12 @@ static void writepages_finish(struct ceph_osd_request *req)
- 	bool remove_page;
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 8cf644197b1a..85650b415e73 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -267,6 +267,7 @@ struct ceph_osd_client {
+ 	struct rb_root         osds;          /* osds */
+ 	struct list_head       osd_lru;       /* idle osds */
+ 	spinlock_t             osd_lru_lock;
++	u32		       epoch_barrier;
+ 	struct ceph_osd        homeless_osd;
+ 	atomic64_t             last_tid;      /* tid of last request */
+ 	u64                    last_linger_id;
+@@ -305,6 +306,7 @@ extern void ceph_osdc_handle_reply(struct ceph_osd_client *osdc,
+ 				   struct ceph_msg *msg);
+ extern void ceph_osdc_handle_map(struct ceph_osd_client *osdc,
+ 				 struct ceph_msg *msg);
++void ceph_osdc_update_epoch_barrier(struct ceph_osd_client *osdc, u32 eb);
  
- 	dout("writepages_finish %p rc %d\n", inode, rc);
--	if (rc < 0)
-+	if (rc < 0) {
- 		mapping_set_error(mapping, rc);
-+		ceph_set_error_write(ci);
-+	} else {
-+		ceph_clear_error_write(ci);
-+	}
+ extern void osd_req_op_init(struct ceph_osd_request *osd_req,
+ 			    unsigned int which, u16 opcode, u32 flags);
+diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+index d7e63a4f5578..71ba13927b3d 100644
+--- a/net/ceph/debugfs.c
++++ b/net/ceph/debugfs.c
+@@ -62,7 +62,8 @@ static int osdmap_show(struct seq_file *s, void *p)
+ 		return 0;
  
- 	/*
- 	 * We lost the cache cap, need to truncate the page before
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index cff35a1ff53c..0480492aa349 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -1020,19 +1020,22 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+ 	down_read(&osdc->lock);
+-	seq_printf(s, "epoch %d flags 0x%x\n", map->epoch, map->flags);
++	seq_printf(s, "epoch %u barrier %u flags 0x%x\n", map->epoch,
++			osdc->epoch_barrier, map->flags);
  
+ 	for (n = rb_first(&map->pg_pools); n; n = rb_next(n)) {
+ 		struct ceph_pg_pool_info *pi =
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 55b7585ccefd..fb35adae7fbf 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1298,8 +1298,9 @@ static bool target_should_be_paused(struct ceph_osd_client *osdc,
+ 		       __pool_full(pi);
+ 
+ 	WARN_ON(pi->id != t->base_oloc.pool);
+-	return (t->flags & CEPH_OSD_FLAG_READ && pauserd) ||
+-	       (t->flags & CEPH_OSD_FLAG_WRITE && pausewr);
++	return ((t->flags & CEPH_OSD_FLAG_READ) && pauserd) ||
++	       ((t->flags & CEPH_OSD_FLAG_WRITE) && pausewr) ||
++	       (osdc->osdmap->epoch < osdc->epoch_barrier);
+ }
+ 
+ enum calc_target_result {
+@@ -1654,8 +1655,13 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
+ 		goto promote;
+ 	}
+ 
+-	if ((req->r_flags & CEPH_OSD_FLAG_WRITE) &&
+-	    ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR)) {
++	if (osdc->osdmap->epoch < osdc->epoch_barrier) {
++		dout("req %p epoch %u barrier %u\n", req, osdc->osdmap->epoch,
++		     osdc->epoch_barrier);
++		req->r_t.paused = true;
++		maybe_request_map(osdc);
++	} else if ((req->r_flags & CEPH_OSD_FLAG_WRITE) &&
++		   ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR)) {
+ 		dout("req %p pausewr\n", req);
+ 		req->r_t.paused = true;
+ 		maybe_request_map(osdc);
+@@ -1809,11 +1815,14 @@ static void abort_request(struct ceph_osd_request *req, int err)
+ 
+ /*
+  * Drop all pending requests that are stalled waiting on a full condition to
+- * clear, and complete them with ENOSPC as the return code.
++ * clear, and complete them with ENOSPC as the return code. Set the
++ * osdc->epoch_barrier to the latest map epoch that we've seen if any were
++ * cancelled.
+  */
+ static void ceph_osdc_abort_on_full(struct ceph_osd_client *osdc)
+ {
+ 	struct rb_node *n;
++	bool set_barrier = false;
+ 
+ 	dout("enter abort_on_full\n");
+ 
+@@ -1832,12 +1841,18 @@ static void ceph_osdc_abort_on_full(struct ceph_osd_client *osdc)
+ 
+ 			if (req->r_abort_on_full &&
+ 			    (ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
+-			     pool_full(osdc, req->r_t.target_oloc.pool)))
++			     pool_full(osdc, req->r_t.target_oloc.pool))) {
+ 				abort_request(req, -ENOSPC);
++				set_barrier = true;
++			}
+ 		}
+ 	}
++
++	/* Update the epoch barrier to current epoch if a call was aborted */
++	if (set_barrier)
++		osdc->epoch_barrier = osdc->osdmap->epoch;
  out:
- 		ceph_osdc_put_request(req);
--		if (ret == 0) {
--			pos += len;
--			written += len;
--
--			if (pos > i_size_read(inode)) {
--				check_caps = ceph_inode_set_size(inode, pos);
--				if (check_caps)
--					ceph_check_caps(ceph_inode(inode),
--							CHECK_CAPS_AUTHONLY,
--							NULL);
--			}
--		} else
-+		if (ret != 0) {
-+			ceph_set_error_write(ci);
- 			break;
-+		}
-+
-+		ceph_clear_error_write(ci);
-+		pos += len;
-+		written += len;
-+		if (pos > i_size_read(inode)) {
-+			check_caps = ceph_inode_set_size(inode, pos);
-+			if (check_caps)
-+				ceph_check_caps(ceph_inode(inode),
-+						CHECK_CAPS_AUTHONLY,
-+						NULL);
-+		}
-+
- 	}
+-	dout("return abort_on_full\n");
++	dout("return abort_on_full barrier=%u\n", osdc->epoch_barrier);
+ }
  
- 	if (ret != -EOLDSNAPC && written > 0) {
-@@ -1238,6 +1241,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
- 	}
+ static void check_pool_dne(struct ceph_osd_request *req)
+@@ -3293,7 +3308,8 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+ 	pausewr = ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR) ||
+ 		  ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
+ 		  have_pool_full(osdc);
+-	if (was_pauserd || was_pausewr || pauserd || pausewr)
++	if (was_pauserd || was_pausewr || pauserd || pausewr ||
++	    osdc->osdmap->epoch < osdc->epoch_barrier)
+ 		maybe_request_map(osdc);
  
- retry_snap:
-+	/* FIXME: not complete since it doesn't account for being at quota */
- 	if (ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL)) {
- 		err = -ENOSPC;
- 		goto out;
-@@ -1259,7 +1263,8 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
- 	     inode, ceph_vinop(inode), pos, count, ceph_cap_string(got));
+ 	kick_requests(osdc, &need_resend, &need_resend_linger);
+@@ -3311,6 +3327,24 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
+ 	up_write(&osdc->lock);
+ }
  
- 	if ((got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO)) == 0 ||
--	    (iocb->ki_flags & IOCB_DIRECT) || (fi->flags & CEPH_F_SYNC)) {
-+	    (iocb->ki_flags & IOCB_DIRECT) || (fi->flags & CEPH_F_SYNC) ||
-+	    (ci->i_ceph_flags & CEPH_I_ERROR_WRITE)) {
- 		struct ceph_snap_context *snapc;
- 		struct iov_iter data;
- 		inode_unlock(inode);
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index c68e6a045fb9..7334ee86b9e8 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -474,6 +474,32 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
- #define CEPH_I_CAP_DROPPED	(1 << 8)  /* caps were forcibly dropped */
- #define CEPH_I_KICK_FLUSH	(1 << 9)  /* kick flushing caps */
- #define CEPH_I_FLUSH_SNAPS	(1 << 10) /* need flush snapss */
-+#define CEPH_I_ERROR_WRITE	(1 << 11) /* have seen write errors */
-+
-+/*
-+ * We set the ERROR_WRITE bit when we start seeing write errors on an inode
-+ * and then clear it when they start succeeding. Note that we do a lockless
-+ * check first, and only take the lock if it looks like it needs to be changed.
-+ * The write submission code just takes this as a hint, so we're not too
-+ * worried if a few slip through in either direction.
-+ */
-+static inline void ceph_set_error_write(struct ceph_inode_info *ci)
++void ceph_osdc_update_epoch_barrier(struct ceph_osd_client *osdc, u32 eb)
 +{
-+	if (!(READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE)) {
-+		spin_lock(&ci->i_ceph_lock);
-+		ci->i_ceph_flags |= CEPH_I_ERROR_WRITE;
-+		spin_unlock(&ci->i_ceph_lock);
++	down_read(&osdc->lock);
++	if (unlikely(eb > osdc->epoch_barrier)) {
++		up_read(&osdc->lock);
++		down_write(&osdc->lock);
++		if (likely(eb > osdc->epoch_barrier)) {
++			dout("updating epoch_barrier from %u to %u\n",
++					osdc->epoch_barrier, eb);
++			osdc->epoch_barrier = eb;
++		}
++		up_write(&osdc->lock);
++	} else {
++		up_read(&osdc->lock);
 +	}
 +}
++EXPORT_SYMBOL(ceph_osdc_update_epoch_barrier);
 +
-+static inline void ceph_clear_error_write(struct ceph_inode_info *ci)
-+{
-+	if (READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE) {
-+		spin_lock(&ci->i_ceph_lock);
-+		ci->i_ceph_flags &= ~CEPH_I_ERROR_WRITE;
-+		spin_unlock(&ci->i_ceph_lock);
-+	}
-+}
- 
- static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
- 					   long long release_count,
+ /*
+  * Resubmit requests pending on the given osd.
+  */
 -- 
 2.9.3
 
