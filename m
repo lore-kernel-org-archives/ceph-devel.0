@@ -1,134 +1,149 @@
-From: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
-Subject: Re: rgw keystone revocation thread
-Date: Wed, 5 Apr 2017 12:59:03 +0000
-Message-ID: <9AA2ADE1-F674-4255-81FF-8AEEFAD2A75A@walmartlabs.com>
-References: <668A58E4-2994-4FFC-A96F-1B145094BCF0@walmartlabs.com>
- <CADRKj5RreYnkfcmqGrA_DaZ6FHboqHLko6FQcPR4z_zO6RsyBQ@mail.gmail.com>
- <113923053.10925537.1491336258739.JavaMail.zimbra@redhat.com>
- <CA+H5UW3vx=ZDh2xp0XFagoL0i-3=Fiuzzfuzb8+maPoY974BJA@mail.gmail.com>
- <558264060.11035373.1491354731997.JavaMail.zimbra@redhat.com>
- <CA+H5UW1UxOxgJgBkX-uxY1dBJ1u6uPuAqWD69xHwUMTRWkS2PA@mail.gmail.com>
- <20170405085317.GA30236@degu.eng.arb.redhat.com>
- <CA+H5UW3h-OB0HyVz7LLRMmFH5=YxdWs9fw3pcvvqwpRfkyUQLA@mail.gmail.com>
- <764813255.11282714.1491396574036.JavaMail.zimbra@redhat.com>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: Fwd: rgw keystone revocation thread
+Date: Wed, 5 Apr 2017 08:49:34 -0400 (EDT)
+Message-ID: <764813255.11282714.1491396574036.JavaMail.zimbra@redhat.com>
+References: <668A58E4-2994-4FFC-A96F-1B145094BCF0@walmartlabs.com> <CADRKj5RreYnkfcmqGrA_DaZ6FHboqHLko6FQcPR4z_zO6RsyBQ@mail.gmail.com> <113923053.10925537.1491336258739.JavaMail.zimbra@redhat.com> <CA+H5UW3vx=ZDh2xp0XFagoL0i-3=Fiuzzfuzb8+maPoY974BJA@mail.gmail.com> <558264060.11035373.1491354731997.JavaMail.zimbra@redhat.com> <CA+H5UW1UxOxgJgBkX-uxY1dBJ1u6uPuAqWD69xHwUMTRWkS2PA@mail.gmail.com> <20170405085317.GA30236@degu.eng.arb.redhat.com> <CA+H5UW3h-OB0HyVz7LLRMmFH5=YxdWs9fw3pcvvqwpRfkyUQLA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ppes-mail-n6.wal-mart.com ([161.168.133.166]:45572 "EHLO
-        ppes-mail-n6.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755074AbdDEM7N (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Apr 2017 08:59:13 -0400
-In-Reply-To: <764813255.11282714.1491396574036.JavaMail.zimbra@redhat.com>
-Content-Language: en-US
-Content-ID: <784C28B9C16A804FB15C71F6907331F1@NAMP100.PROD.OUTLOOK.COM>
+Received: from mx1.redhat.com ([209.132.183.28]:49650 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754342AbdDEMte (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 5 Apr 2017 08:49:34 -0400
+In-Reply-To: <CA+H5UW3h-OB0HyVz7LLRMmFH5=YxdWs9fw3pcvvqwpRfkyUQLA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matt Benjamin <mbenjamin@redhat.com>
+To: "Rallabhandi, Pavan" <PRallabhandi@walmartlabs.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgTWF0dCwNCg0KQXBwcmVjaWF0ZSB5b3VyIHJlc3BvbnNlLCB3b3VsZCBtYWtlIHRoZSByZXZv
-Y2F0aW9uIHRocmVhZCBjb25maWd1cmFibGUgZm9yIG5vdy4NCg0KVGhhbmtzLA0KLVBhdmFuLg0K
-DQpPbiAwNS8wNC8xNyA2OjE5IHBtLCAiTWF0dCBCZW5qYW1pbiIgPG1iZW5qYW1pbkByZWRoYXQu
-Y29tPiB3cm90ZToNCg0KICAgIEhpIFBhdmFuLA0KICAgIA0KICAgIFlvdXIgZW1haWwgc3Bhcmtl
-ZCBzb21lIGJhY2tjaGFubmVsIGRpc2N1c3Npb24uDQogICAgDQogICAgSSAtdGhpbmstIE1hcmN1
-cyBhbmQgUmFkb3NsYXcgd291bGQgYWdyZWUgdGhhdCBydW5uaW5nIGEgcmV2b2NhdGlvbiB0aHJl
-YWQgc2hvdWxkIGJlIGNvbmZpZ3VyYWJsZS4gIFRoZSBhYmlsaXR5IHRvIHByb3Blcmx5IGRldGVj
-dCByZXZva2VkIEZlcm5ldCB0b2tlbnMgKE9TLVJFVk9LRSwgYmVsb3cpIHdpbGwgYmUgaW1wbGVt
-ZW50ZWQgdXBzdHJlYW0uDQogICAgDQogICAgUmVnYXJkcywNCiAgICANCiAgICBNYXR0DQogICAg
-DQogICAgLS0tLS0gRm9yd2FyZGVkIE1lc3NhZ2UgLS0tLS0NCiAgICBGcm9tOiAiUmFkb3NsYXcg
-WmFyenluc2tpIiA8cnphcnp5bnNraUBtaXJhbnRpcy5jb20+DQogICAgVG86ICJNYXJjdXMgV2F0
-dHMiIDxtd2F0dHNAcmVkaGF0LmNvbT4NCiAgICBDYzogIk1hdHQgQmVuamFtaW4iIDxtYmVuamFt
-aW5AcmVkaGF0LmNvbT4sICJZZWh1ZGEgU2FkZWgtV2VpbnJhdWIiIDx5c2FkZWh3ZUByZWRoYXQu
-Y29tPg0KICAgIFNlbnQ6IFdlZG5lc2RheSwgQXByaWwgNSwgMjAxNyA3OjAxOjE1IEFNDQogICAg
-U3ViamVjdDogUmU6IHJndyBrZXlzdG9uZSByZXZvY2F0aW9uIHRocmVhZA0KICAgIA0KICAgIEhp
-IE1hcmN1cywNCiAgICANCiAgICBUaGFua3MgYSBsb3QgZm9yIHRoZSB0aGVzZSBwb2ludHMhDQog
-ICAgDQogICAgPiAzLiBJdCdzIHBvc3NpYmxlIHRvIHJldm9rZSBmZXJuZXQgdG9rZW5zLiAgUmV2
-b2tlZCBmZXJuZXQgdG9rZW5zDQogICAgPiBjYW4gbm8gbG9uZ2VyIGJlIHZhbGlkYXRlZC4gIENs
-ZWFybHkgaW50ZXJuYWxseSB0aGV5IGdldCBtYXJrZWQNCiAgICA+IGFzIHJldm9rZWQuICAqSG93
-ZXZlciwgdGhleSBkb24ndCBhcHBlYXIgaW4gdGhlIG91dHB1dCBmcm9tDQogICAgPiBPUy1QS0kv
-cmV2b2tlZC4qDQogICAgDQogICAgRXNwZWNpYWxseSB0aGlzIG9uZSBpcyB0aGUgZ2FtZS1jaGFu
-Z2VyLiBUaGUgc2FtZSBtaWdodCBhcHBseQ0KICAgIHRvIHRoZSAidG9rZW5zL3Jldm9rZWQiIG9m
-IEtleXN0b25lIEFQSSB2Mi4gSW4gdGhlIGVuZCBvZiAyMDE2DQogICAgaXQgaGFzIGJlZW4gZG9j
-dW1lbnRlZCBbMV0gKHRvZ2V0aGVyIHdpdGggT1MtUEtJL3Jldm9rZWQpIGluDQogICAgYSB3YXkg
-c3VnZ2VzdGluZyBbMl0gaXQgd29ya3Mgb25seSB3aXRoIFBLSSB0b2tlbnMuIEl0J3MgcG9zc2li
-bGUNCiAgICB0aGF0IFBLSVogYXJlIGFsc28gY292ZXJlZCBidXQgSSdtIG5vdCBzdXJlIGFib3V0
-IEZlcm5ldC9VVUlELg0KICAgIA0KICAgID4gNC4gVGhlIHJlcGxhY2VtZW50IGFwaSBpcyAvdjMv
-T1MtUkVWT0tFL2V2ZW50cw0KICAgID4gVGhpcyBhcHBlYXJzIHRvIGJlIDIgZ2VuZXJhdGlvbnMg
-YWhlYWQgb2YgT1MtUEtJL3Jldm9rZWQ7DQogICAgPiB0aGVyZSB3YXMgc29tZXRoaW5nIGluYmV0
-d2VlbiB0aGF0IGFwcGFyZW50bHkgaGFkIGFuDQogICAgPiBpbmNvbnZlbmllbnQgZGVwZW5kZW5j
-eSBvbiAiZXhwaXJlc19hdCIuICBJdCBkb2VzIG5vdA0KICAgID4gdXNlIGEgc2lnbmluZyBrZXku
-ICBJbiBvcmRlciB0byB1c2UgaXQsIGl0J3MgbmVjZXNhcnkNCiAgICA+IHRvIHRyYWNrIHRoaW5n
-cyBieSAiYXVkaXRfaWQiLiAgVGhpcyBjb21lcyBiYWNrIHdpdGggdGhlDQogICAgPiB0b2tlbiB2
-YWxpZGF0ZSBjYWxsLg0KICAgIA0KICAgIEkganVzdCBjcmVhdGVkIGEgdGlja2V0IGZvciBPUy1S
-RVZPS0U6DQogICAgICAqIGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8xOTQ5OQ0KICAg
-IA0KICAgIFJlZ2FyZHMsDQogICAgUmFkZWsNCiAgICANCiAgICBbMV0gaHR0cHM6Ly9idWdzLmxh
-dW5jaHBhZC5uZXQva2V5c3RvbmUvK2J1Zy8xNjI2Nzc4DQogICAgWzJdIGRlc2NyaXB0aW9uIG9m
-IHRoZSAic2lnbmVkIiBwYXJhbWV0ZXIsDQogICAgICAgICBodHRwczovL2dpdC5vcGVuc3RhY2su
-b3JnL2NnaXQvb3BlbnN0YWNrL2tleXN0b25lL2NvbW1pdC8/aWQ9YzcwYmFhMGE3YTFmMTZkMWUz
-Y2IzNmFiYzg2NjY2MjY2MzMxMzNkYg0KICAgIA0KICAgIE9uIFdlZCwgQXByIDUsIDIwMTcgYXQg
-MTA6NTMgQU0sIE1hcmN1cyBXYXR0cyA8bXdhdHRzQHJlZGhhdC5jb20+IHdyb3RlOg0KICAgID4g
-SSBkaWQgc29tZSBleHBlcmltZW50cyB3aXRoIGZlcm5ldCB0b2tlbnMsIHJldm9jYXRpb24sIGFu
-ZCBjZXBoLg0KICAgID4NCiAgICA+IGNlcGg6IHJlY2VudCBtYXN0ZXIgYnJhbmNoLiAga2V5c3Rv
-bmU6IGxpYmVydHkuDQogICAgPg0KICAgID4gc3VtbWFyeS4gIGRvZXNuJ3Qgd29yay4gIHJlYWxs
-eSBkb2Vzbid0IHdvcmsgb3V0IG9mIHRoZSBib3guDQogICAgPg0KICAgID4gQ291cGxlIG9mIGNv
-bW1lbnRzIGFuZCBvYnNlcnZhdGlvbnMuDQogICAgPg0KICAgID4gMS4gdGhlIHVwc3RyZWFtIGRv
-Y3VtZW50YXRpb24gZm9yIGtleXN0b25lIG1pdGFrYSsgIm1hbnVhbCBpbnN0YWxsIg0KICAgID4g
-ZG9lcyBub3QgZGVzY3JpYmUgaG93IHRvIGNyZWF0ZSBhIHNpZ25pbmdfa2V5IG9yIGluZGljYXRl
-DQogICAgPiB0aGF0IGl0J3MgbmVjZXNzYXJ5LiAgU28gZmFyLCBpbiBteSBrZXlzdG9uZSBleHBl
-cmltZW50cywNCiAgICA+IEkgaGF2ZW4ndCBmb3VuZCBhbnkgaW50cmluc2ljIHJlYXNvbiB3aHkg
-aXQncyB1c2VmdWwuDQogICAgPiBOb3RlIHRoYXQgb3RhY2EgZG9lc24ndCBldmVuIGluY2x1ZGUg
-cGtpL3BraXogdG9rZW5zLg0KICAgID4gICAgICAgICBbIC4uLiBhbmQgdGhlIHVwc3RyZWFtIGRv
-Y3VtZW50YXRpb24gZm9yIGRvaW5nIGENCiAgICA+ICAgICAgICAgIm1hbnVhbCBpbnN0YWxsIiBv
-ZiBsaWJlcnR5IGFwcGVhcnMgdG8gaGF2ZSB2YW5pc2hlZC4gXQ0KICAgID4NCiAgICA+IDIuIC92
-My9hdXRoL3Rva2Vucy9PUy1QS0kvcmV2b2tlZA0KICAgID4gaXMgYXBwYXJlbnRseSBkZXByZWNh
-dGVkLiAgSW4gb3JkZXIgdG8gdXNlIGl0LCBpdCAqaXMqDQogICAgPiBuZWNlc3NhcnkgdG8gY3Jl
-YXRlIGEgc2lnbmluZyBrZXkuDQogICAgPg0KICAgID4gMy4gSXQncyBwb3NzaWJsZSB0byByZXZv
-a2UgZmVybmV0IHRva2Vucy4gIFJldm9rZWQgZmVybmV0IHRva2Vucw0KICAgID4gY2FuIG5vIGxv
-bmdlciBiZSB2YWxpZGF0ZWQuICBDbGVhcmx5IGludGVybmFsbHkgdGhleSBnZXQgbWFya2VkDQog
-ICAgPiBhcyByZXZva2VkLiAgSG93ZXZlciwgdGhleSBkb24ndCBhcHBlYXIgaW4gdGhlIG91dHB1
-dCBmcm9tDQogICAgPiBPUy1QS0kvcmV2b2tlZC4NCiAgICA+DQogICAgPiA0LiBUaGUgcmVwbGFj
-ZW1lbnQgYXBpIGlzIC92My9PUy1SRVZPS0UvZXZlbnRzDQogICAgPiBUaGlzIGFwcGVhcnMgdG8g
-YmUgMiBnZW5lcmF0aW9ucyBhaGVhZCBvZiBPUy1QS0kvcmV2b2tlZDsNCiAgICA+IHRoZXJlIHdh
-cyBzb21ldGhpbmcgaW5iZXR3ZWVuIHRoYXQgYXBwYXJlbnRseSBoYWQgYW4NCiAgICA+IGluY29u
-dmVuaWVudCBkZXBlbmRlbmN5IG9uICJleHBpcmVzX2F0Ii4gIEl0IGRvZXMgbm90DQogICAgPiB1
-c2UgYSBzaWduaW5nIGtleS4gIEluIG9yZGVyIHRvIHVzZSBpdCwgaXQncyBuZWNlc2FyeQ0KICAg
-ID4gdG8gdHJhY2sgdGhpbmdzIGJ5ICJhdWRpdF9pZCIuICBUaGlzIGNvbWVzIGJhY2sgd2l0aCB0
-aGUNCiAgICA+IHRva2VuIHZhbGlkYXRlIGNhbGwuDQogICAgPg0KICAgID4gNS4gVGhlIGNlcGgg
-cmFkb3NndyB0aHJlYWQgdGhhdCBjYWxscyBPUy1QS0kvcmV2b2tlZCBkb2Vzbid0DQogICAgPiBk
-byBhbnl0aGluZyBlbHNlIGJ1dCBwcm9jZXNzIHRoZSBvdXRwdXQgb2YgdGhhdC4gIElmIGl0IHN1
-Y2NlZWRzLA0KICAgID4gaXQgY2FuIGV2ZW50dWFsbHkgaW52YWxpZGF0ZSB0b2tlbnMgKGJ5IGlk
-LCBub3QgYnkgYXVkaXQtaWQpLg0KICAgID4gSSBkb24ndCBiZWxpZXZlIGl0IGRvZXMgYW55IG90
-aGVyIGNhY2hlIG1haW50ZW5hbmNlIC0gc28gaW4gbXkNCiAgICA+IHNldHVwIHdoZXJlIGl0IG5l
-dmVyIHNlZXMgZmVybmV0IHJldm9jYXRpb25zIEkgYmVsaWV2ZSBpdCdzDQogICAgPiBkb2luZyBu
-b3RoaW5nIHVzZWZ1bC4gIChBbmQgdGhlIHJldm9rZWQgdG9rZW4gdGhhdCBJIGNhbid0IHZhbGlk
-YXRlDQogICAgPiBzdGlsbCB3b3JrcyB3aXRoIGNlcGguKQ0KICAgID4NCiAgICA+IDYuIFRoZSBj
-ZXBoIHJhZG9zZ3cga2V5c3RvbmUgZG9jdW1lbnRhdGlvbiBkb2N1bWVudHMgYWRkaW5nIHRoZSBw
-cml2YXRlIGtleQ0KICAgID4gZm9yIGJvdGggdGhlIENBIGFuZCB0aGUgc2lnbmluZyBjZXJ0LiAg
-SSBjYW4ndCB0aGluayBvZiBhbnkgcmVhc29uDQogICAgPiB3aHkgdGhhdCdzIHVzZWZ1bCwgbmVj
-ZXNzYXJ5LCBvciBkZXNpcmFibGUuICBJdCAqaXMqIG5lY2Vzc2FyeQ0KICAgID4gdG8gaGF2ZSB0
-aGUgc2lnbmluZyAqY2VydGlmaWNhdGUqIC0gdGhlIGNtcyBtZXNzYWdlIGZyb20gT1MtUEtJL3Jl
-dm9rZWQNCiAgICA+IGRvZXNuJ3QgaGF2ZSBhIGNlcnRpZmljYXRlLiAgKEFuZCB0aGUgQ0EgY2Vy
-dCBpcyBwcm9iYWJseSBhbHNvIHVzZWZ1bA0KICAgID4gZXNwLiBpZiB1c2luZyBodHRwcyB3LyBr
-ZXlzdG9uZS4uLikNCiAgICA+DQogICAgPiA3LiBUaGVyZSdzIG5vdCBtdWNoIHBvaW50IGluIHJl
-cGVhdGVkbHkgcG9sbGluZyBmb3IgcmV2b2tlZCB0b2tlbnMNCiAgICA+IGlmIHRoZSB0b2tlbiBj
-YWNoZSBpcyBlbXB0eS4gICggYnV0IG5vdCBiYWQgdG8gY2hlY2sgb25jZQ0KICAgID4gYXQgc3Rh
-cnR1cCBqdXN0IHRvIHZhbGlkYXRlIHRoZSBjb25maWd1cmF0aW9uLiApDQogICAgPg0KICAgID4g
-OC4gcmVmcy4NCiAgICA+IGh0dHBzOi8vZG9jcy5vcGVuc3RhY2sub3JnL21pdGFrYS9pbnN0YWxs
-LWd1aWRlLXJkby9rZXlzdG9uZS5odG1sDQogICAgPiAgICAgICAgIG1pdGFrYSBrZXlzdG9uZSBt
-YW51YWwgaW5zdGFsbA0KICAgID4gaHR0cHM6Ly9kb2NzLm9wZW5zdGFjay5vcmcvZGV2ZWxvcGVy
-L2tleXN0b25lL2NvbmZpZ3VyYXRpb24uaHRtbA0KICAgID4gICAgICAgICBjb250YWlucyBpbmZv
-cm1hdGlvbiBvbiByZXZvY2F0aW9uIGV2ZW50cw0KICAgID4gaHR0cHM6Ly9kZXZlbG9wZXIub3Bl
-bnN0YWNrLm9yZy9hcGktcmVmL2lkZW50aXR5L3YzLWV4dC8/ZXhwYW5kZWQ9bGlzdC1yZXZvY2F0
-aW9uLWV2ZW50cy1kZXRhaWwNCiAgICA+ICAgICAgICAgYXBpIGRvYw0KICAgID4gaHR0cHM6Ly9i
-dWdzLmxhdW5jaHBhZC5uZXQva2V5c3RvbmUvK2J1Zy8xMjQyNjIwDQogICAgPiAgICAgICAgIGhp
-c3RvcnkNCiAgICA+IGh0dHBzOi8vYnVncy5sYXVuY2hwYWQubmV0L29wZW5zdGFjay1hcGktc2l0
-ZS8rYnVnLzEzMDQ2MDYNCiAgICA+ICAgICAgICAgaGlzdG9yeQ0KICAgID4gaHR0cHM6Ly9ibHVl
-cHJpbnRzLmxhdW5jaHBhZC5uZXQva2V5c3RvbmUvK3NwZWMvcmV2b2NhdGlvbi1ldmVudHMNCiAg
-ICA+ICAgICAgICAgaGlzdG9yeQ0KICAgID4NCiAgICA+ICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgIC1NYXJjdXMgV2F0dHMNCiAgICANCiAgICAtLSANCiAg
-ICBNYXR0IEJlbmphbWluDQogICAgUmVkIEhhdCwgSW5jLg0KICAgIDMxNSBXZXN0IEh1cm9uIFN0
-cmVldCwgU3VpdGUgMTQwQQ0KICAgIEFubiBBcmJvciwgTWljaGlnYW4gNDgxMDMNCiAgICANCiAg
-ICBodHRwOi8vd3d3LnJlZGhhdC5jb20vZW4vdGVjaG5vbG9naWVzL3N0b3JhZ2UNCiAgICANCiAg
-ICB0ZWwuICA3MzQtODIxLTUxMDENCiAgICBmYXguICA3MzQtNzY5LTg5MzgNCiAgICBjZWwuICA3
-MzQtMjE2LTUzMDkNCiAgICANCg0K
+Hi Pavan,
+
+Your email sparked some backchannel discussion.
+
+I -think- Marcus and Radoslaw would agree that running a revocation thread should be configurable.  The ability to properly detect revoked Fernet tokens (OS-REVOKE, below) will be implemented upstream.
+
+Regards,
+
+Matt
+
+----- Forwarded Message -----
+From: "Radoslaw Zarzynski" <rzarzynski@mirantis.com>
+To: "Marcus Watts" <mwatts@redhat.com>
+Cc: "Matt Benjamin" <mbenjamin@redhat.com>, "Yehuda Sadeh-Weinraub" <ysadehwe@redhat.com>
+Sent: Wednesday, April 5, 2017 7:01:15 AM
+Subject: Re: rgw keystone revocation thread
+
+Hi Marcus,
+
+Thanks a lot for the these points!
+
+> 3. It's possible to revoke fernet tokens.  Revoked fernet tokens
+> can no longer be validated.  Clearly internally they get marked
+> as revoked.  *However, they don't appear in the output from
+> OS-PKI/revoked.*
+
+Especially this one is the game-changer. The same might apply
+to the "tokens/revoked" of Keystone API v2. In the end of 2016
+it has been documented [1] (together with OS-PKI/revoked) in
+a way suggesting [2] it works only with PKI tokens. It's possible
+that PKIZ are also covered but I'm not sure about Fernet/UUID.
+
+> 4. The replacement api is /v3/OS-REVOKE/events
+> This appears to be 2 generations ahead of OS-PKI/revoked;
+> there was something inbetween that apparently had an
+> inconvenient dependency on "expires_at".  It does not
+> use a signing key.  In order to use it, it's necesary
+> to track things by "audit_id".  This comes back with the
+> token validate call.
+
+I just created a ticket for OS-REVOKE:
+  * http://tracker.ceph.com/issues/19499
+
+Regards,
+Radek
+
+[1] https://bugs.launchpad.net/keystone/+bug/1626778
+[2] description of the "signed" parameter,
+     https://git.openstack.org/cgit/openstack/keystone/commit/?id=c70baa0a7a1f16d1e3cb36abc8666626633133db
+
+On Wed, Apr 5, 2017 at 10:53 AM, Marcus Watts <mwatts@redhat.com> wrote:
+> I did some experiments with fernet tokens, revocation, and ceph.
+>
+> ceph: recent master branch.  keystone: liberty.
+>
+> summary.  doesn't work.  really doesn't work out of the box.
+>
+> Couple of comments and observations.
+>
+> 1. the upstream documentation for keystone mitaka+ "manual install"
+> does not describe how to create a signing_key or indicate
+> that it's necessary.  So far, in my keystone experiments,
+> I haven't found any intrinsic reason why it's useful.
+> Note that otaca doesn't even include pki/pkiz tokens.
+>         [ ... and the upstream documentation for doing a
+>         "manual install" of liberty appears to have vanished. ]
+>
+> 2. /v3/auth/tokens/OS-PKI/revoked
+> is apparently deprecated.  In order to use it, it *is*
+> necessary to create a signing key.
+>
+> 3. It's possible to revoke fernet tokens.  Revoked fernet tokens
+> can no longer be validated.  Clearly internally they get marked
+> as revoked.  However, they don't appear in the output from
+> OS-PKI/revoked.
+>
+> 4. The replacement api is /v3/OS-REVOKE/events
+> This appears to be 2 generations ahead of OS-PKI/revoked;
+> there was something inbetween that apparently had an
+> inconvenient dependency on "expires_at".  It does not
+> use a signing key.  In order to use it, it's necesary
+> to track things by "audit_id".  This comes back with the
+> token validate call.
+>
+> 5. The ceph radosgw thread that calls OS-PKI/revoked doesn't
+> do anything else but process the output of that.  If it succeeds,
+> it can eventually invalidate tokens (by id, not by audit-id).
+> I don't believe it does any other cache maintenance - so in my
+> setup where it never sees fernet revocations I believe it's
+> doing nothing useful.  (And the revoked token that I can't validate
+> still works with ceph.)
+>
+> 6. The ceph radosgw keystone documentation documents adding the private key
+> for both the CA and the signing cert.  I can't think of any reason
+> why that's useful, necessary, or desirable.  It *is* necessary
+> to have the signing *certificate* - the cms message from OS-PKI/revoked
+> doesn't have a certificate.  (And the CA cert is probably also useful
+> esp. if using https w/ keystone...)
+>
+> 7. There's not much point in repeatedly polling for revoked tokens
+> if the token cache is empty.  ( but not bad to check once
+> at startup just to validate the configuration. )
+>
+> 8. refs.
+> https://docs.openstack.org/mitaka/install-guide-rdo/keystone.html
+>         mitaka keystone manual install
+> https://docs.openstack.org/developer/keystone/configuration.html
+>         contains information on revocation events
+> https://developer.openstack.org/api-ref/identity/v3-ext/?expanded=list-revocation-events-detail
+>         api doc
+> https://bugs.launchpad.net/keystone/+bug/1242620
+>         history
+> https://bugs.launchpad.net/openstack-api-site/+bug/1304606
+>         history
+> https://blueprints.launchpad.net/keystone/+spec/revocation-events
+>         history
+>
+>                                                 -Marcus Watts
+
+-- 
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-821-5101
+fax.  734-769-8938
+cel.  734-216-5309
