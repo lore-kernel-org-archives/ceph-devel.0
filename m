@@ -1,47 +1,67 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH 1/5] ceph: fix wrong check in ceph_renew_caps()
-Date: Wed, 05 Apr 2017 10:16:27 -0400
-Message-ID: <1491401787.18658.6.camel@redhat.com>
-References: <20170405013019.5032-1-zyan@redhat.com>
+Subject: [PATCH v7 6/7] Revert "ceph: SetPageError() for writeback pages if writepages fails"
+Date: Wed,  5 Apr 2017 13:14:16 -0400
+Message-ID: <20170405171417.25187-7-jlayton@redhat.com>
+References: <20170405171417.25187-1-jlayton@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f175.google.com ([209.85.216.175]:33961 "EHLO
-        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755334AbdDEOQb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Apr 2017 10:16:31 -0400
-Received: by mail-qt0-f175.google.com with SMTP id n21so11549965qta.1
-        for <ceph-devel@vger.kernel.org>; Wed, 05 Apr 2017 07:16:31 -0700 (PDT)
-In-Reply-To: <20170405013019.5032-1-zyan@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:43088 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933767AbdDEROb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 5 Apr 2017 13:14:31 -0400
+In-Reply-To: <20170405171417.25187-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+To: idryomov@gmail.com, zyan@redhat.com, sage@redhat.com
+Cc: jspray@redhat.com, ceph-devel@vger.kernel.org
 
-On Wed, 2017-04-05 at 09:30 +0800, Yan, Zheng wrote:
-> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-> ---
->  fs/ceph/file.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 579a16c..0480492 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -123,7 +123,7 @@ int ceph_renew_caps(struct inode *inode)
->  	spin_lock(&ci->i_ceph_lock);
->  	wanted = __ceph_caps_file_wanted(ci);
->  	if (__ceph_is_any_real_caps(ci) &&
-> -	    (!(wanted & CEPH_CAP_ANY_WR) == 0 || ci->i_auth_cap)) {
-> +	    (!(wanted & CEPH_CAP_ANY_WR) || ci->i_auth_cap)) {
->  		int issued = __ceph_caps_issued(ci, NULL);
->  		spin_unlock(&ci->i_ceph_lock);
->  		dout("renew caps %p want %s issued %s updating mds_wanted\n",
+This reverts commit b109eec6f4332bd517e2f41e207037c4b9065094.
 
-That certainly looks more like what was intended, but I'm still a
-little unclear on why we have so much special casing in all of this
-caps handling.
+If I'm filling up a filesystem with this sort of command:
 
-Why do we skip ceph_check_caps if we want CEPH_CAP_ANY_WR?
+    $ dd if=/dev/urandom of=/mnt/cephfs/fillfile bs=2M oflag=sync
+
+...then I'll eventually get back EIO on a write. Further calls
+will give us ENOSPC.
+
+I'm not sure what prompted this change, but I don't think it's what we
+want to do. If writepages failed, we will have already set the mapping
+error appropriately, and that's what gets reported by fsync() or
+close().
+
+__filemap_fdatawait_range however, does this:
+
+	wait_on_page_writeback(page);
+	if (TestClearPageError(page))
+		ret = -EIO;
+
+...and that -EIO ends up trumping the mapping's error if one exists.
+
+When writepages fails, we only want to set the error in the mapping,
+and not flag the individual pages.
+
+Reviewed-by: "Yan, Zheng” <zyan@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+---
+ fs/ceph/addr.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 7e3fae334620..6cdf94459ac4 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -703,9 +703,6 @@ static void writepages_finish(struct ceph_osd_request *req)
+ 				clear_bdi_congested(&fsc->backing_dev_info,
+ 						    BLK_RW_ASYNC);
+ 
+-			if (rc < 0)
+-				SetPageError(page);
+-
+ 			ceph_put_snap_context(page_snap_context(page));
+ 			page->private = 0;
+ 			ClearPagePrivate(page);
 -- 
-Jeff Layton <jlayton@redhat.com>
+2.9.3
+
