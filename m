@@ -1,186 +1,129 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v7 4/7] libceph: add an epoch_barrier field to struct ceph_osd_client
-Date: Wed,  5 Apr 2017 13:14:14 -0400
-Message-ID: <20170405171417.25187-5-jlayton@redhat.com>
+Subject: [PATCH v7 2/7] libceph: allow requests to return immediately on full conditions if caller wishes
+Date: Wed,  5 Apr 2017 13:14:12 -0400
+Message-ID: <20170405171417.25187-3-jlayton@redhat.com>
 References: <20170405171417.25187-1-jlayton@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55352 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:53256 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933668AbdDEROY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 5 Apr 2017 13:14:24 -0400
+        id S933343AbdDEROW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 5 Apr 2017 13:14:22 -0400
 In-Reply-To: <20170405171417.25187-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: idryomov@gmail.com, zyan@redhat.com, sage@redhat.com
 Cc: jspray@redhat.com, ceph-devel@vger.kernel.org
 
-Cephfs can get cap update requests that contain a new epoch barrier in
-them. When that happens we want to pause all OSD traffic until the right
-map epoch arrives.
+Usually, when the osd map is flagged as full or the pool is at quota,
+write requests just hang. This is not what we want for cephfs, where
+it would be better to simply report -ENOSPC back to userland instead
+of stalling.
 
-Add an epoch_barrier field to ceph_osd_client that is protected by the
-osdc->lock rwsem. When the barrier is set, and the current OSD map
-epoch is below that, pause the request target when submitting the
-request or when revisiting it. Add a way for upper layers (cephfs)
-to update the epoch_barrier as well.
+If the caller knows that it will want an immediate error return instead
+of blocking on a full or at-quota error condition then allow it to set a
+flag to request that behavior.
 
-If we get a new map, compare the new epoch against the barrier before
-kicking requests and request another map if the map epoch is still lower
-than the one we want.
+Set that flag in ceph_osdc_new_request (since ceph.ko is the only caller),
+and on any other write request from ceph.ko.
 
-If we get a map with a full pool, or at quota condition, then set the
-barrier to the current epoch value.
+A later patch will deal with requests that were submitted before the new
+map showing the full condition came in.
 
 Reviewed-by: "Yan, Zheng” <zyan@redhat.com>
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
 Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- include/linux/ceph/osd_client.h |  2 ++
- net/ceph/debugfs.c              |  3 ++-
- net/ceph/osd_client.c           | 50 ++++++++++++++++++++++++++++++++++-------
- 3 files changed, 46 insertions(+), 9 deletions(-)
+ fs/ceph/addr.c                  | 1 +
+ fs/ceph/file.c                  | 1 +
+ include/linux/ceph/osd_client.h | 1 +
+ net/ceph/osd_client.c           | 7 +++++++
+ 4 files changed, 10 insertions(+)
 
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 1a3e1b40799a..7e3fae334620 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -1892,6 +1892,7 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
+ 	err = ceph_osdc_start_request(&fsc->client->osdc, rd_req, false);
+ 
+ 	wr_req->r_mtime = ci->vfs_inode.i_mtime;
++	wr_req->r_abort_on_full = true;
+ 	err2 = ceph_osdc_start_request(&fsc->client->osdc, wr_req, false);
+ 
+ 	if (!err)
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 356b7c76a2f1..cff35a1ff53c 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -712,6 +712,7 @@ static void ceph_aio_retry_work(struct work_struct *work)
+ 	req->r_callback = ceph_aio_complete_req;
+ 	req->r_inode = inode;
+ 	req->r_priv = aio_req;
++	req->r_abort_on_full = true;
+ 
+ 	ret = ceph_osdc_start_request(req->r_osdc, req, false);
+ out:
 diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
-index 8cf644197b1a..85650b415e73 100644
+index 3fc9e7754a9b..8cf644197b1a 100644
 --- a/include/linux/ceph/osd_client.h
 +++ b/include/linux/ceph/osd_client.h
-@@ -267,6 +267,7 @@ struct ceph_osd_client {
- 	struct rb_root         osds;          /* osds */
- 	struct list_head       osd_lru;       /* idle osds */
- 	spinlock_t             osd_lru_lock;
-+	u32		       epoch_barrier;
- 	struct ceph_osd        homeless_osd;
- 	atomic64_t             last_tid;      /* tid of last request */
- 	u64                    last_linger_id;
-@@ -305,6 +306,7 @@ extern void ceph_osdc_handle_reply(struct ceph_osd_client *osdc,
- 				   struct ceph_msg *msg);
- extern void ceph_osdc_handle_map(struct ceph_osd_client *osdc,
- 				 struct ceph_msg *msg);
-+void ceph_osdc_update_epoch_barrier(struct ceph_osd_client *osdc, u32 eb);
+@@ -187,6 +187,7 @@ struct ceph_osd_request {
+ 	struct timespec r_mtime;              /* ditto */
+ 	u64 r_data_offset;                    /* ditto */
+ 	bool r_linger;                        /* don't resend on failure */
++	bool r_abort_on_full;		      /* return ENOSPC when full */
  
- extern void osd_req_op_init(struct ceph_osd_request *osd_req,
- 			    unsigned int which, u16 opcode, u32 flags);
-diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
-index d7e63a4f5578..71ba13927b3d 100644
---- a/net/ceph/debugfs.c
-+++ b/net/ceph/debugfs.c
-@@ -62,7 +62,8 @@ static int osdmap_show(struct seq_file *s, void *p)
- 		return 0;
- 
- 	down_read(&osdc->lock);
--	seq_printf(s, "epoch %d flags 0x%x\n", map->epoch, map->flags);
-+	seq_printf(s, "epoch %u barrier %u flags 0x%x\n", map->epoch,
-+			osdc->epoch_barrier, map->flags);
- 
- 	for (n = rb_first(&map->pg_pools); n; n = rb_next(n)) {
- 		struct ceph_pg_pool_info *pi =
+ 	/* internal */
+ 	unsigned long r_stamp;                /* jiffies, send or check time */
 diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
-index 55b7585ccefd..fb35adae7fbf 100644
+index feb666c22381..52a2019a2b64 100644
 --- a/net/ceph/osd_client.c
 +++ b/net/ceph/osd_client.c
-@@ -1298,8 +1298,9 @@ static bool target_should_be_paused(struct ceph_osd_client *osdc,
- 		       __pool_full(pi);
- 
- 	WARN_ON(pi->id != t->base_oloc.pool);
--	return (t->flags & CEPH_OSD_FLAG_READ && pauserd) ||
--	       (t->flags & CEPH_OSD_FLAG_WRITE && pausewr);
-+	return ((t->flags & CEPH_OSD_FLAG_READ) && pauserd) ||
-+	       ((t->flags & CEPH_OSD_FLAG_WRITE) && pausewr) ||
-+	       (osdc->osdmap->epoch < osdc->epoch_barrier);
- }
- 
- enum calc_target_result {
-@@ -1654,8 +1655,13 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
- 		goto promote;
+@@ -961,6 +961,7 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ 				       truncate_size, truncate_seq);
  	}
  
--	if ((req->r_flags & CEPH_OSD_FLAG_WRITE) &&
--	    ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR)) {
-+	if (osdc->osdmap->epoch < osdc->epoch_barrier) {
-+		dout("req %p epoch %u barrier %u\n", req, osdc->osdmap->epoch,
-+		     osdc->epoch_barrier);
-+		req->r_t.paused = true;
-+		maybe_request_map(osdc);
-+	} else if ((req->r_flags & CEPH_OSD_FLAG_WRITE) &&
-+		   ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR)) {
- 		dout("req %p pausewr\n", req);
++	req->r_abort_on_full = true;
+ 	req->r_flags = flags;
+ 	req->r_base_oloc.pool = layout->pool_id;
+ 	req->r_base_oloc.pool_ns = ceph_try_get_string(layout->pool_ns);
+@@ -1627,6 +1628,7 @@ static void maybe_request_map(struct ceph_osd_client *osdc)
+ 		ceph_monc_renew_subs(&osdc->client->monc);
+ }
+ 
++static void complete_request(struct ceph_osd_request *req, int err);
+ static void send_map_check(struct ceph_osd_request *req);
+ 
+ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
+@@ -1636,6 +1638,7 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
+ 	enum calc_target_result ct_res;
+ 	bool need_send = false;
+ 	bool promoted = false;
++	bool need_abort = false;
+ 
+ 	WARN_ON(req->r_tid);
+ 	dout("%s req %p wrlocked %d\n", __func__, req, wrlocked);
+@@ -1670,6 +1673,8 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
+ 		pr_warn_ratelimited("FULL or reached pool quota\n");
  		req->r_t.paused = true;
  		maybe_request_map(osdc);
-@@ -1809,11 +1815,14 @@ static void abort_request(struct ceph_osd_request *req, int err)
++		if (req->r_abort_on_full)
++			need_abort = true;
+ 	} else if (!osd_homeless(osd)) {
+ 		need_send = true;
+ 	} else {
+@@ -1686,6 +1691,8 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
+ 	link_request(osd, req);
+ 	if (need_send)
+ 		send_request(req);
++	else if (need_abort)
++		complete_request(req, -ENOSPC);
+ 	mutex_unlock(&osd->lock);
  
- /*
-  * Drop all pending requests that are stalled waiting on a full condition to
-- * clear, and complete them with ENOSPC as the return code.
-+ * clear, and complete them with ENOSPC as the return code. Set the
-+ * osdc->epoch_barrier to the latest map epoch that we've seen if any were
-+ * cancelled.
-  */
- static void ceph_osdc_abort_on_full(struct ceph_osd_client *osdc)
- {
- 	struct rb_node *n;
-+	bool set_barrier = false;
- 
- 	dout("enter abort_on_full\n");
- 
-@@ -1832,12 +1841,18 @@ static void ceph_osdc_abort_on_full(struct ceph_osd_client *osdc)
- 
- 			if (req->r_abort_on_full &&
- 			    (ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
--			     pool_full(osdc, req->r_t.target_oloc.pool)))
-+			     pool_full(osdc, req->r_t.target_oloc.pool))) {
- 				abort_request(req, -ENOSPC);
-+				set_barrier = true;
-+			}
- 		}
- 	}
-+
-+	/* Update the epoch barrier to current epoch if a call was aborted */
-+	if (set_barrier)
-+		osdc->epoch_barrier = osdc->osdmap->epoch;
- out:
--	dout("return abort_on_full\n");
-+	dout("return abort_on_full barrier=%u\n", osdc->epoch_barrier);
- }
- 
- static void check_pool_dne(struct ceph_osd_request *req)
-@@ -3293,7 +3308,8 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
- 	pausewr = ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR) ||
- 		  ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) ||
- 		  have_pool_full(osdc);
--	if (was_pauserd || was_pausewr || pauserd || pausewr)
-+	if (was_pauserd || was_pausewr || pauserd || pausewr ||
-+	    osdc->osdmap->epoch < osdc->epoch_barrier)
- 		maybe_request_map(osdc);
- 
- 	kick_requests(osdc, &need_resend, &need_resend_linger);
-@@ -3311,6 +3327,24 @@ void ceph_osdc_handle_map(struct ceph_osd_client *osdc, struct ceph_msg *msg)
- 	up_write(&osdc->lock);
- }
- 
-+void ceph_osdc_update_epoch_barrier(struct ceph_osd_client *osdc, u32 eb)
-+{
-+	down_read(&osdc->lock);
-+	if (unlikely(eb > osdc->epoch_barrier)) {
-+		up_read(&osdc->lock);
-+		down_write(&osdc->lock);
-+		if (likely(eb > osdc->epoch_barrier)) {
-+			dout("updating epoch_barrier from %u to %u\n",
-+					osdc->epoch_barrier, eb);
-+			osdc->epoch_barrier = eb;
-+		}
-+		up_write(&osdc->lock);
-+	} else {
-+		up_read(&osdc->lock);
-+	}
-+}
-+EXPORT_SYMBOL(ceph_osdc_update_epoch_barrier);
-+
- /*
-  * Resubmit requests pending on the given osd.
-  */
+ 	if (ct_res == CALC_TARGET_POOL_DNE)
 -- 
 2.9.3
 
