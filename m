@@ -1,505 +1,134 @@
-From: nokia ceph <nokiacephusers-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: bluestore - OSD booting issue continuosly
-Date: Wed, 5 Apr 2017 15:45:47 +0530
-Message-ID: <CALWuvY-f6oHRG16p29TGb_pB8jn7NA-fpPN3E2zq6BEJrxTRmA@mail.gmail.com>
+From: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
+Subject: Re: rgw keystone revocation thread
+Date: Wed, 5 Apr 2017 12:59:03 +0000
+Message-ID: <9AA2ADE1-F674-4255-81FF-8AEEFAD2A75A@walmartlabs.com>
+References: <668A58E4-2994-4FFC-A96F-1B145094BCF0@walmartlabs.com>
+ <CADRKj5RreYnkfcmqGrA_DaZ6FHboqHLko6FQcPR4z_zO6RsyBQ@mail.gmail.com>
+ <113923053.10925537.1491336258739.JavaMail.zimbra@redhat.com>
+ <CA+H5UW3vx=ZDh2xp0XFagoL0i-3=Fiuzzfuzb8+maPoY974BJA@mail.gmail.com>
+ <558264060.11035373.1491354731997.JavaMail.zimbra@redhat.com>
+ <CA+H5UW1UxOxgJgBkX-uxY1dBJ1u6uPuAqWD69xHwUMTRWkS2PA@mail.gmail.com>
+ <20170405085317.GA30236@degu.eng.arb.redhat.com>
+ <CA+H5UW3h-OB0HyVz7LLRMmFH5=YxdWs9fw3pcvvqwpRfkyUQLA@mail.gmail.com>
+ <764813255.11282714.1491396574036.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0145308407=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---===============0145308407==
-Content-Type: multipart/alternative; boundary=94eb2c03366c12e048054c68ad46
-
---94eb2c03366c12e048054c68ad46
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-Hello,
-
-Env:- 11.2.0
-         bluestore, EC 4+1 , RHEL7.2
-
-We are facing one OSD's booting again and again which caused the cluster
-crazy :( .  As you can see one PG got in inconsistent state while we tried
-to repair that partular PG, as its primary OSD's went down. After some time
-we found some trace from mon logs that the OSD boot continuously
-
-# ceph pg stat
-
-v1109889: 8192 pgs: 1 *active+clean+inconsistent*, 8191 active+clean; 31041
-GB data, 42473 GB used, 1177 TB / 1218 TB avail; 411 kB/s rd, 28102 kB/s
-wr, 322 op/s
-
-
-
-# ceph health detail | grep 'inconsistent'
-
-HEALTH_ERR 1 pgs inconsistent; 5 scrub errors
-
-pg 1.5c4 is active+clean+inconsistent, acting [258,268,156,14,67]
-
-
-
-# ceph pg deep-scrub 1.5c4
-
-instructing pg 1.5c4 on osd.258 to deep-scrub
-
-
-
-
-
-From ceph-osd.258.log when the problem pops up;
-
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-
-
-2017-04-04 13:08:08.288728 7f6b34fe6700 -1 log_channel(cluster) log [ERR] :
-1.5c4s0 scrub stat mismatch, got 1989/1988 objects, 0/0 clones, 1989/1988
-dirty, 0/0
-
-omap, 0/0 pinned, 0/0 hit_set_archive, 0/0 whiteouts, 4113960196/4110943924
-bytes, 0/0 hit_set_archive bytes.
-
-2017-04-04 13:08:08.288744 7f6b34fe6700 -1 log_channel(cluster) log [ERR] :
-1.5c4s0 scrub 1 missing, 0 inconsistent objects
-
-
-
-2017-04-04 13:08:08.288747 7f6b34fe6700 -1 log_channel(cluster) log [ERR] :
-1.5c4 scrub 5 errors
-
-
-From mon logs
-
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-
-
-
-2017-04-05 07:18:17.665821 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-pgmap v1134421: 8192 pgs: 1 activating+degraded+inconsistent, 4 activ
-
-ating, 27 active+recovery_wait+degraded, 3 active+recovering+degraded, 8157
-active+clean; 31619 GB data, 43163 GB used, 1176 TB / 1218 TB avail;
-
-16429 kB/s rd, 109 MB/s wr, 1208 op/s; 554/87717275 objects degraded
-(0.001%)
-
-2017-04-05 07:18:18.643905 7f0fb55b5700  1 mon.cn1@0(leader).osd e4701
-e4701: 335 osds: 334 up, 335 in
-
-2017-04-05 07:18:18.656143 7f0fb55b5700  0 mon.cn1@0(leader).osd e4701
-crush map has features 288531987042664448, adjusting msgr requires
-
-2017-04-05 07:18:18.676477 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-osdmap e4701: 335 osds: 334 up, 335 in
-
-2017-04-05 07:18:18.731719 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-pgmap v1134422: 8192 pgs: 1 activating+degraded+inconsistent, 4 activ
-
-ating, 27 active+recovery_wait+degraded, 3 active+recovering+degraded, 8157
-active+clean; 31619 GB data, 43163 GB used, 1176 TB / 1218 TB avail;
-
-21108 kB/s rd, 105 MB/s wr, 1165 op/s; 554/87717365 objects degraded
-(0.001%)
-
-2017-04-05 07:18:19.963217 7f0fb55b5700  1 mon.cn1@0(leader).osd e4702
-e4702: 335 osds: 335 up, 335 in
-
-2017-04-05 07:18:19.975002 7f0fb55b5700  0 mon.cn1@0(leader).osd e4702
-crush map has features 288531987042664448, adjusting msgr requires
-
-2017-04-05 07:18:19.978696 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-osd.258 10.139.4.84:6815/27074 *boot   --->>>>>>>>>>>>>>>>>>>>>>>>>>*
-
-2017-04-05 07:18:19.983349 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-osdmap e4702: 335 osds: 335 up, 335 in
-
-2017-04-05 07:18:20.079996 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-pgmap v1134423: 8192 pgs: 1 inconsistent+peering, 15 peering, 23 acti
-
-ve+recovery_wait+degraded, 3 active+recovering+degraded, 8150 active+clean;
-31619 GB data, 43163 GB used, 1176 TB / 1218 TB avail; 6888 kB/s rd,
-
-72604 kB/s wr, 654 op/s; 489/87717555 objects degraded (0.001%)
-
-2017-04-05 07:18:20.135081 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-pgmap v1134424: 8192 pgs: 19 stale+active+clean, 1 inconsistent+peeri
-
-ng, 15 peering, 23 active+recovery_wait+degraded, 3
-active+recovering+degraded, 8131 active+clean; 31619 GB data, 43163 GB
-used, 1176 TB / 1218 T
-
-B avail; 3452 kB/s rd, 97092 kB/s wr, 834 op/s; 489/87717565 objects
-degraded (0.001%)
-
-2017-04-05 07:18:20.303398 7f0fb55b5700  1 mon.cn1@0(leader).osd e4703
-e4703: 335 osds: 335 up, 335 in
-
-Few occurance for boot..
-
-2017-04-05 07:12:40.085065 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-osd.258 10.139.4.84:6815/23975 boot
-2017-04-05 07:13:37.299990 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-osd.258 10.139.4.84:6815/24334 boot
-2017-04-05 07:14:35.413633 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-osd.258 10.139.4.84:6815/25745 boot
-2017-04-05 07:15:30.303761 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-osd.258 10.139.4.84:6815/26194 boot
-2017-04-05 07:16:25.155067 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-osd.258 10.139.4.84:6815/26561 boot
-2017-04-05 07:17:22.538683 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-osd.258 10.139.4.84:6815/26768 boot
-2017-04-05 07:18:19.978696 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-osd.258 10.139.4.84:6815/27074 boot
-2017-04-05 07:19:14.201683 7f0fb55b5700  0 log_channel(cluster) log [INF] :
-osd.258 10.139.4.84:6815/28517 boot
-
-
-From OSD.258..
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-
-  -5299> 2017-04-05 07:18:20.151610 7f7c9ed5e700  1 osd.258 4702
-state: *booting
--> active*
-
- -5298> 2017-04-05 07:18:20.151622 7f7c9ed5e700  0 osd.258 4702 crush map
-has features 288531987042664448, adjusting msgr requires for osds
-
- -5297> 2017-04-05 07:18:20.151759 7f7c92d46700  5 osd.258 pg_epoch: 4701
-pg[1.894s2( v 4699'7995 lc 4260'7863 (2052'4800,4699'7995] local-les=3D4699
-n=3D2058 ec=3D1713 les/c/f 4699/4295/0 4698/4698/4088) [288,191,258,27,125]=
- r=3D2
-lpr=3D4699 pi=3D1713-4697/359 crt=3D4687'7993 lcod 0'0 inactive NOTIFY NIBB=
-LEWISE
-m=3D25] exit Started/Stray 2.766060 3 0.000228
-
- -5296> 2017-04-05 07:18:20.151764 7f7c94549700  5 osd.258 pg_epoch: 4701
-pg[1.636s2( v 4683'8066 (2052'4800,4683'8066] local-les=3D4699 n=3D2039 ec=
-=3D1713
-les/c/f 4699/4699/0 4698/4698/4088) [292,186,258,28,106] r=3D2 lpr=3D4699
-pi=3D1713-4697/354 crt=3D4683'8065 lcod 0'0 inactive NOTIFY NIBBLEWISE] exi=
-t
-Started/Stray 2.765980 3 0.000292
-
---< After some time >
-
-
-197 ec=3D1713 les/c/f 4703/4295/0 4702/4702/4702) [258,268,156,14,67] r=3D0
-lpr=3D4702 pi=3D4098-4701/372 crt=3D4700'8152 mlcod 0'0 active+recovery_wai=
-t+de
-graded+inconsistent m=3D37] exit
-Started/Primary/Active/WaitRemoteRecoveryReserved 0.368048 4 0.000183
-    -1> 2017-04-05 07:18:21.005621 7f7c97d50700  5 osd.258 pg_epoch: 4703
-pg[1.5c4s0( v 4700'8152 lc 0'0 (2052'5000,4700'8152] local-les=3D4703 n=3D2
-197 ec=3D1713 les/c/f 4703/4295/0 4702/4702/4702) [258,268,156,14,67] r=3D0
-lpr=3D4702 pi=3D4098-4701/372 crt=3D4700'8152 mlcod 0'0 active+recovery_wai=
-t+de
-graded+inconsistent m=3D37] enter Started/Primary/Active/Recovering
-     0> 2017-04-05 07:18:21.008127 7f7c8dd3c700 -1
-/home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x=
-86_64/AVAILABLE_DIS
-T/centos7/DIST/centos7/MACHINE_SIZE/huge/release/11.2.0/rpm/el7/BUILD/ceph-=
-11.2.0/src/osd/PrimaryLogPG.cc:
-In function 'uint64_t PrimaryLogPG::re
-cover_primary(uint64_t, ThreadPool::TPHandle&)' thread 7f7c8dd3c700 time
-2017-04-05 07:18:21.005761
-/home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x=
-86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/release/11
-.2.0/rpm/el7/BUILD/ceph-11.2.0/src/osd/PrimaryLogPG.cc: 10659: FAILED
-assert(latest->is_update())
-
- ceph version 11.2.0 (f223e27eeb35991352ebc1f67423d4ebc252adb7)
- 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x85) [0x7f7cba410b35]
- 2: (PrimaryLogPG::recover_primary(unsigned long,
-ThreadPool::TPHandle&)+0x4b5) [0x7f7cb9f32eb5]
- 3: (PrimaryLogPG::start_recovery_ops(unsigned long, ThreadPool::TPHandle&,
-unsigned long*)+0x50e) [0x7f7cb9f3c4be]
- 4: (OSD::do_recovery(PG*, unsigned int, unsigned long,
-ThreadPool::TPHandle&)+0x40c) [0x7f7cb9db58cc]
- 5: (OSD::ShardedOpWQ::_process(unsigned int,
-ceph::heartbeat_handle_d*)+0x771) [0x7f7cb9dbc5c1]
- 6: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x947)
-[0x7f7cba4167a7]
- 7: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7f7cba418900]
- 8: (()+0x7dc5) [0x7f7cb73a3dc5]
-=3D=3D=3D=3D
-
-
-
-
-#ceph pg repair 1.5c4
-
-
-While we ran the pg repair the primary OSD associated with the above PG got
-crashed. Then it tries to boot again.
-
-After pg repair excecution, as it went to  *inconsistent+peering *state.
-
-# ceph pg stat
-
-v1139236: 8192 pgs: 1 *inconsistent+peering*, 5 remapped+peering, 2
-stale+active+clean, 16 peering, *8168 active+clean*; 31701 GB data, 43302
-GB used, 1176 TB / 1218 TB avail; 44501 kB/s rd, 108 MB/s wr, 1193 op/s=E2=
-=80=9D=E2=80=9D=E2=80=9D
-
-
-Initially deep-scrubbing was disabled in cluster and now we have enabled it=
-.
-
-We also ran command 'ceph osd deep-scrub 258' but the osd keeps on booting
-and we could not see any scrubbing initialized.
-
-
-Removing OSD.258 from the cluster and reformat it again and re-inject to
-cluster is the only fix for this issue? Is there any way to get rid of this
-issue?
-
-
-Awaiting for comments
-
-
-Thanks
-
-Jayaram
-
---94eb2c03366c12e048054c68ad46
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hello,<div><br></div><div>Env:- 11.2.0</div><div>=C2=A0 =
-=C2=A0 =C2=A0 =C2=A0 =C2=A0bluestore, EC 4+1 , RHEL7.2</div><div><br></div>=
-<div>We are facing one OSD&#39;s booting again and again which caused the c=
-luster crazy :( .=C2=A0 As you can see one PG got in inconsistent state whi=
-le we tried to repair that partular PG, as its primary OSD&#39;s went down.=
- After some time we found some trace from mon logs that the OSD boot contin=
-uously=C2=A0</div><div><br></div><div><p class=3D"MsoNormal"># ceph pg stat=
-<span></span></p>
-
-<p class=3D"MsoNormal">v1109889: 8192 pgs: 1 <b>active+clean+inconsistent</=
-b>, 8191
-active+clean; 31041 GB data, 42473 GB used, 1177 TB / 1218 TB avail; 411 kB=
-/s
-rd, 28102 kB/s wr, 322 op/s<span></span></p>
-
-<p class=3D"MsoNormal"><span>=C2=A0</span></p>
-
-<p class=3D"MsoNormal"># ceph health detail | grep
-&#39;inconsistent&#39;<span></span></p>
-
-<p class=3D"MsoNormal">HEALTH_ERR 1 pgs inconsistent; 5 scrub errors<span><=
-/span></p>
-
-<p class=3D"MsoNormal">pg 1.5c4 is active+clean+inconsistent, acting
-[258,268,156,14,67]<span></span></p>
-
-<p class=3D"MsoNormal"><span>=C2=A0</span></p>
-
-<p class=3D"MsoNormal"># ceph pg deep-scrub 1.5c4<span></span></p>
-
-<p class=3D"MsoNormal">instructing pg 1.5c4 on osd.258 to deep-scrub<span><=
-/span></p>
-
-<p class=3D"MsoNormal"><span>=C2=A0</span></p>
-
-<p class=3D"MsoNormal"><span>=C2=A0</span></p>
-
-<p class=3D"MsoNormal">From ceph-osd.258.log when the problem pops up;<span=
-></span></p>
-
-<p class=3D"MsoNormal"><span>=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=C2=A0</s=
-pan></p><p class=3D"MsoNormal"><span><br></span></p>
-
-<p class=3D"MsoNormal">2017-04-04 13:08:08.288728 7f6b34fe6700 -1
-log_channel(cluster) log [ERR] : 1.5c4s0 scrub stat mismatch, got 1989/1988
-objects, 0/0 clones, 1989/1988 dirty, 0/0<span></span></p>
-
-<p class=3D"MsoNormal">omap, 0/0 pinned, 0/0 hit_set_archive, 0/0 whiteouts=
-,
-4113960196/4110943924 bytes, 0/0 hit_set_archive bytes.<span></span></p>
-
-<p class=3D"MsoNormal">2017-04-04 13:08:08.288744 7f6b34fe6700 -1
-log_channel(cluster) log [ERR] : 1.5c4s0 scrub 1 missing, 0 inconsistent
-objects<span></span></p>
-
-<p class=3D"MsoNormal"><br></p><p class=3D"MsoNormal"><br></p><p class=3D"M=
-soNormal">2017-04-04 13:08:08.288747 7f6b34fe6700 -1 log_channel(cluster)
-log [ERR] : 1.5c4 scrub 5 errors<span></span></p>
-
-<p class=3D"MsoNormal"><span><br></span></p><p class=3D"MsoNormal"><span>Fr=
-om mon logs</span></p><p class=3D"MsoNormal"><span>=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D</span></p><p class=3D"MsoNormal"><span><br></span></p><p class=3D=
-"MsoNormal"><span><br></span></p><p class=3D"MsoNormal">2017-04-05 07:18:17=
-.665821 7f0fb55b5700 =C2=A00 log_channel(cluster) log [INF] : pgmap v113442=
-1: 8192 pgs: 1 activating+degraded+inconsistent, 4 activ</p><p class=3D"Mso=
-Normal">ating, 27 active+recovery_wait+degraded, 3 active+recovering+degrad=
-ed, 8157 active+clean; 31619 GB data, 43163 GB used, 1176 TB / 1218 TB avai=
-l;</p><p class=3D"MsoNormal">16429 kB/s rd, 109 MB/s wr, 1208 op/s; 554/877=
-17275 objects degraded (0.001%)</p><p class=3D"MsoNormal">2017-04-05 07:18:=
-18.643905 7f0fb55b5700 =C2=A01 mon.cn1@0(leader).osd e4701 e4701: 335 osds:=
- 334 up, 335 in</p><p class=3D"MsoNormal">2017-04-05 07:18:18.656143 7f0fb5=
-5b5700 =C2=A00 mon.cn1@0(leader).osd e4701 crush map has features 288531987=
-042664448, adjusting msgr requires</p><p class=3D"MsoNormal">2017-04-05 07:=
-18:18.676477 7f0fb55b5700 =C2=A00 log_channel(cluster) log [INF] : osdmap e=
-4701: 335 osds: 334 up, 335 in</p><p class=3D"MsoNormal">2017-04-05 07:18:1=
-8.731719 7f0fb55b5700 =C2=A00 log_channel(cluster) log [INF] : pgmap v11344=
-22: 8192 pgs: 1 activating+degraded+inconsistent, 4 activ</p><p class=3D"Ms=
-oNormal">ating, 27 active+recovery_wait+degraded, 3 active+recovering+degra=
-ded, 8157 active+clean; 31619 GB data, 43163 GB used, 1176 TB / 1218 TB ava=
-il;</p><p class=3D"MsoNormal">21108 kB/s rd, 105 MB/s wr, 1165 op/s; 554/87=
-717365 objects degraded (0.001%)</p><p class=3D"MsoNormal">2017-04-05 07:18=
-:19.963217 7f0fb55b5700 =C2=A01 mon.cn1@0(leader).osd e4702 e4702: 335 osds=
-: 335 up, 335 in</p><p class=3D"MsoNormal">2017-04-05 07:18:19.975002 7f0fb=
-55b5700 =C2=A00 mon.cn1@0(leader).osd e4702 crush map has features 28853198=
-7042664448, adjusting msgr requires</p><p class=3D"MsoNormal">2017-04-05 07=
-:18:19.978696 7f0fb55b5700 =C2=A00 log_channel(cluster) log [INF] : osd.258=
- <a href=3D"http://10.139.4.84:6815/27074">10.139.4.84:6815/27074</a> <b>bo=
-ot =C2=A0 ---&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&g=
-t;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</b></p><p class=3D"MsoNormal">20=
-17-04-05 07:18:19.983349 7f0fb55b5700 =C2=A00 log_channel(cluster) log [INF=
-] : osdmap e4702: 335 osds: 335 up, 335 in</p><p class=3D"MsoNormal">2017-0=
-4-05 07:18:20.079996 7f0fb55b5700 =C2=A00 log_channel(cluster) log [INF] : =
-pgmap v1134423: 8192 pgs: 1 inconsistent+peering, 15 peering, 23 acti</p><p=
- class=3D"MsoNormal">ve+recovery_wait+degraded, 3 active+recovering+degrade=
-d, 8150 active+clean; 31619 GB data, 43163 GB used, 1176 TB / 1218 TB avail=
-; 6888 kB/s rd,</p><p class=3D"MsoNormal">72604 kB/s wr, 654 op/s; 489/8771=
-7555 objects degraded (0.001%)</p><p class=3D"MsoNormal">2017-04-05 07:18:2=
-0.135081 7f0fb55b5700 =C2=A00 log_channel(cluster) log [INF] : pgmap v11344=
-24: 8192 pgs: 19 stale+active+clean, 1 inconsistent+peeri</p><p class=3D"Ms=
-oNormal">ng, 15 peering, 23 active+recovery_wait+degraded, 3 active+recover=
-ing+degraded, 8131 active+clean; 31619 GB data, 43163 GB used, 1176 TB / 12=
-18 T</p><p class=3D"MsoNormal">B avail; 3452 kB/s rd, 97092 kB/s wr, 834 op=
-/s; 489/87717565 objects degraded (0.001%)</p><p class=3D"MsoNormal"></p><p=
- class=3D"MsoNormal">2017-04-05 07:18:20.303398 7f0fb55b5700 =C2=A01 mon.cn=
-1@0(leader).osd e4703 e4703: 335 osds: 335 up, 335 in</p><div><br></div><di=
-v>Few occurance for boot..</div><div><br></div><div><div>2017-04-05 07:12:4=
-0.085065 7f0fb55b5700 =C2=A00 log_channel(cluster) log [INF] : osd.258 <a h=
-ref=3D"http://10.139.4.84:6815/23975">10.139.4.84:6815/23975</a> boot</div>=
-<div>2017-04-05 07:13:37.299990 7f0fb55b5700 =C2=A00 log_channel(cluster) l=
-og [INF] : osd.258 <a href=3D"http://10.139.4.84:6815/24334">10.139.4.84:68=
-15/24334</a> boot</div><div>2017-04-05 07:14:35.413633 7f0fb55b5700 =C2=A00=
- log_channel(cluster) log [INF] : osd.258 <a href=3D"http://10.139.4.84:681=
-5/25745">10.139.4.84:6815/25745</a> boot</div><div>2017-04-05 07:15:30.3037=
-61 7f0fb55b5700 =C2=A00 log_channel(cluster) log [INF] : osd.258 <a href=3D=
-"http://10.139.4.84:6815/26194">10.139.4.84:6815/26194</a> boot</div><div>2=
-017-04-05 07:16:25.155067 7f0fb55b5700 =C2=A00 log_channel(cluster) log [IN=
-F] : osd.258 <a href=3D"http://10.139.4.84:6815/26561">10.139.4.84:6815/265=
-61</a> boot</div><div>2017-04-05 07:17:22.538683 7f0fb55b5700 =C2=A00 log_c=
-hannel(cluster) log [INF] : osd.258 <a href=3D"http://10.139.4.84:6815/2676=
-8">10.139.4.84:6815/26768</a> boot</div><div>2017-04-05 07:18:19.978696 7f0=
-fb55b5700 =C2=A00 log_channel(cluster) log [INF] : osd.258 <a href=3D"http:=
-//10.139.4.84:6815/27074">10.139.4.84:6815/27074</a> boot</div><div>2017-04=
--05 07:19:14.201683 7f0fb55b5700 =C2=A00 log_channel(cluster) log [INF] : o=
-sd.258 <a href=3D"http://10.139.4.84:6815/28517">10.139.4.84:6815/28517</a>=
- boot</div></div><div><br></div><div><br></div><div>From OSD.258..</div><di=
-v>=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D</div><div>=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D</div><p class=3D"MsoNormal"><span>=C2=A0</span>=C2=A0-5299&gt; 2017-=
-04-05 07:18:20.151610 7f7c9ed5e700 =C2=A01 osd.258 4702 state: <b>booting -=
-&gt; active</b></p><p class=3D"MsoNormal">=C2=A0-5298&gt; 2017-04-05 07:18:=
-20.151622 7f7c9ed5e700 =C2=A00 osd.258 4702 crush map has features 28853198=
-7042664448, adjusting msgr requires for osds</p><p class=3D"MsoNormal">=C2=
-=A0-5297&gt; 2017-04-05 07:18:20.151759 7f7c92d46700 =C2=A05 osd.258 pg_epo=
-ch: 4701 pg[1.894s2( v 4699&#39;7995 lc 4260&#39;7863 (2052&#39;4800,4699&#=
-39;7995] local-les=3D4699 n=3D2058 ec=3D1713 les/c/f 4699/4295/0 4698/4698/=
-4088) [288,191,258,27,125] r=3D2 lpr=3D4699 pi=3D1713-4697/359 crt=3D4687&#=
-39;7993 lcod 0&#39;0 inactive NOTIFY NIBBLEWISE m=3D25] exit Started/Stray =
-2.766060 3 0.000228</p><p class=3D"MsoNormal">=C2=A0-5296&gt; 2017-04-05 07=
-:18:20.151764 7f7c94549700 =C2=A05 osd.258 pg_epoch: 4701 pg[1.636s2( v 468=
-3&#39;8066 (2052&#39;4800,4683&#39;8066] local-les=3D4699 n=3D2039 ec=3D171=
-3 les/c/f 4699/4699/0 4698/4698/4088) [292,186,258,28,106] r=3D2 lpr=3D4699=
- pi=3D1713-4697/354 crt=3D4683&#39;8065 lcod 0&#39;0 inactive NOTIFY NIBBLE=
-WISE] exit Started/Stray 2.765980 3 0.000292</p><div><br></div><div>--&lt; =
-After some time &gt;=C2=A0</div><div><br></div><div><div><br></div><div>197=
- ec=3D1713 les/c/f 4703/4295/0 4702/4702/4702) [258,268,156,14,67] r=3D0 lp=
-r=3D4702 pi=3D4098-4701/372 crt=3D4700&#39;8152 mlcod 0&#39;0 active+recove=
-ry_wait+de</div><div>graded+inconsistent m=3D37] exit Started/Primary/Activ=
-e/WaitRemoteRecoveryReserved 0.368048 4 0.000183</div><div>=C2=A0 =C2=A0 -1=
-&gt; 2017-04-05 07:18:21.005621 7f7c97d50700 =C2=A05 osd.258 pg_epoch: 4703=
- pg[1.5c4s0( v 4700&#39;8152 lc 0&#39;0 (2052&#39;5000,4700&#39;8152] local=
--les=3D4703 n=3D2</div><div>197 ec=3D1713 les/c/f 4703/4295/0 4702/4702/470=
-2) [258,268,156,14,67] r=3D0 lpr=3D4702 pi=3D4098-4701/372 crt=3D4700&#39;8=
-152 mlcod 0&#39;0 active+recovery_wait+de</div><div>graded+inconsistent m=
-=3D37] enter Started/Primary/Active/Recovering</div><div>=C2=A0 =C2=A0 =C2=
-=A00&gt; 2017-04-05 07:18:21.008127 7f7c8dd3c700 -1 /home/jenkins-build/bui=
-ld/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIS</di=
-v><div>T/centos7/DIST/centos7/MACHINE_SIZE/huge/release/11.2.0/rpm/el7/BUIL=
-D/ceph-11.2.0/src/osd/PrimaryLogPG.cc: In function &#39;uint64_t PrimaryLog=
-PG::re</div><div>cover_primary(uint64_t, ThreadPool::TPHandle&amp;)&#39; th=
-read 7f7c8dd3c700 time 2017-04-05 07:18:21.005761</div><div>/home/jenkins-b=
-uild/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE=
-_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/release/11</div><div>.2.0/rpm/=
-el7/BUILD/ceph-11.2.0/src/osd/PrimaryLogPG.cc: 10659: FAILED assert(latest-=
-&gt;is_update())</div><div><br></div><div>=C2=A0ceph version 11.2.0 (f223e2=
-7eeb35991352ebc1f67423d4ebc252adb7)</div><div>=C2=A01: (ceph::__ceph_assert=
-_fail(char const*, char const*, int, char const*)+0x85) [0x7f7cba410b35]</d=
-iv><div>=C2=A02: (PrimaryLogPG::recover_primary(unsigned long, ThreadPool::=
-TPHandle&amp;)+0x4b5) [0x7f7cb9f32eb5]</div><div>=C2=A03: (PrimaryLogPG::st=
-art_recovery_ops(unsigned long, ThreadPool::TPHandle&amp;, unsigned long*)+=
-0x50e) [0x7f7cb9f3c4be]</div><div>=C2=A04: (OSD::do_recovery(PG*, unsigned =
-int, unsigned long, ThreadPool::TPHandle&amp;)+0x40c) [0x7f7cb9db58cc]</div=
-><div>=C2=A05: (OSD::ShardedOpWQ::_process(unsigned int, ceph::heartbeat_ha=
-ndle_d*)+0x771) [0x7f7cb9dbc5c1]</div><div>=C2=A06: (ShardedThreadPool::sha=
-rdedthreadpool_worker(unsigned int)+0x947) [0x7f7cba4167a7]</div><div>=C2=
-=A07: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7f7cba418900]=
-</div><div>=C2=A08: (()+0x7dc5) [0x7f7cb73a3dc5]</div></div><div>=3D=3D=3D=
-=3D</div><div><br></div><div><br></div>
-
-<p class=3D"MsoNormal"><span>=C2=A0</span></p>
-
-<p class=3D"MsoNormal">#ceph pg repair 1.5c4 <span></span></p>
-
-<p class=3D"MsoNormal"><span>=C2=A0</span></p>
-
-While we ran the pg repair the primary OSD associated with the above PG got=
- crashed. Then it tries to boot again.</div><div><br></div><div>After pg re=
-pair excecution, as it went to =C2=A0<b>inconsistent+peering </b>state. <b>=
-=C2=A0</b></div><div><br></div><div><p class=3D"MsoNormal"># ceph pg stat<s=
-pan></span></p>
-
-<p class=3D"MsoNormal">v1139236: 8192 pgs: 1 <b>inconsistent+peering</b>, 5
-remapped+peering, 2 stale+active+clean, 16 peering, <b>8168 active+clean</b=
->;
-31701 GB data, 43302 GB used, 1176 TB / 1218 TB avail; 44501 kB/s rd, 108 M=
-B/s
-wr, 1193 op/s=E2=80=9D=E2=80=9D=E2=80=9D<br></p><p class=3D"MsoNormal"><spa=
-n></span></p><p class=3D"MsoNormal"><br></p><p class=3D"MsoNormal">Initiall=
-y deep-scrubbing was disabled in cluster and now we
-have enabled it.<span></span></p><p class=3D"MsoNormal">
-
-</p><p class=3D"MsoNormal">We also ran command &#39;ceph osd deep-scrub 258=
-&#39; but the osd
-keeps on booting and we could not see any scrubbing initialized.<span></spa=
-n></p><p class=3D"MsoNormal"><br></p><p class=3D"MsoNormal">Removing OSD.25=
-8 from the cluster and reformat it again and re-inject to cluster is the on=
-ly fix for this issue? Is there any way to get rid of this issue?</p><p cla=
-ss=3D"MsoNormal"><br></p><p class=3D"MsoNormal">Awaiting for comments</p><p=
- class=3D"MsoNormal"><br></p><p class=3D"MsoNormal">Thanks</p><p class=3D"M=
-soNormal">Jayaram</p><p class=3D"MsoNormal"><br></p></div></div>
-
---94eb2c03366c12e048054c68ad46--
-
---===============0145308407==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0145308407==--
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from ppes-mail-n6.wal-mart.com ([161.168.133.166]:45572 "EHLO
+        ppes-mail-n6.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755074AbdDEM7N (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Apr 2017 08:59:13 -0400
+In-Reply-To: <764813255.11282714.1491396574036.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
+Content-ID: <784C28B9C16A804FB15C71F6907331F1@NAMP100.PROD.OUTLOOK.COM>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
+
+SGkgTWF0dCwNCg0KQXBwcmVjaWF0ZSB5b3VyIHJlc3BvbnNlLCB3b3VsZCBtYWtlIHRoZSByZXZv
+Y2F0aW9uIHRocmVhZCBjb25maWd1cmFibGUgZm9yIG5vdy4NCg0KVGhhbmtzLA0KLVBhdmFuLg0K
+DQpPbiAwNS8wNC8xNyA2OjE5IHBtLCAiTWF0dCBCZW5qYW1pbiIgPG1iZW5qYW1pbkByZWRoYXQu
+Y29tPiB3cm90ZToNCg0KICAgIEhpIFBhdmFuLA0KICAgIA0KICAgIFlvdXIgZW1haWwgc3Bhcmtl
+ZCBzb21lIGJhY2tjaGFubmVsIGRpc2N1c3Npb24uDQogICAgDQogICAgSSAtdGhpbmstIE1hcmN1
+cyBhbmQgUmFkb3NsYXcgd291bGQgYWdyZWUgdGhhdCBydW5uaW5nIGEgcmV2b2NhdGlvbiB0aHJl
+YWQgc2hvdWxkIGJlIGNvbmZpZ3VyYWJsZS4gIFRoZSBhYmlsaXR5IHRvIHByb3Blcmx5IGRldGVj
+dCByZXZva2VkIEZlcm5ldCB0b2tlbnMgKE9TLVJFVk9LRSwgYmVsb3cpIHdpbGwgYmUgaW1wbGVt
+ZW50ZWQgdXBzdHJlYW0uDQogICAgDQogICAgUmVnYXJkcywNCiAgICANCiAgICBNYXR0DQogICAg
+DQogICAgLS0tLS0gRm9yd2FyZGVkIE1lc3NhZ2UgLS0tLS0NCiAgICBGcm9tOiAiUmFkb3NsYXcg
+WmFyenluc2tpIiA8cnphcnp5bnNraUBtaXJhbnRpcy5jb20+DQogICAgVG86ICJNYXJjdXMgV2F0
+dHMiIDxtd2F0dHNAcmVkaGF0LmNvbT4NCiAgICBDYzogIk1hdHQgQmVuamFtaW4iIDxtYmVuamFt
+aW5AcmVkaGF0LmNvbT4sICJZZWh1ZGEgU2FkZWgtV2VpbnJhdWIiIDx5c2FkZWh3ZUByZWRoYXQu
+Y29tPg0KICAgIFNlbnQ6IFdlZG5lc2RheSwgQXByaWwgNSwgMjAxNyA3OjAxOjE1IEFNDQogICAg
+U3ViamVjdDogUmU6IHJndyBrZXlzdG9uZSByZXZvY2F0aW9uIHRocmVhZA0KICAgIA0KICAgIEhp
+IE1hcmN1cywNCiAgICANCiAgICBUaGFua3MgYSBsb3QgZm9yIHRoZSB0aGVzZSBwb2ludHMhDQog
+ICAgDQogICAgPiAzLiBJdCdzIHBvc3NpYmxlIHRvIHJldm9rZSBmZXJuZXQgdG9rZW5zLiAgUmV2
+b2tlZCBmZXJuZXQgdG9rZW5zDQogICAgPiBjYW4gbm8gbG9uZ2VyIGJlIHZhbGlkYXRlZC4gIENs
+ZWFybHkgaW50ZXJuYWxseSB0aGV5IGdldCBtYXJrZWQNCiAgICA+IGFzIHJldm9rZWQuICAqSG93
+ZXZlciwgdGhleSBkb24ndCBhcHBlYXIgaW4gdGhlIG91dHB1dCBmcm9tDQogICAgPiBPUy1QS0kv
+cmV2b2tlZC4qDQogICAgDQogICAgRXNwZWNpYWxseSB0aGlzIG9uZSBpcyB0aGUgZ2FtZS1jaGFu
+Z2VyLiBUaGUgc2FtZSBtaWdodCBhcHBseQ0KICAgIHRvIHRoZSAidG9rZW5zL3Jldm9rZWQiIG9m
+IEtleXN0b25lIEFQSSB2Mi4gSW4gdGhlIGVuZCBvZiAyMDE2DQogICAgaXQgaGFzIGJlZW4gZG9j
+dW1lbnRlZCBbMV0gKHRvZ2V0aGVyIHdpdGggT1MtUEtJL3Jldm9rZWQpIGluDQogICAgYSB3YXkg
+c3VnZ2VzdGluZyBbMl0gaXQgd29ya3Mgb25seSB3aXRoIFBLSSB0b2tlbnMuIEl0J3MgcG9zc2li
+bGUNCiAgICB0aGF0IFBLSVogYXJlIGFsc28gY292ZXJlZCBidXQgSSdtIG5vdCBzdXJlIGFib3V0
+IEZlcm5ldC9VVUlELg0KICAgIA0KICAgID4gNC4gVGhlIHJlcGxhY2VtZW50IGFwaSBpcyAvdjMv
+T1MtUkVWT0tFL2V2ZW50cw0KICAgID4gVGhpcyBhcHBlYXJzIHRvIGJlIDIgZ2VuZXJhdGlvbnMg
+YWhlYWQgb2YgT1MtUEtJL3Jldm9rZWQ7DQogICAgPiB0aGVyZSB3YXMgc29tZXRoaW5nIGluYmV0
+d2VlbiB0aGF0IGFwcGFyZW50bHkgaGFkIGFuDQogICAgPiBpbmNvbnZlbmllbnQgZGVwZW5kZW5j
+eSBvbiAiZXhwaXJlc19hdCIuICBJdCBkb2VzIG5vdA0KICAgID4gdXNlIGEgc2lnbmluZyBrZXku
+ICBJbiBvcmRlciB0byB1c2UgaXQsIGl0J3MgbmVjZXNhcnkNCiAgICA+IHRvIHRyYWNrIHRoaW5n
+cyBieSAiYXVkaXRfaWQiLiAgVGhpcyBjb21lcyBiYWNrIHdpdGggdGhlDQogICAgPiB0b2tlbiB2
+YWxpZGF0ZSBjYWxsLg0KICAgIA0KICAgIEkganVzdCBjcmVhdGVkIGEgdGlja2V0IGZvciBPUy1S
+RVZPS0U6DQogICAgICAqIGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8xOTQ5OQ0KICAg
+IA0KICAgIFJlZ2FyZHMsDQogICAgUmFkZWsNCiAgICANCiAgICBbMV0gaHR0cHM6Ly9idWdzLmxh
+dW5jaHBhZC5uZXQva2V5c3RvbmUvK2J1Zy8xNjI2Nzc4DQogICAgWzJdIGRlc2NyaXB0aW9uIG9m
+IHRoZSAic2lnbmVkIiBwYXJhbWV0ZXIsDQogICAgICAgICBodHRwczovL2dpdC5vcGVuc3RhY2su
+b3JnL2NnaXQvb3BlbnN0YWNrL2tleXN0b25lL2NvbW1pdC8/aWQ9YzcwYmFhMGE3YTFmMTZkMWUz
+Y2IzNmFiYzg2NjY2MjY2MzMxMzNkYg0KICAgIA0KICAgIE9uIFdlZCwgQXByIDUsIDIwMTcgYXQg
+MTA6NTMgQU0sIE1hcmN1cyBXYXR0cyA8bXdhdHRzQHJlZGhhdC5jb20+IHdyb3RlOg0KICAgID4g
+SSBkaWQgc29tZSBleHBlcmltZW50cyB3aXRoIGZlcm5ldCB0b2tlbnMsIHJldm9jYXRpb24sIGFu
+ZCBjZXBoLg0KICAgID4NCiAgICA+IGNlcGg6IHJlY2VudCBtYXN0ZXIgYnJhbmNoLiAga2V5c3Rv
+bmU6IGxpYmVydHkuDQogICAgPg0KICAgID4gc3VtbWFyeS4gIGRvZXNuJ3Qgd29yay4gIHJlYWxs
+eSBkb2Vzbid0IHdvcmsgb3V0IG9mIHRoZSBib3guDQogICAgPg0KICAgID4gQ291cGxlIG9mIGNv
+bW1lbnRzIGFuZCBvYnNlcnZhdGlvbnMuDQogICAgPg0KICAgID4gMS4gdGhlIHVwc3RyZWFtIGRv
+Y3VtZW50YXRpb24gZm9yIGtleXN0b25lIG1pdGFrYSsgIm1hbnVhbCBpbnN0YWxsIg0KICAgID4g
+ZG9lcyBub3QgZGVzY3JpYmUgaG93IHRvIGNyZWF0ZSBhIHNpZ25pbmdfa2V5IG9yIGluZGljYXRl
+DQogICAgPiB0aGF0IGl0J3MgbmVjZXNzYXJ5LiAgU28gZmFyLCBpbiBteSBrZXlzdG9uZSBleHBl
+cmltZW50cywNCiAgICA+IEkgaGF2ZW4ndCBmb3VuZCBhbnkgaW50cmluc2ljIHJlYXNvbiB3aHkg
+aXQncyB1c2VmdWwuDQogICAgPiBOb3RlIHRoYXQgb3RhY2EgZG9lc24ndCBldmVuIGluY2x1ZGUg
+cGtpL3BraXogdG9rZW5zLg0KICAgID4gICAgICAgICBbIC4uLiBhbmQgdGhlIHVwc3RyZWFtIGRv
+Y3VtZW50YXRpb24gZm9yIGRvaW5nIGENCiAgICA+ICAgICAgICAgIm1hbnVhbCBpbnN0YWxsIiBv
+ZiBsaWJlcnR5IGFwcGVhcnMgdG8gaGF2ZSB2YW5pc2hlZC4gXQ0KICAgID4NCiAgICA+IDIuIC92
+My9hdXRoL3Rva2Vucy9PUy1QS0kvcmV2b2tlZA0KICAgID4gaXMgYXBwYXJlbnRseSBkZXByZWNh
+dGVkLiAgSW4gb3JkZXIgdG8gdXNlIGl0LCBpdCAqaXMqDQogICAgPiBuZWNlc3NhcnkgdG8gY3Jl
+YXRlIGEgc2lnbmluZyBrZXkuDQogICAgPg0KICAgID4gMy4gSXQncyBwb3NzaWJsZSB0byByZXZv
+a2UgZmVybmV0IHRva2Vucy4gIFJldm9rZWQgZmVybmV0IHRva2Vucw0KICAgID4gY2FuIG5vIGxv
+bmdlciBiZSB2YWxpZGF0ZWQuICBDbGVhcmx5IGludGVybmFsbHkgdGhleSBnZXQgbWFya2VkDQog
+ICAgPiBhcyByZXZva2VkLiAgSG93ZXZlciwgdGhleSBkb24ndCBhcHBlYXIgaW4gdGhlIG91dHB1
+dCBmcm9tDQogICAgPiBPUy1QS0kvcmV2b2tlZC4NCiAgICA+DQogICAgPiA0LiBUaGUgcmVwbGFj
+ZW1lbnQgYXBpIGlzIC92My9PUy1SRVZPS0UvZXZlbnRzDQogICAgPiBUaGlzIGFwcGVhcnMgdG8g
+YmUgMiBnZW5lcmF0aW9ucyBhaGVhZCBvZiBPUy1QS0kvcmV2b2tlZDsNCiAgICA+IHRoZXJlIHdh
+cyBzb21ldGhpbmcgaW5iZXR3ZWVuIHRoYXQgYXBwYXJlbnRseSBoYWQgYW4NCiAgICA+IGluY29u
+dmVuaWVudCBkZXBlbmRlbmN5IG9uICJleHBpcmVzX2F0Ii4gIEl0IGRvZXMgbm90DQogICAgPiB1
+c2UgYSBzaWduaW5nIGtleS4gIEluIG9yZGVyIHRvIHVzZSBpdCwgaXQncyBuZWNlc2FyeQ0KICAg
+ID4gdG8gdHJhY2sgdGhpbmdzIGJ5ICJhdWRpdF9pZCIuICBUaGlzIGNvbWVzIGJhY2sgd2l0aCB0
+aGUNCiAgICA+IHRva2VuIHZhbGlkYXRlIGNhbGwuDQogICAgPg0KICAgID4gNS4gVGhlIGNlcGgg
+cmFkb3NndyB0aHJlYWQgdGhhdCBjYWxscyBPUy1QS0kvcmV2b2tlZCBkb2Vzbid0DQogICAgPiBk
+byBhbnl0aGluZyBlbHNlIGJ1dCBwcm9jZXNzIHRoZSBvdXRwdXQgb2YgdGhhdC4gIElmIGl0IHN1
+Y2NlZWRzLA0KICAgID4gaXQgY2FuIGV2ZW50dWFsbHkgaW52YWxpZGF0ZSB0b2tlbnMgKGJ5IGlk
+LCBub3QgYnkgYXVkaXQtaWQpLg0KICAgID4gSSBkb24ndCBiZWxpZXZlIGl0IGRvZXMgYW55IG90
+aGVyIGNhY2hlIG1haW50ZW5hbmNlIC0gc28gaW4gbXkNCiAgICA+IHNldHVwIHdoZXJlIGl0IG5l
+dmVyIHNlZXMgZmVybmV0IHJldm9jYXRpb25zIEkgYmVsaWV2ZSBpdCdzDQogICAgPiBkb2luZyBu
+b3RoaW5nIHVzZWZ1bC4gIChBbmQgdGhlIHJldm9rZWQgdG9rZW4gdGhhdCBJIGNhbid0IHZhbGlk
+YXRlDQogICAgPiBzdGlsbCB3b3JrcyB3aXRoIGNlcGguKQ0KICAgID4NCiAgICA+IDYuIFRoZSBj
+ZXBoIHJhZG9zZ3cga2V5c3RvbmUgZG9jdW1lbnRhdGlvbiBkb2N1bWVudHMgYWRkaW5nIHRoZSBw
+cml2YXRlIGtleQ0KICAgID4gZm9yIGJvdGggdGhlIENBIGFuZCB0aGUgc2lnbmluZyBjZXJ0LiAg
+SSBjYW4ndCB0aGluayBvZiBhbnkgcmVhc29uDQogICAgPiB3aHkgdGhhdCdzIHVzZWZ1bCwgbmVj
+ZXNzYXJ5LCBvciBkZXNpcmFibGUuICBJdCAqaXMqIG5lY2Vzc2FyeQ0KICAgID4gdG8gaGF2ZSB0
+aGUgc2lnbmluZyAqY2VydGlmaWNhdGUqIC0gdGhlIGNtcyBtZXNzYWdlIGZyb20gT1MtUEtJL3Jl
+dm9rZWQNCiAgICA+IGRvZXNuJ3QgaGF2ZSBhIGNlcnRpZmljYXRlLiAgKEFuZCB0aGUgQ0EgY2Vy
+dCBpcyBwcm9iYWJseSBhbHNvIHVzZWZ1bA0KICAgID4gZXNwLiBpZiB1c2luZyBodHRwcyB3LyBr
+ZXlzdG9uZS4uLikNCiAgICA+DQogICAgPiA3LiBUaGVyZSdzIG5vdCBtdWNoIHBvaW50IGluIHJl
+cGVhdGVkbHkgcG9sbGluZyBmb3IgcmV2b2tlZCB0b2tlbnMNCiAgICA+IGlmIHRoZSB0b2tlbiBj
+YWNoZSBpcyBlbXB0eS4gICggYnV0IG5vdCBiYWQgdG8gY2hlY2sgb25jZQ0KICAgID4gYXQgc3Rh
+cnR1cCBqdXN0IHRvIHZhbGlkYXRlIHRoZSBjb25maWd1cmF0aW9uLiApDQogICAgPg0KICAgID4g
+OC4gcmVmcy4NCiAgICA+IGh0dHBzOi8vZG9jcy5vcGVuc3RhY2sub3JnL21pdGFrYS9pbnN0YWxs
+LWd1aWRlLXJkby9rZXlzdG9uZS5odG1sDQogICAgPiAgICAgICAgIG1pdGFrYSBrZXlzdG9uZSBt
+YW51YWwgaW5zdGFsbA0KICAgID4gaHR0cHM6Ly9kb2NzLm9wZW5zdGFjay5vcmcvZGV2ZWxvcGVy
+L2tleXN0b25lL2NvbmZpZ3VyYXRpb24uaHRtbA0KICAgID4gICAgICAgICBjb250YWlucyBpbmZv
+cm1hdGlvbiBvbiByZXZvY2F0aW9uIGV2ZW50cw0KICAgID4gaHR0cHM6Ly9kZXZlbG9wZXIub3Bl
+bnN0YWNrLm9yZy9hcGktcmVmL2lkZW50aXR5L3YzLWV4dC8/ZXhwYW5kZWQ9bGlzdC1yZXZvY2F0
+aW9uLWV2ZW50cy1kZXRhaWwNCiAgICA+ICAgICAgICAgYXBpIGRvYw0KICAgID4gaHR0cHM6Ly9i
+dWdzLmxhdW5jaHBhZC5uZXQva2V5c3RvbmUvK2J1Zy8xMjQyNjIwDQogICAgPiAgICAgICAgIGhp
+c3RvcnkNCiAgICA+IGh0dHBzOi8vYnVncy5sYXVuY2hwYWQubmV0L29wZW5zdGFjay1hcGktc2l0
+ZS8rYnVnLzEzMDQ2MDYNCiAgICA+ICAgICAgICAgaGlzdG9yeQ0KICAgID4gaHR0cHM6Ly9ibHVl
+cHJpbnRzLmxhdW5jaHBhZC5uZXQva2V5c3RvbmUvK3NwZWMvcmV2b2NhdGlvbi1ldmVudHMNCiAg
+ICA+ICAgICAgICAgaGlzdG9yeQ0KICAgID4NCiAgICA+ICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgIC1NYXJjdXMgV2F0dHMNCiAgICANCiAgICAtLSANCiAg
+ICBNYXR0IEJlbmphbWluDQogICAgUmVkIEhhdCwgSW5jLg0KICAgIDMxNSBXZXN0IEh1cm9uIFN0
+cmVldCwgU3VpdGUgMTQwQQ0KICAgIEFubiBBcmJvciwgTWljaGlnYW4gNDgxMDMNCiAgICANCiAg
+ICBodHRwOi8vd3d3LnJlZGhhdC5jb20vZW4vdGVjaG5vbG9naWVzL3N0b3JhZ2UNCiAgICANCiAg
+ICB0ZWwuICA3MzQtODIxLTUxMDENCiAgICBmYXguICA3MzQtNzY5LTg5MzgNCiAgICBjZWwuICA3
+MzQtMjE2LTUzMDkNCiAgICANCg0K
