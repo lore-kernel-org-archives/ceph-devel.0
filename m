@@ -1,101 +1,78 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Sparse file info in filestore not propagated to other OSDs
-Date: Thu, 6 Apr 2017 11:50:00 -0400
-Message-ID: <CA+aFP1AtPUyxX9e6-gQGfO-FbGPTndFkWTq8ypmUotyGw=nfOQ@mail.gmail.com>
-References: <beaf4408-2322-b0f1-3265-0d9e411c5bf9@corp.ovh.com>
- <alpine.DEB.2.11.1704061322330.2999@piezo.novalocal> <db761315-61b5-bcac-e9ae-519ae8f769dc@corp.ovh.com>
- <alpine.DEB.2.11.1704061353070.2999@piezo.novalocal> <b7d71b5e-ebd6-23c1-962c-59375038ce5b@corp.ovh.com>
- <alpine.DEB.2.11.1704061426480.2999@piezo.novalocal>
-Reply-To: dillaman@redhat.com
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: Jewel 10.2.7 QE status
+Date: Thu, 6 Apr 2017 10:23:13 -0600
+Message-ID: <CALqRxCwAkWmGCv4NwPG-Aamp9EM97H5k1ae7n9J5iFy5q7=NYw@mail.gmail.com>
+References: <CAMMFjmH_DTdeQDB-C4+A7KsUyAF0jxsZRyGn-2drEOxFds7jsw@mail.gmail.com>
+ <CAMMFjmG8jPmC1Ak4mDNN87ZK1qksvN9ms3Gaw8_Wa5v4aTShDw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f42.google.com ([209.85.215.42]:36752 "EHLO
-        mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752617AbdDFPuD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Apr 2017 11:50:03 -0400
-Received: by mail-lf0-f42.google.com with SMTP id x137so28861045lff.3
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Apr 2017 08:50:01 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1704061426480.2999@piezo.novalocal>
+Received: from mail-vk0-f51.google.com ([209.85.213.51]:35727 "EHLO
+        mail-vk0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754719AbdDFQXP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Apr 2017 12:23:15 -0400
+Received: by mail-vk0-f51.google.com with SMTP id r69so46823858vke.2
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Apr 2017 09:23:15 -0700 (PDT)
+In-Reply-To: <CAMMFjmG8jPmC1Ak4mDNN87ZK1qksvN9ms3Gaw8_Wa5v4aTShDw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek@corp.ovh.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: "Development, Ceph" <ceph-devel@vger.kernel.org>
 
-I don't recall a configuration option, but librbd always uses sparse
-reads when the cache is disabled and never uses sparse reads for
-cache-based reads. I'm pretty sure there wasn't a rationale for the
-split -- instead, I've always assumed it was an oversight when that
-feature was added years ago.
+Hi Josh and Sage, are you ok with releasing v10.2.7 from jewel
+(a64d3e4b33e904aa6585464df8ffff6aafdec10c)?
 
-On Thu, Apr 6, 2017 at 10:27 AM, Sage Weil <sage@newdream.net> wrote:
-> On Thu, 6 Apr 2017, Piotr Dałek wrote:
->> On 04/06/2017 03:55 PM, Sage Weil wrote:
->> > On Thu, 6 Apr 2017, Piotr Dałek wrote:
->> > > On 04/06/2017 03:25 PM, Sage Weil wrote:
->> > > > On Thu, 6 Apr 2017, Piotr Dałek wrote:
->> > > > > Hello,
->> > > > >
->> > > > > We recently had an interesting issue with RBD images and filestore on
->> > > > > Jewel
->> > > > > 10.2.5:
->> > > > > We have a pool with RBD images, all of them mostly untouched (large
->> > > > > areas
->> > > > > of
->> > > > > those images unused), and once we added 3 new OSDs to cluster, objects
->> > > > > representing these images grew substantially on new OSDs: objects
->> > > > > hosting
->> > > > > unused areas of these images on original OSDs remained small (~8K of
->> > > > > space
->> > > > > actually used, 4M allocated), but on new OSDs were large (4M allocated
->> > > > > *and*
->> > > > > actually used). After investigation we concluded that Ceph didn't
->> > > > > propagate
->> > > > > sparse file information during cluster rebalance, resulting in correct
->> > > > > data
->> > > > > contents on all OSDs, but no sparse file data on new OSDs, hence disk
->> > > > > space
->> > > > > usage increase on those.
->> > > > >
->> > > > > [..]
->> > > >
->> > > > I think the solution here is to use sparse_read during recovery.  The
->> > > > PushOp data representation already supports it; it's just a matter of
->> > > > skipping the zeros.  The recovery code could also have an option to
->> > > > check
->> > > > for fully-zero regions of the data and turn those into holes as well.
->> > > > For
->> > > > ReplicatedBackend, see build_push_op().
->> > >
->> > > Can we abuse that to reduce amount of regular (client/inter-osd) network
->> > > traffic?
->> >
->> > Yeah... I wouldn't call it abuse :).  sparse_read() will use
->> > SEEK_HOLE/SEEK_DATA on filestore (if enabled).  On bluestore we have the
->> > metadata on-hand.  It may be a bit slower, though... more complexity
->> > and such.  They recently implemented something like this for the kernel
->> > NFS server and found it was faster for very sparse files but the rest of
->> > the time it was a fair bit slower.
+test results passed at http://tracker.ceph.com/issues/19055#note-13
+(with known failures, as far as I can tell)
+
+- Ken
+
+On Wed, Apr 5, 2017 at 3:55 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
+> There had been lengthy discussion in #ceph-devel regarding failed
+> upgrade tests, https://github.com/ceph/teuthology/pull/1055,
+> http://tracker.ceph.com/issues/19429
+>
+> We need to decide what to do about this in context of this release.
+>
+> On Wed, Apr 5, 2017 at 1:16 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
+>> Detailed summary of the QE Validation can be found here
+>> http://tracker.ceph.com/issues/19055#note-13
+>> The following suites were in scope of this point release validation:
 >>
->> I was wondering if we could modify regular reads in a way that makes them work
->> as it used to work, but not transmit zeroed out pages/blocks/objects (in other
->> words, you still would get bufferptrs full of zeroes, but they wouldn't be
->> transmitted as such over the wire; specialized case of RLE compression). That
->> shouldn't be so much slower. But I don't really see how that would work
->> without protocol change... Well, at least it's possible to replace some of
->> calls to read with sparse read, utilizing filesystem/file store metadata to do
->> heavy lifting for us.
->
-> IIRC librbd used to have an option to do sparse-read all the time instead
-> of read (I think this was in ObjectCacher somewhere?) but I think it got
-> turned off for some reason?  Memory is very fuzzy here.  In any case,
-> changing the client to use sparse-read is the way to do it, I think.
-> I'm a bit skeptical that this will have much of an impact, though.
->
-> sage
-
-
-
--- 
-Jason
+>> rados (subset 35/50 227 jobceph-ansibles)
+>> rbd
+>> rgw
+>> fs
+>> krbd
+>> kcephfs
+>> knfs
+>> rest
+>> hadoop - EXCLUDED
+>> samba - EXCLUDED
+>> ceph-deploy
+>> ceph-disk
+>> upgrade/client-upgrade
+>> upgrade/hammer-x (jewel)
+>> upgrade/jewel-x/point-to-point-x
+>> powercycle
+>> ceph-ansible
+>>
+>> (please let me know if any suites are missing from this ^ list)
+>>
+>> =====================
+>> Outstanding issues
+>>
+>> rados - two jobs failed, need Josh's approval
+>> krbd - seems similar to previous release, need Ilya's approval
+>>
+>> upgrade/client-upgrade
+>> and
+>> upgrade/hammer-x (jewel) - suspect
+>> http://tracker.ceph.com/issues/19429, need Sage/Josh approve
+>>
+>> Thx
+>> YuriW
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
