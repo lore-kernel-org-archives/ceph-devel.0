@@ -1,31 +1,36 @@
-From: Mark Nelson <mnelson@redhat.com>
+From: =?UTF-8?B?QmFydMWCb21pZWogxZp3acSZY2tp?=
+        <bartlomiej.swiecki@corp.ovh.com>
 Subject: Re: rescheduling the performance call
-Date: Fri, 7 Apr 2017 07:08:27 -0500
-Message-ID: <4d7cae2a-e37d-9fac-343d-071fca3ffb47@redhat.com>
+Date: Fri, 7 Apr 2017 14:48:38 +0200
+Message-ID: <e126db41-3a57-87b9-77a7-4bfc2dea3548@corp.ovh.com>
 References: <alpine.DEB.2.11.1704061400450.2999@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="windows-1252"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41616 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932938AbdDGMI2 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 7 Apr 2017 08:08:28 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 5CD384FC
-        for <ceph-devel@vger.kernel.org>; Fri,  7 Apr 2017 12:08:28 +0000 (UTC)
+Received: from 5.mo302.mail-out.ovh.net ([137.74.110.78]:40797 "EHLO
+        5.mo302.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753505AbdDGMso (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Apr 2017 08:48:44 -0400
 In-Reply-To: <alpine.DEB.2.11.1704061400450.2999@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
 
-All 3 slots are fine with me, though 1 & 2 are slightly preferable.
+Hi,
 
-Mark
+#1 best for me,
+#2 also acceptable
+#3 still doable but I'd like to avoid it
 
-On 04/06/2017 09:25 AM, Sage Weil wrote:
+BTW, those times are in UTC, I assume this will be adjusted with 
+daylight saving time?
+
+Thanks,
+Bartek
+
+
+On 04/06/2017 04:25 PM, Sage Weil wrote:
 > Hi all,
 >
 > We talked about options for rescheduling the performance call yesterday
@@ -47,4 +52,4 @@ On 04/06/2017 09:25 AM, Sage Weil wrote:
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+
