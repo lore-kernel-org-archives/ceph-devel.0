@@ -1,96 +1,50 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Toying with a FreeBSD cluster results in a crash
-Date: Fri, 7 Apr 2017 16:34:44 +0200
-Message-ID: <f94f1932-ae99-eb6a-7fc6-e2fb6afee051@digiware.nl>
+From: Alexandre Oliva <oliva@gnu.org>
+Subject: Re: [PATCH 1/1] EC backfill retries
+Date: Fri, 07 Apr 2017 12:16:26 -0300
+Message-ID: <orwpaw2qph.fsf@lxoliva.fsfla.org>
+References: <ormvcx2dr8.fsf@lxoliva.fsfla.org>
+        <06c85dc1-3318-fc05-ec1a-7f68d3aecc37@redhat.com>
+        <ork27qguwv.fsf@lxoliva.fsfla.org>
+        <52362dc8-faca-82f4-b1ac-dc7df6150afe@redhat.com>
+        <orwpbpf766.fsf@lxoliva.fsfla.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:25501 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755318AbdDGOet (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 7 Apr 2017 10:34:49 -0400
-Received: from [192.168.10.67] (opteron [192.168.10.67])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by smtp.digiware.nl (Postfix) with ESMTPSA id 451613DA79
-        for <ceph-devel@vger.kernel.org>; Fri,  7 Apr 2017 16:34:46 +0200 (CEST)
+Received: from linux-libre.fsfla.org ([208.118.235.54]:35997 "EHLO
+        linux-libre.fsfla.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933873AbdDGPQh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Apr 2017 11:16:37 -0400
+Received: from freie.home (home.lxoliva.fsfla.org [172.31.160.164])
+        by linux-libre.fsfla.org (8.14.4/8.14.4/Debian-4.1ubuntu1) with ESMTP id v37FGXRT005249
+        for <ceph-devel@vger.kernel.org>; Fri, 7 Apr 2017 15:16:34 GMT
+In-Reply-To: <orwpbpf766.fsf@lxoliva.fsfla.org> (Alexandre Oliva's message of
+        "Thu, 16 Mar 2017 14:44:17 -0300")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: David Zafman <dzafman@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
+On Mar 16, 2017, Alexandre Oliva <oliva@gnu.org> wrote:
 
-I'm playing with my/a FreeBSD test cluster.
-It is full with different types of disks, and sometimes they are not
-very new.
+> On Mar 15, 2017, David Zafman <dzafman@redhat.com> wrote:
+>> If it applies cleanly
 
-The deepscrub on it showed things like:
- filestore(/var/lib/ceph/osd/osd.7) error creating
-#-1:4962ce63:::inc_osdmap.705:0#
-(/var/lib/ceph/osd/osd.7/current/meta/inc\uosdmap
-.705__0_C6734692__none) in index: (87) Attribute not found
+> It did when I created it.
 
+And the 3 patches applied cleanly as I prepared to build my patched
+10.2.6, so I can't imagine why they would have conflicted for you.  Are
+you sure you were trying to apply them to the jewel branch?
 
-I've build the cluster with:
-	osd pool default size      = 1
+> According to my logs, the commits I cherry-picked, that I referenced by
+> issue, were:
 
-Created some pools, and then increased
-	osd pool default size      = 3
+> 82f5cc63404ce9f680d714fc85148946f2b2c376 (your patch for 13937)
+> (cherry picked from commit c51d70e1e837c972e42ddd5fa66f7ca4477b95cc)
 
-Restarted the pools, but 1 pool does not want to reboot, so now I wonder
-if the restarting problem is due to issue like quoted above?
+> b3224a18f6acc7ed54c2162b140a33b6146a16be (Kefu Chai's patch for 17857)
 
-And how do I cleanup this mess, without wiping the cluster and
-restarting. :) Note that it is just practice for me doing somewhat more
-tricky work.
-
-Thanx,
---WjW
-
-
-    -6> 2017-04-07 16:04:57.530301 806e16000  0 osd.7 733 crush map has
-features 2200130813952, adjusting msgr requires for clients
-    -5> 2017-04-07 16:04:57.530314 806e16000  0 osd.7 733 crush map has
-features 2200130813952 was 8705, adjusting msgr requires for mons
-    -4> 2017-04-07 16:04:57.530321 806e16000  0 osd.7 733 crush map has
-features 2200130813952, adjusting msgr requires for osds
-    -3> 2017-04-07 16:04:57.552968 806e16000  0 osd.7 733 load_pgs
-    -2> 2017-04-07 16:04:57.553479 806e16000 -1 osd.7 0 failed to load
-OSD map for epoch 714, got 0 bytes
-    -1> 2017-04-07 16:04:57.553493 806e16000 -1 osd.7 733 load_pgs: have
-pgid 8.e9 at epoch 714, but missing map.  Crashing.
-     0> 2017-04-07 16:04:57.554157 806e16000 -1
-/usr/ports/net/ceph/work/ceph-wip.FreeBSD/src/osd/OSD.cc: In function
-'void OSD::load_pgs()' thread 806e16000 time 2017-04-0
-7 16:04:57.553497
-/usr/ports/net/ceph/work/ceph-wip.FreeBSD/src/osd/OSD.cc: 3360: FAILED
-assert(0 == "Missing map in load_pgs")
-
-Most of the pools are in "oke" state:
-[/var/log/ceph] wjw@cephtest> ceph -s
-    cluster 746e196d-e344-11e6-b4b7-0025903744dc
-     health HEALTH_ERR
-            45 pgs are stuck inactive for more than 300 seconds
-            7 pgs down
-            38 pgs stale
-            7 pgs stuck inactive
-            38 pgs stuck stale
-            7 pgs stuck unclean
-            pool cephfsdata has many more objects per pg than average
-(too few pgs?)
-     monmap e5: 3 mons at
-{a=192.168.10.70:6789/0,b=192.168.9.79:6789/0,c=192.168.8.79:6789/0}
-            election epoch 114, quorum 0,1,2 c,b,a
-      fsmap e755: 1/1/1 up {0=alpha=up:active}
-        mgr active: admin
-     osdmap e877: 8 osds: 7 up, 7 in; 6 remapped pgs
-            flags sortbitwise,require_jewel_osds,require_kraken_osds
-      pgmap v681735: 1864 pgs, 7 pools, 12416 MB data, 354 kobjects
-            79963 MB used, 7837 GB / 7915 GB avail
-                1819 active+clean
-                  38 stale+active+clean
-                   6 down
-                   1 down+remapped
-
-Just the ones that were only on the OSD that doesn't want to come up.
+-- 
+Alexandre Oliva, freedom fighter    http://FSFLA.org/~lxoliva/
+You must be the change you wish to see in the world. -- Gandhi
+Be Free! -- http://FSFLA.org/   FSF Latin America board member
+Free Software Evangelist|Red Hat Brasil GNU Toolchain Engineer
