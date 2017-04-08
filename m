@@ -1,58 +1,115 @@
-From: Deepa Dinamani <deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 02/12] trace: Make trace_hwlat timestamp
-	y2038 safe
-Date: Fri, 7 Apr 2017 19:16:54 -0700
-Message-ID: <CABeXuvoQJSg+eVH4LX5s87DtE4N3goKDnjZgJ9fLk8txgwN+QA@mail.gmail.com>
-References: <1491613030-11599-1-git-send-email-deepa.kernel@gmail.com>
-	<1491613030-11599-3-git-send-email-deepa.kernel@gmail.com>
-	<20170407213011.36e29f42@gandalf.local.home>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: Toying with a FreeBSD cluster results in a crash
+Date: Sat, 8 Apr 2017 11:33:23 +0800
+Message-ID: <CAJE9aONW_n1k+_5by=JLs_7kkpka8xJCkcsPkM0YMchQottA_Q@mail.gmail.com>
+References: <f94f1932-ae99-eb6a-7fc6-e2fb6afee051@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-In-Reply-To: <20170407213011.36e29f42-f9ZlEuEWxVcJvu8Pb33WZ0EMvNT87kid@public.gmane.org>
-List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
-List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
-Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
-Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-To: Steven Rostedt <rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org>
-Cc: yuchao0-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, "J. Bruce Fields" <bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org>, Chris Mason <clm-b10kYP2dOMg@public.gmane.org>, linux-mtd <linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Evgeniy Dushistov <dushistov-JGs/UdohzUI@public.gmane.org>, Jeff Layton <jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Paul Moore <paul-r2n+y4ga6xFZroRs9YW3xA@public.gmane.org>, y2038 Mailman List <y2038-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, oleg.drokin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>, Jaegeuk Kim <jaegeuk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Josef Bacik <jbacik-b10kYP2dOMg@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Eric Paris <eparis-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>"Linux F2FS DEV,
-	Mailing List" <li>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-vk0-f54.google.com ([209.85.213.54]:36419 "EHLO
+        mail-vk0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750717AbdDHDdZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Apr 2017 23:33:25 -0400
+Received: by mail-vk0-f54.google.com with SMTP id s68so89053355vke.3
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Apr 2017 20:33:25 -0700 (PDT)
+In-Reply-To: <f94f1932-ae99-eb6a-7fc6-e2fb6afee051@digiware.nl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
->> -     trace_seq_printf(s, "#%-5u inner/outer(us): %4llu/%-5llu ts:%ld.%09ld",
->> +     trace_seq_printf(s, "#%-5u inner/outer(us): %4llu/%-5llu ts:%lld.%09ld",
->>                        field->seqnum,
->>                        field->duration,
->>                        field->outer_duration,
->> -                      field->timestamp.tv_sec,
->> +                      (long long)field->timestamp.tv_sec,
+On Fri, Apr 7, 2017 at 10:34 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> Hi,
 >
-> Refresh my memory. We need the cast because on 64 bit boxes
-> timestamp.tv_sec is just a long?
+> I'm playing with my/a FreeBSD test cluster.
+> It is full with different types of disks, and sometimes they are not
+> very new.
+>
+> The deepscrub on it showed things like:
+>  filestore(/var/lib/ceph/osd/osd.7) error creating
+> #-1:4962ce63:::inc_osdmap.705:0#
+> (/var/lib/ceph/osd/osd.7/current/meta/inc\uosdmap
+> .705__0_C6734692__none) in index: (87) Attribute not found
 
-This is only required until we change the definition of timespec64.
-Right now it is defined as
+filestore stores subdir states using xattr, could you check the xattr
+of your meta collection using something like:
 
-#if __BITS_PER_LONG == 64
-# define timespec64 timespec
-#else
-struct timespec64 {
-    time64_t tv_sec;
-    long tv_nsec;
-};
-#endif
+ lsextattr user /var/lib/ceph/osd/osd.7/current/meta
 
-And timespec.tv_sec is just long int on 64 bit machines.
-This is why we need the cast now.
+if nothing shows up, did you enable the xattr on the mounted fs in
+which /var/lib/ceph/osd/osd.7/current/meta is located?
 
-We will probably change this and only define __kernel_timespec instead
-of timespec, leaving only one definition of timespec64.
-At that time, we will not need this.
+>
+>
+> I've build the cluster with:
+>         osd pool default size      = 1
+>
+> Created some pools, and then increased
+>         osd pool default size      = 3
+>
+> Restarted the pools, but 1 pool does not want to reboot, so now I wonder
+> if the restarting problem is due to issue like quoted above?
+>
+> And how do I cleanup this mess, without wiping the cluster and
+> restarting. :) Note that it is just practice for me doing somewhat more
+> tricky work.
+>
+> Thanx,
+> --WjW
+>
+>
+>     -6> 2017-04-07 16:04:57.530301 806e16000  0 osd.7 733 crush map has
+> features 2200130813952, adjusting msgr requires for clients
+>     -5> 2017-04-07 16:04:57.530314 806e16000  0 osd.7 733 crush map has
+> features 2200130813952 was 8705, adjusting msgr requires for mons
+>     -4> 2017-04-07 16:04:57.530321 806e16000  0 osd.7 733 crush map has
+> features 2200130813952, adjusting msgr requires for osds
+>     -3> 2017-04-07 16:04:57.552968 806e16000  0 osd.7 733 load_pgs
+>     -2> 2017-04-07 16:04:57.553479 806e16000 -1 osd.7 0 failed to load
+> OSD map for epoch 714, got 0 bytes
+>     -1> 2017-04-07 16:04:57.553493 806e16000 -1 osd.7 733 load_pgs: have
+> pgid 8.e9 at epoch 714, but missing map.  Crashing.
+>      0> 2017-04-07 16:04:57.554157 806e16000 -1
+> /usr/ports/net/ceph/work/ceph-wip.FreeBSD/src/osd/OSD.cc: In function
+> 'void OSD::load_pgs()' thread 806e16000 time 2017-04-0
+> 7 16:04:57.553497
+> /usr/ports/net/ceph/work/ceph-wip.FreeBSD/src/osd/OSD.cc: 3360: FAILED
+> assert(0 == "Missing map in load_pgs")
+>
+> Most of the pools are in "oke" state:
+> [/var/log/ceph] wjw@cephtest> ceph -s
+>     cluster 746e196d-e344-11e6-b4b7-0025903744dc
+>      health HEALTH_ERR
+>             45 pgs are stuck inactive for more than 300 seconds
+>             7 pgs down
+>             38 pgs stale
+>             7 pgs stuck inactive
+>             38 pgs stuck stale
+>             7 pgs stuck unclean
+>             pool cephfsdata has many more objects per pg than average
+> (too few pgs?)
+>      monmap e5: 3 mons at
+> {a=192.168.10.70:6789/0,b=192.168.9.79:6789/0,c=192.168.8.79:6789/0}
+>             election epoch 114, quorum 0,1,2 c,b,a
+>       fsmap e755: 1/1/1 up {0=alpha=up:active}
+>         mgr active: admin
+>      osdmap e877: 8 osds: 7 up, 7 in; 6 remapped pgs
+>             flags sortbitwise,require_jewel_osds,require_kraken_osds
+>       pgmap v681735: 1864 pgs, 7 pools, 12416 MB data, 354 kobjects
+>             79963 MB used, 7837 GB / 7915 GB avail
+>                 1819 active+clean
+>                   38 stale+active+clean
+>                    6 down
+>                    1 down+remapped
+>
+> Just the ones that were only on the OSD that doesn't want to come up.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
--Deepa
+
+
+-- 
+Regards
+Kefu Chai
