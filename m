@@ -1,151 +1,130 @@
-From: Paul Moore <paul@paul-moore.com>
-Subject: Re: [PATCH 06/12] audit: Use timespec64 to represent audit timestamps
-Date: Sat, 8 Apr 2017 08:40:17 -0400
-Message-ID: <CAHC9VhTYWeKL+BAb6F3tfwzs7OKUEA8ANM=V05sfoiahNNX=9w@mail.gmail.com>
-References: <1491613030-11599-1-git-send-email-deepa.kernel@gmail.com> <1491613030-11599-7-git-send-email-deepa.kernel@gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Toying with a FreeBSD cluster results in a crash
+Date: Sat, 8 Apr 2017 14:43:37 +0200
+Message-ID: <3fd7e04e-cf9d-5439-a932-33dcef685c88@digiware.nl>
+References: <f94f1932-ae99-eb6a-7fc6-e2fb6afee051@digiware.nl>
+ <CAJE9aONW_n1k+_5by=JLs_7kkpka8xJCkcsPkM0YMchQottA_Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <1491613030-11599-7-git-send-email-deepa.kernel@gmail.com>
-Sender: owner-linux-security-module@vger.kernel.org
-To: Deepa Dinamani <deepa.kernel@gmail.com>
-Cc: linux-kernel@vger.kernel.org, akpm@linux-foundation.org, tglx@linutronix.de, viro@zeniv.linux.org.uk, gregkh@linuxfoundation.org, andreas.dilger@intel.com, arnd@arndb.de, bfields@fieldses.org, clm@fb.com, davem@davemloft.net, dsterba@suse.com, dushistov@mail.ru, Eric Paris <eparis@redhat.com>, jaegeuk@kernel.org, jbacik@fb.com, jlayton@poochiereds.net, john.stultz@linaro.org, jsimmons@infradead.org, mingo@redhat.com, oleg.drokin@intel.com, rostedt@goodmis.org, yuchao0@huawei.com, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, linux-audit@redhat.com, linux-btrfs@vger.kernel.org, linux-cifs@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, linux-fsdevel@vger.kernel.org, linux-mtd@lists.infradead.org, linux-security-module@vger.kernel.org, lustre-devel@lists.lu
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.digiware.nl ([176.74.240.9]:19700 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751997AbdDHMnk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 8 Apr 2017 08:43:40 -0400
+In-Reply-To: <CAJE9aONW_n1k+_5by=JLs_7kkpka8xJCkcsPkM0YMchQottA_Q@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Apr 7, 2017 at 8:57 PM, Deepa Dinamani <deepa.kernel@gmail.com> wrote:
-> struct timespec is not y2038 safe.
-> Audit timestamps are recorded in string format into
-> an audit buffer for a given context.
-> These mark the entry timestamps for the syscalls.
-> Use y2038 safe struct timespec64 to represent the times.
-> The log strings can handle this transition as strings can
-> hold upto 1024 characters.
->
-> Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
-> Reviewed-by: Arnd Bergmann <arnd@arndb.de>
-> Acked-by: Paul Moore <paul@paul-moore.com>
-> Acked-by: Richard Guy Briggs <rgb@redhat.com>
-> ---
->  include/linux/audit.h |  4 ++--
->  kernel/audit.c        | 10 +++++-----
->  kernel/audit.h        |  2 +-
->  kernel/auditsc.c      |  6 +++---
->  4 files changed, 11 insertions(+), 11 deletions(-)
+On 08-04-17 05:33, kefu chai wrote:
+> On Fri, Apr 7, 2017 at 10:34 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>> Hi,
+>>
+>> I'm playing with my/a FreeBSD test cluster.
+>> It is full with different types of disks, and sometimes they are not
+>> very new.
+>>
+>> The deepscrub on it showed things like:
+>>  filestore(/var/lib/ceph/osd/osd.7) error creating
+>> #-1:4962ce63:::inc_osdmap.705:0#
+>> (/var/lib/ceph/osd/osd.7/current/meta/inc\uosdmap
+>> .705__0_C6734692__none) in index: (87) Attribute not found
+> 
+> filestore stores subdir states using xattr, could you check the xattr
+> of your meta collection using something like:
+> 
+>  lsextattr user /var/lib/ceph/osd/osd.7/current/meta
+> 
+> if nothing shows up, did you enable the xattr on the mounted fs in
+> which /var/lib/ceph/osd/osd.7/current/meta is located?
 
-I have no problem merging this patch into audit/next for v4.12, would
-you prefer me to do that so at least this patch is merged?
+This is on ZFS, and there attributes are on per default.
 
-It would probably make life a small bit easier for us in the audit
-world too as it would reduce the potential merge conflict.  However,
-that's a relatively small thing to worry about.
+I checked other parts of the OSD files and several other did have
+attributes. But everything in this directory had nothing set.
 
-> diff --git a/include/linux/audit.h b/include/linux/audit.h
-> index 6fdfefc..f830508 100644
-> --- a/include/linux/audit.h
-> +++ b/include/linux/audit.h
-> @@ -332,7 +332,7 @@ static inline void audit_ptrace(struct task_struct *t)
->                                 /* Private API (for audit.c only) */
->  extern unsigned int audit_serial(void);
->  extern int auditsc_get_stamp(struct audit_context *ctx,
-> -                             struct timespec *t, unsigned int *serial);
-> +                             struct timespec64 *t, unsigned int *serial);
->  extern int audit_set_loginuid(kuid_t loginuid);
->
->  static inline kuid_t audit_get_loginuid(struct task_struct *tsk)
-> @@ -511,7 +511,7 @@ static inline void __audit_seccomp(unsigned long syscall, long signr, int code)
->  static inline void audit_seccomp(unsigned long syscall, long signr, int code)
->  { }
->  static inline int auditsc_get_stamp(struct audit_context *ctx,
-> -                             struct timespec *t, unsigned int *serial)
-> +                             struct timespec64 *t, unsigned int *serial)
->  {
->         return 0;
->  }
-> diff --git a/kernel/audit.c b/kernel/audit.c
-> index 2f4964c..fcbf377 100644
-> --- a/kernel/audit.c
-> +++ b/kernel/audit.c
-> @@ -1625,10 +1625,10 @@ unsigned int audit_serial(void)
->  }
->
->  static inline void audit_get_stamp(struct audit_context *ctx,
-> -                                  struct timespec *t, unsigned int *serial)
-> +                                  struct timespec64 *t, unsigned int *serial)
->  {
->         if (!ctx || !auditsc_get_stamp(ctx, t, serial)) {
-> -               *t = CURRENT_TIME;
-> +               ktime_get_real_ts64(t);
->                 *serial = audit_serial();
->         }
->  }
-> @@ -1652,7 +1652,7 @@ struct audit_buffer *audit_log_start(struct audit_context *ctx, gfp_t gfp_mask,
->                                      int type)
->  {
->         struct audit_buffer *ab;
-> -       struct timespec t;
-> +       struct timespec64 t;
->         unsigned int uninitialized_var(serial);
->
->         if (audit_initialized != AUDIT_INITIALIZED)
-> @@ -1705,8 +1705,8 @@ struct audit_buffer *audit_log_start(struct audit_context *ctx, gfp_t gfp_mask,
->         }
->
->         audit_get_stamp(ab->ctx, &t, &serial);
-> -       audit_log_format(ab, "audit(%lu.%03lu:%u): ",
-> -                        t.tv_sec, t.tv_nsec/1000000, serial);
-> +       audit_log_format(ab, "audit(%llu.%03lu:%u): ",
-> +                        (unsigned long long)t.tv_sec, t.tv_nsec/1000000, serial);
->
->         return ab;
->  }
-> diff --git a/kernel/audit.h b/kernel/audit.h
-> index 0f1cf6d..cdf96f4 100644
-> --- a/kernel/audit.h
-> +++ b/kernel/audit.h
-> @@ -112,7 +112,7 @@ struct audit_context {
->         enum audit_state    state, current_state;
->         unsigned int        serial;     /* serial number for record */
->         int                 major;      /* syscall number */
-> -       struct timespec     ctime;      /* time of syscall entry */
-> +       struct timespec64   ctime;      /* time of syscall entry */
->         unsigned long       argv[4];    /* syscall arguments */
->         long                return_code;/* syscall return code */
->         u64                 prio;
-> diff --git a/kernel/auditsc.c b/kernel/auditsc.c
-> index e59ffc7..a2d9217 100644
-> --- a/kernel/auditsc.c
-> +++ b/kernel/auditsc.c
-> @@ -1532,7 +1532,7 @@ void __audit_syscall_entry(int major, unsigned long a1, unsigned long a2,
->                 return;
->
->         context->serial     = 0;
-> -       context->ctime      = CURRENT_TIME;
-> +       ktime_get_real_ts64(&context->ctime);
->         context->in_syscall = 1;
->         context->current_state  = state;
->         context->ppid       = 0;
-> @@ -1941,13 +1941,13 @@ EXPORT_SYMBOL_GPL(__audit_inode_child);
->  /**
->   * auditsc_get_stamp - get local copies of audit_context values
->   * @ctx: audit_context for the task
-> - * @t: timespec to store time recorded in the audit_context
-> + * @t: timespec64 to store time recorded in the audit_context
->   * @serial: serial value that is recorded in the audit_context
->   *
->   * Also sets the context as auditable.
->   */
->  int auditsc_get_stamp(struct audit_context *ctx,
-> -                      struct timespec *t, unsigned int *serial)
-> +                      struct timespec64 *t, unsigned int *serial)
->  {
->         if (!ctx->in_syscall)
->                 return 0;
-> --
-> 2.7.4
->
+Now the trick question is if it can recover from a crash like this:
+>> /usr/ports/net/ceph/work/ceph-wip.FreeBSD/src/osd/OSD.cc: 3360:
+>> FAILED assert(0 == "Missing map in load_pgs")
 
+If it depends on infomation in its local tree, things might be too
+corrupt to restart it...
+But if it needs to be fetched from the rest of the cluster, I had a
+different type of problem?
 
+--WjW
+> 
+>>
+>>
+>> I've build the cluster with:
+>>         osd pool default size      = 1
+>>
+>> Created some pools, and then increased
+>>         osd pool default size      = 3
+>>
+>> Restarted the pools, but 1 pool does not want to reboot, so now I wonder
+>> if the restarting problem is due to issue like quoted above?
+>>
+>> And how do I cleanup this mess, without wiping the cluster and
+>> restarting. :) Note that it is just practice for me doing somewhat more
+>> tricky work.
+>>
+>> Thanx,
+>> --WjW
+>>
+>>
+>>     -6> 2017-04-07 16:04:57.530301 806e16000  0 osd.7 733 crush map has
+>> features 2200130813952, adjusting msgr requires for clients
+>>     -5> 2017-04-07 16:04:57.530314 806e16000  0 osd.7 733 crush map has
+>> features 2200130813952 was 8705, adjusting msgr requires for mons
+>>     -4> 2017-04-07 16:04:57.530321 806e16000  0 osd.7 733 crush map has
+>> features 2200130813952, adjusting msgr requires for osds
+>>     -3> 2017-04-07 16:04:57.552968 806e16000  0 osd.7 733 load_pgs
+>>     -2> 2017-04-07 16:04:57.553479 806e16000 -1 osd.7 0 failed to load
+>> OSD map for epoch 714, got 0 bytes
+>>     -1> 2017-04-07 16:04:57.553493 806e16000 -1 osd.7 733 load_pgs: have
+>> pgid 8.e9 at epoch 714, but missing map.  Crashing.
+>>      0> 2017-04-07 16:04:57.554157 806e16000 -1
+>> /usr/ports/net/ceph/work/ceph-wip.FreeBSD/src/osd/OSD.cc: In function
+>> 'void OSD::load_pgs()' thread 806e16000 time 2017-04-0
+>> 7 16:04:57.553497
+>> /usr/ports/net/ceph/work/ceph-wip.FreeBSD/src/osd/OSD.cc: 3360: FAILED
+>> assert(0 == "Missing map in load_pgs")
+>>
+>> Most of the pools are in "oke" state:
+>> [/var/log/ceph] wjw@cephtest> ceph -s
+>>     cluster 746e196d-e344-11e6-b4b7-0025903744dc
+>>      health HEALTH_ERR
+>>             45 pgs are stuck inactive for more than 300 seconds
+>>             7 pgs down
+>>             38 pgs stale
+>>             7 pgs stuck inactive
+>>             38 pgs stuck stale
+>>             7 pgs stuck unclean
+>>             pool cephfsdata has many more objects per pg than average
+>> (too few pgs?)
+>>      monmap e5: 3 mons at
+>> {a=192.168.10.70:6789/0,b=192.168.9.79:6789/0,c=192.168.8.79:6789/0}
+>>             election epoch 114, quorum 0,1,2 c,b,a
+>>       fsmap e755: 1/1/1 up {0=alpha=up:active}
+>>         mgr active: admin
+>>      osdmap e877: 8 osds: 7 up, 7 in; 6 remapped pgs
+>>             flags sortbitwise,require_jewel_osds,require_kraken_osds
+>>       pgmap v681735: 1864 pgs, 7 pools, 12416 MB data, 354 kobjects
+>>             79963 MB used, 7837 GB / 7915 GB avail
+>>                 1819 active+clean
+>>                   38 stale+active+clean
+>>                    6 down
+>>                    1 down+remapped
+>>
+>> Just the ones that were only on the OSD that doesn't want to come up.
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> 
 
--- 
-paul moore
-www.paul-moore.com
