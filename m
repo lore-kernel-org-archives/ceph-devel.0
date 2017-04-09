@@ -1,125 +1,100 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: revisiting uneven CRUSH distributions
-Date: Sun, 30 Apr 2017 16:15:06 +0200
-Message-ID: <712e34ca-d94e-b4a5-6195-5ca4cbc2aa34@dachary.org>
+From: Orit Wasserman <owasserm@redhat.com>
+Subject: Re: Help debugging RGW bug in jewel 10.2.8 integration branch
+Date: Sun, 9 Apr 2017 20:47:02 +0300
+Message-ID: <CABo9giTo1ACgVBhE6gRNUq85am6pr0jbheX=c9Mfvk-4dC-r5g@mail.gmail.com>
+References: <b0339864-0d92-704e-597a-77981e057999@suse.cz> <7a6ea2c2-0f49-177d-e2f6-28b97b620280@suse.cz>
+ <CAMMFjmEZjc8H_RwWubOGg-yC=WJaH7hTBfAu_CzzivHPt1LKyQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay8-d.mail.gandi.net ([217.70.183.201]:53834 "EHLO
-        relay8-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S968945AbdD3OPK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 30 Apr 2017 10:15:10 -0400
-Received: from relay5-d.mail.gandi.net (relay5-d.mail.gandi.net [217.70.183.197])
-        by relay8-d.mail.gandi.net (Postfix) with ESMTPS id 3E72A406C9
-        for <ceph-devel@vger.kernel.org>; Sun, 30 Apr 2017 16:15:09 +0200 (CEST)
-Received: from mfilter16-d.gandi.net (mfilter16-d.gandi.net [217.70.178.144])
-        by relay5-d.mail.gandi.net (Postfix) with ESMTP id 2AA9241C08A
-        for <ceph-devel@vger.kernel.org>; Sun, 30 Apr 2017 16:15:09 +0200 (CEST)
-Received: from relay5-d.mail.gandi.net ([IPv6:::ffff:217.70.183.197])
-        by mfilter16-d.gandi.net (mfilter16-d.gandi.net [::ffff:10.0.15.180]) (amavisd-new, port 10024)
-        with ESMTP id ujX1h4NS9WBm for <ceph-devel@vger.kernel.org>;
-        Sun, 30 Apr 2017 16:15:07 +0200 (CEST)
-Received: from [192.168.3.6] (x4db483b4.dyn.telefonica.de [77.180.131.180])
-        (Authenticated sender: loic@dachary.org)
-        by relay5-d.mail.gandi.net (Postfix) with ESMTPSA id 7F8DA41C088
-        for <ceph-devel@vger.kernel.org>; Sun, 30 Apr 2017 16:15:07 +0200 (CEST)
+Received: from mail-lf0-f48.google.com ([209.85.215.48]:34229 "EHLO
+        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752559AbdDIRrJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 9 Apr 2017 13:47:09 -0400
+Received: by mail-lf0-f48.google.com with SMTP id z15so60878345lfd.1
+        for <ceph-devel@vger.kernel.org>; Sun, 09 Apr 2017 10:47:08 -0700 (PDT)
+In-Reply-To: <CAMMFjmEZjc8H_RwWubOGg-yC=WJaH7hTBfAu_CzzivHPt1LKyQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: Nathan Cutler <ncutler@suse.cz>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 Hi,
+This pr is related to versioning:
+https://github.com/ceph/ceph/pull/14368/
+Try to see if removing it helps.
 
-Ideally CRUSH distributes PGs evenly on OSDs so that they all fill in
-the same proportion. If an OSD is 75% full, it is expected that all
-other OSDs are also 75% full.
+Regards,
+Orit
 
-In reality the distribution is even only when more than 100,000 PGs
-are distributed in a pool of size 1 (i.e. no replication).
-
-In small clusters there are a few thousands PGs and it is not enough
-to get an even distribution. Running the following with
-python-crush[1], shows a 15% difference when distributing 1,000 PGs on
-6 devices. Only with 1,000,000 PGs does the difference drop under 1%.
-
-  for PGs in 1000 10000 100000 1000000 ; do
-    crush analyze --replication-count 1 \
-                  --type device \
-                  --values-count $PGs \
-                  --rule data \
-                  --crushmap tests/sample-crushmap.json
-  done
-
-In larger clusters, even though a greater number of PGs are
-distributed, there are at most a few dozens devices per host and the
-problem remains. On a machine with 24 OSDs each expected to handle a
-few hundred PGs, a total of a few thousands PGs are distributed which
-is not enough to get an even distribution.
-
-There is a secondary reason for the distribution to be uneven, when
-there is more than one replica. The second replica must be on a
-different device than the first replica. This conditional probability
-is not taken into account by CRUSH and would create an uneven
-distribution if more than 10,000 PGs were distributed per OSD[2]. But
-a given OSD can only handle a few hundred PGs and this conditional
-probability bias is dominated by the uneven distribution caused by the
-low number of PGs.
-
-The uneven CRUSH distributions are always caused by a low number of
-samples, even in large clusters. Since this noise (i.e. the difference
-between the desired distribution and the actual distribution) is
-random, it cannot be fixed by optimizations methods.  The
-Nedler-Mead[3] simplex converges to a local minimum that is far from
-the optimal minimum in many cases. Broyden–Fletcher–Goldfarb–Shanno[4]
-fails to find a gradient that would allow it to converge faster. And
-even if it did, the local minimum found would be as often wrong as
-with Nedler-Mead, only it would go faster. A least mean squares
-filter[5] is equally unable to suppress the noise created by the
-uneven distribution because no coefficients can model a random noise.
-
-With that in mind, I implemented a simple optimization algorithm[6]
-which was first suggested by Thierry Delamare a few weeks ago. It goes
-like this:
-
-    - Distribute the desired number of PGs[7]
-    - Subtract 1% of the weight of the OSD that is the most over used
-    - Add the subtracted weight to the OSD that is the most under used
-    - Repeat until the Kullback–Leibler divergence[8] is small enough
-
-Quoting Adam Kupczyk, this works because:
-
-  "...CRUSH is not random proces at all, it behaves in numerically
-   stable way.  Specifically, if we increase weight on one node, we
-   will get more PGs on this node and less on every other node:
-   CRUSH([10.1, 10, 10, 5, 5]) -> [146(+3), 152, 156(-2), 70(-1), 76]"
-
-A nice side effect of this optimization algorithm is that it does not
-change the weight of the bucket containing the items being
-optimized. It is local to a bucket with no influence on the other
-parts of the crushmap (modulo the conditional probability bias).
-
-In all tests the situation improves at least by an order of
-magnitude. For instance when there is a 30% difference between two
-OSDs, it is down to less than 3% after optimization.
-
-The tests for the optimization method can be run with
-
-   git clone -b wip-fix-2 http://libcrush.org/dachary/python-crush.git
-   tox -e py27 -- -s -vv -k test_fix tests/test_analyze.py
-
-If anyone think of a reason why this algorithm won't work in some
-cases, please speak up :-)
-
-Cheers
-
-[1] python-crush http://crush.readthedocs.io/
-[2] crush multipick anomaly http://marc.info/?l=ceph-devel&m=148539995928656&w=2
-[3] Nedler-Mead https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method
-[4] L-BFGS-B https://docs.scipy.org/doc/scipy-0.18.1/reference/optimize.minimize-lbfgsb.html#optimize-minimize-lbfgsb
-[5] Least mean squares filter https://en.wikipedia.org/wiki/Least_mean_squares_filter
-[6] http://libcrush.org/dachary/python-crush/blob/c6af9bbcbef7123af84ee4d75d63dd1b967213a2/tests/test_analyze.py#L39
-[7] Predicting Ceph PG placement http://dachary.org/?p=4020
-[8] Kullback–Leibler divergence https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
+On Sun, Apr 9, 2017 at 7:02 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
+> Just a note that rgw passed for v10.2.7
+> So we may need to split PRs in smaller batches to find offending one.
+>
+> On Sun, Apr 9, 2017 at 8:28 AM, Nathan Cutler <ncutler@suse.cz> wrote:
+>> All the failures appear to be in rgw/verify and rgw/multifs
+>>
+>>
+>> On 04/09/2017 03:33 PM, Nathan Cutler wrote:
+>>>
+>>> Hello RGW developers:
+>>>
+>>> Since 10.2.7 is almost out, I'm now running integration tests for
+>>> 10.2.8. As usual, there is quite a crop of RGW backports. The
+>>> integration branch is "wip-jewel-backports" and the RGW suite [1] is not
+>>> looking good: over 50 failures, and most of them are this:
+>>>
+>>> ======================================================================
+>>> FAIL: s3tests.functional.test_s3.test_versioning_obj_suspend_versions
+>>> ----------------------------------------------------------------------
+>>> Traceback (most recent call last):
+>>>   File
+>>>
+>>> "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-packages/nose/case.py",
+>>> line 197, in runTest
+>>>     self.test(*self.arg)
+>>>   File "/home/ubuntu/cephtest/s3-tests/s3tests/functional/test_s3.py",
+>>> line 6385, in test_versioning_obj_suspend_versions
+>>>     overwrite_suspended_versioning_obj(bucket, objname, k, c, 'null
+>>> content 2')
+>>>   File "/home/ubuntu/cephtest/s3-tests/s3tests/functional/test_s3.py",
+>>> line 6243, in overwrite_suspended_versioning_obj
+>>>     check_obj_versions(bucket, objname, k, c)
+>>>   File "/home/ubuntu/cephtest/s3-tests/s3tests/functional/test_s3.py",
+>>> line 6080, in check_obj_versions
+>>>     eq(keys[i].version_id or 'null', key.version_id)
+>>> AssertionError: u'yGSvpxjEbJRBE.JL76y4OzeJISqDtmJ' != u'null'
+>>>
+>>> Does anyone have an idea which of these PRs [2] might be the culprit?
+>>>
+>>> [1]
+>>>
+>>> http://pulpito.ceph.com/smithfarm-2017-04-07_09:30:57-rgw-wip-jewel-backports-distro-basic-smithi/
+>>>
+>>> [2]
+>>>
+>>> https://github.com/ceph/ceph/pulls?q=is%3Aopen+is%3Apr+milestone%3Ajewel+label%3Argw
+>>>
+>>>
+>>> Thanks in advance,
+>>> Nathan
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>> --
+>> Nathan Cutler
+>> Software Engineer Distributed Storage
+>> SUSE LINUX, s.r.o.
+>> Tel.: +420 284 084 037
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
