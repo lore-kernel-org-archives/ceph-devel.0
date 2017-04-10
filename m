@@ -1,86 +1,65 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: OSD creation and device class
-Date: Mon, 10 Apr 2017 13:49:32 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1704101347260.2999@piezo.novalocal>
-References: <9c19c5c5-8640-63d3-debd-7105e16ceb75@dachary.org> <alpine.DEB.2.11.1704101327320.2999@piezo.novalocal> <da8a2939-332d-5670-7a46-7e9432b27cb2@dachary.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Forwarding Rocksdb to a new sha
+Date: Mon, 10 Apr 2017 13:52:33 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1704101350380.2999@piezo.novalocal>
+References: <efe3e212-13b9-c4b6-9abd-f95a6803123a@digiware.nl> <alpine.DEB.2.11.1704101334321.2999@piezo.novalocal> <21ce1351-d892-90ed-d902-fb043af3d87e@digiware.nl>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-696905710-1491832173=:2999"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55396 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753211AbdDJNte (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 10 Apr 2017 09:49:34 -0400
-In-Reply-To: <da8a2939-332d-5670-7a46-7e9432b27cb2@dachary.org>
+Received: from cobra.newdream.net ([66.33.216.30]:57205 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752903AbdDJNwg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Apr 2017 09:52:36 -0400
+In-Reply-To: <21ce1351-d892-90ed-d902-fb043af3d87e@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: joao@suse.de, Ceph Development <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-696905710-1491832173=:2999
-Content-Type: TEXT/PLAIN; charset=windows-1252
-Content-Transfer-Encoding: 8BIT
-
-On Mon, 10 Apr 2017, Loic Dachary wrote:
-> On 04/10/2017 03:32 PM, Sage Weil wrote:
-> > On Mon, 10 Apr 2017, Loic Dachary wrote:
-> >> Hi Sage,
+On Mon, 10 Apr 2017, Willem Jan Withagen wrote:
+> On 10-4-2017 15:36, Sage Weil wrote:
+> > On Mon, 10 Apr 2017, Willem Jan Withagen wrote:
+> >> Hi,
 > >>
-> >> When the OSD is prepared, we add a --device-class option to ceph-disk 
-> >> that creates a device_class file and activate can use it use when 
-> >> creating the the OSD[1]. The ceph osd create command is given an 
-> >> additional optional argument (device class). If the device class 
-> >> argument is present, ceph osd create[2] creates a device entry in the 
-> >> crushmap (it currently does nothing with the crushmap) so that the 
-> >> corresponding device class can be preserved. This happens before 
-> >> update_crush_location[3] is called and since the device is not included 
-> >> in any crush tree it won't be used.
+> >> I have submitted a PR to RocksDB that got accepted.
+> >> But now I'd like to try it in my WIP tree.
 > >>
-> >> I'm not happy about adding an argument to osd create. We could instead 
-> >> have a new dedicated command create-with-device-class but I like that 
-> >> even less. We could also add a "ceph osd crush create-device" and have 
-> >> ceph-disk call it right after "ceph osd create", followed by "ceph osd 
-> >> crush set-device-class". That would be my second favorite: the only 
-> >> drawback is having a multi-step device creation during activation but 
-> >> all steps are idempotents that should not be a problem.
+> >> So how do I locally roll the RocksDB version forward?
 > >>
-> >> What do you think ?
+> >> Is it as simple as going into RocksDB and go:
+> >> 	'git pull' ??
 > > 
-> > We're aiming toward a new osd create command anyway that does all of this 
-> > stuff at once (create osd id and set uuid, set cephx key, set lockbox key 
-> > for dmcrypt, add to crush map).  Having it also set the device class seems 
-> > like an easy addition.  I believe Joao has started or is about to start 
-> > work on this?
-> > 
-> > In the meantime, I would do the simplest thing, which is probably just 
-> > calling 'ceph osd crush set-device-class'.  It could be done before the 
-> > 'osd crush create-or-move' in OSD::update_crush_location(), 
+> > It depends on what remotes you have in the rocksdb repository; you may 
+> > have to 'git remote add upstream https://github.com/facebook/rocksdb' and 
+> > fetch that first.
 > 
-> Does that mean we should have a --device-class argument to ceph-osd --mkfs ? Or is there another way I'm not seeing ?
+> Uptil now I avoided cloning RocksDB and submitted PRs fully thru GitHub ;-)
+> 
+> > Once you get the submodule on the right commit, you'll need to make a 
+> > commit in the containing ceph.git updating the submodule sha1.  (I usually 
+> > use 'git gui' for this.)
+> 
+> There is not that many updates to RocksDB, And my PR-commit is the
+> current HEAD: 04abb2b2ddc308ab03f55ea9a1e08b62667d6e39
+> 
+> So how do I forward the submodule to this SHA?
 
-If you're putting a file in the osd_data directory, you can use 
-ObjectStore::read_meta() (and/or write_meta()) to easily access it.
-
-Thinking about this a bit more, if the admin has explicitly specified the 
-type like this, I don't think we need to worry about set-but-do-not-change 
-behavior like I suggested below...
+Yeah, that makes sense!
 
 sage
 
+
+
+> And I can actually test this release of RockDB with Ceph. Otherwise we
+> stay at the old version we include, and I need to keep a patch.
+
 > 
-> > but then we'd 
-> > probably want to make it only set it if a device class isn't already set 
-> > (i.e., don't change it if the admin set it to something else).  Or at some 
-> > convenient point during the initial activation that similarly avoids 
-> > clobbering the value if the admin set it...
-> > 
-> > sage
-> > 
-> 
-> -- 
-> Loïc Dachary, Artisan Logiciel Libre
+> --WjW
 > 
 > 
---8323329-696905710-1491832173=:2999--
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
