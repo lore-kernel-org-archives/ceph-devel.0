@@ -1,32 +1,89 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: OSD creation and device class
-Date: Mon, 10 Apr 2017 12:56:00 +0200
-Message-ID: <9c19c5c5-8640-63d3-debd-7105e16ceb75@dachary.org>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Toying with a FreeBSD cluster results in a crash
+Date: Mon, 10 Apr 2017 14:32:11 +0200
+Message-ID: <fcebd83a-1fe2-6e9e-2bb8-4678d48c6721@digiware.nl>
+References: <f94f1932-ae99-eb6a-7fc6-e2fb6afee051@digiware.nl>
+ <CAJE9aONW_n1k+_5by=JLs_7kkpka8xJCkcsPkM0YMchQottA_Q@mail.gmail.com>
+ <3fd7e04e-cf9d-5439-a932-33dcef685c88@digiware.nl>
+ <CAJE9aOO2v3Yd7+wQ86EgJAOgs-6S+oSwmRBQKT54uiM-QKA1sw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:38661 "EHLO
-        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752343AbdDJK4F (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Apr 2017 06:56:05 -0400
+Received: from smtp.digiware.nl ([176.74.240.9]:49024 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752756AbdDJMcf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 10 Apr 2017 08:32:35 -0400
+In-Reply-To: <CAJE9aOO2v3Yd7+wQ86EgJAOgs-6S+oSwmRBQKT54uiM-QKA1sw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
+To: kefu chai <tchaikov@gmail.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+On 10-4-2017 10:12, kefu chai wrote:
+> On Sat, Apr 8, 2017 at 8:43 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>> On 08-04-17 05:33, kefu chai wrote:
+>>> On Fri, Apr 7, 2017 at 10:34 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>>> Hi,
+>>>>
+>>>> I'm playing with my/a FreeBSD test cluster.
+>>>> It is full with different types of disks, and sometimes they are not
+>>>> very new.
+>>>>
+>>>> The deepscrub on it showed things like:
+>>>>  filestore(/var/lib/ceph/osd/osd.7) error creating
+>>>> #-1:4962ce63:::inc_osdmap.705:0#
+>>>> (/var/lib/ceph/osd/osd.7/current/meta/inc\uosdmap
+>>>> .705__0_C6734692__none) in index: (87) Attribute not found
+>>>
+>>> filestore stores subdir states using xattr, could you check the xattr
+>>> of your meta collection using something like:
+>>>
+>>>  lsextattr user /var/lib/ceph/osd/osd.7/current/meta
+>>>
+>>> if nothing shows up, did you enable the xattr on the mounted fs in
+>>> which /var/lib/ceph/osd/osd.7/current/meta is located?
+>>
+>> This is on ZFS, and there attributes are on per default.
+>>
+>> I checked other parts of the OSD files and several other did have
+>> attributes. But everything in this directory had nothing set.
+> 
+> that sounds weird. looks like a bug. can you reproduce it?
 
-When the OSD is prepared, we add a --device-class option to ceph-disk that creates a device_class file and activate can use it use when creating the the OSD[1]. The ceph osd create command is given an additional optional argument (device class). If the device class argument is present, ceph osd create[2] creates a device entry in the crushmap (it currently does nothing with the crushmap) so that the corresponding device class can be preserved. This happens before update_crush_location[3] is called and since the device is not included in any crush tree it won't be used.
+It is a long standing (> 3 months) test cluster that has been severely
+abused by me learning Ceph things and testing ceph-fuse.
 
-I'm not happy about adding an argument to osd create. We could instead have a new dedicated command create-with-device-class but I like that even less. We could also add a "ceph osd crush create-device" and have ceph-disk call it right after "ceph osd create", followed by "ceph osd crush set-device-class". That would be my second favorite: the only drawback is having a multi-step device creation during activation but all steps are idempotents that should not be a problem.
+>> Now the trick question is if it can recover from a crash like this:
+>>>> /usr/ports/net/ceph/work/ceph-wip.FreeBSD/src/osd/OSD.cc: 3360:
+>>>> FAILED assert(0 == "Missing map in load_pgs")
+>>
+>> If it depends on infomation in its local tree, things might be too
+>> corrupt to restart it...
+> 
+> yes, the osdmap is stored in the meta collection, which in turn misses
+> the subdir states stored in the xattr.
+> 
+>> But if it needs to be fetched from the rest of the cluster, I had a
+>> different type of problem?
+> 
+> maybe you can rebuild that osd? the meta collection is different from
+> one osd to another, i am not sure if we can copy it over from anther
+> osd.
 
-What do you think ?
+Well trouble started when I wanted to grow from 1 replica to 3 replica.
+(So what is lost on osd.7 is not available elsewhere.)
 
-Cheers
+This I did to see how that this growing behaves, and then this osd.7
+crashed. From what I could find in the logfiles it complained about the
+missing maps or attributes.
 
-[1] https://github.com/ceph/ceph/blob/master/src/ceph-disk/ceph_disk/main.py#L1055
-[2] https://github.com/ceph/ceph/blob/master/src/mon/OSDMonitor.cc#L7604 
-[3] https://github.com/ceph/ceph/blob/master/src/osd/OSD.cc#L3024
--- 
-Loïc Dachary, Artisan Logiciel Libre
+I guess I'll just scrap the cluster, and start fresh, because this could
+very well be a FreeBSD-ish problem in combination with me doing silly
+things. And I do not have to keep the cluster around, because it has
+grown to a size that eats all my diskspace on the test hardware.
+
+--WjW
+
+
+
