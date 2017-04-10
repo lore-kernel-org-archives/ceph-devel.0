@@ -1,7 +1,7 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
 Subject: Re: Forwarding Rocksdb to a new sha
-Date: Mon, 10 Apr 2017 22:26:22 +0200
-Message-ID: <fdbe3e26-6e81-4958-581b-af7c627fb781@digiware.nl>
+Date: Mon, 10 Apr 2017 22:46:39 +0200
+Message-ID: <97255fc7-0528-c6a9-2d27-9a73b4b396b4@digiware.nl>
 References: <efe3e212-13b9-c4b6-9abd-f95a6803123a@digiware.nl>
  <alpine.DEB.2.11.1704101334321.2999@piezo.novalocal>
  <21ce1351-d892-90ed-d902-fb043af3d87e@digiware.nl>
@@ -10,12 +10,12 @@ References: <efe3e212-13b9-c4b6-9abd-f95a6803123a@digiware.nl>
  <323ff1df-e8c4-8fff-9fe0-81e5c45d22dd@suse.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:64646 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([176.74.240.9]:16934 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751702AbdDJU0Z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 10 Apr 2017 16:26:25 -0400
+        id S1751888AbdDJUqq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 10 Apr 2017 16:46:46 -0400
 In-Reply-To: <323ff1df-e8c4-8fff-9fe0-81e5c45d22dd@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -39,26 +39,20 @@ On 10-04-17 22:13, Nathan Cutler wrote:
 > https://github.com/ceph/rocksdb so the first thing is to get the commit
 > into that repo.
 
-That is what I done thusfar, but in the wrong repo.
-Mine is in Facebook/rocksdb ;-)
+So the first step is this:
+	https://github.com/ceph/rocksdb/pull/16
+And now somebody needs to merge this??
+
+--WjW
 
 > Once it is there, you set the submodule to that commit and then open a
 > PR (against ceph/ceph.git) changing the SHA1 that the src/rocksdb points
 > to. IIRC the trick is that when the submodule is populated you can just
 > "git add src/rocksdb" and git "does the right thing".
-
-Now this starts making sense.
-
+> 
 > I've done this before, so it can't be too difficult ;-) I think I read
 > this: https://git-scm.com/book/en/v2/Git-Tools-Submodules
-
-Git and 'not difficult' are three words I do not dare to use in the same
-sentence. .
-But I'll work it out now that I know that I was barking up the wrong repo.
-
-Thanx,
---WjW
-
+> 
 > Here's what a commit changing the src/rocksdb submodule looks like:
 > 
 > smithfarm@wilbur:~/src/ceph/smithfarm/ceph> git show
