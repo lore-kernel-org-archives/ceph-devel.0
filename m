@@ -1,65 +1,61 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Forwarding Rocksdb to a new sha
-Date: Mon, 10 Apr 2017 13:52:33 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1704101350380.2999@piezo.novalocal>
-References: <efe3e212-13b9-c4b6-9abd-f95a6803123a@digiware.nl> <alpine.DEB.2.11.1704101334321.2999@piezo.novalocal> <21ce1351-d892-90ed-d902-fb043af3d87e@digiware.nl>
+From: Loic Dachary <loic@dachary.org>
+Subject: crush multiweight implementation details
+Date: Mon, 10 Apr 2017 16:04:24 +0200
+Message-ID: <6bcba5f9-7f68-bcf7-3f85-323b4fa6dd29@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57205 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752903AbdDJNwg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Apr 2017 09:52:36 -0400
-In-Reply-To: <21ce1351-d892-90ed-d902-fb043af3d87e@digiware.nl>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:44946 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752877AbdDJOE2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Apr 2017 10:04:28 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
+To: Sage Weil <sweil@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 10 Apr 2017, Willem Jan Withagen wrote:
-> On 10-4-2017 15:36, Sage Weil wrote:
-> > On Mon, 10 Apr 2017, Willem Jan Withagen wrote:
-> >> Hi,
-> >>
-> >> I have submitted a PR to RocksDB that got accepted.
-> >> But now I'd like to try it in my WIP tree.
-> >>
-> >> So how do I locally roll the RocksDB version forward?
-> >>
-> >> Is it as simple as going into RocksDB and go:
-> >> 	'git pull' ??
-> > 
-> > It depends on what remotes you have in the rocksdb repository; you may 
-> > have to 'git remote add upstream https://github.com/facebook/rocksdb' and 
-> > fetch that first.
-> 
-> Uptil now I avoided cloning RocksDB and submitted PRs fully thru GitHub ;-)
-> 
-> > Once you get the submodule on the right commit, you'll need to make a 
-> > commit in the containing ceph.git updating the submodule sha1.  (I usually 
-> > use 'git gui' for this.)
-> 
-> There is not that many updates to RocksDB, And my PR-commit is the
-> current HEAD: 04abb2b2ddc308ab03f55ea9a1e08b62667d6e39
-> 
-> So how do I forward the submodule to this SHA?
+Hi Sage,
 
-Yeah, that makes sense!
+We could have:
 
-sage
+struct crush_choose_arg {
+  __u32 bucket_id;
+  __u32 num_items;
+  __u32 *ids; // override the bucket items for placement
+  __u32 num_positions;
+  __u32 *weights; // size is num_positions*num_items
+};
+ 
+struct crush_choose_arg_map {
+  struct crush_choose_arg *args;
+  __u32 size;
+};
 
+and
 
+void crush_init_workspace(const struct crush_map *m, struct crush_choose_arg_map *arg_map, void *v) {
+...
+if (m->buckets[b]->id == arg_map[b]->bucket_id)
+   w->work[b]->arg = arg_map[b];
+...
+}
 
-> And I can actually test this release of RockDB with Ceph. Otherwise we
-> stay at the old version we include, and I need to keep a patch.
+with
 
-> 
-> --WjW
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+struct crush_work_bucket {
+    __u32 perm_x; /* @x for which *perm is defined */
+    __u32 perm_n; /* num elements of *perm that are permuted/defined */
+    __u32 *perm;  /* Permutation of the bucket's items */
+    struct crush_choose_arg *arg;
+};
+
+There would be no need to change the code path since crush_bucket_choose already is given the crush_work_bucket. And crush_init_workspace already has logic that is algorithm dependent. And all the sanity checks could be done in crush_init_workspace so that the choose function only does what's absolutely necessary.
+
+What do you think ?
+
+Cheers
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
+
