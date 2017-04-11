@@ -1,111 +1,86 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: multiple cherrypys in ceph-mgr modules stomp on each other
-Date: Tue, 11 Apr 2017 12:17:33 +0100
-Message-ID: <CALe9h7cT5z8-gAszW5e+xoFJbv42+D=-UW=uveqFHaY+LUAbCA@mail.gmail.com>
-References: <ded84b4f-d13b-d2f0-6d40-fe34d6905adb@suse.com>
+From: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
+Subject: v10.2.7 Jewel released
+Date: Tue, 11 Apr 2017 13:34:37 +0200
+Message-ID: <333d2b6c-f2d7-69a2-a879-4f321006e765@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:38261 "EHLO
-        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752291AbdDKLRz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Apr 2017 07:17:55 -0400
-Received: by mail-wm0-f44.google.com with SMTP id t189so58530652wmt.1
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Apr 2017 04:17:54 -0700 (PDT)
-In-Reply-To: <ded84b4f-d13b-d2f0-6d40-fe34d6905adb@suse.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Tim Serong <tserong@suse.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Apr 11, 2017 at 11:41 AM, Tim Serong <tserong@suse.com> wrote:
-> Hi All,
->
-> We have a problem using cherrypy in mgr modules.  Specifically, multiple
-> modules that use cherrypy stomp on each other.  I discovered this while
-> playing with John's guilolz experiment
-> (https://github.com/ceph/ceph/pull/13725).
->
-> Both rest and guilolz modules follow this pattern:
->
->   cherrypy.config.update({'server.socket_port': ....})
->   cherrypy.tree.graft(...)  # or cherrypy.tree.mount(...)
->   cherrypy.engine.start()
->   cherrypy.engine.block()
->
-> So:
->
-> - They're both first setting the port to listen on globally.
-> - They both eat the whole web namespace (graft/mount).
-> - They both call cherrypy.engine.start() to start the server.
->
-> In each of the above cases, the first module loaded will win and the
-> other won't (or, it might be racey and you'll kinda get a mix?).  For
-> example, the second call to cherrypy.engine.start() fails complaining it
-> can't be called more than once from the same thread.
->
-> I'm not sure how best to deal with this.  Assuming we *do* want it to be
-> possible for multiple modules that provide a web service to be loaded
-> simultaneously, we need to:
->
-> - not set the port globally.
-> - not stomp on each others namespaces.
-> - only call cherrypy.engine.start() once.
->
-> You can have multiple cherrypy servers listening on different ports, so
-> that gets us part of the way there, e.g.:
->
->   from cherrypy._cpserver import Server
->   server = Server()
->   server.socket_port = .... # whatever
->   server.subscribe()
->
-> But, this doesn't fix the namespace eating problem.  That might be
-> doable with cherrypy virtualhosts
-> (http://tools.cherrypy.org/wiki/VirtualHosts), but I haven't
-> experimented further with that yet.
->
-> Also, those subscribe()s have to happen before the
-> cherrypy.engine.start() call or they have no effect.  One way to do that
-> would be to have some magic cherrypy module which is always loaded last
-> to start the engine, but that might be ugly.
->
-> Another option might be to have a separate python interpreter per module
-> (can't stomp on each other then, right?) but that might be too resource
-> intensive.
-
-My assumption has been that the global cherrypy stuff was a
-convenience that could be un-wrapped into something simpler as and
-when, but that may not be the case...
-
-We could have a small shared python module next to mgr_module.py that
-modules could use to cooperate nicely on the global cherrypy bits.  It
-wouldn't be a total hack, as it would make some of "make me a
-webserver" code less repetitive between modules that want to do that.
-
-Doing separate sub-interpreters would also be an option that would
-give us more robustness generally in the face of python modules that
-do global things.  I don't think there was any fundamental reason I
-didn't use sub-interpreters when writing this stuff originally,
-they're just a comparatively sparesely documented part of CPython.
-
-I think either one is probably fine?
-
-John
-
->
->
-> Thoughts?
->
-> Thanks,
->
-> Tim
-> --
-> Tim Serong
-> Senior Clustering Engineer
-> SUSE
-> tserong@suse.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+VGhpcyBwb2ludCByZWxlYXNlIGZpeGVzIHNldmVyYWwgaW1wb3J0YW50IGJ1Z3MgaW4gUkJEIG1p
+cnJvcmluZywgbGlicmJkICYgUkdXLgoKV2UgcmVjb21tZW5kIHRoYXQgYWxsIHYxMC4yLnggdXNl
+cnMgdXBncmFkZS4KCkZvciBtb3JlIGRldGFpbGVkIGluZm9ybWF0aW9uLCByZWZlciB0byB0aGUg
+Y29tcGxldGUgY2hhbmdlbG9nWzFdIGFuZCB0aGUgcmVsZWFzZSBub3Rlc1syXQoKTm90YWJsZSBD
+aGFuZ2VzCi0tLS0tLS0tLS0tLS0tLQoKKiBsaWJyYmQ6IHBvc3NpYmxlIHJhY2UgaW4gRXhjbHVz
+aXZlTG9jayBoYW5kbGVfcGVlcl9ub3RpZmljYXRpb24gKGlzc3VlIzE5MzY4LCBwciMxNDIzMywg
+TXlrb2xhIEdvbHViKQoqIG9zZDogSW5jcmVhc2UgcHJpb3JpdHkgZm9yIGluYWN0aXZlIFBHcyBi
+YWNrZmlsbCAoaXNzdWUjMTgzNTAsIHByIzEzMjMyLCBCYXJ0xYJvbWllaiDFmndpxJlja2kpCiog
+b3NkOiBTY3J1YiBpbXByb3ZlbWVudHMgYW5kIG90aGVyIGZpeGVzIChpc3N1ZSMxNzg1NywgaXNz
+dWUjMTgxMTQsIGlzc3VlIzEzOTM3LCBpc3N1ZSMxODExMywgcHIjMTMxNDYsIEtlZnUgQ2hhaSwg
+RGF2aWQgWmFmbWFuKQoqIG9zZDogZml4IE9TRCBuZXR3b3JrIGFkZHJlc3MgaW4gT1NEIGhlYXJ0
+YmVhdF9jaGVjayBsb2cgbWVzc2FnZSAoaXNzdWUjMTg2NTcsIHByIzEzMTA4LCBWaWtoeWF0IFVt
+cmFvKQoqIHJiZC1taXJyb3I6IGRlbGV0aW5nIGEgc25hcHNob3QgZHVyaW5nIHN5bmMgY2FuIHJl
+c3VsdCBpbiByZWFkIGVycm9ycyAoaXNzdWUjMTg5OTAsIHByIzEzNTk2LCBKYXNvbiBEaWxsYW1h
+bikKKiByZ3c6ICdwZXJpb2QgdXBkYXRlJyBkb2VzIG5vdCByZW1vdmUgc2hvcnRfem9uZV9pZHMg
+b2YgZGVsZXRlZCB6b25lcyAoaXNzdWUjMTU2MTgsIHByIzE0MTQwLCBDYXNleSBCb2RsZXkpCiog
+cmd3OiBEVU1QQUJMRSBmbGFnIGlzIGNsZWFyZWQgYnkgc2V0dWlkIHByZXZlbnRpbmcgY29yZWR1
+bXBzIChpc3N1ZSMxOTA4OSwgcHIjMTM4NDQsIEJyYWQgSHViYmFyZCkKKiByZ3c6IGNsZWFyIGRh
+dGFfc3luY19jciBpZiBSR1dEYXRhU3luY0NvbnRyb2xDUiBmYWlscyAoaXNzdWUjMTc1NjksIHBy
+IzEzODg2LCBDYXNleSBCb2RsZXkpCiogcmd3OiBmaXggb3BlbnNzbCAoaXNzdWUjMTEyMzksIGlz
+c3VlIzE5MDk4LCBpc3N1ZSMxNjUzNSwgcHIjMTQyMTUsIE1hcmN1cyBXYXR0cykKKiByZ3c6IGZp
+eCBzd2lmdCBjYW5ub3QgZGlzYWJsZSBvYmplY3QgdmVyc2lvbmluZyB3aXRoIGVtcHR5IFgtVmVy
+c2lvbnMtTG9jYXRpb24gKGlzc3VlIzE4ODUyLCBwciMxMzgyMywgSmluZyBXZW5qdW4pCiogcmd3
+OiBsaWJyZ3c6IFJHV0xpYkZTOjpzZXRhdHRyIGZhaWxzIG9uIGRpcmVjdG9yaWVzIChpc3N1ZSMx
+ODgwOCwgcHIjMTM3NzgsIE1hdHQgQmVuamFtaW4pCiogcmd3OiBtYWtlIHNlbmRpbmcgQ29udGVu
+dC1MZW5ndGggaW4gMjA0IGFuZCAzMDQgY29udHJvbGxhYmxlIChpc3N1ZSMxNjYwMiwgcHIjMTM1
+MDMsIFJhZG9zbGF3IFphcnp5bnNraSwgTWF0dCBCZW5qYW1pbikKKiByZ3c6IG11bHRpcGFydCB1
+cGxvYWRzIGNvcHkgcGFydCBzdXBwb3J0IChpc3N1ZSMxMjc5MCwgcHIjMTMyMTksIFllaHVkYSBT
+YWRlaCwgSmF2aWVyIE0uIE1lbGxpZCwgTWF0dCBCZW5qYW1pbikKKiByZ3c6IG11bHRpc2l0ZTog
+UkdXTWV0YVN5bmNTaGFyZENvbnRyb2xDUiBnaXZlcyB1cCBvbiBFSU8gKGlzc3VlIzE5MDE5LCBw
+ciMxMzg2NywgQ2FzZXkgQm9kbGV5KQoqIHJndzogcmFkb3Nndy9zd2lmdDogY2xlYW4gdXAgZmx1
+c2ggLyBuZXdsaW5lIGJlaGF2aW9yIChpc3N1ZSMxODQ3MywgcHIjMTQxMDAsIE5hdGhhbiBDdXRs
+ZXIsIE1hcmN1cyBXYXR0cywgTWF0dCBCZW5qYW1pbikKKiByZ3c6IHJhZG9zZ3cvc3dpZnQ6IGNs
+ZWFuIHVwIGZsdXNoIC8gbmV3bGluZSBiZWhhdmlvci4gKGlzc3VlIzE4NDczLCBwciMxMzE0Mywg
+TWFyY3VzIFdhdHRzLCBNYXR0IEJlbmphbWluKQoqIHJndzogcmd3X2ZoOiBSR1dGaWxlSGFuZGxl
+IGR0b3IgbXVzdCBhbHNvIGNvbmQtdW5saW5rIGZyb20gRkhDYWNoZSAoaXNzdWUjMTkxMTIsIHBy
+IzE0MjMxLCBNYXR0IEJlbmphbWluKQoqIHJndzogcmd3X2ZpbGU6IGF2b2lkIGludGVybmluZyAu
+LiBpbiBGSENhY2hlIHRhYmxlIGFuZCBkb24ndCByZWYgZm9yIHRoZW0gKGlzc3VlIzE5MDM2LCBw
+ciMxMzg0OCwgTWF0dCBCZW5qYW1pbikKKiByZ3c6IHJnd19maWxlOiBpbnRlcm5lZCBSR1dGaWxl
+SGFuZGxlIG9iamVjdHMgbmVlZCBwYXJlbnQgcmVmcyAoaXNzdWUjMTg2NTAsIHByIzEzNTgzLCBN
+YXR0IEJlbmphbWluKQoqIHJndzogcmd3X2ZpbGU6IHJlc3RvcmUgKGNvcnJlY3RlZCkgZml4IGZv
+ciBkaXIgcGFydGlhbCBtYXRjaCAocmV0dXJuIG9mIEZMQUdfRVhBQ1RfTUFUQ0gpIChpc3N1ZSMx
+OTA2MCwgaXNzdWUjMTg5OTIsIGlzc3VlIzE5MDU5LCBwciMxMzg1OCwgTWF0dCBCZW5qYW1pbikK
+KiByZ3c6IHJnd19maWxlOiBGSENhY2hlIHJlc2lkZW5jZSBjaGVjayBzaG91bGQgYmUgZXhoYXVz
+dGl2ZSAoaXNzdWUjMTkxMTEsIHByIzE0MTY5LCBNYXR0IEJlbmphbWluKQoqIHJndzogcmd3X2Zp
+bGU6IGVuc3VyZSB2YWxpZF9zM19vYmplY3RfbmFtZSBmb3IgZGlyZWN0b3JpZXMsIHRvbyAoaXNz
+dWUjMTkwNjYsIHByIzEzNzE3LCBNYXR0IEJlbmphbWluKQoqIHJndzogcmd3X2ZpbGU6IGZpeCBt
+YXJrZXIgY29tcHV0YXRpb24gKGlzc3VlIzE5MDE4LCBpc3N1ZSMxODk4OSwgaXNzdWUjMTg5OTIs
+IGlzc3VlIzE4OTkxLCBwciMxMzg2OSwgTWF0dCBCZW5qYW1pbikKKiByZ3c6IHJnd19maWxlOiB3
+aXAgZGlyIG9ycGhhbiAoaXNzdWUjMTg5OTIsIGlzc3VlIzE4OTg5LCBpc3N1ZSMxOTAxOCwgaXNz
+dWUjMTg5OTEsIHByIzE0MjA1LCBHdWkgSGVjaGVuZywgTWF0dCBCZW5qYW1pbikKKiByZ3c6IHJn
+d19maWxlOiB2YXJpb3VzIGZpeGVzIChwciMxNDIwNiwgTWF0dCBCZW5qYW1pbikKKiByZ3c6IHJn
+d19maWxlOiBleHBhbmQgYXJndiAocHIjMTQyMzAsIE1hdHQgQmVuamFtaW4pCgpHZXR0aW5nIENl
+cGgKLS0tLS0tLS0tLS0tCgoqIEdpdCBhdCBnaXQ6Ly9naXRodWIuY29tL2NlcGgvY2VwaC5naXQK
+KiBUYXJiYWxsIGF0IGh0dHA6Ly9kb3dubG9hZC5jZXBoLmNvbS90YXJiYWxscy9jZXBoLTEwLjIu
+Ny50YXIuZ3oKKiBGb3IgcGFja2FnZXMsIHNlZSBodHRwOi8vZG9jcy5jZXBoLmNvbS9kb2NzL21h
+c3Rlci9pbnN0YWxsL2dldC1wYWNrYWdlcy8KKiBGb3IgY2VwaC1kZXBsb3ksIHNlZSBodHRwOi8v
+ZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rlci9pbnN0YWxsL2luc3RhbGwtY2VwaC1kZXBsb3kKKiBS
+ZWxlYXNlIFNIQTE6IDUwZTg2M2UwZjRiYzhmNGI5ZTMxMTU2ZGU2OTBkNzY1YWYyNDUxODUKClsx
+XTogaHR0cDovL2RvY3MuY2VwaC5jb20vZG9jcy9tYXN0ZXIvX2Rvd25sb2Fkcy92MTAuMi43LnR4
+dApbMl06IGh0dHA6Ly9jZXBoLmNvbS9yZWxlYXNlcy92MTAtMi03LWpld2VsLXJlbGVhc2VkLwoK
+LS0gCgpBYmhpc2hlayBMZWtzaG1hbmFuClNVU0UgTGludXggR21iSCwgR0Y6IEZlbGl4IEltZW5k
+w7ZyZmZlciwgSmFuZSBTbWl0aGFyZCwgR3JhaGFtIE5vcnRvbiwgSFJCIDIxMjg0IChBRyBOw7xy
+bmJlcmcpCgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18K
+Y2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8v
+bGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
