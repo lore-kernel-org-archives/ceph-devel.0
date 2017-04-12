@@ -1,32 +1,35 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Question about writeback performance and content address obejct
- for deduplication
-Date: Wed, 12 Apr 2017 15:51:11 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1704121550520.10661@piezo.novalocal>
-References: <CAFNt83bds6KzCnMvxyN=vPu7dg_NyX3cHdZwgmhiQqKt4B314A@mail.gmail.com> <alpine.DEB.2.11.1701311420210.3654@piezo.novalocal> <CAFNt83Z1+n+uEGo_58DmrXYxfNQe_GzG4iTYtBdDnt6PEYvdHQ@mail.gmail.com> <alpine.DEB.2.11.1702071442411.3654@piezo.novalocal>
- <CAFNt83ZUHKxPZJiFO0MEbj+BNgQo6PxmfFQWdQ=E5fnq-w+Piw@mail.gmail.com> <alpine.DEB.2.11.1703160249260.10776@piezo.novalocal> <CAFNt83aS0hOWQuairQkKvregr_FCho1__kNqPjM5TMg85oKF5A@mail.gmail.com> <alpine.DEB.2.11.1703241932310.10776@piezo.novalocal>
- <CAFNt83b-X701_oio4UzDdy_-UGqrzF-zG0_MWLzzCkPajbHhSA@mail.gmail.com> <alpine.DEB.2.11.1703271357000.10776@piezo.novalocal> <CAFNt83bgCHpLZxriPVgyswiAHsNPTKaS7-y7z-ju68WEpUtp7Q@mail.gmail.com>
- <CAFNt83YuGDLQ20312vVoG3vSDjaybVae7UyZSBXQ02B5Ohsg5Q@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Minimal crush weight_set integration
+Date: Wed, 12 Apr 2017 18:42:29 +0200
+Message-ID: <fcb0529a-ff48-1e50-5f8a-ad40f73d12c8@dachary.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59212 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752695AbdDLPvY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 12 Apr 2017 11:51:24 -0400
-In-Reply-To: <CAFNt83YuGDLQ20312vVoG3vSDjaybVae7UyZSBXQ02B5Ohsg5Q@mail.gmail.com>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:54071 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755180AbdDLQmd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2017 12:42:33 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: myoungwon oh <ohmyoungwon@gmail.com>
-Cc: ceph-devel@vger.kernel.org, =?EUC-KR?B?v8C47b/4?= <omwmw@sk.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, 29 Mar 2017, myoungwon oh wrote:
-> Hi sage,
-> 
-> I made two pads in order to discuss #3, #4.
-> 
-> #3: http://pad.ceph.com/p/deduplication_how_do_we_chunk
-> #4: http://pad.ceph.com/p/deduplication_how_to_drive_dedup_process
+Hi Sage,
 
-Updated!
-sage
+Assuming the weight set is implemented in crush[1], it could be used with a weight_set matrix for each pool, encoded/decoded with the crushmap[2]. If the weight_set for a given pool does not exist the legacy behavior is preserved. Whenever a pool size, pgp_num changes, the weight_set should also be updated simultaneously.
+
+Currently CrushWrapper re-creates the workspace for each call to crush_do_rule which is expensive. It could instead be cached. The workspace is created with the replication count as an argument and could then be populated with the weight_set for the corresponding pool which is assumed to be in sync with the pool state (size, pgp_num etc).
+
+This would be a very loose implementation of the weight_set relying on external tools to be in sync. The next step would be to add commands on top of that to make it less error prone.
+
+Do you think we should come up with a robust use case / cli / syntax before implementing this first step ? Or does it look like a sound first step ?
+
+Cheers
+
+[1] http://libcrush.org/main/libcrush/merge_requests/30/diffs
+[2] https://github.com/ceph/ceph/pull/14486
+[3] https://github.com/ceph/ceph/pull/14486/files#diff-215e8db28af558a5e445f6267530c786R1179
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
