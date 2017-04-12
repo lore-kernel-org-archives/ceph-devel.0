@@ -1,78 +1,59 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Help debugging RGW bug in jewel 10.2.8 integration branch
-Date: Wed, 12 Apr 2017 15:28:05 +0200
-Message-ID: <1325c536-9bd0-2708-271a-2c05abca5e16@suse.cz>
-References: <b0339864-0d92-704e-597a-77981e057999@suse.cz>
+From: =?UTF-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org>
+Subject: PG calculator improvement
+Date: Wed, 12 Apr 2017 15:35:06 +0200
+Message-ID: <09f3b299-bf62-7d4c-c95b-9cdb86dde16e@univ-lorraine.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:33972 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752676AbdDLN2H (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 12 Apr 2017 09:28:07 -0400
-In-Reply-To: <b0339864-0d92-704e-597a-77981e057999@suse.cz>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Orit Wasserman <owasserm@redhat.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Orit, Yehuda:
-
-Regarding the 
-s3tests.functional.test_s3.test_versioning_obj_suspend_versions failure 
-that we were seeing in the 10.2.8 integration branch (see quoted email 
-below), Abhishek and I bisected it with the conclusion that 
-https://github.com/ceph/ceph/pull/13552 is causing the failure. I marked 
-that PR "DNM" and will schedule a new round of jewel integration tests.
-
-Nathan
-
-On 04/09/2017 03:33 PM, Nathan Cutler wrote:
-> Hello RGW developers:
->
-> Since 10.2.7 is almost out, I'm now running integration tests for
-> 10.2.8. As usual, there is quite a crop of RGW backports. The
-> integration branch is "wip-jewel-backports" and the RGW suite [1] is not
-> looking good: over 50 failures, and most of them are this:
->
-> ======================================================================
-> FAIL: s3tests.functional.test_s3.test_versioning_obj_suspend_versions
-> ----------------------------------------------------------------------
-> Traceback (most recent call last):
->   File
-> "/home/ubuntu/cephtest/s3-tests/virtualenv/local/lib/python2.7/site-packages/nose/case.py",
-> line 197, in runTest
->     self.test(*self.arg)
->   File "/home/ubuntu/cephtest/s3-tests/s3tests/functional/test_s3.py",
-> line 6385, in test_versioning_obj_suspend_versions
->     overwrite_suspended_versioning_obj(bucket, objname, k, c, 'null
-> content 2')
->   File "/home/ubuntu/cephtest/s3-tests/s3tests/functional/test_s3.py",
-> line 6243, in overwrite_suspended_versioning_obj
->     check_obj_versions(bucket, objname, k, c)
->   File "/home/ubuntu/cephtest/s3-tests/s3tests/functional/test_s3.py",
-> line 6080, in check_obj_versions
->     eq(keys[i].version_id or 'null', key.version_id)
-> AssertionError: u'yGSvpxjEbJRBE.JL76y4OzeJISqDtmJ' != u'null'
->
-> Does anyone have an idea which of these PRs [2] might be the culprit?
->
-> [1]
-> http://pulpito.ceph.com/smithfarm-2017-04-07_09:30:57-rgw-wip-jewel-backports-distro-basic-smithi/
->
-> [2]
-> https://github.com/ceph/ceph/pulls?q=is%3Aopen+is%3Apr+milestone%3Ajewel+label%3Argw
->
->
-> Thanks in advance,
-> Nathan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
--- 
-Nathan Cutler
-Software Engineer Distributed Storage
-SUSE LINUX, s.r.o.
-Tel.: +420 284 084 037
+CkhpLAoKSSB3YW50ZWQgdG8gc2hhcmUgYSBiYWQgZXhwZXJpZW5jZSB3ZSBoYWQgZHVlIHRvIGhv
+dyB0aGUgUEcgY2FsY3VsYXRvciAKd29ya3MuCgpXaGVuIHdlIHNldCBvdXIgcHJvZHVjdGlvbiBj
+bHVzdGVyIG1vbnRocyBhZ28sIHdlIGhhZCB0byBkZWNpZGUgb24gdGhlIApudW1iZXIgb2YgUEdz
+IHRvIGdpdmUgdG8gZWFjaCBwb29sIGluIHRoZSBjbHVzdGVyLgpBcyB5b3Uga25vdywgdGhlIFBH
+IGNhbGMgd291bGQgcmVjb21tZW5kZWQgdG8gZ2l2ZSBhIGxvdCBvZiBQR3MgdG8gaGVhdnkgCnBv
+b2xzIGluIHNpemUsIHJlZ2FyZGxlc3MgdGhlIG51bWJlciBvZiBvYmplY3RzIGluIHRoZSBwb29s
+cy4gSG93IGJhZC4uLgoKV2UgZXNzZW50aWFsbHkgaGFkIDMgcG9vbHMgdG8gc2V0IG9uIDE0NCBP
+U0RzIDoKCjEuIGEgRUM1KzQgcG9vbCBmb3IgdGhlIHJhZG9zR1cgKC5yZ3cuYnVja2V0cykgdGhh
+dCB3b3VsZCBob2xkIDgwJSBvZiAKYWxsIGRhdGFzIGluIHRoZSBjbHVzdGVyLiBQRyBjYWxjIHJl
+Y29tbWVuZGVkIDIwNDggUEdzLgoyLiBhIEVDNSs0IHBvb2wgZm9yIHppbWJyYSdzIGRhdGEgKGVt
+YWlscykgdGhhdCB3b3VsZCBob2xkIDIwJSBvZiBhbGwgCmRhdGFzLiBQRyBjYWxjIHJlY29tbWVu
+ZGVkIDUxMiBQR3MuCjMuIGEgcmVwbGljYXRlZCBwb29sIGZvciB6aW1icmEncyBtZXRhZGF0YSAo
+bnVsbCBzaXplIG9iamVjdHMgaG9sZGluZyAKeGF0dHJzIC0gdXNlZCBmb3IgZGVkdXBsaWNhdGlv
+bikgdGhhdCB3b3VsZCBob2xkIDAlIG9mIGFsbCBkYXRhcy4gUEcgCmNhbGMgcmVjb21tZW5kZWQg
+MTI4IFBHcywgYnV0IHdlIGRlY2lkZWQgb24gMjU2LgoKV2l0aCAxMjBNIG9mIG9iamVjdHMgaW4g
+cG9vbCAjMywgYXMgc29vbiBhcyB3ZSB1cGdyYWRlZCB0byBKZXdlbCwgd2UgaGl0IAp0aGUgSmV3
+ZWwgc2NydWJiaW5nIGJ1ZyAoT1NEcyBmbGFwcGluZykuCkJlZm9yZSB3ZSBjb3VsZCB1cGdyYWRl
+IHRvIHBhdGNoZWQgSmV3ZWwsIHNjcnViIGFsbCB0aGUgY2x1c3RlciBhZ2FpbiAKcHJpb3IgdG8g
+aW5jcmVhc2luZyB0aGUgbnVtYmVyIG9mIFBHcyBvbiB0aGlzIHBvb2wsIHdlIGhhZCB0byB0YWtl
+IG1vcmUgCnRoYW4gYSBodW5kcmVkIG9mIHNuYXBzaG90cyAoZm9yIGJhY2t1cC9yZXN0b3JhdGlv
+biBwdXJwb3NlcyksIHdpdGggdGhlIApudW1iZXIgb2Ygb2JqZWN0cyBzdGlsbCBpbmNyZWFzaW5n
+IGluIHRoZSBwb29sLiBUaGVuIHdoZW4gYSBzbmFwc2hvdCB3YXMgCnJlbW92ZWQsIHdlIGhpdCB0
+aGUgY3VycmVudCBKZXdlbCBzbmFwIHRyaW1taW5nIGJ1ZyBhZmZlY3RpbmcgcG9vbHMgd2l0aCAK
+dG9vIG1hbnkgb2JqZWN0cyBmb3IgdGhlIG51bWJlciBvZiBQR3MuIFRoZSBvbmx5IHdheSB3ZSBj
+b3VsZCBzdG9wIHRoZSAKdHJpbW1pbmcgd2FzIHRvIHN0b3AgT1NEcyByZXN1bHRpbmcgaW4gUEdz
+IGJlaW5nIGRlZ3JhZGVkIGFuZCBub3QgCnRyaW1taW5nIGFueW1vcmUgKHNuYXAgdHJpbW1pbmcg
+b25seSBoYXBwZW5zIG9uIGFjdGl2ZStjbGVhbiBQR3MpLgoKV2UncmUgbm93IGp1c3QgZ2V0dGlu
+ZyBvdXQgb2YgdGhpcyBob2xlLCB0aGFua3MgdG8gTmljaydzIHBvc3QgcmVnYXJkaW5nIApvc2Rf
+c25hcF90cmltX3NsZWVwIGFuZCBSSENTIHN1cHBvcnQgZXhwZXJ0aXNlLgoKSWYgdGhlIFBHIGNh
+bGMgaGFkIGNvbnNpZGVyZWQgbm90IG9ubHkgdGhlIHBvb2xzIHdlaWdodCBidXQgYWxzbyB0aGUg
+Cm51bWJlciBvZiBleHBlY3RlZCBvYmplY3RzIGluIHRoZSBwb29sICh3aGljaCB3ZSBrbmV3IGJ5
+IHRoYXQgdGltZSksIHdlIAp3b3VsZG4ndCBoYXZlIGl0IHRoZXNlIDIgYnVncy4KV2UgaG9wZSB0
+aGlzIHdpbGwgaGVscCBpbXByb3ZpbmcgdGhlIGNlcGguY29tIGFuZCBSSENTIFBHIGNhbGN1bGF0
+b3JzLgoKUmVnYXJkcywKCkZyw6lkw6lyaWMuCgotLSAKCkZyw6lkw6lyaWMgTmFzcwoKU291cy1k
+aXJlY3Rpb24gSW5mcmFzdHJ1Y3R1cmVzCkRpcmVjdGlvbiBkdSBOdW3DqXJpcXVlClVuaXZlcnNp
+dMOpIGRlIExvcnJhaW5lCgpUw6lsIDogKzMzIDMgNzIgNzQgMTEgMzUKCl9fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0
+CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZv
+LmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
