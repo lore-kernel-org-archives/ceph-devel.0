@@ -1,59 +1,46 @@
-From: =?UTF-8?B?RnLDqWTDqXJpYyBOYXNz?= <frederic.nass-mHc8WM8rKNgDTEWcYJR2Ng@public.gmane.org>
-Subject: PG calculator improvement
-Date: Wed, 12 Apr 2017 15:35:06 +0200
-Message-ID: <09f3b299-bf62-7d4c-c95b-9cdb86dde16e@univ-lorraine.fr>
+From: David Sterba <dsterba@suse.cz>
+Subject: Re: [PATCH 07/12] fs: btrfs: Use ktime_get_real_ts for root
+	ctime
+Date: Wed, 12 Apr 2017 15:42:45 +0200
+Message-ID: <20170412134245.GK4781@twin.jikos.cz>
+References: <1491613030-11599-1-git-send-email-deepa.kernel@gmail.com>
+ <1491613030-11599-8-git-send-email-deepa.kernel@gmail.com>
+Reply-To: dsterba@suse.cz
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <y2038-bounces@lists.linaro.org>
+Content-Disposition: inline
+In-Reply-To: <1491613030-11599-8-git-send-email-deepa.kernel@gmail.com>
+List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/y2038/>
+List-Post: <mailto:y2038@lists.linaro.org>
+List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
+List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=subscribe>
+Errors-To: y2038-bounces@lists.linaro.org
+Sender: "Y2038" <y2038-bounces@lists.linaro.org>
+To: Deepa Dinamani <deepa.kernel@gmail.com>
+Cc: yuchao0@huawei.com, bfields@fieldses.org, clm@fb.com, linux-mtd@lists.infradead.org, dushistov@mail.ru, jlayton@poochiereds.net, ceph-devel@vger.kernel.org, devel@driverdev.osuosl.org, linux-cifs@vger.kernel.org, paul@paul-moore.com, y2038@lists.linaro.org, mingo@redhat.com, jsimmons@infradead.org, arnd@arndb.de, rostedt@goodmis.org, oleg.drokin@intel.com, john.stultz@linaro.org, viro@zeniv.linux.org.uk, dsterba@suse.com, jaegeuk@kernel.org, tglx@linutronix.de, andreas.dilger@intel.com, jbacik@fb.com, gregkh@linuxfoundation.org, samba-technical@lists.samba.org, linux-kernel@vger.kernel.org, eparis@redhat.com, linux-f2fs-devel@lists.sourceforge.net, linux-security-module@vger.kernel.org, linux-audit@redhat.com, netdev@vger.kernel.org, linux-fsdevel@vger.kernel.org, akpm@linux-foundation.org, davem@davemloft.net, linux-btrfs@vger.kernel.org, lustre-devel@lists.lustre.org
 List-Id: ceph-devel.vger.kernel.org
 
-CkhpLAoKSSB3YW50ZWQgdG8gc2hhcmUgYSBiYWQgZXhwZXJpZW5jZSB3ZSBoYWQgZHVlIHRvIGhv
-dyB0aGUgUEcgY2FsY3VsYXRvciAKd29ya3MuCgpXaGVuIHdlIHNldCBvdXIgcHJvZHVjdGlvbiBj
-bHVzdGVyIG1vbnRocyBhZ28sIHdlIGhhZCB0byBkZWNpZGUgb24gdGhlIApudW1iZXIgb2YgUEdz
-IHRvIGdpdmUgdG8gZWFjaCBwb29sIGluIHRoZSBjbHVzdGVyLgpBcyB5b3Uga25vdywgdGhlIFBH
-IGNhbGMgd291bGQgcmVjb21tZW5kZWQgdG8gZ2l2ZSBhIGxvdCBvZiBQR3MgdG8gaGVhdnkgCnBv
-b2xzIGluIHNpemUsIHJlZ2FyZGxlc3MgdGhlIG51bWJlciBvZiBvYmplY3RzIGluIHRoZSBwb29s
-cy4gSG93IGJhZC4uLgoKV2UgZXNzZW50aWFsbHkgaGFkIDMgcG9vbHMgdG8gc2V0IG9uIDE0NCBP
-U0RzIDoKCjEuIGEgRUM1KzQgcG9vbCBmb3IgdGhlIHJhZG9zR1cgKC5yZ3cuYnVja2V0cykgdGhh
-dCB3b3VsZCBob2xkIDgwJSBvZiAKYWxsIGRhdGFzIGluIHRoZSBjbHVzdGVyLiBQRyBjYWxjIHJl
-Y29tbWVuZGVkIDIwNDggUEdzLgoyLiBhIEVDNSs0IHBvb2wgZm9yIHppbWJyYSdzIGRhdGEgKGVt
-YWlscykgdGhhdCB3b3VsZCBob2xkIDIwJSBvZiBhbGwgCmRhdGFzLiBQRyBjYWxjIHJlY29tbWVu
-ZGVkIDUxMiBQR3MuCjMuIGEgcmVwbGljYXRlZCBwb29sIGZvciB6aW1icmEncyBtZXRhZGF0YSAo
-bnVsbCBzaXplIG9iamVjdHMgaG9sZGluZyAKeGF0dHJzIC0gdXNlZCBmb3IgZGVkdXBsaWNhdGlv
-bikgdGhhdCB3b3VsZCBob2xkIDAlIG9mIGFsbCBkYXRhcy4gUEcgCmNhbGMgcmVjb21tZW5kZWQg
-MTI4IFBHcywgYnV0IHdlIGRlY2lkZWQgb24gMjU2LgoKV2l0aCAxMjBNIG9mIG9iamVjdHMgaW4g
-cG9vbCAjMywgYXMgc29vbiBhcyB3ZSB1cGdyYWRlZCB0byBKZXdlbCwgd2UgaGl0IAp0aGUgSmV3
-ZWwgc2NydWJiaW5nIGJ1ZyAoT1NEcyBmbGFwcGluZykuCkJlZm9yZSB3ZSBjb3VsZCB1cGdyYWRl
-IHRvIHBhdGNoZWQgSmV3ZWwsIHNjcnViIGFsbCB0aGUgY2x1c3RlciBhZ2FpbiAKcHJpb3IgdG8g
-aW5jcmVhc2luZyB0aGUgbnVtYmVyIG9mIFBHcyBvbiB0aGlzIHBvb2wsIHdlIGhhZCB0byB0YWtl
-IG1vcmUgCnRoYW4gYSBodW5kcmVkIG9mIHNuYXBzaG90cyAoZm9yIGJhY2t1cC9yZXN0b3JhdGlv
-biBwdXJwb3NlcyksIHdpdGggdGhlIApudW1iZXIgb2Ygb2JqZWN0cyBzdGlsbCBpbmNyZWFzaW5n
-IGluIHRoZSBwb29sLiBUaGVuIHdoZW4gYSBzbmFwc2hvdCB3YXMgCnJlbW92ZWQsIHdlIGhpdCB0
-aGUgY3VycmVudCBKZXdlbCBzbmFwIHRyaW1taW5nIGJ1ZyBhZmZlY3RpbmcgcG9vbHMgd2l0aCAK
-dG9vIG1hbnkgb2JqZWN0cyBmb3IgdGhlIG51bWJlciBvZiBQR3MuIFRoZSBvbmx5IHdheSB3ZSBj
-b3VsZCBzdG9wIHRoZSAKdHJpbW1pbmcgd2FzIHRvIHN0b3AgT1NEcyByZXN1bHRpbmcgaW4gUEdz
-IGJlaW5nIGRlZ3JhZGVkIGFuZCBub3QgCnRyaW1taW5nIGFueW1vcmUgKHNuYXAgdHJpbW1pbmcg
-b25seSBoYXBwZW5zIG9uIGFjdGl2ZStjbGVhbiBQR3MpLgoKV2UncmUgbm93IGp1c3QgZ2V0dGlu
-ZyBvdXQgb2YgdGhpcyBob2xlLCB0aGFua3MgdG8gTmljaydzIHBvc3QgcmVnYXJkaW5nIApvc2Rf
-c25hcF90cmltX3NsZWVwIGFuZCBSSENTIHN1cHBvcnQgZXhwZXJ0aXNlLgoKSWYgdGhlIFBHIGNh
-bGMgaGFkIGNvbnNpZGVyZWQgbm90IG9ubHkgdGhlIHBvb2xzIHdlaWdodCBidXQgYWxzbyB0aGUg
-Cm51bWJlciBvZiBleHBlY3RlZCBvYmplY3RzIGluIHRoZSBwb29sICh3aGljaCB3ZSBrbmV3IGJ5
-IHRoYXQgdGltZSksIHdlIAp3b3VsZG4ndCBoYXZlIGl0IHRoZXNlIDIgYnVncy4KV2UgaG9wZSB0
-aGlzIHdpbGwgaGVscCBpbXByb3ZpbmcgdGhlIGNlcGguY29tIGFuZCBSSENTIFBHIGNhbGN1bGF0
-b3JzLgoKUmVnYXJkcywKCkZyw6lkw6lyaWMuCgotLSAKCkZyw6lkw6lyaWMgTmFzcwoKU291cy1k
-aXJlY3Rpb24gSW5mcmFzdHJ1Y3R1cmVzCkRpcmVjdGlvbiBkdSBOdW3DqXJpcXVlClVuaXZlcnNp
-dMOpIGRlIExvcnJhaW5lCgpUw6lsIDogKzMzIDMgNzIgNzQgMTEgMzUKCl9fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0
-CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZv
-LmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+T24gRnJpLCBBcHIgMDcsIDIwMTcgYXQgMDU6NTc6MDVQTSAtMDcwMCwgRGVlcGEgRGluYW1hbmkg
+d3JvdGU6Cj4gYnRyZnNfcm9vdF9pdGVtIG1haW50YWlucyB0aGUgY3RpbWUgZm9yIHJvb3QgdXBk
+YXRlcy4KPiBUaGlzIGlzIG5vdCBwYXJ0IG9mIHZmc19pbm9kZS4KPiAKPiBTaW5jZSBjdXJyZW50
+X3RpbWUoKSB1c2VzIHN0cnVjdCBpbm9kZSogYXMgYW4gYXJndW1lbnQKPiBhcyBMaW51cyBzdWdn
+ZXN0ZWQsIHRoaXMgY2Fubm90IGJlIHVzZWQgdG8gdXBkYXRlIHJvb3QKPiB0aW1lcyB1bmxlc3Ms
+IHdlIG1vZGlmeSB0aGUgc2lnbmF0dXJlIHRvIHVzZSBpbm9kZS4KPiAKPiBTaW5jZSBidHJmcyB1
+c2VzIG5hbm9zZWNvbmQgdGltZSBncmFudWxhcml0eSwgaXQgY2FuIGFsc28KPiB1c2Uga3RpbWVf
+Z2V0X3JlYWxfdHMgZGlyZWN0bHkgdG8gb2J0YWluIHRpbWVzdGFtcCBmb3IKPiB0aGUgcm9vdC4g
+SXQgaXMgbmVjZXNzYXJ5IHRvIHVzZSB0aGUgdGltZXNwZWMgdGltZSBhcGkKPiBoZXJlIGJlY2F1
+c2UgdGhlIHNhbWUgYnRyZnNfc2V0X3N0YWNrX3RpbWVzcGVjXyooKSBhcGlzCj4gYXJlIHVzZWQg
+Zm9yIHZmcyBpbm9kZSB0aW1lcyBhcyB3ZWxsLiBUaGVzZSBjYW4gYmUKPiB0cmFuc2l0aW9uZWQg
+dG8gdXNpbmcgdGltZXNwZWM2NCB3aGVuIGJ0cmZzIGludGVybmFsbHkKPiBjaGFuZ2VzIHRvIHVz
+ZSB0aW1lc3BlYzY0IGFzIHdlbGwuCj4gCj4gU2lnbmVkLW9mZi1ieTogRGVlcGEgRGluYW1hbmkg
+PGRlZXBhLmtlcm5lbEBnbWFpbC5jb20+Cj4gQWNrZWQtYnk6IERhdmlkIFN0ZXJiYSA8ZHN0ZXJi
+YUBzdXNlLmNvbT4KPiBSZXZpZXdlZC1ieTogQXJuZCBCZXJnbWFubiA8YXJuZEBhcm5kYi5kZT4K
+CkknbSBnb2luZyB0byBhZGQgdGhlIHBhdGNoIHRvIG15IDQuMTIgcXVldWUgYW5kIHdpbGwgbGV0
+IEFuZHJldyBrbm93LgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fXwpZMjAzOCBtYWlsaW5nIGxpc3QKWTIwMzhAbGlzdHMubGluYXJvLm9yZwpodHRwczovL2xp
+c3RzLmxpbmFyby5vcmcvbWFpbG1hbi9saXN0aW5mby95MjAzOAo=
