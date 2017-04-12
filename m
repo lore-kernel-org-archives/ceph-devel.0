@@ -1,71 +1,65 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Minimal crush weight_set integration
-Date: Wed, 12 Apr 2017 22:45:37 +0200
-Message-ID: <3fd4fe80-9767-872b-37a2-87c2950a8095@dachary.org>
-References: <fcb0529a-ff48-1e50-5f8a-ad40f73d12c8@dachary.org>
- <alpine.DEB.2.11.1704121833280.10661@piezo.novalocal>
+From: Dan Mick <dmick@redhat.com>
+Subject: Re: Weekly perf meeting changing from Wednesday to Thursday
+Date: Wed, 12 Apr 2017 15:17:30 -0700
+Message-ID: <bb286e4a-d144-5b8a-04ec-d519ed1903ff@redhat.com>
+References: <b000f2c2-0fe7-dcdb-549e-5b92d80b3e65@redhat.com>
+ <CAJ4mKGa1aHfs4_4og8aYYFAaUXTGo-Zeey75P23O6nfmef=bXQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay8-d.mail.gandi.net ([217.70.183.201]:52334 "EHLO
-        relay8-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752851AbdDLUpl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Apr 2017 16:45:41 -0400
-In-Reply-To: <alpine.DEB.2.11.1704121833280.10661@piezo.novalocal>
+Received: from mx1.redhat.com ([209.132.183.28]:43576 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755271AbdDLWRc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 12 Apr 2017 18:17:32 -0400
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 53152C059742
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Apr 2017 22:17:31 +0000 (UTC)
+In-Reply-To: <CAJ4mKGa1aHfs4_4og8aYYFAaUXTGo-Zeey75P23O6nfmef=bXQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>, Mark Nelson <mnelson@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+There was a global announcement that they would be changing on the 29th;
+maybe it came early?
 
+https://www.redhat.com/en/conference-numbers
 
-On 04/12/2017 08:35 PM, Sage Weil wrote:
-> On Wed, 12 Apr 2017, Loic Dachary wrote:
->> Hi Sage,
->>
->> Assuming the weight set is implemented in crush[1], it could be used 
->> with a weight_set matrix for each pool, encoded/decoded with the 
->> crushmap[2]. If the weight_set for a given pool does not exist the 
->> legacy behavior is preserved. Whenever a pool size, pgp_num changes, the 
->> weight_set should also be updated simultaneously.
->>
->> Currently CrushWrapper re-creates the workspace for each call to 
->> crush_do_rule which is expensive. It could instead be cached. The 
->> workspace is created with the replication count as an argument and could 
->> then be populated with the weight_set for the corresponding pool which 
->> is assumed to be in sync with the pool state (size, pgp_num etc).
+On 04/12/2017 09:50 AM, Gregory Farnum wrote:
+> I noticed today that the bluejeans website phone numbers didn't work
+> to call in to the meeting, even though it was the correct URL and you
+> could join via the app.
 > 
-> Hmm.  The current workspace is meant to be a private temporary space that 
-> is not shared across threads (this allows the crush mapping functions to 
-> be const and called on a const OSDMap/CrushWrapper without any locks).  
-> We should keep its setup as fast/cheap as possible...
->
-> I think the weight set is also effectively const, which suggests that 
-> it probably shouldn't be the same structure after all...
-
-Of course... what was I thinking... *sigh* :-)
-
-> sage
+> Any idea why that is/can we recreate a new room to fix it?
 > 
+> On Wed, Apr 12, 2017 at 9:45 AM, Mark Nelson <mnelson@redhat.com> wrote:
+>> Hi All,
 >>
->> This would be a very loose implementation of the weight_set relying on 
->> external tools to be in sync. The next step would be to add commands on 
->> top of that to make it less error prone.
+>> Due to some of the Ceph folks having a conflicting meeting (that can't be
+>> changed) on Wednesdays, we're going to move the perf meeting to Thursdays at
+>> the same 8AM PST time.  That time slot appeared to be the least-bad option
+>> for folks in various timezones that we talked to. We'll use the same meeting
+>> url:
 >>
->> Do you think we should come up with a robust use case / cli / syntax 
->> before implementing this first step ? Or does it look like a sound first 
->> step ?
+>> https://bluejeans.com/944567299
 >>
->> Cheers
+>> and etherpad:
 >>
->> [1] http://libcrush.org/main/libcrush/merge_requests/30/diffs
->> [2] https://github.com/ceph/ceph/pull/14486
->> [3] https://github.com/ceph/ceph/pull/14486/files#diff-215e8db28af558a5e445f6267530c786R1179
+>> http://pad.ceph.com/p/performance_weekly
 >>
->> -- 
->> Loïc Dachary, Artisan Logiciel Libre
+>> I'll send out a reminder next week on Wednesday as well. See you then!
 >>
+>> Mark
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
