@@ -1,69 +1,112 @@
-From: Tim Serong <tserong@suse.com>
-Subject: Re: multiple cherrypys in ceph-mgr modules stomp on each other
-Date: Thu, 13 Apr 2017 23:21:12 +1000
-Message-ID: <c93b59d3-f7f5-fe18-20dc-324be4e0331e@suse.com>
-References: <ded84b4f-d13b-d2f0-6d40-fe34d6905adb@suse.com>
- <CALe9h7cT5z8-gAszW5e+xoFJbv42+D=-UW=uveqFHaY+LUAbCA@mail.gmail.com>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
+Subject: Re: Sparse file info in filestore not propagated to other OSDs
+Date: Thu, 13 Apr 2017 16:23:12 +0200
+Message-ID: <d4bde447-f179-aeca-bac5-636fa40ccba5@corp.ovh.com>
+References: <beaf4408-2322-b0f1-3265-0d9e411c5bf9@corp.ovh.com>
+ <alpine.DEB.2.11.1704061322330.2999@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:53430 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752728AbdDMNVV (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Thu, 13 Apr 2017 09:21:21 -0400
-In-Reply-To: <CALe9h7cT5z8-gAszW5e+xoFJbv42+D=-UW=uveqFHaY+LUAbCA@mail.gmail.com>
+Received: from 3.mo302.mail-out.ovh.net ([137.74.110.76]:40965 "EHLO
+        3.mo302.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750745AbdDMOXP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Apr 2017 10:23:15 -0400
+In-Reply-To: <alpine.DEB.2.11.1704061322330.2999@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 04/11/2017 09:17 PM, John Spray wrote:
-> On Tue, Apr 11, 2017 at 11:41 AM, Tim Serong <tserong@suse.com> wrote:
->> [...]
->> cherrypy.engine.start() call or they have no effect.  One way to do that
->> would be to have some magic cherrypy module which is always loaded last
->> to start the engine, but that might be ugly.
+On 04/06/2017 03:25 PM, Sage Weil wrote:
+> On Thu, 6 Apr 2017, Piotr Dałek wrote:
+>> Hello,
 >>
->> Another option might be to have a separate python interpreter per module
->> (can't stomp on each other then, right?) but that might be too resource
->> intensive.
-> 
-> My assumption has been that the global cherrypy stuff was a
-> convenience that could be un-wrapped into something simpler as and
-> when, but that may not be the case...
-> 
-> We could have a small shared python module next to mgr_module.py that
-> modules could use to cooperate nicely on the global cherrypy bits.  It
-> wouldn't be a total hack, as it would make some of "make me a
-> webserver" code less repetitive between modules that want to do that.
-> 
-> Doing separate sub-interpreters would also be an option that would
-> give us more robustness generally in the face of python modules that
-> do global things.  I don't think there was any fundamental reason I
-> didn't use sub-interpreters when writing this stuff originally,
-> they're just a comparatively sparesely documented part of CPython.
+>> We recently had an interesting issue with RBD images and filestore on Jewel
+>> 10.2.5:
+>> We have a pool with RBD images, all of them mostly untouched (large areas of
+>> those images unused), and once we added 3 new OSDs to cluster, objects
+>> representing these images grew substantially on new OSDs: objects hosting
+>> unused areas of these images on original OSDs remained small (~8K of space
+>> actually used, 4M allocated), but on new OSDs were large (4M allocated *and*
+>> actually used). After investigation we concluded that Ceph didn't propagate
+>> sparse file information during cluster rebalance, resulting in correct data
+>> contents on all OSDs, but no sparse file data on new OSDs, hence disk space
+>> usage increase on those.
+>>
+>> Example on test cluster, before growing it by one OSD:
+>>
+>> ls:
+>>
+>> osd-01-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
+>> /var/lib/ceph/osd-01-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+>> osd-02-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
+>> /var/lib/ceph/osd-02-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+>> osd-03-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
+>> /var/lib/ceph/osd-03-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+>>
+>> du:
+>>
+>> osd-01-cluster: 12
+>> /var/lib/ceph/osd-01-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+>> osd-02-cluster: 12
+>> /var/lib/ceph/osd-02-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+>> osd-03-cluster: 12
+>> /var/lib/ceph/osd-03-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+>>
+>>
+>> mon-01-cluster:~ # rbd diff test
+>> Offset   Length  Type
+>> 8388608  4194304 data
+>> 16777216 4096    data
+>> 33554432 4194304 data
+>> 37748736 2048    data
+>>
+>> And after growing it:
+>>
+>> ls:
+>>
+>> clush> find /var/lib/ceph/osd-*/current/0.*head/ -type f -name '*data*' -exec
+>> ls -l {} \+
+>> osd-02-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
+>> /var/lib/ceph/osd-02-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+>> osd-03-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
+>> /var/lib/ceph/osd-03-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+>> osd-04-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:25
+>> /var/lib/ceph/osd-04-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+>>
+>> du:
+>>
+>> clush> find /var/lib/ceph/osd-*/current/0.*head/ -type f -name '*data*' -exec
+>> du -k {} \+
+>> osd-02-cluster: 12
+>> /var/lib/ceph/osd-02-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+>> osd-03-cluster: 12
+>> /var/lib/ceph/osd-03-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+>> osd-04-cluster: 4100
+>> /var/lib/ceph/osd-04-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+>>
+>> Note that "rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0" grew
+>> from 12 to 4100KB when copied from other OSDs to osd-04.
+>>
+>> Is this something to be expected? Is there any way to make it propagate the
+>> sparse file info? Or should we think about issuing a "fallocate -d"-like patch
+>> for writes on filestore?
+>>
+>> (We're using kernel 3.13.0-45-generic but on 4.4.0-31-generic the issue
+>> remains; our XFS uses 4K bsize).
+>
+> I think the solution here is to use sparse_read during recovery.  The
+> PushOp data representation already supports it; it's just a matter of
+> skipping the zeros.  The recovery code could also have an option to check
+> for fully-zero regions of the data and turn those into holes as well.  For
+> ReplicatedBackend, see build_push_op().
 
-I think I'm liking the second option for general robustness.  My best
-guess right now is that's probably adding a Py_NewInterpreter() call to
-MgrPyModule's constructor, and PyThreadState_Swap()s in its methods so
-the right thread state is active at the right time.  I reckon this'll
-require some other rejigging in various places though -- note how
-https://docs.python.org/2/c-api/init.html#bugs-and-caveats says that
-combining sub-interpreters with the PyGILState_*() APIs "is delicate",
-and further up it flat out states "The following functions use
-thread-local storage, and are not compatible with sub-interpreters:
-PyGILState_Ensure() ... PyGILState_Release()..." etc.
+So far it turns out that there's even easier solution, we just enabled 
+"filestore seek hole" on some test cluster and that seems to fix the problem 
+for us. We'll see if fiemap works too.
 
-Given the sparseness of the docs it's probably best to just try it and
-see what catches on fire.  I'll keep you posted.
-
-Regards,
-
-Tim
 -- 
-Tim Serong
-Senior Clustering Engineer
-SUSE
-tserong@suse.com
+Piotr Dałek
+piotr.dalek@corp.ovh.com
+https://www.ovh.com/us/
