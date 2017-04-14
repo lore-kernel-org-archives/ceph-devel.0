@@ -1,29 +1,40 @@
-From: Sarah JOHNSON <sarah.johnson197070@gmail.com>
-Subject: Greetings.
-Date: Fri, 14 Apr 2017 11:31:16 +0000 (UTC)
-Message-ID: <1310674507.262443.1492169476655__26657.2148226716$1492169483$gmane$org@mail.yahoo.com>
-References: <1310674507.262443.1492169476655.ref@mail.yahoo.com>
-Reply-To: Sarah JOHNSON <sarah.johnson197070@yahoo.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: Static Analysis
+Date: Fri, 14 Apr 2017 19:48:13 +0800
+Message-ID: <CAJE9aONm=H4+jgZZE6pR3uz+Oudfs-bo5-88DWtqSsfP1Me4RA@mail.gmail.com>
+References: <CAF-wwdGvjMBWPXk6dacA5=A0c_gqTup4mE4Mzx_p574aEgZeMA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from sonic316-29.consmr.mail.ne1.yahoo.com ([66.163.187.155]:37912
-        "EHLO sonic316-29.consmr.mail.ne1.yahoo.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751323AbdDNLbT (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 14 Apr 2017 07:31:19 -0400
+Received: from mail-vk0-f44.google.com ([209.85.213.44]:35070 "EHLO
+        mail-vk0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751976AbdDNLsO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Apr 2017 07:48:14 -0400
+Received: by mail-vk0-f44.google.com with SMTP id r69so38625006vke.2
+        for <ceph-devel@vger.kernel.org>; Fri, 14 Apr 2017 04:48:14 -0700 (PDT)
+In-Reply-To: <CAF-wwdGvjMBWPXk6dacA5=A0c_gqTup4mE4Mzx_p574aEgZeMA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Good Day Dearest.
+On Fri, Apr 14, 2017 at 9:04 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
+> Latest static analyser results are up on  http://people.redhat.com/bhubbard/
 
-My name is Sarah JOHNSON I am 18 years old, the only daughter of late Mr. Raymond JOHNSON from Burkina Faso, I am contacting you to help me relocate to your country to continue my university education in  your country, before my father died he gave me a deposit slip document of ($7,000,000 USD) and made me understand that it was because of his position in the government that his government associates planed and poisoned him on a business trip with them to France and he advised me to look for a faithful and reliable foreigner who will help me to transfer this money to his country and help me to relocate over there to continue my studies.
+some of the latest warnings are taken care of by
+https://github.com/ceph/ceph/pull/14549.
 
-I hope you will help me with the good faith and trust I have in you, after you have secured the money and settle my education, I will give you 30% of the money for your good and kind assistance to me. Please Contact me e-Mail:sarah.johnson197070@yahoo.com 
+>
+> --
+> Cheers,
+> Brad
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-I am waiting on your reply
 
-Regards,
 
-Sarah.
+-- 
+Regards
+Kefu Chai
