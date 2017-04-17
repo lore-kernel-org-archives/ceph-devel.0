@@ -1,97 +1,110 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: another scrub bug? blocked for > 10240.948831 secs
-Date: Mon, 17 Apr 2017 13:18:50 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1704171316150.10661@piezo.novalocal>
-References: <94127293-3ba3-8bb8-db43-604b6a54eb55@brockmann-consult.de>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: Extremely high OSD memory utilization on Kraken
+ 11.2.0 (with XFS -or- bluestore)
+Date: Mon, 17 Apr 2017 15:15:53 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1704171457320.10661@piezo.novalocal>
+References: <CAFFcurqEctQ2fHHDcGYfy3YCuaq9DxZr0VU4e8dNVACNVLDmqA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:49825 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752796AbdDQNSx (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Apr 2017 09:18:53 -0400
-In-Reply-To: <94127293-3ba3-8bb8-db43-604b6a54eb55@brockmann-consult.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Peter Maloney <peter.maloney@brockmann-consult.de>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-21323233-1492442156=:10661"
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAFFcurqEctQ2fHHDcGYfy3YCuaq9DxZr0VU4e8dNVACNVLDmqA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Aaron Ten Clay <aarontc-q67U1YB0R7xBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Sat, 15 Apr 2017, Peter Maloney wrote:
-> Is this another scrub bug? Something just like this (1 or 2 requests
-> blocked forever until osd restart) happened about 5 times so far, each
-> time during recovery or some other thing I did myself to trigger it,
-> probably involving snapshots. This time I noticed that it says scrub in
-> the log. One other time it made a client block, but didn't seem to this
-> time. I didn't have the same issue in 10.2.3, but I don't know if I
-> generated the same load or whatever causes it back then.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-21323233-1492442156=:10661
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+
+On Sat, 15 Apr 2017, Aaron Ten Clay wrote:
+> Hi all,
 > 
-> ceph version 10.2.5 (c461ee19ecbc0c5c330aca20f7392c9a00730367)
-> 
-> If you want me to try 10.2.6 or 7 instead, I can do that, but no
-> guarantee I can reproduce it any time soon.
+> Our cluster is experiencing a very odd issue and I'm hoping for some
+> guidance on troubleshooting steps and/or suggestions to mitigate the issue.
+> tl;dr: Individual ceph-osd processes try to allocate > 90GiB of RAM and are
+> eventually nuked by oom_killer.
 
-There have been lots of scrub-related patches since 10.2.5, but I don't 
-see one that would explain this.  I'm guessing there is a scrub waitlist 
-bug that we aren't turning up in qa because our thrashing tests are 
-triggering lots of other actions in sequence (peering from up/down osds 
-and balancing) and those probably have the effect of 
-clearing the issue.
+My guess is that there there is a bug in a decoding path and it's 
+trying to allocate some huge amount of memory.  Can you try setting a 
+memory ulimit to something like 40gb and then enabling core dumps so you 
+can get a core?  Something like
 
-Next time you see it, can you capture the output of 'ceph daemon osd.NNN 
-ops' so we can see what steps the request went through?  Also, any 
-additional or more specific clues as to what might have triggered it would 
-help.
+ulimit -c unlimited
+ulimit -m 20000000
 
-Thanks!
+or whatever the corresponding systemd unit file options are...
+
+Once we have a core file it will hopefully be clear who is 
+doing the bad allocation...
+
 sage
 
 
 
 > 
-> >  42392 GB used, 24643 GB / 67035 GB avail; 15917 kB/s rd, 147 MB/s wr,
-> > 1483 op/s
-> > 2017-04-15 03:53:57.301902 osd.5 10.3.0.132:6813/1085915 1991 :
-> > cluster [WRN] 1 slow requests, 1 included below; oldest blocked for >
-> > 5.372629 secs
-> > 2017-04-15 03:53:57.301905 osd.5 10.3.0.132:6813/1085915 1992 :
-> > cluster [WRN] slow request 5.372629 seconds old, received at
-> > 2017-04-15 03:53:51.929240: replica scrub(pg:
-> > 4.25,from:0'0,to:73551'5179474,epoch:73551,start:4:a4537100:::rbd_data.4bf687238e1f29.000000000001e5dc:0,end:4:a453818a:::rbd_data.4bf687238e1f29.0000000000017d8b:db18,chunky:1,deep:0,seed:4294967295,version:6)
-> > currently reached_pg
-> > 2017-04-15 03:53:57.312641 mon.0 10.3.0.131:6789/0 158090 : cluster
-> > [INF] pgmap v14652123: 896 pgs: 2 active+clean+scrubbing+deep, 5
-> > active+clean+scrubbing, 889 active+clean; 17900 GB data, 42392 GB
-> > used, 24643 GB / 67035 GB avail; 22124 kB/s rd, 191 MB/s wr, 2422 op/s
-> > ...
-> > 2017-04-15 03:53:57.419047 osd.8 10.3.0.133:6814/1124407 1725 :
-> > cluster [WRN] 1 slow requests, 1 included below; oldest blocked for >
-> > 5.489743 secs
-> > 2017-04-15 03:53:57.419052 osd.8 10.3.0.133:6814/1124407 1726 :
-> > cluster [WRN] slow request 5.489743 seconds old, received at
-> > 2017-04-15 03:53:51.929266: replica scrub(pg:
-> > 4.25,from:0'0,to:73551'5179474,epoch:73551,start:4:a4537100:::rbd_data.4bf687238e1f29.000000000001e5dc:0,end:4:a453818a:::rbd_data.4bf687238e1f29.0000000000017d8b:db18,chunky:1,deep:0,seed:4294967295,version:6)
-> > currently reached_pg
-> > ...
-> > 2017-04-15 06:44:32.969476 mon.0 10.3.0.131:6789/0 168432 : cluster
-> > [INF] pgmap v14662280: 896 pgs: 5 active+clean+scrubbing, 891
-> > active+clean; 18011 GB data, 42703 GB used, 24332 GB / 6703
-> > 5 GB avail; 2512 kB/s rd, 12321 kB/s wr, 1599 op/s
-> > 2017-04-15 06:44:32.878155 osd.8 10.3.0.133:6814/1124407 1747 :
-> > cluster [WRN] 1 slow requests, 1 included below; oldest blocked for >
-> > 10240.948831 secs
-> > 2017-04-15 06:44:32.878159 osd.8 10.3.0.133:6814/1124407 1748 :
-> > cluster [WRN] slow request 10240.948831 seconds old, received at
-> > 2017-04-15 03:53:51.929266: replica scrub(pg: 4.25,from:0'0,
-> > to:73551'5179474,epoch:73551,start:4:a4537100:::rbd_data.4bf687238e1f29.000000000001e5dc:0,end:4:a453818a:::rbd_data.4bf687238e1f29.0000000000017d8b:db18,chunky:1,deep:0,seed:4294967295,ver
-> > sion:6) currently reached_pg
-> > 2017-04-15 06:44:33.984306 mon.0 10.3.0.131:6789/0 168433 : cluster
-> > [INF] pgmap v14662281: 896 pgs: 5 active+clean+scrubbing, 891
-> > active+clean; 18011 GB data, 42703 GB used, 24332 GB / 6703
-> > 5 GB avail; 11675 kB/s rd, 29068 kB/s wr, 1847 op/s
+> I'll try to explain the situation in detail:
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> We have 24-4TB bluestore HDD OSDs, and 4-600GB SSD OSDs. The SSD OSDs are in
+> a different CRUSH "root", used as a cache tier for the main storage pools,
+> which are erasure coded and used for cephfs. The OSDs are spread across two
+> identical machines with 128GiB of RAM each, and there are three monitor
+> nodes on different hardware.
+> 
+> Several times we've encountered crippling bugs with previous Ceph releases
+> when we were on RC or betas, or using non-recommended configurations, so in
+> January we abandoned all previous Ceph usage, deployed LTS Ubuntu 16.04, and
+> went with stable Kraken 11.2.0 with the configuration mentioned above.
+> Everything was fine until the end of March, when one day we find all but a
+> couple of OSDs are "down" inexplicably. Investigation reveals oom_killer
+> came along and nuked almost all the ceph-osd processes.
+> 
+> We've gone through a bunch of iterations of restarting the OSDs, trying to
+> bring them up one at a time gradually, all at once, various configuration
+> settings to reduce cache size as suggested in this ticket:
+> http://tracker.ceph.com/issues/18924...
+> 
+> I don't know if that ticket really pertains to our situation or not, I have
+> no experience with memory allocation debugging. I'd be willing to try if
+> someone can point me to a guide or walk me through the process.
+> 
+> I've even tried, just to see if the situation was  transitory, adding over
+> 300GiB of swap to both OSD machines. The OSD procs managed to allocate, in a
+> matter of 5-10 minutes, more than 300GiB of RAM pressure and became
+> oom_killer victims once again.
+> 
+> No software or hardware changes took place around the time this problem
+> started, and no significant data changes occurred either. We added about
+> 40GiB of ~1GiB files a week or so before the problem started and that's the
+> last time data was written.
+> 
+> I can only assume we've found another crippling bug of some kind, this level
+> of memory usage is entirely unprecedented. What can we do?
+> 
+> Thanks in advance for any suggestions.
+> -Aaron
 > 
 > 
+--8323329-21323233-1492442156=:10661
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--8323329-21323233-1492442156=:10661--
