@@ -1,110 +1,76 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: Extremely high OSD memory utilization on Kraken
- 11.2.0 (with XFS -or- bluestore)
-Date: Mon, 17 Apr 2017 15:15:53 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1704171457320.10661@piezo.novalocal>
-References: <CAFFcurqEctQ2fHHDcGYfy3YCuaq9DxZr0VU4e8dNVACNVLDmqA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-21323233-1492442156=:10661"
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAFFcurqEctQ2fHHDcGYfy3YCuaq9DxZr0VU4e8dNVACNVLDmqA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Aaron Ten Clay <aarontc-q67U1YB0R7xBDgjK7y7TUQ@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+From: Jeff Layton <jlayton@redhat.com>
+Subject: [PATCH v8 1/7] libceph: remove req->r_replay_version
+Date: Mon, 17 Apr 2017 12:42:52 -0400
+Message-ID: <20170417164258.31527-2-jlayton@redhat.com>
+References: <20170417164258.31527-1-jlayton@redhat.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:41258 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754661AbdDQQnD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 17 Apr 2017 12:43:03 -0400
+In-Reply-To: <20170417164258.31527-1-jlayton@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: idryomov@gmail.com, zyan@redhat.com, sage@redhat.com
+Cc: jspray@redhat.com, ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Nothing uses this anymore with the removal of the ack vs. commit code.
+Remove the field and just encode zeroes into place in the request
+encoding.
 
---8323329-21323233-1492442156=:10661
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ include/linux/ceph/osd_client.h | 1 -
+ net/ceph/debugfs.c              | 4 +---
+ net/ceph/osd_client.c           | 7 ++++---
+ 3 files changed, 5 insertions(+), 7 deletions(-)
 
-On Sat, 15 Apr 2017, Aaron Ten Clay wrote:
-> Hi all,
-> 
-> Our cluster is experiencing a very odd issue and I'm hoping for some
-> guidance on troubleshooting steps and/or suggestions to mitigate the issue.
-> tl;dr: Individual ceph-osd processes try to allocate > 90GiB of RAM and are
-> eventually nuked by oom_killer.
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index d6a625e75040..3fc9e7754a9b 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -192,7 +192,6 @@ struct ceph_osd_request {
+ 	unsigned long r_stamp;                /* jiffies, send or check time */
+ 	unsigned long r_start_stamp;          /* jiffies */
+ 	int r_attempts;
+-	struct ceph_eversion r_replay_version; /* aka reassert_version */
+ 	u32 r_last_force_resend;
+ 	u32 r_map_dne_bound;
+ 
+diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+index c62b2b029a6e..d7e63a4f5578 100644
+--- a/net/ceph/debugfs.c
++++ b/net/ceph/debugfs.c
+@@ -177,9 +177,7 @@ static void dump_request(struct seq_file *s, struct ceph_osd_request *req)
+ 	seq_printf(s, "%llu\t", req->r_tid);
+ 	dump_target(s, &req->r_t);
+ 
+-	seq_printf(s, "\t%d\t%u'%llu", req->r_attempts,
+-		   le32_to_cpu(req->r_replay_version.epoch),
+-		   le64_to_cpu(req->r_replay_version.version));
++	seq_printf(s, "\t%d", req->r_attempts);
+ 
+ 	for (i = 0; i < req->r_num_ops; i++) {
+ 		struct ceph_osd_req_op *op = &req->r_ops[i];
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index b4500a8ab8b3..feb666c22381 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -1503,9 +1503,10 @@ static void encode_request(struct ceph_osd_request *req, struct ceph_msg *msg)
+ 	ceph_encode_32(&p, req->r_flags);
+ 	ceph_encode_timespec(p, &req->r_mtime);
+ 	p += sizeof(struct ceph_timespec);
+-	/* aka reassert_version */
+-	memcpy(p, &req->r_replay_version, sizeof(req->r_replay_version));
+-	p += sizeof(req->r_replay_version);
++
++	/* reassert_version */
++	memset(p, 0, sizeof(struct ceph_eversion));
++	p += sizeof(struct ceph_eversion);
+ 
+ 	/* oloc */
+ 	ceph_start_encoding(&p, 5, 4,
+-- 
+2.9.3
 
-My guess is that there there is a bug in a decoding path and it's 
-trying to allocate some huge amount of memory.  Can you try setting a 
-memory ulimit to something like 40gb and then enabling core dumps so you 
-can get a core?  Something like
-
-ulimit -c unlimited
-ulimit -m 20000000
-
-or whatever the corresponding systemd unit file options are...
-
-Once we have a core file it will hopefully be clear who is 
-doing the bad allocation...
-
-sage
-
-
-
-> 
-> I'll try to explain the situation in detail:
-> 
-> We have 24-4TB bluestore HDD OSDs, and 4-600GB SSD OSDs. The SSD OSDs are in
-> a different CRUSH "root", used as a cache tier for the main storage pools,
-> which are erasure coded and used for cephfs. The OSDs are spread across two
-> identical machines with 128GiB of RAM each, and there are three monitor
-> nodes on different hardware.
-> 
-> Several times we've encountered crippling bugs with previous Ceph releases
-> when we were on RC or betas, or using non-recommended configurations, so in
-> January we abandoned all previous Ceph usage, deployed LTS Ubuntu 16.04, and
-> went with stable Kraken 11.2.0 with the configuration mentioned above.
-> Everything was fine until the end of March, when one day we find all but a
-> couple of OSDs are "down" inexplicably. Investigation reveals oom_killer
-> came along and nuked almost all the ceph-osd processes.
-> 
-> We've gone through a bunch of iterations of restarting the OSDs, trying to
-> bring them up one at a time gradually, all at once, various configuration
-> settings to reduce cache size as suggested in this ticket:
-> http://tracker.ceph.com/issues/18924...
-> 
-> I don't know if that ticket really pertains to our situation or not, I have
-> no experience with memory allocation debugging. I'd be willing to try if
-> someone can point me to a guide or walk me through the process.
-> 
-> I've even tried, just to see if the situation was  transitory, adding over
-> 300GiB of swap to both OSD machines. The OSD procs managed to allocate, in a
-> matter of 5-10 minutes, more than 300GiB of RAM pressure and became
-> oom_killer victims once again.
-> 
-> No software or hardware changes took place around the time this problem
-> started, and no significant data changes occurred either. We added about
-> 40GiB of ~1GiB files a week or so before the problem started and that's the
-> last time data was written.
-> 
-> I can only assume we've found another crippling bug of some kind, this level
-> of memory usage is entirely unprecedented. What can we do?
-> 
-> Thanks in advance for any suggestions.
-> -Aaron
-> 
-> 
---8323329-21323233-1492442156=:10661
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---8323329-21323233-1492442156=:10661--
