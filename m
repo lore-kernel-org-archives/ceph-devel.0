@@ -1,92 +1,97 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: [ceph-users] fsping, why you no work no mo?
-Date: Sun, 16 Apr 2017 22:57:01 +0100
-Message-ID: <CALe9h7e9Q7+MnxG+Lgoq64AiCNOmFZrHwzf+iUjV5fwe__N-Rg@mail.gmail.com>
-References: <CABZ+qqnUUxq-OVTs6MFYVqnDZdmWqPzq0TjCePAjZtnKGD0E-w@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: another scrub bug? blocked for > 10240.948831 secs
+Date: Mon, 17 Apr 2017 13:18:50 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1704171316150.10661@piezo.novalocal>
+References: <94127293-3ba3-8bb8-db43-604b6a54eb55@brockmann-consult.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f177.google.com ([209.85.128.177]:36690 "EHLO
-        mail-wr0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756638AbdDPV5X (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 16 Apr 2017 17:57:23 -0400
-Received: by mail-wr0-f177.google.com with SMTP id c55so75012112wrc.3
-        for <ceph-devel@vger.kernel.org>; Sun, 16 Apr 2017 14:57:22 -0700 (PDT)
-In-Reply-To: <CABZ+qqnUUxq-OVTs6MFYVqnDZdmWqPzq0TjCePAjZtnKGD0E-w@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:49825 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752796AbdDQNSx (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Apr 2017 09:18:53 -0400
+In-Reply-To: <94127293-3ba3-8bb8-db43-604b6a54eb55@brockmann-consult.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: Peter Maloney <peter.maloney@brockmann-consult.de>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Apr 13, 2017 at 6:41 PM, Dan van der Ster <dan@vanderster.com> wrote:
-> Dear ceph-*,
->
-> A couple weeks ago I wrote this simple tool to measure the round-trip
-> latency of a shared filesystem.
->
->    https://github.com/dvanders/fsping
->
-> In our case, the tool is to be run from two clients who mount the same
-> CephFS.
->
-> First, start the server (a.k.a. the ping reflector) on one machine in a
-> CephFS directory:
->
->    ./fsping --server
->
-> Then, from another client machine and in the same directory, start the
-> fsping client (aka the ping emitter):
->
->     ./fsping --prefix <prefix from the server above>
->
-> The idea is that the "client" writes a syn file, the reflector notices it,
-> and writes an ack file. The time for the client to notice the ack file is
-> what I call the rtt.
->
-> And the output looks like normal ping, so that's neat. (The README.md shows
-> a working example)
->
->
-> Anyway, two weeks ago when I wrote this, it was working very well on my
-> CephFS clusters (running 10.2.5, IIRC). I was seeing ~20ms rtt for small
-> files, which is more or less what I was expecting on my test cluster.
->
-> But when I run fsping today, it does one of two misbehaviours:
->
->   1. Most of the time it just hangs, both on the reflector and on the
-> emitter. The fsping processes are stuck in some uninterruptible state --
-> only an MDS failover breaks them out. I tried with and without
-> fuse_disable_pagecache -- no big difference.
->
->   2. When I increase the fsping --size to 512kB, it works a bit more
-> reliably. But there is a weird bimodal distribution with most "packets"
-> having 20-30ms rtt, some ~20% having ~5-6 seconds rtt, and some ~5% taking
-> ~10-11s. I suspected the mds_tick_interval -- but decreasing that didn't
-> help.
->
->
-> In summary, if someone is curious, please give this tool a try on your
-> CephFS cluster -- let me know if its working or not (and what rtt you can
-> achieve with which configuration).
-> And perhaps a dev would understand why it is not working with latest jewel
-> ceph-fuse / ceph MDS's?
+On Sat, 15 Apr 2017, Peter Maloney wrote:
+> Is this another scrub bug? Something just like this (1 or 2 requests
+> blocked forever until osd restart) happened about 5 times so far, each
+> time during recovery or some other thing I did myself to trigger it,
+> probably involving snapshots. This time I noticed that it says scrub in
+> the log. One other time it made a client block, but didn't seem to this
+> time. I didn't have the same issue in 10.2.3, but I don't know if I
+> generated the same load or whatever causes it back then.
+> 
+> ceph version 10.2.5 (c461ee19ecbc0c5c330aca20f7392c9a00730367)
+> 
+> If you want me to try 10.2.6 or 7 instead, I can do that, but no
+> guarantee I can reproduce it any time soon.
 
-Yes, this immediately seizes up on my development environment (i.e.
-master) and shows up as two blocked requests on the MDS.  We have
-broken something...
+There have been lots of scrub-related patches since 10.2.5, but I don't 
+see one that would explain this.  I'm guessing there is a scrub waitlist 
+bug that we aren't turning up in qa because our thrashing tests are 
+triggering lots of other actions in sequence (peering from up/down osds 
+and balancing) and those probably have the effect of 
+clearing the issue.
 
-Opened ticket here: http://tracker.ceph.com/issues/19635
+Next time you see it, can you capture the output of 'ceph daemon osd.NNN 
+ops' so we can see what steps the request went through?  Also, any 
+additional or more specific clues as to what might have triggered it would 
+help.
 
-John
+Thanks!
+sage
 
-> Best Regards,
->
-> Dan
->
->
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
+
+
+> 
+> >  42392 GB used, 24643 GB / 67035 GB avail; 15917 kB/s rd, 147 MB/s wr,
+> > 1483 op/s
+> > 2017-04-15 03:53:57.301902 osd.5 10.3.0.132:6813/1085915 1991 :
+> > cluster [WRN] 1 slow requests, 1 included below; oldest blocked for >
+> > 5.372629 secs
+> > 2017-04-15 03:53:57.301905 osd.5 10.3.0.132:6813/1085915 1992 :
+> > cluster [WRN] slow request 5.372629 seconds old, received at
+> > 2017-04-15 03:53:51.929240: replica scrub(pg:
+> > 4.25,from:0'0,to:73551'5179474,epoch:73551,start:4:a4537100:::rbd_data.4bf687238e1f29.000000000001e5dc:0,end:4:a453818a:::rbd_data.4bf687238e1f29.0000000000017d8b:db18,chunky:1,deep:0,seed:4294967295,version:6)
+> > currently reached_pg
+> > 2017-04-15 03:53:57.312641 mon.0 10.3.0.131:6789/0 158090 : cluster
+> > [INF] pgmap v14652123: 896 pgs: 2 active+clean+scrubbing+deep, 5
+> > active+clean+scrubbing, 889 active+clean; 17900 GB data, 42392 GB
+> > used, 24643 GB / 67035 GB avail; 22124 kB/s rd, 191 MB/s wr, 2422 op/s
+> > ...
+> > 2017-04-15 03:53:57.419047 osd.8 10.3.0.133:6814/1124407 1725 :
+> > cluster [WRN] 1 slow requests, 1 included below; oldest blocked for >
+> > 5.489743 secs
+> > 2017-04-15 03:53:57.419052 osd.8 10.3.0.133:6814/1124407 1726 :
+> > cluster [WRN] slow request 5.489743 seconds old, received at
+> > 2017-04-15 03:53:51.929266: replica scrub(pg:
+> > 4.25,from:0'0,to:73551'5179474,epoch:73551,start:4:a4537100:::rbd_data.4bf687238e1f29.000000000001e5dc:0,end:4:a453818a:::rbd_data.4bf687238e1f29.0000000000017d8b:db18,chunky:1,deep:0,seed:4294967295,version:6)
+> > currently reached_pg
+> > ...
+> > 2017-04-15 06:44:32.969476 mon.0 10.3.0.131:6789/0 168432 : cluster
+> > [INF] pgmap v14662280: 896 pgs: 5 active+clean+scrubbing, 891
+> > active+clean; 18011 GB data, 42703 GB used, 24332 GB / 6703
+> > 5 GB avail; 2512 kB/s rd, 12321 kB/s wr, 1599 op/s
+> > 2017-04-15 06:44:32.878155 osd.8 10.3.0.133:6814/1124407 1747 :
+> > cluster [WRN] 1 slow requests, 1 included below; oldest blocked for >
+> > 10240.948831 secs
+> > 2017-04-15 06:44:32.878159 osd.8 10.3.0.133:6814/1124407 1748 :
+> > cluster [WRN] slow request 10240.948831 seconds old, received at
+> > 2017-04-15 03:53:51.929266: replica scrub(pg: 4.25,from:0'0,
+> > to:73551'5179474,epoch:73551,start:4:a4537100:::rbd_data.4bf687238e1f29.000000000001e5dc:0,end:4:a453818a:::rbd_data.4bf687238e1f29.0000000000017d8b:db18,chunky:1,deep:0,seed:4294967295,ver
+> > sion:6) currently reached_pg
+> > 2017-04-15 06:44:33.984306 mon.0 10.3.0.131:6789/0 168433 : cluster
+> > [INF] pgmap v14662281: 896 pgs: 5 active+clean+scrubbing, 891
+> > active+clean; 18011 GB data, 42703 GB used, 24332 GB / 6703
+> > 5 GB avail; 11675 kB/s rd, 29068 kB/s wr, 1847 op/s
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
