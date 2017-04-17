@@ -1,156 +1,129 @@
 From: Jeff Layton <jlayton@redhat.com>
-Subject: [PATCH v8 7/7] ceph: when seeing write errors on an inode, switch to sync writes
-Date: Mon, 17 Apr 2017 12:42:58 -0400
-Message-ID: <20170417164258.31527-8-jlayton@redhat.com>
+Subject: [PATCH v8 2/7] libceph: allow requests to return immediately on full conditions if caller wishes
+Date: Mon, 17 Apr 2017 12:42:53 -0400
+Message-ID: <20170417164258.31527-3-jlayton@redhat.com>
 References: <20170417164258.31527-1-jlayton@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57332 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33284 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754725AbdDQQnJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 17 Apr 2017 12:43:09 -0400
+        id S1754639AbdDQQnF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 17 Apr 2017 12:43:05 -0400
 In-Reply-To: <20170417164258.31527-1-jlayton@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: idryomov@gmail.com, zyan@redhat.com, sage@redhat.com
 Cc: jspray@redhat.com, ceph-devel@vger.kernel.org
 
-Currently, we don't have a real feedback mechanism in place for when we
-start seeing buffered writeback errors. If writeback is failing, there
-is nothing that prevents an application from continuing to dirty pages
-that aren't being cleaned.
+Usually, when the osd map is flagged as full or the pool is at quota,
+write requests just hang. This is not what we want for cephfs, where
+it would be better to simply report -ENOSPC back to userland instead
+of stalling.
 
-In the event that we're seeing write errors of any sort occur on an
-inode, have the callback set a flag to force further writes to be
-synchronous. When the next write succeeds, clear the flag to allow
-buffered writeback to continue.
+If the caller knows that it will want an immediate error return instead
+of blocking on a full or at-quota error condition then allow it to set a
+flag to request that behavior.
 
-Since this is just a hint to the write submission mechanism, we only
-take the i_ceph_lock when a lockless check shows that the flag needs to
-be changed.
+Set that flag in ceph_osdc_new_request (since ceph.ko is the only caller),
+and on any other write request from ceph.ko.
+
+A later patch will deal with requests that were submitted before the new
+map showing the full condition came in.
 
 Reviewed-by: "Yan, Zheng” <zyan@redhat.com>
+Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- fs/ceph/addr.c  |  6 +++++-
- fs/ceph/file.c  | 31 ++++++++++++++++++-------------
- fs/ceph/super.h | 26 ++++++++++++++++++++++++++
- 3 files changed, 49 insertions(+), 14 deletions(-)
+ fs/ceph/addr.c                  | 1 +
+ fs/ceph/file.c                  | 1 +
+ include/linux/ceph/osd_client.h | 1 +
+ net/ceph/osd_client.c           | 7 +++++++
+ 4 files changed, 10 insertions(+)
 
 diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 6cdf94459ac4..e253102b43cd 100644
+index 1a3e1b40799a..7e3fae334620 100644
 --- a/fs/ceph/addr.c
 +++ b/fs/ceph/addr.c
-@@ -670,8 +670,12 @@ static void writepages_finish(struct ceph_osd_request *req)
- 	bool remove_page;
+@@ -1892,6 +1892,7 @@ static int __ceph_pool_perm_get(struct ceph_inode_info *ci,
+ 	err = ceph_osdc_start_request(&fsc->client->osdc, rd_req, false);
  
- 	dout("writepages_finish %p rc %d\n", inode, rc);
--	if (rc < 0)
-+	if (rc < 0) {
- 		mapping_set_error(mapping, rc);
-+		ceph_set_error_write(ci);
-+	} else {
-+		ceph_clear_error_write(ci);
-+	}
+ 	wr_req->r_mtime = ci->vfs_inode.i_mtime;
++	wr_req->r_abort_on_full = true;
+ 	err2 = ceph_osdc_start_request(&fsc->client->osdc, wr_req, false);
  
- 	/*
- 	 * We lost the cache cap, need to truncate the page before
+ 	if (!err)
 diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index cff35a1ff53c..0480492aa349 100644
+index 356b7c76a2f1..cff35a1ff53c 100644
 --- a/fs/ceph/file.c
 +++ b/fs/ceph/file.c
-@@ -1020,19 +1020,22 @@ ceph_sync_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos,
+@@ -712,6 +712,7 @@ static void ceph_aio_retry_work(struct work_struct *work)
+ 	req->r_callback = ceph_aio_complete_req;
+ 	req->r_inode = inode;
+ 	req->r_priv = aio_req;
++	req->r_abort_on_full = true;
  
+ 	ret = ceph_osdc_start_request(req->r_osdc, req, false);
  out:
- 		ceph_osdc_put_request(req);
--		if (ret == 0) {
--			pos += len;
--			written += len;
--
--			if (pos > i_size_read(inode)) {
--				check_caps = ceph_inode_set_size(inode, pos);
--				if (check_caps)
--					ceph_check_caps(ceph_inode(inode),
--							CHECK_CAPS_AUTHONLY,
--							NULL);
--			}
--		} else
-+		if (ret != 0) {
-+			ceph_set_error_write(ci);
- 			break;
-+		}
-+
-+		ceph_clear_error_write(ci);
-+		pos += len;
-+		written += len;
-+		if (pos > i_size_read(inode)) {
-+			check_caps = ceph_inode_set_size(inode, pos);
-+			if (check_caps)
-+				ceph_check_caps(ceph_inode(inode),
-+						CHECK_CAPS_AUTHONLY,
-+						NULL);
-+		}
-+
+diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/osd_client.h
+index 3fc9e7754a9b..8cf644197b1a 100644
+--- a/include/linux/ceph/osd_client.h
++++ b/include/linux/ceph/osd_client.h
+@@ -187,6 +187,7 @@ struct ceph_osd_request {
+ 	struct timespec r_mtime;              /* ditto */
+ 	u64 r_data_offset;                    /* ditto */
+ 	bool r_linger;                        /* don't resend on failure */
++	bool r_abort_on_full;		      /* return ENOSPC when full */
+ 
+ 	/* internal */
+ 	unsigned long r_stamp;                /* jiffies, send or check time */
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index feb666c22381..52a2019a2b64 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -961,6 +961,7 @@ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ 				       truncate_size, truncate_seq);
  	}
  
- 	if (ret != -EOLDSNAPC && written > 0) {
-@@ -1238,6 +1241,7 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
- 	}
++	req->r_abort_on_full = true;
+ 	req->r_flags = flags;
+ 	req->r_base_oloc.pool = layout->pool_id;
+ 	req->r_base_oloc.pool_ns = ceph_try_get_string(layout->pool_ns);
+@@ -1627,6 +1628,7 @@ static void maybe_request_map(struct ceph_osd_client *osdc)
+ 		ceph_monc_renew_subs(&osdc->client->monc);
+ }
  
- retry_snap:
-+	/* FIXME: not complete since it doesn't account for being at quota */
- 	if (ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL)) {
- 		err = -ENOSPC;
- 		goto out;
-@@ -1259,7 +1263,8 @@ static ssize_t ceph_write_iter(struct kiocb *iocb, struct iov_iter *from)
- 	     inode, ceph_vinop(inode), pos, count, ceph_cap_string(got));
++static void complete_request(struct ceph_osd_request *req, int err);
+ static void send_map_check(struct ceph_osd_request *req);
  
- 	if ((got & (CEPH_CAP_FILE_BUFFER|CEPH_CAP_FILE_LAZYIO)) == 0 ||
--	    (iocb->ki_flags & IOCB_DIRECT) || (fi->flags & CEPH_F_SYNC)) {
-+	    (iocb->ki_flags & IOCB_DIRECT) || (fi->flags & CEPH_F_SYNC) ||
-+	    (ci->i_ceph_flags & CEPH_I_ERROR_WRITE)) {
- 		struct ceph_snap_context *snapc;
- 		struct iov_iter data;
- 		inode_unlock(inode);
-diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index c68e6a045fb9..7334ee86b9e8 100644
---- a/fs/ceph/super.h
-+++ b/fs/ceph/super.h
-@@ -474,6 +474,32 @@ static inline struct inode *ceph_find_inode(struct super_block *sb,
- #define CEPH_I_CAP_DROPPED	(1 << 8)  /* caps were forcibly dropped */
- #define CEPH_I_KICK_FLUSH	(1 << 9)  /* kick flushing caps */
- #define CEPH_I_FLUSH_SNAPS	(1 << 10) /* need flush snapss */
-+#define CEPH_I_ERROR_WRITE	(1 << 11) /* have seen write errors */
-+
-+/*
-+ * We set the ERROR_WRITE bit when we start seeing write errors on an inode
-+ * and then clear it when they start succeeding. Note that we do a lockless
-+ * check first, and only take the lock if it looks like it needs to be changed.
-+ * The write submission code just takes this as a hint, so we're not too
-+ * worried if a few slip through in either direction.
-+ */
-+static inline void ceph_set_error_write(struct ceph_inode_info *ci)
-+{
-+	if (!(READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE)) {
-+		spin_lock(&ci->i_ceph_lock);
-+		ci->i_ceph_flags |= CEPH_I_ERROR_WRITE;
-+		spin_unlock(&ci->i_ceph_lock);
-+	}
-+}
-+
-+static inline void ceph_clear_error_write(struct ceph_inode_info *ci)
-+{
-+	if (READ_ONCE(ci->i_ceph_flags) & CEPH_I_ERROR_WRITE) {
-+		spin_lock(&ci->i_ceph_lock);
-+		ci->i_ceph_flags &= ~CEPH_I_ERROR_WRITE;
-+		spin_unlock(&ci->i_ceph_lock);
-+	}
-+}
+ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
+@@ -1636,6 +1638,7 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
+ 	enum calc_target_result ct_res;
+ 	bool need_send = false;
+ 	bool promoted = false;
++	bool need_abort = false;
  
- static inline void __ceph_dir_set_complete(struct ceph_inode_info *ci,
- 					   long long release_count,
+ 	WARN_ON(req->r_tid);
+ 	dout("%s req %p wrlocked %d\n", __func__, req, wrlocked);
+@@ -1670,6 +1673,8 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
+ 		pr_warn_ratelimited("FULL or reached pool quota\n");
+ 		req->r_t.paused = true;
+ 		maybe_request_map(osdc);
++		if (req->r_abort_on_full)
++			need_abort = true;
+ 	} else if (!osd_homeless(osd)) {
+ 		need_send = true;
+ 	} else {
+@@ -1686,6 +1691,8 @@ static void __submit_request(struct ceph_osd_request *req, bool wrlocked)
+ 	link_request(osd, req);
+ 	if (need_send)
+ 		send_request(req);
++	else if (need_abort)
++		complete_request(req, -ENOSPC);
+ 	mutex_unlock(&osd->lock);
+ 
+ 	if (ct_res == CALC_TARGET_POOL_DNE)
 -- 
 2.9.3
 
