@@ -1,76 +1,229 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Smarter blacklisting?
-Date: Tue, 18 Apr 2017 14:36:29 -0400
-Message-ID: <CAJ4mKGZxf3RcZGub7PKkpDV_GDZPBXACtX1tVwxdw2SpS1cooA@mail.gmail.com>
-References: <CALe9h7dh2=BYjSdSuPXKE457TWg06xrw6QOjmbk_tLvU5fd69w@mail.gmail.com>
- <alpine.DEB.2.11.1704181638530.6579@piezo.novalocal>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH v8 4/7] libceph: add an epoch_barrier field to struct ceph_osd_client
+Date: Tue, 18 Apr 2017 20:57:44 +0200
+Message-ID: <CAOi1vP8582D_PTVvu1KXJTZVovAdin1FeGhCRsSyRe4knrm+-A@mail.gmail.com>
+References: <20170417164258.31527-1-jlayton@redhat.com> <20170417164258.31527-5-jlayton@redhat.com>
+ <1492517978.10210.3.camel@redhat.com> <CAOi1vP_-uj3xAFqhQ_Lew5c=Ud6PtA02yxfND=rdXOit-48hZA@mail.gmail.com>
+ <1492521887.17102.1.camel@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f54.google.com ([209.85.214.54]:35027 "EHLO
-        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753933AbdDRSgd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Apr 2017 14:36:33 -0400
-Received: by mail-it0-f54.google.com with SMTP id 70so15411962ita.0
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Apr 2017 11:36:32 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1704181638530.6579@piezo.novalocal>
+Received: from mail-vk0-f65.google.com ([209.85.213.65]:33269 "EHLO
+        mail-vk0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752610AbdDRS5q (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Apr 2017 14:57:46 -0400
+Received: by mail-vk0-f65.google.com with SMTP id j127so152637vkh.0
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Apr 2017 11:57:45 -0700 (PDT)
+In-Reply-To: <1492521887.17102.1.camel@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Jeff Layton <jlayton@redhat.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Apr 18, 2017 at 12:41 PM, Sage Weil <sage@newdream.net> wrote:
-> On Tue, 18 Apr 2017, John Spray wrote:
->> Currently, when we add an address to the blacklist, we leave it in
->> there for a set period of time (24 minutes by default, which I suspect
->> might have been meant to be 24 hours), and then expire it.
+On Tue, Apr 18, 2017 at 3:24 PM, Jeff Layton <jlayton@redhat.com> wrote:
+> On Tue, 2017-04-18 at 15:09 +0200, Ilya Dryomov wrote:
+>> On Tue, Apr 18, 2017 at 2:19 PM, Jeff Layton <jlayton@redhat.com> wrote:
+>> > On Mon, 2017-04-17 at 12:42 -0400, Jeff Layton wrote:
+>> > > Cephfs can get cap update requests that contain a new epoch barrier =
+in
+>> > > them. When that happens we want to pause all OSD traffic until the r=
+ight
+>> > > map epoch arrives.
+>> > >
+>> > > Add an epoch_barrier field to ceph_osd_client that is protected by t=
+he
+>> > > osdc->lock rwsem. When the barrier is set, and the current OSD map
+>> > > epoch is below that, pause the request target when submitting the
+>> > > request or when revisiting it. Add a way for upper layers (cephfs)
+>> > > to update the epoch_barrier as well.
+>> > >
+>> > > If we get a new map, compare the new epoch against the barrier befor=
+e
+>> > > kicking requests and request another map if the map epoch is still l=
+ower
+>> > > than the one we want.
+>> > >
+>> > > If we get a map with a full pool, or at quota condition, then set th=
+e
+>> > > barrier to the current epoch value.
+>> > >
+>> > > Reviewed-by: "Yan, Zheng=E2=80=9D <zyan@redhat.com>
+>> > > Signed-off-by: Jeff Layton <jlayton@redhat.com>
+>> > > Reviewed-by: Ilya Dryomov <idryomov@gmail.com>
+>> > > ---
+>> > >  include/linux/ceph/osd_client.h |  2 ++
+>> > >  net/ceph/debugfs.c              |  3 +-
+>> > >  net/ceph/osd_client.c           | 76 ++++++++++++++++++++++++++++++=
+++++++-----
+>> > >  3 files changed, 72 insertions(+), 9 deletions(-)
+>> > >
+>> > > diff --git a/include/linux/ceph/osd_client.h b/include/linux/ceph/os=
+d_client.h
+>> > > index 8cf644197b1a..85650b415e73 100644
+>> > > --- a/include/linux/ceph/osd_client.h
+>> > > +++ b/include/linux/ceph/osd_client.h
+>> > > @@ -267,6 +267,7 @@ struct ceph_osd_client {
+>> > >       struct rb_root         osds;          /* osds */
+>> > >       struct list_head       osd_lru;       /* idle osds */
+>> > >       spinlock_t             osd_lru_lock;
+>> > > +     u32                    epoch_barrier;
+>> > >       struct ceph_osd        homeless_osd;
+>> > >       atomic64_t             last_tid;      /* tid of last request *=
+/
+>> > >       u64                    last_linger_id;
+>> > > @@ -305,6 +306,7 @@ extern void ceph_osdc_handle_reply(struct ceph_o=
+sd_client *osdc,
+>> > >                                  struct ceph_msg *msg);
+>> > >  extern void ceph_osdc_handle_map(struct ceph_osd_client *osdc,
+>> > >                                struct ceph_msg *msg);
+>> > > +void ceph_osdc_update_epoch_barrier(struct ceph_osd_client *osdc, u=
+32 eb);
+>> > >
+>> > >  extern void osd_req_op_init(struct ceph_osd_request *osd_req,
+>> > >                           unsigned int which, u16 opcode, u32 flags)=
+;
+>> > > diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+>> > > index d7e63a4f5578..71ba13927b3d 100644
+>> > > --- a/net/ceph/debugfs.c
+>> > > +++ b/net/ceph/debugfs.c
+>> > > @@ -62,7 +62,8 @@ static int osdmap_show(struct seq_file *s, void *p=
+)
+>> > >               return 0;
+>> > >
+>> > >       down_read(&osdc->lock);
+>> > > -     seq_printf(s, "epoch %d flags 0x%x\n", map->epoch, map->flags)=
+;
+>> > > +     seq_printf(s, "epoch %u barrier %u flags 0x%x\n", map->epoch,
+>> > > +                     osdc->epoch_barrier, map->flags);
+>> > >
+>> > >       for (n =3D rb_first(&map->pg_pools); n; n =3D rb_next(n)) {
+>> > >               struct ceph_pg_pool_info *pi =3D
+>> > > diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+>> > > index 55b7585ccefd..beeac4f39aa5 100644
+>> > > --- a/net/ceph/osd_client.c
+>> > > +++ b/net/ceph/osd_client.c
+>> > > @@ -1298,8 +1298,9 @@ static bool target_should_be_paused(struct cep=
+h_osd_client *osdc,
+>> > >                      __pool_full(pi);
+>> > >
+>> > >       WARN_ON(pi->id !=3D t->base_oloc.pool);
+>> > > -     return (t->flags & CEPH_OSD_FLAG_READ && pauserd) ||
+>> > > -            (t->flags & CEPH_OSD_FLAG_WRITE && pausewr);
+>> > > +     return ((t->flags & CEPH_OSD_FLAG_READ) && pauserd) ||
+>> > > +            ((t->flags & CEPH_OSD_FLAG_WRITE) && pausewr) ||
+>> > > +            (osdc->osdmap->epoch < osdc->epoch_barrier);
+>> > >  }
+>> > >
+>> > >  enum calc_target_result {
+>> > > @@ -1654,8 +1655,13 @@ static void __submit_request(struct ceph_osd_=
+request *req, bool wrlocked)
+>> > >               goto promote;
+>> > >       }
+>> > >
+>> > > -     if ((req->r_flags & CEPH_OSD_FLAG_WRITE) &&
+>> > > -         ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR)) {
+>> > > +     if (osdc->osdmap->epoch < osdc->epoch_barrier) {
+>> > > +             dout("req %p epoch %u barrier %u\n", req, osdc->osdmap=
+->epoch,
+>> > > +                  osdc->epoch_barrier);
+>> > > +             req->r_t.paused =3D true;
+>> > > +             maybe_request_map(osdc);
+>> > > +     } else if ((req->r_flags & CEPH_OSD_FLAG_WRITE) &&
+>> > > +                ceph_osdmap_flag(osdc, CEPH_OSDMAP_PAUSEWR)) {
+>> > >               dout("req %p pausewr\n", req);
+>> > >               req->r_t.paused =3D true;
+>> > >               maybe_request_map(osdc);
+>> > > @@ -1809,17 +1815,48 @@ static void abort_request(struct ceph_osd_re=
+quest *req, int err)
+>> > >
+>> > >  /*
+>> > >   * Drop all pending requests that are stalled waiting on a full con=
+dition to
+>> > > - * clear, and complete them with ENOSPC as the return code.
+>> > > + * clear, and complete them with ENOSPC as the return code. Set the
+>> > > + * osdc->epoch_barrier to the latest map epoch that we've seen if a=
+ny were
+>> > > + * cancelled.
+>> > >   */
+>> > >  static void ceph_osdc_abort_on_full(struct ceph_osd_client *osdc)
+>> > >  {
+>> > >       struct rb_node *n;
+>> > > +     bool victims =3D false;
+>> > >
+>> > >       dout("enter abort_on_full\n");
+>> > >
+>> > >       if (!ceph_osdmap_flag(osdc, CEPH_OSDMAP_FULL) && !have_pool_fu=
+ll(osdc))
+>> > >               goto out;
+>> > >
+>> > > +     /* Scan list and see if there is anything to abort */
+>> > > +     for (n =3D rb_first(&osdc->osds); n; n =3D rb_next(n)) {
+>> > > +             struct ceph_osd *osd =3D rb_entry(n, struct ceph_osd, =
+o_node);
+>> > > +             struct rb_node *m;
+>> > > +
+>> > > +             m =3D rb_first(&osd->o_requests);
+>> > > +             while (m) {
+>> > > +                     struct ceph_osd_request *req =3D rb_entry(m,
+>> > > +                                     struct ceph_osd_request, r_nod=
+e);
+>> > > +                     m =3D rb_next(m);
+>> > > +
+>> > > +                     if (req->r_abort_on_full) {
+>> > > +                             victims =3D true;
+>> > > +                             break;
+>> > > +                     }
+>> > > +             }
+>> > > +             if (victims)
+>> > > +                     break;
+>> > > +     }
+>> > > +
+>> > > +     if (!victims)
+>> > > +             goto out;
+>> > > +
+>> > > +     /*
+>> > > +      * Update the barrier to current epoch since we know we have s=
+ome
+>> > > +      * calls to be aborted in the tree.
+>> > > +      */
+>> > > +     osdc->epoch_barrier =3D osdc->osdmap->epoch;
+>> >
+>> > Erm...now that I think about it even more...
+>> >
+>> > Is it possible we can end up with the eb going backward here? Suppose
+>> > we get a MDS cap message with a later epoch barrier, and then a map
+>> > update that is not quite to the barrier yet.
+>> >
+>> > I think we probably want to only set it if it's newer than what's
+>> > there. So this should probably read something like:
+>> >
+>> >         if (osdc->osdmap->epoch > osdc->epoch_barrier)
+>> >                 osdc->epoch_barrier =3D osdc->osdmap->epoch;
+>> >
+>> > If no one objects, I'll go ahead and make this change in the testing
+>> > branch without a full re-post to the list.
 >>
->> Clearly there are two problems with that:
->>  * We leave things in the list for much longer than necessary most of
->> the time, when a blacklisted client/node comes back reasonably soon
->> after a restart
->>  * We are never 100% guaranteed that a long-halted client won't come
->> back after its blacklist entry has expired (e.g. a paused VM with
->> dirty pages, wakes up a day later and writes back to OSDs).
+>> I'd wrap
 >>
->> These mostly haven't been too much trouble in practice, but we may be
->> (optionally) doing a lot more blacklisting on cephfs systems soon[1],
->> and cephfs clients are perhaps more likely to be VMs than RBD hosts.
+>>     if (likely(eb > osdc->epoch_barrier)) {
+>>             dout("updating epoch_barrier from %u to %u\n",
+>>                             osdc->epoch_barrier, eb);
+>>             osdc->epoch_barrier =3D eb;
+>>             /* Request map if we're not to the barrier yet */
+>>             if (eb > osdc->osdmap->epoch)
+>>                     maybe_request_map(osdc);
+>>     }
 >>
->> One thought is to have an alternative type of backlist entry that does
->> not have an expiration, but instead is automatically removed when we
->> see a client authenticate with the same auth id, from the same IP
->> address as the blacklist entry, but with a different nonce.
+>> from ceph_osdc_update_epoch_barrier() into update_epoch_barrier() and
+>> call it from here.
 >>
->> Flushing out any blacklist entries from a host that never came back
->> would be an administrative operation, or we could do it automatically
->> on a *super* long expiration time (like a month), and in other cases
->> like if the auth identity associated with the blacklist entry was
->> removed.
->>
->> Any thoughts?
 >
-> I like it!  I'm not sure it needs to be a different type of entry,
-> though... we can just set the expiration to one month, and then have some
-> other bit of code remove it early based on the heuristic.
->
-> I suspect the main logistical issue is who pays attention to the new auth
-> or mount request from the client.  And where the cleanup heuristic
-> lives..
+> Done. Take a look at the patch in testing branch when you get a chance
+> and let me know if you see anything wrong there?
 
-I'd also be a little concerned about building up blacklist entries
-over a long time period. Right now they just live in the OSDMap (as a
-set?), and if we're keeping them for a month that could be an awful
-lot of them. We may need to see if we can pull it out into a separate
-structure, or at least encode them more efficiently in incrementals.
+Looks fine to me.
 
-But I'd definitely like if we did something to try and clean them up
-based on reconnecting clients. I can think of a few different ways to
-go:
-1) OSDs request entries be removed when they see a blacklist.
-2) Servers report connected clients to the manager and it compares
-them to the blacklist.
-3) Clients which reconnect submit requests to the monitor directly.
+Thanks,
 
-What approach were you thinking of, John?
--Greg
+                Ilya
