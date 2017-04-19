@@ -1,145 +1,55 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH] ceph: fix recursively call between ceph_set_acl and
- __ceph_setattr
-Date: Wed, 19 Apr 2017 06:16:08 -0400
-Message-ID: <1492596968.2783.1.camel@redhat.com>
-References: <20170419033347.45857-1-zyan@redhat.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Comparing straw2 and CARP
+Date: Wed, 19 Apr 2017 12:21:13 +0200
+Message-ID: <a4765385-bde7-0117-7baa-3fc80041c20b@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f170.google.com ([209.85.216.170]:34694 "EHLO
-        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1761919AbdDSKQL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Apr 2017 06:16:11 -0400
-Received: by mail-qt0-f170.google.com with SMTP id c45so14987520qtb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Apr 2017 03:16:11 -0700 (PDT)
-In-Reply-To: <20170419033347.45857-1-zyan@redhat.com>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:33698 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1762155AbdDSKVR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Apr 2017 06:21:17 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, 2017-04-19 at 11:33 +0800, Yan, Zheng wrote:
-> ceph_set_acl() calls __ceph_setattr() if the setacl operation needs
-> to modify inode's i_mode. __ceph_setattr() updates inode's i_mode,
-> then calls posix_acl_chmod().
-> 
-> The problem is that __ceph_setattr() calls posix_acl_chmod() before
-> sending the setattr request. The get_acl() call in posix_acl_chmod()
-> can trigger a getxattr request. The reply of the getxattr request
-> can restore inode's i_mode to it's old value. The set_acl() call in
-> posix_acl_chmod() sees old value of inode's i_mode, so it calls
-> __ceph_setattr() again.
-> 
-> Link: http://tracker.ceph.com/issues/19688
-> Reported-by: Jerry Lee <leisurelysw24@gmail.com>
-> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-> ---
->  fs/ceph/acl.c   |  4 ++--
->  fs/ceph/inode.c | 24 +++++++++++-------------
->  fs/ceph/super.h |  3 ++-
->  3 files changed, 15 insertions(+), 16 deletions(-)
-> 
-> diff --git a/fs/ceph/acl.c b/fs/ceph/acl.c
-> index 987044b..bc985e0 100644
-> --- a/fs/ceph/acl.c
-> +++ b/fs/ceph/acl.c
-> @@ -133,7 +133,7 @@ int ceph_set_acl(struct inode *inode, struct posix_acl *acl, int type)
->  	if (new_mode != old_mode) {
->  		newattrs.ia_mode = new_mode;
->  		newattrs.ia_valid = ATTR_MODE;
-> -		ret = __ceph_setattr(inode, &newattrs);
-> +		ret = __ceph_setattr(inode, &newattrs, false);
->  		if (ret)
->  			goto out_free;
->  	}
-> @@ -143,7 +143,7 @@ int ceph_set_acl(struct inode *inode, struct posix_acl *acl, int type)
->  		if (new_mode != old_mode) {
->  			newattrs.ia_mode = old_mode;
->  			newattrs.ia_valid = ATTR_MODE;
-> -			__ceph_setattr(inode, &newattrs);
-> +                       __ceph_setattr(inode, &newattrs, false);
->  		}
->  		goto out_free;
->  	}
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index efee88c..4aa23c6 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -1885,7 +1885,7 @@ static const struct inode_operations ceph_symlink_iops = {
->  	.listxattr = ceph_listxattr,
->  };
->  
-> -int __ceph_setattr(struct inode *inode, struct iattr *attr)
-> +int __ceph_setattr(struct inode *inode, struct iattr *attr, bool update_acl)
+Hi,
 
-Passing in bools like this makes for a messy API. After all, update_acl
-has no meaning when ATTR_MODE is not set. Since you're only setting it
-to true in ceph_setattr, why not just move the posix_acl_chmod call into
-the caller?
+I recently discovered CARP[1] which is implemented in Squid[2] and provides the same features as straw2:
 
+- stable placement when a device is added or removed
+- weighted devices
+- given enough objects their distribution is uniform
 
->  {
->  	struct ceph_inode_info *ci = ceph_inode(inode);
->  	const unsigned int ia_valid = attr->ia_valid;
-> @@ -2078,11 +2078,6 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
->  	if (inode_dirty_flags)
->  		__mark_inode_dirty(inode, inode_dirty_flags);
->  
-> -	if (ia_valid & ATTR_MODE) {
-> -		err = posix_acl_chmod(inode, attr->ia_mode);
-> -		if (err)
-> -			goto out_put;
-> -	}
->  
->  	if (mask) {
->  		req->r_inode = inode;
-> @@ -2096,13 +2091,16 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
->  	     ceph_cap_string(dirtied), mask);
->  
->  	ceph_mdsc_put_request(req);
-> -	if (mask & CEPH_SETATTR_SIZE)
-> -		__ceph_do_pending_vmtruncate(inode);
-> -	ceph_free_cap_flush(prealloc_cf);
-> -	return err;
-> -out_put:
-> -	ceph_mdsc_put_request(req);
->  	ceph_free_cap_flush(prealloc_cf);
-> +
-> +	if (err >= 0) {
-> +		if (update_acl && (ia_valid & ATTR_MODE)) {
-> +			err = posix_acl_chmod(inode, attr->ia_mode);
-> +		}
-> +		if (mask & CEPH_SETATTR_SIZE) {
-> +			__ceph_do_pending_vmtruncate(inode);
-> +		}
-> +	}
->  	return err;
->  }
->  
-> @@ -2121,7 +2119,7 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
->  	if (err != 0)
->  		return err;
->  
-> -	return __ceph_setattr(inode, attr);
-> +       return __ceph_setattr(inode, attr, true);
->  }
->  
->  /*
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index 7334ee8..bc7769c 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -809,7 +809,8 @@ static inline int ceph_do_getattr(struct inode *inode, int mask, bool force)
->  	return __ceph_do_getattr(inode, NULL, mask, force);
->  }
->  extern int ceph_permission(struct inode *inode, int mask);
-> -extern int __ceph_setattr(struct inode *inode, struct iattr *attr);
-> +extern int __ceph_setattr(struct inode *inode, struct iattr *attr,
-> +                         bool update_acl);
->  extern int ceph_setattr(struct dentry *dentry, struct iattr *attr);
->  extern int ceph_getattr(const struct path *path, struct kstat *stat,
->  			u32 request_mask, unsigned int flags);
+The differences are:
+
+- the hash function:
+  - bit rotation based on the name of the item / object for CARP[3]
+  - Robert J. Jenkins hash on the PG id for CRUSH[4] and no hashing for the item id
+
+- the combination of the item hash and the object hash
+  - XOR for CARP[5]
+  - Robert J. Jenkins hash on the PG id hash and the item id for CRUSH[6]
+
+- applying the weight to the the combination of the item hash and the object hash
+  - the multiplier is calculated per device for CARP[7] and the combined hash is multiplied by it to get the score[8]
+  - the weight is multiplied with the log of the combined hash for CRUSH[9]
+
+I'd like to setup a simulation that shows the effect of these differences. I tried a few but the results are roughly the same wether I use CRUSH or CARP. Any idea ?
+
+Cheers
+
+[1] CARP https://tools.ietf.org/html/draft-vinod-carp-v1-03
+[2] CARP in squid http://bazaar.launchpad.net/~squid/squid/trunk/view/head:/src/carp.cc#L198
+[3] CARP hash http://bazaar.launchpad.net/~squid/squid/trunk/view/head:/src/carp.cc#L96
+[4] CRUSH hash https://github.com/ceph/ceph/blob/master/src/osd/osd_types.cc#L1357
+[5] CARP combination http://bazaar.launchpad.net/~squid/squid/trunk/view/head:/src/carp.cc#L200
+[6] CRUSH combination https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L313
+[7] CARP multiplier http://bazaar.launchpad.net/~squid/squid/trunk/view/head:/src/carp.cc#L133
+[8] CARP score http://bazaar.launchpad.net/~squid/squid/trunk/view/head:/src/carp.cc#L203
+[9] CRUSH score https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L335
 
 -- 
-Jeff Layton <jlayton@redhat.com>
+Loïc Dachary, Artisan Logiciel Libre
