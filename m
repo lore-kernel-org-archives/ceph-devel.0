@@ -1,105 +1,33 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [PATCH v2] ceph: fix recursively call between ceph_set_acl and
- __ceph_setattr
-Date: Wed, 19 Apr 2017 15:54:19 +0100
-Message-ID: <20170419145419.4vxhno2geszcqv2v@hermes.olymp>
-References: <20170419103622.52060-1-zyan@redhat.com>
+From: Greg Procunier <greg.procunier@gmail.com>
+Subject: Ceph, RDMA and 40gbit Cisco CNA
+Date: Wed, 19 Apr 2017 16:17:25 -0400
+Message-ID: <CALd5Md0Q0b70q4n5s5uw+r-yy50cxU1P_EdCb8x9ZRZy4rGSEQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:59666 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S935709AbdDSOyW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 19 Apr 2017 10:54:22 -0400
-Content-Disposition: inline
-In-Reply-To: <20170419103622.52060-1-zyan@redhat.com>
+Received: from mail-qk0-f176.google.com ([209.85.220.176]:33228 "EHLO
+        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1765441AbdDSUR0 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Apr 2017 16:17:26 -0400
+Received: by mail-qk0-f176.google.com with SMTP id h67so30247775qke.0
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Apr 2017 13:17:26 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel@vger.kernel.org, jlayton@redhat.com
+To: ceph-devel@vger.kernel.org
 
-On Wed, Apr 19, 2017 at 06:36:22PM +0800, Yan, Zheng wrote:
-> ceph_set_acl() calls __ceph_setattr() if the setacl operation needs
-> to modify inode's i_mode. __ceph_setattr() updates inode's i_mode,
-> then calls posix_acl_chmod().
-> 
-> The problem is that __ceph_setattr() calls posix_acl_chmod() before
-> sending the setattr request. The get_acl() call in posix_acl_chmod()
-> can trigger a getxattr request. The reply of the getxattr request
-> can restore inode's i_mode to its old value. The set_acl() call in
-> posix_acl_chmod() sees old value of inode's i_mode, so it calls
-> __ceph_setattr() again.
-> 
-> Link: http://tracker.ceph.com/issues/19688
-> Reported-by: Jerry Lee <leisurelysw24@gmail.com>
-> Tested-by: Luis Henriques <lhenriques@suse.com>
-> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+Hello,
 
-An additional comment is that this should be tagged for stable kernels.
+I was wondering if anyone could provide some guidance of if Ceph can
+leverage the RDMA capabilities of the Cisco VIC 1340 / 1387 40gbit
+converged network adapter.
+From the product page
+(http://www.cisco.com/c/en/us/products/interfaces-modules/ucs-virtual-interface-card-1387/index.html
+) I see this card supports the following features:
 
-Cheers,
---
-Luís
+Remote direct memory access (RDMA)
+Data Plane Development Kit (DPDK)
 
-> ---
->  fs/ceph/inode.c | 24 ++++++++++++------------
->  1 file changed, 12 insertions(+), 12 deletions(-)
-> 
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index efee88c..976fd3a 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -2078,11 +2078,6 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
->  	if (inode_dirty_flags)
->  		__mark_inode_dirty(inode, inode_dirty_flags);
->  
-> -	if (ia_valid & ATTR_MODE) {
-> -		err = posix_acl_chmod(inode, attr->ia_mode);
-> -		if (err)
-> -			goto out_put;
-> -	}
->  
->  	if (mask) {
->  		req->r_inode = inode;
-> @@ -2096,13 +2091,13 @@ int __ceph_setattr(struct inode *inode, struct iattr *attr)
->  	     ceph_cap_string(dirtied), mask);
->  
->  	ceph_mdsc_put_request(req);
-> -	if (mask & CEPH_SETATTR_SIZE)
-> -		__ceph_do_pending_vmtruncate(inode);
-> -	ceph_free_cap_flush(prealloc_cf);
-> -	return err;
-> -out_put:
-> -	ceph_mdsc_put_request(req);
->  	ceph_free_cap_flush(prealloc_cf);
-> +
-> +	if (err >= 0) {
-> +		if (mask & CEPH_SETATTR_SIZE) {
-> +			__ceph_do_pending_vmtruncate(inode);
-> +		}
-> +	}
->  	return err;
->  }
->  
-> @@ -2121,7 +2116,12 @@ int ceph_setattr(struct dentry *dentry, struct iattr *attr)
->  	if (err != 0)
->  		return err;
->  
-> -	return __ceph_setattr(inode, attr);
-> +	err = __ceph_setattr(inode, attr);
-> +
-> +	if (err >= 0 && (attr->ia_valid & ATTR_MODE)) {
-> +		err = posix_acl_chmod(inode, attr->ia_mode);
-> +	}
-> +	return err;
->  }
->  
->  /*
-> -- 
-> 2.9.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+So I am hopeful, but looking for a more definitive answer from folks
+who are in the know.
+
+Cheers
