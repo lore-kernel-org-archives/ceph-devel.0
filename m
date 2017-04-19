@@ -1,25 +1,25 @@
-From: Luis Henriques <lhenriques@suse.com>
+From: Jeff Layton <jlayton@redhat.com>
 Subject: Re: [PATCH] ceph: fix recursively call between ceph_set_acl and
  __ceph_setattr
-Date: Wed, 19 Apr 2017 10:02:27 +0100
-Message-ID: <20170419090227.f4bze7qbhyuqrnlg@hermes.olymp>
+Date: Wed, 19 Apr 2017 06:16:08 -0400
+Message-ID: <1492596968.2783.1.camel@redhat.com>
 References: <20170419033347.45857-1-zyan@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:46321 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1761350AbdDSJCa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 19 Apr 2017 05:02:30 -0400
-Content-Disposition: inline
+Received: from mail-qt0-f170.google.com ([209.85.216.170]:34694 "EHLO
+        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1761919AbdDSKQL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Apr 2017 06:16:11 -0400
+Received: by mail-qt0-f170.google.com with SMTP id c45so14987520qtb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Apr 2017 03:16:11 -0700 (PDT)
 In-Reply-To: <20170419033347.45857-1-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel@vger.kernel.org, jlayton@redhat.com
+To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
 
-On Wed, Apr 19, 2017 at 11:33:47AM +0800, Yan, Zheng wrote:
+On Wed, 2017-04-19 at 11:33 +0800, Yan, Zheng wrote:
 > ceph_set_acl() calls __ceph_setattr() if the setacl operation needs
 > to modify inode's i_mode. __ceph_setattr() updates inode's i_mode,
 > then calls posix_acl_chmod().
@@ -34,15 +34,6 @@ On Wed, Apr 19, 2017 at 11:33:47AM +0800, Yan, Zheng wrote:
 > Link: http://tracker.ceph.com/issues/19688
 > Reported-by: Jerry Lee <leisurelysw24@gmail.com>
 > Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-
-FWIW I was able to reproduce the issue, so feel free to add my
-
-Tested-by: Luis Henriques <lhenriques@suse.com>
-
-Cheers,
---
-Luís
-
 > ---
 >  fs/ceph/acl.c   |  4 ++--
 >  fs/ceph/inode.c | 24 +++++++++++-------------
@@ -81,6 +72,13 @@ Luís
 >  
 > -int __ceph_setattr(struct inode *inode, struct iattr *attr)
 > +int __ceph_setattr(struct inode *inode, struct iattr *attr, bool update_acl)
+
+Passing in bools like this makes for a messy API. After all, update_acl
+has no meaning when ATTR_MODE is not set. Since you're only setting it
+to true in ceph_setattr, why not just move the posix_acl_chmod call into
+the caller?
+
+
 >  {
 >  	struct ceph_inode_info *ci = ceph_inode(inode);
 >  	const unsigned int ia_valid = attr->ia_valid;
@@ -142,11 +140,6 @@ Luís
 >  extern int ceph_setattr(struct dentry *dentry, struct iattr *attr);
 >  extern int ceph_getattr(const struct path *path, struct kstat *stat,
 >  			u32 request_mask, unsigned int flags);
-> -- 
-> 2.9.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+
+-- 
+Jeff Layton <jlayton@redhat.com>
