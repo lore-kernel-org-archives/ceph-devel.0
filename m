@@ -1,33 +1,45 @@
-From: Greg Procunier <greg.procunier@gmail.com>
-Subject: Ceph, RDMA and 40gbit Cisco CNA
-Date: Wed, 19 Apr 2017 16:17:25 -0400
-Message-ID: <CALd5Md0Q0b70q4n5s5uw+r-yy50cxU1P_EdCb8x9ZRZy4rGSEQ@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Ceph-deploy for FreeBSD
+Date: Wed, 19 Apr 2017 13:47:06 -0700
+Message-ID: <CAJ4mKGZmMv+ZcuBEkvaqajW7ntK26TDEbT77DM+nDFsPxsyDOw@mail.gmail.com>
+References: <30f688f7-a156-5275-94cb-fbc07b7d449e@digiware.nl> <76dc3a7e-80bb-6c9d-d502-535258ce0b54@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:33228 "EHLO
-        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1765441AbdDSUR0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Apr 2017 16:17:26 -0400
-Received: by mail-qk0-f176.google.com with SMTP id h67so30247775qke.0
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Apr 2017 13:17:26 -0700 (PDT)
+Received: from mail-io0-f181.google.com ([209.85.223.181]:32976 "EHLO
+        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S937671AbdDSUrI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Apr 2017 16:47:08 -0400
+Received: by mail-io0-f181.google.com with SMTP id k87so36893076ioi.0
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Apr 2017 13:47:08 -0700 (PDT)
+In-Reply-To: <76dc3a7e-80bb-6c9d-d502-535258ce0b54@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Willem Jan Withagen <wjw@digiware.nl>, Joao Eduardo Luis <joao@suse.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hello,
+On Fri, Apr 14, 2017 at 1:44 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> Having solved the first few step in ceph-deploy, I can now get to the
+> point where it actually wants to start the first monitor.
+> Like:
+>     /usr/local/bin/ceph-deploy mon create-initial
+>
+> And if I look at the other platform booting the inital monitor is
+> started thru the init|systemd|upstart....
+>
+> However under FreeBSD bsdrc I require atleast in ceph.conf
+> [mon]
+>     host = cephtest
+>
+> This is not the case on the other platforms?
+>
+> And how would I otherwise get this into the ceph.conf?
 
-I was wondering if anyone could provide some guidance of if Ceph can
-leverage the RDMA capabilities of the Cisco VIC 1340 / 1387 40gbit
-converged network adapter.
-From the product page
-(http://www.cisco.com/c/en/us/products/interfaces-modules/ucs-virtual-interface-card-1387/index.html
-) I see this card supports the following features:
-
-Remote direct memory access (RDMA)
-Data Plane Development Kit (DPDK)
-
-So I am hopeful, but looking for a more definitive answer from folks
-who are in the know.
-
-Cheers
+I think you're running into some annoying deployment sharp edges here.
+The monitor "host" config value has gone in and out of being necessary
+at various times — the whole monitor boot sequence is pretty finicky
+so I've added Joao to the thread. It's possible that the way things
+are default-configured in FreeBSD that's necessary to work around some
+other default configs?
+-Greg
