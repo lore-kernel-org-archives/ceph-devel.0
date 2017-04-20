@@ -1,127 +1,44 @@
-From: Peter Maloney <peter.maloney@brockmann-consult.de>
-Subject: Re: another scrub bug? blocked for > 10240.948831 secs
-Date: Thu, 20 Apr 2017 07:58:34 +0200
-Message-ID: <456cafe7-ecaa-5c62-ca82-6c09a2b06ae7@brockmann-consult.de>
-References: <94127293-3ba3-8bb8-db43-604b6a54eb55@brockmann-consult.de>
- <alpine.DEB.2.11.1704171316150.10661@piezo.novalocal>
+From: "Reshetova, Elena" <elena.reshetova@intel.com>
+Subject: RE: [PATCH 0/2] fs, ceph filesystem refcount conversions
+Date: Thu, 20 Apr 2017 07:40:16 +0000
+Message-ID: <2236FBA76BA1254E88B949DDB74E612B41C8D6E8@IRSMSX102.ger.corp.intel.com>
+References: <1488532507-27863-1-git-send-email-elena.reshetova@intel.com>
+ <CAOi1vP-wZL9yW=_MkhU0x6fGn=9=xEYP1T03ikL2p6g49Vandw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.130]:64430 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S938972AbdDTF57 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Apr 2017 01:57:59 -0400
-In-Reply-To: <alpine.DEB.2.11.1704171316150.10661@piezo.novalocal>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAOi1vP-wZL9yW=_MkhU0x6fGn=9=xEYP1T03ikL2p6g49Vandw@mail.gmail.com>
 Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, "peterz@infradead.org" <peterz@infradead.org>, Greg KH <gregkh@linuxfoundation.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On 04/17/17 15:18, Sage Weil wrote:
-> On Sat, 15 Apr 2017, Peter Maloney wrote:
->> Is this another scrub bug? Something just like this (1 or 2 requests
->> blocked forever until osd restart) happened about 5 times so far, each
->> time during recovery or some other thing I did myself to trigger it,
->> probably involving snapshots. This time I noticed that it says scrub in
->> the log. One other time it made a client block, but didn't seem to this
->> time. I didn't have the same issue in 10.2.3, but I don't know if I
->> generated the same load or whatever causes it back then.
->>
->> ceph version 10.2.5 (c461ee19ecbc0c5c330aca20f7392c9a00730367)
->>
->> If you want me to try 10.2.6 or 7 instead, I can do that, but no
->> guarantee I can reproduce it any time soon.
-> There have been lots of scrub-related patches since 10.2.5, but I don't 
-> see one that would explain this.  I'm guessing there is a scrub waitlist 
-> bug that we aren't turning up in qa because our thrashing tests are 
-> triggering lots of other actions in sequence (peering from up/down osds 
-> and balancing) and those probably have the effect of 
-> clearing the issue.
->
-> Next time you see it, can you capture the output of 'ceph daemon osd.NNN 
-> ops' so we can see what steps the request went through?  Also, any 
-> additional or more specific clues as to what might have triggered it would 
-> help.
->
-> Thanks!
-> sage
->
-
-
-Here, we go...
-
-> 2017-04-20 05:03:58.522624 osd.20 10.3.0.132:6824/1088346 2078 :
-> cluster [WRN] slow request 20480.953923 seconds old, received at
-> 2017-04-19 23:22:37.568657: replica scrub(pg:
-> 4.2d,from:0'0,to:79873'5433886,epoch:79873,start:4:b46a9ab4:::rbd_data.43e4a9238e1f29.00000000000019fe:e438,end:4:b46a9ab4:::rbd_data.43e4a9238e1f29.00000000000019fe:e43a,chunky:1,deep:1,seed:4294967295,version:6)
-> currently reached_pg
->
->
-> root@ceph3:/var/log/ceph # ceph pg dump | grep -E "^pg_stat|^4.2d"
-> dumped all in format plain
-> pg_stat objects mip     degr    misp    unf     bytes   log    
-> disklog state   state_stamp     v       reported        up     
-> up_primary      acting  acting_primary  last_scrub      scrub_stamp 
-> last_deep_scrub deep_scrub_stamp
-> 4.2d    3494    0       0       0       0       13061467136    
-> 3012    3012    active+clean+scrubbing+deep     2017-04-19
-> 23:11:22.763008      80142'5447712   80142:3027638   [14,7,20]  
-> 14       [14,7,20]       14      76449'5396453   2017-04-18
-> 17:30:01.419498      73551'5298960   2017-04-15 03:23:48.821848
->
-> ceph daemon osd.14 ops > longscrubbug.14.log # ceph1
-> ceph daemon osd.7 ops > longscrubbug.7.log # ceph3
-> ceph daemon osd.20 ops > longscrubbug.20.log # ceph2
->
->
->
-> peter@peter:~/tmp/longscrubbug $ cat longscrubbug.14.log
-> {
->     "ops": [],
->     "num_ops": 0
-> }
->
-> peter@peter:~/tmp/longscrubbug $ cat longscrubbug.7.log
-> {
->     "ops": [],
->     "num_ops": 0
-> }
->
-> peter@peter:~/tmp/longscrubbug $ cat longscrubbug.20.log
-> {
->     "ops": [
->         {
->             "description": "replica scrub(pg:
-> 4.2d,from:0'0,to:79873'5433886,epoch:79873,start:4:b46a9ab4:::rbd_data.43e4a9238e1f29.00000000000019fe:e438,end:4:b46a9ab4:::rbd_data.43e4a9238e1f29.00000000000019fe:e43a,chunky:1,deep:1,seed:4294967295,version:6)",
->             "initiated_at": "2017-04-19 23:22:37.568657",
->             "age": 30563.826540,
->             "duration": 30563.826803,
->             "type_data": [
->                 "reached pg",
->                 [
->                     {
->                         "time": "2017-04-19 23:22:37.568657",
->                         "event": "initiated"
->                     },
->                     {
->                         "time": "2017-04-19 23:22:37.568769",
->                         "event": "queued_for_pg"
->                     },
->                     {
->                         "time": "2017-04-19 23:22:37.568814",
->                         "event": "reached_pg"
->                     }
->                 ]
->             ]
->         }
->     ],
->     "num_ops": 1
-> }
->
-
-to me that looks kinda non-useful... anything else you need? (I think
-I'll leave this one alone for a while in case you reply soon and want
-something)
-
+DQo+IE9uIEZyaSwgTWFyIDMsIDIwMTcgYXQgMTA6MTUgQU0sIEVsZW5hIFJlc2hldG92YQ0KPiA8
+ZWxlbmEucmVzaGV0b3ZhQGludGVsLmNvbT4gd3JvdGU6DQo+ID4gTm93IHdoZW4gbmV3IHJlZmNv
+dW50X3QgdHlwZSBhbmQgQVBJIGFyZSBmaW5hbGx5IG1lcmdlZA0KPiA+IChzZWUgaW5jbHVkZS9s
+aW51eC9yZWZjb3VudC5oKSwgdGhlIGZvbGxvd2luZw0KPiA+IHBhdGNoZXMgY29udmVydCB2YXJp
+b3VzIHJlZmNvdW50ZXJzIGluIHRoZSBjZXBoIGZpbGVzeXN0ZW0gZnJvbSBhdG9taWNfdA0KPiA+
+IHRvIHJlZmNvdW50X3QuIEJ5IGRvaW5nIHRoaXMgd2UgcHJldmVudCBpbnRlbnRpb25hbCBvciBh
+Y2NpZGVudGFsDQo+ID4gdW5kZXJmbG93cyBvciBvdmVyZmxvd3MgdGhhdCBjYW4gbGVkIHRvIHVz
+ZS1hZnRlci1mcmVlIHZ1bG5lcmFiaWxpdGllcy4NCj4gPg0KPiA+IFRoZSBiZWxvdyBwYXRjaGVz
+IGFyZSBmdWxseSBpbmRlcGVuZGVudCBhbmQgY2FuIGJlIGNoZXJyeS1waWNrZWQgc2VwYXJhdGVs
+eS4NCj4gPiBTaW5jZSB3ZSBjb252ZXJ0IGFsbCBrZXJuZWwgc3Vic3lzdGVtcyBpbiB0aGUgc2Ft
+ZSBmYXNoaW9uLCByZXN1bHRpbmcNCj4gPiBpbiBhYm91dCAzMDAgcGF0Y2hlcywgd2UgaGF2ZSB0
+byBncm91cCB0aGVtIGZvciBzZW5kaW5nIGF0IGxlYXN0IGluIHNvbWUNCj4gPiBmYXNoaW9uIHRv
+IGJlIG1hbmFnZWFibGUuIFBsZWFzZSBleGN1c2UgdGhlIGxvbmcgY2MgbGlzdC4NCj4gPg0KPiA+
+IE5vdCBydW50aW1lIHRlc3RlZCwgc2luY2UgSSBhbSBub3Qgc3VyZSBob3cgdG8gZG8gaXQgZm9y
+IGNlcGguDQo+ID4gSG93ZXZlciBjaGFuZ2VzIGFyZSBwcmV0dHkgdHJpdmlhbCBpbiB0aGlzIGNh
+c2UuDQo+ID4NCj4gPiBFbGVuYSBSZXNoZXRvdmEgKDIpOg0KPiA+ICAgZnMsIGNlcGg6IGNvbnZl
+cnQgY2VwaF9tZHNfc2Vzc2lvbi5zX3JlZiBmcm9tIGF0b21pY190IHRvIHJlZmNvdW50X3QNCj4g
+PiAgIGZzLCBjZXBoOiBjb252ZXJ0IGNlcGhfY2FwX3NuYXAubnJlZiBmcm9tIGF0b21pY190IHRv
+IHJlZmNvdW50X3QNCj4gPg0KPiA+ICBmcy9jZXBoL2NhcHMuYyAgICAgICB8ICA0ICsrLS0NCj4g
+PiAgZnMvY2VwaC9tZHNfY2xpZW50LmMgfCAxOCArKysrKysrKystLS0tLS0tLS0NCj4gPiAgZnMv
+Y2VwaC9tZHNfY2xpZW50LmggfCAgNSArKystLQ0KPiA+ICBmcy9jZXBoL3NuYXAuYyAgICAgICB8
+ICAyICstDQo+ID4gIGZzL2NlcGgvc3VwZXIuaCAgICAgIHwgIDUgKysrLS0NCj4gPiAgNSBmaWxl
+cyBjaGFuZ2VkLCAxOCBpbnNlcnRpb25zKCspLCAxNiBkZWxldGlvbnMoLSkNCj4gDQo+IEknbGwg
+cHVsbCB0aGVzZSBpbnRvIHRlc3RpbmcuDQoNCkp1c3QgYSBjaGVjazogaG93IGRpZCB0ZXN0aW5n
+IHdlbnQgb24gdGhpcz8gDQpJZiBldmVyeXRoaW5nIGlzIGdvb2QsIGNhbiB5b3UgbWVyZ2UgdGhl
+IGNoYW5nZXM/DQoNCkJlc3QgUmVnYXJkcywNCkVsZW5hLg0KDQo+IA0KPiBUaGFua3MsDQo+IA0K
+PiAgICAgICAgICAgICAgICAgSWx5YQ0K
