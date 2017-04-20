@@ -1,44 +1,84 @@
-From: "Reshetova, Elena" <elena.reshetova@intel.com>
-Subject: RE: [PATCH 0/2] fs, ceph filesystem refcount conversions
-Date: Thu, 20 Apr 2017 07:40:16 +0000
-Message-ID: <2236FBA76BA1254E88B949DDB74E612B41C8D6E8@IRSMSX102.ger.corp.intel.com>
-References: <1488532507-27863-1-git-send-email-elena.reshetova@intel.com>
- <CAOi1vP-wZL9yW=_MkhU0x6fGn=9=xEYP1T03ikL2p6g49Vandw@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Ceph-deploy for FreeBSD
+Date: Thu, 20 Apr 2017 10:55:25 +0200
+Message-ID: <68eaf07b-e611-fb55-ca9c-08dceb8cae14@digiware.nl>
+References: <30f688f7-a156-5275-94cb-fbc07b7d449e@digiware.nl>
+ <76dc3a7e-80bb-6c9d-d502-535258ce0b54@digiware.nl>
+ <CAJ4mKGZmMv+ZcuBEkvaqajW7ntK26TDEbT77DM+nDFsPxsyDOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOi1vP-wZL9yW=_MkhU0x6fGn=9=xEYP1T03ikL2p6g49Vandw@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, "peterz@infradead.org" <peterz@infradead.org>, Greg KH <gregkh@linuxfoundation.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.digiware.nl ([176.74.240.9]:28819 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S943218AbdDTIza (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 20 Apr 2017 04:55:30 -0400
+In-Reply-To: <CAJ4mKGZmMv+ZcuBEkvaqajW7ntK26TDEbT77DM+nDFsPxsyDOw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>, Joao Eduardo Luis <joao@suse.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-DQo+IE9uIEZyaSwgTWFyIDMsIDIwMTcgYXQgMTA6MTUgQU0sIEVsZW5hIFJlc2hldG92YQ0KPiA8
-ZWxlbmEucmVzaGV0b3ZhQGludGVsLmNvbT4gd3JvdGU6DQo+ID4gTm93IHdoZW4gbmV3IHJlZmNv
-dW50X3QgdHlwZSBhbmQgQVBJIGFyZSBmaW5hbGx5IG1lcmdlZA0KPiA+IChzZWUgaW5jbHVkZS9s
-aW51eC9yZWZjb3VudC5oKSwgdGhlIGZvbGxvd2luZw0KPiA+IHBhdGNoZXMgY29udmVydCB2YXJp
-b3VzIHJlZmNvdW50ZXJzIGluIHRoZSBjZXBoIGZpbGVzeXN0ZW0gZnJvbSBhdG9taWNfdA0KPiA+
-IHRvIHJlZmNvdW50X3QuIEJ5IGRvaW5nIHRoaXMgd2UgcHJldmVudCBpbnRlbnRpb25hbCBvciBh
-Y2NpZGVudGFsDQo+ID4gdW5kZXJmbG93cyBvciBvdmVyZmxvd3MgdGhhdCBjYW4gbGVkIHRvIHVz
-ZS1hZnRlci1mcmVlIHZ1bG5lcmFiaWxpdGllcy4NCj4gPg0KPiA+IFRoZSBiZWxvdyBwYXRjaGVz
-IGFyZSBmdWxseSBpbmRlcGVuZGVudCBhbmQgY2FuIGJlIGNoZXJyeS1waWNrZWQgc2VwYXJhdGVs
-eS4NCj4gPiBTaW5jZSB3ZSBjb252ZXJ0IGFsbCBrZXJuZWwgc3Vic3lzdGVtcyBpbiB0aGUgc2Ft
-ZSBmYXNoaW9uLCByZXN1bHRpbmcNCj4gPiBpbiBhYm91dCAzMDAgcGF0Y2hlcywgd2UgaGF2ZSB0
-byBncm91cCB0aGVtIGZvciBzZW5kaW5nIGF0IGxlYXN0IGluIHNvbWUNCj4gPiBmYXNoaW9uIHRv
-IGJlIG1hbmFnZWFibGUuIFBsZWFzZSBleGN1c2UgdGhlIGxvbmcgY2MgbGlzdC4NCj4gPg0KPiA+
-IE5vdCBydW50aW1lIHRlc3RlZCwgc2luY2UgSSBhbSBub3Qgc3VyZSBob3cgdG8gZG8gaXQgZm9y
-IGNlcGguDQo+ID4gSG93ZXZlciBjaGFuZ2VzIGFyZSBwcmV0dHkgdHJpdmlhbCBpbiB0aGlzIGNh
-c2UuDQo+ID4NCj4gPiBFbGVuYSBSZXNoZXRvdmEgKDIpOg0KPiA+ICAgZnMsIGNlcGg6IGNvbnZl
-cnQgY2VwaF9tZHNfc2Vzc2lvbi5zX3JlZiBmcm9tIGF0b21pY190IHRvIHJlZmNvdW50X3QNCj4g
-PiAgIGZzLCBjZXBoOiBjb252ZXJ0IGNlcGhfY2FwX3NuYXAubnJlZiBmcm9tIGF0b21pY190IHRv
-IHJlZmNvdW50X3QNCj4gPg0KPiA+ICBmcy9jZXBoL2NhcHMuYyAgICAgICB8ICA0ICsrLS0NCj4g
-PiAgZnMvY2VwaC9tZHNfY2xpZW50LmMgfCAxOCArKysrKysrKystLS0tLS0tLS0NCj4gPiAgZnMv
-Y2VwaC9tZHNfY2xpZW50LmggfCAgNSArKystLQ0KPiA+ICBmcy9jZXBoL3NuYXAuYyAgICAgICB8
-ICAyICstDQo+ID4gIGZzL2NlcGgvc3VwZXIuaCAgICAgIHwgIDUgKysrLS0NCj4gPiAgNSBmaWxl
-cyBjaGFuZ2VkLCAxOCBpbnNlcnRpb25zKCspLCAxNiBkZWxldGlvbnMoLSkNCj4gDQo+IEknbGwg
-cHVsbCB0aGVzZSBpbnRvIHRlc3RpbmcuDQoNCkp1c3QgYSBjaGVjazogaG93IGRpZCB0ZXN0aW5n
-IHdlbnQgb24gdGhpcz8gDQpJZiBldmVyeXRoaW5nIGlzIGdvb2QsIGNhbiB5b3UgbWVyZ2UgdGhl
-IGNoYW5nZXM/DQoNCkJlc3QgUmVnYXJkcywNCkVsZW5hLg0KDQo+IA0KPiBUaGFua3MsDQo+IA0K
-PiAgICAgICAgICAgICAgICAgSWx5YQ0K
+On 19-4-2017 22:47, Gregory Farnum wrote:
+> On Fri, Apr 14, 2017 at 1:44 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>> Having solved the first few step in ceph-deploy, I can now get to the
+>> point where it actually wants to start the first monitor.
+>> Like:
+>>     /usr/local/bin/ceph-deploy mon create-initial
+>>
+>> And if I look at the other platform booting the inital monitor is
+>> started thru the init|systemd|upstart....
+>>
+>> However under FreeBSD bsdrc I require atleast in ceph.conf
+>> [mon]
+>>     host = cephtest
+>>
+>> This is not the case on the other platforms?
+>>
+>> And how would I otherwise get this into the ceph.conf?
+> 
+> I think you're running into some annoying deployment sharp edges here.
+> The monitor "host" config value has gone in and out of being necessary
+> at various times — the whole monitor boot sequence is pretty finicky
+> so I've added Joao to the thread. It's possible that the way things
+> are default-configured in FreeBSD that's necessary to work around some
+> other default configs?
+
+Hi Greg, Joao,
+
+Could very well be like you describe...
+
+The call sequence in of course rather convoluted:
+
+	ceph-deply
+	-> remote call ceph-disk prepare
+	-> remote call ceph-disk activat
+
+And expect after the activate to actually have a running OSD.
+But to do so, ceph-disk calls the FreeBSD init script:
+	service ceph start osd.x
+that activates actual initscript:
+	/usr/local/etc/rc.d/ceph
+which calls:
+	init-ceph
+
+And init-ceph goes thru /etc/ceph/ceph.conf for OSD that it can start on
+this host. Now if the OSD description/config is not there, it doesn't
+get started.
+
+I'm doing the service -> rc.d/ceph -> init-ceph way, because that seems
+to me the natural way of doing things, and that will take into account
+all the settings/bits/other stuff that is set on that host.
+AND by keeping init-ceph as main executor, I can try to keep in pace
+with the code in the ceph-repo.
+
+So I guess the best fix is to add routines to add the OSD to the config
+and then copy it to the remote host.
+
+Why would it be not wanted on the other systems?
+Otherwise I'd call those adds only from the FreeBSD init part.
+
+--WjW
+
+
+
