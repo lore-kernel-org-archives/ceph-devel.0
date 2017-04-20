@@ -1,54 +1,128 @@
-From: "Reshetova, Elena" <elena.reshetova@intel.com>
-Subject: RE: [PATCH 0/2] fs, ceph filesystem refcount conversions
-Date: Thu, 20 Apr 2017 10:28:22 +0000
-Message-ID: <2236FBA76BA1254E88B949DDB74E612B41C8D7AE@IRSMSX102.ger.corp.intel.com>
-References: <1488532507-27863-1-git-send-email-elena.reshetova@intel.com>
- <CAOi1vP-wZL9yW=_MkhU0x6fGn=9=xEYP1T03ikL2p6g49Vandw@mail.gmail.com>
- <2236FBA76BA1254E88B949DDB74E612B41C8D6E8@IRSMSX102.ger.corp.intel.com>
- <CAOi1vP-cVj19gU4yi8z0wssokT8oTM1n-cKRURDdL0t2ztxJ6w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:53003 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S941992AbdDTK20 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 20 Apr 2017 06:28:26 -0400
-In-Reply-To: <CAOi1vP-cVj19gU4yi8z0wssokT8oTM1n-cKRURDdL0t2ztxJ6w@mail.gmail.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, "peterz@infradead.org" <peterz@infradead.org>, Greg KH <gregkh@linuxfoundation.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>
+From: Alexander Graf <agraf@suse.de>
+Subject: [PATCH] ceph: Fix file open flags on ppc64
+Date: Thu, 20 Apr 2017 14:40:30 +0200
+Message-ID: <1492692030-146869-1-git-send-email-agraf@suse.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ceph-devel@vger.kernel.org
+Cc: zyan@redhat.com, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, linux-kernel@vger.kernel.org, Jan.Fajerski@suse.com
+List-Id: ceph-devel.vger.kernel.org
 
-DQoNCj4gT24gVGh1LCBBcHIgMjAsIDIwMTcgYXQgOTo0MCBBTSwgUmVzaGV0b3ZhLCBFbGVuYQ0K
-PiA8ZWxlbmEucmVzaGV0b3ZhQGludGVsLmNvbT4gd3JvdGU6DQo+ID4NCj4gPj4gT24gRnJpLCBN
-YXIgMywgMjAxNyBhdCAxMDoxNSBBTSwgRWxlbmEgUmVzaGV0b3ZhDQo+ID4+IDxlbGVuYS5yZXNo
-ZXRvdmFAaW50ZWwuY29tPiB3cm90ZToNCj4gPj4gPiBOb3cgd2hlbiBuZXcgcmVmY291bnRfdCB0
-eXBlIGFuZCBBUEkgYXJlIGZpbmFsbHkgbWVyZ2VkDQo+ID4+ID4gKHNlZSBpbmNsdWRlL2xpbnV4
-L3JlZmNvdW50LmgpLCB0aGUgZm9sbG93aW5nDQo+ID4+ID4gcGF0Y2hlcyBjb252ZXJ0IHZhcmlv
-dXMgcmVmY291bnRlcnMgaW4gdGhlIGNlcGggZmlsZXN5c3RlbSBmcm9tIGF0b21pY190DQo+ID4+
-ID4gdG8gcmVmY291bnRfdC4gQnkgZG9pbmcgdGhpcyB3ZSBwcmV2ZW50IGludGVudGlvbmFsIG9y
-IGFjY2lkZW50YWwNCj4gPj4gPiB1bmRlcmZsb3dzIG9yIG92ZXJmbG93cyB0aGF0IGNhbiBsZWQg
-dG8gdXNlLWFmdGVyLWZyZWUgdnVsbmVyYWJpbGl0aWVzLg0KPiA+PiA+DQo+ID4+ID4gVGhlIGJl
-bG93IHBhdGNoZXMgYXJlIGZ1bGx5IGluZGVwZW5kZW50IGFuZCBjYW4gYmUgY2hlcnJ5LXBpY2tl
-ZA0KPiBzZXBhcmF0ZWx5Lg0KPiA+PiA+IFNpbmNlIHdlIGNvbnZlcnQgYWxsIGtlcm5lbCBzdWJz
-eXN0ZW1zIGluIHRoZSBzYW1lIGZhc2hpb24sIHJlc3VsdGluZw0KPiA+PiA+IGluIGFib3V0IDMw
-MCBwYXRjaGVzLCB3ZSBoYXZlIHRvIGdyb3VwIHRoZW0gZm9yIHNlbmRpbmcgYXQgbGVhc3QgaW4g
-c29tZQ0KPiA+PiA+IGZhc2hpb24gdG8gYmUgbWFuYWdlYWJsZS4gUGxlYXNlIGV4Y3VzZSB0aGUg
-bG9uZyBjYyBsaXN0Lg0KPiA+PiA+DQo+ID4+ID4gTm90IHJ1bnRpbWUgdGVzdGVkLCBzaW5jZSBJ
-IGFtIG5vdCBzdXJlIGhvdyB0byBkbyBpdCBmb3IgY2VwaC4NCj4gPj4gPiBIb3dldmVyIGNoYW5n
-ZXMgYXJlIHByZXR0eSB0cml2aWFsIGluIHRoaXMgY2FzZS4NCj4gPj4gPg0KPiA+PiA+IEVsZW5h
-IFJlc2hldG92YSAoMik6DQo+ID4+ID4gICBmcywgY2VwaDogY29udmVydCBjZXBoX21kc19zZXNz
-aW9uLnNfcmVmIGZyb20gYXRvbWljX3QgdG8gcmVmY291bnRfdA0KPiA+PiA+ICAgZnMsIGNlcGg6
-IGNvbnZlcnQgY2VwaF9jYXBfc25hcC5ucmVmIGZyb20gYXRvbWljX3QgdG8gcmVmY291bnRfdA0K
-PiA+PiA+DQo+ID4+ID4gIGZzL2NlcGgvY2Fwcy5jICAgICAgIHwgIDQgKystLQ0KPiA+PiA+ICBm
-cy9jZXBoL21kc19jbGllbnQuYyB8IDE4ICsrKysrKysrKy0tLS0tLS0tLQ0KPiA+PiA+ICBmcy9j
-ZXBoL21kc19jbGllbnQuaCB8ICA1ICsrKy0tDQo+ID4+ID4gIGZzL2NlcGgvc25hcC5jICAgICAg
-IHwgIDIgKy0NCj4gPj4gPiAgZnMvY2VwaC9zdXBlci5oICAgICAgfCAgNSArKystLQ0KPiA+PiA+
-ICA1IGZpbGVzIGNoYW5nZWQsIDE4IGluc2VydGlvbnMoKyksIDE2IGRlbGV0aW9ucygtKQ0KPiA+
-Pg0KPiA+PiBJJ2xsIHB1bGwgdGhlc2UgaW50byB0ZXN0aW5nLg0KPiA+DQo+ID4gSnVzdCBhIGNo
-ZWNrOiBob3cgZGlkIHRlc3Rpbmcgd2VudCBvbiB0aGlzPw0KPiA+IElmIGV2ZXJ5dGhpbmcgaXMg
-Z29vZCwgY2FuIHlvdSBtZXJnZSB0aGUgY2hhbmdlcz8NCj4gDQo+IFllcCwgSSdsbCBtZXJnZSB0
-aGVzZSBpbnRvIDQuMTIuDQoNCkdyZWF0LCB0aGFuayB5b3UhDQoNCkJlc3QgUmVnYXJkcywNCkVs
-ZW5hLg0KPiANCj4gVGhhbmtzLA0KPiANCj4gICAgICAgICAgICAgICAgIElseWENCg==
+The file open flags (O_foo) are platform specific and should never go
+out to an interface that is not local to the system.
+
+Unfortunately these flags have leaked out onto the wire in the cephfs
+implementation. That lead to bogus flags getting transmitted on ppc64.
+
+This patch converts the kernel view of flags to the ceph view of file
+open flags. On x86 systems, the new function should get optimized out
+by smart compilers. On systems where the flags differ, it should adapt
+them accordingly.
+
+Fixes: 124e68e74 ("ceph: file operations")
+Signed-off-by: Alexander Graf <agraf@suse.de>
+---
+ fs/ceph/file.c               | 45 +++++++++++++++++++++++++++++++++++++++++++-
+ include/linux/ceph/ceph_fs.h | 24 +++++++++++++++++++++++
+ 2 files changed, 68 insertions(+), 1 deletion(-)
+
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 26cc954..0ed6392 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -103,6 +103,49 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
+ 	return ERR_PTR(ret);
+ }
+ 
++static u32 ceph_flags_sys2wire(u32 flags)
++{
++	u32 wire_flags = 0;
++
++	switch (flags & O_ACCMODE) {
++	case O_RDONLY:
++		wire_flags |= CEPH_O_RDONLY;
++		break;
++	case O_WRONLY:
++		wire_flags |= CEPH_O_WRONLY;
++		break;
++	case O_RDWR:
++		wire_flags |= CEPH_O_RDWR;
++		break;
++	}
++	flags &= ~O_ACCMODE;
++
++#define ceph_sys2wire(a) if (flags & a) { wire_flags |= CEPH_##a; flags &= ~a; }
++
++	ceph_sys2wire(O_CREAT);
++	ceph_sys2wire(O_NOCTTY);
++	ceph_sys2wire(O_TRUNC);
++	ceph_sys2wire(O_APPEND);
++	ceph_sys2wire(O_NONBLOCK);
++	ceph_sys2wire(O_DSYNC);
++	ceph_sys2wire(FASYNC);
++	ceph_sys2wire(O_DIRECT);
++	ceph_sys2wire(O_LARGEFILE);
++	ceph_sys2wire(O_DIRECTORY);
++	ceph_sys2wire(O_NOFOLLOW);
++	ceph_sys2wire(O_NOATIME);
++	ceph_sys2wire(O_CLOEXEC);
++	ceph_sys2wire(__O_SYNC);
++	ceph_sys2wire(O_PATH);
++	ceph_sys2wire(__O_TMPFILE);
++
++#undef ceph_sys2wire
++
++	WARN_ONCE(flags, "Found unknown open flags: %x", flags);
++
++	return wire_flags;
++}
++
+ /*
+  * Prepare an open request.  Preallocate ceph_cap to avoid an
+  * inopportune ENOMEM later.
+@@ -123,7 +166,7 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
+ 	if (IS_ERR(req))
+ 		goto out;
+ 	req->r_fmode = ceph_flags_to_mode(flags);
+-	req->r_args.open.flags = cpu_to_le32(flags);
++	req->r_args.open.flags = ceph_flags_sys2wire(cpu_to_le32(flags));
+ 	req->r_args.open.mode = cpu_to_le32(create_mode);
+ out:
+ 	return req;
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index f4b2ee1..d254b48 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -366,6 +366,30 @@ enum {
+ #define CEPH_READDIR_FRAG_COMPLETE	(1<<8)
+ #define CEPH_READDIR_HASH_ORDER		(1<<9)
+ 
++/*
++ * open request flags
++ */
++#define CEPH_O_RDONLY		00000000
++#define CEPH_O_WRONLY		00000001
++#define CEPH_O_RDWR		00000002
++#define CEPH_O_CREAT		00000100
++#define CEPH_O_EXCL		00000200
++#define CEPH_O_NOCTTY		00000400
++#define CEPH_O_TRUNC		00001000
++#define CEPH_O_APPEND		00002000
++#define CEPH_O_NONBLOCK		00004000
++#define CEPH_O_DSYNC		00010000
++#define CEPH_FASYNC		00020000
++#define CEPH_O_DIRECT		00040000
++#define CEPH_O_LARGEFILE	00100000
++#define CEPH_O_DIRECTORY	00200000
++#define CEPH_O_NOFOLLOW		00400000
++#define CEPH_O_NOATIME		01000000
++#define CEPH_O_CLOEXEC		02000000
++#define CEPH___O_SYNC		04000000
++#define CEPH_O_PATH		010000000
++#define CEPH___O_TMPFILE	020000000
++
+ union ceph_mds_request_args {
+ 	struct {
+ 		__le32 mask;                 /* CEPH_CAP_* */
+-- 
+1.8.5.6
