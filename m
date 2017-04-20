@@ -1,128 +1,87 @@
-From: Alexander Graf <agraf@suse.de>
-Subject: [PATCH] ceph: Fix file open flags on ppc64
-Date: Thu, 20 Apr 2017 14:40:30 +0200
-Message-ID: <1492692030-146869-1-git-send-email-agraf@suse.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ceph-devel@vger.kernel.org
-Cc: zyan@redhat.com, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, linux-kernel@vger.kernel.org, Jan.Fajerski@suse.com
-List-Id: ceph-devel.vger.kernel.org
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: Smarter blacklisting?
+Date: Thu, 20 Apr 2017 09:09:20 -0400
+Message-ID: <CA+aFP1CyAL9AA2w9Sd3Vzhj-DOcfhCHNu3AmKmCx=S36U252Tg@mail.gmail.com>
+References: <CALe9h7dh2=BYjSdSuPXKE457TWg06xrw6QOjmbk_tLvU5fd69w@mail.gmail.com>
+ <alpine.DEB.2.11.1704181638530.6579@piezo.novalocal> <CAJ4mKGZxf3RcZGub7PKkpDV_GDZPBXACtX1tVwxdw2SpS1cooA@mail.gmail.com>
+ <CALe9h7e6qY_yqzsFzsGNNVi2DG_JwNEti=gP-pkB_LZiXu5_ig@mail.gmail.com>
+ <alpine.DEB.2.11.1704191315210.6575@piezo.novalocal> <f354a27c-931d-ce64-4fa4-e4f6d802998d@redhat.com>
+Reply-To: dillaman@redhat.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yw0-f170.google.com ([209.85.161.170]:35890 "EHLO
+        mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753990AbdDTNJW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Apr 2017 09:09:22 -0400
+Received: by mail-yw0-f170.google.com with SMTP id j9so38016965ywj.3
+        for <ceph-devel@vger.kernel.org>; Thu, 20 Apr 2017 06:09:21 -0700 (PDT)
+In-Reply-To: <f354a27c-931d-ce64-4fa4-e4f6d802998d@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Josh Durgin <jdurgin@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Mike Christie <mchristi@redhat.com>
 
-The file open flags (O_foo) are platform specific and should never go
-out to an interface that is not local to the system.
+We didn't fully flesh it out, but I believe we were talking about
+iSCSI persistent group reservations and how we could pseudo-blacklist
+a (stale) client after the reservation has been updated. The current
+approach to handle PGRs requires two round-trips for each IO to (1)
+verify the current PGR state and (2) issue the IO if the reservation
+is still active. Not only will this be slow due to the extra
+round-trip -- it's taking advantage of some ambiguity in the spec with
+regard to how in-flight IOs would react given a PGR update.
 
-Unfortunately these flags have leaked out onto the wire in the cephfs
-implementation. That lead to bogus flags getting transmitted on ppc64.
+In order to eliminate this extra round-trip, we need some way for the
+OSDs to generically enforce the PGR on each IO. The idea was that we
+could have a new "user-managed epoch" sequence that would be managed
+by the monitors and enforced by the OSDs. Given such a system, if I
+have a target with an in-flight IO that is associated with epoch X
+(e.g. via a new op at the start of the transaction) and the end-user
+application issuing IO has a failover event which results in a PGR
+update, the target path could request epoch X + 1 and know that from
+that point on any old, in-flight IO associated with the older sequence
+number could not be committed to disk.
 
-This patch converts the kernel view of flags to the ceph view of file
-open flags. On x86 systems, the new function should get optimized out
-by smart compilers. On systems where the flags differ, it should adapt
-them accordingly.
+The problem is that you would somehow need to ensure that all the
+primary PGs know about the new epoch, hopefully without the need to
+have librbd "ping" each of the primary PGs that could contain the
+backing objects to an image. Perhaps this op could implement a small
+lease window on the epoch to ensure the OSDs never have a epoch
+sequence that is over X seconds old.
 
-Fixes: 124e68e74 ("ceph: file operations")
-Signed-off-by: Alexander Graf <agraf@suse.de>
----
- fs/ceph/file.c               | 45 +++++++++++++++++++++++++++++++++++++++++++-
- include/linux/ceph/ceph_fs.h | 24 +++++++++++++++++++++++
- 2 files changed, 68 insertions(+), 1 deletion(-)
+Jason
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 26cc954..0ed6392 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -103,6 +103,49 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
- 	return ERR_PTR(ret);
- }
- 
-+static u32 ceph_flags_sys2wire(u32 flags)
-+{
-+	u32 wire_flags = 0;
-+
-+	switch (flags & O_ACCMODE) {
-+	case O_RDONLY:
-+		wire_flags |= CEPH_O_RDONLY;
-+		break;
-+	case O_WRONLY:
-+		wire_flags |= CEPH_O_WRONLY;
-+		break;
-+	case O_RDWR:
-+		wire_flags |= CEPH_O_RDWR;
-+		break;
-+	}
-+	flags &= ~O_ACCMODE;
-+
-+#define ceph_sys2wire(a) if (flags & a) { wire_flags |= CEPH_##a; flags &= ~a; }
-+
-+	ceph_sys2wire(O_CREAT);
-+	ceph_sys2wire(O_NOCTTY);
-+	ceph_sys2wire(O_TRUNC);
-+	ceph_sys2wire(O_APPEND);
-+	ceph_sys2wire(O_NONBLOCK);
-+	ceph_sys2wire(O_DSYNC);
-+	ceph_sys2wire(FASYNC);
-+	ceph_sys2wire(O_DIRECT);
-+	ceph_sys2wire(O_LARGEFILE);
-+	ceph_sys2wire(O_DIRECTORY);
-+	ceph_sys2wire(O_NOFOLLOW);
-+	ceph_sys2wire(O_NOATIME);
-+	ceph_sys2wire(O_CLOEXEC);
-+	ceph_sys2wire(__O_SYNC);
-+	ceph_sys2wire(O_PATH);
-+	ceph_sys2wire(__O_TMPFILE);
-+
-+#undef ceph_sys2wire
-+
-+	WARN_ONCE(flags, "Found unknown open flags: %x", flags);
-+
-+	return wire_flags;
-+}
-+
- /*
-  * Prepare an open request.  Preallocate ceph_cap to avoid an
-  * inopportune ENOMEM later.
-@@ -123,7 +166,7 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
- 	if (IS_ERR(req))
- 		goto out;
- 	req->r_fmode = ceph_flags_to_mode(flags);
--	req->r_args.open.flags = cpu_to_le32(flags);
-+	req->r_args.open.flags = ceph_flags_sys2wire(cpu_to_le32(flags));
- 	req->r_args.open.mode = cpu_to_le32(create_mode);
- out:
- 	return req;
-diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-index f4b2ee1..d254b48 100644
---- a/include/linux/ceph/ceph_fs.h
-+++ b/include/linux/ceph/ceph_fs.h
-@@ -366,6 +366,30 @@ enum {
- #define CEPH_READDIR_FRAG_COMPLETE	(1<<8)
- #define CEPH_READDIR_HASH_ORDER		(1<<9)
- 
-+/*
-+ * open request flags
-+ */
-+#define CEPH_O_RDONLY		00000000
-+#define CEPH_O_WRONLY		00000001
-+#define CEPH_O_RDWR		00000002
-+#define CEPH_O_CREAT		00000100
-+#define CEPH_O_EXCL		00000200
-+#define CEPH_O_NOCTTY		00000400
-+#define CEPH_O_TRUNC		00001000
-+#define CEPH_O_APPEND		00002000
-+#define CEPH_O_NONBLOCK		00004000
-+#define CEPH_O_DSYNC		00010000
-+#define CEPH_FASYNC		00020000
-+#define CEPH_O_DIRECT		00040000
-+#define CEPH_O_LARGEFILE	00100000
-+#define CEPH_O_DIRECTORY	00200000
-+#define CEPH_O_NOFOLLOW		00400000
-+#define CEPH_O_NOATIME		01000000
-+#define CEPH_O_CLOEXEC		02000000
-+#define CEPH___O_SYNC		04000000
-+#define CEPH_O_PATH		010000000
-+#define CEPH___O_TMPFILE	020000000
-+
- union ceph_mds_request_args {
- 	struct {
- 		__le32 mask;                 /* CEPH_CAP_* */
+On Wed, Apr 19, 2017 at 7:26 PM, Josh Durgin <jdurgin@redhat.com> wrote:
+> On 04/19/2017 06:16 AM, Sage Weil wrote:
+>>
+>> On Wed, 19 Apr 2017, John Spray wrote:
+>>>
+>>> I was already pondering where the more detailed blacklist info (e.g.
+>>> ids of clients) should go, as it's not something that actually needs
+>>> to be shared with all the normal OSDMap subscribers (it's only the
+>>> entity that does the blacklist removal that needs to see that).  It's
+>>> already not ideal imho that we expose the list of all blacklisted
+>>> clients to all the other clients -- in general they shouldn't be able
+>>> to e.g. learn one another's addresses like this.
+>>
+>>
+>> We already break the OSDMap encoding into two sections: the first part
+>> that clients care about, and the second part that is only used by OSDs.
+>> (The kernel client doesn't bother to decode the second half.)
+>>
+>> I suspect it wouldn't take much to send abbreviated maps (and
+>> incrementals) to clients that don't include that second half at all...
+>
+>
+> I was talking to Jason and Mike about another use of more generalized
+> blacklisting at Vault, but I can't remember the details - do you guys?
+>
+> IIRC it sounded like that use would make sense as a separate map that
+> osds and clients would subscribe to.
+>
+> Josh
+
+
+
 -- 
-1.8.5.6
+Jason
