@@ -1,87 +1,133 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Smarter blacklisting?
-Date: Thu, 20 Apr 2017 09:09:20 -0400
-Message-ID: <CA+aFP1CyAL9AA2w9Sd3Vzhj-DOcfhCHNu3AmKmCx=S36U252Tg@mail.gmail.com>
-References: <CALe9h7dh2=BYjSdSuPXKE457TWg06xrw6QOjmbk_tLvU5fd69w@mail.gmail.com>
- <alpine.DEB.2.11.1704181638530.6579@piezo.novalocal> <CAJ4mKGZxf3RcZGub7PKkpDV_GDZPBXACtX1tVwxdw2SpS1cooA@mail.gmail.com>
- <CALe9h7e6qY_yqzsFzsGNNVi2DG_JwNEti=gP-pkB_LZiXu5_ig@mail.gmail.com>
- <alpine.DEB.2.11.1704191315210.6575@piezo.novalocal> <f354a27c-931d-ce64-4fa4-e4f6d802998d@redhat.com>
-Reply-To: dillaman@redhat.com
+From: Sage Weil <sage@newdream.net>
+Subject: Re: another scrub bug? blocked for > 10240.948831 secs
+Date: Thu, 20 Apr 2017 14:23:13 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1704201421120.6575@piezo.novalocal>
+References: <94127293-3ba3-8bb8-db43-604b6a54eb55@brockmann-consult.de> <alpine.DEB.2.11.1704171316150.10661@piezo.novalocal> <456cafe7-ecaa-5c62-ca82-6c09a2b06ae7@brockmann-consult.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f170.google.com ([209.85.161.170]:35890 "EHLO
-        mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753990AbdDTNJW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Apr 2017 09:09:22 -0400
-Received: by mail-yw0-f170.google.com with SMTP id j9so38016965ywj.3
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Apr 2017 06:09:21 -0700 (PDT)
-In-Reply-To: <f354a27c-931d-ce64-4fa4-e4f6d802998d@redhat.com>
+Received: from cobra.newdream.net ([66.33.216.30]:33675 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S946228AbdDTOXQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Apr 2017 10:23:16 -0400
+In-Reply-To: <456cafe7-ecaa-5c62-ca82-6c09a2b06ae7@brockmann-consult.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Mike Christie <mchristi@redhat.com>
+To: Peter Maloney <peter.maloney@brockmann-consult.de>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-We didn't fully flesh it out, but I believe we were talking about
-iSCSI persistent group reservations and how we could pseudo-blacklist
-a (stale) client after the reservation has been updated. The current
-approach to handle PGRs requires two round-trips for each IO to (1)
-verify the current PGR state and (2) issue the IO if the reservation
-is still active. Not only will this be slow due to the extra
-round-trip -- it's taking advantage of some ambiguity in the spec with
-regard to how in-flight IOs would react given a PGR update.
+On Thu, 20 Apr 2017, Peter Maloney wrote:
+> On 04/17/17 15:18, Sage Weil wrote:
+> > On Sat, 15 Apr 2017, Peter Maloney wrote:
+> >> Is this another scrub bug? Something just like this (1 or 2 requests
+> >> blocked forever until osd restart) happened about 5 times so far, each
+> >> time during recovery or some other thing I did myself to trigger it,
+> >> probably involving snapshots. This time I noticed that it says scrub in
+> >> the log. One other time it made a client block, but didn't seem to this
+> >> time. I didn't have the same issue in 10.2.3, but I don't know if I
+> >> generated the same load or whatever causes it back then.
+> >>
+> >> ceph version 10.2.5 (c461ee19ecbc0c5c330aca20f7392c9a00730367)
+> >>
+> >> If you want me to try 10.2.6 or 7 instead, I can do that, but no
+> >> guarantee I can reproduce it any time soon.
+> > There have been lots of scrub-related patches since 10.2.5, but I don't 
+> > see one that would explain this.  I'm guessing there is a scrub waitlist 
+> > bug that we aren't turning up in qa because our thrashing tests are 
+> > triggering lots of other actions in sequence (peering from up/down osds 
+> > and balancing) and those probably have the effect of 
+> > clearing the issue.
+> >
+> > Next time you see it, can you capture the output of 'ceph daemon osd.NNN 
+> > ops' so we can see what steps the request went through?  Also, any 
+> > additional or more specific clues as to what might have triggered it would 
+> > help.
+> >
+> > Thanks!
+> > sage
+> >
+> 
+> 
+> Here, we go...
+> 
+> > 2017-04-20 05:03:58.522624 osd.20 10.3.0.132:6824/1088346 2078 :
+> > cluster [WRN] slow request 20480.953923 seconds old, received at
+> > 2017-04-19 23:22:37.568657: replica scrub(pg:
+> > 4.2d,from:0'0,to:79873'5433886,epoch:79873,start:4:b46a9ab4:::rbd_data.43e4a9238e1f29.00000000000019fe:e438,end:4:b46a9ab4:::rbd_data.43e4a9238e1f29.00000000000019fe:e43a,chunky:1,deep:1,seed:4294967295,version:6)
+> > currently reached_pg
+> >
+> >
+> > root@ceph3:/var/log/ceph # ceph pg dump | grep -E "^pg_stat|^4.2d"
+> > dumped all in format plain
+> > pg_stat objects mip     degr    misp    unf     bytes   log    
+> > disklog state   state_stamp     v       reported        up     
+> > up_primary      acting  acting_primary  last_scrub      scrub_stamp 
+> > last_deep_scrub deep_scrub_stamp
+> > 4.2d    3494    0       0       0       0       13061467136    
+> > 3012    3012    active+clean+scrubbing+deep     2017-04-19
+> > 23:11:22.763008      80142'5447712   80142:3027638   [14,7,20]  
+> > 14       [14,7,20]       14      76449'5396453   2017-04-18
+> > 17:30:01.419498      73551'5298960   2017-04-15 03:23:48.821848
+> >
+> > ceph daemon osd.14 ops > longscrubbug.14.log # ceph1
+> > ceph daemon osd.7 ops > longscrubbug.7.log # ceph3
+> > ceph daemon osd.20 ops > longscrubbug.20.log # ceph2
+> >
+> >
+> >
+> > peter@peter:~/tmp/longscrubbug $ cat longscrubbug.14.log
+> > {
+> >     "ops": [],
+> >     "num_ops": 0
+> > }
+> >
+> > peter@peter:~/tmp/longscrubbug $ cat longscrubbug.7.log
+> > {
+> >     "ops": [],
+> >     "num_ops": 0
+> > }
+> >
+> > peter@peter:~/tmp/longscrubbug $ cat longscrubbug.20.log
+> > {
+> >     "ops": [
+> >         {
+> >             "description": "replica scrub(pg:
+> > 4.2d,from:0'0,to:79873'5433886,epoch:79873,start:4:b46a9ab4:::rbd_data.43e4a9238e1f29.00000000000019fe:e438,end:4:b46a9ab4:::rbd_data.43e4a9238e1f29.00000000000019fe:e43a,chunky:1,deep:1,seed:4294967295,version:6)",
+> >             "initiated_at": "2017-04-19 23:22:37.568657",
+> >             "age": 30563.826540,
+> >             "duration": 30563.826803,
+> >             "type_data": [
+> >                 "reached pg",
+> >                 [
+> >                     {
+> >                         "time": "2017-04-19 23:22:37.568657",
+> >                         "event": "initiated"
+> >                     },
+> >                     {
+> >                         "time": "2017-04-19 23:22:37.568769",
+> >                         "event": "queued_for_pg"
+> >                     },
+> >                     {
+> >                         "time": "2017-04-19 23:22:37.568814",
+> >                         "event": "reached_pg"
+> >                     }
+> >                 ]
+> >             ]
+> >         }
+> >     ],
+> >     "num_ops": 1
+> > }
+> >
+> 
+> to me that looks kinda non-useful... anything else you need? (I think
+> I'll leave this one alone for a while in case you reply soon and want
+> something)
 
-In order to eliminate this extra round-trip, we need some way for the
-OSDs to generically enforce the PGR on each IO. The idea was that we
-could have a new "user-managed epoch" sequence that would be managed
-by the monitors and enforced by the OSDs. Given such a system, if I
-have a target with an in-flight IO that is associated with epoch X
-(e.g. via a new op at the start of the transaction) and the end-user
-application issuing IO has a failover event which results in a PGR
-update, the target path could request epoch X + 1 and know that from
-that point on any old, in-flight IO associated with the older sequence
-number could not be committed to disk.
+Hmm.  Yeah, not terribly helpful.  Can you attach a 'ceph osd dump -f 
+json-pretty' for epoch 79870 through 79880, as well as the latest?
 
-The problem is that you would somehow need to ensure that all the
-primary PGs know about the new epoch, hopefully without the need to
-have librbd "ping" each of the primary PGs that could contain the
-backing objects to an image. Perhaps this op could implement a small
-lease window on the epoch to ensure the OSDs never have a epoch
-sequence that is over X seconds old.
+My best guess is this is an interaction with snap trimming; the osdmap 
+should indicate if a snap was deleted right around then.
 
-Jason
-
-On Wed, Apr 19, 2017 at 7:26 PM, Josh Durgin <jdurgin@redhat.com> wrote:
-> On 04/19/2017 06:16 AM, Sage Weil wrote:
->>
->> On Wed, 19 Apr 2017, John Spray wrote:
->>>
->>> I was already pondering where the more detailed blacklist info (e.g.
->>> ids of clients) should go, as it's not something that actually needs
->>> to be shared with all the normal OSDMap subscribers (it's only the
->>> entity that does the blacklist removal that needs to see that).  It's
->>> already not ideal imho that we expose the list of all blacklisted
->>> clients to all the other clients -- in general they shouldn't be able
->>> to e.g. learn one another's addresses like this.
->>
->>
->> We already break the OSDMap encoding into two sections: the first part
->> that clients care about, and the second part that is only used by OSDs.
->> (The kernel client doesn't bother to decode the second half.)
->>
->> I suspect it wouldn't take much to send abbreviated maps (and
->> incrementals) to clients that don't include that second half at all...
->
->
-> I was talking to Jason and Mike about another use of more generalized
-> blacklisting at Vault, but I can't remember the details - do you guys?
->
-> IIRC it sounded like that use would make sense as a separate map that
-> osds and clients would subscribe to.
->
-> Josh
-
-
-
--- 
-Jason
+Thanks!
+sage
