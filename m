@@ -1,77 +1,127 @@
-From: NeilBrown <neilb@suse.com>
-Subject: [PATCH 00/10] block: assorted cleanup for bio splitting
-	and cloning.
-Date: Thu, 20 Apr 2017 15:38:48 +1000
-Message-ID: <149266645258.27388.14083229348123176454.stgit@noble>
+From: Peter Maloney <peter.maloney@brockmann-consult.de>
+Subject: Re: another scrub bug? blocked for > 10240.948831 secs
+Date: Thu, 20 Apr 2017 07:58:34 +0200
+Message-ID: <456cafe7-ecaa-5c62-ca82-6c09a2b06ae7@brockmann-consult.de>
+References: <94127293-3ba3-8bb8-db43-604b6a54eb55@brockmann-consult.de>
+ <alpine.DEB.2.11.1704171316150.10661@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xen.org>
-List-Unsubscribe: <https://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <https://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xen.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
-To: Jens Axboe <axboe@kernel.dk>
-Cc: Alex Elder <elder@kernel.org>, Sage Weil <sage@redhat.com>, linux-kernel@vger.kernel.org, Philipp Reisner <philipp.reisner@linbit.com>, linux-block@vger.kernel.org, linux-bcache@vger.kernel.org, Kent Overstreet <kent.overstreet@gmail.com>, Lars Ellenberg <lars.ellenberg@linbit.com>, xen-devel@lists.xenproject.org, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, drbd-dev@lists.linbit.com
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.126.130]:64430 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S938972AbdDTF57 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Apr 2017 01:57:59 -0400
+In-Reply-To: <alpine.DEB.2.11.1704171316150.10661@piezo.novalocal>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-VGhpcyBzZXJpZXMgY29udGFpbnMgbW9yZSB3b3JrIHRvd2FyZHMgZ2V0dGluZyByaWQgb2YgdGhl
-IGJpb3NldCB3b3JrCnF1ZXVlcyBhbmQgZ2VuZXJhbGx5IGltcHJvdmluZyB0aGUgc3BsaXR0aW5n
-IGFuZCBjbG9uaW5nIG9mIGJpb3MuCgpUaGUgZmlyc3QgdGhyZWUgcGF0Y2hlcyBhcmUgc2ltaWxh
-ciB0byBvbmVzIHRoYXQgSSBzZW50IHByZXZpb3VzbHkuClRoZXkgaGF2ZSBiZWVuIHJlYmFzZWQg
-b24gdGhlIGN1cnJlbnQgYmxvY2sgZm9yLW5leHQgdHJlZSBhbmQgaW1wcm92ZWQKYSBsaXR0bGUu
-ICBTcGVjaWZpY2FsbHkgSSBubyBsb25nZXIgY2hhbmdlIGFsbCBpbnN0YW5jZXMgb2YKYmlvc2V0
-X2NyZWF0ZSgpIHRvIGJpb3NldF9jcmVhdGVfcmVzY3VlZCgpLiAgSW5zdGVhZCBJIG9ubHkgY2hh
-bmdlCnRob3NlIHdoaWNoIGNhbm5vdCBlYXNpbHkgYmUgc2hvd24gdG8gbm90IG5lZWQgY2hhbmdp
-bmcuCgpUaGUgbmV4dCBwYXRjaCBmaXhlcyBzb21lIGlzc3VlcyB3aXRoIGJvdW5jZS5jLiAgTW9z
-dCBzaWduaWZpY2FudGx5IGl0CnVzZWQgdG8gYmUgY2FsbGVkIGFmdGVyIGJsa19xdWV1ZV9zcGxp
-dCgpLCBidXQgbm93IGl0IGlzIGNhbGxlZApiZWZvcmUuICBUaGlzIG1lYW5zIHRoYXQgaXQgY2Fu
-IG5vIGxvbmdlciBhc3N1bWUgdGhhdCB0aGUKYmlvIGhhcyBiZWVuIHNwbGl0IGlmIGl0IGNvbnRh
-aW5lZCBtb3JlIHRoYW4gQklPX01BWF9QQUdFUy4KCk1vc3Qgb2YgdGhlIHJlc3QgY2hhbmdlIGEg
-bnVtYmVyIG9mIGJpb19jbG9uZSgpIGNhbGxzIHRvCmJpb19jbG9uZV9mYXN0KCkgYXMgdGhhdCBp
-cyBvZnRlbiB3aGF0IGlzIG5lZWRlZC4gIGJpb19jbG9uZSgpIGRvZXMKbm90IHdvcmsgd2l0aCBi
-aW9zIGxhcmdlciB0aGFuIEJJT19NQVhfUEFHRVMsIGJpb19jbG9uZV9mYXN0KCkgZG9lcy4KCkZp
-bmFsbHkgd2UgcmVtb3ZlIGJpb19jbG9uZSgpICh3aGljaCBpcyBubyBsb25nZXIgdXNlZCkgYW5k
-IHN0b3AKYmxrX2Jpb19zZWdtZW50X3NwbGl0KCkgZnJvbSBzcGxpdHRpbmcgYWZ0ZXIgQklPX01B
-WF9QQUdFUywgYXMgdGhhdAppcyBubyBsb25nZXIgbmVjZXNzYXJ5LgoKLS0tCgpOZWlsQnJvd24g
-KDExKToKICAgICAgYmxrOiByZW1vdmUgYmlvX3NldCBhcmcgZnJvbSBibGtfcXVldWVfc3BsaXQo
-KQogICAgICBibGs6IG1ha2UgdGhlIGJpb3NldCByZXNjdWVfd29ya3F1ZXVlIG9wdGlvbmFsLgog
-ICAgICBibGs6IHVzZSBub24tcmVzY3VpbmcgYmlvc2V0IGZvciBxLT5iaW9fc3BsaXQuCiAgICAg
-IGJsb2NrOiBJbXByb3ZlbWVudHMgdG8gYm91bmNlLWJ1ZmZlciBoYW5kbGluZwogICAgICByYmQ6
-IHVzZSBiaW9fY2xvbmVfZmFzdCgpIGluc3RlYWQgb2YgYmlvX2Nsb25lKCkKICAgICAgZHJiZDog
-dXNlIGJpb19jbG9uZV9mYXN0KCkgaW5zdGVhZCBvZiBiaW9fY2xvbmUoKQogICAgICBwa3RjZHZk
-OiB1c2UgYmlvX2Nsb25lX2Zhc3QoKSBpbnN0ZWFkIG9mIGJpb19jbG9uZSgpCiAgICAgIHhlbi1i
-bGtmcm9udDogcmVtb3ZlIGJpbyBzcGxpdHRpbmcuCiAgICAgIGJjYWNoZTogdXNlIGttYWxsb2Mg
-dG8gYWxsb2NhdGUgYmlvIGluIGJjaF9kYXRhX3ZlcmlmeSgpCiAgICAgIGJsb2NrOiByZW1vdmUg
-YmlvX2Nsb25lKCkgYW5kIGFsbCByZWZlcmVuY2VzLgogICAgICBibG9jazogZG9uJ3QgY2hlY2sg
-Zm9yIEJJT19NQVhfUEFHRVMgaW4gYmxrX2Jpb19zZWdtZW50X3NwbGl0KCkKCgogRG9jdW1lbnRh
-dGlvbi9ibG9jay9iaW9kb2MudHh0IHwgICAgMiArCiBibG9jay9iaW8uYyAgICAgICAgICAgICAg
-ICAgICAgfCAgIDMwICsrKysrKysrKysrKysrKysrKystLS0KIGJsb2NrL2Jsay1jb3JlLmMgICAg
-ICAgICAgICAgICB8ICAgIDIgKwogYmxvY2svYmxrLW1lcmdlLmMgICAgICAgICAgICAgIHwgICAz
-MSArKystLS0tLS0tLS0tLS0tLS0tLS0tLQogYmxvY2svYmxrLW1xLmMgICAgICAgICAgICAgICAg
-IHwgICAgMiArCiBibG9jay9ib3VuY2UuYyAgICAgICAgICAgICAgICAgfCAgIDI3ICsrKysrKysr
-KysrKysrKysrKystCiBkcml2ZXJzL2Jsb2NrL2RyYmQvZHJiZF9pbnQuaCAgfCAgICAzICsrCiBk
-cml2ZXJzL2Jsb2NrL2RyYmQvZHJiZF9tYWluLmMgfCAgICA5ICsrKysrKysKIGRyaXZlcnMvYmxv
-Y2svZHJiZC9kcmJkX3JlcS5jICB8ICAgIDIgKwogZHJpdmVycy9ibG9jay9kcmJkL2RyYmRfcmVx
-LmggIHwgICAgMiArCiBkcml2ZXJzL2Jsb2NrL3BrdGNkdmQuYyAgICAgICAgfCAgIDE0ICsrKysr
-KysrLS0KIGRyaXZlcnMvYmxvY2svcHMzdnJhbS5jICAgICAgICB8ICAgIDIgKwogZHJpdmVycy9i
-bG9jay9yYmQuYyAgICAgICAgICAgIHwgICAxNiArKysrKysrKysrKy0KIGRyaXZlcnMvYmxvY2sv
-cnN4eC9kZXYuYyAgICAgICB8ICAgIDIgKwogZHJpdmVycy9ibG9jay91bWVtLmMgICAgICAgICAg
-IHwgICAgMiArCiBkcml2ZXJzL2Jsb2NrL3hlbi1ibGtmcm9udC5jICAgfCAgIDU0ICsrLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KIGRyaXZlcnMvYmxvY2svenJhbS96cmFt
-X2Rydi5jICB8ICAgIDIgKwogZHJpdmVycy9saWdodG52bS9ycnBjLmMgICAgICAgIHwgICAgMiAr
-CiBkcml2ZXJzL21kL2JjYWNoZS9kZWJ1Zy5jICAgICAgfCAgICAyICsKIGRyaXZlcnMvbWQvYmNh
-Y2hlL3N1cGVyLmMgICAgICB8ICAgIDQgKy0tCiBkcml2ZXJzL21kL2RtLWNyeXB0LmMgICAgICAg
-ICAgfCAgICAyICsKIGRyaXZlcnMvbWQvZG0taW8uYyAgICAgICAgICAgICB8ICAgIDIgKwogZHJp
-dmVycy9tZC9kbS5jICAgICAgICAgICAgICAgIHwgICAgNSArKy0tCiBkcml2ZXJzL21kL21kLmMg
-ICAgICAgICAgICAgICAgfCAgICA0ICstLQogZHJpdmVycy9zMzkwL2Jsb2NrL2Rjc3NibGsuYyAg
-IHwgICAgMiArCiBkcml2ZXJzL3MzOTAvYmxvY2sveHByYW0uYyAgICAgfCAgICAyICsKIGluY2x1
-ZGUvbGludXgvYmlvLmggICAgICAgICAgICB8ICAgIDcgKy0tLS0KIGluY2x1ZGUvbGludXgvYmxr
-ZGV2LmggICAgICAgICB8ICAgIDMgKy0KIDI4IGZpbGVzIGNoYW5nZWQsIDEyMSBpbnNlcnRpb25z
-KCspLCAxMTYgZGVsZXRpb25zKC0pCgotLQpTaWduYXR1cmUKCgpfX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fXwpYZW4tZGV2ZWwgbWFpbGluZyBsaXN0Clhlbi1k
-ZXZlbEBsaXN0cy54ZW4ub3JnCmh0dHBzOi8vbGlzdHMueGVuLm9yZy94ZW4tZGV2ZWwK
+On 04/17/17 15:18, Sage Weil wrote:
+> On Sat, 15 Apr 2017, Peter Maloney wrote:
+>> Is this another scrub bug? Something just like this (1 or 2 requests
+>> blocked forever until osd restart) happened about 5 times so far, each
+>> time during recovery or some other thing I did myself to trigger it,
+>> probably involving snapshots. This time I noticed that it says scrub in
+>> the log. One other time it made a client block, but didn't seem to this
+>> time. I didn't have the same issue in 10.2.3, but I don't know if I
+>> generated the same load or whatever causes it back then.
+>>
+>> ceph version 10.2.5 (c461ee19ecbc0c5c330aca20f7392c9a00730367)
+>>
+>> If you want me to try 10.2.6 or 7 instead, I can do that, but no
+>> guarantee I can reproduce it any time soon.
+> There have been lots of scrub-related patches since 10.2.5, but I don't 
+> see one that would explain this.  I'm guessing there is a scrub waitlist 
+> bug that we aren't turning up in qa because our thrashing tests are 
+> triggering lots of other actions in sequence (peering from up/down osds 
+> and balancing) and those probably have the effect of 
+> clearing the issue.
+>
+> Next time you see it, can you capture the output of 'ceph daemon osd.NNN 
+> ops' so we can see what steps the request went through?  Also, any 
+> additional or more specific clues as to what might have triggered it would 
+> help.
+>
+> Thanks!
+> sage
+>
+
+
+Here, we go...
+
+> 2017-04-20 05:03:58.522624 osd.20 10.3.0.132:6824/1088346 2078 :
+> cluster [WRN] slow request 20480.953923 seconds old, received at
+> 2017-04-19 23:22:37.568657: replica scrub(pg:
+> 4.2d,from:0'0,to:79873'5433886,epoch:79873,start:4:b46a9ab4:::rbd_data.43e4a9238e1f29.00000000000019fe:e438,end:4:b46a9ab4:::rbd_data.43e4a9238e1f29.00000000000019fe:e43a,chunky:1,deep:1,seed:4294967295,version:6)
+> currently reached_pg
+>
+>
+> root@ceph3:/var/log/ceph # ceph pg dump | grep -E "^pg_stat|^4.2d"
+> dumped all in format plain
+> pg_stat objects mip     degr    misp    unf     bytes   log    
+> disklog state   state_stamp     v       reported        up     
+> up_primary      acting  acting_primary  last_scrub      scrub_stamp 
+> last_deep_scrub deep_scrub_stamp
+> 4.2d    3494    0       0       0       0       13061467136    
+> 3012    3012    active+clean+scrubbing+deep     2017-04-19
+> 23:11:22.763008      80142'5447712   80142:3027638   [14,7,20]  
+> 14       [14,7,20]       14      76449'5396453   2017-04-18
+> 17:30:01.419498      73551'5298960   2017-04-15 03:23:48.821848
+>
+> ceph daemon osd.14 ops > longscrubbug.14.log # ceph1
+> ceph daemon osd.7 ops > longscrubbug.7.log # ceph3
+> ceph daemon osd.20 ops > longscrubbug.20.log # ceph2
+>
+>
+>
+> peter@peter:~/tmp/longscrubbug $ cat longscrubbug.14.log
+> {
+>     "ops": [],
+>     "num_ops": 0
+> }
+>
+> peter@peter:~/tmp/longscrubbug $ cat longscrubbug.7.log
+> {
+>     "ops": [],
+>     "num_ops": 0
+> }
+>
+> peter@peter:~/tmp/longscrubbug $ cat longscrubbug.20.log
+> {
+>     "ops": [
+>         {
+>             "description": "replica scrub(pg:
+> 4.2d,from:0'0,to:79873'5433886,epoch:79873,start:4:b46a9ab4:::rbd_data.43e4a9238e1f29.00000000000019fe:e438,end:4:b46a9ab4:::rbd_data.43e4a9238e1f29.00000000000019fe:e43a,chunky:1,deep:1,seed:4294967295,version:6)",
+>             "initiated_at": "2017-04-19 23:22:37.568657",
+>             "age": 30563.826540,
+>             "duration": 30563.826803,
+>             "type_data": [
+>                 "reached pg",
+>                 [
+>                     {
+>                         "time": "2017-04-19 23:22:37.568657",
+>                         "event": "initiated"
+>                     },
+>                     {
+>                         "time": "2017-04-19 23:22:37.568769",
+>                         "event": "queued_for_pg"
+>                     },
+>                     {
+>                         "time": "2017-04-19 23:22:37.568814",
+>                         "event": "reached_pg"
+>                     }
+>                 ]
+>             ]
+>         }
+>     ],
+>     "num_ops": 1
+> }
+>
+
+to me that looks kinda non-useful... anything else you need? (I think
+I'll leave this one alone for a while in case you reply soon and want
+something)
+
