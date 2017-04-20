@@ -1,52 +1,54 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: Smarter blacklisting?
-Date: Wed, 19 Apr 2017 16:26:08 -0700
-Message-ID: <f354a27c-931d-ce64-4fa4-e4f6d802998d@redhat.com>
-References: <CALe9h7dh2=BYjSdSuPXKE457TWg06xrw6QOjmbk_tLvU5fd69w@mail.gmail.com>
- <alpine.DEB.2.11.1704181638530.6579@piezo.novalocal>
- <CAJ4mKGZxf3RcZGub7PKkpDV_GDZPBXACtX1tVwxdw2SpS1cooA@mail.gmail.com>
- <CALe9h7e6qY_yqzsFzsGNNVi2DG_JwNEti=gP-pkB_LZiXu5_ig@mail.gmail.com>
- <alpine.DEB.2.11.1704191315210.6575@piezo.novalocal>
+From: "Martin K. Petersen" <martin.petersen@oracle.com>
+Subject: Re: [PATCH] block: get rid of blk_integrity_revalidate()
+Date: Wed, 19 Apr 2017 22:04:59 -0400
+Message-ID: <yq1shl3rfzo.fsf@oracle.com>
+References: <1492533800-30627-1-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38024 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S966081AbdDSX0L (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 19 Apr 2017 19:26:11 -0400
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id A9C898049E
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Apr 2017 23:26:10 +0000 (UTC)
-In-Reply-To: <alpine.DEB.2.11.1704191315210.6575@piezo.novalocal>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Jason Dillaman <dillaman@redhat.com>, Mike Christie <mchristi@redhat.com>
+Content-Type: text/plain
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <1492533800-30627-1-git-send-email-idryomov@gmail.com> (Ilya
+        Dryomov's message of "Tue, 18 Apr 2017 18:43:20 +0200")
+Sender: linux-block-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "Martin K. Petersen" <martin.petersen@oracle.com>, Dan Williams <dan.j.williams@intel.com>, Christoph Hellwig <hch@lst.de>, Mike Snitzer <snitzer@redhat.com>, Jens Axboe <axboe@fb.com>, linux-block@vger.kernel.org, linux-nvme@lists.infradead.org, dm-devel@redhat.com, ceph-devel@vger.kernel.org, Keith Busch <keith.busch@intel.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On 04/19/2017 06:16 AM, Sage Weil wrote:
-> On Wed, 19 Apr 2017, John Spray wrote:
->> I was already pondering where the more detailed blacklist info (e.g.
->> ids of clients) should go, as it's not something that actually needs
->> to be shared with all the normal OSDMap subscribers (it's only the
->> entity that does the blacklist removal that needs to see that).  It's
->> already not ideal imho that we expose the list of all blacklisted
->> clients to all the other clients -- in general they shouldn't be able
->> to e.g. learn one another's addresses like this.
+Ilya Dryomov <idryomov@gmail.com> writes:
+
+Ilya,
+
+> Commit 25520d55cdb6 ("block: Inline blk_integrity in struct gendisk")
+> introduced blk_integrity_revalidate(), which seems to assume ownership
+> of the stable pages flag and unilaterally clears it if no blk_integrity
+> profile is registered:
 >
-> We already break the OSDMap encoding into two sections: the first part
-> that clients care about, and the second part that is only used by OSDs.
-> (The kernel client doesn't bother to decode the second half.)
+>     if (bi->profile)
+>             disk->queue->backing_dev_info->capabilities |=
+>                     BDI_CAP_STABLE_WRITES;
+>     else
+>             disk->queue->backing_dev_info->capabilities &=
+>                     ~BDI_CAP_STABLE_WRITES;
 >
-> I suspect it wouldn't take much to send abbreviated maps (and
-> incrementals) to clients that don't include that second half at all...
+> It's called from revalidate_disk() and rescan_partitions(), making it
+> impossible to enable stable pages for drivers that support partitions
+> and don't use blk_integrity: while the call in revalidate_disk() can be
+> trivially worked around (see zram, which doesn't support partitions and
+> hence gets away with zram_revalidate_disk()), rescan_partitions() can
+> be triggered from userspace at any time.  This breaks rbd, where the
+> ceph messenger is responsible for generating/verifying CRCs.
+>
+> Since blk_integrity_{un,}register() "must" be used for (un)registering
+> the integrity profile with the block layer, move BDI_CAP_STABLE_WRITES
+> setting there.  This way drivers that call blk_integrity_register() and
+> use integrity infrastructure won't interfere with drivers that don't
+> but still want stable pages.
 
-I was talking to Jason and Mike about another use of more generalized
-blacklisting at Vault, but I can't remember the details - do you guys?
+I seem to recall that the reason for the revalidate hook was that either
+NVMe or nvdimm had to register an integrity profile prior to the actual
+format being known.
 
-IIRC it sounded like that use would make sense as a separate map that
-osds and clients would subscribe to.
+So while I am OK with the change from a SCSI perspective, I think we
+need Keith and Dan to ack it.
 
-Josh
+-- 
+Martin K. Petersen	Oracle Linux Engineering
