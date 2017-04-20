@@ -1,84 +1,55 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Ceph-deploy for FreeBSD
-Date: Thu, 20 Apr 2017 10:55:25 +0200
-Message-ID: <68eaf07b-e611-fb55-ca9c-08dceb8cae14@digiware.nl>
-References: <30f688f7-a156-5275-94cb-fbc07b7d449e@digiware.nl>
- <76dc3a7e-80bb-6c9d-d502-535258ce0b54@digiware.nl>
- <CAJ4mKGZmMv+ZcuBEkvaqajW7ntK26TDEbT77DM+nDFsPxsyDOw@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 0/2] fs, ceph filesystem refcount conversions
+Date: Thu, 20 Apr 2017 11:40:37 +0200
+Message-ID: <CAOi1vP-cVj19gU4yi8z0wssokT8oTM1n-cKRURDdL0t2ztxJ6w@mail.gmail.com>
+References: <1488532507-27863-1-git-send-email-elena.reshetova@intel.com>
+ <CAOi1vP-wZL9yW=_MkhU0x6fGn=9=xEYP1T03ikL2p6g49Vandw@mail.gmail.com> <2236FBA76BA1254E88B949DDB74E612B41C8D6E8@IRSMSX102.ger.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:28819 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S943218AbdDTIza (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 20 Apr 2017 04:55:30 -0400
-In-Reply-To: <CAJ4mKGZmMv+ZcuBEkvaqajW7ntK26TDEbT77DM+nDFsPxsyDOw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>, Joao Eduardo Luis <joao@suse.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <2236FBA76BA1254E88B949DDB74E612B41C8D6E8@IRSMSX102.ger.corp.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Reshetova, Elena" <elena.reshetova@intel.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ceph Development <ceph-devel@vger.kernel.org>, "peterz@infradead.org" <peterz@infradead.org>, Greg KH <gregkh@linuxfoundation.org>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On 19-4-2017 22:47, Gregory Farnum wrote:
-> On Fri, Apr 14, 2017 at 1:44 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> Having solved the first few step in ceph-deploy, I can now get to the
->> point where it actually wants to start the first monitor.
->> Like:
->>     /usr/local/bin/ceph-deploy mon create-initial
+On Thu, Apr 20, 2017 at 9:40 AM, Reshetova, Elena
+<elena.reshetova@intel.com> wrote:
+>
+>> On Fri, Mar 3, 2017 at 10:15 AM, Elena Reshetova
+>> <elena.reshetova@intel.com> wrote:
+>> > Now when new refcount_t type and API are finally merged
+>> > (see include/linux/refcount.h), the following
+>> > patches convert various refcounters in the ceph filesystem from atomic_t
+>> > to refcount_t. By doing this we prevent intentional or accidental
+>> > underflows or overflows that can led to use-after-free vulnerabilities.
+>> >
+>> > The below patches are fully independent and can be cherry-picked separately.
+>> > Since we convert all kernel subsystems in the same fashion, resulting
+>> > in about 300 patches, we have to group them for sending at least in some
+>> > fashion to be manageable. Please excuse the long cc list.
+>> >
+>> > Not runtime tested, since I am not sure how to do it for ceph.
+>> > However changes are pretty trivial in this case.
+>> >
+>> > Elena Reshetova (2):
+>> >   fs, ceph: convert ceph_mds_session.s_ref from atomic_t to refcount_t
+>> >   fs, ceph: convert ceph_cap_snap.nref from atomic_t to refcount_t
+>> >
+>> >  fs/ceph/caps.c       |  4 ++--
+>> >  fs/ceph/mds_client.c | 18 +++++++++---------
+>> >  fs/ceph/mds_client.h |  5 +++--
+>> >  fs/ceph/snap.c       |  2 +-
+>> >  fs/ceph/super.h      |  5 +++--
+>> >  5 files changed, 18 insertions(+), 16 deletions(-)
 >>
->> And if I look at the other platform booting the inital monitor is
->> started thru the init|systemd|upstart....
->>
->> However under FreeBSD bsdrc I require atleast in ceph.conf
->> [mon]
->>     host = cephtest
->>
->> This is not the case on the other platforms?
->>
->> And how would I otherwise get this into the ceph.conf?
-> 
-> I think you're running into some annoying deployment sharp edges here.
-> The monitor "host" config value has gone in and out of being necessary
-> at various times — the whole monitor boot sequence is pretty finicky
-> so I've added Joao to the thread. It's possible that the way things
-> are default-configured in FreeBSD that's necessary to work around some
-> other default configs?
+>> I'll pull these into testing.
+>
+> Just a check: how did testing went on this?
+> If everything is good, can you merge the changes?
 
-Hi Greg, Joao,
+Yep, I'll merge these into 4.12.
 
-Could very well be like you describe...
+Thanks,
 
-The call sequence in of course rather convoluted:
-
-	ceph-deply
-	-> remote call ceph-disk prepare
-	-> remote call ceph-disk activat
-
-And expect after the activate to actually have a running OSD.
-But to do so, ceph-disk calls the FreeBSD init script:
-	service ceph start osd.x
-that activates actual initscript:
-	/usr/local/etc/rc.d/ceph
-which calls:
-	init-ceph
-
-And init-ceph goes thru /etc/ceph/ceph.conf for OSD that it can start on
-this host. Now if the OSD description/config is not there, it doesn't
-get started.
-
-I'm doing the service -> rc.d/ceph -> init-ceph way, because that seems
-to me the natural way of doing things, and that will take into account
-all the settings/bits/other stuff that is set on that host.
-AND by keeping init-ceph as main executor, I can try to keep in pace
-with the code in the ceph-repo.
-
-So I guess the best fix is to add routines to add the OSD to the config
-and then copy it to the remote host.
-
-Why would it be not wanted on the other systems?
-Otherwise I'd call those adds only from the FreeBSD init part.
-
---WjW
-
-
-
+                Ilya
