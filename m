@@ -1,153 +1,62 @@
-From: Alexander Graf <agraf@suse.de>
-Subject: Re: [PATCH] ceph: Fix file open flags on ppc64
-Date: Fri, 21 Apr 2017 15:59:13 +0200
-Message-ID: <51c27e5d-6c80-dfda-b371-dd6e46f911dd@suse.de>
-References: <1492692030-146869-1-git-send-email-agraf@suse.de>
- <EEF153C1-1BC5-4BDF-8A73-5836E3A5D305@redhat.com>
+From: Dan Williams <dan.j.williams@intel.com>
+Subject: Re: [PATCH] block: get rid of blk_integrity_revalidate()
+Date: Fri, 21 Apr 2017 13:13:52 -0700
+Message-ID: <CAPcyv4h_T734PmfLPOgz8U_jNXKburcD688fdGRJX+SHQvfPjQ@mail.gmail.com>
+References: <1492533800-30627-1-git-send-email-idryomov@gmail.com> <yq1shl3rfzo.fsf@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:54035 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1161252AbdDUN7Q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 21 Apr 2017 09:59:16 -0400
-In-Reply-To: <EEF153C1-1BC5-4BDF-8A73-5836E3A5D305@redhat.com>
+Received: from mail-oi0-f51.google.com ([209.85.218.51]:33794 "EHLO
+        mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1161420AbdDUUOM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Apr 2017 16:14:12 -0400
+Received: by mail-oi0-f51.google.com with SMTP id x184so111425147oia.1
+        for <ceph-devel@vger.kernel.org>; Fri, 21 Apr 2017 13:14:11 -0700 (PDT)
+In-Reply-To: <yq1shl3rfzo.fsf@oracle.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jan.Fajerski@suse.com
+To: "Martin K. Petersen" <martin.petersen@oracle.com>
+Cc: Ilya Dryomov <idryomov@gmail.com>, Christoph Hellwig <hch@lst.de>, Mike Snitzer <snitzer@redhat.com>, Jens Axboe <axboe@fb.com>, linux-block@vger.kernel.org, linux-nvme@lists.infradead.org, dm-devel@redhat.com, ceph-devel@vger.kernel.org, Keith Busch <keith.busch@intel.com>
 
-
-
-On 21.04.17 04:22, Yan, Zheng wrote:
+On Wed, Apr 19, 2017 at 7:04 PM, Martin K. Petersen
+<martin.petersen@oracle.com> wrote:
+> Ilya Dryomov <idryomov@gmail.com> writes:
 >
->> On 20 Apr 2017, at 20:40, Alexander Graf <agraf@suse.de> wrote:
->>
->> The file open flags (O_foo) are platform specific and should never go
->> out to an interface that is not local to the system.
->>
->> Unfortunately these flags have leaked out onto the wire in the cephfs
->> implementation. That lead to bogus flags getting transmitted on ppc64.
->>
->> This patch converts the kernel view of flags to the ceph view of file
->> open flags. On x86 systems, the new function should get optimized out
->> by smart compilers. On systems where the flags differ, it should adapt
->> them accordingly.
->>
->> Fixes: 124e68e74 ("ceph: file operations")
->> Signed-off-by: Alexander Graf <agraf@suse.de>
->> ---
->> fs/ceph/file.c               | 45 +++++++++++++++++++++++++++++++++++++++++++-
->> include/linux/ceph/ceph_fs.h | 24 +++++++++++++++++++++++
->> 2 files changed, 68 insertions(+), 1 deletion(-)
->>
->> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
->> index 26cc954..0ed6392 100644
->> --- a/fs/ceph/file.c
->> +++ b/fs/ceph/file.c
->> @@ -103,6 +103,49 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
->> 	return ERR_PTR(ret);
->> }
->>
->> +static u32 ceph_flags_sys2wire(u32 flags)
->> +{
->> +	u32 wire_flags = 0;
->> +
->> +	switch (flags & O_ACCMODE) {
->> +	case O_RDONLY:
->> +		wire_flags |= CEPH_O_RDONLY;
->> +		break;
->> +	case O_WRONLY:
->> +		wire_flags |= CEPH_O_WRONLY;
->> +		break;
->> +	case O_RDWR:
->> +		wire_flags |= CEPH_O_RDWR;
->> +		break;
->> +	}
->> +	flags &= ~O_ACCMODE;
->> +
->> +#define ceph_sys2wire(a) if (flags & a) { wire_flags |= CEPH_##a; flags &= ~a; }
->> +
->> +	ceph_sys2wire(O_CREAT);
->> +	ceph_sys2wire(O_NOCTTY);
->> +	ceph_sys2wire(O_TRUNC);
->> +	ceph_sys2wire(O_APPEND);
->> +	ceph_sys2wire(O_NONBLOCK);
->> +	ceph_sys2wire(O_DSYNC);
->> +	ceph_sys2wire(FASYNC);
->> +	ceph_sys2wire(O_DIRECT);
->> +	ceph_sys2wire(O_LARGEFILE);
->> +	ceph_sys2wire(O_DIRECTORY);
->> +	ceph_sys2wire(O_NOFOLLOW);
->> +	ceph_sys2wire(O_NOATIME);
->> +	ceph_sys2wire(O_CLOEXEC);
->> +	ceph_sys2wire(__O_SYNC);
->> +	ceph_sys2wire(O_PATH);
->> +	ceph_sys2wire(__O_TMPFILE);
->> +
->> +#undef ceph_sys2wire
->> +
->> +	WARN_ONCE(flags, "Found unknown open flags: %x", flags);
->> +
->> +	return wire_flags;
->> +}
->> +
->> /*
->>  * Prepare an open request.  Preallocate ceph_cap to avoid an
->>  * inopportune ENOMEM later.
->> @@ -123,7 +166,7 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
->> 	if (IS_ERR(req))
->> 		goto out;
->> 	req->r_fmode = ceph_flags_to_mode(flags);
->> -	req->r_args.open.flags = cpu_to_le32(flags);
->> +	req->r_args.open.flags = ceph_flags_sys2wire(cpu_to_le32(flags));
+> Ilya,
 >
-> cpu_to_le32(ceph_flags_sys2wire(flags)) ?
-
-Jeff also pointed to it. Definitely, yes. My thinko.
-
->
->> 	req->r_args.open.mode = cpu_to_le32(create_mode);
->> out:
->> 	return req;
->> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
->> index f4b2ee1..d254b48 100644
->> --- a/include/linux/ceph/ceph_fs.h
->> +++ b/include/linux/ceph/ceph_fs.h
->> @@ -366,6 +366,30 @@ enum {
->> #define CEPH_READDIR_FRAG_COMPLETE	(1<<8)
->> #define CEPH_READDIR_HASH_ORDER		(1<<9)
+>> Commit 25520d55cdb6 ("block: Inline blk_integrity in struct gendisk")
+>> introduced blk_integrity_revalidate(), which seems to assume ownership
+>> of the stable pages flag and unilaterally clears it if no blk_integrity
+>> profile is registered:
 >>
->> +/*
->> + * open request flags
->> + */
->> +#define CEPH_O_RDONLY		00000000
->> +#define CEPH_O_WRONLY		00000001
->> +#define CEPH_O_RDWR		00000002
->> +#define CEPH_O_CREAT		00000100
->> +#define CEPH_O_EXCL		00000200
->> +#define CEPH_O_NOCTTY		00000400
->> +#define CEPH_O_TRUNC		00001000
->> +#define CEPH_O_APPEND		00002000
->> +#define CEPH_O_NONBLOCK		00004000
->> +#define CEPH_O_DSYNC		00010000
->> +#define CEPH_FASYNC		00020000
->> +#define CEPH_O_DIRECT		00040000
->> +#define CEPH_O_LARGEFILE	00100000
->> +#define CEPH_O_DIRECTORY	00200000
->> +#define CEPH_O_NOFOLLOW		00400000
->> +#define CEPH_O_NOATIME		01000000
->> +#define CEPH_O_CLOEXEC		02000000
->> +#define CEPH___O_SYNC		04000000
->> +#define CEPH_O_PATH		010000000
->> +#define CEPH___O_TMPFILE	020000000
->> +
+>>     if (bi->profile)
+>>             disk->queue->backing_dev_info->capabilities |=
+>>                     BDI_CAP_STABLE_WRITES;
+>>     else
+>>             disk->queue->backing_dev_info->capabilities &=
+>>                     ~BDI_CAP_STABLE_WRITES;
+>>
+>> It's called from revalidate_disk() and rescan_partitions(), making it
+>> impossible to enable stable pages for drivers that support partitions
+>> and don't use blk_integrity: while the call in revalidate_disk() can be
+>> trivially worked around (see zram, which doesn't support partitions and
+>> hence gets away with zram_revalidate_disk()), rescan_partitions() can
+>> be triggered from userspace at any time.  This breaks rbd, where the
+>> ceph messenger is responsible for generating/verifying CRCs.
+>>
+>> Since blk_integrity_{un,}register() "must" be used for (un)registering
+>> the integrity profile with the block layer, move BDI_CAP_STABLE_WRITES
+>> setting there.  This way drivers that call blk_integrity_register() and
+>> use integrity infrastructure won't interfere with drivers that don't
+>> but still want stable pages.
 >
-> RDONLY, WRONLY, RDWR, CREAT, EXCL, TRUNC, DIRECTORY, NOFOLLOW  are used by mds, no need to define the rest.
+> I seem to recall that the reason for the revalidate hook was that either
+> NVMe or nvdimm had to register an integrity profile prior to the actual
+> format being known.
+>
+> So while I am OK with the change from a SCSI perspective, I think we
+> need Keith and Dan to ack it.
 
-So currently the function checks for any bits it doesn't know about. Do 
-we want to drop that check then?
+Looks good to me,
 
-
-Alex
+Tested-by: Dan Williams <dan.j.williams@intel.com>
