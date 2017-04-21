@@ -1,50 +1,40 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Ceph-deploy for FreeBSD
-Date: Fri, 21 Apr 2017 11:46:04 +0200
-Message-ID: <77cc3068-e0d3-e834-6901-5b69a4a6b166@digiware.nl>
-References: <30f688f7-a156-5275-94cb-fbc07b7d449e@digiware.nl>
- <76dc3a7e-80bb-6c9d-d502-535258ce0b54@digiware.nl>
- <CAJ4mKGZmMv+ZcuBEkvaqajW7ntK26TDEbT77DM+nDFsPxsyDOw@mail.gmail.com>
- <68eaf07b-e611-fb55-ca9c-08dceb8cae14@digiware.nl>
- <5d1fbebf-243b-ece9-0a77-961f4d269c53@suse.cz>
- <20170421091325.t23jra6qdbfjgjeh@nora.maurer-it.com>
+From: Elita Lobo <loboelita@gmail.com>
+Subject: When is do_redundant_reads flag set?
+Date: Fri, 21 Apr 2017 15:42:34 +0530
+Message-ID: <CAA8xDw0KvsgYGC7utasZKpy5_960T3vDd4N_7TVecSey=f4X=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:43684 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S971117AbdDUJqK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 21 Apr 2017 05:46:10 -0400
-In-Reply-To: <20170421091325.t23jra6qdbfjgjeh@nora.maurer-it.com>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:36367 "EHLO
+        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1037795AbdDUKMf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Apr 2017 06:12:35 -0400
+Received: by mail-wm0-f52.google.com with SMTP id o81so12111018wmb.1
+        for <ceph-devel@vger.kernel.org>; Fri, 21 Apr 2017 03:12:35 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Fabian_Gr=c3=bcnbichler?= <f.gruenbichler@proxmox.com>, Nathan Cutler <ncutler@suse.cz>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Joao Eduardo Luis <joao@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, Myna V <mynaramana@gmail.com>
 
-On 21-04-17 11:13, Fabian Grünbichler wrote:
-> On Thu, Apr 20, 2017 at 08:11:38PM +0200, Nathan Cutler wrote:
->> Hi Willem:
->>
->> It sounds like you are trying to use the sysvinit scripts? These have been
->> unmaintained (presumably with lots of weeds growing up) since infernalis.
->> Until now I have been assuming that all init systems other than systemd
->> (sysvinit, upstart, etc.) are deprecated in Ceph.
-> 
-> Slightly OT, but AFAICT http://tracker.ceph.com/issues/18305 still
-> applies to the official ceph.com Kraken Debian packages, i.e., ceph-base
-> installs and activates the init.d script, which then races against the
-> (udev-activated) ceph-osd systemd units. If anything except systemd is
-> indeed deprecated, I wonder why the Debian packages (still) ship AND
-> activate both systemd units and Sys V init scripts?
-> 
-> (Note that the proposed fix probably does not apply as is anymore,
-> because ceph-disk and the systemd units have been changed in the
-> meantime).
-> 
-Thanx for the headsup.
+Hi,
 
-It means that I cannot get my axe out and start whacking at init-ceph
-just at will.
+We were going through get_min_avail_to_read_shards function and we had
+a query regarding the same.
 
---WjW
+int get_min_avail_to_read_shards(
+    const hobject_t &hoid,     ///< [in] object
+    const set<int> &want,      ///< [in] desired shards
+    bool for_recovery,         ///< [in] true if we may use non-acting replicas
+    bool do_redundant_reads,   ///< [in] true if we want to issue
+redundant reads to reduce latency
+    //set<pg_shard_t> *to_read   ///< [out] shards to read
+    //); ///< @return error code, 0 on success
+    map<pg_shard_t, list<pair<int,int>>> *to_read);
+
+In which all cases is do_redundant_reads flag set and what is the
+purpose of this flag?
+
+
+
+Thanking you,
+Yours sincerely,
+Elita Lobo
