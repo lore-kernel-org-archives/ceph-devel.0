@@ -1,159 +1,139 @@
-From: Alexander Graf <agraf@suse.de>
-Subject: Re: [PATCH] ceph: Fix file open flags on ppc64
-Date: Fri, 21 Apr 2017 09:25:26 +0200
-Message-ID: <33BF9A5A-2B46-48B7-914C-10197BACA0E0@suse.de>
-References: <1492692030-146869-1-git-send-email-agraf@suse.de> <EEF153C1-1BC5-4BDF-8A73-5836E3A5D305@redhat.com> <20170421065939.hunjgekn4knrfzx4@jf_suse_laptop>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain;
-        charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Ceph-deploy for FreeBSD
+Date: Fri, 21 Apr 2017 09:33:32 +0200
+Message-ID: <de44a5b4-593e-ed88-c3f4-93520fea972e@digiware.nl>
+References: <30f688f7-a156-5275-94cb-fbc07b7d449e@digiware.nl>
+ <76dc3a7e-80bb-6c9d-d502-535258ce0b54@digiware.nl>
+ <CAJ4mKGZmMv+ZcuBEkvaqajW7ntK26TDEbT77DM+nDFsPxsyDOw@mail.gmail.com>
+ <68eaf07b-e611-fb55-ca9c-08dceb8cae14@digiware.nl>
+ <5d1fbebf-243b-ece9-0a77-961f4d269c53@suse.cz>
+ <CAJ4mKGZzDTN4KQxFyM0Oify-w0PvxVaX77qwXSYhhMpRGpRkDg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:54183 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1035995AbdDUHZd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 21 Apr 2017 03:25:33 -0400
-In-Reply-To: <20170421065939.hunjgekn4knrfzx4@jf_suse_laptop>
+Received: from smtp.digiware.nl ([176.74.240.9]:43108 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1036078AbdDUHdg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 21 Apr 2017 03:33:36 -0400
+In-Reply-To: <CAJ4mKGZzDTN4KQxFyM0Oify-w0PvxVaX77qwXSYhhMpRGpRkDg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jan Fajerski <jfajerski@suse.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jan.Fajerski@suse.com
+To: Gregory Farnum <gfarnum@redhat.com>, Nathan Cutler <ncutler@suse.cz>
+Cc: Joao Eduardo Luis <joao@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
+On 20-04-17 20:18, Gregory Farnum wrote:
+> On Thu, Apr 20, 2017 at 11:11 AM, Nathan Cutler <ncutler@suse.cz> wrote:
+>> Hi Willem:
+>>
+>> It sounds like you are trying to use the sysvinit scripts? These have been
+>> unmaintained (presumably with lots of weeds growing up) since infernalis.
+>> Until now I have been assuming that all init systems other than systemd
+>> (sysvinit, upstart, etc.) are deprecated in Ceph.
 
+sysvinit => init-ceph?
 
-> Am 21.04.2017 um 08:59 schrieb Jan Fajerski <jfajerski@suse.com>:
+If that is the case and is "abandoned", I could start making it more to
+my liking to use it under FreeBSD. FreeBSD does not (yet) have this wild
+choice of init systems.
+
+Attempts to port Linux one to FreeBSD are in progress, but if they make
+it to a large crowd is questionable. Unless it is incorporated in the
+the FreeBSD release itself.
+
+> Yeah. In particular, the scripts generally set up some magic to turn
+> on daemons instead of enumerating them in the ceph.conf. I forget how
+> the OSDs work but it's some hotplug system, and I think maybe the
+> monitor scripts just look for any monitor directories and start them?
+> Don't really remember.
+
+So systemd is digging around in /dev and /sys proding for devices with
+Ceph properties, and then starts the required ceph-(mon|osd|mds|mgr).
+Or Udev-events telling systemd to act on a device that presents itself
+in the system?
+
+So on an average system there is no OSD info in /etc/ceph/ceph.conf
+
+> -Greg
 > 
->> On Fri, Apr 21, 2017 at 10:22:16AM +0800, Yan, Zheng wrote:
->> 
->>> On 20 Apr 2017, at 20:40, Alexander Graf <agraf@suse.de> wrote:
->>> 
->>> The file open flags (O_foo) are platform specific and should never go
->>> out to an interface that is not local to the system.
->>> 
->>> Unfortunately these flags have leaked out onto the wire in the cephfs
->>> implementation. That lead to bogus flags getting transmitted on ppc64.
->>> 
->>> This patch converts the kernel view of flags to the ceph view of file
->>> open flags. On x86 systems, the new function should get optimized out
->>> by smart compilers. On systems where the flags differ, it should adapt
->>> them accordingly.
->>> 
->>> Fixes: 124e68e74 ("ceph: file operations")
->>> Signed-off-by: Alexander Graf <agraf@suse.de>
->>> ---
->>> fs/ceph/file.c               | 45 +++++++++++++++++++++++++++++++++++++++++++-
->>> include/linux/ceph/ceph_fs.h | 24 +++++++++++++++++++++++
->>> 2 files changed, 68 insertions(+), 1 deletion(-)
->>> 
->>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
->>> index 26cc954..0ed6392 100644
->>> --- a/fs/ceph/file.c
->>> +++ b/fs/ceph/file.c
->>> @@ -103,6 +103,49 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
->>>    return ERR_PTR(ret);
->>> }
->>> 
->>> +static u32 ceph_flags_sys2wire(u32 flags)
->>> +{
->>> +    u32 wire_flags = 0;
->>> +
->>> +    switch (flags & O_ACCMODE) {
->>> +    case O_RDONLY:
->>> +        wire_flags |= CEPH_O_RDONLY;
->>> +        break;
->>> +    case O_WRONLY:
->>> +        wire_flags |= CEPH_O_WRONLY;
->>> +        break;
->>> +    case O_RDWR:
->>> +        wire_flags |= CEPH_O_RDWR;
->>> +        break;
->>> +    }
->>> +    flags &= ~O_ACCMODE;
->>> +
->>> +#define ceph_sys2wire(a) if (flags & a) { wire_flags |= CEPH_##a; flags &= ~a; }
->>> +
->>> +    ceph_sys2wire(O_CREAT);
->>> +    ceph_sys2wire(O_NOCTTY);
->>> +    ceph_sys2wire(O_TRUNC);
->>> +    ceph_sys2wire(O_APPEND);
->>> +    ceph_sys2wire(O_NONBLOCK);
->>> +    ceph_sys2wire(O_DSYNC);
->>> +    ceph_sys2wire(FASYNC);
->>> +    ceph_sys2wire(O_DIRECT);
->>> +    ceph_sys2wire(O_LARGEFILE);
->>> +    ceph_sys2wire(O_DIRECTORY);
->>> +    ceph_sys2wire(O_NOFOLLOW);
->>> +    ceph_sys2wire(O_NOATIME);
->>> +    ceph_sys2wire(O_CLOEXEC);
->>> +    ceph_sys2wire(__O_SYNC);
->>> +    ceph_sys2wire(O_PATH);
->>> +    ceph_sys2wire(__O_TMPFILE);
->>> +
->>> +#undef ceph_sys2wire
->>> +
->>> +    WARN_ONCE(flags, "Found unknown open flags: %x", flags);
->>> +
->>> +    return wire_flags;
->>> +}
->>> +
->>> /*
->>> * Prepare an open request.  Preallocate ceph_cap to avoid an
->>> * inopportune ENOMEM later.
->>> @@ -123,7 +166,7 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
->>>    if (IS_ERR(req))
->>>        goto out;
->>>    req->r_fmode = ceph_flags_to_mode(flags);
->>> -    req->r_args.open.flags = cpu_to_le32(flags);
->>> +    req->r_args.open.flags = ceph_flags_sys2wire(cpu_to_le32(flags));
->> 
->> cpu_to_le32(ceph_flags_sys2wire(flags)) ?
->> 
->>>    req->r_args.open.mode = cpu_to_le32(create_mode);
->>> out:
->>>    return req;
->>> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
->>> index f4b2ee1..d254b48 100644
->>> --- a/include/linux/ceph/ceph_fs.h
->>> +++ b/include/linux/ceph/ceph_fs.h
->>> @@ -366,6 +366,30 @@ enum {
->>> #define CEPH_READDIR_FRAG_COMPLETE    (1<<8)
->>> #define CEPH_READDIR_HASH_ORDER        (1<<9)
->>> 
->>> +/*
->>> + * open request flags
->>> + */
->>> +#define CEPH_O_RDONLY        00000000
->>> +#define CEPH_O_WRONLY        00000001
->>> +#define CEPH_O_RDWR        00000002
->>> +#define CEPH_O_CREAT        00000100
->>> +#define CEPH_O_EXCL        00000200
->>> +#define CEPH_O_NOCTTY        00000400
->>> +#define CEPH_O_TRUNC        00001000
->>> +#define CEPH_O_APPEND        00002000
->>> +#define CEPH_O_NONBLOCK        00004000
->>> +#define CEPH_O_DSYNC        00010000
->>> +#define CEPH_FASYNC        00020000
->>> +#define CEPH_O_DIRECT        00040000
->>> +#define CEPH_O_LARGEFILE    00100000
->>> +#define CEPH_O_DIRECTORY    00200000
->>> +#define CEPH_O_NOFOLLOW        00400000
->>> +#define CEPH_O_NOATIME        01000000
->>> +#define CEPH_O_CLOEXEC        02000000
->>> +#define CEPH___O_SYNC        04000000
->>> +#define CEPH_O_PATH        010000000
->>> +#define CEPH___O_TMPFILE    020000000
->>> +
->> 
->> RDONLY, WRONLY, RDWR, CREAT, EXCL, TRUNC, DIRECTORY, NOFOLLOW  are used by mds, no need to define the rest.
->> 
->>> union ceph_mds_request_args {
->>>    struct {
->>>        __le32 mask;                 /* CEPH_CAP_* */
->> 
->> Besides, the ceph mds server requires the fix too. Do you have patch for that?
-> If the wire format is normalized like this, the mds can remain unchanged, can it not?
-
-I think he means the case when mds is running on a ppc64 host.
-
-Alex
-
+>> Cheers,
+>> Nathan
+>>
+>>
+>> On 04/20/2017 10:55 AM, Willem Jan Withagen wrote:
+>>>
+>>> On 19-4-2017 22:47, Gregory Farnum wrote:
+>>>>
+>>>> On Fri, Apr 14, 2017 at 1:44 PM, Willem Jan Withagen <wjw@digiware.nl>
+>>>> wrote:
+>>>>>
+>>>>> Having solved the first few step in ceph-deploy, I can now get to the
+>>>>> point where it actually wants to start the first monitor.
+>>>>> Like:
+>>>>>     /usr/local/bin/ceph-deploy mon create-initial
+>>>>>
+>>>>> And if I look at the other platform booting the inital monitor is
+>>>>> started thru the init|systemd|upstart....
+>>>>>
+>>>>> However under FreeBSD bsdrc I require atleast in ceph.conf
+>>>>> [mon]
+>>>>>     host = cephtest
+>>>>>
+>>>>> This is not the case on the other platforms?
+>>>>>
+>>>>> And how would I otherwise get this into the ceph.conf?
+>>>>
+>>>>
+>>>> I think you're running into some annoying deployment sharp edges here.
+>>>> The monitor "host" config value has gone in and out of being necessary
+>>>> at various times — the whole monitor boot sequence is pretty finicky
+>>>> so I've added Joao to the thread. It's possible that the way things
+>>>> are default-configured in FreeBSD that's necessary to work around some
+>>>> other default configs?
+>>>
+>>>
+>>> Hi Greg, Joao,
+>>>
+>>> Could very well be like you describe...
+>>>
+>>> The call sequence in of course rather convoluted:
+>>>
+>>>         ceph-deply
+>>>         -> remote call ceph-disk prepare
+>>>         -> remote call ceph-disk activat
+>>>
+>>> And expect after the activate to actually have a running OSD.
+>>> But to do so, ceph-disk calls the FreeBSD init script:
+>>>         service ceph start osd.x
+>>> that activates actual initscript:
+>>>         /usr/local/etc/rc.d/ceph
+>>> which calls:
+>>>         init-ceph
+>>>
+>>> And init-ceph goes thru /etc/ceph/ceph.conf for OSD that it can start on
+>>> this host. Now if the OSD description/config is not there, it doesn't
+>>> get started.
+>>>
+>>> I'm doing the service -> rc.d/ceph -> init-ceph way, because that seems
+>>> to me the natural way of doing things, and that will take into account
+>>> all the settings/bits/other stuff that is set on that host.
+>>> AND by keeping init-ceph as main executor, I can try to keep in pace
+>>> with the code in the ceph-repo.
+>>>
+>>> So I guess the best fix is to add routines to add the OSD to the config
+>>> and then copy it to the remote host.
+>>>
+>>> Why would it be not wanted on the other systems?
+>>> Otherwise I'd call those adds only from the FreeBSD init part.
+>>>
+>>> --WjW
+>>>
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
 
