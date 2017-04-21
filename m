@@ -1,31 +1,32 @@
-From: Sage Weil <sage@newdream.net>
+From: Fabian =?iso-8859-1?Q?Gr=FCnbichler?= <f.gruenbichler@proxmox.com>
 Subject: Re: Ceph-deploy for FreeBSD
-Date: Fri, 21 Apr 2017 13:52:45 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1704211351480.6575@piezo.novalocal>
-References: <30f688f7-a156-5275-94cb-fbc07b7d449e@digiware.nl> <76dc3a7e-80bb-6c9d-d502-535258ce0b54@digiware.nl> <CAJ4mKGZmMv+ZcuBEkvaqajW7ntK26TDEbT77DM+nDFsPxsyDOw@mail.gmail.com> <68eaf07b-e611-fb55-ca9c-08dceb8cae14@digiware.nl>
- <5d1fbebf-243b-ece9-0a77-961f4d269c53@suse.cz> <20170421091325.t23jra6qdbfjgjeh@nora.maurer-it.com> <alpine.DEB.2.11.1704211313220.6575@piezo.novalocal> <20170421133946.4r4qja74uwq6f25l@nora.maurer-it.com>
+Date: Fri, 21 Apr 2017 15:54:11 +0200
+Message-ID: <20170421135411.ehy5xp3yb7dfm2zi@nora.maurer-it.com>
+References: <30f688f7-a156-5275-94cb-fbc07b7d449e@digiware.nl>
+ <76dc3a7e-80bb-6c9d-d502-535258ce0b54@digiware.nl>
+ <CAJ4mKGZmMv+ZcuBEkvaqajW7ntK26TDEbT77DM+nDFsPxsyDOw@mail.gmail.com>
+ <68eaf07b-e611-fb55-ca9c-08dceb8cae14@digiware.nl>
+ <5d1fbebf-243b-ece9-0a77-961f4d269c53@suse.cz>
+ <20170421091325.t23jra6qdbfjgjeh@nora.maurer-it.com>
+ <alpine.DEB.2.11.1704211313220.6575@piezo.novalocal>
+ <20170421133946.4r4qja74uwq6f25l@nora.maurer-it.com>
  <alpine.DEB.2.11.1704211342220.6575@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-25069558-1492782767=:6575"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58796 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1040191AbdDUNwt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Apr 2017 09:52:49 -0400
+Received: from proxmox.maurer-it.com ([212.186.127.180]:59387 "EHLO
+        proxmox.maurer-it.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1040157AbdDUNyQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Apr 2017 09:54:16 -0400
+Content-Disposition: inline
 In-Reply-To: <alpine.DEB.2.11.1704211342220.6575@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-15?Q?Fabian_Gr=FCnbichler?= <f.gruenbichler@proxmox.com>
+To: Sage Weil <sage@newdream.net>
 Cc: Nathan Cutler <ncutler@suse.cz>, Willem Jan Withagen <wjw@digiware.nl>, Gregory Farnum <gfarnum@redhat.com>, Joao Eduardo Luis <joao@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-25069558-1492782767=:6575
-Content-Type: TEXT/PLAIN; charset=iso-8859-1
-Content-Transfer-Encoding: 8BIT
-
-On Fri, 21 Apr 2017, Sage Weil wrote:
+On Fri, Apr 21, 2017 at 01:45:05PM +0000, Sage Weil wrote:
 > On Fri, 21 Apr 2017, Fabian Grünbichler wrote:
 > > On Fri, Apr 21, 2017 at 01:16:23PM +0000, Sage Weil wrote:
 > > > On Fri, 21 Apr 2017, Fabian Grünbichler wrote:
@@ -85,10 +86,33 @@ On Fri, 21 Apr 2017, Sage Weil wrote:
 > anymore I'm not sure if it's still necessary or not.  (I guess it can't 
 > hurt, though!)
 
-Hmm, it's a bit tricky because of the package separation between 
-ceph-base, ceph-common, and ceph-osd.  The ceph sysvinit script is in the 
-base or common package but ceph-disk is in ceph-osd... I'm not sure where 
-the ceph.service masking service should go.
+I am sorry if that was not clear enough - the incompleteness I mentioned
+in my previous mail is not theoretical, if I "systemctl mask
+ceph.service" (which disables the init script) on a Debian Jessie /
+Ceph Jewel based system, not all OSDs will be activated on boot (in
+fact, most of the time none will). The ceph-osd services are only
+started if a udev add event for a OSD partition happens late enough in
+the boot process (e.g., if I hot unplug and replug the OSD disk, they
+are correctly started). I last tested this around 10.2.5 (and have had
+the "ceph-disk activate-all" ceph.service in place since), but it was
+very reproducible.
 
-sage
---8323329-25069558-1492782767=:6575--
+> 
+> > the whole ceph service startup is pretty messy in general IMHO,
+> > especially for OSDs where (IIRC?) udev rules are calling python scripts
+> > which are starting systemd units which are in turn calling python
+> > scripts with different parameters that end up starting systemd units
+> > which actually start daemons (somewhere in there the mounting happens as
+> > well..).
+> 
+> Agreed.  The goal with using udev like this was to make it all hotplug, 
+> but I'm not sure if any operators actually take advantage of this.  If 
+> they don't, we could consider going back to something a bit less weird...
+> 
+> sage
+
+I am undecided on this - the current state is far from elegant, but
+OTOH, simply moving OSD disks between hosts and having them work OOTB is
+a nice feature...
+
+
