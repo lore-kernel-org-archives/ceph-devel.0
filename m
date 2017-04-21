@@ -1,45 +1,84 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: When is do_redundant_reads flag set?
-Date: Fri, 21 Apr 2017 13:20:56 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1704211319500.6575@piezo.novalocal>
-References: <CAA8xDw0KvsgYGC7utasZKpy5_960T3vDd4N_7TVecSey=f4X=g@mail.gmail.com>
+From: Fabian =?iso-8859-1?Q?Gr=FCnbichler?= <f.gruenbichler@proxmox.com>
+Subject: Re: Ceph-deploy for FreeBSD
+Date: Fri, 21 Apr 2017 15:39:46 +0200
+Message-ID: <20170421133946.4r4qja74uwq6f25l@nora.maurer-it.com>
+References: <30f688f7-a156-5275-94cb-fbc07b7d449e@digiware.nl>
+ <76dc3a7e-80bb-6c9d-d502-535258ce0b54@digiware.nl>
+ <CAJ4mKGZmMv+ZcuBEkvaqajW7ntK26TDEbT77DM+nDFsPxsyDOw@mail.gmail.com>
+ <68eaf07b-e611-fb55-ca9c-08dceb8cae14@digiware.nl>
+ <5d1fbebf-243b-ece9-0a77-961f4d269c53@suse.cz>
+ <20170421091325.t23jra6qdbfjgjeh@nora.maurer-it.com>
+ <alpine.DEB.2.11.1704211313220.6575@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58113 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1039719AbdDUNU7 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Apr 2017 09:20:59 -0400
-In-Reply-To: <CAA8xDw0KvsgYGC7utasZKpy5_960T3vDd4N_7TVecSey=f4X=g@mail.gmail.com>
+Received: from proxmox.maurer-it.com ([212.186.127.180]:26800 "EHLO
+        proxmox.maurer-it.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1039801AbdDUNjw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 21 Apr 2017 09:39:52 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.11.1704211313220.6575@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Elita Lobo <loboelita@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Myna V <mynaramana@gmail.com>
+To: Sage Weil <sage@newdream.net>
+Cc: Nathan Cutler <ncutler@suse.cz>, Willem Jan Withagen <wjw@digiware.nl>, Gregory Farnum <gfarnum@redhat.com>, Joao Eduardo Luis <joao@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 21 Apr 2017, Elita Lobo wrote:
-> Hi,
+On Fri, Apr 21, 2017 at 01:16:23PM +0000, Sage Weil wrote:
+> On Fri, 21 Apr 2017, Fabian Grünbichler wrote:
+> > On Thu, Apr 20, 2017 at 08:11:38PM +0200, Nathan Cutler wrote:
+> > > Hi Willem:
+> > > 
+> > > It sounds like you are trying to use the sysvinit scripts? These have been
+> > > unmaintained (presumably with lots of weeds growing up) since infernalis.
+> > > Until now I have been assuming that all init systems other than systemd
+> > > (sysvinit, upstart, etc.) are deprecated in Ceph.
+> > 
+> > Slightly OT, but AFAICT http://tracker.ceph.com/issues/18305 still
+> > applies to the official ceph.com Kraken Debian packages, i.e., ceph-base
+> > installs and activates the init.d script, which then races against the
+> > (udev-activated) ceph-osd systemd units. If anything except systemd is
+> > indeed deprecated, I wonder why the Debian packages (still) ship AND
+> > activate both systemd units and Sys V init scripts?
+> > 
+> > (Note that the proposed fix probably does not apply as is anymore,
+> > because ceph-disk and the systemd units have been changed in the
+> > meantime).
 > 
-> We were going through get_min_avail_to_read_shards function and we had
-> a query regarding the same.
+> I think the issue with Debian (generally) is that it "supports" multiple 
+> init systems (sysvinit and systemd both), even though systemd is the one 
+> installed default.  Which means we ship the sysvinit script and systemd 
+> unit files.
 > 
-> int get_min_avail_to_read_shards(
->     const hobject_t &hoid,     ///< [in] object
->     const set<int> &want,      ///< [in] desired shards
->     bool for_recovery,         ///< [in] true if we may use non-acting replicas
->     bool do_redundant_reads,   ///< [in] true if we want to issue
-> redundant reads to reduce latency
->     //set<pg_shard_t> *to_read   ///< [out] shards to read
->     //); ///< @return error code, 0 on success
->     map<pg_shard_t, list<pair<int,int>>> *to_read);
+> (There may very well be a bug in how we "activate" them, though!)
 > 
-> In which all cases is do_redundant_reads flag set and what is the
-> purpose of this flag?
 
-The idea is that if you have a k+m code, you read all k+m shards (not just 
-k of them), and use whatever replies come back first to assemble or 
-recover the data block.  It helps reduce tail latency on EC pools by 
-preventing the slowest responder from delaying the reply (as long as the 
-slowest responder isn't the primary).
+that's why I reported the original issue - in general you never want to
+have both a multi-daemon init script (like the "old" ceph one) and the
+replacing split up systemd units active at the same time.
 
-sage
+since systemd will generate a unit for every init script for which a
+unit of the same name does not already exist, you either need to mask
+the auto-generated unit (i.e., symlink it to /dev/null) or write a
+replacement unit that has the identical name (so the "ceph" init script
+becomes the "ceph.service" unit). if you don't do that and your units
+are named differently than your init script, both will be active (this
+is not a Debianism, it is how the LSB generator in systemd is supposed
+to work to ease the transition from Sys V init to systemd..).
+
+what exacerbates the issue in this case is that the systemd units + udev
+actually don't completely replace the old init scripts, because some of
+the udev events might have been processed before the system was fully
+booted, and osds might not be properly activated on boot as a result.
+
+hence my proposal to add a ceph.service that simply calls "ceph-disk
+activate-all", which is AFAICT the only part of the init script that is
+not covered by the current systemd units / udev rules.
+
+the whole ceph service startup is pretty messy in general IMHO,
+especially for OSDs where (IIRC?) udev rules are calling python scripts
+which are starting systemd units which are in turn calling python
+scripts with different parameters that end up starting systemd units
+which actually start daemons (somewhere in there the mounting happens as
+well..).
 
