@@ -1,23 +1,29 @@
 From: Alexander Graf <agraf@suse.de>
 Subject: Re: [PATCH] ceph: Fix file open flags on ppc64
-Date: Fri, 21 Apr 2017 15:58:13 +0200
-Message-ID: <51c1c597-d573-827b-0918-1a07d86ba117@suse.de>
+Date: Fri, 21 Apr 2017 15:59:13 +0200
+Message-ID: <51c27e5d-6c80-dfda-b371-dd6e46f911dd@suse.de>
 References: <1492692030-146869-1-git-send-email-agraf@suse.de>
- <1492782361.7308.12.camel@redhat.com>
+ <EEF153C1-1BC5-4BDF-8A73-5836E3A5D305@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1492782361.7308.12.camel@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jeff Layton <jlayton@redhat.com>, ceph-devel@vger.kernel.org
-Cc: zyan@redhat.com, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, linux-kernel@vger.kernel.org, Jan.Fajerski@suse.com
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:54035 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1161252AbdDUN7Q (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 21 Apr 2017 09:59:16 -0400
+In-Reply-To: <EEF153C1-1BC5-4BDF-8A73-5836E3A5D305@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jan.Fajerski@suse.com
 
 
 
-On 21.04.17 15:46, Jeff Layton wrote:
-> On Thu, 2017-04-20 at 14:40 +0200, Alexander Graf wrote:
+On 21.04.17 04:22, Yan, Zheng wrote:
+>
+>> On 20 Apr 2017, at 20:40, Alexander Graf <agraf@suse.de> wrote:
+>>
 >> The file open flags (O_foo) are platform specific and should never go
 >> out to an interface that is not local to the system.
 >>
@@ -32,17 +38,17 @@ On 21.04.17 15:46, Jeff Layton wrote:
 >> Fixes: 124e68e74 ("ceph: file operations")
 >> Signed-off-by: Alexander Graf <agraf@suse.de>
 >> ---
->>  fs/ceph/file.c               | 45 +++++++++++++++++++++++++++++++++++++++++++-
->>  include/linux/ceph/ceph_fs.h | 24 +++++++++++++++++++++++
->>  2 files changed, 68 insertions(+), 1 deletion(-)
+>> fs/ceph/file.c               | 45 +++++++++++++++++++++++++++++++++++++++++++-
+>> include/linux/ceph/ceph_fs.h | 24 +++++++++++++++++++++++
+>> 2 files changed, 68 insertions(+), 1 deletion(-)
 >>
 >> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
 >> index 26cc954..0ed6392 100644
 >> --- a/fs/ceph/file.c
 >> +++ b/fs/ceph/file.c
 >> @@ -103,6 +103,49 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
->>  	return ERR_PTR(ret);
->>  }
+>> 	return ERR_PTR(ret);
+>> }
 >>
 >> +static u32 ceph_flags_sys2wire(u32 flags)
 >> +{
@@ -87,26 +93,61 @@ On 21.04.17 15:46, Jeff Layton wrote:
 >> +	return wire_flags;
 >> +}
 >> +
->>  /*
->>   * Prepare an open request.  Preallocate ceph_cap to avoid an
->>   * inopportune ENOMEM later.
+>> /*
+>>  * Prepare an open request.  Preallocate ceph_cap to avoid an
+>>  * inopportune ENOMEM later.
 >> @@ -123,7 +166,7 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
->>  	if (IS_ERR(req))
->>  		goto out;
->>  	req->r_fmode = ceph_flags_to_mode(flags);
+>> 	if (IS_ERR(req))
+>> 		goto out;
+>> 	req->r_fmode = ceph_flags_to_mode(flags);
 >> -	req->r_args.open.flags = cpu_to_le32(flags);
 >> +	req->r_args.open.flags = ceph_flags_sys2wire(cpu_to_le32(flags));
 >
-> Shouldn't that be:
+> cpu_to_le32(ceph_flags_sys2wire(flags)) ?
+
+Jeff also pointed to it. Definitely, yes. My thinko.
+
 >
->     req->r_args.open.flags = cpu_to_le32(ceph_flags_sys2wire(flags));
+>> 	req->r_args.open.mode = cpu_to_le32(create_mode);
+>> out:
+>> 	return req;
+>> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+>> index f4b2ee1..d254b48 100644
+>> --- a/include/linux/ceph/ceph_fs.h
+>> +++ b/include/linux/ceph/ceph_fs.h
+>> @@ -366,6 +366,30 @@ enum {
+>> #define CEPH_READDIR_FRAG_COMPLETE	(1<<8)
+>> #define CEPH_READDIR_HASH_ORDER		(1<<9)
+>>
+>> +/*
+>> + * open request flags
+>> + */
+>> +#define CEPH_O_RDONLY		00000000
+>> +#define CEPH_O_WRONLY		00000001
+>> +#define CEPH_O_RDWR		00000002
+>> +#define CEPH_O_CREAT		00000100
+>> +#define CEPH_O_EXCL		00000200
+>> +#define CEPH_O_NOCTTY		00000400
+>> +#define CEPH_O_TRUNC		00001000
+>> +#define CEPH_O_APPEND		00002000
+>> +#define CEPH_O_NONBLOCK		00004000
+>> +#define CEPH_O_DSYNC		00010000
+>> +#define CEPH_FASYNC		00020000
+>> +#define CEPH_O_DIRECT		00040000
+>> +#define CEPH_O_LARGEFILE	00100000
+>> +#define CEPH_O_DIRECTORY	00200000
+>> +#define CEPH_O_NOFOLLOW		00400000
+>> +#define CEPH_O_NOATIME		01000000
+>> +#define CEPH_O_CLOEXEC		02000000
+>> +#define CEPH___O_SYNC		04000000
+>> +#define CEPH_O_PATH		010000000
+>> +#define CEPH___O_TMPFILE	020000000
+>> +
+>
+> RDONLY, WRONLY, RDWR, CREAT, EXCL, TRUNC, DIRECTORY, NOFOLLOW  are used by mds, no need to define the rest.
 
-Ouch. Yes, of course.
-
-> It might be best though to move the cpu_to_le32 conversion into
-> ceph_flags_sys2wire instead.
-
-Makes a lot of sense, yes.
+So currently the function checks for any bits it doesn't know about. Do 
+we want to drop that check then?
 
 
 Alex
