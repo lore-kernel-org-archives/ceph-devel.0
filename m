@@ -1,84 +1,216 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: Ceph Package Repo on Ubuntu Precise(12.04) is broken
-Date: Mon, 24 Apr 2017 10:05:16 -0400
-Message-ID: <CAC-Np1wPAnB2gWkmdvrvk6Wf7_OUofmg3Q9D85K49JBZvfBAHQ@mail.gmail.com>
-References: <CAEYCsVL3SAwAr26nVFJcZqwXJM2skj5AztFSj15VRGQXvRrEvQ@mail.gmail.com>
- <CALJWc2vwBSniKR0_-dD8pK2bNmMRvj7xMD-t2qYWNrt1qy_5iQ@mail.gmail.com>
- <CAEYCsVK1YWb-0ihZ_hCz_NRYwPcosCBcL0Gq8y06VNy2gV7h0A@mail.gmail.com> <CAC-Np1y2ohw7NCWjthpwpZp0JL8Yn14UAxsbh6fVWtcZ1GgNkg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: =?UTF-8?q?Michal=20Koutn=C3=BD?= <mkoutny@suse.com>
+Subject: [PATCH] osd: Do not subtract object overlaps from cache usage
+Date: Mon, 24 Apr 2017 17:15:27 +0200
+Message-ID: <20170424151527.10888-1-mkoutny@suse.com>
+References: <d343aaa4-58f3-437b-276e-4a15ea4f209b@suse.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:38591 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1170792AbdDXOFT (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Apr 2017 10:05:19 -0400
-Received: by mail-wm0-f53.google.com with SMTP id r190so68928962wme.1
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Apr 2017 07:05:18 -0700 (PDT)
-In-Reply-To: <CAC-Np1y2ohw7NCWjthpwpZp0JL8Yn14UAxsbh6fVWtcZ1GgNkg@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:40792 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S934531AbdDXPPn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 24 Apr 2017 11:15:43 -0400
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 7BFA0AAB1
+        for <ceph-devel@vger.kernel.org>; Mon, 24 Apr 2017 15:15:41 +0000 (UTC)
+In-Reply-To: <d343aaa4-58f3-437b-276e-4a15ea4f209b@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xiaoxi Chen <superdebuger@gmail.com>
-Cc: xiaoguang fan <fanxiaoguang008@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Apr 24, 2017 at 8:53 AM, Alfredo Deza <adeza@redhat.com> wrote:
-> On Mon, Apr 24, 2017 at 2:41 AM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
->> Well, I can definitely build my own,
->>
->> 1. Precise is NOT EOL on Hammer release, which was confirmed in
->> previous mail thread. So we still need to maintain point-in-time
->> hammer package for end users.
->
-> Ceph Hammer is EOL
->
->>
->> 2. It is NOT ONLY missing 0.94.10, instead, as how we organize the
->> repo index(only contains latest package in  index), now all 0.94.x
->> package on precise are not installable via apt.
->>
->
-> I think this may be because we didn't built precise for 0.94.10 and
-> Debian repositories do not support multi-version packages. So although
-> other versions are there, but the latest one isn't, the repository
-> acts as there is nothing for Precise.
->
-> I would suggest an upgrade to a newer Ceph version at this point,
-> although Precise isn't built for any newer Ceph versions, so
-> effectively you are looking at
-> upgrading to a newer OS as well.
->
->>
->> 2017-04-24 14:02 GMT+08:00 xiaoguang fan <fanxiaoguang008@gmail.com>:
->>> If you need this deb package 0.94.10 on precise(12.04), I think you can
->>> build it by yourself, you can use the script make_deps.sh
->>>
->>> 2017-04-24 11:35 GMT+08:00 Xiaoxi Chen <superdebuger@gmail.com>:
->>>>
->>>> Hi,
->>>>
->>>>      The 0.94.10 packages were not build for Ubuntu Precise, till now.
->>>> What is worse, the dist discription
->>>>
->>>> (http://download.ceph.com/debian-hammer/dists/precise/main/binary-amd64/Packages)
->>>>  doesnt contains any ceph core pacages.
->>>>
->>>>      It make Precise user unable provision their ceph cluster/client.
->>>> Could anyone pls help to fix it?
+Hi,
+this is a followup of my question [1] which I partially answered by looking at
+code history -- semantics of num_bytes isn't meant to include objects
+overlapping areas. However, this results in underestimating of space
+occupied on a cache tier proportional to the number of (overlapping) clone
+objects stored there.
 
-I've started to build the Precise packages for that version, hopefully
-we can get something worked out today or tomorrow. You are right that
-Precise wasn't EOL when
-that version of Hammer was released, and this was an omission on our end.
+Could you please comment on the patch below if it's a right avenue to address
+this misaccounting problem. (This is rather for a discussion, I plan to submit
+a regular PR afterwards.)
+
+Thanks,
+Michal
 
 
->>>>
->>>> Xiaoxi
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+[1] http://lists.ceph.com/pipermail/ceph-users-ceph.com/2017-April/017288.html
+
+---
+
+PG group field num_bytes does not include space that is part of clone
+object overlaps. Introduce a new field num_bytes_overlap that stands for
+this space only, so that it can be used to strictly limit cache tier
+usage with object storage backends that do not support storing overlaps
+efficiently.
+---
+ src/osd/PrimaryLogPG.cc | 15 ++++++++++++++-
+ src/osd/PrimaryLogPG.h  |  1 +
+ src/osd/osd_types.cc    |  9 ++++++++-
+ src/osd/osd_types.h     |  6 +++++-
+ 4 files changed, 28 insertions(+), 3 deletions(-)
+
+diff --git a/src/osd/PrimaryLogPG.cc b/src/osd/PrimaryLogPG.cc
+index 2f15999..12c02a0 100644
+--- a/src/osd/PrimaryLogPG.cc
++++ b/src/osd/PrimaryLogPG.cc
+@@ -6407,6 +6407,7 @@ void PrimaryLogPG::make_writeable(OpContext *ctx)
+       ctx->delta_stats.num_objects_omap++;
+     if (snap_oi->is_cache_pinned())
+       ctx->delta_stats.num_objects_pinned++;
++    ctx->delta_stats.num_bytes_overlap += ctx->obs->oi.size;
+     ctx->delta_stats.num_object_clones++;
+     ctx->new_snapset.clones.push_back(coid.snap);
+     ctx->new_snapset.clone_size[coid.snap] = ctx->obs->oi.size;
+@@ -6439,8 +6440,10 @@ void PrimaryLogPG::make_writeable(OpContext *ctx)
+     if (is_present_clone(last_clone_oid)) {
+       interval_set<uint64_t> &newest_overlap = ctx->new_snapset.clone_overlap.rbegin()->second;
+       ctx->modified_ranges.intersection_of(newest_overlap);
+-      // modified_ranges is still in use by the clone
++      // modified_ranges is still in use by the clone (but not in accounted overlap)
+       add_interval_usage(ctx->modified_ranges, ctx->delta_stats);
++      sub_interval_usage(ctx->modified_ranges, ctx->delta_stats);
++
+       newest_overlap.subtract(ctx->modified_ranges);
+     }
+   }
+@@ -6479,6 +6482,13 @@ void PrimaryLogPG::add_interval_usage(interval_set<uint64_t>& s, object_stat_sum
+   }
+ }
+ 
++void PrimaryLogPG::sub_interval_usage(interval_set<uint64_t>& s, object_stat_sum_t& delta_stats)
++{
++  for (interval_set<uint64_t>::const_iterator p = s.begin(); p != s.end(); ++p) {
++    delta_stats.num_bytes_overlap -= p.get_len();
++  }
++}
++
+ void PrimaryLogPG::complete_disconnect_watches(
+   ObjectContextRef obc,
+   const list<watch_disconnect_t> &to_disconnect)
+@@ -12250,6 +12260,9 @@ bool PrimaryLogPG::agent_choose_mode(bool restart, OpRequestRef op)
+     num_user_objects = 0;
+ 
+   uint64_t num_user_bytes = info.stats.stats.sum.num_bytes;
++  // TODO should go depend on osd->store
++  uint64_t overlap_bytes = info.stats.stats.sum.num_bytes_overlap;
++  num_user_bytes += overlap_bytes;
+   uint64_t unflushable_bytes = info.stats.stats.sum.num_bytes_hit_set_archive;
+   num_user_bytes -= unflushable_bytes;
+   uint64_t num_overhead_bytes = osd->store->estimate_objects_overhead(num_user_objects);
+diff --git a/src/osd/PrimaryLogPG.h b/src/osd/PrimaryLogPG.h
+index 3d92e3b9..a802da1 100644
+--- a/src/osd/PrimaryLogPG.h
++++ b/src/osd/PrimaryLogPG.h
+@@ -1095,6 +1095,7 @@ protected:
+ 				   uint64_t length, bool count_bytes,
+ 				   bool force_changesize=false);
+   void add_interval_usage(interval_set<uint64_t>& s, object_stat_sum_t& st);
++  void sub_interval_usage(interval_set<uint64_t>& s, object_stat_sum_t& st);
+ 
+ 
+   enum class cache_result_t {
+diff --git a/src/osd/osd_types.cc b/src/osd/osd_types.cc
+index 2cce17e..25aaad6 100644
+--- a/src/osd/osd_types.cc
++++ b/src/osd/osd_types.cc
+@@ -1846,6 +1846,7 @@ ostream& operator<<(ostream& out, const pg_pool_t& p)
+ void object_stat_sum_t::dump(Formatter *f) const
+ {
+   f->dump_int("num_bytes", num_bytes);
++  f->dump_int("num_bytes_overlap", num_bytes_overlap);
+   f->dump_int("num_objects", num_objects);
+   f->dump_int("num_object_clones", num_object_clones);
+   f->dump_int("num_object_copies", num_object_copies);
+@@ -1883,11 +1884,12 @@ void object_stat_sum_t::dump(Formatter *f) const
+ 
+ void object_stat_sum_t::encode(bufferlist& bl) const
+ {
+-  ENCODE_START(15, 3, bl);
++  ENCODE_START(16, 3, bl);
+ #if defined(CEPH_LITTLE_ENDIAN)
+   bl.append((char *)(&num_bytes), sizeof(object_stat_sum_t));
+ #else
+   ::encode(num_bytes, bl);
++  ::encode(num_bytes_overlap, bl);
+   ::encode(num_objects, bl);
+   ::encode(num_object_clones, bl);
+   ::encode(num_object_copies, bl);
+@@ -1941,6 +1943,8 @@ void object_stat_sum_t::decode(bufferlist::iterator& bl)
+       uint64_t num_kb;
+       ::decode(num_kb, bl);
+     }
++    if (struct_v >= 16)
++      ::decode(num_bytes_overlap, bl);
+     ::decode(num_objects, bl);
+     ::decode(num_object_clones, bl);
+     ::decode(num_object_copies, bl);
+@@ -2078,6 +2082,7 @@ void object_stat_sum_t::generate_test_instances(list<object_stat_sum_t*>& o)
+ void object_stat_sum_t::add(const object_stat_sum_t& o)
+ {
+   num_bytes += o.num_bytes;
++  num_bytes_overlap += o.num_bytes_overlap;
+   num_objects += o.num_objects;
+   num_object_clones += o.num_object_clones;
+   num_object_copies += o.num_object_copies;
+@@ -2116,6 +2121,7 @@ void object_stat_sum_t::add(const object_stat_sum_t& o)
+ void object_stat_sum_t::sub(const object_stat_sum_t& o)
+ {
+   num_bytes -= o.num_bytes;
++  num_bytes_overlap -= o.num_bytes_overlap;
+   num_objects -= o.num_objects;
+   num_object_clones -= o.num_object_clones;
+   num_object_copies -= o.num_object_copies;
+@@ -2155,6 +2161,7 @@ bool operator==(const object_stat_sum_t& l, const object_stat_sum_t& r)
+ {
+   return
+     l.num_bytes == r.num_bytes &&
++    l.num_bytes_overlap == r.num_bytes_overlap &&
+     l.num_objects == r.num_objects &&
+     l.num_object_clones == r.num_object_clones &&
+     l.num_object_copies == r.num_object_copies &&
+diff --git a/src/osd/osd_types.h b/src/osd/osd_types.h
+index 0d22975..59b29e0 100644
+--- a/src/osd/osd_types.h
++++ b/src/osd/osd_types.h
+@@ -1577,6 +1577,7 @@ struct object_stat_sum_t {
+    * adding/removing fields!
+    **************************************************************************/
+   int64_t num_bytes;    // in bytes
++  int64_t num_bytes_overlap;  // date in clone objects overlaps
+   int64_t num_objects;
+   int64_t num_object_clones;
+   int64_t num_object_copies;  // num_objects * num_replicas
+@@ -1612,7 +1613,7 @@ struct object_stat_sum_t {
+   int64_t num_objects_missing;
+ 
+   object_stat_sum_t()
+-    : num_bytes(0),
++    : num_bytes(0), num_bytes_overlap(0),
+       num_objects(0), num_object_clones(0), num_object_copies(0),
+       num_objects_missing_on_primary(0), num_objects_degraded(0),
+       num_objects_unfound(0),
+@@ -1643,6 +1644,7 @@ struct object_stat_sum_t {
+   void floor(int64_t f) {
+ #define FLOOR(x) if (x < f) x = f
+     FLOOR(num_bytes);
++    FLOOR(num_bytes_overlap);
+     FLOOR(num_objects);
+     FLOOR(num_object_clones);
+     FLOOR(num_object_copies);
+@@ -1689,6 +1691,7 @@ struct object_stat_sum_t {
+     }                                           \
+ 
+     SPLIT(num_bytes);
++    SPLIT(num_bytes_overlap);
+     SPLIT(num_objects);
+     SPLIT(num_object_clones);
+     SPLIT(num_object_copies);
+@@ -1745,6 +1748,7 @@ struct object_stat_sum_t {
+     static_assert(
+       sizeof(object_stat_sum_t) ==
+         sizeof(num_bytes) +
++        sizeof(num_bytes_overlap) +
+         sizeof(num_objects) +
+         sizeof(num_object_clones) +
+         sizeof(num_object_copies) +
+-- 
+2.10.2
+
