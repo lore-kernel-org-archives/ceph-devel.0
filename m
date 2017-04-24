@@ -1,109 +1,163 @@
-From: Fabian =?iso-8859-1?Q?Gr=FCnbichler?= <f.gruenbichler@proxmox.com>
-Subject: Re: Ceph-deploy for FreeBSD
-Date: Mon, 24 Apr 2017 08:46:52 +0200
-Message-ID: <20170424064652.3eb7xapcsqxddkbj@nora.maurer-it.com>
-References: <30f688f7-a156-5275-94cb-fbc07b7d449e@digiware.nl>
- <76dc3a7e-80bb-6c9d-d502-535258ce0b54@digiware.nl>
- <CAJ4mKGZmMv+ZcuBEkvaqajW7ntK26TDEbT77DM+nDFsPxsyDOw@mail.gmail.com>
- <68eaf07b-e611-fb55-ca9c-08dceb8cae14@digiware.nl>
- <5d1fbebf-243b-ece9-0a77-961f4d269c53@suse.cz>
- <20170421091325.t23jra6qdbfjgjeh@nora.maurer-it.com>
- <alpine.DEB.2.11.1704211313220.6575@piezo.novalocal>
- <20170421133946.4r4qja74uwq6f25l@nora.maurer-it.com>
- <alpine.DEB.2.11.1704211342220.6575@piezo.novalocal>
- <alpine.DEB.2.11.1704211351480.6575@piezo.novalocal>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH] ceph: Fix file open flags on ppc64
+Date: Mon, 24 Apr 2017 17:16:45 +0800
+Message-ID: <5062BD33-23B6-467F-8C82-EE0E07EFEEA7@redhat.com>
+References: <1492692030-146869-1-git-send-email-agraf@suse.de>
+ <EEF153C1-1BC5-4BDF-8A73-5836E3A5D305@redhat.com>
+ <51c27e5d-6c80-dfda-b371-dd6e46f911dd@suse.de>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from proxmox.maurer-it.com ([212.186.127.180]:38361 "EHLO
-        proxmox.maurer-it.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1165699AbdDXGrB (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Apr 2017 02:47:01 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1704211351480.6575@piezo.novalocal>
+Received: from mx1.redhat.com ([209.132.183.28]:52898 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1167740AbdDXJQz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 24 Apr 2017 05:16:55 -0400
+In-Reply-To: <51c27e5d-6c80-dfda-b371-dd6e46f911dd@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Nathan Cutler <ncutler@suse.cz>, Willem Jan Withagen <wjw@digiware.nl>, Gregory Farnum <gfarnum@redhat.com>, Joao Eduardo Luis <joao@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Alexander Graf <agraf@suse.de>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jan.Fajerski@suse.com
 
-On Fri, Apr 21, 2017 at 01:52:45PM +0000, Sage Weil wrote:
-> On Fri, 21 Apr 2017, Sage Weil wrote:
-> > On Fri, 21 Apr 2017, Fabian Grünbichler wrote:
-> > > On Fri, Apr 21, 2017 at 01:16:23PM +0000, Sage Weil wrote:
-> > > > On Fri, 21 Apr 2017, Fabian Grünbichler wrote:
-> > > > > On Thu, Apr 20, 2017 at 08:11:38PM +0200, Nathan Cutler wrote:
-> > > > > > Hi Willem:
-> > > > > > 
-> > > > > > It sounds like you are trying to use the sysvinit scripts? These have been
-> > > > > > unmaintained (presumably with lots of weeds growing up) since infernalis.
-> > > > > > Until now I have been assuming that all init systems other than systemd
-> > > > > > (sysvinit, upstart, etc.) are deprecated in Ceph.
-> > > > > 
-> > > > > Slightly OT, but AFAICT http://tracker.ceph.com/issues/18305 still
-> > > > > applies to the official ceph.com Kraken Debian packages, i.e., ceph-base
-> > > > > installs and activates the init.d script, which then races against the
-> > > > > (udev-activated) ceph-osd systemd units. If anything except systemd is
-> > > > > indeed deprecated, I wonder why the Debian packages (still) ship AND
-> > > > > activate both systemd units and Sys V init scripts?
-> > > > > 
-> > > > > (Note that the proposed fix probably does not apply as is anymore,
-> > > > > because ceph-disk and the systemd units have been changed in the
-> > > > > meantime).
-> > > > 
-> > > > I think the issue with Debian (generally) is that it "supports" multiple 
-> > > > init systems (sysvinit and systemd both), even though systemd is the one 
-> > > > installed default.  Which means we ship the sysvinit script and systemd 
-> > > > unit files.
-> > > > 
-> > > > (There may very well be a bug in how we "activate" them, though!)
-> > > > 
-> > > 
-> > > that's why I reported the original issue - in general you never want to
-> > > have both a multi-daemon init script (like the "old" ceph one) and the
-> > > replacing split up systemd units active at the same time.
-> > > 
-> > > since systemd will generate a unit for every init script for which a
-> > > unit of the same name does not already exist, you either need to mask
-> > > the auto-generated unit (i.e., symlink it to /dev/null) or write a
-> > > replacement unit that has the identical name (so the "ceph" init script
-> > > becomes the "ceph.service" unit). if you don't do that and your units
-> > > are named differently than your init script, both will be active (this
-> > > is not a Debianism, it is how the LSB generator in systemd is supposed
-> > > to work to ease the transition from Sys V init to systemd..).
-> > > 
-> > > what exacerbates the issue in this case is that the systemd units + udev
-> > > actually don't completely replace the old init scripts, because some of
-> > > the udev events might have been processed before the system was fully
-> > > booted, and osds might not be properly activated on boot as a result.
-> > > 
-> > > hence my proposal to add a ceph.service that simply calls "ceph-disk
-> > > activate-all", which is AFAICT the only part of the init script that is
-> > > not covered by the current systemd units / udev rules.
-> > 
-> > This sounds reasonable to me.  It could also do nothing... IIRC the 
-> > ceph-disk activate-all was a workaround for racy/buggy udev interactions 
-> > that preventing all osds from starting on large boxes with lots of disks 
-> > (see below).  Given that we don't have such a workaround on systemd 
-> > anymore I'm not sure if it's still necessary or not.  (I guess it can't 
-> > hurt, though!)
+
+> On 21 Apr 2017, at 21:59, Alexander Graf <agraf@suse.de> wrote:
 > 
-> Hmm, it's a bit tricky because of the package separation between 
-> ceph-base, ceph-common, and ceph-osd.  The ceph sysvinit script is in the 
-> base or common package but ceph-disk is in ceph-osd... I'm not sure where 
-> the ceph.service masking service should go.
 > 
+> 
+> On 21.04.17 04:22, Yan, Zheng wrote:
+>> 
+>>> On 20 Apr 2017, at 20:40, Alexander Graf <agraf@suse.de> wrote:
+>>> 
+>>> The file open flags (O_foo) are platform specific and should never go
+>>> out to an interface that is not local to the system.
+>>> 
+>>> Unfortunately these flags have leaked out onto the wire in the cephfs
+>>> implementation. That lead to bogus flags getting transmitted on ppc64.
+>>> 
+>>> This patch converts the kernel view of flags to the ceph view of file
+>>> open flags. On x86 systems, the new function should get optimized out
+>>> by smart compilers. On systems where the flags differ, it should adapt
+>>> them accordingly.
+>>> 
+>>> Fixes: 124e68e74 ("ceph: file operations")
+>>> Signed-off-by: Alexander Graf <agraf@suse.de>
+>>> ---
+>>> fs/ceph/file.c               | 45 +++++++++++++++++++++++++++++++++++++++++++-
+>>> include/linux/ceph/ceph_fs.h | 24 +++++++++++++++++++++++
+>>> 2 files changed, 68 insertions(+), 1 deletion(-)
+>>> 
+>>> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+>>> index 26cc954..0ed6392 100644
+>>> --- a/fs/ceph/file.c
+>>> +++ b/fs/ceph/file.c
+>>> @@ -103,6 +103,49 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
+>>> 	return ERR_PTR(ret);
+>>> }
+>>> 
+>>> +static u32 ceph_flags_sys2wire(u32 flags)
+>>> +{
+>>> +	u32 wire_flags = 0;
+>>> +
+>>> +	switch (flags & O_ACCMODE) {
+>>> +	case O_RDONLY:
+>>> +		wire_flags |= CEPH_O_RDONLY;
+>>> +		break;
+>>> +	case O_WRONLY:
+>>> +		wire_flags |= CEPH_O_WRONLY;
+>>> +		break;
+>>> +	case O_RDWR:
+>>> +		wire_flags |= CEPH_O_RDWR;
+>>> +		break;
+>>> +	}
+>>> +	flags &= ~O_ACCMODE;
+>>> +
+>>> +#define ceph_sys2wire(a) if (flags & a) { wire_flags |= CEPH_##a; flags &= ~a; }
+>>> +
+>>> +	ceph_sys2wire(O_CREAT);
+>>> +	ceph_sys2wire(O_NOCTTY);
+>>> +	ceph_sys2wire(O_TRUNC);
+>>> +	ceph_sys2wire(O_APPEND);
+>>> +	ceph_sys2wire(O_NONBLOCK);
+>>> +	ceph_sys2wire(O_DSYNC);
+>>> +	ceph_sys2wire(FASYNC);
+>>> +	ceph_sys2wire(O_DIRECT);
+>>> +	ceph_sys2wire(O_LARGEFILE);
+>>> +	ceph_sys2wire(O_DIRECTORY);
+>>> +	ceph_sys2wire(O_NOFOLLOW);
+>>> +	ceph_sys2wire(O_NOATIME);
+>>> +	ceph_sys2wire(O_CLOEXEC);
+>>> +	ceph_sys2wire(__O_SYNC);
+>>> +	ceph_sys2wire(O_PATH);
+>>> +	ceph_sys2wire(__O_TMPFILE);
+>>> +
+>>> +#undef ceph_sys2wire
+>>> +
+>>> +	WARN_ONCE(flags, "Found unknown open flags: %x", flags);
+>>> +
+>>> +	return wire_flags;
+>>> +}
+>>> +
+>>> /*
+>>> * Prepare an open request.  Preallocate ceph_cap to avoid an
+>>> * inopportune ENOMEM later.
+>>> @@ -123,7 +166,7 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
+>>> 	if (IS_ERR(req))
+>>> 		goto out;
+>>> 	req->r_fmode = ceph_flags_to_mode(flags);
+>>> -	req->r_args.open.flags = cpu_to_le32(flags);
+>>> +	req->r_args.open.flags = ceph_flags_sys2wire(cpu_to_le32(flags));
+>> 
+>> cpu_to_le32(ceph_flags_sys2wire(flags)) ?
+> 
+> Jeff also pointed to it. Definitely, yes. My thinko.
+> 
+>> 
+>>> 	req->r_args.open.mode = cpu_to_le32(create_mode);
+>>> out:
+>>> 	return req;
+>>> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+>>> index f4b2ee1..d254b48 100644
+>>> --- a/include/linux/ceph/ceph_fs.h
+>>> +++ b/include/linux/ceph/ceph_fs.h
+>>> @@ -366,6 +366,30 @@ enum {
+>>> #define CEPH_READDIR_FRAG_COMPLETE	(1<<8)
+>>> #define CEPH_READDIR_HASH_ORDER		(1<<9)
+>>> 
+>>> +/*
+>>> + * open request flags
+>>> + */
+>>> +#define CEPH_O_RDONLY		00000000
+>>> +#define CEPH_O_WRONLY		00000001
+>>> +#define CEPH_O_RDWR		00000002
+>>> +#define CEPH_O_CREAT		00000100
+>>> +#define CEPH_O_EXCL		00000200
+>>> +#define CEPH_O_NOCTTY		00000400
+>>> +#define CEPH_O_TRUNC		00001000
+>>> +#define CEPH_O_APPEND		00002000
+>>> +#define CEPH_O_NONBLOCK		00004000
+>>> +#define CEPH_O_DSYNC		00010000
+>>> +#define CEPH_FASYNC		00020000
+>>> +#define CEPH_O_DIRECT		00040000
+>>> +#define CEPH_O_LARGEFILE	00100000
+>>> +#define CEPH_O_DIRECTORY	00200000
+>>> +#define CEPH_O_NOFOLLOW		00400000
+>>> +#define CEPH_O_NOATIME		01000000
+>>> +#define CEPH_O_CLOEXEC		02000000
+>>> +#define CEPH___O_SYNC		04000000
+>>> +#define CEPH_O_PATH		010000000
+>>> +#define CEPH___O_TMPFILE	020000000
+>>> +
+>> 
+>> RDONLY, WRONLY, RDWR, CREAT, EXCL, TRUNC, DIRECTORY, NOFOLLOW  are used by mds, no need to define the rest.
+> 
+> So currently the function checks for any bits it doesn't know about. Do we want to drop that check then?
 
-well, both variants (ceph-base and ceph-osd) make sense, and I don't
-think that the bottom-line changes much?
+yes. I think itâ€™s better to only encode flags that mds understands to wire.
 
-ceph-base:
-- init script is already there, and does only work when ceph-mon,
-  ceph-osd etc are installed as well
-- future packaging modifications won't miss the connection between init
-  script and override service
+Regards
+Yan, Zheng 
 
-ceph-osd:
-- arguably where it belongs when looking at the functionality it
-  provides
+> 
+> 
+> Alex
 
