@@ -1,66 +1,95 @@
-From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
-Subject: Re: cephfs issue, get_reply data > preallocated
-Date: Mon, 24 Apr 2017 14:57:26 -0400
-Message-ID: <CAGbviv+9PPFFYC+7k-r-WVt-dPRSHbbu+E7fS28Q9L_oEMfjgQ@mail.gmail.com>
-References: <CAGbvivLexKgh7L5hhLXjWSJiPj-nEwuxC4O3Hefxt5WGWjHpgw@mail.gmail.com>
- <CAOi1vP9LUyuXgj1gOQNLxNsvuQbKqpkGaaZvWU=EnfMVkks8xQ@mail.gmail.com>
+From: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Ceph Package Repo on Ubuntu Precise(12.04) is
+	broken
+Date: Mon, 24 Apr 2017 16:20:05 -0400
+Message-ID: <CAC-Np1xyYM4p=WzX7AfQF4tfqu0KpZNhPW94SzKxDk2BN9anZg@mail.gmail.com>
+References: <CAEYCsVL3SAwAr26nVFJcZqwXJM2skj5AztFSj15VRGQXvRrEvQ@mail.gmail.com>
+	<CALJWc2vwBSniKR0_-dD8pK2bNmMRvj7xMD-t2qYWNrt1qy_5iQ@mail.gmail.com>
+	<CAEYCsVK1YWb-0ihZ_hCz_NRYwPcosCBcL0Gq8y06VNy2gV7h0A@mail.gmail.com>
+	<CAC-Np1y2ohw7NCWjthpwpZp0JL8Yn14UAxsbh6fVWtcZ1GgNkg@mail.gmail.com>
+	<CAC-Np1wPAnB2gWkmdvrvk6Wf7_OUofmg3Q9D85K49JBZvfBAHQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f41.google.com ([209.85.214.41]:35935 "EHLO
-        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1173860AbdDXS52 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Apr 2017 14:57:28 -0400
-Received: by mail-it0-f41.google.com with SMTP id g66so4607404ite.1
-        for <ceph-devel@vger.kernel.org>; Mon, 24 Apr 2017 11:57:27 -0700 (PDT)
-In-Reply-To: <CAOi1vP9LUyuXgj1gOQNLxNsvuQbKqpkGaaZvWU=EnfMVkks8xQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAC-Np1wPAnB2gWkmdvrvk6Wf7_OUofmg3Q9D85K49JBZvfBAHQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: xiaoguang fan <fanxiaoguang008-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-We have a directory of debian package files under cephfs and over the
-past week or so we've noticed this issue when trying to read some of
-the packages from that directory.
-
-Here are some messages from the system logs, they all look like they
-come from the same place in the code.
-
-[Thu Apr 20 17:22:34 2017] libceph: get_reply osd11 tid 31399 data
-2441216 > preallocated 1720320, skipping
-[Mon Apr 24 11:54:09 2017] libceph: get_reply osd42 tid 150169 data
-2083124 > preallocated 1048576, skipping
-
-
-(Also, its Ubuntu 14.04.4, not 16.04.1, but the kernel is 4.9.10 and
-ceph is 10.2.5)
-
-
-
-On Mon, Apr 24, 2017 at 2:48 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> On Mon, Apr 24, 2017 at 5:51 PM, Wyllys Ingersoll
-> <wyllys.ingersoll@keepertech.com> wrote:
->> Ubuntu 16.04.1
->> Ceph 10.2.5
->> Linux 4.9.10 kernel
+On Mon, Apr 24, 2017 at 10:05 AM, Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> On Mon, Apr 24, 2017 at 8:53 AM, Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>> On Mon, Apr 24, 2017 at 2:41 AM, Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>>> Well, I can definitely build my own,
+>>>
+>>> 1. Precise is NOT EOL on Hammer release, which was confirmed in
+>>> previous mail thread. So we still need to maintain point-in-time
+>>> hammer package for end users.
 >>
->> We are having problems accessing some files in cephfs, the process
->> reading the files become hung when trying to read them (md5sum, for
->> example).  When these hangups occur, there are messages in the system
->> logs that look like this:
+>> Ceph Hammer is EOL
 >>
->> "libceph: get_reply osd6 tid 55 data 1305852 > preallocated 1048576, skipping"
+>>>
+>>> 2. It is NOT ONLY missing 0.94.10, instead, as how we organize the
+>>> repo index(only contains latest package in  index), now all 0.94.x
+>>> package on precise are not installable via apt.
+
+Can you try now? 0.94.10 for precise was just pushed out.
+
+Let me know if you get into any issues
+>>>
 >>
->> The cluster shows healthy status and all OSD are reporting as up/up.
+>> I think this may be because we didn't built precise for 0.94.10 and
+>> Debian repositories do not support multi-version packages. So although
+>> other versions are there, but the latest one isn't, the repository
+>> acts as there is nothing for Precise.
 >>
->> Wondering if our hanging read issues are related to the messages being
->> reported, they seem to be since we only see the messages once we
->> encounter the issue reading the files.
+>> I would suggest an upgrade to a newer Ceph version at this point,
+>> although Precise isn't built for any newer Ceph versions, so
+>> effectively you are looking at
+>> upgrading to a newer OS as well.
+>>
+>>>
+>>> 2017-04-24 14:02 GMT+08:00 xiaoguang fan <fanxiaoguang008-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+>>>> If you need this deb package 0.94.10 on precise(12.04), I think you can
+>>>> build it by yourself, you can use the script make_deps.sh
+>>>>
+>>>> 2017-04-24 11:35 GMT+08:00 Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
+>>>>>
+>>>>> Hi,
+>>>>>
+>>>>>      The 0.94.10 packages were not build for Ubuntu Precise, till now.
+>>>>> What is worse, the dist discription
+>>>>>
+>>>>> (http://download.ceph.com/debian-hammer/dists/precise/main/binary-amd64/Packages)
+>>>>>  doesnt contains any ceph core pacages.
+>>>>>
+>>>>>      It make Precise user unable provision their ceph cluster/client.
+>>>>> Could anyone pls help to fix it?
 >
-> Definitely -- this message is printed when the reply is dropped on the
-> floor.  Can you tell us more about these files and/or provide a sample
-> of these messages?
+> I've started to build the Precise packages for that version, hopefully
+> we can get something worked out today or tomorrow. You are right that
+> Precise wasn't EOL when
+> that version of Hammer was released, and this was an omission on our end.
 >
-> Thanks,
 >
->                 Ilya
+>>>>>
+>>>>> Xiaoxi
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
