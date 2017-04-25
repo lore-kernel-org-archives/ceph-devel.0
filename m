@@ -1,34 +1,24 @@
 From: Nathan Cutler <ncutler@suse.cz>
 Subject: Re: jewel 10.2.8 last call
-Date: Tue, 25 Apr 2017 22:47:25 +0200
-Message-ID: <1ee6d36b-9b30-b7c7-a430-3e008383a5dd@suse.cz>
+Date: Tue, 25 Apr 2017 22:50:38 +0200
+Message-ID: <b45f789f-cdb3-b23e-3385-2824700b5c03@suse.cz>
 References: <18bf7357-dfbd-2def-ee9c-506e67fc24e0@suse.cz>
- <0015fa14-1baa-f79f-0a95-3a7a904b8c6b@objoo.org>
+ <CAC7t81YdPg5q_SiHNnOOfqpkW+Vt2+o9iiWN9gswqJZJAdE6JA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:39580 "EHLO mx1.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:39936 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1176518AbdDYUr1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 25 Apr 2017 16:47:27 -0400
-In-Reply-To: <0015fa14-1baa-f79f-0a95-3a7a904b8c6b@objoo.org>
+        id S1758711AbdDYUup (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 25 Apr 2017 16:50:45 -0400
+In-Reply-To: <CAC7t81YdPg5q_SiHNnOOfqpkW+Vt2+o9iiWN9gswqJZJAdE6JA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yann Dupont <yd@objoo.org>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Alexey Sheplyakov <asheplyakov@mirantis.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Yann:
+> I'd like to get https://github.com/ceph/ceph/pull/14392 included (it
+> fixes a bug breaking upgrade from Hammer <= 0.94.6)
 
-> AFAICT, this one still isn't merged :
->
-> https://github.com/ceph/ceph/commit/793ceac2f3d5a2c404ac50569c44a21de6001b62
->
->
->
-> This is quite simple, but without it, tiering throttling isn't working
-> the way it should.
-
-OK, created http://tracker.ceph.com/issues/19773 and flagged for 
-backport to jewel!
-
-Nathan
+This has been backported and tested; all it needs is someone to review it.
