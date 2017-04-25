@@ -1,79 +1,95 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 1/9] rbd: move rbd_dev_destroy() call out of rbd_dev_image_release()
-Date: Tue, 25 Apr 2017 11:33:37 +0200
-Message-ID: <1493112825-16403-2-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 4/9] rbd: ignore unlock errors
+Date: Tue, 25 Apr 2017 11:33:40 +0200
+Message-ID: <1493112825-16403-5-git-send-email-idryomov@gmail.com>
 References: <1493112825-16403-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f193.google.com ([209.85.216.193]:35642 "EHLO
-        mail-qt0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1428696AbdDYJeN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Apr 2017 05:34:13 -0400
-Received: by mail-qt0-f193.google.com with SMTP id o36so24161393qtb.2
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Apr 2017 02:34:13 -0700 (PDT)
+Received: from mail-qt0-f196.google.com ([209.85.216.196]:35655 "EHLO
+        mail-qt0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1428699AbdDYJeQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Apr 2017 05:34:16 -0400
+Received: by mail-qt0-f196.google.com with SMTP id o36so24161483qtb.2
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Apr 2017 02:34:15 -0700 (PDT)
 Received: from orange.brq.redhat.com. (nat-pool-brq-t.redhat.com. [213.175.37.10])
-        by smtp.gmail.com with ESMTPSA id w6sm7461396qta.50.2017.04.25.02.34.11
+        by smtp.gmail.com with ESMTPSA id w6sm7461396qta.50.2017.04.25.02.34.14
         for <ceph-devel@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 25 Apr 2017 02:34:12 -0700 (PDT)
+        Tue, 25 Apr 2017 02:34:14 -0700 (PDT)
 In-Reply-To: <1493112825-16403-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-... to simplify error handling in do_rbd_add().
+Currently the lock_state is set to UNLOCKED (preventing further I/O),
+but RELEASED_LOCK notification isn't sent.  Be consistent with userspace
+and treat ceph_cls_unlock() errors as the image is unlocked.
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- drivers/block/rbd.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ drivers/block/rbd.c | 32 ++++++++++++++------------------
+ 1 file changed, 14 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-index 2fb0a7a76d8e..2effa3e8f96c 100644
+index aadf35451be7..4b72286c4be6 100644
 --- a/drivers/block/rbd.c
 +++ b/drivers/block/rbd.c
-@@ -5967,8 +5967,6 @@ static void rbd_dev_image_release(struct rbd_device *rbd_dev)
- 	rbd_dev->image_format = 0;
- 	kfree(rbd_dev->spec->image_id);
- 	rbd_dev->spec->image_id = NULL;
+@@ -3097,7 +3097,7 @@ static int rbd_lock(struct rbd_device *rbd_dev)
+ /*
+  * lock_rwsem must be held for write
+  */
+-static int rbd_unlock(struct rbd_device *rbd_dev)
++static void rbd_unlock(struct rbd_device *rbd_dev)
+ {
+ 	struct ceph_osd_client *osdc = &rbd_dev->rbd_client->client->osdc;
+ 	char cookie[32];
+@@ -3105,19 +3105,16 @@ static int rbd_unlock(struct rbd_device *rbd_dev)
+ 
+ 	WARN_ON(!__rbd_is_lock_owner(rbd_dev));
+ 
+-	rbd_dev->lock_state = RBD_LOCK_STATE_UNLOCKED;
 -
--	rbd_dev_destroy(rbd_dev);
+ 	format_lock_cookie(rbd_dev, cookie);
+ 	ret = ceph_cls_unlock(osdc, &rbd_dev->header_oid, &rbd_dev->header_oloc,
+ 			      RBD_LOCK_NAME, cookie);
+-	if (ret && ret != -ENOENT) {
+-		rbd_warn(rbd_dev, "cls_unlock failed: %d", ret);
+-		return ret;
+-	}
++	if (ret && ret != -ENOENT)
++		rbd_warn(rbd_dev, "failed to unlock: %d", ret);
+ 
++	/* treat errors as the image is unlocked */
++	rbd_dev->lock_state = RBD_LOCK_STATE_UNLOCKED;
+ 	rbd_set_owner_cid(rbd_dev, &rbd_empty_cid);
+ 	queue_work(rbd_dev->task_wq, &rbd_dev->released_lock_work);
+-	return 0;
  }
  
- /*
-@@ -6135,8 +6133,7 @@ static ssize_t do_rbd_add(struct bus_type *bus,
- 		 * commit 1f3ef78861ac.
- 		 */
- 		rbd_unregister_watch(rbd_dev);
--		rbd_dev_image_release(rbd_dev);
--		goto out;
-+		goto err_out_image_probe;
- 	}
+ static int __rbd_notify_op_lock(struct rbd_device *rbd_dev,
+@@ -3490,16 +3487,15 @@ static bool rbd_release_lock(struct rbd_device *rbd_dev)
+ 	if (rbd_dev->lock_state != RBD_LOCK_STATE_RELEASING)
+ 		return false;
  
- 	rc = count;
-@@ -6144,6 +6141,8 @@ static ssize_t do_rbd_add(struct bus_type *bus,
- 	module_put(THIS_MODULE);
- 	return rc;
- 
-+err_out_image_probe:
-+	rbd_dev_image_release(rbd_dev);
- err_out_rbd_dev:
- 	rbd_dev_destroy(rbd_dev);
- err_out_client:
-@@ -6203,6 +6202,7 @@ static void rbd_dev_remove_parent(struct rbd_device *rbd_dev)
- 		}
- 		rbd_assert(second);
- 		rbd_dev_image_release(second);
-+		rbd_dev_destroy(second);
- 		first->parent = NULL;
- 		first->parent_overlap = 0;
- 
-@@ -6285,7 +6285,7 @@ static ssize_t do_rbd_remove(struct bus_type *bus,
- 	 */
- 	rbd_dev_device_release(rbd_dev);
- 	rbd_dev_image_release(rbd_dev);
+-	if (!rbd_unlock(rbd_dev))
+-		/*
+-		 * Give others a chance to grab the lock - we would re-acquire
+-		 * almost immediately if we got new IO during ceph_osdc_sync()
+-		 * otherwise.  We need to ack our own notifications, so this
+-		 * lock_dwork will be requeued from rbd_wait_state_locked()
+-		 * after wake_requests() in rbd_handle_released_lock().
+-		 */
+-		cancel_delayed_work(&rbd_dev->lock_dwork);
 -
-+	rbd_dev_destroy(rbd_dev);
- 	return count;
++	rbd_unlock(rbd_dev);
++	/*
++	 * Give others a chance to grab the lock - we would re-acquire
++	 * almost immediately if we got new IO during ceph_osdc_sync()
++	 * otherwise.  We need to ack our own notifications, so this
++	 * lock_dwork will be requeued from rbd_wait_state_locked()
++	 * after wake_requests() in rbd_handle_released_lock().
++	 */
++	cancel_delayed_work(&rbd_dev->lock_dwork);
+ 	return true;
  }
  
 -- 
