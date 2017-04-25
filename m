@@ -1,128 +1,190 @@
-From: Dan van der Ster <dan-EOCVfBHj35C+XT7JhA+gdA@public.gmane.org>
+From: Dan van der Ster <dan@vanderster.com>
 Subject: Re: v12.0.2 Luminous (dev) released
-Date: Tue, 25 Apr 2017 11:34:21 +0200
-Message-ID: <CABZ+qqnDSxaoa_JaFLTA9qMXKYxi7-TzdyXFgtY8ujPQqfZQUA@mail.gmail.com>
+Date: Tue, 25 Apr 2017 11:55:08 +0200
+Message-ID: <CABZ+qq=EuD3Nq6OUeD2U4Ug-BsZXk6jJGYSMxK49bFrJ=gutxw@mail.gmail.com>
 References: <319cffed-6ef8-bb3f-186a-77b2be62a2db@suse.com>
-	<CABZ+qq=MkZBRe2_NADF0LXobbLfVRV-kyqfvxPiNfJLcW_B_fA@mail.gmail.com>
+ <CABZ+qq=MkZBRe2_NADF0LXobbLfVRV-kyqfvxPiNfJLcW_B_fA@mail.gmail.com> <CABZ+qqnDSxaoa_JaFLTA9qMXKYxi7-TzdyXFgtY8ujPQqfZQUA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CABZ+qq=MkZBRe2_NADF0LXobbLfVRV-kyqfvxPiNfJLcW_B_fA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Abhishek Lekshmanan <abhishek-IBi9RG/b67k@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-oi0-f68.google.com ([209.85.218.68]:35526 "EHLO
+        mail-oi0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758285AbdDYJzv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Apr 2017 05:55:51 -0400
+Received: by mail-oi0-f68.google.com with SMTP id m34so25215316oik.2
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Apr 2017 02:55:50 -0700 (PDT)
+Received: from mail-oi0-f53.google.com (mail-oi0-f53.google.com. [209.85.218.53])
+        by smtp.gmail.com with ESMTPSA id v72sm9226475oif.8.2017.04.25.02.55.49
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 25 Apr 2017 02:55:49 -0700 (PDT)
+Received: by mail-oi0-f53.google.com with SMTP id y11so133075514oie.0
+        for <ceph-devel@vger.kernel.org>; Tue, 25 Apr 2017 02:55:49 -0700 (PDT)
+In-Reply-To: <CABZ+qqnDSxaoa_JaFLTA9qMXKYxi7-TzdyXFgtY8ujPQqfZQUA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Abhishek Lekshmanan <abhishek@suse.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-Q291bGQgdGhpcyBjaGFuZ2UgYmUgdGhlIGN1bHByaXQ/Cgpjb21taXQgOTczODI5MTMyYmY3MjA2
-ZWZmNmMyY2YzMGRkMGFhMzJmYjBjZTcwNgpBdXRob3I6IFNhZ2UgV2VpbCA8c2FnZUByZWRoYXQu
-Y29tPgpEYXRlOiAgIEZyaSBNYXIgMzEgMDk6MzM6MTkgMjAxNyAtMDQwMAoKICAgIG1vbi9PU0RN
-b25pdG9yOiBzcGlubG9jayAtPiBzdGQ6Om11dGV4CgogICAgSSB0aGluayBzcGlubG9jayBpcyBk
-YW5nZXJvdXMgaGVyZTogd2UncmUgZG9pbmcgc2VtaS11bmJvdW5kZWQKICAgIHdvcmsgKGRlY29k
-ZSkuICBBbHNvIHNlZW1pbmdseSBpbm5vY3VvdXMgY29kZSBsaWtlIGRvdXQgbWFjcm9zCiAgICB0
-YWtlIG11dGV4ZXMuCgogICAgU2lnbmVkLW9mZi1ieTogU2FnZSBXZWlsIDxzYWdlQHJlZGhhdC5j
-b20+CgoKZGlmZiAtLWdpdCBhL3NyYy9tb24vT1NETW9uaXRvci5jYyBiL3NyYy9tb24vT1NETW9u
-aXRvci5jYwppbmRleCA1NDMzMzhiZGYzLi42ZmE1ZThkZTRiIDEwMDY0NAotLS0gYS9zcmMvbW9u
-L09TRE1vbml0b3IuY2MKKysrIGIvc3JjL21vbi9PU0RNb25pdG9yLmNjCkBAIC0yNDUsNyArMjQ1
-LDcgQEAgdm9pZCBPU0RNb25pdG9yOjp1cGRhdGVfZnJvbV9wYXhvcyhib29sICpuZWVkX2Jvb3Rz
-dHJhcCkKICAgICBidWZmZXJsaXN0IGJsOwogICAgIG1vbi0+c3RvcmUtPmdldChPU0RfUEdfQ1JF
-QVRJTkdfUFJFRklYLCAiY3JlYXRpbmciLCBibCk7CiAgICAgYXV0byBwID0gYmwuYmVnaW4oKTsK
-LSAgICBzdGQ6OmxvY2tfZ3VhcmQ8U3BpbmxvY2s+IGwoY3JlYXRpbmdfcGdzX2xvY2spOworICAg
-IHN0ZDo6bG9ja19ndWFyZDxzdGQ6Om11dGV4PiBsKGNyZWF0aW5nX3Bnc19sb2NrKTsKICAgICBj
-cmVhdGluZ19wZ3MuZGVjb2RlKHApOwogICAgIGRvdXQoNykgPDwgX19mdW5jX18gPDwgIiBsb2Fk
-aW5nIGNyZWF0aW5nX3BncyBlIiA8PApjcmVhdGluZ19wZ3MubGFzdF9zY2FuX2Vwb2NoIDw8IGRl
-bmRsOwogICB9Ci4uLgoKCkNoZWVycywgRGFuCgoKT24gVHVlLCBBcHIgMjUsIDIwMTcgYXQgMTE6
-MTUgQU0sIERhbiB2YW4gZGVyIFN0ZXIgPGRhbkB2YW5kZXJzdGVyLmNvbT4gd3JvdGU6Cj4gSGks
-Cj4KPiBUaGUgbW9uJ3Mgb24gbXkgdGVzdCBsdW1pbm91cyBjbHVzdGVyIGRvIG5vdCBzdGFydCBh
-ZnRlciB1cGdyYWRpbmcKPiBmcm9tIDEyLjAuMSB0byAxMi4wLjIuIEhlcmUgaXMgdGhlIGJhY2t0
-cmFjZToKPgo+ICAgICAgMD4gMjAxNy0wNC0yNSAxMTowNjowMi44OTc5NDEgN2Y0NjdkZGQ3ODgw
-IC0xICoqKiBDYXVnaHQgc2lnbmFsCj4gKEFib3J0ZWQpICoqCj4gIGluIHRocmVhZCA3ZjQ2N2Rk
-ZDc4ODAgdGhyZWFkX25hbWU6Y2VwaC1tb24KPgo+ICBjZXBoIHZlcnNpb24gMTIuMC4yICg1YTFi
-NmIzMjY5ZGE5OWExODk4NGMxMzhjMjM5MzVlNWViOTZmNzNlKQo+ICAxOiAoKCkrMHg3OTdlN2Yp
-IFsweDdmNDY3ZTU4Y2U3Zl0KPiAgMjogKCgpKzB4ZjM3MCkgWzB4N2Y0NjdkMThkMzcwXQo+ICAz
-OiAoZ3NpZ25hbCgpKzB4MzcpIFsweDdmNDY3YTQ0ZjFkN10KPiAgNDogKGFib3J0KCkrMHgxNDgp
-IFsweDdmNDY3YTQ1MDhjOF0KPiAgNTogKF9fZ251X2N4eDo6X192ZXJib3NlX3Rlcm1pbmF0ZV9o
-YW5kbGVyKCkrMHgxNjUpIFsweDdmNDY3YWQ1MzlkNV0KPiAgNjogKCgpKzB4NWU5NDYpIFsweDdm
-NDY3YWQ1MTk0Nl0KPiAgNzogKCgpKzB4NWU5NzMpIFsweDdmNDY3YWQ1MTk3M10KPiAgODogKCgp
-KzB4NWViOTMpIFsweDdmNDY3YWQ1MWI5M10KPiAgOTogKGNlcGg6OmJ1ZmZlcjo6bGlzdDo6aXRl
-cmF0b3JfaW1wbDxmYWxzZT46OmNvcHkodW5zaWduZWQgaW50LAo+IGNoYXIqKSsweGE1KSBbMHg3
-ZjQ2N2UyZmM3MTVdCj4gIDEwOiAoY3JlYXRpbmdfcGdzX3Q6OmRlY29kZShjZXBoOjpidWZmZXI6
-Omxpc3Q6Oml0ZXJhdG9yJikrMHgzYykKPiBbMHg3ZjQ2N2UyMTFlOGNdCj4gIDExOiAoT1NETW9u
-aXRvcjo6dXBkYXRlX2Zyb21fcGF4b3MoYm9vbCopKzB4MjI1YSkgWzB4N2Y0NjdlMWNkMTZhXQo+
-ICAxMjogKFBheG9zU2VydmljZTo6cmVmcmVzaChib29sKikrMHgxYTUpIFsweDdmNDY3ZTE5NjMz
-NV0KPiAgMTM6IChNb25pdG9yOjpyZWZyZXNoX2Zyb21fcGF4b3MoYm9vbCopKzB4MTliKSBbMHg3
-ZjQ2N2UxMjk1M2JdCj4gIDE0OiAoTW9uaXRvcjo6aW5pdF9wYXhvcygpKzB4MTE1KSBbMHg3ZjQ2
-N2UxMjk5NzVdCj4gIDE1OiAoTW9uaXRvcjo6cHJlaW5pdCgpKzB4OTNkKSBbMHg3ZjQ2N2UxM2Iw
-N2RdCj4gIDE2OiAobWFpbigpKzB4MjUxOCkgWzB4N2Y0NjdlMDdmODQ4XQo+ICAxNzogKF9fbGli
-Y19zdGFydF9tYWluKCkrMHhmNSkgWzB4N2Y0NjdhNDNiYjM1XQo+ICAxODogKCgpKzB4MzI2NzFl
-KSBbMHg3ZjQ2N2UxMWI3MWVdCj4gIE5PVEU6IGEgY29weSBvZiB0aGUgZXhlY3V0YWJsZSwgb3Ig
-YG9iamR1bXAgLXJkUyA8ZXhlY3V0YWJsZT5gIGlzCj4gbmVlZGVkIHRvIGludGVycHJldCB0aGlz
-Lgo+Cj4gQ2hlZXJzLCBEYW4KPgo+Cj4gT24gTW9uLCBBcHIgMjQsIDIwMTcgYXQgNTo0OSBQTSwg
-QWJoaXNoZWsgTGVrc2htYW5hbiA8YWJoaXNoZWtAc3VzZS5jb20+IHdyb3RlOgo+PiBUaGlzIGlz
-IHRoZSB0aGlyZCBkZXZlbG9wbWVudCBjaGVja3BvaW50IHJlbGVhc2Ugb2YgTHVtaW5vdXMsIHRo
-ZSBuZXh0Cj4+IGxvbmcgdGVybQo+PiBzdGFibGUgcmVsZWFzZS4KPj4KPj4gTWFqb3IgY2hhbmdl
-cyBmcm9tIHYxMi4wLjEKPj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPj4gKiBUaGUgb3Jp
-Z2luYWwgbGlicmFkb3MgcmFkb3Nfb2JqZWN0c19saXN0X29wZW4gKEMpIGFuZCBvYmplY3RzX2Jl
-Z2luCj4+ICAgKEMrKykgb2JqZWN0IGxpc3RpbmcgQVBJLCBkZXByZWNhdGVkIGluIEhhbW1lciwg
-aGFzIGZpbmFsbHkgYmVlbgo+PiAgIHJlbW92ZWQuICBVc2VycyBvZiB0aGlzIGludGVyZmFjZSBt
-dXN0IHVwZGF0ZSB0aGVpciBzb2Z0d2FyZSB0byB1c2UKPj4gICBlaXRoZXIgdGhlIHJhZG9zX25v
-YmplY3RzX2xpc3Rfb3BlbiAoQykgYW5kIG5vYmplY3RzX2JlZ2luIChDKyspIEFQSSBvcgo+PiAg
-IHRoZSBuZXcgcmFkb3Nfb2JqZWN0X2xpc3RfYmVnaW4gKEMpIGFuZCBvYmplY3RfbGlzdF9iZWdp
-biAoQysrKSBBUEkKPj4gICBiZWZvcmUgdXBkYXRpbmcgdGhlIGNsaWVudC1zaWRlIGxpYnJhZG9z
-IGxpYnJhcnkgdG8gTHVtaW5vdXMuCj4+Cj4+ICAgT2JqZWN0IGVudW1lcmF0aW9uICh2aWEgYW55
-IEFQSSkgd2l0aCB0aGUgbGF0ZXN0IGxpYnJhZG9zIHZlcnNpb24KPj4gICBhbmQgcHJlLUhhbW1l
-ciBPU0RzIGlzIG5vIGxvbmdlciBzdXBwb3J0ZWQuICBOb3RlIHRoYXQgbm8gaW4tdHJlZQo+PiAg
-IENlcGggc2VydmljZXMgcmVseSBvbiBvYmplY3QgZW51bWVyYXRpb24gdmlhIHRoZSBkZXByZWNh
-dGVkIEFQSXMsIHNvCj4+ICAgb25seSBleHRlcm5hbCBsaWJyYWRvcyB1c2VycyBtaWdodCBiZSBh
-ZmZlY3RlZC4KPj4KPj4gICBUaGUgbmV3ZXN0IChhbmQgcmVjb21tZW5kZWQpIHJhZG9zX29iamVj
-dF9saXN0X2JlZ2luIChDKSBhbmQKPj4gICBvYmplY3RfbGlzdF9iZWdpbiAoQysrKSBBUEkgaXMg
-b25seSB1c2FibGUgb24gY2x1c3RlcnMgd2l0aCB0aGUKPj4gICBTT1JUQklUV0lTRSBmbGFnIGVu
-YWJsZWQgKEpld2VsIGFuZCBsYXRlcikuICAoTm90ZSB0aGF0IHRoaXMgZmxhZyBpcwo+PiAgIHJl
-cXVpcmVkIHRvIGJlIHNldCBiZWZvcmUgdXBncmFkaW5nIGJleW9uZCBKZXdlbC4pCj4+Cj4+ICog
-Q2VwaEZTIGNsaWVudHMgd2l0aG91dCB0aGUgJ3AnIGZsYWcgaW4gdGhlaXIgYXV0aGVudGljYXRp
-b24gY2FwYWJpbGl0eQo+PiAgIHN0cmluZyB3aWxsIG5vIGxvbmdlciBiZSBhYmxlIHRvIHNldCBx
-dW90YXMgb3IgYW55IGxheW91dCBmaWVsZHMuICBUaGlzCj4+ICAgZmxhZyBwcmV2aW91c2x5IG9u
-bHkgcmVzdHJpY3RlZCBtb2RpZmljYXRpb24gb2YgdGhlIHBvb2wgYW5kIG5hbWVzcGFjZQo+PiAg
-IGZpZWxkcyBpbiBsYXlvdXRzLgo+Pgo+PiAqIENlcGhGUyBkaXJlY3RvcnkgZnJhZ21lbnRhdGlv
-biAobGFyZ2UgZGlyZWN0b3J5IHN1cHBvcnQpIGlzIGVuYWJsZWQKPj4gICBieSBkZWZhdWx0IG9u
-IG5ldyBmaWxlc3lzdGVtcy4gIFRvIGVuYWJsZSBpdCBvbiBleGlzdGluZyBmaWxlc3lzdGVtcwo+
-PiAgIHVzZSAiY2VwaCBmcyBzZXQgPGZzX25hbWU+IGFsbG93X2RpcmZyYWdzIi4KPj4KPj4gKiBD
-ZXBoRlMgd2lsbCBnZW5lcmF0ZSBhIGhlYWx0aCB3YXJuaW5nIGlmIHlvdSBoYXZlIGZld2VyIHN0
-YW5kYnkgZGFlbW9ucwo+PiAgIHRoYW4gaXQgdGhpbmtzIHlvdSB3YW50ZWQuICBCeSBkZWZhdWx0
-IHRoaXMgd2lsbCBiZSAxIGlmIHlvdSBldmVyIGhhZAo+PiAgIGEgc3RhbmRieSwgYW5kIDAgaWYg
-eW91IGRpZCBub3QuICBZb3UgY2FuIGN1c3RvbWl6ZSB0aGlzIHVzaW5nCj4+ICAgYGBjZXBoIGZz
-IHNldCA8ZnM+IHN0YW5kYnlfY291bnRfd2FudGVkIDxudW1iZXI+YGAuICBTZXR0aW5nIGl0Cj4+
-ICAgdG8gemVybyB3aWxsIGVmZmVjdGl2ZWx5IGRpc2FibGUgdGhlIGhlYWx0aCBjaGVjay4KPj4K
-Pj4gKiBUaGUgImNlcGggbWRzIHRlbGwgLi4uIiBjb21tYW5kIGhhcyBiZWVuIHJlbW92ZWQuICBJ
-dCBpcyBzdXBlcnNlZGVkCj4+ICAgYnkgImNlcGggdGVsbCBtZHMuPGlkPiAuLi4iCj4+Cj4+ICog
-UkdXIGludHJvZHVjZXMgc2VydmVyIHNpZGUgZW5jcnlwdGlvbiBvZiB1cGxvYWRlZCBvYmplY3Rz
-IHdpdGggMwo+PiBvcHRpb25zIGZvcgo+PiAgIHRoZSBtYW5hZ2VtZW50IG9mIGVuY3J5cHRpb24g
-a2V5cywgYXV0b21hdGljIGVuY3J5cHRpb24gKG9ubHkKPj4gcmVjb21tZW5kZWQgZm9yCj4+ICAg
-dGVzdCBzZXR1cHMpLCBjdXN0b21lciBwcm92aWRlZCBrZXlzIHNpbWlsYXIgdG8gQW1hem9uIFNT
-RSBLTVMKPj4gc3BlY2lmaWNhdGlvbiAmCj4+ICAgdXNpbmcgYSBrZXkgbWFuYWdlbWVudCBzZXJ2
-aWNlIChvcGVuc3RhY2sgYmFyYmljaWFuKQo+Pgo+PiBGb3IgYSBtb3JlIGRldGFpbGVkIGNoYW5n
-ZWxvZywgcmVmZXIgdG8KPj4gaHR0cDovL2NlcGguY29tL3JlbGVhc2VzL2NlcGgtdjEyLTAtMi1s
-dW1pbm91cy1kZXYtcmVsZWFzZWQvCj4+Cj4+IEdldHRpbmcgQ2VwaAo+PiAtLS0tLS0tLS0tLS0K
-Pj4KPj4gKiBHaXQgYXQgZ2l0Oi8vZ2l0aHViLmNvbS9jZXBoL2NlcGguZ2l0Cj4+ICogVGFyYmFs
-bCBhdCBodHRwOi8vZG93bmxvYWQuY2VwaC5jb20vdGFyYmFsbHMvY2VwaC0xMi4wLjIudGFyLmd6
-Cj4+ICogRm9yIHBhY2thZ2VzLCBzZWUgaHR0cDovL2RvY3MuY2VwaC5jb20vZG9jcy9tYXN0ZXIv
-aW5zdGFsbC9nZXQtcGFja2FnZXMvCj4+ICogRm9yIGNlcGgtZGVwbG95LCBzZWUKPj4gaHR0cDov
-L2RvY3MuY2VwaC5jb20vZG9jcy9tYXN0ZXIvaW5zdGFsbC9pbnN0YWxsLWNlcGgtZGVwbG95Cj4+
-ICogUmVsZWFzZSBzaGExOiA1YTFiNmIzMjY5ZGE5OWExODk4NGMxMzhjMjM5MzVlNWViOTZmNzNl
-Cj4+Cj4+IC0tCj4+IEFiaGlzaGVrIExla3NobWFuYW4KPj4gU1VTRSBMaW51eCBHbWJILCBHRjog
-RmVsaXggSW1lbmTDtnJmZmVyLCBKYW5lIFNtaXRoYXJkLCBHcmFoYW0gTm9ydG9uLAo+PiBIUkIg
-MjEyODQgKEFHIE7DvHJuYmVyZykKPj4KPj4gLS0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlz
-IGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluCj4+IHRoZSBi
-b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4+IE1vcmUgbWFq
-b3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRt
-bApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVz
-ZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5j
-ZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+Created ticket to follow up: http://tracker.ceph.com/issues/19769
+
+
+
+On Tue, Apr 25, 2017 at 11:34 AM, Dan van der Ster <dan@vanderster.com> wro=
+te:
+> Could this change be the culprit?
+>
+> commit 973829132bf7206eff6c2cf30dd0aa32fb0ce706
+> Author: Sage Weil <sage@redhat.com>
+> Date:   Fri Mar 31 09:33:19 2017 -0400
+>
+>     mon/OSDMonitor: spinlock -> std::mutex
+>
+>     I think spinlock is dangerous here: we're doing semi-unbounded
+>     work (decode).  Also seemingly innocuous code like dout macros
+>     take mutexes.
+>
+>     Signed-off-by: Sage Weil <sage@redhat.com>
+>
+>
+> diff --git a/src/mon/OSDMonitor.cc b/src/mon/OSDMonitor.cc
+> index 543338bdf3..6fa5e8de4b 100644
+> --- a/src/mon/OSDMonitor.cc
+> +++ b/src/mon/OSDMonitor.cc
+> @@ -245,7 +245,7 @@ void OSDMonitor::update_from_paxos(bool *need_bootstr=
+ap)
+>      bufferlist bl;
+>      mon->store->get(OSD_PG_CREATING_PREFIX, "creating", bl);
+>      auto p =3D bl.begin();
+> -    std::lock_guard<Spinlock> l(creating_pgs_lock);
+> +    std::lock_guard<std::mutex> l(creating_pgs_lock);
+>      creating_pgs.decode(p);
+>      dout(7) << __func__ << " loading creating_pgs e" <<
+> creating_pgs.last_scan_epoch << dendl;
+>    }
+> ...
+>
+>
+> Cheers, Dan
+>
+>
+> On Tue, Apr 25, 2017 at 11:15 AM, Dan van der Ster <dan@vanderster.com> w=
+rote:
+>> Hi,
+>>
+>> The mon's on my test luminous cluster do not start after upgrading
+>> from 12.0.1 to 12.0.2. Here is the backtrace:
+>>
+>>      0> 2017-04-25 11:06:02.897941 7f467ddd7880 -1 *** Caught signal
+>> (Aborted) **
+>>  in thread 7f467ddd7880 thread_name:ceph-mon
+>>
+>>  ceph version 12.0.2 (5a1b6b3269da99a18984c138c23935e5eb96f73e)
+>>  1: (()+0x797e7f) [0x7f467e58ce7f]
+>>  2: (()+0xf370) [0x7f467d18d370]
+>>  3: (gsignal()+0x37) [0x7f467a44f1d7]
+>>  4: (abort()+0x148) [0x7f467a4508c8]
+>>  5: (__gnu_cxx::__verbose_terminate_handler()+0x165) [0x7f467ad539d5]
+>>  6: (()+0x5e946) [0x7f467ad51946]
+>>  7: (()+0x5e973) [0x7f467ad51973]
+>>  8: (()+0x5eb93) [0x7f467ad51b93]
+>>  9: (ceph::buffer::list::iterator_impl<false>::copy(unsigned int,
+>> char*)+0xa5) [0x7f467e2fc715]
+>>  10: (creating_pgs_t::decode(ceph::buffer::list::iterator&)+0x3c)
+>> [0x7f467e211e8c]
+>>  11: (OSDMonitor::update_from_paxos(bool*)+0x225a) [0x7f467e1cd16a]
+>>  12: (PaxosService::refresh(bool*)+0x1a5) [0x7f467e196335]
+>>  13: (Monitor::refresh_from_paxos(bool*)+0x19b) [0x7f467e12953b]
+>>  14: (Monitor::init_paxos()+0x115) [0x7f467e129975]
+>>  15: (Monitor::preinit()+0x93d) [0x7f467e13b07d]
+>>  16: (main()+0x2518) [0x7f467e07f848]
+>>  17: (__libc_start_main()+0xf5) [0x7f467a43bb35]
+>>  18: (()+0x32671e) [0x7f467e11b71e]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to interpret this.
+>>
+>> Cheers, Dan
+>>
+>>
+>> On Mon, Apr 24, 2017 at 5:49 PM, Abhishek Lekshmanan <abhishek@suse.com>=
+ wrote:
+>>> This is the third development checkpoint release of Luminous, the next
+>>> long term
+>>> stable release.
+>>>
+>>> Major changes from v12.0.1
+>>> --------------------------
+>>> * The original librados rados_objects_list_open (C) and objects_begin
+>>>   (C++) object listing API, deprecated in Hammer, has finally been
+>>>   removed.  Users of this interface must update their software to use
+>>>   either the rados_nobjects_list_open (C) and nobjects_begin (C++) API =
+or
+>>>   the new rados_object_list_begin (C) and object_list_begin (C++) API
+>>>   before updating the client-side librados library to Luminous.
+>>>
+>>>   Object enumeration (via any API) with the latest librados version
+>>>   and pre-Hammer OSDs is no longer supported.  Note that no in-tree
+>>>   Ceph services rely on object enumeration via the deprecated APIs, so
+>>>   only external librados users might be affected.
+>>>
+>>>   The newest (and recommended) rados_object_list_begin (C) and
+>>>   object_list_begin (C++) API is only usable on clusters with the
+>>>   SORTBITWISE flag enabled (Jewel and later).  (Note that this flag is
+>>>   required to be set before upgrading beyond Jewel.)
+>>>
+>>> * CephFS clients without the 'p' flag in their authentication capabilit=
+y
+>>>   string will no longer be able to set quotas or any layout fields.  Th=
+is
+>>>   flag previously only restricted modification of the pool and namespac=
+e
+>>>   fields in layouts.
+>>>
+>>> * CephFS directory fragmentation (large directory support) is enabled
+>>>   by default on new filesystems.  To enable it on existing filesystems
+>>>   use "ceph fs set <fs_name> allow_dirfrags".
+>>>
+>>> * CephFS will generate a health warning if you have fewer standby daemo=
+ns
+>>>   than it thinks you wanted.  By default this will be 1 if you ever had
+>>>   a standby, and 0 if you did not.  You can customize this using
+>>>   ``ceph fs set <fs> standby_count_wanted <number>``.  Setting it
+>>>   to zero will effectively disable the health check.
+>>>
+>>> * The "ceph mds tell ..." command has been removed.  It is superseded
+>>>   by "ceph tell mds.<id> ..."
+>>>
+>>> * RGW introduces server side encryption of uploaded objects with 3
+>>> options for
+>>>   the management of encryption keys, automatic encryption (only
+>>> recommended for
+>>>   test setups), customer provided keys similar to Amazon SSE KMS
+>>> specification &
+>>>   using a key management service (openstack barbician)
+>>>
+>>> For a more detailed changelog, refer to
+>>> http://ceph.com/releases/ceph-v12-0-2-luminous-dev-released/
+>>>
+>>> Getting Ceph
+>>> ------------
+>>>
+>>> * Git at git://github.com/ceph/ceph.git
+>>> * Tarball at http://download.ceph.com/tarballs/ceph-12.0.2.tar.gz
+>>> * For packages, see http://docs.ceph.com/docs/master/install/get-packag=
+es/
+>>> * For ceph-deploy, see
+>>> http://docs.ceph.com/docs/master/install/install-ceph-deploy
+>>> * Release sha1: 5a1b6b3269da99a18984c138c23935e5eb96f73e
+>>>
+>>> --
+>>> Abhishek Lekshmanan
+>>> SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Nort=
+on,
+>>> HRB 21284 (AG N=C3=BCrnberg)
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
