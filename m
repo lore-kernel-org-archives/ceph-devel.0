@@ -1,216 +1,151 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: [ceph-users] v12.0.2 Luminous (dev) released
-Date: Wed, 26 Apr 2017 20:15:12 +0800
-Message-ID: <CAJE9aOP-6f3-GVy2EbpW=qwerQPWKat8k=K5iXSUh-PLs3OJhA@mail.gmail.com>
-References: <319cffed-6ef8-bb3f-186a-77b2be62a2db@suse.com>
- <CABZ+qq=MkZBRe2_NADF0LXobbLfVRV-kyqfvxPiNfJLcW_B_fA@mail.gmail.com>
- <CABZ+qqnDSxaoa_JaFLTA9qMXKYxi7-TzdyXFgtY8ujPQqfZQUA@mail.gmail.com>
- <CABZ+qq=EuD3Nq6OUeD2U4Ug-BsZXk6jJGYSMxK49bFrJ=gutxw@mail.gmail.com> <CAJ4mKGZEVyNXSBvrkMkRfXX+mmV3qVydOASsT+O+eK04uAjN+Q@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: repeating "wrong node" and ceph-mgr CPU usage get higher and
+ higher without any I/O
+Date: Wed, 26 Apr 2017 13:26:42 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1704261325350.3646@piezo.novalocal>
+References: <CAKQB+fubL9-JNyD-1xR9w_u=-hW2e4CJNOaiVjOJQWJHi=SsWw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f195.google.com ([209.85.217.195]:34060 "EHLO
-        mail-ua0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1954803AbdDZMPP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Apr 2017 08:15:15 -0400
-Received: by mail-ua0-f195.google.com with SMTP id 110so20788183uas.1
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Apr 2017 05:15:13 -0700 (PDT)
-In-Reply-To: <CAJ4mKGZEVyNXSBvrkMkRfXX+mmV3qVydOASsT+O+eK04uAjN+Q@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:58542 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1947788AbdDZN0p (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 26 Apr 2017 09:26:45 -0400
+In-Reply-To: <CAKQB+fubL9-JNyD-1xR9w_u=-hW2e4CJNOaiVjOJQWJHi=SsWw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Dan van der Ster <dan@vanderster.com>, Kefu Chai <kchai@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jerry Lee <leisurelysw24@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, haomaiwang@gmail.com
 
-On Tue, Apr 25, 2017 at 9:15 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> This is more likely a result of Kefu's work to move the creating_pgs
-> members around. It may not have been versioned in a way that allowed
-> luminous RC upgrades; I'm not sure what feature bits are involved or
-> if there's a good way to resolve that. :/
+On Wed, 26 Apr 2017, Jerry Lee wrote:
+> Hi,
+> 
+> I got a issue that the ceph-mgr consumes more and more CPU computing
+> power even when there's no I/O in my cluster.  Some logs and strace
+> output are provided as follows.  From the logs, it seems that the
+> "wrong node" log starts appearing when a node leave and rejoin the
+> cluster.  The question is why does ceph-mgr keeps trying the old
+> connections even after it knows the new (correct) nonce already? And
+> the number of trial connections is also increasing as time go on.  The
+> only way to mitigate the issue is to restart the ceph-mgr process, but
+> after several hours, the issue occurs again.  Is there any suggestion
+> or idea that I could do to solve the issue?  Thanks!
+> 
+> 
+> environment:
+> =========
+> linux-4.2.8
+> ceph version v11.0.2
 
-sage's patch fixes it. we have the mon's FEATURE_LUMINOUS already.
+Are you sure that's the version you're running?  That's a random 
+pre-kraken development release.
 
-> -Greg
->
-> On Tue, Apr 25, 2017 at 5:55 AM, Dan van der Ster <dan@vanderster.com> wr=
-ote:
->> Created ticket to follow up: http://tracker.ceph.com/issues/19769
->>
->>
->>
->> On Tue, Apr 25, 2017 at 11:34 AM, Dan van der Ster <dan@vanderster.com> =
-wrote:
->>> Could this change be the culprit?
->>>
->>> commit 973829132bf7206eff6c2cf30dd0aa32fb0ce706
->>> Author: Sage Weil <sage@redhat.com>
->>> Date:   Fri Mar 31 09:33:19 2017 -0400
->>>
->>>     mon/OSDMonitor: spinlock -> std::mutex
->>>
->>>     I think spinlock is dangerous here: we're doing semi-unbounded
->>>     work (decode).  Also seemingly innocuous code like dout macros
->>>     take mutexes.
->>>
->>>     Signed-off-by: Sage Weil <sage@redhat.com>
->>>
->>>
->>> diff --git a/src/mon/OSDMonitor.cc b/src/mon/OSDMonitor.cc
->>> index 543338bdf3..6fa5e8de4b 100644
->>> --- a/src/mon/OSDMonitor.cc
->>> +++ b/src/mon/OSDMonitor.cc
->>> @@ -245,7 +245,7 @@ void OSDMonitor::update_from_paxos(bool *need_boots=
-trap)
->>>      bufferlist bl;
->>>      mon->store->get(OSD_PG_CREATING_PREFIX, "creating", bl);
->>>      auto p =3D bl.begin();
->>> -    std::lock_guard<Spinlock> l(creating_pgs_lock);
->>> +    std::lock_guard<std::mutex> l(creating_pgs_lock);
->>>      creating_pgs.decode(p);
->>>      dout(7) << __func__ << " loading creating_pgs e" <<
->>> creating_pgs.last_scan_epoch << dendl;
->>>    }
->>> ...
->>>
->>>
->>> Cheers, Dan
->>>
->>>
->>> On Tue, Apr 25, 2017 at 11:15 AM, Dan van der Ster <dan@vanderster.com>=
- wrote:
->>>> Hi,
->>>>
->>>> The mon's on my test luminous cluster do not start after upgrading
->>>> from 12.0.1 to 12.0.2. Here is the backtrace:
->>>>
->>>>      0> 2017-04-25 11:06:02.897941 7f467ddd7880 -1 *** Caught signal
->>>> (Aborted) **
->>>>  in thread 7f467ddd7880 thread_name:ceph-mon
->>>>
->>>>  ceph version 12.0.2 (5a1b6b3269da99a18984c138c23935e5eb96f73e)
->>>>  1: (()+0x797e7f) [0x7f467e58ce7f]
->>>>  2: (()+0xf370) [0x7f467d18d370]
->>>>  3: (gsignal()+0x37) [0x7f467a44f1d7]
->>>>  4: (abort()+0x148) [0x7f467a4508c8]
->>>>  5: (__gnu_cxx::__verbose_terminate_handler()+0x165) [0x7f467ad539d5]
->>>>  6: (()+0x5e946) [0x7f467ad51946]
->>>>  7: (()+0x5e973) [0x7f467ad51973]
->>>>  8: (()+0x5eb93) [0x7f467ad51b93]
->>>>  9: (ceph::buffer::list::iterator_impl<false>::copy(unsigned int,
->>>> char*)+0xa5) [0x7f467e2fc715]
->>>>  10: (creating_pgs_t::decode(ceph::buffer::list::iterator&)+0x3c)
->>>> [0x7f467e211e8c]
->>>>  11: (OSDMonitor::update_from_paxos(bool*)+0x225a) [0x7f467e1cd16a]
->>>>  12: (PaxosService::refresh(bool*)+0x1a5) [0x7f467e196335]
->>>>  13: (Monitor::refresh_from_paxos(bool*)+0x19b) [0x7f467e12953b]
->>>>  14: (Monitor::init_paxos()+0x115) [0x7f467e129975]
->>>>  15: (Monitor::preinit()+0x93d) [0x7f467e13b07d]
->>>>  16: (main()+0x2518) [0x7f467e07f848]
->>>>  17: (__libc_start_main()+0xf5) [0x7f467a43bb35]
->>>>  18: (()+0x32671e) [0x7f467e11b71e]
->>>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
->>>> needed to interpret this.
->>>>
->>>> Cheers, Dan
->>>>
->>>>
->>>> On Mon, Apr 24, 2017 at 5:49 PM, Abhishek Lekshmanan <abhishek@suse.co=
-m> wrote:
->>>>> This is the third development checkpoint release of Luminous, the nex=
-t
->>>>> long term
->>>>> stable release.
->>>>>
->>>>> Major changes from v12.0.1
->>>>> --------------------------
->>>>> * The original librados rados_objects_list_open (C) and objects_begin
->>>>>   (C++) object listing API, deprecated in Hammer, has finally been
->>>>>   removed.  Users of this interface must update their software to use
->>>>>   either the rados_nobjects_list_open (C) and nobjects_begin (C++) AP=
-I or
->>>>>   the new rados_object_list_begin (C) and object_list_begin (C++) API
->>>>>   before updating the client-side librados library to Luminous.
->>>>>
->>>>>   Object enumeration (via any API) with the latest librados version
->>>>>   and pre-Hammer OSDs is no longer supported.  Note that no in-tree
->>>>>   Ceph services rely on object enumeration via the deprecated APIs, s=
-o
->>>>>   only external librados users might be affected.
->>>>>
->>>>>   The newest (and recommended) rados_object_list_begin (C) and
->>>>>   object_list_begin (C++) API is only usable on clusters with the
->>>>>   SORTBITWISE flag enabled (Jewel and later).  (Note that this flag i=
-s
->>>>>   required to be set before upgrading beyond Jewel.)
->>>>>
->>>>> * CephFS clients without the 'p' flag in their authentication capabil=
-ity
->>>>>   string will no longer be able to set quotas or any layout fields.  =
-This
->>>>>   flag previously only restricted modification of the pool and namesp=
-ace
->>>>>   fields in layouts.
->>>>>
->>>>> * CephFS directory fragmentation (large directory support) is enabled
->>>>>   by default on new filesystems.  To enable it on existing filesystem=
-s
->>>>>   use "ceph fs set <fs_name> allow_dirfrags".
->>>>>
->>>>> * CephFS will generate a health warning if you have fewer standby dae=
-mons
->>>>>   than it thinks you wanted.  By default this will be 1 if you ever h=
-ad
->>>>>   a standby, and 0 if you did not.  You can customize this using
->>>>>   ``ceph fs set <fs> standby_count_wanted <number>``.  Setting it
->>>>>   to zero will effectively disable the health check.
->>>>>
->>>>> * The "ceph mds tell ..." command has been removed.  It is superseded
->>>>>   by "ceph tell mds.<id> ..."
->>>>>
->>>>> * RGW introduces server side encryption of uploaded objects with 3
->>>>> options for
->>>>>   the management of encryption keys, automatic encryption (only
->>>>> recommended for
->>>>>   test setups), customer provided keys similar to Amazon SSE KMS
->>>>> specification &
->>>>>   using a key management service (openstack barbician)
->>>>>
->>>>> For a more detailed changelog, refer to
->>>>> http://ceph.com/releases/ceph-v12-0-2-luminous-dev-released/
->>>>>
->>>>> Getting Ceph
->>>>> ------------
->>>>>
->>>>> * Git at git://github.com/ceph/ceph.git
->>>>> * Tarball at http://download.ceph.com/tarballs/ceph-12.0.2.tar.gz
->>>>> * For packages, see http://docs.ceph.com/docs/master/install/get-pack=
-ages/
->>>>> * For ceph-deploy, see
->>>>> http://docs.ceph.com/docs/master/install/install-ceph-deploy
->>>>> * Release sha1: 5a1b6b3269da99a18984c138c23935e5eb96f73e
->>>>>
->>>>> --
->>>>> Abhishek Lekshmanan
->>>>> SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham No=
-rton,
->>>>> HRB 21284 (AG N=C3=BCrnberg)
->>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+That said, even if its 11.2.0, we've fixed a ton of mgr issues in the 
+run-up to luminous, so I'm not surprised if you've seen problems on 
+kraken.  The easy workaround is to just stop the mgr daemon--it doesn't 
+really do anything on kraken yet!
+
+sage
+
+
+> 8 nodes and 8 8TB disks on each nodes.
+>    - 3 MONs
+>    - 3 MGRs
+>    - 3 MDSs
+> 
+> parts of ceph-mgr log:
+> ================
+> 2017-04-25 12:27:23.298417 7f2b74d31700  0 -- 192.168.2.8:6849/3516 >>
+> 192.168.2.7:0/3459516139 conn(0x55b915d77800 :6849 s=STATE_OPEN pgs=2
+> cs=1 l=0).fault initiating reconnect
+> 2017-04-25 12:27:23.480121 7f2b74530700  0 -- 192.168.2.8:6849/3516 >>
+> 192.168.2.7:0/1237847161 conn(0x55b915d79000 :6849 s=STATE_OPEN pgs=2
+> cs=1 l=0).fault initiating reconnect
+> 2017-04-25 12:27:23.614977 7f2b75532700  0 -- 192.168.2.8:6849/3516 >>
+> 192.168.2.7:0/2251622435 conn(0x55b915d7a800 :6849 s=STATE_OPEN pgs=2
+> cs=1 l=0).fault initiating reconnect
+> ...
+> 2017-04-25 14:21:54.632838 7f2b74530700  0 -- 192.168.2.8:6849/3516 >>
+> 192.168.2.6:6824/3898 conn(0x55b914c7a000 :6849
+> s=STATE_CONNECTING_WAIT_BANNER_AND_IDENTIFY pgs=2 cs=2
+> l=0)._process_connection connect claims to be 192.168.2.6:6824/3683
+> not 192.168.2.6:6824/3898 - wrong node!
+> 2017-04-25 14:21:54.824814 7f2b74530700  0 -- 192.168.2.8:6849/3516 >>
+> 192.168.2.6:6812/3552 conn(0x55b914c4e000 :6849
+> s=STATE_CONNECTING_WAIT_BANNER_AND_IDENTIFY pgs=2 cs=2
+> l=0)._process_connection connect claims to be 192.168.2.6:6812/3467
+> not 192.168.2.6:6812/3552 - wrong node!
+> 2017-04-25 14:21:55.240852 7f2b75532700  0 -- 192.168.2.8:6849/3516 >>
+> 192.168.2.6:6836/4430 conn(0x55b914413000 :6849
+> s=STATE_CONNECTING_WAIT_BANNER_AND_IDENTIFY pgs=2 cs=2
+> l=0)._process_connection connect claims to be 192.168.2.6:6836/3978
+> not 192.168.2.6:6836/4430 - wrong node!
+> 
+> strace output:
+> ==========
+> [BEFORE]
+> # timeout 10 ./strace -p 3518 -c
+> ./strace: Process 3518 attached
+> ./strace: Process 3518 detached
+> % time     seconds  usecs/call     calls    errors syscall
+> ------ ----------- ----------- --------- --------- ----------------
+>  96.91    0.282674          15     19033           epoll_wait
+>   0.95    0.002783           2      1662         7 futex
+>   0.58    0.001682           2       902       892 connect
+>   0.54    0.001581           4       381        78 read
+>   0.27    0.000774           1       912           epoll_ctl
+>   0.19    0.000563           7        79           sendmsg
+>   0.14    0.000409           1       329           close
+>   0.14    0.000398           1       329           socket
+>   0.12    0.000364           1       658           fcntl
+>   0.08    0.000247           1       329       319 shutdown
+>   0.08    0.000224           1       329           setsockopt
+> ------ ----------- ----------- --------- --------- ----------------
+> 100.00    0.291699                 24943      1296 total
+> 
+> [AFTER about 1 day]
+> # timeout 10 ./strace -p 3518 -c
+> ./strace: Process 3518 attached
+> ./strace: Process 3518 detached
+> % time     seconds  usecs/call     calls    errors syscall
+> ------ ----------- ----------- --------- --------- ----------------
+>  99.91    0.403715           2    199589           epoll_wait
+>   0.05    0.000218           0     18739     18739 connect
+>   0.02    0.000075           0     32176       169 futex
+>   0.01    0.000024           0      6486           socket
+>   0.00    0.000020           0     12972           fcntl
+>   0.00    0.000018           0     18739           epoll_ctl
+>   0.00    0.000010           0      6486           setsockopt
+>   0.00    0.000006           0      6486           close
+>   0.00    0.000005           0      6486      6486 shutdown
+>   0.00    0.000000           0       304        51 read
+>   0.00    0.000000           0        51           sendmsg
+> ------ ----------- ----------- --------- --------- ----------------
+> 100.00    0.404091                308514     25445 total
+> 
+> detailed strace result on a ceph-mgr:
+> ==========================
+> socket(AF_INET, SOCK_STREAM, IPPROTO_IP) = 94
+> fcntl(94, F_GETFL)                      = 0x2 (flags O_RDWR)
+> fcntl(94, F_SETFL, O_RDWR|O_NONBLOCK)   = 0
+> setsockopt(94, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+> connect(94, {sa_family=AF_INET, sin_port=htons(0),
+> sin_addr=inet_addr("192.168.2.7")}, 16) = -1 EINPROGRESS (Operation
+> now in progress)
+> epoll_ctl(4, EPOLL_CTL_ADD, 94, {EPOLLIN|EPOLLET, {u32=94, u64=94}}) = 0
+> connect(94, {sa_family=AF_INET, sin_port=htons(0),
+> sin_addr=inet_addr("192.168.2.7")}, 16) = -1 EALREADY (Operation
+> already in progress)
+> epoll_ctl(4, EPOLL_CTL_MOD, 94, {EPOLLIN|EPOLLOUT|EPOLLET, {u32=94,
+> u64=94}}) = 0
+> epoll_wait(4, [{EPOLLIN|EPOLLOUT|EPOLLERR|EPOLLHUP, {u32=95, u64=95}},
+> {EPOLLIN|EPOLLOUT|EPOLLERR|EPOLLHUP, {u32=93, u64=93}}], 5000, 4) = 2
+> connect(95, {sa_family=AF_INET, sin_port=htons(0),
+> sin_addr=inet_addr("192.168.2.2")}, 16) = -1 ECONNREFUSED (Connection
+> refused)
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
---=20
-Regards
-Kefu Chai
+> 
+> 
