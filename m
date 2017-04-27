@@ -1,237 +1,106 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: [PATCH] osd: Do not subtract object overlaps from cache usage
-Date: Thu, 27 Apr 2017 11:25:11 -0700
-Message-ID: <CAJ4mKGYQEcgPJBGS5oofpU96Fcb1_M_vAj30fW9J92pswrYLLw@mail.gmail.com>
-References: <d343aaa4-58f3-437b-276e-4a15ea4f209b@suse.com> <20170424151527.10888-1-mkoutny@suse.com>
+From: David Butterfield <dab21774@gmail.com>
+Subject: Usermode iSCSI-SCST updated to use Ceph RBD as backing storage
+Date: Thu, 27 Apr 2017 12:29:19 -0600
+Message-ID: <CALiN7rz7kXB5ok_=XNAiufQBGVKOT8Lh4d_Uf3rE0nEDPWdpdw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f52.google.com ([209.85.214.52]:37111 "EHLO
-        mail-it0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1164000AbdD0SZO (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Apr 2017 14:25:14 -0400
-Received: by mail-it0-f52.google.com with SMTP id x188so19607860itb.0
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Apr 2017 11:25:13 -0700 (PDT)
-In-Reply-To: <20170424151527.10888-1-mkoutny@suse.com>
+Received: from mail-vk0-f52.google.com ([209.85.213.52]:33559 "EHLO
+        mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965615AbdD0S3V (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Apr 2017 14:29:21 -0400
+Received: by mail-vk0-f52.google.com with SMTP id j127so22095872vkh.0
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Apr 2017 11:29:20 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Michal_Koutn=C3=BD?= <mkoutny@suse.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Mon, Apr 24, 2017 at 8:15 AM, Michal Koutný <mkoutny@suse.com> wrote:
-> Hi,
-> this is a followup of my question [1] which I partially answered by looking at
-> code history -- semantics of num_bytes isn't meant to include objects
-> overlapping areas. However, this results in underestimating of space
-> occupied on a cache tier proportional to the number of (overlapping) clone
-> objects stored there.
->
-> Could you please comment on the patch below if it's a right avenue to address
-> this misaccounting problem. (This is rather for a discussion, I plan to submit
-> a regular PR afterwards.)
+An update on the port of SCST to run entirely in usermode:
 
-Broadly speaking this seems like a sane approach. You're correct that
-the OSD tries to not count overlapping space, but that's not accurate
-on FileStore (sorry your previous email lost everybody's notice), and
-it would be good to have a solution for that.
+I've created a new branch "ceph_rbd" in my SCST-Usermode-Adaptation
+repository which includes a "shim" between the SCST BLOCKIO code (when
+running in usermode), and the Ceph librbd API.
 
-It might go better to query via the ObjectStore interface whether
-clones are space-minimized or duplicates and make some higher-level
-choices based on that; not really sure. I'd send in a PR where it can
-be more easily discussed. :)
--Greg
+https://github.com/DavidButterfield/SCST-Usermode-Adaptation/blob/ceph_rbd/scst/src/dev_handlers/scst_vdisk_ceph_rbd.c
 
+This enables a purely usermode instance of SCST to serve iSCSI
+initiators in a TCP/IP network using calls to librbd for access to the
+backing store.  There is no SCST code running in the kernel -- the
+usermode server uses regular socket(2) calls for access to the network,
+with the iSCSI protocol interpreter and the core SCSI engine both
+running in usermode.
 
+Running the iSCSI/SCST/RBD server in usermode using regular socket calls
+opens the possibility of building it for non-Linux systems (e.g. FreeBSD).
+
+I just decided to write this shim to Ceph RBD three days ago, and got it
+working today, so consider it "alpha".  It doesn't handle everything
+perfectly right, but it runs, and read/write seem to be working.
+
+So far I've tested it by running an iSCSI session from another Linux
+machine (open-iscsi) to the usermode SCST/RBD server, exporting a 4GB
+image I created on the Ceph server: I copied some files in and out of it
+a few times, and compared the result with the original.  That worked.
+
+At the moment you have to compile it either to use local aio(7) calls or
+librbd calls -- making them work side-by-side is TBD.
+
+(The idea to connect the usermode iSCSI server with Ceph came to
+me from Adrian Saul.)
+
+On Fri, Apr 21, 2017 at 2:18 PM, David Butterfield <dab21774@gmail.com> wrote:
+> This may be of interest, running SCST as an iSCSI server entirely in usermode.
+> It uses regular socket calls on the network and preadv/pwritev on the
+> backing store.
+> It looks like it would be straightforward to adapt it to make direct
+> calls to librados.
 >
-> Thanks,
-> Michal
+> One thing mentioned in the paper is that with iSCSI/SCST running entirely in
+> usermode using regular system calls, iSCSI/SCST could be compiled not only on
+> Linux systems, but on any POSIX-style system with gcc and the other libraries
+> (e.g. freebsd).
 >
+> https://davidbutterfield.github.io/SCST-Usermode-Adaptation/docs/SCST_Usermode.html
 >
-> [1] http://lists.ceph.com/pipermail/ceph-users-ceph.com/2017-April/017288.html
+> Regards,
+> David Butterfield
+> -----------------
 >
-> ---
+> iSCSI-SCST Storage Server Usermode Adaptation
+> An adaptation of the iSCSI-SCST storage server software to run
+> entirely in usermode on an unmodified kernel
+> David A. Butterfield
 >
-> PG group field num_bytes does not include space that is part of clone
-> object overlaps. Introduce a new field num_bytes_overlap that stands for
-> this space only, so that it can be used to strictly limit cache tier
-> usage with object storage backends that do not support storing overlaps
-> efficiently.
-> ---
->  src/osd/PrimaryLogPG.cc | 15 ++++++++++++++-
->  src/osd/PrimaryLogPG.h  |  1 +
->  src/osd/osd_types.cc    |  9 ++++++++-
->  src/osd/osd_types.h     |  6 +++++-
->  4 files changed, 28 insertions(+), 3 deletions(-)
+> This paper describes an adaptation of the iSCSI-SCST storage server software to
+> run entirely in usermode on an unmodified Linux kernel; performance
+> measurements and model; and an experimental algorithm to improve performance
+> for small Read operations.
 >
-> diff --git a/src/osd/PrimaryLogPG.cc b/src/osd/PrimaryLogPG.cc
-> index 2f15999..12c02a0 100644
-> --- a/src/osd/PrimaryLogPG.cc
-> +++ b/src/osd/PrimaryLogPG.cc
-> @@ -6407,6 +6407,7 @@ void PrimaryLogPG::make_writeable(OpContext *ctx)
->        ctx->delta_stats.num_objects_omap++;
->      if (snap_oi->is_cache_pinned())
->        ctx->delta_stats.num_objects_pinned++;
-> +    ctx->delta_stats.num_bytes_overlap += ctx->obs->oi.size;
->      ctx->delta_stats.num_object_clones++;
->      ctx->new_snapset.clones.push_back(coid.snap);
->      ctx->new_snapset.clone_size[coid.snap] = ctx->obs->oi.size;
-> @@ -6439,8 +6440,10 @@ void PrimaryLogPG::make_writeable(OpContext *ctx)
->      if (is_present_clone(last_clone_oid)) {
->        interval_set<uint64_t> &newest_overlap = ctx->new_snapset.clone_overlap.rbegin()->second;
->        ctx->modified_ranges.intersection_of(newest_overlap);
-> -      // modified_ranges is still in use by the clone
-> +      // modified_ranges is still in use by the clone (but not in accounted overlap)
->        add_interval_usage(ctx->modified_ranges, ctx->delta_stats);
-> +      sub_interval_usage(ctx->modified_ranges, ctx->delta_stats);
-> +
->        newest_overlap.subtract(ctx->modified_ranges);
->      }
->    }
-> @@ -6479,6 +6482,13 @@ void PrimaryLogPG::add_interval_usage(interval_set<uint64_t>& s, object_stat_sum
->    }
->  }
+> In a standard installation of SCST the iscsi-scstd daemon runs as a
+> single-threaded Linux usermode process that cooperates with the kernel-resident
+> SCST datapath implementation using ioctl(2) and netlink(7) for communication.
 >
-> +void PrimaryLogPG::sub_interval_usage(interval_set<uint64_t>& s, object_stat_sum_t& delta_stats)
-> +{
-> +  for (interval_set<uint64_t>::const_iterator p = s.begin(); p != s.end(); ++p) {
-> +    delta_stats.num_bytes_overlap -= p.get_len();
-> +  }
-> +}
-> +
->  void PrimaryLogPG::complete_disconnect_watches(
->    ObjectContextRef obc,
->    const list<watch_disconnect_t> &to_disconnect)
-> @@ -12250,6 +12260,9 @@ bool PrimaryLogPG::agent_choose_mode(bool restart, OpRequestRef op)
->      num_user_objects = 0;
+> In the iSCSI-SCST Usermode Adaptation the iscsi-scstd daemon runs on the main
+> thread in a multi-threaded process in which other usermode threads are
+> concurrently providing the services and executing the SCST code that would be
+> running inside the kernel in a standard installation of SCST.
 >
->    uint64_t num_user_bytes = info.stats.stats.sum.num_bytes;
-> +  // TODO should go depend on osd->store
-> +  uint64_t overlap_bytes = info.stats.stats.sum.num_bytes_overlap;
-> +  num_user_bytes += overlap_bytes;
->    uint64_t unflushable_bytes = info.stats.stats.sum.num_bytes_hit_set_archive;
->    num_user_bytes -= unflushable_bytes;
->    uint64_t num_overhead_bytes = osd->store->estimate_objects_overhead(num_user_objects);
-> diff --git a/src/osd/PrimaryLogPG.h b/src/osd/PrimaryLogPG.h
-> index 3d92e3b9..a802da1 100644
-> --- a/src/osd/PrimaryLogPG.h
-> +++ b/src/osd/PrimaryLogPG.h
-> @@ -1095,6 +1095,7 @@ protected:
->                                    uint64_t length, bool count_bytes,
->                                    bool force_changesize=false);
->    void add_interval_usage(interval_set<uint64_t>& s, object_stat_sum_t& st);
-> +  void sub_interval_usage(interval_set<uint64_t>& s, object_stat_sum_t& st);
+> The iSCSI server executable program can run as a regular (non-super) user, as
+> long as it has permission to access the backing storage (file or block device).
+> Administration is done in the usual SCST way using scstadmin, which accesses
+> the running server program through a fuse-mounted filesystem implemented using
+> a shim to connect the SCST procfs calls with the fuse(8) filesystem API.
 >
+> The subset of SCST used supports the iSCSI transport type and SCSI Block
+> Commands (vdisk).  It includes the SCST Core, the iSCSI daemon and kernel
+> logic, the vdisk device, and the /proc interface; comprising about 80,000 lines
+> of SCST source code.  To support running in usermode, around 55 (fifty-five)
+> lines of executable C code had to be added or changed in SCST source files.
 >
->    enum class cache_result_t {
-> diff --git a/src/osd/osd_types.cc b/src/osd/osd_types.cc
-> index 2cce17e..25aaad6 100644
-> --- a/src/osd/osd_types.cc
-> +++ b/src/osd/osd_types.cc
-> @@ -1846,6 +1846,7 @@ ostream& operator<<(ostream& out, const pg_pool_t& p)
->  void object_stat_sum_t::dump(Formatter *f) const
->  {
->    f->dump_int("num_bytes", num_bytes);
-> +  f->dump_int("num_bytes_overlap", num_bytes_overlap);
->    f->dump_int("num_objects", num_objects);
->    f->dump_int("num_object_clones", num_object_clones);
->    f->dump_int("num_object_copies", num_object_copies);
-> @@ -1883,11 +1884,12 @@ void object_stat_sum_t::dump(Formatter *f) const
+> For a single session over 1 Gb Ethernet being serviced by a single 2.4 GHz CPU:
+> the described Adaptive Nagle optimization improves peak throughput performance
+> for 512-Byte Random Read of /dev/zero from around 63,000 IOPS to more than
+> 100,000 IOPS, with no adverse impact below Queue Depth 17.
 >
->  void object_stat_sum_t::encode(bufferlist& bl) const
->  {
-> -  ENCODE_START(15, 3, bl);
-> +  ENCODE_START(16, 3, bl);
->  #if defined(CEPH_LITTLE_ENDIAN)
->    bl.append((char *)(&num_bytes), sizeof(object_stat_sum_t));
->  #else
->    ::encode(num_bytes, bl);
-> +  ::encode(num_bytes_overlap, bl);
->    ::encode(num_objects, bl);
->    ::encode(num_object_clones, bl);
->    ::encode(num_object_copies, bl);
-> @@ -1941,6 +1943,8 @@ void object_stat_sum_t::decode(bufferlist::iterator& bl)
->        uint64_t num_kb;
->        ::decode(num_kb, bl);
->      }
-> +    if (struct_v >= 16)
-> +      ::decode(num_bytes_overlap, bl);
->      ::decode(num_objects, bl);
->      ::decode(num_object_clones, bl);
->      ::decode(num_object_copies, bl);
-> @@ -2078,6 +2082,7 @@ void object_stat_sum_t::generate_test_instances(list<object_stat_sum_t*>& o)
->  void object_stat_sum_t::add(const object_stat_sum_t& o)
->  {
->    num_bytes += o.num_bytes;
-> +  num_bytes_overlap += o.num_bytes_overlap;
->    num_objects += o.num_objects;
->    num_object_clones += o.num_object_clones;
->    num_object_copies += o.num_object_copies;
-> @@ -2116,6 +2121,7 @@ void object_stat_sum_t::add(const object_stat_sum_t& o)
->  void object_stat_sum_t::sub(const object_stat_sum_t& o)
->  {
->    num_bytes -= o.num_bytes;
-> +  num_bytes_overlap -= o.num_bytes_overlap;
->    num_objects -= o.num_objects;
->    num_object_clones -= o.num_object_clones;
->    num_object_copies -= o.num_object_copies;
-> @@ -2155,6 +2161,7 @@ bool operator==(const object_stat_sum_t& l, const object_stat_sum_t& r)
->  {
->    return
->      l.num_bytes == r.num_bytes &&
-> +    l.num_bytes_overlap == r.num_bytes_overlap &&
->      l.num_objects == r.num_objects &&
->      l.num_object_clones == r.num_object_clones &&
->      l.num_object_copies == r.num_object_copies &&
-> diff --git a/src/osd/osd_types.h b/src/osd/osd_types.h
-> index 0d22975..59b29e0 100644
-> --- a/src/osd/osd_types.h
-> +++ b/src/osd/osd_types.h
-> @@ -1577,6 +1577,7 @@ struct object_stat_sum_t {
->     * adding/removing fields!
->     **************************************************************************/
->    int64_t num_bytes;    // in bytes
-> +  int64_t num_bytes_overlap;  // date in clone objects overlaps
->    int64_t num_objects;
->    int64_t num_object_clones;
->    int64_t num_object_copies;  // num_objects * num_replicas
-> @@ -1612,7 +1613,7 @@ struct object_stat_sum_t {
->    int64_t num_objects_missing;
->
->    object_stat_sum_t()
-> -    : num_bytes(0),
-> +    : num_bytes(0), num_bytes_overlap(0),
->        num_objects(0), num_object_clones(0), num_object_copies(0),
->        num_objects_missing_on_primary(0), num_objects_degraded(0),
->        num_objects_unfound(0),
-> @@ -1643,6 +1644,7 @@ struct object_stat_sum_t {
->    void floor(int64_t f) {
->  #define FLOOR(x) if (x < f) x = f
->      FLOOR(num_bytes);
-> +    FLOOR(num_bytes_overlap);
->      FLOOR(num_objects);
->      FLOOR(num_object_clones);
->      FLOOR(num_object_copies);
-> @@ -1689,6 +1691,7 @@ struct object_stat_sum_t {
->      }                                           \
->
->      SPLIT(num_bytes);
-> +    SPLIT(num_bytes_overlap);
->      SPLIT(num_objects);
->      SPLIT(num_object_clones);
->      SPLIT(num_object_copies);
-> @@ -1745,6 +1748,7 @@ struct object_stat_sum_t {
->      static_assert(
->        sizeof(object_stat_sum_t) ==
->          sizeof(num_bytes) +
-> +        sizeof(num_bytes_overlap) +
->          sizeof(num_objects) +
->          sizeof(num_object_clones) +
->          sizeof(num_object_copies) +
-> --
-> 2.10.2
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Paper:  https://davidbutterfield.github.io/SCST-Usermode-Adaptation/docs/SCST_Usermode.html
+> Code:   https://github.com/DavidButterfield/SCST-Usermode-Adaptation
