@@ -1,46 +1,39 @@
-From: David Byte <dbyte@suse.com>
+From: Mark Nelson <mnelson@redhat.com>
 Subject: Re: Performance Measurement
-Date: Thu, 27 Apr 2017 13:13:42 +0000
-Message-ID: <E07DFAE6-523E-4DED-8235-9746106FDA2A@suse.com>
+Date: Thu, 27 Apr 2017 09:38:45 -0500
+Message-ID: <f1ec7ff5-ed06-3736-eba5-4b96bd450311@redhat.com>
 References: <alpine.LSU.2.20.1704270603070.1886@ancalagon.suse.de>
- <61985B77-CDB1-45DB-B355-531EDA2DBC79@suse.com>
+ <95a3c7e5-6f56-4254-895d-a89b3f0360f2@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from prvmx02.microfocus.com ([130.57.1.217]:2617 "EHLO
-        prvmx02.microfocus.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753261AbdD0N2q (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Apr 2017 09:28:46 -0400
-In-Reply-To: <61985B77-CDB1-45DB-B355-531EDA2DBC79@suse.com>
-Content-Language: en-US
-Content-ID: <6527E45163D24241B7E3CC7568E85479@microfocus.com>
+Received: from mx1.redhat.com ([209.132.183.28]:59136 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1162133AbdD0Oir (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 27 Apr 2017 10:38:47 -0400
+In-Reply-To: <95a3c7e5-6f56-4254-895d-a89b3f0360f2@corp.ovh.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jesse Williamson <jwilliamson@suse.de>, Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>, Jesse Williamson <jwilliamson@suse.de>, Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-RmF0IGZpbmdlciwgQ0JUIGFzIFBpb3RyIERhbGVrIG1lbnRpb25zDQoNCkRhdmlkIEJ5dGUNClNy
-LiBUZWNobm9sb2d5IFN0cmF0ZWdpc3QNCkFsbGlhbmNlcyBhbmQgU1VTRSBFbWJlZGRlZA0KZGJ5
-dGVAc3VzZS5jb20NCjkxOC41MjguNDQyMg0KDQpPbiA0LzI3LzE3LCA4OjExIEFNLCAiRGF2aWQg
-Qnl0ZSIgPGRieXRlQHN1c2UuY29tPiB3cm90ZToNCg0KICAgIFRoZXJlIGFyZSBiZW5jaG1hcmtz
-IGJ1aWx0IGluIGxpa2UgcmFkb3MgYmVuY2ggYW5kIGNlcGggb3NkIHRlbGwuDQogICAgDQogICAg
-VGhlcmXigJlzIGFsc28gQ0JEDQogICAgDQogICAgSSB1c3VhbGx5IHVzZSBmaW8gKHp5cHBlciBp
-biBmaW8pIGZvciBSQkQsIENlcGhGUywgYW5kIGlzY3NpIG1vdW50ZWQgZGV2aWNlcyBhbmQgY29z
-YmVuY2goZG93bmxvYWQgZWxzZXdoZXJlIGluY2x1ZGluZyBhbiBhcHBsaWFuY2UgSSBidWlsdCB0
-aGF0IGlzIGxpa2VseSBvdXQgb2YgZGF0ZSkgZm9yIFMzL1N3aWZ0DQogICAgDQogICAgRGF2aWQg
-Qnl0ZQ0KICAgIFNyLiBUZWNobm9sb2d5IFN0cmF0ZWdpc3QNCiAgICBBbGxpYW5jZXMgYW5kIFNV
-U0UgRW1iZWRkZWQNCiAgICBkYnl0ZUBzdXNlLmNvbQ0KICAgIDkxOC41MjguNDQyMg0KICAgIA0K
-ICAgIE9uIDQvMjcvMTcsIDg6MDUgQU0sICJjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
-ZyBvbiBiZWhhbGYgb2YgSmVzc2UgV2lsbGlhbXNvbiIgPGNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
-ZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBqd2lsbGlhbXNvbkBzdXNlLmRlPiB3cm90ZToNCiAgICAN
-CiAgICAgICAgDQogICAgICAgIEhpIGZvbGtzLA0KICAgICAgICANCiAgICAgICAgQXJlIHRoZXJl
-IHdlbGwta25vd24gYmVuY2htYXJrIHN1aXRlcyB0aGF0IGNvbWUgd2l0aCBvciBhcmUgdXN1YWxs
-eSB1c2VkIA0KICAgICAgICB3aXRoIENlcGg/IEEgbWFnaWNhbCBsb2FkIGdlbmVyYXRvciBwb3dl
-cmVkIGJ5IHVuaWNvcm5zIGFuZCBmdXp6eSBidW5uaWVzPyANCiAgICAgICAgSWYgc3VjaCBtYWdp
-YyBleGlzdHMsIHdoZXJlIHdvdWxkIEkgZmluZCBpdD8NCiAgICAgICAgDQogICAgICAgIFRoYW5r
-IHlvdSwNCiAgICAgICAgDQogICAgICAgIC1KZXNzZQ0KICAgICAgICAtLQ0KICAgICAgICBUbyB1
-bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2Vw
-aC1kZXZlbCIgaW4NCiAgICAgICAgdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2
-Z2VyLmtlcm5lbC5vcmcNCiAgICAgICAgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3Zn
-ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQogICAgICAgIA0KICAgICAgICANCiAg
-ICANCiAgICANCg0K
+On 04/27/2017 08:11 AM, Piotr Dałek wrote:
+> On 04/27/2017 03:05 PM, Jesse Williamson wrote:
+>>
+>> Hi folks,
+>>
+>> Are there well-known benchmark suites that come with or are usually used
+>> with Ceph? A magical load generator powered by unicorns and fuzzy
+>> bunnies?
+>> If such magic exists, where would I find it?
+>
+> CBT - https://github.com/ceph/cbt
+> FIO (RBD engine)
+> "rados bench" (CLI command)
+>
+
+For swift object benchmarks, I've started using Mark Seger's getput, 
+though I have a custom branch that is necessary for it to work 
+accurately with the cbt getput module:
+
+https://github.com/markhpc/getput/tree/wip-fix-timing
