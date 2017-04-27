@@ -1,106 +1,39 @@
-From: David Butterfield <dab21774@gmail.com>
-Subject: Usermode iSCSI-SCST updated to use Ceph RBD as backing storage
-Date: Thu, 27 Apr 2017 12:29:19 -0600
-Message-ID: <CALiN7rz7kXB5ok_=XNAiufQBGVKOT8Lh4d_Uf3rE0nEDPWdpdw@mail.gmail.com>
+From: Yann Dupont <yd@objoo.org>
+Subject: Re: jewel 10.2.8 last call
+Date: Thu, 27 Apr 2017 21:34:33 +0200
+Message-ID: <a442ed6e-7fe2-cadd-3841-b1b0f945bf93@objoo.org>
+References: <18bf7357-dfbd-2def-ee9c-506e67fc24e0@suse.cz>
+ <0015fa14-1baa-f79f-0a95-3a7a904b8c6b@objoo.org>
+ <1ee6d36b-9b30-b7c7-a430-3e008383a5dd@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f52.google.com ([209.85.213.52]:33559 "EHLO
-        mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965615AbdD0S3V (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Apr 2017 14:29:21 -0400
-Received: by mail-vk0-f52.google.com with SMTP id j127so22095872vkh.0
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Apr 2017 11:29:20 -0700 (PDT)
+Received: from smtptls2-lmb.cpub.univ-nantes.fr ([193.52.103.111]:49490 "EHLO
+        smtp-tls.univ-nantes.fr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1030771AbdD0Teh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Apr 2017 15:34:37 -0400
+In-Reply-To: <1ee6d36b-9b30-b7c7-a430-3e008383a5dd@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Nathan Cutler <ncutler@suse.cz>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-An update on the port of SCST to run entirely in usermode:
 
-I've created a new branch "ceph_rbd" in my SCST-Usermode-Adaptation
-repository which includes a "shim" between the SCST BLOCKIO code (when
-running in usermode), and the Ceph librbd API.
 
-https://github.com/DavidButterfield/SCST-Usermode-Adaptation/blob/ceph_rbd/scst/src/dev_handlers/scst_vdisk_ceph_rbd.c
-
-This enables a purely usermode instance of SCST to serve iSCSI
-initiators in a TCP/IP network using calls to librbd for access to the
-backing store.  There is no SCST code running in the kernel -- the
-usermode server uses regular socket(2) calls for access to the network,
-with the iSCSI protocol interpreter and the core SCSI engine both
-running in usermode.
-
-Running the iSCSI/SCST/RBD server in usermode using regular socket calls
-opens the possibility of building it for non-Linux systems (e.g. FreeBSD).
-
-I just decided to write this shim to Ceph RBD three days ago, and got it
-working today, so consider it "alpha".  It doesn't handle everything
-perfectly right, but it runs, and read/write seem to be working.
-
-So far I've tested it by running an iSCSI session from another Linux
-machine (open-iscsi) to the usermode SCST/RBD server, exporting a 4GB
-image I created on the Ceph server: I copied some files in and out of it
-a few times, and compared the result with the original.  That worked.
-
-At the moment you have to compile it either to use local aio(7) calls or
-librbd calls -- making them work side-by-side is TBD.
-
-(The idea to connect the usermode iSCSI server with Ceph came to
-me from Adrian Saul.)
-
-On Fri, Apr 21, 2017 at 2:18 PM, David Butterfield <dab21774@gmail.com> wrote:
-> This may be of interest, running SCST as an iSCSI server entirely in usermode.
-> It uses regular socket calls on the network and preadv/pwritev on the
-> backing store.
-> It looks like it would be straightforward to adapt it to make direct
-> calls to librados.
+Le 25/04/17 à 22:47, Nathan Cutler a écrit :
+> Hi Yann:
 >
-> One thing mentioned in the paper is that with iSCSI/SCST running entirely in
-> usermode using regular system calls, iSCSI/SCST could be compiled not only on
-> Linux systems, but on any POSIX-style system with gcc and the other libraries
-> (e.g. freebsd).
+>> AFAICT, this one still isn't merged :
+>>
+>> https://github.com/ceph/ceph/commit/793ceac2f3d5a2c404ac50569c44a21de6001b62 
+>>
+>>
+>>
+>>
+>> This is quite simple, but without it, tiering throttling isn't working
+>> the way it should.
 >
-> https://davidbutterfield.github.io/SCST-Usermode-Adaptation/docs/SCST_Usermode.html
->
-> Regards,
-> David Butterfield
-> -----------------
->
-> iSCSI-SCST Storage Server Usermode Adaptation
-> An adaptation of the iSCSI-SCST storage server software to run
-> entirely in usermode on an unmodified kernel
-> David A. Butterfield
->
-> This paper describes an adaptation of the iSCSI-SCST storage server software to
-> run entirely in usermode on an unmodified Linux kernel; performance
-> measurements and model; and an experimental algorithm to improve performance
-> for small Read operations.
->
-> In a standard installation of SCST the iscsi-scstd daemon runs as a
-> single-threaded Linux usermode process that cooperates with the kernel-resident
-> SCST datapath implementation using ioctl(2) and netlink(7) for communication.
->
-> In the iSCSI-SCST Usermode Adaptation the iscsi-scstd daemon runs on the main
-> thread in a multi-threaded process in which other usermode threads are
-> concurrently providing the services and executing the SCST code that would be
-> running inside the kernel in a standard installation of SCST.
->
-> The iSCSI server executable program can run as a regular (non-super) user, as
-> long as it has permission to access the backing storage (file or block device).
-> Administration is done in the usual SCST way using scstadmin, which accesses
-> the running server program through a fuse-mounted filesystem implemented using
-> a shim to connect the SCST procfs calls with the fuse(8) filesystem API.
->
-> The subset of SCST used supports the iSCSI transport type and SCSI Block
-> Commands (vdisk).  It includes the SCST Core, the iSCSI daemon and kernel
-> logic, the vdisk device, and the /proc interface; comprising about 80,000 lines
-> of SCST source code.  To support running in usermode, around 55 (fifty-five)
-> lines of executable C code had to be added or changed in SCST source files.
->
-> For a single session over 1 Gb Ethernet being serviced by a single 2.4 GHz CPU:
-> the described Adaptive Nagle optimization improves peak throughput performance
-> for 512-Byte Random Read of /dev/zero from around 63,000 IOPS to more than
-> 100,000 IOPS, with no adverse impact below Queue Depth 17.
->
-> Paper:  https://davidbutterfield.github.io/SCST-Usermode-Adaptation/docs/SCST_Usermode.html
-> Code:   https://github.com/DavidButterfield/SCST-Usermode-Adaptation
+> OK, created http://tracker.ceph.com/issues/19773 and flagged for 
+> backport to jewel!
+Thanks Nathan !
+Cheers,
