@@ -1,53 +1,131 @@
-From: Peter Maloney <peter.maloney@brockmann-consult.de>
-Subject: Re: another scrub bug? blocked for > 10240.948831 secs
-Date: Fri, 28 Apr 2017 09:24:38 +0200
-Message-ID: <27bfebcd-6a91-bd00-82c5-e56af6775d52@brockmann-consult.de>
-References: <94127293-3ba3-8bb8-db43-604b6a54eb55@brockmann-consult.de>
- <alpine.DEB.2.11.1704171316150.10661@piezo.novalocal>
- <456cafe7-ecaa-5c62-ca82-6c09a2b06ae7@brockmann-consult.de>
- <alpine.DEB.2.11.1704201421120.6575@piezo.novalocal>
- <d0b1c505-8ccd-dfbf-2dd8-c44fc3f7b96e@brockmann-consult.de>
- <alpine.DEB.2.11.1704201617120.6575@piezo.novalocal>
- <b8e72ba6-919b-e9f2-9fd3-577cb7ab6389@brockmann-consult.de>
-Mime-Version: 1.0
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH v2] ceph: Fix file open flags on ppc64
+Date: Fri, 28 Apr 2017 15:57:43 +0800
+Message-ID: <D29AEA6E-CB75-42CF-A0B6-47F61A23183C@redhat.com>
+References: <1493310840-201351-1-git-send-email-agraf@suse.de>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([217.72.192.74]:60810 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756057AbdD1HXv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Apr 2017 03:23:51 -0400
-In-Reply-To: <b8e72ba6-919b-e9f2-9fd3-577cb7ab6389@brockmann-consult.de>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:36016 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753646AbdD1H5y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 28 Apr 2017 03:57:54 -0400
+In-Reply-To: <1493310840-201351-1-git-send-email-agraf@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Alexander Graf <agraf@suse.de>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jan.Fajerski@suse.com, Jeff Layton <jlayton@redhat.com>
 
-On 04/20/17 20:58, Peter Maloney wrote:
-> On 04/20/17 18:19, Sage Weil wrote:
->>  but I guess the 
->> underlying first question is whether any snap deletion happened anywhere 
->> around this period (2560+ sec before the warning, or around the time the 
->> op was sent in epoch 83264).  
-> A snapshot based backup thing ran at 12:00 CEST and took until 18:25
-> CEST to finish, which overlaps that, and creates and removes 120
-> snapshots spread throughout the process.
->> (And yeah, removed_snaps is the field that 
->> matters here!)
->>
->> Thanks!
->> sage
-This still happens in 10.2.7
 
-> 2017-04-28 04:41:59.343443 osd.9 10.3.0.132:6808/2704 18 : cluster
-> [WRN] slow request 10.040822 seconds old, received at 2017-04-28
-> 04:41:49.302552: replica scrub(pg:
-> 4.145,from:0'0,to:93267'6832180,epoch:93267,start:4:a2d2c99e:::rbd_data.4bf687238e1f29.000000000000f7a3:0,end:4:a2d2dcd6:::rbd_data.46820b238e1f29.000000000000bfbc:f25e,chunky:1,deep:0,seed:4294967295,version:6)
-> currently reached_pg
-> ...
-> 2017-04-28 06:07:09.975902 osd.9 10.3.0.132:6808/2704 36 : cluster
-> [WRN] slow request 5120.673291 seconds old, received at 2017-04-28
-> 04:41:49.302552: replica scrub(pg: 4.145,from:0'0,to:93
-> 267'6832180,epoch:93267,start:4:a2d2c99e:::rbd_data.4bf687238e1f29.000000000000f7a3:0,end:4:a2d2dcd6:::rbd_data.46820b238e1f29.000000000000bfbc:f25e,chunky:1,deep:0,seed:4294967295,version:
-and there are snaps created and removed around that time.
+> On 28 Apr 2017, at 00:34, Alexander Graf <agraf@suse.de> wrote:
+> 
+> The file open flags (O_foo) are platform specific and should never go
+> out to an interface that is not local to the system.
+> 
+> Unfortunately these flags have leaked out onto the wire in the cephfs
+> implementation. That lead to bogus flags getting transmitted on ppc64.
+> 
+> This patch converts the kernel view of flags to the ceph view of file
+> open flags.
+> 
+> Fixes: 124e68e74 ("ceph: file operations")
+> Signed-off-by: Alexander Graf <agraf@suse.de>
+> 
+> —
+
+I removed the "unused open flags” dout and applied the patch. Thank you for tracking down and fixing the bug.
+
+Regards
+Yan, Zheng
+
+> 
+> v1 -> v2:
+> 
+>  - Only convert flags mds knows about
+>  - Fix le conversion
+> ---
+> fs/ceph/file.c               | 35 ++++++++++++++++++++++++++++++++++-
+> include/linux/ceph/ceph_fs.h | 12 ++++++++++++
+> 2 files changed, 46 insertions(+), 1 deletion(-)
+> 
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index 26cc954..9cac018 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -103,6 +103,39 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
+> 	return ERR_PTR(ret);
+> }
+> 
+> +static __le32 ceph_flags_sys2wire(u32 flags)
+> +{
+> +	u32 wire_flags = 0;
+> +
+> +	switch (flags & O_ACCMODE) {
+> +	case O_RDONLY:
+> +		wire_flags |= CEPH_O_RDONLY;
+> +		break;
+> +	case O_WRONLY:
+> +		wire_flags |= CEPH_O_WRONLY;
+> +		break;
+> +	case O_RDWR:
+> +		wire_flags |= CEPH_O_RDWR;
+> +		break;
+> +	}
+> +	flags &= ~O_ACCMODE;
+> +
+> +#define ceph_sys2wire(a) if (flags & a) { wire_flags |= CEPH_##a; flags &= ~a; }
+> +
+> +	ceph_sys2wire(O_CREAT);
+> +	ceph_sys2wire(O_EXCL);
+> +	ceph_sys2wire(O_TRUNC);
+> +	ceph_sys2wire(O_DIRECTORY);
+> +	ceph_sys2wire(O_NOFOLLOW);
+> +
+> +#undef ceph_sys2wire
+> +
+> +	if (flags)
+> +		dout("Unused open flags: %x", flags);
+> +
+> +	return cpu_to_le32(wire_flags);
+> +}
+> +
+> /*
+>  * Prepare an open request.  Preallocate ceph_cap to avoid an
+>  * inopportune ENOMEM later.
+> @@ -123,7 +156,7 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
+> 	if (IS_ERR(req))
+> 		goto out;
+> 	req->r_fmode = ceph_flags_to_mode(flags);
+> -	req->r_args.open.flags = cpu_to_le32(flags);
+> +	req->r_args.open.flags = ceph_flags_sys2wire(flags);
+> 	req->r_args.open.mode = cpu_to_le32(create_mode);
+> out:
+> 	return req;
+> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+> index f4b2ee1..9581c70 100644
+> --- a/include/linux/ceph/ceph_fs.h
+> +++ b/include/linux/ceph/ceph_fs.h
+> @@ -366,6 +366,18 @@ enum {
+> #define CEPH_READDIR_FRAG_COMPLETE	(1<<8)
+> #define CEPH_READDIR_HASH_ORDER		(1<<9)
+> 
+> +/*
+> + * open request flags
+> + */
+> +#define CEPH_O_RDONLY		00000000
+> +#define CEPH_O_WRONLY		00000001
+> +#define CEPH_O_RDWR		00000002
+> +#define CEPH_O_CREAT		00000100
+> +#define CEPH_O_EXCL		00000200
+> +#define CEPH_O_TRUNC		00001000
+> +#define CEPH_O_DIRECTORY	00200000
+> +#define CEPH_O_NOFOLLOW		00400000
+> +
+> union ceph_mds_request_args {
+> 	struct {
+> 		__le32 mask;                 /* CEPH_CAP_* */
+> -- 
+> 1.8.5.6
+> 
+
