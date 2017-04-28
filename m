@@ -1,44 +1,85 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: PRs not being tested by jenkins??
-Date: Fri, 28 Apr 2017 14:28:22 -0700
-Message-ID: <CAJ4mKGaz09_gTA64aAAT2ZVFnpp+NXMazX3VWEY1Tg-qN5AZGg@mail.gmail.com>
-References: <368674ff-451c-f006-147b-ba7ab17b660a@digiware.nl> <585be7e7-3eab-76e8-af6b-788d79d6721e@digiware.nl>
+Subject: Re: ceph-fuse is working on FreeBSD
+Date: Fri, 28 Apr 2017 15:01:51 -0700
+Message-ID: <CAJ4mKGbGsK37n0mr2-NELWW7HL=yOQB5kaWJ87Wsf_ugPRt_ng@mail.gmail.com>
+References: <2133312b-b225-0060-bad8-f8aab4f4fcf7@digiware.nl>
+ <CAJ4mKGbvc9fiFxbrnFpCm13-QsUNR8FF_Ka6N4eFtbD9xKk=NQ@mail.gmail.com> <4dd8464c-7db5-f2ce-e002-ecc8cfdf0dd2@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f45.google.com ([209.85.214.45]:35310 "EHLO
-        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S967307AbdD1V2Y (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Apr 2017 17:28:24 -0400
-Received: by mail-it0-f45.google.com with SMTP id 70so50127214ita.0
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Apr 2017 14:28:23 -0700 (PDT)
-In-Reply-To: <585be7e7-3eab-76e8-af6b-788d79d6721e@digiware.nl>
+Received: from mail-io0-f172.google.com ([209.85.223.172]:34333 "EHLO
+        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1030308AbdD1WBw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Apr 2017 18:01:52 -0400
+Received: by mail-io0-f172.google.com with SMTP id a103so77352161ioj.1
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Apr 2017 15:01:52 -0700 (PDT)
+In-Reply-To: <4dd8464c-7db5-f2ce-e002-ecc8cfdf0dd2@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>, Willem Jan Withagen <wjw@digiware.nl>
-Cc: Alfredo Deza <adeza@redhat.com>, Andrew Schoen <aschoen@redhat.com>, Ken Dreyer <kdreyer@redhat.com>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Apparently something happened to out Jenkins system during an upgrade
-so it was out for a while. One of the CC'ed guys can hopefully provide
-some details.
+Eek, sorry this got lost in my inbox.
+
+On Thu, Mar 30, 2017 at 2:59 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> On 29-3-2017 18:12, Gregory Farnum wrote:
+>> Sweet! Try pjd yet? ;)
+>
+> I now know why pjd sounded so familiar. Pawel Jakub Dawidek
+> <pawel@dawidek.net> was the person that ported ZFS to FreeBSD and did an
+> excellent at that. I guess that this was his testbed to see if
+> everything was working as should.
+>
+> Now my questions about this:
+>  - You select UFS as testing FS?
+
+I don't think we did anything explicit here; it's just whatever
+pjd-on-linux does by default. I would guess UFS is the closest
+equivalent on BSD, but can't be sure. :/
+
+>  - What coverage do you get from running the test?
+
+It invokes most of the fs-related syscalls in most of the ways they
+can be tested? Not sure what you mean.
+
+>
+> Like what I just tried gave me tons of errors on chflags and device
+> operations etc...
+
+I'm not familiar with chflags, but as I look at the manpage that looks
+like a BSD thing with a bunch of flags Linux doesn't support? So Ceph
+definitely won't do well with that.
 -Greg
 
-On Thu, Apr 27, 2017 at 8:05 AM Willem Jan Withagen <wjw@digiware.nl> wrote:
 >
-> On 27-4-2017 16:52, Willem Jan Withagen wrote:
-> > Hi,
-> >
-> > Is there any particulars why I have 4 PRs that are held on trial runs
-> > thru Jenkins?
->
-> 'mmm,
->
-> Some/All of them "just" started to be processed.
-> So I guess the queue was rather full.
+> The other thing is I need to remake my cephfs, it complains it is about
+> 17x to small if I look at the pgs :(
+> So got to look in dimensioning cephfs.
 >
 > --WjW
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>> On Wed, Mar 29, 2017 at 9:08 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>> Hi,
+>>>
+>>> I needed some more skills to actually get everythingin place to get it
+>>> working. But in essence I have ceph-fuse running...
+>>>
+>>> wjw# df | grep fuse
+>>> /dev/fuse 9168256790 203540395 8964716395 2%    /zfs/home/wjw/mnt/zfs
+>>> /dev/fuse 8241876992  60174336 8181702656 1%    /zfs/home/wjw/mnt/cephf
+>>>
+>>> wjw# ls ~/mnt/cephfs/
+>>> wjw# touch ~/mnt/cephfs//test
+>>> wjw# ~/mnt/cephfs/
+>>> test
+>>>
+>>> So we are slowly getting there....
+>>>
+>>> --WjW
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
