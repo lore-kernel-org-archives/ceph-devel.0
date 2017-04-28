@@ -1,31 +1,28 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: jewel 10.2.8 last call
-Date: Fri, 28 Apr 2017 18:05:11 +0200
-Message-ID: <3a053a39-773b-37fa-7dd3-272ff6b0ee45@suse.cz>
-References: <18bf7357-dfbd-2def-ee9c-506e67fc24e0@suse.cz>
- <0015fa14-1baa-f79f-0a95-3a7a904b8c6b@objoo.org>
- <1ee6d36b-9b30-b7c7-a430-3e008383a5dd@suse.cz>
- <a442ed6e-7fe2-cadd-3841-b1b0f945bf93@objoo.org>
- <CADRKj5Sb_ptBD5=YyT5AAdfVJgG7q3ZQCXyRCzi2kV7ouW5DuA@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: osd and/or filestore tuning for ssds?
+Date: Fri, 28 Apr 2017 17:14:10 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1704281712110.21526@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:41480 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1756530AbdD1QFO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 28 Apr 2017 12:05:14 -0400
-In-Reply-To: <CADRKj5Sb_ptBD5=YyT5AAdfVJgG7q3ZQCXyRCzi2kV7ouW5DuA@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:55662 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1426403AbdD1ROM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 28 Apr 2017 13:14:12 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: ceph-users@ceph.com
 
-On 04/28/2017 05:41 PM, Yehuda Sadeh-Weinraub wrote:
-> I want to get this one in:
-> https://github.com/ceph/ceph/pull/14851
+Hi everyone,
 
-OK, staged http://tracker.ceph.com/issues/19806 and will include in the 
-next round of tests.
+Are there any osd or filestore options that operators are tuning for 
+all-SSD clusters?  If so (and they make sense) we'd like to introduce them 
+as defaults for ssd-backed OSDs.
 
-Nathan
+BlueStore already has different hdd and ssd default values for many 
+options that it chooses based on the type of device; we'd like to do that 
+for other options in either filestore or the OSD if it makes sense.
+
+Thanks!
+sage
