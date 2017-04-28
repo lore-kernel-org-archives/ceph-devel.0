@@ -1,83 +1,55 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: fix memory leak in __ceph_setxattr()
-Date: Fri, 28 Apr 2017 21:52:26 +0800
-Message-ID: <4A628342-B33B-4730-889F-3D8F62037CB1@redhat.com>
-References: <20170428101404.17765-1-lhenriques@suse.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20170428101404.17765-1-lhenriques@suse.com>
-Sender: stable-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, stable@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
+Subject: Re: jewel 10.2.8 last call
+Date: Fri, 28 Apr 2017 08:41:45 -0700
+Message-ID: <CADRKj5Sb_ptBD5=YyT5AAdfVJgG7q3ZQCXyRCzi2kV7ouW5DuA@mail.gmail.com>
+References: <18bf7357-dfbd-2def-ee9c-506e67fc24e0@suse.cz> <0015fa14-1baa-f79f-0a95-3a7a904b8c6b@objoo.org>
+ <1ee6d36b-9b30-b7c7-a430-3e008383a5dd@suse.cz> <a442ed6e-7fe2-cadd-3841-b1b0f945bf93@objoo.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qk0-f172.google.com ([209.85.220.172]:35729 "EHLO
+        mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755797AbdD1Plr (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Apr 2017 11:41:47 -0400
+Received: by mail-qk0-f172.google.com with SMTP id f76so56020777qke.2
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Apr 2017 08:41:46 -0700 (PDT)
+In-Reply-To: <a442ed6e-7fe2-cadd-3841-b1b0f945bf93@objoo.org>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Yann Dupont <yd@objoo.org>
+Cc: Nathan Cutler <ncutler@suse.cz>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+I want to get this one in:
+https://github.com/ceph/ceph/pull/14851
 
-> On 28 Apr 2017, at 18:14, Luis Henriques <lhenriques@suse.com> wrote:
-> 
-> The ceph_inode_xattr needs to be released when removing an xattr.  Easily
-> reproducible running the 'generic/020' test from xfstests or simply by
-> doing:
-> 
->  attr -s attr0 -V 0 /mnt/test && attr -r attr0 /mnt/test
-> 
-> While there, also fix the error path.
-> 
-> Here's the kmemleak splat:
-> 
-> unreferenced object 0xffff88001f86fbc0 (size 64):
->  comm "attr", pid 244, jiffies 4294904246 (age 98.464s)
->  hex dump (first 32 bytes):
->    40 fa 86 1f 00 88 ff ff 80 32 38 1f 00 88 ff ff  @........28.....
->    00 01 00 00 00 00 ad de 00 02 00 00 00 00 ad de  ................
->  backtrace:
->    [<ffffffff81560199>] kmemleak_alloc+0x49/0xa0
->    [<ffffffff810f3e5b>] kmem_cache_alloc+0x9b/0xf0
->    [<ffffffff812b157e>] __ceph_setxattr+0x17e/0x820
->    [<ffffffff812b1c57>] ceph_set_xattr_handler+0x37/0x40
->    [<ffffffff8111fb4b>] __vfs_removexattr+0x4b/0x60
->    [<ffffffff8111fd37>] vfs_removexattr+0x77/0xd0
->    [<ffffffff8111fdd1>] removexattr+0x41/0x60
->    [<ffffffff8111fe65>] path_removexattr+0x75/0xa0
->    [<ffffffff81120aeb>] SyS_lremovexattr+0xb/0x10
->    [<ffffffff81564b20>] entry_SYSCALL_64_fastpath+0x13/0x94
->    [<ffffffffffffffff>] 0xffffffffffffffff
-> 
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> ---
-> fs/ceph/xattr.c | 3 +++
-> 1 file changed, 3 insertions(+)
-> 
-> diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-> index febc28f9e2c2..75267cdd5dfd 100644
-> --- a/fs/ceph/xattr.c
-> +++ b/fs/ceph/xattr.c
-> @@ -392,6 +392,7 @@ static int __set_xattr(struct ceph_inode_info *ci,
-> 
-> 	if (update_xattr) {
-> 		int err = 0;
-> +
-> 		if (xattr && (flags & XATTR_CREATE))
-> 			err = -EEXIST;
-> 		else if (!xattr && (flags & XATTR_REPLACE))
-> @@ -399,12 +400,14 @@ static int __set_xattr(struct ceph_inode_info *ci,
-> 		if (err) {
-> 			kfree(name);
-> 			kfree(val);
-> +			kfree(*newxattr);
-> 			return err;
-> 		}
-> 		if (update_xattr < 0) {
-> 			if (xattr)
-> 				__remove_xattr(ci, xattr);
-> 			kfree(name);
-> +			kfree(*newxattr);
-> 			return 0;
-> 		}
-> 	}
+Yehuda
 
-Applied, thanks
-
-Yan, Zheng
+On Thu, Apr 27, 2017 at 12:34 PM, Yann Dupont <yd@objoo.org> wrote:
+>
+>
+> Le 25/04/17 à 22:47, Nathan Cutler a écrit :
+>>
+>> Hi Yann:
+>>
+>>> AFAICT, this one still isn't merged :
+>>>
+>>>
+>>> https://github.com/ceph/ceph/commit/793ceac2f3d5a2c404ac50569c44a21de6001b62
+>>>
+>>>
+>>>
+>>> This is quite simple, but without it, tiering throttling isn't working
+>>> the way it should.
+>>
+>>
+>> OK, created http://tracker.ceph.com/issues/19773 and flagged for backport
+>> to jewel!
+>
+> Thanks Nathan !
+> Cheers,
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
