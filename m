@@ -1,56 +1,71 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH v2] ceph: Fix file open flags on ppc64
-Date: Fri, 28 Apr 2017 17:23:46 +0800
-Message-ID: <414E884C-2A35-40D5-858D-2F05D67C9CA5@redhat.com>
-References: <1493310840-201351-1-git-send-email-agraf@suse.de>
- <D29AEA6E-CB75-42CF-A0B6-47F61A23183C@redhat.com>
- <56b605cc-ee88-612e-4935-a60a3a151f04@suse.de>
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55804 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1162944AbdD1JX4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 28 Apr 2017 05:23:56 -0400
-In-Reply-To: <56b605cc-ee88-612e-4935-a60a3a151f04@suse.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alexander Graf <agraf@suse.de>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jan.Fajerski@suse.com, Jeff Layton <jlayton@redhat.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH] ceph: fix memory leak in __ceph_setxattr()
+Date: Fri, 28 Apr 2017 11:14:04 +0100
+Message-ID: <20170428101404.17765-1-lhenriques@suse.com>
+Return-path: <stable-owner@vger.kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>, stable@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
+The ceph_inode_xattr needs to be released when removing an xattr.  Easily
+reproducible running the 'generic/020' test from xfstests or simply by
+doing:
 
-> On 28 Apr 2017, at 17:14, Alexander Graf <agraf@suse.de> wrote:
-> 
-> 
-> 
-> On 28.04.17 09:57, Yan, Zheng wrote:
->> 
->>> On 28 Apr 2017, at 00:34, Alexander Graf <agraf@suse.de> wrote:
->>> 
->>> The file open flags (O_foo) are platform specific and should never go
->>> out to an interface that is not local to the system.
->>> 
->>> Unfortunately these flags have leaked out onto the wire in the cephfs
->>> implementation. That lead to bogus flags getting transmitted on ppc64.
->>> 
->>> This patch converts the kernel view of flags to the ceph view of file
->>> open flags.
->>> 
->>> Fixes: 124e68e74 ("ceph: file operations")
->>> Signed-off-by: Alexander Graf <agraf@suse.de>
->>> 
->>> —
->> 
->> I removed the "unused open flags” dout and applied the patch. Thank you for tracking down and fixing the bug.
-> 
-> I actually put that in on purpose, in case anyone in 2 years tries to find out why a particular flag doesn't get populated :).
-> 
-Ok, I will put it back.
+  attr -s attr0 -V 0 /mnt/test && attr -r attr0 /mnt/test
 
-Regards
-Yan, Zheng
+While there, also fix the error path.
 
-> 
-> Alex
+Here's the kmemleak splat:
 
+unreferenced object 0xffff88001f86fbc0 (size 64):
+  comm "attr", pid 244, jiffies 4294904246 (age 98.464s)
+  hex dump (first 32 bytes):
+    40 fa 86 1f 00 88 ff ff 80 32 38 1f 00 88 ff ff  @........28.....
+    00 01 00 00 00 00 ad de 00 02 00 00 00 00 ad de  ................
+  backtrace:
+    [<ffffffff81560199>] kmemleak_alloc+0x49/0xa0
+    [<ffffffff810f3e5b>] kmem_cache_alloc+0x9b/0xf0
+    [<ffffffff812b157e>] __ceph_setxattr+0x17e/0x820
+    [<ffffffff812b1c57>] ceph_set_xattr_handler+0x37/0x40
+    [<ffffffff8111fb4b>] __vfs_removexattr+0x4b/0x60
+    [<ffffffff8111fd37>] vfs_removexattr+0x77/0xd0
+    [<ffffffff8111fdd1>] removexattr+0x41/0x60
+    [<ffffffff8111fe65>] path_removexattr+0x75/0xa0
+    [<ffffffff81120aeb>] SyS_lremovexattr+0xb/0x10
+    [<ffffffff81564b20>] entry_SYSCALL_64_fastpath+0x13/0x94
+    [<ffffffffffffffff>] 0xffffffffffffffff
+
+Cc: stable@vger.kernel.org
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ fs/ceph/xattr.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
+index febc28f9e2c2..75267cdd5dfd 100644
+--- a/fs/ceph/xattr.c
++++ b/fs/ceph/xattr.c
+@@ -392,6 +392,7 @@ static int __set_xattr(struct ceph_inode_info *ci,
+ 
+ 	if (update_xattr) {
+ 		int err = 0;
++
+ 		if (xattr && (flags & XATTR_CREATE))
+ 			err = -EEXIST;
+ 		else if (!xattr && (flags & XATTR_REPLACE))
+@@ -399,12 +400,14 @@ static int __set_xattr(struct ceph_inode_info *ci,
+ 		if (err) {
+ 			kfree(name);
+ 			kfree(val);
++			kfree(*newxattr);
+ 			return err;
+ 		}
+ 		if (update_xattr < 0) {
+ 			if (xattr)
+ 				__remove_xattr(ci, xattr);
+ 			kfree(name);
++			kfree(*newxattr);
+ 			return 0;
+ 		}
+ 	}
