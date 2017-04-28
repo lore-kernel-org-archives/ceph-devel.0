@@ -1,131 +1,103 @@
 From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH v2] ceph: Fix file open flags on ppc64
-Date: Fri, 28 Apr 2017 15:57:43 +0800
-Message-ID: <D29AEA6E-CB75-42CF-A0B6-47F61A23183C@redhat.com>
-References: <1493310840-201351-1-git-send-email-agraf@suse.de>
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Subject: [PATCH] ceph: choose readdir frag based on previous readdir reply
+Date: Fri, 28 Apr 2017 16:03:41 +0800
+Message-ID: <20170428080341.13742-1-zyan@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36016 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:25316 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753646AbdD1H5y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 28 Apr 2017 03:57:54 -0400
-In-Reply-To: <1493310840-201351-1-git-send-email-agraf@suse.de>
+        id S932429AbdD1IDu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 28 Apr 2017 04:03:50 -0400
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id ECFE0C059727
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Apr 2017 08:03:49 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexander Graf <agraf@suse.de>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jan.Fajerski@suse.com, Jeff Layton <jlayton@redhat.com>
+To: ceph-devel@vger.kernel.org
+Cc: jlayton@redhat.com, "Yan, Zheng" <zyan@redhat.com>
 
+The dirfragtree is lazily updated, it's not always accurate. Infinite
+loops happens in following circumstance.
 
-> On 28 Apr 2017, at 00:34, Alexander Graf <agraf@suse.de> wrote:
-> 
-> The file open flags (O_foo) are platform specific and should never go
-> out to an interface that is not local to the system.
-> 
-> Unfortunately these flags have leaked out onto the wire in the cephfs
-> implementation. That lead to bogus flags getting transmitted on ppc64.
-> 
-> This patch converts the kernel view of flags to the ceph view of file
-> open flags.
-> 
-> Fixes: 124e68e74 ("ceph: file operations")
-> Signed-off-by: Alexander Graf <agraf@suse.de>
-> 
-> —
+- client send request to read frag A
+- frag A has been fragmented into frag B and C. So mds fills the reply
+  with contents of frag B
+- client wants to read next frag C. ceph_choose_frag(frag value of C)
+  return frag A.
 
-I removed the "unused open flags” dout and applied the patch. Thank you for tracking down and fixing the bug.
+The fix is using previous readdir reply to calculate next readdir frag
+when possible.
 
-Regards
-Yan, Zheng
+Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+---
+ fs/ceph/dir.c | 19 ++++++++++++-------
+ 1 file changed, 12 insertions(+), 7 deletions(-)
 
-> 
-> v1 -> v2:
-> 
->  - Only convert flags mds knows about
->  - Fix le conversion
-> ---
-> fs/ceph/file.c               | 35 ++++++++++++++++++++++++++++++++++-
-> include/linux/ceph/ceph_fs.h | 12 ++++++++++++
-> 2 files changed, 46 insertions(+), 1 deletion(-)
-> 
-> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-> index 26cc954..9cac018 100644
-> --- a/fs/ceph/file.c
-> +++ b/fs/ceph/file.c
-> @@ -103,6 +103,39 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
-> 	return ERR_PTR(ret);
-> }
-> 
-> +static __le32 ceph_flags_sys2wire(u32 flags)
-> +{
-> +	u32 wire_flags = 0;
-> +
-> +	switch (flags & O_ACCMODE) {
-> +	case O_RDONLY:
-> +		wire_flags |= CEPH_O_RDONLY;
-> +		break;
-> +	case O_WRONLY:
-> +		wire_flags |= CEPH_O_WRONLY;
-> +		break;
-> +	case O_RDWR:
-> +		wire_flags |= CEPH_O_RDWR;
-> +		break;
-> +	}
-> +	flags &= ~O_ACCMODE;
-> +
-> +#define ceph_sys2wire(a) if (flags & a) { wire_flags |= CEPH_##a; flags &= ~a; }
-> +
-> +	ceph_sys2wire(O_CREAT);
-> +	ceph_sys2wire(O_EXCL);
-> +	ceph_sys2wire(O_TRUNC);
-> +	ceph_sys2wire(O_DIRECTORY);
-> +	ceph_sys2wire(O_NOFOLLOW);
-> +
-> +#undef ceph_sys2wire
-> +
-> +	if (flags)
-> +		dout("Unused open flags: %x", flags);
-> +
-> +	return cpu_to_le32(wire_flags);
-> +}
-> +
-> /*
->  * Prepare an open request.  Preallocate ceph_cap to avoid an
->  * inopportune ENOMEM later.
-> @@ -123,7 +156,7 @@ static size_t dio_get_pagev_size(const struct iov_iter *it)
-> 	if (IS_ERR(req))
-> 		goto out;
-> 	req->r_fmode = ceph_flags_to_mode(flags);
-> -	req->r_args.open.flags = cpu_to_le32(flags);
-> +	req->r_args.open.flags = ceph_flags_sys2wire(flags);
-> 	req->r_args.open.mode = cpu_to_le32(create_mode);
-> out:
-> 	return req;
-> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-> index f4b2ee1..9581c70 100644
-> --- a/include/linux/ceph/ceph_fs.h
-> +++ b/include/linux/ceph/ceph_fs.h
-> @@ -366,6 +366,18 @@ enum {
-> #define CEPH_READDIR_FRAG_COMPLETE	(1<<8)
-> #define CEPH_READDIR_HASH_ORDER		(1<<9)
-> 
-> +/*
-> + * open request flags
-> + */
-> +#define CEPH_O_RDONLY		00000000
-> +#define CEPH_O_WRONLY		00000001
-> +#define CEPH_O_RDWR		00000002
-> +#define CEPH_O_CREAT		00000100
-> +#define CEPH_O_EXCL		00000200
-> +#define CEPH_O_TRUNC		00001000
-> +#define CEPH_O_DIRECTORY	00200000
-> +#define CEPH_O_NOFOLLOW		00400000
-> +
-> union ceph_mds_request_args {
-> 	struct {
-> 		__le32 mask;                 /* CEPH_CAP_* */
-> -- 
-> 1.8.5.6
-> 
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index ae61cdf..e071d23 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -294,7 +294,7 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
+ 	struct ceph_mds_client *mdsc = fsc->mdsc;
+ 	int i;
+ 	int err;
+-	u32 ftype;
++	unsigned frag = -1;
+ 	struct ceph_mds_reply_info_parsed *rinfo;
+ 
+ 	dout("readdir %p file %p pos %llx\n", inode, file, ctx->pos);
+@@ -341,7 +341,6 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
+ 	/* do we have the correct frag content buffered? */
+ 	if (need_send_readdir(fi, ctx->pos)) {
+ 		struct ceph_mds_request *req;
+-		unsigned frag;
+ 		int op = ceph_snap(inode) == CEPH_SNAPDIR ?
+ 			CEPH_MDS_OP_LSSNAP : CEPH_MDS_OP_READDIR;
+ 
+@@ -352,8 +351,11 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
+ 		}
+ 
+ 		if (is_hash_order(ctx->pos)) {
+-			frag = ceph_choose_frag(ci, fpos_hash(ctx->pos),
+-						NULL, NULL);
++			/* fragtree isn't always accurate. choose frag
++			 * based on previous reply when possible. */
++			if (frag == (unsigned)-1)
++				frag = ceph_choose_frag(ci, fpos_hash(ctx->pos),
++							NULL, NULL);
+ 		} else {
+ 			frag = fpos_frag(ctx->pos);
+ 		}
+@@ -480,6 +482,7 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
+ 		struct ceph_mds_reply_dir_entry *rde = rinfo->dir_entries + i;
+ 		struct ceph_vino vino;
+ 		ino_t ino;
++		u32 ftype;
+ 
+ 		BUG_ON(rde->offset < ctx->pos);
+ 
+@@ -502,15 +505,17 @@ static int ceph_readdir(struct file *file, struct dir_context *ctx)
+ 		ctx->pos++;
+ 	}
+ 
++	ceph_mdsc_put_request(fi->last_readdir);
++	fi->last_readdir = NULL;
++
+ 	if (fi->next_offset > 2) {
+-		ceph_mdsc_put_request(fi->last_readdir);
+-		fi->last_readdir = NULL;
++		frag = fi->frag;
+ 		goto more;
+ 	}
+ 
+ 	/* more frags? */
+ 	if (!ceph_frag_is_rightmost(fi->frag)) {
+-		unsigned frag = ceph_frag_next(fi->frag);
++		frag = ceph_frag_next(fi->frag);
+ 		if (is_hash_order(ctx->pos)) {
+ 			loff_t new_pos = ceph_make_fpos(ceph_frag_value(frag),
+ 							fi->next_offset, true);
+-- 
+2.9.3
 
