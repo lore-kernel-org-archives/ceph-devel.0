@@ -1,39 +1,31 @@
-From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
-Subject: Re: kraken 11.2.1 last call
-Date: Fri, 28 Apr 2017 08:43:47 -0700
-Message-ID: <CADRKj5TooRHtVNbqx4d2=zWy7jPHONcTpEJXfDpek-0HpS_+GQ@mail.gmail.com>
-References: <5136cf62-8567-7189-098a-206140e10447@suse.cz>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: jewel 10.2.8 last call
+Date: Fri, 28 Apr 2017 18:05:11 +0200
+Message-ID: <3a053a39-773b-37fa-7dd3-272ff6b0ee45@suse.cz>
+References: <18bf7357-dfbd-2def-ee9c-506e67fc24e0@suse.cz>
+ <0015fa14-1baa-f79f-0a95-3a7a904b8c6b@objoo.org>
+ <1ee6d36b-9b30-b7c7-a430-3e008383a5dd@suse.cz>
+ <a442ed6e-7fe2-cadd-3841-b1b0f945bf93@objoo.org>
+ <CADRKj5Sb_ptBD5=YyT5AAdfVJgG7q3ZQCXyRCzi2kV7ouW5DuA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f182.google.com ([209.85.216.182]:34075 "EHLO
-        mail-qt0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1424318AbdD1Pns (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Apr 2017 11:43:48 -0400
-Received: by mail-qt0-f182.google.com with SMTP id c45so53289287qtb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Apr 2017 08:43:48 -0700 (PDT)
-In-Reply-To: <5136cf62-8567-7189-098a-206140e10447@suse.cz>
+Received: from mx2.suse.de ([195.135.220.15]:41480 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1756530AbdD1QFO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 28 Apr 2017 12:05:14 -0400
+In-Reply-To: <CADRKj5Sb_ptBD5=YyT5AAdfVJgG7q3ZQCXyRCzi2kV7ouW5DuA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
+To: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-I need to have this in:
-https://github.com/ceph/ceph/pull/14852
+On 04/28/2017 05:41 PM, Yehuda Sadeh-Weinraub wrote:
+> I want to get this one in:
+> https://github.com/ceph/ceph/pull/14851
 
-Doesn't necessarily need to make the cut for the version as long as it
-gets into the kraken branch (needed for upgrade to luminous testing).
+OK, staged http://tracker.ceph.com/issues/19806 and will include in the 
+next round of tests.
 
-Yehuda
-
-On Mon, Apr 24, 2017 at 10:00 PM, Nathan Cutler <ncutler@suse.cz> wrote:
-> In the interests of getting jewel 10.2.8 released sooner rather than later,
-> if there is anything you would like to get in, please let me know by
-> replying to this message.
->
-> Thanks,
-> Nathan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Nathan
