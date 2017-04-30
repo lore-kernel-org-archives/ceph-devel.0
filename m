@@ -1,99 +1,125 @@
 From: Loic Dachary <loic@dachary.org>
-Subject: Re: [ceph-users] LRC low level plugin configuration can't express
- maximal erasure resilience
-Date: Sun, 30 Apr 2017 00:13:15 +0200
-Message-ID: <c3861738-1b6e-e02c-2bb5-d14cae17e8b8@dachary.org>
-References: <gHAYZJ1TyZwY4DvF8kONBaLjzLW6KAqfoW_smQg5xFxqbPN9pzY0ba35gbKiyobwKIUKsdQC54IriRh37vBwCpxSHFnnEICOkzxvxl7VtBA=@protonmail.com>
- <5d82ecfc-2ddf-e3e2-cf25-6447943d6405@dachary.org>
- <CXqVN-y-wEvzO923ecYL6S32ROGSrVHPPhV_eVs4gSQqoNTjJvweoIDnhthDu8Dc3Kwhvggkd9fkOH1k1aNPvD8H4-5lV9MZLFKUyW8qFhw=@protonmail.com>
+Subject: revisiting uneven CRUSH distributions
+Date: Sun, 30 Apr 2017 16:15:06 +0200
+Message-ID: <712e34ca-d94e-b4a5-6195-5ca4cbc2aa34@dachary.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:48831 "EHLO
-        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S967277AbdD2WNU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 29 Apr 2017 18:13:20 -0400
-In-Reply-To: <CXqVN-y-wEvzO923ecYL6S32ROGSrVHPPhV_eVs4gSQqoNTjJvweoIDnhthDu8Dc3Kwhvggkd9fkOH1k1aNPvD8H4-5lV9MZLFKUyW8qFhw=@protonmail.com>
+Received: from relay8-d.mail.gandi.net ([217.70.183.201]:53834 "EHLO
+        relay8-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S968945AbdD3OPK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 30 Apr 2017 10:15:10 -0400
+Received: from relay5-d.mail.gandi.net (relay5-d.mail.gandi.net [217.70.183.197])
+        by relay8-d.mail.gandi.net (Postfix) with ESMTPS id 3E72A406C9
+        for <ceph-devel@vger.kernel.org>; Sun, 30 Apr 2017 16:15:09 +0200 (CEST)
+Received: from mfilter16-d.gandi.net (mfilter16-d.gandi.net [217.70.178.144])
+        by relay5-d.mail.gandi.net (Postfix) with ESMTP id 2AA9241C08A
+        for <ceph-devel@vger.kernel.org>; Sun, 30 Apr 2017 16:15:09 +0200 (CEST)
+Received: from relay5-d.mail.gandi.net ([IPv6:::ffff:217.70.183.197])
+        by mfilter16-d.gandi.net (mfilter16-d.gandi.net [::ffff:10.0.15.180]) (amavisd-new, port 10024)
+        with ESMTP id ujX1h4NS9WBm for <ceph-devel@vger.kernel.org>;
+        Sun, 30 Apr 2017 16:15:07 +0200 (CEST)
+Received: from [192.168.3.6] (x4db483b4.dyn.telefonica.de [77.180.131.180])
+        (Authenticated sender: loic@dachary.org)
+        by relay5-d.mail.gandi.net (Postfix) with ESMTPSA id 7F8DA41C088
+        for <ceph-devel@vger.kernel.org>; Sun, 30 Apr 2017 16:15:07 +0200 (CEST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Matan Liram <matanl@protonmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
+Hi,
 
+Ideally CRUSH distributes PGs evenly on OSDs so that they all fill in
+the same proportion. If an OSD is 75% full, it is expected that all
+other OSDs are also 75% full.
 
-On 04/29/2017 11:48 PM, Matan Liram wrote:
-> Hi Loïc,
-> 
-> Thank you for the fast response, I will try rephrasing:
-> 
-> Consider a Reed-Solomon code with 6 data chunks {a, b, c, d, e, f} and 2 parity chunks {u, v}. Notice that "u" is a linear combination of a, b, c, d, e, f. If we split "u" into x - linear combination of a, b, c, and y - linear combination of d, e, f, we get an LRC code with 9 chunks (a, b, c, d, e, f - data; v - global; x, y - local), which copes with 2 erasures. It is implied from the fact that it has all the information of a (8,6) Reed-Solomon code.
-> 
-> However, in the LRC construction you proposed there are 10 chunks, which impose a higher overhead than the optimal 9 chunks which I showed in the previous paragraph. I wonder if there's a way to get the optimal LRC construction for this case, using the plugin configuration Ceph provides. In the previous message I added an example which implies why the solution to this problem is not trivial.
+In reality the distribution is even only when more than 100,000 PGs
+are distributed in a pool of size 1 (i.e. no replication).
 
-Thanks for explaining. I don't think the current LRC plugin allows for that. It would require another plugin with a different implementation.
+In small clusters there are a few thousands PGs and it is not enough
+to get an even distribution. Running the following with
+python-crush[1], shows a 15% difference when distributing 1,000 PGs on
+6 devices. Only with 1,000,000 PGs does the difference drop under 1%.
+
+  for PGs in 1000 10000 100000 1000000 ; do
+    crush analyze --replication-count 1 \
+                  --type device \
+                  --values-count $PGs \
+                  --rule data \
+                  --crushmap tests/sample-crushmap.json
+  done
+
+In larger clusters, even though a greater number of PGs are
+distributed, there are at most a few dozens devices per host and the
+problem remains. On a machine with 24 OSDs each expected to handle a
+few hundred PGs, a total of a few thousands PGs are distributed which
+is not enough to get an even distribution.
+
+There is a secondary reason for the distribution to be uneven, when
+there is more than one replica. The second replica must be on a
+different device than the first replica. This conditional probability
+is not taken into account by CRUSH and would create an uneven
+distribution if more than 10,000 PGs were distributed per OSD[2]. But
+a given OSD can only handle a few hundred PGs and this conditional
+probability bias is dominated by the uneven distribution caused by the
+low number of PGs.
+
+The uneven CRUSH distributions are always caused by a low number of
+samples, even in large clusters. Since this noise (i.e. the difference
+between the desired distribution and the actual distribution) is
+random, it cannot be fixed by optimizations methods.  The
+Nedler-Mead[3] simplex converges to a local minimum that is far from
+the optimal minimum in many cases. Broyden–Fletcher–Goldfarb–Shanno[4]
+fails to find a gradient that would allow it to converge faster. And
+even if it did, the local minimum found would be as often wrong as
+with Nedler-Mead, only it would go faster. A least mean squares
+filter[5] is equally unable to suppress the noise created by the
+uneven distribution because no coefficients can model a random noise.
+
+With that in mind, I implemented a simple optimization algorithm[6]
+which was first suggested by Thierry Delamare a few weeks ago. It goes
+like this:
+
+    - Distribute the desired number of PGs[7]
+    - Subtract 1% of the weight of the OSD that is the most over used
+    - Add the subtracted weight to the OSD that is the most under used
+    - Repeat until the Kullback–Leibler divergence[8] is small enough
+
+Quoting Adam Kupczyk, this works because:
+
+  "...CRUSH is not random proces at all, it behaves in numerically
+   stable way.  Specifically, if we increase weight on one node, we
+   will get more PGs on this node and less on every other node:
+   CRUSH([10.1, 10, 10, 5, 5]) -> [146(+3), 152, 156(-2), 70(-1), 76]"
+
+A nice side effect of this optimization algorithm is that it does not
+change the weight of the bucket containing the items being
+optimized. It is local to a bucket with no influence on the other
+parts of the crushmap (modulo the conditional probability bias).
+
+In all tests the situation improves at least by an order of
+magnitude. For instance when there is a 30% difference between two
+OSDs, it is down to less than 3% after optimization.
+
+The tests for the optimization method can be run with
+
+   git clone -b wip-fix-2 http://libcrush.org/dachary/python-crush.git
+   tox -e py27 -- -s -vv -k test_fix tests/test_analyze.py
+
+If anyone think of a reason why this algorithm won't work in some
+cases, please speak up :-)
 
 Cheers
 
-
-> Thank you,
-> Matan Liram
-> 
-> 
->> -------- Original Message --------
->> Subject: Re: [ceph-users] LRC low level plugin configuration can't express maximal erasure resilience
->> Local Time: April 29, 2017 11:58 PM
->> UTC Time: April 29, 2017 8:58 PM
->> From: loic@dachary.org
->> To: Matan Liram <matanl@protonmail.com>, ceph-users@lists.ceph.com <ceph-users@lists.ceph.com>
->>
->> Hi Matan,
->>
->> On 04/29/2017 10:47 PM, Matan Liram wrote:
->> > LRC low level plugin configuration of the following example copes with a single erasure while it can easily protect from two.
->> >
->> > In case I use the layers:
->> > 1: DDDDDDc_ _
->> > 2: DDD_ _ _ _c_
->> > 3: _ _ _DDD_ _c
->> >
->> > Neither of the rules protect from 2 failures. However, if we calculate the XOR of the two local parities we can treat the calculated value as a second parity disk and cope with two erasures.
->> > This thread discusses the same issue, while according to my understanding it doesn't provide a solution.
->> > http://www.spinics.net/lists/ceph-devel/msg19886.html
->> >
->> > Is there a way to make the proposed construction cope with 2 erasures? A few modifications are acceptable.
->>
->> I'm not sure to understand what you're asking. Would you mind rephrasing ?
->>
->> 1: DDDDDDc_ _
->> 2: DDD_ _ _ _c_
->> 3: _ _ _DDD_ _c
->>
->>
->> 1: DDDDDDc_ __
->> 2: DDD_ _ _ _c__
->> 3: _ _ _DDD_ _cc
->>
->> That would not work ?
->>
->> Cheers
->>
->> >
->> > Thank you,
->> > Matan Liram
->> >
->> >
->> >
->> >
->> > _______________________________________________
->> > ceph-users mailing list
->> > ceph-users@lists.ceph.com
->> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->> >
->>
->> -- 
->> Loïc Dachary, Artisan Logiciel Libre
-> 
+[1] python-crush http://crush.readthedocs.io/
+[2] crush multipick anomaly http://marc.info/?l=ceph-devel&m=148539995928656&w=2
+[3] Nedler-Mead https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method
+[4] L-BFGS-B https://docs.scipy.org/doc/scipy-0.18.1/reference/optimize.minimize-lbfgsb.html#optimize-minimize-lbfgsb
+[5] Least mean squares filter https://en.wikipedia.org/wiki/Least_mean_squares_filter
+[6] http://libcrush.org/dachary/python-crush/blob/c6af9bbcbef7123af84ee4d75d63dd1b967213a2/tests/test_analyze.py#L39
+[7] Predicting Ceph PG placement http://dachary.org/?p=4020
+[8] Kullback–Leibler divergence https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
 
 -- 
 Loïc Dachary, Artisan Logiciel Libre
