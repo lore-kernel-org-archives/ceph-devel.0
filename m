@@ -1,56 +1,186 @@
-From: Ming Lin <mlin@kernel.org>
-Subject: Re: xlog_write: reservation ran out
-Date: Mon, 1 May 2017 13:18:58 -0700
-Message-ID: <CAF1ivSZgh-v1=LqeFwKZWuzcARwy9w37Qg_J3r_Hm-jnbmaH6g@mail.gmail.com>
-References: <CAF1ivSZeYhnzh6CPZViYUNFXdm33hhTA_CzP7V745QociEEnKg@mail.gmail.com>
- <CAF1ivSbjdixqDo663wvAEkzRk-ctOX+y5UYxq4UdPA-=JVufyw@mail.gmail.com>
- <CAF1ivSbEfhTYxcBx1dafK9TD3VdeXbJrNMzWJmXY8kyU0ibkUw@mail.gmail.com>
- <8accf9d5-b2e4-c82e-fa47-3c5bc2ea35b1@kernel.org> <20170501131222.GA2109@bfoster.bfoster>
- <70def595-91a9-970a-d227-547055da5bb5@kernel.org> <20170501184822.GB3775@bfoster.bfoster>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: revisiting uneven CRUSH distributions
+Date: Tue, 2 May 2017 01:12:20 +0200
+Message-ID: <172cefc2-1189-99e8-b793-1d85fcaf6441@dachary.org>
+References: <712e34ca-d94e-b4a5-6195-5ca4cbc2aa34@dachary.org>
+ <c2237c5e-165e-20be-1c9e-c239d8792c37@profihost.ag>
+ <10f4d4b3-56a4-35de-ac0e-c68bb7fd182f@dachary.org>
+ <1ac6382d-d963-7aed-2f31-f8b5dbe8fdf3@profihost.ag>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.136]:54032 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751432AbdEAUTl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 1 May 2017 16:19:41 -0400
-In-Reply-To: <20170501184822.GB3775@bfoster.bfoster>
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:39544 "EHLO
+        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750936AbdEAXMZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 1 May 2017 19:12:25 -0400
+In-Reply-To: <1ac6382d-d963-7aed-2f31-f8b5dbe8fdf3@profihost.ag>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brian Foster <bfoster@redhat.com>
-Cc: Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@lst.de>, linux-xfs@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, "LIU, Fei" <james.liu@alibaba-inc.com>, xiongwei.jiang@alibaba-inc.com, boqian.zy@alibaba-inc.com, sheng.qiu@alibaba-inc.com, Sage Weil <sweil@redhat.com>
+To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, May 1, 2017 at 11:48 AM, Brian Foster <bfoster@redhat.com> wrote:
+It is working, with straw2 (your cluster still is using straw).
+
+For instance for one host it goes from:
+
+        ~expected~  ~objects~  ~over/under used %~  ~delta~  ~delta%~
+~name~
+osd.24         149        159                 6.65     10.0      6.71
+osd.29         149        159                 6.65     10.0      6.71
+osd.0           69         77                11.04      8.0     11.59
+osd.2           69         69                -0.50      0.0      0.00
+osd.42         149        148                -0.73     -1.0     -0.67
+osd.1           69         62               -10.59     -7.0    -10.14
+osd.23          69         62               -10.59     -7.0    -10.14
+osd.36         149        132               -11.46    -17.0    -11.41
+
+to
+
+        ~expected~  ~objects~  ~over/under used %~  ~delta~  ~delta%~
+~name~
+osd.0           69         69                -0.50      0.0      0.00
+osd.23          69         69                -0.50      0.0      0.00
+osd.24         149        149                -0.06      0.0      0.00
+osd.29         149        149                -0.06      0.0      0.00
+osd.36         149        149                -0.06      0.0      0.00
+osd.1           69         68                -1.94     -1.0     -1.45
+osd.2           69         68                -1.94     -1.0     -1.45
+osd.42         149        147                -1.40     -2.0     -1.34
+
+By changing the weights to
+
+[0.6609248140022604, 0.9148542821020436, 0.8174711575190294, 0.8870680217468655, 1.6031393139865695, 1.5871079208467038, 1.8784764188501162, 1.7308530904776616]
+
+And you could set these weights on the crushmap, there would be no need for backporting.
+
+
+On 05/01/2017 08:06 PM, Stefan Priebe - Profihost AG wrote:
+> Am 01.05.2017 um 19:47 schrieb Loic Dachary:
+>> Hi Stefan,
 >>
->> It takes about 10 hours to reproduce the problem.
+>> On 05/01/2017 07:15 PM, Stefan Priebe - Profihost AG wrote:
+>>> That sounds amazing! Is there any chance this will be backported to jewel?
 >>
->
-> Out of curiosity, is that 10 hours of removing files or 10 hours of
-> repopulating and removing until the problem happens to occur? If the
-> latter, roughly how many fill/remove cycles does that entail (tens,
-> hundreds, thousands)?
+>> There should be ways to make that work with kraken and jewel. It may not even require a backport. If you know of a cluster with an uneven distribution, it would be great if you could send the crushmap so that I can test the algorithm. I'm still not sure this is the right solution and it would help confirm that.
+> 
+> I've lots of them ;-)
+> 
+> Will sent you one via private e-mail in some minutes.
+> 
+> Greets,
+> Stefan
+> 
+>> Cheers
+>>
+>>>
+>>> Greets,
+>>> Stefan
+>>>
+>>> Am 30.04.2017 um 16:15 schrieb Loic Dachary:
+>>>> Hi,
+>>>>
+>>>> Ideally CRUSH distributes PGs evenly on OSDs so that they all fill in
+>>>> the same proportion. If an OSD is 75% full, it is expected that all
+>>>> other OSDs are also 75% full.
+>>>>
+>>>> In reality the distribution is even only when more than 100,000 PGs
+>>>> are distributed in a pool of size 1 (i.e. no replication).
+>>>>
+>>>> In small clusters there are a few thousands PGs and it is not enough
+>>>> to get an even distribution. Running the following with
+>>>> python-crush[1], shows a 15% difference when distributing 1,000 PGs on
+>>>> 6 devices. Only with 1,000,000 PGs does the difference drop under 1%.
+>>>>
+>>>>   for PGs in 1000 10000 100000 1000000 ; do
+>>>>     crush analyze --replication-count 1 \
+>>>>                   --type device \
+>>>>                   --values-count $PGs \
+>>>>                   --rule data \
+>>>>                   --crushmap tests/sample-crushmap.json
+>>>>   done
+>>>>
+>>>> In larger clusters, even though a greater number of PGs are
+>>>> distributed, there are at most a few dozens devices per host and the
+>>>> problem remains. On a machine with 24 OSDs each expected to handle a
+>>>> few hundred PGs, a total of a few thousands PGs are distributed which
+>>>> is not enough to get an even distribution.
+>>>>
+>>>> There is a secondary reason for the distribution to be uneven, when
+>>>> there is more than one replica. The second replica must be on a
+>>>> different device than the first replica. This conditional probability
+>>>> is not taken into account by CRUSH and would create an uneven
+>>>> distribution if more than 10,000 PGs were distributed per OSD[2]. But
+>>>> a given OSD can only handle a few hundred PGs and this conditional
+>>>> probability bias is dominated by the uneven distribution caused by the
+>>>> low number of PGs.
+>>>>
+>>>> The uneven CRUSH distributions are always caused by a low number of
+>>>> samples, even in large clusters. Since this noise (i.e. the difference
+>>>> between the desired distribution and the actual distribution) is
+>>>> random, it cannot be fixed by optimizations methods.  The
+>>>> Nedler-Mead[3] simplex converges to a local minimum that is far from
+>>>> the optimal minimum in many cases. Broyden–Fletcher–Goldfarb–Shanno[4]
+>>>> fails to find a gradient that would allow it to converge faster. And
+>>>> even if it did, the local minimum found would be as often wrong as
+>>>> with Nedler-Mead, only it would go faster. A least mean squares
+>>>> filter[5] is equally unable to suppress the noise created by the
+>>>> uneven distribution because no coefficients can model a random noise.
+>>>>
+>>>> With that in mind, I implemented a simple optimization algorithm[6]
+>>>> which was first suggested by Thierry Delamare a few weeks ago. It goes
+>>>> like this:
+>>>>
+>>>>     - Distribute the desired number of PGs[7]
+>>>>     - Subtract 1% of the weight of the OSD that is the most over used
+>>>>     - Add the subtracted weight to the OSD that is the most under used
+>>>>     - Repeat until the Kullback–Leibler divergence[8] is small enough
+>>>>
+>>>> Quoting Adam Kupczyk, this works because:
+>>>>
+>>>>   "...CRUSH is not random proces at all, it behaves in numerically
+>>>>    stable way.  Specifically, if we increase weight on one node, we
+>>>>    will get more PGs on this node and less on every other node:
+>>>>    CRUSH([10.1, 10, 10, 5, 5]) -> [146(+3), 152, 156(-2), 70(-1), 76]"
+>>>>
+>>>> A nice side effect of this optimization algorithm is that it does not
+>>>> change the weight of the bucket containing the items being
+>>>> optimized. It is local to a bucket with no influence on the other
+>>>> parts of the crushmap (modulo the conditional probability bias).
+>>>>
+>>>> In all tests the situation improves at least by an order of
+>>>> magnitude. For instance when there is a 30% difference between two
+>>>> OSDs, it is down to less than 3% after optimization.
+>>>>
+>>>> The tests for the optimization method can be run with
+>>>>
+>>>>    git clone -b wip-fix-2 http://libcrush.org/dachary/python-crush.git
+>>>>    tox -e py27 -- -s -vv -k test_fix tests/test_analyze.py
+>>>>
+>>>> If anyone think of a reason why this algorithm won't work in some
+>>>> cases, please speak up :-)
+>>>>
+>>>> Cheers
+>>>>
+>>>> [1] python-crush http://crush.readthedocs.io/
+>>>> [2] crush multipick anomaly http://marc.info/?l=ceph-devel&m=148539995928656&w=2
+>>>> [3] Nedler-Mead https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method
+>>>> [4] L-BFGS-B https://docs.scipy.org/doc/scipy-0.18.1/reference/optimize.minimize-lbfgsb.html#optimize-minimize-lbfgsb
+>>>> [5] Least mean squares filter https://en.wikipedia.org/wiki/Least_mean_squares_filter
+>>>> [6] http://libcrush.org/dachary/python-crush/blob/c6af9bbcbef7123af84ee4d75d63dd1b967213a2/tests/test_analyze.py#L39
+>>>> [7] Predicting Ceph PG placement http://dachary.org/?p=4020
+>>>> [8] Kullback–Leibler divergence https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
+>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-10 hours of repopulating the cluster. Then remove all rbd images with
-"rbd rm xxx"
-Just 1 cycle: fill then remove.
-
-> You could try to populate the fs using Ceph as with your current
-> reproducer, particularly since it may use patterns or features that
-> could affect this problem (xattrs?) that fio may not induce, and then
-> try to directly reproduce the overrun via manual file removals. This
-> would be sufficient for debugging because if you can share a metadump
-> image of the original fs and appropriate steps to reproduce, we don't
-> particularly need to care about how the fs was constructed in the first
-> place.
->
-> For example, if you have a test that currently populates and depopulates
-> the fs through Ceph, something I might try is to update the test to
-> generate a metadump image of the fs every time your test cycles from
-> populating to depopulating. Once the problem reproduces, you now have a
-> metadump image of the original fs that you can restore and use to try to
-> reproduce the overrun manually (repeatedly, if nec.).
-
-That's a nice idea to debug it.
-I'll try.
-
-Thanks.
+-- 
+Loïc Dachary, Artisan Logiciel Libre
