@@ -1,141 +1,193 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: revisiting uneven CRUSH distributions
-Date: Mon, 1 May 2017 20:06:07 +0200
-Message-ID: <1ac6382d-d963-7aed-2f31-f8b5dbe8fdf3@profihost.ag>
-References: <712e34ca-d94e-b4a5-6195-5ca4cbc2aa34@dachary.org>
- <c2237c5e-165e-20be-1c9e-c239d8792c37@profihost.ag>
- <10f4d4b3-56a4-35de-ac0e-c68bb7fd182f@dachary.org>
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: xlog_write: reservation ran out
+Date: Mon, 1 May 2017 14:48:24 -0400
+Message-ID: <20170501184822.GB3775@bfoster.bfoster>
+References: <CAF1ivSZeYhnzh6CPZViYUNFXdm33hhTA_CzP7V745QociEEnKg@mail.gmail.com>
+ <CAF1ivSbjdixqDo663wvAEkzRk-ctOX+y5UYxq4UdPA-=JVufyw@mail.gmail.com>
+ <CAF1ivSbEfhTYxcBx1dafK9TD3VdeXbJrNMzWJmXY8kyU0ibkUw@mail.gmail.com>
+ <8accf9d5-b2e4-c82e-fa47-3c5bc2ea35b1@kernel.org>
+ <20170501131222.GA2109@bfoster.bfoster>
+ <70def595-91a9-970a-d227-547055da5bb5@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:44879 "EHLO
-        cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750704AbdEASGK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 1 May 2017 14:06:10 -0400
-In-Reply-To: <10f4d4b3-56a4-35de-ac0e-c68bb7fd182f@dachary.org>
+Received: from mx1.redhat.com ([209.132.183.28]:57774 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750816AbdEASs1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 1 May 2017 14:48:27 -0400
+Content-Disposition: inline
+In-Reply-To: <70def595-91a9-970a-d227-547055da5bb5@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ming Lin <mlin@kernel.org>
+Cc: Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@lst.de>, linux-xfs@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, "LIU, Fei" <james.liu@alibaba-inc.com>, xiongwei.jiang@alibaba-inc.com, boqian.zy@alibaba-inc.com, sheng.qiu@alibaba-inc.com, Sage Weil <sweil@redhat.com>
 
-Am 01.05.2017 um 19:47 schrieb Loic Dachary:
-> Hi Stefan,
+On Mon, May 01, 2017 at 10:41:06AM -0700, Ming Lin wrote:
+> On 5/1/2017 6:12 AM, Brian Foster wrote:
+> > On Sun, Apr 30, 2017 at 11:10:15PM -0700, Ming Lin wrote:
+> >>
+> >> On 4/28/2017 1:56 PM, Ming Lin wrote:
+> >>> I'm new to xfs code.
+> >>>
+> >>> Search  XFS_TRANS_INACTIVE and the usage is like below,
+> >>>
+> >>> xfs_trans_alloc(mp, XFS_TRANS_INACTIVE);
+> >>> xfs_trans_reserve(tp, &M_RES(mp)->tr_itruncate, 0, 0);
+> >>>
+> >>> xfs_trans_alloc(mp, XFS_TRANS_INACTIVE);
+> >>> xfs_trans_reserve(tp, &M_RES(mp)->tr_ifree, XFS_IFREE_SPACE_RES(mp), 0);
+> >>>
+> >>> seems tr_remove is not related.
+> >>> I'll just try to enlarge the reservation for tr_itruncate and tr_ifree.
+> >>
+> >> Now things are a little bit more clear. I tried below debug patch.
+> >> The t_decrease[] array was used to track where the space was used.
+> >>
+> >>  fs/xfs/libxfs/xfs_trans_resv.c |  4 ++--
+> >>  fs/xfs/xfs_log.c               | 23 ++++++++++++++++++++---
+> >>  fs/xfs/xfs_log_cil.c           |  8 ++++++++
+> >>  fs/xfs/xfs_log_priv.h          |  3 +++
+> >>  fs/xfs/xfs_super.c             |  1 +
+> >>  5 files changed, 34 insertions(+), 5 deletions(-)
+> >>
+> > ...
+> >>  277 static void
+> >>  278 xlog_cil_insert_items(
+> >>  279         struct xlog             *log,
+> >>  280         struct xfs_trans        *tp)
+> >>  281 {
+> >>
+> >> ....
+> >>
+> >>  340         /* do we need space for more log record headers? */
+> >>  341         iclog_space = log->l_iclog_size - log->l_iclog_hsize;
+> >>  342         if (len > 0 && (ctx->space_used / iclog_space !=
+> >>  343                                 (ctx->space_used + len) / iclog_space)) {
+> >>  344                 int hdrs;
+> >>  345
+> >>  346                 hdrs = (len + iclog_space - 1) / iclog_space;
+> >>  347                 /* need to take into account split region headers, too */
+> >>  348                 hdrs *= log->l_iclog_hsize + sizeof(struct xlog_op_header);
+> >>  349                 ctx->ticket->t_unit_res += hdrs;
+> >>  350                 ctx->ticket->t_curr_res += hdrs;
+> >>  351                 tp->t_ticket->t_curr_res -= hdrs;
+> >>  352                 tp->t_ticket->t_decrease[6] = hdrs;
+> >>  353                 ASSERT(tp->t_ticket->t_curr_res >= len);
+> >>  354         }
+> >>  355         tp->t_ticket->t_curr_res -= len;
+> >>  356         tp->t_ticket->t_decrease[7] = len;
+> >>  357         ctx->space_used += len;
+> >>  358
+> >>  359         spin_unlock(&cil->xc_cil_lock);
+> >>  360 }
+> >>
+> >> Any idea why it used so many reservation space here?
+> >>
+> > 
+> > Nothing really rings a bell for me atm. Perhaps others might have ideas.
+> > That does appear to be a sizable overrun, as opposed to a few bytes that
+> > could more likely be attributed to rounding, header accounting issues or
+> > something of that nature.
 > 
-> On 05/01/2017 07:15 PM, Stefan Priebe - Profihost AG wrote:
->> That sounds amazing! Is there any chance this will be backported to jewel?
+> FYI, here are some numbers.
 > 
-> There should be ways to make that work with kraken and jewel. It may not even require a backport. If you know of a cluster with an uneven distribution, it would be great if you could send the crushmap so that I can test the algorithm. I'm still not sure this is the right solution and it would help confirm that.
-
-I've lots of them ;-)
-
-Will sent you one via private e-mail in some minutes.
-
-Greets,
-Stefan
-
-> Cheers
+> The original "unit res" is 83024. I made it x2 larger, so now it's 166048
+> "unit res" - "current res" = the reservation space already used
 > 
->>
->> Greets,
->> Stefan
->>
->> Am 30.04.2017 um 16:15 schrieb Loic Dachary:
->>> Hi,
->>>
->>> Ideally CRUSH distributes PGs evenly on OSDs so that they all fill in
->>> the same proportion. If an OSD is 75% full, it is expected that all
->>> other OSDs are also 75% full.
->>>
->>> In reality the distribution is even only when more than 100,000 PGs
->>> are distributed in a pool of size 1 (i.e. no replication).
->>>
->>> In small clusters there are a few thousands PGs and it is not enough
->>> to get an even distribution. Running the following with
->>> python-crush[1], shows a 15% difference when distributing 1,000 PGs on
->>> 6 devices. Only with 1,000,000 PGs does the difference drop under 1%.
->>>
->>>   for PGs in 1000 10000 100000 1000000 ; do
->>>     crush analyze --replication-count 1 \
->>>                   --type device \
->>>                   --values-count $PGs \
->>>                   --rule data \
->>>                   --crushmap tests/sample-crushmap.json
->>>   done
->>>
->>> In larger clusters, even though a greater number of PGs are
->>> distributed, there are at most a few dozens devices per host and the
->>> problem remains. On a machine with 24 OSDs each expected to handle a
->>> few hundred PGs, a total of a few thousands PGs are distributed which
->>> is not enough to get an even distribution.
->>>
->>> There is a secondary reason for the distribution to be uneven, when
->>> there is more than one replica. The second replica must be on a
->>> different device than the first replica. This conditional probability
->>> is not taken into account by CRUSH and would create an uneven
->>> distribution if more than 10,000 PGs were distributed per OSD[2]. But
->>> a given OSD can only handle a few hundred PGs and this conditional
->>> probability bias is dominated by the uneven distribution caused by the
->>> low number of PGs.
->>>
->>> The uneven CRUSH distributions are always caused by a low number of
->>> samples, even in large clusters. Since this noise (i.e. the difference
->>> between the desired distribution and the actual distribution) is
->>> random, it cannot be fixed by optimizations methods.  The
->>> Nedler-Mead[3] simplex converges to a local minimum that is far from
->>> the optimal minimum in many cases. Broyden–Fletcher–Goldfarb–Shanno[4]
->>> fails to find a gradient that would allow it to converge faster. And
->>> even if it did, the local minimum found would be as often wrong as
->>> with Nedler-Mead, only it would go faster. A least mean squares
->>> filter[5] is equally unable to suppress the noise created by the
->>> uneven distribution because no coefficients can model a random noise.
->>>
->>> With that in mind, I implemented a simple optimization algorithm[6]
->>> which was first suggested by Thierry Delamare a few weeks ago. It goes
->>> like this:
->>>
->>>     - Distribute the desired number of PGs[7]
->>>     - Subtract 1% of the weight of the OSD that is the most over used
->>>     - Add the subtracted weight to the OSD that is the most under used
->>>     - Repeat until the Kullback–Leibler divergence[8] is small enough
->>>
->>> Quoting Adam Kupczyk, this works because:
->>>
->>>   "...CRUSH is not random proces at all, it behaves in numerically
->>>    stable way.  Specifically, if we increase weight on one node, we
->>>    will get more PGs on this node and less on every other node:
->>>    CRUSH([10.1, 10, 10, 5, 5]) -> [146(+3), 152, 156(-2), 70(-1), 76]"
->>>
->>> A nice side effect of this optimization algorithm is that it does not
->>> change the weight of the bucket containing the items being
->>> optimized. It is local to a bucket with no influence on the other
->>> parts of the crushmap (modulo the conditional probability bias).
->>>
->>> In all tests the situation improves at least by an order of
->>> magnitude. For instance when there is a 30% difference between two
->>> OSDs, it is down to less than 3% after optimization.
->>>
->>> The tests for the optimization method can be run with
->>>
->>>    git clone -b wip-fix-2 http://libcrush.org/dachary/python-crush.git
->>>    tox -e py27 -- -s -vv -k test_fix tests/test_analyze.py
->>>
->>> If anyone think of a reason why this algorithm won't work in some
->>> cases, please speak up :-)
->>>
->>> Cheers
->>>
->>> [1] python-crush http://crush.readthedocs.io/
->>> [2] crush multipick anomaly http://marc.info/?l=ceph-devel&m=148539995928656&w=2
->>> [3] Nedler-Mead https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method
->>> [4] L-BFGS-B https://docs.scipy.org/doc/scipy-0.18.1/reference/optimize.minimize-lbfgsb.html#optimize-minimize-lbfgsb
->>> [5] Least mean squares filter https://en.wikipedia.org/wiki/Least_mean_squares_filter
->>> [6] http://libcrush.org/dachary/python-crush/blob/c6af9bbcbef7123af84ee4d75d63dd1b967213a2/tests/test_analyze.py#L39
->>> [7] Predicting Ceph PG placement http://dachary.org/?p=4020
->>> [8] Kullback–Leibler divergence https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+> XFS (nvme10n1p1): xlog_write: reservation summary:
+>   trans type  = INACTIVE (3)
+>   unit res    = 166048 bytes
+>   current res = 77088 bytes
+>   total reg   = 0 bytes (o/flow = 0 bytes)
+>   ophdrs      = 0 (ophdr space = 0 bytes)
+>   ophdr + reg = 0 bytes
+>   num regions = 0
 > 
+> "already used" = 166048 - 77088 = 88960
+> overrun = 88960 - 83024 = 5936
+> 
+> 
+> XFS (nvme7n1p1): xlog_write: reservation summary:
+>   trans type  = INACTIVE (3)
+>   unit res    = 166048 bytes
+>   current res = 53444 bytes
+>   total reg   = 0 bytes (o/flow = 0 bytes)
+>   ophdrs      = 0 (ophdr space = 0 bytes)
+>   ophdr + reg = 0 bytes
+>   num regions = 0
+> 
+> "already used" = 166048 - 53444 = 112604
+> overrun = 112604 - 83024 = 29580
+> 
+> The overrun bytes seems a lot to me.
+> 
+
+Yes.
+
+> > 
+> > The debug code doesn't really tell us much beyond that the transaction
+> > required logging more data than it had reserved. In the snippet above,
+> > len essentially refers to a byte total of what is logged across all of
+> > the various items (inode, buffers, etc.) in the transaction.
+> > 
+> > I'm assuming you can reproduce this often enough if you can capture
+> 
+> It takes about 10 hours to reproduce the problem.
+> 
+
+Out of curiosity, is that 10 hours of removing files or 10 hours of
+repopulating and removing until the problem happens to occur? If the
+latter, roughly how many fill/remove cycles does that entail (tens,
+hundreds, thousands)?
+
+> > debug information. Have you tried to reproduce the actual transaction
+> > overrun without using Ceph (i.e., create the fs using ceph as normal,
+> > but run the object removal directly)? If you can do that, you could
+> 
+> Not exactly same.
+> But I did try just write the xfs fs with fio(64 threads) to 80% full,
+> then remove the files, but can't reproduce it.
+> 
+
+You could try to populate the fs using Ceph as with your current
+reproducer, particularly since it may use patterns or features that
+could affect this problem (xattrs?) that fio may not induce, and then
+try to directly reproduce the overrun via manual file removals. This
+would be sufficient for debugging because if you can share a metadump
+image of the original fs and appropriate steps to reproduce, we don't
+particularly need to care about how the fs was constructed in the first
+place.
+
+For example, if you have a test that currently populates and depopulates
+the fs through Ceph, something I might try is to update the test to
+generate a metadump image of the fs every time your test cycles from
+populating to depopulating. Once the problem reproduces, you now have a
+metadump image of the original fs that you can restore and use to try to
+reproduce the overrun manually (repeatedly, if nec.).
+
+> > create an xfs_metadump of the populated fs, run a more simple reproducer
+> > on that and that might make it easier to 1.) try newer distro and/or
+> > upstream kernels to try and isolate where the problem exists and/or 2.)
+> > share it so we can try to reproduce and narrow down where the overrun
+> > seems to occur (particularly if this hasn't already been fixed
+> > somewhere).
+> 
+> I'll try to find a more simple reproducer.
+> 
+
+Thanks.
+
+Brian
+
+> Thanks,
+> Ming
+> 
+> > 
+> > Brian
+> > 
+> >> Thanks,
+> >> Ming
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
