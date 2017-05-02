@@ -1,230 +1,220 @@
-From: Dan van der Ster <dan@vanderster.com>
-Subject: Re: revisiting uneven CRUSH distributions
-Date: Tue, 2 May 2017 12:39:18 +0200
-Message-ID: <CABZ+qq=Tfh3VSiX+9FkcrqXn7X6mS6Z2=n4rxyi=1DDaF5bSAg@mail.gmail.com>
-References: <712e34ca-d94e-b4a5-6195-5ca4cbc2aa34@dachary.org>
- <CABZ+qqnqiUFbz=6CegW_o=2goOThpmoskDQ0oOUfE27jW0D17A@mail.gmail.com> <03d71363-b865-90af-2d4e-7490e7787caa@dachary.org>
+From: Jerry Lee <leisurelysw24@gmail.com>
+Subject: Re: repeating "wrong node" and ceph-mgr CPU usage get higher and
+ higher without any I/O
+Date: Tue, 2 May 2017 19:26:24 +0800
+Message-ID: <CAKQB+ftJcW6Oa3iEwSTXN5jWrSz0iiqFviSDTO-hJ16vQR6hEA@mail.gmail.com>
+References: <CAKQB+fubL9-JNyD-1xR9w_u=-hW2e4CJNOaiVjOJQWJHi=SsWw@mail.gmail.com>
+ <alpine.DEB.2.11.1704261325350.3646@piezo.novalocal> <CAKQB+fvv35h8vSuUYQRTcTzUT4_N43xV29utvsc8WgAcJXQhUw@mail.gmail.com>
+ <alpine.DEB.2.11.1704271317550.3646@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f177.google.com ([209.85.223.177]:33081 "EHLO
-        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751013AbdEBKkB (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 2 May 2017 06:40:01 -0400
-Received: by mail-io0-f177.google.com with SMTP id o22so22779179iod.0
-        for <ceph-devel@vger.kernel.org>; Tue, 02 May 2017 03:40:01 -0700 (PDT)
-Received: from mail-io0-f182.google.com (mail-io0-f182.google.com. [209.85.223.182])
-        by smtp.gmail.com with ESMTPSA id y22sm7626144ioi.26.2017.05.02.03.40.00
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 02 May 2017 03:40:00 -0700 (PDT)
-Received: by mail-io0-f182.google.com with SMTP id r16so154342786ioi.2
-        for <ceph-devel@vger.kernel.org>; Tue, 02 May 2017 03:40:00 -0700 (PDT)
-In-Reply-To: <03d71363-b865-90af-2d4e-7490e7787caa@dachary.org>
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:36044 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750997AbdEBL0c (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 2 May 2017 07:26:32 -0400
+Received: by mail-wr0-f194.google.com with SMTP id v42so16734139wrc.3
+        for <ceph-devel@vger.kernel.org>; Tue, 02 May 2017 04:26:26 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1704271317550.3646@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Haomai Wang <haomaiwang@gmail.com>
 
-On Tue, May 2, 2017 at 12:21 PM, Loic Dachary <loic@dachary.org> wrote:
-> On 05/02/2017 11:35 AM, Dan van der Ster wrote:
-> > Hi Loic,
-> >
-> > I'm not managing to compile this on my CentOS 7 dev box.
+On 27 April 2017 at 21:18, Sage Weil <sweil@redhat.com> wrote:
+> On Thu, 27 Apr 2017, Jerry Lee wrote:
+>> On 26 April 2017 at 21:26, Sage Weil <sweil@redhat.com> wrote:
+>> > On Wed, 26 Apr 2017, Jerry Lee wrote:
+>> >> Hi,
+>> >>
+>> >> I got a issue that the ceph-mgr consumes more and more CPU computing
+>> >> power even when there's no I/O in my cluster.  Some logs and strace
+>> >> output are provided as follows.  From the logs, it seems that the
+>> >> "wrong node" log starts appearing when a node leave and rejoin the
+>> >> cluster.  The question is why does ceph-mgr keeps trying the old
+>> >> connections even after it knows the new (correct) nonce already? And
+>> >> the number of trial connections is also increasing as time go on.  The
+>> >> only way to mitigate the issue is to restart the ceph-mgr process, but
+>> >> after several hours, the issue occurs again.  Is there any suggestion
+>> >> or idea that I could do to solve the issue?  Thanks!
+>> >>
+>> >>
+>> >> environment:
+>> >> =========
+>> >> linux-4.2.8
+>> >> ceph version v11.0.2
+>> >
+>> > Are you sure that's the version you're running?  That's a random
+>> > pre-kraken development release.
+>> >
+>>
+>> Yes, I found kraken 11.0.2 released in Oct. 2016, and I just gave it a
+>> try.  Is there any recommended version for kraken?  Or, I should use
+>> Jewel instead?
 >
-> What error do you get ? With pip 8.1 + you should not need to compile, th=
-ere are binary wheels available.
+> 11.2.z are the stable kraken releases.  11.0.z are the development
+> checkpoints and not meant for production.
 >
-
-Double requirement given: appdirs=3D=3D1.4.3 (from -r
-/root/git/python-crush/requirements-dev.txt (line 8)) (already in
-appdirs=3D=3D1.4.3 (from -r /root/git/python-crush/requirements.txt (line
-10)), name=3D'appdirs')
-
-[root@dvanders-work python-crush]# grep appdirs *.txt
-requirements-dev.txt:appdirs=3D=3D1.4.3
-requirements.txt:appdirs=3D=3D1.4.3
-
-
-
-> > Do you want to try a "complicated" crush map? Here is ours: https://www=
-.dropbox.com/s/ihg7cwz7wug50pb/cern.crush?dl=3D1
+>> > That said, even if its 11.2.0, we've fixed a ton of mgr issues in the
+>> > run-up to luminous, so I'm not surprised if you've seen problems on
+>> > kraken.  The easy workaround is to just stop the mgr daemon--it doesn't
+>> > really do anything on kraken yet!
+>> >
+>> > sage
+>>
+>> I will stop the mgr daemon and keep monitoring the cluster status.
 >
-> Could you also tell me the pool numbers, pg_num and size and the rule the=
-y use ?
-
-pool 4 'volumes' replicated size 3 min_size 2 crush_ruleset 0
-object_hash rjenkins pg_num 4096 pgp_num 4096 last_change 628176 flags
-nodelete,nopgchange,nosizechange min_read_recency_for_promote 1
-stripe_width 0
-pool 5 'images' replicated size 3 min_size 2 crush_ruleset 0
-object_hash rjenkins pg_num 2048 pgp_num 2048 last_change 628178 flags
-hashpspool,nodelete,nopgchange,nosizechange
-min_read_recency_for_promote 1 stripe_width 0
-pool 75 'cinder-critical' replicated size 3 min_size 2 crush_ruleset 4
-object_hash rjenkins pg_num 8192 pgp_num 8192 last_change 587162 flags
-hashpspool,nodelete,nopgchange,nosizechange
-min_read_recency_for_promote 1 stripe_width 0
-
-
->
-> > The important rules are "data" and "critical", and note that there are =
-two rooms which are expected to fill at different rates. So we'd like to op=
-timize separately for buckets 0513-R-0050 and 0513-R-0060.
->
-> Thanks, I will :-)
+> Sounds good!
+> sage
 >
 
-Cool, thanks!
+[ update ]
 
--- Dan
+After stopping the ceph-mgr, the CPU loading is much reasonable when
+there's no I/O issued to the cluster.  However, for the nodes running
+ceph-mon, all the ceph-osd eats more and more memory like below:
 
-> > Cheers, Dan
-> >
-> >
-> > On Sun, Apr 30, 2017 at 4:15 PM, Loic Dachary <loic@dachary.org <mailto=
-:loic@dachary.org>> wrote:
-> >
-> >     Hi,
-> >
-> >     Ideally CRUSH distributes PGs evenly on OSDs so that they all fill =
-in
-> >     the same proportion. If an OSD is 75% full, it is expected that all
-> >     other OSDs are also 75% full.
-> >
-> >     In reality the distribution is even only when more than 100,000 PGs
-> >     are distributed in a pool of size 1 (i.e. no replication).
-> >
-> >     In small clusters there are a few thousands PGs and it is not enoug=
-h
-> >     to get an even distribution. Running the following with
-> >     python-crush[1], shows a 15% difference when distributing 1,000 PGs=
- on
-> >     6 devices. Only with 1,000,000 PGs does the difference drop under 1=
-%.
-> >
-> >       for PGs in 1000 10000 100000 1000000 ; do
-> >         crush analyze --replication-count 1 \
-> >                       --type device \
-> >                       --values-count $PGs \
-> >                       --rule data \
-> >                       --crushmap tests/sample-crushmap.json
-> >       done
-> >
-> >     In larger clusters, even though a greater number of PGs are
-> >     distributed, there are at most a few dozens devices per host and th=
-e
-> >     problem remains. On a machine with 24 OSDs each expected to handle =
-a
-> >     few hundred PGs, a total of a few thousands PGs are distributed whi=
-ch
-> >     is not enough to get an even distribution.
-> >
-> >     There is a secondary reason for the distribution to be uneven, when
-> >     there is more than one replica. The second replica must be on a
-> >     different device than the first replica. This conditional probabili=
-ty
-> >     is not taken into account by CRUSH and would create an uneven
-> >     distribution if more than 10,000 PGs were distributed per OSD[2]. B=
-ut
-> >     a given OSD can only handle a few hundred PGs and this conditional
-> >     probability bias is dominated by the uneven distribution caused by =
-the
-> >     low number of PGs.
-> >
-> >     The uneven CRUSH distributions are always caused by a low number of
-> >     samples, even in large clusters. Since this noise (i.e. the differe=
-nce
-> >     between the desired distribution and the actual distribution) is
-> >     random, it cannot be fixed by optimizations methods.  The
-> >     Nedler-Mead[3] simplex converges to a local minimum that is far fro=
-m
-> >     the optimal minimum in many cases. Broyden=E2=80=93Fletcher=E2=80=
-=93Goldfarb=E2=80=93Shanno[4]
-> >     fails to find a gradient that would allow it to converge faster. An=
-d
-> >     even if it did, the local minimum found would be as often wrong as
-> >     with Nedler-Mead, only it would go faster. A least mean squares
-> >     filter[5] is equally unable to suppress the noise created by the
-> >     uneven distribution because no coefficients can model a random nois=
-e.
-> >
-> >     With that in mind, I implemented a simple optimization algorithm[6]
-> >     which was first suggested by Thierry Delamare a few weeks ago. It g=
-oes
-> >     like this:
-> >
-> >         - Distribute the desired number of PGs[7]
-> >         - Subtract 1% of the weight of the OSD that is the most over us=
-ed
-> >         - Add the subtracted weight to the OSD that is the most under u=
-sed
-> >         - Repeat until the Kullback=E2=80=93Leibler divergence[8] is sm=
-all enough
-> >
-> >     Quoting Adam Kupczyk, this works because:
-> >
-> >       "...CRUSH is not random proces at all, it behaves in numerically
-> >        stable way.  Specifically, if we increase weight on one node, we
-> >        will get more PGs on this node and less on every other node:
-> >        CRUSH([10.1, 10, 10, 5, 5]) -> [146(+3), 152, 156(-2), 70(-1), 7=
-6]"
-> >
-> >     A nice side effect of this optimization algorithm is that it does n=
-ot
-> >     change the weight of the bucket containing the items being
-> >     optimized. It is local to a bucket with no influence on the other
-> >     parts of the crushmap (modulo the conditional probability bias).
-> >
-> >     In all tests the situation improves at least by an order of
-> >     magnitude. For instance when there is a 30% difference between two
-> >     OSDs, it is down to less than 3% after optimization.
-> >
-> >     The tests for the optimization method can be run with
-> >
-> >        git clone -b wip-fix-2 http://libcrush.org/dachary/python-crush.=
-git <http://libcrush.org/dachary/python-crush.git>
-> >        tox -e py27 -- -s -vv -k test_fix tests/test_analyze.py
-> >
-> >     If anyone think of a reason why this algorithm won't work in some
-> >     cases, please speak up :-)
-> >
-> >     Cheers
-> >
-> >     [1] python-crush http://crush.readthedocs.io/
-> >     [2] crush multipick anomaly http://marc.info/?l=3Dceph-devel&m=3D14=
-8539995928656&w=3D2 <http://marc.info/?l=3Dceph-devel&m=3D148539995928656&w=
-=3D2>
-> >     [3] Nedler-Mead https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_m=
-ethod <https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method>
-> >     [4] L-BFGS-B https://docs.scipy.org/doc/scipy-0.18.1/reference/opti=
-mize.minimize-lbfgsb.html#optimize-minimize-lbfgsb <https://docs.scipy.org/=
-doc/scipy-0.18.1/reference/optimize.minimize-lbfgsb.html#optimize-minimize-=
-lbfgsb>
-> >     [5] Least mean squares filter https://en.wikipedia.org/wiki/Least_m=
-ean_squares_filter <https://en.wikipedia.org/wiki/Least_mean_squares_filter=
+[root@ceph-node-1 ~]# ceph tell osd.0 heap dump
+osd.0 dumping heap profile now.
+------------------------------------------------
+MALLOC:     1944123696 ( 1854.1 MiB) Bytes in use by application
+MALLOC: +            0 (    0.0 MiB) Bytes in page heap freelist
+MALLOC: +     20776152 (   19.8 MiB) Bytes in central cache freelist
+MALLOC: +     19503760 (   18.6 MiB) Bytes in transfer cache freelist
+MALLOC: +     16697192 (   15.9 MiB) Bytes in thread cache freelists
+MALLOC: +      9269408 (    8.8 MiB) Bytes in malloc metadata
+MALLOC:   ------------
+MALLOC: =   2010370208 ( 1917.2 MiB) Actual memory used (physical + swap)
+MALLOC: +      1941504 (    1.9 MiB) Bytes released to OS (aka unmapped)
+MALLOC:   ------------
+MALLOC: =   2012311712 ( 1919.1 MiB) Virtual address space used
+MALLOC:
+MALLOC:         121812              Spans in use
+MALLOC:             39              Thread heaps in use
+MALLOC:           8192              Tcmalloc page size
+------------------------------------------------
+
+But after restarting all the ceph-osd daemon on those nodes, the
+memory consumption of the osd becomes much sane (I compare the memory
+usage of osd on other nodes without mon running).  If there's any
+other information I could provide to help analyze the strange issue
+(or I should try the stable kraken release instead?), please let me
+know.  Thanks!
+
+
+jerry
+
 >
-> >     [6] http://libcrush.org/dachary/python-crush/blob/c6af9bbcbef7123af=
-84ee4d75d63dd1b967213a2/tests/test_analyze.py#L39 <http://libcrush.org/dach=
-ary/python-crush/blob/c6af9bbcbef7123af84ee4d75d63dd1b967213a2/tests/test_a=
-nalyze.py#L39>
-> >     [7] Predicting Ceph PG placement http://dachary.org/?p=3D4020
-> >     [8] Kullback=E2=80=93Leibler divergence https://en.wikipedia.org/wi=
-ki/Kullback%E2%80%93Leibler_divergence <https://en.wikipedia.org/wiki/Kullb=
-ack%E2%80%93Leibler_divergence>
-> >
-> >     --
-> >     Lo=C3=AFc Dachary, Artisan Logiciel Libre
-> >     --
-> >     To unsubscribe from this list: send the line "unsubscribe ceph-deve=
-l" in
-> >     the body of a message to majordomo@vger.kernel.org <mailto:majordom=
-o@vger.kernel.org>
-> >     More majordomo info at  http://vger.kernel.org/majordomo-info.html =
-<http://vger.kernel.org/majordomo-info.html>
-> >
-> >
->
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+>> Thanks for your quick reply!
+>>
+>> Jerry
+>>
+>> >
+>> >
+>> >> 8 nodes and 8 8TB disks on each nodes.
+>> >>    - 3 MONs
+>> >>    - 3 MGRs
+>> >>    - 3 MDSs
+>> >>
+>> >> parts of ceph-mgr log:
+>> >> ================
+>> >> 2017-04-25 12:27:23.298417 7f2b74d31700  0 -- 192.168.2.8:6849/3516 >>
+>> >> 192.168.2.7:0/3459516139 conn(0x55b915d77800 :6849 s=STATE_OPEN pgs=2
+>> >> cs=1 l=0).fault initiating reconnect
+>> >> 2017-04-25 12:27:23.480121 7f2b74530700  0 -- 192.168.2.8:6849/3516 >>
+>> >> 192.168.2.7:0/1237847161 conn(0x55b915d79000 :6849 s=STATE_OPEN pgs=2
+>> >> cs=1 l=0).fault initiating reconnect
+>> >> 2017-04-25 12:27:23.614977 7f2b75532700  0 -- 192.168.2.8:6849/3516 >>
+>> >> 192.168.2.7:0/2251622435 conn(0x55b915d7a800 :6849 s=STATE_OPEN pgs=2
+>> >> cs=1 l=0).fault initiating reconnect
+>> >> ...
+>> >> 2017-04-25 14:21:54.632838 7f2b74530700  0 -- 192.168.2.8:6849/3516 >>
+>> >> 192.168.2.6:6824/3898 conn(0x55b914c7a000 :6849
+>> >> s=STATE_CONNECTING_WAIT_BANNER_AND_IDENTIFY pgs=2 cs=2
+>> >> l=0)._process_connection connect claims to be 192.168.2.6:6824/3683
+>> >> not 192.168.2.6:6824/3898 - wrong node!
+>> >> 2017-04-25 14:21:54.824814 7f2b74530700  0 -- 192.168.2.8:6849/3516 >>
+>> >> 192.168.2.6:6812/3552 conn(0x55b914c4e000 :6849
+>> >> s=STATE_CONNECTING_WAIT_BANNER_AND_IDENTIFY pgs=2 cs=2
+>> >> l=0)._process_connection connect claims to be 192.168.2.6:6812/3467
+>> >> not 192.168.2.6:6812/3552 - wrong node!
+>> >> 2017-04-25 14:21:55.240852 7f2b75532700  0 -- 192.168.2.8:6849/3516 >>
+>> >> 192.168.2.6:6836/4430 conn(0x55b914413000 :6849
+>> >> s=STATE_CONNECTING_WAIT_BANNER_AND_IDENTIFY pgs=2 cs=2
+>> >> l=0)._process_connection connect claims to be 192.168.2.6:6836/3978
+>> >> not 192.168.2.6:6836/4430 - wrong node!
+>> >>
+>> >> strace output:
+>> >> ==========
+>> >> [BEFORE]
+>> >> # timeout 10 ./strace -p 3518 -c
+>> >> ./strace: Process 3518 attached
+>> >> ./strace: Process 3518 detached
+>> >> % time     seconds  usecs/call     calls    errors syscall
+>> >> ------ ----------- ----------- --------- --------- ----------------
+>> >>  96.91    0.282674          15     19033           epoll_wait
+>> >>   0.95    0.002783           2      1662         7 futex
+>> >>   0.58    0.001682           2       902       892 connect
+>> >>   0.54    0.001581           4       381        78 read
+>> >>   0.27    0.000774           1       912           epoll_ctl
+>> >>   0.19    0.000563           7        79           sendmsg
+>> >>   0.14    0.000409           1       329           close
+>> >>   0.14    0.000398           1       329           socket
+>> >>   0.12    0.000364           1       658           fcntl
+>> >>   0.08    0.000247           1       329       319 shutdown
+>> >>   0.08    0.000224           1       329           setsockopt
+>> >> ------ ----------- ----------- --------- --------- ----------------
+>> >> 100.00    0.291699                 24943      1296 total
+>> >>
+>> >> [AFTER about 1 day]
+>> >> # timeout 10 ./strace -p 3518 -c
+>> >> ./strace: Process 3518 attached
+>> >> ./strace: Process 3518 detached
+>> >> % time     seconds  usecs/call     calls    errors syscall
+>> >> ------ ----------- ----------- --------- --------- ----------------
+>> >>  99.91    0.403715           2    199589           epoll_wait
+>> >>   0.05    0.000218           0     18739     18739 connect
+>> >>   0.02    0.000075           0     32176       169 futex
+>> >>   0.01    0.000024           0      6486           socket
+>> >>   0.00    0.000020           0     12972           fcntl
+>> >>   0.00    0.000018           0     18739           epoll_ctl
+>> >>   0.00    0.000010           0      6486           setsockopt
+>> >>   0.00    0.000006           0      6486           close
+>> >>   0.00    0.000005           0      6486      6486 shutdown
+>> >>   0.00    0.000000           0       304        51 read
+>> >>   0.00    0.000000           0        51           sendmsg
+>> >> ------ ----------- ----------- --------- --------- ----------------
+>> >> 100.00    0.404091                308514     25445 total
+>> >>
+>> >> detailed strace result on a ceph-mgr:
+>> >> ==========================
+>> >> socket(AF_INET, SOCK_STREAM, IPPROTO_IP) = 94
+>> >> fcntl(94, F_GETFL)                      = 0x2 (flags O_RDWR)
+>> >> fcntl(94, F_SETFL, O_RDWR|O_NONBLOCK)   = 0
+>> >> setsockopt(94, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+>> >> connect(94, {sa_family=AF_INET, sin_port=htons(0),
+>> >> sin_addr=inet_addr("192.168.2.7")}, 16) = -1 EINPROGRESS (Operation
+>> >> now in progress)
+>> >> epoll_ctl(4, EPOLL_CTL_ADD, 94, {EPOLLIN|EPOLLET, {u32=94, u64=94}}) = 0
+>> >> connect(94, {sa_family=AF_INET, sin_port=htons(0),
+>> >> sin_addr=inet_addr("192.168.2.7")}, 16) = -1 EALREADY (Operation
+>> >> already in progress)
+>> >> epoll_ctl(4, EPOLL_CTL_MOD, 94, {EPOLLIN|EPOLLOUT|EPOLLET, {u32=94,
+>> >> u64=94}}) = 0
+>> >> epoll_wait(4, [{EPOLLIN|EPOLLOUT|EPOLLERR|EPOLLHUP, {u32=95, u64=95}},
+>> >> {EPOLLIN|EPOLLOUT|EPOLLERR|EPOLLHUP, {u32=93, u64=93}}], 5000, 4) = 2
+>> >> connect(95, {sa_family=AF_INET, sin_port=htons(0),
+>> >> sin_addr=inet_addr("192.168.2.2")}, 16) = -1 ECONNREFUSED (Connection
+>> >> refused)
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >> the body of a message to majordomo@vger.kernel.org
+>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>
+>> >>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
