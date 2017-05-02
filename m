@@ -1,186 +1,46 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: revisiting uneven CRUSH distributions
-Date: Tue, 2 May 2017 01:12:20 +0200
-Message-ID: <172cefc2-1189-99e8-b793-1d85fcaf6441@dachary.org>
-References: <712e34ca-d94e-b4a5-6195-5ca4cbc2aa34@dachary.org>
- <c2237c5e-165e-20be-1c9e-c239d8792c37@profihost.ag>
- <10f4d4b3-56a4-35de-ac0e-c68bb7fd182f@dachary.org>
- <1ac6382d-d963-7aed-2f31-f8b5dbe8fdf3@profihost.ag>
+From: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
+Subject: Re: osd and/or filestore tuning for ssds?
+Date: Tue, 2 May 2017 05:00:41 +0200 (CEST)
+Message-ID: <1457289083.3296.1493694041615@ox.pcextreme.nl>
+References: <alpine.DEB.2.11.1704281712110.21526@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:39544 "EHLO
-        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750936AbdEAXMZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 1 May 2017 19:12:25 -0400
-In-Reply-To: <1ac6382d-d963-7aed-2f31-f8b5dbe8fdf3@profihost.ag>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, Ceph Development <ceph-devel@vger.kernel.org>
-
-It is working, with straw2 (your cluster still is using straw).
-
-For instance for one host it goes from:
-
-        ~expected~  ~objects~  ~over/under used %~  ~delta~  ~delta%~
-~name~
-osd.24         149        159                 6.65     10.0      6.71
-osd.29         149        159                 6.65     10.0      6.71
-osd.0           69         77                11.04      8.0     11.59
-osd.2           69         69                -0.50      0.0      0.00
-osd.42         149        148                -0.73     -1.0     -0.67
-osd.1           69         62               -10.59     -7.0    -10.14
-osd.23          69         62               -10.59     -7.0    -10.14
-osd.36         149        132               -11.46    -17.0    -11.41
-
-to
-
-        ~expected~  ~objects~  ~over/under used %~  ~delta~  ~delta%~
-~name~
-osd.0           69         69                -0.50      0.0      0.00
-osd.23          69         69                -0.50      0.0      0.00
-osd.24         149        149                -0.06      0.0      0.00
-osd.29         149        149                -0.06      0.0      0.00
-osd.36         149        149                -0.06      0.0      0.00
-osd.1           69         68                -1.94     -1.0     -1.45
-osd.2           69         68                -1.94     -1.0     -1.45
-osd.42         149        147                -1.40     -2.0     -1.34
-
-By changing the weights to
-
-[0.6609248140022604, 0.9148542821020436, 0.8174711575190294, 0.8870680217468655, 1.6031393139865695, 1.5871079208467038, 1.8784764188501162, 1.7308530904776616]
-
-And you could set these weights on the crushmap, there would be no need for backporting.
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1704281712110.21526-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
 
-On 05/01/2017 08:06 PM, Stefan Priebe - Profihost AG wrote:
-> Am 01.05.2017 um 19:47 schrieb Loic Dachary:
->> Hi Stefan,
->>
->> On 05/01/2017 07:15 PM, Stefan Priebe - Profihost AG wrote:
->>> That sounds amazing! Is there any chance this will be backported to jewel?
->>
->> There should be ways to make that work with kraken and jewel. It may not even require a backport. If you know of a cluster with an uneven distribution, it would be great if you could send the crushmap so that I can test the algorithm. I'm still not sure this is the right solution and it would help confirm that.
+> Op 28 april 2017 om 19:14 schreef Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
 > 
-> I've lots of them ;-)
 > 
-> Will sent you one via private e-mail in some minutes.
+> Hi everyone,
 > 
-> Greets,
-> Stefan
-> 
->> Cheers
->>
->>>
->>> Greets,
->>> Stefan
->>>
->>> Am 30.04.2017 um 16:15 schrieb Loic Dachary:
->>>> Hi,
->>>>
->>>> Ideally CRUSH distributes PGs evenly on OSDs so that they all fill in
->>>> the same proportion. If an OSD is 75% full, it is expected that all
->>>> other OSDs are also 75% full.
->>>>
->>>> In reality the distribution is even only when more than 100,000 PGs
->>>> are distributed in a pool of size 1 (i.e. no replication).
->>>>
->>>> In small clusters there are a few thousands PGs and it is not enough
->>>> to get an even distribution. Running the following with
->>>> python-crush[1], shows a 15% difference when distributing 1,000 PGs on
->>>> 6 devices. Only with 1,000,000 PGs does the difference drop under 1%.
->>>>
->>>>   for PGs in 1000 10000 100000 1000000 ; do
->>>>     crush analyze --replication-count 1 \
->>>>                   --type device \
->>>>                   --values-count $PGs \
->>>>                   --rule data \
->>>>                   --crushmap tests/sample-crushmap.json
->>>>   done
->>>>
->>>> In larger clusters, even though a greater number of PGs are
->>>> distributed, there are at most a few dozens devices per host and the
->>>> problem remains. On a machine with 24 OSDs each expected to handle a
->>>> few hundred PGs, a total of a few thousands PGs are distributed which
->>>> is not enough to get an even distribution.
->>>>
->>>> There is a secondary reason for the distribution to be uneven, when
->>>> there is more than one replica. The second replica must be on a
->>>> different device than the first replica. This conditional probability
->>>> is not taken into account by CRUSH and would create an uneven
->>>> distribution if more than 10,000 PGs were distributed per OSD[2]. But
->>>> a given OSD can only handle a few hundred PGs and this conditional
->>>> probability bias is dominated by the uneven distribution caused by the
->>>> low number of PGs.
->>>>
->>>> The uneven CRUSH distributions are always caused by a low number of
->>>> samples, even in large clusters. Since this noise (i.e. the difference
->>>> between the desired distribution and the actual distribution) is
->>>> random, it cannot be fixed by optimizations methods.  The
->>>> Nedler-Mead[3] simplex converges to a local minimum that is far from
->>>> the optimal minimum in many cases. Broyden–Fletcher–Goldfarb–Shanno[4]
->>>> fails to find a gradient that would allow it to converge faster. And
->>>> even if it did, the local minimum found would be as often wrong as
->>>> with Nedler-Mead, only it would go faster. A least mean squares
->>>> filter[5] is equally unable to suppress the noise created by the
->>>> uneven distribution because no coefficients can model a random noise.
->>>>
->>>> With that in mind, I implemented a simple optimization algorithm[6]
->>>> which was first suggested by Thierry Delamare a few weeks ago. It goes
->>>> like this:
->>>>
->>>>     - Distribute the desired number of PGs[7]
->>>>     - Subtract 1% of the weight of the OSD that is the most over used
->>>>     - Add the subtracted weight to the OSD that is the most under used
->>>>     - Repeat until the Kullback–Leibler divergence[8] is small enough
->>>>
->>>> Quoting Adam Kupczyk, this works because:
->>>>
->>>>   "...CRUSH is not random proces at all, it behaves in numerically
->>>>    stable way.  Specifically, if we increase weight on one node, we
->>>>    will get more PGs on this node and less on every other node:
->>>>    CRUSH([10.1, 10, 10, 5, 5]) -> [146(+3), 152, 156(-2), 70(-1), 76]"
->>>>
->>>> A nice side effect of this optimization algorithm is that it does not
->>>> change the weight of the bucket containing the items being
->>>> optimized. It is local to a bucket with no influence on the other
->>>> parts of the crushmap (modulo the conditional probability bias).
->>>>
->>>> In all tests the situation improves at least by an order of
->>>> magnitude. For instance when there is a 30% difference between two
->>>> OSDs, it is down to less than 3% after optimization.
->>>>
->>>> The tests for the optimization method can be run with
->>>>
->>>>    git clone -b wip-fix-2 http://libcrush.org/dachary/python-crush.git
->>>>    tox -e py27 -- -s -vv -k test_fix tests/test_analyze.py
->>>>
->>>> If anyone think of a reason why this algorithm won't work in some
->>>> cases, please speak up :-)
->>>>
->>>> Cheers
->>>>
->>>> [1] python-crush http://crush.readthedocs.io/
->>>> [2] crush multipick anomaly http://marc.info/?l=ceph-devel&m=148539995928656&w=2
->>>> [3] Nedler-Mead https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method
->>>> [4] L-BFGS-B https://docs.scipy.org/doc/scipy-0.18.1/reference/optimize.minimize-lbfgsb.html#optimize-minimize-lbfgsb
->>>> [5] Least mean squares filter https://en.wikipedia.org/wiki/Least_mean_squares_filter
->>>> [6] http://libcrush.org/dachary/python-crush/blob/c6af9bbcbef7123af84ee4d75d63dd1b967213a2/tests/test_analyze.py#L39
->>>> [7] Predicting Ceph PG placement http://dachary.org/?p=4020
->>>> [8] Kullback–Leibler divergence https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Are there any osd or filestore options that operators are tuning for 
+> all-SSD clusters?  If so (and they make sense) we'd like to introduce them 
+> as defaults for ssd-backed OSDs.
 > 
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+osd_op_threads and osd_disk_threads. They can be increased to 2x or 4x to get performance improvments on SSDs.
+
+> BlueStore already has different hdd and ssd default values for many 
+> options that it chooses based on the type of device; we'd like to do that 
+> for other options in either filestore or the OSD if it makes sense.
+> 
+> Thanks!
+> sage
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
