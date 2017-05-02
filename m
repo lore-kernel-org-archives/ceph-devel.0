@@ -1,50 +1,119 @@
-From: Mohamad Gebai <mgebai@suse.com>
-Subject: Re: Tracing Ceph results
-Date: Tue, 2 May 2017 17:05:01 -0400
-Message-ID: <51909d0c-e1de-d349-1515-80a85427aebf@suse.com>
-References: <3b0fde47-4325-6c5c-f121-7a250fedb195@suse.com>
- <alpine.DEB.2.11.1705022044070.32730@piezo.novalocal>
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: xlog_write: reservation ran out
+Date: Wed, 3 May 2017 09:51:52 +1000
+Message-ID: <20170502235152.GN12369@dastard>
+References: <CAF1ivSZeYhnzh6CPZViYUNFXdm33hhTA_CzP7V745QociEEnKg@mail.gmail.com>
+ <CAF1ivSbjdixqDo663wvAEkzRk-ctOX+y5UYxq4UdPA-=JVufyw@mail.gmail.com>
+ <CAF1ivSbEfhTYxcBx1dafK9TD3VdeXbJrNMzWJmXY8kyU0ibkUw@mail.gmail.com>
+ <8accf9d5-b2e4-c82e-fa47-3c5bc2ea35b1@kernel.org>
+ <20170501131222.GA2109@bfoster.bfoster>
+ <70def595-91a9-970a-d227-547055da5bb5@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:42068 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751270AbdEBVFW (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Tue, 2 May 2017 17:05:22 -0400
-In-Reply-To: <alpine.DEB.2.11.1705022044070.32730@piezo.novalocal>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:5182 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1750819AbdEBX5A (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 2 May 2017 19:57:00 -0400
+Content-Disposition: inline
+In-Reply-To: <70def595-91a9-970a-d227-547055da5bb5@kernel.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: anjaneya.chagam@intel.com, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ming Lin <mlin@kernel.org>
+Cc: Brian Foster <bfoster@redhat.com>, Christoph Hellwig <hch@lst.de>, linux-xfs@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, "LIU, Fei" <james.liu@alibaba-inc.com>, xiongwei.jiang@alibaba-inc.com, boqian.zy@alibaba-inc.com, sheng.qiu@alibaba-inc.com, Sage Weil <sweil@redhat.com>
 
-On 05/02/2017 04:47 PM, Sage Weil wrote:
-> On Tue, 2 May 2017, Mohamad Gebai wrote:
->> Image [2] shows a better image of the call stack view, and Image [3] shows a
->> better one of the critical path.
->>
->> The code is in branch [4].
-> These are awesome! What is the tool you're screenshotting to visualize?
-Sorry, I forgot to mention that part. The viewing tool is TraceCompass 
-(use with an SSD because the traces are quite big).
-> It would be great to apply the build options based on an option passed to
-> cmake (e.g, -DWITH_INSTRUMENT_FUNCTIONS).
-That's definitely an option, I'll submit a patch. The thing is that it 
-also needs -no-pie in order to resolve the function addresses at 
-analysis time.
-> Also, I wonder if these are a better/simpler alternative to the
-> FUNCTRACE() macro in src/common/EventTrace.h.  What kind of overhead is
-> introduced?  LTTNG lets you enable on specific tracepoints, right?
-Indeed, but these are all the same tracepoint (function_entry and 
-function_exit, with different payloads depending on the function that is 
-called). We could also limit the stack depth to stop tracing after a 
-certain number of nested function calls.
+On Mon, May 01, 2017 at 10:41:06AM -0700, Ming Lin wrote:
+> On 5/1/2017 6:12 AM, Brian Foster wrote:
+> > On Sun, Apr 30, 2017 at 11:10:15PM -0700, Ming Lin wrote:
+> >>
+> >> On 4/28/2017 1:56 PM, Ming Lin wrote:
+> >>> I'm new to xfs code.
+> >>>
+> >>> Search  XFS_TRANS_INACTIVE and the usage is like below,
+> >>>
+> >>> xfs_trans_alloc(mp, XFS_TRANS_INACTIVE);
+> >>> xfs_trans_reserve(tp, &M_RES(mp)->tr_itruncate, 0, 0);
+> >>>
+> >>> xfs_trans_alloc(mp, XFS_TRANS_INACTIVE);
+> >>> xfs_trans_reserve(tp, &M_RES(mp)->tr_ifree, XFS_IFREE_SPACE_RES(mp), 0);
+> >>>
+> >>> seems tr_remove is not related.
+> >>> I'll just try to enlarge the reservation for tr_itruncate and tr_ifree.
+> >>
+> >> Now things are a little bit more clear. I tried below debug patch.
+> >> The t_decrease[] array was used to track where the space was used.
+> >>
+> >>  fs/xfs/libxfs/xfs_trans_resv.c |  4 ++--
+> >>  fs/xfs/xfs_log.c               | 23 ++++++++++++++++++++---
+> >>  fs/xfs/xfs_log_cil.c           |  8 ++++++++
+> >>  fs/xfs/xfs_log_priv.h          |  3 +++
+> >>  fs/xfs/xfs_super.c             |  1 +
+> >>  5 files changed, 34 insertions(+), 5 deletions(-)
+> >>
+> > ...
+> >>  277 static void
+> >>  278 xlog_cil_insert_items(
+> >>  279         struct xlog             *log,
+> >>  280         struct xfs_trans        *tp)
+> >>  281 {
+> >>
+> >> ....
+> >>
+> >>  340         /* do we need space for more log record headers? */
+> >>  341         iclog_space = log->l_iclog_size - log->l_iclog_hsize;
+> >>  342         if (len > 0 && (ctx->space_used / iclog_space !=
+> >>  343                                 (ctx->space_used + len) / iclog_space)) {
+> >>  344                 int hdrs;
+> >>  345
+> >>  346                 hdrs = (len + iclog_space - 1) / iclog_space;
+> >>  347                 /* need to take into account split region headers, too */
+> >>  348                 hdrs *= log->l_iclog_hsize + sizeof(struct xlog_op_header);
+> >>  349                 ctx->ticket->t_unit_res += hdrs;
+> >>  350                 ctx->ticket->t_curr_res += hdrs;
+> >>  351                 tp->t_ticket->t_curr_res -= hdrs;
+> >>  352                 tp->t_ticket->t_decrease[6] = hdrs;
+> >>  353                 ASSERT(tp->t_ticket->t_curr_res >= len);
+> >>  354         }
+> >>  355         tp->t_ticket->t_curr_res -= len;
+> >>  356         tp->t_ticket->t_decrease[7] = len;
+> >>  357         ctx->space_used += len;
+> >>  358
+> >>  359         spin_unlock(&cil->xc_cil_lock);
+> >>  360 }
+> >>
+> >> Any idea why it used so many reservation space here?
+> >>
+> > 
+> > Nothing really rings a bell for me atm. Perhaps others might have ideas.
+> > That does appear to be a sizable overrun, as opposed to a few bytes that
+> > could more likely be attributed to rounding, header accounting issues or
+> > something of that nature.
+> 
+> FYI, here are some numbers.
+> 
+> The original "unit res" is 83024. I made it x2 larger, so now it's 166048
+> "unit res" - "current res" = the reservation space already used
+> 
+> XFS (nvme10n1p1): xlog_write: reservation summary:
+>   trans type  = INACTIVE (3)
+>   unit res    = 166048 bytes
+>   current res = 77088 bytes
+>   total reg   = 0 bytes (o/flow = 0 bytes)
+>   ophdrs      = 0 (ophdr space = 0 bytes)
+>   ophdr + reg = 0 bytes
+>   num regions = 0
 
-I've done some benchmarking of LTTng in the past. On average, a kernel 
-tracepoint costs less than 100ns and a userspace one is around 150ns. It 
-also hits the disk to periodically flush the tracing buffers. The 
-overhead is definitely non negligeable. I'll write a how-to as there are 
-quite a few steps to get all of this running.
+So the problem here is that the ticket summary is being printed
+after everything useful has been removed from the ticket and moved
+to the CIL. i.e. for more useful debug, this overrun condition
+needs to be checked between the xlog_cil_insert_format_items() call
+and moving the items off the transaction in xfs_log_commit_cil().
 
-Mohamad
+That way xlog_print_tic_res() will actually tell us how many regions
+are being logged and give us a much better idea of the scope of
+changes logged in the transaction that lead to the overrun.
+
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
