@@ -1,164 +1,67 @@
-From: Dan van der Ster <dan@vanderster.com>
-Subject: Re: revisiting uneven CRUSH distributions
-Date: Wed, 3 May 2017 11:35:37 +0200
-Message-ID: <CABZ+qqmvMSy+A8uqwYBh24P0o9Kh6-T0Zi_H-__kqSoRAzokiQ@mail.gmail.com>
-References: <712e34ca-d94e-b4a5-6195-5ca4cbc2aa34@dachary.org> <9e59a2e1-4aab-9c71-901c-379b537df517@dachary.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f44.google.com ([209.85.218.44]:36550 "EHLO
-        mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752658AbdECJgU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 May 2017 05:36:20 -0400
-Received: by mail-oi0-f44.google.com with SMTP id h4so19939152oib.3
-        for <ceph-devel@vger.kernel.org>; Wed, 03 May 2017 02:36:19 -0700 (PDT)
-Received: from mail-oi0-f41.google.com (mail-oi0-f41.google.com. [209.85.218.41])
-        by smtp.gmail.com with ESMTPSA id b2sm9606654otd.10.2017.05.03.02.36.18
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 03 May 2017 02:36:18 -0700 (PDT)
-Received: by mail-oi0-f41.google.com with SMTP id h4so19938682oib.3
-        for <ceph-devel@vger.kernel.org>; Wed, 03 May 2017 02:36:18 -0700 (PDT)
-In-Reply-To: <9e59a2e1-4aab-9c71-901c-379b537df517@dachary.org>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH] fstests: attr: add support for cephfs
+Date: Wed,  3 May 2017 11:54:13 +0100
+Message-ID: <20170503105413.8314-1-lhenriques@suse.com>
+Return-path: <fstests-owner@vger.kernel.org>
+Sender: fstests-owner@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: ceph-devel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, May 2, 2017 at 6:16 PM, Loic Dachary <loic@dachary.org> wrote:
-> Greg raised the following problem today: what if, as a consequence of cha=
-nging the weights, the failure of a host/rack (whatever the failure domain =
-is) makes the cluster full ? For instance if you have racks 1, 2, 3 with "e=
-ffective" weights .8, 1.1, 1 and you lose half of rack 3 then rack 2 is goi=
-ng to get a lot more of the data than rack 1 is.
->
+Block size for cephfs is 4M, which makes generic/020 test fail as the
+value for MAX_ATTRS and MAX_ATTRVAL_SIZE will be too high.  Restrict these
+two variables to sane values for this FSTYP.
 
-Is this really a problem? In your example, the rack weights are
-tweaked to correct the "rate" at which CRUSH is assigning PGs to each
-rack. If you fail half of rack 3, then your effective weights will
-continue to ensure that the moved PGs get equally assigned to racks 1
-and 2.
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ common/attr | 24 +++++++++++++++++-------
+ 1 file changed, 17 insertions(+), 7 deletions(-)
 
-
-On the other hand, one problem I see with your new approach is that it
-does not address the secondary multi-pick problem, which is that the
-ratio of 1st, 2nd, 3rd, etc... replicas/stripes is not equal for the
-lower weighted OSDs.
-
--- Dan
-
-
-> In other words, getting an even distribution must not be done at the expe=
-nse of the ability of the cluster to sustain the failure of at least one bu=
-cket in the failure domain. It is necessary to evaluate that before and aft=
-er the optimization.
->
-> On 04/30/2017 04:15 PM, Loic Dachary wrote:
->> Hi,
->>
->> Ideally CRUSH distributes PGs evenly on OSDs so that they all fill in
->> the same proportion. If an OSD is 75% full, it is expected that all
->> other OSDs are also 75% full.
->>
->> In reality the distribution is even only when more than 100,000 PGs
->> are distributed in a pool of size 1 (i.e. no replication).
->>
->> In small clusters there are a few thousands PGs and it is not enough
->> to get an even distribution. Running the following with
->> python-crush[1], shows a 15% difference when distributing 1,000 PGs on
->> 6 devices. Only with 1,000,000 PGs does the difference drop under 1%.
->>
->>   for PGs in 1000 10000 100000 1000000 ; do
->>     crush analyze --replication-count 1 \
->>                   --type device \
->>                   --values-count $PGs \
->>                   --rule data \
->>                   --crushmap tests/sample-crushmap.json
->>   done
->>
->> In larger clusters, even though a greater number of PGs are
->> distributed, there are at most a few dozens devices per host and the
->> problem remains. On a machine with 24 OSDs each expected to handle a
->> few hundred PGs, a total of a few thousands PGs are distributed which
->> is not enough to get an even distribution.
->>
->> There is a secondary reason for the distribution to be uneven, when
->> there is more than one replica. The second replica must be on a
->> different device than the first replica. This conditional probability
->> is not taken into account by CRUSH and would create an uneven
->> distribution if more than 10,000 PGs were distributed per OSD[2]. But
->> a given OSD can only handle a few hundred PGs and this conditional
->> probability bias is dominated by the uneven distribution caused by the
->> low number of PGs.
->>
->> The uneven CRUSH distributions are always caused by a low number of
->> samples, even in large clusters. Since this noise (i.e. the difference
->> between the desired distribution and the actual distribution) is
->> random, it cannot be fixed by optimizations methods.  The
->> Nedler-Mead[3] simplex converges to a local minimum that is far from
->> the optimal minimum in many cases. Broyden=E2=80=93Fletcher=E2=80=93Gold=
-farb=E2=80=93Shanno[4]
->> fails to find a gradient that would allow it to converge faster. And
->> even if it did, the local minimum found would be as often wrong as
->> with Nedler-Mead, only it would go faster. A least mean squares
->> filter[5] is equally unable to suppress the noise created by the
->> uneven distribution because no coefficients can model a random noise.
->>
->> With that in mind, I implemented a simple optimization algorithm[6]
->> which was first suggested by Thierry Delamare a few weeks ago. It goes
->> like this:
->>
->>     - Distribute the desired number of PGs[7]
->>     - Subtract 1% of the weight of the OSD that is the most over used
->>     - Add the subtracted weight to the OSD that is the most under used
->>     - Repeat until the Kullback=E2=80=93Leibler divergence[8] is small e=
-nough
->>
->> Quoting Adam Kupczyk, this works because:
->>
->>   "...CRUSH is not random proces at all, it behaves in numerically
->>    stable way.  Specifically, if we increase weight on one node, we
->>    will get more PGs on this node and less on every other node:
->>    CRUSH([10.1, 10, 10, 5, 5]) -> [146(+3), 152, 156(-2), 70(-1), 76]"
->>
->> A nice side effect of this optimization algorithm is that it does not
->> change the weight of the bucket containing the items being
->> optimized. It is local to a bucket with no influence on the other
->> parts of the crushmap (modulo the conditional probability bias).
->>
->> In all tests the situation improves at least by an order of
->> magnitude. For instance when there is a 30% difference between two
->> OSDs, it is down to less than 3% after optimization.
->>
->> The tests for the optimization method can be run with
->>
->>    git clone -b wip-fix-2 http://libcrush.org/dachary/python-crush.git
->>    tox -e py27 -- -s -vv -k test_fix tests/test_analyze.py
->>
->> If anyone think of a reason why this algorithm won't work in some
->> cases, please speak up :-)
->>
->> Cheers
->>
->> [1] python-crush http://crush.readthedocs.io/
->> [2] crush multipick anomaly http://marc.info/?l=3Dceph-devel&m=3D1485399=
-95928656&w=3D2
->> [3] Nedler-Mead https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method
->> [4] L-BFGS-B https://docs.scipy.org/doc/scipy-0.18.1/reference/optimize.=
-minimize-lbfgsb.html#optimize-minimize-lbfgsb
->> [5] Least mean squares filter https://en.wikipedia.org/wiki/Least_mean_s=
-quares_filter
->> [6] http://libcrush.org/dachary/python-crush/blob/c6af9bbcbef7123af84ee4=
-d75d63dd1b967213a2/tests/test_analyze.py#L39
->> [7] Predicting Ceph PG placement http://dachary.org/?p=3D4020
->> [8] Kullback=E2=80=93Leibler divergence https://en.wikipedia.org/wiki/Ku=
-llback%E2%80%93Leibler_divergence
->>
->
-> --
-> Lo=C3=AFc Dachary, Artisan Logiciel Libre
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/common/attr b/common/attr
+index ac139e618b2a..c840ce42a1fa 100644
+--- a/common/attr
++++ b/common/attr
+@@ -254,26 +254,36 @@ _sort_getfattr_output()
+ }
+ 
+ # set maximum total attr space based on fs type
+-if [ "$FSTYP" == "xfs" -o "$FSTYP" == "udf" -o "$FSTYP" == "pvfs2" ]; then
++case "$FSTYP" in
++xfs|udf|pvfs2|ceph)
+ 	MAX_ATTRS=1000
+-else # Assume max ~1 block of attrs
++	;;
++*)
++	# Assume max ~1 block of attrs
+ 	BLOCK_SIZE=`_get_block_size $TEST_DIR`
+ 	# user.attribute_XXX="value.XXX" is about 32 bytes; leave some overhead
+ 	let MAX_ATTRS=$BLOCK_SIZE/40
+-fi
++esac
+ 
+ export MAX_ATTRS
+ 
+ # Set max attr value size based on fs type
+-if [ "$FSTYP" == "xfs" -o "$FSTYP" == "udf" -o "$FSTYP" == "btrfs" ]; then
++case "$FSTYP" in
++xfs|udf|btrfs)
+ 	MAX_ATTRVAL_SIZE=64
+-elif [ "$FSTYP" == "pvfs2" ]; then
++	;;
++pvfs2)
+ 	MAX_ATTRVAL_SIZE=8192
+-else # Assume max ~1 block of attrs
++	;;
++ceph)
++	MAX_ATTRVAL_SIZE=65536
++	;;
++*)
++	# Assume max ~1 block of attrs
+ 	BLOCK_SIZE=`_get_block_size $TEST_DIR`
+ 	# leave a little overhead
+ 	let MAX_ATTRVAL_SIZE=$BLOCK_SIZE-256
+-fi
++esac
+ 
+ export MAX_ATTRVAL_SIZE
+ # make sure this script returns success
