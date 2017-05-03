@@ -1,51 +1,65 @@
-From: Paul Lopez-Bravo <5028981@gmail.com>
-Subject: Re:
-Date: Wed, 03 May 2017 12:26:09 +0100
-Message-ID: <7fff416131bad3fd7f42c2544f668f62@localhost>
-Reply-To: bravolpaul55@gmail.com
+From: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: CDM tonight @ 9p EDT
+Date: Wed, 3 May 2017 09:27:12 -0400
+Message-ID: <CAAZbbf2an1xZ5byLw__5kN5m-oDfZ8YtL6tVZ3BZ_eO6ojPR2w@mail.gmail.com>
+References: <CAAZbbf1Ood-ruf0thnGHjrek6=OCQfuV-puT2Gof+RTe7p29Og@mail.gmail.com>
+	<CAAZbbf0Xq_WjSwnui+vrNVYtxd2iXWnTDuwnb39sXqn=3T_DGg@mail.gmail.com>
+	<CAAZbbf0c5J4vJKnOH9YS8LsYsd=QqGCUq7+xCMQqZKb5gN1+3w@mail.gmail.com>
+	<CAAZbbf15GOOM8Z6hms9j5+fSS_Gr83wFnpmq7yQPA3iKuiPP8Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mailhost02.turknetserver.com ([193.192.122.118]:47845 "EHLO
-        mailhost02.turknetserver.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751835AbdECLeN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 May 2017 07:34:13 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============0709986625=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAAZbbf15GOOM8Z6hms9j5+fSS_Gr83wFnpmq7yQPA3iKuiPP8Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
---
-Hallo,
+--===============0709986625==
+Content-Type: multipart/alternative; boundary=94eb2c18fde0378a62054e9e9d82
 
-Erlauben Sie mir, diese sehr wichtige Anfrage durch diesen Median 
-aufgrund seiner vertraulichen Natur zu machen. Mein Name ist Herr Paul 
-Lopez-Bravo, ein Rechtsanwalt in Spanien. Ich vertrete Late Philip, der 
-vor seinem Tod im Jahr 2009 ein reicher Unternehmer war. Ich vertraue 
-dir in einer dringenden Angelegenheit an, die sich auf eine Kaution 
-bezieht, die von diesem besonderen Klienten von mir vor seinem Tod 
-gemacht wurde. Ich suche für Ihre Zustimmung, mich zu ermächtigen, 
-Ihnen als seinen Erben zu präsentieren, um seine Bank zu veranlassen, 
-die Summe von $ 7.5Million (Sieben Million Fünfhundert Tausend Dollar), 
-die in einem suspendierten Bankkonto hinterlegt werden, zu übergeben. 
-Seine Bank hat mir ein letztes Ultimatum als sein Anwalt ausgegeben, um 
-seinen Erben zu präsentieren, da die gesetzlich zulässige Zeit für eine 
-solche Forderung abgelaufen ist, sonst wird der Fonds beschlagnahmt.
-Die beabsichtigte Transaktion wird unter einer legitimen Art und Weise 
-durchgeführt, die Sie und ich vor jeglicher Rechtsverletzung schützen 
-wird. Ich werde meine Position als Mandantenanwalt nutzen, um die 
-Bearbeitung der benötigten rechtlichen Dokumentationen und die 
-erfolgreiche Durchführung dieser Transaktion zu gewährleisten. Alles 
-was ich verlange ist Ihr Verständnis und ehrliche Zusammenarbeit für 
-den Erfolg. Beachten Sie, dass nach der erfolgreichen Durchführung der 
-Transaktion, halten Sie 40% des gesamten Fonds nach allen Kosten.
- Ich gebe Ihnen ausführliche Details, wenn Sie Ihr Interesse 
-bestätigen.
+--94eb2c18fde0378a62054e9e9d82
+Content-Type: text/plain; charset=UTF-8
 
-Ich hoffe, von Ihnen bald zu hören.
+Hey cephers,
 
-Mit freundlichen Grüßen
-Paul Lopez-Bravo Esq
-Tel: +34692899384
+Just a reminder that the monthly Ceph Developer call is tonight at 9p EDT
+as we're on an APAC-friendly month.
 
+http://wiki.ceph.com/Planning
+
+Please add any ongoing work to the will so that we can discuss. Thanks!
+
+--94eb2c18fde0378a62054e9e9d82
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"auto">Hey cephers,<div dir=3D"auto"><br></div><div dir=3D"auto"=
+>Just a reminder that the monthly Ceph Developer call is tonight at 9p EDT =
+as we&#39;re on an APAC-friendly month.</div><div dir=3D"auto"><br></div><d=
+iv dir=3D"auto"><a href=3D"http://wiki.ceph.com/Planning">http://wiki.ceph.=
+com/Planning</a><br></div><div dir=3D"auto"><br></div><div dir=3D"auto">Ple=
+ase add any ongoing work to the will so that we can discuss. Thanks!</div><=
+div dir=3D"auto"><br></div></div>
+
+--94eb2c18fde0378a62054e9e9d82--
+
+--===============0709986625==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0709986625==--
