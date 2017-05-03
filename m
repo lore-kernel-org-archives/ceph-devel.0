@@ -1,156 +1,31 @@
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: xlog_write: reservation ran out
-Date: Wed, 3 May 2017 10:10:32 -0400
-Message-ID: <20170503141030.GA11549@bfoster.bfoster>
-References: <CAF1ivSZeYhnzh6CPZViYUNFXdm33hhTA_CzP7V745QociEEnKg@mail.gmail.com>
- <CAF1ivSbjdixqDo663wvAEkzRk-ctOX+y5UYxq4UdPA-=JVufyw@mail.gmail.com>
- <CAF1ivSbEfhTYxcBx1dafK9TD3VdeXbJrNMzWJmXY8kyU0ibkUw@mail.gmail.com>
- <8accf9d5-b2e4-c82e-fa47-3c5bc2ea35b1@kernel.org>
- <20170501131222.GA2109@bfoster.bfoster>
- <70def595-91a9-970a-d227-547055da5bb5@kernel.org>
- <20170502235152.GN12369@dastard>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: doc: dead link in doc template
+Date: Wed, 3 May 2017 08:39:43 -0600
+Message-ID: <CALqRxCyLJnh0tWAzO4aX8c4XQbKhUDHy0ceTg3762Wgbd5zcuQ@mail.gmail.com>
+References: <CAJiejCQoJGWGOdkvzn3REKAzb0eLWdFpshM5XxRf0ieK+ZUONw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43482 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752598AbdECOKi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 3 May 2017 10:10:38 -0400
-Content-Disposition: inline
-In-Reply-To: <20170502235152.GN12369@dastard>
+Received: from mail-ua0-f181.google.com ([209.85.217.181]:34142 "EHLO
+        mail-ua0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752948AbdECOjp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 May 2017 10:39:45 -0400
+Received: by mail-ua0-f181.google.com with SMTP id g49so42663093uaa.1
+        for <ceph-devel@vger.kernel.org>; Wed, 03 May 2017 07:39:45 -0700 (PDT)
+In-Reply-To: <CAJiejCQoJGWGOdkvzn3REKAzb0eLWdFpshM5XxRf0ieK+ZUONw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dave Chinner <david@fromorbit.com>
-Cc: Ming Lin <mlin@kernel.org>, Christoph Hellwig <hch@lst.de>, linux-xfs@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, "LIU, Fei" <james.liu@alibaba-inc.com>, xiongwei.jiang@alibaba-inc.com, boqian.zy@alibaba-inc.com, sheng.qiu@alibaba-inc.com, Sage Weil <sweil@redhat.com>
+To: Drunkard Zhang <gongfan193@gmail.com>
+Cc: maillist-linux-fs <ceph-devel@vger.kernel.org>
 
-On Wed, May 03, 2017 at 09:51:52AM +1000, Dave Chinner wrote:
-> On Mon, May 01, 2017 at 10:41:06AM -0700, Ming Lin wrote:
-> > On 5/1/2017 6:12 AM, Brian Foster wrote:
-> > > On Sun, Apr 30, 2017 at 11:10:15PM -0700, Ming Lin wrote:
-> > >>
-> > >> On 4/28/2017 1:56 PM, Ming Lin wrote:
-> > >>> I'm new to xfs code.
-> > >>>
-> > >>> Search  XFS_TRANS_INACTIVE and the usage is like below,
-> > >>>
-> > >>> xfs_trans_alloc(mp, XFS_TRANS_INACTIVE);
-> > >>> xfs_trans_reserve(tp, &M_RES(mp)->tr_itruncate, 0, 0);
-> > >>>
-> > >>> xfs_trans_alloc(mp, XFS_TRANS_INACTIVE);
-> > >>> xfs_trans_reserve(tp, &M_RES(mp)->tr_ifree, XFS_IFREE_SPACE_RES(mp), 0);
-> > >>>
-> > >>> seems tr_remove is not related.
-> > >>> I'll just try to enlarge the reservation for tr_itruncate and tr_ifree.
-> > >>
-> > >> Now things are a little bit more clear. I tried below debug patch.
-> > >> The t_decrease[] array was used to track where the space was used.
-> > >>
-> > >>  fs/xfs/libxfs/xfs_trans_resv.c |  4 ++--
-> > >>  fs/xfs/xfs_log.c               | 23 ++++++++++++++++++++---
-> > >>  fs/xfs/xfs_log_cil.c           |  8 ++++++++
-> > >>  fs/xfs/xfs_log_priv.h          |  3 +++
-> > >>  fs/xfs/xfs_super.c             |  1 +
-> > >>  5 files changed, 34 insertions(+), 5 deletions(-)
-> > >>
-> > > ...
-> > >>  277 static void
-> > >>  278 xlog_cil_insert_items(
-> > >>  279         struct xlog             *log,
-> > >>  280         struct xfs_trans        *tp)
-> > >>  281 {
-> > >>
-> > >> ....
-> > >>
-> > >>  340         /* do we need space for more log record headers? */
-> > >>  341         iclog_space = log->l_iclog_size - log->l_iclog_hsize;
-> > >>  342         if (len > 0 && (ctx->space_used / iclog_space !=
-> > >>  343                                 (ctx->space_used + len) / iclog_space)) {
-> > >>  344                 int hdrs;
-> > >>  345
-> > >>  346                 hdrs = (len + iclog_space - 1) / iclog_space;
-> > >>  347                 /* need to take into account split region headers, too */
-> > >>  348                 hdrs *= log->l_iclog_hsize + sizeof(struct xlog_op_header);
-> > >>  349                 ctx->ticket->t_unit_res += hdrs;
-> > >>  350                 ctx->ticket->t_curr_res += hdrs;
-> > >>  351                 tp->t_ticket->t_curr_res -= hdrs;
-> > >>  352                 tp->t_ticket->t_decrease[6] = hdrs;
-> > >>  353                 ASSERT(tp->t_ticket->t_curr_res >= len);
-> > >>  354         }
-> > >>  355         tp->t_ticket->t_curr_res -= len;
-> > >>  356         tp->t_ticket->t_decrease[7] = len;
-> > >>  357         ctx->space_used += len;
-> > >>  358
-> > >>  359         spin_unlock(&cil->xc_cil_lock);
-> > >>  360 }
-> > >>
-> > >> Any idea why it used so many reservation space here?
-> > >>
-> > > 
-> > > Nothing really rings a bell for me atm. Perhaps others might have ideas.
-> > > That does appear to be a sizable overrun, as opposed to a few bytes that
-> > > could more likely be attributed to rounding, header accounting issues or
-> > > something of that nature.
-> > 
-> > FYI, here are some numbers.
-> > 
-> > The original "unit res" is 83024. I made it x2 larger, so now it's 166048
-> > "unit res" - "current res" = the reservation space already used
-> > 
-> > XFS (nvme10n1p1): xlog_write: reservation summary:
-> >   trans type  = INACTIVE (3)
-> >   unit res    = 166048 bytes
-> >   current res = 77088 bytes
-> >   total reg   = 0 bytes (o/flow = 0 bytes)
-> >   ophdrs      = 0 (ophdr space = 0 bytes)
-> >   ophdr + reg = 0 bytes
-> >   num regions = 0
-> 
-> So the problem here is that the ticket summary is being printed
-> after everything useful has been removed from the ticket and moved
-> to the CIL. i.e. for more useful debug, this overrun condition
-> needs to be checked between the xlog_cil_insert_format_items() call
-> and moving the items off the transaction in xfs_log_commit_cil().
-> 
-> That way xlog_print_tic_res() will actually tell us how many regions
-> are being logged and give us a much better idea of the scope of
-> changes logged in the transaction that lead to the overrun.
-> 
+On Wed, May 3, 2017 at 1:56 AM, Drunkard Zhang <gongfan193@gmail.com> wrote:
+>
+> Can we remove it or fixup? Thx.
 
-Hmm.. interesting idea, but I'm not sure that just moving the ticket
-summary prior to the CIL insertion tells us much. For one, this is a
-transaction ticket and afaict the region count bits are only really used
-for a CIL ticket, unless I'm missing something..? IOWs, it seems to me
-that if we had such pre-CIL format overrun detection, we'd probably want
-to add new code to dump information about what is attached to the
-transaction so we can analyze what was logged against the actual
-reservation.
+Yes, we should remove it IMHO.
 
-Assuming we add such code, we'd still need to actually detect the
-overrun before doing the insert, which is currently where we calculate
-the consumed transaction reservation (i.e., in the ->iop_format()
-callouts). I guess we could look into refactoring that, though I fear
-that would get ugly rather quickly. I'm also not sure how deterministic
-we can be given some of the additional drains on the transaction ticket
-reservation from xlog_cil_insert_items(). Perhaps we could assume worst
-case in that regard?
+ayni.ceph.com was an old web site that got retired when we moved
+*.ceph.com's infrastructure out of Dreamhost's Irvine datacenter a
+while back.
 
-I note that shadow buffer allocation already processes the size of each
-item. I wonder if we could just use that to perform a semi-lazy
-pre-insert check to see if we've already blown the reservation before
-the CIL has started to process the tp (leaving the post-insert check in
-place, as well). For example, update xlog_cil_alloc_shadow_bufs() to
-return a total 'nbytes' from the dirty tp items and use that value in
-the caller. Hmm, thinking more about it, I suppose we could just add
-another similar helper since we'd presumably want to process the list of
-items again if the reservation is overrun. Thoughts?
-
-Brian
-
-> -Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+- Ken
