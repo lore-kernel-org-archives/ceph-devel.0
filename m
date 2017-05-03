@@ -1,186 +1,170 @@
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: xlog_write: reservation ran out
-Date: Wed, 3 May 2017 12:15:10 -0400
-Message-ID: <20170503161508.GA12343@bfoster.bfoster>
-References: <CAF1ivSZeYhnzh6CPZViYUNFXdm33hhTA_CzP7V745QociEEnKg@mail.gmail.com>
- <CAF1ivSbjdixqDo663wvAEkzRk-ctOX+y5UYxq4UdPA-=JVufyw@mail.gmail.com>
- <CAF1ivSbEfhTYxcBx1dafK9TD3VdeXbJrNMzWJmXY8kyU0ibkUw@mail.gmail.com>
- <8accf9d5-b2e4-c82e-fa47-3c5bc2ea35b1@kernel.org>
- <20170501131222.GA2109@bfoster.bfoster>
- <70def595-91a9-970a-d227-547055da5bb5@kernel.org>
- <20170502235152.GN12369@dastard>
- <20170503141030.GA11549@bfoster.bfoster>
- <20170503155335.GF5973@birch.djwong.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: revisiting uneven CRUSH distributions
+Date: Wed, 3 May 2017 18:50:58 +0200
+Message-ID: <876ebcef-03b6-077c-8d58-9fe14c1480a9@dachary.org>
+References: <712e34ca-d94e-b4a5-6195-5ca4cbc2aa34@dachary.org>
+ <9e59a2e1-4aab-9c71-901c-379b537df517@dachary.org>
+ <CABZ+qqmvMSy+A8uqwYBh24P0o9Kh6-T0Zi_H-__kqSoRAzokiQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51294 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750919AbdECQPN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 3 May 2017 12:15:13 -0400
-Content-Disposition: inline
-In-Reply-To: <20170503155335.GF5973@birch.djwong.org>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:40495 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751796AbdECQvC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 May 2017 12:51:02 -0400
+In-Reply-To: <CABZ+qqmvMSy+A8uqwYBh24P0o9Kh6-T0Zi_H-__kqSoRAzokiQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Dave Chinner <david@fromorbit.com>, Ming Lin <mlin@kernel.org>, Christoph Hellwig <hch@lst.de>, linux-xfs@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, "LIU, Fei" <james.liu@alibaba-inc.com>, xiongwei.jiang@alibaba-inc.com, boqian.zy@alibaba-inc.com, sheng.qiu@alibaba-inc.com, Sage Weil <sweil@redhat.com>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, May 03, 2017 at 08:53:35AM -0700, Darrick J. Wong wrote:
-> On Wed, May 03, 2017 at 10:10:32AM -0400, Brian Foster wrote:
-> > On Wed, May 03, 2017 at 09:51:52AM +1000, Dave Chinner wrote:
-> > > On Mon, May 01, 2017 at 10:41:06AM -0700, Ming Lin wrote:
-> > > > On 5/1/2017 6:12 AM, Brian Foster wrote:
-> > > > > On Sun, Apr 30, 2017 at 11:10:15PM -0700, Ming Lin wrote:
-> > > > >>
-> > > > >> On 4/28/2017 1:56 PM, Ming Lin wrote:
-> > > > >>> I'm new to xfs code.
-> > > > >>>
-> > > > >>> Search  XFS_TRANS_INACTIVE and the usage is like below,
-> > > > >>>
-> > > > >>> xfs_trans_alloc(mp, XFS_TRANS_INACTIVE);
-> > > > >>> xfs_trans_reserve(tp, &M_RES(mp)->tr_itruncate, 0, 0);
-> > > > >>>
-> > > > >>> xfs_trans_alloc(mp, XFS_TRANS_INACTIVE);
-> > > > >>> xfs_trans_reserve(tp, &M_RES(mp)->tr_ifree, XFS_IFREE_SPACE_RES(mp), 0);
-> > > > >>>
-> > > > >>> seems tr_remove is not related.
-> > > > >>> I'll just try to enlarge the reservation for tr_itruncate and tr_ifree.
-> > > > >>
-> > > > >> Now things are a little bit more clear. I tried below debug patch.
-> > > > >> The t_decrease[] array was used to track where the space was used.
-> > > > >>
-> > > > >>  fs/xfs/libxfs/xfs_trans_resv.c |  4 ++--
-> > > > >>  fs/xfs/xfs_log.c               | 23 ++++++++++++++++++++---
-> > > > >>  fs/xfs/xfs_log_cil.c           |  8 ++++++++
-> > > > >>  fs/xfs/xfs_log_priv.h          |  3 +++
-> > > > >>  fs/xfs/xfs_super.c             |  1 +
-> > > > >>  5 files changed, 34 insertions(+), 5 deletions(-)
-> > > > >>
-> > > > > ...
-> > > > >>  277 static void
-> > > > >>  278 xlog_cil_insert_items(
-> > > > >>  279         struct xlog             *log,
-> > > > >>  280         struct xfs_trans        *tp)
-> > > > >>  281 {
-> > > > >>
-> > > > >> ....
-> > > > >>
-> > > > >>  340         /* do we need space for more log record headers? */
-> > > > >>  341         iclog_space = log->l_iclog_size - log->l_iclog_hsize;
-> > > > >>  342         if (len > 0 && (ctx->space_used / iclog_space !=
-> > > > >>  343                                 (ctx->space_used + len) / iclog_space)) {
-> > > > >>  344                 int hdrs;
-> > > > >>  345
-> > > > >>  346                 hdrs = (len + iclog_space - 1) / iclog_space;
-> > > > >>  347                 /* need to take into account split region headers, too */
-> > > > >>  348                 hdrs *= log->l_iclog_hsize + sizeof(struct xlog_op_header);
-> > > > >>  349                 ctx->ticket->t_unit_res += hdrs;
-> > > > >>  350                 ctx->ticket->t_curr_res += hdrs;
-> > > > >>  351                 tp->t_ticket->t_curr_res -= hdrs;
-> > > > >>  352                 tp->t_ticket->t_decrease[6] = hdrs;
-> > > > >>  353                 ASSERT(tp->t_ticket->t_curr_res >= len);
-> > > > >>  354         }
-> > > > >>  355         tp->t_ticket->t_curr_res -= len;
-> > > > >>  356         tp->t_ticket->t_decrease[7] = len;
-> > > > >>  357         ctx->space_used += len;
-> > > > >>  358
-> > > > >>  359         spin_unlock(&cil->xc_cil_lock);
-> > > > >>  360 }
-> > > > >>
-> > > > >> Any idea why it used so many reservation space here?
-> > > > >>
-> > > > > 
-> > > > > Nothing really rings a bell for me atm. Perhaps others might have ideas.
-> > > > > That does appear to be a sizable overrun, as opposed to a few bytes that
-> > > > > could more likely be attributed to rounding, header accounting issues or
-> > > > > something of that nature.
-> > > > 
-> > > > FYI, here are some numbers.
-> > > > 
-> > > > The original "unit res" is 83024. I made it x2 larger, so now it's 166048
-> > > > "unit res" - "current res" = the reservation space already used
-> > > > 
-> > > > XFS (nvme10n1p1): xlog_write: reservation summary:
-> > > >   trans type  = INACTIVE (3)
-> > > >   unit res    = 166048 bytes
-> > > >   current res = 77088 bytes
-> > > >   total reg   = 0 bytes (o/flow = 0 bytes)
-> > > >   ophdrs      = 0 (ophdr space = 0 bytes)
-> > > >   ophdr + reg = 0 bytes
-> > > >   num regions = 0
-> > > 
-> > > So the problem here is that the ticket summary is being printed
-> > > after everything useful has been removed from the ticket and moved
-> > > to the CIL. i.e. for more useful debug, this overrun condition
-> > > needs to be checked between the xlog_cil_insert_format_items() call
-> > > and moving the items off the transaction in xfs_log_commit_cil().
-> > > 
-> > > That way xlog_print_tic_res() will actually tell us how many regions
-> > > are being logged and give us a much better idea of the scope of
-> > > changes logged in the transaction that lead to the overrun.
-> > > 
-> > 
-> > Hmm.. interesting idea, but I'm not sure that just moving the ticket
-> > summary prior to the CIL insertion tells us much. For one, this is a
-> > transaction ticket and afaict the region count bits are only really used
-> > for a CIL ticket, unless I'm missing something..? IOWs, it seems to me
-> > that if we had such pre-CIL format overrun detection, we'd probably want
-> > to add new code to dump information about what is attached to the
-> > transaction so we can analyze what was logged against the actual
-> > reservation.
-> > 
-> > Assuming we add such code, we'd still need to actually detect the
-> > overrun before doing the insert, which is currently where we calculate
-> > the consumed transaction reservation (i.e., in the ->iop_format()
-> > callouts). I guess we could look into refactoring that, though I fear
-> > that would get ugly rather quickly. I'm also not sure how deterministic
-> > we can be given some of the additional drains on the transaction ticket
-> > reservation from xlog_cil_insert_items(). Perhaps we could assume worst
-> > case in that regard?
-> > 
-> > I note that shadow buffer allocation already processes the size of each
-> > item. I wonder if we could just use that to perform a semi-lazy
-> > pre-insert check to see if we've already blown the reservation before
-> > the CIL has started to process the tp (leaving the post-insert check in
-> > place, as well). For example, update xlog_cil_alloc_shadow_bufs() to
-> > return a total 'nbytes' from the dirty tp items and use that value in
+
+
+On 05/03/2017 11:35 AM, Dan van der Ster wrote:
+> On Tue, May 2, 2017 at 6:16 PM, Loic Dachary <loic@dachary.org> wrote:
+>> Greg raised the following problem today: what if, as a consequence of changing the weights, the failure of a host/rack (whatever the failure domain is) makes the cluster full ? For instance if you have racks 1, 2, 3 with "effective" weights .8, 1.1, 1 and you lose half of rack 3 then rack 2 is going to get a lot more of the data than rack 1 is.
+>>
 > 
-> Seems useful to be able to detect potential overruns and to dump the
-> current list of log items via ftrace or something so that we can capture
-> exactly what was going on when an overflow happened.
+> Is this really a problem? In your example, the rack weights are
+> tweaked to correct the "rate" at which CRUSH is assigning PGs to each
+> rack. If you fail half of rack 3, then your effective weights will
+> continue to ensure that the moved PGs get equally assigned to racks 1
+> and 2.
+
+It should be possible to verify if the opimitization makes things worse in case of a failure, just by running a simulation with every failure scenario. If the worst scenario (i.e. the one with the highest overfull OSD) before optimization is better than the worst scenario after optimization, the opimization can be discarded.
+
+> On the other hand, one problem I see with your new approach is that it
+> does not address the secondary multi-pick problem, which is that the
+> ratio of 1st, 2nd, 3rd, etc... replicas/stripes is not equal for the
+> lower weighted OSDs.
+
+Note that in pools with less than 10,000 PGs the multi-pick problem does not happen: there are too few samples and the uneven distribution is dominated by that problem.
+
+However, I think the proposed algorithm could also work by tweaking the weights of each replica (but I only thought about it right now so...):
+
+  first pick uses the target weights, say 1 1 1 1 10, always
+  second pick uses the target weights the first time
+  run a simulation and lower the weight of the item that is the most over full and increase the weight of the item that is the most under full
+  repeat until the distribution is even
+  do the same for the third pick etc.
+
+If we do that we have the desired property of a distribution that is stable when we change the size of the pool. The key difference with the previous approaches is that the weights are adjusted based on repeated simulations instead of maths. For every pool know the exact value of each PG placed by Ceph using CRUSH.
+
+Does that make sense or am I missing something ?
+
 > 
-> > the caller. Hmm, thinking more about it, I suppose we could just add
-> > another similar helper since we'd presumably want to process the list of
-> > items again if the reservation is overrun. Thoughts?
+> -- Dan
 > 
-> Process them again how?  I think I'm missing something here; are you
-> saying that we could (try to) get more reservation if allocating the
-> shadow buffer shows that we've run over?
+> 
+>> In other words, getting an even distribution must not be done at the expense of the ability of the cluster to sustain the failure of at least one bucket in the failure domain. It is necessary to evaluate that before and after the optimization.
+>>
+>> On 04/30/2017 04:15 PM, Loic Dachary wrote:
+>>> Hi,
+>>>
+>>> Ideally CRUSH distributes PGs evenly on OSDs so that they all fill in
+>>> the same proportion. If an OSD is 75% full, it is expected that all
+>>> other OSDs are also 75% full.
+>>>
+>>> In reality the distribution is even only when more than 100,000 PGs
+>>> are distributed in a pool of size 1 (i.e. no replication).
+>>>
+>>> In small clusters there are a few thousands PGs and it is not enough
+>>> to get an even distribution. Running the following with
+>>> python-crush[1], shows a 15% difference when distributing 1,000 PGs on
+>>> 6 devices. Only with 1,000,000 PGs does the difference drop under 1%.
+>>>
+>>>   for PGs in 1000 10000 100000 1000000 ; do
+>>>     crush analyze --replication-count 1 \
+>>>                   --type device \
+>>>                   --values-count $PGs \
+>>>                   --rule data \
+>>>                   --crushmap tests/sample-crushmap.json
+>>>   done
+>>>
+>>> In larger clusters, even though a greater number of PGs are
+>>> distributed, there are at most a few dozens devices per host and the
+>>> problem remains. On a machine with 24 OSDs each expected to handle a
+>>> few hundred PGs, a total of a few thousands PGs are distributed which
+>>> is not enough to get an even distribution.
+>>>
+>>> There is a secondary reason for the distribution to be uneven, when
+>>> there is more than one replica. The second replica must be on a
+>>> different device than the first replica. This conditional probability
+>>> is not taken into account by CRUSH and would create an uneven
+>>> distribution if more than 10,000 PGs were distributed per OSD[2]. But
+>>> a given OSD can only handle a few hundred PGs and this conditional
+>>> probability bias is dominated by the uneven distribution caused by the
+>>> low number of PGs.
+>>>
+>>> The uneven CRUSH distributions are always caused by a low number of
+>>> samples, even in large clusters. Since this noise (i.e. the difference
+>>> between the desired distribution and the actual distribution) is
+>>> random, it cannot be fixed by optimizations methods.  The
+>>> Nedler-Mead[3] simplex converges to a local minimum that is far from
+>>> the optimal minimum in many cases. Broyden–Fletcher–Goldfarb–Shanno[4]
+>>> fails to find a gradient that would allow it to converge faster. And
+>>> even if it did, the local minimum found would be as often wrong as
+>>> with Nedler-Mead, only it would go faster. A least mean squares
+>>> filter[5] is equally unable to suppress the noise created by the
+>>> uneven distribution because no coefficients can model a random noise.
+>>>
+>>> With that in mind, I implemented a simple optimization algorithm[6]
+>>> which was first suggested by Thierry Delamare a few weeks ago. It goes
+>>> like this:
+>>>
+>>>     - Distribute the desired number of PGs[7]
+>>>     - Subtract 1% of the weight of the OSD that is the most over used
+>>>     - Add the subtracted weight to the OSD that is the most under used
+>>>     - Repeat until the Kullback–Leibler divergence[8] is small enough
+>>>
+>>> Quoting Adam Kupczyk, this works because:
+>>>
+>>>   "...CRUSH is not random proces at all, it behaves in numerically
+>>>    stable way.  Specifically, if we increase weight on one node, we
+>>>    will get more PGs on this node and less on every other node:
+>>>    CRUSH([10.1, 10, 10, 5, 5]) -> [146(+3), 152, 156(-2), 70(-1), 76]"
+>>>
+>>> A nice side effect of this optimization algorithm is that it does not
+>>> change the weight of the bucket containing the items being
+>>> optimized. It is local to a bucket with no influence on the other
+>>> parts of the crushmap (modulo the conditional probability bias).
+>>>
+>>> In all tests the situation improves at least by an order of
+>>> magnitude. For instance when there is a 30% difference between two
+>>> OSDs, it is down to less than 3% after optimization.
+>>>
+>>> The tests for the optimization method can be run with
+>>>
+>>>    git clone -b wip-fix-2 http://libcrush.org/dachary/python-crush.git
+>>>    tox -e py27 -- -s -vv -k test_fix tests/test_analyze.py
+>>>
+>>> If anyone think of a reason why this algorithm won't work in some
+>>> cases, please speak up :-)
+>>>
+>>> Cheers
+>>>
+>>> [1] python-crush http://crush.readthedocs.io/
+>>> [2] crush multipick anomaly http://marc.info/?l=ceph-devel&m=148539995928656&w=2
+>>> [3] Nedler-Mead https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method
+>>> [4] L-BFGS-B https://docs.scipy.org/doc/scipy-0.18.1/reference/optimize.minimize-lbfgsb.html#optimize-minimize-lbfgsb
+>>> [5] Least mean squares filter https://en.wikipedia.org/wiki/Least_mean_squares_filter
+>>> [6] http://libcrush.org/dachary/python-crush/blob/c6af9bbcbef7123af84ee4d75d63dd1b967213a2/tests/test_analyze.py#L39
+>>> [7] Predicting Ceph PG placement http://dachary.org/?p=4020
+>>> [8] Kullback–Leibler divergence https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
+>>>
+>>
+>> --
+>> Loïc Dachary, Artisan Logiciel Libre
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 
-No, poor choice of words.. s/process/iterate/.
-
-I just mean that we may want another helper since we'd have to iterate
-the list of tp items potentially twice: first to calculate the total
-size, again to dump whatever info we want if the total overruns the
-reservation.
-
-Brian
-
-> --D
-> 
-> > 
-> > Brian
-> > 
-> > > -Dave.
-> > > -- 
-> > > Dave Chinner
-> > > david@fromorbit.com
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Loïc Dachary, Artisan Logiciel Libre
