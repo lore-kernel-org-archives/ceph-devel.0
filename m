@@ -1,42 +1,51 @@
-From: M Ranga Swami Reddy <swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Increase PG or reweight OSDs?
-Date: Wed, 3 May 2017 16:27:30 +0530
-Message-ID: <CANA9Uk6ba=RYj0g4_81wfGsRm-ejs+tr4tYiD2DUEihMqx9gTw@mail.gmail.com>
-References: <CANA9Uk5GQRbKgy+BuV++piJpw17ts6iDAuVz7LpT2+=7wrANMQ@mail.gmail.com>
+From: Paul Lopez-Bravo <5028981@gmail.com>
+Subject: Re:
+Date: Wed, 03 May 2017 12:26:09 +0100
+Message-ID: <7fff416131bad3fd7f42c2544f668f62@localhost>
+Reply-To: bravolpaul55@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CANA9Uk5GQRbKgy+BuV++piJpw17ts6iDAuVz7LpT2+=7wrANMQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain;
+ charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mailhost02.turknetserver.com ([193.192.122.118]:47845 "EHLO
+        mailhost02.turknetserver.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751835AbdECLeN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 May 2017 07:34:13 -0400
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 
-+ Ceph-devel
+--
+Hallo,
 
-On Tue, May 2, 2017 at 11:46 AM, M Ranga Swami Reddy
-<swamireddy-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Hello,
-> I have added 5 new Ceph OSD nodes to my ceph cluster. Here, I wanted
-> to increase PG/PGP numbers of pools based new OSDs count. Same time
-> need to increase the newly added OSDs weight from 0 -> 1.
->
-> My question is:
-> Do I need to increase the PG/PGP num increase and then reweight the OSDs?
-> Or
-> Reweight the OSDs first and then increase the PG/PGP num. of pool(s)?
->
-> Both will cause the rebalnce...but wanted to understand, which one
-> should be preferable to do on running cluster.
->
-> Thanks
-> Swami
+Erlauben Sie mir, diese sehr wichtige Anfrage durch diesen Median 
+aufgrund seiner vertraulichen Natur zu machen. Mein Name ist Herr Paul 
+Lopez-Bravo, ein Rechtsanwalt in Spanien. Ich vertrete Late Philip, der 
+vor seinem Tod im Jahr 2009 ein reicher Unternehmer war. Ich vertraue 
+dir in einer dringenden Angelegenheit an, die sich auf eine Kaution 
+bezieht, die von diesem besonderen Klienten von mir vor seinem Tod 
+gemacht wurde. Ich suche für Ihre Zustimmung, mich zu ermächtigen, 
+Ihnen als seinen Erben zu präsentieren, um seine Bank zu veranlassen, 
+die Summe von $ 7.5Million (Sieben Million Fünfhundert Tausend Dollar), 
+die in einem suspendierten Bankkonto hinterlegt werden, zu übergeben. 
+Seine Bank hat mir ein letztes Ultimatum als sein Anwalt ausgegeben, um 
+seinen Erben zu präsentieren, da die gesetzlich zulässige Zeit für eine 
+solche Forderung abgelaufen ist, sonst wird der Fonds beschlagnahmt.
+Die beabsichtigte Transaktion wird unter einer legitimen Art und Weise 
+durchgeführt, die Sie und ich vor jeglicher Rechtsverletzung schützen 
+wird. Ich werde meine Position als Mandantenanwalt nutzen, um die 
+Bearbeitung der benötigten rechtlichen Dokumentationen und die 
+erfolgreiche Durchführung dieser Transaktion zu gewährleisten. Alles 
+was ich verlange ist Ihr Verständnis und ehrliche Zusammenarbeit für 
+den Erfolg. Beachten Sie, dass nach der erfolgreichen Durchführung der 
+Transaktion, halten Sie 40% des gesamten Fonds nach allen Kosten.
+ Ich gebe Ihnen ausführliche Details, wenn Sie Ihr Interesse 
+bestätigen.
+
+Ich hoffe, von Ihnen bald zu hören.
+
+Mit freundlichen Grüßen
+Paul Lopez-Bravo Esq
+Tel: +34692899384
+
