@@ -1,63 +1,161 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: [PATCH 0/9] rbd: support for rbd map --exclusive
-Date: Wed, 3 May 2017 15:16:25 -0400
-Message-ID: <CA+aFP1BgPUzQQ6Qfj=fpursJpY1AuvxFDD64DgT_ncaxX+v54w@mail.gmail.com>
-References: <1493112825-16403-1-git-send-email-idryomov@gmail.com>
-Reply-To: dillaman@redhat.com
+From: Gregory Meno <gmeno@redhat.com>
+Subject: Re: EXT: Re: [Ceph-ansible] osd-directory scenario is used by us
+Date: Wed, 3 May 2017 15:17:57 -0700
+Message-ID: <CABq-AyS+kuFd15dJ1dZMBkEOcDM6XNV7cXquTWXX6=jLeOb2gw@mail.gmail.com>
+References: <D52531DE.26501%michael.gugino@walmart.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f174.google.com ([209.85.161.174]:36466 "EHLO
-        mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755950AbdECTQ0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 May 2017 15:16:26 -0400
-Received: by mail-yw0-f174.google.com with SMTP id l18so90377165ywh.3
-        for <ceph-devel@vger.kernel.org>; Wed, 03 May 2017 12:16:26 -0700 (PDT)
-In-Reply-To: <1493112825-16403-1-git-send-email-idryomov@gmail.com>
+Received: from mail-qt0-f181.google.com ([209.85.216.181]:35876 "EHLO
+        mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752003AbdECWR7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 May 2017 18:17:59 -0400
+Received: by mail-qt0-f181.google.com with SMTP id m91so2741964qte.3
+        for <ceph-devel@vger.kernel.org>; Wed, 03 May 2017 15:17:59 -0700 (PDT)
+In-Reply-To: <D52531DE.26501%michael.gugino@walmart.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Michael Gugino <Michael.Gugino@walmart.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Sebastien Han <shan@redhat.com>, Alfredo Deza <adeza@redhat.com>, "ceph-ansible@lists.ceph.com" <ceph-ansible@lists.ceph.com>
 
-Reviewed-by: Jason Dillaman <dillaman@redhat.com>
+Haven't seen any comments in a week. I'm going to cross-post this to ceph-devel
 
-On Tue, Apr 25, 2017 at 5:33 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> Hello,
->
-> This adds support for optionally disabling automatic exclusive lock
-> transitions.  Patches 1-3 fix some existing error paths and can go in
-> independently.
->
-> Thanks,
->
->                 Ilya
->
->
-> Ilya Dryomov (9):
->   rbd: move rbd_dev_destroy() call out of rbd_dev_image_release()
->   rbd: move rbd_unregister_watch() call into rbd_dev_image_release()
->   rbd: fix error handling around rbd_init_disk()
->   rbd: ignore unlock errors
->   rbd: store lock cookie
->   rbd: support updating the lock cookie without releasing the lock
->   rbd: kill rbd_is_lock_supported()
->   rbd: return ResponseMessage result from rbd_handle_request_lock()
->   rbd: exclusive map option
->
->  drivers/block/rbd.c                  | 357 +++++++++++++++++++++--------------
->  include/linux/ceph/cls_lock_client.h |   5 +
->  net/ceph/cls_lock_client.c           |  51 +++++
->  3 files changed, 270 insertions(+), 143 deletions(-)
->
-> --
-> 2.4.3
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Dear ceph-devel in an effort to simplify ceph-ansible I removed the
+code that sets up directory backed OSDs. We found our that it was
+being used in the following way.
 
+I would like to hear thoughts about this approach pro and con.
 
+cheers,
+G
 
--- 
-Jason
+On Tue, Apr 25, 2017 at 2:12 PM, Michael Gugino
+<Michael.Gugino@walmart.com> wrote:
+> All,
+>
+>   Thank you for the responses and consideration.  What we are doing is
+> creating lvm volumes, mounting them, and using the mounts as directories
+> for ceph-ansible.  Our primary concern is the use of lvmcache.  We’re
+> using faster drives for the cache and slower drives for the backing
+> volumes.
+>
+>   We try to keep as few local patches as practical, and our initial
+> rollout of lvmcache + ceph-ansible steered us towards osd_directory
+> scenario.  Currently, ceph-ansible does not allow use to use lvm in the
+> way that we desire, but we are looking into submitting a PR to go that
+> direction (at some point).
+>
+>   As far as using the stable branches, I’m not entirely sure what our
+> strategy going forward will be.  Currently we are maintaining ceph-ansible
+> branches based on ceph releases, not ceph-ansible releases.
+>
+>
+> Michael Gugino
+> Cloud Powered
+> (540) 846-0304 Mobile
+>
+> Walmart ✻
+> Saving people money so they can live better.
+>
+>
+>
+>
+>
+> On 4/25/17, 4:51 PM, "Sebastien Han" <shan@redhat.com> wrote:
+>
+>>One other argument to remove the osd directory scenario is BlueStore.
+>>Luminous is around the corner and we strongly hope it'll be the
+>>default object store.
+>>
+>>On Tue, Apr 25, 2017 at 7:40 PM, Gregory Meno <gmeno@redhat.com> wrote:
+>>> Michael,
+>>>
+>>> I am naturally interested in the specifics of your use-case and would
+>>> love to hear more about it.
+>>> I think the desire to remove this scenario from the stable-2.2 release
+>>> is low considering what you just shared.
+>>> Would it be fair to ask that sharing your setup be the justification
+>>> for restoring this functionality?
+>>> Are you using the stable released bits already? I recommend doing so.
+>>>
+>>> +Seb +Alfredo
+>>>
+>>> cheers,
+>>> Gregory
+>>>
+>>> On Tue, Apr 25, 2017 at 10:08 AM, Michael Gugino
+>>> <Michael.Gugino@walmart.com> wrote:
+>>>> Ceph-ansible community,
+>>>>
+>>>>   I see that recently osd-directory scenario was removed from
+>>>>deployment
+>>>> options.  We use this option in production, I will be submitting a
+>>>>patch
+>>>> and a small fix to re-add that scenario.  We believe our use-case is
+>>>> non-trivial, and we are hoping to share our setup with the community in
+>>>> the near future once we get approval.
+>>>>
+>>>> Thank you
+>>>>
+>>>>
+>>>> Michael Gugino
+>>>> Cloud Powered
+>>>> (540) 846-0304 Mobile
+>>>>
+>>>> Walmart ✻
+>>>> Saving people money so they can live better.
+>>>>
+>>>>
+>>>>
+>>>>
+>>>>
+>>>> On 4/18/17, 3:41 PM, "Ceph-ansible on behalf of Sebastien Han"
+>>>> <ceph-ansible-bounces@lists.ceph.com on behalf of shan@redhat.com>
+>>>>wrote:
+>>>>
+>>>>>Hi everyone,
+>>>>>
+>>>>>We are close from releasing the new ceph-ansible stable release.
+>>>>>We are currently in a heavy QA phase where we are pushing new tags in
+>>>>>the format of v2.2.x.
+>>>>>The latest tag already points to stable-2.2 branch.
+>>>>>
+>>>>>Stay tuned, stable-2.2 is just around the corner.
+>>>>>Thanks!
+>>>>>
+>>>>>--
+>>>>>Cheers
+>>>>>
+>>>>>––––––
+>>>>>Sébastien Han
+>>>>>Principal Software Engineer, Storage Architect
+>>>>>
+>>>>>"Always give 100%. Unless you're giving blood."
+>>>>>
+>>>>>Mail: seb@redhat.com
+>>>>>Address: 11 bis, rue Roquépine - 75008 Paris
+>>>>>_______________________________________________
+>>>>>Ceph-ansible mailing list
+>>>>>Ceph-ansible@lists.ceph.com
+>>>>>http://lists.ceph.com/listinfo.cgi/ceph-ansible-ceph.com
+>>>>
+>>>> _______________________________________________
+>>>> Ceph-ansible mailing list
+>>>> Ceph-ansible@lists.ceph.com
+>>>> http://lists.ceph.com/listinfo.cgi/ceph-ansible-ceph.com
+>>
+>>
+>>
+>>--
+>>Cheers
+>>
+>>––––––
+>>Sébastien Han
+>>Principal Software Engineer, Storage Architect
+>>
+>>"Always give 100%. Unless you're giving blood."
+>>
+>>Mail: seb@redhat.com
+>>Address: 11 bis, rue Roquépine - 75008 Paris
+>
