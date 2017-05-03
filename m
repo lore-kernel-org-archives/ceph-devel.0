@@ -1,25 +1,23 @@
-From: Vaibhav Singhal <singhalvaibhav28@gmail.com>
-Subject: Introduction to community
-Date: Wed, 3 May 2017 11:50:08 +0530
-Message-ID: <CAEfyebTrtm80PnB5g+gvq6QP7rshrhm09Suuk7=hq=mE0OJkiQ@mail.gmail.com>
+From: Jos Collin <jcollin@redhat.com>
+Subject: Re: Introduction to community
+Date: Wed, 3 May 2017 12:07:03 +0530
+Message-ID: <96839f82-1f21-92d2-9990-658621e7cd53@redhat.com>
+References: <CAEfyebTrtm80PnB5g+gvq6QP7rshrhm09Suuk7=hq=mE0OJkiQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f169.google.com ([209.85.223.169]:33486 "EHLO
-        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751265AbdECGUJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 May 2017 02:20:09 -0400
-Received: by mail-io0-f169.google.com with SMTP id p24so122067ioi.0
-        for <ceph-devel@vger.kernel.org>; Tue, 02 May 2017 23:20:09 -0700 (PDT)
+Received: from mail-pf0-f178.google.com ([209.85.192.178]:36716 "EHLO
+        mail-pf0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750966AbdECGhJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 May 2017 02:37:09 -0400
+Received: by mail-pf0-f178.google.com with SMTP id q66so8135944pfi.3
+        for <ceph-devel@vger.kernel.org>; Tue, 02 May 2017 23:37:09 -0700 (PDT)
+In-Reply-To: <CAEfyebTrtm80PnB5g+gvq6QP7rshrhm09Suuk7=hq=mE0OJkiQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Vaibhav Singhal <singhalvaibhav28@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi,
+https://www.youtube.com/watch?v=t5UIehZ1oLs
 
-I am Vaibhav Singhal, final year undergraduate student at Delhi
-Technological University, India. I am proficient in C++, Java, Python,
-JavaScript and I want to get involved in contributing to Ceph. Can
-somebody please help me in getting started?
-
-Thanks
+http://tracker.ceph.com/
