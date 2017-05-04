@@ -1,172 +1,186 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: revisiting uneven CRUSH distributions
-Date: Wed, 3 May 2017 18:14:12 -0700
-Message-ID: <CAJ4mKGbhQcieDrL4ydZ2xNqfzQqnq9YKYPMWww-zme1+HXep7A@mail.gmail.com>
-References: <712e34ca-d94e-b4a5-6195-5ca4cbc2aa34@dachary.org>
- <9e59a2e1-4aab-9c71-901c-379b537df517@dachary.org> <CABZ+qqmvMSy+A8uqwYBh24P0o9Kh6-T0Zi_H-__kqSoRAzokiQ@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [ceph-users] kernel BUG at fs/ceph/inode.c:1197
+Date: Thu, 4 May 2017 10:12:41 +0800
+Message-ID: <CAAM7YAkczCU5p_bBLzVs2HmOf9Xr-RWnsTioOYh2QmC82TTN5A@mail.gmail.com>
+References: <7f55f708-0d47-0203-96df-5880bda43e8f@fasthosts.com> <CAF-wwdFCVC2yiWi_3RG0K8KTB5ykc6cheLk=sCCiUNZWB27NdQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f53.google.com ([209.85.214.53]:36132 "EHLO
-        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752122AbdEDBOO (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 May 2017 21:14:14 -0400
-Received: by mail-it0-f53.google.com with SMTP id o5so5291186ith.1
-        for <ceph-devel@vger.kernel.org>; Wed, 03 May 2017 18:14:14 -0700 (PDT)
-In-Reply-To: <CABZ+qqmvMSy+A8uqwYBh24P0o9Kh6-T0Zi_H-__kqSoRAzokiQ@mail.gmail.com>
+Received: from mail-vk0-f41.google.com ([209.85.213.41]:35254 "EHLO
+        mail-vk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753343AbdEDCMn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 May 2017 22:12:43 -0400
+Received: by mail-vk0-f41.google.com with SMTP id v20so326089vke.2
+        for <ceph-devel@vger.kernel.org>; Wed, 03 May 2017 19:12:42 -0700 (PDT)
+In-Reply-To: <CAF-wwdFCVC2yiWi_3RG0K8KTB5ykc6cheLk=sCCiUNZWB27NdQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>
-Cc: Loic Dachary <loic@dachary.org>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Ceph Users <ceph-users@lists.ceph.com>
 
-On Wed, May 3, 2017 at 2:35 AM, Dan van der Ster <dan@vanderster.com> wrote:
-> On Tue, May 2, 2017 at 6:16 PM, Loic Dachary <loic@dachary.org> wrote:
->> Greg raised the following problem today: what if, as a consequence of changing the weights, the failure of a host/rack (whatever the failure domain is) makes the cluster full ? For instance if you have racks 1, 2, 3 with "effective" weights .8, 1.1, 1 and you lose half of rack 3 then rack 2 is going to get a lot more of the data than rack 1 is.
+On Thu, May 4, 2017 at 7:27 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
+> +ceph-devel
+>
+> On Thu, May 4, 2017 at 12:51 AM, James Poole <james.poole@fasthosts.com> wrote:
+>> Hello,
+>>
+>> We currently have a ceph cluster supporting an Openshift cluster using
+>> cephfs and dynamic rbd provisioning. The client nodes appear to be
+>> triggering a kernel bug and are rebooting unexpectedly with the same message
+>> each time. Clients are running CentOS 7:
+>>
+>>       KERNEL: /usr/lib/debug/lib/modules/3.10.0-514.10.2.el7.x86_64/vmlinux
+>>     DUMPFILE: /var/crash/127.0.0.1-2017-05-02-09:06:17/vmcore  [PARTIAL
+>> DUMP]
+>>         CPUS: 16
+>>         DATE: Tue May  2 09:06:15 2017
+>>       UPTIME: 00:43:14
+>> LOAD AVERAGE: 1.52, 1.40, 1.48
+>>        TASKS: 7408
+>>     NODENAME: [redacted]
+>>      RELEASE: 3.10.0-514.10.2.el7.x86_64
+>>      VERSION: #1 SMP Fri Mar 3 00:04:05 UTC 2017
+>>      MACHINE: x86_64  (1997 Mhz)
+>>       MEMORY: 32 GB
+>>        PANIC: "kernel BUG at fs/ceph/inode.c:1197!"
+>>          PID: 133
+>>      COMMAND: "kworker/1:1"
+>>         TASK: ffff8801399bde20  [THREAD_INFO: ffff880138d0c000]
+>>          CPU: 1
+>>        STATE: TASK_RUNNING (PANIC)
+>>
+>> [ 2596.061470] ------------[ cut here ]------------
+>> [ 2596.061499] kernel BUG at fs/ceph/inode.c:1197!
+>> [ 2596.061516] invalid opcode: 0000 [#1] SMP
+>> [ 2596.061535] Modules linked in: cfg80211 rfkill binfmt_misc veth ext4
+>> mbcache jbd2 rbd xt_statistic xt_nat xt_recent ipt_REJECT nf_reject_ipv4
+>> xt_mark ipt_MASQUERADE nf_nat_masquerad
+>> e_ipv4 xt_addrtype br_netfilter bridge stp llc dm_thin_pool
+>> dm_persistent_data dm_bio_prison dm_bufio loop fuse ceph libceph
+>> dns_resolver vport_vxlan vxlan ip6_udp_tunnel udp_tunnel op
+>> envswitch nf_conntrack_ipv6 nf_nat_ipv6 nf_defrag_ipv6 iptable_nat
+>> nf_nat_ipv4 nf_nat xt_limit nf_log_ipv4 vmw_vsock_vmci_transport
+>> nf_log_common xt_LOG vsock nf_conntrack_ipv4 nf_defr
+>> ag_ipv4 xt_comment xt_multiport xt_conntrack nf_conntrack iptable_filter
+>> intel_powerclamp coretemp iosf_mbi crc32_pclmul ghash_clmulni_intel
+>> aesni_intel lrw gf128mul glue_helper ablk_h
+>> elper cryptd ppdev vmw_balloon pcspkr sg vmw_vmci shpchp i2c_piix4
+>> parport_pc
+>> [ 2596.061875]  parport nfsd nfs_acl lockd auth_rpcgss grace sunrpc
+>> ip_tables xfs libcrc32c sr_mod cdrom sd_mod crc_t10dif crct10dif_generic
+>> ata_generic pata_acpi vmwgfx drm_kms_helper
+>>  syscopyarea sysfillrect sysimgblt fb_sys_fops ttm crct10dif_pclmul
+>> crct10dif_common mptspi crc32c_intel drm ata_piix scsi_transport_spi
+>> serio_raw mptscsih libata mptbase vmxnet3 i2c_c
+>> ore fjes dm_mirror dm_region_hash dm_log dm_mod
+>> [ 2596.062042] CPU: 1 PID: 133 Comm: kworker/1:1 Not tainted
+>> 3.10.0-514.10.2.el7.x86_64 #1
+>> [ 2596.062070] Hardware name: VMware, Inc. VMware Virtual Platform/440BX
+>> Desktop Reference Platform, BIOS 6.00 09/17/2015
+>> [ 2596.062118] Workqueue: ceph-msgr ceph_con_workfn [libceph]
+>> [ 2596.062140] task: fffdf8801399be20 ti: ffff880138d0c000 task.ti:
+>> ffff880138d0c000
+>> [ 2596.062166] RIP: 0010:[<ffffffffa05d96c3>]  [<ffffffffa05d96c3>]
+>> ceph_fill_trace+0x893/0xa00 [ceph]
+>> [ 2596.062209] RSP: 0000:ffff880138d0fb80  EFLAGS: 00010287
+>> [ 2596.062230] RAX: ffff88083b079680 RBX: ffff8801efe86760 RCX:
+>> ffff880095e26c00
+>> [ 2596.062257] RDX: ffff880003e8f2c0 RSI: ffff88053b4c0a08 RDI:
+>> ffff88053b4c0a00
+>> [ 2596.062288] RBP: ffff880138d0fbf8 R08: ffff880003e8f2c0 R09:
+>> 0000000000000000
+>> [ 2596.062320] R10: 0000000000000001 R11: ffff8804256f3ac0 R12:
+>> ffff880121d15400
+>> [ 2596.062351] R13: ffff880138dd4000 R14: ffff88007053f280 R15:
+>> ffff8807ee10f2c0
+>> [ 2596.062379] FS:  0000000000000000(0000) GS:ffff88013b840000(0000)
+>> knlGS:0000000000000000
+>> [ 2596.062413] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
+>> [ 2596.062436] CR2: 00007fe3bab2dcd0 CR3: 000000042ebe0000 CR4:
+>> 00000000001407e0
+>> [ 2596.062498] DR0: 0000000000000000 DR1: 0000000000000000 DR2:
+>> 0000000000000000
+>> [ 2596.062540] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7:
+>> 0000000000000400
+>> [ 2596.062567] Stack:
+>> [ 2596.062578]  ffff880121d15778 ffff880121d15718 ffff880138d0fc50
+>> ffff880095e26e7a
+>> [ 2596.062612]  ffff880035c12400 ffff88053b4c7800 000000003b4c0800
+>> ffff880138d0fbb8
+>> [ 2596.062645]  ffff880138d0fbb8 00000000a5446715 ffff88053b4c0800
+>> ffff88008238ee10
+>> [ 2596.062681] Call Trace:
+>> [ 2596.062703]  [<ffffffffa05f96a8>] handle_reply+0x3e8/0xc80 [ceph]
+>> [ 2596.062736]  [<ffffffffa05fbd39>] dispatch+0xd9/0xaf0 [ceph]
+>> [ 2596.062762]  [<ffffffff815559ca>] ? kernel_recvmsg+0x3a/0x50
+>> [ 2596.062790]  [<ffffffffa057ceff>] try_read+0x4bf/0x1220 [libceph]
+>> [ 2596.062819]  [<ffffffffa057b743>] ? try_write+0xa13/0xe60 [libceph]
+>> [ 2596.062851]  [<ffffffffa057dd19>] ceph_con_workfn+0xb9/0x650 [libceph]
+>> [ 2596.062878]  [<ffffffff810a810b>] process_one_work+0x17b/0x470
+>> [ 2596.062902]  [<ffffffff810a8f46>] worker_thread+0x126/0x410
+>> [ 2596.062925]  [<ffffffff810a8e20>] ? rescuer_thread+0x460/0x460
+>> [ 2596.062949]  [<ffffffff810b06ff>] kthread+0xcf/0xe0
+>> [ 2596.064014]  [<ffffffff810b0630>] ? kthread_create_on_node+0x140/0x140
+>> [ 2596.065010]  [<ffffffff81696a58>] ret_from_fork+0x58/0x90
+>> [ 2596.065955]  [<ffffffff810b0630>] ? kthread_create_on_node+0x140/0x140
+>> [ 2596.066945] Code: e8 c3 2b d6 e0 e9 ca fa ff ff 4c 89 fa 48 c7 c6 07 d0
+>> 60 a0 48 c7 c7 50 24 61 a0 31 c0 e8 a6 2b d6 e0 e9 cd fa ff ff 0f 0b 0f 0b
+>> <0f> 0b 0f 0b 48 8b 83 c8 fc ff ff
+>>  4c 8b 89 c8 fc ff ff 4c 89 fa
+>> [ 2596.069127] RIP  [<ffffffffa05d96c3>] ceph_fill_trace+0x893/0xa00 [ceph]
+>> [ 2596.070120]  RSP <ffff880138d0fb80>
+>>
+
+this issue is fixed by upstream commit 3dd69aabc "ceph: add a new flag
+to indicate whether parent is locked". But we haven't backported it to
+rhel kernel. Can you use 4.10 kernel instead
+
+Regards
+Yan, Zheng
+
+>>
+>> Just before the above there are lots of messages similar to this from all
+>> ceph node ips:
+>> [  933.282441] [IPTABLES:INPUT] dropped IN=eno33557248 OUT=
+>> MAC=00:50:56:0f:9a:47:00:50:56:35:28:f1:08:00 SRC=192.168.5.6
+>> DST=192.168.3.2 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=20778 DF P
+>> ROTO=TCP SPT=6816 DPT=47140 WINDOW=2406 RES=0x00 ACK FIN URGP=0
+>> [  933.922440] [IPTABLES:INPUT] dropped IN=eno33557248 OUT=
+>> MAC=00:50:56:0f:9a:47:00:50:56:35:28:f1:08:00 SRC=192.168.5.6
+>> DST=192.168.3.2 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=1440 DF PR
+>> OTO=TCP SPT=6800 DPT=56290 WINDOW=2889 RES=0x00 ACK FIN URGP=0
+>> [  934.031555] [IPTABLES:INPUT] dropped IN=eno33557248 OUT=
+>> MAC=00:50:56:0f:9a:47:00:50:56:26:f3:39:08:00 SRC=192.168.5.7
+>> DST=192.168.3.2 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=58232 DF P
+>> ROTO=TCP SPT=6812 DPT=59564 WINDOW=8433 RES=0x00 ACK FIN URGP=0
+>> [  934.031579] [IPTABLES:INPUT] dropped IN=eno33557248 OUT=
+>> MAC=00:50:56:0f:9a:47:00:50:56:26:f3:39:08:00 SRC=192.168.5.7
+>> DST=192.168.3.2 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=20084 DF P
+>> ROTO=TCP SPT=6816 DPT=55574 WINDOW=2925 RES=0x00 ACK FIN URGP=0
+>> [  934.105440] [IPTABLES:INPUT] dropped IN=eno33557248 OUT=
+>> MAC=00:50:56:0f:9a:47:00:50:56:37:f8:4c:08:00 SRC=192.168.5.4
+>> DST=192.168.3.2 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=48428 DF P
+>> ROTO=TCP SPT=6804 DPT=59156 WINDOW=6422 RES=0x00 ACK FIN URGP=0
+>> [  935.133060] [IPTABLES:INPUT] dropped IN=eno33557248 OUT=
+>> MAC=00:50:56:0f:9a:47:00:50:56:0d:13:27:08:00 SRC=192.168.5.3
+>> DST=192.168.3.2 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=35384 DF P
+>> ROTO=TCP SPT=6817 DPT=52674 WINDOW=24576 RES=0x00 ACK FIN URGP=0
+>>
+>> Many thanks
+>>
+>> James
+>>
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 >>
 >
-> Is this really a problem? In your example, the rack weights are
-> tweaked to correct the "rate" at which CRUSH is assigning PGs to each
-> rack. If you fail half of rack 3, then your effective weights will
-> continue to ensure that the moved PGs get equally assigned to racks 1
-> and 2.
-
-This intuition is *probably* wrong. In general, we expect data to be
-redistributed according to the CRUSH weights in use. In specific
-instances that turns out not to be the case — and because it's
-pseudo-random there's a statistical variance from perfect balance
-anyway — but there is no reason to expect that the "ideal" weights
-under CRUSH map {X} will lead to anything like an ideal balance under
-map {Y}.
-
-So the problem isn't just that if you have set effective rack weights
-of .8, 1.1, and 1 and then reduce the third rack to .5, you might fill
-up a particular OSD. It's that the statistical guarantees CRUSH
-provides about how much data moves to where are broken (due to us
-changing the weights) — we expect rack 2 to get (1.1/.8=)37.5% more
-data than rack 1, despite them really being the same size.
-
-As I said to Loïc, there may be space to play around with this in a
-practical sense. But we would want to somehow avoid moving data from
-1->2 while re-replicating data into the correct locations, and without
-putting data into the wrong place to start. I don't know if there's a
-way to resolve that.
-
-
-Do those issues make sense?
--Greg
-
-> On the other hand, one problem I see with your new approach is that it
-> does not address the secondary multi-pick problem, which is that the
-> ratio of 1st, 2nd, 3rd, etc... replicas/stripes is not equal for the
-> lower weighted OSDs.
->
-> -- Dan
 >
 >
->> In other words, getting an even distribution must not be done at the expense of the ability of the cluster to sustain the failure of at least one bucket in the failure domain. It is necessary to evaluate that before and after the optimization.
->>
->> On 04/30/2017 04:15 PM, Loic Dachary wrote:
->>> Hi,
->>>
->>> Ideally CRUSH distributes PGs evenly on OSDs so that they all fill in
->>> the same proportion. If an OSD is 75% full, it is expected that all
->>> other OSDs are also 75% full.
->>>
->>> In reality the distribution is even only when more than 100,000 PGs
->>> are distributed in a pool of size 1 (i.e. no replication).
->>>
->>> In small clusters there are a few thousands PGs and it is not enough
->>> to get an even distribution. Running the following with
->>> python-crush[1], shows a 15% difference when distributing 1,000 PGs on
->>> 6 devices. Only with 1,000,000 PGs does the difference drop under 1%.
->>>
->>>   for PGs in 1000 10000 100000 1000000 ; do
->>>     crush analyze --replication-count 1 \
->>>                   --type device \
->>>                   --values-count $PGs \
->>>                   --rule data \
->>>                   --crushmap tests/sample-crushmap.json
->>>   done
->>>
->>> In larger clusters, even though a greater number of PGs are
->>> distributed, there are at most a few dozens devices per host and the
->>> problem remains. On a machine with 24 OSDs each expected to handle a
->>> few hundred PGs, a total of a few thousands PGs are distributed which
->>> is not enough to get an even distribution.
->>>
->>> There is a secondary reason for the distribution to be uneven, when
->>> there is more than one replica. The second replica must be on a
->>> different device than the first replica. This conditional probability
->>> is not taken into account by CRUSH and would create an uneven
->>> distribution if more than 10,000 PGs were distributed per OSD[2]. But
->>> a given OSD can only handle a few hundred PGs and this conditional
->>> probability bias is dominated by the uneven distribution caused by the
->>> low number of PGs.
->>>
->>> The uneven CRUSH distributions are always caused by a low number of
->>> samples, even in large clusters. Since this noise (i.e. the difference
->>> between the desired distribution and the actual distribution) is
->>> random, it cannot be fixed by optimizations methods.  The
->>> Nedler-Mead[3] simplex converges to a local minimum that is far from
->>> the optimal minimum in many cases. Broyden–Fletcher–Goldfarb–Shanno[4]
->>> fails to find a gradient that would allow it to converge faster. And
->>> even if it did, the local minimum found would be as often wrong as
->>> with Nedler-Mead, only it would go faster. A least mean squares
->>> filter[5] is equally unable to suppress the noise created by the
->>> uneven distribution because no coefficients can model a random noise.
->>>
->>> With that in mind, I implemented a simple optimization algorithm[6]
->>> which was first suggested by Thierry Delamare a few weeks ago. It goes
->>> like this:
->>>
->>>     - Distribute the desired number of PGs[7]
->>>     - Subtract 1% of the weight of the OSD that is the most over used
->>>     - Add the subtracted weight to the OSD that is the most under used
->>>     - Repeat until the Kullback–Leibler divergence[8] is small enough
->>>
->>> Quoting Adam Kupczyk, this works because:
->>>
->>>   "...CRUSH is not random proces at all, it behaves in numerically
->>>    stable way.  Specifically, if we increase weight on one node, we
->>>    will get more PGs on this node and less on every other node:
->>>    CRUSH([10.1, 10, 10, 5, 5]) -> [146(+3), 152, 156(-2), 70(-1), 76]"
->>>
->>> A nice side effect of this optimization algorithm is that it does not
->>> change the weight of the bucket containing the items being
->>> optimized. It is local to a bucket with no influence on the other
->>> parts of the crushmap (modulo the conditional probability bias).
->>>
->>> In all tests the situation improves at least by an order of
->>> magnitude. For instance when there is a 30% difference between two
->>> OSDs, it is down to less than 3% after optimization.
->>>
->>> The tests for the optimization method can be run with
->>>
->>>    git clone -b wip-fix-2 http://libcrush.org/dachary/python-crush.git
->>>    tox -e py27 -- -s -vv -k test_fix tests/test_analyze.py
->>>
->>> If anyone think of a reason why this algorithm won't work in some
->>> cases, please speak up :-)
->>>
->>> Cheers
->>>
->>> [1] python-crush http://crush.readthedocs.io/
->>> [2] crush multipick anomaly http://marc.info/?l=ceph-devel&m=148539995928656&w=2
->>> [3] Nedler-Mead https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method
->>> [4] L-BFGS-B https://docs.scipy.org/doc/scipy-0.18.1/reference/optimize.minimize-lbfgsb.html#optimize-minimize-lbfgsb
->>> [5] Least mean squares filter https://en.wikipedia.org/wiki/Least_mean_squares_filter
->>> [6] http://libcrush.org/dachary/python-crush/blob/c6af9bbcbef7123af84ee4d75d63dd1b967213a2/tests/test_analyze.py#L39
->>> [7] Predicting Ceph PG placement http://dachary.org/?p=4020
->>> [8] Kullback–Leibler divergence https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
->>>
->>
->> --
->> Loïc Dachary, Artisan Logiciel Libre
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> Cheers,
+> Brad
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
