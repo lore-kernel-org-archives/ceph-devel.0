@@ -1,62 +1,67 @@
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: xlog_write: reservation ran out
-Date: Thu, 4 May 2017 10:37:56 +1000
-Message-ID: <20170504003755.GD17542@dastard>
-References: <CAF1ivSZeYhnzh6CPZViYUNFXdm33hhTA_CzP7V745QociEEnKg@mail.gmail.com>
- <CAF1ivSbjdixqDo663wvAEkzRk-ctOX+y5UYxq4UdPA-=JVufyw@mail.gmail.com>
- <CAF1ivSbEfhTYxcBx1dafK9TD3VdeXbJrNMzWJmXY8kyU0ibkUw@mail.gmail.com>
- <8accf9d5-b2e4-c82e-fa47-3c5bc2ea35b1@kernel.org>
- <20170501131222.GA2109@bfoster.bfoster>
- <70def595-91a9-970a-d227-547055da5bb5@kernel.org>
- <20170502235152.GN12369@dastard>
- <20170503141030.GA11549@bfoster.bfoster>
- <20170503155335.GF5973@birch.djwong.org>
- <20170503161508.GA12343@bfoster.bfoster>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: [ceph-users] Intel power tuning - 30% throughput performance increase
+Date: Thu, 4 May 2017 08:58:10 +0800
+Message-ID: <CACJqLyYLAo5n=Mq=nS85dVjr1aNZ0LuaQN7Rm4Du9T1L2qKkEA@mail.gmail.com>
+References: <CA+z5Dsx1Fwkxxk=5N3u_Ox6m+VC_vW2oexWsF29ispcm+Hf8bA@mail.gmail.com>
+ <CABZ+qqk-cN25u8vf-XWoTincF5M90_JjBGnedHvnfAcL8CUDwQ@mail.gmail.com>
+ <CA+z5DswHcgddrbYnwDH7o+58sASO5jZA5ZK+-NQ60Rw+bPRKkA@mail.gmail.com>
+ <CABZ+qq=+1SvbPhZOBCS0Be4Z=6LXsgck2AgK+o40BOU_BwDngQ@mail.gmail.com>
+ <CA+z5DsydfEGGzmKT+mf7BqpkwsD5CwL0hNMTW2OXFPeJjDWSGQ@mail.gmail.com>
+ <CABZ+qqmu2C4jdu50X2u38K9cb57c0=BdfKG0BhrjJfTQYOPcjg@mail.gmail.com>
+ <CA+z5DszC6EmYSPpZsj3O0Neb-qMhfmUDjjXWpfkgukrqTyZa6A@mail.gmail.com> <CAF-wwdF-w_nBF5HN3nwMtaSxK2KM+EsdBES=HhoCa71PH8Obbg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:3568 "EHLO
-        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751821AbdEDAiA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 3 May 2017 20:38:00 -0400
-Content-Disposition: inline
-In-Reply-To: <20170503161508.GA12343@bfoster.bfoster>
+Received: from mail-pu1apc01on0126.outbound.protection.outlook.com ([104.47.126.126]:35688
+        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752375AbdEDA6S (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 3 May 2017 20:58:18 -0400
+Received: by mail-io0-f175.google.com with SMTP id k91so1402584ioi.1
+        for <ceph-devel@vger.kernel.org>; Wed, 03 May 2017 17:58:15 -0700 (PDT)
+In-Reply-To: <CAF-wwdF-w_nBF5HN3nwMtaSxK2KM+EsdBES=HhoCa71PH8Obbg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brian Foster <bfoster@redhat.com>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, Ming Lin <mlin@kernel.org>, Christoph Hellwig <hch@lst.de>, linux-xfs@vger.kernel.org, Ceph Development <ceph-devel@vger.kernel.org>, "LIU, Fei" <james.liu@alibaba-inc.com>, xiongwei.jiang@alibaba-inc.com, boqian.zy@alibaba-inc.com, sheng.qiu@alibaba-inc.com, Sage Weil <sweil@redhat.com>
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-On Wed, May 03, 2017 at 12:15:10PM -0400, Brian Foster wrote:
-> On Wed, May 03, 2017 at 08:53:35AM -0700, Darrick J. Wong wrote:
-> > On Wed, May 03, 2017 at 10:10:32AM -0400, Brian Foster wrote:
-> > > the caller. Hmm, thinking more about it, I suppose we could just add
-> > > another similar helper since we'd presumably want to process the list of
-> > > items again if the reservation is overrun. Thoughts?
-> > 
-> > Process them again how?  I think I'm missing something here; are you
-> > saying that we could (try to) get more reservation if allocating the
-> > shadow buffer shows that we've run over?
-> > 
-> 
-> No, poor choice of words.. s/process/iterate/.
-> 
-> I just mean that we may want another helper since we'd have to iterate
-> the list of tp items potentially twice: first to calculate the total
-> size, again to dump whatever info we want if the total overruns the
-> reservation.
+refer to https://github.com/ceph/ceph/pull/5013
 
-xlog_cil_insert_format_items() already calculates the total size
-when doing the formatting of the log items into log vectors (i.e.
-the returned len value) - we use it later in xlog_cil_insert_items()
-to do the ticket reservation accounting.
-
-So there's no additional overhead for detecting an overrun earlier
-than we already do, and we don't care about the overhead of dumping
-the transaction info if an overrun is detected...
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+On Thu, May 4, 2017 at 7:56 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
+> +ceph-devel to get input on whether we want/need to check the value of
+> /dev/cpu_dma_latency (platform dependant) at startup and issue a
+> warning, or whether documenting this would suffice?
+>
+> Any doc contribution would be welcomed.
+>
+> On Wed, May 3, 2017 at 7:18 PM, Blair Bethwaite
+> <blair.bethwaite@gmail.com> wrote:
+>> On 3 May 2017 at 19:07, Dan van der Ster <dan@vanderster.com> wrote:
+>>> Whether cpu_dma_latency should be 0 or 1, I'm not sure yet. I assume
+>>> your 30% boost was when going from throughput-performance to
+>>> dma_latency=0, right? I'm trying to understand what is the incremental
+>>> improvement from 1 to 0.
+>>
+>> Probably minimal given that represents a state transition latency
+>> taking only 1us. Presumably the main issue is when the CPU can drop
+>> into the lower states and the compounding impact of that over time. I
+>> will do some simple characterisation of that over the next couple of
+>> weeks and report back...
+>>
+>> --
+>> Cheers,
+>> ~Blairo
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+>
+> --
+> Cheers,
+> Brad
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
