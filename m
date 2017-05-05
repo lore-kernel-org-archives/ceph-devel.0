@@ -1,10 +1,10 @@
 From: Roger Brown <rogerpbrown-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: RGW: removal of support for fastcgi
-Date: Fri, 05 May 2017 19:57:25 +0000
-Message-ID: <CAFS+ELg2DhJAr7Q5Qfj+_breXnJr6s-SVkrRXgD-FN0LNqueVg@mail.gmail.com>
+Date: Fri, 05 May 2017 20:06:04 +0000
+Message-ID: <CAFS+ELhCJ1usUSjPTwRPOzFtnR6HAcu4ic4EL=19aJVVY-OYsA@mail.gmail.com>
 References: <CADRKj5SSio-vpfSBgJbEWTZC2HDqnWQsYd6K0auy-=F7PpBVeA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0111701448=="
+Content-Type: multipart/mixed; boundary="===============0036471090=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <CADRKj5SSio-vpfSBgJbEWTZC2HDqnWQsYd6K0auy-=F7PpBVeA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
@@ -19,15 +19,20 @@ Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 To: Yehuda Sadeh-Weinraub <yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============0111701448==
-Content-Type: multipart/alternative; boundary=001a1148e9060879db054ecc4d68
+--===============0036471090==
+Content-Type: multipart/alternative; boundary=001a11491f24e97e42054ecc6bac
 
---001a1148e9060879db054ecc4d68
+--001a11491f24e97e42054ecc6bac
 Content-Type: text/plain; charset=UTF-8
 
 I'm using fastcgi/apache2 instead of civetweb (centos7) because i couldn't
 get civetweb to work with SSL on port 443 and in a subdomain of my main
 website.
+So I have domain.com, www.domain.com, s3.domain.com (RGW), and *.
+s3.domain.com for the RGW buckets. As long as you can do the same with
+civitweb for RGW, then maybe I don't care.
+
+Roger
 
 
 On Fri, May 5, 2017 at 1:51 PM Yehuda Sadeh-Weinraub <yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
@@ -68,18 +73,23 @@ wrote:
 > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 >
 
---001a1148e9060879db054ecc4d68
+--001a11491f24e97e42054ecc6bac
 Content-Type: text/html; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-<div dir=3D"ltr">I&#39;m using fastcgi/apache2 instead of civetweb (centos7=
-) because i couldn&#39;t get civetweb to work with SSL on port 443 and in a=
- subdomain of my main website.<div><br></div></div><br><div class=3D"gmail_=
-quote"><div dir=3D"ltr">On Fri, May 5, 2017 at 1:51 PM Yehuda Sadeh-Weinrau=
-b &lt;<a href=3D"mailto:yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:=
-<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;bord=
-er-left:1px #ccc solid;padding-left:1ex">RGW has supported since forever. O=
-riginally it was the only supported<br>
+<div dir=3D"ltr"><div>I&#39;m using fastcgi/apache2 instead of civetweb (ce=
+ntos7) because i couldn&#39;t get civetweb to work with SSL on port 443 and=
+ in a subdomain of my main website.</div><div>So I have <a href=3D"http://d=
+omain.com">domain.com</a>, <a href=3D"http://www.domain.com">www.domain.com=
+</a>, <a href=3D"http://s3.domain.com">s3.domain.com</a> (RGW), and *.<a hr=
+ef=3D"http://s3.domain.com">s3.domain.com</a> for the RGW buckets. As long =
+as you can do the same with civitweb for RGW, then maybe I don&#39;t care.=
+=C2=A0</div><div><br></div><div>Roger</div><div><br></div><br><div class=3D=
+"gmail_quote"><div dir=3D"ltr">On Fri, May 5, 2017 at 1:51 PM Yehuda Sadeh-=
+Weinraub &lt;<a href=3D"mailto:yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org">yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;=
+ wrote:<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8=
+ex;border-left:1px #ccc solid;padding-left:1ex">RGW has supported since for=
+ever. Originally it was the only supported<br>
 frontend, and nowadays it is the least preferred one.<br>
 <br>
 Rgw was first developed over fastcgi + lighttpd, but there were some<br>
@@ -122,11 +132,11 @@ ists.ceph.com</a><br>
 <a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
 oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-=
 ceph.com</a><br>
-</blockquote></div>
+</blockquote></div></div>
 
---001a1148e9060879db054ecc4d68--
+--001a11491f24e97e42054ecc6bac--
 
---===============0111701448==
+--===============0036471090==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -137,4 +147,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============0111701448==--
+--===============0036471090==--
