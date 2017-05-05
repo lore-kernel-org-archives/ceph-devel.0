@@ -1,68 +1,46 @@
-From: Huang Zhiteng <winston.d@gmail.com>
-Subject: Re: Alibaba's work on recovery process
-Date: Sat, 6 May 2017 02:30:03 +0800
-Message-ID: <CAE7zfpM33_7iBnoxOTq16TFh5MXmEE=xWJoTunV5=CSh24Kb+Q@mail.gmail.com>
-References: <a67e2852-8c58-aca2-cf08-f8315d00e470@corp.ovh.com> <017717D3-EE64-4BCB-A284-D066C32C8181@alibaba-inc.com>
+From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Subject: RGW: removal of support for fastcgi
+Date: Fri, 5 May 2017 12:51:06 -0700
+Message-ID: <CADRKj5SSio-vpfSBgJbEWTZC2HDqnWQsYd6K0auy-=F7PpBVeA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:33259 "EHLO
-        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751069AbdEESaE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 5 May 2017 14:30:04 -0400
-Received: by mail-io0-f171.google.com with SMTP id p24so18796091ioi.0
-        for <ceph-devel@vger.kernel.org>; Fri, 05 May 2017 11:30:04 -0700 (PDT)
-In-Reply-To: <017717D3-EE64-4BCB-A284-D066C32C8181@alibaba-inc.com>
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:33326 "EHLO
+        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751104AbdEETvH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 5 May 2017 15:51:07 -0400
+Received: by mail-qk0-f174.google.com with SMTP id n4so14235172qkc.0
+        for <ceph-devel@vger.kernel.org>; Fri, 05 May 2017 12:51:07 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "LIU, Fei" <james.liu@alibaba-inc.com>
-Cc: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek@corp.ovh.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi James,
+RGW has supported since forever. Originally it was the only supported
+frontend, and nowadays it is the least preferred one.
 
-Could you share the slidedeck to the list instead of individuals?  Thanks.
+Rgw was first developed over fastcgi + lighttpd, but there were some
+issues with this setup, so we switched to fastcgi + apache as our main
+supported configuration. This was also sub-optimal, as there wasn't a
+good, supported, and mainained fastcgi module for apache that we could
+find. At the time there were two modules: mod_fcgid, and mod_fastcgi.
+The former had a major flaw, which it buffered all PUTs before sending
+them to the backend (rgw). It also didn't really support 100-continue.
+The latter was mostly unmaintained, and didn't quite support
+100-continue either. We ended up maintaining a fork of mod_fastcgi for
+quite a while, which was a pain. Later came mod-proxy-fcgi, which also
+didn't fully support 100-continue (iirc), but it was maintained, and
+was good enough to use out of the box, so we settled on it. At that
+time we already had civetweb as a frontend, so we didn't really worry
+about it.
+Now, I'd like to know whether anyone actually uses and needs fastcgi.
+I get an occasional request to remove it altogether, and I'd like to
+have some more info before we go and do it. The requests for removal
+usually cite security reasons, but I can also add 'we don't really
+want to maintain it anymore'.
+A valid replacement for fastcgi could be using civetweb directly, or
+using mod-proxy (in apache, I'd expect similar solution in other
+webservers) with civetweb as the rgw frontend.
 
-On Sat, May 6, 2017 at 2:25 AM, LIU, Fei <james.liu@alibaba-inc.com> wrote:
-> Hi Piotr,
->
->    Will send to you soon.
->
->    Regards,
->    James
->
-> On 5/5/17, 5:48 AM, "Piotr Da=C5=82ek" <ceph-devel-owner@vger.kernel.org =
-on behalf of piotr.dalek@corp.ovh.com> wrote:
->
->     Hello,
->
->     On yesterday's perf meeting, guys from Alibaba presented their progre=
-ss on
->     improving recovery process. Has anybody received the slides form thei=
-r talk
->     - and can share them?
->
->     Thanks in advance,
->
->     --
->     Piotr Dalek
->     piotr.dalek@corp.ovh.com
->     https://www.ovh.com/us/
->     --
->     To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
->     the body of a message to majordomo@vger.kernel.org
->     More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+TL;DR: Does anyone care if we remove support for fastcgi in rgw?
 
-
-
---=20
-Regards
-Huang Zhiteng
+Yehuda
