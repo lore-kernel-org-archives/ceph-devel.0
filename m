@@ -1,38 +1,51 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH] ceph: Check that the new inode size is within limits in ceph_fallocate()
-Date: Fri,  5 May 2017 18:28:44 +0100
-Message-ID: <20170505172844.18374-1-lhenriques@suse.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
+Subject: Re: Alibaba's work on recovery process
+Date: Sat, 06 May 2017 02:25:40 +0800
+Message-ID: <017717D3-EE64-4BCB-A284-D066C32C8181@alibaba-inc.com>
+References: <a67e2852-8c58-aca2-cf08-f8315d00e470@corp.ovh.com>
+Mime-Version: 1.0
+Content-Type: text/plain;
+        charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from out0-217.mail.aliyun.com ([140.205.0.217]:42840 "EHLO
+        out0-217.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751000AbdEES0C (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 5 May 2017 14:26:02 -0400
+In-Reply-To: <a67e2852-8c58-aca2-cf08-f8315d00e470@corp.ovh.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Piotr =?UTF-8?B?RGHFgmVr?= <piotr.dalek@corp.ovh.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Currently the ceph client doesn't respect the rlimit in fallocate.  This
-means that a user can allocate a file with size > RLIMIT_FSIZE.  This
-patch adds the call to inode_newsize_ok() to verify filesystem limits and
-ulimits.  This should make ceph successfully run xfstest generic/228.
+Hi Piotr,
 
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
----
- fs/ceph/file.c | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+   Will send to you soon.
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 26cc95421cca..bc5809d4d2d4 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -1636,8 +1636,12 @@ static long ceph_fallocate(struct file *file, int mode,
- 	}
- 
- 	size = i_size_read(inode);
--	if (!(mode & FALLOC_FL_KEEP_SIZE))
-+	if (!(mode & FALLOC_FL_KEEP_SIZE)) {
- 		endoff = offset + length;
-+		ret = inode_newsize_ok(inode, endoff);
-+		if (ret)
-+			goto unlock;
-+	}
- 
- 	if (fi->fmode & CEPH_FILE_MODE_LAZY)
- 		want = CEPH_CAP_FILE_BUFFER | CEPH_CAP_FILE_LAZYIO;
+   Regards,
+   James
+
+On 5/5/17, 5:48 AM, "Piotr Da=C5=82ek" <ceph-devel-owner@vger.kernel.org on beh=
+alf of piotr.dalek@corp.ovh.com> wrote:
+
+    Hello,
+   =20
+    On yesterday's perf meeting, guys from Alibaba presented their progress=
+ on=20
+    improving recovery process. Has anybody received the slides form their =
+talk=20
+    - and can share them?
+   =20
+    Thanks in advance,
+   =20
+    --=20
+    Piotr Dalek
+    piotr.dalek@corp.ovh.com
+    https://www.ovh.com/us/
+    --
+    To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
+n
+    the body of a message to majordomo@vger.kernel.org
+    More majordomo info at  http://vger.kernel.org/majordomo-info.html
+   =20
+
+
