@@ -1,22 +1,64 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Static Analysis
-Date: Sat, 6 May 2017 08:20:15 +1000
-Message-ID: <CAF-wwdFTrOW6Z9_-PnJpZsDYQyjDbsWYjQUW+SW3d1J9542Vpg@mail.gmail.com>
+From: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
+Subject: Re: RGW: removal of support for fastcgi
+Date: Sat, 6 May 2017 09:24:39 +0200 (CEST)
+Message-ID: <1362244267.3654.1494055480591@ox.pcextreme.nl>
+References: <CADRKj5SSio-vpfSBgJbEWTZC2HDqnWQsYd6K0auy-=F7PpBVeA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f46.google.com ([209.85.214.46]:35828 "EHLO
-        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750941AbdEEWUR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 5 May 2017 18:20:17 -0400
-Received: by mail-it0-f46.google.com with SMTP id c15so38547604ith.0
-        for <ceph-devel@vger.kernel.org>; Fri, 05 May 2017 15:20:16 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CADRKj5SSio-vpfSBgJbEWTZC2HDqnWQsYd6K0auy-=F7PpBVeA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, Yehuda Sadeh-Weinraub <yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Latest static analyser results are up on  http://people.redhat.com/bhubbard/
 
--- 
-Cheers,
-Brad
+> Op 5 mei 2017 om 21:51 schreef Yehuda Sadeh-Weinraub <yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+> 
+> 
+> RGW has supported since forever. Originally it was the only supported
+> frontend, and nowadays it is the least preferred one.
+> 
+> Rgw was first developed over fastcgi + lighttpd, but there were some
+> issues with this setup, so we switched to fastcgi + apache as our main
+> supported configuration. This was also sub-optimal, as there wasn't a
+> good, supported, and mainained fastcgi module for apache that we could
+> find. At the time there were two modules: mod_fcgid, and mod_fastcgi.
+> The former had a major flaw, which it buffered all PUTs before sending
+> them to the backend (rgw). It also didn't really support 100-continue.
+> The latter was mostly unmaintained, and didn't quite support
+> 100-continue either. We ended up maintaining a fork of mod_fastcgi for
+> quite a while, which was a pain. Later came mod-proxy-fcgi, which also
+> didn't fully support 100-continue (iirc), but it was maintained, and
+> was good enough to use out of the box, so we settled on it. At that
+> time we already had civetweb as a frontend, so we didn't really worry
+> about it.
+> Now, I'd like to know whether anyone actually uses and needs fastcgi.
+> I get an occasional request to remove it altogether, and I'd like to
+> have some more info before we go and do it. The requests for removal
+> usually cite security reasons, but I can also add 'we don't really
+> want to maintain it anymore'.
+> A valid replacement for fastcgi could be using civetweb directly, or
+> using mod-proxy (in apache, I'd expect similar solution in other
+> webservers) with civetweb as the rgw frontend.
+> 
+> TL;DR: Does anyone care if we remove support for fastcgi in rgw?
+
+Nope! I always run Civetweb in all situations. Usually I put Nginx or Apache in front to to the SSL termination. I am aware Civetweb can do it, but I prefer having Apache or Nginx handling the HTTP traffic towards the clients.
+
+Wido
+
+> 
+> Yehuda
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
