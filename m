@@ -1,117 +1,153 @@
-From: Hequan <hequanzh@gmail.com>
-Subject: Re: GSOC about ceph-mgr:POOL PG_NUM AUTO-TUNING
-Date: Mon, 8 May 2017 14:12:15 +0800
-Message-ID: <CALKDg+1ySTOh4ONQWO1T8p8q=xf+0a-0FgL1=mQpDZo6HBps6Q@mail.gmail.com>
-References: <CALKDg+3dUcUqamE8D9XPUu2pzOCBuWCuF9yCyBvPa4emxS0q7Q@mail.gmail.com>
- <CAAXqJ+oj_LD=gEWed3p_9sqHSZnR59BA9SQe-UGwanTJEBz84Q@mail.gmail.com> <CAJE9aOPLM5X22j1RmqiY6WZmi4Pj3yDKtP6wd5Pjv8z_3nC45A@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Proposal for a CRUSH collision fallback
+Date: Mon, 8 May 2017 08:51:18 +0200
+Message-ID: <0de1abd0-63f7-9155-7d8d-9d9c86f92d7a@dachary.org>
+References: <af0b13a9-cb6c-fccf-c80a-52a15ed8a328@dachary.org>
+ <alpine.DEB.2.11.1705080304000.3646@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:37178 "EHLO
-        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751872AbdEHGM5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 8 May 2017 02:12:57 -0400
-Received: by mail-wm0-f49.google.com with SMTP id m123so52743295wma.0
-        for <ceph-devel@vger.kernel.org>; Sun, 07 May 2017 23:12:56 -0700 (PDT)
-In-Reply-To: <CAJE9aOPLM5X22j1RmqiY6WZmi4Pj3yDKtP6wd5Pjv8z_3nC45A@mail.gmail.com>
+Received: from relay9-d.mail.gandi.net ([217.70.183.199]:50567 "EHLO
+        relay9-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752321AbdEHGvW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 8 May 2017 02:51:22 -0400
+In-Reply-To: <alpine.DEB.2.11.1705080304000.3646@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: Spandan Kumar Sahu <spandankumarsahu@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, "kchai@redhat.com" <kchai@redhat.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-2017-05-08 14:04 GMT+08:00 kefu chai <tchaikov@gmail.com>:
-> On Mon, May 8, 2017 at 12:55 PM, Spandan Kumar Sahu
-> <spandankumarsahu@gmail.com> wrote:
->> Hey Hequan
+
+
+On 05/08/2017 05:09 AM, Sage Weil wrote:
+> On Sun, 7 May 2017, Loic Dachary wrote:
+>> Hi Sage,
 >>
->> I am Spandan Kumar Sahu, a second year undergraduate student selected
->> for "Smarter Reweight by Utilisation" project.
+>> When choosing the second replica, crush_bucket_choose picks an item and 
+>> crush_choose_{indep,firstn} checks if it has already been chosen for the 
+>> first replica. If so, it is discarded as a collision[1], r is modified 
+>> and another attempt is made to get a different item. If no value is 
+>> found after choose_tries attempt, the mapping is incomplete.
 >>
->> The mailing list only accepts plain text emails, so your proposal sent
->> as an attachment, isn't there in the mail I received. It would be
->> great, if you can upload it on Github and share the link. I am running
->> into some errors when I use vstart, so I would like to see how you go
->> about it.
+>> Another way to do the same would be that crush_bucket_choose / 
+>> bucket_straw2_choose[2] ignores the items that have already been chosen. 
+>> It could be done by looping over the list but that would mean N (number 
+>> of replicas) lookups for each item.
 >>
->> As an initial observation, the various API calls, that could be made,
->> are present in PyModules.cc under the definition of
->> get_python(const std::string &what) function.
+>> The current implementation is optimized for the cases where collisions 
+>> are rare. However, when the weights of the items are two order of 
+>> magnitude appart or more, choose_tries has to be set to a very large 
+>> value (more than 1000) for the mapping to succeed. In practice that is 
+>> not a problem as it is unlikely that a host is 100 times bigger than 
+>> another host ;-)
 >>
->> Hope this helps.
+>> When fixing an uneven distribution[3], CRUSH weights are sometime set to 
+>> values with that kind of difference (1 against 100) to compensate for 
+>> the probability bias and/or a small number of samples. For instance when 
+>> there are 5 hosts with weights 5 1 1 1 1, modifying the weight set 
+>> fails. It goes as far as 8.9, 0.01, 0.01, 0.01, 0.01 with choose_tries 
+>> 2000. The value of choose_tries has to be increased a lot for a gain 
+>> that is smaller and smaller and the CPU usage goes up. In this 
+>> situation, an alternative implementation of the CRUSH collision seems a 
+>> good idea.
 >>
->> On Mon, May 8, 2017 at 9:19 AM, Hequan <hequanzh@gmail.com> wrote:
->>> Hi, everyone
->>>
->>> Nice to join you! My name is Hequan Zhang. I am a postgraduate student
->>> in Wuhan National Laboratory for Optoelectronics of Huazhong
->>> University of Science and Technology, majoring in Computer Science.
->
->
-> Welcome to join us, Hequan! Ceph is an active community.
->
->>>
->>> It is my great pleasure that my proposal (see the attachment) had been accepted.
->
-> like Spandan mentioned, you can either format it in plain-text or
-> reference it using a hyper link.
->
->>>
->>> Now I have completed the following setps about my project:
->>>
->>>     setup up a ceph cluster with ceph-mgr for testing with vstart.sh.
->>>
->>> [root@ceph2 build]# ./bin/ceph -s
->>> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
->>> 2017-05-08 11:32:06.634767 7f5e14ea5700 -1 WARNING: all dangerous and
->>> experimental features are enabled.
->>> 2017-05-08 11:32:06.668537 7f5e14ea5700 -1 WARNING: all dangerous and
->>> experimental features are enabled.
->>>     cluster e471b2c9-181f-4bc7-9d07-e36e187dd5ca
->>>      health HEALTH_OK
->>>      monmap e2: 1 mons at {a=192.168.10.2:40914/0}
->>>             election epoch 4, quorum 0 a
->>>         mgr active: x
->>>      osdmap e24: 4 osds: 4 up, 4 in
->>>       pgmap v499: 72 pgs, 2 pools, 0 bytes data, 0 objects
->>>             4368 MB used, 36847 MB / 41215 MB avail
->>>                   72 active+clean
->>>
->>>       Understand how Ceph uses PG for data placement and migration.
->>>
->>>       Understand the tradeoffs.
->>>
->>> For the last two steps, please refer to my proposal.
->>>
->>> Now I have some questions regarding ceph-mgr, and hope to have your suggestions.
->>>
->>> First, except for http://docs.ceph.com/docs/master/mgr/, is there any
->>> other docs about how ceph-mgr works?
->
-> could you be more specific on the problem you are running into?
->
->>>
->>> Second, I would like to know the working mechanisms of python module.
->>> Would you please recommend some related materials?
->
-> which python module are you referencing? or you mean how ceph-mgr
-> interacts with its plugins in general?
+>> Instead of failing after choose_tries attempts, crush_bucket_choose 
+>> could be called with the list of already chosen items and loop over them 
+>> to ensure none of them are candidate. The result will always be correct 
+>> but the implementation more expensive. The default choose_tries could 
+>> even be set to a lower value (19 instead of 50 ?) since it is likely 
+>> more expensive to handle 30 more collisions rather than looping over 
+>> each item already selected.
+>>
+>> What do you think ?
+> 
+> I think this direction is promising!  The problem is that I think it's not 
+> quite as simple as you suggest, since you may be choosing over multiple 
+> levels of a hierarchy.  If the weight tree is something like
+> 
+>       4
+>     /   \
+>    2     2
+>   / \   / \
+>  1   1 1   1
+>  a   b c   d
+> 
+> and you chose a, then yes, if you get back into the left branch you can 
+> filter it out of the straw2 selections.  And num_rep is usually small so 
+> that won't be expensive.  But you also need the first choice at the top 
+> level of the hierarchy to weight the left *tree* with 1 instead of 2.
 
-yes, i would like to know how to begin my code.
+I don't understand why this is necessary ? Here are the scenarios I have in mind:
 
 
->
->>>
->>> At last, is there a dashboard working for ceph-mgr now, if so, what is it?
->
-> see https://github.com/ceph/ceph/pull/14946.
+        /         \
+       /           \
+  r1  4        r2   4         rack (failure domain)
+    /   \         /   \
+   2     2       2     2      host
+  / \   / \     / \   / \
+ 1   1 1   1   1   1 1   1    device
+ a   b c   d   e   f g   h
 
-Nice.
+Say value 10 ends up in a the first time, it first went through rack
+r1 which is the failure domain. If value 10 also ends up in r1 the
+second time, straw2 will skip/collide it at that level because r1 is
+stored in out while a is stored in out2.
 
->
->>>
->>> Any comments and feedback would be appreciated.
->
->
-> --
-> Regards
-> Kefu Chai
+There only case I can think of that requires collision to be resolved
+in a higher hierarchical level is when there is no alternative.
+
+
+
+        /         \
+       /           \
+  r1  4        r2   4         rack
+    /             /   \
+h1 2             2     2      host     (failure domain)
+  /             / \   / \
+ 1             1   1 1   1    device
+ a             e   f g   h
+
+If 10 ends up in h1 the first time and the second time, it will
+collide because there is no alternative. It will then retry_descent,
+ftotal increases which goes into r and it gets another chance at landing on a host
+that's not h1.
+
+I must be missing a use case :-)
+
+
+> 
+> I think this could be done by adjusting the hierarchical weights as you go 
+> (and I think one of Adam's early passes at the multipick problem did 
+> something similar), but it's a bit more complex.
+> 
+> It seems worth pursuing, though!
+> 
+> And dynamically doing this only after the first N 'normal' attempts fail 
+> seems like a good way to avoid slowing down the common path (no 
+> collisions).  I suspect the optimal N is probably closer to 5 than 19, 
+> though?
+> 
+> sage
+> 
+> 
+>>
+>> Cheers
+>>
+>> P.S. Note that even in this border case modifying the weights to 7.1, 
+>> 0.5, 0.5, 0.4, 0.4 significantly improves the distribution (twice better 
+>> instead of ten times better). Only it cannot do better because it hits a 
+>> limitation of the current CRUSH implementation. But it looks like it is 
+>> not too difficult to fix.
+>>
+>>
+>> [1] https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L541
+>> [2] https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L332
+>> [3] http://marc.info/?l=ceph-devel&m=149407691823750&w=2
+>> -- 
+>> Loïc Dachary, Artisan Logiciel Libre
+>>
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
