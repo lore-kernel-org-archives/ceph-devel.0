@@ -1,133 +1,103 @@
-From: Warren Wang - ISD <Warren.Wang@walmart.com>
-Subject: Re: EXT: Re: [Ceph-ansible] EXT: Re:  osd-directory scenario is used
- by us
-Date: Mon, 8 May 2017 03:57:54 +0000
-Message-ID: <C7677170-0BA7-4310-B25B-CC3006517D2D@walmart.com>
+From: Spandan Kumar Sahu <spandankumarsahu@gmail.com>
+Subject: Re: GSOC about ceph-mgr:POOL PG_NUM AUTO-TUNING
+Date: Mon, 8 May 2017 10:25:58 +0530
+Message-ID: <CAAXqJ+oj_LD=gEWed3p_9sqHSZnR59BA9SQe-UGwanTJEBz84Q@mail.gmail.com>
+References: <CALKDg+3dUcUqamE8D9XPUu2pzOCBuWCuF9yCyBvPa4emxS0q7Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ppes-mail-e6.wal-mart.com ([161.165.133.168]:59369 "EHLO
-        ppes-mail-e6.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750980AbdEHEie (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 8 May 2017 00:38:34 -0400
-Content-Language: en-US
-Content-ID: <79E0082622EC0841B75888D032ED7B84@NAMP100.PROD.OUTLOOK.COM>
+Received: from mail-oi0-f44.google.com ([209.85.218.44]:35327 "EHLO
+        mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750862AbdEHEz7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 8 May 2017 00:55:59 -0400
+Received: by mail-oi0-f44.google.com with SMTP id l18so38284382oig.2
+        for <ceph-devel@vger.kernel.org>; Sun, 07 May 2017 21:55:59 -0700 (PDT)
+In-Reply-To: <CALKDg+3dUcUqamE8D9XPUu2pzOCBuWCuF9yCyBvPa4emxS0q7Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Meno <gmeno@redhat.com>, Michael Gugino <Michael.Gugino@walmart.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users-bounces@lists.ceph.com>
-Cc: "ceph-ansible@lists.ceph.com" <ceph-ansible@lists.ceph.com>, Sebastien Han <shan@redhat.com>
+To: Hequan <hequanzh@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, kchai@redhat.com
 
-WW91IG1pZ2h0IGZpbmQgYWRkaXRpb25hbCByZXNwb25zZXMgaW4gY2VwaC11c2Vycy4gQWRkZWQu
-DQoNCkEgbGl0dGxlIGV4dHJhIGJhY2tncm91bmQgaGVyZS4gSWYgQ2VwaCBkaXJlY3RseSBzdXBw
-b3J0ZWQgTFZNIGRldmljZXMgYXMgT1NEcywgd2UgcHJvYmFibHkgd291bGRu4oCZdCBoYXZlIHRv
-IGRvIHdoYXQgd2XigJlyZSBkb2luZyBub3cuICBXZSBkb27igJl0IGtub3cgb2YgYSB3YXkgdG8g
-YmUgYWJsZSB0byB1c2UgTFZNIGNhY2hlIGRldmljZSBhcyBhbiBPU0Qgd2l0aG91dCB0aGlzIHR5
-cGUgb2YgY29uZmlnLiBUaGlzIGlzIHByaW1hcmlseSB0byBzdXBwb3J0IGJpZyBkYXRhIHdvcmts
-b2FkcyB0aGF0IHVzZSBvYmplY3Qgc3RvcmFnZSBhcyB0aGUgb25seSBiYWNraW5nIHN0b3JhZ2Uu
-IFNvIHRoZSB0eXBlIG9mIElPIHRoYXQgd2Ugc2VlIGlzIGhpZ2hseSBpcnJlZ3VsYXIsIGNvbXBh
-cmVkIHRvIG1vc3Qgb2JqZWN0IHN0b3JhZ2Ugd29ya2xvYWRzLiBTaGFtZWxlc3MgcGx1ZywgbXkg
-YmlnIGRhdGEgY29sbGVhZ3VlcyB3aWxsIGJlIHByZXNlbnRpbmcgb24gdGhpcyB0b3BpYyBuZXh0
-IHdlZWsgYXQgdGhlIE9wZW5TdGFjayBzdW1taXQuIA0KDQpodHRwczovL3d3dy5vcGVuc3RhY2su
-b3JnL3N1bW1pdC9ib3N0b24tMjAxNy9zdW1taXQtc2NoZWR1bGUvZXZlbnRzLzE4NDMyL2ludHJv
-ZHVjaW5nLXN3aWZ0YS1hLXBlcmZvcm1hbnQtaGFkb29wLWZpbGUtc3lzdGVtLWRyaXZlci1mb3It
-b3BlbnN0YWNrLXN3aWZ0DQoNClNlYmFzdGllbiwgZXZlbiB3aXRoIEJsdWVzdG9yZSwgd2XigJly
-ZSBleHBlY3RpbmcgdG8gdXNlIExWTSBjYWNoZWQgZGV2aWNlcyBmb3IgdGhlIGJ1bGsgb2Ygb2Jq
-ZWN0IHN0b3JhZ2UsIHdpdGggYSBkZWRpY2F0ZWQgTlZNZS9TU0QgcGFydGl0aW9uIGZvciBSb2Nr
-c0RCLiBJIGRvbuKAmXQga25vdyBpZiB0aGF0IG1hdHRlcnMgYXQgYWxsIHdpdGggcmVnYXJkcyB0
-byB0aGUgT1NEIGRpcmVjdG9yeSBkaXNjdXNzaW9uLiBXZSByZWFsbHkgaGF2ZW7igJl0IGRvbmUg
-YW55dGhpbmcgb3RoZXIgdGhhbiBhIGJhc2ljIEJsdWVzdG9yZSB0ZXN0IG9uIHN5c3RlbXMgd2hl
-cmUgd2UgaGFkIG5vdCBzZXR1cCBMVk0gY2FjaGUgZGV2aWNlcy4NCg0KV2FycmVuIFdhbmcNCldh
-bG1hcnQg4py7DQoNCk9uIDUvMy8xNywgNjoxNyBQTSwgIkNlcGgtYW5zaWJsZSBvbiBiZWhhbGYg
-b2YgR3JlZ29yeSBNZW5vIiA8Y2VwaC1hbnNpYmxlLWJvdW5jZXNAbGlzdHMuY2VwaC5jb20gb24g
-YmVoYWxmIG9mIGdtZW5vQHJlZGhhdC5jb20+IHdyb3RlOg0KDQogICAgSGF2ZW4ndCBzZWVuIGFu
-eSBjb21tZW50cyBpbiBhIHdlZWsuIEknbSBnb2luZyB0byBjcm9zcy1wb3N0IHRoaXMgdG8gY2Vw
-aC1kZXZlbA0KICAgIA0KICAgIERlYXIgY2VwaC1kZXZlbCBpbiBhbiBlZmZvcnQgdG8gc2ltcGxp
-ZnkgY2VwaC1hbnNpYmxlIEkgcmVtb3ZlZCB0aGUNCiAgICBjb2RlIHRoYXQgc2V0cyB1cCBkaXJl
-Y3RvcnkgYmFja2VkIE9TRHMuIFdlIGZvdW5kIG91ciB0aGF0IGl0IHdhcw0KICAgIGJlaW5nIHVz
-ZWQgaW4gdGhlIGZvbGxvd2luZyB3YXkuDQogICAgDQogICAgSSB3b3VsZCBsaWtlIHRvIGhlYXIg
-dGhvdWdodHMgYWJvdXQgdGhpcyBhcHByb2FjaCBwcm8gYW5kIGNvbi4NCiAgICANCiAgICBjaGVl
-cnMsDQogICAgRw0KICAgIA0KICAgIE9uIFR1ZSwgQXByIDI1LCAyMDE3IGF0IDI6MTIgUE0sIE1p
-Y2hhZWwgR3VnaW5vDQogICAgPE1pY2hhZWwuR3VnaW5vQHdhbG1hcnQuY29tPiB3cm90ZToNCiAg
-ICA+IEFsbCwNCiAgICA+DQogICAgPiAgIFRoYW5rIHlvdSBmb3IgdGhlIHJlc3BvbnNlcyBhbmQg
-Y29uc2lkZXJhdGlvbi4gIFdoYXQgd2UgYXJlIGRvaW5nIGlzDQogICAgPiBjcmVhdGluZyBsdm0g
-dm9sdW1lcywgbW91bnRpbmcgdGhlbSwgYW5kIHVzaW5nIHRoZSBtb3VudHMgYXMgZGlyZWN0b3Jp
-ZXMNCiAgICA+IGZvciBjZXBoLWFuc2libGUuICBPdXIgcHJpbWFyeSBjb25jZXJuIGlzIHRoZSB1
-c2Ugb2YgbHZtY2FjaGUuICBXZeKAmXJlDQogICAgPiB1c2luZyBmYXN0ZXIgZHJpdmVzIGZvciB0
-aGUgY2FjaGUgYW5kIHNsb3dlciBkcml2ZXMgZm9yIHRoZSBiYWNraW5nDQogICAgPiB2b2x1bWVz
-Lg0KICAgID4NCiAgICA+ICAgV2UgdHJ5IHRvIGtlZXAgYXMgZmV3IGxvY2FsIHBhdGNoZXMgYXMg
-cHJhY3RpY2FsLCBhbmQgb3VyIGluaXRpYWwNCiAgICA+IHJvbGxvdXQgb2YgbHZtY2FjaGUgKyBj
-ZXBoLWFuc2libGUgc3RlZXJlZCB1cyB0b3dhcmRzIG9zZF9kaXJlY3RvcnkNCiAgICA+IHNjZW5h
-cmlvLiAgQ3VycmVudGx5LCBjZXBoLWFuc2libGUgZG9lcyBub3QgYWxsb3cgdXNlIHRvIHVzZSBs
-dm0gaW4gdGhlDQogICAgPiB3YXkgdGhhdCB3ZSBkZXNpcmUsIGJ1dCB3ZSBhcmUgbG9va2luZyBp
-bnRvIHN1Ym1pdHRpbmcgYSBQUiB0byBnbyB0aGF0DQogICAgPiBkaXJlY3Rpb24gKGF0IHNvbWUg
-cG9pbnQpLg0KICAgID4NCiAgICA+ICAgQXMgZmFyIGFzIHVzaW5nIHRoZSBzdGFibGUgYnJhbmNo
-ZXMsIEnigJltIG5vdCBlbnRpcmVseSBzdXJlIHdoYXQgb3VyDQogICAgPiBzdHJhdGVneSBnb2lu
-ZyBmb3J3YXJkIHdpbGwgYmUuICBDdXJyZW50bHkgd2UgYXJlIG1haW50YWluaW5nIGNlcGgtYW5z
-aWJsZQ0KICAgID4gYnJhbmNoZXMgYmFzZWQgb24gY2VwaCByZWxlYXNlcywgbm90IGNlcGgtYW5z
-aWJsZSByZWxlYXNlcy4NCiAgICA+DQogICAgPg0KICAgID4gTWljaGFlbCBHdWdpbm8NCiAgICA+
-IENsb3VkIFBvd2VyZWQNCiAgICA+ICg1NDApIDg0Ni0wMzA0IE1vYmlsZQ0KICAgID4NCiAgICA+
-IFdhbG1hcnQg4py7DQogICAgPiBTYXZpbmcgcGVvcGxlIG1vbmV5IHNvIHRoZXkgY2FuIGxpdmUg
-YmV0dGVyLg0KICAgID4NCiAgICA+DQogICAgPg0KICAgID4NCiAgICA+DQogICAgPiBPbiA0LzI1
-LzE3LCA0OjUxIFBNLCAiU2ViYXN0aWVuIEhhbiIgPHNoYW5AcmVkaGF0LmNvbT4gd3JvdGU6DQog
-ICAgPg0KICAgID4+T25lIG90aGVyIGFyZ3VtZW50IHRvIHJlbW92ZSB0aGUgb3NkIGRpcmVjdG9y
-eSBzY2VuYXJpbyBpcyBCbHVlU3RvcmUuDQogICAgPj5MdW1pbm91cyBpcyBhcm91bmQgdGhlIGNv
-cm5lciBhbmQgd2Ugc3Ryb25nbHkgaG9wZSBpdCdsbCBiZSB0aGUNCiAgICA+PmRlZmF1bHQgb2Jq
-ZWN0IHN0b3JlLg0KICAgID4+DQogICAgPj5PbiBUdWUsIEFwciAyNSwgMjAxNyBhdCA3OjQwIFBN
-LCBHcmVnb3J5IE1lbm8gPGdtZW5vQHJlZGhhdC5jb20+IHdyb3RlOg0KICAgID4+PiBNaWNoYWVs
-LA0KICAgID4+Pg0KICAgID4+PiBJIGFtIG5hdHVyYWxseSBpbnRlcmVzdGVkIGluIHRoZSBzcGVj
-aWZpY3Mgb2YgeW91ciB1c2UtY2FzZSBhbmQgd291bGQNCiAgICA+Pj4gbG92ZSB0byBoZWFyIG1v
-cmUgYWJvdXQgaXQuDQogICAgPj4+IEkgdGhpbmsgdGhlIGRlc2lyZSB0byByZW1vdmUgdGhpcyBz
-Y2VuYXJpbyBmcm9tIHRoZSBzdGFibGUtMi4yIHJlbGVhc2UNCiAgICA+Pj4gaXMgbG93IGNvbnNp
-ZGVyaW5nIHdoYXQgeW91IGp1c3Qgc2hhcmVkLg0KICAgID4+PiBXb3VsZCBpdCBiZSBmYWlyIHRv
-IGFzayB0aGF0IHNoYXJpbmcgeW91ciBzZXR1cCBiZSB0aGUganVzdGlmaWNhdGlvbg0KICAgID4+
-PiBmb3IgcmVzdG9yaW5nIHRoaXMgZnVuY3Rpb25hbGl0eT8NCiAgICA+Pj4gQXJlIHlvdSB1c2lu
-ZyB0aGUgc3RhYmxlIHJlbGVhc2VkIGJpdHMgYWxyZWFkeT8gSSByZWNvbW1lbmQgZG9pbmcgc28u
-DQogICAgPj4+DQogICAgPj4+ICtTZWIgK0FsZnJlZG8NCiAgICA+Pj4NCiAgICA+Pj4gY2hlZXJz
-LA0KICAgID4+PiBHcmVnb3J5DQogICAgPj4+DQogICAgPj4+IE9uIFR1ZSwgQXByIDI1LCAyMDE3
-IGF0IDEwOjA4IEFNLCBNaWNoYWVsIEd1Z2lubw0KICAgID4+PiA8TWljaGFlbC5HdWdpbm9Ad2Fs
-bWFydC5jb20+IHdyb3RlOg0KICAgID4+Pj4gQ2VwaC1hbnNpYmxlIGNvbW11bml0eSwNCiAgICA+
-Pj4+DQogICAgPj4+PiAgIEkgc2VlIHRoYXQgcmVjZW50bHkgb3NkLWRpcmVjdG9yeSBzY2VuYXJp
-byB3YXMgcmVtb3ZlZCBmcm9tDQogICAgPj4+PmRlcGxveW1lbnQNCiAgICA+Pj4+IG9wdGlvbnMu
-ICBXZSB1c2UgdGhpcyBvcHRpb24gaW4gcHJvZHVjdGlvbiwgSSB3aWxsIGJlIHN1Ym1pdHRpbmcg
-YQ0KICAgID4+Pj5wYXRjaA0KICAgID4+Pj4gYW5kIGEgc21hbGwgZml4IHRvIHJlLWFkZCB0aGF0
-IHNjZW5hcmlvLiAgV2UgYmVsaWV2ZSBvdXIgdXNlLWNhc2UgaXMNCiAgICA+Pj4+IG5vbi10cml2
-aWFsLCBhbmQgd2UgYXJlIGhvcGluZyB0byBzaGFyZSBvdXIgc2V0dXAgd2l0aCB0aGUgY29tbXVu
-aXR5IGluDQogICAgPj4+PiB0aGUgbmVhciBmdXR1cmUgb25jZSB3ZSBnZXQgYXBwcm92YWwuDQog
-ICAgPj4+Pg0KICAgID4+Pj4gVGhhbmsgeW91DQogICAgPj4+Pg0KICAgID4+Pj4NCiAgICA+Pj4+
-IE1pY2hhZWwgR3VnaW5vDQogICAgPj4+PiBDbG91ZCBQb3dlcmVkDQogICAgPj4+PiAoNTQwKSA4
-NDYtMDMwNCBNb2JpbGUNCiAgICA+Pj4+DQogICAgPj4+PiBXYWxtYXJ0IOKcuw0KICAgID4+Pj4g
-U2F2aW5nIHBlb3BsZSBtb25leSBzbyB0aGV5IGNhbiBsaXZlIGJldHRlci4NCiAgICA+Pj4+DQog
-ICAgPj4+Pg0KICAgID4+Pj4NCiAgICA+Pj4+DQogICAgPj4+Pg0KICAgID4+Pj4gT24gNC8xOC8x
-NywgMzo0MSBQTSwgIkNlcGgtYW5zaWJsZSBvbiBiZWhhbGYgb2YgU2ViYXN0aWVuIEhhbiINCiAg
-ICA+Pj4+IDxjZXBoLWFuc2libGUtYm91bmNlc0BsaXN0cy5jZXBoLmNvbSBvbiBiZWhhbGYgb2Yg
-c2hhbkByZWRoYXQuY29tPg0KICAgID4+Pj53cm90ZToNCiAgICA+Pj4+DQogICAgPj4+Pj5IaSBl
-dmVyeW9uZSwNCiAgICA+Pj4+Pg0KICAgID4+Pj4+V2UgYXJlIGNsb3NlIGZyb20gcmVsZWFzaW5n
-IHRoZSBuZXcgY2VwaC1hbnNpYmxlIHN0YWJsZSByZWxlYXNlLg0KICAgID4+Pj4+V2UgYXJlIGN1
-cnJlbnRseSBpbiBhIGhlYXZ5IFFBIHBoYXNlIHdoZXJlIHdlIGFyZSBwdXNoaW5nIG5ldyB0YWdz
-IGluDQogICAgPj4+Pj50aGUgZm9ybWF0IG9mIHYyLjIueC4NCiAgICA+Pj4+PlRoZSBsYXRlc3Qg
-dGFnIGFscmVhZHkgcG9pbnRzIHRvIHN0YWJsZS0yLjIgYnJhbmNoLg0KICAgID4+Pj4+DQogICAg
-Pj4+Pj5TdGF5IHR1bmVkLCBzdGFibGUtMi4yIGlzIGp1c3QgYXJvdW5kIHRoZSBjb3JuZXIuDQog
-ICAgPj4+Pj5UaGFua3MhDQogICAgPj4+Pj4NCiAgICA+Pj4+Pi0tDQogICAgPj4+Pj5DaGVlcnMN
-CiAgICA+Pj4+Pg0KICAgID4+Pj4+4oCT4oCT4oCT4oCT4oCT4oCTDQogICAgPj4+Pj5Tw6liYXN0
-aWVuIEhhbg0KICAgID4+Pj4+UHJpbmNpcGFsIFNvZnR3YXJlIEVuZ2luZWVyLCBTdG9yYWdlIEFy
-Y2hpdGVjdA0KICAgID4+Pj4+DQogICAgPj4+Pj4iQWx3YXlzIGdpdmUgMTAwJS4gVW5sZXNzIHlv
-dSdyZSBnaXZpbmcgYmxvb2QuIg0KICAgID4+Pj4+DQogICAgPj4+Pj5NYWlsOiBzZWJAcmVkaGF0
-LmNvbQ0KICAgID4+Pj4+QWRkcmVzczogMTEgYmlzLCBydWUgUm9xdcOpcGluZSAtIDc1MDA4IFBh
-cmlzDQogICAgPj4+Pj5fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fXw0KICAgID4+Pj4+Q2VwaC1hbnNpYmxlIG1haWxpbmcgbGlzdA0KICAgID4+Pj4+Q2VwaC1h
-bnNpYmxlQGxpc3RzLmNlcGguY29tDQogICAgPj4+Pj5odHRwOi8vbGlzdHMuY2VwaC5jb20vbGlz
-dGluZm8uY2dpL2NlcGgtYW5zaWJsZS1jZXBoLmNvbQ0KICAgID4+Pj4NCiAgICA+Pj4+IF9fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQogICAgPj4+PiBDZXBo
-LWFuc2libGUgbWFpbGluZyBsaXN0DQogICAgPj4+PiBDZXBoLWFuc2libGVAbGlzdHMuY2VwaC5j
-b20NCiAgICA+Pj4+IGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC1hbnNp
-YmxlLWNlcGguY29tDQogICAgPj4NCiAgICA+Pg0KICAgID4+DQogICAgPj4tLQ0KICAgID4+Q2hl
-ZXJzDQogICAgPj4NCiAgICA+PuKAk+KAk+KAk+KAk+KAk+KAkw0KICAgID4+U8OpYmFzdGllbiBI
-YW4NCiAgICA+PlByaW5jaXBhbCBTb2Z0d2FyZSBFbmdpbmVlciwgU3RvcmFnZSBBcmNoaXRlY3QN
-CiAgICA+Pg0KICAgID4+IkFsd2F5cyBnaXZlIDEwMCUuIFVubGVzcyB5b3UncmUgZ2l2aW5nIGJs
-b29kLiINCiAgICA+Pg0KICAgID4+TWFpbDogc2ViQHJlZGhhdC5jb20NCiAgICA+PkFkZHJlc3M6
-IDExIGJpcywgcnVlIFJvcXXDqXBpbmUgLSA3NTAwOCBQYXJpcw0KICAgID4NCiAgICBfX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXw0KICAgIENlcGgtYW5zaWJs
-ZSBtYWlsaW5nIGxpc3QNCiAgICBDZXBoLWFuc2libGVAbGlzdHMuY2VwaC5jb20NCiAgICBodHRw
-Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtYW5zaWJsZS1jZXBoLmNvbQ0KICAg
-IA0KDQo=
+Hey Hequan
+
+I am Spandan Kumar Sahu, a second year undergraduate student selected
+for "Smarter Reweight by Utilisation" project.
+
+The mailing list only accepts plain text emails, so your proposal sent
+as an attachment, isn't there in the mail I received. It would be
+great, if you can upload it on Github and share the link. I am running
+into some errors when I use vstart, so I would like to see how you go
+about it.
+
+As an initial observation, the various API calls, that could be made,
+are present in PyModules.cc under the definition of
+get_python(const std::string &what) function.
+
+Hope this helps.
+
+On Mon, May 8, 2017 at 9:19 AM, Hequan <hequanzh@gmail.com> wrote:
+> Hi, everyone
+>
+> Nice to join you! My name is Hequan Zhang. I am a postgraduate student
+> in Wuhan National Laboratory for Optoelectronics of Huazhong
+> University of Science and Technology, majoring in Computer Science.
+>
+> It is my great pleasure that my proposal (see the attachment) had been accepted.
+>
+> Now I have completed the following setps about my project:
+>
+>     setup up a ceph cluster with ceph-mgr for testing with vstart.sh.
+>
+> [root@ceph2 build]# ./bin/ceph -s
+> *** DEVELOPER MODE: setting PATH, PYTHONPATH and LD_LIBRARY_PATH ***
+> 2017-05-08 11:32:06.634767 7f5e14ea5700 -1 WARNING: all dangerous and
+> experimental features are enabled.
+> 2017-05-08 11:32:06.668537 7f5e14ea5700 -1 WARNING: all dangerous and
+> experimental features are enabled.
+>     cluster e471b2c9-181f-4bc7-9d07-e36e187dd5ca
+>      health HEALTH_OK
+>      monmap e2: 1 mons at {a=192.168.10.2:40914/0}
+>             election epoch 4, quorum 0 a
+>         mgr active: x
+>      osdmap e24: 4 osds: 4 up, 4 in
+>       pgmap v499: 72 pgs, 2 pools, 0 bytes data, 0 objects
+>             4368 MB used, 36847 MB / 41215 MB avail
+>                   72 active+clean
+>
+>       Understand how Ceph uses PG for data placement and migration.
+>
+>       Understand the tradeoffs.
+>
+> For the last two steps, please refer to my proposal.
+>
+> Now I have some questions regarding ceph-mgr, and hope to have your suggestions.
+>
+> First, except for http://docs.ceph.com/docs/master/mgr/, is there any
+> other docs about how ceph-mgr works?
+>
+> Second, I would like to know the working mechanisms of python module.
+> Would you please recommend some related materials?
+>
+> At last, is there a dashboard working for ceph-mgr now, if so, what is it?
+>
+> Any comments and feedback would be appreciated.
+>
+> Thanks.
+> Hequan
+> -----------------------------------------------------
+> Hequan Zhang
+> Phone: +86 158-0279-2436
+> Room 408, Building B
+> Wuhan National Laboratory for Optoelectronics
+> Huazhong University of Science and Technology
+> Wuhan, Hubei 430074
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Spandan Kumar Sahu
+IIT Kharagpur
