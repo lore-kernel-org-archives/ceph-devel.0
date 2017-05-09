@@ -1,77 +1,105 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Calculating the expected PGs distribution
-Date: Tue, 9 May 2017 15:53:14 +0200
-Message-ID: <443c9da8-54a7-7e3c-0603-3887865628fa@dachary.org>
-References: <4538c9b9-18a2-11b9-e5f1-00a0243c1d88@dachary.org>
- <CAJRHzqn5D24EDts1RbJfP0Kn60Y+1E2MQDMdY1_M0Y2zaJxhqg@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: quick testing/development with ceph-ansible
+Date: Tue, 9 May 2017 09:53:53 -0400
+Message-ID: <CAC-Np1zJJF8f4nh2RMQH6m85hKfXOWbDcvzXUOyv89YEyLUiRA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:55443 "EHLO
-        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754335AbdEINx2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 09:53:28 -0400
-In-Reply-To: <CAJRHzqn5D24EDts1RbJfP0Kn60Y+1E2MQDMdY1_M0Y2zaJxhqg@mail.gmail.com>
+Received: from mail-wr0-f171.google.com ([209.85.128.171]:33754 "EHLO
+        mail-wr0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753798AbdEINxz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 09:53:55 -0400
+Received: by mail-wr0-f171.google.com with SMTP id w50so100789wrc.0
+        for <ceph-devel@vger.kernel.org>; Tue, 09 May 2017 06:53:55 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xavier Villaneau <xvillaneau+ceph@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, Andrew Schoen <aschoen@redhat.com>
 
-Hi Xavier,
+Hi,
 
-On 05/09/2017 08:18 AM, Xavier Villaneau wrote:
-> Hello Loïc,
-> 
-> On Mon, May 8, 2017 at 5:49 AM, Loic Dachary <loic@dachary.org <mailto:loic@dachary.org>> wrote:
->> I can't figure out the formula myself, my maths are not good enough. Could you please guide me in the right direction ?
-> 
-> That's quite an interesting problem, and not a trivial one. As you mentioned in that other discussion with Sage, the way collision is handled results in the probabilities of picking items dependent on the previous items picked. So there is can actually be a big gap between weights and the resulting mappings.
-> 
-> I did some rough calculations by hand on your case and found the following result:
->   84 29 29 29 29
-> I haven't tested with an actual crushmap yet, but from what I understand of the code it should be close to that.
-> For curiosity, if you tried to improve the result by setting the weight of OSD.0 to infinity, you'd still have at best:
->   100 25 25 25 25
-> 
-> So here are my thoughts about this:
-> 1 - There is a theoretical limit to how skewed the distribution of PGs can be; some target weights are impossible to achieve because of how the rules work. I have a rough idea of the limit: if taking N items, then a single bucket at the failure domain level cannot have more than 1/N of the weight. But that needs to proven, and I'm not sure how it would apply to more complex rules.
+For the past few months Andrew Schoen and I have been working on
+getting a testing workflow [0] for ceph-ansible that can quickly bring
+up a number of machines, deploy Ceph, and verify correctness
+afterwards.
 
-1/N makes intuitive sense, indeed ! So, for each item the weight has an upper bound of (sum of item weights) / N. Since this is a border case, I'm inclined to just cap the weight to its upper bound when optimizing or analyzing the crushmap. A warning was added to crush analyze when this is the case:
+Unlike other testing *frameworks*, there is no actual framework, but
+just a collection of tools working together to create machines, deploy
+ceph, and run tests. The process uses a few tools:
 
-        ~id~  ~weight~  ~objects~  ~over/under used %~
-~name~                                                
-host3     -5       1.0        646                34.06
-host4     -6       1.0        610                26.59
-host2     -4       1.0        575                19.32
-host1     -3       1.0        571                18.49
-host0     -2       4.5       1694               -21.88
+* tox [1] For creating the test matrix from variables (factors) and
+defining the steps
 
-Worst case scenario if a host fails:
+* vagrant [2] To create the machines
 
-        ~over used %~
-~type~               
-host            41.33
-root             0.00
+* testinfra [3] For testing remote nodes
 
-The following weights have been modified
+* virtualbox or libvirt: as the backend for creating machines
 
-        ~id~  ~original weight~  ~weight~
-~name~                                   
-host0     -2                  5       4.5
+Our reasoning for something like this was to be able to test
+thoroughly all pull requests coming into the ceph-ansible project,
+with all the permutations we think are important (e.g. we have the
+ability to test ansible 2.1 and 2.2, and can add 2.3 easily to the
+matrix), while being able to run these locally.
 
-Cheers
+Currently, we are running about 26 separate test scenarios per pull
+request. These are just a few of the combinations we currently
+support:
 
-> 2 - If the target weights are reachable, then the effective weights could be either pre-computed (using libcrush to simulate how changing weights affects the PGs) or adjust weights once the skew is observed on the actual data. Or why not both?
-> 
-> Side notes:
->  - For massively skewed weights, the CHOOSE_TRIES tunable can become limiting; if set too low, there starts to be a significant chance that crush gives up on trying to find non-conflicting results and spits out mappings with holes. I'm guessing that's a known thing already.
->  - This is not only an issue for massively skewed weights; I believe it also affects any non-uniform hierarchy (since the probabilities to pick a bucket change after each pick), albeit at a lesser magnitude. But as long as the target weights are within the theoretical limit, the distribution can be fixed so that they are achieved.
->  - What we're seeing is similar to a more common crush "problem": N replicas on N buckets will always give one replica per bucket regardless of the weights. That is actually a corner case of what we're seeing here.
-> 
-> --
-> Xavier Villaneau
-> Software Engineer, Concurrent Computer Corp.
+jewel-ansible2.2-xenial_cluster
+jewel-ansible2.2-journal_collocation
+jewel-ansible2.2-centos7_cluster
+jewel-ansible2.2-dmcrypt_journal
+jewel-ansible2.2-dmcrypt_journal_collocation
+jewel-ansible2.2-docker_cluster
+jewel-ansible2.2-purge_cluster
+jewel-ansible2.2-purge_dmcrypt
+jewel-ansible2.2-docker_dedicated_journal
+jewel-ansible2.2-docker_dmcrypt_journal_collocation
+jewel-ansible2.2-update_dmcrypt
+jewel-ansible2.2-update_cluster
+jewel-ansible2.2-cluster
+kraken-ansible2.2-xenial_cluster
+kraken-ansible2.2-journal_collocation
+kraken-ansible2.2-centos7_cluster
+kraken-ansible2.2-dmcrypt_journal
+kraken-ansible2.2-dmcrypt_journal_collocation
+kraken-ansible2.2-docker_cluster
+kraken-ansible2.2-purge_cluster
+kraken-ansible2.2-purge_dmcrypt
+kraken-ansible2.2-docker_dedicated_journal
+kraken-ansible2.2-docker_dmcrypt_journal_collocation
+kraken-ansible2.2-update_dmcrypt
+kraken-ansible2.2-update_cluster
+kraken-ansible2.2-cluster
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+All of those are expanded by tox, from factors defined in the tox.ini
+[4] (tox's configuration file).
+
+This way of setting up a cluster is very liberating: machines are in
+pristine condition each time, with a few variables the provisioning
+can change, one can reproduce environments regardless of the testing
+system (e.g. not tied to Jenkins or other CI components), and it
+doesn't need actual running machines.
+
+The objective of this is to bring up a cluster, test it, and tear it
+down, but for debugging/development  it isn't hard to keep the
+machines around: just remove the line in tox.ini that destroys the
+machines with vagrant.
+
+The amount of (non-functional) tests we have is not very large, but
+helps make verification of deployment with ceph-ansible. For example,
+there are assertions on how we generate a ceph.conf file from the
+template.
+
+We have a good amount of initial documentation for the project [0]
+explaining how to set things up and add/change tests, any feedback is
+welcome so we can improve those docs and make it easier to get
+started.
+
+Thanks!
+
+[0] http://docs.ceph.com/ceph-ansible/master/testing/index.html
+[1] https://tox.readthedocs.io/en/latest/
+[2] https://www.vagrantup.com/
+[3] https://testinfra.readthedocs.io/en/latest/
+[4] https://github.com/ceph/ceph-ansible/blob/master/tox.ini
