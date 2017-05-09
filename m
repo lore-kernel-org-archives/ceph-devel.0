@@ -1,34 +1,41 @@
-From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: Request for subscribing to ceph-devel list
-Date: Tue, 9 May 2017 12:50:01 +0200
-Message-ID: <21706cc1-1eeb-4f45-bf8e-b277494fa3ad@corp.ovh.com>
+Date: Tue, 9 May 2017 13:34:02 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1705091330280.3646@piezo.novalocal>
 References: <CA+b5B09bq6qK2koVigxqaic-9c3jZfTbmznpXeLRG-2maRAvUg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 8.mo302.mail-out.ovh.net ([137.74.110.81]:57558 "EHLO
-        8.mo302.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751295AbdEIKuE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 06:50:04 -0400
-Received: from EX3.OVH.local (gw1.corp.ovh.com [51.255.55.226])
-        by mo302.mail-out.ovh.net (Postfix) with ESMTPS id 187DC11145
-        for <ceph-devel@vger.kernel.org>; Tue,  9 May 2017 12:50:02 +0200 (CEST)
+Received: from cobra.newdream.net ([66.33.216.30]:35340 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752049AbdEINeF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 09:34:05 -0400
 In-Reply-To: <CA+b5B09bq6qK2koVigxqaic-9c3jZfTbmznpXeLRG-2maRAvUg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: saumay agrawal <saumay.agrawal@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On 05/09/2017 12:38 PM, saumay agrawal wrote:
-> Hi,
->
+Hi Saumay,
+
+On Tue, 9 May 2017, saumay agrawal wrote:
 > I got selected under GSOC on project ceph-mgr: Cluster Status
 > Dashboard. I have subscribed to all the ceph mailing lists. I don't
 > how I missed this. Please add me to this mailing list.
 
-Request granted.
+Welcome to the project!
 
--- 
-Piotr Dalek
-piotr.dalek@corp.ovh.com
-https://www.ovh.com/us/
+You can email majordomo@vger.kernel.org with 'subscribe ceph-devel' in the 
+body of the message.  Make sure you are sending plaintext email and not 
+HTML mail.
+
+We have a barebones dashboard prototype almost ready to merge; see
+
+	https://github.com/ceph/ceph/pull/14946
+
+It's very basic right now, though, and there is a lot we'd like to add.  
+Probably the biggest thing would be adding some visualization for the 
+performance counters so you can see cluster IOPS, space utilization, and 
+so on!  When do you start?
+
+sage
