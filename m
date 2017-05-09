@@ -1,36 +1,59 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: Re: boost::future and continuations
-Date: Tue, 9 May 2017 13:36:06 -0400
-Message-ID: <3e2a1d5b-3706-a0cc-1652-69f48bf3c479@redhat.com>
-References: <457eab81-262e-c7f1-44e2-916dbfa3b4cb@redhat.com>
- <CAJ4mKGbzvYp6+RupbyA=L=kAMUuykFrAy+DBEafAiV+fcWz6AQ@mail.gmail.com>
- <alpine.DEB.2.11.1705091640470.18953@piezo.novalocal>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: Re: Question regarding struct ceph_timestamp
+Date: Tue, 9 May 2017 19:25:42 +0100
+Message-ID: <20170509182542.utphva2p2xl4kozp@hermes.olymp>
+References: <20170509142331.ntm3wuyk2ce6mnui@hermes.olymp>
+ <CAJ4mKGanWD5PSMnf+C4nJJ7-t04f7jYjJ4T0xH-q+srfQ5_o6w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f179.google.com ([209.85.220.179]:32893 "EHLO
-        mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751210AbdEIRgI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 13:36:08 -0400
-Received: by mail-qk0-f179.google.com with SMTP id y201so7460317qka.0
-        for <ceph-devel@vger.kernel.org>; Tue, 09 May 2017 10:36:08 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1705091640470.18953@piezo.novalocal>
+Received: from mx2.suse.de ([195.135.220.15]:39293 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754223AbdEISZu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 9 May 2017 14:25:50 -0400
+Content-Disposition: inline
+In-Reply-To: <CAJ4mKGanWD5PSMnf+C4nJJ7-t04f7jYjJ4T0xH-q+srfQ5_o6w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+On Tue, May 09, 2017 at 09:42:49AM -0700, Gregory Farnum wrote:
+> On Tue, May 9, 2017 at 7:23 AM, Luis Henriques <lhenriques@suse.com> wrote:
+> > Hi,
+> >
+> > While analysing an xfstest failure (generic/258) I had to look at the
+> > definition of struct ceph_timespec.  And I was surprised to verify that
+> > both its fields (tv_sec and tv_nsec) are 32-bits (__le32).  And I believe
+> > that this explains the test failure, as ceph_encode_timespec() would fail
+> > to convert the negative pre-epoch value (-315615540 => 3979351756).
+> >
+> > The failure can be easily reproduced by simply creating a test file in a
+> > cephfs mount with:
+> >
+> >  $ touch -t 196001010101 /mnt/testfile
+> >  $ ls -l /mnt/testfile
+> >  -rw-r--r-- 1 root 0 0 Jan  1  1960 testfile
+> >
+> > After remounting the filesystem:
+> >
+> >  $ ls -l /mnt/testfile
+> >  -rw-r--r-- 1 root 0 0 Feb  6  2096 testfile
+> >
+> > Am I missing something?  If I'm not (and I probably am!), this isn't just
+> > a client-side issue and fixing it will require touching several other
+> > parts of the code.
+> 
+> I haven't done any work with most of the kernel code, but I believe
+> this was discussed last year:
+> https://patchwork.kernel.org/patch/8308691/
 
-On 05/09/2017 12:41 PM, Sage Weil wrote:
-> Yeah, +100 if it's on a standards track.  Is the implic unwrapping
-> something that is planned and/or coming soon?
->
-> sage
+Ah, awesome!  Thanks for pointing me to this thread.  I did a quick search
+before sending my email but failed to find it.  Anyway, that discussion
+contains lots of interesting information around the issue and it looks
+like it is being taken care of.  Again, thanks Greg!
 
-These extensions were added in boost 1.57 and haven't changed since. The 
-related tracker issues were last modified 3 years ago:
-https://svn.boost.org/trac/boost/ticket/10424
-https://svn.boost.org/trac/boost/ticket/10550
-
-Casey
+Cheers,
+--
+Luís
