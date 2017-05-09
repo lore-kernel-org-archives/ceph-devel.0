@@ -1,105 +1,59 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: quick testing/development with ceph-ansible
-Date: Tue, 9 May 2017 09:53:53 -0400
-Message-ID: <CAC-Np1zJJF8f4nh2RMQH6m85hKfXOWbDcvzXUOyv89YEyLUiRA@mail.gmail.com>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: boost::future and continuations
+Date: Tue, 9 May 2017 10:16:18 -0400
+Message-ID: <457eab81-262e-c7f1-44e2-916dbfa3b4cb@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f171.google.com ([209.85.128.171]:33754 "EHLO
-        mail-wr0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753798AbdEINxz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 09:53:55 -0400
-Received: by mail-wr0-f171.google.com with SMTP id w50so100789wrc.0
-        for <ceph-devel@vger.kernel.org>; Tue, 09 May 2017 06:53:55 -0700 (PDT)
+Received: from mail-qt0-f175.google.com ([209.85.216.175]:35047 "EHLO
+        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751653AbdEIOQU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 10:16:20 -0400
+Received: by mail-qt0-f175.google.com with SMTP id n4so1742916qte.2
+        for <ceph-devel@vger.kernel.org>; Tue, 09 May 2017 07:16:20 -0700 (PDT)
+Received: from [10.17.151.126] ([12.118.3.106])
+        by smtp.gmail.com with ESMTPSA id k10sm54266qke.3.2017.05.09.07.16.19
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 09 May 2017 07:16:19 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, Andrew Schoen <aschoen@redhat.com>
+To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Hi,
+I recently discovered that the Boost.Thread library implements some 
+extensions to boost::future from the 'Technical Specification for C++ 
+Extensions for Concurrency' [1]. The std::experimental interfaces are 
+documented on cppreference.com [2], but neither gcc nor clang provide them.
 
-For the past few months Andrew Schoen and I have been working on
-getting a testing workflow [0] for ceph-ansible that can quickly bring
-up a number of machines, deploy Ceph, and verify correctness
-afterwards.
+The coolest new feature is future::then(), which takes a continuation to 
+be called once the future is ready, and returns a future for the 
+continuation's result. This allows futures to be composed into 
+higher-level asynchronous operations - an ability that is sorely lacking 
+in the c++11 std::future.
 
-Unlike other testing *frameworks*, there is no actual framework, but
-just a collection of tools working together to create machines, deploy
-ceph, and run tests. The process uses a few tools:
+While these extensions are not enabled in boost by default, they can be 
+turned on with a series of BOOST_THREAD_PROVIDES_FUTURE* defines (since 
+boost 1.57). The boost documentation for 'Conformance and Extension' 
+[3]describes the status of this implementation, listing some features as 
+'partial'. I wrote a set of unit tests to explore this, and was happy 
+with the results. The only unfortunate piece missing is 'implicit 
+unwrapping' for future::then() - if you pass it a continuation that 
+returns a future<T>, then() will return a future<future<T>>. This 
+-should- be implicitly converted to future<T>, but boost::future 
+requires you to do it explicitly by calling future::unwrap().
 
-* tox [1] For creating the test matrix from variables (factors) and
-defining the steps
+I'm curious to see how people feel about this. Would you consider using 
+boost::futures? Are there concerns about using boost extensions? About 
+slight changes to interfaces? I opened a pull request [4] for discussion 
+- take a look at the unit tests for examples, and let me know what you 
+think.
 
-* vagrant [2] To create the machines
+Thanks,
+Casey
 
-* testinfra [3] For testing remote nodes
-
-* virtualbox or libvirt: as the backend for creating machines
-
-Our reasoning for something like this was to be able to test
-thoroughly all pull requests coming into the ceph-ansible project,
-with all the permutations we think are important (e.g. we have the
-ability to test ansible 2.1 and 2.2, and can add 2.3 easily to the
-matrix), while being able to run these locally.
-
-Currently, we are running about 26 separate test scenarios per pull
-request. These are just a few of the combinations we currently
-support:
-
-jewel-ansible2.2-xenial_cluster
-jewel-ansible2.2-journal_collocation
-jewel-ansible2.2-centos7_cluster
-jewel-ansible2.2-dmcrypt_journal
-jewel-ansible2.2-dmcrypt_journal_collocation
-jewel-ansible2.2-docker_cluster
-jewel-ansible2.2-purge_cluster
-jewel-ansible2.2-purge_dmcrypt
-jewel-ansible2.2-docker_dedicated_journal
-jewel-ansible2.2-docker_dmcrypt_journal_collocation
-jewel-ansible2.2-update_dmcrypt
-jewel-ansible2.2-update_cluster
-jewel-ansible2.2-cluster
-kraken-ansible2.2-xenial_cluster
-kraken-ansible2.2-journal_collocation
-kraken-ansible2.2-centos7_cluster
-kraken-ansible2.2-dmcrypt_journal
-kraken-ansible2.2-dmcrypt_journal_collocation
-kraken-ansible2.2-docker_cluster
-kraken-ansible2.2-purge_cluster
-kraken-ansible2.2-purge_dmcrypt
-kraken-ansible2.2-docker_dedicated_journal
-kraken-ansible2.2-docker_dmcrypt_journal_collocation
-kraken-ansible2.2-update_dmcrypt
-kraken-ansible2.2-update_cluster
-kraken-ansible2.2-cluster
-
-All of those are expanded by tox, from factors defined in the tox.ini
-[4] (tox's configuration file).
-
-This way of setting up a cluster is very liberating: machines are in
-pristine condition each time, with a few variables the provisioning
-can change, one can reproduce environments regardless of the testing
-system (e.g. not tied to Jenkins or other CI components), and it
-doesn't need actual running machines.
-
-The objective of this is to bring up a cluster, test it, and tear it
-down, but for debugging/development  it isn't hard to keep the
-machines around: just remove the line in tox.ini that destroys the
-machines with vagrant.
-
-The amount of (non-functional) tests we have is not very large, but
-helps make verification of deployment with ceph-ansible. For example,
-there are assertions on how we generate a ceph.conf file from the
-template.
-
-We have a good amount of initial documentation for the project [0]
-explaining how to set things up and add/change tests, any feedback is
-welcome so we can improve those docs and make it easier to get
-started.
-
-Thanks!
-
-[0] http://docs.ceph.com/ceph-ansible/master/testing/index.html
-[1] https://tox.readthedocs.io/en/latest/
-[2] https://www.vagrantup.com/
-[3] https://testinfra.readthedocs.io/en/latest/
-[4] https://github.com/ceph/ceph-ansible/blob/master/tox.ini
+[1] http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/p0159r0.html
+[2] http://en.cppreference.com/w/cpp/experimental/concurrency
+[3] 
+http://www.boost.org/doc/libs/1_63_0/doc/html/thread/compliance.html#thread.compliance.cxx1y
+[4] https://github.com/ceph/ceph/pull/14987
