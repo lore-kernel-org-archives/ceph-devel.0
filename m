@@ -1,208 +1,122 @@
-From: Vasu Kulkarni <vakulkar@redhat.com>
-Subject: Re: [Ceph-ansible] EXT: Re: osd-directory scenario is used by us
-Date: Tue, 9 May 2017 13:54:34 -0700
-Message-ID: <CAKPXa=bfp9iXRe4Yq16XjZQEXEs+7x12C692a=zF2Z6ABmP4Qg@mail.gmail.com>
-References: <D52531DE.26501%michael.gugino@walmart.com> <CABq-AyS+kuFd15dJ1dZMBkEOcDM6XNV7cXquTWXX6=jLeOb2gw@mail.gmail.com>
- <CA+HUO7L2L-z_FerkqzHTJbP9KVZAgkg7853EgMDwy8YrUvLw_w@mail.gmail.com> <CAKPXa=Y8bXezvEmP5RKgxFnAHnZfBfR0XQkkUZUHZhhg80Vuxg@mail.gmail.com>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: quick testing/development with ceph-ansible
+Date: Wed, 10 May 2017 09:30:14 +1000
+Message-ID: <CAF-wwdF6F7jeo5agYdS9YMmz6RZnDHUHg5wUGBu1BwS52MYeGw@mail.gmail.com>
+References: <CAC-Np1zJJF8f4nh2RMQH6m85hKfXOWbDcvzXUOyv89YEyLUiRA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f53.google.com ([74.125.83.53]:33348 "EHLO
-        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750911AbdEIUyf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 16:54:35 -0400
-Received: by mail-pg0-f53.google.com with SMTP id u187so5514294pgb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 09 May 2017 13:54:35 -0700 (PDT)
-In-Reply-To: <CAKPXa=Y8bXezvEmP5RKgxFnAHnZfBfR0XQkkUZUHZhhg80Vuxg@mail.gmail.com>
+Received: from mail-it0-f42.google.com ([209.85.214.42]:35115 "EHLO
+        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750812AbdEIXaQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 19:30:16 -0400
+Received: by mail-it0-f42.google.com with SMTP id c15so15372727ith.0
+        for <ceph-devel@vger.kernel.org>; Tue, 09 May 2017 16:30:16 -0700 (PDT)
+In-Reply-To: <CAC-Np1zJJF8f4nh2RMQH6m85hKfXOWbDcvzXUOyv89YEyLUiRA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sebastien Han <shan@redhat.com>
-Cc: Gregory Meno <gmeno@redhat.com>, Michael Gugino <Michael.Gugino@walmart.com>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-ansible@lists.ceph.com" <ceph-ansible@lists.ceph.com>
+To: Alfredo Deza <adeza@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Andrew Schoen <aschoen@redhat.com>
 
-Sorry, sending as text
+Looks good guys!
 
-On Tue, May 9, 2017 at 1:51 PM, Vasu Kulkarni <vakulkar@redhat.com> wrote:
->
->
->
-> On Tue, May 9, 2017 at 12:54 PM, Sebastien Han <shan@redhat.com> wrote:
->>
->> I just think that if we remove this from ceph-ansible (e.g: because
->> this is a scenario we don't want to support anymore), then perhaps we
->> should remove it from ceph-disk and ceph-deploy too.
 
- AFAIK it is not really documented for ceph-deploy
-http://docs.ceph.com/docs/master/rados/deployment/ceph-deploy-osd/#activate-osds,
-so it is for *testing* purpose only.
+On Tue, May 9, 2017 at 11:53 PM, Alfredo Deza <adeza@redhat.com> wrote:
+> Hi,
+>
+> For the past few months Andrew Schoen and I have been working on
+> getting a testing workflow [0] for ceph-ansible that can quickly bring
+> up a number of machines, deploy Ceph, and verify correctness
+> afterwards.
+>
+> Unlike other testing *frameworks*, there is no actual framework, but
+> just a collection of tools working together to create machines, deploy
+> ceph, and run tests. The process uses a few tools:
+>
+> * tox [1] For creating the test matrix from variables (factors) and
+> defining the steps
+>
+> * vagrant [2] To create the machines
+>
+> * testinfra [3] For testing remote nodes
+>
+> * virtualbox or libvirt: as the backend for creating machines
+>
+> Our reasoning for something like this was to be able to test
+> thoroughly all pull requests coming into the ceph-ansible project,
+> with all the permutations we think are important (e.g. we have the
+> ability to test ansible 2.1 and 2.2, and can add 2.3 easily to the
+> matrix), while being able to run these locally.
+>
+> Currently, we are running about 26 separate test scenarios per pull
+> request. These are just a few of the combinations we currently
+> support:
+>
+> jewel-ansible2.2-xenial_cluster
+> jewel-ansible2.2-journal_collocation
+> jewel-ansible2.2-centos7_cluster
+> jewel-ansible2.2-dmcrypt_journal
+> jewel-ansible2.2-dmcrypt_journal_collocation
+> jewel-ansible2.2-docker_cluster
+> jewel-ansible2.2-purge_cluster
+> jewel-ansible2.2-purge_dmcrypt
+> jewel-ansible2.2-docker_dedicated_journal
+> jewel-ansible2.2-docker_dmcrypt_journal_collocation
+> jewel-ansible2.2-update_dmcrypt
+> jewel-ansible2.2-update_cluster
+> jewel-ansible2.2-cluster
+> kraken-ansible2.2-xenial_cluster
+> kraken-ansible2.2-journal_collocation
+> kraken-ansible2.2-centos7_cluster
+> kraken-ansible2.2-dmcrypt_journal
+> kraken-ansible2.2-dmcrypt_journal_collocation
+> kraken-ansible2.2-docker_cluster
+> kraken-ansible2.2-purge_cluster
+> kraken-ansible2.2-purge_dmcrypt
+> kraken-ansible2.2-docker_dedicated_journal
+> kraken-ansible2.2-docker_dmcrypt_journal_collocation
+> kraken-ansible2.2-update_dmcrypt
+> kraken-ansible2.2-update_cluster
+> kraken-ansible2.2-cluster
+>
+> All of those are expanded by tox, from factors defined in the tox.ini
+> [4] (tox's configuration file).
+>
+> This way of setting up a cluster is very liberating: machines are in
+> pristine condition each time, with a few variables the provisioning
+> can change, one can reproduce environments regardless of the testing
+> system (e.g. not tied to Jenkins or other CI components), and it
+> doesn't need actual running machines.
+>
+> The objective of this is to bring up a cluster, test it, and tear it
+> down, but for debugging/development  it isn't hard to keep the
+> machines around: just remove the line in tox.ini that destroys the
+> machines with vagrant.
+>
+> The amount of (non-functional) tests we have is not very large, but
+> helps make verification of deployment with ceph-ansible. For example,
+> there are assertions on how we generate a ceph.conf file from the
+> template.
+>
+> We have a good amount of initial documentation for the project [0]
+> explaining how to set things up and add/change tests, any feedback is
+> welcome so we can improve those docs and make it easier to get
+> started.
+>
+> Thanks!
+>
+> [0] http://docs.ceph.com/ceph-ansible/master/testing/index.html
+> [1] https://tox.readthedocs.io/en/latest/
+> [2] https://www.vagrantup.com/
+> [3] https://testinfra.readthedocs.io/en/latest/
+> [4] https://github.com/ceph/ceph-ansible/blob/master/tox.ini
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
->>
->> Moreover, with
->> Bluestore, that feature will naturally go away ultimately.
->> What do you think?
->>
->> On Wed, May 3, 2017 at 6:17 PM, Gregory Meno <gmeno@redhat.com> wrote:
->> > Haven't seen any comments in a week. I'm going to cross-post this to ceph-devel
->> >
->> > Dear ceph-devel in an effort to simplify ceph-ansible I removed the
->> > code that sets up directory backed OSDs. We found our that it was
->> > being used in the following way.
->> >
->> > I would like to hear thoughts about this approach pro and con.
->> >
->> > cheers,
->> > G
->> >
->> > On Tue, Apr 25, 2017 at 2:12 PM, Michael Gugino
->> > <Michael.Gugino@walmart.com> wrote:
->> >> All,
->> >>
->> >>   Thank you for the responses and consideration.  What we are doing is
->> >> creating lvm volumes, mounting them, and using the mounts as directories
->> >> for ceph-ansible.  Our primary concern is the use of lvmcache.  We’re
->> >> using faster drives for the cache and slower drives for the backing
->> >> volumes.
->> >>
->> >>   We try to keep as few local patches as practical, and our initial
->> >> rollout of lvmcache + ceph-ansible steered us towards osd_directory
->> >> scenario.  Currently, ceph-ansible does not allow use to use lvm in the
->> >> way that we desire, but we are looking into submitting a PR to go that
->> >> direction (at some point).
->> >>
->> >>   As far as using the stable branches, I’m not entirely sure what our
->> >> strategy going forward will be.  Currently we are maintaining ceph-ansible
->> >> branches based on ceph releases, not ceph-ansible releases.
->> >>
->> >>
->> >> Michael Gugino
->> >> Cloud Powered
->> >> (540) 846-0304 Mobile
->> >>
->> >> Walmart ✻
->> >> Saving people money so they can live better.
->> >>
->> >>
->> >>
->> >>
->> >>
->> >> On 4/25/17, 4:51 PM, "Sebastien Han" <shan@redhat.com> wrote:
->> >>
->> >>>One other argument to remove the osd directory scenario is BlueStore.
->> >>>Luminous is around the corner and we strongly hope it'll be the
->> >>>default object store.
->> >>>
->> >>>On Tue, Apr 25, 2017 at 7:40 PM, Gregory Meno <gmeno@redhat.com> wrote:
->> >>>> Michael,
->> >>>>
->> >>>> I am naturally interested in the specifics of your use-case and would
->> >>>> love to hear more about it.
->> >>>> I think the desire to remove this scenario from the stable-2.2 release
->> >>>> is low considering what you just shared.
->> >>>> Would it be fair to ask that sharing your setup be the justification
->> >>>> for restoring this functionality?
->> >>>> Are you using the stable released bits already? I recommend doing so.
->> >>>>
->> >>>> +Seb +Alfredo
->> >>>>
->> >>>> cheers,
->> >>>> Gregory
->> >>>>
->> >>>> On Tue, Apr 25, 2017 at 10:08 AM, Michael Gugino
->> >>>> <Michael.Gugino@walmart.com> wrote:
->> >>>>> Ceph-ansible community,
->> >>>>>
->> >>>>>   I see that recently osd-directory scenario was removed from
->> >>>>>deployment
->> >>>>> options.  We use this option in production, I will be submitting a
->> >>>>>patch
->> >>>>> and a small fix to re-add that scenario.  We believe our use-case is
->> >>>>> non-trivial, and we are hoping to share our setup with the community in
->> >>>>> the near future once we get approval.
->> >>>>>
->> >>>>> Thank you
->> >>>>>
->> >>>>>
->> >>>>> Michael Gugino
->> >>>>> Cloud Powered
->> >>>>> (540) 846-0304 Mobile
->> >>>>>
->> >>>>> Walmart ✻
->> >>>>> Saving people money so they can live better.
->> >>>>>
->> >>>>>
->> >>>>>
->> >>>>>
->> >>>>>
->> >>>>> On 4/18/17, 3:41 PM, "Ceph-ansible on behalf of Sebastien Han"
->> >>>>> <ceph-ansible-bounces@lists.ceph.com on behalf of shan@redhat.com>
->> >>>>>wrote:
->> >>>>>
->> >>>>>>Hi everyone,
->> >>>>>>
->> >>>>>>We are close from releasing the new ceph-ansible stable release.
->> >>>>>>We are currently in a heavy QA phase where we are pushing new tags in
->> >>>>>>the format of v2.2.x.
->> >>>>>>The latest tag already points to stable-2.2 branch.
->> >>>>>>
->> >>>>>>Stay tuned, stable-2.2 is just around the corner.
->> >>>>>>Thanks!
->> >>>>>>
->> >>>>>>--
->> >>>>>>Cheers
->> >>>>>>
->> >>>>>>––––––
->> >>>>>>Sébastien Han
->> >>>>>>Principal Software Engineer, Storage Architect
->> >>>>>>
->> >>>>>>"Always give 100%. Unless you're giving blood."
->> >>>>>>
->> >>>>>>Mail: seb@redhat.com
->> >>>>>>Address: 11 bis, rue Roquépine - 75008 Paris
->> >>>>>>_______________________________________________
->> >>>>>>Ceph-ansible mailing list
->> >>>>>>Ceph-ansible@lists.ceph.com
->> >>>>>>http://lists.ceph.com/listinfo.cgi/ceph-ansible-ceph.com
->> >>>>>
->> >>>>> _______________________________________________
->> >>>>> Ceph-ansible mailing list
->> >>>>> Ceph-ansible@lists.ceph.com
->> >>>>> http://lists.ceph.com/listinfo.cgi/ceph-ansible-ceph.com
->> >>>
->> >>>
->> >>>
->> >>>--
->> >>>Cheers
->> >>>
->> >>>––––––
->> >>>Sébastien Han
->> >>>Principal Software Engineer, Storage Architect
->> >>>
->> >>>"Always give 100%. Unless you're giving blood."
->> >>>
->> >>>Mail: seb@redhat.com
->> >>>Address: 11 bis, rue Roquépine - 75008 Paris
->> >>
->> > _______________________________________________
->> > Ceph-ansible mailing list
->> > Ceph-ansible@lists.ceph.com
->> > http://lists.ceph.com/listinfo.cgi/ceph-ansible-ceph.com
->>
->>
->>
->> --
->> Cheers
->>
->> ––––––
->> Sébastien Han
->> Principal Software Engineer, Storage Architect
->>
->> "Always give 100%. Unless you're giving blood."
->>
->> Mail: seb@redhat.com
->> Address: 11 bis, rue Roquépine - 75008 Paris
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+
+
+-- 
+Cheers,
+Brad
