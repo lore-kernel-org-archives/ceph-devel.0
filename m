@@ -1,49 +1,36 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: fs: mandatory client quota
-Date: Tue, 9 May 2017 09:51:27 -0700
-Message-ID: <CAJ4mKGZVODhE0y180bp6HDADWyGfOz255-DsXOpRznTjhaitiQ@mail.gmail.com>
-References: <CABZ+qqkk=2Q8p+KCpOEKWw_ZkviPW_v6rgt=ML984O25CFYxOw@mail.gmail.com>
- <CABZ+qqnFwaV9Va-B4WHp=ntPgKZdsDA1P=m67pLPWU7Y9Tyu+Q@mail.gmail.com> <alpine.DEB.2.11.1705051456250.3646@piezo.novalocal>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: Re: boost::future and continuations
+Date: Tue, 9 May 2017 13:36:06 -0400
+Message-ID: <3e2a1d5b-3706-a0cc-1652-69f48bf3c479@redhat.com>
+References: <457eab81-262e-c7f1-44e2-916dbfa3b4cb@redhat.com>
+ <CAJ4mKGbzvYp6+RupbyA=L=kAMUuykFrAy+DBEafAiV+fcWz6AQ@mail.gmail.com>
+ <alpine.DEB.2.11.1705091640470.18953@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f51.google.com ([209.85.214.51]:36642 "EHLO
-        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753017AbdEIQv3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 12:51:29 -0400
-Received: by mail-it0-f51.google.com with SMTP id o5so9316676ith.1
-        for <ceph-devel@vger.kernel.org>; Tue, 09 May 2017 09:51:29 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1705051456250.3646@piezo.novalocal>
+Received: from mail-qk0-f179.google.com ([209.85.220.179]:32893 "EHLO
+        mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751210AbdEIRgI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 13:36:08 -0400
+Received: by mail-qk0-f179.google.com with SMTP id y201so7460317qka.0
+        for <ceph-devel@vger.kernel.org>; Tue, 09 May 2017 10:36:08 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1705091640470.18953@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
+Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-[ Resend due to accidental HTML subpart ]
 
-On Fri, May 5, 2017 at 7:57 AM, Sage Weil <sage@newdream.net> wrote:
+On 05/09/2017 12:41 PM, Sage Weil wrote:
+> Yeah, +100 if it's on a standards track.  Is the implic unwrapping
+> something that is planned and/or coming soon?
 >
-> On Fri, 5 May 2017, Dan van der Ster wrote:
-> > On Fri, May 5, 2017 at 4:36 PM, Dan van der Ster <dan@vanderster.com> wrote:
-> > > Hi all,
-> > >
-> > > It would be really nice if for Luminous client quotas were always
-> > > enabled -- it should be impossible to disable quota enforcement on the
-> > > client side.
-> > >
-> > > From the looks of things, the patch to remove client_quota and
-> > > client_quota_df would be trivial.
-> > > Is there some reason we need to leave that optional?
-> >
-> > PR: 14978
->
-> This seems reasonable to me.  Client can of course run modified code so
-> it's not really "secure" in that sense but it's certainly inconvenient to
-> circumvent.
+> sage
 
-I'm sure John will comment on this once he gets back from vacation,
-but there were some reasons not to enable it by default when this was
-discussed by the team last fall. I think it was combined concern about
-the lack of server-side enforcement and (more importantly) not wanting
-to provide default experiences which differ across the userspace and
-kernel clients.
--Greg
+These extensions were added in boost 1.57 and haven't changed since. The 
+related tracker issues were last modified 3 years ago:
+https://svn.boost.org/trac/boost/ticket/10424
+https://svn.boost.org/trac/boost/ticket/10550
+
+Casey
