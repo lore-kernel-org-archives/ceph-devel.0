@@ -1,51 +1,40 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Question regarding struct ceph_timestamp
-Date: Tue, 9 May 2017 15:23:31 +0100
-Message-ID: <20170509142331.ntm3wuyk2ce6mnui@hermes.olymp>
+From: saumay agrawal <saumay.agrawal@gmail.com>
+Subject: Fwd: GSOC on ceph-mgr:Cluster Status Dashboard
+Date: Tue, 9 May 2017 20:00:06 +0530
+Message-ID: <CA+b5B08_sBtwoKYj7ZPE3+61JEDpeku72uRoPUBc=ySsbmVg5g@mail.gmail.com>
+References: <CA+b5B0-EOZx5i3knFO-KEg6xgZ0yvxpMTz4xEvCiKFi3Lqsk4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:49966 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754468AbdEIOXe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 9 May 2017 10:23:34 -0400
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id 9AC9CABBD
-        for <ceph-devel@vger.kernel.org>; Tue,  9 May 2017 14:23:32 +0000 (UTC)
-Received: from localhost (hermes.olymp [local])
-        by hermes.olymp (OpenSMTPD) with ESMTPA id c1d56d25
-        for <ceph-devel@vger.kernel.org>;
-        Tue, 9 May 2017 14:23:31 +0000 (UTC)
-Content-Disposition: inline
+Received: from mail-io0-f181.google.com ([209.85.223.181]:34478 "EHLO
+        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752498AbdEIOa1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 10:30:27 -0400
+Received: by mail-io0-f181.google.com with SMTP id k91so2809789ioi.1
+        for <ceph-devel@vger.kernel.org>; Tue, 09 May 2017 07:30:27 -0700 (PDT)
+In-Reply-To: <CA+b5B0-EOZx5i3knFO-KEg6xgZ0yvxpMTz4xEvCiKFi3Lqsk4Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi,
+Hi everyone,
 
-While analysing an xfstest failure (generic/258) I had to look at the
-definition of struct ceph_timespec.  And I was surprised to verify that
-both its fields (tv_sec and tv_nsec) are 32-bits (__le32).  And I believe
-that this explains the test failure, as ceph_encode_timespec() would fail
-to convert the negative pre-epoch value (-315615540 => 3979351756).
+I am Saumay Agrawal, a freshman at Vellore Institute of Technology,
+Chennai Campus, India. I am pursuing BTech. in Computer Science and
+Engineering. I am mainly interested in Web Development, UI/UX Design,
+and Data Storage and Analytics. I take great pleasure in learning new
+kinds of technologies.
 
-The failure can be easily reproduced by simply creating a test file in a
-cephfs mount with:
+I am very glad that I was selected to work with Ceph community. I hope
+I would be able to make a worthwhile contribution to Ceph.
 
- $ touch -t 196001010101 /mnt/testfile
- $ ls -l /mnt/testfile
- -rw-r--r-- 1 root 0 0 Jan  1  1960 testfile
+Please do have a look at my proposal, and let me know if I could make
+it better in any way. I believe feedback is the only way we can learn
+more and make better things.
+https://docs.google.com/document/d/14-a9qYu2tniaZADq1EYm3JtFxzKkga7Z8nLdHV6jC_U/edit?usp=sharing
 
-After remounting the filesystem:
+As of now, I am looking into the dashboard prototype almost ready to be merged.
+https://github.com/ceph/ceph/pull/14946
 
- $ ls -l /mnt/testfile
- -rw-r--r-- 1 root 0 0 Feb  6  2096 testfile
 
-Am I missing something?  If I'm not (and I probably am!), this isn't just
-a client-side issue and fixing it will require touching several other
-parts of the code.
-
-Cheers,
---
-Luís
+Saumay.
