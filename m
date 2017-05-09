@@ -1,24 +1,34 @@
-From: saumay agrawal <saumay.agrawal@gmail.com>
-Subject: Request for subscribing to ceph-devel list
-Date: Tue, 9 May 2017 16:08:45 +0530
-Message-ID: <CA+b5B09bq6qK2koVigxqaic-9c3jZfTbmznpXeLRG-2maRAvUg@mail.gmail.com>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
+Subject: Re: Request for subscribing to ceph-devel list
+Date: Tue, 9 May 2017 12:50:01 +0200
+Message-ID: <21706cc1-1eeb-4f45-bf8e-b277494fa3ad@corp.ovh.com>
+References: <CA+b5B09bq6qK2koVigxqaic-9c3jZfTbmznpXeLRG-2maRAvUg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f169.google.com ([209.85.223.169]:32960 "EHLO
-        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751537AbdEIKjH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 06:39:07 -0400
-Received: by mail-io0-f169.google.com with SMTP id p24so67441553ioi.0
-        for <ceph-devel@vger.kernel.org>; Tue, 09 May 2017 03:39:06 -0700 (PDT)
+Received: from 8.mo302.mail-out.ovh.net ([137.74.110.81]:57558 "EHLO
+        8.mo302.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751295AbdEIKuE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 9 May 2017 06:50:04 -0400
+Received: from EX3.OVH.local (gw1.corp.ovh.com [51.255.55.226])
+        by mo302.mail-out.ovh.net (Postfix) with ESMTPS id 187DC11145
+        for <ceph-devel@vger.kernel.org>; Tue,  9 May 2017 12:50:02 +0200 (CEST)
+In-Reply-To: <CA+b5B09bq6qK2koVigxqaic-9c3jZfTbmznpXeLRG-2maRAvUg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-Hi,
+On 05/09/2017 12:38 PM, saumay agrawal wrote:
+> Hi,
+>
+> I got selected under GSOC on project ceph-mgr: Cluster Status
+> Dashboard. I have subscribed to all the ceph mailing lists. I don't
+> how I missed this. Please add me to this mailing list.
 
-I got selected under GSOC on project ceph-mgr: Cluster Status
-Dashboard. I have subscribed to all the ceph mailing lists. I don't
-how I missed this. Please add me to this mailing list.
+Request granted.
 
-Thank You.
+-- 
+Piotr Dalek
+piotr.dalek@corp.ovh.com
+https://www.ovh.com/us/
