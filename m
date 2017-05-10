@@ -1,84 +1,70 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: crush optimization targets
-Date: Wed, 10 May 2017 19:04:17 +0200
-Message-ID: <75b686d1-51b5-3df6-82a8-8c2b367b3544@dachary.org>
-References: <alpine.DEB.2.11.1705101247210.18953@piezo.novalocal>
+From: Peter Maloney <peter.maloney@brockmann-consult.de>
+Subject: Re: fs: mandatory client quota
+Date: Wed, 10 May 2017 22:46:30 +0200
+Message-ID: <f0f0b204-0fd3-feb7-4717-5bc42697775a@brockmann-consult.de>
+References: <CABZ+qqkk=2Q8p+KCpOEKWw_ZkviPW_v6rgt=ML984O25CFYxOw@mail.gmail.com>
+ <CABZ+qqnFwaV9Va-B4WHp=ntPgKZdsDA1P=m67pLPWU7Y9Tyu+Q@mail.gmail.com>
+ <alpine.DEB.2.11.1705051456250.3646@piezo.novalocal>
+ <CAJ4mKGZJ0ZJxhuKf9ndhchp4Ca=Y8+QUdkq-tZBvnsCqfCdkTA@mail.gmail.com>
+ <CALe9h7cXHxwDo=aBYKJyVn0jo5xeKctBhB8SHTcuqwJ8wjfmSQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:59816 "EHLO
-        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753001AbdEJREW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 10 May 2017 13:04:22 -0400
-In-Reply-To: <alpine.DEB.2.11.1705101247210.18953@piezo.novalocal>
+Received: from mout.kundenserver.de ([212.227.17.24]:55072 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752927AbdEJUpP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 10 May 2017 16:45:15 -0400
+In-Reply-To: <CALe9h7cXHxwDo=aBYKJyVn0jo5xeKctBhB8SHTcuqwJ8wjfmSQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Dan van der Ster <dan@vanderster.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+On 05/10/17 09:03, John Spray wrote:
+> On Tue, May 9, 2017 at 5:47 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+>> On Fri, May 5, 2017 at 7:57 AM, Sage Weil <sage@newdream.net> wrote:
+>>> On Fri, 5 May 2017, Dan van der Ster wrote:
+>>>> On Fri, May 5, 2017 at 4:36 PM, Dan van der Ster <dan@vanderster.com>
+>>>> wrote:
+>>>>> Hi all,
+>>>>>
+>>>>> It would be really nice if for Luminous client quotas were always
+>>>>> enabled -- it should be impossible to disable quota enforcement on the
+>>>>> client side.
+>>>>>
+>>>>> From the looks of things, the patch to remove client_quota and
+>>>>> client_quota_df would be trivial.
+>>>>> Is there some reason we need to leave that optional?
+>>>> PR: 14978
+>>> This seems reasonable to me.  Client can of course run modified code so
+>>> it's not really "secure" in that sense but it's certainly inconvenient to
+>>> circumvent.
+>> I'm sure John will comment on this once he gets back from vacation, but
+>> there were some reasons not to enable it by default when this was discussed
+>> by the team last fall. I think it was combined concern about the lack of
+>> server-side enforcement and (more importantly) not wanting to provide
+>> default experiences which differ across the userspace and kernel clients.
+> client_quota has been true by default in master for about a year -- I
+> think at this stage the question is just whether it's important to
+> enable people to disable them, where disabling is really only sensible
+> in cases where someone e.g. hits a quota bug and wants to skip the
+> code.
+>
+> My view is that the simplicity of support (not worrying about users
+> disabling quota and then complaining about it not working) is a good
+> enough motivator to remove the setting.  Making it less convenient for
+> naughty clients to circumvent quota is a bonus.
+>
+> Commenting on PR....
+>
+> John
+>
+I don't think it was mentioned yet...but isn't a pool quota mandatory?
+If so, you could use that for those naughty clients.
 
+I'm using cephfs with a pool quota and found the client just hangs
+waiting for space if the pool quota is hit, and ceph -s gets a warning.
+That's less than desirable, but if combined with the client quota, it
+ought to be friendly.
 
-On 05/10/2017 03:00 PM, Sage Weil wrote:
-> This is slightly off topic, but I want to throw out one more thing into 
-> this discussion: we ultimately (with all of these methods) want to address 
-> CRUSH rules that only target a subset of the overall hierarchy.  I tried 
-> to do this in the pg-upmap improvemnets PR (which, incidentally, Loic, 
-> could use a review :) at
-> 
-> 	https://github.com/ceph/ceph/pull/14902
-> 
-> In this commit
-> 
-> 	https://github.com/ceph/ceph/pull/14902/commits/a9ba66c46e76b5ef8e5184a5100a37598a7e7695
-> 
-> it uses the get_rule_weight_osd_map() method, which returns a weighted map 
-> of how much "weight" a rule is trying to store on each of the OSDs that 
-> are potentially targetted by the CRUSH rule.  This helper us currently 
-> used by the 'df' code when trying to calculate the MAX AVAIL value and 
-> is not quite perfect (it doesn't factor in complex crush rules with 
-> multiple 'take' ops, for one) but for basic rules it works fine.
-
-A few weeks ago I was very confused by what df shows. get_rule_weight_osd_map assumes an even distribution but we now know this is not the case, most of the time, because there are not enough PGs. When an pool uses a given OSD more than it should and another pool uses the same OSD less that it should, the sum is a variance that only makes sense if all pools occupy the same space which rarely is the case. It is not uncommon to see df report an OSD as being under used (variance < 1) while the actual usage of the OSD shows it is filled X% more than it should.
-
-I did not think to file a bug at the time (maybe there already is one). But reading your mail made me remember so... here it is ;-)
-
-Cheers
-
-> 
-> Anyway, that upmap code will take the set of pools you're balancing, look 
-> at how much they collectively *should* be putting on the target OSDs, and 
-> optimize against that (as opposed to the raw device CRUSH weight).
-> 
-> I *think* this is the simplest way to approach this (at least currently), 
-> although it is not in fact perfect.  We basically assume that the crush 
-> rules the admin has set up "make sense."  For example, if you have two 
-> crush rules that target a subset of the hierarchy, but they are 
-> overlapping (e.g., one is a subset of the other), then the subset that is 
-> covered by both will get utilized by the sum of the two and have a higher 
-> utilization--and the optimizer will not care (in fact, it will expect it).
-> 
-> That rules out at least one potential use-case, though: say you have a 
-> pool and rule defined that target a single host.  Depending on how much 
-> you store in that pool, those devices will be that much more utilized.  
-> One could imagine wanting Ceph to automatically monitor that pool's 
-> utilization (directly or indirectly) and push other pools' data out of 
-> those devices as the host-local pool fills.  I don't really like this 
-> scenario, though, so I can't tell if it is a "valid" one we should care 
-> about.
-> 
-> In any case, my hope is that at the end of the day we have a suite of 
-> opimization mechanisms: crush weights via the new choose_args, pg-upmap, 
-> and (if we don't deprecate it entirely) the osd reweight; and pg-based or 
-> osd utilization-based optimization (expected usage vs actual usage, or 
-> however you want to put it).  Ideally, they could use a common setup 
-> framework that handles the calculation of what the expected/optimal 
-> targets we're optimizing against (using something like the above) so that 
-> it isn't reinvented/reimplemented (or, more likely, not!) for each one.
-> 
-> Is it possible?
-> sage
-> 
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
