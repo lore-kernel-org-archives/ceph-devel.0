@@ -1,23 +1,23 @@
 From: Loic Dachary <loic@dachary.org>
 Subject: Re: crush optimization targets
-Date: Wed, 10 May 2017 18:46:53 +0200
-Message-ID: <8ec07e2b-20f9-6161-f9b0-4a33a01eccab@dachary.org>
+Date: Wed, 10 May 2017 19:04:17 +0200
+Message-ID: <75b686d1-51b5-3df6-82a8-8c2b367b3544@dachary.org>
 References: <alpine.DEB.2.11.1705101247210.18953@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay8-d.mail.gandi.net ([217.70.183.201]:48102 "EHLO
-        relay8-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753226AbdEJQq6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 10 May 2017 12:46:58 -0400
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:59816 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753001AbdEJREW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 10 May 2017 13:04:22 -0400
 In-Reply-To: <alpine.DEB.2.11.1705101247210.18953@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+
 
 On 05/10/2017 03:00 PM, Sage Weil wrote:
 > This is slightly off topic, but I want to throw out one more thing into 
@@ -38,6 +38,13 @@ On 05/10/2017 03:00 PM, Sage Weil wrote:
 > used by the 'df' code when trying to calculate the MAX AVAIL value and 
 > is not quite perfect (it doesn't factor in complex crush rules with 
 > multiple 'take' ops, for one) but for basic rules it works fine.
+
+A few weeks ago I was very confused by what df shows. get_rule_weight_osd_map assumes an even distribution but we now know this is not the case, most of the time, because there are not enough PGs. When an pool uses a given OSD more than it should and another pool uses the same OSD less that it should, the sum is a variance that only makes sense if all pools occupy the same space which rarely is the case. It is not uncommon to see df report an OSD as being under used (variance < 1) while the actual usage of the OSD shows it is filled X% more than it should.
+
+I did not think to file a bug at the time (maybe there already is one). But reading your mail made me remember so... here it is ;-)
+
+Cheers
+
 > 
 > Anyway, that upmap code will take the set of pools you're balancing, look 
 > at how much they collectively *should* be putting on the target OSDs, and 
@@ -70,10 +77,8 @@ On 05/10/2017 03:00 PM, Sage Weil wrote:
 > it isn't reinvented/reimplemented (or, more likely, not!) for each one.
 > 
 > Is it possible?
-
-I'm afraid I'm not able to usefully comment on this because I've not thought about ways to address multi-pool / varying PGs sizes problems. I'll think about it.
-
-Cheers
+> sage
+> 
 
 -- 
 Loïc Dachary, Artisan Logiciel Libre
