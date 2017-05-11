@@ -1,86 +1,67 @@
-From: Forumulator V <forumulator@gmail.com>
-Subject: Re: GSoC participant Pranjal Agrawal
-Date: Thu, 11 May 2017 05:48:28 -0400
-Message-ID: <CAN1NP8ioYMAfdsv09YuRFoua9s9_ExaQwECafXh3kU4N8GB83A@mail.gmail.com>
-References: <1434908636.6039724.1494290728770.JavaMail.zimbra@redhat.com>
- <2014928941.6040021.1494290915738.JavaMail.zimbra@redhat.com> <CAF-wwdFwLHqpBjS6=kW=fZTaWVaGjsZp7QQWAX-em19b3=ob-A@mail.gmail.com>
+From: Jan Fajerski <jfajerski@suse.com>
+Subject: Monitoring ceph and prometheus
+Date: Thu, 11 May 2017 13:52:12 +0200
+Message-ID: <20170511115211.isjqn6y3x2tuqxbo@jf_suse_laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-15; format=flowed
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f179.google.com ([209.85.217.179]:34277 "EHLO
-        mail-ua0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932086AbdEKJs3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 May 2017 05:48:29 -0400
-Received: by mail-ua0-f179.google.com with SMTP id g49so23790400uaa.1
-        for <ceph-devel@vger.kernel.org>; Thu, 11 May 2017 02:48:29 -0700 (PDT)
-In-Reply-To: <CAF-wwdFwLHqpBjS6=kW=fZTaWVaGjsZp7QQWAX-em19b3=ob-A@mail.gmail.com>
+Received: from smtp.nue.novell.com ([195.135.221.5]:35066 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932385AbdEKLwR (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Thu, 11 May 2017 07:52:17 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: Ali Maredia <amaredia@redhat.com>, Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>, Orit Wasserman <owasserm@redhat.com>, Casey Bodley <cbodley@redhat.com>, Matt Benjamin <mbenjami@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi everyone,
+Hi list,
+I recently looked into Ceph monitoring with prometheus. There is already a ceph 
+exporter for this purpose here https://github.com/digitalocean/ceph_exporter.
 
-Sorry for the delayed reply, I was travelling. I'm really happy to
-have been selected to work on the file backend,
-and looking forward to it. Also excited to work with all of you.
+Prometheus encourages software projects to instrument their code directly and 
+expose this data, instead of using an external piece of code. Several libraries 
+are provided for this purpose: 
+https://prometheus.io/docs/instrumenting/clientlibs/
 
-My plan is basically to create a new backend first(first 1/2 of the
-project), and then integrate it into RGW(2nd half)
-via an abstraction replacing the RGW Rados class. For that, I'll need
-to decouple the Ceph specific calls from
-RGW ops, and since the task is pretty big, I'd like to get ahead in
-the communit bonding period itself, making a list
-of calls that I need to refactor and so forth.
+I think there are arguments for adding this instrumentation to Ceph directly.  
+Generally speaking it should reduce overall complexity in the code (no extra 
+exporter component outside of ceph) and in operations (no extra package and 
+configuration).
 
-For anyone who's interested, here's my GSoC proposal, in which I have
-listed my entire plan so far:
-https://docs.google.com/document/d/1sEzGJB7u5zBkpeY6WKKePKIqYfrsMHyG3t3l-0Sl6uQ/edit?usp=sharing
+The direct instrumentation could happen in two places:
+1)
+Directly in Cephs C++ code using https://github.com/jupp0r/prometheus-cpp.  This 
+would mean daemons expose their metrics directly via the prometheus http 
+interface. This would be the most direct way of exposing metrics, prometheus 
+would simply poll all endpoints. Service discovery for scrape targets, say added 
+or removed OSDS, would however have to be handled somewhere. For orchestration 
+tools à la k8s, ansible, salt, ... either have this feature already or it would 
+be simple enough to add. Deployments not using a tool like that need another 
+approach. Prometheus offer various mechanisms 
+(https://prometheus.io/docs/operating/configuration/#%3Cscrape_config%3E) or a 
+ceph component (say mon or mgr) could handle this.
 
-The main section of interest is the interface and implementation
-section. Please feel free to comment with any
-thoughts you might have.
+2)
+Add a ceph-mgr plugin that exposes the metrics available to ceph-mgr as a 
+prometheus scrape target (using https://github.com/prometheus/client_python).  
+This would handle the service discovery issue for ceph daemons out of the box 
+(though not for the actual mgr-daemon which is the scrape target). The code 
+would also be in a central location instead of being scattered in several 
+places. It does however add a (maybe pointless) level of indirection 
+($ceph_daemon -> ceph-mgr -> prometheus) and adds the need for two different 
+scrape intervals (assuming mgr polls metrics from daemons).
 
-I'll be asking all my questions here, once I'm actively doing the RGW
-refactoring part itself.
+I'm aware of the current dashboard efforts based on ceph-mgr exported data. I'm 
+sure the data export for the dashboard and prometheus could be unified at some 
+point.
 
-Regards,
-Pranjal
+Best,
+Jan
 
-On Tue, May 9, 2017 at 12:17 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
-> Welcome aboard Pranjal!
->
-> On Tue, May 9, 2017 at 10:48 AM, Ali Maredia <amaredia@redhat.com> wrote:
->> Adding Ceph-devel. Pranjal will be working on the first steps toward decoupling the RGW from the rest of Ceph.
->>
->> Welcome!
->>
->> -Ali
->>
->> ----- Original Message -----
->>> From: "Ali Maredia" <amaredia@redhat.com>
->>> To: "Yehuda Sadeh-Weinraub" <ysadehwe@redhat.com>, "Orit Wasserman" <owasserm@redhat.com>, "Casey Bodley"
->>> <cbodley@redhat.com>, "Matt Benjamin" <mbenjami@redhat.com>
->>> Cc: "Forumulator V" <forumulator@gmail.com>
->>> Sent: Monday, May 8, 2017 8:45:28 PM
->>> Subject: GSoC participant Pranjal Agrawal
->>>
->>> Hey everyone I'd like to welcome one of our GSoC participants Pranjal
->>> Agrawal! He is from India and studies at the Indian Institute of Technology
->>> Guwahati. He'll be working on the local back-end for the RGW.
->>>
->>> Pranjal, Yehuda is the tech lead for the RGW and Orit, Casey, and Matt are
->>> also heavy contributors to the RGW, and have forgotten more about the RGW
->>> then I've learned ;).
->>>
->>> -Ali
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Cheers,
-> Brad
+-- 
+Jan Fajerski
+Engineer Enterprise Storage
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
+HRB 21284 (AG Nürnberg)
