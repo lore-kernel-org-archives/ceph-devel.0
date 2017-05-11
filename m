@@ -1,81 +1,53 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Monitoring ceph and prometheus
-Date: Thu, 11 May 2017 13:14:42 +0100
-Message-ID: <CALe9h7ed4aUDYEJKfH8qSoVmiPB8+F+g7+ffzrwE08sdX7RHSQ@mail.gmail.com>
-References: <20170511115211.isjqn6y3x2tuqxbo@jf_suse_laptop>
+From: Warren Wang - ISD <Warren.Wang@walmart.com>
+Subject: Re: EXT: Re: [Ceph-ansible] EXT: Re: EXT: Re: osd-directory scenario
+ is used by us
+Date: Thu, 11 May 2017 12:09:48 +0000
+Message-ID: <B5F2444B-0FCB-4739-8F13-C36EB37ABD55@walmart.com>
+References: <C7677170-0BA7-4310-B25B-CC3006517D2D@walmart.com>,<b56c9d1d-07c3-2b50-fffc-fabbc86d75a8@sanger.ac.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:35157 "EHLO
-        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932330AbdEKMPE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 May 2017 08:15:04 -0400
-Received: by mail-wm0-f44.google.com with SMTP id b84so38874825wmh.0
-        for <ceph-devel@vger.kernel.org>; Thu, 11 May 2017 05:15:04 -0700 (PDT)
-In-Reply-To: <20170511115211.isjqn6y3x2tuqxbo@jf_suse_laptop>
+Received: from ppes-mail-n6.wal-mart.com ([161.168.133.166]:40010 "EHLO
+        ppes-mail-n6.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755624AbdEKMXE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 May 2017 08:23:04 -0400
+In-Reply-To: <b56c9d1d-07c3-2b50-fffc-fabbc86d75a8@sanger.ac.uk>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Matthew Vernon <mv3@sanger.ac.uk>
+Cc: Gregory Meno <gmeno@redhat.com>, Michael Gugino <Michael.Gugino@walmart.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users-bounces@lists.ceph.com>, "ceph-ansible@lists.ceph.com" <ceph-ansible@lists.ceph.com>, Sebastien Han <shan@redhat.com>
 
-On Thu, May 11, 2017 at 12:52 PM, Jan Fajerski <jfajerski@suse.com> wrote:
-> Hi list,
-> I recently looked into Ceph monitoring with prometheus. There is already a
-> ceph exporter for this purpose here
-> https://github.com/digitalocean/ceph_exporter.
->
-> Prometheus encourages software projects to instrument their code directly
-> and expose this data, instead of using an external piece of code. Several
-> libraries are provided for this purpose:
-> https://prometheus.io/docs/instrumenting/clientlibs/
->
-> I think there are arguments for adding this instrumentation to Ceph
-> directly.  Generally speaking it should reduce overall complexity in the
-> code (no extra exporter component outside of ceph) and in operations (no
-> extra package and configuration).
->
-> The direct instrumentation could happen in two places:
-> 1)
-> Directly in Cephs C++ code using https://github.com/jupp0r/prometheus-cpp.
-> This would mean daemons expose their metrics directly via the prometheus
-> http interface. This would be the most direct way of exposing metrics,
-> prometheus would simply poll all endpoints. Service discovery for scrape
-> targets, say added or removed OSDS, would however have to be handled
-> somewhere. For orchestration tools à la k8s, ansible, salt, ... either have
-> this feature already or it would be simple enough to add. Deployments not
-> using a tool like that need another approach. Prometheus offer various
-> mechanisms
-> (https://prometheus.io/docs/operating/configuration/#%3Cscrape_config%3E) or
-> a ceph component (say mon or mgr) could handle this.
->
-> 2)
-> Add a ceph-mgr plugin that exposes the metrics available to ceph-mgr as a
-> prometheus scrape target (using
-> https://github.com/prometheus/client_python).  This would handle the service
-> discovery issue for ceph daemons out of the box (though not for the actual
-> mgr-daemon which is the scrape target). The code would also be in a central
-> location instead of being scattered in several places. It does however add a
-> (maybe pointless) level of indirection ($ceph_daemon -> ceph-mgr ->
-> prometheus) and adds the need for two different scrape intervals (assuming
-> mgr polls metrics from daemons).
-
-I would love to see a mgr module for prometheus integration!
-
-John
-
-> I'm aware of the current dashboard efforts based on ceph-mgr exported data.
-> I'm sure the data export for the dashboard and prometheus could be unified
-> at some point.
->
-> Best,
-> Jan
->
-> --
-> Jan Fajerski
-> Engineer Enterprise Storage
-> SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
-> HRB 21284 (AG Nürnberg)
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+TlZNZSBqb3VybmFscywgb3IgYW55IENlcGggZmlsZXN0b3JlIGpvdXJuYWwsIGlzIHJlYWxseSBv
+bmx5IHVzZWQgZm9yIHdyaXRlcy4gSWYgeW91IHdhdGNoIHRoZSBJTyBvbiB5b3VyIGpvdXJuYWxz
+LCB5b3Ugd2lsbCBzZWUgdGhpcy4gVGhlIG9ubHkgdGhpbmcgeW91IGdldCBoZXJlIGlzIGEgZmFz
+dGVyIHdyaXRlIEFDSywgaWYgeW91IGhhdmUgY2hvc2VuIHRoZSByaWdodCBOVk1lIGRldmljZS4g
+V2UgaGF2ZSB0ZXN0ZWQgc29tZSBzbG93ZXIgdGhhbiBTQVRBIFNTRC4gQSBiaXQgb2YgYSB3YXN0
+ZSBvZiBsb3RzIG9mIGV4dHJhIHNwYWNlIGluIHNvbWUgY2FzZXMuIA0KDQpXZSBsZXZlcmFnZSB0
+aGUgTlZNZSBkZXZpY2VzIHRvIGFjY2VsZXJhdGUgb3VyIHdyaXRlcyBhbmQgcmVhZHMuIEFuZCB3
+ZSBnZXQgdGhlIGJlbmVmaXQgb2YgdGhlIGZsdXNoIGZyb20gam91cm5hbCB0byBPU0QgYmVpbmcg
+ZmFzdGVyIHRvby4gUkdXIGluZGV4ZXMgYXJlIG9uZSBleGFtcGxlIG9mIHRoaXMuIA0KDQpJdCBp
+cyBub3QgdW5jb21tb24gZm9yIHVzIHRvIHNlZSBib3RoIGhpZ2ggYmFuZHdpZHRoIGFuZCBoaWdo
+IElPUFMgcmVxdWVzdHMgY29tZSBpbiBhdCB0aGUgc2FtZSB0aW1lIGZyb20gdGhlIHNhbWUgSGFk
+b29wIGpvYi4gRm9ydHVuYXRlbHkgb3VyIGJpZyBkYXRhIHRlYW0gaGFzIGJlZW4gbXVjaCBoYXBw
+aWVyIG5vdyB0aGF0IHdlIGhhdmUgbW92ZWQgdG8gdGhpcyBzb3J0IG9mIHNldHVwLiANCg0KV2Fy
+cmVuDQoNCj4gT24gTWF5IDExLCAyMDE3LCBhdCA0OjQxIEFNLCBNYXR0aGV3IFZlcm5vbiA8bXYz
+QHNhbmdlci5hYy51az4gd3JvdGU6DQo+IA0KPj4gT24gMDgvMDUvMTcgMDQ6NTcsIFdhcnJlbiBX
+YW5nIC0gSVNEIHdyb3RlOg0KPj4gDQo+PiBBIGxpdHRsZSBleHRyYSBiYWNrZ3JvdW5kIGhlcmUu
+IElmIENlcGggZGlyZWN0bHkgc3VwcG9ydGVkIExWTQ0KPj4gZGV2aWNlcyBhcyBPU0RzLCB3ZSBw
+cm9iYWJseSB3b3VsZG7igJl0IGhhdmUgdG8gZG8gd2hhdCB3ZeKAmXJlIGRvaW5nDQo+PiBub3cu
+ICBXZSBkb27igJl0IGtub3cgb2YgYSB3YXkgdG8gYmUgYWJsZSB0byB1c2UgTFZNIGNhY2hlIGRl
+dmljZSBhcyBhbg0KPj4gT1NEIHdpdGhvdXQgdGhpcyB0eXBlIG9mIGNvbmZpZy4gVGhpcyBpcyBw
+cmltYXJpbHkgdG8gc3VwcG9ydCBiaWcNCj4+IGRhdGEgd29ya2xvYWRzIHRoYXQgdXNlIG9iamVj
+dCBzdG9yYWdlIGFzIHRoZSBvbmx5IGJhY2tpbmcgc3RvcmFnZS4NCj4+IFNvIHRoZSB0eXBlIG9m
+IElPIHRoYXQgd2Ugc2VlIGlzIGhpZ2hseSBpcnJlZ3VsYXIsIGNvbXBhcmVkIHRvIG1vc3QNCj4+
+IG9iamVjdCBzdG9yYWdlIHdvcmtsb2Fkcy4NCj4gDQo+IFRoaXMgaXMgcHJvYmFibHkgYSBzdHVw
+aWQgcXVlc3Rpb24sIGJ1dCBkb2VzIHVzaW5nIHlvdXIgTlZNZSBhcyBjZXBoIGpvdXJuYWxzICh3
+aGljaCBpcyB3aGF0IHdlIGRvKSBub3QgZG8gdGhlIHNhbWUgc29ydCBvZiBqb2IgYXMgTFZNIGNh
+Y2hlIGRldmljZXM/DQo+IA0KPiBSZWdhcmRzLA0KPiANCj4gTWF0dGhldw0KPiANCj4gDQo+IC0t
+IA0KPiBUaGUgV2VsbGNvbWUgVHJ1c3QgU2FuZ2VyIEluc3RpdHV0ZSBpcyBvcGVyYXRlZCBieSBH
+ZW5vbWUgUmVzZWFyY2ggTGltaXRlZCwgYSBjaGFyaXR5IHJlZ2lzdGVyZWQgaW4gRW5nbGFuZCB3
+aXRoIG51bWJlciAxMDIxNDU3IGFuZCBhIGNvbXBhbnkgcmVnaXN0ZXJlZCBpbiBFbmdsYW5kIHdp
+dGggbnVtYmVyIDI3NDI5NjksIHdob3NlIHJlZ2lzdGVyZWQgb2ZmaWNlIGlzIDIxNSBFdXN0b24g
+Um9hZCwgTG9uZG9uLCBOVzEgMkJFLiANCg==
