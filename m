@@ -1,68 +1,145 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: crush optimization targets
-Date: Thu, 11 May 2017 08:41:47 +0200
-Message-ID: <12440f27-f33f-87ab-5ebb-0a9263c64821@dachary.org>
-References: <alpine.DEB.2.11.1705101247210.18953@piezo.novalocal>
- <e566cfec-26c7-e626-cbbb-f010ef4702dc@villaneau.fr>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: GSOC on ceph-mgr : SMARTER SMARTER REWEIGHT-BY-UTILIZATION
+Date: Thu, 11 May 2017 15:18:23 +0800
+Message-ID: <CAJE9aON0cqmfRWYK-QyhA04Gqmm4a8Cs71bCoyc07Wt-REW=0g@mail.gmail.com>
+References: <CAAXqJ+pv=rGtDFD=e=HPCGJyQE9qVLchDpNaaYQFiPd3iRCohw@mail.gmail.com>
+ <CAJE9aON5UwizH80RZjp6UjCM6mbmReXo46QtV-OkBiGN4UU9kQ@mail.gmail.com>
+ <CAAXqJ+qZxuyoD-OasWkANF0OP1TGLHb1HCW2QRaNJ_ewHHOoTw@mail.gmail.com> <CAAXqJ+qjAoBtG7cDRzO3own9o-KaGpWHJZxekSr+XqXtFztWDA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay9-d.mail.gandi.net ([217.70.183.199]:60599 "EHLO
-        relay9-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751208AbdEKGlw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 May 2017 02:41:52 -0400
-In-Reply-To: <e566cfec-26c7-e626-cbbb-f010ef4702dc@villaneau.fr>
+Received: from mail-ua0-f178.google.com ([209.85.217.178]:36126 "EHLO
+        mail-ua0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753303AbdEKHS2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 May 2017 03:18:28 -0400
+Received: by mail-ua0-f178.google.com with SMTP id j17so20195321uag.3
+        for <ceph-devel@vger.kernel.org>; Thu, 11 May 2017 00:18:28 -0700 (PDT)
+In-Reply-To: <CAAXqJ+qjAoBtG7cDRzO3own9o-KaGpWHJZxekSr+XqXtFztWDA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xavier Villaneau <xavier.ceph@villaneau.fr>
+To: Spandan Kumar Sahu <spandankumarsahu@gmail.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Xavier,
-
-On 05/11/2017 07:52 AM, Xavier Villaneau wrote:
-> Hello Sage,
-> 
-> On 05/10/2017 at 09:00 AM, Sage Weil wrote:
->> I *think* this is the simplest way to approach this (at least currently),
->> although it is not in fact perfect.  We basically assume that the crush
->> rules the admin has set up "make sense."  For example, if you have two
->> crush rules that target a subset of the hierarchy, but they are
->> overlapping (e.g., one is a subset of the other), then the subset that is
->> covered by both will get utilized by the sum of the two and have a higher
->> utilization--and the optimizer will not care (in fact, it will expect it).
+On Tue, May 9, 2017 at 9:43 AM, Spandan Kumar Sahu
+<spandankumarsahu@gmail.com> wrote:
 >>
->> That rules out at least one potential use-case, though: say you have a
->> pool and rule defined that target a single host.  Depending on how much
->> you store in that pool, those devices will be that much more utilized.
->> One could imagine wanting Ceph to automatically monitor that pool's
->> utilization (directly or indirectly) and push other pools' data out of
->> those devices as the host-local pool fills.  I don't really like this
->> scenario, though, so I can't tell if it is a "valid" one we should care
->> about.
-> It looks like upmap calculation works by counting placement groups, so "weird" maps and rules are mostly a problem if the overlapping pools have different ratios of bytes per PG. Maybe that data could be used in the algorithm, but I don't know if the added complexity would be worth it. At this point, it is probably fair to think those corner cases are only seen on maps created by knowledgeable users.
-> 
->> In any case, my hope is that at the end of the day we have a suite of
->> opimization mechanisms: crush weights via the new choose_args, pg-upmap,
->> and (if we don't deprecate it entirely) the osd reweight; and pg-based or
->> osd utilization-based optimization (expected usage vs actual usage, or
->> however you want to put it).  Ideally, they could use a common setup
->> framework that handles the calculation of what the expected/optimal
->> targets we're optimizing against (using something like the above) so that
->> it isn't reinvented/reimplemented (or, more likely, not!) for each one.
-> I like pg-upmap, it looks great for fine control and has a small impact (compared to manipulating weights, which could move thousands of PGs around). This means it is ideal for re-balancing running clusters.
+>>>>
+>>>> I would really appreciate if anyone can go through the proposal, and
+>>>> suggest me changes/problems.
+>>>
+>>> i like your idea of applying PID to ceph. but i am not sure if the PID
+>>> algorithm applies to Ceph. or put in other words, is a Ceph cluster a
+>>> linear system? what is it's transfer function? does it satisfy the
+>>> Nyquist stability criterion? if not, how can we determine its
+>>> stability? as it's always the most difficult part to tune the PID
+>>> controller parameters when designing a PID based control system.
+>>>
+>> The Ceph cluster is a stochastic process, under a short number of
+>> trials ( or runs/iterations). However, when the trials are made in
+>> reasonably large number, the weight distribution is linearly
+>> proportional to the weight of the OSD, (if the anomaly were not to
 
-The weight manipulation is done by small increments. I believe each increment can be applied individually to throttle the PGs movements (i.e. a crushmap with slightly modified weights can be produced & uploaded at each step). It's not as fine grain as pg-upmap but it does not need to be an all-or-nothing optimization either.
+the weight is a *distribution*, but not a function of time. could you
+explain a little bit its input and output using the model explained by
+https://en.wikipedia.org/wiki/Linear_system ?
 
-> It also addresses the "weight spike" issue (that 5 1 1 1 1 case) since it can just move placement groups until it runs of options. This allows the theoretical limit cases to be reached eventually, whereas with weights it's only asymptotic.
-> 
-> Hopefully that won't be too confusing; reweight is already quite difficult to explain to new users, so pg-upmap will probably be too. There's also the question of how those tools interact with each other, for instance if PG-based optimization is run on top of utilization-based optimization.
-> 
-> (Hopefully I did not say anything too wrong, I haven't been able to follow those developments closely for the past couple of weeks),
-> 
-> Regards,
+>> happen). Hence, the weight distribution is linear in terms of weight
 
-Cheers
+the function of "distribution" does not have the property of
+superposition, that's the crux of the problem we are facing. we
+assumed that it was, but it turns out to be not. that's why Lo=C3=AFc and
+other developers are trying to use some optimization methods to reach
+an optimum solution.
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+>> of the OSD for reasonable number of iterations.
+>> Under normal conditions, the "load percentage the OSD handles" is an
+>> "expected" linear function of the "ratio of the OSD's weight to the
+>> total weight".
+>>
+> The transfer function and Nyquist stability criterion are difficult to
+> determine because the cluster behaves stochastic-ally for small
+> numbers. The stability can be determined by the difference in the
+> current load percentage of the OSD and the expected load percentage.
+
+but you mentioned above that it is a linear system if the number of
+trials is large enough. so let's assume that we have large number of
+trials.
+
+>
+> As an example, Loic did implement a simpler version of the PID, and
+> gained significant improvement.This is his algorithm :
+> " - Distribute the desired number of PGs
+>     - Subtract 1% of the weight of the OSD that is the most over used
+>     - Add the subtracted weight to the OSD that is the most under used
+>     - Repeat until the Kullback=E2=80=93Leibler divergence[8] is small en=
+ough
+> " (Discussed on " revisiting uneven Crush" in the mailing list)
+
+this is an iterative method to approach the optimum weights.
+
+>
+> So, basically, he was more or less implementing only the Proportional
+> (P) part of the PID system and only for the most and least used OSDs.
+> This was the performance gain he obtained :
+> " In all tests the situation improves at least by an order of
+> magnitude. For instance when there is a 30% difference between two
+> OSDs, it is down to less than 3% after optimization. "
+>
+> This made me hopeful that we can go ahead with a stronger form of PID
+> and expect a better optimisation.
+>
+> I understand that tuning the PID is the most challenging part. But
+> there are various PID tuning algorithms, and there are certain PID
+> tuners, one of which I have worked on and have included in my
+> proposal.
+
+there are.  but i think PID has its limitation.
+
+>
+>>> instead, i think Ceph is a stochastic process. as discussed in another
+>>> thread (with the title of "crush multipick anomaly") in this mailing
+>>> list.
+>>>
+>> Also, should I start with the first part of the project, as to how to
+>> analyse a reweight algorithm?
+
+yes! please see Lo=C3=AFc's crush tool it offers a subcommand "analyze"
+which will show how the PG is distributed among OSDs. the more even
+the better.
+
+>>
+>>>>
+>>>> Thanks
+>>>>
+>>>> Spandan Kumar Sahu
+>>>> IIT Kharagpur
+>>>>
+>>>> [1] : https://github.com/SpandanKumarSahu/Ceph_Proposal/blob/master/GS=
+oCProposalSMARTERREWEIGHT-BY-UTILIZATION.pdf
+>>>> [2] : https://github.com/SpandanKumarSahu/Ceph_Proposal/blob/master/Re=
+adme
+>>>
+>>>
+>>>
+>>> --
+>>> Regards
+>>> Kefu Chai
+>>
+>>
+>>
+>> --
+>> Spandan Kumar Sahu
+>> IIT Kharagpur
+>
+>
+>
+> --
+> Spandan Kumar Sahu
+> IIT Kharagpur
+
+
+
+--=20
+Regards
+Kefu Chai
