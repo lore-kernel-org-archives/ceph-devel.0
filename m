@@ -1,44 +1,86 @@
-From: Matthew Vernon <mv3@sanger.ac.uk>
-Subject: Re: [Ceph-ansible] EXT: Re: EXT: Re: osd-directory scenario is used
- by us
-Date: Thu, 11 May 2017 09:41:07 +0100
-Message-ID: <b56c9d1d-07c3-2b50-fffc-fabbc86d75a8@sanger.ac.uk>
-References: <C7677170-0BA7-4310-B25B-CC3006517D2D@walmart.com>
+From: Forumulator V <forumulator@gmail.com>
+Subject: Re: GSoC participant Pranjal Agrawal
+Date: Thu, 11 May 2017 05:48:28 -0400
+Message-ID: <CAN1NP8ioYMAfdsv09YuRFoua9s9_ExaQwECafXh3kU4N8GB83A@mail.gmail.com>
+References: <1434908636.6039724.1494290728770.JavaMail.zimbra@redhat.com>
+ <2014928941.6040021.1494290915738.JavaMail.zimbra@redhat.com> <CAF-wwdFwLHqpBjS6=kW=fZTaWVaGjsZp7QQWAX-em19b3=ob-A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.sanger.ac.uk ([193.62.202.243]:39616 "EHLO
-        smtp.sanger.ac.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932258AbdEKI5A (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 May 2017 04:57:00 -0400
-In-Reply-To: <C7677170-0BA7-4310-B25B-CC3006517D2D@walmart.com>
+Received: from mail-ua0-f179.google.com ([209.85.217.179]:34277 "EHLO
+        mail-ua0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932086AbdEKJs3 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 May 2017 05:48:29 -0400
+Received: by mail-ua0-f179.google.com with SMTP id g49so23790400uaa.1
+        for <ceph-devel@vger.kernel.org>; Thu, 11 May 2017 02:48:29 -0700 (PDT)
+In-Reply-To: <CAF-wwdFwLHqpBjS6=kW=fZTaWVaGjsZp7QQWAX-em19b3=ob-A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Warren Wang - ISD <Warren.Wang@walmart.com>, Gregory Meno <gmeno@redhat.com>, Michael Gugino <Michael.Gugino@walmart.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users-bounces@lists.ceph.com>
-Cc: "ceph-ansible@lists.ceph.com" <ceph-ansible@lists.ceph.com>, Sebastien Han <shan@redhat.com>
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: Ali Maredia <amaredia@redhat.com>, Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>, Orit Wasserman <owasserm@redhat.com>, Casey Bodley <cbodley@redhat.com>, Matt Benjamin <mbenjami@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 08/05/17 04:57, Warren Wang - ISD wrote:
+Hi everyone,
 
-> A little extra background here. If Ceph directly supported LVM
-> devices as OSDs, we probably wouldn’t have to do what we’re doing
-> now.  We don’t know of a way to be able to use LVM cache device as an
-> OSD without this type of config. This is primarily to support big
-> data workloads that use object storage as the only backing storage.
-> So the type of IO that we see is highly irregular, compared to most
-> object storage workloads.
+Sorry for the delayed reply, I was travelling. I'm really happy to
+have been selected to work on the file backend,
+and looking forward to it. Also excited to work with all of you.
 
-This is probably a stupid question, but does using your NVMe as ceph 
-journals (which is what we do) not do the same sort of job as LVM cache 
-devices?
+My plan is basically to create a new backend first(first 1/2 of the
+project), and then integrate it into RGW(2nd half)
+via an abstraction replacing the RGW Rados class. For that, I'll need
+to decouple the Ceph specific calls from
+RGW ops, and since the task is pretty big, I'd like to get ahead in
+the communit bonding period itself, making a list
+of calls that I need to refactor and so forth.
+
+For anyone who's interested, here's my GSoC proposal, in which I have
+listed my entire plan so far:
+https://docs.google.com/document/d/1sEzGJB7u5zBkpeY6WKKePKIqYfrsMHyG3t3l-0Sl6uQ/edit?usp=sharing
+
+The main section of interest is the interface and implementation
+section. Please feel free to comment with any
+thoughts you might have.
+
+I'll be asking all my questions here, once I'm actively doing the RGW
+refactoring part itself.
 
 Regards,
+Pranjal
 
-Matthew
-
-
--- 
- The Wellcome Trust Sanger Institute is operated by Genome Research 
- Limited, a charity registered in England with number 1021457 and a 
- company registered in England with number 2742969, whose registered 
- office is 215 Euston Road, London, NW1 2BE. 
+On Tue, May 9, 2017 at 12:17 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
+> Welcome aboard Pranjal!
+>
+> On Tue, May 9, 2017 at 10:48 AM, Ali Maredia <amaredia@redhat.com> wrote:
+>> Adding Ceph-devel. Pranjal will be working on the first steps toward decoupling the RGW from the rest of Ceph.
+>>
+>> Welcome!
+>>
+>> -Ali
+>>
+>> ----- Original Message -----
+>>> From: "Ali Maredia" <amaredia@redhat.com>
+>>> To: "Yehuda Sadeh-Weinraub" <ysadehwe@redhat.com>, "Orit Wasserman" <owasserm@redhat.com>, "Casey Bodley"
+>>> <cbodley@redhat.com>, "Matt Benjamin" <mbenjami@redhat.com>
+>>> Cc: "Forumulator V" <forumulator@gmail.com>
+>>> Sent: Monday, May 8, 2017 8:45:28 PM
+>>> Subject: GSoC participant Pranjal Agrawal
+>>>
+>>> Hey everyone I'd like to welcome one of our GSoC participants Pranjal
+>>> Agrawal! He is from India and studies at the Indian Institute of Technology
+>>> Guwahati. He'll be working on the local back-end for the RGW.
+>>>
+>>> Pranjal, Yehuda is the tech lead for the RGW and Orit, Casey, and Matt are
+>>> also heavy contributors to the RGW, and have forgotten more about the RGW
+>>> then I've learned ;).
+>>>
+>>> -Ali
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Cheers,
+> Brad
