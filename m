@@ -1,32 +1,37 @@
-From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
-Subject: Alibaba's work on majority commit
-Date: Fri, 12 May 2017 00:41:46 +0800
-Message-ID: <FBA81CC7-C30D-4994-BC95-B11FAF32ABAD@alibaba-inc.com>
-References: <EE680D4A-C2A0-4A47-8780-FB3FD47FCD0D@alibaba-inc.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Alibaba's work on recovery process
+Date: Thu, 11 May 2017 17:44:42 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1705111741450.18953@piezo.novalocal>
+References: <a67e2852-8c58-aca2-cf08-f8315d00e470@corp.ovh.com> <017717D3-EE64-4BCB-A284-D066C32C8181@alibaba-inc.com> <CAE7zfpM33_7iBnoxOTq16TFh5MXmEE=xWJoTunV5=CSh24Kb+Q@mail.gmail.com> <F28FEF91-F57A-48FB-B673-817758BCAF58@alibaba-inc.com>
+ <abe1e3d7-7659-f991-63d4-2dea5400e90a@corp.ovh.com> <3CF80935-8AC5-41B1-BC56-7DFB0F590172@alibaba-inc.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from out0-224.mail.aliyun.com ([140.205.0.224]:36153 "EHLO
-        out0-224.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757777AbdEKQmY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 May 2017 12:42:24 -0400
-In-Reply-To: <EE680D4A-C2A0-4A47-8780-FB3FD47FCD0D@alibaba-inc.com>
+Received: from cobra.newdream.net ([66.33.216.30]:37514 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752298AbdEKRoq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 May 2017 13:44:46 -0400
+In-Reply-To: <3CF80935-8AC5-41B1-BC56-7DFB0F590172@alibaba-inc.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: Ming Lin <ming.lin@alibaba-inc.com>, =?GBK?B?0OzR072t?= <yanjiang.xyj@alibaba-inc.com>, Mark Nelson <mnelson@redhat.com>, Sage Weil <sweil@redhat.com>, =?GBK?B?wsC9qMrgKMLAvaEp?= <jianshu.ljs@alibaba-inc.com>, Gregory Farnum <gfarnum@redhat.com>
+To: "LIU, Fei" <james.liu@alibaba-inc.com>
+Cc: =?ISO-8859-2?Q?Piotr_Da=B3ek?= <piotr.dalek@corp.ovh.com>, ceph-devel <ceph-devel@vger.kernel.org>, Ming Lin <ming.lin@alibaba-inc.com>, =?ISO-2022-JP?Q?=1B$B=3Dy1d9=3E=1B=28J?= <yanjiang.xyj@alibaba-inc.com>, Mark Nelson <mnelson@redhat.com>
 
-Hi All,
-  Here is the slides that we presented this morning regarding to IO returni=
-ng once we get majority commit.=C2=A0 Please feel free to send us any comments a=
-nd questions.
-  =C2=A0
-  https://www.slideshare.net/jupiturliu/ceph-majority-commit
-  =C2=A0
-  Regards,
-  James
+On Fri, 12 May 2017, LIU, Fei wrote:
+> Hi Piotr,
+>    Here you go. We just uploaded the slide into slideshare for your reference. Please feel free to let us know if you have any comments.
+> 
+>    https://www.slideshare.net/jupiturliu/ceph-recovery-improvement-v02
+> 
+>    Regards,
+>    James
 
+Hi James-
 
+This work is very promising!  Putting the write info in the log is 
+probably one of the easier pieces to tackle (and Josh is already looking a 
+variation of the async recovery).  If you have the time I'd love to 
+resurrect that PR and get it into a mergeable state.  Is there an open PR 
+with the current code?
 
+sage
