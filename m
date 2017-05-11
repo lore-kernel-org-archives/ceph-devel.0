@@ -1,74 +1,94 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Monitoring ceph and prometheus
-Date: Thu, 11 May 2017 12:47:21 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1705111246400.18953@piezo.novalocal>
-References: <20170511115211.isjqn6y3x2tuqxbo@jf_suse_laptop> <CALe9h7ed4aUDYEJKfH8qSoVmiPB8+F+g7+ffzrwE08sdX7RHSQ@mail.gmail.com>
+Subject: Re: Mon identity in a dynamic environment
+Date: Thu, 11 May 2017 15:26:12 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1705111521580.18953@piezo.novalocal>
+References: <D538DFE2.8B37F%travis.nielsen@quantum.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1529629190-1494506843=:18953"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:59899 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:34758 "EHLO
         cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932181AbdEKMrY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 May 2017 08:47:24 -0400
-In-Reply-To: <CALe9h7ed4aUDYEJKfH8qSoVmiPB8+F+g7+ffzrwE08sdX7RHSQ@mail.gmail.com>
+        with ESMTP id S1756882AbdEKP0V (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 11 May 2017 11:26:21 -0400
+In-Reply-To: <D538DFE2.8B37F%travis.nielsen@quantum.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Travis Nielsen <Travis.Nielsen@Quantum.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi Travis,
 
---8323329-1529629190-1494506843=:18953
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-
-On Thu, 11 May 2017, John Spray wrote:
-> On Thu, May 11, 2017 at 12:52 PM, Jan Fajerski <jfajerski@suse.com> wrote:
-> > Hi list,
-> > I recently looked into Ceph monitoring with prometheus. There is already a
-> > ceph exporter for this purpose here
-> > https://github.com/digitalocean/ceph_exporter.
-> >
-> > Prometheus encourages software projects to instrument their code directly
-> > and expose this data, instead of using an external piece of code. Several
-> > libraries are provided for this purpose:
-> > https://prometheus.io/docs/instrumenting/clientlibs/
-> >
-> > I think there are arguments for adding this instrumentation to Ceph
-> > directly.  Generally speaking it should reduce overall complexity in the
-> > code (no extra exporter component outside of ceph) and in operations (no
-> > extra package and configuration).
-> >
-> > The direct instrumentation could happen in two places:
-> > 1)
-> > Directly in Cephs C++ code using https://github.com/jupp0r/prometheus-cpp.
-> > This would mean daemons expose their metrics directly via the prometheus
-> > http interface. This would be the most direct way of exposing metrics,
-> > prometheus would simply poll all endpoints. Service discovery for scrape
-> > targets, say added or removed OSDS, would however have to be handled
-> > somewhere. For orchestration tools à la k8s, ansible, salt, ... either have
-> > this feature already or it would be simple enough to add. Deployments not
-> > using a tool like that need another approach. Prometheus offer various
-> > mechanisms
-> > (https://prometheus.io/docs/operating/configuration/#%3Cscrape_config%3E) or
-> > a ceph component (say mon or mgr) could handle this.
-> >
-> > 2)
-> > Add a ceph-mgr plugin that exposes the metrics available to ceph-mgr as a
-> > prometheus scrape target (using
-> > https://github.com/prometheus/client_python).  This would handle the service
-> > discovery issue for ceph daemons out of the box (though not for the actual
-> > mgr-daemon which is the scrape target). The code would also be in a central
-> > location instead of being scattered in several places. It does however add a
-> > (maybe pointless) level of indirection ($ceph_daemon -> ceph-mgr ->
-> > prometheus) and adds the need for two different scrape intervals (assuming
-> > mgr polls metrics from daemons).
+On Wed, 10 May 2017, Travis Nielsen wrote:
+> How can we get monitors to work in an environment where their
+> identity/endpoint might change? (Kubernetes). On the Rook team we have a
+> few ideas on how to deal with this. What is your recommendation on which
+> one of these we should pursue or if you have another recommendation
+> altogether?
 > 
-> I would love to see a mgr module for prometheus integration!
+> Background: Consider the following in Kubernetes:
+> 
+> * A monitor runs inside a pod, which has an unstable ip address. Whenever
+> the pod restarts it might get a new ip address. This is not a frequent
+> event, but it also must be an expected part of failure or maintenance
+> * A stable endpoint can be created with a Kubernetes service, which is
+> done by routing to the ip address of the pod. Now you have a stable
+> address routing to the unstable address. You can hand out the service
+> address and theoretically nobody should care there is an unstable address
+> under the covers.
+> 
+> Solutions:
+> 
+> There are at least two approaches to this problem.
+> 
+> 1) Modify Ceph with the concept of an "advertise address" that is
+> different from the "bind address". In other words, the ip address the
+> monitor binds to locally is different than the ip address that is
+> advertised to the monmap. Other monitors and clients would all connect to
+> a mon with its advertise_addr, which would be routed to the the local
+> bind_addr where the mon is actually listening. The monmap would be stable
+> for a given set of mons even if they had a new bind_addr after restart.
+> The main challenge with this is that it would be a non-trivial change for
+> Ceph to support the advertise_addr.
+> 
+> This is a pattern followed in other systems such as etcd that support both
+> a bind and advertise address.
+> 
+> Today the mons prohibit an advertised address from being different from
+> the bind address with a check for the mon identity in a couple places such
+> as this:
+> https://github.com/ceph/ceph/blob/7f72100be553072d2b8fcf2699296fd2b23f2665/
+> src/msg/async/AsyncConnection.cc#L980
+> 
+> In a prototype, I confirmed that disabling this error allowed the
+> communication with monitors to be successful with a simulated
+> advertise_addr. Essentially I generated config files with an advertised ip
+> address, except that a mon would start with its own bind_addr in the
+> config. The prototype has the shortcoming that the bind_addr is in the mon
+> map, so there is still a problem as soon as the pod restarts. We still
+> need the advertise_addr to be in the monmap, while the mon binds to a
+> bind_addr.
 
-Me too!  It might make more sense to do it in C++ than python, though, for 
-performance reasons.
+I think this is the way to go, and I don't think it will be *that* 
+involved.  Probably it just requires an option to supplement public_addr 
+with bind_addr.  As long as the Messenger myaddr field is populated with 
+the public_addr (and not bind_addr) field I suspect everything will Just 
+Work.  Peers connecting to us will see the public_addr for their 
+getpeeraddr config and that's the one that the messenger will advertise 
+during its handshake; bind_addr would be used *only* by the actual bind 
+call.  Does that seem reasonable?
+
+> 2) Every time the mons get a new address, inject a new monmap to the
+> changed monitors. This would require no changes in the Ceph codebase, but
+> Rook would implement automation around the monmap injection. Rook would
+> carefully track the health of the monitors. When a mon ip address changes,
+> if quorum has been lost Rook would inject the new address to the monmap of
+> each mon, and the monitors would come up again. This seems feasible, but
+> it's also very difficult to get right.
+> 
+> This proposal is along a similar vein as #2 to move the same mon to a new
+> endpoint, but it doesn't seem complete for the scenario.
+> https://trello.com/c/mgmh0YGO/214-mon-ceph-mon-move
+
+Yeah, this seems more fragile.  :)
 
 sage
---8323329-1529629190-1494506843=:18953--
