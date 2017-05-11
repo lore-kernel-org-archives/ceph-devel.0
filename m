@@ -1,76 +1,69 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: RBD client wallclock profile during 4k random writes
-Date: Wed, 10 May 2017 19:21:23 -0500
-Message-ID: <b7cd8ab2-42a9-dd42-4b09-4910365a8674@redhat.com>
-References: <9e13c0f0-cde1-b8ec-d469-da5d87c5ba74@redhat.com>
- <CA+aFP1BBTvbNca1qEQeWyPYbiU497+cDqqO0OpCHnQNUy5+xdw@mail.gmail.com>
- <59cdc3c9-e6b0-bd9f-9826-33874a7423e1@redhat.com>
+From: Xavier Villaneau <xavier.ceph@villaneau.fr>
+Subject: Re: Calculating the expected PGs distribution
+Date: Wed, 10 May 2017 21:52:04 -0400
+Message-ID: <19453021-17e0-a39a-bb22-8ab73a9a8789@villaneau.fr>
+References: <4538c9b9-18a2-11b9-e5f1-00a0243c1d88@dachary.org>
+ <CAJRHzqn5D24EDts1RbJfP0Kn60Y+1E2MQDMdY1_M0Y2zaJxhqg@mail.gmail.com>
+ <443c9da8-54a7-7e3c-0603-3887865628fa@dachary.org>
+ <ca0b9821-fc03-9bbe-423f-568827d5ff96@dachary.org>
+ <f2e21f6e-5373-25de-f000-43a713902896@dachary.org>
+ <491efe42-07f3-5142-e181-fad958a860bf@villaneau.fr>
+ <07685bf4-61fc-fd56-d128-838ed5692965@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53442 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751096AbdEKAV0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 10 May 2017 20:21:26 -0400
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 3D4B664D94
-        for <ceph-devel@vger.kernel.org>; Thu, 11 May 2017 00:21:26 +0000 (UTC)
-In-Reply-To: <59cdc3c9-e6b0-bd9f-9826-33874a7423e1@redhat.com>
+Received: from mo20.mail-out.ovh.net ([178.32.228.20]:42320 "EHLO
+        mo20.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751633AbdEKBwK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 10 May 2017 21:52:10 -0400
+In-Reply-To: <07685bf4-61fc-fd56-d128-838ed5692965@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dillaman@redhat.com
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-
-
-On 05/10/2017 06:24 PM, Mark Nelson wrote:
+Le 05/10/2017 à 02:45 AM, Loic Dachary a écrit :
+> The best we can do is to lower the weight of the overweight item to get a set of weights that can lead to an even distribution. We cannot fix the fact that the overweight item will be underfilled. But by fixing the weights we can fix the fact that the other items are overfilled which is what causes problems to the sysadmin.
+I'm not sure that's the correct approach; over/under filled are relative 
+notions, meaning that if there are drives filling up slower than the 
+average cluster usage, then there must be drives filling up faster. 
+Whatever happens, that first large OSD won't be full when the other 
+drives are.
+> In our example (with 2 replicas)
 >
+> ( 5 + 1 + 1 + 1 + 1 ) / 2 = 4.5 therefore all items with a weight > 4.5 are overweight
 >
-> On 05/10/2017 05:31 PM, Jason Dillaman wrote:
->> On Wed, May 10, 2017 at 6:10 PM, Mark Nelson <mnelson@redhat.com> wrote:
->>> 1) 7 - tp_librbd, line 82
->>>
->>> Lots of stuff going on here, but the big thing is all the time spent in
->>> librbd::ImageCtx::write_to_cache.  70.2% of the total time in this
->>> thread is
->>> spent in ObjectCacher::writex with lots of nested stuff, but if you
->>> look all
->>> the way down on line 1293, another 11.8% of the time is spent in
->>> Locker()
->>> and 1.5% of the time spent in ~Locker().
->>
->> Yes -- the ObjectCacher is long overdue for a re-write since it's
->> single threaded. It looks like you were essentially performing
->> writethrough as well. I'd imagine you would just be better off
->> disabling the rbd cache when doing high-performance random write
->> workloads since you are going to get zero benefit from the cache with
->> that workload -- at least that's what I usually recommend.
->>
+> we remove the overweight items and sum the weight of the remaining items:
 >
-> Often I do turn rbd cache off for bluestore testing.  This was an older
-> conf file where I inadvertently hadn't disabled it.  Still, it's an
-> unfortunate choice that has to be made, potentially by someone other
-> than the user running the workload. :/
-
-Yep, disabling rbd cache bumped 4K write IOPS from ~14K to ~31K, and 
-closer ~36-37K with a higher IO depth at around 410% CPU usage.
-
-trace without rbd cache here:
-
-https://pastebin.com/t8FFsWNb
-
-looking a lot better, though thread 5 (tp_librbd) is still pegging. 
-Still a little bit of locking in various places.  a bit more time 
-shifted into _calc_target.
-
-async msgr is as expected a lot busier than it used to be.
-
+> ( 1 + 1 + 1 + 1 ) = 4
 >
-> Mark
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> and we divide by the number of replicas minus the number of overweight items
+>
+> 4 / ( 2 - 1 ) = 4
+>
+> and we set the weight of the overweight item to this number
+>
+> ( 4 + 1 + 1 + 1 + 1 ) / 2 = 4 therefore all items are <= maximum weight
+Actually, taking those weights would be worse: Because the weight of the 
+large drive is lower, Crush will favor putting data on the other drives 
+a bit more and will lead to them filling up faster.
+
+In the details with 4 1 1 1 1, numbered 0 through 4 with 2 replicas and 
+100 PGs:
+- There is a 4/8 = 50% chance of picking 0 as a primary drive, so that's 
+50 PGs using it already.
+- There is a 12.5% (1/8) chance of picking 1 as primary. Once that is 
+done, the remaining weights are 4 . 1 1 1 for a total of 7, meaning 
+there is a 4/7 = 57% chance of picking 0 as second OSD. Therefore the 
+chance of mapping to [1, 0] is 7.14%. Same for 2, 3 and 4 as primary, so 
+the total chance of having 0 as second OSD is 28.6%.
+On average, 78.6 PGs will be mapped to OSD 0 in either position. If we 
+round up the numbers nicely, the final expected PGs for 4 1 1 1 1 is 
+around 80 30 30 30 30. This is indeed more even, but actually worse for 
+drive usage if the size ratios are 5 1 1 1 1.
+
+-- 
+Xavier Villaneau
+Software Engineer, Concurrent Computer Corp.
+
