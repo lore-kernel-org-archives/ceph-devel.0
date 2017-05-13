@@ -1,93 +1,87 @@
-From: saumay agrawal <saumay.agrawal@gmail.com>
-Subject: Re: [GSOC] ceph-mgr: Cluster Status Dashboard
-Date: Sat, 13 May 2017 16:07:42 +0530
-Message-ID: <CA+b5B089q0sbcF07Di2-4JroUjZNNekvAa2SeOQvWgB7X8wqaQ@mail.gmail.com>
-References: <CA+b5B08BdnpZvbnWS+ocr2oObG4moc0nGibGwm6Taq9Eh=46wg@mail.gmail.com>
- <CALe9h7esz4MquzA6ZqCniOj8jb=j+7QdhnSkLTj+2d9HCyYtFw@mail.gmail.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: global backfill reservation?
+Date: Sat, 13 May 2017 18:55:04 +0200
+Message-ID: <CABZ+qqmtqL7Dgzu4XNsfyqgdJRZrkRXbfxRaRH+1bWg8zvDCBA@mail.gmail.com>
+References: <alpine.DEB.2.11.1705112237290.18953@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f49.google.com ([209.85.214.49]:33543 "EHLO
-        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750822AbdEMKiD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 13 May 2017 06:38:03 -0400
-Received: by mail-it0-f49.google.com with SMTP id w68so6334896itc.0
-        for <ceph-devel@vger.kernel.org>; Sat, 13 May 2017 03:38:03 -0700 (PDT)
-In-Reply-To: <CALe9h7esz4MquzA6ZqCniOj8jb=j+7QdhnSkLTj+2d9HCyYtFw@mail.gmail.com>
+Received: from mail-oi0-f42.google.com ([209.85.218.42]:35346 "EHLO
+        mail-oi0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755393AbdEMQzq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 13 May 2017 12:55:46 -0400
+Received: by mail-oi0-f42.google.com with SMTP id l18so94649492oig.2
+        for <ceph-devel@vger.kernel.org>; Sat, 13 May 2017 09:55:46 -0700 (PDT)
+Received: from mail-oi0-f43.google.com (mail-oi0-f43.google.com. [209.85.218.43])
+        by smtp.gmail.com with ESMTPSA id w186sm3176157oib.38.2017.05.13.09.55.44
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sat, 13 May 2017 09:55:45 -0700 (PDT)
+Received: by mail-oi0-f43.google.com with SMTP id h4so94599696oib.3
+        for <ceph-devel@vger.kernel.org>; Sat, 13 May 2017 09:55:44 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1705112237290.18953@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: kefu chai <tchaikov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sat, May 13, 2017 at 1:35 PM, John Spray <jspray@redhat.com> wrote:
-> On Sat, May 13, 2017 at 6:06 AM, saumay agrawal
-> <saumay.agrawal@gmail.com> wrote:
->> Hi Kefu,
->>
->> I apologize for the late reply.
->>
->> I have been looking into the PR you mentioned earlier
->> https://github.com/ceph/ceph/pull/14946 . I have also explored the
->> Calamari Dashboard in the past few days. I have some queries.
->>
->> I guess since Calamari Dashboard already does the job of visualizing
->> the statistics of a Ceph cluster (health, OSDs, MONs, pools, IOPS,
->> space utilization etc), we would primarily be improving on its UI/UX,
->> that is to say the visualization portion and some other
->> functionalities. Please do correct me if I am wrong in this.
->>
->> Moreover, Calamari Dashboard is made up of Calamari Server (backend)
->> and Calamari Clients (frontend).
->>
->> I found out that Calamari Server uses a new REST API instead of being
->> based upon the CEPH REST API. Will I be working on improving this new
->> REST API?
->>
->> Moreover, Calamari Server is written in Django and
->> django-rest-framework. However in the prototype of the dashboard
->> mentioned in the PR above, I could find that the dashboard is using
->> CherryPy too. CherryPy is a minimalist framework which is good for
->> prototyping and makes it very easy. Meanwhile Django is more of a
->> complete web application stack. So will we be using a single
->> technology primarily, or a combination of both?
+On Fri, May 12, 2017 at 8:53 PM, Sage Weil <sweil@redhat.com> wrote:
+> A common complaint is that recovery/backfill/rebalancing has a high
+> impact.  That isn't news.  What I realized this week after hearing more
+> operators describe their workaround is that everybody's workaround is
+> roughly the same: make small changes to the crush map so that only a small
+> number of PGs are backfilling at a time.  In retrospect it seems obvious,
+> but the problem is that our backfill throttling is per-OSD: the "slowest"
+> we can go is 1 backfilling PG per OSD.  (Actually, 2.. one primary and one
+> replica due to separate reservation thresholds to avoid deadlock.)  That
+> means that every OSD is impacted.  Doing fewer PGs doesn't make the
+> recovery vs client scheduling better, but it means it affects fewer PGs
+> and fewer client IOs and the net observed impact is smaller.
 >
-> Welcome!
+> Anyway, in short, I think we need to be able to set a *global* threshold
+> of "no more than X % of OSDs should be backfilling at a time," which is
+> impossible given the current reservation appoach.
 >
+> This could be done naively by having OSDs reserve a slot via the mon or
+> mgr.  If we only did it for backfill the impact should be minimal (those
+> are big slow long-running operations already).
+>
+> I think you can *almost* do it cleverly by inferring the set of PGs that
+> have to backfill by pg_temp.  However, that doesn't take any priority or
+> stuck PGs into consideration.
+>
+> Anyway, the naive thing probably isn't so bad...
+>
+> 1) PGMap counts backfilling PGs per OSD (and then the number of OSDs with
+> one or more backfilling PGs).
+>
+> 2) For the first step of the backfill (recovery?) reservation, OSDs ask
+> the mgr for a reservation slot.  The reservation is (pgid,interval epoch)
+> so that the mgr can throw out the reservation require without needing an
+> explicit cancellation if there is an interval change.
+>
+> 3) mgr grants as many reservations as it can without (backfilling +
+> grants) > whatever the max is.
+>
+> We can set the max with a global tunable like
+>
+>  max_osd_backfilling_ratio = .3
+>
+> so that only 30% of the osds can be backfilling at once?
+>
+> sage
 
-Thanks, John. :)
++1, this is something I've wanted for awhile. Using my "gentle
+reweight" scripts, I've found that backfilling stays pretty
+transparent as long as we limit to <5% of OSDs backfilling on our
+large clusters. I think it will take some experimentation to find the
+best default ratio to ship.
 
-> Don't worry about any of the Django or REST stuff.  Django is being
-> dropped from everything because the maintainers of downstream
-> (distribution) packages are highly opposed to supporting it as a
-> dependency.  The REST part is not needed when the dashboard is built
-> as a mgr module, because as a mgr module is has direct access to the
-> Ceph state.
->
+On the other hand, the *other* reason that we operators like to make
+small changes is to limit the number of PGs that go through peering
+all at once. Correct me if I'm wrong, but as an operator I'd hesitate
+to trigger a re-peering of *all* PGs in an active pool -- users would
+surely notice such an operation. Does luminous or luminous++ have some
+improvements to this half of the problem?
 
-As you say. Can you point out any other areas of Ceph that I should
-explore thoroughly for this project? Also, I would be glad if you
-could share any kind of technologies that I need to be familiar with
-(other than HTML, CSS, JS etc). For example, I'm looking into CherryPy
-these days. It will help me to pick up things more easily if I know
-the tech you are planning to use for the dashboard.
-
->> Last thing I want to ask is for what kinds of things I should be
->> contacting you and for what kind of things I should be contacting
->> John? Since John is my mentor on this project and I can see him
->> working on most of the Dashboard portion on GitHub, I presume for any
->> dashboard related issue I should contact him. And also to whom should
->> I send the weekly report of my progress on my project?
->
-> I think I'm supposed to be a co-mentor (whatever that means :-) ) and
-> Kefu is your primary point of contact.  I'm always happy to provide
-> opinions though of course.
->
-> John
->
->
->> Regards,
->> Saumay.
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Cheers, Dan
