@@ -1,248 +1,128 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: revisiting uneven CRUSH distributions
-Date: Mon, 15 May 2017 22:35:38 +0200
-Message-ID: <b0afb438-e7af-c1a9-0879-5a3cfb59a3eb@dachary.org>
-References: <712e34ca-d94e-b4a5-6195-5ca4cbc2aa34@dachary.org>
- <c2237c5e-165e-20be-1c9e-c239d8792c37@profihost.ag>
- <10f4d4b3-56a4-35de-ac0e-c68bb7fd182f@dachary.org>
- <1ac6382d-d963-7aed-2f31-f8b5dbe8fdf3@profihost.ag>
- <172cefc2-1189-99e8-b793-1d85fcaf6441@dachary.org>
- <d221e0d7-0b4b-3b12-b8f0-1aff391dfee9@profihost.ag>
- <ca860a8b-7ff1-4628-8a7d-f56ca02e3b82@dachary.org>
- <a3792889-8f6c-b819-5f7c-2355c5e73fbf@dachary.org>
- <92165564-0de1-67b8-eb55-ca3cdea3d0e5@profihost.ag>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: global backfill reservation?
+Date: Mon, 15 May 2017 15:02:51 -0700
+Message-ID: <CAJ4mKGag26AdYAOU_A96tRKvSqjNt2NpA2nbeZN+xBXL+rw-iQ@mail.gmail.com>
+References: <alpine.DEB.2.11.1705112237290.18953@piezo.novalocal> <99194e05-6bb9-29db-a85b-bf13da36fcf4@brockmann-consult.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay8-d.mail.gandi.net ([217.70.183.201]:33360 "EHLO
-        relay8-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751267AbdEOUfo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 15 May 2017 16:35:44 -0400
-In-Reply-To: <92165564-0de1-67b8-eb55-ca3cdea3d0e5@profihost.ag>
+Received: from mail-io0-f180.google.com ([209.85.223.180]:34427 "EHLO
+        mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750860AbdEOWCx (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 15 May 2017 18:02:53 -0400
+Received: by mail-io0-f180.google.com with SMTP id k91so82652750ioi.1
+        for <ceph-devel@vger.kernel.org>; Mon, 15 May 2017 15:02:52 -0700 (PDT)
+In-Reply-To: <99194e05-6bb9-29db-a85b-bf13da36fcf4@brockmann-consult.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Peter Maloney <peter.maloney@brockmann-consult.de>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
+On Fri, May 12, 2017 at 1:49 PM, Peter Maloney
+<peter.maloney@brockmann-consult.de> wrote:
+> On 05/12/17 20:53, Sage Weil wrote:
+>> A common complaint is that recovery/backfill/rebalancing has a high
+>> impact.  That isn't news.  What I realized this week after hearing more
+>> operators describe their workaround is that everybody's workaround is
+>> roughly the same: make small changes to the crush map so that only a small
+>> number of PGs are backfilling at a time.  In retrospect it seems obvious,
+>> but the problem is that our backfill throttling is per-OSD: the "slowest"
+>> we can go is 1 backfilling PG per OSD.  (Actually, 2.. one primary and one
+>> replica due to separate reservation thresholds to avoid deadlock.)  That
+>> means that every OSD is impacted.  Doing fewer PGs doesn't make the
+>> recovery vs client scheduling better, but it means it affects fewer PGs
+>> and fewer client IOs and the net observed impact is smaller.
+>>
+>> Anyway, in short, I think we need to be able to set a *global* threshold
+>> of "no more than X % of OSDs should be backfilling at a time," which is
+>> impossible given the current reservation appoach.
+>>
+>> This could be done naively by having OSDs reserve a slot via the mon or
+>> mgr.  If we only did it for backfill the impact should be minimal (those
+>> are big slow long-running operations already).
+>>
+>> I think you can *almost* do it cleverly by inferring the set of PGs that
+>> have to backfill by pg_temp.  However, that doesn't take any priority or
+>> stuck PGs into consideration.
+>>
+>> Anyway, the naive thing probably isn't so bad...
+>>
+>> 1) PGMap counts backfilling PGs per OSD (and then the number of OSDs with
+>> one or more backfilling PGs).
+>>
+>> 2) For the first step of the backfill (recovery?) reservation, OSDs ask
+>> the mgr for a reservation slot.  The reservation is (pgid,interval epoch)
+>> so that the mgr can throw out the reservation require without needing an
+>> explicit cancellation if there is an interval change.
+>>
+>> 3) mgr grants as many reservations as it can without (backfilling +
+>> grants) > whatever the max is.
+>>
+>> We can set the max with a global tunable like
+>>
+>>  max_osd_backfilling_ratio = .3
+>>
+>> so that only 30% of the osds can be backfilling at once?
+>>
+>> sage
+>
+> I think the biggest problem is not how many OSDs are busy, but that any
+> single osd is overloaded long enough for a human user to call it laggy
+> (eg. "ls" takes 5s because of blocked requests). A setting to say you
+> want all osds 30% busy would be better than saying you want 30% of your
+> osds overloaded and 70% idle (where another word for idle is wasted).
 
+Yeah, this.
 
-On 05/15/2017 09:08 PM, Stefan Priebe - Profihost AG wrote:
-> Hello Loic,
-> 
-> sounds good but my initial question was if this shouldn't be integrated
-> in ceph-deploy - so when you add OSDs it also does the correct reweight?
+I think your first instinct was right, Sage: the client-visible
+backfill impact is mostly a result of poor scheduling and
+prioritization. The workaround of minimizing how much work we do at
+once is really about reducing the tail size to a level low enough
+people don't complain about it, but I think anybody aggregating data
+metrics and looking at 99th%ile latencies and expecting some kind of
+SLA would remain fairly unhappy with these outcomes. (The other issue
+is as Dan notes — peering all at once is very visible; something that
+delays only a small percentage of ops means other ops can keep
+processing and client VMs don't seize up the same way).
 
-Ideally it should be fully transparent and we can forget the problem ever existed. I think we'll get there, maybe with a ceph-mgr task running on a regular basis to gradually optimize when it can't be done in real time. It won't be ready for Luminous but it could be for M*.
+That said, global backfill scheduling has other uses (...and might be
+faster to implement than proper prioritization). It lets us restrict
+network bandwidth devoted to backfill, not just local disk ops. And a
+central daemon like the manager can do better prioritization than the
+OSDs are really capable of in the case of degraded stuff (especially
+with more complicated things like the undersized level on erasure
+coded data across varying rules).
+Those use cases make me think we might not want to start with such a
+naive approach though. Perhaps OSDs report their personal backfill
+limits to the manager when asking for the number of reservations they
+want, and the manager decides which ones to issue based on that data,
+its global limits, and the priorities it can see in terms of overall
+PG states and backfill progress?
+(In particular, it may want to "save" reservations for somebody that
+is currently a backfill target but will shortly be freeing up a slot
+or something.)
+-Greg
 
-Cheers
-
-> Greets,
-> Stefan
-> 
-> Am 14.05.2017 um 19:46 schrieb Loic Dachary:
->> Hi Stefan,
->>
->> A new python-crush[1] subcommand will be available next week that you could use to rebalance your clusters. You give it a crushmap and it optimizes the weights to fix the uneven distribution. It can produce a series of crushmaps, each with a small modification so that you can gradually improve the situation and better control how many PGs are moving.
->>
->> Would that be useful for the clusters you have ?
->>
->> Cheers
->>
->> [1] http://crush.readthedocs.io/
->>
->> On 05/02/2017 09:32 AM, Loic Dachary wrote:
->>>
->>>
->>> On 05/02/2017 07:43 AM, Stefan Priebe - Profihost AG wrote:
->>>> Hi Loic,
->>>>
->>>> yes i didn't changed them to straw2 as i didn't saw any difference. I
->>>> switched to straw2 now but it didn't change anything at all.
->>>
->>> straw vs straw2 is not responsible for the uneven distribution you're seeing. I meant to say the optimization only works on straw2 buckets, it is not implemented for straw buckets.
->>>
->>>> If i use those weights manuall i've to adjust them on every crush change
->>>> on the cluster? That's something i don't really like to do.
->>>
->>> This is not practical indeed :-) I'm hoping python-crush can automate that.
->>>
->>> Cheers
->>>
->>>> Greets,
->>>> Stefan
->>>>
->>>> Am 02.05.2017 um 01:12 schrieb Loic Dachary:
->>>>> It is working, with straw2 (your cluster still is using straw).
->>>>>
->>>>> For instance for one host it goes from:
->>>>>
->>>>>         ~expected~  ~objects~  ~over/under used %~  ~delta~  ~delta%~
->>>>> ~name~
->>>>> osd.24         149        159                 6.65     10.0      6.71
->>>>> osd.29         149        159                 6.65     10.0      6.71
->>>>> osd.0           69         77                11.04      8.0     11.59
->>>>> osd.2           69         69                -0.50      0.0      0.00
->>>>> osd.42         149        148                -0.73     -1.0     -0.67
->>>>> osd.1           69         62               -10.59     -7.0    -10.14
->>>>> osd.23          69         62               -10.59     -7.0    -10.14
->>>>> osd.36         149        132               -11.46    -17.0    -11.41
->>>>>
->>>>> to
->>>>>
->>>>>         ~expected~  ~objects~  ~over/under used %~  ~delta~  ~delta%~
->>>>> ~name~
->>>>> osd.0           69         69                -0.50      0.0      0.00
->>>>> osd.23          69         69                -0.50      0.0      0.00
->>>>> osd.24         149        149                -0.06      0.0      0.00
->>>>> osd.29         149        149                -0.06      0.0      0.00
->>>>> osd.36         149        149                -0.06      0.0      0.00
->>>>> osd.1           69         68                -1.94     -1.0     -1.45
->>>>> osd.2           69         68                -1.94     -1.0     -1.45
->>>>> osd.42         149        147                -1.40     -2.0     -1.34
->>>>>
->>>>> By changing the weights to
->>>>>
->>>>> [0.6609248140022604, 0.9148542821020436, 0.8174711575190294, 0.8870680217468655, 1.6031393139865695, 1.5871079208467038, 1.8784764188501162, 1.7308530904776616]
->>>>>
->>>>> And you could set these weights on the crushmap, there would be no need for backporting.
->>>>>
->>>>>
->>>>> On 05/01/2017 08:06 PM, Stefan Priebe - Profihost AG wrote:
->>>>>> Am 01.05.2017 um 19:47 schrieb Loic Dachary:
->>>>>>> Hi Stefan,
->>>>>>>
->>>>>>> On 05/01/2017 07:15 PM, Stefan Priebe - Profihost AG wrote:
->>>>>>>> That sounds amazing! Is there any chance this will be backported to jewel?
->>>>>>>
->>>>>>> There should be ways to make that work with kraken and jewel. It may not even require a backport. If you know of a cluster with an uneven distribution, it would be great if you could send the crushmap so that I can test the algorithm. I'm still not sure this is the right solution and it would help confirm that.
->>>>>>
->>>>>> I've lots of them ;-)
->>>>>>
->>>>>> Will sent you one via private e-mail in some minutes.
->>>>>>
->>>>>> Greets,
->>>>>> Stefan
->>>>>>
->>>>>>> Cheers
->>>>>>>
->>>>>>>>
->>>>>>>> Greets,
->>>>>>>> Stefan
->>>>>>>>
->>>>>>>> Am 30.04.2017 um 16:15 schrieb Loic Dachary:
->>>>>>>>> Hi,
->>>>>>>>>
->>>>>>>>> Ideally CRUSH distributes PGs evenly on OSDs so that they all fill in
->>>>>>>>> the same proportion. If an OSD is 75% full, it is expected that all
->>>>>>>>> other OSDs are also 75% full.
->>>>>>>>>
->>>>>>>>> In reality the distribution is even only when more than 100,000 PGs
->>>>>>>>> are distributed in a pool of size 1 (i.e. no replication).
->>>>>>>>>
->>>>>>>>> In small clusters there are a few thousands PGs and it is not enough
->>>>>>>>> to get an even distribution. Running the following with
->>>>>>>>> python-crush[1], shows a 15% difference when distributing 1,000 PGs on
->>>>>>>>> 6 devices. Only with 1,000,000 PGs does the difference drop under 1%.
->>>>>>>>>
->>>>>>>>>   for PGs in 1000 10000 100000 1000000 ; do
->>>>>>>>>     crush analyze --replication-count 1 \
->>>>>>>>>                   --type device \
->>>>>>>>>                   --values-count $PGs \
->>>>>>>>>                   --rule data \
->>>>>>>>>                   --crushmap tests/sample-crushmap.json
->>>>>>>>>   done
->>>>>>>>>
->>>>>>>>> In larger clusters, even though a greater number of PGs are
->>>>>>>>> distributed, there are at most a few dozens devices per host and the
->>>>>>>>> problem remains. On a machine with 24 OSDs each expected to handle a
->>>>>>>>> few hundred PGs, a total of a few thousands PGs are distributed which
->>>>>>>>> is not enough to get an even distribution.
->>>>>>>>>
->>>>>>>>> There is a secondary reason for the distribution to be uneven, when
->>>>>>>>> there is more than one replica. The second replica must be on a
->>>>>>>>> different device than the first replica. This conditional probability
->>>>>>>>> is not taken into account by CRUSH and would create an uneven
->>>>>>>>> distribution if more than 10,000 PGs were distributed per OSD[2]. But
->>>>>>>>> a given OSD can only handle a few hundred PGs and this conditional
->>>>>>>>> probability bias is dominated by the uneven distribution caused by the
->>>>>>>>> low number of PGs.
->>>>>>>>>
->>>>>>>>> The uneven CRUSH distributions are always caused by a low number of
->>>>>>>>> samples, even in large clusters. Since this noise (i.e. the difference
->>>>>>>>> between the desired distribution and the actual distribution) is
->>>>>>>>> random, it cannot be fixed by optimizations methods.  The
->>>>>>>>> Nedler-Mead[3] simplex converges to a local minimum that is far from
->>>>>>>>> the optimal minimum in many cases. Broyden–Fletcher–Goldfarb–Shanno[4]
->>>>>>>>> fails to find a gradient that would allow it to converge faster. And
->>>>>>>>> even if it did, the local minimum found would be as often wrong as
->>>>>>>>> with Nedler-Mead, only it would go faster. A least mean squares
->>>>>>>>> filter[5] is equally unable to suppress the noise created by the
->>>>>>>>> uneven distribution because no coefficients can model a random noise.
->>>>>>>>>
->>>>>>>>> With that in mind, I implemented a simple optimization algorithm[6]
->>>>>>>>> which was first suggested by Thierry Delamare a few weeks ago. It goes
->>>>>>>>> like this:
->>>>>>>>>
->>>>>>>>>     - Distribute the desired number of PGs[7]
->>>>>>>>>     - Subtract 1% of the weight of the OSD that is the most over used
->>>>>>>>>     - Add the subtracted weight to the OSD that is the most under used
->>>>>>>>>     - Repeat until the Kullback–Leibler divergence[8] is small enough
->>>>>>>>>
->>>>>>>>> Quoting Adam Kupczyk, this works because:
->>>>>>>>>
->>>>>>>>>   "...CRUSH is not random proces at all, it behaves in numerically
->>>>>>>>>    stable way.  Specifically, if we increase weight on one node, we
->>>>>>>>>    will get more PGs on this node and less on every other node:
->>>>>>>>>    CRUSH([10.1, 10, 10, 5, 5]) -> [146(+3), 152, 156(-2), 70(-1), 76]"
->>>>>>>>>
->>>>>>>>> A nice side effect of this optimization algorithm is that it does not
->>>>>>>>> change the weight of the bucket containing the items being
->>>>>>>>> optimized. It is local to a bucket with no influence on the other
->>>>>>>>> parts of the crushmap (modulo the conditional probability bias).
->>>>>>>>>
->>>>>>>>> In all tests the situation improves at least by an order of
->>>>>>>>> magnitude. For instance when there is a 30% difference between two
->>>>>>>>> OSDs, it is down to less than 3% after optimization.
->>>>>>>>>
->>>>>>>>> The tests for the optimization method can be run with
->>>>>>>>>
->>>>>>>>>    git clone -b wip-fix-2 http://libcrush.org/dachary/python-crush.git
->>>>>>>>>    tox -e py27 -- -s -vv -k test_fix tests/test_analyze.py
->>>>>>>>>
->>>>>>>>> If anyone think of a reason why this algorithm won't work in some
->>>>>>>>> cases, please speak up :-)
->>>>>>>>>
->>>>>>>>> Cheers
->>>>>>>>>
->>>>>>>>> [1] python-crush http://crush.readthedocs.io/
->>>>>>>>> [2] crush multipick anomaly http://marc.info/?l=ceph-devel&m=148539995928656&w=2
->>>>>>>>> [3] Nedler-Mead https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method
->>>>>>>>> [4] L-BFGS-B https://docs.scipy.org/doc/scipy-0.18.1/reference/optimize.minimize-lbfgsb.html#optimize-minimize-lbfgsb
->>>>>>>>> [5] Least mean squares filter https://en.wikipedia.org/wiki/Least_mean_squares_filter
->>>>>>>>> [6] http://libcrush.org/dachary/python-crush/blob/c6af9bbcbef7123af84ee4d75d63dd1b967213a2/tests/test_analyze.py#L39
->>>>>>>>> [7] Predicting Ceph PG placement http://dachary.org/?p=4020
->>>>>>>>> [8] Kullback–Leibler divergence https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
->>>>>>>>>
->>>>>>>> --
->>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>>>
->>>>>>>
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>
->>>>>
->>>>
->>>
->>
+> The problems with clients seem to happen when they hit an overly busy
+> osd, rather than because many are moderately busy. (Is the future QoS
+> code supposed to handle this, for recovery [and scrub, snap trim,
+> flatten, rbd resize, etc.] not just clients? And I find resize [shrink
+> with snaps present] and flatten to be the worst since there appears to
+> be no config options to slow them down)
+>
+> I always have max backfills = 1 and recovery max active = 1, but with my
+> small cluster (3 nodes and 36 osds so far), I find that letting it go
+> fully parallel is better than trying to make small changes one at a
+> time. I have tested things like running fio or xfs_fsr to defrag and
+> overloading one osd makes it far worse than having many osds a bit busy.
+> And I verified that by putting those things in cgroups where they are
+> limited to a certain iops and bandwidth per disk, and then they can't
+> cause blocked requests easily.
+>
+> Peter
+>
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
