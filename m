@@ -1,128 +1,187 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: global backfill reservation?
-Date: Mon, 15 May 2017 15:02:51 -0700
-Message-ID: <CAJ4mKGag26AdYAOU_A96tRKvSqjNt2NpA2nbeZN+xBXL+rw-iQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1705112237290.18953@piezo.novalocal> <99194e05-6bb9-29db-a85b-bf13da36fcf4@brockmann-consult.de>
+From: Aaron Ten Clay <aarontc-q67U1YB0R7xBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: Extremely high OSD memory utilization on Kraken
+ 11.2.0 (with XFS -or- bluestore)
+Date: Mon, 15 May 2017 16:01:59 -0700
+Message-ID: <CAFFcuroCpM7GGdsfcpNEvLQAsWEWqUbnPfP1FmZxq_-DyjgQeA@mail.gmail.com>
+References: <CAFFcurqEctQ2fHHDcGYfy3YCuaq9DxZr0VU4e8dNVACNVLDmqA@mail.gmail.com>
+	<alpine.DEB.2.11.1704171457320.10661@piezo.novalocal>
+	<CAFFcurrA8BKF0a+9gdGAsTDbE78ci9X8dwEaWEycoF4DNQN8uw@mail.gmail.com>
+	<CAFFcuroumvWGZA+KC4V7wOiF9T0y7k9v+Ms=GgOh+bGm8gP__g@mail.gmail.com>
+	<alpine.DEB.2.11.1705042124210.3646@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f180.google.com ([209.85.223.180]:34427 "EHLO
-        mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750860AbdEOWCx (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 15 May 2017 18:02:53 -0400
-Received: by mail-io0-f180.google.com with SMTP id k91so82652750ioi.1
-        for <ceph-devel@vger.kernel.org>; Mon, 15 May 2017 15:02:52 -0700 (PDT)
-In-Reply-To: <99194e05-6bb9-29db-a85b-bf13da36fcf4@brockmann-consult.de>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Peter Maloney <peter.maloney@brockmann-consult.de>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1705042124210.3646-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, May 12, 2017 at 1:49 PM, Peter Maloney
-<peter.maloney@brockmann-consult.de> wrote:
-> On 05/12/17 20:53, Sage Weil wrote:
->> A common complaint is that recovery/backfill/rebalancing has a high
->> impact.  That isn't news.  What I realized this week after hearing more
->> operators describe their workaround is that everybody's workaround is
->> roughly the same: make small changes to the crush map so that only a small
->> number of PGs are backfilling at a time.  In retrospect it seems obvious,
->> but the problem is that our backfill throttling is per-OSD: the "slowest"
->> we can go is 1 backfilling PG per OSD.  (Actually, 2.. one primary and one
->> replica due to separate reservation thresholds to avoid deadlock.)  That
->> means that every OSD is impacted.  Doing fewer PGs doesn't make the
->> recovery vs client scheduling better, but it means it affects fewer PGs
->> and fewer client IOs and the net observed impact is smaller.
->>
->> Anyway, in short, I think we need to be able to set a *global* threshold
->> of "no more than X % of OSDs should be backfilling at a time," which is
->> impossible given the current reservation appoach.
->>
->> This could be done naively by having OSDs reserve a slot via the mon or
->> mgr.  If we only did it for backfill the impact should be minimal (those
->> are big slow long-running operations already).
->>
->> I think you can *almost* do it cleverly by inferring the set of PGs that
->> have to backfill by pg_temp.  However, that doesn't take any priority or
->> stuck PGs into consideration.
->>
->> Anyway, the naive thing probably isn't so bad...
->>
->> 1) PGMap counts backfilling PGs per OSD (and then the number of OSDs with
->> one or more backfilling PGs).
->>
->> 2) For the first step of the backfill (recovery?) reservation, OSDs ask
->> the mgr for a reservation slot.  The reservation is (pgid,interval epoch)
->> so that the mgr can throw out the reservation require without needing an
->> explicit cancellation if there is an interval change.
->>
->> 3) mgr grants as many reservations as it can without (backfilling +
->> grants) > whatever the max is.
->>
->> We can set the max with a global tunable like
->>
->>  max_osd_backfilling_ratio = .3
->>
->> so that only 30% of the osds can be backfilling at once?
->>
->> sage
+Hi Sage,
+
+No problem. I thought this would take a lot longer to resolve so I
+waited to find a good chunk of time, then it only took a few minutes!
+
+Here are the respective backtrace outputs from gdb:
+
+https://aarontc.com/ceph/dumps/core.ceph-osd.150.082e9ca887c34cfbab183366a214a84c.6742.1492634493000000000000.backtrace.txt
+https://aarontc.com/ceph/dumps/core.ceph-osd.150.082e9ca887c34cfbab183366a214a84c.7202.1492634508000000000000.backtrace.txt
+
+Hope that helps!
+
+-Aaron
+
+
+On Thu, May 4, 2017 at 2:25 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
+> Hi Aaron-
 >
-> I think the biggest problem is not how many OSDs are busy, but that any
-> single osd is overloaded long enough for a human user to call it laggy
-> (eg. "ls" takes 5s because of blocked requests). A setting to say you
-> want all osds 30% busy would be better than saying you want 30% of your
-> osds overloaded and 70% idle (where another word for idle is wasted).
-
-Yeah, this.
-
-I think your first instinct was right, Sage: the client-visible
-backfill impact is mostly a result of poor scheduling and
-prioritization. The workaround of minimizing how much work we do at
-once is really about reducing the tail size to a level low enough
-people don't complain about it, but I think anybody aggregating data
-metrics and looking at 99th%ile latencies and expecting some kind of
-SLA would remain fairly unhappy with these outcomes. (The other issue
-is as Dan notes — peering all at once is very visible; something that
-delays only a small percentage of ops means other ops can keep
-processing and client VMs don't seize up the same way).
-
-That said, global backfill scheduling has other uses (...and might be
-faster to implement than proper prioritization). It lets us restrict
-network bandwidth devoted to backfill, not just local disk ops. And a
-central daemon like the manager can do better prioritization than the
-OSDs are really capable of in the case of degraded stuff (especially
-with more complicated things like the undersized level on erasure
-coded data across varying rules).
-Those use cases make me think we might not want to start with such a
-naive approach though. Perhaps OSDs report their personal backfill
-limits to the manager when asking for the number of reservations they
-want, and the manager decides which ones to issue based on that data,
-its global limits, and the priorities it can see in terms of overall
-PG states and backfill progress?
-(In particular, it may want to "save" reservations for somebody that
-is currently a backfill target but will shortly be freeing up a slot
-or something.)
--Greg
-
-> The problems with clients seem to happen when they hit an overly busy
-> osd, rather than because many are moderately busy. (Is the future QoS
-> code supposed to handle this, for recovery [and scrub, snap trim,
-> flatten, rbd resize, etc.] not just clients? And I find resize [shrink
-> with snaps present] and flatten to be the worst since there appears to
-> be no config options to slow them down)
+> Sorry, lost track of this one.  In order to get backtraces out of the core
+> you need the matching executables.  Can you make sure the ceph-osd-dbg or
+> ceph-debuginfo package is installed on the machine (depending on if it's
+> deb or rpm) and then gdb ceph-osd corefile and 'thr app all bt'?
 >
-> I always have max backfills = 1 and recovery max active = 1, but with my
-> small cluster (3 nodes and 36 osds so far), I find that letting it go
-> fully parallel is better than trying to make small changes one at a
-> time. I have tested things like running fio or xfs_fsr to defrag and
-> overloading one osd makes it far worse than having many osds a bit busy.
-> And I verified that by putting those things in cgroups where they are
-> limited to a certain iops and bandwidth per disk, and then they can't
-> cause blocked requests easily.
+> Thanks!
+> sage
 >
-> Peter
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> On Thu, 4 May 2017, Aaron Ten Clay wrote:
+>
+>> Were the backtraces we obtained not useful? Is there anything else we
+>> can try to get the OSDs up again?
+>>
+>> On Wed, Apr 19, 2017 at 4:18 PM, Aaron Ten Clay <aarontc-q67U1YB0R7xBDgjK7y7TUQ@public.gmane.org> wrote:
+>> > I'm new to doing this all via systemd and systemd-coredump, but I appear to
+>> > have gotten cores from two OSD processes. When xzipped they are < 2MIB each,
+>> > but I threw them on my webserver to avoid polluting the mailing list. This
+>> > seems oddly small, so if I've botched the process somehow let me know :)
+>> >
+>> > https://aarontc.com/ceph/dumps/core.ceph-osd.150.082e9ca887c34cfbab183366a214a84c.6742.1492634493000000000000.xz
+>> > https://aarontc.com/ceph/dumps/core.ceph-osd.150.082e9ca887c34cfbab183366a214a84c.7202.1492634508000000000000.xz
+>> >
+>> > And for reference:
+>> > root@osd001:/var/lib/systemd/coredump# ceph -v
+>> > ceph version 11.2.0 (f223e27eeb35991352ebc1f67423d4ebc252adb7)
+>> >
+>> >
+>> > I am also investigating sysdig as recommended.
+>> >
+>> > Thanks!
+>> > -Aaron
+>> >
+>> >
+>> > On Mon, Apr 17, 2017 at 8:15 AM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
+>> >>
+>> >> On Sat, 15 Apr 2017, Aaron Ten Clay wrote:
+>> >> > Hi all,
+>> >> >
+>> >> > Our cluster is experiencing a very odd issue and I'm hoping for some
+>> >> > guidance on troubleshooting steps and/or suggestions to mitigate the
+>> >> > issue.
+>> >> > tl;dr: Individual ceph-osd processes try to allocate > 90GiB of RAM and
+>> >> > are
+>> >> > eventually nuked by oom_killer.
+>> >>
+>> >> My guess is that there there is a bug in a decoding path and it's
+>> >> trying to allocate some huge amount of memory.  Can you try setting a
+>> >> memory ulimit to something like 40gb and then enabling core dumps so you
+>> >> can get a core?  Something like
+>> >>
+>> >> ulimit -c unlimited
+>> >> ulimit -m 20000000
+>> >>
+>> >> or whatever the corresponding systemd unit file options are...
+>> >>
+>> >> Once we have a core file it will hopefully be clear who is
+>> >> doing the bad allocation...
+>> >>
+>> >> sage
+>> >>
+>> >>
+>> >>
+>> >> >
+>> >> > I'll try to explain the situation in detail:
+>> >> >
+>> >> > We have 24-4TB bluestore HDD OSDs, and 4-600GB SSD OSDs. The SSD OSDs
+>> >> > are in
+>> >> > a different CRUSH "root", used as a cache tier for the main storage
+>> >> > pools,
+>> >> > which are erasure coded and used for cephfs. The OSDs are spread across
+>> >> > two
+>> >> > identical machines with 128GiB of RAM each, and there are three monitor
+>> >> > nodes on different hardware.
+>> >> >
+>> >> > Several times we've encountered crippling bugs with previous Ceph
+>> >> > releases
+>> >> > when we were on RC or betas, or using non-recommended configurations, so
+>> >> > in
+>> >> > January we abandoned all previous Ceph usage, deployed LTS Ubuntu 16.04,
+>> >> > and
+>> >> > went with stable Kraken 11.2.0 with the configuration mentioned above.
+>> >> > Everything was fine until the end of March, when one day we find all but
+>> >> > a
+>> >> > couple of OSDs are "down" inexplicably. Investigation reveals oom_killer
+>> >> > came along and nuked almost all the ceph-osd processes.
+>> >> >
+>> >> > We've gone through a bunch of iterations of restarting the OSDs, trying
+>> >> > to
+>> >> > bring them up one at a time gradually, all at once, various
+>> >> > configuration
+>> >> > settings to reduce cache size as suggested in this ticket:
+>> >> > http://tracker.ceph.com/issues/18924...
+>> >> >
+>> >> > I don't know if that ticket really pertains to our situation or not, I
+>> >> > have
+>> >> > no experience with memory allocation debugging. I'd be willing to try if
+>> >> > someone can point me to a guide or walk me through the process.
+>> >> >
+>> >> > I've even tried, just to see if the situation was  transitory, adding
+>> >> > over
+>> >> > 300GiB of swap to both OSD machines. The OSD procs managed to allocate,
+>> >> > in a
+>> >> > matter of 5-10 minutes, more than 300GiB of RAM pressure and became
+>> >> > oom_killer victims once again.
+>> >> >
+>> >> > No software or hardware changes took place around the time this problem
+>> >> > started, and no significant data changes occurred either. We added about
+>> >> > 40GiB of ~1GiB files a week or so before the problem started and that's
+>> >> > the
+>> >> > last time data was written.
+>> >> >
+>> >> > I can only assume we've found another crippling bug of some kind, this
+>> >> > level
+>> >> > of memory usage is entirely unprecedented. What can we do?
+>> >> >
+>> >> > Thanks in advance for any suggestions.
+>> >> > -Aaron
+>> >> >
+>> >> >
+>> >
+>> >
+>> >
+>> >
+>> > --
+>> > Aaron Ten Clay
+>> > https://aarontc.com
+>>
+>>
+>>
+>> --
+>> Aaron Ten Clay
+>> https://aarontc.com
+>>
+>>
+
+
+
+-- 
+Aaron Ten Clay
+https://aarontc.com
