@@ -1,36 +1,44 @@
-From: "J. Eric Ivancich" <ivancich@redhat.com>
-Subject: Re: How best to integrate dmClock QoS library into ceph codebase
-Date: Tue, 16 May 2017 08:29:35 -0400
-Message-ID: <f08daf3b-751a-6887-fce0-f5ab38097af4@redhat.com>
-References: <6D8EA95A-572E-4C71-A6AF-6BB8A6E8B26C@redhat.com>
- <CAF1ivSaa=06CGGJRNQ_9QO_wy6Wc5yK4zbNFiHJLnoJJiqrCSg@mail.gmail.com>
+From: Lars Marowsky-Bree <lmb@suse.com>
+Subject: Re: [ceph-users] Cephalocon Cancelled
+Date: Tue, 16 May 2017 15:08:33 +0200
+Message-ID: <20170516130833.lb7k2cw2i7rjazc5@suse.com>
+References: <CAAZbbf0hLO4n5UzY=3CNAeSc4G=C3ZWBPK1ssD3L6KzFuZUcEQ@mail.gmail.com>
+ <479524647.120.1494621906731@ox.pcextreme.nl>
+ <CALe9h7cQcV16NnzogodUcsxO3UxEgL=aYcP-R+ujvB1hsXan8w@mail.gmail.com>
+ <793626ca-5900-8645-4d09-e019d8daad25@suse.de>
+ <461709d0-6e43-e39f-b601-eb1e5146c2e9@bisect.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37940 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752912AbdEPM3r (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 16 May 2017 08:29:47 -0400
-In-Reply-To: <CAF1ivSaa=06CGGJRNQ_9QO_wy6Wc5yK4zbNFiHJLnoJJiqrCSg@mail.gmail.com>
-Content-Language: en-US
+Received: from smtp.nue.novell.com ([195.135.221.5]:53474 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750970AbdEPNIt (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Tue, 16 May 2017 09:08:49 -0400
+Content-Disposition: inline
+In-Reply-To: <461709d0-6e43-e39f-b601-eb1e5146c2e9@bisect.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ming Lin <minggr@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-users@ceph.com" <ceph-users@ceph.com>, board@ceph.com, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 05/15/2017 10:46 PM, Ming Lin wrote:
-> Hi Eric,
-> 
-> Do you have any integration patches I can have a try?
-Hi Ming,
+On 2017-05-15T15:21:47, Danny Al-Gaaf <danny.al-gaaf@bisect.de> wrote:
 
-The dmClock library became part of the master branch in early May.
+> What about moving the event to the next OpenStack Summit in Sydney, let
+> say directly following the Summit. Not sure how many people already plan
+> to go to Sydney from the Ceph Community, but this way the 10-20 h flight
+> (depending on your location) would probably make much more sense, than
+> for 3 days only.
 
-Also, two implementations of the dmClock QoS are in a pull request
-currently being reviewed:
+I'd not be opposed to this, but I know that the travel budget to
+Australia would severely impact the number of people a number of
+organizations would be able to send. Alas.
 
-    https://github.com/ceph/ceph/pull/14997
 
-Eric
+Regards,
+    Lars
+
+-- 
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+"Experience is the name everyone gives to their mistakes." -- Oscar Wilde
 
