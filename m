@@ -1,52 +1,75 @@
-From: David Butterfield <dab21774@gmail.com>
-Subject: Re: global backfill reservation?
-Date: Tue, 16 May 2017 01:21:30 -0600
-Message-ID: <CALiN7rynLdFkYV+VmnmqOy8_8ghvLDSwNfXQfTkugw3C60iheA@mail.gmail.com>
-References: <alpine.DEB.2.11.1705112237290.18953@piezo.novalocal>
- <99194e05-6bb9-29db-a85b-bf13da36fcf4@brockmann-consult.de> <CAJ4mKGag26AdYAOU_A96tRKvSqjNt2NpA2nbeZN+xBXL+rw-iQ@mail.gmail.com>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
+Subject: Re: Why does the heartbeat packet have 122 bytes of messages?
+Date: Tue, 16 May 2017 09:41:38 +0200
+Message-ID: <e888470f-b73c-4f79-36a9-6324f45712ea@corp.ovh.com>
+References: <CAN=xyVVirpj9BsYPB5eMyNy4KrLN6KA+ysTC_29h4aD3rffSdA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f179.google.com ([209.85.217.179]:36729 "EHLO
-        mail-ua0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751338AbdEPHVc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 16 May 2017 03:21:32 -0400
-Received: by mail-ua0-f179.google.com with SMTP id j17so94009257uag.3
-        for <ceph-devel@vger.kernel.org>; Tue, 16 May 2017 00:21:32 -0700 (PDT)
-In-Reply-To: <CAJ4mKGag26AdYAOU_A96tRKvSqjNt2NpA2nbeZN+xBXL+rw-iQ@mail.gmail.com>
+Received: from 2.mo301.mail-out.ovh.net ([137.74.110.65]:39066 "EHLO
+        2.mo301.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751138AbdEPHlm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 16 May 2017 03:41:42 -0400
+In-Reply-To: <CAN=xyVVirpj9BsYPB5eMyNy4KrLN6KA+ysTC_29h4aD3rffSdA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Peter Maloney <peter.maloney@brockmann-consult.de>, Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: qi Shi <m13913886148@gmail.com>, ceph-devel@vger.kernel.org
 
-On Mon, May 15, 2017 at 4:02 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> On Fri, May 12, 2017 at 1:49 PM, Peter Maloney wrote:
->> I think the biggest problem is not how many OSDs are busy, but that any
->> single osd is overloaded long enough for a human user to call it laggy
->> (eg. "ls" takes 5s because of blocked requests). A setting to say you
->> want all osds 30% busy would be better than saying you want 30% of your
->> osds overloaded and 70% idle (where another word for idle is wasted).
+On 05/16/2017 06:50 AM, qi Shi wrote:
+> [..snip..]
+> But when i look at the code, heartbeat packet is only 9 bytes.
+> Here is the code:
+> ------------------------------------------------------------------------------------------------------------
+> int Pipe::write_keepalive2(char tag, const utime_t& t)
+> {
+>   ldout(msgr->cct,10) << "write_keepalive2 " << (int)tag << " " << t << dendl;
+>   struct ceph_timespec ts;
+>   t.encode_timeval(&ts);
+>   struct msghdr msg;
+>   memset(&msg, 0, sizeof(msg));
+>   struct iovec msgvec[2];
+>   msgvec[0].iov_base = &tag;
+>   msgvec[0].iov_len = 1;
+>   msgvec[1].iov_base = &ts;
+>   msgvec[1].iov_len = sizeof(ts);
+>   msg.msg_iov = msgvec;
+>   msg.msg_iovlen = 2;
 >
-> That said, global backfill scheduling has other uses (...and might be
-> faster to implement than proper prioritization). It lets us restrict
-> network bandwidth devoted to backfill, not just local disk ops.
+>   if (do_sendmsg(&msg, 1 + sizeof(ts)) < 0)
+>     return -1;
+>   return 0;
+> }
+> -----------------------------------------------------------------------------------------------------------------
+> "ts" is 8 bytes, and "1+sizeof(ts)" == 9 bytes.
+>
+>
+> My question is why the packet will appear 122 bytes of the message,
+> this message is heartbeat message?
 
-I worked on the performance of resynchronization (after node recovery)
-and restripe (after node add/remove) of a distributed SAN that already
-had an adjustable bandwidth limit when I started on it (leaky bucket
-sort of thing).  It limited bandwidth, but the restripe after adding a new
-node could take a week (it was cruder with its fixed geometry than
-newer techniques).
+The packet that contains ping data is defined in MOSDPing.h, and the code to 
+build it looks like this:
 
-I found it worked better to disable the bandwidth limiter and instead
-control the resync load by adjusting the number of network I/O ops
-a recovering node will issue and have outstanding to other nodes for
-resync I/O at any given time.  Queue Depths like 2 or 3 or 4 finished
-sooner and with less impact on client I/O than using the B/W limiter.
+   void encode_payload(uint64_t features) override {
+     ::encode(fsid, payload);
+     ::encode(map_epoch, payload);
+     ::encode(peer_as_of_epoch, payload);
+     ::encode(op, payload);
+     ::encode(peer_stat, payload);
+     ::encode(stamp, payload);
+   }
 
-It still wasn't wonderful, but it was better, so it might be an approach
-to consider.  Note that in this system all nodes would do recovery
-concurrently.  The QD limit can be set independently by each node
-without resort to a central or distributed algorithm.  If necessary each
-node could dynamically control its own pull rate by adjusting its
-recovery QD based on its current load or whatever.
+fsid is 16 bytes, map_epoch and peer_as_of_epoch is 4 bytes each, op is 1 
+byte, peer_stat is 14 bytes (8 bytes data + 6 bytes for extra encoding 
+header) and stamp is 8 bytes. This makes 47 bytes of data for MODSDPing 
+alone, and you need to include encoding header and probably a bunch of other 
+things required by Ceph protocol. Note that there's also MDS heartbeat 
+(defined in MHeartbeat.h) that at first glance looks even larger than the 
+one above.
+Try capturing some packet data, you'll be able to find out what is actually 
+transmitted and why it takes that space.
+
+-- 
+Piotr Dalek
+piotr.dalek@corp.ovh.com
+https://www.ovh.com/us/
