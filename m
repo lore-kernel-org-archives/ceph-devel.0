@@ -1,47 +1,41 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH] ceph: check i_nlink while converting a file handle to dentry
-Date: Wed, 17 May 2017 12:21:07 +0100
-Message-ID: <20170517112107.31025-1-lhenriques@suse.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
+From: Abhishek L <abhishek-IBi9RG/b67k@public.gmane.org>
+Subject: v12.0.3 Luminous (dev) released
+Date: Wed, 17 May 2017 20:23:20 +0200
+Message-ID: <874lwjbaw7.fsf@suse.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Converting a file handle to a dentry can be done call after the inode
-unlink.  This means that __fh_to_dentry() requires an extra check to
-verify the number of links is not 0.
-
-The issue can be easily reproduced using xfstest generic/426, which does
-something like:
-
-  name_to_handle_at(&fh)
-  echo 3 > /proc/sys/vm/drop_caches
-  unlink()
-  open_by_handle_at(&fh)
-
-The call to open_by_handle_at() should fail, as the file doesn't exist
-anymore.
-
-Cc: stable@vger.kernel.org
-Link: http://tracker.ceph.com/issues/19958
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
----
- fs/ceph/export.c | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-index e8f11fa565c5..7df550c13d7f 100644
---- a/fs/ceph/export.c
-+++ b/fs/ceph/export.c
-@@ -91,6 +91,10 @@ static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
- 		ceph_mdsc_put_request(req);
- 		if (!inode)
- 			return ERR_PTR(-ESTALE);
-+		if (inode->i_nlink == 0) {
-+			iput(inode);
-+			return ERR_PTR(-ESTALE);
-+		}
- 	}
- 
- 	return d_obtain_alias(inode);
+VGhpcyBpcyB0aGUgZm91cnRoIGRldmVsb3BtZW50IGNoZWNrcG9pbnQgcmVsZWFzZSBvZiBMdW1p
+bm91cywgdGhlIG5leHQKbG9uZyB0ZXJtIHN0YWJsZSByZWxlYXNlLiBUaGlzIHdvdWxkIG1vc3Qg
+bGlrZWx5IGJlIHRoZSBmaW5hbApkZXZlbG9wbWVudCBjaGVja3BvaW50IHJlbGVhc2UgYmVmb3Jl
+IHdlIG1vdmUgdG8gYSByZWxlYXNlIGNhbmRpZGF0ZQpzb29uLiBUaGlzIHJlbGVhc2UgaW50cm9k
+dWNlcyBzZXZlcmFsIGltcHJvdmVtZW50cyBpbiBibHVlc3RvcmUsCm1vbml0b3IsIHJiZCAmIHJn
+dy4KCk1ham9yIGNoYW5nZXMgZnJvbSB2MTIuMC4yCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+CiogVGhlICJqb3VybmFsZXIgYWxsb3cgc3BsaXQgZW50cmllcyIgY29uZmlnIHNldHRpbmcgaGFz
+IGJlZW4gcmVtb3ZlZC4KCkZvciBhIGRldGFpbGVkIGxpc3Qgb2YgY2hhbmdlcyB0aGF0IHdlbnQg
+aW50byB0aGlzIHJlbGVhc2UgcmVmZXIgdG8KaHR0cDovL2NlcGguY29tL3JlbGVhc2VzL2NlcGgt
+djEyLTAtMy1sdW1pbm91cy1kZXYtcmVsZWFzZWQvCgpHZXR0aW5nIENlcGgKLS0tLS0tLS0tLS0t
+CgoqIEdpdCBhdCBnaXQ6Ly9naXRodWIuY29tL2NlcGgvY2VwaC5naXQKKiBUYXJiYWxsIGF0IGh0
+dHA6Ly9kb3dubG9hZC5jZXBoLmNvbS90YXJiYWxscy9jZXBoLTEyLjAuMy50YXIuZ3oKKiBGb3Ig
+cGFja2FnZXMsIHNlZSBodHRwOi8vZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rlci9pbnN0YWxsL2dl
+dC1wYWNrYWdlcy8KKiBGb3IgY2VwaC1kZXBsb3ksIHNlZSBodHRwOi8vZG9jcy5jZXBoLmNvbS9k
+b2NzL21hc3Rlci9pbnN0YWxsL2luc3RhbGwtY2VwaC1kZXBsb3kKKiBSZWxlYXNlIHNoYTE6IGYy
+MzM3ZDFiNDJmYTQ5ZGJiMGE5M2U0MDQ4YTQyNzYyZTNkZmZiYmYKCi0tCkFiaGlzaGVrIExla3No
+bWFuYW4KU1VTRSBMaW51eCBHbWJILCBHRjogRmVsaXggSW1lbmTDtnJmZmVyLCBKYW5lIFNtaXRo
+YXJkLCBHcmFoYW0gTm9ydG9uLCBIUkIgMjEyODQgKEFHIE7DvHJuYmVyZykKX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxp
+c3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
+Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
