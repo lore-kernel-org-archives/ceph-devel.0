@@ -1,136 +1,47 @@
-From: Tim Serong <tserong@suse.com>
-Subject: ceph-mgr REST API
-Date: Wed, 17 May 2017 16:29:04 +1000
-Message-ID: <6c4ce752-4594-aa31-9d0e-35985e379c5a@suse.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:51697 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751886AbdEQG3O (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Wed, 17 May 2017 02:29:14 -0400
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, openattic-users@googlegroups.com, tendrl-devel@redhat.com
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH] ceph: check i_nlink while converting a file handle to dentry
+Date: Wed, 17 May 2017 12:21:07 +0100
+Message-ID: <20170517112107.31025-1-lhenriques@suse.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi All,
+Converting a file handle to a dentry can be done call after the inode
+unlink.  This means that __fh_to_dentry() requires an extra check to
+verify the number of links is not 0.
 
-There's a PR that's been open for a while to add a new pecan-based REST
-API to ceph-mgr:
+The issue can be easily reproduced using xfstest generic/426, which does
+something like:
 
-  https://github.com/ceph/ceph/pull/14457
+  name_to_handle_at(&fh)
+  echo 3 > /proc/sys/vm/drop_caches
+  unlink()
+  open_by_handle_at(&fh)
 
-This is intended to be consumed internally by management tools such as
-openATTIC[1] and Tendrl[2] (and anything else that wants to manage a
-Ceph cluster via a REST API).
+The call to open_by_handle_at() should fail, as the file doesn't exist
+anymore.
 
-There's been quite some discussion on the PR, and we also spoke about it
-at the May CDM, but I don't think much mention has occurred on the
-various mailing lists, so I'm writing this to raise awareness and
-solicit feedback.
+Cc: stable@vger.kernel.org
+Link: http://tracker.ceph.com/issues/19958
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ fs/ceph/export.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-There's a desire to get this PR merged for the Luminous release, but
-possibly marked "experimental", so that at least we have something out
-there that people can start using.
-
-I had volunteered to document the delta between this ceph-mgr REST API
-and the Ceph REST API currently present in openATTIC, to attempt to
-gauge the effort involved in making openATTIC use the ceph-mgr REST API,
-but Sebastian Wagner has beaten me to it with some good details[3]
-(thanks!), so I'll just try to summarise here for the record:
-
-- Both APIs provide:
-  - For OSDs: list, get details, modify (reweight, up/in state)
-  - For Pools: list, get details, modify, delete
-  - A means of handling long running requests (although AIUI these
-    work somewhat differently)
-
-- The openATTIC API provides in addition:
-  - For PGs: list (can be filtered by pool, osd), get details
-  - For RBD volumes: list, create, delete, modify
-  - For CephFS: list
-  - For EC Profiles: list, create, delete
-  - Pagination of lists (important for non-small clusters)
-
-- The ceph-mgr REST API provides in addition:
-  - For cluster config options: list, get value
-  - For CRUSH rules: list
-  - For MONs: list, get details
-  - For OSDs: run commands (scrub, deep_scrub, repair)
-  - For Servers: list, get details
-
-There are also some differences in naming and which fields are
-exposed[4], but hopefully this is enough to give a general idea.  My
-apologies to Boris Ranto (ceph-mgr REST API) and the openATTIC folks if
-I've gotten anything wrong here.
-
-Regards,
-
-Tim
-
-[1] https://www.openattic.org/
-[2] http://tendrl.org/
-[3] https://github.com/ceph/ceph/pull/14457#issuecomment-301954323
-[4] For example, compare:
-
-GET /openattic/api/ceph/80b30fd5-e0b2-363e-9ddd-63e87bac02c6/osds/0
-
-{
-    "id": 0,
-    "crush_weight": 0.018494,
-    "exists": 1,
-    "name": "osd.0",
-    "primary_affinity": 1.0,
-    "reweight": 1.0,
-    "status": "up",
-    "type": "osd",
-    "hostname": "ses4-5",
-    "in_state": 1,
-    "kb": 19911660,
-    "kb_used": 35792,
-    "kb_avail": 19875868
-}
-
-GET https://localhost:8002/osd/0
-
-{
-    "cluster_addr": "192.168.12.150:6801/1861",
-    "down_at": 29,
-    "heartbeat_back_addr": "192.168.12.150:6802/1861",
-    "heartbeat_front_addr": "192.168.12.150:6803/1861",
-    "in": 1,
-    "last_clean_begin": 6,
-    "last_clean_end": 26,
-    "lost_at": 0,
-    "osd": 0,
-    "pools": [
-        0
-    ],
-    "primary_affinity": 1.0,
-    "public_addr": "192.168.12.150:6800/1861",
-    "reweight": 1.0,
-    "server": "ses4-5",
-    "state": [
-        "exists",
-        "up"
-    ],
-    "up": 1,
-    "up_from": 30,
-    "up_thru": 42,
-    "uuid": "fd129a52-0448-4e04-b41d-680e796f2731",
-    "valid_commands": [
-        "scrub",
-        "deep_scrub",
-        "repair"
-    ],
-    "weight": 1.0
-}
-
-
--- 
-Tim Serong
-Senior Clustering Engineer
-SUSE
-tserong@suse.com
+diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+index e8f11fa565c5..7df550c13d7f 100644
+--- a/fs/ceph/export.c
++++ b/fs/ceph/export.c
+@@ -91,6 +91,10 @@ static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
+ 		ceph_mdsc_put_request(req);
+ 		if (!inode)
+ 			return ERR_PTR(-ESTALE);
++		if (inode->i_nlink == 0) {
++			iput(inode);
++			return ERR_PTR(-ESTALE);
++		}
+ 	}
+ 
+ 	return d_obtain_alias(inode);
