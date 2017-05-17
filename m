@@ -1,42 +1,136 @@
-From: Ming Lin <minggr@gmail.com>
-Subject: Re: How best to integrate dmClock QoS library into ceph codebase
-Date: Tue, 16 May 2017 10:59:38 -0700
-Message-ID: <CAF1ivSZyMJ+TC5zYPY4TSMpj7dN7n6+P3otS+KOoZgu=XnEEYg@mail.gmail.com>
-References: <6D8EA95A-572E-4C71-A6AF-6BB8A6E8B26C@redhat.com>
- <CAF1ivSaa=06CGGJRNQ_9QO_wy6Wc5yK4zbNFiHJLnoJJiqrCSg@mail.gmail.com> <f08daf3b-751a-6887-fce0-f5ab38097af4@redhat.com>
+From: Tim Serong <tserong@suse.com>
+Subject: ceph-mgr REST API
+Date: Wed, 17 May 2017 16:29:04 +1000
+Message-ID: <6c4ce752-4594-aa31-9d0e-35985e379c5a@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f171.google.com ([209.85.192.171]:33470 "EHLO
-        mail-pf0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753073AbdEPR7j (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 16 May 2017 13:59:39 -0400
-Received: by mail-pf0-f171.google.com with SMTP id e193so84119917pfh.0
-        for <ceph-devel@vger.kernel.org>; Tue, 16 May 2017 10:59:39 -0700 (PDT)
-In-Reply-To: <f08daf3b-751a-6887-fce0-f5ab38097af4@redhat.com>
+Received: from smtp.nue.novell.com ([195.135.221.5]:51697 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751886AbdEQG3O (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Wed, 17 May 2017 02:29:14 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "J. Eric Ivancich" <ivancich@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, openattic-users@googlegroups.com, tendrl-devel@redhat.com
 
-On Tue, May 16, 2017 at 5:29 AM, J. Eric Ivancich <ivancich@redhat.com> wrote:
-> On 05/15/2017 10:46 PM, Ming Lin wrote:
->> Hi Eric,
->>
->> Do you have any integration patches I can have a try?
-> Hi Ming,
->
-> The dmClock library became part of the master branch in early May.
->
-> Also, two implementations of the dmClock QoS are in a pull request
-> currently being reviewed:
->
->     https://github.com/ceph/ceph/pull/14997
+Hi All,
 
-That's great. I'll test it soon.
+There's a PR that's been open for a while to add a new pecan-based REST
+API to ceph-mgr:
 
-Thanks.
+  https://github.com/ceph/ceph/pull/14457
 
->
-> Eric
->
+This is intended to be consumed internally by management tools such as
+openATTIC[1] and Tendrl[2] (and anything else that wants to manage a
+Ceph cluster via a REST API).
+
+There's been quite some discussion on the PR, and we also spoke about it
+at the May CDM, but I don't think much mention has occurred on the
+various mailing lists, so I'm writing this to raise awareness and
+solicit feedback.
+
+There's a desire to get this PR merged for the Luminous release, but
+possibly marked "experimental", so that at least we have something out
+there that people can start using.
+
+I had volunteered to document the delta between this ceph-mgr REST API
+and the Ceph REST API currently present in openATTIC, to attempt to
+gauge the effort involved in making openATTIC use the ceph-mgr REST API,
+but Sebastian Wagner has beaten me to it with some good details[3]
+(thanks!), so I'll just try to summarise here for the record:
+
+- Both APIs provide:
+  - For OSDs: list, get details, modify (reweight, up/in state)
+  - For Pools: list, get details, modify, delete
+  - A means of handling long running requests (although AIUI these
+    work somewhat differently)
+
+- The openATTIC API provides in addition:
+  - For PGs: list (can be filtered by pool, osd), get details
+  - For RBD volumes: list, create, delete, modify
+  - For CephFS: list
+  - For EC Profiles: list, create, delete
+  - Pagination of lists (important for non-small clusters)
+
+- The ceph-mgr REST API provides in addition:
+  - For cluster config options: list, get value
+  - For CRUSH rules: list
+  - For MONs: list, get details
+  - For OSDs: run commands (scrub, deep_scrub, repair)
+  - For Servers: list, get details
+
+There are also some differences in naming and which fields are
+exposed[4], but hopefully this is enough to give a general idea.  My
+apologies to Boris Ranto (ceph-mgr REST API) and the openATTIC folks if
+I've gotten anything wrong here.
+
+Regards,
+
+Tim
+
+[1] https://www.openattic.org/
+[2] http://tendrl.org/
+[3] https://github.com/ceph/ceph/pull/14457#issuecomment-301954323
+[4] For example, compare:
+
+GET /openattic/api/ceph/80b30fd5-e0b2-363e-9ddd-63e87bac02c6/osds/0
+
+{
+    "id": 0,
+    "crush_weight": 0.018494,
+    "exists": 1,
+    "name": "osd.0",
+    "primary_affinity": 1.0,
+    "reweight": 1.0,
+    "status": "up",
+    "type": "osd",
+    "hostname": "ses4-5",
+    "in_state": 1,
+    "kb": 19911660,
+    "kb_used": 35792,
+    "kb_avail": 19875868
+}
+
+GET https://localhost:8002/osd/0
+
+{
+    "cluster_addr": "192.168.12.150:6801/1861",
+    "down_at": 29,
+    "heartbeat_back_addr": "192.168.12.150:6802/1861",
+    "heartbeat_front_addr": "192.168.12.150:6803/1861",
+    "in": 1,
+    "last_clean_begin": 6,
+    "last_clean_end": 26,
+    "lost_at": 0,
+    "osd": 0,
+    "pools": [
+        0
+    ],
+    "primary_affinity": 1.0,
+    "public_addr": "192.168.12.150:6800/1861",
+    "reweight": 1.0,
+    "server": "ses4-5",
+    "state": [
+        "exists",
+        "up"
+    ],
+    "up": 1,
+    "up_from": 30,
+    "up_thru": 42,
+    "uuid": "fd129a52-0448-4e04-b41d-680e796f2731",
+    "valid_commands": [
+        "scrub",
+        "deep_scrub",
+        "repair"
+    ],
+    "weight": 1.0
+}
+
+
+-- 
+Tim Serong
+Senior Clustering Engineer
+SUSE
+tserong@suse.com
