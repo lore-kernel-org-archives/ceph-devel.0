@@ -1,36 +1,44 @@
-From: Dan Mick <dmick@redhat.com>
-Subject: Re: Is jenkins still building docs for branches in ceph.git?
-Date: Thu, 18 May 2017 16:05:30 -0700
-Message-ID: <6e5d9a7b-2f93-de08-65a5-7e39a328c1ec@redhat.com>
-References: <9d38ef73-ca54-00c4-7c12-35ef75280279@redhat.com>
+From: fisherman <fisherman.dong@gmail.com>
+Subject: A question about Ceph's paxos implication
+Date: Fri, 19 May 2017 07:31:08 +0800
+Message-ID: <CACRPdDQACqOdoFJQMpfNEDY7zgqc6-m+DWG2f8JMHDTu+2HqSg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38208 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754392AbdERXFb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 18 May 2017 19:05:31 -0400
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id E0F3768A6
-        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2017 23:05:30 +0000 (UTC)
-In-Reply-To: <9d38ef73-ca54-00c4-7c12-35ef75280279@redhat.com>
-Content-Language: en-US
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:33139 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753332AbdERXbK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 19:31:10 -0400
+Received: by mail-wm0-f41.google.com with SMTP id v15so15668448wmv.0
+        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2017 16:31:09 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 05/18/2017 09:25 AM, Casey Bodley wrote:
-> The last few times I pushed doc branches to ceph/ceph.git, I never saw
-> previews built. For example, I pushed
-> https://github.com/ceph/ceph/commits/wip-doc-rgw-remove-agent a couple
-> days ago, and I'm still getting 404 errors for
-> http://docs.ceph.com/docs/wip-doc-rgw-remove-agent/.
-> 
-> This used to work. Are there new rules about which branches get built?
-> Does there have to be an open PR targetting the ceph/ceph.git branch?
+Hi, Sage and all Cepher
 
+   I am reading Ceph's implementation of paxos and have a question about it.
+   The question is given by an example below:
 
-http://tracker.ceph.com/issues/19976 is filed and I'm chewing on solutions.
+   Assume there are 5 monitor nodes: n1, n2, n3, n4, n5.
+
+1) Node n1 is the leader,  all nodes are synchroined with
+Last_committed=100, and there is no pending operation;
+2) A client, say c1, sends a request R1 to n1;
+3) Node n1 proposes a value v(for R1) with log version 101, stores
+version 101 and pending_v =101 in its db. But it goes down before
+sending anything to other nodes;
+   Note: only n1 has pending_v == 101.
+4) Node n2 becomes the leader(without n1) and the cluster become
+active. Client c1 querys n2 for status, and the result shows R1 is
+lost;
+5) Node n1 recovers and becomes leader again;
+6) Node n1 finds pending_v == 101 and log version 101, so R1 get
+replicated and applied;
+7) Client C1 queries again, and finds R1 has been applied.
+    ==>inconsitent with the result of 4)
+
+Am I right on this point?
+
+Thanks
+Fisher
