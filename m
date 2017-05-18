@@ -1,84 +1,71 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: Re: RBD client wallclock profile during 4k random writes
-Date: Fri, 19 May 2017 00:33:01 +0800
-Message-ID: <CALZt5jytJPkvOuaF6QUH2QYRVbK7D3oVMUkmXnQuPqP61KpqoQ@mail.gmail.com>
-References: <9e13c0f0-cde1-b8ec-d469-da5d87c5ba74@redhat.com>
- <CA+aFP1BBTvbNca1qEQeWyPYbiU497+cDqqO0OpCHnQNUy5+xdw@mail.gmail.com>
- <59cdc3c9-e6b0-bd9f-9826-33874a7423e1@redhat.com> <b7cd8ab2-42a9-dd42-4b09-4910365a8674@redhat.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: Re: [PATCH] ceph: check i_nlink while converting a file handle to
+ dentry
+Date: Thu, 18 May 2017 17:48:05 +0100
+Message-ID: <20170518164805.jgvxvvvseurrur7e@hermes.olymp>
+References: <20170517112107.31025-1-lhenriques@suse.com>
+ <DEB2EE75-52B1-4C4D-9F05-E0458CB10FB3@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f49.google.com ([209.85.214.49]:37896 "EHLO
-        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753332AbdERQdD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 12:33:03 -0400
-Received: by mail-it0-f49.google.com with SMTP id e65so31525151ita.1
-        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2017 09:33:02 -0700 (PDT)
-In-Reply-To: <b7cd8ab2-42a9-dd42-4b09-4910365a8674@redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:39195 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932196AbdERQsJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 18 May 2017 12:48:09 -0400
+Content-Disposition: inline
+In-Reply-To: <DEB2EE75-52B1-4C4D-9F05-E0458CB10FB3@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>, Loic Dachary <loic@dachary.org>, Sage Weil <sweil@redhat.com>
-Cc: dillaman@redhat.com, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-2017-05-11 8:21 GMT+08:00 Mark Nelson <mnelson@redhat.com>:
->
->
-> On 05/10/2017 06:24 PM, Mark Nelson wrote:
->>
->>
->>
->> On 05/10/2017 05:31 PM, Jason Dillaman wrote:
->>>
->>> On Wed, May 10, 2017 at 6:10 PM, Mark Nelson <mnelson@redhat.com> wrote:
->>>>
->>>> 1) 7 - tp_librbd, line 82
->>>>
->>>> Lots of stuff going on here, but the big thing is all the time spent in
->>>> librbd::ImageCtx::write_to_cache.  70.2% of the total time in this
->>>> thread is
->>>> spent in ObjectCacher::writex with lots of nested stuff, but if you
->>>> look all
->>>> the way down on line 1293, another 11.8% of the time is spent in
->>>> Locker()
->>>> and 1.5% of the time spent in ~Locker().
->>>
->>>
->>> Yes -- the ObjectCacher is long overdue for a re-write since it's
->>> single threaded. It looks like you were essentially performing
->>> writethrough as well. I'd imagine you would just be better off
->>> disabling the rbd cache when doing high-performance random write
->>> workloads since you are going to get zero benefit from the cache with
->>> that workload -- at least that's what I usually recommend.
->>>
->>
->> Often I do turn rbd cache off for bluestore testing.  This was an older
->> conf file where I inadvertently hadn't disabled it.  Still, it's an
->> unfortunate choice that has to be made, potentially by someone other
->> than the user running the workload. :/
->
->
-> Yep, disabling rbd cache bumped 4K write IOPS from ~14K to ~31K, and closer
-> ~36-37K with a higher IO depth at around 410% CPU usage.
->
-> trace without rbd cache here:
->
-> https://pastebin.com/t8FFsWNb
->
-> looking a lot better, though thread 5 (tp_librbd) is still pegging. Still a
-> little bit of locking in various places.  a bit more time shifted into
-> _calc_target.
->
-> async msgr is as expected a lot busier than it used to be.
->
+On Thu, May 18, 2017 at 09:36:44PM +0800, Yan, Zheng wrote:
+> 
+> > On 17 May 2017, at 19:21, Luis Henriques <lhenriques@suse.com> wrote:
+> > 
+> > Converting a file handle to a dentry can be done call after the inode
+> > unlink.  This means that __fh_to_dentry() requires an extra check to
+> > verify the number of links is not 0.
+> > 
+> > The issue can be easily reproduced using xfstest generic/426, which does
+> > something like:
+> > 
+> >  name_to_handle_at(&fh)
+> >  echo 3 > /proc/sys/vm/drop_caches
+> >  unlink()
+> >  open_by_handle_at(&fh)
+> > 
+> > The call to open_by_handle_at() should fail, as the file doesn't exist
+> > anymore.
+> > 
+> > Cc: stable@vger.kernel.org
+> > Link: http://tracker.ceph.com/issues/19958
+> > Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> > ---
+> > fs/ceph/export.c | 4 ++++
+> > 1 file changed, 4 insertions(+)
+> > 
+> > diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+> > index e8f11fa565c5..7df550c13d7f 100644
+> > --- a/fs/ceph/export.c
+> > +++ b/fs/ceph/export.c
+> > @@ -91,6 +91,10 @@ static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
+> > 		ceph_mdsc_put_request(req);
+> > 		if (!inode)
+> > 			return ERR_PTR(-ESTALE);
+> > +		if (inode->i_nlink == 0) {
+> > +			iput(inode);
+> > +			return ERR_PTR(-ESTALE);
+> > +		}
+> > 	}
+> 
+> maybe we should do this check in MDS
 
-So it seems calc pg mapping is an expensive operation. And
-furthermore, if we always need to retry the loop because of collision
-and rejection.
+Thank you for your review.  Are you suggesting to do this check *only* in
+the MDS?  I guess that's probably a good thing to do too, but don't you
+think it's a good idea to keep it on the client side as well?
 
-What about using a mapping cache table to look up the pg mapping
-directly once it is calculated? I think We can re-calucate the pg
-mapping until the osdmap epoch is changed, otherwise, pg mapping
-should be consistent during one osdmap.
-
-Regards
-Ning Yao
+Cheers,
+--
+Luís
