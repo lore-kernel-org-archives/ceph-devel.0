@@ -1,121 +1,62 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Monitoring ceph and prometheus
-Date: Thu, 18 May 2017 10:03:25 +0100
-Message-ID: <CALe9h7fBzp4wi3OSzjMpbigz+zwzti=GZfBWwO1m1SzL65gang@mail.gmail.com>
-References: <20170511115211.isjqn6y3x2tuqxbo@jf_suse_laptop>
- <CALe9h7ed4aUDYEJKfH8qSoVmiPB8+F+g7+ffzrwE08sdX7RHSQ@mail.gmail.com>
- <alpine.DEB.2.11.1705111246400.18953@piezo.novalocal> <20170513101414.wisczvozh6kilps7@suse.com>
- <CALe9h7fhson-vgFpbUoi+x+nSiqZRw72qmKKEMgrT-KQtWy93g@mail.gmail.com>
- <20170515064449.hsbl7l6zzkuwowq2@suse.com> <CALe9h7c9vdgKc3rSG853Lmbr=oan73Y32jxc+-1gWfniRV_iaw@mail.gmail.com>
- <20170518083716.s4kv4d5gus7e2trb@suse.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH] ceph: check i_nlink while converting a file handle to
+ dentry
+Date: Thu, 18 May 2017 21:36:44 +0800
+Message-ID: <DEB2EE75-52B1-4C4D-9F05-E0458CB10FB3@redhat.com>
+References: <20170517112107.31025-1-lhenriques@suse.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f182.google.com ([209.85.128.182]:35516 "EHLO
-        mail-wr0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753348AbdERJDs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 05:03:48 -0400
-Received: by mail-wr0-f182.google.com with SMTP id z52so28655580wrc.2
-        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2017 02:03:47 -0700 (PDT)
-In-Reply-To: <20170518083716.s4kv4d5gus7e2trb@suse.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Lars Marowsky-Bree <lmb@suse.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170517112107.31025-1-lhenriques@suse.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Luis Henriques <lhenriques@suse.com>
+Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, May 18, 2017 at 9:37 AM, Lars Marowsky-Bree <lmb@suse.com> wrote:
-> On 2017-05-15T13:33:29, John Spray <jspray@redhat.com> wrote:
->
->> At the risk of being a bit picky, it's only redundant if prometheus is
->> the only thing consuming them.  If the user is also using some mgr
->> modules (including things like handy CLI views) that consume the
->> stats, it's not redundant at all.  I'd like to keep these stats around
->> in the mgr because we're not quite sure yet what kinds of modules
->> we'll end up with.
->
-> Fair enough. The point that they may wish to gather information at
-> different frequencies still remains though - a ceph-mgr module may do it
-> on-demand for certain tasks, event driven, or periodically, prometheus
-> (or other trending) would want to poll certain counters at various
-> frequencies, etc.
 
-I'm slightly getting the impression that you might not have noticed
-the existing functionality here -- the perf counters are sent
-continuously from the daemons to the mgr, rather than being polled.
-The mgr is in control of how often that is (via the MMgrConfigure
-message).
+> On 17 May 2017, at 19:21, Luis Henriques <lhenriques@suse.com> wrote:
+> 
+> Converting a file handle to a dentry can be done call after the inode
+> unlink.  This means that __fh_to_dentry() requires an extra check to
+> verify the number of links is not 0.
+> 
+> The issue can be easily reproduced using xfstest generic/426, which does
+> something like:
+> 
+>  name_to_handle_at(&fh)
+>  echo 3 > /proc/sys/vm/drop_caches
+>  unlink()
+>  open_by_handle_at(&fh)
+> 
+> The call to open_by_handle_at() should fail, as the file doesn't exist
+> anymore.
+> 
+> Cc: stable@vger.kernel.org
+> Link: http://tracker.ceph.com/issues/19958
+> Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> ---
+> fs/ceph/export.c | 4 ++++
+> 1 file changed, 4 insertions(+)
+> 
+> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+> index e8f11fa565c5..7df550c13d7f 100644
+> --- a/fs/ceph/export.c
+> +++ b/fs/ceph/export.c
+> @@ -91,6 +91,10 @@ static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
+> 		ceph_mdsc_put_request(req);
+> 		if (!inode)
+> 			return ERR_PTR(-ESTALE);
+> +		if (inode->i_nlink == 0) {
+> +			iput(inode);
+> +			return ERR_PTR(-ESTALE);
+> +		}
+> 	}
 
->
-> (e.g., maybe the OSD ones every 10s, SMART every 3h, whatever)
+maybe we should do this check in MDS
 
-To be clear, when I talk about stats I'm talking about the perf
-counters -- if SMART monitoring is added at some stage then I would
-imagine sending that using a different mechanism.  As you say, sending
-SMART counters at the same frequency as normal perf counters wouldn't
-make sense.
+Regards
+Yan, Zheng
 
->
-> Aligning these would be annoying, and it seems to me that it makes more
-> sense to allow them to poll independently from the same interfaces.
->
->> Sage's recent change to add the importance thresholds to perf counters
->> could be interesting here: we might end up sending everything that's
->> "reasonably important" and higher to the mgr for exposing in CLI tools
->> etc (I'm thinking of things like the OSD throughput, the MDS number of
->> each op per second, etc), while perhaps the really obscure stuff would
->> only get collected (into prometheus?) if someone actively chose that.
->
-> That's actually somewhat related to how smart classifies. Value,
-> threshold, type (old-age, pre-fail, we could add a "perf" one).
->
-> I take the point - there's also a need for an event-driven channel that
-> needs to be push by default. (From simple operation completion
-> notification to "OMFG the disk caught fire.")
-
-Again, that would be something separate from the existing perf counter
-functionality.
-
-> I could see those going to ceph-mgr for handling/relaying.
-
-Yep.
-
->
->> > So, perhaps exposing this - the dynamic service/target discovery via
->> > ceph-mgr to Prometheus, and then having Prometheus pull directly - is a
->> > synthesis of both positions?
->> It would certainly be ++good build in the service discovery so that
->> the user only needs to point prometheus at one place to discover
->> everything.  Anything that avoids the need for extra external tools to
->> set things up makes me happy.
->
-> Yes, I think that'd be great to have. And at least in my head the idea
-> of where information goes becomes clearer.
->
-> Notifications/events go to and through ceph-mgr. ceph-mgr keeps track of
-> Ceph services. Trending/metrics should IMNSHO be polled directly as
-> needed.
-
-I'm not opposed to having a polling interface there if you want to add
-it -- it could be useful for anyone who chooses to turn off the
-existing stats transmission.  However, we should be mindful that it
-will complicate the lives of plugin authors if they are uncertain
-about whether they're running on a polling-configured (reading stats
-is a network op) or a streaming-configured system (reading stats super
-fast).
-
-John
-
->
->
-> Regards,
->     Lars
->
-> --
-> SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
-> "Experience is the name everyone gives to their mistakes." -- Oscar Wilde
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 	return d_obtain_alias(inode);
