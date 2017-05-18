@@ -1,252 +1,36 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Proposal for a CRUSH collision fallback
-Date: Fri, 19 May 2017 00:21:51 +0300
-Message-ID: <4861046d-ae0d-bccc-a596-c14455d9d4a8@dachary.org>
-References: <af0b13a9-cb6c-fccf-c80a-52a15ed8a328@dachary.org>
- <alpine.DEB.2.11.1705080304000.3646@piezo.novalocal>
- <0de1abd0-63f7-9155-7d8d-9d9c86f92d7a@dachary.org>
- <alpine.DEB.2.11.1705081333230.3646@piezo.novalocal>
- <3ef347c8-e1d9-f13c-2a4f-3f1fd0fd0aeb@dachary.org>
- <CALZt5jzB9n-6QLQcj44kOK+t0n=Q4ttSUaY19offWSv8Fk-K_g@mail.gmail.com>
+From: Dan Mick <dmick@redhat.com>
+Subject: Re: Is jenkins still building docs for branches in ceph.git?
+Date: Thu, 18 May 2017 16:05:30 -0700
+Message-ID: <6e5d9a7b-2f93-de08-65a5-7e39a328c1ec@redhat.com>
+References: <9d38ef73-ca54-00c4-7c12-35ef75280279@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:35627 "EHLO
-        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756091AbdERVV5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 17:21:57 -0400
-In-Reply-To: <CALZt5jzB9n-6QLQcj44kOK+t0n=Q4ttSUaY19offWSv8Fk-K_g@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:38208 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754392AbdERXFb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 18 May 2017 19:05:31 -0400
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id E0F3768A6
+        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2017 23:05:30 +0000 (UTC)
+In-Reply-To: <9d38ef73-ca54-00c4-7c12-35ef75280279@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ning Yao <zay11022@gmail.com>
-Cc: Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Casey Bodley <cbodley@redhat.com>, The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Hi,
+On 05/18/2017 09:25 AM, Casey Bodley wrote:
+> The last few times I pushed doc branches to ceph/ceph.git, I never saw
+> previews built. For example, I pushed
+> https://github.com/ceph/ceph/commits/wip-doc-rgw-remove-agent a couple
+> days ago, and I'm still getting 404 errors for
+> http://docs.ceph.com/docs/wip-doc-rgw-remove-agent/.
+> 
+> This used to work. Are there new rules about which branches get built?
+> Does there have to be an open PR targetting the ceph/ceph.git branch?
 
-On 05/18/2017 07:48 PM, Ning Yao wrote:
-> Hi, Loic
-> 
-> we already notice this problem before and find that it is not easy to
-> solved.  The problem not only occurs in collision case, but also in
-> rejection when is_out is called:
-> 
-> static int is_out(const struct crush_map *map,
->  const __u32 *weight, int weight_max,
->  int item, int x)
-> {
-> if (item >= weight_max)
-> return 1;
-> if (weight[item] >= 0x10000)
-> return 0;
-> if (weight[item] == 0)
-> return 1;
-> if ((crush_hash32_2(CRUSH_HASH_RJENKINS1, x, item) & 0xffff)
->    < weight[item])
-> return 0;
-> return 1;
-> }
-> 
-> That means if we use ceph osd out [osd.id], or osd is marked out
-> automatically when it is down, or we use reweight-by-utilization to
-> alter the reweight for an osd.
-> I think it may  use the same way as Sage mentioned to solve this problem.
-> Regards
-> Ning Yao
 
-You're right, it's the same kind of problem, thanks for mentionning that.
-
-Cheers
-
-> 
-> 
-> 2017-05-08 22:45 GMT+08:00 Loic Dachary <loic@dachary.org>:
->>
->>
->> On 05/08/2017 03:42 PM, Sage Weil wrote:
->>> On Mon, 8 May 2017, Loic Dachary wrote:
->>>> On 05/08/2017 05:09 AM, Sage Weil wrote:
->>>>> On Sun, 7 May 2017, Loic Dachary wrote:
->>>>>> Hi Sage,
->>>>>>
->>>>>> When choosing the second replica, crush_bucket_choose picks an item and
->>>>>> crush_choose_{indep,firstn} checks if it has already been chosen for the
->>>>>> first replica. If so, it is discarded as a collision[1], r is modified
->>>>>> and another attempt is made to get a different item. If no value is
->>>>>> found after choose_tries attempt, the mapping is incomplete.
->>>>>>
->>>>>> Another way to do the same would be that crush_bucket_choose /
->>>>>> bucket_straw2_choose[2] ignores the items that have already been chosen.
->>>>>> It could be done by looping over the list but that would mean N (number
->>>>>> of replicas) lookups for each item.
->>>>>>
->>>>>> The current implementation is optimized for the cases where collisions
->>>>>> are rare. However, when the weights of the items are two order of
->>>>>> magnitude appart or more, choose_tries has to be set to a very large
->>>>>> value (more than 1000) for the mapping to succeed. In practice that is
->>>>>> not a problem as it is unlikely that a host is 100 times bigger than
->>>>>> another host ;-)
->>>>>>
->>>>>> When fixing an uneven distribution[3], CRUSH weights are sometime set to
->>>>>> values with that kind of difference (1 against 100) to compensate for
->>>>>> the probability bias and/or a small number of samples. For instance when
->>>>>> there are 5 hosts with weights 5 1 1 1 1, modifying the weight set
->>>>>> fails. It goes as far as 8.9, 0.01, 0.01, 0.01, 0.01 with choose_tries
->>>>>> 2000. The value of choose_tries has to be increased a lot for a gain
->>>>>> that is smaller and smaller and the CPU usage goes up. In this
->>>>>> situation, an alternative implementation of the CRUSH collision seems a
->>>>>> good idea.
->>>>>>
->>>>>> Instead of failing after choose_tries attempts, crush_bucket_choose
->>>>>> could be called with the list of already chosen items and loop over them
->>>>>> to ensure none of them are candidate. The result will always be correct
->>>>>> but the implementation more expensive. The default choose_tries could
->>>>>> even be set to a lower value (19 instead of 50 ?) since it is likely
->>>>>> more expensive to handle 30 more collisions rather than looping over
->>>>>> each item already selected.
->>>>>>
->>>>>> What do you think ?
->>>>>
->>>>> I think this direction is promising!  The problem is that I think it's not
->>>>> quite as simple as you suggest, since you may be choosing over multiple
->>>>> levels of a hierarchy.  If the weight tree is something like
->>>>>
->>>>>       4
->>>>>     /   \
->>>>>    2     2
->>>>>   / \   / \
->>>>>  1   1 1   1
->>>>>  a   b c   d
->>>>>
->>>>> and you chose a, then yes, if you get back into the left branch you can
->>>>> filter it out of the straw2 selections.  And num_rep is usually small so
->>>>> that won't be expensive.  But you also need the first choice at the top
->>>>> level of the hierarchy to weight the left *tree* with 1 instead of 2.
->>>>
->>>> I don't understand why this is necessary ? Here are the scenarios I have in mind:
->>>>
->>>>
->>>>         /         \
->>>>        /           \
->>>>   r1  4        r2   4         rack (failure domain)
->>>>     /   \         /   \
->>>>    2     2       2     2      host
->>>>   / \   / \     / \   / \
->>>>  1   1 1   1   1   1 1   1    device
->>>>  a   b c   d   e   f g   h
->>>>
->>>> Say value 10 ends up in a the first time, it first went through rack
->>>> r1 which is the failure domain. If value 10 also ends up in r1 the
->>>> second time, straw2 will skip/collide it at that level because r1 is
->>>> stored in out while a is stored in out2.
->>>>
->>>> There only case I can think of that requires collision to be resolved
->>>> in a higher hierarchical level is when there is no alternative.
->>>>
->>>>
->>>>
->>>>         /         \
->>>>        /           \
->>>>   r1  4        r2   4         rack
->>>>     /             /   \
->>>> h1 2             2     2      host     (failure domain)
->>>>   /             / \   / \
->>>>  1             1   1 1   1    device
->>>>  a             e   f g   h
->>>>
->>>> If 10 ends up in h1 the first time and the second time, it will
->>>> collide because there is no alternative. It will then retry_descent,
->>>> ftotal increases which goes into r and it gets another chance at landing on a host
->>>> that's not h1.
->>>
->>> The problem isn't when choose[leaf] is specifying the intermediate
->>> level (rack or host in your examples); it's when there is an intervening
->>> level that a single choose is crossing.  In your first tree,
->>>
->>>           root 6
->>>>         /         \
->>>>        /           \
->>>>   r1  4        r2   4         rack
->>>>     /   \         /   \
->>>> h1 2  h2 2    h3 2  h4 2      host (failure domain)
->>>>   / \   / \     / \   / \
->>>>  1   1 1   1   1   1 1   1    device
->>>>  a   b c   d   e   f g   h
->>>
->>> let's say the failure domain is the host instead of the rack.  If we
->>> choose a (h1) the first time, for subsequent descents from the root we
->>> still pick r1 and r2 equally (4 vs 4) even though r1 only has 1 usable
->>> host (h2).  This normally is fine because we reject the entire descent for
->>> 50% of the r1 choices, so *effectively* r1's weight is only 2 (it's as if
->>> the other attempts never happened).  But with the smarter straw2 choose h2
->>> 100% for r1 and you'll end up with 2x more tiems for that second position
->>> on h2 than you want.
->>>
->>> Does that make sense?
->>
->> Absolutely, thanks for explaining. The easier route as far as getting an even distribution is concerned seems to find a way to calculate when a combination of weights (5 1 1 1 1 with 2 replica for instance) cannot be evenly distributed.
->>
->> Cheers
->>
->>>
->>> sage
->>>
->>>
->>>>
->>>> I must be missing a use case :-)
->>>>
->>>>
->>>>>
->>>>> I think this could be done by adjusting the hierarchical weights as you go
->>>>> (and I think one of Adam's early passes at the multipick problem did
->>>>> something similar), but it's a bit more complex.
->>>>>
->>>>> It seems worth pursuing, though!
->>>>>
->>>>> And dynamically doing this only after the first N 'normal' attempts fail
->>>>> seems like a good way to avoid slowing down the common path (no
->>>>> collisions).  I suspect the optimal N is probably closer to 5 than 19,
->>>>> though?
->>>>>
->>>>> sage
->>>>>
->>>>>
->>>>>>
->>>>>> Cheers
->>>>>>
->>>>>> P.S. Note that even in this border case modifying the weights to 7.1,
->>>>>> 0.5, 0.5, 0.4, 0.4 significantly improves the distribution (twice better
->>>>>> instead of ten times better). Only it cannot do better because it hits a
->>>>>> limitation of the current CRUSH implementation. But it looks like it is
->>>>>> not too difficult to fix.
->>>>>>
->>>>>>
->>>>>> [1] https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L541
->>>>>> [2] https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L332
->>>>>> [3] http://marc.info/?l=ceph-devel&m=149407691823750&w=2
->>>>>> --
->>>>>> Loïc Dachary, Artisan Logiciel Libre
->>>>>>
->>>>
->>>> --
->>>> Loïc Dachary, Artisan Logiciel Libre
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>
->> --
->> Loïc Dachary, Artisan Logiciel Libre
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
+http://tracker.ceph.com/issues/19976 is filed and I'm chewing on solutions.
