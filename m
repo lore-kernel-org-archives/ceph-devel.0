@@ -1,46 +1,39 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: What should we do if ceph feature bit is all used?
-Date: Thu, 18 May 2017 11:50:50 -0400
-Message-ID: <20170518155050.GC31766@ultraspiritum.eng.arb.redhat.com>
-References: <CALZt5jyPyb8d0maz06LTguhC=++tzdKKY7fJ6DQHLkOS5amzDw@mail.gmail.com>
- <alpine.DEB.2.11.1705181338010.4016@piezo.novalocal>
+From: Ning Yao <zay11022@gmail.com>
+Subject: Re: Alibaba's work on majority commit
+Date: Fri, 19 May 2017 00:16:41 +0800
+Message-ID: <CALZt5jwSYZyMgdoGvYEgLrp-9VD2MeAUc2hhhM7ATHWOdtwLBQ@mail.gmail.com>
+References: <EE680D4A-C2A0-4A47-8780-FB3FD47FCD0D@alibaba-inc.com> <FBA81CC7-C30D-4994-BC95-B11FAF32ABAD@alibaba-inc.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:33281 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S934310AbdERPuv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 18 May 2017 11:50:51 -0400
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id F23A7804F8
-        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2017 15:50:50 +0000 (UTC)
-Received: from ultraspiritum.eng.arb.redhat.com (unknown [10.17.150.166])
-        by smtp.corp.redhat.com (Postfix) with SMTP id B88FC183B3
-        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2017 15:50:50 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1705181338010.4016@piezo.novalocal>
+Received: from mail-it0-f41.google.com ([209.85.214.41]:35277 "EHLO
+        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932522AbdERQQm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 12:16:42 -0400
+Received: by mail-it0-f41.google.com with SMTP id c15so103222851ith.0
+        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2017 09:16:42 -0700 (PDT)
+In-Reply-To: <FBA81CC7-C30D-4994-BC95-B11FAF32ABAD@alibaba-inc.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: "LIU, Fei" <james.liu@alibaba-inc.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 18/05/2017, Sage Weil wrote:
-> We are recycling feature bits.  If you look at ceph_features.h in
-> master, there are macros that make it explicit when a feature is
-> deprecated and when it can be resused.  Once luminous is out we'll
-> have another 10+ bits available.
+It is a private slide
+Regards
+Ning Yao
+
+
+2017-05-12 0:41 GMT+08:00 LIU, Fei <james.liu@alibaba-inc.com>:
+> Hi All,
+>   Here is the slides that we presented this morning regarding to IO returning once we get majority commit.  Please feel free to send us any comments and questions.
 >
-> Right now the only ones we can't reuse are the ones that affect
-> client behavior; those we have to be more careful deprecating in
-> order to preserve support for old clients.
-
-We could always use one of the feature bits to tell if we support a
-/second/ collection of feature bits that is a length-marked bitset.
-
-(Only half-way joking.)
-
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+>   https://www.slideshare.net/jupiturliu/ceph-majority-commit
+>
+>   Regards,
+>   James
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
