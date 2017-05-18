@@ -1,62 +1,35 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: check i_nlink while converting a file handle to
- dentry
-Date: Thu, 18 May 2017 21:36:44 +0800
-Message-ID: <DEB2EE75-52B1-4C4D-9F05-E0458CB10FB3@redhat.com>
-References: <20170517112107.31025-1-lhenriques@suse.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170517112107.31025-1-lhenriques@suse.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+From: Sage Weil <sage@newdream.net>
+Subject: Re: What should we do if ceph feature bit is all used?
+Date: Thu, 18 May 2017 13:39:00 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1705181338010.4016@piezo.novalocal>
+References: <CALZt5jyPyb8d0maz06LTguhC=++tzdKKY7fJ6DQHLkOS5amzDw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:42974 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755868AbdERNjI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 09:39:08 -0400
+In-Reply-To: <CALZt5jyPyb8d0maz06LTguhC=++tzdKKY7fJ6DQHLkOS5amzDw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ning Yao <zay11022@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, onebeiniunai@163.com
 
+On Thu, 18 May 2017, Ning Yao wrote:
+> Hi, Sage and all Cepher
+> 
+> I find that CEPH_FEATURE bit uses uint64_t and only 64 bits can be
+> used totally. However, it will be exhausted soon.  What should we do
+> then? Thanks
 
-> On 17 May 2017, at 19:21, Luis Henriques <lhenriques@suse.com> wrote:
-> 
-> Converting a file handle to a dentry can be done call after the inode
-> unlink.  This means that __fh_to_dentry() requires an extra check to
-> verify the number of links is not 0.
-> 
-> The issue can be easily reproduced using xfstest generic/426, which does
-> something like:
-> 
->  name_to_handle_at(&fh)
->  echo 3 > /proc/sys/vm/drop_caches
->  unlink()
->  open_by_handle_at(&fh)
-> 
-> The call to open_by_handle_at() should fail, as the file doesn't exist
-> anymore.
-> 
-> Cc: stable@vger.kernel.org
-> Link: http://tracker.ceph.com/issues/19958
-> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> ---
-> fs/ceph/export.c | 4 ++++
-> 1 file changed, 4 insertions(+)
-> 
-> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
-> index e8f11fa565c5..7df550c13d7f 100644
-> --- a/fs/ceph/export.c
-> +++ b/fs/ceph/export.c
-> @@ -91,6 +91,10 @@ static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
-> 		ceph_mdsc_put_request(req);
-> 		if (!inode)
-> 			return ERR_PTR(-ESTALE);
-> +		if (inode->i_nlink == 0) {
-> +			iput(inode);
-> +			return ERR_PTR(-ESTALE);
-> +		}
-> 	}
+We are recycling feature bits.  If you look at ceph_features.h in master, 
+there are macros that make it explicit when a feature is deprecated and 
+when it can be resused.  Once luminous is out we'll have another 10+ bits 
+available.
 
-maybe we should do this check in MDS
+Right now the only ones we can't reuse are the ones that affect client 
+behavior; those we have to be more careful deprecating in order to 
+preserve support for old clients.
 
-Regards
-Yan, Zheng
-
-> 
-> 	return d_obtain_alias(inode);
+sage
