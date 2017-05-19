@@ -1,56 +1,50 @@
-From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
-Subject: Re: Alibaba's work on majority commit
-Date: Fri, 19 May 2017 08:50:22 +0800
-Message-ID: <E52930BD-9CB9-46FC-8A86-D0350D495EF6@alibaba-inc.com>
-References: <EE680D4A-C2A0-4A47-8780-FB3FD47FCD0D@alibaba-inc.com>
- <FBA81CC7-C30D-4994-BC95-B11FAF32ABAD@alibaba-inc.com>
- <CALZt5jwSYZyMgdoGvYEgLrp-9VD2MeAUc2hhhM7ATHWOdtwLBQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: A question about Ceph's paxos implication
+Date: Fri, 19 May 2017 02:37:07 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1705190230060.3646@piezo.novalocal>
+References: <CACRPdDQACqOdoFJQMpfNEDY7zgqc6-m+DWG2f8JMHDTu+2HqSg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from out0-205.mail.aliyun.com ([140.205.0.205]:38153 "EHLO
-        out0-205.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751486AbdESAum (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 20:50:42 -0400
-In-Reply-To: <CALZt5jwSYZyMgdoGvYEgLrp-9VD2MeAUc2hhhM7ATHWOdtwLBQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:57879 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755210AbdESChK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 22:37:10 -0400
+In-Reply-To: <CACRPdDQACqOdoFJQMpfNEDY7zgqc6-m+DWG2f8JMHDTu+2HqSg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ning Yao <zay11022@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Brett Niver <bniver@redhat.com>
+To: fisherman <fisherman.dong@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Lin and Brett,
-   Out of town for business trip. Got a little bit of problem to access slideshare out of US. Will send you the link soon after I am back to town.
+On Fri, 19 May 2017, fisherman wrote:
+> Hi, Sage and all Cepher
+> 
+>    I am reading Ceph's implementation of paxos and have a question about it.
+>    The question is given by an example below:
+> 
+>    Assume there are 5 monitor nodes: n1, n2, n3, n4, n5.
+> 
+> 1) Node n1 is the leader,  all nodes are synchroined with
+> Last_committed=100, and there is no pending operation;
+> 2) A client, say c1, sends a request R1 to n1;
+> 3) Node n1 proposes a value v(for R1) with log version 101, stores
+> version 101 and pending_v =101 in its db. But it goes down before
+> sending anything to other nodes;
+>    Note: only n1 has pending_v == 101.
+> 4) Node n2 becomes the leader(without n1) and the cluster become
+> active. Client c1 querys n2 for status, and the result shows R1 is
+> lost;
+> 5) Node n1 recovers and becomes leader again;
+> 6) Node n1 finds pending_v == 101 and log version 101, so R1 get
+> replicated and applied;
+> 7) Client C1 queries again, and finds R1 has been applied.
+>     ==>inconsitent with the result of 4)
+> 
+> Am I right on this point?
 
-  thanks,
-  James
+IIRC at step 4, as soon as a quorum is formed without n1, the original 
+proposal from n1 is rendered obsolete.  (If it isn't explicitly 
+invalidated it would also be highly likely to be implicitly as soon as the 
+new quorum passed its first proposal.)
 
-On 5/19/17, 12:16 AM, "Ning Yao" <ceph-devel-owner@vger.kernel.org on behalf of zay11022@gmail.com> wrote:
-
-    It is a private slide
-    Regards
-    Ning Yao
-    
-    
-    2017-05-12 0:41 GMT+08:00 LIU, Fei <james.liu@alibaba-inc.com>:
-    > Hi All,
-    >   Here is the slides that we presented this morning regarding to IO returning once we get majority commit.  Please feel free to send us any comments and questions.
-    >
-    >   https://www.slideshare.net/jupiturliu/ceph-majority-commit
-    >
-    >   Regards,
-    >   James
-    >
-    >
-    >
-    > --
-    > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-    > the body of a message to majordomo@vger.kernel.org
-    > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-    --
-    To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-    the body of a message to majordomo@vger.kernel.org
-    More majordomo info at  http://vger.kernel.org/majordomo-info.html
-    
-
-
+sage
