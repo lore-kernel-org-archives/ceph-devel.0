@@ -1,22 +1,64 @@
-From: Jos Collin <jcollin@redhat.com>
-Subject: Re: Kernel warnings in CEPH
-Date: Fri, 19 May 2017 08:19:02 +0530
-Message-ID: <ed6f60a3-f4ac-b6d3-5849-cd0eed22e762@redhat.com>
-References: <20170518170613.5e1d924f@xeon-e3>
+From: Tim Serong <tserong@suse.com>
+Subject: subpackages for mgr modules
+Date: Fri, 19 May 2017 16:19:07 +1000
+Message-ID: <3c199f5d-a09a-f600-5c16-7e0c25495efc@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f174.google.com ([209.85.192.174]:35224 "EHLO
-        mail-pf0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755728AbdESCtH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 22:49:07 -0400
-Received: by mail-pf0-f174.google.com with SMTP id n23so32694322pfb.2
-        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2017 19:49:06 -0700 (PDT)
-In-Reply-To: <20170518170613.5e1d924f@xeon-e3>
+Received: from smtp.nue.novell.com ([195.135.221.5]:35224 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755065AbdESGTV (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Fri, 19 May 2017 02:19:21 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stephen Hemminger <stephen@networkplumber.org>, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>
-Cc: ceph-devel@vger.kernel.org
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Stephen, Is it the latest source code of Ceph ?
+Hi All,
+
+At some point, we're going to want to have (some of) mgr's python
+modules shipped not as part of the ceph-mgr package, but as subpackages
+that can be optionally installed (ceph-mgr-foo, ceph-mgr-bar, whatever).
+ That's easy to do.  What I'm wondering about is having installation of
+an mgr module subpackage automatically enable the loading of that module.
+
+Ordinarily, to enable an mgr module that isn't enabled by default at
+compile time, you'd set "mgr modules = foo bar" in the [mgr] section of
+ceph.conf.  But that will get irritating.
+
+We can't have mgr just load everything that exists (someone might want
+to disable some modules, without necessarily uninstalling them).
+
+A couple of approaches I thought of are:
+
+1) Add a command line argument (or arguments) to ceph-mgr to list
+modules to enable (or disable).  This could in turn be set by some
+variable(s) in /etc/sysconfig/ceph.  Subpackages then tweak those
+variables at install time.
+
+2) Do something with symlinks; set up a directory structure something
+like this:
+
+/usr/lib64/ceph/mgr/enabled/
+/usr/lib64/ceph/mgr/modules/
+/usr/lib64/ceph/mgr/modules/fsstatus
+/usr/lib64/ceph/mgr/modules/rest
+/usr/lib64/ceph/mgr/modules/...
+
+Then, any module you want to enable, create a symlink to it from the
+"enabled" directory.  Subpackages could do this at install time.  mgr
+iterates through that directory and loads anything present.
+
+(Personally I rather prefer approach 2 to approach 1).
+
+I'm sure there's other possibilities.  Thoughts, anyone?
+
+Thanks,
+
+Tim
+-- 
+Tim Serong
+Senior Clustering Engineer
+SUSE
+tserong@suse.com
