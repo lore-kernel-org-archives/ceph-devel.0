@@ -1,35 +1,52 @@
-From: Stephen Hemminger <stephen@networkplumber.org>
-Subject: Kernel warnings in CEPH
-Date: Thu, 18 May 2017 17:06:13 -0700
-Message-ID: <20170518170613.5e1d924f@xeon-e3>
+From: David Zafman <dzafman@redhat.com>
+Subject: standby_count_wanted
+Date: Thu, 18 May 2017 17:10:48 -0700
+Message-ID: <062f5224-fe69-ca4c-9180-5964cd6609b0@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f172.google.com ([209.85.192.172]:34117 "EHLO
-        mail-pf0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751155AbdESAGV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 20:06:21 -0400
-Received: by mail-pf0-f172.google.com with SMTP id 9so31189903pfj.1
-        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2017 17:06:21 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:33234 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754072AbdESAKu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 18 May 2017 20:10:50 -0400
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 6A05761B83
+        for <ceph-devel@vger.kernel.org>; Fri, 19 May 2017 00:10:49 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>
-Cc: ceph-devel@vger.kernel.org
-
-Building kernel with CEPH and warnings enabled shows several missing
-prototypes and unused variables. Please fix.
+To: pdonnell@redhat.com
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
 
-net/ceph/ceph_common.c:62:13: warning: no previous prototype for =E2=80=98c=
-eph_file_part=E2=80=99 [-Wmissing-prototypes]
-net/ceph/messenger.c: In function =E2=80=98write_partial_message_data=E2=80=
-=99:
-net/ceph/messenger.c:1580:8: warning: variable =E2=80=98need_crc=E2=80=99 s=
-et but not used [-Wunused-but-set-variable]
-net/ceph/mon_client.c: In function =E2=80=98ceph_monmap_decode=E2=80=99:
-net/ceph/mon_client.c:46:6: warning: variable =E2=80=98version=E2=80=99 set=
- but not used [-Wunused-but-set-variable]
-net/ceph/auth_x.c: In function =E2=80=98process_one_ticket=E2=80=99:
-net/ceph/auth_x.c:146:19: warning: variable =E2=80=98blob_struct_v=E2=80=99=
- set but not used [-Wunused-but-set-variable]
+Patrick,
+
+
+     It looks like a commit which tests the standby_count_wanted option 
+has been committed, but it fails and I don't see the implementation 
+anywhere.
+
+
+2017-05-18T22:58:43.585 INFO:teuthology.orchestra.run.smithi161:Running: 
+'sudo adjust-ulimits ceph-coverage 
+/home/ubuntu/cephtest/archive/coverage timeout 120 ceph --cluster ceph 
+fs set cephfs standby_count_wanted 0'
+2017-05-18T22:58:43.725 
+INFO:teuthology.orchestra.run.smithi161.stderr:Invalid command: 
+standby_count_wanted not in 
+max_mds|max_file_size|allow_new_snaps|inline_data|cluster_down|allow_multimds|allow_dirfrags
+2017-05-18T22:58:43.725 
+INFO:teuthology.orchestra.run.smithi161.stderr:fs set <fs_name> 
+max_mds|max_file_size|allow_new_snaps|inline_data|cluster_down|allow_multimds|allow_dirfrags 
+<val> {<confirm>} :  set mds parameter <var> to <val>
+2017-05-18T22:58:43.725 
+INFO:teuthology.orchestra.run.smithi161.stderr:Error EINVAL: invalid command
+
+
+http://pulpito.ceph.com/dzafman-2017-05-18_15:46:40-rados-wip-zafman-testing-distro-basic-smithi/1193530
+
+
+David
+
