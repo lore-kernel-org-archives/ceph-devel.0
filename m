@@ -1,44 +1,35 @@
-From: fisherman <fisherman.dong@gmail.com>
-Subject: A question about Ceph's paxos implication
-Date: Fri, 19 May 2017 07:31:08 +0800
-Message-ID: <CACRPdDQACqOdoFJQMpfNEDY7zgqc6-m+DWG2f8JMHDTu+2HqSg@mail.gmail.com>
+From: Stephen Hemminger <stephen@networkplumber.org>
+Subject: Kernel warnings in CEPH
+Date: Thu, 18 May 2017 17:06:13 -0700
+Message-ID: <20170518170613.5e1d924f@xeon-e3>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:33139 "EHLO
-        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753332AbdERXbK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 19:31:10 -0400
-Received: by mail-wm0-f41.google.com with SMTP id v15so15668448wmv.0
-        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2017 16:31:09 -0700 (PDT)
+Received: from mail-pf0-f172.google.com ([209.85.192.172]:34117 "EHLO
+        mail-pf0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751155AbdESAGV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 20:06:21 -0400
+Received: by mail-pf0-f172.google.com with SMTP id 9so31189903pfj.1
+        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2017 17:06:21 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi, Sage and all Cepher
+Building kernel with CEPH and warnings enabled shows several missing
+prototypes and unused variables. Please fix.
 
-   I am reading Ceph's implementation of paxos and have a question about it.
-   The question is given by an example below:
 
-   Assume there are 5 monitor nodes: n1, n2, n3, n4, n5.
-
-1) Node n1 is the leader,  all nodes are synchroined with
-Last_committed=100, and there is no pending operation;
-2) A client, say c1, sends a request R1 to n1;
-3) Node n1 proposes a value v(for R1) with log version 101, stores
-version 101 and pending_v =101 in its db. But it goes down before
-sending anything to other nodes;
-   Note: only n1 has pending_v == 101.
-4) Node n2 becomes the leader(without n1) and the cluster become
-active. Client c1 querys n2 for status, and the result shows R1 is
-lost;
-5) Node n1 recovers and becomes leader again;
-6) Node n1 finds pending_v == 101 and log version 101, so R1 get
-replicated and applied;
-7) Client C1 queries again, and finds R1 has been applied.
-    ==>inconsitent with the result of 4)
-
-Am I right on this point?
-
-Thanks
-Fisher
+net/ceph/ceph_common.c:62:13: warning: no previous prototype for =E2=80=98c=
+eph_file_part=E2=80=99 [-Wmissing-prototypes]
+net/ceph/messenger.c: In function =E2=80=98write_partial_message_data=E2=80=
+=99:
+net/ceph/messenger.c:1580:8: warning: variable =E2=80=98need_crc=E2=80=99 s=
+et but not used [-Wunused-but-set-variable]
+net/ceph/mon_client.c: In function =E2=80=98ceph_monmap_decode=E2=80=99:
+net/ceph/mon_client.c:46:6: warning: variable =E2=80=98version=E2=80=99 set=
+ but not used [-Wunused-but-set-variable]
+net/ceph/auth_x.c: In function =E2=80=98process_one_ticket=E2=80=99:
+net/ceph/auth_x.c:146:19: warning: variable =E2=80=98blob_struct_v=E2=80=99=
+ set but not used [-Wunused-but-set-variable]
