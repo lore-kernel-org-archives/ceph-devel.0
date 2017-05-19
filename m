@@ -1,74 +1,47 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: A question about Ceph's paxos implication
-Date: Fri, 19 May 2017 16:38:19 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1705191636070.3646@piezo.novalocal>
-References: <CACRPdDQACqOdoFJQMpfNEDY7zgqc6-m+DWG2f8JMHDTu+2HqSg@mail.gmail.com> <alpine.DEB.2.11.1705190230060.3646@piezo.novalocal> <CACRPdDSAFOpLneXfCuT10ppfSovQwm7k95UEjZYSjHhumgKTtA@mail.gmail.com>
+From: Xiaoxi Chen <superdebuger@gmail.com>
+Subject: Re: [GSOC] ceph-mgr: Cluster Status Dashboard
+Date: Sat, 20 May 2017 00:40:10 +0800
+Message-ID: <CAEYCsVK-4wSUJb_EBuaJr3+U2Dzbu9ASsJRrgCxJDLN5Fn9Vzg@mail.gmail.com>
+References: <CA+b5B08BdnpZvbnWS+ocr2oObG4moc0nGibGwm6Taq9Eh=46wg@mail.gmail.com>
+ <CALe9h7esz4MquzA6ZqCniOj8jb=j+7QdhnSkLTj+2d9HCyYtFw@mail.gmail.com>
+ <CA+b5B089q0sbcF07Di2-4JroUjZNNekvAa2SeOQvWgB7X8wqaQ@mail.gmail.com>
+ <CAEYCsVLV7zA+9-9D-LGe=Myub4Qf49fUDdMOdDrA7DD6411DDw@mail.gmail.com>
+ <alpine.DEB.2.11.1705191215090.3646@piezo.novalocal> <CABZ+qqmeEDVQFy3X7YZ1jn8UzgniF+4pi1p77fxcgrNeBCNg0A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:45699 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751155AbdESQiW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 19 May 2017 12:38:22 -0400
-In-Reply-To: <CACRPdDSAFOpLneXfCuT10ppfSovQwm7k95UEjZYSjHhumgKTtA@mail.gmail.com>
+Received: from mail-yw0-f179.google.com ([209.85.161.179]:33452 "EHLO
+        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751159AbdESQkL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 19 May 2017 12:40:11 -0400
+Received: by mail-yw0-f179.google.com with SMTP id p73so26678171ywp.0
+        for <ceph-devel@vger.kernel.org>; Fri, 19 May 2017 09:40:11 -0700 (PDT)
+In-Reply-To: <CABZ+qqmeEDVQFy3X7YZ1jn8UzgniF+4pi1p77fxcgrNeBCNg0A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: fisherman <fisherman.dong@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: Sage Weil <sage@newdream.net>, saumay agrawal <saumay.agrawal@gmail.com>, John Spray <jspray@redhat.com>, kefu chai <tchaikov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 19 May 2017, fisherman wrote:
-> On Fri, May 19, 2017 at 10:37 AM, Sage Weil <sage@newdream.net> wrote:
-> > On Fri, 19 May 2017, fisherman wrote:
-> >> Hi, Sage and all Cepher
-> >>
-> >>    I am reading Ceph's implementation of paxos and have a question about it.
-> >>    The question is given by an example below:
-> >>
-> >>    Assume there are 5 monitor nodes: n1, n2, n3, n4, n5.
-> >>
-> >> 1) Node n1 is the leader,  all nodes are synchroined with
-> >> Last_committed=100, and there is no pending operation;
-> >> 2) A client, say c1, sends a request R1 to n1;
-> >> 3) Node n1 proposes a value v(for R1) with log version 101, stores
-> >> version 101 and pending_v =101 in its db. But it goes down before
-> >> sending anything to other nodes;
-> >>    Note: only n1 has pending_v == 101.
-> >> 4) Node n2 becomes the leader(without n1) and the cluster become
-> >> active. Client c1 querys n2 for status, and the result shows R1 is
-> >> lost;
-> >> 5) Node n1 recovers and becomes leader again;
-> >> 6) Node n1 finds pending_v == 101 and log version 101, so R1 get
-> >> replicated and applied;
-> >> 7) Client C1 queries again, and finds R1 has been applied.
-> >>     ==>inconsitent with the result of 4)
-> >>
-> >> Am I right on this point?
-> >
-> > IIRC at step 4, as soon as a quorum is formed without n1, the original
-> > proposal from n1 is rendered obsolete.  (If it isn't explicitly
-> > invalidated it would also be highly likely to be implicitly as soon as the
-> > new quorum passed its first proposal.)
->    Maybe the original proposal should be rendered obsolete in
-> handle_last function, after having got ack from everyone in quorum,
-> but I can't find the code.
->    It can be invalidated by the first proposal of the new quorum. The
-> inconsistency problem I described only occurs when read happens before
-> any new proposal.
+>(c) makes the nervous.  You shouldn't need to consume daemonperf output;
+>the 'ceph daemon <name> perf dump' provides the same (and more) data in
+>json form.
 
-Yeah, I think the simplest fix is to *always* propose from 
-handle_last.  If a previously proposed value wasn't learned, we can 
-do a 'null' proposal that still bumps up last_committed.  That happens 
-before the lease is extended so we avoid any window of readability 
-before the quorum could fail and a new round including n1 could re-propose 
-the old value.  This guard
+Yes, we do use "perf dump" but borrow the code pieces from daemonperf
+to parse the result, you may need to sub, max, or calc interval
+average, based on the counter's type.
 
-      // did we learn an old value?
-      if (uncommitted_v == last_committed+1 &&
-	  uncommitted_value.length()) {
+Prometheus is a MUST for such use case as it can do histogram and
+enable us to show percentile (like 95% commit latency) on dashboard,
+it is the only way to read 1000+ osd's metrics.
 
-would prevent it from being used because last_committed would have 
-advanced.
-
-Does that seem reasonable?
-
-sage
+2017-05-19 20:22 GMT+08:00 Dan van der Ster <dan@vanderster.com>:
+> On Fri, May 19, 2017 at 2:18 PM, Sage Weil <sage@newdream.net> wrote:
+>> I'm also curious how the grafana dashboards are built (I haven't used
+>> Grafana before).  Is this the sort of thing where the dashboards can be
+>> developed and managed in source control?  It would be great to have a
+>> bunch of pre-built and collaboratively developed Ceph dashboards!
+>
+> A grafana dashboard is described by a json file, which can exported
+> and shared, e.g. at https://grafana.com/dashboards
+>
+> -- dan
