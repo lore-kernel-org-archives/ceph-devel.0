@@ -1,75 +1,56 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: check i_nlink while converting a file handle to
- dentry
-Date: Fri, 19 May 2017 08:41:45 +0800
-Message-ID: <A5330653-F609-4CE7-BE15-AD80C671FAD2@redhat.com>
-References: <20170517112107.31025-1-lhenriques@suse.com>
- <DEB2EE75-52B1-4C4D-9F05-E0458CB10FB3@redhat.com>
- <20170518164805.jgvxvvvseurrur7e@hermes.olymp>
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20170518164805.jgvxvvvseurrur7e@hermes.olymp>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
+Subject: Re: Alibaba's work on majority commit
+Date: Fri, 19 May 2017 08:50:22 +0800
+Message-ID: <E52930BD-9CB9-46FC-8A86-D0350D495EF6@alibaba-inc.com>
+References: <EE680D4A-C2A0-4A47-8780-FB3FD47FCD0D@alibaba-inc.com>
+ <FBA81CC7-C30D-4994-BC95-B11FAF32ABAD@alibaba-inc.com>
+ <CALZt5jwSYZyMgdoGvYEgLrp-9VD2MeAUc2hhhM7ATHWOdtwLBQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain;
+        charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from out0-205.mail.aliyun.com ([140.205.0.205]:38153 "EHLO
+        out0-205.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751486AbdESAum (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 20:50:42 -0400
+In-Reply-To: <CALZt5jwSYZyMgdoGvYEgLrp-9VD2MeAUc2hhhM7ATHWOdtwLBQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ning Yao <zay11022@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Brett Niver <bniver@redhat.com>
+
+Hi Lin and Brett,
+   Out of town for business trip. Got a little bit of problem to access slideshare out of US. Will send you the link soon after I am back to town.
+
+  thanks,
+  James
+
+On 5/19/17, 12:16 AM, "Ning Yao" <ceph-devel-owner@vger.kernel.org on behalf of zay11022@gmail.com> wrote:
+
+    It is a private slide
+    Regards
+    Ning Yao
+    
+    
+    2017-05-12 0:41 GMT+08:00 LIU, Fei <james.liu@alibaba-inc.com>:
+    > Hi All,
+    >   Here is the slides that we presented this morning regarding to IO returning once we get majority commit.  Please feel free to send us any comments and questions.
+    >
+    >   https://www.slideshare.net/jupiturliu/ceph-majority-commit
+    >
+    >   Regards,
+    >   James
+    >
+    >
+    >
+    > --
+    > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+    > the body of a message to majordomo@vger.kernel.org
+    > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+    --
+    To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+    the body of a message to majordomo@vger.kernel.org
+    More majordomo info at  http://vger.kernel.org/majordomo-info.html
+    
 
 
-> On 19 May 2017, at 00:48, Luis Henriques <lhenriques@suse.com> wrote:
-> 
-> On Thu, May 18, 2017 at 09:36:44PM +0800, Yan, Zheng wrote:
->> 
->>> On 17 May 2017, at 19:21, Luis Henriques <lhenriques@suse.com> wrote:
->>> 
->>> Converting a file handle to a dentry can be done call after the inode
->>> unlink.  This means that __fh_to_dentry() requires an extra check to
->>> verify the number of links is not 0.
->>> 
->>> The issue can be easily reproduced using xfstest generic/426, which does
->>> something like:
->>> 
->>> name_to_handle_at(&fh)
->>> echo 3 > /proc/sys/vm/drop_caches
->>> unlink()
->>> open_by_handle_at(&fh)
->>> 
->>> The call to open_by_handle_at() should fail, as the file doesn't exist
->>> anymore.
->>> 
->>> Cc: stable@vger.kernel.org
->>> Link: http://tracker.ceph.com/issues/19958
->>> Signed-off-by: Luis Henriques <lhenriques@suse.com>
->>> ---
->>> fs/ceph/export.c | 4 ++++
->>> 1 file changed, 4 insertions(+)
->>> 
->>> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
->>> index e8f11fa565c5..7df550c13d7f 100644
->>> --- a/fs/ceph/export.c
->>> +++ b/fs/ceph/export.c
->>> @@ -91,6 +91,10 @@ static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
->>> 		ceph_mdsc_put_request(req);
->>> 		if (!inode)
->>> 			return ERR_PTR(-ESTALE);
->>> +		if (inode->i_nlink == 0) {
->>> +			iput(inode);
->>> +			return ERR_PTR(-ESTALE);
->>> +		}
->>> 	}
->> 
->> maybe we should do this check in MDS
-> 
-> Thank you for your review.  Are you suggesting to do this check *only* in
-> the MDS?  I guess that's probably a good thing to do too, but don't you
-> think it's a good idea to keep it on the client side as well?
-
-Applied. Thanks
-
-Yan, Zheng
-
-> 
-> Cheers,
-> --
-> Luís
