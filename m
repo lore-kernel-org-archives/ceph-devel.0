@@ -1,56 +1,75 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: standby_count_wanted
-Date: Thu, 18 May 2017 20:12:43 -0400
-Message-ID: <CA+2bHPaJsPQayPBcWBnswJKtePvoU=gXUg0JRKCeg9YBkdHQuw@mail.gmail.com>
-References: <062f5224-fe69-ca4c-9180-5964cd6609b0@redhat.com> <CA+2bHPa=WbeJ5Hsmr2DAQYou7QSTifCj5UuD9t1xw3p1mkBbMg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:32828 "EHLO
-        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754330AbdESANP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 18 May 2017 20:13:15 -0400
-Received: by mail-qk0-f182.google.com with SMTP id y201so49750384qka.0
-        for <ceph-devel@vger.kernel.org>; Thu, 18 May 2017 17:13:14 -0700 (PDT)
-In-Reply-To: <CA+2bHPa=WbeJ5Hsmr2DAQYou7QSTifCj5UuD9t1xw3p1mkBbMg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH] ceph: check i_nlink while converting a file handle to
+ dentry
+Date: Fri, 19 May 2017 08:41:45 +0800
+Message-ID: <A5330653-F609-4CE7-BE15-AD80C671FAD2@redhat.com>
+References: <20170517112107.31025-1-lhenriques@suse.com>
+ <DEB2EE75-52B1-4C4D-9F05-E0458CB10FB3@redhat.com>
+ <20170518164805.jgvxvvvseurrur7e@hermes.olymp>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20170518164805.jgvxvvvseurrur7e@hermes.olymp>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Luis Henriques <lhenriques@suse.com>
+Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-+ ceph-devel
 
-On Thu, May 18, 2017 at 8:11 PM, Patrick Donnelly <pdonnell@redhat.com> wrote:
-> Hi David,
->
-> That should be fixed by: https://github.com/ceph/ceph/pull/15126
->
-> Sorry for the trouble.
->
-> On Thu, May 18, 2017 at 8:10 PM, David Zafman <dzafman@redhat.com> wrote:
->>
->> Patrick,
->>
->>
->>     It looks like a commit which tests the standby_count_wanted option has
->> been committed, but it fails and I don't see the implementation anywhere.
->>
->>
->> 2017-05-18T22:58:43.585 INFO:teuthology.orchestra.run.smithi161:Running:
->> 'sudo adjust-ulimits ceph-coverage /home/ubuntu/cephtest/archive/coverage
->> timeout 120 ceph --cluster ceph fs set cephfs standby_count_wanted 0'
->> 2017-05-18T22:58:43.725
->> INFO:teuthology.orchestra.run.smithi161.stderr:Invalid command:
->> standby_count_wanted not in
->> max_mds|max_file_size|allow_new_snaps|inline_data|cluster_down|allow_multimds|allow_dirfrags
->> 2017-05-18T22:58:43.725 INFO:teuthology.orchestra.run.smithi161.stderr:fs
->> set <fs_name>
->> max_mds|max_file_size|allow_new_snaps|inline_data|cluster_down|allow_multimds|allow_dirfrags
->> <val> {<confirm>} :  set mds parameter <var> to <val>
->> 2017-05-18T22:58:43.725 INFO:teuthology.orchestra.run.smithi161.stderr:Error
->> EINVAL: invalid command
->>
->>
->> http://pulpito.ceph.com/dzafman-2017-05-18_15:46:40-rados-wip-zafman-testing-distro-basic-smithi/1193530
+> On 19 May 2017, at 00:48, Luis Henriques <lhenriques@suse.com> wrote:
+> 
+> On Thu, May 18, 2017 at 09:36:44PM +0800, Yan, Zheng wrote:
+>> 
+>>> On 17 May 2017, at 19:21, Luis Henriques <lhenriques@suse.com> wrote:
+>>> 
+>>> Converting a file handle to a dentry can be done call after the inode
+>>> unlink.  This means that __fh_to_dentry() requires an extra check to
+>>> verify the number of links is not 0.
+>>> 
+>>> The issue can be easily reproduced using xfstest generic/426, which does
+>>> something like:
+>>> 
+>>> name_to_handle_at(&fh)
+>>> echo 3 > /proc/sys/vm/drop_caches
+>>> unlink()
+>>> open_by_handle_at(&fh)
+>>> 
+>>> The call to open_by_handle_at() should fail, as the file doesn't exist
+>>> anymore.
+>>> 
+>>> Cc: stable@vger.kernel.org
+>>> Link: http://tracker.ceph.com/issues/19958
+>>> Signed-off-by: Luis Henriques <lhenriques@suse.com>
+>>> ---
+>>> fs/ceph/export.c | 4 ++++
+>>> 1 file changed, 4 insertions(+)
+>>> 
+>>> diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+>>> index e8f11fa565c5..7df550c13d7f 100644
+>>> --- a/fs/ceph/export.c
+>>> +++ b/fs/ceph/export.c
+>>> @@ -91,6 +91,10 @@ static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
+>>> 		ceph_mdsc_put_request(req);
+>>> 		if (!inode)
+>>> 			return ERR_PTR(-ESTALE);
+>>> +		if (inode->i_nlink == 0) {
+>>> +			iput(inode);
+>>> +			return ERR_PTR(-ESTALE);
+>>> +		}
+>>> 	}
+>> 
+>> maybe we should do this check in MDS
+> 
+> Thank you for your review.  Are you suggesting to do this check *only* in
+> the MDS?  I guess that's probably a good thing to do too, but don't you
+> think it's a good idea to keep it on the client side as well?
 
--- 
-Patrick Donnelly
+Applied. Thanks
+
+Yan, Zheng
+
+> 
+> Cheers,
+> --
+> Luís
