@@ -1,117 +1,87 @@
 From: Xiaoxi Chen <superdebuger@gmail.com>
-Subject: Re: [GSOC] ceph-mgr: Cluster Status Dashboard
-Date: Fri, 19 May 2017 15:18:59 +0800
-Message-ID: <CAEYCsVLV7zA+9-9D-LGe=Myub4Qf49fUDdMOdDrA7DD6411DDw@mail.gmail.com>
-References: <CA+b5B08BdnpZvbnWS+ocr2oObG4moc0nGibGwm6Taq9Eh=46wg@mail.gmail.com>
- <CALe9h7esz4MquzA6ZqCniOj8jb=j+7QdhnSkLTj+2d9HCyYtFw@mail.gmail.com> <CA+b5B089q0sbcF07Di2-4JroUjZNNekvAa2SeOQvWgB7X8wqaQ@mail.gmail.com>
+Subject: Re: [ceph-users] Intel power tuning - 30% throughput performance increase
+Date: Fri, 19 May 2017 15:23:06 +0800
+Message-ID: <CAEYCsV+5-0euXPHAHsrko9DUeA4H3krNSZyZU1Kioyw9Dg4w7w@mail.gmail.com>
+References: <CA+z5Dsx1Fwkxxk=5N3u_Ox6m+VC_vW2oexWsF29ispcm+Hf8bA@mail.gmail.com>
+ <CABZ+qqk-cN25u8vf-XWoTincF5M90_JjBGnedHvnfAcL8CUDwQ@mail.gmail.com>
+ <CA+z5DswHcgddrbYnwDH7o+58sASO5jZA5ZK+-NQ60Rw+bPRKkA@mail.gmail.com>
+ <CABZ+qq=+1SvbPhZOBCS0Be4Z=6LXsgck2AgK+o40BOU_BwDngQ@mail.gmail.com>
+ <CA+z5DsydfEGGzmKT+mf7BqpkwsD5CwL0hNMTW2OXFPeJjDWSGQ@mail.gmail.com>
+ <CABZ+qqmu2C4jdu50X2u38K9cb57c0=BdfKG0BhrjJfTQYOPcjg@mail.gmail.com>
+ <CA+z5DszC6EmYSPpZsj3O0Neb-qMhfmUDjjXWpfkgukrqTyZa6A@mail.gmail.com>
+ <CAF-wwdF-w_nBF5HN3nwMtaSxK2KM+EsdBES=HhoCa71PH8Obbg@mail.gmail.com>
+ <CACJqLyYLAo5n=Mq=nS85dVjr1aNZ0LuaQN7Rm4Du9T1L2qKkEA@mail.gmail.com> <CAF-wwdEF7ReHz+wjZBTcdJ=Xh3UQ8dGEjJtxhosPXra4xm2t9A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yb0-f180.google.com ([209.85.213.180]:34856 "EHLO
-        mail-yb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750982AbdESHTA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 19 May 2017 03:19:00 -0400
-Received: by mail-yb0-f180.google.com with SMTP id p143so15796871yba.2
-        for <ceph-devel@vger.kernel.org>; Fri, 19 May 2017 00:19:00 -0700 (PDT)
-In-Reply-To: <CA+b5B089q0sbcF07Di2-4JroUjZNNekvAa2SeOQvWgB7X8wqaQ@mail.gmail.com>
+Received: from mail-yw0-f181.google.com ([209.85.161.181]:34312 "EHLO
+        mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750760AbdESHXH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 19 May 2017 03:23:07 -0400
+Received: by mail-yw0-f181.google.com with SMTP id l14so31223302ywk.1
+        for <ceph-devel@vger.kernel.org>; Fri, 19 May 2017 00:23:07 -0700 (PDT)
+In-Reply-To: <CAF-wwdEF7ReHz+wjZBTcdJ=Xh3UQ8dGEjJtxhosPXra4xm2t9A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: saumay agrawal <saumay.agrawal@gmail.com>
-Cc: John Spray <jspray@redhat.com>, kefu chai <tchaikov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: Haomai Wang <haomai@xsky.com>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
 
-FWIW, we have our home-made dashboard  in production including
-a) Ceph cluster status  (Healthy, PG, pool, space , IO statistisc by pool)
-b) Hardware metrics on ceph nodes(cpu, memory ,disk iostat, network)
-c) perf dump via admin socket, most importantly , commit_latency and
-apply_latency for OSDs.
-d) user facing performance , mostly latency,  collected by periodly
-running some test IO on top of the cluster.
+would be better to document it first on "Known system-wise tuning
+knobs" in the doc?
 
-The data are come from ceph itself(a) , prometheus agent(b) , hacked
-script from "ceph daemonperf" (c), and home mode monitoring code(d).
-Dashboard is Grafana on top of prometheus, it is easy to use and easy
-to customized.
 
-Wondering if Grafana or whatever other existing dashboard framework
-could also be a choice for dashboard? Just ceph-mgr collect all the
-informations and dashboard frontend consume data from ceph-mgr via
-API?
-
-Xiaoxi
-
-2017-05-13 18:37 GMT+08:00 saumay agrawal <saumay.agrawal@gmail.com>:
-> On Sat, May 13, 2017 at 1:35 PM, John Spray <jspray@redhat.com> wrote:
->> On Sat, May 13, 2017 at 6:06 AM, saumay agrawal
->> <saumay.agrawal@gmail.com> wrote:
->>> Hi Kefu,
->>>
->>> I apologize for the late reply.
->>>
->>> I have been looking into the PR you mentioned earlier
->>> https://github.com/ceph/ceph/pull/14946 . I have also explored the
->>> Calamari Dashboard in the past few days. I have some queries.
->>>
->>> I guess since Calamari Dashboard already does the job of visualizing
->>> the statistics of a Ceph cluster (health, OSDs, MONs, pools, IOPS,
->>> space utilization etc), we would primarily be improving on its UI/UX,
->>> that is to say the visualization portion and some other
->>> functionalities. Please do correct me if I am wrong in this.
->>>
->>> Moreover, Calamari Dashboard is made up of Calamari Server (backend)
->>> and Calamari Clients (frontend).
->>>
->>> I found out that Calamari Server uses a new REST API instead of being
->>> based upon the CEPH REST API. Will I be working on improving this new
->>> REST API?
->>>
->>> Moreover, Calamari Server is written in Django and
->>> django-rest-framework. However in the prototype of the dashboard
->>> mentioned in the PR above, I could find that the dashboard is using
->>> CherryPy too. CherryPy is a minimalist framework which is good for
->>> prototyping and makes it very easy. Meanwhile Django is more of a
->>> complete web application stack. So will we be using a single
->>> technology primarily, or a combination of both?
->>
->> Welcome!
->>
+2017-05-05 8:28 GMT+08:00 Brad Hubbard <bhubbard@redhat.com>:
+> On Thu, May 4, 2017 at 10:58 AM, Haomai Wang <haomai@xsky.com> wrote:
+>> refer to https://github.com/ceph/ceph/pull/5013
 >
-> Thanks, John. :)
+> How about we issue a warning about possible performance implications
+> if we detect this is not set to 1 *or* 0 at startup?
 >
->> Don't worry about any of the Django or REST stuff.  Django is being
->> dropped from everything because the maintainers of downstream
->> (distribution) packages are highly opposed to supporting it as a
->> dependency.  The REST part is not needed when the dashboard is built
->> as a mgr module, because as a mgr module is has direct access to the
->> Ceph state.
 >>
->
-> As you say. Can you point out any other areas of Ceph that I should
-> explore thoroughly for this project? Also, I would be glad if you
-> could share any kind of technologies that I need to be familiar with
-> (other than HTML, CSS, JS etc). For example, I'm looking into CherryPy
-> these days. It will help me to pick up things more easily if I know
-> the tech you are planning to use for the dashboard.
->
->>> Last thing I want to ask is for what kinds of things I should be
->>> contacting you and for what kind of things I should be contacting
->>> John? Since John is my mentor on this project and I can see him
->>> working on most of the Dashboard portion on GitHub, I presume for any
->>> dashboard related issue I should contact him. And also to whom should
->>> I send the weekly report of my progress on my project?
->>
->> I think I'm supposed to be a co-mentor (whatever that means :-) ) and
->> Kefu is your primary point of contact.  I'm always happy to provide
->> opinions though of course.
->>
->> John
->>
->>
->>> Regards,
->>> Saumay.
+>> On Thu, May 4, 2017 at 7:56 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
+>>> +ceph-devel to get input on whether we want/need to check the value of
+>>> /dev/cpu_dma_latency (platform dependant) at startup and issue a
+>>> warning, or whether documenting this would suffice?
+>>>
+>>> Any doc contribution would be welcomed.
+>>>
+>>> On Wed, May 3, 2017 at 7:18 PM, Blair Bethwaite
+>>> <blair.bethwaite@gmail.com> wrote:
+>>>> On 3 May 2017 at 19:07, Dan van der Ster <dan@vanderster.com> wrote:
+>>>>> Whether cpu_dma_latency should be 0 or 1, I'm not sure yet. I assume
+>>>>> your 30% boost was when going from throughput-performance to
+>>>>> dma_latency=0, right? I'm trying to understand what is the incremental
+>>>>> improvement from 1 to 0.
+>>>>
+>>>> Probably minimal given that represents a state transition latency
+>>>> taking only 1us. Presumably the main issue is when the CPU can drop
+>>>> into the lower states and the compounding impact of that over time. I
+>>>> will do some simple characterisation of that over the next couple of
+>>>> weeks and report back...
+>>>>
+>>>> --
+>>>> Cheers,
+>>>> ~Blairo
+>>>> _______________________________________________
+>>>> ceph-users mailing list
+>>>> ceph-users@lists.ceph.com
+>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>>
+>>>
+>>>
 >>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> Cheers,
+>>> Brad
+>>> _______________________________________________
+>>> ceph-users mailing list
+>>> ceph-users@lists.ceph.com
+>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+>
+> --
+> Cheers,
+> Brad
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
