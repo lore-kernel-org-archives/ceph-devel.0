@@ -1,118 +1,51 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: [ceph-users] Intel power tuning - 30% throughput performance increase
-Date: Sat, 20 May 2017 10:14:29 +1000
-Message-ID: <CAF-wwdGF0-vNEfh+R_dq2qArup4PumXha3Judr79n85x4K7Jmg@mail.gmail.com>
-References: <CA+z5Dsx1Fwkxxk=5N3u_Ox6m+VC_vW2oexWsF29ispcm+Hf8bA@mail.gmail.com>
- <CABZ+qqk-cN25u8vf-XWoTincF5M90_JjBGnedHvnfAcL8CUDwQ@mail.gmail.com>
- <CA+z5DswHcgddrbYnwDH7o+58sASO5jZA5ZK+-NQ60Rw+bPRKkA@mail.gmail.com>
- <CABZ+qq=+1SvbPhZOBCS0Be4Z=6LXsgck2AgK+o40BOU_BwDngQ@mail.gmail.com>
- <CA+z5DsydfEGGzmKT+mf7BqpkwsD5CwL0hNMTW2OXFPeJjDWSGQ@mail.gmail.com>
- <CABZ+qqmu2C4jdu50X2u38K9cb57c0=BdfKG0BhrjJfTQYOPcjg@mail.gmail.com>
- <CA+z5DszC6EmYSPpZsj3O0Neb-qMhfmUDjjXWpfkgukrqTyZa6A@mail.gmail.com>
- <CAF-wwdF-w_nBF5HN3nwMtaSxK2KM+EsdBES=HhoCa71PH8Obbg@mail.gmail.com>
- <CACJqLyYLAo5n=Mq=nS85dVjr1aNZ0LuaQN7Rm4Du9T1L2qKkEA@mail.gmail.com>
- <CAF-wwdEF7ReHz+wjZBTcdJ=Xh3UQ8dGEjJtxhosPXra4xm2t9A@mail.gmail.com>
- <CAEYCsV+5-0euXPHAHsrko9DUeA4H3krNSZyZU1Kioyw9Dg4w7w@mail.gmail.com> <CALJWc2tv8wRWYciRfMsGFV5wZk2eko5dNRdWm=A5jHOCVV1XGg@mail.gmail.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: subpackages for mgr modules
+Date: Sat, 20 May 2017 08:24:57 +0800
+Message-ID: <CAJE9aON-0F3u-OJW=_y0FfFaFx0KOjmCq4B6oFF9kYmQ3Lehjw@mail.gmail.com>
+References: <3c199f5d-a09a-f600-5c16-7e0c25495efc@suse.com> <CALqRxCwjnU7wzPF49APaCZU0XSWfwBJMkPbNnnxKqTfkqcrgOw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f45.google.com ([209.85.214.45]:38614 "EHLO
-        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751457AbdETAOb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 19 May 2017 20:14:31 -0400
-Received: by mail-it0-f45.google.com with SMTP id e65so55282939ita.1
-        for <ceph-devel@vger.kernel.org>; Fri, 19 May 2017 17:14:30 -0700 (PDT)
-In-Reply-To: <CALJWc2tv8wRWYciRfMsGFV5wZk2eko5dNRdWm=A5jHOCVV1XGg@mail.gmail.com>
+Received: from mail-vk0-f41.google.com ([209.85.213.41]:33015 "EHLO
+        mail-vk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751874AbdETAY7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 19 May 2017 20:24:59 -0400
+Received: by mail-vk0-f41.google.com with SMTP id x71so19871700vkd.0
+        for <ceph-devel@vger.kernel.org>; Fri, 19 May 2017 17:24:58 -0700 (PDT)
+In-Reply-To: <CALqRxCwjnU7wzPF49APaCZU0XSWfwBJMkPbNnnxKqTfkqcrgOw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: xiaoguang fan <fanxiaoguang008@gmail.com>
-Cc: Xiaoxi Chen <superdebuger@gmail.com>, Haomai Wang <haomai@xsky.com>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: Tim Serong <tserong@suse.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-It just came to my attention that Intel has advised Red Hat never to
-lock in C0 as it may affect the life expectancy of server components
-such as fans and the CPUs themselves.
+On Sat, May 20, 2017 at 2:25 AM, Ken Dreyer <kdreyer@redhat.com> wrote:
+> On Fri, May 19, 2017 at 12:19 AM, Tim Serong <tserong@suse.com> wrote:
+>> We can't have mgr just load everything that exists (someone might want
+>> to disable some modules, without necessarily uninstalling them).
 
-FYI, YMMV.
+it does not. user can always enable/disable a plugin using "mgr_modules", right?
 
-On Fri, May 19, 2017 at 5:53 PM, xiaoguang fan
-<fanxiaoguang008@gmail.com> wrote:
-> I have done a test about close c-stat , but performance didn't increase
 >
+> I'm curious why not?
 >
+> Ceph is already hard to configure, and "install to enable / uninstall
+> to disable" would make it simpler to use.
+
+
+i agree, if he/she wants to disable it, he/she could just uninstall
+the plugin. actually, i am planning to split the dashboard into a
+separated package. so for example, mgr does not need to depend on
+cherrypy.
+
 >
-> 2017-05-19 15:23 GMT+08:00 Xiaoxi Chen <superdebuger@gmail.com>:
->>
->> would be better to document it first on "Known system-wise tuning
->> knobs" in the doc?
->>
->>
->> 2017-05-05 8:28 GMT+08:00 Brad Hubbard <bhubbard@redhat.com>:
->> > On Thu, May 4, 2017 at 10:58 AM, Haomai Wang <haomai@xsky.com> wrote:
->> >> refer to https://github.com/ceph/ceph/pull/5013
->> >
->> > How about we issue a warning about possible performance implications
->> > if we detect this is not set to 1 *or* 0 at startup?
->> >
->> >>
->> >> On Thu, May 4, 2017 at 7:56 AM, Brad Hubbard <bhubbard@redhat.com>
->> >> wrote:
->> >>> +ceph-devel to get input on whether we want/need to check the value of
->> >>> /dev/cpu_dma_latency (platform dependant) at startup and issue a
->> >>> warning, or whether documenting this would suffice?
->> >>>
->> >>> Any doc contribution would be welcomed.
->> >>>
->> >>> On Wed, May 3, 2017 at 7:18 PM, Blair Bethwaite
->> >>> <blair.bethwaite@gmail.com> wrote:
->> >>>> On 3 May 2017 at 19:07, Dan van der Ster <dan@vanderster.com> wrote:
->> >>>>> Whether cpu_dma_latency should be 0 or 1, I'm not sure yet. I assume
->> >>>>> your 30% boost was when going from throughput-performance to
->> >>>>> dma_latency=0, right? I'm trying to understand what is the
->> >>>>> incremental
->> >>>>> improvement from 1 to 0.
->> >>>>
->> >>>> Probably minimal given that represents a state transition latency
->> >>>> taking only 1us. Presumably the main issue is when the CPU can drop
->> >>>> into the lower states and the compounding impact of that over time. I
->> >>>> will do some simple characterisation of that over the next couple of
->> >>>> weeks and report back...
->> >>>>
->> >>>> --
->> >>>> Cheers,
->> >>>> ~Blairo
->> >>>> _______________________________________________
->> >>>> ceph-users mailing list
->> >>>> ceph-users@lists.ceph.com
->> >>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->> >>>
->> >>>
->> >>>
->> >>> --
->> >>> Cheers,
->> >>> Brad
->> >>> _______________________________________________
->> >>> ceph-users mailing list
->> >>> ceph-users@lists.ceph.com
->> >>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->> >
->> >
->> >
->> > --
->> > Cheers,
->> > Brad
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+> - Ken
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
 
 -- 
-Cheers,
-Brad
+Regards
+Kefu Chai
