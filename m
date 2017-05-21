@@ -1,39 +1,59 @@
-From: qi Shi <m13913886148@gmail.com>
-Subject: Which function is mon ping osd?
-Date: Sun, 21 May 2017 22:10:01 +0800
-Message-ID: <CAN=xyVX9S2g6RW-PMjhR8Xhch2Kd8UofZRDwHV=yrEbt7EFyFA@mail.gmail.com>
+From: Fabian Frederick <fabf@skynet.be>
+Subject: [PATCH 00/11 linux-next] super magic values consolidation
+Date: Sun, 21 May 2017 17:39:47 +0200
+Message-ID: <20170521153947.26281-1-fabf@skynet.be>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f49.google.com ([209.85.214.49]:34865 "EHLO
-        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754165AbdEUOKD (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 21 May 2017 10:10:03 -0400
-Received: by mail-it0-f49.google.com with SMTP id c15so139599685ith.0
-        for <ceph-devel@vger.kernel.org>; Sun, 21 May 2017 07:10:02 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+To: Alexander Viro <viro@zeniv.linux.org.uk>
+Cc: jfs-discussion@lists.sourceforge.net, linux-kernel@vger.kernel.org, fabf@skynet.be, linux-mtd@lists.infradead.org, linux-fsdevel@vger.kernel.org, pvfs2-developers@beowulf-underground.org, ceph-devel@vger.kernel.org, ocfs2-devel@oss.oracle.com
+List-Id: ceph-devel.vger.kernel.org
 
-When i read the official documents,I found that mon would ping osds.
+This small patchset reorganizes magic.h and fixes filesystems
+which defined locally super magic values.
 
-The following is a description of the official documentation:
----------------------------------------------------------------------------------------------------------------------
+Fabian Frederick (11):
+  uapi: reorganize magic.h
+  exofs: use magic.h
+  ceph: use magic.h
+  orangefs: use magic.h
+  ubifs: use magic.h
+  jfs: use magic.h
+  ocfs2: use magic.h
+  fuse: use magic.h
+  freevxfs: use magic.h
+  fs: define hfs super magic values globally
+  hfsplus: export super magic value
 
-OSD Membership and Status: Ceph OSD Daemons join a cluster and report
-on their status. At the lowest level, the Ceph OSD Daemon status is up
-or down reflecting whether or not it is running and able to service
-Ceph Client requests. If a Ceph OSD Daemon is down and inthe Ceph
-Storage Cluster, this status may indicate the failure of the Ceph OSD
-Daemon. If a Ceph OSD Daemon is not running (e.g., it crashes), the
-Ceph OSD Daemon cannot notify the Ceph Monitor that it is down. The
-Ceph Monitor can ping a Ceph OSD Daemon periodically to ensure that it
-is running. However, Ceph also empowers Ceph OSD Daemons to determine
-if a neighboring OSD is down, to update the cluster map and to report
-it to the Ceph monitor(s). This means that Ceph monitors can remain
-light weight processes. SeeMonitoring OSDs and Heartbeats for
-additional details.
------------------------------------------------------------------------------------------------------------------------
+ fs/ceph/super.h            |   4 +-
+ fs/exofs/common.h          |   6 +--
+ fs/freevxfs/vxfs.h         |   6 +--
+ fs/fuse/control.c          |   3 +-
+ fs/fuse/inode.c            |   3 +-
+ fs/hfs/hfs.h               |   4 +-
+ fs/hfsplus/hfsplus_raw.h   |   2 +-
+ fs/hfsplus/part_tbl.c      |   2 -
+ fs/jfs/jfs_incore.h        |   6 +--
+ fs/ocfs2/ocfs2_fs.h        |   5 +--
+ fs/orangefs/protocol.h     |   3 +-
+ fs/ubifs/ubifs.h           |   4 +-
+ include/uapi/linux/magic.h | 104 ++++++++++++++++++++++-----------------------
+ 13 files changed, 65 insertions(+), 87 deletions(-)
 
-Who can tell me which file in the source code, and which function,
-which function to do mon ping osd?
+-- 
+2.9.3
+
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
