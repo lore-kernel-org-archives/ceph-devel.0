@@ -1,59 +1,55 @@
 From: Fabian Frederick <fabf@skynet.be>
-Subject: [PATCH 00/11 linux-next] super magic values consolidation
-Date: Sun, 21 May 2017 17:39:47 +0200
-Message-ID: <20170521153947.26281-1-fabf@skynet.be>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
-List-Post: <mailto:linux-mtd@lists.infradead.org>
-List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
- <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
-Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
+Subject: [PATCH 03/11 linux-next] ceph: use magic.h
+Date: Sun, 21 May 2017 17:40:45 +0200
+Message-ID: <20170521154045.26925-1-fabf@skynet.be>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Alexander Viro <viro@zeniv.linux.org.uk>
-Cc: jfs-discussion@lists.sourceforge.net, linux-kernel@vger.kernel.org, fabf@skynet.be, linux-mtd@lists.infradead.org, linux-fsdevel@vger.kernel.org, pvfs2-developers@beowulf-underground.org, ceph-devel@vger.kernel.org, ocfs2-devel@oss.oracle.com
+Cc: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, fabf@skynet.be
 List-Id: ceph-devel.vger.kernel.org
 
-This small patchset reorganizes magic.h and fixes filesystems
-which defined locally super magic values.
+Filesystems generally use SUPER_MAGIC values from magic.h
+instead of a local definition.
 
-Fabian Frederick (11):
-  uapi: reorganize magic.h
-  exofs: use magic.h
-  ceph: use magic.h
-  orangefs: use magic.h
-  ubifs: use magic.h
-  jfs: use magic.h
-  ocfs2: use magic.h
-  fuse: use magic.h
-  freevxfs: use magic.h
-  fs: define hfs super magic values globally
-  hfsplus: export super magic value
+Signed-off-by: Fabian Frederick <fabf@skynet.be>
+---
+ fs/ceph/super.h            | 4 +---
+ include/uapi/linux/magic.h | 1 +
+ 2 files changed, 2 insertions(+), 3 deletions(-)
 
- fs/ceph/super.h            |   4 +-
- fs/exofs/common.h          |   6 +--
- fs/freevxfs/vxfs.h         |   6 +--
- fs/fuse/control.c          |   3 +-
- fs/fuse/inode.c            |   3 +-
- fs/hfs/hfs.h               |   4 +-
- fs/hfsplus/hfsplus_raw.h   |   2 +-
- fs/hfsplus/part_tbl.c      |   2 -
- fs/jfs/jfs_incore.h        |   6 +--
- fs/ocfs2/ocfs2_fs.h        |   5 +--
- fs/orangefs/protocol.h     |   3 +-
- fs/ubifs/ubifs.h           |   4 +-
- include/uapi/linux/magic.h | 104 ++++++++++++++++++++++-----------------------
- 13 files changed, 65 insertions(+), 87 deletions(-)
-
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index a973acd..8be85c4 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -15,6 +15,7 @@
+ #include <linux/slab.h>
+ #include <linux/posix_acl.h>
+ #include <linux/refcount.h>
++#include <linux/magic.h>
+ 
+ #include <linux/ceph/libceph.h>
+ 
+@@ -22,9 +23,6 @@
+ #include <linux/fscache.h>
+ #endif
+ 
+-/* f_type in struct statfs */
+-#define CEPH_SUPER_MAGIC 0x00c36400
+-
+ /* large granularity for statfs utilization stats to facilitate
+  * large volume sizes on 32-bit machines. */
+ #define CEPH_BLOCK_SHIFT   22  /* 4 MB */
+diff --git a/include/uapi/linux/magic.h b/include/uapi/linux/magic.h
+index 1265355..507f3c3 100644
+--- a/include/uapi/linux/magic.h
++++ b/include/uapi/linux/magic.h
+@@ -12,6 +12,7 @@
+ #define BPF_FS_MAGIC		0xcafe4a11
+ #define BTRFS_SUPER_MAGIC	0x9123683E
+ #define BTRFS_TEST_MAGIC	0x73727279
++#define CEPH_SUPER_MAGIC	0x00c36400
+ #define CGROUP2_SUPER_MAGIC	0x63677270
+ #define CGROUP_SUPER_MAGIC	0x27e0eb
+ #define CODA_SUPER_MAGIC	0x73757245
 -- 
 2.9.3
-
-
-______________________________________________________
-Linux MTD discussion mailing list
-http://lists.infradead.org/mailman/listinfo/linux-mtd/
