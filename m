@@ -1,103 +1,54 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: [bug report] ceph: fix race between page writeback and truncate
-Date: Mon, 22 May 2017 23:35:15 +0300
-Message-ID: <20170522203515.GA25922@elgon.mountain>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: understanding Ubuntu's package version numbers for Ceph
+Date: Mon, 22 May 2017 16:04:06 -0600
+Message-ID: <CALqRxCxd=TVLumgwkRVeRBYOQr3m4mFsY4zd8026zvVJk9OZOQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:41639 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758066AbdEVUg2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 May 2017 16:36:28 -0400
-Content-Disposition: inline
+Received: from mail-ua0-f179.google.com ([209.85.217.179]:35339 "EHLO
+        mail-ua0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934403AbdEVWEI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 May 2017 18:04:08 -0400
+Received: by mail-ua0-f179.google.com with SMTP id y4so61466522uay.2
+        for <ceph-devel@vger.kernel.org>; Mon, 22 May 2017 15:04:07 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: zheng.z.yan@intel.com
-Cc: ceph-devel@vger.kernel.org
+To: james.page@ubuntu.com
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-[ Hm...  This is really old.  I have no idea why the warning is only
-  showing up now... -dan ]
+Hi James,
 
-Hello Yan, Zheng,
+The latest distro version of Ceph in Xenial is 10.2.7-0ubuntu0.16.04.1
 
-The patch fc2744aa12da: "ceph: fix race between page writeback and
-truncate" from May 31, 2013, leads to the following static checker
-warning:
+Would you mind breaking down those version numbers for me?
 
-	fs/ceph/addr.c:550 writepage_nounlock()
-	warn: missing error code here? 'page_snap_context()' failed. 'err' = '0'
+I'm guessing it's like this?
 
-fs/ceph/addr.c
-   521  static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
-   522  {
-   523          struct inode *inode;
-   524          struct ceph_inode_info *ci;
-   525          struct ceph_fs_client *fsc;
-   526          struct ceph_osd_client *osdc;
-   527          struct ceph_snap_context *snapc, *oldest;
-   528          loff_t page_off = page_offset(page);
-   529          loff_t snap_size = -1;
-   530          long writeback_stat;
-   531          u64 truncate_size;
-   532          u32 truncate_seq;
-   533          int err = 0, len = PAGE_SIZE;
-                    ^^^^^^^
+"10.2.7": this is the upstream version from ceph.com
 
-   534  
-   535          dout("writepage %p idx %lu\n", page, page->index);
-   536  
-   537          if (!page->mapping || !page->mapping->host) {
-   538                  dout("writepage %p - no mapping\n", page);
-   539                  return -EFAULT;
-                        ^^^^^^^^^^^^^^
-I wish we could all take a second to appreciate how obvious and
-intentional direct returns are.  No wondering what the author intended
-because it's right there.  -EFAULT.
+"0ubuntu":
+ The "0" signifies that 10.2.7 is not yet in Debian, otherwise it would be "1"?
+ The "ubuntu" signifies that it is not a clean copy from Debian?
 
-   540          }
-   541          inode = page->mapping->host;
-   542          ci = ceph_inode(inode);
-   543          fsc = ceph_inode_to_client(inode);
-   544          osdc = &fsc->client->osdc;
-   545  
-   546          /* verify this is a writeable snap context */
-   547          snapc = page_snap_context(page);
-   548          if (snapc == NULL) {
-   549                  dout("writepage %p page %p not dirty?\n", inode, page);
-   550                  goto out;
-                        ^^^^^^^^
-Can you guess what goto out does?  It just immediately returns success.
-I guess that seems legit if the page isn't dirty.
+"0.16.04"
+ Why does this part start with "0."?
+ 16.04 seems simple enough :)
 
-   551          }
-   552          oldest = get_oldest_context(inode, &snap_size,
-   553                                      &truncate_size, &truncate_seq);
-   554          if (snapc->seq > oldest->seq) {
-   555                  dout("writepage %p page %p snapc %p not writeable - noop\n",
-   556                       inode, page, snapc);
-   557                  /* we should only noop if called by kswapd */
-   558                  WARN_ON((current->flags & PF_MEMALLOC) == 0);
-   559                  ceph_put_snap_context(oldest);
-   560                  goto out;
-                        ^^^^^^^
-Returning success sounds legit here as well because it's a no-op.
+".1"
+ Guessing this is a simple "release" number that you increment each
+time you build and ship v10.2.7 for Xenial? Is there anything more to
+it?
 
-   561          }
-   562          ceph_put_snap_context(oldest);
-   563  
-   564          if (snap_size == -1)
-   565                  snap_size = i_size_read(inode);
-   566  
-   567          /* is this a partial page at end of file? */
-   568          if (page_off >= snap_size) {
-   569                  dout("%p page eof %llu\n", page, snap_size);
-   570                  goto out;
-                        ^^^^^^^^
-But is it what was intended here?  You have to be the kind of X-Men who
-can read minds to know if return zero was really intentional or just
-happens by mistake.
 
-   571          }
+One of the reasons I'm asking is that historically we've tacked on
+"trusty" or "xenial" to the ceph.com builds, so we have
 
-regards,
-dan carpenter
+  ceph_10.2.7-1trusty_amd64.deb
+  ceph_10.2.7-1xenial_amd64.deb
+
+...and Apt and do-release-upgrade would treat "1xenial" as higher than
+"1trusty", so upgrades work. But when Artful Aardvark is available,
+1artful will sort lower than 1xenial, so we should probably change our
+strategy. What do you think?
+
+- Ken
