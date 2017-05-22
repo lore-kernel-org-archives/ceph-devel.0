@@ -1,54 +1,75 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: understanding Ubuntu's package version numbers for Ceph
-Date: Mon, 22 May 2017 16:04:06 -0600
-Message-ID: <CALqRxCxd=TVLumgwkRVeRBYOQr3m4mFsY4zd8026zvVJk9OZOQ@mail.gmail.com>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: Haven't been paying attention: Gperf missing
+Date: Tue, 23 May 2017 08:52:46 +1000
+Message-ID: <CAF-wwdFRzGxAdtXAAoieUYADZ7YQrf8u9Zkwqxs2FCk+bgwaSQ@mail.gmail.com>
+References: <9cc2b255-f617-e109-b9b9-23a32ea8509f@digiware.nl>
+ <CAF-wwdFP4Wy-4Bx+wkW=btjCQokTW3QaLSaVudJJyBM=2XmaLA@mail.gmail.com> <9c1c2403-c114-bec9-d37b-e217d2d23e69@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f179.google.com ([209.85.217.179]:35339 "EHLO
-        mail-ua0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934403AbdEVWEI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 May 2017 18:04:08 -0400
-Received: by mail-ua0-f179.google.com with SMTP id y4so61466522uay.2
-        for <ceph-devel@vger.kernel.org>; Mon, 22 May 2017 15:04:07 -0700 (PDT)
+Received: from mail-it0-f42.google.com ([209.85.214.42]:36752 "EHLO
+        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758774AbdEVWws (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 May 2017 18:52:48 -0400
+Received: by mail-it0-f42.google.com with SMTP id o5so7935071ith.1
+        for <ceph-devel@vger.kernel.org>; Mon, 22 May 2017 15:52:47 -0700 (PDT)
+In-Reply-To: <9c1c2403-c114-bec9-d37b-e217d2d23e69@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: james.page@ubuntu.com
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Kefu Chai <kchai@redhat.com>
 
-Hi James,
+I had to install gperf myself when this change came in (which wasn't
+an issue for me).
 
-The latest distro version of Ceph in Xenial is 10.2.7-0ubuntu0.16.04.1
+Kefu may have further input.
 
-Would you mind breaking down those version numbers for me?
+On Mon, May 22, 2017 at 7:59 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> On 22-05-17 11:27, Brad Hubbard wrote:
+>> On Mon, May 22, 2017 at 6:16 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>> But from the things below gperf is now an essential requirement?
+>>>
+>>> --WjW
+>>>
+>>> -- Check if the system is big endian - little endian
+>>> -- Found PythonInterp: /usr/local/bin/python2.7 (found version "2.7.13")
+>>> -- Boost version: 1.64.0
+>>> CMake Error at src/rgw/CMakeLists.txt:30 (message):
+>>>   Can't find gperf
+>>
+>> https://github.com/ceph/ceph/commit/6761a838a3750998ffc0e315d429168858a80a0a
+>
+> Hi Brad,
+>
+> That'll will fix a bit of my pain on FreeBSD.
+> But What if I don't want to build with gperf, like I used too?
+> Is that still possible?
+>
+> If so I'll PR a if-then-else change...
+>
+> --WjW
+>
+>>>
+>>>
+>>> -- Configuring incomplete, errors occurred!
+>>> See also
+>>> "/home/jenkins/workspace/ceph-master/build/CMakeFiles/CMakeOutput.log".
+>>> See also "/home/jenkins/workspace/ceph-master/build/CMakeFiles/CMa
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-I'm guessing it's like this?
-
-"10.2.7": this is the upstream version from ceph.com
-
-"0ubuntu":
- The "0" signifies that 10.2.7 is not yet in Debian, otherwise it would be "1"?
- The "ubuntu" signifies that it is not a clean copy from Debian?
-
-"0.16.04"
- Why does this part start with "0."?
- 16.04 seems simple enough :)
-
-".1"
- Guessing this is a simple "release" number that you increment each
-time you build and ship v10.2.7 for Xenial? Is there anything more to
-it?
 
 
-One of the reasons I'm asking is that historically we've tacked on
-"trusty" or "xenial" to the ceph.com builds, so we have
-
-  ceph_10.2.7-1trusty_amd64.deb
-  ceph_10.2.7-1xenial_amd64.deb
-
-...and Apt and do-release-upgrade would treat "1xenial" as higher than
-"1trusty", so upgrades work. But when Artful Aardvark is available,
-1artful will sort lower than 1xenial, so we should probably change our
-strategy. What do you think?
-
-- Ken
+-- 
+Cheers,
+Brad
