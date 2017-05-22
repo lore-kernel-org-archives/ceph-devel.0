@@ -1,35 +1,58 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: subpackages for mgr modules
-Date: Mon, 22 May 2017 09:45:53 -0600
-Message-ID: <CALqRxCzJr4UAXQ4=KAE260=geE3bDsnoc7nCqVzDcj+1bDwhVg@mail.gmail.com>
-References: <3c199f5d-a09a-f600-5c16-7e0c25495efc@suse.com>
- <CALqRxCwjnU7wzPF49APaCZU0XSWfwBJMkPbNnnxKqTfkqcrgOw@mail.gmail.com> <CALe9h7eXUq-aRdOPLjDtRMFg_0bEUEHNuLR7G=QaONPZgFXOKg@mail.gmail.com>
+From: Mark Nelson <mnelson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Scuttlemonkey signing off...
+Date: Mon, 22 May 2017 12:00:20 -0500
+Message-ID: <36119611-227f-7d27-7f90-2d7410191b89@redhat.com>
+References: <CAAZbbf2+JwVzYtcZ0dS4zVckRWjwTLKz6tH+eE0h8tixQ+C0EA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f171.google.com ([209.85.217.171]:34031 "EHLO
-        mail-ua0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752231AbdEVPpy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 May 2017 11:45:54 -0400
-Received: by mail-ua0-f171.google.com with SMTP id u10so61745553uaf.1
-        for <ceph-devel@vger.kernel.org>; Mon, 22 May 2017 08:45:54 -0700 (PDT)
-In-Reply-To: <CALe9h7eXUq-aRdOPLjDtRMFg_0bEUEHNuLR7G=QaONPZgFXOKg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Tim Serong <tserong@suse.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAAZbbf2+JwVzYtcZ0dS4zVckRWjwTLKz6tH+eE0h8tixQ+C0EA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Sun, May 21, 2017 at 4:31 PM, John Spray <jspray@redhat.com> wrote:
-> My preferred solution would be mon commands for toggling modules "ceph
-> mgr module [enable|disable] <module>", and a record in the MgrMap that
-> says which are enabled.
+Say it ain't so scuttlemonkey!  I'm very sorry to see you go but, I hope 
+you enjoy your new opportunity immensely!  Best of luck!
 
-Sure. It's just another command users have to do to get to a preferred state.
+Mark
 
-The classic response on these things has been "ceph setup is hard,
-let's wrap it in ceph-ansible" (or whatever higher-level tool will do
-all these tricky steps). Then ceph-ansible becomes more and more
-complex, and I wonder whether the complexity could be addressed
-elsewhere by simply scaling down the flexibility.
-
-- Ken
+On 05/22/2017 09:36 AM, Patrick McGarry wrote:
+> Hey cephers,
+>
+> I'm writing to you today to share that my time in the Ceph community
+> is coming to an end this year. The last five years (!!) of working
+> with the Ceph community have yielded some of the most rewarding
+> adventures of my professional career, but a new opportunity has come
+> along that I just couldn't pass up.
+>
+> I will continue to work through the end of July in order to transition
+> my responsibilities to a replacement.  In the spirit of Ceph openness,
+> I am currently assisting Stormy Peters (Red Hat's senior community
+> manager - stormy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org) in seeking candidates, so if you know
+> anyone who might be interested in managing the Ceph community, please
+> let me know.
+>
+> While this is definitely bittersweet for me, the Ceph community has
+> done a good job of self-managing, self-healing, and replicating just
+> like the underlying technology, so I know you are all in good hands
+> (each others!).  If you would like to keep in touch, or have questions
+> beyond the time I am able to answer my @redhat.com email address, feel
+> free to reach out to me at pmcgarry-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org and I'll be happy to
+> catch up.
+>
+> If you have any questions or concerns in the meantime feel free to
+> reach out to me directly, but I'll do my best to ensure there is
+> minimal distruption during this transition. Thank you to all of you in
+> the Ceph community who have made this journey so rewarding. I look
+> forward to seeing even more amazing things in Ceph's future!
+>
+>
