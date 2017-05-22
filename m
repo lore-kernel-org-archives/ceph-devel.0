@@ -1,26 +1,36 @@
-From: =?UTF-8?B?5pSA5YiY?= <liupan1111@gmail.com>
-Subject: live migration
-Date: Mon, 22 May 2017 19:36:35 +0800
-Message-ID: <CAMwhyqWvRUGD_9DoAPtWHSqendOjYcHWrK0+toeugFkhedZ_SQ@mail.gmail.com>
+From: Peter Maloney <peter.maloney@brockmann-consult.de>
+Subject: Re: live migration
+Date: Mon, 22 May 2017 13:54:02 +0200
+Message-ID: <686db815-e82a-631a-6b66-c4932bdd0561@brockmann-consult.de>
+References: <CAMwhyqWvRUGD_9DoAPtWHSqendOjYcHWrK0+toeugFkhedZ_SQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f45.google.com ([209.85.213.45]:33554 "EHLO
-        mail-vk0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751846AbdEVLgh (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 May 2017 07:36:37 -0400
-Received: by mail-vk0-f45.google.com with SMTP id x71so38808796vkd.0
-        for <ceph-devel@vger.kernel.org>; Mon, 22 May 2017 04:36:37 -0700 (PDT)
+Received: from mout.kundenserver.de ([212.227.126.131]:51680 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757783AbdEVLyG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 May 2017 07:54:06 -0400
+In-Reply-To: <CAMwhyqWvRUGD_9DoAPtWHSqendOjYcHWrK0+toeugFkhedZ_SQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: =?UTF-8?B?5pSA5YiY?= <liupan1111@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi All,
+On 05/22/17 13:36, 攀刘 wrote:
+> Hi All,
+>
+> I am working on live migration for some images(migrate images from one
+> pool of one cluster, to a new pool in "another" cluster).
+>
+> Do you have any experience or suggestion on how to do it?
+Proxmox VE can use the qemu feature "move_disk" to do this. If you are
+also using qemu-kvm, you could also do that from the qemu monitor. It
+lets you move a disk to another storage place (eg. from NFS to ceph
+librbd and back which I tested) without restarting the VM.
 
-I am working on live migration for some images(migrate images from one
-pool of one cluster, to a new pool in "another" cluster).
+>
+> Thanks
+> Pan
+> --
 
-Do you have any experience or suggestion on how to do it?
-
-Thanks
-Pan
