@@ -1,100 +1,33 @@
-From: Ali Maredia <amaredia@redhat.com>
-Subject: Re: Scuttlemonkey signing off...
-Date: Mon, 22 May 2017 15:05:32 -0400 (EDT)
-Message-ID: <1170938500.14059927.1495479932814.JavaMail.zimbra@redhat.com>
-References: <CAAZbbf2+JwVzYtcZ0dS4zVckRWjwTLKz6tH+eE0h8tixQ+C0EA@mail.gmail.com> <7A12666C-507A-4B13-BE61-B14170C2E72C@acm.org> <CAOtw9Wg0YBK0_aYpUr4jzfCcJvf4Z+Gnj554Foko3M6-2ckvew@mail.gmail.com>
+From: Patrick McGarry <pmcgarry@gmail.com>
+Subject: Ceph Tech Talk This Thurs!
+Date: Mon, 22 May 2017 15:38:17 -0400
+Message-ID: <CAP8Oy=Jv2K0+LHUTE6j0Va-gP9+B0_LFGfdxiF29b2epvvAK-A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44762 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751030AbdEVTFe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 22 May 2017 15:05:34 -0400
-In-Reply-To: <CAOtw9Wg0YBK0_aYpUr4jzfCcJvf4Z+Gnj554Foko3M6-2ckvew@mail.gmail.com>
+Received: from mail-qk0-f171.google.com ([209.85.220.171]:36660 "EHLO
+        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S964937AbdEVTiT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 22 May 2017 15:38:19 -0400
+Received: by mail-qk0-f171.google.com with SMTP id u75so114728504qka.3
+        for <ceph-devel@vger.kernel.org>; Mon, 22 May 2017 12:38:18 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Victor Denisov <denisovenator@gmail.com>
-Cc: Federico Lucifredi <flucifredi@acm.org>, ceph-devel@vger.kernel.org
+To: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Best of luck Patrick. It's been a pleasure working with you.
+Hey cephers,
 
-Best,
+Just a reminder that the monthly Ceph Tech Talk will be this Thursday
+at 1p EDT.  This month Sage will be talking about all of the ongoing
+work around Ceph on ARM, which includes a few guest speakers and
+contributors. If you are interested in the future of Ceph on ARM
+please join us.
 
-Ali
+http://ceph.com/ceph-tech-talks/
 
------ Original Message -----
-> From: "Victor Denisov" <denisovenator@gmail.com>
-> To: "Federico Lucifredi" <flucifredi@acm.org>
-> Cc: ceph-devel@vger.kernel.org
-> Sent: Monday, May 22, 2017 2:39:32 PM
-> Subject: Re: Scuttlemonkey signing off...
-> 
-> So sorry to hear it, Patrick.
-> Good luck in your future endeavor.
-> 
-> V.
-> 
-> On Mon, May 22, 2017 at 10:22 AM, Federico Lucifredi <flucifredi@acm.org>
-> wrote:
-> > Patrick,
-> >   It has been an absolute privilege to work with you, and I hope we get to
-> >   do it again sometime soon!
-> >
-> > Best-F
-> >
-> >
-> >> On May 22, 2017, at 10:37 AM, Patrick McGarry <pmcgarry@redhat.com> wrote:
-> >>
-> >> Hey cephers,
-> >>
-> >> I'm writing to you today to share that my time in the Ceph community
-> >> is coming to an end this year. The last five years (!!) of working
-> >> with the Ceph community have yielded some of the most rewarding
-> >> adventures of my professional career, but a new opportunity has come
-> >> along that I just couldn't pass up.
-> >>
-> >> I will continue to work through the end of July in order to transition
-> >> my responsibilities to a replacement.  In the spirit of Ceph openness,
-> >> I am currently assisting Stormy Peters (Red Hat's senior community
-> >> manager - stormy@redhat.com) in seeking candidates, so if you know
-> >> anyone who might be interested in managing the Ceph community, please
-> >> let me know.
-> >>
-> >> While this is definitely bittersweet for me, the Ceph community has
-> >> done a good job of self-managing, self-healing, and replicating just
-> >> like the underlying technology, so I know you are all in good hands
-> >> (each others!).  If you would like to keep in touch, or have questions
-> >> beyond the time I am able to answer my @redhat.com email address, feel
-> >> free to reach out to me at pmcgarry@gmail.com and I'll be happy to
-> >> catch up.
-> >>
-> >> If you have any questions or concerns in the meantime feel free to
-> >> reach out to me directly, but I'll do my best to ensure there is
-> >> minimal distruption during this transition. Thank you to all of you in
-> >> the Ceph community who have made this journey so rewarding. I look
-> >> forward to seeing even more amazing things in Ceph's future!
-> >>
-> >>
-> >> --
-> >>
-> >> Best Regards,
-> >>
-> >> Patrick McGarry
-> >> Director Ceph Community || Red Hat
-> >> http://ceph.com  ||  http://community.redhat.com
-> >> @scuttlemonkey || @ceph
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+
+Best Regards,
+
+
+Patrick McGarry
+pmcgarry@gmail.com
