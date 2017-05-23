@@ -1,35 +1,122 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 4/5] libceph: validate blob_struct_v in process_one_ticket()
-Date: Tue, 23 May 2017 20:40:43 +0200
-Message-ID: <CAOi1vP9StiPi6ThbC68KUymNgLx1JorQ2OmqLGKtnAQBk+pfNw@mail.gmail.com>
-References: <1495557238-1077-1-git-send-email-idryomov@gmail.com>
- <1495557238-1077-5-git-send-email-idryomov@gmail.com> <acf57851-8c0e-ca92-d7c4-13ae945983c0@ieee.org>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Problem with query and any operation on PGs
+Date: Tue, 23 May 2017 21:48:34 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1705232146500.3646@piezo.novalocal>
+References: <175484591.20170523135449@tlen.pl> <483467685.20170523144818@tlen.pl>     <alpine.DEB.2.11.1705231415400.3646@piezo.novalocal>  <1464688590.20170523185052@tlen.pl>  <alpine.DEB.2.11.1705231738520.3646@piezo.novalocal>
+ <1075363645.20170523234331@tlen.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-402465409-1495576116=:3646"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f67.google.com ([209.85.213.67]:34423 "EHLO
-        mail-vk0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1761746AbdEWSko (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 14:40:44 -0400
-Received: by mail-vk0-f67.google.com with SMTP id w1so7979228vkd.1
-        for <ceph-devel@vger.kernel.org>; Tue, 23 May 2017 11:40:44 -0700 (PDT)
-In-Reply-To: <acf57851-8c0e-ca92-d7c4-13ae945983c0@ieee.org>
+Received: from cobra.newdream.net ([66.33.216.30]:55010 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1034411AbdEWVsm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 17:48:42 -0400
+In-Reply-To: <1075363645.20170523234331@tlen.pl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alex Elder <elder@ieee.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, May 23, 2017 at 7:44 PM, Alex Elder <elder@ieee.org> wrote:
-> On 05/23/2017 11:33 AM, Ilya Dryomov wrote:
->> None of these are validated in userspace, but since we do validate
->> reply_struct_v in ceph_x_proc_ticket_reply(), tkt_struct_v (first) and
->> CephXServiceTicket struct_v (second) in process_one_ticket(), validate
->> CephXTicketBlob struct_v as well.
->>
->> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
->
-> Looks good.  (I don't know what's valid but I know you do.)
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-All those auth structs are v1.  Thanks for the review!
+--8323329-402465409-1495576116=:3646
+Content-Type: TEXT/PLAIN; charset=iso-8859-2
+Content-Transfer-Encoding: 8BIT
 
-                Ilya
+On Tue, 23 May 2017, £ukasz Chrustek wrote:
+> Cze¶æ,
+> 
+> > On Tue, 23 May 2017, £ukasz Chrustek wrote:
+> >> I'm  not  sleeping for over 30 hours, and still can't find solution. I
+> >> did,      as      You      wrote,     but     turning     off     this
+> >> (https://pastebin.com/1npBXeMV) osds didn't resolve issue...
+> 
+> > The important bit is:
+> 
+> >             "blocked": "peering is blocked due to down osds",
+> >             "down_osds_we_would_probe": [
+> >                 6,
+> >                 10,
+> >                 33,
+> >                 37,
+> >                 72
+> >             ],
+> >             "peering_blocked_by": [
+> >                 {
+> >                     "osd": 6,
+> >                     "current_lost_at": 0,
+> >                     "comment": "starting or marking this osd lost may let
+> > us proceed"
+> >                 },
+> >                 {
+> >                     "osd": 10,
+> >                     "current_lost_at": 0,
+> >                     "comment": "starting or marking this osd lost may let
+> > us proceed"
+> >                 },
+> >                 {
+> >                     "osd": 37,
+> >                     "current_lost_at": 0,
+> >                     "comment": "starting or marking this osd lost may let
+> > us proceed"
+> >                 },
+> >                 {
+> >                     "osd": 72,
+> >                     "current_lost_at": 113771,
+> >                     "comment": "starting or marking this osd lost may let
+> > us proceed"
+> >                 }
+> >             ]
+> >         },
+> 
+> > Are any of those OSDs startable?
+> 
+> They were all up and running - but I decided to shut them down and out
+> them  from  ceph, now it looks like ceph working ok, but still two PGs
+> are in down state, how to get rid of it ?
+
+If you haven't deleted the data, you should start the OSDs back up.
+
+If they are partially damanged you can use ceph-objectstore-tool to 
+extract just the PGs in question to make sure you haven't lost anything, 
+inject them on some other OSD(s) and restart those, and *then* mark the 
+bad OSDs as 'lost'.
+
+If all else fails, you can just mark those OSDs 'lost', but in doing so 
+you might be telling the cluster to lose data.
+
+The best thing to do is definitely to get those OSDs started again.
+
+sage
+
+
+> 
+> ceph health detail
+> HEALTH_WARN 2 pgs down; 2 pgs peering; 2 pgs stuck inactive
+> pg 1.165 is stuck inactive since forever, current state down+remapped+peering, last acting [38,48]
+> pg 1.60 is stuck inactive since forever, current state down+remapped+peering, last acting [66,40]
+> pg 1.60 is down+remapped+peering, acting [66,40]
+> pg 1.165 is down+remapped+peering, acting [38,48]
+> [root@cc1 ~]# ceph -s
+>     cluster 8cdfbff9-b7be-46de-85bd-9d49866fcf60
+>      health HEALTH_WARN
+>             2 pgs down
+>             2 pgs peering
+>             2 pgs stuck inactive
+>      monmap e1: 3 mons at {cc1=192.168.128.1:6789/0,cc2=192.168.128.2:6789/0,cc3=192.168.128.3:6789/0}
+>             election epoch 872, quorum 0,1,2 cc1,cc2,cc3
+>      osdmap e115175: 100 osds: 88 up, 86 in; 2 remapped pgs
+>       pgmap v67583069: 3520 pgs, 17 pools, 26675 GB data, 4849 kobjects
+>             76638 GB used, 107 TB / 182 TB avail
+>                 3515 active+clean
+>                    3 active+clean+scrubbing+deep
+>                    2 down+remapped+peering
+>   client io 0 B/s rd, 869 kB/s wr, 14 op/s rd, 113 op/s wr
+> 
+> -- 
+> Regards
+>  £ukasz Chrustek
+> 
+> 
+--8323329-402465409-1495576116=:3646--
