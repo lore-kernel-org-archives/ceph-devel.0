@@ -1,55 +1,87 @@
-From: John Spray <jspray@redhat.com>
-Subject: Handling is_readable=0 periods in mon
-Date: Tue, 23 May 2017 18:29:23 +0100
-Message-ID: <CALe9h7cSEaLD90iDwjhi1GYogo7SV0mnc=8MjGQG_bnDVA0ygw@mail.gmail.com>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH 1/5] libceph: use kbasename() and kill ceph_file_part()
+Date: Tue, 23 May 2017 12:39:25 -0500
+Message-ID: <12383c71-04bd-cbbb-c7c7-ba3b6b907047@ieee.org>
+References: <1495557238-1077-1-git-send-email-idryomov@gmail.com>
+ <1495557238-1077-2-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:34824 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965501AbdEWR3q (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 13:29:46 -0400
-Received: by mail-wm0-f45.google.com with SMTP id b84so33685192wmh.0
-        for <ceph-devel@vger.kernel.org>; Tue, 23 May 2017 10:29:45 -0700 (PDT)
+Received: from mail-io0-f182.google.com ([209.85.223.182]:33983 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935638AbdEWRjd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 13:39:33 -0400
+Received: by mail-io0-f182.google.com with SMTP id k91so102364815ioi.1
+        for <ceph-devel@vger.kernel.org>; Tue, 23 May 2017 10:39:28 -0700 (PDT)
+In-Reply-To: <1495557238-1077-2-git-send-email-idryomov@gmail.com>
+Content-Language: en-CA
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>, Kefu Chai <kchai@redhat.com>, Joao Eduardo Luis <joao@suse.de>
+To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
 
-Hi all,
+On 05/23/2017 11:33 AM, Ilya Dryomov wrote:
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 
-I could use some help from people who understand the mon better than I
-do with this ticket: http://tracker.ceph.com/issues/19706
+Looks good.
 
-The issue is that MDSMonitor is incorrectly killing MDSs because it
-hasn't seen beacon messages, but the beacon messages are actually just
-held up because is_readable = 0, like this:
-2017-05-23 13:34:20.054785 7f772f1c2700 10
-mon.b@0(leader).paxosservice(mdsmap 1..11) dispatch 0x7f7742989740
-mdsbeacon(4141/a up:active seq 96 v9) v7 from mds.0
-172.21.15.77:6809/2700711429 con 0x7f77428d8f00
-2017-05-23 13:34:20.054788 7f772f1c2700  5 mon.b@0(leader).paxos(paxos
-recovering c 1..293) is_readable = 0 - now=2017-05-23 13:34:20.054789
-lease_expire=0.000000 has v0 lc 293
-2017-05-23 13:34:20.054791 7f772f1c2700 10
-mon.b@0(leader).paxosservice(mdsmap 1..11)  waiting for paxos ->
-readable (v9)
+Reviewed-by: Alex Elder <elder@linaro.org>
 
-This appears to be happening when one or more mons are a bit laggy,
-but it is happening before an election has happened.
+> ---
+>  include/linux/ceph/ceph_debug.h |  6 +++---
+>  net/ceph/ceph_common.c          | 13 -------------
+>  2 files changed, 3 insertions(+), 16 deletions(-)
+> 
+> diff --git a/include/linux/ceph/ceph_debug.h b/include/linux/ceph/ceph_debug.h
+> index aa2e19182d99..51c5bd64bd00 100644
+> --- a/include/linux/ceph/ceph_debug.h
+> +++ b/include/linux/ceph/ceph_debug.h
+> @@ -3,6 +3,8 @@
+>  
+>  #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+>  
+> +#include <linux/string.h>
+> +
+>  #ifdef CONFIG_CEPH_LIB_PRETTYDEBUG
+>  
+>  /*
+> @@ -12,12 +14,10 @@
+>   */
+>  
+>  # if defined(DEBUG) || defined(CONFIG_DYNAMIC_DEBUG)
+> -extern const char *ceph_file_part(const char *s, int len);
+>  #  define dout(fmt, ...)						\
+>  	pr_debug("%.*s %12.12s:%-4d : " fmt,				\
+>  		 8 - (int)sizeof(KBUILD_MODNAME), "    ",		\
+> -		 ceph_file_part(__FILE__, sizeof(__FILE__)),		\
+> -		 __LINE__, ##__VA_ARGS__)
+> +		 kbasename(__FILE__), __LINE__, ##__VA_ARGS__)
+>  # else
+>  /* faux printk call just to see any compiler warnings. */
+>  #  define dout(fmt, ...)	do {				\
+> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+> index 4fd02831beed..47e94b560ba0 100644
+> --- a/net/ceph/ceph_common.c
+> +++ b/net/ceph/ceph_common.c
+> @@ -56,19 +56,6 @@ static const struct kernel_param_ops param_ops_supported_features = {
+>  module_param_cb(supported_features, &param_ops_supported_features, NULL,
+>  		S_IRUGO);
+>  
+> -/*
+> - * find filename portion of a path (/foo/bar/baz -> baz)
+> - */
+> -const char *ceph_file_part(const char *s, int len)
+> -{
+> -	const char *e = s + len;
+> -
+> -	while (e != s && *(e-1) != '/')
+> -		e--;
+> -	return e;
+> -}
+> -EXPORT_SYMBOL(ceph_file_part);
+> -
+>  const char *ceph_msg_type_name(int type)
+>  {
+>  	switch (type) {
+> 
 
-We have code for handling slow elections by checking how long it has
-been since the last tick, and resetting our timeout information for
-MDS beacons if it has been too long
-(https://github.com/ceph/ceph/blob/master/src/mon/MDSMonitor.cc#L2070)
-
-However, in this case the tick() function is getting called
-throughout, we're just not seeing the beacons because they're held up
-waiting for readable.
-
-I could hack around this by only doing timeouts if *any* daemon has
-successfully got a beacon through in the last (mds_beacon_grace*2) or
-something like that, but I wonder if there's a Right way to handle
-this for PaxosService subclasses?
-
-Thanks,
-John
