@@ -1,73 +1,42 @@
-From: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
-Subject: Re: Scuttlemonkey signing off...
-Date: Tue, 23 May 2017 15:01:01 +0200 (CEST)
-Message-ID: <282454629.591.1495544461946@ox.pcextreme.nl>
-References: <CAAZbbf2+JwVzYtcZ0dS4zVckRWjwTLKz6tH+eE0h8tixQ+C0EA@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: RADOS: Deleting all objects in a namespace
+Date: Tue, 23 May 2017 14:09:27 +0100
+Message-ID: <CALe9h7eQMGGB1K_W-qryVjYhfjr5jGBRKLkawUr8q=QD1rXTSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAAZbbf2+JwVzYtcZ0dS4zVckRWjwTLKz6tH+eE0h8tixQ+C0EA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:34944 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1762917AbdEWNJu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 09:09:50 -0400
+Received: by mail-wm0-f43.google.com with SMTP id b84so24135644wmh.0
+        for <ceph-devel@vger.kernel.org>; Tue, 23 May 2017 06:09:49 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hey Patrick,
+Soon, we'll probably be letting multiple CephFS filesystems use the
+same data and metadata pools, where the filesystems are separated by
+rados namespace.
 
-Thanks for all your work in the last 5 years! Sad to see you leave, but again, your effort is very much appreciated!
+When removing filesystems, in the interests of robustness and speed,
+I'd like to be able to delete all objects in a namespace -- otherwise
+we would have to rely on a "rm -rf" and then some new code to
+explicitly enumerate and delete all metadata objects for that
+filesystem.
 
-Wido
+I'm pondering whether this should just be a process that happens via
+normal client interfaces (where mon/mgr would be the client), or
+whether it would be feasible/desirable to implement something inside
+the OSD.  Obviously the OSD ultimately has to do the same underlying
+enumeration, but at least it doesn't have to thrash through the whole
+request/response cycle for deleting each object individually -- might
+enable it to throttle internally in the OSD based on how busy it knows
+itself to be, rather than having the client apply some arbitrary "only
+issue N deletions at once" type limit that might make the deletion
+process unecessarily slow.
 
-> Op 22 mei 2017 om 16:36 schreef Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
-> 
-> 
-> Hey cephers,
-> 
-> I'm writing to you today to share that my time in the Ceph community
-> is coming to an end this year. The last five years (!!) of working
-> with the Ceph community have yielded some of the most rewarding
-> adventures of my professional career, but a new opportunity has come
-> along that I just couldn't pass up.
-> 
-> I will continue to work through the end of July in order to transition
-> my responsibilities to a replacement.  In the spirit of Ceph openness,
-> I am currently assisting Stormy Peters (Red Hat's senior community
-> manager - stormy-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org) in seeking candidates, so if you know
-> anyone who might be interested in managing the Ceph community, please
-> let me know.
-> 
-> While this is definitely bittersweet for me, the Ceph community has
-> done a good job of self-managing, self-healing, and replicating just
-> like the underlying technology, so I know you are all in good hands
-> (each others!).  If you would like to keep in touch, or have questions
-> beyond the time I am able to answer my @redhat.com email address, feel
-> free to reach out to me at pmcgarry-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org and I'll be happy to
-> catch up.
-> 
-> If you have any questions or concerns in the meantime feel free to
-> reach out to me directly, but I'll do my best to ensure there is
-> minimal distruption during this transition. Thank you to all of you in
-> the Ceph community who have made this journey so rewarding. I look
-> forward to seeing even more amazing things in Ceph's future!
-> 
-> 
-> -- 
-> 
-> Best Regards,
-> 
-> Patrick McGarry
-> Director Ceph Community || Red Hat
-> http://ceph.com  ||  http://community.redhat.com
-> @scuttlemonkey || @ceph
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+I have a feeling we must have talked about this at some point but my
+memory is failing me...
+
+John
