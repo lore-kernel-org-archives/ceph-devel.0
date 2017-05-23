@@ -1,41 +1,61 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] libceph: NULL deref on crush_decode() error path
-Date: Tue, 23 May 2017 18:23:24 +0200
-Message-ID: <CAOi1vP98DgHKtYTXHaerz7PeooQYhM_9Ph2bVOQuHONRfGrbXg@mail.gmail.com>
-References: <20170523142430.GA28152@elgon.mountain>
+From: David Zafman <dzafman@redhat.com>
+Subject: Re: RADOS: Deleting all objects in a namespace
+Date: Tue, 23 May 2017 09:30:21 -0700
+Message-ID: <42dcb545-5881-5219-7d4e-9eb194873edd@redhat.com>
+References: <CALe9h7eQMGGB1K_W-qryVjYhfjr5jGBRKLkawUr8q=QD1rXTSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <kernel-janitors-owner@vger.kernel.org>
-In-Reply-To: <20170523142430.GA28152@elgon.mountain>
-Sender: kernel-janitors-owner@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, kernel-janitors@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:36436 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1763219AbdEWQaX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 23 May 2017 12:30:23 -0400
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id B2DAC8123E
+        for <ceph-devel@vger.kernel.org>; Tue, 23 May 2017 16:30:22 +0000 (UTC)
+In-Reply-To: <CALe9h7eQMGGB1K_W-qryVjYhfjr5jGBRKLkawUr8q=QD1rXTSw@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, May 23, 2017 at 4:25 PM, Dan Carpenter <dan.carpenter@oracle.com> wrote:
-> If there is not enough space then ceph_decode_32_safe() does a goto bad.
-> We need to return an error code in that situation.  The current code
-> returns ERR_PTR(0) which is NULL.  The callers are not expecting that
-> and it results in a NULL dereference.
+
+I imagine an operation similar to PGNLS could be sent that does the same 
+thing, but performs deletes instead of returning the names.
+
+David
+
+On 5/23/17 6:09 AM, John Spray wrote:
+> Soon, we'll probably be letting multiple CephFS filesystems use the
+> same data and metadata pools, where the filesystems are separated by
+> rados namespace.
 >
-> Fixes: f24e9980eb86 ("ceph: OSD client")
-> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+> When removing filesystems, in the interests of robustness and speed,
+> I'd like to be able to delete all objects in a namespace -- otherwise
+> we would have to rely on a "rm -rf" and then some new code to
+> explicitly enumerate and delete all metadata objects for that
+> filesystem.
 >
-> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-> index ffe9e904d4d1..55e3a477f92d 100644
-> --- a/net/ceph/osdmap.c
-> +++ b/net/ceph/osdmap.c
-> @@ -317,6 +317,7 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
->                 u32 yes;
->                 struct crush_rule *r;
+> I'm pondering whether this should just be a process that happens via
+> normal client interfaces (where mon/mgr would be the client), or
+> whether it would be feasible/desirable to implement something inside
+> the OSD.  Obviously the OSD ultimately has to do the same underlying
+> enumeration, but at least it doesn't have to thrash through the whole
+> request/response cycle for deleting each object individually -- might
+> enable it to throttle internally in the OSD based on how busy it knows
+> itself to be, rather than having the client apply some arbitrary "only
+> issue N deletions at once" type limit that might make the deletion
+> process unecessarily slow.
 >
-> +               err = -EINVAL;
->                 ceph_decode_32_safe(p, end, yes, bad);
->                 if (!yes) {
->                         dout("crush_decode NO rule %d off %x %p to %p\n",
+> I have a feeling we must have talked about this at some point but my
+> memory is failing me...
+>
+> John
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Applied.
-
-Thanks,
-
-                Ilya
