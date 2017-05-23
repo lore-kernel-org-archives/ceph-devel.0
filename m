@@ -1,132 +1,73 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: [bug report] ceph: fix race between page writeback and truncate
-Date: Tue, 23 May 2017 17:00:12 +0800
-Message-ID: <CAAM7YAkyH8zPzuG9mrhCgWS_XPBjFKLxj8XD=cRbiSKVrJ==Lw@mail.gmail.com>
-References: <20170522203515.GA25922@elgon.mountain>
+From: Peter Maloney <peter.maloney@brockmann-consult.de>
+Subject: Re: another scrub bug? blocked for > 10240.948831 secs
+Date: Tue, 23 May 2017 11:29:20 +0200
+Message-ID: <cae31cf5-344a-d6f6-c810-4f0aec031ae4@brockmann-consult.de>
+References: <94127293-3ba3-8bb8-db43-604b6a54eb55@brockmann-consult.de>
+ <alpine.DEB.2.11.1704171316150.10661@piezo.novalocal>
+ <456cafe7-ecaa-5c62-ca82-6c09a2b06ae7@brockmann-consult.de>
+ <alpine.DEB.2.11.1704201421120.6575@piezo.novalocal>
+ <d0b1c505-8ccd-dfbf-2dd8-c44fc3f7b96e@brockmann-consult.de>
+ <alpine.DEB.2.11.1704201617120.6575@piezo.novalocal>
+ <b8e72ba6-919b-e9f2-9fd3-577cb7ab6389@brockmann-consult.de>
+ <27bfebcd-6a91-bd00-82c5-e56af6775d52@brockmann-consult.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f195.google.com ([209.85.217.195]:36805 "EHLO
-        mail-ua0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932795AbdEWJAN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 05:00:13 -0400
-Received: by mail-ua0-f195.google.com with SMTP id i46so9428899uaa.3
-        for <ceph-devel@vger.kernel.org>; Tue, 23 May 2017 02:00:13 -0700 (PDT)
-In-Reply-To: <20170522203515.GA25922@elgon.mountain>
+Received: from mout.kundenserver.de ([212.227.126.187]:58614 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S966947AbdEWJ31 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 05:29:27 -0400
+In-Reply-To: <27bfebcd-6a91-bd00-82c5-e56af6775d52@brockmann-consult.de>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: "Yan, Zheng" <zheng.z.yan@intel.com>, ceph-devel <ceph-devel@vger.kernel.org>, Jeff Layton <jlayton@redhat.com>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, May 23, 2017 at 4:35 AM, Dan Carpenter <dan.carpenter@oracle.com> wrote:
-> [ Hm...  This is really old.  I have no idea why the warning is only
->   showing up now... -dan ]
+On 04/28/17 09:24, Peter Maloney wrote:
+> On 04/20/17 20:58, Peter Maloney wrote:
+>> On 04/20/17 18:19, Sage Weil wrote:
+>>>  but I guess the 
+>>> underlying first question is whether any snap deletion happened anywhere 
+>>> around this period (2560+ sec before the warning, or around the time the 
+>>> op was sent in epoch 83264).  
+>> A snapshot based backup thing ran at 12:00 CEST and took until 18:25
+>> CEST to finish, which overlaps that, and creates and removes 120
+>> snapshots spread throughout the process.
+>>> (And yeah, removed_snaps is the field that 
+>>> matters here!)
+>>>
+>>> Thanks!
+>>> sage
+> This still happens in 10.2.7
 >
-> Hello Yan, Zheng,
->
-> The patch fc2744aa12da: "ceph: fix race between page writeback and
-> truncate" from May 31, 2013, leads to the following static checker
-> warning:
->
->         fs/ceph/addr.c:550 writepage_nounlock()
->         warn: missing error code here? 'page_snap_context()' failed. 'err' = '0'
->
-> fs/ceph/addr.c
->    521  static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
->    522  {
->    523          struct inode *inode;
->    524          struct ceph_inode_info *ci;
->    525          struct ceph_fs_client *fsc;
->    526          struct ceph_osd_client *osdc;
->    527          struct ceph_snap_context *snapc, *oldest;
->    528          loff_t page_off = page_offset(page);
->    529          loff_t snap_size = -1;
->    530          long writeback_stat;
->    531          u64 truncate_size;
->    532          u32 truncate_seq;
->    533          int err = 0, len = PAGE_SIZE;
->                     ^^^^^^^
->
->    534
->    535          dout("writepage %p idx %lu\n", page, page->index);
->    536
->    537          if (!page->mapping || !page->mapping->host) {
->    538                  dout("writepage %p - no mapping\n", page);
->    539                  return -EFAULT;
->                         ^^^^^^^^^^^^^^
-> I wish we could all take a second to appreciate how obvious and
-> intentional direct returns are.  No wondering what the author intended
-> because it's right there.  -EFAULT.
->
->    540          }
+>> 2017-04-28 04:41:59.343443 osd.9 10.3.0.132:6808/2704 18 : cluster
+>> [WRN] slow request 10.040822 seconds old, received at 2017-04-28
+>> 04:41:49.302552: replica scrub(pg:
+>> 4.145,from:0'0,to:93267'6832180,epoch:93267,start:4:a2d2c99e:::rbd_data.4bf687238e1f29.000000000000f7a3:0,end:4:a2d2dcd6:::rbd_data.46820b238e1f29.000000000000bfbc:f25e,chunky:1,deep:0,seed:4294967295,version:6)
+>> currently reached_pg
+>> ...
+>> 2017-04-28 06:07:09.975902 osd.9 10.3.0.132:6808/2704 36 : cluster
+>> [WRN] slow request 5120.673291 seconds old, received at 2017-04-28
+>> 04:41:49.302552: replica scrub(pg: 4.145,from:0'0,to:93
+>> 267'6832180,epoch:93267,start:4:a2d2c99e:::rbd_data.4bf687238e1f29.000000000000f7a3:0,end:4:a2d2dcd6:::rbd_data.46820b238e1f29.000000000000bfbc:f25e,chunky:1,deep:0,seed:4294967295,version:
+> and there are snaps created and removed around that time.
 
-I think we can remove this code. page->mapping shouldn't be null here.
+So I changed some settings a long time ago for unrelated reasons, and
+now it's far more rare (only happened once since, but had many more than
+1 request blocked).
+
+Here are the old settings:
+
+> osd deep scrub stride = 524288  # 512 KiB
+> osd scrub chunk min = 1
+> osd scrub chunk max = 1
+> osd scrub sleep = 0.5
+And the new:
+> osd deep scrub stride = 4194304  # 4 MiB
+> osd scrub chunk min = 20
+> osd scrub chunk max = 25
+> osd scrub sleep = 4
 
 
->    541          inode = page->mapping->host;
->    542          ci = ceph_inode(inode);
->    543          fsc = ceph_inode_to_client(inode);
->    544          osdc = &fsc->client->osdc;
->    545
->    546          /* verify this is a writeable snap context */
->    547          snapc = page_snap_context(page);
->    548          if (snapc == NULL) {
->    549                  dout("writepage %p page %p not dirty?\n", inode, page);
->    550                  goto out;
->                         ^^^^^^^^
-> Can you guess what goto out does?  It just immediately returns success.
-> I guess that seems legit if the page isn't dirty.
->
-
-dirty pages are supposed to have snap context. This code is for the
-unexpected 'snapc == NULL' condition. Maybe we should use derr here.
-
->    551          }
->    552          oldest = get_oldest_context(inode, &snap_size,
->    553                                      &truncate_size, &truncate_seq);
->    554          if (snapc->seq > oldest->seq) {
->    555                  dout("writepage %p page %p snapc %p not writeable - noop\n",
->    556                       inode, page, snapc);
->    557                  /* we should only noop if called by kswapd */
->    558                  WARN_ON((current->flags & PF_MEMALLOC) == 0);
->    559                  ceph_put_snap_context(oldest);
->    560                  goto out;
->                         ^^^^^^^
-> Returning success sounds legit here as well because it's a no-op.
-
-This code seems incorrect. We need to write dirty pages back in the
-order in which snap context they belong to. Dirty pages belong to
-older snap context should be flushed earlier. I think we should
-redirty the page here.
-
->
->    561          }
->    562          ceph_put_snap_context(oldest);
->    563
->    564          if (snap_size == -1)
->    565                  snap_size = i_size_read(inode);
->    566
->    567          /* is this a partial page at end of file? */
->    568          if (page_off >= snap_size) {
->    569                  dout("%p page eof %llu\n", page, snap_size);
->    570                  goto out;
->                         ^^^^^^^^
-> But is it what was intended here?  You have to be the kind of X-Men who
-> can read minds to know if return zero was really intentional or just
-> happens by mistake.
-
-this is analogous to the code "skip page if it's beyond EOF" in other fs.
-
-Regards
-Yan, Zheng
-
-
->
->    571          }
->
-> regards,
-> dan carpenter
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
