@@ -1,86 +1,35 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: [PATCH] rbd: implement REQ_OP_WRITE_ZEROES
-Date: Tue, 23 May 2017 14:28:00 -0400
-Message-ID: <CA+aFP1CMXuVFn80iFMX_5XJKgBCeG91438Na5TD6yj_4v4jmgg@mail.gmail.com>
-References: <1495552107-1237-1-git-send-email-idryomov@gmail.com>
-Reply-To: dillaman@redhat.com
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 4/5] libceph: validate blob_struct_v in process_one_ticket()
+Date: Tue, 23 May 2017 20:40:43 +0200
+Message-ID: <CAOi1vP9StiPi6ThbC68KUymNgLx1JorQ2OmqLGKtnAQBk+pfNw@mail.gmail.com>
+References: <1495557238-1077-1-git-send-email-idryomov@gmail.com>
+ <1495557238-1077-5-git-send-email-idryomov@gmail.com> <acf57851-8c0e-ca92-d7c4-13ae945983c0@ieee.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f173.google.com ([209.85.161.173]:35203 "EHLO
-        mail-yw0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S967395AbdEWS2B (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 14:28:01 -0400
-Received: by mail-yw0-f173.google.com with SMTP id l74so78759092ywe.2
-        for <ceph-devel@vger.kernel.org>; Tue, 23 May 2017 11:28:01 -0700 (PDT)
-In-Reply-To: <1495552107-1237-1-git-send-email-idryomov@gmail.com>
+Received: from mail-vk0-f67.google.com ([209.85.213.67]:34423 "EHLO
+        mail-vk0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1761746AbdEWSko (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 14:40:44 -0400
+Received: by mail-vk0-f67.google.com with SMTP id w1so7979228vkd.1
+        for <ceph-devel@vger.kernel.org>; Tue, 23 May 2017 11:40:44 -0700 (PDT)
+In-Reply-To: <acf57851-8c0e-ca92-d7c4-13ae945983c0@ieee.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, Hannes Reinecke <hare@suse.com>
+To: Alex Elder <elder@ieee.org>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-lgtm
+On Tue, May 23, 2017 at 7:44 PM, Alex Elder <elder@ieee.org> wrote:
+> On 05/23/2017 11:33 AM, Ilya Dryomov wrote:
+>> None of these are validated in userspace, but since we do validate
+>> reply_struct_v in ceph_x_proc_ticket_reply(), tkt_struct_v (first) and
+>> CephXServiceTicket struct_v (second) in process_one_ticket(), validate
+>> CephXTicketBlob struct_v as well.
+>>
+>> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+>
+> Looks good.  (I don't know what's valid but I know you do.)
 
-Reviewed-by: Jason Dillaman <dillaman@redhat.com>
+All those auth structs are v1.  Thanks for the review!
 
-On Tue, May 23, 2017 at 11:08 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> Commit 93c1defedcae ("rbd: remove the discard_zeroes_data flag")
-> explicitly didn't implement REQ_OP_WRITE_ZEROES for rbd, while the
-> following commit 48920ff2a5a9 ("block: remove the discard_zeroes_data
-> flag") dropped ->discard_zeroes_data in favor of REQ_OP_WRITE_ZEROES.
->
-> rbd does support efficient zeroing via CEPH_OSD_OP_ZERO opcode and will
-> release either some or all blocks depending on whether the zeroing
-> request is rbd_obj_bytes() aligned.  This is how we currently implement
-> discards, so REQ_OP_WRITE_ZEROES can be identical to REQ_OP_DISCARD for
-> now.  Caveats:
->
-> - REQ_NOUNMAP is ignored, but AFAICT that's true of at least two other
->   current implementations - nvme and loop
->
-> - there is no ->write_zeroes_alignment and blk_bio_write_zeroes_split()
->   is hence less helpful than blk_bio_discard_split(), but this can (and
->   should) be fixed on the rbd side
->
-> In the future we will split these into two code paths to respect
-> REQ_NOUNMAP on zeroout and save on zeroing blocks that couldn't be
-> released on discard.
->
-> Fixes: 93c1defedcae ("rbd: remove the discard_zeroes_data flag")
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->  drivers/block/rbd.c | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index 454bf9c34882..c16f74547804 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -4023,6 +4023,7 @@ static void rbd_queue_workfn(struct work_struct *work)
->
->         switch (req_op(rq)) {
->         case REQ_OP_DISCARD:
-> +       case REQ_OP_WRITE_ZEROES:
->                 op_type = OBJ_OP_DISCARD;
->                 break;
->         case REQ_OP_WRITE:
-> @@ -4420,6 +4421,7 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
->         q->limits.discard_granularity = segment_size;
->         q->limits.discard_alignment = segment_size;
->         blk_queue_max_discard_sectors(q, segment_size / SECTOR_SIZE);
-> +       blk_queue_max_write_zeroes_sectors(q, segment_size / SECTOR_SIZE);
->
->         if (!ceph_test_opt(rbd_dev->rbd_client->client, NOCRC))
->                 q->backing_dev_info->capabilities |= BDI_CAP_STABLE_WRITES;
-> --
-> 2.4.3
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Jason
+                Ilya
