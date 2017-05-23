@@ -1,36 +1,23 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
-Subject: Re: Haven't been paying attention: Gperf missing
-Date: Tue, 23 May 2017 00:18:51 -0400
-Message-ID: <20170523041850.GA28714@ultraspiritum.eng.arb.redhat.com>
-References: <9cc2b255-f617-e109-b9b9-23a32ea8509f@digiware.nl>
- <CAF-wwdFP4Wy-4Bx+wkW=btjCQokTW3QaLSaVudJJyBM=2XmaLA@mail.gmail.com>
- <9c1c2403-c114-bec9-d37b-e217d2d23e69@digiware.nl>
- <CAF-wwdFRzGxAdtXAAoieUYADZ7YQrf8u9Zkwqxs2FCk+bgwaSQ@mail.gmail.com>
+From: Jos Collin <jcollin@redhat.com>
+Subject: Re: How to initiate tests in jenkins.
+Date: Tue, 23 May 2017 09:50:27 +0530
+Message-ID: <22176efb-d2f4-a209-4df4-4bfa196c10c2@redhat.com>
+References: <CAGvpcHYotA=9gb8d2OAcOVBrnx5+zOQ_np8M4Dkk6UiWNQJtow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42932 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750885AbdEWESy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 23 May 2017 00:18:54 -0400
-Content-Disposition: inline
-In-Reply-To: <CAF-wwdFRzGxAdtXAAoieUYADZ7YQrf8u9Zkwqxs2FCk+bgwaSQ@mail.gmail.com>
+Received: from mail-pf0-f180.google.com ([209.85.192.180]:33352 "EHLO
+        mail-pf0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752949AbdEWEUb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 00:20:31 -0400
+Received: by mail-pf0-f180.google.com with SMTP id e193so101717041pfh.0
+        for <ceph-devel@vger.kernel.org>; Mon, 22 May 2017 21:20:31 -0700 (PDT)
+In-Reply-To: <CAGvpcHYotA=9gb8d2OAcOVBrnx5+zOQ_np8M4Dkk6UiWNQJtow@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>, Kefu Chai <kchai@redhat.com>
+To: Myna V <mynaramana@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
 
-On 23/05/2017, Brad Hubbard wrote:
-> I had to install gperf myself when this change came in (which wasn't
-> an issue for me).
-> 
-> Kefu may have further input.
-
-It's only needed if you're building RGW, at least for the moment. I use
-it as part of the S3 Bucket Policy support. (Someone else might use it
-for something else later.)
-
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+Please see the comment of liewegas in your PR. That will do.
+But before doing that make sure that the errors are not introduced by 
+your changes.
