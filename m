@@ -1,49 +1,71 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 4/5] libceph: validate blob_struct_v in process_one_ticket()
-Date: Tue, 23 May 2017 18:33:57 +0200
-Message-ID: <1495557238-1077-5-git-send-email-idryomov@gmail.com>
-References: <1495557238-1077-1-git-send-email-idryomov@gmail.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: [ceph-users] Scuttlemonkey signing off...
+Date: Wed, 24 May 2017 01:12:44 +0800
+Message-ID: <CAJE9aONhOQCHeE6eLg4qM7PS3ph1_svOb6YfS9WTxPZD3sh4Dg@mail.gmail.com>
+References: <CAAZbbf2+JwVzYtcZ0dS4zVckRWjwTLKz6tH+eE0h8tixQ+C0EA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f196.google.com ([209.85.220.196]:35972 "EHLO
-        mail-qk0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935721AbdEWQeP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 12:34:15 -0400
-Received: by mail-qk0-f196.google.com with SMTP id y128so23471582qka.3
-        for <ceph-devel@vger.kernel.org>; Tue, 23 May 2017 09:34:15 -0700 (PDT)
-Received: from orange.brq.redhat.com. (nat-pool-brq-t.redhat.com. [213.175.37.10])
-        by smtp.gmail.com with ESMTPSA id o15sm784055qki.47.2017.05.23.09.34.13
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 23 May 2017 09:34:14 -0700 (PDT)
-In-Reply-To: <1495557238-1077-1-git-send-email-idryomov@gmail.com>
+Received: from mail-ua0-f175.google.com ([209.85.217.175]:33637 "EHLO
+        mail-ua0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752114AbdEWRMp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 13:12:45 -0400
+Received: by mail-ua0-f175.google.com with SMTP id e28so82248787uah.0
+        for <ceph-devel@vger.kernel.org>; Tue, 23 May 2017 10:12:45 -0700 (PDT)
+In-Reply-To: <CAAZbbf2+JwVzYtcZ0dS4zVckRWjwTLKz6tH+eE0h8tixQ+C0EA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Patrick McGarry <pmcgarry@redhat.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
-None of these are validated in userspace, but since we do validate
-reply_struct_v in ceph_x_proc_ticket_reply(), tkt_struct_v (first) and
-CephXServiceTicket struct_v (second) in process_one_ticket(), validate
-CephXTicketBlob struct_v as well.
+Patrick, sorry to learn this. All the best!
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- net/ceph/auth_x.c | 3 +++
- 1 file changed, 3 insertions(+)
+On Mon, May 22, 2017 at 10:36 PM, Patrick McGarry <pmcgarry@redhat.com> wrote:
+> Hey cephers,
+>
+> I'm writing to you today to share that my time in the Ceph community
+> is coming to an end this year. The last five years (!!) of working
+> with the Ceph community have yielded some of the most rewarding
+> adventures of my professional career, but a new opportunity has come
+> along that I just couldn't pass up.
+>
+> I will continue to work through the end of July in order to transition
+> my responsibilities to a replacement.  In the spirit of Ceph openness,
+> I am currently assisting Stormy Peters (Red Hat's senior community
+> manager - stormy@redhat.com) in seeking candidates, so if you know
+> anyone who might be interested in managing the Ceph community, please
+> let me know.
+>
+> While this is definitely bittersweet for me, the Ceph community has
+> done a good job of self-managing, self-healing, and replicating just
+> like the underlying technology, so I know you are all in good hands
+> (each others!).  If you would like to keep in touch, or have questions
+> beyond the time I am able to answer my @redhat.com email address, feel
+> free to reach out to me at pmcgarry@gmail.com and I'll be happy to
+> catch up.
+>
+> If you have any questions or concerns in the meantime feel free to
+> reach out to me directly, but I'll do my best to ensure there is
+> minimal distruption during this transition. Thank you to all of you in
+> the Ceph community who have made this journey so rewarding. I look
+> forward to seeing even more amazing things in Ceph's future!
+>
+>
+> --
+>
+> Best Regards,
+>
+> Patrick McGarry
+> Director Ceph Community || Red Hat
+> http://ceph.com  ||  http://community.redhat.com
+> @scuttlemonkey || @ceph
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-diff --git a/net/ceph/auth_x.c b/net/ceph/auth_x.c
-index 2034fb926670..d0126df33f1f 100644
---- a/net/ceph/auth_x.c
-+++ b/net/ceph/auth_x.c
-@@ -215,6 +215,9 @@ static int process_one_ticket(struct ceph_auth_client *ac,
- 	dout(" ticket blob is %d bytes\n", dlen);
- 	ceph_decode_need(ptp, tpend, 1 + sizeof(u64), bad);
- 	blob_struct_v = ceph_decode_8(ptp);
-+	if (blob_struct_v != 1)
-+		goto bad;
-+
- 	new_secret_id = ceph_decode_64(ptp);
- 	ret = ceph_decode_buffer(&new_ticket_blob, ptp, tpend);
- 	if (ret)
+
+
 -- 
-2.4.3
-
+Regards
+Kefu Chai
