@@ -1,41 +1,39 @@
-From: Richard Arends <cephmailinglist-QNYwNwIP+WJmR6Xm/wNWPw@public.gmane.org>
-Subject: Re: Scuttlemonkey signing off...
-Date: Tue, 23 May 2017 08:37:45 +0200
-Message-ID: <c3204eb5-b7f5-3490-30d6-a3fbbec49818@mosibi.nl>
-References: <CAAZbbf2+JwVzYtcZ0dS4zVckRWjwTLKz6tH+eE0h8tixQ+C0EA@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Haven't been paying attention: Gperf missing
+Date: Tue, 23 May 2017 10:05:47 +0200
+Message-ID: <b226809a-b527-1b54-d34f-2ac8ebf1c160@digiware.nl>
+References: <9cc2b255-f617-e109-b9b9-23a32ea8509f@digiware.nl>
+ <CAF-wwdFP4Wy-4Bx+wkW=btjCQokTW3QaLSaVudJJyBM=2XmaLA@mail.gmail.com>
+ <9c1c2403-c114-bec9-d37b-e217d2d23e69@digiware.nl>
+ <CAF-wwdFRzGxAdtXAAoieUYADZ7YQrf8u9Zkwqxs2FCk+bgwaSQ@mail.gmail.com>
+ <20170523041850.GA28714@ultraspiritum.eng.arb.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAAZbbf2+JwVzYtcZ0dS4zVckRWjwTLKz6tH+eE0h8tixQ+C0EA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-MW
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.digiware.nl ([176.74.240.9]:62136 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757355AbdEWIFv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 23 May 2017 04:05:51 -0400
+In-Reply-To: <20170523041850.GA28714@ultraspiritum.eng.arb.redhat.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Brad Hubbard <bhubbard@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Kefu Chai <kchai@redhat.com>
 
-On 05/22/2017 04:36 PM, Patrick McGarry wrote:
+On 23-05-17 06:18, Adam C. Emerson wrote:
+> On 23/05/2017, Brad Hubbard wrote:
+>> I had to install gperf myself when this change came in (which wasn't
+>> an issue for me).
+>>
+>> Kefu may have further input.
+> 
+> It's only needed if you're building RGW, at least for the moment. I use
+> it as part of the S3 Bucket Policy support. (Someone else might use it
+> for something else later.)
 
-HI Patrick,
+I'm trying to bld as mch as I can under FreeBSD.
+And RGW was building until this sneaked in. :)
+I'll add it to the depends
 
-> I'm writing to you today to share that my time in the Ceph community
-> is coming to an end this year. The last five years (!!) of working
-> with the Ceph community have yielded some of the most rewarding
-> adventures of my professional career, but a new opportunity has come
-> along that I just couldn't pass up.
-
-Thanks for what you have done for the Ceph community.
-
--- 
-
-With regards,
-
-Richard Arends.
-Snow BV / http://snow.nl
+--WjW
