@@ -1,87 +1,338 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH 1/5] libceph: use kbasename() and kill ceph_file_part()
-Date: Tue, 23 May 2017 12:39:25 -0500
-Message-ID: <12383c71-04bd-cbbb-c7c7-ba3b6b907047@ieee.org>
-References: <1495557238-1077-1-git-send-email-idryomov@gmail.com>
- <1495557238-1077-2-git-send-email-idryomov@gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Problem with query and any operation on PGs
+Date: Tue, 23 May 2017 17:40:10 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1705231738520.3646@piezo.novalocal>
+References: <175484591.20170523135449@tlen.pl> <483467685.20170523144818@tlen.pl>   <alpine.DEB.2.11.1705231415400.3646@piezo.novalocal> <1464688590.20170523185052@tlen.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1519173126-1495561134=:3646"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f182.google.com ([209.85.223.182]:33983 "EHLO
-        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935638AbdEWRjd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 13:39:33 -0400
-Received: by mail-io0-f182.google.com with SMTP id k91so102364815ioi.1
-        for <ceph-devel@vger.kernel.org>; Tue, 23 May 2017 10:39:28 -0700 (PDT)
-In-Reply-To: <1495557238-1077-2-git-send-email-idryomov@gmail.com>
-Content-Language: en-CA
+Received: from cobra.newdream.net ([66.33.216.30]:53485 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S937142AbdEWRkN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 13:40:13 -0400
+In-Reply-To: <1464688590.20170523185052@tlen.pl>
+Content-ID: <alpine.DEB.2.11.1705231738590.3646@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
+To: =?ISO-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
+Cc: ceph-devel@vger.kernel.org
 
-On 05/23/2017 11:33 AM, Ilya Dryomov wrote:
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Looks good.
+--8323329-1519173126-1495561134=:3646
+Content-Type: TEXT/PLAIN; CHARSET=ISO-8859-2
+Content-Transfer-Encoding: 8BIT
+Content-ID: <alpine.DEB.2.11.1705231738591.3646@piezo.novalocal>
 
-Reviewed-by: Alex Elder <elder@linaro.org>
+On Tue, 23 May 2017, £ukasz Chrustek wrote:
+> I'm  not  sleeping for over 30 hours, and still can't find solution. I
+> did,      as      You      wrote,     but     turning     off     this
+> (https://pastebin.com/1npBXeMV) osds didn't resolve issue...
 
-> ---
->  include/linux/ceph/ceph_debug.h |  6 +++---
->  net/ceph/ceph_common.c          | 13 -------------
->  2 files changed, 3 insertions(+), 16 deletions(-)
+The important bit is:
+
+            "blocked": "peering is blocked due to down osds",
+            "down_osds_we_would_probe": [
+                6,
+                10,
+                33,
+                37,
+                72
+            ],
+            "peering_blocked_by": [
+                {
+                    "osd": 6,
+                    "current_lost_at": 0,
+                    "comment": "starting or marking this osd lost may let 
+us proceed"
+                },
+                {
+                    "osd": 10,
+                    "current_lost_at": 0,
+                    "comment": "starting or marking this osd lost may let 
+us proceed"
+                },
+                {
+                    "osd": 37,
+                    "current_lost_at": 0,
+                    "comment": "starting or marking this osd lost may let 
+us proceed"
+                },
+                {
+                    "osd": 72,
+                    "current_lost_at": 113771,
+                    "comment": "starting or marking this osd lost may let 
+us proceed"
+                }
+            ]
+        },
+
+Are any of those OSDs startable?
+
+sage
+
+
 > 
-> diff --git a/include/linux/ceph/ceph_debug.h b/include/linux/ceph/ceph_debug.h
-> index aa2e19182d99..51c5bd64bd00 100644
-> --- a/include/linux/ceph/ceph_debug.h
-> +++ b/include/linux/ceph/ceph_debug.h
-> @@ -3,6 +3,8 @@
->  
->  #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
->  
-> +#include <linux/string.h>
-> +
->  #ifdef CONFIG_CEPH_LIB_PRETTYDEBUG
->  
->  /*
-> @@ -12,12 +14,10 @@
->   */
->  
->  # if defined(DEBUG) || defined(CONFIG_DYNAMIC_DEBUG)
-> -extern const char *ceph_file_part(const char *s, int len);
->  #  define dout(fmt, ...)						\
->  	pr_debug("%.*s %12.12s:%-4d : " fmt,				\
->  		 8 - (int)sizeof(KBUILD_MODNAME), "    ",		\
-> -		 ceph_file_part(__FILE__, sizeof(__FILE__)),		\
-> -		 __LINE__, ##__VA_ARGS__)
-> +		 kbasename(__FILE__), __LINE__, ##__VA_ARGS__)
->  # else
->  /* faux printk call just to see any compiler warnings. */
->  #  define dout(fmt, ...)	do {				\
-> diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
-> index 4fd02831beed..47e94b560ba0 100644
-> --- a/net/ceph/ceph_common.c
-> +++ b/net/ceph/ceph_common.c
-> @@ -56,19 +56,6 @@ static const struct kernel_param_ops param_ops_supported_features = {
->  module_param_cb(supported_features, &param_ops_supported_features, NULL,
->  		S_IRUGO);
->  
-> -/*
-> - * find filename portion of a path (/foo/bar/baz -> baz)
-> - */
-> -const char *ceph_file_part(const char *s, int len)
-> -{
-> -	const char *e = s + len;
-> -
-> -	while (e != s && *(e-1) != '/')
-> -		e--;
-> -	return e;
-> -}
-> -EXPORT_SYMBOL(ceph_file_part);
-> -
->  const char *ceph_msg_type_name(int type)
->  {
->  	switch (type) {
+> Regards
+> Lukasz Chrustek
 > 
-
+> 
+> > On Tue, 23 May 2017, £ukasz Chrustek wrote:
+> >> Cze¶æ,
+> >> 
+> >> Hello,
+> >> 
+> >> After terrible outage coused by failure of 10Gbit switch, ceph cluster
+> >> went  to HEALTH_ERR (three whole storage servers go offline in the same time
+> >> and didn't back in short time). After cluster recovery two PGs goto to
+> >> incomplite state, I can't them query, and can't do with them anything,
+> 
+> > The thing where you can't query a PG is because the OSD is throttling 
+> > incoming work and the throttle is exhausted (the PG can't do work so it
+> > isn't making progress).  A workaround for jewel is to restart the OSD 
+> > serving the PG and do the query quickly after that (probably in a loop so
+> > that you catch it after it starts up but before the throttle is 
+> > exhausted again).  (In luminous this is fixed.)
+> 
+> > Once you have the query output ('ceph tell $pgid query') you'll be able to
+> > tell what is preventing the PG from peering.
+> 
+> > You can identify the osd(s) hosting the pg with 'ceph pg map $pgid'.
+> 
+> > HTH!
+> > sage
+> 
+> 
+> >> what   would   allow   back  working cluster back. here is strace of
+> >> this command: https://pastebin.com/HpNFvR8Z. But... this cluster isn't enteriely off:
+> >> 
+> >> [root@cc1 ~]# rbd ls management-vms
+> >> os-mongodb1
+> >> os-mongodb1-database
+> >> os-gitlab-root
+> >> os-mongodb1-database2
+> >> os-wiki-root
+> >> [root@cc1 ~]# rbd ls volumes
+> >> ^C
+> >> [root@cc1 ~]#
+> >> 
+> >> and for all mon hosts (don't put all three here)
+> >> 
+> >> [root@cc1 ~]# rbd -m 192.168.128.1 list management-vms
+> >> os-mongodb1
+> >> os-mongodb1-database
+> >> os-gitlab-root
+> >> os-mongodb1-database2
+> >> os-wiki-root
+> >> [root@cc1 ~]# rbd -m 192.168.128.1 list volumes
+> >> ^C
+> >> [root@cc1 ~]#
+> >> 
+> >> and  all other POOLs from list, except (most important) volumes, I can
+> >> list images.
+> >> 
+> >> Fanny thing, I can list rbd info for particular image:
+> >> 
+> >> [root@cc1 ~]# rbd info
+> >> volumes/volume-197602d7-40f9-40ad-b286-cdec688b1497
+> >> rbd image 'volume-197602d7-40f9-40ad-b286-cdec688b1497':
+> >>         size 20480 MB in 1280 objects
+> >>         order 24 (16384 kB objects)
+> >>         block_name_prefix: rbd_data.64a21a0a9acf52
+> >>         format: 2
+> >>         features: layering
+> >>         flags:
+> >>         parent: images/37bdf0ca-f1f3-46ce-95b9-c04bb9ac8a53@snap
+> >>         overlap: 3072 MB
+> >> 
+> >> but can't list the whole content of pool volumes.
+> >> 
+> >> [root@cc1 ~]# ceph osd pool ls
+> >> volumes
+> >> images
+> >> backups
+> >> volumes-ssd-intel-s3700
+> >> management-vms
+> >> .rgw.root
+> >> .rgw.control
+> >> .rgw
+> >> .rgw.gc
+> >> .log
+> >> .users.uid
+> >> .rgw.buckets.index
+> >> .users
+> >> .rgw.buckets.extra
+> >> .rgw.buckets
+> >> volumes-cached
+> >> cache-ssd
+> >> 
+> >> here is ceph osd tree:
+> >> 
+> >> ID  WEIGHT    TYPE NAME            UP/DOWN REWEIGHT PRIMARY-AFFINITY
+> >>  -7  20.88388 root ssd-intel-s3700
+> >> -11   3.19995     host ssd-stor1
+> >>  56   0.79999         osd.56            up  1.00000          1.00000
+> >>  57   0.79999         osd.57            up  1.00000          1.00000
+> >>  58   0.79999         osd.58            up  1.00000          1.00000
+> >>  59   0.79999         osd.59            up  1.00000          1.00000
+> >>  -9   2.12999     host ssd-stor2
+> >>  60   0.70999         osd.60            up  1.00000          1.00000
+> >>  61   0.70999         osd.61            up  1.00000          1.00000
+> >>  62   0.70999         osd.62            up  1.00000          1.00000
+> >>  -8   2.12999     host ssd-stor3
+> >>  63   0.70999         osd.63            up  1.00000          1.00000
+> >>  64   0.70999         osd.64            up  1.00000          1.00000
+> >>  65   0.70999         osd.65            up  1.00000          1.00000
+> >> -10   4.19998     host ssd-stor4
+> >>  25   0.70000         osd.25            up  1.00000          1.00000
+> >>  26   0.70000         osd.26            up  1.00000          1.00000
+> >>  27   0.70000         osd.27            up  1.00000          1.00000
+> >>  28   0.70000         osd.28            up  1.00000          1.00000
+> >>  29   0.70000         osd.29            up  1.00000          1.00000
+> >>  24   0.70000         osd.24            up  1.00000          1.00000
+> >> -12   3.41199     host ssd-stor5
+> >>  73   0.85300         osd.73            up  1.00000          1.00000
+> >>  74   0.85300         osd.74            up  1.00000          1.00000
+> >>  75   0.85300         osd.75            up  1.00000          1.00000
+> >>  76   0.85300         osd.76            up  1.00000          1.00000
+> >> -13   3.41199     host ssd-stor6
+> >>  77   0.85300         osd.77            up  1.00000          1.00000
+> >>  78   0.85300         osd.78            up  1.00000          1.00000
+> >>  79   0.85300         osd.79            up  1.00000          1.00000
+> >>  80   0.85300         osd.80            up  1.00000          1.00000
+> >> -15   2.39999     host ssd-stor7
+> >>  90   0.79999         osd.90            up  1.00000          1.00000
+> >>  91   0.79999         osd.91            up  1.00000          1.00000
+> >>  92   0.79999         osd.92            up  1.00000          1.00000
+> >>  -1 167.69969 root default
+> >>  -2  33.99994     host stor1
+> >>   6   3.39999         osd.6           down        0          1.00000
+> >>   7   3.39999         osd.7             up  1.00000          1.00000
+> >>   8   3.39999         osd.8             up  1.00000          1.00000
+> >>   9   3.39999         osd.9             up  1.00000          1.00000
+> >>  10   3.39999         osd.10          down        0          1.00000
+> >>  11   3.39999         osd.11          down        0          1.00000
+> >>  69   3.39999         osd.69            up  1.00000          1.00000
+> >>  70   3.39999         osd.70            up  1.00000          1.00000
+> >>  71   3.39999         osd.71          down        0          1.00000
+> >>  81   3.39999         osd.81            up  1.00000          1.00000
+> >>  -3  20.99991     host stor2
+> >>  13   2.09999         osd.13            up  1.00000          1.00000
+> >>  12   2.09999         osd.12            up  1.00000          1.00000
+> >>  14   2.09999         osd.14            up  1.00000          1.00000
+> >>  15   2.09999         osd.15            up  1.00000          1.00000
+> >>  16   2.09999         osd.16            up  1.00000          1.00000
+> >>  17   2.09999         osd.17            up  1.00000          1.00000
+> >>  18   2.09999         osd.18          down        0          1.00000
+> >>  19   2.09999         osd.19            up  1.00000          1.00000
+> >>  20   2.09999         osd.20            up  1.00000          1.00000
+> >>  21   2.09999         osd.21            up  1.00000          1.00000
+> >>  -4  25.00000     host stor3
+> >>  30   2.50000         osd.30            up  1.00000          1.00000
+> >>  31   2.50000         osd.31            up  1.00000          1.00000
+> >>  32   2.50000         osd.32            up  1.00000          1.00000
+> >>  33   2.50000         osd.33          down        0          1.00000
+> >>  34   2.50000         osd.34            up  1.00000          1.00000
+> >>  35   2.50000         osd.35            up  1.00000          1.00000
+> >>  66   2.50000         osd.66            up  1.00000          1.00000
+> >>  67   2.50000         osd.67            up  1.00000          1.00000
+> >>  68   2.50000         osd.68            up  1.00000          1.00000
+> >>  72   2.50000         osd.72          down        0          1.00000
+> >>  -5  25.00000     host stor4
+> >>  44   2.50000         osd.44            up  1.00000          1.00000
+> >>  45   2.50000         osd.45            up  1.00000          1.00000
+> >>  46   2.50000         osd.46          down        0          1.00000
+> >>  47   2.50000         osd.47            up  1.00000          1.00000
+> >>   0   2.50000         osd.0             up  1.00000          1.00000
+> >>   1   2.50000         osd.1             up  1.00000          1.00000
+> >>   2   2.50000         osd.2             up  1.00000          1.00000
+> >>   3   2.50000         osd.3             up  1.00000          1.00000
+> >>   4   2.50000         osd.4             up  1.00000          1.00000
+> >>   5   2.50000         osd.5             up  1.00000          1.00000
+> >>  -6  14.19991     host stor5
+> >>  48   1.79999         osd.48            up  1.00000          1.00000
+> >>  49   1.59999         osd.49            up  1.00000          1.00000
+> >>  50   1.79999         osd.50            up  1.00000          1.00000
+> >>  51   1.79999         osd.51          down        0          1.00000
+> >>  52   1.79999         osd.52            up  1.00000          1.00000
+> >>  53   1.79999         osd.53            up  1.00000          1.00000
+> >>  54   1.79999         osd.54            up  1.00000          1.00000
+> >>  55   1.79999         osd.55            up  1.00000          1.00000
+> >> -14  14.39999     host stor6
+> >>  82   1.79999         osd.82            up  1.00000          1.00000
+> >>  83   1.79999         osd.83            up  1.00000          1.00000
+> >>  84   1.79999         osd.84            up  1.00000          1.00000
+> >>  85   1.79999         osd.85            up  1.00000          1.00000
+> >>  86   1.79999         osd.86            up  1.00000          1.00000
+> >>  87   1.79999         osd.87            up  1.00000          1.00000
+> >>  88   1.79999         osd.88            up  1.00000          1.00000
+> >>  89   1.79999         osd.89            up  1.00000          1.00000
+> >> -16  12.59999     host stor7
+> >>  93   1.79999         osd.93            up  1.00000          1.00000
+> >>  94   1.79999         osd.94            up  1.00000          1.00000
+> >>  95   1.79999         osd.95            up  1.00000          1.00000
+> >>  96   1.79999         osd.96            up  1.00000          1.00000
+> >>  97   1.79999         osd.97            up  1.00000          1.00000
+> >>  98   1.79999         osd.98            up  1.00000          1.00000
+> >>  99   1.79999         osd.99            up  1.00000          1.00000
+> >> -17  21.49995     host stor8
+> >>  22   1.59999         osd.22            up  1.00000          1.00000
+> >>  23   1.59999         osd.23            up  1.00000          1.00000
+> >>  36   2.09999         osd.36            up  1.00000          1.00000
+> >>  37   2.09999         osd.37            up  1.00000          1.00000
+> >>  38   2.50000         osd.38            up  1.00000          1.00000
+> >>  39   2.50000         osd.39            up  1.00000          1.00000
+> >>  40   2.50000         osd.40            up  1.00000          1.00000
+> >>  41   2.50000         osd.41          down        0          1.00000
+> >>  42   2.50000         osd.42            up  1.00000          1.00000
+> >>  43   1.59999         osd.43            up  1.00000          1.00000
+> >> [root@cc1 ~]#
+> >> 
+> >> and ceph health detail:
+> >> 
+> >> ceph health detail | grep down
+> >> HEALTH_WARN 23 pgs backfilling; 23 pgs degraded; 2 pgs down; 2 pgs
+> >> peering; 2 pgs stuck inactive; 25 pgs stuck unclean; 23 pgs
+> >> undersized; recovery 176211/14148564 objects degraded (1.245%);
+> >> recovery 238972/14148564 objects misplaced (1.689%); noout flag(s) set
+> >> pg 1.60 is stuck inactive since forever, current state
+> >> down+remapped+peering, last acting [66,69,40]
+> >> pg 1.165 is stuck inactive since forever, current state
+> >> down+remapped+peering, last acting [37]
+> >> pg 1.60 is stuck unclean since forever, current state
+> >> down+remapped+peering, last acting [66,69,40]
+> >> pg 1.165 is stuck unclean since forever, current state
+> >> down+remapped+peering, last acting [37]
+> >> pg 1.165 is down+remapped+peering, acting [37]
+> >> pg 1.60 is down+remapped+peering, acting [66,69,40]
+> >> 
+> >> 
+> >> problematic pgs are 1.165 and 1.60.
+> >> 
+> >> Please  advice  how  to  unblock pool volumes and/or make this two pgs
+> >> working  -  in a last night and day, when we tried to solve this issue
+> >> these pgs are for 100% empty from data.
+> >> 
+> >> 
+> >> 
+> >> 
+> >> -- 
+> >> Pozdrowienia,
+> >>  £ukasz Chrustek
+> >> 
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >> 
+> >> 
+> 
+> 
+> 
+> -- 
+> Pozdrowienia,
+>  £ukasz Chrustek
+> 
+> 
+--8323329-1519173126-1495561134=:3646--
