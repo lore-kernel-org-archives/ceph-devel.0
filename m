@@ -1,23 +1,41 @@
-From: Jos Collin <jcollin@redhat.com>
-Subject: Re: How to initiate tests in jenkins.
-Date: Tue, 23 May 2017 09:50:27 +0530
-Message-ID: <22176efb-d2f4-a209-4df4-4bfa196c10c2@redhat.com>
-References: <CAGvpcHYotA=9gb8d2OAcOVBrnx5+zOQ_np8M4Dkk6UiWNQJtow@mail.gmail.com>
+From: Richard Arends <cephmailinglist-QNYwNwIP+WJmR6Xm/wNWPw@public.gmane.org>
+Subject: Re: Scuttlemonkey signing off...
+Date: Tue, 23 May 2017 08:37:45 +0200
+Message-ID: <c3204eb5-b7f5-3490-30d6-a3fbbec49818@mosibi.nl>
+References: <CAAZbbf2+JwVzYtcZ0dS4zVckRWjwTLKz6tH+eE0h8tixQ+C0EA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f180.google.com ([209.85.192.180]:33352 "EHLO
-        mail-pf0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752949AbdEWEUb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 00:20:31 -0400
-Received: by mail-pf0-f180.google.com with SMTP id e193so101717041pfh.0
-        for <ceph-devel@vger.kernel.org>; Mon, 22 May 2017 21:20:31 -0700 (PDT)
-In-Reply-To: <CAGvpcHYotA=9gb8d2OAcOVBrnx5+zOQ_np8M4Dkk6UiWNQJtow@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Myna V <mynaramana@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAAZbbf2+JwVzYtcZ0dS4zVckRWjwTLKz6tH+eE0h8tixQ+C0EA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-MW
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Patrick McGarry <pmcgarry-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Please see the comment of liewegas in your PR. That will do.
-But before doing that make sure that the errors are not introduced by 
-your changes.
+On 05/22/2017 04:36 PM, Patrick McGarry wrote:
+
+HI Patrick,
+
+> I'm writing to you today to share that my time in the Ceph community
+> is coming to an end this year. The last five years (!!) of working
+> with the Ceph community have yielded some of the most rewarding
+> adventures of my professional career, but a new opportunity has come
+> along that I just couldn't pass up.
+
+Thanks for what you have done for the Ceph community.
+
+-- 
+
+With regards,
+
+Richard Arends.
+Snow BV / http://snow.nl
