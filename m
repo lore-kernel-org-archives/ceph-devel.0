@@ -1,71 +1,55 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: [ceph-users] Scuttlemonkey signing off...
-Date: Wed, 24 May 2017 01:12:44 +0800
-Message-ID: <CAJE9aONhOQCHeE6eLg4qM7PS3ph1_svOb6YfS9WTxPZD3sh4Dg@mail.gmail.com>
-References: <CAAZbbf2+JwVzYtcZ0dS4zVckRWjwTLKz6tH+eE0h8tixQ+C0EA@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Handling is_readable=0 periods in mon
+Date: Tue, 23 May 2017 18:29:23 +0100
+Message-ID: <CALe9h7cSEaLD90iDwjhi1GYogo7SV0mnc=8MjGQG_bnDVA0ygw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f175.google.com ([209.85.217.175]:33637 "EHLO
-        mail-ua0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752114AbdEWRMp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 13:12:45 -0400
-Received: by mail-ua0-f175.google.com with SMTP id e28so82248787uah.0
-        for <ceph-devel@vger.kernel.org>; Tue, 23 May 2017 10:12:45 -0700 (PDT)
-In-Reply-To: <CAAZbbf2+JwVzYtcZ0dS4zVckRWjwTLKz6tH+eE0h8tixQ+C0EA@mail.gmail.com>
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:34824 "EHLO
+        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965501AbdEWR3q (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 23 May 2017 13:29:46 -0400
+Received: by mail-wm0-f45.google.com with SMTP id b84so33685192wmh.0
+        for <ceph-devel@vger.kernel.org>; Tue, 23 May 2017 10:29:45 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick McGarry <pmcgarry@redhat.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>, Kefu Chai <kchai@redhat.com>, Joao Eduardo Luis <joao@suse.de>
 
-Patrick, sorry to learn this. All the best!
+Hi all,
 
-On Mon, May 22, 2017 at 10:36 PM, Patrick McGarry <pmcgarry@redhat.com> wrote:
-> Hey cephers,
->
-> I'm writing to you today to share that my time in the Ceph community
-> is coming to an end this year. The last five years (!!) of working
-> with the Ceph community have yielded some of the most rewarding
-> adventures of my professional career, but a new opportunity has come
-> along that I just couldn't pass up.
->
-> I will continue to work through the end of July in order to transition
-> my responsibilities to a replacement.  In the spirit of Ceph openness,
-> I am currently assisting Stormy Peters (Red Hat's senior community
-> manager - stormy@redhat.com) in seeking candidates, so if you know
-> anyone who might be interested in managing the Ceph community, please
-> let me know.
->
-> While this is definitely bittersweet for me, the Ceph community has
-> done a good job of self-managing, self-healing, and replicating just
-> like the underlying technology, so I know you are all in good hands
-> (each others!).  If you would like to keep in touch, or have questions
-> beyond the time I am able to answer my @redhat.com email address, feel
-> free to reach out to me at pmcgarry@gmail.com and I'll be happy to
-> catch up.
->
-> If you have any questions or concerns in the meantime feel free to
-> reach out to me directly, but I'll do my best to ensure there is
-> minimal distruption during this transition. Thank you to all of you in
-> the Ceph community who have made this journey so rewarding. I look
-> forward to seeing even more amazing things in Ceph's future!
->
->
-> --
->
-> Best Regards,
->
-> Patrick McGarry
-> Director Ceph Community || Red Hat
-> http://ceph.com  ||  http://community.redhat.com
-> @scuttlemonkey || @ceph
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+I could use some help from people who understand the mon better than I
+do with this ticket: http://tracker.ceph.com/issues/19706
 
+The issue is that MDSMonitor is incorrectly killing MDSs because it
+hasn't seen beacon messages, but the beacon messages are actually just
+held up because is_readable = 0, like this:
+2017-05-23 13:34:20.054785 7f772f1c2700 10
+mon.b@0(leader).paxosservice(mdsmap 1..11) dispatch 0x7f7742989740
+mdsbeacon(4141/a up:active seq 96 v9) v7 from mds.0
+172.21.15.77:6809/2700711429 con 0x7f77428d8f00
+2017-05-23 13:34:20.054788 7f772f1c2700  5 mon.b@0(leader).paxos(paxos
+recovering c 1..293) is_readable = 0 - now=2017-05-23 13:34:20.054789
+lease_expire=0.000000 has v0 lc 293
+2017-05-23 13:34:20.054791 7f772f1c2700 10
+mon.b@0(leader).paxosservice(mdsmap 1..11)  waiting for paxos ->
+readable (v9)
 
+This appears to be happening when one or more mons are a bit laggy,
+but it is happening before an election has happened.
 
--- 
-Regards
-Kefu Chai
+We have code for handling slow elections by checking how long it has
+been since the last tick, and resetting our timeout information for
+MDS beacons if it has been too long
+(https://github.com/ceph/ceph/blob/master/src/mon/MDSMonitor.cc#L2070)
+
+However, in this case the tick() function is getting called
+throughout, we're just not seeing the beacons because they're held up
+waiting for readable.
+
+I could hack around this by only doing timeouts if *any* daemon has
+successfully got a beacon through in the last (mds_beacon_grace*2) or
+something like that, but I wonder if there's a Right way to handle
+this for PaxosService subclasses?
+
+Thanks,
+John
