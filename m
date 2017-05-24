@@ -1,177 +1,79 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: [PATCH] rbd: implement REQ_OP_WRITE_ZEROES
-Date: Wed, 24 May 2017 15:34:46 -0400
-Message-ID: <CA+aFP1DKTV2Q_5z4sBAa-6X+gJL2CKrg0=Od=RoGQuAY6hFH-A@mail.gmail.com>
-References: <1495552107-1237-1-git-send-email-idryomov@gmail.com>
- <CA+aFP1CMXuVFn80iFMX_5XJKgBCeG91438Na5TD6yj_4v4jmgg@mail.gmail.com>
- <1952072407.12977460.1495625908099.JavaMail.zimbra@oxygem.tv>
- <CA+aFP1BYCnxeCL6PJO1crAFsDFciuH9X7c5pB02Yd4PZKjZQtA@mail.gmail.com> <274721074.13000578.1495647514038.JavaMail.zimbra@oxygem.tv>
-Reply-To: dillaman@redhat.com
+From: John Spray <jspray@redhat.com>
+Subject: Re: Help build a drive reliability service!
+Date: Wed, 24 May 2017 20:35:48 +0100
+Message-ID: <CALe9h7cTf3+ee4BJhhDVV90n-k+i7-rcPE8GmV3osMK1-6+TTA@mail.gmail.com>
+References: <CAAZbbf3kS+KQ06KFe=p=Gn1Qmb8xen35U5CLgpcq3BaTT+e5Vg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f182.google.com ([209.85.161.182]:36101 "EHLO
-        mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S936992AbdEXTes (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 May 2017 15:34:48 -0400
-Received: by mail-yw0-f182.google.com with SMTP id b68so94171778ywe.3
-        for <ceph-devel@vger.kernel.org>; Wed, 24 May 2017 12:34:47 -0700 (PDT)
-In-Reply-To: <274721074.13000578.1495647514038.JavaMail.zimbra@oxygem.tv>
+Received: from mail-wr0-f178.google.com ([209.85.128.178]:33561 "EHLO
+        mail-wr0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S936992AbdEXTgK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 May 2017 15:36:10 -0400
+Received: by mail-wr0-f178.google.com with SMTP id w50so60847187wrc.0
+        for <ceph-devel@vger.kernel.org>; Wed, 24 May 2017 12:36:09 -0700 (PDT)
+In-Reply-To: <CAAZbbf3kS+KQ06KFe=p=Gn1Qmb8xen35U5CLgpcq3BaTT+e5Vg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alexandre DERUMIER <aderumier@odiso.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, Hannes Reinecke <hare@suse.com>
+To: Patrick McGarry <pmcgarry@redhat.com>
+Cc: Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Wed, May 24, 2017 at 1:38 PM, Alexandre DERUMIER <aderumier@odiso.com> wrote:
->>>I just opened a tracker ticket for this [1]
->>>
->>>[1] http://tracker.ceph.com/issues/20070
+On Wed, May 24, 2017 at 7:57 PM, Patrick McGarry <pmcgarry@redhat.com> wrote:
+> Hey cephers,
 >
-> Thanks Jason!
+> Just wanted to share the genesis of a new community project that could
+> use a few helping hands (and any amount of feedback/discussion that
+> you might like to offer).
 >
->>>-- let me know if you have
->>>any other QEMU improvement ideas.
+> As a bit of backstory, around 2013 the Backblaze folks started
+> publishing statistics about hard drive reliability from within their
+> data center for the world to consume. This included things like model,
+> make, failure state, and SMART data. If you would like to view the
+> Backblaze data set, you can find it at:
 >
-> For the moment, the bigger limitation is cpu usage of librbd,
-> as qemu can only 1 thread, I can't reach more than around 70000 iops by disk.
-> (3,1ghz cpu, disabling debug, rbd_cache, using jemalloc).
+> https://www.backblaze.com/b2/hard-drive-test-data.html
 >
-> So any improvement to reduce cpu usage could be great :)
+> While most major cloud providers are doing this for themselves
+> internally, we would like to replicate/enhance this effort across a
+> much wider segment of the population as a free service.  I think we
+> have a pretty good handle on the server/platform side of things, and a
+> couple of people who have expressed interest in building the
+> reliability model (although we could always use more!), what we really
+> need is a passionate volunteer who would like to come forward to write
+> the agent that sits on the drives, aggregates data, and submits daily
+> stats reports via an API (and potentially receives information back as
+> results are calculated about MTTF or potential to fail in the next
+> 24-48 hrs).
+>
+> Currently my thinking is to build our collection method based on the
+> Backblaze data set so that we can use it to train our model and build
+> from going forward. If this sounds like a project you would like to be
+> involved in (especially if you're from Backblaze!) please let me know.
+> I think a first pass of the agent should be something we can build in
+> a couple of afternoons to start testing with a small pilot group that
+> we already have available.
 
-We've had some interest expressed in volunteering time and code
-contributions to reduce the CPU usage of librbd / librados. I am
-hoping some of these improvements will be included in the Mimic
-release.
+I happen to already have written (some time ago) an agent that
+collects smart data and posts it to a web service.  It's in golang and
+links with a crudely hacked version of smartmontools to gather the
+stats.
 
-> Also, in the future, I think qemu will support multiple iothreads by disk,
-> I don't known if librbd is already ready for this ?
+Any interest?  (hopefully I can find the code...)
 
-This is hopefully another improvement we can make in the Mimic release
-timeframe. librbd already has an architecture to support multiple
-internal IO threads, but we have it disabled for now due to lack of
-thorough testing -- and for the fact that librados needs to utilize
-multiple IO threads as well.
+John
 
 >
->
-> ----- Mail original -----
-> De: "Jason Dillaman" <jdillama@redhat.com>
-> À: "aderumier" <aderumier@odiso.com>
-> Cc: "Ilya Dryomov" <idryomov@gmail.com>, "ceph-devel" <ceph-devel@vger.kernel.org>, "Christoph Hellwig" <hch@lst.de>, "Hannes Reinecke" <hare@suse.com>
-> Envoyé: Mercredi 24 Mai 2017 13:53:40
-> Objet: Re: [PATCH] rbd: implement REQ_OP_WRITE_ZEROES
->
-> I just opened a tracker ticket for this [1] -- let me know if you have
-> any other QEMU improvement ideas.
->
-> [1] http://tracker.ceph.com/issues/20070
->
-> On Wed, May 24, 2017 at 7:38 AM, Alexandre DERUMIER <aderumier@odiso.com> wrote:
->> Hi,
->>
->> is it planned to implement write zeroes in qemu rbd block driver soon ?
->> (bdrv_co_write_zeroes)
->>
->> It's really missing currently, as qemu drive-mirror need it to have sparse images on copy.
->>
->> Ref from my discussion with Paolo from redhat in 2014 about this:
->> https://lists.gnu.org/archive/html/qemu-devel/2014-10/msg01274.html
->>
->>
->> REgards,
->>
->> Alexandre
->>
->> ----- Mail original -----
->> De: "Jason Dillaman" <jdillama@redhat.com>
->> À: "Ilya Dryomov" <idryomov@gmail.com>
->> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, "Christoph Hellwig" <hch@lst.de>, "Hannes Reinecke" <hare@suse.com>
->> Envoyé: Mardi 23 Mai 2017 20:28:00
->> Objet: Re: [PATCH] rbd: implement REQ_OP_WRITE_ZEROES
->>
->> lgtm
->>
->> Reviewed-by: Jason Dillaman <dillaman@redhat.com>
->>
->> On Tue, May 23, 2017 at 11:08 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
->>> Commit 93c1defedcae ("rbd: remove the discard_zeroes_data flag")
->>> explicitly didn't implement REQ_OP_WRITE_ZEROES for rbd, while the
->>> following commit 48920ff2a5a9 ("block: remove the discard_zeroes_data
->>> flag") dropped ->discard_zeroes_data in favor of REQ_OP_WRITE_ZEROES.
->>>
->>> rbd does support efficient zeroing via CEPH_OSD_OP_ZERO opcode and will
->>> release either some or all blocks depending on whether the zeroing
->>> request is rbd_obj_bytes() aligned. This is how we currently implement
->>> discards, so REQ_OP_WRITE_ZEROES can be identical to REQ_OP_DISCARD for
->>> now. Caveats:
->>>
->>> - REQ_NOUNMAP is ignored, but AFAICT that's true of at least two other
->>> current implementations - nvme and loop
->>>
->>> - there is no ->write_zeroes_alignment and blk_bio_write_zeroes_split()
->>> is hence less helpful than blk_bio_discard_split(), but this can (and
->>> should) be fixed on the rbd side
->>>
->>> In the future we will split these into two code paths to respect
->>> REQ_NOUNMAP on zeroout and save on zeroing blocks that couldn't be
->>> released on discard.
->>>
->>> Fixes: 93c1defedcae ("rbd: remove the discard_zeroes_data flag")
->>> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
->>> ---
->>> drivers/block/rbd.c | 2 ++
->>> 1 file changed, 2 insertions(+)
->>>
->>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->>> index 454bf9c34882..c16f74547804 100644
->>> --- a/drivers/block/rbd.c
->>> +++ b/drivers/block/rbd.c
->>> @@ -4023,6 +4023,7 @@ static void rbd_queue_workfn(struct work_struct *work)
->>>
->>> switch (req_op(rq)) {
->>> case REQ_OP_DISCARD:
->>> + case REQ_OP_WRITE_ZEROES:
->>> op_type = OBJ_OP_DISCARD;
->>> break;
->>> case REQ_OP_WRITE:
->>> @@ -4420,6 +4421,7 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
->>> q->limits.discard_granularity = segment_size;
->>> q->limits.discard_alignment = segment_size;
->>> blk_queue_max_discard_sectors(q, segment_size / SECTOR_SIZE);
->>> + blk_queue_max_write_zeroes_sectors(q, segment_size / SECTOR_SIZE);
->>>
->>> if (!ceph_test_opt(rbd_dev->rbd_client->client, NOCRC))
->>> q->backing_dev_info->capabilities |= BDI_CAP_STABLE_WRITES;
->>> --
->>> 2.4.3
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>
->>
->>
->> --
->> Jason
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at http://vger.kernel.org/majordomo-info.html
->
->
+> Happy to entertain any thoughts or feedback that people might have. Thanks!
 >
 > --
-> Jason
 >
-
-
-
--- 
-Jason
+> Best Regards,
+>
+> Patrick McGarry
+> Director Ceph Community || Red Hat
+> http://ceph.com  ||  http://community.redhat.com
+> @scuttlemonkey || @ceph
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
