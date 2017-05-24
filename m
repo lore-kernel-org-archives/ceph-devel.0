@@ -1,267 +1,153 @@
-From: Sage Weil <sage@newdream.net>
+From: =?iso-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
 Subject: Re: Problem with query and any operation on PGs
-Date: Wed, 24 May 2017 14:47:23 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1705241444150.3646@piezo.novalocal>
-References: <175484591.20170523135449@tlen.pl> <483467685.20170523144818@tlen.pl>           <alpine.DEB.2.11.1705231415400.3646@piezo.novalocal>     <1464688590.20170523185052@tlen.pl>     <alpine.DEB.2.11.1705231738520.3646@piezo.novalocal>   
- <1075363645.20170523234331@tlen.pl>   <alpine.DEB.2.11.1705232146500.3646@piezo.novalocal>   <135176900.20170524151952@tlen.pl>   <alpine.DEB.2.11.1705241335190.3646@piezo.novalocal>  <1203308391.20170524155848@tlen.pl>  <alpine.DEB.2.11.1705241401260.3646@piezo.novalocal>
- <379087365.20170524161815@tlen.pl>
+Date: Wed, 24 May 2017 17:00:05 +0200
+Message-ID: <419974552.20170524170005@tlen.pl>
+References: <175484591.20170523135449@tlen.pl> <483467685.20170523144818@tlen.pl>           
+  <alpine.DEB.2.11.1705231415400.3646@piezo.novalocal>    
+  <1464688590.20170523185052@tlen.pl>    
+  <alpine.DEB.2.11.1705231738520.3646@piezo.novalocal>   
+  <1075363645.20170523234331@tlen.pl>  
+  <alpine.DEB.2.11.1705232146500.3646@piezo.novalocal>  
+  <135176900.20170524151952@tlen.pl>  
+  <alpine.DEB.2.11.1705241335190.3646@piezo.novalocal>
+  <1203308391.20170524155848@tlen.pl>
+  <alpine.DEB.2.11.1705241401260.3646@piezo.novalocal>
+  <379087365.20170524161815@tlen.pl>
+  <alpine.DEB.2.11.1705241444150.3646@piezo.novalocal>
+Reply-To: =?iso-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-677686918-1495637245=:3646"
+Content-Type: text/plain; charset=iso-8859-2
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:42567 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933703AbdEXOr1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 May 2017 10:47:27 -0400
-In-Reply-To: <379087365.20170524161815@tlen.pl>
+Received: from mx-out.tlen.pl ([193.222.135.148]:37438 "EHLO mx-out.tlen.pl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S940394AbdEXPAK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 24 May 2017 11:00:10 -0400
+In-Reply-To: <alpine.DEB.2.11.1705241444150.3646@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
+To: Sage Weil <sage@newdream.net>
 Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hello,
 
---8323329-677686918-1495637245=:3646
-Content-Type: TEXT/PLAIN; charset=iso-8859-2
-Content-Transfer-Encoding: 8BIT
+> On Wed, 24 May 2017, 즩kasz Chrustek wrote:
+>> Cze뜻,
+>> 
+>> > On Wed, 24 May 2017, 즩kasz Chrustek wrote:
+>> >> Cze뜻,
+>> >> 
+>> >> > On Wed, 24 May 2017, 즩kasz Chrustek wrote:
+>> >> >> Cze뜻,
+>> >> >> 
+>> >> >> > On Tue, 23 May 2017, 즩kasz Chrustek wrote:
+>> >> >> >> Cze뜻,
+>> >> >> >> 
+>> >> >> >> > On Tue, 23 May 2017, 즩kasz Chrustek wrote:
+>> >> >> >> >> I'm  not  sleeping for over 30 hours, and still can't find solution. I
+>> >> >> >> >> did,      as      You      wrote,     but     turning     off     this
+>> >> >> >> >> (https://pastebin.com/1npBXeMV) osds didn't resolve issue...
+>> >> >> >> 
+>> >> >> >> > The important bit is:
+>> >> >> >> 
+>> >> >> >> >             "blocked": "peering is blocked due to down osds",
+>> >> >> >> >             "down_osds_we_would_probe": [
+>> >> >> >> >                 6,
+>> >> >> >> >                 10,
+>> >> >> >> >                 33,
+>> >> >> >> >                 37,
+>> >> >> >> >                 72
+>> >> >> >> >             ],
+>> >> >> >> >             "peering_blocked_by": [
+>> >> >> >> >                 {
+>> >> >> >> >                     "osd": 6,
+>> >> >> >> >                     "current_lost_at": 0,
+>> >> >> >> >                     "comment": "starting or marking this osd lost may let
+>> >> >> >> > us proceed"
+>> >> >> >> >                 },
+>> >> >> >> >                 {
+>> >> >> >> >                     "osd": 10,
+>> >> >> >> >                     "current_lost_at": 0,
+>> >> >> >> >                     "comment": "starting or marking this osd lost may let
+>> >> >> >> > us proceed"
+>> >> >> >> >                 },
+>> >> >> >> >                 {
+>> >> >> >> >                     "osd": 37,
+>> >> >> >> >                     "current_lost_at": 0,
+>> >> >> >> >                     "comment": "starting or marking this osd lost may let
+>> >> >> >> > us proceed"
+>> >> >> >> >                 },
+>> >> >> >> >                 {
+>> >> >> >> >                     "osd": 72,
+>> >> >> >> >                     "current_lost_at": 113771,
+>> >> >> >> >                     "comment": "starting or marking this osd lost may let
+>> >> >> >> > us proceed"
+>> 
+>> > These are the osds (6, 10, 37, 72).
+>> 
+>> >> >> >> >                 }
+>> >> >> >> >             ]
+>> >> >> >> >         },
+>> >> >> >> 
+>> >> >> >> > Are any of those OSDs startable?
+>> 
+>> > This
+>> 
+>> osd 6 - isn't startable
 
-On Wed, 24 May 2017, 즩kasz Chrustek wrote:
-> Cze뜻,
-> 
-> > On Wed, 24 May 2017, 즩kasz Chrustek wrote:
-> >> Cze뜻,
-> >> 
-> >> > On Wed, 24 May 2017, 즩kasz Chrustek wrote:
-> >> >> Cze뜻,
-> >> >> 
-> >> >> > On Tue, 23 May 2017, 즩kasz Chrustek wrote:
-> >> >> >> Cze뜻,
-> >> >> >> 
-> >> >> >> > On Tue, 23 May 2017, 즩kasz Chrustek wrote:
-> >> >> >> >> I'm  not  sleeping for over 30 hours, and still can't find solution. I
-> >> >> >> >> did,      as      You      wrote,     but     turning     off     this
-> >> >> >> >> (https://pastebin.com/1npBXeMV) osds didn't resolve issue...
-> >> >> >> 
-> >> >> >> > The important bit is:
-> >> >> >> 
-> >> >> >> >             "blocked": "peering is blocked due to down osds",
-> >> >> >> >             "down_osds_we_would_probe": [
-> >> >> >> >                 6,
-> >> >> >> >                 10,
-> >> >> >> >                 33,
-> >> >> >> >                 37,
-> >> >> >> >                 72
-> >> >> >> >             ],
-> >> >> >> >             "peering_blocked_by": [
-> >> >> >> >                 {
-> >> >> >> >                     "osd": 6,
-> >> >> >> >                     "current_lost_at": 0,
-> >> >> >> >                     "comment": "starting or marking this osd lost may let
-> >> >> >> > us proceed"
-> >> >> >> >                 },
-> >> >> >> >                 {
-> >> >> >> >                     "osd": 10,
-> >> >> >> >                     "current_lost_at": 0,
-> >> >> >> >                     "comment": "starting or marking this osd lost may let
-> >> >> >> > us proceed"
-> >> >> >> >                 },
-> >> >> >> >                 {
-> >> >> >> >                     "osd": 37,
-> >> >> >> >                     "current_lost_at": 0,
-> >> >> >> >                     "comment": "starting or marking this osd lost may let
-> >> >> >> > us proceed"
-> >> >> >> >                 },
-> >> >> >> >                 {
-> >> >> >> >                     "osd": 72,
-> >> >> >> >                     "current_lost_at": 113771,
-> >> >> >> >                     "comment": "starting or marking this osd lost may let
-> >> >> >> > us proceed"
-> 
-> > These are the osds (6, 10, 37, 72).
-> 
-> >> >> >> >                 }
-> >> >> >> >             ]
-> >> >> >> >         },
-> >> >> >> 
-> >> >> >> > Are any of those OSDs startable?
-> 
-> > This
-> 
-> osd 6 - isn't startable
+> Disk completely 100% dead, or just borken enough that ceph-osd won't 
+> start?  ceph-objectstore-tool can be used to extract a copy of the 2 pgs
+> from this osd to recover any important writes on that osd.
 
-Disk completely 100% dead, or just borken enough that ceph-osd won't 
-start?  ceph-objectstore-tool can be used to extract a copy of the 2 pgs 
-from this osd to recover any important writes on that osd.
+2017-05-24 11:21:23.341938 7f6830a36940  0 ceph version 9.2.1 (752b6a3020c3de74e07d2a8b4c5e48dab5a6b6fd), process ceph-osd, pid 1375
+2017-05-24 11:21:23.350180 7f6830a36940  0 filestore(/var/lib/ceph/osd/ceph-6) backend btrfs (magic 0x9123683e)
+2017-05-24 11:21:23.350610 7f6830a36940  0 genericfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_features: FIEMAP ioctl is supported and appears to work
+2017-05-24 11:21:23.350617 7f6830a36940  0 genericfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_features: SEEK_DATA/SEEK_HOLE is disabled via 'filestore seek data hole' config option
+2017-05-24 11:21:23.350633 7f6830a36940  0 genericfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_features: splice is supported
+2017-05-24 11:21:23.351897 7f6830a36940  0 genericfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_features: syncfs(2) syscall fully supported (by glibc and kernel)
+2017-05-24 11:21:23.351951 7f6830a36940  0 btrfsfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_feature: CLONE_RANGE ioctl is supported
+2017-05-24 11:21:23.351970 7f6830a36940  0 btrfsfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_feature: failed to create simple subvolume test_subvol: (17) File exists
+2017-05-24 11:21:23.351981 7f6830a36940  0 btrfsfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_feature: SNAP_CREATE is supported
+2017-05-24 11:21:23.351984 7f6830a36940  0 btrfsfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_feature: SNAP_DESTROY failed: (1) Operation not permitted
+2017-05-24 11:21:23.351987 7f6830a36940  0 btrfsfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_feature: failed with EPERM as non-root; remount with -o user_subvol_rm_allowed
+2017-05-24 11:21:23.351996 7f6830a36940  0 btrfsfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_feature: snaps enabled, but no SNAP_DESTROY ioctl; DISABLING
+2017-05-24 11:21:23.352573 7f6830a36940  0 btrfsfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_feature: START_SYNC is supported (transid 252877)
+2017-05-24 11:21:23.353001 7f6830a36940  0 btrfsfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_feature: WAIT_SYNC is supported
+2017-05-24 11:21:23.353012 7f6830a36940  0 btrfsfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_feature: removing old async_snap_test
+2017-05-24 11:21:23.353016 7f6830a36940  0 btrfsfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_feature: failed to remove old async_snap_test: (1) Operation not permitted
+2017-05-24 11:21:23.353021 7f6830a36940  0 btrfsfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_feature: SNAP_CREATE_V2 is supported
+2017-05-24 11:21:23.353022 7f6830a36940  0 btrfsfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_feature: SNAP_DESTROY failed: (1) Operation not permitted
+2017-05-24 11:21:23.353027 7f6830a36940  0 btrfsfilestorebackend(/var/lib/ceph/osd/ceph-6) detect_feature: failed to remove test_subvol: (1) Operation not permitted
+2017-05-24 11:21:23.355156 7f6830a36940  0 filestore(/var/lib/ceph/osd/ceph-6) mount: enabling WRITEAHEAD journal mode: checkpoint is not enabled
+2017-05-24 11:21:23.355881 7f6830a36940 -1 filestore(/var/lib/ceph/osd/ceph-6) could not find -1/23c2fcde/osd_superblock/0 in index: (2) No such file or directory
+2017-05-24 11:21:23.355891 7f6830a36940 -1 osd.6 0 OSD::init() : unable to read osd superblock
+2017-05-24 11:21:23.356411 7f6830a36940 -1 ^[[0;31m ** ERROR: osd init failed: (22) Invalid argument^[[0m
 
-> osd 10, 37, 72 are startable
+it is all I get for this osd in logs, when I try to start it.
 
-With those started, I'd repeat the original sequence and get a fresh pg 
-query to confirm that it still wants just osd.6.
+>> osd 10, 37, 72 are startable
 
-use ceph-objectstore-tool to export the pg from osd.6, stop some other 
-ranodm osd (not one of these ones), import the pg into that osd, and start 
-again.  once it is up, 'ceph osd lost 6'.  the pg *should* peer at that 
-point.  repeat with the same basic process with the other pg.
+> With those started, I'd repeat the original sequence and get a fresh pg
+> query to confirm that it still wants just osd.6.
 
-s
+You  mean about procedure with loop and taking down OSDs, which broken
+PGs are pointing to ?
+pg 1.60 is down+remapped+peering, acting [66,40]
+pg 1.165 is down+peering, acting [67,88,48]
+
+for pg 1.60 <--> 66 down, then in loop check pg query ?
 
 
-> 
-> >> >> >> 
-> >> >> >> They were all up and running - but I decided to shut them down and out
-> >> >> >> them  from  ceph, now it looks like ceph working ok, but still two PGs
-> >> >> >> are in down state, how to get rid of it ?
-> >> >> 
-> >> >> > If you haven't deleted the data, you should start the OSDs back up.
-> 
-> > This
-> 
-> By OSDs backup You mean copy /var/lib/ceph/osd/ceph-72/* to some other
-> (non ceph) disk ?
-> 
-> >> >> 
-> >> >> > If they are partially damanged you can use ceph-objectstore-tool to 
-> >> >> > extract just the PGs in question to make sure you haven't lost anything,
-> >> >> > inject them on some other OSD(s) and restart those, and *then* mark the
-> >> >> > bad OSDs as 'lost'.
-> >> >> 
-> >> >> > If all else fails, you can just mark those OSDs 'lost', but in doing so
-> >> >> > you might be telling the cluster to lose data.
-> >> >> 
-> >> >> > The best thing to do is definitely to get those OSDs started again.
-> 
-> > This
-> 
-> There were actions on this PGs, that make them destroy. I started this
-> osds   (these  three,  which  are  startable)  -  this  dosn't  solved
-> situation.  I  need to add, that on this cluster are other pools, only
-> with pool with broken/down PGs is problem.
-> >> >> 
-> >> >> Now situation looks like this:
-> >> >> 
-> >> >> [root@cc1 ~]# rbd info volumes/volume-ccc5d976-cecf-4938-a452-1bee6188987b
-> >> >> rbd image 'volume-ccc5d976-cecf-4938-a452-1bee6188987b':
-> >> >>         size 500 GB in 128000 objects
-> >> >>         order 22 (4096 kB objects)
-> >> >>         block_name_prefix: rbd_data.ed9d394a851426
-> >> >>         format: 2
-> >> >>         features: layering
-> >> >>         flags:
-> >> >> 
-> >> >> [root@cc1 ~]# rados -p volumes ls | grep rbd_data.ed9d394a851426
-> >> >> (output cutted)
-> >> >> rbd_data.ed9d394a851426.000000000000447c
-> >> >> rbd_data.ed9d394a851426.0000000000010857
-> >> >> rbd_data.ed9d394a851426.000000000000ec8b
-> >> >> rbd_data.ed9d394a851426.000000000000fa43
-> >> >> rbd_data.ed9d394a851426.000000000001ef2d
-> >> >> ^C
-> >> >> 
-> >> >> it hangs on this object and isn't going further. rbd cp also hangs...
-> >> >> rbd map - also...
-> >> >> 
-> >> >> can  You advice what can be solution for this case ?
-> >> 
-> >> > The hang is due to OSD throttling (see my first reply for how to wrok 
-> >> > around that and get a pg query).  But you already did that and the cluster
-> >> > told you which OSDs it needs to see up in order for it to peer and 
-> >> > recover.  If you haven't destroyed those disks, you should start those
-> 
-> >> > osds and it shoudl be fine.  If you've destroyed the data or the disks are
-> >> > truly broken and dead, then you can mark those OSDs lost and the cluster
-> >> > *maybe* recover (but hard to say given the information you've shared).
-> 
-> > This
-> 
-> 
-> [root@cc1 ~]# ceph osd lost 10 --yes-i-really-mean-it
-> marked osd lost in epoch 115310
-> [root@cc1 ~]# ceph osd lost 37 --yes-i-really-mean-it
-> marked osd lost in epoch 115314
-> [root@cc1 ~]# ceph osd lost 72 --yes-i-really-mean-it
-> marked osd lost in epoch 115317
-> [root@cc1 ~]# ceph -s
->     cluster 8cdfbff9-b7be-46de-85bd-9d49866fcf60
->      health HEALTH_WARN
->             2 pgs down
->             2 pgs peering
->             2 pgs stuck inactive
->      monmap e1: 3 mons at {cc1=192.168.128.1:6789/0,cc2=192.168.128.2:6789/0,cc3=192.168.128.3:6789/0}
->             election epoch 872, quorum 0,1,2 cc1,cc2,cc3
->      osdmap e115434: 100 osds: 89 up, 86 in; 1 remapped pgs
->       pgmap v67642483: 4032 pgs, 18 pools, 26713 GB data, 4857 kobjects
->             76718 GB used, 107 TB / 182 TB avail
->                 4030 active+clean
->                    1 down+remapped+peering
->                    1 down+peering
->   client io 14624 kB/s rd, 31619 kB/s wr, 382 op/s rd, 228 op/s wr
-> [root@cc1 ~]# ceph -s
->     cluster 8cdfbff9-b7be-46de-85bd-9d49866fcf60
->      health HEALTH_WARN
->             2 pgs down
->             2 pgs peering
->             2 pgs stuck inactive
->      monmap e1: 3 mons at {cc1=192.168.128.1:6789/0,cc2=192.168.128.2:6789/0,cc3=192.168.128.3:6789/0}
->             election epoch 872, quorum 0,1,2 cc1,cc2,cc3
->      osdmap e115434: 100 osds: 89 up, 86 in; 1 remapped pgs
->       pgmap v67642485: 4032 pgs, 18 pools, 26713 GB data, 4857 kobjects
->             76718 GB used, 107 TB / 182 TB avail
->                 4030 active+clean
->                    1 down+remapped+peering
->                    1 down+peering
->   client io 17805 kB/s rd, 18787 kB/s wr, 215 op/s rd, 107 op/s wr
-> 
-> >> 
-> >> > sage
-> >> 
-> >> What information I can bring to You to say it is recoverable ?
-> >> 
-> >> here are ceph -s and ceph health detail:
-> >> 
-> >> [root@cc1 ~]# ceph -s
-> >>     cluster 8cdfbff9-b7be-46de-85bd-9d49866fcf60
-> >>      health HEALTH_WARN
-> >>             2 pgs down
-> >>             2 pgs peering
-> >>             2 pgs stuck inactive
-> >>      monmap e1: 3 mons at {cc1=192.168.128.1:6789/0,cc2=192.168.128.2:6789/0,cc3=192.168.128.3:6789/0}
-> >>             election epoch 872, quorum 0,1,2 cc1,cc2,cc3
-> >>      osdmap e115431: 100 osds: 89 up, 86 in; 1 remapped pgs
-> >>       pgmap v67641261: 4032 pgs, 18 pools, 26706 GB data, 4855 kobjects
-> >>             76705 GB used, 107 TB / 182 TB avail
-> >>                 4030 active+clean
-> >>                    1 down+remapped+peering
-> >>                    1 down+peering
-> >>   client io 5704 kB/s rd, 24685 kB/s wr, 49 op/s rd, 165 op/s wr
-> >> [root@cc1 ~]# ceph health detail
-> >> HEALTH_WARN 2 pgs down; 2 pgs peering; 2 pgs stuck inactive
-> >> pg 1.165 is stuck inactive since forever, current state down+peering, last acting [67,88,48]
-> >> pg 1.60 is stuck inactive since forever, current state down+remapped+peering, last acting [66,40]
-> >> pg 1.60 is down+remapped+peering, acting [66,40]
-> >> pg 1.165 is down+peering, acting [67,88,48]
-> >> [root@cc1 ~]#
-> >> 
-> >> -- 
-> >> Regards,
-> >>  즩kasz Chrustek
-> >> 
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >> 
-> >> 
-> 
-> 
-> 
-> -- 
-> Pozdrowienia,
->  즩kasz Chrustek
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---8323329-677686918-1495637245=:3646--
+
+> use ceph-objectstore-tool to export the pg from osd.6, stop some other
+> ranodm osd (not one of these ones), import the pg into that osd, and start
+> again.  once it is up, 'ceph osd lost 6'.  the pg *should* peer at that
+> point.  repeat with the same basic process with the other pg.
+
+I have already did 'ceph osd lost 6', do I need to do this once again ?
+
+
+-- 
+Regards
+ 즩kasz Chrustek
+
