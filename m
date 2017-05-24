@@ -1,245 +1,267 @@
-From: =?iso-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: Problem with query and any operation on PGs
-Date: Wed, 24 May 2017 16:18:15 +0200
-Message-ID: <379087365.20170524161815@tlen.pl>
-References: <175484591.20170523135449@tlen.pl> <483467685.20170523144818@tlen.pl>         
-  <alpine.DEB.2.11.1705231415400.3646@piezo.novalocal>   
-  <1464688590.20170523185052@tlen.pl>   
-  <alpine.DEB.2.11.1705231738520.3646@piezo.novalocal>  
-  <1075363645.20170523234331@tlen.pl>
-  <alpine.DEB.2.11.1705232146500.3646@piezo.novalocal>
-  <135176900.20170524151952@tlen.pl>
-  <alpine.DEB.2.11.1705241335190.3646@piezo.novalocal>
-  <1203308391.20170524155848@tlen.pl>
-  <alpine.DEB.2.11.1705241401260.3646@piezo.novalocal>
-Reply-To: =?iso-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
+Date: Wed, 24 May 2017 14:47:23 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1705241444150.3646@piezo.novalocal>
+References: <175484591.20170523135449@tlen.pl> <483467685.20170523144818@tlen.pl>           <alpine.DEB.2.11.1705231415400.3646@piezo.novalocal>     <1464688590.20170523185052@tlen.pl>     <alpine.DEB.2.11.1705231738520.3646@piezo.novalocal>   
+ <1075363645.20170523234331@tlen.pl>   <alpine.DEB.2.11.1705232146500.3646@piezo.novalocal>   <135176900.20170524151952@tlen.pl>   <alpine.DEB.2.11.1705241335190.3646@piezo.novalocal>  <1203308391.20170524155848@tlen.pl>  <alpine.DEB.2.11.1705241401260.3646@piezo.novalocal>
+ <379087365.20170524161815@tlen.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: 8BIT
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-677686918-1495637245=:3646"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx-out.tlen.pl ([193.222.135.142]:33411 "EHLO mx-out.tlen.pl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S964846AbdEXOSS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 24 May 2017 10:18:18 -0400
-In-Reply-To: <alpine.DEB.2.11.1705241401260.3646@piezo.novalocal>
+Received: from cobra.newdream.net ([66.33.216.30]:42567 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933703AbdEXOr1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 May 2017 10:47:27 -0400
+In-Reply-To: <379087365.20170524161815@tlen.pl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: =?ISO-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
 Cc: ceph-devel@vger.kernel.org
 
-Cze뜻,
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-> On Wed, 24 May 2017, 즩kasz Chrustek wrote:
->> Cze뜻,
->> 
->> > On Wed, 24 May 2017, 즩kasz Chrustek wrote:
->> >> Cze뜻,
->> >> 
->> >> > On Tue, 23 May 2017, 즩kasz Chrustek wrote:
->> >> >> Cze뜻,
->> >> >> 
->> >> >> > On Tue, 23 May 2017, 즩kasz Chrustek wrote:
->> >> >> >> I'm  not  sleeping for over 30 hours, and still can't find solution. I
->> >> >> >> did,      as      You      wrote,     but     turning     off     this
->> >> >> >> (https://pastebin.com/1npBXeMV) osds didn't resolve issue...
->> >> >> 
->> >> >> > The important bit is:
->> >> >> 
->> >> >> >             "blocked": "peering is blocked due to down osds",
->> >> >> >             "down_osds_we_would_probe": [
->> >> >> >                 6,
->> >> >> >                 10,
->> >> >> >                 33,
->> >> >> >                 37,
->> >> >> >                 72
->> >> >> >             ],
->> >> >> >             "peering_blocked_by": [
->> >> >> >                 {
->> >> >> >                     "osd": 6,
->> >> >> >                     "current_lost_at": 0,
->> >> >> >                     "comment": "starting or marking this osd lost may let
->> >> >> > us proceed"
->> >> >> >                 },
->> >> >> >                 {
->> >> >> >                     "osd": 10,
->> >> >> >                     "current_lost_at": 0,
->> >> >> >                     "comment": "starting or marking this osd lost may let
->> >> >> > us proceed"
->> >> >> >                 },
->> >> >> >                 {
->> >> >> >                     "osd": 37,
->> >> >> >                     "current_lost_at": 0,
->> >> >> >                     "comment": "starting or marking this osd lost may let
->> >> >> > us proceed"
->> >> >> >                 },
->> >> >> >                 {
->> >> >> >                     "osd": 72,
->> >> >> >                     "current_lost_at": 113771,
->> >> >> >                     "comment": "starting or marking this osd lost may let
->> >> >> > us proceed"
+--8323329-677686918-1495637245=:3646
+Content-Type: TEXT/PLAIN; charset=iso-8859-2
+Content-Transfer-Encoding: 8BIT
 
-> These are the osds (6, 10, 37, 72).
+On Wed, 24 May 2017, 즩kasz Chrustek wrote:
+> Cze뜻,
+> 
+> > On Wed, 24 May 2017, 즩kasz Chrustek wrote:
+> >> Cze뜻,
+> >> 
+> >> > On Wed, 24 May 2017, 즩kasz Chrustek wrote:
+> >> >> Cze뜻,
+> >> >> 
+> >> >> > On Tue, 23 May 2017, 즩kasz Chrustek wrote:
+> >> >> >> Cze뜻,
+> >> >> >> 
+> >> >> >> > On Tue, 23 May 2017, 즩kasz Chrustek wrote:
+> >> >> >> >> I'm  not  sleeping for over 30 hours, and still can't find solution. I
+> >> >> >> >> did,      as      You      wrote,     but     turning     off     this
+> >> >> >> >> (https://pastebin.com/1npBXeMV) osds didn't resolve issue...
+> >> >> >> 
+> >> >> >> > The important bit is:
+> >> >> >> 
+> >> >> >> >             "blocked": "peering is blocked due to down osds",
+> >> >> >> >             "down_osds_we_would_probe": [
+> >> >> >> >                 6,
+> >> >> >> >                 10,
+> >> >> >> >                 33,
+> >> >> >> >                 37,
+> >> >> >> >                 72
+> >> >> >> >             ],
+> >> >> >> >             "peering_blocked_by": [
+> >> >> >> >                 {
+> >> >> >> >                     "osd": 6,
+> >> >> >> >                     "current_lost_at": 0,
+> >> >> >> >                     "comment": "starting or marking this osd lost may let
+> >> >> >> > us proceed"
+> >> >> >> >                 },
+> >> >> >> >                 {
+> >> >> >> >                     "osd": 10,
+> >> >> >> >                     "current_lost_at": 0,
+> >> >> >> >                     "comment": "starting or marking this osd lost may let
+> >> >> >> > us proceed"
+> >> >> >> >                 },
+> >> >> >> >                 {
+> >> >> >> >                     "osd": 37,
+> >> >> >> >                     "current_lost_at": 0,
+> >> >> >> >                     "comment": "starting or marking this osd lost may let
+> >> >> >> > us proceed"
+> >> >> >> >                 },
+> >> >> >> >                 {
+> >> >> >> >                     "osd": 72,
+> >> >> >> >                     "current_lost_at": 113771,
+> >> >> >> >                     "comment": "starting or marking this osd lost may let
+> >> >> >> > us proceed"
+> 
+> > These are the osds (6, 10, 37, 72).
+> 
+> >> >> >> >                 }
+> >> >> >> >             ]
+> >> >> >> >         },
+> >> >> >> 
+> >> >> >> > Are any of those OSDs startable?
+> 
+> > This
+> 
+> osd 6 - isn't startable
 
->> >> >> >                 }
->> >> >> >             ]
->> >> >> >         },
->> >> >> 
->> >> >> > Are any of those OSDs startable?
+Disk completely 100% dead, or just borken enough that ceph-osd won't 
+start?  ceph-objectstore-tool can be used to extract a copy of the 2 pgs 
+from this osd to recover any important writes on that osd.
 
-> This
+> osd 10, 37, 72 are startable
 
-osd 6 - isn't startable
+With those started, I'd repeat the original sequence and get a fresh pg 
+query to confirm that it still wants just osd.6.
 
-osd 10, 37, 72 are startable
+use ceph-objectstore-tool to export the pg from osd.6, stop some other 
+ranodm osd (not one of these ones), import the pg into that osd, and start 
+again.  once it is up, 'ceph osd lost 6'.  the pg *should* peer at that 
+point.  repeat with the same basic process with the other pg.
 
->> >> >> 
->> >> >> They were all up and running - but I decided to shut them down and out
->> >> >> them  from  ceph, now it looks like ceph working ok, but still two PGs
->> >> >> are in down state, how to get rid of it ?
->> >> 
->> >> > If you haven't deleted the data, you should start the OSDs back up.
-
-> This
-
-By OSDs backup You mean copy /var/lib/ceph/osd/ceph-72/* to some other
-(non ceph) disk ?
-
->> >> 
->> >> > If they are partially damanged you can use ceph-objectstore-tool to 
->> >> > extract just the PGs in question to make sure you haven't lost anything,
->> >> > inject them on some other OSD(s) and restart those, and *then* mark the
->> >> > bad OSDs as 'lost'.
->> >> 
->> >> > If all else fails, you can just mark those OSDs 'lost', but in doing so
->> >> > you might be telling the cluster to lose data.
->> >> 
->> >> > The best thing to do is definitely to get those OSDs started again.
-
-> This
-
-There were actions on this PGs, that make them destroy. I started this
-osds   (these  three,  which  are  startable)  -  this  dosn't  solved
-situation.  I  need to add, that on this cluster are other pools, only
-with pool with broken/down PGs is problem.
->> >> 
->> >> Now situation looks like this:
->> >> 
->> >> [root@cc1 ~]# rbd info volumes/volume-ccc5d976-cecf-4938-a452-1bee6188987b
->> >> rbd image 'volume-ccc5d976-cecf-4938-a452-1bee6188987b':
->> >>         size 500 GB in 128000 objects
->> >>         order 22 (4096 kB objects)
->> >>         block_name_prefix: rbd_data.ed9d394a851426
->> >>         format: 2
->> >>         features: layering
->> >>         flags:
->> >> 
->> >> [root@cc1 ~]# rados -p volumes ls | grep rbd_data.ed9d394a851426
->> >> (output cutted)
->> >> rbd_data.ed9d394a851426.000000000000447c
->> >> rbd_data.ed9d394a851426.0000000000010857
->> >> rbd_data.ed9d394a851426.000000000000ec8b
->> >> rbd_data.ed9d394a851426.000000000000fa43
->> >> rbd_data.ed9d394a851426.000000000001ef2d
->> >> ^C
->> >> 
->> >> it hangs on this object and isn't going further. rbd cp also hangs...
->> >> rbd map - also...
->> >> 
->> >> can  You advice what can be solution for this case ?
->> 
->> > The hang is due to OSD throttling (see my first reply for how to wrok 
->> > around that and get a pg query).  But you already did that and the cluster
->> > told you which OSDs it needs to see up in order for it to peer and 
->> > recover.  If you haven't destroyed those disks, you should start those
-
->> > osds and it shoudl be fine.  If you've destroyed the data or the disks are
->> > truly broken and dead, then you can mark those OSDs lost and the cluster
->> > *maybe* recover (but hard to say given the information you've shared).
-
-> This
+s
 
 
-[root@cc1 ~]# ceph osd lost 10 --yes-i-really-mean-it
-marked osd lost in epoch 115310
-[root@cc1 ~]# ceph osd lost 37 --yes-i-really-mean-it
-marked osd lost in epoch 115314
-[root@cc1 ~]# ceph osd lost 72 --yes-i-really-mean-it
-marked osd lost in epoch 115317
-[root@cc1 ~]# ceph -s
-    cluster 8cdfbff9-b7be-46de-85bd-9d49866fcf60
-     health HEALTH_WARN
-            2 pgs down
-            2 pgs peering
-            2 pgs stuck inactive
-     monmap e1: 3 mons at {cc1=192.168.128.1:6789/0,cc2=192.168.128.2:6789/0,cc3=192.168.128.3:6789/0}
-            election epoch 872, quorum 0,1,2 cc1,cc2,cc3
-     osdmap e115434: 100 osds: 89 up, 86 in; 1 remapped pgs
-      pgmap v67642483: 4032 pgs, 18 pools, 26713 GB data, 4857 kobjects
-            76718 GB used, 107 TB / 182 TB avail
-                4030 active+clean
-                   1 down+remapped+peering
-                   1 down+peering
-  client io 14624 kB/s rd, 31619 kB/s wr, 382 op/s rd, 228 op/s wr
-[root@cc1 ~]# ceph -s
-    cluster 8cdfbff9-b7be-46de-85bd-9d49866fcf60
-     health HEALTH_WARN
-            2 pgs down
-            2 pgs peering
-            2 pgs stuck inactive
-     monmap e1: 3 mons at {cc1=192.168.128.1:6789/0,cc2=192.168.128.2:6789/0,cc3=192.168.128.3:6789/0}
-            election epoch 872, quorum 0,1,2 cc1,cc2,cc3
-     osdmap e115434: 100 osds: 89 up, 86 in; 1 remapped pgs
-      pgmap v67642485: 4032 pgs, 18 pools, 26713 GB data, 4857 kobjects
-            76718 GB used, 107 TB / 182 TB avail
-                4030 active+clean
-                   1 down+remapped+peering
-                   1 down+peering
-  client io 17805 kB/s rd, 18787 kB/s wr, 215 op/s rd, 107 op/s wr
-
->> 
->> > sage
->> 
->> What information I can bring to You to say it is recoverable ?
->> 
->> here are ceph -s and ceph health detail:
->> 
->> [root@cc1 ~]# ceph -s
->>     cluster 8cdfbff9-b7be-46de-85bd-9d49866fcf60
->>      health HEALTH_WARN
->>             2 pgs down
->>             2 pgs peering
->>             2 pgs stuck inactive
->>      monmap e1: 3 mons at {cc1=192.168.128.1:6789/0,cc2=192.168.128.2:6789/0,cc3=192.168.128.3:6789/0}
->>             election epoch 872, quorum 0,1,2 cc1,cc2,cc3
->>      osdmap e115431: 100 osds: 89 up, 86 in; 1 remapped pgs
->>       pgmap v67641261: 4032 pgs, 18 pools, 26706 GB data, 4855 kobjects
->>             76705 GB used, 107 TB / 182 TB avail
->>                 4030 active+clean
->>                    1 down+remapped+peering
->>                    1 down+peering
->>   client io 5704 kB/s rd, 24685 kB/s wr, 49 op/s rd, 165 op/s wr
->> [root@cc1 ~]# ceph health detail
->> HEALTH_WARN 2 pgs down; 2 pgs peering; 2 pgs stuck inactive
->> pg 1.165 is stuck inactive since forever, current state down+peering, last acting [67,88,48]
->> pg 1.60 is stuck inactive since forever, current state down+remapped+peering, last acting [66,40]
->> pg 1.60 is down+remapped+peering, acting [66,40]
->> pg 1.165 is down+peering, acting [67,88,48]
->> [root@cc1 ~]#
->> 
->> -- 
->> Regards,
->>  즩kasz Chrustek
->> 
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> 
->> 
-
-
-
--- 
-Pozdrowienia,
- 즩kasz Chrustek
-
+> 
+> >> >> >> 
+> >> >> >> They were all up and running - but I decided to shut them down and out
+> >> >> >> them  from  ceph, now it looks like ceph working ok, but still two PGs
+> >> >> >> are in down state, how to get rid of it ?
+> >> >> 
+> >> >> > If you haven't deleted the data, you should start the OSDs back up.
+> 
+> > This
+> 
+> By OSDs backup You mean copy /var/lib/ceph/osd/ceph-72/* to some other
+> (non ceph) disk ?
+> 
+> >> >> 
+> >> >> > If they are partially damanged you can use ceph-objectstore-tool to 
+> >> >> > extract just the PGs in question to make sure you haven't lost anything,
+> >> >> > inject them on some other OSD(s) and restart those, and *then* mark the
+> >> >> > bad OSDs as 'lost'.
+> >> >> 
+> >> >> > If all else fails, you can just mark those OSDs 'lost', but in doing so
+> >> >> > you might be telling the cluster to lose data.
+> >> >> 
+> >> >> > The best thing to do is definitely to get those OSDs started again.
+> 
+> > This
+> 
+> There were actions on this PGs, that make them destroy. I started this
+> osds   (these  three,  which  are  startable)  -  this  dosn't  solved
+> situation.  I  need to add, that on this cluster are other pools, only
+> with pool with broken/down PGs is problem.
+> >> >> 
+> >> >> Now situation looks like this:
+> >> >> 
+> >> >> [root@cc1 ~]# rbd info volumes/volume-ccc5d976-cecf-4938-a452-1bee6188987b
+> >> >> rbd image 'volume-ccc5d976-cecf-4938-a452-1bee6188987b':
+> >> >>         size 500 GB in 128000 objects
+> >> >>         order 22 (4096 kB objects)
+> >> >>         block_name_prefix: rbd_data.ed9d394a851426
+> >> >>         format: 2
+> >> >>         features: layering
+> >> >>         flags:
+> >> >> 
+> >> >> [root@cc1 ~]# rados -p volumes ls | grep rbd_data.ed9d394a851426
+> >> >> (output cutted)
+> >> >> rbd_data.ed9d394a851426.000000000000447c
+> >> >> rbd_data.ed9d394a851426.0000000000010857
+> >> >> rbd_data.ed9d394a851426.000000000000ec8b
+> >> >> rbd_data.ed9d394a851426.000000000000fa43
+> >> >> rbd_data.ed9d394a851426.000000000001ef2d
+> >> >> ^C
+> >> >> 
+> >> >> it hangs on this object and isn't going further. rbd cp also hangs...
+> >> >> rbd map - also...
+> >> >> 
+> >> >> can  You advice what can be solution for this case ?
+> >> 
+> >> > The hang is due to OSD throttling (see my first reply for how to wrok 
+> >> > around that and get a pg query).  But you already did that and the cluster
+> >> > told you which OSDs it needs to see up in order for it to peer and 
+> >> > recover.  If you haven't destroyed those disks, you should start those
+> 
+> >> > osds and it shoudl be fine.  If you've destroyed the data or the disks are
+> >> > truly broken and dead, then you can mark those OSDs lost and the cluster
+> >> > *maybe* recover (but hard to say given the information you've shared).
+> 
+> > This
+> 
+> 
+> [root@cc1 ~]# ceph osd lost 10 --yes-i-really-mean-it
+> marked osd lost in epoch 115310
+> [root@cc1 ~]# ceph osd lost 37 --yes-i-really-mean-it
+> marked osd lost in epoch 115314
+> [root@cc1 ~]# ceph osd lost 72 --yes-i-really-mean-it
+> marked osd lost in epoch 115317
+> [root@cc1 ~]# ceph -s
+>     cluster 8cdfbff9-b7be-46de-85bd-9d49866fcf60
+>      health HEALTH_WARN
+>             2 pgs down
+>             2 pgs peering
+>             2 pgs stuck inactive
+>      monmap e1: 3 mons at {cc1=192.168.128.1:6789/0,cc2=192.168.128.2:6789/0,cc3=192.168.128.3:6789/0}
+>             election epoch 872, quorum 0,1,2 cc1,cc2,cc3
+>      osdmap e115434: 100 osds: 89 up, 86 in; 1 remapped pgs
+>       pgmap v67642483: 4032 pgs, 18 pools, 26713 GB data, 4857 kobjects
+>             76718 GB used, 107 TB / 182 TB avail
+>                 4030 active+clean
+>                    1 down+remapped+peering
+>                    1 down+peering
+>   client io 14624 kB/s rd, 31619 kB/s wr, 382 op/s rd, 228 op/s wr
+> [root@cc1 ~]# ceph -s
+>     cluster 8cdfbff9-b7be-46de-85bd-9d49866fcf60
+>      health HEALTH_WARN
+>             2 pgs down
+>             2 pgs peering
+>             2 pgs stuck inactive
+>      monmap e1: 3 mons at {cc1=192.168.128.1:6789/0,cc2=192.168.128.2:6789/0,cc3=192.168.128.3:6789/0}
+>             election epoch 872, quorum 0,1,2 cc1,cc2,cc3
+>      osdmap e115434: 100 osds: 89 up, 86 in; 1 remapped pgs
+>       pgmap v67642485: 4032 pgs, 18 pools, 26713 GB data, 4857 kobjects
+>             76718 GB used, 107 TB / 182 TB avail
+>                 4030 active+clean
+>                    1 down+remapped+peering
+>                    1 down+peering
+>   client io 17805 kB/s rd, 18787 kB/s wr, 215 op/s rd, 107 op/s wr
+> 
+> >> 
+> >> > sage
+> >> 
+> >> What information I can bring to You to say it is recoverable ?
+> >> 
+> >> here are ceph -s and ceph health detail:
+> >> 
+> >> [root@cc1 ~]# ceph -s
+> >>     cluster 8cdfbff9-b7be-46de-85bd-9d49866fcf60
+> >>      health HEALTH_WARN
+> >>             2 pgs down
+> >>             2 pgs peering
+> >>             2 pgs stuck inactive
+> >>      monmap e1: 3 mons at {cc1=192.168.128.1:6789/0,cc2=192.168.128.2:6789/0,cc3=192.168.128.3:6789/0}
+> >>             election epoch 872, quorum 0,1,2 cc1,cc2,cc3
+> >>      osdmap e115431: 100 osds: 89 up, 86 in; 1 remapped pgs
+> >>       pgmap v67641261: 4032 pgs, 18 pools, 26706 GB data, 4855 kobjects
+> >>             76705 GB used, 107 TB / 182 TB avail
+> >>                 4030 active+clean
+> >>                    1 down+remapped+peering
+> >>                    1 down+peering
+> >>   client io 5704 kB/s rd, 24685 kB/s wr, 49 op/s rd, 165 op/s wr
+> >> [root@cc1 ~]# ceph health detail
+> >> HEALTH_WARN 2 pgs down; 2 pgs peering; 2 pgs stuck inactive
+> >> pg 1.165 is stuck inactive since forever, current state down+peering, last acting [67,88,48]
+> >> pg 1.60 is stuck inactive since forever, current state down+remapped+peering, last acting [66,40]
+> >> pg 1.60 is down+remapped+peering, acting [66,40]
+> >> pg 1.165 is down+peering, acting [67,88,48]
+> >> [root@cc1 ~]#
+> >> 
+> >> -- 
+> >> Regards,
+> >>  즩kasz Chrustek
+> >> 
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >> 
+> >> 
+> 
+> 
+> 
+> -- 
+> Pozdrowienia,
+>  즩kasz Chrustek
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+--8323329-677686918-1495637245=:3646--
