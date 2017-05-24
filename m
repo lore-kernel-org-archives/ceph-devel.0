@@ -1,60 +1,185 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Beta testing crush optimization
-Date: Wed, 24 May 2017 17:01:16 +0300
-Message-ID: <624fbbf9-a0cd-5ffa-2db2-6137713c5c2e@dachary.org>
-References: <07dda37f-b8c9-f977-c767-6c1c4bc78fd6@dachary.org>
- <c4186786-d7ff-097d-ac71-1dbb12d58540@profihost.ag>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Problem with query and any operation on PGs
+Date: Wed, 24 May 2017 14:02:31 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1705241401260.3646@piezo.novalocal>
+References: <175484591.20170523135449@tlen.pl> <483467685.20170523144818@tlen.pl>         <alpine.DEB.2.11.1705231415400.3646@piezo.novalocal>    <1464688590.20170523185052@tlen.pl>    <alpine.DEB.2.11.1705231738520.3646@piezo.novalocal>  
+ <1075363645.20170523234331@tlen.pl>  <alpine.DEB.2.11.1705232146500.3646@piezo.novalocal>  <135176900.20170524151952@tlen.pl>  <alpine.DEB.2.11.1705241335190.3646@piezo.novalocal> <1203308391.20170524155848@tlen.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1166781378-1495634554=:3646"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:33897 "EHLO
-        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965567AbdEXOBX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 May 2017 10:01:23 -0400
-In-Reply-To: <c4186786-d7ff-097d-ac71-1dbb12d58540@profihost.ag>
+Received: from cobra.newdream.net ([66.33.216.30]:41499 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S967297AbdEXOCf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 May 2017 10:02:35 -0400
+In-Reply-To: <1203308391.20170524155848@tlen.pl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
+Cc: ceph-devel@vger.kernel.org
 
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
+--8323329-1166781378-1495634554=:3646
+Content-Type: TEXT/PLAIN; charset=iso-8859-2
+Content-Transfer-Encoding: 8BIT
 
-On 05/24/2017 04:50 PM, Stefan Priebe - Profihost AG wrote:
-> Hello,
+On Wed, 24 May 2017, £ukasz Chrustek wrote:
+> Cze¶æ,
 > 
-> great! What means pool 3? Is it just the pool nr from the poll dump / ls
-> command?
+> > On Wed, 24 May 2017, £ukasz Chrustek wrote:
+> >> Cze¶æ,
+> >> 
+> >> > On Tue, 23 May 2017, £ukasz Chrustek wrote:
+> >> >> Cze¶æ,
+> >> >> 
+> >> >> > On Tue, 23 May 2017, £ukasz Chrustek wrote:
+> >> >> >> I'm  not  sleeping for over 30 hours, and still can't find solution. I
+> >> >> >> did,      as      You      wrote,     but     turning     off     this
+> >> >> >> (https://pastebin.com/1npBXeMV) osds didn't resolve issue...
+> >> >> 
+> >> >> > The important bit is:
+> >> >> 
+> >> >> >             "blocked": "peering is blocked due to down osds",
+> >> >> >             "down_osds_we_would_probe": [
+> >> >> >                 6,
+> >> >> >                 10,
+> >> >> >                 33,
+> >> >> >                 37,
+> >> >> >                 72
+> >> >> >             ],
+> >> >> >             "peering_blocked_by": [
+> >> >> >                 {
+> >> >> >                     "osd": 6,
+> >> >> >                     "current_lost_at": 0,
+> >> >> >                     "comment": "starting or marking this osd lost may let
+> >> >> > us proceed"
+> >> >> >                 },
+> >> >> >                 {
+> >> >> >                     "osd": 10,
+> >> >> >                     "current_lost_at": 0,
+> >> >> >                     "comment": "starting or marking this osd lost may let
+> >> >> > us proceed"
+> >> >> >                 },
+> >> >> >                 {
+> >> >> >                     "osd": 37,
+> >> >> >                     "current_lost_at": 0,
+> >> >> >                     "comment": "starting or marking this osd lost may let
+> >> >> > us proceed"
+> >> >> >                 },
+> >> >> >                 {
+> >> >> >                     "osd": 72,
+> >> >> >                     "current_lost_at": 113771,
+> >> >> >                     "comment": "starting or marking this osd lost may let
+> >> >> > us proceed"
 
-Yes. In the report you sent me, this is the number of the only pool in the cluster.
+These are the osds (6, 10, 37, 72).
+
+> >> >> >                 }
+> >> >> >             ]
+> >> >> >         },
+> >> >> 
+> >> >> > Are any of those OSDs startable?
+
+This
+
+> >> >> 
+> >> >> They were all up and running - but I decided to shut them down and out
+> >> >> them  from  ceph, now it looks like ceph working ok, but still two PGs
+> >> >> are in down state, how to get rid of it ?
+> >> 
+> >> > If you haven't deleted the data, you should start the OSDs back up.
+
+This
+
+> >> 
+> >> > If they are partially damanged you can use ceph-objectstore-tool to 
+> >> > extract just the PGs in question to make sure you haven't lost anything,
+> >> > inject them on some other OSD(s) and restart those, and *then* mark the
+> >> > bad OSDs as 'lost'.
+> >> 
+> >> > If all else fails, you can just mark those OSDs 'lost', but in doing so
+> >> > you might be telling the cluster to lose data.
+> >> 
+> >> > The best thing to do is definitely to get those OSDs started again.
+
+This
+
+> >> 
+> >> Now situation looks like this:
+> >> 
+> >> [root@cc1 ~]# rbd info volumes/volume-ccc5d976-cecf-4938-a452-1bee6188987b
+> >> rbd image 'volume-ccc5d976-cecf-4938-a452-1bee6188987b':
+> >>         size 500 GB in 128000 objects
+> >>         order 22 (4096 kB objects)
+> >>         block_name_prefix: rbd_data.ed9d394a851426
+> >>         format: 2
+> >>         features: layering
+> >>         flags:
+> >> 
+> >> [root@cc1 ~]# rados -p volumes ls | grep rbd_data.ed9d394a851426
+> >> (output cutted)
+> >> rbd_data.ed9d394a851426.000000000000447c
+> >> rbd_data.ed9d394a851426.0000000000010857
+> >> rbd_data.ed9d394a851426.000000000000ec8b
+> >> rbd_data.ed9d394a851426.000000000000fa43
+> >> rbd_data.ed9d394a851426.000000000001ef2d
+> >> ^C
+> >> 
+> >> it hangs on this object and isn't going further. rbd cp also hangs...
+> >> rbd map - also...
+> >> 
+> >> can  You advice what can be solution for this case ?
+> 
+> > The hang is due to OSD throttling (see my first reply for how to wrok 
+> > around that and get a pg query).  But you already did that and the cluster
+> > told you which OSDs it needs to see up in order for it to peer and 
+> > recover.  If you haven't destroyed those disks, you should start those
+
+> > osds and it shoudl be fine.  If you've destroyed the data or the disks are
+> > truly broken and dead, then you can mark those OSDs lost and the cluster
+> > *maybe* recover (but hard to say given the information you've shared).
+
+This
 
 > 
-> Stefan
+> > sage
 > 
-> Am 24.05.2017 um 15:48 schrieb Loic Dachary:
->> Hi Stefan,
->>
->> Thanks for volunteering to beta test the crush optimization on a live cluster :-)
->>
->> The "crush optimize" command was published today[1] and you should be able to improve your cluster distribution with the following:
->>
->> ceph report > report.json
->> crush optimize --no-forecast --step 64 --crushmap report.json --pool 3 --out-path optimized.crush
->> ceph osd setcrushmap -i optimized.crush
->>
->> Note that it will only perform a first optimization step (moving around 64 PGs). You will need to repeat this command a dozen time to fully optimize the cluster. I assume that's what you will want to control the workload. If you want a minimal change at each step, you can try --step 1 but it will require more than a hundred steps.
->>
->> If you're not worried about the load of the cluster, you can optimize it in one go with:
->>
->> ceph report > report.json
->> crush optimize --crushmap report.json --pool 3 --out-path optimized.crush
->> ceph osd setcrushmap -i optimized.crush
->>
->> Cheers
->>
->> [1] http://crush.readthedocs.io/en/latest/ceph/optimize.html
->>
+> What information I can bring to You to say it is recoverable ?
 > 
-
--- 
-LoÃ¯c Dachary, Artisan Logiciel Libre
+> here are ceph -s and ceph health detail:
+> 
+> [root@cc1 ~]# ceph -s
+>     cluster 8cdfbff9-b7be-46de-85bd-9d49866fcf60
+>      health HEALTH_WARN
+>             2 pgs down
+>             2 pgs peering
+>             2 pgs stuck inactive
+>      monmap e1: 3 mons at {cc1=192.168.128.1:6789/0,cc2=192.168.128.2:6789/0,cc3=192.168.128.3:6789/0}
+>             election epoch 872, quorum 0,1,2 cc1,cc2,cc3
+>      osdmap e115431: 100 osds: 89 up, 86 in; 1 remapped pgs
+>       pgmap v67641261: 4032 pgs, 18 pools, 26706 GB data, 4855 kobjects
+>             76705 GB used, 107 TB / 182 TB avail
+>                 4030 active+clean
+>                    1 down+remapped+peering
+>                    1 down+peering
+>   client io 5704 kB/s rd, 24685 kB/s wr, 49 op/s rd, 165 op/s wr
+> [root@cc1 ~]# ceph health detail
+> HEALTH_WARN 2 pgs down; 2 pgs peering; 2 pgs stuck inactive
+> pg 1.165 is stuck inactive since forever, current state down+peering, last acting [67,88,48]
+> pg 1.60 is stuck inactive since forever, current state down+remapped+peering, last acting [66,40]
+> pg 1.60 is down+remapped+peering, acting [66,40]
+> pg 1.165 is down+peering, acting [67,88,48]
+> [root@cc1 ~]#
+> 
+> -- 
+> Regards,
+>  £ukasz Chrustek
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+--8323329-1166781378-1495634554=:3646--
