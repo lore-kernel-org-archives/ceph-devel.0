@@ -1,111 +1,150 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Handling is_readable=0 periods in mon
-Date: Wed, 24 May 2017 13:45:24 -0700
-Message-ID: <CAJ4mKGaC0BuxsYPsZoqosAf2YXMKpte2WTpma=Q4TxpT+WbBVw@mail.gmail.com>
-References: <CALe9h7cSEaLD90iDwjhi1GYogo7SV0mnc=8MjGQG_bnDVA0ygw@mail.gmail.com>
- <CAJ4mKGaARoBiG+A4PSLzBLNVuZqCBHi2VWTGmsfU8ofVTeEUkQ@mail.gmail.com> <CALe9h7dqh9mw=raWFF1gcn=DyKZTPVVswN8V14SMpPV+WaZPXw@mail.gmail.com>
+Subject: Re: RADOS: Deleting all objects in a namespace
+Date: Wed, 24 May 2017 13:47:28 -0700
+Message-ID: <CAJ4mKGbsiVgjHFxTZ6UGkOavV=oQG0PfjnBDaegHvS9jbqSSLw@mail.gmail.com>
+References: <CALe9h7eQMGGB1K_W-qryVjYhfjr5jGBRKLkawUr8q=QD1rXTSw@mail.gmail.com>
+ <CAJ4mKGZorBntpTQDBzqdLHamyprOUx_4Abcz_f1RX=afEp45jA@mail.gmail.com>
+ <CALe9h7daCUq1j_t0rwd4iiUiinEehzPYKjhxuLE4bLzO-S=8iw@mail.gmail.com> <alpine.DEB.2.11.1705241328580.3646@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f179.google.com ([209.85.223.179]:33335 "EHLO
-        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1032477AbdEXUp0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 May 2017 16:45:26 -0400
-Received: by mail-io0-f179.google.com with SMTP id p24so125479933ioi.0
-        for <ceph-devel@vger.kernel.org>; Wed, 24 May 2017 13:45:25 -0700 (PDT)
-In-Reply-To: <CALe9h7dqh9mw=raWFF1gcn=DyKZTPVVswN8V14SMpPV+WaZPXw@mail.gmail.com>
+Received: from mail-it0-f48.google.com ([209.85.214.48]:33709 "EHLO
+        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1032477AbdEXUra (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 May 2017 16:47:30 -0400
+Received: by mail-it0-f48.google.com with SMTP id w68so13282134itc.0
+        for <ceph-devel@vger.kernel.org>; Wed, 24 May 2017 13:47:30 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1705241328580.3646@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Kefu Chai <kchai@redhat.com>, Joao Eduardo Luis <joao@suse.de>
+To: Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, May 24, 2017 at 3:20 AM John Spray <jspray@redhat.com> wrote:
+On Wed, May 24, 2017 at 6:32 AM Sage Weil <sweil@redhat.com> wrote:
 >
-> On Wed, May 24, 2017 at 6:12 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> > On Tue, May 23, 2017 at 10:31 AM John Spray <jspray@redhat.com> wrote:
-> >>
-> >> Hi all,
-> >>
-> >> I could use some help from people who understand the mon better than I
-> >> do with this ticket: http://tracker.ceph.com/issues/19706
-> >>
-> >> The issue is that MDSMonitor is incorrectly killing MDSs because it
-> >> hasn't seen beacon messages, but the beacon messages are actually just
-> >> held up because is_readable = 0, like this:
-> >> 2017-05-23 13:34:20.054785 7f772f1c2700 10
-> >> mon.b@0(leader).paxosservice(mdsmap 1..11) dispatch 0x7f7742989740
-> >> mdsbeacon(4141/a up:active seq 96 v9) v7 from mds.0
-> >> 172.21.15.77:6809/2700711429 con 0x7f77428d8f00
-> >> 2017-05-23 13:34:20.054788 7f772f1c2700  5 mon.b@0(leader).paxos(paxos
-> >> recovering c 1..293) is_readable = 0 - now=2017-05-23 13:34:20.054789
-> >> lease_expire=0.000000 has v0 lc 293
-> >> 2017-05-23 13:34:20.054791 7f772f1c2700 10
-> >> mon.b@0(leader).paxosservice(mdsmap 1..11)  waiting for paxos ->
-> >> readable (v9)
-> >>
-> >> This appears to be happening when one or more mons are a bit laggy,
-> >> but it is happening before an election has happened.
-> >>
-> >> We have code for handling slow elections by checking how long it has
-> >> been since the last tick, and resetting our timeout information for
-> >> MDS beacons if it has been too long
-> >> (https://github.com/ceph/ceph/blob/master/src/mon/MDSMonitor.cc#L2070)
-> >>
-> >>
-> >> However, in this case the tick() function is getting called
-> >> throughout, we're just not seeing the beacons because they're held up
-> >> waiting for readable.
+> On Wed, 24 May 2017, John Spray wrote:
+> > On Wed, May 24, 2017 at 6:12 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
+> > > On Tue, May 23, 2017 at 6:10 AM John Spray <jspray@redhat.com> wrote:
+> > >>
+> > >> Soon, we'll probably be letting multiple CephFS filesystems use the
+> > >> same data and metadata pools, where the filesystems are separated by
+> > >> rados namespace.
+> > >>
+> > >> When removing filesystems, in the interests of robustness and speed,
+> > >> I'd like to be able to delete all objects in a namespace -- otherwise
+> > >> we would have to rely on a "rm -rf" and then some new code to
+> > >> explicitly enumerate and delete all metadata objects for that
+> > >> filesystem.
+> > >>
+> > >> I'm pondering whether this should just be a process that happens via
+> > >> normal client interfaces (where mon/mgr would be the client), or
+> > >> whether it would be feasible/desirable to implement something inside
+> > >> the OSD.  Obviously the OSD ultimately has to do the same underlying
+> > >> enumeration, but at least it doesn't have to thrash through the whole
+> > >> request/response cycle for deleting each object individually -- might
+> > >> enable it to throttle internally in the OSD based on how busy it knows
+> > >> itself to be, rather than having the client apply some arbitrary "only
+> > >> issue N deletions at once" type limit that might make the deletion
+> > >> process unecessarily slow.
+> > >>
+> > >> I have a feeling we must have talked about this at some point but my
+> > >> memory is failing me...
+> > >
+> > >
+> > > This is an interesting thought and I don't think it's been discussed
+> > > before. Some random things:
+> > > 1) We tend to suck at throttling stuff in the OSD (although we're
+> > > getting close to having the right pattern)
+> > > 2) Deleting objects is a *lot* more expensive than listing them;
+> > > David's right it would probably look like pgnls, but it's definitely
+> > > not analogous. For the listing we just go through omap keys but here
+> > > we have to shove deletes into XFS (...for now. I suppose they're
+> > > actually pretty similar in BlueStore, though I don't really know the
+> > > cost of a delete)
+> > > 3) If this happens inside the OSD it will be much harder to bill it
+> > > against client IO. Not sure if that's relevant given it's removal,
+> > > but...
+> > > 4) I'm actually not sure how we could best do this internally if we
+> > > wanted to. Deletes as noted would have to take a while, which means it
+> > > would probably be a very long-lived operation — much more than eg 30
+> > > seconds. Or else we'd need a whole internal queue of stuff to delete,
+> > > where the client "op" is just queueing up the namespace and the actual
+> > > deletes get spaced out much later...and then that would imply more new
+> > > checks around whether something is logically deleted even though it
+> > > still exists in our data store. (And what happens if a user starts
+> > > putting new objects in the namespace while the delete is still going
+> > > on? Is that blocked somehow? Or does the OSD need to handle it with a
+> > > way of distinguishing between namespace "epoch" 1 and 2?)
 > >
+> > Yeah, all those things are why this is a "hmmm" mailing list thread
+> > rather than a PR :-)
 > >
-> > This story doesn't seem quite right/complete This code is only invoked
-> > if the monitor is the leader, which certainly doesn't happen when the
-> > monitor is out of quorum. Is the beacon maybe going to a peon which
-> > isn't forwarding quickly enough?
+> > > Overall I definitely see the appeal of wanting to do gross deletes
+> > > like that, but it'll be at least a little trickier than I suspect
+> > > people are considering. Given the semantic confusion and implied
+> > > versus real costs I'm generally not really a fan of allowing stuff
+> > > like this on units other than pools/PGs and I'm not sure when the
+> > > bandwidth to implement it might come up. How important do you think it
+> > > really is compared to doing "rm -rf"?
+> >
+> > The trouble with the literal rm -rf is that is requires e.g. the MDS
+> > to be up and healthy, requires that the deletion code definitely has
+> > no bugs, that there were definitely no stray objects in the
+> > filesystem, etc.  Orchestrating it in a way that ensured it was done
+> > before we permitted the filesystem to be removed would probably mean
+> > adding a new "destroying" state to MDSs and having them do the work,
+> > rather than accepting a client's promise that it had done it.
+> >
+> > The intermediate option where we're doing a pgnls and then sending a
+> > delete for each object (probably from the mgr) is less evil, my
+> > concerns with that one are just that we're sending a huge number of
+> > ops to do one logical thing, and that it might be slower than
+> > necessary from the user's point of view.  I suppose we could hide the
+> > latency from the user by having a "trash" list in the FSMap but that
+> > will cause confusion when they look at their df stats (which people
+> > seem to do quite a lot).
+> >
+> > Doing the pgnls + O(N) deletes from the mgr is I suppose going to at
+> > least have some commonality with what we would be doing in a nicely
+> > orchestrated backward scrub, so it's not completely crazy.  People
+> > would still appreciate how much faster it was than doing a rm -rf.
 >
-> That was what I thought (the messages are indeed being forwarded and
-> getting held up a bit there), but then I looked at the leader's log
-> and they were getting held up there too.
+> I think the most reasonable way to do something like this would be to have
+> a "trash ns queue" list broadcast to all OSDs, and have them do the
+> cleanup during scrub (when they're already iterating over the namespace).
+> OSDs would track a lower bound on a trash sequence number that has been
+> scrubbed and applied (or similar) so that delete queue items get retired.
+> (We need to do something similar with the snap trimming so that the delete
+> list isn't publishes for all time in the OSDMap.)
+>
+> Scrub is already initiating updates for a couple different reasons
+> (to update digests, and to convert legacy snapsets).  It's worked well so
+> far, although deletion will be a bit more expensive than the current
+> updates which are all xattr-only.
 
 
-Okay, so it's not that one peon is laggy but that the monitors are
-knowingly not in a quorum, including the one who is leader on both
-sides of the election (but not while things are laggy!). And then when
-the election happens, the leader does a tick and notices it hasn't
-gotten a beacon from any MDSes in the past timeout interval.
+We discussed this a bit more in the RADOS standup. Sage remains
+interested in the problem, but it sounded to me like the consensus was
+we shouldn't move forward on this:
+1) doing the delete *outside* of scrub is basically making the RADOS
+cluster look at {M} data to do operations on {N} (where sizeof(N) <<<<
+sizeof(M)). Scrub at least merges it in to work we're already doing,
+but...
+2) doing the delete during scrub makes the throttling/scheduling
+dramatically harder
+3) doing aysnchronous operations of any kind is a giant foot-gun for
+our API users; obviously our in-tree systems are going to know they
+can't write to a namespace after deleting it but you just *know* that
+somebody is going to use it as a shortcut for "delete all my data" and
+then start writing to it immediately after the acknowledgement commit
+returns. So we probably need to introduce epoch versioning of
+namespaces (nearly impossible?) and certainly need async operation
+reporting. Lots of complexity.
+4) There don't seem to be any other users and it seems like a lot more
+work to do this in the OSD than to have the MDS or manager orchestrate
+it somehow.
 
-So that suggests you actually just need to take account of how long
-it's been since the monitor went active, not that you need a major
-rework of the tracking. Probably just modify it so the code won't mark
-down an MDS until at least beacon_timeout has passed since the mon
-went active? (I don't know off-hand how to query that state but I'm
-sure it's available somewhere.)
+Of course, now it's written down so people can tell me my
+understanding was wrong... ;)
 -Greg
-
->
->
-> I was thinking/hoping that there would be an existing mechanism to
-> deal with laggy mons not forwarding messages, but perhaps not if they
-> only look laggy to the other mons and not to the client :-/
->
-> >
-> >>
-> >>
-> >> I could hack around this by only doing timeouts if *any* daemon has
-> >> successfully got a beacon through in the last (mds_beacon_grace*2) or
-> >> something like that, but I wonder if there's a Right way to handle
-> >> this for PaxosService subclasses?
-> >
-> >
-> > The MDS is I think the only thing doing this, so if its patterns
-> > aren't working we probably don't. (The manager just started doing it,
-> > so may have a similar problem?)
-> > I suppose you might take into account the paxos quorum timeouts and
-> > which monitor the MDS was connected to, so that it only marks an MDS
-> > down if you have positive belief the monitor it was pinging is alive?
->
-> Yeah, you're probably right that if there's not something else
-> thinking about the forwarding, then MDSMonitor does need to track who
-> forwarded and consider whether the forwarder is still considered
-> healthy.
->
-> John
