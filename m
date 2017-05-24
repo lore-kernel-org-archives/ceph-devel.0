@@ -1,88 +1,156 @@
-From: =?iso-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
-Subject: Re: Problem with query and any operation on PGs
-Date: Wed, 24 May 2017 19:28:53 +0200
-Message-ID: <1614890646.20170524192853@tlen.pl>
-References: <175484591.20170523135449@tlen.pl> <483467685.20170523144818@tlen.pl>           
-     <alpine.DEB.2.11.1705231415400.3646@piezo.novalocal>      
-  <1464688590.20170523185052@tlen.pl>      
-  <alpine.DEB.2.11.1705231738520.3646@piezo.novalocal>     
-  <1075363645.20170523234331@tlen.pl>    
-  <alpine.DEB.2.11.1705232146500.3646@piezo.novalocal>    
-  <135176900.20170524151952@tlen.pl>    
-  <alpine.DEB.2.11.1705241335190.3646@piezo.novalocal>   
-  <1203308391.20170524155848@tlen.pl>   
-  <alpine.DEB.2.11.1705241401260.3646@piezo.novalocal>
-  <379087365.20170524161815@tlen.pl>  
-  <alpine.DEB.2.11.1705241444150.3646@piezo.novalocal>
-  <419974552.20170524170005@tlen.pl>
-  <alpine.DEB.2.11.1705241510290.3646@piezo.novalocal>
-  <806057225.20170524175447@tlen.pl> <501939192.20170524180213@tlen.pl>
-  <1412483127.20170524190709@tlen.pl>
-  <alpine.DEB.2.11.1705241716000.3646@piezo.novalocal>
-Reply-To: =?iso-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
+From: Alexandre DERUMIER <aderumier@odiso.com>
+Subject: Re: [PATCH] rbd: implement REQ_OP_WRITE_ZEROES
+Date: Wed, 24 May 2017 19:38:34 +0200 (CEST)
+Message-ID: <274721074.13000578.1495647514038.JavaMail.zimbra@oxygem.tv>
+References: <1495552107-1237-1-git-send-email-idryomov@gmail.com> <CA+aFP1CMXuVFn80iFMX_5XJKgBCeG91438Na5TD6yj_4v4jmgg@mail.gmail.com> <1952072407.12977460.1495625908099.JavaMail.zimbra@oxygem.tv> <CA+aFP1BYCnxeCL6PJO1crAFsDFciuH9X7c5pB02Yd4PZKjZQtA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx-out.tlen.pl ([193.222.135.140]:29068 "EHLO mx-out.tlen.pl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753967AbdEXRfl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 24 May 2017 13:35:41 -0400
-In-Reply-To: <alpine.DEB.2.11.1705241716000.3646@piezo.novalocal>
+Received: from mailpro.odiso.net ([89.248.211.110]:37054 "EHLO
+        mailpro.odiso.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753880AbdEXRjT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 May 2017 13:39:19 -0400
+In-Reply-To: <CA+aFP1BYCnxeCL6PJO1crAFsDFciuH9X7c5pB02Yd4PZKjZQtA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: dillaman <dillaman@redhat.com>
+Cc: Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Christoph Hellwig <hch@lst.de>, Hannes Reinecke <hare@suse.com>
 
-Cze∂Ê,
+>>I just opened a tracker ticket for this [1] 
+>>
+>>[1] http://tracker.ceph.com/issues/20070
 
-> On Wed, 24 May 2017, £ukasz Chrustek wrote:
->> 
->> >> And  now  it  is very weird.... I made osd.37 up, and loop
->> >> while true;do; ceph tell 1.165 query ;done
->> 
->> > Here  need  to  explain  more  - all I did was start ceph-osd id=37 on
->> > storage node, in ceph osd tree this osd osd is marked as out:
->> 
->> 
->> > -17  21.49995     host stor8
->> >  22   1.59999         osd.22            up  1.00000          1.00000 
->> >  23   1.59999         osd.23            up  1.00000          1.00000 
->> >  36   2.09999         osd.36            up  1.00000          1.00000 
->> >  37   2.09999         osd.37            up        0          1.00000 
->> >  38   2.50000         osd.38            up  1.00000          1.00000 
->> >  39   2.50000         osd.39            up  1.00000          1.00000 
->> >  40   2.50000         osd.40            up        0          1.00000 
->> >  41   2.50000         osd.41          down        0          1.00000 
->> >  42   2.50000         osd.42            up  1.00000          1.00000 
->> >  43   1.59999         osd.43            up  1.00000          1.00000
->> 
->> >  after start of this osd, ceph tell 1.165 query  worked only for one call of this command
->> >> catch this:
->> 
->> >> https://pastebin.com/zKu06fJn
->> 
->> here is for pg 1.60:
->> 
->> https://pastebin.com/Xuk5iFXr
+Thanks Jason!
 
-> Look at the bottom, after it says
+>>-- let me know if you have
+>>any other QEMU improvement ideas.
 
->             "blocked": "peering is blocked due to down osds",
+For the moment, the bigger limitation is cpu usage of librbd, 
+as qemu can only 1 thread, I can't reach more than around 70000 iops by disk.
+(3,1ghz cpu, disabling debug, rbd_cache, using jemalloc).
 
-> Did the 1.165 pg recover?
+So any improvement to reduce cpu usage could be great :)
 
-No it didn't:
 
-[root@cc1 ~]# ceph health detail
-HEALTH_WARN 1 pgs down; 1 pgs incomplete; 1 pgs peering; 2 pgs stuck inactive
-pg 1.165 is stuck inactive since forever, current state incomplete, last acting [67,88,48]
-pg 1.60 is stuck inactive since forever, current state down+remapped+peering, last acting [68]
-pg 1.60 is down+remapped+peering, acting [68]
-pg 1.165 is incomplete, acting [67,88,48]
-[root@cc1 ~]#
+Also, in the future, I think qemu will support multiple iothreads by disk, 
+I don't known if librbd is already ready for this ?
+
+
+
+
+----- Mail original -----
+De: "Jason Dillaman" <jdillama@redhat.com>
+√Ä: "aderumier" <aderumier@odiso.com>
+Cc: "Ilya Dryomov" <idryomov@gmail.com>, "ceph-devel" <ceph-devel@vger.kernel.org>, "Christoph Hellwig" <hch@lst.de>, "Hannes Reinecke" <hare@suse.com>
+Envoy√©: Mercredi 24 Mai 2017 13:53:40
+Objet: Re: [PATCH] rbd: implement REQ_OP_WRITE_ZEROES
+
+I just opened a tracker ticket for this [1] -- let me know if you have 
+any other QEMU improvement ideas. 
+
+[1] http://tracker.ceph.com/issues/20070 
+
+On Wed, May 24, 2017 at 7:38 AM, Alexandre DERUMIER <aderumier@odiso.com> wrote: 
+> Hi, 
+> 
+> is it planned to implement write zeroes in qemu rbd block driver soon ? 
+> (bdrv_co_write_zeroes) 
+> 
+> It's really missing currently, as qemu drive-mirror need it to have sparse images on copy. 
+> 
+> Ref from my discussion with Paolo from redhat in 2014 about this: 
+> https://lists.gnu.org/archive/html/qemu-devel/2014-10/msg01274.html 
+> 
+> 
+> REgards, 
+> 
+> Alexandre 
+> 
+> ----- Mail original ----- 
+> De: "Jason Dillaman" <jdillama@redhat.com> 
+> √Ä: "Ilya Dryomov" <idryomov@gmail.com> 
+> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>, "Christoph Hellwig" <hch@lst.de>, "Hannes Reinecke" <hare@suse.com> 
+> Envoy√©: Mardi 23 Mai 2017 20:28:00 
+> Objet: Re: [PATCH] rbd: implement REQ_OP_WRITE_ZEROES 
+> 
+> lgtm 
+> 
+> Reviewed-by: Jason Dillaman <dillaman@redhat.com> 
+> 
+> On Tue, May 23, 2017 at 11:08 AM, Ilya Dryomov <idryomov@gmail.com> wrote: 
+>> Commit 93c1defedcae ("rbd: remove the discard_zeroes_data flag") 
+>> explicitly didn't implement REQ_OP_WRITE_ZEROES for rbd, while the 
+>> following commit 48920ff2a5a9 ("block: remove the discard_zeroes_data 
+>> flag") dropped ->discard_zeroes_data in favor of REQ_OP_WRITE_ZEROES. 
+>> 
+>> rbd does support efficient zeroing via CEPH_OSD_OP_ZERO opcode and will 
+>> release either some or all blocks depending on whether the zeroing 
+>> request is rbd_obj_bytes() aligned. This is how we currently implement 
+>> discards, so REQ_OP_WRITE_ZEROES can be identical to REQ_OP_DISCARD for 
+>> now. Caveats: 
+>> 
+>> - REQ_NOUNMAP is ignored, but AFAICT that's true of at least two other 
+>> current implementations - nvme and loop 
+>> 
+>> - there is no ->write_zeroes_alignment and blk_bio_write_zeroes_split() 
+>> is hence less helpful than blk_bio_discard_split(), but this can (and 
+>> should) be fixed on the rbd side 
+>> 
+>> In the future we will split these into two code paths to respect 
+>> REQ_NOUNMAP on zeroout and save on zeroing blocks that couldn't be 
+>> released on discard. 
+>> 
+>> Fixes: 93c1defedcae ("rbd: remove the discard_zeroes_data flag") 
+>> Signed-off-by: Ilya Dryomov <idryomov@gmail.com> 
+>> --- 
+>> drivers/block/rbd.c | 2 ++ 
+>> 1 file changed, 2 insertions(+) 
+>> 
+>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c 
+>> index 454bf9c34882..c16f74547804 100644 
+>> --- a/drivers/block/rbd.c 
+>> +++ b/drivers/block/rbd.c 
+>> @@ -4023,6 +4023,7 @@ static void rbd_queue_workfn(struct work_struct *work) 
+>> 
+>> switch (req_op(rq)) { 
+>> case REQ_OP_DISCARD: 
+>> + case REQ_OP_WRITE_ZEROES: 
+>> op_type = OBJ_OP_DISCARD; 
+>> break; 
+>> case REQ_OP_WRITE: 
+>> @@ -4420,6 +4421,7 @@ static int rbd_init_disk(struct rbd_device *rbd_dev) 
+>> q->limits.discard_granularity = segment_size; 
+>> q->limits.discard_alignment = segment_size; 
+>> blk_queue_max_discard_sectors(q, segment_size / SECTOR_SIZE); 
+>> + blk_queue_max_write_zeroes_sectors(q, segment_size / SECTOR_SIZE); 
+>> 
+>> if (!ceph_test_opt(rbd_dev->rbd_client->client, NOCRC)) 
+>> q->backing_dev_info->capabilities |= BDI_CAP_STABLE_WRITES; 
+>> -- 
+>> 2.4.3 
+>> 
+>> -- 
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in 
+>> the body of a message to majordomo@vger.kernel.org 
+>> More majordomo info at http://vger.kernel.org/majordomo-info.html 
+> 
+> 
+> 
+> -- 
+> Jason 
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in 
+> the body of a message to majordomo@vger.kernel.org 
+> More majordomo info at http://vger.kernel.org/majordomo-info.html 
+> 
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in 
+> the body of a message to majordomo@vger.kernel.org 
+> More majordomo info at http://vger.kernel.org/majordomo-info.html 
+
+
 
 -- 
-Pozdrowienia,
- £ukasz Chrustek
+Jason 
 
