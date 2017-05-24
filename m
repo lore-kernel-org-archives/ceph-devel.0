@@ -1,88 +1,61 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Problem with query and any operation on PGs
-Date: Wed, 24 May 2017 18:16:31 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1705241815040.3646@piezo.novalocal>
-References: <175484591.20170523135449@tlen.pl> <483467685.20170523144818@tlen.pl>                <alpine.DEB.2.11.1705231415400.3646@piezo.novalocal>        <1464688590.20170523185052@tlen.pl>        <alpine.DEB.2.11.1705231738520.3646@piezo.novalocal>    
-   <1075363645.20170523234331@tlen.pl>      <alpine.DEB.2.11.1705232146500.3646@piezo.novalocal>      <135176900.20170524151952@tlen.pl>      <alpine.DEB.2.11.1705241335190.3646@piezo.novalocal>     <1203308391.20170524155848@tlen.pl>    
- <alpine.DEB.2.11.1705241401260.3646@piezo.novalocal>   <379087365.20170524161815@tlen.pl>    <alpine.DEB.2.11.1705241444150.3646@piezo.novalocal>   <419974552.20170524170005@tlen.pl>   <alpine.DEB.2.11.1705241510290.3646@piezo.novalocal>  
- <806057225.20170524175447@tlen.pl> <501939192.20170524180213@tlen.pl>  <1412483127.20170524190709@tlen.pl>  <alpine.DEB.2.11.1705241716000.3646@piezo.novalocal> <1614890646.20170524192853@tlen.pl>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Help build a drive reliability service!
+Date: Wed, 24 May 2017 14:57:29 -0400
+Message-ID: <CAAZbbf3kS+KQ06KFe=p=Gn1Qmb8xen35U5CLgpcq3BaTT+e5Vg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-197066680-1495649793=:3646"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:47736 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933130AbdEXSQe (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 May 2017 14:16:34 -0400
-In-Reply-To: <1614890646.20170524192853@tlen.pl>
+Received: from mail-qt0-f180.google.com ([209.85.216.180]:35036 "EHLO
+        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754524AbdEXS5b (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 May 2017 14:57:31 -0400
+Received: by mail-qt0-f180.google.com with SMTP id v27so163325785qtg.2
+        for <ceph-devel@vger.kernel.org>; Wed, 24 May 2017 11:57:31 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
-Cc: ceph-devel@vger.kernel.org
+To: Ceph Devel <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hey cephers,
 
---8323329-197066680-1495649793=:3646
-Content-Type: TEXT/PLAIN; charset=iso-8859-2
-Content-Transfer-Encoding: 8BIT
+Just wanted to share the genesis of a new community project that could
+use a few helping hands (and any amount of feedback/discussion that
+you might like to offer).
 
-On Wed, 24 May 2017, £ukasz Chrustek wrote:
-> Cze¶æ,
-> 
-> > On Wed, 24 May 2017, £ukasz Chrustek wrote:
-> >> 
-> >> >> And  now  it  is very weird.... I made osd.37 up, and loop
-> >> >> while true;do; ceph tell 1.165 query ;done
-> >> 
-> >> > Here  need  to  explain  more  - all I did was start ceph-osd id=37 on
-> >> > storage node, in ceph osd tree this osd osd is marked as out:
-> >> 
-> >> 
-> >> > -17  21.49995     host stor8
-> >> >  22   1.59999         osd.22            up  1.00000          1.00000 
-> >> >  23   1.59999         osd.23            up  1.00000          1.00000 
-> >> >  36   2.09999         osd.36            up  1.00000          1.00000 
-> >> >  37   2.09999         osd.37            up        0          1.00000 
-> >> >  38   2.50000         osd.38            up  1.00000          1.00000 
-> >> >  39   2.50000         osd.39            up  1.00000          1.00000 
-> >> >  40   2.50000         osd.40            up        0          1.00000 
-> >> >  41   2.50000         osd.41          down        0          1.00000 
-> >> >  42   2.50000         osd.42            up  1.00000          1.00000 
-> >> >  43   1.59999         osd.43            up  1.00000          1.00000
-> >> 
-> >> >  after start of this osd, ceph tell 1.165 query  worked only for one call of this command
-> >> >> catch this:
-> >> 
-> >> >> https://pastebin.com/zKu06fJn
-> >> 
-> >> here is for pg 1.60:
-> >> 
-> >> https://pastebin.com/Xuk5iFXr
-> 
-> > Look at the bottom, after it says
-> 
-> >             "blocked": "peering is blocked due to down osds",
-> 
-> > Did the 1.165 pg recover?
-> 
-> No it didn't:
-> 
-> [root@cc1 ~]# ceph health detail
-> HEALTH_WARN 1 pgs down; 1 pgs incomplete; 1 pgs peering; 2 pgs stuck inactive
-> pg 1.165 is stuck inactive since forever, current state incomplete, last acting [67,88,48]
-> pg 1.60 is stuck inactive since forever, current state down+remapped+peering, last acting [68]
-> pg 1.60 is down+remapped+peering, acting [68]
-> pg 1.165 is incomplete, acting [67,88,48]
-> [root@cc1 ~]#
+As a bit of backstory, around 2013 the Backblaze folks started
+publishing statistics about hard drive reliability from within their
+data center for the world to consume. This included things like model,
+make, failure state, and SMART data. If you would like to view the
+Backblaze data set, you can find it at:
 
-Hrm.
+https://www.backblaze.com/b2/hard-drive-test-data.html
 
- ceph daemon osd.67 config set debug_osd 20
- ceph daemon osd.67 config set debug_ms 1
- ceph osd down 67
+While most major cloud providers are doing this for themselves
+internally, we would like to replicate/enhance this effort across a
+much wider segment of the population as a free service.  I think we
+have a pretty good handle on the server/platform side of things, and a
+couple of people who have expressed interest in building the
+reliability model (although we could always use more!), what we really
+need is a passionate volunteer who would like to come forward to write
+the agent that sits on the drives, aggregates data, and submits daily
+stats reports via an API (and potentially receives information back as
+results are calculated about MTTF or potential to fail in the next
+24-48 hrs).
 
-and capture the log resulting log segment, then post it with 
-ceph-post-file.
+Currently my thinking is to build our collection method based on the
+Backblaze data set so that we can use it to train our model and build
+from going forward. If this sounds like a project you would like to be
+involved in (especially if you're from Backblaze!) please let me know.
+I think a first pass of the agent should be something we can build in
+a couple of afternoons to start testing with a small pilot group that
+we already have available.
 
-sage
---8323329-197066680-1495649793=:3646--
+Happy to entertain any thoughts or feedback that people might have. Thanks!
+
+-- 
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
