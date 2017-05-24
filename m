@@ -1,132 +1,129 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: RADOS: Deleting all objects in a namespace
-Date: Wed, 24 May 2017 13:32:36 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1705241328580.3646@piezo.novalocal>
-References: <CALe9h7eQMGGB1K_W-qryVjYhfjr5jGBRKLkawUr8q=QD1rXTSw@mail.gmail.com> <CAJ4mKGZorBntpTQDBzqdLHamyprOUx_4Abcz_f1RX=afEp45jA@mail.gmail.com> <CALe9h7daCUq1j_t0rwd4iiUiinEehzPYKjhxuLE4bLzO-S=8iw@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Problem with query and any operation on PGs
+Date: Wed, 24 May 2017 13:37:29 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1705241335190.3646@piezo.novalocal>
+References: <175484591.20170523135449@tlen.pl> <483467685.20170523144818@tlen.pl>       <alpine.DEB.2.11.1705231415400.3646@piezo.novalocal>   <1464688590.20170523185052@tlen.pl>   <alpine.DEB.2.11.1705231738520.3646@piezo.novalocal>  <1075363645.20170523234331@tlen.pl>
+  <alpine.DEB.2.11.1705232146500.3646@piezo.novalocal> <135176900.20170524151952@tlen.pl>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1904825304-1495632758=:3646"
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1334502866-1495633051=:3646"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49332 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S967189AbdEXNcj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 24 May 2017 09:32:39 -0400
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id A31E7C04B93B
-        for <ceph-devel@vger.kernel.org>; Wed, 24 May 2017 13:32:38 +0000 (UTC)
-In-Reply-To: <CALe9h7daCUq1j_t0rwd4iiUiinEehzPYKjhxuLE4bLzO-S=8iw@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:40890 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758529AbdEXNhc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 24 May 2017 09:37:32 -0400
+In-Reply-To: <135176900.20170524151952@tlen.pl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-2?Q?=A3ukasz_Chrustek?= <skidoo@tlen.pl>
+Cc: ceph-devel@vger.kernel.org
 
   This message is in MIME format.  The first part should be readable text,
   while the remaining parts are likely unreadable without MIME-aware tools.
 
---8323329-1904825304-1495632758=:3646
-Content-Type: TEXT/PLAIN; charset=UTF-8
+--8323329-1334502866-1495633051=:3646
+Content-Type: TEXT/PLAIN; charset=iso-8859-2
 Content-Transfer-Encoding: 8BIT
 
-On Wed, 24 May 2017, John Spray wrote:
-> On Wed, May 24, 2017 at 6:12 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> > On Tue, May 23, 2017 at 6:10 AM John Spray <jspray@redhat.com> wrote:
-> >>
-> >> Soon, we'll probably be letting multiple CephFS filesystems use the
-> >> same data and metadata pools, where the filesystems are separated by
-> >> rados namespace.
-> >>
-> >> When removing filesystems, in the interests of robustness and speed,
-> >> I'd like to be able to delete all objects in a namespace -- otherwise
-> >> we would have to rely on a "rm -rf" and then some new code to
-> >> explicitly enumerate and delete all metadata objects for that
-> >> filesystem.
-> >>
-> >> I'm pondering whether this should just be a process that happens via
-> >> normal client interfaces (where mon/mgr would be the client), or
-> >> whether it would be feasible/desirable to implement something inside
-> >> the OSD.  Obviously the OSD ultimately has to do the same underlying
-> >> enumeration, but at least it doesn't have to thrash through the whole
-> >> request/response cycle for deleting each object individually -- might
-> >> enable it to throttle internally in the OSD based on how busy it knows
-> >> itself to be, rather than having the client apply some arbitrary "only
-> >> issue N deletions at once" type limit that might make the deletion
-> >> process unecessarily slow.
-> >>
-> >> I have a feeling we must have talked about this at some point but my
-> >> memory is failing me...
-> >
-> >
-> > This is an interesting thought and I don't think it's been discussed
-> > before. Some random things:
-> > 1) We tend to suck at throttling stuff in the OSD (although we're
-> > getting close to having the right pattern)
-> > 2) Deleting objects is a *lot* more expensive than listing them;
-> > David's right it would probably look like pgnls, but it's definitely
-> > not analogous. For the listing we just go through omap keys but here
-> > we have to shove deletes into XFS (...for now. I suppose they're
-> > actually pretty similar in BlueStore, though I don't really know the
-> > cost of a delete)
-> > 3) If this happens inside the OSD it will be much harder to bill it
-> > against client IO. Not sure if that's relevant given it's removal,
-> > but...
-> > 4) I'm actually not sure how we could best do this internally if we
-> > wanted to. Deletes as noted would have to take a while, which means it
-> > would probably be a very long-lived operation â€” much more than eg 30
-> > seconds. Or else we'd need a whole internal queue of stuff to delete,
-> > where the client "op" is just queueing up the namespace and the actual
-> > deletes get spaced out much later...and then that would imply more new
-> > checks around whether something is logically deleted even though it
-> > still exists in our data store. (And what happens if a user starts
-> > putting new objects in the namespace while the delete is still going
-> > on? Is that blocked somehow? Or does the OSD need to handle it with a
-> > way of distinguishing between namespace "epoch" 1 and 2?)
+On Wed, 24 May 2017, £ukasz Chrustek wrote:
+> Cze¶æ,
 > 
-> Yeah, all those things are why this is a "hmmm" mailing list thread
-> rather than a PR :-)
+> > On Tue, 23 May 2017, £ukasz Chrustek wrote:
+> >> Cze¶æ,
+> >> 
+> >> > On Tue, 23 May 2017, £ukasz Chrustek wrote:
+> >> >> I'm  not  sleeping for over 30 hours, and still can't find solution. I
+> >> >> did,      as      You      wrote,     but     turning     off     this
+> >> >> (https://pastebin.com/1npBXeMV) osds didn't resolve issue...
+> >> 
+> >> > The important bit is:
+> >> 
+> >> >             "blocked": "peering is blocked due to down osds",
+> >> >             "down_osds_we_would_probe": [
+> >> >                 6,
+> >> >                 10,
+> >> >                 33,
+> >> >                 37,
+> >> >                 72
+> >> >             ],
+> >> >             "peering_blocked_by": [
+> >> >                 {
+> >> >                     "osd": 6,
+> >> >                     "current_lost_at": 0,
+> >> >                     "comment": "starting or marking this osd lost may let
+> >> > us proceed"
+> >> >                 },
+> >> >                 {
+> >> >                     "osd": 10,
+> >> >                     "current_lost_at": 0,
+> >> >                     "comment": "starting or marking this osd lost may let
+> >> > us proceed"
+> >> >                 },
+> >> >                 {
+> >> >                     "osd": 37,
+> >> >                     "current_lost_at": 0,
+> >> >                     "comment": "starting or marking this osd lost may let
+> >> > us proceed"
+> >> >                 },
+> >> >                 {
+> >> >                     "osd": 72,
+> >> >                     "current_lost_at": 113771,
+> >> >                     "comment": "starting or marking this osd lost may let
+> >> > us proceed"
+> >> >                 }
+> >> >             ]
+> >> >         },
+> >> 
+> >> > Are any of those OSDs startable?
+> >> 
+> >> They were all up and running - but I decided to shut them down and out
+> >> them  from  ceph, now it looks like ceph working ok, but still two PGs
+> >> are in down state, how to get rid of it ?
 > 
-> > Overall I definitely see the appeal of wanting to do gross deletes
-> > like that, but it'll be at least a little trickier than I suspect
-> > people are considering. Given the semantic confusion and implied
-> > versus real costs I'm generally not really a fan of allowing stuff
-> > like this on units other than pools/PGs and I'm not sure when the
-> > bandwidth to implement it might come up. How important do you think it
-> > really is compared to doing "rm -rf"?
+> > If you haven't deleted the data, you should start the OSDs back up.
 > 
-> The trouble with the literal rm -rf is that is requires e.g. the MDS
-> to be up and healthy, requires that the deletion code definitely has
-> no bugs, that there were definitely no stray objects in the
-> filesystem, etc.  Orchestrating it in a way that ensured it was done
-> before we permitted the filesystem to be removed would probably mean
-> adding a new "destroying" state to MDSs and having them do the work,
-> rather than accepting a client's promise that it had done it.
+> > If they are partially damanged you can use ceph-objectstore-tool to 
+> > extract just the PGs in question to make sure you haven't lost anything,
+> > inject them on some other OSD(s) and restart those, and *then* mark the
+> > bad OSDs as 'lost'.
 > 
-> The intermediate option where we're doing a pgnls and then sending a
-> delete for each object (probably from the mgr) is less evil, my
-> concerns with that one are just that we're sending a huge number of
-> ops to do one logical thing, and that it might be slower than
-> necessary from the user's point of view.  I suppose we could hide the
-> latency from the user by having a "trash" list in the FSMap but that
-> will cause confusion when they look at their df stats (which people
-> seem to do quite a lot).
+> > If all else fails, you can just mark those OSDs 'lost', but in doing so
+> > you might be telling the cluster to lose data.
 > 
-> Doing the pgnls + O(N) deletes from the mgr is I suppose going to at
-> least have some commonality with what we would be doing in a nicely
-> orchestrated backward scrub, so it's not completely crazy.  People
-> would still appreciate how much faster it was than doing a rm -rf.
+> > The best thing to do is definitely to get those OSDs started again.
+> 
+> Now situation looks like this:
+> 
+> [root@cc1 ~]# rbd info volumes/volume-ccc5d976-cecf-4938-a452-1bee6188987b
+> rbd image 'volume-ccc5d976-cecf-4938-a452-1bee6188987b':
+>         size 500 GB in 128000 objects
+>         order 22 (4096 kB objects)
+>         block_name_prefix: rbd_data.ed9d394a851426
+>         format: 2
+>         features: layering
+>         flags:
+> 
+> [root@cc1 ~]# rados -p volumes ls | grep rbd_data.ed9d394a851426
+> (output cutted)
+> rbd_data.ed9d394a851426.000000000000447c
+> rbd_data.ed9d394a851426.0000000000010857
+> rbd_data.ed9d394a851426.000000000000ec8b
+> rbd_data.ed9d394a851426.000000000000fa43
+> rbd_data.ed9d394a851426.000000000001ef2d
+> ^C
+> 
+> it hangs on this object and isn't going further. rbd cp also hangs...
+> rbd map - also...
+> 
+> can  You advice what can be solution for this case ?
 
-I think the most reasonable way to do something like this would be to have 
-a "trash ns queue" list broadcast to all OSDs, and have them do the 
-cleanup during scrub (when they're already iterating over the namespace).  
-OSDs would track a lower bound on a trash sequence number that has been 
-scrubbed and applied (or similar) so that delete queue items get retired.
-(We need to do something similar with the snap trimming so that the delete 
-list isn't publishes for all time in the OSDMap.)
-
-Scrub is already initiating updates for a couple different reasons 
-(to update digests, and to convert legacy snapsets).  It's worked well so 
-far, although deletion will be a bit more expensive than the current 
-updates which are all xattr-only.
+The hang is due to OSD throttling (see my first reply for how to wrok 
+around that and get a pg query).  But you already did that and the cluster 
+told you which OSDs it needs to see up in order for it to peer and 
+recover.  If you haven't destroyed those disks, you should start those 
+osds and it shoudl be fine.  If you've destroyed the data or the disks are 
+truly broken and dead, then you can mark those OSDs lost and the cluster 
+*maybe* recover (but hard to say given the information you've shared).
 
 sage
---8323329-1904825304-1495632758=:3646--
+
+--8323329-1334502866-1495633051=:3646--
