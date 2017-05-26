@@ -1,33 +1,93 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Adding / removing OSDs with weight set
-Date: Fri, 26 May 2017 09:43:42 +0300
-Message-ID: <e794a980-b701-a8b1-a2ee-b0f13bd23831@dachary.org>
+From: Aleksei Gutikov <aleksey.gutikov@synesis.ru>
+Subject: Tuning radosgw for constant uniform high load.
+Date: Fri, 26 May 2017 14:18:45 +0300
+Message-ID: <59054d80-97de-328d-8e94-5048b7cf9776@synesis.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:47072 "EHLO
-        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1763310AbdEZGns (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 26 May 2017 02:43:48 -0400
+Received: from mail-lf0-f65.google.com ([209.85.215.65]:35174 "EHLO
+        mail-lf0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S967424AbdEZLSt (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 26 May 2017 07:18:49 -0400
+Received: by mail-lf0-f65.google.com with SMTP id 99so739009lfu.2
+        for <ceph-devel@vger.kernel.org>; Fri, 26 May 2017 04:18:48 -0700 (PDT)
+Received: from [172.20.8.234] ([86.57.155.118])
+        by smtp.gmail.com with ESMTPSA id d188sm118714lfg.69.2017.05.26.04.18.45
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 26 May 2017 04:18:46 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Sage,
+Hi,
 
-If weight set are created and updated, either offline via "crush optimize" (possible now) or via a ceph-mgr task (hopefully in the future), adding and removing OSDs won't work via the ceph cli (CrushWrapper errors out on create_or_move_item which is what osd crush create-or-move needs, for instance).
 
-Requiring a workflow where OSDs must be added to the crushmap instead of the usual ceph osd crush create-or-move is impractical. Instead, create_or_move_item should be modified to update the weight sets, if any. What we could not figure out a few weeks ago is which values make sense for a newly added OSD.
+We are designing ceph+rgw setup for constant uniform high load.
 
-Assuming the weight set are updated via an incremental rebalancing process, I think the weight set of a new OSD should simply be zero for all positions and the target weight is set as usual. The next time the rebalancing process runs, it will set the weight set to the right value and backfilling will start. Or, if it proceeds incrementally, it will gradually increase the weight set until it reaches the optimal value. From the user perspective, the only difference is that backfilling does not happen right away, it has to wait for the next rebalancing update.
+We prefer higher throughput than lower latency so seems that we do not 
+need asynchronous features, especially garbage collection.
 
-Preparing an OSD to be decomissionned can be done by setting the target weight to zero. The rebalancing process will (gradually or not) set the weight set to zero and all PGs will move out of the OSD.
+Currently we observing issue that after amount of time rgw's gc becoming 
+very very slow (removing 1 rados object per second for example)
 
-What do you think ?
+on one rgw, than on another and so forth,
 
-Cheers
+but while s3 delete operations proceeding completes fast clients 
+continue creating and removing objects,
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+then pool quotas starting overflowing.
+
+Partially this issue can be eliminated by running 10-th of additional 
+'radosgw-admin gc process',
+
+but we assume that is workaround but not common approach.
+
+
+Profiling on our load model that RGWGC::process() take about 30%-40% of CPU,
+
+and while seems that CPU consuming level is ok, in real time it took 
+much more.
+
+For example deleting buckets with radosgw-admin with --bypass-gc option 
+and without --inconsistent-index option
+
+takes 3 times less real time than deleting all objects via s3 and wait 
+while gc finish his work
+
+(with rgw_gc_processor_period value much less than total time of deletion).
+
+
+
+I've used code from rgw_remove_bucket_bypass_gc() in RGWDeleteObj::execute()
+
+instead of calling RGWRados::Object::Delete::delete_obj()
+
+and measured time consumed by RGWDeleteObj::execute() + RGWGC::process()
+
+on the same tasks and without gc consumed time is 3 times lower.
+
+At first look seems that bucket index stay consistent without gc.
+
+
+
+So, while I'm not yet completely understand operations required to 
+perform to delete object my questions:
+
+1) rgw_remove_bucket_bypass_gc() is called from radosgw-admin.
+
+    Is it safe to call it from rgw itself?
+
+2) rgw_remove_bucket_bypass_gc() uses librados::IoCtx::aio_operate(), 
+while RGWGC::process() uses librados::IoCtx::operate().
+
+    So maybe making gc multithread can speed-up it, is there any 
+constraints that prevents make gc multithreaded?
+
+
+
+
+
+Thanks in advance,
+Aleksei Gutikov
