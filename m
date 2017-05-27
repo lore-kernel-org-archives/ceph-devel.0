@@ -1,43 +1,371 @@
-From: Sistem Administrator <nurul@agenfirsttravel.co.id>
-Subject: Admin
-Date: Sat, 27 May 2017 13:51:14 +0530
-Message-ID: <20170527082145.707C2406B0AB@mail.agenfirsttravel.co.id>
-Reply-To: Sistemass_Adminss@mail2world.com
+From: =?UTF-8?B?5pSA5YiY?= <liupan1111@gmail.com>
+Subject: Re: revisiting uneven CRUSH distributions
+Date: Sat, 27 May 2017 18:03:13 +0800
+Message-ID: <CAMwhyqXO7eBLyT9QN_ick8ua+dUeGq2KxJVA+1g=yY+fqxAHRg@mail.gmail.com>
+References: <712e34ca-d94e-b4a5-6195-5ca4cbc2aa34@dachary.org>
+ <c2237c5e-165e-20be-1c9e-c239d8792c37@profihost.ag> <10f4d4b3-56a4-35de-ac0e-c68bb7fd182f@dachary.org>
+ <1ac6382d-d963-7aed-2f31-f8b5dbe8fdf3@profihost.ag> <172cefc2-1189-99e8-b793-1d85fcaf6441@dachary.org>
+ <d221e0d7-0b4b-3b12-b8f0-1aff391dfee9@profihost.ag> <ca860a8b-7ff1-4628-8a7d-f56ca02e3b82@dachary.org>
+ <a3792889-8f6c-b819-5f7c-2355c5e73fbf@dachary.org> <92165564-0de1-67b8-eb55-ca3cdea3d0e5@profihost.ag>
+ <7e280481-b004-ce88-02f9-c572cf176b89@profihost.ag> <5d928877-83a7-8783-25d1-780b077cda13@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.agenfirsttravel.co.id ([117.102.253.125]:44220 "EHLO
-        mail.agenfirsttravel.co.id" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1754381AbdE0IdH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 27 May 2017 04:33:07 -0400
-Content-Description: Mail message body
+Received: from mail-ua0-f172.google.com ([209.85.217.172]:34658 "EHLO
+        mail-ua0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751390AbdE0KDO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 27 May 2017 06:03:14 -0400
+Received: by mail-ua0-f172.google.com with SMTP id u10so16738268uaf.1
+        for <ceph-devel@vger.kernel.org>; Sat, 27 May 2017 03:03:14 -0700 (PDT)
+In-Reply-To: <5d928877-83a7-8783-25d1-780b077cda13@dachary.org>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <nurul@agenfirsttravel.co.id>
+To: Loic Dachary <loic@dachary.org>
+Cc: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>, Ceph Development <ceph-devel@vger.kernel.org>
 
-PERHATIAN
+Hi Loic,
 
-Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang =
-didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda =
-mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali m=
-emvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, ki=
-rim informasi berikut di bawah ini:
+I am also looking forward for this tool! Please let me know asap when
+it is finished. At this time, for our on-line product environment, I
+have to use reweight multiple times for this pg uneven distribution.
+But I have to say, I still have some concern about affinity:
 
-Nama:
-Username:
-sandi:
-Konfirmasi sandi:
-E-mail:
-telepon:
+I used one script to dump primary pgs of each OSD:
+for a in `ceph osd ls`;do echo -n $a:;ceph pg ls-by-primary  $a|grep
+-v pg_stat|wc -l;done
 
-Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda =
-akan dinonaktifkan!
+I test it in a cluster with 228 OSDS and 8192 pgs, the max pg of one
+osd is:50, min is 21.
 
-Maaf atas ketidaknyamanan ini.
-Kode verifikasi: en:0009876...nw.na.website Admin..id...9876mm.2017
-Surat Dukungan Teknis =A92017
+Will your tool also handle it?
 
-terima kasih
-Sistem Administrator
+Thanks
+Pa
+
+
+2017-05-23 3:00 GMT+08:00 Loic Dachary <loic@dachary.org>:
+> Hi Stefan,
+>
+> On 05/22/2017 09:44 PM, Stefan Priebe - Profihost AG wrote:
+>> Hello Loic,
+>>
+>> i want to optimize a crush map. What are the exact steps to archieve thi=
+s?
+>>
+>> http://crush.readthedocs.io/en/latest/
+>> doesn't tell me about an optimization command.
+>
+> It's not published yet. I was hoping to finish it last week but ... I did=
+ something really stupid (early optimization :-). Fortunately I realized my=
+ mistake tonight while discussing the problem with a friend over a beer. Lo=
+ng story short: I'm optimistic about publishing something sensible in the n=
+ext few days.
+>
+> If you send me the ceph report of the cluster you'd like to optimize, I'l=
+l make sure it works as expected. I've been using the ceph report you sent =
+me last week as well, it has been very helpful.
+>
+> Cheers
+>
+>>
+>> Stefan
+>>
+>> Am 15.05.2017 um 21:08 schrieb Stefan Priebe - Profihost AG:
+>>> Hello Loic,
+>>>
+>>> sounds good but my initial question was if this shouldn't be integrated
+>>> in ceph-deploy - so when you add OSDs it also does the correct reweight=
+?
+>>>
+>>> Greets,
+>>> Stefan
+>>>
+>>> Am 14.05.2017 um 19:46 schrieb Loic Dachary:
+>>>> Hi Stefan,
+>>>>
+>>>> A new python-crush[1] subcommand will be available next week that you =
+could use to rebalance your clusters. You give it a crushmap and it optimiz=
+es the weights to fix the uneven distribution. It can produce a series of c=
+rushmaps, each with a small modification so that you can gradually improve =
+the situation and better control how many PGs are moving.
+>>>>
+>>>> Would that be useful for the clusters you have ?
+>>>>
+>>>> Cheers
+>>>>
+>>>> [1] http://crush.readthedocs.io/
+>>>>
+>>>> On 05/02/2017 09:32 AM, Loic Dachary wrote:
+>>>>>
+>>>>>
+>>>>> On 05/02/2017 07:43 AM, Stefan Priebe - Profihost AG wrote:
+>>>>>> Hi Loic,
+>>>>>>
+>>>>>> yes i didn't changed them to straw2 as i didn't saw any difference. =
+I
+>>>>>> switched to straw2 now but it didn't change anything at all.
+>>>>>
+>>>>> straw vs straw2 is not responsible for the uneven distribution you're=
+ seeing. I meant to say the optimization only works on straw2 buckets, it i=
+s not implemented for straw buckets.
+>>>>>
+>>>>>> If i use those weights manuall i've to adjust them on every crush ch=
+ange
+>>>>>> on the cluster? That's something i don't really like to do.
+>>>>>
+>>>>> This is not practical indeed :-) I'm hoping python-crush can automate=
+ that.
+>>>>>
+>>>>> Cheers
+>>>>>
+>>>>>> Greets,
+>>>>>> Stefan
+>>>>>>
+>>>>>> Am 02.05.2017 um 01:12 schrieb Loic Dachary:
+>>>>>>> It is working, with straw2 (your cluster still is using straw).
+>>>>>>>
+>>>>>>> For instance for one host it goes from:
+>>>>>>>
+>>>>>>>         ~expected~  ~objects~  ~over/under used %~  ~delta~  ~delta=
+%~
+>>>>>>> ~name~
+>>>>>>> osd.24         149        159                 6.65     10.0      6.=
+71
+>>>>>>> osd.29         149        159                 6.65     10.0      6.=
+71
+>>>>>>> osd.0           69         77                11.04      8.0     11.=
+59
+>>>>>>> osd.2           69         69                -0.50      0.0      0.=
+00
+>>>>>>> osd.42         149        148                -0.73     -1.0     -0.=
+67
+>>>>>>> osd.1           69         62               -10.59     -7.0    -10.=
+14
+>>>>>>> osd.23          69         62               -10.59     -7.0    -10.=
+14
+>>>>>>> osd.36         149        132               -11.46    -17.0    -11.=
+41
+>>>>>>>
+>>>>>>> to
+>>>>>>>
+>>>>>>>         ~expected~  ~objects~  ~over/under used %~  ~delta~  ~delta=
+%~
+>>>>>>> ~name~
+>>>>>>> osd.0           69         69                -0.50      0.0      0.=
+00
+>>>>>>> osd.23          69         69                -0.50      0.0      0.=
+00
+>>>>>>> osd.24         149        149                -0.06      0.0      0.=
+00
+>>>>>>> osd.29         149        149                -0.06      0.0      0.=
+00
+>>>>>>> osd.36         149        149                -0.06      0.0      0.=
+00
+>>>>>>> osd.1           69         68                -1.94     -1.0     -1.=
+45
+>>>>>>> osd.2           69         68                -1.94     -1.0     -1.=
+45
+>>>>>>> osd.42         149        147                -1.40     -2.0     -1.=
+34
+>>>>>>>
+>>>>>>> By changing the weights to
+>>>>>>>
+>>>>>>> [0.6609248140022604, 0.9148542821020436, 0.8174711575190294, 0.8870=
+680217468655, 1.6031393139865695, 1.5871079208467038, 1.8784764188501162, 1=
+.7308530904776616]
+>>>>>>>
+>>>>>>> And you could set these weights on the crushmap, there would be no =
+need for backporting.
+>>>>>>>
+>>>>>>>
+>>>>>>> On 05/01/2017 08:06 PM, Stefan Priebe - Profihost AG wrote:
+>>>>>>>> Am 01.05.2017 um 19:47 schrieb Loic Dachary:
+>>>>>>>>> Hi Stefan,
+>>>>>>>>>
+>>>>>>>>> On 05/01/2017 07:15 PM, Stefan Priebe - Profihost AG wrote:
+>>>>>>>>>> That sounds amazing! Is there any chance this will be backported=
+ to jewel?
+>>>>>>>>>
+>>>>>>>>> There should be ways to make that work with kraken and jewel. It =
+may not even require a backport. If you know of a cluster with an uneven di=
+stribution, it would be great if you could send the crushmap so that I can =
+test the algorithm. I'm still not sure this is the right solution and it wo=
+uld help confirm that.
+>>>>>>>>
+>>>>>>>> I've lots of them ;-)
+>>>>>>>>
+>>>>>>>> Will sent you one via private e-mail in some minutes.
+>>>>>>>>
+>>>>>>>> Greets,
+>>>>>>>> Stefan
+>>>>>>>>
+>>>>>>>>> Cheers
+>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> Greets,
+>>>>>>>>>> Stefan
+>>>>>>>>>>
+>>>>>>>>>> Am 30.04.2017 um 16:15 schrieb Loic Dachary:
+>>>>>>>>>>> Hi,
+>>>>>>>>>>>
+>>>>>>>>>>> Ideally CRUSH distributes PGs evenly on OSDs so that they all f=
+ill in
+>>>>>>>>>>> the same proportion. If an OSD is 75% full, it is expected that=
+ all
+>>>>>>>>>>> other OSDs are also 75% full.
+>>>>>>>>>>>
+>>>>>>>>>>> In reality the distribution is even only when more than 100,000=
+ PGs
+>>>>>>>>>>> are distributed in a pool of size 1 (i.e. no replication).
+>>>>>>>>>>>
+>>>>>>>>>>> In small clusters there are a few thousands PGs and it is not e=
+nough
+>>>>>>>>>>> to get an even distribution. Running the following with
+>>>>>>>>>>> python-crush[1], shows a 15% difference when distributing 1,000=
+ PGs on
+>>>>>>>>>>> 6 devices. Only with 1,000,000 PGs does the difference drop und=
+er 1%.
+>>>>>>>>>>>
+>>>>>>>>>>>   for PGs in 1000 10000 100000 1000000 ; do
+>>>>>>>>>>>     crush analyze --replication-count 1 \
+>>>>>>>>>>>                   --type device \
+>>>>>>>>>>>                   --values-count $PGs \
+>>>>>>>>>>>                   --rule data \
+>>>>>>>>>>>                   --crushmap tests/sample-crushmap.json
+>>>>>>>>>>>   done
+>>>>>>>>>>>
+>>>>>>>>>>> In larger clusters, even though a greater number of PGs are
+>>>>>>>>>>> distributed, there are at most a few dozens devices per host an=
+d the
+>>>>>>>>>>> problem remains. On a machine with 24 OSDs each expected to han=
+dle a
+>>>>>>>>>>> few hundred PGs, a total of a few thousands PGs are distributed=
+ which
+>>>>>>>>>>> is not enough to get an even distribution.
+>>>>>>>>>>>
+>>>>>>>>>>> There is a secondary reason for the distribution to be uneven, =
+when
+>>>>>>>>>>> there is more than one replica. The second replica must be on a
+>>>>>>>>>>> different device than the first replica. This conditional proba=
+bility
+>>>>>>>>>>> is not taken into account by CRUSH and would create an uneven
+>>>>>>>>>>> distribution if more than 10,000 PGs were distributed per OSD[2=
+]. But
+>>>>>>>>>>> a given OSD can only handle a few hundred PGs and this conditio=
+nal
+>>>>>>>>>>> probability bias is dominated by the uneven distribution caused=
+ by the
+>>>>>>>>>>> low number of PGs.
+>>>>>>>>>>>
+>>>>>>>>>>> The uneven CRUSH distributions are always caused by a low numbe=
+r of
+>>>>>>>>>>> samples, even in large clusters. Since this noise (i.e. the dif=
+ference
+>>>>>>>>>>> between the desired distribution and the actual distribution) i=
+s
+>>>>>>>>>>> random, it cannot be fixed by optimizations methods.  The
+>>>>>>>>>>> Nedler-Mead[3] simplex converges to a local minimum that is far=
+ from
+>>>>>>>>>>> the optimal minimum in many cases. Broyden=E2=80=93Fletcher=E2=
+=80=93Goldfarb=E2=80=93Shanno[4]
+>>>>>>>>>>> fails to find a gradient that would allow it to converge faster=
+. And
+>>>>>>>>>>> even if it did, the local minimum found would be as often wrong=
+ as
+>>>>>>>>>>> with Nedler-Mead, only it would go faster. A least mean squares
+>>>>>>>>>>> filter[5] is equally unable to suppress the noise created by th=
+e
+>>>>>>>>>>> uneven distribution because no coefficients can model a random =
+noise.
+>>>>>>>>>>>
+>>>>>>>>>>> With that in mind, I implemented a simple optimization algorith=
+m[6]
+>>>>>>>>>>> which was first suggested by Thierry Delamare a few weeks ago. =
+It goes
+>>>>>>>>>>> like this:
+>>>>>>>>>>>
+>>>>>>>>>>>     - Distribute the desired number of PGs[7]
+>>>>>>>>>>>     - Subtract 1% of the weight of the OSD that is the most ove=
+r used
+>>>>>>>>>>>     - Add the subtracted weight to the OSD that is the most und=
+er used
+>>>>>>>>>>>     - Repeat until the Kullback=E2=80=93Leibler divergence[8] i=
+s small enough
+>>>>>>>>>>>
+>>>>>>>>>>> Quoting Adam Kupczyk, this works because:
+>>>>>>>>>>>
+>>>>>>>>>>>   "...CRUSH is not random proces at all, it behaves in numerica=
+lly
+>>>>>>>>>>>    stable way.  Specifically, if we increase weight on one node=
+, we
+>>>>>>>>>>>    will get more PGs on this node and less on every other node:
+>>>>>>>>>>>    CRUSH([10.1, 10, 10, 5, 5]) -> [146(+3), 152, 156(-2), 70(-1=
+), 76]"
+>>>>>>>>>>>
+>>>>>>>>>>> A nice side effect of this optimization algorithm is that it do=
+es not
+>>>>>>>>>>> change the weight of the bucket containing the items being
+>>>>>>>>>>> optimized. It is local to a bucket with no influence on the oth=
+er
+>>>>>>>>>>> parts of the crushmap (modulo the conditional probability bias)=
+.
+>>>>>>>>>>>
+>>>>>>>>>>> In all tests the situation improves at least by an order of
+>>>>>>>>>>> magnitude. For instance when there is a 30% difference between =
+two
+>>>>>>>>>>> OSDs, it is down to less than 3% after optimization.
+>>>>>>>>>>>
+>>>>>>>>>>> The tests for the optimization method can be run with
+>>>>>>>>>>>
+>>>>>>>>>>>    git clone -b wip-fix-2 http://libcrush.org/dachary/python-cr=
+ush.git
+>>>>>>>>>>>    tox -e py27 -- -s -vv -k test_fix tests/test_analyze.py
+>>>>>>>>>>>
+>>>>>>>>>>> If anyone think of a reason why this algorithm won't work in so=
+me
+>>>>>>>>>>> cases, please speak up :-)
+>>>>>>>>>>>
+>>>>>>>>>>> Cheers
+>>>>>>>>>>>
+>>>>>>>>>>> [1] python-crush http://crush.readthedocs.io/
+>>>>>>>>>>> [2] crush multipick anomaly http://marc.info/?l=3Dceph-devel&m=
+=3D148539995928656&w=3D2
+>>>>>>>>>>> [3] Nedler-Mead https://en.wikipedia.org/wiki/Nelder%E2%80%93Me=
+ad_method
+>>>>>>>>>>> [4] L-BFGS-B https://docs.scipy.org/doc/scipy-0.18.1/reference/=
+optimize.minimize-lbfgsb.html#optimize-minimize-lbfgsb
+>>>>>>>>>>> [5] Least mean squares filter https://en.wikipedia.org/wiki/Lea=
+st_mean_squares_filter
+>>>>>>>>>>> [6] http://libcrush.org/dachary/python-crush/blob/c6af9bbcbef71=
+23af84ee4d75d63dd1b967213a2/tests/test_analyze.py#L39
+>>>>>>>>>>> [7] Predicting Ceph PG placement http://dachary.org/?p=3D4020
+>>>>>>>>>>> [8] Kullback=E2=80=93Leibler divergence https://en.wikipedia.or=
+g/wiki/Kullback%E2%80%93Leibler_divergence
+>>>>>>>>>>>
+>>>>>>>>>> --
+>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-d=
+evel" in
+>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.ht=
+ml
+>>>>>>>>>>
+>>>>>>>>>
+>>>>>>>> --
+>>>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-dev=
+el" in
+>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>>>
+>>>>>>>
+>>>>>>
+>>>>>
+>>>>
+>>
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
