@@ -1,55 +1,33 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: [ceph-users] How are you using Ceph with Kubernetes?
-Date: Sat, 27 May 2017 20:52:44 +0100
-Message-ID: <CALe9h7e7BFafngepVcwSF-XkSZfNFwmi6uPnifxmDiDo8+npQA@mail.gmail.com>
-References: <CAGEA57eazJzgq6HkSfEZk4C-tnfOSHkmYqx_daD4GcCso7BJRg@mail.gmail.com>
- <alpine.DEB.2.11.1705261903310.3646@piezo.novalocal>
+From: Loic Dachary <loic@dachary.org>
+Subject: Lowering the weight to move PGs out
+Date: Sun, 28 May 2017 11:17:26 +0300
+Message-ID: <51ba058a-8ecf-4b43-1ee8-e5aae04f661a@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f174.google.com ([209.85.128.174]:35512 "EHLO
-        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750737AbdE0TxG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 27 May 2017 15:53:06 -0400
-Received: by mail-wr0-f174.google.com with SMTP id q97so685947wrb.2
-        for <ceph-devel@vger.kernel.org>; Sat, 27 May 2017 12:53:06 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1705261903310.3646@piezo.novalocal>
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:52190 "EHLO
+        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750888AbdE1IRa (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 28 May 2017 04:17:30 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Jim Curtis <jicurtis@redhat.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, May 26, 2017 at 8:04 PM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 24 May 2017, Jim Curtis wrote:
->> Hi,
->>
->> A few of us that work on Ceph in Kubernetes wanted to get an
->> understanding of how the community is using Ceph with Kubernetes.
+Hi Sage,
 
-Turning it around slightly... what are you working on building?  Is
-there a vision for how Ceph integrates with Kubernetes?
+The most time consuming part of the optimization algorithm[1] comes from lowering the weight of the most over filled item. We cannot know exactly which value will push the desired number of PGs out. The values influenced by the weight are calculated during mapping[2] and derived from the parameters.
 
-Possibly a premature question but I'm curious, and it doesn't hurt to ask.
+It would be useful find a way to expose all ln values (i.e. log(hash(PGid,r,item)) without the weight applied. A function behaving like map() but returning all straws from bucket_straw2_choose instead of chosing one based on the weights.
 
-(apologies for being OT: I have no answer to the actual question since
-I don't run a Kubernetes cluster)
+With the actual values influenced by the weights, we can calculate how much to lower the weight of a given item so that it does not win. Instead of trying small increments, we calculate the exact value.
 
-Cheers,
-John
+What do you think ?
 
+Cheers
 
-
->> Specifically, what are you using to deploy Ceph on Kubernetes?  Are
->> you using Ansible scripts?  Are you using a Helm chart?  Are there
->> other tools you use to deploy Ceph on Kubenetes?
->>
->> Please provide your insights on this thread.
->
-> [Adding in ceph-devel, too!]
->
-> Thanks!
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+[1] An algorithm to fix uneven CRUSH distributions in Ceph http://dachary.org/?p=4055
+[2] https://github.com/ceph/ceph/blob/master/src/crush/mapper.c#L323
+-- 
+Loïc Dachary, Artisan Logiciel Libre
