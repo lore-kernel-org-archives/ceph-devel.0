@@ -1,53 +1,202 @@
-From: Andreas Calminder <andreas.calminder@klarna.com>
-Subject: RGW multisite sync, data sync issues
-Date: Wed, 31 May 2017 15:49:01 +0200
-Message-ID: <CAA1GxO2xdsB5C_MwuugjSYMnSUUzjXP1MRb9=bhHOwGKmHNkCg@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: RE: RADOS: Deleting all objects in a namespace
+Date: Wed, 31 May 2017 13:58:30 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1705311354280.3646@piezo.novalocal>
+References: <CALe9h7eQMGGB1K_W-qryVjYhfjr5jGBRKLkawUr8q=QD1rXTSw@mail.gmail.com> <CAJ4mKGZorBntpTQDBzqdLHamyprOUx_4Abcz_f1RX=afEp45jA@mail.gmail.com> <CALe9h7daCUq1j_t0rwd4iiUiinEehzPYKjhxuLE4bLzO-S=8iw@mail.gmail.com> <alpine.DEB.2.11.1705241328580.3646@piezo.novalocal>
+ <CAJ4mKGbsiVgjHFxTZ6UGkOavV=oQG0PfjnBDaegHvS9jbqSSLw@mail.gmail.com> <AMSPR07MB229B947819E8800737CA38D8AF10@AMSPR07MB229.eurprd07.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1931934927-1496239112=:3646"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f54.google.com ([74.125.83.54]:34765 "EHLO
-        mail-pg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750904AbdEaNtX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 31 May 2017 09:49:23 -0400
-Received: by mail-pg0-f54.google.com with SMTP id u28so8279123pgn.1
-        for <ceph-devel@vger.kernel.org>; Wed, 31 May 2017 06:49:22 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:37330 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750878AbdEaN6d (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 31 May 2017 09:58:33 -0400
+In-Reply-To: <AMSPR07MB229B947819E8800737CA38D8AF10@AMSPR07MB229.eurprd07.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Puerta, Ernesto (Nokia - ES/Madrid)" <ernesto.puerta@nokia.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hello,
-Asked on ceph-users, thought I post here as well, if anyone knows the
-ins and outs of rgw.
-I've got a sync issue with my multisite setup. There's 2 zones in 1
-zone group in 1 realm. The data sync in the non-master zone have stuck
-on Incremental sync is behind by 1 shard, this wasn't noticed until
-the radosgw instances in the master zone started dying from out of
-memory issues, all radosgw instances in the non-master zone was then
-shutdown to ensure services in the master zone while trying to
-troubleshoot the issue.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-From the rgw logs in the master zone I see entries like:
+--8323329-1931934927-1496239112=:3646
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 
-2017-05-29 16:10:34.717988 7fbbc1ffb700  0 ERROR: failed to sync
-object: 12354/BUCKETNAME:be8fa19b-ad79-4cd8-ac7b-1e14fdc882f6.2374181.27/dirname_1/dirname_2/filename_1.ext
-2017-05-29 16:10:34.718016 7fbbc1ffb700  0 ERROR: failed to sync
-object: 12354/BUCKETNAME:be8fa19b-ad79-4cd8-ac7b-1e14fdc882f6.2374181.27/dirname_1/dirname_2/filename_2.ext
-2017-05-29 16:10:34.718504 7fbbc1ffb700  0 ERROR: failed to fetch
-remote data log info: ret=-5
-2017-05-29 16:10:34.719443 7fbbc1ffb700  0 ERROR: a sync operation
-returned error
-2017-05-29 16:10:34.720291 7fbc167f4700  0 store->fetch_remote_obj()
-returned r=-5
+On Wed, 31 May 2017, Puerta, Ernesto (Nokia - ES/Madrid) wrote:
+> Based on this discussion on the delayed deletes, has there already been 
+> any previous discussion/effort on expired TTL'd deletes? This would 
+> align Ceph to other distributed (or SSTable-based) systems, like 
+> Cassandra, which mark data as deleted (aka tombstones) and then 
+> consolidate them during scheduled overnight/off-peak timeframes (usually 
+> at compaction stage).
 
-sync status in the non-master zone reports that the metadata is up to
-sync and that the data sync is behind on 1 shard and that the oldest
-incremental change not applied is about 2 weeks back.
+It's come up a few times, but we've never gotten very serious about 
+designing or implementing it.  I think whats missing is a compelling 
+librados user/use-case that wants rados-level objects to disappear on 
+their own.  Currently all(?) librados users are building higher-level data 
+structures out of multiple rados objects and having the disappear in 
+an uncoordinated fashion isn't quite the right match.  (RGW, for 
+instance, needs to update the bucket index and quota etc info, 
+hence it has its own gc process.)
 
-I'm not quite sure how to proceed, is there a way to find out the id
-of the shard and force some kind of re-sync of the data in it from the
-master zone? I'm unable to have the non-master zone rgw's running
-because it'll leave the master zone in a bad state with rgw dying
-every now and then.
+Also, there are some implementation issues.  The main one is that scrub 
+currently only runs when a PG is clean (all replicas up to date), which 
+means that a degraded cluster wouldn't scrub and thus wouldn't retire TTL 
+data.  This could lead to the cluster overfilling.
 
-Regards,
-Andreas
+That said, I think we're open to it if there is a compelling use case that 
+avoids those issues...
+
+sage
+
+
+
+ > 
+> Ernesto
+> 
+> > -----Original Message-----
+> > From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> > owner@vger.kernel.org] On Behalf Of Gregory Farnum
+> > Sent: miércoles, 24 de mayo de 2017 22:47
+> > To: Sage Weil <sweil@redhat.com>; John Spray <jspray@redhat.com>
+> > Cc: Ceph Development <ceph-devel@vger.kernel.org>
+> > Subject: Re: RADOS: Deleting all objects in a namespace
+> > 
+> > On Wed, May 24, 2017 at 6:32 AM Sage Weil <sweil@redhat.com> wrote:
+> > >
+> > > On Wed, 24 May 2017, John Spray wrote:
+> > > > On Wed, May 24, 2017 at 6:12 AM, Gregory Farnum
+> > <gfarnum@redhat.com> wrote:
+> > > > > On Tue, May 23, 2017 at 6:10 AM John Spray <jspray@redhat.com>
+> > wrote:
+> > > > >>
+> > > > >> Soon, we'll probably be letting multiple CephFS filesystems use
+> > > > >> the same data and metadata pools, where the filesystems are
+> > > > >> separated by rados namespace.
+> > > > >>
+> > > > >> When removing filesystems, in the interests of robustness and
+> > > > >> speed, I'd like to be able to delete all objects in a namespace
+> > > > >> -- otherwise we would have to rely on a "rm -rf" and then some
+> > > > >> new code to explicitly enumerate and delete all metadata objects
+> > > > >> for that filesystem.
+> > > > >>
+> > > > >> I'm pondering whether this should just be a process that happens
+> > > > >> via normal client interfaces (where mon/mgr would be the client),
+> > > > >> or whether it would be feasible/desirable to implement something
+> > > > >> inside the OSD.  Obviously the OSD ultimately has to do the same
+> > > > >> underlying enumeration, but at least it doesn't have to thrash
+> > > > >> through the whole request/response cycle for deleting each object
+> > > > >> individually -- might enable it to throttle internally in the OSD
+> > > > >> based on how busy it knows itself to be, rather than having the
+> > > > >> client apply some arbitrary "only issue N deletions at once" type
+> > > > >> limit that might make the deletion process unecessarily slow.
+> > > > >>
+> > > > >> I have a feeling we must have talked about this at some point but
+> > > > >> my memory is failing me...
+> > > > >
+> > > > >
+> > > > > This is an interesting thought and I don't think it's been
+> > > > > discussed before. Some random things:
+> > > > > 1) We tend to suck at throttling stuff in the OSD (although we're
+> > > > > getting close to having the right pattern)
+> > > > > 2) Deleting objects is a *lot* more expensive than listing them;
+> > > > > David's right it would probably look like pgnls, but it's
+> > > > > definitely not analogous. For the listing we just go through omap
+> > > > > keys but here we have to shove deletes into XFS (...for now. I
+> > > > > suppose they're actually pretty similar in BlueStore, though I
+> > > > > don't really know the cost of a delete)
+> > > > > 3) If this happens inside the OSD it will be much harder to bill
+> > > > > it against client IO. Not sure if that's relevant given it's
+> > > > > removal, but...
+> > > > > 4) I'm actually not sure how we could best do this internally if
+> > > > > we wanted to. Deletes as noted would have to take a while, which
+> > > > > means it would probably be a very long-lived operation — much more
+> > > > > than eg 30 seconds. Or else we'd need a whole internal queue of
+> > > > > stuff to delete, where the client "op" is just queueing up the
+> > > > > namespace and the actual deletes get spaced out much later...and
+> > > > > then that would imply more new checks around whether something is
+> > > > > logically deleted even though it still exists in our data store.
+> > > > > (And what happens if a user starts putting new objects in the
+> > > > > namespace while the delete is still going on? Is that blocked
+> > > > > somehow? Or does the OSD need to handle it with a way of
+> > > > > distinguishing between namespace "epoch" 1 and 2?)
+> > > >
+> > > > Yeah, all those things are why this is a "hmmm" mailing list thread
+> > > > rather than a PR :-)
+> > > >
+> > > > > Overall I definitely see the appeal of wanting to do gross deletes
+> > > > > like that, but it'll be at least a little trickier than I suspect
+> > > > > people are considering. Given the semantic confusion and implied
+> > > > > versus real costs I'm generally not really a fan of allowing stuff
+> > > > > like this on units other than pools/PGs and I'm not sure when the
+> > > > > bandwidth to implement it might come up. How important do you
+> > > > > think it really is compared to doing "rm -rf"?
+> > > >
+> > > > The trouble with the literal rm -rf is that is requires e.g. the MDS
+> > > > to be up and healthy, requires that the deletion code definitely has
+> > > > no bugs, that there were definitely no stray objects in the
+> > > > filesystem, etc.  Orchestrating it in a way that ensured it was done
+> > > > before we permitted the filesystem to be removed would probably
+> > mean
+> > > > adding a new "destroying" state to MDSs and having them do the work,
+> > > > rather than accepting a client's promise that it had done it.
+> > > >
+> > > > The intermediate option where we're doing a pgnls and then sending a
+> > > > delete for each object (probably from the mgr) is less evil, my
+> > > > concerns with that one are just that we're sending a huge number of
+> > > > ops to do one logical thing, and that it might be slower than
+> > > > necessary from the user's point of view.  I suppose we could hide
+> > > > the latency from the user by having a "trash" list in the FSMap but
+> > > > that will cause confusion when they look at their df stats (which
+> > > > people seem to do quite a lot).
+> > > >
+> > > > Doing the pgnls + O(N) deletes from the mgr is I suppose going to at
+> > > > least have some commonality with what we would be doing in a nicely
+> > > > orchestrated backward scrub, so it's not completely crazy.  People
+> > > > would still appreciate how much faster it was than doing a rm -rf.
+> > >
+> > > I think the most reasonable way to do something like this would be to
+> > > have a "trash ns queue" list broadcast to all OSDs, and have them do
+> > > the cleanup during scrub (when they're already iterating over the
+> > namespace).
+> > > OSDs would track a lower bound on a trash sequence number that has
+> > > been scrubbed and applied (or similar) so that delete queue items get
+> > retired.
+> > > (We need to do something similar with the snap trimming so that the
+> > > delete list isn't publishes for all time in the OSDMap.)
+> > >
+> > > Scrub is already initiating updates for a couple different reasons (to
+> > > update digests, and to convert legacy snapsets).  It's worked well so
+> > > far, although deletion will be a bit more expensive than the current
+> > > updates which are all xattr-only.
+> > 
+> > 
+> > We discussed this a bit more in the RADOS standup. Sage remains interested
+> > in the problem, but it sounded to me like the consensus was we shouldn't
+> > move forward on this:
+> > 1) doing the delete *outside* of scrub is basically making the RADOS cluster
+> > look at {M} data to do operations on {N} (where sizeof(N) <<<< sizeof(M)).
+> > Scrub at least merges it in to work we're already doing, but...
+> > 2) doing the delete during scrub makes the throttling/scheduling dramatically
+> > harder
+> > 3) doing aysnchronous operations of any kind is a giant foot-gun for our API
+> > users; obviously our in-tree systems are going to know they can't write to a
+> > namespace after deleting it but you just *know* that somebody is going to
+> > use it as a shortcut for "delete all my data" and then start writing to it
+> > immediately after the acknowledgement commit returns. So we probably
+> > need to introduce epoch versioning of namespaces (nearly impossible?) and
+> > certainly need async operation reporting. Lots of complexity.
+> > 4) There don't seem to be any other users and it seems like a lot more work
+> > to do this in the OSD than to have the MDS or manager orchestrate it
+> > somehow.
+> > 
+> > Of course, now it's written down so people can tell me my understanding
+> > was wrong... ;) -Greg
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
+> > body of a message to majordomo@vger.kernel.org More majordomo info at
+> > http://vger.kernel.org/majordomo-info.html
+> 
+--8323329-1931934927-1496239112=:3646--
