@@ -1,87 +1,69 @@
-From: Loic Dachary <loic@dachary.org>
+From: han vincent <hangzws@gmail.com>
 Subject: Re: Beta testing crush optimization
-Date: Wed, 31 May 2017 10:01:17 +0300
-Message-ID: <2f58ce5a-761c-2fad-5fa0-efd4c778745c@dachary.org>
-References: <07dda37f-b8c9-f977-c767-6c1c4bc78fd6@dachary.org>
- <c4186786-d7ff-097d-ac71-1dbb12d58540@profihost.ag>
- <624fbbf9-a0cd-5ffa-2db2-6137713c5c2e@dachary.org>
+Date: Wed, 31 May 2017 17:52:35 +0800
+Message-ID: <CANNfkuYtWeucakVigP5Hh_HxPztqU54GRVPMMG9BrpqokRyzkg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:39246 "EHLO
-        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750778AbdEaHBW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 31 May 2017 03:01:22 -0400
-In-Reply-To: <624fbbf9-a0cd-5ffa-2db2-6137713c5c2e@dachary.org>
+Received: from mail-io0-f169.google.com ([209.85.223.169]:36009 "EHLO
+        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751022AbdEaJwh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 31 May 2017 05:52:37 -0400
+Received: by mail-io0-f169.google.com with SMTP id o12so12949687iod.3
+        for <ceph-devel@vger.kernel.org>; Wed, 31 May 2017 02:52:36 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: loic@dachary.org
 
-(as a conclusion to this thread)
+hello, loic:
 
-Thanks for testing (and your patience while I was fixing a few bugs). 
+I had a cluster build with hammer 0.94.10, then I used the following
+commands to change the algorithm from "straw" to "straw2".
+1. ceph osd crush tunables hammer
+2. ceph osd getcrushmap -o /tmp/cmap
+3. crushtool -d /tmp/cmap -o /tmp/cmap.txt
+4. vim /tmp/cmap.txt and change the algorithm of each bucket from
+"straw" to "straw2"
+5. crushtool -c /tmp/cmap.txt -o /tmp/cmap
+6. ceph osd setcrushmap -i /tmp/cmap
+7. ceph osd crush reweight-all
+after that, I used "python crush" to optimize the cluster, the version
+of "python crush" is 1.0.32
 
-I'm glad your cluster is now almost even (+/- 1.5% over/under filled for the OSDs and 0.5% for the hosts). It is better than it was before (+/- 25% over/under filled for the OSDs and 6% for the hosts).
+1. ceph report > report.json
+2. crush optimize --crushmap report.json --out-path optimized.crush
+Unfortunately, there was an error in the output:
 
-Worst case scenario if a host fails was (before optimization):
+2017-05-30 18:48:01,803 42.1 map to [4, 9] instead of [4, 8]
+2017-05-30 18:48:01,838 49.3af map to [9, 2] instead of [9, 3]
+2017-05-30 18:48:01,838 49.e3 map to [6, 4] instead of [6, 5]
+2017-05-30 18:48:01,838 49.e1 map to [7, 2] instead of [7, 3]
+2017-05-30 18:48:01,838 49.e0 map to [5, 1] instead of [5, 0]
+2017-05-30 18:48:01,838 49.20d map to [3, 1] instead of [3, 0]
+2017-05-30 18:48:01,838 49.20c map to [2, 9] instead of [2, 8]
+2017-05-30 18:48:01,838 49.36e map to [6, 1] instead of [6, 0]
+......
 
-        ~over filled %~
-~type~                 
-device            30.15
-host              10.53
-
-After optimization it is down to:
-
-        ~over filled %~
-~type~                 
-device             7.94
-host               4.55
-
-Since you have a full SSD cluster you chose to optimize all at once. It means the incremental approach (--step) was not used.
-
-Cheers
-
-On 05/24/2017 05:01 PM, Loic Dachary wrote:
-> 
-> 
-> On 05/24/2017 04:50 PM, Stefan Priebe - Profihost AG wrote:
->> Hello,
->>
->> great! What means pool 3? Is it just the pool nr from the poll dump / ls
->> command?
-> 
-> Yes. In the report you sent me, this is the number of the only pool in the cluster.
-> 
->>
->> Stefan
->>
->> Am 24.05.2017 um 15:48 schrieb Loic Dachary:
->>> Hi Stefan,
->>>
->>> Thanks for volunteering to beta test the crush optimization on a live cluster :-)
->>>
->>> The "crush optimize" command was published today[1] and you should be able to improve your cluster distribution with the following:
->>>
->>> ceph report > report.json
->>> crush optimize --no-forecast --step 64 --crushmap report.json --pool 3 --out-path optimized.crush
->>> ceph osd setcrushmap -i optimized.crush
->>>
->>> Note that it will only perform a first optimization step (moving around 64 PGs). You will need to repeat this command a dozen time to fully optimize the cluster. I assume that's what you will want to control the workload. If you want a minimal change at each step, you can try --step 1 but it will require more than a hundred steps.
->>>
->>> If you're not worried about the load of the cluster, you can optimize it in one go with:
->>>
->>> ceph report > report.json
->>> crush optimize --crushmap report.json --pool 3 --out-path optimized.crush
->>> ceph osd setcrushmap -i optimized.crush
->>>
->>> Cheers
->>>
->>> [1] http://crush.readthedocs.io/en/latest/ceph/optimize.html
->>>
->>
-> 
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
+Traceback (most recent call last):
+ File "/usr/bin/crush", line 25, in <module>
+sys.exit(Ceph().main(sys.argv[1:]))
+ File "/usr/lib64/python2.7/site-packages/crush/main.py", line 136, in main
+return self.constructor(argv).run()
+ File "/usr/lib64/python2.7/site-packages/crush/optimize.py", line 373, in run
+crushmap = self.main.convert_to_crushmap(self.args.crushmap)
+ File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py",
+line 690, in convert_to_crushmap
+c.parse(crushmap)
+ File "/usr/lib64/python2.7/site-packages/crush/__init__.py", line 138, in parse
+return self.parse_crushmap(self._convert_to_crushmap(something))
+ File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py",
+line 416, in _convert_to_crushmap
+crushmap = CephReport().parse_report(something)
+ File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py",
+line 137, in parse_report
+raise MappingError("some mapping failed, please file a bug at "
+crush.ceph.MappingError: some mapping failed, please file a bug at
+http://libcrush.org/main/python-crush/issues/new
+Do you know what the problem is? can you help me? I would be very
+grateful to you.
