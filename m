@@ -1,174 +1,87 @@
-From: "Puerta, Ernesto (Nokia - ES/Madrid)" <ernesto.puerta@nokia.com>
-Subject: RE: RADOS: Deleting all objects in a namespace
-Date: Wed, 31 May 2017 10:47:34 +0000
-Message-ID: <AMSPR07MB229B947819E8800737CA38D8AF10@AMSPR07MB229.eurprd07.prod.outlook.com>
-References: <CALe9h7eQMGGB1K_W-qryVjYhfjr5jGBRKLkawUr8q=QD1rXTSw@mail.gmail.com>
- <CAJ4mKGZorBntpTQDBzqdLHamyprOUx_4Abcz_f1RX=afEp45jA@mail.gmail.com>
- <CALe9h7daCUq1j_t0rwd4iiUiinEehzPYKjhxuLE4bLzO-S=8iw@mail.gmail.com>
- <alpine.DEB.2.11.1705241328580.3646@piezo.novalocal>
- <CAJ4mKGbsiVgjHFxTZ6UGkOavV=oQG0PfjnBDaegHvS9jbqSSLw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Beta testing crush optimization
+Date: Wed, 31 May 2017 14:34:55 +0300
+Message-ID: <b5814b74-fb97-85de-3f8b-f906c5363195@dachary.org>
+References: <CANNfkubYdJqJDRV8kuNDBy368OxOyXkXKU3wr9ULFeafPnBoHg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-he1eur01on0135.outbound.protection.outlook.com ([104.47.0.135]:27699
-        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751009AbdEaKrh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 31 May 2017 06:47:37 -0400
-In-Reply-To: <CAJ4mKGbsiVgjHFxTZ6UGkOavV=oQG0PfjnBDaegHvS9jbqSSLw@mail.gmail.com>
-Content-Language: en-US
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:34532 "EHLO
+        relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751025AbdEaLfB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 31 May 2017 07:35:01 -0400
+In-Reply-To: <CANNfkubYdJqJDRV8kuNDBy368OxOyXkXKU3wr9ULFeafPnBoHg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>, Sage Weil <sweil@redhat.com>, John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: han vincent <hangzws@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-QmFzZWQgb24gdGhpcyBkaXNjdXNzaW9uIG9uIHRoZSBkZWxheWVkIGRlbGV0ZXMsIGhhcyB0aGVy
-ZSBhbHJlYWR5IGJlZW4gYW55IHByZXZpb3VzIGRpc2N1c3Npb24vZWZmb3J0IG9uIGV4cGlyZWQg
-VFRMJ2QgZGVsZXRlcz8gVGhpcyB3b3VsZCBhbGlnbiBDZXBoIHRvIG90aGVyIGRpc3RyaWJ1dGVk
-IChvciBTU1RhYmxlLWJhc2VkKSBzeXN0ZW1zLCBsaWtlIENhc3NhbmRyYSwgd2hpY2ggbWFyayBk
-YXRhIGFzIGRlbGV0ZWQgKGFrYSB0b21ic3RvbmVzKSBhbmQgdGhlbiBjb25zb2xpZGF0ZSB0aGVt
-IGR1cmluZyBzY2hlZHVsZWQgb3Zlcm5pZ2h0L29mZi1wZWFrIHRpbWVmcmFtZXMgKHVzdWFsbHkg
-YXQgY29tcGFjdGlvbiBzdGFnZSkuDQoNCkVybmVzdG8NCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3Nh
-Z2UtLS0tLQ0KPiBGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRv
-OmNlcGgtZGV2ZWwtDQo+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEdyZWdv
-cnkgRmFybnVtDQo+IFNlbnQ6IG1pw6lyY29sZXMsIDI0IGRlIG1heW8gZGUgMjAxNyAyMjo0Nw0K
-PiBUbzogU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPjsgSm9obiBTcHJheSA8anNwcmF5QHJl
-ZGhhdC5jb20+DQo+IENjOiBDZXBoIERldmVsb3BtZW50IDxjZXBoLWRldmVsQHZnZXIua2VybmVs
-Lm9yZz4NCj4gU3ViamVjdDogUmU6IFJBRE9TOiBEZWxldGluZyBhbGwgb2JqZWN0cyBpbiBhIG5h
-bWVzcGFjZQ0KPiANCj4gT24gV2VkLCBNYXkgMjQsIDIwMTcgYXQgNjozMiBBTSBTYWdlIFdlaWwg
-PHN3ZWlsQHJlZGhhdC5jb20+IHdyb3RlOg0KPiA+DQo+ID4gT24gV2VkLCAyNCBNYXkgMjAxNywg
-Sm9obiBTcHJheSB3cm90ZToNCj4gPiA+IE9uIFdlZCwgTWF5IDI0LCAyMDE3IGF0IDY6MTIgQU0s
-IEdyZWdvcnkgRmFybnVtDQo+IDxnZmFybnVtQHJlZGhhdC5jb20+IHdyb3RlOg0KPiA+ID4gPiBP
-biBUdWUsIE1heSAyMywgMjAxNyBhdCA2OjEwIEFNIEpvaG4gU3ByYXkgPGpzcHJheUByZWRoYXQu
-Y29tPg0KPiB3cm90ZToNCj4gPiA+ID4+DQo+ID4gPiA+PiBTb29uLCB3ZSdsbCBwcm9iYWJseSBi
-ZSBsZXR0aW5nIG11bHRpcGxlIENlcGhGUyBmaWxlc3lzdGVtcyB1c2UNCj4gPiA+ID4+IHRoZSBz
-YW1lIGRhdGEgYW5kIG1ldGFkYXRhIHBvb2xzLCB3aGVyZSB0aGUgZmlsZXN5c3RlbXMgYXJlDQo+
-ID4gPiA+PiBzZXBhcmF0ZWQgYnkgcmFkb3MgbmFtZXNwYWNlLg0KPiA+ID4gPj4NCj4gPiA+ID4+
-IFdoZW4gcmVtb3ZpbmcgZmlsZXN5c3RlbXMsIGluIHRoZSBpbnRlcmVzdHMgb2Ygcm9idXN0bmVz
-cyBhbmQNCj4gPiA+ID4+IHNwZWVkLCBJJ2QgbGlrZSB0byBiZSBhYmxlIHRvIGRlbGV0ZSBhbGwg
-b2JqZWN0cyBpbiBhIG5hbWVzcGFjZQ0KPiA+ID4gPj4gLS0gb3RoZXJ3aXNlIHdlIHdvdWxkIGhh
-dmUgdG8gcmVseSBvbiBhICJybSAtcmYiIGFuZCB0aGVuIHNvbWUNCj4gPiA+ID4+IG5ldyBjb2Rl
-IHRvIGV4cGxpY2l0bHkgZW51bWVyYXRlIGFuZCBkZWxldGUgYWxsIG1ldGFkYXRhIG9iamVjdHMN
-Cj4gPiA+ID4+IGZvciB0aGF0IGZpbGVzeXN0ZW0uDQo+ID4gPiA+Pg0KPiA+ID4gPj4gSSdtIHBv
-bmRlcmluZyB3aGV0aGVyIHRoaXMgc2hvdWxkIGp1c3QgYmUgYSBwcm9jZXNzIHRoYXQgaGFwcGVu
-cw0KPiA+ID4gPj4gdmlhIG5vcm1hbCBjbGllbnQgaW50ZXJmYWNlcyAod2hlcmUgbW9uL21nciB3
-b3VsZCBiZSB0aGUgY2xpZW50KSwNCj4gPiA+ID4+IG9yIHdoZXRoZXIgaXQgd291bGQgYmUgZmVh
-c2libGUvZGVzaXJhYmxlIHRvIGltcGxlbWVudCBzb21ldGhpbmcNCj4gPiA+ID4+IGluc2lkZSB0
-aGUgT1NELiAgT2J2aW91c2x5IHRoZSBPU0QgdWx0aW1hdGVseSBoYXMgdG8gZG8gdGhlIHNhbWUN
-Cj4gPiA+ID4+IHVuZGVybHlpbmcgZW51bWVyYXRpb24sIGJ1dCBhdCBsZWFzdCBpdCBkb2Vzbid0
-IGhhdmUgdG8gdGhyYXNoDQo+ID4gPiA+PiB0aHJvdWdoIHRoZSB3aG9sZSByZXF1ZXN0L3Jlc3Bv
-bnNlIGN5Y2xlIGZvciBkZWxldGluZyBlYWNoIG9iamVjdA0KPiA+ID4gPj4gaW5kaXZpZHVhbGx5
-IC0tIG1pZ2h0IGVuYWJsZSBpdCB0byB0aHJvdHRsZSBpbnRlcm5hbGx5IGluIHRoZSBPU0QNCj4g
-PiA+ID4+IGJhc2VkIG9uIGhvdyBidXN5IGl0IGtub3dzIGl0c2VsZiB0byBiZSwgcmF0aGVyIHRo
-YW4gaGF2aW5nIHRoZQ0KPiA+ID4gPj4gY2xpZW50IGFwcGx5IHNvbWUgYXJiaXRyYXJ5ICJvbmx5
-IGlzc3VlIE4gZGVsZXRpb25zIGF0IG9uY2UiIHR5cGUNCj4gPiA+ID4+IGxpbWl0IHRoYXQgbWln
-aHQgbWFrZSB0aGUgZGVsZXRpb24gcHJvY2VzcyB1bmVjZXNzYXJpbHkgc2xvdy4NCj4gPiA+ID4+
-DQo+ID4gPiA+PiBJIGhhdmUgYSBmZWVsaW5nIHdlIG11c3QgaGF2ZSB0YWxrZWQgYWJvdXQgdGhp
-cyBhdCBzb21lIHBvaW50IGJ1dA0KPiA+ID4gPj4gbXkgbWVtb3J5IGlzIGZhaWxpbmcgbWUuLi4N
-Cj4gPiA+ID4NCj4gPiA+ID4NCj4gPiA+ID4gVGhpcyBpcyBhbiBpbnRlcmVzdGluZyB0aG91Z2h0
-IGFuZCBJIGRvbid0IHRoaW5rIGl0J3MgYmVlbg0KPiA+ID4gPiBkaXNjdXNzZWQgYmVmb3JlLiBT
-b21lIHJhbmRvbSB0aGluZ3M6DQo+ID4gPiA+IDEpIFdlIHRlbmQgdG8gc3VjayBhdCB0aHJvdHRs
-aW5nIHN0dWZmIGluIHRoZSBPU0QgKGFsdGhvdWdoIHdlJ3JlDQo+ID4gPiA+IGdldHRpbmcgY2xv
-c2UgdG8gaGF2aW5nIHRoZSByaWdodCBwYXR0ZXJuKQ0KPiA+ID4gPiAyKSBEZWxldGluZyBvYmpl
-Y3RzIGlzIGEgKmxvdCogbW9yZSBleHBlbnNpdmUgdGhhbiBsaXN0aW5nIHRoZW07DQo+ID4gPiA+
-IERhdmlkJ3MgcmlnaHQgaXQgd291bGQgcHJvYmFibHkgbG9vayBsaWtlIHBnbmxzLCBidXQgaXQn
-cw0KPiA+ID4gPiBkZWZpbml0ZWx5IG5vdCBhbmFsb2dvdXMuIEZvciB0aGUgbGlzdGluZyB3ZSBq
-dXN0IGdvIHRocm91Z2ggb21hcA0KPiA+ID4gPiBrZXlzIGJ1dCBoZXJlIHdlIGhhdmUgdG8gc2hv
-dmUgZGVsZXRlcyBpbnRvIFhGUyAoLi4uZm9yIG5vdy4gSQ0KPiA+ID4gPiBzdXBwb3NlIHRoZXkn
-cmUgYWN0dWFsbHkgcHJldHR5IHNpbWlsYXIgaW4gQmx1ZVN0b3JlLCB0aG91Z2ggSQ0KPiA+ID4g
-PiBkb24ndCByZWFsbHkga25vdyB0aGUgY29zdCBvZiBhIGRlbGV0ZSkNCj4gPiA+ID4gMykgSWYg
-dGhpcyBoYXBwZW5zIGluc2lkZSB0aGUgT1NEIGl0IHdpbGwgYmUgbXVjaCBoYXJkZXIgdG8gYmls
-bA0KPiA+ID4gPiBpdCBhZ2FpbnN0IGNsaWVudCBJTy4gTm90IHN1cmUgaWYgdGhhdCdzIHJlbGV2
-YW50IGdpdmVuIGl0J3MNCj4gPiA+ID4gcmVtb3ZhbCwgYnV0Li4uDQo+ID4gPiA+IDQpIEknbSBh
-Y3R1YWxseSBub3Qgc3VyZSBob3cgd2UgY291bGQgYmVzdCBkbyB0aGlzIGludGVybmFsbHkgaWYN
-Cj4gPiA+ID4gd2Ugd2FudGVkIHRvLiBEZWxldGVzIGFzIG5vdGVkIHdvdWxkIGhhdmUgdG8gdGFr
-ZSBhIHdoaWxlLCB3aGljaA0KPiA+ID4gPiBtZWFucyBpdCB3b3VsZCBwcm9iYWJseSBiZSBhIHZl
-cnkgbG9uZy1saXZlZCBvcGVyYXRpb24g4oCUIG11Y2ggbW9yZQ0KPiA+ID4gPiB0aGFuIGVnIDMw
-IHNlY29uZHMuIE9yIGVsc2Ugd2UnZCBuZWVkIGEgd2hvbGUgaW50ZXJuYWwgcXVldWUgb2YNCj4g
-PiA+ID4gc3R1ZmYgdG8gZGVsZXRlLCB3aGVyZSB0aGUgY2xpZW50ICJvcCIgaXMganVzdCBxdWV1
-ZWluZyB1cCB0aGUNCj4gPiA+ID4gbmFtZXNwYWNlIGFuZCB0aGUgYWN0dWFsIGRlbGV0ZXMgZ2V0
-IHNwYWNlZCBvdXQgbXVjaCBsYXRlci4uLmFuZA0KPiA+ID4gPiB0aGVuIHRoYXQgd291bGQgaW1w
-bHkgbW9yZSBuZXcgY2hlY2tzIGFyb3VuZCB3aGV0aGVyIHNvbWV0aGluZyBpcw0KPiA+ID4gPiBs
-b2dpY2FsbHkgZGVsZXRlZCBldmVuIHRob3VnaCBpdCBzdGlsbCBleGlzdHMgaW4gb3VyIGRhdGEg
-c3RvcmUuDQo+ID4gPiA+IChBbmQgd2hhdCBoYXBwZW5zIGlmIGEgdXNlciBzdGFydHMgcHV0dGlu
-ZyBuZXcgb2JqZWN0cyBpbiB0aGUNCj4gPiA+ID4gbmFtZXNwYWNlIHdoaWxlIHRoZSBkZWxldGUg
-aXMgc3RpbGwgZ29pbmcgb24/IElzIHRoYXQgYmxvY2tlZA0KPiA+ID4gPiBzb21laG93PyBPciBk
-b2VzIHRoZSBPU0QgbmVlZCB0byBoYW5kbGUgaXQgd2l0aCBhIHdheSBvZg0KPiA+ID4gPiBkaXN0
-aW5ndWlzaGluZyBiZXR3ZWVuIG5hbWVzcGFjZSAiZXBvY2giIDEgYW5kIDI/KQ0KPiA+ID4NCj4g
-PiA+IFllYWgsIGFsbCB0aG9zZSB0aGluZ3MgYXJlIHdoeSB0aGlzIGlzIGEgImhtbW0iIG1haWxp
-bmcgbGlzdCB0aHJlYWQNCj4gPiA+IHJhdGhlciB0aGFuIGEgUFIgOi0pDQo+ID4gPg0KPiA+ID4g
-PiBPdmVyYWxsIEkgZGVmaW5pdGVseSBzZWUgdGhlIGFwcGVhbCBvZiB3YW50aW5nIHRvIGRvIGdy
-b3NzIGRlbGV0ZXMNCj4gPiA+ID4gbGlrZSB0aGF0LCBidXQgaXQnbGwgYmUgYXQgbGVhc3QgYSBs
-aXR0bGUgdHJpY2tpZXIgdGhhbiBJIHN1c3BlY3QNCj4gPiA+ID4gcGVvcGxlIGFyZSBjb25zaWRl
-cmluZy4gR2l2ZW4gdGhlIHNlbWFudGljIGNvbmZ1c2lvbiBhbmQgaW1wbGllZA0KPiA+ID4gPiB2
-ZXJzdXMgcmVhbCBjb3N0cyBJJ20gZ2VuZXJhbGx5IG5vdCByZWFsbHkgYSBmYW4gb2YgYWxsb3dp
-bmcgc3R1ZmYNCj4gPiA+ID4gbGlrZSB0aGlzIG9uIHVuaXRzIG90aGVyIHRoYW4gcG9vbHMvUEdz
-IGFuZCBJJ20gbm90IHN1cmUgd2hlbiB0aGUNCj4gPiA+ID4gYmFuZHdpZHRoIHRvIGltcGxlbWVu
-dCBpdCBtaWdodCBjb21lIHVwLiBIb3cgaW1wb3J0YW50IGRvIHlvdQ0KPiA+ID4gPiB0aGluayBp
-dCByZWFsbHkgaXMgY29tcGFyZWQgdG8gZG9pbmcgInJtIC1yZiI/DQo+ID4gPg0KPiA+ID4gVGhl
-IHRyb3VibGUgd2l0aCB0aGUgbGl0ZXJhbCBybSAtcmYgaXMgdGhhdCBpcyByZXF1aXJlcyBlLmcu
-IHRoZSBNRFMNCj4gPiA+IHRvIGJlIHVwIGFuZCBoZWFsdGh5LCByZXF1aXJlcyB0aGF0IHRoZSBk
-ZWxldGlvbiBjb2RlIGRlZmluaXRlbHkgaGFzDQo+ID4gPiBubyBidWdzLCB0aGF0IHRoZXJlIHdl
-cmUgZGVmaW5pdGVseSBubyBzdHJheSBvYmplY3RzIGluIHRoZQ0KPiA+ID4gZmlsZXN5c3RlbSwg
-ZXRjLiAgT3JjaGVzdHJhdGluZyBpdCBpbiBhIHdheSB0aGF0IGVuc3VyZWQgaXQgd2FzIGRvbmUN
-Cj4gPiA+IGJlZm9yZSB3ZSBwZXJtaXR0ZWQgdGhlIGZpbGVzeXN0ZW0gdG8gYmUgcmVtb3ZlZCB3
-b3VsZCBwcm9iYWJseQ0KPiBtZWFuDQo+ID4gPiBhZGRpbmcgYSBuZXcgImRlc3Ryb3lpbmciIHN0
-YXRlIHRvIE1EU3MgYW5kIGhhdmluZyB0aGVtIGRvIHRoZSB3b3JrLA0KPiA+ID4gcmF0aGVyIHRo
-YW4gYWNjZXB0aW5nIGEgY2xpZW50J3MgcHJvbWlzZSB0aGF0IGl0IGhhZCBkb25lIGl0Lg0KPiA+
-ID4NCj4gPiA+IFRoZSBpbnRlcm1lZGlhdGUgb3B0aW9uIHdoZXJlIHdlJ3JlIGRvaW5nIGEgcGdu
-bHMgYW5kIHRoZW4gc2VuZGluZyBhDQo+ID4gPiBkZWxldGUgZm9yIGVhY2ggb2JqZWN0IChwcm9i
-YWJseSBmcm9tIHRoZSBtZ3IpIGlzIGxlc3MgZXZpbCwgbXkNCj4gPiA+IGNvbmNlcm5zIHdpdGgg
-dGhhdCBvbmUgYXJlIGp1c3QgdGhhdCB3ZSdyZSBzZW5kaW5nIGEgaHVnZSBudW1iZXIgb2YNCj4g
-PiA+IG9wcyB0byBkbyBvbmUgbG9naWNhbCB0aGluZywgYW5kIHRoYXQgaXQgbWlnaHQgYmUgc2xv
-d2VyIHRoYW4NCj4gPiA+IG5lY2Vzc2FyeSBmcm9tIHRoZSB1c2VyJ3MgcG9pbnQgb2Ygdmlldy4g
-IEkgc3VwcG9zZSB3ZSBjb3VsZCBoaWRlDQo+ID4gPiB0aGUgbGF0ZW5jeSBmcm9tIHRoZSB1c2Vy
-IGJ5IGhhdmluZyBhICJ0cmFzaCIgbGlzdCBpbiB0aGUgRlNNYXAgYnV0DQo+ID4gPiB0aGF0IHdp
-bGwgY2F1c2UgY29uZnVzaW9uIHdoZW4gdGhleSBsb29rIGF0IHRoZWlyIGRmIHN0YXRzICh3aGlj
-aA0KPiA+ID4gcGVvcGxlIHNlZW0gdG8gZG8gcXVpdGUgYSBsb3QpLg0KPiA+ID4NCj4gPiA+IERv
-aW5nIHRoZSBwZ25scyArIE8oTikgZGVsZXRlcyBmcm9tIHRoZSBtZ3IgaXMgSSBzdXBwb3NlIGdv
-aW5nIHRvIGF0DQo+ID4gPiBsZWFzdCBoYXZlIHNvbWUgY29tbW9uYWxpdHkgd2l0aCB3aGF0IHdl
-IHdvdWxkIGJlIGRvaW5nIGluIGEgbmljZWx5DQo+ID4gPiBvcmNoZXN0cmF0ZWQgYmFja3dhcmQg
-c2NydWIsIHNvIGl0J3Mgbm90IGNvbXBsZXRlbHkgY3JhenkuICBQZW9wbGUNCj4gPiA+IHdvdWxk
-IHN0aWxsIGFwcHJlY2lhdGUgaG93IG11Y2ggZmFzdGVyIGl0IHdhcyB0aGFuIGRvaW5nIGEgcm0g
-LXJmLg0KPiA+DQo+ID4gSSB0aGluayB0aGUgbW9zdCByZWFzb25hYmxlIHdheSB0byBkbyBzb21l
-dGhpbmcgbGlrZSB0aGlzIHdvdWxkIGJlIHRvDQo+ID4gaGF2ZSBhICJ0cmFzaCBucyBxdWV1ZSIg
-bGlzdCBicm9hZGNhc3QgdG8gYWxsIE9TRHMsIGFuZCBoYXZlIHRoZW0gZG8NCj4gPiB0aGUgY2xl
-YW51cCBkdXJpbmcgc2NydWIgKHdoZW4gdGhleSdyZSBhbHJlYWR5IGl0ZXJhdGluZyBvdmVyIHRo
-ZQ0KPiBuYW1lc3BhY2UpLg0KPiA+IE9TRHMgd291bGQgdHJhY2sgYSBsb3dlciBib3VuZCBvbiBh
-IHRyYXNoIHNlcXVlbmNlIG51bWJlciB0aGF0IGhhcw0KPiA+IGJlZW4gc2NydWJiZWQgYW5kIGFw
-cGxpZWQgKG9yIHNpbWlsYXIpIHNvIHRoYXQgZGVsZXRlIHF1ZXVlIGl0ZW1zIGdldA0KPiByZXRp
-cmVkLg0KPiA+IChXZSBuZWVkIHRvIGRvIHNvbWV0aGluZyBzaW1pbGFyIHdpdGggdGhlIHNuYXAg
-dHJpbW1pbmcgc28gdGhhdCB0aGUNCj4gPiBkZWxldGUgbGlzdCBpc24ndCBwdWJsaXNoZXMgZm9y
-IGFsbCB0aW1lIGluIHRoZSBPU0RNYXAuKQ0KPiA+DQo+ID4gU2NydWIgaXMgYWxyZWFkeSBpbml0
-aWF0aW5nIHVwZGF0ZXMgZm9yIGEgY291cGxlIGRpZmZlcmVudCByZWFzb25zICh0bw0KPiA+IHVw
-ZGF0ZSBkaWdlc3RzLCBhbmQgdG8gY29udmVydCBsZWdhY3kgc25hcHNldHMpLiAgSXQncyB3b3Jr
-ZWQgd2VsbCBzbw0KPiA+IGZhciwgYWx0aG91Z2ggZGVsZXRpb24gd2lsbCBiZSBhIGJpdCBtb3Jl
-IGV4cGVuc2l2ZSB0aGFuIHRoZSBjdXJyZW50DQo+ID4gdXBkYXRlcyB3aGljaCBhcmUgYWxsIHhh
-dHRyLW9ubHkuDQo+IA0KPiANCj4gV2UgZGlzY3Vzc2VkIHRoaXMgYSBiaXQgbW9yZSBpbiB0aGUg
-UkFET1Mgc3RhbmR1cC4gU2FnZSByZW1haW5zIGludGVyZXN0ZWQNCj4gaW4gdGhlIHByb2JsZW0s
-IGJ1dCBpdCBzb3VuZGVkIHRvIG1lIGxpa2UgdGhlIGNvbnNlbnN1cyB3YXMgd2Ugc2hvdWxkbid0
-DQo+IG1vdmUgZm9yd2FyZCBvbiB0aGlzOg0KPiAxKSBkb2luZyB0aGUgZGVsZXRlICpvdXRzaWRl
-KiBvZiBzY3J1YiBpcyBiYXNpY2FsbHkgbWFraW5nIHRoZSBSQURPUyBjbHVzdGVyDQo+IGxvb2sg
-YXQge019IGRhdGEgdG8gZG8gb3BlcmF0aW9ucyBvbiB7Tn0gKHdoZXJlIHNpemVvZihOKSA8PDw8
-IHNpemVvZihNKSkuDQo+IFNjcnViIGF0IGxlYXN0IG1lcmdlcyBpdCBpbiB0byB3b3JrIHdlJ3Jl
-IGFscmVhZHkgZG9pbmcsIGJ1dC4uLg0KPiAyKSBkb2luZyB0aGUgZGVsZXRlIGR1cmluZyBzY3J1
-YiBtYWtlcyB0aGUgdGhyb3R0bGluZy9zY2hlZHVsaW5nIGRyYW1hdGljYWxseQ0KPiBoYXJkZXIN
-Cj4gMykgZG9pbmcgYXlzbmNocm9ub3VzIG9wZXJhdGlvbnMgb2YgYW55IGtpbmQgaXMgYSBnaWFu
-dCBmb290LWd1biBmb3Igb3VyIEFQSQ0KPiB1c2Vyczsgb2J2aW91c2x5IG91ciBpbi10cmVlIHN5
-c3RlbXMgYXJlIGdvaW5nIHRvIGtub3cgdGhleSBjYW4ndCB3cml0ZSB0byBhDQo+IG5hbWVzcGFj
-ZSBhZnRlciBkZWxldGluZyBpdCBidXQgeW91IGp1c3QgKmtub3cqIHRoYXQgc29tZWJvZHkgaXMg
-Z29pbmcgdG8NCj4gdXNlIGl0IGFzIGEgc2hvcnRjdXQgZm9yICJkZWxldGUgYWxsIG15IGRhdGEi
-IGFuZCB0aGVuIHN0YXJ0IHdyaXRpbmcgdG8gaXQNCj4gaW1tZWRpYXRlbHkgYWZ0ZXIgdGhlIGFj
-a25vd2xlZGdlbWVudCBjb21taXQgcmV0dXJucy4gU28gd2UgcHJvYmFibHkNCj4gbmVlZCB0byBp
-bnRyb2R1Y2UgZXBvY2ggdmVyc2lvbmluZyBvZiBuYW1lc3BhY2VzIChuZWFybHkgaW1wb3NzaWJs
-ZT8pIGFuZA0KPiBjZXJ0YWlubHkgbmVlZCBhc3luYyBvcGVyYXRpb24gcmVwb3J0aW5nLiBMb3Rz
-IG9mIGNvbXBsZXhpdHkuDQo+IDQpIFRoZXJlIGRvbid0IHNlZW0gdG8gYmUgYW55IG90aGVyIHVz
-ZXJzIGFuZCBpdCBzZWVtcyBsaWtlIGEgbG90IG1vcmUgd29yaw0KPiB0byBkbyB0aGlzIGluIHRo
-ZSBPU0QgdGhhbiB0byBoYXZlIHRoZSBNRFMgb3IgbWFuYWdlciBvcmNoZXN0cmF0ZSBpdA0KPiBz
-b21laG93Lg0KPiANCj4gT2YgY291cnNlLCBub3cgaXQncyB3cml0dGVuIGRvd24gc28gcGVvcGxl
-IGNhbiB0ZWxsIG1lIG15IHVuZGVyc3RhbmRpbmcNCj4gd2FzIHdyb25nLi4uIDspIC1HcmVnDQo+
-IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1
-YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUNCj4gYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jk
-b21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+IGh0dHA6Ly92Z2Vy
-Lmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+Hi,
+
+On 05/31/2017 12:32 PM, han vincent wrote:
+> hello, loic:
+>      
+> I had a cluster build with hammer 0.94.10, then I used the following commands to change the algorithm from "straw" to "straw2".
+> 1. ceph osd crush tunables hammer
+> 2. ceph osd getcrushmap -o /tmp/cmap
+> 3. crushtool -d /tmp/cmap -o /tmp/cmap.txt
+> 4. vim /tmp/cmap.txt and change the algorithm of each bucket from "straw" to "straw2"
+> 5. crushtool -c /tmp/cmap.txt -o /tmp/cmap
+> 6. ceph osd setcrushmap -i /tmp/cmap
+> 7. ceph osd crush reweight-all
+> after that, I used "python crush" to optimize the cluster, the version of "python crush" is 1.0.32
+> 
+> 1. ceph report > report.json
+> 2. crush optimize --crushmap report.json --out-path optimized.crush
+> Unfortunately, there was an error in the output:
+> 
+> 2017-05-30 18:48:01,803 42.1 map to [4, 9] instead of [4, 8]
+> 2017-05-30 18:48:01,838 49.3af map to [9, 2] instead of [9, 3]
+> 2017-05-30 18:48:01,838 49.e3 map to [6, 4] instead of [6, 5]
+> 2017-05-30 18:48:01,838 49.e1 map to [7, 2] instead of [7, 3]
+> 2017-05-30 18:48:01,838 49.e0 map to [5, 1] instead of [5, 0]
+> 2017-05-30 18:48:01,838 49.20d map to [3, 1] instead of [3, 0]
+> 2017-05-30 18:48:01,838 49.20c map to [2, 9] instead of [2, 8]
+> 2017-05-30 18:48:01,838 49.36e map to [6, 1] instead of [6, 0]
+> ......
+> 
+> Traceback (most recent call last):
+>  File "/usr/bin/crush", line 25, in <module>
+> sys.exit(Ceph().main(sys.argv[1:]))
+>  File "/usr/lib64/python2.7/site-packages/crush/main.py", line 136, in main
+> return self.constructor(argv).run()
+>  File "/usr/lib64/python2.7/site-packages/crush/optimize.py", line 373, in run
+> crushmap = self.main.convert_to_crushmap(self.args.crushmap)
+>  File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py", line 690, in convert_to_crushmap
+> c.parse(crushmap)
+>  File "/usr/lib64/python2.7/site-packages/crush/__init__.py", line 138, in parse
+> return self.parse_crushmap(self._convert_to_crushmap(something))
+>  File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py", line 416, in _convert_to_crushmap
+> crushmap = CephReport().parse_report(something)
+>  File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py", line 137, in parse_report
+> raise MappingError("some mapping failed, please file a bug at "
+> crush.ceph.MappingError: some mapping failed, please file a bug at http://libcrush.org/main/python-crush/issues/new
+> Do you know what the problem is? can you help me? I would be very grateful to you.    
+
+This is a safeguard to make sure python-crush maps exactly as expected. I'm not sure yet why there is a difference but I'll work on that, using the crush implementation found in hammer 0.94.10. For your information, the full output of:
+
+$ crush analyze --crushmap /tmp/han-vincent-report.json
+
+is at https://paste2.org/PyeHe2dC What I find strange is that your output regarding pool 42 is different than mine. You have:
+
+
+2017-05-30 18:48:01,803 42.1 map to [4, 9] instead of [4, 8]
+
+and I have
+
+2017-05-31 12:55:04,207 42.3 map to [4, 3] instead of [4, 2]
+2017-05-31 12:55:04,207 42.7 map to [8, 0] instead of [8, 1]
+2017-05-31 12:55:04,207 42.1 map to [4, 9] instead of [4, 8]
+
+I wonder if that's a sign that the changes to the crushmap following your change to straw2 are still going on. Would you mind sending me the output of ceph report (please run it again after receiving this mail) ?
+
+Cheers
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
