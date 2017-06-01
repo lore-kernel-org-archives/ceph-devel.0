@@ -1,110 +1,101 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Beta testing crush optimization
-Date: Thu, 1 Jun 2017 14:23:16 +0200
-Message-ID: <e7c26a8f-e0cc-ff35-e4ae-6326846a1e02@dachary.org>
-References: <CANNfkubYdJqJDRV8kuNDBy368OxOyXkXKU3wr9ULFeafPnBoHg@mail.gmail.com>
- <b5814b74-fb97-85de-3f8b-f906c5363195@dachary.org>
- <d3cee009-9187-d90a-4a40-6ab98e619897@dachary.org>
- <CANNfkubxHfAYn-aLkHCQV_YZoMuVTzug9nRbvaTSE4UyKiQLuw@mail.gmail.com>
- <9c4d5c65-4bd3-19e0-2e0e-59331f952c46@dachary.org>
- <CANNfkuZbfNSW5CQHaV0yyF3744FPf-gh0vKBj45bZKrvZ27MhA@mail.gmail.com>
- <eefdcd45-e6fa-4bf0-56b3-76e155f45de2@dachary.org>
- <CANNfkuZF219VWnCYYQoPY7CXXBAFq1=BrfOyC_vL7-+nU5ixMg@mail.gmail.com>
- <6721f5e4-4da0-868c-6d65-c180fdb564e0@dachary.org>
- <CANNfkuY1KfLb=WR2scJKb82RKqGAwUB3wWSrPzvht-=ixsfhGg@mail.gmail.com>
- <5c2c692a-99c3-4b33-33bd-b9523943d7a4@dachary.org>
- <CANNfkubHKXhdaF5p2kOxfhTe-W3H=OmyyJ4hM+e10X=UB+rjEg@mail.gmail.com>
+From: =?UTF-8?B?5LqO55u45rSL?= <penglaiyxy@gmail.com>
+Subject: [ceph-osd] sloppy crc check fail and osd down
+Date: Thu, 1 Jun 2017 20:28:54 +0800
+Message-ID: <CAE5T3NynLEkWfg1cJqRDKibDUyiDJmvN+o3VuEGLo=pvKQxLSg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:34029 "EHLO
-        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751076AbdFAMXZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2017 08:23:25 -0400
-In-Reply-To: <CANNfkubHKXhdaF5p2kOxfhTe-W3H=OmyyJ4hM+e10X=UB+rjEg@mail.gmail.com>
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:32980 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751056AbdFAM24 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2017 08:28:56 -0400
+Received: by mail-wm0-f66.google.com with SMTP id b84so10968819wmh.0
+        for <ceph-devel@vger.kernel.org>; Thu, 01 Jun 2017 05:28:55 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: han vincent <hangzws@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+
+Hi cephers,
+
+ I encounter an osd dump problem, log shows as below,
+
+2017-04-21 05:46:53.764912 7f8e3134a700 0 filestore(/data/osd/osd.243)
+FileStore::read
+1.af36_head/a9c4af36/zone-wzr11.3412686.21__multipart_vod-99513923_2ce07d31-66e1-4d4e-ae75-fd86850a758e--20170412030045.flv.2~ukC7CODkZERVp9ffUqlmVRpeScHJYeO.5/head//1
+0~4194304 ... BAD CRC:
+offset 3407872 len 65536 has crc 3699171359 expected 3081294859
+
+2017-04-21 05:46:53.840907 7f8e3134a700 -1 os/FileStore.cc: In
+function 'virtual int FileStore::read(coll_t, const ghobject_t&,
+uint64_t, size_t, ceph::bufferlist&, uint32_t, bool)' thread
+7f8e3134a700 time 2017-04-21 05:46:53.765286
+os/FileStore.cc: 2892: FAILED assert(0 == "bad crc on read")
+
+ceph version 0.94.1 (e4bfad3a3c51054df7e537a724c8d0bf9be972ff)
+ 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+const*)+0x85) [0xc250a5]
+ 2: (FileStore::read(coll_t, ghobject_t const&, unsigned long,
+unsigned long, ceph::buffer::list&, unsigned int, bool)+0x5db)
+[0x8a752b]
+ 3: (ReplicatedBackend::objects_read_sync(hobject_t const&, unsigned
+long, unsigned long, unsigned int, ceph::buffer::list*)+0x96)
+[0xae5936]
+ 4: (ReplicatedPG::do_osd_ops(ReplicatedPG::OpContext*,
+std::vector&lt;OSDOp, std::allocator&lt;OSDOp&gt; >&)+0x2876)
+[0x9fdc16]
+ 5: (ReplicatedPG::prepare_transaction(ReplicatedPG::OpContext*)+0xcf)
+[0xa08fcf]
+ 6: (ReplicatedPG::execute_ctx(ReplicatedPG::OpContext*)+0x893) [0xa09993]
+ 7: (ReplicatedPG::do_op(std::tr1::shared_ptr&lt;OpRequest&gt;&)+0x2548)
+[0xa0cf18]
+ 8: (ReplicatedPG::do_request(std::tr1::shared_ptr&lt;OpRequest&gt;&,
+ThreadPool::TPHandle&)+0x463) [0x9a77c3]
+
+Disks are healthy and there is no error log in sys message. I can't
+find the culprit.
+
+The cluster ceph version is : 0.94.1
+
+When I start the down osd up, and read the file
+vod-99513923_2ce07d31-66e1-4d4e-ae75-fd86850a758e--20170412030045.flv,
+the osd went down again.
+
+After deep check the problem file
+"zone-wzr11.3412686.21__multipart_vod-99513923_2ce07d31-66e1-4d4e-ae75-fd86850a758e--20170412030045.flv.2~ukC7CODkZERVp9ffUqlmVRpeScHJYeO.5"
+ in osds, I find md5sum differs between the replica set osds.
+
+PRIMARY
+[root@wzR11-132 DIR_C]# ls -l
+zone-wzr11.3412686.21\\u\\umultipart\\uvod-99513923\\u2ce07d31-66e1-4d4e-ae75-fd86850a758e--20170412030045.flv.2~ukC7CODkZERVp9ffUqlmVRpeScHJYeO.5__head_A9C4AF36__1
+-rw-r--r-- 1 root root 4194304 Apr 12 04:14
+zone-wzr11.3412686.21\u\umultipart\uvod-99513923\u2ce07d31-66e1-4d4e-ae75-fd86850a758e--20170412030045.flv.2~ukC7CODkZERVp9ffUqlmVRpeScHJYeO.5__head_A9C4AF36__1
+
+mds5sum :  f3f910623270d18c6897bd5bed44b89f
 
 
+SECONDARY1
+[root@wzR11-120 DIR_C]# ls -l zone-wzr11.3412686.21\\u\\umultipart\\uvod-995*
+-rw-r--r-- 1 root root 4194304 Apr 12 04:14
+zone-wzr11.3412686.21\u\umultipart\uvod-99513923\u2ce07d31-66e1-4d4e-ae75-fd86850a758e--20170412030045.flv.2~ukC7CODkZERVp9ffUqlmVRpeScHJYeO.5__head_A9C4AF36__1
 
-On 06/01/2017 02:17 PM, han vincent wrote:
-> you can get the crushmap from
-> https://drive.google.com/open?id=0B5Kd4hBGEUvnUU9BcWY1NWtWNHM.
+md5sum:  94497a2f9c62c84628eb70c6bb8844fd
 
-Got it. You may want to remove it now as you probably don't want to expose all the informations it contains to the general public.
+SECONDARY2
 
-Cheers
+[root@wzR11-139 DIR_C]# ls -l
+zone-wzr11.3412686.21\\u\\umultipart\\uvod-99513923\\u2ce07d31-66e1-4d4e-ae75-fd86850a758e--20170412030045.flv.2~ukC7CODkZERVp9ffUqlmVRpeScHJYeO.5__head_A9C4AF36__1
+-rw-r--r-- 1 root root 4194304 Apr 12 04:14
+zone-wzr11.3412686.21\u\umultipart\uvod-99513923\u2ce07d31-66e1-4d4e-ae75-fd86850a758e--20170412030045.flv.2~ukC7CODkZERVp9ffUqlmVRpeScHJYeO.5__head_A9C4AF36__1
 
-> 
-> 2017-06-01 20:08 GMT+08:00 Loic Dachary <loic@dachary.org>:
->>
->>
->> On 06/01/2017 01:52 PM, han vincent wrote:
->>> 2017-06-01 19:43 GMT+08:00 Loic Dachary <loic@dachary.org>:
->>>>
->>>>
->>>> On 06/01/2017 01:38 PM, han vincent wrote:
->>>>> 2017-06-01 18:21 GMT+08:00 Loic Dachary <loic@dachary.org>:
->>>>>>
->>>>>>
->>>>>> On 06/01/2017 12:05 PM, han vincent wrote:
->>>>>>> Hi loic:
->>>>>>>    I still have two questions, in the following to commands:
->>>>>>>
->>>>>>>    1. crush optimize --crushmap /tmp/han-vincent-report.json --out-path /tmp/han-vincent-report-optimized.txt --out-format txt --pool 49
->>>>>>>
->>>>>>>    Is "--pool" options must specified in this command? if not, will it optimize all the pools without "--pool" option?
->>>>>>>    if there are several pools in my cluster and each pool has a lot of pgs. If I optimize one of the, will it affect the other pools?
->>>>>>>    how to use it to optimize multiple pools in a cluster of hammer?
->>>>>>>
->>>>>>>    2. crush analyze --crushmap /tmp/han-vincent-report-optimized.txt --pool 49 --replication-count=2 --pg-num=1024 --pgp-num=1024 --rule=replicated_ruleset --choose-args=49
->>>>>>>    In this command, the value of the "--choose-args" option is 49, it is same as the pool id, what is the mean of "--choose-args" option?
->>>>>>>
->>>>>>
->>>>>> The --pool option is required. You can only optimize one pool at a time.
->>>>>>
->>>>>> If multiple pools use the same crush rule or the same crush hierarchy, rebalancing one of them will hurt the balance of the others. It is possible to optimize multiple pools but only if they have different rules and crush hiearchies.
->>>>>>
->>>>>> The --choose-args option is the name of the weights that achieve the rebalancing. By convention it is the same as the pool id: this is required by Luminous clusters. Even though your cluster is not luminous, we stick to this convention.
->>>>>>
->>>>>> Cheers
->>>>>>
->>>>>> --
->>>>>> Loïc Dachary, Artisan Logiciel Libre
->>>>>
->>>>>  if the pools use the same crush rule or the same crush hierarchy, is
->>>>> there any way to optimize the cluster?
->>>>
->>>> It depends on the pools. In your cluster it does not matter because all pools except pool 49 are mostly empty. You can rebalance pool 49 and leave the other pool alone.
->>>>
->>>> Cheers
->>>>
->>>> --
->>>> Loïc Dachary, Artisan Logiciel Libre
->>>
->>> the crushmap of which cluster I send to you is in lab environment, I
->>> have a much bigger cluster in production.
->>> I will send the crushmap to you later, could you help me to optimize
->>> this cluster?
->>
->> It is an interesting use case, I will help.
->>
->>> If you have detailed steps, please send it to me.
->>
->> Using the output of "ceph report" cluster, I will be able to verify it works as expected. The steps are simple but they will require an upgrade to Luminous.
->>
->> Cheers
->>
->> --
->> Loïc Dachary, Artisan Logiciel Libre
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+md5sum:  94497a2f9c62c84628eb70c6bb8844fd
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+
+I have an idea to rename the file from the primary osd, and copy it
+from secondary osd  and set attrs as it is before. But I think this
+methord is too rigid and complicated if there are lots of xattrs.
+
+Are there some quick methords to deal with the problem?
+
+cheeks,
+
+brandy
