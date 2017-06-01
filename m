@@ -1,72 +1,52 @@
-From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
-Subject: Alibaba's work on async transaction
-Date: Fri, 02 Jun 2017 05:31:04 +0800
-Message-ID: <C00F39E2-837F-4995-A7D8-1FD100C59E48@alibaba-inc.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: Alibaba's work on async transaction
+Date: Thu, 1 Jun 2017 21:42:59 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1706012135210.3646@piezo.novalocal>
+References: <C00F39E2-837F-4995-A7D8-1FD100C59E48@alibaba-inc.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from out0-205.mail.aliyun.com ([140.205.0.205]:46112 "EHLO
-        out0-205.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751116AbdFAVb1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2017 17:31:27 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:57516 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751105AbdFAVnC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 1 Jun 2017 17:43:02 -0400
+In-Reply-To: <C00F39E2-837F-4995-A7D8-1FD100C59E48@alibaba-inc.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
-Cc: Sheng Qiu <sheng.qiu@alibaba-inc.com>
+To: "LIU, Fei" <james.liu@alibaba-inc.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sheng Qiu <sheng.qiu@alibaba-inc.com>
 
-Hi Sage, 
-   Here is the slides that I mentioned in morning conference call regarding to async transaction implementation in the backend blustore
+Hi James,
 
-  https://www.slideshare.net/jupiturliu/async-queuetransaction
+On Fri, 2 Jun 2017, LIU, Fei wrote:
+> Hi Sage, 
+>    Here is the slides that I mentioned in morning conference call regarding to async transaction implementation in the backend blustore
+> 
+>   https://www.slideshare.net/jupiturliu/async-queuetransaction
+> 
+>   We will modify the PR accordingly with your advice last time.
 
-  We will modify the PR accordingly with your advice last time.
+This is the PR, right?
 
-  Thanks,
-  James
+	https://github.com/ceph/ceph/pull/15141
 
-On 5/18/17, 5:50 PM, "LIU, Fei" <ceph-devel-owner@vger.kernel.org on behalf of james.liu@alibaba-inc.com> wrote:
+I don't remember exactly what I said before :), but I think the more 
+promising path forward is not to introduce a context switch but instead to 
+find a way to drop PG::lock once the operation is serialized on the 
+sequencer, or to have a second PG lock just for submitting the 
+transaction.  E.g.,
 
-    Hi Lin and Brett,
-       Out of town for business trip. Got a little bit of problem to access slideshare out of US. Will send you the link soon after I am back to town.
-    
-      thanks,
-      James
-    
-    On 5/19/17, 12:16 AM, "Ning Yao" <ceph-devel-owner@vger.kernel.org on behalf of zay11022@gmail.com> wrote:
-    
-        It is a private slide
-        Regards
-        Ning Yao
-        
-        
-        2017-05-12 0:41 GMT+08:00 LIU, Fei <james.liu@alibaba-inc.com>:
-        > Hi All,
-        >   Here is the slides that we presented this morning regarding to IO returning once we get majority commit.  Please feel free to send us any comments and questions.
-        >
-        >   https://www.slideshare.net/jupiturliu/ceph-majority-commit
-        >
-        >   Regards,
-        >   James
-        >
-        >
-        >
-        > --
-        > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-        > the body of a message to majordomo@vger.kernel.org
-        > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-        --
-        To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-        the body of a message to majordomo@vger.kernel.org
-        More majordomo info at  http://vger.kernel.org/majordomo-info.html
-        
-    
-    
-    --
-    To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-    the body of a message to majordomo@vger.kernel.org
-    More majordomo info at  http://vger.kernel.org/majordomo-info.html
-    
+  pg->submit_lock.Lock();
+  pg->unlock();
+  store->submit_transaction(...);
+  pg->submit_lock.Unlock();
 
+This will require a careful look at what is happening inside PG after 
+PG::lock is dropped, though.  It probably makes sense to look at this in 
+conjuction with something like
 
+	https://github.com/ceph/ceph/pull/11188
+
+which never got finished (and has now gone very stale)...
+
+sage
