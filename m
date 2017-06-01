@@ -1,50 +1,39 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: Beta testing crush optimization
-Date: Thu, 1 Jun 2017 12:21:49 +0200
-Message-ID: <eefdcd45-e6fa-4bf0-56b3-76e155f45de2@dachary.org>
-References: <CANNfkubYdJqJDRV8kuNDBy368OxOyXkXKU3wr9ULFeafPnBoHg@mail.gmail.com>
- <b5814b74-fb97-85de-3f8b-f906c5363195@dachary.org>
- <d3cee009-9187-d90a-4a40-6ab98e619897@dachary.org>
- <CANNfkubxHfAYn-aLkHCQV_YZoMuVTzug9nRbvaTSE4UyKiQLuw@mail.gmail.com>
- <9c4d5c65-4bd3-19e0-2e0e-59331f952c46@dachary.org>
- <CANNfkuZbfNSW5CQHaV0yyF3744FPf-gh0vKBj45bZKrvZ27MhA@mail.gmail.com>
+From: David Howells <dhowells@redhat.com>
+Subject: Re: [PATCH 01/35] fscache: Remove unused ->now_uncached callback
+Date: Thu, 01 Jun 2017 11:26:08 +0100
+Message-ID: <10376.1496312768@warthog.procyon.org.uk>
+References: <20170601093245.29238-2-jack@suse.cz> <20170601093245.29238-1-jack@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay2-d.mail.gandi.net ([217.70.183.194]:43492 "EHLO
-        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751764AbdFAKVy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2017 06:21:54 -0400
-In-Reply-To: <CANNfkuZbfNSW5CQHaV0yyF3744FPf-gh0vKBj45bZKrvZ27MhA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: han vincent <hangzws@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20170601093245.29238-2-jack@suse.cz>
+Content-ID: <10375.1496312768.1@warthog.procyon.org.uk>
+Sender: owner-linux-mm@kvack.org
+To: Jan Kara <jack@suse.cz>
+Cc: dhowells@redhat.com, linux-mm@kvack.org, Hugh Dickins <hughd@google.com>, linux-afs@lists.infradead.org, Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>, linux-nilfs@vger.kernel.org, Bob Peterson <rpeterso@redhat.com>, cluster-devel@redhat.com, Jaegeuk Kim <jaegeuk@kernel.org>, linux-f2fs-devel@lists.sourceforge.net, tytso@mit.edu, linux-ext4@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, "Yan,
+                         Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org, David Sterba <dsterba@suse.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, linux-xfs@vger.kernel.org, Nadia Yvette Chambers <nyc@holomorphy.com>
+List-Id: ceph-devel.vger.kernel.org
 
+Jan Kara <jack@suse.cz> wrote:
 
+> The callback doesn't ever get called. Remove it.
 
-On 06/01/2017 12:05 PM, han vincent wrote:
-> Hi loic:
->    I still have two questions, in the following to commands:
->    
->    1. crush optimize --crushmap /tmp/han-vincent-report.json --out-path /tmp/han-vincent-report-optimized.txt --out-format txt --pool 49
-> 
->    Is "--pool" options must specified in this command? if not, will it optimize all the pools without "--pool" option?
->    if there are several pools in my cluster and each pool has a lot of pgs. If I optimize one of the, will it affect the other pools?
->    how to use it to optimize multiple pools in a cluster of hammer?
-> 
->    2. crush analyze --crushmap /tmp/han-vincent-report-optimized.txt --pool 49 --replication-count=2 --pg-num=1024 --pgp-num=1024 --rule=replicated_ruleset --choose-args=49
->    In this command, the value of the "--choose-args" option is 49, it is same as the pool id, what is the mean of "--choose-args" option?
->    
+Hmmm...  I should perhaps be calling this.  I'm not sure why I never did.
 
-The --pool option is required. You can only optimize one pool at a time.
+At the moment, it doesn't strictly matter as ops on pages marked with
+PG_fscache get ignored if the cache has suffered an I/O error or has been
+withdrawn - but it will incur a performance penalty (the PG_fscache flag is
+checked in the netfs before calling into fscache).
 
-If multiple pools use the same crush rule or the same crush hierarchy, rebalancing one of them will hurt the balance of the others. It is possible to optimize multiple pools but only if they have different rules and crush hiearchies.
+The downside of calling this is that when a cache is removed, fscache would go
+through all the cookies for that cache and iterate over all the pages
+associated with those cookies - which could cause a performance dip in the
+system.
 
-The --choose-args option is the name of the weights that achieve the rebalancing. By convention it is the same as the pool id: this is required by Luminous clusters. Even though your cluster is not luminous, we stick to this convention.
+David
 
-Cheers
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
