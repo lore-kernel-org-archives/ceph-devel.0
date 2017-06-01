@@ -1,359 +1,266 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Wed, 31 May 2017 21:33:00 -0700
-Message-ID: <592f98fc54df6_4e8d72f330517b3@ss1435.mail>
+From: han vincent <hangzws@gmail.com>
+Subject: Fwd: Beta testing crush optimization
+Date: Thu, 1 Jun 2017 14:29:39 +0800
+Message-ID: <CANNfkua2F6=tk8tRoE_3GB6VyszsPur9Q9=38LT_fkZ+-kBiSQ@mail.gmail.com>
+References: <CANNfkubYdJqJDRV8kuNDBy368OxOyXkXKU3wr9ULFeafPnBoHg@mail.gmail.com>
+ <b5814b74-fb97-85de-3f8b-f906c5363195@dachary.org> <d3cee009-9187-d90a-4a40-6ab98e619897@dachary.org>
+ <CANNfkubv6FF_5NHBr6reE-Tq7Tfy8Yqg2TX=xiCO06qxHFpgrw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from o2.lv30e.shared.sendgrid.net ([50.31.63.43]:61105 "EHLO
-        o2.lv30e.shared.sendgrid.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750726AbdFAEej (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2017 00:34:39 -0400
-Received: from coverity.com (static-208.69.177.245.nephosdns.com [208.69.177.245])
-        by ismtpd0001p1sjc2.sendgrid.net (SG) with ESMTP id -bCnTshoTJCsXHV_8qX7ow
-        for <ceph-devel@vger.kernel.org>; Thu, 01 Jun 2017 04:33:00.388 +0000 (UTC)
+Received: from mail-it0-f50.google.com ([209.85.214.50]:33982 "EHLO
+        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750848AbdFAG3l (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2017 02:29:41 -0400
+Received: by mail-it0-f50.google.com with SMTP id a10so503488itg.1
+        for <ceph-devel@vger.kernel.org>; Wed, 31 May 2017 23:29:40 -0700 (PDT)
+In-Reply-To: <CANNfkubv6FF_5NHBr6reE-Tq7Tfy8Yqg2TX=xiCO06qxHFpgrw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Loic Dachary <loic@dachary.org>
+
+---------- Forwarded message ----------
+From: han vincent <hangzws@gmail.com>
+Date: 2017-06-01 14:27 GMT+08:00
+Subject: Re: Beta testing crush optimization
+To: Loic Dachary <loic@dachary.org>
 
 
-Hi,
+Hi, Loic:
+  Thanks for you apply,  If you fix the bug, please tell me, thanks.
+And I still have some questions troubled me.
 
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+  you said there was a "statble" tunable was implemented after hammer,
+Does it mean that the version of the "straw2" is unstable in hammer?
+  do you know which version the "statble" tunable was pulished?
 
-11 new defect(s) introduced to ceph found with Coverity Scan.
-3 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+  >crush optimize --crushmap /tmp/han-vincent-report.json --out-path
+/tmp/han-vincent-report-optimized.txt --out-format txt --pool 49
+  Is "--pool" options must specified in this command? if not, will it
+optimize all the pools without "--pool" option?
+  if there are several pools in my cluster and each pool has a lot of
+pgs. If I optimize one of the, will it affect the other pools?
+  how to use it to optimize multiple pools in a cluster of hammer?
 
-New defect(s) Reported-by: Coverity Scan
-Showing 11 of 11 defect(s)
+  >(virtualenv) loic@fold:~/software/libcrush/python-crush$ crush
+analyze --crushmap /tmp/han-vincent-report-optimized.txt --pool 49
+--replication-count=3D2 --pg-num=3D1024 --pgp-num=3D1024
+--rule=3Dreplicated_ruleset --choose-args=3D49
+  In this command, the value of the "--choose-args" option is 49, it
+is same as the pool id, what is the mean of "--choose-args" option?
 
-
-** CID 1411820:  Integer handling issues  (DIVIDE_BY_ZERO)
-/home/brad/working/src/ceph/src/test/test_denc.cc: 618 in Legacy::encode_n(unsigned int, const std::vector<unsigned int, std::allocator<unsigned int>> &)()
-
-
-________________________________________________________________________________________________________
-*** CID 1411820:  Integer handling issues  (DIVIDE_BY_ZERO)
-/home/brad/working/src/ceph/src/test/test_denc.cc: 618 in Legacy::encode_n(unsigned int, const std::vector<unsigned int, std::allocator<unsigned int>> &)()
-612       bufferlist segmented;
-613       auto p = bl.begin();
-614     
-615       auto sum = std::accumulate(segments.begin(), segments.end(), 0u);
-616       for (auto i : segments) {
-617         buffer::ptr seg;
->>>     CID 1411820:  Integer handling issues  (DIVIDE_BY_ZERO)
->>>     In expression "bl.length() * i / sum", division by expression "sum" which may be zero has undefined behavior.
-618         p.copy_deep(bl.length() * i / sum, seg);
-619         segmented.push_back(seg);
-620       }
-621       p.copy_all(segmented);
-622       return segmented;
-623     }
-
-** CID 1411821:  API usage errors  (INVALIDATE_ITERATOR)
-/home/brad/working/src/ceph/src/test/encoding/ceph_dencoder.cc: 147 in _ZN12DencoderBaseI15sstring_wrapperE16select_generatedB5cxx11Ej()
-
-
-________________________________________________________________________________________________________
-*** CID 1411821:  API usage errors  (INVALIDATE_ITERATOR)
-/home/brad/working/src/ceph/src/test/encoding/ceph_dencoder.cc: 147 in _ZN12DencoderBaseI15sstring_wrapperE16select_generatedB5cxx11Ej()
-141         if (i == 0)
-142           i = m_list.size();
-143         if ((i == 0) || (i > m_list.size()))
-144           return "invalid id for generated object";
-145         typename list<T*>::iterator p = m_list.begin();
-146         for (i--; i > 0 && p != m_list.end(); ++p, --i) ;
->>>     CID 1411821:  API usage errors  (INVALIDATE_ITERATOR)
->>>     Dereferencing iterator "p" though it is already past the end of its container.
-147         m_object = *p;
-148         return string();
-149       }
-150     
-151       bool is_deterministic() override {
-152         return !nondeterministic;
-
-** CID 1411822:    (NEGATIVE_RETURNS)
-/home/brad/working/src/ceph/src/include/buffer.h: 661 in ceph::buffer::list::list(unsigned int)()
-/home/brad/working/src/ceph/src/include/rados/buffer.h: 661 in ceph::buffer::list::list(unsigned int)()
-
-
-________________________________________________________________________________________________________
-*** CID 1411822:    (NEGATIVE_RETURNS)
-/home/brad/working/src/ceph/src/include/buffer.h: 661 in ceph::buffer::list::list(unsigned int)()
-655         int zero_copy_to_fd(int fd) const;
-656     
-657       public:
-658         // cons/des
-659         list() : _len(0), _memcopy_count(0), last_p(this) {}
-660         // cppcheck-suppress noExplicitConstructor
->>>     CID 1411822:    (NEGATIVE_RETURNS)
->>>     Assigning: "this->_mempool" = a negative value.
-661         list(unsigned prealloc) : _len(0), _memcopy_count(0), last_p(this) {
-662           reserve(prealloc);
-663         }
-664     
-665         list(const list& other) : _buffers(other._buffers), _len(other._len),
-666     			      _memcopy_count(other._memcopy_count), last_p(this) {
-/home/brad/working/src/ceph/src/include/rados/buffer.h: 661 in ceph::buffer::list::list(unsigned int)()
-655         int zero_copy_to_fd(int fd) const;
-656     
-657       public:
-658         // cons/des
-659         list() : _len(0), _memcopy_count(0), last_p(this) {}
-660         // cppcheck-suppress noExplicitConstructor
->>>     CID 1411822:    (NEGATIVE_RETURNS)
->>>     Assigning: "this->_mempool" = a negative value.
-661         list(unsigned prealloc) : _len(0), _memcopy_count(0), last_p(this) {
-662           reserve(prealloc);
-663         }
-664     
-665         list(const list& other) : _buffers(other._buffers), _len(other._len),
-666     			      _memcopy_count(other._memcopy_count), last_p(this) {
-
-** CID 1411823:  Null pointer dereferences  (NULL_RETURNS)
-/home/brad/working/src/ceph/src/crush/CrushWrapper.cc: 1378 in CrushWrapper::bucket_add_item(crush_bucket *, int, int)()
-
-
-________________________________________________________________________________________________________
-*** CID 1411823:  Null pointer dereferences  (NULL_RETURNS)
-/home/brad/working/src/ceph/src/crush/CrushWrapper.cc: 1378 in CrushWrapper::bucket_add_item(crush_bucket *, int, int)()
-1372         crush_choose_arg_map arg_map = w.second;
-1373         crush_choose_arg *arg = &arg_map.args[-1-bucket->id];
-1374         for (__u32 j = 0; j < arg->weight_set_size; j++) {
-1375           crush_weight_set *weight_set = &arg->weight_set[j];
-1376           weight_set->weights = (__u32*)realloc(weight_set->weights, new_size * sizeof(__u32));
-1377           assert(weight_set->size + 1 == new_size);
->>>     CID 1411823:  Null pointer dereferences  (NULL_RETURNS)
->>>     Dereferencing a null pointer "weight_set->weights".
-1378           weight_set->weights[weight_set->size] = weight;
-1379           weight_set->size = new_size;
-1380         }
-1381         if (arg->ids_size) {
-1382           arg->ids = (int*)realloc(arg->ids, new_size * sizeof(int));
-1383           assert(arg->ids_size + 1 == new_size);
-
-** CID 1411824:  Memory - corruptions  (OVERRUN)
-
-
-________________________________________________________________________________________________________
-*** CID 1411824:  Memory - corruptions  (OVERRUN)
-/home/brad/working/src/ceph/src/osd/osd_types.cc: 4933 in object_manifest_t::encode(ceph::buffer::list &) const()
-4927     }
-4928     
-4929     // -- object_manifest_t --
-4930     
-4931     void object_manifest_t::encode(bufferlist& bl) const
-4932     {
->>>     CID 1411824:  Memory - corruptions  (OVERRUN)
->>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
-4933       ENCODE_START(1, 1, bl);
-4934       ::encode(type, bl);
-4935       switch (type) {
-4936         case TYPE_NONE: break;
-4937         case TYPE_REDIRECT: 
-4938           ::encode(redirect_target, bl);
-
-** CID 1411825:    (OVERRUN)
-/home/brad/working/src/ceph/src/crush/CrushWrapper.cc: 1378 in CrushWrapper::bucket_add_item(crush_bucket *, int, int)()
-/home/brad/working/src/ceph/src/crush/CrushWrapper.cc: 1378 in CrushWrapper::bucket_add_item(crush_bucket *, int, int)()
-
-
-________________________________________________________________________________________________________
-*** CID 1411825:    (OVERRUN)
-/home/brad/working/src/ceph/src/crush/CrushWrapper.cc: 1378 in CrushWrapper::bucket_add_item(crush_bucket *, int, int)()
-1372         crush_choose_arg_map arg_map = w.second;
-1373         crush_choose_arg *arg = &arg_map.args[-1-bucket->id];
-1374         for (__u32 j = 0; j < arg->weight_set_size; j++) {
-1375           crush_weight_set *weight_set = &arg->weight_set[j];
-1376           weight_set->weights = (__u32*)realloc(weight_set->weights, new_size * sizeof(__u32));
-1377           assert(weight_set->size + 1 == new_size);
->>>     CID 1411825:    (OVERRUN)
->>>     Overrunning dynamic array "weight_set->weights" at offset corresponding to index variable "weight_set->size".
-1378           weight_set->weights[weight_set->size] = weight;
-1379           weight_set->size = new_size;
-1380         }
-1381         if (arg->ids_size) {
-1382           arg->ids = (int*)realloc(arg->ids, new_size * sizeof(int));
-1383           assert(arg->ids_size + 1 == new_size);
-/home/brad/working/src/ceph/src/crush/CrushWrapper.cc: 1378 in CrushWrapper::bucket_add_item(crush_bucket *, int, int)()
-1372         crush_choose_arg_map arg_map = w.second;
-1373         crush_choose_arg *arg = &arg_map.args[-1-bucket->id];
-1374         for (__u32 j = 0; j < arg->weight_set_size; j++) {
-1375           crush_weight_set *weight_set = &arg->weight_set[j];
-1376           weight_set->weights = (__u32*)realloc(weight_set->weights, new_size * sizeof(__u32));
-1377           assert(weight_set->size + 1 == new_size);
->>>     CID 1411825:    (OVERRUN)
->>>     Overrunning dynamic array "weight_set->weights" at offset corresponding to index variable "weight_set->size".
-1378           weight_set->weights[weight_set->size] = weight;
-1379           weight_set->size = new_size;
-1380         }
-1381         if (arg->ids_size) {
-1382           arg->ids = (int*)realloc(arg->ids, new_size * sizeof(int));
-1383           assert(arg->ids_size + 1 == new_size);
-
-** CID 1411826:    (OVERRUN)
-/home/brad/working/src/ceph/src/crush/CrushWrapper.cc: 1384 in CrushWrapper::bucket_add_item(crush_bucket *, int, int)()
-/home/brad/working/src/ceph/src/crush/CrushWrapper.cc: 1384 in CrushWrapper::bucket_add_item(crush_bucket *, int, int)()
-
-
-________________________________________________________________________________________________________
-*** CID 1411826:    (OVERRUN)
-/home/brad/working/src/ceph/src/crush/CrushWrapper.cc: 1384 in CrushWrapper::bucket_add_item(crush_bucket *, int, int)()
-1378           weight_set->weights[weight_set->size] = weight;
-1379           weight_set->size = new_size;
-1380         }
-1381         if (arg->ids_size) {
-1382           arg->ids = (int*)realloc(arg->ids, new_size * sizeof(int));
-1383           assert(arg->ids_size + 1 == new_size);
->>>     CID 1411826:    (OVERRUN)
->>>     Overrunning dynamic array "arg->ids" at offset corresponding to index variable "arg->ids_size".
-1384           arg->ids[arg->ids_size] = item;
-1385           arg->ids_size = new_size;
-1386         }
-1387       }
-1388       return crush_bucket_add_item(crush, bucket, item, weight);
-1389     }
-/home/brad/working/src/ceph/src/crush/CrushWrapper.cc: 1384 in CrushWrapper::bucket_add_item(crush_bucket *, int, int)()
-1378           weight_set->weights[weight_set->size] = weight;
-1379           weight_set->size = new_size;
-1380         }
-1381         if (arg->ids_size) {
-1382           arg->ids = (int*)realloc(arg->ids, new_size * sizeof(int));
-1383           assert(arg->ids_size + 1 == new_size);
->>>     CID 1411826:    (OVERRUN)
->>>     Overrunning dynamic array "arg->ids" at offset corresponding to index variable "arg->ids_size".
-1384           arg->ids[arg->ids_size] = item;
-1385           arg->ids_size = new_size;
-1386         }
-1387       }
-1388       return crush_bucket_add_item(crush, bucket, item, weight);
-1389     }
-
-** CID 1411827:    (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/test/librados/tier.cc: 5494 in LibRadosTwoPoolsECPP_SetRedirectRead_Test::TestBody()()
-/home/brad/working/src/ceph/src/test/librados/tier.cc: 5492 in LibRadosTwoPoolsECPP_SetRedirectRead_Test::TestBody()()
-
-
-________________________________________________________________________________________________________
-*** CID 1411827:    (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/test/librados/tier.cc: 5494 in LibRadosTwoPoolsECPP_SetRedirectRead_Test::TestBody()()
-5488       {
-5489         ObjectWriteOperation op;
-5490         op.set_redirect("bar", cache_ioctx, 0);
-5491         librados::AioCompletion *completion = cluster.aio_create_completion();
-5492         ASSERT_EQ(0, ioctx.aio_operate("foo", completion, &op));
-5493         completion->wait_for_safe();
->>>     CID 1411827:    (RESOURCE_LEAK)
->>>     Variable "completion" going out of scope leaks the storage it points to.
-5494         ASSERT_EQ(0, completion->get_return_value());
-5495         completion->release();
-5496       }
-5497       // read and verify the object
-5498       {
-5499         bufferlist bl;
-/home/brad/working/src/ceph/src/test/librados/tier.cc: 5492 in LibRadosTwoPoolsECPP_SetRedirectRead_Test::TestBody()()
-5486       cluster.wait_for_latest_osdmap();
-5487     
-5488       {
-5489         ObjectWriteOperation op;
-5490         op.set_redirect("bar", cache_ioctx, 0);
-5491         librados::AioCompletion *completion = cluster.aio_create_completion();
->>>     CID 1411827:    (RESOURCE_LEAK)
->>>     Variable "completion" going out of scope leaks the storage it points to.
-5492         ASSERT_EQ(0, ioctx.aio_operate("foo", completion, &op));
-5493         completion->wait_for_safe();
-5494         ASSERT_EQ(0, completion->get_return_value());
-5495         completion->release();
-5496       }
-5497       // read and verify the object
-
-** CID 1411828:    (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/test/librados/tier.cc: 2795 in LibRadosTwoPoolsPP_SetRedirectRead_Test::TestBody()()
-/home/brad/working/src/ceph/src/test/librados/tier.cc: 2793 in LibRadosTwoPoolsPP_SetRedirectRead_Test::TestBody()()
-
-
-________________________________________________________________________________________________________
-*** CID 1411828:    (RESOURCE_LEAK)
-/home/brad/working/src/ceph/src/test/librados/tier.cc: 2795 in LibRadosTwoPoolsPP_SetRedirectRead_Test::TestBody()()
-2789       {
-2790         ObjectWriteOperation op;
-2791         op.set_redirect("bar", cache_ioctx, 0);
-2792         librados::AioCompletion *completion = cluster.aio_create_completion();
-2793         ASSERT_EQ(0, ioctx.aio_operate("foo", completion, &op));
-2794         completion->wait_for_safe();
->>>     CID 1411828:    (RESOURCE_LEAK)
->>>     Variable "completion" going out of scope leaks the storage it points to.
-2795         ASSERT_EQ(0, completion->get_return_value());
-2796         completion->release();
-2797       }
-2798       // read and verify the object
-2799       {
-2800         bufferlist bl;
-/home/brad/working/src/ceph/src/test/librados/tier.cc: 2793 in LibRadosTwoPoolsPP_SetRedirectRead_Test::TestBody()()
-2787       cluster.wait_for_latest_osdmap();
-2788     
-2789       {
-2790         ObjectWriteOperation op;
-2791         op.set_redirect("bar", cache_ioctx, 0);
-2792         librados::AioCompletion *completion = cluster.aio_create_completion();
->>>     CID 1411828:    (RESOURCE_LEAK)
->>>     Variable "completion" going out of scope leaks the storage it points to.
-2793         ASSERT_EQ(0, ioctx.aio_operate("foo", completion, &op));
-2794         completion->wait_for_safe();
-2795         ASSERT_EQ(0, completion->get_return_value());
-2796         completion->release();
-2797       }
-2798       // read and verify the object
-
-** CID 1411829:  Uninitialized members  (UNINIT_CTOR)
-/home/brad/working/src/ceph/src/test/osd/TestRados.cc: 55 in WeightedTestGenerator::WeightedTestGenerator(int, int, std::map<TestOpType, unsigned int, std::less<TestOpType>, std::allocator<std::pair<const TestOpType, unsigned int>>>, TestOpStat *, int, bool, bool, bool)()
-
-
-________________________________________________________________________________________________________
-*** CID 1411829:  Uninitialized members  (UNINIT_CTOR)
-/home/brad/working/src/ceph/src/test/osd/TestRados.cc: 55 in WeightedTestGenerator::WeightedTestGenerator(int, int, std::map<TestOpType, unsigned int, std::less<TestOpType>, std::allocator<std::pair<const TestOpType, unsigned int>>>, TestOpStat *, int, bool, bool, bool)()
-49         if (m_set_redirect) {
-50           /* create redirect objects + set-redirect*/
-51           m_redirect_objects = objects*2; // for copy_from + set-redirect test
-52           m_initial_redirected_objects = objects;
-53           m_ops = ops+m_redirect_objects+m_initial_redirected_objects;
-54         }
->>>     CID 1411829:  Uninitialized members  (UNINIT_CTOR)
->>>     Non-static class member "m_initial_redirected_objects" is not initialized in this constructor nor in any functions that it calls.
-55       }
-56     
-57       TestOp *next(RadosTestContext &context) override
-58       {
-59         TestOp *retval = NULL;
-60     
-
-** CID 1411830:  Uninitialized members  (UNINIT_CTOR)
-/home/brad/working/src/ceph/src/test/osd/RadosModel.h: 2126 in UnsetRedirectOp::UnsetRedirectOp(int, RadosTestContext *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, TestOpStat *)()
-
-
-________________________________________________________________________________________________________
-*** CID 1411830:  Uninitialized members  (UNINIT_CTOR)
-/home/brad/working/src/ceph/src/test/osd/RadosModel.h: 2126 in UnsetRedirectOp::UnsetRedirectOp(int, RadosTestContext *, const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> &, TestOpStat *)()
-2120     
-2121       UnsetRedirectOp(int n,
-2122     	   RadosTestContext *context,
-2123     	   const string &oid,
-2124     	   TestOpStat *stat = 0)
-2125         : TestOp(n, context, stat), oid(oid)
->>>     CID 1411830:  Uninitialized members  (UNINIT_CTOR)
->>>     Non-static class member "comp" is not initialized in this constructor nor in any functions that it calls.
-2126       {}
-2127     
-2128       void _begin() override
-2129       {
-2130         context->state_lock.Lock();
-2131         if (context->get_watch_context(oid)) {
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRaGCnxtQO9E3gxlB2GxVsWFENryh7bC5hIb-2FQBVM85YLQ-3D-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8G5OiOArS4mvucljpKkZw44xl0QoIr8EpGQt1P0w1oaffl7nxw8VV-2FfL-2BSHVBEVO6LCmn0hI3U0Gj4IBjBpEHsBqkyG32oG7OM07i90czclrUn8ZHIPd7o0COMiw9vRPoQvv9Qjc4bhBMPPuVAfW-2Fp-2Fl68O2kkGS5yLflkFKEpdvr57J6B1ycB-2BZ93t-2Fb-2BrHkw-3D
-
-To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRbVDbis712qZDP-2FA8y06Nq4Bco8jcmzhh7FSyvoR0E3-2BDgRcBCQ6OuthHBtaTCGNq9OVG2ZVnjrgThgf5hX3GVEkIxvBX-2BorwRZfOftSp7HPfCifRGGak1MlgNFVd3IIPA-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8G5OiOArS4mvucljpKkZw44xl0QoIr8EpGQt1P0w1oafXCIZ8tHMljtYMd-2Fvesxn1V8hxDdwW85wJWMZSoNgAEHWwSeYpAfDcwI4c-2FwCOmfWTElzRdAYV-2FwKXoRzvooUS1exKyuJU-2FEzJqVabH9jj4h26-2BepOn998l-2FejVNhKELgNj8j2nQHqQTsEd6D0fWZnc-3D
-
+>2017-05-31 20:40 GMT+08:00 Loic Dachary <loic@dachary.org>:
+>
+> Hi,
+>
+> I found the reason for the map problem, thanks a lot for reporting it. In=
+ a nutshell the "stable" tunable was implemented after hammer and your ceph=
+ report does not mention it at all. python-crush incorrectly assumes this m=
+eans it should default to 1. It must default to 0 instead. When I do that m=
+anually, all mappings are correct. I'll fix this and publish a new version =
+by tomorrow.
+>
+> Your cluster is not very unbalanced (less than 10% overfilled):
+>
+> (virtualenv) loic@fold:~/software/libcrush/python-crush$ crush analyze --=
+crushmap /tmp/han-vincent-report.json --pool 49
+>          ~id~  ~weight~  ~PGs~  ~over/under filled %~
+> ~name~
+> node-6v    -4      1.08    427                   4.25
+> node-4     -2      1.08    416                   1.56
+> node-7v    -5      1.08    407                  -0.63
+> node-8v    -6      1.08    405                  -1.12
+> node-5v    -3      1.08    393                  -4.05
+>
+> Worst case scenario if a host fails:
+>
+>         ~over filled %~
+> ~type~
+> device             7.81
+> host               4.10
+> root               0.00
+> (virtualenv) loic@fold:~/software/libcrush/python-crush$ crush analyze --=
+type device --crushmap /tmp/han-vincent-report.json --pool 49
+>         ~id~  ~weight~  ~PGs~  ~over/under filled %~
+> ~name~
+> osd.5      5      0.54    221                   7.91
+> osd.0      0      0.54    211                   3.03
+> osd.7      7      0.54    210                   2.54
+> osd.4      4      0.54    206                   0.59
+> osd.8      8      0.54    206                   0.59
+> osd.1      1      0.54    205                   0.10
+> osd.3      3      0.54    200                  -2.34
+> osd.9      9      0.54    199                  -2.83
+> osd.6      6      0.54    197                  -3.81
+> osd.2      2      0.54    193                  -5.76
+>
+> Worst case scenario if a host fails:
+>
+>         ~over filled %~
+> ~type~
+> device             7.81
+> host               4.10
+> root               0.00
+>
+> With optimization things will improve:
+>
+> $ crush optimize --crushmap /tmp/han-vincent-report.json --out-path /tmp/=
+han-vincent-report-optimized.txt --out-format txt --pool 49
+> 2017-05-31 15:17:59,917 argv =3D optimize --crushmap /tmp/han-vincent-rep=
+ort.json --out-path /tmp/han-vincent-report-optimized.txt --out-format txt =
+--pool 49 --replication-count=3D2 --pg-num=3D1024 --pgp-num=3D1024 --rule=
+=3Dreplicated_ruleset --out-version=3Dh --no-positions --choose-args=3D49
+> 2017-05-31 15:17:59,940 default optimizing
+> 2017-05-31 15:18:05,007 default wants to swap 43 PGs
+> 2017-05-31 15:18:05,013 node-6v optimizing
+> 2017-05-31 15:18:05,013 node-4 optimizing
+> 2017-05-31 15:18:05,016 node-8v optimizing
+> 2017-05-31 15:18:05,016 node-7v optimizing
+> 2017-05-31 15:18:05,018 node-5v optimizing
+> 2017-05-31 15:18:05,369 node-4 wants to swap 8 PGs
+> 2017-05-31 15:18:05,742 node-6v wants to swap 10 PGs
+> 2017-05-31 15:18:06,382 node-5v wants to swap 7 PGs
+> 2017-05-31 15:18:06,602 node-7v wants to swap 7 PGs
+> 2017-05-31 15:18:07,346 node-8v already optimized
+>
+> (virtualenv) loic@fold:~/software/libcrush/python-crush$ crush analyze --=
+crushmap /tmp/han-vincent-report-optimized.txt --pool 49 --replication-coun=
+t=3D2 --pg-num=3D1024 --pgp-num=3D1024 --rule=3Dreplicated_ruleset --choose=
+-args=3D49
+>          ~id~  ~weight~  ~PGs~  ~over/under filled %~
+> ~name~
+> node-4     -2      1.08    410                   0.10
+> node-5v    -3      1.08    410                   0.10
+> node-6v    -4      1.08    410                   0.10
+> node-7v    -5      1.08    409                  -0.15
+> node-8v    -6      1.08    409                  -0.15
+>
+> Worst case scenario if a host fails:
+>
+>         ~over filled %~
+> ~type~
+> device             5.47
+> host               3.71
+> root               0.00
+> (virtualenv) loic@fold:~/software/libcrush/python-crush$ crush analyze --=
+type device --crushmap /tmp/han-vincent-report-optimized.txt --pool 49 --re=
+plication-count=3D2 --pg-num=3D1024 --pgp-num=3D1024 --rule=3Dreplicated_ru=
+leset --choose-args=3D49
+>         ~id~  ~weight~  ~PGs~  ~over/under filled %~
+> ~name~
+> osd.2      2      0.54    206                   0.59
+> osd.8      8      0.54    206                   0.59
+> osd.0      0      0.54    205                   0.10
+> osd.1      1      0.54    205                   0.10
+> osd.4      4      0.54    205                   0.10
+> osd.5      5      0.54    205                   0.10
+> osd.7      7      0.54    205                   0.10
+> osd.3      3      0.54    204                  -0.39
+> osd.6      6      0.54    204                  -0.39
+> osd.9      9      0.54    203                  -0.88
+>
+> Worst case scenario if a host fails:
+>
+>         ~over filled %~
+> ~type~
+> device             5.47
+>
+> host               3.71
+> root               0.00
+>
+> Note that the other pools won't be optimized and their PGs will be moved =
+around for no good reason. However, since they contain very few PGs each (8=
+ for most of them, 32 for one of them) and very little data (less than 1MB =
+total), it won't matter much.
+>
+> Cheers
+>
+> On 05/31/2017 02:34 PM, Loic Dachary wrote:
+> > Hi,
+> >
+> > On 05/31/2017 12:32 PM, han vincent wrote:
+> >> hello, loic:
+> >>
+> >> I had a cluster build with hammer 0.94.10, then I used the following c=
+ommands to change the algorithm from "straw" to "straw2".
+> >> 1. ceph osd crush tunables hammer
+> >> 2. ceph osd getcrushmap -o /tmp/cmap
+> >> 3. crushtool -d /tmp/cmap -o /tmp/cmap.txt
+> >> 4. vim /tmp/cmap.txt and change the algorithm of each bucket from "str=
+aw" to "straw2"
+> >> 5. crushtool -c /tmp/cmap.txt -o /tmp/cmap
+> >> 6. ceph osd setcrushmap -i /tmp/cmap
+> >> 7. ceph osd crush reweight-all
+> >> after that, I used "python crush" to optimize the cluster, the version=
+ of "python crush" is 1.0.32
+> >>
+> >> 1. ceph report > report.json
+> >> 2. crush optimize --crushmap report.json --out-path optimized.crush
+> >> Unfortunately, there was an error in the output:
+> >>
+> >> 2017-05-30 18:48:01,803 42.1 map to [4, 9] instead of [4, 8]
+> >> 2017-05-30 18:48:01,838 49.3af map to [9, 2] instead of [9, 3]
+> >> 2017-05-30 18:48:01,838 49.e3 map to [6, 4] instead of [6, 5]
+> >> 2017-05-30 18:48:01,838 49.e1 map to [7, 2] instead of [7, 3]
+> >> 2017-05-30 18:48:01,838 49.e0 map to [5, 1] instead of [5, 0]
+> >> 2017-05-30 18:48:01,838 49.20d map to [3, 1] instead of [3, 0]
+> >> 2017-05-30 18:48:01,838 49.20c map to [2, 9] instead of [2, 8]
+> >> 2017-05-30 18:48:01,838 49.36e map to [6, 1] instead of [6, 0]
+> >> ......
+> >>
+> >> Traceback (most recent call last):
+> >>  File "/usr/bin/crush", line 25, in <module>
+> >> sys.exit(Ceph().main(sys.argv[1:]))
+> >>  File "/usr/lib64/python2.7/site-packages/crush/main.py", line 136, in=
+ main
+> >> return self.constructor(argv).run()
+> >>  File "/usr/lib64/python2.7/site-packages/crush/optimize.py", line 373=
+, in run
+> >> crushmap =3D self.main.convert_to_crushmap(self.args.crushmap)
+> >>  File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py", lin=
+e 690, in convert_to_crushmap
+> >> c.parse(crushmap)
+> >>  File "/usr/lib64/python2.7/site-packages/crush/__init__.py", line 138=
+, in parse
+> >> return self.parse_crushmap(self._convert_to_crushmap(something))
+> >>  File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py", lin=
+e 416, in _convert_to_crushmap
+> >> crushmap =3D CephReport().parse_report(something)
+> >>  File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py", lin=
+e 137, in parse_report
+> >> raise MappingError("some mapping failed, please file a bug at "
+> >> crush.ceph.MappingError: some mapping failed, please file a bug at htt=
+p://libcrush.org/main/python-crush/issues/new
+> >> Do you know what the problem is? can you help me? I would be very grat=
+eful to you.
+> >
+> > This is a safeguard to make sure python-crush maps exactly as expected.=
+ I'm not sure yet why there is a difference but I'll work on that, using th=
+e crush implementation found in hammer 0.94.10. For your information, the f=
+ull output of:
+> >
+> > $ crush analyze --crushmap /tmp/han-vincent-report.json
+> >
+> > is at https://paste2.org/PyeHe2dC What I find strange is that your outp=
+ut regarding pool 42 is different than mine. You have:
+> >
+> >
+> > 2017-05-30 18:48:01,803 42.1 map to [4, 9] instead of [4, 8]
+> >
+> > and I have
+> >
+> > 2017-05-31 12:55:04,207 42.3 map to [4, 3] instead of [4, 2]
+> > 2017-05-31 12:55:04,207 42.7 map to [8, 0] instead of [8, 1]
+> > 2017-05-31 12:55:04,207 42.1 map to [4, 9] instead of [4, 8]
+> >
+> > I wonder if that's a sign that the changes to the crushmap following yo=
+ur change to straw2 are still going on. Would you mind sending me the outpu=
+t of ceph report (please run it again after receiving this mail) ?
+> >
+> > Cheers
+> >
+>
+> --
+> Lo=C3=AFc Dachary, Artisan Logiciel Libre
