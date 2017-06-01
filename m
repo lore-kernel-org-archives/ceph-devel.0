@@ -1,82 +1,50 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH 04/12] fs: ceph: CURRENT_TIME with
-	ktime_get_real_ts()
-Date: Thu, 1 Jun 2017 12:22:47 +0200
-Message-ID: <CAK8P3a1pCw1Oo-Wg70kH5L12pbtEzGDfaPZ8g6ErERJjvY8znQ@mail.gmail.com>
-References: <1491613030-11599-1-git-send-email-deepa.kernel@gmail.com>
-	<1491613030-11599-5-git-send-email-deepa.kernel@gmail.com>
-	<CAAM7YAmp=cZKqGHa8UqDnrQLCe+6TKx+7w9SDZv4cW5fr4dfvA@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Beta testing crush optimization
+Date: Thu, 1 Jun 2017 12:21:49 +0200
+Message-ID: <eefdcd45-e6fa-4bf0-56b3-76e155f45de2@dachary.org>
+References: <CANNfkubYdJqJDRV8kuNDBy368OxOyXkXKU3wr9ULFeafPnBoHg@mail.gmail.com>
+ <b5814b74-fb97-85de-3f8b-f906c5363195@dachary.org>
+ <d3cee009-9187-d90a-4a40-6ab98e619897@dachary.org>
+ <CANNfkubxHfAYn-aLkHCQV_YZoMuVTzug9nRbvaTSE4UyKiQLuw@mail.gmail.com>
+ <9c4d5c65-4bd3-19e0-2e0e-59331f952c46@dachary.org>
+ <CANNfkuZbfNSW5CQHaV0yyF3744FPf-gh0vKBj45bZKrvZ27MhA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-In-Reply-To: <CAAM7YAmp=cZKqGHa8UqDnrQLCe+6TKx+7w9SDZv4cW5fr4dfvA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
-List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
-Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
-Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-To: "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: yuchao0-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, "J. Bruce Fields" <bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org>, Chris Mason <clm-b10kYP2dOMg@public.gmane.org>, linux-mtd <linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Deepa Dinamani <deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Evgeniy Dushistov <dushistov-JGs/UdohzUI@public.gmane.org>, Jeff Layton <jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Paul Moore <paul-r2n+y4ga6xFZroRs9YW3xA@public.gmane.org>, y2038 Mailman List <y2038-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Steven Rostedt <rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org>, "Drokin,
-	Oleg" <oleg.drokin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>, Jaegeuk Kim <jaegeuk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Josef Bacik <jbacik-b10kYP2dOMg@public.gmane.org>, gregkh <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Eric
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:43492 "EHLO
+        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751764AbdFAKVy (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2017 06:21:54 -0400
+In-Reply-To: <CANNfkuZbfNSW5CQHaV0yyF3744FPf-gh0vKBj45bZKrvZ27MhA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: han vincent <hangzws@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Jun 1, 2017 at 11:56 AM, Yan, Zheng <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> On Sat, Apr 8, 2017 at 8:57 AM, Deepa Dinamani <deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
 
->> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
->> index 517838b..77204da 100644
->> --- a/drivers/block/rbd.c
->> +++ b/drivers/block/rbd.c
->> @@ -1922,7 +1922,7 @@ static void rbd_osd_req_format_write(struct rbd_obj_request *obj_request)
->>  {
->>         struct ceph_osd_request *osd_req = obj_request->osd_req;
->>
->> -       osd_req->r_mtime = CURRENT_TIME;
->> +       ktime_get_real_ts(&osd_req->r_mtime);
->>         osd_req->r_data_offset = obj_request->offset;
->>  }
->>
->> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
->> index c681762..1d3fa90 100644
->> --- a/fs/ceph/mds_client.c
->> +++ b/fs/ceph/mds_client.c
->> @@ -1666,6 +1666,7 @@ struct ceph_mds_request *
->>  ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
->>  {
->>         struct ceph_mds_request *req = kzalloc(sizeof(*req), GFP_NOFS);
->> +       struct timespec ts;
->>
->>         if (!req)
->>                 return ERR_PTR(-ENOMEM);
->> @@ -1684,7 +1685,8 @@ ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
->>         init_completion(&req->r_safe_completion);
->>         INIT_LIST_HEAD(&req->r_unsafe_item);
->>
->> -       req->r_stamp = current_fs_time(mdsc->fsc->sb);
->> +       ktime_get_real_ts(&ts);
->> +       req->r_stamp = timespec_trunc(ts, mdsc->fsc->sb->s_time_gran);
->
-> This change causes our kernel_untar_tar test case to fail (inode's
-> ctime goes back). The reason is that there is time drift between the
-> time stamps got by  ktime_get_real_ts() and current_time(). We need to
-> revert this change until current_time() uses ktime_get_real_ts()
-> internally.
 
-Hmm, the change was not supposed to have a user-visible effect, so
-something has gone wrong, but I don't immediately see how it
-relates to what you observe.
+On 06/01/2017 12:05 PM, han vincent wrote:
+> Hi loic:
+>    I still have two questions, in the following to commands:
+>    
+>    1. crush optimize --crushmap /tmp/han-vincent-report.json --out-path /tmp/han-vincent-report-optimized.txt --out-format txt --pool 49
+> 
+>    Is "--pool" options must specified in this command? if not, will it optimize all the pools without "--pool" option?
+>    if there are several pools in my cluster and each pool has a lot of pgs. If I optimize one of the, will it affect the other pools?
+>    how to use it to optimize multiple pools in a cluster of hammer?
+> 
+>    2. crush analyze --crushmap /tmp/han-vincent-report-optimized.txt --pool 49 --replication-count=2 --pg-num=1024 --pgp-num=1024 --rule=replicated_ruleset --choose-args=49
+>    In this command, the value of the "--choose-args" option is 49, it is same as the pool id, what is the mean of "--choose-args" option?
+>    
 
-ktime_get_real_ts() and current_time() use the same time base, there
-is no drift, but there is a difference in resolution, as the latter uses
-the time stamp of the last jiffies update, which may be up to one jiffy
-(10ms) behind the exact time we put in the request stamps here.
+The --pool option is required. You can only optimize one pool at a time.
 
-Do you still see problems if you use current_kernel_time() instead of
-ktime_get_real_ts()?
+If multiple pools use the same crush rule or the same crush hierarchy, rebalancing one of them will hurt the balance of the others. It is possible to optimize multiple pools but only if they have different rules and crush hiearchies.
 
-        Arnd
+The --choose-args option is the name of the weights that achieve the rebalancing. By convention it is the same as the pool id: this is required by Luminous clusters. Even though your cluster is not luminous, we stick to this convention.
+
+Cheers
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
