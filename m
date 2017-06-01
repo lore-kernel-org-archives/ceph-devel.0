@@ -1,90 +1,72 @@
-From: Sage Weil <sage@redhat.com>
-Subject: mgr dashboard and rest api configs
-Date: Thu, 1 Jun 2017 20:23:39 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706012007280.15628@piezo.novalocal>
+From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
+Subject: Re: Alibaba's work on majority commit
+Date: Fri, 02 Jun 2017 05:28:44 +0800
+Message-ID: <F5D9C7AC-29EF-4E35-9C35-7843C4CA8E10@alibaba-inc.com>
+References: <EE680D4A-C2A0-4A47-8780-FB3FD47FCD0D@alibaba-inc.com>
+ <FBA81CC7-C30D-4994-BC95-B11FAF32ABAD@alibaba-inc.com>
+ <CALZt5jwSYZyMgdoGvYEgLrp-9VD2MeAUc2hhhM7ATHWOdtwLBQ@mail.gmail.com>
+ <E52930BD-9CB9-46FC-8A86-D0350D495EF6@alibaba-inc.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+        charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:56045 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751029AbdFAUXl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2017 16:23:41 -0400
+Received: from out0-212.mail.aliyun.com ([140.205.0.212]:56752 "EHLO
+        out0-212.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751078AbdFAV3I (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2017 17:29:08 -0400
+In-Reply-To: <E52930BD-9CB9-46FC-8A86-D0350D495EF6@alibaba-inc.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: branto@redhat.com
+To: Ning Yao <zay11022@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Brett Niver <bniver@redhat.com>
 
-Hi all,
+Hi Ning and Brett,
+  We put the slides into public. We are still fixing several bugs and submit another PR soon ,stay tuned.
 
-So we now have 2 services in mgr that present http[s] endpoints: the 
-dashboard and the new 'restful' API.  Once 
-https://github.com/ceph/ceph/pull/15405 is merged these will be set up by 
-vstart.sh for each testing:
+  Thanks,
+  James
 
- $ MGR=2 ../src/vstart.sh -n -l ...
- ...
- started.  stop.sh to stop.  see out/* (e.g. 'tail -f out/????') for debug 
- output.
+On 5/18/17, 5:50 PM, "LIU, Fei" <ceph-devel-owner@vger.kernel.org on behalf of james.liu@alibaba-inc.com> wrote:
 
- dashboard urls:  http://127.0.0.1:41542/ http://127.0.0.1:41544/
- restful urls:    https://127.0.0.1:41543 https://127.0.0.1:41545
-    user/pass:    admin / secret
- ...
+    Hi Lin and Brett,
+       Out of town for business trip. Got a little bit of problem to access slideshare out of US. Will send you the link soon after I am back to town.
+    
+      thanks,
+      James
+    
+    On 5/19/17, 12:16 AM, "Ning Yao" <ceph-devel-owner@vger.kernel.org on behalf of zay11022@gmail.com> wrote:
+    
+        It is a private slide
+        Regards
+        Ning Yao
+        
+        
+        2017-05-12 0:41 GMT+08:00 LIU, Fei <james.liu@alibaba-inc.com>:
+        > Hi All,
+        >   Here is the slides that we presented this morning regarding to IO returning once we get majority commit.  Please feel free to send us any comments and questions.
+        >
+        >   https://www.slideshare.net/jupiturliu/ceph-majority-commit
+        >
+        >   Regards,
+        >   James
+        >
+        >
+        >
+        > --
+        > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+        > the body of a message to majordomo@vger.kernel.org
+        > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+        --
+        To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+        the body of a message to majordomo@vger.kernel.org
+        More majordomo info at  http://vger.kernel.org/majordomo-info.html
+        
+    
+    
+    --
+    To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+    the body of a message to majordomo@vger.kernel.org
+    More majordomo info at  http://vger.kernel.org/majordomo-info.html
+    
 
-The services are configured via the config-key interface:
-
-gnit:build (wip-rest-test) 04:06 PM $ bin/ceph config-key list
-[
-    "mgr/x/dashboard/server_addr",
-    "mgr/x/dashboard/server_port",
-    "mgr/x/restful/cert",
-    "mgr/x/restful/keys",
-    "mgr/x/restful/pkey_file",
-    "mgr/x/restful/server_addr",
-    "mgr/x/restful/server_port",
-    "mgr/y/dashboard/server_addr",
-    "mgr/y/dashboard/server_port",
-    "mgr/y/restful/cert",
-    "mgr/y/restful/keys",
-    "mgr/y/restful/pkey_file",
-    "mgr/y/restful/server_addr",
-    "mgr/y/restful/server_port"
-]
-
-Several comments, questions, as I think there's lots of room for 
-improvement here:
-
-- The dashboard is always http; the restful endpoint always https.  Should 
-we make either/both of them support either?
-
-- The crt and key for restful can either come from the 'cert' or 
-'pkey' option, a file named by 'cert_file' or 'pkey_file', or read out of 
-/etc/ceph.  The ceph-mgr package currently generates an unsigned cert and 
-puts it in /etc/ceph for that purpose.  Should we instead make the restful 
-service generate its own key and store it on startup if it is not stored 
-on disk?  I'm not a big fan of putting this in /etc/ceph.
-
-- What if you want the crt/key to be shared across mgr daemons?  This 
-would make sense if you have a load balancer (or some network indirection 
-like that provided by kubernetes) in front of it.  In that case, should we 
-allow these options to come from, say, either mgr/$id/$module/$option or 
-mgr/*/$module/$option?  Or restructure the namespace so that it's either 
-mgr/$module/$option or mgr.$id/$module/$option (more like the config 
-sections work where they are [mgr] or [mgr.$id])?  [1]
-
-- s/cert/crt/ and s/pkey/key/?
-
-Comments welcome!
-sage
-
-
-[1] How should config options appear in config-key?  The current proposal 
-at http://pad.ceph.com/p/ceph-conf-kv-store suggests config/$type/option 
-or config/$type.$id/option.  Where do mgr modules fit into this namespace?
-
-   config/mgr/$module/$option
-   config/mgr.x/$module/$option
-
-Or should they maybe not live under the config/ prefix that the "regular" 
-ceph options will live under? ?
 
