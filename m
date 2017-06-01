@@ -1,27 +1,27 @@
 From: "=?GBK?B?TElVLCBGZWk=?=" <james.liu@alibaba-inc.com>
-Subject: Re: Alibaba's work on majority commit
-Date: Fri, 02 Jun 2017 05:28:44 +0800
-Message-ID: <F5D9C7AC-29EF-4E35-9C35-7843C4CA8E10@alibaba-inc.com>
-References: <EE680D4A-C2A0-4A47-8780-FB3FD47FCD0D@alibaba-inc.com>
- <FBA81CC7-C30D-4994-BC95-B11FAF32ABAD@alibaba-inc.com>
- <CALZt5jwSYZyMgdoGvYEgLrp-9VD2MeAUc2hhhM7ATHWOdtwLBQ@mail.gmail.com>
- <E52930BD-9CB9-46FC-8A86-D0350D495EF6@alibaba-inc.com>
+Subject: Alibaba's work on async transaction
+Date: Fri, 02 Jun 2017 05:31:04 +0800
+Message-ID: <C00F39E2-837F-4995-A7D8-1FD100C59E48@alibaba-inc.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
         charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from out0-212.mail.aliyun.com ([140.205.0.212]:56752 "EHLO
-        out0-212.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751078AbdFAV3I (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2017 17:29:08 -0400
-In-Reply-To: <E52930BD-9CB9-46FC-8A86-D0350D495EF6@alibaba-inc.com>
+Received: from out0-205.mail.aliyun.com ([140.205.0.205]:46112 "EHLO
+        out0-205.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751116AbdFAVb1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2017 17:31:27 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ning Yao <zay11022@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Brett Niver <bniver@redhat.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+Cc: Sheng Qiu <sheng.qiu@alibaba-inc.com>
 
-Hi Ning and Brett,
-  We put the slides into public. We are still fixing several bugs and submit another PR soon ,stay tuned.
+Hi Sage, 
+   Here is the slides that I mentioned in morning conference call regarding to async transaction implementation in the backend blustore
+
+  https://www.slideshare.net/jupiturliu/async-queuetransaction
+
+  We will modify the PR accordingly with your advice last time.
 
   Thanks,
   James
