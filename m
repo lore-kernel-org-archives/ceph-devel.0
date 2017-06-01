@@ -1,302 +1,144 @@
-From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 25/35] mm: Remove nr_pages argument from
-	pagevec_lookup_{, range}_tag()
-Date: Thu,  1 Jun 2017 11:32:35 +0200
-Message-ID: <20170601093245.29238-26-jack@suse.cz>
-References: <20170601093245.29238-1-jack@suse.cz>
-Return-path: <cluster-devel-bounces@redhat.com>
-In-Reply-To: <20170601093245.29238-1-jack@suse.cz>
-List-Unsubscribe: <https://www.redhat.com/mailman/options/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=unsubscribe>
-List-Archive: <https://www.redhat.com/archives/cluster-devel>
-List-Post: <mailto:cluster-devel@redhat.com>
-List-Help: <mailto:cluster-devel-request@redhat.com?subject=help>
-List-Subscribe: <https://www.redhat.com/mailman/listinfo/cluster-devel>,
-	<mailto:cluster-devel-request@redhat.com?subject=subscribe>
-Sender: cluster-devel-bounces@redhat.com
-Errors-To: cluster-devel-bounces@redhat.com
-To: linux-mm@kvack.org
-Cc: cluster-devel@redhat.com, linux-nilfs@vger.kernel.org, tytso@mit.edu, linux-xfs@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Jan Kara <jack@suse.cz>, "Darrick J . Wong" <darrick.wong@oracle.com>, Hugh Dickins <hughd@google.com>, linux-f2fs-devel@lists.sourceforge.net, David Howells <dhowells@redhat.com>, David Sterba <dsterba@suse.com>, ceph-devel@vger.kernel.org, Nadia Yvette Chambers <nyc@holomorphy.com>, Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>, Jaegeuk Kim <jaegeuk@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, linux-ext4@vger.kernel.org, linux-afs@lists.infradead.org, linux-btrfs@vger.kernel.org
+From: "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 04/12] fs: ceph: CURRENT_TIME with ktime_get_real_ts()
+Date: Thu, 1 Jun 2017 17:56:36 +0800
+Message-ID: <CAAM7YAmp=cZKqGHa8UqDnrQLCe+6TKx+7w9SDZv4cW5fr4dfvA@mail.gmail.com>
+References: <1491613030-11599-1-git-send-email-deepa.kernel@gmail.com> <1491613030-11599-5-git-send-email-deepa.kernel@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1491613030-11599-5-git-send-email-deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Deepa Dinamani <deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, andreas.dilger-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org, clm-b10kYP2dOMg@public.gmane.org, davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org, dsterba-IBi9RG/b67k@public.gmane.org, dushistov-JGs/UdohzUI@public.gmane.org, eparis-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, jaegeuk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, jbacik-b10kYP2dOMg@public.gmane.org, jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org, john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jsimmons-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, oleg.drokin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, paul-r2n+y4ga6xFZroRs9YW3xA@public.gmane.org, rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org, yuchao0-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-audit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-btrfs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-f2fs-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-securit
 List-Id: ceph-devel.vger.kernel.org
 
-All users of pagevec_lookup() and pagevec_lookup_range() now pass
-PAGEVEC_SIZE as a desired number of pages. Just drop the argument.
+On Sat, Apr 8, 2017 at 8:57 AM, Deepa Dinamani <deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> CURRENT_TIME is not y2038 safe.
+> The macro will be deleted and all the references to it
+> will be replaced by ktime_get_* apis.
+>
+> struct timespec is also not y2038 safe.
+> Retain timespec for timestamp representation here as ceph
+> uses it internally everywhere.
+> These references will be changed to use struct timespec64
+> in a separate patch.
+>
+> The current_fs_time() api is being changed to use vfs
+> struct inode* as an argument instead of struct super_block*.
+>
+> Set the new mds client request r_stamp field using
+> ktime_get_real_ts() instead of using current_fs_time().
+>
+> Also, since r_stamp is used as mtime on the server, use
+> timespec_trunc() to truncate the timestamp, using the right
+> granularity from the superblock.
+>
+> This api will be transitioned to be y2038 safe along
+> with vfs.
+>
+> Signed-off-by: Deepa Dinamani <deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> Reviewed-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+> ---
+>  drivers/block/rbd.c   | 2 +-
+>  fs/ceph/mds_client.c  | 4 +++-
+>  net/ceph/messenger.c  | 6 ++++--
+>  net/ceph/osd_client.c | 4 ++--
+>  4 files changed, 10 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 517838b..77204da 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -1922,7 +1922,7 @@ static void rbd_osd_req_format_write(struct rbd_obj_request *obj_request)
+>  {
+>         struct ceph_osd_request *osd_req = obj_request->osd_req;
+>
+> -       osd_req->r_mtime = CURRENT_TIME;
+> +       ktime_get_real_ts(&osd_req->r_mtime);
+>         osd_req->r_data_offset = obj_request->offset;
+>  }
+>
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index c681762..1d3fa90 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -1666,6 +1666,7 @@ struct ceph_mds_request *
+>  ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
+>  {
+>         struct ceph_mds_request *req = kzalloc(sizeof(*req), GFP_NOFS);
+> +       struct timespec ts;
+>
+>         if (!req)
+>                 return ERR_PTR(-ENOMEM);
+> @@ -1684,7 +1685,8 @@ ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
+>         init_completion(&req->r_safe_completion);
+>         INIT_LIST_HEAD(&req->r_unsafe_item);
+>
+> -       req->r_stamp = current_fs_time(mdsc->fsc->sb);
+> +       ktime_get_real_ts(&ts);
+> +       req->r_stamp = timespec_trunc(ts, mdsc->fsc->sb->s_time_gran);
 
-Signed-off-by: Jan Kara <jack@suse.cz>
----
- fs/btrfs/extent_io.c    | 6 +++---
- fs/ceph/addr.c          | 3 +--
- fs/ext4/inode.c         | 2 +-
- fs/f2fs/checkpoint.c    | 2 +-
- fs/f2fs/data.c          | 2 +-
- fs/f2fs/node.c          | 8 ++++----
- fs/gfs2/aops.c          | 2 +-
- fs/nilfs2/btree.c       | 4 ++--
- fs/nilfs2/page.c        | 7 +++----
- fs/nilfs2/segment.c     | 6 +++---
- include/linux/pagevec.h | 8 +++-----
- mm/filemap.c            | 2 +-
- mm/page-writeback.c     | 2 +-
- mm/swap.c               | 4 ++--
- 14 files changed, 27 insertions(+), 31 deletions(-)
+This change causes our kernel_untar_tar test case to fail (inode's
+ctime goes back). The reason is that there is time drift between the
+time stamps got by  ktime_get_real_ts() and current_time(). We need to
+revert this change until current_time() uses ktime_get_real_ts()
+internally.
 
-diff --git a/fs/btrfs/extent_io.c b/fs/btrfs/extent_io.c
-index 6287eaba30ac..53d742a5a99b 100644
---- a/fs/btrfs/extent_io.c
-+++ b/fs/btrfs/extent_io.c
-@@ -3838,7 +3838,7 @@ int btree_write_cache_pages(struct address_space *mapping,
- 		tag_pages_for_writeback(mapping, index, end);
- 	while (!done && !nr_to_write_done && (index <= end) &&
- 	       (nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
--			tag, PAGEVEC_SIZE))) {
-+			tag))) {
- 		unsigned i;
- 
- 		scanned = 1;
-@@ -3979,8 +3979,8 @@ static int extent_write_cache_pages(struct address_space *mapping,
- 		tag_pages_for_writeback(mapping, index, end);
- 	done_index = index;
- 	while (!done && !nr_to_write_done && (index <= end) &&
--	       (nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
--			tag, PAGEVEC_SIZE))) {
-+			(nr_pages = pagevec_lookup_range_tag(&pvec, mapping,
-+						&index, end, tag))) {
- 		unsigned i;
- 
- 		scanned = 1;
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 0b7e56ae3b8c..a0d5c46fc9bf 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -848,8 +848,7 @@ static int ceph_writepages_start(struct address_space *mapping,
- get_more_pages:
- 		first = -1;
- 		pvec_pages = pagevec_lookup_range_tag(&pvec, mapping, &index,
--						end, PAGECACHE_TAG_DIRTY,
--						PAGEVEC_SIZE);
-+						end, PAGECACHE_TAG_DIRTY);
- 		dout("pagevec_lookup_range_tag got %d\n", pvec_pages);
- 		if (!pvec_pages && !locked_pages)
- 			break;
-diff --git a/fs/ext4/inode.c b/fs/ext4/inode.c
-index 050fba2d12c2..d1896f14d72f 100644
---- a/fs/ext4/inode.c
-+++ b/fs/ext4/inode.c
-@@ -2556,7 +2556,7 @@ static int mpage_prepare_extent_to_map(struct mpage_da_data *mpd)
- 	mpd->next_page = index;
- 	while (index <= end) {
- 		nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
--				tag, PAGEVEC_SIZE);
-+				tag);
- 		if (nr_pages == 0)
- 			goto out;
- 
-diff --git a/fs/f2fs/checkpoint.c b/fs/f2fs/checkpoint.c
-index 6da86eac758a..ad5bc5340ba2 100644
---- a/fs/f2fs/checkpoint.c
-+++ b/fs/f2fs/checkpoint.c
-@@ -310,7 +310,7 @@ long sync_meta_pages(struct f2fs_sb_info *sbi, enum page_type type,
- 	blk_start_plug(&plug);
- 
- 	while (nr_pages = pagevec_lookup_tag(&pvec, mapping, &index,
--				PAGECACHE_TAG_DIRTY, PAGEVEC_SIZE)) {
-+				PAGECACHE_TAG_DIRTY)) {
- 		int i;
- 
- 		for (i = 0; i < nr_pages; i++) {
-diff --git a/fs/f2fs/data.c b/fs/f2fs/data.c
-index 3e6244a82ac5..afca42392fbd 100644
---- a/fs/f2fs/data.c
-+++ b/fs/f2fs/data.c
-@@ -1604,7 +1604,7 @@ static int f2fs_write_cache_pages(struct address_space *mapping,
- 		int i;
- 
- 		nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
--				tag, PAGEVEC_SIZE);
-+				tag);
- 		if (nr_pages == 0)
- 			break;
- 
-diff --git a/fs/f2fs/node.c b/fs/f2fs/node.c
-index dd53bcd9fc46..00cae42c778a 100644
---- a/fs/f2fs/node.c
-+++ b/fs/f2fs/node.c
-@@ -1268,7 +1268,7 @@ static struct page *last_fsync_dnode(struct f2fs_sb_info *sbi, nid_t ino)
- 	index = 0;
- 
- 	while (nr_pages = pagevec_lookup_tag(&pvec, NODE_MAPPING(sbi), &index,
--				PAGECACHE_TAG_DIRTY, PAGEVEC_SIZE)) {
-+				PAGECACHE_TAG_DIRTY)) {
- 		int i;
- 
- 		for (i = 0; i < nr_pages; i++) {
-@@ -1418,7 +1418,7 @@ int fsync_node_pages(struct f2fs_sb_info *sbi, struct inode *inode,
- 	index = 0;
- 
- 	while (nr_pages = pagevec_lookup_tag(&pvec, NODE_MAPPING(sbi), &index,
--				PAGECACHE_TAG_DIRTY, PAGEVEC_SIZE)) {
-+				PAGECACHE_TAG_DIRTY)) {
- 		int i;
- 
- 		for (i = 0; i < nr_pages; i++) {
-@@ -1530,7 +1530,7 @@ int sync_node_pages(struct f2fs_sb_info *sbi, struct writeback_control *wbc)
- 	index = 0;
- 
- 	while (nr_pages = pagevec_lookup_tag(&pvec, NODE_MAPPING(sbi), &index,
--				PAGECACHE_TAG_DIRTY, PAGEVEC_SIZE)) {
-+				PAGECACHE_TAG_DIRTY)) {
- 		int i;
- 
- 		for (i = 0; i < nr_pages; i++) {
-@@ -1627,7 +1627,7 @@ int wait_on_node_pages_writeback(struct f2fs_sb_info *sbi, nid_t ino)
- 	pagevec_init(&pvec, 0);
- 
- 	while (nr_pages = pagevec_lookup_tag(&pvec, NODE_MAPPING(sbi), &index,
--				PAGECACHE_TAG_WRITEBACK, PAGEVEC_SIZE)) {
-+				PAGECACHE_TAG_WRITEBACK)) {
- 		int i;
- 
- 		for (i = 0; i < nr_pages; i++) {
-diff --git a/fs/gfs2/aops.c b/fs/gfs2/aops.c
-index 158ceb900ab5..903a1c9f60a5 100644
---- a/fs/gfs2/aops.c
-+++ b/fs/gfs2/aops.c
-@@ -386,7 +386,7 @@ static int gfs2_write_cache_jdata(struct address_space *mapping,
- 	done_index = index;
- 	while (!done && (index <= end)) {
- 		nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
--				tag, PAGEVEC_SIZE);
-+				tag);
- 		if (nr_pages == 0)
- 			break;
- 
-diff --git a/fs/nilfs2/btree.c b/fs/nilfs2/btree.c
-index 06ffa135dfa6..35989c7bb065 100644
---- a/fs/nilfs2/btree.c
-+++ b/fs/nilfs2/btree.c
-@@ -2158,8 +2158,8 @@ static void nilfs_btree_lookup_dirty_buffers(struct nilfs_bmap *btree,
- 
- 	pagevec_init(&pvec, 0);
- 
--	while (pagevec_lookup_tag(&pvec, btcache, &index, PAGECACHE_TAG_DIRTY,
--				  PAGEVEC_SIZE)) {
-+	while (pagevec_lookup_tag(&pvec, btcache, &index,
-+					PAGECACHE_TAG_DIRTY)) {
- 		for (i = 0; i < pagevec_count(&pvec); i++) {
- 			bh = head = page_buffers(pvec.pages[i]);
- 			do {
-diff --git a/fs/nilfs2/page.c b/fs/nilfs2/page.c
-index 8616c46d33da..1c16726915c1 100644
---- a/fs/nilfs2/page.c
-+++ b/fs/nilfs2/page.c
-@@ -257,8 +257,7 @@ int nilfs_copy_dirty_pages(struct address_space *dmap,
- 
- 	pagevec_init(&pvec, 0);
- repeat:
--	if (!pagevec_lookup_tag(&pvec, smap, &index, PAGECACHE_TAG_DIRTY,
--				PAGEVEC_SIZE))
-+	if (!pagevec_lookup_tag(&pvec, smap, &index, PAGECACHE_TAG_DIRTY))
- 		return 0;
- 
- 	for (i = 0; i < pagevec_count(&pvec); i++) {
-@@ -376,8 +375,8 @@ void nilfs_clear_dirty_pages(struct address_space *mapping, bool silent)
- 
- 	pagevec_init(&pvec, 0);
- 
--	while (pagevec_lookup_tag(&pvec, mapping, &index, PAGECACHE_TAG_DIRTY,
--				  PAGEVEC_SIZE)) {
-+	while (pagevec_lookup_tag(&pvec, mapping, &index,
-+					PAGECACHE_TAG_DIRTY)) {
- 		for (i = 0; i < pagevec_count(&pvec); i++) {
- 			struct page *page = pvec.pages[i];
- 
-diff --git a/fs/nilfs2/segment.c b/fs/nilfs2/segment.c
-index fd9eeca5f784..c123f1590e41 100644
---- a/fs/nilfs2/segment.c
-+++ b/fs/nilfs2/segment.c
-@@ -712,7 +712,7 @@ static size_t nilfs_lookup_dirty_data_buffers(struct inode *inode,
-  repeat:
- 	if (unlikely(index > last) ||
- 	    !pagevec_lookup_range_tag(&pvec, mapping, &index, last,
--				PAGECACHE_TAG_DIRTY, PAGEVEC_SIZE))
-+				PAGECACHE_TAG_DIRTY))
- 		return ndirties;
- 
- 	for (i = 0; i < pagevec_count(&pvec); i++) {
-@@ -755,8 +755,8 @@ static void nilfs_lookup_dirty_node_buffers(struct inode *inode,
- 
- 	pagevec_init(&pvec, 0);
- 
--	while (pagevec_lookup_tag(&pvec, mapping, &index, PAGECACHE_TAG_DIRTY,
--				  PAGEVEC_SIZE)) {
-+	while (pagevec_lookup_tag(&pvec, mapping, &index,
-+					PAGECACHE_TAG_DIRTY)) {
- 		for (i = 0; i < pagevec_count(&pvec); i++) {
- 			bh = head = page_buffers(pvec.pages[i]);
- 			do {
-diff --git a/include/linux/pagevec.h b/include/linux/pagevec.h
-index 371edacc10d5..f3f2b9690764 100644
---- a/include/linux/pagevec.h
-+++ b/include/linux/pagevec.h
-@@ -39,13 +39,11 @@ static inline unsigned pagevec_lookup(struct pagevec *pvec,
- 
- unsigned pagevec_lookup_range_tag(struct pagevec *pvec,
- 		struct address_space *mapping, pgoff_t *index, pgoff_t end,
--		int tag, unsigned nr_pages);
-+		int tag);
- static inline unsigned pagevec_lookup_tag(struct pagevec *pvec,
--		struct address_space *mapping, pgoff_t *index, int tag,
--		unsigned nr_pages)
-+		struct address_space *mapping, pgoff_t *index, int tag)
- {
--	return pagevec_lookup_range_tag(pvec, mapping, index, (pgoff_t)-1, tag,
--					nr_pages);
-+	return pagevec_lookup_range_tag(pvec, mapping, index, (pgoff_t)-1, tag);
- }
- 
- static inline void pagevec_init(struct pagevec *pvec, int cold)
-diff --git a/mm/filemap.c b/mm/filemap.c
-index 8039b6bb9c27..910f2e39fef2 100644
---- a/mm/filemap.c
-+++ b/mm/filemap.c
-@@ -391,7 +391,7 @@ static int __filemap_fdatawait_range(struct address_space *mapping,
- 	pagevec_init(&pvec, 0);
- 	while ((index <= end) &&
- 			(nr_pages = pagevec_lookup_range_tag(&pvec, mapping,
--			&index, end, PAGECACHE_TAG_WRITEBACK, PAGEVEC_SIZE))) {
-+			&index, end, PAGECACHE_TAG_WRITEBACK))) {
- 		unsigned i;
- 
- 		for (i = 0; i < nr_pages; i++) {
-diff --git a/mm/page-writeback.c b/mm/page-writeback.c
-index c77c387465ec..6fd235139d8e 100644
---- a/mm/page-writeback.c
-+++ b/mm/page-writeback.c
-@@ -2195,7 +2195,7 @@ int write_cache_pages(struct address_space *mapping,
- 		int i;
- 
- 		nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
--				tag, PAGEVEC_SIZE);
-+				tag);
- 		if (nr_pages == 0)
- 			break;
- 
-diff --git a/mm/swap.c b/mm/swap.c
-index 4714d07965c1..dc63970f79b9 100644
---- a/mm/swap.c
-+++ b/mm/swap.c
-@@ -971,10 +971,10 @@ EXPORT_SYMBOL(pagevec_lookup_range);
- 
- unsigned pagevec_lookup_range_tag(struct pagevec *pvec,
- 		struct address_space *mapping, pgoff_t *index, pgoff_t end,
--		int tag, unsigned nr_pages)
-+		int tag)
- {
- 	pvec->nr = find_get_pages_range_tag(mapping, index, end, tag,
--					nr_pages, pvec->pages);
-+					PAGEVEC_SIZE, pvec->pages);
- 	return pagevec_count(pvec);
- }
- EXPORT_SYMBOL(pagevec_lookup_range_tag);
--- 
-2.12.3
+Regards
+Yan, Zheng
+
+
+>
+>         req->r_op = op;
+>         req->r_direct_mode = mode;
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index f76bb33..5766a6c 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -1386,8 +1386,9 @@ static void prepare_write_keepalive(struct ceph_connection *con)
+>         dout("prepare_write_keepalive %p\n", con);
+>         con_out_kvec_reset(con);
+>         if (con->peer_features & CEPH_FEATURE_MSGR_KEEPALIVE2) {
+> -               struct timespec now = CURRENT_TIME;
+> +               struct timespec now;
+>
+> +               ktime_get_real_ts(&now);
+>                 con_out_kvec_add(con, sizeof(tag_keepalive2), &tag_keepalive2);
+>                 ceph_encode_timespec(&con->out_temp_keepalive2, &now);
+>                 con_out_kvec_add(con, sizeof(con->out_temp_keepalive2),
+> @@ -3176,8 +3177,9 @@ bool ceph_con_keepalive_expired(struct ceph_connection *con,
+>  {
+>         if (interval > 0 &&
+>             (con->peer_features & CEPH_FEATURE_MSGR_KEEPALIVE2)) {
+> -               struct timespec now = CURRENT_TIME;
+> +               struct timespec now;
+>                 struct timespec ts;
+> +               ktime_get_real_ts(&now);
+>                 jiffies_to_timespec(interval, &ts);
+>                 ts = timespec_add(con->last_keepalive_ack, ts);
+>                 return timespec_compare(&now, &ts) >= 0;
+> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+> index e15ea9e..242d7c0 100644
+> --- a/net/ceph/osd_client.c
+> +++ b/net/ceph/osd_client.c
+> @@ -3574,7 +3574,7 @@ ceph_osdc_watch(struct ceph_osd_client *osdc,
+>         ceph_oid_copy(&lreq->t.base_oid, oid);
+>         ceph_oloc_copy(&lreq->t.base_oloc, oloc);
+>         lreq->t.flags = CEPH_OSD_FLAG_WRITE;
+> -       lreq->mtime = CURRENT_TIME;
+> +       ktime_get_real_ts(&lreq->mtime);
+>
+>         lreq->reg_req = alloc_linger_request(lreq);
+>         if (!lreq->reg_req) {
+> @@ -3632,7 +3632,7 @@ int ceph_osdc_unwatch(struct ceph_osd_client *osdc,
+>         ceph_oid_copy(&req->r_base_oid, &lreq->t.base_oid);
+>         ceph_oloc_copy(&req->r_base_oloc, &lreq->t.base_oloc);
+>         req->r_flags = CEPH_OSD_FLAG_WRITE;
+> -       req->r_mtime = CURRENT_TIME;
+> +       ktime_get_real_ts(&req->r_mtime);
+>         osd_req_op_watch_init(req, 0, lreq->linger_id,
+>                               CEPH_OSD_WATCH_OP_UNWATCH);
+>
+> --
+> 2.7.4
+>
