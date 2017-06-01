@@ -1,42 +1,88 @@
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [Cluster-devel] [PATCH 00/35 v1] pagevec API cleanups
-Date: Thu, 1 Jun 2017 14:05:56 +0200
-Message-ID: <20170601120556.GD23077@quack2.suse.cz>
-References: <20170601093245.29238-1-jack@suse.cz>
- <20170601113604.GA10829@infradead.org>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Beta testing crush optimization
+Date: Thu, 1 Jun 2017 14:08:17 +0200
+Message-ID: <5c2c692a-99c3-4b33-33bd-b9523943d7a4@dachary.org>
+References: <CANNfkubYdJqJDRV8kuNDBy368OxOyXkXKU3wr9ULFeafPnBoHg@mail.gmail.com>
+ <b5814b74-fb97-85de-3f8b-f906c5363195@dachary.org>
+ <d3cee009-9187-d90a-4a40-6ab98e619897@dachary.org>
+ <CANNfkubxHfAYn-aLkHCQV_YZoMuVTzug9nRbvaTSE4UyKiQLuw@mail.gmail.com>
+ <9c4d5c65-4bd3-19e0-2e0e-59331f952c46@dachary.org>
+ <CANNfkuZbfNSW5CQHaV0yyF3744FPf-gh0vKBj45bZKrvZ27MhA@mail.gmail.com>
+ <eefdcd45-e6fa-4bf0-56b3-76e155f45de2@dachary.org>
+ <CANNfkuZF219VWnCYYQoPY7CXXBAFq1=BrfOyC_vL7-+nU5ixMg@mail.gmail.com>
+ <6721f5e4-4da0-868c-6d65-c180fdb564e0@dachary.org>
+ <CANNfkuY1KfLb=WR2scJKb82RKqGAwUB3wWSrPzvht-=ixsfhGg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:59003 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751091AbdFAMF7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 1 Jun 2017 08:05:59 -0400
-Content-Disposition: inline
-In-Reply-To: <20170601113604.GA10829@infradead.org>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:33879 "EHLO
+        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751083AbdFAMIV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 1 Jun 2017 08:08:21 -0400
+In-Reply-To: <CANNfkuY1KfLb=WR2scJKb82RKqGAwUB3wWSrPzvht-=ixsfhGg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Jan Kara <jack@suse.cz>, linux-mm@kvack.org, cluster-devel@redhat.com, linux-nilfs@vger.kernel.org, tytso@mit.edu, linux-xfs@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Hugh Dickins <hughd@google.com>, linux-f2fs-devel@lists.sourceforge.net, David Howells <dhowells@redhat.com>, David Sterba <dsterba@suse.com>, ceph-devel@vger.kernel.org, Nadia Yvette Chambers <nyc@holomorphy.com>, Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>, Jaegeuk Kim <jaegeuk@kernel.org>, Ilya Dryomov <idryomov@gmail.com>, linux-ext4@vger.kernel.org, linux-afs@lists.infradead.org, linux-btrfs@vger.kernel.org
+To: han vincent <hangzws@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu 01-06-17 04:36:04, Christoph Hellwig wrote:
-> On Thu, Jun 01, 2017 at 11:32:10AM +0200, Jan Kara wrote:
-> > * Implement ranged variants for pagevec_lookup and find_get_ functions. Lot
-> >   of callers actually want a ranged lookup and we unnecessarily opencode this
-> >   in lot of them.
+
+
+On 06/01/2017 01:52 PM, han vincent wrote:
+> 2017-06-01 19:43 GMT+08:00 Loic Dachary <loic@dachary.org>:
+>>
+>>
+>> On 06/01/2017 01:38 PM, han vincent wrote:
+>>> 2017-06-01 18:21 GMT+08:00 Loic Dachary <loic@dachary.org>:
+>>>>
+>>>>
+>>>> On 06/01/2017 12:05 PM, han vincent wrote:
+>>>>> Hi loic:
+>>>>>    I still have two questions, in the following to commands:
+>>>>>
+>>>>>    1. crush optimize --crushmap /tmp/han-vincent-report.json --out-path /tmp/han-vincent-report-optimized.txt --out-format txt --pool 49
+>>>>>
+>>>>>    Is "--pool" options must specified in this command? if not, will it optimize all the pools without "--pool" option?
+>>>>>    if there are several pools in my cluster and each pool has a lot of pgs. If I optimize one of the, will it affect the other pools?
+>>>>>    how to use it to optimize multiple pools in a cluster of hammer?
+>>>>>
+>>>>>    2. crush analyze --crushmap /tmp/han-vincent-report-optimized.txt --pool 49 --replication-count=2 --pg-num=1024 --pgp-num=1024 --rule=replicated_ruleset --choose-args=49
+>>>>>    In this command, the value of the "--choose-args" option is 49, it is same as the pool id, what is the mean of "--choose-args" option?
+>>>>>
+>>>>
+>>>> The --pool option is required. You can only optimize one pool at a time.
+>>>>
+>>>> If multiple pools use the same crush rule or the same crush hierarchy, rebalancing one of them will hurt the balance of the others. It is possible to optimize multiple pools but only if they have different rules and crush hiearchies.
+>>>>
+>>>> The --choose-args option is the name of the weights that achieve the rebalancing. By convention it is the same as the pool id: this is required by Luminous clusters. Even though your cluster is not luminous, we stick to this convention.
+>>>>
+>>>> Cheers
+>>>>
+>>>> --
+>>>> Loïc Dachary, Artisan Logiciel Libre
+>>>
+>>>  if the pools use the same crush rule or the same crush hierarchy, is
+>>> there any way to optimize the cluster?
+>>
+>> It depends on the pools. In your cluster it does not matter because all pools except pool 49 are mostly empty. You can rebalance pool 49 and leave the other pool alone.
+>>
+>> Cheers
+>>
+>> --
+>> Loïc Dachary, Artisan Logiciel Libre
 > 
-> How does this compare to Kents page cache iterators:
-> 
-> http://www.spinics.net/lists/linux-mm/msg104737.html
+> the crushmap of which cluster I send to you is in lab environment, I
+> have a much bigger cluster in production.
+> I will send the crushmap to you later, could you help me to optimize
+> this cluster?
 
-Interesting. I didn't know about that work. I guess the tradeoff is pretty
-obvious - my patches are more conservative (changing less) and as a result
-the API is not as neat as Kent's one. That being said I was also thinking
-about something similar to what Kent did but what I didn't like about such
-iterator is that you still need to specially handle the cases where you
-break out of the loop (you need to do that with pagevecs too but there it
-is kind of obvious from the API).
+It is an interesting use case, I will help.
 
-								Honza
+> If you have detailed steps, please send it to me.
+
+Using the output of "ceph report" cluster, I will be able to verify it works as expected. The steps are simple but they will require an upgrade to Luminous.
+
+Cheers
+
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+Loïc Dachary, Artisan Logiciel Libre
