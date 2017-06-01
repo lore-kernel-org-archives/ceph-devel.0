@@ -1,138 +1,96 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: mgr dashboard and rest api configs
-Date: Thu, 1 Jun 2017 22:16:18 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706012208360.3646@piezo.novalocal>
-References: <alpine.DEB.2.11.1706012007280.15628@piezo.novalocal> <CALe9h7fmjF1Yvkvf068nzpvACKfo7qz5PJ5SZdhWsboueg1xFA@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Crashes with unittest_dencoder
+Date: Fri, 2 Jun 2017 01:00:32 +0200
+Message-ID: <66fafc3c-a5dd-405d-a521-597fe524d1e3@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43560 "EHLO mx1.redhat.com"
+Received: from smtp.digiware.nl ([176.74.240.9]:59498 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751105AbdFAWQU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 1 Jun 2017 18:16:20 -0400
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        id S1751105AbdFAXAf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 1 Jun 2017 19:00:35 -0400
+Received: from [192.168.11.152] (unknown [192.168.11.152])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 30745B1E31
-        for <ceph-devel@vger.kernel.org>; Thu,  1 Jun 2017 22:16:20 +0000 (UTC)
-In-Reply-To: <CALe9h7fmjF1Yvkvf068nzpvACKfo7qz5PJ5SZdhWsboueg1xFA@mail.gmail.com>
+        by smtp.digiware.nl (Postfix) with ESMTPSA id 703E7424AA
+        for <ceph-devel@vger.kernel.org>; Fri,  2 Jun 2017 01:00:31 +0200 (CEST)
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Ranto, Boris" <branto@redhat.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, 1 Jun 2017, John Spray wrote:
-> On Thu, Jun 1, 2017 at 9:23 PM, Sage Weil <sage@redhat.com> wrote:
-> > Hi all,
-> >
-> > So we now have 2 services in mgr that present http[s] endpoints: the
-> > dashboard and the new 'restful' API.  Once
-> > https://github.com/ceph/ceph/pull/15405 is merged these will be set up by
-> > vstart.sh for each testing:
-> >
-> >  $ MGR=2 ../src/vstart.sh -n -l ...
-> >  ...
-> >  started.  stop.sh to stop.  see out/* (e.g. 'tail -f out/????') for debug
-> >  output.
-> >
-> >  dashboard urls:  http://127.0.0.1:41542/ http://127.0.0.1:41544/
-> >  restful urls:    https://127.0.0.1:41543 https://127.0.0.1:41545
-> >     user/pass:    admin / secret
-> >  ...
-> 
-> I spent a few minutes there wondering why the authentication wasn't
-> working until I realise that the "/" rest endpoint gives you that "Use
-> \"ceph tell mgr create_key <key>\" to create a key pair," prompt even
-> if you are already authenticated!
-> 
-> > The services are configured via the config-key interface:
-> >
-> > gnit:build (wip-rest-test) 04:06 PM $ bin/ceph config-key list
-> > [
-> >     "mgr/x/dashboard/server_addr",
-> >     "mgr/x/dashboard/server_port",
-> >     "mgr/x/restful/cert",
-> >     "mgr/x/restful/keys",
-> >     "mgr/x/restful/pkey_file",
-> >     "mgr/x/restful/server_addr",
-> >     "mgr/x/restful/server_port",
-> >     "mgr/y/dashboard/server_addr",
-> >     "mgr/y/dashboard/server_port",
-> >     "mgr/y/restful/cert",
-> >     "mgr/y/restful/keys",
-> >     "mgr/y/restful/pkey_file",
-> >     "mgr/y/restful/server_addr",
-> >     "mgr/y/restful/server_port"
-> > ]
-> 
-> Aargh!  All the keys are prefixed with the daemon name!  I missed this
-> change (dc15cd60) when it went in.
-> 
-> We should undo that.  The idea of the interface for modules is that
-> they can store things and then retrieve them at any time, including
-> when they have failed over to another daemon.  Modules are very much
-> *not* meant to have local state on particular daemons (apart from this
-> particular special case we're discussing about certificates for things
-> that do HTTP).
+Any hints on what changes in the current code generates the illegal
+memaccess in the trace below?
 
-Okay, but I think all of these options (except 'keys') fall into that 
-special case.  We can make get_config() look at mgr/$id/$module/$option 
-and, if it doesn't exist, then look at mgr/$module/$option... or make a 
-special variant of get_config() for the possibly-mgr-localized options?
+Lots of tests fail, and I guess that mst have to do with this.
 
-> > Several comments, questions, as I think there's lots of room for
-> > improvement here:
-> >
-> > - The dashboard is always http; the restful endpoint always https.  Should
-> > we make either/both of them support either?
-> >
-> > - The crt and key for restful can either come from the 'cert' or
-> > 'pkey' option, a file named by 'cert_file' or 'pkey_file', or read out of
-> > /etc/ceph.  The ceph-mgr package currently generates an unsigned cert and
-> > puts it in /etc/ceph for that purpose.  Should we instead make the restful
-> > service generate its own key and store it on startup if it is not stored
-> > on disk?  I'm not a big fan of putting this in /etc/ceph.
-> 
-> I would really prefer modules to be self contained with this kind of thing:
->  - do their own initial setup, rather than having code in the packaging
->  - store their stuff in the get_config/set_config stuff and not on the
-> local filesystem
-> 
-> iirc the main reason that the restful module wanted to put the cert on
-> the local filesystem at all was just that it was using a library that
-> couldn't consume a certificate any way other than a file path?
+--WjW
 
-That part I fixed with NamedTemporaryFile in
-	https://github.com/liewegas/ceph/commit/c169c8fd461bf94459cd98b658d2a2d8bf42bca6
-
-Was there also a python module dependency problem?  If not, it seems much 
-more natural for the module to create the crt/key pair the first time it 
-stats if it's not present...
-
-> > - What if you want the crt/key to be shared across mgr daemons?  This
-> > would make sense if you have a load balancer (or some network indirection
-> > like that provided by kubernetes) in front of it.  In that case, should we
-> > allow these options to come from, say, either mgr/$id/$module/$option or
-> > mgr/*/$module/$option?  Or restructure the namespace so that it's either
-> > mgr/$module/$option or mgr.$id/$module/$option (more like the config
-> > sections work where they are [mgr] or [mgr.$id])?  [1]
-> 
-> I think we should avoid going down the path of complex configuration
-> paths (like having a /mgr/foo/ and /mgr/*/ and a rule about which has
-> precedence) unless there are cases where it seems absolutely
-> necessary.
-
-Like this one?
- 
-> Assuming we roll back the change that prefixed every key with the
-> daemon name, modules are free to do their own prefixing for any
-> settings that they want to be per-daemon.  To enable it we just need
-> to make sure the module has a way of finding out the name of the
-> daemon where it's currently running.
-
-The reason why it's there now is that (almost) every config key we've used 
-so far need to be able to be mgr-specific.  Do you have an alternative 
-proposal (besides trying mgr/$id/$module/$option or 
-mgr.$id/$Module/$option and then mgr/$module/$option)?
-
-sage
+Program received signal SIGSEGV, Segmentation fault.
+0x00000008025e693e in std::__1::__atomic_base<unsigned long,
+true>::fetch_add (this=0x108803637688,
+    __op=1, __m=std::__1::memory_order_seq_cst) at
+/usr/include/c++/v1/atomic:980
+980             {return __c11_atomic_fetch_add(&this->__a_, __op, __m);}
+(gdb) bt
+#0  0x00000008025e693e in std::__1::__atomic_base<unsigned long,
+true>::fetch_add (this=0x108803637688,
+    __op=1, __m=std::__1::memory_order_seq_cst) at
+/usr/include/c++/v1/atomic:980
+#1  std::__1::__atomic_base<unsigned long, true>::operator+=
+(this=0x108803637688, __op=1)
+    at /usr/include/c++/v1/atomic:1025
+#2  mempool::pool_t::adjust_count (this=0x108803637680, items=1, bytes=42)
+    at /home/jenkins/workspace/ceph-master/src/common/mempool.cc:85
+#3  0x00000008024f1bfb in ceph::buffer::raw::reassign_to_mempool
+(this=0x1076130, pool=-1)
+    at /home/jenkins/workspace/ceph-master/src/common/buffer.cc:196
+#4  0x00000008024e1b19 in ceph::buffer::list::reserve
+(this=0x7fffffffd040, prealloc=42)
+    at /home/jenkins/workspace/ceph-master/src/common/buffer.cc:1772
+#5  0x00000000004d0ad5 in ceph::buffer::list::list (this=0x7fffffffd040,
+prealloc=42)
+    at /home/jenkins/workspace/ceph-master/src/include/buffer.h:662
+#6  0x00000000004b4114 in Legacy::encode_n (n=42, segments=...)
+    at /home/jenkins/workspace/ceph-master/src/test/test_denc.cc:610
+#7  0x00000000004b4d22 in
+denc_no_copy_if_segmented_and_lengthy_Test::TestBody (this=0x1068070)
+    at /home/jenkins/workspace/ceph-master/src/test/test_denc.cc:633
+#8  0x00000000005ea62e in
+testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test,
+void> (
+    object=0x1068070, method=&virtual testing::Test::TestBody(),
+location=0x6156ee "the test body")
+    at
+/home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2402
+#9  0x00000000005ccabb in
+testing::internal::HandleExceptionsInMethodIfSupported<testing::Test,
+void> (
+    object=0x1068070, method=&virtual testing::Test::TestBody(),
+location=0x6156ee "the test body")
+    at
+/home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2438
+#10 0x00000000005885c6 in testing::Test::Run (this=0x1068070)
+    at
+/home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2474
+#11 0x000000000058ad0d in testing::TestInfo::Run (this=0x106edd0)
+    at
+/home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2656
+#12 0x000000000058bfcc in testing::TestCase::Run (this=0x106e0d0)
+    at
+/home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2774
+#13 0x00000000005a2e8c in testing::internal::UnitTestImpl::RunAllTests
+(this=0x1072000)
+    at
+/home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:4649
+#14 0x00000000005ed4be in
+testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl,
+bool> (object=0x1072000,
+    method=(bool
+(testing::internal::UnitTestImpl::*)(testing::internal::UnitTestImpl *
+const)) 0x5a2af0 <testing::internal::UnitTestImpl::RunAllTests()>,
+    location=0x615d71 "auxiliary test code (environments or event
+listeners)")
+    at
+/home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2402
