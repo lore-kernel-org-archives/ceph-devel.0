@@ -1,94 +1,101 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: teuthology SELinux failures
-Date: Fri, 2 Jun 2017 08:31:06 -0700
-Message-ID: <CAMMFjmHwSPhRwsDBofq3bo6QDk7KA8=712rjU0inkVK5Uk7Hrg@mail.gmail.com>
-References: <CADRKj5QHS+qeB3jLJf4y9LVtoZ9pZSxiswO=64eTgGQm6ScdJA@mail.gmail.com>
- <1496331233.10067.1.camel@redhat.com> <CAKPXa=Ydy_KAoFaUrnMPWA51S_D3snjPPfAtGW5oE=omi41ENg@mail.gmail.com>
- <CALe9h7ch+6NHLEhC=YDAaY77ki-Xo-L0Eh5m9XsaGWRAsPETfw@mail.gmail.com> <CAMMFjmE8vy_h8uNtJW4bHVDa=MGMsX0C+ecTSXsFoFs=kSH1NQ@mail.gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: global backfill reservation?
+Date: Fri, 2 Jun 2017 15:38:42 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1706021535560.3646@piezo.novalocal>
+References: <alpine.DEB.2.11.1705112237290.18953@piezo.novalocal> <CABZ+qqmtqL7Dgzu4XNsfyqgdJRZrkRXbfxRaRH+1bWg8zvDCBA@mail.gmail.com> <c59514c6-c817-dcea-ba16-4cc6003316de@brockmann-consult.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f182.google.com ([209.85.128.182]:35205 "EHLO
-        mail-wr0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750813AbdFBPbI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Jun 2017 11:31:08 -0400
-Received: by mail-wr0-f182.google.com with SMTP id q97so8822143wrb.2
-        for <ceph-devel@vger.kernel.org>; Fri, 02 Jun 2017 08:31:08 -0700 (PDT)
-In-Reply-To: <CAMMFjmE8vy_h8uNtJW4bHVDa=MGMsX0C+ecTSXsFoFs=kSH1NQ@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:33210 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750813AbdFBPip (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Jun 2017 11:38:45 -0400
+In-Reply-To: <c59514c6-c817-dcea-ba16-4cc6003316de@brockmann-consult.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Vasu Kulkarni <vakulkar@redhat.com>, Boris Ranto <branto@redhat.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Peter Maloney <peter.maloney@brockmann-consult.de>
+Cc: Dan van der Ster <dan@vanderster.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Reviewed crontab schedules and all suite are using "-k" explicitly now
+On Fri, 2 Jun 2017, Peter Maloney wrote:
+> On 05/13/17 18:55, Dan van der Ster wrote:
+> > +1, this is something I've wanted for awhile. Using my "gentle
+> > reweight" scripts, I've found that backfilling stays pretty
+> > transparent as long as we limit to <5% of OSDs backfilling on our
+> > large clusters. I think it will take some experimentation to find the
+> > best default ratio to ship.
+> >
+> > On the other hand, the *other* reason that we operators like to make
+> > small changes is to limit the number of PGs that go through peering
+> > all at once. Correct me if I'm wrong, but as an operator I'd hesitate
+> > to trigger a re-peering of *all* PGs in an active pool -- users would
+> > surely notice such an operation. Does luminous or luminous++ have some
+> > improvements to this half of the problem?
+> >
+> > Cheers, Dan
+> >
+> 
+> Hi Dan,
+> 
+> I have read your script:
+> https://github.com/cernceph/ceph-scripts/blob/master/tools/ceph-gentle-reweight#L42
+> 
+> And at that line I see you using "ceph osd crush reweight" instead of
+> "ceph osd reweight".
+> 
+> And I just added 2 nodes to my cluster and had some related issues and
+> solved them. Doing it like your script, crush reweighting a tiny bit a
+> time causes blocked requests for long durations, even just moving 1 pg
+> ... I let one go for 40s before stopping it. It seemed impossible to
+> ever get one pg to peer without such a long block. I also tried making a
+> special pool with those 12 osds to test and it took 1 minute to make 64
+> pgs without any clients using them, which is still unreasonable for a
+> blocked request. (Also the "normal" way to just blindly add osds with
+> full weight and not take any special care would just do the same in one
+> big jump instead of many.)
 
-On Thu, Jun 1, 2017 at 9:50 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
-> all k* suites run with -k testing in nightlies
->
-> On Thu, Jun 1, 2017 at 9:39 AM, John Spray <jspray@redhat.com> wrote:
->> On Thu, Jun 1, 2017 at 5:15 PM, Vasu Kulkarni <vakulkar@redhat.com> wrote:
->>> I believe the nodes are pretty much messed up with various kernel
->>> versions, ideally we should not be seeing this on distro kernel(as per
->>> Boris's comment)
->>> so probably we should just schedule kernel client tests on vps so that
->>> the smithi's and mira's have only latest distro kernels for other
->>> suites for correct testing.
->>
->> We do need to be able to run with "-k testing" for kcephfs, knfs and
->> multimds suites (this has always been the case), and I don't think to
->> move all those off of our main test nodes would be realistic.
->>
->> Folks can already use "-k distro" on their runs (I have use this on
->> all my fs suite runs for a long time), it would probably make sense
->> for teuthology to use that as the default so that people are not
->> getting a random kernel.
->>
->> John
->>
->>> Also it would be nice to automatically reimage the nodes back to
->>> distro once in a week.
->>>
->>> On Thu, Jun 1, 2017 at 8:33 AM, Boris Ranto <branto@redhat.com> wrote:
->>>> I did not check all of the failed tests but those that I checked
->>>> complained about dac_read_search. The dac_* family of capabilities
->>>> complains that root is trying to access a file that the standard
->>>> permissions does not allow him (root) to access (i.e. having 600 and
->>>> ceph/ceph user/group).
->>>>
->>>> However, there is a lot of dac_* failures all throughout the system and
->>>> the target contexts are different for these files (i.e. there would
->>>> have to be a lot of files like that) so I am inclined to say that this
->>>> is a kernel bug. Especially considering that this does not present in
->>>> older/stock kernels where there already is a dac_override support.
->>>>
->>>> Anyway, it should be safe to ignore these (not our processes, not our
->>>> files...)
->>>>
->>>> Regards,
->>>> Boris
->>>>
->>>>
->>>> On Wed, 2017-05-31 at 13:23 -0700, Yehuda Sadeh-Weinraub wrote:
->>>>> We started seeing SELinux related failures in recent teuthology run,
->>>>> e.g.:
->>>>> http://pulpito.ceph.com/yehudasa-2017-05-30_14:55:10-rgw-wip-rgw-mdse
->>>>> arch---basic-smithi/
->>>>>
->>>>> It seems that it's unrelated to the runs themselves, possibly postfix
->>>>> that's running in the background is triggering these. Any idea what
->>>>> we
->>>>> should do there?
->>>>>
->>>>> Yehuda
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+FWIW this sounds a lot like the problem that Josh is solving now (deletes 
+in the workload can make peering slow).  "Slow peering" is not very 
+specific, I guess, but that's the one known issue that makes peering 10s 
+of seconds slow.
+
+> And the solution in the end was quite painless... have osds up (with
+> either weight 0), then just set reweight 0, crush weight normal (TB) and
+> then it does peering (one sort of peering?) and then after peering is
+> done, change "ceph osd reweight", even a bunch at once and it has barely
+> any impact... it does peering (the other sort of peering, not repeating
+> the slow terrible sort it did already?), but very fast and with only a
+> few 5s blocked requests (which is fairly normal here due to rbd
+> snapshots). Maybe the crush weight peering with 0 reweight makes it do
+> the slow terrible sort of peering, but without blocking any real pgs,
+> and therefore without blocking clients, so it's tolerable (blocking
+> empty osds, not used pools and pgs). And then the other peering is fast.
+
+I don't see how this would be any different from a peering perspective.  
+The pattern of data movement and remapping would be different, but there's 
+no difference in this sequence that seems like it relate to peering 
+taking 10s of seconds.  :/
+
+How confident are you that this was a real effect?  Could it be that when 
+you tried the second method your disk caches were warm vs the first time 
+around when they were cold?
+
+sage
+
+> And Sage, if that's true, then couldn't ceph by default just do the
+> first kind of peering work before any pgs, pools, clients, etc. are
+> affected, before moving on to the stuff that affects clients, regardless
+> of which steps were used? At some point during adding t hose 2 nodes I
+> was thinking how could ceph be so broken and mysterious... why does it
+> just hang there? Would it do this during recovery of a dead osd too? Now
+> I know how to avoid it and that it shouldn't affect recovering dead osds
+> (not changing crush weight)... but it would be nice for all users not to
+> ever think that way. :)
+> 
+> And Dan, I am curious about why you use crush reweight for this (which I
+> failed to), and whether you tried it the way I describe above, or
+> another way.
+> 
+> And I'm using jewel 10.2.7. I don't know how other versions behave.
+> 
+> 
+> 
