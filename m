@@ -1,88 +1,74 @@
-From: Sage Weil <sweil@redhat.com>
+From: John Spray <jspray@redhat.com>
 Subject: Re: mgr dashboard and rest api configs
-Date: Fri, 2 Jun 2017 13:41:53 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706021335380.3646@piezo.novalocal>
-References: <alpine.DEB.2.11.1706012007280.15628@piezo.novalocal> <CALe9h7fmjF1Yvkvf068nzpvACKfo7qz5PJ5SZdhWsboueg1xFA@mail.gmail.com> <alpine.DEB.2.11.1706012208360.3646@piezo.novalocal> <CALe9h7eQL=G5QHLYcEdrq18Um8xL_g43uNzvLaM2S+Rh1RFf5w@mail.gmail.com>
+Date: Fri, 2 Jun 2017 14:42:10 +0100
+Message-ID: <CALe9h7d39FswDZP7ky-E7yCHCnpUEXdaVt2mHsD_um1jTgosHQ@mail.gmail.com>
+References: <alpine.DEB.2.11.1706012007280.15628@piezo.novalocal>
+ <CALe9h7fmjF1Yvkvf068nzpvACKfo7qz5PJ5SZdhWsboueg1xFA@mail.gmail.com>
+ <alpine.DEB.2.11.1706012208360.3646@piezo.novalocal> <1496394883.10067.8.camel@redhat.com>
+ <alpine.DEB.2.11.1706021334430.3646@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41170 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751138AbdFBNlz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 2 Jun 2017 09:41:55 -0400
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 00BF880C0E
-        for <ceph-devel@vger.kernel.org>; Fri,  2 Jun 2017 13:41:55 +0000 (UTC)
-In-Reply-To: <CALe9h7eQL=G5QHLYcEdrq18Um8xL_g43uNzvLaM2S+Rh1RFf5w@mail.gmail.com>
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:33420 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751138AbdFBNmc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Jun 2017 09:42:32 -0400
+Received: by mail-wm0-f43.google.com with SMTP id m7so12282239wmg.0
+        for <ceph-devel@vger.kernel.org>; Fri, 02 Jun 2017 06:42:32 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1706021334430.3646@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Ranto, Boris" <branto@redhat.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: Boris Ranto <branto@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 2 Jun 2017, John Spray wrote:
-> >> Assuming we roll back the change that prefixed every key with the
-> >> daemon name, modules are free to do their own prefixing for any
-> >> settings that they want to be per-daemon.  To enable it we just need
-> >> to make sure the module has a way of finding out the name of the
-> >> daemon where it's currently running.
-> >
-> > The reason why it's there now is that (almost) every config key we've used
-> > so far need to be able to be mgr-specific.  Do you have an alternative
-> > proposal (besides trying mgr/$id/$module/$option or
-> > mgr.$id/$Module/$option and then mgr/$module/$option)?
-> 
-> My proposal is mgr/$module/<whatever the module wants>
-> ...which in practice for TLS certs would be mgr/$module/$id/$option
-> 
-> Then, enable the modules to retrieve their current daemon's config by
-> giving them a function that tells them the name of the currently
-> running daemon.
+On Fri, Jun 2, 2017 at 2:35 PM, Sage Weil <sweil@redhat.com> wrote:
+> On Fri, 2 Jun 2017, Boris Ranto wrote:
+>> On Thu, 2017-06-01 at 22:16 +0000, Sage Weil wrote:
+>> > That part I fixed with NamedTemporaryFile in
+>> >         https://github.com/liewegas/ceph/commit/c169c8fd461bf94459cd9
+>> > 8b658d2a2d8bf42bca6
+>> >
+>> > Was there also a python module dependency problem?  If not, it seems
+>> > much  more natural for the module to create the crt/key pair the first
+>> > time it  stats if it's not present...
+>> >
+>>
+>> I had something like that before, see commit
+>>
+>> https://github.com/ceph/ceph/pull/14457/commits/92fa210aaa87fcc47b2491f
+>> a44f029f7426cd7b9
+>>
+>> or
+>>
+>> https://github.com/ceph/ceph/pull/14457/commits/f59e9bf0bbda870311c6084
+>> 74b9aad63f4323c43
+>>
+>> that removed/changed it. I had a couple more implementations that did
+>> all sorts of things. I later removed all of them and went with as
+>> simple solution as possible for two reasons:
+>>
+>> - the simple straight-forward solution is usually least likely to bite
+>> us in the future
+>> - it seemed almost impossible to get an agreement on how a more
+>> sophisticated solution should actually look like (it felt like I was
+>> going in the circles)
+>>
+>> The one removed in the first linked patch did not require any special
+>> dependencies (make_ssl_devcert is part of werkzeug). The other linked
+>> one required pyOpenSSL which was kinda bad as afaik, pyOpenSSL is not
+>> being properly maintained.
+>
+> I like the make_ssl_devcert approach personally... John?
 
-That sounds fine to me.
+I just had a look at the werkzeug code and it seems to be using
+pyOpenSSL too under the hood, so I guess has same issue as the other
+approach?
 
-> One day, it would be nice to have modules consume their config from
-> the new key/val config store on the mon.  Then, they could just have
-> whatever level of cleverness was available for configuration in
-> general for those settings, and the current "get_config" stuff would
-> be exclusively for persistent state as opposed to user-input config.
+If pyOpenSSL is not viable, maybe invoking the openssl CLI from inside
+the module would still be neater than having the module depend on
+packaging to do it?
 
-FWIW my hope here was to adopt a convention here that matched what we were 
-going to do for config.  That's why there is the global -> mgr -> mgr.x 
-hierarchy thing.  That might be a fool's errand, though, since we 
-(will) have a well-defined set of config options, whereas the module 
-options are module-defined.
+John
 
-Anyway, I think the suggestion currently is for
-
-    "mgr/dashboard/x/server_addr",
-    "mgr/dashboard/x/server_port",
-    "mgr/dashboard/y/server_addr",
-    "mgr/dashboard/y/server_port",
-    "mgr/restful/keys",
-    "mgr/restful/x/crt",
-    "mgr/restful/x/key",
-    "mgr/restful/x/server_addr",
-    "mgr/restful/x/server_port",
-    "mgr/restful/y/crt",
-    "mgr/restful/y/key",
-    "mgr/restful/y/server_addr",
-    "mgr/restful/y/server_port"
-
-?
-
-Although I'd probably suggest also changing
-
-    "mgr/restful/keys",
-
-to separate per-key keys, like
-
-    "mgr/restful/keys/$user",
-
-(Also, the 'ceph tell mgr.x create_key $name' thing concerns me a bit 
-that it's unclear this is for the restful module.  Should we have modules 
-prefix their commands by module name by convention where it makes sense?  
-e.g., 'ceph tell mgr.x restful create_key $name'?)
-
-sage
+>
+> sage
