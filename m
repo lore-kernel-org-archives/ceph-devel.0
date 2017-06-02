@@ -1,161 +1,55 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Crashes with unittest_dencoder
-Date: Fri, 2 Jun 2017 09:22:59 +0200
-Message-ID: <db29e531-cff6-8795-a4a2-4ac65ca75a6a@digiware.nl>
-References: <66fafc3c-a5dd-405d-a521-597fe524d1e3@digiware.nl>
- <CAF-wwdF9QXMg6EzKU=HoG8e6K5+SMSu-ZU3rHVtrYMVJVpJjUQ@mail.gmail.com>
- <6d384986-a2b8-7b5e-4098-80b9d2a98f99@digiware.nl>
- <46da372a-cd7e-32b5-38c6-98aa94d13780@digiware.nl>
- <CAF-wwdFJjrXFdSZCjOxVkz9LWx2JtXbxJFdvGWjQXTFfodCXfw@mail.gmail.com>
+From: John Johansen <john.johansen@canonical.com>
+Subject: Re: [PATCH 10/12] apparmorfs: Replace CURRENT_TIME with
+ current_time()
+Date: Fri, 2 Jun 2017 00:29:48 -0700
+Message-ID: <b5d3d600-d3fe-669f-f6bc-01dcedbb7fe3@canonical.com>
+References: <1491613030-11599-1-git-send-email-deepa.kernel@gmail.com>
+ <1491613030-11599-11-git-send-email-deepa.kernel@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:19492 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750772AbdFBHXB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 2 Jun 2017 03:23:01 -0400
-In-Reply-To: <CAF-wwdFJjrXFdSZCjOxVkz9LWx2JtXbxJFdvGWjQXTFfodCXfw@mail.gmail.com>
-Content-Language: nl
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <y2038-bounces@lists.linaro.org>
+In-Reply-To: <1491613030-11599-11-git-send-email-deepa.kernel@gmail.com>
+Content-Language: en-GB
+List-Unsubscribe: <https://lists.linaro.org/mailman/options/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/y2038/>
+List-Post: <mailto:y2038@lists.linaro.org>
+List-Help: <mailto:y2038-request@lists.linaro.org?subject=help>
+List-Subscribe: <https://lists.linaro.org/mailman/listinfo/y2038>,
+ <mailto:y2038-request@lists.linaro.org?subject=subscribe>
+Errors-To: y2038-bounces@lists.linaro.org
+Sender: "Y2038" <y2038-bounces@lists.linaro.org>
+To: Deepa Dinamani <deepa.kernel@gmail.com>, linux-kernel@vger.kernel.org, akpm@linux-foundation.org
+Cc: yuchao0@huawei.com, bfields@fieldses.org, clm@fb.com, linux-mtd@lists.infradead.org, dushistov@mail.ru, jlayton@poochiereds.net, tglx@linutronix.de, devel@driverdev.osuosl.org, linux-cifs@vger.kernel.org, paul@paul-moore.com, y2038@lists.linaro.org, mingo@redhat.com, jsimmons@infradead.org, arnd@arndb.de, rostedt@goodmis.org, oleg.drokin@intel.com, john.stultz@linaro.org, viro@zeniv.linux.org.uk, dsterba@suse.com, jaegeuk@kernel.org, ceph-devel@vger.kernel.org, andreas.dilger@intel.com, jbacik@fb.com, gregkh@linuxfoundation.org, samba-technical@lists.samba.org, eparis@redhat.com, linux-f2fs-devel@lists.sourceforge.net, linux-security-module@vger.kernel.org, linux-audit@redhat.com, netdev@vger.kernel.org, linux-fsdevel@vger.kernel.org, davem@davemloft.net, linux-btrfs@vger.kernel.org, lustre-devel@lists.lustre.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 02/06/2017 09:08, Brad Hubbard wrote:
-> On Fri, Jun 2, 2017 at 10:46 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> On 02/06/2017 02:23, Willem Jan Withagen wrote:
->>> On 02/06/2017 01:27, Brad Hubbard wrote:
->>>> The first guess I would have is that this may have something to do
->>>> with https://github.com/ceph/ceph/pull/15352
->>>
->>> Reverting 15402 and 15403 get me back to normal builds.
->>>
->>> And was only having trouble with osd-scrib-repair.sh until this morning,
->>> and then six showed up, preventing compilation. And somewhere in between
->>> the problem with dencoder started.
->>> So I'd execpt it to be one these to actually expect 15402, but I'd
->>> expect that 15403 cannot do without 15402.
-> 
-> Not sure I understand. Neither of these has been merged yet so should
-> not affect master?
-
-You are right....
-
-I looked at commits that jenkins had as changes since the first moment
-things still executed oke. From there I looked for buffer/mempool/....
-stuff, and saw that Sage had commit some stuff. So I checked his PRs in
-github, and found these two. What I did not look at, was wether the PRs
-were commited. :)
-
-So 15402 is a going to be fix for a problem that exhibits it sell on
-FreeBSD.
-
-Thanx for being so sharp.
-
---WjW
-
-> 
->>>
->>
->> Actually it is 15403, if I undo that PR unittest_denc starts producing
->> errors.
->>
->> --WjW
->>
->>> --WjW
->>>> Could you try backing that change out Willem and let us know how that goes?
->>>>
->>>> On Fri, Jun 2, 2017 at 9:00 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>>>> Any hints on what changes in the current code generates the illegal
->>>>> memaccess in the trace below?
->>>>>
->>>>> Lots of tests fail, and I guess that mst have to do with this.
->>>>>
->>>>> --WjW
->>>>>
->>>>> Program received signal SIGSEGV, Segmentation fault.
->>>>> 0x00000008025e693e in std::__1::__atomic_base<unsigned long,
->>>>> true>::fetch_add (this=0x108803637688,
->>>>>     __op=1, __m=std::__1::memory_order_seq_cst) at
->>>>> /usr/include/c++/v1/atomic:980
->>>>> 980             {return __c11_atomic_fetch_add(&this->__a_, __op, __m);}
->>>>> (gdb) bt
->>>>> #0  0x00000008025e693e in std::__1::__atomic_base<unsigned long,
->>>>> true>::fetch_add (this=0x108803637688,
->>>>>     __op=1, __m=std::__1::memory_order_seq_cst) at
->>>>> /usr/include/c++/v1/atomic:980
->>>>> #1  std::__1::__atomic_base<unsigned long, true>::operator+=
->>>>> (this=0x108803637688, __op=1)
->>>>>     at /usr/include/c++/v1/atomic:1025
->>>>> #2  mempool::pool_t::adjust_count (this=0x108803637680, items=1, bytes=42)
->>>>>     at /home/jenkins/workspace/ceph-master/src/common/mempool.cc:85
->>>>> #3  0x00000008024f1bfb in ceph::buffer::raw::reassign_to_mempool
->>>>> (this=0x1076130, pool=-1)
->>>>>     at /home/jenkins/workspace/ceph-master/src/common/buffer.cc:196
->>>>> #4  0x00000008024e1b19 in ceph::buffer::list::reserve
->>>>> (this=0x7fffffffd040, prealloc=42)
->>>>>     at /home/jenkins/workspace/ceph-master/src/common/buffer.cc:1772
->>>>> #5  0x00000000004d0ad5 in ceph::buffer::list::list (this=0x7fffffffd040,
->>>>> prealloc=42)
->>>>>     at /home/jenkins/workspace/ceph-master/src/include/buffer.h:662
->>>>> #6  0x00000000004b4114 in Legacy::encode_n (n=42, segments=...)
->>>>>     at /home/jenkins/workspace/ceph-master/src/test/test_denc.cc:610
->>>>> #7  0x00000000004b4d22 in
->>>>> denc_no_copy_if_segmented_and_lengthy_Test::TestBody (this=0x1068070)
->>>>>     at /home/jenkins/workspace/ceph-master/src/test/test_denc.cc:633
->>>>> #8  0x00000000005ea62e in
->>>>> testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test,
->>>>> void> (
->>>>>     object=0x1068070, method=&virtual testing::Test::TestBody(),
->>>>> location=0x6156ee "the test body")
->>>>>     at
->>>>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2402
->>>>> #9  0x00000000005ccabb in
->>>>> testing::internal::HandleExceptionsInMethodIfSupported<testing::Test,
->>>>> void> (
->>>>>     object=0x1068070, method=&virtual testing::Test::TestBody(),
->>>>> location=0x6156ee "the test body")
->>>>>     at
->>>>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2438
->>>>> #10 0x00000000005885c6 in testing::Test::Run (this=0x1068070)
->>>>>     at
->>>>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2474
->>>>> #11 0x000000000058ad0d in testing::TestInfo::Run (this=0x106edd0)
->>>>>     at
->>>>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2656
->>>>> #12 0x000000000058bfcc in testing::TestCase::Run (this=0x106e0d0)
->>>>>     at
->>>>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2774
->>>>> #13 0x00000000005a2e8c in testing::internal::UnitTestImpl::RunAllTests
->>>>> (this=0x1072000)
->>>>>     at
->>>>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:4649
->>>>> #14 0x00000000005ed4be in
->>>>> testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl,
->>>>> bool> (object=0x1072000,
->>>>>     method=(bool
->>>>> (testing::internal::UnitTestImpl::*)(testing::internal::UnitTestImpl *
->>>>> const)) 0x5a2af0 <testing::internal::UnitTestImpl::RunAllTests()>,
->>>>>     location=0x615d71 "auxiliary test code (environments or event
->>>>> listeners)")
->>>>>     at
->>>>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2402
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>>>
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
-> 
-> 
-> 
-
+T24gMDQvMDcvMjAxNyAwNTo1NyBQTSwgRGVlcGEgRGluYW1hbmkgd3JvdGU6Cj4gQ1VSUkVOVF9U
+SU1FIG1hY3JvIGlzIG5vdCB5MjAzOCBzYWZlIG9uIDMyIGJpdCBzeXN0ZW1zLgo+IAo+IFRoZSBw
+YXRjaCByZXBsYWNlcyBhbGwgdGhlIHVzZXMgb2YgQ1VSUkVOVF9USU1FIGJ5Cj4gY3VycmVudF90
+aW1lKCkuCj4gCj4gVGhpcyBpcyBhbHNvIGluIHByZXBhcmF0aW9uIGZvciB0aGUgcGF0Y2ggdGhh
+dCB0cmFuc2l0aW9ucwo+IHZmcyB0aW1lc3RhbXBzIHRvIHVzZSA2NCBiaXQgdGltZSBhbmQgaGVu
+Y2UgbWFrZSB0aGVtCj4geTIwMzggc2FmZS4gY3VycmVudF90aW1lKCkgaXMgYWxzbyBwbGFubmVk
+IHRvIGJlIHRyYW5zaXRpb25lZAo+IHRvIHkyMDM4IHNhZmUgYmVoYXZpb3IgYWxvbmcgd2l0aCB0
+aGlzIGNoYW5nZS4KPiAKPiBDVVJSRU5UX1RJTUUgbWFjcm8gd2lsbCBiZSBkZWxldGVkIGJlZm9y
+ZSBtZXJnaW5nIHRoZQo+IGFmb3JlbWVudGlvbmVkIGNoYW5nZS4KPiAKPiBTaWduZWQtb2ZmLWJ5
+OiBEZWVwYSBEaW5hbWFuaSA8ZGVlcGEua2VybmVsQGdtYWlsLmNvbT4KClRoaXMgaXMgYWxsIGdv
+b2QsIGFuZCBJIGhhdmUgbm8gb2JqZWN0aW9ucyB0byBpdCBiZWluZyBtZXJnZWQgZm9yIDQuMTIu
+CklmIGl0IGlzbid0IHRoaXMgY2hhbmdlIGlzIGFscmVhZHkgcXVldWVkIHVwIGZvciB0aGUgYXBw
+YXJtb3IgNC4xMwptZXJnZQoKQWNrZWQtYnk6IEpvaG4gSm9oYW5zZW4gPGpvaG4uam9oYW5zZW5A
+Y2Fub25pY2FsLmNvbT4KCj4gLS0tCj4gIHNlY3VyaXR5L2FwcGFybW9yL2FwcGFybW9yZnMuYyB8
+IDIgKy0KPiAgMSBmaWxlIGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pCj4g
+Cj4gZGlmZiAtLWdpdCBhL3NlY3VyaXR5L2FwcGFybW9yL2FwcGFybW9yZnMuYyBiL3NlY3VyaXR5
+L2FwcGFybW9yL2FwcGFybW9yZnMuYwo+IGluZGV4IGJlMGI0OTguLjRmNmFjOWQgMTAwNjQ0Cj4g
+LS0tIGEvc2VjdXJpdHkvYXBwYXJtb3IvYXBwYXJtb3Jmcy5jCj4gKysrIGIvc2VjdXJpdHkvYXBw
+YXJtb3IvYXBwYXJtb3Jmcy5jCj4gQEAgLTEzNTcsNyArMTM1Nyw3IEBAIHN0YXRpYyBpbnQgYWFf
+bWtfbnVsbF9maWxlKHN0cnVjdCBkZW50cnkgKnBhcmVudCkKPiAgCj4gIAlpbm9kZS0+aV9pbm8g
+PSBnZXRfbmV4dF9pbm8oKTsKPiAgCWlub2RlLT5pX21vZGUgPSBTX0lGQ0hSIHwgU19JUlVHTyB8
+IFNfSVdVR087Cj4gLQlpbm9kZS0+aV9hdGltZSA9IGlub2RlLT5pX210aW1lID0gaW5vZGUtPmlf
+Y3RpbWUgPSBDVVJSRU5UX1RJTUU7Cj4gKwlpbm9kZS0+aV9hdGltZSA9IGlub2RlLT5pX210aW1l
+ID0gaW5vZGUtPmlfY3RpbWUgPSBjdXJyZW50X3RpbWUoaW5vZGUpOwo+ICAJaW5pdF9zcGVjaWFs
+X2lub2RlKGlub2RlLCBTX0lGQ0hSIHwgU19JUlVHTyB8IFNfSVdVR08sCj4gIAkJCSAgIE1LREVW
+KE1FTV9NQUpPUiwgMykpOwo+ICAJZF9pbnN0YW50aWF0ZShkZW50cnksIGlub2RlKTsKPiAKCl9f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fClkyMDM4IG1haWxp
+bmcgbGlzdApZMjAzOEBsaXN0cy5saW5hcm8ub3JnCmh0dHBzOi8vbGlzdHMubGluYXJvLm9yZy9t
+YWlsbWFuL2xpc3RpbmZvL3kyMDM4Cg==
