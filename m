@@ -1,17 +1,17 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
 Subject: Re: Missing prettytable during ceph-disk runs
-Date: Fri, 2 Jun 2017 16:42:00 +0200
-Message-ID: <c21afa65-5806-b6d4-7549-8692c37898d5@digiware.nl>
+Date: Fri, 2 Jun 2017 16:49:54 +0200
+Message-ID: <fee031e9-0310-ab38-1527-8e8d665714a0@digiware.nl>
 References: <92db6d6a-420d-3f89-9631-8376b5d7d6a2@digiware.nl>
  <CAC-Np1y1hBFVnor9OhMxmj+xXZO5cnHvcQz6wAbjJ-7xhLhPBw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:55348 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([176.74.240.9]:59879 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751160AbdFBOmE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 2 Jun 2017 10:42:04 -0400
+        id S1751125AbdFBOt6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 2 Jun 2017 10:49:58 -0400
 In-Reply-To: <CAC-Np1y1hBFVnor9OhMxmj+xXZO5cnHvcQz6wAbjJ-7xhLhPBw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -45,10 +45,25 @@ On 2-6-2017 16:36, Alfredo Deza wrote:
 > 
 > This also sounds like a bug :)
 
-I agree that it could a bug, but I also guess that Dan added it for
-ansible purposes. How that passes jenkins, I do not know.
-But on my FreeBSD/jenkins end it dropped on the floor.
+tox.ini contains:
+[testenv]
+setenv =
+       VIRTUAL_ENV={envdir}
+       CEPH_DISK={envbindir}/coverage run --append --source=ceph_disk --
+{envbindir}/ceph-disk
+usedevelop = true
+deps =
+  {env:NO_INDEX:}
+  --use-wheel
+  --find-links=file://{toxinidir}/wheelhouse
+  -r{toxinidir}/requirements.txt
+  -r{toxinidir}/test-requirements.txt
+  ../ceph-detect-init
 
+So I added it to requirements.txt, and ran make tests.
+
+After that every thing is A-oke.
+
+Thanx,
 --WjW
-
 
