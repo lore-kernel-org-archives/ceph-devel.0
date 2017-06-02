@@ -1,133 +1,111 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Crashes with unittest_dencoder
-Date: Fri, 2 Jun 2017 02:46:53 +0200
-Message-ID: <46da372a-cd7e-32b5-38c6-98aa94d13780@digiware.nl>
-References: <66fafc3c-a5dd-405d-a521-597fe524d1e3@digiware.nl>
- <CAF-wwdF9QXMg6EzKU=HoG8e6K5+SMSu-ZU3rHVtrYMVJVpJjUQ@mail.gmail.com>
- <6d384986-a2b8-7b5e-4098-80b9d2a98f99@digiware.nl>
+From: Deepa Dinamani <deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 04/12] fs: ceph: CURRENT_TIME with
+	ktime_get_real_ts()
+Date: Thu, 1 Jun 2017 17:57:02 -0700
+Message-ID: <CABeXuvqvLr6sSGF+rZEXXxpCBDKTOeLX1ObSjbPPY4aFBuwvMg@mail.gmail.com>
+References: <1491613030-11599-1-git-send-email-deepa.kernel@gmail.com>
+	<1491613030-11599-5-git-send-email-deepa.kernel@gmail.com>
+	<CAAM7YAmp=cZKqGHa8UqDnrQLCe+6TKx+7w9SDZv4cW5fr4dfvA@mail.gmail.com>
+	<CAK8P3a1pCw1Oo-Wg70kH5L12pbtEzGDfaPZ8g6ErERJjvY8znQ@mail.gmail.com>
+	<CAAM7YAnWLUXMOCVbgfdKGfvK04EtAQcz-ETm7xFO=8Y=_fCvOQ@mail.gmail.com>
+	<CALAqxLV-yVKWM5es7fAFiDzhSQmtZFiZDPQwBRUYbWUtqhoWVg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:10460 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750851AbdFBAq4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 1 Jun 2017 20:46:56 -0400
-In-Reply-To: <6d384986-a2b8-7b5e-4098-80b9d2a98f99@digiware.nl>
-Content-Language: nl
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+In-Reply-To: <CALAqxLV-yVKWM5es7fAFiDzhSQmtZFiZDPQwBRUYbWUtqhoWVg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
+List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
+Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+To: John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: yuchao0-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, "J. Bruce Fields" <bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org>, Chris Mason <clm-b10kYP2dOMg@public.gmane.org>, linux-mtd <linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Evgeniy Dushistov <dushistov-JGs/UdohzUI@public.gmane.org>, Jeff Layton <jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Paul Moore <paul-r2n+y4ga6xFZroRs9YW3xA@public.gmane.org>, y2038 Mailman List <y2038-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Steven Rostedt <rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org>, "Drokin,
+	Oleg" <oleg.drokin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>, Jaegeuk Kim <jaegeuk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Josef Bacik <jbacik-b10kYP2dOMg@public.gmane.org>, gregkh <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Eric Paris <eparis@red>
+List-Id: ceph-devel.vger.kernel.org
 
-On 02/06/2017 02:23, Willem Jan Withagen wrote:
-> On 02/06/2017 01:27, Brad Hubbard wrote:
->> The first guess I would have is that this may have something to do
->> with https://github.com/ceph/ceph/pull/15352
-> 
-> Reverting 15402 and 15403 get me back to normal builds.
-> 
-> And was only having trouble with osd-scrib-repair.sh until this morning,
-> and then six showed up, preventing compilation. And somewhere in between
-> the problem with dencoder started.
-> So I'd execpt it to be one these to actually expect 15402, but I'd
-> expect that 15403 cannot do without 15402.
+On Thu, Jun 1, 2017 at 5:36 PM, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On Thu, Jun 1, 2017 at 5:26 PM, Yan, Zheng <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>> On Thu, Jun 1, 2017 at 6:22 PM, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
+>>> On Thu, Jun 1, 2017 at 11:56 AM, Yan, Zheng <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>>>> On Sat, Apr 8, 2017 at 8:57 AM, Deepa Dinamani <deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>>>
+>>>>> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+>>>>> index 517838b..77204da 100644
+>>>>> --- a/drivers/block/rbd.c
+>>>>> +++ b/drivers/block/rbd.c
+>>>>> @@ -1922,7 +1922,7 @@ static void rbd_osd_req_format_write(struct rbd_obj_request *obj_request)
+>>>>>  {
+>>>>>         struct ceph_osd_request *osd_req = obj_request->osd_req;
+>>>>>
+>>>>> -       osd_req->r_mtime = CURRENT_TIME;
+>>>>> +       ktime_get_real_ts(&osd_req->r_mtime);
+>>>>>         osd_req->r_data_offset = obj_request->offset;
+>>>>>  }
+>>>>>
+>>>>> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+>>>>> index c681762..1d3fa90 100644
+>>>>> --- a/fs/ceph/mds_client.c
+>>>>> +++ b/fs/ceph/mds_client.c
+>>>>> @@ -1666,6 +1666,7 @@ struct ceph_mds_request *
+>>>>>  ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
+>>>>>  {
+>>>>>         struct ceph_mds_request *req = kzalloc(sizeof(*req), GFP_NOFS);
+>>>>> +       struct timespec ts;
+>>>>>
+>>>>>         if (!req)
+>>>>>                 return ERR_PTR(-ENOMEM);
+>>>>> @@ -1684,7 +1685,8 @@ ceph_mdsc_create_request(struct ceph_mds_client *mdsc, int op, int mode)
+>>>>>         init_completion(&req->r_safe_completion);
+>>>>>         INIT_LIST_HEAD(&req->r_unsafe_item);
+>>>>>
+>>>>> -       req->r_stamp = current_fs_time(mdsc->fsc->sb);
+>>>>> +       ktime_get_real_ts(&ts);
+>>>>> +       req->r_stamp = timespec_trunc(ts, mdsc->fsc->sb->s_time_gran);
+>>>>
+>>>> This change causes our kernel_untar_tar test case to fail (inode's
+>>>> ctime goes back). The reason is that there is time drift between the
+>>>> time stamps got by  ktime_get_real_ts() and current_time(). We need to
+>>>> revert this change until current_time() uses ktime_get_real_ts()
+>>>> internally.
+>>>
+>>> Hmm, the change was not supposed to have a user-visible effect, so
+>>> something has gone wrong, but I don't immediately see how it
+>>> relates to what you observe.
+>>>
+>>> ktime_get_real_ts() and current_time() use the same time base, there
+>>> is no drift, but there is a difference in resolution, as the latter uses
+>>> the time stamp of the last jiffies update, which may be up to one jiffy
+>>> (10ms) behind the exact time we put in the request stamps here.
+>>>
+>>> Do you still see problems if you use current_kernel_time() instead of
+>>> ktime_get_real_ts()?
+>>
+>> The problem disappears after using current_kernel_time().
+>>
+>> https://github.com/ceph/ceph-client/commit/2e0f648da23167034a3cf1500bc90ec60aef2417
 >
+> From the commit above:
+> "It seems there is time drift between ktime_get_real_ts() and
+> current_kernel_time()"
+>
+> Its more of a granularity difference. current_kernel_time() returns
+> the cached time at the last tick, where as ktime_get_real_ts() reads
+> the clocksource hardware and returns the immediate time.
+>
+> Filesystems usually use the cached time (similar to
+> CLOCK_REALTIME_COARSE), for performance reasons, as touching the
+> clocksource takes time.
 
-Actually it is 15403, if I undo that PR unittest_denc starts producing
-errors.
+Alternatively, it would be best for this code also to use current_time().
+I had suggested this in one of the previous versions of the patch.
+The implementation of current_time() will change when we switch vfs to
+use 64 bit time. This will prevent such errors from happening again.
+But, this also means there is more code reordering for these modules
+to get a reference to inode.
 
---WjW
-
-> --WjW
->> Could you try backing that change out Willem and let us know how that goes?
->>
->> On Fri, Jun 2, 2017 at 9:00 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>> Any hints on what changes in the current code generates the illegal
->>> memaccess in the trace below?
->>>
->>> Lots of tests fail, and I guess that mst have to do with this.
->>>
->>> --WjW
->>>
->>> Program received signal SIGSEGV, Segmentation fault.
->>> 0x00000008025e693e in std::__1::__atomic_base<unsigned long,
->>> true>::fetch_add (this=0x108803637688,
->>>     __op=1, __m=std::__1::memory_order_seq_cst) at
->>> /usr/include/c++/v1/atomic:980
->>> 980             {return __c11_atomic_fetch_add(&this->__a_, __op, __m);}
->>> (gdb) bt
->>> #0  0x00000008025e693e in std::__1::__atomic_base<unsigned long,
->>> true>::fetch_add (this=0x108803637688,
->>>     __op=1, __m=std::__1::memory_order_seq_cst) at
->>> /usr/include/c++/v1/atomic:980
->>> #1  std::__1::__atomic_base<unsigned long, true>::operator+=
->>> (this=0x108803637688, __op=1)
->>>     at /usr/include/c++/v1/atomic:1025
->>> #2  mempool::pool_t::adjust_count (this=0x108803637680, items=1, bytes=42)
->>>     at /home/jenkins/workspace/ceph-master/src/common/mempool.cc:85
->>> #3  0x00000008024f1bfb in ceph::buffer::raw::reassign_to_mempool
->>> (this=0x1076130, pool=-1)
->>>     at /home/jenkins/workspace/ceph-master/src/common/buffer.cc:196
->>> #4  0x00000008024e1b19 in ceph::buffer::list::reserve
->>> (this=0x7fffffffd040, prealloc=42)
->>>     at /home/jenkins/workspace/ceph-master/src/common/buffer.cc:1772
->>> #5  0x00000000004d0ad5 in ceph::buffer::list::list (this=0x7fffffffd040,
->>> prealloc=42)
->>>     at /home/jenkins/workspace/ceph-master/src/include/buffer.h:662
->>> #6  0x00000000004b4114 in Legacy::encode_n (n=42, segments=...)
->>>     at /home/jenkins/workspace/ceph-master/src/test/test_denc.cc:610
->>> #7  0x00000000004b4d22 in
->>> denc_no_copy_if_segmented_and_lengthy_Test::TestBody (this=0x1068070)
->>>     at /home/jenkins/workspace/ceph-master/src/test/test_denc.cc:633
->>> #8  0x00000000005ea62e in
->>> testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test,
->>> void> (
->>>     object=0x1068070, method=&virtual testing::Test::TestBody(),
->>> location=0x6156ee "the test body")
->>>     at
->>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2402
->>> #9  0x00000000005ccabb in
->>> testing::internal::HandleExceptionsInMethodIfSupported<testing::Test,
->>> void> (
->>>     object=0x1068070, method=&virtual testing::Test::TestBody(),
->>> location=0x6156ee "the test body")
->>>     at
->>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2438
->>> #10 0x00000000005885c6 in testing::Test::Run (this=0x1068070)
->>>     at
->>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2474
->>> #11 0x000000000058ad0d in testing::TestInfo::Run (this=0x106edd0)
->>>     at
->>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2656
->>> #12 0x000000000058bfcc in testing::TestCase::Run (this=0x106e0d0)
->>>     at
->>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2774
->>> #13 0x00000000005a2e8c in testing::internal::UnitTestImpl::RunAllTests
->>> (this=0x1072000)
->>>     at
->>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:4649
->>> #14 0x00000000005ed4be in
->>> testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl,
->>> bool> (object=0x1072000,
->>>     method=(bool
->>> (testing::internal::UnitTestImpl::*)(testing::internal::UnitTestImpl *
->>> const)) 0x5a2af0 <testing::internal::UnitTestImpl::RunAllTests()>,
->>>     location=0x615d71 "auxiliary test code (environments or event
->>> listeners)")
->>>     at
->>> /home/jenkins/workspace/ceph-master/src/googletest/googletest/src/gtest.cc:2402
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->>
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+-Deepa
