@@ -1,86 +1,94 @@
-From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
-Subject: Re: radosgw refuses upload when Content-Type missing from POST policy (fwd)
-Date: Fri, 2 Jun 2017 07:57:56 -0700
-Message-ID: <CADRKj5Sfh2m7K3Ciz2DdpnLGLiRNsDco8bE8_EZ+FrvMqjxaSg@mail.gmail.com>
-References: <20170602090939.GJ2558@sanger.ac.uk>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Re: teuthology SELinux failures
+Date: Fri, 2 Jun 2017 08:31:06 -0700
+Message-ID: <CAMMFjmHwSPhRwsDBofq3bo6QDk7KA8=712rjU0inkVK5Uk7Hrg@mail.gmail.com>
+References: <CADRKj5QHS+qeB3jLJf4y9LVtoZ9pZSxiswO=64eTgGQm6ScdJA@mail.gmail.com>
+ <1496331233.10067.1.camel@redhat.com> <CAKPXa=Ydy_KAoFaUrnMPWA51S_D3snjPPfAtGW5oE=omi41ENg@mail.gmail.com>
+ <CALe9h7ch+6NHLEhC=YDAaY77ki-Xo-L0Eh5m9XsaGWRAsPETfw@mail.gmail.com> <CAMMFjmE8vy_h8uNtJW4bHVDa=MGMsX0C+ecTSXsFoFs=kSH1NQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:36841 "EHLO
-        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751128AbdFBO56 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Jun 2017 10:57:58 -0400
-Received: by mail-qt0-f171.google.com with SMTP id f55so61069847qta.3
-        for <ceph-devel@vger.kernel.org>; Fri, 02 Jun 2017 07:57:57 -0700 (PDT)
-In-Reply-To: <20170602090939.GJ2558@sanger.ac.uk>
+Received: from mail-wr0-f182.google.com ([209.85.128.182]:35205 "EHLO
+        mail-wr0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750813AbdFBPbI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Jun 2017 11:31:08 -0400
+Received: by mail-wr0-f182.google.com with SMTP id q97so8822143wrb.2
+        for <ceph-devel@vger.kernel.org>; Fri, 02 Jun 2017 08:31:08 -0700 (PDT)
+In-Reply-To: <CAMMFjmE8vy_h8uNtJW4bHVDa=MGMsX0C+ecTSXsFoFs=kSH1NQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dave Holland <dh3@sanger.ac.uk>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Vasu Kulkarni <vakulkar@redhat.com>, Boris Ranto <branto@redhat.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Yeah, seems like an api incompatibility issue. Can you open a ceph
-tracker with the details there?
+Reviewed crontab schedules and all suite are using "-k" explicitly now
 
-Thanks,
-Yehuda
-
-On Fri, Jun 2, 2017 at 2:09 AM, Dave Holland <dh3@sanger.ac.uk> wrote:
-> Resending to ceph-devel, as I guess when radosgw behaves differently to
-> AWS S3 it's more an interoperability question than a usage question.
+On Thu, Jun 1, 2017 at 9:50 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
+> all k* suites run with -k testing in nightlies
 >
-> Cheers,
-> Dave
->
-> ----- Forwarded message from Dave Holland <dh3@sanger.ac.uk> -----
->
-> Date: Wed, 31 May 2017 17:02:14 +0100
-> From: Dave Holland <dh3@sanger.ac.uk>
-> To: ceph-users@lists.ceph.com
-> Subject: radosgw refuses upload when Content-Type missing from POST policy
-> Message-ID: <20170531160214.GC2558@sanger.ac.uk>
->
-> Hi,
->
-> I'm trying to get files into radosgw (Ubuntu Ceph package
-> 10.2.3-0ubuntu0.16.04.2) using Fine Uploader
-> https://github.com/FineUploader/fine-uploader but I'm running into
-> difficulties in the case where the uploaded file has a filename
-> extension which the browser can't map to a MIME type (or, no extension
-> at all).
->
-> The radosgw replies with a 403 error, "Policy missing condition:
-> Content-Type". Examining the policy which the browser sends as part of
-> the multipart data confirms that there is no Content-Type. (The POST and
-> multipart do have Content-Type headers.) The same code and POST works
-> fine against AWS S3. Should radosgw require a Content-Type in the POST
-> policy when AWS S3 doesn't? It seems that for maximum compatibility, it
-> shouldn't.
->
-> The bucket's CORS policy is "<AllowedHeader>*</AllowedHeader>" but it
-> doesn't work with explicitly mentioning Content-Type either.
->
-> I put a radosgw debug=20 log of the successful OPTIONS call and failing
-> POST call here:
-> https://docs.google.com/document/d/1i3exJSil1xj14ZrDOF_oM9eZC238gnNVAsnaZ-Pkvzo/edit?usp=sharing
->
-> Happy to provide other debug info if necessary.
->
-> thanks,
-> Dave
-> --
-> ** Dave Holland ** Systems Support -- Informatics Systems Group **
-> ** 01223 496923 ** The Sanger Institute, Hinxton, Cambridge, UK **
->
-> ----- End forwarded message -----
->
->
->
-> --
->  The Wellcome Trust Sanger Institute is operated by Genome Research
->  Limited, a charity registered in England with number 1021457 and a
->  company registered in England with number 2742969, whose registered
->  office is 215 Euston Road, London, NW1 2BE.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> On Thu, Jun 1, 2017 at 9:39 AM, John Spray <jspray@redhat.com> wrote:
+>> On Thu, Jun 1, 2017 at 5:15 PM, Vasu Kulkarni <vakulkar@redhat.com> wrote:
+>>> I believe the nodes are pretty much messed up with various kernel
+>>> versions, ideally we should not be seeing this on distro kernel(as per
+>>> Boris's comment)
+>>> so probably we should just schedule kernel client tests on vps so that
+>>> the smithi's and mira's have only latest distro kernels for other
+>>> suites for correct testing.
+>>
+>> We do need to be able to run with "-k testing" for kcephfs, knfs and
+>> multimds suites (this has always been the case), and I don't think to
+>> move all those off of our main test nodes would be realistic.
+>>
+>> Folks can already use "-k distro" on their runs (I have use this on
+>> all my fs suite runs for a long time), it would probably make sense
+>> for teuthology to use that as the default so that people are not
+>> getting a random kernel.
+>>
+>> John
+>>
+>>> Also it would be nice to automatically reimage the nodes back to
+>>> distro once in a week.
+>>>
+>>> On Thu, Jun 1, 2017 at 8:33 AM, Boris Ranto <branto@redhat.com> wrote:
+>>>> I did not check all of the failed tests but those that I checked
+>>>> complained about dac_read_search. The dac_* family of capabilities
+>>>> complains that root is trying to access a file that the standard
+>>>> permissions does not allow him (root) to access (i.e. having 600 and
+>>>> ceph/ceph user/group).
+>>>>
+>>>> However, there is a lot of dac_* failures all throughout the system and
+>>>> the target contexts are different for these files (i.e. there would
+>>>> have to be a lot of files like that) so I am inclined to say that this
+>>>> is a kernel bug. Especially considering that this does not present in
+>>>> older/stock kernels where there already is a dac_override support.
+>>>>
+>>>> Anyway, it should be safe to ignore these (not our processes, not our
+>>>> files...)
+>>>>
+>>>> Regards,
+>>>> Boris
+>>>>
+>>>>
+>>>> On Wed, 2017-05-31 at 13:23 -0700, Yehuda Sadeh-Weinraub wrote:
+>>>>> We started seeing SELinux related failures in recent teuthology run,
+>>>>> e.g.:
+>>>>> http://pulpito.ceph.com/yehudasa-2017-05-30_14:55:10-rgw-wip-rgw-mdse
+>>>>> arch---basic-smithi/
+>>>>>
+>>>>> It seems that it's unrelated to the runs themselves, possibly postfix
+>>>>> that's running in the background is triggering these. Any idea what
+>>>>> we
+>>>>> should do there?
+>>>>>
+>>>>> Yehuda
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
