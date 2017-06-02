@@ -1,86 +1,74 @@
-From: Peter Maloney <peter.maloney@brockmann-consult.de>
-Subject: Re: global backfill reservation?
-Date: Fri, 2 Jun 2017 16:05:50 +0200
-Message-ID: <c59514c6-c817-dcea-ba16-4cc6003316de@brockmann-consult.de>
-References: <alpine.DEB.2.11.1705112237290.18953@piezo.novalocal>
- <CABZ+qqmtqL7Dgzu4XNsfyqgdJRZrkRXbfxRaRH+1bWg8zvDCBA@mail.gmail.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH 04/12] fs: ceph: CURRENT_TIME with
+	ktime_get_real_ts()
+Date: Fri, 2 Jun 2017 16:18:26 +0200
+Message-ID: <CAK8P3a1etuRz6zwytXTHqK-T0g2YnbR4zcCwo98ehjjD1Dj+Ow@mail.gmail.com>
+References: <1491613030-11599-1-git-send-email-deepa.kernel@gmail.com>
+	<1491613030-11599-5-git-send-email-deepa.kernel@gmail.com>
+	<CAAM7YAmp=cZKqGHa8UqDnrQLCe+6TKx+7w9SDZv4cW5fr4dfvA@mail.gmail.com>
+	<CAK8P3a1pCw1Oo-Wg70kH5L12pbtEzGDfaPZ8g6ErERJjvY8znQ@mail.gmail.com>
+	<CAAM7YAnWLUXMOCVbgfdKGfvK04EtAQcz-ETm7xFO=8Y=_fCvOQ@mail.gmail.com>
+	<CALAqxLV-yVKWM5es7fAFiDzhSQmtZFiZDPQwBRUYbWUtqhoWVg@mail.gmail.com>
+	<CABeXuvqvLr6sSGF+rZEXXxpCBDKTOeLX1ObSjbPPY4aFBuwvMg@mail.gmail.com>
+	<CAAM7YAkXNo_69tOrw6a5kpyref9nEpEp-2vxBbFVSHGmAVbt+A@mail.gmail.com>
+	<CAK8P3a1TwkVRCwDWqgYE8Z3wZT2+v6xayq=dVeW8KaHmO0W4cg@mail.gmail.com>
+	<CAAM7YA=BJHFLz_Ud==7L=yCzxj+1sjctc68tvpNogPhiSxxELQ@mail.gmail.com>
+	<CAK8P3a0D3EXuwBj+sSVL9cmpysdvQWXnkE0zEctBJS8XOqhX7A@mail.gmail.com>
+	<CAAM7YAk8JNU=XV=sOCczagWjBimO4JSPU08th7E4u6FTJN--9A@mail.gmail.com>
+	<CAK8P3a3m3nt6rfvAvDG6HFuUvy+qWbmk5K0UtLGqYhYHOfdF8w@mail.gmail.com>
+	<CAAM7YA=f74Wye8hgqR52CNG-c4Sh3sm74AzZYhSnhjN1B=G-Ow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.130]:62706 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751402AbdFBOGE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 2 Jun 2017 10:06:04 -0400
-In-Reply-To: <CABZ+qqmtqL7Dgzu4XNsfyqgdJRZrkRXbfxRaRH+1bWg8zvDCBA@mail.gmail.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+In-Reply-To: <CAAM7YA=f74Wye8hgqR52CNG-c4Sh3sm74AzZYhSnhjN1B=G-Ow-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
+List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
+	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
+Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
+Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
+To: "Yan, Zheng" <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: yuchao0-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, "J. Bruce Fields" <bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org>, Chris Mason <clm-b10kYP2dOMg@public.gmane.org>, linux-mtd <linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Deepa Dinamani <deepa.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Evgeniy Dushistov <dushistov-JGs/UdohzUI@public.gmane.org>, Jeff Layton <jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Paul Moore <paul-r2n+y4ga6xFZroRs9YW3xA@public.gmane.org>, y2038 Mailman List <y2038-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Steven Rostedt <rostedt-nx8X9YLhiw1AfugRpC6u6w@public.gmane.org>, "Drokin,
+	Oleg" <oleg.drokin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, David Sterba <dsterba-IBi9RG/b67k@public.gmane.org>, Jaegeuk Kim <jaegeuk-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Josef Bacik <jbacik-b10kYP2dOMg@public.gmane.org>, gregkh <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Eric
+List-Id: ceph-devel.vger.kernel.org
 
-On 05/13/17 18:55, Dan van der Ster wrote:
-> +1, this is something I've wanted for awhile. Using my "gentle
-> reweight" scripts, I've found that backfilling stays pretty
-> transparent as long as we limit to <5% of OSDs backfilling on our
-> large clusters. I think it will take some experimentation to find the
-> best default ratio to ship.
+On Fri, Jun 2, 2017 at 2:18 PM, Yan, Zheng <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> On Fri, Jun 2, 2017 at 7:33 PM, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
+>> On Fri, Jun 2, 2017 at 1:18 PM, Yan, Zheng <ukernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>> What I meant is another related problem in ceph_mkdir() where the
+>> i_ctime field of the parent inode is different between the persistent
+>> representation in the mds and the in-memory representation.
+>>
 >
-> On the other hand, the *other* reason that we operators like to make
-> small changes is to limit the number of PGs that go through peering
-> all at once. Correct me if I'm wrong, but as an operator I'd hesitate
-> to trigger a re-peering of *all* PGs in an active pool -- users would
-> surely notice such an operation. Does luminous or luminous++ have some
-> improvements to this half of the problem?
->
-> Cheers, Dan
->
+> I don't see any problem in mkdir case. Parent inode's i_ctime in mds is set to
+> r_stamp. When client receives request reply, it set its in-memory inode's ctime
+> to the same time stamp.
 
-Hi Dan,
+Ok, I see it now, thanks for the clarification. Most other file systems do this
+the other way round and update all fields in the in-memory inode structure
+first and then write that to persistent storage, so I was getting confused about
+the order of events here.
 
-I have read your script:
-https://github.com/cernceph/ceph-scripts/blob/master/tools/ceph-gentle-reweight#L42
+If I understand it all right, we have three different behaviors in ceph now,
+though the differences are very minor and probably don't ever matter:
 
-And at that line I see you using "ceph osd crush reweight" instead of
-"ceph osd reweight".
+- in setattr(), we update ctime in the in-memory inode first and then send
+  the same time to the mds, and expect to set it again when the reply comes.
 
-And I just added 2 nodes to my cluster and had some related issues and
-solved them. Doing it like your script, crush reweighting a tiny bit a
-time causes blocked requests for long durations, even just moving 1 pg
-... I let one go for 40s before stopping it. It seemed impossible to
-ever get one pg to peer without such a long block. I also tried making a
-special pool with those 12 osds to test and it took 1 minute to make 64
-pgs without any clients using them, which is still unreasonable for a
-blocked request. (Also the "normal" way to just blindly add osds with
-full weight and not take any special care would just do the same in one
-big jump instead of many.)
+- in ceph_write_iter write() and mmap/page_mkwrite(), we call
+  file_update_time() to set i_mtime and i_ctime to the same
+  timestamp first once a write is observed by the fs and then take
+  two other timestamps that we send to the mds, and update the
+  in-memory inode a second time when the reply comes. ctime
+  is never older than mtime here, as far as I can tell, but it may
+  be newer when the timer interrupt happens between taking the
+  two stamps.
 
-And the solution in the end was quite painless... have osds up (with
-either weight 0), then just set reweight 0, crush weight normal (TB) and
-then it does peering (one sort of peering?) and then after peering is
-done, change "ceph osd reweight", even a bunch at once and it has barely
-any impact... it does peering (the other sort of peering, not repeating
-the slow terrible sort it did already?), but very fast and with only a
-few 5s blocked requests (which is fairly normal here due to rbd
-snapshots). Maybe the crush weight peering with 0 reweight makes it do
-the slow terrible sort of peering, but without blocking any real pgs,
-and therefore without blocking clients, so it's tolerable (blocking
-empty osds, not used pools and pgs). And then the other peering is fast.
+- in all other calls, we only update the inode (and/or parent inode)
+  after the reply arrives.
 
-And Sage, if that's true, then couldn't ceph by default just do the
-first kind of peering work before any pgs, pools, clients, etc. are
-affected, before moving on to the stuff that affects clients, regardless
-of which steps were used? At some point during adding t hose 2 nodes I
-was thinking how could ceph be so broken and mysterious... why does it
-just hang there? Would it do this during recovery of a dead osd too? Now
-I know how to avoid it and that it shouldn't affect recovering dead osds
-(not changing crush weight)... but it would be nice for all users not to
-ever think that way. :)
-
-And Dan, I am curious about why you use crush reweight for this (which I
-failed to), and whether you tried it the way I describe above, or
-another way.
-
-And I'm using jewel 10.2.7. I don't know how other versions behave.
-
-
+       Arnd
