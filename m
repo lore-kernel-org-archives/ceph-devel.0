@@ -1,29 +1,28 @@
 From: Peter Maloney <peter.maloney@brockmann-consult.de>
 Subject: Re: global backfill reservation?
-Date: Sun, 4 Jun 2017 00:58:15 +0200
-Message-ID: <dbe60a96-8873-6457-70f4-048b129376ff@brockmann-consult.de>
+Date: Sun, 4 Jun 2017 01:11:47 +0200
+Message-ID: <ba500cf4-2bc5-3669-5d03-ec1bdfa4cc80@brockmann-consult.de>
 References: <alpine.DEB.2.11.1705112237290.18953@piezo.novalocal>
  <CABZ+qqmtqL7Dgzu4XNsfyqgdJRZrkRXbfxRaRH+1bWg8zvDCBA@mail.gmail.com>
  <c59514c6-c817-dcea-ba16-4cc6003316de@brockmann-consult.de>
- <CABZ+qq=0FCRcoKAn88FradsW17s3d0aT4H5gAkXSbz_yY0fRaQ@mail.gmail.com>
+ <alpine.DEB.2.11.1706021535560.3646@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.187]:62847 "EHLO
+Received: from mout.kundenserver.de ([212.227.126.134]:54328 "EHLO
         mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751077AbdFCW6Z (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Jun 2017 18:58:25 -0400
-In-Reply-To: <CABZ+qq=0FCRcoKAn88FradsW17s3d0aT4H5gAkXSbz_yY0fRaQ@mail.gmail.com>
+        with ESMTP id S1751077AbdFCXLz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 3 Jun 2017 19:11:55 -0400
+In-Reply-To: <alpine.DEB.2.11.1706021535560.3646@piezo.novalocal>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+To: Sage Weil <sage@newdream.net>
+Cc: Dan van der Ster <dan@vanderster.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 06/03/17 09:51, Dan van der Ster wrote:
-> On Fri, Jun 2, 2017 at 4:05 PM, Peter Maloney
-> <peter.maloney@brockmann-consult.de> wrote:
+On 06/02/17 17:38, Sage Weil wrote:
+> On Fri, 2 Jun 2017, Peter Maloney wrote:
 >> On 05/13/17 18:55, Dan van der Ster wrote:
 >>> +1, this is something I've wanted for awhile. Using my "gentle
 >>> reweight" scripts, I've found that backfilling stays pretty
@@ -58,7 +57,11 @@ On 06/03/17 09:51, Dan van der Ster wrote:
 >> blocked request. (Also the "normal" way to just blindly add osds with
 >> full weight and not take any special care would just do the same in one
 >> big jump instead of many.)
->>
+> FWIW this sounds a lot like the problem that Josh is solving now (deletes 
+> in the workload can make peering slow).  "Slow peering" is not very 
+> specific, I guess, but that's the one known issue that makes peering 10s 
+> of seconds slow.
+>
 >> And the solution in the end was quite painless... have osds up (with
 >> either weight 0), then just set reweight 0, crush weight normal (TB) and
 >> then it does peering (one sort of peering?) and then after peering is
@@ -70,7 +73,44 @@ On 06/03/17 09:51, Dan van der Ster wrote:
 >> the slow terrible sort of peering, but without blocking any real pgs,
 >> and therefore without blocking clients, so it's tolerable (blocking
 >> empty osds, not used pools and pgs). And then the other peering is fast.
->>
+> I don't see how this would be any different from a peering perspective.  
+> The pattern of data movement and remapping would be different, but there's 
+> no difference in this sequence that seems like it relate to peering 
+> taking 10s of seconds.  :/
+Maybe I explained it badly.... I mean it took just as long to change the
+crush weight and peer, but when reweight was 0, the clients weren't
+affected. Then when I set reweight 1, it was faster and clients seemed
+happy still.
+> How confident are you that this was a real effect?  Could it be that when 
+> you tried the second method your disk caches were warm vs the first time 
+> around when they were cold?
+I don't know how to judge whether it cached anything... what is there to
+cache on an empty disk? And does repating the test use the same data? It
+was trying to peer the same pg each time.
+
+I repeatedly re-tested the same osd to try to get it to peer many
+times...like 30 or 40 times probably, spread over 2 days. Each time I
+just let it block clients for about 5-20 seconds, and then when I
+managed to somehow get it to only block 1 pg I know didn't matter much
+(a basically idle pool), then I let it go 40s or longer.
+
+I considered that doing the test with the separate root prepared the
+osds for peering in the real root... but thought that's probably wrong
+since the first osd was still slow doing my same test as before, until I
+thought of using reweight instead of crush reweight. So that's like 40
+times trying crush weight on one osd (a few times with 2-3 osds)... one
+time testing separate a root and it fully peered... then a few times
+trying crush weight again... then the reweight idea with one disk, then
+one more, etc. and then the last 3 or 4 at once.
+
+And I checked iostat and didn't think the disks looked very busy while
+peering. I'll pay closer attention to that stuff (and anything you
+suggest before then) when I do the next 18 osds (first removing, then
+adding larger ones).
+
+>
+> sage
+>
 >> And Sage, if that's true, then couldn't ceph by default just do the
 >> first kind of peering work before any pgs, pools, clients, etc. are
 >> affected, before moving on to the stuff that affects clients, regardless
@@ -88,38 +128,10 @@ On 06/03/17 09:51, Dan van der Ster wrote:
 >> And I'm using jewel 10.2.7. I don't know how other versions behave.
 >>
 >>
-> Here's what we do:
->   1. Create and start new OSDs with initial crush weight = 0.0. No PGs
-> should re-peer when these are booted.
->   2. Run the reweight script, e.g. like this for some 6T drives:
->
->    ceph-gentle-reweight -o osd.10,osd.11,osd.12 -l 15 -b 50 -d 0.01 -t 5.46
->
-> In practice we've added >150 drives at once with that script -- using
-> that tiny delta.
->
-> We use crush reweight because it "works for us (tm)". We haven't seen
-> any strange peering hangs, though we exercise this on hammer, not
-> (yet) jewel.
-> I hadn't thought of your method using osd reweight -- how do you add
-> new osds with an initial osd reweight? Maybe you create the osds in a
-> non-default root then move them after being reweighted to 0.0?
->
-> Cheers, Dan
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-I added them with crush weight 0, then my plan was to raise the weight
-like you do. That's basically what I did for all the other servers. But
-I fiddled with the crush map and had them in another root when I set the
-reweight 0, then weight 6, then moved them to root default (long
-peering), then reweight 1 (short peering). But that wasn't what I
-planned on doing or plan to do in the future.
-
-I expect that would be the same as crush weight 0 and in the normal root
-when created, then when ready for peering, set reweight 0 first, then
-crush weight 6, then after peering is done, reweight 1 for a few at a
-time (ceph osd reweight ...; sleep 2; while ceph health | grep peering;
-do sleep 1; done ...).
-
-The next step in this upgrade is to replace 18 2TB disks with 6TB
-ones... I'll do it that way and find out if it works without the extra root.
 
