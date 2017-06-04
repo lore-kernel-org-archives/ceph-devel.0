@@ -1,7 +1,7 @@
 From: ceph.novice-k4R3PER4nllwCEqMux5wBA@public.gmane.org
 Subject: Re: RGW lifecycle not expiring objects
-Date: Mon, 5 Jun 2017 01:12:49 +0200
-Message-ID: <trinity-9ac6e555-43be-4a82-b5b5-e120d3af1e8b-1496617969363@3capp-gmx-bs31>
+Date: Mon, 5 Jun 2017 01:16:02 +0200
+Message-ID: <trinity-fe7badd9-ecbc-4d65-8fa0-231496938a25-1496618162797@3capp-gmx-bs31>
 References: <CABGPr5nfykSv=ib6N_jMOarOF=O1XaPLxCXY6nNYR81wa62TBQ@mail.gmail.com>
 	<CABGPr5=5y3NBJ_jGB1w=2=DeHU1GF4f7Ji+kTAJ_4f+O37hTFg@mail.gmail.com>
 	<e19ebc5a-c8c1-eefb-acec-65fbc0284101@umn.edu>
@@ -9,9 +9,12 @@ References: <CABGPr5nfykSv=ib6N_jMOarOF=O1XaPLxCXY6nNYR81wa62TBQ@mail.gmail.com>
 	<CADRKj5ShtTBA=_3e89jC-t31sArHZ=9Wfc5cA5VRHKFfd+gz0A@mail.gmail.com>
 	<trinity-b11b03b1-bc6b-466e-ba26-77e1154d575f-1496604855693@3capp-gmx-bs77>
 	<trinity-76fa44cc-8cd5-41f0-90e9-4a6d2e603ae6-1496617549501@3capp-gmx-bs31>
+	<trinity-9ac6e555-43be-4a82-b5b5-e120d3af1e8b-1496617969363@3capp-gmx-bs31>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0203209776=="
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <trinity-9ac6e555-43be-4a82-b5b5-e120d3af1e8b-1496617969363@3capp-gmx-bs31>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -25,222 +28,118 @@ To: Yehuda Sadeh-Weinraub <yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
---===============0203209776==
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<html><head></head><body><div style=3D"font-family: Verdana;font-size: 12=
-=2E0px;"><div>&nbsp;
-<div>
-<div>Hi (again) Yehuda=2E</div>
-
-<div>&nbsp;</div>
-
-<div name=3D"quoted-content">Looping in ceph-devel=2E=2E=2E</div>
-
-<div name=3D"quoted-content">&nbsp;</div>
-
-<div name=3D"quoted-content">Could it be that lifecycle is still not imple=
-mented neither in Jewel nor in Kraken, even if release notes and other plac=
-es say so?<br/>
-&nbsp;<br/>
-<a href=3D"https://www=2Espinics=2Enet/lists/ceph-devel/msg34492=2Ehtml" t=
-arget=3D"_blank">https://www=2Espinics=2Enet/lists/ceph-devel/msg34492=2Eht=
-ml</a><br/>
-<a href=3D"https://github=2Ecom/ceph/ceph-ci/commit/7d48f62f5c86913d8f00b4=
-4d46a04a52d338907c" target=3D"_blank">https://github=2Ecom/ceph/ceph-ci/com=
-mit/7d48f62f5c86913d8f00b44d46a04a52d338907c</a><br/>
-<a href=3D"https://github=2Ecom/ceph/ceph-ci/commit/9162bd29594d34429a0956=
-2ed60a32a0703940ea" target=3D"_blank">https://github=2Ecom/ceph/ceph-ci/com=
-mit/9162bd29594d34429a09562ed60a32a0703940ea</a><br/>
-&nbsp;<br/>
-Thanks &amp; regards<br/>
-&nbsp;Anton<br/>
-&nbsp;<br/>
-<br/>
-Gesendet:&nbsp;Sonntag, 04=2E Juni 2017 um 21:34 Uhr<br/>
-Von:&nbsp;ceph=2Enovice@habmalnefrage=2Ede<br/>
-An:&nbsp;&quot;Yehuda Sadeh-Weinraub&quot; &lt;yehuda@redhat=2Ecom&gt;<br/=
->
-Cc:&nbsp;&quot;ceph-users@lists=2Eceph=2Ecom&quot; &lt;ceph-users@lists=2E=
-ceph=2Ecom&gt;<br/>
-Betreff:&nbsp;Re: [ceph-users] RGW lifecycle not expiring objects<br/>
-Hi Yahuda=2E<br/>
-<br/>
-Well, here we go: <a href=3D"http://tracker=2Eceph=2Ecom/issues/20177" tar=
-get=3D"_blank">http://tracker=2Eceph=2Ecom/issues/20177</a><br/>
-<br/>
-As it&#39;s my first one, hope it&#39;s ok as it is=2E=2E=2E<br/>
-<br/>
-Thanks &amp; regards<br/>
-Anton<br/>
-<br/>
-<br/>
-Gesendet:&nbsp;Samstag, 03=2E Juni 2017 um 00:14 Uhr<br/>
-Von:&nbsp;&quot;Yehuda Sadeh-Weinraub&quot; &lt;yehuda@redhat=2Ecom&gt;<br=
-/>
-An:&nbsp;ceph=2Enovice@habmalnefrage=2Ede<br/>
-Cc:&nbsp;&quot;Graham Allan&quot; &lt;gta@umn=2Eedu&gt;, &quot;ceph-users@=
-lists=2Eceph=2Ecom&quot; &lt;ceph-users@lists=2Eceph=2Ecom&gt;<br/>
-Betreff:&nbsp;Re: [ceph-users] RGW lifecycle not expiring objects<br/>
-Have you opened a ceph tracker issue, so that we don&#39;t lose track of<b=
-r/>
-the problem?<br/>
-<br/>
-Thanks,<br/>
-Yehuda<br/>
-<br/>
-On Fri, Jun 2, 2017 at 3:05 PM, &lt;ceph=2Enovice@habmalnefrage=2Ede&gt; w=
-rote:<br/>
-&gt; Hi Graham=2E<br/>
-&gt;<br/>
-&gt; We are on Kraken and have the same problem with &quot;lifecycle&quot;=
-=2E Various (other) tools like s3cmd or CyberDuck do show the applied &quot=
-;expiration&quot; settings, but objects seem never to be purged=2E<br/>
-&gt;<br/>
-&gt; If you should have new findings, hints,=2E=2E=2E PLEASE share/let me =
-know=2E<br/>
-&gt;<br/>
-&gt; Thanks a lot!<br/>
-&gt; Anton<br/>
-&gt;<br/>
-&gt;<br/>
-&gt; Gesendet: Freitag, 19=2E Mai 2017 um 22:44 Uhr<br/>
-&gt; Von: &quot;Graham Allan&quot; &lt;gta@umn=2Eedu&gt;<br/>
-&gt; An: ceph-users@lists=2Eceph=2Ecom<br/>
-&gt; Betreff: [ceph-users] RGW lifecycle not expiring objects<br/>
-&gt; I&#39;ve been having a hard time getting the s3 object lifecycle to d=
-o<br/>
-&gt; anything here=2E I was able to set a lifecycle on a test bucket=2E As=
- others<br/>
-&gt; also seem to have found, I do get an EACCES error on setting the<br/>
-&gt; lifecycle, but it does however get stored:<br/>
-&gt;<br/>
-&gt;&gt; % aws --endpoint-url <a href=3D"https://xxx=2Exxx=2Exxx=2Exxx" ta=
-rget=3D"_blank">https://xxx=2Exxx=2Exxx=2Exxx</a>[<a href=3D"https://xxx=2E=
-xxx=2Exxx=2Exxx" target=3D"_blank">https://xxx=2Exxx=2Exxx=2Exxx</a>] s3api=
- get-bucket-lifecycle-configuration --bucket=3Dtestgta<br/>
-&gt;&gt; {<br/>
-&gt;&gt; &quot;Rules&quot;: [<br/>
-&gt;&gt; {<br/>
-&gt;&gt; &quot;Status&quot;: &quot;Enabled&quot;,<br/>
-&gt;&gt; &quot;Prefix&quot;: &quot;&quot;,<br/>
-&gt;&gt; &quot;Expiration&quot;: {<br/>
-&gt;&gt; &quot;Days&quot;: 3<br/>
-&gt;&gt; },<br/>
-&gt;&gt; &quot;ID&quot;: &quot;test&quot;<br/>
-&gt;&gt; }<br/>
-&gt;&gt; ]<br/>
-&gt;&gt; }<br/>
-&gt;<br/>
-&gt; but many days later I have yet to see any object actually get expired=
-=2E<br/>
-&gt; There are some hints in the rgw log that the expiry thread does run<b=
-r/>
-&gt; periodically:<br/>
-&gt;<br/>
-&gt;&gt; 2017-05-19 03:49:03=2E281347 7f74f1134700 2 RGWDataChangesLog::Ch=
-angesRenewThread: start<br/>
-&gt;&gt; 2017-05-19 03:49:16=2E356022 7f74ef931700 2 object expiration: st=
-art<br/>
-&gt;&gt; 2017-05-19 03:49:16=2E356036 7f74ef931700 20 proceeding shard =3D=
- obj_delete_at_hint=2E0000000000<br/>
-&gt;&gt; 2017-05-19 03:49:16=2E359785 7f74ef931700 20 proceeding shard =3D=
- obj_delete_at_hint=2E0000000001<br/>
-&gt;&gt; 2017-05-19 03:49:16=2E364667 7f74ef931700 20 proceeding shard =3D=
- obj_delete_at_hint=2E0000000002<br/>
-&gt;&gt; 2017-05-19 03:49:16=2E369636 7f74ef931700 20 proceeding shard =3D=
- obj_delete_at_hint=2E0000000003<br/>
-&gt; =2E=2E=2E<br/>
-&gt;&gt; 2017-05-19 03:49:16=2E803270 7f74ef931700 20 proceeding shard =3D=
- obj_delete_at_hint=2E0000000126<br/>
-&gt;&gt; 2017-05-19 03:49:16=2E806423 7f74ef931700 2 object expiration: st=
-op<br/>
-&gt;<br/>
-&gt; &quot;radosgw-admin lc process&quot; gives me no output unless I enab=
-le debug, then:<br/>
-&gt;<br/>
-&gt;&gt; ]# radosgw-admin lc process<br/>
-&gt;&gt; 2017-05-19 15:28:46=2E383049 7fedb9ffb700 2 RGWDataChangesLog::Ch=
-angesRenewThread: start<br/>
-&gt;&gt; 2017-05-19 15:28:46=2E421806 7feddc240c80 10 Cannot find current =
-period zone using local zone<br/>
-&gt;&gt; 2017-05-19 15:28:46=2E453431 7feddc240c80 2 all 8 watchers are se=
-t, enabling cache<br/>
-&gt;&gt; 2017-05-19 15:28:46=2E614991 7feddc240c80 2 removed watcher, disa=
-bling cache<br/>
-&gt;<br/>
-&gt; &quot;radosgw-admin lc list&quot; seems to return &quot;empty&quot; o=
-utput:<br/>
-&gt;<br/>
-&gt;&gt; # radosgw-admin lc list<br/>
-&gt;&gt; []<br/>
-&gt;<br/>
-&gt; Is there anything obvious that I might be missing?<br/>
-&gt;<br/>
-&gt; Graham<br/>
-&gt; --<br/>
-&gt; Graham Allan<br/>
-&gt; Minnesota Supercomputing Institute - gta@umn=2Eedu<br/>
-&gt; _______________________________________________<br/>
-&gt; ceph-users mailing list<br/>
-&gt; ceph-users@lists=2Eceph=2Ecom<br/>
-&gt; <a href=3D"http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-users-ceph=
-=2Ecom" target=3D"_blank">http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-use=
-rs-ceph=2Ecom</a>[<a href=3D"http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-=
-users-ceph=2Ecom" target=3D"_blank">http://lists=2Eceph=2Ecom/listinfo=2Ecg=
-i/ceph-users-ceph=2Ecom</a>][<a href=3D"http://lists=2Eceph=2Ecom/listinfo=
-=2Ecgi/ceph-users-ceph=2Ecom" target=3D"_blank">http://lists=2Eceph=2Ecom/l=
-istinfo=2Ecgi/ceph-users-ceph=2Ecom</a>[<a href=3D"http://lists=2Eceph=2Eco=
-m/listinfo=2Ecgi/ceph-users-ceph=2Ecom" target=3D"_blank">http://lists=2Ece=
-ph=2Ecom/listinfo=2Ecgi/ceph-users-ceph=2Ecom</a>]][<a href=3D"http://lists=
-=2Eceph=2Ecom/listinfo=2Ecgi/ceph-users-ceph=2Ecom" target=3D"_blank">http:=
-//lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-users-ceph=2Ecom</a>[<a href=3D"ht=
-tp://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-users-ceph=2Ecom" target=3D"_bl=
-ank">http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-users-ceph=2Ecom</a>][<a=
- href=3D"http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-users-ceph=2Ecom" ta=
-rget=3D"_blank">http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-users-ceph=2E=
-com</a>[<a href=3D"http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-users-ceph=
-=2Ecom" target=3D"_blank">http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-use=
-rs-ceph=2Ecom</a>]]]<br/>
-&gt;<br/>
-&gt;<br/>
-&gt; _______________________________________________<br/>
-&gt; ceph-users mailing list<br/>
-&gt; ceph-users@lists=2Eceph=2Ecom<br/>
-&gt; <a href=3D"http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-users-ceph=
-=2Ecom" target=3D"_blank">http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-use=
-rs-ceph=2Ecom</a>[<a href=3D"http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-=
-users-ceph=2Ecom" target=3D"_blank">http://lists=2Eceph=2Ecom/listinfo=2Ecg=
-i/ceph-users-ceph=2Ecom</a>][<a href=3D"http://lists=2Eceph=2Ecom/listinfo=
-=2Ecgi/ceph-users-ceph=2Ecom" target=3D"_blank">http://lists=2Eceph=2Ecom/l=
-istinfo=2Ecgi/ceph-users-ceph=2Ecom</a>[<a href=3D"http://lists=2Eceph=2Eco=
-m/listinfo=2Ecgi/ceph-users-ceph=2Ecom" target=3D"_blank">http://lists=2Ece=
-ph=2Ecom/listinfo=2Ecgi/ceph-users-ceph=2Ecom</a>]]<br/>
-_______________________________________________<br/>
-ceph-users mailing list<br/>
-ceph-users@lists=2Eceph=2Ecom<br/>
-<a href=3D"http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-users-ceph=2Ecom"=
- target=3D"_blank">http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-users-ceph=
-=2Ecom</a>[<a href=3D"http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-users-c=
-eph=2Ecom" target=3D"_blank">http://lists=2Eceph=2Ecom/listinfo=2Ecgi/ceph-=
-users-ceph=2Ecom</a>]</div>
-</div>
-</div>
-
-<div>&nbsp;</div>
-
-<div class=3D"signature">&nbsp;</div></div></body></html>
-
---===============0203209776==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0203209776==--
+CmdycnIuLi4gc29ycnkgJiYgYW5kIGFnYWluIGFzIHRleHQgOnwKwqAKCkdlc2VuZGV0OsKgTW9u
+dGFnLCAwNS4gSnVuaSAyMDE3IHVtIDAxOjEyIFVocgpWb246wqBjZXBoLm5vdmljZUBoYWJtYWxu
+ZWZyYWdlLmRlCkFuOsKgIlllaHVkYSBTYWRlaC1XZWlucmF1YiIgPHllaHVkYUByZWRoYXQuY29t
+PgpDYzrCoCJjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tIiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBo
+LmNvbT4sIGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnCkJldHJlZmY6wqBSZTogW2NlcGgtdXNl
+cnNdIFJHVyBsaWZlY3ljbGUgbm90IGV4cGlyaW5nIG9iamVjdHMKCsKgCgpIaSAoYWdhaW4pIFll
+aHVkYS4KwqAKTG9vcGluZyBpbiBjZXBoLWRldmVsLi4uCsKgCkNvdWxkIGl0IGJlIHRoYXQgbGlm
+ZWN5Y2xlIGlzIHN0aWxsIG5vdCBpbXBsZW1lbnRlZCBuZWl0aGVyIGluIEpld2VsIG5vciBpbiBL
+cmFrZW4sIGV2ZW4gaWYgcmVsZWFzZSBub3RlcyBhbmQgb3RoZXIgcGxhY2VzIHNheSBzbz8KwqAK
+aHR0cHM6Ly93d3cuc3Bpbmljcy5uZXQvbGlzdHMvY2VwaC1kZXZlbC9tc2czNDQ5Mi5odG1sCmh0
+dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgtY2kvY29tbWl0LzdkNDhmNjJmNWM4NjkxM2Q4ZjAw
+YjQ0ZDQ2YTA0YTUyZDMzODkwN2MKaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC1jaS9jb21t
+aXQvOTE2MmJkMjk1OTRkMzQ0MjlhMDk1NjJlZDYwYTMyYTA3MDM5NDBlYQrCoApUaGFua3MgJiBy
+ZWdhcmRzCsKgQW50b24KwqAKCkdlc2VuZGV0OsKgU29ubnRhZywgMDQuIEp1bmkgMjAxNyB1bSAy
+MTozNCBVaHIKVm9uOsKgY2VwaC5ub3ZpY2VAaGFibWFsbmVmcmFnZS5kZQpBbjrCoCJZZWh1ZGEg
+U2FkZWgtV2VpbnJhdWIiIDx5ZWh1ZGFAcmVkaGF0LmNvbT4KQ2M6wqAiY2VwaC11c2Vyc0BsaXN0
+cy5jZXBoLmNvbSIgPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+CkJldHJlZmY6wqBSZTogW2Nl
+cGgtdXNlcnNdIFJHVyBsaWZlY3ljbGUgbm90IGV4cGlyaW5nIG9iamVjdHMKSGkgWWFodWRhLgoK
+V2VsbCwgaGVyZSB3ZSBnbzogaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzIwMTc3W2h0
+dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8yMDE3N10KCkFzIGl0J3MgbXkgZmlyc3Qgb25l
+LCBob3BlIGl0J3Mgb2sgYXMgaXQgaXMuLi4KClRoYW5rcyAmIHJlZ2FyZHMKQW50b24KCgpHZXNl
+bmRldDrCoFNhbXN0YWcsIDAzLiBKdW5pIDIwMTcgdW0gMDA6MTQgVWhyClZvbjrCoCJZZWh1ZGEg
+U2FkZWgtV2VpbnJhdWIiIDx5ZWh1ZGFAcmVkaGF0LmNvbT4KQW46wqBjZXBoLm5vdmljZUBoYWJt
+YWxuZWZyYWdlLmRlCkNjOsKgIkdyYWhhbSBBbGxhbiIgPGd0YUB1bW4uZWR1PiwgImNlcGgtdXNl
+cnNAbGlzdHMuY2VwaC5jb20iIDxjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPgpCZXRyZWZmOsKg
+UmU6IFtjZXBoLXVzZXJzXSBSR1cgbGlmZWN5Y2xlIG5vdCBleHBpcmluZyBvYmplY3RzCkhhdmUg
+eW91IG9wZW5lZCBhIGNlcGggdHJhY2tlciBpc3N1ZSwgc28gdGhhdCB3ZSBkb24ndCBsb3NlIHRy
+YWNrIG9mCnRoZSBwcm9ibGVtPwoKVGhhbmtzLApZZWh1ZGEKCk9uIEZyaSwgSnVuIDIsIDIwMTcg
+YXQgMzowNSBQTSwgPGNlcGgubm92aWNlQGhhYm1hbG5lZnJhZ2UuZGU+IHdyb3RlOgo+IEhpIEdy
+YWhhbS4KPgo+IFdlIGFyZSBvbiBLcmFrZW4gYW5kIGhhdmUgdGhlIHNhbWUgcHJvYmxlbSB3aXRo
+ICJsaWZlY3ljbGUiLiBWYXJpb3VzIChvdGhlcikgdG9vbHMgbGlrZSBzM2NtZCBvciBDeWJlckR1
+Y2sgZG8gc2hvdyB0aGUgYXBwbGllZCAiZXhwaXJhdGlvbiIgc2V0dGluZ3MsIGJ1dCBvYmplY3Rz
+IHNlZW0gbmV2ZXIgdG8gYmUgcHVyZ2VkLgo+Cj4gSWYgeW91IHNob3VsZCBoYXZlIG5ldyBmaW5k
+aW5ncywgaGludHMsLi4uIFBMRUFTRSBzaGFyZS9sZXQgbWUga25vdy4KPgo+IFRoYW5rcyBhIGxv
+dCEKPiBBbnRvbgo+Cj4KPiBHZXNlbmRldDogRnJlaXRhZywgMTkuIE1haSAyMDE3IHVtIDIyOjQ0
+IFVocgo+IFZvbjogIkdyYWhhbSBBbGxhbiIgPGd0YUB1bW4uZWR1Pgo+IEFuOiBjZXBoLXVzZXJz
+QGxpc3RzLmNlcGguY29tCj4gQmV0cmVmZjogW2NlcGgtdXNlcnNdIFJHVyBsaWZlY3ljbGUgbm90
+IGV4cGlyaW5nIG9iamVjdHMKPiBJJ3ZlIGJlZW4gaGF2aW5nIGEgaGFyZCB0aW1lIGdldHRpbmcg
+dGhlIHMzIG9iamVjdCBsaWZlY3ljbGUgdG8gZG8KPiBhbnl0aGluZyBoZXJlLiBJIHdhcyBhYmxl
+IHRvIHNldCBhIGxpZmVjeWNsZSBvbiBhIHRlc3QgYnVja2V0LiBBcyBvdGhlcnMKPiBhbHNvIHNl
+ZW0gdG8gaGF2ZSBmb3VuZCwgSSBkbyBnZXQgYW4gRUFDQ0VTIGVycm9yIG9uIHNldHRpbmcgdGhl
+Cj4gbGlmZWN5Y2xlLCBidXQgaXQgZG9lcyBob3dldmVyIGdldCBzdG9yZWQ6Cj4KPj4gJSBhd3Mg
+LS1lbmRwb2ludC11cmwgaHR0cHM6Ly94eHgueHh4Lnh4eC54eHhbaHR0cHM6Ly94eHgueHh4Lnh4
+eC54eHhdW2h0dHBzOi8veHh4Lnh4eC54eHgueHh4W2h0dHBzOi8veHh4Lnh4eC54eHgueHh4XV0g
+czNhcGkgZ2V0LWJ1Y2tldC1saWZlY3ljbGUtY29uZmlndXJhdGlvbiAtLWJ1Y2tldD10ZXN0Z3Rh
+Cj4+IHsKPj4gIlJ1bGVzIjogWwo+PiB7Cj4+ICJTdGF0dXMiOiAiRW5hYmxlZCIsCj4+ICJQcmVm
+aXgiOiAiIiwKPj4gIkV4cGlyYXRpb24iOiB7Cj4+ICJEYXlzIjogMwo+PiB9LAo+PiAiSUQiOiAi
+dGVzdCIKPj4gfQo+PiBdCj4+IH0KPgo+IGJ1dCBtYW55IGRheXMgbGF0ZXIgSSBoYXZlIHlldCB0
+byBzZWUgYW55IG9iamVjdCBhY3R1YWxseSBnZXQgZXhwaXJlZC4KPiBUaGVyZSBhcmUgc29tZSBo
+aW50cyBpbiB0aGUgcmd3IGxvZyB0aGF0IHRoZSBleHBpcnkgdGhyZWFkIGRvZXMgcnVuCj4gcGVy
+aW9kaWNhbGx5Ogo+Cj4+IDIwMTctMDUtMTkgMDM6NDk6MDMuMjgxMzQ3IDdmNzRmMTEzNDcwMCAy
+IFJHV0RhdGFDaGFuZ2VzTG9nOjpDaGFuZ2VzUmVuZXdUaHJlYWQ6IHN0YXJ0Cj4+IDIwMTctMDUt
+MTkgMDM6NDk6MTYuMzU2MDIyIDdmNzRlZjkzMTcwMCAyIG9iamVjdCBleHBpcmF0aW9uOiBzdGFy
+dAo+PiAyMDE3LTA1LTE5IDAzOjQ5OjE2LjM1NjAzNiA3Zjc0ZWY5MzE3MDAgMjAgcHJvY2VlZGlu
+ZyBzaGFyZCA9IG9ial9kZWxldGVfYXRfaGludC4wMDAwMDAwMDAwCj4+IDIwMTctMDUtMTkgMDM6
+NDk6MTYuMzU5Nzg1IDdmNzRlZjkzMTcwMCAyMCBwcm9jZWVkaW5nIHNoYXJkID0gb2JqX2RlbGV0
+ZV9hdF9oaW50LjAwMDAwMDAwMDEKPj4gMjAxNy0wNS0xOSAwMzo0OToxNi4zNjQ2NjcgN2Y3NGVm
+OTMxNzAwIDIwIHByb2NlZWRpbmcgc2hhcmQgPSBvYmpfZGVsZXRlX2F0X2hpbnQuMDAwMDAwMDAw
+Mgo+PiAyMDE3LTA1LTE5IDAzOjQ5OjE2LjM2OTYzNiA3Zjc0ZWY5MzE3MDAgMjAgcHJvY2VlZGlu
+ZyBzaGFyZCA9IG9ial9kZWxldGVfYXRfaGludC4wMDAwMDAwMDAzCj4gLi4uCj4+IDIwMTctMDUt
+MTkgMDM6NDk6MTYuODAzMjcwIDdmNzRlZjkzMTcwMCAyMCBwcm9jZWVkaW5nIHNoYXJkID0gb2Jq
+X2RlbGV0ZV9hdF9oaW50LjAwMDAwMDAxMjYKPj4gMjAxNy0wNS0xOSAwMzo0OToxNi44MDY0MjMg
+N2Y3NGVmOTMxNzAwIDIgb2JqZWN0IGV4cGlyYXRpb246IHN0b3AKPgo+ICJyYWRvc2d3LWFkbWlu
+IGxjIHByb2Nlc3MiIGdpdmVzIG1lIG5vIG91dHB1dCB1bmxlc3MgSSBlbmFibGUgZGVidWcsIHRo
+ZW46Cj4KPj4gXSMgcmFkb3Nndy1hZG1pbiBsYyBwcm9jZXNzCj4+IDIwMTctMDUtMTkgMTU6Mjg6
+NDYuMzgzMDQ5IDdmZWRiOWZmYjcwMCAyIFJHV0RhdGFDaGFuZ2VzTG9nOjpDaGFuZ2VzUmVuZXdU
+aHJlYWQ6IHN0YXJ0Cj4+IDIwMTctMDUtMTkgMTU6Mjg6NDYuNDIxODA2IDdmZWRkYzI0MGM4MCAx
+MCBDYW5ub3QgZmluZCBjdXJyZW50IHBlcmlvZCB6b25lIHVzaW5nIGxvY2FsIHpvbmUKPj4gMjAx
+Ny0wNS0xOSAxNToyODo0Ni40NTM0MzEgN2ZlZGRjMjQwYzgwIDIgYWxsIDggd2F0Y2hlcnMgYXJl
+IHNldCwgZW5hYmxpbmcgY2FjaGUKPj4gMjAxNy0wNS0xOSAxNToyODo0Ni42MTQ5OTEgN2ZlZGRj
+MjQwYzgwIDIgcmVtb3ZlZCB3YXRjaGVyLCBkaXNhYmxpbmcgY2FjaGUKPgo+ICJyYWRvc2d3LWFk
+bWluIGxjIGxpc3QiIHNlZW1zIHRvIHJldHVybiAiZW1wdHkiIG91dHB1dDoKPgo+PiAjIHJhZG9z
+Z3ctYWRtaW4gbGMgbGlzdAo+PiBbXQo+Cj4gSXMgdGhlcmUgYW55dGhpbmcgb2J2aW91cyB0aGF0
+IEkgbWlnaHQgYmUgbWlzc2luZz8KPgo+IEdyYWhhbQo+IC0tCj4gR3JhaGFtIEFsbGFuCj4gTWlu
+bmVzb3RhIFN1cGVyY29tcHV0aW5nIEluc3RpdHV0ZSAtIGd0YUB1bW4uZWR1Cj4gX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPiBjZXBoLXVzZXJzIG1haWxp
+bmcgbGlzdAo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPiBodHRwOi8vbGlzdHMuY2VwaC5j
+b20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb21baHR0cDovL2xpc3RzLmNlcGguY29t
+L2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tXVtodHRwOi8vbGlzdHMuY2VwaC5jb20v
+bGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb21baHR0cDovL2xpc3RzLmNlcGguY29tL2xp
+c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tXV1baHR0cDovL2xpc3RzLmNlcGguY29tL2xp
+c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0
+aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbV1baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3Rp
+bmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5m
+by5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbV1dXVtodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
+Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb21baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZv
+LmNnaS9jZXBoLXVzZXJzLWNlcGguY29tXVtodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8u
+Y2dpL2NlcGgtdXNlcnMtY2VwaC5jb21baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNn
+aS9jZXBoLXVzZXJzLWNlcGguY29tXV1baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNn
+aS9jZXBoLXVzZXJzLWNlcGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kv
+Y2VwaC11c2Vycy1jZXBoLmNvbV1baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9j
+ZXBoLXVzZXJzLWNlcGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2Vw
+aC11c2Vycy1jZXBoLmNvbV1dXV0KPgo+Cj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX18KPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNA
+bGlzdHMuY2VwaC5jb20KPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgt
+dXNlcnMtY2VwaC5jb21baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVz
+ZXJzLWNlcGguY29tXVtodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
+cnMtY2VwaC5jb21baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJz
+LWNlcGguY29tXV1baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJz
+LWNlcGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1j
+ZXBoLmNvbV1baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNl
+cGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBo
+LmNvbV1dXQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpj
+ZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9s
+aXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbVtodHRwOi8vbGlz
+dHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb21dW2h0dHA6Ly9saXN0
+cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbVtodHRwOi8vbGlzdHMu
+Y2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb21dXQrCoArCoF9fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fIGNlcGgtdXNlcnMgbWFpbGlu
+ZyBsaXN0IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20gaHR0cDovL2xpc3RzLmNlcGguY29tL2xp
+c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0
+aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbV0KX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0Bs
+aXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
+cnMtY2VwaC5jb20K
