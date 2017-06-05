@@ -1,51 +1,91 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: health checks and logging
-Date: Mon, 5 Jun 2017 21:21:36 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706052112360.3646@piezo.novalocal>
+From: Jesse Williamson <jwilliamson@suse.de>
+Subject: Re: VLA detection ...
+Date: Mon, 5 Jun 2017 14:25:31 -0700 (PDT)
+Message-ID: <alpine.LSU.2.21.1706051405131.14104@ancalagon.suse.de>
+References: <174f417f-02f5-beb1-0f8b-96ff4a70349b@digiware.nl> <CAJE9aONhiWL+gHMKaeeg95mnSpua+DeDbArks+O=okKDh3k=YQ@mail.gmail.com> <5b4dd43f-5e9f-ca46-2448-8147a1615921@digiware.nl> <alpine.DEB.2.11.1706041826470.3646@piezo.novalocal>
+ <0cc648f1-6f35-9a4b-060a-704c19333ef6@digiware.nl> <alpine.LSU.2.21.1706051215130.14104@ancalagon.suse.de> <2f2fbedc-1916-8838-e7f0-2b1c62e65cd2@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=US-ASCII; format=flowed
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:36368 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751153AbdFEVVj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 5 Jun 2017 17:21:39 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 2AC6A3DBC8
-        for <ceph-devel@vger.kernel.org>; Mon,  5 Jun 2017 21:21:39 +0000 (UTC)
+Received: from mx2.suse.de ([195.135.220.15]:53781 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751188AbdFEVZh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 5 Jun 2017 17:25:37 -0400
+In-Reply-To: <2f2fbedc-1916-8838-e7f0-2b1c62e65cd2@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: john.spray@redhat.com
-Cc: ceph-devel@vger.kernel.org
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Sage Weil <sage@newdream.net>, kefu chai <tchaikov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-I took a quick look at the get_health() methods in the Monitor after our 
-discussion this morning:
+On Mon, 5 Jun 2017, Willem Jan Withagen wrote:
 
-- OSDMonitor::get_health() looks at the pool stats for a few things; I 
-think these can be safely/easily moved to PGMap::get_health() (so that 
-they will run in ceph-mgr)
-- Then it'll be an easy change to calculate the health and detail sets in 
-encoding_pending as each OSDMap in published.
-- MgrStatMonitor is already persisting the mgr health messages.
-- MDSMonitor is also strictly a fundion of the FSMap so it'd be easy to 
-move to encode_pending.
-- Monitor::get_health() has some odds and ends we can either leave in 
-place or improve (e.g, time skew checks).  Not sure it matters much.
+Hi Willem,
 
-My main question is whether you had specific thoughts about how to 
-identify warnings so that we can note when they appear and disappear.  We 
-can just go by the unique strings but then you'll see something like
+Thank you for your comments!
 
- 1 osd(s) down
- ...
- 1 osd(s) down cleared
- 2 osd(s) down
- ...
+> I think your remarks are all valid and referencing VLA could/should be
+> done with some careful gards. On the otherhand the code is full with
+> pointer, and not all constructs are 100% C++ type, and can also run out
+> of bound. (As I've already noticed a few times)
 
-(or whatever we make the messages for cleared warnings look like).  Should 
-we associate a 'tag' for each message that is used to identify it, so 
-that, for example, "%d osd down" for any number of OSDs is considered the 
-"same" message and we log when it changes but don't say it has cleared?
+We certainly need to be able to use "dangerous" constructs, and to be sure 
+they're present for good reasons.
 
-sage
+In my view, the problem isn't that VLAs exist, it's that're so easy to use 
+by complete accident, and if ever mis-used can lead to some extremely 
+subtle problems that in a bad case are difficult to reproduce and even 
+harder to find.
+
+> So care has to be taken when VLA are used, as with all constructs one
+> selects to solve a problem.
+
+Definitely agreed.
+
+> The disadvantage with just switching on warnings is that they start to
+> bloat. And as such start to create noise, masquerading/distracting from
+> new real important warning. Because that is what is going to happen:
+> People start just reading over them, and then some more.
+
+I'm happy to provide patches, and resubmit the PR at some point soon. 
+Completely agreed that warnings have to be useful, and if we ignore them 
+then they might as well not be there.
+
+> I, for one, disagree with that. It is not going to help the problem by
+> switching the warnings on. The actual issue needs to be fixed, Kefu
+> tried that, and declared his first attempt not really satisfactory.
+
+I'll try to catch up with Kefu and see where the pain points were.
+
+> So I think this is going to stay here until "the stds group", in its
+> infinite wisdom has designed a solution for this that actually works.
+> Until then, all bets are of.
+
+I know that there are some relevant proposals, but AFAIK not super strong 
+traction just yet.
+
+As long as nothing's actually exploded, I suppose it's like pointing at a 
+bunch of TNT and saying "hey, we probably shouldn't smoke near that", but 
+nobody's happend to do it yet so it seems fine. ;-)
+
+> Not to sound pedantic, but this is all part of this of code requirements
+> that are sort underlying this project. But I have yet to see that people
+> are being hit over the head with these rules. (Unlike in other projects
+> where I work and we had regular audits to check confirmity to the code
+> rules)
+
+It's unclear to me what extensions we do and do not allow. If the project 
+is in standard C++11, VLAs shouldn't be allowed because they're not part 
+of the language. Then again, that sort of pedanticism may be of limited 
+actual utility.
+
+> Or be like me, I try to keep things FreeBSD compatible, and try to chase
+> people using VLAs suggesting that they pick a different solution.
+
+I'll try to see where we're using them now and get a sense of where they 
+are specifically chosen and useful.
+
+> Lets get back to programming.....
+
+Always a good plan! :-)
+
+-Jesse
