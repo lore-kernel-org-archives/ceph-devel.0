@@ -1,97 +1,62 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: understanding bucket_straw2_choose
-Date: Mon, 5 Jun 2017 18:13:56 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706051807380.14237@piezo.novalocal>
-References: <1422f34a-6a4d-45a8-85ad-32b6a7cc4a5f@dachary.org>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Errocodes over the line....
+Date: Mon, 5 Jun 2017 20:40:02 +0200
+Message-ID: <b3b8f54c-d9f9-31d0-daac-ea97cb7dde56@digiware.nl>
+References: <fd007197-fa5f-a036-e1ae-ee0097320510@withagen.nl>
+ <alpine.DEB.2.11.1705300128170.3646@piezo.novalocal>
+ <dbf4fcb0-6077-5f35-9300-59bb841f2a74@digiware.nl>
+ <alpine.DEB.2.11.1706050123390.3646@piezo.novalocal>
+ <de489da4-28f7-a62d-385b-de5aa5ddf95a@digiware.nl>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1843916167-1496686437=:14237"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50892 "EHLO mx1.redhat.com"
+Received: from smtp.digiware.nl ([176.74.240.9]:51552 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751162AbdFESN6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 5 Jun 2017 14:13:58 -0400
-In-Reply-To: <1422f34a-6a4d-45a8-85ad-32b6a7cc4a5f@dachary.org>
+        id S1751182AbdFESkF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 5 Jun 2017 14:40:05 -0400
+In-Reply-To: <de489da4-28f7-a62d-385b-de5aa5ddf95a@digiware.nl>
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On 05/06/2017 09:09, Willem Jan Withagen wrote:
+> On 05/06/2017 03:25, Sage Weil wrote:
+>> On Sun, 4 Jun 2017, Willem Jan Withagen wrote:
+>>> On 30/05/2017 03:30, Sage Weil wrote:
+>>>> It does.  There is a helper somewhere that maps error codes in MOSDOpReply 
+>>>> that go over the wire that was added for an AIX port a year or two ago.  
+>>>> look for errorcode32_t and ceph_to_host_errno etc
+>>>
+>>> 'mmm
+>>>
+>>> It looks like it is the other way around as what I'm looking for...
+>>> These are the linux errno's translated to AIX/Darwin codes. So the
+>>> native OS does not get upset when playing client. These .cc files are
+>>> not even compiled in the standard ceph tree, as far as I can see.
+>>>
+>>> So I guess what I'm looking for is to issue the correct errorcodes on
+>>> the line when also acting as server. And as far as I can imagine will
+>>> need both: ceph_to_host_errno() and host_to_ceph_errno() and start
+>>> glueing that in.
+>>> Now the question is: I that restricted to one location to insert as
+>>> well, or go I need to go chasing all places where the errcode is de/encoded.
+>>
+>> 1. Write the ceph_to_host_errno and host_to_ceph_errno methods
+>> 2. Fix the errorcode32_t to use them for encode *and* decode.
+>> 3. Identify the handful of places where we send errcodes over the wire 
+>> (mostly MOSDOpReply and friends) and switch the type to errorcode32_t so 
+>> that it is translated during encode/decode.
+>>
+>> Happy to help with 2 and 3 once we have 1 in place!
 
---8323329-1843916167-1496686437=:14237
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+First attempt at 1) and 2) in https://github.com/ceph/ceph/pull/15495.
+I took the darwin version as template.
+If you like the array approach, I will also convert the original
+ceph_to_host to array as well. (Or the other way around)
 
-On Mon, 5 Jun 2017, Loic Dachary wrote:
-> Hi Sage,
-> 
-> The following lines of bucket_straw2_choose are part black magic to me and I would very much appreciate
-> pointers to better understand what they do.
-> 
-> 			u = crush_hash32_3(bucket->h.hash, x, ids[i], r);
-> 			u &= 0xffff;
-> 
-> 			/*
-> 			 * for some reason slightly less than 0x10000 produces
-> 			 * a slightly more accurate distribution... probably a
-> 			 * rounding effect.
-> 			 *
-> 			 * the natural log lookup table maps [0,0xffff]
-> 			 * (corresponding to real numbers [1/0x10000, 1] to
-> 			 * [0, 0xffffffffffff] (corresponding to real numbers
-> 			 * [-11.090355,0]).
-> 			 */
-> 			ln = crush_ln(u) - 0x1000000000000ll;
-> 
-> I understand the general idea (I think) which is to hash the parameters 
-> and calculate the log of the hash so that it can be multiplied by the 
-> weight without overflowing. What I don't get is the details such as: why 
-> &= 0xffff ? I suppose that's because crush_ln is only capable of 
-> returning the log for this range of values.
-
-Yeah this is somewhat arbitrary, but probably because in general all of 
-these values are 16.16 fixed point and [0,0x10000] is [0,1.0].  It 
-probably also originally was picked because it set the size of the 
-original lookup table.  (crush_ln() is now a more complicated function 
-to approximate ln.)
-
-> If that's the case how come 
-> it does not hurt the hashing function (in the sense that it increases 
-> the likelyhood that values have very similar hash) because it discards 
-> the higher bits?
-
-Precision here isn't all that important; these values are just determining 
-relative weights between different choices, but even with a very imprecise 
-hash function it would all average out over a large number of inputs.
-
-> Also why is it necessary to subtract 0x1000000000000ll 
-> ? And why this number and not another one ?
-
-crush_ln gives you [0,0xffffffffffff]; the subtraction just makes it a 
-negative fixed-point value before doing the division (corresponding to 
-[-11,0]).  Without shifting the values everything skews toward the low end 
-instead of the high end when you divide.
-
-sage
+--WjW
 
 
-> 
-> There is no immediate urgency to answer these questions, of course. I'm 
-> asking because I worked on tests to verify the C implementation of the 
-> algorithm to balance buckets and got into trouble. I think the reason is 
-> because I used straw values that are outside of the possible range for 
-> ln. But maybe it is because they are in the range and their distribution 
-> is very unlikely. Or something else ... ;-)
-> 
-> Cheers
-> 
-> -- 
-> Loïc Dachary, Artisan Logiciel Libre
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---8323329-1843916167-1496686437=:14237--
