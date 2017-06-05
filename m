@@ -1,95 +1,112 @@
-From: xxhdx1985126 <xxhdx1985126@163.com>
+From: Sage Weil <sweil@redhat.com>
 Subject: Re:Re: How does rbd-mirror preserve the order of WRITE operations
  that finished on the primary cluster
-Date: Mon, 5 Jun 2017 23:49:19 +0800 (CST)
-Message-ID: <75e21ee8.f334.15c78f23929.Coremail.xxhdx1985126@163.com>
-References: <70c5c552.66e6.15c766dce68.Coremail.xxhdx1985126@163.com>
- <CA+aFP1B=M97rVtGcY=v79zg_2rS=+NNcO5FTT32yLCZtky7N7g@mail.gmail.com>
+Date: Mon, 5 Jun 2017 16:21:34 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1706051616540.3646@piezo.novalocal>
+References: <70c5c552.66e6.15c766dce68.Coremail.xxhdx1985126@163.com> <CA+aFP1B=M97rVtGcY=v79zg_2rS=+NNcO5FTT32yLCZtky7N7g@mail.gmail.com> <75e21ee8.f334.15c78f23929.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GBK
-Content-Transfer-Encoding: base64
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-734118854-1496679696=:3646"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m13-45.163.com ([220.181.13.45]:15603 "EHLO m13-45.163.com"
+Received: from mx1.redhat.com ([209.132.183.28]:54626 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751112AbdFEQEf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 5 Jun 2017 12:04:35 -0400
-In-Reply-To: <CA+aFP1B=M97rVtGcY=v79zg_2rS=+NNcO5FTT32yLCZtky7N7g@mail.gmail.com>
+        id S1752211AbdFEQVu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 5 Jun 2017 12:21:50 -0400
+In-Reply-To: <75e21ee8.f334.15c78f23929.Coremail.xxhdx1985126@163.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: jdillama@redhat.com
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: xxhdx1985126 <xxhdx1985126@163.com>
+Cc: jdillama@redhat.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-ClVoLCBzb3JyeSwgSSBkb24ndCBxdWl0ZSBmb2xsb3cgeW91LiBBY2NvcmRpbmcgdG8gbXkgdW5k
-ZXJzdGFuZGluZyBvZiB0aGUgc291cmNlIGNvZGUgb2YgT1NEIGFuZCBvdXIgZXhwZXJpbWVudCBw
-cmV2aW91c2x5IG1lbnRpb25lZCBpbiAiaHR0cHM6Ly93d3cubWFpbC1hcmNoaXZlLmNvbS9jZXBo
-LXVzZXJzQGxpc3RzLmNlcGguY29tL21zZzM2MTc4Lmh0bWwiLCB0aGVyZSBleGlzdHMgdGhlIGZv
-bGxvd2luZyBzY2VuYXJpbyB3aGVyZSB0aGUgYWN0dWFsIGZpbmlzaGluZyBvcmRlciBvZiB0aGUg
-V1JJVEVzIHRoYXQgdGFyZ2V0cyB0aGUgc2FtZSBvYmplY3QgaXMgbm90IHRoZSBzYW1lIGFzIHRo
-ZSBvcmRlciB0aGV5IGFycml2ZWQgYXQgT1NELCB3aGljaCwgSSB0aGluaywgY291bGQgYmUgYSBo
-aW50IHRoYXQgdGhlIG9yZGVyIG9mIHdyaXRlcyBmcm9tIGEgc2luZ2xlIGNsaWVudCBjb25uZWN0
-aW9uIHRvIGEgc2luZ2xlIE9TRCBpcyBub3QgZ3VyYW50ZWVkOgoKICAgICAgU2F5IHRocmVlIHdy
-aXRlcyB0aGF0IHRhcmdldGluZyB0aGUgc2FtZSBvYmplY3QgQSBhcnJpdmVkIGF0IGFuIE9TRCBp
-biB0aGUgb3JkZXI6ICJXUklURSBBLm9mZiAxIiwgIldSSVRFIEEub2ZmIDIiLCAiV1JJVEUgQS5v
-ZmYgMyIuIFRoZSBmaXJzdCB3cml0ZSwgIldSSVRFIEEub2ZmIDEiLCBhY3F1aXJlcyB0aGUgb2Jq
-ZWN0Y29udGV4dCBsb2NrIG9mIG9iamVjdCBBLCBhbmQgaXMgcHV0IGludG8gYSB0cmFuc2FjdGlv
-biBxdWV1ZSB0byBnbyB0aHJvdWdoIHRoZSAiam91cm5hbGluZyArIGZpbGUgc3lzdGVtIHdyaXRl
-IiBwcm9jZWR1cmUuIEJlZm9yZSBpdCdzIGZpbmlzaGVkLCBhIHRocmVhZCBvZiBPU0Q6Om9zZF9v
-cF90cCByZXRyaWV2ZWQgdGhlIHNlY29uZCB3cml0ZSBhbmQgYXR0ZW1wdCB0byBwcm9jZXNzIGl0
-IGR1cmluZyB3aGljaCBpdCBmaW5kcyB0aGF0IHRoZSBvYmplY3Rjb250ZXh0IGxvY2sgb2YgQSBp
-cyBoZWxkIGJ5IGEgcHJldmlvdXMgV1JJVEUgYW5kIHB1dCB0aGUgc2Vjb25kIHdyaXRlIGludG8g
-QSdzIHJ3c3RhdGU6OndhaXRlcnMgcXVldWUuIEl0J3Mgb25seSB3aGVuIHRoZSBmaXJzdCB3cml0
-ZSBpcyBmaW5pc2hlZCBvbiBhbGwgcmVwbGljYSBPU0RzIHRoYXQgdGhlIHNlY29uZCB3cml0ZSBp
-cyBwdXQgYmFjayBpbnRvIE9TRDo6c2hhcmRlZG9wX3dxIHRvIGJlIHByb2Nlc3NlZCBhZ2FpbiBp
-biB0aGUgZnV0dXJlLiBJZiwgYWZ0ZXIgdGhlIHNlY29uZCB3cml0ZSBpcyBwdXQgaW50byByd3N0
-YXRlOjp3YWl0ZXJzIHF1ZXVlIGFuZCB0aGUgZmlyc3Qgd3JpdGUgaXMgZmluaXNoZWQgb24gYWxs
-IHJlcGxpY2EgT1NEcywgaW4gd2hpY2ggY2FzZSB0aGUgZmlyc3Qgd3JpdGUgcmVsZWFzZSB0aGUg
-QSdzIG9iamVjdGNvbnRleHQgbG9jaywgYnV0IGJlZm9yZSB0aGUgc2Vjb25kIHdyaXRlIGlzIHB1
-dCBiYWNrIGludG8gT1NEOjpzaGFyZGVkb3Bfd3EsIHRoZSB0aGlyZCB3cml0ZSBpcyByZXRyaWV2
-ZWQgYnkgT1NEJ3Mgd29ya2VyIHRocmVhZCwgaXQgd291bGQgZ2V0IHByb2Nlc3NlZCBhcyBubyBw
-cmV2aW91cyBvcGVyYXRpb24gaXMgaG9sZGluZyBBJ3Mgb2JqZWN0Y29udGV4dCBsb2NrLCBpbiB3
-aGljaCBjYXNlLCB0aGUgYWN0dWFsIGZpbmlzaGluZyBvcmRlciBvZiB0aGUgdGhyZWUgd3JpdGVz
-IGlzICJXUklURSBBLm9mZiAxIiwgIldSSVRFIEEub2ZmIDMiLCAiV1JJVEUgQS5vZmYgMiIsIHdo
-aWNoIGlzIGRpZmZlcmVudCBmcm9tIHRoZSBvcmRlciB0aGV5IGFycml2ZWQuCgpJbiBodHRwczov
-L3d3dy5tYWlsLWFyY2hpdmUuY29tL2NlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20vbXNnMzYxNzgu
-aHRtbCwgd2Ugc2hvd2VkIG91ciBleHBlcmltZW50IHJlc3VsdCB3aGljaCBpcyBleGFjdGx5IGFz
-IHRoZSBhYm92ZSBzY2VuYXJpbyBzaG93cy4KCkhvd2V2ZXIsIHRoZSBjZXBoJ3MgdmVyc2lvbiBv
-biB3aGljaCB3ZSBkaWQgdGhlIGV4cGVyaW1lbnQgYW5kIHRoZSBzb3VjZSBjb2RlIG9mIHdoaWNo
-IHdlIHJlYWQgd2FzIEhhbW1lciwgMC45NC41LiBJIGRvbid0IGtub3cgd2hldGhlciB0aGUgc2Nl
-bmFyaW8gYWJvdmUgbWF5IHN0aWxsIGV4aXN0cyBpbiBsYXRlciB2ZXJzaW9ucy4KCkFtIEkgcmln
-aHQgYWJvdXQgdGhpcz8gT3IgYW0gSSBtaXNzaW5nIGFueXRoaW5nPyBQbGVhc2UgaGVscCBtZSwg
-SSdtIHJlYWxseSBjb25mdXNlZCByaWdodCBub3cuIFRoYW5rIHlvdS4KCkF0IDIwMTctMDYtMDUg
-MjA6MDA6MDYsICJKYXNvbiBEaWxsYW1hbiIgPGpkaWxsYW1hQHJlZGhhdC5jb20+IHdyb3RlOgo+
-VGhlIG9yZGVyIG9mIHdyaXRlcyBmcm9tIGEgc2luZ2xlIGNsaWVudCBjb25uZWN0aW9uIHRvIGEg
-c2luZ2xlIE9TRCBpcwo+Z3VhcmFudGVlZC4gVGhlIHJiZC1taXJyb3Igam91cm5hbCByZXBsYXkg
-cHJvY2VzcyBoYW5kbGVzIG9uZSBldmVudCBhdAo+YSB0aW1lIGFuZCBkb2VzIG5vdCBzdGFydCBw
-cm9jZXNzaW5nIHRoZSBuZXh0IGV2ZW50IHVudGlsIHRoZSBJTyBoYXMKPmJlZW4gc3RhcnRlZCBp
-bi1mbGlnaHQgd2l0aCBsaWJyYWRvcy4gVGhlcmVmb3JlLCBldmVuIHRob3VnaCB0aGUKPnJlcGxh
-eSBwcm9jZXNzIGFsbG93cyA1MCAtIDEwMCBJTyByZXF1ZXN0cyB0byBiZSBpbi1mbGlnaHQsIHRo
-b3NlIElPcwo+YXJlIGFjdHVhbGx5IHdlbGwtb3JkZXJlZCBpbiB0ZXJtcyBvZiB1cGRhdGVzIHRv
-IGEgc2luZ2xlIG9iamVjdC4KPgo+T2YgY291cnNlLCBzdWNoIGFuIElPIHJlcXVlc3QgZnJvbSB0
-aGUgY2xpZW50IGFwcGxpY2F0aW9uIC8gVk0gd291bGQKPmJlIGluY29ycmVjdCBiZWhhdmlvciBp
-ZiB0aGV5IGRpZG4ndCB3YWl0IGZvciB0aGUgY29tcGxldGlvbiBjYWxsYmFjawo+YmVmb3JlIGlz
-c3VpbmcgdGhlIHNlY29uZCB1cGRhdGUuCj4KPk9uIE1vbiwgSnVuIDUsIDIwMTcgYXQgMTI6MDUg
-QU0sIHh4aGR4MTk4NTEyNiA8eHhoZHgxOTg1MTI2QDE2My5jb20+IHdyb3RlOgo+PiBIaSwgZXZl
-cnlvbmUuCj4+Cj4+Cj4+IFJlY2VudGx5LCBJJ3ZlIGJlZW4gcmVhZGluZyB0aGUgc291cmNlIGNv
-ZGUgb2YgcmJkLW1pcnJvci4gSSB3b25kZXIgaG93IHJiZC1taXJyb3IgcHJlc2VydmVzIHRoZSBv
-cmRlciBvZiBXUklURSBvcGVyYXRpb25zIHRoYXQgZmluaXNoZWQgb24gdGhlIHByaW1hcnkgY2x1
-c3Rlci4gQXMgZmFyIGFzIEkgY2FuIHVuZGVyc3RhbmQgdGhlIGNvZGUsIHJiZC1taXJyb3IgZmV0
-Y2hlcyBJL08gb3BlcmF0aW9ucyBmcm9tIHRoZSBqb3VybmFsIG9uIHRoZSBwcmltYXJ5IGNsdXN0
-ZXIsIGFuZCByZXBsYXkgdGhlbSBvbiB0aGUgc2xhdmUgY2x1c3RlciB3aXRob3V0IGNoZWNraW5n
-IHdoZXRoZXIgdGhlcmUncyBhbHJlYWR5IGFueSBJL08gb3BlcmF0aW9ucyB0YXJnZXRpbmcgdGhl
-IHNhbWUgb2JqZWN0IHRoYXQgaGFzIGJlZW4gaXNzdWVkIHRvIHRoZSBzbGF2ZSBjbHVzdGVyIGFu
-ZCBub3QgeWV0IGZpbmlzaGVkLiBTaW5jZSBjb25jdXJyZW50IG9wZXJhdGlvbnMgbWF5IGZpbmlz
-aCBpbiBhIGRpZmZlcmVudCBvcmRlciB0aGFuIHRoYXQgaW4gd2hpY2ggdGhleSBhcnJpdmVkIGF0
-IHRoZSBPU0QsIHRoZSBvcmRlciB0aGF0IHRoZSBXUklURSBvcGVyYXRpb25zIGZpbmlzaCBvbiB0
-aGUgc2xhdmUgY2x1c3RlciBtYXkgYmUgZGlmZmVyZW50IHRoYW4gdGhhdCBvbiB0aGUgcHJpbWF5
-IGNsdXN0ZXIuIEZvciBleGFtcGxlOiBvbiB0aGUgcHJpbWFyeSBjbHVzdGVyLCB0aGVyZSBhcmUg
-dHdvIFdSSVRFIG9wZXJhdGlvbiB0YXJnZXRpbmcgdGhlIHNhbWUgb2JqZWN0IEEgd2hpY2ggYXJl
-LCBpbiB0aGUgb3JkZXIgdGhleSBmaW5pc2ggb24gdGhlIHByaW1hcnkgY2x1c3RlciwgIldSSVRF
-IEEub2ZmIGRhdGExIiBhbmQgIldSSVRFIEEub2ZmIGRhdGEyIjsgd2hpbGUgd2hlbiB0aGV5IGFy
-ZSByZXBsYXllZCBvbiB0aGUgc2xhdmUgY2x1c3RlciwgdGhlIG9yZGVyIG1heSBiZSAiV1JJVEUg
-QS5vZmYgZGF0YTIiIGFuZCAiV1JJVEUgQS5vZmYgZGF0YTEiLCB3aGljaCBtZWFucyB0aGF0IHRo
-ZSByZXN1bHQgb2YgdGhlIHR3byBvcGVyYXRpb25zIG9uIHRoZSBwcmltYXJ5IGNsdXN0ZXIgaXMg
-QS5vZmY9ZGF0YTIgd2hpbGUsIG9uIHRoZSBzbGF2ZSBjbHVzdGVyLCB0aGUgcmVzdWx0IGlzIEEu
-b2ZmPWRhdGExLgo+Pgo+Pgo+PiBJcyB0aGlzIHBvc3NpYmxlPwo+Pgo+Pgo+Pgo+Cj4KPgo+LS0g
-Cj5KYXNvbgo=
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-734118854-1496679696=:3646
+Content-Type: TEXT/PLAIN; charset=GBK
+Content-Transfer-Encoding: 8BIT
+
+On Mon, 5 Jun 2017, xxhdx1985126 wrote:
+> 
+> Uh, sorry, I don't quite follow you. According to my understanding of 
+> the source code of OSD and our experiment previously mentioned in 
+> "https://www.mail-archive.com/ceph-users@lists.ceph.com/msg36178.html", 
+> there exists the following scenario where the actual finishing order of 
+> the WRITEs that targets the same object is not the same as the order 
+> they arrived at OSD, which, I think, could be a hint that the order of 
+> writes from a single client connection to a single OSD is not guranteed:
+
+If so, it is a bug that should be fixed in the OSD.  rbd-mirror relying on 
+OSD ordering to be correct is totally fine--lots of other stuff does too.
+
+>       Say three writes that targeting the same object A arrived at an 
+> OSD in the order: "WRITE A.off 1", "WRITE A.off 2", "WRITE A.off 3". The 
+> first write, "WRITE A.off 1", acquires the objectcontext lock of object 
+> A, and is put into a transaction queue to go through the "journaling + 
+> file system write" procedure. Before it's finished, a thread of 
+> OSD::osd_op_tp retrieved the second write and attempt to process it 
+> during which it finds that the objectcontext lock of A is held by a 
+> previous WRITE and put the second write into A's rwstate::waiters queue. 
+> It's only when the first write is finished on all replica OSDs that the 
+> second write is put back into OSD::shardedop_wq to be processed again in 
+> the future. If, after the second write is put into rwstate::waiters 
+> queue and the first write is finished on all replica OSDs, in which case 
+> the first write release the A's objectcontext lock, but before the 
+> second write is put back into OSD::shardedop_wq, the third write is 
+> retrieved by OSD's worker thread, it would get processed as no previous 
+> operation is holding A's objectcontext lock, in which case, the actual 
+> finishing order of the three writes is "WRITE A.off 1", "WRITE A.off 3", 
+> "WRITE A.off 2", which is different from the order they arrived.
+
+This should not happen.  (If it happened in the past, it was a bug, but I 
+would expect it is fixed in the latest hammer point release, and in jewel 
+and master.)  The requeing is done under the PG::lock so that requeueing 
+preserves ordering.  A fair bit of code and a *lot* of testing goes into 
+ensuring that this is true.  If you've seen this recently, then a 
+reproducer or log (and tracker ticket) would be welcome!  When we see any 
+ordering errors in QA we take them very seriously and fix them quickly.
+
+You might be interested in the osd_debug_op_order config option, which we 
+enable in qa, which asserts if it sees ops from a client arrive out of 
+order.  The ceph_test_rados workload generate that we use for much of the 
+rados qa suite also fails if it sees out of order operations.
+
+sage
+
+> 
+> In https://www.mail-archive.com/ceph-users@lists.ceph.com/msg36178.html, we showed our experiment result which is exactly as the above scenario shows.
+> 
+> However, the ceph's version on which we did the experiment and the souce code of which we read was Hammer, 0.94.5. I don't know whether the scenario above may still exists in later versions.
+> 
+> Am I right about this? Or am I missing anything? Please help me, I'm really confused right now. Thank you.
+> 
+> At 2017-06-05 20:00:06, "Jason Dillaman" <jdillama@redhat.com> wrote:
+> >The order of writes from a single client connection to a single OSD is
+> >guaranteed. The rbd-mirror journal replay process handles one event at
+> >a time and does not start processing the next event until the IO has
+> >been started in-flight with librados. Therefore, even though the
+> >replay process allows 50 - 100 IO requests to be in-flight, those IOs
+> >are actually well-ordered in terms of updates to a single object.
+> >
+> >Of course, such an IO request from the client application / VM would
+> >be incorrect behavior if they didn't wait for the completion callback
+> >before issuing the second update.
+> >
+> >On Mon, Jun 5, 2017 at 12:05 AM, xxhdx1985126 <xxhdx1985126@163.com> wrote:
+> >> Hi, everyone.
+> >>
+> >>
+> >> Recently, I've been reading the source code of rbd-mirror. I wonder how rbd-mirror preserves the order of WRITE operations that finished on the primary cluster. As far as I can understand the code, rbd-mirror fetches I/O operations from the journal on the primary cluster, and replay them on the slave cluster without checking whether there's already any I/O operations targeting the same object that has been issued to the slave cluster and not yet finished. Since concurrent operations may finish in a different order than that in which they arrived at the OSD, the order that the WRITE operations finish on the slave cluster may be different than that on the primay cluster. For example: on the primary cluster, there are two WRITE operation targeting the same object A which are, in the orde
+ r they finish on the primary cluster, "WRITE A.off data1" and "WRITE A.off data2"; while when they are replayed on the slave cluster, the order may be "WRITE A.off data2" and "WRITE A.off data1", wh
+ ich means that the result of the two operations on the primary cluster is A.off=data2 while, on the slave cluster, the result is A.off=data1.
+> >>
+> >>
+> >> Is this possible?
+> >>
+> >>
+> >>
+> >
+> >
+> >
+> >-- 
+> >Jason
+> Nãß≤ÊÏr∏õy???öÿb≤X???«ßvÿ^???ﬁ∫{.n???â∑úzò]z˜•ä{ay??? á⁄ô???j???f£¢∑höã‡z???Æw•¢???¢∑???:+vâ®äwËjÿm∂ü???´ëÍÁzZ+É˘öéä›???"ù˙!∂i
+--8323329-734118854-1496679696=:3646--
