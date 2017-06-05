@@ -1,39 +1,38 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Missing CMake compilation for different OSes common/*_errno.cc
-Date: Mon, 5 Jun 2017 02:31:42 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706050231300.3646@piezo.novalocal>
-References: <8ce3c764-c4aa-c1c7-75bb-85c14639c0ed@digiware.nl>
+From: xxhdx1985126 <xxhdx1985126@163.com>
+Subject: How does rbd-mirror preserve the order of WRITE operations that
+ finished on the primary cluster
+Date: Mon, 5 Jun 2017 12:05:26 +0800 (CST)
+Message-ID: <70c5c552.66e6.15c766dce68.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:46590 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751204AbdFECbp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Jun 2017 22:31:45 -0400
-In-Reply-To: <8ce3c764-c4aa-c1c7-75bb-85c14639c0ed@digiware.nl>
+Received: from m13-83.163.com ([220.181.13.83]:23601 "EHLO m13-83.163.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751234AbdFEEUg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 5 Jun 2017 00:20:36 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Sun, 4 Jun 2017, Willem Jan Withagen wrote:
-> Hi,
-> 
-> I found the following in src/common/Makefile.am:
-> if SOLARIS
-> libcommon_internal_la_SOURCES += \
->         common/solaris_errno.cc
-> endif
-> 
-> if AIX
-> libcommon_internal_la_SOURCES += \
->         common/aix_errno.cc
-> endif
-> 
-> But I seem to be unable to find its counterpart in the Cmake files.
-> 
-> Is this an "oversight", or part of thet code that is not excersized
-> anyways on these platforms?
-
-Oversight, I think!
-sage
+SGksIGV2ZXJ5b25lLgoKClJlY2VudGx5LCBJJ3ZlIGJlZW4gcmVhZGluZyB0aGUgc291cmNlIGNv
+ZGUgb2YgcmJkLW1pcnJvci4gSSB3b25kZXIgaG93wqByYmQtbWlycm9yIHByZXNlcnZlcyB0aGUg
+b3JkZXIgb2YgV1JJVEUgb3BlcmF0aW9ucyB0aGF0IGZpbmlzaGVkIG9uIHRoZSBwcmltYXJ5IGNs
+dXN0ZXIuIEFzIGZhciBhcyBJIGNhbiB1bmRlcnN0YW5kIHRoZSBjb2RlLCByYmQtbWlycm9yIGZl
+dGNoZXMgSS9PIG9wZXJhdGlvbnMgZnJvbSB0aGUgam91cm5hbCBvbiB0aGUgcHJpbWFyeSBjbHVz
+dGVyLCBhbmQgcmVwbGF5IHRoZW0gb24gdGhlIHNsYXZlIGNsdXN0ZXIgd2l0aG91dCBjaGVja2lu
+ZyB3aGV0aGVyIHRoZXJlJ3MgYWxyZWFkeSBhbnkgSS9PIG9wZXJhdGlvbnMgdGFyZ2V0aW5nIHRo
+ZSBzYW1lIG9iamVjdCB0aGF0IGhhcyBiZWVuIGlzc3VlZCB0byB0aGUgc2xhdmUgY2x1c3RlciBh
+bmQgbm90IHlldCBmaW5pc2hlZC4gU2luY2UgY29uY3VycmVudCBvcGVyYXRpb25zIG1heSBmaW5p
+c2ggaW4gYSBkaWZmZXJlbnQgb3JkZXIgdGhhbiB0aGF0IGluIHdoaWNoIHRoZXkgYXJyaXZlZCBh
+dCB0aGUgT1NELCB0aGUgb3JkZXIgdGhhdCB0aGUgV1JJVEUgb3BlcmF0aW9ucyBmaW5pc2ggb24g
+dGhlIHNsYXZlIGNsdXN0ZXIgbWF5IGJlIGRpZmZlcmVudCB0aGFuIHRoYXQgb24gdGhlIHByaW1h
+eSBjbHVzdGVyLiBGb3IgZXhhbXBsZTogb24gdGhlIHByaW1hcnkgY2x1c3RlciwgdGhlcmUgYXJl
+IHR3byBXUklURSBvcGVyYXRpb24gdGFyZ2V0aW5nIHRoZSBzYW1lIG9iamVjdCBBIHdoaWNoIGFy
+ZSwgaW4gdGhlIG9yZGVyIHRoZXkgZmluaXNoIG9uIHRoZSBwcmltYXJ5IGNsdXN0ZXIsICJXUklU
+RSBBLm9mZiBkYXRhMSIgYW5kICJXUklURSBBLm9mZiBkYXRhMiI7IHdoaWxlIHdoZW4gdGhleSBh
+cmUgcmVwbGF5ZWQgb24gdGhlIHNsYXZlIGNsdXN0ZXIsIHRoZSBvcmRlciBtYXkgYmUgIldSSVRF
+IEEub2ZmIGRhdGEyIiBhbmQgIldSSVRFIEEub2ZmIGRhdGExIiwgd2hpY2ggbWVhbnMgdGhhdCB0
+aGUgcmVzdWx0IG9mIHRoZSB0d28gb3BlcmF0aW9ucyBvbiB0aGUgcHJpbWFyeSBjbHVzdGVyIGlz
+IEEub2ZmPWRhdGEyIHdoaWxlLCBvbiB0aGUgc2xhdmUgY2x1c3RlciwgdGhlIHJlc3VsdCBpcyBB
+Lm9mZj1kYXRhMS4KCgpJcyB0aGlzIHBvc3NpYmxlPwoKCsKg
