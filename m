@@ -1,76 +1,154 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: health checks and logging
-Date: Mon, 5 Jun 2017 23:46:27 +0100
-Message-ID: <CALe9h7exMAZfDVmhCBv_o+Ez3BN-MJ_43jkD7evZ8Ropk4-FKA@mail.gmail.com>
-References: <alpine.DEB.2.11.1706052112360.3646@piezo.novalocal>
+From: xxhdx1985126 <xxhdx1985126@163.com>
+Subject: Re:Re:Re:Re: How does rbd-mirror preserve the order of WRITE
+ operations that finished on the primary cluster
+Date: Tue, 6 Jun 2017 06:50:49 +0800 (CST)
+Message-ID: <cdf481f.45b.15c7a741e28.Coremail.xxhdx1985126@163.com>
+References: <70c5c552.66e6.15c766dce68.Coremail.xxhdx1985126@163.com>
+ <CA+aFP1B=M97rVtGcY=v79zg_2rS=+NNcO5FTT32yLCZtky7N7g@mail.gmail.com>
+ <75e21ee8.f334.15c78f23929.Coremail.xxhdx1985126@163.com>
+ <alpine.DEB.2.11.1706051616540.3646@piezo.novalocal>
+ <428d3e79.3d2.15c7a56a64f.Coremail.xxhdx1985126@163.com>
+ <alpine.DEB.2.11.1706052222060.3646@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f179.google.com ([209.85.128.179]:33134 "EHLO
-        mail-wr0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751195AbdFEWqt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jun 2017 18:46:49 -0400
-Received: by mail-wr0-f179.google.com with SMTP id v104so45591847wrb.0
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Jun 2017 15:46:49 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1706052112360.3646@piezo.novalocal>
+Received: from m13-135.163.com ([220.181.13.135]:15133 "EHLO m13-135.163.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751239AbdFEWvB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 5 Jun 2017 18:51:01 -0400
+In-Reply-To: <alpine.DEB.2.11.1706052222060.3646@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
-Cc: John Spray <john.spray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: jdillama@redhat.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Jun 5, 2017 at 10:21 PM, Sage Weil <sweil@redhat.com> wrote:
-> I took a quick look at the get_health() methods in the Monitor after our
-> discussion this morning:
->
-> - OSDMonitor::get_health() looks at the pool stats for a few things; I
-> think these can be safely/easily moved to PGMap::get_health() (so that
-> they will run in ceph-mgr)
-> - Then it'll be an easy change to calculate the health and detail sets in
-> encoding_pending as each OSDMap in published.
-> - MgrStatMonitor is already persisting the mgr health messages.
-> - MDSMonitor is also strictly a fundion of the FSMap so it'd be easy to
-> move to encode_pending.
-> - Monitor::get_health() has some odds and ends we can either leave in
-> place or improve (e.g, time skew checks).  Not sure it matters much.
->
-> My main question is whether you had specific thoughts about how to
-> identify warnings so that we can note when they appear and disappear.  We
-> can just go by the unique strings but then you'll see something like
->
->  1 osd(s) down
->  ...
->  1 osd(s) down cleared
->  2 osd(s) down
->  ...
->
-> (or whatever we make the messages for cleared warnings look like).  Should
-> we associate a 'tag' for each message that is used to identify it, so
-> that, for example, "%d osd down" for any number of OSDs is considered the
-> "same" message and we log when it changes but don't say it has cleared?
-
-Yes, exactly.
-
-All the possible health messages warnings should get a unique error
-code (tag, if you like), that would be a stable thing that we explain
-in the docs, like we do for the MDS health messages[1].  Adding the
-codes for health messages generally was one of the steps on my
-favorite tracker ticket[2] (it has aged like a fine wine).
-
-We'll need to look at the interplay between this and other logging --
-in some cases, if we're e.g. already logging nice messages for OSDs
-going up and down, then we might not want to also have log messages
-redundantly printing the health state.  We might also want to get rid
-of the places that we echo the map summary on changes like this, or at
-least put them at a lower severity than what the operator sees by
-default.  Basically, when an OSD goes down, we should make sure there
-is one log message to that effect, rather than 2 or 3.
-
-BTW, earlier we were talking about logging things at a host/rack level
-when lots of OSDs change at once, which I didn't realize already
-existed, but now I'm failing to find it in the tree (looking in
-OSDMonitor)...?
-
-John
-
-1. http://docs.ceph.com/docs/master/cephfs/health-messages/#daemon-reported-health-checks
-2. http://tracker.ceph.com/issues/7192
+ClRoYW5rcyBmb3IgeW91ciByZXBseTotKQoKVGhlIHJlcXVldWVpbmcgaXMgcHJvdGVjdGVkIGJ5
+IFBHOjpsb2NrLCBob3dldmVyLCB3aGVuIHRoZSB3cml0ZSByZXF1ZXN0IGlzIGFkZCB0byB0aGUg
+dHJhbnNhY3Rpb24gcXVldWUsIGl0J3MgbGVmdCBmb3IgdGhlIGpvdXJuYWxpbmcgdGhyZWFkIGFu
+ZCBmaWxlc3RvcmUgdGhyZWFkLCB0byBkbyB0aGUgYWN0dWFsIHdyaXRlLCB0aGUgT1NEJ3Mgd29y
+a2VyIHRocmVhZCBqdXN0IHJlbGVhc2UgdGhlIFBHOjpsb2NrIGFuZCB0cnkgdG8gcmV0cmlldmUg
+dGhlIG5leHQgcmVxIGluIE9TRCdzIHdvcmsgcXVldWUsIHdoaWNoIGdpdmVzIHRoZSBvcHBvcnR1
+bml0eSBmb3IgbGF0ZXIgcmVxcyB0byBnbyBiZWZvcmUgcHJldmlvdXMgcmVxcy4gVGhpcyBkaWQg
+aGFwcGVuZWQgaW4gb3VyIGV4cGVyaW1lbnQuCgpIb3dldmVyLCBzaW5jZSB0aGlzIGV4cGVyaW1l
+bnQgd2FzIGRvbmUgc2VydmVyYWwgbW9udGggYWdvLCBJJ2xsIHVwbG9hZCB0aGUgbG9nIGlmIEkg
+Y2FuIGZpbmQgaXQsIG9yIEknbGwgdHJ5IHRvIHJlcHJvZHVjZSBpdC4KCkF0IDIwMTctMDYtMDYg
+MDY6MjI6MzYsICJTYWdlIFdlaWwiIDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToKPk9uIFR1ZSwg
+NiBKdW4gMjAxNywgeHhoZHgxOTg1MTI2IHdyb3RlOgo+PiBUaGFua3MgZm9yIHlvdXIgcmVwbHk6
+LSkKPj4gCj4+IFRoZSByZXF1ZXVlaW5nIGlzIHByb3RlY3RlZCBieSBQRzo6bG9jaywgaG93ZXZl
+ciwgd2hlbiB0aGUgd3JpdGUgcmVxdWVzdCBpcwo+PiBhZGQgdG8gdGhlIHRyYW5zYWN0aW9uIHF1
+ZXVlLCBpdCdzIGxlZnQgZm9yIHRoZSBqb3VybmFsaW5nIHRocmVhZCBhbmQKPj4gZmlsZXN0b3Jl
+IHRocmVhZCwgdG8gZG8gdGhlIGFjdHVhbCB3cml0ZSwgdGhlIE9TRCdzIHdvcmtlciB0aHJlYWQg
+anVzdAo+PiByZWxlYXNlIHRoZSBQRzo6bG9jayBhbmQgdHJ5IHRvIHJldHJpZXZlIHRoZSBuZXh0
+IHJlcSBpbiBPU0QncyB3b3JrIHF1ZXVlLAo+PiB3aGljaCBnaXZlcyB0aGUgb3Bwb3J0dW5pdHkg
+Zm9yIGxhdGVyIHJlcXMgdG8gZ28gYmVmb3JlIHByZXZpb3VzIHJlcXMuIFRoaXMKPj4gZGlkIGhh
+cHBlbmVkIGluIG91ciBleHBlcmltZW50Lgo+Cj5GaWxlU3RvcmUgc2hvdWxkIGFsc28gc3RyaWN0
+bHkgb3JkZXIgdGhlIHJlcXVlc3RzIHZpYSB0aGUgT3BTZXF1ZW5jZXIuCj4KPj4gSG93ZXZlciwg
+c2luY2UgdGhpcyBleHBlcmltZW50IHdhcyBkb25lIHNlcnZlcmFsIG1vbnRoIGFnbywgSSdsbCB1
+cGxvYWQgdGhlCj4+IGxvZyBpZiBJIGNhbiBmaW5kIGl0LCBvciBJJ2xsIHRyeSB0byByZXByb2R1
+Y2UgaXQuCj4KPk9rYXksIHRoYW5rcyEKPgo+c2FnZQo+Cj4KPj4gCj4+IEF0IDIwMTctMDYtMDYg
+MDA6MjE6MzQsICJTYWdlIFdlaWwiIDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToKPj4gPk9uIE1v
+biwgNSBKdW4gMjAxNywgeHhoZHgxOTg1MTI2IHdyb3RlOgo+PiA+PiAKPj4gPj4gVWgsIHNvcnJ5
+LCBJIGRvbid0IHF1aXRlIGZvbGxvdyB5b3UuIEFjY29yZGluZyB0byBteSB1bmRlcnN0YW5kaW5n
+IG9mIAo+PiA+PiB0aGUgc291cmNlIGNvZGUgb2YgT1NEIGFuZCBvdXIgZXhwZXJpbWVudCBwcmV2
+aW91c2x5IG1lbnRpb25lZCBpbiAKPj4gPj4gImh0dHBzOi8vd3d3Lm1haWwtYXJjaGl2ZS5jb20v
+Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbS9tc2czNjE3OC5odG1sIiwgCj4+ID4+IHRoZXJlIGV4
+aXN0cyB0aGUgZm9sbG93aW5nIHNjZW5hcmlvIHdoZXJlIHRoZSBhY3R1YWwgZmluaXNoaW5nIG9y
+ZGVyIG9mIAo+PiA+PiB0aGUgV1JJVEVzIHRoYXQgdGFyZ2V0cyB0aGUgc2FtZSBvYmplY3QgaXMg
+bm90IHRoZSBzYW1lIGFzIHRoZSBvcmRlciAKPj4gPj4gdGhleSBhcnJpdmVkIGF0IE9TRCwgd2hp
+Y2gsIEkgdGhpbmssIGNvdWxkIGJlIGEgaGludCB0aGF0IHRoZSBvcmRlciBvZiAKPj4gPj4gd3Jp
+dGVzIGZyb20gYSBzaW5nbGUgY2xpZW50IGNvbm5lY3Rpb24gdG8gYSBzaW5nbGUgT1NEIGlzIG5v
+dCBndXJhbnRlZWQ6Cj4+ID4KPj4gPklmIHNvLCBpdCBpcyBhIGJ1ZyB0aGF0IHNob3VsZCBiZSBm
+aXhlZCBpbiB0aGUgT1NELiAgcmJkLW1pcnJvciByZWx5aW5nIG9uIAo+PiA+T1NEIG9yZGVyaW5n
+IHRvIGJlIGNvcnJlY3QgaXMgdG90YWxseSBmaW5lLS1sb3RzIG9mIG90aGVyIHN0dWZmIGRvZXMg
+dG9vLgo+PiA+Cj4+ID4+ICAgICAgIFNheSB0aHJlZSB3cml0ZXMgdGhhdCB0YXJnZXRpbmcgdGhl
+IHNhbWUgb2JqZWN0IEEgYXJyaXZlZCBhdCBhbiAKPj4gPj4gT1NEIGluIHRoZSBvcmRlcjogIldS
+SVRFIEEub2ZmIDEiLCAiV1JJVEUgQS5vZmYgMiIsICJXUklURSBBLm9mZiAzIi4gVGhlIAo+PiA+
+PiBmaXJzdCB3cml0ZSwgIldSSVRFIEEub2ZmIDEiLCBhY3F1aXJlcyB0aGUgb2JqZWN0Y29udGV4
+dCBsb2NrIG9mIG9iamVjdCAKPj4gPj4gQSwgYW5kIGlzIHB1dCBpbnRvIGEgdHJhbnNhY3Rpb24g
+cXVldWUgdG8gZ28gdGhyb3VnaCB0aGUgImpvdXJuYWxpbmcgKyAKPj4gPj4gZmlsZSBzeXN0ZW0g
+d3JpdGUiIHByb2NlZHVyZS4gQmVmb3JlIGl0J3MgZmluaXNoZWQsIGEgdGhyZWFkIG9mIAo+PiA+
+PiBPU0Q6Om9zZF9vcF90cCByZXRyaWV2ZWQgdGhlIHNlY29uZCB3cml0ZSBhbmQgYXR0ZW1wdCB0
+byBwcm9jZXNzIGl0IAo+PiA+PiBkdXJpbmcgd2hpY2ggaXQgZmluZHMgdGhhdCB0aGUgb2JqZWN0
+Y29udGV4dCBsb2NrIG9mIEEgaXMgaGVsZCBieSBhIAo+PiA+PiBwcmV2aW91cyBXUklURSBhbmQg
+cHV0IHRoZSBzZWNvbmQgd3JpdGUgaW50byBBJ3MgcndzdGF0ZTo6d2FpdGVycyBxdWV1ZS4gCj4+
+ID4+IEl0J3Mgb25seSB3aGVuIHRoZSBmaXJzdCB3cml0ZSBpcyBmaW5pc2hlZCBvbiBhbGwgcmVw
+bGljYSBPU0RzIHRoYXQgdGhlIAo+PiA+PiBzZWNvbmQgd3JpdGUgaXMgcHV0IGJhY2sgaW50byBP
+U0Q6OnNoYXJkZWRvcF93cSB0byBiZSBwcm9jZXNzZWQgYWdhaW4gaW4gCj4+ID4+IHRoZSBmdXR1
+cmUuIElmLCBhZnRlciB0aGUgc2Vjb25kIHdyaXRlIGlzIHB1dCBpbnRvIHJ3c3RhdGU6OndhaXRl
+cnMgCj4+ID4+IHF1ZXVlIGFuZCB0aGUgZmlyc3Qgd3JpdGUgaXMgZmluaXNoZWQgb24gYWxsIHJl
+cGxpY2EgT1NEcywgaW4gd2hpY2ggY2FzZSAKPj4gPj4gdGhlIGZpcnN0IHdyaXRlIHJlbGVhc2Ug
+dGhlIEEncyBvYmplY3Rjb250ZXh0IGxvY2ssIGJ1dCBiZWZvcmUgdGhlIAo+PiA+PiBzZWNvbmQg
+d3JpdGUgaXMgcHV0IGJhY2sgaW50byBPU0Q6OnNoYXJkZWRvcF93cSwgdGhlIHRoaXJkIHdyaXRl
+IGlzIAo+PiA+PiByZXRyaWV2ZWQgYnkgT1NEJ3Mgd29ya2VyIHRocmVhZCwgaXQgd291bGQgZ2V0
+IHByb2Nlc3NlZCBhcyBubyBwcmV2aW91cyAKPj4gPj4gb3BlcmF0aW9uIGlzIGhvbGRpbmcgQSdz
+IG9iamVjdGNvbnRleHQgbG9jaywgaW4gd2hpY2ggY2FzZSwgdGhlIGFjdHVhbCAKPj4gPj4gZmlu
+aXNoaW5nIG9yZGVyIG9mIHRoZSB0aHJlZSB3cml0ZXMgaXMgIldSSVRFIEEub2ZmIDEiLCAiV1JJ
+VEUgQS5vZmYgMyIsIAo+PiA+PiAiV1JJVEUgQS5vZmYgMiIsIHdoaWNoIGlzIGRpZmZlcmVudCBm
+cm9tIHRoZSBvcmRlciB0aGV5IGFycml2ZWQuCj4+ID4KPj4gPlRoaXMgc2hvdWxkIG5vdCBoYXBw
+ZW4uICAoSWYgaXQgaGFwcGVuZWQgaW4gdGhlIHBhc3QsIGl0IHdhcyBhIGJ1ZywgYnV0IEkgCj4+
+ID53b3VsZCBleHBlY3QgaXQgaXMgZml4ZWQgaW4gdGhlIGxhdGVzdCBoYW1tZXIgcG9pbnQgcmVs
+ZWFzZSwgYW5kIGluIGpld2VsIAo+PiA+YW5kIG1hc3Rlci4pICBUaGUgcmVxdWVpbmcgaXMgZG9u
+ZSB1bmRlciB0aGUgUEc6OmxvY2sgc28gdGhhdCByZXF1ZXVlaW5nIAo+PiA+cHJlc2VydmVzIG9y
+ZGVyaW5nLiAgQSBmYWlyIGJpdCBvZiBjb2RlIGFuZCBhICpsb3QqIG9mIHRlc3RpbmcgZ29lcyBp
+bnRvIAo+PiA+ZW5zdXJpbmcgdGhhdCB0aGlzIGlzIHRydWUuICBJZiB5b3UndmUgc2VlbiB0aGlz
+IHJlY2VudGx5LCB0aGVuIGEgCj4+ID5yZXByb2R1Y2VyIG9yIGxvZyAoYW5kIHRyYWNrZXIgdGlj
+a2V0KSB3b3VsZCBiZSB3ZWxjb21lISAgV2hlbiB3ZSBzZWUgYW55IAo+PiA+b3JkZXJpbmcgZXJy
+b3JzIGluIFFBIHdlIHRha2UgdGhlbSB2ZXJ5IHNlcmlvdXNseSBhbmQgZml4IHRoZW0gcXVpY2ts
+eS4KPj4gPgo+PiA+WW91IG1pZ2h0IGJlIGludGVyZXN0ZWQgaW4gdGhlIG9zZF9kZWJ1Z19vcF9v
+cmRlciBjb25maWcgb3B0aW9uLCB3aGljaCB3ZSAKPj4gPmVuYWJsZSBpbiBxYSwgd2hpY2ggYXNz
+ZXJ0cyBpZiBpdCBzZWVzIG9wcyBmcm9tIGEgY2xpZW50IGFycml2ZSBvdXQgb2YgCj4+ID5vcmRl
+ci4gIFRoZSBjZXBoX3Rlc3RfcmFkb3Mgd29ya2xvYWQgZ2VuZXJhdGUgdGhhdCB3ZSB1c2UgZm9y
+IG11Y2ggb2YgdGhlIAo+PiA+cmFkb3MgcWEgc3VpdGUgYWxzbyBmYWlscyBpZiBpdCBzZWVzIG91
+dCBvZiBvcmRlciBvcGVyYXRpb25zLgo+PiA+Cj4+ID5zYWdlCj4+ID4KPj4gPj4gCj4+ID4+IElu
+IGh0dHBzOi8vd3d3Lm1haWwtYXJjaGl2ZS5jb20vY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbS9t
+c2czNjE3OC5odG1sLCAKPj4gd2Ugc2hvd2VkIG91ciBleHBlcmltZW50IHJlc3VsdCB3aGljaCBp
+cyBleGFjdGx5IGFzIHRoZSBhYm92ZSBzY2VuYXJpbyBzaG93cwo+PiAuCj4+ID4+IAo+PiA+PiBI
+b3dldmVyLCB0aGUgY2VwaCdzIHZlcnNpb24gb24gd2hpY2ggd2UgZGlkIHRoZSBleHBlcmltZW50
+IGFuZCB0aGUgc291Y2UgCj4+IGNvZGUgb2Ygd2hpY2ggd2UgcmVhZCB3YXMgSGFtbWVyLCAwLjk0
+LjUuIEkgZG9uJ3Qga25vdyB3aGV0aGVyIHRoZSBzY2VuYXJpbyAKPj4gYWJvdmUgbWF5IHN0aWxs
+IGV4aXN0cyBpbiBsYXRlciB2ZXJzaW9ucy4KPj4gPj4gCj4+ID4+IEFtIEkgcmlnaHQgYWJvdXQg
+dGhpcz8gT3IgYW0gSSBtaXNzaW5nIGFueXRoaW5nPyBQbGVhc2UgaGVscCBtZSwgSSdtIHJlYWwK
+Pj4gbHkgY29uZnVzZWQgcmlnaHQgbm93LiBUaGFuayB5b3UuCj4+ID4+IAo+PiA+PiBBdCAyMDE3
+LTA2LTA1IDIwOjAwOjA2LCAiSmFzb24gRGlsbGFtYW4iIDxqZGlsbGFtYUByZWRoYXQuY29tPiB3
+cm90ZToKPj4gPj4gPlRoZSBvcmRlciBvZiB3cml0ZXMgZnJvbSBhIHNpbmdsZSBjbGllbnQgY29u
+bmVjdGlvbiB0byBhIHNpbmdsZSBPU0QgaXMKPj4gPj4gPmd1YXJhbnRlZWQuIFRoZSByYmQtbWly
+cm9yIGpvdXJuYWwgcmVwbGF5IHByb2Nlc3MgaGFuZGxlcyBvbmUgZXZlbnQgYXQKPj4gPj4gPmEg
+dGltZSBhbmQgZG9lcyBub3Qgc3RhcnQgcHJvY2Vzc2luZyB0aGUgbmV4dCBldmVudCB1bnRpbCB0
+aGUgSU8gaGFzCj4+ID4+ID5iZWVuIHN0YXJ0ZWQgaW4tZmxpZ2h0IHdpdGggbGlicmFkb3MuIFRo
+ZXJlZm9yZSwgZXZlbiB0aG91Z2ggdGhlCj4+ID4+ID5yZXBsYXkgcHJvY2VzcyBhbGxvd3MgNTAg
+LSAxMDAgSU8gcmVxdWVzdHMgdG8gYmUgaW4tZmxpZ2h0LCB0aG9zZSBJT3MKPj4gPj4gPmFyZSBh
+Y3R1YWxseSB3ZWxsLW9yZGVyZWQgaW4gdGVybXMgb2YgdXBkYXRlcyB0byBhIHNpbmdsZSBvYmpl
+Y3QuCj4+ID4+ID4KPj4gPj4gPk9mIGNvdXJzZSwgc3VjaCBhbiBJTyByZXF1ZXN0IGZyb20gdGhl
+IGNsaWVudCBhcHBsaWNhdGlvbiAvIFZNIHdvdWxkCj4+ID4+ID5iZSBpbmNvcnJlY3QgYmVoYXZp
+b3IgaWYgdGhleSBkaWRuJ3Qgd2FpdCBmb3IgdGhlIGNvbXBsZXRpb24gY2FsbGJhY2sKPj4gPj4g
+PmJlZm9yZSBpc3N1aW5nIHRoZSBzZWNvbmQgdXBkYXRlLgo+PiA+PiA+Cj4+ID4+ID5PbiBNb24s
+IEp1biA1LCAyMDE3IGF0IDEyOjA1IEFNLCB4eGhkeDE5ODUxMjYgPHh4aGR4MTk4NTEyNkAxNjMu
+Y29tPiB3cm8KPj4gdGU6Cj4+ID4+ID4+IEhpLCBldmVyeW9uZS4KPj4gPj4gPj4KPj4gPj4gPj4K
+Pj4gPj4gPj4gUmVjZW50bHksIEkndmUgYmVlbiByZWFkaW5nIHRoZSBzb3VyY2UgY29kZSBvZiBy
+YmQtbWlycm9yLiBJIHdvbmRlciBobwo+PiB3IHJiZC1taXJyb3IgcHJlc2VydmVzIHRoZSBvcmRl
+ciBvZiBXUklURSBvcGVyYXRpb25zIHRoYXQgZmluaXNoZWQgb24gdGhlIHByCj4+IGltYXJ5IGNs
+dXN0ZXIuIEFzIGZhciBhcyBJIGNhbiB1bmRlcnN0YW5kIHRoZSBjb2RlLCByYmQtbWlycm9yIGZl
+dGNoZXMgSS9PIG8KPj4gcGVyYXRpb25zIGZyb20gdGhlIGpvdXJuYWwgb24gdGhlIHByaW1hcnkg
+Y2x1c3RlciwgYW5kIHJlcGxheSB0aGVtIG9uIHRoZSBzbAo+PiBhdmUgY2x1c3RlciB3aXRob3V0
+IGNoZWNraW5nIHdoZXRoZXIgdGhlcmUncyBhbHJlYWR5IGFueSBJL08gb3BlcmF0aW9ucyB0YXJn
+Cj4+IGV0aW5nIHRoZSBzYW1lIG9iamVjdCB0aGF0IGhhcyBiZWVuIGlzc3VlZCB0byB0aGUgc2xh
+dmUgY2x1c3RlciBhbmQgbm90IHlldCAKPj4gZmluaXNoZWQuIFNpbmNlIGNvbmN1cnJlbnQgb3Bl
+cmF0aW9ucyBtYXkgZmluaXNoIGluIGEgZGlmZmVyZW50IG9yZGVyIHRoYW4gdAo+PiBoYXQgaW4g
+d2hpY2ggdGhleSBhcnJpdmVkIGF0IHRoZSBPU0QsIHRoZSBvcmRlciB0aGF0IHRoZSBXUklURSBv
+cGVyYXRpb25zIGZpCj4+IG5pc2ggb24gdGhlIHNsYXZlIGNsdXN0ZXIgbWF5IGJlIGRpZmZlcmVu
+dCB0aGFuIHRoYXQgb24gdGhlIHByaW1heSBjbHVzdGVyLiAKPj4gRm9yIGV4YW1wbGU6IG9uIHRo
+ZSBwcmltYXJ5IGNsdXN0ZXIsIHRoZXJlIGFyZSB0d28gV1JJVEUgb3BlcmF0aW9uIHRhcmdldGlu
+Zwo+PiAgdGhlIHNhbWUgb2JqZWN0IEEgd2hpY2ggYXJlLCBpbiB0aGUgb3JkZXIgdGhleSBmaW5p
+c2ggb24gdGhlIHByaW1hcnkgY2x1c3RlCj4+IHIsICJXUklURSBBLm9mZiBkYXRhMSIgYW5kICJX
+UklURSBBLm9mZiBkYXRhMiI7IHdoaWxlIHdoZW4gdGhleSBhcmUgcmVwbGF5ZWQKPj4gIG9uIHRo
+ZSBzbGF2ZSBjbHVzdGVyLCB0aGUgb3JkZXIgbWF5IGJlICJXUklURSBBLm9mZiBkYXRhMiIgYW5k
+ICJXUklURSBBLm9mZgo+PiAgZGF0YTEiLCB3aAo+PiA+IGljaCBtZWFucyB0aGF0IHRoZSByZXN1
+bHQgb2YgdGhlIHR3byBvcGVyYXRpb25zIG9uIHRoZSBwcmltYXJ5IGNsdXN0ZXIgaXMgCj4+IEEu
+b2ZmPWRhdGEyIHdoaWxlLCBvbiB0aGUgc2xhdmUgY2x1c3RlciwgdGhlIHJlc3VsdCBpcyBBLm9m
+Zj1kYXRhMS4KPj4gPj4gPj4KPj4gPj4gPj4KPj4gPj4gPj4gSXMgdGhpcyBwb3NzaWJsZT8KPj4g
+Pj4gPj4KPj4gPj4gPj4KPj4gPj4gPj4KPj4gPj4gPgo+PiA+PiA+Cj4+ID4+ID4KPj4gPj4gPi0t
+IAo+PiA+PiA+SmFzb24KPj4gPj4gTuWrpeWPiemdo+esoXk/Pz/msIpi556CPz8/5Y2DduixnT8/
+P+iXk3subj8/P+Wjj+a4ruamj3rps5DlpqBheT8/P+iVoOi3iD8/P2o/Pz9m77yC56mQ5q6d6YSX
+Cj4+ID8/P+eVkOOCoj8/P+KSjj8/PzorduWivuWmm+mRmuixsOeomz8/P+ePo+i1mXpaK+WHkuau
+oOWouD8/PyLmv58h56eICj4+IAo+PiAKPj4gwqAKPj4gCj4+IAo+PiAK
