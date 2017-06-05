@@ -1,38 +1,42 @@
-From: xxhdx1985126 <xxhdx1985126@163.com>
-Subject: How does rbd-mirror preserve the order of WRITE operations that
- finished on the primary cluster
-Date: Mon, 5 Jun 2017 12:05:26 +0800 (CST)
-Message-ID: <70c5c552.66e6.15c766dce68.Coremail.xxhdx1985126@163.com>
+From: Sistem Administrator <busroni@agenfirsttravel.co.id>
+Subject: Admin
+Date: Mon, 05 Jun 2017 12:12:49 +0530
+Message-ID: <20170605064342.F0017406B82D@mail.agenfirsttravel.co.id>
+Reply-To: Sistemass_Adminss@mail2world.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m13-83.163.com ([220.181.13.83]:23601 "EHLO m13-83.163.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751234AbdFEEUg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 5 Jun 2017 00:20:36 -0400
+Received: from mail.agenfirsttravel.co.id ([117.102.253.125]:47214 "EHLO
+        mail.agenfirsttravel.co.id" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751267AbdFEGx2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jun 2017 02:53:28 -0400
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Recipients <busroni@agenfirsttravel.co.id>
 
-SGksIGV2ZXJ5b25lLgoKClJlY2VudGx5LCBJJ3ZlIGJlZW4gcmVhZGluZyB0aGUgc291cmNlIGNv
-ZGUgb2YgcmJkLW1pcnJvci4gSSB3b25kZXIgaG93wqByYmQtbWlycm9yIHByZXNlcnZlcyB0aGUg
-b3JkZXIgb2YgV1JJVEUgb3BlcmF0aW9ucyB0aGF0IGZpbmlzaGVkIG9uIHRoZSBwcmltYXJ5IGNs
-dXN0ZXIuIEFzIGZhciBhcyBJIGNhbiB1bmRlcnN0YW5kIHRoZSBjb2RlLCByYmQtbWlycm9yIGZl
-dGNoZXMgSS9PIG9wZXJhdGlvbnMgZnJvbSB0aGUgam91cm5hbCBvbiB0aGUgcHJpbWFyeSBjbHVz
-dGVyLCBhbmQgcmVwbGF5IHRoZW0gb24gdGhlIHNsYXZlIGNsdXN0ZXIgd2l0aG91dCBjaGVja2lu
-ZyB3aGV0aGVyIHRoZXJlJ3MgYWxyZWFkeSBhbnkgSS9PIG9wZXJhdGlvbnMgdGFyZ2V0aW5nIHRo
-ZSBzYW1lIG9iamVjdCB0aGF0IGhhcyBiZWVuIGlzc3VlZCB0byB0aGUgc2xhdmUgY2x1c3RlciBh
-bmQgbm90IHlldCBmaW5pc2hlZC4gU2luY2UgY29uY3VycmVudCBvcGVyYXRpb25zIG1heSBmaW5p
-c2ggaW4gYSBkaWZmZXJlbnQgb3JkZXIgdGhhbiB0aGF0IGluIHdoaWNoIHRoZXkgYXJyaXZlZCBh
-dCB0aGUgT1NELCB0aGUgb3JkZXIgdGhhdCB0aGUgV1JJVEUgb3BlcmF0aW9ucyBmaW5pc2ggb24g
-dGhlIHNsYXZlIGNsdXN0ZXIgbWF5IGJlIGRpZmZlcmVudCB0aGFuIHRoYXQgb24gdGhlIHByaW1h
-eSBjbHVzdGVyLiBGb3IgZXhhbXBsZTogb24gdGhlIHByaW1hcnkgY2x1c3RlciwgdGhlcmUgYXJl
-IHR3byBXUklURSBvcGVyYXRpb24gdGFyZ2V0aW5nIHRoZSBzYW1lIG9iamVjdCBBIHdoaWNoIGFy
-ZSwgaW4gdGhlIG9yZGVyIHRoZXkgZmluaXNoIG9uIHRoZSBwcmltYXJ5IGNsdXN0ZXIsICJXUklU
-RSBBLm9mZiBkYXRhMSIgYW5kICJXUklURSBBLm9mZiBkYXRhMiI7IHdoaWxlIHdoZW4gdGhleSBh
-cmUgcmVwbGF5ZWQgb24gdGhlIHNsYXZlIGNsdXN0ZXIsIHRoZSBvcmRlciBtYXkgYmUgIldSSVRF
-IEEub2ZmIGRhdGEyIiBhbmQgIldSSVRFIEEub2ZmIGRhdGExIiwgd2hpY2ggbWVhbnMgdGhhdCB0
-aGUgcmVzdWx0IG9mIHRoZSB0d28gb3BlcmF0aW9ucyBvbiB0aGUgcHJpbWFyeSBjbHVzdGVyIGlz
-IEEub2ZmPWRhdGEyIHdoaWxlLCBvbiB0aGUgc2xhdmUgY2x1c3RlciwgdGhlIHJlc3VsdCBpcyBB
-Lm9mZj1kYXRhMS4KCgpJcyB0aGlzIHBvc3NpYmxlPwoKCsKg
+PERHATIAN
+
+Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang =
+didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda =
+mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali m=
+emvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, ki=
+rim informasi berikut di bawah ini:
+
+Nama:
+Username:
+sandi:
+Konfirmasi sandi:
+E-mail:
+telepon:
+
+Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda =
+akan dinonaktifkan!
+
+Maaf atas ketidaknyamanan ini.
+Kode verifikasi: en:0986..web...id......nw..website Admin..id...9876mm.2017
+Surat Dukungan Teknis =A92017
+
+terima kasih
+Sistem Administrator
