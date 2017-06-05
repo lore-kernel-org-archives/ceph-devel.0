@@ -1,62 +1,90 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Errocodes over the line....
-Date: Mon, 5 Jun 2017 20:40:02 +0200
-Message-ID: <b3b8f54c-d9f9-31d0-daac-ea97cb7dde56@digiware.nl>
-References: <fd007197-fa5f-a036-e1ae-ee0097320510@withagen.nl>
- <alpine.DEB.2.11.1705300128170.3646@piezo.novalocal>
- <dbf4fcb0-6077-5f35-9300-59bb841f2a74@digiware.nl>
- <alpine.DEB.2.11.1706050123390.3646@piezo.novalocal>
- <de489da4-28f7-a62d-385b-de5aa5ddf95a@digiware.nl>
+From: Jesse Williamson <jwilliamson@suse.de>
+Subject: Re: VLA detection ...
+Date: Mon, 5 Jun 2017 13:02:34 -0700 (PDT)
+Message-ID: <alpine.LSU.2.21.1706051215130.14104@ancalagon.suse.de>
+References: <174f417f-02f5-beb1-0f8b-96ff4a70349b@digiware.nl> <CAJE9aONhiWL+gHMKaeeg95mnSpua+DeDbArks+O=okKDh3k=YQ@mail.gmail.com> <5b4dd43f-5e9f-ca46-2448-8147a1615921@digiware.nl> <alpine.DEB.2.11.1706041826470.3646@piezo.novalocal>
+ <0cc648f1-6f35-9a4b-060a-704c19333ef6@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; format=flowed; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:51552 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751182AbdFESkF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 5 Jun 2017 14:40:05 -0400
-In-Reply-To: <de489da4-28f7-a62d-385b-de5aa5ddf95a@digiware.nl>
-Content-Language: nl
+Received: from mx2.suse.de ([195.135.220.15]:46899 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751178AbdFEUCk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 5 Jun 2017 16:02:40 -0400
+In-Reply-To: <0cc648f1-6f35-9a4b-060a-704c19333ef6@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Sage Weil <sage@newdream.net>, kefu chai <tchaikov@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 05/06/2017 09:09, Willem Jan Withagen wrote:
-> On 05/06/2017 03:25, Sage Weil wrote:
->> On Sun, 4 Jun 2017, Willem Jan Withagen wrote:
->>> On 30/05/2017 03:30, Sage Weil wrote:
->>>> It does.  There is a helper somewhere that maps error codes in MOSDOpReply 
->>>> that go over the wire that was added for an AIX port a year or two ago.  
->>>> look for errorcode32_t and ceph_to_host_errno etc
->>>
->>> 'mmm
->>>
->>> It looks like it is the other way around as what I'm looking for...
->>> These are the linux errno's translated to AIX/Darwin codes. So the
->>> native OS does not get upset when playing client. These .cc files are
->>> not even compiled in the standard ceph tree, as far as I can see.
->>>
->>> So I guess what I'm looking for is to issue the correct errorcodes on
->>> the line when also acting as server. And as far as I can imagine will
->>> need both: ceph_to_host_errno() and host_to_ceph_errno() and start
->>> glueing that in.
->>> Now the question is: I that restricted to one location to insert as
->>> well, or go I need to go chasing all places where the errcode is de/encoded.
->>
->> 1. Write the ceph_to_host_errno and host_to_ceph_errno methods
->> 2. Fix the errorcode32_t to use them for encode *and* decode.
->> 3. Identify the handful of places where we send errcodes over the wire 
->> (mostly MOSDOpReply and friends) and switch the type to errorcode32_t so 
->> that it is translated during encode/decode.
->>
->> Happy to help with 2 and 3 once we have 1 in place!
+On Sun, 4 Jun 2017, Willem Jan Withagen wrote:
 
-First attempt at 1) and 2) in https://github.com/ceph/ceph/pull/15495.
-I took the darwin version as template.
-If you like the array approach, I will also convert the original
-ceph_to_host to array as well. (Or the other way around)
+Hi,
 
---WjW
+>>> And next the major complaint I find about it, is that these structures
+>>> are build on the stack, which might cause stackoverlows (and that mostly
+>>> on embedded computers) That would be something for programmers to be
+>>> aware of.
 
+There are a few potential issues to consider. I'll highlight a couple of 
+them.
 
+I think it's definitely important to mention that VLAs are certainly 
+useful, and there are cases where they can be important for performance 
+reasons. This is why I suggest -Wvla rather than -Wvla-error (though I'm 
+okay with that, too, and disabling on a case-by-case basis).
+
+The main issue with VLAs: they're really, really easy to write.
+
+While this is in part a feature, it also means that programmers can use 
+this feature entirely inadvertently. Seeing this happen "in the wild" is 
+actually why I'm suggesting adding -Wvla: they can be useful, but I think 
+the potential issues they can cause, and resultant effort debugging, make 
+them worth warning about since they're so easy to invoke by accident.
+
+VLAs allow unbounded and entirely unchecked allocation on the stack. There 
+is no way to detect overflow or any other error. If the allocation exceeds 
+the available stack space, the call stack is straight-up clobbered, which 
+is not very easy to debug when it's the third item in a 30 layer deep call 
+stack that's spoiling the fun. Note that some platforms start the stack at 
+the end of the address space and count backwards.
+
+Maybe a miscalculated VLA will crash. But if you're having a bad Monday, 
+that won't happen: the program might keep ticking along for hours, with 
+random parts of memory silently corrupted. (Note: alloca() does not save 
+you from this.) There's no way to detect this error.
+
+And, this can also go in the other direction-- consider what happens here:
+ 	int foo[bar] = { 1, 2, 3, 4, 5, 6 };
+...great, unless bar is < 6... but you won't know until things go wrong.
+
+Finally, note that sizeof(my_vla) is a /runtime/ calculation.
+
+Anyway, as I said, I'm not suggesting we outright ban them, but I think a 
+warning is a good idea because I've seen people write these completely 
+accidentally. There's a lot of current effort in the committee to provide 
+a feature like this, but to my knowledge it's not yet settled-- other than 
+general agreement that the C approach doesn't work so well in C++.[1]
+
+Naturally, we're used to courting some danger since we're using C family 
+languages, but I hope I've helped to at least raise awareness as to why it 
+may be a good idea to warn when this non-standard feature is used.
+
+* Some more background on VLAs and C++:
+         http://www.stroustrup.com/examples_short.pdf
+
+ 	There have been some proposals to add features like this, but no takers
+ 	yet. There are others, but for example (and some discussion):
+ 	http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3497.html
+ 	http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3810.pdf
+
+>> Yep, my bad for assuming the cleanup was already done (or trivial)!
+
+My bad for not submitting patches along with adding -Wvla, and not 
+flagging the PR "RFC", which is what I should have done. Sorry for the 
+trouble.
+
+-Jesse
+
+1. This is a discussion that seems to generate some heat:
+"https://groups.google.com/forum/#!searchin/comp.std.c$2B$2B/vlas|sort:relevance/comp.std.c++/K_4lgA1JYeg/2qRcUvmGhBEJ"
