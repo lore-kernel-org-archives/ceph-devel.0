@@ -1,145 +1,80 @@
-From: ceph.novice-k4R3PER4nllwCEqMux5wBA@public.gmane.org
-Subject: Re: RGW lifecycle not expiring objects
-Date: Mon, 5 Jun 2017 01:16:02 +0200
-Message-ID: <trinity-fe7badd9-ecbc-4d65-8fa0-231496938a25-1496618162797@3capp-gmx-bs31>
-References: <CABGPr5nfykSv=ib6N_jMOarOF=O1XaPLxCXY6nNYR81wa62TBQ@mail.gmail.com>
-	<CABGPr5=5y3NBJ_jGB1w=2=DeHU1GF4f7Ji+kTAJ_4f+O37hTFg@mail.gmail.com>
-	<e19ebc5a-c8c1-eefb-acec-65fbc0284101@umn.edu>
-	<trinity-9ef02e67-6909-42f8-ab06-a750a2bfab3c-1496441134227@3capp-gmx-bs48>
-	<CADRKj5ShtTBA=_3e89jC-t31sArHZ=9Wfc5cA5VRHKFfd+gz0A@mail.gmail.com>
-	<trinity-b11b03b1-bc6b-466e-ba26-77e1154d575f-1496604855693@3capp-gmx-bs77>
-	<trinity-76fa44cc-8cd5-41f0-90e9-4a6d2e603ae6-1496617549501@3capp-gmx-bs31>
-	<trinity-9ac6e555-43be-4a82-b5b5-e120d3af1e8b-1496617969363@3capp-gmx-bs31>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Errocodes over the line....
+Date: Mon, 5 Jun 2017 01:25:55 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1706050123390.3646@piezo.novalocal>
+References: <fd007197-fa5f-a036-e1ae-ee0097320510@withagen.nl> <alpine.DEB.2.11.1705300128170.3646@piezo.novalocal> <dbf4fcb0-6077-5f35-9300-59bb841f2a74@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <trinity-9ac6e555-43be-4a82-b5b5-e120d3af1e8b-1496617969363@3capp-gmx-bs31>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Yehuda Sadeh-Weinraub <yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:46402 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751224AbdFEBZ6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 4 Jun 2017 21:25:58 -0400
+In-Reply-To: <dbf4fcb0-6077-5f35-9300-59bb841f2a74@digiware.nl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: ceph-devel@vger.kernel.org
 
-CmdycnIuLi4gc29ycnkgJiYgYW5kIGFnYWluIGFzIHRleHQgOnwKwqAKCkdlc2VuZGV0OsKgTW9u
-dGFnLCAwNS4gSnVuaSAyMDE3IHVtIDAxOjEyIFVocgpWb246wqBjZXBoLm5vdmljZUBoYWJtYWxu
-ZWZyYWdlLmRlCkFuOsKgIlllaHVkYSBTYWRlaC1XZWlucmF1YiIgPHllaHVkYUByZWRoYXQuY29t
-PgpDYzrCoCJjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tIiA8Y2VwaC11c2Vyc0BsaXN0cy5jZXBo
-LmNvbT4sIGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnCkJldHJlZmY6wqBSZTogW2NlcGgtdXNl
-cnNdIFJHVyBsaWZlY3ljbGUgbm90IGV4cGlyaW5nIG9iamVjdHMKCsKgCgpIaSAoYWdhaW4pIFll
-aHVkYS4KwqAKTG9vcGluZyBpbiBjZXBoLWRldmVsLi4uCsKgCkNvdWxkIGl0IGJlIHRoYXQgbGlm
-ZWN5Y2xlIGlzIHN0aWxsIG5vdCBpbXBsZW1lbnRlZCBuZWl0aGVyIGluIEpld2VsIG5vciBpbiBL
-cmFrZW4sIGV2ZW4gaWYgcmVsZWFzZSBub3RlcyBhbmQgb3RoZXIgcGxhY2VzIHNheSBzbz8KwqAK
-aHR0cHM6Ly93d3cuc3Bpbmljcy5uZXQvbGlzdHMvY2VwaC1kZXZlbC9tc2czNDQ5Mi5odG1sCmh0
-dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgtY2kvY29tbWl0LzdkNDhmNjJmNWM4NjkxM2Q4ZjAw
-YjQ0ZDQ2YTA0YTUyZDMzODkwN2MKaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC1jaS9jb21t
-aXQvOTE2MmJkMjk1OTRkMzQ0MjlhMDk1NjJlZDYwYTMyYTA3MDM5NDBlYQrCoApUaGFua3MgJiBy
-ZWdhcmRzCsKgQW50b24KwqAKCkdlc2VuZGV0OsKgU29ubnRhZywgMDQuIEp1bmkgMjAxNyB1bSAy
-MTozNCBVaHIKVm9uOsKgY2VwaC5ub3ZpY2VAaGFibWFsbmVmcmFnZS5kZQpBbjrCoCJZZWh1ZGEg
-U2FkZWgtV2VpbnJhdWIiIDx5ZWh1ZGFAcmVkaGF0LmNvbT4KQ2M6wqAiY2VwaC11c2Vyc0BsaXN0
-cy5jZXBoLmNvbSIgPGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20+CkJldHJlZmY6wqBSZTogW2Nl
-cGgtdXNlcnNdIFJHVyBsaWZlY3ljbGUgbm90IGV4cGlyaW5nIG9iamVjdHMKSGkgWWFodWRhLgoK
-V2VsbCwgaGVyZSB3ZSBnbzogaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzIwMTc3W2h0
-dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8yMDE3N10KCkFzIGl0J3MgbXkgZmlyc3Qgb25l
-LCBob3BlIGl0J3Mgb2sgYXMgaXQgaXMuLi4KClRoYW5rcyAmIHJlZ2FyZHMKQW50b24KCgpHZXNl
-bmRldDrCoFNhbXN0YWcsIDAzLiBKdW5pIDIwMTcgdW0gMDA6MTQgVWhyClZvbjrCoCJZZWh1ZGEg
-U2FkZWgtV2VpbnJhdWIiIDx5ZWh1ZGFAcmVkaGF0LmNvbT4KQW46wqBjZXBoLm5vdmljZUBoYWJt
-YWxuZWZyYWdlLmRlCkNjOsKgIkdyYWhhbSBBbGxhbiIgPGd0YUB1bW4uZWR1PiwgImNlcGgtdXNl
-cnNAbGlzdHMuY2VwaC5jb20iIDxjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tPgpCZXRyZWZmOsKg
-UmU6IFtjZXBoLXVzZXJzXSBSR1cgbGlmZWN5Y2xlIG5vdCBleHBpcmluZyBvYmplY3RzCkhhdmUg
-eW91IG9wZW5lZCBhIGNlcGggdHJhY2tlciBpc3N1ZSwgc28gdGhhdCB3ZSBkb24ndCBsb3NlIHRy
-YWNrIG9mCnRoZSBwcm9ibGVtPwoKVGhhbmtzLApZZWh1ZGEKCk9uIEZyaSwgSnVuIDIsIDIwMTcg
-YXQgMzowNSBQTSwgPGNlcGgubm92aWNlQGhhYm1hbG5lZnJhZ2UuZGU+IHdyb3RlOgo+IEhpIEdy
-YWhhbS4KPgo+IFdlIGFyZSBvbiBLcmFrZW4gYW5kIGhhdmUgdGhlIHNhbWUgcHJvYmxlbSB3aXRo
-ICJsaWZlY3ljbGUiLiBWYXJpb3VzIChvdGhlcikgdG9vbHMgbGlrZSBzM2NtZCBvciBDeWJlckR1
-Y2sgZG8gc2hvdyB0aGUgYXBwbGllZCAiZXhwaXJhdGlvbiIgc2V0dGluZ3MsIGJ1dCBvYmplY3Rz
-IHNlZW0gbmV2ZXIgdG8gYmUgcHVyZ2VkLgo+Cj4gSWYgeW91IHNob3VsZCBoYXZlIG5ldyBmaW5k
-aW5ncywgaGludHMsLi4uIFBMRUFTRSBzaGFyZS9sZXQgbWUga25vdy4KPgo+IFRoYW5rcyBhIGxv
-dCEKPiBBbnRvbgo+Cj4KPiBHZXNlbmRldDogRnJlaXRhZywgMTkuIE1haSAyMDE3IHVtIDIyOjQ0
-IFVocgo+IFZvbjogIkdyYWhhbSBBbGxhbiIgPGd0YUB1bW4uZWR1Pgo+IEFuOiBjZXBoLXVzZXJz
-QGxpc3RzLmNlcGguY29tCj4gQmV0cmVmZjogW2NlcGgtdXNlcnNdIFJHVyBsaWZlY3ljbGUgbm90
-IGV4cGlyaW5nIG9iamVjdHMKPiBJJ3ZlIGJlZW4gaGF2aW5nIGEgaGFyZCB0aW1lIGdldHRpbmcg
-dGhlIHMzIG9iamVjdCBsaWZlY3ljbGUgdG8gZG8KPiBhbnl0aGluZyBoZXJlLiBJIHdhcyBhYmxl
-IHRvIHNldCBhIGxpZmVjeWNsZSBvbiBhIHRlc3QgYnVja2V0LiBBcyBvdGhlcnMKPiBhbHNvIHNl
-ZW0gdG8gaGF2ZSBmb3VuZCwgSSBkbyBnZXQgYW4gRUFDQ0VTIGVycm9yIG9uIHNldHRpbmcgdGhl
-Cj4gbGlmZWN5Y2xlLCBidXQgaXQgZG9lcyBob3dldmVyIGdldCBzdG9yZWQ6Cj4KPj4gJSBhd3Mg
-LS1lbmRwb2ludC11cmwgaHR0cHM6Ly94eHgueHh4Lnh4eC54eHhbaHR0cHM6Ly94eHgueHh4Lnh4
-eC54eHhdW2h0dHBzOi8veHh4Lnh4eC54eHgueHh4W2h0dHBzOi8veHh4Lnh4eC54eHgueHh4XV0g
-czNhcGkgZ2V0LWJ1Y2tldC1saWZlY3ljbGUtY29uZmlndXJhdGlvbiAtLWJ1Y2tldD10ZXN0Z3Rh
-Cj4+IHsKPj4gIlJ1bGVzIjogWwo+PiB7Cj4+ICJTdGF0dXMiOiAiRW5hYmxlZCIsCj4+ICJQcmVm
-aXgiOiAiIiwKPj4gIkV4cGlyYXRpb24iOiB7Cj4+ICJEYXlzIjogMwo+PiB9LAo+PiAiSUQiOiAi
-dGVzdCIKPj4gfQo+PiBdCj4+IH0KPgo+IGJ1dCBtYW55IGRheXMgbGF0ZXIgSSBoYXZlIHlldCB0
-byBzZWUgYW55IG9iamVjdCBhY3R1YWxseSBnZXQgZXhwaXJlZC4KPiBUaGVyZSBhcmUgc29tZSBo
-aW50cyBpbiB0aGUgcmd3IGxvZyB0aGF0IHRoZSBleHBpcnkgdGhyZWFkIGRvZXMgcnVuCj4gcGVy
-aW9kaWNhbGx5Ogo+Cj4+IDIwMTctMDUtMTkgMDM6NDk6MDMuMjgxMzQ3IDdmNzRmMTEzNDcwMCAy
-IFJHV0RhdGFDaGFuZ2VzTG9nOjpDaGFuZ2VzUmVuZXdUaHJlYWQ6IHN0YXJ0Cj4+IDIwMTctMDUt
-MTkgMDM6NDk6MTYuMzU2MDIyIDdmNzRlZjkzMTcwMCAyIG9iamVjdCBleHBpcmF0aW9uOiBzdGFy
-dAo+PiAyMDE3LTA1LTE5IDAzOjQ5OjE2LjM1NjAzNiA3Zjc0ZWY5MzE3MDAgMjAgcHJvY2VlZGlu
-ZyBzaGFyZCA9IG9ial9kZWxldGVfYXRfaGludC4wMDAwMDAwMDAwCj4+IDIwMTctMDUtMTkgMDM6
-NDk6MTYuMzU5Nzg1IDdmNzRlZjkzMTcwMCAyMCBwcm9jZWVkaW5nIHNoYXJkID0gb2JqX2RlbGV0
-ZV9hdF9oaW50LjAwMDAwMDAwMDEKPj4gMjAxNy0wNS0xOSAwMzo0OToxNi4zNjQ2NjcgN2Y3NGVm
-OTMxNzAwIDIwIHByb2NlZWRpbmcgc2hhcmQgPSBvYmpfZGVsZXRlX2F0X2hpbnQuMDAwMDAwMDAw
-Mgo+PiAyMDE3LTA1LTE5IDAzOjQ5OjE2LjM2OTYzNiA3Zjc0ZWY5MzE3MDAgMjAgcHJvY2VlZGlu
-ZyBzaGFyZCA9IG9ial9kZWxldGVfYXRfaGludC4wMDAwMDAwMDAzCj4gLi4uCj4+IDIwMTctMDUt
-MTkgMDM6NDk6MTYuODAzMjcwIDdmNzRlZjkzMTcwMCAyMCBwcm9jZWVkaW5nIHNoYXJkID0gb2Jq
-X2RlbGV0ZV9hdF9oaW50LjAwMDAwMDAxMjYKPj4gMjAxNy0wNS0xOSAwMzo0OToxNi44MDY0MjMg
-N2Y3NGVmOTMxNzAwIDIgb2JqZWN0IGV4cGlyYXRpb246IHN0b3AKPgo+ICJyYWRvc2d3LWFkbWlu
-IGxjIHByb2Nlc3MiIGdpdmVzIG1lIG5vIG91dHB1dCB1bmxlc3MgSSBlbmFibGUgZGVidWcsIHRo
-ZW46Cj4KPj4gXSMgcmFkb3Nndy1hZG1pbiBsYyBwcm9jZXNzCj4+IDIwMTctMDUtMTkgMTU6Mjg6
-NDYuMzgzMDQ5IDdmZWRiOWZmYjcwMCAyIFJHV0RhdGFDaGFuZ2VzTG9nOjpDaGFuZ2VzUmVuZXdU
-aHJlYWQ6IHN0YXJ0Cj4+IDIwMTctMDUtMTkgMTU6Mjg6NDYuNDIxODA2IDdmZWRkYzI0MGM4MCAx
-MCBDYW5ub3QgZmluZCBjdXJyZW50IHBlcmlvZCB6b25lIHVzaW5nIGxvY2FsIHpvbmUKPj4gMjAx
-Ny0wNS0xOSAxNToyODo0Ni40NTM0MzEgN2ZlZGRjMjQwYzgwIDIgYWxsIDggd2F0Y2hlcnMgYXJl
-IHNldCwgZW5hYmxpbmcgY2FjaGUKPj4gMjAxNy0wNS0xOSAxNToyODo0Ni42MTQ5OTEgN2ZlZGRj
-MjQwYzgwIDIgcmVtb3ZlZCB3YXRjaGVyLCBkaXNhYmxpbmcgY2FjaGUKPgo+ICJyYWRvc2d3LWFk
-bWluIGxjIGxpc3QiIHNlZW1zIHRvIHJldHVybiAiZW1wdHkiIG91dHB1dDoKPgo+PiAjIHJhZG9z
-Z3ctYWRtaW4gbGMgbGlzdAo+PiBbXQo+Cj4gSXMgdGhlcmUgYW55dGhpbmcgb2J2aW91cyB0aGF0
-IEkgbWlnaHQgYmUgbWlzc2luZz8KPgo+IEdyYWhhbQo+IC0tCj4gR3JhaGFtIEFsbGFuCj4gTWlu
-bmVzb3RhIFN1cGVyY29tcHV0aW5nIEluc3RpdHV0ZSAtIGd0YUB1bW4uZWR1Cj4gX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KPiBjZXBoLXVzZXJzIG1haWxp
-bmcgbGlzdAo+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPiBodHRwOi8vbGlzdHMuY2VwaC5j
-b20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb21baHR0cDovL2xpc3RzLmNlcGguY29t
-L2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tXVtodHRwOi8vbGlzdHMuY2VwaC5jb20v
-bGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb21baHR0cDovL2xpc3RzLmNlcGguY29tL2xp
-c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tXV1baHR0cDovL2xpc3RzLmNlcGguY29tL2xp
-c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0
-aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbV1baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3Rp
-bmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5m
-by5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbV1dXVtodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
-Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb21baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZv
-LmNnaS9jZXBoLXVzZXJzLWNlcGguY29tXVtodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8u
-Y2dpL2NlcGgtdXNlcnMtY2VwaC5jb21baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNn
-aS9jZXBoLXVzZXJzLWNlcGguY29tXV1baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNn
-aS9jZXBoLXVzZXJzLWNlcGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kv
-Y2VwaC11c2Vycy1jZXBoLmNvbV1baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9j
-ZXBoLXVzZXJzLWNlcGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2Vw
-aC11c2Vycy1jZXBoLmNvbV1dXV0KPgo+Cj4gX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX18KPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+IGNlcGgtdXNlcnNA
-bGlzdHMuY2VwaC5jb20KPiBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgt
-dXNlcnMtY2VwaC5jb21baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVz
-ZXJzLWNlcGguY29tXVtodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
-cnMtY2VwaC5jb21baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJz
-LWNlcGguY29tXV1baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJz
-LWNlcGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1j
-ZXBoLmNvbV1baHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNl
-cGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBo
-LmNvbV1dXQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpj
-ZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9s
-aXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbVtodHRwOi8vbGlz
-dHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb21dW2h0dHA6Ly9saXN0
-cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbVtodHRwOi8vbGlzdHMu
-Y2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb21dXQrCoArCoF9fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fIGNlcGgtdXNlcnMgbWFpbGlu
-ZyBsaXN0IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20gaHR0cDovL2xpc3RzLmNlcGguY29tL2xp
-c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tW2h0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0
-aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbV0KX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0Bs
-aXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
-cnMtY2VwaC5jb20K
+On Sun, 4 Jun 2017, Willem Jan Withagen wrote:
+> On 30/05/2017 03:30, Sage Weil wrote:
+> > It does.  There is a helper somewhere that maps error codes in MOSDOpReply 
+> > that go over the wire that was added for an AIX port a year or two ago.  
+> > look for errorcode32_t and ceph_to_host_errno etc
+> 
+> 'mmm
+> 
+> It looks like it is the other way around as what I'm looking for...
+> These are the linux errno's translated to AIX/Darwin codes. So the
+> native OS does not get upset when playing client. These .cc files are
+> not even compiled in the standard ceph tree, as far as I can see.
+> 
+> So I guess what I'm looking for is to issue the correct errorcodes on
+> the line when also acting as server. And as far as I can imagine will
+> need both: ceph_to_host_errno() and host_to_ceph_errno() and start
+> glueing that in.
+> Now the question is: I that restricted to one location to insert as
+> well, or go I need to go chasing all places where the errcode is de/encoded.
+
+1. Write the ceph_to_host_errno and host_to_ceph_errno methods
+2. Fix the errorcode32_t to use them for encode *and* decode.
+3. Identify the handful of places where we send errcodes over the wire 
+(mostly MOSDOpReply and friends) and switch the type to errorcode32_t so 
+that it is translated during encode/decode.
+
+Happy to help with 2 and 3 once we have 1 in place!
+
+sage
+
+
+
+> 
+> --WjW
+> 
+> > 
+> > On Mon, 29 May 2017, Willem Jan Withagen wrote:
+> > 
+> >> Hi Sage
+> >>
+> >> I came accros the following, dataing september 2011, writen by you:
+> >> ====
+> >> These error codes pass over the wire, so we should make sure the actual
+> >> values are consistent across the platforms, so a FreeBSD client can talk
+> >> to a Linux server, or vice-versa.
+> >>
+> >> I'm not sure if that's the case for other error codes...?
+> >> ====
+> >>
+> >> Now the trick question is: Does ENODATA travel over the wire?
+> >>
+> >> Because the way I designed it now
+> >> 	ENOATTR on FreeBSD is 87
+> >> 	ENODATA on Linux is 61
+> >>
+> >> So that is not going to match, if it is communicated.
+> >>
+> >> --WjW
+> >>
+> >>
+> 
+> 
