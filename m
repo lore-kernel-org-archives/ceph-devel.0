@@ -1,194 +1,95 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: [sepia] CentOS builds failing in Shaman since Friday evening
-Date: Mon, 5 Jun 2017 09:23:07 -0400
-Message-ID: <CAC-Np1ytSw=z0RzOWGhX+mVdd1YsGofEezepnf6oEDYkT5ct1g@mail.gmail.com>
-References: <4a0aa923-028a-a9bf-d988-ead0f51fe831@suse.cz> <CAJ4mKGYGn4vL3k5TKs3v=Ho8L7DuU97eDWLD_HBqCKf+J+pfZg@mail.gmail.com>
- <alpine.DEB.2.11.1706032044430.3646@piezo.novalocal> <CALe9h7dXF2LhGvrv-6Y6aKYTJmFTqa1H54Za_S1pUuP=ihmmOA@mail.gmail.com>
- <CAC-Np1w0XQOdRcrqUYstYwZ+b4v_5eGr1jDpBcNicX896C6Z5Q@mail.gmail.com>
+From: xxhdx1985126 <xxhdx1985126@163.com>
+Subject: Re:Re: How does rbd-mirror preserve the order of WRITE operations
+ that finished on the primary cluster
+Date: Mon, 5 Jun 2017 23:49:19 +0800 (CST)
+Message-ID: <75e21ee8.f334.15c78f23929.Coremail.xxhdx1985126@163.com>
+References: <70c5c552.66e6.15c766dce68.Coremail.xxhdx1985126@163.com>
+ <CA+aFP1B=M97rVtGcY=v79zg_2rS=+NNcO5FTT32yLCZtky7N7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=GBK
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:38178 "EHLO
-        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751310AbdFENXK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jun 2017 09:23:10 -0400
-Received: by mail-wm0-f54.google.com with SMTP id n195so75735895wmg.1
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Jun 2017 06:23:09 -0700 (PDT)
-In-Reply-To: <CAC-Np1w0XQOdRcrqUYstYwZ+b4v_5eGr1jDpBcNicX896C6Z5Q@mail.gmail.com>
+Received: from m13-45.163.com ([220.181.13.45]:15603 "EHLO m13-45.163.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751112AbdFEQEf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 5 Jun 2017 12:04:35 -0400
+In-Reply-To: <CA+aFP1B=M97rVtGcY=v79zg_2rS=+NNcO5FTT32yLCZtky7N7g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Sage Weil <sage@newdream.net>, "sepia@ceph.com" <sepia@ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>
+To: jdillama@redhat.com
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-And I just had to kill a few concurrent builds that got picked up by
-the misconfigured slave.
-
-If your build says 'Killed by Alfredo' it is because of the previous
-email. Please reschedule!
-
-
-On Mon, Jun 5, 2017 at 9:16 AM, Alfredo Deza <adeza@redhat.com> wrote:
-> On Sun, Jun 4, 2017 at 5:26 AM, John Spray <jspray@redhat.com> wrote:
->> On Sat, Jun 3, 2017 at 9:45 PM, Sage Weil <sage@newdream.net> wrote:
->>> I'm seeing the builds all complete:
->>>
->>> https://shaman.ceph.com/repos/ceph/wip-sage-testing/468be5dab6a2d8421a4fc35744463d47a80f47c2/
->>>
->>> but it won't schedule:
->>>
->>> $ teuthology-suite -s rados -c wip-sage-testing2 --subset 111/444 -p 100
->>> -k distro
->>> 2017-06-03 20:44:27,112.112 INFO:teuthology.suite.run:kernel sha1: distro
->>> 2017-06-03 20:44:27,389.389 INFO:teuthology.suite.run:ceph sha1:
->>> b03f3062d40c35e4898d77604d62e7e7c4e88afd
->>> Traceback (most recent call last):
->>>   File "/home/sage/src/teuthology/virtualenv/bin/teuthology-suite", line 11, in <module>
->>>     load_entry_point('teuthology', 'console_scripts', 'teuthology-suite')()
->>>   File "/home/sage/src/teuthology/scripts/suite.py", line 137, in main
->>>     return teuthology.suite.main(args)
->>>   File "/home/sage/src/teuthology/teuthology/suite/__init__.py", line 86, in main
->>>     run = Run(conf)
->>>   File "/home/sage/src/teuthology/teuthology/suite/run.py", line 46, in __init__
->>>     self.base_config = self.create_initial_config()
->>>   File "/home/sage/src/teuthology/teuthology/suite/run.py", line 92, in create_initial_config
->>>     self.choose_ceph_version(ceph_hash)
->>>   File "/home/sage/src/teuthology/teuthology/suite/run.py", line 185, in choose_ceph_version
->>>     util.schedule_fail(str(exc), self.name)
->>>   File "/home/sage/src/teuthology/teuthology/suite/util.py", line 72, in schedule_fail
->>>     raise ScheduleFailError(message, name)
->>> teuthology.exceptions.ScheduleFailError: Scheduling sage-2017-06-03_20:44:27-rados-wip-sage-testing2-distro-basic-smithi
->>> failed: 'package_manager_version'
->>>
->>> :/
->>
->> Same here.
->
-> On Friday we had configuration that was recently pushed to Jenkins to
-> build nfs-ganesha and samba for every commit to Ceph release branches
-> *including master*
->
-> The effect of that change was not immediately apparent since it
-> "reacts" to behavior on the Ceph repo.
->
-> Locally `git log` just shows 19 new commits for June 2nd (that Friday)
-> but Github shows about 15 merges with a *ton* of commits for master
-> (+100 commits)
->
-> This is not usually a problem, but the combinatorial effect meant that
-> those ~100 commits where really more like +300 commits *that appeared
-> within minutes of each other*.
->
-> Trying to mitigate that problem, I manually tried to change a slave to
-> be able to consume more of these "bookkeeping" from the master Jenkins
-> instance. This had the problem of
-> doing up to 10 ceph builds at the same time (we don't allow this) and
-> having mixed information as to where builds go.
->
-> Builds follow this path: github -> jenkins trigger -> jenkins jobs for
-> different distros -> jenkins asks shaman what chacra server to push to
-> -> binaries are pushed to selected chacra server
->
-> Since I made this one server do several Ceph builds, the variables
-> that are used to find out "what chacra server should I push my
-> binaries to" got polluted. This is why John's build POSTed
-> to a chacra server that was wrong (hence the 404).
->
-> On Friday we disabled the nfs-ganesha, and samba builds, and we have a
-> tracker issue open to address the fact that we are (currently) unable
-> to digest several hundred commits at once:
->
->     http://tracker.ceph.com/issues/20095
->
-> Apologies for the trouble, this unfortunately means you will need to
-> rebuild your branches (if they failed to schedule)
->
->>
->> The tip of my branch is 50b0654e, I can see teuthology finding that
->> and going to query shaman at this URL:
->> https://shaman.ceph.com/api/search/?status=ready&project=ceph&flavor=default&distros=centos%2F7%2Fx86_64&sha1=50b0654ed19cb083af494878738c7debe80db31e
->>
->> The result has an empty dict for the 'extra' field, where teuthology
->> is expecting to see package_manager_version.
->>
->> That stuff is supposed to be populated by ceph-build/build/build-rpm
->> posting a repo-extra.json file to chacra.ceph.com
->>
->> I see my build log here:
->> https://jenkins.ceph.com/job/ceph-dev-new-build/ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=centos7,DIST=centos7,MACHINE_SIZE=huge/3848//consoleFull
->>
->> And I see the POST to chacra failing here:
->>
->> """
->> build@2/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/repo-extra.json
->> -u admin:[*******]
->> https://1.chacra.ceph.com/repos/ceph/wip-jcsp-testing-20170604/50b0654ed19cb083af494878738c7debe80db31e/centos/7/flavors/default/extra/
->>   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
->>                                  Dload  Upload   Total   Spent    Left  Speed
->>
->>   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
->> 100   505  100    52  100   453    145   1267 --:--:-- --:--:-- --:--:--  1268
->> 404 Not Found
->>
->> The resource could not be found.
->> """
->>
->> So the ceph-build script is succeeding where it should be failing
->> (does curl not return an error or is the script ignoring it?) and
->> something is wrong with chacra.ceph.com that's making it 404 here (I
->> don't know where to begin to debug that).
->>
->> John
->>
->> P.S. Probably a topic for another day, but I didn't love having to
->> traverse several different git repos to try and work out what was
->> happening during a build, wouldn't it be simpler to have a single repo
->> for the build infrastructure?
->>
->>>
->>> On Sat, 3 Jun 2017, Gregory Farnum wrote:
->>>
->>>> Adding sepia list for more infrastructure dev attention. (No idea where that
->>>> problem is coming from.)
->>>>
->>>> On Sat, Jun 3, 2017 at 5:52 AM Nathan Cutler <ncutler@suse.cz> wrote:
->>>>       CentOS builds in Shaman started failing with this error:
->>>>
->>>>       {standard input}: Assembler messages:
->>>>       {standard input}:186778: Warning: end of file not at end of a
->>>>       line;
->>>>       newline inserted
->>>>       {standard input}: Error: open CFI at the end of file; missing
->>>>       .cfi_endproc directive
->>>>       c++: internal compiler error: Killed (program cc1plus)
->>>>       Please submit a full bug report,
->>>>       with preprocessed source if appropriate.
->>>>       See <http://bugzilla.redhat.com/bugzilla> for instructions.
->>>>
->>>>       AFAICT the first occurrence was in [1] and the error has been
->>>>       haunting
->>>>       the build queue since then.
->>>>
->>>>       [1]
->>>> https://shaman.ceph.com/builds/ceph/wip-sage-testing2/f93ad23a8fec219667a03
->>>>       695136842edb0cceace/default/45729/
->>>>
->>>>       Nathan
->>>>       --
->>>>       To unsubscribe from this list: send the line "unsubscribe
->>>>       ceph-devel" in
->>>>       the body of a message to majordomo@vger.kernel.org
->>>>       More majordomo info at
->>>>       http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>>>
->>>
->>> _______________________________________________
->>> Sepia mailing list
->>> Sepia@lists.ceph.com
->>> http://lists.ceph.com/listinfo.cgi/sepia-ceph.com
->>>
->> _______________________________________________
->> Sepia mailing list
->> Sepia@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/sepia-ceph.com
+ClVoLCBzb3JyeSwgSSBkb24ndCBxdWl0ZSBmb2xsb3cgeW91LiBBY2NvcmRpbmcgdG8gbXkgdW5k
+ZXJzdGFuZGluZyBvZiB0aGUgc291cmNlIGNvZGUgb2YgT1NEIGFuZCBvdXIgZXhwZXJpbWVudCBw
+cmV2aW91c2x5IG1lbnRpb25lZCBpbiAiaHR0cHM6Ly93d3cubWFpbC1hcmNoaXZlLmNvbS9jZXBo
+LXVzZXJzQGxpc3RzLmNlcGguY29tL21zZzM2MTc4Lmh0bWwiLCB0aGVyZSBleGlzdHMgdGhlIGZv
+bGxvd2luZyBzY2VuYXJpbyB3aGVyZSB0aGUgYWN0dWFsIGZpbmlzaGluZyBvcmRlciBvZiB0aGUg
+V1JJVEVzIHRoYXQgdGFyZ2V0cyB0aGUgc2FtZSBvYmplY3QgaXMgbm90IHRoZSBzYW1lIGFzIHRo
+ZSBvcmRlciB0aGV5IGFycml2ZWQgYXQgT1NELCB3aGljaCwgSSB0aGluaywgY291bGQgYmUgYSBo
+aW50IHRoYXQgdGhlIG9yZGVyIG9mIHdyaXRlcyBmcm9tIGEgc2luZ2xlIGNsaWVudCBjb25uZWN0
+aW9uIHRvIGEgc2luZ2xlIE9TRCBpcyBub3QgZ3VyYW50ZWVkOgoKICAgICAgU2F5IHRocmVlIHdy
+aXRlcyB0aGF0IHRhcmdldGluZyB0aGUgc2FtZSBvYmplY3QgQSBhcnJpdmVkIGF0IGFuIE9TRCBp
+biB0aGUgb3JkZXI6ICJXUklURSBBLm9mZiAxIiwgIldSSVRFIEEub2ZmIDIiLCAiV1JJVEUgQS5v
+ZmYgMyIuIFRoZSBmaXJzdCB3cml0ZSwgIldSSVRFIEEub2ZmIDEiLCBhY3F1aXJlcyB0aGUgb2Jq
+ZWN0Y29udGV4dCBsb2NrIG9mIG9iamVjdCBBLCBhbmQgaXMgcHV0IGludG8gYSB0cmFuc2FjdGlv
+biBxdWV1ZSB0byBnbyB0aHJvdWdoIHRoZSAiam91cm5hbGluZyArIGZpbGUgc3lzdGVtIHdyaXRl
+IiBwcm9jZWR1cmUuIEJlZm9yZSBpdCdzIGZpbmlzaGVkLCBhIHRocmVhZCBvZiBPU0Q6Om9zZF9v
+cF90cCByZXRyaWV2ZWQgdGhlIHNlY29uZCB3cml0ZSBhbmQgYXR0ZW1wdCB0byBwcm9jZXNzIGl0
+IGR1cmluZyB3aGljaCBpdCBmaW5kcyB0aGF0IHRoZSBvYmplY3Rjb250ZXh0IGxvY2sgb2YgQSBp
+cyBoZWxkIGJ5IGEgcHJldmlvdXMgV1JJVEUgYW5kIHB1dCB0aGUgc2Vjb25kIHdyaXRlIGludG8g
+QSdzIHJ3c3RhdGU6OndhaXRlcnMgcXVldWUuIEl0J3Mgb25seSB3aGVuIHRoZSBmaXJzdCB3cml0
+ZSBpcyBmaW5pc2hlZCBvbiBhbGwgcmVwbGljYSBPU0RzIHRoYXQgdGhlIHNlY29uZCB3cml0ZSBp
+cyBwdXQgYmFjayBpbnRvIE9TRDo6c2hhcmRlZG9wX3dxIHRvIGJlIHByb2Nlc3NlZCBhZ2FpbiBp
+biB0aGUgZnV0dXJlLiBJZiwgYWZ0ZXIgdGhlIHNlY29uZCB3cml0ZSBpcyBwdXQgaW50byByd3N0
+YXRlOjp3YWl0ZXJzIHF1ZXVlIGFuZCB0aGUgZmlyc3Qgd3JpdGUgaXMgZmluaXNoZWQgb24gYWxs
+IHJlcGxpY2EgT1NEcywgaW4gd2hpY2ggY2FzZSB0aGUgZmlyc3Qgd3JpdGUgcmVsZWFzZSB0aGUg
+QSdzIG9iamVjdGNvbnRleHQgbG9jaywgYnV0IGJlZm9yZSB0aGUgc2Vjb25kIHdyaXRlIGlzIHB1
+dCBiYWNrIGludG8gT1NEOjpzaGFyZGVkb3Bfd3EsIHRoZSB0aGlyZCB3cml0ZSBpcyByZXRyaWV2
+ZWQgYnkgT1NEJ3Mgd29ya2VyIHRocmVhZCwgaXQgd291bGQgZ2V0IHByb2Nlc3NlZCBhcyBubyBw
+cmV2aW91cyBvcGVyYXRpb24gaXMgaG9sZGluZyBBJ3Mgb2JqZWN0Y29udGV4dCBsb2NrLCBpbiB3
+aGljaCBjYXNlLCB0aGUgYWN0dWFsIGZpbmlzaGluZyBvcmRlciBvZiB0aGUgdGhyZWUgd3JpdGVz
+IGlzICJXUklURSBBLm9mZiAxIiwgIldSSVRFIEEub2ZmIDMiLCAiV1JJVEUgQS5vZmYgMiIsIHdo
+aWNoIGlzIGRpZmZlcmVudCBmcm9tIHRoZSBvcmRlciB0aGV5IGFycml2ZWQuCgpJbiBodHRwczov
+L3d3dy5tYWlsLWFyY2hpdmUuY29tL2NlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20vbXNnMzYxNzgu
+aHRtbCwgd2Ugc2hvd2VkIG91ciBleHBlcmltZW50IHJlc3VsdCB3aGljaCBpcyBleGFjdGx5IGFz
+IHRoZSBhYm92ZSBzY2VuYXJpbyBzaG93cy4KCkhvd2V2ZXIsIHRoZSBjZXBoJ3MgdmVyc2lvbiBv
+biB3aGljaCB3ZSBkaWQgdGhlIGV4cGVyaW1lbnQgYW5kIHRoZSBzb3VjZSBjb2RlIG9mIHdoaWNo
+IHdlIHJlYWQgd2FzIEhhbW1lciwgMC45NC41LiBJIGRvbid0IGtub3cgd2hldGhlciB0aGUgc2Nl
+bmFyaW8gYWJvdmUgbWF5IHN0aWxsIGV4aXN0cyBpbiBsYXRlciB2ZXJzaW9ucy4KCkFtIEkgcmln
+aHQgYWJvdXQgdGhpcz8gT3IgYW0gSSBtaXNzaW5nIGFueXRoaW5nPyBQbGVhc2UgaGVscCBtZSwg
+SSdtIHJlYWxseSBjb25mdXNlZCByaWdodCBub3cuIFRoYW5rIHlvdS4KCkF0IDIwMTctMDYtMDUg
+MjA6MDA6MDYsICJKYXNvbiBEaWxsYW1hbiIgPGpkaWxsYW1hQHJlZGhhdC5jb20+IHdyb3RlOgo+
+VGhlIG9yZGVyIG9mIHdyaXRlcyBmcm9tIGEgc2luZ2xlIGNsaWVudCBjb25uZWN0aW9uIHRvIGEg
+c2luZ2xlIE9TRCBpcwo+Z3VhcmFudGVlZC4gVGhlIHJiZC1taXJyb3Igam91cm5hbCByZXBsYXkg
+cHJvY2VzcyBoYW5kbGVzIG9uZSBldmVudCBhdAo+YSB0aW1lIGFuZCBkb2VzIG5vdCBzdGFydCBw
+cm9jZXNzaW5nIHRoZSBuZXh0IGV2ZW50IHVudGlsIHRoZSBJTyBoYXMKPmJlZW4gc3RhcnRlZCBp
+bi1mbGlnaHQgd2l0aCBsaWJyYWRvcy4gVGhlcmVmb3JlLCBldmVuIHRob3VnaCB0aGUKPnJlcGxh
+eSBwcm9jZXNzIGFsbG93cyA1MCAtIDEwMCBJTyByZXF1ZXN0cyB0byBiZSBpbi1mbGlnaHQsIHRo
+b3NlIElPcwo+YXJlIGFjdHVhbGx5IHdlbGwtb3JkZXJlZCBpbiB0ZXJtcyBvZiB1cGRhdGVzIHRv
+IGEgc2luZ2xlIG9iamVjdC4KPgo+T2YgY291cnNlLCBzdWNoIGFuIElPIHJlcXVlc3QgZnJvbSB0
+aGUgY2xpZW50IGFwcGxpY2F0aW9uIC8gVk0gd291bGQKPmJlIGluY29ycmVjdCBiZWhhdmlvciBp
+ZiB0aGV5IGRpZG4ndCB3YWl0IGZvciB0aGUgY29tcGxldGlvbiBjYWxsYmFjawo+YmVmb3JlIGlz
+c3VpbmcgdGhlIHNlY29uZCB1cGRhdGUuCj4KPk9uIE1vbiwgSnVuIDUsIDIwMTcgYXQgMTI6MDUg
+QU0sIHh4aGR4MTk4NTEyNiA8eHhoZHgxOTg1MTI2QDE2My5jb20+IHdyb3RlOgo+PiBIaSwgZXZl
+cnlvbmUuCj4+Cj4+Cj4+IFJlY2VudGx5LCBJJ3ZlIGJlZW4gcmVhZGluZyB0aGUgc291cmNlIGNv
+ZGUgb2YgcmJkLW1pcnJvci4gSSB3b25kZXIgaG93IHJiZC1taXJyb3IgcHJlc2VydmVzIHRoZSBv
+cmRlciBvZiBXUklURSBvcGVyYXRpb25zIHRoYXQgZmluaXNoZWQgb24gdGhlIHByaW1hcnkgY2x1
+c3Rlci4gQXMgZmFyIGFzIEkgY2FuIHVuZGVyc3RhbmQgdGhlIGNvZGUsIHJiZC1taXJyb3IgZmV0
+Y2hlcyBJL08gb3BlcmF0aW9ucyBmcm9tIHRoZSBqb3VybmFsIG9uIHRoZSBwcmltYXJ5IGNsdXN0
+ZXIsIGFuZCByZXBsYXkgdGhlbSBvbiB0aGUgc2xhdmUgY2x1c3RlciB3aXRob3V0IGNoZWNraW5n
+IHdoZXRoZXIgdGhlcmUncyBhbHJlYWR5IGFueSBJL08gb3BlcmF0aW9ucyB0YXJnZXRpbmcgdGhl
+IHNhbWUgb2JqZWN0IHRoYXQgaGFzIGJlZW4gaXNzdWVkIHRvIHRoZSBzbGF2ZSBjbHVzdGVyIGFu
+ZCBub3QgeWV0IGZpbmlzaGVkLiBTaW5jZSBjb25jdXJyZW50IG9wZXJhdGlvbnMgbWF5IGZpbmlz
+aCBpbiBhIGRpZmZlcmVudCBvcmRlciB0aGFuIHRoYXQgaW4gd2hpY2ggdGhleSBhcnJpdmVkIGF0
+IHRoZSBPU0QsIHRoZSBvcmRlciB0aGF0IHRoZSBXUklURSBvcGVyYXRpb25zIGZpbmlzaCBvbiB0
+aGUgc2xhdmUgY2x1c3RlciBtYXkgYmUgZGlmZmVyZW50IHRoYW4gdGhhdCBvbiB0aGUgcHJpbWF5
+IGNsdXN0ZXIuIEZvciBleGFtcGxlOiBvbiB0aGUgcHJpbWFyeSBjbHVzdGVyLCB0aGVyZSBhcmUg
+dHdvIFdSSVRFIG9wZXJhdGlvbiB0YXJnZXRpbmcgdGhlIHNhbWUgb2JqZWN0IEEgd2hpY2ggYXJl
+LCBpbiB0aGUgb3JkZXIgdGhleSBmaW5pc2ggb24gdGhlIHByaW1hcnkgY2x1c3RlciwgIldSSVRF
+IEEub2ZmIGRhdGExIiBhbmQgIldSSVRFIEEub2ZmIGRhdGEyIjsgd2hpbGUgd2hlbiB0aGV5IGFy
+ZSByZXBsYXllZCBvbiB0aGUgc2xhdmUgY2x1c3RlciwgdGhlIG9yZGVyIG1heSBiZSAiV1JJVEUg
+QS5vZmYgZGF0YTIiIGFuZCAiV1JJVEUgQS5vZmYgZGF0YTEiLCB3aGljaCBtZWFucyB0aGF0IHRo
+ZSByZXN1bHQgb2YgdGhlIHR3byBvcGVyYXRpb25zIG9uIHRoZSBwcmltYXJ5IGNsdXN0ZXIgaXMg
+QS5vZmY9ZGF0YTIgd2hpbGUsIG9uIHRoZSBzbGF2ZSBjbHVzdGVyLCB0aGUgcmVzdWx0IGlzIEEu
+b2ZmPWRhdGExLgo+Pgo+Pgo+PiBJcyB0aGlzIHBvc3NpYmxlPwo+Pgo+Pgo+Pgo+Cj4KPgo+LS0g
+Cj5KYXNvbgo=
