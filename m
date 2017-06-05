@@ -1,178 +1,185 @@
-From: Daniel Gryniewicz <dang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: RGW lifecycle not expiring objects
-Date: Mon, 5 Jun 2017 09:16:22 -0400
-Message-ID: <3c3ff290-8032-1e03-dd82-eefd2ac01d34@redhat.com>
-References: <CABGPr5nfykSv=ib6N_jMOarOF=O1XaPLxCXY6nNYR81wa62TBQ@mail.gmail.com>
-	<CABGPr5=5y3NBJ_jGB1w=2=DeHU1GF4f7Ji+kTAJ_4f+O37hTFg@mail.gmail.com>
-	<e19ebc5a-c8c1-eefb-acec-65fbc0284101@umn.edu>
-	<trinity-9ef02e67-6909-42f8-ab06-a750a2bfab3c-1496441134227@3capp-gmx-bs48>
-	<CADRKj5ShtTBA=_3e89jC-t31sArHZ=9Wfc5cA5VRHKFfd+gz0A@mail.gmail.com>
-	<trinity-b11b03b1-bc6b-466e-ba26-77e1154d575f-1496604855693@3capp-gmx-bs77>
-	<trinity-76fa44cc-8cd5-41f0-90e9-4a6d2e603ae6-1496617549501@3capp-gmx-bs31>
-	<trinity-9ac6e555-43be-4a82-b5b5-e120d3af1e8b-1496617969363@3capp-gmx-bs31>
-	<trinity-fe7badd9-ecbc-4d65-8fa0-231496938a25-1496618162797@3capp-gmx-bs31>
-Reply-To: dang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: [sepia] CentOS builds failing in Shaman since Friday evening
+Date: Mon, 5 Jun 2017 09:16:39 -0400
+Message-ID: <CAC-Np1w0XQOdRcrqUYstYwZ+b4v_5eGr1jDpBcNicX896C6Z5Q@mail.gmail.com>
+References: <4a0aa923-028a-a9bf-d988-ead0f51fe831@suse.cz> <CAJ4mKGYGn4vL3k5TKs3v=Ho8L7DuU97eDWLD_HBqCKf+J+pfZg@mail.gmail.com>
+ <alpine.DEB.2.11.1706032044430.3646@piezo.novalocal> <CALe9h7dXF2LhGvrv-6Y6aKYTJmFTqa1H54Za_S1pUuP=ihmmOA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <trinity-fe7badd9-ecbc-4d65-8fa0-231496938a25-1496618162797@3capp-gmx-bs31>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: ceph.novice-k4R3PER4nllwCEqMux5wBA@public.gmane.org, Yehuda Sadeh-Weinraub <yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wr0-f175.google.com ([209.85.128.175]:34084 "EHLO
+        mail-wr0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751386AbdFENQl (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jun 2017 09:16:41 -0400
+Received: by mail-wr0-f175.google.com with SMTP id g76so38145151wrd.1
+        for <ceph-devel@vger.kernel.org>; Mon, 05 Jun 2017 06:16:40 -0700 (PDT)
+In-Reply-To: <CALe9h7dXF2LhGvrv-6Y6aKYTJmFTqa1H54Za_S1pUuP=ihmmOA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, "sepia@ceph.com" <sepia@ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>
 
-Kraken has lifecycle, Jewel does not.
+On Sun, Jun 4, 2017 at 5:26 AM, John Spray <jspray@redhat.com> wrote:
+> On Sat, Jun 3, 2017 at 9:45 PM, Sage Weil <sage@newdream.net> wrote:
+>> I'm seeing the builds all complete:
+>>
+>> https://shaman.ceph.com/repos/ceph/wip-sage-testing/468be5dab6a2d8421a4fc35744463d47a80f47c2/
+>>
+>> but it won't schedule:
+>>
+>> $ teuthology-suite -s rados -c wip-sage-testing2 --subset 111/444 -p 100
+>> -k distro
+>> 2017-06-03 20:44:27,112.112 INFO:teuthology.suite.run:kernel sha1: distro
+>> 2017-06-03 20:44:27,389.389 INFO:teuthology.suite.run:ceph sha1:
+>> b03f3062d40c35e4898d77604d62e7e7c4e88afd
+>> Traceback (most recent call last):
+>>   File "/home/sage/src/teuthology/virtualenv/bin/teuthology-suite", line 11, in <module>
+>>     load_entry_point('teuthology', 'console_scripts', 'teuthology-suite')()
+>>   File "/home/sage/src/teuthology/scripts/suite.py", line 137, in main
+>>     return teuthology.suite.main(args)
+>>   File "/home/sage/src/teuthology/teuthology/suite/__init__.py", line 86, in main
+>>     run = Run(conf)
+>>   File "/home/sage/src/teuthology/teuthology/suite/run.py", line 46, in __init__
+>>     self.base_config = self.create_initial_config()
+>>   File "/home/sage/src/teuthology/teuthology/suite/run.py", line 92, in create_initial_config
+>>     self.choose_ceph_version(ceph_hash)
+>>   File "/home/sage/src/teuthology/teuthology/suite/run.py", line 185, in choose_ceph_version
+>>     util.schedule_fail(str(exc), self.name)
+>>   File "/home/sage/src/teuthology/teuthology/suite/util.py", line 72, in schedule_fail
+>>     raise ScheduleFailError(message, name)
+>> teuthology.exceptions.ScheduleFailError: Scheduling sage-2017-06-03_20:44:27-rados-wip-sage-testing2-distro-basic-smithi
+>> failed: 'package_manager_version'
+>>
+>> :/
+>
+> Same here.
 
-Daniel
+On Friday we had configuration that was recently pushed to Jenkins to
+build nfs-ganesha and samba for every commit to Ceph release branches
+*including master*
 
-On 06/04/2017 07:16 PM, ceph.novice-k4R3PER4nllwCEqMux5wBA@public.gmane.org wrote:
+The effect of that change was not immediately apparent since it
+"reacts" to behavior on the Ceph repo.
+
+Locally `git log` just shows 19 new commits for June 2nd (that Friday)
+but Github shows about 15 merges with a *ton* of commits for master
+(+100 commits)
+
+This is not usually a problem, but the combinatorial effect meant that
+those ~100 commits where really more like +300 commits *that appeared
+within minutes of each other*.
+
+Trying to mitigate that problem, I manually tried to change a slave to
+be able to consume more of these "bookkeeping" from the master Jenkins
+instance. This had the problem of
+doing up to 10 ceph builds at the same time (we don't allow this) and
+having mixed information as to where builds go.
+
+Builds follow this path: github -> jenkins trigger -> jenkins jobs for
+different distros -> jenkins asks shaman what chacra server to push to
+-> binaries are pushed to selected chacra server
+
+Since I made this one server do several Ceph builds, the variables
+that are used to find out "what chacra server should I push my
+binaries to" got polluted. This is why John's build POSTed
+to a chacra server that was wrong (hence the 404).
+
+On Friday we disabled the nfs-ganesha, and samba builds, and we have a
+tracker issue open to address the fact that we are (currently) unable
+to digest several hundred commits at once:
+
+    http://tracker.ceph.com/issues/20095
+
+Apologies for the trouble, this unfortunately means you will need to
+rebuild your branches (if they failed to schedule)
+
 >
-> grrr... sorry && and again as text :|
+> The tip of my branch is 50b0654e, I can see teuthology finding that
+> and going to query shaman at this URL:
+> https://shaman.ceph.com/api/search/?status=ready&project=ceph&flavor=default&distros=centos%2F7%2Fx86_64&sha1=50b0654ed19cb083af494878738c7debe80db31e
 >
+> The result has an empty dict for the 'extra' field, where teuthology
+> is expecting to see package_manager_version.
 >
-> Gesendet: Montag, 05. Juni 2017 um 01:12 Uhr
-> Von: ceph.novice-k4R3PER4nllwCEqMux5wBA@public.gmane.org
-> An: "Yehuda Sadeh-Weinraub" <yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> Betreff: Re: [ceph-users] RGW lifecycle not expiring objects
+> That stuff is supposed to be populated by ceph-build/build/build-rpm
+> posting a repo-extra.json file to chacra.ceph.com
 >
+> I see my build log here:
+> https://jenkins.ceph.com/job/ceph-dev-new-build/ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=centos7,DIST=centos7,MACHINE_SIZE=huge/3848//consoleFull
 >
+> And I see the POST to chacra failing here:
 >
-> Hi (again) Yehuda.
+> """
+> build@2/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/repo-extra.json
+> -u admin:[*******]
+> https://1.chacra.ceph.com/repos/ceph/wip-jcsp-testing-20170604/50b0654ed19cb083af494878738c7debe80db31e/centos/7/flavors/default/extra/
+>   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+>                                  Dload  Upload   Total   Spent    Left  Speed
 >
-> Looping in ceph-devel...
+>   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+> 100   505  100    52  100   453    145   1267 --:--:-- --:--:-- --:--:--  1268
+> 404 Not Found
 >
-> Could it be that lifecycle is still not implemented neither in Jewel nor in Kraken, even if release notes and other places say so?
+> The resource could not be found.
+> """
 >
-> https://www.spinics.net/lists/ceph-devel/msg34492.html
-> https://github.com/ceph/ceph-ci/commit/7d48f62f5c86913d8f00b44d46a04a52d338907c
-> https://github.com/ceph/ceph-ci/commit/9162bd29594d34429a09562ed60a32a0703940ea
+> So the ceph-build script is succeeding where it should be failing
+> (does curl not return an error or is the script ignoring it?) and
+> something is wrong with chacra.ceph.com that's making it 404 here (I
+> don't know where to begin to debug that).
 >
-> Thanks & regards
->  Anton
+> John
 >
+> P.S. Probably a topic for another day, but I didn't love having to
+> traverse several different git repos to try and work out what was
+> happening during a build, wouldn't it be simpler to have a single repo
+> for the build infrastructure?
 >
-> Gesendet: Sonntag, 04. Juni 2017 um 21:34 Uhr
-> Von: ceph.novice-k4R3PER4nllwCEqMux5wBA@public.gmane.org
-> An: "Yehuda Sadeh-Weinraub" <yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-> Betreff: Re: [ceph-users] RGW lifecycle not expiring objects
-> Hi Yahuda.
->
-> Well, here we go: http://tracker.ceph.com/issues/20177[http://tracker.ceph.com/issues/20177]
->
-> As it's my first one, hope it's ok as it is...
->
-> Thanks & regards
-> Anton
->
->
-> Gesendet: Samstag, 03. Juni 2017 um 00:14 Uhr
-> Von: "Yehuda Sadeh-Weinraub" <yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> An: ceph.novice-k4R3PER4nllwCEqMux5wBA@public.gmane.org
-> Cc: "Graham Allan" <gta-OJFnDUYgAso@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-> Betreff: Re: [ceph-users] RGW lifecycle not expiring objects
-> Have you opened a ceph tracker issue, so that we don't lose track of
-> the problem?
->
-> Thanks,
-> Yehuda
->
-> On Fri, Jun 2, 2017 at 3:05 PM, <ceph.novice-k4R3PER4nllwCEqMux5wBA@public.gmane.org> wrote:
->> Hi Graham.
 >>
->> We are on Kraken and have the same problem with "lifecycle". Various (other) tools like s3cmd or CyberDuck do show the applied "expiration" settings, but objects seem never to be purged.
+>> On Sat, 3 Jun 2017, Gregory Farnum wrote:
 >>
->> If you should have new findings, hints,... PLEASE share/let me know.
+>>> Adding sepia list for more infrastructure dev attention. (No idea where that
+>>> problem is coming from.)
+>>>
+>>> On Sat, Jun 3, 2017 at 5:52 AM Nathan Cutler <ncutler@suse.cz> wrote:
+>>>       CentOS builds in Shaman started failing with this error:
+>>>
+>>>       {standard input}: Assembler messages:
+>>>       {standard input}:186778: Warning: end of file not at end of a
+>>>       line;
+>>>       newline inserted
+>>>       {standard input}: Error: open CFI at the end of file; missing
+>>>       .cfi_endproc directive
+>>>       c++: internal compiler error: Killed (program cc1plus)
+>>>       Please submit a full bug report,
+>>>       with preprocessed source if appropriate.
+>>>       See <http://bugzilla.redhat.com/bugzilla> for instructions.
+>>>
+>>>       AFAICT the first occurrence was in [1] and the error has been
+>>>       haunting
+>>>       the build queue since then.
+>>>
+>>>       [1]
+>>> https://shaman.ceph.com/builds/ceph/wip-sage-testing2/f93ad23a8fec219667a03
+>>>       695136842edb0cceace/default/45729/
+>>>
+>>>       Nathan
+>>>       --
+>>>       To unsubscribe from this list: send the line "unsubscribe
+>>>       ceph-devel" in
+>>>       the body of a message to majordomo@vger.kernel.org
+>>>       More majordomo info at
+>>>       http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>>
 >>
->> Thanks a lot!
->> Anton
->>
->>
->> Gesendet: Freitag, 19. Mai 2017 um 22:44 Uhr
->> Von: "Graham Allan" <gta-OJFnDUYgAso@public.gmane.org>
->> An: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> Betreff: [ceph-users] RGW lifecycle not expiring objects
->> I've been having a hard time getting the s3 object lifecycle to do
->> anything here. I was able to set a lifecycle on a test bucket. As others
->> also seem to have found, I do get an EACCES error on setting the
->> lifecycle, but it does however get stored:
->>
->>> % aws --endpoint-url https://xxx.xxx.xxx.xxx[https://xxx.xxx.xxx.xxx][https://xxx.xxx.xxx.xxx[https://xxx.xxx.xxx.xxx]] s3api get-bucket-lifecycle-configuration --bucket=testgta
->>> {
->>> "Rules": [
->>> {
->>> "Status": "Enabled",
->>> "Prefix": "",
->>> "Expiration": {
->>> "Days": 3
->>> },
->>> "ID": "test"
->>> }
->>> ]
->>> }
->>
->> but many days later I have yet to see any object actually get expired.
->> There are some hints in the rgw log that the expiry thread does run
->> periodically:
->>
->>> 2017-05-19 03:49:03.281347 7f74f1134700 2 RGWDataChangesLog::ChangesRenewThread: start
->>> 2017-05-19 03:49:16.356022 7f74ef931700 2 object expiration: start
->>> 2017-05-19 03:49:16.356036 7f74ef931700 20 proceeding shard = obj_delete_at_hint.0000000000
->>> 2017-05-19 03:49:16.359785 7f74ef931700 20 proceeding shard = obj_delete_at_hint.0000000001
->>> 2017-05-19 03:49:16.364667 7f74ef931700 20 proceeding shard = obj_delete_at_hint.0000000002
->>> 2017-05-19 03:49:16.369636 7f74ef931700 20 proceeding shard = obj_delete_at_hint.0000000003
->> ...
->>> 2017-05-19 03:49:16.803270 7f74ef931700 20 proceeding shard = obj_delete_at_hint.0000000126
->>> 2017-05-19 03:49:16.806423 7f74ef931700 2 object expiration: stop
->>
->> "radosgw-admin lc process" gives me no output unless I enable debug, then:
->>
->>> ]# radosgw-admin lc process
->>> 2017-05-19 15:28:46.383049 7fedb9ffb700 2 RGWDataChangesLog::ChangesRenewThread: start
->>> 2017-05-19 15:28:46.421806 7feddc240c80 10 Cannot find current period zone using local zone
->>> 2017-05-19 15:28:46.453431 7feddc240c80 2 all 8 watchers are set, enabling cache
->>> 2017-05-19 15:28:46.614991 7feddc240c80 2 removed watcher, disabling cache
->>
->> "radosgw-admin lc list" seems to return "empty" output:
->>
->>> # radosgw-admin lc list
->>> []
->>
->> Is there anything obvious that I might be missing?
->>
->> Graham
->> --
->> Graham Allan
->> Minnesota Supercomputing Institute - gta-OJFnDUYgAso@public.gmane.org
 >> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com][http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com]][http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com][http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com]]][http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com][http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com]][http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com][http://lists.cep
- h.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com]]]]
+>> Sepia mailing list
+>> Sepia@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/sepia-ceph.com
 >>
->>
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com][http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com]][http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com][http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com]]]
 > _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com][http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com]]
->
->  _______________________________________________ ceph-users mailing list ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com[http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com]
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
+> Sepia mailing list
+> Sepia@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/sepia-ceph.com
