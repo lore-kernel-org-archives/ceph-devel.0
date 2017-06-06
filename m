@@ -1,61 +1,161 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: [ceph-users] Write back mode Cach-tier behavior
-Date: Mon, 5 Jun 2017 18:22:42 -0700
-Message-ID: <CAJ4mKGZR_VQi+8Poyq-zGXVev2Nh3EjC88tQ_5D1qmcmgkbPyg@mail.gmail.com>
-References: <8841B22B-1A20-4D79-9EAB-32D0BBFB2DD9@gmail.com>
+From: xxhdx1985126 <xxhdx1985126@163.com>
+Subject: Re:Re:Re:Re:Re: How does rbd-mirror preserve the order of WRITE
+ operations that finished on the primary cluster
+Date: Tue, 6 Jun 2017 11:04:08 +0800 (CST)
+Message-ID: <448ceff0.46ce.15c7b5c0b16.Coremail.xxhdx1985126@163.com>
+References: <70c5c552.66e6.15c766dce68.Coremail.xxhdx1985126@163.com>
+ <CA+aFP1B=M97rVtGcY=v79zg_2rS=+NNcO5FTT32yLCZtky7N7g@mail.gmail.com>
+ <75e21ee8.f334.15c78f23929.Coremail.xxhdx1985126@163.com>
+ <alpine.DEB.2.11.1706051616540.3646@piezo.novalocal>
+ <428d3e79.3d2.15c7a56a64f.Coremail.xxhdx1985126@163.com>
+ <alpine.DEB.2.11.1706052222060.3646@piezo.novalocal>
+ <cdf481f.45b.15c7a741e28.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f50.google.com ([209.85.214.50]:36845 "EHLO
-        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751192AbdFFBWo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 5 Jun 2017 21:22:44 -0400
-Received: by mail-it0-f50.google.com with SMTP id m47so79818050iti.1
-        for <ceph-devel@vger.kernel.org>; Mon, 05 Jun 2017 18:22:44 -0700 (PDT)
-In-Reply-To: <8841B22B-1A20-4D79-9EAB-32D0BBFB2DD9@gmail.com>
+Received: from m13-98.163.com ([220.181.13.98]:58788 "EHLO m13-98.163.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751215AbdFFDEW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 5 Jun 2017 23:04:22 -0400
+In-Reply-To: <cdf481f.45b.15c7a741e28.Coremail.xxhdx1985126@163.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: TYLin <wooertim@gmail.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: jdillama@redhat.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-[ Moving to ceph-devel ]
-
-On Sun, Jun 4, 2017 at 9:25 PM, TYLin <wooertim@gmail.com> wrote:
-> Hi all,
->
-> We’re using cache-tier with write-back mode but the write throughput is not
-> as good as we expect. We use CephFS and create a 20GB file in it. While data
-> is writing, we use iostat to get the disk statistics. From iostat, we saw
-> that ssd (cache-tier) is idle most of the time and hdd (storage-tier) is
-> busy all the time. From the document
->
-> “When admins configure tiers with writeback mode, Ceph clients write data to
-> the cache tier and receive an ACK from the cache tier. In time, the data
-> written to the cache tier migrates to the storage tier and gets flushed from
-> the cache tier.”
->
-> So the data is write to cache-tier and then flush to storage tier when dirty
-> ratio is more than 0.4? The word “in time” in the document confused me.
->
-> We found that the throughput of creating a new file is slower than overwrite
-> an existing file, and ssd has more write when doing overwrite. We then look
-> into the source code and log. A newly created file goes to proxy_write,
-> which is followed by a promote_object. Does this means that the object
-> actually goes to storage pool directly and then be promoted to the
-> cache-tier when creating a new file?
-
-So I skimmed this thread and thought it was very wrong, since we don't
-need to proxy when we're doing fresh writes. But looking at current
-master, that does indeed appear to be the case when creating new
-objects: they always get proxied (I didn't follow the whole chain, but
-PrimaryLogPG::maybe_handle_cache_detail unconditionally calls
-do_proxy_write() if the OSD cluster supports proxying and we aren't
-must_promote!).
-
-Was this intentional? I know we've flipped around a bit on ideal
-tiering behavior but it seems like at the very least it should be
-configurable — proxying then promoting is a very inefficient pattern
-for workloads that involve generating lots of data, modifying it, and
-then never reading it again.
--Greg
+Ckkgc3VibWl0dGVkIGFuIGlzc3VlIGFib3V0IHRocmVlIG1vbnRocyBhZ286wqBodHRwOi8vdHJh
+Y2tlci5jZXBoLmNvbS9pc3N1ZXMvMTkyNTIsIGluIHdoaWNoIEkgc3VibWl0dGVkIHBhcnQgb2Yg
+bXkgbG9nLgoKCkF0IDIwMTctMDYtMDYgMDY6NTA6NDksICJ4eGhkeDE5ODUxMjYiIDx4eGhkeDE5
+ODUxMjZAMTYzLmNvbT4gd3JvdGU6Cj4KPlRoYW5rcyBmb3IgeW91ciByZXBseTotKQo+Cj5UaGUg
+cmVxdWV1ZWluZyBpcyBwcm90ZWN0ZWQgYnkgUEc6OmxvY2ssIGhvd2V2ZXIsIHdoZW4gdGhlIHdy
+aXRlIHJlcXVlc3QgaXMgYWRkIHRvIHRoZSB0cmFuc2FjdGlvbiBxdWV1ZSwgaXQncyBsZWZ0IGZv
+ciB0aGUgam91cm5hbGluZyB0aHJlYWQgYW5kIGZpbGVzdG9yZSB0aHJlYWQsIHRvIGRvIHRoZSBh
+Y3R1YWwgd3JpdGUsIHRoZSBPU0QncyB3b3JrZXIgdGhyZWFkIGp1c3QgcmVsZWFzZSB0aGUgUEc6
+OmxvY2sgYW5kIHRyeSB0byByZXRyaWV2ZSB0aGUgbmV4dCByZXEgaW4gT1NEJ3Mgd29yayBxdWV1
+ZSwgd2hpY2ggZ2l2ZXMgdGhlIG9wcG9ydHVuaXR5IGZvciBsYXRlciByZXFzIHRvIGdvIGJlZm9y
+ZSBwcmV2aW91cyByZXFzLiBUaGlzIGRpZCBoYXBwZW5lZCBpbiBvdXIgZXhwZXJpbWVudC4KPgo+
+SG93ZXZlciwgc2luY2UgdGhpcyBleHBlcmltZW50IHdhcyBkb25lIHNlcnZlcmFsIG1vbnRoIGFn
+bywgSSdsbCB1cGxvYWQgdGhlIGxvZyBpZiBJIGNhbiBmaW5kIGl0LCBvciBJJ2xsIHRyeSB0byBy
+ZXByb2R1Y2UgaXQuCj4KPkF0IDIwMTctMDYtMDYgMDY6MjI6MzYsICJTYWdlIFdlaWwiIDxzd2Vp
+bEByZWRoYXQuY29tPiB3cm90ZToKPj5PbiBUdWUsIDYgSnVuIDIwMTcsIHh4aGR4MTk4NTEyNiB3
+cm90ZToKPj4+IFRoYW5rcyBmb3IgeW91ciByZXBseTotKQo+Pj4gCj4+PiBUaGUgcmVxdWV1ZWlu
+ZyBpcyBwcm90ZWN0ZWQgYnkgUEc6OmxvY2ssIGhvd2V2ZXIsIHdoZW4gdGhlIHdyaXRlIHJlcXVl
+c3QgaXMKPj4+IGFkZCB0byB0aGUgdHJhbnNhY3Rpb24gcXVldWUsIGl0J3MgbGVmdCBmb3IgdGhl
+IGpvdXJuYWxpbmcgdGhyZWFkIGFuZAo+Pj4gZmlsZXN0b3JlIHRocmVhZCwgdG8gZG8gdGhlIGFj
+dHVhbCB3cml0ZSwgdGhlIE9TRCdzIHdvcmtlciB0aHJlYWQganVzdAo+Pj4gcmVsZWFzZSB0aGUg
+UEc6OmxvY2sgYW5kIHRyeSB0byByZXRyaWV2ZSB0aGUgbmV4dCByZXEgaW4gT1NEJ3Mgd29yayBx
+dWV1ZSwKPj4+IHdoaWNoIGdpdmVzIHRoZSBvcHBvcnR1bml0eSBmb3IgbGF0ZXIgcmVxcyB0byBn
+byBiZWZvcmUgcHJldmlvdXMgcmVxcy4gVGhpcwo+Pj4gZGlkIGhhcHBlbmVkIGluIG91ciBleHBl
+cmltZW50Lgo+Pgo+PkZpbGVTdG9yZSBzaG91bGQgYWxzbyBzdHJpY3RseSBvcmRlciB0aGUgcmVx
+dWVzdHMgdmlhIHRoZSBPcFNlcXVlbmNlci4KPj4KPj4+IEhvd2V2ZXIsIHNpbmNlIHRoaXMgZXhw
+ZXJpbWVudCB3YXMgZG9uZSBzZXJ2ZXJhbCBtb250aCBhZ28sIEknbGwgdXBsb2FkIHRoZQo+Pj4g
+bG9nIGlmIEkgY2FuIGZpbmQgaXQsIG9yIEknbGwgdHJ5IHRvIHJlcHJvZHVjZSBpdC4KPj4KPj5P
+a2F5LCB0aGFua3MhCj4+Cj4+c2FnZQo+Pgo+Pgo+Pj4gCj4+PiBBdCAyMDE3LTA2LTA2IDAwOjIx
+OjM0LCAiU2FnZSBXZWlsIiA8c3dlaWxAcmVkaGF0LmNvbT4gd3JvdGU6Cj4+PiA+T24gTW9uLCA1
+IEp1biAyMDE3LCB4eGhkeDE5ODUxMjYgd3JvdGU6Cj4+PiA+PiAKPj4+ID4+IFVoLCBzb3JyeSwg
+SSBkb24ndCBxdWl0ZSBmb2xsb3cgeW91LiBBY2NvcmRpbmcgdG8gbXkgdW5kZXJzdGFuZGluZyBv
+ZiAKPj4+ID4+IHRoZSBzb3VyY2UgY29kZSBvZiBPU0QgYW5kIG91ciBleHBlcmltZW50IHByZXZp
+b3VzbHkgbWVudGlvbmVkIGluIAo+Pj4gPj4gImh0dHBzOi8vd3d3Lm1haWwtYXJjaGl2ZS5jb20v
+Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbS9tc2czNjE3OC5odG1sIiwgCj4+PiA+PiB0aGVyZSBl
+eGlzdHMgdGhlIGZvbGxvd2luZyBzY2VuYXJpbyB3aGVyZSB0aGUgYWN0dWFsIGZpbmlzaGluZyBv
+cmRlciBvZiAKPj4+ID4+IHRoZSBXUklURXMgdGhhdCB0YXJnZXRzIHRoZSBzYW1lIG9iamVjdCBp
+cyBub3QgdGhlIHNhbWUgYXMgdGhlIG9yZGVyIAo+Pj4gPj4gdGhleSBhcnJpdmVkIGF0IE9TRCwg
+d2hpY2gsIEkgdGhpbmssIGNvdWxkIGJlIGEgaGludCB0aGF0IHRoZSBvcmRlciBvZiAKPj4+ID4+
+IHdyaXRlcyBmcm9tIGEgc2luZ2xlIGNsaWVudCBjb25uZWN0aW9uIHRvIGEgc2luZ2xlIE9TRCBp
+cyBub3QgZ3VyYW50ZWVkOgo+Pj4gPgo+Pj4gPklmIHNvLCBpdCBpcyBhIGJ1ZyB0aGF0IHNob3Vs
+ZCBiZSBmaXhlZCBpbiB0aGUgT1NELiAgcmJkLW1pcnJvciByZWx5aW5nIG9uIAo+Pj4gPk9TRCBv
+cmRlcmluZyB0byBiZSBjb3JyZWN0IGlzIHRvdGFsbHkgZmluZS0tbG90cyBvZiBvdGhlciBzdHVm
+ZiBkb2VzIHRvby4KPj4+ID4KPj4+ID4+ICAgICAgIFNheSB0aHJlZSB3cml0ZXMgdGhhdCB0YXJn
+ZXRpbmcgdGhlIHNhbWUgb2JqZWN0IEEgYXJyaXZlZCBhdCBhbiAKPj4+ID4+IE9TRCBpbiB0aGUg
+b3JkZXI6ICJXUklURSBBLm9mZiAxIiwgIldSSVRFIEEub2ZmIDIiLCAiV1JJVEUgQS5vZmYgMyIu
+IFRoZSAKPj4+ID4+IGZpcnN0IHdyaXRlLCAiV1JJVEUgQS5vZmYgMSIsIGFjcXVpcmVzIHRoZSBv
+YmplY3Rjb250ZXh0IGxvY2sgb2Ygb2JqZWN0IAo+Pj4gPj4gQSwgYW5kIGlzIHB1dCBpbnRvIGEg
+dHJhbnNhY3Rpb24gcXVldWUgdG8gZ28gdGhyb3VnaCB0aGUgImpvdXJuYWxpbmcgKyAKPj4+ID4+
+IGZpbGUgc3lzdGVtIHdyaXRlIiBwcm9jZWR1cmUuIEJlZm9yZSBpdCdzIGZpbmlzaGVkLCBhIHRo
+cmVhZCBvZiAKPj4+ID4+IE9TRDo6b3NkX29wX3RwIHJldHJpZXZlZCB0aGUgc2Vjb25kIHdyaXRl
+IGFuZCBhdHRlbXB0IHRvIHByb2Nlc3MgaXQgCj4+PiA+PiBkdXJpbmcgd2hpY2ggaXQgZmluZHMg
+dGhhdCB0aGUgb2JqZWN0Y29udGV4dCBsb2NrIG9mIEEgaXMgaGVsZCBieSBhIAo+Pj4gPj4gcHJl
+dmlvdXMgV1JJVEUgYW5kIHB1dCB0aGUgc2Vjb25kIHdyaXRlIGludG8gQSdzIHJ3c3RhdGU6Ondh
+aXRlcnMgcXVldWUuIAo+Pj4gPj4gSXQncyBvbmx5IHdoZW4gdGhlIGZpcnN0IHdyaXRlIGlzIGZp
+bmlzaGVkIG9uIGFsbCByZXBsaWNhIE9TRHMgdGhhdCB0aGUgCj4+PiA+PiBzZWNvbmQgd3JpdGUg
+aXMgcHV0IGJhY2sgaW50byBPU0Q6OnNoYXJkZWRvcF93cSB0byBiZSBwcm9jZXNzZWQgYWdhaW4g
+aW4gCj4+PiA+PiB0aGUgZnV0dXJlLiBJZiwgYWZ0ZXIgdGhlIHNlY29uZCB3cml0ZSBpcyBwdXQg
+aW50byByd3N0YXRlOjp3YWl0ZXJzIAo+Pj4gPj4gcXVldWUgYW5kIHRoZSBmaXJzdCB3cml0ZSBp
+cyBmaW5pc2hlZCBvbiBhbGwgcmVwbGljYSBPU0RzLCBpbiB3aGljaCBjYXNlIAo+Pj4gPj4gdGhl
+IGZpcnN0IHdyaXRlIHJlbGVhc2UgdGhlIEEncyBvYmplY3Rjb250ZXh0IGxvY2ssIGJ1dCBiZWZv
+cmUgdGhlIAo+Pj4gPj4gc2Vjb25kIHdyaXRlIGlzIHB1dCBiYWNrIGludG8gT1NEOjpzaGFyZGVk
+b3Bfd3EsIHRoZSB0aGlyZCB3cml0ZSBpcyAKPj4+ID4+IHJldHJpZXZlZCBieSBPU0QncyB3b3Jr
+ZXIgdGhyZWFkLCBpdCB3b3VsZCBnZXQgcHJvY2Vzc2VkIGFzIG5vIHByZXZpb3VzIAo+Pj4gPj4g
+b3BlcmF0aW9uIGlzIGhvbGRpbmcgQSdzIG9iamVjdGNvbnRleHQgbG9jaywgaW4gd2hpY2ggY2Fz
+ZSwgdGhlIGFjdHVhbCAKPj4+ID4+IGZpbmlzaGluZyBvcmRlciBvZiB0aGUgdGhyZWUgd3JpdGVz
+IGlzICJXUklURSBBLm9mZiAxIiwgIldSSVRFIEEub2ZmIDMiLCAKPj4+ID4+ICJXUklURSBBLm9m
+ZiAyIiwgd2hpY2ggaXMgZGlmZmVyZW50IGZyb20gdGhlIG9yZGVyIHRoZXkgYXJyaXZlZC4KPj4+
+ID4KPj4+ID5UaGlzIHNob3VsZCBub3QgaGFwcGVuLiAgKElmIGl0IGhhcHBlbmVkIGluIHRoZSBw
+YXN0LCBpdCB3YXMgYSBidWcsIGJ1dCBJIAo+Pj4gPndvdWxkIGV4cGVjdCBpdCBpcyBmaXhlZCBp
+biB0aGUgbGF0ZXN0IGhhbW1lciBwb2ludCByZWxlYXNlLCBhbmQgaW4gamV3ZWwgCj4+PiA+YW5k
+IG1hc3Rlci4pICBUaGUgcmVxdWVpbmcgaXMgZG9uZSB1bmRlciB0aGUgUEc6OmxvY2sgc28gdGhh
+dCByZXF1ZXVlaW5nIAo+Pj4gPnByZXNlcnZlcyBvcmRlcmluZy4gIEEgZmFpciBiaXQgb2YgY29k
+ZSBhbmQgYSAqbG90KiBvZiB0ZXN0aW5nIGdvZXMgaW50byAKPj4+ID5lbnN1cmluZyB0aGF0IHRo
+aXMgaXMgdHJ1ZS4gIElmIHlvdSd2ZSBzZWVuIHRoaXMgcmVjZW50bHksIHRoZW4gYSAKPj4+ID5y
+ZXByb2R1Y2VyIG9yIGxvZyAoYW5kIHRyYWNrZXIgdGlja2V0KSB3b3VsZCBiZSB3ZWxjb21lISAg
+V2hlbiB3ZSBzZWUgYW55IAo+Pj4gPm9yZGVyaW5nIGVycm9ycyBpbiBRQSB3ZSB0YWtlIHRoZW0g
+dmVyeSBzZXJpb3VzbHkgYW5kIGZpeCB0aGVtIHF1aWNrbHkuCj4+PiA+Cj4+PiA+WW91IG1pZ2h0
+IGJlIGludGVyZXN0ZWQgaW4gdGhlIG9zZF9kZWJ1Z19vcF9vcmRlciBjb25maWcgb3B0aW9uLCB3
+aGljaCB3ZSAKPj4+ID5lbmFibGUgaW4gcWEsIHdoaWNoIGFzc2VydHMgaWYgaXQgc2VlcyBvcHMg
+ZnJvbSBhIGNsaWVudCBhcnJpdmUgb3V0IG9mIAo+Pj4gPm9yZGVyLiAgVGhlIGNlcGhfdGVzdF9y
+YWRvcyB3b3JrbG9hZCBnZW5lcmF0ZSB0aGF0IHdlIHVzZSBmb3IgbXVjaCBvZiB0aGUgCj4+PiA+
+cmFkb3MgcWEgc3VpdGUgYWxzbyBmYWlscyBpZiBpdCBzZWVzIG91dCBvZiBvcmRlciBvcGVyYXRp
+b25zLgo+Pj4gPgo+Pj4gPnNhZ2UKPj4+ID4KPj4+ID4+IAo+Pj4gPj4gSW4gaHR0cHM6Ly93d3cu
+bWFpbC1hcmNoaXZlLmNvbS9jZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tL21zZzM2MTc4Lmh0bWws
+IAo+Pj4gd2Ugc2hvd2VkIG91ciBleHBlcmltZW50IHJlc3VsdCB3aGljaCBpcyBleGFjdGx5IGFz
+IHRoZSBhYm92ZSBzY2VuYXJpbyBzaG93cwo+Pj4gLgo+Pj4gPj4gCj4+PiA+PiBIb3dldmVyLCB0
+aGUgY2VwaCdzIHZlcnNpb24gb24gd2hpY2ggd2UgZGlkIHRoZSBleHBlcmltZW50IGFuZCB0aGUg
+c291Y2UgCj4+PiBjb2RlIG9mIHdoaWNoIHdlIHJlYWQgd2FzIEhhbW1lciwgMC45NC41LiBJIGRv
+bid0IGtub3cgd2hldGhlciB0aGUgc2NlbmFyaW8gCj4+PiBhYm92ZSBtYXkgc3RpbGwgZXhpc3Rz
+IGluIGxhdGVyIHZlcnNpb25zLgo+Pj4gPj4gCj4+PiA+PiBBbSBJIHJpZ2h0IGFib3V0IHRoaXM/
+IE9yIGFtIEkgbWlzc2luZyBhbnl0aGluZz8gUGxlYXNlIGhlbHAgbWUsIEknbSByZWFsCj4+PiBs
+eSBjb25mdXNlZCByaWdodCBub3cuIFRoYW5rIHlvdS4KPj4+ID4+IAo+Pj4gPj4gQXQgMjAxNy0w
+Ni0wNSAyMDowMDowNiwgIkphc29uIERpbGxhbWFuIiA8amRpbGxhbWFAcmVkaGF0LmNvbT4gd3Jv
+dGU6Cj4+PiA+PiA+VGhlIG9yZGVyIG9mIHdyaXRlcyBmcm9tIGEgc2luZ2xlIGNsaWVudCBjb25u
+ZWN0aW9uIHRvIGEgc2luZ2xlIE9TRCBpcwo+Pj4gPj4gPmd1YXJhbnRlZWQuIFRoZSByYmQtbWly
+cm9yIGpvdXJuYWwgcmVwbGF5IHByb2Nlc3MgaGFuZGxlcyBvbmUgZXZlbnQgYXQKPj4+ID4+ID5h
+IHRpbWUgYW5kIGRvZXMgbm90IHN0YXJ0IHByb2Nlc3NpbmcgdGhlIG5leHQgZXZlbnQgdW50aWwg
+dGhlIElPIGhhcwo+Pj4gPj4gPmJlZW4gc3RhcnRlZCBpbi1mbGlnaHQgd2l0aCBsaWJyYWRvcy4g
+VGhlcmVmb3JlLCBldmVuIHRob3VnaCB0aGUKPj4+ID4+ID5yZXBsYXkgcHJvY2VzcyBhbGxvd3Mg
+NTAgLSAxMDAgSU8gcmVxdWVzdHMgdG8gYmUgaW4tZmxpZ2h0LCB0aG9zZSBJT3MKPj4+ID4+ID5h
+cmUgYWN0dWFsbHkgd2VsbC1vcmRlcmVkIGluIHRlcm1zIG9mIHVwZGF0ZXMgdG8gYSBzaW5nbGUg
+b2JqZWN0Lgo+Pj4gPj4gPgo+Pj4gPj4gPk9mIGNvdXJzZSwgc3VjaCBhbiBJTyByZXF1ZXN0IGZy
+b20gdGhlIGNsaWVudCBhcHBsaWNhdGlvbiAvIFZNIHdvdWxkCj4+PiA+PiA+YmUgaW5jb3JyZWN0
+IGJlaGF2aW9yIGlmIHRoZXkgZGlkbid0IHdhaXQgZm9yIHRoZSBjb21wbGV0aW9uIGNhbGxiYWNr
+Cj4+PiA+PiA+YmVmb3JlIGlzc3VpbmcgdGhlIHNlY29uZCB1cGRhdGUuCj4+PiA+PiA+Cj4+PiA+
+PiA+T24gTW9uLCBKdW4gNSwgMjAxNyBhdCAxMjowNSBBTSwgeHhoZHgxOTg1MTI2IDx4eGhkeDE5
+ODUxMjZAMTYzLmNvbT4gd3JvCj4+PiB0ZToKPj4+ID4+ID4+IEhpLCBldmVyeW9uZS4KPj4+ID4+
+ID4+Cj4+PiA+PiA+Pgo+Pj4gPj4gPj4gUmVjZW50bHksIEkndmUgYmVlbiByZWFkaW5nIHRoZSBz
+b3VyY2UgY29kZSBvZiByYmQtbWlycm9yLiBJIHdvbmRlciBobwo+Pj4gdyByYmQtbWlycm9yIHBy
+ZXNlcnZlcyB0aGUgb3JkZXIgb2YgV1JJVEUgb3BlcmF0aW9ucyB0aGF0IGZpbmlzaGVkIG9uIHRo
+ZSBwcgo+Pj4gaW1hcnkgY2x1c3Rlci4gQXMgZmFyIGFzIEkgY2FuIHVuZGVyc3RhbmQgdGhlIGNv
+ZGUsIHJiZC1taXJyb3IgZmV0Y2hlcyBJL08gbwo+Pj4gcGVyYXRpb25zIGZyb20gdGhlIGpvdXJu
+YWwgb24gdGhlIHByaW1hcnkgY2x1c3RlciwgYW5kIHJlcGxheSB0aGVtIG9uIHRoZSBzbAo+Pj4g
+YXZlIGNsdXN0ZXIgd2l0aG91dCBjaGVja2luZyB3aGV0aGVyIHRoZXJlJ3MgYWxyZWFkeSBhbnkg
+SS9PIG9wZXJhdGlvbnMgdGFyZwo+Pj4gZXRpbmcgdGhlIHNhbWUgb2JqZWN0IHRoYXQgaGFzIGJl
+ZW4gaXNzdWVkIHRvIHRoZSBzbGF2ZSBjbHVzdGVyIGFuZCBub3QgeWV0IAo+Pj4gZmluaXNoZWQu
+IFNpbmNlIGNvbmN1cnJlbnQgb3BlcmF0aW9ucyBtYXkgZmluaXNoIGluIGEgZGlmZmVyZW50IG9y
+ZGVyIHRoYW4gdAo+Pj4gaGF0IGluIHdoaWNoIHRoZXkgYXJyaXZlZCBhdCB0aGUgT1NELCB0aGUg
+b3JkZXIgdGhhdCB0aGUgV1JJVEUgb3BlcmF0aW9ucyBmaQo+Pj4gbmlzaCBvbiB0aGUgc2xhdmUg
+Y2x1c3RlciBtYXkgYmUgZGlmZmVyZW50IHRoYW4gdGhhdCBvbiB0aGUgcHJpbWF5IGNsdXN0ZXIu
+IAo+Pj4gRm9yIGV4YW1wbGU6IG9uIHRoZSBwcmltYXJ5IGNsdXN0ZXIsIHRoZXJlIGFyZSB0d28g
+V1JJVEUgb3BlcmF0aW9uIHRhcmdldGluZwo+Pj4gIHRoZSBzYW1lIG9iamVjdCBBIHdoaWNoIGFy
+ZSwgaW4gdGhlIG9yZGVyIHRoZXkgZmluaXNoIG9uIHRoZSBwcmltYXJ5IGNsdXN0ZQo+Pj4gciwg
+IldSSVRFIEEub2ZmIGRhdGExIiBhbmQgIldSSVRFIEEub2ZmIGRhdGEyIjsgd2hpbGUgd2hlbiB0
+aGV5IGFyZSByZXBsYXllZAo+Pj4gIG9uIHRoZSBzbGF2ZSBjbHVzdGVyLCB0aGUgb3JkZXIgbWF5
+IGJlICJXUklURSBBLm9mZiBkYXRhMiIgYW5kICJXUklURSBBLm9mZgo+Pj4gIGRhdGExIiwgd2gK
+Pj4+ID4gaWNoIG1lYW5zIHRoYXQgdGhlIHJlc3VsdCBvZiB0aGUgdHdvIG9wZXJhdGlvbnMgb24g
+dGhlIHByaW1hcnkgY2x1c3RlciBpcyAKPj4+IEEub2ZmPWRhdGEyIHdoaWxlLCBvbiB0aGUgc2xh
+dmUgY2x1c3RlciwgdGhlIHJlc3VsdCBpcyBBLm9mZj1kYXRhMS4KPj4+ID4+ID4+Cj4+PiA+PiA+
+Pgo+Pj4gPj4gPj4gSXMgdGhpcyBwb3NzaWJsZT8KPj4+ID4+ID4+Cj4+PiA+PiA+Pgo+Pj4gPj4g
+Pj4KPj4+ID4+ID4KPj4+ID4+ID4KPj4+ID4+ID4KPj4+ID4+ID4tLSAKPj4+ID4+ID5KYXNvbgo+
+Pj4gPj4gTuWrpeWPiemdo+esoXk/Pz/msIpi556CPz8/5Y2DduixnT8/P+iXk3subj8/P+Wjj+a4
+ruamj3rps5DlpqBheT8/P+iVoOi3iD8/P2o/Pz9m77yC56mQ5q6d6YSXCj4+PiA/Pz/nlZDjgqI/
+Pz/iko4/Pz86K3blor7lppvpkZrosbDnqJs/Pz/nj6PotZl6Wivlh5LmrqDlqLg/Pz8i5r+fIeen
+iAo+Pj4gCj4+PiAKPj4+IMKgCj4+PiAKPj4+IAo+Pj4gCgoKCsKg
