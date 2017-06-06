@@ -1,128 +1,39 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: understanding bucket_straw2_choose
-Date: Tue, 6 Jun 2017 17:20:24 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706061714170.3646@piezo.novalocal>
-References: <1422f34a-6a4d-45a8-85ad-32b6a7cc4a5f@dachary.org> <alpine.DEB.2.11.1706051807380.14237@piezo.novalocal> <5c6140f1-c0cc-d71e-8761-8e7fc1e68200@dachary.org> <alpine.DEB.2.11.1706061329120.3646@piezo.novalocal>
- <275673a2-cdf2-8386-1ffd-d61b82a5fef2@dachary.org>
+From: Dan Mick <dmick@redhat.com>
+Subject: Re: make check failures on arm64
+Date: Tue, 6 Jun 2017 11:17:06 -0700
+Message-ID: <0ce9b5e6-338d-bf34-600c-d75e0f235884@redhat.com>
+References: <f30c77d2-76f6-5028-dca7-848b624acb70@redhat.com>
+ <CAJE9aOM4Z_NPLeq85P+b-DhwNbtAz5MR_cMuts8SdoNpJOisOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51470 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:46230 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751619AbdFFRUb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 6 Jun 2017 13:20:31 -0400
-In-Reply-To: <275673a2-cdf2-8386-1ffd-d61b82a5fef2@dachary.org>
+        id S1751239AbdFFSRG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 6 Jun 2017 14:17:06 -0400
+In-Reply-To: <CAJE9aOM4Z_NPLeq85P+b-DhwNbtAz5MR_cMuts8SdoNpJOisOw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 6 Jun 2017, Loic Dachary wrote:
-> On 06/06/2017 03:42 PM, Sage Weil wrote:
-> > On Tue, 6 Jun 2017, Loic Dachary wrote:
-> >> On 06/05/2017 08:13 PM, Sage Weil wrote:
-> >>> On Mon, 5 Jun 2017, Loic Dachary wrote:
-> >>>> Hi Sage,
-> >>>>
-> >>>> The following lines of bucket_straw2_choose are part black magic to me and I would very much appreciate
-> >>>> pointers to better understand what they do.
-> >>>>
-> >>>> 			u = crush_hash32_3(bucket->h.hash, x, ids[i], r);
-> >>>> 			u &= 0xffff;
-> >>>>
-> >>>> 			/*
-> >>>> 			 * for some reason slightly less than 0x10000 produces
-> >>>> 			 * a slightly more accurate distribution... probably a
-> >>>> 			 * rounding effect.
-> >>>> 			 *
-> >>>> 			 * the natural log lookup table maps [0,0xffff]
-> >>>> 			 * (corresponding to real numbers [1/0x10000, 1] to
-> >>>> 			 * [0, 0xffffffffffff] (corresponding to real numbers
-> >>>> 			 * [-11.090355,0]).
-> >>>> 			 */
-> >>>> 			ln = crush_ln(u) - 0x1000000000000ll;
-> >>>>
-> >>>> I understand the general idea (I think) which is to hash the parameters 
-> >>>> and calculate the log of the hash so that it can be multiplied by the 
-> >>>> weight without overflowing. What I don't get is the details such as: why 
-> >>>> &= 0xffff ? I suppose that's because crush_ln is only capable of 
-> >>>> returning the log for this range of values.
-> >>>
-> >>> Yeah this is somewhat arbitrary, but probably because in general all of 
-> >>> these values are 16.16 fixed point and [0,0x10000] is [0,1.0].  It 
-> >>> probably also originally was picked because it set the size of the 
-> >>> original lookup table.  (crush_ln() is now a more complicated function 
-> >>> to approximate ln.)
-> >>>
-> >>>> If that's the case how come 
-> >>>> it does not hurt the hashing function (in the sense that it increases 
-> >>>> the likelyhood that values have very similar hash) because it discards 
-> >>>> the higher bits?
-> >>>
-> >>> Precision here isn't all that important; these values are just determining 
-> >>> relative weights between different choices, but even with a very imprecise 
-> >>> hash function it would all average out over a large number of inputs.
-> >>>
-> >>>> Also why is it necessary to subtract 0x1000000000000ll 
-> >>>> ? And why this number and not another one ?
-> >>>
-> >>> crush_ln gives you [0,0xffffffffffff]; the subtraction just makes it a 
-> >>> negative fixed-point value before doing the division (corresponding to 
-> >>> [-11,0]).  
-> >>
-> >> What kind of fixed-point value is this ? I understand Q16.16 represented
-> >> in a u32. But here we have s64 out of which 48 bits are used and this confuses me.
-> > 
-> > The real equation is
-> > 
-> >  straw length = ln(x) / weight
-> > 
-> > where x is some random value in (0,1].
-> > 
-> > You can think of x as a 16.16 fixed-point value stored in a 64-bit 
-> > integer, but it doesn't really matter... it's just that the crush_ln value 
-> > is expecting 16-bits of input to [1/0x10000,1].  That starting value 
-> > ln(.000015) happens to be about -11, and ln(1) is 0, so the output range 
-> > in real numbers is roughly [-11,0].  crush_ln(x) *actually* returns a 
-> > value from [0,0x1000000000000ll], so we put it in an s64 and subtract 
-> > 0x1000000000000ll so that it's a negative s.48 fixed-point value, we can 
-> > divide by a 16.16 fixed-point weight value, and get a result that has a 
-> > reasonable amount of precision left.
-> > 
-> > The ranges for these fixed-point values are semi-arbitrarily chosen, 
-> > partly to get reasonable precision, and partly because that's what made 
-> > sense to me at the time. For example the crush_ln() could have been 
-> > adjusted to return a value that was already a negative value; the reason 
-> > it looks like it does it because it was originally implemented as a simple 
-> > lookup table that mapped (0,1) as [0,0xffff] to [-11,0] as 
-> > [0,0xffffffffffff] and I did the adjustment back into "real" fixed-point 
-> > values in the caller.  I can't remember excatly why that made the 
-> > most sense at the time.  :)
-> 
-> It makes sense now !
-> 
-> >> I'm also confused by the fact that crush_ln(x) returns a positive number from which 0x1000000000000ll 
-> >> is subtracted to make it a negative number. log(x) where x is [0,1[ is a negative number already. 
-> >> Unless crush_ln does not really return the log but something related to it ?
-> >>
-> >> I think I'm lost in the real number representations :-)
-> >>
-> >>> Without shifting the values everything skews toward the low end 
-> >>> instead of the high end when you divide.
-> 
-> I'm not sure I understand why. 
-> 
-> If the hash is on 16 bits (&0xffff) multiplying it by the weight u32 which is in the range [0, 0xffff ffff]
-> will produce a result in the range [0, 0xffff ffff ffff]. The weights used in Ceph are all grouped around 0x10000 and unlikely to be in outside of the range [0x1000, 0x1000000]. But I don't see why it would cause a problem for the distribution.
-> 
-> I'm missing something important but I can't figure out what.
+That looks like it got them all.  Thanks.
 
-Just that if you take [0,1] and divide by 100 you end up in [0,0.01] 
-("skews toward low end") but if you take [-1,0] and divide by 100 you end 
-up in [-.01, 0] ("skews toward high end").  (My termninology isn't very 
-precise.)  In any case, if the ln(x) value isn't in the proper (negative) 
-range and you then divide, the relative straw lengths are all wrong and 
-the algorithm it doesn work (because, say, the ratio between straw lengths 
-for weight W and W/2 ends up being wrong).
-
-sage
+On 06/06/2017 06:43 AM, kefu chai wrote:
+> On Tue, Jun 6, 2017 at 12:33 PM, Dan Mick <dmick@redhat.com> wrote:
+>> Haven't looked into these yet; just in process of redoing the build to
+>> make sure it wasn't spurious.  Looks like some things crept in.
+> 
+> see https://github.com/ceph/ceph/pull/15515
+> 
+>>
+>> The following tests FAILED:
+>>          13 - unittest_bufferlist.sh (Failed)
+>>          31 - unittest_bufferlist (Failed)
+>>          62 - unittest_sloppy_crc_map (Failed)
+>>          68 - unittest_crc32c (Failed)
+>>          76 - unittest_bit_vector (Failed)
+>>         114 - unittest_journal (Failed)
+>>         140 - unittest_bluestore_types (Failed)
