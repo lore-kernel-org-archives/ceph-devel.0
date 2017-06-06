@@ -1,192 +1,298 @@
-From: xxhdx1985126 <xxhdx1985126@163.com>
-Subject: Re:Re:Re: Re:Re:Re:Re: How does rbd-mirror preserve the order of
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: Re:Re: Re:Re:Re:Re: How does rbd-mirror preserve the order of
  WRITE operations that finished on the primary cluster
-Date: Tue, 6 Jun 2017 15:40:23 +0800 (CST)
-Message-ID: <762fe21a.9068.15c7c58f41b.Coremail.xxhdx1985126@163.com>
+Date: Tue, 6 Jun 2017 15:49:07 +0800
+Message-ID: <CACJqLyaKv3TvkFopog0mkGCyDqOaC-9ZcgPnPgYMvNRiW3DWCg@mail.gmail.com>
 References: <70c5c552.66e6.15c766dce68.Coremail.xxhdx1985126@163.com>
  <CA+aFP1B=M97rVtGcY=v79zg_2rS=+NNcO5FTT32yLCZtky7N7g@mail.gmail.com>
- <75e21ee8.f334.15c78f23929.Coremail.xxhdx1985126@163.com>
- <alpine.DEB.2.11.1706051616540.3646@piezo.novalocal>
- <428d3e79.3d2.15c7a56a64f.Coremail.xxhdx1985126@163.com>
- <alpine.DEB.2.11.1706052222060.3646@piezo.novalocal>
- <cdf481f.45b.15c7a741e28.Coremail.xxhdx1985126@163.com>
- <448ceff0.46ce.15c7b5c0b16.Coremail.xxhdx1985126@163.com>
+ <75e21ee8.f334.15c78f23929.Coremail.xxhdx1985126@163.com> <alpine.DEB.2.11.1706051616540.3646@piezo.novalocal>
+ <428d3e79.3d2.15c7a56a64f.Coremail.xxhdx1985126@163.com> <alpine.DEB.2.11.1706052222060.3646@piezo.novalocal>
+ <cdf481f.45b.15c7a741e28.Coremail.xxhdx1985126@163.com> <448ceff0.46ce.15c7b5c0b16.Coremail.xxhdx1985126@163.com>
  <CACJqLyYVmvTuxz6rABvweFyM2++2TFf2q6n3-dzt6AfrpZyDKQ@mail.gmail.com>
- <344a1254.5a75.15c7b942fa4.Coremail.xxhdx1985126@163.com>
+ <344a1254.5a75.15c7b942fa4.Coremail.xxhdx1985126@163.com> <762fe21a.9068.15c7c58f41b.Coremail.xxhdx1985126@163.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from m13-98.163.com ([220.181.13.98]:33498 "EHLO m13-98.163.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751194AbdFFHka (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 6 Jun 2017 03:40:30 -0400
-In-Reply-To: <344a1254.5a75.15c7b942fa4.Coremail.xxhdx1985126@163.com>
+Received: from mail-sg2apc01on0100.outbound.protection.outlook.com ([104.47.125.100]:43264
+        "EHLO APC01-SG2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751285AbdFFHtV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 6 Jun 2017 03:49:21 -0400
+Received: by mail-it0-f51.google.com with SMTP id m47so100991814iti.0
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Jun 2017 00:49:16 -0700 (PDT)
+In-Reply-To: <762fe21a.9068.15c7c58f41b.Coremail.xxhdx1985126@163.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
+To: xxhdx1985126 <xxhdx1985126@163.com>
 Cc: Sage Weil <sweil@redhat.com>, jdillama@redhat.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-ClVoLCBzb3JyeSwgbXkgZmF1bHQuIE9TRCBkb2VzIHRyZWF0IHJlcXVlc3RzIGZyb20gZGlmZmVy
-ZW50IGNsaWVudHMgc2VwZXJhdGVseS4KCkJ5IHRoZSB3YXksIEkndmUgYSBmdXJ0aGVyIHF1ZXN0
-aW9uLiBTYXksIHRoZXJlIGlzIGEgd3JpdGUgb3BlcmF0aW9uOiBXUklURShvYmpBLm9mZj0zLCBv
-YmpCLm9mZj00KSwgaWYsIGR1ZSB0byBzb21lIHJlYXNvbihwcmltYXJ5IGNsdXN0ZXIncyBPU0Qg
-ZmFpbHVyZSwgZm9yIGV4YW1wbGUpLCB0aGUgIm9iakIiIHBhcnQgb2YgdGhlIG9wZXJhdGlvbiBj
-YW4gbm90IGJlIHJlcGxpY2F0ZWQgdG8gc2xhdmUgY2x1c3RlciwgY2FuIHRoZSAib2JqQSIgcGFy
-dCBhbmQgbm9uLW9iakIgcGFydCBvZiBzdWJzZXF1ZW50IHdyaXRlcyB0aGF0IGludm9sdmUgb2Jq
-QiBzdGlsbCBiZSByZXBsaWNhdGVkPwoKQXQgMjAxNy0wNi0wNiAxMjowNToyOCwgInh4aGR4MTk4
-NTEyNiIgPHh4aGR4MTk4NTEyNkAxNjMuY29tPiB3cm90ZToKPgo+WWVzLCBpdCBpcyBmcm9tIHR3
-byBjbGllbnRzLCBidXQgaXQgbG9va3MgdG8gbWUgdGhhdCBPU0QgdHJlYXRzIHJlcXVlc3RzIGZy
-b20gZGlmZmVyZW50IGNsaWVudHMgdW5pZm9ybWx5LiBTbyBJIHRoaW5rLCBpbiB0aGUgc2NlbmFy
-aW8gb2YgcmJkLW1pcnJvciwgcmVxdWVzdHMgZnJvbSB0aGUgc2FtZSByYmQtbWlycm9yIGluc3Rh
-bmNlIGNhbiBhbHNvIGdldCBkaXNvcmRlcmVkLgo+Cj4KPkF0IDIwMTctMDYtMDYgMTE6MTM6NDgs
-ICJIYW9tYWkgV2FuZyIgPGhhb21haUB4c2t5LmNvbT4gd3JvdGU6Cj4+T24gVHVlLCBKdW4gNiwg
-MjAxNyBhdCAxMTowNCBBTSwgeHhoZHgxOTg1MTI2IDx4eGhkeDE5ODUxMjZAMTYzLmNvbT4gd3Jv
-dGU6Cj4+Pgo+Pj4gSSBzdWJtaXR0ZWQgYW4gaXNzdWUgYWJvdXQgdGhyZWUgbW9udGhzIGFnbzog
-aHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzE5MjUyLCBpbiB3aGljaCBJIHN1Ym1pdHRl
-ZCBwYXJ0IG9mIG15IGxvZy4KPj4+Cj4+Cj4+d2hhdCdzIHlvdXIgdXNlIGNhc2U/Cj4+SSBub3Rp
-Y2VkIHlvdXIgZmlyc3Qgc2VudGVuY2UgIlJlY2VudGx5LCBpbiBvdXIgdGVzdCwgd2UgZm91bmQg
-YQo+PnN0cmFuZ2UgcGhlbm9tZW5vbjogYSBSRUFEIHJlcSBmcm9tIGNsaWVudCBBIHRoYXQgYXJy
-aXZlZCBsYXRlciB0aGFuIGEKPj5XUklURSByZXEgZnJvbSBjbGllbnQgQiBpcyBmaW5pc2hlZCBl
-YWxpZXIgdGhhbiB0aGF0IFdSSVRFIHJlcS4iLgo+Pgo+PklzIGl0IG1lYW5zIHRoZSB0d28gcmVx
-dWVzdHMgZnJvbSB0d28gY2xpZW50PyBpZiBzbywgaXQncyBleHBlY3RlZC4KPj4KPj4+Cj4+PiBB
-dCAyMDE3LTA2LTA2IDA2OjUwOjQ5LCAieHhoZHgxOTg1MTI2IiA8eHhoZHgxOTg1MTI2QDE2My5j
-b20+IHdyb3RlOgo+Pj4+Cj4+Pj5UaGFua3MgZm9yIHlvdXIgcmVwbHk6LSkKPj4+Pgo+Pj4+VGhl
-IHJlcXVldWVpbmcgaXMgcHJvdGVjdGVkIGJ5IFBHOjpsb2NrLCBob3dldmVyLCB3aGVuIHRoZSB3
-cml0ZSByZXF1ZXN0IGlzIGFkZCB0byB0aGUgdHJhbnNhY3Rpb24gcXVldWUsIGl0J3MgbGVmdCBm
-b3IgdGhlIGpvdXJuYWxpbmcgdGhyZWFkIGFuZCBmaWxlc3RvcmUgdGhyZWFkLCB0byBkbyB0aGUg
-YWN0dWFsIHdyaXRlLCB0aGUgT1NEJ3Mgd29ya2VyIHRocmVhZCBqdXN0IHJlbGVhc2UgdGhlIFBH
-Ojpsb2NrIGFuZCB0cnkgdG8gcmV0cmlldmUgdGhlIG5leHQgcmVxIGluIE9TRCdzIHdvcmsgcXVl
-dWUsIHdoaWNoIGdpdmVzIHRoZSBvcHBvcnR1bml0eSBmb3IgbGF0ZXIgcmVxcyB0byBnbyBiZWZv
-cmUgcHJldmlvdXMgcmVxcy4gVGhpcyBkaWQgaGFwcGVuZWQgaW4gb3VyIGV4cGVyaW1lbnQuCj4+
-Pj4KPj4+Pkhvd2V2ZXIsIHNpbmNlIHRoaXMgZXhwZXJpbWVudCB3YXMgZG9uZSBzZXJ2ZXJhbCBt
-b250aCBhZ28sIEknbGwgdXBsb2FkIHRoZSBsb2cgaWYgSSBjYW4gZmluZCBpdCwgb3IgSSdsbCB0
-cnkgdG8gcmVwcm9kdWNlIGl0Lgo+Pj4+Cj4+Pj5BdCAyMDE3LTA2LTA2IDA2OjIyOjM2LCAiU2Fn
-ZSBXZWlsIiA8c3dlaWxAcmVkaGF0LmNvbT4gd3JvdGU6Cj4+Pj4+T24gVHVlLCA2IEp1biAyMDE3
-LCB4eGhkeDE5ODUxMjYgd3JvdGU6Cj4+Pj4+PiBUaGFua3MgZm9yIHlvdXIgcmVwbHk6LSkKPj4+
-Pj4+Cj4+Pj4+PiBUaGUgcmVxdWV1ZWluZyBpcyBwcm90ZWN0ZWQgYnkgUEc6OmxvY2ssIGhvd2V2
-ZXIsIHdoZW4gdGhlIHdyaXRlIHJlcXVlc3QgaXMKPj4+Pj4+IGFkZCB0byB0aGUgdHJhbnNhY3Rp
-b24gcXVldWUsIGl0J3MgbGVmdCBmb3IgdGhlIGpvdXJuYWxpbmcgdGhyZWFkIGFuZAo+Pj4+Pj4g
-ZmlsZXN0b3JlIHRocmVhZCwgdG8gZG8gdGhlIGFjdHVhbCB3cml0ZSwgdGhlIE9TRCdzIHdvcmtl
-ciB0aHJlYWQganVzdAo+Pj4+Pj4gcmVsZWFzZSB0aGUgUEc6OmxvY2sgYW5kIHRyeSB0byByZXRy
-aWV2ZSB0aGUgbmV4dCByZXEgaW4gT1NEJ3Mgd29yayBxdWV1ZSwKPj4+Pj4+IHdoaWNoIGdpdmVz
-IHRoZSBvcHBvcnR1bml0eSBmb3IgbGF0ZXIgcmVxcyB0byBnbyBiZWZvcmUgcHJldmlvdXMgcmVx
-cy4gVGhpcwo+Pj4+Pj4gZGlkIGhhcHBlbmVkIGluIG91ciBleHBlcmltZW50Lgo+Pj4+Pgo+Pj4+
-PkZpbGVTdG9yZSBzaG91bGQgYWxzbyBzdHJpY3RseSBvcmRlciB0aGUgcmVxdWVzdHMgdmlhIHRo
-ZSBPcFNlcXVlbmNlci4KPj4+Pj4KPj4+Pj4+IEhvd2V2ZXIsIHNpbmNlIHRoaXMgZXhwZXJpbWVu
-dCB3YXMgZG9uZSBzZXJ2ZXJhbCBtb250aCBhZ28sIEknbGwgdXBsb2FkIHRoZQo+Pj4+Pj4gbG9n
-IGlmIEkgY2FuIGZpbmQgaXQsIG9yIEknbGwgdHJ5IHRvIHJlcHJvZHVjZSBpdC4KPj4+Pj4KPj4+
-Pj5Pa2F5LCB0aGFua3MhCj4+Pj4+Cj4+Pj4+c2FnZQo+Pj4+Pgo+Pj4+Pgo+Pj4+Pj4KPj4+Pj4+
-IEF0IDIwMTctMDYtMDYgMDA6MjE6MzQsICJTYWdlIFdlaWwiIDxzd2VpbEByZWRoYXQuY29tPiB3
-cm90ZToKPj4+Pj4+ID5PbiBNb24sIDUgSnVuIDIwMTcsIHh4aGR4MTk4NTEyNiB3cm90ZToKPj4+
-Pj4+ID4+Cj4+Pj4+PiA+PiBVaCwgc29ycnksIEkgZG9uJ3QgcXVpdGUgZm9sbG93IHlvdS4gQWNj
-b3JkaW5nIHRvIG15IHVuZGVyc3RhbmRpbmcgb2YKPj4+Pj4+ID4+IHRoZSBzb3VyY2UgY29kZSBv
-ZiBPU0QgYW5kIG91ciBleHBlcmltZW50IHByZXZpb3VzbHkgbWVudGlvbmVkIGluCj4+Pj4+PiA+
-PiAiaHR0cHM6Ly93d3cubWFpbC1hcmNoaXZlLmNvbS9jZXBoLXVzZXJzQGxpc3RzLmNlcGguY29t
-L21zZzM2MTc4Lmh0bWwiLAo+Pj4+Pj4gPj4gdGhlcmUgZXhpc3RzIHRoZSBmb2xsb3dpbmcgc2Nl
-bmFyaW8gd2hlcmUgdGhlIGFjdHVhbCBmaW5pc2hpbmcgb3JkZXIgb2YKPj4+Pj4+ID4+IHRoZSBX
-UklURXMgdGhhdCB0YXJnZXRzIHRoZSBzYW1lIG9iamVjdCBpcyBub3QgdGhlIHNhbWUgYXMgdGhl
-IG9yZGVyCj4+Pj4+PiA+PiB0aGV5IGFycml2ZWQgYXQgT1NELCB3aGljaCwgSSB0aGluaywgY291
-bGQgYmUgYSBoaW50IHRoYXQgdGhlIG9yZGVyIG9mCj4+Pj4+PiA+PiB3cml0ZXMgZnJvbSBhIHNp
-bmdsZSBjbGllbnQgY29ubmVjdGlvbiB0byBhIHNpbmdsZSBPU0QgaXMgbm90IGd1cmFudGVlZDoK
-Pj4+Pj4+ID4KPj4+Pj4+ID5JZiBzbywgaXQgaXMgYSBidWcgdGhhdCBzaG91bGQgYmUgZml4ZWQg
-aW4gdGhlIE9TRC4gIHJiZC1taXJyb3IgcmVseWluZyBvbgo+Pj4+Pj4gPk9TRCBvcmRlcmluZyB0
-byBiZSBjb3JyZWN0IGlzIHRvdGFsbHkgZmluZS0tbG90cyBvZiBvdGhlciBzdHVmZiBkb2VzIHRv
-by4KPj4+Pj4+ID4KPj4+Pj4+ID4+ICAgICAgIFNheSB0aHJlZSB3cml0ZXMgdGhhdCB0YXJnZXRp
-bmcgdGhlIHNhbWUgb2JqZWN0IEEgYXJyaXZlZCBhdCBhbgo+Pj4+Pj4gPj4gT1NEIGluIHRoZSBv
-cmRlcjogIldSSVRFIEEub2ZmIDEiLCAiV1JJVEUgQS5vZmYgMiIsICJXUklURSBBLm9mZiAzIi4g
-VGhlCj4+Pj4+PiA+PiBmaXJzdCB3cml0ZSwgIldSSVRFIEEub2ZmIDEiLCBhY3F1aXJlcyB0aGUg
-b2JqZWN0Y29udGV4dCBsb2NrIG9mIG9iamVjdAo+Pj4+Pj4gPj4gQSwgYW5kIGlzIHB1dCBpbnRv
-IGEgdHJhbnNhY3Rpb24gcXVldWUgdG8gZ28gdGhyb3VnaCB0aGUgImpvdXJuYWxpbmcgKwo+Pj4+
-Pj4gPj4gZmlsZSBzeXN0ZW0gd3JpdGUiIHByb2NlZHVyZS4gQmVmb3JlIGl0J3MgZmluaXNoZWQs
-IGEgdGhyZWFkIG9mCj4+Pj4+PiA+PiBPU0Q6Om9zZF9vcF90cCByZXRyaWV2ZWQgdGhlIHNlY29u
-ZCB3cml0ZSBhbmQgYXR0ZW1wdCB0byBwcm9jZXNzIGl0Cj4+Pj4+PiA+PiBkdXJpbmcgd2hpY2gg
-aXQgZmluZHMgdGhhdCB0aGUgb2JqZWN0Y29udGV4dCBsb2NrIG9mIEEgaXMgaGVsZCBieSBhCj4+
-Pj4+PiA+PiBwcmV2aW91cyBXUklURSBhbmQgcHV0IHRoZSBzZWNvbmQgd3JpdGUgaW50byBBJ3Mg
-cndzdGF0ZTo6d2FpdGVycyBxdWV1ZS4KPj4+Pj4+ID4+IEl0J3Mgb25seSB3aGVuIHRoZSBmaXJz
-dCB3cml0ZSBpcyBmaW5pc2hlZCBvbiBhbGwgcmVwbGljYSBPU0RzIHRoYXQgdGhlCj4+Pj4+PiA+
-PiBzZWNvbmQgd3JpdGUgaXMgcHV0IGJhY2sgaW50byBPU0Q6OnNoYXJkZWRvcF93cSB0byBiZSBw
-cm9jZXNzZWQgYWdhaW4gaW4KPj4+Pj4+ID4+IHRoZSBmdXR1cmUuIElmLCBhZnRlciB0aGUgc2Vj
-b25kIHdyaXRlIGlzIHB1dCBpbnRvIHJ3c3RhdGU6OndhaXRlcnMKPj4+Pj4+ID4+IHF1ZXVlIGFu
-ZCB0aGUgZmlyc3Qgd3JpdGUgaXMgZmluaXNoZWQgb24gYWxsIHJlcGxpY2EgT1NEcywgaW4gd2hp
-Y2ggY2FzZQo+Pj4+Pj4gPj4gdGhlIGZpcnN0IHdyaXRlIHJlbGVhc2UgdGhlIEEncyBvYmplY3Rj
-b250ZXh0IGxvY2ssIGJ1dCBiZWZvcmUgdGhlCj4+Pj4+PiA+PiBzZWNvbmQgd3JpdGUgaXMgcHV0
-IGJhY2sgaW50byBPU0Q6OnNoYXJkZWRvcF93cSwgdGhlIHRoaXJkIHdyaXRlIGlzCj4+Pj4+PiA+
-PiByZXRyaWV2ZWQgYnkgT1NEJ3Mgd29ya2VyIHRocmVhZCwgaXQgd291bGQgZ2V0IHByb2Nlc3Nl
-ZCBhcyBubyBwcmV2aW91cwo+Pj4+Pj4gPj4gb3BlcmF0aW9uIGlzIGhvbGRpbmcgQSdzIG9iamVj
-dGNvbnRleHQgbG9jaywgaW4gd2hpY2ggY2FzZSwgdGhlIGFjdHVhbAo+Pj4+Pj4gPj4gZmluaXNo
-aW5nIG9yZGVyIG9mIHRoZSB0aHJlZSB3cml0ZXMgaXMgIldSSVRFIEEub2ZmIDEiLCAiV1JJVEUg
-QS5vZmYgMyIsCj4+Pj4+PiA+PiAiV1JJVEUgQS5vZmYgMiIsIHdoaWNoIGlzIGRpZmZlcmVudCBm
-cm9tIHRoZSBvcmRlciB0aGV5IGFycml2ZWQuCj4+Pj4+PiA+Cj4+Pj4+PiA+VGhpcyBzaG91bGQg
-bm90IGhhcHBlbi4gIChJZiBpdCBoYXBwZW5lZCBpbiB0aGUgcGFzdCwgaXQgd2FzIGEgYnVnLCBi
-dXQgSQo+Pj4+Pj4gPndvdWxkIGV4cGVjdCBpdCBpcyBmaXhlZCBpbiB0aGUgbGF0ZXN0IGhhbW1l
-ciBwb2ludCByZWxlYXNlLCBhbmQgaW4gamV3ZWwKPj4+Pj4+ID5hbmQgbWFzdGVyLikgIFRoZSBy
-ZXF1ZWluZyBpcyBkb25lIHVuZGVyIHRoZSBQRzo6bG9jayBzbyB0aGF0IHJlcXVldWVpbmcKPj4+
-Pj4+ID5wcmVzZXJ2ZXMgb3JkZXJpbmcuICBBIGZhaXIgYml0IG9mIGNvZGUgYW5kIGEgKmxvdCog
-b2YgdGVzdGluZyBnb2VzIGludG8KPj4+Pj4+ID5lbnN1cmluZyB0aGF0IHRoaXMgaXMgdHJ1ZS4g
-IElmIHlvdSd2ZSBzZWVuIHRoaXMgcmVjZW50bHksIHRoZW4gYQo+Pj4+Pj4gPnJlcHJvZHVjZXIg
-b3IgbG9nIChhbmQgdHJhY2tlciB0aWNrZXQpIHdvdWxkIGJlIHdlbGNvbWUhICBXaGVuIHdlIHNl
-ZSBhbnkKPj4+Pj4+ID5vcmRlcmluZyBlcnJvcnMgaW4gUUEgd2UgdGFrZSB0aGVtIHZlcnkgc2Vy
-aW91c2x5IGFuZCBmaXggdGhlbSBxdWlja2x5Lgo+Pj4+Pj4gPgo+Pj4+Pj4gPllvdSBtaWdodCBi
-ZSBpbnRlcmVzdGVkIGluIHRoZSBvc2RfZGVidWdfb3Bfb3JkZXIgY29uZmlnIG9wdGlvbiwgd2hp
-Y2ggd2UKPj4+Pj4+ID5lbmFibGUgaW4gcWEsIHdoaWNoIGFzc2VydHMgaWYgaXQgc2VlcyBvcHMg
-ZnJvbSBhIGNsaWVudCBhcnJpdmUgb3V0IG9mCj4+Pj4+PiA+b3JkZXIuICBUaGUgY2VwaF90ZXN0
-X3JhZG9zIHdvcmtsb2FkIGdlbmVyYXRlIHRoYXQgd2UgdXNlIGZvciBtdWNoIG9mIHRoZQo+Pj4+
-Pj4gPnJhZG9zIHFhIHN1aXRlIGFsc28gZmFpbHMgaWYgaXQgc2VlcyBvdXQgb2Ygb3JkZXIgb3Bl
-cmF0aW9ucy4KPj4+Pj4+ID4KPj4+Pj4+ID5zYWdlCj4+Pj4+PiA+Cj4+Pj4+PiA+Pgo+Pj4+Pj4g
-Pj4gSW4gaHR0cHM6Ly93d3cubWFpbC1hcmNoaXZlLmNvbS9jZXBoLXVzZXJzQGxpc3RzLmNlcGgu
-Y29tL21zZzM2MTc4Lmh0bWwsCj4+Pj4+PiB3ZSBzaG93ZWQgb3VyIGV4cGVyaW1lbnQgcmVzdWx0
-IHdoaWNoIGlzIGV4YWN0bHkgYXMgdGhlIGFib3ZlIHNjZW5hcmlvIHNob3dzCj4+Pj4+PiAuCj4+
-Pj4+PiA+Pgo+Pj4+Pj4gPj4gSG93ZXZlciwgdGhlIGNlcGgncyB2ZXJzaW9uIG9uIHdoaWNoIHdl
-IGRpZCB0aGUgZXhwZXJpbWVudCBhbmQgdGhlIHNvdWNlCj4+Pj4+PiBjb2RlIG9mIHdoaWNoIHdl
-IHJlYWQgd2FzIEhhbW1lciwgMC45NC41LiBJIGRvbid0IGtub3cgd2hldGhlciB0aGUgc2NlbmFy
-aW8KPj4+Pj4+IGFib3ZlIG1heSBzdGlsbCBleGlzdHMgaW4gbGF0ZXIgdmVyc2lvbnMuCj4+Pj4+
-PiA+Pgo+Pj4+Pj4gPj4gQW0gSSByaWdodCBhYm91dCB0aGlzPyBPciBhbSBJIG1pc3NpbmcgYW55
-dGhpbmc/IFBsZWFzZSBoZWxwIG1lLCBJJ20gcmVhbAo+Pj4+Pj4gbHkgY29uZnVzZWQgcmlnaHQg
-bm93LiBUaGFuayB5b3UuCj4+Pj4+PiA+Pgo+Pj4+Pj4gPj4gQXQgMjAxNy0wNi0wNSAyMDowMDow
-NiwgIkphc29uIERpbGxhbWFuIiA8amRpbGxhbWFAcmVkaGF0LmNvbT4gd3JvdGU6Cj4+Pj4+PiA+
-PiA+VGhlIG9yZGVyIG9mIHdyaXRlcyBmcm9tIGEgc2luZ2xlIGNsaWVudCBjb25uZWN0aW9uIHRv
-IGEgc2luZ2xlIE9TRCBpcwo+Pj4+Pj4gPj4gPmd1YXJhbnRlZWQuIFRoZSByYmQtbWlycm9yIGpv
-dXJuYWwgcmVwbGF5IHByb2Nlc3MgaGFuZGxlcyBvbmUgZXZlbnQgYXQKPj4+Pj4+ID4+ID5hIHRp
-bWUgYW5kIGRvZXMgbm90IHN0YXJ0IHByb2Nlc3NpbmcgdGhlIG5leHQgZXZlbnQgdW50aWwgdGhl
-IElPIGhhcwo+Pj4+Pj4gPj4gPmJlZW4gc3RhcnRlZCBpbi1mbGlnaHQgd2l0aCBsaWJyYWRvcy4g
-VGhlcmVmb3JlLCBldmVuIHRob3VnaCB0aGUKPj4+Pj4+ID4+ID5yZXBsYXkgcHJvY2VzcyBhbGxv
-d3MgNTAgLSAxMDAgSU8gcmVxdWVzdHMgdG8gYmUgaW4tZmxpZ2h0LCB0aG9zZSBJT3MKPj4+Pj4+
-ID4+ID5hcmUgYWN0dWFsbHkgd2VsbC1vcmRlcmVkIGluIHRlcm1zIG9mIHVwZGF0ZXMgdG8gYSBz
-aW5nbGUgb2JqZWN0Lgo+Pj4+Pj4gPj4gPgo+Pj4+Pj4gPj4gPk9mIGNvdXJzZSwgc3VjaCBhbiBJ
-TyByZXF1ZXN0IGZyb20gdGhlIGNsaWVudCBhcHBsaWNhdGlvbiAvIFZNIHdvdWxkCj4+Pj4+PiA+
-PiA+YmUgaW5jb3JyZWN0IGJlaGF2aW9yIGlmIHRoZXkgZGlkbid0IHdhaXQgZm9yIHRoZSBjb21w
-bGV0aW9uIGNhbGxiYWNrCj4+Pj4+PiA+PiA+YmVmb3JlIGlzc3VpbmcgdGhlIHNlY29uZCB1cGRh
-dGUuCj4+Pj4+PiA+PiA+Cj4+Pj4+PiA+PiA+T24gTW9uLCBKdW4gNSwgMjAxNyBhdCAxMjowNSBB
-TSwgeHhoZHgxOTg1MTI2IDx4eGhkeDE5ODUxMjZAMTYzLmNvbT4gd3JvCj4+Pj4+PiB0ZToKPj4+
-Pj4+ID4+ID4+IEhpLCBldmVyeW9uZS4KPj4+Pj4+ID4+ID4+Cj4+Pj4+PiA+PiA+Pgo+Pj4+Pj4g
-Pj4gPj4gUmVjZW50bHksIEkndmUgYmVlbiByZWFkaW5nIHRoZSBzb3VyY2UgY29kZSBvZiByYmQt
-bWlycm9yLiBJIHdvbmRlciBobwo+Pj4+Pj4gdyByYmQtbWlycm9yIHByZXNlcnZlcyB0aGUgb3Jk
-ZXIgb2YgV1JJVEUgb3BlcmF0aW9ucyB0aGF0IGZpbmlzaGVkIG9uIHRoZSBwcgo+Pj4+Pj4gaW1h
-cnkgY2x1c3Rlci4gQXMgZmFyIGFzIEkgY2FuIHVuZGVyc3RhbmQgdGhlIGNvZGUsIHJiZC1taXJy
-b3IgZmV0Y2hlcyBJL08gbwo+Pj4+Pj4gcGVyYXRpb25zIGZyb20gdGhlIGpvdXJuYWwgb24gdGhl
-IHByaW1hcnkgY2x1c3RlciwgYW5kIHJlcGxheSB0aGVtIG9uIHRoZSBzbAo+Pj4+Pj4gYXZlIGNs
-dXN0ZXIgd2l0aG91dCBjaGVja2luZyB3aGV0aGVyIHRoZXJlJ3MgYWxyZWFkeSBhbnkgSS9PIG9w
-ZXJhdGlvbnMgdGFyZwo+Pj4+Pj4gZXRpbmcgdGhlIHNhbWUgb2JqZWN0IHRoYXQgaGFzIGJlZW4g
-aXNzdWVkIHRvIHRoZSBzbGF2ZSBjbHVzdGVyIGFuZCBub3QgeWV0Cj4+Pj4+PiBmaW5pc2hlZC4g
-U2luY2UgY29uY3VycmVudCBvcGVyYXRpb25zIG1heSBmaW5pc2ggaW4gYSBkaWZmZXJlbnQgb3Jk
-ZXIgdGhhbiB0Cj4+Pj4+PiBoYXQgaW4gd2hpY2ggdGhleSBhcnJpdmVkIGF0IHRoZSBPU0QsIHRo
-ZSBvcmRlciB0aGF0IHRoZSBXUklURSBvcGVyYXRpb25zIGZpCj4+Pj4+PiBuaXNoIG9uIHRoZSBz
-bGF2ZSBjbHVzdGVyIG1heSBiZSBkaWZmZXJlbnQgdGhhbiB0aGF0IG9uIHRoZSBwcmltYXkgY2x1
-c3Rlci4KPj4+Pj4+IEZvciBleGFtcGxlOiBvbiB0aGUgcHJpbWFyeSBjbHVzdGVyLCB0aGVyZSBh
-cmUgdHdvIFdSSVRFIG9wZXJhdGlvbiB0YXJnZXRpbmcKPj4+Pj4+ICB0aGUgc2FtZSBvYmplY3Qg
-QSB3aGljaCBhcmUsIGluIHRoZSBvcmRlciB0aGV5IGZpbmlzaCBvbiB0aGUgcHJpbWFyeSBjbHVz
-dGUKPj4+Pj4+IHIsICJXUklURSBBLm9mZiBkYXRhMSIgYW5kICJXUklURSBBLm9mZiBkYXRhMiI7
-IHdoaWxlIHdoZW4gdGhleSBhcmUgcmVwbGF5ZWQKPj4+Pj4+ICBvbiB0aGUgc2xhdmUgY2x1c3Rl
-ciwgdGhlIG9yZGVyIG1heSBiZSAiV1JJVEUgQS5vZmYgZGF0YTIiIGFuZCAiV1JJVEUgQS5vZmYK
-Pj4+Pj4+ICBkYXRhMSIsIHdoCj4+Pj4+PiA+IGljaCBtZWFucyB0aGF0IHRoZSByZXN1bHQgb2Yg
-dGhlIHR3byBvcGVyYXRpb25zIG9uIHRoZSBwcmltYXJ5IGNsdXN0ZXIgaXMKPj4+Pj4+IEEub2Zm
-PWRhdGEyIHdoaWxlLCBvbiB0aGUgc2xhdmUgY2x1c3RlciwgdGhlIHJlc3VsdCBpcyBBLm9mZj1k
-YXRhMS4KPj4+Pj4+ID4+ID4+Cj4+Pj4+PiA+PiA+Pgo+Pj4+Pj4gPj4gPj4gSXMgdGhpcyBwb3Nz
-aWJsZT8KPj4+Pj4+ID4+ID4+Cj4+Pj4+PiA+PiA+Pgo+Pj4+Pj4gPj4gPj4KPj4+Pj4+ID4+ID4K
-Pj4+Pj4+ID4+ID4KPj4+Pj4+ID4+ID4KPj4+Pj4+ID4+ID4tLQo+Pj4+Pj4gPj4gPkphc29uCj4+
-Pj4+PiA+PiBO5aul5Y+J6Z2j56yheT8/P+awimLnnoI/Pz/ljYN26LGdPz8/6JeTey5uPz8/5aOP
-5riu5qaPeumzkOWmoGF5Pz8/6JWg6LeIPz8/aj8/P2bvvILnqZDmrp3phJcKPj4+Pj4+ID8/P+eV
-kOOCoj8/P+KSjj8/PzorduWivuWmm+mRmuixsOeomz8/P+ePo+i1mXpaK+WHkuauoOWouD8/PyLm
-v58h56eICj4+Pj4+Pgo+Pj4+Pj4KPj4+Pj4+Cj4+Pj4+Pgo+Pj4+Pj4KPj4+Pj4+Cj4+Pgo+Pj4K
-Pj4+Cj4+Pgo+Cj4KPgo+wqAK
+On Tue, Jun 6, 2017 at 3:40 PM, xxhdx1985126 <xxhdx1985126@163.com> wrote:
+>
+> Uh, sorry, my fault. OSD does treat requests from different clients seper=
+ately.
+>
+> By the way, I've a further question. Say, there is a write operation: WRI=
+TE(objA.off=3D3, objB.off=3D4), if, due to some reason(primary cluster's OS=
+D failure, for example), the "objB" part of the operation can not be replic=
+ated to slave cluster, can the "objA" part and non-objB part of subsequent =
+writes that involve objB still be replicated?
+
+librados only support object-level transaction
+
+>
+> At 2017-06-06 12:05:28, "xxhdx1985126" <xxhdx1985126@163.com> wrote:
+>>
+>>Yes, it is from two clients, but it looks to me that OSD treats requests =
+from different clients uniformly. So I think, in the scenario of rbd-mirror=
+, requests from the same rbd-mirror instance can also get disordered.
+>>
+>>
+>>At 2017-06-06 11:13:48, "Haomai Wang" <haomai@xsky.com> wrote:
+>>>On Tue, Jun 6, 2017 at 11:04 AM, xxhdx1985126 <xxhdx1985126@163.com> wro=
+te:
+>>>>
+>>>> I submitted an issue about three months ago: http://tracker.ceph.com/i=
+ssues/19252, in which I submitted part of my log.
+>>>>
+>>>
+>>>what's your use case?
+>>>I noticed your first sentence "Recently, in our test, we found a
+>>>strange phenomenon: a READ req from client A that arrived later than a
+>>>WRITE req from client B is finished ealier than that WRITE req.".
+>>>
+>>>Is it means the two requests from two client? if so, it's expected.
+>>>
+>>>>
+>>>> At 2017-06-06 06:50:49, "xxhdx1985126" <xxhdx1985126@163.com> wrote:
+>>>>>
+>>>>>Thanks for your reply:-)
+>>>>>
+>>>>>The requeueing is protected by PG::lock, however, when the write reque=
+st is add to the transaction queue, it's left for the journaling thread and=
+ filestore thread, to do the actual write, the OSD's worker thread just rel=
+ease the PG::lock and try to retrieve the next req in OSD's work queue, whi=
+ch gives the opportunity for later reqs to go before previous reqs. This di=
+d happened in our experiment.
+>>>>>
+>>>>>However, since this experiment was done serveral month ago, I'll uploa=
+d the log if I can find it, or I'll try to reproduce it.
+>>>>>
+>>>>>At 2017-06-06 06:22:36, "Sage Weil" <sweil@redhat.com> wrote:
+>>>>>>On Tue, 6 Jun 2017, xxhdx1985126 wrote:
+>>>>>>> Thanks for your reply:-)
+>>>>>>>
+>>>>>>> The requeueing is protected by PG::lock, however, when the write re=
+quest is
+>>>>>>> add to the transaction queue, it's left for the journaling thread a=
+nd
+>>>>>>> filestore thread, to do the actual write, the OSD's worker thread j=
+ust
+>>>>>>> release the PG::lock and try to retrieve the next req in OSD's work=
+ queue,
+>>>>>>> which gives the opportunity for later reqs to go before previous re=
+qs. This
+>>>>>>> did happened in our experiment.
+>>>>>>
+>>>>>>FileStore should also strictly order the requests via the OpSequencer=
+.
+>>>>>>
+>>>>>>> However, since this experiment was done serveral month ago, I'll up=
+load the
+>>>>>>> log if I can find it, or I'll try to reproduce it.
+>>>>>>
+>>>>>>Okay, thanks!
+>>>>>>
+>>>>>>sage
+>>>>>>
+>>>>>>
+>>>>>>>
+>>>>>>> At 2017-06-06 00:21:34, "Sage Weil" <sweil@redhat.com> wrote:
+>>>>>>> >On Mon, 5 Jun 2017, xxhdx1985126 wrote:
+>>>>>>> >>
+>>>>>>> >> Uh, sorry, I don't quite follow you. According to my understandi=
+ng of
+>>>>>>> >> the source code of OSD and our experiment previously mentioned i=
+n
+>>>>>>> >> "https://www.mail-archive.com/ceph-users@lists.ceph.com/msg36178=
+.html",
+>>>>>>> >> there exists the following scenario where the actual finishing o=
+rder of
+>>>>>>> >> the WRITEs that targets the same object is not the same as the o=
+rder
+>>>>>>> >> they arrived at OSD, which, I think, could be a hint that the or=
+der of
+>>>>>>> >> writes from a single client connection to a single OSD is not gu=
+ranteed:
+>>>>>>> >
+>>>>>>> >If so, it is a bug that should be fixed in the OSD.  rbd-mirror re=
+lying on
+>>>>>>> >OSD ordering to be correct is totally fine--lots of other stuff do=
+es too.
+>>>>>>> >
+>>>>>>> >>       Say three writes that targeting the same object A arrived =
+at an
+>>>>>>> >> OSD in the order: "WRITE A.off 1", "WRITE A.off 2", "WRITE A.off=
+ 3". The
+>>>>>>> >> first write, "WRITE A.off 1", acquires the objectcontext lock of=
+ object
+>>>>>>> >> A, and is put into a transaction queue to go through the "journa=
+ling +
+>>>>>>> >> file system write" procedure. Before it's finished, a thread of
+>>>>>>> >> OSD::osd_op_tp retrieved the second write and attempt to process=
+ it
+>>>>>>> >> during which it finds that the objectcontext lock of A is held b=
+y a
+>>>>>>> >> previous WRITE and put the second write into A's rwstate::waiter=
+s queue.
+>>>>>>> >> It's only when the first write is finished on all replica OSDs t=
+hat the
+>>>>>>> >> second write is put back into OSD::shardedop_wq to be processed =
+again in
+>>>>>>> >> the future. If, after the second write is put into rwstate::wait=
+ers
+>>>>>>> >> queue and the first write is finished on all replica OSDs, in wh=
+ich case
+>>>>>>> >> the first write release the A's objectcontext lock, but before t=
+he
+>>>>>>> >> second write is put back into OSD::shardedop_wq, the third write=
+ is
+>>>>>>> >> retrieved by OSD's worker thread, it would get processed as no p=
+revious
+>>>>>>> >> operation is holding A's objectcontext lock, in which case, the =
+actual
+>>>>>>> >> finishing order of the three writes is "WRITE A.off 1", "WRITE A=
+.off 3",
+>>>>>>> >> "WRITE A.off 2", which is different from the order they arrived.
+>>>>>>> >
+>>>>>>> >This should not happen.  (If it happened in the past, it was a bug=
+, but I
+>>>>>>> >would expect it is fixed in the latest hammer point release, and i=
+n jewel
+>>>>>>> >and master.)  The requeing is done under the PG::lock so that requ=
+eueing
+>>>>>>> >preserves ordering.  A fair bit of code and a *lot* of testing goe=
+s into
+>>>>>>> >ensuring that this is true.  If you've seen this recently, then a
+>>>>>>> >reproducer or log (and tracker ticket) would be welcome!  When we =
+see any
+>>>>>>> >ordering errors in QA we take them very seriously and fix them qui=
+ckly.
+>>>>>>> >
+>>>>>>> >You might be interested in the osd_debug_op_order config option, w=
+hich we
+>>>>>>> >enable in qa, which asserts if it sees ops from a client arrive ou=
+t of
+>>>>>>> >order.  The ceph_test_rados workload generate that we use for much=
+ of the
+>>>>>>> >rados qa suite also fails if it sees out of order operations.
+>>>>>>> >
+>>>>>>> >sage
+>>>>>>> >
+>>>>>>> >>
+>>>>>>> >> In https://www.mail-archive.com/ceph-users@lists.ceph.com/msg361=
+78.html,
+>>>>>>> we showed our experiment result which is exactly as the above scena=
+rio shows
+>>>>>>> .
+>>>>>>> >>
+>>>>>>> >> However, the ceph's version on which we did the experiment and t=
+he souce
+>>>>>>> code of which we read was Hammer, 0.94.5. I don't know whether the =
+scenario
+>>>>>>> above may still exists in later versions.
+>>>>>>> >>
+>>>>>>> >> Am I right about this? Or am I missing anything? Please help me,=
+ I'm real
+>>>>>>> ly confused right now. Thank you.
+>>>>>>> >>
+>>>>>>> >> At 2017-06-05 20:00:06, "Jason Dillaman" <jdillama@redhat.com> w=
+rote:
+>>>>>>> >> >The order of writes from a single client connection to a single=
+ OSD is
+>>>>>>> >> >guaranteed. The rbd-mirror journal replay process handles one e=
+vent at
+>>>>>>> >> >a time and does not start processing the next event until the I=
+O has
+>>>>>>> >> >been started in-flight with librados. Therefore, even though th=
+e
+>>>>>>> >> >replay process allows 50 - 100 IO requests to be in-flight, tho=
+se IOs
+>>>>>>> >> >are actually well-ordered in terms of updates to a single objec=
+t.
+>>>>>>> >> >
+>>>>>>> >> >Of course, such an IO request from the client application / VM =
+would
+>>>>>>> >> >be incorrect behavior if they didn't wait for the completion ca=
+llback
+>>>>>>> >> >before issuing the second update.
+>>>>>>> >> >
+>>>>>>> >> >On Mon, Jun 5, 2017 at 12:05 AM, xxhdx1985126 <xxhdx1985126@163=
+.com> wro
+>>>>>>> te:
+>>>>>>> >> >> Hi, everyone.
+>>>>>>> >> >>
+>>>>>>> >> >>
+>>>>>>> >> >> Recently, I've been reading the source code of rbd-mirror. I =
+wonder ho
+>>>>>>> w rbd-mirror preserves the order of WRITE operations that finished =
+on the pr
+>>>>>>> imary cluster. As far as I can understand the code, rbd-mirror fetc=
+hes I/O o
+>>>>>>> perations from the journal on the primary cluster, and replay them =
+on the sl
+>>>>>>> ave cluster without checking whether there's already any I/O operat=
+ions targ
+>>>>>>> eting the same object that has been issued to the slave cluster and=
+ not yet
+>>>>>>> finished. Since concurrent operations may finish in a different ord=
+er than t
+>>>>>>> hat in which they arrived at the OSD, the order that the WRITE oper=
+ations fi
+>>>>>>> nish on the slave cluster may be different than that on the primay =
+cluster.
+>>>>>>> For example: on the primary cluster, there are two WRITE operation =
+targeting
+>>>>>>>  the same object A which are, in the order they finish on the prima=
+ry cluste
+>>>>>>> r, "WRITE A.off data1" and "WRITE A.off data2"; while when they are=
+ replayed
+>>>>>>>  on the slave cluster, the order may be "WRITE A.off data2" and "WR=
+ITE A.off
+>>>>>>>  data1", wh
+>>>>>>> > ich means that the result of the two operations on the primary cl=
+uster is
+>>>>>>> A.off=3Ddata2 while, on the slave cluster, the result is A.off=3Dda=
+ta1.
+>>>>>>> >> >>
+>>>>>>> >> >>
+>>>>>>> >> >> Is this possible?
+>>>>>>> >> >>
+>>>>>>> >> >>
+>>>>>>> >> >>
+>>>>>>> >> >
+>>>>>>> >> >
+>>>>>>> >> >
+>>>>>>> >> >--
+>>>>>>> >> >Jason
+>>>>>>> >> N=E5=AB=A5=E5=8F=89=E9=9D=A3=E7=AC=A1y???=E6=B0=8Ab=E7=9E=82???=
+=E5=8D=83v=E8=B1=9D???=E8=97=93{.n???=E5=A3=8F=E6=B8=AE=E6=A6=8Fz=E9=B3=90=
+=E5=A6=A0ay???=E8=95=A0=E8=B7=88???j???f=EF=BC=82=E7=A9=90=E6=AE=9D=E9=84=
+=97
+>>>>>>> ???=E7=95=90=E3=82=A2???=E2=92=8E???:+v=E5=A2=BE=E5=A6=9B=E9=91=9A=
+=E8=B1=B0=E7=A8=9B???=E7=8F=A3=E8=B5=99zZ+=E5=87=92=E6=AE=A0=E5=A8=B8???"=
+=E6=BF=9F!=E7=A7=88
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>
+>>>>
+>>>>
+>>>>
+>>
+>>
+>>
+>>
