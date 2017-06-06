@@ -1,90 +1,39 @@
-From: han vincent <hangzws@gmail.com>
-Subject: Re: Beta testing crush optimization
-Date: Tue, 6 Jun 2017 17:02:27 +0800
-Message-ID: <CANNfkubvjhfV8PCdBD6s043acm5kQEC2y2pQk39wLzbqL325kw@mail.gmail.com>
-References: <CANNfkubYdJqJDRV8kuNDBy368OxOyXkXKU3wr9ULFeafPnBoHg@mail.gmail.com>
- <d3cee009-9187-d90a-4a40-6ab98e619897@dachary.org> <CANNfkubxHfAYn-aLkHCQV_YZoMuVTzug9nRbvaTSE4UyKiQLuw@mail.gmail.com>
- <9c4d5c65-4bd3-19e0-2e0e-59331f952c46@dachary.org> <CANNfkuZbfNSW5CQHaV0yyF3744FPf-gh0vKBj45bZKrvZ27MhA@mail.gmail.com>
- <eefdcd45-e6fa-4bf0-56b3-76e155f45de2@dachary.org> <CANNfkuZF219VWnCYYQoPY7CXXBAFq1=BrfOyC_vL7-+nU5ixMg@mail.gmail.com>
- <6721f5e4-4da0-868c-6d65-c180fdb564e0@dachary.org> <CANNfkuY1KfLb=WR2scJKb82RKqGAwUB3wWSrPzvht-=ixsfhGg@mail.gmail.com>
- <5c2c692a-99c3-4b33-33bd-b9523943d7a4@dachary.org> <CANNfkubHKXhdaF5p2kOxfhTe-W3H=OmyyJ4hM+e10X=UB+rjEg@mail.gmail.com>
- <e7c26a8f-e0cc-ff35-e4ae-6326846a1e02@dachary.org> <CANNfkubUEyxupv_fc=X6yNht1enwwjWbwXsX4T=DDHiLeDYkGw@mail.gmail.com>
- <62744992-f6d9-7577-eb84-47c794a5fad4@dachary.org> <CANNfkua3j+214FXAJsnW+5Vww-ALN4YWUOERB9hmsiH=tmjZ5w@mail.gmail.com>
- <989c0eab-ab12-074a-be4b-ee7d4c0b63e4@dachary.org> <e524e1e8-7845-4ebf-f1eb-7328c4d40316@dachary.org>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: Re: Re:Re: Re:Re:Re:Re: How does rbd-mirror preserve the order of
+ WRITE operations that finished on the primary cluster
+Date: Tue, 6 Jun 2017 07:20:02 -0400
+Message-ID: <CA+aFP1B6KpO4QV=gO0VLU6manv9vRiX6_aXBr50VUu9Xn=4b3Q@mail.gmail.com>
+References: <70c5c552.66e6.15c766dce68.Coremail.xxhdx1985126@163.com>
+ <CA+aFP1B=M97rVtGcY=v79zg_2rS=+NNcO5FTT32yLCZtky7N7g@mail.gmail.com>
+ <75e21ee8.f334.15c78f23929.Coremail.xxhdx1985126@163.com> <alpine.DEB.2.11.1706051616540.3646@piezo.novalocal>
+ <428d3e79.3d2.15c7a56a64f.Coremail.xxhdx1985126@163.com> <alpine.DEB.2.11.1706052222060.3646@piezo.novalocal>
+ <cdf481f.45b.15c7a741e28.Coremail.xxhdx1985126@163.com> <448ceff0.46ce.15c7b5c0b16.Coremail.xxhdx1985126@163.com>
+ <CACJqLyYVmvTuxz6rABvweFyM2++2TFf2q6n3-dzt6AfrpZyDKQ@mail.gmail.com>
+ <344a1254.5a75.15c7b942fa4.Coremail.xxhdx1985126@163.com> <762fe21a.9068.15c7c58f41b.Coremail.xxhdx1985126@163.com>
+ <CACJqLyaKv3TvkFopog0mkGCyDqOaC-9ZcgPnPgYMvNRiW3DWCg@mail.gmail.com> <349ebded.9bdc.15c7c722502.Coremail.xxhdx1985126@163.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f42.google.com ([209.85.214.42]:35175 "EHLO
-        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751243AbdFFJC2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Jun 2017 05:02:28 -0400
-Received: by mail-it0-f42.google.com with SMTP id m62so87226049itc.0
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Jun 2017 02:02:28 -0700 (PDT)
-In-Reply-To: <e524e1e8-7845-4ebf-f1eb-7328c4d40316@dachary.org>
+Received: from mail-yb0-f177.google.com ([209.85.213.177]:33469 "EHLO
+        mail-yb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751577AbdFFLUD (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Jun 2017 07:20:03 -0400
+Received: by mail-yb0-f177.google.com with SMTP id 202so40620748ybd.0
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Jun 2017 04:20:03 -0700 (PDT)
+In-Reply-To: <349ebded.9bdc.15c7c722502.Coremail.xxhdx1985126@163.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Loic Dachary <loic@dachary.org>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: xxhdx1985126 <xxhdx1985126@163.com>
+Cc: Haomai Wang <haomai@xsky.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi, loic:
-   I saw you had published a new version(v1.0.33) of "python crush" .
-And then I test it used my crushmap.
-   I am glad to tell you that the "optimize" command have worked well.
-when I used the following command such as:
+On Tue, Jun 6, 2017 at 4:07 AM, xxhdx1985126 <xxhdx1985126@163.com> wrote:
+> So, if that case happens, rbd-mirror will go on replicate subsequent writes, is this right?
 
-   crush optimize --crushmap report.json --out-path optimized.crush
---rule replicated_ruleset --pool 49
+Yes -- until it reaches a flush event and is stalled on the
+uncommitted IO from the down OSD (or until it reaches the hard-stop of
+100 in-flight, uncommitted IOs).
 
-   There was no error output anymore. And after that I import the
-optimized crushmap to my cluster, after rebalancing all the OSDs are
-+-0.9 over/under filled.
 
-   when I used the "compare" command, there was an error in output:
-   crush compare --rule replicated_ruleset --replication-count 2
---origin /tmp/report.json --destination optimized.crush
-
-   Traceback (most recent call last):
-   File "/usr/bin/crush", line 25, in <module>
-    sys.exit(Ceph().main(sys.argv[1:]))
-   File "/usr/lib64/python2.7/site-packages/crush/main.py", line 136, in main
-    return self.constructor(argv).run()
-   File "/usr/lib64/python2.7/site-packages/crush/compare.py", line 327, in run
-    self.run_compare()
-   File "/usr/lib64/python2.7/site-packages/crush/compare.py", line
-332, in run_compare
-    self.set_destination_crushmap(self.args.destination)
-   File "/usr/lib64/python2.7/site-packages/crush/compare.py", line
-59, in set_destination_crushmap
-    d.parse(self.main.convert_to_crushmap(destination))
-   File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py",
-line 739, in convert_to_crushmap
-    self.set_compat_choose_args(c, crushmap, choose_args_name)
-   File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py",
-line 716, in set_compat_choose_args
-    assert choose_args_name
-   AssertionError
-
-   After that, I got the report of my cluster and "optimize" it once
-again, there still have an error in output:
-  ceph report > report.new.json
-  crush optimize --crushmap report.json --out-path optimized.crush
---rule replicated_ruleset --pool 49
-  [root@node-4 ~]# crush optimize --crushmap report.json --out-path
-optimized.crush --rule replicated_ruleset --pool 49
-Traceback (most recent call last):
-  File "/usr/bin/crush", line 25, in <module>
-    sys.exit(Ceph().main(sys.argv[1:]))
-  File "/usr/lib64/python2.7/site-packages/crush/main.py", line 136, in main
-    return self.constructor(argv).run()
-  File "/usr/lib64/python2.7/site-packages/crush/optimize.py", line 373, in run
-    crushmap = self.main.convert_to_crushmap(self.args.crushmap)
-  File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py",
-line 731, in convert_to_crushmap
-    self.set_analyze_args(crushmap)
-  File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py",
-line 657, in set_analyze_args
-    compat_pool = self.get_compat_choose_args(crushmap)
-  File "/usr/lib64/python2.7/site-packages/crush/ceph/__init__.py",
-line 645, in get_compat_choose_args
-    assert 1 == len(crushmap['private']['pools'])
-AssertionError
+-- 
+Jason
