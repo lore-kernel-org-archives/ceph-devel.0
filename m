@@ -1,83 +1,149 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: health checks and logging
-Date: Tue, 6 Jun 2017 23:33:35 +0100
-Message-ID: <CALe9h7cnb0o7O5D4oO7C8nirbXA=RjVqndOuCYEQS708j4OSZw@mail.gmail.com>
-References: <alpine.DEB.2.11.1706052112360.3646@piezo.novalocal>
- <CALe9h7exMAZfDVmhCBv_o+Ez3BN-MJ_43jkD7evZ8Ropk4-FKA@mail.gmail.com> <alpine.DEB.2.11.1706062127120.5514@piezo.novalocal>
+From: Xiaoxi Chen <superdebuger@gmail.com>
+Subject: Re: blustore: revisiting rocksdb buffer settings
+Date: Wed, 7 Jun 2017 09:33:16 +0800
+Message-ID: <CAEYCsV+Wooif-E1Mo7e8o0BpHff_WnnWF-0HVdO6fpLY8-O1+A@mail.gmail.com>
+References: <e71c9cf6-9db5-36f7-fc98-81e24b0c67fe@redhat.com>
+ <CAEYCsVJW8WKc=F1eBGSfrQse3LvMDX8+r2radwryUp4EeZcQ8w@mail.gmail.com> <CACJqLyYC1CPSmUDLXCLRnUFbB3hHG3SszWFuaZocok=kzykD0Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f172.google.com ([209.85.128.172]:34857 "EHLO
-        mail-wr0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751433AbdFFWd5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Jun 2017 18:33:57 -0400
-Received: by mail-wr0-f172.google.com with SMTP id q97so60061920wrb.2
-        for <ceph-devel@vger.kernel.org>; Tue, 06 Jun 2017 15:33:56 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1706062127120.5514@piezo.novalocal>
+Received: from mail-oi0-f54.google.com ([209.85.218.54]:34145 "EHLO
+        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751436AbdFGBdS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 6 Jun 2017 21:33:18 -0400
+Received: by mail-oi0-f54.google.com with SMTP id o65so161443640oif.1
+        for <ceph-devel@vger.kernel.org>; Tue, 06 Jun 2017 18:33:17 -0700 (PDT)
+In-Reply-To: <CACJqLyYC1CPSmUDLXCLRnUFbB3hHG3SszWFuaZocok=kzykD0Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: John Spray <john.spray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomai@xsky.com>
+Cc: Mark Nelson <mnelson@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Jun 6, 2017 at 10:29 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Mon, 5 Jun 2017, John Spray wrote:
->> On Mon, Jun 5, 2017 at 10:21 PM, Sage Weil <sweil@redhat.com> wrote:
->> > I took a quick look at the get_health() methods in the Monitor after our
->> > discussion this morning:
->> >
->> > - OSDMonitor::get_health() looks at the pool stats for a few things; I
->> > think these can be safely/easily moved to PGMap::get_health() (so that
->> > they will run in ceph-mgr)
->> > - Then it'll be an easy change to calculate the health and detail sets in
->> > encoding_pending as each OSDMap in published.
->> > - MgrStatMonitor is already persisting the mgr health messages.
->> > - MDSMonitor is also strictly a fundion of the FSMap so it'd be easy to
->> > move to encode_pending.
->> > - Monitor::get_health() has some odds and ends we can either leave in
->> > place or improve (e.g, time skew checks).  Not sure it matters much.
->> >
->> > My main question is whether you had specific thoughts about how to
->> > identify warnings so that we can note when they appear and disappear.  We
->> > can just go by the unique strings but then you'll see something like
->> >
->> >  1 osd(s) down
->> >  ...
->> >  1 osd(s) down cleared
->> >  2 osd(s) down
->> >  ...
->> >
->> > (or whatever we make the messages for cleared warnings look like).  Should
->> > we associate a 'tag' for each message that is used to identify it, so
->> > that, for example, "%d osd down" for any number of OSDs is considered the
->> > "same" message and we log when it changes but don't say it has cleared?
->>
->> Yes, exactly.
->>
->> All the possible health messages warnings should get a unique error
->> code (tag, if you like), that would be a stable thing that we explain
->> in the docs, like we do for the MDS health messages[1].  Adding the
->> codes for health messages generally was one of the steps on my
->> favorite tracker ticket[2] (it has aged like a fine wine).
->>
->> We'll need to look at the interplay between this and other logging --
->> in some cases, if we're e.g. already logging nice messages for OSDs
->> going up and down, then we might not want to also have log messages
->> redundantly printing the health state.  We might also want to get rid
->> of the places that we echo the map summary on changes like this, or at
->> least put them at a lower severity than what the operator sees by
->> default.  Basically, when an OSD goes down, we should make sure there
->> is one log message to that effect, rather than 2 or 3.
->>
->> BTW, earlier we were talking about logging things at a host/rack level
->> when lots of OSDs change at once, which I didn't realize already
->> existed, but now I'm failing to find it in the tree (looking in
->> OSDMonitor)...?
+2017-06-06 23:29 GMT+08:00 Haomai Wang <haomai@xsky.com>:
+> On Tue, Jun 6, 2017 at 11:23 PM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
+>> Hi Mark,
+>>       Cool data, wondering if we take the compaction wallclock time
+>> into account, is 32MB memtable still showing advantage on CPU
+>> consumption?  I am expecting 256MB is better as compaction workload
+>> reduced significantly.
 >
-> https://github.com/ceph/ceph/blob/master/src/mon/OSDMonitor.cc#L3567-L3700
+> I don't have the real data about the different, but from the
+> implementation the larger table size, it will cause worser internal
+> fragment. If want to achieve the same live utilization compared to
+> smaller table size, it need to do more compaction traffic than
+> smaller.
+>
 
-Thanks -- I think when we were talking about it before I was confused
-between the logging and the health bits.
+I totally hear your point.  But compaction is not only from L0 to L1,
+it is in all leve.  Merging short live KV creation/deletion and
+several update against same KV at upper level (L0) should be more
+efficient than do it later on lower level, isnt it?
 
-John
 
-> sage
+> Hmm, I'm not sure my description answer the question....
+>
+>>
+>> Xiaoxi
+>>
+>> 2017-06-02 21:48 GMT+08:00 Mark Nelson <mnelson@redhat.com>:
+>>> Hi all,
+>>>
+>>> Last fall we ran through some tests to try to determine how many and what
+>>> size write buffers (ie the memtable size) should be used in rocksdb for
+>>> bluestore:
+>>>
+>>> https://drive.google.com/file/d/0B2gTBZrkrnpZRFdiYjFRNmxLblU/view?usp=sharing
+>>>
+>>> As a result of that analysis, we chose to use larger than expected buffers.
+>>> The advantage is that the number of compaction events and total amount of
+>>> compacted data is greatly reduced in the tests we ran. The downside is that
+>>> working on larger memtables is potentially slower.
+>>>
+>>> Since we did that analysis last fall, we've made a number of changes that
+>>> potentially could affect the results. Specifically, we discovered that the
+>>> compaction thread was under extremely heavy load, even with large buffers,
+>>> doing small sequential reads due to a lack of compaction readahead.  The
+>>> compaction thread is much less busy after that fix, so we decided to run a
+>>> couple of new, smaller scale tests to verify our original findings.  As
+>>> opposed to the previous tests, these tests were only run against a single
+>>> OSD and used a larger 512GB RBD volume where not all of the onodes could fit
+>>> in the bluestore cache.  Measurements were taken after the volume was
+>>> pre-filled with 4MB writes followed by a 5 minute 4k random write workload.
+>>>
+>>> https://drive.google.com/file/d/0B2gTBZrkrnpZVXpzR2JNRmR0WFE/view?usp=sharing
+>>>
+>>> In these results, the effect of compaction on client IO is dramatically
+>>> lower since the OSD is spending a significant amount of time doing onode
+>>> reads from the DB.  Having said that, DB and compaction statistics still
+>>> show a dramatic reduction in reads, writes, and write-amp when larger
+>>> buffers/memtables are used.
+>>>
+>>> The question of whether or not the large memtables might be hurting in other
+>>> ways remains.  To examine this, additional tests were run, this time with a
+>>> smaller 16GB RBD volume so that all onodes stay in cache. 4k random write
+>>> tests with 4 256MB and 32MB buffers were compared. Using 256MB buffers
+>>> provided around a 10% performance advantage vs 32MB buffers, however tests
+>>> with 32MB buffers showed less time spent doing key comparisons when adding
+>>> data to the Memtables in kv_sync_thread:
+>>>
+>>> 32MB buffers:
+>>>
+>>> 34.45% rocksdb::MemTable::Add
+>>> + 20.40% rocksdb::InlineSkipList<rocksdb::MemTableRep::KeyComparator
+>>> const&>::Insert<false>
+>>> | + 18.65% rocksdb::InlineSkipList<rocksdb::MemTableRep::KeyComparator
+>>> const&>::RecomputeSpliceLevels
+>>> | | + 18.45% rocksdb::InlineSkipList<rocksdb::MemTableRep::KeyComparator
+>>> const&>::FindSpliceForLevel
+>>> | |   + 16.00% KeyIsAfterNode
+>>> | |   | + 15.60% rocksdb::MemTable::KeyComparator::operator()
+>>> | |   |   + 10.25% rocksdb::InternalKeyComparator::Compare
+>>> | |   |   | + 6.95% rocksdb::(anonymous
+>>> namespace)::BytewiseComparatorImpl::Compare
+>>> | |   |   | | + 6.30% compare
+>>> | |   |   | |   + 5.55% __memcmp_sse4_1
+>>> | |   |   | |   + 0.10% memcmp@plt
+>>> | |   |   | + 0.10% ExtractUserKey
+>>> | |   |   + 4.00% GetLengthPrefixedSlice
+>>> | |   |     + 0.45% GetVarint32Ptr
+>>>
+>>> 256MB buffers:
+>>>
+>>> 43.20% rocksdb::MemTable::Add
+>>> + 30.85% rocksdb::InlineSkipList<rocksdb::MemTableRep::KeyComparator
+>>> const&>::Insert<false>
+>>> | + 29.15% rocksdb::InlineSkipList<rocksdb::MemTableRep::KeyComparator
+>>> const&>::RecomputeSpliceLevels
+>>> | | + 28.70% rocksdb::InlineSkipList<rocksdb::MemTableRep::KeyComparator
+>>> const&>::FindSpliceForLevel
+>>> | |   + 25.50% KeyIsAfterNode
+>>> | |   | + 24.90% rocksdb::MemTable::KeyComparator::operator()
+>>> | |   |   + 13.05% rocksdb::InternalKeyComparator::Compare
+>>> | |   |   | + 9.35% rocksdb::(anonymous
+>>> namespace)::BytewiseComparatorImpl::Compare
+>>> | |   |   | | + 8.50% compare
+>>> | |   |   | |   + 7.55% __memcmp_sse4_1
+>>> | |   |   | |   + 0.30% memcmp@plt
+>>> | |   |   | + 0.55% ExtractUserKey
+>>> | |   |   + 10.05% GetLengthPrefixedSlice
+>>> | |   |     + 2.05% GetVarint32Ptr
+>>>
+>>> So the takeaway here is that larger buffers still provide a performance
+>>> advantage likely due to a much better compaction workload, but are causing
+>>> the kv_sync_thread to spend more wallclock time and burn more CPU processing
+>>> the memtable in KeyIsAfterNode. Using smaller buffers reduces the time spent
+>>> from ~25.5% to ~16% during the actual writes, but results in higher write
+>>> amp, more writes, and more reads during compaction.  Ultimately all of this
+>>> only really matters if the onodes are kept in cache since cache misses
+>>> quickly become a major bottleneck when the cache isn't large enough to hold
+>>> all onodes in random write scenarios.
+>>>
+>>> Mark
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
