@@ -1,47 +1,56 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: run-tox-ceph-disk
-Date: Thu, 8 Jun 2017 13:12:42 +0200
-Message-ID: <4334e173-002d-7785-8aa2-186913773d4e@dachary.org>
-References: <062dfae7-eb33-9eb3-b2ad-34497bc0c1c2@redhat.com>
- <e7901bfc-9e21-e226-fa6c-eabfee817ce8@dachary.org>
- <CALBbquH=BWGej5OKj0cQT=0Pa+e5jM5sJ7Ji5zoT6tyzkqrUrQ@mail.gmail.com>
- <2661a852-65a9-05e3-a621-81cbda974a2d@dachary.org>
- <eacabba5-899e-6a28-b871-d1d6063d49a9@redhat.com>
- <3a4cc839-97c9-bb08-b946-a07da30d6b04@redhat.com>
+From: XoD <xoddark@gmail.com>
+Subject: Rados API out of Unix environment
+Date: Thu, 8 Jun 2017 15:10:54 +0200
+Message-ID: <CAAGJuFhkQXRUjUfgVZpnMtyLVHg8CFPfRscLULZ2hV7LOC40YA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:37934 "EHLO
-        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750788AbdFHLMq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Jun 2017 07:12:46 -0400
-In-Reply-To: <3a4cc839-97c9-bb08-b946-a07da30d6b04@redhat.com>
+Received: from mail-ot0-f170.google.com ([74.125.82.170]:36459 "EHLO
+        mail-ot0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751132AbdFHNLg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Jun 2017 09:11:36 -0400
+Received: by mail-ot0-f170.google.com with SMTP id i31so22949016ota.3
+        for <ceph-devel@vger.kernel.org>; Thu, 08 Jun 2017 06:11:36 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jos Collin <jcollin@redhat.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Yes, that's hopefully good enough. The real solution would be for the ceph CLI to be a python module with dependencies in a requirements.txt file, but that would be more complicated ;-)
+Hello, in my company we are looking for a most efficient solution to
+distribute a lot of small files, for a lot of clients.
 
-On 06/08/2017 01:08 PM, Jos Collin wrote:
-> Looks like it is already fixed:
-> 
-> commit 91d36b64f3a1000e38aa620cddfdf3fe1866ad85
-> Author: Willem Jan Withagen <wjw@digiware.nl>
-> Date:   Fri Jun 2 16:53:43 2017 +0200
-> 
->     ceph-disk: use system modules if needed
-> 
->      - prettytable usage was introduced in:
->             https://github.com/ceph/ceph/commit/3fa8bb1
->        It is in the install-deps.sh file to be installed, but
->        it is not per default installed in the testenvironment
->        So allow tox tests to use "external" modules
-> 
->     Signed-off-by: Willem Jan Withagen <wjw@digiware.nl>
-> 
-> 
+We are considering using Ceph for this (Or Gluster) as our server
+infrastructure.
+On the client side we want to access data as object directly from the
+application.
+Our applications will not run in an unix environment (Windows among others).
+But unfortunately the Rados API (Or Gluster API) depends on Unix
+technologies and headers.
 
--- 
-Loïc Dachary, Artisan Logiciel Libre
+So to summarize our needs for the API are :
+- put new files on a volume
+- read files on the volume
+- remove files on the volume
+We do not need to update any files after the first write.
+
+For the moment, here is our current investigation status:
+We have tried to build the api (librados) in a Msys/Mingw environment,
+but all dependencies are not available.
+We are considering to modify librados to replace Unix dependencies,
+but it's seems a lot of work.
+We are considering to reimplement the client library, but I haven't
+found documentation about the communication protocol of rados api.
+We are also considering to create a new (simpler) API, possibly based
+on http, but we need to know how implement the server part.
+We have seen the rados_dll port of rados for Windows, but this port is
+not up to date.
+
+Without any knowledge of the internal Ceph functionality it's not
+easy, and I haven't found any documentation about it.
+
+So here are my questions:
+Does anybody have advices/warnings about how we can achieve any of the
+afore mentioned ports ?
+Or know any open source library project to access to files/objects on
+from (at least) a Windows application.
+
+Thank you
