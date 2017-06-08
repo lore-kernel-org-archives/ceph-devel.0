@@ -1,27 +1,42 @@
-From: "Seydou Thieba" <seydouthieba@tiscali.co.uk>
-Subject: Investment Interest & Offer
-Date: Sat, 03 Jun 2017 00:01:51 +0100
-Message-ID: <201706022301.v52MWded028747__22389.3517432318$1496897965$gmane$org@www.brfliseberg.se>
-Reply-To: seydouthiebaconsultant@gmail.com
+From: Sistem Administrator <jadson.rumpia@customs.go.id>
+Subject: Admin
+Date: Thu, 08 Jun 2017 11:59:56 +0530
+Message-ID: <20170608063236.D6ADC2BC83BF@mail.customs.go.id>
+Reply-To: adminwebmailsistem@mail2world.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from www.brfliseberg.se ([213.242.162.1]:37178 "EHLO
-        www.brfliseberg.se" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750917AbdFHE7S (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Jun 2017 00:59:18 -0400
+Received: from mail.customs.go.id ([202.61.126.135]:44826 "EHLO
+        mail.customs.go.id" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751484AbdFHGb2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 8 Jun 2017 02:31:28 -0400
 Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <seydouthieba@tiscali.co.uk>
+To: Recipients <jadson.rumpia@customs.go.id>
 
-We are a Fund management company located in the United Kingdom, we specialize in searching for potential investments opportunities for our high net-worth clients globally. Should this be of interest to you, please do not hesitate to email me for  further information.
+PERHATIAN
 
-Thanks
-Seydou Thieba
+Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang =
+didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda =
+mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali m=
+emvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, ki=
+rim informasi berikut di bawah ini:
 
----
-This email has been checked for viruses by AVG.
-http://www.avg.com
+Nama:
+Username:
+sandi:
+Konfirmasi sandi:
+E-mail:
+telepon:
 
+Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda =
+akan dinonaktifkan!
+
+Maaf atas ketidaknyamanan ini.
+Kode verifikasi: en:0986..web...id......nw..website Admin..id...9876mm.2017
+Surat Dukungan Teknis =A92017
+
+terima kasih
+Sistem Administrator
