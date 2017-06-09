@@ -1,45 +1,30 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: [ceph-users] removing cluster name support
-Date: Fri, 9 Jun 2017 16:07:15 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706091602210.3646@piezo.novalocal>
-References: <alpine.DEB.2.11.1706081936570.3646@piezo.novalocal>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Are we ready for 10.2.8 - core
+Date: Fri, 9 Jun 2017 18:09:42 +0200
+Message-ID: <9e7edca0-d56a-2315-9098-94dab50db691@suse.cz>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:54185 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751534AbdFIQHS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Jun 2017 12:07:18 -0400
-In-Reply-To: <alpine.DEB.2.11.1706081936570.3646@piezo.novalocal>
+Received: from mx2.suse.de ([195.135.220.15]:40109 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751784AbdFIQJu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 9 Jun 2017 12:09:50 -0400
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id A006BAB5D
+        for <ceph-devel@vger.kernel.org>; Fri,  9 Jun 2017 16:09:43 +0000 (UTC)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, 8 Jun 2017, Sage Weil wrote:
-> Questions:
-> 
->  - Does anybody on the list use a non-default cluster name?
->  - If so, do you have a reason not to switch back to 'ceph'?
+Hi Josh:
 
-It sounds like the answer is "yes," but not for daemons. Several users use 
-it on the client side to connect to multiple clusters from the same host.
+The following core backports have been merged into the jewel branch in 
+preparation for the 10.2.8 release.
 
-Nobody is colocating multiple daemons from different clusters on the same 
-host.  Some have in the past but stopped.  If they choose to in the 
-future, they can customize the systemd units themselves.
+http://tracker.ceph.com/projects/ceph/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=3&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=537&f%5B%5D=subproject_id&op%5Bsubproject_id%5D=%21*&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D=
 
-The rbd-mirror daemon has a similar requirement to talk to multiple 
-clusters as a client.
+Do you think it's time for QE to do its testing?
 
-This makes me conclude our current path is fine:
-
- - leave existing --cluster infrastructure in place in the ceph code, but
- - remove support for deploying daemons with custom cluster names from the 
-deployment tools.
-
-This neatly avoids the systemd limitations for all but the most 
-adventuresome admins and avoid the more common case of an admin falling 
-into the "oh, I can name my cluster? cool! [...] oh, i have to add 
---cluster rover to every command? ick!" trap.
-
-sage
+Nathan
