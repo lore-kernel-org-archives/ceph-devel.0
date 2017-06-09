@@ -1,30 +1,72 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Are we ready for 10.2.8 - rgw
-Date: Fri, 9 Jun 2017 18:17:12 +0200
-Message-ID: <ef00f025-27ea-6efa-80db-2ebb15d5b819@suse.cz>
+From: Erik McCormick <emccormick@cirrusseven.com>
+Subject: Re: [ceph-users] removing cluster name support
+Date: Fri, 9 Jun 2017 12:19:10 -0400
+Message-ID: <CAHUi5cOM8zrnZ80RMqJhEwowE6XmM3dnAKJmxNf8E82fM7Nfbg@mail.gmail.com>
+References: <alpine.DEB.2.11.1706081936570.3646@piezo.novalocal> <alpine.DEB.2.11.1706091602210.3646@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:41486 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751644AbdFIQRT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 9 Jun 2017 12:17:19 -0400
-Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id 1A084ADB1
-        for <ceph-devel@vger.kernel.org>; Fri,  9 Jun 2017 16:17:13 +0000 (UTC)
-Content-Language: en-US
+Received: from mail-qt0-f169.google.com ([209.85.216.169]:35301 "EHLO
+        mail-qt0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751572AbdFIQTM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Jun 2017 12:19:12 -0400
+Received: by mail-qt0-f169.google.com with SMTP id w1so81165504qtg.2
+        for <ceph-devel@vger.kernel.org>; Fri, 09 Jun 2017 09:19:12 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1706091602210.3646@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org, ceph-users@ceph.com
 
-Hi Yehuda:
+On Fri, Jun 9, 2017 at 12:07 PM, Sage Weil <sage@newdream.net> wrote:
+> On Thu, 8 Jun 2017, Sage Weil wrote:
+>> Questions:
+>>
+>>  - Does anybody on the list use a non-default cluster name?
+>>  - If so, do you have a reason not to switch back to 'ceph'?
+>
+> It sounds like the answer is "yes," but not for daemons. Several users use
+> it on the client side to connect to multiple clusters from the same host.
+>
 
-The following rgw backports have been merged into the jewel branch in 
-preparation for the 10.2.8 release.
+I thought some folks said they were running with non-default naming
+for daemons, but if not, then count me as one who does. This was
+mainly a relic of the past, where I thought I would be running
+multiple clusters on one host. Before long I decided it would be a bad
+idea, but by then the cluster was already in heavy use and I couldn't
+undo it.
 
-http://tracker.ceph.com/projects/rgw/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=3&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=537&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D=
+I will say that I am not opposed to renaming back to ceph, but it
+would be great to have a documented process for accomplishing this
+prior to deprecation. Even going so far as to remove --cluster from
+deployment tools will leave me unable to add OSDs if I want to upgrade
+when Luminous is released.
 
-Do you think it's time for QE to do its testing?
+> Nobody is colocating multiple daemons from different clusters on the same
+> host.  Some have in the past but stopped.  If they choose to in the
+> future, they can customize the systemd units themselves.
+>
+> The rbd-mirror daemon has a similar requirement to talk to multiple
+> clusters as a client.
+>
+> This makes me conclude our current path is fine:
+>
+>  - leave existing --cluster infrastructure in place in the ceph code, but
+>  - remove support for deploying daemons with custom cluster names from the
+> deployment tools.
+>
+> This neatly avoids the systemd limitations for all but the most
+> adventuresome admins and avoid the more common case of an admin falling
+> into the "oh, I can name my cluster? cool! [...] oh, i have to add
+> --cluster rover to every command? ick!" trap.
+>
 
-Nathan
+Yeah, that was me in 2012. Oops.
+
+-Erik
+
+> sage
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
