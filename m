@@ -1,33 +1,30 @@
-From: Mykola Golub <to.my.trociny@gmail.com>
-Subject: Re: [ceph-users] removing cluster name support
-Date: Fri, 9 Jun 2017 19:16:01 +0300
-Message-ID: <20170609161600.GB13741@gmail.com>
-References: <alpine.DEB.2.11.1706081936570.3646@piezo.novalocal>
- <alpine.DEB.2.11.1706091602210.3646@piezo.novalocal>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Are we ready for 10.2.8 - rgw
+Date: Fri, 9 Jun 2017 18:17:12 +0200
+Message-ID: <ef00f025-27ea-6efa-80db-2ebb15d5b819@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f42.google.com ([209.85.215.42]:36312 "EHLO
-        mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751659AbdFIQQE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 9 Jun 2017 12:16:04 -0400
-Received: by mail-lf0-f42.google.com with SMTP id o83so31636673lff.3
-        for <ceph-devel@vger.kernel.org>; Fri, 09 Jun 2017 09:16:03 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1706091602210.3646@piezo.novalocal>
+Received: from mx2.suse.de ([195.135.220.15]:41486 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751644AbdFIQRT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 9 Jun 2017 12:17:19 -0400
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 1A084ADB1
+        for <ceph-devel@vger.kernel.org>; Fri,  9 Jun 2017 16:17:13 +0000 (UTC)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org, ceph-users@ceph.com
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Jun 09, 2017 at 04:07:15PM +0000, Sage Weil wrote:
+Hi Yehuda:
 
-> This neatly avoids the systemd limitations for all but the most 
-> adventuresome admins and avoid the more common case of an admin falling 
-> into the "oh, I can name my cluster? cool! [...] oh, i have to add 
-> --cluster rover to every command? ick!" trap.
+The following rgw backports have been merged into the jewel branch in 
+preparation for the 10.2.8 release.
 
-"... oh, I can add --cluster to CEPH_ARGS. cool!" :-)
+http://tracker.ceph.com/projects/rgw/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=3&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=537&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D=
 
--- 
-Mykola Golub
+Do you think it's time for QE to do its testing?
+
+Nathan
