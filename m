@@ -1,59 +1,47 @@
-From: Loic Dachary <loic@dachary.org>
-Subject: Re: erasure_code_version() for a new erasure code
-Date: Sun, 11 Jun 2017 08:51:06 +0200
-Message-ID: <bb2cbb3a-cb7a-d4cd-ed6e-187dd1b61677@dachary.org>
-References: <CAODUPsEkkQ-bHzK6vy-AUjtRkvEZZEDNoRHc+E5WHhsrS+uJpA@mail.gmail.com>
- <ad68008d-59ab-2cd0-03c7-b7896ac955ea@dachary.org>
- <CAODUPsFQ+7Je-pahjaayrqy8+uDHFAc+2Atz6atjmROJ5hV+Mw@mail.gmail.com>
- <aa4efbd2-c28d-2255-a536-892ecc89157c@dachary.org>
- <CAODUPsEzgwXH32CoyvuLe+JMdrOUnG6tjTD01WCdwfQvgMan-A@mail.gmail.com>
- <e1caaa40-5981-0dba-9dfe-eb2b6d1f682e@dachary.org>
- <eab906b8-d64d-aaa3-ac82-84d73a9bb947@suse.cz>
- <CAODUPsE0VHUgKVPrkQn0Faq8f=fsHJswHu=C6meo7YdW15jYRQ@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Extra daemons/servers reporting to mgr
+Date: Sun, 11 Jun 2017 08:04:49 -0400
+Message-ID: <CALe9h7eT+7KUt7VZPaYfR49FEPP3mJbe2+ARK82BaZUMmStchw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:35730 "EHLO
-        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751676AbdFKGvK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 11 Jun 2017 02:51:10 -0400
-In-Reply-To: <CAODUPsE0VHUgKVPrkQn0Faq8f=fsHJswHu=C6meo7YdW15jYRQ@mail.gmail.com>
+Received: from mail-wr0-f180.google.com ([209.85.128.180]:35606 "EHLO
+        mail-wr0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751631AbdFKMFL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 11 Jun 2017 08:05:11 -0400
+Received: by mail-wr0-f180.google.com with SMTP id q97so70801792wrb.2
+        for <ceph-devel@vger.kernel.org>; Sun, 11 Jun 2017 05:05:11 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Oleg Kolosov <olekol@gmail.com>, Nathan Cutler <ncutler@suse.cz>
-Cc: ceph-devel@vger.kernel.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
+MgrClient instances (such as those in the daemons, and those in every
+librados instance) open a session with ceph-mgr where they identify
+themselves by entity name and type.  ceph-mgr sends a MgrConfigure
+message, which tells the client whether to both sending stats and how
+often.  ceph-mgr also keeps a copy of the metadata (a la "ceph osd
+metadata...") for OSD and MDS daemons -- it loads all that up at
+startup, and then also freshens it when it sees a daemon restart or
+sees a new daemon.
 
+We would like to have something similar so that the mgr can be aware
+of the existence of other services like RGW gateways, RBD mirror
+services, perhaps also NFS gateways.
 
-On 06/11/2017 06:21 AM, Oleg Kolosov wrote:
-> Hi Nathan, 
-> I've used branch 10.2.2
+The information about each daemon would at a minimum be its identity,
+type, and some static metadata.  It might also include some dynamic
+state/health structure.  The challenging part here is how to expose
+that to the various daemons, given that things like RGW are not known
+in advance to core Ceph and that they just consume the librados
+interface.
 
-You should try with the master branch instead. This is where new features need to be contributed.
+It doesn't feel like a particularly natural thing for librados, but
+ultimately whatever we expose to rgw/rbd is de-facto librados, even if
+we put it in a different library or whatever.
 
-Cheers
+So far I've got as far as thinking we should have an extra call just
+in the C++ bindings that lets callers say "Hi, I'm a service not just
+a client, and here's a map of metadata", that they call one time
+between creating their RadosClient and connecting to the cluster.
 
-> 
-> Thanks,
-> Oleg
-> 
-> On Jun 11, 2017 7:19 AM, "Nathan Cutler" <ncutler@suse.cz <mailto:ncutler@suse.cz>> wrote:
-> 
->             I've tried renaming lrc lib to the name of my code (I've edited
->             Makefile.am and CMakeLists.txt to match the new name), to see whether
->             it'll run, but again I got the same error.
-> 
-> 
->         Makefile.am is not used anymore, you can ignore it.
-> 
-> 
->     There is no Makefile.am at all in master; it was ripped out. So presumably Oleg is not basing his changes on master.
-> 
->     The "jewel" branch does have both Makefile.am and CMakeLists.txt, but cmake in jewel is not expected to work. Oleg, which branch are you basing your changes on?
-> 
->     Nathan
-> 
-
--- 
-Loïc Dachary, Artisan Logiciel Libre
+John
