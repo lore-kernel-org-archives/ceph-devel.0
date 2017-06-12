@@ -1,87 +1,56 @@
-From: Matt Benjamin <mbenjamin@redhat.com>
-Subject: Re: Extra daemons/servers reporting to mgr
-Date: Mon, 12 Jun 2017 10:26:27 -0400 (EDT)
-Message-ID: <1284111406.22125094.1497277587133.JavaMail.zimbra@redhat.com>
-References: <CALe9h7eT+7KUt7VZPaYfR49FEPP3mJbe2+ARK82BaZUMmStchw@mail.gmail.com> <f483cee0-0a90-0571-d993-d1784e6a39ec@redhat.com>
+From: Georgi Chorbadzhiyski <gf@unixsol.org>
+Subject: Re: ceph-mds crash v12.0.3
+Date: Mon, 12 Jun 2017 17:45:47 +0300
+Message-ID: <a5a98b97-b04e-78e5-d1f6-461da78b279c@unixsol.org>
+References: <eaf869fc-892f-a8e1-fea3-2661ce7f401e@unixsol.org>
+ <CALe9h7c9bBMc4qd55sHx_T1jRrsHqWn+RksvQ=pzDFDKUYEwPw@mail.gmail.com>
+ <73168653-b8c8-1f43-e505-0d1f3e3612df@unixsol.org>
+ <CAAM7YA=dJRvjog8QOObzNEt3uqD+gPLqCuTSP8TTq=_Os2WE9g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:14884 "EHLO mx1.redhat.com"
+Received: from ns.unixsol.org ([193.110.159.2]:51872 "EHLO ns.unixsol.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752135AbdFLO0b (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 12 Jun 2017 10:26:31 -0400
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 9D39433458C
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2017 14:26:30 +0000 (UTC)
-In-Reply-To: <f483cee0-0a90-0571-d993-d1784e6a39ec@redhat.com>
+        id S1752164AbdFLOpu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 12 Jun 2017 10:45:50 -0400
+In-Reply-To: <CAAM7YA=dJRvjog8QOObzNEt3uqD+gPLqCuTSP8TTq=_Os2WE9g@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dang@redhat.com
+To: "Yan, Zheng" <ukernel@gmail.com>
 Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-The nfs gateways are clients of either libcephfs or librgw, so in the first instance, I would say that librgw, for example, which creates an RGW instance, should be the client of this API.
-
-Matt
-
------ Original Message -----
-> From: "Daniel Gryniewicz" <dang@redhat.com>
-> To: "John Spray" <jspray@redhat.com>, "Ceph Development" <ceph-devel@vger.kernel.org>
-> Sent: Monday, June 12, 2017 10:14:02 AM
-> Subject: Re: Extra daemons/servers reporting to mgr
+On 6/12/17 3:58 PM, Yan, Zheng wrote:
+> On Mon, Jun 12, 2017 at 6:56 PM, Georgi Chorbadzhiyski <gf@unixsol.org> wrote:
+>> On 6/12/17 1:22 PM, John Spray wrote:
+>>> On Mon, Jun 12, 2017 at 5:13 AM, Georgi Chorbadzhiyski <gf@unixsol.org> wrote:
+>>>> We started getting these on all of our 3 MDS-es. Any idea how to fix it or at least debug
+>>>> it and remove the dir entries that are causing the problem?
+>>>
+>>> Assuming it's easy to reproduce, set "debug mds = 20", "debug ms = 1"
+>>> and gather the logs in the run up to the crash.
+>>
+>> After turning up debug as you suggested here are the logs before the crash.
+>>
+>>    -10> 2017-06-12 05:46:05.808399 7fc8038d2700 10 MDSInternalContextBase::complete: 18C_MDS_RetryRequest
+>>     -9> 2017-06-12 05:46:05.808401 7fc8038d2700  7 mds.0.server dispatch_client_request client_request(client.467465:121280822 readdir #1000007d3e8 sess_umos5jqii50rttcag852lros73 2017-06-12 03:36:19.073284 RETRY=115 caller_uid=1838, caller_gid=1838{}) v2
+>>     -8> 2017-06-12 05:46:05.808407 7fc8038d2700 10 mds.0.server rdlock_path_pin_ref request(client.467465:121280822 cr=0x7fc819988f00) #1000007d3e8
+>>     -7> 2017-06-12 05:46:05.808410 7fc8038d2700 10 mds.0.locker acquire_locks request(client.467465:121280822 cr=0x7fc819988f00) - done locking
+>>     -6> 2017-06-12 05:46:05.808416 7fc8038d2700 20 Session check_access path /client/shared/site.com/oc-content/uploads/session
+>>     -5> 2017-06-12 05:46:05.808418 7fc8038d2700 10 MDSAuthCap is_capable inode(path /client/shared/site.com/oc-content/uploads/session owner 1838:1838 mode 040755) by caller 1838:1838 mask 1 new 1024:524288 cap: MDSAuthCaps[allow *]
+>>
+>>     -4> 2017-06-12 05:46:05.808423 7fc8038d2700 10 mds.0.server  frag 1* offset 'sess_umos5jqii50rttcag852lros73' offset_hash 13141348 flags 0
+>>     -3> 2017-06-12 05:46:05.808426 7fc8038d2700 10 mds.0.server  adjust frag 1* -> 1000* fragtree_t(*^1 0*^1 1*^3)
+>>     -2> 2017-06-12 05:46:05.808430 7fc8038d2700 10 mds.0.server handle_client_readdir on [dir 1000007d3e8.1000* /client/shared/site.com/oc-content/uploads/session/ [2,head] auth pv=1077482 v=1077481 cv=0/0 ap=1+2+2 state=1610612738|complete f(v86 218=218+0) n(v10 b67671 218=218+0) hs=218+6,ss=0+0 dirty=10 | child=1 dirty=1 waiter=0 authpin=1 0x7fc828eae340]
+>>     -1> 2017-06-12 05:46:05.808447 7fc8038d2700 10 mds.0.server snapid head
+>>      0> 2017-06-12 05:46:05.843735 7fc8038d2700 -1 *** Caught signal (Segmentation fault) **
+>>  in thread 7fc8038d2700 thread_name:ms_dispatch
 > 
-> On 06/11/2017 08:04 AM, John Spray wrote:
-> > MgrClient instances (such as those in the daemons, and those in every
-> > librados instance) open a session with ceph-mgr where they identify
-> > themselves by entity name and type.  ceph-mgr sends a MgrConfigure
-> > message, which tells the client whether to both sending stats and how
-> > often.  ceph-mgr also keeps a copy of the metadata (a la "ceph osd
-> > metadata...") for OSD and MDS daemons -- it loads all that up at
-> > startup, and then also freshens it when it sees a daemon restart or
-> > sees a new daemon.
-> >
-> > We would like to have something similar so that the mgr can be aware
-> > of the existence of other services like RGW gateways, RBD mirror
-> > services, perhaps also NFS gateways.
-> >
-> > The information about each daemon would at a minimum be its identity,
-> > type, and some static metadata.  It might also include some dynamic
-> > state/health structure.  The challenging part here is how to expose
-> > that to the various daemons, given that things like RGW are not known
-> > in advance to core Ceph and that they just consume the librados
-> > interface.
-> >
-> > It doesn't feel like a particularly natural thing for librados, but
-> > ultimately whatever we expose to rgw/rbd is de-facto librados, even if
-> > we put it in a different library or whatever.
-> >
-> > So far I've got as far as thinking we should have an extra call just
-> > in the C++ bindings that lets callers say "Hi, I'm a service not just
-> > a client, and here's a map of metadata", that they call one time
-> > between creating their RadosClient and connecting to the cluster.
-> >
-> 
-> This seems fine, but if we want NFS gateways, too, then a C API would be
-> helpful.
-> 
-> Daniel
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> The log doesn't contain useful information for this issue. Could you
+> please enable coredump try again. Besides, please install debug info
+> for ceph-mds or re-compile ceph with debug info. After got coredump,
+> using gdb to debug this issue is convenient.
 
--- 
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-821-5101
-fax.  734-769-8938
-cel.  734-216-5309
+I have core dump, where can I get the debug info for official centos 7
+packages?
