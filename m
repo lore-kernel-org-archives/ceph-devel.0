@@ -1,63 +1,56 @@
-From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
-Subject: ceph.dir.rbytes inconsistent on different hosts
-Date: Mon, 12 Jun 2017 15:45:26 -0400
-Message-ID: <CAGbvivJw+gEDijgq3eG41k78K2AGh+HknKwE7FKVUGo01Wd3SA@mail.gmail.com>
+From: Matt Benjamin <mbenjamin@redhat.com>
+Subject: Re: Extra daemons/servers reporting to mgr
+Date: Mon, 12 Jun 2017 16:03:13 -0400 (EDT)
+Message-ID: <1396097469.22206951.1497297793862.JavaMail.zimbra@redhat.com>
+References: <CALe9h7eT+7KUt7VZPaYfR49FEPP3mJbe2+ARK82BaZUMmStchw@mail.gmail.com> <73f90019-71aa-2cf1-92e8-0ba7087d62a4@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f43.google.com ([209.85.214.43]:36815 "EHLO
-        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752135AbdFLTp1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Jun 2017 15:45:27 -0400
-Received: by mail-it0-f43.google.com with SMTP id m47so28902920iti.1
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2017 12:45:27 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:50290 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752371AbdFLUDS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 12 Jun 2017 16:03:18 -0400
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 1D27137E66
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2017 20:03:18 +0000 (UTC)
+In-Reply-To: <73f90019-71aa-2cf1-92e8-0ba7087d62a4@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Casey Bodley <cbodley@redhat.com>
+Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Ceph 10.2.7
-Ubuntu 16.04.2
+I agree, though I'm unsure how much this matters either way?
 
-We have 2 hosts running identical versions of ceph with identical
-ceph.conf configuration files.
-Both mount /cephfs with the same options.
+Matt
 
-We have a directory under /cephfs with a 4GB file in it.  The
-ceph.dir.rbytes xattr reported by ceph is different on the 2 hosts.
-One is correct, one is not.
+----- Original Message -----
 
-One host reports the 'ceph.dir.rbytes' correctly as 4129644548, the
-other reports it incorrectly as  2389190660
-Any ideas why this would be happening ?
+> 
+> Hi John,
+> 
+> Is there a reason that radosgw can't instantiate its own MgrClient
+> instance and report status through that, instead of having to go through
+> librados? If we have to report an entity instance, we could choose from
+> one of our Rados clients.
+> 
+> Casey
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-- Wyllys Ingersoll
-  Keeper Technology, LLC
+-- 
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
 
+http://www.redhat.com/en/technologies/storage
 
-HOST A (correct values):
-$ ls -alF /cephfs/exports/smbtest
-total 4032857
-drwxrwxrwx 1 root    root    4129644548 May 31 11:28 ./
-drwxr-xr-x 1 root    root    4129644548 May 31 11:25 ../
--rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
--rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
--rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
-
-$ getfattr -d -m ceph.dir /cephfs/exports/smbtest
-getfattr: Removing leading '/' from absolute path names
-# file: cephfs/exports/smbtest
-ceph.dir.rbytes="4129644548"
-
-HOST B (incorrect values)
-$ ls -alF /cephfs/exports/smbtest
-total 4032857
-drwxrwxrwx 1 root          root         2389190660 May 31 11:28 ./
-drwxr-xr-x 1 root          root         4129644548 May 31 11:25 ../
--rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
--rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
--rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
-
-$ getfattr -d -m ceph.dir.rbytes /cephfs/exports/smbtest
-getfattr: Removing leading '/' from absolute path names
-# file: cephfs/exports/smbtest
-ceph.dir.rbytes="2389190660"
+tel.  734-821-5101
+fax.  734-769-8938
+cel.  734-216-5309
