@@ -1,48 +1,83 @@
-From: Georgi Chorbadzhiyski <gf@unixsol.org>
-Subject: Re: ceph-mds crash v12.0.3
-Date: Mon, 12 Jun 2017 13:56:45 +0300
-Message-ID: <73168653-b8c8-1f43-e505-0d1f3e3612df@unixsol.org>
-References: <eaf869fc-892f-a8e1-fea3-2661ce7f401e@unixsol.org>
- <CALe9h7c9bBMc4qd55sHx_T1jRrsHqWn+RksvQ=pzDFDKUYEwPw@mail.gmail.com>
+From: Jens Rosenboom <j.rosenboom-C33AMpY93qY@public.gmane.org>
+Subject: Re: RGW: Truncated objects and bad error handling
+Date: Mon, 12 Jun 2017 11:06:39 +0000
+Message-ID: <CADr68Wa1BdGHgu9z3WtdmA1hTeTQx4H825H5kcXDa2YF6Tq-bA@mail.gmail.com>
+References: <CADr68WaSwmgd3Cwf9AcEcbTYefbrEmREoFYzeWdeGtksEDjgFA@mail.gmail.com>
+	<CAJ4mKGbbPyUsj662Fz84NYvvKjbsQxXz=Eagpk+r9bh5gW-7NQ@mail.gmail.com>
+	<CADr68WbwwSvvcm_rBAFvA_K_EN9Q9+sJ9Sg0x6ivO_S_aHCdyA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ns.unixsol.org ([193.110.159.2]:42876 "EHLO ns.unixsol.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751969AbdFLK4r (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 12 Jun 2017 06:56:47 -0400
-In-Reply-To: <CALe9h7c9bBMc4qd55sHx_T1jRrsHqWn+RksvQ=pzDFDKUYEwPw@mail.gmail.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CADr68WbwwSvvcm_rBAFvA_K_EN9Q9+sJ9Sg0x6ivO_S_aHCdyA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 6/12/17 1:22 PM, John Spray wrote:
-> On Mon, Jun 12, 2017 at 5:13 AM, Georgi Chorbadzhiyski <gf@unixsol.org> wrote:
->> We started getting these on all of our 3 MDS-es. Any idea how to fix it or at least debug
->> it and remove the dir entries that are causing the problem?
-> 
-> Assuming it's easy to reproduce, set "debug mds = 20", "debug ms = 1"
-> and gather the logs in the run up to the crash.
+Adding ceph-devel as this now involves two bugs that are IMO critical,
+one resulting in data loss, the other in data not getting removed
+properly.
 
-After turning up debug as you suggested here are the logs before the crash.
+2017-06-07 9:23 GMT+00:00 Jens Rosenboom <j.rosenboom-C33AMpY93qY@public.gmane.org>:
+> 2017-06-01 18:52 GMT+00:00 Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+>>
+>>
+>> On Thu, Jun 1, 2017 at 2:03 AM Jens Rosenboom <j.rosenboom-C33AMpY93qY@public.gmane.org> wrote:
+>>>
+>>> On a large Hammer-based cluster (> 1 Gobjects) we are seeing a small
+>>> amount of objects being truncated. All of these objects are between
+>>> 512kB and 4MB in size and they are not uploaded as multipart, so the
+>>> first 512kB get stored into the head object and the next chunks should
+>>> be in tail objects named <bucket_id>__shadow_<tag>_N, but the latter
+>>> seem to go missing sometimes. The PUT operation for these objects is
+>>> logged as successful (HTTP code 200), so I'm currently having two
+>>> hypotheses as to what might be happening:
+>>>
+>>> 1. The object is received by the radosgw process, the head object is
+>>> written successfully, then the write for the tail object somehow
+>>> fails. So the question is whether this is possible or whether radosgw
+>>> will always wait until all operations have completed successfully
+>>> before returning the 200. This blog [1] at least mentions some
+>>> asynchronous operations.
+>>>
+>>> 2. The full object is written correctly, but the tail objects are
+>>> getting deleted somehow afterwards. This might happen during garbage
+>>> collection if there was a collision between the tail object names for
+>>> two objects, but again I'm not sure whether this is possible.
+>>>
+>>> So the question is whether anyone else has seen this issue, also
+>>> whether it may possibly be fixed in Jewel or later.
 
-   -10> 2017-06-12 05:46:05.808399 7fc8038d2700 10 MDSInternalContextBase::complete: 18C_MDS_RetryRequest
-    -9> 2017-06-12 05:46:05.808401 7fc8038d2700  7 mds.0.server dispatch_client_request client_request(client.467465:121280822 readdir #1000007d3e8 sess_umos5jqii50rttcag852lros73 2017-06-12 03:36:19.073284 RETRY=115 caller_uid=1838, caller_gid=1838{}) v2
-    -8> 2017-06-12 05:46:05.808407 7fc8038d2700 10 mds.0.server rdlock_path_pin_ref request(client.467465:121280822 cr=0x7fc819988f00) #1000007d3e8
-    -7> 2017-06-12 05:46:05.808410 7fc8038d2700 10 mds.0.locker acquire_locks request(client.467465:121280822 cr=0x7fc819988f00) - done locking
-    -6> 2017-06-12 05:46:05.808416 7fc8038d2700 20 Session check_access path /client/shared/site.com/oc-content/uploads/session
-    -5> 2017-06-12 05:46:05.808418 7fc8038d2700 10 MDSAuthCap is_capable inode(path /client/shared/site.com/oc-content/uploads/session owner 1838:1838 mode 040755) by caller 1838:1838 mask 1 new 1024:524288 cap: MDSAuthCaps[allow *]
+For reference, the original issue is: http://tracker.ceph.com/issues/20107
 
-    -4> 2017-06-12 05:46:05.808423 7fc8038d2700 10 mds.0.server  frag 1* offset 'sess_umos5jqii50rttcag852lros73' offset_hash 13141348 flags 0
-    -3> 2017-06-12 05:46:05.808426 7fc8038d2700 10 mds.0.server  adjust frag 1* -> 1000* fragtree_t(*^1 0*^1 1*^3)
-    -2> 2017-06-12 05:46:05.808430 7fc8038d2700 10 mds.0.server handle_client_readdir on [dir 1000007d3e8.1000* /client/shared/site.com/oc-content/uploads/session/ [2,head] auth pv=1077482 v=1077481 cv=0/0 ap=1+2+2 state=1610612738|complete f(v86 218=218+0) n(v10 b67671 218=218+0) hs=218+6,ss=0+0 dirty=10 | child=1 dirty=1 waiter=0 authpin=1 0x7fc828eae340]
-    -1> 2017-06-12 05:46:05.808447 7fc8038d2700 10 mds.0.server snapid head
-     0> 2017-06-12 05:46:05.843735 7fc8038d2700 -1 *** Caught signal (Segmentation fault) **
- in thread 7fc8038d2700 thread_name:ms_dispatch
+> So I think I found out what is happening, which seems to be a pretty
+> severe bug: When an object is copied, is seems like the copy is
+> created with the same prefix for shadow objects. So when the copied
+> object is afterwards deleted, garbage collection will delete the
+> shadow object, rendering the original object truncated.
 
-I've looked at mds code but nothing caught my eye and after "snapid head" debug
-message unfortunately there is not a lot debug printing going on to get a better
-idea what's going on.
+This inital idea of mine was wrong, the sharing of the shadow objects
+is intentional. There is another additional bug though, that results
+in shadow objects not being deleted at all anymore once an object has
+been copied:
+
+http://tracker.ceph.com/issues/20234
+
+So this is making it even more mysterious why it sometimes can happen
+that shadow objects _are_ being removed prematurely. But we are still
+seing this on our production system at a rate of at least a couple of
+events per day.
+
+I'd also still like to get feedback on how best to deal with reading
+these truncated objects:
+
+> http://tracker.ceph.com/issues/20166
