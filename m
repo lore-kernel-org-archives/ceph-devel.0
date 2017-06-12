@@ -1,17 +1,17 @@
 From: Georgi Chorbadzhiyski <gf@unixsol.org>
 Subject: Re: ceph-mds crash v12.0.3
-Date: Mon, 12 Jun 2017 13:38:35 +0300
-Message-ID: <86ee7418-a1b2-2d29-c40c-751b72a1bdde@unixsol.org>
+Date: Mon, 12 Jun 2017 13:56:45 +0300
+Message-ID: <73168653-b8c8-1f43-e505-0d1f3e3612df@unixsol.org>
 References: <eaf869fc-892f-a8e1-fea3-2661ce7f401e@unixsol.org>
  <CALe9h7c9bBMc4qd55sHx_T1jRrsHqWn+RksvQ=pzDFDKUYEwPw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ns.unixsol.org ([193.110.159.2]:58067 "EHLO ns.unixsol.org"
+Received: from ns.unixsol.org ([193.110.159.2]:42876 "EHLO ns.unixsol.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752024AbdFLKij (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 12 Jun 2017 06:38:39 -0400
+        id S1751969AbdFLK4r (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 12 Jun 2017 06:56:47 -0400
 In-Reply-To: <CALe9h7c9bBMc4qd55sHx_T1jRrsHqWn+RksvQ=pzDFDKUYEwPw@mail.gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
@@ -27,108 +27,22 @@ On 6/12/17 1:22 PM, John Spray wrote:
 > Assuming it's easy to reproduce, set "debug mds = 20", "debug ms = 1"
 > and gather the logs in the run up to the crash.
 
-I'll try that.
+After turning up debug as you suggested here are the logs before the crash.
 
-> What is the workload?  Is there anything unusual about this directory?
+   -10> 2017-06-12 05:46:05.808399 7fc8038d2700 10 MDSInternalContextBase::complete: 18C_MDS_RetryRequest
+    -9> 2017-06-12 05:46:05.808401 7fc8038d2700  7 mds.0.server dispatch_client_request client_request(client.467465:121280822 readdir #1000007d3e8 sess_umos5jqii50rttcag852lros73 2017-06-12 03:36:19.073284 RETRY=115 caller_uid=1838, caller_gid=1838{}) v2
+    -8> 2017-06-12 05:46:05.808407 7fc8038d2700 10 mds.0.server rdlock_path_pin_ref request(client.467465:121280822 cr=0x7fc819988f00) #1000007d3e8
+    -7> 2017-06-12 05:46:05.808410 7fc8038d2700 10 mds.0.locker acquire_locks request(client.467465:121280822 cr=0x7fc819988f00) - done locking
+    -6> 2017-06-12 05:46:05.808416 7fc8038d2700 20 Session check_access path /client/shared/site.com/oc-content/uploads/session
+    -5> 2017-06-12 05:46:05.808418 7fc8038d2700 10 MDSAuthCap is_capable inode(path /client/shared/site.com/oc-content/uploads/session owner 1838:1838 mode 040755) by caller 1838:1838 mask 1 new 1024:524288 cap: MDSAuthCaps[allow *]
 
-The problem is that I don't know which directory is causing the problems.
+    -4> 2017-06-12 05:46:05.808423 7fc8038d2700 10 mds.0.server  frag 1* offset 'sess_umos5jqii50rttcag852lros73' offset_hash 13141348 flags 0
+    -3> 2017-06-12 05:46:05.808426 7fc8038d2700 10 mds.0.server  adjust frag 1* -> 1000* fragtree_t(*^1 0*^1 1*^3)
+    -2> 2017-06-12 05:46:05.808430 7fc8038d2700 10 mds.0.server handle_client_readdir on [dir 1000007d3e8.1000* /client/shared/site.com/oc-content/uploads/session/ [2,head] auth pv=1077482 v=1077481 cv=0/0 ap=1+2+2 state=1610612738|complete f(v86 218=218+0) n(v10 b67671 218=218+0) hs=218+6,ss=0+0 dirty=10 | child=1 dirty=1 waiter=0 authpin=1 0x7fc828eae340]
+    -1> 2017-06-12 05:46:05.808447 7fc8038d2700 10 mds.0.server snapid head
+     0> 2017-06-12 05:46:05.843735 7fc8038d2700 -1 *** Caught signal (Segmentation fault) **
+ in thread 7fc8038d2700 thread_name:ms_dispatch
 
-I'll try to remove all clients and the try to pinpoint the directory,
-because currently the thing is just unusable.
-
->  Has the cluster ever experienced severe damage like a lost PG?
-
-Nope, the cluster was working just fine until two hours ago. We've installed
-it last week and tere were no problems until today.
-
->> [root@amssn3 ~]# yum info ceph-mds
->> Name        : ceph-mds
->> Arch        : x86_64
->> Epoch       : 1
->> Version     : 12.0.3
->> Release     : 0.el7
->>
->> Jun 12 04:11:39 amssn1.sgvps.net ceph-mds[3532]: *** Caught signal (Segmentation fault) **
->> Jun 12 04:11:39 amssn1.sgvps.net ceph-mds[3532]: in thread 7f9e0ae70700 thread_name:mds_rank_progr
->> Jun 12 04:11:39 amssn1.sgvps.net ceph-mds[3532]: ceph version 12.0.3 (f2337d1b42fa49dbb0a93e4048a42762e3dffbbf)
->> Jun 12 04:11:39 amssn1.sgvps.net ceph-mds[3532]: 1: (()+0x563caf) [0x7f9e16d46caf]
->> Jun 12 04:11:39 amssn1.sgvps.net ceph-mds[3532]: 2: (()+0xf370) [0x7f9e148cc370]
->> Jun 12 04:11:39 amssn1.sgvps.net ceph-mds[3532]: 3: (Server::handle_client_readdir(boost::intrusive_ptr<MDRequestImpl>&)+0xbb9) [0x7f9e16ac3559]
->> Jun 12 04:11:39 amssn1.sgvps.net ceph-mds[3532]: 4: (Server::dispatch_client_request(boost::intrusive_ptr<MDRequestImpl>&)+0x9b1) [0x7f9e16af2231]
->> Jun 12 04:11:39 amssn1.sgvps.net ceph-mds[3532]: 5: (MDSInternalContextBase::complete(int)+0x1eb) [0x7f9e16cd1bcb]
->> Jun 12 04:11:39 amssn1.sgvps.net ceph-mds[3532]: 6: (MDSRank::_advance_queues()+0x4a5) [0x7f9e16a7e375]
->> Jun 12 04:11:39 amssn1.sgvps.net ceph-mds[3532]: 7: (MDSRank::ProgressThread::entry()+0x4a) [0x7f9e16a7e7ea]
->> Jun 12 04:11:39 amssn1.sgvps.net ceph-mds[3532]: 8: (()+0x7dc5) [0x7f9e148c4dc5]
->> Jun 12 04:11:39 amssn1.sgvps.net ceph-mds[3532]: 9: (clone()+0x6d) [0x7f9e137a476d]
->> Jun 12 04:11:39 amssn1.sgvps.net ceph-mds[3532]: 2017-06-12 04:11:39.585944 7f9e0ae70700 -1 *** Caught signal (Segmentation fault) **
->>
->>
->> Jun 12 03:36:19 amssn3.sgvps.net ceph-mds[3503]: ceph version 12.0.3 (f2337d1b42fa49dbb0a93e4048a42762e3dffbbf)
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 1: (()+0x563caf) [0x7f24fe425caf]
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 2: (()+0xf370) [0x7f24fbfab370]
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 3: (Server::handle_client_readdir(boost::intrusive_ptr<MDRequestImpl>&)+0xbb9) [0x7f24fe1a2559]
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 4: (Server::dispatch_client_request(boost::intrusive_ptr<MDRequestImpl>&)+0x9b1) [0x7f24fe1d1231]
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 5: (Server::handle_client_request(MClientRequest*)+0x48d) [0x7f24fe1d1a6d]
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 6: (Server::dispatch(Message*)+0x38b) [0x7f24fe1d619b]
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 7: (MDSRank::handle_deferrable_message(Message*)+0x7fc) [0x7f24fe152bbc]
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 8: (MDSRank::_dispatch(Message*, bool)+0x1eb) [0x7f24fe15db4b]
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 9: (MDSRankDispatcher::ms_dispatch(Message*)+0x15) [0x7f24fe15ea95]
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 10: (MDSDaemon::ms_dispatch(Message*)+0xf3) [0x7f24fe14a7c3]
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 11: (DispatchQueue::entry()+0x7a2) [0x7f24fe6a9a02]
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 12: (DispatchQueue::DispatchThread::entry()+0xd) [0x7f24fe4dd23d]
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 13: (()+0x7dc5) [0x7f24fbfa3dc5]
->> Jun 12 03:36:19 amssn3 ceph-mds[3503]: 14: (clone()+0x6d) [0x7f24fae8376d]
->>
->>
->> Jun 12 04:01:33 amssn5 ceph-mds[2544]: starting mds.amssn5 at -
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: *** Caught signal (Segmentation fault) **
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: in thread 7f45d2595700 thread_name:mds_rank_progr
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: ceph version 12.0.3 (f2337d1b42fa49dbb0a93e4048a42762e3dffbbf)
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 1: (()+0x563caf) [0x7f45de46bcaf]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 2: (()+0xf370) [0x7f45dbff1370]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 3: (Server::handle_client_readdir(boost::intrusive_ptr<MDRequestImpl>&)+0xbb9) [0x7f45de1e8559]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 4: (Server::dispatch_client_request(boost::intrusive_ptr<MDRequestImpl>&)+0x9b1) [0x7f45de217231]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 5: (MDSInternalContextBase::complete(int)+0x1eb) [0x7f45de3f6bcb]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 6: (MDSRank::_advance_queues()+0x4a5) [0x7f45de1a3375]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 7: (MDSRank::ProgressThread::entry()+0x4a) [0x7f45de1a37ea]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 8: (()+0x7dc5) [0x7f45dbfe9dc5]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 9: (clone()+0x6d) [0x7f45daec976d]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 2017-06-12 04:01:43.579491 7f45d2595700 -1 *** Caught signal (Segmentation fault) **
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: in thread 7f45d2595700 thread_name:mds_rank_progr
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: ceph version 12.0.3 (f2337d1b42fa49dbb0a93e4048a42762e3dffbbf)
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 1: (()+0x563caf) [0x7f45de46bcaf]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 2: (()+0xf370) [0x7f45dbff1370]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 3: (Server::handle_client_readdir(boost::intrusive_ptr<MDRequestImpl>&)+0xbb9) [0x7f45de1e8559]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 4: (Server::dispatch_client_request(boost::intrusive_ptr<MDRequestImpl>&)+0x9b1) [0x7f45de217231]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 5: (MDSInternalContextBase::complete(int)+0x1eb) [0x7f45de3f6bcb]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 6: (MDSRank::_advance_queues()+0x4a5) [0x7f45de1a3375]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 7: (MDSRank::ProgressThread::entry()+0x4a) [0x7f45de1a37ea]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 8: (()+0x7dc5) [0x7f45dbfe9dc5]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 9: (clone()+0x6d) [0x7f45daec976d]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 0> 2017-06-12 04:01:43.579491 7f45d2595700 -1 *** Caught signal (Segmentation fault) **
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: in thread 7f45d2595700 thread_name:mds_rank_progr
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: ceph version 12.0.3 (f2337d1b42fa49dbb0a93e4048a42762e3dffbbf)
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 1: (()+0x563caf) [0x7f45de46bcaf]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 2: (()+0xf370) [0x7f45dbff1370]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 3: (Server::handle_client_readdir(boost::intrusive_ptr<MDRequestImpl>&)+0xbb9) [0x7f45de1e8559]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 4: (Server::dispatch_client_request(boost::intrusive_ptr<MDRequestImpl>&)+0x9b1) [0x7f45de217231]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 5: (MDSInternalContextBase::complete(int)+0x1eb) [0x7f45de3f6bcb]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 6: (MDSRank::_advance_queues()+0x4a5) [0x7f45de1a3375]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 7: (MDSRank::ProgressThread::entry()+0x4a) [0x7f45de1a37ea]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 8: (()+0x7dc5) [0x7f45dbfe9dc5]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: 9: (clone()+0x6d) [0x7f45daec976d]
->> Jun 12 04:01:43 amssn5 ceph-mds[2544]: NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
-
--- 
-Georgi Chorbadzhiyski | http://georgi.unixsol.org/ | http://github.com/gfto/
+I've looked at mds code but nothing caught my eye and after "snapid head" debug
+message unfortunately there is not a lot debug printing going on to get a better
+idea what's going on.
