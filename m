@@ -1,43 +1,63 @@
-From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
-Subject: Re: Are we ready for 10.2.8 - rgw
-Date: Mon, 12 Jun 2017 11:59:46 -0700
-Message-ID: <CADRKj5T_B0Rsva7--OnNehV3-8tYYRfv_V=rAOc-pyWZh7MycA@mail.gmail.com>
-References: <ef00f025-27ea-6efa-80db-2ebb15d5b819@suse.cz>
+From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Subject: ceph.dir.rbytes inconsistent on different hosts
+Date: Mon, 12 Jun 2017 15:45:26 -0400
+Message-ID: <CAGbvivJw+gEDijgq3eG41k78K2AGh+HknKwE7FKVUGo01Wd3SA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f180.google.com ([209.85.216.180]:33166 "EHLO
-        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752050AbdFLS7s (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Jun 2017 14:59:48 -0400
-Received: by mail-qt0-f180.google.com with SMTP id u12so138371736qth.0
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2017 11:59:47 -0700 (PDT)
-In-Reply-To: <ef00f025-27ea-6efa-80db-2ebb15d5b819@suse.cz>
+Received: from mail-it0-f43.google.com ([209.85.214.43]:36815 "EHLO
+        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752135AbdFLTp1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Jun 2017 15:45:27 -0400
+Received: by mail-it0-f43.google.com with SMTP id m47so28902920iti.1
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2017 12:45:27 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-I think so. I do see a large list of issues  with backport set to
-jewel. Some of these were already backported but we didn't resolve the
-tracker. I think that we can probably cut 10.2.8 now, and maybe plan
-on early 10.2.9?
+Ceph 10.2.7
+Ubuntu 16.04.2
 
-Yehuda
+We have 2 hosts running identical versions of ceph with identical
+ceph.conf configuration files.
+Both mount /cephfs with the same options.
 
-On Fri, Jun 9, 2017 at 9:17 AM, Nathan Cutler <ncutler@suse.cz> wrote:
-> Hi Yehuda:
->
-> The following rgw backports have been merged into the jewel branch in
-> preparation for the 10.2.8 release.
->
-> http://tracker.ceph.com/projects/rgw/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=3&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=537&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D=
->
-> Do you think it's time for QE to do its testing?
->
-> Nathan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+We have a directory under /cephfs with a 4GB file in it.  The
+ceph.dir.rbytes xattr reported by ceph is different on the 2 hosts.
+One is correct, one is not.
+
+One host reports the 'ceph.dir.rbytes' correctly as 4129644548, the
+other reports it incorrectly as  2389190660
+Any ideas why this would be happening ?
+
+- Wyllys Ingersoll
+  Keeper Technology, LLC
+
+
+HOST A (correct values):
+$ ls -alF /cephfs/exports/smbtest
+total 4032857
+drwxrwxrwx 1 root    root    4129644548 May 31 11:28 ./
+drwxr-xr-x 1 root    root    4129644548 May 31 11:25 ../
+-rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
+-rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
+-rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
+
+$ getfattr -d -m ceph.dir /cephfs/exports/smbtest
+getfattr: Removing leading '/' from absolute path names
+# file: cephfs/exports/smbtest
+ceph.dir.rbytes="4129644548"
+
+HOST B (incorrect values)
+$ ls -alF /cephfs/exports/smbtest
+total 4032857
+drwxrwxrwx 1 root          root         2389190660 May 31 11:28 ./
+drwxr-xr-x 1 root          root         4129644548 May 31 11:25 ../
+-rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
+-rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
+-rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
+
+$ getfattr -d -m ceph.dir.rbytes /cephfs/exports/smbtest
+getfattr: Removing leading '/' from absolute path names
+# file: cephfs/exports/smbtest
+ceph.dir.rbytes="2389190660"
