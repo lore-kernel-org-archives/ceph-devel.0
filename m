@@ -1,102 +1,186 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: Fwd: About dmClock tests confusion after integrating dmClock QoS
- library into ceph codebase
-Date: Tue, 13 Jun 2017 09:08:34 -0700
-Message-ID: <CAB7xdikrrXp5rw7xqtJ0FPhHLYLdWKup2pYJ4dyVt2g6Qd1pWQ@mail.gmail.com>
-References: <509B214C5E2CEA4D9C41C1AB2A76BDD1A36B38B0@H3CMLB12-EX.srv.huawei-3com.com>
- <5a40a1e8-c1c5-1bc1-86ce-4f5d2593d2d4@redhat.com> <CAB7xdinyGMQMnORDfNknEg4a_y5EpW_ibndNZUyWtRhS9TNgFg@mail.gmail.com>
+From: Abhishek Varshney <abhishek.varshney@flipkart.com>
+Subject: Re: rgw: leak with incomplete multiparts (was: Request for review)
+Date: Tue, 13 Jun 2017 21:40:52 +0530
+Message-ID: <CAP3mxSzUyQf0gS-JR5W8pwvp74EMQhfX-WqGGsNFs3H4CVnotg@mail.gmail.com>
+References: <CAP3mxSwbgTxzSL-d7-HxncV16JehvEuP+Pz-EmbQJvxT_G4HtQ@mail.gmail.com>
+ <CAE5T3Nz6voZMcq-g89JGhzXyhGaAbu6EXXEADDhEhfiQuBWjXw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f52.google.com ([209.85.213.52]:36492 "EHLO
-        mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752167AbdFMQIg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jun 2017 12:08:36 -0400
-Received: by mail-vk0-f52.google.com with SMTP id y70so28359362vky.3
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Jun 2017 09:08:35 -0700 (PDT)
-In-Reply-To: <CAB7xdinyGMQMnORDfNknEg4a_y5EpW_ibndNZUyWtRhS9TNgFg@mail.gmail.com>
+Received: from mail-yb0-f174.google.com ([209.85.213.174]:34443 "EHLO
+        mail-yb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750899AbdFMQKz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jun 2017 12:10:55 -0400
+Received: by mail-yb0-f174.google.com with SMTP id 4so37080072ybl.1
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Jun 2017 09:10:55 -0700 (PDT)
+In-Reply-To: <CAE5T3Nz6voZMcq-g89JGhzXyhGaAbu6EXXEADDhEhfiQuBWjXw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: =?UTF-8?B?5LqO55u45rSL?= <penglaiyxy@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Eric,
+Hi Penglaiyxy,
 
-we are also very interested in your dmclock work in ceph. May I ask if
-this branch wip_dmclock_clients has both clients and OSD support for
-dmclock?
-we want to fully test this implementations.
+I was able to reproduce the scenario described by you in current
+master branch. It turns out that, in case of re-uploading a part, rgw
+assigns a different prefix to it. This was introduced by the commit
+[1] as a fix for racy part uploads [2]. This leads to orphaned parts
+being uploaded, which have an entry in bucket index, but are not
+really part of any uploaded object. Such orphaned parts should have
+ideally been cleaned-up on multipart complete or abort operation. This
+looks like a slightly different issue, as the clean-up of such parts
+should not wait for a bucket deletion operation to happen.
 
-thanks for your help.
+Can you open a separate tracker issue for this, if one not present already.
 
-Sheng
+[1] https://github.com/ceph/ceph/pull/1781/commits/bd8e026f88b812cc70caf623=
+2c247844df5d99bf
+[2] http://tracker.ceph.com/issues/8269
 
-On Tue, Jun 13, 2017 at 7:14 AM, J. Eric Ivancich <ivancich@redhat.com> wro=
-te:
+Thanks
+Abhishek
+
+On Tue, Jun 13, 2017 at 12:28 PM, =E4=BA=8E=E7=9B=B8=E6=B4=8B <penglaiyxy@g=
+mail.com> wrote:
+> Hi Abhishek,
 >
-> On 06/02/2017 03:36 AM, Lijie wrote:
-> > Hi Eric,
-> >
-> > Our team has developed QOS feature on ceph using the dmclock library
-> > from community. We treat a rbd as a dmclock client instead of pool as .
-> > We tested our code and the result is   confusing .
-> >
-> >
-> >
-> > Testing environment: single server with 16 cores  , RAM of 32G, 8
-> > non-systerm disks,each runs one OSD. We set
-> > osd_op_num_threads_per_shard=3D2, osd_op_num_shards=3D5 on each OSD. Th=
-e
-> > Size of our RBD is 100G. The qos params of RBD is =EF=BC=88r:1K, p:100,=
- l:2k=EF=BC=89,
-> > rbd_cache =3D false , allow_limit_break =3D false.
-> >
-> >
-> >
-> > Conclusion:   we only got 1500 IOPS while the system serves much more
-> > than the limit value 2000.
-> >
-> > We used fio and adjusted  osd_op_num_shards .And we found that iops run=
-s
-> > bigger along as the growth of osd_op_num_shards. Finally it can break
-> > the limit value .( fio iops =3D 2300 while osd_op_num_shards =3D 20) .
-> >
-> >
-> >
-> > So would you mind to provide your test environment and result about
-> > dmclock library? And we would be appreciated if you offer some other
-> > direction . It will really be a great help for us.
+> Your PR is practical  for anyone who can not delete an non-empty bucket.
+>
+> But I think in one scenario that you still can not delete bucket
+> because of the orphan object leaked by multipart upload.
+>
+> Upload a multipart object:
+>
+> 1. Upload part 1 with prefix   2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5
+>
+> 2. The connection between rgw client and server is cutoff,  I don't
+> know if  I have upload part one completely ,so I re-upload part 1 then
+> the part 1 is attached with a new prefix like
+> eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH(which is tackled by rgw server )
+>
+> 3. The connection between rgw client and server is cutoff again, then
+> I re-upload part 1 with new  prefix d9H1FWnoOwmr3IAejtYQJ2hyIjsUA7U
+>
+> 4. Upload part 2 and left parts
+>
+> 5. At the end, complete the upload.
+>
+> The object with names below is leaked and I can not see them through
+> s3 client.  (My upload size is 15MB and stripe size is 4M)
+>
+> center-master.4439.1__multipart_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5=
+.1
+> center-master.4439.1__shadow_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5.1_=
+1
+> center-master.4439.1__shadow_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5.1_=
+2
+> center-master.4439.1__shadow_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5.1_=
+3
+>
+> center-master.4439.1__multipart_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1
+> center-master.4439.1__shadow_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1_1
+> center-master.4439.1__shadow_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1_2
+> center-master.4439.1__shadow_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1_3
+>
+> The above upload process is really occurring in our production
+> application and we find a lot space leaked.
+>
+> How can I reclaim the space leaked?
+>
+> Any Idea is appreciated.
 >
 >
+> ________________________________
+> penglaiyxy
 >
-> Are you using src/common/mClockPriorityQueue.h? Because it makes sure
-> allow_limit_break is true and asserts that as long as the dmclock queue
-> is not empty, it will retrieve a request when pull_request is called
-> (assert(pr.is_retn());). If allow_limit_break is false, that assert can
-> fail.
+> From: Abhishek Varshney
+> Date: 2017-06-13 00:17
+> To: Ceph Development
+> Subject: rgw: leak with incomplete multiparts (was: Request for review)
+> Reviving an old thread by a colleague on rgw leaking rados objects,
+> the PR submitted earlier [1] had failed teuthology rgw run, due to
+> radosgw-admin failing to remove a user with --purge-data flag. I tried
+> to root cause the issue, and it turned out that incomplete multiparts
+> need to be aborted when doing bucket rm with --purge-data. Here is the
+> new PR (https://github.com/ceph/ceph/pull/15630) which handles
+> incomplete multiparts with behaviour as given below:
 >
-> I'm guessing you've created your own interface to the dmclock library,
-> because of the issue outlined above.
+> * radosgw-admin user/bucket rm with incomplete multiparts would return
+> bucket not empty error.
+> * radosgw-admin user/bucket rm --purge-data with incomplete multiparts
+> would abort the pending multiparts and then delete the bucket.
+> * S3 delete bucket API with incomplete multiparts would return bucket
+> not empty error. The expectation here is on the user to either
+> complete or cancel all pending multipart uploads before deleting the
+> bucket.
 >
-> The dmclock library has a simulator built on top of it, which you can
-> use to design various scenarios and see how it works.
+> Requesting review on this PR.
 >
-> You can run it, for example, by:
+> PS : The check for an empty bucket index here [2] in the previous PR
+> [1] has been removed, as we found instances of inconsistent bucket
+> index with stale entries, without corresponding objects present in
+> data pool. This would have prevented the deletion of an empty bucket
+> with such inconsistent indexes. I am not sure on how to reproduce such
+> a scenario though.
 >
->     $ git clone git@github.com:ceph/dmclock.git
->     $ cd dmclock/
->     $ mkdir build
->     $ cd build
->     $ cmake ..
->     $ make dmclock-sims
->     $ sim/dmc_sim -c ../sim/dmc_sim_100th.conf
+> [1] https://github.com/ceph/ceph/pull/10920
+> [2] https://github.com/ceph/ceph/pull/10920/files#diff-c30965955342b98393=
+b73be699f4e355R7349
 >
-> where the file dmc_sim_100th.conf describes the scenario being simulated.
+> Thanks
+> Abhishek
 >
-> I'm not fully clear I understand your approach. If you can describe it
-> in more detail, I'll try to address any questions.
+> On Mon, Sep 12, 2016 at 4:23 AM, Praveen Kumar G T (Cloud Platform)
+> <praveen.gt@flipkart.com> wrote:
+>> Definitions
+>>
+>> Orphaned Objects: Orphaned objects are created when a Multipart upload h=
+as uploaded some or all of the parts but without executing multipart cancel=
+ or multipart complete. An incomplete Multipart upload is neither created n=
+or destroyed, it is in orphan state
+>> Leaked Objects : Objects that are not deleted on the ceph cluster but as=
+sumed to be deleted by s3 client. These objects cannot be accessed by s3 cl=
+ients but still occupy space in the ceph cluster
+>>
+>> Problem
+>>
+>> A s3 bucket cannot be deleted when there are objects in it. The bucket d=
+eletion command will fail with error BucketNotEmpty. The objects in the buc=
+kets can be listed using any of the s3 clients. In case if we have orphaned=
+ objects present in the bucket, they will not be listed via the normal list=
+ing operations of the s3 clients. If the bucket is deleted when there are o=
+rphaned objects in the bucket, they will end up being leaked. This ends of =
+using space in the ceph cluster even though the objects are not accessed by=
+ any of the s3 clients. This space is not accounted under the radosgw user =
+account as well
+>>
+>> Tracker link
+>>
+>> http://tracker.ceph.com/issues/17164
+>>
+>> Fix
+>>
+>> The fix will avoid deletion of buckets even if there are Orphaned object=
+s in the bucket. So now bucket deletion command will return BucketNotEmpty =
+ when there are orphaned objects as well.
+>>
+>> Pull request
+>>
+>> https://github.com/ceph/ceph/pull/10920
+>>
+>> Can somebody Please review the fix. We have already verified the fix loc=
+ally.
+>>
+>> Regards,
+>> Praveen.
+>>
+>>
+>> --
 >
-> Eric
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
