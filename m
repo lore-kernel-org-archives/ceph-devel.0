@@ -1,187 +1,64 @@
-From: Abhishek Varshney <abhishek.varshney@flipkart.com>
-Subject: Re: rgw: leak with incomplete multiparts (was: Request for review)
-Date: Tue, 13 Jun 2017 21:40:52 +0530
-Message-ID: <CAP3mxSzUyQf0gS-JR5W8pwvp74EMQhfX-WqGGsNFs3H4CVnotg@mail.gmail.com>
-References: <CAP3mxSwbgTxzSL-d7-HxncV16JehvEuP+Pz-EmbQJvxT_G4HtQ@mail.gmail.com>
- <CAE5T3Nz6voZMcq-g89JGhzXyhGaAbu6EXXEADDhEhfiQuBWjXw@mail.gmail.com>
+From: "Mahalingam, Ganesh" <ganesh.mahalingam@intel.com>
+Subject: RE: Ceph ISA-L git submodule
+Date: Tue, 13 Jun 2017 17:03:09 +0000
+Message-ID: <B209D98D8385BE41BC4DE002C072AEBE859F760F@fmsmsx118.amr.corp.intel.com>
+References: <B209D98D8385BE41BC4DE002C072AEBE859F7544@fmsmsx118.amr.corp.intel.com>
+ <9e3edca1-efbd-a1dc-0809-da781d045f26@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yb0-f174.google.com ([209.85.213.174]:34443 "EHLO
-        mail-yb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750899AbdFMQKz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jun 2017 12:10:55 -0400
-Received: by mail-yb0-f174.google.com with SMTP id 4so37080072ybl.1
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Jun 2017 09:10:55 -0700 (PDT)
-In-Reply-To: <CAE5T3Nz6voZMcq-g89JGhzXyhGaAbu6EXXEADDhEhfiQuBWjXw@mail.gmail.com>
+Received: from mga05.intel.com ([192.55.52.43]:28020 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751802AbdFMREH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 13 Jun 2017 13:04:07 -0400
+In-Reply-To: <9e3edca1-efbd-a1dc-0809-da781d045f26@dachary.org>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?5LqO55u45rSL?= <penglaiyxy@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Loic Dachary <loic@dachary.org>
+Cc: "Gohad, Tushar" <tushar.gohad@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Penglaiyxy,
 
-I was able to reproduce the scenario described by you in current
-master branch. It turns out that, in case of re-uploading a part, rgw
-assigns a different prefix to it. This was introduced by the commit
-[1] as a fix for racy part uploads [2]. This leads to orphaned parts
-being uploaded, which have an entry in bucket index, but are not
-really part of any uploaded object. Such orphaned parts should have
-ideally been cleaned-up on multipart complete or abort operation. This
-looks like a slightly different issue, as the clean-up of such parts
-should not wait for a bucket deletion operation to happen.
 
-Can you open a separate tracker issue for this, if one not present already.
-
-[1] https://github.com/ceph/ceph/pull/1781/commits/bd8e026f88b812cc70caf623=
-2c247844df5d99bf
-[2] http://tracker.ceph.com/issues/8269
-
-Thanks
-Abhishek
-
-On Tue, Jun 13, 2017 at 12:28 PM, =E4=BA=8E=E7=9B=B8=E6=B4=8B <penglaiyxy@g=
-mail.com> wrote:
-> Hi Abhishek,
->
-> Your PR is practical  for anyone who can not delete an non-empty bucket.
->
-> But I think in one scenario that you still can not delete bucket
-> because of the orphan object leaked by multipart upload.
->
-> Upload a multipart object:
->
-> 1. Upload part 1 with prefix   2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5
->
-> 2. The connection between rgw client and server is cutoff,  I don't
-> know if  I have upload part one completely ,so I re-upload part 1 then
-> the part 1 is attached with a new prefix like
-> eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH(which is tackled by rgw server )
->
-> 3. The connection between rgw client and server is cutoff again, then
-> I re-upload part 1 with new  prefix d9H1FWnoOwmr3IAejtYQJ2hyIjsUA7U
->
-> 4. Upload part 2 and left parts
->
-> 5. At the end, complete the upload.
->
-> The object with names below is leaked and I can not see them through
-> s3 client.  (My upload size is 15MB and stripe size is 4M)
->
-> center-master.4439.1__multipart_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5=
-.1
-> center-master.4439.1__shadow_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5.1_=
-1
-> center-master.4439.1__shadow_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5.1_=
-2
-> center-master.4439.1__shadow_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5.1_=
-3
->
-> center-master.4439.1__multipart_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1
-> center-master.4439.1__shadow_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1_1
-> center-master.4439.1__shadow_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1_2
-> center-master.4439.1__shadow_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1_3
->
-> The above upload process is really occurring in our production
-> application and we find a lot space leaked.
->
-> How can I reclaim the space leaked?
->
-> Any Idea is appreciated.
->
->
-> ________________________________
-> penglaiyxy
->
-> From: Abhishek Varshney
-> Date: 2017-06-13 00:17
-> To: Ceph Development
-> Subject: rgw: leak with incomplete multiparts (was: Request for review)
-> Reviving an old thread by a colleague on rgw leaking rados objects,
-> the PR submitted earlier [1] had failed teuthology rgw run, due to
-> radosgw-admin failing to remove a user with --purge-data flag. I tried
-> to root cause the issue, and it turned out that incomplete multiparts
-> need to be aborted when doing bucket rm with --purge-data. Here is the
-> new PR (https://github.com/ceph/ceph/pull/15630) which handles
-> incomplete multiparts with behaviour as given below:
->
-> * radosgw-admin user/bucket rm with incomplete multiparts would return
-> bucket not empty error.
-> * radosgw-admin user/bucket rm --purge-data with incomplete multiparts
-> would abort the pending multiparts and then delete the bucket.
-> * S3 delete bucket API with incomplete multiparts would return bucket
-> not empty error. The expectation here is on the user to either
-> complete or cancel all pending multipart uploads before deleting the
-> bucket.
->
-> Requesting review on this PR.
->
-> PS : The check for an empty bucket index here [2] in the previous PR
-> [1] has been removed, as we found instances of inconsistent bucket
-> index with stale entries, without corresponding objects present in
-> data pool. This would have prevented the deletion of an empty bucket
-> with such inconsistent indexes. I am not sure on how to reproduce such
-> a scenario though.
->
-> [1] https://github.com/ceph/ceph/pull/10920
-> [2] https://github.com/ceph/ceph/pull/10920/files#diff-c30965955342b98393=
-b73be699f4e355R7349
->
-> Thanks
-> Abhishek
->
-> On Mon, Sep 12, 2016 at 4:23 AM, Praveen Kumar G T (Cloud Platform)
-> <praveen.gt@flipkart.com> wrote:
->> Definitions
->>
->> Orphaned Objects: Orphaned objects are created when a Multipart upload h=
-as uploaded some or all of the parts but without executing multipart cancel=
- or multipart complete. An incomplete Multipart upload is neither created n=
-or destroyed, it is in orphan state
->> Leaked Objects : Objects that are not deleted on the ceph cluster but as=
-sumed to be deleted by s3 client. These objects cannot be accessed by s3 cl=
-ients but still occupy space in the ceph cluster
->>
->> Problem
->>
->> A s3 bucket cannot be deleted when there are objects in it. The bucket d=
-eletion command will fail with error BucketNotEmpty. The objects in the buc=
-kets can be listed using any of the s3 clients. In case if we have orphaned=
- objects present in the bucket, they will not be listed via the normal list=
-ing operations of the s3 clients. If the bucket is deleted when there are o=
-rphaned objects in the bucket, they will end up being leaked. This ends of =
-using space in the ceph cluster even though the objects are not accessed by=
- any of the s3 clients. This space is not accounted under the radosgw user =
-account as well
->>
->> Tracker link
->>
->> http://tracker.ceph.com/issues/17164
->>
->> Fix
->>
->> The fix will avoid deletion of buckets even if there are Orphaned object=
-s in the bucket. So now bucket deletion command will return BucketNotEmpty =
- when there are orphaned objects as well.
->>
->> Pull request
->>
->> https://github.com/ceph/ceph/pull/10920
->>
->> Can somebody Please review the fix. We have already verified the fix loc=
-ally.
->>
->> Regards,
->> Praveen.
->>
->>
->> --
->
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-
+> owner@vger.kernel.org] On Behalf Of Loic Dachary
+> Sent: Tuesday, June 13, 2017 8:52 AM
+> To: Mahalingam, Ganesh <ganesh.mahalingam@intel.com>
+> Cc: Gohad, Tushar <tushar.gohad@intel.com>; Ceph Development <ceph-
+> devel@vger.kernel.org>
+> Subject: Re: Ceph ISA-L git submodule
+> 
+> [cc'ing ceph-devel]
+> 
+> Hi !
+> 
+> On 06/13/2017 05:25 PM, Mahalingam, Ganesh wrote:
+> > Hi Loic,
+> > Apologies for the duplicate communication. Just thought leaving an
+> > email would be better compared to trusting the persistence of IRC. :)
+> >
+> > Was wondering if you could shed some light on how the community handles
+> submodule updates? Does the maintainer get the latest from the upstream
+> project and then a PR will just change the SHA reference or do we do a PR to
+> the submodule as well?
+> 
+> Yes, it's basically how it is done.
+[Mahalingam, Ganesh] Thanks Loic. if I understand this as the maintainer updated the ceph copy, might I put in a request to update the ceph fork of isa-l? 
+> 
+> > We wanted to update the ISA-L sources from v2.16 to v2.18 and hence the
+> questions.
+> 
+> The automated make check will use the new submodule to verify it is able to
+> decode/encode shards.
+[Mahalingam, Ganesh] Awesome. Thanks for the info.
+> 
+> Cheers
+> 
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Loïc Dachary, Artisan Logiciel Libre
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
