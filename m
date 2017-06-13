@@ -1,34 +1,39 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: Are we ready for 10.2.8 - core
-Date: Tue, 13 Jun 2017 11:20:58 -0400
-Message-ID: <e2a46e29-a874-6a7d-40f1-5836da7a15db@redhat.com>
-References: <9e7edca0-d56a-2315-9098-94dab50db691@suse.cz>
+From: Loic Dachary <loic@dachary.org>
+Subject: Re: Ceph ISA-L git submodule
+Date: Tue, 13 Jun 2017 17:51:31 +0200
+Message-ID: <9e3edca1-efbd-a1dc-0809-da781d045f26@dachary.org>
+References: <B209D98D8385BE41BC4DE002C072AEBE859F7544@fmsmsx118.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56584 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753175AbdFMPVB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Jun 2017 11:21:01 -0400
-In-Reply-To: <9e7edca0-d56a-2315-9098-94dab50db691@suse.cz>
-Content-Language: en-US
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:54001 "EHLO
+        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750899AbdFMPvf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jun 2017 11:51:35 -0400
+In-Reply-To: <B209D98D8385BE41BC4DE002C072AEBE859F7544@fmsmsx118.amr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Mahalingam, Ganesh" <ganesh.mahalingam@intel.com>
+Cc: "Gohad, Tushar" <tushar.gohad@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 06/09/2017 12:09 PM, Nathan Cutler wrote:
-> Hi Josh:
-> 
-> The following core backports have been merged into the jewel branch in 
-> preparation for the 10.2.8 release.
-> 
-> http://tracker.ceph.com/projects/ceph/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=3&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=537&f%5B%5D=subproject_id&op%5Bsubproject_id%5D=%21*&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D= 
-> 
-> 
-> Do you think it's time for QE to do its testing?
+[cc'ing ceph-devel]
 
-Could we also include:
+Hi !
 
-https://github.com/ceph/ceph/pull/14392
-https://github.com/ceph/ceph/pull/15529
+On 06/13/2017 05:25 PM, Mahalingam, Ganesh wrote:
+> Hi Loic,
+> Apologies for the duplicate communication. Just thought leaving an email would be better compared to trusting the persistence of IRC. :)
+> 
+> Was wondering if you could shed some light on how the community handles submodule updates? Does the maintainer get the latest from the upstream project and then a PR will just change the SHA reference or do we do a PR to the submodule as well?
+
+Yes, it's basically how it is done.
+
+> We wanted to update the ISA-L sources from v2.16 to v2.18 and hence the questions. 
+
+The automated make check will use the new submodule to verify it is able to decode/encode shards.
+
+Cheers
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
