@@ -1,80 +1,34 @@
-From: "J. Eric Ivancich" <ivancich@redhat.com>
-Subject: Re: About dmClock tests confusion after integrating dmClock QoS
- library into ceph codebase
-Date: Tue, 13 Jun 2017 10:14:01 -0400
-Message-ID: <5a40a1e8-c1c5-1bc1-86ce-4f5d2593d2d4@redhat.com>
-References: <509B214C5E2CEA4D9C41C1AB2A76BDD1A36B38B0@H3CMLB12-EX.srv.huawei-3com.com>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: Re: Are we ready for 10.2.8 - core
+Date: Tue, 13 Jun 2017 11:20:58 -0400
+Message-ID: <e2a46e29-a874-6a7d-40f1-5836da7a15db@redhat.com>
+References: <9e7edca0-d56a-2315-9098-94dab50db691@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40332 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:56584 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752109AbdFMOOD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Jun 2017 10:14:03 -0400
-In-Reply-To: <509B214C5E2CEA4D9C41C1AB2A76BDD1A36B38B0@H3CMLB12-EX.srv.huawei-3com.com>
+        id S1753175AbdFMPVB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 13 Jun 2017 11:21:01 -0400
+In-Reply-To: <9e7edca0-d56a-2315-9098-94dab50db691@suse.cz>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lijie <li.jieA@h3c.com>, 'Ceph Development' <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 06/02/2017 03:36 AM, Lijie wrote:
-> Hi Eric,
+On 06/09/2017 12:09 PM, Nathan Cutler wrote:
+> Hi Josh:
 > 
-> Our team has developed QOS feature on ceph using the dmclock library
-> from community. We treat a rbd as a dmclock client instead of pool as .
-> We tested our code and the result is   confusing .
+> The following core backports have been merged into the jewel branch in 
+> preparation for the 10.2.8 release.
 > 
->  
+> http://tracker.ceph.com/projects/ceph/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=3&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=537&f%5B%5D=subproject_id&op%5Bsubproject_id%5D=%21*&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D= 
 > 
-> Testing environment: single server with 16 cores  , RAM of 32G, 8
-> non-systerm disks,each runs one OSD. We set
-> osd_op_num_threads_per_shard=2, osd_op_num_shards=5 on each OSD. The
-> Size of our RBD is 100G. The qos params of RBD is £¨r:1K, p:100, l:2k£©,
-> rbd_cache = false , allow_limit_break = false.
 > 
->  
-> 
-> Conclusion:   we only got 1500 IOPS while the system serves much more
-> than the limit value 2000.
-> 
-> We used fio and adjusted  osd_op_num_shards .And we found that iops runs
-> bigger along as the growth of osd_op_num_shards. Finally it can break
-> the limit value .( fio iops = 2300 while osd_op_num_shards = 20) .
-> 
->  
-> 
-> So would you mind to provide your test environment and result about
-> dmclock library? And we would be appreciated if you offer some other
-> direction . It will really be a great help for us.
+> Do you think it's time for QE to do its testing?
 
+Could we also include:
 
-
-Are you using src/common/mClockPriorityQueue.h? Because it makes sure
-allow_limit_break is true and asserts that as long as the dmclock queue
-is not empty, it will retrieve a request when pull_request is called
-(assert(pr.is_retn());). If allow_limit_break is false, that assert can
-fail.
-
-I'm guessing you've created your own interface to the dmclock library,
-because of the issue outlined above.
-
-The dmclock library has a simulator built on top of it, which you can
-use to design various scenarios and see how it works.
-
-You can run it, for example, by:
-
-    $ git clone git@github.com:ceph/dmclock.git
-    $ cd dmclock/
-    $ mkdir build
-    $ cd build
-    $ cmake ..
-    $ make dmclock-sims
-    $ sim/dmc_sim -c ../sim/dmc_sim_100th.conf
-
-where the file dmc_sim_100th.conf describes the scenario being simulated.
-
-I'm not fully clear I understand your approach. If you can describe it
-in more detail, I'll try to address any questions.
-
-Eric
+https://github.com/ceph/ceph/pull/14392
+https://github.com/ceph/ceph/pull/15529
