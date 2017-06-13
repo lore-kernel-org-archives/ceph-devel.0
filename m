@@ -1,22 +1,33 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Static Analysis
-Date: Tue, 13 Jun 2017 11:41:10 +1000
-Message-ID: <CAF-wwdF1v6c4D0SjuVMZJs9uUQf440gTZtZgKerx2+eqoLMqMA@mail.gmail.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: msg/async question
+Date: Tue, 13 Jun 2017 10:26:04 +0800
+Message-ID: <CACJqLyYC34ep3C5HMnTWd_4eTo2FNc+fnv2DOteM9+DbZ4r-7w@mail.gmail.com>
+References: <alpine.DEB.2.11.1706121845530.3646@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f178.google.com ([209.85.223.178]:36657 "EHLO
-        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752816AbdFMBlM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 12 Jun 2017 21:41:12 -0400
-Received: by mail-io0-f178.google.com with SMTP id y77so65139194ioe.3
-        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2017 18:41:12 -0700 (PDT)
+Received: from mail-sg2apc01on0128.outbound.protection.outlook.com ([104.47.125.128]:61488
+        "EHLO APC01-SG2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1753157AbdFMC0M (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 12 Jun 2017 22:26:12 -0400
+Received: by mail-it0-f51.google.com with SMTP id m62so33320260itc.0
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2017 19:26:08 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1706121845530.3646@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Latest static analyser results are up on  http://people.redhat.com/bhubbard/
+https://github.com/ceph/ceph/pull/15645
 
--- 
-Cheers,
-Brad
+On Tue, Jun 13, 2017 at 2:46 AM, Sage Weil <sweil@redhat.com> wrote:
+> Hi Haomai,
+>
+> Ticket http://tracker.ceph.com/issues/20230 is about a busy loop in
+> AsyncConnection::handle_connect_msg(). Can you take a look?  I don't
+> understand what that block of code is trying to do.
+>
+> Thanks!
+> sage
+>
