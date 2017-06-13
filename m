@@ -1,117 +1,130 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: ceph.dir.rbytes inconsistent on different hosts
-Date: Tue, 13 Jun 2017 15:19:58 -0400
-Message-ID: <CALe9h7f8sg+z5WaKkPsqQ1go_AWkKyiMn5GM8+xz1e6RWWHG3Q@mail.gmail.com>
-References: <CAGbvivJw+gEDijgq3eG41k78K2AGh+HknKwE7FKVUGo01Wd3SA@mail.gmail.com>
- <CABZ+qq=NUHM6v7v5kS5FD8DQsPiSNbBAgU+qY1=vcANNZ4+zHg@mail.gmail.com> <CAGbvivLGTLXDLb5JUr3481L-CE0tJo2eR9LZ2akBeh8gz29d-A@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: cluster health checks
+Date: Tue, 13 Jun 2017 19:34:00 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1706131928320.3646@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f182.google.com ([209.85.128.182]:33592 "EHLO
-        mail-wr0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752615AbdFMTUU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jun 2017 15:20:20 -0400
-Received: by mail-wr0-f182.google.com with SMTP id v104so148278743wrb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Jun 2017 12:20:20 -0700 (PDT)
-In-Reply-To: <CAGbvivLGTLXDLb5JUr3481L-CE0tJo2eR9LZ2akBeh8gz29d-A@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:10237 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752168AbdFMTeC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 13 Jun 2017 15:34:02 -0400
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id BD9DD145F94
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Jun 2017 19:34:01 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, =?UTF-8?B?5Lil5q2j?= <zyan@redhat.com>
-Cc: Dan van der Ster <dan@vanderster.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: jspray@redhat.com
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, Jun 13, 2017 at 9:05 AM, Wyllys Ingersoll
-<wyllys.ingersoll@keepertech.com> wrote:
-> That sounds similar but Im not sure if its the same issue.  Our mounts
-> were done using kernel mounting, not fuse.
+I've put together a rework of the cluster health checks at
 
-The fix for userspace was to issue a stat on inodes before reading
-virtual xattrs:
+	https://github.com/ceph/ceph/pull/15643
 
-commit 532dc4b68e538c189ef828f67cecd0d647a62250
-Author: John Spray <john.spray@redhat.com>
-Date:   Wed Mar 15 15:32:47 2017 +0000
+based on John's original proposal in
 
-    client: getattr before read on ceph.* xattrs
+	http://tracker.ceph.com/issues/7192
 
-    Previously we were returning values for quota, layout
-    xattrs without any kind of update -- the user just got
-    whatever happened to be in our cache.
+(with a few changes).  I think it's pretty complete except that the 
+MDSMonitor new-style checks aren't implemented yet.
 
-    Clearly this extra round trip has a cost, but reads of
-    these xattrs are fairly rare, happening on admin
-    intervention rather than in normal operation.
+This would be a semi-incompatible change with pre-luminous ceph in that
 
-We didn't look at doing it in the kernel client at that point because
-the motivation was to fix quota handling, and the kernel client
-doesn't do quotas.
+ - the structured (json/xml) health output is totally different
+ - the plaintext health *detail* output is different
+ - specific error messages are a bit different.  I was reimplementing them 
+and took the liberty of revising what information was in the 
+summary and detail in several cases.
 
-It seems like we should probably update the kernel client to do the
-same thing -- Zheng, what do you think?
+Let me know what you think!
 
-John
+Thanks-
+sage
 
-> On Tue, Jun 13, 2017 at 6:02 AM, Dan van der Ster <dan@vanderster.com> wrote:
->> Sounds like this issue?
->>
->>    http://tracker.ceph.com/issues/17939
->>
->> Cheers, Dan
->>
->>
->>
->> On Mon, Jun 12, 2017 at 9:45 PM, Wyllys Ingersoll
->> <wyllys.ingersoll@keepertech.com> wrote:
->>> Ceph 10.2.7
->>> Ubuntu 16.04.2
->>>
->>> We have 2 hosts running identical versions of ceph with identical
->>> ceph.conf configuration files.
->>> Both mount /cephfs with the same options.
->>>
->>> We have a directory under /cephfs with a 4GB file in it.  The
->>> ceph.dir.rbytes xattr reported by ceph is different on the 2 hosts.
->>> One is correct, one is not.
->>>
->>> One host reports the 'ceph.dir.rbytes' correctly as 4129644548, the
->>> other reports it incorrectly as  2389190660
->>> Any ideas why this would be happening ?
->>>
->>> - Wyllys Ingersoll
->>>   Keeper Technology, LLC
->>>
->>>
->>> HOST A (correct values):
->>> $ ls -alF /cephfs/exports/smbtest
->>> total 4032857
->>> drwxrwxrwx 1 root    root    4129644548 May 31 11:28 ./
->>> drwxr-xr-x 1 root    root    4129644548 May 31 11:25 ../
->>> -rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
->>> -rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
->>> -rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
->>>
->>> $ getfattr -d -m ceph.dir /cephfs/exports/smbtest
->>> getfattr: Removing leading '/' from absolute path names
->>> # file: cephfs/exports/smbtest
->>> ceph.dir.rbytes="4129644548"
->>>
->>> HOST B (incorrect values)
->>> $ ls -alF /cephfs/exports/smbtest
->>> total 4032857
->>> drwxrwxrwx 1 root          root         2389190660 May 31 11:28 ./
->>> drwxr-xr-x 1 root          root         4129644548 May 31 11:25 ../
->>> -rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
->>> -rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
->>> -rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
->>>
->>> $ getfattr -d -m ceph.dir.rbytes /cephfs/exports/smbtest
->>> getfattr: Removing leading '/' from absolute path names
->>> # file: cephfs/exports/smbtest
->>> ceph.dir.rbytes="2389190660"
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+$ ceph -s
+  cluster:
+    id:     9ee7f49c-57c3-4686-afd1-75b3a8f08c73
+    health: HEALTH_WARN
+            2 osds down
+            1 host (2 osds) down
+            1 root (2 osds) down
+            8 pgs stale
+
+  services:
+    mon: 3 daemons, quorum a,b,c
+    mgr: x(active)
+    osd: 2 osds: 0 up, 2 in
+
+  data:
+    pools:   1 pools, 8 pgs
+    objects: 0 objects, 0 bytes
+    usage:   414 GB used, 330 GB / 744 GB avail
+    pgs:     8 stale+active+clean
+
+$ ceph health detail -f json-pretty
+{
+    "checks": {
+        "OSD_DOWN": {
+            "severity": "HEALTH_WARN",
+            "message": "2 osds down"
+        },
+        "OSD_HOST_DOWN": {
+            "severity": "HEALTH_WARN",
+            "message": "1 host (2 osds) down"
+        },
+        "OSD_ROOT_DOWN": {
+            "severity": "HEALTH_WARN",
+            "message": "1 root (2 osds) down"
+        },
+        "PG_STALE": {
+            "severity": "HEALTH_WARN",
+            "message": "8 pgs stale"
+        }
+    },
+    "status": "HEALTH_WARN",
+    "detail": {
+        "OSD_DOWN": [
+            "osd.0 (root=default,host=gnit) is down",
+            "osd.1 (root=default,host=gnit) is down"
+        ],
+        "OSD_HOST_DOWN": [
+            "host gnit (root=default) (2 osds) is down"
+        ],
+        "OSD_ROOT_DOWN": [
+            "root default (2 osds) is down"
+        ],
+        "PG_STALE": [
+            "pg 0.7 is stale+active+clean, acting [1,0]",
+            "pg 0.6 is stale+active+clean, acting [0,1]",
+            "pg 0.5 is stale+active+clean, acting [0,1]",
+            "pg 0.4 is stale+active+clean, acting [0,1]",
+            "pg 0.0 is stale+active+clean, acting [0,1]",
+            "pg 0.1 is stale+active+clean, acting [1,0]",
+            "pg 0.2 is stale+active+clean, acting [0,1]",
+            "pg 0.3 is stale+active+clean, acting [0,1]"
+        ]
+    }
+}
+
+$ ceph health detail
+HEALTH_WARN 2 osds down; 1 host (2 osds) down; 1 root (2 osds) down; 8 pgs stale
+OSD_DOWN 2 osds down
+    osd.0 (root=default,host=gnit) is down
+    osd.1 (root=default,host=gnit) is down
+OSD_HOST_DOWN 1 host (2 osds) down
+    host gnit (root=default) (2 osds) is down
+OSD_ROOT_DOWN 1 root (2 osds) down
+    root default (2 osds) is down
+PG_STALE 8 pgs stale
+    pg 0.7 is stale+active+clean, acting [1,0]
+    pg 0.6 is stale+active+clean, acting [0,1]
+    pg 0.5 is stale+active+clean, acting [0,1]
+    pg 0.4 is stale+active+clean, acting [0,1]
+    pg 0.0 is stale+active+clean, acting [0,1]
+    pg 0.1 is stale+active+clean, acting [1,0]
+    pg 0.2 is stale+active+clean, acting [0,1]
+    pg 0.3 is stale+active+clean, acting [0,1]
+
