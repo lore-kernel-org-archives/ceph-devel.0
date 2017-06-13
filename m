@@ -1,65 +1,85 @@
-From: Dan van der Ster <dan@vanderster.com>
-Subject: Re: Are we ready for 10.2.8 - cephfs
-Date: Tue, 13 Jun 2017 13:49:08 +0200
-Message-ID: <CABZ+qq=p_=8PHCwBoo=aQ1V5CeRk4QdNiK7t=ooeisFHB9etyg@mail.gmail.com>
-References: <be949951-5e1c-9471-23f6-2c595baec10a@suse.cz>
+From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Subject: Re: ceph.dir.rbytes inconsistent on different hosts
+Date: Tue, 13 Jun 2017 09:05:43 -0400
+Message-ID: <CAGbvivLGTLXDLb5JUr3481L-CE0tJo2eR9LZ2akBeh8gz29d-A@mail.gmail.com>
+References: <CAGbvivJw+gEDijgq3eG41k78K2AGh+HknKwE7FKVUGo01Wd3SA@mail.gmail.com>
+ <CABZ+qq=NUHM6v7v5kS5FD8DQsPiSNbBAgU+qY1=vcANNZ4+zHg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f169.google.com ([74.125.82.169]:36723 "EHLO
-        mail-ot0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752033AbdFMLtv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jun 2017 07:49:51 -0400
-Received: by mail-ot0-f169.google.com with SMTP id i31so85774711ota.3
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Jun 2017 04:49:50 -0700 (PDT)
-Received: from mail-ot0-f170.google.com (mail-ot0-f170.google.com. [74.125.82.170])
-        by smtp.gmail.com with ESMTPSA id l18sm6327080ota.0.2017.06.13.04.49.49
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 13 Jun 2017 04:49:49 -0700 (PDT)
-Received: by mail-ot0-f170.google.com with SMTP id a2so85831396oth.2
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Jun 2017 04:49:49 -0700 (PDT)
-In-Reply-To: <be949951-5e1c-9471-23f6-2c595baec10a@suse.cz>
+Received: from mail-it0-f41.google.com ([209.85.214.41]:38373 "EHLO
+        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752456AbdFMNFo (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jun 2017 09:05:44 -0400
+Received: by mail-it0-f41.google.com with SMTP id l6so28475683iti.1
+        for <ceph-devel@vger.kernel.org>; Tue, 13 Jun 2017 06:05:44 -0700 (PDT)
+In-Reply-To: <CABZ+qq=NUHM6v7v5kS5FD8DQsPiSNbBAgU+qY1=vcANNZ4+zHg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+That sounds similar but Im not sure if its the same issue.  Our mounts
+were done using kernel mounting, not fuse.
 
-Would it be possible to get these into 10.2.8?
-
-    http://tracker.ceph.com/issues/19677
-    http://tracker.ceph.com/issues/19762
-    http://tracker.ceph.com/issues/20027
-
-Thanks!
-
-Dan
-
-
-On Fri, Jun 9, 2017 at 6:13 PM, Nathan Cutler <ncutler@suse.cz> wrote:
-> Hi John:
+On Tue, Jun 13, 2017 at 6:02 AM, Dan van der Ster <dan@vanderster.com> wrote:
+> Sounds like this issue?
 >
-> The following cephfs backports have been merged into the jewel branch in
-> preparation for the 10.2.8 release.
+>    http://tracker.ceph.com/issues/17939
 >
-> http://tracker.ceph.com/projects/cephfs/issues?utf8=3D%E2%9C%93&set_filte=
-r=3D1&f%5B%5D=3Dstatus_id&op%5Bstatus_id%5D=3D%3D&v%5Bstatus_id%5D%5B%5D=3D=
-3&f%5B%5D=3Dtracker_id&op%5Btracker_id%5D=3D%3D&v%5Btracker_id%5D%5B%5D=3D9=
-&f%5B%5D=3Dfixed_version_id&op%5Bfixed_version_id%5D=3D%3D&v%5Bfixed_versio=
-n_id%5D%5B%5D=3D537&f%5B%5D=3D&c%5B%5D=3Dproject&c%5B%5D=3Dtracker&c%5B%5D=
-=3Dstatus&c%5B%5D=3Dpriority&c%5B%5D=3Dsubject&c%5B%5D=3Dassigned_to&c%5B%5=
-D=3Dupdated_on&c%5B%5D=3Dcategory&c%5B%5D=3Dfixed_version&c%5B%5D=3Dcf_3&gr=
-oup_by=3D&t%5B%5D=3D
+> Cheers, Dan
 >
-> (I thought there were more than two, but apparently not?)
 >
-> Do you think it's time for QE to do its testing?
 >
-> Nathan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> On Mon, Jun 12, 2017 at 9:45 PM, Wyllys Ingersoll
+> <wyllys.ingersoll@keepertech.com> wrote:
+>> Ceph 10.2.7
+>> Ubuntu 16.04.2
+>>
+>> We have 2 hosts running identical versions of ceph with identical
+>> ceph.conf configuration files.
+>> Both mount /cephfs with the same options.
+>>
+>> We have a directory under /cephfs with a 4GB file in it.  The
+>> ceph.dir.rbytes xattr reported by ceph is different on the 2 hosts.
+>> One is correct, one is not.
+>>
+>> One host reports the 'ceph.dir.rbytes' correctly as 4129644548, the
+>> other reports it incorrectly as  2389190660
+>> Any ideas why this would be happening ?
+>>
+>> - Wyllys Ingersoll
+>>   Keeper Technology, LLC
+>>
+>>
+>> HOST A (correct values):
+>> $ ls -alF /cephfs/exports/smbtest
+>> total 4032857
+>> drwxrwxrwx 1 root    root    4129644548 May 31 11:28 ./
+>> drwxr-xr-x 1 root    root    4129644548 May 31 11:25 ../
+>> -rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
+>> -rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
+>> -rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
+>>
+>> $ getfattr -d -m ceph.dir /cephfs/exports/smbtest
+>> getfattr: Removing leading '/' from absolute path names
+>> # file: cephfs/exports/smbtest
+>> ceph.dir.rbytes="4129644548"
+>>
+>> HOST B (incorrect values)
+>> $ ls -alF /cephfs/exports/smbtest
+>> total 4032857
+>> drwxrwxrwx 1 root          root         2389190660 May 31 11:28 ./
+>> drwxr-xr-x 1 root          root         4129644548 May 31 11:25 ../
+>> -rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
+>> -rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
+>> -rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
+>>
+>> $ getfattr -d -m ceph.dir.rbytes /cephfs/exports/smbtest
+>> getfattr: Removing leading '/' from absolute path names
+>> # file: cephfs/exports/smbtest
+>> ceph.dir.rbytes="2389190660"
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
