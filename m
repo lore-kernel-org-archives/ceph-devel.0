@@ -1,68 +1,159 @@
-From: "Robin H. Johnson" <robbat2@gentoo.org>
-Subject: Re: ceph osd memory free problem
-Date: Tue, 13 Jun 2017 05:37:28 +0000
-Message-ID: <20170613053728.GJ23586@orbis-terrarum.net>
-References: <CAE5T3Nw4Ok6xcpWgOsRCj+NC5AiswUGShQmXRzxrJ_cNSPgCHw@mail.gmail.com>
- <robbat2-20170612T060139-811827739Z@orbis-terrarum.net>
- <CAE5T3Nx+Tt54BLJfzCEigu9dQkgYWpo8=7Rab74LCXfuT3ozZg@mail.gmail.com>
-Reply-To: ceph-devel@vger.kernel.org
+From: =?UTF-8?B?5LqO55u45rSL?= <penglaiyxy@gmail.com>
+Subject: Re: rgw: leak with incomplete multiparts (was: Request for review)
+Date: Tue, 13 Jun 2017 14:58:28 +0800
+Message-ID: <CAE5T3Nz6voZMcq-g89JGhzXyhGaAbu6EXXEADDhEhfiQuBWjXw@mail.gmail.com>
+References: <CAP3mxSwbgTxzSL-d7-HxncV16JehvEuP+Pz-EmbQJvxT_G4HtQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.gentoo.org ([140.211.166.183]:49356 "EHLO smtp.gentoo.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752033AbdFMFh3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 13 Jun 2017 01:37:29 -0400
-Received: from grubbs.orbis-terrarum.net (localhost [127.0.0.1])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-SHA (128/128 bits))
-        (No client certificate requested)
-        by smtp.gentoo.org (Postfix) with ESMTPS id E52953419C4
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Jun 2017 05:37:28 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <CAE5T3Nx+Tt54BLJfzCEigu9dQkgYWpo8=7Rab74LCXfuT3ozZg@mail.gmail.com>
+Received: from mail-wr0-f169.google.com ([209.85.128.169]:36701 "EHLO
+        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752191AbdFMG6a (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jun 2017 02:58:30 -0400
+Received: by mail-wr0-f169.google.com with SMTP id 36so5706506wry.3
+        for <ceph-devel@vger.kernel.org>; Mon, 12 Jun 2017 23:58:30 -0700 (PDT)
+In-Reply-To: <CAP3mxSwbgTxzSL-d7-HxncV16JehvEuP+Pz-EmbQJvxT_G4HtQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?utf-8?B?5LqO55u45rSL?= <penglaiyxy@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Abhishek Varshney <abhishek.varshney@flipkart.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Jun 12, 2017 at 02:37:48PM +0800, 于相洋 wrote:
-> Appreciate to receive you reply, Robin Hugh.
-> I have also try to adjust the vm configuration before ,but get no effect.
-> 
-> Now I will accept your method to do "echo 2 "> drop_caches
-That's strictly a workaround.
+Hi Abhishek,
 
-The OTHER way we can recover memory is to stop the OSD process for a
-given filesystem, umount the filesystem, (not just remount), mount it
-again and restart the OSD process.
+Your PR is practical  for anyone who can not delete an non-empty bucket.
 
-Can you share some of your OOM messages, and we can try and confirm if
-it's the same issue? Also possibly fixed in much newer kernels, but I think
-BlueStore is going to make the bug irrelevant as well by avoiding XFS systems
-with lots of inodes.
+But I think in one scenario that you still can not delete bucket
+because of the orphan object leaked by multipart upload.
 
-In our case, each XFS filesystem has ~6M inodes (over ~52k directories), and
-this hugely impacts slab.
+Upload a multipart object:
 
-From "slabtop -s c", to sort by size:
-  OBJS   ACTIVE    USE OBJ-SIZE  SLABS OBJ/SLAB CACHE-SIZE NAME                   
- 4017576  1872371  46%    2.00K 251186       16   8037952K kmalloc-2048
-19057016 17725140  93%    0.38K 455004       42   7280064K mnt_cache
- 4952967  2288054  46%    1.06K 167276       30   5352832K xfs_inode
- 5346579  2380752  44%    0.57K 191958       28   3071328K radix_tree_node
- 6701565  6694510  99%    0.10K 171835       39    687340K buffer_head
- 7478016  2597615  34%    0.06K 116844       64    467376K kmalloc-64
-  832624   256901  30%    0.50K  26021       32    416336K kmalloc-512
-   71220    68291  95%    3.50K   7916        9    253312K task_struct
-  238380   104089  43%    1.00K   7487       32    239584K kmalloc-1024
-  896658   612456  68%    0.19K  21349       42    170792K dentry
-  121930   116536  95%    0.61K   3616       52    115712K proc_inode_cache
+1. Upload part 1 with prefix   2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5
+
+2. The connection between rgw client and server is cutoff,  I don't
+know if  I have upload part one completely ,so I re-upload part 1 then
+the part 1 is attached with a new prefix like
+eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH(which is tackled by rgw server )
+
+3. The connection between rgw client and server is cutoff again, then
+I re-upload part 1 with new  prefix d9H1FWnoOwmr3IAejtYQJ2hyIjsUA7U
+
+4. Upload part 2 and left parts
+
+5. At the end, complete the upload.
+
+The object with names below is leaked and I can not see them through
+s3 client.  (My upload size is 15MB and stripe size is 4M)
+
+center-master.4439.1__multipart_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5.1
+center-master.4439.1__shadow_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5.1_1
+center-master.4439.1__shadow_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5.1_2
+center-master.4439.1__shadow_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5.1_3
+
+center-master.4439.1__multipart_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1
+center-master.4439.1__shadow_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1_1
+center-master.4439.1__shadow_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1_2
+center-master.4439.1__shadow_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1_3
+
+The above upload process is really occurring in our production
+application and we find a lot space leaked.
+
+How can I reclaim the space leaked?
+
+Any Idea is appreciated.
 
 
--- 
-Robin Hugh Johnson
-Gentoo Linux: Dev, Infra Lead, Foundation Trustee & Treasurer
-E-Mail   : robbat2@gentoo.org
-GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
-GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
+________________________________
+penglaiyxy
+
+From: Abhishek Varshney
+Date: 2017-06-13 00:17
+To: Ceph Development
+Subject: rgw: leak with incomplete multiparts (was: Request for review)
+Reviving an old thread by a colleague on rgw leaking rados objects,
+the PR submitted earlier [1] had failed teuthology rgw run, due to
+radosgw-admin failing to remove a user with --purge-data flag. I tried
+to root cause the issue, and it turned out that incomplete multiparts
+need to be aborted when doing bucket rm with --purge-data. Here is the
+new PR (https://github.com/ceph/ceph/pull/15630) which handles
+incomplete multiparts with behaviour as given below:
+
+* radosgw-admin user/bucket rm with incomplete multiparts would return
+bucket not empty error.
+* radosgw-admin user/bucket rm --purge-data with incomplete multiparts
+would abort the pending multiparts and then delete the bucket.
+* S3 delete bucket API with incomplete multiparts would return bucket
+not empty error. The expectation here is on the user to either
+complete or cancel all pending multipart uploads before deleting the
+bucket.
+
+Requesting review on this PR.
+
+PS : The check for an empty bucket index here [2] in the previous PR
+[1] has been removed, as we found instances of inconsistent bucket
+index with stale entries, without corresponding objects present in
+data pool. This would have prevented the deletion of an empty bucket
+with such inconsistent indexes. I am not sure on how to reproduce such
+a scenario though.
+
+[1] https://github.com/ceph/ceph/pull/10920
+[2] https://github.com/ceph/ceph/pull/10920/files#diff-c30965955342b98393b7=
+3be699f4e355R7349
+
+Thanks
+Abhishek
+
+On Mon, Sep 12, 2016 at 4:23 AM, Praveen Kumar G T (Cloud Platform)
+<praveen.gt@flipkart.com> wrote:
+> Definitions
+>
+> Orphaned Objects: Orphaned objects are created when a Multipart upload ha=
+s uploaded some or all of the parts but without executing multipart cancel =
+or multipart complete. An incomplete Multipart upload is neither created no=
+r destroyed, it is in orphan state
+> Leaked Objects : Objects that are not deleted on the ceph cluster but ass=
+umed to be deleted by s3 client. These objects cannot be accessed by s3 cli=
+ents but still occupy space in the ceph cluster
+>
+> Problem
+>
+> A s3 bucket cannot be deleted when there are objects in it. The bucket de=
+letion command will fail with error BucketNotEmpty. The objects in the buck=
+ets can be listed using any of the s3 clients. In case if we have orphaned =
+objects present in the bucket, they will not be listed via the normal listi=
+ng operations of the s3 clients. If the bucket is deleted when there are or=
+phaned objects in the bucket, they will end up being leaked. This ends of u=
+sing space in the ceph cluster even though the objects are not accessed by =
+any of the s3 clients. This space is not accounted under the radosgw user a=
+ccount as well
+>
+> Tracker link
+>
+> http://tracker.ceph.com/issues/17164
+>
+> Fix
+>
+> The fix will avoid deletion of buckets even if there are Orphaned objects=
+ in the bucket. So now bucket deletion command will return BucketNotEmpty  =
+when there are orphaned objects as well.
+>
+> Pull request
+>
+> https://github.com/ceph/ceph/pull/10920
+>
+> Can somebody Please review the fix. We have already verified the fix loca=
+lly.
+>
+> Regards,
+> Praveen.
+>
+>
+> --
+
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
