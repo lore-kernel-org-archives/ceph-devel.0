@@ -1,34 +1,127 @@
-From: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
-Subject: Stats on list buckets
-Date: Wed, 14 Jun 2017 06:30:26 +0000
-Message-ID: <93D96934-EEFD-4D0C-BB32-FC445EE9838C@walmartlabs.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: ceph.dir.rbytes inconsistent on different hosts
+Date: Wed, 14 Jun 2017 15:59:12 +0800
+Message-ID: <FA6D3991-C236-4D52-9F1C-3FDCB24C2B41@redhat.com>
+References: <CAGbvivJw+gEDijgq3eG41k78K2AGh+HknKwE7FKVUGo01Wd3SA@mail.gmail.com>
+ <CABZ+qq=NUHM6v7v5kS5FD8DQsPiSNbBAgU+qY1=vcANNZ4+zHg@mail.gmail.com>
+ <CAGbvivLGTLXDLb5JUr3481L-CE0tJo2eR9LZ2akBeh8gz29d-A@mail.gmail.com>
+ <CALe9h7f8sg+z5WaKkPsqQ1go_AWkKyiMn5GM8+xz1e6RWWHG3Q@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from ppes-mail-e5.wal-mart.com ([161.165.133.167]:51299 "EHLO
-        ppes-mail-e5.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754206AbdFNG5G (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 02:57:06 -0400
-Received: from pps.filterd (ppes-mail-e5.wal-mart.com [127.0.0.1])
-        by ppes-mail-e5.wal-mart.com (8.16.0.20/8.16.0.20) with SMTP id v5E6KMwb048299
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 01:30:29 -0500
-Received: from honts35014.homeoffice.wal-mart.com (oser500423.wal-mart.com [10.24.131.23])
-        by ppes-mail-e5.wal-mart.com with ESMTP id 2b0cdt4d4s-1
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 01:30:29 -0500
-Content-Language: en-GB
-Content-ID: <525527BFDC05664291BA3C11ECF568DE@NAMP100.PROD.OUTLOOK.COM>
+Received: from mx1.redhat.com ([209.132.183.28]:53422 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750751AbdFNH7U (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Jun 2017 03:59:20 -0400
+In-Reply-To: <CALe9h7f8sg+z5WaKkPsqQ1go_AWkKyiMn5GM8+xz1e6RWWHG3Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, Dan van der Ster <dan@vanderster.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-SSB3YXMgcmVmZXJyaW5nIHRvIHRoZSBSR1dMaXN0QnVja2V0cyBpbXBsZW1lbnRhdGlvbiBmb3Ig
-c3dpZnQgYW5kIHJlYWxpemVkIHRoYXQg4oCYbmVlZF9zdGF0c+KAmSBpcyBzZXQgdG8gdHJ1ZSBi
-eSBkZWZhdWx0LCBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL2Jsb2IvbWFzdGVyL3NyYy9y
-Z3cvcmd3X3Jlc3Rfc3dpZnQuaCNMNDYNCg0KSSByZWFsaXplIGJlY2F1c2Ugb2YgdGhpcywgdGhl
-IGxpc3Rpbmcgb2YgYnVja2V0cyBhdCBhIHVzZXIgbGV2ZWwgZm9yIG9uZSBvZiBvdXIgd29ya2xv
-YWRzIHdpdGggcG90ZW50aWFsbHkgbGFyZ2UgbnVtYmVyIG9mIG9iamVjdHMgaW4gYSBjb250YWlu
-ZXIgaXMgdGFraW5nIGZvcmV2ZXIuIA0KDQpJcyB0aGVyZSBhIHJlYXNvbiB3aHkgaXQgaXMgdHJ1
-ZSBieSBkZWZhdWx0LCBhbSBjb25zaWRlcmluZyB0byBmaXggaXQuIFRoaXMgd2FzIGludHJvZHVj
-ZWQgaGVyZSBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvNDc1OS4NCg0KVGhhbmtzLA0K
-LVBhdmFuLg0KDQo=
+
+> On 14 Jun 2017, at 03:19, John Spray <jspray@redhat.com> wrote:
+> 
+> On Tue, Jun 13, 2017 at 9:05 AM, Wyllys Ingersoll
+> <wyllys.ingersoll@keepertech.com> wrote:
+>> That sounds similar but Im not sure if its the same issue.  Our mounts
+>> were done using kernel mounting, not fuse.
+> 
+> The fix for userspace was to issue a stat on inodes before reading
+> virtual xattrs:
+> 
+> commit 532dc4b68e538c189ef828f67cecd0d647a62250
+> Author: John Spray <john.spray@redhat.com>
+> Date:   Wed Mar 15 15:32:47 2017 +0000
+> 
+>    client: getattr before read on ceph.* xattrs
+> 
+>    Previously we were returning values for quota, layout
+>    xattrs without any kind of update -- the user just got
+>    whatever happened to be in our cache.
+> 
+>    Clearly this extra round trip has a cost, but reads of
+>    these xattrs are fairly rare, happening on admin
+>    intervention rather than in normal operation.
+> 
+> We didn't look at doing it in the kernel client at that point because
+> the motivation was to fix quota handling, and the kernel client
+> doesn't do quotas.
+> 
+> It seems like we should probably update the kernel client to do the
+> same thing -- Zheng, what do you think?
+> 
+done, https://github.com/ceph/ceph-client/commit/d69a42d91de651d5981d1b5538132ff362a9ee
+
+Regards
+Yan, Zheng
+
+> John
+> 
+>> On Tue, Jun 13, 2017 at 6:02 AM, Dan van der Ster <dan@vanderster.com> wrote:
+>>> Sounds like this issue?
+>>> 
+>>>   http://tracker.ceph.com/issues/17939
+>>> 
+>>> Cheers, Dan
+>>> 
+>>> 
+>>> 
+>>> On Mon, Jun 12, 2017 at 9:45 PM, Wyllys Ingersoll
+>>> <wyllys.ingersoll@keepertech.com> wrote:
+>>>> Ceph 10.2.7
+>>>> Ubuntu 16.04.2
+>>>> 
+>>>> We have 2 hosts running identical versions of ceph with identical
+>>>> ceph.conf configuration files.
+>>>> Both mount /cephfs with the same options.
+>>>> 
+>>>> We have a directory under /cephfs with a 4GB file in it.  The
+>>>> ceph.dir.rbytes xattr reported by ceph is different on the 2 hosts.
+>>>> One is correct, one is not.
+>>>> 
+>>>> One host reports the 'ceph.dir.rbytes' correctly as 4129644548, the
+>>>> other reports it incorrectly as  2389190660
+>>>> Any ideas why this would be happening ?
+>>>> 
+>>>> - Wyllys Ingersoll
+>>>>  Keeper Technology, LLC
+>>>> 
+>>>> 
+>>>> HOST A (correct values):
+>>>> $ ls -alF /cephfs/exports/smbtest
+>>>> total 4032857
+>>>> drwxrwxrwx 1 root    root    4129644548 May 31 11:28 ./
+>>>> drwxr-xr-x 1 root    root    4129644548 May 31 11:25 ../
+>>>> -rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
+>>>> -rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
+>>>> -rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
+>>>> 
+>>>> $ getfattr -d -m ceph.dir /cephfs/exports/smbtest
+>>>> getfattr: Removing leading '/' from absolute path names
+>>>> # file: cephfs/exports/smbtest
+>>>> ceph.dir.rbytes="4129644548"
+>>>> 
+>>>> HOST B (incorrect values)
+>>>> $ ls -alF /cephfs/exports/smbtest
+>>>> total 4032857
+>>>> drwxrwxrwx 1 root          root         2389190660 May 31 11:28 ./
+>>>> drwxr-xr-x 1 root          root         4129644548 May 31 11:25 ../
+>>>> -rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
+>>>> -rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
+>>>> -rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
+>>>> 
+>>>> $ getfattr -d -m ceph.dir.rbytes /cephfs/exports/smbtest
+>>>> getfattr: Removing leading '/' from absolute path names
+>>>> # file: cephfs/exports/smbtest
+>>>> ceph.dir.rbytes="2389190660"
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
