@@ -1,39 +1,34 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Are we ready for 10.2.8 - cephfs
-Date: Wed, 14 Jun 2017 13:44:58 -0400
-Message-ID: <CALe9h7eetaO1bBht1QBZTZm8T=5uFGSf6FYoX-px5ETeDDoc+A@mail.gmail.com>
-References: <be949951-5e1c-9471-23f6-2c595baec10a@suse.cz> <CABZ+qq=p_=8PHCwBoo=aQ1V5CeRk4QdNiK7t=ooeisFHB9etyg@mail.gmail.com>
- <CALe9h7dUCBXKnyxGVi3utN_ArkZixO-SZ+xH60L23R11FELMzw@mail.gmail.com> <1c7fab31-4990-681d-eb5f-0ae4a1977a41@suse.cz>
+From: Radoslaw Zarzynski <rzarzynski@mirantis.com>
+Subject: Re: Clang does not like constexpression
+Date: Wed, 14 Jun 2017 19:45:01 +0200
+Message-ID: <CA+H5UW2MqpJtV9eWQ9VJg1XVkWRCv0HQf6KVWKwEcsQAHj=_qQ@mail.gmail.com>
+References: <3b811d53-d45f-7ed2-a65f-b7114739e891@digiware.nl>
+ <CA+H5UW2k7ZEJVYJXE4aGvbNkjBsN3mVaDiNpRY585CvyGpOdeA@mail.gmail.com> <20170614170617.GA6164@ultraspiritum.eng.arb.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f182.google.com ([209.85.128.182]:35961 "EHLO
-        mail-wr0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752126AbdFNRpe (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 13:45:34 -0400
-Received: by mail-wr0-f182.google.com with SMTP id 36so10465567wry.3
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 10:45:33 -0700 (PDT)
-In-Reply-To: <1c7fab31-4990-681d-eb5f-0ae4a1977a41@suse.cz>
+Received: from mail-yw0-f177.google.com ([209.85.161.177]:36100 "EHLO
+        mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752204AbdFNRu7 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 13:50:59 -0400
+Received: by mail-yw0-f177.google.com with SMTP id l75so4924872ywc.3
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 10:50:59 -0700 (PDT)
+In-Reply-To: <20170614170617.GA6164@ultraspiritum.eng.arb.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Dan van der Ster <dan@vanderster.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Jun 14, 2017 at 1:39 PM, Nathan Cutler <ncutler@suse.cz> wrote:
->> Nathan, if we have time to do another pre-merge test run for jewel
->> backports, then there are a few with label:cephfs and my review on,
->> that would just need to go through a fs suite.
->
->
-> OK, I think we can manage that. Please note that it's the milestone:jewel
-> tag in the PR that determines whether the PR gets picked up for integration
-> testing. If the milestone is not set, the script doesn't see it. (I will
-> look into patching the script so it makes noise if it sees a PR targeting
-> the jewel branch but without a milestone, or with the wrong milestone.)
+On Wed, Jun 14, 2017 at 7:06 PM, Adam C. Emerson <aemerson@redhat.com> wrote:
 
-Just curious, why do we add that label?  I've always filtered this by
-using "base:jewel" in github.
+> Though I admit the more builders we add the slower Jenkins is. Are there
+> any older systems or variants we could prune out?
 
-John
+I fully understand and agree that verifying all PRs for everything is no-no
+due to economical reasons. Though, maybe we don't need to spawn all
+jobs automatically but, in some cases, delegate the decision to reviewers?
+For instance, if someone faces a C++11-heavy code, he could trigger
+a Clang validation just by posting comment like: "jenkins, Clang validation
+please".
 
-> Nathan
+Regards,
+Radek
