@@ -1,34 +1,59 @@
-From: Radoslaw Zarzynski <rzarzynski@mirantis.com>
+From: "Adam C. Emerson" <aemerson@redhat.com>
 Subject: Re: Clang does not like constexpression
-Date: Wed, 14 Jun 2017 19:45:01 +0200
-Message-ID: <CA+H5UW2MqpJtV9eWQ9VJg1XVkWRCv0HQf6KVWKwEcsQAHj=_qQ@mail.gmail.com>
+Date: Wed, 14 Jun 2017 13:59:28 -0400
+Message-ID: <20170614175928.GA6666@ultraspiritum.eng.arb.redhat.com>
 References: <3b811d53-d45f-7ed2-a65f-b7114739e891@digiware.nl>
- <CA+H5UW2k7ZEJVYJXE4aGvbNkjBsN3mVaDiNpRY585CvyGpOdeA@mail.gmail.com> <20170614170617.GA6164@ultraspiritum.eng.arb.redhat.com>
+ <alpine.LSU.2.21.1706140915130.5364@ancalagon.suse.de>
+ <alpine.LSU.2.21.1706140931320.5364@ancalagon.suse.de>
+ <CAEFDAA5Ge=68Xu1rerM6uG3aTQNdQXQtMfAfROXCf6x2C9h95w@mail.gmail.com>
+ <CA+H5UW2CGJ_FHc-GGFbox-yzEUe4B4=8ncB7GBtr2fSKAR6hDg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f177.google.com ([209.85.161.177]:36100 "EHLO
-        mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752204AbdFNRu7 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 13:50:59 -0400
-Received: by mail-yw0-f177.google.com with SMTP id l75so4924872ywc.3
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 10:50:59 -0700 (PDT)
-In-Reply-To: <20170614170617.GA6164@ultraspiritum.eng.arb.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:52508 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752503AbdFNR7b (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Jun 2017 13:59:31 -0400
+Content-Disposition: inline
+In-Reply-To: <CA+H5UW2CGJ_FHc-GGFbox-yzEUe4B4=8ncB7GBtr2fSKAR6hDg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
+Cc: Michal Jarzabek <stiopa@gmail.com>, Jesse Williamson <jwilliamson@suse.de>, Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Jun 14, 2017 at 7:06 PM, Adam C. Emerson <aemerson@redhat.com> wrote:
+On 14/06/2017, Radoslaw Zarzynski wrote:
+> This isn't a drop-in replacement for strlen(). It works differently
+> for strings with \0 buried somewhere in the middle.
 
-> Though I admit the more builders we add the slower Jenkins is. Are there
-> any older systems or variants we could prune out?
+#include <iostream>
+#include <cstdlib>
+#include <stdexcept>
 
-I fully understand and agree that verifying all PRs for everything is no-no
-due to economical reasons. Though, maybe we don't need to spawn all
-jobs automatically but, in some cases, delegate the decision to reviewers?
-For instance, if someone faces a C++11-heavy code, he could trigger
-a Clang validation just by posting comment like: "jenkins, Clang validation
-please".
+namespace _ {
+constexpr std::size_t string_length_(const char* s, std::size_t i,
+                                     std::size_t n) {
+  return i < n ? (*(s + i) == '\0' ? i : string_length_(s, i + 1, n))
+             : throw std::invalid_argument("Unterminated string constant.");
+}
+}
 
-Regards,
-Radek
+template<std::size_t N>
+constexpr std::size_t string_length(const char(&s)[N]) {
+  return _::string_length_(s, 0, N);
+}
+
+constexpr const char s1[] = "cat";
+constexpr const char s2[] = "cat\0dog";
+constexpr const char s3[3] = { 'c', 'a', 't' };
+constexpr std::size_t n1 = string_length(s1);
+constexpr std::size_t n2 = string_length(s2);
+
+int main(void) {
+  std::cout << "string_length(s1): " << n1 << std::endl;
+  std::cout << "string_length(s2): " << n2 << std::endl;
+  try {
+    std::cout << "string_length(s3): " << string_length(s3) << std::endl;
+  } catch (const std::invalid_argument& e) {
+    std::cerr << "How exceptional! " << e.what() << std::endl;
+  }
+}
