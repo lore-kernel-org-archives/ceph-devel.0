@@ -1,59 +1,35 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: Clang does not like constexpression
-Date: Wed, 14 Jun 2017 13:59:28 -0400
-Message-ID: <20170614175928.GA6666@ultraspiritum.eng.arb.redhat.com>
-References: <3b811d53-d45f-7ed2-a65f-b7114739e891@digiware.nl>
- <alpine.LSU.2.21.1706140915130.5364@ancalagon.suse.de>
- <alpine.LSU.2.21.1706140931320.5364@ancalagon.suse.de>
- <CAEFDAA5Ge=68Xu1rerM6uG3aTQNdQXQtMfAfROXCf6x2C9h95w@mail.gmail.com>
- <CA+H5UW2CGJ_FHc-GGFbox-yzEUe4B4=8ncB7GBtr2fSKAR6hDg@mail.gmail.com>
+Date: Wed, 14 Jun 2017 18:02:21 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1706141801170.3646@piezo.novalocal>
+References: <3b811d53-d45f-7ed2-a65f-b7114739e891@digiware.nl> <CA+H5UW2k7ZEJVYJXE4aGvbNkjBsN3mVaDiNpRY585CvyGpOdeA@mail.gmail.com> <20170614170617.GA6164@ultraspiritum.eng.arb.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:52508 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752503AbdFNR7b (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 14 Jun 2017 13:59:31 -0400
-Content-Disposition: inline
-In-Reply-To: <CA+H5UW2CGJ_FHc-GGFbox-yzEUe4B4=8ncB7GBtr2fSKAR6hDg@mail.gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:57715 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751920AbdFNSCY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 14:02:24 -0400
+In-Reply-To: <20170614170617.GA6164@ultraspiritum.eng.arb.redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
-Cc: Michal Jarzabek <stiopa@gmail.com>, Jesse Williamson <jwilliamson@suse.de>, Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Adam C. Emerson" <aemerson@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 14/06/2017, Radoslaw Zarzynski wrote:
-> This isn't a drop-in replacement for strlen(). It works differently
-> for strings with \0 buried somewhere in the middle.
+On Wed, 14 Jun 2017, Adam C. Emerson wrote:
+> On 14/06/2017, Radoslaw Zarzynski wrote:
+> > Thanks for the info, Willem. I'm on it.
+> > 
+> > BTW: it would be nice to have a Clang builder to find out similar
+> > issues as early as possible.
+> 
+> Oh yes, please Infrastructure Gods.
+> 
+> Though I admit the more builders we add the slower Jenkins is. Are there
+> any older systems or variants we could prune out?
 
-#include <iostream>
-#include <cstdlib>
-#include <stdexcept>
+Note that any jenkins checks run in parallel, and how long that takes just 
+depends on how many VMs we spin up (in OVH).  I think the main thing to 
+watch out for is long duration tests, not the quantity of tests.
 
-namespace _ {
-constexpr std::size_t string_length_(const char* s, std::size_t i,
-                                     std::size_t n) {
-  return i < n ? (*(s + i) == '\0' ? i : string_length_(s, i + 1, n))
-             : throw std::invalid_argument("Unterminated string constant.");
-}
-}
-
-template<std::size_t N>
-constexpr std::size_t string_length(const char(&s)[N]) {
-  return _::string_length_(s, 0, N);
-}
-
-constexpr const char s1[] = "cat";
-constexpr const char s2[] = "cat\0dog";
-constexpr const char s3[3] = { 'c', 'a', 't' };
-constexpr std::size_t n1 = string_length(s1);
-constexpr std::size_t n2 = string_length(s2);
-
-int main(void) {
-  std::cout << "string_length(s1): " << n1 << std::endl;
-  std::cout << "string_length(s2): " << n2 << std::endl;
-  try {
-    std::cout << "string_length(s3): " << string_length(s3) << std::endl;
-  } catch (const std::invalid_argument& e) {
-    std::cerr << "How exceptional! " << e.what() << std::endl;
-  }
-}
+sage
