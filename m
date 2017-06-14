@@ -1,42 +1,37 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
+From: Michal Jarzabek <stiopa@gmail.com>
 Subject: Re: Clang does not like constexpression
-Date: Wed, 14 Jun 2017 13:06:17 -0400
-Message-ID: <20170614170617.GA6164@ultraspiritum.eng.arb.redhat.com>
+Date: Wed, 14 Jun 2017 18:16:32 +0100
+Message-ID: <CAEFDAA5Ge=68Xu1rerM6uG3aTQNdQXQtMfAfROXCf6x2C9h95w@mail.gmail.com>
 References: <3b811d53-d45f-7ed2-a65f-b7114739e891@digiware.nl>
- <CA+H5UW2k7ZEJVYJXE4aGvbNkjBsN3mVaDiNpRY585CvyGpOdeA@mail.gmail.com>
+ <alpine.LSU.2.21.1706140915130.5364@ancalagon.suse.de> <alpine.LSU.2.21.1706140931320.5364@ancalagon.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46520 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751904AbdFNRGS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 14 Jun 2017 13:06:18 -0400
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 5DE764E4C3
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 17:06:18 +0000 (UTC)
-Received: from ultraspiritum.eng.arb.redhat.com (unknown [10.17.150.166])
-        by smtp.corp.redhat.com (Postfix) with SMTP id 24DB38E516
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 17:06:18 +0000 (UTC)
-Content-Disposition: inline
-In-Reply-To: <CA+H5UW2k7ZEJVYJXE4aGvbNkjBsN3mVaDiNpRY585CvyGpOdeA@mail.gmail.com>
+Received: from mail-it0-f44.google.com ([209.85.214.44]:35371 "EHLO
+        mail-it0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752499AbdFNRQe (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 13:16:34 -0400
+Received: by mail-it0-f44.google.com with SMTP id m62so4291394itc.0
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 10:16:33 -0700 (PDT)
+In-Reply-To: <alpine.LSU.2.21.1706140931320.5364@ancalagon.suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Jesse Williamson <jwilliamson@suse.de>
+Cc: Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 14/06/2017, Radoslaw Zarzynski wrote:
-> Thanks for the info, Willem. I'm on it.
-> 
-> BTW: it would be nice to have a Clang builder to find out similar
-> issues as early as possible.
+You could also do :
 
-Oh yes, please Infrastructure Gods.
+template< size_t N >
+constexpr size_t string_length(const char (&)[N] )
+{
+  return N-1;
+}
 
-Though I admit the more builders we add the slower Jenkins is. Are there
-any older systems or variants we could prune out?
 
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+On Wed, Jun 14, 2017 at 5:50 PM, Jesse Williamson <jwilliamson@suse.de> wrote:
+>
+>
+> Here's a C++11 version that might be useful to you (largely untested,
+> and I'm only on my first cup of coffee, so... ;>).
+>
+> -Jesse
