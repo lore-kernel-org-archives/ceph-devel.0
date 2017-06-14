@@ -1,48 +1,89 @@
-From: Jianjian Huo <samuel.huo@gmail.com>
-Subject: Jewel 10.2.7 client IOPS drops to zero freqently
-Date: Wed, 14 Jun 2017 14:32:50 -0700
-Message-ID: <CAB=cV2RgFVgv+559haqcW50GmKV=629FCOzJtOkZv6HfJk0P3w@mail.gmail.com>
+From: Jesse Williamson <jwilliamson@suse.de>
+Subject: Re: Clang does not like constexpression
+Date: Wed, 14 Jun 2017 15:46:59 -0700 (PDT)
+Message-ID: <alpine.LSU.2.21.1706141521010.5364@ancalagon.suse.de>
+References: <3b811d53-d45f-7ed2-a65f-b7114739e891@digiware.nl> <alpine.LSU.2.21.1706140915130.5364@ancalagon.suse.de> <alpine.LSU.2.21.1706140931320.5364@ancalagon.suse.de> <CAEFDAA5Ge=68Xu1rerM6uG3aTQNdQXQtMfAfROXCf6x2C9h95w@mail.gmail.com>
+ <CA+H5UW2CGJ_FHc-GGFbox-yzEUe4B4=8ncB7GBtr2fSKAR6hDg@mail.gmail.com> <20170614175928.GA6666@ultraspiritum.eng.arb.redhat.com> <alpine.LSU.2.21.1706141118120.5364@ancalagon.suse.de> <20170614182841.GC12086@ultraspiritum.eng.arb.redhat.com>
+ <alpine.DEB.2.11.1706141832010.3646@piezo.novalocal> <alpine.LSU.2.21.1706141139090.5364@ancalagon.suse.de> <alpine.DEB.2.11.1706141939190.32269@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; format=flowed; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f181.google.com ([74.125.82.181]:35736 "EHLO
-        mail-ot0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752459AbdFNVdL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 17:33:11 -0400
-Received: by mail-ot0-f181.google.com with SMTP id 106so3845788otc.2
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 14:33:11 -0700 (PDT)
+Received: from mx2.suse.de ([195.135.220.15]:49172 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751600AbdFNWrF (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Jun 2017 18:47:05 -0400
+In-Reply-To: <alpine.DEB.2.11.1706141939190.32269@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: "Adam C. Emerson" <aemerson@redhat.com>, Radoslaw Zarzynski <rzarzynski@mirantis.com>, Michal Jarzabek <stiopa@gmail.com>, Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+On Wed, 14 Jun 2017, Sage Weil wrote:
 
-At Alibaba, we experienced unstable performance with Jewel on one
-production cluster, and we can easily reproduce it now with several
-small test clusters. One test cluster has 30 SSDs, and another test
-one has 120 SSDs, we are using filestore+async messenger on the
-backend and fio+librbd to test them. When this issue happens, client
-fio IOPS drops to zero (or close to zero) frequently during fio runs.
-And the durations of those drops were very short, about 1 second or
-so.
+> But nobody does that.  It's stuff like
+>
+> 	strlen("\r\nffffffffffffffff;chunk-signature=")
+>
+> which can just be
+>
+> 	sizeof("whatever") - 1
+>
+> and it is clear to the reader of the code that it isn't strlen and \0's in
+> the string aren't relevant.
 
-For the 30 SSDs test cluster, we use 135 client fio writing into 135
-rbd images individually, each fio has only 1 job and rate limit is
-3MB/s. On this fresh created test cluster, for all 135 client fio
-runs, during first 15 minutes or so, client IOPS were very stable and
-each OSD server's throughput was very stable as well. After 15 minutes
-and 360 GB data written, the test cluster entered an unstable state,
-client fio IOPS dropped to zero (or close) frequently and each OSD
-server's throughput became very spiky as well (from 500MB/s to less
-1MB/s). We tried let all fio keeping writing for about 16 hours,
-cluster was still in this swing state.
+In that case, I agree, though it's worth considering that operator sizeof 
+won't give us the right result when the argument is deduced as a pointer. 
+That is:
 
-This is very easily reproducible. I don't think it's caused by
-filestore folder splitting, since they were all done during the first
-15 minutes. And also, OSD server mem/cpu/disk were far from saturated.
-One thing we noticed from perf counter is that op_latency increased
-from 0.7 ms to >20 ms after entering this unstable state. Is this
-normal Jewel/filestore behavior? Anyone knows what causes it?
+const char *msg = "Hello, World!";
+auto sz = sizeof(msg) - 1;
 
-Thanks,
-Jianjian
+...sz != strlen(msg). We certainly have constants and macros in our code.
+
+Consider also the innocuous-looking:
+
+const char s[10] = {};
+
+...where again sizeof(s) - 1 and strlen(s) differ.
+
+Nothing about /having/ a compile-time strlen() function precludes someone 
+from using sizeof(s) - 1 when we have an array, of course.
+
+With respect to having character arrays in our code with multiple NULL 
+characters, there are instances in in our own submodules, in our test 
+code, and at least one case where Ceph code uses that technique at runtime 
+to send split strings to Python-- so, I think that if it is put in a 
+function and given a name, we don't want to claim it computes a string 
+length if it is computing size - 1.
+
+The proposed version from Adam with the runtime check should be okay if we 
+want a checked version, or we can use another implementation.
+
+> IOW I don't see why we would need a fully C-like constexpr strlen...
+
+In this specific situation, I guess the use is to help solve Willem's 
+problem. :-) In a general library where we're doing compile-time slicing 
+and dicing, it would be pretty important.
+
+Another idea is to wrap the compiler intrinsics, which will give us 
+constexpr-ness across at least GCC and clang (and may be helpful in 
+Willem's case). Something like this might work:
+
+namespace ceph {
+namespace util {
+
+constexpr size_t strlen(const char *s)
+{
+#if __clang__
+  return __builtin_strlen(s);
+#else
+  return std::strlen(s);
+#endif
+}
+
+}} // namespace ceph::util
+
+I hope this is useful-- it's always fun when "simple" things generate 
+lively discussion!
+
+-Jesse
