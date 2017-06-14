@@ -1,131 +1,170 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: ceph.dir.rbytes inconsistent on different hosts
-Date: Wed, 14 Jun 2017 08:34:36 -0400
-Message-ID: <CALe9h7c6DQM40UK8p_cS0x9xzsa9fQDoe_8ntJTEe9mh6cyepA@mail.gmail.com>
-References: <CAGbvivJw+gEDijgq3eG41k78K2AGh+HknKwE7FKVUGo01Wd3SA@mail.gmail.com>
- <CABZ+qq=NUHM6v7v5kS5FD8DQsPiSNbBAgU+qY1=vcANNZ4+zHg@mail.gmail.com>
- <CAGbvivLGTLXDLb5JUr3481L-CE0tJo2eR9LZ2akBeh8gz29d-A@mail.gmail.com>
- <CALe9h7f8sg+z5WaKkPsqQ1go_AWkKyiMn5GM8+xz1e6RWWHG3Q@mail.gmail.com> <FA6D3991-C236-4D52-9F1C-3FDCB24C2B41@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Sparse file info in filestore not propagated to other OSDs
+Date: Wed, 14 Jun 2017 13:44:49 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1706141340520.3646@piezo.novalocal>
+References: <beaf4408-2322-b0f1-3265-0d9e411c5bf9@corp.ovh.com> <alpine.DEB.2.11.1704061322330.2999@piezo.novalocal> <d4bde447-f179-aeca-bac5-636fa40ccba5@corp.ovh.com> <415c9590-ab96-01b6-3c49-553b0d9529fa@sadziu.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1219057633-1497447891=:3646"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f176.google.com ([209.85.128.176]:35855 "EHLO
-        mail-wr0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751904AbdFNMe6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 08:34:58 -0400
-Received: by mail-wr0-f176.google.com with SMTP id 36so66020814wry.3
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 05:34:57 -0700 (PDT)
-In-Reply-To: <FA6D3991-C236-4D52-9F1C-3FDCB24C2B41@redhat.com>
+Received: from cobra.newdream.net ([66.33.216.30]:53261 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751624AbdFNNow (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 09:44:52 -0400
+In-Reply-To: <415c9590-ab96-01b6-3c49-553b0d9529fa@sadziu.pl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, Dan van der Ster <dan@vanderster.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: =?ISO-8859-2?Q?Pawe=B3_Sadowski?= <ceph@sadziu.pl>
+Cc: =?ISO-8859-2?Q?Piotr_Da=B3ek?= <piotr.dalek@corp.ovh.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-Nice!
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-On Wed, Jun 14, 2017 at 3:59 AM, Yan, Zheng <zyan@redhat.com> wrote:
->
->> On 14 Jun 2017, at 03:19, John Spray <jspray@redhat.com> wrote:
->>
->> On Tue, Jun 13, 2017 at 9:05 AM, Wyllys Ingersoll
->> <wyllys.ingersoll@keepertech.com> wrote:
->>> That sounds similar but Im not sure if its the same issue.  Our mounts
->>> were done using kernel mounting, not fuse.
->>
->> The fix for userspace was to issue a stat on inodes before reading
->> virtual xattrs:
->>
->> commit 532dc4b68e538c189ef828f67cecd0d647a62250
->> Author: John Spray <john.spray@redhat.com>
->> Date:   Wed Mar 15 15:32:47 2017 +0000
->>
->>    client: getattr before read on ceph.* xattrs
->>
->>    Previously we were returning values for quota, layout
->>    xattrs without any kind of update -- the user just got
->>    whatever happened to be in our cache.
->>
->>    Clearly this extra round trip has a cost, but reads of
->>    these xattrs are fairly rare, happening on admin
->>    intervention rather than in normal operation.
->>
->> We didn't look at doing it in the kernel client at that point because
->> the motivation was to fix quota handling, and the kernel client
->> doesn't do quotas.
->>
->> It seems like we should probably update the kernel client to do the
->> same thing -- Zheng, what do you think?
->>
-> done, https://github.com/ceph/ceph-client/commit/d69a42d91de651d5981d1b5538132ff362a9ee
->
-> Regards
-> Yan, Zheng
->
->> John
->>
->>> On Tue, Jun 13, 2017 at 6:02 AM, Dan van der Ster <dan@vanderster.com> wrote:
->>>> Sounds like this issue?
->>>>
->>>>   http://tracker.ceph.com/issues/17939
->>>>
->>>> Cheers, Dan
->>>>
->>>>
->>>>
->>>> On Mon, Jun 12, 2017 at 9:45 PM, Wyllys Ingersoll
->>>> <wyllys.ingersoll@keepertech.com> wrote:
->>>>> Ceph 10.2.7
->>>>> Ubuntu 16.04.2
->>>>>
->>>>> We have 2 hosts running identical versions of ceph with identical
->>>>> ceph.conf configuration files.
->>>>> Both mount /cephfs with the same options.
->>>>>
->>>>> We have a directory under /cephfs with a 4GB file in it.  The
->>>>> ceph.dir.rbytes xattr reported by ceph is different on the 2 hosts.
->>>>> One is correct, one is not.
->>>>>
->>>>> One host reports the 'ceph.dir.rbytes' correctly as 4129644548, the
->>>>> other reports it incorrectly as  2389190660
->>>>> Any ideas why this would be happening ?
->>>>>
->>>>> - Wyllys Ingersoll
->>>>>  Keeper Technology, LLC
->>>>>
->>>>>
->>>>> HOST A (correct values):
->>>>> $ ls -alF /cephfs/exports/smbtest
->>>>> total 4032857
->>>>> drwxrwxrwx 1 root    root    4129644548 May 31 11:28 ./
->>>>> drwxr-xr-x 1 root    root    4129644548 May 31 11:25 ../
->>>>> -rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
->>>>> -rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
->>>>> -rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
->>>>>
->>>>> $ getfattr -d -m ceph.dir /cephfs/exports/smbtest
->>>>> getfattr: Removing leading '/' from absolute path names
->>>>> # file: cephfs/exports/smbtest
->>>>> ceph.dir.rbytes="4129644548"
->>>>>
->>>>> HOST B (incorrect values)
->>>>> $ ls -alF /cephfs/exports/smbtest
->>>>> total 4032857
->>>>> drwxrwxrwx 1 root          root         2389190660 May 31 11:28 ./
->>>>> drwxr-xr-x 1 root          root         4129644548 May 31 11:25 ../
->>>>> -rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
->>>>> -rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
->>>>> -rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
->>>>>
->>>>> $ getfattr -d -m ceph.dir.rbytes /cephfs/exports/smbtest
->>>>> getfattr: Removing leading '/' from absolute path names
->>>>> # file: cephfs/exports/smbtest
->>>>> ceph.dir.rbytes="2389190660"
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+--8323329-1219057633-1497447891=:3646
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+
+On Wed, 14 Jun 2017, Paweł Sadowski wrote:
+> On 04/13/2017 04:23 PM, Piotr Dałek wrote:
+> > On 04/06/2017 03:25 PM, Sage Weil wrote:
+> >> On Thu, 6 Apr 2017, Piotr Dałek wrote:
+> >>> Hello,
+> >>>
+> >>> We recently had an interesting issue with RBD images and filestore
+> >>> on Jewel
+> >>> 10.2.5:
+> >>> We have a pool with RBD images, all of them mostly untouched (large
+> >>> areas of
+> >>> those images unused), and once we added 3 new OSDs to cluster, objects
+> >>> representing these images grew substantially on new OSDs: objects
+> >>> hosting
+> >>> unused areas of these images on original OSDs remained small (~8K of
+> >>> space
+> >>> actually used, 4M allocated), but on new OSDs were large (4M
+> >>> allocated *and*
+> >>> actually used). After investigation we concluded that Ceph didn't
+> >>> propagate
+> >>> sparse file information during cluster rebalance, resulting in
+> >>> correct data
+> >>> contents on all OSDs, but no sparse file data on new OSDs, hence
+> >>> disk space
+> >>> usage increase on those.
+> >>>
+> >>> Example on test cluster, before growing it by one OSD:
+> >>>
+> >>> ls:
+> >>>
+> >>> osd-01-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
+> >>> /var/lib/ceph/osd-01-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+> >>>
+> >>> osd-02-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
+> >>> /var/lib/ceph/osd-02-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+> >>>
+> >>> osd-03-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
+> >>> /var/lib/ceph/osd-03-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+> >>>
+> >>>
+> >>> du:
+> >>>
+> >>> osd-01-cluster: 12
+> >>> /var/lib/ceph/osd-01-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+> >>>
+> >>> osd-02-cluster: 12
+> >>> /var/lib/ceph/osd-02-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+> >>>
+> >>> osd-03-cluster: 12
+> >>> /var/lib/ceph/osd-03-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+> >>>
+> >>>
+> >>>
+> >>> mon-01-cluster:~ # rbd diff test
+> >>> Offset   Length  Type
+> >>> 8388608  4194304 data
+> >>> 16777216 4096    data
+> >>> 33554432 4194304 data
+> >>> 37748736 2048    data
+> >>>
+> >>> And after growing it:
+> >>>
+> >>> ls:
+> >>>
+> >>> clush> find /var/lib/ceph/osd-*/current/0.*head/ -type f -name
+> >>> '*data*' -exec
+> >>> ls -l {} \+
+> >>> osd-02-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
+> >>> /var/lib/ceph/osd-02-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+> >>>
+> >>> osd-03-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
+> >>> /var/lib/ceph/osd-03-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+> >>>
+> >>> osd-04-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:25
+> >>> /var/lib/ceph/osd-04-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+> >>>
+> >>>
+> >>> du:
+> >>>
+> >>> clush> find /var/lib/ceph/osd-*/current/0.*head/ -type f -name
+> >>> '*data*' -exec
+> >>> du -k {} \+
+> >>> osd-02-cluster: 12
+> >>> /var/lib/ceph/osd-02-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+> >>>
+> >>> osd-03-cluster: 12
+> >>> /var/lib/ceph/osd-03-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+> >>>
+> >>> osd-04-cluster: 4100
+> >>> /var/lib/ceph/osd-04-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
+> >>>
+> >>>
+> >>> Note that
+> >>> "rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0" grew
+> >>> from 12 to 4100KB when copied from other OSDs to osd-04.
+> >>>
+> >>> Is this something to be expected? Is there any way to make it
+> >>> propagate the
+> >>> sparse file info? Or should we think about issuing a "fallocate
+> >>> -d"-like patch
+> >>> for writes on filestore?
+> >>>
+> >>> (We're using kernel 3.13.0-45-generic but on 4.4.0-31-generic the issue
+> >>> remains; our XFS uses 4K bsize).
+> >>
+> >> I think the solution here is to use sparse_read during recovery.  The
+> >> PushOp data representation already supports it; it's just a matter of
+> >> skipping the zeros.  The recovery code could also have an option to
+> >> check
+> >> for fully-zero regions of the data and turn those into holes as
+> >> well.  For
+> >> ReplicatedBackend, see build_push_op().
+> >
+> > So far it turns out that there's even easier solution, we just enabled
+> > "filestore seek hole" on some test cluster and that seems to fix the
+> > problem for us. We'll see if fiemap works too.
+> >
+> 
+> Is it safe to enable "filestore seek hole", are there any tests that
+> verifies that everything related to RBD works fine with this enabled?
+> Can we make this enabled by default?
+
+We would need to enable it in the qa environment first.  The risk here is 
+that users run a broad range of kernels and we are exposing ourselves to 
+any bugs in any kernel version they may run.  I'd prefer to leave it off 
+by default.  We can enable it in the qa suite, though, which covers 
+centos7 (latest kernel) and ubuntu xenial and trusty.
+ 
+> I tested on few of our production images and it seems that about 30% is
+> sparse. This will be lost on any cluster wide event (add/remove nodes,
+> PG grow, recovery).
+> 
+> How this is/will be handled in BlueStore?
+
+BlueStore exposes the same sparseness metadata that enabling the 
+filestore seek hole or fiemap options does, so it won't be a problem 
+there.
+
+I think the only thing that we could potentially add is zero detection 
+on writes (so that explicitly writing zeros consumes no space).  We'd 
+have to be a bit careful measuring the performance impact of that check on 
+non-zero writes.
+
+sage
+--8323329-1219057633-1497447891=:3646--
