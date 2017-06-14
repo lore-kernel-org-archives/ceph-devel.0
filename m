@@ -1,36 +1,43 @@
-From: Jesse Williamson <jwilliamson@suse.de>
+From: "Adam C. Emerson" <aemerson@redhat.com>
 Subject: Re: Clang does not like constexpression
-Date: Wed, 14 Jun 2017 11:21:49 -0700 (PDT)
-Message-ID: <alpine.LSU.2.21.1706141119410.5364@ancalagon.suse.de>
-References: <3b811d53-d45f-7ed2-a65f-b7114739e891@digiware.nl> <alpine.LSU.2.21.1706140915130.5364@ancalagon.suse.de> <alpine.LSU.2.21.1706140931320.5364@ancalagon.suse.de> <CAEFDAA5Ge=68Xu1rerM6uG3aTQNdQXQtMfAfROXCf6x2C9h95w@mail.gmail.com>
- <CA+H5UW2CGJ_FHc-GGFbox-yzEUe4B4=8ncB7GBtr2fSKAR6hDg@mail.gmail.com> <20170614175928.GA6666@ultraspiritum.eng.arb.redhat.com> <CA+H5UW10tDxJiADk+tqPpkBn_93vXc1xsz30p65wABwoFtfLfw@mail.gmail.com>
+Date: Wed, 14 Jun 2017 14:23:30 -0400
+Message-ID: <20170614182330.GB12086@ultraspiritum.eng.arb.redhat.com>
+References: <3b811d53-d45f-7ed2-a65f-b7114739e891@digiware.nl>
+ <alpine.LSU.2.21.1706140915130.5364@ancalagon.suse.de>
+ <alpine.LSU.2.21.1706140931320.5364@ancalagon.suse.de>
+ <CAEFDAA5Ge=68Xu1rerM6uG3aTQNdQXQtMfAfROXCf6x2C9h95w@mail.gmail.com>
+ <CA+H5UW2CGJ_FHc-GGFbox-yzEUe4B4=8ncB7GBtr2fSKAR6hDg@mail.gmail.com>
+ <20170614175928.GA6666@ultraspiritum.eng.arb.redhat.com>
+ <alpine.LSU.2.21.1706141118120.5364@ancalagon.suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII; format=flowed
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:35054 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752099AbdFNSVy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 14 Jun 2017 14:21:54 -0400
-In-Reply-To: <CA+H5UW10tDxJiADk+tqPpkBn_93vXc1xsz30p65wABwoFtfLfw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:11611 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752099AbdFNSXc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Jun 2017 14:23:32 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.LSU.2.21.1706141118120.5364@ancalagon.suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Radoslaw Zarzynski <rzarzynski@mirantis.com>
-Cc: Michal Jarzabek <stiopa@gmail.com>, Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Jesse Williamson <jwilliamson@suse.de>
+Cc: Radoslaw Zarzynski <rzarzynski@mirantis.com>, Michal Jarzabek <stiopa@gmail.com>, Willem Jan Withagen <wjw@digiware.nl>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, 14 Jun 2017, Radoslaw Zarzynski wrote:
+On 14/06/2017, Jesse Williamson wrote:
+> This will no longer be constexpr.
 
-> May we put this somewhere under common/? Although the mentioned
-> Clang build failure has been resolved this morning, I bet the constexpr-
-> capable variant of strlen (ceph::strlen?) will be very useful in the future.
-> Also, I would love to make a clean-up PR based on it.
+That is true, but only in the case when it throws, and it's similar to the usage in...
 
-I'd certainly like to see this, as well as a few other goodies for 
-wrangling C (I have some ideas, and soon some code).
+http://en.cppreference.com/w/cpp/language/constexpr
 
-For folks who haven't seen Matt Godbolt's compiler explorer, this is a 
-super useful tool for testing things like this, since you can see the 
-assembly output from different compilers produced in a very handy way 
-(warning: lots of fun, may be addictive!):
-https://godbolt.org/
+>    // constexpr functions signal errors by throwing exceptions
+>    // in C++11, they must do so from the conditional operator ?:
+>    constexpr char operator[](std::size_t n) const
+>    {
+>        return n < sz? p[n] : throw std::out_of_range("");
+>    }
 
--Jesse
+-- 
+Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
+IRC: Aemerson@{RedHat, OFTC}
+0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
