@@ -1,127 +1,59 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: ceph.dir.rbytes inconsistent on different hosts
-Date: Wed, 14 Jun 2017 15:59:12 +0800
-Message-ID: <FA6D3991-C236-4D52-9F1C-3FDCB24C2B41@redhat.com>
-References: <CAGbvivJw+gEDijgq3eG41k78K2AGh+HknKwE7FKVUGo01Wd3SA@mail.gmail.com>
- <CABZ+qq=NUHM6v7v5kS5FD8DQsPiSNbBAgU+qY1=vcANNZ4+zHg@mail.gmail.com>
- <CAGbvivLGTLXDLb5JUr3481L-CE0tJo2eR9LZ2akBeh8gz29d-A@mail.gmail.com>
- <CALe9h7f8sg+z5WaKkPsqQ1go_AWkKyiMn5GM8+xz1e6RWWHG3Q@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Clang does not like constexpression
+Date: Wed, 14 Jun 2017 10:49:12 +0200
+Message-ID: <3b811d53-d45f-7ed2-a65f-b7114739e891@digiware.nl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53422 "EHLO mx1.redhat.com"
+Received: from smtp.digiware.nl ([176.74.240.9]:43692 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750751AbdFNH7U (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 14 Jun 2017 03:59:20 -0400
-In-Reply-To: <CALe9h7f8sg+z5WaKkPsqQ1go_AWkKyiMn5GM8+xz1e6RWWHG3Q@mail.gmail.com>
+        id S1754763AbdFNItc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 14 Jun 2017 04:49:32 -0400
+Received: from [192.168.10.67] (opteron [192.168.10.67])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id 0EDDE4379A
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 10:49:29 +0200 (CEST)
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>, Dan van der Ster <dan@vanderster.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
+I guess that in Clang strlen is not evaluation to a constant.
 
-> On 14 Jun 2017, at 03:19, John Spray <jspray@redhat.com> wrote:
-> 
-> On Tue, Jun 13, 2017 at 9:05 AM, Wyllys Ingersoll
-> <wyllys.ingersoll@keepertech.com> wrote:
->> That sounds similar but Im not sure if its the same issue.  Our mounts
->> were done using kernel mounting, not fuse.
-> 
-> The fix for userspace was to issue a stat on inodes before reading
-> virtual xattrs:
-> 
-> commit 532dc4b68e538c189ef828f67cecd0d647a62250
-> Author: John Spray <john.spray@redhat.com>
-> Date:   Wed Mar 15 15:32:47 2017 +0000
-> 
->    client: getattr before read on ceph.* xattrs
-> 
->    Previously we were returning values for quota, layout
->    xattrs without any kind of update -- the user just got
->    whatever happened to be in our cache.
-> 
->    Clearly this extra round trip has a cost, but reads of
->    these xattrs are fairly rare, happening on admin
->    intervention rather than in normal operation.
-> 
-> We didn't look at doing it in the kernel client at that point because
-> the motivation was to fix quota handling, and the kernel client
-> doesn't do quotas.
-> 
-> It seems like we should probably update the kernel client to do the
-> same thing -- Zheng, what do you think?
-> 
-done, https://github.com/ceph/ceph-client/commit/d69a42d91de651d5981d1b5538132ff362a9ee
+--WjW
 
-Regards
-Yan, Zheng
-
-> John
-> 
->> On Tue, Jun 13, 2017 at 6:02 AM, Dan van der Ster <dan@vanderster.com> wrote:
->>> Sounds like this issue?
->>> 
->>>   http://tracker.ceph.com/issues/17939
->>> 
->>> Cheers, Dan
->>> 
->>> 
->>> 
->>> On Mon, Jun 12, 2017 at 9:45 PM, Wyllys Ingersoll
->>> <wyllys.ingersoll@keepertech.com> wrote:
->>>> Ceph 10.2.7
->>>> Ubuntu 16.04.2
->>>> 
->>>> We have 2 hosts running identical versions of ceph with identical
->>>> ceph.conf configuration files.
->>>> Both mount /cephfs with the same options.
->>>> 
->>>> We have a directory under /cephfs with a 4GB file in it.  The
->>>> ceph.dir.rbytes xattr reported by ceph is different on the 2 hosts.
->>>> One is correct, one is not.
->>>> 
->>>> One host reports the 'ceph.dir.rbytes' correctly as 4129644548, the
->>>> other reports it incorrectly as  2389190660
->>>> Any ideas why this would be happening ?
->>>> 
->>>> - Wyllys Ingersoll
->>>>  Keeper Technology, LLC
->>>> 
->>>> 
->>>> HOST A (correct values):
->>>> $ ls -alF /cephfs/exports/smbtest
->>>> total 4032857
->>>> drwxrwxrwx 1 root    root    4129644548 May 31 11:28 ./
->>>> drwxr-xr-x 1 root    root    4129644548 May 31 11:25 ../
->>>> -rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
->>>> -rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
->>>> -rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
->>>> 
->>>> $ getfattr -d -m ceph.dir /cephfs/exports/smbtest
->>>> getfattr: Removing leading '/' from absolute path names
->>>> # file: cephfs/exports/smbtest
->>>> ceph.dir.rbytes="4129644548"
->>>> 
->>>> HOST B (incorrect values)
->>>> $ ls -alF /cephfs/exports/smbtest
->>>> total 4032857
->>>> drwxrwxrwx 1 root          root         2389190660 May 31 11:28 ./
->>>> drwxr-xr-x 1 root          root         4129644548 May 31 11:25 ../
->>>> -rw-r--r-- 1 2000501 2000514       4096 May 31 11:26 ._.DS_Store
->>>> -rw-r--r-- 1 2000501 2000514       6148 Jun  1 14:37 .DS_Store
->>>> -rw-r--r-- 1 2000501 2000514 4129634304 Jun 12 15:25 test-2017-05-30-m1.iso
->>>> 
->>>> $ getfattr -d -m ceph.dir.rbytes /cephfs/exports/smbtest
->>>> getfattr: Removing leading '/' from absolute path names
->>>> # file: cephfs/exports/smbtest
->>>> ceph.dir.rbytes="2389190660"
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+In file included from
+/home/jenkins/workspace/ceph-master/src/rgw/rgw_auth_keystone.cc:22:
+/home/jenkins/workspace/ceph-master/src/rgw/rgw_auth_s3.h:171:29: error:
+constexpr variable 'META_MAX_SIZE' must be initialized by a constant
+expression
+    static constexpr size_t META_MAX_SIZE = \
+                            ^
+/home/jenkins/workspace/ceph-master/src/rgw/rgw_auth_s3.h:172:7: note:
+non-constexpr function 'strlen' cannot be used in a constant expression
+      strlen("\r\nffffffffffffffff;chunk-signature=") + SIG_SIZE +
+strlen("\r\n");
+      ^
+/home/jenkins/workspace/ceph-master/src/rgw/rgw_auth_s3.h:175:29: error:
+constexpr variable 'META_MIN_SIZE' must be initialized by a constant
+expression
+    static constexpr size_t META_MIN_SIZE = \
+                            ^
+/home/jenkins/workspace/ceph-master/src/rgw/rgw_auth_s3.h:176:7: note:
+non-constexpr function 'strlen' cannot be used in a constant expression
+      strlen("0;chunk-signature=") + SIG_SIZE + strlen("\r\n");
+      ^
+/home/jenkins/workspace/ceph-master/src/rgw/rgw_auth_s3.h:204:41: error:
+non-type template argument is not a constant expression
+  boost::container::static_vector<char, ChunkMeta::META_MAX_SIZE>
+parsing_buf;
+                                        ^~~~~~~~~~~~~~~~~~~~~~~~
+/home/jenkins/workspace/ceph-master/src/rgw/rgw_auth_s3.h:204:41: note:
+initializer of 'META_MAX_SIZE' is not a constant expression
+/home/jenkins/workspace/ceph-master/src/rgw/rgw_auth_s3.h:171:29: note:
+declared here
+    static constexpr size_t META_MAX_SIZE = \
+                            ^
+3 errors generated.
