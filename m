@@ -1,36 +1,48 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Extra daemons/servers reporting to mgr
-Date: Wed, 14 Jun 2017 17:20:28 -0400
-Message-ID: <CA+aFP1B0ngk-Wkfy0KXnkyRP2XZJqvce1qhdBfpL+5PcjmGNoQ@mail.gmail.com>
-References: <CALe9h7eT+7KUt7VZPaYfR49FEPP3mJbe2+ARK82BaZUMmStchw@mail.gmail.com>
- <CADRKj5RCQf8wv+Y3VsL=e_gB9URYzK0SkzGRVfTFQwcJn-OL4g@mail.gmail.com> <alpine.DEB.2.11.1706141943490.32269@piezo.novalocal>
-Reply-To: dillaman@redhat.com
+From: Jianjian Huo <samuel.huo@gmail.com>
+Subject: Jewel 10.2.7 client IOPS drops to zero freqently
+Date: Wed, 14 Jun 2017 14:32:50 -0700
+Message-ID: <CAB=cV2RgFVgv+559haqcW50GmKV=629FCOzJtOkZv6HfJk0P3w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f174.google.com ([209.85.161.174]:35456 "EHLO
-        mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752450AbdFNVU3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 17:20:29 -0400
-Received: by mail-yw0-f174.google.com with SMTP id v7so8389957ywc.2
-        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 14:20:29 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1706141943490.32269@piezo.novalocal>
+Received: from mail-ot0-f181.google.com ([74.125.82.181]:35736 "EHLO
+        mail-ot0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752459AbdFNVdL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 17:33:11 -0400
+Received: by mail-ot0-f181.google.com with SMTP id 106so3845788otc.2
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 14:33:11 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Jun 14, 2017 at 3:50 PM, Sage Weil <sweil@redhat.com> wrote:
-> Is there anything that is updated at runtime (not startup) that
-> doesn't fit into a perfcounter?  It not, then a single call to something
-> like rados_register_daemon(name, metadata_map) (and some mechanism
-> for cleaning out dead people) ought to suffice?
+Hi,
 
-My 2 cents: for rbd-mirror, I was thinking of injecting dynamic health
-state like "X images in error state" so that things like dashboard
-could have that data available for display without having to poll the
-data from the backing status objects in the OSDs. Low-level details
-about which images have issues would still require a pull.
+At Alibaba, we experienced unstable performance with Jewel on one
+production cluster, and we can easily reproduce it now with several
+small test clusters. One test cluster has 30 SSDs, and another test
+one has 120 SSDs, we are using filestore+async messenger on the
+backend and fio+librbd to test them. When this issue happens, client
+fio IOPS drops to zero (or close to zero) frequently during fio runs.
+And the durations of those drops were very short, about 1 second or
+so.
 
--- 
-Jason
+For the 30 SSDs test cluster, we use 135 client fio writing into 135
+rbd images individually, each fio has only 1 job and rate limit is
+3MB/s. On this fresh created test cluster, for all 135 client fio
+runs, during first 15 minutes or so, client IOPS were very stable and
+each OSD server's throughput was very stable as well. After 15 minutes
+and 360 GB data written, the test cluster entered an unstable state,
+client fio IOPS dropped to zero (or close) frequently and each OSD
+server's throughput became very spiky as well (from 500MB/s to less
+1MB/s). We tried let all fio keeping writing for about 16 hours,
+cluster was still in this swing state.
+
+This is very easily reproducible. I don't think it's caused by
+filestore folder splitting, since they were all done during the first
+15 minutes. And also, OSD server mem/cpu/disk were far from saturated.
+One thing we noticed from perf counter is that op_latency increased
+from 0.7 ms to >20 ms after entering this unstable state. Is this
+normal Jewel/filestore behavior? Anyone knows what causes it?
+
+Thanks,
+Jianjian
