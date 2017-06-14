@@ -1,35 +1,95 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Are we ready for 10.2.8 - cephfs
-Date: Wed, 14 Jun 2017 20:45:39 +0200
-Message-ID: <44b31673-0021-fe48-251e-61780614a283@suse.cz>
-References: <be949951-5e1c-9471-23f6-2c595baec10a@suse.cz>
- <CABZ+qq=p_=8PHCwBoo=aQ1V5CeRk4QdNiK7t=ooeisFHB9etyg@mail.gmail.com>
- <CALe9h7dUCBXKnyxGVi3utN_ArkZixO-SZ+xH60L23R11FELMzw@mail.gmail.com>
- <1c7fab31-4990-681d-eb5f-0ae4a1977a41@suse.cz>
- <CALe9h7eetaO1bBht1QBZTZm8T=5uFGSf6FYoX-px5ETeDDoc+A@mail.gmail.com>
+From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
+Subject: Re: Extra daemons/servers reporting to mgr
+Date: Wed, 14 Jun 2017 12:03:37 -0700
+Message-ID: <CADRKj5R9u3JL4M5xXy2u4fN+KF=Lzi5BCYZYKLpOMh4Q1QZViQ@mail.gmail.com>
+References: <CALe9h7eT+7KUt7VZPaYfR49FEPP3mJbe2+ARK82BaZUMmStchw@mail.gmail.com>
+ <f483cee0-0a90-0571-d993-d1784e6a39ec@redhat.com> <1284111406.22125094.1497277587133.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:36121 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751670AbdFNSpm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 14 Jun 2017 14:45:42 -0400
-In-Reply-To: <CALe9h7eetaO1bBht1QBZTZm8T=5uFGSf6FYoX-px5ETeDDoc+A@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-qt0-f169.google.com ([209.85.216.169]:36587 "EHLO
+        mail-qt0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751598AbdFNTDj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 15:03:39 -0400
+Received: by mail-qt0-f169.google.com with SMTP id u19so11519424qta.3
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 12:03:38 -0700 (PDT)
+In-Reply-To: <1284111406.22125094.1497277587133.JavaMail.zimbra@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Dan van der Ster <dan@vanderster.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Matt Benjamin <mbenjamin@redhat.com>
+Cc: Daniel Gryniewicz <dang@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-> Just curious, why do we add that label?  I've always filtered this by
-> using "base:jewel" in github.
+On Mon, Jun 12, 2017 at 7:26 AM, Matt Benjamin <mbenjamin@redhat.com> wrote:
+> The nfs gateways are clients of either libcephfs or librgw, so in the first instance, I would say that librgw, for example, which creates an RGW instance, should be the client of this API.
 
-Well, when we are trying to get backports merged for the "next" point 
-release while the "current" one is in QE, we open PRs targeting 
-jewel-next - so that's not ironclad.
+Yes, but should be able to provide radosgw specific info that the nfs
+gateway does not provide (e.g., port, ssl).
 
-But I don't really know the answer to why the milestone tag is there. 
-It's what we've always populated the integration branch by. I agree it's 
-not optimal because PRs can get delayed waiting for someone to set the 
-milestone.
+Yehuda
+
+>
+> Matt
+>
+> ----- Original Message -----
+>> From: "Daniel Gryniewicz" <dang@redhat.com>
+>> To: "John Spray" <jspray@redhat.com>, "Ceph Development" <ceph-devel@vger.kernel.org>
+>> Sent: Monday, June 12, 2017 10:14:02 AM
+>> Subject: Re: Extra daemons/servers reporting to mgr
+>>
+>> On 06/11/2017 08:04 AM, John Spray wrote:
+>> > MgrClient instances (such as those in the daemons, and those in every
+>> > librados instance) open a session with ceph-mgr where they identify
+>> > themselves by entity name and type.  ceph-mgr sends a MgrConfigure
+>> > message, which tells the client whether to both sending stats and how
+>> > often.  ceph-mgr also keeps a copy of the metadata (a la "ceph osd
+>> > metadata...") for OSD and MDS daemons -- it loads all that up at
+>> > startup, and then also freshens it when it sees a daemon restart or
+>> > sees a new daemon.
+>> >
+>> > We would like to have something similar so that the mgr can be aware
+>> > of the existence of other services like RGW gateways, RBD mirror
+>> > services, perhaps also NFS gateways.
+>> >
+>> > The information about each daemon would at a minimum be its identity,
+>> > type, and some static metadata.  It might also include some dynamic
+>> > state/health structure.  The challenging part here is how to expose
+>> > that to the various daemons, given that things like RGW are not known
+>> > in advance to core Ceph and that they just consume the librados
+>> > interface.
+>> >
+>> > It doesn't feel like a particularly natural thing for librados, but
+>> > ultimately whatever we expose to rgw/rbd is de-facto librados, even if
+>> > we put it in a different library or whatever.
+>> >
+>> > So far I've got as far as thinking we should have an extra call just
+>> > in the C++ bindings that lets callers say "Hi, I'm a service not just
+>> > a client, and here's a map of metadata", that they call one time
+>> > between creating their RadosClient and connecting to the cluster.
+>> >
+>>
+>> This seems fine, but if we want NFS gateways, too, then a C API would be
+>> helpful.
+>>
+>> Daniel
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+> --
+> Matt Benjamin
+> Red Hat, Inc.
+> 315 West Huron Street, Suite 140A
+> Ann Arbor, Michigan 48103
+>
+> http://www.redhat.com/en/technologies/storage
+>
+> tel.  734-821-5101
+> fax.  734-769-8938
+> cel.  734-216-5309
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
