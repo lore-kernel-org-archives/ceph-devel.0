@@ -1,224 +1,116 @@
-From: =?UTF-8?B?5LqO55u45rSL?= <penglaiyxy@gmail.com>
-Subject: Re: rgw: leak with incomplete multiparts (was: Request for review)
-Date: Wed, 14 Jun 2017 10:14:36 +0800
-Message-ID: <CAE5T3Nyxr=mZYws0B_rgkKE7EbMEWwnRQ5ygRHOdBfRp7Zgrsw@mail.gmail.com>
-References: <CAP3mxSwbgTxzSL-d7-HxncV16JehvEuP+Pz-EmbQJvxT_G4HtQ@mail.gmail.com>
- <CAE5T3Nz6voZMcq-g89JGhzXyhGaAbu6EXXEADDhEhfiQuBWjXw@mail.gmail.com> <CAP3mxSzUyQf0gS-JR5W8pwvp74EMQhfX-WqGGsNFs3H4CVnotg@mail.gmail.com>
+From: =?UTF-8?Q?Pawe=c5=82_Sadowski?= <ceph-Bj5ZXqqQV65mR6Xm/wNWPw@public.gmane.org>
+Subject: Re: Sparse file info in filestore not propagated to
+	other OSDs
+Date: Wed, 14 Jun 2017 08:30:10 +0200
+Message-ID: <415c9590-ab96-01b6-3c49-553b0d9529fa@sadziu.pl>
+References: <beaf4408-2322-b0f1-3265-0d9e411c5bf9@corp.ovh.com>
+	<alpine.DEB.2.11.1704061322330.2999@piezo.novalocal>
+	<d4bde447-f179-aeca-bac5-636fa40ccba5@corp.ovh.com>
+Reply-To: ceph-Bj5ZXqqQV65mR6Xm/wNWPw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f181.google.com ([209.85.128.181]:33635 "EHLO
-        mail-wr0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751448AbdFNCOi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 13 Jun 2017 22:14:38 -0400
-Received: by mail-wr0-f181.google.com with SMTP id v104so158601163wrb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 13 Jun 2017 19:14:37 -0700 (PDT)
-In-Reply-To: <CAP3mxSzUyQf0gS-JR5W8pwvp74EMQhfX-WqGGsNFs3H4CVnotg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Varshney <abhishek.varshney@flipkart.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <d4bde447-f179-aeca-bac5-636fa40ccba5-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Abhishek,
-
-Our team has developed a radosgw-admin command to reclaim the leak
-space caused by re-upload the same part.
-
-I have reviewed the code yestoday and the procedure is scheduled as below:
-1. list the objects with ns=3Dmultipart from the bucket index with a
-specified shard-id, since meta and multipart part index belongs to the
-same shard-id.
-2. if meta index exists, we ignore the object.
-3. if meta index does not exists, we think the multipart index is
-orphan parts and any objects associated are also leaked, then we put
-these leaked objects to gc.
-
-It's a method to reclaim the leaked space.But in my opinion, I do not
-think it is good enough.
-And we have to trigger the reclaim through shell or humen.
-We have to check which object is leaked, if bucket index shard-num is
-too large, it is a heavy and long work.
-
-How do you think the method?
-I hope to modify the code well and contribute  to the ceph community.
-
-I have opened a tracker for the problem.
-http://tracker.ceph.com/issues/20284
-
-Best Regards,
-Penglaixy
---=20
-Software Engineer, ChinaNetCenter Co., ShenZhen, Guangdong Province, China
-
-2017-06-14 0:10 GMT+08:00 Abhishek Varshney <abhishek.varshney@flipkart.com=
->:
-> Hi Penglaiyxy,
->
-> I was able to reproduce the scenario described by you in current
-> master branch. It turns out that, in case of re-uploading a part, rgw
-> assigns a different prefix to it. This was introduced by the commit
-> [1] as a fix for racy part uploads [2]. This leads to orphaned parts
-> being uploaded, which have an entry in bucket index, but are not
-> really part of any uploaded object. Such orphaned parts should have
-> ideally been cleaned-up on multipart complete or abort operation. This
-> looks like a slightly different issue, as the clean-up of such parts
-> should not wait for a bucket deletion operation to happen.
->
-> Can you open a separate tracker issue for this, if one not present alread=
-y.
->
-> [1] https://github.com/ceph/ceph/pull/1781/commits/bd8e026f88b812cc70caf6=
-232c247844df5d99bf
-> [2] http://tracker.ceph.com/issues/8269
->
-> Thanks
-> Abhishek
->
-> On Tue, Jun 13, 2017 at 12:28 PM, =E4=BA=8E=E7=9B=B8=E6=B4=8B <penglaiyxy=
-@gmail.com> wrote:
->> Hi Abhishek,
->>
->> Your PR is practical  for anyone who can not delete an non-empty bucket.
->>
->> But I think in one scenario that you still can not delete bucket
->> because of the orphan object leaked by multipart upload.
->>
->> Upload a multipart object:
->>
->> 1. Upload part 1 with prefix   2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5
->>
->> 2. The connection between rgw client and server is cutoff,  I don't
->> know if  I have upload part one completely ,so I re-upload part 1 then
->> the part 1 is attached with a new prefix like
->> eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH(which is tackled by rgw server )
->>
->> 3. The connection between rgw client and server is cutoff again, then
->> I re-upload part 1 with new  prefix d9H1FWnoOwmr3IAejtYQJ2hyIjsUA7U
->>
->> 4. Upload part 2 and left parts
->>
->> 5. At the end, complete the upload.
->>
->> The object with names below is leaked and I can not see them through
->> s3 client.  (My upload size is 15MB and stripe size is 4M)
->>
->> center-master.4439.1__multipart_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-=
-5.1
->> center-master.4439.1__shadow_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5.1=
-_1
->> center-master.4439.1__shadow_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5.1=
-_2
->> center-master.4439.1__shadow_bigfile.2~-DUZmxVbiv9dBycBdci2iMhiKEEUv-5.1=
-_3
->>
->> center-master.4439.1__multipart_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.=
-1
->> center-master.4439.1__shadow_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1_1
->> center-master.4439.1__shadow_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1_2
->> center-master.4439.1__shadow_bigfile.eOntuNHW8UdvnpbLl9UAdYGuWrL9HPH.1_3
->>
->> The above upload process is really occurring in our production
->> application and we find a lot space leaked.
->>
->> How can I reclaim the space leaked?
->>
->> Any Idea is appreciated.
->>
->>
->> ________________________________
->> penglaiyxy
->>
->> From: Abhishek Varshney
->> Date: 2017-06-13 00:17
->> To: Ceph Development
->> Subject: rgw: leak with incomplete multiparts (was: Request for review)
->> Reviving an old thread by a colleague on rgw leaking rados objects,
->> the PR submitted earlier [1] had failed teuthology rgw run, due to
->> radosgw-admin failing to remove a user with --purge-data flag. I tried
->> to root cause the issue, and it turned out that incomplete multiparts
->> need to be aborted when doing bucket rm with --purge-data. Here is the
->> new PR (https://github.com/ceph/ceph/pull/15630) which handles
->> incomplete multiparts with behaviour as given below:
->>
->> * radosgw-admin user/bucket rm with incomplete multiparts would return
->> bucket not empty error.
->> * radosgw-admin user/bucket rm --purge-data with incomplete multiparts
->> would abort the pending multiparts and then delete the bucket.
->> * S3 delete bucket API with incomplete multiparts would return bucket
->> not empty error. The expectation here is on the user to either
->> complete or cancel all pending multipart uploads before deleting the
->> bucket.
->>
->> Requesting review on this PR.
->>
->> PS : The check for an empty bucket index here [2] in the previous PR
->> [1] has been removed, as we found instances of inconsistent bucket
->> index with stale entries, without corresponding objects present in
->> data pool. This would have prevented the deletion of an empty bucket
->> with such inconsistent indexes. I am not sure on how to reproduce such
->> a scenario though.
->>
->> [1] https://github.com/ceph/ceph/pull/10920
->> [2] https://github.com/ceph/ceph/pull/10920/files#diff-c30965955342b9839=
-3b73be699f4e355R7349
->>
->> Thanks
->> Abhishek
->>
->> On Mon, Sep 12, 2016 at 4:23 AM, Praveen Kumar G T (Cloud Platform)
->> <praveen.gt@flipkart.com> wrote:
->>> Definitions
->>>
->>> Orphaned Objects: Orphaned objects are created when a Multipart upload =
-has uploaded some or all of the parts but without executing multipart cance=
-l or multipart complete. An incomplete Multipart upload is neither created =
-nor destroyed, it is in orphan state
->>> Leaked Objects : Objects that are not deleted on the ceph cluster but a=
-ssumed to be deleted by s3 client. These objects cannot be accessed by s3 c=
-lients but still occupy space in the ceph cluster
->>>
->>> Problem
->>>
->>> A s3 bucket cannot be deleted when there are objects in it. The bucket =
-deletion command will fail with error BucketNotEmpty. The objects in the bu=
-ckets can be listed using any of the s3 clients. In case if we have orphane=
-d objects present in the bucket, they will not be listed via the normal lis=
-ting operations of the s3 clients. If the bucket is deleted when there are =
-orphaned objects in the bucket, they will end up being leaked. This ends of=
- using space in the ceph cluster even though the objects are not accessed b=
-y any of the s3 clients. This space is not accounted under the radosgw user=
- account as well
->>>
->>> Tracker link
->>>
->>> http://tracker.ceph.com/issues/17164
->>>
->>> Fix
->>>
->>> The fix will avoid deletion of buckets even if there are Orphaned objec=
-ts in the bucket. So now bucket deletion command will return BucketNotEmpty=
-  when there are orphaned objects as well.
->>>
->>> Pull request
->>>
->>> https://github.com/ceph/ceph/pull/10920
->>>
->>> Can somebody Please review the fix. We have already verified the fix lo=
-cally.
->>>
->>> Regards,
->>> Praveen.
->>>
->>>
->>> --
->>
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
->>
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+CgpPbiAwNC8xMy8yMDE3IDA0OjIzIFBNLCBQaW90ciBEYcWCZWsgd3JvdGU6Cj4gT24gMDQvMDYv
+MjAxNyAwMzoyNSBQTSwgU2FnZSBXZWlsIHdyb3RlOgo+PiBPbiBUaHUsIDYgQXByIDIwMTcsIFBp
+b3RyIERhxYJlayB3cm90ZToKPj4+IEhlbGxvLAo+Pj4KPj4+IFdlIHJlY2VudGx5IGhhZCBhbiBp
+bnRlcmVzdGluZyBpc3N1ZSB3aXRoIFJCRCBpbWFnZXMgYW5kIGZpbGVzdG9yZQo+Pj4gb24gSmV3
+ZWwKPj4+IDEwLjIuNToKPj4+IFdlIGhhdmUgYSBwb29sIHdpdGggUkJEIGltYWdlcywgYWxsIG9m
+IHRoZW0gbW9zdGx5IHVudG91Y2hlZCAobGFyZ2UKPj4+IGFyZWFzIG9mCj4+PiB0aG9zZSBpbWFn
+ZXMgdW51c2VkKSwgYW5kIG9uY2Ugd2UgYWRkZWQgMyBuZXcgT1NEcyB0byBjbHVzdGVyLCBvYmpl
+Y3RzCj4+PiByZXByZXNlbnRpbmcgdGhlc2UgaW1hZ2VzIGdyZXcgc3Vic3RhbnRpYWxseSBvbiBu
+ZXcgT1NEczogb2JqZWN0cwo+Pj4gaG9zdGluZwo+Pj4gdW51c2VkIGFyZWFzIG9mIHRoZXNlIGlt
+YWdlcyBvbiBvcmlnaW5hbCBPU0RzIHJlbWFpbmVkIHNtYWxsICh+OEsgb2YKPj4+IHNwYWNlCj4+
+PiBhY3R1YWxseSB1c2VkLCA0TSBhbGxvY2F0ZWQpLCBidXQgb24gbmV3IE9TRHMgd2VyZSBsYXJn
+ZSAoNE0KPj4+IGFsbG9jYXRlZCAqYW5kKgo+Pj4gYWN0dWFsbHkgdXNlZCkuIEFmdGVyIGludmVz
+dGlnYXRpb24gd2UgY29uY2x1ZGVkIHRoYXQgQ2VwaCBkaWRuJ3QKPj4+IHByb3BhZ2F0ZQo+Pj4g
+c3BhcnNlIGZpbGUgaW5mb3JtYXRpb24gZHVyaW5nIGNsdXN0ZXIgcmViYWxhbmNlLCByZXN1bHRp
+bmcgaW4KPj4+IGNvcnJlY3QgZGF0YQo+Pj4gY29udGVudHMgb24gYWxsIE9TRHMsIGJ1dCBubyBz
+cGFyc2UgZmlsZSBkYXRhIG9uIG5ldyBPU0RzLCBoZW5jZQo+Pj4gZGlzayBzcGFjZQo+Pj4gdXNh
+Z2UgaW5jcmVhc2Ugb24gdGhvc2UuCj4+Pgo+Pj4gRXhhbXBsZSBvbiB0ZXN0IGNsdXN0ZXIsIGJl
+Zm9yZSBncm93aW5nIGl0IGJ5IG9uZSBPU0Q6Cj4+Pgo+Pj4gbHM6Cj4+Pgo+Pj4gb3NkLTAxLWNs
+dXN0ZXI6IC1ydy1yLS1yLS0gMSByb290IHJvb3QgNDE5NDMwNCBBcHIgIDYgMDk6MTgKPj4+IC92
+YXIvbGliL2NlcGgvb3NkLTAxLWNsdXN0ZXIvY3VycmVudC8wLjI3X2hlYWQvcmJkXHVkYXRhLjEy
+YTQ3NGIwZGM1MS4wMDAwMDAwMDAwMDAwMDA4X19oZWFkXzJERDY0NzY3X18wCj4+Pgo+Pj4gb3Nk
+LTAyLWNsdXN0ZXI6IC1ydy1yLS1yLS0gMSByb290IHJvb3QgNDE5NDMwNCBBcHIgIDYgMDk6MTgK
+Pj4+IC92YXIvbGliL2NlcGgvb3NkLTAyLWNsdXN0ZXIvY3VycmVudC8wLjI3X2hlYWQvcmJkXHVk
+YXRhLjEyYTQ3NGIwZGM1MS4wMDAwMDAwMDAwMDAwMDA4X19oZWFkXzJERDY0NzY3X18wCj4+Pgo+
+Pj4gb3NkLTAzLWNsdXN0ZXI6IC1ydy1yLS1yLS0gMSByb290IHJvb3QgNDE5NDMwNCBBcHIgIDYg
+MDk6MTgKPj4+IC92YXIvbGliL2NlcGgvb3NkLTAzLWNsdXN0ZXIvY3VycmVudC8wLjI3X2hlYWQv
+cmJkXHVkYXRhLjEyYTQ3NGIwZGM1MS4wMDAwMDAwMDAwMDAwMDA4X19oZWFkXzJERDY0NzY3X18w
+Cj4+Pgo+Pj4KPj4+IGR1Ogo+Pj4KPj4+IG9zZC0wMS1jbHVzdGVyOiAxMgo+Pj4gL3Zhci9saWIv
+Y2VwaC9vc2QtMDEtY2x1c3Rlci9jdXJyZW50LzAuMjdfaGVhZC9yYmRcdWRhdGEuMTJhNDc0YjBk
+YzUxLjAwMDAwMDAwMDAwMDAwMDhfX2hlYWRfMkRENjQ3NjdfXzAKPj4+Cj4+PiBvc2QtMDItY2x1
+c3RlcjogMTIKPj4+IC92YXIvbGliL2NlcGgvb3NkLTAyLWNsdXN0ZXIvY3VycmVudC8wLjI3X2hl
+YWQvcmJkXHVkYXRhLjEyYTQ3NGIwZGM1MS4wMDAwMDAwMDAwMDAwMDA4X19oZWFkXzJERDY0NzY3
+X18wCj4+Pgo+Pj4gb3NkLTAzLWNsdXN0ZXI6IDEyCj4+PiAvdmFyL2xpYi9jZXBoL29zZC0wMy1j
+bHVzdGVyL2N1cnJlbnQvMC4yN19oZWFkL3JiZFx1ZGF0YS4xMmE0NzRiMGRjNTEuMDAwMDAwMDAw
+MDAwMDAwOF9faGVhZF8yREQ2NDc2N19fMAo+Pj4KPj4+Cj4+Pgo+Pj4gbW9uLTAxLWNsdXN0ZXI6
+fiAjIHJiZCBkaWZmIHRlc3QKPj4+IE9mZnNldCAgIExlbmd0aCAgVHlwZQo+Pj4gODM4ODYwOCAg
+NDE5NDMwNCBkYXRhCj4+PiAxNjc3NzIxNiA0MDk2ICAgIGRhdGEKPj4+IDMzNTU0NDMyIDQxOTQz
+MDQgZGF0YQo+Pj4gMzc3NDg3MzYgMjA0OCAgICBkYXRhCj4+Pgo+Pj4gQW5kIGFmdGVyIGdyb3dp
+bmcgaXQ6Cj4+Pgo+Pj4gbHM6Cj4+Pgo+Pj4gY2x1c2g+IGZpbmQgL3Zhci9saWIvY2VwaC9vc2Qt
+Ki9jdXJyZW50LzAuKmhlYWQvIC10eXBlIGYgLW5hbWUKPj4+ICcqZGF0YSonIC1leGVjCj4+PiBs
+cyAtbCB7fSBcKwo+Pj4gb3NkLTAyLWNsdXN0ZXI6IC1ydy1yLS1yLS0gMSByb290IHJvb3QgNDE5
+NDMwNCBBcHIgIDYgMDk6MTgKPj4+IC92YXIvbGliL2NlcGgvb3NkLTAyLWNsdXN0ZXIvY3VycmVu
+dC8wLjI3X2hlYWQvcmJkXHVkYXRhLjEyYTQ3NGIwZGM1MS4wMDAwMDAwMDAwMDAwMDA4X19oZWFk
+XzJERDY0NzY3X18wCj4+Pgo+Pj4gb3NkLTAzLWNsdXN0ZXI6IC1ydy1yLS1yLS0gMSByb290IHJv
+b3QgNDE5NDMwNCBBcHIgIDYgMDk6MTgKPj4+IC92YXIvbGliL2NlcGgvb3NkLTAzLWNsdXN0ZXIv
+Y3VycmVudC8wLjI3X2hlYWQvcmJkXHVkYXRhLjEyYTQ3NGIwZGM1MS4wMDAwMDAwMDAwMDAwMDA4
+X19oZWFkXzJERDY0NzY3X18wCj4+Pgo+Pj4gb3NkLTA0LWNsdXN0ZXI6IC1ydy1yLS1yLS0gMSBy
+b290IHJvb3QgNDE5NDMwNCBBcHIgIDYgMDk6MjUKPj4+IC92YXIvbGliL2NlcGgvb3NkLTA0LWNs
+dXN0ZXIvY3VycmVudC8wLjI3X2hlYWQvcmJkXHVkYXRhLjEyYTQ3NGIwZGM1MS4wMDAwMDAwMDAw
+MDAwMDA4X19oZWFkXzJERDY0NzY3X18wCj4+Pgo+Pj4KPj4+IGR1Ogo+Pj4KPj4+IGNsdXNoPiBm
+aW5kIC92YXIvbGliL2NlcGgvb3NkLSovY3VycmVudC8wLipoZWFkLyAtdHlwZSBmIC1uYW1lCj4+
+PiAnKmRhdGEqJyAtZXhlYwo+Pj4gZHUgLWsge30gXCsKPj4+IG9zZC0wMi1jbHVzdGVyOiAxMgo+
+Pj4gL3Zhci9saWIvY2VwaC9vc2QtMDItY2x1c3Rlci9jdXJyZW50LzAuMjdfaGVhZC9yYmRcdWRh
+dGEuMTJhNDc0YjBkYzUxLjAwMDAwMDAwMDAwMDAwMDhfX2hlYWRfMkRENjQ3NjdfXzAKPj4+Cj4+
+PiBvc2QtMDMtY2x1c3RlcjogMTIKPj4+IC92YXIvbGliL2NlcGgvb3NkLTAzLWNsdXN0ZXIvY3Vy
+cmVudC8wLjI3X2hlYWQvcmJkXHVkYXRhLjEyYTQ3NGIwZGM1MS4wMDAwMDAwMDAwMDAwMDA4X19o
+ZWFkXzJERDY0NzY3X18wCj4+Pgo+Pj4gb3NkLTA0LWNsdXN0ZXI6IDQxMDAKPj4+IC92YXIvbGli
+L2NlcGgvb3NkLTA0LWNsdXN0ZXIvY3VycmVudC8wLjI3X2hlYWQvcmJkXHVkYXRhLjEyYTQ3NGIw
+ZGM1MS4wMDAwMDAwMDAwMDAwMDA4X19oZWFkXzJERDY0NzY3X18wCj4+Pgo+Pj4KPj4+IE5vdGUg
+dGhhdAo+Pj4gInJiZFx1ZGF0YS4xMmE0NzRiMGRjNTEuMDAwMDAwMDAwMDAwMDAwOF9faGVhZF8y
+REQ2NDc2N19fMCIgZ3Jldwo+Pj4gZnJvbSAxMiB0byA0MTAwS0Igd2hlbiBjb3BpZWQgZnJvbSBv
+dGhlciBPU0RzIHRvIG9zZC0wNC4KPj4+Cj4+PiBJcyB0aGlzIHNvbWV0aGluZyB0byBiZSBleHBl
+Y3RlZD8gSXMgdGhlcmUgYW55IHdheSB0byBtYWtlIGl0Cj4+PiBwcm9wYWdhdGUgdGhlCj4+PiBz
+cGFyc2UgZmlsZSBpbmZvPyBPciBzaG91bGQgd2UgdGhpbmsgYWJvdXQgaXNzdWluZyBhICJmYWxs
+b2NhdGUKPj4+IC1kIi1saWtlIHBhdGNoCj4+PiBmb3Igd3JpdGVzIG9uIGZpbGVzdG9yZT8KPj4+
+Cj4+PiAoV2UncmUgdXNpbmcga2VybmVsIDMuMTMuMC00NS1nZW5lcmljIGJ1dCBvbiA0LjQuMC0z
+MS1nZW5lcmljIHRoZSBpc3N1ZQo+Pj4gcmVtYWluczsgb3VyIFhGUyB1c2VzIDRLIGJzaXplKS4K
+Pj4KPj4gSSB0aGluayB0aGUgc29sdXRpb24gaGVyZSBpcyB0byB1c2Ugc3BhcnNlX3JlYWQgZHVy
+aW5nIHJlY292ZXJ5LiAgVGhlCj4+IFB1c2hPcCBkYXRhIHJlcHJlc2VudGF0aW9uIGFscmVhZHkg
+c3VwcG9ydHMgaXQ7IGl0J3MganVzdCBhIG1hdHRlciBvZgo+PiBza2lwcGluZyB0aGUgemVyb3Mu
+ICBUaGUgcmVjb3ZlcnkgY29kZSBjb3VsZCBhbHNvIGhhdmUgYW4gb3B0aW9uIHRvCj4+IGNoZWNr
+Cj4+IGZvciBmdWxseS16ZXJvIHJlZ2lvbnMgb2YgdGhlIGRhdGEgYW5kIHR1cm4gdGhvc2UgaW50
+byBob2xlcyBhcwo+PiB3ZWxsLiAgRm9yCj4+IFJlcGxpY2F0ZWRCYWNrZW5kLCBzZWUgYnVpbGRf
+cHVzaF9vcCgpLgo+Cj4gU28gZmFyIGl0IHR1cm5zIG91dCB0aGF0IHRoZXJlJ3MgZXZlbiBlYXNp
+ZXIgc29sdXRpb24sIHdlIGp1c3QgZW5hYmxlZAo+ICJmaWxlc3RvcmUgc2VlayBob2xlIiBvbiBz
+b21lIHRlc3QgY2x1c3RlciBhbmQgdGhhdCBzZWVtcyB0byBmaXggdGhlCj4gcHJvYmxlbSBmb3Ig
+dXMuIFdlJ2xsIHNlZSBpZiBmaWVtYXAgd29ya3MgdG9vLgo+CgpJcyBpdCBzYWZlIHRvIGVuYWJs
+ZSAiZmlsZXN0b3JlIHNlZWsgaG9sZSIsIGFyZSB0aGVyZSBhbnkgdGVzdHMgdGhhdAp2ZXJpZmll
+cyB0aGF0IGV2ZXJ5dGhpbmcgcmVsYXRlZCB0byBSQkQgd29ya3MgZmluZSB3aXRoIHRoaXMgZW5h
+YmxlZD8KQ2FuIHdlIG1ha2UgdGhpcyBlbmFibGVkIGJ5IGRlZmF1bHQ/CgpJIHRlc3RlZCBvbiBm
+ZXcgb2Ygb3VyIHByb2R1Y3Rpb24gaW1hZ2VzIGFuZCBpdCBzZWVtcyB0aGF0IGFib3V0IDMwJSBp
+cwpzcGFyc2UuIFRoaXMgd2lsbCBiZSBsb3N0IG9uIGFueSBjbHVzdGVyIHdpZGUgZXZlbnQgKGFk
+ZC9yZW1vdmUgbm9kZXMsClBHIGdyb3csIHJlY292ZXJ5KS4KCkhvdyB0aGlzIGlzL3dpbGwgYmUg
+aGFuZGxlZCBpbiBCbHVlU3RvcmU/CgoKKGFkZGVkIGNlcGgtdXNlcnMgYXMgaXQgbWlnaHQgaW50
+ZXJlc3Qgb3RoZXJzIGFsc28pLgoKLS0gClBTCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlz
+dHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJz
+LWNlcGguY29tCg==
