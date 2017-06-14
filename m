@@ -1,170 +1,68 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Sparse file info in filestore not propagated to other OSDs
-Date: Wed, 14 Jun 2017 13:44:49 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706141340520.3646@piezo.novalocal>
-References: <beaf4408-2322-b0f1-3265-0d9e411c5bf9@corp.ovh.com> <alpine.DEB.2.11.1704061322330.2999@piezo.novalocal> <d4bde447-f179-aeca-bac5-636fa40ccba5@corp.ovh.com> <415c9590-ab96-01b6-3c49-553b0d9529fa@sadziu.pl>
+From: John Spray <jspray@redhat.com>
+Subject: Re: Are we ready for 10.2.8 - cephfs
+Date: Wed, 14 Jun 2017 10:25:28 -0400
+Message-ID: <CALe9h7dUCBXKnyxGVi3utN_ArkZixO-SZ+xH60L23R11FELMzw@mail.gmail.com>
+References: <be949951-5e1c-9471-23f6-2c595baec10a@suse.cz> <CABZ+qq=p_=8PHCwBoo=aQ1V5CeRk4QdNiK7t=ooeisFHB9etyg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1219057633-1497447891=:3646"
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:53261 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751624AbdFNNow (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 09:44:52 -0400
-In-Reply-To: <415c9590-ab96-01b6-3c49-553b0d9529fa@sadziu.pl>
+Received: from mail-wr0-f177.google.com ([209.85.128.177]:33210 "EHLO
+        mail-wr0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750717AbdFNOZu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 14 Jun 2017 10:25:50 -0400
+Received: by mail-wr0-f177.google.com with SMTP id r103so742812wrb.0
+        for <ceph-devel@vger.kernel.org>; Wed, 14 Jun 2017 07:25:50 -0700 (PDT)
+In-Reply-To: <CABZ+qq=p_=8PHCwBoo=aQ1V5CeRk4QdNiK7t=ooeisFHB9etyg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?Pawe=B3_Sadowski?= <ceph@sadziu.pl>
-Cc: =?ISO-8859-2?Q?Piotr_Da=B3ek?= <piotr.dalek@corp.ovh.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: Nathan Cutler <ncutler@suse.cz>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Tue, Jun 13, 2017 at 7:49 AM, Dan van der Ster <dan@vanderster.com> wrote:
+> Hi,
+>
+> Would it be possible to get these into 10.2.8?
+>
+>     http://tracker.ceph.com/issues/19677
+>     http://tracker.ceph.com/issues/19762
+>     http://tracker.ceph.com/issues/20027
 
---8323329-1219057633-1497447891=:3646
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+I've been a bit behind on reviewing backports lately, sorry about that.
 
-On Wed, 14 Jun 2017, Paweł Sadowski wrote:
-> On 04/13/2017 04:23 PM, Piotr Dałek wrote:
-> > On 04/06/2017 03:25 PM, Sage Weil wrote:
-> >> On Thu, 6 Apr 2017, Piotr Dałek wrote:
-> >>> Hello,
-> >>>
-> >>> We recently had an interesting issue with RBD images and filestore
-> >>> on Jewel
-> >>> 10.2.5:
-> >>> We have a pool with RBD images, all of them mostly untouched (large
-> >>> areas of
-> >>> those images unused), and once we added 3 new OSDs to cluster, objects
-> >>> representing these images grew substantially on new OSDs: objects
-> >>> hosting
-> >>> unused areas of these images on original OSDs remained small (~8K of
-> >>> space
-> >>> actually used, 4M allocated), but on new OSDs were large (4M
-> >>> allocated *and*
-> >>> actually used). After investigation we concluded that Ceph didn't
-> >>> propagate
-> >>> sparse file information during cluster rebalance, resulting in
-> >>> correct data
-> >>> contents on all OSDs, but no sparse file data on new OSDs, hence
-> >>> disk space
-> >>> usage increase on those.
-> >>>
-> >>> Example on test cluster, before growing it by one OSD:
-> >>>
-> >>> ls:
-> >>>
-> >>> osd-01-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
-> >>> /var/lib/ceph/osd-01-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
-> >>>
-> >>> osd-02-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
-> >>> /var/lib/ceph/osd-02-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
-> >>>
-> >>> osd-03-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
-> >>> /var/lib/ceph/osd-03-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
-> >>>
-> >>>
-> >>> du:
-> >>>
-> >>> osd-01-cluster: 12
-> >>> /var/lib/ceph/osd-01-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
-> >>>
-> >>> osd-02-cluster: 12
-> >>> /var/lib/ceph/osd-02-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
-> >>>
-> >>> osd-03-cluster: 12
-> >>> /var/lib/ceph/osd-03-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
-> >>>
-> >>>
-> >>>
-> >>> mon-01-cluster:~ # rbd diff test
-> >>> Offset   Length  Type
-> >>> 8388608  4194304 data
-> >>> 16777216 4096    data
-> >>> 33554432 4194304 data
-> >>> 37748736 2048    data
-> >>>
-> >>> And after growing it:
-> >>>
-> >>> ls:
-> >>>
-> >>> clush> find /var/lib/ceph/osd-*/current/0.*head/ -type f -name
-> >>> '*data*' -exec
-> >>> ls -l {} \+
-> >>> osd-02-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
-> >>> /var/lib/ceph/osd-02-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
-> >>>
-> >>> osd-03-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:18
-> >>> /var/lib/ceph/osd-03-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
-> >>>
-> >>> osd-04-cluster: -rw-r--r-- 1 root root 4194304 Apr  6 09:25
-> >>> /var/lib/ceph/osd-04-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
-> >>>
-> >>>
-> >>> du:
-> >>>
-> >>> clush> find /var/lib/ceph/osd-*/current/0.*head/ -type f -name
-> >>> '*data*' -exec
-> >>> du -k {} \+
-> >>> osd-02-cluster: 12
-> >>> /var/lib/ceph/osd-02-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
-> >>>
-> >>> osd-03-cluster: 12
-> >>> /var/lib/ceph/osd-03-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
-> >>>
-> >>> osd-04-cluster: 4100
-> >>> /var/lib/ceph/osd-04-cluster/current/0.27_head/rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0
-> >>>
-> >>>
-> >>> Note that
-> >>> "rbd\udata.12a474b0dc51.0000000000000008__head_2DD64767__0" grew
-> >>> from 12 to 4100KB when copied from other OSDs to osd-04.
-> >>>
-> >>> Is this something to be expected? Is there any way to make it
-> >>> propagate the
-> >>> sparse file info? Or should we think about issuing a "fallocate
-> >>> -d"-like patch
-> >>> for writes on filestore?
-> >>>
-> >>> (We're using kernel 3.13.0-45-generic but on 4.4.0-31-generic the issue
-> >>> remains; our XFS uses 4K bsize).
-> >>
-> >> I think the solution here is to use sparse_read during recovery.  The
-> >> PushOp data representation already supports it; it's just a matter of
-> >> skipping the zeros.  The recovery code could also have an option to
-> >> check
-> >> for fully-zero regions of the data and turn those into holes as
-> >> well.  For
-> >> ReplicatedBackend, see build_push_op().
-> >
-> > So far it turns out that there's even easier solution, we just enabled
-> > "filestore seek hole" on some test cluster and that seems to fix the
-> > problem for us. We'll see if fiemap works too.
-> >
-> 
-> Is it safe to enable "filestore seek hole", are there any tests that
-> verifies that everything related to RBD works fine with this enabled?
-> Can we make this enabled by default?
+I've merged the first two of those.  The third one had a PR that
+didn't have the cephfs label so it got missed.
 
-We would need to enable it in the qa environment first.  The risk here is 
-that users run a broad range of kernels and we are exposing ourselves to 
-any bugs in any kernel version they may run.  I'd prefer to leave it off 
-by default.  We can enable it in the qa suite, though, which covers 
-centos7 (latest kernel) and ubuntu xenial and trusty.
- 
-> I tested on few of our production images and it seems that about 30% is
-> sparse. This will be lost on any cluster wide event (add/remove nodes,
-> PG grow, recovery).
-> 
-> How this is/will be handled in BlueStore?
+Nathan, if we have time to do another pre-merge test run for jewel
+backports, then there are a few with label:cephfs and my review on,
+that would just need to go through a fs suite.
 
-BlueStore exposes the same sparseness metadata that enabling the 
-filestore seek hole or fiemap options does, so it won't be a problem 
-there.
+Cheers,
+John
 
-I think the only thing that we could potentially add is zero detection 
-on writes (so that explicitly writing zeros consumes no space).  We'd 
-have to be a bit careful measuring the performance impact of that check on 
-non-zero writes.
-
-sage
---8323329-1219057633-1497447891=:3646--
+> Thanks!
+>
+> Dan
+>
+>
+> On Fri, Jun 9, 2017 at 6:13 PM, Nathan Cutler <ncutler@suse.cz> wrote:
+>> Hi John:
+>>
+>> The following cephfs backports have been merged into the jewel branch in
+>> preparation for the 10.2.8 release.
+>>
+>> http://tracker.ceph.com/projects/cephfs/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=3&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=537&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D=
+>>
+>> (I thought there were more than two, but apparently not?)
+>>
+>> Do you think it's time for QE to do its testing?
+>>
+>> Nathan
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
