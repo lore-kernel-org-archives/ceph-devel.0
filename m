@@ -1,103 +1,344 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Fwd: Build failed in Jenkins: ceph-master #804
-Date: Fri, 16 Jun 2017 09:49:15 +0200
-Message-ID: <f640f8ae-afcd-888b-0a2c-a222ec6116fe@digiware.nl>
-References: <394935589.12.1497535633528.JavaMail.jenkins@cephdev.digiware.nl>
- <f59d7e73-01ed-255c-9dee-85805f36ae56@digiware.nl>
- <97ec6826-d5d0-206f-7461-79a786fd304a@redhat.com>
- <2e3c5dff-8f88-bca6-e241-a35c12100493@digiware.nl>
- <1a41f840-8521-eab5-8000-a7ef3dc5bb03@digiware.nl>
- <3f1da6b3-d5ca-634c-8859-473c268f0c80@digiware.nl>
+From: Jake Grimmett <jog@mrc-lmb.cam.ac.uk>
+Subject: Re: ceph-mds crash v12.0.3
+Date: Fri, 16 Jun 2017 09:19:14 +0100
+Message-ID: <16f4a813-05e9-6697-866f-bec23250ac16@mrc-lmb.cam.ac.uk>
+References: <fbb1a455-48c3-16c4-fbbf-2a46e720bb67@mrc-lmb.cam.ac.uk>
+ <CAAM7YAmGGoFXpqUNOtJnEt1qvcW4dUeie8y+mrM=5RYuJyrbCQ@mail.gmail.com>
+ <77dd0d48-6ff9-5c3d-f828-29824998e0d9@mrc-lmb.cam.ac.uk>
+ <CAAM7YAnkBpGU+3q13jbV2gknCYKc5YQP3gMGk0=aOmwHinuzdg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:19865 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752447AbdFPHtV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 16 Jun 2017 03:49:21 -0400
-In-Reply-To: <3f1da6b3-d5ca-634c-8859-473c268f0c80@digiware.nl>
-Content-Language: nl
+Received: from ppsw-31.csi.cam.ac.uk ([131.111.8.131]:33559 "EHLO
+        ppsw-31.csi.cam.ac.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752352AbdFPITV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jun 2017 04:19:21 -0400
+In-Reply-To: <CAAM7YAnkBpGU+3q13jbV2gknCYKc5YQP3gMGk0=aOmwHinuzdg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>, Jake Grimmett <jog@mrc-lmb.cam.ac.uk>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 16-6-2017 00:20, Willem Jan Withagen wrote:
-> On 15-6-2017 23:36, Willem Jan Withagen wrote:
->> On 15-6-2017 23:32, Willem Jan Withagen wrote:
->>> On 15-6-2017 16:44, Casey Bodley wrote:
->>>> Yeah, this was changed in https://github.com/ceph/ceph/pull/15376. That
->>>> Boost::thread string shouldn't be making it to the link line. Can you
->>>> share your cmake --version?
->>>
->>> wjw@cephdev:~/master % cmake --version
->>> cmake version 3.6.3
->>>
->>> But note that this is FreeBSDS and I'm using the system Boost, v1.64
->>>
->>> I'll pull the PR into my jenkins, and see what it brings.
+Hi Yan,
+
+Many thanks for getting back to me - sorry to cause you bother.
+
+I think I'm patching OK, but can you please check my methodology?
+
+git clone git://github.com/ceph/ceph ; cd ceph
+
+git apply ceph-mds.patch ; ./make-srpm.sh 
+
+rpmbuild --rebuild /root/ceph/ceph/ceph-12.0.3-1661-g3ddbfcd.el7.src.rpm
+
+
+here is the section of the patched src/mds/journal.cc
+
+   2194   // note which segments inodes belong to, so we don't have to
+start rejournaling them
+   2195   for (const auto &ino : inos) {
+   2196     CInode *in = mds->mdcache->get_inode(ino);
+   2197     if (!in) {
+   2198       dout(0) << "EOpen.replay ino " << ino << " not in
+metablob" << dendl;
+   2199       assert(in);
+   2200     }
+   2201     _segment->open_files.push_back(&in->item_open_file);
+   2202   }
+   2203   for (const auto &vino : snap_inos) {
+   2204     CInode *in = mds->mdcache->get_inode(vino);
+   2205     if (!in) {
+   2206       dout(0) << "EOpen.replay ino " << vino << " not in
+metablob" << dendl;
+   2207       continue;
+   2208     }
+
+many thanks for your time,
+
+Jake
+
+
+On 16/06/17 08:04, Yan, Zheng wrote:
+> On Thu, Jun 15, 2017 at 7:32 PM, Jake Grimmett <jog@mrc-lmb.cam.ac.uk> wrote:
+>> Hi Yan,
 >>
->> Now I know what you ment #15376 was merged and probably causes this.
-> 
-> One of the problems might be that the included cmake templates for boost
-> do not (yet) understand this version:
-
-Hi Casey,
-
-I was a bit behind on upgrade to newer versions, since there is a rather
-big API change in FreeBSD 12-CURRENT. And upgrading is a bit tricky.
-But it is now required to start using pre-build packages, as I found out
-the hard way.
-
-So all packages are now upgraded to the latest release, and this has
-gone away. So I guess it had to do with the fact that Boost 1.64 was not
-known in the modules for Cmake (which is now at 3.8.2)
-
-Sorry about the noise,
---WjW
-
-
-> 
-> ====
-> CMake Warning at /usr/local/share/cmake/Modules/FindBoost.cmake:743
-> (message):
->   Imported targets not available for Boost version 106400
-> Call Stack (most recent call first):
->   /usr/local/share/cmake/Modules/FindBoost.cmake:842
-> (_Boost_COMPONENT_DEPENDENCIES)
->   /usr/local/share/cmake/Modules/FindBoost.cmake:1395
-> (_Boost_MISSING_DEPENDENCIES)
->   CMakeLists.txt:553 (find_package)
-> ====
-> 
-> The output of cmake is full of warnings:
-> ====
-> CMake Warning (dev) at src/CMakeLists.txt:694 (add_executable):
->   Policy CMP0028 is not set: Double colon in target name means ALIAS or
->   IMPORTED target.  Run "cmake --help-policy CMP0028" for policy details.
->   Use the cmake_policy command to set the policy and suppress this warning.
-> 
->   Target "librados-config" links to target "Boost::thread" but the
-> target was
->   not found.  Perhaps a find_package() call is missing for an IMPORTED
->   target, or an ALIAS target is missing?
-> This warning is for project developers.  Use -Wno-dev to suppress it.
-> 
-> CMake Warning (dev) at src/CMakeLists.txt:694 (add_executable):
->   Policy CMP0028 is not set: Double colon in target name means ALIAS or
->   IMPORTED target.  Run "cmake --help-policy CMP0028" for policy details.
->   Use the cmake_policy command to set the policy and suppress this warning.
-> 
->   Target "librados-config" links to target "Boost::system" but the
-> target was
->   not found.  Perhaps a find_package() call is missing for an IMPORTED
->   target, or an ALIAS target is missing?
-> This warning is for project developers.  Use -Wno-dev to suppress it.
-> ====
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+>> Many thanks for looking into this and providing a patch.
+>>
+>> I've downloaded ceph 12.0.3-1661-g3ddbfcd, applied your patch, rebuilt
+>> the rpms, and installed across my cluster.
+>>
+>> Unfortunately, the MDS are still crashing, any ideas welcome :)
+>>
+>> With "debug_mds = 10" the full Log is 140MB, a truncated version of the
+>> log immediately preceding the crash follows:
+>>
+>> best,
+>>
+>> Jake
+>>
+>>     -5> 2017-06-15 12:21:14.084373 7f77fe590700 10 mds.0.journal
+>> EMetaBlob.replay added (full) [dentry
+>> #1/isilon/sc/users/spc/JessComb_AB_230115/JessB_TO_190115_F6_1/n0/JessB_TO_190115_F6_1.peaks_int
+>> [9f,head] auth NULL (dversion lock) v=3104 inode=0
+>> state=1073741888|bottomlru 0x7f781a3f1860]
+>>     -4> 2017-06-15 12:21:14.084375 7f77fe590700 10 mds.0.journal
+>> EMetaBlob.replay added [inode 1000147f773 [9f,head]
+>> /isilon/sc/users/spc/JessComb_AB_230115/JessB_TO_190115_F6_1/n0/JessB_TO_190115_F6_1.peaks_int
+>> auth v3104 s=4 n(v0 b4 1=1+0) (iversion lock) cr={3554272=0-4194304@9e}
+>> 0x7f781a3f5800]
+>>     -3> 2017-06-15 12:21:14.084379 7f77fe590700 10 mds.0.journal
+>> EMetaBlob.replay added (full) [dentry
+>> #1/isilon/sc/users/spc/JessComb_AB_230115/JessB_TO_190115_F6_1/n0/JessB_TO_190115_F6_1.peaks_maxt
+>> [9f,head] auth NULL (dversion lock) v=3132 inode=0
+>> state=1073741888|bottomlru 0x7f781a3f1d40]
+>>     -2> 2017-06-15 12:21:14.084381 7f77fe590700 10 mds.0.journal
+>> EMetaBlob.replay added [inode 1000147f775 [9f,head]
+>> /isilon/sc/users/spc/JessComb_AB_230115/JessB_TO_190115_F6_1/n0/JessB_TO_190115_F6_1.peaks_maxt
+>> auth v3132 s=4 n(v0 b4 1=1+0) (iversion lock) cr={3554272=0-4194304@9e}
+>> 0x7f781a3f5e00]
+>>     -1> 2017-06-15 12:21:14.084406 7f77fe590700  0 mds.0.journal
+>> EOpen.replay ino 1000147761b.9a not in metablob
+>>      0> 2017-06-15 12:21:14.085348 7f77fe590700 -1
+>> /root/rpmbuild/BUILD/ceph-12.0.3-1661-g3ddbfcd/src/mds/journal.cc: In
+>> function 'virtual void EOpen::replay(MDSRank*)' thread 7f77fe590700 time
+>> 2017-06-15 12:21:14.084409
+>> /root/rpmbuild/BUILD/ceph-12.0.3-1661-g3ddbfcd/src/mds/journal.cc: 2207:
+>> FAILED assert(in)
+>>
+> The assertion should be removed by my patch. Maybe you didn't cleanly
+> apply the patch.
+>
+>
+> Regards
+> Yan, Zheng
+>
+>>  ceph version 12.0.3-1661-g3ddbfcd
+>> (3ddbfcd4357ab3a3c2f17f86f88dc83172d4ce0d) luminous (dev)
+>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>> const*)+0x110) [0x7f780d290500]
+>>  2: (EOpen::replay(MDSRank*)+0x3e5) [0x7f780d2397b5]
+>>  3: (MDLog::_replay_thread()+0x5f2) [0x7f780d1efd12]
+>>  4: (MDLog::ReplayThread::entry()+0xd) [0x7f780cf9b6ad]
+>>  5: (()+0x7dc5) [0x7f780adb4dc5]
+>>  6: (clone()+0x6d) [0x7f7809e9476d]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to interpret this.
+>>
+>> --- logging levels ---
+>>    0/ 5 none
+>>    0/ 1 lockdep
+>>    0/ 1 context
+>>    1/ 1 crush
+>>   10/10 mds
+>>    1/ 5 mds_balancer
+>>    1/ 5 mds_locker
+>>    1/ 5 mds_log
+>>    1/ 5 mds_log_expire
+>>    1/ 5 mds_migrator
+>>    0/ 1 buffer
+>>    0/ 1 timer
+>>    0/ 1 filer
+>>    0/ 1 striper
+>>    0/ 1 objecter
+>>    0/ 5 rados
+>>    0/ 5 rbd
+>>    0/ 5 rbd_mirror
+>>    0/ 5 rbd_replay
+>>    0/ 5 journaler
+>>    0/ 5 objectcacher
+>>    0/ 5 client
+>>    1/ 5 osd
+>>    0/ 5 optracker
+>>    0/ 5 objclass
+>>    1/ 3 filestore
+>>    1/ 3 journal
+>>    0/ 5 ms
+>>    1/ 5 mon
+>>    0/10 monc
+>>    1/ 5 paxos
+>>    0/ 5 tp
+>>    1/ 5 auth
+>>    1/ 5 crypto
+>>    1/ 1 finisher
+>>    1/ 5 heartbeatmap
+>>    1/ 5 perfcounter
+>>    1/ 5 rgw
+>>    1/10 civetweb
+>>    1/ 5 javaclient
+>>    1/ 5 asok
+>>    1/ 1 throttle
+>>    0/ 0 refs
+>>    1/ 5 xio
+>>    1/ 5 compressor
+>>    1/ 5 bluestore
+>>    1/ 5 bluefs
+>>    1/ 3 bdev
+>>    1/ 5 kstore
+>>    4/ 5 rocksdb
+>>    4/ 5 leveldb
+>>    4/ 5 memdb
+>>    1/ 5 kinetic
+>>    1/ 5 fuse
+>>    1/ 5 mgr
+>>    1/ 5 mgrc
+>>    1/ 5 dpdk
+>>    1/ 5 eventtrace
+>>   -2/-2 (syslog threshold)
+>>   -1/-1 (stderr threshold)
+>>   max_recent     10000
+>>   max_new         1000
+>>   log_file /var/log/ceph/ceph-mds.cephfs1.log
+>> --- end dump of recent events ---
+>> 2017-06-15 12:21:14.101761 7f77fe590700 -1 *** Caught signal (Aborted) **
+>>  in thread 7f77fe590700 thread_name:md_log_replay
+>>
+>>  ceph version 12.0.3-1661-g3ddbfcd
+>> (3ddbfcd4357ab3a3c2f17f86f88dc83172d4ce0d) luminous (dev)
+>>  1: (()+0x57d7ff) [0x7f780d2507ff]
+>>  2: (()+0xf370) [0x7f780adbc370]
+>>  3: (gsignal()+0x37) [0x7f7809dd21d7]
+>>  4: (abort()+0x148) [0x7f7809dd38c8]
+>>  5: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>> const*)+0x284) [0x7f780d290674]
+>>  6: (EOpen::replay(MDSRank*)+0x3e5) [0x7f780d2397b5]
+>>  7: (MDLog::_replay_thread()+0x5f2) [0x7f780d1efd12]
+>>  8: (MDLog::ReplayThread::entry()+0xd) [0x7f780cf9b6ad]
+>>  9: (()+0x7dc5) [0x7f780adb4dc5]
+>>  10: (clone()+0x6d) [0x7f7809e9476d]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to interpret this.
+>>
+>> --- begin dump of recent events ---
+>>      0> 2017-06-15 12:21:14.101761 7f77fe590700 -1 *** Caught signal
+>> (Aborted) **
+>>  in thread 7f77fe590700 thread_name:md_log_replay
+>>
+>>  ceph version 12.0.3-1661-g3ddbfcd
+>> (3ddbfcd4357ab3a3c2f17f86f88dc83172d4ce0d) luminous (dev)
+>>  1: (()+0x57d7ff) [0x7f780d2507ff]
+>>  2: (()+0xf370) [0x7f780adbc370]
+>>  3: (gsignal()+0x37) [0x7f7809dd21d7]
+>>  4: (abort()+0x148) [0x7f7809dd38c8]
+>>  5: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>> const*)+0x284) [0x7f780d290674]
+>>  6: (EOpen::replay(MDSRank*)+0x3e5) [0x7f780d2397b5]
+>>  7: (MDLog::_replay_thread()+0x5f2) [0x7f780d1efd12]
+>>  8: (MDLog::ReplayThread::entry()+0xd) [0x7f780cf9b6ad]
+>>  9: (()+0x7dc5) [0x7f780adb4dc5]
+>>  10: (clone()+0x6d) [0x7f7809e9476d]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to interpret this.
+>>
+>> --- logging levels ---
+>>    0/ 5 none
+>>    0/ 1 lockdep
+>>    0/ 1 context
+>>    1/ 1 crush
+>>   10/10 mds
+>>    1/ 5 mds_balancer
+>>    1/ 5 mds_locker
+>>    1/ 5 mds_log
+>>    1/ 5 mds_log_expire
+>>    1/ 5 mds_migrator
+>>    0/ 1 buffer
+>>    0/ 1 timer
+>>    0/ 1 filer
+>>    0/ 1 striper
+>>    0/ 1 objecter
+>>    0/ 5 rados
+>>    0/ 5 rbd
+>>    0/ 5 rbd_mirror
+>>    0/ 5 rbd_replay
+>>    0/ 5 journaler
+>>    0/ 5 objectcacher
+>>    0/ 5 client
+>>    1/ 5 osd
+>>    0/ 5 optracker
+>>    0/ 5 objclass
+>>    1/ 3 filestore
+>>    1/ 3 journal
+>>    0/ 5 ms
+>>    1/ 5 mon
+>>    0/10 monc
+>>    1/ 5 paxos
+>>    0/ 5 tp
+>>    1/ 5 auth
+>>    1/ 5 crypto
+>>    1/ 1 finisher
+>>    1/ 5 heartbeatmap
+>>    1/ 5 perfcounter
+>>    1/ 5 rgw
+>>    1/10 civetweb
+>>    1/ 5 javaclient
+>>    1/ 5 asok
+>>    1/ 1 throttle
+>>    0/ 0 refs
+>>    1/ 5 xio
+>>    1/ 5 compressor
+>>    1/ 5 bluestore
+>>    1/ 5 bluefs
+>>    1/ 3 bdev
+>>    1/ 5 kstore
+>>    4/ 5 rocksdb
+>>    4/ 5 leveldb
+>>    4/ 5 memdb
+>>    1/ 5 kinetic
+>>    1/ 5 fuse
+>>    1/ 5 mgr
+>>    1/ 5 mgrc
+>>    1/ 5 dpdk
+>>    1/ 5 eventtrace
+>>   -2/-2 (syslog threshold)
+>>   -1/-1 (stderr threshold)
+>>   max_recent     10000
+>>   max_new         1000
+>>   log_file /var/log/ceph/ceph-mds.cephfs1.log
+>> --- end dump of recent events ---
+>>
+>>
+>> On 15/06/17 08:10, Yan, Zheng wrote:
+>>> On Wed, Jun 14, 2017 at 11:49 PM, Jake Grimmett <jog@mrc-lmb.cam.ac.uk> wrote:
+>>>> Dear All,
+>>>>
+>>>> Sorry, but I need to add +1 to the mds crash reports with ceph
+>>>> 12.0.3-1507-g52f0deb
+>>>>
+>>>> This happened to me after updating from 12.0.2
+>>>> All was fairly OK for a few hours, I/O  around 500MB/s, then both MDS
+>>>> servers crashed, and have not worked since.
+>>>>
+>>>> The two MDS servers, are active:standby, both now crash immediately
+>>>> after being started.
+>>>>
+>>>> This cluster has been upgraded from Kraken, through several Luminous
+>>>> versions, so I did a clean install of SL7.3 on one MDS server, and still
+>>>> have crashes on this machine.
+>>>>
+>>>> Cluster has 40 x 8TB drives (EC 4+1), with dual replicated NVME
+>>>> providing a hotpool to drive the Cephfs layer. df -h /cephfs is/was
+>>>> 200TB. All OSD's are bluestore, and were generated on Luminous.
+>>>>
+>>>> I enabled snapshots a few days ago, and keep 144 snapshots (one taken
+>>>> every 10 minutes, each is kept for 24 hours only) about 30TB is copied
+>>>> into the fs each day. If snapshots caused the crash, I can regenerate
+>>>> the data, but they are very useful.
+>>>>
+>>>> One MDS gave this log...
+>>>>
+>>>> <http://www.mrc-lmb.cam.ac.uk/jog/ceph-mds.cephfs1.log>
+>>> It is a snapshot related bug. The Attached patch should prevent mds
+>>> from crashing.
+>>> Next time you restart mds, please set debug_mds=10 and upload the log.
+>>>
+>>> Regards
+>>> Yan, Zheng
+>>>
+>>>> many thanks for any suggestions, and it's great to see the experimental
+>>>> flag removed from bluestore!
+>>>>
+>>>> Jake
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
