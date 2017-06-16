@@ -1,101 +1,87 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: EXT: [ceph-users] ceph-lvm - a tool to deploy OSDs from LVM
+From: Willem Jan Withagen <wjw-dOtk1Lsa4IaEVqv0pETR8A@public.gmane.org>
+Subject: Re: EXT: ceph-lvm - a tool to deploy OSDs from LVM
  volumes
-Date: Fri, 16 Jun 2017 18:42:39 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706161842140.32269@piezo.novalocal>
-References: <A5E80C1D-74F4-455B-8257-5B9E2FF6AB39@walmart.com> <CAC-Np1yqCZO7CzEjTV+hrNve857BtM_rZ+LxAi6Vf9UJkPM04g@mail.gmail.com>
+Date: Fri, 16 Jun 2017 21:37:32 +0200
+Message-ID: <7157215d-cef5-84a8-27b8-2cf49076779b@digiware.nl>
+References: <A5E80C1D-74F4-455B-8257-5B9E2FF6AB39@walmart.com>
+	<CAC-Np1yqCZO7CzEjTV+hrNve857BtM_rZ+LxAi6Vf9UJkPM04g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-811301427-1497638562=:32269"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:58313 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750982AbdFPSmn (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 16 Jun 2017 14:42:43 -0400
-In-Reply-To: <CAC-Np1yqCZO7CzEjTV+hrNve857BtM_rZ+LxAi6Vf9UJkPM04g@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: Warren Wang - ISD <Warren.Wang@walmart.com>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAC-Np1yqCZO7CzEjTV+hrNve857BtM_rZ+LxAi6Vf9UJkPM04g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: nl
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Warren Wang - ISD <Warren.Wang-dFwxUrggiyBBDgjK7y7TUQ@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-811301427-1497638562=:32269
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-
-On Fri, 16 Jun 2017, Alfredo Deza wrote:
-> On Fri, Jun 16, 2017 at 2:11 PM, Warren Wang - ISD
-> <Warren.Wang@walmart.com> wrote:
-> > I would prefer that this is something more generic, to possibly support other backends one day, like ceph-volume. Creating one tool per backend seems silly.
-> >
-> > Also, ceph-lvm seems to imply that ceph itself has something to do with lvm, which it really doesn’t. This is simply to deal with the underlying disk. If there’s resistance to something more generic like ceph-volume, then it should at least be called something like ceph-disk-lvm.
-> 
-> Sage, you had mentioned the need for "composable" tools for this, and
-> I think that if we go with `ceph-volume` we could allow plugins for
-> each strategy. We are starting with `lvm` support so that would look
-> like: `ceph-volume lvm`
-> 
-> The `lvm` functionality could be implemented as a plugin itself, and
-> when we start working with supporting regular disks, then `ceph-volume
-> disk` can come along, etc...
-> 
-> It would also open the door for anyone to be able to write a plugin to
-> `ceph-volume` to implement their own logic, while at the same time
-> re-using most of what we are implementing today: logging, reporting,
-> systemd support, OSD metadata, etc...
-> 
-> If we were to separate these into single-purpose tools, all those
-> would need to be re-done.
-
-Yeah, this sounds great to me!
-
-sage
-
-
-> 
-> 
-> >
-> > 2 cents from one of the LVM for Ceph users,
-> > Warren Wang
-> > Walmart ✻
-> >
-> > On 6/16/17, 10:25 AM, "ceph-users on behalf of Alfredo Deza" <ceph-users-bounces@lists.ceph.com on behalf of adeza@redhat.com> wrote:
-> >
-> >     Hello,
-> >
-> >     At the last CDM [0] we talked about `ceph-lvm` and the ability to
-> >     deploy OSDs from logical volumes. We have now an initial draft for the
-> >     documentation [1] and would like some feedback.
-> >
-> >     The important features for this new tool are:
-> >
-> >     * parting ways with udev (new approach will rely on LVM functionality
-> >     for discovery)
-> >     * compatibility/migration for existing LVM volumes deployed as directories
-> >     * dmcache support
-> >
-> >     By documenting the API and workflows first we are making sure that
-> >     those look fine before starting on actual development.
-> >
-> >     It would be great to get some feedback, specially if you are currently
-> >     using LVM with ceph (or planning to!).
-> >
-> >     Please note that the documentation is not complete and is missing
-> >     content on some parts.
-> >
-> >     [0] http://tracker.ceph.com/projects/ceph/wiki/CDM_06-JUN-2017
-> >     [1] http://docs.ceph.com/ceph-lvm/
-> >     _______________________________________________
-> >     ceph-users mailing list
-> >     ceph-users@lists.ceph.com
-> >     http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> >
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---8323329-811301427-1497638562=:32269--
+T24gMTYtNi0yMDE3IDIwOjIzLCBBbGZyZWRvIERlemEgd3JvdGU6Cj4gT24gRnJpLCBKdW4gMTYs
+IDIwMTcgYXQgMjoxMSBQTSwgV2FycmVuIFdhbmcgLSBJU0QKPiA8V2FycmVuLldhbmdAd2FsbWFy
+dC5jb20+IHdyb3RlOgo+PiBJIHdvdWxkIHByZWZlciB0aGF0IHRoaXMgaXMgc29tZXRoaW5nIG1v
+cmUgZ2VuZXJpYywgdG8gcG9zc2libHkgc3VwcG9ydCBvdGhlciBiYWNrZW5kcyBvbmUgZGF5LCBs
+aWtlIGNlcGgtdm9sdW1lLiBDcmVhdGluZyBvbmUgdG9vbCBwZXIgYmFja2VuZCBzZWVtcyBzaWxs
+eS4KPj4KPj4gQWxzbywgY2VwaC1sdm0gc2VlbXMgdG8gaW1wbHkgdGhhdCBjZXBoIGl0c2VsZiBo
+YXMgc29tZXRoaW5nIHRvIGRvIHdpdGggbHZtLCB3aGljaCBpdCByZWFsbHkgZG9lc27igJl0LiBU
+aGlzIGlzIHNpbXBseSB0byBkZWFsIHdpdGggdGhlIHVuZGVybHlpbmcgZGlzay4gSWYgdGhlcmXi
+gJlzIHJlc2lzdGFuY2UgdG8gc29tZXRoaW5nIG1vcmUgZ2VuZXJpYyBsaWtlIGNlcGgtdm9sdW1l
+LCB0aGVuIGl0IHNob3VsZCBhdCBsZWFzdCBiZSBjYWxsZWQgc29tZXRoaW5nIGxpa2UgY2VwaC1k
+aXNrLWx2bS4KPiAKPiBTYWdlLCB5b3UgaGFkIG1lbnRpb25lZCB0aGUgbmVlZCBmb3IgImNvbXBv
+c2FibGUiIHRvb2xzIGZvciB0aGlzLCBhbmQKPiBJIHRoaW5rIHRoYXQgaWYgd2UgZ28gd2l0aCBg
+Y2VwaC12b2x1bWVgIHdlIGNvdWxkIGFsbG93IHBsdWdpbnMgZm9yCj4gZWFjaCBzdHJhdGVneS4g
+V2UgYXJlIHN0YXJ0aW5nIHdpdGggYGx2bWAgc3VwcG9ydCBzbyB0aGF0IHdvdWxkIGxvb2sKPiBs
+aWtlOiBgY2VwaC12b2x1bWUgbHZtYAo+IAo+IFRoZSBgbHZtYCBmdW5jdGlvbmFsaXR5IGNvdWxk
+IGJlIGltcGxlbWVudGVkIGFzIGEgcGx1Z2luIGl0c2VsZiwgYW5kCj4gd2hlbiB3ZSBzdGFydCB3
+b3JraW5nIHdpdGggc3VwcG9ydGluZyByZWd1bGFyIGRpc2tzLCB0aGVuIGBjZXBoLXZvbHVtZQo+
+IGRpc2tgIGNhbiBjb21lIGFsb25nLCBldGMuLi4KPiAKPiBJdCB3b3VsZCBhbHNvIG9wZW4gdGhl
+IGRvb3IgZm9yIGFueW9uZSB0byBiZSBhYmxlIHRvIHdyaXRlIGEgcGx1Z2luIHRvCj4gYGNlcGgt
+dm9sdW1lYCB0byBpbXBsZW1lbnQgdGhlaXIgb3duIGxvZ2ljLCB3aGlsZSBhdCB0aGUgc2FtZSB0
+aW1lCj4gcmUtdXNpbmcgbW9zdCBvZiB3aGF0IHdlIGFyZSBpbXBsZW1lbnRpbmcgdG9kYXk6IGxv
+Z2dpbmcsIHJlcG9ydGluZywKPiBzeXN0ZW1kIHN1cHBvcnQsIE9TRCBtZXRhZGF0YSwgZXRjLi4u
+Cj4gCj4gSWYgd2Ugd2VyZSB0byBzZXBhcmF0ZSB0aGVzZSBpbnRvIHNpbmdsZS1wdXJwb3NlIHRv
+b2xzLCBhbGwgdGhvc2UKPiB3b3VsZCBuZWVkIHRvIGJlIHJlLWRvbmUuCgpMb29raW5nIGF0IG15
+IGN1cnJlbnQgd29yayBJIGRpZCBvbiBjZXBoLWRpc2sgZm9yIEZyZWVCU0QsIGl0IHN0YXJ0cyB0
+bwpsb29rIGxpa2Ugc29tZXRoaW5nIGxpa2UgYGNlcGgtdm9sdW1lIHpmc2AuIEl0IHdvdWxkIG1h
+a2UgcG9ydGluZyBhIGxvdAptb3JlIG1hbmFnZWJsZS4gQnV0IHRoZSBjb21wb3NhYmxlIGRlY29t
+cG9zaXRpb24gbmVlZHMgdG8gYmUgYXQgYSBsZXZlbApoaWdoIGVub3VnaCB0aGF0IGFzIGxpdHRs
+ZSBhcyBwb3NzaWJsZSBvZiBsaW51eC1pc21zIHNlZXAgdGhyb3VnaC4KVGhlIG9uZSB0aGF0IHNw
+cmluZ3MgdG8gbWluZCBpbiB0aGlzIGlzOiBlbmNyeXB0aW9uLgoKU28gKzEKCi0tV2pXCj4gCj4g
+Cj4+Cj4+IDIgY2VudHMgZnJvbSBvbmUgb2YgdGhlIExWTSBmb3IgQ2VwaCB1c2VycywKPj4gV2Fy
+cmVuIFdhbmcKPj4gV2FsbWFydCDinLsKPj4KPj4gT24gNi8xNi8xNywgMTA6MjUgQU0sICJjZXBo
+LXVzZXJzIG9uIGJlaGFsZiBvZiBBbGZyZWRvIERlemEiIDxjZXBoLXVzZXJzLWJvdW5jZXNAbGlz
+dHMuY2VwaC5jb20gb24gYmVoYWxmIG9mIGFkZXphQHJlZGhhdC5jb20+IHdyb3RlOgo+Pgo+PiAg
+ICAgSGVsbG8sCj4+Cj4+ICAgICBBdCB0aGUgbGFzdCBDRE0gWzBdIHdlIHRhbGtlZCBhYm91dCBg
+Y2VwaC1sdm1gIGFuZCB0aGUgYWJpbGl0eSB0bwo+PiAgICAgZGVwbG95IE9TRHMgZnJvbSBsb2dp
+Y2FsIHZvbHVtZXMuIFdlIGhhdmUgbm93IGFuIGluaXRpYWwgZHJhZnQgZm9yIHRoZQo+PiAgICAg
+ZG9jdW1lbnRhdGlvbiBbMV0gYW5kIHdvdWxkIGxpa2Ugc29tZSBmZWVkYmFjay4KPj4KPj4gICAg
+IFRoZSBpbXBvcnRhbnQgZmVhdHVyZXMgZm9yIHRoaXMgbmV3IHRvb2wgYXJlOgo+Pgo+PiAgICAg
+KiBwYXJ0aW5nIHdheXMgd2l0aCB1ZGV2IChuZXcgYXBwcm9hY2ggd2lsbCByZWx5IG9uIExWTSBm
+dW5jdGlvbmFsaXR5Cj4+ICAgICBmb3IgZGlzY292ZXJ5KQo+PiAgICAgKiBjb21wYXRpYmlsaXR5
+L21pZ3JhdGlvbiBmb3IgZXhpc3RpbmcgTFZNIHZvbHVtZXMgZGVwbG95ZWQgYXMgZGlyZWN0b3Jp
+ZXMKPj4gICAgICogZG1jYWNoZSBzdXBwb3J0Cj4+Cj4+ICAgICBCeSBkb2N1bWVudGluZyB0aGUg
+QVBJIGFuZCB3b3JrZmxvd3MgZmlyc3Qgd2UgYXJlIG1ha2luZyBzdXJlIHRoYXQKPj4gICAgIHRo
+b3NlIGxvb2sgZmluZSBiZWZvcmUgc3RhcnRpbmcgb24gYWN0dWFsIGRldmVsb3BtZW50Lgo+Pgo+
+PiAgICAgSXQgd291bGQgYmUgZ3JlYXQgdG8gZ2V0IHNvbWUgZmVlZGJhY2ssIHNwZWNpYWxseSBp
+ZiB5b3UgYXJlIGN1cnJlbnRseQo+PiAgICAgdXNpbmcgTFZNIHdpdGggY2VwaCAob3IgcGxhbm5p
+bmcgdG8hKS4KPj4KPj4gICAgIFBsZWFzZSBub3RlIHRoYXQgdGhlIGRvY3VtZW50YXRpb24gaXMg
+bm90IGNvbXBsZXRlIGFuZCBpcyBtaXNzaW5nCj4+ICAgICBjb250ZW50IG9uIHNvbWUgcGFydHMu
+Cj4+Cj4+ICAgICBbMF0gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vcHJvamVjdHMvY2VwaC93aWtp
+L0NETV8wNi1KVU4tMjAxNwo+PiAgICAgWzFdIGh0dHA6Ly9kb2NzLmNlcGguY29tL2NlcGgtbHZt
+Lwo+PiAgICAgX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18K
+Pj4gICAgIGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0Cj4+ICAgICBjZXBoLXVzZXJzQGxpc3RzLmNl
+cGguY29tCj4+ICAgICBodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNl
+cnMtY2VwaC5jb20KPj4KPj4KPiAtLQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBz
+ZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbgo+IHRoZSBib2R5IG9mIGEg
+bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5m
+byBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCj4gCgpfX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1h
+aWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNv
+bS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
