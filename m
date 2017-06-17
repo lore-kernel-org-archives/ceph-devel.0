@@ -1,49 +1,49 @@
-From: Jesse Williamson <jwilliamson@suse.de>
-Subject: Re: Clang does not like constexpression
-Date: Fri, 16 Jun 2017 14:20:49 -0700 (PDT)
-Message-ID: <alpine.LSU.2.21.1706161420150.3182@ancalagon.suse.de>
-References: <3b811d53-d45f-7ed2-a65f-b7114739e891@digiware.nl> <alpine.LSU.2.21.1706140915130.5364@ancalagon.suse.de> <alpine.LSU.2.21.1706140931320.5364@ancalagon.suse.de> <CAEFDAA5Ge=68Xu1rerM6uG3aTQNdQXQtMfAfROXCf6x2C9h95w@mail.gmail.com>
- <CA+H5UW2CGJ_FHc-GGFbox-yzEUe4B4=8ncB7GBtr2fSKAR6hDg@mail.gmail.com> <20170614175928.GA6666@ultraspiritum.eng.arb.redhat.com> <CA+H5UW10tDxJiADk+tqPpkBn_93vXc1xsz30p65wABwoFtfLfw@mail.gmail.com> <20170614181932.GA12086@ultraspiritum.eng.arb.redhat.com>
- <6df88279-f533-ecec-8083-e5ff277d36df@digiware.nl>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Caught the first erroneous translated errorcode
+Date: Sat, 17 Jun 2017 12:50:22 +0200
+Message-ID: <34251a6c-a335-fe31-0705-a5fe7af9ae08@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII; format=flowed
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:37526 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750792AbdFPVUz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 16 Jun 2017 17:20:55 -0400
-In-Reply-To: <6df88279-f533-ecec-8083-e5ff277d36df@digiware.nl>
+Received: from smtp.digiware.nl ([176.74.240.9]:19331 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752726AbdFQKub (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 17 Jun 2017 06:50:31 -0400
+Received: from [192.168.10.67] (opteron [192.168.10.67])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id AEC344322B
+        for <ceph-devel@vger.kernel.org>; Sat, 17 Jun 2017 12:50:28 +0200 (CEST)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Radoslaw Zarzynski <rzarzynski@mirantis.com>, Michal Jarzabek <stiopa@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>, Casey Bodley <cbodley@redhat.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 16 Jun 2017, Willem Jan Withagen wrote:
+Hi,
 
-> Let me resurrect this discussion once more:
-> // specializations for char*/const char* use strlen()
-> template <>
-> struct string_traits<const char*> {
->  static constexpr size_t size(const char* s) { return std::strlen(s); }
-> };
+I think I've found the first fact where the errno translation (ceph ->
+hostos -> client-ceph ) goes wrong....
 
-Not the most elegant of solutions, but see if this works for you:
+Repeatedly I get the following error:
+116:
+/home/jenkins/workspace/ceph-master/src/test/libradosstriper/rados-striper.sh:42:
+run:  rados --pool rbd --striper put toy
+file td/rados-striper/toyfile
+116: 2017-06-17 12:32:05.290234 810016000 -1 libradosstriper:
+RadosStriperImpl::openStripedObjectForWrite : could not set new s
+ize for toyfile : rc = -125error putting rbd/toyfile: (125) Unknown
+error: 125
 
-namespace ceph {
-namespace util {
+125 is ECANCELD on Linux
+but FreeBSD
+#define ECANCELED       85              /* Operation canceled */
 
-constexpr size_t strlen(const char *s)
-{
-#if __clang__
-  return __builtin_strlen(s);
-#else
-  return std::strlen(s);
-#endif
-}
+So probably the server returns ECANCELD in network format (125)
+but the client does not translate back...
 
-}} // namespace ceph::util
+Now if I want to have some logging for this in Freebsd_errno.cc
+What is the easiest way to get something in the logs?
+What descriptor is available there?
 
-...and make the above call to ceph::util::strlen().
-
--Jesse
-
+--WjW
