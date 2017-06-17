@@ -1,41 +1,58 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 4.12-rc6
-Date: Sat, 17 Jun 2017 15:43:33 +0200
-Message-ID: <1497707013-13361-1-git-send-email-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: John Spray <jspray@redhat.com>
+Subject: Re: Caught the first erroneous translated errorcode
+Date: Sat, 17 Jun 2017 18:52:06 +0100
+Message-ID: <CALe9h7fveb7hek7uoX59P2w7Yx3fCvLf5JL0qURTrhZHzcD7hg@mail.gmail.com>
+References: <34251a6c-a335-fe31-0705-a5fe7af9ae08@digiware.nl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wr0-f176.google.com ([209.85.128.176]:33528 "EHLO
+        mail-wr0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752024AbdFQRw2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 17 Jun 2017 13:52:28 -0400
+Received: by mail-wr0-f176.google.com with SMTP id r103so52600078wrb.0
+        for <ceph-devel@vger.kernel.org>; Sat, 17 Jun 2017 10:52:27 -0700 (PDT)
+In-Reply-To: <34251a6c-a335-fe31-0705-a5fe7af9ae08@digiware.nl>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Linus,
+On Sat, Jun 17, 2017 at 11:50 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> Hi,
+>
+> I think I've found the first fact where the errno translation (ceph ->
+> hostos -> client-ceph ) goes wrong....
+>
+> Repeatedly I get the following error:
+> 116:
+> /home/jenkins/workspace/ceph-master/src/test/libradosstriper/rados-striper.sh:42:
+> run:  rados --pool rbd --striper put toy
+> file td/rados-striper/toyfile
+> 116: 2017-06-17 12:32:05.290234 810016000 -1 libradosstriper:
+> RadosStriperImpl::openStripedObjectForWrite : could not set new s
+> ize for toyfile : rc = -125error putting rbd/toyfile: (125) Unknown
+> error: 125
+>
+> 125 is ECANCELD on Linux
+> but FreeBSD
+> #define ECANCELED       85              /* Operation canceled */
+>
+> So probably the server returns ECANCELD in network format (125)
+> but the client does not translate back...
 
-The following changes since commit 32c1431eea4881a6b17bd7c639315010aeefa452:
+Somewhat related perhaps: people running cephfs on ARM recently had
+this problem, for that case the solution was simply to define in Ceph
+some constants that mirror the linux ones, see commit 88d2da5e9.
 
-  Linux 4.12-rc5 (2017-06-11 16:48:20 -0700)
+John
 
-are available in the git repository at:
-
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.12-rc6
-
-for you to fetch changes up to 4ca2fea6f8277ab381bd08b996d641255b6f7b00:
-
-  ceph: unify inode i_ctime update (2017-06-14 19:37:23 +0200)
-
-----------------------------------------------------------------
-A fix for an old ceph ->fh_to_* bug from Luis and two timestamp
-fixups from Zheng, prompted by the ongoing y2038 work.
-
-----------------------------------------------------------------
-Luis Henriques (1):
-      ceph: check i_nlink while converting a file handle to dentry
-
-Yan, Zheng (2):
-      ceph: use current_kernel_time() to get request time stamp
-      ceph: unify inode i_ctime update
-
- fs/ceph/acl.c        | 1 +
- fs/ceph/export.c     | 4 ++++
- fs/ceph/inode.c      | 5 ++---
- fs/ceph/mds_client.c | 4 +---
- 4 files changed, 8 insertions(+), 6 deletions(-)
+> Now if I want to have some logging for this in Freebsd_errno.cc
+> What is the easiest way to get something in the logs?
+> What descriptor is available there?
+>
+> --WjW
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
