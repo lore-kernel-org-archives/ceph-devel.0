@@ -1,37 +1,236 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Extra daemons/servers reporting to mgr
-Date: Mon, 19 Jun 2017 19:26:21 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706191924150.32269@piezo.novalocal>
-References: <CALe9h7eT+7KUt7VZPaYfR49FEPP3mJbe2+ARK82BaZUMmStchw@mail.gmail.com> <CADRKj5RCQf8wv+Y3VsL=e_gB9URYzK0SkzGRVfTFQwcJn-OL4g@mail.gmail.com> <alpine.DEB.2.11.1706141943490.32269@piezo.novalocal>
- <CA+aFP1B0ngk-Wkfy0KXnkyRP2XZJqvce1qhdBfpL+5PcjmGNoQ@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Fwd: EXT: [ceph-users] ceph-lvm - a tool to deploy OSDs from LVM volumes
+Date: Mon, 19 Jun 2017 21:24:48 +0100
+Message-ID: <CALe9h7cxPioPHLw48Gj02bEkD-HC49yHT8kG62AyLm_V9KnOZQ@mail.gmail.com>
+References: <A5E80C1D-74F4-455B-8257-5B9E2FF6AB39@walmart.com>
+ <CAC-Np1yqCZO7CzEjTV+hrNve857BtM_rZ+LxAi6Vf9UJkPM04g@mail.gmail.com>
+ <CALe9h7cV6U3A_OT9R8tv_yPoGG9zFaWF3qXV5cwYK0KM-NDu4g@mail.gmail.com>
+ <CAC-Np1yiRgkmhZCOij9qSBmqUo-YYtErWXk2gevYuvWKrYFyeg@mail.gmail.com>
+ <CALe9h7cT54esfoT=eOgZq=ZbYAp1pjH_CeLiz-kFO61jABasrA@mail.gmail.com> <CAC-Np1zwnzcwFBn4kqAzuhwmk9vZv1ZiUdd7owQZkA76k=QYuA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44322 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750950AbdFST00 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 19 Jun 2017 15:26:26 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id BCDA54E4CA
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Jun 2017 19:26:25 +0000 (UTC)
-In-Reply-To: <CA+aFP1B0ngk-Wkfy0KXnkyRP2XZJqvce1qhdBfpL+5PcjmGNoQ@mail.gmail.com>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:38887 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751019AbdFSUZL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Jun 2017 16:25:11 -0400
+Received: by mail-wm0-f46.google.com with SMTP id u195so3197697wmd.1
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Jun 2017 13:25:10 -0700 (PDT)
+In-Reply-To: <CAC-Np1zwnzcwFBn4kqAzuhwmk9vZv1ZiUdd7owQZkA76k=QYuA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dillaman@redhat.com
-Cc: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-I wrote up a quick proposal at
+On Mon, Jun 19, 2017 at 6:53 PM, Alfredo Deza <adeza@redhat.com> wrote:
+>>> * faster release cycles
+>>> * easier and faster to test
+>>
+>> I think having one part of Ceph on a different release cycle to the
+>> rest of Ceph is an even more dramatic thing than having it in a
+>> separate git repository.
+>>
+>> It seems like there is some dissatisfaction with how the Ceph project
+>> as whole is doing things that is driving you to try and do work
+>> outside of the repo where the rest of the project lives -- if the
+>> release cycles or test infrastructure within Ceph are not adequate for
+>> the tool that formats drives for OSDs, what can we do to fix them?
+>
+> It isn't Ceph the project :)
+>
+> Not every tool about Ceph has to come from ceph.git, in which case the
+> argument could be flipped around: why isn't ceph-installer,
+> ceph-ansible, ceph-deploy, radosgw-agent, etc... all coming from
+> within ceph.git ?
 
-	http://pad.ceph.com/p/service-map
+ceph-installer, ceph-deploy and ceph-ansible are special cases because
+they are installers, that operate before a particular version of Ceph
+has been selected for installation, and might operate on two
+differently versioned clusters at the same time.
 
-Basic idea:
+radosgw-agent, presumably (I haven't worked on it) is separate because
+it sits between two clusters but is logically part of neither, and
+those clusters could potentially be different-versioned too.
 
- - generic ServiceMap of service -> daemon -> metadata and status
- - managed/persisted by mon
- - librados interface to register as service X name Y (e.g., 'rgw.foo')
- - librados will send regular beacon to mon to keep entry alive
- - various mon commands to dump all or part of the service map
+ceph-disk, on the other hand, rides alongside ceph-osd, writes a
+format that ceph-osd needs to understand, the two go together
+everywhere.  You use whatever version of ceph-disk corresponds to the
+ceph-osd package you have.  You run whatever ceph-osd corresponds to
+the version of ceph-disk you just used.  The two things are not
+separate, any more than ceph-objectstore-tool would be.
 
-sage
+It would be more intuitive if we had called ceph-disk
+"ceph-osd-format" or similar.  The utility that prepares drives for
+use by the OSD naturally belongs in the same package (or at the very
+least the same release!) as the OSD code that reads that on-disk
+format.
+
+There is a very clear distinction in my mind between things that
+install Ceph (i.e. they operate before the ceph packages are on the
+system), and things that prepare the system (a particular Ceph version
+is already installed, we're just getting ready to run it).
+ceph-objectstore-tool would be another example of something that
+operates on the drives, but is intimately coupled to the OSDs and
+would not make sense as a separately released thing.
+
+> They don't necessarily need to be tied in. In the case of
+> ceph-installer: there is nothing ceph-specific it needs from ceph.git
+> to run, why force it in?
+
+Because Ceph is already a huge, complex codebase, and we already have
+lots of things to keep track of.  Sometimes breaking things up makes
+life easier, sometimes commonality makes live easier -- the trick is
+knowing when to do which.
+
+The binaries, the libraries, the APIs, these things benefit from being
+broken down into manageable bitesize pieces.  The version control, the
+releases, the build management, these things do not (with the
+exception of optimizing jenkins by doing fewer builds in some cases).
+
+I don't ever want to have to ask or answer the question "What version
+of ceph-disk to I need for ceph x.y.z?", or "Can I run ceph-osd x.y.z
+on a drive formatted with ceph-disk a.b.c?".
+
+Being able to give a short, simple answer to "what version of Ceph is
+this?" has HUGE value, and that goes out the window when you start
+splitting bits off on their own release schedules.
+
+>>> I am not ruling out going into Ceph at some point though, ideally when
+>>> things slow down and become stable.
+>>
+>> I think that the decision about where this code lives needs to be made
+>> before it is released -- moving it later is rather awkward.  If you'd
+>> rather not have the code in Ceph master until you're happy with it,
+>> then a branch would be the natural way to do that.
+>>
+>
+> The decision was made a few weeks ago, and I really don't think we
+> should be in ceph.git, but I am OK to keep
+> discussing on the reasoning.
+>
+>
+>>> Is your argument only to have parity in Ceph's branching? That was
+>>> never a problem with out-of-tree tools like ceph-deploy for example.
+>>
+>> I guess my argument isn't so much an argument as it is an assertion
+>> that if you want to go your own way then you need to have a really
+>> strong clear reason.
+>
+> Many! Like I mentioned: easier testing, faster release cycle, can
+> publish in any package index, doesn't need anything in ceph.git to
+> operate, etc..
+
+Testing: being separate is only easier if you're only doing python
+unit testing.  If you're testing that ceph-disk/ceph-volume really
+does its job, then you absolutely do want to be in the ceph tree, so
+that you can fire up an OSD that checks that ceph-disk really did it's
+job.
+
+Faster release cycle: we release pretty often.  We release often
+enough to deal with critical OSD and mon bugs.  The tool that formats
+OSDs doesn't need to be released more often than the OSD itself.
+
+Package indices: putting any of the Ceph code in pypi is of limited
+value, even if we do periodically run into people with a passion for
+it.  If someone did a "pip install librados", the very next thing they
+would have to do would be to go find some packages of the C librados
+bindings, and hope like hell that those packages matched whatever they
+just downloaded from pypi, and they probably wouldn't, because what
+are the chances that pip is fetching python bindings that match the
+Ceph version I have on my system?  I don't want to have to deal with
+users who get themselves into that situation.
+
+>> Put a bit bluntly: if CephFS, RBD, RGW, the mon and the OSD can all
+>> successfully co-habit in one git repository, what makes the CLI that
+>> formats drives so special that it needs its own?
+>
+> Sure. Again, there is nothing some of our tooling needs from ceph.git
+> so I don't see why the need to have then in-tree. I am sure RGW and
+> other
+> components do need to consume Ceph code in some way? I don't even
+> think ceph-disk should be in tree for the same reason. I believe that
+> in the very
+> beginning it was just so easy to have everything be built from ceph.git
+
+We are, for better or worse, currently in a "one big repo" model (with
+the exception of installers and inter-cluster rgw bits).
+
+One could legitimately argue that more modularity is better, and
+separate out RBD and RGW into separate projects, because hey, they're
+standalone, right?  Or, one can go the other way and argue that more
+modularity creates versioning headaches that just don't need to exist.
+
+Both are valid worldviews, but the WORST outcome is to have almost
+everything in one repo, and then splinter off individual command line
+tools based on ad hoc decisions when someone is doing a particular
+feature.
+
+I know how backwards that must sound, when you're looking at the
+possibility of having a nice self contained git repo, that contains a
+pypi-eligible python module, which has unit tests that run fast in
+jenkins on every commit.  I get the appeal!  But for the sake of the
+overall simplicity of Ceph, please think again, or if you really want
+to convert us to a multi-repo model, then make that case for the
+project as a whole rather than doing it individually on a bit-by-bit
+basis.
+
+John
+
+> Even in some cases like pybind, it has been requested numerous times
+> to get them on separate package indexes like PyPI, but that has always
+> been
+> *tremendously* difficult: http://tracker.ceph.com/issues/5900
+>>>>  - I agree with others that a single entrypoint (i.e. executable) will
+>>>> be more manageable than having conspicuously separate tools, but we
+>>>> shouldn't worry too much about making things "plugins" as such -- they
+>>>> can just be distinct code inside one tool, sharing as much or as
+>>>> little as they need.
+>>>>
+>>>> What if we delivered this set of LVM functionality as "ceph-disk lvm
+>>>> ..." commands to minimise the impression that the tooling is changing,
+>>>> even if internally it's all new/distinct code?
+>>>
+>>> That sounded appealing initially, but because we are introducing a
+>>> very different API, it would look odd to interact
+>>> with other subcommands without a normalized interaction. For example,
+>>> for 'prepare' this would be:
+>>>
+>>> ceph-disk prepare [...]
+>>>
+>>> And for LVM it would possible be
+>>>
+>>> ceph-disk lvm prepare [...]
+>>>
+>>> The level at which these similar actions are presented imply that one
+>>> may be a preferred (or even default) one, while the other one
+>>> isn't.
+>>>
+>>> At one point we are going to add regular disk worfklows (replacing
+>>> ceph-disk functionality) and then it would become even more
+>>> confusing to keep it there (or do you think at that point we could split?)
+>>>
+>>>>
+>>>> At the risk of being a bit picky about language, I don't like calling
+>>>> this anything with "volume" in the name, because afaik we've never
+>>>> ever called OSDs or the drives they occupy "volumes", so we're
+>>>> introducing a whole new noun, and a widely used (to mean different
+>>>> things) one at that.
+>>>>
+>>>
+>>> We have never called them 'volumes' because there was never anything
+>>> to support something other than regular disks, the approach
+>>> has always been disks and partitions.
+>>>
+>>> A "volume" can be a physical volume (e.g. a disk) or a logical one
+>>> (lvm, dmcache). It is an all-encompassing name to allow different
+>>> device-like to work with.
+>>
+>> The trouble with "volume" is that it means so many things in so many
+>> different storage systems -- I haven't often seen it used to mean
+>> "block device" or "drive".  It's more often used to describe a logical
+>> entity.  I also think "disk" is fine -- most people get the idea that
+>> a disk is a hard drive but it could also be any block device.
+>
+> If your thinking is that a disk can be any block device then yes, we
+> are at opposite ends here of our naming. We are picking a
+> "widely used" term because it is not specific. "disk" sounds fairly
+> specific, and we don't want that.
