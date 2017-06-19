@@ -1,56 +1,37 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: Pecan dependency
-Date: Mon, 19 Jun 2017 09:00:59 +1000
-Message-ID: <CAF-wwdGKxgSu-1h4ndnuRyn1qLRd-FFriWGOY-XcgBnF+3cG2Q@mail.gmail.com>
-References: <CAF-wwdGBn4i=-jD7qKJAhmCL8_fEXiMNgc+z=9+4gj2FwA7RFA@mail.gmail.com>
+From: Sistem Administrator <ahmadzakyramdani@students.itb.ac.id>
+Subject: PERHATIAN
+Date: Mon, 19 Jun 2017 12:58:49 +0530
+Message-ID: <20170619072901.6EE677CA1C48@students.itb.ac.id>
+Reply-To: adminwebmailsistem@mail2world.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f178.google.com ([209.85.223.178]:34826 "EHLO
-        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752503AbdFRXBB (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 18 Jun 2017 19:01:01 -0400
-Received: by mail-io0-f178.google.com with SMTP id k93so54192214ioi.2
-        for <ceph-devel@vger.kernel.org>; Sun, 18 Jun 2017 16:01:00 -0700 (PDT)
-In-Reply-To: <CAF-wwdGBn4i=-jD7qKJAhmCL8_fEXiMNgc+z=9+4gj2FwA7RFA@mail.gmail.com>
+Received: from mx2.itb.ac.id ([167.205.1.67]:40047 "EHLO mx2.itb.ac.id"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750952AbdFSIAW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 19 Jun 2017 04:00:22 -0400
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Recipients <ahmadzakyramdani@students.itb.ac.id>
 
-Please ignore this, we already install this as a dependency via
-install-deps.sh, I was misreading the situation I'm afraid :)
+PERHATIAN
 
-So I'm not sure any action is required at this stage.
+Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali memvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, kirim informasi berikut di bawah ini:
 
-On Mon, Jun 19, 2017 at 8:37 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
-> http://tracker.ceph.com/issues/20322 is caused by an unsatisfied pecan
-> dependency for the MGR restful module. Given the error message is rather cryptic
-> and not immediately relatable to a missing pecan module we should address this
-> in some way, shape, or fashion.
->
-> Willem reported this issue here,
-> https://www.spinics.net/lists/ceph-devel/msg37057.html and submitted a PR which
-> resolves the issue for FreeBSD by installing pecan with pip.
->
-> There are several approaches we could take, most of which provided by John Spray
-> in the tracker.
->
-> 1. Make pecan a required dependency for ceph.
->
-> 2. Test for the availability of the module in vstart and warn if it is not
-> available and/or disable the restful module parts.
->
-> 3. Make the restful parts configurable within vstart and *disable* them by
-> default.
->
-> Which way would we like to jump?
->
-> --
-> Cheers,
-> Brad
+Nama:
+Username:
+sandi:
+Konfirmasi sandi:
+E-mail:
+telepon:
 
+Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda akan dinonaktifkan!
 
+Maaf atas ketidaknyamanan ini.
+Kode verifikasi: en:0986..web...id......nw..website Admin..id...9876mm.2017
+Surat Dukungan Teknis ©2017
 
--- 
-Cheers,
-Brad
+terima kasih
+Sistem Administrator
