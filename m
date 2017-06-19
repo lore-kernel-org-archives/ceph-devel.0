@@ -1,57 +1,97 @@
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH 01/35] fscache: Remove unused ->now_uncached callback
-Date: Mon, 19 Jun 2017 15:12:53 +0200
-Message-ID: <20170619131253.GA22128@quack2.suse.cz>
-References: <20170601093245.29238-2-jack@suse.cz>
- <20170601093245.29238-1-jack@suse.cz>
- <10376.1496312768@warthog.procyon.org.uk>
- <20170601113434.GC23077@quack2.suse.cz>
+From: John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: EXT: ceph-lvm - a tool to deploy OSDs from LVM
+	volumes
+Date: Mon, 19 Jun 2017 14:27:42 +0100
+Message-ID: <CALe9h7cV6U3A_OT9R8tv_yPoGG9zFaWF3qXV5cwYK0KM-NDu4g@mail.gmail.com>
+References: <A5E80C1D-74F4-455B-8257-5B9E2FF6AB39@walmart.com>
+	<CAC-Np1yqCZO7CzEjTV+hrNve857BtM_rZ+LxAi6Vf9UJkPM04g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170601113434.GC23077@quack2.suse.cz>
-Sender: owner-linux-mm@kvack.org
-To: David Howells <dhowells@redhat.com>
-Cc: Jan Kara <jack@suse.cz>, linux-mm@kvack.org, Hugh Dickins <hughd@google.com>, linux-afs@lists.infradead.org, Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>, linux-nilfs@vger.kernel.org, Bob Peterson <rpeterso@redhat.com>, cluster-devel@redhat.com, Jaegeuk Kim <jaegeuk@kernel.org>, linux-f2fs-devel@lists.sourceforge.net, tytso@mit.edu, linux-ext4@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org, David Sterba <dsterba@suse.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, linux-xfs@vger.kernel.org, Nadia Yvette Chambers <nyc@holomorphy.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAC-Np1yqCZO7CzEjTV+hrNve857BtM_rZ+LxAi6Vf9UJkPM04g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Thu 01-06-17 13:34:34, Jan Kara wrote:
-> On Thu 01-06-17 11:26:08, David Howells wrote:
-> > Jan Kara <jack@suse.cz> wrote:
-> > 
-> > > The callback doesn't ever get called. Remove it.
-> > 
-> > Hmmm...  I should perhaps be calling this.  I'm not sure why I never did.
-> > 
-> > At the moment, it doesn't strictly matter as ops on pages marked with
-> > PG_fscache get ignored if the cache has suffered an I/O error or has been
-> > withdrawn - but it will incur a performance penalty (the PG_fscache flag is
-> > checked in the netfs before calling into fscache).
-> > 
-> > The downside of calling this is that when a cache is removed, fscache would go
-> > through all the cookies for that cache and iterate over all the pages
-> > associated with those cookies - which could cause a performance dip in the
-> > system.
-> 
-> So I know nothing about fscache. If you decide these functions should stay
-> in as you are going to use them soon, then I can just convert them to the
-> new API as everything else. What just caught my eye and why I had a more
-> detailed look is that I didn't understand that 'PAGEVEC_SIZE -
-> pagevec_count(&pvec)' as a pagevec_lookup() argument since pagevec_count()
-> should always return 0 at that point?
-
-David, what is your final decision regarding this? Do you want to keep
-these unused functions (and I will just update my patch to convert them to
-the new calling convention) or will you apply the patch to remove them?
-
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+T24gRnJpLCBKdW4gMTYsIDIwMTcgYXQgNzoyMyBQTSwgQWxmcmVkbyBEZXphIDxhZGV6YUByZWRo
+YXQuY29tPiB3cm90ZToKPiBPbiBGcmksIEp1biAxNiwgMjAxNyBhdCAyOjExIFBNLCBXYXJyZW4g
+V2FuZyAtIElTRAo+IDxXYXJyZW4uV2FuZ0B3YWxtYXJ0LmNvbT4gd3JvdGU6Cj4+IEkgd291bGQg
+cHJlZmVyIHRoYXQgdGhpcyBpcyBzb21ldGhpbmcgbW9yZSBnZW5lcmljLCB0byBwb3NzaWJseSBz
+dXBwb3J0IG90aGVyIGJhY2tlbmRzIG9uZSBkYXksIGxpa2UgY2VwaC12b2x1bWUuIENyZWF0aW5n
+IG9uZSB0b29sIHBlciBiYWNrZW5kIHNlZW1zIHNpbGx5Lgo+Pgo+PiBBbHNvLCBjZXBoLWx2bSBz
+ZWVtcyB0byBpbXBseSB0aGF0IGNlcGggaXRzZWxmIGhhcyBzb21ldGhpbmcgdG8gZG8gd2l0aCBs
+dm0sIHdoaWNoIGl0IHJlYWxseSBkb2VzbuKAmXQuIFRoaXMgaXMgc2ltcGx5IHRvIGRlYWwgd2l0
+aCB0aGUgdW5kZXJseWluZyBkaXNrLiBJZiB0aGVyZeKAmXMgcmVzaXN0YW5jZSB0byBzb21ldGhp
+bmcgbW9yZSBnZW5lcmljIGxpa2UgY2VwaC12b2x1bWUsIHRoZW4gaXQgc2hvdWxkIGF0IGxlYXN0
+IGJlIGNhbGxlZCBzb21ldGhpbmcgbGlrZSBjZXBoLWRpc2stbHZtLgo+Cj4gU2FnZSwgeW91IGhh
+ZCBtZW50aW9uZWQgdGhlIG5lZWQgZm9yICJjb21wb3NhYmxlIiB0b29scyBmb3IgdGhpcywgYW5k
+Cj4gSSB0aGluayB0aGF0IGlmIHdlIGdvIHdpdGggYGNlcGgtdm9sdW1lYCB3ZSBjb3VsZCBhbGxv
+dyBwbHVnaW5zIGZvcgo+IGVhY2ggc3RyYXRlZ3kuIFdlIGFyZSBzdGFydGluZyB3aXRoIGBsdm1g
+IHN1cHBvcnQgc28gdGhhdCB3b3VsZCBsb29rCj4gbGlrZTogYGNlcGgtdm9sdW1lIGx2bWAKPgo+
+IFRoZSBgbHZtYCBmdW5jdGlvbmFsaXR5IGNvdWxkIGJlIGltcGxlbWVudGVkIGFzIGEgcGx1Z2lu
+IGl0c2VsZiwgYW5kCj4gd2hlbiB3ZSBzdGFydCB3b3JraW5nIHdpdGggc3VwcG9ydGluZyByZWd1
+bGFyIGRpc2tzLCB0aGVuIGBjZXBoLXZvbHVtZQo+IGRpc2tgIGNhbiBjb21lIGFsb25nLCBldGMu
+Li4KPgo+IEl0IHdvdWxkIGFsc28gb3BlbiB0aGUgZG9vciBmb3IgYW55b25lIHRvIGJlIGFibGUg
+dG8gd3JpdGUgYSBwbHVnaW4gdG8KPiBgY2VwaC12b2x1bWVgIHRvIGltcGxlbWVudCB0aGVpciBv
+d24gbG9naWMsIHdoaWxlIGF0IHRoZSBzYW1lIHRpbWUKPiByZS11c2luZyBtb3N0IG9mIHdoYXQg
+d2UgYXJlIGltcGxlbWVudGluZyB0b2RheTogbG9nZ2luZywgcmVwb3J0aW5nLAo+IHN5c3RlbWQg
+c3VwcG9ydCwgT1NEIG1ldGFkYXRhLCBldGMuLi4KPgo+IElmIHdlIHdlcmUgdG8gc2VwYXJhdGUg
+dGhlc2UgaW50byBzaW5nbGUtcHVycG9zZSB0b29scywgYWxsIHRob3NlCj4gd291bGQgbmVlZCB0
+byBiZSByZS1kb25lLgoKQ291cGxlIG9mIHRob3VnaHRzOgogLSBsZXQncyBrZWVwIHRoaXMgaW4g
+dGhlIENlcGggcmVwb3NpdG9yeSB1bmxlc3MgdGhlcmUncyBhIHN0cm9uZwpyZWFzb24gbm90IHRv
+IC0tIGl0J2xsIGVuYWJsZSB0aGUgdG9vbCdzIGJyYW5jaGluZyB0byBhdXRvbWF0aWNhbGx5Cmhh
+cHBlbiBpbiBsaW5lIHdpdGggQ2VwaCdzLgogLSBJIGFncmVlIHdpdGggb3RoZXJzIHRoYXQgYSBz
+aW5nbGUgZW50cnlwb2ludCAoaS5lLiBleGVjdXRhYmxlKSB3aWxsCmJlIG1vcmUgbWFuYWdlYWJs
+ZSB0aGFuIGhhdmluZyBjb25zcGljdW91c2x5IHNlcGFyYXRlIHRvb2xzLCBidXQgd2UKc2hvdWxk
+bid0IHdvcnJ5IHRvbyBtdWNoIGFib3V0IG1ha2luZyB0aGluZ3MgInBsdWdpbnMiIGFzIHN1Y2gg
+LS0gdGhleQpjYW4ganVzdCBiZSBkaXN0aW5jdCBjb2RlIGluc2lkZSBvbmUgdG9vbCwgc2hhcmlu
+ZyBhcyBtdWNoIG9yIGFzCmxpdHRsZSBhcyB0aGV5IG5lZWQuCgpXaGF0IGlmIHdlIGRlbGl2ZXJl
+ZCB0aGlzIHNldCBvZiBMVk0gZnVuY3Rpb25hbGl0eSBhcyAiY2VwaC1kaXNrIGx2bQouLi4iIGNv
+bW1hbmRzIHRvIG1pbmltaXNlIHRoZSBpbXByZXNzaW9uIHRoYXQgdGhlIHRvb2xpbmcgaXMgY2hh
+bmdpbmcsCmV2ZW4gaWYgaW50ZXJuYWxseSBpdCdzIGFsbCBuZXcvZGlzdGluY3QgY29kZT8KCkF0
+IHRoZSByaXNrIG9mIGJlaW5nIGEgYml0IHBpY2t5IGFib3V0IGxhbmd1YWdlLCBJIGRvbid0IGxp
+a2UgY2FsbGluZwp0aGlzIGFueXRoaW5nIHdpdGggInZvbHVtZSIgaW4gdGhlIG5hbWUsIGJlY2F1
+c2UgYWZhaWsgd2UndmUgbmV2ZXIKZXZlciBjYWxsZWQgT1NEcyBvciB0aGUgZHJpdmVzIHRoZXkg
+b2NjdXB5ICJ2b2x1bWVzIiwgc28gd2UncmUKaW50cm9kdWNpbmcgYSB3aG9sZSBuZXcgbm91biwg
+YW5kIGEgd2lkZWx5IHVzZWQgKHRvIG1lYW4gZGlmZmVyZW50CnRoaW5ncykgb25lIGF0IHRoYXQu
+CgpKb2huCgo+Cj4KPj4KPj4gMiBjZW50cyBmcm9tIG9uZSBvZiB0aGUgTFZNIGZvciBDZXBoIHVz
+ZXJzLAo+PiBXYXJyZW4gV2FuZwo+PiBXYWxtYXJ0IOKcuwo+Pgo+PiBPbiA2LzE2LzE3LCAxMDoy
+NSBBTSwgImNlcGgtdXNlcnMgb24gYmVoYWxmIG9mIEFsZnJlZG8gRGV6YSIgPGNlcGgtdXNlcnMt
+Ym91bmNlc0BsaXN0cy5jZXBoLmNvbSBvbiBiZWhhbGYgb2YgYWRlemFAcmVkaGF0LmNvbT4gd3Jv
+dGU6Cj4+Cj4+ICAgICBIZWxsbywKPj4KPj4gICAgIEF0IHRoZSBsYXN0IENETSBbMF0gd2UgdGFs
+a2VkIGFib3V0IGBjZXBoLWx2bWAgYW5kIHRoZSBhYmlsaXR5IHRvCj4+ICAgICBkZXBsb3kgT1NE
+cyBmcm9tIGxvZ2ljYWwgdm9sdW1lcy4gV2UgaGF2ZSBub3cgYW4gaW5pdGlhbCBkcmFmdCBmb3Ig
+dGhlCj4+ICAgICBkb2N1bWVudGF0aW9uIFsxXSBhbmQgd291bGQgbGlrZSBzb21lIGZlZWRiYWNr
+Lgo+Pgo+PiAgICAgVGhlIGltcG9ydGFudCBmZWF0dXJlcyBmb3IgdGhpcyBuZXcgdG9vbCBhcmU6
+Cj4+Cj4+ICAgICAqIHBhcnRpbmcgd2F5cyB3aXRoIHVkZXYgKG5ldyBhcHByb2FjaCB3aWxsIHJl
+bHkgb24gTFZNIGZ1bmN0aW9uYWxpdHkKPj4gICAgIGZvciBkaXNjb3ZlcnkpCj4+ICAgICAqIGNv
+bXBhdGliaWxpdHkvbWlncmF0aW9uIGZvciBleGlzdGluZyBMVk0gdm9sdW1lcyBkZXBsb3llZCBh
+cyBkaXJlY3Rvcmllcwo+PiAgICAgKiBkbWNhY2hlIHN1cHBvcnQKPj4KPj4gICAgIEJ5IGRvY3Vt
+ZW50aW5nIHRoZSBBUEkgYW5kIHdvcmtmbG93cyBmaXJzdCB3ZSBhcmUgbWFraW5nIHN1cmUgdGhh
+dAo+PiAgICAgdGhvc2UgbG9vayBmaW5lIGJlZm9yZSBzdGFydGluZyBvbiBhY3R1YWwgZGV2ZWxv
+cG1lbnQuCj4+Cj4+ICAgICBJdCB3b3VsZCBiZSBncmVhdCB0byBnZXQgc29tZSBmZWVkYmFjaywg
+c3BlY2lhbGx5IGlmIHlvdSBhcmUgY3VycmVudGx5Cj4+ICAgICB1c2luZyBMVk0gd2l0aCBjZXBo
+IChvciBwbGFubmluZyB0byEpLgo+Pgo+PiAgICAgUGxlYXNlIG5vdGUgdGhhdCB0aGUgZG9jdW1l
+bnRhdGlvbiBpcyBub3QgY29tcGxldGUgYW5kIGlzIG1pc3NpbmcKPj4gICAgIGNvbnRlbnQgb24g
+c29tZSBwYXJ0cy4KPj4KPj4gICAgIFswXSBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9wcm9qZWN0
+cy9jZXBoL3dpa2kvQ0RNXzA2LUpVTi0yMDE3Cj4+ICAgICBbMV0gaHR0cDovL2RvY3MuY2VwaC5j
+b20vY2VwaC1sdm0vCj4+ICAgICBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fXwo+PiAgICAgY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPj4gICAgIGNlcGgtdXNl
+cnNAbGlzdHMuY2VwaC5jb20KPj4gICAgIGh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5j
+Z2kvY2VwaC11c2Vycy1jZXBoLmNvbQo+Pgo+Pgo+IC0tCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0
+aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluCj4gdGhl
+IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPiBNb3JlIG1h
+am9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
+bWwKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11
+c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMu
+Y2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
