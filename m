@@ -1,47 +1,57 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Caught the first erroneous translated errorcode
-Date: Mon, 19 Jun 2017 15:00:28 +0200
-Message-ID: <95b2bd08-f38b-f5ff-ebfc-523dddb1398b@digiware.nl>
-References: <34251a6c-a335-fe31-0705-a5fe7af9ae08@digiware.nl>
- <CALe9h7fveb7hek7uoX59P2w7Yx3fCvLf5JL0qURTrhZHzcD7hg@mail.gmail.com>
- <5ca934f2-0f95-bb6c-0fce-267468cb59b4@digiware.nl>
- <028757af-a82b-d873-648d-294961984bbb@digiware.nl>
- <CA+aFP1BST9e4UV6kyxP=kLN0tN0=1EkV=41cBV2Y5d98hrED7A@mail.gmail.com>
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH 01/35] fscache: Remove unused ->now_uncached callback
+Date: Mon, 19 Jun 2017 15:12:53 +0200
+Message-ID: <20170619131253.GA22128@quack2.suse.cz>
+References: <20170601093245.29238-2-jack@suse.cz>
+ <20170601093245.29238-1-jack@suse.cz>
+ <10376.1496312768@warthog.procyon.org.uk>
+ <20170601113434.GC23077@quack2.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:58287 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750928AbdFSNAc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 19 Jun 2017 09:00:32 -0400
-In-Reply-To: <CA+aFP1BST9e4UV6kyxP=kLN0tN0=1EkV=41cBV2Y5d98hrED7A@mail.gmail.com>
-Content-Language: nl
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: dillaman@redhat.com
-Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170601113434.GC23077@quack2.suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: David Howells <dhowells@redhat.com>
+Cc: Jan Kara <jack@suse.cz>, linux-mm@kvack.org, Hugh Dickins <hughd@google.com>, linux-afs@lists.infradead.org, Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>, linux-nilfs@vger.kernel.org, Bob Peterson <rpeterso@redhat.com>, cluster-devel@redhat.com, Jaegeuk Kim <jaegeuk@kernel.org>, linux-f2fs-devel@lists.sourceforge.net, tytso@mit.edu, linux-ext4@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org, linux-btrfs@vger.kernel.org, David Sterba <dsterba@suse.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, linux-xfs@vger.kernel.org, Nadia Yvette Chambers <nyc@holomorphy.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On 19-6-2017 14:56, Jason Dillaman wrote:
-> On Sun, Jun 18, 2017 at 1:18 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> librbd/io/AioCompletion.cc:199:ssize_t AioCompletion::get_return_value() {
+On Thu 01-06-17 13:34:34, Jan Kara wrote:
+> On Thu 01-06-17 11:26:08, David Howells wrote:
+> > Jan Kara <jack@suse.cz> wrote:
+> > 
+> > > The callback doesn't ever get called. Remove it.
+> > 
+> > Hmmm...  I should perhaps be calling this.  I'm not sure why I never did.
+> > 
+> > At the moment, it doesn't strictly matter as ops on pages marked with
+> > PG_fscache get ignored if the cache has suffered an I/O error or has been
+> > withdrawn - but it will incur a performance penalty (the PG_fscache flag is
+> > checked in the netfs before calling into fscache).
+> > 
+> > The downside of calling this is that when a cache is removed, fscache would go
+> > through all the cookies for that cache and iterate over all the pages
+> > associated with those cookies - which could cause a performance dip in the
+> > system.
 > 
-> 
-> librbd just wraps librados, so I would think all the error codes
-> should have already been properly translated before it reaches this
-> level since otherwise any internal librbd error logging will output
-> the incorrect failure reason. I'd suspect most of the client-side
-> handling should probably be handled inside osdc/Objecter.h/cc..
+> So I know nothing about fscache. If you decide these functions should stay
+> in as you are going to use them soon, then I can just convert them to the
+> new API as everything else. What just caught my eye and why I had a more
+> detailed look is that I didn't understand that 'PAGEVEC_SIZE -
+> pagevec_count(&pvec)' as a pagevec_lookup() argument since pagevec_count()
+> should always return 0 at that point?
 
-Hi Jason,
+David, what is your final decision regarding this? Do you want to keep
+these unused functions (and I will just update my patch to convert them to
+the new calling convention) or will you apply the patch to remove them?
 
-Thanx for the pointer. Changing any of the librbd stuff did indeed not
-result in a working rados-stripper.sh
+								Honza
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
 
-Objecter.{h,cc} already had the forward error rewrite. I added the
-reverse in the original patch. But obviously that is not enough (yet)
-So I'll start digging a bit more in the librados files as you suggested.
-
---WjW
-
-
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
