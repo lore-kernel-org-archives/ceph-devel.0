@@ -1,29 +1,29 @@
 From: Alfredo Deza <adeza@redhat.com>
 Subject: Re: EXT: [ceph-users] ceph-lvm - a tool to deploy OSDs from LVM volumes
-Date: Mon, 19 Jun 2017 13:53:07 -0400
-Message-ID: <CAC-Np1zwnzcwFBn4kqAzuhwmk9vZv1ZiUdd7owQZkA76k=QYuA@mail.gmail.com>
+Date: Mon, 19 Jun 2017 13:57:59 -0400
+Message-ID: <CAC-Np1y=0wkOHvGDHaxyZ+0jesQ_64TX2fvrMLaRkWOoLC6OsQ@mail.gmail.com>
 References: <A5E80C1D-74F4-455B-8257-5B9E2FF6AB39@walmart.com>
  <CAC-Np1yqCZO7CzEjTV+hrNve857BtM_rZ+LxAi6Vf9UJkPM04g@mail.gmail.com>
  <CALe9h7cV6U3A_OT9R8tv_yPoGG9zFaWF3qXV5cwYK0KM-NDu4g@mail.gmail.com>
- <CAC-Np1yiRgkmhZCOij9qSBmqUo-YYtErWXk2gevYuvWKrYFyeg@mail.gmail.com> <CALe9h7cT54esfoT=eOgZq=ZbYAp1pjH_CeLiz-kFO61jABasrA@mail.gmail.com>
+ <CAC-Np1yiRgkmhZCOij9qSBmqUo-YYtErWXk2gevYuvWKrYFyeg@mail.gmail.com> <626e190c-fa2a-71d2-980a-49ddd2770eb9@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f177.google.com ([209.85.128.177]:34557 "EHLO
-        mail-wr0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750990AbdFSRxJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Jun 2017 13:53:09 -0400
-Received: by mail-wr0-f177.google.com with SMTP id 77so78757923wrb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 19 Jun 2017 10:53:09 -0700 (PDT)
-In-Reply-To: <CALe9h7cT54esfoT=eOgZq=ZbYAp1pjH_CeLiz-kFO61jABasrA@mail.gmail.com>
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:38030 "EHLO
+        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750780AbdFSR6B (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 19 Jun 2017 13:58:01 -0400
+Received: by mail-wm0-f45.google.com with SMTP id u195so366855wmd.1
+        for <ceph-devel@vger.kernel.org>; Mon, 19 Jun 2017 10:58:01 -0700 (PDT)
+In-Reply-To: <626e190c-fa2a-71d2-980a-49ddd2770eb9@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Warren Wang - ISD <Warren.Wang@walmart.com>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: John Spray <jspray@redhat.com>, Warren Wang - ISD <Warren.Wang@walmart.com>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Jun 19, 2017 at 12:55 PM, John Spray <jspray@redhat.com> wrote:
-> On Mon, Jun 19, 2017 at 3:13 PM, Alfredo Deza <adeza@redhat.com> wrote:
+On Mon, Jun 19, 2017 at 11:37 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> On 19-6-2017 16:13, Alfredo Deza wrote:
 >> On Mon, Jun 19, 2017 at 9:27 AM, John Spray <jspray@redhat.com> wrote:
 >>> On Fri, Jun 16, 2017 at 7:23 PM, Alfredo Deza <adeza@redhat.com> wrote:
 >>>> On Fri, Jun 16, 2017 at 2:11 PM, Warren Wang - ISD
@@ -58,7 +58,15 @@ On Mon, Jun 19, 2017 at 12:55 PM, John Spray <jspray@redhat.com> wrote:
 >> the Ceph source tree. There are some niceties about being in-source,
 >> like
 >> not being required to deal with what features we are supporting on what version.
->>
+>
+> Just my observation, need not be true at all, but ...
+>
+> As long as you do not have it interact with the other tools, that is
+> true. But as soon as you start depending on ceph-{disk-new,volume} in
+> other parts of the mainstream ceph-code you have created a ty-in with
+> the versioning and will require it to be maintained in the same way.
+>
+>
 >> Although there is no code yet, I consider the project in an "unstable"
 >> state, it will move incredibly fast (it has to!) and that puts it at
 >> odds with the cadence
@@ -66,71 +74,21 @@ On Mon, Jun 19, 2017 at 12:55 PM, John Spray <jspray@redhat.com> wrote:
 >>
 >> * faster release cycles
 >> * easier and faster to test
->
-> I think having one part of Ceph on a different release cycle to the
-> rest of Ceph is an even more dramatic thing than having it in a
-> separate git repository.
->
-> It seems like there is some dissatisfaction with how the Ceph project
-> as whole is doing things that is driving you to try and do work
-> outside of the repo where the rest of the project lives -- if the
-> release cycles or test infrastructure within Ceph are not adequate for
-> the tool that formats drives for OSDs, what can we do to fix them?
-
-It isn't Ceph the project :)
-
-Not every tool about Ceph has to come from ceph.git, in which case the
-argument could be flipped around: why isn't ceph-installer,
-ceph-ansible, ceph-deploy, radosgw-agent, etc... all coming from
-within ceph.git ?
-
-They don't necessarily need to be tied in. In the case of
-ceph-installer: there is nothing ceph-specific it needs from ceph.git
-to run, why force it in?
-
->
+>>
 >> I am not ruling out going into Ceph at some point though, ideally when
 >> things slow down and become stable.
->
-> I think that the decision about where this code lives needs to be made
-> before it is released -- moving it later is rather awkward.  If you'd
-> rather not have the code in Ceph master until you're happy with it,
-> then a branch would be the natural way to do that.
->
-
-The decision was made a few weeks ago, and I really don't think we
-should be in ceph.git, but I am OK to keep
-discussing on the reasoning.
-
+>>
 >> Is your argument only to have parity in Ceph's branching? That was
 >> never a problem with out-of-tree tools like ceph-deploy for example.
 >
-> I guess my argument isn't so much an argument as it is an assertion
-> that if you want to go your own way then you need to have a really
-> strong clear reason.
+> Some of the external targets move so fast (ceph-asible) that I have
+> given up on trying to see what is going on. For this tool I'd like it to
+> do the ZFS/FreeBSD stuff as a plugin-module.
+> In the expectation that it will supersede the current ceph-disk,
+> otherwise there are 2 place to maintain this type of code.
 
-Many! Like I mentioned: easier testing, faster release cycle, can
-publish in any package index, doesn't need anything in ceph.git to
-operate, etc..
-
->
-> Put a bit bluntly: if CephFS, RBD, RGW, the mon and the OSD can all
-> successfully co-habit in one git repository, what makes the CLI that
-> formats drives so special that it needs its own?
-
-Sure. Again, there is nothing some of our tooling needs from ceph.git
-so I don't see why the need to have then in-tree. I am sure RGW and
-other
-components do need to consume Ceph code in some way? I don't even
-think ceph-disk should be in tree for the same reason. I believe that
-in the very
-beginning it was just so easy to have everything be built from ceph.git
-
-Even in some cases like pybind, it has been requested numerous times
-to get them on separate package indexes like PyPI, but that has always
-been
-*tremendously* difficult: http://tracker.ceph.com/issues/5900
-
+Yes, the idea is that it will be pluggable from the start, and that it
+will supersede current ceph-disk (but not immediately)
 
 >
 >>>  - I agree with others that a single entrypoint (i.e. executable) will
@@ -157,12 +115,28 @@ been
 >> The level at which these similar actions are presented imply that one
 >> may be a preferred (or even default) one, while the other one
 >> isn't.
->>
+>
+> Is this about API "cosmetics"? Because there is a lot of examples
+> suggestions and other stuff out there that is using the old syntax.
+>
+> And why not do a hybrid? it will require a bit more commandline parsing,
+> but that is not a major dealbreaker.
+>
+> so the line would look like
+>     ceph-disk [lvm,zfs,disk,partition] prepare [...]
+> and the first parameter is optional reverting to the current supported
+> systems.
+>
+> You can always start warning users that their API usage is old style,
+> and that it is going to go away in a next release.
+>
 >> At one point we are going to add regular disk worfklows (replacing
 >> ceph-disk functionality) and then it would become even more
 >> confusing to keep it there (or do you think at that point we could split?)
->>
->>>
+>
+> The more separate you go, the more akward it is going to be when things
+> start to melt together.
+>
 >>> At the risk of being a bit picky about language, I don't like calling
 >>> this anything with "volume" in the name, because afaik we've never
 >>> ever called OSDs or the drives they occupy "volumes", so we're
@@ -178,20 +152,25 @@ been
 >> (lvm, dmcache). It is an all-encompassing name to allow different
 >> device-like to work with.
 >
-> The trouble with "volume" is that it means so many things in so many
-> different storage systems -- I haven't often seen it used to mean
-> "block device" or "drive".  It's more often used to describe a logical
-> entity.  I also think "disk" is fine -- most people get the idea that
-> a disk is a hard drive but it could also be any block device.
-
-If your thinking is that a disk can be any block device then yes, we
-are at opposite ends here of our naming. We are picking a
-"widely used" term because it is not specific. "disk" sounds fairly
-specific, and we don't want that.
-
-
+> ZFS talks about volumes, vdev, partitions, .... and perhaps even more.
+> Being picky: ceph-disk now also works on pre-build trees to build filestore.
 >
-> John
+
+Naming will continue to be the hardest part to get consensus on :) Of
+course we could've just gone the other
+way and pick something that has a nice ring to it, and nothing that
+even hints at what it does :)
+
+
+> I would just try to glue it into ceph-disk in the most flexible way
+
+We can't "glue it into ceph-disk" because we are proposing a
+completely new way of doing things that
+go against how ceph-disk works.
+
+
+> possible.
+> --WjW
 >
 >>
 >>
@@ -240,3 +219,9 @@ specific, and we don't want that.
 >>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >>>> the body of a message to majordomo@vger.kernel.org
 >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
