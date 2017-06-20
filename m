@@ -1,63 +1,48 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: jewel 10.2.8 status - blocked
-Date: Tue, 20 Jun 2017 10:44:12 -0700
-Message-ID: <CAJ4mKGZ2NjRans3Goj6yb65+2kzkmro3sCA+uRXv8q6xANV=bw@mail.gmail.com>
-References: <5b7336d6-e7ee-d36d-5272-e807cb17a4b1@suse.cz>
+Subject: Re: Extra daemons/servers reporting to mgr
+Date: Tue, 20 Jun 2017 13:39:10 -0700
+Message-ID: <CAJ4mKGZCQP0FXh5NWA8429mFmZq3=oqFX=eJMRCPoapmEVJULg@mail.gmail.com>
+References: <CALe9h7eT+7KUt7VZPaYfR49FEPP3mJbe2+ARK82BaZUMmStchw@mail.gmail.com>
+ <CADRKj5RCQf8wv+Y3VsL=e_gB9URYzK0SkzGRVfTFQwcJn-OL4g@mail.gmail.com>
+ <alpine.DEB.2.11.1706141943490.32269@piezo.novalocal> <CA+aFP1B0ngk-Wkfy0KXnkyRP2XZJqvce1qhdBfpL+5PcjmGNoQ@mail.gmail.com>
+ <alpine.DEB.2.11.1706191924150.32269@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f51.google.com ([209.85.214.51]:36087 "EHLO
-        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750816AbdFTRoT (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jun 2017 13:44:19 -0400
-Received: by mail-it0-f51.google.com with SMTP id m47so18537667iti.1
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 10:44:19 -0700 (PDT)
-In-Reply-To: <5b7336d6-e7ee-d36d-5272-e807cb17a4b1@suse.cz>
+Received: from mail-io0-f171.google.com ([209.85.223.171]:36422 "EHLO
+        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751029AbdFTUjM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jun 2017 16:39:12 -0400
+Received: by mail-io0-f171.google.com with SMTP id y77so92200242ioe.3
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 13:39:11 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1706191924150.32269@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Jason Dillaman <dillaman@redhat.com>, Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Jun 20, 2017 at 4:36 AM, Nathan Cutler <ncutler@suse.cz> wrote:
-> Here's the latest jewel 10.2.8 status update.
+On Mon, Jun 19, 2017 at 12:26 PM, Sage Weil <sweil@redhat.com> wrote:
+> I wrote up a quick proposal at
 >
-> I prepared an integration branch containing the following PRs that the leads
-> indicated they would like to see merged before the release:
+>         http://pad.ceph.com/p/service-map
 >
-> https://github.com/ceph/ceph/pull/14392
-> https://github.com/ceph/ceph/pull/14930
-> https://github.com/ceph/ceph/pull/15000
-> https://github.com/ceph/ceph/pull/15383
-> https://github.com/ceph/ceph/pull/15438
-> https://github.com/ceph/ceph/pull/15468
-> https://github.com/ceph/ceph/pull/15472
-> https://github.com/ceph/ceph/pull/15529
+> Basic idea:
 >
-> However, as the last jewel rados nightly [1] shows, integration testing will
-> not be possible until we implement a fix for
-> http://tracker.ceph.com/issues/20171
->
-> Kefu and I looked at that one today - it appears to be a Debian packaging
-> issue which doesn't apply to kraken or master because ceph-create-keys was
-> ripped out in infernalis.
+>  - generic ServiceMap of service -> daemon -> metadata and status
+>  - managed/persisted by mon
+>  - librados interface to register as service X name Y (e.g., 'rgw.foo')
+>  - librados will send regular beacon to mon to keep entry alive
+>  - various mon commands to dump all or part of the service map
 
-I'm pretty confused when I look through the ticket. This is apparently
-a new issue; do we have any idea what changed? There seems to be some
-kind of dependency on a running ceph-mds for ceph-create-keys, but the
-cause isn't identified in any way I understand.
-
-So, uh, what's happening exactly? :)
+I am deeply uncomfortable with putting this stuff into the monitor (at
+least, directly). The main purpose we've discussed is to enable
+manager dashboard display of these services, along with stats
+collection, and there's no reason for that to go anywhere other than
+the manager — in fact, routing it through the monitor is inimical to
+timely updates of statistics. Why do you want to do that instead of
+letting it be handled by the manager, which can aggregate and persist
+whatever data it likes in a convenient form — and in ways which are
+mindful of monitor IO abilities?
+(The librados interface looks fine to me, though.)
 -Greg
-
->
-> As soon as we have a PR open with a fix, I'll add it to the integration
-> branch and start the last round of testing.
->
-> Nathan
->
-> [1]
-> http://pulpito.ceph.com/teuthology-2017-06-19_02:00:02-rados-jewel-distro-basic-smithi/
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
