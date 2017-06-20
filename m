@@ -1,70 +1,64 @@
-From: Wangwenfeng <wang.wenfeng@h3c.com>
-Subject: almost all of the Ceph cluster OSD are assert when create pg for
- luminous(12.0.3)
-Date: Tue, 20 Jun 2017 09:17:23 +0000
-Message-ID: <F0858C043E80304FBFA0A767AC8DE5E7A33657F9@H3CMLB14-EX.srv.huawei-3com.com>
-References: <F0858C043E80304FBFA0A767AC8DE5E7A33637C4@H3CMLB14-EX.srv.huawei-3com.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: path-restricted mds caps cause EPERM on (some) stray files
+Date: Tue, 20 Jun 2017 12:04:00 +0200
+Message-ID: <CABZ+qqnnGm4wdeLryDEX5A5oFF1mRvq5rvQd9_ktFJBTT_ZA7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:57108 "EHLO h3cmg01-ex.h3c.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751090AbdFTJ1y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 20 Jun 2017 05:27:54 -0400
-In-Reply-To: <F0858C043E80304FBFA0A767AC8DE5E7A33637C4@H3CMLB14-EX.srv.huawei-3com.com>
-Content-Language: zh-CN
+Received: from mail-ot0-f177.google.com ([74.125.82.177]:33165 "EHLO
+        mail-ot0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750925AbdFTKEm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jun 2017 06:04:42 -0400
+Received: by mail-ot0-f177.google.com with SMTP id y47so63845167oty.0
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 03:04:42 -0700 (PDT)
+Received: from mail-ot0-f175.google.com (mail-ot0-f175.google.com. [74.125.82.175])
+        by smtp.gmail.com with ESMTPSA id x190sm6151110oix.8.2017.06.20.03.04.40
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 20 Jun 2017 03:04:41 -0700 (PDT)
+Received: by mail-ot0-f175.google.com with SMTP id r67so86195947ota.1
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 03:04:40 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: pdonnell@redhat.com
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGksIGFsbA0KSSB0ZXN0IHRoZSBsdW1pbm91cygxMi4wLjMpLCBhbG1vc3QgYWxsIG9mIHRoZSBD
-ZXBoIGNsdXN0ZXIgT1NEIGFyZSBhc3NlcnQgd2hlbiBjcmVhdGUgcGcuIFRoZSBhc3NlcnQgaXMN
-Cg0KMjAxNy0wNi0xOSAxOTo1Mjo0My4wMzAxMTAgN2Y0ZDBhNTg5NzAwIDEwIG9zZC4xIDYyMiBi
-dWlsZF9pbml0aWFsX3BnX2hpc3RvcnkgMy4xZjMgY3JlYXRlZCAzNzcNCjIwMTctMDYtMTkgMTk6
-NTI6NDMuMDYzODkxIDdmNGQwYTU4OTcwMCAtMSAvcm9vdC9tbnQvY2VwaF90bXAvcmVsZWFzZS9V
-YnVudHUvV09SS0RJUi9jZXBoLTEyLjAuMy9zcmMvb3NkL09TRE1hcC5oOiBJbiBmdW5jdGlvbiAn
-Y29uc3QgZXBvY2hfdCYgT1NETWFwOjpnZXRfdXBfZnJvbShpbnQpIGNvbnN0JyB0aHJlYWQgN2Y0
-ZDBhNTg5NzAwIHRpbWUgMjAxNy0wNi0xOSAxOTo1Mjo0My4wNjA4MDUNCi9yb290L21udC9jZXBo
-X3RtcC9yZWxlYXNlL1VidW50dS9XT1JLRElSL2NlcGgtMTIuMC4zL3NyYy9vc2QvT1NETWFwLmg6
-IDU1NjogRkFJTEVEIGFzc2VydChleGlzdHMob3NkKSkNCg0KIDE6IChjZXBoOjpfX2NlcGhfYXNz
-ZXJ0X2ZhaWwoY2hhciBjb25zdCosIGNoYXIgY29uc3QqLCBpbnQsIGNoYXIgY29uc3QqKSsweDEw
-ZSkgWzB4NTVmMGM5MjkzZDNlXQ0KIDI6ICgoKSsweDNjOWNiMCkgWzB4NTVmMGM4Yzk5Y2IwXQ0K
-IDM6IChQYXN0SW50ZXJ2YWxzOjpjaGVja19uZXdfaW50ZXJ2YWwoaW50LCBpbnQsIHN0ZDo6dmVj
-dG9yPGludCwgc3RkOjphbGxvY2F0b3I8aW50PiA+IGNvbnN0Jiwgc3RkOjp2ZWN0b3I8aW50LCBz
-dGQ6OmFsbG9jYXRvcjxpbnQ+ID4gY29uc3QmLCBpbnQsIGludCwgc3RkOjp2ZWN0b3I8aW50LCBz
-dGQ6OmFsbG9jYXRvcjxpbnQ+ID4gY29uc3QmLCBzdGQ6OnZlY3RvcjxpbnQsIHN0ZDo6YWxsb2Nh
-dG9yPGludD4gPiBjb25zdCYsIHVuc2lnbmVkIGludCwgdW5zaWduZWQgaW50LCBzdGQ6OnNoYXJl
-ZF9wdHI8T1NETWFwIGNvbnN0Piwgc3RkOjpzaGFyZWRfcHRyPE9TRE1hcCBjb25zdD4sIHBnX3Qs
-IElzUEdSZWNvdmVyYWJsZVByZWRpY2F0ZSosIFBhc3RJbnRlcnZhbHMqLCBzdGQ6Om9zdHJlYW0q
-KSsweDVjZCkgWzB4NTVmMGM4Zjg4MjZkXQ0KIDQ6IChPU0Q6OmJ1aWxkX2luaXRpYWxfcGdfaGlz
-dG9yeShzcGdfdCwgdW5zaWduZWQgaW50LCB1dGltZV90LCBwZ19oaXN0b3J5X3QqLCBQYXN0SW50
-ZXJ2YWxzKikrMHg1OTQpIFsweDU1ZjBjOGQ4NGNlNF0NCiA1OiAoT1NEOjpoYW5kbGVfcGdfY3Jl
-YXRlKGJvb3N0OjppbnRydXNpdmVfcHRyPE9wUmVxdWVzdD4pKzB4OTdjKSBbMHg1NWYwYzhkOGY1
-Y2NdDQogNjogKE9TRDo6ZGlzcGF0Y2hfb3AoYm9vc3Q6OmludHJ1c2l2ZV9wdHI8T3BSZXF1ZXN0
-PikrMHgxYjEpIFsweDU1ZjBjOGQ5MTY0MV0NCiA3OiAoT1NEOjpkb193YWl0ZXJzKCkrMHg5ZCkg
-WzB4NTVmMGM4ZDkxN2NkXQ0KIDg6IChPU0Q6Om1zX2Rpc3BhdGNoKE1lc3NhZ2UqKSsweDY5KSBb
-MHg1NWYwYzhkOTIzZjldDQogOTogKERpc3BhdGNoUXVldWU6OmVudHJ5KCkrMHg3OWIpIFsweDU1
-ZjBjOTQ1ZmFlYl0NCiAxMDogKERpc3BhdGNoUXVldWU6OkRpc3BhdGNoVGhyZWFkOjplbnRyeSgp
-KzB4ZCkgWzB4NTVmMGM5MzBjYWZkXQ0KIDExOiAoKCkrMHg4MTgyKSBbMHg3ZjRkMTZiYjAxODJd
-DQogMTI6IChjbG9uZSgpKzB4NmQpIFsweDdmNGQxNWNhMDQ3ZF0NCiBOT1RFOiBhIGNvcHkgb2Yg
-dGhlIGV4ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4ZWN1dGFibGU+YCBpcyBuZWVkZWQg
-dG8gaW50ZXJwcmV0IHRoaXMuDQoNCkRvZXMgYW55b25lIGhhdmUgdGhpcyBwcm9ibGVtPyBIYXMg
-dGhlIHByb2JlbSBiZWVuIHNvbHZlZD8NCg0KDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQrmnKzpgq7k
-u7blj4rlhbbpmYTku7blkKvmnInmlrDljY7kuInmioDmnK/mnInpmZDlhazlj7jnmoTkv53lr4bk
-v6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJflh7oNCueahOS4quS6
-uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8j+S9v+eUqO+8
-iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWkjeWItuOAgQ0K
-5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo6ZSZ5pS25LqG5pys
-6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R5Lu25Lq65bm25Yig
-6Zmk5pysDQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFp
-biBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBOZXcgSDNDLCB3aGljaCBpcw0KaW50ZW5k
-ZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQg
-YWJvdmUuIEFueSB1c2Ugb2YgdGhlDQppbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFu
-eSB3YXkgKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsDQpk
-aXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMgb3Ro
-ZXIgdGhhbiB0aGUgaW50ZW5kZWQNCnJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5b3Ug
-cmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyDQpi
-eSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0K
+Hi Patrick,
+
+In tracker #20340 I've found that path-restricted mds caps can still
+occasionally trigger incorrect EPERM errors.
+
+It seems that sometimes Session::check_access uses a path looking like
+#<inode num>, which of course doesn't match the path restriction. Here
+is a *normal*, working check_access with stray_prior_path:
+
+2017-06-20 11:22:38.489414 7f4fb4687700 20 Session check_access
+stray_prior_path /volumes/_nogroup/4722edf2-a761-4189-b925-
+dbf2d44c5345/aijens151.cern.ch/clone/modules/ironic/.fe57a500217328e0cb41c6e0731bf9ec3f949bff/.git/tvvy1sQ
+2017-06-20 11:22:38.489417 7f4fb4687700 10 MDSAuthCap is_capable
+inode(path /volumes/_nogroup/4722edf2-a761-4189-b925-dbf2d
+44c5345/aijens151.cern.ch/clone/modules/ironic/.fe57a500217328e0cb41c6e0731bf9ec3f949bff/.git/tvvy1sQ
+owner 993:991 mode 01
+00600) by caller 4294967295:4294967295 mask 2 new 0:0 cap:
+MDSAuthCaps[allow rw path="/volumes/_nogroup/4722edf2-a761-4189-
+b925-dbf2d44c5345"]
+
+But then here is one with the inode num path, which returns Permission denied:
+
+2017-06-20 11:22:40.736744 7f4fb4687700 20 Session check_access
+stray_prior_path #10000ee3d6f/tmp_obj_x3Ncq5
+2017-06-20 11:22:40.736745 7f4fb4687700 10 MDSAuthCap is_capable
+inode(path /10000ee3d6f/tmp_obj_x3Ncq5 owner 993:991 mode 0100444) by
+caller 0:0 mask 1 new 0:0 cap: MDSAuthCaps[allow rw
+path="/volumes/_nogroup/4722edf2-a761-4189-b925-dbf2d44c5345"]
+2017-06-20 11:22:40.736749 7f4fb4687700 10 mds.0.server
+reply_client_request -13 ((13) Permission denied)
+client_request(client.372408617:11903 lookup
+#10000ee3d6f/62f6fac09b5291e0924a6c844e11da53e40397 2017-06-20
+11:22:40.734619) v3
+
+Do you understand why these files get occasionally stuck with that
+funny stray_prior_path?
+
+Best Regards,
+Dan
