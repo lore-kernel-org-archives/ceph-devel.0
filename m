@@ -1,64 +1,49 @@
-From: Dan van der Ster <dan@vanderster.com>
-Subject: path-restricted mds caps cause EPERM on (some) stray files
-Date: Tue, 20 Jun 2017 12:04:00 +0200
-Message-ID: <CABZ+qqnnGm4wdeLryDEX5A5oFF1mRvq5rvQd9_ktFJBTT_ZA7g@mail.gmail.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: jewel 10.2.8 status - blocked
+Date: Tue, 20 Jun 2017 13:36:23 +0200
+Message-ID: <5b7336d6-e7ee-d36d-5272-e807cb17a4b1@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f177.google.com ([74.125.82.177]:33165 "EHLO
-        mail-ot0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750925AbdFTKEm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jun 2017 06:04:42 -0400
-Received: by mail-ot0-f177.google.com with SMTP id y47so63845167oty.0
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 03:04:42 -0700 (PDT)
-Received: from mail-ot0-f175.google.com (mail-ot0-f175.google.com. [74.125.82.175])
-        by smtp.gmail.com with ESMTPSA id x190sm6151110oix.8.2017.06.20.03.04.40
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 20 Jun 2017 03:04:41 -0700 (PDT)
-Received: by mail-ot0-f175.google.com with SMTP id r67so86195947ota.1
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 03:04:40 -0700 (PDT)
+Received: from mx2.suse.de ([195.135.220.15]:53931 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750993AbdFTLgZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 20 Jun 2017 07:36:25 -0400
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 9D3AAAAF2
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 11:36:23 +0000 (UTC)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: pdonnell@redhat.com
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Patrick,
+Here's the latest jewel 10.2.8 status update.
 
-In tracker #20340 I've found that path-restricted mds caps can still
-occasionally trigger incorrect EPERM errors.
+I prepared an integration branch containing the following PRs that the 
+leads indicated they would like to see merged before the release:
 
-It seems that sometimes Session::check_access uses a path looking like
-#<inode num>, which of course doesn't match the path restriction. Here
-is a *normal*, working check_access with stray_prior_path:
+https://github.com/ceph/ceph/pull/14392
+https://github.com/ceph/ceph/pull/14930
+https://github.com/ceph/ceph/pull/15000
+https://github.com/ceph/ceph/pull/15383
+https://github.com/ceph/ceph/pull/15438
+https://github.com/ceph/ceph/pull/15468
+https://github.com/ceph/ceph/pull/15472
+https://github.com/ceph/ceph/pull/15529
 
-2017-06-20 11:22:38.489414 7f4fb4687700 20 Session check_access
-stray_prior_path /volumes/_nogroup/4722edf2-a761-4189-b925-
-dbf2d44c5345/aijens151.cern.ch/clone/modules/ironic/.fe57a500217328e0cb41c6e0731bf9ec3f949bff/.git/tvvy1sQ
-2017-06-20 11:22:38.489417 7f4fb4687700 10 MDSAuthCap is_capable
-inode(path /volumes/_nogroup/4722edf2-a761-4189-b925-dbf2d
-44c5345/aijens151.cern.ch/clone/modules/ironic/.fe57a500217328e0cb41c6e0731bf9ec3f949bff/.git/tvvy1sQ
-owner 993:991 mode 01
-00600) by caller 4294967295:4294967295 mask 2 new 0:0 cap:
-MDSAuthCaps[allow rw path="/volumes/_nogroup/4722edf2-a761-4189-
-b925-dbf2d44c5345"]
+However, as the last jewel rados nightly [1] shows, integration testing 
+will not be possible until we implement a fix for 
+http://tracker.ceph.com/issues/20171
 
-But then here is one with the inode num path, which returns Permission denied:
+Kefu and I looked at that one today - it appears to be a Debian 
+packaging issue which doesn't apply to kraken or master because 
+ceph-create-keys was ripped out in infernalis.
 
-2017-06-20 11:22:40.736744 7f4fb4687700 20 Session check_access
-stray_prior_path #10000ee3d6f/tmp_obj_x3Ncq5
-2017-06-20 11:22:40.736745 7f4fb4687700 10 MDSAuthCap is_capable
-inode(path /10000ee3d6f/tmp_obj_x3Ncq5 owner 993:991 mode 0100444) by
-caller 0:0 mask 1 new 0:0 cap: MDSAuthCaps[allow rw
-path="/volumes/_nogroup/4722edf2-a761-4189-b925-dbf2d44c5345"]
-2017-06-20 11:22:40.736749 7f4fb4687700 10 mds.0.server
-reply_client_request -13 ((13) Permission denied)
-client_request(client.372408617:11903 lookup
-#10000ee3d6f/62f6fac09b5291e0924a6c844e11da53e40397 2017-06-20
-11:22:40.734619) v3
+As soon as we have a PR open with a fix, I'll add it to the integration 
+branch and start the last round of testing.
 
-Do you understand why these files get occasionally stuck with that
-funny stray_prior_path?
+Nathan
 
-Best Regards,
-Dan
+[1] 
+http://pulpito.ceph.com/teuthology-2017-06-19_02:00:02-rados-jewel-distro-basic-smithi/
