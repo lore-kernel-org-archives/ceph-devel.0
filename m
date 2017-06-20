@@ -1,49 +1,50 @@
-From: Andrew Schoen <aschoen@redhat.com>
-Subject: Re: Fwd: EXT: [ceph-users] ceph-lvm - a tool to deploy OSDs from LVM volumes
-Date: Tue, 20 Jun 2017 09:43:02 -0500
-Message-ID: <CAEPMp+41hTKanCsxJ7r-YA7k11QFQczGPXaiwmYptW9viFAEAQ@mail.gmail.com>
-References: <A5E80C1D-74F4-455B-8257-5B9E2FF6AB39@walmart.com>
- <CAC-Np1yqCZO7CzEjTV+hrNve857BtM_rZ+LxAi6Vf9UJkPM04g@mail.gmail.com>
- <CALe9h7cV6U3A_OT9R8tv_yPoGG9zFaWF3qXV5cwYK0KM-NDu4g@mail.gmail.com>
- <CAC-Np1yiRgkmhZCOij9qSBmqUo-YYtErWXk2gevYuvWKrYFyeg@mail.gmail.com>
- <CALe9h7cT54esfoT=eOgZq=ZbYAp1pjH_CeLiz-kFO61jABasrA@mail.gmail.com>
- <CAC-Np1zwnzcwFBn4kqAzuhwmk9vZv1ZiUdd7owQZkA76k=QYuA@mail.gmail.com>
- <CALe9h7cxPioPHLw48Gj02bEkD-HC49yHT8kG62AyLm_V9KnOZQ@mail.gmail.com> <09d01c0c-b5f0-519e-0687-c8117e1fc2ce@suse.cz>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: almost all of the Ceph cluster OSD are assert when create pg for luminous(12.0.3)
+Date: Tue, 20 Jun 2017 10:38:21 -0700
+Message-ID: <CAJ4mKGZQXLgAnbu5A_wPqs5_VEKD05BitAy3-6Y_H7aHz9RETg@mail.gmail.com>
+References: <F0858C043E80304FBFA0A767AC8DE5E7A33637C4@H3CMLB14-EX.srv.huawei-3com.com>
+ <F0858C043E80304FBFA0A767AC8DE5E7A33657F9@H3CMLB14-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f180.google.com ([209.85.216.180]:35386 "EHLO
-        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751056AbdFTOnn (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jun 2017 10:43:43 -0400
-Received: by mail-qt0-f180.google.com with SMTP id w1so134504781qtg.2
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 07:43:43 -0700 (PDT)
-In-Reply-To: <09d01c0c-b5f0-519e-0687-c8117e1fc2ce@suse.cz>
+Received: from mail-io0-f174.google.com ([209.85.223.174]:35658 "EHLO
+        mail-io0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751071AbdFTRiW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jun 2017 13:38:22 -0400
+Received: by mail-io0-f174.google.com with SMTP id k93so89189807ioi.2
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 10:38:22 -0700 (PDT)
+In-Reply-To: <F0858C043E80304FBFA0A767AC8DE5E7A33657F9@H3CMLB14-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Wangwenfeng <wang.wenfeng@h3c.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Jun 20, 2017 at 2:12 AM, Nathan Cutler <ncutler@suse.cz> wrote:
-> On 06/19/2017 10:24 PM, John Spray wrote:
->>
->> Testing: being separate is only easier if you're only doing python
->> unit testing.
+On Tue, Jun 20, 2017 at 2:17 AM, Wangwenfeng <wang.wenfeng@h3c.com> wrote:
+> Hi, all
+> I test the luminous(12.0.3), almost all of the Ceph cluster OSD are assert when create pg. The assert is
 >
+> 2017-06-19 19:52:43.030110 7f4d0a589700 10 osd.1 622 build_initial_pg_history 3.1f3 created 377
+> 2017-06-19 19:52:43.063891 7f4d0a589700 -1 /root/mnt/ceph_tmp/release/Ubuntu/WORKDIR/ceph-12.0.3/src/osd/OSDMap.h: In function 'const epoch_t& OSDMap::get_up_from(int) const' thread 7f4d0a589700 time 2017-06-19 19:52:43.060805
+> /root/mnt/ceph_tmp/release/Ubuntu/WORKDIR/ceph-12.0.3/src/osd/OSDMap.h: 556: FAILED assert(exists(osd))
 >
-> Hear hear! I do a lot of functional/integration/regression testing and can
-> confirm that it became a whole lot easier when ceph-qa-suite was moved
-> in-tree.
+>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x10e) [0x55f0c9293d3e]
+>  2: (()+0x3c9cb0) [0x55f0c8c99cb0]
+>  3: (PastIntervals::check_new_interval(int, int, std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, int, int, std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, unsigned int, unsigned int, std::shared_ptr<OSDMap const>, std::shared_ptr<OSDMap const>, pg_t, IsPGRecoverablePredicate*, PastIntervals*, std::ostream*)+0x5cd) [0x55f0c8f8826d]
+>  4: (OSD::build_initial_pg_history(spg_t, unsigned int, utime_t, pg_history_t*, PastIntervals*)+0x594) [0x55f0c8d84ce4]
+>  5: (OSD::handle_pg_create(boost::intrusive_ptr<OpRequest>)+0x97c) [0x55f0c8d8f5cc]
+>  6: (OSD::dispatch_op(boost::intrusive_ptr<OpRequest>)+0x1b1) [0x55f0c8d91641]
+>  7: (OSD::do_waiters()+0x9d) [0x55f0c8d917cd]
+>  8: (OSD::ms_dispatch(Message*)+0x69) [0x55f0c8d923f9]
+>  9: (DispatchQueue::entry()+0x79b) [0x55f0c945faeb]
+>  10: (DispatchQueue::DispatchThread::entry()+0xd) [0x55f0c930cafd]
+>  11: (()+0x8182) [0x7f4d16bb0182]
+>  12: (clone()+0x6d) [0x7f4d15ca047d]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
+>
+> Does anyone have this problem? Has the probem been solved?
 
-Comparing ceph-qa-suite to a contained python module isn't quite a
-fair comparison though. For upstream testing of ceph-volume (if it
-existed outside ceph.git) you'd simply install it with pip. A jenkins
-job that built every branch of ceph-volume.git and pushed them to
-shaman would be easy enough as well if that's what's preferred.
-
-Honestly, I think all manner of testing (including functional) becomes
-easier with this out of ceph.git. Especially when it comes to testing
-something inside of a container.
-
-Best,
-Andrew
+Nobody else has reported this and it doesn't seem to have turned up in
+our nightlies. Can you describe a little more about what happens? If
+you got a core dump, can you find the value of old_acting_primary?
+-Greg
