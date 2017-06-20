@@ -1,118 +1,79 @@
-From: Prince Hamandawana <phamandawana@gmail.com>
-Subject: ceph-deploy mon create-initial errors on centos 7
-Date: Tue, 20 Jun 2017 17:43:23 +0900
-Message-ID: <CAC4_f3sgoVnde6-3wTP6Q=PGzmE+3B-AZDUu4ysCCZzPs0p+YA@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Caught the first erroneous translated errorcode
+Date: Tue, 20 Jun 2017 11:27:30 +0200
+Message-ID: <99f5f500-796e-d4fc-e373-7c5a3583fc49@digiware.nl>
+References: <34251a6c-a335-fe31-0705-a5fe7af9ae08@digiware.nl>
+ <CALe9h7fveb7hek7uoX59P2w7Yx3fCvLf5JL0qURTrhZHzcD7hg@mail.gmail.com>
+ <5ca934f2-0f95-bb6c-0fce-267468cb59b4@digiware.nl>
+ <028757af-a82b-d873-648d-294961984bbb@digiware.nl>
+ <CA+aFP1BST9e4UV6kyxP=kLN0tN0=1EkV=41cBV2Y5d98hrED7A@mail.gmail.com>
+ <95b2bd08-f38b-f5ff-ebfc-523dddb1398b@digiware.nl>
+ <alpine.DEB.2.11.1706191430290.32269@piezo.novalocal>
+ <6ec50c30-420b-2039-9af3-184665177149@digiware.nl>
+ <CAJ4mKGaQWJk7dghda6pVOt2g0RfiTh7dw4t8mcqvsRoiR80Rog@mail.gmail.com>
+ <e16d4ec0-7aa1-a793-80dc-4b46a0eb0793@digiware.nl>
+ <748ac281-3574-e9dc-e421-b8863d70f34e@digiware.nl>
+ <alpine.DEB.2.11.1706200235310.32269@piezo.novalocal>
+ <14973fcb-3ecf-fe71-17cf-95f916f18512@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f67.google.com ([209.85.214.67]:32912 "EHLO
-        mail-it0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751083AbdFTInZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jun 2017 04:43:25 -0400
-Received: by mail-it0-f67.google.com with SMTP id g184so12205382ita.0
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 01:43:24 -0700 (PDT)
+Received: from smtp.digiware.nl ([176.74.240.9]:44257 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752072AbdFTJ1d (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 20 Jun 2017 05:27:33 -0400
+In-Reply-To: <14973fcb-3ecf-fe71-17cf-95f916f18512@digiware.nl>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Jason Dillaman <dillaman@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Dear all
+On 20-6-2017 10:23, Willem Jan Withagen wrote:
+> On 20-6-2017 04:35, Sage Weil wrote:
+>> Try changing
+>>
+>>   int32_t rval;
+>>
+>> in OSDOp in osd_types.h to errorcode32_t.
+> 
+> Nice suggestion, and I think it is a correct one.
+> But I'm still getting -125 as error code.
 
-I am having problems when trying to deploy my initial monitors via
-ceph-deplyoy on centos 7 . The version of ceph I am running is ceph
-version 10.2.7 (50e863e0f4bc8f4b9e31156de690d765af245185). When I run
-ceph-deploy mon create-initial, i get the following errors ;
+I think this is the suspect part?
+  for (unsigned i = 0;
+       p != out_ops.end() && pb != op->out_bl.end();
+       ++i, ++p, ++pb, ++pr, ++ph) {
+    ldout(cct, 10) << " op " << i << " rval " << p->rval
+                   << " len " << p->outdata.length() << dendl;
+    if (*pb)
+      **pb = p->outdata;
+    // set rval before running handlers so that handlers
+    // can change it if e.g. decoding fails
+    if (*pr) {
+      **pr = ceph_to_hostos_errno(p->rval);
+      ldout(cct, 10) << "after  ceph_to_hostos_errno **pr: " << **pr <<
+dendl;
+    }
+    if (*ph) {
+      ldout(cct, 10) << " op " << i << " handler " << *ph << dendl;
+      (*ph)->complete(ceph_to_hostos_errno(p->rval));
+      *ph = NULL;
+    }
+  }
 
-[root@dumbo008 my-cluster]# ceph-deploy mon create-initial
-[ceph_deploy.conf][DEBUG ] found configuration file at: /root/.cephdeploy.conf
-[ceph_deploy.cli][INFO  ] Invoked (1.5.37): /usr/bin/ceph-deploy mon
-create-initial
-[ceph_deploy.cli][INFO  ] ceph-deploy options:
-[ceph_deploy.cli][INFO  ]  username                      : None
-[ceph_deploy.cli][INFO  ]  verbose                       : False
-[ceph_deploy.cli][INFO  ]  overwrite_conf                : False
-[ceph_deploy.cli][INFO  ]  subcommand                    : create-initial
-[ceph_deploy.cli][INFO  ]  quiet                         : False
-[ceph_deploy.cli][INFO  ]  cd_conf                       :
-<ceph_deploy.conf.cephdeploy.Conf instance at 0x27b5fc8>
-[ceph_deploy.cli][INFO  ]  cluster                       : ceph
-[ceph_deploy.cli][INFO  ]  func                          : <function
-mon at 0x27ad5f0>
-[ceph_deploy.cli][INFO  ]  ceph_conf                     : None
-[ceph_deploy.cli][INFO  ]  default_release               : False
-[ceph_deploy.cli][INFO  ]  keyrings                      : None
-[ceph_deploy.mon][DEBUG ] Deploying mon, cluster ceph hosts dumbo007 dumbo008
-[ceph_deploy.mon][DEBUG ] detecting platform for host dumbo007 ...
-[dumbo007][DEBUG ] connected to host: dumbo007
-[dumbo007][DEBUG ] detect platform information from remote host
-[dumbo007][DEBUG ] detect machine type
-[dumbo007][DEBUG ] find the location of an executable
-[ceph_deploy.mon][INFO  ] distro info: CentOS Linux 7.3.1611 Core
-[dumbo007][DEBUG ] determining if provided host has same hostname in remote
-[dumbo007][DEBUG ] get remote short hostname
-[dumbo007][DEBUG ] deploying mon to dumbo007
-[dumbo007][DEBUG ] get remote short hostname
-[dumbo007][DEBUG ] remote hostname: dumbo007
-[dumbo007][DEBUG ] write cluster configuration to /etc/ceph/{cluster}.conf
-[dumbo007][DEBUG ] create the mon path if it does not exist
-[dumbo007][DEBUG ] checking for done path: /var/lib/ceph/mon/ceph-dumbo007/done
-[dumbo007][DEBUG ] create a done file to avoid re-doing the mon deployment
-[dumbo007][DEBUG ] create the init path if it does not exist
-[dumbo007][INFO  ] Running command: systemctl enable ceph.target
-[dumbo007][INFO  ] Running command: systemctl enable ceph-mon@dumbo007
-[dumbo007][INFO  ] Running command: systemctl start ceph-mon@dumbo007
-[dumbo007][INFO  ] Running command: ceph --cluster=ceph --admin-daemon
-/var/run/ceph/ceph-mon.dumbo007.asok mon_status
-[dumbo007][ERROR ] admin_socket: exception getting command
-descriptions: [Errno 111] Connection refused
-[dumbo007][WARNIN] monitor: mon.dumbo007, might not be running yet
-[dumbo007][INFO  ] Running command: ceph --cluster=ceph --admin-daemon
-/var/run/ceph/ceph-mon.dumbo007.asok mon_status
-[dumbo007][ERROR ] admin_socket: exception getting command
-descriptions: [Errno 111] Connection refused
-[dumbo007][WARNIN] monitor dumbo007 does not exist in monmap
-[dumbo007][WARNIN] neither `public_addr` nor `public_network` keys are
-defined for monitors
-[dumbo007][WARNIN] monitors may not be able to form quorum
-[ceph_deploy.mon][DEBUG ] detecting platform for host dumbo008 ...
-[dumbo008][DEBUG ] connected to host: dumbo008
-[dumbo008][DEBUG ] detect platform information from remote host
-[dumbo008][DEBUG ] detect machine type
-[dumbo008][DEBUG ] find the location of an executable
-[ceph_deploy.mon][INFO  ] distro info: CentOS Linux 7.3.1611 Core
-[dumbo008][DEBUG ] determining if provided host has same hostname in remote
-[dumbo008][DEBUG ] get remote short hostname
-[dumbo008][DEBUG ] deploying mon to dumbo008
-[dumbo008][DEBUG ] get remote short hostname
-[dumbo008][DEBUG ] remote hostname: dumbo008
-[dumbo008][DEBUG ] write cluster configuration to /etc/ceph/{cluster}.conf
-[ceph_deploy.mon][ERROR ] RuntimeError: config file
-/etc/ceph/ceph.conf exists with different content; use
---overwrite-conf to overwrite
-[ceph_deploy][ERROR ] GenericError: Failed to create 1 monitors
+where it generates:
+116: 2017-06-20 11:20:15.365583 80fc18800 10
+client.4115.objecter:handle_osd_op_reply(3461) op 0 rval -125 len 0
+116: 2017-06-20 11:20:15.365591 80fc18800 10
+client.4115.objecter:handle_osd_op_reply(3461) op 1 rval 0 len 0
 
+So neither of the if(*pr) or if(*ph) cases is taken.
+And thus the error is not translated.
 
-this is my ceph.conf file
-[root@dumbo008 my-cluster]#
-[root@dumbo008 my-cluster]# vim ceph.conf
-[global]
-fsid = f3207ed8-8b96-4650-a76e-f42c91ffb42c
-mon_initial_members = dumbo007, dumbo008
-mon_host = 172.20.1.7,172.20.1.8
-auth_cluster_required = cephx
-auth_service_required = cephx
-auth_client_required = cephx
+Note that this part of the code is in the original code before I started
+working on this.
 
-Below is the information of my Linux OS
-[root@dumbo008 my-cluster]# uname -a
-Linux dumbo008 3.10.0-327.el7.x86_64 #1 SMP Thu Nov 19 22:10:57 UTC
-2015 x86_64 x86_64 x86_64 GNU/Linux
+--WjW
 
-[root@dumbo008 my-cluster]#
-[root@dumbo008 my-cluster]# lsb_release -d
-Description: CentOS Linux release 7.3.1611 (Core)
-[root@dumbo008 my-cluster]#
-[root@dumbo008 my-cluster]# lsb_release
-LSB Version: :core-4.1-amd64:core-4.1-ia32:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-ia32:cxx-4.1-noarch:desktop-4.1-amd64:
-desktop-4.1-ia32:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch
-
-Can someone help.
