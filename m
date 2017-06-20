@@ -1,48 +1,61 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Extra daemons/servers reporting to mgr
-Date: Tue, 20 Jun 2017 13:39:10 -0700
-Message-ID: <CAJ4mKGZCQP0FXh5NWA8429mFmZq3=oqFX=eJMRCPoapmEVJULg@mail.gmail.com>
-References: <CALe9h7eT+7KUt7VZPaYfR49FEPP3mJbe2+ARK82BaZUMmStchw@mail.gmail.com>
- <CADRKj5RCQf8wv+Y3VsL=e_gB9URYzK0SkzGRVfTFQwcJn-OL4g@mail.gmail.com>
- <alpine.DEB.2.11.1706141943490.32269@piezo.novalocal> <CA+aFP1B0ngk-Wkfy0KXnkyRP2XZJqvce1qhdBfpL+5PcjmGNoQ@mail.gmail.com>
- <alpine.DEB.2.11.1706191924150.32269@piezo.novalocal>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: Fwd: EXT: [ceph-users] ceph-lvm - a tool to deploy OSDs from LVM
+ volumes
+Date: Tue, 20 Jun 2017 22:40:05 +0200
+Message-ID: <0d432012-9491-0ebd-edd0-06d68fb1801b@suse.cz>
+References: <A5E80C1D-74F4-455B-8257-5B9E2FF6AB39@walmart.com>
+ <CAC-Np1yqCZO7CzEjTV+hrNve857BtM_rZ+LxAi6Vf9UJkPM04g@mail.gmail.com>
+ <CALe9h7cV6U3A_OT9R8tv_yPoGG9zFaWF3qXV5cwYK0KM-NDu4g@mail.gmail.com>
+ <CAC-Np1yiRgkmhZCOij9qSBmqUo-YYtErWXk2gevYuvWKrYFyeg@mail.gmail.com>
+ <CALe9h7cT54esfoT=eOgZq=ZbYAp1pjH_CeLiz-kFO61jABasrA@mail.gmail.com>
+ <CAC-Np1zwnzcwFBn4kqAzuhwmk9vZv1ZiUdd7owQZkA76k=QYuA@mail.gmail.com>
+ <CALe9h7cxPioPHLw48Gj02bEkD-HC49yHT8kG62AyLm_V9KnOZQ@mail.gmail.com>
+ <09d01c0c-b5f0-519e-0687-c8117e1fc2ce@suse.cz>
+ <CAEPMp+41hTKanCsxJ7r-YA7k11QFQczGPXaiwmYptW9viFAEAQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:36422 "EHLO
-        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751029AbdFTUjM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jun 2017 16:39:12 -0400
-Received: by mail-io0-f171.google.com with SMTP id y77so92200242ioe.3
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 13:39:11 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1706191924150.32269@piezo.novalocal>
+Received: from mx2.suse.de ([195.135.220.15]:33899 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752049AbdFTUkH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 20 Jun 2017 16:40:07 -0400
+In-Reply-To: <CAEPMp+41hTKanCsxJ7r-YA7k11QFQczGPXaiwmYptW9viFAEAQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Jason Dillaman <dillaman@redhat.com>, Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Andrew Schoen <aschoen@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Jun 19, 2017 at 12:26 PM, Sage Weil <sweil@redhat.com> wrote:
-> I wrote up a quick proposal at
->
->         http://pad.ceph.com/p/service-map
->
-> Basic idea:
->
->  - generic ServiceMap of service -> daemon -> metadata and status
->  - managed/persisted by mon
->  - librados interface to register as service X name Y (e.g., 'rgw.foo')
->  - librados will send regular beacon to mon to keep entry alive
->  - various mon commands to dump all or part of the service map
+> For upstream testing of ceph-volume (if it
+> existed outside ceph.git) you'd simply install it with pip.
 
-I am deeply uncomfortable with putting this stuff into the monitor (at
-least, directly). The main purpose we've discussed is to enable
-manager dashboard display of these services, along with stats
-collection, and there's no reason for that to go anywhere other than
-the manager — in fact, routing it through the monitor is inimical to
-timely updates of statistics. Why do you want to do that instead of
-letting it be handled by the manager, which can aggregate and persist
-whatever data it likes in a convenient form — and in ways which are
-mindful of monitor IO abilities?
-(The librados interface looks fine to me, though.)
--Greg
+Like, e.g., setuptools? Always use the latest version, and you're fine?
+
+Seriously, this would be OK if the ceph-volume maintainers ensure that 
+every new release is thoroughly regression-tested against all stable 
+versions of Ceph that are in maintenance at the time and agree not to 
+roll out any non-backward-compatible features (?).
+
+I recall that with ceph-deploy we did get into a situation where the 
+latest version did not support hammer, so hammer users could not simply 
+grab the latest version of ceph-deploy. (I guess that has been fixed in 
+the meantime?) Users had to "know" which version played nice with hammer 
+and grab that one specifically. Also, whatever bugs were in that 
+version, they were stuck with because nothing is backported.
+
+I suppose the Ceph project could do the same - just maintain a single 
+codestream ("master") and cut releases from time to time. It would be a 
+lot simpler! And if a distro wanted to backport fixes to a previous 
+release, nothing to stop them, right? But for some reason the Ceph 
+project goes through the trouble to maintain multiple codestreams. And 
+doesn't the Linux kernel project maintains stable branches, too?
+
+Maintaining stable branches is a lot of work, so there must be good 
+reasons for it. One reason I can think of is that it becomes possible to 
+implement non-backward-compatible features in mainline/master, yet folks 
+who value stability (i.e. distros and the vast majority of users) can 
+continue to use the older codestreams and benefit from bugfixes that get 
+backported.
+
+Nathan
