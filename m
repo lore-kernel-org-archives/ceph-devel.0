@@ -1,142 +1,49 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: ceph-deploy mon create-initial errors on centos 7
-Date: Tue, 20 Jun 2017 10:33:01 -0400
-Message-ID: <CAC-Np1wrCUgxQt=F56Bn6TAx+sHew0uFGoYR8MOihXci5UgpSQ@mail.gmail.com>
-References: <CAC4_f3sgoVnde6-3wTP6Q=PGzmE+3B-AZDUu4ysCCZzPs0p+YA@mail.gmail.com>
+From: Andrew Schoen <aschoen@redhat.com>
+Subject: Re: Fwd: EXT: [ceph-users] ceph-lvm - a tool to deploy OSDs from LVM volumes
+Date: Tue, 20 Jun 2017 09:43:02 -0500
+Message-ID: <CAEPMp+41hTKanCsxJ7r-YA7k11QFQczGPXaiwmYptW9viFAEAQ@mail.gmail.com>
+References: <A5E80C1D-74F4-455B-8257-5B9E2FF6AB39@walmart.com>
+ <CAC-Np1yqCZO7CzEjTV+hrNve857BtM_rZ+LxAi6Vf9UJkPM04g@mail.gmail.com>
+ <CALe9h7cV6U3A_OT9R8tv_yPoGG9zFaWF3qXV5cwYK0KM-NDu4g@mail.gmail.com>
+ <CAC-Np1yiRgkmhZCOij9qSBmqUo-YYtErWXk2gevYuvWKrYFyeg@mail.gmail.com>
+ <CALe9h7cT54esfoT=eOgZq=ZbYAp1pjH_CeLiz-kFO61jABasrA@mail.gmail.com>
+ <CAC-Np1zwnzcwFBn4kqAzuhwmk9vZv1ZiUdd7owQZkA76k=QYuA@mail.gmail.com>
+ <CALe9h7cxPioPHLw48Gj02bEkD-HC49yHT8kG62AyLm_V9KnOZQ@mail.gmail.com> <09d01c0c-b5f0-519e-0687-c8117e1fc2ce@suse.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f181.google.com ([209.85.128.181]:33865 "EHLO
-        mail-wr0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751175AbdFTOdI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jun 2017 10:33:08 -0400
-Received: by mail-wr0-f181.google.com with SMTP id 77so93541049wrb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 07:33:02 -0700 (PDT)
-In-Reply-To: <CAC4_f3sgoVnde6-3wTP6Q=PGzmE+3B-AZDUu4ysCCZzPs0p+YA@mail.gmail.com>
+Received: from mail-qt0-f180.google.com ([209.85.216.180]:35386 "EHLO
+        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751056AbdFTOnn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 20 Jun 2017 10:43:43 -0400
+Received: by mail-qt0-f180.google.com with SMTP id w1so134504781qtg.2
+        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 07:43:43 -0700 (PDT)
+In-Reply-To: <09d01c0c-b5f0-519e-0687-c8117e1fc2ce@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Prince Hamandawana <phamandawana@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Jun 20, 2017 at 4:43 AM, Prince Hamandawana
-<phamandawana@gmail.com> wrote:
-> Dear all
->
-> I am having problems when trying to deploy my initial monitors via
-> ceph-deplyoy on centos 7 . The version of ceph I am running is ceph
-> version 10.2.7 (50e863e0f4bc8f4b9e31156de690d765af245185). When I run
-> ceph-deploy mon create-initial, i get the following errors ;
->
-> [root@dumbo008 my-cluster]# ceph-deploy mon create-initial
-> [ceph_deploy.conf][DEBUG ] found configuration file at: /root/.cephdeploy.conf
-> [ceph_deploy.cli][INFO  ] Invoked (1.5.37): /usr/bin/ceph-deploy mon
-> create-initial
-> [ceph_deploy.cli][INFO  ] ceph-deploy options:
-> [ceph_deploy.cli][INFO  ]  username                      : None
-> [ceph_deploy.cli][INFO  ]  verbose                       : False
-> [ceph_deploy.cli][INFO  ]  overwrite_conf                : False
-> [ceph_deploy.cli][INFO  ]  subcommand                    : create-initial
-> [ceph_deploy.cli][INFO  ]  quiet                         : False
-> [ceph_deploy.cli][INFO  ]  cd_conf                       :
-> <ceph_deploy.conf.cephdeploy.Conf instance at 0x27b5fc8>
-> [ceph_deploy.cli][INFO  ]  cluster                       : ceph
-> [ceph_deploy.cli][INFO  ]  func                          : <function
-> mon at 0x27ad5f0>
-> [ceph_deploy.cli][INFO  ]  ceph_conf                     : None
-> [ceph_deploy.cli][INFO  ]  default_release               : False
-> [ceph_deploy.cli][INFO  ]  keyrings                      : None
-> [ceph_deploy.mon][DEBUG ] Deploying mon, cluster ceph hosts dumbo007 dumbo008
-> [ceph_deploy.mon][DEBUG ] detecting platform for host dumbo007 ...
-> [dumbo007][DEBUG ] connected to host: dumbo007
-> [dumbo007][DEBUG ] detect platform information from remote host
-> [dumbo007][DEBUG ] detect machine type
-> [dumbo007][DEBUG ] find the location of an executable
-> [ceph_deploy.mon][INFO  ] distro info: CentOS Linux 7.3.1611 Core
-> [dumbo007][DEBUG ] determining if provided host has same hostname in remote
-> [dumbo007][DEBUG ] get remote short hostname
-> [dumbo007][DEBUG ] deploying mon to dumbo007
-> [dumbo007][DEBUG ] get remote short hostname
-> [dumbo007][DEBUG ] remote hostname: dumbo007
-> [dumbo007][DEBUG ] write cluster configuration to /etc/ceph/{cluster}.conf
-> [dumbo007][DEBUG ] create the mon path if it does not exist
-> [dumbo007][DEBUG ] checking for done path: /var/lib/ceph/mon/ceph-dumbo007/done
-> [dumbo007][DEBUG ] create a done file to avoid re-doing the mon deployment
-> [dumbo007][DEBUG ] create the init path if it does not exist
-> [dumbo007][INFO  ] Running command: systemctl enable ceph.target
-> [dumbo007][INFO  ] Running command: systemctl enable ceph-mon@dumbo007
-> [dumbo007][INFO  ] Running command: systemctl start ceph-mon@dumbo007
-> [dumbo007][INFO  ] Running command: ceph --cluster=ceph --admin-daemon
-> /var/run/ceph/ceph-mon.dumbo007.asok mon_status
-> [dumbo007][ERROR ] admin_socket: exception getting command
-> descriptions: [Errno 111] Connection refused
-> [dumbo007][WARNIN] monitor: mon.dumbo007, might not be running yet
-> [dumbo007][INFO  ] Running command: ceph --cluster=ceph --admin-daemon
-> /var/run/ceph/ceph-mon.dumbo007.asok mon_status
-> [dumbo007][ERROR ] admin_socket: exception getting command
-> descriptions: [Errno 111] Connection refused
-> [dumbo007][WARNIN] monitor dumbo007 does not exist in monmap
-> [dumbo007][WARNIN] neither `public_addr` nor `public_network` keys are
-> defined for monitors
-> [dumbo007][WARNIN] monitors may not be able to form quorum
-> [ceph_deploy.mon][DEBUG ] detecting platform for host dumbo008 ...
-> [dumbo008][DEBUG ] connected to host: dumbo008
-> [dumbo008][DEBUG ] detect platform information from remote host
-> [dumbo008][DEBUG ] detect machine type
-> [dumbo008][DEBUG ] find the location of an executable
-> [ceph_deploy.mon][INFO  ] distro info: CentOS Linux 7.3.1611 Core
-> [dumbo008][DEBUG ] determining if provided host has same hostname in remote
-> [dumbo008][DEBUG ] get remote short hostname
-> [dumbo008][DEBUG ] deploying mon to dumbo008
-> [dumbo008][DEBUG ] get remote short hostname
-> [dumbo008][DEBUG ] remote hostname: dumbo008
-> [dumbo008][DEBUG ] write cluster configuration to /etc/ceph/{cluster}.conf
-> [ceph_deploy.mon][ERROR ] RuntimeError: config file
-> /etc/ceph/ceph.conf exists with different content; use
-> --overwrite-conf to overwrite
-> [ceph_deploy][ERROR ] GenericError: Failed to create 1 monitors
+On Tue, Jun 20, 2017 at 2:12 AM, Nathan Cutler <ncutler@suse.cz> wrote:
+> On 06/19/2017 10:24 PM, John Spray wrote:
+>>
+>> Testing: being separate is only easier if you're only doing python
+>> unit testing.
 >
 >
-> this is my ceph.conf file
-> [root@dumbo008 my-cluster]#
-> [root@dumbo008 my-cluster]# vim ceph.conf
-> [global]
-> fsid = f3207ed8-8b96-4650-a76e-f42c91ffb42c
-> mon_initial_members = dumbo007, dumbo008
-> mon_host = 172.20.1.7,172.20.1.8
-> auth_cluster_required = cephx
-> auth_service_required = cephx
-> auth_client_required = cephx
->
-> Below is the information of my Linux OS
-> [root@dumbo008 my-cluster]# uname -a
-> Linux dumbo008 3.10.0-327.el7.x86_64 #1 SMP Thu Nov 19 22:10:57 UTC
-> 2015 x86_64 x86_64 x86_64 GNU/Linux
->
-> [root@dumbo008 my-cluster]#
-> [root@dumbo008 my-cluster]# lsb_release -d
-> Description: CentOS Linux release 7.3.1611 (Core)
-> [root@dumbo008 my-cluster]#
-> [root@dumbo008 my-cluster]# lsb_release
-> LSB Version: :core-4.1-amd64:core-4.1-ia32:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-ia32:cxx-4.1-noarch:desktop-4.1-amd64:
-> desktop-4.1-ia32:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch
->
-> Can someone help.
+> Hear hear! I do a lot of functional/integration/regression testing and can
+> confirm that it became a whole lot easier when ceph-qa-suite was moved
+> in-tree.
 
-This here tells me you have tried this more than once:
+Comparing ceph-qa-suite to a contained python module isn't quite a
+fair comparison though. For upstream testing of ceph-volume (if it
+existed outside ceph.git) you'd simply install it with pip. A jenkins
+job that built every branch of ceph-volume.git and pushed them to
+shaman would be easy enough as well if that's what's preferred.
 
-> [ceph_deploy.mon][ERROR ] RuntimeError: config file
-> /etc/ceph/ceph.conf exists with different content; use
-> --overwrite-conf to overwrite
+Honestly, I think all manner of testing (including functional) becomes
+easier with this out of ceph.git. Especially when it comes to testing
+something inside of a container.
 
-Or possibly deployed to a host that had left overs from another
-cluster. There are many reasons why a monitor may not come up, you
-could
-try looking at the logs in the `dumbo007` box and look at
-/var/log/ceph/* and `journalctl -xe` to find out what the unit file is
-complaining about.
-
-
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Best,
+Andrew
