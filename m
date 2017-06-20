@@ -1,79 +1,70 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Caught the first erroneous translated errorcode
-Date: Tue, 20 Jun 2017 11:27:30 +0200
-Message-ID: <99f5f500-796e-d4fc-e373-7c5a3583fc49@digiware.nl>
-References: <34251a6c-a335-fe31-0705-a5fe7af9ae08@digiware.nl>
- <CALe9h7fveb7hek7uoX59P2w7Yx3fCvLf5JL0qURTrhZHzcD7hg@mail.gmail.com>
- <5ca934f2-0f95-bb6c-0fce-267468cb59b4@digiware.nl>
- <028757af-a82b-d873-648d-294961984bbb@digiware.nl>
- <CA+aFP1BST9e4UV6kyxP=kLN0tN0=1EkV=41cBV2Y5d98hrED7A@mail.gmail.com>
- <95b2bd08-f38b-f5ff-ebfc-523dddb1398b@digiware.nl>
- <alpine.DEB.2.11.1706191430290.32269@piezo.novalocal>
- <6ec50c30-420b-2039-9af3-184665177149@digiware.nl>
- <CAJ4mKGaQWJk7dghda6pVOt2g0RfiTh7dw4t8mcqvsRoiR80Rog@mail.gmail.com>
- <e16d4ec0-7aa1-a793-80dc-4b46a0eb0793@digiware.nl>
- <748ac281-3574-e9dc-e421-b8863d70f34e@digiware.nl>
- <alpine.DEB.2.11.1706200235310.32269@piezo.novalocal>
- <14973fcb-3ecf-fe71-17cf-95f916f18512@digiware.nl>
+From: Wangwenfeng <wang.wenfeng@h3c.com>
+Subject: almost all of the Ceph cluster OSD are assert when create pg for
+ luminous(12.0.3)
+Date: Tue, 20 Jun 2017 09:17:23 +0000
+Message-ID: <F0858C043E80304FBFA0A767AC8DE5E7A33657F9@H3CMLB14-EX.srv.huawei-3com.com>
+References: <F0858C043E80304FBFA0A767AC8DE5E7A33637C4@H3CMLB14-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:44257 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752072AbdFTJ1d (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 20 Jun 2017 05:27:33 -0400
-In-Reply-To: <14973fcb-3ecf-fe71-17cf-95f916f18512@digiware.nl>
-Content-Language: en-US
+Received: from smtp.h3c.com ([60.191.123.56]:57108 "EHLO h3cmg01-ex.h3c.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751090AbdFTJ1y (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 20 Jun 2017 05:27:54 -0400
+In-Reply-To: <F0858C043E80304FBFA0A767AC8DE5E7A33637C4@H3CMLB14-EX.srv.huawei-3com.com>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Jason Dillaman <dillaman@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 20-6-2017 10:23, Willem Jan Withagen wrote:
-> On 20-6-2017 04:35, Sage Weil wrote:
->> Try changing
->>
->>   int32_t rval;
->>
->> in OSDOp in osd_types.h to errorcode32_t.
-> 
-> Nice suggestion, and I think it is a correct one.
-> But I'm still getting -125 as error code.
-
-I think this is the suspect part?
-  for (unsigned i = 0;
-       p != out_ops.end() && pb != op->out_bl.end();
-       ++i, ++p, ++pb, ++pr, ++ph) {
-    ldout(cct, 10) << " op " << i << " rval " << p->rval
-                   << " len " << p->outdata.length() << dendl;
-    if (*pb)
-      **pb = p->outdata;
-    // set rval before running handlers so that handlers
-    // can change it if e.g. decoding fails
-    if (*pr) {
-      **pr = ceph_to_hostos_errno(p->rval);
-      ldout(cct, 10) << "after  ceph_to_hostos_errno **pr: " << **pr <<
-dendl;
-    }
-    if (*ph) {
-      ldout(cct, 10) << " op " << i << " handler " << *ph << dendl;
-      (*ph)->complete(ceph_to_hostos_errno(p->rval));
-      *ph = NULL;
-    }
-  }
-
-where it generates:
-116: 2017-06-20 11:20:15.365583 80fc18800 10
-client.4115.objecter:handle_osd_op_reply(3461) op 0 rval -125 len 0
-116: 2017-06-20 11:20:15.365591 80fc18800 10
-client.4115.objecter:handle_osd_op_reply(3461) op 1 rval 0 len 0
-
-So neither of the if(*pr) or if(*ph) cases is taken.
-And thus the error is not translated.
-
-Note that this part of the code is in the original code before I started
-working on this.
-
---WjW
-
+SGksIGFsbA0KSSB0ZXN0IHRoZSBsdW1pbm91cygxMi4wLjMpLCBhbG1vc3QgYWxsIG9mIHRoZSBD
+ZXBoIGNsdXN0ZXIgT1NEIGFyZSBhc3NlcnQgd2hlbiBjcmVhdGUgcGcuIFRoZSBhc3NlcnQgaXMN
+Cg0KMjAxNy0wNi0xOSAxOTo1Mjo0My4wMzAxMTAgN2Y0ZDBhNTg5NzAwIDEwIG9zZC4xIDYyMiBi
+dWlsZF9pbml0aWFsX3BnX2hpc3RvcnkgMy4xZjMgY3JlYXRlZCAzNzcNCjIwMTctMDYtMTkgMTk6
+NTI6NDMuMDYzODkxIDdmNGQwYTU4OTcwMCAtMSAvcm9vdC9tbnQvY2VwaF90bXAvcmVsZWFzZS9V
+YnVudHUvV09SS0RJUi9jZXBoLTEyLjAuMy9zcmMvb3NkL09TRE1hcC5oOiBJbiBmdW5jdGlvbiAn
+Y29uc3QgZXBvY2hfdCYgT1NETWFwOjpnZXRfdXBfZnJvbShpbnQpIGNvbnN0JyB0aHJlYWQgN2Y0
+ZDBhNTg5NzAwIHRpbWUgMjAxNy0wNi0xOSAxOTo1Mjo0My4wNjA4MDUNCi9yb290L21udC9jZXBo
+X3RtcC9yZWxlYXNlL1VidW50dS9XT1JLRElSL2NlcGgtMTIuMC4zL3NyYy9vc2QvT1NETWFwLmg6
+IDU1NjogRkFJTEVEIGFzc2VydChleGlzdHMob3NkKSkNCg0KIDE6IChjZXBoOjpfX2NlcGhfYXNz
+ZXJ0X2ZhaWwoY2hhciBjb25zdCosIGNoYXIgY29uc3QqLCBpbnQsIGNoYXIgY29uc3QqKSsweDEw
+ZSkgWzB4NTVmMGM5MjkzZDNlXQ0KIDI6ICgoKSsweDNjOWNiMCkgWzB4NTVmMGM4Yzk5Y2IwXQ0K
+IDM6IChQYXN0SW50ZXJ2YWxzOjpjaGVja19uZXdfaW50ZXJ2YWwoaW50LCBpbnQsIHN0ZDo6dmVj
+dG9yPGludCwgc3RkOjphbGxvY2F0b3I8aW50PiA+IGNvbnN0Jiwgc3RkOjp2ZWN0b3I8aW50LCBz
+dGQ6OmFsbG9jYXRvcjxpbnQ+ID4gY29uc3QmLCBpbnQsIGludCwgc3RkOjp2ZWN0b3I8aW50LCBz
+dGQ6OmFsbG9jYXRvcjxpbnQ+ID4gY29uc3QmLCBzdGQ6OnZlY3RvcjxpbnQsIHN0ZDo6YWxsb2Nh
+dG9yPGludD4gPiBjb25zdCYsIHVuc2lnbmVkIGludCwgdW5zaWduZWQgaW50LCBzdGQ6OnNoYXJl
+ZF9wdHI8T1NETWFwIGNvbnN0Piwgc3RkOjpzaGFyZWRfcHRyPE9TRE1hcCBjb25zdD4sIHBnX3Qs
+IElzUEdSZWNvdmVyYWJsZVByZWRpY2F0ZSosIFBhc3RJbnRlcnZhbHMqLCBzdGQ6Om9zdHJlYW0q
+KSsweDVjZCkgWzB4NTVmMGM4Zjg4MjZkXQ0KIDQ6IChPU0Q6OmJ1aWxkX2luaXRpYWxfcGdfaGlz
+dG9yeShzcGdfdCwgdW5zaWduZWQgaW50LCB1dGltZV90LCBwZ19oaXN0b3J5X3QqLCBQYXN0SW50
+ZXJ2YWxzKikrMHg1OTQpIFsweDU1ZjBjOGQ4NGNlNF0NCiA1OiAoT1NEOjpoYW5kbGVfcGdfY3Jl
+YXRlKGJvb3N0OjppbnRydXNpdmVfcHRyPE9wUmVxdWVzdD4pKzB4OTdjKSBbMHg1NWYwYzhkOGY1
+Y2NdDQogNjogKE9TRDo6ZGlzcGF0Y2hfb3AoYm9vc3Q6OmludHJ1c2l2ZV9wdHI8T3BSZXF1ZXN0
+PikrMHgxYjEpIFsweDU1ZjBjOGQ5MTY0MV0NCiA3OiAoT1NEOjpkb193YWl0ZXJzKCkrMHg5ZCkg
+WzB4NTVmMGM4ZDkxN2NkXQ0KIDg6IChPU0Q6Om1zX2Rpc3BhdGNoKE1lc3NhZ2UqKSsweDY5KSBb
+MHg1NWYwYzhkOTIzZjldDQogOTogKERpc3BhdGNoUXVldWU6OmVudHJ5KCkrMHg3OWIpIFsweDU1
+ZjBjOTQ1ZmFlYl0NCiAxMDogKERpc3BhdGNoUXVldWU6OkRpc3BhdGNoVGhyZWFkOjplbnRyeSgp
+KzB4ZCkgWzB4NTVmMGM5MzBjYWZkXQ0KIDExOiAoKCkrMHg4MTgyKSBbMHg3ZjRkMTZiYjAxODJd
+DQogMTI6IChjbG9uZSgpKzB4NmQpIFsweDdmNGQxNWNhMDQ3ZF0NCiBOT1RFOiBhIGNvcHkgb2Yg
+dGhlIGV4ZWN1dGFibGUsIG9yIGBvYmpkdW1wIC1yZFMgPGV4ZWN1dGFibGU+YCBpcyBuZWVkZWQg
+dG8gaW50ZXJwcmV0IHRoaXMuDQoNCkRvZXMgYW55b25lIGhhdmUgdGhpcyBwcm9ibGVtPyBIYXMg
+dGhlIHByb2JlbSBiZWVuIHNvbHZlZD8NCg0KDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQrmnKzpgq7k
+u7blj4rlhbbpmYTku7blkKvmnInmlrDljY7kuInmioDmnK/mnInpmZDlhazlj7jnmoTkv53lr4bk
+v6Hmga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJflh7oNCueahOS4quS6
+uuaIlue+pOe7hOOAguemgeatouS7u+S9leWFtuS7luS6uuS7peS7u+S9leW9ouW8j+S9v+eUqO+8
+iOWMheaLrOS9huS4jemZkOS6juWFqOmDqOaIlumDqOWIhuWcsOazhOmcsuOAgeWkjeWItuOAgQ0K
+5oiW5pWj5Y+R77yJ5pys6YKu5Lu25Lit55qE5L+h5oGv44CC5aaC5p6c5oKo6ZSZ5pS25LqG5pys
+6YKu5Lu277yM6K+35oKo56uL5Y2z55S16K+d5oiW6YKu5Lu26YCa55+l5Y+R5Lu25Lq65bm25Yig
+6Zmk5pysDQrpgq7ku7bvvIENClRoaXMgZS1tYWlsIGFuZCBpdHMgYXR0YWNobWVudHMgY29udGFp
+biBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gZnJvbSBOZXcgSDNDLCB3aGljaCBpcw0KaW50ZW5k
+ZWQgb25seSBmb3IgdGhlIHBlcnNvbiBvciBlbnRpdHkgd2hvc2UgYWRkcmVzcyBpcyBsaXN0ZWQg
+YWJvdmUuIEFueSB1c2Ugb2YgdGhlDQppbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGluIGFu
+eSB3YXkgKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsDQpk
+aXNjbG9zdXJlLCByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMgb3Ro
+ZXIgdGhhbiB0aGUgaW50ZW5kZWQNCnJlY2lwaWVudChzKSBpcyBwcm9oaWJpdGVkLiBJZiB5b3Ug
+cmVjZWl2ZSB0aGlzIGUtbWFpbCBpbiBlcnJvciwgcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyDQpi
+eSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQ0K
