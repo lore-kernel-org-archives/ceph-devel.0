@@ -1,77 +1,93 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: [ceph-mgr] Signal Raised in tcmalloc
-Date: Wed, 21 Jun 2017 13:21:32 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706211321020.32269@piezo.novalocal>
-References: <CALi+v1_3uLU2T5TPN_qusFF-BVukp6uyQke7a9iFBU8=AKkHPA@mail.gmail.com>
+Subject: Re: Sparse file info in filestore not propagated to other OSDs
+Date: Wed, 21 Jun 2017 13:24:55 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1706211322360.32269@piezo.novalocal>
+References: <beaf4408-2322-b0f1-3265-0d9e411c5bf9@corp.ovh.com> <alpine.DEB.2.11.1704061322330.2999@piezo.novalocal> <d4bde447-f179-aeca-bac5-636fa40ccba5@corp.ovh.com> <415c9590-ab96-01b6-3c49-553b0d9529fa@sadziu.pl> <alpine.DEB.2.11.1706141340520.3646@piezo.novalocal>
+ <e89cc0ed-14f0-b092-784f-784c8c967e9d@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-53503738-1498051497=:32269"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34911 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:34921 "EHLO
         cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750823AbdFUNVf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jun 2017 09:21:35 -0400
-In-Reply-To: <CALi+v1_3uLU2T5TPN_qusFF-BVukp6uyQke7a9iFBU8=AKkHPA@mail.gmail.com>
+        with ESMTP id S1750992AbdFUNY6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jun 2017 09:24:58 -0400
+In-Reply-To: <e89cc0ed-14f0-b092-784f-784c8c967e9d@corp.ovh.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: zengran zhang <z13121369189@gmail.com>
-Cc: tchaikov@gmail.com, ceph-devel@vger.kernel.org
+To: =?ISO-8859-2?Q?Piotr_Da=B3ek?= <piotr.dalek@corp.ovh.com>
+Cc: =?ISO-8859-2?Q?Pawe=B3_Sadowski?= <ceph@sadziu.pl>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-On Wed, 21 Jun 2017, zengran zhang wrote:
-> Hi, Kefu:
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-53503738-1498051497=:32269
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+
+On Wed, 21 Jun 2017, Piotr Dałek wrote:
+> On 17-06-14 03:44 PM, Sage Weil wrote:
+> > On Wed, 14 Jun 2017, Paweł Sadowski wrote:
+> > > On 04/13/2017 04:23 PM, Piotr Dałek wrote:
+> > > > On 04/06/2017 03:25 PM, Sage Weil wrote:
+> > > > > On Thu, 6 Apr 2017, Piotr Dałek wrote:
+> > > > > > [snip]
+> > > > > 
+> > > > > I think the solution here is to use sparse_read during recovery.  The
+> > > > > PushOp data representation already supports it; it's just a matter of
+> > > > > skipping the zeros.  The recovery code could also have an option to
+> > > > > check
+> > > > > for fully-zero regions of the data and turn those into holes as
+> > > > > well.  For
+> > > > > ReplicatedBackend, see build_push_op().
+> > > > 
+> > > > So far it turns out that there's even easier solution, we just enabled
+> > > > "filestore seek hole" on some test cluster and that seems to fix the
+> > > > problem for us. We'll see if fiemap works too.
+> > > > 
+> > > 
+> > > Is it safe to enable "filestore seek hole", are there any tests that
+> > > verifies that everything related to RBD works fine with this enabled?
+> > > Can we make this enabled by default?
+> > 
+> > We would need to enable it in the qa environment first.  The risk here is
+> > that users run a broad range of kernels and we are exposing ourselves to
+> > any bugs in any kernel version they may run.  I'd prefer to leave it off
+> > by default.
 > 
->    we found a mgr instance hang, and attach it with gdb. we can see a
-> signal raised(#8) in or after
-> `DaemonPerfCounters::update(MMgrReport*)` , so its because the
-> tcmalloc heap corrupt. can you help to disgnose the problem? ceph
-> version is 12.0.2. thanks so much.
+> That's a common regression? If not, we could blacklist particular kernels and
+> call it a day.
+>  > We can enable it in the qa suite, though, which covers
+> > centos7 (latest kernel) and ubuntu xenial and trusty.
+> 
+> +1. Do you need some particular PR for that?
 
-This is likely to be fixed on the latest master.  We were seeing lots of 
-crashes when the mgr went from active to inactive; now it is quite 
-stable.
+Sure.  How about a patch that adds the config option to several of the 
+files in qa/suites/rados/thrash/thrashers?
+
+> > > I tested on few of our production images and it seems that about 30% is
+> > > sparse. This will be lost on any cluster wide event (add/remove nodes,
+> > > PG grow, recovery).
+> > > 
+> > > How this is/will be handled in BlueStore?
+> > 
+> > BlueStore exposes the same sparseness metadata that enabling the
+> > filestore seek hole or fiemap options does, so it won't be a problem
+> > there.
+> > 
+> > I think the only thing that we could potentially add is zero detection
+> > on writes (so that explicitly writing zeros consumes no space).  We'd
+> > have to be a bit careful measuring the performance impact of that check on
+> > non-zero writes.
+> 
+> I saw that RBD (librbd) does that - replacing writes with discards when buffer
+> contains only zeros. Some code that does the same in librados could be added
+> and it shouldn't impact performance much, current implementation of
+> mem_is_zero is fast and shouldn't be a big problem.
+
+I'd rather not have librados silently translating requests; I think it 
+makes more sense to do any zero checking in bluestore.  _do_write_small 
+and _do_write_big already break writes into (aligned) chunks; that would 
+be an easy place to add the check.
 
 sage
-
-
-> 
-> #0  0x00007f2245fc8026 in SpinLock::SlowLock() () from /usr/lib/libtcmalloc.so.4
-> #1  0x00007f2245fb907a in
-> tcmalloc::CentralFreeList::RemoveRange(void**, void**, int) () from
-> /usr/lib/libtcmalloc.so.4
-> #2  0x00007f2245fbbfaa in
-> tcmalloc::ThreadCache::FetchFromCentralCache(unsigned long, unsigned
-> long) () from /usr/lib/libtcmalloc.so.4
-> #3  0x00007f2245fce368 in tc_newarray () from /usr/lib/libtcmalloc.so.4
-> #4  0x000055840e8f670d in ?? ()
-> #5  0x000055840e8f6a9c in pretty_version_to_str[abi:cxx11]() ()
-> #6  0x000055840e7122b6 in ceph::BackTrace::print(std::ostream&) const ()
-> #7  0x000055840e6f8a27 in ?? ()
-> #8  <signal handler called>
-> #9  0x00007f2245fb8c33 in
-> tcmalloc::CentralFreeList::FetchFromOneSpans(int, void**, void**) ()
-> from /usr/lib/libtcmalloc.so.4
-> #10 0x00007f2245fb8f0a in
-> tcmalloc::CentralFreeList::FetchFromOneSpansSafe(int, void**, void**)
-> () from /usr/lib/libtcmalloc.so.4
-> #11 0x00007f2245fb8fbf in
-> tcmalloc::CentralFreeList::RemoveRange(void**, void**, int) () from
-> /usr/lib/libtcmalloc.so.4
-> #12 0x00007f2245fbbfaa in
-> tcmalloc::ThreadCache::FetchFromCentralCache(unsigned long, unsigned
-> long) () from /usr/lib/libtcmalloc.so.4
-> #13 0x00007f2245fce368 in tc_newarray () from /usr/lib/libtcmalloc.so.4
-> #14 0x000055840e67036d in ?? ()
-> #15 0x000055840e671e46 in DaemonPerfCounters::update(MMgrReport*) ()
-> #16 0x000055840e6770e4 in DaemonServer::handle_report(MMgrReport*) ()
-> #17 0x000055840e67cb70 in DaemonServer::ms_dispatch(Message*) ()
-> #18 0x000055840e970f6a in DispatchQueue::entry() ()
-> #19 0x000055840e809d7d in DispatchQueue::DispatchThread::entry() ()
-> #20 0x00007f22453d96ba in start_thread (arg=0x7f223b6dc700) at
-> pthread_create.c:333
-> #21 0x00007f224444582d in clone () at
-> ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+--8323329-53503738-1498051497=:32269--
