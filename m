@@ -1,62 +1,75 @@
-From: zengran zhang <z13121369189@gmail.com>
-Subject: [ceph-mgr] Signal Raised in tcmalloc
-Date: Wed, 21 Jun 2017 14:07:21 +0800
-Message-ID: <CALi+v1_3uLU2T5TPN_qusFF-BVukp6uyQke7a9iFBU8=AKkHPA@mail.gmail.com>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Subject: Re: Sparse file info in filestore not propagated to
+	other OSDs
+Date: Wed, 21 Jun 2017 09:05:42 +0200
+Message-ID: <e89cc0ed-14f0-b092-784f-784c8c967e9d@corp.ovh.com>
+References: <beaf4408-2322-b0f1-3265-0d9e411c5bf9@corp.ovh.com>
+	<alpine.DEB.2.11.1704061322330.2999@piezo.novalocal>
+	<d4bde447-f179-aeca-bac5-636fa40ccba5@corp.ovh.com>
+	<415c9590-ab96-01b6-3c49-553b0d9529fa@sadziu.pl>
+	<alpine.DEB.2.11.1706141340520.3646@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:33242 "EHLO
-        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750979AbdFUGHc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jun 2017 02:07:32 -0400
-Received: by mail-io0-f171.google.com with SMTP id t87so4586752ioe.0
-        for <ceph-devel@vger.kernel.org>; Tue, 20 Jun 2017 23:07:32 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: tchaikov@gmail.com
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1706141340520.3646-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, =?UTF-8?Q?Pawe=c5=82_Sadowski?= <ceph-Bj5ZXqqQV65mR6Xm/wNWPw@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi, Kefu:
-
-   we found a mgr instance hang, and attach it with gdb. we can see a
-signal raised(#8) in or after
-`DaemonPerfCounters::update(MMgrReport*)` , so its because the
-tcmalloc heap corrupt. can you help to disgnose the problem? ceph
-version is 12.0.2. thanks so much.
-
-#0  0x00007f2245fc8026 in SpinLock::SlowLock() () from /usr/lib/libtcmalloc.so.4
-#1  0x00007f2245fb907a in
-tcmalloc::CentralFreeList::RemoveRange(void**, void**, int) () from
-/usr/lib/libtcmalloc.so.4
-#2  0x00007f2245fbbfaa in
-tcmalloc::ThreadCache::FetchFromCentralCache(unsigned long, unsigned
-long) () from /usr/lib/libtcmalloc.so.4
-#3  0x00007f2245fce368 in tc_newarray () from /usr/lib/libtcmalloc.so.4
-#4  0x000055840e8f670d in ?? ()
-#5  0x000055840e8f6a9c in pretty_version_to_str[abi:cxx11]() ()
-#6  0x000055840e7122b6 in ceph::BackTrace::print(std::ostream&) const ()
-#7  0x000055840e6f8a27 in ?? ()
-#8  <signal handler called>
-#9  0x00007f2245fb8c33 in
-tcmalloc::CentralFreeList::FetchFromOneSpans(int, void**, void**) ()
-from /usr/lib/libtcmalloc.so.4
-#10 0x00007f2245fb8f0a in
-tcmalloc::CentralFreeList::FetchFromOneSpansSafe(int, void**, void**)
-() from /usr/lib/libtcmalloc.so.4
-#11 0x00007f2245fb8fbf in
-tcmalloc::CentralFreeList::RemoveRange(void**, void**, int) () from
-/usr/lib/libtcmalloc.so.4
-#12 0x00007f2245fbbfaa in
-tcmalloc::ThreadCache::FetchFromCentralCache(unsigned long, unsigned
-long) () from /usr/lib/libtcmalloc.so.4
-#13 0x00007f2245fce368 in tc_newarray () from /usr/lib/libtcmalloc.so.4
-#14 0x000055840e67036d in ?? ()
-#15 0x000055840e671e46 in DaemonPerfCounters::update(MMgrReport*) ()
-#16 0x000055840e6770e4 in DaemonServer::handle_report(MMgrReport*) ()
-#17 0x000055840e67cb70 in DaemonServer::ms_dispatch(Message*) ()
-#18 0x000055840e970f6a in DispatchQueue::entry() ()
-#19 0x000055840e809d7d in DispatchQueue::DispatchThread::entry() ()
-#20 0x00007f22453d96ba in start_thread (arg=0x7f223b6dc700) at
-pthread_create.c:333
-#21 0x00007f224444582d in clone () at
-../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+T24gMTctMDYtMTQgMDM6NDQgUE0sIFNhZ2UgV2VpbCB3cm90ZToKPiBPbiBXZWQsIDE0IEp1biAy
+MDE3LCBQYXdlxYIgU2Fkb3dza2kgd3JvdGU6Cj4+IE9uIDA0LzEzLzIwMTcgMDQ6MjMgUE0sIFBp
+b3RyIERhxYJlayB3cm90ZToKPj4+IE9uIDA0LzA2LzIwMTcgMDM6MjUgUE0sIFNhZ2UgV2VpbCB3
+cm90ZToKPj4+PiBPbiBUaHUsIDYgQXByIDIwMTcsIFBpb3RyIERhxYJlayB3cm90ZToKPj4+Pj4g
+W3NuaXBdCj4+Pj4KPj4+PiBJIHRoaW5rIHRoZSBzb2x1dGlvbiBoZXJlIGlzIHRvIHVzZSBzcGFy
+c2VfcmVhZCBkdXJpbmcgcmVjb3ZlcnkuICBUaGUKPj4+PiBQdXNoT3AgZGF0YSByZXByZXNlbnRh
+dGlvbiBhbHJlYWR5IHN1cHBvcnRzIGl0OyBpdCdzIGp1c3QgYSBtYXR0ZXIgb2YKPj4+PiBza2lw
+cGluZyB0aGUgemVyb3MuICBUaGUgcmVjb3ZlcnkgY29kZSBjb3VsZCBhbHNvIGhhdmUgYW4gb3B0
+aW9uIHRvCj4+Pj4gY2hlY2sKPj4+PiBmb3IgZnVsbHktemVybyByZWdpb25zIG9mIHRoZSBkYXRh
+IGFuZCB0dXJuIHRob3NlIGludG8gaG9sZXMgYXMKPj4+PiB3ZWxsLiAgRm9yCj4+Pj4gUmVwbGlj
+YXRlZEJhY2tlbmQsIHNlZSBidWlsZF9wdXNoX29wKCkuCj4+Pgo+Pj4gU28gZmFyIGl0IHR1cm5z
+IG91dCB0aGF0IHRoZXJlJ3MgZXZlbiBlYXNpZXIgc29sdXRpb24sIHdlIGp1c3QgZW5hYmxlZAo+
+Pj4gImZpbGVzdG9yZSBzZWVrIGhvbGUiIG9uIHNvbWUgdGVzdCBjbHVzdGVyIGFuZCB0aGF0IHNl
+ZW1zIHRvIGZpeCB0aGUKPj4+IHByb2JsZW0gZm9yIHVzLiBXZSdsbCBzZWUgaWYgZmllbWFwIHdv
+cmtzIHRvby4KPj4+Cj4+Cj4+IElzIGl0IHNhZmUgdG8gZW5hYmxlICJmaWxlc3RvcmUgc2VlayBo
+b2xlIiwgYXJlIHRoZXJlIGFueSB0ZXN0cyB0aGF0Cj4+IHZlcmlmaWVzIHRoYXQgZXZlcnl0aGlu
+ZyByZWxhdGVkIHRvIFJCRCB3b3JrcyBmaW5lIHdpdGggdGhpcyBlbmFibGVkPwo+PiBDYW4gd2Ug
+bWFrZSB0aGlzIGVuYWJsZWQgYnkgZGVmYXVsdD8KPiAKPiBXZSB3b3VsZCBuZWVkIHRvIGVuYWJs
+ZSBpdCBpbiB0aGUgcWEgZW52aXJvbm1lbnQgZmlyc3QuICBUaGUgcmlzayBoZXJlIGlzCj4gdGhh
+dCB1c2VycyBydW4gYSBicm9hZCByYW5nZSBvZiBrZXJuZWxzIGFuZCB3ZSBhcmUgZXhwb3Npbmcg
+b3Vyc2VsdmVzIHRvCj4gYW55IGJ1Z3MgaW4gYW55IGtlcm5lbCB2ZXJzaW9uIHRoZXkgbWF5IHJ1
+bi4gIEknZCBwcmVmZXIgdG8gbGVhdmUgaXQgb2ZmCj4gYnkgZGVmYXVsdC4KClRoYXQncyBhIGNv
+bW1vbiByZWdyZXNzaW9uPyBJZiBub3QsIHdlIGNvdWxkIGJsYWNrbGlzdCBwYXJ0aWN1bGFyIGtl
+cm5lbHMgCmFuZCBjYWxsIGl0IGEgZGF5LgogID4gV2UgY2FuIGVuYWJsZSBpdCBpbiB0aGUgcWEg
+c3VpdGUsIHRob3VnaCwgd2hpY2ggY292ZXJzCj4gY2VudG9zNyAobGF0ZXN0IGtlcm5lbCkgYW5k
+IHVidW50dSB4ZW5pYWwgYW5kIHRydXN0eS4KCisxLiBEbyB5b3UgbmVlZCBzb21lIHBhcnRpY3Vs
+YXIgUFIgZm9yIHRoYXQ/Cgo+PiBJIHRlc3RlZCBvbiBmZXcgb2Ygb3VyIHByb2R1Y3Rpb24gaW1h
+Z2VzIGFuZCBpdCBzZWVtcyB0aGF0IGFib3V0IDMwJSBpcwo+PiBzcGFyc2UuIFRoaXMgd2lsbCBi
+ZSBsb3N0IG9uIGFueSBjbHVzdGVyIHdpZGUgZXZlbnQgKGFkZC9yZW1vdmUgbm9kZXMsCj4+IFBH
+IGdyb3csIHJlY292ZXJ5KS4KPj4KPj4gSG93IHRoaXMgaXMvd2lsbCBiZSBoYW5kbGVkIGluIEJs
+dWVTdG9yZT8KPiAKPiBCbHVlU3RvcmUgZXhwb3NlcyB0aGUgc2FtZSBzcGFyc2VuZXNzIG1ldGFk
+YXRhIHRoYXQgZW5hYmxpbmcgdGhlCj4gZmlsZXN0b3JlIHNlZWsgaG9sZSBvciBmaWVtYXAgb3B0
+aW9ucyBkb2VzLCBzbyBpdCB3b24ndCBiZSBhIHByb2JsZW0KPiB0aGVyZS4KPiAKPiBJIHRoaW5r
+IHRoZSBvbmx5IHRoaW5nIHRoYXQgd2UgY291bGQgcG90ZW50aWFsbHkgYWRkIGlzIHplcm8gZGV0
+ZWN0aW9uCj4gb24gd3JpdGVzIChzbyB0aGF0IGV4cGxpY2l0bHkgd3JpdGluZyB6ZXJvcyBjb25z
+dW1lcyBubyBzcGFjZSkuICBXZSdkCj4gaGF2ZSB0byBiZSBhIGJpdCBjYXJlZnVsIG1lYXN1cmlu
+ZyB0aGUgcGVyZm9ybWFuY2UgaW1wYWN0IG9mIHRoYXQgY2hlY2sgb24KPiBub24temVybyB3cml0
+ZXMuCgpJIHNhdyB0aGF0IFJCRCAobGlicmJkKSBkb2VzIHRoYXQgLSByZXBsYWNpbmcgd3JpdGVz
+IHdpdGggZGlzY2FyZHMgd2hlbiAKYnVmZmVyIGNvbnRhaW5zIG9ubHkgemVyb3MuIFNvbWUgY29k
+ZSB0aGF0IGRvZXMgdGhlIHNhbWUgaW4gbGlicmFkb3MgY291bGQgCmJlIGFkZGVkIGFuZCBpdCBz
+aG91bGRuJ3QgaW1wYWN0IHBlcmZvcm1hbmNlIG11Y2gsIGN1cnJlbnQgaW1wbGVtZW50YXRpb24g
+b2YgCiAgbWVtX2lzX3plcm8gaXMgZmFzdCBhbmQgc2hvdWxkbid0IGJlIGEgYmlnIHByb2JsZW0u
+CgotLSAKUGlvdHIgRGHFgmVrCnBpb3RyLmRhbGVrQGNvcnAub3ZoLmNvbQpodHRwczovL3d3dy5v
+dmguY29tL3VzLwpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+XwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6
+Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
