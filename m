@@ -1,78 +1,49 @@
-From: Wangwenfeng <wang.wenfeng@h3c.com>
-Subject: Re: almost all of the Ceph cluster OSD are assert when create pg
- for luminous(12.0.3)
-Date: Wed, 21 Jun 2017 08:49:54 +0000
-Message-ID: <F0858C043E80304FBFA0A767AC8DE5E7A3368B51@H3CMLB14-EX.srv.huawei-3com.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: Fwd: EXT: [ceph-users] ceph-lvm - a tool to deploy OSDs from LVM
+ volumes
+Date: Wed, 21 Jun 2017 13:25:00 +0200
+Message-ID: <b3eb845a-b70a-d2c8-b8b2-0ac75f1b6c4a@suse.cz>
+References: <A5E80C1D-74F4-455B-8257-5B9E2FF6AB39@walmart.com>
+ <CAC-Np1yqCZO7CzEjTV+hrNve857BtM_rZ+LxAi6Vf9UJkPM04g@mail.gmail.com>
+ <CALe9h7cV6U3A_OT9R8tv_yPoGG9zFaWF3qXV5cwYK0KM-NDu4g@mail.gmail.com>
+ <CAC-Np1yiRgkmhZCOij9qSBmqUo-YYtErWXk2gevYuvWKrYFyeg@mail.gmail.com>
+ <CALe9h7cT54esfoT=eOgZq=ZbYAp1pjH_CeLiz-kFO61jABasrA@mail.gmail.com>
+ <CAC-Np1zwnzcwFBn4kqAzuhwmk9vZv1ZiUdd7owQZkA76k=QYuA@mail.gmail.com>
+ <CALe9h7cxPioPHLw48Gj02bEkD-HC49yHT8kG62AyLm_V9KnOZQ@mail.gmail.com>
+ <09d01c0c-b5f0-519e-0687-c8117e1fc2ce@suse.cz>
+ <CAEPMp+41hTKanCsxJ7r-YA7k11QFQczGPXaiwmYptW9viFAEAQ@mail.gmail.com>
+ <0d432012-9491-0ebd-edd0-06d68fb1801b@suse.cz>
+ <CAC-Np1wAh5mewdgKOosHc=b8WrRZW+zUuosoaB-FmmX1g4fLLA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:15822 "EHLO h3cmg01-ex.h3c.com"
+Received: from mx2.suse.de ([195.135.220.15]:40688 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751434AbdFUIuS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 21 Jun 2017 04:50:18 -0400
-Content-Language: zh-CN
+        id S1751028AbdFULZC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 21 Jun 2017 07:25:02 -0400
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 7214DAB09
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Jun 2017 11:25:01 +0000 (UTC)
+In-Reply-To: <CAC-Np1wAh5mewdgKOosHc=b8WrRZW+zUuosoaB-FmmX1g4fLLA@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: 'Gregory Farnum' <gfarnum@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-T24gVHVlLCBKdW4gMjAsIDIwMTcgYXQgMjoxNyBBTSwgV2FuZ3dlbmZlbmcgPHdhbmcud2VuZmVu
-Z0BoM2MuY29tPiB3cm90ZToNCj4gSGksIGFsbA0KPiBJIHRlc3QgdGhlIGx1bWlub3VzKDEyLjAu
-MyksIGFsbW9zdCBhbGwgb2YgdGhlIENlcGggY2x1c3RlciBPU0QgYXJlDQo+IGFzc2VydCB3aGVu
-IGNyZWF0ZSBwZy4gVGhlIGFzc2VydCBpcw0KPg0KPiAyMDE3LTA2LTE5IDE5OjUyOjQzLjAzMDEx
-MCA3ZjRkMGE1ODk3MDAgMTAgb3NkLjEgNjIyDQo+IGJ1aWxkX2luaXRpYWxfcGdfaGlzdG9yeSAz
-LjFmMyBjcmVhdGVkIDM3Nw0KPiAyMDE3LTA2LTE5IDE5OjUyOjQzLjA2Mzg5MSA3ZjRkMGE1ODk3
-MDAgLTENCj4gL3Jvb3QvbW50L2NlcGhfdG1wL3JlbGVhc2UvVWJ1bnR1L1dPUktESVIvY2VwaC0x
-Mi4wLjMvc3JjL29zZC9PU0RNYXAuaA0KPiA6IEluIGZ1bmN0aW9uICdjb25zdCBlcG9jaF90JiBP
-U0RNYXA6OmdldF91cF9mcm9tKGludCkgY29uc3QnIHRocmVhZA0KPiA3ZjRkMGE1ODk3MDAgdGlt
-ZSAyMDE3LTA2LTE5IDE5OjUyOjQzLjA2MDgwNQ0KPiAvcm9vdC9tbnQvY2VwaF90bXAvcmVsZWFz
-ZS9VYnVudHUvV09SS0RJUi9jZXBoLTEyLjAuMy9zcmMvb3NkL09TRE1hcC5oDQo+IDogNTU2OiBG
-QUlMRUQgYXNzZXJ0KGV4aXN0cyhvc2QpKQ0KPg0KPiAgMTogKGNlcGg6Ol9fY2VwaF9hc3NlcnRf
-ZmFpbChjaGFyIGNvbnN0KiwgY2hhciBjb25zdCosIGludCwgY2hhcg0KPiBjb25zdCopKzB4MTBl
-KSBbMHg1NWYwYzkyOTNkM2VdDQo+ICAyOiAoKCkrMHgzYzljYjApIFsweDU1ZjBjOGM5OWNiMF0N
-Cj4gIDM6IChQYXN0SW50ZXJ2YWxzOjpjaGVja19uZXdfaW50ZXJ2YWwoaW50LCBpbnQsIHN0ZDo6
-dmVjdG9yPGludCwNCj4gc3RkOjphbGxvY2F0b3I8aW50PiA+IGNvbnN0Jiwgc3RkOjp2ZWN0b3I8
-aW50LCBzdGQ6OmFsbG9jYXRvcjxpbnQ+ID4NCj4gY29uc3QmLCBpbnQsIGludCwgc3RkOjp2ZWN0
-b3I8aW50LCBzdGQ6OmFsbG9jYXRvcjxpbnQ+ID4gY29uc3QmLA0KPiBzdGQ6OnZlY3RvcjxpbnQs
-IHN0ZDo6YWxsb2NhdG9yPGludD4gPiBjb25zdCYsIHVuc2lnbmVkIGludCwgdW5zaWduZWQNCj4g
-aW50LCBzdGQ6OnNoYXJlZF9wdHI8T1NETWFwIGNvbnN0Piwgc3RkOjpzaGFyZWRfcHRyPE9TRE1h
-cCBjb25zdD4sDQo+IHBnX3QsIElzUEdSZWNvdmVyYWJsZVByZWRpY2F0ZSosIFBhc3RJbnRlcnZh
-bHMqLCBzdGQ6Om9zdHJlYW0qKSsweDVjZCkNCj4gWzB4NTVmMGM4Zjg4MjZkXQ0KPiAgNDogKE9T
-RDo6YnVpbGRfaW5pdGlhbF9wZ19oaXN0b3J5KHNwZ190LCB1bnNpZ25lZCBpbnQsIHV0aW1lX3Qs
-DQo+IHBnX2hpc3RvcnlfdCosIFBhc3RJbnRlcnZhbHMqKSsweDU5NCkgWzB4NTVmMGM4ZDg0Y2U0
-XQ0KPiAgNTogKE9TRDo6aGFuZGxlX3BnX2NyZWF0ZShib29zdDo6aW50cnVzaXZlX3B0cjxPcFJl
-cXVlc3Q+KSsweDk3YykNCj4gWzB4NTVmMGM4ZDhmNWNjXQ0KPiAgNjogKE9TRDo6ZGlzcGF0Y2hf
-b3AoYm9vc3Q6OmludHJ1c2l2ZV9wdHI8T3BSZXF1ZXN0PikrMHgxYjEpDQo+IFsweDU1ZjBjOGQ5
-MTY0MV0NCj4gIDc6IChPU0Q6OmRvX3dhaXRlcnMoKSsweDlkKSBbMHg1NWYwYzhkOTE3Y2RdDQo+
-ICA4OiAoT1NEOjptc19kaXNwYXRjaChNZXNzYWdlKikrMHg2OSkgWzB4NTVmMGM4ZDkyM2Y5XQ0K
-PiAgOTogKERpc3BhdGNoUXVldWU6OmVudHJ5KCkrMHg3OWIpIFsweDU1ZjBjOTQ1ZmFlYl0NCj4g
-IDEwOiAoRGlzcGF0Y2hRdWV1ZTo6RGlzcGF0Y2hUaHJlYWQ6OmVudHJ5KCkrMHhkKSBbMHg1NWYw
-YzkzMGNhZmRdDQo+ICAxMTogKCgpKzB4ODE4MikgWzB4N2Y0ZDE2YmIwMTgyXQ0KPiAgMTI6IChj
-bG9uZSgpKzB4NmQpIFsweDdmNGQxNWNhMDQ3ZF0NCj4gIE5PVEU6IGEgY29weSBvZiB0aGUgZXhl
-Y3V0YWJsZSwgb3IgYG9iamR1bXAgLXJkUyA8ZXhlY3V0YWJsZT5gIGlzIG5lZWRlZCB0byBpbnRl
-cnByZXQgdGhpcy4NCj4NCj4gRG9lcyBhbnlvbmUgaGF2ZSB0aGlzIHByb2JsZW0/IEhhcyB0aGUg
-cHJvYmVtIGJlZW4gc29sdmVkPw0KDQpOb2JvZHkgZWxzZSBoYXMgcmVwb3J0ZWQgdGhpcyBhbmQg
-aXQgZG9lc24ndCBzZWVtIHRvIGhhdmUgdHVybmVkIHVwIGluIG91ciBuaWdodGxpZXMuIENhbiB5
-b3UgZGVzY3JpYmUgYSBsaXR0bGUgbW9yZSBhYm91dCB3aGF0IGhhcHBlbnM/IElmIHlvdSBnb3Qg
-YSBjb3JlIGR1bXAsIGNhbiB5b3UgZmluZCB0aGUgdmFsdWUgb2Ygb2xkX2FjdGluZ19wcmltYXJ5
-Pw0KVGhlIGNsdXN0ZXIgaGFzIDMgSE9TVHMsIGVhY2ggaG9zdCBoYXMgMTEgT1NEcy4gVGhlIGNs
-dXN0ZXIgaGFzIDIgcG9vbHMgd2hpY2ggaGFzIDEwMjQgcGdzLiBJIHJlbW92ZSAxIGhvc3QgYW5k
-IGFkZCB0aGUgaG9zdCB0aGVuLg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K5pys6YKu5Lu25Y+K5YW2
-6ZmE5Lu25ZCr5pyJ5paw5Y2O5LiJ5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM
-5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQrnmoTkuKrkurrmiJbnvqTn
-u4TjgILnpoHmraLku7vkvZXlhbbku5bkurrku6Xku7vkvZXlvaLlvI/kvb/nlKjvvIjljIXmi6zk
-vYbkuI3pmZDkuo7lhajpg6jmiJbpg6jliIblnLDms4TpnLLjgIHlpI3liLbjgIENCuaIluaVo+WP
-ke+8ieacrOmCruS7tuS4reeahOS/oeaBr+OAguWmguaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8
-jOivt+aCqOeri+WNs+eUteivneaIlumCruS7tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZpOacrA0K
-6YKu5Lu277yBDQpUaGlzIGUtbWFpbCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlk
-ZW50aWFsIGluZm9ybWF0aW9uIGZyb20gTmV3IEgzQywgd2hpY2ggaXMNCmludGVuZGVkIG9ubHkg
-Zm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBB
-bnkgdXNlIG9mIHRoZQ0KaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChp
-bmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbA0KZGlzY2xvc3Vy
-ZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4g
-dGhlIGludGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUg
-dGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUg
-b3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCg==
+> My position is that a small, python-only, with no direct bindings to
+> Ceph other than the CLI, should probably have the
+> freedom of staying out of tree, and that it can keep up with older
+> versions, and release often when bugs come up (as you've mentioned
+> happened
+> with ceph-deploy)
+
+Release often in a single codestream? In other words, you are not 
+planning to maintain separate codestreams for each stable branch of Ceph?
+
+By the way, is there any other use for ceph-volume, other than as a tool 
+for deploying OSDs? If not, I don't see the "no direct bindings to 
+Ceph". It is bound to Ceph directly in that Ceph is the only reason for 
+its existence.
+
+Nathan
