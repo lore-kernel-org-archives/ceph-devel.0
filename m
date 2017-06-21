@@ -1,92 +1,64 @@
-From: Daniel Gryniewicz <dang@redhat.com>
-Subject: Re: RGW: Implement S3 storage class feature
-Date: Wed, 21 Jun 2017 11:50:14 -0400
-Message-ID: <092f8bc6-8222-b3b0-1b74-7133ae1c320d@redhat.com>
-References: <CAF8OO3Mo3xFbxioTedym+rByF1Eu3kNhHayn9mx1V6N5h-LWbQ@mail.gmail.com>
- <2035535832.26037779.1498053843582.JavaMail.zimbra@redhat.com>
- <b2db655b-eec8-aeb3-3428-1f12d1c28796@redhat.com>
- <CADRKj5Q4YZaYoPEABhjnNRNoN-vC1T=49knL9npHQpsSzWUr=w@mail.gmail.com>
-Reply-To: dang@redhat.com
+From: sheng qiu <herbert1984106@gmail.com>
+Subject: Re: How best to integrate dmClock QoS library into ceph codebase
+Date: Wed, 21 Jun 2017 10:38:32 -0700
+Message-ID: <CAB7xdikG-Pc8DfX7VJv905ZdM8E8wXtfgw_4q693SeNnzDZ63g@mail.gmail.com>
+References: <6D8EA95A-572E-4C71-A6AF-6BB8A6E8B26C@redhat.com>
+ <CAF1ivSaa=06CGGJRNQ_9QO_wy6Wc5yK4zbNFiHJLnoJJiqrCSg@mail.gmail.com> <f08daf3b-751a-6887-fce0-f5ab38097af4@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f180.google.com ([209.85.220.180]:36438 "EHLO
-        mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751007AbdFUQpp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jun 2017 12:45:45 -0400
-Received: by mail-qk0-f180.google.com with SMTP id p21so15207825qke.3
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Jun 2017 09:45:44 -0700 (PDT)
-In-Reply-To: <CADRKj5Q4YZaYoPEABhjnNRNoN-vC1T=49knL9npHQpsSzWUr=w@mail.gmail.com>
+Received: from mail-ua0-f173.google.com ([209.85.217.173]:34727 "EHLO
+        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751130AbdFURie (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jun 2017 13:38:34 -0400
+Received: by mail-ua0-f173.google.com with SMTP id z22so25377235uah.1
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Jun 2017 10:38:34 -0700 (PDT)
+In-Reply-To: <f08daf3b-751a-6887-fce0-f5ab38097af4@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
-Cc: Matt Benjamin <mbenjamin@redhat.com>, Jiaying Ren <mikulely@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "J. Eric Ivancich" <ivancich@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 06/21/2017 11:14 AM, Yehuda Sadeh-Weinraub wrote:
-> On Wed, Jun 21, 2017 at 7:46 AM, Daniel Gryniewicz <dang@redhat.com> wrote:
->> On 06/21/2017 10:04 AM, Matt Benjamin wrote:
->>>
->>> Hi,
->>>
->>> Looks very coherent.
->>>
->>> My main question is about...
->>>
->>> ----- Original Message -----
->>>>
->>>> From: "Jiaying Ren" <mikulely@gmail.com>
->>>> To: "Yehuda Sadeh-Weinraub" <ysadehwe@redhat.com>
->>>> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
->>>> Sent: Wednesday, June 21, 2017 7:39:24 AM
->>>> Subject: RGW: Implement S3 storage class feature
->>>>
->>>
->>>>
->>>> * Todo List
->>>>
->>>> + the head of rgw-object should only contains the metadata of
->>>>   rgw-object,the first chunk of rgw-object data should be stored in
->>>>   the same pool as the tail of rgw-object
->>>
->>>
->>> Is this always desirable?
->>>
+hi Eric,
+
+we are pretty interested in your dmclock integration work with CEPH.
+After reading your pull request, i am a little confusing.
+May i ask if the setting in config such as
+osd_op_queue_mclock_client_op_res functioning in your added dmclock's
+queues and their enqueue and dequeue methods?
+the below enqueue function insert request into a map<priority,
+subqueue>, i guess for mclock_opclass queue, you set high priority for
+client op and lower for scrub, recovery, etc.
+Within each subqueue of same priority, did you do FIFO?
+
+void enqueue_strict(K cl, unsigned priority, T item) override final {
+    high_queue[priority].enqueue(cl, 0, item);
+}
+
+I am appreciated if you can provide some comments, especially if i
+didn't understand correctly.
+
+Thanks,
+Sheng
+
+
+On Tue, May 16, 2017 at 5:29 AM, J. Eric Ivancich <ivancich@redhat.com> wrote:
+> On 05/15/2017 10:46 PM, Ming Lin wrote:
+>> Hi Eric,
 >>
->> Well, unless the head pool happens to have the correct storage class, it's
->> necessary.  And I'd guess that verification of this is complicated, although
->> maybe not.
->>
->> Maybe we can use the head pool if it has >= the correct storage class?
->>
-> My original thinking was that when we reassign an object to a new
-> placement, we only touch its tail which is incompatible with that.
-> However, thinking about it some more I don't see why we need to have
-> this limitation, so it's probably possible to keep the data in the
-> head in one case, and modify the object and have the data in the tail
-> (object's head will need to be rewritten anyway because we modify the
-> manifest).
-> I think that the decision whether we keep data in the head could be a
-> property of the zone. In any case, once an object is created changing
-> this property will only affect newly created objects, and old objects
-> could still be read correctly. Having data in the head is an
-> optimization that supposedly reduces small objects latency, and I
-> still think it's useful in a mixed pools situation. The thought is
-> that the bulk of the data will be at the tail anyway. However, we
-> recently changed the default head size from 512k to 4M, so this might
-> not be true any more. Anyhow, I favour having this as a configurable
-> (which should be simple to add).
+>> Do you have any integration patches I can have a try?
+> Hi Ming,
 >
-> Yehuda
+> The dmClock library became part of the master branch in early May.
 >
-
-
-I would be strongly against keeping data in the head when the head is in 
-a lower-level storage class.  That means that the entire object is 
-violating the constraints of the storage class.
-
-Of course, having the head in a lower storage class (data or not) is 
-probably a violation.  Maybe we'd have to require that all heads go in 
-the highest storage class.
-
-Daniel
+> Also, two implementations of the dmClock QoS are in a pull request
+> currently being reviewed:
+>
+>     https://github.com/ceph/ceph/pull/14997
+>
+> Eric
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
