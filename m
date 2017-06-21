@@ -1,378 +1,309 @@
 From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: ceph-deploy mon create-initial errors on centos 7
-Date: Wed, 21 Jun 2017 07:48:43 -0400
-Message-ID: <CAC-Np1xdDjkZd8XCv5LtpRPNaSmFnG6z7TLFCtsFE8qZPa9Rjg@mail.gmail.com>
-References: <CAC4_f3sgoVnde6-3wTP6Q=PGzmE+3B-AZDUu4ysCCZzPs0p+YA@mail.gmail.com>
- <CAC-Np1wrCUgxQt=F56Bn6TAx+sHew0uFGoYR8MOihXci5UgpSQ@mail.gmail.com>
- <CAC4_f3uY_LhEYYkiqkUH9tqTXPs48SyrgOnexH+34ynm6zQYVw@mail.gmail.com> <CAC4_f3tHqw3xVWhHeWCJ8DWYX=x2ebj=QCPgU_jmpaUgY6O4Qg@mail.gmail.com>
+Subject: Re: EXT: [ceph-users] ceph-lvm - a tool to deploy OSDs from LVM volumes
+Date: Wed, 21 Jun 2017 08:33:04 -0400
+Message-ID: <CAC-Np1xdZCjBKh0S1TFCHrMWMWyCY2EmjVSQ+tRGXk1ybjqLAQ@mail.gmail.com>
+References: <A5E80C1D-74F4-455B-8257-5B9E2FF6AB39@walmart.com>
+ <CAC-Np1yqCZO7CzEjTV+hrNve857BtM_rZ+LxAi6Vf9UJkPM04g@mail.gmail.com>
+ <CALe9h7cV6U3A_OT9R8tv_yPoGG9zFaWF3qXV5cwYK0KM-NDu4g@mail.gmail.com>
+ <CAC-Np1yiRgkmhZCOij9qSBmqUo-YYtErWXk2gevYuvWKrYFyeg@mail.gmail.com>
+ <CALe9h7cT54esfoT=eOgZq=ZbYAp1pjH_CeLiz-kFO61jABasrA@mail.gmail.com>
+ <CAC-Np1zwnzcwFBn4kqAzuhwmk9vZv1ZiUdd7owQZkA76k=QYuA@mail.gmail.com>
+ <CALe9h7cxPioPHLw48Gj02bEkD-HC49yHT8kG62AyLm_V9KnOZQ@mail.gmail.com>
+ <CAC-Np1xe3M9WdNGTZrMhf1inhQBWzT5OLc7BexKCa8ngeUJhRw@mail.gmail.com> <alpine.DEB.2.11.1706192145151.32269@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f181.google.com ([209.85.128.181]:35640 "EHLO
-        mail-wr0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751093AbdFULsp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jun 2017 07:48:45 -0400
-Received: by mail-wr0-f181.google.com with SMTP id y25so92280152wrd.2
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Jun 2017 04:48:45 -0700 (PDT)
-In-Reply-To: <CAC4_f3tHqw3xVWhHeWCJ8DWYX=x2ebj=QCPgU_jmpaUgY6O4Qg@mail.gmail.com>
+Received: from mail-wr0-f176.google.com ([209.85.128.176]:35249 "EHLO
+        mail-wr0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751118AbdFUMdG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jun 2017 08:33:06 -0400
+Received: by mail-wr0-f176.google.com with SMTP id y25so93903307wrd.2
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Jun 2017 05:33:05 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1706192145151.32269@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Prince Hamandawana <phamandawana@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Jun 20, 2017 at 8:35 PM, Prince Hamandawana
-<phamandawana@gmail.com> wrote:
-> I also tried to run a virtual cluster with vstart trying to check
-> where the issue issue might be emanating from.
-
-vstart :(
-
-I think that is just a quick workaround for development, not really
-the supported way to deploy a cluster.
-
-Did you check if the systemd units where saying anything about the mon
-not starting? When the socket is not there
-it means that the mon wasn't able to start. So `journalctl -xe` and
-`systemctl status ceph-mon` is what you want to look at
-besides /var/log/ceph/*
-
-
-
-> If I start vstart i run
-> in the following errors
->
-> creating /root/ceph_ajou/src/keyring
-> ./monmaptool --create --clobber --add a 172.20.1.8:6789 --add b
-> 172.20.1.8:6790 --add c 172.20.1.8:6791 --print /tmp/ceph_monmap.31364
-> ./monmaptool: monmap file /tmp/ceph_monmap.31364
-> ./monmaptool: generated fsid 96a11160-5ebc-47fb-bf83-d26685ed6c37
-> epoch 0
-> fsid 96a11160-5ebc-47fb-bf83-d26685ed6c37
-> last_changed 2017-06-21 09:32:03.110846
-> created 2017-06-21 09:32:03.110846
-> 0: 172.20.1.8:6789/0 mon.a
-> 1: 172.20.1.8:6790/0 mon.b
-> 2: 172.20.1.8:6791/0 mon.c
-> ./monmaptool: writing epoch 0 to /tmp/ceph_monmap.31364 (3 monitors)
-> rm -rf /root/ceph_ajou/src/dev/mon.a
-> mkdir -p /root/ceph_ajou/src/dev/mon.a
-> ./ceph-mon --mkfs -c /root/ceph_ajou/src/ceph.conf -i a
-> --monmap=/tmp/ceph_monmap.31364 --keyring=/root/ceph_ajou/src/keyring
-> 2017-06-21 09:32:03.125803 2aade3726a80 -1 WARNING: the following
-> dangerous and experimental features are enabled: *
-> 2017-06-21 09:32:03.126064 2aade3726a80 -1 WARNING: the following
-> dangerous and experimental features are enabled: *
-> ./ceph-mon: set fsid to 49478204-20fc-4599-a54c-0f48a5037e33
-> pthread lock: Invalid argument
-> *** Caught signal (Aborted) **
->  in thread 2aade3726a80 thread_name:ceph-mon
->  ceph version 1cbcead5bbff7da39dcc93cf233c15cc3ce9b9d
-> (21cbcead5bbff7da39dcc93cf233c15cc3ce9b9d)
->  1: (()+0x4f1082) [0x2aade32fd082]
->  2: (()+0xf370) [0x2aaded996370]
->  3: (gsignal()+0x37) [0x2aadef03e1d7]
->  4: (abort()+0x148) [0x2aadef03f8c8]
->  5: (()+0x14450) [0x2aadecfda450]
->  6: (leveldb::port::Mutex::Unlock()+0) [0x2aaded007d90]
->  7: (leveldb::DBImpl::~DBImpl()+0x2a) [0x2aadecfdf8ba]
->  8: (leveldb::DBImpl::~DBImpl()+0x9) [0x2aadecfdfc29]
->  9: (LevelDBStore::LevelDBWholeSpaceIteratorImpl::lower_bound(std::string
-> const&, std::string const&)+0x39) [0x2aade31db139]
->  10: (LevelDBStore::get(std::string const&, std::string const&,
-> ceph::buffer::list*)+0x163) [0x2aade31d90a3]
->  11: (Monitor::check_fsid()+0xa0) [0x2aade3079d60]
->  12: (Monitor::mkfs(ceph::buffer::list&)+0x87) [0x2aade308a037]
->  13: (main()+0xd4c) [0x2aade30158ec]
->  14: (__libc_start_main()+0xf5) [0x2aadef02ab35]
->  15: (()+0x25d2aa) [0x2aade30692aa]
-> 2017-06-21 09:32:03.234727 2aade3726a80 -1 *** Caught signal (Aborted) **
->  in thread 2aade3726a80 thread_name:ceph-mon
->
->  ceph version 1cbcead5bbff7da39dcc93cf233c15cc3ce9b9d
-> (21cbcead5bbff7da39dcc93cf233c15cc3ce9b9d)
->  1: (()+0x4f1082) [0x2aade32fd082]
->  2: (()+0xf370) [0x2aaded996370]
->  3: (gsignal()+0x37) [0x2aadef03e1d7]
->  4: (abort()+0x148) [0x2aadef03f8c8]
->  5: (()+0x14450) [0x2aadecfda450]
->  6: (leveldb::port::Mutex::Unlock()+0) [0x2aaded007d90]
->  7: (leveldb::DBImpl::~DBImpl()+0x2a) [0x2aadecfdf8ba]
->  8: (leveldb::DBImpl::~DBImpl()+0x9) [0x2aadecfdfc29]
->  9: (LevelDBStore::LevelDBWholeSpaceIteratorImpl::lower_bound(std::string
-> const&, std::string const&)+0x39) [0x2aade31db139]
->  10: (LevelDBStore::get(std::string const&, std::string const&,
-> ceph::buffer::list*)+0x163) [0x2aade31d90a3]
->  11: (Monitor::check_fsid()+0xa0) [0x2aade3079d60]
->  12: (Monitor::mkfs(ceph::buffer::list&)+0x87) [0x2aade308a037]
->  13: (main()+0xd4c) [0x2aade30158ec]
->  14: (__libc_start_main()+0xf5) [0x2aadef02ab35]
->  15: (()+0x25d2aa) [0x2aade30692aa]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
->
->     -8> 2017-06-21 09:32:03.125803 2aade3726a80 -1 WARNING: the
-> following dangerous and experimental features are enabled: *
->     -6> 2017-06-21 09:32:03.126064 2aade3726a80 -1 WARNING: the
-> following dangerous and experimental features are enabled: *
->      0> 2017-06-21 09:32:03.234727 2aade3726a80 -1 *** Caught signal
-> (Aborted) **
->  in thread 2aade3726a80 thread_name:ceph-mon
->
->  ceph version 1cbcead5bbff7da39dcc93cf233c15cc3ce9b9d
-> (21cbcead5bbff7da39dcc93cf233c15cc3ce9b9d)
->  1: (()+0x4f1082) [0x2aade32fd082]
->  2: (()+0xf370) [0x2aaded996370]
->  3: (gsignal()+0x37) [0x2aadef03e1d7]
->  4: (abort()+0x148) [0x2aadef03f8c8]
->  5: (()+0x14450) [0x2aadecfda450]
->  6: (leveldb::port::Mutex::Unlock()+0) [0x2aaded007d90]
->  7: (leveldb::DBImpl::~DBImpl()+0x2a) [0x2aadecfdf8ba]
->  8: (leveldb::DBImpl::~DBImpl()+0x9) [0x2aadecfdfc29]
->  9: (LevelDBStore::LevelDBWholeSpaceIteratorImpl::lower_bound(std::string
-> const&, std::string const&)+0x39) [0x2aade31db139]
->  10: (LevelDBStore::get(std::string const&, std::string const&,
-> ceph::buffer::list*)+0x163) [0x2aade31d90a3]
->  11: (Monitor::check_fsid()+0xa0) [0x2aade3079d60]
->  12: (Monitor::mkfs(ceph::buffer::list&)+0x87) [0x2aade308a037]
->  13: (main()+0xd4c) [0x2aade30158ec]
->  14: (__libc_start_main()+0xf5) [0x2aadef02ab35]
->  15: (()+0x25d2aa) [0x2aade30692aa]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
->
-> ./vstart.sh: line 570: 31542 Aborted                 $cmd
-> [root@dumbo008 src]#
->
-> On Wed, Jun 21, 2017 at 9:29 AM, Prince Hamandawana
-> <phamandawana@gmail.com> wrote:
->> I have overwritten my ceph.conf file but still i got the same errors.
->> After that I purged all my nodes and deleted all keys so i start a new
->> deployment. When I deploy the initial monitors I again run into the
->> following errors;
+On Mon, Jun 19, 2017 at 5:58 PM, Sage Weil <sweil@redhat.com> wrote:
+> On Mon, 19 Jun 2017, Alfredo Deza wrote:
+>> On Mon, Jun 19, 2017 at 4:24 PM, John Spray <jspray@redhat.com> wrote:
+>> > On Mon, Jun 19, 2017 at 6:53 PM, Alfredo Deza <adeza@redhat.com> wrote:
+>> >>>> * faster release cycles
+>> >>>> * easier and faster to test
+>> >>>
+>> >>> I think having one part of Ceph on a different release cycle to the
+>> >>> rest of Ceph is an even more dramatic thing than having it in a
+>> >>> separate git repository.
+>> >>>
+>> >>> It seems like there is some dissatisfaction with how the Ceph project
+>> >>> as whole is doing things that is driving you to try and do work
+>> >>> outside of the repo where the rest of the project lives -- if the
+>> >>> release cycles or test infrastructure within Ceph are not adequate for
+>> >>> the tool that formats drives for OSDs, what can we do to fix them?
+>> >>
+>> >> It isn't Ceph the project :)
+>> >>
+>> >> Not every tool about Ceph has to come from ceph.git, in which case the
+>> >> argument could be flipped around: why isn't ceph-installer,
+>> >> ceph-ansible, ceph-deploy, radosgw-agent, etc... all coming from
+>> >> within ceph.git ?
+>> >
+>> > ceph-installer, ceph-deploy and ceph-ansible are special cases because
+>> > they are installers, that operate before a particular version of Ceph
+>> > has been selected for installation, and might operate on two
+>> > differently versioned clusters at the same time.
 >>
->> [root@dumbo008 my-cluster]# ceph-deploy mon create-initial
->> [ceph_deploy.conf][DEBUG ] found configuration file at: /root/.cephdeploy.conf
->> [ceph_deploy.cli][INFO  ] Invoked (1.5.37): /usr/bin/ceph-deploy mon
->> create-initial
->> [ceph_deploy.cli][INFO  ] ceph-deploy options:
->> [ceph_deploy.cli][INFO  ]  username                      : None
->> [ceph_deploy.cli][INFO  ]  verbose                       : False
->> [ceph_deploy.cli][INFO  ]  overwrite_conf                : False
->> [ceph_deploy.cli][INFO  ]  subcommand                    : create-initial
->> [ceph_deploy.cli][INFO  ]  quiet                         : False
->> [ceph_deploy.cli][INFO  ]  cd_conf                       :
->> <ceph_deploy.conf.cephdeploy.Conf instance at 0x106afc8>
->> [ceph_deploy.cli][INFO  ]  cluster                       : ceph
->> [ceph_deploy.cli][INFO  ]  func                          : <function
->> mon at 0x10625f0>
->> [ceph_deploy.cli][INFO  ]  ceph_conf                     : None
->> [ceph_deploy.cli][INFO  ]  default_release               : False
->> [ceph_deploy.cli][INFO  ]  keyrings                      : None
->> [ceph_deploy.mon][DEBUG ] Deploying mon, cluster ceph hosts dumbo007 dumbo008
->> [ceph_deploy.mon][DEBUG ] detecting platform for host dumbo007 ...
->> [dumbo007][DEBUG ] connected to host: dumbo007
->> [dumbo007][DEBUG ] detect platform information from remote host
->> [dumbo007][DEBUG ] detect machine type
->> [dumbo007][DEBUG ] find the location of an executable
->> [ceph_deploy.mon][INFO  ] distro info: CentOS Linux 7.3.1611 Core
->> [dumbo007][DEBUG ] determining if provided host has same hostname in remote
->> [dumbo007][DEBUG ] get remote short hostname
->> [dumbo007][DEBUG ] deploying mon to dumbo007
->> [dumbo007][DEBUG ] get remote short hostname
->> [dumbo007][DEBUG ] remote hostname: dumbo007
->> [dumbo007][DEBUG ] write cluster configuration to /etc/ceph/{cluster}.conf
->> [dumbo007][DEBUG ] create the mon path if it does not exist
->> [dumbo007][DEBUG ] checking for done path: /var/lib/ceph/mon/ceph-dumbo007/done
->> [dumbo007][DEBUG ] create a done file to avoid re-doing the mon deployment
->> [dumbo007][DEBUG ] create the init path if it does not exist
->> [dumbo007][INFO  ] Running command: systemctl enable ceph.target
->> [dumbo007][INFO  ] Running command: systemctl enable ceph-mon@dumbo007
->> [dumbo007][INFO  ] Running command: systemctl start ceph-mon@dumbo007
->> [dumbo007][INFO  ] Running command: ceph --cluster=ceph --admin-daemon
->> /var/run/ceph/ceph-mon.dumbo007.asok mon_status
->> [dumbo007][ERROR ] admin_socket: exception getting command
->> descriptions: [Errno 111] Connection refused
->> [dumbo007][WARNIN] monitor: mon.dumbo007, might not be running yet
->> [dumbo007][INFO  ] Running command: ceph --cluster=ceph --admin-daemon
->> /var/run/ceph/ceph-mon.dumbo007.asok mon_status
->> [dumbo007][ERROR ] admin_socket: exception getting command
->> descriptions: [Errno 111] Connection refused
->> [dumbo007][WARNIN] monitor dumbo007 does not exist in monmap
->> [dumbo007][WARNIN] neither `public_addr` nor `public_network` keys are
->> defined for monitors
->> [dumbo007][WARNIN] monitors may not be able to form quorum
->> [ceph_deploy.mon][DEBUG ] detecting platform for host dumbo008 ...
->> [dumbo008][DEBUG ] connected to host: dumbo008
->> [dumbo008][DEBUG ] detect platform information from remote host
->> [dumbo008][DEBUG ] detect machine type
->> [dumbo008][DEBUG ] find the location of an executable
->> [ceph_deploy.mon][INFO  ] distro info: CentOS Linux 7.3.1611 Core
->> [dumbo008][DEBUG ] determining if provided host has same hostname in remote
->> [dumbo008][DEBUG ] get remote short hostname
->> [dumbo008][DEBUG ] deploying mon to dumbo008
->> [dumbo008][DEBUG ] get remote short hostname
->> [dumbo008][DEBUG ] remote hostname: dumbo008
->> [dumbo008][DEBUG ] write cluster configuration to /etc/ceph/{cluster}.conf
->> [dumbo008][DEBUG ] create the mon path if it does not exist
->> [dumbo008][DEBUG ] checking for done path: /var/lib/ceph/mon/ceph-dumbo008/done
->> [dumbo008][DEBUG ] create a done file to avoid re-doing the mon deployment
->> [dumbo008][DEBUG ] create the init path if it does not exist
->> [dumbo008][INFO  ] Running command: systemctl enable ceph.target
->> [dumbo008][INFO  ] Running command: systemctl enable ceph-mon@dumbo008
->> [dumbo008][INFO  ] Running command: systemctl start ceph-mon@dumbo008
->> [dumbo008][INFO  ] Running command: ceph --cluster=ceph --admin-daemon
->> /var/run/ceph/ceph-mon.dumbo008.asok mon_status
->> [dumbo008][ERROR ] admin_socket: exception getting command
->> descriptions: [Errno 111] Connection refused
->> [dumbo008][WARNIN] monitor: mon.dumbo008, might not be running yet
->> [dumbo008][INFO  ] Running command: ceph --cluster=ceph --admin-daemon
->> /var/run/ceph/ceph-mon.dumbo008.asok mon_status
->> [dumbo008][ERROR ] admin_socket: exception getting command
->> descriptions: [Errno 111] Connection refused
->> [dumbo008][WARNIN] monitor dumbo008 does not exist in monmap
->> [dumbo008][WARNIN] neither `public_addr` nor `public_network` keys are
->> defined for monitors
->> [dumbo008][WARNIN] monitors may not be able to form quorum
->> [ceph_deploy.mon][INFO  ] processing monitor mon.dumbo007
->> [dumbo007][DEBUG ] connected to host: dumbo007
->> [dumbo007][DEBUG ] detect platform information from remote host
->> [dumbo007][DEBUG ] detect machine type
->> [dumbo007][DEBUG ] find the location of an executable
->> [dumbo007][INFO  ] Running command: ceph --cluster=ceph --admin-daemon
->> /var/run/ceph/ceph-mon.dumbo007.asok mon_status
->> [dumbo007][ERROR ] admin_socket: exception getting command
->> descriptions: [Errno 111] Connection refused
->> [ceph_deploy.mon][WARNIN] mon.dumbo007 monitor is not yet in quorum,
->> tries left: 5
->> [ceph_deploy.mon][WARNIN] waiting 5 seconds before retrying
->> [dumbo007][INFO  ] Running command: ceph --cluster=ceph --admin-daemon
->> /var/run/ceph/ceph-mon.dumbo007.asok mon_status
->> [dumbo007][ERROR ] admin_socket: exception getting command
->> descriptions: exception: [Errno 104] Connection reset by peer
->> [ceph_deploy.mon][WARNIN] mon.dumbo007 monitor is not yet in quorum,
->> tries left: 4
->> [ceph_deploy.mon][WARNIN] waiting 10 seconds before retrying
+>> This is a perfect use case for ceph-volume, the OSD doesn't (and in
+>> most cases this is true) care what is beneath it, as long
+>> as it is mounted and has what it needs to function. The rest is
+>> *almost like installation*.
+>
+> This isn't really true.  ceph-volume (or ceph-disk lvm, or whatever we
+> call it) is going to have specific knowledge about how to provision the
+> OSD.  When we change the bootstrap-osd caps and change hte semantics of
+> 'osd new' (take, for example, teh change we just made from 'osd create' to
+> 'osd new'), then ceph-mon, the cephx caps, and ceph-disk all have to
+> change in unison.  More concretely, with bluestore we have all kinds of
+> choices of how we provision the volumes (what sizes, what options for
+> rocksdb, whatever), those opinions will be enshrine in ceph-volume, and
+> they will change from version to version... likely in unison with
+> bluestore itself (as the code changes the best practice and
+> recommendations change with it).
+>
+> In contrast, I can't think of a reason why ceph-volume without change
+> independently of ceph-osd.  There is no bootstrap issue like with
+> installation.  And no reason why you would want to run different between
+> different versions.
+>
+>
+>
+>> > radosgw-agent, presumably (I haven't worked on it) is separate because
+>> > it sits between two clusters but is logically part of neither, and
+>> > those clusters could potentially be different-versioned too.
+>> >
+>> > ceph-disk, on the other hand, rides alongside ceph-osd, writes a
+>> > format that ceph-osd needs to understand, the two go together
+>> > everywhere.  You use whatever version of ceph-disk corresponds to the
+>> > ceph-osd package you have.  You run whatever ceph-osd corresponds to
+>> > the version of ceph-disk you just used.  The two things are not
+>> > separate, any more than ceph-objectstore-tool would be.
 >>
->> On Tue, Jun 20, 2017 at 11:33 PM, Alfredo Deza <adeza@redhat.com> wrote:
->>> On Tue, Jun 20, 2017 at 4:43 AM, Prince Hamandawana
->>> <phamandawana@gmail.com> wrote:
->>>> Dear all
->>>>
->>>> I am having problems when trying to deploy my initial monitors via
->>>> ceph-deplyoy on centos 7 . The version of ceph I am running is ceph
->>>> version 10.2.7 (50e863e0f4bc8f4b9e31156de690d765af245185). When I run
->>>> ceph-deploy mon create-initial, i get the following errors ;
->>>>
->>>> [root@dumbo008 my-cluster]# ceph-deploy mon create-initial
->>>> [ceph_deploy.conf][DEBUG ] found configuration file at: /root/.cephdeploy.conf
->>>> [ceph_deploy.cli][INFO  ] Invoked (1.5.37): /usr/bin/ceph-deploy mon
->>>> create-initial
->>>> [ceph_deploy.cli][INFO  ] ceph-deploy options:
->>>> [ceph_deploy.cli][INFO  ]  username                      : None
->>>> [ceph_deploy.cli][INFO  ]  verbose                       : False
->>>> [ceph_deploy.cli][INFO  ]  overwrite_conf                : False
->>>> [ceph_deploy.cli][INFO  ]  subcommand                    : create-initial
->>>> [ceph_deploy.cli][INFO  ]  quiet                         : False
->>>> [ceph_deploy.cli][INFO  ]  cd_conf                       :
->>>> <ceph_deploy.conf.cephdeploy.Conf instance at 0x27b5fc8>
->>>> [ceph_deploy.cli][INFO  ]  cluster                       : ceph
->>>> [ceph_deploy.cli][INFO  ]  func                          : <function
->>>> mon at 0x27ad5f0>
->>>> [ceph_deploy.cli][INFO  ]  ceph_conf                     : None
->>>> [ceph_deploy.cli][INFO  ]  default_release               : False
->>>> [ceph_deploy.cli][INFO  ]  keyrings                      : None
->>>> [ceph_deploy.mon][DEBUG ] Deploying mon, cluster ceph hosts dumbo007 dumbo008
->>>> [ceph_deploy.mon][DEBUG ] detecting platform for host dumbo007 ...
->>>> [dumbo007][DEBUG ] connected to host: dumbo007
->>>> [dumbo007][DEBUG ] detect platform information from remote host
->>>> [dumbo007][DEBUG ] detect machine type
->>>> [dumbo007][DEBUG ] find the location of an executable
->>>> [ceph_deploy.mon][INFO  ] distro info: CentOS Linux 7.3.1611 Core
->>>> [dumbo007][DEBUG ] determining if provided host has same hostname in remote
->>>> [dumbo007][DEBUG ] get remote short hostname
->>>> [dumbo007][DEBUG ] deploying mon to dumbo007
->>>> [dumbo007][DEBUG ] get remote short hostname
->>>> [dumbo007][DEBUG ] remote hostname: dumbo007
->>>> [dumbo007][DEBUG ] write cluster configuration to /etc/ceph/{cluster}.conf
->>>> [dumbo007][DEBUG ] create the mon path if it does not exist
->>>> [dumbo007][DEBUG ] checking for done path: /var/lib/ceph/mon/ceph-dumbo007/done
->>>> [dumbo007][DEBUG ] create a done file to avoid re-doing the mon deployment
->>>> [dumbo007][DEBUG ] create the init path if it does not exist
->>>> [dumbo007][INFO  ] Running command: systemctl enable ceph.target
->>>> [dumbo007][INFO  ] Running command: systemctl enable ceph-mon@dumbo007
->>>> [dumbo007][INFO  ] Running command: systemctl start ceph-mon@dumbo007
->>>> [dumbo007][INFO  ] Running command: ceph --cluster=ceph --admin-daemon
->>>> /var/run/ceph/ceph-mon.dumbo007.asok mon_status
->>>> [dumbo007][ERROR ] admin_socket: exception getting command
->>>> descriptions: [Errno 111] Connection refused
->>>> [dumbo007][WARNIN] monitor: mon.dumbo007, might not be running yet
->>>> [dumbo007][INFO  ] Running command: ceph --cluster=ceph --admin-daemon
->>>> /var/run/ceph/ceph-mon.dumbo007.asok mon_status
->>>> [dumbo007][ERROR ] admin_socket: exception getting command
->>>> descriptions: [Errno 111] Connection refused
->>>> [dumbo007][WARNIN] monitor dumbo007 does not exist in monmap
->>>> [dumbo007][WARNIN] neither `public_addr` nor `public_network` keys are
->>>> defined for monitors
->>>> [dumbo007][WARNIN] monitors may not be able to form quorum
->>>> [ceph_deploy.mon][DEBUG ] detecting platform for host dumbo008 ...
->>>> [dumbo008][DEBUG ] connected to host: dumbo008
->>>> [dumbo008][DEBUG ] detect platform information from remote host
->>>> [dumbo008][DEBUG ] detect machine type
->>>> [dumbo008][DEBUG ] find the location of an executable
->>>> [ceph_deploy.mon][INFO  ] distro info: CentOS Linux 7.3.1611 Core
->>>> [dumbo008][DEBUG ] determining if provided host has same hostname in remote
->>>> [dumbo008][DEBUG ] get remote short hostname
->>>> [dumbo008][DEBUG ] deploying mon to dumbo008
->>>> [dumbo008][DEBUG ] get remote short hostname
->>>> [dumbo008][DEBUG ] remote hostname: dumbo008
->>>> [dumbo008][DEBUG ] write cluster configuration to /etc/ceph/{cluster}.conf
->>>> [ceph_deploy.mon][ERROR ] RuntimeError: config file
->>>> /etc/ceph/ceph.conf exists with different content; use
->>>> --overwrite-conf to overwrite
->>>> [ceph_deploy][ERROR ] GenericError: Failed to create 1 monitors
->>>>
->>>>
->>>> this is my ceph.conf file
->>>> [root@dumbo008 my-cluster]#
->>>> [root@dumbo008 my-cluster]# vim ceph.conf
->>>> [global]
->>>> fsid = f3207ed8-8b96-4650-a76e-f42c91ffb42c
->>>> mon_initial_members = dumbo007, dumbo008
->>>> mon_host = 172.20.1.7,172.20.1.8
->>>> auth_cluster_required = cephx
->>>> auth_service_required = cephx
->>>> auth_client_required = cephx
->>>>
->>>> Below is the information of my Linux OS
->>>> [root@dumbo008 my-cluster]# uname -a
->>>> Linux dumbo008 3.10.0-327.el7.x86_64 #1 SMP Thu Nov 19 22:10:57 UTC
->>>> 2015 x86_64 x86_64 x86_64 GNU/Linux
->>>>
->>>> [root@dumbo008 my-cluster]#
->>>> [root@dumbo008 my-cluster]# lsb_release -d
->>>> Description: CentOS Linux release 7.3.1611 (Core)
->>>> [root@dumbo008 my-cluster]#
->>>> [root@dumbo008 my-cluster]# lsb_release
->>>> LSB Version: :core-4.1-amd64:core-4.1-ia32:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-ia32:cxx-4.1-noarch:desktop-4.1-amd64:
->>>> desktop-4.1-ia32:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch
->>>>
->>>> Can someone help.
->>>
->>> This here tells me you have tried this more than once:
->>>
->>>> [ceph_deploy.mon][ERROR ] RuntimeError: config file
->>>> /etc/ceph/ceph.conf exists with different content; use
->>>> --overwrite-conf to overwrite
->>>
->>> Or possibly deployed to a host that had left overs from another
->>> cluster. There are many reasons why a monitor may not come up, you
->>> could
->>> try looking at the logs in the `dumbo007` box and look at
->>> /var/log/ceph/* and `journalctl -xe` to find out what the unit file is
->>> complaining about.
->>>
->>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> The OSD needs a mounted volume that has pieces that the OSD itself
+>> puts in there. It is a bit convoluted because
+>> there are other steps, but the tool itself isn't crucial for the OSD
+>> to function, it is borderline an orchestrator to get the volume
+>> where the OSD runs ready.
+>>
+>> >
+>> > It would be more intuitive if we had called ceph-disk
+>> > "ceph-osd-format" or similar.  The utility that prepares drives for
+>> > use by the OSD naturally belongs in the same package (or at the very
+>> > least the same release!) as the OSD code that reads that on-disk
+>> > format.
+>> >
+>> > There is a very clear distinction in my mind between things that
+>> > install Ceph (i.e. they operate before the ceph packages are on the
+>> > system), and things that prepare the system (a particular Ceph version
+>> > is already installed, we're just getting ready to run it).
+>> > ceph-objectstore-tool would be another example of something that
+>> > operates on the drives, but is intimately coupled to the OSDs and
+>> > would not make sense as a separately released thing.
+>>
+>> And ceph-disk isn't really coupled (maybe a tiny corner of it is). Or
+>> maybe you can exemplify how those are tied? I've gone through every
+>> single step to get an OSD, and although in some cases it is a bit more
+>> complex, it isn't more than a few steps (6 in total from our own docs):
+>>
+>> http://docs.ceph.com/docs/master/rados/operations/add-or-rm-osds/#adding-an-osd-manual
+>>
+>> ceph-ansible *does* prepare a system for running Ceph, so does
+>> ceph-docker. ceph-disk has had some pitfalls that ceph-ansible has to
+>> workaround, and has to implement other things as well to be able to
+>> deploy OSDs.
+>
+> Again, I think the 'osd create' -> 'osd new' is a perfect example of
+> coupling.  And I anticipate others with bluestore.  For example, when we
+> start supporting SPDK for NVMe (kernel bypass) the interface for setting
+> that up will likely evolve and will need to match the behavior in
+> ceph-volume.
+>
+> [...]
+>
+> Perhaps we can look at this from the other angle, though?  Why *should*
+> this particular tool be separate?
+>
+>
+>> >>>> Is your argument only to have parity in Ceph's branching? That was
+>> >>>> never a problem with out-of-tree tools like ceph-deploy for example.
+>> >>>
+>> >>> I guess my argument isn't so much an argument as it is an assertion
+>> >>> that if you want to go your own way then you need to have a really
+>> >>> strong clear reason.
+>> >>
+>> >> Many! Like I mentioned: easier testing, faster release cycle, can
+>> >> publish in any package index, doesn't need anything in ceph.git to
+>> >> operate, etc..
+>> >
+>> > Testing: being separate is only easier if you're only doing python
+>> > unit testing.  If you're testing that ceph-disk/ceph-volume really
+>> > does its job, then you absolutely do want to be in the ceph tree, so
+>> > that you can fire up an OSD that checks that ceph-disk really did it's
+>> > job.
+>> >
+>> > Faster release cycle: we release pretty often.
+>>
+>> Uh, it depends on what "fast" means for you. 4 months waiting on a
+>> ceph-disk issue that was fixed/merged to have ceph-ansible not have that
+>> bug is not really fast.
+>
+> Can you be tell us more about this incident?  We are regular backport
+> changes to the stable branches, and have a pretty regular cadence for
+> stable release.
+
+I discussed this with Ken at some point, and going through those notes
+found a couple of things worth noting.
+
+* keeping/syncing up with feature bits is going to be easier:
+Although like I've mentioned this is not that hard to do, it will end
+up being one less thing to worry about
+
+* delays in backporting, or releases, is not something that should be
+worked around:
+In this case, it is clear I am trying to circumvent that to make other
+consumer(s) life easier, like in the case with ceph-ansible. Ken
+emphasized that issues like those need to bubble up so that leads are
+aware. A separate tool doesn't really improve that process.
+
+Since one of the initial agreements for this tool was to be outside of
+Ceph to promote faster development to get to a release, it was
+surprising to see
+push back in something that I didn't see was up for discussion.
+
+So I am still conflicted on ease of (initial) development. This will
+make things a bit slower for me, but the offset is that at some point
+it would make sense
+for the tool to live along the rest of the Ceph components. I will
+start working on porting the initial work over, and try to get some
+ad-hoc test harness for pull requests (which
+would also fix the issue of having to go through make check)
+
+Having said that, I want to reiterate (seems it may have been lost in
+the many back and forth) that it has not been my intention to
+criticize the Ceph release cycle, or
+any of the workflows for backporting features/fixes.
+
+Thanks all for the feedback
+>
+>> >  We release often
+>> > enough to deal with critical OSD and mon bugs.  The tool that formats
+>> > OSDs doesn't need to be released more often than the OSD itself.
+>>
+>> It does need to be released often when the tool is new!
+>
+> For development, we are doing builds on a continuous basis, with new
+> 'master' or branch packages every few hours in most cases.  And all of our
+> deployment tools can deploy those test branches...
+>
+>
+>> > I know how backwards that must sound, when you're looking at the
+>> > possibility of having a nice self contained git repo, that contains a
+>> > pypi-eligible python module, which has unit tests that run fast in
+>> > jenkins on every commit.  I get the appeal!  But for the sake of the
+>> > overall simplicity of Ceph, please think again, or if you really want
+>> > to convert us to a multi-repo model, then make that case for the
+>> > project as a whole rather than doing it individually on a bit-by-bit
+>> > basis.
+>>
+>> We can't make the world of Ceph repos to abide today by a multi-repo
+>> model. I would need to counter argue you for a few more months :)
+>>
+>> The examples you give for ceph-disk, and how ceph-disk is today, is why
+>> we want to change things.
+>>
+>> It is not only faster unit tests, or a "nice self contained git repo"
+>> just because we want to release to PyPI, we are facing a situation where
+>> we need faster development and increased release cycles that we can't
+>> get being in an already big repository.
+>
+> If I'm reading this right, the core reason is "faster development and
+> increased release cycles".  Can you explain what that means at a
+> practical level?  We build packages all day every day, and don't generally
+> need packages at all for development testing.  And any release that
+> uses ceph-volume is weeks away, and will be followed up by a regular
+> cadence of point releases.  Where is the limitation?
+>
+> Thanks!
+> sage
+>
+>
+>>
+>>
+>> >
+>> > John
+>> >
+>> >> Even in some cases like pybind, it has been requested numerous times
+>> >> to get them on separate package indexes like PyPI, but that has always
+>> >> been
+>> >> *tremendously* difficult: http://tracker.ceph.com/issues/5900
+>> >>>>>  - I agree with others that a single entrypoint (i.e. executable) will
+>> >>>>> be more manageable than having conspicuously separate tools, but we
+>> >>>>> shouldn't worry too much about making things "plugins" as such -- they
+>> >>>>> can just be distinct code inside one tool, sharing as much or as
+>> >>>>> little as they need.
+>> >>>>>
+>> >>>>> What if we delivered this set of LVM functionality as "ceph-disk lvm
+>> >>>>> ..." commands to minimise the impression that the tooling is changing,
+>> >>>>> even if internally it's all new/distinct code?
+>> >>>>
+>> >>>> That sounded appealing initially, but because we are introducing a
+>> >>>> very different API, it would look odd to interact
+>> >>>> with other subcommands without a normalized interaction. For example,
+>> >>>> for 'prepare' this would be:
+>> >>>>
+>> >>>> ceph-disk prepare [...]
+>> >>>>
+>> >>>> And for LVM it would possible be
+>> >>>>
+>> >>>> ceph-disk lvm prepare [...]
+>> >>>>
+>> >>>> The level at which these similar actions are presented imply that one
+>> >>>> may be a preferred (or even default) one, while the other one
+>> >>>> isn't.
+>> >>>>
+>> >>>> At one point we are going to add regular disk worfklows (replacing
+>> >>>> ceph-disk functionality) and then it would become even more
+>> >>>> confusing to keep it there (or do you think at that point we could split?)
+>> >>>>
+>> >>>>>
+>> >>>>> At the risk of being a bit picky about language, I don't like calling
+>> >>>>> this anything with "volume" in the name, because afaik we've never
+>> >>>>> ever called OSDs or the drives they occupy "volumes", so we're
+>> >>>>> introducing a whole new noun, and a widely used (to mean different
+>> >>>>> things) one at that.
+>> >>>>>
+>> >>>>
+>> >>>> We have never called them 'volumes' because there was never anything
+>> >>>> to support something other than regular disks, the approach
+>> >>>> has always been disks and partitions.
+>> >>>>
+>> >>>> A "volume" can be a physical volume (e.g. a disk) or a logical one
+>> >>>> (lvm, dmcache). It is an all-encompassing name to allow different
+>> >>>> device-like to work with.
+>> >>>
+>> >>> The trouble with "volume" is that it means so many things in so many
+>> >>> different storage systems -- I haven't often seen it used to mean
+>> >>> "block device" or "drive".  It's more often used to describe a logical
+>> >>> entity.  I also think "disk" is fine -- most people get the idea that
+>> >>> a disk is a hard drive but it could also be any block device.
+>> >>
+>> >> If your thinking is that a disk can be any block device then yes, we
+>> >> are at opposite ends here of our naming. We are picking a
+>> >> "widely used" term because it is not specific. "disk" sounds fairly
+>> >> specific, and we don't want that.
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
