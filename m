@@ -1,64 +1,33 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: Re: How best to integrate dmClock QoS library into ceph codebase
-Date: Wed, 21 Jun 2017 10:38:32 -0700
-Message-ID: <CAB7xdikG-Pc8DfX7VJv905ZdM8E8wXtfgw_4q693SeNnzDZ63g@mail.gmail.com>
-References: <6D8EA95A-572E-4C71-A6AF-6BB8A6E8B26C@redhat.com>
- <CAF1ivSaa=06CGGJRNQ_9QO_wy6Wc5yK4zbNFiHJLnoJJiqrCSg@mail.gmail.com> <f08daf3b-751a-6887-fce0-f5ab38097af4@redhat.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: Extra daemons/servers reporting to mgr
+Date: Wed, 21 Jun 2017 19:53:43 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1706211948570.32269@piezo.novalocal>
+References: <CALe9h7eT+7KUt7VZPaYfR49FEPP3mJbe2+ARK82BaZUMmStchw@mail.gmail.com> <CADRKj5RCQf8wv+Y3VsL=e_gB9URYzK0SkzGRVfTFQwcJn-OL4g@mail.gmail.com> <alpine.DEB.2.11.1706141943490.32269@piezo.novalocal> <CA+aFP1B0ngk-Wkfy0KXnkyRP2XZJqvce1qhdBfpL+5PcjmGNoQ@mail.gmail.com>
+ <alpine.DEB.2.11.1706191924150.32269@piezo.novalocal> <CAJ4mKGZCQP0FXh5NWA8429mFmZq3=oqFX=eJMRCPoapmEVJULg@mail.gmail.com> <alpine.DEB.2.11.1706202045410.32269@piezo.novalocal> <CAJ4mKGY8mGwi=F3mu-q_zB19L6VBDHeGEkyHGtY3oDafV2gQLQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f173.google.com ([209.85.217.173]:34727 "EHLO
-        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751130AbdFURie (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 21 Jun 2017 13:38:34 -0400
-Received: by mail-ua0-f173.google.com with SMTP id z22so25377235uah.1
-        for <ceph-devel@vger.kernel.org>; Wed, 21 Jun 2017 10:38:34 -0700 (PDT)
-In-Reply-To: <f08daf3b-751a-6887-fce0-f5ab38097af4@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:54973 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751108AbdFUTxr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 21 Jun 2017 15:53:47 -0400
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 370B380F97
+        for <ceph-devel@vger.kernel.org>; Wed, 21 Jun 2017 19:53:47 +0000 (UTC)
+In-Reply-To: <CAJ4mKGY8mGwi=F3mu-q_zB19L6VBDHeGEkyHGtY3oDafV2gQLQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "J. Eric Ivancich" <ivancich@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Jason Dillaman <dillaman@redhat.com>, Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-hi Eric,
+I've updated the pad at
 
-we are pretty interested in your dmclock integration work with CEPH.
-After reading your pull request, i am a little confusing.
-May i ask if the setting in config such as
-osd_op_queue_mclock_client_op_res functioning in your added dmclock's
-queues and their enqueue and dequeue methods?
-the below enqueue function insert request into a map<priority,
-subqueue>, i guess for mclock_opclass queue, you set high priority for
-client op and lower for scrub, recovery, etc.
-Within each subqueue of same priority, did you do FIFO?
+	http://pad.ceph.com/p/service-map
 
-void enqueue_strict(K cl, unsigned priority, T item) override final {
-    high_queue[priority].enqueue(cl, 0, item);
-}
+- commands mediated by mgr
+- (some) state persisted in config-key
+- a few use-cases outline explicitly
 
-I am appreciated if you can provide some comments, especially if i
-didn't understand correctly.
-
-Thanks,
-Sheng
-
-
-On Tue, May 16, 2017 at 5:29 AM, J. Eric Ivancich <ivancich@redhat.com> wrote:
-> On 05/15/2017 10:46 PM, Ming Lin wrote:
->> Hi Eric,
->>
->> Do you have any integration patches I can have a try?
-> Hi Ming,
->
-> The dmClock library became part of the master branch in early May.
->
-> Also, two implementations of the dmClock QoS are in a pull request
-> currently being reviewed:
->
->     https://github.com/ceph/ceph/pull/14997
->
-> Eric
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+sage
