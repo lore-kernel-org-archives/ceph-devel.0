@@ -1,143 +1,58 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Wed, 21 Jun 2017 21:27:02 -0700
-Message-ID: <594b471650911_6605116f32c8989d@ss1435.mail>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Jewel 10.2.8 UNBLOCKED (was Re: jewel 10.2.8 status - blocked)
+Date: Thu, 22 Jun 2017 08:26:30 +0200
+Message-ID: <aefed8a3-b22c-3955-6f95-1af414770acb@suse.cz>
+References: <5b7336d6-e7ee-d36d-5272-e807cb17a4b1@suse.cz>
+ <CAJ4mKGZ2NjRans3Goj6yb65+2kzkmro3sCA+uRXv8q6xANV=bw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from o5.24nn.shared.sendgrid.net ([50.31.63.1]:16853 "EHLO
-        o5.24nn.shared.sendgrid.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750812AbdFVE1E (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 22 Jun 2017 00:27:04 -0400
-Received: from coverity.com (static-208.69.177.245.nephosdns.com [208.69.177.245])
-        by ismtpd0002p1sjc2.sendgrid.net (SG) with ESMTP id KnCigpE6RRqiTI4qzE9yfw
-        for <ceph-devel@vger.kernel.org>; Thu, 22 Jun 2017 04:27:02.363 +0000 (UTC)
+Received: from mx2.suse.de ([195.135.220.15]:50319 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751064AbdFVG0c (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 22 Jun 2017 02:26:32 -0400
+In-Reply-To: <CAJ4mKGZ2NjRans3Goj6yb65+2kzkmro3sCA+uRXv8q6xANV=bw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+>> However, as the last jewel rados nightly [1] shows, integration testing will
+>> not be possible until we implement a fix for
+>> http://tracker.ceph.com/issues/20171
+>>
+>> Kefu and I looked at that one today - it appears to be a Debian packaging
+>> issue which doesn't apply to kraken or master because ceph-create-keys was
+>> ripped out in infernalis.
+> 
+> I'm pretty confused when I look through the ticket. This is apparently
+> a new issue; do we have any idea what changed? There seems to be some
+> kind of dependency on a running ceph-mds for ceph-create-keys, but the
+> cause isn't identified in any way I understand.
+> 
+> So, uh, what's happening exactly? :)
 
-Hi,
+The short answer is that teuthology was ignoring ceph-create-keys log 
+messages by grepping for a certain string, but then Xenial syslog 
+suddenly started inserting the PID into the middle of that string.
 
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+Kefu opened https://github.com/ceph/teuthology/pull/1084 with a fix.
 
-4 new defect(s) introduced to ceph found with Coverity Scan.
-452 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+The larger context is the Debian packaging of the Ceph daemons. In RPM, 
+when you install a package containing a ceph daemon, you have to 
+explicitly enable/start the corresponding systemd unit file (e.g. 
+ceph-mon@.service). In Debian, the mere act of installing the package 
+causes the systemd service to start, and this starts the daemon.
 
-New defect(s) Reported-by: Coverity Scan
-Showing 4 of 4 defect(s)
+So for example when the ceph-mds package is installed in Xenial, the 
+"ceph-mds@$HOST.service" file gets started. In jewel, this triggers 
+ceph-create-keys which issues that log message when it cannot connect to 
+a MON. By the time the cluster gets up and running, lots of these 
+messages get logged, but they are harmless.
 
+I have patched my teuthology environment and will proceed with 10.2.8 
+integration testing.
 
-** CID 1412976:  Security best practices violations  (DC.WEAK_CRYPTO)
-/home/brad/working/src/ceph/src/test/librbd/test_librbd.cc: 5530 in TestLibRBD_ExclusiveLock_Test::TestBody()::[lambda(int, void *&) (instance 1)]::operator ()(int, void *&) const()
-
-
-________________________________________________________________________________________________________
-*** CID 1412976:  Security best practices violations  (DC.WEAK_CRYPTO)
-/home/brad/working/src/ceph/src/test/librbd/test_librbd.cc: 5530 in TestLibRBD_ExclusiveLock_Test::TestBody()::[lambda(int, void *&) (instance 1)]::operator ()(int, void *&) const()
-5524     	EXPECT_TRUE(lock_owner);
-5525     	std::cout << m_id << ": exclusive lock acquired" << std::endl;
-5526     	{
-5527     	  lock_guard<mutex> locker(lock);
-5528     	  owner_id = m_id;
-5529     	}
->>>     CID 1412976:  Security best practices violations  (DC.WEAK_CRYPTO)
->>>     "rand" should not be used for security related applications, as linear congruential algorithms are too easy to break.
-5530     	usleep(rand() % 50000);
-5531           }
-5532     
-5533           lock_guard<mutex> locker(lock);
-5534           if (owner_id == m_id) {
-5535     	EXPECT_EQ(0, rbd_lock_release(m_image));
-
-** CID 1412977:  Security best practices violations  (DC.WEAK_CRYPTO)
-/home/brad/working/src/ceph/src/os/bluestore/BlueStore.cc: 2027 in BlueStore::ExtentMap::allocate_spanning_blob_id()()
-
-
-________________________________________________________________________________________________________
-*** CID 1412977:  Security best practices violations  (DC.WEAK_CRYPTO)
-/home/brad/working/src/ceph/src/os/bluestore/BlueStore.cc: 2027 in BlueStore::ExtentMap::allocate_spanning_blob_id()()
-2021         return 0;
-2022       bid_t bid = spanning_blob_map.rbegin()->first + 1;
-2023       // bid is valid and available.
-2024       if (bid >= 0)
-2025         return bid;
-2026       // Find next unused bid;
->>>     CID 1412977:  Security best practices violations  (DC.WEAK_CRYPTO)
->>>     "rand" should not be used for security related applications, as linear congruential algorithms are too easy to break.
-2027       bid = rand() % (numeric_limits<bid_t>::max() + 1);
-2028       const auto begin_bid = bid;
-2029       do {
-2030         if (!spanning_blob_map.count(bid))
-2031           return bid;
-2032         else {
-
-** CID 1412978:    (SLEEP)
-/home/brad/working/src/ceph/src/test/librbd/test_librbd.cc: 5530 in TestLibRBD_ExclusiveLock_Test::TestBody()::[lambda(int, void *&) (instance 1)]::operator ()(int, void *&) const()
-/home/brad/working/src/ceph/src/test/librbd/test_librbd.cc: 5530 in TestLibRBD_ExclusiveLock_Test::TestBody()::[lambda(int, void *&) (instance 1)]::operator ()(int, void *&) const()
-
-
-________________________________________________________________________________________________________
-*** CID 1412978:    (SLEEP)
-/home/brad/working/src/ceph/src/test/librbd/test_librbd.cc: 5530 in TestLibRBD_ExclusiveLock_Test::TestBody()::[lambda(int, void *&) (instance 1)]::operator ()(int, void *&) const()
-5524     	EXPECT_TRUE(lock_owner);
-5525     	std::cout << m_id << ": exclusive lock acquired" << std::endl;
-5526     	{
-5527     	  lock_guard<mutex> locker(lock);
-5528     	  owner_id = m_id;
-5529     	}
->>>     CID 1412978:    (SLEEP)
->>>     Call to "usleep" might sleep while holding lock "this->lock".
-5530     	usleep(rand() % 50000);
-5531           }
-5532     
-5533           lock_guard<mutex> locker(lock);
-5534           if (owner_id == m_id) {
-5535     	EXPECT_EQ(0, rbd_lock_release(m_image));
-/home/brad/working/src/ceph/src/test/librbd/test_librbd.cc: 5530 in TestLibRBD_ExclusiveLock_Test::TestBody()::[lambda(int, void *&) (instance 1)]::operator ()(int, void *&) const()
-5524     	EXPECT_TRUE(lock_owner);
-5525     	std::cout << m_id << ": exclusive lock acquired" << std::endl;
-5526     	{
-5527     	  lock_guard<mutex> locker(lock);
-5528     	  owner_id = m_id;
-5529     	}
->>>     CID 1412978:    (SLEEP)
->>>     Call to "usleep" might sleep while holding lock "this->lock".
-5530     	usleep(rand() % 50000);
-5531           }
-5532     
-5533           lock_guard<mutex> locker(lock);
-5534           if (owner_id == m_id) {
-5535     	EXPECT_EQ(0, rbd_lock_release(m_image));
-
-** CID 1412979:  Uninitialized members  (UNINIT_CTOR)
-/home/brad/working/src/ceph/src/rgw/rgw_lc.h: 81 in LCRule::LCRule()()
-
-
-________________________________________________________________________________________________________
-*** CID 1412979:  Uninitialized members  (UNINIT_CTOR)
-/home/brad/working/src/ceph/src/rgw/rgw_lc.h: 81 in LCRule::LCRule()()
-75       LCExpiration noncur_expiration;
-76       LCExpiration mp_expiration;
-77       bool dm_expiration;
-78     
-79     public:
-80     
->>>     CID 1412979:  Uninitialized members  (UNINIT_CTOR)
->>>     Non-static class member "dm_expiration" is not initialized in this constructor nor in any functions that it calls.
-81       LCRule(){};
-82       ~LCRule(){};
-83     
-84       bool get_id(string& _id) {
-85           _id = id;
-86           return true;
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRaGCnxtQO9E3gxlB2GxVsWFENryh7bC5hIb-2FQBVM85YLQ-3D-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8Hdr6h-2FwNY-2BPNl-2FhRJsMeMY8yymIcYqeyx8I3yhnIuuNXhTLvZvv-2B2vp6eYcBQUaGjiTdUH-2FKWqdHEACF-2FvC4vDL5J9VzCCwDkbrOC7-2FUBv2txEyPUyeQJ-2FMyLiWTzCCahjhOYO-2FWGq3tgUd9nPissGlkgFgepCfSwkrOhRPM0g66-2Fm0yJ2ZE5Rm5CxN3vF9OU-3D
-
-To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRbVDbis712qZDP-2FA8y06Nq4Bco8jcmzhh7FSyvoR0E3-2BDgRcBCQ6OuthHBtaTCGNq9OVG2ZVnjrgThgf5hX3GVEkIxvBX-2BorwRZfOftSp7HPfCifRGGak1MlgNFVd3IIPA-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8Hdr6h-2FwNY-2BPNl-2FhRJsMeMY8yymIcYqeyx8I3yhnIuuNfq2DsgbC22CplMb1dqqY7yL-2BkFwVLkKiGMREPzHvy-2BrqqyulPg4I4WrUxx-2FW-2F-2BhvXpNpR9gvo7B6GUb7iNz4Idkfu18bmQY8kDFWh0e01UR-2BzTealqAB7YPDtwdxN4D5BHjkk8tiliYISXCkqo3ke8-3D
-
+Nathan
