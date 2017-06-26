@@ -1,103 +1,116 @@
-From: Jianjian Huo <samuel.huo@gmail.com>
-Subject: Re: Jewel 10.2.7 client IOPS drops to zero freqently
-Date: Mon, 26 Jun 2017 10:57:41 -0700
-Message-ID: <CAB=cV2Ts8shRZz=PbprekQTYA8kMfk1jwZ763Xadcs3g6_fDcQ@mail.gmail.com>
-References: <CAB=cV2RgFVgv+559haqcW50GmKV=629FCOzJtOkZv6HfJk0P3w@mail.gmail.com>
- <CAJ4mKGYPCF36=VMOJHm4Cw8NQjgOhPcCxPxsmO464qwc3vgBOA@mail.gmail.com> <CAMwhyqXfHF+TYqJMhn6cqGiLfrg4ik2fMu=-y8HJgRhv30ZJZA@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: Remote execution in ceph-medic
+Date: Mon, 26 Jun 2017 14:20:33 -0400
+Message-ID: <CAC-Np1w10n=s+EL=1=QHA3n8XTK8-wKCEZpvWvTc+da4jPTYAQ@mail.gmail.com>
+References: <CALe9h7f7TtnFmc68xr2ayjEA8vyvnN7FPUoys=ea4HW_5JOKXA@mail.gmail.com>
+ <CAC-Np1yuWP3+=8Ay=w41geuc7dkNgCv1FN3zDQqvaU9sv6B6ng@mail.gmail.com>
+ <CALe9h7c3TT=qFS7TSJx3gpf2=3jznEmBnFZfXX+mDwyMA-NoRg@mail.gmail.com>
+ <CAC-Np1wiSUTtc4qudf9e5FQYnLJ6OypYU1-XgAuuOmfbJqhhgA@mail.gmail.com> <CALe9h7fwWACV3aVZ9k2eeGH-GYhMkkwLOP3PTarnq4gKvgBCFQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f180.google.com ([74.125.82.180]:36082 "EHLO
-        mail-ot0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751308AbdFZR6C (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Jun 2017 13:58:02 -0400
-Received: by mail-ot0-f180.google.com with SMTP id 95so6376310ott.3
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Jun 2017 10:58:02 -0700 (PDT)
-In-Reply-To: <CAMwhyqXfHF+TYqJMhn6cqGiLfrg4ik2fMu=-y8HJgRhv30ZJZA@mail.gmail.com>
+Received: from mail-wr0-f175.google.com ([209.85.128.175]:33966 "EHLO
+        mail-wr0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751308AbdFZSUf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Jun 2017 14:20:35 -0400
+Received: by mail-wr0-f175.google.com with SMTP id 77so148600733wrb.1
+        for <ceph-devel@vger.kernel.org>; Mon, 26 Jun 2017 11:20:34 -0700 (PDT)
+In-Reply-To: <CALe9h7fwWACV3aVZ9k2eeGH-GYhMkkwLOP3PTarnq4gKvgBCFQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?5pSA5YiY?= <liupan1111@gmail.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Andrew Schoen <aschoen@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Thanks, Greg.
-Actually, we found two problems related to this issue. One is NIC
-driver memory allocation failure issue, another one is the PR
-mentioned by Pan. After those problems were fixed, we don't see those
-IOPS drops anymore. :-)
-
-Jianjian
-
-On Sun, Jun 25, 2017 at 6:38 AM, =E6=94=80=E5=88=98 <liupan1111@gmail.com> =
-wrote:
-> hi Gregory and Sage,
->
-> This issue has been resolved by alibaba group with PR
-> https://github.com/ceph/ceph/pull/15891. During the debug phrase, we
-> added "max latency perf counters=E2=80=9D to dump max latency of each par=
-t of
-> io path, and finally catch it by perf dump.
->
-> For current perf counters in ceph, we could get total latency and
-> total count, and it is useful For watching average latency , but not
-> very helpful For long tail latency, or latency wave. Yes, we could
-> also use lttng, but there will lots of output before bad happens, not
-> good user experience, also make cluster slow down. so Do you agree max
-> latency perf counter is a good method? We are pleasure to pull a
-> request with our changes if you agree.
->
-> Thanks
-> Pan from Alibaba
->
-> 2017-06-15 8:05 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
->> On Wed, Jun 14, 2017 at 2:32 PM, Jianjian Huo <samuel.huo@gmail.com> wro=
-te:
->>> Hi,
+On Mon, Jun 26, 2017 at 1:55 PM, John Spray <jspray@redhat.com> wrote:
+> On Mon, Jun 26, 2017 at 6:21 PM, Alfredo Deza <adeza@redhat.com> wrote:
+>> On Mon, Jun 26, 2017 at 12:56 PM, John Spray <jspray@redhat.com> wrote:
+>>> On Mon, Jun 26, 2017 at 5:34 PM, Alfredo Deza <adeza@redhat.com> wrote:
+>>>> On Mon, Jun 26, 2017 at 11:52 AM, John Spray <jspray@redhat.com> wrote:
+>>>>> Hi guys,
+>>>>>
+>>>>> I was pondering this and wondered if you had any existing plans...
+>>>>>
+>>>>> For doing network testing between two remote nodes, we'll need to be
+>>>>> able to spin up some sort of listener on one end, presumably via SSH
+>>>>> from a third party node.
+>>>>
+>>>> What kind of testing warrants this type of setup?
 >>>
->>> At Alibaba, we experienced unstable performance with Jewel on one
->>> production cluster, and we can easily reproduce it now with several
->>> small test clusters. One test cluster has 30 SSDs, and another test
->>> one has 120 SSDs, we are using filestore+async messenger on the
->>> backend and fio+librbd to test them. When this issue happens, client
->>> fio IOPS drops to zero (or close to zero) frequently during fio runs.
->>> And the durations of those drops were very short, about 1 second or
->>> so.
->>>
->>> For the 30 SSDs test cluster, we use 135 client fio writing into 135
->>> rbd images individually, each fio has only 1 job and rate limit is
->>> 3MB/s. On this fresh created test cluster, for all 135 client fio
->>> runs, during first 15 minutes or so, client IOPS were very stable and
->>> each OSD server's throughput was very stable as well. After 15 minutes
->>> and 360 GB data written, the test cluster entered an unstable state,
->>> client fio IOPS dropped to zero (or close) frequently and each OSD
->>> server's throughput became very spiky as well (from 500MB/s to less
->>> 1MB/s). We tried let all fio keeping writing for about 16 hours,
->>> cluster was still in this swing state.
->>>
->>> This is very easily reproducible. I don't think it's caused by
->>> filestore folder splitting, since they were all done during the first
->>> 15 minutes. And also, OSD server mem/cpu/disk were far from saturated.
->>> One thing we noticed from perf counter is that op_latency increased
->>> from 0.7 ms to >20 ms after entering this unstable state. Is this
->>> normal Jewel/filestore behavior? Anyone knows what causes it?
+>>> I'm talking about opening a TCP connection between two remote nodes to
+>>> verify that the network connectivity is working, and probably doing
+>>> this across a large set of pairs e.g. doing an all-to-all ping pong
+>>> between OSD nodes.  Obviously, there is just the standard `ping`, but
+>>> I'm expecting that we'll want to test using actual TCP traffic in the
+>>> port ranges that the OSDs would use.
 >>
->> This sounds a lot like you're overrunning your journal and flushing
->> the data out to xfs isn't going smoothly. You can look at the
->> perfcounters to see what your throttles look like, your journal space
->> used, etc and try adjusting those config values to keep it running at
->> a maintainable level. There's lots of tuning space here and we don't
->> have a good auto-tuning system, unfortunately.
->> -Greg
+>> If we are checking connectivity between OSD nodes, wouldn't it be
+>> sufficient to test
+>> if the port where the OSD is listening can be reached? Again, we can
+>> use plain Python to send actual TCP traffic here.
+>
+> I don't think we should assume a running OSD process for this --
+> partly to enable someone to fully test their pre-Ceph configuration
+> before they install Ceph, but also because we would like to
+> distinguish between network issues and "OSD isn't
+> listening/responding" issues.
+
+Aha, important distinction: "pre Ceph" vs. "post Ceph".
+
+ceph-medic is currently a "post Ceph" tool. Not that it means that it
+can't (or shouldn't) have some kind
+of pre-flight checks.
+
+Those types of checks have to be lenient and approached fairly
+different, and I believe that it was discussed as something
+that will get implemented.
+
+
+>
+> John
+>
+>> I think that what you are proposing was going to be checked as part of
+>> the 'network' collection. Managing processes to listen to each
+>> other and report if they do/don't, sounds like it can be avoided.
+>>
+>> I have created a ticket to make sure that we collect the inter-node connectivity
+>>
+>>     https://github.com/ceph/ceph-medic/issues/18
+>>
 >>
 >>>
->>> Thanks,
->>> Jianjian
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> John
+>>>
+>>>>>
+>>>>> I guess the choice here is whether to depend on having ceph-medic
+>>>>> already installed on all the nodes (and invoke it with a special
+>>>>> --receiver type argument) or whether the tool should inject its code
+>>>>> over SSH (e.g. run a big fat python command line with a script in it
+>>>>> over SSH).
+>>>>>
+>>>>
+>>>> That is kind of how this works already, borrowing from ceph-deploy: it
+>>>> uses SSH to connect
+>>>> to remote nodes and execute either system commands or Python code.
+>>>>
+>>>> In what scenario using a system call or Python code will not gather
+>>>> enough information that a server/client
+>>>> setup would?
+>>>>
+>>>>> I lean towards the latter in the interests of making the deployment
+>>>>> simple, but I'm not sure what the story is with e.g. selinux in
+>>>>> situations like this, whether a server is going to get unhappy about
+>>>>> an SSH session that tries to open ports.
+>>>>
+>>>> Having two processes running to check connectivity sounds a bit
+>>>> complicated to handle. One of the things the tool does
+>>>> is to cross-check against other nodes in the system, so this would
+>>>> potentially mean running an exponential amount of
+>>>> processes: for every node to each node in the cluster.
+>>>>
+>>>> It will be cheaper to perform those checks with either plain Python or
+>>>> a system call.
+>>>>
+>>>> Or maybe you mean some other type of check? What are your ideas on
+>>>> "network testing" ?
+>>>>>
+>>>>> John
