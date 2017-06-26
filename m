@@ -1,393 +1,382 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Contributor credits for Luminous v12.1.0 RC
-Date: Mon, 26 Jun 2017 20:37:08 +0100
-Message-ID: <CALe9h7c=F6EuAvu_bOmPFb19ocjZE9faHF6wRrG-GwBVZbPT6A@mail.gmail.com>
+From: "Mahalingam, Ganesh" <ganesh.mahalingam@intel.com>
+Subject: RE: Contributor credits for Luminous v12.1.0 RC
+Date: Mon, 26 Jun 2017 22:30:22 +0000
+Message-ID: <B209D98D8385BE41BC4DE002C072AEBE859FCBBA@fmsmsx118.amr.corp.intel.com>
 References: <f32cec8db925296fccb5b408e06229ce@suse.com>
+ <CALe9h7c=F6EuAvu_bOmPFb19ocjZE9faHF6wRrG-GwBVZbPT6A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:35709 "EHLO
-        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751439AbdFZTha (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 26 Jun 2017 15:37:30 -0400
-Received: by mail-wm0-f46.google.com with SMTP id w126so6475892wme.0
-        for <ceph-devel@vger.kernel.org>; Mon, 26 Jun 2017 12:37:29 -0700 (PDT)
-In-Reply-To: <f32cec8db925296fccb5b408e06229ce@suse.com>
+Received: from mga02.intel.com ([134.134.136.20]:35927 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751466AbdFZWaY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 26 Jun 2017 18:30:24 -0400
+In-Reply-To: <CALe9h7c=F6EuAvu_bOmPFb19ocjZE9faHF6wRrG-GwBVZbPT6A@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek <abhishek@suse.com>
+To: John Spray <jspray@redhat.com>, Abhishek <abhishek@suse.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Jun 26, 2017 at 7:49 PM, Abhishek <abhishek@suse.com> wrote:
-> Hi Ceph,
->
-> The first release candidate for Luminous was out,
-> here is a sorted list of authors and organizations
-> who contributed to v12.1.0 RC, by number of commits &/or
-> reviews back to v12.0.3. Thank you everyone for contributing, and keep
-> up the good work. The affiliation of authors to organizations can be
-> updated by submitting a patch to
-> https://github.com/ceph/ceph/blob/master/.organizationmap
->
-> All commits are reviewed but the number of reviews is a fraction of
-> the number of commits. More often than not, the reviewer(s) is only
-> mentioned in the message of the merge although it means that all
-> associated commits have been reviewed. If you are curious about how it
-> is done, do checkout the wiki entry at
-> http://tracker.ceph.com/projects/ceph/wiki/Ceph_contributors_list_maintenance_guide
->
-> Number of lines added and removed, by authors
-
->      1  282468 John Spray <jspray@redhat.com>
-
-Let me be the first to confess that I did not really write 282k lines
-of code :-)  I think that's probably the js/css in the dashboard
-module throwing the stats.
-
-John
-
-
->      2   21177 Ganesh Mahalingam <ganesh.mahalingam@intel.com>
->      3   14387 Sage Weil <sweil@redhat.com>
->      4    8403 Yehuda Sadeh <ysadehwe@redhat.com>
->      5    7012 Radoslaw Zarzynski <rzarzynski@mirantis.com>
->      6    6129 Casey Bodley <cbodley@redhat.com>
->      7    4554 Adam C. Emerson <aemerson@redhat.com>
->      8    4429 Kefu Chai <kchai@redhat.com>
->      9    3946 Jason Dillaman <dillaman@redhat.com>
->     10    3892 Amir Vadai <amir@vadai.me>
->     11    3772 Boris Ranto <branto@redhat.com>
->     12    3413 Orit Wasserman <owasserm@redhat.com>
->     13    2711 Mykola Golub <mgolub@mirantis.com>
->     14    2468 Greg Farnum <gfarnum@redhat.com>
->     15    2128 João Eduardo Luís <joao@suse.de>
->     16    2025 Xie Xingguo <xie.xingguo@zte.com.cn>
->     17    1452 Yan, Zheng <zyan@redhat.com>
->     18    1322 Jesse Williamson <jesse.williamson@suse.com>
->     19    1315 Abhishek Lekshmanan <abhishek@suse.com>
->     20    1218 Jos Collin <jcollin@redhat.com>
->     21    1012 Willem Jan Withagen <wjw@digiware.nl>
->     22     994 Brad Hubbard <bhubbard@redhat.com>
->     23     887 Myoungwon Oh <omwmw@sk.com>
->     24     870 Marcus Watts <mwatts@redhat.com>
->     25     767 Pritha Srivastava <prsrivas@redhat.com>
->     26     743 Piotr Dałek <piotr.dalek@corp.ovh.com>
->     27     639 Zhang Shaowen <zhangshaowen@cmss.chinamobile.com>
->     28     635 Xiaowei Chen <chen.xiaowei@h3c.com>
->     29     628 Loic Dachary <ldachary@redhat.com>
->     30     551 mychoxin <mychoxin@gmail.com>
->     31     544 Ma Jianpeng <jianpeng.ma@intel.com>
->     32     519 Neha Ojha <nojha@redhat.com>
->     33     512 David Zafman <dzafman@redhat.com>
->     34     489 Matt Benjamin <mbenjamin@redhat.com>
->     35     482 Haomai Wang <haomai@xsky.com>
->     36     477 Adam Kupczyk <akupczyk@mirantis.com>
->     37     453 Tim Serong <tserong@suse.com>
->     38     398 Pan Liu <wanjun.lp@alibaba-inc.com>
->     39     386 Chang Liu <liuchang0812@gmail.com>
->     40     380 Nathan Cutler <ncutler@suse.com>
->     41     354 Luo Runbing <runsisi@zte.com.cn>
->     42     334 Andrew Solomon <asolomon@us.ibm.com>
->     43     287 Daniel Oliveira <doliveira@suse.com>
->     44     276 J. Eric Ivancich <ivancich@redhat.com>
->     45     268 Igor Fedotov <ifedotov@mirantis.com>
->     46     250 lu.shasha <lu.shasha@eisoo.com>
->     47     221 Javier M. Mellid <jmunhoz@igalia.com>
->     48     206 Fang Yuxiang <fang.yuxiang@eisoo.com>
->     49     175 Ilya Dryomov <idryomov@redhat.com>
->     50     163 Victor Araujo <ve.ar91@gmail.com>
->     51     150 Dan Mick <dmick@redhat.com>
->     52     120 Leo Zhang <nguzcf@gmail.com>
->     53     114 Mohamad Gebai <mgebai@suse.com>
->     54     114 Logan Blyth <mrbojangles3@gmail.com>
->     55     107 Jiaying Ren <jiaying.ren@umcloud.com>
->     56      99 Gui Hecheng <guihecheng@cmss.chinamobile.com>
->     57      94 Jens Rosenboom <j.rosenboom@x-ion.de>
->     58      82 Zhi Zhang <willzzhang@tencent.com>
->     59      71 Zhang Lei <243290414@qq.com>
->     60      65 Jing Wenjun <jingwenjun@cmss.chinamobile.com>
->     61      64 James Page <james.page@ubuntu.com>
->     62      53 Xiaoyan Li <xiaoyan.li@intel.com>
->     63      52 Vicente Cheng <vicente_cheng@bigtera.com>
->     64      49 Lin Bing <hawkerous@gmail.com>
->     65      45 Ken Dreyer <kdreyer@redhat.com>
->     66      44 Jin Cai <caijin.caij@alibaba-inc.com>
->     67      43 Daniel Gryniewicz <dang@redhat.com>
->     68      40 Ren Huanwen <ren.huanwen@zte.com.cn>
->     69      39 Yuli Yang <yuliyang@cmss.chinamobile.com>
->     70      37 Dongdong Tao <tdd21151186@gmail.com>
->     71      34 Adir Lev <adirl@mellanox.com>
->     72      27 Drunkard Zhang <gongfan193@gmail.com>
->     73      26 Patrick Donnelly <pdonnell@redhat.com>
->     74      20 Guo Zhandong <guozhandong@cmss.chinamobile.com>
->     75      20 Enming Zhang <enming.zhang@umcloud.com>
->     76      19 Sameer Tiwari <stiwari@salesforce.com>
->     77      19 Bassam Tabbara <bassam.tabbara@quantum.com>
->     78      18 Mingxin Liu <mingxin@xsky.com>
->     79      17 Zhang Zezhu <zhang.zezhu@zte.com.cn>
->     80      17 Daniel Bar-On <danielbo@mellanox.com>
->     81      16 Shiqi <m13913886148@gmail.com>
->     82      12 Andreas Gerstmayr <andreas.gerstmayr@catalysts.cc>
->     83      10 Tushar Gohad <tushar.gohad@intel.com>
->     84       9 Chenfang Xian <chenfangxian@cmss.chinamobile.com>
->     85       9 Ali Maredia <amaredia@redhat.com>
->     86       8 Yao Zongyou <yaozongyou@vip.qq.com>
->     87       8 Thomas Serlin <tserlin@redhat.com>
->     88       8 Fabian Grünbichler <f.gruenbichler@proxmox.com>
->     89       7 Yu Shengzuo <yu.shengzuo@99cloud.net>
->     90       6 Zheng Yin <zhengyin@chinac.com>
->     91       6 Yuri Weinstein <yuriw@redhat.com>
->     92       6 Redick Wang <redickwang@tencent.com>
->     93       6 Mark Nelson <mnelson@redhat.com>
->     94       6 Dongsheng Yang <dongsheng.yang@easystack.cn>
->     95       4 Henry Chang <henry_chang@bigtera.com>
->     96       4 Barbora Ančincová <bara@redhat.com>
->     97       3 Yanhu Cao <gmayyyha@gmail.com>
->     98       2 Shengjing Zhu <zsj950618@gmail.com>
->     99       2 Sarit Zubakov <saritz@mellanox.com>
->    100       2 MinSheng Lin <minsheng.l@inwinstack.com>
->    101       2 Liu Yuhong <liuyuhong@cmss.chinamobile.com>
->    102       2 Li Hongjie <lihongjie@cmss.chinamobile.com>
->    103       2 Hong Zhangoole <hong.zhangoole@gmail.com>
->    104       2 Alessandro Barbieri <ale.barbio@alice.it>
->
-> Number of lines added and removed, by organization
->      1  342166 Red Hat <contact@redhat.com>
->      2   21784 Intel <contact@intel.com>
->      3   10468 Mirantis <contact@mirantis.com>
->      4    6194 Unaffiliated <no@organization.net>
->      5    5999 SUSE <contact@suse.com>
->      6    2436 ZTE <contact@zte.com.cn>
->      7    1012 Digiware <contact@digiware.nl>
->      8     875 China Mobile <contact@chinamobile.com>
->      9     743 OVH <ceph@ovh.net>
->     10     635 H3C <contact@h3c.com>
->     11     500 XSky <contact@xsky.com>
->     12     456 EISOO <contact@eisoo.com>
->     13     442 Alibaba <contact@alibaba-inc.com>
->     14     334 IBM <contact@IBM.com>
->     15     221 Igalia <contact@igalia.com>
->     16     127 UMCloud <contact@umcloud.com>
->     17     120 T2Cloud <contact@t2cloud.net>
->     18      94 X-ion GmbH <contact@x-ion.de>
->     19      88 Tencent <contact@tencent.com>
->     20      64 Canonical <contact@canonical.com>
->     21      56 Bigtera <contact@bigtera.com>
->     22      53 Mellanox <contact@mellanox.com>
->     23      19 Salesforce <contact@salesforce.com>
->     24      19 Quantum Corporation <info@quantum.com>
->     25      16 Trendy Tech <contact@trendytech.com.cn>
->     26      12 Catalysts <office@catalysts.cc>
->     27       8 Proxmox Server Solutions GmbH <office@proxmox.com>
->     28       7 99Cloud Inc <contact@99cloud.net>
->     29       6 Easystack <contact@easystack.cn>
->     30       6 Chinac <info@chinac.com>
->     31       2 inwinSTACK inc. <leo.l@inwinstack.com>
->
-> Commits, by authors
->      1      328 Sage Weil <sweil@redhat.com>
->      2      123 Yehuda Sadeh <ysadehwe@redhat.com>
->      3      102 Kefu Chai <kchai@redhat.com>
->      4       73 Radoslaw Zarzynski <rzarzynski@mirantis.com>
->      5       63 John Spray <jspray@redhat.com>
->      6       51 Greg Farnum <gfarnum@redhat.com>
->      7       50 Yan, Zheng <zyan@redhat.com>
->      8       50 Casey Bodley <cbodley@redhat.com>
->      9       46 Orit Wasserman <owasserm@redhat.com>
->     10       38 Abhishek Lekshmanan <abhishek@suse.com>
->     11       37 Jason Dillaman <dillaman@redhat.com>
->     12       33 Xie Xingguo <xie.xingguo@zte.com.cn>
->     13       25 Willem Jan Withagen <wjw@digiware.nl>
->     14       21 Nathan Cutler <ncutler@suse.com>
->     15       20 Jos Collin <jcollin@redhat.com>
->     16       20 Boris Ranto <branto@redhat.com>
->     17       18 Haomai Wang <haomai@xsky.com>
->     18       18 Amir Vadai <amir@vadai.me>
->     19       16 Xiaowei Chen <chen.xiaowei@h3c.com>
->     20       16 Jesse Williamson <jesse.williamson@suse.com>
->     21       16 Adam C. Emerson <aemerson@redhat.com>
->     22       14 João Eduardo Luís <joao@suse.de>
->     23       12 Chang Liu <liuchang0812@gmail.com>
->     24       11 Neha Ojha <nojha@redhat.com>
->     25       11 Myoungwon Oh <omwmw@sk.com>
->     26       11 Mykola Golub <mgolub@mirantis.com>
->     27       11 Dan Mick <dmick@redhat.com>
->     28       11 Brad Hubbard <bhubbard@redhat.com>
->     29       10 Zhang Shaowen <zhangshaowen@cmss.chinamobile.com>
->     30       10 Gui Hecheng <guihecheng@cmss.chinamobile.com>
->     31        9 Pritha Srivastava <prsrivas@redhat.com>
->     32        9 Loic Dachary <ldachary@redhat.com>
->     33        9 Leo Zhang <nguzcf@gmail.com>
->     34        9 Igor Fedotov <ifedotov@mirantis.com>
->     35        8 Luo Runbing <runsisi@zte.com.cn>
->     36        8 Jiaying Ren <jiaying.ren@umcloud.com>
->     37        7 Matt Benjamin <mbenjamin@redhat.com>
->     38        7 Ma Jianpeng <jianpeng.ma@intel.com>
->     39        7 lu.shasha <lu.shasha@eisoo.com>
->     40        7 Lin Bing <hawkerous@gmail.com>
->     41        7 Fang Yuxiang <fang.yuxiang@eisoo.com>
->     42        7 David Zafman <dzafman@redhat.com>
->     43        6 Zhang Lei <243290414@qq.com>
->     44        6 Drunkard Zhang <gongfan193@gmail.com>
->     45        5 Zhi Zhang <willzzhang@tencent.com>
->     46        5 Piotr Dałek <piotr.dalek@corp.ovh.com>
->     47        5 Patrick Donnelly <pdonnell@redhat.com>
->     48        5 Pan Liu <wanjun.lp@alibaba-inc.com>
->     49        5 Mohamad Gebai <mgebai@suse.com>
->     50        4 Yuli Yang <yuliyang@cmss.chinamobile.com>
->     51        4 Tim Serong <tserong@suse.com>
->     52        4 Shiqi <m13913886148@gmail.com>
->     53        4 Ren Huanwen <ren.huanwen@zte.com.cn>
->     54        4 J. Eric Ivancich <ivancich@redhat.com>
->     55        4 Ilya Dryomov <idryomov@redhat.com>
->     56        4 Daniel Oliveira <doliveira@suse.com>
->     57        3 Zhang Zezhu <zhang.zezhu@zte.com.cn>
->     58        3 Xiaoyan Li <xiaoyan.li@intel.com>
->     59        3 Mingxin Liu <mingxin@xsky.com>
->     60        3 Ken Dreyer <kdreyer@redhat.com>
->     61        3 Bassam Tabbara <bassam.tabbara@quantum.com>
->     62        3 Adam Kupczyk <akupczyk@mirantis.com>
->     63        2 Vicente Cheng <vicente_cheng@bigtera.com>
->     64        2 Tushar Gohad <tushar.gohad@intel.com>
->     65        2 Thomas Serlin <tserlin@redhat.com>
->     66        2 Sameer Tiwari <stiwari@salesforce.com>
->     67        2 Redick Wang <redickwang@tencent.com>
->     68        2 Mark Nelson <mnelson@redhat.com>
->     69        2 Jens Rosenboom <j.rosenboom@x-ion.de>
->     70        2 Fabian Grünbichler <f.gruenbichler@proxmox.com>
->     71        2 Dongdong Tao <tdd21151186@gmail.com>
->     72        2 Daniel Bar-On <danielbo@mellanox.com>
->     73        2 Andrew Solomon <asolomon@us.ibm.com>
->     74        2 Adir Lev <adirl@mellanox.com>
->     75        1 Zheng Yin <zhengyin@chinac.com>
->     76        1 Yu Shengzuo <yu.shengzuo@99cloud.net>
->     77        1 Yuri Weinstein <yuriw@redhat.com>
->     78        1 Yao Zongyou <yaozongyou@vip.qq.com>
->     79        1 Yanhu Cao <gmayyyha@gmail.com>
->     80        1 Victor Araujo <ve.ar91@gmail.com>
->     81        1 Shengjing Zhu <zsj950618@gmail.com>
->     82        1 Sarit Zubakov <saritz@mellanox.com>
->     83        1 mychoxin <mychoxin@gmail.com>
->     84        1 MinSheng Lin <minsheng.l@inwinstack.com>
->     85        1 Marcus Watts <mwatts@redhat.com>
->     86        1 Logan Blyth <mrbojangles3@gmail.com>
->     87        1 Liu Yuhong <liuyuhong@cmss.chinamobile.com>
->     88        1 Li Hongjie <lihongjie@cmss.chinamobile.com>
->     89        1 Jing Wenjun <jingwenjun@cmss.chinamobile.com>
->     90        1 Jin Cai <caijin.caij@alibaba-inc.com>
->     91        1 Javier M. Mellid <jmunhoz@igalia.com>
->     92        1 James Page <james.page@ubuntu.com>
->     93        1 Hong Zhangoole <hong.zhangoole@gmail.com>
->     94        1 Henry Chang <henry_chang@bigtera.com>
->     95        1 Guo Zhandong <guozhandong@cmss.chinamobile.com>
->     96        1 Ganesh Mahalingam <ganesh.mahalingam@intel.com>
->     97        1 Enming Zhang <enming.zhang@umcloud.com>
->     98        1 Dongsheng Yang <dongsheng.yang@easystack.cn>
->     99        1 Daniel Gryniewicz <dang@redhat.com>
->    100        1 Chenfang Xian <chenfangxian@cmss.chinamobile.com>
->    101        1 Barbora Ančincová <bara@redhat.com>
->    102        1 Andreas Gerstmayr <andreas.gerstmayr@catalysts.cc>
->    103        1 Ali Maredia <amaredia@redhat.com>
->    104        1 Alessandro Barbieri <ale.barbio@alice.it>
->
-> Commits, by organizations
->      1      996 Red Hat <contact@redhat.com>
->      2      102 SUSE <contact@suse.com>
->      3       96 Mirantis <contact@mirantis.com>
->      4       70 Unaffiliated <no@organization.net>
->      5       48 ZTE <contact@zte.com.cn>
->      6       29 China Mobile <contact@chinamobile.com>
->      7       25 Digiware <contact@digiware.nl>
->      8       21 XSky <contact@xsky.com>
->      9       16 H3C <contact@h3c.com>
->     10       14 EISOO <contact@eisoo.com>
->     11       13 Intel <contact@intel.com>
->     12        9 UMCloud <contact@umcloud.com>
->     13        9 T2Cloud <contact@t2cloud.net>
->     14        7 Tencent <contact@tencent.com>
->     15        6 Alibaba <contact@alibaba-inc.com>
->     16        5 OVH <ceph@ovh.net>
->     17        5 Mellanox <contact@mellanox.com>
->     18        4 Trendy Tech <contact@trendytech.com.cn>
->     19        3 Quantum Corporation <info@quantum.com>
->     20        3 Bigtera <contact@bigtera.com>
->     21        2 X-ion GmbH <contact@x-ion.de>
->     22        2 Salesforce <contact@salesforce.com>
->     23        2 Proxmox Server Solutions GmbH <office@proxmox.com>
->     24        2 IBM <contact@IBM.com>
->     25        1 inwinSTACK inc. <leo.l@inwinstack.com>
->     26        1 Igalia <contact@igalia.com>
->     27        1 Easystack <contact@easystack.cn>
->     28        1 Chinac <info@chinac.com>
->     29        1 Catalysts <office@catalysts.cc>
->     30        1 Canonical <contact@canonical.com>
->     31        1 99Cloud Inc <contact@99cloud.net>
->
-> Reviews, by authors (one review spans multiple commits)
->      1      118 Kefu Chai <kchai@redhat.com>
->      2       94 Sage Weil <sweil@redhat.com>
->      3       52 Casey Bodley <cbodley@redhat.com>
->      4       46 Josh Durgin <jdurgin@redhat.com>
->      5       28 John Spray <jspray@redhat.com>
->      6       19 Jason Dillaman <dillaman@redhat.com>
->      7       17 Loic Dachary <ldachary@redhat.com>
->      8       16 Greg Farnum <gfarnum@redhat.com>
->      9       15 Igor Fedotov <ifedotov@mirantis.com>
->     10       13 Xie Xingguo <xie.xingguo@zte.com.cn>
->     11       13 Mykola Golub <mgolub@mirantis.com>
->     12       10 Yan, Zheng <zyan@redhat.com>
->     13       10 Patrick Donnelly <pdonnell@redhat.com>
->     14       10 Jos Collin <jcollin@redhat.com>
->     15       10 Haomai Wang <haomai@xsky.com>
->     16        9 Yehuda Sadeh <ysadehwe@redhat.com>
->     17        9 Brad Hubbard <bhubbard@redhat.com>
->     18        8 Orit Wasserman <owasserm@redhat.com>
->     19        7 Willem Jan Withagen <wjw@digiware.nl>
->     20        6 Radoslaw Zarzynski <rzarzynski@mirantis.com>
->     21        6 Adam C. Emerson <aemerson@redhat.com>
->     22        5 Nathan Cutler <ncutler@suse.com>
->     23        5 Ken Dreyer <kdreyer@redhat.com>
->     24        5 Daniel Gryniewicz <dang@redhat.com>
->     25        5 Boris Ranto <branto@redhat.com>
->     26        5 Abhishek Lekshmanan <abhishek@suse.com>
->     27        4 Varada Kari <varada.kari@sandisk.com>
->     28        4 Mark Nelson <mnelson@redhat.com>
->     29        3 Dan Mick <dmick@redhat.com>
->     30        3 Alfredo Deza <adeza@redhat.com>
->     31        2 Piotr Dałek <piotr.dalek@corp.ovh.com>
->     32        2 Neha Ojha <nojha@redhat.com>
->     33        2 David Zafman <dzafman@redhat.com>
->     34        1 Wido den Hollander <wido@42on.com>
->     35        1 Vasu Kulkarni <vasu@redhat.com>
->     36        1 Tim Serong <tserong@suse.com>
->     37        1 Pan Liu <wanjun.lp@alibaba-inc.com>
->     38        1 John Wilkins <jwilkins@redhat.com>
->     39        1 João Eduardo Luís <joao@suse.de>
->     40        1 Douglas Fuller <dfuller@redhat.com>
->     41        1 David Disseldorp <ddiss@suse.de>
->     42        1 Bassam Tabbara <bassam.tabbara@quantum.com>
->     43        1 Alexey Sheplyakov <asheplyakov@mirantis.com>
->     44        1 Adam Kupczyk <akupczyk@mirantis.com>
->
-> Reviews, by organizations (one review spans multiple commits)
->      1      477 Red Hat <contact@redhat.com>
->      2       36 Mirantis <contact@mirantis.com>
->      3       13 ZTE <contact@zte.com.cn>
->      4       13 SUSE <contact@suse.com>
->      5       10 XSky <contact@xsky.com>
->      6        7 Digiware <contact@digiware.nl>
->      7        7 Cloudwatt <libre.licensing@cloudwatt.com>
->      8        4 SanDisk <contact@sandisk.com>
->      9        2 OVH <ceph@ovh.net>
->     10        1 Wido 42on <contact@42on.com>
->     11        1 Quantum Corporation <info@quantum.com>
->     12        1 Alibaba <contact@alibaba-inc.com>
->
-> Best,
-> Abhishek
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJA
+dmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gb3duZXJAdmdlci5rZXJuZWwu
+b3JnXSBPbiBCZWhhbGYgT2YgSm9obiBTcHJheQ0KPiBTZW50OiBNb25kYXksIEp1bmUgMjYsIDIw
+MTcgMTI6MzcgUE0NCj4gVG86IEFiaGlzaGVrIDxhYmhpc2hla0BzdXNlLmNvbT4NCj4gQ2M6IENl
+cGggRGV2ZWxvcG1lbnQgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KPiBTdWJqZWN0OiBS
+ZTogQ29udHJpYnV0b3IgY3JlZGl0cyBmb3IgTHVtaW5vdXMgdjEyLjEuMCBSQw0KPiANCj4gT24g
+TW9uLCBKdW4gMjYsIDIwMTcgYXQgNzo0OSBQTSwgQWJoaXNoZWsgPGFiaGlzaGVrQHN1c2UuY29t
+PiB3cm90ZToNCj4gPiBIaSBDZXBoLA0KPiA+DQo+ID4gVGhlIGZpcnN0IHJlbGVhc2UgY2FuZGlk
+YXRlIGZvciBMdW1pbm91cyB3YXMgb3V0LCBoZXJlIGlzIGEgc29ydGVkDQo+ID4gbGlzdCBvZiBh
+dXRob3JzIGFuZCBvcmdhbml6YXRpb25zIHdobyBjb250cmlidXRlZCB0byB2MTIuMS4wIFJDLCBi
+eQ0KPiA+IG51bWJlciBvZiBjb21taXRzICYvb3IgcmV2aWV3cyBiYWNrIHRvIHYxMi4wLjMuIFRo
+YW5rIHlvdSBldmVyeW9uZSBmb3INCj4gPiBjb250cmlidXRpbmcsIGFuZCBrZWVwIHVwIHRoZSBn
+b29kIHdvcmsuIFRoZSBhZmZpbGlhdGlvbiBvZiBhdXRob3JzIHRvDQo+ID4gb3JnYW5pemF0aW9u
+cyBjYW4gYmUgdXBkYXRlZCBieSBzdWJtaXR0aW5nIGEgcGF0Y2ggdG8NCj4gPiBodHRwczovL2dp
+dGh1Yi5jb20vY2VwaC9jZXBoL2Jsb2IvbWFzdGVyLy5vcmdhbml6YXRpb25tYXANCj4gPg0KPiA+
+IEFsbCBjb21taXRzIGFyZSByZXZpZXdlZCBidXQgdGhlIG51bWJlciBvZiByZXZpZXdzIGlzIGEg
+ZnJhY3Rpb24gb2YNCj4gPiB0aGUgbnVtYmVyIG9mIGNvbW1pdHMuIE1vcmUgb2Z0ZW4gdGhhbiBu
+b3QsIHRoZSByZXZpZXdlcihzKSBpcyBvbmx5DQo+ID4gbWVudGlvbmVkIGluIHRoZSBtZXNzYWdl
+IG9mIHRoZSBtZXJnZSBhbHRob3VnaCBpdCBtZWFucyB0aGF0IGFsbA0KPiA+IGFzc29jaWF0ZWQg
+Y29tbWl0cyBoYXZlIGJlZW4gcmV2aWV3ZWQuIElmIHlvdSBhcmUgY3VyaW91cyBhYm91dCBob3cg
+aXQNCj4gPiBpcyBkb25lLCBkbyBjaGVja291dCB0aGUgd2lraSBlbnRyeSBhdA0KPiA+IGh0dHA6
+Ly90cmFja2VyLmNlcGguY29tL3Byb2plY3RzL2NlcGgvd2lraS9DZXBoX2NvbnRyaWJ1dG9yc19s
+aXN0X21haW4NCj4gPiB0ZW5hbmNlX2d1aWRlDQo+ID4NCj4gPiBOdW1iZXIgb2YgbGluZXMgYWRk
+ZWQgYW5kIHJlbW92ZWQsIGJ5IGF1dGhvcnMNCj4gDQo+ID4gICAgICAxICAyODI0NjggSm9obiBT
+cHJheSA8anNwcmF5QHJlZGhhdC5jb20+DQo+IA0KPiBMZXQgbWUgYmUgdGhlIGZpcnN0IHRvIGNv
+bmZlc3MgdGhhdCBJIGRpZCBub3QgcmVhbGx5IHdyaXRlIDI4MmsgbGluZXMgb2YNCj4gY29kZSA6
+LSkgIEkgdGhpbmsgdGhhdCdzIHByb2JhYmx5IHRoZSBqcy9jc3MgaW4gdGhlIGRhc2hib2FyZCBt
+b2R1bGUNCj4gdGhyb3dpbmcgdGhlIHN0YXRzLg0KPiANCj4gSm9obg0KPiANCj4gDQo+ID4gICAg
+ICAyICAgMjExNzcgR2FuZXNoIE1haGFsaW5nYW0gPGdhbmVzaC5tYWhhbGluZ2FtQGludGVsLmNv
+bT4NCltNYWhhbGluZ2FtLCBHYW5lc2hdIEkgYW0gd2l0aCB5b3Ugb24gdGhhdCBvbmUuIFRoZSBz
+bWFsbCBzaWRlIGVmZmVjdCBvZiBkb2luZyBnaXQgc3RhdHMgc2hvd2luZyBsaW5lcyBhZGRlZCBh
+bmQgZGVsZXRlZCAod2hpY2ggaXMgd2FhYWF5eXkgZWFzaWVyIHRoYW4gYWRkaW5nIGxpbmVzKS4N
+Cj4gPiAgICAgIDMgICAxNDM4NyBTYWdlIFdlaWwgPHN3ZWlsQHJlZGhhdC5jb20+DQo+ID4gICAg
+ICA0ICAgIDg0MDMgWWVodWRhIFNhZGVoIDx5c2FkZWh3ZUByZWRoYXQuY29tPg0KPiA+ICAgICAg
+NSAgICA3MDEyIFJhZG9zbGF3IFphcnp5bnNraSA8cnphcnp5bnNraUBtaXJhbnRpcy5jb20+DQo+
+ID4gICAgICA2ICAgIDYxMjkgQ2FzZXkgQm9kbGV5IDxjYm9kbGV5QHJlZGhhdC5jb20+DQo+ID4g
+ICAgICA3ICAgIDQ1NTQgQWRhbSBDLiBFbWVyc29uIDxhZW1lcnNvbkByZWRoYXQuY29tPg0KPiA+
+ICAgICAgOCAgICA0NDI5IEtlZnUgQ2hhaSA8a2NoYWlAcmVkaGF0LmNvbT4NCj4gPiAgICAgIDkg
+ICAgMzk0NiBKYXNvbiBEaWxsYW1hbiA8ZGlsbGFtYW5AcmVkaGF0LmNvbT4NCj4gPiAgICAgMTAg
+ICAgMzg5MiBBbWlyIFZhZGFpIDxhbWlyQHZhZGFpLm1lPg0KPiA+ICAgICAxMSAgICAzNzcyIEJv
+cmlzIFJhbnRvIDxicmFudG9AcmVkaGF0LmNvbT4NCj4gPiAgICAgMTIgICAgMzQxMyBPcml0IFdh
+c3Nlcm1hbiA8b3dhc3Nlcm1AcmVkaGF0LmNvbT4NCj4gPiAgICAgMTMgICAgMjcxMSBNeWtvbGEg
+R29sdWIgPG1nb2x1YkBtaXJhbnRpcy5jb20+DQo+ID4gICAgIDE0ICAgIDI0NjggR3JlZyBGYXJu
+dW0gPGdmYXJudW1AcmVkaGF0LmNvbT4NCj4gPiAgICAgMTUgICAgMjEyOCBKb8OjbyBFZHVhcmRv
+IEx1w61zIDxqb2FvQHN1c2UuZGU+DQo+ID4gICAgIDE2ICAgIDIwMjUgWGllIFhpbmdndW8gPHhp
+ZS54aW5nZ3VvQHp0ZS5jb20uY24+DQo+ID4gICAgIDE3ICAgIDE0NTIgWWFuLCBaaGVuZyA8enlh
+bkByZWRoYXQuY29tPg0KPiA+ICAgICAxOCAgICAxMzIyIEplc3NlIFdpbGxpYW1zb24gPGplc3Nl
+LndpbGxpYW1zb25Ac3VzZS5jb20+DQo+ID4gICAgIDE5ICAgIDEzMTUgQWJoaXNoZWsgTGVrc2ht
+YW5hbiA8YWJoaXNoZWtAc3VzZS5jb20+DQo+ID4gICAgIDIwICAgIDEyMTggSm9zIENvbGxpbiA8
+amNvbGxpbkByZWRoYXQuY29tPg0KPiA+ICAgICAyMSAgICAxMDEyIFdpbGxlbSBKYW4gV2l0aGFn
+ZW4gPHdqd0BkaWdpd2FyZS5ubD4NCj4gPiAgICAgMjIgICAgIDk5NCBCcmFkIEh1YmJhcmQgPGJo
+dWJiYXJkQHJlZGhhdC5jb20+DQo+ID4gICAgIDIzICAgICA4ODcgTXlvdW5nd29uIE9oIDxvbXdt
+d0Bzay5jb20+DQo+ID4gICAgIDI0ICAgICA4NzAgTWFyY3VzIFdhdHRzIDxtd2F0dHNAcmVkaGF0
+LmNvbT4NCj4gPiAgICAgMjUgICAgIDc2NyBQcml0aGEgU3JpdmFzdGF2YSA8cHJzcml2YXNAcmVk
+aGF0LmNvbT4NCj4gPiAgICAgMjYgICAgIDc0MyBQaW90ciBEYcWCZWsgPHBpb3RyLmRhbGVrQGNv
+cnAub3ZoLmNvbT4NCj4gPiAgICAgMjcgICAgIDYzOSBaaGFuZyBTaGFvd2VuIDx6aGFuZ3NoYW93
+ZW5AY21zcy5jaGluYW1vYmlsZS5jb20+DQo+ID4gICAgIDI4ICAgICA2MzUgWGlhb3dlaSBDaGVu
+IDxjaGVuLnhpYW93ZWlAaDNjLmNvbT4NCj4gPiAgICAgMjkgICAgIDYyOCBMb2ljIERhY2hhcnkg
+PGxkYWNoYXJ5QHJlZGhhdC5jb20+DQo+ID4gICAgIDMwICAgICA1NTEgbXljaG94aW4gPG15Y2hv
+eGluQGdtYWlsLmNvbT4NCj4gPiAgICAgMzEgICAgIDU0NCBNYSBKaWFucGVuZyA8amlhbnBlbmcu
+bWFAaW50ZWwuY29tPg0KPiA+ICAgICAzMiAgICAgNTE5IE5laGEgT2poYSA8bm9qaGFAcmVkaGF0
+LmNvbT4NCj4gPiAgICAgMzMgICAgIDUxMiBEYXZpZCBaYWZtYW4gPGR6YWZtYW5AcmVkaGF0LmNv
+bT4NCj4gPiAgICAgMzQgICAgIDQ4OSBNYXR0IEJlbmphbWluIDxtYmVuamFtaW5AcmVkaGF0LmNv
+bT4NCj4gPiAgICAgMzUgICAgIDQ4MiBIYW9tYWkgV2FuZyA8aGFvbWFpQHhza3kuY29tPg0KPiA+
+ICAgICAzNiAgICAgNDc3IEFkYW0gS3VwY3p5ayA8YWt1cGN6eWtAbWlyYW50aXMuY29tPg0KPiA+
+ICAgICAzNyAgICAgNDUzIFRpbSBTZXJvbmcgPHRzZXJvbmdAc3VzZS5jb20+DQo+ID4gICAgIDM4
+ICAgICAzOTggUGFuIExpdSA8d2FuanVuLmxwQGFsaWJhYmEtaW5jLmNvbT4NCj4gPiAgICAgMzkg
+ICAgIDM4NiBDaGFuZyBMaXUgPGxpdWNoYW5nMDgxMkBnbWFpbC5jb20+DQo+ID4gICAgIDQwICAg
+ICAzODAgTmF0aGFuIEN1dGxlciA8bmN1dGxlckBzdXNlLmNvbT4NCj4gPiAgICAgNDEgICAgIDM1
+NCBMdW8gUnVuYmluZyA8cnVuc2lzaUB6dGUuY29tLmNuPg0KPiA+ICAgICA0MiAgICAgMzM0IEFu
+ZHJldyBTb2xvbW9uIDxhc29sb21vbkB1cy5pYm0uY29tPg0KPiA+ICAgICA0MyAgICAgMjg3IERh
+bmllbCBPbGl2ZWlyYSA8ZG9saXZlaXJhQHN1c2UuY29tPg0KPiA+ICAgICA0NCAgICAgMjc2IEou
+IEVyaWMgSXZhbmNpY2ggPGl2YW5jaWNoQHJlZGhhdC5jb20+DQo+ID4gICAgIDQ1ICAgICAyNjgg
+SWdvciBGZWRvdG92IDxpZmVkb3RvdkBtaXJhbnRpcy5jb20+DQo+ID4gICAgIDQ2ICAgICAyNTAg
+bHUuc2hhc2hhIDxsdS5zaGFzaGFAZWlzb28uY29tPg0KPiA+ICAgICA0NyAgICAgMjIxIEphdmll
+ciBNLiBNZWxsaWQgPGptdW5ob3pAaWdhbGlhLmNvbT4NCj4gPiAgICAgNDggICAgIDIwNiBGYW5n
+IFl1eGlhbmcgPGZhbmcueXV4aWFuZ0BlaXNvby5jb20+DQo+ID4gICAgIDQ5ICAgICAxNzUgSWx5
+YSBEcnlvbW92IDxpZHJ5b21vdkByZWRoYXQuY29tPg0KPiA+ICAgICA1MCAgICAgMTYzIFZpY3Rv
+ciBBcmF1am8gPHZlLmFyOTFAZ21haWwuY29tPg0KPiA+ICAgICA1MSAgICAgMTUwIERhbiBNaWNr
+IDxkbWlja0ByZWRoYXQuY29tPg0KPiA+ICAgICA1MiAgICAgMTIwIExlbyBaaGFuZyA8bmd1emNm
+QGdtYWlsLmNvbT4NCj4gPiAgICAgNTMgICAgIDExNCBNb2hhbWFkIEdlYmFpIDxtZ2ViYWlAc3Vz
+ZS5jb20+DQo+ID4gICAgIDU0ICAgICAxMTQgTG9nYW4gQmx5dGggPG1yYm9qYW5nbGVzM0BnbWFp
+bC5jb20+DQo+ID4gICAgIDU1ICAgICAxMDcgSmlheWluZyBSZW4gPGppYXlpbmcucmVuQHVtY2xv
+dWQuY29tPg0KPiA+ICAgICA1NiAgICAgIDk5IEd1aSBIZWNoZW5nIDxndWloZWNoZW5nQGNtc3Mu
+Y2hpbmFtb2JpbGUuY29tPg0KPiA+ICAgICA1NyAgICAgIDk0IEplbnMgUm9zZW5ib29tIDxqLnJv
+c2VuYm9vbUB4LWlvbi5kZT4NCj4gPiAgICAgNTggICAgICA4MiBaaGkgWmhhbmcgPHdpbGx6emhh
+bmdAdGVuY2VudC5jb20+DQo+ID4gICAgIDU5ICAgICAgNzEgWmhhbmcgTGVpIDwyNDMyOTA0MTRA
+cXEuY29tPg0KPiA+ICAgICA2MCAgICAgIDY1IEppbmcgV2VuanVuIDxqaW5nd2VuanVuQGNtc3Mu
+Y2hpbmFtb2JpbGUuY29tPg0KPiA+ICAgICA2MSAgICAgIDY0IEphbWVzIFBhZ2UgPGphbWVzLnBh
+Z2VAdWJ1bnR1LmNvbT4NCj4gPiAgICAgNjIgICAgICA1MyBYaWFveWFuIExpIDx4aWFveWFuLmxp
+QGludGVsLmNvbT4NCj4gPiAgICAgNjMgICAgICA1MiBWaWNlbnRlIENoZW5nIDx2aWNlbnRlX2No
+ZW5nQGJpZ3RlcmEuY29tPg0KPiA+ICAgICA2NCAgICAgIDQ5IExpbiBCaW5nIDxoYXdrZXJvdXNA
+Z21haWwuY29tPg0KPiA+ICAgICA2NSAgICAgIDQ1IEtlbiBEcmV5ZXIgPGtkcmV5ZXJAcmVkaGF0
+LmNvbT4NCj4gPiAgICAgNjYgICAgICA0NCBKaW4gQ2FpIDxjYWlqaW4uY2FpakBhbGliYWJhLWlu
+Yy5jb20+DQo+ID4gICAgIDY3ICAgICAgNDMgRGFuaWVsIEdyeW5pZXdpY3ogPGRhbmdAcmVkaGF0
+LmNvbT4NCj4gPiAgICAgNjggICAgICA0MCBSZW4gSHVhbndlbiA8cmVuLmh1YW53ZW5AenRlLmNv
+bS5jbj4NCj4gPiAgICAgNjkgICAgICAzOSBZdWxpIFlhbmcgPHl1bGl5YW5nQGNtc3MuY2hpbmFt
+b2JpbGUuY29tPg0KPiA+ICAgICA3MCAgICAgIDM3IERvbmdkb25nIFRhbyA8dGRkMjExNTExODZA
+Z21haWwuY29tPg0KPiA+ICAgICA3MSAgICAgIDM0IEFkaXIgTGV2IDxhZGlybEBtZWxsYW5veC5j
+b20+DQo+ID4gICAgIDcyICAgICAgMjcgRHJ1bmthcmQgWmhhbmcgPGdvbmdmYW4xOTNAZ21haWwu
+Y29tPg0KPiA+ICAgICA3MyAgICAgIDI2IFBhdHJpY2sgRG9ubmVsbHkgPHBkb25uZWxsQHJlZGhh
+dC5jb20+DQo+ID4gICAgIDc0ICAgICAgMjAgR3VvIFpoYW5kb25nIDxndW96aGFuZG9uZ0BjbXNz
+LmNoaW5hbW9iaWxlLmNvbT4NCj4gPiAgICAgNzUgICAgICAyMCBFbm1pbmcgWmhhbmcgPGVubWlu
+Zy56aGFuZ0B1bWNsb3VkLmNvbT4NCj4gPiAgICAgNzYgICAgICAxOSBTYW1lZXIgVGl3YXJpIDxz
+dGl3YXJpQHNhbGVzZm9yY2UuY29tPg0KPiA+ICAgICA3NyAgICAgIDE5IEJhc3NhbSBUYWJiYXJh
+IDxiYXNzYW0udGFiYmFyYUBxdWFudHVtLmNvbT4NCj4gPiAgICAgNzggICAgICAxOCBNaW5neGlu
+IExpdSA8bWluZ3hpbkB4c2t5LmNvbT4NCj4gPiAgICAgNzkgICAgICAxNyBaaGFuZyBaZXpodSA8
+emhhbmcuemV6aHVAenRlLmNvbS5jbj4NCj4gPiAgICAgODAgICAgICAxNyBEYW5pZWwgQmFyLU9u
+IDxkYW5pZWxib0BtZWxsYW5veC5jb20+DQo+ID4gICAgIDgxICAgICAgMTYgU2hpcWkgPG0xMzkx
+Mzg4NjE0OEBnbWFpbC5jb20+DQo+ID4gICAgIDgyICAgICAgMTIgQW5kcmVhcyBHZXJzdG1heXIg
+PGFuZHJlYXMuZ2Vyc3RtYXlyQGNhdGFseXN0cy5jYz4NCj4gPiAgICAgODMgICAgICAxMCBUdXNo
+YXIgR29oYWQgPHR1c2hhci5nb2hhZEBpbnRlbC5jb20+DQo+ID4gICAgIDg0ICAgICAgIDkgQ2hl
+bmZhbmcgWGlhbiA8Y2hlbmZhbmd4aWFuQGNtc3MuY2hpbmFtb2JpbGUuY29tPg0KPiA+ICAgICA4
+NSAgICAgICA5IEFsaSBNYXJlZGlhIDxhbWFyZWRpYUByZWRoYXQuY29tPg0KPiA+ICAgICA4NiAg
+ICAgICA4IFlhbyBab25neW91IDx5YW96b25neW91QHZpcC5xcS5jb20+DQo+ID4gICAgIDg3ICAg
+ICAgIDggVGhvbWFzIFNlcmxpbiA8dHNlcmxpbkByZWRoYXQuY29tPg0KPiA+ICAgICA4OCAgICAg
+ICA4IEZhYmlhbiBHcsO8bmJpY2hsZXIgPGYuZ3J1ZW5iaWNobGVyQHByb3htb3guY29tPg0KPiA+
+ICAgICA4OSAgICAgICA3IFl1IFNoZW5nenVvIDx5dS5zaGVuZ3p1b0A5OWNsb3VkLm5ldD4NCj4g
+PiAgICAgOTAgICAgICAgNiBaaGVuZyBZaW4gPHpoZW5neWluQGNoaW5hYy5jb20+DQo+ID4gICAg
+IDkxICAgICAgIDYgWXVyaSBXZWluc3RlaW4gPHl1cml3QHJlZGhhdC5jb20+DQo+ID4gICAgIDky
+ICAgICAgIDYgUmVkaWNrIFdhbmcgPHJlZGlja3dhbmdAdGVuY2VudC5jb20+DQo+ID4gICAgIDkz
+ICAgICAgIDYgTWFyayBOZWxzb24gPG1uZWxzb25AcmVkaGF0LmNvbT4NCj4gPiAgICAgOTQgICAg
+ICAgNiBEb25nc2hlbmcgWWFuZyA8ZG9uZ3NoZW5nLnlhbmdAZWFzeXN0YWNrLmNuPg0KPiA+ICAg
+ICA5NSAgICAgICA0IEhlbnJ5IENoYW5nIDxoZW5yeV9jaGFuZ0BiaWd0ZXJhLmNvbT4NCj4gPiAg
+ICAgOTYgICAgICAgNCBCYXJib3JhIEFuxI1pbmNvdsOhIDxiYXJhQHJlZGhhdC5jb20+DQo+ID4g
+ICAgIDk3ICAgICAgIDMgWWFuaHUgQ2FvIDxnbWF5eXloYUBnbWFpbC5jb20+DQo+ID4gICAgIDk4
+ICAgICAgIDIgU2hlbmdqaW5nIFpodSA8enNqOTUwNjE4QGdtYWlsLmNvbT4NCj4gPiAgICAgOTkg
+ICAgICAgMiBTYXJpdCBadWJha292IDxzYXJpdHpAbWVsbGFub3guY29tPg0KPiA+ICAgIDEwMCAg
+ICAgICAyIE1pblNoZW5nIExpbiA8bWluc2hlbmcubEBpbndpbnN0YWNrLmNvbT4NCj4gPiAgICAx
+MDEgICAgICAgMiBMaXUgWXVob25nIDxsaXV5dWhvbmdAY21zcy5jaGluYW1vYmlsZS5jb20+DQo+
+ID4gICAgMTAyICAgICAgIDIgTGkgSG9uZ2ppZSA8bGlob25namllQGNtc3MuY2hpbmFtb2JpbGUu
+Y29tPg0KPiA+ICAgIDEwMyAgICAgICAyIEhvbmcgWmhhbmdvb2xlIDxob25nLnpoYW5nb29sZUBn
+bWFpbC5jb20+DQo+ID4gICAgMTA0ICAgICAgIDIgQWxlc3NhbmRybyBCYXJiaWVyaSA8YWxlLmJh
+cmJpb0BhbGljZS5pdD4NCj4gPg0KPiA+IE51bWJlciBvZiBsaW5lcyBhZGRlZCBhbmQgcmVtb3Zl
+ZCwgYnkgb3JnYW5pemF0aW9uDQo+ID4gICAgICAxICAzNDIxNjYgUmVkIEhhdCA8Y29udGFjdEBy
+ZWRoYXQuY29tPg0KPiA+ICAgICAgMiAgIDIxNzg0IEludGVsIDxjb250YWN0QGludGVsLmNvbT4N
+Cj4gPiAgICAgIDMgICAxMDQ2OCBNaXJhbnRpcyA8Y29udGFjdEBtaXJhbnRpcy5jb20+DQo+ID4g
+ICAgICA0ICAgIDYxOTQgVW5hZmZpbGlhdGVkIDxub0Bvcmdhbml6YXRpb24ubmV0Pg0KPiA+ICAg
+ICAgNSAgICA1OTk5IFNVU0UgPGNvbnRhY3RAc3VzZS5jb20+DQo+ID4gICAgICA2ICAgIDI0MzYg
+WlRFIDxjb250YWN0QHp0ZS5jb20uY24+DQo+ID4gICAgICA3ICAgIDEwMTIgRGlnaXdhcmUgPGNv
+bnRhY3RAZGlnaXdhcmUubmw+DQo+ID4gICAgICA4ICAgICA4NzUgQ2hpbmEgTW9iaWxlIDxjb250
+YWN0QGNoaW5hbW9iaWxlLmNvbT4NCj4gPiAgICAgIDkgICAgIDc0MyBPVkggPGNlcGhAb3ZoLm5l
+dD4NCj4gPiAgICAgMTAgICAgIDYzNSBIM0MgPGNvbnRhY3RAaDNjLmNvbT4NCj4gPiAgICAgMTEg
+ICAgIDUwMCBYU2t5IDxjb250YWN0QHhza3kuY29tPg0KPiA+ICAgICAxMiAgICAgNDU2IEVJU09P
+IDxjb250YWN0QGVpc29vLmNvbT4NCj4gPiAgICAgMTMgICAgIDQ0MiBBbGliYWJhIDxjb250YWN0
+QGFsaWJhYmEtaW5jLmNvbT4NCj4gPiAgICAgMTQgICAgIDMzNCBJQk0gPGNvbnRhY3RASUJNLmNv
+bT4NCj4gPiAgICAgMTUgICAgIDIyMSBJZ2FsaWEgPGNvbnRhY3RAaWdhbGlhLmNvbT4NCj4gPiAg
+ICAgMTYgICAgIDEyNyBVTUNsb3VkIDxjb250YWN0QHVtY2xvdWQuY29tPg0KPiA+ICAgICAxNyAg
+ICAgMTIwIFQyQ2xvdWQgPGNvbnRhY3RAdDJjbG91ZC5uZXQ+DQo+ID4gICAgIDE4ICAgICAgOTQg
+WC1pb24gR21iSCA8Y29udGFjdEB4LWlvbi5kZT4NCj4gPiAgICAgMTkgICAgICA4OCBUZW5jZW50
+IDxjb250YWN0QHRlbmNlbnQuY29tPg0KPiA+ICAgICAyMCAgICAgIDY0IENhbm9uaWNhbCA8Y29u
+dGFjdEBjYW5vbmljYWwuY29tPg0KPiA+ICAgICAyMSAgICAgIDU2IEJpZ3RlcmEgPGNvbnRhY3RA
+YmlndGVyYS5jb20+DQo+ID4gICAgIDIyICAgICAgNTMgTWVsbGFub3ggPGNvbnRhY3RAbWVsbGFu
+b3guY29tPg0KPiA+ICAgICAyMyAgICAgIDE5IFNhbGVzZm9yY2UgPGNvbnRhY3RAc2FsZXNmb3Jj
+ZS5jb20+DQo+ID4gICAgIDI0ICAgICAgMTkgUXVhbnR1bSBDb3Jwb3JhdGlvbiA8aW5mb0BxdWFu
+dHVtLmNvbT4NCj4gPiAgICAgMjUgICAgICAxNiBUcmVuZHkgVGVjaCA8Y29udGFjdEB0cmVuZHl0
+ZWNoLmNvbS5jbj4NCj4gPiAgICAgMjYgICAgICAxMiBDYXRhbHlzdHMgPG9mZmljZUBjYXRhbHlz
+dHMuY2M+DQo+ID4gICAgIDI3ICAgICAgIDggUHJveG1veCBTZXJ2ZXIgU29sdXRpb25zIEdtYkgg
+PG9mZmljZUBwcm94bW94LmNvbT4NCj4gPiAgICAgMjggICAgICAgNyA5OUNsb3VkIEluYyA8Y29u
+dGFjdEA5OWNsb3VkLm5ldD4NCj4gPiAgICAgMjkgICAgICAgNiBFYXN5c3RhY2sgPGNvbnRhY3RA
+ZWFzeXN0YWNrLmNuPg0KPiA+ICAgICAzMCAgICAgICA2IENoaW5hYyA8aW5mb0BjaGluYWMuY29t
+Pg0KPiA+ICAgICAzMSAgICAgICAyIGlud2luU1RBQ0sgaW5jLiA8bGVvLmxAaW53aW5zdGFjay5j
+b20+DQo+ID4NCj4gPiBDb21taXRzLCBieSBhdXRob3JzDQo+ID4gICAgICAxICAgICAgMzI4IFNh
+Z2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT4NCj4gPiAgICAgIDIgICAgICAxMjMgWWVodWRhIFNh
+ZGVoIDx5c2FkZWh3ZUByZWRoYXQuY29tPg0KPiA+ICAgICAgMyAgICAgIDEwMiBLZWZ1IENoYWkg
+PGtjaGFpQHJlZGhhdC5jb20+DQo+ID4gICAgICA0ICAgICAgIDczIFJhZG9zbGF3IFphcnp5bnNr
+aSA8cnphcnp5bnNraUBtaXJhbnRpcy5jb20+DQo+ID4gICAgICA1ICAgICAgIDYzIEpvaG4gU3By
+YXkgPGpzcHJheUByZWRoYXQuY29tPg0KPiA+ICAgICAgNiAgICAgICA1MSBHcmVnIEZhcm51bSA8
+Z2Zhcm51bUByZWRoYXQuY29tPg0KPiA+ICAgICAgNyAgICAgICA1MCBZYW4sIFpoZW5nIDx6eWFu
+QHJlZGhhdC5jb20+DQo+ID4gICAgICA4ICAgICAgIDUwIENhc2V5IEJvZGxleSA8Y2JvZGxleUBy
+ZWRoYXQuY29tPg0KPiA+ICAgICAgOSAgICAgICA0NiBPcml0IFdhc3Nlcm1hbiA8b3dhc3Nlcm1A
+cmVkaGF0LmNvbT4NCj4gPiAgICAgMTAgICAgICAgMzggQWJoaXNoZWsgTGVrc2htYW5hbiA8YWJo
+aXNoZWtAc3VzZS5jb20+DQo+ID4gICAgIDExICAgICAgIDM3IEphc29uIERpbGxhbWFuIDxkaWxs
+YW1hbkByZWRoYXQuY29tPg0KPiA+ICAgICAxMiAgICAgICAzMyBYaWUgWGluZ2d1byA8eGllLnhp
+bmdndW9AenRlLmNvbS5jbj4NCj4gPiAgICAgMTMgICAgICAgMjUgV2lsbGVtIEphbiBXaXRoYWdl
+biA8d2p3QGRpZ2l3YXJlLm5sPg0KPiA+ICAgICAxNCAgICAgICAyMSBOYXRoYW4gQ3V0bGVyIDxu
+Y3V0bGVyQHN1c2UuY29tPg0KPiA+ICAgICAxNSAgICAgICAyMCBKb3MgQ29sbGluIDxqY29sbGlu
+QHJlZGhhdC5jb20+DQo+ID4gICAgIDE2ICAgICAgIDIwIEJvcmlzIFJhbnRvIDxicmFudG9AcmVk
+aGF0LmNvbT4NCj4gPiAgICAgMTcgICAgICAgMTggSGFvbWFpIFdhbmcgPGhhb21haUB4c2t5LmNv
+bT4NCj4gPiAgICAgMTggICAgICAgMTggQW1pciBWYWRhaSA8YW1pckB2YWRhaS5tZT4NCj4gPiAg
+ICAgMTkgICAgICAgMTYgWGlhb3dlaSBDaGVuIDxjaGVuLnhpYW93ZWlAaDNjLmNvbT4NCj4gPiAg
+ICAgMjAgICAgICAgMTYgSmVzc2UgV2lsbGlhbXNvbiA8amVzc2Uud2lsbGlhbXNvbkBzdXNlLmNv
+bT4NCj4gPiAgICAgMjEgICAgICAgMTYgQWRhbSBDLiBFbWVyc29uIDxhZW1lcnNvbkByZWRoYXQu
+Y29tPg0KPiA+ICAgICAyMiAgICAgICAxNCBKb8OjbyBFZHVhcmRvIEx1w61zIDxqb2FvQHN1c2Uu
+ZGU+DQo+ID4gICAgIDIzICAgICAgIDEyIENoYW5nIExpdSA8bGl1Y2hhbmcwODEyQGdtYWlsLmNv
+bT4NCj4gPiAgICAgMjQgICAgICAgMTEgTmVoYSBPamhhIDxub2poYUByZWRoYXQuY29tPg0KPiA+
+ICAgICAyNSAgICAgICAxMSBNeW91bmd3b24gT2ggPG9td213QHNrLmNvbT4NCj4gPiAgICAgMjYg
+ICAgICAgMTEgTXlrb2xhIEdvbHViIDxtZ29sdWJAbWlyYW50aXMuY29tPg0KPiA+ICAgICAyNyAg
+ICAgICAxMSBEYW4gTWljayA8ZG1pY2tAcmVkaGF0LmNvbT4NCj4gPiAgICAgMjggICAgICAgMTEg
+QnJhZCBIdWJiYXJkIDxiaHViYmFyZEByZWRoYXQuY29tPg0KPiA+ICAgICAyOSAgICAgICAxMCBa
+aGFuZyBTaGFvd2VuIDx6aGFuZ3NoYW93ZW5AY21zcy5jaGluYW1vYmlsZS5jb20+DQo+ID4gICAg
+IDMwICAgICAgIDEwIEd1aSBIZWNoZW5nIDxndWloZWNoZW5nQGNtc3MuY2hpbmFtb2JpbGUuY29t
+Pg0KPiA+ICAgICAzMSAgICAgICAgOSBQcml0aGEgU3JpdmFzdGF2YSA8cHJzcml2YXNAcmVkaGF0
+LmNvbT4NCj4gPiAgICAgMzIgICAgICAgIDkgTG9pYyBEYWNoYXJ5IDxsZGFjaGFyeUByZWRoYXQu
+Y29tPg0KPiA+ICAgICAzMyAgICAgICAgOSBMZW8gWmhhbmcgPG5ndXpjZkBnbWFpbC5jb20+DQo+
+ID4gICAgIDM0ICAgICAgICA5IElnb3IgRmVkb3RvdiA8aWZlZG90b3ZAbWlyYW50aXMuY29tPg0K
+PiA+ICAgICAzNSAgICAgICAgOCBMdW8gUnVuYmluZyA8cnVuc2lzaUB6dGUuY29tLmNuPg0KPiA+
+ICAgICAzNiAgICAgICAgOCBKaWF5aW5nIFJlbiA8amlheWluZy5yZW5AdW1jbG91ZC5jb20+DQo+
+ID4gICAgIDM3ICAgICAgICA3IE1hdHQgQmVuamFtaW4gPG1iZW5qYW1pbkByZWRoYXQuY29tPg0K
+PiA+ICAgICAzOCAgICAgICAgNyBNYSBKaWFucGVuZyA8amlhbnBlbmcubWFAaW50ZWwuY29tPg0K
+PiA+ICAgICAzOSAgICAgICAgNyBsdS5zaGFzaGEgPGx1LnNoYXNoYUBlaXNvby5jb20+DQo+ID4g
+ICAgIDQwICAgICAgICA3IExpbiBCaW5nIDxoYXdrZXJvdXNAZ21haWwuY29tPg0KPiA+ICAgICA0
+MSAgICAgICAgNyBGYW5nIFl1eGlhbmcgPGZhbmcueXV4aWFuZ0BlaXNvby5jb20+DQo+ID4gICAg
+IDQyICAgICAgICA3IERhdmlkIFphZm1hbiA8ZHphZm1hbkByZWRoYXQuY29tPg0KPiA+ICAgICA0
+MyAgICAgICAgNiBaaGFuZyBMZWkgPDI0MzI5MDQxNEBxcS5jb20+DQo+ID4gICAgIDQ0ICAgICAg
+ICA2IERydW5rYXJkIFpoYW5nIDxnb25nZmFuMTkzQGdtYWlsLmNvbT4NCj4gPiAgICAgNDUgICAg
+ICAgIDUgWmhpIFpoYW5nIDx3aWxsenpoYW5nQHRlbmNlbnQuY29tPg0KPiA+ICAgICA0NiAgICAg
+ICAgNSBQaW90ciBEYcWCZWsgPHBpb3RyLmRhbGVrQGNvcnAub3ZoLmNvbT4NCj4gPiAgICAgNDcg
+ICAgICAgIDUgUGF0cmljayBEb25uZWxseSA8cGRvbm5lbGxAcmVkaGF0LmNvbT4NCj4gPiAgICAg
+NDggICAgICAgIDUgUGFuIExpdSA8d2FuanVuLmxwQGFsaWJhYmEtaW5jLmNvbT4NCj4gPiAgICAg
+NDkgICAgICAgIDUgTW9oYW1hZCBHZWJhaSA8bWdlYmFpQHN1c2UuY29tPg0KPiA+ICAgICA1MCAg
+ICAgICAgNCBZdWxpIFlhbmcgPHl1bGl5YW5nQGNtc3MuY2hpbmFtb2JpbGUuY29tPg0KPiA+ICAg
+ICA1MSAgICAgICAgNCBUaW0gU2Vyb25nIDx0c2Vyb25nQHN1c2UuY29tPg0KPiA+ICAgICA1MiAg
+ICAgICAgNCBTaGlxaSA8bTEzOTEzODg2MTQ4QGdtYWlsLmNvbT4NCj4gPiAgICAgNTMgICAgICAg
+IDQgUmVuIEh1YW53ZW4gPHJlbi5odWFud2VuQHp0ZS5jb20uY24+DQo+ID4gICAgIDU0ICAgICAg
+ICA0IEouIEVyaWMgSXZhbmNpY2ggPGl2YW5jaWNoQHJlZGhhdC5jb20+DQo+ID4gICAgIDU1ICAg
+ICAgICA0IElseWEgRHJ5b21vdiA8aWRyeW9tb3ZAcmVkaGF0LmNvbT4NCj4gPiAgICAgNTYgICAg
+ICAgIDQgRGFuaWVsIE9saXZlaXJhIDxkb2xpdmVpcmFAc3VzZS5jb20+DQo+ID4gICAgIDU3ICAg
+ICAgICAzIFpoYW5nIFplemh1IDx6aGFuZy56ZXpodUB6dGUuY29tLmNuPg0KPiA+ICAgICA1OCAg
+ICAgICAgMyBYaWFveWFuIExpIDx4aWFveWFuLmxpQGludGVsLmNvbT4NCj4gPiAgICAgNTkgICAg
+ICAgIDMgTWluZ3hpbiBMaXUgPG1pbmd4aW5AeHNreS5jb20+DQo+ID4gICAgIDYwICAgICAgICAz
+IEtlbiBEcmV5ZXIgPGtkcmV5ZXJAcmVkaGF0LmNvbT4NCj4gPiAgICAgNjEgICAgICAgIDMgQmFz
+c2FtIFRhYmJhcmEgPGJhc3NhbS50YWJiYXJhQHF1YW50dW0uY29tPg0KPiA+ICAgICA2MiAgICAg
+ICAgMyBBZGFtIEt1cGN6eWsgPGFrdXBjenlrQG1pcmFudGlzLmNvbT4NCj4gPiAgICAgNjMgICAg
+ICAgIDIgVmljZW50ZSBDaGVuZyA8dmljZW50ZV9jaGVuZ0BiaWd0ZXJhLmNvbT4NCj4gPiAgICAg
+NjQgICAgICAgIDIgVHVzaGFyIEdvaGFkIDx0dXNoYXIuZ29oYWRAaW50ZWwuY29tPg0KPiA+ICAg
+ICA2NSAgICAgICAgMiBUaG9tYXMgU2VybGluIDx0c2VybGluQHJlZGhhdC5jb20+DQo+ID4gICAg
+IDY2ICAgICAgICAyIFNhbWVlciBUaXdhcmkgPHN0aXdhcmlAc2FsZXNmb3JjZS5jb20+DQo+ID4g
+ICAgIDY3ICAgICAgICAyIFJlZGljayBXYW5nIDxyZWRpY2t3YW5nQHRlbmNlbnQuY29tPg0KPiA+
+ICAgICA2OCAgICAgICAgMiBNYXJrIE5lbHNvbiA8bW5lbHNvbkByZWRoYXQuY29tPg0KPiA+ICAg
+ICA2OSAgICAgICAgMiBKZW5zIFJvc2VuYm9vbSA8ai5yb3NlbmJvb21AeC1pb24uZGU+DQo+ID4g
+ICAgIDcwICAgICAgICAyIEZhYmlhbiBHcsO8bmJpY2hsZXIgPGYuZ3J1ZW5iaWNobGVyQHByb3ht
+b3guY29tPg0KPiA+ICAgICA3MSAgICAgICAgMiBEb25nZG9uZyBUYW8gPHRkZDIxMTUxMTg2QGdt
+YWlsLmNvbT4NCj4gPiAgICAgNzIgICAgICAgIDIgRGFuaWVsIEJhci1PbiA8ZGFuaWVsYm9AbWVs
+bGFub3guY29tPg0KPiA+ICAgICA3MyAgICAgICAgMiBBbmRyZXcgU29sb21vbiA8YXNvbG9tb25A
+dXMuaWJtLmNvbT4NCj4gPiAgICAgNzQgICAgICAgIDIgQWRpciBMZXYgPGFkaXJsQG1lbGxhbm94
+LmNvbT4NCj4gPiAgICAgNzUgICAgICAgIDEgWmhlbmcgWWluIDx6aGVuZ3lpbkBjaGluYWMuY29t
+Pg0KPiA+ICAgICA3NiAgICAgICAgMSBZdSBTaGVuZ3p1byA8eXUuc2hlbmd6dW9AOTljbG91ZC5u
+ZXQ+DQo+ID4gICAgIDc3ICAgICAgICAxIFl1cmkgV2VpbnN0ZWluIDx5dXJpd0ByZWRoYXQuY29t
+Pg0KPiA+ICAgICA3OCAgICAgICAgMSBZYW8gWm9uZ3lvdSA8eWFvem9uZ3lvdUB2aXAucXEuY29t
+Pg0KPiA+ICAgICA3OSAgICAgICAgMSBZYW5odSBDYW8gPGdtYXl5eWhhQGdtYWlsLmNvbT4NCj4g
+PiAgICAgODAgICAgICAgIDEgVmljdG9yIEFyYXVqbyA8dmUuYXI5MUBnbWFpbC5jb20+DQo+ID4g
+ICAgIDgxICAgICAgICAxIFNoZW5namluZyBaaHUgPHpzajk1MDYxOEBnbWFpbC5jb20+DQo+ID4g
+ICAgIDgyICAgICAgICAxIFNhcml0IFp1YmFrb3YgPHNhcml0ekBtZWxsYW5veC5jb20+DQo+ID4g
+ICAgIDgzICAgICAgICAxIG15Y2hveGluIDxteWNob3hpbkBnbWFpbC5jb20+DQo+ID4gICAgIDg0
+ICAgICAgICAxIE1pblNoZW5nIExpbiA8bWluc2hlbmcubEBpbndpbnN0YWNrLmNvbT4NCj4gPiAg
+ICAgODUgICAgICAgIDEgTWFyY3VzIFdhdHRzIDxtd2F0dHNAcmVkaGF0LmNvbT4NCj4gPiAgICAg
+ODYgICAgICAgIDEgTG9nYW4gQmx5dGggPG1yYm9qYW5nbGVzM0BnbWFpbC5jb20+DQo+ID4gICAg
+IDg3ICAgICAgICAxIExpdSBZdWhvbmcgPGxpdXl1aG9uZ0BjbXNzLmNoaW5hbW9iaWxlLmNvbT4N
+Cj4gPiAgICAgODggICAgICAgIDEgTGkgSG9uZ2ppZSA8bGlob25namllQGNtc3MuY2hpbmFtb2Jp
+bGUuY29tPg0KPiA+ICAgICA4OSAgICAgICAgMSBKaW5nIFdlbmp1biA8amluZ3dlbmp1bkBjbXNz
+LmNoaW5hbW9iaWxlLmNvbT4NCj4gPiAgICAgOTAgICAgICAgIDEgSmluIENhaSA8Y2FpamluLmNh
+aWpAYWxpYmFiYS1pbmMuY29tPg0KPiA+ICAgICA5MSAgICAgICAgMSBKYXZpZXIgTS4gTWVsbGlk
+IDxqbXVuaG96QGlnYWxpYS5jb20+DQo+ID4gICAgIDkyICAgICAgICAxIEphbWVzIFBhZ2UgPGph
+bWVzLnBhZ2VAdWJ1bnR1LmNvbT4NCj4gPiAgICAgOTMgICAgICAgIDEgSG9uZyBaaGFuZ29vbGUg
+PGhvbmcuemhhbmdvb2xlQGdtYWlsLmNvbT4NCj4gPiAgICAgOTQgICAgICAgIDEgSGVucnkgQ2hh
+bmcgPGhlbnJ5X2NoYW5nQGJpZ3RlcmEuY29tPg0KPiA+ICAgICA5NSAgICAgICAgMSBHdW8gWmhh
+bmRvbmcgPGd1b3poYW5kb25nQGNtc3MuY2hpbmFtb2JpbGUuY29tPg0KPiA+ICAgICA5NiAgICAg
+ICAgMSBHYW5lc2ggTWFoYWxpbmdhbSA8Z2FuZXNoLm1haGFsaW5nYW1AaW50ZWwuY29tPg0KPiA+
+ICAgICA5NyAgICAgICAgMSBFbm1pbmcgWmhhbmcgPGVubWluZy56aGFuZ0B1bWNsb3VkLmNvbT4N
+Cj4gPiAgICAgOTggICAgICAgIDEgRG9uZ3NoZW5nIFlhbmcgPGRvbmdzaGVuZy55YW5nQGVhc3lz
+dGFjay5jbj4NCj4gPiAgICAgOTkgICAgICAgIDEgRGFuaWVsIEdyeW5pZXdpY3ogPGRhbmdAcmVk
+aGF0LmNvbT4NCj4gPiAgICAxMDAgICAgICAgIDEgQ2hlbmZhbmcgWGlhbiA8Y2hlbmZhbmd4aWFu
+QGNtc3MuY2hpbmFtb2JpbGUuY29tPg0KPiA+ICAgIDEwMSAgICAgICAgMSBCYXJib3JhIEFuxI1p
+bmNvdsOhIDxiYXJhQHJlZGhhdC5jb20+DQo+ID4gICAgMTAyICAgICAgICAxIEFuZHJlYXMgR2Vy
+c3RtYXlyIDxhbmRyZWFzLmdlcnN0bWF5ckBjYXRhbHlzdHMuY2M+DQo+ID4gICAgMTAzICAgICAg
+ICAxIEFsaSBNYXJlZGlhIDxhbWFyZWRpYUByZWRoYXQuY29tPg0KPiA+ICAgIDEwNCAgICAgICAg
+MSBBbGVzc2FuZHJvIEJhcmJpZXJpIDxhbGUuYmFyYmlvQGFsaWNlLml0Pg0KPiA+DQo+ID4gQ29t
+bWl0cywgYnkgb3JnYW5pemF0aW9ucw0KPiA+ICAgICAgMSAgICAgIDk5NiBSZWQgSGF0IDxjb250
+YWN0QHJlZGhhdC5jb20+DQo+ID4gICAgICAyICAgICAgMTAyIFNVU0UgPGNvbnRhY3RAc3VzZS5j
+b20+DQo+ID4gICAgICAzICAgICAgIDk2IE1pcmFudGlzIDxjb250YWN0QG1pcmFudGlzLmNvbT4N
+Cj4gPiAgICAgIDQgICAgICAgNzAgVW5hZmZpbGlhdGVkIDxub0Bvcmdhbml6YXRpb24ubmV0Pg0K
+PiA+ICAgICAgNSAgICAgICA0OCBaVEUgPGNvbnRhY3RAenRlLmNvbS5jbj4NCj4gPiAgICAgIDYg
+ICAgICAgMjkgQ2hpbmEgTW9iaWxlIDxjb250YWN0QGNoaW5hbW9iaWxlLmNvbT4NCj4gPiAgICAg
+IDcgICAgICAgMjUgRGlnaXdhcmUgPGNvbnRhY3RAZGlnaXdhcmUubmw+DQo+ID4gICAgICA4ICAg
+ICAgIDIxIFhTa3kgPGNvbnRhY3RAeHNreS5jb20+DQo+ID4gICAgICA5ICAgICAgIDE2IEgzQyA8
+Y29udGFjdEBoM2MuY29tPg0KPiA+ICAgICAxMCAgICAgICAxNCBFSVNPTyA8Y29udGFjdEBlaXNv
+by5jb20+DQo+ID4gICAgIDExICAgICAgIDEzIEludGVsIDxjb250YWN0QGludGVsLmNvbT4NCj4g
+PiAgICAgMTIgICAgICAgIDkgVU1DbG91ZCA8Y29udGFjdEB1bWNsb3VkLmNvbT4NCj4gPiAgICAg
+MTMgICAgICAgIDkgVDJDbG91ZCA8Y29udGFjdEB0MmNsb3VkLm5ldD4NCj4gPiAgICAgMTQgICAg
+ICAgIDcgVGVuY2VudCA8Y29udGFjdEB0ZW5jZW50LmNvbT4NCj4gPiAgICAgMTUgICAgICAgIDYg
+QWxpYmFiYSA8Y29udGFjdEBhbGliYWJhLWluYy5jb20+DQo+ID4gICAgIDE2ICAgICAgICA1IE9W
+SCA8Y2VwaEBvdmgubmV0Pg0KPiA+ICAgICAxNyAgICAgICAgNSBNZWxsYW5veCA8Y29udGFjdEBt
+ZWxsYW5veC5jb20+DQo+ID4gICAgIDE4ICAgICAgICA0IFRyZW5keSBUZWNoIDxjb250YWN0QHRy
+ZW5keXRlY2guY29tLmNuPg0KPiA+ICAgICAxOSAgICAgICAgMyBRdWFudHVtIENvcnBvcmF0aW9u
+IDxpbmZvQHF1YW50dW0uY29tPg0KPiA+ICAgICAyMCAgICAgICAgMyBCaWd0ZXJhIDxjb250YWN0
+QGJpZ3RlcmEuY29tPg0KPiA+ICAgICAyMSAgICAgICAgMiBYLWlvbiBHbWJIIDxjb250YWN0QHgt
+aW9uLmRlPg0KPiA+ICAgICAyMiAgICAgICAgMiBTYWxlc2ZvcmNlIDxjb250YWN0QHNhbGVzZm9y
+Y2UuY29tPg0KPiA+ICAgICAyMyAgICAgICAgMiBQcm94bW94IFNlcnZlciBTb2x1dGlvbnMgR21i
+SCA8b2ZmaWNlQHByb3htb3guY29tPg0KPiA+ICAgICAyNCAgICAgICAgMiBJQk0gPGNvbnRhY3RA
+SUJNLmNvbT4NCj4gPiAgICAgMjUgICAgICAgIDEgaW53aW5TVEFDSyBpbmMuIDxsZW8ubEBpbndp
+bnN0YWNrLmNvbT4NCj4gPiAgICAgMjYgICAgICAgIDEgSWdhbGlhIDxjb250YWN0QGlnYWxpYS5j
+b20+DQo+ID4gICAgIDI3ICAgICAgICAxIEVhc3lzdGFjayA8Y29udGFjdEBlYXN5c3RhY2suY24+
+DQo+ID4gICAgIDI4ICAgICAgICAxIENoaW5hYyA8aW5mb0BjaGluYWMuY29tPg0KPiA+ICAgICAy
+OSAgICAgICAgMSBDYXRhbHlzdHMgPG9mZmljZUBjYXRhbHlzdHMuY2M+DQo+ID4gICAgIDMwICAg
+ICAgICAxIENhbm9uaWNhbCA8Y29udGFjdEBjYW5vbmljYWwuY29tPg0KPiA+ICAgICAzMSAgICAg
+ICAgMSA5OUNsb3VkIEluYyA8Y29udGFjdEA5OWNsb3VkLm5ldD4NCj4gPg0KPiA+IFJldmlld3Ms
+IGJ5IGF1dGhvcnMgKG9uZSByZXZpZXcgc3BhbnMgbXVsdGlwbGUgY29tbWl0cykNCj4gPiAgICAg
+IDEgICAgICAxMTggS2VmdSBDaGFpIDxrY2hhaUByZWRoYXQuY29tPg0KPiA+ICAgICAgMiAgICAg
+ICA5NCBTYWdlIFdlaWwgPHN3ZWlsQHJlZGhhdC5jb20+DQo+ID4gICAgICAzICAgICAgIDUyIENh
+c2V5IEJvZGxleSA8Y2JvZGxleUByZWRoYXQuY29tPg0KPiA+ICAgICAgNCAgICAgICA0NiBKb3No
+IER1cmdpbiA8amR1cmdpbkByZWRoYXQuY29tPg0KPiA+ICAgICAgNSAgICAgICAyOCBKb2huIFNw
+cmF5IDxqc3ByYXlAcmVkaGF0LmNvbT4NCj4gPiAgICAgIDYgICAgICAgMTkgSmFzb24gRGlsbGFt
+YW4gPGRpbGxhbWFuQHJlZGhhdC5jb20+DQo+ID4gICAgICA3ICAgICAgIDE3IExvaWMgRGFjaGFy
+eSA8bGRhY2hhcnlAcmVkaGF0LmNvbT4NCj4gPiAgICAgIDggICAgICAgMTYgR3JlZyBGYXJudW0g
+PGdmYXJudW1AcmVkaGF0LmNvbT4NCj4gPiAgICAgIDkgICAgICAgMTUgSWdvciBGZWRvdG92IDxp
+ZmVkb3RvdkBtaXJhbnRpcy5jb20+DQo+ID4gICAgIDEwICAgICAgIDEzIFhpZSBYaW5nZ3VvIDx4
+aWUueGluZ2d1b0B6dGUuY29tLmNuPg0KPiA+ICAgICAxMSAgICAgICAxMyBNeWtvbGEgR29sdWIg
+PG1nb2x1YkBtaXJhbnRpcy5jb20+DQo+ID4gICAgIDEyICAgICAgIDEwIFlhbiwgWmhlbmcgPHp5
+YW5AcmVkaGF0LmNvbT4NCj4gPiAgICAgMTMgICAgICAgMTAgUGF0cmljayBEb25uZWxseSA8cGRv
+bm5lbGxAcmVkaGF0LmNvbT4NCj4gPiAgICAgMTQgICAgICAgMTAgSm9zIENvbGxpbiA8amNvbGxp
+bkByZWRoYXQuY29tPg0KPiA+ICAgICAxNSAgICAgICAxMCBIYW9tYWkgV2FuZyA8aGFvbWFpQHhz
+a3kuY29tPg0KPiA+ICAgICAxNiAgICAgICAgOSBZZWh1ZGEgU2FkZWggPHlzYWRlaHdlQHJlZGhh
+dC5jb20+DQo+ID4gICAgIDE3ICAgICAgICA5IEJyYWQgSHViYmFyZCA8Ymh1YmJhcmRAcmVkaGF0
+LmNvbT4NCj4gPiAgICAgMTggICAgICAgIDggT3JpdCBXYXNzZXJtYW4gPG93YXNzZXJtQHJlZGhh
+dC5jb20+DQo+ID4gICAgIDE5ICAgICAgICA3IFdpbGxlbSBKYW4gV2l0aGFnZW4gPHdqd0BkaWdp
+d2FyZS5ubD4NCj4gPiAgICAgMjAgICAgICAgIDYgUmFkb3NsYXcgWmFyenluc2tpIDxyemFyenlu
+c2tpQG1pcmFudGlzLmNvbT4NCj4gPiAgICAgMjEgICAgICAgIDYgQWRhbSBDLiBFbWVyc29uIDxh
+ZW1lcnNvbkByZWRoYXQuY29tPg0KPiA+ICAgICAyMiAgICAgICAgNSBOYXRoYW4gQ3V0bGVyIDxu
+Y3V0bGVyQHN1c2UuY29tPg0KPiA+ICAgICAyMyAgICAgICAgNSBLZW4gRHJleWVyIDxrZHJleWVy
+QHJlZGhhdC5jb20+DQo+ID4gICAgIDI0ICAgICAgICA1IERhbmllbCBHcnluaWV3aWN6IDxkYW5n
+QHJlZGhhdC5jb20+DQo+ID4gICAgIDI1ICAgICAgICA1IEJvcmlzIFJhbnRvIDxicmFudG9AcmVk
+aGF0LmNvbT4NCj4gPiAgICAgMjYgICAgICAgIDUgQWJoaXNoZWsgTGVrc2htYW5hbiA8YWJoaXNo
+ZWtAc3VzZS5jb20+DQo+ID4gICAgIDI3ICAgICAgICA0IFZhcmFkYSBLYXJpIDx2YXJhZGEua2Fy
+aUBzYW5kaXNrLmNvbT4NCj4gPiAgICAgMjggICAgICAgIDQgTWFyayBOZWxzb24gPG1uZWxzb25A
+cmVkaGF0LmNvbT4NCj4gPiAgICAgMjkgICAgICAgIDMgRGFuIE1pY2sgPGRtaWNrQHJlZGhhdC5j
+b20+DQo+ID4gICAgIDMwICAgICAgICAzIEFsZnJlZG8gRGV6YSA8YWRlemFAcmVkaGF0LmNvbT4N
+Cj4gPiAgICAgMzEgICAgICAgIDIgUGlvdHIgRGHFgmVrIDxwaW90ci5kYWxla0Bjb3JwLm92aC5j
+b20+DQo+ID4gICAgIDMyICAgICAgICAyIE5laGEgT2poYSA8bm9qaGFAcmVkaGF0LmNvbT4NCj4g
+PiAgICAgMzMgICAgICAgIDIgRGF2aWQgWmFmbWFuIDxkemFmbWFuQHJlZGhhdC5jb20+DQo+ID4g
+ICAgIDM0ICAgICAgICAxIFdpZG8gZGVuIEhvbGxhbmRlciA8d2lkb0A0Mm9uLmNvbT4NCj4gPiAg
+ICAgMzUgICAgICAgIDEgVmFzdSBLdWxrYXJuaSA8dmFzdUByZWRoYXQuY29tPg0KPiA+ICAgICAz
+NiAgICAgICAgMSBUaW0gU2Vyb25nIDx0c2Vyb25nQHN1c2UuY29tPg0KPiA+ICAgICAzNyAgICAg
+ICAgMSBQYW4gTGl1IDx3YW5qdW4ubHBAYWxpYmFiYS1pbmMuY29tPg0KPiA+ICAgICAzOCAgICAg
+ICAgMSBKb2huIFdpbGtpbnMgPGp3aWxraW5zQHJlZGhhdC5jb20+DQo+ID4gICAgIDM5ICAgICAg
+ICAxIEpvw6NvIEVkdWFyZG8gTHXDrXMgPGpvYW9Ac3VzZS5kZT4NCj4gPiAgICAgNDAgICAgICAg
+IDEgRG91Z2xhcyBGdWxsZXIgPGRmdWxsZXJAcmVkaGF0LmNvbT4NCj4gPiAgICAgNDEgICAgICAg
+IDEgRGF2aWQgRGlzc2VsZG9ycCA8ZGRpc3NAc3VzZS5kZT4NCj4gPiAgICAgNDIgICAgICAgIDEg
+QmFzc2FtIFRhYmJhcmEgPGJhc3NhbS50YWJiYXJhQHF1YW50dW0uY29tPg0KPiA+ICAgICA0MyAg
+ICAgICAgMSBBbGV4ZXkgU2hlcGx5YWtvdiA8YXNoZXBseWFrb3ZAbWlyYW50aXMuY29tPg0KPiA+
+ICAgICA0NCAgICAgICAgMSBBZGFtIEt1cGN6eWsgPGFrdXBjenlrQG1pcmFudGlzLmNvbT4NCj4g
+Pg0KPiA+IFJldmlld3MsIGJ5IG9yZ2FuaXphdGlvbnMgKG9uZSByZXZpZXcgc3BhbnMgbXVsdGlw
+bGUgY29tbWl0cykNCj4gPiAgICAgIDEgICAgICA0NzcgUmVkIEhhdCA8Y29udGFjdEByZWRoYXQu
+Y29tPg0KPiA+ICAgICAgMiAgICAgICAzNiBNaXJhbnRpcyA8Y29udGFjdEBtaXJhbnRpcy5jb20+
+DQo+ID4gICAgICAzICAgICAgIDEzIFpURSA8Y29udGFjdEB6dGUuY29tLmNuPg0KPiA+ICAgICAg
+NCAgICAgICAxMyBTVVNFIDxjb250YWN0QHN1c2UuY29tPg0KPiA+ICAgICAgNSAgICAgICAxMCBY
+U2t5IDxjb250YWN0QHhza3kuY29tPg0KPiA+ICAgICAgNiAgICAgICAgNyBEaWdpd2FyZSA8Y29u
+dGFjdEBkaWdpd2FyZS5ubD4NCj4gPiAgICAgIDcgICAgICAgIDcgQ2xvdWR3YXR0IDxsaWJyZS5s
+aWNlbnNpbmdAY2xvdWR3YXR0LmNvbT4NCj4gPiAgICAgIDggICAgICAgIDQgU2FuRGlzayA8Y29u
+dGFjdEBzYW5kaXNrLmNvbT4NCj4gPiAgICAgIDkgICAgICAgIDIgT1ZIIDxjZXBoQG92aC5uZXQ+
+DQo+ID4gICAgIDEwICAgICAgICAxIFdpZG8gNDJvbiA8Y29udGFjdEA0Mm9uLmNvbT4NCj4gPiAg
+ICAgMTEgICAgICAgIDEgUXVhbnR1bSBDb3Jwb3JhdGlvbiA8aW5mb0BxdWFudHVtLmNvbT4NCj4g
+PiAgICAgMTIgICAgICAgIDEgQWxpYmFiYSA8Y29udGFjdEBhbGliYWJhLWluYy5jb20+DQo+ID4N
+Cj4gPiBCZXN0LA0KPiA+IEFiaGlzaGVrDQo+ID4NCj4gPiAtLQ0KPiA+IFRvIHVuc3Vic2NyaWJl
+IGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIg0K
+PiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3Jn
+IE1vcmUgbWFqb3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpv
+cmRvbW8taW5mby5odG1sDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBz
+ZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiBpbiB0aGUNCj4gYm9keSBvZiBh
+IG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZv
+IGF0DQo+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
