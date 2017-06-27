@@ -1,68 +1,309 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Zabbix plugin for ceph-mgr
-Date: Tue, 27 Jun 2017 11:57:47 +0200 (CEST)
-Message-ID: <2085831152.2838.1498557467669@ox.pcextreme.nl>
-References: <1977676292.2763.1498503429028@ox.pcextreme.nl>
- <CALe9h7fTn10YGPSswZpe15aaWamdh1KekV24Ax=Umg7asi4Ehw@mail.gmail.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: Re: [PATCH] ceph: new mount option that control fscache data are indexed
+Date: Tue, 27 Jun 2017 17:20:06 +0100
+Message-ID: <87o9t99zd5.fsf@hermes>
+References: <20170627042322.72031-1-zyan@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from se06-out.mail.pcextreme.nl ([185.87.185.222]:37745 "EHLO
-        se06-out.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751625AbdF0PmI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 27 Jun 2017 11:42:08 -0400
-In-Reply-To: <CALe9h7fTn10YGPSswZpe15aaWamdh1KekV24Ax=Umg7asi4Ehw@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:54363 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751541AbdF0QUK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 27 Jun 2017 12:20:10 -0400
+In-Reply-To: <20170627042322.72031-1-zyan@redhat.com> (Zheng Yan's message of
+        "Tue, 27 Jun 2017 12:23:22 +0800")
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: ceph-devel@vger.kernel.org, milosz@adfin.com, jlayton@redhat.com, anish_gupta@yahoo.com, dhowells@redhat.com
 
+"Yan, Zheng" <zyan@redhat.com> writes:
 
-> Op 27 juni 2017 om 11:42 schreef John Spray <jspray@redhat.com>:
-> 
-> 
-> On Mon, Jun 26, 2017 at 7:57 PM, Wido den Hollander <wido@42on.com> wrote:
-> > Hi,
-> >
-> > After looking at the documentation [0] on how to write a plugin for ceph-mgr I've been playing with the idea to create a Zabbix [1] plugin for ceph-mgr.
-> >
-> > Before I start writing one I'd like to check if I'm thinking in the right direction.
-> >
-> > Zabbix supports Items and Triggers. Triggers are based on Items's values. A Item could be from the type 'Trapper' where a application can simply send key=value pairs, for example:
-> >
-> > my.host.name ceph.health HEALTH_OK
-> > my.host.name ceph.osd.up 499
-> > my.host.name ceph.osd.in 498
-> >
-> > A simple ceph-mgr module could do:
-> >
-> > def serve(self):
-> >   while True:
-> >     send_data_to_zabbix()
-> >     time.sleep(60)
-> >
-> > Now, would that be a sane plugin for ceph-mgr or is this something you shouldn't put in the mgr? To me it seems like a good place since it already has all the data present.
-> 
-> This is absolutely a sane thing to put in the mgr (and include in the
-> main ceph tree) -- go for it!
-> 
+> Current ceph uses FSID as primary index key of fscache data. This
+> allows ceph to retain cached data across remount. But this causes
+> problem (kernel opps, fscache does not support sharing data) when
+> a filesystem get mounted (with fscache enabled) several times.
+>
+> The fix is adding a new mount option, which makes ceph use client
+> ID as primary index key. Client ID is unique for each mount. For
+> the old fscache mount option, only allow one fscache instance for
+> each filesystem.
+>
+> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+> ---
+>  fs/ceph/cache.c | 117 +++++++++++++++++++++++++++++++++++++++++++++++++++-----
+>  fs/ceph/super.c |  32 ++++++++++------
+>  fs/ceph/super.h |   5 ++-
+>  3 files changed, 131 insertions(+), 23 deletions(-)
+>
+> diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
+> index 4e7421c..b4956b4 100644
+> --- a/fs/ceph/cache.c
+> +++ b/fs/ceph/cache.c
+> @@ -35,8 +35,17 @@ struct fscache_netfs ceph_cache_netfs = {
+>  	.version	= 0,
+>  };
+>  
+> -static uint16_t ceph_fscache_session_get_key(const void *cookie_netfs_data,
+> -					     void *buffer, uint16_t maxbuf)
+> +static DEFINE_MUTEX(ceph_fscache_fsid_lock);
+> +static LIST_HEAD(ceph_fscache_fsid_list);
+> +
+> +struct ceph_fscache_fsid {
+> +	struct list_head list;
+> +	struct fscache_cookie *fscache;
+> +	struct ceph_fsid fsid;
+> +};
+> +
+> +static uint16_t ceph_fscache_fsid_get_key(const void *cookie_netfs_data,
+> +					  void *buffer, uint16_t maxbuf)
+>  {
+>  	const struct ceph_fs_client* fsc = cookie_netfs_data;
+>  	uint16_t klen;
+> @@ -52,7 +61,32 @@ static uint16_t ceph_fscache_session_get_key(const void *cookie_netfs_data,
+>  static const struct fscache_cookie_def ceph_fscache_fsid_object_def = {
+>  	.name		= "CEPH.fsid",
+>  	.type		= FSCACHE_COOKIE_TYPE_INDEX,
+> -	.get_key	= ceph_fscache_session_get_key,
+> +	.get_key	= ceph_fscache_fsid_get_key,
+> +};
+> +
+> +static uint16_t ceph_fscache_client_get_key(const void *cookie_netfs_data,
+> +					    void *buffer, uint16_t maxbuf)
+> +{
+> +	const struct ceph_fs_client* fsc = cookie_netfs_data;
+> +	const struct ceph_fsid *fsid = &fsc->client->fsid;
+> +	u64 client_id = fsc->client->monc.auth->global_id;
+> +	uint16_t fsid_len, key_len;
+> +
+> +	fsid_len = sizeof(*fsid);
+> +	key_len = fsid_len + sizeof(client_id);
+> +	if (key_len > maxbuf)
+> +		return 0;
+> +
+> +	memcpy(buffer, fsid, fsid_len);
+> +	memcpy(buffer + fsid_len, &client_id, sizeof(client_id));
+> +
+> +	return key_len;
+> +}
+> +
+> +static const struct fscache_cookie_def ceph_fscache_client_object_def = {
+> +	.name		= "CEPH.client",
+> +	.type		= FSCACHE_COOKIE_TYPE_INDEX,
+> +	.get_key	= ceph_fscache_client_get_key,
+>  };
+>  
+>  int ceph_fscache_register(void)
+> @@ -67,13 +101,54 @@ void ceph_fscache_unregister(void)
+>  
+>  int ceph_fscache_register_fs(struct ceph_fs_client* fsc)
+>  {
+> -	fsc->fscache = fscache_acquire_cookie(ceph_cache_netfs.primary_index,
+> -					      &ceph_fscache_fsid_object_def,
+> -					      fsc, true);
+> -	if (!fsc->fscache)
+> -		pr_err("Unable to register fsid: %p fscache cookie\n", fsc);
+> +	const struct ceph_fsid *fsid = &fsc->client->fsid;
+> +	struct ceph_fscache_fsid *ent;
+> +	int err = 0;
+> +
+> +	if (fsc->mount_options->flags & CEPH_MOUNT_OPT_TMPFSCACHE) {
+> +		fsc->fscache = fscache_acquire_cookie(
+> +						ceph_cache_netfs.primary_index,
+> +						&ceph_fscache_client_object_def,
+> +						fsc, true);
+> +		if (!fsc->fscache)
+> +			pr_err("Unable to register fsid: %p "
+> +			       "fscache cookie\n", fsc);
 
-Ok, good! I'll take a stab at it and also include a Zabbix template (XML) so users can easily adopt it.
+err needs to be set here (-ENOMEM?) and also below, after the
+kfree(ent).
 
-Sorry for posting this message a couple of times. Spamfilters were fighting me, greylisting and such, but suddenly the messages came through. My apologies!
+Cheers,
+-- 
+Luís
 
-Wido
-
-> John
-> 
-> >
-> > Wido
-> >
-> > [0]: http://docs.ceph.com/docs/master/mgr/plugins/
-> > [1]: http://www.zabbix.com/
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +	} else {
+> +		mutex_lock(&ceph_fscache_fsid_lock);
+> +		list_for_each_entry(ent, &ceph_fscache_fsid_list, list) {
+> +			if (!memcmp(&ent->fsid, fsid, sizeof(*fsid))) {
+> +				pr_err("fscache cookie already registered "
+> +				       "for fsid %pU\n", fsid);
+> +				pr_err("  use tmpfsc mount option instead\n");
+> +				err = -EBUSY;
+> +				goto out_unlock;
+> +			}
+> +		}
+>  
+> -	return 0;
+> +		ent = kzalloc(sizeof(*ent), GFP_KERNEL);
+> +		if (!ent) {
+> +			err = -ENOMEM;
+> +			goto out_unlock;
+> +		}
+> +
+> +		fsc->fscache = fscache_acquire_cookie(
+> +						ceph_cache_netfs.primary_index,
+> +						&ceph_fscache_fsid_object_def,
+> +						fsc, true);
+> +
+> +		if (fsc->fscache) {
+> +			memcpy(&ent->fsid, fsid, sizeof(*fsid));
+> +			ent->fscache = fsc->fscache;
+> +			list_add_tail(&ent->list, &ceph_fscache_fsid_list);
+> +		} else {
+> +			kfree(ent);
+> +			pr_err("Unable to register fsid: %p "
+> +			       "fscache cookie\n", fsc);
+> +		}
+> +out_unlock:
+> +		mutex_unlock(&ceph_fscache_fsid_lock);
+> +	}
+> +	return err;
+>  }
+>  
+>  static uint16_t ceph_fscache_inode_get_key(const void *cookie_netfs_data,
+> @@ -349,7 +424,29 @@ void ceph_invalidate_fscache_page(struct inode* inode, struct page *page)
+>  
+>  void ceph_fscache_unregister_fs(struct ceph_fs_client* fsc)
+>  {
+> -	fscache_relinquish_cookie(fsc->fscache, 0);
+> +	if (fscache_cookie_valid(fsc->fscache)) {
+> +		if (fsc->fscache->def == &ceph_fscache_fsid_object_def) {
+> +			const struct ceph_fsid *fsid = &fsc->client->fsid;
+> +			struct ceph_fscache_fsid *ent, *found = NULL;
+> +
+> +			mutex_lock(&ceph_fscache_fsid_lock);
+> +			list_for_each_entry(ent, &ceph_fscache_fsid_list, list) {
+> +				if (!memcmp(&ent->fsid, fsid, sizeof(*fsid))) {
+> +					found = ent;
+> +					break;
+> +				}
+> +			}
+> +			if (found) {
+> +				WARN_ON_ONCE(found->fscache != fsc->fscache);
+> +				list_del(&found->list);
+> +				kfree(found);
+> +			} else {
+> +				WARN_ON_ONCE(true);
+> +			}
+> +			mutex_unlock(&ceph_fscache_fsid_lock);
+> +		}
+> +		__fscache_relinquish_cookie(fsc->fscache, 0);
+> +	}
+>  	fsc->fscache = NULL;
+>  }
+>  
+> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> index 14e78dd..bb6dd7f 100644
+> --- a/fs/ceph/super.c
+> +++ b/fs/ceph/super.c
+> @@ -134,6 +134,7 @@ enum {
+>  	Opt_ino32,
+>  	Opt_noino32,
+>  	Opt_fscache,
+> +	Opt_tmpfscache,
+>  	Opt_nofscache,
+>  	Opt_poolperm,
+>  	Opt_nopoolperm,
+> @@ -170,6 +171,7 @@ static match_table_t fsopt_tokens = {
+>  	{Opt_ino32, "ino32"},
+>  	{Opt_noino32, "noino32"},
+>  	{Opt_fscache, "fsc"},
+> +	{Opt_tmpfscache, "tmpfsc"},
+>  	{Opt_nofscache, "nofsc"},
+>  	{Opt_poolperm, "poolperm"},
+>  	{Opt_nopoolperm, "nopoolperm"},
+> @@ -281,6 +283,10 @@ static int parse_fsopt_token(char *c, void *private)
+>  	case Opt_fscache:
+>  		fsopt->flags |= CEPH_MOUNT_OPT_FSCACHE;
+>  		break;
+> +	case Opt_tmpfscache:
+> +		fsopt->flags |= CEPH_MOUNT_OPT_FSCACHE |
+> +				CEPH_MOUNT_OPT_TMPFSCACHE;
+> +		break;
+>  	case Opt_nofscache:
+>  		fsopt->flags &= ~CEPH_MOUNT_OPT_FSCACHE;
+>  		break;
+> @@ -475,8 +481,12 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
+>  		seq_puts(m, ",noasyncreaddir");
+>  	if ((fsopt->flags & CEPH_MOUNT_OPT_DCACHE) == 0)
+>  		seq_puts(m, ",nodcache");
+> -	if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE)
+> -		seq_puts(m, ",fsc");
+> +	if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE) {
+> +		if (fsopt->flags & CEPH_MOUNT_OPT_TMPFSCACHE)
+> +			seq_puts(m, ",tmpfsc");
+> +		else
+> +			seq_puts(m, ",fsc");
+> +	}
+>  	if (fsopt->flags & CEPH_MOUNT_OPT_NOPOOLPERM)
+>  		seq_puts(m, ",nopoolperm");
+>  
+> @@ -597,18 +607,11 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
+>  	if (!fsc->wb_pagevec_pool)
+>  		goto fail_trunc_wq;
+>  
+> -	/* setup fscache */
+> -	if ((fsopt->flags & CEPH_MOUNT_OPT_FSCACHE) &&
+> -	    (ceph_fscache_register_fs(fsc) != 0))
+> -		goto fail_fscache;
+> -
+>  	/* caps */
+>  	fsc->min_caps = fsopt->max_readdir;
+>  
+>  	return fsc;
+>  
+> -fail_fscache:
+> -	ceph_fscache_unregister_fs(fsc);
+>  fail_trunc_wq:
+>  	destroy_workqueue(fsc->trunc_wq);
+>  fail_pg_inv_wq:
+> @@ -626,8 +629,6 @@ static void destroy_fs_client(struct ceph_fs_client *fsc)
+>  {
+>  	dout("destroy_fs_client %p\n", fsc);
+>  
+> -	ceph_fscache_unregister_fs(fsc);
+> -
+>  	destroy_workqueue(fsc->wb_wq);
+>  	destroy_workqueue(fsc->pg_inv_wq);
+>  	destroy_workqueue(fsc->trunc_wq);
+> @@ -820,6 +821,13 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
+>  		if (err < 0)
+>  			goto out;
+>  
+> +		/* setup fscache */
+> +		if (fsc->mount_options->flags & CEPH_MOUNT_OPT_FSCACHE) {
+> +			err = ceph_fscache_register_fs(fsc);
+> +			if (err < 0)
+> +				goto out;
+> +		}
+> +
+>  		if (!fsc->mount_options->server_path) {
+>  			path = "";
+>  			dout("mount opening path \\t\n");
+> @@ -1042,6 +1050,8 @@ static void ceph_kill_sb(struct super_block *s)
+>  	fsc->client->extra_mon_dispatch = NULL;
+>  	ceph_fs_debugfs_cleanup(fsc);
+>  
+> +	ceph_fscache_unregister_fs(fsc);
+> +
+>  	ceph_mdsc_destroy(fsc);
+>  
+>  	destroy_fs_client(fsc);
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index f8a0aba..21e5562 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -36,8 +36,9 @@
+>  #define CEPH_MOUNT_OPT_INO32           (1<<8) /* 32 bit inos */
+>  #define CEPH_MOUNT_OPT_DCACHE          (1<<9) /* use dcache for readdir etc */
+>  #define CEPH_MOUNT_OPT_FSCACHE         (1<<10) /* use fscache */
+> -#define CEPH_MOUNT_OPT_NOPOOLPERM      (1<<11) /* no pool permission check */
+> -#define CEPH_MOUNT_OPT_MOUNTWAIT       (1<<12) /* mount waits if no mds is up */
+> +#define CEPH_MOUNT_OPT_TMPFSCACHE      (1<<11) /* use temp fscache */
+> +#define CEPH_MOUNT_OPT_NOPOOLPERM      (1<<12) /* no pool permission check */
+> +#define CEPH_MOUNT_OPT_MOUNTWAIT       (1<<13) /* mount waits if no mds is up */
+>  
+>  #define CEPH_MOUNT_OPT_DEFAULT    CEPH_MOUNT_OPT_DCACHE
