@@ -1,309 +1,120 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [PATCH] ceph: new mount option that control fscache data are indexed
-Date: Tue, 27 Jun 2017 17:20:06 +0100
-Message-ID: <87o9t99zd5.fsf@hermes>
-References: <20170627042322.72031-1-zyan@redhat.com>
+From: Jeff Layton <jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org>
+Subject: Re: [PATCH 3/3] staging/lustre, 9p, ceph, cifs, dlm: negate remote
+ pids for F_GETLK
+Date: Tue, 27 Jun 2017 15:36:10 -0400
+Message-ID: <1498592170.4830.8.camel@poochiereds.net>
+References: <cover.1498572504.git.bcodding@redhat.com>
+         <3154a78290017da7bbbcb920456b860dbfe9ba26.1498572504.git.bcodding@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:54363 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751541AbdF0QUK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 27 Jun 2017 12:20:10 -0400
-In-Reply-To: <20170627042322.72031-1-zyan@redhat.com> (Zheng Yan's message of
-        "Tue, 27 Jun 2017 12:23:22 +0800")
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel@vger.kernel.org, milosz@adfin.com, jlayton@redhat.com, anish_gupta@yahoo.com, dhowells@redhat.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <3154a78290017da7bbbcb920456b860dbfe9ba26.1498572504.git.bcodding-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Benjamin Coddington <bcodding-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Oleg Drokin <oleg.drokin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andreas Dilger <andreas.dilger-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, James Simmons <jsimmons-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Eric Van Hensbergen <ericvh-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ron Minnich <rminnich-4OHPYypu0djtX7QSmKvirg@public.gmane.org>, Latchesar Ionkov <lucho-OnYtXJJ0/fesTnJN9+BGXg@public.gmane.org>, "Yan, Zheng" <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Christine Caulfield <ccaulfie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, David Teigland <teigland-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Miklos Szeredi <miklos-sUDqSbJrdHQHWmgEVkV9KA@public.gmane.org>, Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, "J. Bruce Fields" <bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org>, Vitaly Fertman <vitaly_fertman-qCPWdT176rRBDgjK7y7TUQ@public.gmane.org>, "John L. Hammond" <john.hammond-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andriy
+Cc: lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-"Yan, Zheng" <zyan@redhat.com> writes:
-
-> Current ceph uses FSID as primary index key of fscache data. This
-> allows ceph to retain cached data across remount. But this causes
-> problem (kernel opps, fscache does not support sharing data) when
-> a filesystem get mounted (with fscache enabled) several times.
+On Tue, 2017-06-27 at 11:18 -0400, Benjamin Coddington wrote:
+> In the previous patch, the locks API will expect that if a filesystem
+> returns a remote pid as opposed to a local pid for F_GETLK, that remote pid
+> will be <= 0.  This signifies that the pid is remote, and the locks API
+> will forego translating that pid into the pid namespace of the local
+> calling process.  Since local pids will never be larger than PID_MAX_LIMIT
+> (which is currently defined as <= 4 million), but pid_t is an unsigned int,
+> we should have plenty of room to represent remote pids with negative
+> numbers if we assume that remote pid numbers are similarly limited.  If
+> this is not the case, then we run the risk of having a remote pid returned
+> for which there is also a corresponding local pid.  This is a problem we
+> have now, but this patch should reduce the chances of that occurring, while
+> also returning those remote pid numbers, for whatever that may be worth.
 >
-> The fix is adding a new mount option, which makes ceph use client
-> ID as primary index key. Client ID is unique for each mount. For
-> the old fscache mount option, only allow one fscache instance for
-> each filesystem.
->
-> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+> This patch updates lustre, 9p, ceph, cifs, and dlm to negate the remote pid
+> returned for F_GETLK lock requests.
+> 
+> Signed-off-by: Benjamin Coddington <bcodding-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 > ---
->  fs/ceph/cache.c | 117 +++++++++++++++++++++++++++++++++++++++++++++++++++-----
->  fs/ceph/super.c |  32 ++++++++++------
->  fs/ceph/super.h |   5 ++-
->  3 files changed, 131 insertions(+), 23 deletions(-)
->
-> diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
-> index 4e7421c..b4956b4 100644
-> --- a/fs/ceph/cache.c
-> +++ b/fs/ceph/cache.c
-> @@ -35,8 +35,17 @@ struct fscache_netfs ceph_cache_netfs = {
->  	.version	= 0,
->  };
+>  drivers/staging/lustre/lustre/ldlm/ldlm_flock.c | 2 +-
+>  fs/9p/vfs_file.c                                | 2 +-
+>  fs/ceph/locks.c                                 | 2 +-
+>  fs/cifs/cifssmb.c                               | 2 +-
+>  fs/dlm/plock.c                                  | 2 +-
+>  5 files changed, 5 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/staging/lustre/lustre/ldlm/ldlm_flock.c b/drivers/staging/lustre/lustre/ldlm/ldlm_flock.c
+> index b7f28b39c7b3..abcbf075acc0 100644
+> --- a/drivers/staging/lustre/lustre/ldlm/ldlm_flock.c
+> +++ b/drivers/staging/lustre/lustre/ldlm/ldlm_flock.c
+> @@ -596,7 +596,7 @@ ldlm_flock_completion_ast(struct ldlm_lock *lock, __u64 flags, void *data)
+>  		default:
+>  			getlk->fl_type = F_UNLCK;
+>  		}
+> -		getlk->fl_pid = (pid_t)lock->l_policy_data.l_flock.pid;
+> +		getlk->fl_pid = -(pid_t)lock->l_policy_data.l_flock.pid;
+>  		getlk->fl_start = (loff_t)lock->l_policy_data.l_flock.start;
+>  		getlk->fl_end = (loff_t)lock->l_policy_data.l_flock.end;
+>  	} else {
+> diff --git a/fs/9p/vfs_file.c b/fs/9p/vfs_file.c
+> index 3de3b4a89d89..43c242e17132 100644
+> --- a/fs/9p/vfs_file.c
+> +++ b/fs/9p/vfs_file.c
+> @@ -288,7 +288,7 @@ static int v9fs_file_getlock(struct file *filp, struct file_lock *fl)
+>  			fl->fl_end = OFFSET_MAX;
+>  		else
+>  			fl->fl_end = glock.start + glock.length - 1;
+> -		fl->fl_pid = glock.proc_id;
+> +		fl->fl_pid = -glock.proc_id;
+>  	}
+>  	kfree(glock.client_id);
+>  	return res;
+> diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
+> index 6806dbeaee19..0fd5c288ce4e 100644
+> --- a/fs/ceph/locks.c
+> +++ b/fs/ceph/locks.c
+> @@ -79,7 +79,7 @@ static int ceph_lock_message(u8 lock_type, u16 operation, struct file *file,
+>  	err = ceph_mdsc_do_request(mdsc, inode, req);
 >  
-> -static uint16_t ceph_fscache_session_get_key(const void *cookie_netfs_data,
-> -					     void *buffer, uint16_t maxbuf)
-> +static DEFINE_MUTEX(ceph_fscache_fsid_lock);
-> +static LIST_HEAD(ceph_fscache_fsid_list);
-> +
-> +struct ceph_fscache_fsid {
-> +	struct list_head list;
-> +	struct fscache_cookie *fscache;
-> +	struct ceph_fsid fsid;
-> +};
-> +
-> +static uint16_t ceph_fscache_fsid_get_key(const void *cookie_netfs_data,
-> +					  void *buffer, uint16_t maxbuf)
->  {
->  	const struct ceph_fs_client* fsc = cookie_netfs_data;
->  	uint16_t klen;
-> @@ -52,7 +61,32 @@ static uint16_t ceph_fscache_session_get_key(const void *cookie_netfs_data,
->  static const struct fscache_cookie_def ceph_fscache_fsid_object_def = {
->  	.name		= "CEPH.fsid",
->  	.type		= FSCACHE_COOKIE_TYPE_INDEX,
-> -	.get_key	= ceph_fscache_session_get_key,
-> +	.get_key	= ceph_fscache_fsid_get_key,
-> +};
-> +
-> +static uint16_t ceph_fscache_client_get_key(const void *cookie_netfs_data,
-> +					    void *buffer, uint16_t maxbuf)
-> +{
-> +	const struct ceph_fs_client* fsc = cookie_netfs_data;
-> +	const struct ceph_fsid *fsid = &fsc->client->fsid;
-> +	u64 client_id = fsc->client->monc.auth->global_id;
-> +	uint16_t fsid_len, key_len;
-> +
-> +	fsid_len = sizeof(*fsid);
-> +	key_len = fsid_len + sizeof(client_id);
-> +	if (key_len > maxbuf)
-> +		return 0;
-> +
-> +	memcpy(buffer, fsid, fsid_len);
-> +	memcpy(buffer + fsid_len, &client_id, sizeof(client_id));
-> +
-> +	return key_len;
-> +}
-> +
-> +static const struct fscache_cookie_def ceph_fscache_client_object_def = {
-> +	.name		= "CEPH.client",
-> +	.type		= FSCACHE_COOKIE_TYPE_INDEX,
-> +	.get_key	= ceph_fscache_client_get_key,
->  };
+>  	if (operation == CEPH_MDS_OP_GETFILELOCK) {
+> -		fl->fl_pid = le64_to_cpu(req->r_reply_info.filelock_reply->pid);
+> +		fl->fl_pid = -le64_to_cpu(req->r_reply_info.filelock_reply->pid);
+>  		if (CEPH_LOCK_SHARED == req->r_reply_info.filelock_reply->type)
+>  			fl->fl_type = F_RDLCK;
+>  		else if (CEPH_LOCK_EXCL == req->r_reply_info.filelock_reply->type)
+> diff --git a/fs/cifs/cifssmb.c b/fs/cifs/cifssmb.c
+> index fbb0d4cbda41..cb367050f972 100644
+> --- a/fs/cifs/cifssmb.c
+> +++ b/fs/cifs/cifssmb.c
+> @@ -2515,7 +2515,7 @@ CIFSSMBPosixLock(const unsigned int xid, struct cifs_tcon *tcon,
+>  			pLockData->fl_start = le64_to_cpu(parm_data->start);
+>  			pLockData->fl_end = pLockData->fl_start +
+>  					le64_to_cpu(parm_data->length) - 1;
+> -			pLockData->fl_pid = le32_to_cpu(parm_data->pid);
+> +			pLockData->fl_pid = -le32_to_cpu(parm_data->pid);
+>  		}
+>  	}
 >  
->  int ceph_fscache_register(void)
-> @@ -67,13 +101,54 @@ void ceph_fscache_unregister(void)
->  
->  int ceph_fscache_register_fs(struct ceph_fs_client* fsc)
->  {
-> -	fsc->fscache = fscache_acquire_cookie(ceph_cache_netfs.primary_index,
-> -					      &ceph_fscache_fsid_object_def,
-> -					      fsc, true);
-> -	if (!fsc->fscache)
-> -		pr_err("Unable to register fsid: %p fscache cookie\n", fsc);
-> +	const struct ceph_fsid *fsid = &fsc->client->fsid;
-> +	struct ceph_fscache_fsid *ent;
-> +	int err = 0;
-> +
-> +	if (fsc->mount_options->flags & CEPH_MOUNT_OPT_TMPFSCACHE) {
-> +		fsc->fscache = fscache_acquire_cookie(
-> +						ceph_cache_netfs.primary_index,
-> +						&ceph_fscache_client_object_def,
-> +						fsc, true);
-> +		if (!fsc->fscache)
-> +			pr_err("Unable to register fsid: %p "
-> +			       "fscache cookie\n", fsc);
+> diff --git a/fs/dlm/plock.c b/fs/dlm/plock.c
+> index d401425f602a..e631b1689228 100644
+> --- a/fs/dlm/plock.c
+> +++ b/fs/dlm/plock.c
+> @@ -367,7 +367,7 @@ int dlm_posix_get(dlm_lockspace_t *lockspace, u64 number, struct file *file,
+>  		locks_init_lock(fl);
+>  		fl->fl_type = (op->info.ex) ? F_WRLCK : F_RDLCK;
+>  		fl->fl_flags = FL_POSIX;
+> -		fl->fl_pid = op->info.pid;
+> +		fl->fl_pid = -op->info.pid;
+>  		fl->fl_start = op->info.start;
+>  		fl->fl_end = op->info.end;
+>  		rv = 0;
 
-err needs to be set here (-ENOMEM?) and also below, after the
-kfree(ent).
 
-Cheers,
+I think this is probably a reasonable thing to do, given that we also
+report OFD locks today with an l_pid of -1. The pid on any sort of
+distributed fs is pretty meaningless anyway.
+
+I think this all looks good. I'll plan to merge it for -next in a bit
+and do some testing with it.
+
+Thanks!
 -- 
-Luís
-
-> +	} else {
-> +		mutex_lock(&ceph_fscache_fsid_lock);
-> +		list_for_each_entry(ent, &ceph_fscache_fsid_list, list) {
-> +			if (!memcmp(&ent->fsid, fsid, sizeof(*fsid))) {
-> +				pr_err("fscache cookie already registered "
-> +				       "for fsid %pU\n", fsid);
-> +				pr_err("  use tmpfsc mount option instead\n");
-> +				err = -EBUSY;
-> +				goto out_unlock;
-> +			}
-> +		}
->  
-> -	return 0;
-> +		ent = kzalloc(sizeof(*ent), GFP_KERNEL);
-> +		if (!ent) {
-> +			err = -ENOMEM;
-> +			goto out_unlock;
-> +		}
-> +
-> +		fsc->fscache = fscache_acquire_cookie(
-> +						ceph_cache_netfs.primary_index,
-> +						&ceph_fscache_fsid_object_def,
-> +						fsc, true);
-> +
-> +		if (fsc->fscache) {
-> +			memcpy(&ent->fsid, fsid, sizeof(*fsid));
-> +			ent->fscache = fsc->fscache;
-> +			list_add_tail(&ent->list, &ceph_fscache_fsid_list);
-> +		} else {
-> +			kfree(ent);
-> +			pr_err("Unable to register fsid: %p "
-> +			       "fscache cookie\n", fsc);
-> +		}
-> +out_unlock:
-> +		mutex_unlock(&ceph_fscache_fsid_lock);
-> +	}
-> +	return err;
->  }
->  
->  static uint16_t ceph_fscache_inode_get_key(const void *cookie_netfs_data,
-> @@ -349,7 +424,29 @@ void ceph_invalidate_fscache_page(struct inode* inode, struct page *page)
->  
->  void ceph_fscache_unregister_fs(struct ceph_fs_client* fsc)
->  {
-> -	fscache_relinquish_cookie(fsc->fscache, 0);
-> +	if (fscache_cookie_valid(fsc->fscache)) {
-> +		if (fsc->fscache->def == &ceph_fscache_fsid_object_def) {
-> +			const struct ceph_fsid *fsid = &fsc->client->fsid;
-> +			struct ceph_fscache_fsid *ent, *found = NULL;
-> +
-> +			mutex_lock(&ceph_fscache_fsid_lock);
-> +			list_for_each_entry(ent, &ceph_fscache_fsid_list, list) {
-> +				if (!memcmp(&ent->fsid, fsid, sizeof(*fsid))) {
-> +					found = ent;
-> +					break;
-> +				}
-> +			}
-> +			if (found) {
-> +				WARN_ON_ONCE(found->fscache != fsc->fscache);
-> +				list_del(&found->list);
-> +				kfree(found);
-> +			} else {
-> +				WARN_ON_ONCE(true);
-> +			}
-> +			mutex_unlock(&ceph_fscache_fsid_lock);
-> +		}
-> +		__fscache_relinquish_cookie(fsc->fscache, 0);
-> +	}
->  	fsc->fscache = NULL;
->  }
->  
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index 14e78dd..bb6dd7f 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -134,6 +134,7 @@ enum {
->  	Opt_ino32,
->  	Opt_noino32,
->  	Opt_fscache,
-> +	Opt_tmpfscache,
->  	Opt_nofscache,
->  	Opt_poolperm,
->  	Opt_nopoolperm,
-> @@ -170,6 +171,7 @@ static match_table_t fsopt_tokens = {
->  	{Opt_ino32, "ino32"},
->  	{Opt_noino32, "noino32"},
->  	{Opt_fscache, "fsc"},
-> +	{Opt_tmpfscache, "tmpfsc"},
->  	{Opt_nofscache, "nofsc"},
->  	{Opt_poolperm, "poolperm"},
->  	{Opt_nopoolperm, "nopoolperm"},
-> @@ -281,6 +283,10 @@ static int parse_fsopt_token(char *c, void *private)
->  	case Opt_fscache:
->  		fsopt->flags |= CEPH_MOUNT_OPT_FSCACHE;
->  		break;
-> +	case Opt_tmpfscache:
-> +		fsopt->flags |= CEPH_MOUNT_OPT_FSCACHE |
-> +				CEPH_MOUNT_OPT_TMPFSCACHE;
-> +		break;
->  	case Opt_nofscache:
->  		fsopt->flags &= ~CEPH_MOUNT_OPT_FSCACHE;
->  		break;
-> @@ -475,8 +481,12 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
->  		seq_puts(m, ",noasyncreaddir");
->  	if ((fsopt->flags & CEPH_MOUNT_OPT_DCACHE) == 0)
->  		seq_puts(m, ",nodcache");
-> -	if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE)
-> -		seq_puts(m, ",fsc");
-> +	if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE) {
-> +		if (fsopt->flags & CEPH_MOUNT_OPT_TMPFSCACHE)
-> +			seq_puts(m, ",tmpfsc");
-> +		else
-> +			seq_puts(m, ",fsc");
-> +	}
->  	if (fsopt->flags & CEPH_MOUNT_OPT_NOPOOLPERM)
->  		seq_puts(m, ",nopoolperm");
->  
-> @@ -597,18 +607,11 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
->  	if (!fsc->wb_pagevec_pool)
->  		goto fail_trunc_wq;
->  
-> -	/* setup fscache */
-> -	if ((fsopt->flags & CEPH_MOUNT_OPT_FSCACHE) &&
-> -	    (ceph_fscache_register_fs(fsc) != 0))
-> -		goto fail_fscache;
-> -
->  	/* caps */
->  	fsc->min_caps = fsopt->max_readdir;
->  
->  	return fsc;
->  
-> -fail_fscache:
-> -	ceph_fscache_unregister_fs(fsc);
->  fail_trunc_wq:
->  	destroy_workqueue(fsc->trunc_wq);
->  fail_pg_inv_wq:
-> @@ -626,8 +629,6 @@ static void destroy_fs_client(struct ceph_fs_client *fsc)
->  {
->  	dout("destroy_fs_client %p\n", fsc);
->  
-> -	ceph_fscache_unregister_fs(fsc);
-> -
->  	destroy_workqueue(fsc->wb_wq);
->  	destroy_workqueue(fsc->pg_inv_wq);
->  	destroy_workqueue(fsc->trunc_wq);
-> @@ -820,6 +821,13 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
->  		if (err < 0)
->  			goto out;
->  
-> +		/* setup fscache */
-> +		if (fsc->mount_options->flags & CEPH_MOUNT_OPT_FSCACHE) {
-> +			err = ceph_fscache_register_fs(fsc);
-> +			if (err < 0)
-> +				goto out;
-> +		}
-> +
->  		if (!fsc->mount_options->server_path) {
->  			path = "";
->  			dout("mount opening path \\t\n");
-> @@ -1042,6 +1050,8 @@ static void ceph_kill_sb(struct super_block *s)
->  	fsc->client->extra_mon_dispatch = NULL;
->  	ceph_fs_debugfs_cleanup(fsc);
->  
-> +	ceph_fscache_unregister_fs(fsc);
-> +
->  	ceph_mdsc_destroy(fsc);
->  
->  	destroy_fs_client(fsc);
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index f8a0aba..21e5562 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -36,8 +36,9 @@
->  #define CEPH_MOUNT_OPT_INO32           (1<<8) /* 32 bit inos */
->  #define CEPH_MOUNT_OPT_DCACHE          (1<<9) /* use dcache for readdir etc */
->  #define CEPH_MOUNT_OPT_FSCACHE         (1<<10) /* use fscache */
-> -#define CEPH_MOUNT_OPT_NOPOOLPERM      (1<<11) /* no pool permission check */
-> -#define CEPH_MOUNT_OPT_MOUNTWAIT       (1<<12) /* mount waits if no mds is up */
-> +#define CEPH_MOUNT_OPT_TMPFSCACHE      (1<<11) /* use temp fscache */
-> +#define CEPH_MOUNT_OPT_NOPOOLPERM      (1<<12) /* no pool permission check */
-> +#define CEPH_MOUNT_OPT_MOUNTWAIT       (1<<13) /* mount waits if no mds is up */
->  
->  #define CEPH_MOUNT_OPT_DEFAULT    CEPH_MOUNT_OPT_DCACHE
+Jeff Layton <jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org>
