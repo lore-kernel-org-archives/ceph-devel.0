@@ -1,60 +1,67 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Are we ready for 10.2.8 - cephfs
-Date: Tue, 27 Jun 2017 12:51:27 +0100
-Message-ID: <CALe9h7d0jAV1_2Z+ok4wHvPmGAUepfmgjOxoZ6s5QUC=5=pHtA@mail.gmail.com>
-References: <be949951-5e1c-9471-23f6-2c595baec10a@suse.cz> <CABZ+qq=p_=8PHCwBoo=aQ1V5CeRk4QdNiK7t=ooeisFHB9etyg@mail.gmail.com>
- <CALe9h7dUCBXKnyxGVi3utN_ArkZixO-SZ+xH60L23R11FELMzw@mail.gmail.com> <cd9be044-1b2f-c698-4207-e6fbaaa854c7@suse.cz>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: cls_rbd copyup and write
+Date: Tue, 27 Jun 2017 09:40:35 -0400
+Message-ID: <CA+aFP1AJRmsA57aEp-1jQkvLp=NW81hJqUHUM4+HRrpN=8ONHw@mail.gmail.com>
+References: <CALZt5jzk+8yS7SY6L+5BNvKuTGDZV+KOW5b=vDqO=R7t_o9Vfw@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:32864 "EHLO
-        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752828AbdF0Lvu (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Jun 2017 07:51:50 -0400
-Received: by mail-wm0-f50.google.com with SMTP id z75so5167063wmc.0
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Jun 2017 04:51:49 -0700 (PDT)
-In-Reply-To: <cd9be044-1b2f-c698-4207-e6fbaaa854c7@suse.cz>
+Received: from mail-yb0-f180.google.com ([209.85.213.180]:36824 "EHLO
+        mail-yb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753168AbdF0Nkh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Jun 2017 09:40:37 -0400
+Received: by mail-yb0-f180.google.com with SMTP id s9so9352839ybe.3
+        for <ceph-devel@vger.kernel.org>; Tue, 27 Jun 2017 06:40:37 -0700 (PDT)
+In-Reply-To: <CALZt5jzk+8yS7SY6L+5BNvKuTGDZV+KOW5b=vDqO=R7t_o9Vfw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Dan van der Ster <dan@vanderster.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ning Yao <zay11022@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Jun 27, 2017 at 12:41 PM, Nathan Cutler <ncutler@suse.cz> wrote:
-> Hi John:
->
-> I believe we have all the requested CephFS fixes in, now. Do you think
-> 10.2.8 is ready for QE, as far as CephFS is concerned?
+This is definitely an optimization we can test post-Luminous release
+once bluestore is the defacto OSD object store. Of course, even
+bluestore won't track holes down to 8KiB -- only 16KiB or 64KiB
+depending on your backing device and settings. I am pretty sure
+Luminous already has an optimization to not copy-up if the full parent
+object is zeroed.
 
-Yes, I think we're good.
+I do remember a presentation about surprising results when
+implementing NFS v4.2 READ_PLUS sparse support where it actually
+degraded performance due to the need to seek the file holes. There
+might be a performance trade-off to consider when objects have lots of
+holes due to increased metadata plus decreased data locality.
 
-John
+On Tue, Jun 27, 2017 at 4:22 AM, Ning Yao <zay11022@gmail.com> wrote:
+> Hi, all
+>
+> currently I find that when do copy on write for a clone image. librbd
+> call the cls copyup function to write the data, reading from its
+> parent, to the child.
+>
+> However, there is a issue here:  if an object in the parent image -->
+> [0, 8192] with data and [8192, end] without data, then after COW
+> operation, it will filling the whole object [0, end] to the children
+> object with [8192, end] all zeros. This phenomenon also occurs in
+> flatten images.
+>
+> Actually, we already have sparse_read to just read data without holes.
+> However, copyup function does not support to write serveral fragments
+> such as {[0, 8192], [16384,20480]}.
+>
+> So it that possible to direct send OSDOp {[cow write], [cow write],
+> [user write]} instead of  OSDOp {[copyup], [user write]} ?
+>
+>
+>
+> Regards
+> Ning Yao
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
->
-> Nathan
->
->
-> On 06/14/2017 04:25 PM, John Spray wrote:
->>
->> On Tue, Jun 13, 2017 at 7:49 AM, Dan van der Ster <dan@vanderster.com>
->> wrote:
->>>
->>> Hi,
->>>
->>> Would it be possible to get these into 10.2.8?
->>>
->>>      http://tracker.ceph.com/issues/19677
->>>      http://tracker.ceph.com/issues/19762
->>>      http://tracker.ceph.com/issues/20027
->>
->>
->> I've been a bit behind on reviewing backports lately, sorry about that.
->>
->> I've merged the first two of those.  The third one had a PR that
->> didn't have the cephfs label so it got missed.
->>
->> Nathan, if we have time to do another pre-merge test run for jewel
->> backports, then there are a few with label:cephfs and my review on,
->> that would just need to go through a fs suite.
->>
->> Cheers,
->> John
+
+
+-- 
+Jason
