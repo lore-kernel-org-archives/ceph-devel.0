@@ -1,67 +1,68 @@
-From: Benjamin Coddington <bcodding-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 0/3 v6] Fixups for l_pid
-Date: Tue, 27 Jun 2017 11:18:06 -0400
-Message-ID: <cover.1498572504.git.bcodding@redhat.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Re: Zabbix plugin for ceph-mgr
+Date: Tue, 27 Jun 2017 11:57:47 +0200 (CEST)
+Message-ID: <2085831152.2838.1498557467669@ox.pcextreme.nl>
+References: <1977676292.2763.1498503429028@ox.pcextreme.nl>
+ <CALe9h7fTn10YGPSswZpe15aaWamdh1KekV24Ax=Umg7asi4Ehw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-List-Unsubscribe: <http://lists.lustre.org/options.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.lustre.org/pipermail/lustre-devel-lustre.org/>
-List-Post: <mailto:lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-List-Help: <mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.lustre.org/listinfo.cgi/lustre-devel-lustre.org>,
-	<mailto:lustre-devel-request-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org?subject=subscribe>
-Errors-To: lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
-Sender: "lustre-devel" <lustre-devel-bounces-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org>
-To: Oleg Drokin <oleg.drokin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andreas Dilger <andreas.dilger-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, James Simmons <jsimmons-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Eric Van Hensbergen <ericvh-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ron Minnich <rminnich-4OHPYypu0djtX7QSmKvirg@public.gmane.org>, Latchesar Ionkov <lucho-OnYtXJJ0/fesTnJN9+BGXg@public.gmane.org>, "Yan, Zheng" <zyan-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Sage Weil <sage-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Christine Caulfield <ccaulfie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, David Teigland <teigland-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Miklos Szeredi <miklos-sUDqSbJrdHQHWmgEVkV9KA@public.gmane.org>, Alexander Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Jeff Layton <jlayton-vpEMnDpepFuMZCB2o+C8xQ@public.gmane.org>, "J. Bruce Fields" <bfields-uC3wQj2KruNg9hUCZPvPmw@public.gmane.org>, Vitaly Fertman <vitaly_fertman-qCPWdT176rRBDgjK7y7TUQ@public.gmane.org>, "John L. Hammond" <john.hammond-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andriy Skulysh <andriy.skulysh-ShLqkCeKS0lBDgjK7y7TUQ@public.gmane.org>, Benjamin Coddington <bcodding-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Emoly Liu <emoly.liu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, samba-technical-w/Ol4Ecudpl8XjKLYN78aQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cluster-devel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, v9fs-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lustre-devel-aLEFhgZF4x6X6Mz3xDxJMA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from se06-out.mail.pcextreme.nl ([185.87.185.222]:37745 "EHLO
+        se06-out.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751625AbdF0PmI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 27 Jun 2017 11:42:08 -0400
+In-Reply-To: <CALe9h7fTn10YGPSswZpe15aaWamdh1KekV24Ax=Umg7asi4Ehw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-LTP fcntl tests (fcntl11 fcntl14 fcntl17 fcntl19 fcntl20 fcntl21) have been
-failing for NFSv4 mounts due to an unexpected l_pid.  What follows are some
-fixups:
 
-v2: - Rebase onto linux-next
-    - Revert back to using the stack in locks_mandatory_area(), and fixup
-	patch description for 1/3
+> Op 27 juni 2017 om 11:42 schreef John Spray <jspray@redhat.com>:
+> 
+> 
+> On Mon, Jun 26, 2017 at 7:57 PM, Wido den Hollander <wido@42on.com> wrote:
+> > Hi,
+> >
+> > After looking at the documentation [0] on how to write a plugin for ceph-mgr I've been playing with the idea to create a Zabbix [1] plugin for ceph-mgr.
+> >
+> > Before I start writing one I'd like to check if I'm thinking in the right direction.
+> >
+> > Zabbix supports Items and Triggers. Triggers are based on Items's values. A Item could be from the type 'Trapper' where a application can simply send key=value pairs, for example:
+> >
+> > my.host.name ceph.health HEALTH_OK
+> > my.host.name ceph.osd.up 499
+> > my.host.name ceph.osd.in 498
+> >
+> > A simple ceph-mgr module could do:
+> >
+> > def serve(self):
+> >   while True:
+> >     send_data_to_zabbix()
+> >     time.sleep(60)
+> >
+> > Now, would that be a sane plugin for ceph-mgr or is this something you shouldn't put in the mgr? To me it seems like a good place since it already has all the data present.
+> 
+> This is absolutely a sane thing to put in the mgr (and include in the
+> main ceph tree) -- go for it!
+> 
 
-v3: - The lkp-robot found some serious per_thread_ops performance
-	regressions for v1 and v2, so this version changes things around to not
-	acquire a reference to struct pid in fl_nspid for every lock.  Instead,
-	it drops fl_nspid altogether, and defers the lookup of the
-	namespace-translated pid until it actually needed.
+Ok, good! I'll take a stab at it and also include a Zabbix template (XML) so users can easily adopt it.
 
-v4: - Instead of looking up the virtual pid by way of referencing the struct
-	task of the that pid, instead use find_pid_ns() and pid_nr_ns(), which
-	avoids a the problem where we race to get a reference to the struct task
-	while it may be freed.
+Sorry for posting this message a couple of times. Spamfilters were fighting me, greylisting and such, but suddenly the messages came through. My apologies!
 
-v5: - Squash previous 2/3 and 3/3 to avoid regression where F_GETLK would
-	return the init_ns pid instead of a translated pid.
+Wido
 
-v6: - State clearly how the differing cases of l_pid translation should be
-	handled, specifically regarding remote locks on remote files: that
-	fl_pid ought to be returned from the filesystem as <= 0 to indicate that
-	it makes no sense to translate this l_pid.
-	- Follow up with a patch to have filesystems negate fl_pid for remote
-	locks on remote files.
-
-Benjamin Coddington (3):
-  fs/locks: Use allocation rather than the stack in fcntl_getlk()
-  fs/locks: Remove fl_nspid and use fs-specific l_pid for remote locks
-  staging/lustre, 9p, ceph, cifs, dlm: negate remote pids for F_GETLK
-
- drivers/staging/lustre/lustre/ldlm/ldlm_flock.c |   2 +-
- fs/9p/vfs_file.c                                |   2 +-
- fs/ceph/locks.c                                 |   2 +-
- fs/cifs/cifssmb.c                               |   2 +-
- fs/dlm/plock.c                                  |   2 +-
- fs/fuse/file.c                                  |   6 +-
- fs/locks.c                                      | 108 ++++++++++++++----------
- include/linux/fs.h                              |   2 +-
- 8 files changed, 72 insertions(+), 54 deletions(-)
-
--- 
-2.9.3
+> John
+> 
+> >
+> > Wido
+> >
+> > [0]: http://docs.ceph.com/docs/master/mgr/plugins/
+> > [1]: http://www.zabbix.com/
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
