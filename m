@@ -1,40 +1,64 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: cls_rbd copyup and write
-Date: Tue, 27 Jun 2017 16:22:46 +0800
-Message-ID: <CALZt5jzk+8yS7SY6L+5BNvKuTGDZV+KOW5b=vDqO=R7t_o9Vfw@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: On FreeBSD: Could not find executable
+ /home/jenkins/workspace/ceph-master/build/bin/unittest_mclock_priority_queue
+Date: Tue, 27 Jun 2017 11:18:59 +0200
+Message-ID: <12a91c7f-df87-9415-8ced-c3928078f4d5@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f172.google.com ([209.85.223.172]:33319 "EHLO
-        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751504AbdF0IWr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Jun 2017 04:22:47 -0400
-Received: by mail-io0-f172.google.com with SMTP id h64so13640133iod.0
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Jun 2017 01:22:47 -0700 (PDT)
+Received: from smtp.digiware.nl ([176.74.240.9]:31797 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751498AbdF0JTD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 27 Jun 2017 05:19:03 -0400
+Received: from [192.168.10.67] (opteron [192.168.10.67])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id 7F21043F9F
+        for <ceph-devel@vger.kernel.org>; Tue, 27 Jun 2017 11:19:00 +0200 (CEST)
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi, all
+Something is dire missing to complete the test with success on FreeBSD.
+Perhaps because not everything is build that has to do with dmclock?
 
-currently I find that when do copy on write for a clone image. librbd
-call the cls copyup function to write the data, reading from its
-parent, to the child.
+--WjW
 
-However, there is a issue here:  if an object in the parent image -->
-[0, 8192] with data and [8192, end] without data, then after COW
-operation, it will filling the whole object [0, end] to the children
-object with [8192, end] all zeros. This phenomenon also occurs in
-flatten images.
-
-Actually, we already have sparse_read to just read data without holes.
-However, copyup function does not support to write serveral fragments
-such as {[0, 8192], [16384,20480]}.
-
-So it that possible to direct send OSDOp {[cow write], [cow write],
-[user write]} instead of  OSDOp {[copyup], [user write]} ?
-
-
-
-Regards
-Ning Yao
+        Start  57: unittest_mclock_priority_queue
+Could not find executable
+/home/jenkins/workspace/ceph-master/build/bin/unittest_mclock_priority_queue
+Looked in the following places:
+/home/jenkins/workspace/ceph-master/build/bin/unittest_mclock_priority_queue
+/home/jenkins/workspace/ceph-master/build/bin/unittest_mclock_priority_queue
+/home/jenkins/workspace/ceph-master/build/bin/Release/unittest_mclock_priority_queue
+/home/jenkins/workspace/ceph-master/build/bin/Release/unittest_mclock_priority_queue
+/home/jenkins/workspace/ceph-master/build/bin/Debug/unittest_mclock_priority_queue
+/home/jenkins/workspace/ceph-master/build/bin/Debug/unittest_mclock_priority_queue
+/home/jenkins/workspace/ceph-master/build/bin/MinSizeRel/unittest_mclock_priority_queue
+/home/jenkins/workspace/ceph-master/build/bin/MinSizeRel/unittest_mclock_priority_queue
+/home/jenkins/workspace/ceph-master/build/bin/RelWithDebInfo/unittest_mclock_priority_queue
+/home/jenkins/workspace/ceph-master/build/bin/RelWithDebInfo/unittest_mclock_priority_queue
+/home/jenkins/workspace/ceph-master/build/bin/Deployment/unittest_mclock_priority_queue
+/home/jenkins/workspace/ceph-master/build/bin/Deployment/unittest_mclock_priority_queue
+/home/jenkins/workspace/ceph-master/build/bin/Development/unittest_mclock_priority_queue
+/home/jenkins/workspace/ceph-master/build/bin/Development/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/Release/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/Release/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/Debug/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/Debug/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/MinSizeRel/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/MinSizeRel/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/RelWithDebInfo/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/RelWithDebInfo/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/Deployment/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/Deployment/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/Development/unittest_mclock_priority_queue
+home/jenkins/workspace/ceph-master/build/bin/Development/unittest_mclock_priority_queue
+Unable to find executable:
+/home/jenkins/workspace/ceph-master/build/bin/unittest_mclock_priority_queue
+ 43/169 Test  #57: unittest_mclock_priority_queue ..........***Not Run
+0.00 sec
