@@ -1,58 +1,53 @@
-From: Ning Yao <zay11022@gmail.com>
-Subject: Re: cls_rbd copyup and write
-Date: Wed, 28 Jun 2017 12:09:24 +0800
-Message-ID: <CALZt5jwW2kdR8WnXfkrj7SLTvNFkX5KxgOygFOB4y7f8FdTAng@mail.gmail.com>
-References: <CALZt5jzk+8yS7SY6L+5BNvKuTGDZV+KOW5b=vDqO=R7t_o9Vfw@mail.gmail.com>
- <alpine.DEB.2.11.1706271339330.3424@piezo.novalocal>
+From: Abhishek L <abhishek.lekshmanan@gmail.com>
+Subject: Re: Minor doc nits for Luminous upgrade
+Date: Wed, 28 Jun 2017 06:23:45 +0200
+Message-ID: <CAEw75dMcOjzfZFYWhPpo4yRfpU7ReN6a_gg5a7vKbm61Bn=X9A@mail.gmail.com>
+References: <a29ea0cb-a1b8-9c26-ae4c-9ff91ba6a917@catalyst.net.nz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f51.google.com ([209.85.214.51]:36942 "EHLO
-        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751597AbdF1EJZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Jun 2017 00:09:25 -0400
-Received: by mail-it0-f51.google.com with SMTP id m84so27007040ita.0
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Jun 2017 21:09:25 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1706271339330.3424@piezo.novalocal>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:38870 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750842AbdF1EXq (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Jun 2017 00:23:46 -0400
+Received: by mail-wm0-f42.google.com with SMTP id b184so45471544wme.1
+        for <ceph-devel@vger.kernel.org>; Tue, 27 Jun 2017 21:23:46 -0700 (PDT)
+In-Reply-To: <a29ea0cb-a1b8-9c26-ae4c-9ff91ba6a917@catalyst.net.nz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-2017-06-27 21:42 GMT+08:00 Sage Weil <sage@newdream.net>:
-> On Tue, 27 Jun 2017, Ning Yao wrote:
->> Hi, all
->>
->> currently I find that when do copy on write for a clone image. librbd
->> call the cls copyup function to write the data, reading from its
->> parent, to the child.
->>
->> However, there is a issue here:  if an object in the parent image -->
->> [0, 8192] with data and [8192, end] without data, then after COW
->> operation, it will filling the whole object [0, end] to the children
->> object with [8192, end] all zeros. This phenomenon also occurs in
->> flatten images.
+On Wed, Jun 28, 2017 at 3:07 AM, Mark Kirkwood
+<mark.kirkwood@catalyst.net.nz> wrote:
+> I've just done an upgrade from Jewel to Luminous following
+> http://docs.ceph.com/docs/master/release-notes/#upgrade-from-jewel-or-kraken
+> . Generally nice and easy to follow, but there are a couple of (fortunately
+> very obvious) instructions that are wrong:
 >
-> Note that BlueStore (luminous) doesn't have this issue: the clone is an
-> O(1) metadata operation and subsequent writes are basically copy-no-write.
-Do we say the same things? the osd-side clone ops only occurs for rbd
-snapshot. what I said is rbd clone, which is the layering feature in
-red-client side.
+> 1/ Mon feature list
+>
+> <# ceph mon feature ls
+>># ceph mon feature list
 
+While the final feature of release and the next RC will feature the
+`ls` version, this  RC still had the older list version, I've made a
+correction to the blog entry.
 
->> Actually, we already have sparse_read to just read data without holes.
->> However, copyup function does not support to write serveral fragments
->> such as {[0, 8192], [16384,20480]}.
->>
->> So it that possible to direct send OSDOp {[cow write], [cow write],
->> [user write]} instead of  OSDOp {[copyup], [user write]} ?
+> 2/ Osd restart
 >
-> It seems like the better fix for FileStore is to make the copyup operation
-> do a sparse_read and write only the allocated ranges.  I think the only
-> issue there is that the two mechanisms for making sparse_read actually
-> sparse are fiemap and seek_hole_data, both of which are disabled by
-> default because they rely on newish or buggy-in-the-past kernel APIs and
-> we want to avoid hard to diagnose breakage.  They should be enabled with
-> caution.
+> <# systemctl ceph-osd.target
+>># systemctl restart ceph-osd.target
+
+Ah thanks, there seem to be a bunch of these, good catch
+> Otherwise all good.
 >
-> sage
+> Cheers
+>
+>
+> Mark
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
