@@ -1,30 +1,51 @@
-From: Timofey Titovets <nefelim4ag@gmail.com>
-Subject: Bluestore: compession heuristic
-Date: Wed, 28 Jun 2017 01:47:26 +0300
-Message-ID: <CAGqmi77-KqhcTKxa=jnxZ2NUzVL-MT=ktRwoUYy9Zg6-C9n9dA@mail.gmail.com>
+From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Subject: Minor doc nits for Luminous upgrade
+Date: Wed, 28 Jun 2017 13:07:33 +1200
+Message-ID: <a29ea0cb-a1b8-9c26-ae4c-9ff91ba6a917@catalyst.net.nz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f177.google.com ([209.85.216.177]:35923 "EHLO
-        mail-qt0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753846AbdF0WsI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Jun 2017 18:48:08 -0400
-Received: by mail-qt0-f177.google.com with SMTP id i2so36849233qta.3
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Jun 2017 15:48:07 -0700 (PDT)
+Received: from cat-porwal-prod-mail1.catalyst.net.nz ([202.78.240.226]:53720
+        "EHLO cat-porwal-prod-mail1.catalyst.net.nz" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751693AbdF1BQy (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 27 Jun 2017 21:16:54 -0400
+Received: from localhost (localhost [127.0.0.1])
+        by cat-porwal-prod-mail1.catalyst.net.nz (Postfix) with ESMTP id EBF6B802B9
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Jun 2017 13:07:35 +1200 (NZST)
+Received: from cat-porwal-prod-mail1.catalyst.net.nz ([127.0.0.1])
+        by localhost (cat-porwal-prod-mail1.servers.catalyst.net.nz [127.0.0.1]) (amavisd-new, port 10024)
+        with ESMTP id FzPcnAnljihQ for <ceph-devel@vger.kernel.org>;
+        Wed, 28 Jun 2017 13:07:33 +1200 (NZST)
+Received: from [192.168.1.64] (122-62-60-69.jetstream.xtra.co.nz [122.62.60.69])
+        (Authenticated sender: mark.kirkwood@catalyst.net.nz)
+        by cat-porwal-prod-mail1.catalyst.net.nz (Postfix) with ESMTPSA id B765B802C9
+        for <ceph-devel@vger.kernel.org>; Wed, 28 Jun 2017 13:07:33 +1200 (NZST)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-users <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-Hi, i've write some heuristic code for btrfs compression subsystem,
-userspace option are simple and fast enough (~4GiB/s on my notebook).
+I've just done an upgrade from Jewel to Luminous following 
+http://docs.ceph.com/docs/master/release-notes/#upgrade-from-jewel-or-kraken 
+. Generally nice and easy to follow, but there are a couple of 
+(fortunately very obvious) instructions that are wrong:
 
-Heuristic can detect good/bad compressible data, to decrease cpu load
-and avoid compressing bad compressible data.
+1/ Mon feature list
 
-https://github.com/Nefelim4ag/Entropy_Calculation
+<# ceph mon feature ls
+ ># ceph mon feature list
 
-So, if that looks interesting, please let me know,
-Thanks.
--- 
-Have a nice day,
-Timofey.
+2/ Osd restart
+
+<# systemctl ceph-osd.target
+ ># systemctl restart ceph-osd.target
+
+Otherwise all good.
+
+Cheers
+
+
+Mark
+
