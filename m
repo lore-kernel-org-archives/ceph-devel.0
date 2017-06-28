@@ -1,46 +1,87 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Minor doc nits for Luminous upgrade
-Date: Wed, 28 Jun 2017 13:48:41 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706281347180.3424@piezo.novalocal>
-References: <a29ea0cb-a1b8-9c26-ae4c-9ff91ba6a917@catalyst.net.nz> <CAEw75dMcOjzfZFYWhPpo4yRfpU7ReN6a_gg5a7vKbm61Bn=X9A@mail.gmail.com> <8d60d33f-babc-2a56-73f8-8f3547ee08e4@catalyst.net.nz>
+Subject: Re: osd full still writing data while cluster recovering
+Date: Wed, 28 Jun 2017 16:37:22 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1706281636190.3424@piezo.novalocal>
+References: <CALCdKocMeqpY=3dx8BqE96-9Gvt7bYo4DJHEP4bbU9vmUsRSkQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-376776471-1498667844=:3424"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:57160 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:58168 "EHLO
         cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751469AbdF1Nsu (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Jun 2017 09:48:50 -0400
-In-Reply-To: <8d60d33f-babc-2a56-73f8-8f3547ee08e4@catalyst.net.nz>
+        with ESMTP id S1751489AbdF1QhZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Jun 2017 12:37:25 -0400
+In-Reply-To: <CALCdKocMeqpY=3dx8BqE96-9Gvt7bYo4DJHEP4bbU9vmUsRSkQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Cc: Abhishek L <abhishek.lekshmanan@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: handong He <hedongho@gmail.com>, dzafman@redhat.com
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 28 Jun 2017, Mark Kirkwood wrote:
-> On 28/06/17 16:23, Abhishek L wrote:
-> > On Wed, Jun 28, 2017 at 3:07 AM, Mark Kirkwood
-> > <mark.kirkwood@catalyst.net.nz> wrote:
-> > > 
-> > > 1/ Mon feature list
-> > > 
-> > > <# ceph mon feature ls
-> > > > # ceph mon feature list
-> > While the final feature of release and the next RC will feature the
-> > `ls` version, this  RC still had the older list version, I've made a
-> > correction to the blog entry.
-> > 
-> > 
-> I'm not sure I've been clear with this point, but the 'ls' command does not
-> work if you are upgrading from Jewel - surely this is a) a problem and b) a
-> very likely upgrade path!
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-The first rc 12.1.0 has 'mon feature list' instead of 'mon feature ls'; 
-the command was renamed right after the release was tagged to be more 
-consistent with other cli commands.  (Can you confirm that 'mon feature 
-list' works?)
+--8323329-376776471-1498667844=:3424
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 
-The command should start working as soon as the monitors are upgraded to 
-luminous.
+On Wed, 28 Jun 2017, handong He wrote:
+> Hello,
+> 
+> I'm using ceph-jewel 10.2.7 for some test.
+> Discovered that when an osd is full(like full_ratio=0.95), client
+> write failed, which is normal. But a full osd cannot stop a recovering
+> cluster writing data, make osd used ratio from 95% to100%. When that
+> happen, osd will be down for no space left and cannot startup anymore.
+> 
+> So the question is : can the cluster auto stop recovering while osd is
+> reaching full without setting the norecover flag manually?  Or is it
+> already fix in the latest version?
+> 
+> Consider this situation: a half-full cluster with many osds. For some
+> bad luck(netlink down| server down | or others) in midnight, some osds
+> down|out and trigger cluster recovery, makes some  other health osds'
+> used% to 100% (experienceless in operation and maintenance, please fix
+> me if i'm wrong). Unluckly, this just like a plague and make much more
+> osds down. It maybe easy to fix one down osd like that, but a disaster
+> to fix 10+ osds with 100% space used.
+
+There are additional thresholds for stopping backfill and (later) a 
+failsafe to prevent any writes, but you're not hte first one to see these 
+not work properly in jewel.  David recently made a ton of 
+improvements here in master for luminous, but I'm not sure what the 
+status is for backporting some of the critical pieces to jewel...
 
 sage
 
+ 
+> here is my test environment and steps:
+> 
+> three nodes, each node has one monitor and one osd(10G hdd for
+> convenient), running in vm.
+> ceph conf is basic.
+> pool size set to 2.
+> using 'rados bench' writing data to osds.
+> 
+> 1. exec command  to set osd full ratio:
+> # ceph pg set_full_ratio 0.8
+> # ceph pg set nearfull_ratio 0.7
+> 
+> 2. writing data, when an osd is reaching full, stop writing and mark
+> out one osd with command:
+> # ceph osd out 0
+> 
+> 3. waiting for cluster recovering finished , and exec command:
+> # ceph osd df
+> # ceph osd tree
+> 
+> we can find that other osds is down.
+> 
+> Thanks and Best Regards！
+> 
+> He Handong
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+--8323329-376776471-1498667844=:3424--
