@@ -1,74 +1,44 @@
-From: Kyle Bader <kyle.bader@gmail.com>
-Subject: Re: crush devices class types
-Date: Tue, 27 Jun 2017 22:28:57 -0700
-Message-ID: <CAFMfnwqOUnmV2w2kuhaboo9nzKVoFbrsxP2Sy7N1sO6xWvgGHg@mail.gmail.com>
-References: <e5fad669-da68-1287-7025-9c5e48d67601@dachary.org>
- <1971303930.7861.1485178720341@ox.pcextreme.nl> <alpine.DEB.2.11.1701231428190.3654@piezo.novalocal>
- <372c7fcb-8697-28ea-0d7c-1efc29fc21cf@dachary.org> <alpine.DEB.2.11.1702022047070.3654@piezo.novalocal>
- <2e591b25-3db2-2dd2-03af-2c1ef40292ac@dachary.org> <CALe9h7ds0PpqX-QJ0Usb-OLggPMCE2KF0tLurGfKFmms89nDiA@mail.gmail.com>
- <83ad191e-933f-83a4-c6d4-c831c1ac893f@dachary.org> <CALe9h7e-uOvQdO1GqNo6xpJ=QgoLyJ_ycgyP9c_Z_sXptHUJjg@mail.gmail.com>
- <8bf1e90e-20ca-e4e9-d3dd-3535b6a7d781@dachary.org> <CABZ+qqkNb8rAr27oKL3txJfY-OFjpF5vKXFCyRywEVvkzNXbgg@mail.gmail.com>
- <alpine.DEB.2.11.1703081432150.1727@piezo.novalocal>
+From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Subject: Re: Minor doc nits for Luminous upgrade
+Date: Wed, 28 Jun 2017 19:47:38 +1200
+Message-ID: <8d60d33f-babc-2a56-73f8-8f3547ee08e4@catalyst.net.nz>
+References: <a29ea0cb-a1b8-9c26-ae4c-9ff91ba6a917@catalyst.net.nz>
+ <CAEw75dMcOjzfZFYWhPpo4yRfpU7ReN6a_gg5a7vKbm61Bn=X9A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yb0-f173.google.com ([209.85.213.173]:34863 "EHLO
-        mail-yb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751010AbdF1F26 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 28 Jun 2017 01:28:58 -0400
-Received: by mail-yb0-f173.google.com with SMTP id b81so15780568yba.2
-        for <ceph-devel@vger.kernel.org>; Tue, 27 Jun 2017 22:28:58 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1703081432150.1727@piezo.novalocal>
+Received: from cat-porwal-prod-mail1.catalyst.net.nz ([202.78.240.226]:50364
+        "EHLO cat-porwal-prod-mail1.catalyst.net.nz" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751084AbdF1Hrn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 28 Jun 2017 03:47:43 -0400
+In-Reply-To: <CAEw75dMcOjzfZFYWhPpo4yRfpU7ReN6a_gg5a7vKbm61Bn=X9A@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Dan van der Ster <dan@vanderster.com>, Loic Dachary <loic@dachary.org>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Abhishek L <abhishek.lekshmanan@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Mar 8, 2017 at 6:39 AM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 8 Mar 2017, Dan van der Ster wrote:
->> Hi Loic,
+
+
+On 28/06/17 16:23, Abhishek L wrote:
+> On Wed, Jun 28, 2017 at 3:07 AM, Mark Kirkwood
+> <mark.kirkwood@catalyst.net.nz> wrote:
 >>
->> Did you already have a plan for how an operator would declare the
->> device class of each OSD?
->> Would this be a new --device-class option to ceph-disk prepare, which
->> would perhaps create a device-class file in the root of the OSD's xfs
->> dir?
->> Then osd crush create-or-move in ceph-osd-prestart.sh would be a
->> combination of ceph.conf's "crush location" and this per-OSD file.
+>> 1/ Mon feature list
+>>
+>> <# ceph mon feature ls
+>>> # ceph mon feature list
+> While the final feature of release and the next RC will feature the
+> `ls` version, this  RC still had the older list version, I've made a
+> correction to the blog entry.
 >
-> Hmm we haven't talked about this part yet.  I see a few options...
 >
-> 1) explicit ceph-disk argument, recorded as a file in osd_data
->
-> 2) osd can autodetect this based on the 'rotational' flag in sysfs.  The
-> trick here, I think, is to come up with suitable defaults.  We might have
-> NVMe, SATA/SAS SSDs, HDD, or a combination (with journal and data (and
-> db) spread across multiple types).   Perhaps those could break down into
-> classes like
->
->         hdd
->         ssd
->         nvme
->         hdd+ssd-journal
->         hdd+nvme-jouranl
->         hdd+ssd-db+nvme-jouranl
->
-> which is probably sufficient for most users.  And if the admin likes they
-> can override.
->
-> - Then the osd adjusts device-class on startup, just like it does with the
-> crush map position.  (Note that this will have no real effect until the
-> CRUSH rule(s) are changed to use device class.)
->
-> - We'll need an 'osd crush set-device-class <osd.NNN> <class>' command.
-> The only danger I see here is that if you set it to something other than
-> what the OSD autodetects above, it'll get clobbered on the next OSD
-> restart.  Maybe the autodetection *only* sets the device class if it isn't
-> already set?
+I'm not sure I've been clear with this point, but the 'ls' command does 
+not work if you are upgrading from Jewel - surely this is a) a problem 
+and b) a very likely upgrade path!
 
-one of the classes could be "autodetect" and it could be the default,
-kinda like auto negotiation on nic / switch ports?
+regards
 
--- 
-
-Kyle Bader
+Mark
