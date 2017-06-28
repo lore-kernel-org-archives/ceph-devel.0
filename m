@@ -1,49 +1,43 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Are we ready for 10.2.8 - core
-Date: Wed, 28 Jun 2017 12:48:04 +0200
-Message-ID: <6663b229-6570-1d2c-1c2f-2ebf5105173f@suse.cz>
-References: <9e7edca0-d56a-2315-9098-94dab50db691@suse.cz>
- <e2a46e29-a874-6a7d-40f1-5836da7a15db@redhat.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: Where to find the newest blueprints
+Date: Wed, 28 Jun 2017 07:09:29 -0500
+Message-ID: <9deabbab-92aa-2ac2-d23b-d77dd54b2327@redhat.com>
+References: <CAJACTud9Xc_XEM5bxxco_QcS-F-uFD7-ZSEi2ayG5zwAmVONvA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:42254 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750829AbdF1KsG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 28 Jun 2017 06:48:06 -0400
-In-Reply-To: <e2a46e29-a874-6a7d-40f1-5836da7a15db@redhat.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:40280 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751509AbdF1MJb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 28 Jun 2017 08:09:31 -0400
+In-Reply-To: <CAJACTud9Xc_XEM5bxxco_QcS-F-uFD7-ZSEi2ayG5zwAmVONvA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Xuehan Xu <xxhdx1985126@gmail.com>, ceph-devel@vger.kernel.org
 
-> Could we also include:
-> 
-> https://github.com/ceph/ceph/pull/14392
-> https://github.com/ceph/ceph/pull/15529
+Hi Xu,
 
-Hi Josh:
+If you look at the CDM section of the planning page, you can see some of 
+the ideas people from the community are putting forth for future 
+projects.  The latest one is here:
 
-All the outstanding PRs earmarked for 10.2.8 (including the two you 
-mentioned) have been merged. I ran two final suites:
+http://tracker.ceph.com/projects/ceph/wiki/CDM_06-JUN-2017
 
-rados 
-http://pulpito.front.sepia.ceph.com:80/smithfarm-2017-06-27_19:13:42-rados-wip-jewel-backports-distro-basic-smithi/
-upgrade/hammer-x 
-http://pulpito.front.sepia.ceph.com:80/smithfarm-2017-06-27_15:24:41-upgrade:hammer-x-wip-jewel-backports-distro-basic-vps/
+Mark
 
-Both are looking pretty good, but these runs did identify two issues 
-that might be significant:
-
-* the upgrade suite has what appears to be a regression: 
-http://tracker.ceph.com/issues/13381
-* the rados suite has this bug (possibly RGW-related) that I haven't 
-seen before: http://tracker.ceph.com/issues/20449
-
-The rados suite also had six "infrastructure noise" failures which might 
-be hiding real bugs. I reran these, but Sepia is down ATM.
-
-Do you think 10.2.8 is ready for QE to start its testing?
-
-Nathan
+On 06/28/2017 05:39 AM, Xuehan Xu wrote:
+> Hi, everyone.
+>
+> I find that blueprints in
+> http://tracker.ceph.com/projects/ceph/wiki/Planning seem to be
+> outdated, since the most recent version in it is still Jewel. Where
+> can I find the most recent blueprints? And where can I find what the
+> community is planning about for future ceph development?
+>
+> Thank you:-)
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
