@@ -1,51 +1,41 @@
-From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Subject: Minor doc nits for Luminous upgrade
-Date: Wed, 28 Jun 2017 13:07:33 +1200
-Message-ID: <a29ea0cb-a1b8-9c26-ae4c-9ff91ba6a917@catalyst.net.nz>
+From: Rolland Santimano <rolland.s@flipkart.com>
+Subject: Downstream IO circuit-breaker in RGW ?
+Date: Wed, 28 Jun 2017 07:07:23 +0530
+Message-ID: <CACiNYre28nZjMhLevyBPWLMcvu0_iayKsq8kH267y+Y3_Tccwg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cat-porwal-prod-mail1.catalyst.net.nz ([202.78.240.226]:53720
-        "EHLO cat-porwal-prod-mail1.catalyst.net.nz" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751693AbdF1BQy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 27 Jun 2017 21:16:54 -0400
-Received: from localhost (localhost [127.0.0.1])
-        by cat-porwal-prod-mail1.catalyst.net.nz (Postfix) with ESMTP id EBF6B802B9
-        for <ceph-devel@vger.kernel.org>; Wed, 28 Jun 2017 13:07:35 +1200 (NZST)
-Received: from cat-porwal-prod-mail1.catalyst.net.nz ([127.0.0.1])
-        by localhost (cat-porwal-prod-mail1.servers.catalyst.net.nz [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id FzPcnAnljihQ for <ceph-devel@vger.kernel.org>;
-        Wed, 28 Jun 2017 13:07:33 +1200 (NZST)
-Received: from [192.168.1.64] (122-62-60-69.jetstream.xtra.co.nz [122.62.60.69])
-        (Authenticated sender: mark.kirkwood@catalyst.net.nz)
-        by cat-porwal-prod-mail1.catalyst.net.nz (Postfix) with ESMTPSA id B765B802C9
-        for <ceph-devel@vger.kernel.org>; Wed, 28 Jun 2017 13:07:33 +1200 (NZST)
-Content-Language: en-US
+Received: from mail-oi0-f44.google.com ([209.85.218.44]:34416 "EHLO
+        mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753066AbdF1Bho (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 27 Jun 2017 21:37:44 -0400
+Received: by mail-oi0-f44.google.com with SMTP id l83so31047300oif.1
+        for <ceph-devel@vger.kernel.org>; Tue, 27 Jun 2017 18:37:44 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
+Cc: "Saood Khan (Engineering Manager)" <saood.khan@flipkart.com>
 
-I've just done an upgrade from Jewel to Luminous following 
-http://docs.ceph.com/docs/master/release-notes/#upgrade-from-jewel-or-kraken 
-. Generally nice and easy to follow, but there are a couple of 
-(fortunately very obvious) instructions that are wrong:
+(Please retain the CC list in your replies)
 
-1/ Mon feature list
+Our Ceph deployment is a S3 service with an SSD index pool, and HDD
+data pool. We often see service outages due to blocked requests
+against latent OSDs, mostly at the index pool.
 
-<# ceph mon feature ls
- ># ceph mon feature list
+I have been looking at code-changes in the RGW IO path that fence-off
+latent OSDs or fast-fail IOs targeted to such OSDs; ie. something like
+a circuit breaker pattern. A "retry-after" header is inserted in user
+responses for such failed user requests.
 
-2/ Osd restart
+The above circuit-breaker uses local knowledge at each RGW, ie. there
+is no central state about latent OSDs at the MON or elsewhere -- maybe
+this is something that can be piggy-backed on the OSD map maintained
+by the MON, or pushed to the ceph-mgr.
 
-<# systemctl ceph-osd.target
- ># systemctl restart ceph-osd.target
+Any thoughts or suggestions on the above ?
 
-Otherwise all good.
+(I was not sure about the folks to target this mail to, please
+re-direct as appropriate.)
 
-Cheers
-
-
-Mark
-
+-- 
+Rolland
