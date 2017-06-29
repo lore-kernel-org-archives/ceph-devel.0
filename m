@@ -1,34 +1,45 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Bug 19198: Double the memory caused by page alignment
-Date: Thu, 29 Jun 2017 15:33:30 -0400
-Message-ID: <CA+aFP1A8KfoYMBR163YQKbqJLSWyBuXab3Z1qcqJ8FDdkWgppA@mail.gmail.com>
-References: <39ba1efe-0c32-249a-8bea-183a1eab13b2@suse.com> <alpine.DEB.2.11.1706291920450.3424@piezo.novalocal>
-Reply-To: dillaman@redhat.com
+From: "Jianjian Huo" <j.huo@alibaba-inc.com>
+Subject: Re: Ceph FileStore optimization with Intel drive and scrubbing
+ optimization
+Date: Fri, 30 Jun 2017 04:14:06 +0800
+Message-ID: <3EFB19B4-D8E1-4BBB-8957-52494E25EDDC@alibaba-inc.com>
+References: <F8851965-497D-464B-94E4-6D2F2C88476A@alibaba-inc.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain;
+        charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yb0-f181.google.com ([209.85.213.181]:35472 "EHLO
-        mail-yb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751681AbdF2Tdb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jun 2017 15:33:31 -0400
-Received: by mail-yb0-f181.google.com with SMTP id b81so32020737yba.2
-        for <ceph-devel@vger.kernel.org>; Thu, 29 Jun 2017 12:33:31 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1706291920450.3424@piezo.novalocal>
+Received: from out0-218.mail.aliyun.com ([140.205.0.218]:52944 "EHLO
+        out0-218.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751827AbdF2UOd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jun 2017 16:14:33 -0400
+In-Reply-To: <F8851965-497D-464B-94E4-6D2F2C88476A@alibaba-inc.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Mohamad Gebai <mgebai@suse.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: =?GBK?B?TElVLCBGZWk=?= <james.liu@alibaba-inc.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sage@newdream.net>, Mark Nelson <mnelson@redhat.com>, =?GBK?B?ssy9+Ciw2NPwKQ==?= <caijin.caij@alibaba-inc.com>
 
-On Thu, Jun 29, 2017 at 3:25 PM, Sage Weil <sage@newdream.net> wrote:
-> IIRC Igor hit this by doing 4KB random writes via the fio ObjectStore
-> driver.  I suspect we'd see a similar with the OSD and 4KB writes, but
-> never confirmed.
+Hi Sage and Mark,
 
-There was also a recent ticket for the librbd client-side cache using
-up exactly 2x the amount RAM as expected under 4K workloads. I haven't
-looked into it yet, but I can see how "raw_combined" could potentially
-cause this ballooning that I haven't seen before (I used to expect it
-on <4K workloads under hammer).
+We had another test case (24 hours filestore run with journal stored in Optane drive) done, under our write intensive workloads, we saw IOPS increased by 59%, average latency reduced by 37%, but tail latency (99.99th) went up 65%. This new result is more meaningful for our production consideration.
+Do you have any thoughts on why tail latency went up?
 
--- 
-Jason
+Thanks,
+Jianjian
+
+On 6/29/17, 9:20 AM, "LIU, Fei" <james.liu@alibaba-inc.com> wrote:
+
+    Hi  All,
+      Below link is the slides we presented today in Ceph weekly performance meeting regarding to Ceph Filestore optimization with Intel drive and scrubbing optimization.
+    
+      https://www.slideshare.net/jupiturliu/ceph-filestore-with-optane-drive-scrub-optimization
+    
+      Please feel free to let us know if you have any questions.
+      
+       Regards,
+       James 
+       Alibaba Storage Team 
+    
+    
+
+
