@@ -1,75 +1,56 @@
-From: Tim Serong <tserong@suse.com>
-Subject: Re: ceph-mgr setup magic
-Date: Thu, 29 Jun 2017 15:14:20 +1000
-Message-ID: <b35fe433-e55e-e7da-f32e-56cd88687f43@suse.com>
-References: <alpine.DEB.2.11.1706281857110.8533@piezo.novalocal>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Luminous "upgrade"
+Date: Thu, 29 Jun 2017 10:38:30 +0200
+Message-ID: <a59baf60-394c-46f1-9445-80ef81fb56f8@digiware.nl>
+References: <ac2ebcde-f3d1-7706-86bc-8123956314a8@digiware.nl>
+ <alpine.DEB.2.11.1706290229230.3424@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:59869 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751553AbdF2FOc (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Thu, 29 Jun 2017 01:14:32 -0400
-In-Reply-To: <alpine.DEB.2.11.1706281857110.8533@piezo.novalocal>
+Received: from smtp.digiware.nl ([176.74.240.9]:19348 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752090AbdF2Iie (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 29 Jun 2017 04:38:34 -0400
+In-Reply-To: <alpine.DEB.2.11.1706290229230.3424@piezo.novalocal>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
-Cc: jspray@redhat.com
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 06/29/2017 05:04 AM, Sage Weil wrote:
-> There is some goofy behavior with the systemd unit files that tries to 
-> make a new ceph-mgr daemon automagically appear next to the mons during a 
-> cluster upgrade:
+On 29-6-2017 04:30, Sage Weil wrote:
+> On Thu, 29 Jun 2017, Willem Jan Withagen wrote:
+>> Hi,
+>>
+>> I installed the FreeBSD package i build for v12.1.0 but now my cluster
+>> reports:
+>>
+>>   cluster:
+>>     id:     6436b2a5-59a5-11e7-b746-0025903744dc
+>>     health: HEALTH_ERR
+>>             mds rank 0 has failed
+>>             mds cluster is degraded
+>>             all OSDs are running luminous or later but
+>> require_osd_release < luminous
+>>
+>> However `ceph osd set` only has:
+>> 	require_jewel_osds|require_kraken_osds
+>>
+>> So I cannot set something luminous....
 > 
-> - The ceph-mon@.service triggers ceph-mgr@ to start
-> - The ceph-mgr@.service tries to create a ceph-mgr key using whatever 
-> mon key it can find
+> Do
 > 
-> This was intended to ease the upgrade path by auto-creating ceph-mgr 
-> daemons along the way.
+>  ceph osd require-osd-release luminous
 
-It's also helpful for new installs; it means you don't actually have to
-explicitly configure mgr daemons in order to get a running cluster.  You
-just end up with as many mgrs as mons automatically.
+The upgrading link from the release page did not work for me.
+So I missed the upgrading page.
 
-That said, it is somewhat obscure, and also can make it slightly
-irritating if you want to run mgrs on separate nodes (then you have to
-explicitly deploy mgr, and also either uninstall the ceph-mgr package
-from the mon nodes, or at least `systemctl mask ceph-mgr@$(hostname)` on
-those nodes.
+And I tried the command, but with the wrong incantation. I tried:
+	require_osd_release
+Note the underscores.
 
-> Do we really want this?  I was reminded this behavior is here because of 
-> #19994, which points out that this isn't implemented for upstart (still 
-> used by trusty 14.04).
-> 
-> The jewel -> luminous upgrade process is currently documented here
-> 
-> 	http://docs.ceph.com/docs/master/release-notes/#upgrade-from-jewel-or-kraken
-> 
-> and basically has a step that says 'verify mgr daemons are running and, if 
-> not, create some'.  Is that sufficient?
+Thanx for setting me straight.
 
-Probably.  Especially given that now ceph-mgr isn't optional (you'll end
-up with "HEATH_ERR; no active mgr"), there's incentive for everyone to
-configure some mgr daemons ;-)
+--WjW
 
-More seriously: the systemd magic was able to ensure mgr was running
-with Kraken, prior to the various deployment tools growing support for
-deploying mgr, and (possibly?) prior to mgr appearing in the docs.
-
-That magic still works fine and I personally don't mind keeping it, but
-if it's going to result in inconsistent automatic behaviour across
-distros, that's probably bad.  Maybe then for Luminous it's best now to
-drop the magic and require everyone to explicitly configure mgr, as for
-all other daemons?
-
-Regards,
-
-Tim
--- 
-Tim Serong
-Senior Clustering Engineer
-SUSE
-tserong@suse.com
