@@ -1,45 +1,65 @@
-From: "Jianjian Huo" <j.huo@alibaba-inc.com>
-Subject: Re: Ceph FileStore optimization with Intel drive and scrubbing
- optimization
-Date: Fri, 30 Jun 2017 04:14:06 +0800
-Message-ID: <3EFB19B4-D8E1-4BBB-8957-52494E25EDDC@alibaba-inc.com>
-References: <F8851965-497D-464B-94E4-6D2F2C88476A@alibaba-inc.com>
+From: Mohamad Gebai <mgebai@suse.com>
+Subject: Re: Bug 19198: Double the memory caused by page alignment
+Date: Thu, 29 Jun 2017 17:11:06 -0400
+Message-ID: <3822b2e0-69b2-1213-ff9e-bb5f576dc43f@suse.com>
+References: <39ba1efe-0c32-249a-8bea-183a1eab13b2@suse.com>
+ <alpine.DEB.2.11.1706291920450.3424@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from out0-218.mail.aliyun.com ([140.205.0.218]:52944 "EHLO
-        out0-218.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751827AbdF2UOd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jun 2017 16:14:33 -0400
-In-Reply-To: <F8851965-497D-464B-94E4-6D2F2C88476A@alibaba-inc.com>
+Received: from smtp.nue.novell.com ([195.135.221.5]:37630 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753347AbdF2VLV (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Thu, 29 Jun 2017 17:11:21 -0400
+In-Reply-To: <alpine.DEB.2.11.1706291920450.3424@piezo.novalocal>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?GBK?B?TElVLCBGZWk=?= <james.liu@alibaba-inc.com>, Ceph Development <ceph-devel@vger.kernel.org>
-Cc: Sage Weil <sage@newdream.net>, Mark Nelson <mnelson@redhat.com>, =?GBK?B?ssy9+Ciw2NPwKQ==?= <caijin.caij@alibaba-inc.com>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Sage and Mark,
+Hi Sage,
 
-We had another test case (24 hours filestore run with journal stored in Optane drive) done, under our write intensive workloads, we saw IOPS increased by 59%, average latency reduced by 37%, but tail latency (99.99th) went up 65%. This new result is more meaningful for our production consideration.
-Do you have any thoughts on why tail latency went up?
+On 06/29/2017 03:25 PM, Sage Weil wrote:
+> On Thu, 29 Jun 2017, Mohamad Gebai wrote:
+>> If the page-aligned allocations are large, and if they are sparse (ie.
+>> there are random smaller non-page-aligned allocations in between), the
+>> heap is much less fragmented, and it won't seem like the memory is
+>> wasted. Does that seem like a reasonable hypothesis or did I completely
+>> misunderstand the bug report?
+> This all sounds right.
+>
+> The problem is that it is common and expected for bluestore to ask for a 
+> 4kb page-aligned buffer.  There is the 4kb aligned allocation for the 
+> buffer itself, and there is the small buffer::raw tracking struct 
+> with the ref count and so on.  This should end up consuming 4kb + a little 
+> bit, not 8kb.
 
-Thanks,
-Jianjian
+Right, 4kb for the data and a few extra bytes for the rest. So in total,
+two pages are touched and accounted for the process for each
+page-aligned allocation.
 
-On 6/29/17, 9:20 AM, "LIU, Fei" <james.liu@alibaba-inc.com> wrote:
+> First, it would be good to confirm the allocator actually does behave this 
+> way.  (Ick.)
 
-    Hi  All,
-      Below link is the slides we presented today in Ceph weekly performance meeting regarding to Ceph Filestore optimization with Intel drive and scrubbing optimization.
-    
-      https://www.slideshare.net/jupiturliu/ceph-filestore-with-optane-drive-scrub-optimization
-    
-      Please feel free to let us know if you have any questions.
-      
-       Regards,
-       James 
-       Alibaba Storage Team 
-    
-    
+I was able to reproduce this quite easily outside of Ceph, if you're
+interested the code is here:
+https://github.com/mogeb/utils/tree/master/mempool. This is simply a
+standalone version of the attachment in the tracker. The output of the
+program is as follows:
+
+Mem before2: VmRSS:       10900 kB
+Mem after2: VmRSS:     8399680 kB
+Mem actually used: 8590110720 bytes
+Mem that should be used: 4294967296 bytes
+Difference: 4295143424 bytes, 4.00016 gb
+
+Also, preloading libtcmalloc makes this behavior disappear (at least for
+this program), which confirms further the hypothesis, since tcmalloc
+does larger allocations internally.
+
+Mohamad
 
 
