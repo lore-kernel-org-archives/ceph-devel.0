@@ -1,158 +1,362 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Luminous RC feedback - device classes and osd df weirdness
-Date: Thu, 29 Jun 2017 13:27:57 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1706291326030.3424@piezo.novalocal>
-References: <71ce32a8-6232-0f5b-35a5-d86f30a045db@catalyst.net.nz>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH] ceph: new mount option that control fscache data are
+ indexed
+Date: Thu, 29 Jun 2017 21:39:47 +0800
+Message-ID: <F7C02643-DDC3-4288-BC39-0817122CA1DC@redhat.com>
+References: <20170627042322.72031-1-zyan@redhat.com>
+ <32744905.807639.1498691427197@mail.yahoo.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:35231 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752698AbdF2N2A (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 29 Jun 2017 09:28:00 -0400
-In-Reply-To: <71ce32a8-6232-0f5b-35a5-d86f30a045db@catalyst.net.nz>
+Received: from mx1.redhat.com ([209.132.183.28]:36718 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752768AbdF2Njv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 29 Jun 2017 09:39:51 -0400
+In-Reply-To: <32744905.807639.1498691427197@mail.yahoo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
-
-On Thu, 29 Jun 2017, Mark Kirkwood wrote:
-> Hi,
-> 
-> I'm running a 4 node test 'cluster' (VMs on my workstation) that I've upgraded
-> to Luminous RC. Specifically I wanted to test having each node with 1 spinning
-> device and one solid state state so I could try out device classes to create
-> fast and slow(er) pools.
-> 
-> I started with 4 filestore osds (comimg from the Jewel pre-upgrade), and added
-> 4 more, all of which were Bluestore on the ssds.
-> 
-> I used crushtool to set the device classes (see crush test diff below).
-> 
-> That all went very smoothly, with only a couple of things that seemed weird.
-> Firstly the crush/osd tree output is a bit strange (but I could get to the
-> point where it make sense):
-> 
-> $ sudo ceph osd tree
-> ID  WEIGHT  TYPE NAME          UP/DOWN REWEIGHT PRIMARY-AFFINITY
-> -15 0.23196 root default~ssd
-> -11 0.05699     host ceph1~ssd
->   4 0.05699         osd.4           up  1.00000 1.00000
-> -12 0.05899     host ceph2~ssd
->   5 0.05899         osd.5           up  1.00000 1.00000
-> -13 0.05699     host ceph3~ssd
->   6 0.05699         osd.6           up  1.00000 1.00000
-> -14 0.05899     host ceph4~ssd
->   7 0.05899         osd.7           up  1.00000 1.00000
-> -10 0.07996 root default~hdd
->  -6 0.01999     host ceph1~hdd
->   0 0.01999         osd.0           up  1.00000 1.00000
->  -7 0.01999     host ceph2~hdd
->   1 0.01999         osd.1           up  1.00000 1.00000
->  -8 0.01999     host ceph3~hdd
->   2 0.01999         osd.2           up  1.00000 1.00000
->  -9 0.01999     host ceph4~hdd
->   3 0.01999         osd.3           up  1.00000 1.00000
->  -1 0.31198 root default
->  -2 0.07700     host ceph1
->   0 0.01999         osd.0           up  1.00000 1.00000
->   4 0.05699         osd.4           up  1.00000 1.00000
->  -3 0.07899     host ceph2
->   1 0.01999         osd.1           up  1.00000 1.00000
->   5 0.05899         osd.5           up  1.00000 1.00000
->  -4 0.07700     host ceph3
->   2 0.01999         osd.2           up  1.00000 1.00000
->   6 0.05699         osd.6           up  1.00000 1.00000
->  -5 0.07899     host ceph4
->   3 0.01999         osd.3           up  1.00000 1.00000
->   7 0.05899         osd.7           up  1.00000 1.00000
-
-I was a bit divided when we were doing this about whether the unfiltered 
-(above) output or a view that hides the per-class view is better.  Maybe
-
- ceph osd tree
-
-would show the traditional view (with a device class column) and
-
- ceph osd class-tree <class>
-
-would show a single class?
-
-> But the osd df output is baffling, I've got two identical lines for each osd
-> (hard to see immediately - sorting by osd id would make it easier). This is
-> not ideal, particularly as for the bluestore guys there is no other way to
-> work out utilization. Any ideas - have I done something obviously wrong here
-> that is triggering the 2 lines?
-> 
-> $ sudo ceph osd df
-> ID WEIGHT  REWEIGHT SIZE   USE    AVAIL  %USE VAR  PGS
->  4 0.05699  1.00000 60314M  1093M 59221M 1.81 1.27   0
->  5 0.05899  1.00000 61586M  1234M 60351M 2.00 1.40   0
->  6 0.05699  1.00000 60314M  1248M 59066M 2.07 1.45   0
->  7 0.05899  1.00000 61586M  1209M 60376M 1.96 1.37   0
->  0 0.01999  1.00000 25586M 43812k 25543M 0.17 0.12  45
->  1 0.01999  1.00000 25586M 42636k 25544M 0.16 0.11  37
->  2 0.01999  1.00000 25586M 44336k 25543M 0.17 0.12  53
->  3 0.01999  1.00000 25586M 42716k 25544M 0.16 0.11  57
->  0 0.01999  1.00000 25586M 43812k 25543M 0.17 0.12  45
->  4 0.05699  1.00000 60314M  1093M 59221M 1.81 1.27   0
->  1 0.01999  1.00000 25586M 42636k 25544M 0.16 0.11  37
->  5 0.05899  1.00000 61586M  1234M 60351M 2.00 1.40   0
->  2 0.01999  1.00000 25586M 44336k 25543M 0.17 0.12  53
->  6 0.05699  1.00000 60314M  1248M 59066M 2.07 1.45   0
->  3 0.01999  1.00000 25586M 42716k 25544M 0.16 0.11  57
->  7 0.05899  1.00000 61586M  1209M 60376M 1.96 1.37   0
->               TOTAL   338G  4955M   333G 1.43
-> MIN/MAX VAR: 0.11/1.45  STDDEV: 0.97
-
-This is just a bug, fixing.
-
-Thanks!
-sage
+To: Anish Gupta <anish_gupta@yahoo.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Milosz Tanski <milosz@adfin.com>, Jeff Layton <jlayton@redhat.com>, David Howells <dhowells@redhat.com>
 
 
+> On 29 Jun 2017, at 07:10, Anish Gupta <anish_gupta@yahoo.com> wrote:
+> 
+> Zheng,
+> 
+> Few comments on the patch:
+> 
+> 1) the option  "tempfsc" sounds yucky. Can it be renamed to "client_fsc" or something more meaningful and changed everywhere.
+> 2) few inline comments with [AG]
+> 
 
+I wrote a new patch "ceph: new mount option that specifies fscache uniquifier”, which let user to specify a uniquifier 
+
+Regards
+Yan, Zheng
+
+On Monday, June 26, 2017, 9:23:15 PM PDT, Yan, Zheng <zyan@redhat.com> wrote:
 > 
 > 
-> The modifications to crush map
-> --- crush.txt.orig    2017-06-28 14:38:38.067669000 +1200
-> +++ crush.txt    2017-06-28 14:41:22.071669000 +1200
-> @@ -8,14 +8,14 @@
->  tunable allowed_bucket_algs 54
+> Current ceph uses FSID as primary index key of fscache data. This
+> allows ceph to retain cached data across remount. But this causes
+> problem (kernel opps, fscache does not support sharing data) when
+> a filesystem get mounted (with fscache enabled) several times.
 > 
->  # devices
-> -device 0 osd.0
-> -device 1 osd.1
-> -device 2 osd.2
-> -device 3 osd.3
-> -device 4 osd.4
-> -device 5 osd.5
-> -device 6 osd.6
-> -device 7 osd.7
-> +device 0 osd.0 class hdd
-> +device 1 osd.1 class hdd
-> +device 2 osd.2 class hdd
-> +device 3 osd.3 class hdd
-> +device 4 osd.4 class ssd
-> +device 5 osd.5 class ssd
-> +device 6 osd.6 class ssd
-> +device 7 osd.7 class ssd
+> The fix is adding a new mount option, which makes ceph use client
+> ID as primary index key. Client ID is unique for each mount. For
+> the old fscache mount option, only allow one fscache instance for
+> each filesystem.
 > 
->  # types
->  type 0 osd
-> @@ -80,7 +80,7 @@
->      type replicated
->      min_size 1
->      max_size 10
-> -    step take default
-> +    step take default class hdd
->      step chooseleaf firstn 0 type host
->      step emit
->  }
+> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+> ---
+> fs/ceph/cache.c | 117 +++++++++++++++++++++++++++++++++++++++++++++++++++-----
+> fs/ceph/super.c |  32 ++++++++++------
+> fs/ceph/super.h |  5 ++-
+> 3 files changed, 131 insertions(+), 23 deletions(-)
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
+> index 4e7421c..b4956b4 100644
+> --- a/fs/ceph/cache.c
+> +++ b/fs/ceph/cache.c
+> @@ -35,8 +35,17 @@ struct fscache_netfs ceph_cache_netfs = {
+>     .version    = 0,
+> };
+> 
+> -static uint16_t ceph_fscache_session_get_key(const void *cookie_netfs_data,
+> -                        void *buffer, uint16_t maxbuf)
+> +static DEFINE_MUTEX(ceph_fscache_fsid_lock);
+> +static LIST_HEAD(ceph_fscache_fsid_list);
+> +
+> +struct ceph_fscache_fsid {
+> +    struct list_head list;
+> +    struct fscache_cookie *fscache;
+> +    struct ceph_fsid fsid;
+> +};
+> +
+> +static uint16_t ceph_fscache_fsid_get_key(const void *cookie_netfs_data,
+> +                      void *buffer, uint16_t maxbuf)
+> {
+>     const struct ceph_fs_client* fsc = cookie_netfs_data;
+>     uint16_t klen;
+> @@ -52,7 +61,32 @@ static uint16_t ceph_fscache_session_get_key(const void *cookie_netfs_data,
+> static const struct fscache_cookie_def ceph_fscache_fsid_object_def = {
+>     .name        = "CEPH.fsid",
+>     .type        = FSCACHE_COOKIE_TYPE_INDEX,
+> -    .get_key    = ceph_fscache_session_get_key,
+> +    .get_key    = ceph_fscache_fsid_get_key,
+> +};
+> +
+> +static uint16_t ceph_fscache_client_get_key(const void *cookie_netfs_data,
+> +                        void *buffer, uint16_t maxbuf)
+> +{
+> +    const struct ceph_fs_client* fsc = cookie_netfs_data;
+> +    const struct ceph_fsid *fsid = &fsc->client->fsid;
+> +    u64 client_id = fsc->client->monc.auth->global_id;
+> +    uint16_t fsid_len, key_len;
+> +
+> +    fsid_len = sizeof(*fsid);
+> +    key_len = fsid_len + sizeof(client_id);
+> +    if (key_len > maxbuf)
+> +        return 0;
+> +
+> +    memcpy(buffer, fsid, fsid_len);
+> +    memcpy(buffer + fsid_len, &client_id, sizeof(client_id));
+> +
+> +    return key_len;
+> +}
+> +
+> +static const struct fscache_cookie_def ceph_fscache_client_object_def = {
+> +    .name        = "CEPH.client",
+> +    .type        = FSCACHE_COOKIE_TYPE_INDEX,
+> +    .get_key    = ceph_fscache_client_get_key,
+> };
+> 
+> int ceph_fscache_register(void)
+> @@ -67,13 +101,54 @@ void ceph_fscache_unregister(void)
+> 
+> int ceph_fscache_register_fs(struct ceph_fs_client* fsc)
+> {
+> -    fsc->fscache = fscache_acquire_cookie(ceph_cache_netfs.primary_index,
+> -                          &ceph_fscache_fsid_object_def,
+> -                          fsc, true);
+> -    if (!fsc->fscache)
+> -        pr_err("Unable to register fsid: %p fscache cookie\n", fsc);
+> +    const struct ceph_fsid *fsid = &fsc->client->fsid;
+> +    struct ceph_fscache_fsid *ent;
+> +    int err = 0;
+> +
+> +    if (fsc->mount_options->flags & CEPH_MOUNT_OPT_TMPFSCACHE) {
+> +        fsc->fscache = fscache_acquire_cookie(
+> +                        ceph_cache_netfs.primary_index,
+> +                        &ceph_fscache_client_object_def,
+> +                        fsc, true);
+> +        if (!fsc->fscache)
+> +            pr_err("Unable to register fsid: %p "
+> +                  "fscache cookie\n", fsc);
+> 
+> [AG] return an error here?
+> 
+> +    } else {
+> +        mutex_lock(&ceph_fscache_fsid_lock);
 > 
 > 
+> [AG] For client entries (ie "CEPH.client"),  where are you adding them to ceph_fscache_fsid_list?
+> Code much below is only doing that for "CEPH.fsid" entries. 
+> If there is no list for "CEPH.client" entries, why walk the list here?
+> IMHO, we should have a list of fscached CLIENT entries too.
+> 
+> +        list_for_each_entry(ent, &ceph_fscache_fsid_list, list) {
+> +            if (!memcmp(&ent->fsid, fsid, sizeof(*fsid))) {
+> +                pr_err("fscache cookie already registered "
+> +                      "for fsid %pU\n", fsid);
+> +                pr_err("  use tmpfsc mount option instead\n");
+> +                err = -EBUSY;
+> +                goto out_unlock;
+> +            }
+> +        }
+> 
+> [AG] Missing a mutex_unlock() before the return 
+> 
+> -    return 0;
+> +        ent = kzalloc(sizeof(*ent), GFP_KERNEL);
+> +        if (!ent) {
+> +            err = -ENOMEM;
+> +            goto out_unlock;
+> +        }
+> +
+> +        fsc->fscache = fscache_acquire_cookie(
+> +                        ceph_cache_netfs.primary_index,
+> +                        &ceph_fscache_fsid_object_def,
+> +                        fsc, true);
+> +
+> +        if (fsc->fscache) {
+> +            memcpy(&ent->fsid, fsid, sizeof(*fsid));
+> +            ent->fscache = fsc->fscache;
+> +            list_add_tail(&ent->list, &ceph_fscache_fsid_list);
+> +        } else {
+> +            kfree(ent);
+> +            pr_err("Unable to register fsid: %p "
+> +                  "fscache cookie\n", fsc);
+> +        }
+> +out_unlock:
+> +        mutex_unlock(&ceph_fscache_fsid_lock);
+> +    }
+> +    return err;
+> }
+> 
+> static uint16_t ceph_fscache_inode_get_key(const void *cookie_netfs_data,
+> @@ -349,7 +424,29 @@ void ceph_invalidate_fscache_page(struct inode* inode, struct page *page)
+> 
+> void ceph_fscache_unregister_fs(struct ceph_fs_client* fsc)
+> {
+> -    fscache_relinquish_cookie(fsc->fscache, 0);
+> +    if (fscache_cookie_valid(fsc->fscache)) {
+> +        if (fsc->fscache->def == &ceph_fscache_fsid_object_def) {
+> 
+> [AG] How/Where do you handle ceph_fscace_client_object_def entries?
+> 
+> +            const struct ceph_fsid *fsid = &fsc->client->fsid;
+> +            struct ceph_fscache_fsid *ent, *found = NULL;
+> +
+> +            mutex_lock(&ceph_fscache_fsid_lock);
+> +            list_for_each_entry(ent, &ceph_fscache_fsid_list, list) {
+> +                if (!memcmp(&ent->fsid, fsid, sizeof(*fsid))) {
+> +                    found = ent;
+> +                    break;
+> +                }
+> +            }
+> +            if (found) {
+> +                WARN_ON_ONCE(found->fscache != fsc->fscache);
+> +                list_del(&found->list);
+> +                kfree(found);
+> 
+> [AG] return from here? 
+> If there are additional entries in the list, aren't you setting fsc->fscache = NULL?
+> 
+> 
+> 
+> +            } else {
+> +                WARN_ON_ONCE(true);
+> +            }
+> +            mutex_unlock(&ceph_fscache_fsid_lock);
+> +        }
+> +        __fscache_relinquish_cookie(fsc->fscache, 0);
+> +    }
+>     fsc->fscache = NULL;
+> }
+> 
+> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> index 14e78dd..bb6dd7f 100644
+> --- a/fs/ceph/super.c
+> +++ b/fs/ceph/super.c
+> @@ -134,6 +134,7 @@ enum {
+>     Opt_ino32,
+>     Opt_noino32,
+>     Opt_fscache,
+> +    Opt_tmpfscache,
+>     Opt_nofscache,
+>     Opt_poolperm,
+>     Opt_nopoolperm,
+> @@ -170,6 +171,7 @@ static match_table_t fsopt_tokens = {
+>     {Opt_ino32, "ino32"},
+>     {Opt_noino32, "noino32"},
+>     {Opt_fscache, "fsc"},
+> +    {Opt_tmpfscache, "tmpfsc"},
+> 
+> [AG] Rename "tmpfsc" please.
+> 
+> 
+>     {Opt_nofscache, "nofsc"},
+> 
+> [AG] Does "nofsc" work for both the "fsc"  options?
+> 
+>     {Opt_poolperm, "poolperm"},
+>     {Opt_nopoolperm, "nopoolperm"},
+> @@ -281,6 +283,10 @@ static int parse_fsopt_token(char *c, void *private)
+>     case Opt_fscache:
+>         fsopt->flags |= CEPH_MOUNT_OPT_FSCACHE;
+>         break;
+> +    case Opt_tmpfscache:
+> +        fsopt->flags |= CEPH_MOUNT_OPT_FSCACHE |
+> +                CEPH_MOUNT_OPT_TMPFSCACHE;
+> +        break;
+>     case Opt_nofscache:
+>         fsopt->flags &= ~CEPH_MOUNT_OPT_FSCACHE;
+>         break;
+> @@ -475,8 +481,12 @@ static int ceph_show_options(struct seq_file *m, struct dentry *root)
+>         seq_puts(m, ",noasyncreaddir");
+>     if ((fsopt->flags & CEPH_MOUNT_OPT_DCACHE) == 0)
+>         seq_puts(m, ",nodcache");
+> -    if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE)
+> -        seq_puts(m, ",fsc");
+> +    if (fsopt->flags & CEPH_MOUNT_OPT_FSCACHE) {
+> +        if (fsopt->flags & CEPH_MOUNT_OPT_TMPFSCACHE)
+> +            seq_puts(m, ",tmpfsc");
+> +        else
+> +            seq_puts(m, ",fsc");
+> +    }
+>     if (fsopt->flags & CEPH_MOUNT_OPT_NOPOOLPERM)
+>         seq_puts(m, ",nopoolperm");
+> 
+> @@ -597,18 +607,11 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
+>     if (!fsc->wb_pagevec_pool)
+>         goto fail_trunc_wq;
+> 
+> -    /* setup fscache */
+> -    if ((fsopt->flags & CEPH_MOUNT_OPT_FSCACHE) &&
+> -        (ceph_fscache_register_fs(fsc) != 0))
+> -        goto fail_fscache;
+> -
+>     /* caps */
+>     fsc->min_caps = fsopt->max_readdir;
+> 
+>     return fsc;
+> 
+> -fail_fscache:
+> -    ceph_fscache_unregister_fs(fsc);
+> fail_trunc_wq:
+>     destroy_workqueue(fsc->trunc_wq);
+> fail_pg_inv_wq:
+> @@ -626,8 +629,6 @@ static void destroy_fs_client(struct ceph_fs_client *fsc)
+> {
+>     dout("destroy_fs_client %p\n", fsc);
+> 
+> -    ceph_fscache_unregister_fs(fsc);
+> -
+>     destroy_workqueue(fsc->wb_wq);
+>     destroy_workqueue(fsc->pg_inv_wq);
+>     destroy_workqueue(fsc->trunc_wq);
+> @@ -820,6 +821,13 @@ static struct dentry *ceph_real_mount(struct ceph_fs_client *fsc)
+>         if (err < 0)
+>             goto out;
+> 
+> +        /* setup fscache */
+> +        if (fsc->mount_options->flags & CEPH_MOUNT_OPT_FSCACHE) {
+> +            err = ceph_fscache_register_fs(fsc);
+> +            if (err < 0)
+> +                goto out;
+> +        }
+> 
+> 
+> [AG] How does one unregister "tmpfsc" entries?
+> 
+> +
+>         if (!fsc->mount_options->server_path) {
+>             path = "";
+>             dout("mount opening path \\t\n");
+> @@ -1042,6 +1050,8 @@ static void ceph_kill_sb(struct super_block *s)
+>     fsc->client->extra_mon_dispatch = NULL;
+>     ceph_fs_debugfs_cleanup(fsc);
+> 
+> +    ceph_fscache_unregister_fs(fsc);
+> +
+>     ceph_mdsc_destroy(fsc);
+> 
+>     destroy_fs_client(fsc);
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index f8a0aba..21e5562 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -36,8 +36,9 @@
+> #define CEPH_MOUNT_OPT_INO32          (1<<8) /* 32 bit inos */
+> #define CEPH_MOUNT_OPT_DCACHE          (1<<9) /* use dcache for readdir etc */
+> #define CEPH_MOUNT_OPT_FSCACHE        (1<<10) /* use fscache */
+> -#define CEPH_MOUNT_OPT_NOPOOLPERM      (1<<11) /* no pool permission check */
+> -#define CEPH_MOUNT_OPT_MOUNTWAIT      (1<<12) /* mount waits if no mds is up */
+> +#define CEPH_MOUNT_OPT_TMPFSCACHE      (1<<11) /* use temp fscache */
+> 
+> [AG] Rename  "tmpfsc" please.
+> 
+> thank you,
+> Anish
+> 
+> 
+> +#define CEPH_MOUNT_OPT_NOPOOLPERM      (1<<12) /* no pool permission check */
+> +#define CEPH_MOUNT_OPT_MOUNTWAIT      (1<<13) /* mount waits if no mds is up */
+> 
+> #define CEPH_MOUNT_OPT_DEFAULT    CEPH_MOUNT_OPT_DCACHE
+> 
+> -- 
+> 2.9.4
+
