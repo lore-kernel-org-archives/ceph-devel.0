@@ -1,35 +1,37 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Jewel 10.2.8 -> QE
-Date: Fri, 30 Jun 2017 22:04:56 +0200
-Message-ID: <5e48dd6f-6493-aeb0-3e57-537caa3858e6@suse.cz>
-References: <078ac38a-9f3b-3d8a-ff8b-7764eb9c13c1@suse.cz>
- <CAMMFjmH5coCEnnx79Jpr3U1fx56PMBGQTfZHsRO-i6iVP0t6dw@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: dev build issues
+Date: Fri, 30 Jun 2017 16:39:13 -0400
+Message-ID: <CAC-Np1wO-S1B2O_a+HvY=-TqO4oOkq-pVpaZ9DqGy5HcYBW74g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:45986 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752117AbdF3UE6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 30 Jun 2017 16:04:58 -0400
-In-Reply-To: <CAMMFjmH5coCEnnx79Jpr3U1fx56PMBGQTfZHsRO-i6iVP0t6dw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wr0-f179.google.com ([209.85.128.179]:35825 "EHLO
+        mail-wr0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751982AbdF3UjP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jun 2017 16:39:15 -0400
+Received: by mail-wr0-f179.google.com with SMTP id k67so208847527wrc.2
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Jun 2017 13:39:14 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-> This SHA1 build on trusty failed.
-> Can you do another pls ?
-> 
-> https://jenkins.ceph.com/job/ceph-dev-build/ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=trusty,DIST=trusty,MACHINE_SIZE=huge/8736//consoleFull
+We are experiencing DNS issues where some of our build nodes can't
+resolve other services in the system.
 
-Hi Yuri:
+This means that some builds will just not complete and will appear as
+'started' (yellow) in shaman.
 
-That's a build infrastructure failure. Though I could change the SHA1 by 
-adding a bogus commit to the jewel branch, I'd much rather ask someone 
-in the CI team (Alfredo, Andrew, David G., Dan?) to trigger a rebuild.
+We are going to try to get these build nodes to resolve more robustly,
+in the meantime you can trigger another build with an amend to your
+last commit and pushing, or rebasing and pushing to your branch in
+ceph-ci.git
 
-Please talk to them about it.
+The reason why it is not immediately apparent that the build has
+failed is because the build node is in charge of updating the status,
+but since it can't resolve shaman.ceph.com the build in shaman appears
+to stay in 'building' state (yellow)
 
-Nathan
+These fail fairly quickly, so for now, please check after a few
+minutes to re-trigger if the build didn't go through.
+
+-Alfredo
