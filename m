@@ -1,13 +1,15 @@
-From: David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org>
 Subject: Re: dropping filestore+btrfs testing for luminous
-Date: Fri, 30 Jun 2017 16:29:43 +0000
-Message-ID: <CAN-GepJ=2HC-Q38EEhK7EWF=pe0z7-v2oVPhRnS_gB8opM7y=g@mail.gmail.com>
+Date: Sat, 1 Jul 2017 01:44:30 +0900
+Message-ID: <20170701014430.73bc4bb0@batzmaru.gol.ad.jp>
 References: <alpine.DEB.2.11.1706300314120.3424@piezo.novalocal>
 	<c4cf8858-6c29-4ec7-7ffa-479781258569@grimmer.com>
+	<CAN-GepJ=2HC-Q38EEhK7EWF=pe0z7-v2oVPhRnS_gB8opM7y=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0262554534=="
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <c4cf8858-6c29-4ec7-7ffa-479781258569-L588LILoNhJBDgjK7y7TUQ@public.gmane.org>
+In-Reply-To: <CAN-GepJ=2HC-Q38EEhK7EWF=pe0z7-v2oVPhRnS_gB8opM7y=g@mail.gmail.com>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -17,212 +19,77 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Lenz Grimmer <lenz-L588LILoNhJBDgjK7y7TUQ@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+To: ceph-users-Qp0mS5GaXlQ@public.gmane.org
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
---===============0262554534==
-Content-Type: multipart/alternative; boundary="f403045c185255be9d05532fed44"
-
---f403045c185255be9d05532fed44
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-I actually don't see either of these as issues with just flat out saying
-that Btrfs will not be supported in Luminous.  It's a full new release and
-it sounds like it is no longer a relevant Filestore backend in Luminous.
-People can either plan to migrate their OSDs to Bluestore once they reach
-Luminous or just not upgrade to Luminous.  Upgrading is optional and not
-mandatory.
-
-On Fri, Jun 30, 2017 at 11:47 AM Lenz Grimmer <lenz-L588LILoNhJBDgjK7y7TUQ@public.gmane.org> wrote:
-
-> Hi Sage,
->
-> On 06/30/2017 05:21 AM, Sage Weil wrote:
->
-> > The easiest thing is to
-> >
-> > 1/ Stop testing filestore+btrfs for luminous onward.  We've recommended
-> > against btrfs for a long time and are moving toward bluestore anyway.
->
-> Searching the documentation for "btrfs" does not really give a user any
-> clue that the use of Btrfs is discouraged.
->
-> Where exactly has this been recommended?
->
-> The documentation currently states:
->
->
-> http://docs.ceph.com/docs/master/rados/configuration/ceph-conf/?highlight=
-=3Dbtrfs#osds
->
-> "We recommend using the xfs file system or the btrfs file system when
-> running mkfs."
->
->
-> http://docs.ceph.com/docs/master/rados/configuration/filesystem-recommend=
-ations/?highlight=3Dbtrfs#filesystems
->
-> "btrfs is still supported and has a comparatively compelling set of
-> features, but be mindful of its stability and support status in your
-> Linux distribution."
->
->
-> http://docs.ceph.com/docs/master/start/os-recommendations/?highlight=3Dbt=
-rfs#ceph-dependencies
->
-> "If you use the btrfs file system with Ceph, we recommend using a recent
-> Linux kernel (3.14 or later)."
->
-> As an end user, none of these statements would really sound as
-> recommendations *against* using Btrfs to me.
->
-> I'm therefore concerned about just disabling the tests related to
-> filestore on Btrfs while still including and shipping it. This has
-> potential to introduce regressions that won't get caught and fixed.
->
-> > 2/ Leave btrfs in the mix for jewel, and manually tolerate and filter o=
-ut
-> > the occasional ENOSPC errors we see.  (They make the test runs noisy bu=
-t
-> > are pretty easy to identify.)
-> >
-> > If we don't stop testing filestore on btrfs now, I'm not sure when we
-> > would ever be able to stop, and that's pretty clearly not sustainable.
-> > Does that seem reasonable?  (Pretty please?)
->
-> If you want to get rid of filestore on Btrfs, start a proper deprecation
-> process and inform users that support for it it's going to be removed in
-> the near future. The documentation must be updated accordingly and it
-> must be clearly emphasized in the release notes.
->
-> Simply disabling the tests while keeping the code in the distribution is
-> setting up users who happen to be using Btrfs for failure.
->
-> Just my 0.02=E2=82=AC,
->
-> Lenz
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-
---f403045c185255be9d05532fed44
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">I actually don&#39;t see either of these as issues with ju=
-st flat out saying that Btrfs will not be supported in Luminous.=C2=A0 It&#=
-39;s a full new release and it sounds like it is no longer a relevant Files=
-tore backend in Luminous.=C2=A0 People can either plan to migrate their OSD=
-s to Bluestore once they reach Luminous or just not upgrade to Luminous.=C2=
-=A0 Upgrading is optional and not mandatory.<div><br><div class=3D"gmail_qu=
-ote"><div dir=3D"ltr">On Fri, Jun 30, 2017 at 11:47 AM Lenz Grimmer &lt;<a =
-href=3D"mailto:lenz-L588LILoNhJBDgjK7y7TUQ@public.gmane.org">lenz-L588LILoNhJBDgjK7y7TUQ@public.gmane.org</a>&gt; wrote:<br></div><=
-blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px=
- #ccc solid;padding-left:1ex">Hi Sage,<br>
-<br>
-On 06/30/2017 05:21 AM, Sage Weil wrote:<br>
-<br>
-&gt; The easiest thing is to<br>
-&gt;<br>
-&gt; 1/ Stop testing filestore+btrfs for luminous onward.=C2=A0 We&#39;ve r=
-ecommended<br>
-&gt; against btrfs for a long time and are moving toward bluestore anyway.<=
-br>
-<br>
-Searching the documentation for &quot;btrfs&quot; does not really give a us=
-er any<br>
-clue that the use of Btrfs is discouraged.<br>
-<br>
-Where exactly has this been recommended?<br>
-<br>
-The documentation currently states:<br>
-<br>
-<a href=3D"http://docs.ceph.com/docs/master/rados/configuration/ceph-conf/?=
-highlight=3Dbtrfs#osds" rel=3D"noreferrer" target=3D"_blank">http://docs.ce=
-ph.com/docs/master/rados/configuration/ceph-conf/?highlight=3Dbtrfs#osds</a=
-><br>
-<br>
-&quot;We recommend using the xfs file system or the btrfs file system when<=
-br>
-running mkfs.&quot;<br>
-<br>
-<a href=3D"http://docs.ceph.com/docs/master/rados/configuration/filesystem-=
-recommendations/?highlight=3Dbtrfs#filesystems" rel=3D"noreferrer" target=
-=3D"_blank">http://docs.ceph.com/docs/master/rados/configuration/filesystem=
--recommendations/?highlight=3Dbtrfs#filesystems</a><br>
-<br>
-&quot;btrfs is still supported and has a comparatively compelling set of<br=
->
-features, but be mindful of its stability and support status in your<br>
-Linux distribution.&quot;<br>
-<br>
-<a href=3D"http://docs.ceph.com/docs/master/start/os-recommendations/?highl=
-ight=3Dbtrfs#ceph-dependencies" rel=3D"noreferrer" target=3D"_blank">http:/=
-/docs.ceph.com/docs/master/start/os-recommendations/?highlight=3Dbtrfs#ceph=
--dependencies</a><br>
-<br>
-&quot;If you use the btrfs file system with Ceph, we recommend using a rece=
-nt<br>
-Linux kernel (3.14 or later).&quot;<br>
-<br>
-As an end user, none of these statements would really sound as<br>
-recommendations *against* using Btrfs to me.<br>
-<br>
-I&#39;m therefore concerned about just disabling the tests related to<br>
-filestore on Btrfs while still including and shipping it. This has<br>
-potential to introduce regressions that won&#39;t get caught and fixed.<br>
-<br>
-&gt; 2/ Leave btrfs in the mix for jewel, and manually tolerate and filter =
-out<br>
-&gt; the occasional ENOSPC errors we see.=C2=A0 (They make the test runs no=
-isy but<br>
-&gt; are pretty easy to identify.)<br>
-&gt;<br>
-&gt; If we don&#39;t stop testing filestore on btrfs now, I&#39;m not sure =
-when we<br>
-&gt; would ever be able to stop, and that&#39;s pretty clearly not sustaina=
-ble.<br>
-&gt; Does that seem reasonable?=C2=A0 (Pretty please?)<br>
-<br>
-If you want to get rid of filestore on Btrfs, start a proper deprecation<br=
->
-process and inform users that support for it it&#39;s going to be removed i=
-n<br>
-the near future. The documentation must be updated accordingly and it<br>
-must be clearly emphasized in the release notes.<br>
-<br>
-Simply disabling the tests while keeping the code in the distribution is<br=
->
-setting up users who happen to be using Btrfs for failure.<br>
-<br>
-Just my 0.02=E2=82=AC,<br>
-<br>
-Lenz<br>
-<br>
-_______________________________________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-users@l=
-ists.ceph.com</a><br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
-oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-=
-ceph.com</a><br>
-</blockquote></div></div></div>
-
---f403045c185255be9d05532fed44--
-
---===============0262554534==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0262554534==--
+T24gRnJpLCAzMCBKdW4gMjAxNyAxNjoyOTo0MyArMDAwMCBEYXZpZCBUdXJuZXIgd3JvdGU6Cgo+
+IEkgYWN0dWFsbHkgZG9uJ3Qgc2VlIGVpdGhlciBvZiB0aGVzZSBhcyBpc3N1ZXMgd2l0aCBqdXN0
+IGZsYXQgb3V0IHNheWluZwo+IHRoYXQgQnRyZnMgd2lsbCBub3QgYmUgc3VwcG9ydGVkIGluIEx1
+bWlub3VzLiAgSXQncyBhIGZ1bGwgbmV3IHJlbGVhc2UgYW5kCj4gaXQgc291bmRzIGxpa2UgaXQg
+aXMgbm8gbG9uZ2VyIGEgcmVsZXZhbnQgRmlsZXN0b3JlIGJhY2tlbmQgaW4gTHVtaW5vdXMuCj4g
+UGVvcGxlIGNhbiBlaXRoZXIgcGxhbiB0byBtaWdyYXRlIHRoZWlyIE9TRHMgdG8gQmx1ZXN0b3Jl
+IG9uY2UgdGhleSByZWFjaAo+IEx1bWlub3VzIG9yIGp1c3Qgbm90IHVwZ3JhZGUgdG8gTHVtaW5v
+dXMuICBVcGdyYWRpbmcgaXMgb3B0aW9uYWwgYW5kIG5vdAo+IG1hbmRhdG9yeS4KPiAKWW91IHRl
+bGwgdGhhdCB0byB0aGUgcGVvcGxlIGluIGNoYXJnZSB3aGVuIHRoZXJlJ3MgYSBjcml0aWNhbCBi
+dWcgaW4gYQp2ZXJzaW9uIHRoYXQncyBubyBsb25nZXIgbWFpbnRhaW5lZC4gCkF0IHRoZSByZWxl
+YXNlIGN5Y2xlIHNwZWVkIG9mIENlcGggdGhpcyB0ZW5kcyB0byBiZSBhbiBvcHRpb24gb25seSBm
+b3IKdGhvc2Ugb2YgdXMgd2hvIGFyZSBoYXBweSB0byBmcmVlemUgYSBjbHVzdGVyIGF0IGEgY2Vy
+dGFpbiB2ZXJzaW9uIHVudGlsCml0IGRpZXMgb2YgbmF0dXJhbCBjYXVzZXMuCgpUaGF0IGJlaW5n
+IHNhaWQsIGFueWJvZHkgd2hvIGRlcGxveWVkIEJUUkZTIHdpdGhpbiB0aGUgbGFzdCAxLTIgeWVh
+cnMKc2hvdWxkIGhhdmUgc2VlbiB0aGUgd3JpdGluZyBvbiB0aGUgd2FsbCwgYnV0IHRoZSBhYmls
+aXR5IG9mIHJlYWRpbmcKYmV0d2VlbiB0aGUgbGluZXMgaXMgbm90IGFuIGV4Y3VzZSBmb3IgYSAi
+cHJvcGVyIGRlcHJlY2F0aW9uIiBpbmRlZWQuCkFuZCBhdCB0aGlzIHRpbWUgdGhhdCBwcm9iYWJs
+eSBzaG91bGQgYmUgZXh0ZW5kZWQgZm9ybWFsbHkgdG8gWkZTLgoKQ2hyaXN0aWFuCgo+IE9uIEZy
+aSwgSnVuIDMwLCAyMDE3IGF0IDExOjQ3IEFNIExlbnogR3JpbW1lciA8bGVuekBncmltbWVyLmNv
+bT4gd3JvdGU6Cj4gCj4gPiBIaSBTYWdlLAo+ID4KPiA+IE9uIDA2LzMwLzIwMTcgMDU6MjEgQU0s
+IFNhZ2UgV2VpbCB3cm90ZToKPiA+ICAKPiA+ID4gVGhlIGVhc2llc3QgdGhpbmcgaXMgdG8KPiA+
+ID4KPiA+ID4gMS8gU3RvcCB0ZXN0aW5nIGZpbGVzdG9yZStidHJmcyBmb3IgbHVtaW5vdXMgb253
+YXJkLiAgV2UndmUgcmVjb21tZW5kZWQKPiA+ID4gYWdhaW5zdCBidHJmcyBmb3IgYSBsb25nIHRp
+bWUgYW5kIGFyZSBtb3ZpbmcgdG93YXJkIGJsdWVzdG9yZSBhbnl3YXkuICAKPiA+Cj4gPiBTZWFy
+Y2hpbmcgdGhlIGRvY3VtZW50YXRpb24gZm9yICJidHJmcyIgZG9lcyBub3QgcmVhbGx5IGdpdmUg
+YSB1c2VyIGFueQo+ID4gY2x1ZSB0aGF0IHRoZSB1c2Ugb2YgQnRyZnMgaXMgZGlzY291cmFnZWQu
+Cj4gPgo+ID4gV2hlcmUgZXhhY3RseSBoYXMgdGhpcyBiZWVuIHJlY29tbWVuZGVkPwo+ID4KPiA+
+IFRoZSBkb2N1bWVudGF0aW9uIGN1cnJlbnRseSBzdGF0ZXM6Cj4gPgo+ID4KPiA+IGh0dHA6Ly9k
+b2NzLmNlcGguY29tL2RvY3MvbWFzdGVyL3JhZG9zL2NvbmZpZ3VyYXRpb24vY2VwaC1jb25mLz9o
+aWdobGlnaHQ9YnRyZnMjb3Nkcwo+ID4KPiA+ICJXZSByZWNvbW1lbmQgdXNpbmcgdGhlIHhmcyBm
+aWxlIHN5c3RlbSBvciB0aGUgYnRyZnMgZmlsZSBzeXN0ZW0gd2hlbgo+ID4gcnVubmluZyBta2Zz
+LiIKPiA+Cj4gPgo+ID4gaHR0cDovL2RvY3MuY2VwaC5jb20vZG9jcy9tYXN0ZXIvcmFkb3MvY29u
+ZmlndXJhdGlvbi9maWxlc3lzdGVtLXJlY29tbWVuZGF0aW9ucy8/aGlnaGxpZ2h0PWJ0cmZzI2Zp
+bGVzeXN0ZW1zCj4gPgo+ID4gImJ0cmZzIGlzIHN0aWxsIHN1cHBvcnRlZCBhbmQgaGFzIGEgY29t
+cGFyYXRpdmVseSBjb21wZWxsaW5nIHNldCBvZgo+ID4gZmVhdHVyZXMsIGJ1dCBiZSBtaW5kZnVs
+IG9mIGl0cyBzdGFiaWxpdHkgYW5kIHN1cHBvcnQgc3RhdHVzIGluIHlvdXIKPiA+IExpbnV4IGRp
+c3RyaWJ1dGlvbi4iCj4gPgo+ID4KPiA+IGh0dHA6Ly9kb2NzLmNlcGguY29tL2RvY3MvbWFzdGVy
+L3N0YXJ0L29zLXJlY29tbWVuZGF0aW9ucy8/aGlnaGxpZ2h0PWJ0cmZzI2NlcGgtZGVwZW5kZW5j
+aWVzCj4gPgo+ID4gIklmIHlvdSB1c2UgdGhlIGJ0cmZzIGZpbGUgc3lzdGVtIHdpdGggQ2VwaCwg
+d2UgcmVjb21tZW5kIHVzaW5nIGEgcmVjZW50Cj4gPiBMaW51eCBrZXJuZWwgKDMuMTQgb3IgbGF0
+ZXIpLiIKPiA+Cj4gPiBBcyBhbiBlbmQgdXNlciwgbm9uZSBvZiB0aGVzZSBzdGF0ZW1lbnRzIHdv
+dWxkIHJlYWxseSBzb3VuZCBhcwo+ID4gcmVjb21tZW5kYXRpb25zICphZ2FpbnN0KiB1c2luZyBC
+dHJmcyB0byBtZS4KPiA+Cj4gPiBJJ20gdGhlcmVmb3JlIGNvbmNlcm5lZCBhYm91dCBqdXN0IGRp
+c2FibGluZyB0aGUgdGVzdHMgcmVsYXRlZCB0bwo+ID4gZmlsZXN0b3JlIG9uIEJ0cmZzIHdoaWxl
+IHN0aWxsIGluY2x1ZGluZyBhbmQgc2hpcHBpbmcgaXQuIFRoaXMgaGFzCj4gPiBwb3RlbnRpYWwg
+dG8gaW50cm9kdWNlIHJlZ3Jlc3Npb25zIHRoYXQgd29uJ3QgZ2V0IGNhdWdodCBhbmQgZml4ZWQu
+Cj4gPiAgCj4gPiA+IDIvIExlYXZlIGJ0cmZzIGluIHRoZSBtaXggZm9yIGpld2VsLCBhbmQgbWFu
+dWFsbHkgdG9sZXJhdGUgYW5kIGZpbHRlciBvdXQKPiA+ID4gdGhlIG9jY2FzaW9uYWwgRU5PU1BD
+IGVycm9ycyB3ZSBzZWUuICAoVGhleSBtYWtlIHRoZSB0ZXN0IHJ1bnMgbm9pc3kgYnV0Cj4gPiA+
+IGFyZSBwcmV0dHkgZWFzeSB0byBpZGVudGlmeS4pCj4gPiA+Cj4gPiA+IElmIHdlIGRvbid0IHN0
+b3AgdGVzdGluZyBmaWxlc3RvcmUgb24gYnRyZnMgbm93LCBJJ20gbm90IHN1cmUgd2hlbiB3ZQo+
+ID4gPiB3b3VsZCBldmVyIGJlIGFibGUgdG8gc3RvcCwgYW5kIHRoYXQncyBwcmV0dHkgY2xlYXJs
+eSBub3Qgc3VzdGFpbmFibGUuCj4gPiA+IERvZXMgdGhhdCBzZWVtIHJlYXNvbmFibGU/ICAoUHJl
+dHR5IHBsZWFzZT8pICAKPiA+Cj4gPiBJZiB5b3Ugd2FudCB0byBnZXQgcmlkIG9mIGZpbGVzdG9y
+ZSBvbiBCdHJmcywgc3RhcnQgYSBwcm9wZXIgZGVwcmVjYXRpb24KPiA+IHByb2Nlc3MgYW5kIGlu
+Zm9ybSB1c2VycyB0aGF0IHN1cHBvcnQgZm9yIGl0IGl0J3MgZ29pbmcgdG8gYmUgcmVtb3ZlZCBp
+bgo+ID4gdGhlIG5lYXIgZnV0dXJlLiBUaGUgZG9jdW1lbnRhdGlvbiBtdXN0IGJlIHVwZGF0ZWQg
+YWNjb3JkaW5nbHkgYW5kIGl0Cj4gPiBtdXN0IGJlIGNsZWFybHkgZW1waGFzaXplZCBpbiB0aGUg
+cmVsZWFzZSBub3Rlcy4KPiA+Cj4gPiBTaW1wbHkgZGlzYWJsaW5nIHRoZSB0ZXN0cyB3aGlsZSBr
+ZWVwaW5nIHRoZSBjb2RlIGluIHRoZSBkaXN0cmlidXRpb24gaXMKPiA+IHNldHRpbmcgdXAgdXNl
+cnMgd2hvIGhhcHBlbiB0byBiZSB1c2luZyBCdHJmcyBmb3IgZmFpbHVyZS4KPiA+Cj4gPiBKdXN0
+IG15IDAuMDLigqwsCj4gPgo+ID4gTGVuego+ID4KPiA+IF9fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fCj4gPiBjZXBoLXVzZXJzIG1haWxpbmcgbGlzdAo+ID4g
+Y2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+ID4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3Rp
+bmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCj4gPiAgCgoKLS0gCkNocmlzdGlhbiBCYWx6ZXIg
+ICAgICAgIE5ldHdvcmsvU3lzdGVtcyBFbmdpbmVlciAgICAgICAgICAgICAgICAKY2hpYmlAZ29s
+LmNvbSAgIAlSYWt1dGVuIENvbW11bmljYXRpb25zCl9fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNA
+bGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVz
+ZXJzLWNlcGguY29tCg==
