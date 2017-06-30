@@ -1,56 +1,59 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: dropping filestore+btrfs testing for luminous
-Date: Fri, 30 Jun 2017 09:17:36 +0100
-Message-ID: <CALe9h7fbRO1bJVf-WGT8HK+tNYEOc2KCvWfMpRTZMKBV0QELBg@mail.gmail.com>
+From: Damien Cassiers <dcs@ewon.biz>
+Subject: RE: dropping filestore+btrfs testing for luminous
+Date: Fri, 30 Jun 2017 09:47:38 +0000
+Message-ID: <DB4PR06MB491866D69D1A12B51B0750DC2D30@DB4PR06MB491.eurprd06.prod.outlook.com>
 References: <alpine.DEB.2.11.1706300314120.3424@piezo.novalocal>
+ <CALe9h7fbRO1bJVf-WGT8HK+tNYEOc2KCvWfMpRTZMKBV0QELBg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:35894 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751787AbdF3IR6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jun 2017 04:17:58 -0400
-Received: by mail-wm0-f42.google.com with SMTP id 62so103078582wmw.1
-        for <ceph-devel@vger.kernel.org>; Fri, 30 Jun 2017 01:17:57 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1706300314120.3424@piezo.novalocal>
+Received: from mail-ve1eur01on0063.outbound.protection.outlook.com ([104.47.1.63]:62912
+        "EHLO EUR01-VE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751710AbdF3Jrl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 30 Jun 2017 05:47:41 -0400
+In-Reply-To: <CALe9h7fbRO1bJVf-WGT8HK+tNYEOc2KCvWfMpRTZMKBV0QELBg@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
+To: John Spray <jspray@redhat.com>, Sage Weil <sweil@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Jun 30, 2017 at 4:21 AM, Sage Weil <sweil@redhat.com> wrote:
-> We're having a series of problems with the valgrind included in xenial[1]
-> that have led us to restrict all valgrind tests to centos nodes.  At teh
-> same time, we're also seeing spurious ENOSPC errors from btrfs on both
-> centos on xenial kernels[2], making trusty the only distro where btrfs
-> works reliably.
->
-> Teuthology doesn't handle this well when it tries to put together the
-> test matrix (we can't test filestore+btrfs+valgrind).
->
-> The easiest thing is to
->
-> 1/ Stop testing filestore+btrfs for luminous onward.  We've recommended
-> against btrfs for a long time and are moving toward bluestore anyway.
-
-+1000
-
-John
-
-> 2/ Leave btrfs in the mix for jewel, and manually tolerate and filter out
-> the occasional ENOSPC errors we see.  (They make the test runs noisy but
-> are pretty easy to identify.)
->
-> If we don't stop testing filestore on btrfs now, I'm not sure when we
-> would ever be able to stop, and that's pretty clearly not sustainable.
-> Does that seem reasonable?  (Pretty please?)
->
-> sage
->
->
-> [1] http://tracker.ceph.com/issues/18126 and http://tracker.ceph.com/issues/20360
-> [2] http://tracker.ceph.com/issues/20169
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SSBoYXZlIG5vdGhpbmcgdG8gZG8gd2l0aCB0aGlzIGlzc3VlLg0KQ291bGQgeW91IHBsZWFzZSBy
+ZW1vdmUgbWUgZnJvbSB5b3VyIGVtYWlsIGV4Y2hhbmdlcy4NClRoYW5rIHlvdSANCg0KLS0tLS1P
+cmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwu
+b3JnIFttYWlsdG86Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBP
+ZiBKb2huIFNwcmF5DQpTZW50OiB2ZW5kcmVkaSAzMCBqdWluIDIwMTcgMTA6MTgNClRvOiBTYWdl
+IFdlaWwgPHN3ZWlsQHJlZGhhdC5jb20+DQpDYzogQ2VwaCBEZXZlbG9wbWVudCA8Y2VwaC1kZXZl
+bEB2Z2VyLmtlcm5lbC5vcmc+DQpTdWJqZWN0OiBSZTogZHJvcHBpbmcgZmlsZXN0b3JlK2J0cmZz
+IHRlc3RpbmcgZm9yIGx1bWlub3VzDQoNCk9uIEZyaSwgSnVuIDMwLCAyMDE3IGF0IDQ6MjEgQU0s
+IFNhZ2UgV2VpbCA8c3dlaWxAcmVkaGF0LmNvbT4gd3JvdGU6DQo+IFdlJ3JlIGhhdmluZyBhIHNl
+cmllcyBvZiBwcm9ibGVtcyB3aXRoIHRoZSB2YWxncmluZCBpbmNsdWRlZCBpbiANCj4geGVuaWFs
+WzFdIHRoYXQgaGF2ZSBsZWQgdXMgdG8gcmVzdHJpY3QgYWxsIHZhbGdyaW5kIHRlc3RzIHRvIGNl
+bnRvcyANCj4gbm9kZXMuICBBdCB0ZWggc2FtZSB0aW1lLCB3ZSdyZSBhbHNvIHNlZWluZyBzcHVy
+aW91cyBFTk9TUEMgZXJyb3JzIA0KPiBmcm9tIGJ0cmZzIG9uIGJvdGggY2VudG9zIG9uIHhlbmlh
+bCBrZXJuZWxzWzJdLCBtYWtpbmcgdHJ1c3R5IHRoZSBvbmx5IA0KPiBkaXN0cm8gd2hlcmUgYnRy
+ZnMgd29ya3MgcmVsaWFibHkuDQo+DQo+IFRldXRob2xvZ3kgZG9lc24ndCBoYW5kbGUgdGhpcyB3
+ZWxsIHdoZW4gaXQgdHJpZXMgdG8gcHV0IHRvZ2V0aGVyIHRoZSANCj4gdGVzdCBtYXRyaXggKHdl
+IGNhbid0IHRlc3QgZmlsZXN0b3JlK2J0cmZzK3ZhbGdyaW5kKS4NCj4NCj4gVGhlIGVhc2llc3Qg
+dGhpbmcgaXMgdG8NCj4NCj4gMS8gU3RvcCB0ZXN0aW5nIGZpbGVzdG9yZStidHJmcyBmb3IgbHVt
+aW5vdXMgb253YXJkLiAgV2UndmUgDQo+IHJlY29tbWVuZGVkIGFnYWluc3QgYnRyZnMgZm9yIGEg
+bG9uZyB0aW1lIGFuZCBhcmUgbW92aW5nIHRvd2FyZCBibHVlc3RvcmUgYW55d2F5Lg0KDQorMTAw
+MA0KDQpKb2huDQoNCj4gMi8gTGVhdmUgYnRyZnMgaW4gdGhlIG1peCBmb3IgamV3ZWwsIGFuZCBt
+YW51YWxseSB0b2xlcmF0ZSBhbmQgZmlsdGVyIA0KPiBvdXQgdGhlIG9jY2FzaW9uYWwgRU5PU1BD
+IGVycm9ycyB3ZSBzZWUuICAoVGhleSBtYWtlIHRoZSB0ZXN0IHJ1bnMgDQo+IG5vaXN5IGJ1dCBh
+cmUgcHJldHR5IGVhc3kgdG8gaWRlbnRpZnkuKQ0KPg0KPiBJZiB3ZSBkb24ndCBzdG9wIHRlc3Rp
+bmcgZmlsZXN0b3JlIG9uIGJ0cmZzIG5vdywgSSdtIG5vdCBzdXJlIHdoZW4gd2UgDQo+IHdvdWxk
+IGV2ZXIgYmUgYWJsZSB0byBzdG9wLCBhbmQgdGhhdCdzIHByZXR0eSBjbGVhcmx5IG5vdCBzdXN0
+YWluYWJsZS4NCj4gRG9lcyB0aGF0IHNlZW0gcmVhc29uYWJsZT8gIChQcmV0dHkgcGxlYXNlPykN
+Cj4NCj4gc2FnZQ0KPg0KPg0KPiBbMV0gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzE4
+MTI2IGFuZCANCj4gaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzIwMzYwDQo+IFsyXSBo
+dHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvMjAxNjkNCj4gLS0NCj4gVG8gdW5zdWJzY3Jp
+YmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwi
+IA0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9y
+ZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpv
+cmRvbW8taW5mby5odG1sDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQg
+dGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2Fn
+ZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0
+dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
