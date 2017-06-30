@@ -1,37 +1,37 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: dev build issues
-Date: Fri, 30 Jun 2017 16:39:13 -0400
-Message-ID: <CAC-Np1wO-S1B2O_a+HvY=-TqO4oOkq-pVpaZ9DqGy5HcYBW74g@mail.gmail.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: "Unix Domain socket path too long" failures in Jenkins make check
+Date: Fri, 30 Jun 2017 23:08:02 +0200
+Message-ID: <bf9dcc9d-3c9e-03a5-1be2-f601bed3a18c@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f179.google.com ([209.85.128.179]:35825 "EHLO
-        mail-wr0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751982AbdF3UjP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 30 Jun 2017 16:39:15 -0400
-Received: by mail-wr0-f179.google.com with SMTP id k67so208847527wrc.2
-        for <ceph-devel@vger.kernel.org>; Fri, 30 Jun 2017 13:39:14 -0700 (PDT)
+Received: from mx2.suse.de ([195.135.220.15]:50576 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752995AbdF3VIE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 30 Jun 2017 17:08:04 -0400
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 6F4ABAAB6
+        for <ceph-devel@vger.kernel.org>; Fri, 30 Jun 2017 21:08:03 +0000 (UTC)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-We are experiencing DNS issues where some of our build nodes can't
-resolve other services in the system.
+Hi Ceph!
 
-This means that some builds will just not complete and will appear as
-'started' (yellow) in shaman.
+Now that 10.2.8 is finally in QE, I had planned to turn my attention to 
+kraken 11.2.1. The first task is to get the backport PRs through "make 
+check". This is proving more difficult than usual because most of the 
+time the make check test fails due to the "Unix Domain socket path too 
+long" error. This happens in jewel PRs, too, but the incidence in kraken 
+PRs seems much higher.
 
-We are going to try to get these build nodes to resolve more robustly,
-in the meantime you can trigger another build with an amend to your
-last commit and pushing, or rebasing and pushing to your branch in
-ceph-ci.git
+Does the CI team have statistics on how many make check jobs are failing 
+due to this bug?
 
-The reason why it is not immediately apparent that the build has
-failed is because the build node is in charge of updating the status,
-but since it can't resolve shaman.ceph.com the build in shaman appears
-to stay in 'building' state (yellow)
+Also, is my understanding correct that there is no way to get Jenkins to 
+shorten the path?
 
-These fail fairly quickly, so for now, please check after a few
-minutes to re-trigger if the build didn't go through.
-
--Alfredo
+Thanks,
+Nathan
