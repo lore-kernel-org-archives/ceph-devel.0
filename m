@@ -1,39 +1,57 @@
-From: Mohamad Gebai <mgebai@suse.com>
-Subject: Re: Bug 19198: Double the memory caused by page alignment
-Date: Fri, 30 Jun 2017 09:41:43 -0400
-Message-ID: <214435da-9714-7929-00a0-3e9235c6d833@suse.com>
-References: <39ba1efe-0c32-249a-8bea-183a1eab13b2@suse.com>
- <alpine.DEB.2.11.1706291920450.3424@piezo.novalocal>
- <3822b2e0-69b2-1213-ff9e-bb5f576dc43f@suse.com>
- <alpine.DEB.2.11.1706292117250.3424@piezo.novalocal>
- <ff5f4540-a99c-a7ab-db5c-02ee3e289f0d@suse.com>
- <72854a7f-2441-b940-c10f-b71cb65600d6@mirantis.com>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: Re: Are we ready for 10.2.8 - core
+Date: Fri, 30 Jun 2017 07:38:44 -0700
+Message-ID: <d9a21f19-676c-c529-4d16-630441c48519@redhat.com>
+References: <9e7edca0-d56a-2315-9098-94dab50db691@suse.cz>
+ <e2a46e29-a874-6a7d-40f1-5836da7a15db@redhat.com>
+ <6663b229-6570-1d2c-1c2f-2ebf5105173f@suse.cz>
+ <9cade684-1f16-487d-d9fc-057522db1dee@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:54080 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751796AbdF3Nl6 (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Fri, 30 Jun 2017 09:41:58 -0400
-In-Reply-To: <72854a7f-2441-b940-c10f-b71cb65600d6@mirantis.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:56362 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751689AbdF3Oiq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 30 Jun 2017 10:38:46 -0400
+In-Reply-To: <9cade684-1f16-487d-d9fc-057522db1dee@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>, Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Igor,
+On 06/30/2017 05:21 AM, Nathan Cutler wrote:
+> Hi again Josh:
+>
+> Here comes the recap of 10.2.8 status. All requested PRs have been
+> merged, so I ran a "rados" suite and an "upgrade/hammer-x" suite. There
+> were some failures, but most were obvious infrastructure noise and
+> disappeared on re-run. There were also two failures that stood out and
+> seemed like they might be real bugs:
+>
+> [1] rados issue: http://tracker.ceph.com/issues/20449
+> [2] upgrade issue: http://tracker.ceph.com/issues/13381
+>
+> Regarding [1], my initial analysis was wrong. The real cause of the
+> failure is a transient gevent/greenlet timeout; happens in about 40% of
+> the runs.
+>
+> Regarding [2], Sage analyzed the initial failure in the tracker. I
+> re-ran the test on both smithi and vps with the following results:
+>
+> * on vps, both jobs passed
+> * on smithi, one job passed and the other failed. However, the failure
+> was for a different reason ("ceph-objectstore-tool: exp list-pgs failure
+> with status 1") - see
+> http://pulpito.front.sepia.ceph.com/smithfarm-2017-06-30_09:08:18-upgrade:hammer-x-wip-jewel-backports-distro-basic-smithi/
+>
+> * http://tracker.ceph.com/issues/13381 was not reproduced
+>
+> What other testing do you think is needed before we send 10.2.8 to QE?
 
-On 06/30/2017 09:32 AM, Igor Fedotov wrote:
-> AFAIR I observed the issue for tcmalloc as well. There is a
-> corresponding note in the ticket..
+What you've run already looks sufficient - I was worried about 13381
+before, but it does not seem related to the 10.2.8 backports at this
+point - just a pre-existing rare race. So I'd say it's ready for QE.
 
-Yes I did see the note, but I wasn't able to reproduce the issue with
-Ceph so I couldn't confirm the status with regard to tcmalloc + Ceph.
-I'm about to try the workload that Sage suggested. If you have some
-instructions on how to reproduce the problem, it would be great!
-
-Mohamad
+Thanks!
+Josh
 
