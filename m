@@ -1,107 +1,42 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: RBD rights acting up.
-Date: Mon, 3 Jul 2017 21:24:03 +0200
-Message-ID: <536f0dd0-41f4-4306-f393-30caffe2375b@digiware.nl>
-References: <066859a0-9ca6-613f-e9de-a01a430e7efa@digiware.nl>
- <CAJ4mKGb=6bMGX2ER2phDDy4g4hsdb2pdW21zuuA2+bge-OUiWg@mail.gmail.com>
+From: Patrick Donnelly <pdonnell@redhat.com>
+Subject: Re: "Unix Domain socket path too long" failures in Jenkins make check
+Date: Mon, 3 Jul 2017 12:35:54 -0700
+Message-ID: <CA+2bHPb4Z4naH-uBf_AFdkUMse78cWEv+oVY9QQQJYZuvBFjYw@mail.gmail.com>
+References: <bf9dcc9d-3c9e-03a5-1be2-f601bed3a18c@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:34568 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751800AbdGCTYB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 3 Jul 2017 15:24:01 -0400
-In-Reply-To: <CAJ4mKGb=6bMGX2ER2phDDy4g4hsdb2pdW21zuuA2+bge-OUiWg@mail.gmail.com>
-Content-Language: nl
+Received: from mail-qt0-f169.google.com ([209.85.216.169]:36269 "EHLO
+        mail-qt0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753422AbdGCTgZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Jul 2017 15:36:25 -0400
+Received: by mail-qt0-f169.google.com with SMTP id i2so150816602qta.3
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Jul 2017 12:36:25 -0700 (PDT)
+In-Reply-To: <bf9dcc9d-3c9e-03a5-1be2-f601bed3a18c@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+On Fri, Jun 30, 2017 at 2:08 PM, Nathan Cutler <ncutler@suse.cz> wrote:
+> Hi Ceph!
+>
+> Now that 10.2.8 is finally in QE, I had planned to turn my attention to
+> kraken 11.2.1. The first task is to get the backport PRs through "make
+> check". This is proving more difficult than usual because most of the time
+> the make check test fails due to the "Unix Domain socket path too long"
+> error. This happens in jewel PRs, too, but the incidence in kraken PRs seems
+> much higher.
+>
+> Does the CI team have statistics on how many make check jobs are failing due
+> to this bug?
+>
+> Also, is my understanding correct that there is no way to get Jenkins to
+> shorten the path?
 
+I have a PR to fix short path restrictions on admin sockets once and for all:
 
-Op 3-7-2017 om 20:00 schreef Gregory Farnum:
-> On Mon, Jul 3, 2017 at 10:51 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> Hi,
->>
->> I do not seem to have luck with working with the rights structure in
->> Ceph. But please help me out with my ignorance....
->>
->> I have setup the FreeBSD cluster running in 5 ceph jails/vms. That works
->> as a charm, and I can use ceph-fuse to mount a FS and write/read/... on
->> it when I'm outside the ceph jails. For that I copies ceph.conf and
->> ceph.client.admin.keyring to the current system I would like to connect
->> with.
->>
->> Also things like ceph -s and rados commands just work as a charm.
->>
->> So the next check is to test rbd-ggate, the freebsd variant to map
->> rbd-images to a device.... But then I start to get things like:
->> ----
->> # rbd info rbd/testrbdggate45846
->> 2017-07-03 19:41:00.562567 80ee53b00 -1 librbd::image::OpenRequest:
->> failed to retrieve create_timestamp: (1) Operation not permitted
->> 2017-07-03 19:41:00.562685 80f8b2000 -1 librbd::ImageState: 0x80ef23640
->> failed to open image: (1) Operation not permitted
->> rbd: error opening image testrbdggate45846: (1) Operation not permitted
->> ----
->>
->> Which is definitly a rights issue, because I can do that without much
->> trouble on one of the Ceph servers:
->> ----
->> # jexec ceph_0 rbd info rbd/testrbdggate45846
->> rbd image 'testrbdggate45846':
->>          size 65536 kB in 16 objects
->>          order 22 (4096 kB objects)
->>          block_name_prefix: rbd_data.10e3c0b1daf
->>          format: 2
->>          features: layering, exclusive-lock, object-map, fast-diff,
->> deep-flatten
->>          flags:
->> ----
->>
->> So why does this work from a server that is actually running
->> mon/osd/mgr, but not from a server that has the same
->> ceph.client.admin.keyring:
->> [client.admin]
->>          key = AQBUXllZMNZSARAAsSexLBkWJQS6vHi9u3rrSA==
->>          auid = 0
->>          caps mds = "allow *"
->>          caps mgr = "allow *"
->>          caps mon = "allow *"
->>          caps osd = "allow *"
->>
->> and ceph auth list:
->> installed auth entries:
->> client.admin
->>          key: AQBUXllZMNZSARAAsSexLBkWJQS6vHi9u3rrSA==
->>          auid: 0
->>          caps: [mds] allow *
->>          caps: [mgr] allow *
->>          caps: [mon] allow *
->>          caps: [osd] allow *
+https://github.com/ceph/ceph/pull/16087
 
->> client.ggate
->>          key: AQANP1pZGNDmNRAAVb8NRXUMmWYh9i1nju6rYA==
->>          caps: [mon] allow r
->>          caps: [osd] allow class-read object_prefix rbd_children, allow
->> rwx pool=rbd
-> Presumably ggate is using this client. I'm not sure off-hand what
-> permissions RBD needs, but I presume it needs class-write in order to
-> create new images (and they probably won't be prefixed with
-> rbd_children?).
-
-Well,  client.ggate was an attempt to mirror what we have in our working 
-OpenStack ceph.
-
-But my major concern is that it all works on a host that is actually 
-part of the cluster (as admin),
-but it does not work for all rbd commands once I start working on a 
-separate host.
-Ceph and rados are oke, but certain rbs commands fail.
-
-So why doesn't it work as admin on an 'external'  host.
-
---WjW
-
+-- 
+Patrick Donnelly
