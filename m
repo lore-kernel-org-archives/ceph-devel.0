@@ -1,42 +1,85 @@
-From: Mohamad Gebai <mgebai@suse.com>
-Subject: Re: Bug 19198: Double the memory caused by page alignment
-Date: Tue, 4 Jul 2017 05:52:48 -0400
-Message-ID: <d058e3ee-256d-5acb-3392-6bb095a6ab73@suse.com>
-References: <39ba1efe-0c32-249a-8bea-183a1eab13b2@suse.com>
- <alpine.DEB.2.11.1706291920450.3424@piezo.novalocal>
- <3822b2e0-69b2-1213-ff9e-bb5f576dc43f@suse.com>
- <alpine.DEB.2.11.1706292117250.3424@piezo.novalocal>
- <ff5f4540-a99c-a7ab-db5c-02ee3e289f0d@suse.com>
- <72854a7f-2441-b940-c10f-b71cb65600d6@mirantis.com>
- <214435da-9714-7929-00a0-3e9235c6d833@suse.com>
- <e248a9c3-052a-cd77-1c77-cb0ec3e812ee@mirantis.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: Optimization Analysis Tool
+Date: Tue, 4 Jul 2017 20:14:58 +0800
+Message-ID: <CAJE9aOOy2yvD=kHKbsvyOEsVdZfO7whPtkpqkpYtSPGdySW49Q@mail.gmail.com>
+References: <CAAXqJ+qsutkbJZTCRbvR=yuNjVX5n_Vk9V=XEBUa8dmKefhEzA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:43666 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751910AbdGDJwy (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Tue, 4 Jul 2017 05:52:54 -0400
-In-Reply-To: <e248a9c3-052a-cd77-1c77-cb0ec3e812ee@mirantis.com>
-Content-Language: en-US
+Received: from mail-vk0-f52.google.com ([209.85.213.52]:33395 "EHLO
+        mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752052AbdGDMPA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Jul 2017 08:15:00 -0400
+Received: by mail-vk0-f52.google.com with SMTP id r126so110112891vkg.0
+        for <ceph-devel@vger.kernel.org>; Tue, 04 Jul 2017 05:15:00 -0700 (PDT)
+In-Reply-To: <CAAXqJ+qsutkbJZTCRbvR=yuNjVX5n_Vk9V=XEBUa8dmKefhEzA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Igor Fedotov <ifedotov@mirantis.com>, Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Spandan Kumar Sahu <spandankumarsahu@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
 
-
-On 06/30/2017 10:55 AM, Igor Fedotov wrote:
+On Tue, Jul 4, 2017 at 1:20 AM, Spandan Kumar Sahu
+<spandankumarsahu@gmail.com> wrote:
+> Hi everyone.
 >
-> But AFAIR the scenario was pretty trivial - build Ceph with ALLOCATOR
-> configured to tcmalloc and run an UT with the diff from the ticket.
+> As a part of GSoC, I will be implementing a tool, to analyse the need
+> of reweighting devices in the crushmap, and assign a score to the
+> reweight-by-utilisation algorithm. Please correct me where I am wrong,
+> and any other suggestions are more than welcome.
 >
+> The tool shall be a python module, in /src/pybind/mgr and it will use
+> Ceph's current python mgr module to get "pg_summary".
+>
+> The parameters that I plan to use are:
+> * The devices utilisation
+>   The number of over-filled devices along with the the amount of
+> over-filled%, will generate a score, using t-distribution. The reason,
+> I shall consider only over-filled devices is because one 10%
+> underfilled with 5 2% overfilled devices, is arguably a better
+> situation than one 10% overfilled with 5 2% underfilled devices. The
+> data for expected distribution after optimization can be obtained from
+> python-crush module.
 
-But the unit tests aren't linked against libtcmalloc.so, and therefore
-aren't using tcmalloc, right? Do I have to set LD_PRELOAD to force ctest
-to use tcmalloc? If I do set LD_PRELOAD, I don't see the memory problem
-anymore.
+i assume the utilization is the ending status of the reweight.
 
-Mohamad
+>
+> * Expected amount of data flow over the network
+>   A score for it can be predicted, using the number of PGs that will
+> be swapped during optimization, which can be found in python-crush[1].
+> However, the number of PGs, might not give a better idea about the
+> amount of data flow, over the network. Hence, using python mgr-module,
+> and obtaining pgmap before and after each optimization step, will give
+> the amount of data flow in the network.
+>
+> * Time for optimization process
+>  This will simply keep a note of the time taken to produce an
+> optimized crushmap from the existing one.
 
+please note, in practice, administrator might want to reweight the cluster in a
+iterative manner, say, change the weight with a smaller step size and multiple
+steps, instead of setting the new weights in a single shot, to
+minimize the impact
+to the production.
+
+>
+> I would be using data from python-crush[2] and from pg_map (in json
+> format) obtained by sending commands to python mgr module, to gather
+> the values for the required parameters. A weighted combination of this
+> shall determine the score for the optimization algorithm in place.
+>
+> My initial target is to output the results into a file. I would try to
+> merge it with the dashboard plugin in mgr module, after the
+> implementing the tool at first.
+>
+> [1]: http://libcrush.org/main/python-crush/blob/master/tests/test_optimize.py#L460
+> [2]:http://libcrush.org/main/python-crush/blob/master/
+>
+> --
+> Spandan Kumar Sahu
+> IIT Kharagpur
+
+
+
+-- 
+Regards
+Kefu Chai
