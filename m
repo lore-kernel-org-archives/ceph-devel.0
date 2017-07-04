@@ -1,56 +1,107 @@
-From: Joao Eduardo Luis <joao@suse.de>
-Subject: Re: ceph-mon leader election problem, should it be improved ?
-Date: Tue, 4 Jul 2017 14:25:06 +0100
-Message-ID: <cfb3c139-7423-644f-ce4c-00d55cce5756@suse.de>
-References: <CAGOEmcO6L2j04NEx5U_wY0WUNnzowW1JkcqKbmtewm6f4rC1PQ@mail.gmail.com>
+From: Lionel Bouton <lionel-subscription-WTamNBQcZIx7tPAFqOLdPg@public.gmane.org>
+Subject: Re: dropping filestore+btrfs testing for luminous
+Date: Tue, 4 Jul 2017 18:54:49 +0200
+Message-ID: <9167c478-bb02-ca72-d00f-798d4718641f@bouton.name>
+References: <alpine.DEB.2.11.1706300314120.3424@piezo.novalocal>
+	<c4cf8858-6c29-4ec7-7ffa-479781258569@grimmer.com>
+	<alpine.DEB.2.11.1706301642570.3424@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:34646 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751902AbdGDNZJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 4 Jul 2017 09:25:09 -0400
-In-Reply-To: <CAGOEmcO6L2j04NEx5U_wY0WUNnzowW1JkcqKbmtewm6f4rC1PQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Z Will <zhao6305@gmail.com>, ceph-devel@vger.kernel.org, Ceph Users <ceph-users@lists.ceph.com>, Sage Weil <sage@newdream.net>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1706301642570.3424-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, Lenz Grimmer <lenz-L588LILoNhJBDgjK7y7TUQ@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 07/04/2017 06:57 AM, Z Will wrote:
-> Hi:
->    I am testing ceph-mon brain split . I have read the code . If I
-> understand it right , I know it won't be brain split. But I think
-> there is still another problem. My ceph version is 0.94.10. And here
-> is my test detail :
->
-> 3 ceph-mons , there ranks are 0, 1, 2 respectively.I stop the rank 1
-> mon , and use iptables to block the communication between mon 0 and
-> mon 1. When the cluster is stable, start mon.1 .  I found the 3
-> monitors will all can not work well. They are all trying to call  new
-> leader  election . This means the cluster can't work anymore.
->
-> Here is my analysis. Because mon will always respond to leader
-> election message, so , in my test, communication between  mon.0 and
-> mon.1 is blocked , so mon.1 will always try to be leader, because it
-> will always see mon.2, and it should win over mon.2. Mon.0 should
-> always win over mon.2. But mon.2 will always responsd to the election
-> message issued by mon.1, so this loop will never end. Am I right ?
->
-> This should be a problem? Or is it  was just designed like this , and
-> should be handled by human ?
-
-This is a known behaviour, quite annoying, but easily identifiable by 
-having the same monitor constantly calling an election and usually 
-timing out because the peon did not defer to it.
-
-In a way, the elector algorithm does what it is intended to. Solving 
-this corner case would be nice, but I don't think there's a good way to 
-solve it. We may be able to presume a monitor is in trouble during the 
-probe phase, to disqualify a given monitor from the election, but in the 
-end this is a network issue that may be transient or unpredictable and 
-there's only so much we can account for.
-
-Dealing with it automatically would be nice, but I think, thus far, the 
-easiest way to address this particular issue is human intervention.
-
-   -Joao
+TGUgMzAvMDYvMjAxNyDDoCAxODo0OCwgU2FnZSBXZWlsIGEgw6ljcml0IDoKPiBPbiBGcmksIDMw
+IEp1biAyMDE3LCBMZW56IEdyaW1tZXIgd3JvdGU6Cj4+IEhpIFNhZ2UsCj4+Cj4+IE9uIDA2LzMw
+LzIwMTcgMDU6MjEgQU0sIFNhZ2UgV2VpbCB3cm90ZToKPj4KPj4+IFRoZSBlYXNpZXN0IHRoaW5n
+IGlzIHRvCj4+Pgo+Pj4gMS8gU3RvcCB0ZXN0aW5nIGZpbGVzdG9yZStidHJmcyBmb3IgbHVtaW5v
+dXMgb253YXJkLiAgV2UndmUgcmVjb21tZW5kZWQgCj4+PiBhZ2FpbnN0IGJ0cmZzIGZvciBhIGxv
+bmcgdGltZSBhbmQgYXJlIG1vdmluZyB0b3dhcmQgYmx1ZXN0b3JlIGFueXdheS4KPj4gU2VhcmNo
+aW5nIHRoZSBkb2N1bWVudGF0aW9uIGZvciAiYnRyZnMiIGRvZXMgbm90IHJlYWxseSBnaXZlIGEg
+dXNlciBhbnkKPj4gY2x1ZSB0aGF0IHRoZSB1c2Ugb2YgQnRyZnMgaXMgZGlzY291cmFnZWQuCj4+
+Cj4+IFdoZXJlIGV4YWN0bHkgaGFzIHRoaXMgYmVlbiByZWNvbW1lbmRlZD8KPj4KPj4gVGhlIGRv
+Y3VtZW50YXRpb24gY3VycmVudGx5IHN0YXRlczoKPj4KPj4gaHR0cDovL2RvY3MuY2VwaC5jb20v
+ZG9jcy9tYXN0ZXIvcmFkb3MvY29uZmlndXJhdGlvbi9jZXBoLWNvbmYvP2hpZ2hsaWdodD1idHJm
+cyNvc2RzCj4+Cj4+ICJXZSByZWNvbW1lbmQgdXNpbmcgdGhlIHhmcyBmaWxlIHN5c3RlbSBvciB0
+aGUgYnRyZnMgZmlsZSBzeXN0ZW0gd2hlbgo+PiBydW5uaW5nIG1rZnMuIgo+Pgo+PiBodHRwOi8v
+ZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rlci9yYWRvcy9jb25maWd1cmF0aW9uL2ZpbGVzeXN0ZW0t
+cmVjb21tZW5kYXRpb25zLz9oaWdobGlnaHQ9YnRyZnMjZmlsZXN5c3RlbXMKPj4KPj4gImJ0cmZz
+IGlzIHN0aWxsIHN1cHBvcnRlZCBhbmQgaGFzIGEgY29tcGFyYXRpdmVseSBjb21wZWxsaW5nIHNl
+dCBvZgo+PiBmZWF0dXJlcywgYnV0IGJlIG1pbmRmdWwgb2YgaXRzIHN0YWJpbGl0eSBhbmQgc3Vw
+cG9ydCBzdGF0dXMgaW4geW91cgo+PiBMaW51eCBkaXN0cmlidXRpb24uIgo+Pgo+PiBodHRwOi8v
+ZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rlci9zdGFydC9vcy1yZWNvbW1lbmRhdGlvbnMvP2hpZ2hs
+aWdodD1idHJmcyNjZXBoLWRlcGVuZGVuY2llcwo+Pgo+PiAiSWYgeW91IHVzZSB0aGUgYnRyZnMg
+ZmlsZSBzeXN0ZW0gd2l0aCBDZXBoLCB3ZSByZWNvbW1lbmQgdXNpbmcgYSByZWNlbnQKPj4gTGlu
+dXgga2VybmVsICgzLjE0IG9yIGxhdGVyKS4iCj4+Cj4+IEFzIGFuIGVuZCB1c2VyLCBub25lIG9m
+IHRoZXNlIHN0YXRlbWVudHMgd291bGQgcmVhbGx5IHNvdW5kIGFzCj4+IHJlY29tbWVuZGF0aW9u
+cyAqYWdhaW5zdCogdXNpbmcgQnRyZnMgdG8gbWUuCj4+Cj4+IEknbSB0aGVyZWZvcmUgY29uY2Vy
+bmVkIGFib3V0IGp1c3QgZGlzYWJsaW5nIHRoZSB0ZXN0cyByZWxhdGVkIHRvCj4+IGZpbGVzdG9y
+ZSBvbiBCdHJmcyB3aGlsZSBzdGlsbCBpbmNsdWRpbmcgYW5kIHNoaXBwaW5nIGl0LiBUaGlzIGhh
+cwo+PiBwb3RlbnRpYWwgdG8gaW50cm9kdWNlIHJlZ3Jlc3Npb25zIHRoYXQgd29uJ3QgZ2V0IGNh
+dWdodCBhbmQgZml4ZWQuCj4gQWgsIGNyYXAuICBUaGlzIGlzIHdoYXQgaGFwcGVucyB3aGVuIGRl
+dnMgZG9uJ3QgcmVhZCB0aGVpciBvd24gCj4gZG9jdW1ldG5hdGlvbi4gIEkgcmVjb21tZW5kIGFn
+YWluc3QgYnRyZnMgZXZlcnkgdGltZSBpdCBldmVyIGNvbWVzIHVwLCB0aGUgCj4gZG93bnN0cmVh
+bSBkaXN0cmlidXRpb25zIGFsbCBzdXBwb3J0IG9ubHkgeGZzLCBidXQgeWVzLCBpdCBsb29rcyBs
+aWtlIHRoZSAKPiBkb2NzIG5ldmVyIGdvdCB1cGRhdGVkLi4uIGRlc3BpdGUgdGhlIHhmcyBmb2N1
+cyBiZWluZyA1aXNoIHllYXJzIG9sZCBub3cuCj4KPiBJJ2xsIHN1Ym1pdCBhIFBSIHRvIGNsZWFu
+IHRoaXMgdXAsIGJ1dAo+ICAKPj4+IDIvIExlYXZlIGJ0cmZzIGluIHRoZSBtaXggZm9yIGpld2Vs
+LCBhbmQgbWFudWFsbHkgdG9sZXJhdGUgYW5kIGZpbHRlciBvdXQgCj4+PiB0aGUgb2NjYXNpb25h
+bCBFTk9TUEMgZXJyb3JzIHdlIHNlZS4gIChUaGV5IG1ha2UgdGhlIHRlc3QgcnVucyBub2lzeSBi
+dXQgCj4+PiBhcmUgcHJldHR5IGVhc3kgdG8gaWRlbnRpZnkuKQo+Pj4KPj4+IElmIHdlIGRvbid0
+IHN0b3AgdGVzdGluZyBmaWxlc3RvcmUgb24gYnRyZnMgbm93LCBJJ20gbm90IHN1cmUgd2hlbiB3
+ZSAKPj4+IHdvdWxkIGV2ZXIgYmUgYWJsZSB0byBzdG9wLCBhbmQgdGhhdCdzIHByZXR0eSBjbGVh
+cmx5IG5vdCBzdXN0YWluYWJsZS4KPj4+IERvZXMgdGhhdCBzZWVtIHJlYXNvbmFibGU/ICAoUHJl
+dHR5IHBsZWFzZT8pCj4+IElmIHlvdSB3YW50IHRvIGdldCByaWQgb2YgZmlsZXN0b3JlIG9uIEJ0
+cmZzLCBzdGFydCBhIHByb3BlciBkZXByZWNhdGlvbgo+PiBwcm9jZXNzIGFuZCBpbmZvcm0gdXNl
+cnMgdGhhdCBzdXBwb3J0IGZvciBpdCBpdCdzIGdvaW5nIHRvIGJlIHJlbW92ZWQgaW4KPj4gdGhl
+IG5lYXIgZnV0dXJlLiBUaGUgZG9jdW1lbnRhdGlvbiBtdXN0IGJlIHVwZGF0ZWQgYWNjb3JkaW5n
+bHkgYW5kIGl0Cj4+IG11c3QgYmUgY2xlYXJseSBlbXBoYXNpemVkIGluIHRoZSByZWxlYXNlIG5v
+dGVzLgo+Pgo+PiBTaW1wbHkgZGlzYWJsaW5nIHRoZSB0ZXN0cyB3aGlsZSBrZWVwaW5nIHRoZSBj
+b2RlIGluIHRoZSBkaXN0cmlidXRpb24gaXMKPj4gc2V0dGluZyB1cCB1c2VycyB3aG8gaGFwcGVu
+IHRvIGJlIHVzaW5nIEJ0cmZzIGZvciBmYWlsdXJlLgo+IEkgZG9uJ3QgdGhpbmsgd2UgY2FuIHdh
+aXQgKmFub3RoZXIqIGN5Y2xlICh5ZWFyKSB0byBzdG9wIHRlc3RpbmcgdGhpcy4KPgo+IFdlIGNh
+biwgaG93ZXZlciwKPgo+ICAtIHByb21pbmVudGx5IGZlYXR1cmUgdGhpcyBpbiB0aGUgbHVtaW5v
+dXMgcmVsZWFzZSBub3RlcywgYW5kCj4gIC0gcmVxdWlyZSB0aGUgJ2VuYWJsZSBleHBlcmltZW50
+YWwgdW5yZWNvdmVyYWJsZSBkYXRhIGNvcnJ1cHRpbmcgZmVhdHVyZXMgPQo+IGJ0cmZzJyBpbiBv
+cmRlciB0byB1c2UgaXQsIHNvIHRoYXQgdXNlcnMgYXJlIGV4cGxpY2l0bHkgb3B0aW5nIGluIHRv
+IAo+IGx1bWlub3VzK2J0cmZzIHRlcnJpdG9yeS4KPgo+IFRoZSBvbmx5IGdvb2QoaXNoKSBuZXdz
+IGlzIHRoYXQgd2UgYXJlbid0IHRvdWNoaW5nIEZpbGVTdG9yZSBpZiB3ZSBjYW4gCj4gaGVscCBp
+dCwgc28gaXQgbGVzcyBsaWtlbHkgdG8gcmVncmVzcyB0aGFuIG90aGVyIHRoaW5ncy4gIEFuZCB3
+ZSdsbCAKPiBjb250aW51ZSB0ZXN0aW5nIGZpbGVzdG9yZStidHJmcyBvbiBqZXdlbCBmb3Igc29t
+ZSB0aW1lLgo+Cj4gSXMgdGhhdCBnb29kIGVub3VnaD8KCk5vdCBzdXJlIGhvdyB3ZSB3aWxsIGhh
+bmRsZSB0aGUgdHJhbnNpdGlvbi4gSXMgYmx1ZXN0b3JlIGNvbnNpZGVyZWQKc3RhYmxlIGluIEpl
+d2VsID8gVGhlbiBvdXIgY3VycmVudCBjbHVzdGVycyAocmVjZW50bHkgbWlncmF0ZWQgZnJvbQpG
+aXJlZmx5IHRvIEhhbW1lcikgd2lsbCBoYXZlIHN1cHBvcnQgZm9yIGJvdGggQlRSRlMrRmlsZXN0
+b3JlIGFuZApCbHVlc3RvcmUgd2hlbiB0aGUgbmV4dCB1cGdyYWRlIHRha2VzIHBsYWNlLiBJZiBC
+bHVlc3RvcmUgaXMgb25seQpjb25zaWRlcmVkIHN0YWJsZSBvbiBMdW1pbm91cyBJIGRvbid0IHNl
+ZSBob3cgd2UgY2FuIG1hbmFnZSB0aGUKdHJhbnNpdGlvbiBlYXNpbHkuIFRoZSBvbmx5IHBhdGgg
+SSBzZWUgaXMgdG8gOgotIG1pZ3JhdGUgdG8gWEZTK2ZpbGVzdG9yZSB3aXRoIEpld2VsICh3aGlj
+aCB3aWxsIG5vdCBvbmx5IHRha2UgdGltZSBidXQKd2lsbCBiZSBhIHJlZ3Jlc3Npb24gZm9yIHVz
+IDogdGhpcyB3aWxsIGNhdXNlIHBlcmZvcm1hbmNlIGFuZCBzaXppbmcKcHJvYmxlbXMgb24gYXQg
+bGVhc3Qgb25lIG9mIG91ciBjbHVzdGVycyBhbmQgd2Ugd2lsbCBsb3NlIHRoZSBzaWxlbnQKY29y
+cnVwdGlvbiBkZXRlY3Rpb24gZnJvbSBCVFJGUykKLSB0aGVuIHVwZ3JhZGUgdG8gTHVtaW5vdXMg
+YW5kIG1pZ3JhdGUgYWdhaW4gdG8gQmx1ZXN0b3JlLgpJIHdhcyBub3QgZXhwZWN0aW5nIHRoZSB0
+cmFuc2l0aW9uIGZyb20gQnRyZnMrRmlsZXN0b3JlIHRvIEJsdWVzdG9yZSB0bwpiZSB0aGlzIGNv
+bnZvbHV0ZWQgKHdlIHdlcmUgcGxhbm5pbmcgdG8gYWRkIEJsdWVzdG9yZSBPU0RzIG9uZSBhdCBh
+IHRpbWUKYW5kIHN0dWR5IHRoZSBwZXJmb3JtYW5jZS9zdGFiaWxpdHkgZm9yIG1vbnRocyBiZWZv
+cmUgbWlncmF0aW5nIHRoZQp3aG9sZSBjbHVzdGVycykuIElzIHRoZXJlIGFueSB3YXkgdG8gcmVz
+dHJpY3QgeW91ciBCVFJGUyB0ZXN0cyB0byBhdApsZWFzdCBhIGdpdmVuIHN0YWJsZSBjb25maWd1
+cmF0aW9uIChCVFJGUyBpcyBrbm93biB0byBoYXZlIHByb2JsZW1zIHdpdGgKdGhlIGhpZ2ggcmF0
+ZSBvZiBzbmFwc2hvdCBkZWxldGlvbiBDZXBoIGdlbmVyYXRlcyBieSBkZWZhdWx0IGZvciBleGFt
+cGxlCmFuZCB3ZSB1c2UgJ2ZpbGVzdG9yZSBidHJmcyBzbmFwID0gZmFsc2UnKSA/CgpCZXN0IHJl
+Z2FyZHMsCgpMaW9uZWwKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpo
+dHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
