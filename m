@@ -1,42 +1,52 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: "Unix Domain socket path too long" failures in Jenkins make check
-Date: Mon, 3 Jul 2017 12:35:54 -0700
-Message-ID: <CA+2bHPb4Z4naH-uBf_AFdkUMse78cWEv+oVY9QQQJYZuvBFjYw@mail.gmail.com>
-References: <bf9dcc9d-3c9e-03a5-1be2-f601bed3a18c@suse.cz>
+From: Bassam Tabbara <Bassam.Tabbara@Quantum.com>
+Subject: Re: Mon identity in a dynamic environment
+Date: Tue, 4 Jul 2017 03:31:17 +0000
+Message-ID: <3B431751-D3C8-4E01-B2D8-91A58598235D@quantum.com>
+References: <D538DFE2.8B37F%travis.nielsen@quantum.com>
+ <alpine.DEB.2.11.1705111521580.18953@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f169.google.com ([209.85.216.169]:36269 "EHLO
-        mail-qt0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753422AbdGCTgZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 3 Jul 2017 15:36:25 -0400
-Received: by mail-qt0-f169.google.com with SMTP id i2so150816602qta.3
-        for <ceph-devel@vger.kernel.org>; Mon, 03 Jul 2017 12:36:25 -0700 (PDT)
-In-Reply-To: <bf9dcc9d-3c9e-03a5-1be2-f601bed3a18c@suse.cz>
+Received: from mail-by2nam01on0050.outbound.protection.outlook.com ([104.47.34.50]:9184
+        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751644AbdGDDb0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 3 Jul 2017 23:31:26 -0400
+In-Reply-To: <alpine.DEB.2.11.1705111521580.18953@piezo.novalocal>
+Content-Language: en-US
+Content-ID: <B46534D0CD454443A284FC74F426B0FA@QUANTUM.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Travis Nielsen <Travis.Nielsen@Quantum.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Jun 30, 2017 at 2:08 PM, Nathan Cutler <ncutler@suse.cz> wrote:
-> Hi Ceph!
->
-> Now that 10.2.8 is finally in QE, I had planned to turn my attention to
-> kraken 11.2.1. The first task is to get the backport PRs through "make
-> check". This is proving more difficult than usual because most of the time
-> the make check test fails due to the "Unix Domain socket path too long"
-> error. This happens in jewel PRs, too, but the incidence in kraken PRs seems
-> much higher.
->
-> Does the CI team have statistics on how many make check jobs are failing due
-> to this bug?
->
-> Also, is my understanding correct that there is no way to get Jenkins to
-> shorten the path?
-
-I have a PR to fix short path restrictions on admin sockets once and for all:
-
-https://github.com/ceph/ceph/pull/16087
-
--- 
-Patrick Donnelly
+SGkgU2FnZSwNCg0KRmluYWxseSBnZXR0aW5nIGFyb3VuZCB0byB0aGlzIG9uZS4NCg0KPiBJIHRo
+aW5rIHRoaXMgaXMgdGhlIHdheSB0byBnbywgYW5kIEkgZG9uJ3QgdGhpbmsgaXQgd2lsbCBiZSAq
+dGhhdCogDQo+IGludm9sdmVkLiAgUHJvYmFibHkgaXQganVzdCByZXF1aXJlcyBhbiBvcHRpb24g
+dG8gc3VwcGxlbWVudCBwdWJsaWNfYWRkciANCj4gd2l0aCBiaW5kX2FkZHIuICBBcyBsb25nIGFz
+IHRoZSBNZXNzZW5nZXIgbXlhZGRyIGZpZWxkIGlzIHBvcHVsYXRlZCB3aXRoIA0KPiB0aGUgcHVi
+bGljX2FkZHIgKGFuZCBub3QgYmluZF9hZGRyKSBmaWVsZCBJIHN1c3BlY3QgZXZlcnl0aGluZyB3
+aWxsIEp1c3QgDQo+IFdvcmsuICBQZWVycyBjb25uZWN0aW5nIHRvIHVzIHdpbGwgc2VlIHRoZSBw
+dWJsaWNfYWRkciBmb3IgdGhlaXIgDQo+IGdldHBlZXJhZGRyIGNvbmZpZyBhbmQgdGhhdCdzIHRo
+ZSBvbmUgdGhhdCB0aGUgbWVzc2VuZ2VyIHdpbGwgYWR2ZXJ0aXNlIA0KPiBkdXJpbmcgaXRzIGhh
+bmRzaGFrZTsgYmluZF9hZGRyIHdvdWxkIGJlIHVzZWQgKm9ubHkqIGJ5IHRoZSBhY3R1YWwgYmlu
+ZCANCj4gY2FsbC4gIERvZXMgdGhhdCBzZWVtIHJlYXNvbmFibGU/DQoNClRoZXJlIGlzIGEgZmFp
+ciBhbW91bnQgb2YgbG9naWMgYXJvdW5kIHB1YmxpY19hZGRyIHRoYXQgbWFrZXMgdGhpcyBhIGxp
+dHRsZSBtb3JlDQpjb21wbGV4LiBGb3IgZXhhbXBsZSwgd2UgYXV0b21hdGljYWxseSBzZWxlY3Qg
+dGhlIHB1YmxpY19hZGRyIHVzaW5nIHBpY2tfYWRkcmVzc2VzDQp3aGVuIHB1YmxpY19uZXR3b3Jr
+IGlzIHNldC4gQWxzbyB3ZSBoYXZlIGxvZ2ljIHRoYXQgYXR0ZW1wdHMgdG8gZGlzY292ZXIgYXZh
+aWxhYmxlIHBvcnRzLA0KYW5kIOKAnHJlYmluZHPigJ0gdGhlIHNvY2tldCB3aGljaCB3ZSB3b3Vs
+ZCB3YW50IHRvIGNhcnJ5IG92ZXIgdG8gdGhlIHByb3Bvc2VkIOKAnGJpbmRfYWRkcuKAnS4NCg0K
+SSB0aGluayBpdCBtaWdodCBiZSBlYXNpZXIgdG8gZ28gaW4gdGhlIG90aGVyIGRpcmVjdGlvbi4g
+aS5lLCBpbnRyb2R1Y2Ug4oCcbW9uX2FkdmVydGlzZV9hZGRy4oCdDQp3aGljaCBvdmVycmlkZXMg
+bXNnci0+bXlfaW5zdC0+YWRkciBhbmQgYmUgdXNlZCBvbiB0aGUgbmV0d29yayB0byByZWFjaCB0
+aGUgbW9ucy4gSWYNCmVtcHR5IChkZWZhdWx0KSBhZHZlcnRpc2VfYWRkciB3aWxsIGJlIHNldCB0
+byB0aGUgZWZmZWN0aXZlIHZhbHVlIG9mIHB1YmxpY19hZGRyLiBJZiBzZXQgaXQgbXVzdCBiZSBh
+biANCmlwIGFkZHJlc3Mgb3IgcmVzb2x2YWJsZSBETlMgbmFtZS4gSWYgYSBwb3J0IGlzIHNwZWNp
+ZmllZCBpdCB3aWxsIGJlIHVzZWQsIG90aGVyd2lzZQ0KQ0VQSF9NT05fUE9SVCBpcyBhc3N1bWVk
+Lg0KDQpGaW5hbGx5LCBieSB1c2luZyB0aGUg4oCcbW9uX+KAnSBwcmVmaXggdGhpcyBtYWtlcyBp
+dCBjbGVhciB0aGF0IHRoaXMgaXMgbGltaXRlZCB0byBNT05zIHdoZXJlIGl0cyBuZWVkZWQuDQpX
+aGlsZSBpdHMgcG9zc2libGUgdG8gZG8gd2l0aCBmb3IgT1NELCBNRFMsIGV0Yy4gSSB0aGluayBp
+dCB1bm5lY2Vzc2FyaWx5IGluY3JlYXNlcyB0aGUgY29uZmlnIHN1cmZhY2UgYXJlYS4NCg0KV2hh
+dCBkbyB5b3UgdGhpbms/DQoNClRoYW5rcyENCkJhc3NhbQ0KDQo=
