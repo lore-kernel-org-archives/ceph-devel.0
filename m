@@ -1,52 +1,38 @@
-From: Bassam Tabbara <Bassam.Tabbara@Quantum.com>
-Subject: Re: Mon identity in a dynamic environment
-Date: Tue, 4 Jul 2017 03:31:17 +0000
-Message-ID: <3B431751-D3C8-4E01-B2D8-91A58598235D@quantum.com>
-References: <D538DFE2.8B37F%travis.nielsen@quantum.com>
- <alpine.DEB.2.11.1705111521580.18953@piezo.novalocal>
+From: Z Will <zhao6305@gmail.com>
+Subject: ceph-mon leader election problem, should it be improved ?
+Date: Tue, 4 Jul 2017 13:57:23 +0800
+Message-ID: <CAGOEmcO6L2j04NEx5U_wY0WUNnzowW1JkcqKbmtewm6f4rC1PQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam01on0050.outbound.protection.outlook.com ([104.47.34.50]:9184
-        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751644AbdGDDb0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 3 Jul 2017 23:31:26 -0400
-In-Reply-To: <alpine.DEB.2.11.1705111521580.18953@piezo.novalocal>
-Content-Language: en-US
-Content-ID: <B46534D0CD454443A284FC74F426B0FA@QUANTUM.com>
+Received: from mail-it0-f51.google.com ([209.85.214.51]:36935 "EHLO
+        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750798AbdGDF5Z (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 4 Jul 2017 01:57:25 -0400
+Received: by mail-it0-f51.google.com with SMTP id m84so66426348ita.0
+        for <ceph-devel@vger.kernel.org>; Mon, 03 Jul 2017 22:57:24 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Travis Nielsen <Travis.Nielsen@Quantum.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, Ceph Users <ceph-users@lists.ceph.com>, Sage Weil <sage@newdream.net>
 
-SGkgU2FnZSwNCg0KRmluYWxseSBnZXR0aW5nIGFyb3VuZCB0byB0aGlzIG9uZS4NCg0KPiBJIHRo
-aW5rIHRoaXMgaXMgdGhlIHdheSB0byBnbywgYW5kIEkgZG9uJ3QgdGhpbmsgaXQgd2lsbCBiZSAq
-dGhhdCogDQo+IGludm9sdmVkLiAgUHJvYmFibHkgaXQganVzdCByZXF1aXJlcyBhbiBvcHRpb24g
-dG8gc3VwcGxlbWVudCBwdWJsaWNfYWRkciANCj4gd2l0aCBiaW5kX2FkZHIuICBBcyBsb25nIGFz
-IHRoZSBNZXNzZW5nZXIgbXlhZGRyIGZpZWxkIGlzIHBvcHVsYXRlZCB3aXRoIA0KPiB0aGUgcHVi
-bGljX2FkZHIgKGFuZCBub3QgYmluZF9hZGRyKSBmaWVsZCBJIHN1c3BlY3QgZXZlcnl0aGluZyB3
-aWxsIEp1c3QgDQo+IFdvcmsuICBQZWVycyBjb25uZWN0aW5nIHRvIHVzIHdpbGwgc2VlIHRoZSBw
-dWJsaWNfYWRkciBmb3IgdGhlaXIgDQo+IGdldHBlZXJhZGRyIGNvbmZpZyBhbmQgdGhhdCdzIHRo
-ZSBvbmUgdGhhdCB0aGUgbWVzc2VuZ2VyIHdpbGwgYWR2ZXJ0aXNlIA0KPiBkdXJpbmcgaXRzIGhh
-bmRzaGFrZTsgYmluZF9hZGRyIHdvdWxkIGJlIHVzZWQgKm9ubHkqIGJ5IHRoZSBhY3R1YWwgYmlu
-ZCANCj4gY2FsbC4gIERvZXMgdGhhdCBzZWVtIHJlYXNvbmFibGU/DQoNClRoZXJlIGlzIGEgZmFp
-ciBhbW91bnQgb2YgbG9naWMgYXJvdW5kIHB1YmxpY19hZGRyIHRoYXQgbWFrZXMgdGhpcyBhIGxp
-dHRsZSBtb3JlDQpjb21wbGV4LiBGb3IgZXhhbXBsZSwgd2UgYXV0b21hdGljYWxseSBzZWxlY3Qg
-dGhlIHB1YmxpY19hZGRyIHVzaW5nIHBpY2tfYWRkcmVzc2VzDQp3aGVuIHB1YmxpY19uZXR3b3Jr
-IGlzIHNldC4gQWxzbyB3ZSBoYXZlIGxvZ2ljIHRoYXQgYXR0ZW1wdHMgdG8gZGlzY292ZXIgYXZh
-aWxhYmxlIHBvcnRzLA0KYW5kIOKAnHJlYmluZHPigJ0gdGhlIHNvY2tldCB3aGljaCB3ZSB3b3Vs
-ZCB3YW50IHRvIGNhcnJ5IG92ZXIgdG8gdGhlIHByb3Bvc2VkIOKAnGJpbmRfYWRkcuKAnS4NCg0K
-SSB0aGluayBpdCBtaWdodCBiZSBlYXNpZXIgdG8gZ28gaW4gdGhlIG90aGVyIGRpcmVjdGlvbi4g
-aS5lLCBpbnRyb2R1Y2Ug4oCcbW9uX2FkdmVydGlzZV9hZGRy4oCdDQp3aGljaCBvdmVycmlkZXMg
-bXNnci0+bXlfaW5zdC0+YWRkciBhbmQgYmUgdXNlZCBvbiB0aGUgbmV0d29yayB0byByZWFjaCB0
-aGUgbW9ucy4gSWYNCmVtcHR5IChkZWZhdWx0KSBhZHZlcnRpc2VfYWRkciB3aWxsIGJlIHNldCB0
-byB0aGUgZWZmZWN0aXZlIHZhbHVlIG9mIHB1YmxpY19hZGRyLiBJZiBzZXQgaXQgbXVzdCBiZSBh
-biANCmlwIGFkZHJlc3Mgb3IgcmVzb2x2YWJsZSBETlMgbmFtZS4gSWYgYSBwb3J0IGlzIHNwZWNp
-ZmllZCBpdCB3aWxsIGJlIHVzZWQsIG90aGVyd2lzZQ0KQ0VQSF9NT05fUE9SVCBpcyBhc3N1bWVk
-Lg0KDQpGaW5hbGx5LCBieSB1c2luZyB0aGUg4oCcbW9uX+KAnSBwcmVmaXggdGhpcyBtYWtlcyBp
-dCBjbGVhciB0aGF0IHRoaXMgaXMgbGltaXRlZCB0byBNT05zIHdoZXJlIGl0cyBuZWVkZWQuDQpX
-aGlsZSBpdHMgcG9zc2libGUgdG8gZG8gd2l0aCBmb3IgT1NELCBNRFMsIGV0Yy4gSSB0aGluayBp
-dCB1bm5lY2Vzc2FyaWx5IGluY3JlYXNlcyB0aGUgY29uZmlnIHN1cmZhY2UgYXJlYS4NCg0KV2hh
-dCBkbyB5b3UgdGhpbms/DQoNClRoYW5rcyENCkJhc3NhbQ0KDQo=
+Hi:
+   I am testing ceph-mon brain split . I have read the code . If I
+understand it right , I know it won't be brain split. But I think
+there is still another problem. My ceph version is 0.94.10. And here
+is my test detail :
+
+3 ceph-mons , there ranks are 0, 1, 2 respectively.I stop the rank 1
+mon , and use iptables to block the communication between mon 0 and
+mon 1. When the cluster is stable, start mon.1 .  I found the 3
+monitors will all can not work well. They are all trying to call  new
+leader  election . This means the cluster can't work anymore.
+
+Here is my analysis. Because mon will always respond to leader
+election message, so , in my test, communication between  mon.0 and
+mon.1 is blocked , so mon.1 will always try to be leader, because it
+will always see mon.2, and it should win over mon.2. Mon.0 should
+always win over mon.2. But mon.2 will always responsd to the election
+message issued by mon.1, so this loop will never end. Am I right ?
+
+This should be a problem? Or is it  was just designed like this , and
+should be handled by human ?
