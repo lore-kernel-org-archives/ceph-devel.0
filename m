@@ -1,42 +1,42 @@
-From: Bassam Tabbara <Bassam.Tabbara@Quantum.com>
-Subject: Re: Mon identity in a dynamic environment
-Date: Wed, 5 Jul 2017 16:25:33 +0000
-Message-ID: <CB6EB13B-F15F-4E3D-A3BD-17CB65746F86@quantum.com>
-References: <D538DFE2.8B37F%travis.nielsen@quantum.com>
- <alpine.DEB.2.11.1705111521580.18953@piezo.novalocal>
- <3B431751-D3C8-4E01-B2D8-91A58598235D@quantum.com>
- <alpine.DEB.2.11.1707051504230.3424@piezo.novalocal>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Where to submit a blueprint?
+Date: Wed, 5 Jul 2017 09:27:33 -0700
+Message-ID: <CAJ4mKGZ2R-Q8Udsi0LBg1Py4dCpUrJF=o-shN2WpvyqKipXrEg@mail.gmail.com>
+References: <CAJACTuc8nJLOXhUXUwqHZPit76MJUK4_=9R06fF300ZpCj+e9g@mail.gmail.com>
+ <CAJ4mKGZK10GLYNt3Xv6CyjXX9b1+4aBUGMXYoen3VaRPcHZ=qA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-co1nam03on0087.outbound.protection.outlook.com ([104.47.40.87]:37126
-        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751696AbdGEQZh (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 5 Jul 2017 12:25:37 -0400
-In-Reply-To: <alpine.DEB.2.11.1707051504230.3424@piezo.novalocal>
-Content-Language: en-US
-Content-ID: <273A8BC8BCA5934F8F6D2D52B1284F44@QUANTUM.com>
+Received: from mail-it0-f45.google.com ([209.85.214.45]:35804 "EHLO
+        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751692AbdGEQ1f (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Jul 2017 12:27:35 -0400
+Received: by mail-it0-f45.google.com with SMTP id v202so116439022itb.0
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Jul 2017 09:27:35 -0700 (PDT)
+In-Reply-To: <CAJ4mKGZK10GLYNt3Xv6CyjXX9b1+4aBUGMXYoen3VaRPcHZ=qA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Travis Nielsen <Travis.Nielsen@Quantum.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Xuehan Xu <xxhdx1985126@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-SeKAmW0gc3RpbGwgZ29pbmcgYmFjayBhbmQgZm9ydGggb24gdGhlIGRlc2lnbiBidXQgd2UgY2Fu
-IG1vdmUgdGhlIGRlc2lnbi9pbXBsZW1lbnRhdGlvbiBkaXNjdXNzaW9uIHRvIHRoZSBQUi4NCg0K
-PiBDYW4geW91IGVsYWJvcmF0ZSBvbiBob3cgdGhlIGt1YmVybmV0ZXMgc2lkZSBvZiB0aGlzIGFw
-cHJvYWNoIHdpbGwgd29yaz8NCg0KSW4gS3ViZXJuZXRlcywgZWFjaCBwb2QgKHRoaW5rIGNvbnRh
-aW5lcikgaXMgYXNzaWduZWQgYSB1bmlxdWUgcG9kSVAgd2hpY2ggaXMgcm91dGFibGUgd2l0aGlu
-IHRoZSBjbHVzdGVyLiBUaGlzIFBvZElQIGNhbiBjaGFuZ2UgZWFjaCB0aW1lIGEgUG9kIGlzIHJl
-c3RhcnRlZC9zY2hlZHVsZWQvbW92ZWQgZXRjLiBJdHMgYWxzbyB0aGUgb25seSBpcCBhZGRyZXNz
-IHRoYXQgY2FuIGJlIGJvdW5kIGluc2lkZSB0aGUgcG9kLiBPYnZpb3VzbHkgdXNpbmcgUG9kSVAg
-YW5kIHB1YmxpY19hZGRyIGlzIHByb2JsZW1hdGljIGZvciBNT05zIHNpbmNlIGl0cyBub3Qgc3Rh
-YmxlLg0KDQpLdWJlcm5ldGVzIGFsc28gc3VwcG9ydHMgYSDigJxzZXJ2aWNl4oCdIHdoaWNoIGlz
-IGVzc2VudGlhbGx5IGEgc3RhdGljIElQIGFkZHJlc3MgYWxsb2NhdGVkIGFuZCBpcyByb3V0YWJs
-ZSBjbHVzdGVyIHdpZGUgKHNlcnZpY2VJUCB0byBwb2RJUCkuIFlvdSBjYW4gYXNzb2NpYXRlIHRo
-ZSBzZXJ2aWNlIHdpdGggYSBwb2QgKGJhc2VkIG9uIHBvZCBuYW1lLCBsYWJlbHMgZXRjLikuIFRo
-ZSBuZXR3b3JraW5nIGxheWVyIHdpbGwgZW5zdXJlIHRoYXQgcm91dGVzIGFyZSB1cGRhdGVkIGV2
-ZW4gd2hlbiB0aGUgcG9kIG1vdmVzL3Jlc3RhcnRlZCBldGMuIA0KDQpTbyB0aGUgaWRlYSBpcyB0
-byBzZXQgcHVibGljX2FkZHIgdG8gdGhlIHBvZElQIChhbHNvIHBvc3NpYmxlIHdpdGggcHVibGlj
-X25ldHdvcmspIGFuZCBtb25fYWR2ZXJ0aXNlX2FkZHIgdG8gc2VydmljZUlQLg0KDQo=
+On Mon, Jul 3, 2017 at 8:36 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
+> On Fri, Jun 30, 2017 at 9:57 PM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
+>> Hi, everyone.
+>>
+>> If I want to add a new blueprint, should I use the following link?
+>> http://tracker.ceph.com/projects/ceph/wiki/Submissions
+>
+> These days we're just doing Ceph developer monthlies, alternating
+> between Asia-friendly and Europe-friendly (with an overlap for the
+> Americas in both) times. I think this month would have been
+> Asia-friendly but it got canceled due to holidays for most of the core
+> devs (it's a holiday week in the USA right now), but I imagine Patrick
+> will have links up for August and September at
+> http://tracker.ceph.com/projects/ceph/wiki/Planning sometime soonish.
+> (Or you can make one!) :)
+
+Probably too late now :( but CDM for this month is not canceled — it's
+at 6PM Pacific time today (about 8.5 hours from now). I think I just
+couldn't read my calendar to find the event. :o
+-Greg
