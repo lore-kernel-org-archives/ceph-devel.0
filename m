@@ -1,106 +1,111 @@
-From: Spandan Kumar Sahu <spandankumarsahu@gmail.com>
-Subject: Re: Optimization Analysis Tool
-Date: Wed, 5 Jul 2017 22:46:19 +0530
-Message-ID: <CAAXqJ+pDo3G2X9_3Z=+ApafR4nJyCvN_fCNRXobZYzQHqNzjrQ@mail.gmail.com>
-References: <CAAXqJ+qsutkbJZTCRbvR=yuNjVX5n_Vk9V=XEBUa8dmKefhEzA@mail.gmail.com>
- <CAJE9aOOy2yvD=kHKbsvyOEsVdZfO7whPtkpqkpYtSPGdySW49Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: "J. Eric Ivancich" <ivancich@redhat.com>
+Subject: Re: How best to integrate dmClock QoS library into ceph codebase
+Date: Wed, 5 Jul 2017 18:06:01 -0400
+Message-ID: <942EFDE5-CB43-4074-B79A-52E036DDF19E@redhat.com>
+References: <6D8EA95A-572E-4C71-A6AF-6BB8A6E8B26C@redhat.com> <CAF1ivSaa=06CGGJRNQ_9QO_wy6Wc5yK4zbNFiHJLnoJJiqrCSg@mail.gmail.com> <f08daf3b-751a-6887-fce0-f5ab38097af4@redhat.com> <CAB7xdikG-Pc8DfX7VJv905ZdM8E8wXtfgw_4q693SeNnzDZ63g@mail.gmail.com> <cca365ed-5b79-9a56-f683-9db271b842ff@redhat.com> <CAB7xdimrWXD7CnEM_yqzO9BzTrwXBq-FyZ2aLcXZL+3m2Z9_Rw@mail.gmail.com> <b26c6cec-d021-01ce-0a2b-77484e267635@redhat.com> <CAB7xdinUB6dTtc+ncfn7YAH0KKcAg03oxu778NbjHiafiqRnKQ@mail.gmail.com> <9c1d41e7-a218-d52b-f17f-0490c3a94d50@redhat.com> <CAGRcXKbCc3h53dxrh=SXhwhZ1zCbE6YKc_4X0BrnsbNYd7uoFw@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f173.google.com ([209.85.128.173]:34149 "EHLO
-        mail-wr0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751987AbdGERQ0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Jul 2017 13:16:26 -0400
-Received: by mail-wr0-f173.google.com with SMTP id 77so266545793wrb.1
-        for <ceph-devel@vger.kernel.org>; Wed, 05 Jul 2017 10:16:25 -0700 (PDT)
-In-Reply-To: <CAJE9aOOy2yvD=kHKbsvyOEsVdZfO7whPtkpqkpYtSPGdySW49Q@mail.gmail.com>
+Received: from mail-qt0-f178.google.com ([209.85.216.178]:35528 "EHLO
+        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751784AbdGEWGF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Jul 2017 18:06:05 -0400
+Received: by mail-qt0-f178.google.com with SMTP id b40so1945561qtb.2
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Jul 2017 15:06:04 -0700 (PDT)
+In-Reply-To: <CAGRcXKbCc3h53dxrh=SXhwhZ1zCbE6YKc_4X0BrnsbNYd7uoFw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Loic Dachary <loic@dachary.org>
+To: Jin Cai <caijin.laurence@gmail.com>
+Cc: sheng qiu <herbert1984106@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Jul 4, 2017 at 5:44 PM, kefu chai <tchaikov@gmail.com> wrote:
->
-> On Tue, Jul 4, 2017 at 1:20 AM, Spandan Kumar Sahu
-> <spandankumarsahu@gmail.com> wrote:
-> > Hi everyone.
-> >
-> > As a part of GSoC, I will be implementing a tool, to analyse the need
-> > of reweighting devices in the crushmap, and assign a score to the
-> > reweight-by-utilisation algorithm. Please correct me where I am wrong,
-> > and any other suggestions are more than welcome.
-> >
-> > The tool shall be a python module, in /src/pybind/mgr and it will use
-> > Ceph's current python mgr module to get "pg_summary".
-> >
-> > The parameters that I plan to use are:
-> > * The devices utilisation
-> >   The number of over-filled devices along with the the amount of
-> > over-filled%, will generate a score, using t-distribution. The reason,
-> > I shall consider only over-filled devices is because one 10%
-> > underfilled with 5 2% overfilled devices, is arguably a better
-> > situation than one 10% overfilled with 5 2% underfilled devices. The
-> > data for expected distribution after optimization can be obtained from
-> > python-crush module.
->
-> i assume the utilization is the ending status of the reweight.
->
-We will have to take the utilisation of both before and after
-reweight, if we are to assign a score.
-> >
-> > * Expected amount of data flow over the network
-> >   A score for it can be predicted, using the number of PGs that will
-> > be swapped during optimization, which can be found in python-crush[1].
-> > However, the number of PGs, might not give a better idea about the
-> > amount of data flow, over the network. Hence, using python mgr-module,
-> > and obtaining pgmap before and after each optimization step, will give
-> > the amount of data flow in the network.
-> >
-> > * Time for optimization process
-> >  This will simply keep a note of the time taken to produce an
-> > optimized crushmap from the existing one.
->
-> please note, in practice, administrator might want to reweight the cluster in a
-> iterative manner, say, change the weight with a smaller step size and multiple
-> steps, instead of setting the new weights in a single shot, to
-> minimize the impact
-> to the production.
->
-Yes, there is an option in python-crush, that does so. We can specify
-how many PGs would be swapped in each step and then, the administrator
-can decide upto how much steps would he would want the process to go
-on.
-But I doubt, how will we keep track of the time, when the actual
-reweight happens, and what information might it give. The time for
-calculating a reweighted crushmap, should be the thing we should try
-and keep a track of.
+Hello,
 
-> >
-> > I would be using data from python-crush[2] and from pg_map (in json
-> > format) obtained by sending commands to python mgr module, to gather
-> > the values for the required parameters. A weighted combination of this
-> > shall determine the score for the optimization algorithm in place.
-> >
-> > My initial target is to output the results into a file. I would try to
-> > merge it with the dashboard plugin in mgr module, after the
-> > implementing the tool at first.
-> >
-> > [1]: http://libcrush.org/main/python-crush/blob/master/tests/test_optimize.py#L460
-> > [2]:http://libcrush.org/main/python-crush/blob/master/
-> >
-> > --
-> > Spandan Kumar Sahu
-> > IIT Kharagpur
->
->
->
-> --
-> Regards
-> Kefu Chai
+Thank you for reporting that. I need to verify whether this error was generated by the code on the master branch, or whether the code has been modified in any way?
 
+The dequeue function with the failed assert (in mClockPriorityQueue.h, line 315) only has two asserts.
 
+The first assert checks that the queue is not empty, and it should not be since OSD::ShardedOpWQ::_process verifies that it’s not empty before calling the dequeue function.
 
+The second assert verifies that when an op was requested from the dmclock queue that it actually got an op, and not an empty code, or a future code (indicating that limits were strictly enforced, which they should not be since allow_limit_break should be true).
 
--- 
-Spandan Kumar Sahu
-IIT Kharagpur
+So please let me know if this is modified code. If need be I’ll try to duplicate your scenario, so I can debug it. Please provide all the necessary details, so I can reproduce it.
+
+Thanks,
+
+Eric
+
+> On Jul 4, 2017, at 8:35 AM, Jin Cai <caijin.laurence@gmail.com> wrote:
+> 
+> Hi, Eric
+>     We are now testing the mclock priority queue that you contributed
+> several days ago.
+>     Our test environment consists of four machines: one machine for
+> the monitor and mgr daemon, two OSDs in each of the left three ones.
+>     mclock-related configurations are as the following:
+> 
+>    osd_op_queue = mclock_opclass
+>    osd_op_queue_mclock_client_op_res = 20000.0
+>    osd_op_queue_mclock_client_op_wgt = 0.0
+>    osd_op_queue_mclock_client_op_lim = 30000.0
+>    osd_op_queue_mclock_recov_res = 0.0
+>    osd_op_queue_mclock_recov_wgt = 0.0
+>    osd_op_queue_mclock_recov_lim = 2000.0
+> 
+> 
+>   When we kiledl one OSD daemon to test the effects of recovery on
+> the client op, other OSDs crashed as well because of assert semantics:
+> 
+>   ceph version 12.0.3-2318-g32ab095
+> (32ab09536207b4b261874c0063b3275b97537045) luminous (dev)
+> 1: (()+0x9e86b1) [0x7f4287e846b1]
+> 2: (()+0xf100) [0x7f4284d18100]
+> 3: (gsignal()+0x37) [0x7f4283d415f7]
+> 4: (abort()+0x148) [0x7f4283d42ce8]
+> 5: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+> const*)+0x284) [0x7f4287ec2364]
+> 6: (ceph::mClockQueue<std::pair<spg_t, PGQueueable>,
+> ceph::mClockOpClassQueue::osd_op_type_t>::dequeue()+0x45f)
+> [0x7f4287baac3f]
+> 7: (ceph::mClockOpClassQueue::dequeue()+0xd) [0x7f4287baacfd]
+> 8: (OSD::ShardedOpWQ::_process(unsigned int,
+> ceph::heartbeat_handle_d*)+0x314) [0x7f428798a174]
+> 9: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x8e9)
+> [0x7f4287ec7d39]
+> 10: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x7f4287ec9ec0]
+> 11: (()+0x7dc5) [0x7f4284d10dc5]
+> 12: (clone()+0x6d) [0x7f4283e02ced]
+> NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
+> 
+> 
+> However, if the value of osd_op_queue was set to wpq or prio, it worked well.
+> So do you know why the assert semantics was triggered.
+> 
+> Thanks very much.
+> 
+> 
+> 
+> 
+> 2017-06-30 2:03 GMT+08:00 J. Eric Ivancich <ivancich@redhat.com>:
+>> On 06/28/2017 02:55 PM, sheng qiu wrote:
+>>> May I ask do you have any plan to implement client side logic for a
+>>> true "D"mclock, seems to me know it's mclock on each individual OSD.
+>>> And each client also has a common iops config. We are planing to
+>>> working on that part and integrate with your current work.
+>> 
+>> That is not a high priority in the short-term. Our main goal with
+>> integrating dmclock/mclock was to better manage priorities among
+>> operation classes.
+>> 
+>> Developers at SK Telecom have done some work towards this, though. For
+>> example, see here:
+>> 
+>>    https://github.com/ivancich/ceph/pull/1
+>> 
+>> Eric
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
