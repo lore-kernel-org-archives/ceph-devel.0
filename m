@@ -1,55 +1,55 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: Re: Where to submit a blueprint?
-Date: Wed, 5 Jul 2017 10:37:51 -0500
-Message-ID: <CAAZbbf3TJCUfmdBX-eMjBpAwupWexLQM77pc4wGUDfg87mRVYA@mail.gmail.com>
-References: <CAJACTuc8nJLOXhUXUwqHZPit76MJUK4_=9R06fF300ZpCj+e9g@mail.gmail.com>
- <CAJ4mKGZK10GLYNt3Xv6CyjXX9b1+4aBUGMXYoen3VaRPcHZ=qA@mail.gmail.com>
+From: Yuri Weinstein <yweinste@redhat.com>
+Subject: Jewel 10.2.8 QE status
+Date: Wed, 5 Jul 2017 08:39:04 -0700
+Message-ID: <CAMMFjmFCkkwKij64f-04gksGOxC0qSSHvhvd0_KEq_BiKiZDuw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f170.google.com ([209.85.216.170]:32834 "EHLO
-        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750908AbdGEPhx (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Jul 2017 11:37:53 -0400
-Received: by mail-qt0-f170.google.com with SMTP id r30so189427248qtc.0
-        for <ceph-devel@vger.kernel.org>; Wed, 05 Jul 2017 08:37:53 -0700 (PDT)
-In-Reply-To: <CAJ4mKGZK10GLYNt3Xv6CyjXX9b1+4aBUGMXYoen3VaRPcHZ=qA@mail.gmail.com>
+Received: from mail-wr0-f175.google.com ([209.85.128.175]:35721 "EHLO
+        mail-wr0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751681AbdGEPjG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Jul 2017 11:39:06 -0400
+Received: by mail-wr0-f175.google.com with SMTP id k67so264589700wrc.2
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Jul 2017 08:39:05 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Xuehan Xu <xxhdx1985126@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Development, Ceph" <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>, "Weil, Sage" <sage@redhat.com>, "Deza, Alfredo" <adeza@redhat.com>
 
-Yeah, I typically don’t post links to the next month until we finish
-one. That way people don’t put their blueprints in the wrong planning
-doc. If you prefer to just email me something this morning when you
-get in I’ll add it to the schedule before we start. Thanks.
+Detailed summary of the QE Validation can be found here
+http://tracker.ceph.com/issues/19538#note-89
+The following suites were in scope of this point release validation:
 
+rados (subset 35/50 227 jobs)
+rbd
+rgw
+fs
+krbd
+kcephfs
+knfs
+rest
+hadoop - EXCLUDED
+samba - EXCLUDED
+ceph-deploy
+ceph-disk
+upgrade/client-upgrade
+upgrade/hammer-x (jewel)
+upgrade/jewel-x/point-to-point-x
+powercycle
+ceph-ansible
 
-On Mon, Jul 3, 2017 at 10:36 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> On Fri, Jun 30, 2017 at 9:57 PM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->> Hi, everyone.
->>
->> If I want to add a new blueprint, should I use the following link?
->> http://tracker.ceph.com/projects/ceph/wiki/Submissions
->
-> These days we're just doing Ceph developer monthlies, alternating
-> between Asia-friendly and Europe-friendly (with an overlap for the
-> Americas in both) times. I think this month would have been
-> Asia-friendly but it got canceled due to holidays for most of the core
-> devs (it's a holiday week in the USA right now), but I imagine Patrick
-> will have links up for August and September at
-> http://tracker.ceph.com/projects/ceph/wiki/Planning sometime soonish.
-> (Or you can make one!) :)
-> -Greg
+(please let me know if any suites are missing from this ^ list)
 
+Three PRs were merged to fix minor issues:
 
+https://github.com/ceph/ceph/pull/16089
+https://github.com/ceph/ceph/pull/16088
+https://github.com/ceph/ceph/pull/14710
 
--- 
+The SHA1 is 66dbf9beef04988dbd3653591e51afa6d84e3990 (tip of "jewel"
+branch) - Nathan pls double check.
 
-Best Regards,
+Jewel 10.2.8 QE - is ready for publishing.
+Alfredo FYI
 
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
+Thx
+YuriW
