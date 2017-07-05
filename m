@@ -1,64 +1,55 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Mon identity in a dynamic environment
-Date: Wed, 5 Jul 2017 15:05:42 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1707051504230.3424@piezo.novalocal>
-References: <D538DFE2.8B37F%travis.nielsen@quantum.com> <alpine.DEB.2.11.1705111521580.18953@piezo.novalocal> <3B431751-D3C8-4E01-B2D8-91A58598235D@quantum.com>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: Re: Where to submit a blueprint?
+Date: Wed, 5 Jul 2017 10:37:51 -0500
+Message-ID: <CAAZbbf3TJCUfmdBX-eMjBpAwupWexLQM77pc4wGUDfg87mRVYA@mail.gmail.com>
+References: <CAJACTuc8nJLOXhUXUwqHZPit76MJUK4_=9R06fF300ZpCj+e9g@mail.gmail.com>
+ <CAJ4mKGZK10GLYNt3Xv6CyjXX9b1+4aBUGMXYoen3VaRPcHZ=qA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1905000904-1499267145=:3424"
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38700 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751653AbdGEPFp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Jul 2017 11:05:45 -0400
-In-Reply-To: <3B431751-D3C8-4E01-B2D8-91A58598235D@quantum.com>
+Received: from mail-qt0-f170.google.com ([209.85.216.170]:32834 "EHLO
+        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750908AbdGEPhx (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 5 Jul 2017 11:37:53 -0400
+Received: by mail-qt0-f170.google.com with SMTP id r30so189427248qtc.0
+        for <ceph-devel@vger.kernel.org>; Wed, 05 Jul 2017 08:37:53 -0700 (PDT)
+In-Reply-To: <CAJ4mKGZK10GLYNt3Xv6CyjXX9b1+4aBUGMXYoen3VaRPcHZ=qA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Bassam Tabbara <Bassam.Tabbara@Quantum.com>
-Cc: Travis Nielsen <Travis.Nielsen@Quantum.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Xuehan Xu <xxhdx1985126@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Yeah, I typically don’t post links to the next month until we finish
+one. That way people don’t put their blueprints in the wrong planning
+doc. If you prefer to just email me something this morning when you
+get in I’ll add it to the schedule before we start. Thanks.
 
---8323329-1905000904-1499267145=:3424
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
 
-On Tue, 4 Jul 2017, Bosom Tabby wrote:
-> Hi Sage,
-> 
-> Finally getting around to this one.
+On Mon, Jul 3, 2017 at 10:36 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
+> On Fri, Jun 30, 2017 at 9:57 PM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
+>> Hi, everyone.
+>>
+>> If I want to add a new blueprint, should I use the following link?
+>> http://tracker.ceph.com/projects/ceph/wiki/Submissions
+>
+> These days we're just doing Ceph developer monthlies, alternating
+> between Asia-friendly and Europe-friendly (with an overlap for the
+> Americas in both) times. I think this month would have been
+> Asia-friendly but it got canceled due to holidays for most of the core
+> devs (it's a holiday week in the USA right now), but I imagine Patrick
+> will have links up for August and September at
+> http://tracker.ceph.com/projects/ceph/wiki/Planning sometime soonish.
+> (Or you can make one!) :)
+> -Greg
 
-Great!
- 
-> > I think this is the way to go, and I don't think it will be *that* 
-> > involved.  Probably it just requires an option to supplement public_addr 
-> > with bind_addr.  As long as the Messenger myaddr field is populated with 
-> > the public_addr (and not bind_addr) field I suspect everything will Just 
-> > Work.  Peers connecting to us will see the public_addr for their 
-> > getpeeraddr config and that's the one that the messenger will advertise 
-> > during its handshake; bind_addr would be used *only* by the actual bind 
-> > call.  Does that seem reasonable?
-> 
-> There is a fair amount of logic around public_addr that makes this a little more
-> complex. For example, we automatically select the public_addr using pick_addresses
-> when public_network is set. Also we have logic that attempts to discover available ports,
-> and “rebinds” the socket which we would want to carry over to the proposed “bind_addr”.
-> 
-> I think it might be easier to go in the other direction. i.e, introduce “mon_advertise_addr”
-> which overrides msgr->my_inst->addr and be used on the network to reach the mons. If
-> empty (default) advertise_addr will be set to the effective value of public_addr. If set it must be an 
-> ip address or resolvable DNS name. If a port is specified it will be used, otherwise
-> CEPH_MON_PORT is assumed.
-> 
-> Finally, by using the “mon_” prefix this makes it clear that this is limited to MONs where its needed.
-> While its possible to do with for OSD, MDS, etc. I think it unnecessarily increases the config surface area.
-> 
-> What do you think?
 
-Yeah, that sounds reasonable to me.
 
-Can you elaborate on how the kubernetes side of this approach will work?
+-- 
 
-Thanks!
-sage
---8323329-1905000904-1499267145=:3424--
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
