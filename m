@@ -1,238 +1,207 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: PGLog: optimize trim/rollback with pointer stored in list
-Date: Thu, 6 Jul 2017 14:28:54 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1707061428460.3424@piezo.novalocal>
-References: <2263ff96-b9eb-fceb-8257-300f47a65491@gmail.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: ceph-mon leader election problem, should it be improved ?
+Date: Thu, 6 Jul 2017 14:31:25 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1707061429420.3424@piezo.novalocal>
+References: <CAGOEmcO6L2j04NEx5U_wY0WUNnzowW1JkcqKbmtewm6f4rC1PQ@mail.gmail.com> <cfb3c139-7423-644f-ce4c-00d55cce5756@suse.de> <CAGOEmcNwuHGoXyAPr51P73pbZL5XOiORhL4P6w7R2yi19e71vA@mail.gmail.com> <52301842-ce14-1a1d-72cb-816633f2b860@suse.de>
+ <CAGOEmcNvNr523e7YH66-4Gv45krA1-53r-My=RvSRpCCj=otrg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47842 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751741AbdGFO24 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 6 Jul 2017 10:28:56 -0400
-In-Reply-To: <2263ff96-b9eb-fceb-8257-300f47a65491@gmail.com>
+Received: from cobra.newdream.net ([66.33.216.30]:33947 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750970AbdGFOb3 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Jul 2017 10:31:29 -0400
+In-Reply-To: <CAGOEmcNvNr523e7YH66-4Gv45krA1-53r-My=RvSRpCCj=otrg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ming Lin <minggr@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Z Will <zhao6305@gmail.com>
+Cc: Joao Eduardo Luis <joao@suse.de>, ceph-devel@vger.kernel.org, Ceph Users <ceph-users@lists.ceph.com>
 
-On Wed, 5 Jul 2017, Ming Lin wrote:
-> Hi Sage,
+On Thu, 6 Jul 2017, Z Will wrote:
+> Hi Joao :
 > 
-> I didn't send a PR for this patch since it's only for version 10.x.
-> Could you help to review it? Then we'll see whether it's ok to apply it
-> to our production system or not.
+>  Thanks for thorough analysis . My initial concern is that , I think
+> in some cases ,  network failure will make low rank monitor see little
+> siblings (not enough to form a quorum ) , but some high rank mointor
+> can see more siblings, so I want to try to choose  the one who can see
+> the most to be leader, to tolerate the netwok error to the biggiest
+> extent , not just to solve the corner case.   Yes , you are right.
+> This kind of complex network failure is rare to occure. Trying to find
+> out  who can contact the highest number of monitors can only cover
+> some of the situation , and will  introduce some other complexities
+> and slow effcient. This is not good. Blacklisting a problematic
+> monitor is simple and good idea.  The implementation in monitor now is
+> like this, no matter which one  with high rank num lost connection
+> with the leader, this lost monitor  will constantly try to call leader
+> election, affect its siblings, and then affect the whole cluster.
+> Because the leader election procedure is fast, it will be OK for a
+> short time , but soon leader election start again, the cluster will
+> become unstable. I think the probability of this kind of network error
+> is high, YES ?  So based on your idea,  make a little change :
+> 
+>  - send a probe to all monitors
+>  - receive acks
+>  - After receiving acks, it will konw the current quorum and how much
+> monitors it can reach to .
+>        If it can reach to current leader, then it will try to join
+> current quorum
+>        If it can not reach to current leader, then it will decide
+> whether to stand by for a while and try later or start a leader
+> election  based on the information got from probing phase.
+> 
+> Do you think this will be OK ?
 
-Can we make the same change to master?
+I'm worried that even if we can form an initial quorum, we are currently 
+very casual about the "call new election" logic.  If a mon is not part of 
+the quorum it will currently trigger a new election... and with this 
+change it will then not be included in it because it can't reach all mons.  
+The logic there will also have to change so that it confirms that it can 
+reach a majority of mon peers before requesting a new election.
 
 sage
 
+
 > 
-> I'm tracking tail latency hot spot and below is one that I have found.
 > 
-> Test setup:
-> 60 OSDs(5 servers each 12 OSDs)
-> 128 fio clients with 16k randwrite
-> 
-> Thanks,
-> Ming
-> 
-> ------
-> From 6b9a101e15b8baad45f581022c6aa8f20a8d82b2 Mon Sep 17 00:00:00 2001
-> From: Ming Lin <ming.lin@alibaba-inc.com>
-> Date: Thu, 6 Jul 2017 13:21:46 +0800
-> Subject: [PATCH] PGLog: optimize trim/rollback with pointer stored in list
-> 
-> Summary:
-> More than 20ms was measured in below push_back().
-> 
->  981   struct PGLogEntryHandler : public PGLog::LogEntryHandler {
->  982     list<pg_log_entry_t> to_rollback;
->  983     set<hobject_t, hobject_t::BitwiseComparator> to_remove;
->  984     list<pg_log_entry_t> to_trim;
->  985     list<pair<hobject_t, version_t> > to_stash;
-> ....
->  997     void trim(const pg_log_entry_t &entry) {
->  998       to_trim.push_back(entry);
->  999     }
-> 
-> Seems it's heavy to copy the whole pg_log_entry_t to the list container.
-> This patch stores "const pg_log_entry_t *", instead of "pg_log_entry_t"
-> to the list container to optimize push_back performance.
-> 
-> Signed-off-by: Ming Lin <ming.lin@alibaba-inc.com>
-> ---
->  src/osd/PG.h              | 24 ++++++++++++------------
->  src/osd/PGLog.cc          |  6 +++---
->  src/osd/PGLog.h           |  4 ++--
->  src/test/osd/TestPGLog.cc | 12 ++++++------
->  4 files changed, 23 insertions(+), 23 deletions(-)
-> 
-> diff --git a/src/osd/PG.h b/src/osd/PG.h
-> index 5456f12..c52bb2b 100644
-> --- a/src/osd/PG.h
-> +++ b/src/osd/PG.h
-> @@ -979,9 +979,9 @@ public:
->    };
-> 
->    struct PGLogEntryHandler : public PGLog::LogEntryHandler {
-> -    list<pg_log_entry_t> to_rollback;
-> +    list<const pg_log_entry_t *> to_rollback;
->      set<hobject_t, hobject_t::BitwiseComparator> to_remove;
-> -    list<pg_log_entry_t> to_trim;
-> +    list<const pg_log_entry_t *> to_trim;
->      list<pair<hobject_t, version_t> > to_stash;
-> 
->      // LogEntryHandler
-> @@ -991,21 +991,21 @@ public:
->      void try_stash(const hobject_t &hoid, version_t v) {
->        to_stash.push_back(make_pair(hoid, v));
->      }
-> -    void rollback(const pg_log_entry_t &entry) {
-> +    void rollback(const pg_log_entry_t *entry) {
->        to_rollback.push_back(entry);
->      }
-> -    void trim(const pg_log_entry_t &entry) {
-> +    void trim(const pg_log_entry_t *entry) {
->        to_trim.push_back(entry);
->      }
-> 
->      void apply(PG *pg, ObjectStore::Transaction *t) {
-> -      for (list<pg_log_entry_t>::iterator j = to_rollback.begin();
-> +      for (list<const pg_log_entry_t *>::iterator j = to_rollback.begin();
->  	   j != to_rollback.end();
->  	   ++j) {
-> -	assert(j->mod_desc.can_rollback());
-> -	pg->get_pgbackend()->rollback(j->soid, j->mod_desc, t);
-> -	SnapRollBacker rollbacker(j->soid, pg, t);
-> -	j->mod_desc.visit(&rollbacker);
-> +	assert((*j)->mod_desc.can_rollback());
-> +	pg->get_pgbackend()->rollback((*j)->soid, (*j)->mod_desc, t);
-> +	SnapRollBacker rollbacker((*j)->soid, pg, t);
-> +	(*j)->mod_desc.visit(&rollbacker);
->        }
->        for (list<pair<hobject_t, version_t> >::iterator i = to_stash.begin();
->  	   i != to_stash.end();
-> @@ -1018,11 +1018,11 @@ public:
->  	pg->get_pgbackend()->rollback_create(*i, t);
->  	pg->remove_snap_mapped_object(*t, *i);
->        }
-> -      for (list<pg_log_entry_t>::reverse_iterator i = to_trim.rbegin();
-> +      for (list<const pg_log_entry_t *>::reverse_iterator i = to_trim.rbegin();
->  	   i != to_trim.rend();
->  	   ++i) {
-> -	LogEntryTrimmer trimmer(i->soid, pg, t);
-> -	i->mod_desc.visit(&trimmer);
-> +	LogEntryTrimmer trimmer((*i)->soid, pg, t);
-> +	(*i)->mod_desc.visit(&trimmer);
->        }
->      }
->    };
-> diff --git a/src/osd/PGLog.cc b/src/osd/PGLog.cc
-> index ac3403c..2fb6a9d 100644
-> --- a/src/osd/PGLog.cc
-> +++ b/src/osd/PGLog.cc
-> @@ -46,7 +46,7 @@ void PGLog::IndexedLog::advance_rollback_info_trimmed_to(
->        ++rollback_info_trimmed_to_riter;
->        break;
->      }
-> -    h->trim(*rollback_info_trimmed_to_riter);
-> +    h->trim(&(*rollback_info_trimmed_to_riter));
->    }
->  }
-> 
-> @@ -368,7 +368,7 @@ void PGLog::_merge_object_divergent_entries(
->      last = i->version;
-> 
->      if (rollbacker)
-> -      rollbacker->trim(*i);
-> +      rollbacker->trim(&(*i));
->    }
-> 
->    const eversion_t prior_version = entries.begin()->prior_version;
-> @@ -475,7 +475,7 @@ void PGLog::_merge_object_divergent_entries(
->        ldpp_dout(dpp, 10) << __func__ << ": hoid " << hoid
->  			 << " rolling back " << *i << dendl;
->        if (rollbacker)
-> -	rollbacker->rollback(*i);
-> +	rollbacker->rollback(&(*i));
->      }
->      ldpp_dout(dpp, 10) << __func__ << ": hoid " << hoid
->  		       << " rolled back" << dendl;
-> diff --git a/src/osd/PGLog.h b/src/osd/PGLog.h
-> index 098bab6..6fc8583 100644
-> --- a/src/osd/PGLog.h
-> +++ b/src/osd/PGLog.h
-> @@ -46,14 +46,14 @@ struct PGLog : DoutPrefixProvider {
->    ////////////////////////////// sub classes //////////////////////////////
->    struct LogEntryHandler {
->      virtual void rollback(
-> -      const pg_log_entry_t &entry) = 0;
-> +      const pg_log_entry_t *entry) = 0;
->      virtual void remove(
->        const hobject_t &hoid) = 0;
->      virtual void try_stash(
->        const hobject_t &entry,
->        version_t v) = 0;
->      virtual void trim(
-> -      const pg_log_entry_t &entry) = 0;
-> +      const pg_log_entry_t *entry) = 0;
->      virtual ~LogEntryHandler() {}
->    };
-> 
-> diff --git a/src/test/osd/TestPGLog.cc b/src/test/osd/TestPGLog.cc
-> index 34d1313..5afe21d 100644
-> --- a/src/test/osd/TestPGLog.cc
-> +++ b/src/test/osd/TestPGLog.cc
-> @@ -156,10 +156,10 @@ public:
-> 
->    struct LogHandler : public PGLog::LogEntryHandler {
->      set<hobject_t, hobject_t::BitwiseComparator> removed;
-> -    list<pg_log_entry_t> rolledback;
-> +    list<const pg_log_entry_t *> rolledback;
-> 
->      void rollback(
-> -      const pg_log_entry_t &entry) {
-> +      const pg_log_entry_t *entry) {
->        rolledback.push_back(entry);
->      }
->      void remove(
-> @@ -170,7 +170,7 @@ public:
->        // lost/unfound cases are not tested yet
->      }
->      void trim(
-> -      const pg_log_entry_t &entry) {}
-> +      const pg_log_entry_t *entry) {}
->    };
-> 
->    void verify_missing(
-> @@ -195,9 +195,9 @@ public:
-> 
->      {
->        list<pg_log_entry_t>::const_iterator titer = tcase.torollback.begin();
-> -      list<pg_log_entry_t>::const_iterator hiter = handler.rolledback.begin();
-> +      list<const pg_log_entry_t *>::const_iterator hiter = handler.rolledback.begin();
->        for (; titer != tcase.torollback.end(); ++titer, ++hiter) {
-> -	EXPECT_EQ(titer->version, hiter->version);
-> +	EXPECT_EQ(titer->version, (*hiter)->version);
->        }
->      }
-> 
-> @@ -282,7 +282,7 @@ struct TestHandler : public PGLog::LogEntryHandler {
->      // lost/unfound cases are not tested yet
->    }
->    void trim(
-> -    const pg_log_entry_t &entry) {}
-> +    const pg_log_entry_t *entry) {}
->  };
-> 
->  TEST_F(PGLogTest, rewind_divergent_log) {
-> -- 
-> 1.9.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> On Wed, Jul 5, 2017 at 6:26 PM, Joao Eduardo Luis <joao@suse.de> wrote:
+> > On 07/05/2017 08:01 AM, Z Will wrote:
+> >>
+> >> Hi Joao:
+> >>     I think this is all because we choose the monitor with the
+> >> smallest rank number to be leader. For this kind of network error, no
+> >> matter which mon has lost connection with the  mon who has the
+> >> smallest rank num , will be constantly calling an election, that say
+> >> ,will constantly affact the cluster until it is stopped by human . So
+> >> do you think it make sense if I try to figure out a way to choose the
+> >> monitor who can see the most monitors ,  or with  the smallest rank
+> >> num if the view num is same , to be leader ?
+> >>     In probing phase:
+> >>        they will know there own view, so can set a view num.
+> >>     In election phase:
+> >>        they send the view num , rank num .
+> >>        when receiving the election message, it compare the view num (
+> >> higher is leader ) and rank num ( lower is leader).
+> >
+> >
+> > As I understand it, our elector trades-off reliability in case of network
+> > failure for expediency in forming a quorum. This by itself is not a problem
+> > since we don't see many real-world cases where this behaviour happens, and
+> > we are a lot more interested in making sure we have a quorum - given without
+> > a quorum your cluster is effectively unusable.
+> >
+> > Currently, we form a quorum with a minimal number of messages passed.
+> > From my poor recollection, I think the Elector works something like
+> >
+> > - 1 probe message to each monitor in the monmap
+> > - receives defer from a monitor, or defers to a monitor
+> > - declares victory if number of defers is an absolute majority (including
+> > one's defer).
+> >
+> > An election cycle takes about 4-5 messages to complete, with roughly two
+> > round-trips (in the best case scenario).
+> >
+> > Figuring out which monitor is able to contact the highest number of
+> > monitors, and having said monitor being elected the leader, will necessarily
+> > increase the number of messages transferred.
+> >
+> > A rough idea would be
+> >
+> > - all monitors will send probes to all other monitors in the monmap;
+> > - all monitors need to ack the other's probes;
+> > - each monitor will count the number of monitors it can reach, and then send
+> > a message proposing itself as the leader to the other monitors, with the
+> > list of monitors they see;
+> > - each monitor will propose itself as the leader, or defer to some other
+> > monitor.
+> >
+> > This is closer to 3 round-trips.
+> >
+> > Additionally, we'd have to account for the fact that some monitors may be
+> > able to reach all other monitors, while some may only be able to reach a
+> > portion. How do we handle this scenario?
+> >
+> > - What do we do with monitors that do not reach all other monitors?
+> > - Do we ignore them for electoral purposes?
+> > - Are they part of the final quorum?
+> > - What if we need those monitors to form a quorum?
+> >
+> > Personally, I think the easiest solution to this problem would be
+> > blacklisting a problematic monitor (for a given amount a time, or until a
+> > new election is needed due to loss of quorum, or by human intervention).
+> >
+> > For example, if a monitor believes it should be the leader, and if all other
+> > monitors are deferring to someone else that is not reachable, the monitor
+> > could then enter a special case branch:
+> >
+> > - send a probe to all monitors
+> > - receive acks
+> > - share that with other monitors
+> > - if that list is missing monitors, then blacklist the monitor for a period,
+> > and send a message to that monitor with that decision
+> > - the monitor would blacklist itself and retry in a given amount of time.
+> >
+> > Basically, this would be something similar to heartbeats. If a monitor can't
+> > reach all monitors in an existing quorum, then just don't do anything.
+> >
+> > In any case, you are more than welcome to propose a solution. Let us know
+> > what you come up with and if you want to discuss this a bit more ;)
+> >
+> >   -Joao
+> >
+> >>
+> >> On Tue, Jul 4, 2017 at 9:25 PM, Joao Eduardo Luis <joao@suse.de> wrote:
+> >>>
+> >>> On 07/04/2017 06:57 AM, Z Will wrote:
+> >>>>
+> >>>>
+> >>>> Hi:
+> >>>>    I am testing ceph-mon brain split . I have read the code . If I
+> >>>> understand it right , I know it won't be brain split. But I think
+> >>>> there is still another problem. My ceph version is 0.94.10. And here
+> >>>> is my test detail :
+> >>>>
+> >>>> 3 ceph-mons , there ranks are 0, 1, 2 respectively.I stop the rank 1
+> >>>> mon , and use iptables to block the communication between mon 0 and
+> >>>> mon 1. When the cluster is stable, start mon.1 .  I found the 3
+> >>>> monitors will all can not work well. They are all trying to call  new
+> >>>> leader  election . This means the cluster can't work anymore.
+> >>>>
+> >>>> Here is my analysis. Because mon will always respond to leader
+> >>>> election message, so , in my test, communication between  mon.0 and
+> >>>> mon.1 is blocked , so mon.1 will always try to be leader, because it
+> >>>> will always see mon.2, and it should win over mon.2. Mon.0 should
+> >>>> always win over mon.2. But mon.2 will always responsd to the election
+> >>>> message issued by mon.1, so this loop will never end. Am I right ?
+> >>>>
+> >>>> This should be a problem? Or is it  was just designed like this , and
+> >>>> should be handled by human ?
+> >>>
+> >>>
+> >>>
+> >>> This is a known behaviour, quite annoying, but easily identifiable by
+> >>> having
+> >>> the same monitor constantly calling an election and usually timing out
+> >>> because the peon did not defer to it.
+> >>>
+> >>> In a way, the elector algorithm does what it is intended to. Solving this
+> >>> corner case would be nice, but I don't think there's a good way to solve
+> >>> it.
+> >>> We may be able to presume a monitor is in trouble during the probe phase,
+> >>> to
+> >>> disqualify a given monitor from the election, but in the end this is a
+> >>> network issue that may be transient or unpredictable and there's only so
+> >>> much we can account for.
+> >>>
+> >>> Dealing with it automatically would be nice, but I think, thus far, the
+> >>> easiest way to address this particular issue is human intervention.
+> >>>
+> >>>   -Joao
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >
 > 
 > 
