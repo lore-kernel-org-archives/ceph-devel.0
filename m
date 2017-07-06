@@ -1,34 +1,56 @@
-From: "McFarland, Bruce" <Bruce.McFarland@Teradata.com>
-Subject: Rados Bench Scaling question from today's Ceph Perf Call
-Date: Thu, 6 Jul 2017 18:49:47 +0000
-Message-ID: <364F3336-51D4-44CF-99CD-B4075392C1EE@teradata.com>
+From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
+Subject: Re: Note about rbd_aio_write usage
+Date: Thu, 6 Jul 2017 21:25:08 +0200
+Message-ID: <20170706192508.GG9832@mailware>
+References: <f5062e24-d138-a096-0171-79bc1259db7b@corp.ovh.com>
+ <CA+aFP1A5UVZzSDfFvphsVq9Jra9PXbJHUXhaJ9tH8LGx5OKJfA@mail.gmail.com>
+ <c81d848d-04f9-bca5-0e8f-6fe1f1814903@corp.ovh.com>
+ <CA+aFP1A_EAMxP+cMKN2SDcZ2C-KE3wadkydK_AGpfBg+p75pcQ@mail.gmail.com>
+ <a974656a-2fc4-1fed-6adc-fbb42c54bd7e@corp.ovh.com>
+ <CA+aFP1Bs4K=eoYn4d1zo7HY8nWufLYOcQHX-r68frZ+ftNBHxQ@mail.gmail.com>
+ <e39eba47-ae4d-05bb-41cd-928565324d6c@corp.ovh.com>
+ <CA+aFP1CXkF914u1qboCC1OnK3Qqqs7w0NctDxG82u=gpmUcxmA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nat13.teradata.com ([153.65.16.13]:33155 "EHLO
-        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1753057AbdGFSty (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Jul 2017 14:49:54 -0400
-Received: from rpc7292.td.teradata.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 62F7C25802E
-        for <ceph-devel@vger.kernel.org>; Thu,  6 Jul 2017 14:50:09 -0400 (EDT)
-Received: from RPC4168.td.teradata.com (unknown [153.65.10.242])
-        by rpc7292.td.teradata.com (Postfix) with ESMTP id 5648D25801E
-        for <ceph-devel@vger.kernel.org>; Thu,  6 Jul 2017 14:50:09 -0400 (EDT)
-Received: from SUSHDC8440.TD.TERADATA.COM (unknown [153.65.10.253])
-        by Websense Email Security Gateway with ESMTPS id 1894E844B0B19
-        for <ceph-devel@vger.kernel.org>; Thu,  6 Jul 2017 14:49:51 -0400 (EDT)
-Content-Language: en-US
-Content-ID: <7BE404E17A0FD048B8B1F047AB81D2E3@namprd13.prod.outlook.com>
+Received: from predictor.org.pl ([185.5.97.54]:40584 "EHLO predictor.org.pl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751813AbdGFTe5 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 6 Jul 2017 15:34:57 -0400
+Content-Disposition: inline
+In-Reply-To: <CA+aFP1CXkF914u1qboCC1OnK3Qqqs7w0NctDxG82u=gpmUcxmA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: dillaman@redhat.com
+Cc: Piotr =?utf-8?B?RGHFgmVr?= <piotr.dalek@corp.ovh.com>, ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
-TWFyaywNCkluIHRvZGF54oCZcyBwZXJmIGNhbGwgeW91IHNob3dlZCBmaWxlc3RvcmUgYW5kIGJs
-dWVzdG9yZSB3cml0ZSBjbGlmZnMuIFdoYXQsIGluIHlvdXIgb3BpbmlvbiwgaXMgdGhlIGNhdXNl
-IG9mIHRoZSBibHVlc3RvcmUgd3JpdGUgY2xpZmY/IElzIHRoYXQgdGhlIHNpemUgb2YgdGhlIGJs
-dWVmcyBhbmQvb3Igcm9ja3NkYiBjYWNoZT8gWW91IG1lbnRpb25lZCBpdCBjb3VsZCBiZSBzb2x2
-ZWQgYnkgbW9yZSBIVyB3aGljaCBJIHRvb2sgdG8gbWVhbiBiaWdnZXIgY2FjaGUuIElzIHRoYXQg
-YSBjb3JyZWN0IGFzc3VtcHRpb24/DQpUaGFua3MgZm9yIHRoZSBwcmVzZW50YXRpb24uDQpCcnVj
-ZQ0KDQoNCg0K
+On Thu, Jul 06, 2017 at 02:02:39PM -0400, Jason Dillaman wrote:
+> On Thu, Jul 6, 2017 at 11:46 AM, Piotr Dałek <piotr.dalek@corp.ovh.com> wrote:
+> > How about a hybrid solution? Keep the old rbd_aio_write contract (don't copy
+> > the buffer with the assumption that it won't change) and instead of
+> > constructing bufferlist containing bufferptr to copied data, construct a
+> > bufferlist containing bufferptr made with create_static(user_buffer)?
+> 
+> We must be talking past each other -- there was never such a
+> pre-Lumunous contract since (1) it did copy the buffer on every IO and
+> (2) it could have potentially copied before the 'rbd_aio_write' call
+> returned or after (but at least before the completion was fired). Just
+> because it works some times doesn't mean it would always work since it
+> would be a race between two threads.
+>
+> Unfortunately, until the librados issue is solved, you will still have
+> to copy the data once when using the C++ API. The only advantage is
+> that you would be responsible for the copying and it would only need
+> to be performed once instead of twice.
+
+Even if it did copied the buffer, it did at unspecified point in time (as
+you noted above!) requiring rbd_aio_write caller to follow usual AIO
+practice of keeping buffers passed for as long as AIO is in progress. With
+Luminous, not only it's no longer necessary, but it also hinders the user
+program performance as buffers are always deep-copied, regardless of whether
+caller follows AIO rules or not. Is that deep copy an equivalent of what
+Jewel librbd did at unspecified point of time, or extra one?
+
+-- 
+Piotr Dałek
