@@ -1,67 +1,50 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH 1/2] ceph: update ceph_dentry_info::lease_session when
- necessary
-Date: Thu, 06 Jul 2017 09:21:06 -0400
-Message-ID: <1499347266.4812.11.camel@redhat.com>
-References: <20170706080212.28111-1-zyan@redhat.com>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Subject: Re: Note about rbd_aio_write usage
+Date: Thu, 6 Jul 2017 15:33:10 +0200
+Message-ID: <c81d848d-04f9-bca5-0e8f-6fe1f1814903@corp.ovh.com>
+References: <f5062e24-d138-a096-0171-79bc1259db7b@corp.ovh.com>
+	<CA+aFP1A5UVZzSDfFvphsVq9Jra9PXbJHUXhaJ9tH8LGx5OKJfA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:34134 "EHLO
-        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752702AbdGFNVJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Jul 2017 09:21:09 -0400
-Received: by mail-qk0-f177.google.com with SMTP id d78so1773582qkb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Jul 2017 06:21:09 -0700 (PDT)
-In-Reply-To: <20170706080212.28111-1-zyan@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CA+aFP1A5UVZzSDfFvphsVq9Jra9PXbJHUXhaJ9tH8LGx5OKJfA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 2017-07-06 at 16:02 +0800, Yan, Zheng wrote:
-> Current code does not update ceph_dentry_info::lease_session once
-> it is set. If auth mds of corresponding dentry changes, dentry lease
-> stays in invalid state.
-> 
-> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-> ---
->  fs/ceph/inode.c | 9 +++++++--
->  1 file changed, 7 insertions(+), 2 deletions(-)
-> 
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index 53f23c9..220dfd8 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -1016,6 +1016,7 @@ static void update_dentry_lease(struct dentry *dentry,
->  	long unsigned ttl = from_time + (duration * HZ) / 1000;
->  	long unsigned half_ttl = from_time + (duration * HZ / 2) / 1000;
->  	struct inode *dir;
-> +	struct ceph_mds_session *old_lease_session = NULL;
->  
->  	/*
->  	 * Make sure dentry's inode matches tgt_vino. NULL tgt_vino means that
-> @@ -1051,8 +1052,10 @@ static void update_dentry_lease(struct dentry *dentry,
->  	    time_before(ttl, di->time))
->  		goto out_unlock;  /* we already have a newer lease. */
->  
-> -	if (di->lease_session && di->lease_session != session)
-> -		goto out_unlock;
-> +	if (di->lease_session && di->lease_session != session) {
-> +		old_lease_session = di->lease_session;
-> +		di->lease_session = NULL;
-> +	}
->  
->  	ceph_dentry_lru_touch(dentry);
->  
-> @@ -1065,6 +1068,8 @@ static void update_dentry_lease(struct dentry *dentry,
->  	di->time = ttl;
->  out_unlock:
->  	spin_unlock(&dentry->d_lock);
-> +	if (old_lease_session)
-> +		ceph_put_mds_session(old_lease_session);
->  	return;
->  }
->  
-
-Reviewed-by: Jeff Layton <jlayton@redhat.com>
+T24gMTctMDctMDYgMDM6MDMgUE0sIEphc29uIERpbGxhbWFuIHdyb3RlOgo+IE9uIFRodSwgSnVs
+IDYsIDIwMTcgYXQgODoyNiBBTSwgUGlvdHIgRGHFgmVrIDxwaW90ci5kYWxla0Bjb3JwLm92aC5j
+b20+IHdyb3RlOgo+PiBIaSwKPj4KPj4gSWYgeW91J3JlIHVzaW5nICJyYmRfYWlvX3dyaXRlKCki
+IGluIHlvdXIgY29kZSwgYmUgYXdhcmUgb2YgdGhlIGZhY3QgdGhhdAo+PiBiZWZvcmUgTHVtaW5v
+dXMgcmVsZWFzZSwgdGhpcyBmdW5jdGlvbiBleHBlY3RzIGJ1ZmZlciB0byByZW1haW4gdW5jaGFu
+Z2VkCj4+IHVudGlsIHdyaXRlIG9wIGVuZHMsIGFuZCBvbiBMdW1pbm91cyBhbmQgbGF0ZXIgdGhp
+cyBmdW5jdGlvbiBpbnRlcm5hbGx5Cj4+IGNvcGllcyB0aGUgYnVmZmVyLCBhbGxvY2F0aW5nIG1l
+bW9yeSB3aGVyZSBuZWVkZWQsIGZyZWVpbmcgaXQgb25jZSB3cml0ZSBpcwo+PiBkb25lLgoKPiBQ
+cmUtTHVtaW5vdXMgYWxzbyBjb3BpZXMgdGhlIHByb3ZpZGVkIGJ1ZmZlciB3aGVuIHVzaW5nIHRo
+ZSBDIEFQSSAtLQo+IGl0IGp1c3QgY29waWVzIGl0IGF0IGEgbGF0ZXIgcG9pbnQgYW5kIG5vdCBp
+bW1lZGlhdGVseS4gVGhlIGV2ZW50dWFsCj4gZ29hbCBpcyB0byBlbGltaW5hdGUgdGhlIGNvcHkg
+Y29tcGxldGVseSwgYnV0IHRoYXQgcmVxdWlyZXMgc29tZQo+IGFkZGl0aW9uYWwgcGx1bWJpbmcg
+d29yayBkZWVwIGRvd24gd2l0aGluIHRoZSBsaWJyYWRvcyBtZXNzZW5nZXIKPiBsYXllci4KCkkn
+dmUgbGVhcm5lZCB0aGUgaGFyZCB3YXkgdGhhdCBwcmUtbHVtaW5vdXMsIGV2ZW4gaWYgaXQgY29w
+aWVzIHRoZSBidWZmZXIsIAppdCBkb2VzIHNvIHRvbyBsYXRlLiBJbiBteSBzcGVjaWZpYyBjYXNl
+LCBteSBGVVNFIG1vZHVsZSBkb2VzIGVudGVyIHRoZSAKd3JpdGUgY2FsbCBhbmQgaXNzdWVzIHJi
+ZF9haW9fd3JpdGUgdGhlcmUsIHRoZW4gZXhpdHMgdGhlIHdyaXRlIC0gZXhwZWN0aW5nIAp0aGUg
+YnVmZmVyIHByb3ZpZGVkIGJ5IEZVU0UgdG8gYmUgY29waWVkIGJ5IGxpYnJiZCAoYXMgaXQgaGFw
+cGVucyBub3cgaW4gCkx1bWlub3VzKS4gSSBkaWRuJ3QgZXhwZWN0IHRoYXQgaXQncyBhIG5ldyBi
+ZWhhdmlvciBhbmQgb25jZSBteSBjb2RlIHdhcyAKZGVwbG95ZWQgdG8gdXNlIEpld2VsIGxpYnJi
+ZCwgaXQgc3RhcnRlZCB0byBjb25zaXN0ZW50bHkgY29ycnVwdCBkYXRhIGR1cmluZyAKd3JpdGUu
+CgotLSAKUGlvdHIgRGHFgmVrCnBpb3RyLmRhbGVrQGNvcnAub3ZoLmNvbQpodHRwczovL3d3dy5v
+dmguY29tL3VzLwpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+XwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6
+Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
