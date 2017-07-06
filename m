@@ -1,196 +1,172 @@
-From: Z Will <zhao6305@gmail.com>
-Subject: Re: ceph-mon leader election problem, should it be improved ?
-Date: Thu, 6 Jul 2017 15:07:24 +0800
-Message-ID: <CAGOEmcNvNr523e7YH66-4Gv45krA1-53r-My=RvSRpCCj=otrg@mail.gmail.com>
-References: <CAGOEmcO6L2j04NEx5U_wY0WUNnzowW1JkcqKbmtewm6f4rC1PQ@mail.gmail.com>
- <cfb3c139-7423-644f-ce4c-00d55cce5756@suse.de> <CAGOEmcNwuHGoXyAPr51P73pbZL5XOiORhL4P6w7R2yi19e71vA@mail.gmail.com>
- <52301842-ce14-1a1d-72cb-816633f2b860@suse.de>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: RBD rights acting up.
+Date: Thu, 6 Jul 2017 10:00:45 +0200
+Message-ID: <b768fbbf-8357-f95c-6361-4d4494a4a77f@digiware.nl>
+References: <066859a0-9ca6-613f-e9de-a01a430e7efa@digiware.nl>
+ <CAJ4mKGb=6bMGX2ER2phDDy4g4hsdb2pdW21zuuA2+bge-OUiWg@mail.gmail.com>
+ <536f0dd0-41f4-4306-f393-30caffe2375b@digiware.nl>
+ <CA+aFP1A+BCwX1xaTzBnb4HJJd-0qeox-NL4Bf+eWhEr0GfL+WQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f43.google.com ([209.85.214.43]:34831 "EHLO
-        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751057AbdGFHHZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Jul 2017 03:07:25 -0400
-Received: by mail-it0-f43.google.com with SMTP id v202so132692088itb.0
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Jul 2017 00:07:25 -0700 (PDT)
-In-Reply-To: <52301842-ce14-1a1d-72cb-816633f2b860@suse.de>
+Received: from smtp.digiware.nl ([176.74.240.9]:50443 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752778AbdGFIAv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 6 Jul 2017 04:00:51 -0400
+In-Reply-To: <CA+aFP1A+BCwX1xaTzBnb4HJJd-0qeox-NL4Bf+eWhEr0GfL+WQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joao Eduardo Luis <joao@suse.de>
-Cc: ceph-devel@vger.kernel.org, Ceph Users <ceph-users@lists.ceph.com>, Sage Weil <sage@newdream.net>
+To: dillaman@redhat.com
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Joao :
+On 6-7-2017 03:20, Jason Dillaman wrote:
+> Any chance that you have the OSD log for the PGs mapped to that
+> image's header? Since that method is brand new, I wonder if the
+> -EOPNOTSUPP error is being somehow mapped to -EPERM under FreeBSD(?).
 
- Thanks for thorough analysis . My initial concern is that , I think
-in some cases ,  network failure will make low rank monitor see little
-siblings (not enough to form a quorum ) , but some high rank mointor
-can see more siblings, so I want to try to choose  the one who can see
-the most to be leader, to tolerate the netwok error to the biggiest
-extent , not just to solve the corner case.   Yes , you are right.
-This kind of complex network failure is rare to occure. Trying to find
-out  who can contact the highest number of monitors can only cover
-some of the situation , and will  introduce some other complexities
-and slow effcient. This is not good. Blacklisting a problematic
-monitor is simple and good idea.  The implementation in monitor now is
-like this, no matter which one  with high rank num lost connection
-with the leader, this lost monitor  will constantly try to call leader
-election, affect its siblings, and then affect the whole cluster.
-Because the leader election procedure is fast, it will be OK for a
-short time , but soon leader election start again, the cluster will
-become unstable. I think the probability of this kind of network error
-is high, YES ?  So based on your idea,  make a little change :
+Hi Jason,
 
- - send a probe to all monitors
- - receive acks
- - After receiving acks, it will konw the current quorum and how much
-monitors it can reach to .
-       If it can reach to current leader, then it will try to join
-current quorum
-       If it can not reach to current leader, then it will decide
-whether to stand by for a while and try later or start a leader
-election  based on the information got from probing phase.
+Getting annoyed witht the fact that I could not get it right, I thrashed
+the cluster and redid it. So no more logs...
+I think we must write this up to "pilot error".
 
-Do you think this will be OK ?
+And then it worked after I build a new cluster..
+Now the difference is that the second time I created the mgr rights in
+the client keyring right from the bat. It was missing that in earlier
+version of my build-cluster script.
 
+So my conclusion is that all tries I did to get a working keyring with
+mgr rights were unsuccessful.
 
-On Wed, Jul 5, 2017 at 6:26 PM, Joao Eduardo Luis <joao@suse.de> wrote:
-> On 07/05/2017 08:01 AM, Z Will wrote:
+But your answer triggers something for me to check....
+There is now conversion of the errorcodes in FreeBSD servers and
+clients. All wire messages should contain the "Linux" version of the
+errorcode, and are translated upon exit or arrival.
+Problem is there what to do with errors that do not have a matching
+counterpart. ATM they are all translated to EPERM, so once converted the
+meaning is lost, and the errorcode stays at EPERM.
+
+This gives me an idea though. Perhaps I should convert errorcodes
+without Linux counterpart to 1000+errocode. Once they arrive at the
+other end, it is time to decide how to translate back:
+	if it is a FreeBSD system, return wirecode-1000
+	if it is a linux system return EPERM.
+(And start looking into the Errorcode class)
+
+Fortunatelly that error type is known on both sides of the fence:
+Linux:#define        EOPNOTSUPP      95
+FreeBSD:#define      EOPNOTSUPP      45
+And should be translatable without loss of information.
+
+Thing is, the full extend of the PR set got merged like only yesterday
+and I'm testing a version of v12.1.0 with without that translation part.
+The package was last build on Tuesday 4th.
+
+So I guess it must have been me, being clumsy with rights.
+
+--WjW
+
+> On Mon, Jul 3, 2017 at 3:24 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
 >>
->> Hi Joao:
->>     I think this is all because we choose the monitor with the
->> smallest rank number to be leader. For this kind of network error, no
->> matter which mon has lost connection with the  mon who has the
->> smallest rank num , will be constantly calling an election, that say
->> ,will constantly affact the cluster until it is stopped by human . So
->> do you think it make sense if I try to figure out a way to choose the
->> monitor who can see the most monitors ,  or with  the smallest rank
->> num if the view num is same , to be leader ?
->>     In probing phase:
->>        they will know there own view, so can set a view num.
->>     In election phase:
->>        they send the view num , rank num .
->>        when receiving the election message, it compare the view num (
->> higher is leader ) and rank num ( lower is leader).
->
->
-> As I understand it, our elector trades-off reliability in case of network
-> failure for expediency in forming a quorum. This by itself is not a problem
-> since we don't see many real-world cases where this behaviour happens, and
-> we are a lot more interested in making sure we have a quorum - given without
-> a quorum your cluster is effectively unusable.
->
-> Currently, we form a quorum with a minimal number of messages passed.
-> From my poor recollection, I think the Elector works something like
->
-> - 1 probe message to each monitor in the monmap
-> - receives defer from a monitor, or defers to a monitor
-> - declares victory if number of defers is an absolute majority (including
-> one's defer).
->
-> An election cycle takes about 4-5 messages to complete, with roughly two
-> round-trips (in the best case scenario).
->
-> Figuring out which monitor is able to contact the highest number of
-> monitors, and having said monitor being elected the leader, will necessarily
-> increase the number of messages transferred.
->
-> A rough idea would be
->
-> - all monitors will send probes to all other monitors in the monmap;
-> - all monitors need to ack the other's probes;
-> - each monitor will count the number of monitors it can reach, and then send
-> a message proposing itself as the leader to the other monitors, with the
-> list of monitors they see;
-> - each monitor will propose itself as the leader, or defer to some other
-> monitor.
->
-> This is closer to 3 round-trips.
->
-> Additionally, we'd have to account for the fact that some monitors may be
-> able to reach all other monitors, while some may only be able to reach a
-> portion. How do we handle this scenario?
->
-> - What do we do with monitors that do not reach all other monitors?
-> - Do we ignore them for electoral purposes?
-> - Are they part of the final quorum?
-> - What if we need those monitors to form a quorum?
->
-> Personally, I think the easiest solution to this problem would be
-> blacklisting a problematic monitor (for a given amount a time, or until a
-> new election is needed due to loss of quorum, or by human intervention).
->
-> For example, if a monitor believes it should be the leader, and if all other
-> monitors are deferring to someone else that is not reachable, the monitor
-> could then enter a special case branch:
->
-> - send a probe to all monitors
-> - receive acks
-> - share that with other monitors
-> - if that list is missing monitors, then blacklist the monitor for a period,
-> and send a message to that monitor with that decision
-> - the monitor would blacklist itself and retry in a given amount of time.
->
-> Basically, this would be something similar to heartbeats. If a monitor can't
-> reach all monitors in an existing quorum, then just don't do anything.
->
-> In any case, you are more than welcome to propose a solution. Let us know
-> what you come up with and if you want to discuss this a bit more ;)
->
->   -Joao
->
 >>
->> On Tue, Jul 4, 2017 at 9:25 PM, Joao Eduardo Luis <joao@suse.de> wrote:
+>> Op 3-7-2017 om 20:00 schreef Gregory Farnum:
 >>>
->>> On 07/04/2017 06:57 AM, Z Will wrote:
+>>> On Mon, Jul 3, 2017 at 10:51 AM, Willem Jan Withagen <wjw@digiware.nl>
+>>> wrote:
 >>>>
+>>>> Hi,
 >>>>
->>>> Hi:
->>>>    I am testing ceph-mon brain split . I have read the code . If I
->>>> understand it right , I know it won't be brain split. But I think
->>>> there is still another problem. My ceph version is 0.94.10. And here
->>>> is my test detail :
+>>>> I do not seem to have luck with working with the rights structure in
+>>>> Ceph. But please help me out with my ignorance....
 >>>>
->>>> 3 ceph-mons , there ranks are 0, 1, 2 respectively.I stop the rank 1
->>>> mon , and use iptables to block the communication between mon 0 and
->>>> mon 1. When the cluster is stable, start mon.1 .  I found the 3
->>>> monitors will all can not work well. They are all trying to call  new
->>>> leader  election . This means the cluster can't work anymore.
+>>>> I have setup the FreeBSD cluster running in 5 ceph jails/vms. That works
+>>>> as a charm, and I can use ceph-fuse to mount a FS and write/read/... on
+>>>> it when I'm outside the ceph jails. For that I copies ceph.conf and
+>>>> ceph.client.admin.keyring to the current system I would like to connect
+>>>> with.
 >>>>
->>>> Here is my analysis. Because mon will always respond to leader
->>>> election message, so , in my test, communication between  mon.0 and
->>>> mon.1 is blocked , so mon.1 will always try to be leader, because it
->>>> will always see mon.2, and it should win over mon.2. Mon.0 should
->>>> always win over mon.2. But mon.2 will always responsd to the election
->>>> message issued by mon.1, so this loop will never end. Am I right ?
+>>>> Also things like ceph -s and rados commands just work as a charm.
 >>>>
->>>> This should be a problem? Or is it  was just designed like this , and
->>>> should be handled by human ?
+>>>> So the next check is to test rbd-ggate, the freebsd variant to map
+>>>> rbd-images to a device.... But then I start to get things like:
+>>>> ----
+>>>> # rbd info rbd/testrbdggate45846
+>>>> 2017-07-03 19:41:00.562567 80ee53b00 -1 librbd::image::OpenRequest:
+>>>> failed to retrieve create_timestamp: (1) Operation not permitted
+>>>> 2017-07-03 19:41:00.562685 80f8b2000 -1 librbd::ImageState: 0x80ef23640
+>>>> failed to open image: (1) Operation not permitted
+>>>> rbd: error opening image testrbdggate45846: (1) Operation not permitted
+>>>> ----
+>>>>
+>>>> Which is definitly a rights issue, because I can do that without much
+>>>> trouble on one of the Ceph servers:
+>>>> ----
+>>>> # jexec ceph_0 rbd info rbd/testrbdggate45846
+>>>> rbd image 'testrbdggate45846':
+>>>>          size 65536 kB in 16 objects
+>>>>          order 22 (4096 kB objects)
+>>>>          block_name_prefix: rbd_data.10e3c0b1daf
+>>>>          format: 2
+>>>>          features: layering, exclusive-lock, object-map, fast-diff,
+>>>> deep-flatten
+>>>>          flags:
+>>>> ----
+>>>>
+>>>> So why does this work from a server that is actually running
+>>>> mon/osd/mgr, but not from a server that has the same
+>>>> ceph.client.admin.keyring:
+>>>> [client.admin]
+>>>>          key = AQBUXllZMNZSARAAsSexLBkWJQS6vHi9u3rrSA==
+>>>>          auid = 0
+>>>>          caps mds = "allow *"
+>>>>          caps mgr = "allow *"
+>>>>          caps mon = "allow *"
+>>>>          caps osd = "allow *"
+>>>>
+>>>> and ceph auth list:
+>>>> installed auth entries:
+>>>> client.admin
+>>>>          key: AQBUXllZMNZSARAAsSexLBkWJQS6vHi9u3rrSA==
+>>>>          auid: 0
+>>>>          caps: [mds] allow *
+>>>>          caps: [mgr] allow *
+>>>>          caps: [mon] allow *
+>>>>          caps: [osd] allow *
+>>
+>>
+>>>> client.ggate
+>>>>          key: AQANP1pZGNDmNRAAVb8NRXUMmWYh9i1nju6rYA==
+>>>>          caps: [mon] allow r
+>>>>          caps: [osd] allow class-read object_prefix rbd_children, allow
+>>>> rwx pool=rbd
 >>>
->>>
->>>
->>> This is a known behaviour, quite annoying, but easily identifiable by
->>> having
->>> the same monitor constantly calling an election and usually timing out
->>> because the peon did not defer to it.
->>>
->>> In a way, the elector algorithm does what it is intended to. Solving this
->>> corner case would be nice, but I don't think there's a good way to solve
->>> it.
->>> We may be able to presume a monitor is in trouble during the probe phase,
->>> to
->>> disqualify a given monitor from the election, but in the end this is a
->>> network issue that may be transient or unpredictable and there's only so
->>> much we can account for.
->>>
->>> Dealing with it automatically would be nice, but I think, thus far, the
->>> easiest way to address this particular issue is human intervention.
->>>
->>>   -Joao
+>>> Presumably ggate is using this client. I'm not sure off-hand what
+>>> permissions RBD needs, but I presume it needs class-write in order to
+>>> create new images (and they probably won't be prefixed with
+>>> rbd_children?).
+>>
+>>
+>> Well,  client.ggate was an attempt to mirror what we have in our working
+>> OpenStack ceph.
+>>
+>> But my major concern is that it all works on a host that is actually part of
+>> the cluster (as admin),
+>> but it does not work for all rbd commands once I start working on a separate
+>> host.
+>> Ceph and rados are oke, but certain rbs commands fail.
+>>
+>> So why doesn't it work as admin on an 'external'  host.
+>>
+>>
+>> --WjW
 >>
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
+> 
+> 
+> 
+
