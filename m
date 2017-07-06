@@ -1,63 +1,67 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH 2/2] ceph: fix race in concurrent readdir
-Date: Thu,  6 Jul 2017 21:12:09 +0800
-Message-ID: <20170706131209.31734-1-zyan@redhat.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: [PATCH 1/2] ceph: update ceph_dentry_info::lease_session when
+ necessary
+Date: Thu, 06 Jul 2017 09:21:06 -0400
+Message-ID: <1499347266.4812.11.camel@redhat.com>
+References: <20170706080212.28111-1-zyan@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53808 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751952AbdGFNLn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 6 Jul 2017 09:11:43 -0400
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id D1A844E33D
-        for <ceph-devel@vger.kernel.org>; Thu,  6 Jul 2017 13:11:42 +0000 (UTC)
+Received: from mail-qk0-f177.google.com ([209.85.220.177]:34134 "EHLO
+        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752702AbdGFNVJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Jul 2017 09:21:09 -0400
+Received: by mail-qk0-f177.google.com with SMTP id d78so1773582qkb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Jul 2017 06:21:09 -0700 (PDT)
+In-Reply-To: <20170706080212.28111-1-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: jlayton@redhat.com
+To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
 
-For a large directory, program needs to issue multiple readdir
-syscalls to get all dentries. When there are multiple programs
-read the directory concurrently. Following sequence of events
-can happen.
+On Thu, 2017-07-06 at 16:02 +0800, Yan, Zheng wrote:
+> Current code does not update ceph_dentry_info::lease_session once
+> it is set. If auth mds of corresponding dentry changes, dentry lease
+> stays in invalid state.
+> 
+> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+> ---
+>  fs/ceph/inode.c | 9 +++++++--
+>  1 file changed, 7 insertions(+), 2 deletions(-)
+> 
+> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
+> index 53f23c9..220dfd8 100644
+> --- a/fs/ceph/inode.c
+> +++ b/fs/ceph/inode.c
+> @@ -1016,6 +1016,7 @@ static void update_dentry_lease(struct dentry *dentry,
+>  	long unsigned ttl = from_time + (duration * HZ) / 1000;
+>  	long unsigned half_ttl = from_time + (duration * HZ / 2) / 1000;
+>  	struct inode *dir;
+> +	struct ceph_mds_session *old_lease_session = NULL;
+>  
+>  	/*
+>  	 * Make sure dentry's inode matches tgt_vino. NULL tgt_vino means that
+> @@ -1051,8 +1052,10 @@ static void update_dentry_lease(struct dentry *dentry,
+>  	    time_before(ttl, di->time))
+>  		goto out_unlock;  /* we already have a newer lease. */
+>  
+> -	if (di->lease_session && di->lease_session != session)
+> -		goto out_unlock;
+> +	if (di->lease_session && di->lease_session != session) {
+> +		old_lease_session = di->lease_session;
+> +		di->lease_session = NULL;
+> +	}
+>  
+>  	ceph_dentry_lru_touch(dentry);
+>  
+> @@ -1065,6 +1068,8 @@ static void update_dentry_lease(struct dentry *dentry,
+>  	di->time = ttl;
+>  out_unlock:
+>  	spin_unlock(&dentry->d_lock);
+> +	if (old_lease_session)
+> +		ceph_put_mds_session(old_lease_session);
+>  	return;
+>  }
+>  
 
- - program calls readdir with pos = 2. ceph sends readdir request
-   to mds. The reply contains N1 entries. ceph adds these N1 entries
-   to readdir cache.
- - program calls readdir with pos = N1+2. The readdir is satisfied
-   by the readdir cache, N2 entries are returned. (Other program
-   calls readdir in the middle, which fills the cache)
- - program calls readdir with pos = N1+N2+2. ceph sends readdir
-   request to mds. The reply contains N3 entries and it reaches
-   directory end. ceph adds these N3 entries to the readdir cache
-   and marks directory complete.
-
-The second readdir call does not update fi->readdir_cache_idx.
-ceph add the last N3 entries to wrong places.
-
-Cc: stable@vger.kernel.org # v4.3+
-Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
----
- fs/ceph/dir.c | 5 +++++
- 1 file changed, 5 insertions(+)
-
-diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index e071d23..ef7240a 100644
---- a/fs/ceph/dir.c
-+++ b/fs/ceph/dir.c
-@@ -271,6 +271,11 @@ static int __dcache_readdir(struct file *file,  struct dir_context *ctx,
- 		if (ret < 0)
- 			err = ret;
- 		dput(last);
-+		/* last_name no longer match cache index */
-+		if (fi->readdir_cache_idx >= 0) {
-+			fi->readdir_cache_idx = -1;
-+			fi->dir_release_count = 0;
-+		}
- 	}
- 	return err;
- }
--- 
-2.9.4
-
+Reviewed-by: Jeff Layton <jlayton@redhat.com>
