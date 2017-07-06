@@ -1,338 +1,188 @@
-From: Jiaying Ren <mikulely@gmail.com>
-Subject: Re: RGW: Implement S3 storage class feature
-Date: Thu, 6 Jul 2017 19:00:25 +0800
-Message-ID: <CAF8OO3Pgrw4HQ0iQv+RoEyG5ygVUpyomA9PKii8X920iJ4PRFA@mail.gmail.com>
-References: <CAF8OO3Mo3xFbxioTedym+rByF1Eu3kNhHayn9mx1V6N5h-LWbQ@mail.gmail.com>
- <2035535832.26037779.1498053843582.JavaMail.zimbra@redhat.com>
- <b2db655b-eec8-aeb3-3428-1f12d1c28796@redhat.com> <CADRKj5Q4YZaYoPEABhjnNRNoN-vC1T=49knL9npHQpsSzWUr=w@mail.gmail.com>
- <092f8bc6-8222-b3b0-1b74-7133ae1c320d@redhat.com> <CAF8OO3NR21ojUdaHLmcvUL+uhsyLf666iHV8im_k9j5ZpCx=KA@mail.gmail.com>
- <CAOi4hNd_wAshA_=4cW4X7Y_rijavs82-J2FbaE-L92P_Vy0RkA@mail.gmail.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: RBD rights acting up.
+Date: Thu, 6 Jul 2017 07:24:00 -0400
+Message-ID: <CA+aFP1D0zdwazOnN_4yDOt8GL5=RUu=OpQ3mn=K+46+COqYeMA@mail.gmail.com>
+References: <066859a0-9ca6-613f-e9de-a01a430e7efa@digiware.nl>
+ <CAJ4mKGb=6bMGX2ER2phDDy4g4hsdb2pdW21zuuA2+bge-OUiWg@mail.gmail.com>
+ <536f0dd0-41f4-4306-f393-30caffe2375b@digiware.nl> <CA+aFP1A+BCwX1xaTzBnb4HJJd-0qeox-NL4Bf+eWhEr0GfL+WQ@mail.gmail.com>
+ <b768fbbf-8357-f95c-6361-4d4494a4a77f@digiware.nl>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f54.google.com ([209.85.218.54]:35568 "EHLO
-        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751952AbdGFLA1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Jul 2017 07:00:27 -0400
-Received: by mail-oi0-f54.google.com with SMTP id 191so13100027oii.2
-        for <ceph-devel@vger.kernel.org>; Thu, 06 Jul 2017 04:00:27 -0700 (PDT)
-In-Reply-To: <CAOi4hNd_wAshA_=4cW4X7Y_rijavs82-J2FbaE-L92P_Vy0RkA@mail.gmail.com>
+Received: from mail-yw0-f169.google.com ([209.85.161.169]:35368 "EHLO
+        mail-yw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750977AbdGFLYG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Jul 2017 07:24:06 -0400
+Received: by mail-yw0-f169.google.com with SMTP id v193so6528250ywg.2
+        for <ceph-devel@vger.kernel.org>; Thu, 06 Jul 2017 04:24:06 -0700 (PDT)
+In-Reply-To: <b768fbbf-8357-f95c-6361-4d4494a4a77f@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?5pa56ZKw57+U?= <abcdeffyx@gmail.com>, Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>, Matt Benjamin <mbenjamin@redhat.com>, dang@redhat.com
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Thanks all for your insight!
-After more investigation,I'd like to
-share some output, your comments are appreciated as always. ;-)
+I leaning towards not a real permission issue since by the time the
+"open image" state machine reached that point of failure, it would
+have already successfully executed several getter class methods on the
+same object -- just like the one that failed.
 
-* proposal
-
-** introduce tail_data_pool
-
-Each storage class is presented as individual placement rule. Each
-placement rule has serveral pools:
-
-+ index_pool(for bucket index)
-+ data_pool(for head)
-+ tail_data_pool(for tail)
-
-Finally,different storage classes use the same index_pool and
-data_pool, but different tail_data_pool. Using different storage
-classes means using different tail_data_pools.
-
-Here's a placement rule/storage class config sample output:
-
-#+BEGIN_EXAMPLE
-    {
-        "key": "STANDARD",
-        "val": {
-            "index_pool": "us-east-1.rgw.buckets.index",
-            "data_pool": "us-east-1.rgw.buckets.data",
-            "tail_data_pool": "us-east-1.rgw.buckets.3replica", <-
-introduced for rgw_obj raw data
-            "data_extra_pool": "us-east-1.rgw.buckets.non-ec",
-            "index_type": 0,
-            "compression": "",
-            "inline_head": 1
-        }
-    },
-#+END_EXAMPLE
-
-Multipart rgw_obj will be stored at tail_data_pool. Further more,for
-those rgw_obj only has head,not tail, we can refactor Manifest to
-support disable inline first chunk data of rgw_obj into the head,
-which can finally match the semantic of AWS S3 sotrage class:
-
-#+BEGIN_EXAMPLE
-    {
-        "key": "STANDARD",
-        "val": {
-            "index_pool": "us-east-1.rgw.buckets.index",
-            "data_pool": "us-east-1.rgw.buckets.data",
-            "tail_data_pool": "us-east-1.rgw.buckets.3replica",
-            "data_extra_pool": "us-east-1.rgw.buckets.non-ec",
-            "index_type": 0,
-            "compression": "",
-            "inline_head": 1  <- introduced for inline first data
-chunk of rgw_obj into head
-        }
-    },
-#+END_EXAMPLE
-
-** expose different storage class as individual placement rule
-
-As draft ,placment list will list all storage class:
-
-#+BEGIN_EXAMPLE
- ./bin/radosgw-admin -c ceph.conf zone  placement list
-[
-    {
-        "key": "STANDARD",
-        "val": {
-            "index_pool": "us-east-1.rgw.buckets.index",
-            "data_pool": "us-east-1.rgw.buckets.data",
-            "tail_data_pool": "us-east-1.rgw.buckets.3replica",
-            "data_extra_pool": "us-east-1.rgw.buckets.non-ec",
-            "index_type": 0,
-            "compression": "",
-            "inline_head": 1
-        }
-    },
-
-    {
-        "key": "RRS",
-        "val": {
-            "index_pool": "us-east-1.rgw.buckets.index",
-            "data_pool": "us-east-1.rgw.buckets.data",
-            "tail_data_pool": "us-east-1.rgw.buckets.2replica",
-            "data_extra_pool": "us-east-1.rgw.buckets.non-ec",
-            "index_type": 0,
-            "compression": ""
-            "inline_head": 1
-        }
-    }
-]
-#+END_EXAMPLE
-
-Another option would be expose serveral storage classes in the same
-placement rule:
-
-#+BEGIN_EXAMPLE
- ./bin/radosgw-admin -c ceph.conf zone  placement list
-[
-    {
-        "key": "default-placement",
-        "val": {
-            "index_pool": "us-east-1.rgw.buckets.index",
-            "storage_class"
-            {
-              "STANDARD" : {
-                           "data_pool": "us-east-1.rgw.3replica",
-                           "data_extra_pool": "us-east-1.rgw.buckets.non-ec=
-",
-                           "inline_head": 1
-                           },
-              "RRS" :      {
-                           "data_pool": "us-east-1.rgw.2replica",
-                           "data_extra_pool": "us-east-1.rgw.buckets.non-ec=
-",
-                           "inline_head": 1
-                           },
-            }
-            "index_type": 0,
-            "compression": ""
-        }
-    }
-]
-#+END_EXAMPLE
-
-This approach strict the meaning of storage class as different data
-pool. But we may support things like Multi-Regional Storage (
-https://cloud.google.com/storage/docs/storage-classes#multi-regional )
-in the future. So I'd prefer expost storage class at placement rule
-level.
-
-* issues
-
-If we introduced the tail_data_pool,we need corresponding
-modification. I'm not sure about this, feedback are appreciated.
-
-** use rgw_pool instead of placment rule in the RGWManifest
-
-In the RGWObjManifest, we've defined two placement rules:
-
-+ head_placement_rule
-(https://github.com/ceph/ceph/blob/master/src/rgw/rgw_rados.h#L406)
-+ tail_placement.placement_rule
-(https://github.com/ceph/ceph/blob/master/src/rgw/rgw_rados.h#L119)
-
-then we use placment rule to find the data_pool of the placement
-rule.If we introduced the tail_data_pool,there's no need to keep
-tail_placement.placement_rule(although it is the same as
-head_placement_rule)
-
-In the RGWObjManifest internal, `class rgw_obj_select`also defined a
-`placement_rule`
-(https://github.com/ceph/ceph/blob/master/src/rgw/rgw_rados.h#L127),
-which finally used placement rule to find the data_pool of that
-placement rule.
-
-So I suppose to instead of using placement rule in the
-RGWManifest, replaced with rgw_pool.so that we've the chance to use
-tail_data_pool and data_pool in the same placement rule.
-
-On 23 June 2017 at 13:43, =E6=96=B9=E9=92=B0=E7=BF=94 <abcdeffyx@gmail.com>=
- wrote:
-> I think storing the head object and tail objects in different pools is al=
-so
-> necessary.
+On Thu, Jul 6, 2017 at 4:00 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> On 6-7-2017 03:20, Jason Dillaman wrote:
+>> Any chance that you have the OSD log for the PGs mapped to that
+>> image's header? Since that method is brand new, I wonder if the
+>> -EOPNOTSUPP error is being somehow mapped to -EPERM under FreeBSD(?).
 >
-> If we introduce a tail_data_pool in placement rule to store tail objects.=
- we
-> can create replicated pool for data_pool and ec for tail_data_pool to
-> leverage the performance and capacity.
+> Hi Jason,
 >
-> 2017-06-22 17:44 GMT+08:00 Jiaying Ren <mikulely@gmail.com>:
->>
->> On 21 June 2017 at 23:50, Daniel Gryniewicz <dang@redhat.com> wrote:
->> >>>
->> >> My original thinking was that when we reassign an object to a new
->> >> placement, we only touch its tail which is incompatible with that.
->> >> However, thinking about it some more I don't see why we need to have
->> >> this limitation, so it's probably possible to keep the data in the
->> >> head in one case, and modify the object and have the data in the tail
->> >> (object's head will need to be rewritten anyway because we modify the
->> >> manifest).
->> >> I think that the decision whether we keep data in the head could be a
->> >> property of the zone.
->>
->> Yes, I guess we also need to check the zone placement rule config when
->> pull the realm in the multisite env, to make sure the sync peer has
->> the same storage class support, multisite sync should also respect
->> object storage class.
->>
->> >> In any case, once an object is created changing
->> >> this property will only affect newly created objects, and old objects
->> >> could still be read correctly. Having data in the head is an
->> >> optimization that supposedly reduces small objects latency, and I
->> >> still think it's useful in a mixed pools situation. The thought is
->> >> that the bulk of the data will be at the tail anyway. However, we
->> >> recently changed the default head size from 512k to 4M, so this might
->> >> not be true any more. Anyhow, I favour having this as a configurable
->> >> (which should be simple to add).
->> >>
->> >> Yehuda
->> >>
->> >
->> >
->> > I would be strongly against keeping data in the head when the head is =
-in
->> > a
->> > lower-level storage class.  That means that the entire object is
->> > violating
->> > the constraints of the storage class.
->>
->> Agreed. The default behavior of storage class require us to keep the
->> data in the head as the same pool as the tail. Even if we made this as
->> a configureable option, we should disable this kind of inline by
->> default to match the default behavior of storage class.
->>
->> >
->> > Of course, having the head in a lower storage class (data or not) is
->> > probably a violation.  Maybe we'd have to require that all heads go in
->> > the
->> > highest storage class.
->> >
->> > Daniel
->>
->> On 21 June 2017 at 23:50, Daniel Gryniewicz <dang@redhat.com> wrote:
->> > On 06/21/2017 11:14 AM, Yehuda Sadeh-Weinraub wrote:
->> >>
->> >> On Wed, Jun 21, 2017 at 7:46 AM, Daniel Gryniewicz <dang@redhat.com>
->> >> wrote:
->> >>>
->> >>> On 06/21/2017 10:04 AM, Matt Benjamin wrote:
->> >>>>
->> >>>>
->> >>>> Hi,
->> >>>>
->> >>>> Looks very coherent.
->> >>>>
->> >>>> My main question is about...
->> >>>>
->> >>>> ----- Original Message -----
->> >>>>>
->> >>>>>
->> >>>>> From: "Jiaying Ren" <mikulely@gmail.com>
->> >>>>> To: "Yehuda Sadeh-Weinraub" <ysadehwe@redhat.com>
->> >>>>> Cc: "ceph-devel" <ceph-devel@vger.kernel.org>
->> >>>>> Sent: Wednesday, June 21, 2017 7:39:24 AM
->> >>>>> Subject: RGW: Implement S3 storage class feature
->> >>>>>
->> >>>>
->> >>>>>
->> >>>>> * Todo List
->> >>>>>
->> >>>>> + the head of rgw-object should only contains the metadata of
->> >>>>>   rgw-object,the first chunk of rgw-object data should be stored i=
-n
->> >>>>>   the same pool as the tail of rgw-object
->> >>>>
->> >>>>
->> >>>>
->> >>>> Is this always desirable?
->> >>>>
->> >>>
->> >>> Well, unless the head pool happens to have the correct storage class=
-,
->> >>> it's
->> >>> necessary.  And I'd guess that verification of this is complicated,
->> >>> although
->> >>> maybe not.
->> >>>
->> >>> Maybe we can use the head pool if it has >=3D the correct storage cl=
-ass?
->> >>>
->> >> My original thinking was that when we reassign an object to a new
->> >> placement, we only touch its tail which is incompatible with that.
->> >> However, thinking about it some more I don't see why we need to have
->> >> this limitation, so it's probably possible to keep the data in the
->> >> head in one case, and modify the object and have the data in the tail
->> >> (object's head will need to be rewritten anyway because we modify the
->> >> manifest).
->> >> I think that the decision whether we keep data in the head could be a
->> >> property of the zone. In any case, once an object is created changing
->> >> this property will only affect newly created objects, and old objects
->> >> could still be read correctly. Having data in the head is an
->> >> optimization that supposedly reduces small objects latency, and I
->> >> still think it's useful in a mixed pools situation. The thought is
->> >> that the bulk of the data will be at the tail anyway. However, we
->> >> recently changed the default head size from 512k to 4M, so this might
->> >> not be true any more. Anyhow, I favour having this as a configurable
->> >> (which should be simple to add).
->> >>
->> >> Yehuda
->> >>
->> >
->> >
->> > I would be strongly against keeping data in the head when the head is =
-in
->> > a
->> > lower-level storage class.  That means that the entire object is
->> > violating
->> > the constraints of the storage class.
->> >
->> > Of course, having the head in a lower storage class (data or not) is
->> > probably a violation.  Maybe we'd have to require that all heads go in
->> > the
->> > highest storage class.
->> >
->> > Daniel
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Getting annoyed witht the fact that I could not get it right, I thrashed
+> the cluster and redid it. So no more logs...
+> I think we must write this up to "pilot error".
 >
+> And then it worked after I build a new cluster..
+> Now the difference is that the second time I created the mgr rights in
+> the client keyring right from the bat. It was missing that in earlier
+> version of my build-cluster script.
 >
+> So my conclusion is that all tries I did to get a working keyring with
+> mgr rights were unsuccessful.
+>
+> But your answer triggers something for me to check....
+> There is now conversion of the errorcodes in FreeBSD servers and
+> clients. All wire messages should contain the "Linux" version of the
+> errorcode, and are translated upon exit or arrival.
+> Problem is there what to do with errors that do not have a matching
+> counterpart. ATM they are all translated to EPERM, so once converted the
+> meaning is lost, and the errorcode stays at EPERM.
+>
+> This gives me an idea though. Perhaps I should convert errorcodes
+> without Linux counterpart to 1000+errocode. Once they arrive at the
+> other end, it is time to decide how to translate back:
+>         if it is a FreeBSD system, return wirecode-1000
+>         if it is a linux system return EPERM.
+> (And start looking into the Errorcode class)
+>
+> Fortunatelly that error type is known on both sides of the fence:
+> Linux:#define        EOPNOTSUPP      95
+> FreeBSD:#define      EOPNOTSUPP      45
+> And should be translatable without loss of information.
+>
+> Thing is, the full extend of the PR set got merged like only yesterday
+> and I'm testing a version of v12.1.0 with without that translation part.
+> The package was last build on Tuesday 4th.
+>
+> So I guess it must have been me, being clumsy with rights.
+>
+> --WjW
+>
+>> On Mon, Jul 3, 2017 at 3:24 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>>
+>>>
+>>> Op 3-7-2017 om 20:00 schreef Gregory Farnum:
+>>>>
+>>>> On Mon, Jul 3, 2017 at 10:51 AM, Willem Jan Withagen <wjw@digiware.nl>
+>>>> wrote:
+>>>>>
+>>>>> Hi,
+>>>>>
+>>>>> I do not seem to have luck with working with the rights structure in
+>>>>> Ceph. But please help me out with my ignorance....
+>>>>>
+>>>>> I have setup the FreeBSD cluster running in 5 ceph jails/vms. That works
+>>>>> as a charm, and I can use ceph-fuse to mount a FS and write/read/... on
+>>>>> it when I'm outside the ceph jails. For that I copies ceph.conf and
+>>>>> ceph.client.admin.keyring to the current system I would like to connect
+>>>>> with.
+>>>>>
+>>>>> Also things like ceph -s and rados commands just work as a charm.
+>>>>>
+>>>>> So the next check is to test rbd-ggate, the freebsd variant to map
+>>>>> rbd-images to a device.... But then I start to get things like:
+>>>>> ----
+>>>>> # rbd info rbd/testrbdggate45846
+>>>>> 2017-07-03 19:41:00.562567 80ee53b00 -1 librbd::image::OpenRequest:
+>>>>> failed to retrieve create_timestamp: (1) Operation not permitted
+>>>>> 2017-07-03 19:41:00.562685 80f8b2000 -1 librbd::ImageState: 0x80ef23640
+>>>>> failed to open image: (1) Operation not permitted
+>>>>> rbd: error opening image testrbdggate45846: (1) Operation not permitted
+>>>>> ----
+>>>>>
+>>>>> Which is definitly a rights issue, because I can do that without much
+>>>>> trouble on one of the Ceph servers:
+>>>>> ----
+>>>>> # jexec ceph_0 rbd info rbd/testrbdggate45846
+>>>>> rbd image 'testrbdggate45846':
+>>>>>          size 65536 kB in 16 objects
+>>>>>          order 22 (4096 kB objects)
+>>>>>          block_name_prefix: rbd_data.10e3c0b1daf
+>>>>>          format: 2
+>>>>>          features: layering, exclusive-lock, object-map, fast-diff,
+>>>>> deep-flatten
+>>>>>          flags:
+>>>>> ----
+>>>>>
+>>>>> So why does this work from a server that is actually running
+>>>>> mon/osd/mgr, but not from a server that has the same
+>>>>> ceph.client.admin.keyring:
+>>>>> [client.admin]
+>>>>>          key = AQBUXllZMNZSARAAsSexLBkWJQS6vHi9u3rrSA==
+>>>>>          auid = 0
+>>>>>          caps mds = "allow *"
+>>>>>          caps mgr = "allow *"
+>>>>>          caps mon = "allow *"
+>>>>>          caps osd = "allow *"
+>>>>>
+>>>>> and ceph auth list:
+>>>>> installed auth entries:
+>>>>> client.admin
+>>>>>          key: AQBUXllZMNZSARAAsSexLBkWJQS6vHi9u3rrSA==
+>>>>>          auid: 0
+>>>>>          caps: [mds] allow *
+>>>>>          caps: [mgr] allow *
+>>>>>          caps: [mon] allow *
+>>>>>          caps: [osd] allow *
+>>>
+>>>
+>>>>> client.ggate
+>>>>>          key: AQANP1pZGNDmNRAAVb8NRXUMmWYh9i1nju6rYA==
+>>>>>          caps: [mon] allow r
+>>>>>          caps: [osd] allow class-read object_prefix rbd_children, allow
+>>>>> rwx pool=rbd
+>>>>
+>>>> Presumably ggate is using this client. I'm not sure off-hand what
+>>>> permissions RBD needs, but I presume it needs class-write in order to
+>>>> create new images (and they probably won't be prefixed with
+>>>> rbd_children?).
+>>>
+>>>
+>>> Well,  client.ggate was an attempt to mirror what we have in our working
+>>> OpenStack ceph.
+>>>
+>>> But my major concern is that it all works on a host that is actually part of
+>>> the cluster (as admin),
+>>> but it does not work for all rbd commands once I start working on a separate
+>>> host.
+>>> Ceph and rados are oke, but certain rbs commands fail.
+>>>
+>>> So why doesn't it work as admin on an 'external'  host.
+>>>
+>>>
+>>> --WjW
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Jason
