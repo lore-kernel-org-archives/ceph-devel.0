@@ -1,85 +1,51 @@
-From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
+From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: Note about rbd_aio_write usage
-Date: Thu, 6 Jul 2017 17:46:04 +0200
-Message-ID: <e39eba47-ae4d-05bb-41cd-928565324d6c@corp.ovh.com>
+Date: Thu, 6 Jul 2017 14:02:39 -0400
+Message-ID: <CA+aFP1CXkF914u1qboCC1OnK3Qqqs7w0NctDxG82u=gpmUcxmA@mail.gmail.com>
 References: <f5062e24-d138-a096-0171-79bc1259db7b@corp.ovh.com>
- <CA+aFP1A5UVZzSDfFvphsVq9Jra9PXbJHUXhaJ9tH8LGx5OKJfA@mail.gmail.com>
- <c81d848d-04f9-bca5-0e8f-6fe1f1814903@corp.ovh.com>
- <CA+aFP1A_EAMxP+cMKN2SDcZ2C-KE3wadkydK_AGpfBg+p75pcQ@mail.gmail.com>
- <a974656a-2fc4-1fed-6adc-fbb42c54bd7e@corp.ovh.com>
- <CA+aFP1Bs4K=eoYn4d1zo7HY8nWufLYOcQHX-r68frZ+ftNBHxQ@mail.gmail.com>
+	<CA+aFP1A5UVZzSDfFvphsVq9Jra9PXbJHUXhaJ9tH8LGx5OKJfA@mail.gmail.com>
+	<c81d848d-04f9-bca5-0e8f-6fe1f1814903@corp.ovh.com>
+	<CA+aFP1A_EAMxP+cMKN2SDcZ2C-KE3wadkydK_AGpfBg+p75pcQ@mail.gmail.com>
+	<a974656a-2fc4-1fed-6adc-fbb42c54bd7e@corp.ovh.com>
+	<CA+aFP1Bs4K=eoYn4d1zo7HY8nWufLYOcQHX-r68frZ+ftNBHxQ@mail.gmail.com>
+	<e39eba47-ae4d-05bb-41cd-928565324d6c@corp.ovh.com>
+Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 2.mo302.mail-out.ovh.net ([137.74.110.75]:33272 "EHLO
-        2.mo302.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751654AbdGFPqH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 6 Jul 2017 11:46:07 -0400
-In-Reply-To: <CA+aFP1Bs4K=eoYn4d1zo7HY8nWufLYOcQHX-r68frZ+ftNBHxQ@mail.gmail.com>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: dillaman@redhat.com
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <e39eba47-ae4d-05bb-41cd-928565324d6c-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 17-07-06 04:40 PM, Jason Dillaman wrote:
-> On Thu, Jul 6, 2017 at 10:22 AM, Piotr Dałek <piotr.dalek@corp.ovh.com> wrote:
->> So I really see two problems here: lack of API docs and
->> backwards-incompatible change in API behavior.
-> 
-> Docs are always in need of update, so any pull requests would be
-> greatly appreciated.
-> 
-> However, I disagree that the behavior has substantively changed -- it
-> was always possible for pre-Luminous to (sometimes) copy the buffer
-> before the "rbd_aio_write" method completed.
-
-But that copy was buried somewhere deep in the librbd internals and - 
-looking at Jewel version - most would assume that it's not really copied and 
-user is responsible for keeping buffer intact until write is complete. API 
-user doesn't really care about what's going on internally and is beyond 
-their control.
-
-> With Luminous, this
-> behavior is more consistent -- but in a future release memory may be
-> zero-copied. If your application can properly conform to the
-> (unwritten) contract that the buffers should remain unchanged, there
-> would be no need for the application to pre-copy the buffers.
-
-So far I am forced to do a copy anyway (see below). The question is whether 
-it's me doing it, or librbd. It doesn't make sense to have it both do the 
-same -- especially if it's going to handle tens of terabytes of data, which 
-could mean for 10TB of data at least 83 886 080 memory allocations, releases 
-and copies plus 2 684 354 560 page faults (assuming 4KB pages) -- and these 
-are the best case scenario numbers assuming 128KB I/O size. What I 
-understand that you expect from me, is to have at least number of memory 
-copies doubled and push not "just" 20TB over the memory bus (reading 10TB 
-from one buffer and writing these 10TB to another), but 40.
-In other words, if I'd write my code considering how Jewel librbd works, 
-there would be no real issue, apart from the fact that suddenly my program 
-would consume more memory and would burn more CPU cycles once librbd is 
-upgraded to Luminous which, considering the amount of data, would be 
-noticeable change.
-
-> If the libfuse implementation requires that the memory is not-in-use
-> by the time you return control to it (i.e. it's a synchronous API and
-> you are using async methods), you will always need to copy it.
-Yes, libfuse expects that once I leave entrypoint, it is free to do anything 
-it wishes with previously provided buffers -- and that's what it actually does.
-
- > The C++
- > API allows you to control the copying since you need to pass
- > "bufferlist"s to the API methods and since they utilize a reference
- > counter, there is no internal copying within librbd / librados.
-
-How about a hybrid solution? Keep the old rbd_aio_write contract (don't copy 
-the buffer with the assumption that it won't change) and instead of 
-constructing bufferlist containing bufferptr to copied data, construct a 
-bufferlist containing bufferptr made with create_static(user_buffer)?
-
-
--- 
-Piotr Dałek
-piotr.dalek@corp.ovh.com
-https://www.ovh.com/us/
+T24gVGh1LCBKdWwgNiwgMjAxNyBhdCAxMTo0NiBBTSwgUGlvdHIgRGHFgmVrIDxwaW90ci5kYWxl
+a0Bjb3JwLm92aC5jb20+IHdyb3RlOgo+IEhvdyBhYm91dCBhIGh5YnJpZCBzb2x1dGlvbj8gS2Vl
+cCB0aGUgb2xkIHJiZF9haW9fd3JpdGUgY29udHJhY3QgKGRvbid0IGNvcHkKPiB0aGUgYnVmZmVy
+IHdpdGggdGhlIGFzc3VtcHRpb24gdGhhdCBpdCB3b24ndCBjaGFuZ2UpIGFuZCBpbnN0ZWFkIG9m
+Cj4gY29uc3RydWN0aW5nIGJ1ZmZlcmxpc3QgY29udGFpbmluZyBidWZmZXJwdHIgdG8gY29waWVk
+IGRhdGEsIGNvbnN0cnVjdCBhCj4gYnVmZmVybGlzdCBjb250YWluaW5nIGJ1ZmZlcnB0ciBtYWRl
+IHdpdGggY3JlYXRlX3N0YXRpYyh1c2VyX2J1ZmZlcik/CgpXZSBtdXN0IGJlIHRhbGtpbmcgcGFz
+dCBlYWNoIG90aGVyIC0tIHRoZXJlIHdhcyBuZXZlciBzdWNoIGEKcHJlLUx1bXVub3VzIGNvbnRy
+YWN0IHNpbmNlICgxKSBpdCBkaWQgY29weSB0aGUgYnVmZmVyIG9uIGV2ZXJ5IElPIGFuZAooMikg
+aXQgY291bGQgaGF2ZSBwb3RlbnRpYWxseSBjb3BpZWQgYmVmb3JlIHRoZSAncmJkX2Fpb193cml0
+ZScgY2FsbApyZXR1cm5lZCBvciBhZnRlciAoYnV0IGF0IGxlYXN0IGJlZm9yZSB0aGUgY29tcGxl
+dGlvbiB3YXMgZmlyZWQpLiBKdXN0CmJlY2F1c2UgaXQgd29ya3Mgc29tZSB0aW1lcyBkb2Vzbid0
+IG1lYW4gaXQgd291bGQgYWx3YXlzIHdvcmsgc2luY2UgaXQKd291bGQgYmUgYSByYWNlIGJldHdl
+ZW4gdHdvIHRocmVhZHMuCgpVbmZvcnR1bmF0ZWx5LCB1bnRpbCB0aGUgbGlicmFkb3MgaXNzdWUg
+aXMgc29sdmVkLCB5b3Ugd2lsbCBzdGlsbCBoYXZlCnRvIGNvcHkgdGhlIGRhdGEgb25jZSB3aGVu
+IHVzaW5nIHRoZSBDKysgQVBJLiBUaGUgb25seSBhZHZhbnRhZ2UgaXMKdGhhdCB5b3Ugd291bGQg
+YmUgcmVzcG9uc2libGUgZm9yIHRoZSBjb3B5aW5nIGFuZCBpdCB3b3VsZCBvbmx5IG5lZWQKdG8g
+YmUgcGVyZm9ybWVkIG9uY2UgaW5zdGVhZCBvZiB0d2ljZS4KCi0tIApKYXNvbgpfX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcg
+bGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0
+aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
