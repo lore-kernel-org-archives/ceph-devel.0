@@ -1,67 +1,58 @@
-From: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Ceph @ OpenStack Sydney Summit
-Date: Fri, 7 Jul 2017 13:47:16 +1000
-Message-ID: <CA+z5Dsz_xCqzq-C3eWvDMBhJXY0xadgu9WnSgq7CehxfO92RFw@mail.gmail.com>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
+Subject: Re: Note about rbd_aio_write usage
+Date: Fri, 7 Jul 2017 08:48:06 +0200
+Message-ID: <ab66c7b1-772e-910f-839e-158224ef0525@corp.ovh.com>
+References: <f5062e24-d138-a096-0171-79bc1259db7b@corp.ovh.com>
+ <CA+aFP1A5UVZzSDfFvphsVq9Jra9PXbJHUXhaJ9tH8LGx5OKJfA@mail.gmail.com>
+ <c81d848d-04f9-bca5-0e8f-6fe1f1814903@corp.ovh.com>
+ <CA+aFP1A_EAMxP+cMKN2SDcZ2C-KE3wadkydK_AGpfBg+p75pcQ@mail.gmail.com>
+ <a974656a-2fc4-1fed-6adc-fbb42c54bd7e@corp.ovh.com>
+ <CA+aFP1Bs4K=eoYn4d1zo7HY8nWufLYOcQHX-r68frZ+ftNBHxQ@mail.gmail.com>
+ <e39eba47-ae4d-05bb-41cd-928565324d6c@corp.ovh.com>
+ <CA+aFP1CXkF914u1qboCC1OnK3Qqqs7w0NctDxG82u=gpmUcxmA@mail.gmail.com>
+ <20170706192508.GG9832@mailware>
+ <CA+aFP1B4iDjCLtpLsdPseuVfrysiatr3Bwb-i5OfZP8dt-WRpg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0311570773=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from 2.mo302.mail-out.ovh.net ([137.74.110.75]:46438 "EHLO
+        2.mo302.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750938AbdGGGsJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Jul 2017 02:48:09 -0400
+In-Reply-To: <CA+aFP1B4iDjCLtpLsdPseuVfrysiatr3Bwb-i5OfZP8dt-WRpg@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
---===============0311570773==
-Content-Type: multipart/alternative; boundary="001a114d9a620ff79d0553b218b0"
+On 17-07-06 09:39 PM, Jason Dillaman wrote:
+> On Thu, Jul 6, 2017 at 3:25 PM, Piotr Dałek <branch@predictor.org.pl> wrote:
+>> Is that deep copy an equivalent of what
+>> Jewel librbd did at unspecified point of time, or extra one?
+> 
+> It's equivalent / replacement -- not an additional copy. This was
+> changed to support scatter/gather IO API methods which the latest
+> version of QEMU now directly utilizes (eliminating the need for a
+> bounce-buffer copy on every IO).
 
---001a114d9a620ff79d0553b218b0
-Content-Type: text/plain; charset="UTF-8"
+OK, that makes more sense now.
 
-Hi all,
+> Once we get that librados issue resolved, that initial librbd IO
+> buffer copy will be dropped and librbd will become zero-copy for IO
+> (at least that's the goal). That's why I am recommending that you just
+> assume normal AIO semantics and not try to optimize for Luminous since
+> perhaps the next release will have that implementation detail of the
+> extra copy removed.
 
-Are there any "official" plans to have Ceph events co-hosted with OpenStack
-Summit Sydney, like in Boston?
-
-The call for presentations closes in a week. The Forum will be organised
-throughout September and (I think) that is the most likely place to have
-e.g. Ceph ops sessions like we have in the past. Some of my local
-colleagues have also expressed interest in having a CephFS BoF.
+Is this: 
+https://github.com/yuyuyu101/ceph/commit/794b49b5b860c538a349bdadb16bb6ae97ad9c20#commitcomment-15707924 
+the issue you mention? Because at this point I'm considering switching to 
+C++ API and passing static bufferptr buried in my bufferlist instead of 
+having extra copy done by C API rbd_aio_write (that way I'd at least control 
+the allocations).
 
 -- 
-Cheers,
-~Blairo
-
---001a114d9a620ff79d0553b218b0
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr">Hi all,<div><br></div><div>Are there any &quot;official&qu=
-ot; plans to have Ceph events co-hosted with OpenStack Summit Sydney, like =
-in Boston?</div><div><br></div><div>The call for presentations closes in a =
-week. The Forum will be organised throughout September and (I think) that i=
-s the most likely place to have e.g. Ceph ops sessions like we have in the =
-past. Some of my local colleagues have also expressed interest in having a =
-CephFS BoF.<br clear=3D"all"><div><br></div>-- <br><div class=3D"gmail_sign=
-ature" data-smartmail=3D"gmail_signature">Cheers,<br>~Blairo</div>
-</div></div>
-
---001a114d9a620ff79d0553b218b0--
-
---===============0311570773==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0311570773==--
+Piotr Dałek
+piotr.dalek@corp.ovh.com
+https://www.ovh.com/us/
