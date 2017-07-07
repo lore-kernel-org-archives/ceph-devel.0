@@ -1,44 +1,106 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Note about rbd_aio_write usage
-Date: Fri, 7 Jul 2017 09:14:03 -0400
-Message-ID: <CA+aFP1AuYLObYpNn1PGbxOm87wERLFZ7weziFZXc0hU6vcsj4w@mail.gmail.com>
-References: <f5062e24-d138-a096-0171-79bc1259db7b@corp.ovh.com>
- <CA+aFP1A5UVZzSDfFvphsVq9Jra9PXbJHUXhaJ9tH8LGx5OKJfA@mail.gmail.com>
- <c81d848d-04f9-bca5-0e8f-6fe1f1814903@corp.ovh.com> <CA+aFP1A_EAMxP+cMKN2SDcZ2C-KE3wadkydK_AGpfBg+p75pcQ@mail.gmail.com>
- <a974656a-2fc4-1fed-6adc-fbb42c54bd7e@corp.ovh.com> <CA+aFP1Bs4K=eoYn4d1zo7HY8nWufLYOcQHX-r68frZ+ftNBHxQ@mail.gmail.com>
- <e39eba47-ae4d-05bb-41cd-928565324d6c@corp.ovh.com> <CA+aFP1CXkF914u1qboCC1OnK3Qqqs7w0NctDxG82u=gpmUcxmA@mail.gmail.com>
- <20170706192508.GG9832@mailware> <CA+aFP1B4iDjCLtpLsdPseuVfrysiatr3Bwb-i5OfZP8dt-WRpg@mail.gmail.com>
- <ab66c7b1-772e-910f-839e-158224ef0525@corp.ovh.com>
-Reply-To: dillaman@redhat.com
+From: Mohamad Gebai <mgebai@suse.com>
+Subject: RBD journaling benchmarks
+Date: Fri, 7 Jul 2017 14:38:28 -0400
+Message-ID: <aee550b1-bbf5-f08c-6ca1-ac676483614c@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f176.google.com ([209.85.161.176]:32846 "EHLO
-        mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750726AbdGGNOF (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Jul 2017 09:14:05 -0400
-Received: by mail-yw0-f176.google.com with SMTP id x125so13148697ywa.0
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Jul 2017 06:14:05 -0700 (PDT)
-In-Reply-To: <ab66c7b1-772e-910f-839e-158224ef0525@corp.ovh.com>
+Received: from smtp.nue.novell.com ([195.135.221.5]:51908 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751034AbdGGSih (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Fri, 7 Jul 2017 14:38:37 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek@corp.ovh.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
 
-On Fri, Jul 7, 2017 at 2:48 AM, Piotr Dałek <piotr.dalek@corp.ovh.com> wrote:
-> Is this:
-> https://github.com/yuyuyu101/ceph/commit/794b49b5b860c538a349bdadb16bb6ae97ad9c20#commitcomment-15707924
-> the issue you mention? Because at this point I'm considering switching to
-> C++ API and passing static bufferptr buried in my bufferlist instead of
-> having extra copy done by C API rbd_aio_write (that way I'd at least control
-> the allocations).
+Hi,
 
-Yes, that is the issue along with the comment from Sage in your
-previous thread [1] where I proposed a potential workaround w/o the
-need to deeply perturb the messaging layer.
+We ran some benchmarks to assess the overhead caused by enabling
+client-side RBD journaling in Luminous. The tests consists of:
+- Create an image with journaling enabled  (--image-feature journaling)
+- Run randread, randwrite and randrw workloads sequentially from a
+single client using fio
+- Collect IOPS
 
-[1] http://lists.ceph.com/pipermail/ceph-users-ceph.com/2017-January/015687.html
+More info:
+- Feature exclusive-lock is enabled with journaling (required)
+- Queue depth of 128 for fio
+- With 1 and 2 threads
 
--- 
-Jason
+
+Cluster 1
+================
+
+- 5 OSD nodes
+- 6 OSDs per node
+- 3 monitors
+- Ceph version 12.0.3-1380-g6984d41b5d
+(6984d41b5d142ce157216b6e757bcb547da2c7d2) luminous (dev)
+- All SSD
+- 10GbE NIC
+- Bluestore + WAL
+
+
+Results:
+
+        Default        Journaling                Jour width 32      
+Jobs    IOPS        IOPS        Slowdown        IOPS        Slowdown
+RW
+1        19521        9104       2.1x            16067        1.2x
+2        30575        726       42.1x              488        62.6x
+Read
+1        22775        22946      0.9x            23601        0.9x
+2        35955        1078      33.3x              446        80.2x
+Write
+1        18515        6054       3.0x             9765        1.9x
+2        29586        1188      24.9x              534        55.4x
+
+- "Default" is the baseline (with journaling disabled)
+- "Journaling" is with journaling enabled
+- "Jour width 32" is with a journal data width of 32 objects
+(--journal-splay-width 32)
+- The major slowdown for two jobs is due to locking
+- With a journal width of 32, the 0.9x slowdown (which is actually a
+speedup) is due to the read-only workload, which doesn't exercise the
+journaling code. The 0.9x slowdown is due to other factors (eg. network
+and other fluctuations), and should ideally be 1.
+- The randwrite workload exercises the journaling code the most, and is
+expected to have the highest slowdown, which is 1.9x in this case.
+
+
+Cluster 2
+================
+
+- 3 OSD nodes
+- 10 OSDs per node
+- 1 monitor
+- All HDD
+- Filestore
+- 10GbE NIC
+- Ceph version 12.1.0-289-g117b171715
+(117b1717154e1236b2d37c405a86a9444cf7871d) luminous (dev)
+
+
+Results:
+
+        Default        Journaling                 Jour width 32      
+Jobs      IOPS        IOPS     Slowdown          IOPS       Slowdown
+RW                                      
+1        11869        3674        3.2x           4914          2.4x
+2        13127         736       17.8x            432         30.4x
+Read                                      
+1        14500       14700        1.0x          14703          1.0x
+2        16673        3893        4.3x            307         54.3x
+Write                                      
+1         8267        1925        4.3x           2591          3.2x
+2         8283        1012        8.2x            417         19.9x
+
+- The number of IOPS for the write workload is quite low, which is due
+to HDDs and filestore
+
+Mohamad
+
+
