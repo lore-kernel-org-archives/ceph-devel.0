@@ -1,106 +1,113 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: kraken <--> luminous osd map decoding
-Date: Fri, 7 Jul 2017 13:09:38 -0700
-Message-ID: <CAJ4mKGZFc7b5xQaiRd5S9WgCQ32Jzfy4B=i3ub4z1TRC0FO6pw@mail.gmail.com>
-References: <CAB2gnbVuTdkGbW38h1Tu7+9ebXH_6-4NPCHNOdT+zNJMCB=Awg@mail.gmail.com>
- <CAB2gnbVtfEGpp1z1ipVk7rCC2uM_6hea64vsLZTPX9X0wh+W=Q@mail.gmail.com>
+Subject: Re: peering process
+Date: Fri, 7 Jul 2017 13:15:26 -0700
+Message-ID: <CAJ4mKGaepvKs9SMZv+G=soSL44sS_KdZkWt-+P0KypObqcNH2g@mail.gmail.com>
+References: <CAB7xdikjRLknjy5pac08zUbcN=r8N0+cJ4ZOL3tPMZkNSiiYLA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f53.google.com ([209.85.214.53]:34288 "EHLO
-        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751059AbdGGUJl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Jul 2017 16:09:41 -0400
-Received: by mail-it0-f53.google.com with SMTP id v202so4957102itb.1
-        for <ceph-devel@vger.kernel.org>; Fri, 07 Jul 2017 13:09:40 -0700 (PDT)
-In-Reply-To: <CAB2gnbVtfEGpp1z1ipVk7rCC2uM_6hea64vsLZTPX9X0wh+W=Q@mail.gmail.com>
+Received: from mail-it0-f41.google.com ([209.85.214.41]:37762 "EHLO
+        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751034AbdGGUP2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Jul 2017 16:15:28 -0400
+Received: by mail-it0-f41.google.com with SMTP id m84so2878963ita.0
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Jul 2017 13:15:28 -0700 (PDT)
+In-Reply-To: <CAB7xdikjRLknjy5pac08zUbcN=r8N0+cJ4ZOL3tPMZkNSiiYLA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noahwatkins@gmail.com>
+To: sheng qiu <herbert1984106@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Exactly what version/release is this?
-
-And are you saying everything works fine on newish Fedora nodes, but
-you get timeouts on Centos7 and that failure on Debian derivatives?
-That is super weird.
-
-On Fri, Jul 7, 2017 at 11:42 AM, Noah Watkins <noahwatkins@gmail.com> wrote:
-> An important thing I noticed:
+On Fri, Jun 30, 2017 at 3:25 PM, sheng qiu <herbert1984106@gmail.com> wrote:
+> Hi,
 >
-> Fedora 24/25: no errors
-> CentOS 7 and Fedora 23: cluster.connect => -ETIMEDOUT
-> All debian/ubuntu: above error: ceph::buffer::end_of_buffer
+> We are trying to reduce the peering processing latency, since it may
+> block front io.
 >
-> On Fri, Jul 7, 2017 at 11:39 AM, Noah Watkins <noahwatkins@gmail.com> wrote:
->> I'm getting osd map decoding errors on cluster connection from a
->> kraken client with a luminous backend. I searched around the mailing
->> list but didn't see this reported, or any note on backwards
->> incompatibility. Back trace:
->>
->> ===
->>
->> terminate called after throwing an instance of 'ceph::buffer::end_of_buffer'
->>   what():  buffer::end_of_buffer
->>
->> Thread 9 "ms_dispatch" received signal SIGABRT, Aborted.
->> [Switching to Thread 0x7fffd3fff700 (LWP 43060)]
->> 0x00007fffee73c428 in __GI_raise (sig=sig@entry=6) at
->> ../sysdeps/unix/sysv/linux/raise.c:54
->> 54      ../sysdeps/unix/sysv/linux/raise.c: No such file or directory.
->> (gdb) bt
->> #0  0x00007fffee73c428 in __GI_raise (sig=sig@entry=6) at
->> ../sysdeps/unix/sysv/linux/raise.c:54
->> #1  0x00007fffee73e02a in __GI_abort () at abort.c:89
->> #2  0x00007fffeed7684d in __gnu_cxx::__verbose_terminate_handler() ()
->> from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
->> #3  0x00007fffeed746b6 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
->> #4  0x00007fffeed74701 in std::terminate() () from
->> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
->> #5  0x00007fffeed74919 in __cxa_throw () from
->> /usr/lib/x86_64-linux-gnu/libstdc++.so.6
->> #6  0x00007fffef49cbb2 in ceph::buffer::ptr::iterator::get_pos_add
->> (this=<optimized out>, this=<optimized out>, n=4) at
->> /home/nwatkins/ceph/src/include/buffer.h:196
->> #7  0x00007fffef4b5509 in ceph::buffer::ptr::iterator::get_pos_add
->> (this=<synthetic pointer>, this=<synthetic pointer>, n=4) at
->> /usr/include/c++/5/bits/stl_vector.h:676
->> #8  denc_traits<unsigned int, void>::decode (p=<synthetic pointer>,
->> o=<optimized out>) at /home/nwatkins/ceph/src/include/denc.h:224
->> #9  denc<unsigned int, denc_traits<unsigned int, void> > (features=0,
->> p=<synthetic pointer>, o=<optimized out>) at
->> /home/nwatkins/ceph/src/include/denc.h:496
->> #10 denc_traits<std::vector<unsigned int, std::allocator<unsigned int>
->>>, void>::decode (p=<synthetic pointer>, s=std::vector of length
->> 16777216, capacity 16777216 = {...})
->>     at /home/nwatkins/ceph/src/include/denc.h:796
->> #11 decode<std::vector<unsigned int, std::allocator<unsigned int> >,
->> denc_traits<std::vector<unsigned int, std::allocator<unsigned int> >,
->> void> > (
->>     o=std::vector of length 16777216, capacity 16777216 = {...},
->> p=...) at /home/nwatkins/ceph/src/include/denc.h:1157
->> #12 0x00007fffef4aee0c in OSDMap::decode (this=this@entry=0x817f20,
->> bl=...) at /home/nwatkins/ceph/src/osd/OSDMap.cc:2144
->> #13 0x00007fffef4b0b2e in OSDMap::decode (this=0x817f20, bl=...) at
->> /home/nwatkins/ceph/src/osd/OSDMap.cc:1991
->> #14 0x00007fffef387d2b in Objecter::handle_osd_map
->> (this=this@entry=0x8178a0, m=m@entry=0x7fffd80012e0) at
->> /home/nwatkins/ceph/src/osdc/Objecter.cc:1242
->> #15 0x00007fffef388a87 in Objecter::ms_dispatch (this=0x8178a0,
->> m=0x7fffd80012e0) at /home/nwatkins/ceph/src/osdc/Objecter.cc:1005
->> #16 0x00007fffef5fd8ca in Messenger::ms_deliver_dispatch
->> (m=0x7fffd80012e0, this=0x789fb0) at
->> /home/nwatkins/ceph/src/msg/Messenger.h:593
->> #17 DispatchQueue::entry (this=0x78a128) at
->> /home/nwatkins/ceph/src/msg/DispatchQueue.cc:197
->> #18 0x00007fffef47968d in DispatchQueue::DispatchThread::entry
->> (this=<optimized out>) at
->> /home/nwatkins/ceph/src/msg/DispatchQueue.h:103
->> #19 0x00007fffef0706ba in start_thread (arg=0x7fffd3fff700) at
->> pthread_create.c:333
->> #20 0x00007fffee80e3dd in clone () at
->> ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> in our experiment, we kill certain osd and bring it back after a very
+> short time. We checked performance counters as below:
+>
+>  "peering_latency": {
+>
+>             "avgcount": 52,
+>
+>             "sum": 52.435308773,
+>
+>             "avglat": 1008.371323
+>
+>         },
+>
+>      "getinfo_latency": {
+>
+>             "avgcount": 52,
+>
+>             "sum": 3.525831625,
+>
+>             "avglat": 67.804454
+>
+>         },
+>
+>         "getlog_latency": {
+>
+>             "avgcount": 46,
+>
+>             "sum": 0.255325943,
+>
+>             "avglat": 5.550564
+>
+>         },
+>
+>  "getmissing_latency": {
+>
+>             "avgcount": 46,
+>
+>             "sum": 0.000877735,
+>
+>             "avglat": 0.019081
+>
+>         },
+>
+>         "waitupthru_latency": {
+>
+>             "avgcount": 46,
+>
+>             "sum": 48.652836368,
+>
+>             "avglat": 1057.670356
+>
+>         }
+>
+> as shown, average peering latency is 1008ms, most of them are consumed
+> by "waitupthru_latency".  By looking at the codes, i am not quite
+> understand this part. Can anyone explain this part especially why it
+> takes such long time in this stage?
+
+I think it's described in documentation somewhere, but in brief:
+1) In order to go active, an OSD must talk to *all* previous OSDs
+which might have modified the PG in question.
+2) That means it has to go talk to everybody who owned it for an OSDMap interval
+3) ...except that could be pointlessly expensive if the cluster was
+thrashing or something and the OSDs weren't actually running during
+that epoch.
+4) So we introduce an "up_thru" mapping from OSD->epoch of the OSDMap,
+which tracks when an OSD was alive.
+5) And before we can go active with a PG, we have to have committed
+(to the OSDMap, via monitors) that we were up_thru during an interval
+where we own it.
+5) Then, subsequent OSDs can do some comparisons between old OSDMaps
+and the PG mappings to figure out if an OSD *might* have gone active
+with the PG.
+
+So that waitupthru_latency is measuring how much time the OSD has to
+spend waiting to get a sufficiently-new up_thru value to actually go
+active on the PG. It's not a measure of local work.
+
+
+>
+> I also noticed there's some description regarding "fast peering" on
+> http://tracker.ceph.com/projects/ceph/wiki/Osd_-_Faster_Peering
+>
+> is this still ongoing or stale?
+
+I don't think any serious work was done on it, no.
+-Greg
