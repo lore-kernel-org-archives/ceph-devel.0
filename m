@@ -1,106 +1,84 @@
-From: Mohamad Gebai <mgebai@suse.com>
-Subject: RBD journaling benchmarks
-Date: Fri, 7 Jul 2017 14:38:28 -0400
-Message-ID: <aee550b1-bbf5-f08c-6ca1-ac676483614c@suse.com>
+From: Noah Watkins <noahwatkins@gmail.com>
+Subject: kraken <--> luminous osd map decoding
+Date: Fri, 7 Jul 2017 11:39:19 -0700
+Message-ID: <CAB2gnbVuTdkGbW38h1Tu7+9ebXH_6-4NPCHNOdT+zNJMCB=Awg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:51908 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751034AbdGGSih (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Fri, 7 Jul 2017 14:38:37 -0400
-Content-Language: en-US
+Received: from mail-yb0-f174.google.com ([209.85.213.174]:34690 "EHLO
+        mail-yb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751089AbdGGSjV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 7 Jul 2017 14:39:21 -0400
+Received: by mail-yb0-f174.google.com with SMTP id e201so13371879ybb.1
+        for <ceph-devel@vger.kernel.org>; Fri, 07 Jul 2017 11:39:20 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi,
+I'm getting osd map decoding errors on cluster connection from a
+kraken client with a luminous backend. I searched around the mailing
+list but didn't see this reported, or any note on backwards
+incompatibility. Back trace:
 
-We ran some benchmarks to assess the overhead caused by enabling
-client-side RBD journaling in Luminous. The tests consists of:
-- Create an image with journaling enabled  (--image-feature journaling)
-- Run randread, randwrite and randrw workloads sequentially from a
-single client using fio
-- Collect IOPS
+===
 
-More info:
-- Feature exclusive-lock is enabled with journaling (required)
-- Queue depth of 128 for fio
-- With 1 and 2 threads
+terminate called after throwing an instance of 'ceph::buffer::end_of_buffer'
+  what():  buffer::end_of_buffer
 
-
-Cluster 1
-================
-
-- 5 OSD nodes
-- 6 OSDs per node
-- 3 monitors
-- Ceph version 12.0.3-1380-g6984d41b5d
-(6984d41b5d142ce157216b6e757bcb547da2c7d2) luminous (dev)
-- All SSD
-- 10GbE NIC
-- Bluestore + WAL
-
-
-Results:
-
-        Default        Journaling                Jour width 32      
-Jobs    IOPS        IOPS        Slowdown        IOPS        Slowdown
-RW
-1        19521        9104       2.1x            16067        1.2x
-2        30575        726       42.1x              488        62.6x
-Read
-1        22775        22946      0.9x            23601        0.9x
-2        35955        1078      33.3x              446        80.2x
-Write
-1        18515        6054       3.0x             9765        1.9x
-2        29586        1188      24.9x              534        55.4x
-
-- "Default" is the baseline (with journaling disabled)
-- "Journaling" is with journaling enabled
-- "Jour width 32" is with a journal data width of 32 objects
-(--journal-splay-width 32)
-- The major slowdown for two jobs is due to locking
-- With a journal width of 32, the 0.9x slowdown (which is actually a
-speedup) is due to the read-only workload, which doesn't exercise the
-journaling code. The 0.9x slowdown is due to other factors (eg. network
-and other fluctuations), and should ideally be 1.
-- The randwrite workload exercises the journaling code the most, and is
-expected to have the highest slowdown, which is 1.9x in this case.
-
-
-Cluster 2
-================
-
-- 3 OSD nodes
-- 10 OSDs per node
-- 1 monitor
-- All HDD
-- Filestore
-- 10GbE NIC
-- Ceph version 12.1.0-289-g117b171715
-(117b1717154e1236b2d37c405a86a9444cf7871d) luminous (dev)
-
-
-Results:
-
-        Default        Journaling                 Jour width 32      
-Jobs      IOPS        IOPS     Slowdown          IOPS       Slowdown
-RW                                      
-1        11869        3674        3.2x           4914          2.4x
-2        13127         736       17.8x            432         30.4x
-Read                                      
-1        14500       14700        1.0x          14703          1.0x
-2        16673        3893        4.3x            307         54.3x
-Write                                      
-1         8267        1925        4.3x           2591          3.2x
-2         8283        1012        8.2x            417         19.9x
-
-- The number of IOPS for the write workload is quite low, which is due
-to HDDs and filestore
-
-Mohamad
-
-
+Thread 9 "ms_dispatch" received signal SIGABRT, Aborted.
+[Switching to Thread 0x7fffd3fff700 (LWP 43060)]
+0x00007fffee73c428 in __GI_raise (sig=sig@entry=6) at
+../sysdeps/unix/sysv/linux/raise.c:54
+54      ../sysdeps/unix/sysv/linux/raise.c: No such file or directory.
+(gdb) bt
+#0  0x00007fffee73c428 in __GI_raise (sig=sig@entry=6) at
+../sysdeps/unix/sysv/linux/raise.c:54
+#1  0x00007fffee73e02a in __GI_abort () at abort.c:89
+#2  0x00007fffeed7684d in __gnu_cxx::__verbose_terminate_handler() ()
+from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#3  0x00007fffeed746b6 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#4  0x00007fffeed74701 in std::terminate() () from
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#5  0x00007fffeed74919 in __cxa_throw () from
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#6  0x00007fffef49cbb2 in ceph::buffer::ptr::iterator::get_pos_add
+(this=<optimized out>, this=<optimized out>, n=4) at
+/home/nwatkins/ceph/src/include/buffer.h:196
+#7  0x00007fffef4b5509 in ceph::buffer::ptr::iterator::get_pos_add
+(this=<synthetic pointer>, this=<synthetic pointer>, n=4) at
+/usr/include/c++/5/bits/stl_vector.h:676
+#8  denc_traits<unsigned int, void>::decode (p=<synthetic pointer>,
+o=<optimized out>) at /home/nwatkins/ceph/src/include/denc.h:224
+#9  denc<unsigned int, denc_traits<unsigned int, void> > (features=0,
+p=<synthetic pointer>, o=<optimized out>) at
+/home/nwatkins/ceph/src/include/denc.h:496
+#10 denc_traits<std::vector<unsigned int, std::allocator<unsigned int>
+>, void>::decode (p=<synthetic pointer>, s=std::vector of length
+16777216, capacity 16777216 = {...})
+    at /home/nwatkins/ceph/src/include/denc.h:796
+#11 decode<std::vector<unsigned int, std::allocator<unsigned int> >,
+denc_traits<std::vector<unsigned int, std::allocator<unsigned int> >,
+void> > (
+    o=std::vector of length 16777216, capacity 16777216 = {...},
+p=...) at /home/nwatkins/ceph/src/include/denc.h:1157
+#12 0x00007fffef4aee0c in OSDMap::decode (this=this@entry=0x817f20,
+bl=...) at /home/nwatkins/ceph/src/osd/OSDMap.cc:2144
+#13 0x00007fffef4b0b2e in OSDMap::decode (this=0x817f20, bl=...) at
+/home/nwatkins/ceph/src/osd/OSDMap.cc:1991
+#14 0x00007fffef387d2b in Objecter::handle_osd_map
+(this=this@entry=0x8178a0, m=m@entry=0x7fffd80012e0) at
+/home/nwatkins/ceph/src/osdc/Objecter.cc:1242
+#15 0x00007fffef388a87 in Objecter::ms_dispatch (this=0x8178a0,
+m=0x7fffd80012e0) at /home/nwatkins/ceph/src/osdc/Objecter.cc:1005
+#16 0x00007fffef5fd8ca in Messenger::ms_deliver_dispatch
+(m=0x7fffd80012e0, this=0x789fb0) at
+/home/nwatkins/ceph/src/msg/Messenger.h:593
+#17 DispatchQueue::entry (this=0x78a128) at
+/home/nwatkins/ceph/src/msg/DispatchQueue.cc:197
+#18 0x00007fffef47968d in DispatchQueue::DispatchThread::entry
+(this=<optimized out>) at
+/home/nwatkins/ceph/src/msg/DispatchQueue.h:103
+#19 0x00007fffef0706ba in start_thread (arg=0x7fffd3fff700) at
+pthread_create.c:333
+#20 0x00007fffee80e3dd in clone () at
+../sysdeps/unix/sysv/linux/x86_64/clone.S:109
