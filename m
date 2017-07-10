@@ -1,80 +1,50 @@
-From: Peter Rajnoha <prajnoha@redhat.com>
-Subject: Re: [PATCH] rules: block - add dm devices to
- whitelist
-Date: Mon, 10 Jul 2017 12:47:24 +0200
-Message-ID: <7e499437-f48c-e630-f277-78b1b0db93a6@redhat.com>
-References: <20170705110145.20172-1-ddiss@suse.de>
- <20170710083838.GE5995@gardel-login> <20170710113703.13ca760d@suse.de>
- <20170710095303.GA6261@gardel-login>
- <df472d6a-b453-aca8-1143-be8ad62b0ce1@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <systemd-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <df472d6a-b453-aca8-1143-be8ad62b0ce1@redhat.com>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/systemd-devel>,
- <mailto:systemd-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/systemd-devel>
-List-Post: <mailto:systemd-devel@lists.freedesktop.org>
-List-Help: <mailto:systemd-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/systemd-devel>,
- <mailto:systemd-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: systemd-devel-bounces@lists.freedesktop.org
-Sender: "systemd-devel" <systemd-devel-bounces@lists.freedesktop.org>
-To: David Disseldorp <ddiss@suse.de>
-Cc: ceph-devel@vger.kernel.org, systemd-devel@lists.freedesktop.org
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] libceph: fix old style declaration warnings
+Date: Mon, 10 Jul 2017 13:17:26 +0200
+Message-ID: <20170710111734.856154-1-arnd@arndb.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-T24gMDcvMTAvMjAxNyAxMjoxNCBQTSwgUGV0ZXIgUmFqbm9oYSB3cm90ZToKPiBPbiAwNy8xMC8y
-MDE3IDExOjUzIEFNLCBMZW5uYXJ0IFBvZXR0ZXJpbmcgd3JvdGU6Cj4+IE9uIE1vbiwgMTAuMDcu
-MTcgMTE6MzcsIERhdmlkIERpc3NlbGRvcnAgKGRkaXNzQHN1c2UuZGUpIHdyb3RlOgo+Pgo+Pj4g
-VGhhbmtzIGZvciB0aGUgZmVlZGJhY2ssIExlbm5hcnQuLi4KPj4+Cj4+PiBPbiBNb24sIDEwIEp1
-bCAyMDE3IDEwOjM4OjM4ICswMjAwLCBMZW5uYXJ0IFBvZXR0ZXJpbmcgd3JvdGU6Cj4+Pgo+Pj4+
-IE9uIFdlZCwgMDUuMDcuMTcgMTM6MDEsIERhdmlkIERpc3NlbGRvcnAgKGRkaXNzQHN1c2UuZGUp
-IHdyb3RlOgo+Pj4+Cj4+Pj4+IENlcGggcmVsaWVzIG9uIGJ5LXBhcnR1dWlkIHN5bWxpbmtzLCBp
-biBvcmRlciB0byBsb2NhdGUgdGhlIGpvdXJuYWwKPj4+Pj4gcGFydGl0aW9uIGZyb20gYSBnaXZl
-biBPU0QgcGFydGl0aW9uLiBGb3IgZGV0YWlscywgc2VlCj4+Pj4+IGh0dHA6Ly90cmFja2VyLmNl
-cGguY29tL2lzc3Vlcy8xOTQ4OS4gIAo+Pj4+Cj4+Pj4gVGhpcyBhcHBlYXJzIHdheSB0b28gYnJv
-YWQsIGFzIGl0IHdvdWxkIGFwcGx5IHRvIGFsbCBMVk0gYW5kIGFsbCBvdGhlcgo+Pj4+IGRldmlj
-ZXMuCj4+Pj4KPj4+PiBJdCBhcHBlYXJzIHRvIG1lIENlcGggc2hvdWxkIGRvIHRoZSBzYW1lIGFz
-IExWTSBkb2VzIGZvciB0aGlzLCBhbmQKPj4+PiBzaGlwIGl0cyBvd24gc2V0IG9mIHJ1bGVzLCBh
-bmQgYmUgY2FyZWZ1bCB0byBvbmx5IG1hdGNoIGFnYWluc3QgdGhlCj4+Pj4gYWN0dWFsIGRldmlj
-ZXMgaXQgY3JlYXRlcy4KPj4+Cj4+PiBXZSBjYW4gY2VydGFpbmx5IGRvIHRoaXMgaW4gYSBDZXBo
-IHNwZWNpZmljIG1hbm5lciB2aWEgdGhlIGV4aXN0aW5nCj4+PiA5NS1jZXBoLW9zZC5ydWxlcywg
-YnV0IG15IGltcHJlc3Npb24gd2FzIHRoYXQgdGhlIGJ5LXBhcnR1dWlkIHN5bWxpbmtzCj4+PiBh
-cmUgIm93bmVkIiBieSA2MC1wZXJzaXN0ZW50LXN0b3JhZ2UucnVsZXMgLgo+Pj4KPj4+IElmIHlv
-dSBkb24ndCB0aGluayB0aGUgZXhpc3RlbmNlIG9mIHRoZXNlIHN5bWxpbmtzIGZvciBkbSBwYXRo
-cyB3aWxsIGJlCj4+PiBvZiB1c2UgdG8gb3RoZXJzIHRoZW4gSSdsbCBnbyBhaGVhZCBhbmQgcHJv
-cG9zZSBpdCBhcyBhIENlcGggb25seQo+Pj4gY2hhbmdlLgo+Pgo+PiBIbW1tLCBzbyB0aGlua2lu
-ZyBhYm91dCB0aGlzIGFnYWluOiAicGFydHV1aWQiIGlzIGFjdHVhbGx5IGZvciBHUFQKPj4gcGFy
-dGl0aW9uIFVVSURzIGlmIEkgcmVjYWxsIHJlY29ycmVjdGx5LCB0aGV5IHdvdWxkbid0IGJlIGdl
-bmVyYXRlZAo+PiBmb3IgRE0gZGV2aWNlcyBhbnl3YXksIHNpbmNlIHRoZXkgYXJlIG9uZSBsYXll
-ciByZW1vdmVkIGZyb20gdGhlIEdQVCwKPj4gc28gYXJlIHlvdSBldmVuIHN1cmUgdGhpcyB3aWxs
-IGRvIHdoYXQgeW91IGFyZSBhc2tpbmcgZm9yPwo+Pgo+PiBCdXQgZXZlbiBpZiB0aGlzIGFjdHVh
-bGx5IHdvcmtzOiBETSBsaW5rcyBzbyBmYXIgYXJlIGNyZWF0ZWQgYnkgdGhlCj4+IExWTS9saWJk
-ZXZpY2VtYXBwZXIvIHBhY2thZ2VzLCBub3QgYnkgdWRldiwgYW5kIEkgZG9uJ3QgdGhpbmsgdGhp
-cwo+PiBzaG91bGQgY2hhbmdlLiBIZW5jZSwgcGxlYXNlIHRhbGsgdG8gdGhlIExWTS9saWJkZXZp
-Y2VtYXBwZXIgZm9sa3MKPj4gYWJvdXQgdGhpcyBhbmQgYXNrIHRoZW0gZm9yIGluY2x1ZGluZyBp
-dC4KPj4KPiAKPiBZZXMsIHBsZWFzZSwgYW55IHJ1bGVzIGZvciBzeW1saW5rcyB3aGljaCBzaG91
-bGQgYmUgY3JlYXRlZCB1bmRlcgo+IC9kZXYvZGlzayBmb3IgRE0gZGV2aWNlcyAoaW5jbHVkaW5n
-IGFsbCBpdHMgc3Vic3lzdGVtcyBsaWtlIExWTSwKPiBtcGF0aC4uLikgc2hvdWxkIGdvIGludG8g
-MTMtZG0tZGlzay5ydWxlcyB0aGF0IGlzIHBhcnQgb2YgTFZNL0RNIHNvdXJjZQo+IHRyZWU6Cj4g
-Cj4gaHR0cHM6Ly9zb3VyY2V3YXJlLm9yZy9naXQvP3A9bHZtMi5naXQ7YT1ibG9iO2Y9dWRldi8x
-My1kbS1kaXNrLnJ1bGVzLmluCj4gCj4gTm93LCB3aGVuIHdlIGNyZWF0ZSBhIHBhcnRpdGlvbiBv
-dmVyIGEgRE0gZGV2aWNlLCB0aGVyZSdzIGEgbmV3IG1hcHBpbmcKPiBjcmVhdGVkIG9uIHRvcCBm
-b3IgZWFjaCBwYXJ0aXRpb24gKGVpdGhlciBieSBjYWxsaW5nIGtwYXJ0eCBtYW51YWxseSBvcgo+
-IGJ5IGhhdmluZyBpdCBjcmVhdGVkIGJ5IHBhcnRpdGlvbmluZyB0b29sIGRpcmVjdGx5IGlmIGl0
-IHN1cHBvcnRzIHRoYXQpLgo+IFNvIGluIHRoaXMgY2FzZSwgaXQncyBub3QgdGhlIGtlcm5lbCBk
-aXJlY3RseSB3aG8gY3JlYXRlcyB0aGUKPiBwYXJ0aXRpb25zLCBidXQgdGhleSdyZSBzaW1wbHkg
-YW5vdGhlciBETSBkZXZpY2VzIGNyZWF0ZWQgb24gdG9wIG9mIHRoZQo+IHVuZGVybHlpbmcgRE0g
-ZGV2aWNlIHRvIHJlcHJlc2VudCB0aGVzZSBwYXJ0aXRpb25zLiBCdXQgSSB0aGluayB0aGF0Cj4g
-ZG9lc24ndCBtYXR0ZXIgLSB3ZSBzaG91bGQgc3RpbGwgY3JlYXRlIHRob3NlIHN5bWxpbmtzIGZv
-ciBwZW9wbGUgdG8KPiBzdGlsbCBoYXZlIGEgcG9zc2liaWxpdHkgdG8gcmVmZXJlbmNlIHRoZSBk
-ZXZpY2UgYnkgaXRzIHBhcnQgdXVpZCAtIEknbGwKPiBmaXggMTMtZG0tZGlzay5ydWxlcyB0byBp
-bmNsdWRlIHRoaXMuCj4gCgpGaXhlZCBoZXJlOgoKaHR0cHM6Ly9zb3VyY2V3YXJlLm9yZy9naXQv
-P3A9bHZtMi5naXQ7YT1jb21taXQ7aD1jNDgxNDljZjgwYzY1ODJjMjM2OWJjN2Y4YTMzZDc5NDAy
-MWQ5ZGFlCgotLSAKUGV0ZXIKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX18Kc3lzdGVtZC1kZXZlbCBtYWlsaW5nIGxpc3QKc3lzdGVtZC1kZXZlbEBsaXN0cy5m
-cmVlZGVza3RvcC5vcmcKaHR0cHM6Ly9saXN0cy5mcmVlZGVza3RvcC5vcmcvbWFpbG1hbi9saXN0
-aW5mby9zeXN0ZW1kLWRldmVsCg==
+The new macros don't follow the usual style for declarations,
+which we get a warning for with 'make W=1':
+
+In file included from fs/ceph/mds_client.c:16:0:
+include/linux/ceph/ceph_features.h:74:1: error: 'static' is not at beginning of declaration [-Werror=old-style-declaration]
+
+This moves the 'static' keyword to the front of the
+declaration.
+
+Fixes: f179d3ba8cb9 ("libceph: new features macros")
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+ include/linux/ceph/ceph_features.h | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/include/linux/ceph/ceph_features.h b/include/linux/ceph/ceph_features.h
+index f0f6c537b64c..040dd105c3e7 100644
+--- a/include/linux/ceph/ceph_features.h
++++ b/include/linux/ceph/ceph_features.h
+@@ -10,14 +10,14 @@
+ #define CEPH_FEATURE_INCARNATION_2 (1ull<<57) // CEPH_FEATURE_SERVER_JEWEL
+ 
+ #define DEFINE_CEPH_FEATURE(bit, incarnation, name)			\
+-	const static uint64_t CEPH_FEATURE_##name = (1ULL<<bit);		\
+-	const static uint64_t CEPH_FEATUREMASK_##name =			\
++	static const uint64_t CEPH_FEATURE_##name = (1ULL<<bit);		\
++	static const uint64_t CEPH_FEATUREMASK_##name =			\
+ 		(1ULL<<bit | CEPH_FEATURE_INCARNATION_##incarnation);
+ 
+ /* this bit is ignored but still advertised by release *when* */
+ #define DEFINE_CEPH_FEATURE_DEPRECATED(bit, incarnation, name, when) \
+-	const static uint64_t DEPRECATED_CEPH_FEATURE_##name = (1ULL<<bit); \
+-	const static uint64_t DEPRECATED_CEPH_FEATUREMASK_##name =		\
++	static const uint64_t DEPRECATED_CEPH_FEATURE_##name = (1ULL<<bit); \
++	static const uint64_t DEPRECATED_CEPH_FEATUREMASK_##name =		\
+ 		(1ULL<<bit | CEPH_FEATURE_INCARNATION_##incarnation);
+ 
+ /*
+-- 
+2.9.0
