@@ -1,54 +1,88 @@
-From: David Disseldorp <ddiss@suse.de>
-Subject: Re: [systemd-devel] [PATCH] rules: block - add dm devices to
- whitelist
-Date: Mon, 10 Jul 2017 13:18:22 +0200
-Message-ID: <20170710131822.7c612d7c@suse.de>
-References: <20170705110145.20172-1-ddiss@suse.de>
-        <20170710083838.GE5995@gardel-login>
-        <20170710113703.13ca760d@suse.de>
-        <20170710095303.GA6261@gardel-login>
-        <df472d6a-b453-aca8-1143-be8ad62b0ce1@redhat.com>
-        <7e499437-f48c-e630-f277-78b1b0db93a6@redhat.com>
+From: Abhishek Varshney <abhishek.varshney@flipkart.com>
+Subject: proposal : read/write threads and handles separation in civetweb and rgw
+Date: Mon, 10 Jul 2017 17:17:26 +0530
+Message-ID: <CAP3mxSxpaAoVFsNusx9E6eudVtK_hYcN7HcwuCr27YcoHrPsaw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:39854 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753819AbdGJLS3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 10 Jul 2017 07:18:29 -0400
-In-Reply-To: <7e499437-f48c-e630-f277-78b1b0db93a6@redhat.com>
+Received: from mail-yb0-f176.google.com ([209.85.213.176]:35175 "EHLO
+        mail-yb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753649AbdGJLr2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Jul 2017 07:47:28 -0400
+Received: by mail-yb0-f176.google.com with SMTP id p207so27054771yba.2
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Jul 2017 04:47:27 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Peter Rajnoha <prajnoha@redhat.com>
-Cc: ceph-devel@vger.kernel.org, systemd-devel@lists.freedesktop.org
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 10 Jul 2017 12:47:24 +0200, Peter Rajnoha wrote:
+TL;DR
+---------
+The proposal is to separate out read and write threads/handles in
+civetweb/rgw to reduce the blast radius in case of an outage caused
+due to one type of op (GET or PUT) being blocked or latent. Proposal
+PR : https://github.com/ceph/civetweb/pull/21
 
-> On 07/10/2017 12:14 PM, Peter Rajnoha wrote:
-...
-> > Yes, please, any rules for symlinks which should be created under
-> > /dev/disk for DM devices (including all its subsystems like LVM,
-> > mpath...) should go into 13-dm-disk.rules that is part of LVM/DM source
-> > tree:
-> > 
-> > https://sourceware.org/git/?p=lvm2.git;a=blob;f=udev/13-dm-disk.rules.in
-> > 
-> > Now, when we create a partition over a DM device, there's a new mapping
-> > created on top for each partition (either by calling kpartx manually or
-> > by having it created by partitioning tool directly if it supports that).
-> > So in this case, it's not the kernel directly who creates the
-> > partitions, but they're simply another DM devices created on top of the
-> > underlying DM device to represent these partitions. But I think that
-> > doesn't matter - we should still create those symlinks for people to
-> > still have a possibility to reference the device by its part uuid - I'll
-> > fix 13-dm-disk.rules to include this.
-> >   
-> 
-> Fixed here:
-> 
-> https://sourceware.org/git/?p=lvm2.git;a=commit;h=c48149cf80c6582c2369bc7f8a33d794021d9dae
+Problem Statment
+------------------------
+Our production clusters, primarily running object gateway workloads on
+hammer, have quite a few times seen one type of op (GET or PUT) being
+blocked or latent due to different reasons. This have resulted in a
+complete outage with rgw becoming totally un-responsive and unable to
+accept connections. After root causing the issue, it is found that
+there is no separation of resources, threads and handles at civetweb
+and rgw layers, which causes a complete blackout.
 
-Looks good and works for me - thanks Peter.
+Scenarios
+--------------
+Some scenarios which are known to block one kind of op (GET or PUT).
 
-Cheers, David
+* PUTs are blocked when pool with bucket index is degraded. We have
+large omap objects, recovery/rebalancing of which is known to block
+PUT ops for longer duration of times ( ~ couple of hours). We are
+working to address this issue separately also.
+
+* GETs are blocked when rgw data pool (which is front-ended by a
+writeback cache tier on a different crush root) is degraded.
+
+There could be other such scenarios too.
+
+Proposed Approach
+---------------------------
+The proposal here is to separate read and write resources in terms of
+threads in civetweb and rados handles in rgw which would help to limit
+the blast radius and reduce the impact of any outage that may happen.
+
+* civetweb : currently in civetweb, there is a common pool of worker
+threads which consume sockets from a queue to process. In case of
+blocked requests in ceph, the queue becomes full and civetweb master
+thread is stuck in a loop waiting for the queue to become empty [1]
+and is unable to process any more requests.
+
+The proposal is to introduce 2 additional queues, a read connection
+queue and a write connection queue along with a dispatcher thread
+which picks sockets from the socket queue and puts them to one of
+these queues based on the type of the op. In case, a queue is full,
+the dispatcher thread would return a 503 instead of waiting for that
+queue to be empty again.
+
+This is supposed to limit failures and thus improve the availability
+of the clusters.
+
+The ideas described above are presented in the form of a PR here :
+https://github.com/ceph/civetweb/pull/21
+
+* rgw : while the proposed changes in civetweb should give major
+returns, next level of optimisations can be done in rgw, where the
+rados handles can be separated again based on the type of op, so that
+civetweb worker threads dont end up contending on rados handles.
+
+Would love to hear suggestions, opinions and feedback from the community.
+
+PS : Due to lack of a proper branch which keeps track of latest branch
+of civetweb and as per the suggestions received from the irc channel,
+the PR is raised against wip-listen4 branch of civetweb.
+
+1. https://github.com/ceph/civetweb/blob/wip-listen4/src/civetweb.c#L12558
+
+Thanks
+Abhishek Varshney
