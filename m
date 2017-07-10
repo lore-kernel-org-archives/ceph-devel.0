@@ -1,94 +1,139 @@
-From: Wangwenfeng <wang.wenfeng@h3c.com>
-Subject: osd down when run fio randwrite 4k using bluestore
-Date: Mon, 10 Jul 2017 08:06:36 +0000
-Message-ID: <F0858C043E80304FBFA0A767AC8DE5E7AEF333EA@H3CMLB12-EX.srv.huawei-3com.com>
-References: <F0858C043E80304FBFA0A767AC8DE5E7AEF323C7@H3CMLB12-EX.srv.huawei-3com.com>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: peering process
+Date: Mon, 10 Jul 2017 18:07:12 +1000
+Message-ID: <CAF-wwdGLL4f7YeH4cqGyvq-+gtJJgdpNBGfWmQh-M-N7mg-epQ@mail.gmail.com>
+References: <CAB7xdikjRLknjy5pac08zUbcN=r8N0+cJ4ZOL3tPMZkNSiiYLA@mail.gmail.com>
+ <CAJ4mKGaepvKs9SMZv+G=soSL44sS_KdZkWt-+P0KypObqcNH2g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:57518 "EHLO h3cmg01-ex.h3c.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751835AbdGJIGr (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 10 Jul 2017 04:06:47 -0400
-In-Reply-To: <F0858C043E80304FBFA0A767AC8DE5E7AEF323C7@H3CMLB12-EX.srv.huawei-3com.com>
-Content-Language: zh-CN
+Received: from mail-pf0-f170.google.com ([209.85.192.170]:34501 "EHLO
+        mail-pf0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753435AbdGJIHU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Jul 2017 04:07:20 -0400
+Received: by mail-pf0-f170.google.com with SMTP id q85so46068358pfq.1
+        for <ceph-devel@vger.kernel.org>; Mon, 10 Jul 2017 01:07:20 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CAJ4mKGaepvKs9SMZv+G=soSL44sS_KdZkWt-+P0KypObqcNH2g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: sheng qiu <herbert1984106@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGksDQogIEkgc2V0dXAgYSBDZXBoIGNsdXN0ZXIgb2YgTHVtaW5vdXMsIGl0oa9zIG9zZCB1c2Ug
-Ymx1ZXN0b3JlIGFuZCBJIGNyZWF0ZSBhIGNlcGhmcywgaXShr3MgbWV0YWRhdGEgdXNpbmcgcmVw
-bGljYXRlZCBhbmQgZGF0YSBwb29sIHVzaW5nIGVyYXN1cmUuDQqhoaGhoaFwb29sIDEgJ21ldGFk
-YXRhJyByZXBsaWNhdGVkIHNpemUgMiBtaW5fc2l6ZSAxIGNydXNoX3J1bGVzZXQgMSBvYmplY3Rf
-aGFzaCByamVua2lucyBwZ19udW0gMTAyNCBwZ3BfbnVtIDEwMjQgbGFzdF9jaGFuZ2UgNTIgZmxh
-Z3MgaGFzaHBzcG9vbCBzdHJpcGVfd2lkdGggMA0KoaGhoaGhcG9vbCAyICdFQ18yXzFfOCcgZXJh
-c3VyZSBzaXplIDMgbWluX3NpemUgMiBjcnVzaF9ydWxlc2V0IDIgb2JqZWN0X2hhc2ggcmplbmtp
-bnMgcGdfbnVtIDEwMjQgcGdwX251bSAxMDI0IGxhc3RfY2hhbmdlIDU2IGZsYWdzIGhhc2hwc3Bv
-b2wsZWNfb3ZlcndyaXRlcyBzdHJpcGVfd2lkdGggODE5MiBleHBlY3RlZF9udW1fb2JqZWN0cyAy
-NzAwMDAwMA0KICBXaGVuIHJ1biBmaW8gdG8gdGVzdCB0aGUgY2x1c3Rlciwgd2hpY2ggY29tbWFu
-ZCBpcw0KoaGhoaGhZmlvIC0tbnVtam9icz0xNiAtLWlvZGVwdGg9MTYgLS1pb2VuZ2luZT1saWJh
-aW8gLS1ydW50aW1lPTYwMCAtLWRpcmVjdD0xIC0tZ3JvdXBfcmVwb3J0aW5nIC0tcnc9cmFuZHdy
-aXRlIC0tYnM9NGsgLS1uYW1lPWFhIC0tZmlsZW5hbWU9L2VjLzEudHh0IC0tc2l6ZT01MDBHDQoN
-CiAgZm9yIGEgd2hpbGUgdGltZSwgc29tZSBvc2RzIGlzIHJlcG9ydGVkIGRvd24uDQogIFRoZSBi
-bHVlc3RvcmUgbG9nIGlzDQoNCjIwMTctMDctMDggMTE6Mjk6MzMuOTQ4Njk4IDdmYjhlNzY4Mjcw
-MCAyMCBibHVlZnMgX2ZsdXNoX2FuZF9zeW5jX2xvZyBjbGVhbmVkIGZpbGUgZmlsZShpbm8gMzAg
-c2l6ZSAweDJmNDRhMSBtdGltZSAyMDE3LTA3LTA4IDExOjI5OjMzLjkyNTA2NiBiZGV2IDEgZXh0
-ZW50cyBbMToweDIzMDAwMDArMTAwMDAwLDE6MHgyOTAwMDAwKzIwMDAwMF0pDQoyMDE3LTA3LTA4
-IDExOjI5OjMzLjk0ODcyMiA3ZmI4ZTc2ODI3MDAgMjAgYmx1ZXN0b3JlKC92YXIvbGliL2NlcGgv
-b3NkL2NlcGgtMykgX2t2X3N5bmNfdGhyZWFkIGNvbW1pdHRlZCAxIGNsZWFuZWQgMSBpbiAwLjAy
-MzgxMyAoMC4wMDAwMTIgZmx1c2ggKyAwLjAyMzgwMCBrdiBjb21taXQpDQoyMDE3LTA3LTA4IDEx
-OjI5OjMzLjk0ODcyNiA3ZmI4ZTc2ODI3MDAgMTAgYmx1ZXN0b3JlKC92YXIvbGliL2NlcGgvb3Nk
-L2NlcGgtMykgX3R4Y19zdGF0ZV9wcm9jIHR4YyAweDU2NTQ1MDkxZTY4MCBrdl9zdWJtaXR0ZWQN
-CjIwMTctMDctMDggMTE6Mjk6MzMuOTQ4NzI4IDdmYjhlNzY4MjcwMCAyMCBibHVlc3RvcmUoL3Zh
-ci9saWIvY2VwaC9vc2QvY2VwaC0zKSBfdHhjX2NvbW1pdHRlZF9rdiB0eGMgMHg1NjU0NTA5MWU2
-ODANCjIwMTctMDctMDggMTE6Mjk6MzMuOTQ4NzQxIDdmYjhlNzY4MjcwMCAyMCBibHVlc3RvcmUo
-L3Zhci9saWIvY2VwaC9vc2QvY2VwaC0zKSBfZGVmZXJyZWRfcXVldWUgdHhjIDB4NTY1NDUwOTFl
-NjgwIG9zciAweDU2NTQ0ZTI3MTgwMA0KMjAxNy0wNy0wOCAxMToyOTozMy45NDg3NTggN2ZiOGU3
-NjgyNzAwIDIwIGJsdWVzdG9yZS5EZWZlcnJlZEJhdGNoKDB4NTY1NDRlMmZjODgwKSBwcmVwYXJl
-X3dyaXRlIHNlcSAxNTUgMHhkYzVmMDAwMH40MDAwIGNyYyA5ZDg5ODNhMA0KMjAxNy0wNy0wOCAx
-MToyOTozMy45NDg3ODQgN2ZiOGU3NjgyNzAwIDEwIGJsdWVzdG9yZSgvdmFyL2xpYi9jZXBoL29z
-ZC9jZXBoLTMpIF90eGNfc3RhdGVfcHJvYyB0eGMgMHg1NjU0NTA5MWVlYzAgZGVmZXJyZWRfY2xl
-YW51cA0KMjAxNy0wNy0wOCAxMToyOTozMy45NDg3ODcgN2ZiOGU3NjgyNzAwIDIwIGJsdWVzdG9y
-ZSgvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTMpIF90eGNfZmluaXNoIDB4NTY1NDUwOTFlZWMwIG9u
-b2RlcyAweDU2NTQ1MTY2MThjMA0KMjAxNy0wNy0wOCAxMToyOTozMy45NDg3OTAgN2ZiOGU3Njgy
-NzAwIDIwIGJsdWVzdG9yZS5CdWZmZXJTcGFjZSgweDU2NTQ1MDYwODY5OCBpbiAweDU2NTQ0ZGM0
-OTVlMCkgZmluaXNoX3dyaXRlIGRpc2NhcmQgYnVmZmVyKDB4NTY1NDUxNzdlMDEwIHNwYWNlIDB4
-NTY1NDUwNjA4Njk4IDB4MH44MDAwMCB3cml0aW5nIG5vY2FjaGUpDQoyMDE3LTA3LTA4IDExOjI5
-OjMzLjk0ODgwNCA3ZmI4ZTc2ODI3MDAgMjAgYmx1ZXN0b3JlLkJ1ZmZlclNwYWNlKDB4NTY1NDUw
-NjA4ODU4IGluIDB4NTY1NDRkYzQ5NWUwKSBmaW5pc2hfd3JpdGUgZGlzY2FyZCBidWZmZXIoMHg1
-NjU0NTE3N2RlZjAgc3BhY2UgMHg1NjU0NTA2MDg4NTggMHgwfjMwMDAwIHdyaXRpbmcgbm9jYWNo
-ZSkNCjIwMTctMDctMDggMTE6Mjk6MzMuOTQ4ODEyIDdmYjhlNzY4MjcwMCAyMCBibHVlc3RvcmUu
-QnVmZmVyU3BhY2UoMHg1NjU0NTA2MDk3MzggaW4gMHg1NjU0NGRjNDk1ZTApIGZpbmlzaF93cml0
-ZSBkaXNjYXJkIGJ1ZmZlcigweDU2NTQ1MTc3ZGY4MCBzcGFjZSAweDU2NTQ1MDYwOTczOCAweDB+
-ODAwMDAgd3JpdGluZyBub2NhY2hlKQ0KMjAxNy0wNy0wOCAxMToyOTozMy45NDg4MjIgN2ZiOGU3
-NjgyNzAwIDIwIGJsdWVzdG9yZS5CdWZmZXJTcGFjZSgweDU2NTQ1MDYwOWMwOCBpbiAweDU2NTQ0
-ZGM0OTVlMCkgZmluaXNoX3dyaXRlIGRpc2NhcmQgYnVmZmVyKDB4NTY1NDUxNzdkZTYwIHNwYWNl
-IDB4NTY1NDUwNjA5YzA4IDB4MzAwMDB+NzAwMCB3cml0aW5nIG5vY2FjaGUpDQoyMDE3LTA3LTA4
-IDExOjI5OjMzLjk0ODgzNiA3ZmI4ZTc2ODI3MDAgMjAgYmx1ZXN0b3JlKC92YXIvbGliL2NlcGgv
-b3NkL2NlcGgtMykgX3R4Y19maW5pc2ggIHR4YyAweDU2NTQ1MDkxZWVjMCBkb25lDQoyMDE3LTA3
-LTA4IDExOjI5OjMzLjk0ODgzOCA3ZmI4ZTc2ODI3MDAgMjAgYmx1ZXN0b3JlKC92YXIvbGliL2Nl
-cGgvb3NkL2NlcGgtMykgX3R4Y19maW5pc2ggIHR4YyAweDU2NTQ0ZGRiZDQ0MCBkb25lDQoyMDE3
-LTA3LTA4IDExOjI5OjMzLjk0ODg0MCA3ZmI4ZTc2ODI3MDAgMjAgYmx1ZXN0b3JlKC92YXIvbGli
-L2NlcGgvb3NkL2NlcGgtMykgX3R4Y19maW5pc2ggIHR4YyAweDU2NTQ1MDkxZTY4MCBkZWZlcnJl
-ZF9xdWV1ZWQNCjIwMTctMDctMDggMTE6Mjk6MzMuOTQ4ODQyIDdmYjhlNzY4MjcwMCAxMCBibHVl
-c3RvcmUoL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0zKSBfdHhjX3JlbGVhc2VfYWxsb2MgMHg1NjU0
-NTA5MWVlYzAgW10NCjIwMTctMDctMDggMTE6Mjk6MzMuOTQ4ODY0IDdmYjhlNzY4MjcwMCAxMCBi
-bHVlc3RvcmUoL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0zKSBfdHhjX3JlbGVhc2VfYWxsb2MgMHg1
-NjU0NGRkYmQ0NDAgW10NCg0KICBEb2VzIGFueW9uZSBoYXZlIHRoaXMgcHJvYmxlbT8NCg0KLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLQ0Ksb7Tyrz+vLDG5Li9vP66rNPQ0MK7qsj9vLzK9dPQz965q8u+tcSx
-o8Pc0MXPoqOsvfbP3tPat6LLzbj4yc/D5rXY1rfW0MHQs/YNCrXEuPbIy7vyyLrX6aGjvfvWucjO
-us7G5Mv7yMvS1MjOus7Qzsq9yrnTw6OosPzAqLWrsrvP3tPayKuyv7vysr+31rXY0LnCtqGiuLTW
-xqGiDQq78smit6KjqbG+08q8/tbQtcTQxc+ioaPI57n7xPq07crVwcuxvtPKvP6jrMfrxPrBory0
-tee7sLvy08q8/s2o1qq3orz+yMuyosm+s/2xvg0K08q8/qOhDQpUaGlzIGUtbWFpbCBhbmQgaXRz
-IGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZyb20gTmV3IEgz
-Qywgd2hpY2ggaXMNCmludGVuZGVkIG9ubHkgZm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3Nl
-IGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBBbnkgdXNlIG9mIHRoZQ0KaW5mb3JtYXRpb24gY29u
-dGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywg
-dG90YWwgb3IgcGFydGlhbA0KZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0
-aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4gdGhlIGludGVuZGVkDQpyZWNpcGllbnQocykgaXMg
-cHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBu
-b3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0
-ZSBpdCENCg==
+
+
+On Sat, Jul 8, 2017 at 6:15 AM, Gregory Farnum <gfarnum@redhat.com> wrote:
+> On Fri, Jun 30, 2017 at 3:25 PM, sheng qiu <herbert1984106@gmail.com> wrote:
+>> Hi,
+>>
+>> We are trying to reduce the peering processing latency, since it may
+>> block front io.
+>>
+>> in our experiment, we kill certain osd and bring it back after a very
+>> short time. We checked performance counters as below:
+>>
+>>  "peering_latency": {
+>>
+>>             "avgcount": 52,
+>>
+>>             "sum": 52.435308773,
+>>
+>>             "avglat": 1008.371323
+>>
+>>         },
+>>
+>>      "getinfo_latency": {
+>>
+>>             "avgcount": 52,
+>>
+>>             "sum": 3.525831625,
+>>
+>>             "avglat": 67.804454
+>>
+>>         },
+>>
+>>         "getlog_latency": {
+>>
+>>             "avgcount": 46,
+>>
+>>             "sum": 0.255325943,
+>>
+>>             "avglat": 5.550564
+>>
+>>         },
+>>
+>>  "getmissing_latency": {
+>>
+>>             "avgcount": 46,
+>>
+>>             "sum": 0.000877735,
+>>
+>>             "avglat": 0.019081
+>>
+>>         },
+>>
+>>         "waitupthru_latency": {
+>>
+>>             "avgcount": 46,
+>>
+>>             "sum": 48.652836368,
+>>
+>>             "avglat": 1057.670356
+>>
+>>         }
+>>
+>> as shown, average peering latency is 1008ms, most of them are consumed
+>> by "waitupthru_latency".  By looking at the codes, i am not quite
+>> understand this part. Can anyone explain this part especially why it
+>> takes such long time in this stage?
+>
+> I think it's described in documentation somewhere, but in brief:
+> 1) In order to go active, an OSD must talk to *all* previous OSDs
+> which might have modified the PG in question.
+> 2) That means it has to go talk to everybody who owned it for an OSDMap interval
+> 3) ...except that could be pointlessly expensive if the cluster was
+> thrashing or something and the OSDs weren't actually running during
+> that epoch.
+> 4) So we introduce an "up_thru" mapping from OSD->epoch of the OSDMap,
+> which tracks when an OSD was alive.
+> 5) And before we can go active with a PG, we have to have committed
+> (to the OSDMap, via monitors) that we were up_thru during an interval
+> where we own it.
+> 5) Then, subsequent OSDs can do some comparisons between old OSDMaps
+> and the PG mappings to figure out if an OSD *might* have gone active
+> with the PG.
+>
+> So that waitupthru_latency is measuring how much time the OSD has to
+> spend waiting to get a sufficiently-new up_thru value to actually go
+> active on the PG. It's not a measure of local work.
+>
+>
+>>
+>> I also noticed there's some description regarding "fast peering" on
+>> http://tracker.ceph.com/projects/ceph/wiki/Osd_-_Faster_Peering
+>>
+>> is this still ongoing or stale?
+>
+> I don't think any serious work was done on it, no.
+
+Before Sam left we looked into whether it was feasible to retain peer_{info,
+missing} when the interval changed to try and avoid the getlog/getmissing steps.
+It's not clear to me this is the same work as that URL since it mentions
+"preemptively requesting" the log+missing which was not discussed as far as I
+remember. Shortly before Sam left we determined that it was only feasible to
+retain peer_info and peer_missing if the OSD determines it is still primary and
+did not go active in the last interval. Due to this limitation the work was
+given a much lower priority but I hope to revisit it soon anyway. We did not
+really discuss waitupthru_latency.
+
+> -Greg
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Cheers,
+Brad
