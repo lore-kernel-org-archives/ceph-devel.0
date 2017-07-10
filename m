@@ -1,47 +1,59 @@
-From: David Disseldorp <ddiss@suse.de>
-Subject: Re: [systemd-devel] [PATCH] rules: block - add dm devices to
+From: Lennart Poettering <lennart@poettering.net>
+Subject: Re: [PATCH] rules: block - add dm devices to
  whitelist
-Date: Mon, 10 Jul 2017 11:37:03 +0200
-Message-ID: <20170710113703.13ca760d@suse.de>
+Date: Mon, 10 Jul 2017 11:53:03 +0200
+Message-ID: <20170710095303.GA6261@gardel-login>
 References: <20170705110145.20172-1-ddiss@suse.de>
-        <20170710083838.GE5995@gardel-login>
+ <20170710083838.GE5995@gardel-login>
+ <20170710113703.13ca760d@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:59496 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752276AbdGJJhH (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 10 Jul 2017 05:37:07 -0400
-In-Reply-To: <20170710083838.GE5995@gardel-login>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Lennart Poettering <lennart@poettering.net>
-Cc: systemd-devel@lists.freedesktop.org, ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <systemd-devel-bounces@lists.freedesktop.org>
+Content-Disposition: inline
+In-Reply-To: <20170710113703.13ca760d@suse.de>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/systemd-devel>,
+ <mailto:systemd-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/systemd-devel>
+List-Post: <mailto:systemd-devel@lists.freedesktop.org>
+List-Help: <mailto:systemd-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/systemd-devel>,
+ <mailto:systemd-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: systemd-devel-bounces@lists.freedesktop.org
+Sender: "systemd-devel" <systemd-devel-bounces@lists.freedesktop.org>
+To: David Disseldorp <ddiss@suse.de>
+Cc: ceph-devel@vger.kernel.org, systemd-devel@lists.freedesktop.org
+List-Id: ceph-devel.vger.kernel.org
 
-Thanks for the feedback, Lennart...
-
-On Mon, 10 Jul 2017 10:38:38 +0200, Lennart Poettering wrote:
-
-> On Wed, 05.07.17 13:01, David Disseldorp (ddiss@suse.de) wrote:
-> 
-> > Ceph relies on by-partuuid symlinks, in order to locate the journal
-> > partition from a given OSD partition. For details, see
-> > http://tracker.ceph.com/issues/19489.  
-> 
-> This appears way too broad, as it would apply to all LVM and all other
-> devices.
->
-> It appears to me Ceph should do the same as LVM does for this, and
-> ship its own set of rules, and be careful to only match against the
-> actual devices it creates.
-
-We can certainly do this in a Ceph specific manner via the existing
-95-ceph-osd.rules, but my impression was that the by-partuuid symlinks
-are "owned" by 60-persistent-storage.rules .
-
-If you don't think the existence of these symlinks for dm paths will be
-of use to others then I'll go ahead and propose it as a Ceph only
-change.
-
-Cheers, David
+T24gTW9uLCAxMC4wNy4xNyAxMTozNywgRGF2aWQgRGlzc2VsZG9ycCAoZGRpc3NAc3VzZS5kZSkg
+d3JvdGU6Cgo+IFRoYW5rcyBmb3IgdGhlIGZlZWRiYWNrLCBMZW5uYXJ0Li4uCj4gCj4gT24gTW9u
+LCAxMCBKdWwgMjAxNyAxMDozODozOCArMDIwMCwgTGVubmFydCBQb2V0dGVyaW5nIHdyb3RlOgo+
+IAo+ID4gT24gV2VkLCAwNS4wNy4xNyAxMzowMSwgRGF2aWQgRGlzc2VsZG9ycCAoZGRpc3NAc3Vz
+ZS5kZSkgd3JvdGU6Cj4gPiAKPiA+ID4gQ2VwaCByZWxpZXMgb24gYnktcGFydHV1aWQgc3ltbGlu
+a3MsIGluIG9yZGVyIHRvIGxvY2F0ZSB0aGUgam91cm5hbAo+ID4gPiBwYXJ0aXRpb24gZnJvbSBh
+IGdpdmVuIE9TRCBwYXJ0aXRpb24uIEZvciBkZXRhaWxzLCBzZWUKPiA+ID4gaHR0cDovL3RyYWNr
+ZXIuY2VwaC5jb20vaXNzdWVzLzE5NDg5LiAgCj4gPiAKPiA+IFRoaXMgYXBwZWFycyB3YXkgdG9v
+IGJyb2FkLCBhcyBpdCB3b3VsZCBhcHBseSB0byBhbGwgTFZNIGFuZCBhbGwgb3RoZXIKPiA+IGRl
+dmljZXMuCj4gPgo+ID4gSXQgYXBwZWFycyB0byBtZSBDZXBoIHNob3VsZCBkbyB0aGUgc2FtZSBh
+cyBMVk0gZG9lcyBmb3IgdGhpcywgYW5kCj4gPiBzaGlwIGl0cyBvd24gc2V0IG9mIHJ1bGVzLCBh
+bmQgYmUgY2FyZWZ1bCB0byBvbmx5IG1hdGNoIGFnYWluc3QgdGhlCj4gPiBhY3R1YWwgZGV2aWNl
+cyBpdCBjcmVhdGVzLgo+IAo+IFdlIGNhbiBjZXJ0YWlubHkgZG8gdGhpcyBpbiBhIENlcGggc3Bl
+Y2lmaWMgbWFubmVyIHZpYSB0aGUgZXhpc3RpbmcKPiA5NS1jZXBoLW9zZC5ydWxlcywgYnV0IG15
+IGltcHJlc3Npb24gd2FzIHRoYXQgdGhlIGJ5LXBhcnR1dWlkIHN5bWxpbmtzCj4gYXJlICJvd25l
+ZCIgYnkgNjAtcGVyc2lzdGVudC1zdG9yYWdlLnJ1bGVzIC4KPiAKPiBJZiB5b3UgZG9uJ3QgdGhp
+bmsgdGhlIGV4aXN0ZW5jZSBvZiB0aGVzZSBzeW1saW5rcyBmb3IgZG0gcGF0aHMgd2lsbCBiZQo+
+IG9mIHVzZSB0byBvdGhlcnMgdGhlbiBJJ2xsIGdvIGFoZWFkIGFuZCBwcm9wb3NlIGl0IGFzIGEg
+Q2VwaCBvbmx5Cj4gY2hhbmdlLgoKSG1tbSwgc28gdGhpbmtpbmcgYWJvdXQgdGhpcyBhZ2Fpbjog
+InBhcnR1dWlkIiBpcyBhY3R1YWxseSBmb3IgR1BUCnBhcnRpdGlvbiBVVUlEcyBpZiBJIHJlY2Fs
+bCByZWNvcnJlY3RseSwgdGhleSB3b3VsZG4ndCBiZSBnZW5lcmF0ZWQKZm9yIERNIGRldmljZXMg
+YW55d2F5LCBzaW5jZSB0aGV5IGFyZSBvbmUgbGF5ZXIgcmVtb3ZlZCBmcm9tIHRoZSBHUFQsCnNv
+IGFyZSB5b3UgZXZlbiBzdXJlIHRoaXMgd2lsbCBkbyB3aGF0IHlvdSBhcmUgYXNraW5nIGZvcj8K
+CkJ1dCBldmVuIGlmIHRoaXMgYWN0dWFsbHkgd29ya3M6IERNIGxpbmtzIHNvIGZhciBhcmUgY3Jl
+YXRlZCBieSB0aGUKTFZNL2xpYmRldmljZW1hcHBlci8gcGFja2FnZXMsIG5vdCBieSB1ZGV2LCBh
+bmQgSSBkb24ndCB0aGluayB0aGlzCnNob3VsZCBjaGFuZ2UuIEhlbmNlLCBwbGVhc2UgdGFsayB0
+byB0aGUgTFZNL2xpYmRldmljZW1hcHBlciBmb2xrcwphYm91dCB0aGlzIGFuZCBhc2sgdGhlbSBm
+b3IgaW5jbHVkaW5nIGl0LgoKTGVubmFydAoKLS0gCkxlbm5hcnQgUG9ldHRlcmluZywgUmVkIEhh
+dApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpzeXN0ZW1k
+LWRldmVsIG1haWxpbmcgbGlzdApzeXN0ZW1kLWRldmVsQGxpc3RzLmZyZWVkZXNrdG9wLm9yZwpo
+dHRwczovL2xpc3RzLmZyZWVkZXNrdG9wLm9yZy9tYWlsbWFuL2xpc3RpbmZvL3N5c3RlbWQtZGV2
+ZWwK
