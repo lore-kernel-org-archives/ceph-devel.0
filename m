@@ -1,151 +1,101 @@
-From: Mark Nelson <mark.a.nelson@gmail.com>
-Subject: Re: Ceph Bluestore OSD CPU utilization
-Date: Tue, 11 Jul 2017 10:46:33 -0500
-Message-ID: <e09c864a-fb65-a68a-4802-f8b4d29f88fc@gmail.com>
-References: <694B98CBCEF42547AE4CD1A693225B5D085533EA@CNMAILEX04.lenovo.com>
- <5f6e1242-f0ec-62f2-9778-eb0a28406838@redhat.com>
- <6929185c-7c88-83ee-9e12-62db1cd23ec5@redhat.com>
- <694B98CBCEF42547AE4CD1A693225B5D085544B4@CNMAILEX04.lenovo.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: [ceph-users] autoconfigured haproxy service?
+Date: Tue, 11 Jul 2017 18:04:34 +0200
+Message-ID: <CABZ+qqk=kvoTdVebgJrxQ1kdVogY2g9aiSVZKXYzPqGaRAQ+5A@mail.gmail.com>
+References: <alpine.DEB.2.11.1707111458470.3424@piezo.novalocal>
+ <alpine.DEB.2.11.1707111507220.3424@piezo.novalocal> <CACJqLyY0fhZJtDZ3ZS3OL=K6TcK_S2fPAE1uUGHPmnbuxDHmvw@mail.gmail.com>
+ <alpine.DEB.2.11.1707111537290.3424@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f49.google.com ([209.85.214.49]:35655 "EHLO
-        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933520AbdGKPqf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Jul 2017 11:46:35 -0400
-Received: by mail-it0-f49.google.com with SMTP id v202so67204934itb.0
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Jul 2017 08:46:35 -0700 (PDT)
-In-Reply-To: <694B98CBCEF42547AE4CD1A693225B5D085544B4@CNMAILEX04.lenovo.com>
-Content-Language: en-US
+Received: from mail-oi0-f52.google.com ([209.85.218.52]:35992 "EHLO
+        mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932313AbdGKQFR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Jul 2017 12:05:17 -0400
+Received: by mail-oi0-f52.google.com with SMTP id x187so3852981oig.3
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Jul 2017 09:05:17 -0700 (PDT)
+Received: from mail-oi0-f43.google.com (mail-oi0-f43.google.com. [209.85.218.43])
+        by smtp.gmail.com with ESMTPSA id b188sm489139oia.17.2017.07.11.09.05.15
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 11 Jul 2017 09:05:15 -0700 (PDT)
+Received: by mail-oi0-f43.google.com with SMTP id x187so3852320oig.3
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Jul 2017 09:05:15 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1707111537290.3424@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Junqin JQ7 Zhang <zhangjq7@lenovo.com>, Mark Nelson <mnelson@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Haomai Wang <haomai@xsky.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-
-
-On 07/11/2017 10:31 AM, Junqin JQ7 Zhang wrote:
-> Hi Mark,
-> 
-> Thanks for your reply.
-> 
-> The hardware is as below for each 3 hosts.
-> 2 SATA SSD and 8 HDD
-
-The model of SSD potentially could be very important here.  The devices 
-we test in our lab are enterprise grade SSDs with power loss protection. 
-  That means they don't have to flush data on sync requests.  O_DSYNC 
-writes are much faster as a result.  I don't know how bad of an impact 
-this has on rocksdb wal/db, but it definitely hurts with filestore journals.
-
-> Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz
-> Network: 20000Mb/s
-> 
-> I configured OSD like
-> [osd.0]
-> host = ceph-1
-> osd data = /var/lib/ceph/osd/ceph-0        # a 100M partition of SSD
-> bluestore block db path = /dev/sda5         # a 10G partition of SSD
-
-Bluestore automatically roles rocksdb data over to the HDD with the db 
-gets full.  I bet with 10GB you'll see good performance at first and 
-then you'll start seeing lots of extra reads/writes on the HDD once it 
-fills up with metadata (the more extents that are written out the more 
-likely you'll hit this boundary).  You'll want to make the db partitions 
-use the majority of the SSD(s).
-
-> bluestore block wal path = /dev/sda6       # a 10G partition of SSD
-
-The WAL can be smaller.  1-2GB is enough (potentially even less if you 
-adjust the rocksdb buffer settings, but 1-2GB should be small enough to 
-devote most of your SSDs to DB storage).
-
-> bluestore block path = /dev/sdd                # a HDD disk
-> 
-> We use fio to test one or more 100G RBDs, an example of our fio config
-> [global]
-> ioengine=rbd
-> clientname=admin
-> pool=rbd
-> rw=randrw
-> bs=8k
-> runtime=120
-> iodepth=16
-> numjobs=4
-
-with the rbd engine I try to avoid numjobs as it can give erroneous 
-results in some cases.  it's probably better generally to stick with 
-multiple independent fio processes (though in this case for a randrw 
-workload it might not matter).
-
-> direct=1
-> rwmixread=0
-> new_group
-> group_reporting
-> [rbd_image0]
-> rbdname=testimage_100GB_0
-> 
-> Any suggestion?
-
-What kind of performance are you seeing and what do you expect to get?
-
-Mark
-
-> Thanks.
-> 
-> B.R.
-> Junqin zhang
-> 
-> -----Original Message-----
-> From: Mark Nelson [mailto:mnelson@redhat.com]
-> Sent: Tuesday, July 11, 2017 7:32 PM
-> To: Junqin JQ7 Zhang; Ceph Development
-> Subject: Re: Ceph Bluestore OSD CPU utilization
-> 
-> Ugh, small sequential *reads* I meant to say.  :)
-> 
-> Mark
-> 
-> On 07/11/2017 06:31 AM, Mark Nelson wrote:
->> Hi Junqin,
+On Tue, Jul 11, 2017 at 5:40 PM, Sage Weil <sage@newdream.net> wrote:
+> On Tue, 11 Jul 2017, Haomai Wang wrote:
+>> On Tue, Jul 11, 2017 at 11:11 PM, Sage Weil <sage@newdream.net> wrote:
+>> > On Tue, 11 Jul 2017, Sage Weil wrote:
+>> >> Hi all,
+>> >>
+>> >> Luminous features a new 'service map' that lets rgw's (and rgw nfs
+>> >> gateways and iscsi gateways and rbd mirror daemons and ...) advertise
+>> >> themselves to the cluster along with some metadata (like the addresses
+>> >> they are binding to and the services the provide).
+>> >>
+>> >> It should be pretty straightforward to build a service that
+>> >> auto-configures haproxy based on this information so that you can deploy
+>> >> an rgw front-end that dynamically reconfigures itself when additional
+>> >> rgw's are deployed or removed.  haproxy has a facility to adjust its
+>> >> backend configuration at runtime[1].
+>> >>
+>> >> Anybody interested in tackling this?  Setting up the load balancer in
+>> >> front of rgw is one of the more annoying pieces of getting ceph up and
+>> >> running in production and until now has been mostly treated as out of
+>> >> scope.  It would be awesome if there was an autoconfigured service that
+>> >> did it out of the box (and had all the right haproxy options set).
+>> >
+>> > [1] https://stackoverflow.com/questions/42678269/haproxy-dynamic-configuration
 >>
->> Can you tell us your hardware configuration (models and quantities of
->> cpus, network cards, disks, ssds, etc) and the command and options you
->> used to measure performance?
->>
->> In many cases bluestore is faster than filestore, but there are a
->> couple of cases where it is notably slower, the big one being when
->> doing small sequential writes without client-side readahead.
->>
->> Mark
->>
->> On 07/11/2017 05:34 AM, Junqin JQ7 Zhang wrote:
->>> Hi,
->>>
->>> I installed Ceph luminous v12.1.0 in 3 nodes cluster with BlueStore
->>> and did some fio test.
->>> During test,  I found the each OSD CPU utilization rate was only
->>> aroud 30%.
->>> And the performance seems not good to me.
->>> Is  there any configuration to help increase OSD CPU utilization to
->>> improve performance?
->>> Change kernel.pid_max? Any BlueStore specific configuration?
->>>
->>> Thanks a lot!
->>>
->>> B.R.
->>> Junqin Zhang
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo@vger.kernel.org More majordomo
->>> info at  http://vger.kernel.org/majordomo-info.html
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+>> it looks we do more compared to before. do we need to care the
+>> lifecycle of haproxy?  we need to manage haproxy in ceph command?
+>
+> I don't think so, although not having done this much I'm not the
+> expert.
+>
+> My suggestion would be a new package like radosgw-haproxy-agent that
+> depends on haproxy and includes a script and some systemd units etc so
+> that with minimal configuration (i.e., set up ceph.conf auth key or
+> something) it will wake up periodically and refresh the running haproxy's
+> config.
+
+So IIUC you want to periodically discover the set of radosgw backends
+to fill haproxy.cfg, then reload the haproxy daemons. That would be
+useful to (a) keep the set of radosgw hosts up to date and (b) to
+provide a high quality haproxy configuration OOTB.
+
+The stackoverflow link you sent is about another interesting use-case
+of haproxy -- mapping different urls to different backends. Indeed we
+used this in the past to migrate between ceph clusters, bucket by
+bucket. And we still use it today to redirect a few very busy buckets
+to an isolated set of radosgw's. I can share our config if that helps
+explain how this works [2]. And maybe that config can already start a
+debate about which are the best settings for an haproxy frontend (I
+won't claim ours is generally correct -- happy to hear about how it
+could be improved).
+
+I don't know if the bucket mapping concept is generally applicable.
+Maybe this haproxy-agent should focus on configuring a single backend
+populated with the radosgw's, and leave more complex configurations up
+to their admins?
+
+(BTW, we generate this haproxy.cfg dynamically via puppet, which fills
+a template by discovering the radosgw hosts in our PuppetDB).
+
+Cheers, Dan
+
+[2] https://gist.github.com/dvanders/857ffcf7249849cffc8d784c55b1a4d5
+
+> We could add a 'ceph-deploy haproxy create ...' command to deploy it,
+> along with something similar in ceph-ansible...
+>
+> sage
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
