@@ -1,65 +1,106 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: autoconfigured haproxy service?
-Date: Tue, 11 Jul 2017 15:40:00 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1707111537290.3424@piezo.novalocal>
-References: <alpine.DEB.2.11.1707111458470.3424@piezo.novalocal>
-	<alpine.DEB.2.11.1707111507220.3424@piezo.novalocal>
-	<CACJqLyY0fhZJtDZ3ZS3OL=K6TcK_S2fPAE1uUGHPmnbuxDHmvw@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Cmake: determening Ceph version when there is no git checkout.
+Date: Tue, 11 Jul 2017 17:42:28 +0200
+Message-ID: <32308ccf-139a-b37a-7282-8bb414c8a146@digiware.nl>
+References: <7683db13-17fc-44a8-cb6c-bcc83048378a@digiware.nl>
+ <alpine.DEB.2.11.1707111404340.3424@piezo.novalocal>
+ <992deb10-b689-ebf7-947c-e7abefcdb878@digiware.nl>
+ <alpine.DEB.2.11.1707111434220.3424@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CACJqLyY0fhZJtDZ3ZS3OL=K6TcK_S2fPAE1uUGHPmnbuxDHmvw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Haomai Wang <haomai-p1s0O0zx/60@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.digiware.nl ([176.74.240.9]:11650 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933490AbdGKPmf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 11 Jul 2017 11:42:35 -0400
+In-Reply-To: <alpine.DEB.2.11.1707111434220.3424@piezo.novalocal>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 11 Jul 2017, Haomai Wang wrote:
-> On Tue, Jul 11, 2017 at 11:11 PM, Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org> wrote:
-> > On Tue, 11 Jul 2017, Sage Weil wrote:
-> >> Hi all,
-> >>
-> >> Luminous features a new 'service map' that lets rgw's (and rgw nfs
-> >> gateways and iscsi gateways and rbd mirror daemons and ...) advertise
-> >> themselves to the cluster along with some metadata (like the addresses
-> >> they are binding to and the services the provide).
-> >>
-> >> It should be pretty straightforward to build a service that
-> >> auto-configures haproxy based on this information so that you can deploy
-> >> an rgw front-end that dynamically reconfigures itself when additional
-> >> rgw's are deployed or removed.  haproxy has a facility to adjust its
-> >> backend configuration at runtime[1].
-> >>
-> >> Anybody interested in tackling this?  Setting up the load balancer in
-> >> front of rgw is one of the more annoying pieces of getting ceph up and
-> >> running in production and until now has been mostly treated as out of
-> >> scope.  It would be awesome if there was an autoconfigured service that
-> >> did it out of the box (and had all the right haproxy options set).
-> >
-> > [1] https://stackoverflow.com/questions/42678269/haproxy-dynamic-configuration
+On 11-7-2017 16:34, Sage Weil wrote:
+> On Tue, 11 Jul 2017, Willem Jan Withagen wrote:
+>> On 11-7-2017 16:05, Sage Weil wrote:
+>>> On Tue, 11 Jul 2017, Willem Jan Withagen wrote:
+>>>> Hi,
+>>>>
+>>>> I'm doing some work to be ready when Luminous gets fully released.
+>>>> But I now run into the following code from src/CMakeLists.txtx
+>>>> ====
+>>>> # the src/.git_version file may be written out by make-dist; otherwise
+>>>> # we pull the git version from .git
+>>>> option(ENABLE_GIT_VERSION "build Ceph with git version string" ON)
+>>>> if(${ENABLE_GIT_VERSION})
+>>>>   get_git_head_revision(GIT_REFSPEC CEPH_GIT_VER)
+>>>>   git_describe(CEPH_GIT_NICE_VER --always)
+>>>>   #if building from a source tarball via make-dist
+>>>>   if(${CEPH_GIT_VER} STREQUAL "GITDIR-NOTFOUND")
+>>>>     message(STATUS "Ceph/.git directory not found, parsing
+>>>> ${CMAKE_CURRENT_SOURCE_DIR}/.git_version for CEPH_GIT_VER and
+>>>> CEPH_GIT_NICE_VER")
+>>>>     file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/.git_version
+>>>> CEPH_GIT_SHA_AND_TAG)
+>>>>     list(GET CEPH_GIT_SHA_AND_TAG 0 CEPH_GIT_VER)
+>>>>     list(GET CEPH_GIT_SHA_AND_TAG 1 CEPH_GIT_NICE_VER)
+>>>>   endif(${CEPH_GIT_VER} STREQUAL "GITDIR-NOTFOUND")
+>>>>   # remove 'v' prefix from raw git version
+>>>>   string(SUBSTRING ${CEPH_GIT_NICE_VER} 1 -1 CEPH_GIT_NICE_VER)
+>>>> else(${ENABLE_GIT_VERSION})
+>>>>   set(CEPH_GIT_VER "no_version")
+>>>>   set(CEPH_GIT_NICE_VER "Development")
+>>>> endif(${ENABLE_GIT_VERSION})
+>>>> ====
+>>>>
+>>>> This build the Ceph version from data in the .git repo.
+>>>> But that is not how FreeBSD packaging works. There a tarbal is fetched
+>>>> but that does not contain any git info.
+>>>>
+>>>> Work is done in:
+>>>> 	/usr/ports/net/ceph/work/ceph-12.1.0
+>>>> and that is about all where I can extract some versioning from.
+>>>>
+>>>> Does anybody have suggestions for an easy way out?
+>>>> Other than hardcode it in the Makefile as an option to CMake.
+>>>
+>>> Take a look at the make-dist script; it puts the git version info in a 
+>>> tarball that has everything needed to build.  (i.e., it writes out 
+>>> the .git_version file referenced above.)
+>>
+>> I think I used the wrong words....
+>>
+>> The make-dis script begins with:
+>> if [ ! -d .git ]; then
+>>     echo "no .git present.  run this from the base dir of the git checkout."
+>>     exit 1
+>> fi
+>>
+>> When I say tarball, I mean that the FreeBSD packaging system will fetch
+>> something like:
+>> https://codeload.github.com/ceph/ceph-v12.1.0_GH0.tar.gz
+>>
+>> And that tar file does not contain ANY git information.
+>> So I have to extract that from somewhere/something else. All I know is
+>> the TAG v12.1.0. So if I want to have a git hash in the version I need
+>> to construct it from that, or use that reference to fetch the hash.
+>>
+>> Otherwise I'll need to put it in the package makefile everytime, I
+>> release a new version.
 > 
-> it looks we do more compared to before. do we need to care the
-> lifecycle of haproxy?  we need to manage haproxy in ceph command?
+> Can you instead fetch the tarball from download.ceph.com?  Those 
+> tarballs are generated with make-dist and already include the 
+> .git_version information.
 
-I don't think so, although not having done this much I'm not the 
-expert.
+mmmm,
+That is everything in one blow...
+So no mucking with git submodules, but have it all ready to compile...
+Could work easier, especially for official releases.
 
-My suggestion would be a new package like radosgw-haproxy-agent that 
-depends on haproxy and includes a script and some systemd units etc so 
-that with minimal configuration (i.e., set up ceph.conf auth key or 
-something) it will wake up periodically and refresh the running haproxy's 
-config.
+I'll try and make an alternative version for the release-ports.
 
-We could add a 'ceph-deploy haproxy create ...' command to deploy it, 
-along with something similar in ceph-ansible...
+Alternative would be to create a dir on download.ceph.com with a hash
+file per released version to download??
 
-sage
+--WjW
