@@ -1,66 +1,93 @@
-From: Wangwenfeng <wang.wenfeng@h3c.com>
+From: Sage Weil <sweil@redhat.com>
 Subject: Re: osd down when run fio randwrite 4k using bluestore
-Date: Tue, 11 Jul 2017 01:35:43 +0000
-Message-ID: <F0858C043E80304FBFA0A767AC8DE5E7AEF35A8C@H3CMLB12-EX.srv.huawei-3com.com>
+Date: Tue, 11 Jul 2017 01:59:12 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1707110158430.3424@piezo.novalocal>
+References: <F0858C043E80304FBFA0A767AC8DE5E7AEF35A8C@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-253640202-1499738354=:3424"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:4403 "EHLO h3cmg01-ex.h3c.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754644AbdGKBgJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 10 Jul 2017 21:36:09 -0400
-Content-Language: zh-CN
+Received: from mx1.redhat.com ([209.132.183.28]:48902 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752333AbdGKB7P (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 10 Jul 2017 21:59:15 -0400
+In-Reply-To: <F0858C043E80304FBFA0A767AC8DE5E7AEF35A8C@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: 'Sage Weil' <sweil@redhat.com>
+To: Wangwenfeng <wang.wenfeng@h3c.com>
 Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SXQgaXMgc3RpbGwgZXhpc3QgaW4gdGhlIGxhdGVzdCBtYXN0ZXIgd2hpY2ggY29udGFpbnMgMTYw
-NTEuDQoNCg0KDQpJIHN1c3BlY3QgdGhpcyBpcyB0aGUgcmVjZW50IGRlZmVycmVkX2FnZ3Jlc3Np
-dmUgZGVhZGxvY2s7IHRoZSBmaXggbWVyZ2VkIGxhc3Qgd2Vlay4gIFBsZWFzZSB0cnkgdGhlIGxh
-dGVzdCBtYXN0ZXIgYnJhbmNoIGFuZCBzZWUgaWYgeW91IGNhbiByZXByb2R1Y2UuDQoNCmh0dHBz
-Oi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8xNjA1MQ0KDQpUaGFua3MhDQpzYWdlDQoNCg0K
-T24gTW9uLCAxMCBKdWwgMjAxNywgV2FuZ3dlbmZlbmcgd3JvdGU6DQoNCj4gDQo+IEhpLCBTYWdl
-DQo+IKGhSSBzZXR1cCBhIENlcGggY2x1c3RlciBvZiBMdW1pbm91cyAxMi4wLjMsIGl0oa9zIG9z
-ZCB1c2UgYmx1ZXN0b3JlIGFuZCBJIGNyZWF0ZSBhIGNlcGhmcywgaXShr3MgbWV0YWRhdGEgdXNp
-bmcgcmVwbGljYXRlZCBhbmQgZGF0YSBwb29sIHVzaW5nIGVyYXN1cmUuDQo+IKGhoaGhoXBvb2wg
-MSAnbWV0YWRhdGEnIHJlcGxpY2F0ZWQgc2l6ZSAyIG1pbl9zaXplIDEgY3J1c2hfcnVsZXNldCAx
-IG9iamVjdF9oYXNoIHJqZW5raW5zIHBnX251bSAxMDI0IHBncF9udW0gMTAyNCBsYXN0X2NoYW5n
-ZSA1MiBmbGFncyBoYXNocHNwb29sIHN0cmlwZV93aWR0aCAwDQo+IKGhoaGhoXBvb2wgMiAnRUNf
-Ml8xXzgnIGVyYXN1cmUgc2l6ZSAzIG1pbl9zaXplIDIgY3J1c2hfcnVsZXNldCAyIG9iamVjdF9o
-YXNoIHJqZW5raW5zIHBnX251bSAxMDI0IHBncF9udW0gMTAyNCBsYXN0X2NoYW5nZSA1NiBmbGFn
-cyBoYXNocHNwb29sLGVjX292ZXJ3cml0ZXMgc3RyaXBlX3dpZHRoIDgxOTIgZXhwZWN0ZWRfbnVt
-X29iamVjdHMgMjcwMDAwMDANCj4gICBXaGVuIHJ1biBmaW8gdG8gdGVzdCB0aGUgY2x1c3Rlciwg
-d2hpY2ggY29tbWFuZCBpcw0KPiChoaGhoaFmaW8gLS1udW1qb2JzPTE2IC0taW9kZXB0aD0xNiAt
-LWlvZW5naW5lPWxpYmFpbyAtLXJ1bnRpbWU9NjAwIA0KPiAtLWRpcmVjdD0xIC0tZ3JvdXBfcmVw
-b3J0aW5nIC0tcnc9cmFuZHdyaXRlIC0tYnM9NGsgLS1uYW1lPWFhIA0KPiAtLWZpbGVuYW1lPS9l
-Yy8xLnR4dCAtLXNpemU9NTAwRw0KPiANCj4gICBmb3IgYSB3aGlsZSB0aW1lLCBzb21lIG9zZHMg
-aXMgcmVwb3J0ZWQgZG93biwgd2hpY2ggYWxzbyBpbiAxMi4xLjAgYW5kIG1hc3Rlci4NCj4gDQo+
-ICAgSSBoYXZlIGEgcXVlc3Rpb24gYWJvdXQgZm9sbG93IGNvZGUNCj4gdm9pZCBCbHVlU3RvcmU6
-Ol9kZWZlcnJlZF9xdWV1ZShUcmFuc0NvbnRleHQgKnR4Yykgew0KPiAgIGRvdXQoMjApIDw8IF9f
-ZnVuY19fIDw8ICIgdHhjICIgPDwgdHhjIDw8ICIgb3NyICIgPDwgdHhjLT5vc3IgPDwgZGVuZGw7
-DQo+ICAgc3RkOjpsb2NrX2d1YXJkPHN0ZDo6bXV0ZXg+IGwoZGVmZXJyZWRfbG9jayk7DQo+ICAg
-oa2hraGtoa2hraGtoa2hraGtoa0NCj4gICBpZiAoZGVmZXJyZWRfYWdncmVzc2l2ZSAmJg0KPiAg
-ICAgICAhdHhjLT5vc3ItPmRlZmVycmVkX3J1bm5pbmcpIHsNCj4gICAgIF9kZWZlcnJlZF9zdWJt
-aXQodHhjLT5vc3IuZ2V0KCkpOw0KPiAgIH0NCj4gfQ0KPiANCj4gSWYgSSBhZGQgJyEnIHRvIGRl
-ZmVycmVkX2FnZ3Jlc3NpdmUsIHRoZSBvc2Qgd2lsbCBub3QgZG93bi4gV291bGQgeW91IGhlbHAg
-dG8gcG9pbnQgdGhpcyBtb2RpZnkgaXMgcmlnaHQgb3Igbm90Pw0KPiAgIGlmICghZGVmZXJyZWRf
-YWdncmVzc2l2ZSAmJg0KPiAgICAgICAhdHhjLT5vc3ItPmRlZmVycmVkX3J1bm5pbmcpIHsNCj4g
-ICAgIF9kZWZlcnJlZF9zdWJtaXQodHhjLT5vc3IuZ2V0KCkpOw0KPiAgIH0NCj4gDQo+IA0KPiAt
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tDQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiCxvtPKvP68sMbkuL28/rqs09DQwruqyP28vMr109DP
-3rmry761xLGjw9zQxc+io6y99s/e09q3osvNuPjJz8PmtdjWt9bQwdCz9g0KPiC1xLj2yMu78si6
-1+mho7371rnIzrrOxuTL+8jL0tTIzrrO0M7Kvcq508OjqLD8wKi1q7K7z97T2sirsr+78rK/t9a1
-2NC5wrahori01sahog0KPiC78smit6KjqbG+08q8/tbQtcTQxc+ioaPI57n7xPq07crVwcuxvtPK
-vP6jrMfrxPrBory0tee7sLvy08q8/s2o1qq3orz+yMuyosm+s/2xvg0KPiDTyrz+o6ENCj4gVGhp
-cyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1h
-dGlvbiBmcm9tIA0KPiBOZXcgSDNDLCB3aGljaCBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVy
-c29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIA0KPiBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ug
-b2YgdGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJlaW4gaW4gYW55IA0KPiB3YXkgKGluY2x1
-ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsIGRpc2Nsb3N1cmUsIA0K
-PiByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0
-aGUgaW50ZW5kZWQNCj4gcmVjaXBpZW50KHMpIGlzIHByb2hpYml0ZWQuIElmIHlvdSByZWNlaXZl
-IHRoaXMgZS1tYWlsIGluIGVycm9yLCANCj4gcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHBo
-b25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo+IA0K
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-253640202-1499738354=:3424
+Content-Type: TEXT/PLAIN; charset=gb2312
+Content-Transfer-Encoding: 8BIT
+
+On Tue, 11 Jul 2017, Wangwenfeng wrote:
+> It is still exist in the latest master which contains 16051.
+
+If you can reproduce this, can you please generate a log with 'debug 
+bluestore = 20' on the osd?
+
+Thanks!
+sage
+
+> 
+> 
+> 
+> I suspect this is the recent deferred_aggressive deadlock; the fix merged last week.  Please try the latest master branch and see if you can reproduce.
+> 
+> https://github.com/ceph/ceph/pull/16051
+> 
+> Thanks!
+> sage
+> 
+> 
+> On Mon, 10 Jul 2017, Wangwenfeng wrote:
+> 
+> > 
+> > Hi, Sage
+> > 　I setup a Ceph cluster of Luminous 12.0.3, it’s osd use bluestore and I create a cephfs, it’s metadata using replicated and data pool using erasure.
+> > 　　　pool 1 'metadata' replicated size 2 min_size 1 crush_ruleset 1 object_hash rjenkins pg_num 1024 pgp_num 1024 last_change 52 flags hashpspool stripe_width 0
+> > 　　　pool 2 'EC_2_1_8' erasure size 3 min_size 2 crush_ruleset 2 object_hash rjenkins pg_num 1024 pgp_num 1024 last_change 56 flags hashpspool,ec_overwrites stripe_width 8192 expected_num_objects 27000000
+> >   When run fio to test the cluster, which command is
+> > 　　　fio --numjobs=16 --iodepth=16 --ioengine=libaio --runtime=600 
+> > --direct=1 --group_reporting --rw=randwrite --bs=4k --name=aa 
+> > --filename=/ec/1.txt --size=500G
+> > 
+> >   for a while time, some osds is reported down, which also in 12.1.0 and master.
+> > 
+> >   I have a question about follow code
+> > void BlueStore::_deferred_queue(TransContext *txc) {
+> >   dout(20) << __func__ << " txc " << txc << " osr " << txc->osr << dendl;
+> >   std::lock_guard<std::mutex> l(deferred_lock);
+> >   …………………………
+> >   if (deferred_aggressive &&
+> >       !txc->osr->deferred_running) {
+> >     _deferred_submit(txc->osr.get());
+> >   }
+> > }
+> > 
+> > If I add '!' to deferred_aggressive, the osd will not down. Would you help to point this modify is right or not?
+> >   if (!deferred_aggressive &&
+> >       !txc->osr->deferred_running) {
+> >     _deferred_submit(txc->osr.get());
+> >   }
+> > 
+> > 
+> > ----------------------------------------------------------------------
+> > ---------------------------------------------------------------
+> > 本邮件及其附件含有新华三技术有限公司的保密信息，仅限于发送给上面地址中列出
+> > 的个人或群组。禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制、
+> > 或散发）本邮件中的信息。如果您错收了本邮件，请您立即电话或邮件通知发件人并删除本
+> > 邮件！
+> > This e-mail and its attachments contain confidential information from 
+> > New H3C, which is intended only for the person or entity whose address 
+> > is listed above. Any use of the information contained herein in any 
+> > way (including, but not limited to, total or partial disclosure, 
+> > reproduction, or dissemination) by persons other than the intended
+> > recipient(s) is prohibited. If you receive this e-mail in error, 
+> > please notify the sender by phone or email immediately and delete it!
+> > 
+> N嫥叉靣笡y???氊b瞂???千v豝???藓{.n???壏渮榏z鳐妠ay???蕠跈???j???f＂穐殝鄗???畐ア???⒎???:+v墾妛鑚豰稛???珣赙zZ+凒殠娸???"濟!秈
+--8323329-253640202-1499738354=:3424--
