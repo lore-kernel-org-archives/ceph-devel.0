@@ -1,30 +1,48 @@
-From: Junqin JQ7 Zhang <zhangjq7@lenovo.com>
-Subject: Ceph Bluestore OSD CPU utilization
-Date: Tue, 11 Jul 2017 10:34:47 +0000
-Message-ID: <694B98CBCEF42547AE4CD1A693225B5D085533EA@CNMAILEX04.lenovo.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: Ceph Bluestore OSD CPU utilization
+Date: Tue, 11 Jul 2017 06:31:11 -0500
+Message-ID: <5f6e1242-f0ec-62f2-9778-eb0a28406838@redhat.com>
+References: <694B98CBCEF42547AE4CD1A693225B5D085533EA@CNMAILEX04.lenovo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail1.bemta12.messagelabs.com ([216.82.251.10]:43044 "EHLO
-        mail1.bemta12.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1755525AbdGKKhu (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 11 Jul 2017 06:37:50 -0400
-Content-Language: zh-CN
+Received: from mx1.redhat.com ([209.132.183.28]:50014 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750929AbdGKLbM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 11 Jul 2017 07:31:12 -0400
+In-Reply-To: <694B98CBCEF42547AE4CD1A693225B5D085533EA@CNMAILEX04.lenovo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Junqin JQ7 Zhang <zhangjq7@lenovo.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+Hi Junqin,
 
-I installed Ceph luminous v12.1.0 in 3 nodes cluster with BlueStore and did some fio test.
-During test,  I found the each OSD CPU utilization rate was only aroud 30%.
-And the performance seems not good to me.
-Is  there any configuration to help increase OSD CPU utilization to improve performance?
-Change kernel.pid_max? Any BlueStore specific configuration?
+Can you tell us your hardware configuration (models and quantities of 
+cpus, network cards, disks, ssds, etc) and the command and options you 
+used to measure performance?
 
-Thanks a lot!
+In many cases bluestore is faster than filestore, but there are a couple 
+of cases where it is notably slower, the big one being when doing small 
+sequential writes without client-side readahead.
 
-B.R.
-Junqin Zhang
+Mark
+
+On 07/11/2017 05:34 AM, Junqin JQ7 Zhang wrote:
+> Hi,
+>
+> I installed Ceph luminous v12.1.0 in 3 nodes cluster with BlueStore and did some fio test.
+> During test,  I found the each OSD CPU utilization rate was only aroud 30%.
+> And the performance seems not good to me.
+> Is  there any configuration to help increase OSD CPU utilization to improve performance?
+> Change kernel.pid_max? Any BlueStore specific configuration?
+>
+> Thanks a lot!
+>
+> B.R.
+> Junqin Zhang
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
