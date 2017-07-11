@@ -1,126 +1,153 @@
-From: "Robin H. Johnson" <robbat2-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org>
-Subject: Re: autoconfigured haproxy service?
-Date: Tue, 11 Jul 2017 18:53:40 +0000
-Message-ID: <robbat2-20170711T181007-461462320Z@orbis-terrarum.net>
-References: <alpine.DEB.2.11.1707111458470.3424@piezo.novalocal>
-	<alpine.DEB.2.11.1707111507220.3424@piezo.novalocal>
-	<CACJqLyY0fhZJtDZ3ZS3OL=K6TcK_S2fPAE1uUGHPmnbuxDHmvw@mail.gmail.com>
-	<alpine.DEB.2.11.1707111537290.3424@piezo.novalocal>
-	<CABZ+qqk=kvoTdVebgJrxQ1kdVogY2g9aiSVZKXYzPqGaRAQ+5A@mail.gmail.com>
-	<alpine.DEB.2.11.1707111614080.3424@piezo.novalocal>
+From: Milosz Tanski <milosz@adfin.com>
+Subject: Re: New(ish) LMDBstore KeyValuedB backend and testing
+Date: Tue, 11 Jul 2017 15:23:18 -0400
+Message-ID: <CANP1eJFpCMM8Do9wBcLZjfqP_1xLyLTBra7GrpUFwJmOgx-Abg@mail.gmail.com>
+References: <e81ae2ee-8e6e-3276-d373-fe26f58f23e9@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1192222648=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1707111614080.3424-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-it0-f52.google.com ([209.85.214.52]:37245 "EHLO
+        mail-it0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933570AbdGKTXT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Jul 2017 15:23:19 -0400
+Received: by mail-it0-f52.google.com with SMTP id m84so1069400ita.0
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Jul 2017 12:23:19 -0700 (PDT)
+In-Reply-To: <e81ae2ee-8e6e-3276-d373-fe26f58f23e9@gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Nelson <mark.a.nelson@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
+On Tue, Jul 11, 2017 at 10:23 AM, Mark Nelson <mark.a.nelson@gmail.com> wrote:
+> Hi guys,
+>
+> A month or so ago I started rewriting Xinxin Shu's old LMDB kvdb PR to work
+> with master.  I've now got it to the point where it no longer segfaults
+> during performance tests as the kvstore for bluestore.
+>
+> The new PR is here:
+>
+> https://github.com/ceph/ceph/pull/16257
+>
+> The original version needed some work to get into a functional state. Some
+> of this was just general things like adding cmake support and adding
+> functionality to conform to the current KeyValueDB interface. Beyond that,
+> the biggest issue was reworking it to not keep multiple concurrent write
+> transactions open.  Other minor issues include removing various temporary
+> string conversions and memory copies where possible.
+>
+> One remaining issue is that Bluestore's BitmapFreelistManager keeps a read
+> iterator open indefinitely.  This translates to keeping a read-only lmdb txn
+> open, which makes new writes to the database grow the database rather than
+> reusing free-pages (ie the db grows without bound with new writes).
+>
+> A (buggy) fix for this is being attempted in another PR (currently probably
+> breaks freelist management, segfaults for large min_alloc sizes), but fixes
+> the db growth issue:
+>
+> https://github.com/ceph/ceph/pull/16243
+>
+> Write performance is fairly low (as expected) vs rocksdb, though it's
+> possible we may be able to improve some of that via a WAL or similar
+> mechanism.  Most of the time is spent doing fdatasync via mdb_env_sync. It
+> might be possible to make the bluestore write workload more favorable to
+> lmdb (bigger key/value pairs) but that's potentially a lot of work.
+>
+> Space-amp so far seems like it might be lower than rocksdb in our current
+> configuration though which could be good for large HDD configurations where
+> the DB is on flash and raw write performance is less of an issue.
+>
+> I think it would be good to try to get some other key/value stores like
+> forestdb or even the aging zetascale into a functional state and do some
+> more comparison testing.
+>
+> Mark
 
---===============1192222648==
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="fh9ZBaUqcBlFuagd"
-Content-Disposition: inline
+Mark, I've actually looked into making LMDB group commit work for
+another project. In the we ended up going a different direction, but
+not before at least we figure out how to do it conceptually. At the
+end of the day the hardest part of making it work comes down how to do
+it in a portable way within the existing code base. LMDB is very well
+written in terms of quality of the implementation (stability / crash
+performance) but the code can be difficult to read/change and in our
+case the issue various cross platform.
 
+Here's a mind dump of what I remember.
 
---fh9ZBaUqcBlFuagd
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Current LMDB transaction design works very similar to a RW lock with
+the additional relaxation of the rules that writes never block reads
+(you just read a potentially older copy). The writes end up being
+bound by fsync() performance. On workload that have lots of small
+database updates in each transaction (like filesystem metadata) this
+lead to somewhat poor write txn rate.
 
-(Trim lots of good related content).
+The fsync() bottle neck is especially true on spinning disk but is
+still apparent on everything but nvdimm. The solution to that is being
+able to commit multiple changes in one go, in traditional database
+this is often referred to group commit. You can implement it either in
+the higher level software that's consuming it (CEPH) or in the lower
+layer (LMDB). I've only though through the second one.
 
-The upcoming HAProxy 1.8 has landed further patches for improving hot
-restarts/reloads of HAProxy, which previously lead to a brief gap period
-when new connections were not serviced. Lots of other approaches had
-been seen, including delaying TCP SYN momentarily [1]. It also notably
-fixes how you needed a separate wrapper for using haproxy w/ systemd.
+The way that works out is:
 
-In the DreamHost RGW usage, I've been building additional functionality
-into HAProxy via Lua, but I'm not convinced it's the best place for some
-of it:
-- rate-limiting by access key (with explicitly whitelisted & blacklisted
-  keys), over multiple frontends [2]
-- Planned: different rates for different operations/customer classes.
-- Planned: issue redirects for buckets being moved (because getting
-  federated metadata between existing clusters is painful) [3].
-  This differs from the CERN backend-selection-by-bucket, because the
-  bucket is going to be moving regions!
+1. You have a previous txn commit that's happening. What I'll refer to
+as "previous turn"
+2. Instead of blocking like we do today in another thread, it's
+possible to rework LMDB code in such a way that the next write
+transaction can proceed using the results from the ongoing write
+assuming it's going to succeed. This is possible since LMDB is COW so
+you're never overwriting existing data. I refer to this "current turn"
+3. Once the "current turn" completes but "previous turn" is not
+complete, we can expend on "current turn" to include the next pending
+transaction. Thus we can end up with a whole group of transaction in
+the "current turn".
+4. When "previous turn" completes, it can check if there's any
+transactions in the "current turn" and wake up one of the threads to
+complete the commit.
+5. If there's an write error in the "previous turn" you obviously need
+to fail "current turn" since it's using results that have not been
+committed. This should hopefully be the corner case.
 
-RGW doesn't seem like the right place for some of this functionality
-either, because storing rate data in multiple places means lots of
-cross-talk.
+So, conceptually it's simple. You get you make progress on then next
+write transaction while the current one is waiting on fsync and you
+opportunistically get to group transactions together. But a I said
+it's easier said then done....
 
-[1] https://engineeringblog.yelp.com/2015/04/true-zero-downtime-haproxy-rel=
-oads.html
-[2] http://blog.armbruster-it.de/2015/08/neo4j-and-haproxy-some-best-practi=
-ces-and-tricks/
-[3] http://docs.aws.amazon.com/AmazonS3/latest/dev/Redirects.html
+The difficulties I have identified:
+1. The LMDB code is designed for and makes a lot of assumptions about
+one writer.
+2. The on-disk format have a root page double buffering scheme (one
+for previous and next transaction) that would need to change (need at
+least 3).
+3. A prototype I experiment with required some point-to-point
+synchronization. "previous turn" commiter thread needs to wake up the
+threads in the current group, then need to wake up one thread in the
+next group to be it's commit leader. There's lots of corner cases of
+what if there's no next group, etc...
+4. I've implemented this the prototype using futex and atomics. A lot
+of complexity came from dealing lock-free queue problems... the double
+buffer root page scheme is essentially replaced by a "queue" and you
+need to worry about pre-allocating it but also making sure you don't
+overrun it (waiting on possibly slow notifications to others in your
+group that have not advanced).
+5. LMDB supports both in single process (threads) and multi-process
+model for accessing the same database. The second case made it
+somewhat harder to implement this.
+6. I'm not sure with what you end up is compatible with LMDB... and
+that might be a burden.
 
-> > I don't know if the bucket mapping concept is generally applicable.
-> > Maybe this haproxy-agent should focus on configuring a single backend
-> > populated with the radosgw's, and leave more complex configurations up
-> > to their admins?
-> Yeah.  (The dynamic remapping is interesting, though!  That could=20
-> potentially be controlled by rgw as well to automatically isolate busy=20
-> buckets or objects.)
-Yes, this would fit well to populate a single HAProxy backend w/ the
-available RGWs, and then that can be wrapped with whatever frontend
-configuration (esp. SSL) that the admin wants.
+There's other things I'm missing. As I said, we've abandoned our
+changes here because we went in a different direction with the whole
+projects (using LMDB as on-disk cache for remote resources) partially
+due to the complexity. But with the right implementation, you can
+ended up with a btree database with a really solid base (LMDB) but
+also with much faster write txn (thanks to implementing group commit).
 
+-- 
+Milosz Tanski
+CTO
+16 East 34th Street, 15th floor
+New York, NY 10016
 
---=20
-Robin Hugh Johnson
-Gentoo Linux: Dev, Infra Lead, Foundation Trustee & Treasurer
-E-Mail   : robbat2-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org
-GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
-GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
-
---fh9ZBaUqcBlFuagd
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-Comment: Robbat2 @ Orbis-Terrarum Networks - The text below is a digital signature. If it doesn't make any sense to you, ignore it.
-
-iQKTBAEBCgB9FiEEveu2pS8Vb98xaNkRGTlfI8WIJsQFAlllHrRfFIAAAAAALgAo
-aXNzdWVyLWZwckBub3RhdGlvbnMub3BlbnBncC5maWZ0aGhvcnNlbWFuLm5ldEJE
-RUJCNkE1MkYxNTZGREYzMTY4RDkxMTE5Mzk1RjIzQzU4ODI2QzQACgkQGTlfI8WI
-JsTxVQ//Ya38/R8nc8AAQUJeGxzRj4Eq+fFrahdUWQEIxue8MK2xehg7kpXGBchf
-5FInRcd3nv66LwRKKF4GE8GFmHixPiEGsUdhl//sfGgXd2G/o+XCQZRUPADAZROt
-Q4w0cke2gKcj6nCddmUqR5+VXbQ0Wh9TPOs3UaPGUXr65yttXr2JGpblG/WqdLdS
-CcPdf0/cMkZp7MxeC8b7Rn2nzfwOr++9rs6O7b2UOf8VHafJt4TyNKmJEUeZelgK
-aExQV9xuKRVPBVAQNX9MFyXgoQcSJ7SgzTtVDWBJJGuev/GoypUIObm4U0TorP/j
-0yRNRnoLvv9lUbj/8DaYevGDB1acmaaEpSnXFkRYtYQ2c8P+FcKezQv+QEO2HQnr
-Fm3VSposX0qtxctm505jxZCOYYqD32ObgjnMCG3LvCeTIxWVK6EsuikAEkY/KswG
-iDMRTkypZVAbUgw9wRUtdVc6OfyuFN6+G3DZHU0jBqd7EVqy1NhWwc8xXZZJhvnk
-sMBTA80RBiFENUbP4F2BhMmJfeDIXHjJxdKlpbRpP2+x/hhf2znYEBsHLt/3qmXP
-G+8rLCsZMXYEY6hz8AHnBC/f3bmpBUvYt84whtTzrde25BjXqtzwMKBF6Zb51Blg
-S3bLJakijKxRJvleCdJLzMoLxD6JcWy2hHIKqkLq8Tt7tinQ6Gg=
-=7HK6
------END PGP SIGNATURE-----
-
---fh9ZBaUqcBlFuagd--
-
---===============1192222648==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============1192222648==--
+p: 646-253-9055
+e: milosz@adfin.com
