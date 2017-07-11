@@ -1,110 +1,43 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph updates for 4.13-rc1
-Date: Tue, 11 Jul 2017 19:21:38 +0200
-Message-ID: <1499793698-8189-1-git-send-email-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Ceph @ OpenStack Sydney Summit
+Date: Tue, 11 Jul 2017 10:48:59 -0700
+Message-ID: <CAJ4mKGY5eD=zMMkj1cKzBByP+9xnv6+5ahNMFcw+s17Bpy3+fQ@mail.gmail.com>
+References: <CA+z5Dsz_xCqzq-C3eWvDMBhJXY0xadgu9WnSgq7CehxfO92RFw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CA+z5Dsz_xCqzq-C3eWvDMBhJXY0xadgu9WnSgq7CehxfO92RFw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hi Linus,
+On Thu, Jul 6, 2017 at 8:47 PM, Blair Bethwaite
+<blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> Hi all,
+>
+> Are there any "official" plans to have Ceph events co-hosted with OpenStack
+> Summit Sydney, like in Boston?
+>
+> The call for presentations closes in a week. The Forum will be organised
+> throughout September and (I think) that is the most likely place to have
+> e.g. Ceph ops sessions like we have in the past. Some of my local colleagues
+> have also expressed interest in having a CephFS BoF.
 
-The following changes since commit 6f7da290413ba713f0cdd9ff1a2a9bb129ef4f6c:
-
-  Linux 4.12 (2017-07-02 16:07:02 -0700)
-
-are available in the git repository at:
-
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.13-rc1
-
-for you to fetch changes up to 33e9c8dbfbcef8e4cda8e43a445e692ab7e0d8c0:
-
-  libceph: advertise support for NEW_OSDOP_ENCODING and SERVER_LUMINOUS (2017-07-07 17:26:24 +0200)
-
-----------------------------------------------------------------
-The main item here is support for v12.y.z ("Luminous") clusters:
-RESEND_ON_SPLIT, RADOS_BACKOFF, OSDMAP_PG_UPMAP and CRUSH_CHOOSE_ARGS
-feature bits, and various other changes in the RADOS client protocol.
-On top of that we have a new fsc mount option to allow supplying
-fscache uniquifier (similar to NFS) and the usual pile of filesystem
-fixes from Zheng.
-
-----------------------------------------------------------------
-Ilya Dryomov (33):
-      libceph: remove ceph_sanitize_features() workaround
-      libceph: new features macros
-      libceph: handle non-empty dest in ceph_{oloc,oid}_copy()
-      libceph: advertise support for OSD_POOLRESEND
-      libceph: support SERVER_JEWEL feature bits
-      libceph: fold [l]req->last_force_resend into ceph_osd_request_target
-      libceph: new pi->last_force_request_resend
-      libceph: introduce ceph_spg, ceph_pg_to_primary_shard()
-      libceph: encode_{pgid,oloc}() helpers
-      libceph: ceph_connection_operations::reencode_message() method
-      libceph: MOSDOp v8 encoding (actual spgid + full hash)
-      libceph: drop need_resend from calc_target()
-      libceph: resend on PG splits if OSD has RESEND_ON_SPLIT
-      libceph: delete from need_resend_linger before check_linger_pool_dne()
-      libceph: make sure need_resend targets reflect latest map
-      libceph: always populate t->target_{oid,oloc} in calc_target()
-      libceph: use target pi for calc_target() calculations
-      libceph: avoid unnecessary pi lookups in calc_target()
-      libceph: make DEFINE_RB_* helpers more general
-      libceph: respect RADOS_BACKOFF backoffs
-      libceph: don't pass pgid by value
-      libceph: introduce and switch to decode_pg_mapping()
-      libceph: kill __{insert,lookup,remove}_pg_mapping()
-      libceph: ceph_decode_skip_* helpers
-      libceph: pg_upmap[_items] infrastructure
-      libceph: compute actual pgid in ceph_pg_to_up_acting_osds()
-      libceph: apply_upmap()
-      crush: implement weight and id overrides for straw2
-      libceph, crush: per-pool crush_choose_arg_map for crush_do_rule()
-      crush: crush_init_workspace starts with struct crush_work
-      crush: remove an obsolete comment
-      libceph: osd_state is 32 bits wide in luminous
-      libceph: advertise support for NEW_OSDOP_ENCODING and SERVER_LUMINOUS
-
-Yan, Zheng (11):
-      ceph: re-request max size after importing caps
-      ceph: update the 'approaching max_size' code
-      ceph: remove useless page->mapping check in writepage_nounlock()
-      ceph: redirty page when writepage_nounlock() skips unwritable page
-      ceph: cleanup writepage_nounlock()
-      ceph: don't re-send interrupted flock request
-      ceph: getattr before read on ceph.* xattrs
-      ceph: avoid invalid memory dereference in the middle of umount
-      ceph: avoid accessing freeing inode in ceph_check_delayed_caps()
-      ceph: new mount option that specifies fscache uniquifier
-      ceph: update ceph_dentry_info::lease_session when necessary
-
- fs/ceph/addr.c                     |  21 +-
- fs/ceph/cache.c                    |  92 +++-
- fs/ceph/caps.c                     |  40 +-
- fs/ceph/file.c                     |   2 +-
- fs/ceph/inode.c                    |  18 +-
- fs/ceph/locks.c                    |  25 +-
- fs/ceph/mds_client.c               |   4 +-
- fs/ceph/super.c                    |  47 +-
- fs/ceph/super.h                    |   4 +-
- fs/ceph/xattr.c                    |   3 +
- include/linux/ceph/ceph_features.h | 264 +++++++----
- include/linux/ceph/ceph_fs.h       |   1 +
- include/linux/ceph/decode.h        |  60 +++
- include/linux/ceph/libceph.h       |  49 +-
- include/linux/ceph/messenger.h     |   2 +
- include/linux/ceph/osd_client.h    |  70 ++-
- include/linux/ceph/osdmap.h        |  41 +-
- include/linux/ceph/rados.h         |   6 +
- include/linux/crush/crush.h        |  66 +++
- include/linux/crush/mapper.h       |   9 +-
- net/ceph/ceph_common.c             |   1 +
- net/ceph/crush/crush.c             |   3 +
- net/ceph/crush/mapper.c            |  81 +++-
- net/ceph/debugfs.c                 | 112 ++++-
- net/ceph/messenger.c               |  10 +-
- net/ceph/mon_client.c              |   8 +-
- net/ceph/osd_client.c              | 905 +++++++++++++++++++++++++++++++++----
- net/ceph/osdmap.c                  | 840 ++++++++++++++++++++++++++--------
- 28 files changed, 2308 insertions(+), 476 deletions(-)
+I poked at Patrick about this and it sounds like the venue is a little
+smaller than usual (and community planning is a little less
+planned-out for those ranges than usual) so things are still up in the
+air. :/
+In Boston we had an ops dinner meetup beyond the open-source days
+track, so you can probably count on that much if nothing more formal
+happens.
+-Greg
