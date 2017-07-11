@@ -1,69 +1,88 @@
-From: Mark Nelson <mark.a.nelson@gmail.com>
-Subject: New(ish) LMDBstore KeyValuedB backend and testing
-Date: Tue, 11 Jul 2017 09:23:00 -0500
-Message-ID: <e81ae2ee-8e6e-3276-d373-fe26f58f23e9@gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Cmake: determening Ceph version when there is no git checkout.
+Date: Tue, 11 Jul 2017 16:33:16 +0200
+Message-ID: <992deb10-b689-ebf7-947c-e7abefcdb878@digiware.nl>
+References: <7683db13-17fc-44a8-cb6c-bcc83048378a@digiware.nl>
+ <alpine.DEB.2.11.1707111404340.3424@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f53.google.com ([209.85.214.53]:33989 "EHLO
-        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932651AbdGKOXI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Jul 2017 10:23:08 -0400
-Received: by mail-it0-f53.google.com with SMTP id v202so16588527itb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Jul 2017 07:23:08 -0700 (PDT)
-Received: from ?IPv6:2603:3016:1200:fb00::7c96? ([2603:3016:1200:fb00::7c96])
-        by smtp.gmail.com with ESMTPSA id e12sm45961ioj.8.2017.07.11.07.23.01
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 11 Jul 2017 07:23:01 -0700 (PDT)
+Received: from smtp.digiware.nl ([176.74.240.9]:60100 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932653AbdGKOdY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 11 Jul 2017 10:33:24 -0400
+In-Reply-To: <alpine.DEB.2.11.1707111404340.3424@piezo.novalocal>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi guys,
+On 11-7-2017 16:05, Sage Weil wrote:
+> On Tue, 11 Jul 2017, Willem Jan Withagen wrote:
+>> Hi,
+>>
+>> I'm doing some work to be ready when Luminous gets fully released.
+>> But I now run into the following code from src/CMakeLists.txtx
+>> ====
+>> # the src/.git_version file may be written out by make-dist; otherwise
+>> # we pull the git version from .git
+>> option(ENABLE_GIT_VERSION "build Ceph with git version string" ON)
+>> if(${ENABLE_GIT_VERSION})
+>>   get_git_head_revision(GIT_REFSPEC CEPH_GIT_VER)
+>>   git_describe(CEPH_GIT_NICE_VER --always)
+>>   #if building from a source tarball via make-dist
+>>   if(${CEPH_GIT_VER} STREQUAL "GITDIR-NOTFOUND")
+>>     message(STATUS "Ceph/.git directory not found, parsing
+>> ${CMAKE_CURRENT_SOURCE_DIR}/.git_version for CEPH_GIT_VER and
+>> CEPH_GIT_NICE_VER")
+>>     file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/.git_version
+>> CEPH_GIT_SHA_AND_TAG)
+>>     list(GET CEPH_GIT_SHA_AND_TAG 0 CEPH_GIT_VER)
+>>     list(GET CEPH_GIT_SHA_AND_TAG 1 CEPH_GIT_NICE_VER)
+>>   endif(${CEPH_GIT_VER} STREQUAL "GITDIR-NOTFOUND")
+>>   # remove 'v' prefix from raw git version
+>>   string(SUBSTRING ${CEPH_GIT_NICE_VER} 1 -1 CEPH_GIT_NICE_VER)
+>> else(${ENABLE_GIT_VERSION})
+>>   set(CEPH_GIT_VER "no_version")
+>>   set(CEPH_GIT_NICE_VER "Development")
+>> endif(${ENABLE_GIT_VERSION})
+>> ====
+>>
+>> This build the Ceph version from data in the .git repo.
+>> But that is not how FreeBSD packaging works. There a tarbal is fetched
+>> but that does not contain any git info.
+>>
+>> Work is done in:
+>> 	/usr/ports/net/ceph/work/ceph-12.1.0
+>> and that is about all where I can extract some versioning from.
+>>
+>> Does anybody have suggestions for an easy way out?
+>> Other than hardcode it in the Makefile as an option to CMake.
+> 
+> Take a look at the make-dist script; it puts the git version info in a 
+> tarball that has everything needed to build.  (i.e., it writes out 
+> the .git_version file referenced above.)
 
-A month or so ago I started rewriting Xinxin Shu's old LMDB kvdb PR to 
-work with master.  I've now got it to the point where it no longer 
-segfaults during performance tests as the kvstore for bluestore.
+I think I used the wrong words....
 
-The new PR is here:
+The make-dis script begins with:
+if [ ! -d .git ]; then
+    echo "no .git present.  run this from the base dir of the git checkout."
+    exit 1
+fi
 
-https://github.com/ceph/ceph/pull/16257
+When I say tarball, I mean that the FreeBSD packaging system will fetch
+something like:
+https://codeload.github.com/ceph/ceph-v12.1.0_GH0.tar.gz
 
-The original version needed some work to get into a functional state. 
-Some of this was just general things like adding cmake support and 
-adding functionality to conform to the current KeyValueDB interface. 
-Beyond that, the biggest issue was reworking it to not keep multiple 
-concurrent write transactions open.  Other minor issues include removing 
-various temporary string conversions and memory copies where possible.
+And that tar file does not contain ANY git information.
+So I have to extract that from somewhere/something else. All I know is
+the TAG v12.1.0. So if I want to have a git hash in the version I need
+to construct it from that, or use that reference to fetch the hash.
 
-One remaining issue is that Bluestore's BitmapFreelistManager keeps a 
-read iterator open indefinitely.  This translates to keeping a read-only 
-lmdb txn open, which makes new writes to the database grow the database 
-rather than reusing free-pages (ie the db grows without bound with new 
-writes).
-
-A (buggy) fix for this is being attempted in another PR (currently 
-probably breaks freelist management, segfaults for large min_alloc 
-sizes), but fixes the db growth issue:
-
-https://github.com/ceph/ceph/pull/16243
-
-Write performance is fairly low (as expected) vs rocksdb, though it's 
-possible we may be able to improve some of that via a WAL or similar 
-mechanism.  Most of the time is spent doing fdatasync via mdb_env_sync. 
-It might be possible to make the bluestore write workload more favorable 
-to lmdb (bigger key/value pairs) but that's potentially a lot of work.
-
-Space-amp so far seems like it might be lower than rocksdb in our 
-current configuration though which could be good for large HDD 
-configurations where the DB is on flash and raw write performance is 
-less of an issue.
-
-I think it would be good to try to get some other key/value stores like 
-forestdb or even the aging zetascale into a functional state and do some 
-more comparison testing.
-
-Mark
+Otherwise I'll need to put it in the package makefile everytime, I
+release a new version.
+	
+--WjW
