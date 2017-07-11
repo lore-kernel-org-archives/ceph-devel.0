@@ -1,71 +1,83 @@
-From: Kyle Bader <kyle.bader@gmail.com>
-Subject: Re: autoconfigured haproxy service?
-Date: Tue, 11 Jul 2017 13:46:17 -0700
-Message-ID: <CAFMfnwowPY+Kzeh3m1U2zQ5ys7iumqy5RJuaAefTCsySbBEq8g@mail.gmail.com>
+From: Matt Benjamin <mbenjami@redhat.com>
+Subject: Re: [ceph-users] autoconfigured haproxy service?
+Date: Tue, 11 Jul 2017 18:55:22 -0400
+Message-ID: <CAKOnar=1eHKp5f=kSCRxi3qH-j7uFMoqirajW2ZONJNofKgiog@mail.gmail.com>
 References: <alpine.DEB.2.11.1707111458470.3424@piezo.novalocal>
+ <alpine.DEB.2.11.1707111507220.3424@piezo.novalocal> <CACJqLyY0fhZJtDZ3ZS3OL=K6TcK_S2fPAE1uUGHPmnbuxDHmvw@mail.gmail.com>
+ <alpine.DEB.2.11.1707111537290.3424@piezo.novalocal> <CABZ+qqk=kvoTdVebgJrxQ1kdVogY2g9aiSVZKXYzPqGaRAQ+5A@mail.gmail.com>
+ <alpine.DEB.2.11.1707111614080.3424@piezo.novalocal> <robbat2-20170711T181007-461462320Z@orbis-terrarum.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f182.google.com ([209.85.161.182]:36022 "EHLO
-        mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932801AbdGKUqT (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Jul 2017 16:46:19 -0400
-Received: by mail-yw0-f182.google.com with SMTP id a12so1649738ywh.3
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Jul 2017 13:46:19 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1707111458470.3424@piezo.novalocal>
+Received: from mail-pf0-f181.google.com ([209.85.192.181]:35940 "EHLO
+        mail-pf0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753647AbdGKWzX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Jul 2017 18:55:23 -0400
+Received: by mail-pf0-f181.google.com with SMTP id q86so3035425pfl.3
+        for <ceph-devel@vger.kernel.org>; Tue, 11 Jul 2017 15:55:23 -0700 (PDT)
+In-Reply-To: <robbat2-20170711T181007-461462320Z@orbis-terrarum.net>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: "Robin H. Johnson" <robbat2@gentoo.org>
+Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-With civetweb, radosgw needs a thread per connection, so recently I've
-been using haproxy on each node running radosgw, with the backend
-being only the local radosgw process. Combined with the haproxy
-configuration setting "option http-server-close", haproxy will hold
-open the connection to the client, but close the connection between it
-and civetweb/rgw after the request finishes. Putting a pile of radosgw
-nodes behind haproxy is fine and all, but doesn't scale cluster
-ingress/egress beyond the pipe size of the haproxy node.
+Hi Robin,
 
-It might be a bigger win to look into doing something with IPVS / LVS,
-which can do direct server return (scaling egress). Perhaps some sort
-of service that pokes the service map and uses it to run commands with
-ipvsadm and ensures a heartbeat service is setup via
-keepalived/corosync.
+On Tue, Jul 11, 2017 at 2:53 PM, Robin H. Johnson <robbat2@gentoo.org> wrote:
+> (Trim lots of good related content).
+>
+> The upcoming HAProxy 1.8 has landed further patches for improving hot
+> restarts/reloads of HAProxy, which previously lead to a brief gap period
+> when new connections were not serviced. Lots of other approaches had
+> been seen, including delaying TCP SYN momentarily [1]. It also notably
+> fixes how you needed a separate wrapper for using haproxy w/ systemd.
+>
+> In the DreamHost RGW usage, I've been building additional functionality
+> into HAProxy via Lua, but I'm not convinced it's the best place for some
+> of it:
+> - rate-limiting by access key (with explicitly whitelisted & blacklisted
+>   keys), over multiple frontends [2]
+> - Planned: different rates for different operations/customer classes.
+> - Planned: issue redirects for buckets being moved (because getting
+>   federated metadata between existing clusters is painful) [3].
+>   This differs from the CERN backend-selection-by-bucket, because the
+>   bucket is going to be moving regions!
 
-To scale ingress *and* egress, we'd need to wire the service map
-feature into a bgp/osfp speaker like bird/quagga in order to
-inject/remove equal cost multipath routes to $virtual_ip/32 and/or
-$virtual_ip6/128 with the upstream router(s).
+This is really cool.
 
-On Tue, Jul 11, 2017 at 8:03 AM, Sage Weil <sweil@redhat.com> wrote:
-> Hi all,
 >
-> Luminous features a new 'service map' that lets rgw's (and rgw nfs
-> gateways and iscsi gateways and rbd mirror daemons and ...) advertise
-> themselves to the cluster along with some metadata (like the addresses
-> they are binding to and the services the provide).
+> RGW doesn't seem like the right place for some of this functionality
+> either, because storing rate data in multiple places means lots of
+> cross-talk.
+
+I'm pretty skeptical about this, though.  RGW isn't becoming a load
+balancer, but also needs to make scheduling decisions.  Probably
+should know what the load balancer knows when it is present?
+
 >
-> It should be pretty straightforward to build a service that
-> auto-configures haproxy based on this information so that you can deploy
-> an rgw front-end that dynamically reconfigures itself when additional
-> rgw's are deployed or removed.  haproxy has a facility to adjust its
-> backend configuration at runtime[1].
+> [1] https://engineeringblog.yelp.com/2015/04/true-zero-downtime-haproxy-reloads.html
+> [2] http://blog.armbruster-it.de/2015/08/neo4j-and-haproxy-some-best-practices-and-tricks/
+> [3] http://docs.aws.amazon.com/AmazonS3/latest/dev/Redirects.html
 >
-> Anybody interested in tackling this?  Setting up the load balancer in
-> front of rgw is one of the more annoying pieces of getting ceph up and
-> running in production and until now has been mostly treated as out of
-> scope.  It would be awesome if there was an autoconfigured service that
-> did it out of the box (and had all the right haproxy options set).
+>> > I don't know if the bucket mapping concept is generally applicable.
+>> > Maybe this haproxy-agent should focus on configuring a single backend
+>> > populated with the radosgw's, and leave more complex configurations up
+>> > to their admins?
+>> Yeah.  (The dynamic remapping is interesting, though!  That could
+>> potentially be controlled by rgw as well to automatically isolate busy
+>> buckets or objects.)
+> Yes, this would fit well to populate a single HAProxy backend w/ the
+> available RGWs, and then that can be wrapped with whatever frontend
+> configuration (esp. SSL) that the admin wants.
 >
-> sage
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Robin Hugh Johnson
+> Gentoo Linux: Dev, Infra Lead, Foundation Trustee & Treasurer
+> E-Mail   : robbat2@gentoo.org
+> GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
+> GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
+>
 
 
-
--- 
-
-Kyle Bader
+Matt
