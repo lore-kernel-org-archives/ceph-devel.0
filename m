@@ -1,80 +1,66 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: cephfs quota support for the kernel client
-Date: Mon, 10 Jul 2017 17:57:23 +0100
-Message-ID: <CALe9h7fDwLfBm9d=7yqbrn3mg=qvtFb7j=Mi8khdj8jyQ=Uyyg@mail.gmail.com>
-References: <20170710150259.kbtbpjn762xu5web@jf_suse_laptop>
+From: Wangwenfeng <wang.wenfeng@h3c.com>
+Subject: Re: osd down when run fio randwrite 4k using bluestore
+Date: Tue, 11 Jul 2017 01:35:43 +0000
+Message-ID: <F0858C043E80304FBFA0A767AC8DE5E7AEF35A8C@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f174.google.com ([209.85.128.174]:36004 "EHLO
-        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754021AbdGJQ5q (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 10 Jul 2017 12:57:46 -0400
-Received: by mail-wr0-f174.google.com with SMTP id c11so146678622wrc.3
-        for <ceph-devel@vger.kernel.org>; Mon, 10 Jul 2017 09:57:45 -0700 (PDT)
-In-Reply-To: <20170710150259.kbtbpjn762xu5web@jf_suse_laptop>
+Received: from smtp.h3c.com ([60.191.123.56]:4403 "EHLO h3cmg01-ex.h3c.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754644AbdGKBgJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 10 Jul 2017 21:36:09 -0400
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: 'Sage Weil' <sweil@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Mon, Jul 10, 2017 at 4:02 PM, Jan Fajerski <jfajerski@suse.com> wrote:
-> Hi list,
-> are there any plans/intentions for or reservations against adding quota
-> support the cephfs kernel client?
-> From a superficial look into the quota implementation there doesn't seem to
-> be technical reason for not adding this feature to the kernel.
-
-The reason is that checking the quota for a given operation requires a
-reverse-traverse of the hierarchy up to the ancestor with the quota on
-it.  This is straightforward in the userspace client (because of
-Client::client_lock), but *much* scarier to do in the kernel, which
-does locking completely differently.
-
-This was all kinda understood at the point that the quota stuff was
-originally contributed, but there wasn't anyone with time/motivation
-to do the kclient-compatible implementation, so we took on the quota
-implementation as-is with the caveat that it was ceph-fuse only.
-
-The way to fix that is to change how quotas work, so that the client
-doesn't have to do a reverse-traversal any more.  That would work by
-handling the lookup server side, and then giving the client a "quota
-realm" or something similar, and then including a reference to that
-with each inode that the client got.  Similar to how SnapRealms work.
-
-If someone steps up and wants to do that work to rework quotas and
-implement kclient support, that would be awesome.
-
-The xattr aspect, I'm kind of unattached to.  We already have xattrs
-for other things though, so it seems less like a quota issue and more
-of a general thing.  Because we provide both fuse and kernel clients,
-xattrs are much nicer than syscalls, as we can implement them the same
-both places.
-
-If we had to live without xattrs in the kernel client in the future, I
-expect we would just use a libcephfs-based command line tool to do the
-administrative tasks like setting quotas and layouts.  There is some
-desire for a tool like that anyway -- it can be pretty annoying in
-practice to have to actually mount a filesystem in order to do
-something simple like changing the default file layout right after
-creating the filesystem.
-
-John
-
-> From an engineering perspective there seem to be some objections against
-> xattr based quota implementations in the wider kernel community.
-> https://patchwork.kernel.org/patch/8449721/
-> https://www.ietf.org/mail-archive/web/nfsv4/current/msg14063.html
-> https://www.spinics.net/lists/linux-fsdevel/msg113357.html
->
-> What does the Ceph community think?
->
-> --
-> Jan Fajerski
-> Engineer Enterprise Storage
-> SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
-> HRB 21284 (AG Nürnberg)
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SXQgaXMgc3RpbGwgZXhpc3QgaW4gdGhlIGxhdGVzdCBtYXN0ZXIgd2hpY2ggY29udGFpbnMgMTYw
+NTEuDQoNCg0KDQpJIHN1c3BlY3QgdGhpcyBpcyB0aGUgcmVjZW50IGRlZmVycmVkX2FnZ3Jlc3Np
+dmUgZGVhZGxvY2s7IHRoZSBmaXggbWVyZ2VkIGxhc3Qgd2Vlay4gIFBsZWFzZSB0cnkgdGhlIGxh
+dGVzdCBtYXN0ZXIgYnJhbmNoIGFuZCBzZWUgaWYgeW91IGNhbiByZXByb2R1Y2UuDQoNCmh0dHBz
+Oi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8xNjA1MQ0KDQpUaGFua3MhDQpzYWdlDQoNCg0K
+T24gTW9uLCAxMCBKdWwgMjAxNywgV2FuZ3dlbmZlbmcgd3JvdGU6DQoNCj4gDQo+IEhpLCBTYWdl
+DQo+IKGhSSBzZXR1cCBhIENlcGggY2x1c3RlciBvZiBMdW1pbm91cyAxMi4wLjMsIGl0oa9zIG9z
+ZCB1c2UgYmx1ZXN0b3JlIGFuZCBJIGNyZWF0ZSBhIGNlcGhmcywgaXShr3MgbWV0YWRhdGEgdXNp
+bmcgcmVwbGljYXRlZCBhbmQgZGF0YSBwb29sIHVzaW5nIGVyYXN1cmUuDQo+IKGhoaGhoXBvb2wg
+MSAnbWV0YWRhdGEnIHJlcGxpY2F0ZWQgc2l6ZSAyIG1pbl9zaXplIDEgY3J1c2hfcnVsZXNldCAx
+IG9iamVjdF9oYXNoIHJqZW5raW5zIHBnX251bSAxMDI0IHBncF9udW0gMTAyNCBsYXN0X2NoYW5n
+ZSA1MiBmbGFncyBoYXNocHNwb29sIHN0cmlwZV93aWR0aCAwDQo+IKGhoaGhoXBvb2wgMiAnRUNf
+Ml8xXzgnIGVyYXN1cmUgc2l6ZSAzIG1pbl9zaXplIDIgY3J1c2hfcnVsZXNldCAyIG9iamVjdF9o
+YXNoIHJqZW5raW5zIHBnX251bSAxMDI0IHBncF9udW0gMTAyNCBsYXN0X2NoYW5nZSA1NiBmbGFn
+cyBoYXNocHNwb29sLGVjX292ZXJ3cml0ZXMgc3RyaXBlX3dpZHRoIDgxOTIgZXhwZWN0ZWRfbnVt
+X29iamVjdHMgMjcwMDAwMDANCj4gICBXaGVuIHJ1biBmaW8gdG8gdGVzdCB0aGUgY2x1c3Rlciwg
+d2hpY2ggY29tbWFuZCBpcw0KPiChoaGhoaFmaW8gLS1udW1qb2JzPTE2IC0taW9kZXB0aD0xNiAt
+LWlvZW5naW5lPWxpYmFpbyAtLXJ1bnRpbWU9NjAwIA0KPiAtLWRpcmVjdD0xIC0tZ3JvdXBfcmVw
+b3J0aW5nIC0tcnc9cmFuZHdyaXRlIC0tYnM9NGsgLS1uYW1lPWFhIA0KPiAtLWZpbGVuYW1lPS9l
+Yy8xLnR4dCAtLXNpemU9NTAwRw0KPiANCj4gICBmb3IgYSB3aGlsZSB0aW1lLCBzb21lIG9zZHMg
+aXMgcmVwb3J0ZWQgZG93biwgd2hpY2ggYWxzbyBpbiAxMi4xLjAgYW5kIG1hc3Rlci4NCj4gDQo+
+ICAgSSBoYXZlIGEgcXVlc3Rpb24gYWJvdXQgZm9sbG93IGNvZGUNCj4gdm9pZCBCbHVlU3RvcmU6
+Ol9kZWZlcnJlZF9xdWV1ZShUcmFuc0NvbnRleHQgKnR4Yykgew0KPiAgIGRvdXQoMjApIDw8IF9f
+ZnVuY19fIDw8ICIgdHhjICIgPDwgdHhjIDw8ICIgb3NyICIgPDwgdHhjLT5vc3IgPDwgZGVuZGw7
+DQo+ICAgc3RkOjpsb2NrX2d1YXJkPHN0ZDo6bXV0ZXg+IGwoZGVmZXJyZWRfbG9jayk7DQo+ICAg
+oa2hraGtoa2hraGtoa2hraGtoa0NCj4gICBpZiAoZGVmZXJyZWRfYWdncmVzc2l2ZSAmJg0KPiAg
+ICAgICAhdHhjLT5vc3ItPmRlZmVycmVkX3J1bm5pbmcpIHsNCj4gICAgIF9kZWZlcnJlZF9zdWJt
+aXQodHhjLT5vc3IuZ2V0KCkpOw0KPiAgIH0NCj4gfQ0KPiANCj4gSWYgSSBhZGQgJyEnIHRvIGRl
+ZmVycmVkX2FnZ3Jlc3NpdmUsIHRoZSBvc2Qgd2lsbCBub3QgZG93bi4gV291bGQgeW91IGhlbHAg
+dG8gcG9pbnQgdGhpcyBtb2RpZnkgaXMgcmlnaHQgb3Igbm90Pw0KPiAgIGlmICghZGVmZXJyZWRf
+YWdncmVzc2l2ZSAmJg0KPiAgICAgICAhdHhjLT5vc3ItPmRlZmVycmVkX3J1bm5pbmcpIHsNCj4g
+ICAgIF9kZWZlcnJlZF9zdWJtaXQodHhjLT5vc3IuZ2V0KCkpOw0KPiAgIH0NCj4gDQo+IA0KPiAt
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tDQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiCxvtPKvP68sMbkuL28/rqs09DQwruqyP28vMr109DP
+3rmry761xLGjw9zQxc+io6y99s/e09q3osvNuPjJz8PmtdjWt9bQwdCz9g0KPiC1xLj2yMu78si6
+1+mho7371rnIzrrOxuTL+8jL0tTIzrrO0M7Kvcq508OjqLD8wKi1q7K7z97T2sirsr+78rK/t9a1
+2NC5wrahori01sahog0KPiC78smit6KjqbG+08q8/tbQtcTQxc+ioaPI57n7xPq07crVwcuxvtPK
+vP6jrMfrxPrBory0tee7sLvy08q8/s2o1qq3orz+yMuyosm+s/2xvg0KPiDTyrz+o6ENCj4gVGhp
+cyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBpbmZvcm1h
+dGlvbiBmcm9tIA0KPiBOZXcgSDNDLCB3aGljaCBpcyBpbnRlbmRlZCBvbmx5IGZvciB0aGUgcGVy
+c29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIA0KPiBpcyBsaXN0ZWQgYWJvdmUuIEFueSB1c2Ug
+b2YgdGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJlaW4gaW4gYW55IA0KPiB3YXkgKGluY2x1
+ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFsIGRpc2Nsb3N1cmUsIA0K
+PiByZXByb2R1Y3Rpb24sIG9yIGRpc3NlbWluYXRpb24pIGJ5IHBlcnNvbnMgb3RoZXIgdGhhbiB0
+aGUgaW50ZW5kZWQNCj4gcmVjaXBpZW50KHMpIGlzIHByb2hpYml0ZWQuIElmIHlvdSByZWNlaXZl
+IHRoaXMgZS1tYWlsIGluIGVycm9yLCANCj4gcGxlYXNlIG5vdGlmeSB0aGUgc2VuZGVyIGJ5IHBo
+b25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo+IA0K
