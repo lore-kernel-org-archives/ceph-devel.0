@@ -1,93 +1,191 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: osd down when run fio randwrite 4k using bluestore
-Date: Tue, 11 Jul 2017 01:59:12 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1707110158430.3424@piezo.novalocal>
-References: <F0858C043E80304FBFA0A767AC8DE5E7AEF35A8C@H3CMLB12-EX.srv.huawei-3com.com>
+From: Z Will <zhao6305-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: ceph-mon leader election problem,
+	should it be improved ?
+Date: Tue, 11 Jul 2017 11:25:52 +0800
+Message-ID: <CAGOEmcNtUPgHMBmFWLbAF0Ynvk+9XnOPPhh6d_UyN9OrfaMS2g@mail.gmail.com>
+References: <CAGOEmcO6L2j04NEx5U_wY0WUNnzowW1JkcqKbmtewm6f4rC1PQ@mail.gmail.com>
+	<cfb3c139-7423-644f-ce4c-00d55cce5756@suse.de>
+	<CAGOEmcNwuHGoXyAPr51P73pbZL5XOiORhL4P6w7R2yi19e71vA@mail.gmail.com>
+	<52301842-ce14-1a1d-72cb-816633f2b860@suse.de>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-253640202-1499738354=:3424"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48902 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752333AbdGKB7P (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 10 Jul 2017 21:59:15 -0400
-In-Reply-To: <F0858C043E80304FBFA0A767AC8DE5E7AEF35A8C@H3CMLB12-EX.srv.huawei-3com.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Wangwenfeng <wang.wenfeng@h3c.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <52301842-ce14-1a1d-72cb-816633f2b860-l3A5Bk7waGM@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi Joao:
 
---8323329-253640202-1499738354=:3424
-Content-Type: TEXT/PLAIN; charset=gb2312
-Content-Transfer-Encoding: 8BIT
+    > Basically, this would be something similar to heartbeats. If a
+monitor can't
+    > reach all monitors in an existing quorum, then just don't do anything.
 
-On Tue, 11 Jul 2017, Wangwenfeng wrote:
-> It is still exist in the latest master which contains 16051.
+     Based on your solution, I make a little change :
+     - send a probe to all monitors
+     - if  get a quorum ,
+             it will join current quorum through join_quorum message,
+when leader  receive this , it will change the quorum and
+ claim victory again,
+             If timeout , it means it can't reach leader , do nothing
+and try later from bootstrap ,
+     - if  get > 1/2 acks, do as before, call election
 
-If you can reproduce this, can you please generate a log with 'debug 
-bluestore = 20' on the osd?
+     With this , sometimes the leader do not have  the  smallest rank
+num , I think this is fine. In quorum message , there will be one more
+byte to point out the leader rank num .
+     I think this will perform as same as before and can tolerate some
+network partition error, and it only need to change little code,  any
+suggesstion for this ? Do I lack of any  considerations ?
 
-Thanks!
-sage
 
-> 
-> 
-> 
-> I suspect this is the recent deferred_aggressive deadlock; the fix merged last week.  Please try the latest master branch and see if you can reproduce.
-> 
-> https://github.com/ceph/ceph/pull/16051
-> 
-> Thanks!
-> sage
-> 
-> 
-> On Mon, 10 Jul 2017, Wangwenfeng wrote:
-> 
-> > 
-> > Hi, Sage
-> > 　I setup a Ceph cluster of Luminous 12.0.3, it’s osd use bluestore and I create a cephfs, it’s metadata using replicated and data pool using erasure.
-> > 　　　pool 1 'metadata' replicated size 2 min_size 1 crush_ruleset 1 object_hash rjenkins pg_num 1024 pgp_num 1024 last_change 52 flags hashpspool stripe_width 0
-> > 　　　pool 2 'EC_2_1_8' erasure size 3 min_size 2 crush_ruleset 2 object_hash rjenkins pg_num 1024 pgp_num 1024 last_change 56 flags hashpspool,ec_overwrites stripe_width 8192 expected_num_objects 27000000
-> >   When run fio to test the cluster, which command is
-> > 　　　fio --numjobs=16 --iodepth=16 --ioengine=libaio --runtime=600 
-> > --direct=1 --group_reporting --rw=randwrite --bs=4k --name=aa 
-> > --filename=/ec/1.txt --size=500G
-> > 
-> >   for a while time, some osds is reported down, which also in 12.1.0 and master.
-> > 
-> >   I have a question about follow code
-> > void BlueStore::_deferred_queue(TransContext *txc) {
-> >   dout(20) << __func__ << " txc " << txc << " osr " << txc->osr << dendl;
-> >   std::lock_guard<std::mutex> l(deferred_lock);
-> >   …………………………
-> >   if (deferred_aggressive &&
-> >       !txc->osr->deferred_running) {
-> >     _deferred_submit(txc->osr.get());
-> >   }
-> > }
-> > 
-> > If I add '!' to deferred_aggressive, the osd will not down. Would you help to point this modify is right or not?
-> >   if (!deferred_aggressive &&
-> >       !txc->osr->deferred_running) {
-> >     _deferred_submit(txc->osr.get());
-> >   }
-> > 
-> > 
-> > ----------------------------------------------------------------------
-> > ---------------------------------------------------------------
-> > 本邮件及其附件含有新华三技术有限公司的保密信息，仅限于发送给上面地址中列出
-> > 的个人或群组。禁止任何其他人以任何形式使用（包括但不限于全部或部分地泄露、复制、
-> > 或散发）本邮件中的信息。如果您错收了本邮件，请您立即电话或邮件通知发件人并删除本
-> > 邮件！
-> > This e-mail and its attachments contain confidential information from 
-> > New H3C, which is intended only for the person or entity whose address 
-> > is listed above. Any use of the information contained herein in any 
-> > way (including, but not limited to, total or partial disclosure, 
-> > reproduction, or dissemination) by persons other than the intended
-> > recipient(s) is prohibited. If you receive this e-mail in error, 
-> > please notify the sender by phone or email immediately and delete it!
-> > 
-> N嫥叉靣笡y???氊b瞂???千v豝???藓{.n???壏渮榏z鳐妠ay???蕠跈???j???f＂穐殝鄗???畐ア???⒎???:+v墾妛鑚豰稛???珣赙zZ+凒殠娸???"濟!秈
---8323329-253640202-1499738354=:3424--
+On Wed, Jul 5, 2017 at 6:26 PM, Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org> wrote:
+> On 07/05/2017 08:01 AM, Z Will wrote:
+>>
+>> Hi Joao:
+>>     I think this is all because we choose the monitor with the
+>> smallest rank number to be leader. For this kind of network error, no
+>> matter which mon has lost connection with the  mon who has the
+>> smallest rank num , will be constantly calling an election, that say
+>> ,will constantly affact the cluster until it is stopped by human . So
+>> do you think it make sense if I try to figure out a way to choose the
+>> monitor who can see the most monitors ,  or with  the smallest rank
+>> num if the view num is same , to be leader ?
+>>     In probing phase:
+>>        they will know there own view, so can set a view num.
+>>     In election phase:
+>>        they send the view num , rank num .
+>>        when receiving the election message, it compare the view num (
+>> higher is leader ) and rank num ( lower is leader).
+>
+>
+> As I understand it, our elector trades-off reliability in case of network
+> failure for expediency in forming a quorum. This by itself is not a problem
+> since we don't see many real-world cases where this behaviour happens, and
+> we are a lot more interested in making sure we have a quorum - given without
+> a quorum your cluster is effectively unusable.
+>
+> Currently, we form a quorum with a minimal number of messages passed.
+> From my poor recollection, I think the Elector works something like
+>
+> - 1 probe message to each monitor in the monmap
+> - receives defer from a monitor, or defers to a monitor
+> - declares victory if number of defers is an absolute majority (including
+> one's defer).
+>
+> An election cycle takes about 4-5 messages to complete, with roughly two
+> round-trips (in the best case scenario).
+>
+> Figuring out which monitor is able to contact the highest number of
+> monitors, and having said monitor being elected the leader, will necessarily
+> increase the number of messages transferred.
+>
+> A rough idea would be
+>
+> - all monitors will send probes to all other monitors in the monmap;
+> - all monitors need to ack the other's probes;
+> - each monitor will count the number of monitors it can reach, and then send
+> a message proposing itself as the leader to the other monitors, with the
+> list of monitors they see;
+> - each monitor will propose itself as the leader, or defer to some other
+> monitor.
+>
+> This is closer to 3 round-trips.
+>
+> Additionally, we'd have to account for the fact that some monitors may be
+> able to reach all other monitors, while some may only be able to reach a
+> portion. How do we handle this scenario?
+>
+> - What do we do with monitors that do not reach all other monitors?
+> - Do we ignore them for electoral purposes?
+> - Are they part of the final quorum?
+> - What if we need those monitors to form a quorum?
+>
+> Personally, I think the easiest solution to this problem would be
+> blacklisting a problematic monitor (for a given amount a time, or until a
+> new election is needed due to loss of quorum, or by human intervention).
+>
+> For example, if a monitor believes it should be the leader, and if all other
+> monitors are deferring to someone else that is not reachable, the monitor
+> could then enter a special case branch:
+>
+> - send a probe to all monitors
+> - receive acks
+> - share that with other monitors
+> - if that list is missing monitors, then blacklist the monitor for a period,
+> and send a message to that monitor with that decision
+> - the monitor would blacklist itself and retry in a given amount of time.
+>
+> Basically, this would be something similar to heartbeats. If a monitor can't
+> reach all monitors in an existing quorum, then just don't do anything.
+>
+> In any case, you are more than welcome to propose a solution. Let us know
+> what you come up with and if you want to discuss this a bit more ;)
+>
+>   -Joao
+>
+>>
+>> On Tue, Jul 4, 2017 at 9:25 PM, Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org> wrote:
+>>>
+>>> On 07/04/2017 06:57 AM, Z Will wrote:
+>>>>
+>>>>
+>>>> Hi:
+>>>>    I am testing ceph-mon brain split . I have read the code . If I
+>>>> understand it right , I know it won't be brain split. But I think
+>>>> there is still another problem. My ceph version is 0.94.10. And here
+>>>> is my test detail :
+>>>>
+>>>> 3 ceph-mons , there ranks are 0, 1, 2 respectively.I stop the rank 1
+>>>> mon , and use iptables to block the communication between mon 0 and
+>>>> mon 1. When the cluster is stable, start mon.1 .  I found the 3
+>>>> monitors will all can not work well. They are all trying to call  new
+>>>> leader  election . This means the cluster can't work anymore.
+>>>>
+>>>> Here is my analysis. Because mon will always respond to leader
+>>>> election message, so , in my test, communication between  mon.0 and
+>>>> mon.1 is blocked , so mon.1 will always try to be leader, because it
+>>>> will always see mon.2, and it should win over mon.2. Mon.0 should
+>>>> always win over mon.2. But mon.2 will always responsd to the election
+>>>> message issued by mon.1, so this loop will never end. Am I right ?
+>>>>
+>>>> This should be a problem? Or is it  was just designed like this , and
+>>>> should be handled by human ?
+>>>
+>>>
+>>>
+>>> This is a known behaviour, quite annoying, but easily identifiable by
+>>> having
+>>> the same monitor constantly calling an election and usually timing out
+>>> because the peon did not defer to it.
+>>>
+>>> In a way, the elector algorithm does what it is intended to. Solving this
+>>> corner case would be nice, but I don't think there's a good way to solve
+>>> it.
+>>> We may be able to presume a monitor is in trouble during the probe phase,
+>>> to
+>>> disqualify a given monitor from the election, but in the end this is a
+>>> network issue that may be transient or unpredictable and there's only so
+>>> much we can account for.
+>>>
+>>> Dealing with it automatically would be nice, but I think, thus far, the
+>>> easiest way to address this particular issue is human intervention.
+>>>
+>>>   -Joao
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
