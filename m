@@ -1,94 +1,126 @@
-From: sheng qiu <herbert1984106@gmail.com>
-Subject: Re: How best to integrate dmClock QoS library into ceph codebase
-Date: Tue, 11 Jul 2017 11:14:29 -0700
-Message-ID: <CAB7xdi=PwRLuE+rYfbAJyd+18fbqObPyZ7n=H1MyaU__VZie_g@mail.gmail.com>
-References: <6D8EA95A-572E-4C71-A6AF-6BB8A6E8B26C@redhat.com>
- <CAF1ivSaa=06CGGJRNQ_9QO_wy6Wc5yK4zbNFiHJLnoJJiqrCSg@mail.gmail.com>
- <f08daf3b-751a-6887-fce0-f5ab38097af4@redhat.com> <CAB7xdikG-Pc8DfX7VJv905ZdM8E8wXtfgw_4q693SeNnzDZ63g@mail.gmail.com>
- <cca365ed-5b79-9a56-f683-9db271b842ff@redhat.com> <CAB7xdimrWXD7CnEM_yqzO9BzTrwXBq-FyZ2aLcXZL+3m2Z9_Rw@mail.gmail.com>
- <b26c6cec-d021-01ce-0a2b-77484e267635@redhat.com>
+From: "Robin H. Johnson" <robbat2-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org>
+Subject: Re: autoconfigured haproxy service?
+Date: Tue, 11 Jul 2017 18:53:40 +0000
+Message-ID: <robbat2-20170711T181007-461462320Z@orbis-terrarum.net>
+References: <alpine.DEB.2.11.1707111458470.3424@piezo.novalocal>
+	<alpine.DEB.2.11.1707111507220.3424@piezo.novalocal>
+	<CACJqLyY0fhZJtDZ3ZS3OL=K6TcK_S2fPAE1uUGHPmnbuxDHmvw@mail.gmail.com>
+	<alpine.DEB.2.11.1707111537290.3424@piezo.novalocal>
+	<CABZ+qqk=kvoTdVebgJrxQ1kdVogY2g9aiSVZKXYzPqGaRAQ+5A@mail.gmail.com>
+	<alpine.DEB.2.11.1707111614080.3424@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:35233 "EHLO
-        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755947AbdGKSOa (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Jul 2017 14:14:30 -0400
-Received: by mail-qt0-f171.google.com with SMTP id b40so3355qtb.2
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Jul 2017 11:14:30 -0700 (PDT)
-In-Reply-To: <b26c6cec-d021-01ce-0a2b-77484e267635@redhat.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "J. Eric Ivancich" <ivancich@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
-
-Hi Eric,
-
-We are trying to evaluate dmclock's effect on controlling the recovery
-traffic in order to reducing impact on client io.
-However, we are experiencing some problem and didn't get our expected results.
-
-we setup a small cluster, with several OSD machines. In our
-configurations, we set recovery limit = 0.001 or even smaller, and
-res=0.0, wgt=1.0.
-we set client res = 20k or even higher, limit=0.0, wgt=500.
-
-Then we killed osd while doing fio on client side and bring it back to
-trigger recovery. We saw fio iops still reduced a lot comparable to
-not using dmclock queue. We did some debugging and saw that when
-recovery is active, fio requests enqueued much less frequent than
-before.
-overall, seems dmclock's configuration on recovery part does not show
-any differences. Since the enqueue rate of fio requests are reduced,
-when dmclock try to dequeue a request, there's less chance to pull a
-fio request.
-
-Can you give some comments on this?
-
-Thanks,
-Sheng
+Content-Type: multipart/mixed; boundary="===============1192222648=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1707111614080.3424-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
 
+--===============1192222648==
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="fh9ZBaUqcBlFuagd"
+Content-Disposition: inline
 
 
+--fh9ZBaUqcBlFuagd
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Jun 28, 2017 at 11:33 AM, J. Eric Ivancich <ivancich@redhat.com> wrote:
-> On 06/27/2017 05:21 PM, sheng qiu wrote:
->> i am appreciated to your kind reply.
->>
->> In our test, we set the following in the ceph.conf:
->>
->> osd_op_queue = mclock_client
->> osd_op_queue_cut_off = high
->> osd_op_queue_mclock_client_op_lim = 100.0
->> osd_op_queue_mclock_client_op_res = 50.0
->> osd_op_num_shards = 1
->> osd_op_num_threads_per_shard = 1
->>
->>
->> in this setup, all io requests should go to one mclock_client queue
->> and using the mclock scheduling (osd_op_queue_cut_off = high).
->> we use fio for test, we set job=1, bs=4k, qd=1 or 16.
->>
->> we are expecting the visible iops by fio should < 100, while we see a
->> much higher value.
->> Did we understand your work correctly? or did we miss anything?
->
-> Hi Sheng,
->
-> I think you understand things well, but there is one additional detail
-> you may not have noticed yet. And that is what should be done when all
-> clients have reached their limit momentarily and the ObjectStore would
-> like another op to keep itself busy? We either a) refuse to provide it
-> with an op, or b) give it the op the op that's most appropriate by
-> weight. The ceph code currently is not designed to handle a) and it's
-> not even clear that we should starve the ObjectStore in that manner. So
-> we do b), and that means we can exceed the limit.
->
-> dmclock's PullPriorityQueue constructors have a parameter
-> _allow_limit_break, which ceph sets to true. That is how we do b) above.
-> If you ever wanted to set that to false you'd need to make other changes
-> to the ObjectStore ceph code to handle cases with the op queue is not
-> empty but not ready/willing to return an op when one is requested.
->
-> Eric
+(Trim lots of good related content).
+
+The upcoming HAProxy 1.8 has landed further patches for improving hot
+restarts/reloads of HAProxy, which previously lead to a brief gap period
+when new connections were not serviced. Lots of other approaches had
+been seen, including delaying TCP SYN momentarily [1]. It also notably
+fixes how you needed a separate wrapper for using haproxy w/ systemd.
+
+In the DreamHost RGW usage, I've been building additional functionality
+into HAProxy via Lua, but I'm not convinced it's the best place for some
+of it:
+- rate-limiting by access key (with explicitly whitelisted & blacklisted
+  keys), over multiple frontends [2]
+- Planned: different rates for different operations/customer classes.
+- Planned: issue redirects for buckets being moved (because getting
+  federated metadata between existing clusters is painful) [3].
+  This differs from the CERN backend-selection-by-bucket, because the
+  bucket is going to be moving regions!
+
+RGW doesn't seem like the right place for some of this functionality
+either, because storing rate data in multiple places means lots of
+cross-talk.
+
+[1] https://engineeringblog.yelp.com/2015/04/true-zero-downtime-haproxy-rel=
+oads.html
+[2] http://blog.armbruster-it.de/2015/08/neo4j-and-haproxy-some-best-practi=
+ces-and-tricks/
+[3] http://docs.aws.amazon.com/AmazonS3/latest/dev/Redirects.html
+
+> > I don't know if the bucket mapping concept is generally applicable.
+> > Maybe this haproxy-agent should focus on configuring a single backend
+> > populated with the radosgw's, and leave more complex configurations up
+> > to their admins?
+> Yeah.  (The dynamic remapping is interesting, though!  That could=20
+> potentially be controlled by rgw as well to automatically isolate busy=20
+> buckets or objects.)
+Yes, this would fit well to populate a single HAProxy backend w/ the
+available RGWs, and then that can be wrapped with whatever frontend
+configuration (esp. SSL) that the admin wants.
+
+
+--=20
+Robin Hugh Johnson
+Gentoo Linux: Dev, Infra Lead, Foundation Trustee & Treasurer
+E-Mail   : robbat2-aBrp7R+bbdUdnm+yROfE0A@public.gmane.org
+GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
+GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
+
+--fh9ZBaUqcBlFuagd
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+Comment: Robbat2 @ Orbis-Terrarum Networks - The text below is a digital signature. If it doesn't make any sense to you, ignore it.
+
+iQKTBAEBCgB9FiEEveu2pS8Vb98xaNkRGTlfI8WIJsQFAlllHrRfFIAAAAAALgAo
+aXNzdWVyLWZwckBub3RhdGlvbnMub3BlbnBncC5maWZ0aGhvcnNlbWFuLm5ldEJE
+RUJCNkE1MkYxNTZGREYzMTY4RDkxMTE5Mzk1RjIzQzU4ODI2QzQACgkQGTlfI8WI
+JsTxVQ//Ya38/R8nc8AAQUJeGxzRj4Eq+fFrahdUWQEIxue8MK2xehg7kpXGBchf
+5FInRcd3nv66LwRKKF4GE8GFmHixPiEGsUdhl//sfGgXd2G/o+XCQZRUPADAZROt
+Q4w0cke2gKcj6nCddmUqR5+VXbQ0Wh9TPOs3UaPGUXr65yttXr2JGpblG/WqdLdS
+CcPdf0/cMkZp7MxeC8b7Rn2nzfwOr++9rs6O7b2UOf8VHafJt4TyNKmJEUeZelgK
+aExQV9xuKRVPBVAQNX9MFyXgoQcSJ7SgzTtVDWBJJGuev/GoypUIObm4U0TorP/j
+0yRNRnoLvv9lUbj/8DaYevGDB1acmaaEpSnXFkRYtYQ2c8P+FcKezQv+QEO2HQnr
+Fm3VSposX0qtxctm505jxZCOYYqD32ObgjnMCG3LvCeTIxWVK6EsuikAEkY/KswG
+iDMRTkypZVAbUgw9wRUtdVc6OfyuFN6+G3DZHU0jBqd7EVqy1NhWwc8xXZZJhvnk
+sMBTA80RBiFENUbP4F2BhMmJfeDIXHjJxdKlpbRpP2+x/hhf2znYEBsHLt/3qmXP
+G+8rLCsZMXYEY6hz8AHnBC/f3bmpBUvYt84whtTzrde25BjXqtzwMKBF6Zb51Blg
+S3bLJakijKxRJvleCdJLzMoLxD6JcWy2hHIKqkLq8Tt7tinQ6Gg=
+=7HK6
+-----END PGP SIGNATURE-----
+
+--fh9ZBaUqcBlFuagd--
+
+--===============1192222648==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============1192222648==--
