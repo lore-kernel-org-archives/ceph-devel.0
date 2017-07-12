@@ -1,83 +1,170 @@
-From: Matt Benjamin <mbenjami@redhat.com>
-Subject: Re: [ceph-users] autoconfigured haproxy service?
-Date: Tue, 11 Jul 2017 18:55:22 -0400
-Message-ID: <CAKOnar=1eHKp5f=kSCRxi3qH-j7uFMoqirajW2ZONJNofKgiog@mail.gmail.com>
+From: David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: autoconfigured haproxy service?
+Date: Wed, 12 Jul 2017 01:58:14 +0000
+Message-ID: <CAN-GepKGb1c0Hvgy0HHg0ZOhcErV=apKV=-9YSSEMgmL8HKqLQ@mail.gmail.com>
 References: <alpine.DEB.2.11.1707111458470.3424@piezo.novalocal>
- <alpine.DEB.2.11.1707111507220.3424@piezo.novalocal> <CACJqLyY0fhZJtDZ3ZS3OL=K6TcK_S2fPAE1uUGHPmnbuxDHmvw@mail.gmail.com>
- <alpine.DEB.2.11.1707111537290.3424@piezo.novalocal> <CABZ+qqk=kvoTdVebgJrxQ1kdVogY2g9aiSVZKXYzPqGaRAQ+5A@mail.gmail.com>
- <alpine.DEB.2.11.1707111614080.3424@piezo.novalocal> <robbat2-20170711T181007-461462320Z@orbis-terrarum.net>
+	<1718355157.3684.1499801810149@ox.pcextreme.nl>
+	<alpine.DEB.2.11.1707112031580.3424@piezo.novalocal>
 Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============0042660064=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1707112031580.3424-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
+
+--===============0042660064==
+Content-Type: multipart/alternative; boundary="94eb2c195a52cb69690554152687"
+
+--94eb2c195a52cb69690554152687
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f181.google.com ([209.85.192.181]:35940 "EHLO
-        mail-pf0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753647AbdGKWzX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 11 Jul 2017 18:55:23 -0400
-Received: by mail-pf0-f181.google.com with SMTP id q86so3035425pfl.3
-        for <ceph-devel@vger.kernel.org>; Tue, 11 Jul 2017 15:55:23 -0700 (PDT)
-In-Reply-To: <robbat2-20170711T181007-461462320Z@orbis-terrarum.net>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Robin H. Johnson" <robbat2@gentoo.org>
-Cc: Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
 
-Hi Robin,
+Would this be able to be modular for other front ends as well? We really
+like using nginx for load balancing and it is capable of reloading the
+config after modifications as well.
 
-On Tue, Jul 11, 2017 at 2:53 PM, Robin H. Johnson <robbat2@gentoo.org> wrote:
-> (Trim lots of good related content).
->
-> The upcoming HAProxy 1.8 has landed further patches for improving hot
-> restarts/reloads of HAProxy, which previously lead to a brief gap period
-> when new connections were not serviced. Lots of other approaches had
-> been seen, including delaying TCP SYN momentarily [1]. It also notably
-> fixes how you needed a separate wrapper for using haproxy w/ systemd.
->
-> In the DreamHost RGW usage, I've been building additional functionality
-> into HAProxy via Lua, but I'm not convinced it's the best place for some
-> of it:
-> - rate-limiting by access key (with explicitly whitelisted & blacklisted
->   keys), over multiple frontends [2]
-> - Planned: different rates for different operations/customer classes.
-> - Planned: issue redirects for buckets being moved (because getting
->   federated metadata between existing clusters is painful) [3].
->   This differs from the CERN backend-selection-by-bucket, because the
->   bucket is going to be moving regions!
+On Tue, Jul 11, 2017, 4:36 PM Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
 
-This is really cool.
-
+> On Tue, 11 Jul 2017, Wido den Hollander wrote:
+> > > Op 11 juli 2017 om 17:03 schreef Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+> > >
+> > >
+> > > Hi all,
+> > >
+> > > Luminous features a new 'service map' that lets rgw's (and rgw nfs
+> > > gateways and iscsi gateways and rbd mirror daemons and ...) advertise
+> > > themselves to the cluster along with some metadata (like the addresses
+> > > they are binding to and the services the provide).
+> > >
+> > > It should be pretty straightforward to build a service that
+> > > auto-configures haproxy based on this information so that you can
+> deploy
+> > > an rgw front-end that dynamically reconfigures itself when additional
+> > > rgw's are deployed or removed.  haproxy has a facility to adjust its
+> > > backend configuration at runtime[1].
+> > >
+> > > Anybody interested in tackling this?  Setting up the load balancer in
+> > > front of rgw is one of the more annoying pieces of getting ceph up and
+> > > running in production and until now has been mostly treated as out of
+> > > scope.  It would be awesome if there was an autoconfigured service that
+> > > did it out of the box (and had all the right haproxy options set).
+> > >
+> >
+> > Are there easy Python bindings for this? I mean querying the service map.
 >
-> RGW doesn't seem like the right place for some of this functionality
-> either, because storing rate data in multiple places means lots of
-> cross-talk.
-
-I'm pretty skeptical about this, though.  RGW isn't becoming a load
-balancer, but also needs to make scheduling decisions.  Probably
-should know what the load balancer knows when it is present?
-
+> Yes and no.  There are no special librados hooks (or python wrappers) to
+> get the map, but you can issue a mon_command for 'service dump' and get it
+> in JSON, which works just as well for python users.
 >
-> [1] https://engineeringblog.yelp.com/2015/04/true-zero-downtime-haproxy-reloads.html
-> [2] http://blog.armbruster-it.de/2015/08/neo4j-and-haproxy-some-best-practices-and-tricks/
-> [3] http://docs.aws.amazon.com/AmazonS3/latest/dev/Redirects.html
+> > I'm personally a fan of running Varnish (with Hitch for SSL) in front of
+> > RGW. Some people might also prefer Traefik [0] since that also supports
+> > dynamic configs.
 >
->> > I don't know if the bucket mapping concept is generally applicable.
->> > Maybe this haproxy-agent should focus on configuring a single backend
->> > populated with the radosgw's, and leave more complex configurations up
->> > to their admins?
->> Yeah.  (The dynamic remapping is interesting, though!  That could
->> potentially be controlled by rgw as well to automatically isolate busy
->> buckets or objects.)
-> Yes, this would fit well to populate a single HAProxy backend w/ the
-> available RGWs, and then that can be wrapped with whatever frontend
-> configuration (esp. SSL) that the admin wants.
+> How would you go about autoconfiguring varnish via the rgw service map in
+> this case?
 >
->
-> --
-> Robin Hugh Johnson
-> Gentoo Linux: Dev, Infra Lead, Foundation Trustee & Treasurer
-> E-Mail   : robbat2@gentoo.org
-> GnuPG FP : 11ACBA4F 4778E3F6 E4EDF38E B27B944E 34884E85
-> GnuPG FP : 7D0B3CEB E9B85B1F 825BCECF EE05E6F6 A48F6136
+> sage
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 >
 
+--94eb2c195a52cb69690554152687
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Matt
+Would this be able to be modular for other front ends as well? We really li=
+ke using nginx for load balancing and it is capable of reloading the config=
+ after modifications as well.<br><br><div class=3D"gmail_quote"><div dir=3D=
+"ltr">On Tue, Jul 11, 2017, 4:36 PM Sage Weil &lt;<a href=3D"mailto:sweil@r=
+edhat.com">sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:<br></div><blockquote class=3D"gm=
+ail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-le=
+ft:1ex">On Tue, 11 Jul 2017, Wido den Hollander wrote:<br>
+&gt; &gt; Op 11 juli 2017 om 17:03 schreef Sage Weil &lt;<a href=3D"mailto:=
+sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" target=3D"_blank">sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;:<br>
+&gt; &gt;<br>
+&gt; &gt;<br>
+&gt; &gt; Hi all,<br>
+&gt; &gt;<br>
+&gt; &gt; Luminous features a new &#39;service map&#39; that lets rgw&#39;s=
+ (and rgw nfs<br>
+&gt; &gt; gateways and iscsi gateways and rbd mirror daemons and ...) adver=
+tise<br>
+&gt; &gt; themselves to the cluster along with some metadata (like the addr=
+esses<br>
+&gt; &gt; they are binding to and the services the provide).<br>
+&gt; &gt;<br>
+&gt; &gt; It should be pretty straightforward to build a service that<br>
+&gt; &gt; auto-configures haproxy based on this information so that you can=
+ deploy<br>
+&gt; &gt; an rgw front-end that dynamically reconfigures itself when additi=
+onal<br>
+&gt; &gt; rgw&#39;s are deployed or removed.=C2=A0 haproxy has a facility t=
+o adjust its<br>
+&gt; &gt; backend configuration at runtime[1].<br>
+&gt; &gt;<br>
+&gt; &gt; Anybody interested in tackling this?=C2=A0 Setting up the load ba=
+lancer in<br>
+&gt; &gt; front of rgw is one of the more annoying pieces of getting ceph u=
+p and<br>
+&gt; &gt; running in production and until now has been mostly treated as ou=
+t of<br>
+&gt; &gt; scope.=C2=A0 It would be awesome if there was an autoconfigured s=
+ervice that<br>
+&gt; &gt; did it out of the box (and had all the right haproxy options set)=
+.<br>
+&gt; &gt;<br>
+&gt;<br>
+&gt; Are there easy Python bindings for this? I mean querying the service m=
+ap.<br>
+<br>
+Yes and no.=C2=A0 There are no special librados hooks (or python wrappers) =
+to<br>
+get the map, but you can issue a mon_command for &#39;service dump&#39; and=
+ get it<br>
+in JSON, which works just as well for python users.<br>
+<br>
+&gt; I&#39;m personally a fan of running Varnish (with Hitch for SSL) in fr=
+ont of<br>
+&gt; RGW. Some people might also prefer Traefik [0] since that also support=
+s<br>
+&gt; dynamic configs.<br>
+<br>
+How would you go about autoconfiguring varnish via the rgw service map in<b=
+r>
+this case?<br>
+<br>
+sage<br>
+_______________________________________________<br>
+ceph-users mailing list<br>
+<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-users@l=
+ists.ceph.com</a><br>
+<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
+oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-=
+ceph.com</a><br>
+</blockquote></div>
+
+--94eb2c195a52cb69690554152687--
+
+--===============0042660064==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============0042660064==--
