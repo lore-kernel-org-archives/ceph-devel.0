@@ -1,170 +1,125 @@
-From: David Turner <drakonstein-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: autoconfigured haproxy service?
-Date: Wed, 12 Jul 2017 01:58:14 +0000
-Message-ID: <CAN-GepKGb1c0Hvgy0HHg0ZOhcErV=apKV=-9YSSEMgmL8HKqLQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1707111458470.3424@piezo.novalocal>
-	<1718355157.3684.1499801810149@ox.pcextreme.nl>
-	<alpine.DEB.2.11.1707112031580.3424@piezo.novalocal>
+From: Junqin JQ7 Zhang <zhangjq7@lenovo.com>
+Subject: RE: Ceph Bluestore OSD CPU utilization
+Date: Wed, 12 Jul 2017 02:44:43 +0000
+Message-ID: <694B98CBCEF42547AE4CD1A693225B5D085545A3@CNMAILEX04.lenovo.com>
+References: <694B98CBCEF42547AE4CD1A693225B5D085533EA@CNMAILEX04.lenovo.com>
+ <5f6e1242-f0ec-62f2-9778-eb0a28406838@redhat.com>
+ <6929185c-7c88-83ee-9e12-62db1cd23ec5@redhat.com>
+ <694B98CBCEF42547AE4CD1A693225B5D085544B4@CNMAILEX04.lenovo.com>
+ <e09c864a-fb65-a68a-4802-f8b4d29f88fc@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0042660064=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1707112031580.3424-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph-User <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail1.bemta12.messagelabs.com ([216.82.251.2]:9797 "EHLO
+        mail1.bemta12.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752619AbdGLCrP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 11 Jul 2017 22:47:15 -0400
+In-Reply-To: <e09c864a-fb65-a68a-4802-f8b4d29f88fc@gmail.com>
+Content-Language: zh-CN
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Mark Nelson <mark.a.nelson@gmail.com>, Mark Nelson <mnelson@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
---===============0042660064==
-Content-Type: multipart/alternative; boundary="94eb2c195a52cb69690554152687"
-
---94eb2c195a52cb69690554152687
-Content-Type: text/plain; charset="UTF-8"
-
-Would this be able to be modular for other front ends as well? We really
-like using nginx for load balancing and it is capable of reloading the
-config after modifications as well.
-
-On Tue, Jul 11, 2017, 4:36 PM Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-
-> On Tue, 11 Jul 2017, Wido den Hollander wrote:
-> > > Op 11 juli 2017 om 17:03 schreef Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
-> > >
-> > >
-> > > Hi all,
-> > >
-> > > Luminous features a new 'service map' that lets rgw's (and rgw nfs
-> > > gateways and iscsi gateways and rbd mirror daemons and ...) advertise
-> > > themselves to the cluster along with some metadata (like the addresses
-> > > they are binding to and the services the provide).
-> > >
-> > > It should be pretty straightforward to build a service that
-> > > auto-configures haproxy based on this information so that you can
-> deploy
-> > > an rgw front-end that dynamically reconfigures itself when additional
-> > > rgw's are deployed or removed.  haproxy has a facility to adjust its
-> > > backend configuration at runtime[1].
-> > >
-> > > Anybody interested in tackling this?  Setting up the load balancer in
-> > > front of rgw is one of the more annoying pieces of getting ceph up and
-> > > running in production and until now has been mostly treated as out of
-> > > scope.  It would be awesome if there was an autoconfigured service that
-> > > did it out of the box (and had all the right haproxy options set).
-> > >
-> >
-> > Are there easy Python bindings for this? I mean querying the service map.
->
-> Yes and no.  There are no special librados hooks (or python wrappers) to
-> get the map, but you can issue a mon_command for 'service dump' and get it
-> in JSON, which works just as well for python users.
->
-> > I'm personally a fan of running Varnish (with Hitch for SSL) in front of
-> > RGW. Some people might also prefer Traefik [0] since that also supports
-> > dynamic configs.
->
-> How would you go about autoconfiguring varnish via the rgw service map in
-> this case?
->
-> sage
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
-
---94eb2c195a52cb69690554152687
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-Would this be able to be modular for other front ends as well? We really li=
-ke using nginx for load balancing and it is capable of reloading the config=
- after modifications as well.<br><br><div class=3D"gmail_quote"><div dir=3D=
-"ltr">On Tue, Jul 11, 2017, 4:36 PM Sage Weil &lt;<a href=3D"mailto:sweil@r=
-edhat.com">sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:<br></div><blockquote class=3D"gm=
-ail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-le=
-ft:1ex">On Tue, 11 Jul 2017, Wido den Hollander wrote:<br>
-&gt; &gt; Op 11 juli 2017 om 17:03 schreef Sage Weil &lt;<a href=3D"mailto:=
-sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" target=3D"_blank">sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;:<br>
-&gt; &gt;<br>
-&gt; &gt;<br>
-&gt; &gt; Hi all,<br>
-&gt; &gt;<br>
-&gt; &gt; Luminous features a new &#39;service map&#39; that lets rgw&#39;s=
- (and rgw nfs<br>
-&gt; &gt; gateways and iscsi gateways and rbd mirror daemons and ...) adver=
-tise<br>
-&gt; &gt; themselves to the cluster along with some metadata (like the addr=
-esses<br>
-&gt; &gt; they are binding to and the services the provide).<br>
-&gt; &gt;<br>
-&gt; &gt; It should be pretty straightforward to build a service that<br>
-&gt; &gt; auto-configures haproxy based on this information so that you can=
- deploy<br>
-&gt; &gt; an rgw front-end that dynamically reconfigures itself when additi=
-onal<br>
-&gt; &gt; rgw&#39;s are deployed or removed.=C2=A0 haproxy has a facility t=
-o adjust its<br>
-&gt; &gt; backend configuration at runtime[1].<br>
-&gt; &gt;<br>
-&gt; &gt; Anybody interested in tackling this?=C2=A0 Setting up the load ba=
-lancer in<br>
-&gt; &gt; front of rgw is one of the more annoying pieces of getting ceph u=
-p and<br>
-&gt; &gt; running in production and until now has been mostly treated as ou=
-t of<br>
-&gt; &gt; scope.=C2=A0 It would be awesome if there was an autoconfigured s=
-ervice that<br>
-&gt; &gt; did it out of the box (and had all the right haproxy options set)=
-.<br>
-&gt; &gt;<br>
-&gt;<br>
-&gt; Are there easy Python bindings for this? I mean querying the service m=
-ap.<br>
-<br>
-Yes and no.=C2=A0 There are no special librados hooks (or python wrappers) =
-to<br>
-get the map, but you can issue a mon_command for &#39;service dump&#39; and=
- get it<br>
-in JSON, which works just as well for python users.<br>
-<br>
-&gt; I&#39;m personally a fan of running Varnish (with Hitch for SSL) in fr=
-ont of<br>
-&gt; RGW. Some people might also prefer Traefik [0] since that also support=
-s<br>
-&gt; dynamic configs.<br>
-<br>
-How would you go about autoconfiguring varnish via the rgw service map in<b=
-r>
-this case?<br>
-<br>
-sage<br>
-_______________________________________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" target=3D"_blank">ceph-users@l=
-ists.ceph.com</a><br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
-oreferrer" target=3D"_blank">http://lists.ceph.com/listinfo.cgi/ceph-users-=
-ceph.com</a><br>
-</blockquote></div>
-
---94eb2c195a52cb69690554152687--
-
---===============0042660064==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0042660064==--
+SGkgTWFyaywNCg0KQWN0dWFsbHksIHdlIHRlc3RlZCBmaWxlc3RvcmUgb24gc2FtZSBDZXBoIHZl
+cnNpb24gdjEyLjEuMCBhbmQgc2FtZSBjbHVzdGVyLg0KIyBjZXBoIC12DQpjZXBoIHZlcnNpb24g
+MTIuMS4wICgyNjI2MTdjOWYxNmM1NWU4NjM2OTMyNTgwNjFjNWIyNWRlYTViMDg2KSBsdW1pbm91
+cyAoZGV2KQ0KDQpDUFUgdXRpbGl6YXRpb24gb2YgZWFjaCBPU0Qgb24gZmlsZXN0b3JlIGNhbiBy
+ZWFjaCBtYXggdG8gYXJvdW5kIDIwMCUsIGJ1dCBDUFUgdXRpbGl6YXRpb24gb2YgT1NEIG9uIGJs
+dWVzdG9yZSBpcyBvbmx5IGFyb3VuZCAzMCUuDQpUaGVuLCBCbHVlU3RvcmUncyBwZXJmb3JtYW5j
+ZSBpcyBvbmx5IGFib3V0IDIwJSBvZiBmaWxlc3RvcmUuDQpXZSB0aGluayB0aGVyZSBtdXN0IGJl
+IHNvbWV0aGluZyB3cm9uZyB3aXRoIG91ciBjb25maWd1cmF0aW9uLg0KDQpJIHRyaWVkIHRvIGNo
+YW5nZSBjZXBoIGNvbmZpZywgbGlrZQ0Kb3NkIG9wIHRocmVhZHMgPSA4DQpvc2QgZGlzayB0aHJl
+YWRzID0gNA0KDQpidXQgc3RpbGwgY2FuJ3QgZ2V0IGEgZ29vZCByZXN1bHQuDQoNCkFueSBpZGVh
+IG9mIHRoaXM/DQoNCkJUVy4gV2UgY2hhbmdlZCBzb21lIGZpbGVzdG9yZSByZWxhdGVkIGNvbmZp
+Z3VyZWQgZHVyaW5nIHRlc3QNCmZpbGVzdG9yZSBmZCBjYWNoZSBzaXplID0gMjA0ODU3NjAwMA0K
+ZmlsZXN0b3JlIGZkIGNhY2hlIHNoYXJkcyA9IDE2DQpmaWxlc3RvcmUgYXN5bmMgdGhyZWFkcyA9
+IDANCmZpbGVzdG9yZSBtYXggc3luYyBpbnRlcnZhbCA9IDE1DQpmaWxlc3RvcmUgd2J0aHJvdHRs
+ZSBlbmFibGUgPSBmYWxzZQ0KZmlsZXN0b3JlIGNvbW1pdCB0aW1lb3V0ID0gMTIwMA0KZmlsZXN0
+b3JlX29wX3RocmVhZF9zdWljaWRlX3RpbWVvdXQgPSAwDQpmaWxlc3RvcmUgcXVldWUgbWF4IG9w
+cyA9IDEwNDg1NzYNCmZpbGVzdG9yZSBxdWV1ZSBtYXggYnl0ZXMgPSAxNzE3OTg2OTE4NA0KbWF4
+IG9wZW4gZmlsZXMgPSAyNjIxNDQNCmZpbGVzdG9yZSBmYWR2aXNlID0gZmFsc2UNCmZpbGVzdG9y
+ZSBvbmRpc2sgZmluaXNoZXIgdGhyZWFkcyA9IDQNCmZpbGVzdG9yZSBvcCB0aHJlYWRzID0gOA0K
+DQpUaGFua3MgYSBsb3QhDQoNCkIuUi4NCkp1bnFpbiBaaGFuZw0KLS0tLS1PcmlnaW5hbCBNZXNz
+YWdlLS0tLS0NCkZyb206IGNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86
+Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBNYXJrIE5lbHNv
+bg0KU2VudDogVHVlc2RheSwgSnVseSAxMSwgMjAxNyAxMTo0NyBQTQ0KVG86IEp1bnFpbiBKUTcg
+Wmhhbmc7IE1hcmsgTmVsc29uOyBDZXBoIERldmVsb3BtZW50DQpTdWJqZWN0OiBSZTogQ2VwaCBC
+bHVlc3RvcmUgT1NEIENQVSB1dGlsaXphdGlvbg0KDQoNCg0KT24gMDcvMTEvMjAxNyAxMDozMSBB
+TSwgSnVucWluIEpRNyBaaGFuZyB3cm90ZToNCj4gSGkgTWFyaywNCj4gDQo+IFRoYW5rcyBmb3Ig
+eW91ciByZXBseS4NCj4gDQo+IFRoZSBoYXJkd2FyZSBpcyBhcyBiZWxvdyBmb3IgZWFjaCAzIGhv
+c3RzLg0KPiAyIFNBVEEgU1NEIGFuZCA4IEhERA0KDQpUaGUgbW9kZWwgb2YgU1NEIHBvdGVudGlh
+bGx5IGNvdWxkIGJlIHZlcnkgaW1wb3J0YW50IGhlcmUuICBUaGUgZGV2aWNlcyB3ZSB0ZXN0IGlu
+IG91ciBsYWIgYXJlIGVudGVycHJpc2UgZ3JhZGUgU1NEcyB3aXRoIHBvd2VyIGxvc3MgcHJvdGVj
+dGlvbi4gDQogIFRoYXQgbWVhbnMgdGhleSBkb24ndCBoYXZlIHRvIGZsdXNoIGRhdGEgb24gc3lu
+YyByZXF1ZXN0cy4gIE9fRFNZTkMgd3JpdGVzIGFyZSBtdWNoIGZhc3RlciBhcyBhIHJlc3VsdC4g
+IEkgZG9uJ3Qga25vdyBob3cgYmFkIG9mIGFuIGltcGFjdCB0aGlzIGhhcyBvbiByb2Nrc2RiIHdh
+bC9kYiwgYnV0IGl0IGRlZmluaXRlbHkgaHVydHMgd2l0aCBmaWxlc3RvcmUgam91cm5hbHMuDQoN
+Cj4gSW50ZWwoUikgWGVvbihSKSBDUFUgRTUtMjYzMCB2NCBAIDIuMjBHSHoNCj4gTmV0d29yazog
+MjAwMDBNYi9zDQo+IA0KPiBJIGNvbmZpZ3VyZWQgT1NEIGxpa2UNCj4gW29zZC4wXQ0KPiBob3N0
+ID0gY2VwaC0xDQo+IG9zZCBkYXRhID0gL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0wICAgICAgICAj
+IGEgMTAwTSBwYXJ0aXRpb24gb2YgU1NEDQo+IGJsdWVzdG9yZSBibG9jayBkYiBwYXRoID0gL2Rl
+di9zZGE1ICAgICAgICAgIyBhIDEwRyBwYXJ0aXRpb24gb2YgU1NEDQoNCkJsdWVzdG9yZSBhdXRv
+bWF0aWNhbGx5IHJvbGVzIHJvY2tzZGIgZGF0YSBvdmVyIHRvIHRoZSBIREQgd2l0aCB0aGUgZGIg
+Z2V0cyBmdWxsLiAgSSBiZXQgd2l0aCAxMEdCIHlvdSdsbCBzZWUgZ29vZCBwZXJmb3JtYW5jZSBh
+dCBmaXJzdCBhbmQgdGhlbiB5b3UnbGwgc3RhcnQgc2VlaW5nIGxvdHMgb2YgZXh0cmEgcmVhZHMv
+d3JpdGVzIG9uIHRoZSBIREQgb25jZSBpdCBmaWxscyB1cCB3aXRoIG1ldGFkYXRhICh0aGUgbW9y
+ZSBleHRlbnRzIHRoYXQgYXJlIHdyaXR0ZW4gb3V0IHRoZSBtb3JlIGxpa2VseSB5b3UnbGwgaGl0
+IHRoaXMgYm91bmRhcnkpLiAgWW91J2xsIHdhbnQgdG8gbWFrZSB0aGUgZGIgcGFydGl0aW9ucyB1
+c2UgdGhlIG1ham9yaXR5IG9mIHRoZSBTU0QocykuDQoNCj4gYmx1ZXN0b3JlIGJsb2NrIHdhbCBw
+YXRoID0gL2Rldi9zZGE2ICAgICAgICMgYSAxMEcgcGFydGl0aW9uIG9mIFNTRA0KDQpUaGUgV0FM
+IGNhbiBiZSBzbWFsbGVyLiAgMS0yR0IgaXMgZW5vdWdoIChwb3RlbnRpYWxseSBldmVuIGxlc3Mg
+aWYgeW91IGFkanVzdCB0aGUgcm9ja3NkYiBidWZmZXIgc2V0dGluZ3MsIGJ1dCAxLTJHQiBzaG91
+bGQgYmUgc21hbGwgZW5vdWdoIHRvIGRldm90ZSBtb3N0IG9mIHlvdXIgU1NEcyB0byBEQiBzdG9y
+YWdlKS4NCg0KPiBibHVlc3RvcmUgYmxvY2sgcGF0aCA9IC9kZXYvc2RkICAgICAgICAgICAgICAg
+ICMgYSBIREQgZGlzaw0KPiANCj4gV2UgdXNlIGZpbyB0byB0ZXN0IG9uZSBvciBtb3JlIDEwMEcg
+UkJEcywgYW4gZXhhbXBsZSBvZiBvdXIgZmlvIGNvbmZpZyANCj4gW2dsb2JhbF0gaW9lbmdpbmU9
+cmJkIGNsaWVudG5hbWU9YWRtaW4gcG9vbD1yYmQgcnc9cmFuZHJ3IGJzPThrDQo+IHJ1bnRpbWU9
+MTIwDQo+IGlvZGVwdGg9MTYNCj4gbnVtam9icz00DQoNCndpdGggdGhlIHJiZCBlbmdpbmUgSSB0
+cnkgdG8gYXZvaWQgbnVtam9icyBhcyBpdCBjYW4gZ2l2ZSBlcnJvbmVvdXMgcmVzdWx0cyBpbiBz
+b21lIGNhc2VzLiAgaXQncyBwcm9iYWJseSBiZXR0ZXIgZ2VuZXJhbGx5IHRvIHN0aWNrIHdpdGgg
+bXVsdGlwbGUgaW5kZXBlbmRlbnQgZmlvIHByb2Nlc3NlcyAodGhvdWdoIGluIHRoaXMgY2FzZSBm
+b3IgYSByYW5kcncgd29ya2xvYWQgaXQgbWlnaHQgbm90IG1hdHRlcikuDQoNCj4gZGlyZWN0PTEN
+Cj4gcndtaXhyZWFkPTANCj4gbmV3X2dyb3VwDQo+IGdyb3VwX3JlcG9ydGluZw0KPiBbcmJkX2lt
+YWdlMF0NCj4gcmJkbmFtZT10ZXN0aW1hZ2VfMTAwR0JfMA0KPiANCj4gQW55IHN1Z2dlc3Rpb24/
+DQoNCldoYXQga2luZCBvZiBwZXJmb3JtYW5jZSBhcmUgeW91IHNlZWluZyBhbmQgd2hhdCBkbyB5
+b3UgZXhwZWN0IHRvIGdldD8NCg0KTWFyaw0KDQo+IFRoYW5rcy4NCj4gDQo+IEIuUi4NCj4gSnVu
+cWluIHpoYW5nDQo+IA0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBNYXJr
+IE5lbHNvbiBbbWFpbHRvOm1uZWxzb25AcmVkaGF0LmNvbV0NCj4gU2VudDogVHVlc2RheSwgSnVs
+eSAxMSwgMjAxNyA3OjMyIFBNDQo+IFRvOiBKdW5xaW4gSlE3IFpoYW5nOyBDZXBoIERldmVsb3Bt
+ZW50DQo+IFN1YmplY3Q6IFJlOiBDZXBoIEJsdWVzdG9yZSBPU0QgQ1BVIHV0aWxpemF0aW9uDQo+
+IA0KPiBVZ2gsIHNtYWxsIHNlcXVlbnRpYWwgKnJlYWRzKiBJIG1lYW50IHRvIHNheS4gIDopDQo+
+IA0KPiBNYXJrDQo+IA0KPiBPbiAwNy8xMS8yMDE3IDA2OjMxIEFNLCBNYXJrIE5lbHNvbiB3cm90
+ZToNCj4+IEhpIEp1bnFpbiwNCj4+DQo+PiBDYW4geW91IHRlbGwgdXMgeW91ciBoYXJkd2FyZSBj
+b25maWd1cmF0aW9uIChtb2RlbHMgYW5kIHF1YW50aXRpZXMgb2YgDQo+PiBjcHVzLCBuZXR3b3Jr
+IGNhcmRzLCBkaXNrcywgc3NkcywgZXRjKSBhbmQgdGhlIGNvbW1hbmQgYW5kIG9wdGlvbnMgDQo+
+PiB5b3UgdXNlZCB0byBtZWFzdXJlIHBlcmZvcm1hbmNlPw0KPj4NCj4+IEluIG1hbnkgY2FzZXMg
+Ymx1ZXN0b3JlIGlzIGZhc3RlciB0aGFuIGZpbGVzdG9yZSwgYnV0IHRoZXJlIGFyZSBhIA0KPj4g
+Y291cGxlIG9mIGNhc2VzIHdoZXJlIGl0IGlzIG5vdGFibHkgc2xvd2VyLCB0aGUgYmlnIG9uZSBi
+ZWluZyB3aGVuIA0KPj4gZG9pbmcgc21hbGwgc2VxdWVudGlhbCB3cml0ZXMgd2l0aG91dCBjbGll
+bnQtc2lkZSByZWFkYWhlYWQuDQo+Pg0KPj4gTWFyaw0KPj4NCj4+IE9uIDA3LzExLzIwMTcgMDU6
+MzQgQU0sIEp1bnFpbiBKUTcgWmhhbmcgd3JvdGU6DQo+Pj4gSGksDQo+Pj4NCj4+PiBJIGluc3Rh
+bGxlZCBDZXBoIGx1bWlub3VzIHYxMi4xLjAgaW4gMyBub2RlcyBjbHVzdGVyIHdpdGggQmx1ZVN0
+b3JlIA0KPj4+IGFuZCBkaWQgc29tZSBmaW8gdGVzdC4NCj4+PiBEdXJpbmcgdGVzdCwgIEkgZm91
+bmQgdGhlIGVhY2ggT1NEIENQVSB1dGlsaXphdGlvbiByYXRlIHdhcyBvbmx5IA0KPj4+IGFyb3Vk
+IDMwJS4NCj4+PiBBbmQgdGhlIHBlcmZvcm1hbmNlIHNlZW1zIG5vdCBnb29kIHRvIG1lLg0KPj4+
+IElzICB0aGVyZSBhbnkgY29uZmlndXJhdGlvbiB0byBoZWxwIGluY3JlYXNlIE9TRCBDUFUgdXRp
+bGl6YXRpb24gdG8gDQo+Pj4gaW1wcm92ZSBwZXJmb3JtYW5jZT8NCj4+PiBDaGFuZ2Uga2VybmVs
+LnBpZF9tYXg/IEFueSBCbHVlU3RvcmUgc3BlY2lmaWMgY29uZmlndXJhdGlvbj8NCj4+Pg0KPj4+
+IFRoYW5rcyBhIGxvdCENCj4+Pg0KPj4+IEIuUi4NCj4+PiBKdW5xaW4gWmhhbmcNCj4+PiAtLQ0K
+Pj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNj
+cmliZSBjZXBoLWRldmVsIg0KPj4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
+bW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPj4+IGluZm8gYXQgIGh0dHA6Ly92
+Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPj4+DQo+PiAtLQ0KPj4gVG8gdW5z
+dWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgt
+ZGV2ZWwiDQo+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
+bmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5v
+cmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMg
+bGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgDQo+IGluIHRoZSBi
+b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jk
+b21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
+bWwNCj4gDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUg
+InVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpv
+cmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2Vy
+Lmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
