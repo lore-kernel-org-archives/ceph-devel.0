@@ -1,129 +1,61 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH] libceph: set -EINVAL in one place in crush_decode()
-Date: Thu, 13 Jul 2017 18:08:02 +0200
-Message-ID: <1499962082-31986-1-git-send-email-idryomov@gmail.com>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:34799 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751267AbdGMQIg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 13 Jul 2017 12:08:36 -0400
-Received: by mail-wm0-f65.google.com with SMTP id p204so6032139wmg.1
-        for <ceph-devel@vger.kernel.org>; Thu, 13 Jul 2017 09:08:36 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: Re: [PATCH net] libceph: osdmap: Fix some NULL dereferences
+Date: Thu, 13 Jul 2017 18:13:22 +0200
+Message-ID: <CAOi1vP8tNXb7izDJXV1LzHhFMcqhFh_+_+zxsHQZnqgb_S+Etg@mail.gmail.com>
+References: <20170713074517.io64uezw3qf6oush@mwanda>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20170713074517.io64uezw3qf6oush@mwanda>
+Sender: netdev-owner@vger.kernel.org
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, kernel-janitors@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-No sooner than Dan had fixed this issue in commit 293dffaad8d5
-("libceph: NULL deref on crush_decode() error path"), I brought it
-back.  Add a new label and set -EINVAL once, right before failing.
+On Thu, Jul 13, 2017 at 9:45 AM, Dan Carpenter <dan.carpenter@oracle.com> wrote:
+> There are hidden gotos in the ceph_decode_* macros.  We need to set the
+> "err" variable on these error paths otherwise we end up returning
+> ERR_PTR(0) which is NULL.  It causes NULL dereferences in the callers.
+>
+> Fixes: 278b1d709c6a ("libceph: ceph_decode_skip_* helpers")
+> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+>
+> diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
+> index 864789c5974e..c7521a847ef7 100644
+> --- a/net/ceph/osdmap.c
+> +++ b/net/ceph/osdmap.c
+> @@ -510,6 +510,7 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
+>                 }
+>         }
+>
+> +       err = -EINVAL;
+>         ceph_decode_skip_map(p, end, 32, string, bad); /* type_map */
+>         ceph_decode_skip_map(p, end, 32, string, bad); /* name_map */
+>         ceph_decode_skip_map(p, end, 32, string, bad); /* rule_name_map */
+> @@ -1825,9 +1826,9 @@ struct ceph_osdmap *osdmap_apply_incremental(void **p, void *end,
+>         if (struct_v >= 3) {
+>                 /* new_erasure_code_profiles */
+>                 ceph_decode_skip_map_of_map(p, end, string, string, string,
+> -                                           bad);
+> +                                           e_inval);
+>                 /* old_erasure_code_profiles */
+> -               ceph_decode_skip_set(p, end, string, bad);
+> +               ceph_decode_skip_set(p, end, string, e_inval);
+>         }
+>
+>         if (struct_v >= 4) {
 
-Fixes: 278b1d709c6a ("libceph: ceph_decode_skip_* helpers")
-Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- net/ceph/osdmap.c | 23 ++++++++++++-----------
- 1 file changed, 12 insertions(+), 11 deletions(-)
+Hi Dan,
 
-diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 7e01099e0a83..64ae9f89773a 100644
---- a/net/ceph/osdmap.c
-+++ b/net/ceph/osdmap.c
-@@ -338,7 +338,7 @@ static void crush_finalize(struct crush_map *c)
- static struct crush_map *crush_decode(void *pbyval, void *end)
- {
- 	struct crush_map *c;
--	int err = -EINVAL;
-+	int err;
- 	int i, j;
- 	void **p = &pbyval;
- 	void *start = pbyval;
-@@ -407,7 +407,6 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
- 			size = sizeof(struct crush_bucket_straw2);
- 			break;
- 		default:
--			err = -EINVAL;
- 			goto bad;
- 		}
- 		BUG_ON(size == 0);
-@@ -439,31 +438,31 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
- 			err = crush_decode_uniform_bucket(p, end,
- 				  (struct crush_bucket_uniform *)b);
- 			if (err < 0)
--				goto bad;
-+				goto fail;
- 			break;
- 		case CRUSH_BUCKET_LIST:
- 			err = crush_decode_list_bucket(p, end,
- 			       (struct crush_bucket_list *)b);
- 			if (err < 0)
--				goto bad;
-+				goto fail;
- 			break;
- 		case CRUSH_BUCKET_TREE:
- 			err = crush_decode_tree_bucket(p, end,
- 				(struct crush_bucket_tree *)b);
- 			if (err < 0)
--				goto bad;
-+				goto fail;
- 			break;
- 		case CRUSH_BUCKET_STRAW:
- 			err = crush_decode_straw_bucket(p, end,
- 				(struct crush_bucket_straw *)b);
- 			if (err < 0)
--				goto bad;
-+				goto fail;
- 			break;
- 		case CRUSH_BUCKET_STRAW2:
- 			err = crush_decode_straw2_bucket(p, end,
- 				(struct crush_bucket_straw2 *)b);
- 			if (err < 0)
--				goto bad;
-+				goto fail;
- 			break;
- 		}
- 	}
-@@ -474,7 +473,6 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
- 		u32 yes;
- 		struct crush_rule *r;
- 
--		err = -EINVAL;
- 		ceph_decode_32_safe(p, end, yes, bad);
- 		if (!yes) {
- 			dout("crush_decode NO rule %d off %x %p to %p\n",
-@@ -489,7 +487,6 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
- 		/* len */
- 		ceph_decode_32_safe(p, end, yes, bad);
- #if BITS_PER_LONG == 32
--		err = -EINVAL;
- 		if (yes > (ULONG_MAX - sizeof(*r))
- 			  / sizeof(struct crush_rule_step))
- 			goto bad;
-@@ -557,7 +554,7 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
- 	if (*p != end) {
- 		err = decode_choose_args(p, end, c);
- 		if (err)
--			goto bad;
-+			goto fail;
- 	}
- 
- done:
-@@ -567,10 +564,14 @@ static struct crush_map *crush_decode(void *pbyval, void *end)
- 
- badmem:
- 	err = -ENOMEM;
--bad:
-+fail:
- 	dout("crush_decode fail %d\n", err);
- 	crush_destroy(c);
- 	return ERR_PTR(err);
-+
-+bad:
-+	err = -EINVAL;
-+	goto fail;
- }
- 
- int ceph_pg_compare(const struct ceph_pg *lhs, const struct ceph_pg *rhs)
--- 
-2.4.3
+I applied osdmap_apply_incremental() hunk and fixed a similar bug in
+osdmap_decode() (it's a not NULL deref, that's why smatch didn't catch
+it).
 
+I posted a separate patch for crush_decode().  This is the second time
+in two months you are fixing it, so I wanted something more future-proof.
+
+See the end result at https://github.com/ceph/ceph-client/commits/testing.
+
+Thanks,
+
+                Ilya
