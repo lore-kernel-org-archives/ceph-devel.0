@@ -1,111 +1,71 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: peering process
-Date: Thu, 13 Jul 2017 10:25:31 +1000
-Message-ID: <CAF-wwdG7SFVmbQ03Syq7iyZiXQJbMD4AatE4GKW5oZwbtBi4BA@mail.gmail.com>
-References: <CAB7xdikjRLknjy5pac08zUbcN=r8N0+cJ4ZOL3tPMZkNSiiYLA@mail.gmail.com>
+From: =?UTF-8?B?5pSA5YiY?= <liupan1111@gmail.com>
+Subject: Re: rocked crash in 12.1.0 release when ran fio+libfio_objectstore.so
+Date: Thu, 13 Jul 2017 11:15:38 +0800
+Message-ID: <CAMwhyqXX7RPC8M54t7brOqrTRDNmMoA7BrGYUVDyrHu7X=jLEA@mail.gmail.com>
+References: <CAMwhyqW3vhQRrwRkoxGsbDp8NQZcqA3tVm9eO_E-pb1T3sFANA@mail.gmail.com>
+ <alpine.DEB.2.11.1707121356090.3424@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f52.google.com ([74.125.83.52]:36370 "EHLO
-        mail-pg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750755AbdGMAZn (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Jul 2017 20:25:43 -0400
-Received: by mail-pg0-f52.google.com with SMTP id u62so20621605pgb.3
-        for <ceph-devel@vger.kernel.org>; Wed, 12 Jul 2017 17:25:43 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CAB7xdikjRLknjy5pac08zUbcN=r8N0+cJ4ZOL3tPMZkNSiiYLA@mail.gmail.com>
+Received: from mail-ua0-f176.google.com ([209.85.217.176]:36558 "EHLO
+        mail-ua0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750933AbdGMDPk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 12 Jul 2017 23:15:40 -0400
+Received: by mail-ua0-f176.google.com with SMTP id g40so26059486uaa.3
+        for <ceph-devel@vger.kernel.org>; Wed, 12 Jul 2017 20:15:39 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1707121356090.3424@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: sheng qiu <herbert1984106@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, 20702390@qq.com
 
+Hi Sage=EF=BC=8C
 
+I ran again for half an hour, this time this crash not be reproduced,
+but yes, there is issue about memory=EF=BC=9A
 
-On Sat, Jul 1, 2017 at 8:25 AM, sheng qiu <herbert1984106@gmail.com> wrote:
-> Hi,
->
-> We are trying to reduce the peering processing latency, since it may
-> block front io.
->
-> in our experiment, we kill certain osd and bring it back after a very
-> short time. We checked performance counters as below:
->
->  "peering_latency": {
->
->             "avgcount": 52,
->
->             "sum": 52.435308773,
->
->             "avglat": 1008.371323
->
->         },
->
->      "getinfo_latency": {
->
->             "avgcount": 52,
->
->             "sum": 3.525831625,
->
->             "avglat": 67.804454
->
->         },
->
->         "getlog_latency": {
->
->             "avgcount": 46,
->
->             "sum": 0.255325943,
->
->             "avglat": 5.550564
->
->         },
->
->  "getmissing_latency": {
->
->             "avgcount": 46,
->
->             "sum": 0.000877735,
->
->             "avglat": 0.019081
->
->         },
->
->         "waitupthru_latency": {
->
->             "avgcount": 46,
->
->             "sum": 48.652836368,
->
->             "avglat": 1057.670356
->
->         }
->
-> as shown, average peering latency is 1008ms, most of them are consumed
-> by "waitupthru_latency".  By looking at the codes, i am not quite
-> understand this part. Can anyone explain this part especially why it
-> takes such long time in this stage?
+At the beginning, only small amount of memory were used:
+   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAN=
+D
+ 32801 root      20   0 1282300 453480 269344 S 196.0  0.3   0:17.99 fio
 
-Could you open a tracker for this issue and provide logs with "debug osd = 20"
-from both the primary and the replica osds? As Greg has mentioned this is not a
-measure of local work so it's important to look at all of the osds involved.
+But after 30 mins, RES went up to 20G, and VIRT went up to 22G ...
 
->
-> I also noticed there's some description regarding "fast peering" on
-> http://tracker.ceph.com/projects/ceph/wiki/Osd_-_Faster_Peering
->
-> is this still ongoing or stale?
->
-> I am appreciated for any kind reply.
->
-> Thanks,
-> Sheng
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Seems memory leak? I will use valgrind to san it.
 
+Thanks
+Pan
 
-
--- 
-Cheers,
-Brad
+2017-07-12 21:56 GMT+08:00 Sage Weil <sage@newdream.net>:
+> On Wed, 12 Jul 2017, =E6=94=80=E5=88=98 wrote:
+>> Hi Cephers,
+>>
+>> When I ran fio_libfio_objectstore.so, I met a crash below after ran 10 m=
+ins:
+>>
+>> https://drive.google.com/open?id=3D0B1m1ON51YNOSTFRHRng3YksxRkk
+>>
+>> I made three disk partitions=EF=BC=9A
+>> 1) db part, 50GB
+>> 2) wal part, 50GB
+>> 3) data part, others.
+>>
+>> I used all default options of RocksDB.
+>
+> I haven't seen this one.  Did you exhaust memory?  (Can you reproduce and
+> see what the memory utilization looks like?)
+>
+> sage
+>
+>>
+>> Could anybody have some opinion?
+>>
+>> Thanks
+>> Pan
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
