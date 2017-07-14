@@ -1,52 +1,64 @@
-From: John Spray <jspray@redhat.com>
-Subject: Changes to md_config_t
-Date: Fri, 14 Jul 2017 15:23:13 +0100
-Message-ID: <CALe9h7fOeO07MH--+R40QoV2LHxPwZ6WDVhM=H4Raf09rqhjYg@mail.gmail.com>
+From: Lars Marowsky-Bree <lmb@suse.com>
+Subject: Re: upgrade procedure to Luminous
+Date: Fri, 14 Jul 2017 16:27:34 +0200
+Message-ID: <20170714142734.5aqzae7x7fmsqmmz@suse.com>
+References: <fc6ff947-e806-84c8-4eae-099a465482c6@suse.de>
+ <alpine.DEB.2.11.1707141407300.27271@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:37361 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753968AbdGNOXf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Jul 2017 10:23:35 -0400
-Received: by mail-wm0-f53.google.com with SMTP id i127so24318862wma.0
-        for <ceph-devel@vger.kernel.org>; Fri, 14 Jul 2017 07:23:34 -0700 (PDT)
+Received: from smtp.nue.novell.com ([195.135.221.5]:41460 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754028AbdGNO1n (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Fri, 14 Jul 2017 10:27:43 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.11.1707141407300.27271@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Joao Eduardo Luis <joao@suse.de>, "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-Hi all,
+On 2017-07-14T14:12:08, Sage Weil <sage@newdream.net> wrote:
 
-There's a change headed for master soon
-(https://github.com/ceph/ceph/pull/16211) that will rework how config
-settings are declared.  Currently they're declared using a
-preprocessor macro, which is a bit too inflexible for some desirable
-enhancements like having different defaults for clients vs servers,
-adding more bounds/range checking, and adding more descriptive doc
-metadata.
+> > Any thoughts on how to mitigate this, or on whether I got this all wrong and
+> > am missing a crucial detail that blows this wall of text away, please let me
+> > know.
+> I don't know; the requirement that mons be upgraded before OSDs doesn't 
+> seem that unreasonable to me.  That might be slightly more painful in a 
+> hyperconverged scenario (osds and mons on the same host), but it should 
+> just require some admin TLC (restart mon daemons instead of 
+> rebooting).
 
-The thing that will effect you immediately is how to add new config settings:
- - Add them in common/options.cc
- - Access them using md_config_t::get()
+I think it's quite unreasonable, to be quite honest. Collocated MONs
+with OSDs is very typical for smaller cluster environments.
 
-The old-style definitions for existing settings still exist in
-common/legacy_config_opts.h.  Do *not* add new definitions to that
-file.  All the definitions in that file now have equivalent
-definitions in common/options.cc, and the ones in common/options.cc
-are authoritative.
+> Is there something in some distros that *requires* a reboot in order to 
+> upgrade packages?
 
-The old header lives on in order to generate C++ member definitions
-for the options in md_config_t (i.e. so that you can get at them with
-g_conf->my_config_opt).  Once the consuming code has been modified to
-avoid accessing them that way, the entries from legacy_config_opts.h
-can be removed.
+Not necessarily.
 
-This sacrifices the compile-time check that you would previously get
-by accessing a class member.  The benefit is that we can do all the
-new-style stuff with clean C++, that we can in principle load
-definitions at runtime (e.g. from the planned central mon config
-store), and that md_config_t will now know which options are really in
-use (because they're accessed by function and not by direct member
-access).
+*But* once we've upgraded the packages, a failure or reboot might
+trigger this.
 
-John
+And customers don't always upgrade all nodes at once in a short period
+(the benefit of a supposed rolling upgrade cycle), increasing the risk.
+
+I wish we'd already be fully containerized so indeed the MONs were truly
+independent of everything else going on on the cluster, but ...
+
+> Also, this only seems like it will affect users that are getting their 
+> ceph packages from the distro itself and not from a ceph.com channel or a 
+> special subscription/product channel (this is how the RHEL stuff works, I 
+> think).
+
+Even there, upgrading only the MON daemons and not the OSDs is tricky?
+
+
+
+
+-- 
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton, HRB 21284 (AG Nürnberg)
+"Experience is the name everyone gives to their mistakes." -- Oscar Wilde
+
