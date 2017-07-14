@@ -1,335 +1,99 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Re: latency compare between 2t NVME SSD P3500 and bluestore
-Date: Fri, 14 Jul 2017 08:31:00 -0500
-Message-ID: <43081ad4-f566-f0a1-16de-940408f91dc2@redhat.com>
-References: <CAMwhyqVYiWuAVg_+HJ7xjsNs=BNkH-g5BtHGTDDP4j-5sSGXLw@mail.gmail.com>
- <alpine.DEB.2.11.1707121158300.3424@piezo.novalocal>
- <CAMwhyqX=ZNTpfK7t3+ajqJZ6D-YrcdkCeVCCy=oX5iDLMxjC-w@mail.gmail.com>
- <alpine.DEB.2.11.1707121351490.3424@piezo.novalocal>
- <CAMwhyqUP4uUNoPMBYkvgOcjiRu5C_za=xY6E1qOpxrx1MO2M0g@mail.gmail.com>
- <CAEYCsVJ0GnFN9RXEkgMyh5jPwkWHr1v=4ZuAWNfiy5GP5i-5Mw@mail.gmail.com>
- <CAERxPZJWFfUJ7zksBgpB7oStA5+GQDDJMDY3Ua8VNLwOWP8MxA@mail.gmail.com>
- <a3e297af-5944-b695-6e58-231eb98f6662@redhat.com>
- <CAERxPZKHdK78bbMCS7g4y0wQZ4PKSrsK-mn5FC7+VXrO22A3HQ@mail.gmail.com>
- <CAEYCsV+p9ORF8UfxjcUnmPtpgfnHWbniOQnkAp-uzYdMXBM4Lw@mail.gmail.com>
- <CAMwhyqU5uWVYaEQ_81x-4w945PKfd8F4fmc-3dcO9rP5qQ7brA@mail.gmail.com>
+From: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
+Subject: upgrade procedure to Luminous
+Date: Fri, 14 Jul 2017 15:01:25 +0100
+Message-ID: <fc6ff947-e806-84c8-4eae-099a465482c6@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44964 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753635AbdGNNbC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 14 Jul 2017 09:31:02 -0400
-In-Reply-To: <CAMwhyqU5uWVYaEQ_81x-4w945PKfd8F4fmc-3dcO9rP5qQ7brA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?5pSA5YiY?= <liupan1111@gmail.com>, Xiaoxi Chen <superdebuger@gmail.com>
-Cc: xiaoyan li <wisher2003@gmail.com>, Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>, p.zhou@alibaba-inc.com, 20702390@qq.com
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Language: en-GB
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 07/14/2017 07:54 AM, 攀刘 wrote:
-> Hi Sage and Mark,
->
-> I did experiment locally for fio+libfio_ceph_bluestore.fio,
-> iodepth = 32, numjobs=64
-> and got the result below:
->
-> 1) Without using gdbprof
->
->    PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND
->  75526 root      20   0 12.193g 7.056g 271672 R 99.0  5.6   4:20.98
-> bstore_kv_sync
->  75527 root      20   0 12.193g 7.056g 271672 S 61.6  5.6   2:57.03
-> bstore_kv_final
->  75504 root      20   0 12.193g 7.056g 271672 S 35.4  5.6   1:46.34 bstore_aio
->  75524 root      20   0 12.193g 7.056g 271672 S 34.1  5.6   1:34.27 finisher
->  75567 root      20   0 12.193g 7.056g 271672 S 10.6  5.6   0:26.32 fio
->
-> We could find the thread of store_kv_sync nearly occupied a core
-> completely(99%).
->
->   write: IOPS=80.1k, BW=1251MiB/s (1312MB/s)(319GiB/260926msec)
->     clat (usec): min=1792, max=52694, avg=25505.15, stdev=1731.77
->      lat (usec): min=1852, max=52780, avg=25568.08, stdev=1732.09
->
-> From fio output, the avg flat is nearly 25.5ms.
->
-> From the perfcounter in the link:
-> http://paste.openstack.org/show/615380/
->
-> We could find :
-> kv_commit_lat: 12.1 ms
-> kv_lat:               12.1 ms
-> state_kv_queued_lat :  9.98 X 2 = 19.9 ms
-> state_kv_commiting_lat: 4.67 ms
->
-> So we should try to improve state_kv_queued_lat, right?
->
-> 2) using gdbprof:
-> http://paste.openstack.org/show/615386/
-> I pasted the stack of thread KVFinalizeThread and KVSyncThread.
+Dear all,
 
-Lots of time spend bogged down in key comparison operations in rocksdb. 
-I see that too, but usually in very high throughput scenarios.  How fast 
-is your CPU?
 
-I'm hoping that the PR from Li will allow us to make the buffers/sst 
-files smaller and we can reduce some of that overhead:
+The current upgrade procedure to jewel, as stated by the RC's release 
+notes, can be boiled down to
 
-https://github.com/ceph/rocksdb/pull/19
+- upgrade all monitors first
+- upgrade osds only after we have a **full** quorum, comprised of all 
+the monitors in the monmap, of luminous monitors (i.e., once we have the 
+'luminous' feature enabled in the monmap).
 
-Mark
+While this is a reasonable idea in principle, reducing a lot of the 
+possible upgrade testing combinations, and a simple enough procedure 
+from Ceph's point-of-view, it seems it's not a widespread upgrade procedure.
 
->
-> I will continue investigate, please let me know if you have any opinion.
->
-> Thanks
-> Pan
->
-> 2017-07-14 17:31 GMT+08:00 Xiaoxi Chen <superdebuger@gmail.com>:
->> in state_kv_commit stage, db-> submit_transcation will be called and
->> all rocksdb insert-key logical is done here, as shown in gdbprof, key
->> comparison and lookup is happening here, but as db->submit_transcation
->> will set sync=false, which will leave the change to RocksDB WAL
->> (potential) is only in memory, not persistent to disk
->>
->> The *submit* you refer to, is just submit an empty transaction with
->> sync=true, to flush all previous WAL persistently into disk.
->>
->> Clearly the kv_commit is CPU intensive and kv_submit is (sequential)
->> IO intensive. So depending on the CPU/Disk speed ratio, one may see
->> different profiling result.  My previous test on HDD show opposite
->> result that kv_lat is pretty long.
->>
->> 2017-07-14 16:29 GMT+08:00 xiaoyan li <wisher2003@gmail.com>:
->>> Here is the output of gdbprof: @Mark please have a look.
->>> I copied _kv_sync_thread and _kv_finalize_thread here.
->>> http://paste.openstack.org/show/615362/
->>>
->>> Lisa
->>>
->>> On Fri, Jul 14, 2017 at 9:54 AM, Mark Nelson <mnelson@redhat.com> wrote:
->>>> Hi Li,
->>>>
->>>> You may want to try my wallclock profiler to see where time is being spent
->>>> during your test.  It is located here:
->>>>
->>>> https://github.com/markhpc/gdbprof
->>>>
->>>> You can run it like:
->>>>
->>>> sudo gdb -ex 'set pagination off' -ex 'attach <pid>' -ex 'source
->>>> /home/ubuntu/src/markhpc/gdbprof/gdbprof.py' -ex 'profile begin' -ex 'quit'
->>>>
->>>> Mark
->>>>
->>>>
->>>> On 07/13/2017 08:47 PM, xiaoyan li wrote:
->>>>>
->>>>> Hi,
->>>>> I am concerned about the rocksdb impact on bluestore whole IO path. I
->>>>> did some test with bluestore fio plugin.
->>>>> For example, I got following data from the log when I did bluestore
->>>>> fio test with numjobs=64 and iopath=32. It seems that for every txc,
->>>>> most of the time spends on queued and commiting states.
->>>>> state time span(us)
->>>>> state_prepare_lat 386
->>>>> state_aio_wait_lat 430
->>>>> state_io_done_lat 0
->>>>> state_kv_queued_lat 7926
->>>>> state_kv_commiting_lat 30653
->>>>> state_kv_done_lat 4
->>>>>
->>>>>         "state_kv_queued_lat": {
->>>>>             "avgcount": 349076566,
->>>>>             "sum": 1214245.959889817,
->>>>>             "avgtime": 0.003478451
->>>>>         },
->>>>>         "state_kv_commiting_lat": {
->>>>>             "avgcount": 174538283,
->>>>>             "sum": 5612849.022306266,
->>>>>             "avgtime": 0.032158268
->>>>>         },
->>>>>
->>>>>
->>>>> And same time, to submit (174538283/3509556 = 49) txcs every time only
->>>>> takes 1024us, which is much less than commiting_lat 30653us.
->>>>>         "kv_lat": {
->>>>>             "avgcount": 3509556,
->>>>>             "sum": 3594.365142193,
->>>>>             "avgtime": 0.001024165
->>>>>         },
->>>>>
->>>>> The time between state_kv_queued_lat and state_kv_commiting_lat:
->>>>>
->>>>> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#L8349
->>>>>
->>>>> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#L8366
->>>>>
->>>>> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#L7741
->>>>>
->>>>> I am still investigating why it spends so long time on
->>>>> kv_commiting_lat, but from above data I doubt it is the problem of
->>>>> rocksdb.
->>>>> Please correct me if I misunderstood anything.
->>>>>
->>>>> Lisa
->>>>>
->>>>>
->>>>> On Thu, Jul 13, 2017 at 12:34 AM, Xiaoxi Chen <superdebuger@gmail.com>
->>>>> wrote:
->>>>>>
->>>>>> FWIW, one thing that KVDB can provide is transaction support, which is
->>>>>> important as we need to update several metadata(Onode, allocator map,
->>>>>> and WAL for small write) transactionally.
->>>>>>
->>>>>>
->>>>>>
->>>>>> 2017-07-13 0:25 GMT+08:00 攀刘 <liupan1111@gmail.com>:
->>>>>>>
->>>>>>> Hi Sage,
->>>>>>>
->>>>>>> Indeed, I have an idea which hold a long time.
->>>>>>>
->>>>>>> Do we really need a heavy k/v database to store metadata? Especially
->>>>>>> for fast disks.... Introduce a third-party database also make
->>>>>>> difficulty for maintenance (maybe because of my limited database
->>>>>>> knowledge) ...
->>>>>>>
->>>>>>> Let's suppose:
->>>>>>> 1) The max pg number in one osd is limited(in my experience, 100~200
->>>>>>> pgs per osd is best performance)
->>>>>>> 2) The max number of objects in one pg is limited, because of disk
->>>>>>> space.
->>>>>>>
->>>>>>> Then, how about this: pre-allocate metadata locations in metadata
->>>>>>> partition。
->>>>>>>
->>>>>>> Part a SSD into two or three partitions(same as bluestore), instead of
->>>>>>> using kv database, just store metadata directly in one disk
->>>>>>> partition(we call it metadata partition). Inside this metadata
->>>>>>> partition, we store several data structures:
->>>>>>> 1) One hash table of PGs, key is PG id, value is another hash
->>>>>>> table(key is object index of this pg, value is object metadata, and
->>>>>>> object location in data partition).
->>>>>>> 2) A free object location list.
->>>>>>>
->>>>>>> And other extra things...
->>>>>>>
->>>>>>> The max pgs belongs to one OSD can be limited by options, so I believe
->>>>>>> the metadata partition should not be big. We could load all metadata
->>>>>>> into RAM if RAM is really big, or part of them and controlled by LRU,
->>>>>>> or just read, modify, and write back to disk when needed.
->>>>>>>
->>>>>>> Do you think this idea reasonable? At least, I believe this kind of
->>>>>>> new storage engine will be much faster.
->>>>>>>
->>>>>>> Thanks
->>>>>>> Pan
->>>>>>>
->>>>>>> 2017-07-12 21:55 GMT+08:00 Sage Weil <sage@newdream.net>:
->>>>>>>>
->>>>>>>> On Wed, 12 Jul 2017, 攀刘 wrote:
->>>>>>>>>
->>>>>>>>> Hi Sage,
->>>>>>>>>
->>>>>>>>> Yes, I totally understand bluestore did much more things than a raw
->>>>>>>>> disk, but the current overhead is a little too big to our usage. I
->>>>>>>>> will compare bluestore with XFS(also has metadata tracking,
->>>>>>>>> allocation, and so on), and to see if XFS also has such impact.
->>>>>>>>>
->>>>>>>>> I would like to give a flamegraph later, but from the perfcounter, we
->>>>>>>>> could find most of time were spent in "kv_lat".
->>>>>>>>
->>>>>>>>
->>>>>>>> That's rocksdb.  And yeah, I think it's pretty clear that either
->>>>>>>> rocksdb
->>>>>>>> needs some serious work to really keep up with nvme (or optane) or
->>>>>>>> (more
->>>>>>>> likely) we need an alternate kv backend that is targetting high speed
->>>>>>>> flash.  I suspect the latter makes the most sense, and I believe there
->>>>>>>> are
->>>>>>>> various efforts at Intel looking at alternatives but no winner just
->>>>>>>> yet.
->>>>>>>>
->>>>>>>> Looking a bit further out, I think a new kv library that natively
->>>>>>>> targets
->>>>>>>> peristent memory (e.g., something built on pmem.io) will be the right
->>>>>>>> solution.  Although at that point, it's probbaly a question of whether
->>>>>>>> we
->>>>>>>> have pmem for metadata and 3D NAND for data or pure pmem; in the latter
->>>>>>>> case a complete replacement for bluestore would make more sense.
->>>>>>>>
->>>>>>>>> For FTL, yes, it is a good idea, after we get the flame graph, we
->>>>>>>>> could discuss which part could be improved by FTL, firmware, even open
->>>>>>>>> channel.
->>>>>>>>
->>>>>>>>
->>>>>>>> Yep!
->>>>>>>> sage
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> 2017-07-12 20:02 GMT+08:00 Sage Weil <sage@newdream.net>:
->>>>>>>>>>
->>>>>>>>>> On Wed, 12 Jul 2017, 攀刘 wrote:
->>>>>>>>>>>
->>>>>>>>>>> Hi Cephers,
->>>>>>>>>>>
->>>>>>>>>>> I did some experiment today to compare the latency between one
->>>>>>>>>>> P3500(2T nvme SSD) and bluestore(fio + libfio_objectstore.so):
->>>>>>>>>>>
->>>>>>>>>>> For iodepth = 1, the random write latency of bluestore is 276.91us,
->>>>>>>>>>> compare with 14.71 of SSD, big overhead.
->>>>>>>>>>>
->>>>>>>>>>> I also test iodepth = 16, Still, there is a big overhead.(143 us ->
->>>>>>>>>>> 642 us)
->>>>>>>>>>>
->>>>>>>>>>> What is your opinion?
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>> There is a lot of work that bluestore is doing over the raw device as
->>>>>>>>>> it
->>>>>>>>>> is implementing all of the metadata tracking, checksumming,
->>>>>>>>>> allocation,
->>>>>>>>>> and so on.  There's definitely lots of room for improvement, but I'm
->>>>>>>>>> not sure you can expect to see latencies in the 10s of us.  That
->>>>>>>>>> said, it
->>>>>>>>>> would be interesting to see an updated flamegraph to see where the
->>>>>>>>>> time is
->>>>>>>>>> being spent and where we can slim this down.  On a new nvme it's
->>>>>>>>>> possible
->>>>>>>>>> we can do away with some of the complexity of, say, the allocator,
->>>>>>>>>> since
->>>>>>>>>> the FTL is performing a lot of the same work anyway.
->>>>>>>>>>
->>>>>>>>>> sage
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>> --
->>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>>
->>>>>
->>>>>
->>>>
->>>
->>>
->>>
->>> --
->>> Best wishes
->>> Lisa
+As far as I can tell, it's not uncommon for users to take this 
+maintenance window to perform system-wide upgrades, including kernel and 
+glibc for instance, and finishing the upgrade with a reboot.
+
+The problem with our current upgrade procedure is that once the first 
+server reboots, the osds in that server will be unable to boot, as the 
+monitor quorum is not yet 'luminous'.
+
+The only way to minimize potential downtime is to upgrade and restart 
+all the nodes at the same time, which can be daunting and it basically 
+defeats the purpose of a rolling upgrade. And in this scenario, there is 
+an expectation of downtime, something Ceph is built to prevent.
+
+Additionally, requiring the `luminous` feature to be enabled in the 
+quorum becomes even less realistic in the face of possible failures. God 
+forbid that in the middle of upgrading, the last remaining monitor 
+server dies a horrible death - e.g., power, network. We'll be left with 
+still a 'not-luminous' quorum, and a bunch of OSDs waiting for this flag 
+to be flipped. And not it's a race to either get that monitor up, or 
+remove it from the monmap.
+
+Even if one were to make the decision of only upgrading system packages, 
+reboot, and then upgrade Ceph packages, there is the unfortunate 
+possibility that library interdependencies would require Ceph's binaries 
+to be updated, so this may be a show-stopper as well.
+
+Alternatively, if one is to simply upgrade the system and not reboot, 
+and then proceed to perform the upgrade procedure, one would still be in 
+a fragile position: if, for some reason, one of the nodes reboots, we're 
+in the same precarious situation as before.
+
+Personally, I can see two ways out of this, at different positions in 
+the reasonability spectrum:
+
+1. add temporary monitor nodes to the cluster, may they be on VMs or 
+bare hardware, already running Luminous, and then remove the same amount 
+of monitors from the cluster. This leaves us to upgrade a single monitor 
+node. This has the drawback of folks not having spare nodes to run the 
+monitors on, or running monitors on VMs -- which may affect their 
+performance during the upgrade window, and increase complexity in terms 
+of firewall and routing rules.
+
+2. migrate/upgrade all nodes on which Monitors are located first, then 
+only restart them after we've gotten all nodes upgraded. If anything 
+goes wrong, one can hurry through this step or fall-back to 3.
+
+3. Reducing the monitor quorum to 1. This pains me to even think about, 
+and it bothers me to bits that I'm finding myself even considering this 
+as a reasonable possibility. It shouldn't, because it isn't. But it's a 
+lot more realistic than expecting OSD downtime during an upgrade procedure.
+
+On top of this all, I found during my tests that any OSD, running 
+luminous prior to the luminous quorum, will need to be restarted before 
+it can properly boot into the cluster. I'm guessing this is a bug rather 
+than a feature though.
+
+Any thoughts on how to mitigate this, or on whether I got this all wrong 
+and am missing a crucial detail that blows this wall of text away, 
+please let me know.
+
+
+   -Joao
