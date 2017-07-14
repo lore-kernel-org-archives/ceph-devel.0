@@ -1,15 +1,12 @@
-From: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
-Subject: Re: autoconfigured haproxy service?
-Date: Fri, 14 Jul 2017 12:05:19 +0200 (CEST)
-Message-ID: <1992399284.4003.1500026719834@ox.pcextreme.nl>
-References: <alpine.DEB.2.11.1707111458470.3424@piezo.novalocal>
-	<1718355157.3684.1499801810149@ox.pcextreme.nl>
-	<alpine.DEB.2.11.1707112031580.3424@piezo.novalocal>
+From: Roshni Chatterjee <roshni.chatterjee-gmN/nmo4RJN0+Iju73vM4Z/QNRX+jHPU@public.gmane.org>
+Subject: Re: Regarding Ceph Debug Logs
+Date: Fri, 14 Jul 2017 10:59:16 +0000
+Message-ID: <FBF2027374433749866CFD13796768DC54D4B917@EXCH-MB01-DEL.nectechnologies.in>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+	boundary="_005_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_"
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1707112031580.3424-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+Content-Language: en-US
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,102 +16,218 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
+--_005_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_
+Content-Type: multipart/alternative;
+	boundary="_000_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_"
 
-> Op 11 juli 2017 om 22:35 schreef Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
-> 
-> 
-> On Tue, 11 Jul 2017, Wido den Hollander wrote:
-> > > Op 11 juli 2017 om 17:03 schreef Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
-> > > 
-> > > 
-> > > Hi all,
-> > > 
-> > > Luminous features a new 'service map' that lets rgw's (and rgw nfs 
-> > > gateways and iscsi gateways and rbd mirror daemons and ...) advertise 
-> > > themselves to the cluster along with some metadata (like the addresses 
-> > > they are binding to and the services the provide).
-> > > 
-> > > It should be pretty straightforward to build a service that 
-> > > auto-configures haproxy based on this information so that you can deploy 
-> > > an rgw front-end that dynamically reconfigures itself when additional 
-> > > rgw's are deployed or removed.  haproxy has a facility to adjust its 
-> > > backend configuration at runtime[1].
-> > > 
-> > > Anybody interested in tackling this?  Setting up the load balancer in 
-> > > front of rgw is one of the more annoying pieces of getting ceph up and 
-> > > running in production and until now has been mostly treated as out of 
-> > > scope.  It would be awesome if there was an autoconfigured service that 
-> > > did it out of the box (and had all the right haproxy options set).
-> > > 
-> > 
-> > Are there easy Python bindings for this? I mean querying the service map.
-> 
-> Yes and no.  There are no special librados hooks (or python wrappers) to 
-> get the map, but you can issue a mon_command for 'service dump' and get it 
-> in JSON, which works just as well for python users.
-> 
-> > I'm personally a fan of running Varnish (with Hitch for SSL) in front of 
-> > RGW. Some people might also prefer Traefik [0] since that also supports 
-> > dynamic configs.
-> 
-> How would you go about autoconfiguring varnish via the rgw service map in 
-> this case?
-> 
+--_000_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 
-Something like this works with RGW: https://gist.github.com/wido/d93f18810f40ecf405a5be0272821999
+Hi All,
 
-You see two backends configured there, but you can have more.
+I am new to ceph and I am trying to debug a few scenarios . I have 2 querie=
+s as listed below  -
+1.Regarding enabling debug logs for ceph
+2.Regarding internal processes of ceph
 
-You can also replace that by:
+QUERY 1
 
-include "backends.vcl"
+I have enabled the logs by setting the log level in /etc/ceph/ceph.conf att=
+ached above -
 
-Where the backends.vcl would then contain:
+But none of this is generating information that could be used in debugging =
+.
+Also ,
+The following CLI generates log as attached in cli_log attachment -
+What are the following codes in the log like -
+7f12a474c700 , 7f12895af700
 
-backend rgw1 {
-    .host = "rgw1";
-    .port = "7480";
-    .connect_timeout = 5s;
-    .first_byte_timeout = 15s;
-    .between_bytes_timeout = 5s;
-    .probe = {
-        .timeout   = 30s;
-        .interval  = 3s;
-        .window    = 10;
-        .threshold = 3;
-        .request =
-            "GET / HTTP/1.1"
-            "Host: localhost"
-            "User-Agent: Varnish-health-check"
-            "Connection: close";
-    }
-}
+QUERY 2
+While running Ceph on LTTng , I came across multiple processes spawned like=
+ tp_osd_tp ,tp_osd_recov, tp_osd_disk, osd_op ,tp_osd_cmd.
+Why are these processes being spawned so many times and what is the functio=
+n if each ?
+If someone can share any document/link to understand the ceph internals pro=
+cesses/functions/working would be highly appreciated.
 
-backend rgw2 {
-    .host = "rgw2";
-    .port = "7480";
-    .connect_timeout = 5s;
-    .first_byte_timeout = 15s;
-    .between_bytes_timeout = 5s;
-    .probe = {
-        .timeout   = 30s;
-        .interval  = 3s;
-        .window    = 10;
-        .threshold = 3;
-        .request =
-            "GET / HTTP/1.1"
-            "Host: localhost"
-            "User-Agent: Varnish-health-check"
-            "Connection: close";
-    }
-}
 
-A very simple piece of code would generate these backends based on the servicemap in Ceph.
+Regards,
+Roshni
 
-Wido
+--_000_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 
-> sage
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+>
+<meta name=3D"Generator" content=3D"Microsoft Word 15 (filtered medium)">
+<style><!--
+/* Font Definitions */
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-priority:99;
+	color:#954F72;
+	text-decoration:underline;}
+span.EmailStyle17
+	{mso-style-type:personal;
+	font-family:"Calibri","sans-serif";
+	color:windowtext;}
+span.EmailStyle18
+	{mso-style-type:personal-reply;
+	font-family:"Calibri","sans-serif";
+	color:#1F497D;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-size:10.0pt;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"EN-US" link=3D"#0563C1" vlink=3D"#954F72">
+<div class=3D"WordSection1">
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Hi All,<o:p></o:p></sp=
+an></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">I am new to ceph and I am trying to debug a few scen=
+arios . I have 2 queries as listed below &nbsp;-<o:p></o:p></p>
+<p class=3D"MsoNormal">1.Regarding enabling debug logs for ceph <o:p></o:p>=
+</p>
+<p class=3D"MsoNormal">2.Regarding internal processes of ceph<o:p></o:p></p=
+>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<div style=3D"border:none;border-bottom:solid windowtext 1.0pt;padding:0in =
+0in 1.0pt 0in">
+<p class=3D"MsoNormal">QUERY 1<o:p></o:p></p>
+</div>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">I have enabled the logs by setting the log level in =
+<span style=3D"color:#1F4E79;mso-style-textfill-fill-color:#1F4E79;mso-styl=
+e-textfill-fill-alpha:100.0%">
+/etc/ceph/ceph.conf </span>attached above &#8211;<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">But none of this is generating information that coul=
+d be used in debugging .<o:p></o:p></p>
+<p class=3D"MsoNormal">Also ,<o:p></o:p></p>
+<p class=3D"MsoNormal">The following CLI generates log as attached in <span=
+ style=3D"color:#1F497D">
+cli_log </span>attachment &#8211;<o:p></o:p></p>
+<p class=3D"MsoNormal"><span style=3D"color:#0D0D0D;mso-style-textfill-fill=
+-color:#0D0D0D;mso-style-textfill-fill-alpha:100.0%">What are the following=
+ codes in the log like
+</span><span style=3D"color:#1F497D">&#8211;<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">7f12a474c700 , 7f12895=
+af700<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<div style=3D"border:none;border-bottom:solid windowtext 1.0pt;padding:0in =
+0in 1.0pt 0in">
+<p class=3D"MsoNormal">QUERY 2<o:p></o:p></p>
+</div>
+<p class=3D"MsoNormal">While running Ceph on LTTng , I came across multiple=
+ processes spawned like tp_osd_tp ,tp_osd_recov, tp_osd_disk, osd_op ,tp_os=
+d_cmd.<o:p></o:p></p>
+<p class=3D"MsoNormal">Why are these processes being spawned so many times =
+and what is the function if each ?<o:p></o:p></p>
+<p class=3D"MsoNormal">If someone can share any document/link to understand=
+ the ceph internals processes/functions/working would be highly appreciated=
+.<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">Regards,<o:p></o:p></p>
+<p class=3D"MsoNormal">Roshni<o:p></o:p></p>
+</div>
+</body>
+</html>
+
+--_000_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_--
+
+--_005_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_
+Content-Type: text/plain; name="ceph_config.txt"
+Content-Description: ceph_config.txt
+Content-Disposition: attachment; filename="ceph_config.txt"; size=900;
+	creation-date="Fri, 14 Jul 2017 10:55:21 GMT";
+	modification-date="Fri, 14 Jul 2017 10:55:21 GMT"
+Content-Transfer-Encoding: base64
+
+W2dsb2JhbF0NCmZzaWQgPSBlYmM1MjhmYS02MWY1LTQ0YmUtYjNkZi01YWY5MmZjZTkzNzkNCm1v
+bl9pbml0aWFsX21lbWJlcnMgPSBjZXBoLWFkbWluDQptb25faG9zdCA9IDEwLjAuNC4xMTgNCmF1
+dGhfY2x1c3Rlcl9yZXF1aXJlZCA9IGNlcGh4DQphdXRoX3NlcnZpY2VfcmVxdWlyZWQgPSBjZXBo
+eA0KYXV0aF9jbGllbnRfcmVxdWlyZWQgPSBjZXBoeA0Kb3NkIHBvb2wgZGVmYXVsdCBzaXplID0g
+MSAgIyBXcml0ZSBhbiBvYmplY3QgbiB0aW1lcy4NCm9zZCBwb29sIGRlZmF1bHQgbWluIHNpemUg
+PSAxICMgQWxsb3cgd3JpdGluZyBuIGNvcHkgaW4gYSBkZWdyYWRlZCBzdGF0ZS4NCm9zZCBwb29s
+IGRlZmF1bHQgcGcgbnVtID0gMTI4DQpvc2QgcG9vbCBkZWZhdWx0IHBncCBudW0gPSAxMjgNCmRl
+YnVnIG1zID0gMS81DQpkZWJ1ZyB0cCBsb2cgPSAxLzIwDQpvc2RfdHJhY2luZyA9IHRydWUNCm9z
+ZF9vYmplY3RzdG9yZV90cmFjaW5nID0gdHJ1ZQ0KcmFkb3NfdHJhY2luZyA9IHRydWUNCnJiZF90
+cmFjaW5nID0gdHJ1ZQ0KDQpbbW9uXQ0KICAgICAgICBkZWJ1ZyBtb24gPSAyMA0KICAgICAgICBk
+ZWJ1ZyBwYXhvcyA9IDEvNQ0KICAgICAgICBkZWJ1ZyBhdXRoID0gMg0KDQpbb3NkXQ0KICAgICAg
+ICBkZWJ1ZyBvc2QgPSAxLzUNCiAgICAgICAgZGVidWcgZmlsZXN0b3JlID0gMS81DQogICAgICAg
+IGRlYnVnIGpvdXJuYWwgPSAxDQogICAgICAgIGRlYnVnIG1vbmMgPSA1LzIwDQoNClttZHNdDQog
+ICAgICAgIGRlYnVnIG1kcyA9IDENCiAgICAgICAgZGVidWcgbWRzIGJhbGFuY2VyID0gMQ0KICAg
+ICAgICBkZWJ1ZyBtZHMgbG9nID0gMQ0KICAgICAgICBkZWJ1ZyBtZHMgbWlncmF0b3IgPSAxDQoN
+CmxvZyB0byBzeXNsb2cgPSB0cnVlDQplcnIgdG8gc3lzbG9nID0gdHJ1ZQ0K
+
+--_005_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_
+Content-Type: text/plain; name="cli_log.txt"
+Content-Description: cli_log.txt
+Content-Disposition: attachment; filename="cli_log.txt"; size=627;
+	creation-date="Fri, 14 Jul 2017 10:57:03 GMT";
+	modification-date="Fri, 14 Jul 2017 10:57:03 GMT"
+Content-Transfer-Encoding: base64
+
+cm9vdEBjZXBoLWFkbWluOi9ob21lL2NlcGh1c2VyL2NsdXN0ZXIjIHJiZCAtLXBvb2wgbXlwb29s
+IHNuYXAgY3JlYXRlIC0tc25hcCBteXNuYXBfbXlpbWFnZTE4IG15aW1hZ2UNCjIwMTctMDctMTMg
+MTc6MjA6NDEuMTA3MjEwIDdmMTJhNDc1OTEwMCAgMSAtLSA6LzAgbWVzc2VuZ2VyLnN0YXJ0DQoy
+MDE3LTA3LTEzIDE3OjIwOjQxLjEwODMwOCA3ZjEyYTQ3NTkxMDAgIDEgLS0gOi83ODIzNTEzNzAg
+LS0+IDEwLjAuNC4xMTg6Njc4OS8wIC0tIGF1dGgocHJvdG8gMCAzMCBieXRlcyBlcG9jaCAwKSB2
+MSAtLSA/KzAgMHg1NTdiOTcxZDc1YTAgY29uIDB4NTU3Yjk3MWQ3MDIwDQoyMDE3LTA3LTEzIDE3
+OjIwOjQxLjExMTk3MiA3ZjEyYTQ3NGM3MDAgIDEgLS0gMTAuMC40LjExODowLzc4MjM1MTM3MCBs
+ZWFybmVkIG15IGFkZHIgMTAuMC40LjExODowLzc4MjM1MTM3MA0KMjAxNy0wNy0xMyAxNzoyMDo0
+MS4xMTI2MjUgN2YxMjg5NWFmNzAwICAxIC0tIDEwLjAuNC4xMTg6MC83ODIzNTEzNzAgPD09IG1v
+bi4wIDEwLjAuNC4xMTg6Njc4OS8wIDEgPT09PSBtb25fbWFwIG1hZ2ljOiAwIHYxID09PT0gMjAw
+KzArMCAoMjAxNDgyNjA0NiAwIDApIDB4N2YxMjc0MDAwYmMwIGNvbiAweDU1N2I5NzFkNzAyMA0K
+
+--_005_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--_005_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_--
