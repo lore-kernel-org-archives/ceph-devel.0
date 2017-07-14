@@ -1,243 +1,349 @@
-From: Roshni Chatterjee <roshni.chatterjee-gmN/nmo4RJN0+Iju73vM4Z/QNRX+jHPU@public.gmane.org>
-Subject: FW: Regarding Ceph Debug Logs
-Date: Fri, 14 Jul 2017 11:14:59 +0000
-Message-ID: <FBF2027374433749866CFD13796768DC54D4B963@EXCH-MB01-DEL.nectechnologies.in>
+From: =?UTF-8?B?5pSA5YiY?= <liupan1111@gmail.com>
+Subject: Re: latency compare between 2t NVME SSD P3500 and bluestore
+Date: Fri, 14 Jul 2017 20:54:32 +0800
+Message-ID: <CAMwhyqU5uWVYaEQ_81x-4w945PKfd8F4fmc-3dcO9rP5qQ7brA@mail.gmail.com>
+References: <CAMwhyqVYiWuAVg_+HJ7xjsNs=BNkH-g5BtHGTDDP4j-5sSGXLw@mail.gmail.com>
+ <alpine.DEB.2.11.1707121158300.3424@piezo.novalocal> <CAMwhyqX=ZNTpfK7t3+ajqJZ6D-YrcdkCeVCCy=oX5iDLMxjC-w@mail.gmail.com>
+ <alpine.DEB.2.11.1707121351490.3424@piezo.novalocal> <CAMwhyqUP4uUNoPMBYkvgOcjiRu5C_za=xY6E1qOpxrx1MO2M0g@mail.gmail.com>
+ <CAEYCsVJ0GnFN9RXEkgMyh5jPwkWHr1v=4ZuAWNfiy5GP5i-5Mw@mail.gmail.com>
+ <CAERxPZJWFfUJ7zksBgpB7oStA5+GQDDJMDY3Ua8VNLwOWP8MxA@mail.gmail.com>
+ <a3e297af-5944-b695-6e58-231eb98f6662@redhat.com> <CAERxPZKHdK78bbMCS7g4y0wQZ4PKSrsK-mn5FC7+VXrO22A3HQ@mail.gmail.com>
+ <CAEYCsV+p9ORF8UfxjcUnmPtpgfnHWbniOQnkAp-uzYdMXBM4Lw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="_005_FBF2027374433749866CFD13796768DC54D4B963EXCHMB01DELnect_"
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
-
---_005_FBF2027374433749866CFD13796768DC54D4B963EXCHMB01DELnect_
-Content-Type: multipart/alternative;
-	boundary="_000_FBF2027374433749866CFD13796768DC54D4B963EXCHMB01DELnect_"
-
---_000_FBF2027374433749866CFD13796768DC54D4B963EXCHMB01DELnect_
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ua0-f182.google.com ([209.85.217.182]:36817 "EHLO
+        mail-ua0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754031AbdGNMye (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Jul 2017 08:54:34 -0400
+Received: by mail-ua0-f182.google.com with SMTP id 35so4280557uax.3
+        for <ceph-devel@vger.kernel.org>; Fri, 14 Jul 2017 05:54:34 -0700 (PDT)
+In-Reply-To: <CAEYCsV+p9ORF8UfxjcUnmPtpgfnHWbniOQnkAp-uzYdMXBM4Lw@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Xiaoxi Chen <superdebuger@gmail.com>
+Cc: xiaoyan li <wisher2003@gmail.com>, Mark Nelson <mnelson@redhat.com>, Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>, p.zhou@alibaba-inc.com, 20702390@qq.com
 
-Hi All,
+Hi Sage and Mark,
 
-I am new to ceph and I am trying to debug a few scenarios . I have 2 querie=
-s as listed below  -
-1.Regarding enabling debug logs for ceph
-2.Regarding internal processes of ceph
+I did experiment locally for fio+libfio_ceph_bluestore.fio,
+iodepth =3D 32, numjobs=3D64
+and got the result below:
 
-QUERY 1
-I have enabled the logs by setting the log level in ceph conf file attached=
- above -
+1) Without using gdbprof
 
-But none of this is generating information that could be used in debugging =
-.
-Also ,
-The following CLI generates log as attached in cli_log attachment -
-What are the following codes in the log like -
-7f12a474c700 , 7f12895af700
+   PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND
+ 75526 root      20   0 12.193g 7.056g 271672 R 99.0  5.6   4:20.98
+bstore_kv_sync
+ 75527 root      20   0 12.193g 7.056g 271672 S 61.6  5.6   2:57.03
+bstore_kv_final
+ 75504 root      20   0 12.193g 7.056g 271672 S 35.4  5.6   1:46.34 bstore_=
+aio
+ 75524 root      20   0 12.193g 7.056g 271672 S 34.1  5.6   1:34.27 finishe=
+r
+ 75567 root      20   0 12.193g 7.056g 271672 S 10.6  5.6   0:26.32 fio
 
-QUERY 2
+We could find the thread of store_kv_sync nearly occupied a core
+completely(99%).
 
-While running Ceph on LTTng , I came across multiple processes spawned like=
- tp_osd_tp ,tp_osd_recov, tp_osd_disk, osd_op ,tp_osd_cmd.
-Why are these processes being spawned so many times and what is the functio=
-n if each ?
-If someone can share any document/link to understand the ceph internals pro=
-cesses/functions/working would be highly appreciated.
+  write: IOPS=3D80.1k, BW=3D1251MiB/s (1312MB/s)(319GiB/260926msec)
+    clat (usec): min=3D1792, max=3D52694, avg=3D25505.15, stdev=3D1731.77
+     lat (usec): min=3D1852, max=3D52780, avg=3D25568.08, stdev=3D1732.09
 
-Regards,
-Roshni
+From fio output, the avg flat is nearly 25.5ms.
 
---_000_FBF2027374433749866CFD13796768DC54D4B963EXCHMB01DELnect_
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+From the perfcounter in the link:
+http://paste.openstack.org/show/615380/
 
-<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
-osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
-xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
-//www.w3.org/TR/REC-html40">
-<head>
-<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+We could find :
+kv_commit_lat: 12.1 ms
+kv_lat:               12.1 ms
+state_kv_queued_lat :  9.98 X 2 =3D 19.9 ms
+state_kv_commiting_lat: 4.67 ms
+
+So we should try to improve state_kv_queued_lat, right?
+
+2) using gdbprof:
+http://paste.openstack.org/show/615386/
+I pasted the stack of thread KVFinalizeThread and KVSyncThread.
+
+I will continue investigate, please let me know if you have any opinion.
+
+Thanks
+Pan
+
+2017-07-14 17:31 GMT+08:00 Xiaoxi Chen <superdebuger@gmail.com>:
+> in state_kv_commit stage, db-> submit_transcation will be called and
+> all rocksdb insert-key logical is done here, as shown in gdbprof, key
+> comparison and lookup is happening here, but as db->submit_transcation
+> will set sync=3Dfalse, which will leave the change to RocksDB WAL
+> (potential) is only in memory, not persistent to disk
 >
-<meta name=3D"Generator" content=3D"Microsoft Word 15 (filtered medium)">
-<style><!--
-/* Font Definitions */
-@font-face
-	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;}
-@font-face
-	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;}
-/* Style Definitions */
-p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin:0in;
-	margin-bottom:.0001pt;
-	font-size:11.0pt;
-	font-family:"Calibri","sans-serif";}
-a:link, span.MsoHyperlink
-	{mso-style-priority:99;
-	color:#0563C1;
-	text-decoration:underline;}
-a:visited, span.MsoHyperlinkFollowed
-	{mso-style-priority:99;
-	color:#954F72;
-	text-decoration:underline;}
-span.EmailStyle17
-	{mso-style-type:personal;
-	font-family:"Calibri","sans-serif";
-	color:windowtext;}
-span.EmailStyle18
-	{mso-style-type:personal;
-	font-family:"Calibri","sans-serif";
-	color:#1F497D;}
-span.EmailStyle19
-	{mso-style-type:personal;
-	font-family:"Calibri","sans-serif";
-	color:#1F497D;}
-span.EmailStyle20
-	{mso-style-type:personal-reply;
-	font-family:"Calibri","sans-serif";
-	color:#1F497D;}
-.MsoChpDefault
-	{mso-style-type:export-only;
-	font-size:10.0pt;}
-@page WordSection1
-	{size:8.5in 11.0in;
-	margin:1.0in 1.0in 1.0in 1.0in;}
-div.WordSection1
-	{page:WordSection1;}
---></style><!--[if gte mso 9]><xml>
-<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
-</xml><![endif]--><!--[if gte mso 9]><xml>
-<o:shapelayout v:ext=3D"edit">
-<o:idmap v:ext=3D"edit" data=3D"1" />
-</o:shapelayout></xml><![endif]-->
-</head>
-<body lang=3D"EN-US" link=3D"#0563C1" vlink=3D"#954F72">
-<div class=3D"WordSection1">
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Hi All,<o:p></o:p></sp=
-an></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">I am new to ceph and I=
- am trying to debug a few scenarios . I have 2 queries as listed below&nbsp=
-; -<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">1.Regarding enabling d=
-ebug logs for ceph
-<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">2.Regarding internal p=
-rocesses of ceph<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">QUERY 1<o:p></o:p></sp=
-an></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">I have enabled the log=
-s by setting the log level in ceph conf file attached above &#8211;<o:p></o=
-:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">But none of this is ge=
-nerating information that could be used in debugging .<o:p></o:p></span></p=
+> The *submit* you refer to, is just submit an empty transaction with
+> sync=3Dtrue, to flush all previous WAL persistently into disk.
 >
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Also ,<o:p></o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">The following CLI gene=
-rates log as attached in cli_log attachment &#8211;<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">What are the following=
- codes in the log like &#8211;<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">7f12a474c700 , 7f12895=
-af700<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">QUERY 2<o:p></o:p></sp=
-an></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">While running Ceph on =
-LTTng , I came across multiple processes spawned like tp_osd_tp ,tp_osd_rec=
-ov, tp_osd_disk, osd_op ,tp_osd_cmd.<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Why are these processe=
-s being spawned so many times and what is the function if each ?<o:p></o:p>=
-</span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">If someone can share a=
-ny document/link to understand the ceph internals processes/functions/worki=
-ng would be highly appreciated.
-<o:p></o:p></span></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
-n></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Regards,<o:p></o:p></s=
-pan></p>
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Roshni<o:p></o:p></spa=
-n></p>
-</div>
-</body>
-</html>
-
---_000_FBF2027374433749866CFD13796768DC54D4B963EXCHMB01DELnect_--
-
---_005_FBF2027374433749866CFD13796768DC54D4B963EXCHMB01DELnect_
-Content-Type: text/plain; name="ceph_config.txt"
-Content-Description: ceph_config.txt
-Content-Disposition: attachment; filename="ceph_config.txt"; size=900;
-	creation-date="Fri, 14 Jul 2017 10:55:21 GMT";
-	modification-date="Fri, 14 Jul 2017 10:55:21 GMT"
-Content-Transfer-Encoding: base64
-
-W2dsb2JhbF0NCmZzaWQgPSBlYmM1MjhmYS02MWY1LTQ0YmUtYjNkZi01YWY5MmZjZTkzNzkNCm1v
-bl9pbml0aWFsX21lbWJlcnMgPSBjZXBoLWFkbWluDQptb25faG9zdCA9IDEwLjAuNC4xMTgNCmF1
-dGhfY2x1c3Rlcl9yZXF1aXJlZCA9IGNlcGh4DQphdXRoX3NlcnZpY2VfcmVxdWlyZWQgPSBjZXBo
-eA0KYXV0aF9jbGllbnRfcmVxdWlyZWQgPSBjZXBoeA0Kb3NkIHBvb2wgZGVmYXVsdCBzaXplID0g
-MSAgIyBXcml0ZSBhbiBvYmplY3QgbiB0aW1lcy4NCm9zZCBwb29sIGRlZmF1bHQgbWluIHNpemUg
-PSAxICMgQWxsb3cgd3JpdGluZyBuIGNvcHkgaW4gYSBkZWdyYWRlZCBzdGF0ZS4NCm9zZCBwb29s
-IGRlZmF1bHQgcGcgbnVtID0gMTI4DQpvc2QgcG9vbCBkZWZhdWx0IHBncCBudW0gPSAxMjgNCmRl
-YnVnIG1zID0gMS81DQpkZWJ1ZyB0cCBsb2cgPSAxLzIwDQpvc2RfdHJhY2luZyA9IHRydWUNCm9z
-ZF9vYmplY3RzdG9yZV90cmFjaW5nID0gdHJ1ZQ0KcmFkb3NfdHJhY2luZyA9IHRydWUNCnJiZF90
-cmFjaW5nID0gdHJ1ZQ0KDQpbbW9uXQ0KICAgICAgICBkZWJ1ZyBtb24gPSAyMA0KICAgICAgICBk
-ZWJ1ZyBwYXhvcyA9IDEvNQ0KICAgICAgICBkZWJ1ZyBhdXRoID0gMg0KDQpbb3NkXQ0KICAgICAg
-ICBkZWJ1ZyBvc2QgPSAxLzUNCiAgICAgICAgZGVidWcgZmlsZXN0b3JlID0gMS81DQogICAgICAg
-IGRlYnVnIGpvdXJuYWwgPSAxDQogICAgICAgIGRlYnVnIG1vbmMgPSA1LzIwDQoNClttZHNdDQog
-ICAgICAgIGRlYnVnIG1kcyA9IDENCiAgICAgICAgZGVidWcgbWRzIGJhbGFuY2VyID0gMQ0KICAg
-ICAgICBkZWJ1ZyBtZHMgbG9nID0gMQ0KICAgICAgICBkZWJ1ZyBtZHMgbWlncmF0b3IgPSAxDQoN
-CmxvZyB0byBzeXNsb2cgPSB0cnVlDQplcnIgdG8gc3lzbG9nID0gdHJ1ZQ0K
-
---_005_FBF2027374433749866CFD13796768DC54D4B963EXCHMB01DELnect_
-Content-Type: text/plain; name="cli_log.txt"
-Content-Description: cli_log.txt
-Content-Disposition: attachment; filename="cli_log.txt"; size=627;
-	creation-date="Fri, 14 Jul 2017 10:57:03 GMT";
-	modification-date="Fri, 14 Jul 2017 10:57:03 GMT"
-Content-Transfer-Encoding: base64
-
-cm9vdEBjZXBoLWFkbWluOi9ob21lL2NlcGh1c2VyL2NsdXN0ZXIjIHJiZCAtLXBvb2wgbXlwb29s
-IHNuYXAgY3JlYXRlIC0tc25hcCBteXNuYXBfbXlpbWFnZTE4IG15aW1hZ2UNCjIwMTctMDctMTMg
-MTc6MjA6NDEuMTA3MjEwIDdmMTJhNDc1OTEwMCAgMSAtLSA6LzAgbWVzc2VuZ2VyLnN0YXJ0DQoy
-MDE3LTA3LTEzIDE3OjIwOjQxLjEwODMwOCA3ZjEyYTQ3NTkxMDAgIDEgLS0gOi83ODIzNTEzNzAg
-LS0+IDEwLjAuNC4xMTg6Njc4OS8wIC0tIGF1dGgocHJvdG8gMCAzMCBieXRlcyBlcG9jaCAwKSB2
-MSAtLSA/KzAgMHg1NTdiOTcxZDc1YTAgY29uIDB4NTU3Yjk3MWQ3MDIwDQoyMDE3LTA3LTEzIDE3
-OjIwOjQxLjExMTk3MiA3ZjEyYTQ3NGM3MDAgIDEgLS0gMTAuMC40LjExODowLzc4MjM1MTM3MCBs
-ZWFybmVkIG15IGFkZHIgMTAuMC40LjExODowLzc4MjM1MTM3MA0KMjAxNy0wNy0xMyAxNzoyMDo0
-MS4xMTI2MjUgN2YxMjg5NWFmNzAwICAxIC0tIDEwLjAuNC4xMTg6MC83ODIzNTEzNzAgPD09IG1v
-bi4wIDEwLjAuNC4xMTg6Njc4OS8wIDEgPT09PSBtb25fbWFwIG1hZ2ljOiAwIHYxID09PT0gMjAw
-KzArMCAoMjAxNDgyNjA0NiAwIDApIDB4N2YxMjc0MDAwYmMwIGNvbiAweDU1N2I5NzFkNzAyMA0K
-
---_005_FBF2027374433749866CFD13796768DC54D4B963EXCHMB01DELnect_
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---_005_FBF2027374433749866CFD13796768DC54D4B963EXCHMB01DELnect_--
+> Clearly the kv_commit is CPU intensive and kv_submit is (sequential)
+> IO intensive. So depending on the CPU/Disk speed ratio, one may see
+> different profiling result.  My previous test on HDD show opposite
+> result that kv_lat is pretty long.
+>
+> 2017-07-14 16:29 GMT+08:00 xiaoyan li <wisher2003@gmail.com>:
+>> Here is the output of gdbprof: @Mark please have a look.
+>> I copied _kv_sync_thread and _kv_finalize_thread here.
+>> http://paste.openstack.org/show/615362/
+>>
+>> Lisa
+>>
+>> On Fri, Jul 14, 2017 at 9:54 AM, Mark Nelson <mnelson@redhat.com> wrote:
+>>> Hi Li,
+>>>
+>>> You may want to try my wallclock profiler to see where time is being sp=
+ent
+>>> during your test.  It is located here:
+>>>
+>>> https://github.com/markhpc/gdbprof
+>>>
+>>> You can run it like:
+>>>
+>>> sudo gdb -ex 'set pagination off' -ex 'attach <pid>' -ex 'source
+>>> /home/ubuntu/src/markhpc/gdbprof/gdbprof.py' -ex 'profile begin' -ex 'q=
+uit'
+>>>
+>>> Mark
+>>>
+>>>
+>>> On 07/13/2017 08:47 PM, xiaoyan li wrote:
+>>>>
+>>>> Hi,
+>>>> I am concerned about the rocksdb impact on bluestore whole IO path. I
+>>>> did some test with bluestore fio plugin.
+>>>> For example, I got following data from the log when I did bluestore
+>>>> fio test with numjobs=3D64 and iopath=3D32. It seems that for every tx=
+c,
+>>>> most of the time spends on queued and commiting states.
+>>>> state time span(us)
+>>>> state_prepare_lat 386
+>>>> state_aio_wait_lat 430
+>>>> state_io_done_lat 0
+>>>> state_kv_queued_lat 7926
+>>>> state_kv_commiting_lat 30653
+>>>> state_kv_done_lat 4
+>>>>
+>>>>         "state_kv_queued_lat": {
+>>>>             "avgcount": 349076566,
+>>>>             "sum": 1214245.959889817,
+>>>>             "avgtime": 0.003478451
+>>>>         },
+>>>>         "state_kv_commiting_lat": {
+>>>>             "avgcount": 174538283,
+>>>>             "sum": 5612849.022306266,
+>>>>             "avgtime": 0.032158268
+>>>>         },
+>>>>
+>>>>
+>>>> And same time, to submit (174538283/3509556 =3D 49) txcs every time on=
+ly
+>>>> takes 1024us, which is much less than commiting_lat 30653us.
+>>>>         "kv_lat": {
+>>>>             "avgcount": 3509556,
+>>>>             "sum": 3594.365142193,
+>>>>             "avgtime": 0.001024165
+>>>>         },
+>>>>
+>>>> The time between state_kv_queued_lat and state_kv_commiting_lat:
+>>>>
+>>>> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc=
+#L8349
+>>>>
+>>>> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc=
+#L8366
+>>>>
+>>>> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc=
+#L7741
+>>>>
+>>>> I am still investigating why it spends so long time on
+>>>> kv_commiting_lat, but from above data I doubt it is the problem of
+>>>> rocksdb.
+>>>> Please correct me if I misunderstood anything.
+>>>>
+>>>> Lisa
+>>>>
+>>>>
+>>>> On Thu, Jul 13, 2017 at 12:34 AM, Xiaoxi Chen <superdebuger@gmail.com>
+>>>> wrote:
+>>>>>
+>>>>> FWIW, one thing that KVDB can provide is transaction support, which i=
+s
+>>>>> important as we need to update several metadata(Onode, allocator map,
+>>>>> and WAL for small write) transactionally.
+>>>>>
+>>>>>
+>>>>>
+>>>>> 2017-07-13 0:25 GMT+08:00 =E6=94=80=E5=88=98 <liupan1111@gmail.com>:
+>>>>>>
+>>>>>> Hi Sage,
+>>>>>>
+>>>>>> Indeed, I have an idea which hold a long time.
+>>>>>>
+>>>>>> Do we really need a heavy k/v database to store metadata? Especially
+>>>>>> for fast disks.... Introduce a third-party database also make
+>>>>>> difficulty for maintenance (maybe because of my limited database
+>>>>>> knowledge) ...
+>>>>>>
+>>>>>> Let's suppose:
+>>>>>> 1) The max pg number in one osd is limited(in my experience, 100~200
+>>>>>> pgs per osd is best performance)
+>>>>>> 2) The max number of objects in one pg is limited, because of disk
+>>>>>> space.
+>>>>>>
+>>>>>> Then, how about this: pre-allocate metadata locations in metadata
+>>>>>> partition=E3=80=82
+>>>>>>
+>>>>>> Part a SSD into two or three partitions(same as bluestore), instead =
+of
+>>>>>> using kv database, just store metadata directly in one disk
+>>>>>> partition(we call it metadata partition). Inside this metadata
+>>>>>> partition, we store several data structures:
+>>>>>> 1) One hash table of PGs, key is PG id, value is another hash
+>>>>>> table(key is object index of this pg, value is object metadata, and
+>>>>>> object location in data partition).
+>>>>>> 2) A free object location list.
+>>>>>>
+>>>>>> And other extra things...
+>>>>>>
+>>>>>> The max pgs belongs to one OSD can be limited by options, so I belie=
+ve
+>>>>>> the metadata partition should not be big. We could load all metadata
+>>>>>> into RAM if RAM is really big, or part of them and controlled by LRU=
+,
+>>>>>> or just read, modify, and write back to disk when needed.
+>>>>>>
+>>>>>> Do you think this idea reasonable? At least, I believe this kind of
+>>>>>> new storage engine will be much faster.
+>>>>>>
+>>>>>> Thanks
+>>>>>> Pan
+>>>>>>
+>>>>>> 2017-07-12 21:55 GMT+08:00 Sage Weil <sage@newdream.net>:
+>>>>>>>
+>>>>>>> On Wed, 12 Jul 2017, =E6=94=80=E5=88=98 wrote:
+>>>>>>>>
+>>>>>>>> Hi Sage,
+>>>>>>>>
+>>>>>>>> Yes, I totally understand bluestore did much more things than a ra=
+w
+>>>>>>>> disk, but the current overhead is a little too big to our usage. I
+>>>>>>>> will compare bluestore with XFS(also has metadata tracking,
+>>>>>>>> allocation, and so on), and to see if XFS also has such impact.
+>>>>>>>>
+>>>>>>>> I would like to give a flamegraph later, but from the perfcounter,=
+ we
+>>>>>>>> could find most of time were spent in "kv_lat".
+>>>>>>>
+>>>>>>>
+>>>>>>> That's rocksdb.  And yeah, I think it's pretty clear that either
+>>>>>>> rocksdb
+>>>>>>> needs some serious work to really keep up with nvme (or optane) or
+>>>>>>> (more
+>>>>>>> likely) we need an alternate kv backend that is targetting high spe=
+ed
+>>>>>>> flash.  I suspect the latter makes the most sense, and I believe th=
+ere
+>>>>>>> are
+>>>>>>> various efforts at Intel looking at alternatives but no winner just
+>>>>>>> yet.
+>>>>>>>
+>>>>>>> Looking a bit further out, I think a new kv library that natively
+>>>>>>> targets
+>>>>>>> peristent memory (e.g., something built on pmem.io) will be the rig=
+ht
+>>>>>>> solution.  Although at that point, it's probbaly a question of whet=
+her
+>>>>>>> we
+>>>>>>> have pmem for metadata and 3D NAND for data or pure pmem; in the la=
+tter
+>>>>>>> case a complete replacement for bluestore would make more sense.
+>>>>>>>
+>>>>>>>> For FTL, yes, it is a good idea, after we get the flame graph, we
+>>>>>>>> could discuss which part could be improved by FTL, firmware, even =
+open
+>>>>>>>> channel.
+>>>>>>>
+>>>>>>>
+>>>>>>> Yep!
+>>>>>>> sage
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> 2017-07-12 20:02 GMT+08:00 Sage Weil <sage@newdream.net>:
+>>>>>>>>>
+>>>>>>>>> On Wed, 12 Jul 2017, =E6=94=80=E5=88=98 wrote:
+>>>>>>>>>>
+>>>>>>>>>> Hi Cephers,
+>>>>>>>>>>
+>>>>>>>>>> I did some experiment today to compare the latency between one
+>>>>>>>>>> P3500(2T nvme SSD) and bluestore(fio + libfio_objectstore.so):
+>>>>>>>>>>
+>>>>>>>>>> For iodepth =3D 1, the random write latency of bluestore is 276.=
+91us,
+>>>>>>>>>> compare with 14.71 of SSD, big overhead.
+>>>>>>>>>>
+>>>>>>>>>> I also test iodepth =3D 16, Still, there is a big overhead.(143 =
+us ->
+>>>>>>>>>> 642 us)
+>>>>>>>>>>
+>>>>>>>>>> What is your opinion?
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> There is a lot of work that bluestore is doing over the raw devic=
+e as
+>>>>>>>>> it
+>>>>>>>>> is implementing all of the metadata tracking, checksumming,
+>>>>>>>>> allocation,
+>>>>>>>>> and so on.  There's definitely lots of room for improvement, but =
+I'm
+>>>>>>>>> not sure you can expect to see latencies in the 10s of us.  That
+>>>>>>>>> said, it
+>>>>>>>>> would be interesting to see an updated flamegraph to see where th=
+e
+>>>>>>>>> time is
+>>>>>>>>> being spent and where we can slim this down.  On a new nvme it's
+>>>>>>>>> possible
+>>>>>>>>> we can do away with some of the complexity of, say, the allocator=
+,
+>>>>>>>>> since
+>>>>>>>>> the FTL is performing a lot of the same work anyway.
+>>>>>>>>>
+>>>>>>>>> sage
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel=
+" in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
+ in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>>>>
+>>>>
+>>>
+>>
+>>
+>>
+>> --
+>> Best wishes
+>> Lisa
