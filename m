@@ -1,294 +1,120 @@
-From: Xiaoxi Chen <superdebuger@gmail.com>
-Subject: Re: latency compare between 2t NVME SSD P3500 and bluestore
-Date: Fri, 14 Jul 2017 17:31:36 +0800
-Message-ID: <CAEYCsV+p9ORF8UfxjcUnmPtpgfnHWbniOQnkAp-uzYdMXBM4Lw@mail.gmail.com>
-References: <CAMwhyqVYiWuAVg_+HJ7xjsNs=BNkH-g5BtHGTDDP4j-5sSGXLw@mail.gmail.com>
- <alpine.DEB.2.11.1707121158300.3424@piezo.novalocal> <CAMwhyqX=ZNTpfK7t3+ajqJZ6D-YrcdkCeVCCy=oX5iDLMxjC-w@mail.gmail.com>
- <alpine.DEB.2.11.1707121351490.3424@piezo.novalocal> <CAMwhyqUP4uUNoPMBYkvgOcjiRu5C_za=xY6E1qOpxrx1MO2M0g@mail.gmail.com>
- <CAEYCsVJ0GnFN9RXEkgMyh5jPwkWHr1v=4ZuAWNfiy5GP5i-5Mw@mail.gmail.com>
- <CAERxPZJWFfUJ7zksBgpB7oStA5+GQDDJMDY3Ua8VNLwOWP8MxA@mail.gmail.com>
- <a3e297af-5944-b695-6e58-231eb98f6662@redhat.com> <CAERxPZKHdK78bbMCS7g4y0wQZ4PKSrsK-mn5FC7+VXrO22A3HQ@mail.gmail.com>
+From: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
+Subject: Re: autoconfigured haproxy service?
+Date: Fri, 14 Jul 2017 12:05:19 +0200 (CEST)
+Message-ID: <1992399284.4003.1500026719834@ox.pcextreme.nl>
+References: <alpine.DEB.2.11.1707111458470.3424@piezo.novalocal>
+	<1718355157.3684.1499801810149@ox.pcextreme.nl>
+	<alpine.DEB.2.11.1707112031580.3424@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f47.google.com ([209.85.218.47]:35615 "EHLO
-        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753502AbdGNJbi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Jul 2017 05:31:38 -0400
-Received: by mail-oi0-f47.google.com with SMTP id 191so66939664oii.2
-        for <ceph-devel@vger.kernel.org>; Fri, 14 Jul 2017 02:31:38 -0700 (PDT)
-In-Reply-To: <CAERxPZKHdK78bbMCS7g4y0wQZ4PKSrsK-mn5FC7+VXrO22A3HQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: xiaoyan li <wisher2003@gmail.com>
-Cc: Mark Nelson <mnelson@redhat.com>, =?UTF-8?B?5pSA5YiY?= <liupan1111@gmail.com>, Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>, p.zhou@alibaba-inc.com, 20702390@qq.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1707112031580.3424-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-in state_kv_commit stage, db-> submit_transcation will be called and
-all rocksdb insert-key logical is done here, as shown in gdbprof, key
-comparison and lookup is happening here, but as db->submit_transcation
-will set sync=3Dfalse, which will leave the change to RocksDB WAL
-(potential) is only in memory, not persistent to disk
 
-The *submit* you refer to, is just submit an empty transaction with
-sync=3Dtrue, to flush all previous WAL persistently into disk.
+> Op 11 juli 2017 om 22:35 schreef Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+> 
+> 
+> On Tue, 11 Jul 2017, Wido den Hollander wrote:
+> > > Op 11 juli 2017 om 17:03 schreef Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+> > > 
+> > > 
+> > > Hi all,
+> > > 
+> > > Luminous features a new 'service map' that lets rgw's (and rgw nfs 
+> > > gateways and iscsi gateways and rbd mirror daemons and ...) advertise 
+> > > themselves to the cluster along with some metadata (like the addresses 
+> > > they are binding to and the services the provide).
+> > > 
+> > > It should be pretty straightforward to build a service that 
+> > > auto-configures haproxy based on this information so that you can deploy 
+> > > an rgw front-end that dynamically reconfigures itself when additional 
+> > > rgw's are deployed or removed.  haproxy has a facility to adjust its 
+> > > backend configuration at runtime[1].
+> > > 
+> > > Anybody interested in tackling this?  Setting up the load balancer in 
+> > > front of rgw is one of the more annoying pieces of getting ceph up and 
+> > > running in production and until now has been mostly treated as out of 
+> > > scope.  It would be awesome if there was an autoconfigured service that 
+> > > did it out of the box (and had all the right haproxy options set).
+> > > 
+> > 
+> > Are there easy Python bindings for this? I mean querying the service map.
+> 
+> Yes and no.  There are no special librados hooks (or python wrappers) to 
+> get the map, but you can issue a mon_command for 'service dump' and get it 
+> in JSON, which works just as well for python users.
+> 
+> > I'm personally a fan of running Varnish (with Hitch for SSL) in front of 
+> > RGW. Some people might also prefer Traefik [0] since that also supports 
+> > dynamic configs.
+> 
+> How would you go about autoconfiguring varnish via the rgw service map in 
+> this case?
+> 
 
-Clearly the kv_commit is CPU intensive and kv_submit is (sequential)
-IO intensive. So depending on the CPU/Disk speed ratio, one may see
-different profiling result.  My previous test on HDD show opposite
-result that kv_lat is pretty long.
+Something like this works with RGW: https://gist.github.com/wido/d93f18810f40ecf405a5be0272821999
 
-2017-07-14 16:29 GMT+08:00 xiaoyan li <wisher2003@gmail.com>:
-> Here is the output of gdbprof: @Mark please have a look.
-> I copied _kv_sync_thread and _kv_finalize_thread here.
-> http://paste.openstack.org/show/615362/
->
-> Lisa
->
-> On Fri, Jul 14, 2017 at 9:54 AM, Mark Nelson <mnelson@redhat.com> wrote:
->> Hi Li,
->>
->> You may want to try my wallclock profiler to see where time is being spe=
-nt
->> during your test.  It is located here:
->>
->> https://github.com/markhpc/gdbprof
->>
->> You can run it like:
->>
->> sudo gdb -ex 'set pagination off' -ex 'attach <pid>' -ex 'source
->> /home/ubuntu/src/markhpc/gdbprof/gdbprof.py' -ex 'profile begin' -ex 'qu=
-it'
->>
->> Mark
->>
->>
->> On 07/13/2017 08:47 PM, xiaoyan li wrote:
->>>
->>> Hi,
->>> I am concerned about the rocksdb impact on bluestore whole IO path. I
->>> did some test with bluestore fio plugin.
->>> For example, I got following data from the log when I did bluestore
->>> fio test with numjobs=3D64 and iopath=3D32. It seems that for every txc=
-,
->>> most of the time spends on queued and commiting states.
->>> state time span(us)
->>> state_prepare_lat 386
->>> state_aio_wait_lat 430
->>> state_io_done_lat 0
->>> state_kv_queued_lat 7926
->>> state_kv_commiting_lat 30653
->>> state_kv_done_lat 4
->>>
->>>         "state_kv_queued_lat": {
->>>             "avgcount": 349076566,
->>>             "sum": 1214245.959889817,
->>>             "avgtime": 0.003478451
->>>         },
->>>         "state_kv_commiting_lat": {
->>>             "avgcount": 174538283,
->>>             "sum": 5612849.022306266,
->>>             "avgtime": 0.032158268
->>>         },
->>>
->>>
->>> And same time, to submit (174538283/3509556 =3D 49) txcs every time onl=
-y
->>> takes 1024us, which is much less than commiting_lat 30653us.
->>>         "kv_lat": {
->>>             "avgcount": 3509556,
->>>             "sum": 3594.365142193,
->>>             "avgtime": 0.001024165
->>>         },
->>>
->>> The time between state_kv_queued_lat and state_kv_commiting_lat:
->>>
->>> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#=
-L8349
->>>
->>> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#=
-L8366
->>>
->>> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#=
-L7741
->>>
->>> I am still investigating why it spends so long time on
->>> kv_commiting_lat, but from above data I doubt it is the problem of
->>> rocksdb.
->>> Please correct me if I misunderstood anything.
->>>
->>> Lisa
->>>
->>>
->>> On Thu, Jul 13, 2017 at 12:34 AM, Xiaoxi Chen <superdebuger@gmail.com>
->>> wrote:
->>>>
->>>> FWIW, one thing that KVDB can provide is transaction support, which is
->>>> important as we need to update several metadata(Onode, allocator map,
->>>> and WAL for small write) transactionally.
->>>>
->>>>
->>>>
->>>> 2017-07-13 0:25 GMT+08:00 =E6=94=80=E5=88=98 <liupan1111@gmail.com>:
->>>>>
->>>>> Hi Sage,
->>>>>
->>>>> Indeed, I have an idea which hold a long time.
->>>>>
->>>>> Do we really need a heavy k/v database to store metadata? Especially
->>>>> for fast disks.... Introduce a third-party database also make
->>>>> difficulty for maintenance (maybe because of my limited database
->>>>> knowledge) ...
->>>>>
->>>>> Let's suppose:
->>>>> 1) The max pg number in one osd is limited(in my experience, 100~200
->>>>> pgs per osd is best performance)
->>>>> 2) The max number of objects in one pg is limited, because of disk
->>>>> space.
->>>>>
->>>>> Then, how about this: pre-allocate metadata locations in metadata
->>>>> partition=E3=80=82
->>>>>
->>>>> Part a SSD into two or three partitions(same as bluestore), instead o=
-f
->>>>> using kv database, just store metadata directly in one disk
->>>>> partition(we call it metadata partition). Inside this metadata
->>>>> partition, we store several data structures:
->>>>> 1) One hash table of PGs, key is PG id, value is another hash
->>>>> table(key is object index of this pg, value is object metadata, and
->>>>> object location in data partition).
->>>>> 2) A free object location list.
->>>>>
->>>>> And other extra things...
->>>>>
->>>>> The max pgs belongs to one OSD can be limited by options, so I believ=
-e
->>>>> the metadata partition should not be big. We could load all metadata
->>>>> into RAM if RAM is really big, or part of them and controlled by LRU,
->>>>> or just read, modify, and write back to disk when needed.
->>>>>
->>>>> Do you think this idea reasonable? At least, I believe this kind of
->>>>> new storage engine will be much faster.
->>>>>
->>>>> Thanks
->>>>> Pan
->>>>>
->>>>> 2017-07-12 21:55 GMT+08:00 Sage Weil <sage@newdream.net>:
->>>>>>
->>>>>> On Wed, 12 Jul 2017, =E6=94=80=E5=88=98 wrote:
->>>>>>>
->>>>>>> Hi Sage,
->>>>>>>
->>>>>>> Yes, I totally understand bluestore did much more things than a raw
->>>>>>> disk, but the current overhead is a little too big to our usage. I
->>>>>>> will compare bluestore with XFS(also has metadata tracking,
->>>>>>> allocation, and so on), and to see if XFS also has such impact.
->>>>>>>
->>>>>>> I would like to give a flamegraph later, but from the perfcounter, =
-we
->>>>>>> could find most of time were spent in "kv_lat".
->>>>>>
->>>>>>
->>>>>> That's rocksdb.  And yeah, I think it's pretty clear that either
->>>>>> rocksdb
->>>>>> needs some serious work to really keep up with nvme (or optane) or
->>>>>> (more
->>>>>> likely) we need an alternate kv backend that is targetting high spee=
-d
->>>>>> flash.  I suspect the latter makes the most sense, and I believe the=
-re
->>>>>> are
->>>>>> various efforts at Intel looking at alternatives but no winner just
->>>>>> yet.
->>>>>>
->>>>>> Looking a bit further out, I think a new kv library that natively
->>>>>> targets
->>>>>> peristent memory (e.g., something built on pmem.io) will be the righ=
-t
->>>>>> solution.  Although at that point, it's probbaly a question of wheth=
-er
->>>>>> we
->>>>>> have pmem for metadata and 3D NAND for data or pure pmem; in the lat=
-ter
->>>>>> case a complete replacement for bluestore would make more sense.
->>>>>>
->>>>>>> For FTL, yes, it is a good idea, after we get the flame graph, we
->>>>>>> could discuss which part could be improved by FTL, firmware, even o=
-pen
->>>>>>> channel.
->>>>>>
->>>>>>
->>>>>> Yep!
->>>>>> sage
->>>>>>
->>>>>>
->>>>>>
->>>>>>
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> 2017-07-12 20:02 GMT+08:00 Sage Weil <sage@newdream.net>:
->>>>>>>>
->>>>>>>> On Wed, 12 Jul 2017, =E6=94=80=E5=88=98 wrote:
->>>>>>>>>
->>>>>>>>> Hi Cephers,
->>>>>>>>>
->>>>>>>>> I did some experiment today to compare the latency between one
->>>>>>>>> P3500(2T nvme SSD) and bluestore(fio + libfio_objectstore.so):
->>>>>>>>>
->>>>>>>>> For iodepth =3D 1, the random write latency of bluestore is 276.9=
-1us,
->>>>>>>>> compare with 14.71 of SSD, big overhead.
->>>>>>>>>
->>>>>>>>> I also test iodepth =3D 16, Still, there is a big overhead.(143 u=
-s ->
->>>>>>>>> 642 us)
->>>>>>>>>
->>>>>>>>> What is your opinion?
->>>>>>>>
->>>>>>>>
->>>>>>>> There is a lot of work that bluestore is doing over the raw device=
- as
->>>>>>>> it
->>>>>>>> is implementing all of the metadata tracking, checksumming,
->>>>>>>> allocation,
->>>>>>>> and so on.  There's definitely lots of room for improvement, but I=
-'m
->>>>>>>> not sure you can expect to see latencies in the 10s of us.  That
->>>>>>>> said, it
->>>>>>>> would be interesting to see an updated flamegraph to see where the
->>>>>>>> time is
->>>>>>>> being spent and where we can slim this down.  On a new nvme it's
->>>>>>>> possible
->>>>>>>> we can do away with some of the complexity of, say, the allocator,
->>>>>>>> since
->>>>>>>> the FTL is performing a lot of the same work anyway.
->>>>>>>>
->>>>>>>> sage
->>>>>>>
->>>>>>>
->>>>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"=
- in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>>
->>
->
->
->
-> --
-> Best wishes
-> Lisa
+You see two backends configured there, but you can have more.
+
+You can also replace that by:
+
+include "backends.vcl"
+
+Where the backends.vcl would then contain:
+
+backend rgw1 {
+    .host = "rgw1";
+    .port = "7480";
+    .connect_timeout = 5s;
+    .first_byte_timeout = 15s;
+    .between_bytes_timeout = 5s;
+    .probe = {
+        .timeout   = 30s;
+        .interval  = 3s;
+        .window    = 10;
+        .threshold = 3;
+        .request =
+            "GET / HTTP/1.1"
+            "Host: localhost"
+            "User-Agent: Varnish-health-check"
+            "Connection: close";
+    }
+}
+
+backend rgw2 {
+    .host = "rgw2";
+    .port = "7480";
+    .connect_timeout = 5s;
+    .first_byte_timeout = 15s;
+    .between_bytes_timeout = 5s;
+    .probe = {
+        .timeout   = 30s;
+        .interval  = 3s;
+        .window    = 10;
+        .threshold = 3;
+        .request =
+            "GET / HTTP/1.1"
+            "Host: localhost"
+            "User-Agent: Varnish-health-check"
+            "Connection: close";
+    }
+}
+
+A very simple piece of code would generate these backends based on the servicemap in Ceph.
+
+Wido
+
+> sage
