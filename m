@@ -1,34 +1,64 @@
-From: Joao Eduardo Luis <joao@suse.de>
+From: Mike Lowe <j.michael.lowe-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: upgrade procedure to Luminous
-Date: Fri, 14 Jul 2017 15:43:31 +0100
-Message-ID: <fc4f8401-b6f1-32a6-fea5-08a308abb29f@suse.de>
+Date: Fri, 14 Jul 2017 11:14:56 -0400
+Message-ID: <1A3D23EA-077A-4D23-A2DA-FC4B085BBCE4@gmail.com>
 References: <fc6ff947-e806-84c8-4eae-099a465482c6@suse.de>
- <alpine.DEB.2.11.1707141407300.27271@piezo.novalocal>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:34319 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754298AbdGNOnd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 14 Jul 2017 10:43:33 -0400
-In-Reply-To: <alpine.DEB.2.11.1707141407300.27271@piezo.novalocal>
-Content-Language: en-GB
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+	<alpine.DEB.2.11.1707141407300.27271@piezo.novalocal>
+	<20170714142734.5aqzae7x7fmsqmmz@suse.com>
+	<C7751C1D-7C11-4706-B167-D4745D058F0B@gmail.com>
+	<20170714143953.5fyirnegj4466ljr@suse.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <20170714143953.5fyirnegj4466ljr-IBi9RG/b67k@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Lars Marowsky-Bree <lmb-IBi9RG/b67k@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 07/14/2017 03:12 PM, Sage Weil wrote:
-> On Fri, 14 Jul 2017, Joao Eduardo Luis wrote:
->> On top of this all, I found during my tests that any OSD, running luminous
->> prior to the luminous quorum, will need to be restarted before it can properly
->> boot into the cluster. I'm guessing this is a bug rather than a feature
->> though.
-> 
-> That sounds like a bug.. probably didn't subscribe to map updates from
-> _start_boot() or something.  Can you open an immediate ticket?
-
-http://tracker.ceph.com/issues/20631
-
-   -Joao
+SXQgd2FzIHJlcXVpcmVkIGZvciBCb2J0YWlsIHRvIEN1dHRsZWZpc2ggYW5kIEN1dHRsZWZpc2gg
+dG8gRHVtcGxpbmcuICAKCkV4YWN0bHkgaG93IG1hbnkgbW9ucyBkbyB5b3UgaGF2ZSBzdWNoIHRo
+YXQgeW91IGFyZSBjb25jZXJuZWQgYWJvdXQgZmFpbHVyZT8gIElmIHlvdSBoYXZlIGxldOKAmXMg
+c2F5IDMgbW9ucywgeW91IHVwZGF0ZSBhbGwgdGhlIGJpdHMsIHRoZW4gaXQgc2hvdWxkbuKAmXQg
+dGFrZSB5b3UgbW9yZSB0aGFuIDIgbWludXRlcyB0byByZXN0YXJ0IHRoZSBtb25zIG9uZSBieSBv
+bmUuICBZb3UgY2FuIHRha2UgeW91ciB0aW1lIHVwZGF0aW5nL3Jlc3RhcnRpbmcgdGhlIG9zZOKA
+mXMuICBJIGdlbmVyYWxseSBjb25zaWRlciBpdCBiYWQgcHJhY3RpY2UgdG8gc2F2ZSB5b3VyIHN5
+c3RlbSB1cGRhdGVzIGZvciBhIG1ham9yIGNlcGggdXBncmFkZS4gSG93IGV4YWN0bHkgY2FuIHlv
+dSBwYXJzZSB0aGUgZGlmZmVyZW5jZSBiZXR3ZWVuIGEgY2VwaCBidWcgYW5kIGEga2VybmVsIHJl
+Z3Jlc3Npb24gaWYgeW91IGRvIHRoZW0gYWxsIGF0IG9uY2U/ICBZb3UgaGF2ZSBhIHJlc2lsaWVu
+dCBzeXN0ZW0gd2h5IHdvdWxkbuKAmXQgeW91IHRha2UgYWR2YW50YWdlIG9mIHRoYXQgcHJvcGVy
+dHkgdG8gY2hhbmdlIG9uZSB0aGluZyBhdCBhIHRpbWU/ICBTbyB3aGF0IHdlIGFyZSByZWFsbHkg
+dGFsa2luZyBhYm91dCBoZXJlIGlzIGEgaGFyZHdhcmUgZmFpbHVyZSBpbiB0aGUgc2hvcnQgcGVy
+aW9kIGl0IHRha2VzIHRvIHJlc3RhcnQgbW9uIHNlcnZpY2VzIGJlY2F1c2UgeW91IHNob3VsZG7i
+gJl0IGJlIHJlYm9vdGluZy4gIElmIHRoZSBjZXBoIG1vbiBkb2VzbuKAmXQgY29tZSBiYWNrIGZy
+b20gYSByZXN0YXJ0IHRoZW4geW91IGhhdmUgYSBidWcgd2hpY2ggaW4gYWxsIGxpa2VsaWhvb2Qg
+d2lsbCBoYXBwZW4gb24gdGhlIGZpcnN0IG1vbiBhbmQgYXQgdGhhdCBwb2ludCB5b3UgaGF2ZSBv
+cHRpb25zIHRvIHJvbGwgYmFjayBvciBydW4gd2l0aCBkZWdyYWRlZCBtb25zIHVudGlsIFNhZ2Ug
+ZXQgYWwgcHV0cyBvdXQgYSBmaXguICBNeSBvbmx5IHNpZ25pZmljYW50IGRvd250aW1lIHdhcyBk
+dWUgdG8gYSBidWcgaW4gYSBuZXcgcmVsZWFzZSBoYXZpbmcgdG8gZG8gd2l0aCBwZyBzcGxpdHRp
+bmcsIDggaG91cnMgbGF0ZXIgSSBoYWQgbXkgZml4LgoKPiBPbiBKdWwgMTQsIDIwMTcsIGF0IDEw
+OjM5IEFNLCBMYXJzIE1hcm93c2t5LUJyZWUgPGxtYkBzdXNlLmNvbT4gd3JvdGU6Cj4gCj4gT24g
+MjAxNy0wNy0xNFQxMDozNDozNSwgTWlrZSBMb3dlIDxqLm1pY2hhZWwubG93ZUBnbWFpbC5jb20+
+IHdyb3RlOgo+IAo+PiBIYXZpbmcgcnVuIGNlcGggY2x1c3RlcnMgaW4gcHJvZHVjdGlvbiBmb3Ig
+dGhlIHBhc3Qgc2l4IHllYXJzIGFuZCB1cGdyYWRpbmcgZnJvbSBldmVyeSBzdGFibGUgcmVsZWFz
+ZSBzdGFydGluZyB3aXRoIGFyZ29uYXV0IHRvIHRoZSBuZXh0LCBJIGNhbiBob25lc3RseSBzYXkg
+YmVpbmcgY2FyZWZ1bCBhYm91dCBvcmRlciBvZiBvcGVyYXRpb25zIGhhcyBub3QgYmVlbiBhIHBy
+b2JsZW0uCj4gCj4gVGhpcyByZXF1aXJlbWVudCBkaWQgbm90IGV4aXN0IGFzIGEgbWFuZGF0b3J5
+IG9uZSBmb3IgcHJldmlvdXMgcmVsZWFzZXMuCj4gCj4gVGhlIHByb2JsZW0gaXMgbm90IHRoZSBz
+dW5zaGluZS1hbGwtaXMtZ29vZCBwYXRoLiBJdCdzIGFib3V0IHdoYXQgdG8gZG8KPiBpbiBjYXNl
+IG9mIGZhaWx1cmVzIGR1cmluZyB0aGUgdXBncmFkZSBwcm9jZXNzLgo+IAo+IAo+IAo+IC0tIAo+
+IFNVU0UgTGludXggR21iSCwgR0Y6IEZlbGl4IEltZW5kw7ZyZmZlciwgSmFuZSBTbWl0aGFyZCwg
+R3JhaGFtIE5vcnRvbiwgSFJCIDIxMjg0IChBRyBOw7xybmJlcmcpCj4gIkV4cGVyaWVuY2UgaXMg
+dGhlIG5hbWUgZXZlcnlvbmUgZ2l2ZXMgdG8gdGhlaXIgbWlzdGFrZXMuIiAtLSBPc2NhciBXaWxk
+ZQo+IAoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2Vw
+aC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlz
+dHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
