@@ -1,158 +1,240 @@
-From: "Ma, Jianpeng" <jianpeng.ma@intel.com>
-Subject: RE: latency compare between 2t NVME SSD P3500 and bluestore
-Date: Fri, 14 Jul 2017 02:49:56 +0000
-Message-ID: <6AA21C22F0A5DA478922644AD2EC308C6856E737@SHSMSX101.ccr.corp.intel.com>
+From: xiaoyan li <wisher2003@gmail.com>
+Subject: Re: latency compare between 2t NVME SSD P3500 and bluestore
+Date: Fri, 14 Jul 2017 16:22:00 +0800
+Message-ID: <CAERxPZ+1ifFd9Xaksrb4M1g1xZObEVBwR0tjkOpC-atf4TGT=w@mail.gmail.com>
 References: <CAMwhyqVYiWuAVg_+HJ7xjsNs=BNkH-g5BtHGTDDP4j-5sSGXLw@mail.gmail.com>
- <alpine.DEB.2.11.1707121158300.3424@piezo.novalocal>
- <CAMwhyqX=ZNTpfK7t3+ajqJZ6D-YrcdkCeVCCy=oX5iDLMxjC-w@mail.gmail.com>
- <alpine.DEB.2.11.1707121351490.3424@piezo.novalocal>
- <CAMwhyqUP4uUNoPMBYkvgOcjiRu5C_za=xY6E1qOpxrx1MO2M0g@mail.gmail.com>
+ <alpine.DEB.2.11.1707121158300.3424@piezo.novalocal> <CAMwhyqX=ZNTpfK7t3+ajqJZ6D-YrcdkCeVCCy=oX5iDLMxjC-w@mail.gmail.com>
+ <alpine.DEB.2.11.1707121351490.3424@piezo.novalocal> <CAMwhyqUP4uUNoPMBYkvgOcjiRu5C_za=xY6E1qOpxrx1MO2M0g@mail.gmail.com>
  <CAEYCsVJ0GnFN9RXEkgMyh5jPwkWHr1v=4ZuAWNfiy5GP5i-5Mw@mail.gmail.com>
- <CAERxPZJWFfUJ7zksBgpB7oStA5+GQDDJMDY3Ua8VNLwOWP8MxA@mail.gmail.com>
+ <CAERxPZJWFfUJ7zksBgpB7oStA5+GQDDJMDY3Ua8VNLwOWP8MxA@mail.gmail.com> <6AA21C22F0A5DA478922644AD2EC308C6856E737@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:4059 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752976AbdGNCuB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 13 Jul 2017 22:50:01 -0400
-In-Reply-To: <CAERxPZJWFfUJ7zksBgpB7oStA5+GQDDJMDY3Ua8VNLwOWP8MxA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:37267 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751362AbdGNIWC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 14 Jul 2017 04:22:02 -0400
+Received: by mail-wm0-f50.google.com with SMTP id i127so15123808wma.0
+        for <ceph-devel@vger.kernel.org>; Fri, 14 Jul 2017 01:22:01 -0700 (PDT)
+In-Reply-To: <6AA21C22F0A5DA478922644AD2EC308C6856E737@SHSMSX101.ccr.corp.intel.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: xiaoyan li <wisher2003@gmail.com>, Xiaoxi Chen <superdebuger@gmail.com>
-Cc: ?? <liupan1111@gmail.com>, Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>, "p.zhou@alibaba-inc.com" <p.zhou@alibaba-inc.com>, "20702390@qq.com" <20702390@qq.com>
+To: "Ma, Jianpeng" <jianpeng.ma@intel.com>
+Cc: Xiaoxi Chen <superdebuger@gmail.com>, ?? <liupan1111@gmail.com>, Sage Weil <sage@newdream.net>, Ceph Development <ceph-devel@vger.kernel.org>, "p.zhou@alibaba-inc.com" <p.zhou@alibaba-inc.com>, "20702390@qq.com" <20702390@qq.com>
 
-InN0YXRlX2t2X2NvbW1pdGluZ19sYXQgLSAga3ZfbGF0IiBtZWFuIHRoZSBsYXRlbmN5IGZvciB0
-aHJlYWQgIiBfa3ZfZmluYWxpemVfdGhyZWFkIi4NCklmIGlzIHRoaXMgY29ycmVjdGx5Pw0KDQpK
-aWFucGVuZw0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2VwaC1kZXZlbC1v
-d25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVs
-Lm9yZ10gT24gQmVoYWxmIE9mIHhpYW95YW4gbGkNClNlbnQ6IEZyaWRheSwgSnVseSAxNCwgMjAx
-NyA5OjQ3IEFNDQpUbzogWGlhb3hpIENoZW4gPHN1cGVyZGVidWdlckBnbWFpbC5jb20+DQpDYzog
-5pSA5YiYIDxsaXVwYW4xMTExQGdtYWlsLmNvbT47IFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5u
-ZXQ+OyBDZXBoIERldmVsb3BtZW50IDxjZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz47IHAuemhv
-dUBhbGliYWJhLWluYy5jb207IDIwNzAyMzkwQHFxLmNvbQ0KU3ViamVjdDogUmU6IGxhdGVuY3kg
-Y29tcGFyZSBiZXR3ZWVuIDJ0IE5WTUUgU1NEIFAzNTAwIGFuZCBibHVlc3RvcmUNCg0KSGksDQpJ
-IGFtIGNvbmNlcm5lZCBhYm91dCB0aGUgcm9ja3NkYiBpbXBhY3Qgb24gYmx1ZXN0b3JlIHdob2xl
-IElPIHBhdGguIEkgZGlkIHNvbWUgdGVzdCB3aXRoIGJsdWVzdG9yZSBmaW8gcGx1Z2luLg0KRm9y
-IGV4YW1wbGUsIEkgZ290IGZvbGxvd2luZyBkYXRhIGZyb20gdGhlIGxvZyB3aGVuIEkgZGlkIGJs
-dWVzdG9yZSBmaW8gdGVzdCB3aXRoIG51bWpvYnM9NjQgYW5kIGlvcGF0aD0zMi4gSXQgc2VlbXMg
-dGhhdCBmb3IgZXZlcnkgdHhjLCBtb3N0IG9mIHRoZSB0aW1lIHNwZW5kcyBvbiBxdWV1ZWQgYW5k
-IGNvbW1pdGluZyBzdGF0ZXMuDQpzdGF0ZSB0aW1lIHNwYW4odXMpDQpzdGF0ZV9wcmVwYXJlX2xh
-dCAzODYNCnN0YXRlX2Fpb193YWl0X2xhdCA0MzANCnN0YXRlX2lvX2RvbmVfbGF0IDANCnN0YXRl
-X2t2X3F1ZXVlZF9sYXQgNzkyNg0Kc3RhdGVfa3ZfY29tbWl0aW5nX2xhdCAzMDY1Mw0Kc3RhdGVf
-a3ZfZG9uZV9sYXQgNA0KDQogICAgICAgICJzdGF0ZV9rdl9xdWV1ZWRfbGF0Ijogew0KICAgICAg
-ICAgICAgImF2Z2NvdW50IjogMzQ5MDc2NTY2LA0KICAgICAgICAgICAgInN1bSI6IDEyMTQyNDUu
-OTU5ODg5ODE3LA0KICAgICAgICAgICAgImF2Z3RpbWUiOiAwLjAwMzQ3ODQ1MQ0KICAgICAgICB9
-LA0KICAgICAgICAic3RhdGVfa3ZfY29tbWl0aW5nX2xhdCI6IHsNCiAgICAgICAgICAgICJhdmdj
-b3VudCI6IDE3NDUzODI4MywNCiAgICAgICAgICAgICJzdW0iOiA1NjEyODQ5LjAyMjMwNjI2NiwN
-CiAgICAgICAgICAgICJhdmd0aW1lIjogMC4wMzIxNTgyNjgNCiAgICAgICAgfSwNCg0KDQpBbmQg
-c2FtZSB0aW1lLCB0byBzdWJtaXQgKDE3NDUzODI4My8zNTA5NTU2ID0gNDkpIHR4Y3MgZXZlcnkg
-dGltZSBvbmx5IHRha2VzIDEwMjR1cywgd2hpY2ggaXMgbXVjaCBsZXNzIHRoYW4gY29tbWl0aW5n
-X2xhdCAzMDY1M3VzLg0KICAgICAgICAia3ZfbGF0Ijogew0KICAgICAgICAgICAgImF2Z2NvdW50
-IjogMzUwOTU1NiwNCiAgICAgICAgICAgICJzdW0iOiAzNTk0LjM2NTE0MjE5MywNCiAgICAgICAg
-ICAgICJhdmd0aW1lIjogMC4wMDEwMjQxNjUNCiAgICAgICAgfSwNCg0KVGhlIHRpbWUgYmV0d2Vl
-biBzdGF0ZV9rdl9xdWV1ZWRfbGF0IGFuZCBzdGF0ZV9rdl9jb21taXRpbmdfbGF0Og0KaHR0cHM6
-Ly9naXRodWIuY29tL2NlcGgvY2VwaC9ibG9iL21hc3Rlci9zcmMvb3MvYmx1ZXN0b3JlL0JsdWVT
-dG9yZS5jYyNMODM0OQ0KaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9ibG9iL21hc3Rlci9z
-cmMvb3MvYmx1ZXN0b3JlL0JsdWVTdG9yZS5jYyNMODM2Ng0KaHR0cHM6Ly9naXRodWIuY29tL2Nl
-cGgvY2VwaC9ibG9iL21hc3Rlci9zcmMvb3MvYmx1ZXN0b3JlL0JsdWVTdG9yZS5jYyNMNzc0MQ0K
-DQpJIGFtIHN0aWxsIGludmVzdGlnYXRpbmcgd2h5IGl0IHNwZW5kcyBzbyBsb25nIHRpbWUgb24g
-a3ZfY29tbWl0aW5nX2xhdCwgYnV0IGZyb20gYWJvdmUgZGF0YSBJIGRvdWJ0IGl0IGlzIHRoZSBw
-cm9ibGVtIG9mIHJvY2tzZGIuDQpQbGVhc2UgY29ycmVjdCBtZSBpZiBJIG1pc3VuZGVyc3Rvb2Qg
-YW55dGhpbmcuDQoNCkxpc2ENCg0KDQpPbiBUaHUsIEp1bCAxMywgMjAxNyBhdCAxMjozNCBBTSwg
-WGlhb3hpIENoZW4gPHN1cGVyZGVidWdlckBnbWFpbC5jb20+IHdyb3RlOg0KPiBGV0lXLCBvbmUg
-dGhpbmcgdGhhdCBLVkRCIGNhbiBwcm92aWRlIGlzIHRyYW5zYWN0aW9uIHN1cHBvcnQsIHdoaWNo
-IGlzIA0KPiBpbXBvcnRhbnQgYXMgd2UgbmVlZCB0byB1cGRhdGUgc2V2ZXJhbCBtZXRhZGF0YShP
-bm9kZSwgYWxsb2NhdG9yIG1hcCwgDQo+IGFuZCBXQUwgZm9yIHNtYWxsIHdyaXRlKSB0cmFuc2Fj
-dGlvbmFsbHkuDQo+DQo+DQo+DQo+IDIwMTctMDctMTMgMDoyNSBHTVQrMDg6MDAg5pSA5YiYIDxs
-aXVwYW4xMTExQGdtYWlsLmNvbT46DQo+PiBIaSBTYWdlLA0KPj4NCj4+IEluZGVlZCwgSSBoYXZl
-IGFuIGlkZWEgd2hpY2ggaG9sZCBhIGxvbmcgdGltZS4NCj4+DQo+PiBEbyB3ZSByZWFsbHkgbmVl
-ZCBhIGhlYXZ5IGsvdiBkYXRhYmFzZSB0byBzdG9yZSBtZXRhZGF0YT8gRXNwZWNpYWxseSANCj4+
-IGZvciBmYXN0IGRpc2tzLi4uLiBJbnRyb2R1Y2UgYSB0aGlyZC1wYXJ0eSBkYXRhYmFzZSBhbHNv
-IG1ha2UgDQo+PiBkaWZmaWN1bHR5IGZvciBtYWludGVuYW5jZSAobWF5YmUgYmVjYXVzZSBvZiBt
-eSBsaW1pdGVkIGRhdGFiYXNlDQo+PiBrbm93bGVkZ2UpIC4uLg0KPj4NCj4+IExldCdzIHN1cHBv
-c2U6DQo+PiAxKSBUaGUgbWF4IHBnIG51bWJlciBpbiBvbmUgb3NkIGlzIGxpbWl0ZWQoaW4gbXkg
-ZXhwZXJpZW5jZSwgMTAwfjIwMCANCj4+IHBncyBwZXIgb3NkIGlzIGJlc3QgcGVyZm9ybWFuY2Up
-DQo+PiAyKSBUaGUgbWF4IG51bWJlciBvZiBvYmplY3RzIGluIG9uZSBwZyBpcyBsaW1pdGVkLCBi
-ZWNhdXNlIG9mIGRpc2sgc3BhY2UuDQo+Pg0KPj4gVGhlbiwgaG93IGFib3V0IHRoaXM6IHByZS1h
-bGxvY2F0ZSBtZXRhZGF0YSBsb2NhdGlvbnMgaW4gbWV0YWRhdGEgDQo+PiBwYXJ0aXRpb27jgIIN
-Cj4+DQo+PiBQYXJ0IGEgU1NEIGludG8gdHdvIG9yIHRocmVlIHBhcnRpdGlvbnMoc2FtZSBhcyBi
-bHVlc3RvcmUpLCBpbnN0ZWFkIA0KPj4gb2YgdXNpbmcga3YgZGF0YWJhc2UsIGp1c3Qgc3RvcmUg
-bWV0YWRhdGEgZGlyZWN0bHkgaW4gb25lIGRpc2sgDQo+PiBwYXJ0aXRpb24od2UgY2FsbCBpdCBt
-ZXRhZGF0YSBwYXJ0aXRpb24pLiBJbnNpZGUgdGhpcyBtZXRhZGF0YSANCj4+IHBhcnRpdGlvbiwg
-d2Ugc3RvcmUgc2V2ZXJhbCBkYXRhIHN0cnVjdHVyZXM6DQo+PiAxKSBPbmUgaGFzaCB0YWJsZSBv
-ZiBQR3MsIGtleSBpcyBQRyBpZCwgdmFsdWUgaXMgYW5vdGhlciBoYXNoIA0KPj4gdGFibGUoa2V5
-IGlzIG9iamVjdCBpbmRleCBvZiB0aGlzIHBnLCB2YWx1ZSBpcyBvYmplY3QgbWV0YWRhdGEsIGFu
-ZCANCj4+IG9iamVjdCBsb2NhdGlvbiBpbiBkYXRhIHBhcnRpdGlvbikuDQo+PiAyKSBBIGZyZWUg
-b2JqZWN0IGxvY2F0aW9uIGxpc3QuDQo+Pg0KPj4gQW5kIG90aGVyIGV4dHJhIHRoaW5ncy4uLg0K
-Pj4NCj4+IFRoZSBtYXggcGdzIGJlbG9uZ3MgdG8gb25lIE9TRCBjYW4gYmUgbGltaXRlZCBieSBv
-cHRpb25zLCBzbyBJIA0KPj4gYmVsaWV2ZSB0aGUgbWV0YWRhdGEgcGFydGl0aW9uIHNob3VsZCBu
-b3QgYmUgYmlnLiBXZSBjb3VsZCBsb2FkIGFsbCANCj4+IG1ldGFkYXRhIGludG8gUkFNIGlmIFJB
-TSBpcyByZWFsbHkgYmlnLCBvciBwYXJ0IG9mIHRoZW0gYW5kIA0KPj4gY29udHJvbGxlZCBieSBM
-UlUsIG9yIGp1c3QgcmVhZCwgbW9kaWZ5LCBhbmQgd3JpdGUgYmFjayB0byBkaXNrIHdoZW4gbmVl
-ZGVkLg0KPj4NCj4+IERvIHlvdSB0aGluayB0aGlzIGlkZWEgcmVhc29uYWJsZT8gQXQgbGVhc3Qs
-IEkgYmVsaWV2ZSB0aGlzIGtpbmQgb2YgDQo+PiBuZXcgc3RvcmFnZSBlbmdpbmUgd2lsbCBiZSBt
-dWNoIGZhc3Rlci4NCj4+DQo+PiBUaGFua3MNCj4+IFBhbg0KPj4NCj4+IDIwMTctMDctMTIgMjE6
-NTUgR01UKzA4OjAwIFNhZ2UgV2VpbCA8c2FnZUBuZXdkcmVhbS5uZXQ+Og0KPj4+IE9uIFdlZCwg
-MTIgSnVsIDIwMTcsIOaUgOWImCB3cm90ZToNCj4+Pj4gSGkgU2FnZSwNCj4+Pj4NCj4+Pj4gWWVz
-LCBJIHRvdGFsbHkgdW5kZXJzdGFuZCBibHVlc3RvcmUgZGlkIG11Y2ggbW9yZSB0aGluZ3MgdGhh
-biBhIHJhdyANCj4+Pj4gZGlzaywgYnV0IHRoZSBjdXJyZW50IG92ZXJoZWFkIGlzIGEgbGl0dGxl
-IHRvbyBiaWcgdG8gb3VyIHVzYWdlLiBJIA0KPj4+PiB3aWxsIGNvbXBhcmUgYmx1ZXN0b3JlIHdp
-dGggWEZTKGFsc28gaGFzIG1ldGFkYXRhIHRyYWNraW5nLCANCj4+Pj4gYWxsb2NhdGlvbiwgYW5k
-IHNvIG9uKSwgYW5kIHRvIHNlZSBpZiBYRlMgYWxzbyBoYXMgc3VjaCBpbXBhY3QuDQo+Pj4+DQo+
-Pj4+IEkgd291bGQgbGlrZSB0byBnaXZlIGEgZmxhbWVncmFwaCBsYXRlciwgYnV0IGZyb20gdGhl
-IHBlcmZjb3VudGVyLCANCj4+Pj4gd2UgY291bGQgZmluZCBtb3N0IG9mIHRpbWUgd2VyZSBzcGVu
-dCBpbiAia3ZfbGF0Ii4NCj4+Pg0KPj4+IFRoYXQncyByb2Nrc2RiLiAgQW5kIHllYWgsIEkgdGhp
-bmsgaXQncyBwcmV0dHkgY2xlYXIgdGhhdCBlaXRoZXIgDQo+Pj4gcm9ja3NkYiBuZWVkcyBzb21l
-IHNlcmlvdXMgd29yayB0byByZWFsbHkga2VlcCB1cCB3aXRoIG52bWUgKG9yIA0KPj4+IG9wdGFu
-ZSkgb3IgKG1vcmUNCj4+PiBsaWtlbHkpIHdlIG5lZWQgYW4gYWx0ZXJuYXRlIGt2IGJhY2tlbmQg
-dGhhdCBpcyB0YXJnZXR0aW5nIGhpZ2ggDQo+Pj4gc3BlZWQgZmxhc2guICBJIHN1c3BlY3QgdGhl
-IGxhdHRlciBtYWtlcyB0aGUgbW9zdCBzZW5zZSwgYW5kIEkgDQo+Pj4gYmVsaWV2ZSB0aGVyZSBh
-cmUgdmFyaW91cyBlZmZvcnRzIGF0IEludGVsIGxvb2tpbmcgYXQgYWx0ZXJuYXRpdmVzIGJ1dCBu
-byB3aW5uZXIganVzdCB5ZXQuDQo+Pj4NCj4+PiBMb29raW5nIGEgYml0IGZ1cnRoZXIgb3V0LCBJ
-IHRoaW5rIGEgbmV3IGt2IGxpYnJhcnkgdGhhdCBuYXRpdmVseSANCj4+PiB0YXJnZXRzIHBlcmlz
-dGVudCBtZW1vcnkgKGUuZy4sIHNvbWV0aGluZyBidWlsdCBvbiBwbWVtLmlvKSB3aWxsIGJlIA0K
-Pj4+IHRoZSByaWdodCBzb2x1dGlvbi4gIEFsdGhvdWdoIGF0IHRoYXQgcG9pbnQsIGl0J3MgcHJv
-YmJhbHkgYSANCj4+PiBxdWVzdGlvbiBvZiB3aGV0aGVyIHdlIGhhdmUgcG1lbSBmb3IgbWV0YWRh
-dGEgYW5kIDNEIE5BTkQgZm9yIGRhdGEgDQo+Pj4gb3IgcHVyZSBwbWVtOyBpbiB0aGUgbGF0dGVy
-IGNhc2UgYSBjb21wbGV0ZSByZXBsYWNlbWVudCBmb3IgYmx1ZXN0b3JlIHdvdWxkIG1ha2UgbW9y
-ZSBzZW5zZS4NCj4+Pg0KPj4+PiBGb3IgRlRMLCB5ZXMsIGl0IGlzIGEgZ29vZCBpZGVhLCBhZnRl
-ciB3ZSBnZXQgdGhlIGZsYW1lIGdyYXBoLCB3ZSANCj4+Pj4gY291bGQgZGlzY3VzcyB3aGljaCBw
-YXJ0IGNvdWxkIGJlIGltcHJvdmVkIGJ5IEZUTCwgZmlybXdhcmUsIGV2ZW4gDQo+Pj4+IG9wZW4g
-Y2hhbm5lbC4NCj4+Pg0KPj4+IFllcCENCj4+PiBzYWdlDQo+Pj4NCj4+Pg0KPj4+DQo+Pj4NCj4+
-Pj4NCj4+Pj4NCj4+Pj4NCj4+Pj4NCj4+Pj4NCj4+Pj4gMjAxNy0wNy0xMiAyMDowMiBHTVQrMDg6
-MDAgU2FnZSBXZWlsIDxzYWdlQG5ld2RyZWFtLm5ldD46DQo+Pj4+ID4gT24gV2VkLCAxMiBKdWwg
-MjAxNywg5pSA5YiYIHdyb3RlOg0KPj4+PiA+PiBIaSBDZXBoZXJzLA0KPj4+PiA+Pg0KPj4+PiA+
-PiBJIGRpZCBzb21lIGV4cGVyaW1lbnQgdG9kYXkgdG8gY29tcGFyZSB0aGUgbGF0ZW5jeSBiZXR3
-ZWVuIG9uZSANCj4+Pj4gPj4gUDM1MDAoMlQgbnZtZSBTU0QpIGFuZCBibHVlc3RvcmUoZmlvICsg
-bGliZmlvX29iamVjdHN0b3JlLnNvKToNCj4+Pj4gPj4NCj4+Pj4gPj4gRm9yIGlvZGVwdGggPSAx
-LCB0aGUgcmFuZG9tIHdyaXRlIGxhdGVuY3kgb2YgYmx1ZXN0b3JlIGlzIA0KPj4+PiA+PiAyNzYu
-OTF1cywgY29tcGFyZSB3aXRoIDE0LjcxIG9mIFNTRCwgYmlnIG92ZXJoZWFkLg0KPj4+PiA+Pg0K
-Pj4+PiA+PiBJIGFsc28gdGVzdCBpb2RlcHRoID0gMTYsIFN0aWxsLCB0aGVyZSBpcyBhIGJpZyBv
-dmVyaGVhZC4oMTQzIHVzIA0KPj4+PiA+PiAtPiA2NDIgdXMpDQo+Pj4+ID4+DQo+Pj4+ID4+IFdo
-YXQgaXMgeW91ciBvcGluaW9uPw0KPj4+PiA+DQo+Pj4+ID4gVGhlcmUgaXMgYSBsb3Qgb2Ygd29y
-ayB0aGF0IGJsdWVzdG9yZSBpcyBkb2luZyBvdmVyIHRoZSByYXcgDQo+Pj4+ID4gZGV2aWNlIGFz
-IGl0IGlzIGltcGxlbWVudGluZyBhbGwgb2YgdGhlIG1ldGFkYXRhIHRyYWNraW5nLCANCj4+Pj4g
-PiBjaGVja3N1bW1pbmcsIGFsbG9jYXRpb24sIGFuZCBzbyBvbi4gIFRoZXJlJ3MgZGVmaW5pdGVs
-eSBsb3RzIG9mIA0KPj4+PiA+IHJvb20gZm9yIGltcHJvdmVtZW50LCBidXQgSSdtIG5vdCBzdXJl
-IHlvdSBjYW4gZXhwZWN0IHRvIHNlZSANCj4+Pj4gPiBsYXRlbmNpZXMgaW4gdGhlIDEwcyBvZiB1
-cy4gIFRoYXQgc2FpZCwgaXQgd291bGQgYmUgaW50ZXJlc3RpbmcgDQo+Pj4+ID4gdG8gc2VlIGFu
-IHVwZGF0ZWQgZmxhbWVncmFwaCB0byBzZWUgd2hlcmUgdGhlIHRpbWUgaXMgYmVpbmcgc3BlbnQg
-DQo+Pj4+ID4gYW5kIHdoZXJlIHdlIGNhbiBzbGltIHRoaXMgZG93bi4gIE9uIGEgbmV3IG52bWUg
-aXQncyBwb3NzaWJsZSB3ZSANCj4+Pj4gPiBjYW4gZG8gYXdheSB3aXRoIHNvbWUgb2YgdGhlIGNv
-bXBsZXhpdHkgb2YsIHNheSwgdGhlIGFsbG9jYXRvciwgc2luY2UgdGhlIEZUTCBpcyBwZXJmb3Jt
-aW5nIGEgbG90IG9mIHRoZSBzYW1lIHdvcmsgYW55d2F5Lg0KPj4+PiA+DQo+Pj4+ID4gc2FnZQ0K
-Pj4+Pg0KPj4+Pg0KPj4gLS0NCj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
-IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBjZXBoLWRldmVsIiANCj4+IGluIHRoZSBib2R5IG9mIGEg
-bWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPj4g
-aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+IC0t
-DQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNj
-cmliZSBjZXBoLWRldmVsIiANCj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9t
-b0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+IGluZm8gYXQgIGh0dHA6Ly92Z2Vy
-Lmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQoNCg0KLS0NCkJlc3Qgd2lzaGVzDQpM
-aXNhDQotLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVu
-c3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
-bW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtl
-cm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+On Fri, Jul 14, 2017 at 10:49 AM, Ma, Jianpeng <jianpeng.ma@intel.com> wrot=
+e:
+> "state_kv_commiting_lat -  kv_lat" mean the latency for thread " _kv_fina=
+lize_thread".
+> If is this correctly?
+Not exactly true. state_kv_commiting_lat is per txc, kv_lat is per
+_kv_sync_thread call, which handle kv update of txcs in the
+kv_queue_unsubmitted.
+
+>
+> Jianpeng
+>
+> -----Original Message-----
+> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kern=
+el.org] On Behalf Of xiaoyan li
+> Sent: Friday, July 14, 2017 9:47 AM
+> To: Xiaoxi Chen <superdebuger@gmail.com>
+> Cc: =E6=94=80=E5=88=98 <liupan1111@gmail.com>; Sage Weil <sage@newdream.n=
+et>; Ceph Development <ceph-devel@vger.kernel.org>; p.zhou@alibaba-inc.com;=
+ 20702390@qq.com
+> Subject: Re: latency compare between 2t NVME SSD P3500 and bluestore
+>
+> Hi,
+> I am concerned about the rocksdb impact on bluestore whole IO path. I did=
+ some test with bluestore fio plugin.
+> For example, I got following data from the log when I did bluestore fio t=
+est with numjobs=3D64 and iopath=3D32. It seems that for every txc, most of=
+ the time spends on queued and commiting states.
+> state time span(us)
+> state_prepare_lat 386
+> state_aio_wait_lat 430
+> state_io_done_lat 0
+> state_kv_queued_lat 7926
+> state_kv_commiting_lat 30653
+> state_kv_done_lat 4
+>
+>         "state_kv_queued_lat": {
+>             "avgcount": 349076566,
+>             "sum": 1214245.959889817,
+>             "avgtime": 0.003478451
+>         },
+>         "state_kv_commiting_lat": {
+>             "avgcount": 174538283,
+>             "sum": 5612849.022306266,
+>             "avgtime": 0.032158268
+>         },
+>
+>
+> And same time, to submit (174538283/3509556 =3D 49) txcs every time only =
+takes 1024us, which is much less than commiting_lat 30653us.
+>         "kv_lat": {
+>             "avgcount": 3509556,
+>             "sum": 3594.365142193,
+>             "avgtime": 0.001024165
+>         },
+>
+> The time between state_kv_queued_lat and state_kv_commiting_lat:
+> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#L8=
+349
+> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#L8=
+366
+> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#L7=
+741
+>
+> I am still investigating why it spends so long time on kv_commiting_lat, =
+but from above data I doubt it is the problem of rocksdb.
+> Please correct me if I misunderstood anything.
+>
+> Lisa
+>
+>
+> On Thu, Jul 13, 2017 at 12:34 AM, Xiaoxi Chen <superdebuger@gmail.com> wr=
+ote:
+>> FWIW, one thing that KVDB can provide is transaction support, which is
+>> important as we need to update several metadata(Onode, allocator map,
+>> and WAL for small write) transactionally.
+>>
+>>
+>>
+>> 2017-07-13 0:25 GMT+08:00 =E6=94=80=E5=88=98 <liupan1111@gmail.com>:
+>>> Hi Sage,
+>>>
+>>> Indeed, I have an idea which hold a long time.
+>>>
+>>> Do we really need a heavy k/v database to store metadata? Especially
+>>> for fast disks.... Introduce a third-party database also make
+>>> difficulty for maintenance (maybe because of my limited database
+>>> knowledge) ...
+>>>
+>>> Let's suppose:
+>>> 1) The max pg number in one osd is limited(in my experience, 100~200
+>>> pgs per osd is best performance)
+>>> 2) The max number of objects in one pg is limited, because of disk spac=
+e.
+>>>
+>>> Then, how about this: pre-allocate metadata locations in metadata
+>>> partition=E3=80=82
+>>>
+>>> Part a SSD into two or three partitions(same as bluestore), instead
+>>> of using kv database, just store metadata directly in one disk
+>>> partition(we call it metadata partition). Inside this metadata
+>>> partition, we store several data structures:
+>>> 1) One hash table of PGs, key is PG id, value is another hash
+>>> table(key is object index of this pg, value is object metadata, and
+>>> object location in data partition).
+>>> 2) A free object location list.
+>>>
+>>> And other extra things...
+>>>
+>>> The max pgs belongs to one OSD can be limited by options, so I
+>>> believe the metadata partition should not be big. We could load all
+>>> metadata into RAM if RAM is really big, or part of them and
+>>> controlled by LRU, or just read, modify, and write back to disk when ne=
+eded.
+>>>
+>>> Do you think this idea reasonable? At least, I believe this kind of
+>>> new storage engine will be much faster.
+>>>
+>>> Thanks
+>>> Pan
+>>>
+>>> 2017-07-12 21:55 GMT+08:00 Sage Weil <sage@newdream.net>:
+>>>> On Wed, 12 Jul 2017, =E6=94=80=E5=88=98 wrote:
+>>>>> Hi Sage,
+>>>>>
+>>>>> Yes, I totally understand bluestore did much more things than a raw
+>>>>> disk, but the current overhead is a little too big to our usage. I
+>>>>> will compare bluestore with XFS(also has metadata tracking,
+>>>>> allocation, and so on), and to see if XFS also has such impact.
+>>>>>
+>>>>> I would like to give a flamegraph later, but from the perfcounter,
+>>>>> we could find most of time were spent in "kv_lat".
+>>>>
+>>>> That's rocksdb.  And yeah, I think it's pretty clear that either
+>>>> rocksdb needs some serious work to really keep up with nvme (or
+>>>> optane) or (more
+>>>> likely) we need an alternate kv backend that is targetting high
+>>>> speed flash.  I suspect the latter makes the most sense, and I
+>>>> believe there are various efforts at Intel looking at alternatives but=
+ no winner just yet.
+>>>>
+>>>> Looking a bit further out, I think a new kv library that natively
+>>>> targets peristent memory (e.g., something built on pmem.io) will be
+>>>> the right solution.  Although at that point, it's probbaly a
+>>>> question of whether we have pmem for metadata and 3D NAND for data
+>>>> or pure pmem; in the latter case a complete replacement for bluestore =
+would make more sense.
+>>>>
+>>>>> For FTL, yes, it is a good idea, after we get the flame graph, we
+>>>>> could discuss which part could be improved by FTL, firmware, even
+>>>>> open channel.
+>>>>
+>>>> Yep!
+>>>> sage
+>>>>
+>>>>
+>>>>
+>>>>
+>>>>>
+>>>>>
+>>>>>
+>>>>>
+>>>>>
+>>>>> 2017-07-12 20:02 GMT+08:00 Sage Weil <sage@newdream.net>:
+>>>>> > On Wed, 12 Jul 2017, =E6=94=80=E5=88=98 wrote:
+>>>>> >> Hi Cephers,
+>>>>> >>
+>>>>> >> I did some experiment today to compare the latency between one
+>>>>> >> P3500(2T nvme SSD) and bluestore(fio + libfio_objectstore.so):
+>>>>> >>
+>>>>> >> For iodepth =3D 1, the random write latency of bluestore is
+>>>>> >> 276.91us, compare with 14.71 of SSD, big overhead.
+>>>>> >>
+>>>>> >> I also test iodepth =3D 16, Still, there is a big overhead.(143 us
+>>>>> >> -> 642 us)
+>>>>> >>
+>>>>> >> What is your opinion?
+>>>>> >
+>>>>> > There is a lot of work that bluestore is doing over the raw
+>>>>> > device as it is implementing all of the metadata tracking,
+>>>>> > checksumming, allocation, and so on.  There's definitely lots of
+>>>>> > room for improvement, but I'm not sure you can expect to see
+>>>>> > latencies in the 10s of us.  That said, it would be interesting
+>>>>> > to see an updated flamegraph to see where the time is being spent
+>>>>> > and where we can slim this down.  On a new nvme it's possible we
+>>>>> > can do away with some of the complexity of, say, the allocator, sin=
+ce the FTL is performing a lot of the same work anyway.
+>>>>> >
+>>>>> > sage
+>>>>>
+>>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>>> info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>> in the body of a message to majordomo@vger.kernel.org More majordomo
+>> info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Best wishes
+> Lisa
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in =
+the body of a message to majordomo@vger.kernel.org More majordomo info at  =
+http://vger.kernel.org/majordomo-info.html
+
+
+
+--=20
+Best wishes
+Lisa
