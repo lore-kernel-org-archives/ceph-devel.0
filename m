@@ -1,10 +1,10 @@
 From: Roshni Chatterjee <roshni.chatterjee-gmN/nmo4RJN0+Iju73vM4Z/QNRX+jHPU@public.gmane.org>
-Subject: Re: Regarding Ceph Debug Logs
-Date: Fri, 14 Jul 2017 10:59:16 +0000
-Message-ID: <FBF2027374433749866CFD13796768DC54D4B917@EXCH-MB01-DEL.nectechnologies.in>
+Subject: Regarding Ceph Debug Logs
+Date: Fri, 14 Jul 2017 11:05:42 +0000
+Message-ID: <FBF2027374433749866CFD13796768DC54D4B946@EXCH-MB01-DEL.nectechnologies.in>
 Mime-Version: 1.0
 Content-Type: multipart/mixed;
-	boundary="_005_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_"
+	boundary="_005_FBF2027374433749866CFD13796768DC54D4B946EXCHMB01DELnect_"
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 Content-Language: en-US
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
@@ -16,16 +16,17 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+To: "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---_005_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_
+--_005_FBF2027374433749866CFD13796768DC54D4B946EXCHMB01DELnect_
 Content-Type: multipart/alternative;
-	boundary="_000_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_"
+	boundary="_000_FBF2027374433749866CFD13796768DC54D4B946EXCHMB01DELnect_"
 
---_000_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_
+--_000_FBF2027374433749866CFD13796768DC54D4B946EXCHMB01DELnect_
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
+
 
 Hi All,
 
@@ -34,8 +35,7 @@ s as listed below  -
 1.Regarding enabling debug logs for ceph
 2.Regarding internal processes of ceph
 
-QUERY 1
-
+QUERY 1 >>
 I have enabled the logs by setting the log level in /etc/ceph/ceph.conf att=
 ached above -
 
@@ -46,19 +46,18 @@ The following CLI generates log as attached in cli_log attachment -
 What are the following codes in the log like -
 7f12a474c700 , 7f12895af700
 
-QUERY 2
+QUERY 2>>
+
 While running Ceph on LTTng , I came across multiple processes spawned like=
  tp_osd_tp ,tp_osd_recov, tp_osd_disk, osd_op ,tp_osd_cmd.
 Why are these processes being spawned so many times and what is the functio=
 n if each ?
 If someone can share any document/link to understand the ceph internals pro=
 cesses/functions/working would be highly appreciated.
-
-
 Regards,
 Roshni
 
---_000_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_
+--_000_FBF2027374433749866CFD13796768DC54D4B946EXCHMB01DELnect_
 Content-Type: text/html; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 
@@ -97,6 +96,10 @@ span.EmailStyle17
 	font-family:"Calibri","sans-serif";
 	color:windowtext;}
 span.EmailStyle18
+	{mso-style-type:personal;
+	font-family:"Calibri","sans-serif";
+	color:#1F497D;}
+span.EmailStyle19
 	{mso-style-type:personal-reply;
 	font-family:"Calibri","sans-serif";
 	color:#1F497D;}
@@ -117,64 +120,67 @@ div.WordSection1
 </head>
 <body lang=3D"EN-US" link=3D"#0563C1" vlink=3D"#954F72">
 <div class=3D"WordSection1">
-<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Hi All,<o:p></o:p></sp=
-an></p>
-<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
-<p class=3D"MsoNormal">I am new to ceph and I am trying to debug a few scen=
-arios . I have 2 queries as listed below &nbsp;-<o:p></o:p></p>
-<p class=3D"MsoNormal">1.Regarding enabling debug logs for ceph <o:p></o:p>=
-</p>
-<p class=3D"MsoNormal">2.Regarding internal processes of ceph<o:p></o:p></p=
->
 <p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
 n></p>
-<div style=3D"border:none;border-bottom:solid windowtext 1.0pt;padding:0in =
-0in 1.0pt 0in">
-<p class=3D"MsoNormal">QUERY 1<o:p></o:p></p>
-</div>
-<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
-<p class=3D"MsoNormal">I have enabled the logs by setting the log level in =
-<span style=3D"color:#1F4E79;mso-style-textfill-fill-color:#1F4E79;mso-styl=
-e-textfill-fill-alpha:100.0%">
-/etc/ceph/ceph.conf </span>attached above &#8211;<o:p></o:p></p>
-<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
-<p class=3D"MsoNormal">But none of this is generating information that coul=
-d be used in debugging .<o:p></o:p></p>
-<p class=3D"MsoNormal">Also ,<o:p></o:p></p>
-<p class=3D"MsoNormal">The following CLI generates log as attached in <span=
- style=3D"color:#1F497D">
-cli_log </span>attachment &#8211;<o:p></o:p></p>
-<p class=3D"MsoNormal"><span style=3D"color:#0D0D0D;mso-style-textfill-fill=
--color:#0D0D0D;mso-style-textfill-fill-alpha:100.0%">What are the following=
- codes in the log like
-</span><span style=3D"color:#1F497D">&#8211;<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Hi All,<o:p></o:p></sp=
+an></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">I am new to ceph and I=
+ am trying to debug a few scenarios . I have 2 queries as listed below&nbsp=
+; -<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">1.Regarding enabling d=
+ebug logs for ceph
+<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">2.Regarding internal p=
+rocesses of ceph<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">QUERY 1 &gt;&gt;<o:p><=
+/o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">I have enabled the log=
+s by setting the log level in /etc/ceph/ceph.conf attached above &#8211;<o:=
+p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">But none of this is ge=
+nerating information that could be used in debugging .<o:p></o:p></span></p=
+>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Also ,<o:p></o:p></spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">The following CLI gene=
+rates log as attached in cli_log attachment &#8211;<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">What are the following=
+ codes in the log like &#8211;<o:p></o:p></span></p>
 <p class=3D"MsoNormal"><span style=3D"color:#1F497D">7f12a474c700 , 7f12895=
 af700<o:p></o:p></span></p>
 <p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
 n></p>
-<div style=3D"border:none;border-bottom:solid windowtext 1.0pt;padding:0in =
-0in 1.0pt 0in">
-<p class=3D"MsoNormal">QUERY 2<o:p></o:p></p>
-</div>
-<p class=3D"MsoNormal">While running Ceph on LTTng , I came across multiple=
- processes spawned like tp_osd_tp ,tp_osd_recov, tp_osd_disk, osd_op ,tp_os=
-d_cmd.<o:p></o:p></p>
-<p class=3D"MsoNormal">Why are these processes being spawned so many times =
-and what is the function if each ?<o:p></o:p></p>
-<p class=3D"MsoNormal">If someone can share any document/link to understand=
- the ceph internals processes/functions/working would be highly appreciated=
-.<o:p></o:p></p>
-<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
-<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
-<p class=3D"MsoNormal">Regards,<o:p></o:p></p>
-<p class=3D"MsoNormal">Roshni<o:p></o:p></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">QUERY 2&gt;&gt;<o:p></=
+o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">While running Ceph on =
+LTTng , I came across multiple processes spawned like tp_osd_tp ,tp_osd_rec=
+ov, tp_osd_disk, osd_op ,tp_osd_cmd.<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Why are these processe=
+s being spawned so many times and what is the function if each ?<o:p></o:p>=
+</span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">If someone can share a=
+ny document/link to understand the ceph internals processes/functions/worki=
+ng would be highly appreciated.
+<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Regards,<o:p></o:p></s=
+pan></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Roshni<o:p></o:p></spa=
+n></p>
 </div>
 </body>
 </html>
 
---_000_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_--
+--_000_FBF2027374433749866CFD13796768DC54D4B946EXCHMB01DELnect_--
 
---_005_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_
+--_005_FBF2027374433749866CFD13796768DC54D4B946EXCHMB01DELnect_
 Content-Type: text/plain; name="ceph_config.txt"
 Content-Description: ceph_config.txt
 Content-Disposition: attachment; filename="ceph_config.txt"; size=900;
@@ -199,7 +205,7 @@ ICAgICAgIGRlYnVnIG1kcyA9IDENCiAgICAgICAgZGVidWcgbWRzIGJhbGFuY2VyID0gMQ0KICAg
 ICAgICBkZWJ1ZyBtZHMgbG9nID0gMQ0KICAgICAgICBkZWJ1ZyBtZHMgbWlncmF0b3IgPSAxDQoN
 CmxvZyB0byBzeXNsb2cgPSB0cnVlDQplcnIgdG8gc3lzbG9nID0gdHJ1ZQ0K
 
---_005_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_
+--_005_FBF2027374433749866CFD13796768DC54D4B946EXCHMB01DELnect_
 Content-Type: text/plain; name="cli_log.txt"
 Content-Description: cli_log.txt
 Content-Disposition: attachment; filename="cli_log.txt"; size=627;
@@ -219,7 +225,7 @@ MS4xMTI2MjUgN2YxMjg5NWFmNzAwICAxIC0tIDEwLjAuNC4xMTg6MC83ODIzNTEzNzAgPD09IG1v
 bi4wIDEwLjAuNC4xMTg6Njc4OS8wIDEgPT09PSBtb25fbWFwIG1hZ2ljOiAwIHYxID09PT0gMjAw
 KzArMCAoMjAxNDgyNjA0NiAwIDApIDB4N2YxMjc0MDAwYmMwIGNvbiAweDU1N2I5NzFkNzAyMA0K
 
---_005_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_
+--_005_FBF2027374433749866CFD13796768DC54D4B946EXCHMB01DELnect_
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -230,4 +236,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---_005_FBF2027374433749866CFD13796768DC54D4B917EXCHMB01DELnect_--
+--_005_FBF2027374433749866CFD13796768DC54D4B946EXCHMB01DELnect_--
