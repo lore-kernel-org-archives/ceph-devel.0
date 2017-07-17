@@ -1,46 +1,35 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] libceph: potential NULL dereference in ceph_msg_data_create()
-Date: Mon, 17 Jul 2017 15:17:34 +0200
-Message-ID: <CAOi1vP9ekX47XqJXmsc0CAEmgtLmqDXReUipL+GpAJpWnvufBQ@mail.gmail.com>
-References: <20170717081335.3hhaj2k2frpq7gfa@mwanda>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: renaming "radosgw" deb to "ceph-radosgw" post-luminous
+Date: Mon, 17 Jul 2017 11:46:32 -0600
+Message-ID: <CALqRxCy-=23VWgM7UjTUumuc2=sfQ_LK_tKnZueGNaiQZCZXsQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <20170717081335.3hhaj2k2frpq7gfa@mwanda>
-Sender: netdev-owner@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Alex Elder <elder@inktank.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, kernel-janitors@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ua0-f172.google.com ([209.85.217.172]:34579 "EHLO
+        mail-ua0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751314AbdGQRqd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 17 Jul 2017 13:46:33 -0400
+Received: by mail-ua0-f172.google.com with SMTP id z22so102935586uah.1
+        for <ceph-devel@vger.kernel.org>; Mon, 17 Jul 2017 10:46:33 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: ceph-ansible@lists.ceph.com
 
-On Mon, Jul 17, 2017 at 10:13 AM, Dan Carpenter
-<dan.carpenter@oracle.com> wrote:
-> If kmem_cache_zalloc() returns NULL then the INIT_LIST_HEAD(&data->links);
-> will Oops.  The callers aren't really prepared for NULL returns so it
-> doesn't make a lot of difference in real life.
->
-> Fixes: 5240d9f95dfe ("libceph: replace message data pointer with list")
-> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
->
-> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
-> index 0c31035bbfee..b7cc615d42ef 100644
-> --- a/net/ceph/messenger.c
-> +++ b/net/ceph/messenger.c
-> @@ -3203,8 +3203,10 @@ static struct ceph_msg_data *ceph_msg_data_create(enum ceph_msg_data_type type)
->                 return NULL;
->
->         data = kmem_cache_zalloc(ceph_msg_data_cache, GFP_NOFS);
-> -       if (data)
-> -               data->type = type;
-> +       if (!data)
-> +               return NULL;
-> +
-> +       data->type = type;
->         INIT_LIST_HEAD(&data->links);
->
->         return data;
+The debian and RPM packages are getting more aligned, although there
+are a couple things that still differ.
 
-Applied.
+One of the differences is the name of the RGW package. On RPM-based
+distros it's "ceph-radosgw", on Debian-based it's "radosgw".
 
-Thanks,
+I plan to push a package rename for radosgw -> ceph-radosgw post-Luminous.
 
-                Ilya
+I've filed http://tracker.ceph.com/issues/20651 to track this. Are
+there any other dependencies we should be aware of when we make this
+package rename that I'm missing?
+
+In particular I want to be sure there is enough time for ubuntu.com
+and debian.org to pick up this rename downstream so that ceph.com
+doesn't ship packages that differ in this regard.
+
+- Ken
