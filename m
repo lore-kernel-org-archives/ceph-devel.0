@@ -1,38 +1,37 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: CLI test for rbd
-Date: Sun, 16 Jul 2017 23:25:25 +0200
-Message-ID: <59aa8ba0-42e8-feaa-d6aa-ec16131fd062@digiware.nl>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: [PATCH] libceph: potential NULL dereference in ceph_msg_data_create()
+Date: Mon, 17 Jul 2017 11:13:35 +0300
+Message-ID: <20170717081335.3hhaj2k2frpq7gfa@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:14351 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751244AbdGPVZ0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 16 Jul 2017 17:25:26 -0400
-Received: from [192.168.11.144] (unknown [192.168.11.144])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by smtp.digiware.nl (Postfix) with ESMTPSA id 2E08F44E6B
-        for <ceph-devel@vger.kernel.org>; Sun, 16 Jul 2017 23:25:24 +0200 (CEST)
-Content-Language: nl
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <kernel-janitors-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: kernel-janitors-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>, Alex Elder <elder@inktank.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, ceph-devel@vger.kernel.org, netdev@vger.kernel.org, kernel-janitors@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+If kmem_cache_zalloc() returns NULL then the INIT_LIST_HEAD(&data->links);
+will Oops.  The callers aren't really prepared for NULL returns so it
+doesn't make a lot of difference in real life.
 
-with the creation of rbd-ggate with FreeBSD we have run into a testing 
-snag..
+Fixes: 5240d9f95dfe ("libceph: replace message data pointer with list")
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
 
-Of rbd tehere is a CLI command help test, that verifies that help 
-generates help.
-But under FreeBSD that help is augmented with some ggate commands.
-
-Do we really want/need that test?
-And might I suggest to remove it, as it is IMHO not al that informative.
-
-Otherwise we need to come up with something rather complex to make
-run-cli-tests work on FreeBSD as well.
-
---WjW
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index 0c31035bbfee..b7cc615d42ef 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -3203,8 +3203,10 @@ static struct ceph_msg_data *ceph_msg_data_create(enum ceph_msg_data_type type)
+ 		return NULL;
+ 
+ 	data = kmem_cache_zalloc(ceph_msg_data_cache, GFP_NOFS);
+-	if (data)
+-		data->type = type;
++	if (!data)
++		return NULL;
++
++	data->type = type;
+ 	INIT_LIST_HEAD(&data->links);
+ 
+ 	return data;
