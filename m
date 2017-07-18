@@ -1,88 +1,120 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: [ceph-users] updating the documentation
-Date: Tue, 18 Jul 2017 13:03:01 -0700
-Message-ID: <CAJ4mKGYGJybO1=r+bbVagt5SjBdBtj6tm-+A855vJT_QecRV6w@mail.gmail.com>
-References: <alpine.DEB.2.11.1707121823111.3424@piezo.novalocal>
- <CA+2bHPaRDo=HLpui_4jcMXcFCzgR6UsmetpX7B6t2L-160oV=A@mail.gmail.com>
- <alpine.DEB.2.11.1707121926150.32272@piezo.novalocal> <CALe9h7fN+K0twCGgCLboiRzehdZBfCdST2yRXm2Zp1=r-rBqcg@mail.gmail.com>
+Subject: Re: Changes to md_config_t
+Date: Tue, 18 Jul 2017 13:08:33 -0700
+Message-ID: <CAJ4mKGYjWu0fo82RSkGwzKHZeotyPF8BSahPmHMh0Eds_N5f+Q@mail.gmail.com>
+References: <CALe9h7fOeO07MH--+R40QoV2LHxPwZ6WDVhM=H4Raf09rqhjYg@mail.gmail.com>
+ <CAJ4mKGZkA5=cGP=uqEqh_Qrd+Qi3W9LTUxocctsWgks9Lv0syQ@mail.gmail.com> <CALe9h7fVLO4xBsZ62uqEkyN-JG=ei+GYO4FD6ORQTbZRpkFSPA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f170.google.com ([209.85.223.170]:36079 "EHLO
-        mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751569AbdGRUDC (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jul 2017 16:03:02 -0400
-Received: by mail-io0-f170.google.com with SMTP id e93so2104152ioi.3
-        for <ceph-devel@vger.kernel.org>; Tue, 18 Jul 2017 13:03:02 -0700 (PDT)
-In-Reply-To: <CALe9h7fN+K0twCGgCLboiRzehdZBfCdST2yRXm2Zp1=r-rBqcg@mail.gmail.com>
+Received: from mail-it0-f49.google.com ([209.85.214.49]:36982 "EHLO
+        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751510AbdGRUIe (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jul 2017 16:08:34 -0400
+Received: by mail-it0-f49.google.com with SMTP id v127so9612859itd.0
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Jul 2017 13:08:34 -0700 (PDT)
+In-Reply-To: <CALe9h7fVLO4xBsZ62uqEkyN-JG=ei+GYO4FD6ORQTbZRpkFSPA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: John Spray <jspray@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, Jul 18, 2017 at 6:51 AM, John Spray <jspray@redhat.com> wrote:
-> On Wed, Jul 12, 2017 at 8:28 PM, Sage Weil <sweil@redhat.com> wrote:
->> On Wed, 12 Jul 2017, Patrick Donnelly wrote:
->>> On Wed, Jul 12, 2017 at 11:29 AM, Sage Weil <sweil@redhat.com> wrote:
->>> > In the meantime, we can also avoid making the problem worse by requiring
->>> > that all pull requests include any relevant documentation updates.  This
->>> > means (1) helping educate contributors that doc updates are needed, (2)
->>> > helping maintainers and reviewers remember that doc updates are part of
->>> > the merge criteria (it will likely take a bit of time before this is
->>> > second nature), and (3) generally inducing developers to become aware of
->>> > the documentation that exists so that they know what needs to be updated
->>> > when they make a change.
+On Tue, Jul 18, 2017 at 3:54 AM, John Spray <jspray@redhat.com> wrote:
+> On Fri, Jul 14, 2017 at 7:35 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+>> On Fri, Jul 14, 2017 at 7:23 AM, John Spray <jspray@redhat.com> wrote:
+>>> Hi all,
 >>>
->>> There was a joke to add a bot which automatically fails PRs for no
->>> documentation but I think there is an way to make that work in a
->>> reasonable way. Perhaps the bot could simply comment on all PRs
->>> touching src/ that documentation is required and where to look, and
->>> then fails a doc check. A developer must comment on the PR to say it
->>> passes documentation requirements before the bot changes the check to
->>> pass.
+>>> There's a change headed for master soon
+>>> (https://github.com/ceph/ceph/pull/16211) that will rework how config
+>>> settings are declared.  Currently they're declared using a
+>>> preprocessor macro, which is a bit too inflexible for some desirable
+>>> enhancements like having different defaults for clients vs servers,
+>>> adding more bounds/range checking, and adding more descriptive doc
+>>> metadata.
 >>>
->>> This addresses all three points in an automatic way.
+>>> The thing that will effect you immediately is how to add new config settings:
+>>>  - Add them in common/options.cc
+>>>  - Access them using md_config_t::get()
+>>>
+>>> The old-style definitions for existing settings still exist in
+>>> common/legacy_config_opts.h.  Do *not* add new definitions to that
+>>> file.  All the definitions in that file now have equivalent
+>>> definitions in common/options.cc, and the ones in common/options.cc
+>>> are authoritative.
+>>>
+>>> The old header lives on in order to generate C++ member definitions
+>>> for the options in md_config_t (i.e. so that you can get at them with
+>>> g_conf->my_config_opt).  Once the consuming code has been modified to
+>>> avoid accessing them that way, the entries from legacy_config_opts.h
+>>> can be removed.
+>>>
+>>> This sacrifices the compile-time check that you would previously get
+>>> by accessing a class member.
 >>
->> This is a great idea.  Greg brought up the idea of a bot but we
->> didn't think of a "docs ok"-type comment to make it happy.
->>
->> Anybody interested in coding it up?
->>
->> Piotr makes a good point about config_opts.h, although that problem is
->> about to go away (or at least change) with John's config update:
->>
->>         https://github.com/ceph/ceph/pull/16211
->>
->> (Config options will be documented in the code where the schema is
->> defined, and docs.ceph.com .rst will eventually be auto-generated from
->> that.)
+>> Aww, that's disappointing. Maybe of limited value, but if we ever typo
+>> one of those options it's going to be rough to track down. What kind
+>> of runtime checking is available? Could we maybe do something like
+>> generate wrapper functions so each config value we know about at
+>> compile time has a getter function we can invoke instead of
+>> get(<string>)?
 >
+> If you do a g_conf->get_val<int64_t>("typo") you'll get an exception
+> (i.e. your process will abort).  In general, I'm expecting that if
+> someone had a typo like that they'd be catching it in unit tests or at
+> worst teuthology tests -- i.e. the issue gets caught before code is
+> merged.
 >
-> Separate to the discussion of bots, here's a proposed change to the
-> SubmittingPatches.rst to formalize the expectation that submitters
-> make doc changes in their PRs.
+> It is certainly possible to do a code generation thing that compiles
+> options.cc and then generates a class with defined accessor methods,
+> but I see that as much less important than the change to expose nicer
+> behaviour and doc strings for the user.  Given that anyone typoing an
+> option will find out Real Soon when their tests fail, I'm not sure
+> it's worth adding the complexity to the build.
 
-https://github.com/ceph/ceph/pull/16394 was meant to go here, I think. :)
+You're probably right. I'm just a little concerned for when we set up
+builds that let users work around or debug stuff we haven't been able
+to reproduce locally, or when we're naughty and don't set up enough
+tests anyway. But I'm glad to hear it's really obvious when you try
+and lookup something nonexistent.
+
+>
+> I am interested in making the access a bit slicker though (i.e.
+> avoiding taking md_config_t's lock every time you want to get a
+> value),
+
+I presume that doesn't (yet) apply to the generated-code stuff being
+pulled over from legacy_config_opts? ;)
+
+ but creatings some binder classes, that would go get their
+> values at first access, register themselves with md_config_t, and then
+> have an atomic_t dirty bit that md_config_t can set to prompt them to
+> re-fetch if the value ever changes.
+
+Hmm, I'm not sure I see a good use for this. If we need to do a memory
+barrier on every config lookup, we'll presumably need to be making our
+own copies and registering a config watcher for updates anyway to make
+stuff fast enough. (And if the memory barrier is fast enough,
+serializing on the config mutex won't matter either.)
+
+Thanks!
 -Greg
 
 >
-> The twist here is that in addition to requiring submitters to make
-> changes, there is a responsibility on the component tech leads to
-> ensure there is a proper place for doc changes to go.  That means that
-> if someone comes with a change to a completely undocumented area of
-> functionality, then it is not the submitter's responsibility to create
-> the whole page just to note their small change (although it would
-> obviously be awesome if they did).
->
-> Cheers,
 > John
 >
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>
+>
+>>
+>>
+>>> The benefit is that we can do all the
+>>> new-style stuff with clean C++, that we can in principle load
+>>> definitions at runtime (e.g. from the planned central mon config
+>>> store), and that md_config_t will now know which options are really in
+>>> use (because they're accessed by function and not by direct member
+>>> access).
+>>>
+>>> John
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
