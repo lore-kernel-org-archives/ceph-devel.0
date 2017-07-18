@@ -1,129 +1,97 @@
-From: Junqin JQ7 Zhang <zhangjq7@lenovo.com>
-Subject: osds have slow requests on Ceph luminous FileStore
-Date: Tue, 18 Jul 2017 10:42:31 +0000
-Message-ID: <694B98CBCEF42547AE4CD1A693225B5D08555F65@CNMAILEX04.lenovo.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: Changes to md_config_t
+Date: Tue, 18 Jul 2017 11:54:55 +0100
+Message-ID: <CALe9h7fVLO4xBsZ62uqEkyN-JG=ei+GYO4FD6ORQTbZRpkFSPA@mail.gmail.com>
+References: <CALe9h7fOeO07MH--+R40QoV2LHxPwZ6WDVhM=H4Raf09rqhjYg@mail.gmail.com>
+ <CAJ4mKGZkA5=cGP=uqEqh_Qrd+Qi3W9LTUxocctsWgks9Lv0syQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail1.bemta12.messagelabs.com ([216.82.251.13]:24562 "EHLO
-        mail1.bemta12.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751404AbdGRKpP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 18 Jul 2017 06:45:15 -0400
-Content-Language: zh-CN
+Received: from mail-wr0-f175.google.com ([209.85.128.175]:35231 "EHLO
+        mail-wr0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751348AbdGRKzR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jul 2017 06:55:17 -0400
+Received: by mail-wr0-f175.google.com with SMTP id w4so23178076wrb.2
+        for <ceph-devel@vger.kernel.org>; Tue, 18 Jul 2017 03:55:16 -0700 (PDT)
+In-Reply-To: <CAJ4mKGZkA5=cGP=uqEqh_Qrd+Qi3W9LTUxocctsWgks9Lv0syQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+On Fri, Jul 14, 2017 at 7:35 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+> On Fri, Jul 14, 2017 at 7:23 AM, John Spray <jspray@redhat.com> wrote:
+>> Hi all,
+>>
+>> There's a change headed for master soon
+>> (https://github.com/ceph/ceph/pull/16211) that will rework how config
+>> settings are declared.  Currently they're declared using a
+>> preprocessor macro, which is a bit too inflexible for some desirable
+>> enhancements like having different defaults for clients vs servers,
+>> adding more bounds/range checking, and adding more descriptive doc
+>> metadata.
+>>
+>> The thing that will effect you immediately is how to add new config settings:
+>>  - Add them in common/options.cc
+>>  - Access them using md_config_t::get()
+>>
+>> The old-style definitions for existing settings still exist in
+>> common/legacy_config_opts.h.  Do *not* add new definitions to that
+>> file.  All the definitions in that file now have equivalent
+>> definitions in common/options.cc, and the ones in common/options.cc
+>> are authoritative.
+>>
+>> The old header lives on in order to generate C++ member definitions
+>> for the options in md_config_t (i.e. so that you can get at them with
+>> g_conf->my_config_opt).  Once the consuming code has been modified to
+>> avoid accessing them that way, the entries from legacy_config_opts.h
+>> can be removed.
+>>
+>> This sacrifices the compile-time check that you would previously get
+>> by accessing a class member.
+>
+> Aww, that's disappointing. Maybe of limited value, but if we ever typo
+> one of those options it's going to be rough to track down. What kind
+> of runtime checking is available? Could we maybe do something like
+> generate wrapper functions so each config value we know about at
+> compile time has a getter function we can invoke instead of
+> get(<string>)?
 
-I met "osds have slow requests" problem on Ceph luminous 12.1.0 FileStore on a newly installed cluster. 
-We have tested 10.2.* version before, but didn't see such kind of issue.
-Could anyone help this?  Thanks in advance.
+If you do a g_conf->get_val<int64_t>("typo") you'll get an exception
+(i.e. your process will abort).  In general, I'm expecting that if
+someone had a typo like that they'd be catching it in unit tests or at
+worst teuthology tests -- i.e. the issue gets caught before code is
+merged.
 
-The Ceph cluster is on 3 nodes. 
-I have tried to restart all OSDs several times, but still same result.
+It is certainly possible to do a code generation thing that compiles
+options.cc and then generates a class with defined accessor methods,
+but I see that as much less important than the change to expose nicer
+behaviour and doc strings for the user.  Given that anyone typoing an
+option will find out Real Soon when their tests fail, I'm not sure
+it's worth adding the complexity to the build.
 
-Here are the phenomenons.
-After, I did rbd bench with high --io-threads, then I can see following error.
+I am interested in making the access a bit slicker though (i.e.
+avoiding taking md_config_t's lock every time you want to get a
+value), but creatings some binder classes, that would go get their
+values at first access, register themselves with md_config_t, and then
+have an atomic_t dirty bit that md_config_t can set to prompt them to
+re-fetch if the value ever changes.
 
-[root@ceph-1 ~]# rbd bench --io-type write --io-size 8196 --io-threads 8 --io-total 4G  --io-pattern rand  rbd/rbdtest
-bench  type write io_size 8196 io_threads 8 bytes 4294967296 pattern random
-  SEC       OPS   OPS/SEC   BYTES/SEC
-    1      7043   7051.57  57794684.13
-    2     15416   7712.12  63208574.94
-......
-   62    508945   8271.42  67792552.91
-   63    517257   8274.47  67817535.56
-elapsed:    63  ops:   524033  ops/sec:  8211.96  bytes/sec: 67305203.40
-2017-07-18 18:13:08.293445 7fb09ffff700 -1 librbd::ImageWatcher: 0x7fb090001ed0 image watch failed: 140396306931344, (107) Transport endpoint is not connected
-2017-07-18 18:13:08.293483 7fb09ffff700 -1 librbd::Watcher: 0x7fb090001ed0 handle_error: handle=140396306931344: (107) Transport endpoint is not connected
+John
 
-Then get " osds have slow requests "
-[root@ceph-1 osddebug]# ceph -s
-  cluster:
-    id:     1f1e3ab0-0e93-4e0e-8cda-fb5d67e072e0
-    health: HEALTH_WARN
-            34213 requests are blocked > 32 sec
-            8 osds have slow requests
 
-And I see very high apply_latency.
-[root@ceph-1 osddebug]# ceph osd perf
-osd commit_latency(ms) apply_latency(ms)
- 23                  0             28958
- 22                  0             30457
-  9                  0             35393
-  8                  0             43926
-  7                  0             45192
-  6                  0             39647
-  5                  0             52997
-  4                  0             45622
-  3                  0             36825
-  2                  0             33094
-  1                  0             49191
-  0                  0             40646
- 10                  0             29356
- 11                  0             36629
- 12                  0             28765
- 13                  0             39133
- 14                  0             38505
- 15                  0             37818
- 16                  0             30575
- 17                  0             43622
- 18                  0             41289
- 19                  0             39110
- 20                  0             39957
- 21                  0             38773
 
-Here is iostat in one node when perform bench.
-
-avg-cpu:  %user   %nice %system %iowait  %steal   %idle
-           7.31    0.00    4.73   42.98    0.00   44.98
-
-Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-sda               0.00     0.00    0.00 8094.00     0.00 49184.00    12.15     0.23    0.03    0.00    0.03   0.03  21.00
-sdb               0.00     0.00    0.00 8250.00     0.00 50144.00    12.16     0.26    0.03    0.00    0.03   0.03  23.50
-sde               0.00   327.00  114.00  468.00   456.00  6644.00    24.40    11.94   20.24   46.76   13.77   1.72 100.00
-sdg               0.00   399.00  145.00  492.00   580.00  5056.00    17.70     7.99   12.38   43.21    3.29   1.57 100.00
-sdk               0.00   422.00  143.00  534.00   572.00  5780.00    18.77     8.55   13.63   43.87    5.53   1.48 100.00
-sdi               0.00   322.00  115.00  581.00   460.00 12016.00    35.85    25.69   77.43   65.58   79.78   1.44 100.00
-sdh               0.00  1914.00   25.00  436.00   100.00 17796.00    77.64   145.97  317.56  257.60  321.00   2.17 100.00
-sdd               0.00   452.00  155.00  549.00   620.00  5756.00    18.11     8.32   11.85   41.14    3.58   1.42 100.00
-sdf               0.00     5.00   11.00  590.00    44.00  2792.00     9.44   146.84  243.25  465.55  239.11   1.66 100.00
-sdj               0.00   378.00  120.00  464.00   480.00  4824.00    18.16     7.84   13.23   50.51    3.59   1.71 100.00
-sdc               0.00     2.00    0.00    6.00     0.00    76.00    25.33     0.05    8.50    0.00    8.50   8.50   5.10
-dm-0              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-dm-1              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-dm-2              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-dm-3              0.00     0.00    0.00    6.00     0.00    76.00    25.33     0.05    8.67    0.00    8.67   8.50   5.10
-
-log in ceph-osd
-2017-07-18 18:13:22.104639 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 43.722246 seconds old, received at 2017-07-18 18:12:38.381955: osd_op(client.76896.0:509128 0.7b 0:de320fa8:::rbd_data.ba112ae8944a.00000000000028a6:head [write 3813028~8196 [fadvise_random]] snapc 0=[] ondisk+write+known_if_redirected e1119) currently commit_sent
-2017-07-18 18:13:22.104644 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 43.714032 seconds old, received at 2017-07-18 18:12:38.390168: osd_repop(client.76896.0:509193 0.29d e1119/1116 0:b97947f6:::rbd_data.ba112ae8944a.0000000000004654:head v 1119'17412) currently commit_sent
-2017-07-18 18:13:22.104648 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 43.653849 seconds old, received at 2017-07-18 18:12:38.450352: osd_repop(client.76896.0:509685 0.1e e1119/1117 0:781ecb04:::rbd_data.ba112ae8944a.0000000000003c5f:head v 1119'13702) currently commit_sent
-2017-07-18 18:13:23.105083 7fe34c270700  0 log_channel(cluster) log [WRN] : 1471 slow requests, 5 included below; oldest blocked for > 44.206332 secs
-2017-07-18 18:13:23.105098 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 44.206332 seconds old, received at 2017-07-18 18:12:38.898459: osd_repop(client.76896.0:513404 0.3a1 e1119/1117 0:85dab8cb:::rbd_data.ba112ae8944a.0000000000001fb4:head v 1119'15378) currently commit_sent
-2017-07-18 18:13:23.105104 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 44.119205 seconds old, received at 2017-07-18 18:12:38.985585: osd_op(client.76896.0:514135 0.2e0 0:07575ed3:::rbd_data.ba112ae8944a.0000000000004782:head [write 2665884~8196 [fadvise_random]] snapc 0=[] ondisk+write+known_if_redirected e1119) currently commit_sent
-2017-07-18 18:13:23.105109 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 44.098773 seconds old, received at 2017-07-18 18:12:39.006017: osd_op(client.76896.0:514296 0.306 0:60da6e83:::rbd_data.ba112ae8944a.0000000000002a78:head [write 2333184~8196 [fadvise_random]] snapc 0=[] ondisk+write+known_if_redirected e1119) currently commit_sent
-2017-07-18 18:13:23.105125 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 44.063825 seconds old, received at 2017-07-18 18:12:39.040965: osd_repop(client.76896.0:514585 0.1e e1119/1117 0:783122c6:::rbd_data.ba112ae8944a.0000000000002292:head v 1119'13711) currently commit_sent
-
-I also checked dmesg, found following log, but seems not at this time.
-[22932.710120] INFO: task filestore_sync:5128 blocked for more than 120 seconds.
-[22932.710121] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-[22932.710123] filestore_sync  D 00007f902b69c708     0  5128      1 0x00000080
-[22932.710126]  ffff885f8d78fd50 0000000000000086 ffff885fbe6f9f60 ffff885f8d78ffd8
-[22932.710130]  ffff885f8d78ffd8 ffff885f8d78ffd8 ffff885fbe6f9f60 ffff885f8d78fe80
-[22932.710133]  ffff885f8d78fe88 7fffffffffffffff ffff885fbe6f9f60 00007f902b69c708
-
-Here is my osd configure.
-[osd.0]
-host = ceph-1
-osd journal = /var/lib/ceph/osd/ceph-0-journal/journal  # a ssd partion
-osd data =  /var/lib/ceph/osd/ceph-0                                      # a HDD disk
-
-Could anyone help how to move on to debug this?
-Thanks a lot!
-
-B.R.
-Junqin Zhang
+>
+>
+>> The benefit is that we can do all the
+>> new-style stuff with clean C++, that we can in principle load
+>> definitions at runtime (e.g. from the planned central mon config
+>> store), and that md_config_t will now know which options are really in
+>> use (because they're accessed by function and not by direct member
+>> access).
+>>
+>> John
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
