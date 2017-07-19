@@ -1,172 +1,148 @@
-From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Subject: Re: Luminous RC feedback - device classes and osd df weirdness
-Date: Wed, 19 Jul 2017 18:57:35 +1200
-Message-ID: <f0536e0e-b9a1-6ef5-c96e-81e873bda624@catalyst.net.nz>
-References: <71ce32a8-6232-0f5b-35a5-d86f30a045db@catalyst.net.nz>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: osds have slow requests on Ceph luminous FileStore
+Date: Wed, 19 Jul 2017 08:37:47 -0500
+Message-ID: <7bcb1ea3-d416-b6c7-4c69-738832977a3b@redhat.com>
+References: <694B98CBCEF42547AE4CD1A693225B5D08555F65@CNMAILEX04.lenovo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cat-porwal-prod-mail1.catalyst.net.nz ([202.78.240.226]:41784
-        "EHLO cat-porwal-prod-mail1.catalyst.net.nz" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751228AbdGSG5i (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 19 Jul 2017 02:57:38 -0400
-Received: from localhost (localhost [127.0.0.1])
-        by cat-porwal-prod-mail1.catalyst.net.nz (Postfix) with ESMTP id 31DCD8041C
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Jul 2017 18:57:37 +1200 (NZST)
-Received: from cat-porwal-prod-mail1.catalyst.net.nz ([127.0.0.1])
-        by localhost (cat-porwal-prod-mail1.servers.catalyst.net.nz [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id bjqA0I1_pDKE for <ceph-devel@vger.kernel.org>;
-        Wed, 19 Jul 2017 18:57:35 +1200 (NZST)
-Received: from [IPv6:2406:e001:913:1:6c04:706d:e259:5ed3] (unknown [IPv6:2406:e001:913:1:6c04:706d:e259:5ed3])
-        (Authenticated sender: mark.kirkwood@catalyst.net.nz)
-        by cat-porwal-prod-mail1.catalyst.net.nz (Postfix) with ESMTPSA id BCCD9804DA
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Jul 2017 18:57:35 +1200 (NZST)
-In-Reply-To: <71ce32a8-6232-0f5b-35a5-d86f30a045db@catalyst.net.nz>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:43766 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751967AbdGSNhs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 19 Jul 2017 09:37:48 -0400
+In-Reply-To: <694B98CBCEF42547AE4CD1A693225B5D08555F65@CNMAILEX04.lenovo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Junqin JQ7 Zhang <zhangjq7@lenovo.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 29/06/17 17:04, Mark Kirkwood wrote:
+Hi Junqin,
 
->
->
-> That all went very smoothly, with only a couple of things that seemed 
-> weird. Firstly the crush/osd tree output is a bit strange (but I could 
-> get to the point where it make sense):
->
-> $ sudo ceph osd tree
-> ID  WEIGHT  TYPE NAME          UP/DOWN REWEIGHT PRIMARY-AFFINITY
-> -15 0.23196 root default~ssd
-> -11 0.05699     host ceph1~ssd
->   4 0.05699         osd.4           up  1.00000 1.00000
-> -12 0.05899     host ceph2~ssd
->   5 0.05899         osd.5           up  1.00000 1.00000
-> -13 0.05699     host ceph3~ssd
->   6 0.05699         osd.6           up  1.00000 1.00000
-> -14 0.05899     host ceph4~ssd
->   7 0.05899         osd.7           up  1.00000 1.00000
-> -10 0.07996 root default~hdd
->  -6 0.01999     host ceph1~hdd
->   0 0.01999         osd.0           up  1.00000 1.00000
->  -7 0.01999     host ceph2~hdd
->   1 0.01999         osd.1           up  1.00000 1.00000
->  -8 0.01999     host ceph3~hdd
->   2 0.01999         osd.2           up  1.00000 1.00000
->  -9 0.01999     host ceph4~hdd
->   3 0.01999         osd.3           up  1.00000 1.00000
->  -1 0.31198 root default
->  -2 0.07700     host ceph1
->   0 0.01999         osd.0           up  1.00000 1.00000
->   4 0.05699         osd.4           up  1.00000 1.00000
->  -3 0.07899     host ceph2
->   1 0.01999         osd.1           up  1.00000 1.00000
->   5 0.05899         osd.5           up  1.00000 1.00000
->  -4 0.07700     host ceph3
->   2 0.01999         osd.2           up  1.00000 1.00000
->   6 0.05699         osd.6           up  1.00000 1.00000
->  -5 0.07899     host ceph4
->   3 0.01999         osd.3           up  1.00000 1.00000
->   7 0.05899         osd.7           up  1.00000 1.00000
->
->
-> But the osd df output is baffling, I've got two identical lines for 
-> each osd (hard to see immediately - sorting by osd id would make it 
-> easier). This is not ideal, particularly as for the bluestore guys 
-> there is no other way to work out utilization. Any ideas - have I done 
-> something obviously wrong here that is triggering the 2 lines?
->
-> $ sudo ceph osd df
-> ID WEIGHT  REWEIGHT SIZE   USE    AVAIL  %USE VAR  PGS
->  4 0.05699  1.00000 60314M  1093M 59221M 1.81 1.27   0
->  5 0.05899  1.00000 61586M  1234M 60351M 2.00 1.40   0
->  6 0.05699  1.00000 60314M  1248M 59066M 2.07 1.45   0
->  7 0.05899  1.00000 61586M  1209M 60376M 1.96 1.37   0
->  0 0.01999  1.00000 25586M 43812k 25543M 0.17 0.12  45
->  1 0.01999  1.00000 25586M 42636k 25544M 0.16 0.11  37
->  2 0.01999  1.00000 25586M 44336k 25543M 0.17 0.12  53
->  3 0.01999  1.00000 25586M 42716k 25544M 0.16 0.11  57
->  0 0.01999  1.00000 25586M 43812k 25543M 0.17 0.12  45
->  4 0.05699  1.00000 60314M  1093M 59221M 1.81 1.27   0
->  1 0.01999  1.00000 25586M 42636k 25544M 0.16 0.11  37
->  5 0.05899  1.00000 61586M  1234M 60351M 2.00 1.40   0
->  2 0.01999  1.00000 25586M 44336k 25543M 0.17 0.12  53
->  6 0.05699  1.00000 60314M  1248M 59066M 2.07 1.45   0
->  3 0.01999  1.00000 25586M 42716k 25544M 0.16 0.11  57
->  7 0.05899  1.00000 61586M  1209M 60376M 1.96 1.37   0
->               TOTAL   338G  4955M   333G 1.43
-> MIN/MAX VAR: 0.11/1.45  STDDEV: 0.97
-
-Revisiting these points after reverting to Jewel again and freshly 
-upgrading to 12.1.1:
-
-$ sudo ceph osd tree
-ID CLASS WEIGHT  TYPE NAME      UP/DOWN REWEIGHT PRI-AFF
--1       0.32996 root default
--2       0.08199     host ceph1
-  0   hdd 0.02399         osd.0       up  1.00000 1.00000
-  4   ssd 0.05699         osd.4       up  1.00000 1.00000
--3       0.08299     host ceph2
-  1   hdd 0.02399         osd.1       up  1.00000 1.00000
-  5   ssd 0.05899         osd.5       up  1.00000 1.00000
--4       0.08199     host ceph3
-  2   hdd 0.02399         osd.2       up  1.00000 1.00000
-  6   ssd 0.05699         osd.6       up  1.00000 1.00000
--5       0.08299     host ceph4
-  3   hdd 0.02399         osd.3       up  1.00000 1.00000
-  7   ssd 0.05899         osd.7       up  1.00000 1.00000
-
-This looks much more friendly!
-
-$ sudo ceph osd df
-ID CLASS WEIGHT  REWEIGHT SIZE   USE    AVAIL  %USE  VAR PGS
-  0   hdd 0.02399  1.00000 25586M 89848k 25498M  0.34 0.03 109
-  4   ssd 0.05699  1.00000 60314M 10096M 50218M 16.74 1.34 60
-  1   hdd 0.02399  1.00000 25586M 93532k 25495M  0.36 0.03 103
-  5   ssd 0.05899  1.00000 61586M  9987M 51598M 16.22 1.30 59
-  2   hdd 0.02399  1.00000 25586M 88120k 25500M  0.34 0.03 111
-  6   ssd 0.05699  1.00000 60314M 12403M 47911M 20.56 1.64 75
-  3   hdd 0.02399  1.00000 25586M 94688k 25494M  0.36 0.03 125
-  7   ssd 0.05899  1.00000 61586M 10435M 51151M 16.94 1.36 62
-                     TOTAL   338G 43280M   295G 12.50
-MIN/MAX VAR: 0.03/1.64  STDDEV: 9.40
-
-...and this is vastly better too. Bit of a toss up whether ordering by 
-host (which is what it seems to be happening here) or ordering by osd id 
-is better, but clearly there are bound to be differing POV on this - I'm 
-happy with the current choice.
-
-One (I think) new thing compared to the 12.1.0 is that restarting the 
-services blitzes the modified crushmap, and we get back to:
-
-$ sudo ceph osd tree
-ID CLASS WEIGHT  TYPE NAME      UP/DOWN REWEIGHT PRI-AFF
--1       0.32996 root default
--2       0.08199     host ceph1
-  0   hdd 0.02399         osd.0       up  1.00000 1.00000
-  4   hdd 0.05699         osd.4       up  1.00000 1.00000
--3       0.08299     host ceph2
-  1   hdd 0.02399         osd.1       up  1.00000 1.00000
-  5   hdd 0.05899         osd.5       up  1.00000 1.00000
--4       0.08199     host ceph3
-  2   hdd 0.02399         osd.2       up  1.00000 1.00000
-  6   hdd 0.05699         osd.6       up  1.00000 1.00000
--5       0.08299     host ceph4
-  3   hdd 0.02399         osd.3       up  1.00000 1.00000
-  7   hdd 0.05899         osd.7       up  1.00000 1.00000
-
-...and all the PG are remapped again. Now I might have just missed this 
-happening with 12.1.0 - but I'm (moderately) confident that I did 
-restart stuff and not see this happening. For now I've added:
-
-osd crush update on start = false
-
-to my ceph.conf to avoid being caught by this.
-
-regards
+Is this the same cluster where bluestore was previously performing 
+slowly for you?  Your disks are definitely being hammered pretty hard. 
+The throughput doesn't appear especially low for HDDs.  I did notice 
+your using 8196 vs 8192 for slightly non-4k aligned IOs.  The latency is 
+the biggest oddity.  Earlier you mentioned you are using a 20000Mb/s 
+network.  Is that bonded 10GbE?  We've seen cases in the past on a 
+customer cluster where the bonding configuration was causing some really 
+nasty network latency on certain routes.
 
 Mark
 
-
+On 07/18/2017 05:42 AM, Junqin JQ7 Zhang wrote:
+> Hi,
+>
+> I met "osds have slow requests" problem on Ceph luminous 12.1.0 FileStore on a newly installed cluster.
+> We have tested 10.2.* version before, but didn't see such kind of issue.
+> Could anyone help this?  Thanks in advance.
+>
+> The Ceph cluster is on 3 nodes.
+> I have tried to restart all OSDs several times, but still same result.
+>
+> Here are the phenomenons.
+> After, I did rbd bench with high --io-threads, then I can see following error.
+>
+> [root@ceph-1 ~]# rbd bench --io-type write --io-size 8196 --io-threads 8 --io-total 4G  --io-pattern rand  rbd/rbdtest
+> bench  type write io_size 8196 io_threads 8 bytes 4294967296 pattern random
+>   SEC       OPS   OPS/SEC   BYTES/SEC
+>     1      7043   7051.57  57794684.13
+>     2     15416   7712.12  63208574.94
+> ......
+>    62    508945   8271.42  67792552.91
+>    63    517257   8274.47  67817535.56
+> elapsed:    63  ops:   524033  ops/sec:  8211.96  bytes/sec: 67305203.40
+> 2017-07-18 18:13:08.293445 7fb09ffff700 -1 librbd::ImageWatcher: 0x7fb090001ed0 image watch failed: 140396306931344, (107) Transport endpoint is not connected
+> 2017-07-18 18:13:08.293483 7fb09ffff700 -1 librbd::Watcher: 0x7fb090001ed0 handle_error: handle=140396306931344: (107) Transport endpoint is not connected
+>
+> Then get " osds have slow requests "
+> [root@ceph-1 osddebug]# ceph -s
+>   cluster:
+>     id:     1f1e3ab0-0e93-4e0e-8cda-fb5d67e072e0
+>     health: HEALTH_WARN
+>             34213 requests are blocked > 32 sec
+>             8 osds have slow requests
+>
+> And I see very high apply_latency.
+> [root@ceph-1 osddebug]# ceph osd perf
+> osd commit_latency(ms) apply_latency(ms)
+>  23                  0             28958
+>  22                  0             30457
+>   9                  0             35393
+>   8                  0             43926
+>   7                  0             45192
+>   6                  0             39647
+>   5                  0             52997
+>   4                  0             45622
+>   3                  0             36825
+>   2                  0             33094
+>   1                  0             49191
+>   0                  0             40646
+>  10                  0             29356
+>  11                  0             36629
+>  12                  0             28765
+>  13                  0             39133
+>  14                  0             38505
+>  15                  0             37818
+>  16                  0             30575
+>  17                  0             43622
+>  18                  0             41289
+>  19                  0             39110
+>  20                  0             39957
+>  21                  0             38773
+>
+> Here is iostat in one node when perform bench.
+>
+> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+>            7.31    0.00    4.73   42.98    0.00   44.98
+>
+> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+> sda               0.00     0.00    0.00 8094.00     0.00 49184.00    12.15     0.23    0.03    0.00    0.03   0.03  21.00
+> sdb               0.00     0.00    0.00 8250.00     0.00 50144.00    12.16     0.26    0.03    0.00    0.03   0.03  23.50
+> sde               0.00   327.00  114.00  468.00   456.00  6644.00    24.40    11.94   20.24   46.76   13.77   1.72 100.00
+> sdg               0.00   399.00  145.00  492.00   580.00  5056.00    17.70     7.99   12.38   43.21    3.29   1.57 100.00
+> sdk               0.00   422.00  143.00  534.00   572.00  5780.00    18.77     8.55   13.63   43.87    5.53   1.48 100.00
+> sdi               0.00   322.00  115.00  581.00   460.00 12016.00    35.85    25.69   77.43   65.58   79.78   1.44 100.00
+> sdh               0.00  1914.00   25.00  436.00   100.00 17796.00    77.64   145.97  317.56  257.60  321.00   2.17 100.00
+> sdd               0.00   452.00  155.00  549.00   620.00  5756.00    18.11     8.32   11.85   41.14    3.58   1.42 100.00
+> sdf               0.00     5.00   11.00  590.00    44.00  2792.00     9.44   146.84  243.25  465.55  239.11   1.66 100.00
+> sdj               0.00   378.00  120.00  464.00   480.00  4824.00    18.16     7.84   13.23   50.51    3.59   1.71 100.00
+> sdc               0.00     2.00    0.00    6.00     0.00    76.00    25.33     0.05    8.50    0.00    8.50   8.50   5.10
+> dm-0              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+> dm-1              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+> dm-2              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+> dm-3              0.00     0.00    0.00    6.00     0.00    76.00    25.33     0.05    8.67    0.00    8.67   8.50   5.10
+>
+> log in ceph-osd
+> 2017-07-18 18:13:22.104639 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 43.722246 seconds old, received at 2017-07-18 18:12:38.381955: osd_op(client.76896.0:509128 0.7b 0:de320fa8:::rbd_data.ba112ae8944a.00000000000028a6:head [write 3813028~8196 [fadvise_random]] snapc 0=[] ondisk+write+known_if_redirected e1119) currently commit_sent
+> 2017-07-18 18:13:22.104644 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 43.714032 seconds old, received at 2017-07-18 18:12:38.390168: osd_repop(client.76896.0:509193 0.29d e1119/1116 0:b97947f6:::rbd_data.ba112ae8944a.0000000000004654:head v 1119'17412) currently commit_sent
+> 2017-07-18 18:13:22.104648 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 43.653849 seconds old, received at 2017-07-18 18:12:38.450352: osd_repop(client.76896.0:509685 0.1e e1119/1117 0:781ecb04:::rbd_data.ba112ae8944a.0000000000003c5f:head v 1119'13702) currently commit_sent
+> 2017-07-18 18:13:23.105083 7fe34c270700  0 log_channel(cluster) log [WRN] : 1471 slow requests, 5 included below; oldest blocked for > 44.206332 secs
+> 2017-07-18 18:13:23.105098 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 44.206332 seconds old, received at 2017-07-18 18:12:38.898459: osd_repop(client.76896.0:513404 0.3a1 e1119/1117 0:85dab8cb:::rbd_data.ba112ae8944a.0000000000001fb4:head v 1119'15378) currently commit_sent
+> 2017-07-18 18:13:23.105104 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 44.119205 seconds old, received at 2017-07-18 18:12:38.985585: osd_op(client.76896.0:514135 0.2e0 0:07575ed3:::rbd_data.ba112ae8944a.0000000000004782:head [write 2665884~8196 [fadvise_random]] snapc 0=[] ondisk+write+known_if_redirected e1119) currently commit_sent
+> 2017-07-18 18:13:23.105109 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 44.098773 seconds old, received at 2017-07-18 18:12:39.006017: osd_op(client.76896.0:514296 0.306 0:60da6e83:::rbd_data.ba112ae8944a.0000000000002a78:head [write 2333184~8196 [fadvise_random]] snapc 0=[] ondisk+write+known_if_redirected e1119) currently commit_sent
+> 2017-07-18 18:13:23.105125 7fe34c270700  0 log_channel(cluster) log [WRN] : slow request 44.063825 seconds old, received at 2017-07-18 18:12:39.040965: osd_repop(client.76896.0:514585 0.1e e1119/1117 0:783122c6:::rbd_data.ba112ae8944a.0000000000002292:head v 1119'13711) currently commit_sent
+>
+> I also checked dmesg, found following log, but seems not at this time.
+> [22932.710120] INFO: task filestore_sync:5128 blocked for more than 120 seconds.
+> [22932.710121] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> [22932.710123] filestore_sync  D 00007f902b69c708     0  5128      1 0x00000080
+> [22932.710126]  ffff885f8d78fd50 0000000000000086 ffff885fbe6f9f60 ffff885f8d78ffd8
+> [22932.710130]  ffff885f8d78ffd8 ffff885f8d78ffd8 ffff885fbe6f9f60 ffff885f8d78fe80
+> [22932.710133]  ffff885f8d78fe88 7fffffffffffffff ffff885fbe6f9f60 00007f902b69c708
+>
+> Here is my osd configure.
+> [osd.0]
+> host = ceph-1
+> osd journal = /var/lib/ceph/osd/ceph-0-journal/journal  # a ssd partion
+> osd data =  /var/lib/ceph/osd/ceph-0                                      # a HDD disk
+>
+> Could anyone help how to move on to debug this?
+> Thanks a lot!
+>
+> B.R.
+> Junqin Zhang
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
