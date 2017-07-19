@@ -1,135 +1,165 @@
-From: "Zhou, Yuan" <yuan.zhou@intel.com>
-Subject: Issue on RGW 500 error: flush_read_list():
- d->client_c->handle_data() returned -5
-Date: Wed, 19 Jul 2017 14:45:54 +0000
-Message-ID: <06681238D8946F44A60AA400760A1CBF12393956@SHSMSX103.ccr.corp.intel.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Luminous RC feedback - device classes and osd df weirdness
+Date: Wed, 19 Jul 2017 14:53:40 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1707191451340.27271@piezo.novalocal>
+References: <71ce32a8-6232-0f5b-35a5-d86f30a045db@catalyst.net.nz> <f0536e0e-b9a1-6ef5-c96e-81e873bda624@catalyst.net.nz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:63836 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754891AbdGSOqt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 19 Jul 2017 10:46:49 -0400
-Content-Language: en-US
+Received: from cobra.newdream.net ([66.33.216.30]:50068 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755108AbdGSOxn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jul 2017 10:53:43 -0400
+In-Reply-To: <f0536e0e-b9a1-6ef5-c96e-81e873bda624@catalyst.net.nz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hello, 
+On Wed, 19 Jul 2017, Mark Kirkwood wrote:
+> On 29/06/17 17:04, Mark Kirkwood wrote:
+> 
+> > 
+> > 
+> > That all went very smoothly, with only a couple of things that seemed weird.
+> > Firstly the crush/osd tree output is a bit strange (but I could get to the
+> > point where it make sense):
+> > 
+> > $ sudo ceph osd tree
+> > ID  WEIGHT  TYPE NAME          UP/DOWN REWEIGHT PRIMARY-AFFINITY
+> > -15 0.23196 root default~ssd
+> > -11 0.05699     host ceph1~ssd
+> >   4 0.05699         osd.4           up  1.00000 1.00000
+> > -12 0.05899     host ceph2~ssd
+> >   5 0.05899         osd.5           up  1.00000 1.00000
+> > -13 0.05699     host ceph3~ssd
+> >   6 0.05699         osd.6           up  1.00000 1.00000
+> > -14 0.05899     host ceph4~ssd
+> >   7 0.05899         osd.7           up  1.00000 1.00000
+> > -10 0.07996 root default~hdd
+> >  -6 0.01999     host ceph1~hdd
+> >   0 0.01999         osd.0           up  1.00000 1.00000
+> >  -7 0.01999     host ceph2~hdd
+> >   1 0.01999         osd.1           up  1.00000 1.00000
+> >  -8 0.01999     host ceph3~hdd
+> >   2 0.01999         osd.2           up  1.00000 1.00000
+> >  -9 0.01999     host ceph4~hdd
+> >   3 0.01999         osd.3           up  1.00000 1.00000
+> >  -1 0.31198 root default
+> >  -2 0.07700     host ceph1
+> >   0 0.01999         osd.0           up  1.00000 1.00000
+> >   4 0.05699         osd.4           up  1.00000 1.00000
+> >  -3 0.07899     host ceph2
+> >   1 0.01999         osd.1           up  1.00000 1.00000
+> >   5 0.05899         osd.5           up  1.00000 1.00000
+> >  -4 0.07700     host ceph3
+> >   2 0.01999         osd.2           up  1.00000 1.00000
+> >   6 0.05699         osd.6           up  1.00000 1.00000
+> >  -5 0.07899     host ceph4
+> >   3 0.01999         osd.3           up  1.00000 1.00000
+> >   7 0.05899         osd.7           up  1.00000 1.00000
+> > 
+> > 
+> > But the osd df output is baffling, I've got two identical lines for each osd
+> > (hard to see immediately - sorting by osd id would make it easier). This is
+> > not ideal, particularly as for the bluestore guys there is no other way to
+> > work out utilization. Any ideas - have I done something obviously wrong here
+> > that is triggering the 2 lines?
+> > 
+> > $ sudo ceph osd df
+> > ID WEIGHT  REWEIGHT SIZE   USE    AVAIL  %USE VAR  PGS
+> >  4 0.05699  1.00000 60314M  1093M 59221M 1.81 1.27   0
+> >  5 0.05899  1.00000 61586M  1234M 60351M 2.00 1.40   0
+> >  6 0.05699  1.00000 60314M  1248M 59066M 2.07 1.45   0
+> >  7 0.05899  1.00000 61586M  1209M 60376M 1.96 1.37   0
+> >  0 0.01999  1.00000 25586M 43812k 25543M 0.17 0.12  45
+> >  1 0.01999  1.00000 25586M 42636k 25544M 0.16 0.11  37
+> >  2 0.01999  1.00000 25586M 44336k 25543M 0.17 0.12  53
+> >  3 0.01999  1.00000 25586M 42716k 25544M 0.16 0.11  57
+> >  0 0.01999  1.00000 25586M 43812k 25543M 0.17 0.12  45
+> >  4 0.05699  1.00000 60314M  1093M 59221M 1.81 1.27   0
+> >  1 0.01999  1.00000 25586M 42636k 25544M 0.16 0.11  37
+> >  5 0.05899  1.00000 61586M  1234M 60351M 2.00 1.40   0
+> >  2 0.01999  1.00000 25586M 44336k 25543M 0.17 0.12  53
+> >  6 0.05699  1.00000 60314M  1248M 59066M 2.07 1.45   0
+> >  3 0.01999  1.00000 25586M 42716k 25544M 0.16 0.11  57
+> >  7 0.05899  1.00000 61586M  1209M 60376M 1.96 1.37   0
+> >               TOTAL   338G  4955M   333G 1.43
+> > MIN/MAX VAR: 0.11/1.45  STDDEV: 0.97
+> 
+> Revisiting these points after reverting to Jewel again and freshly upgrading
+> to 12.1.1:
+> 
+> $ sudo ceph osd tree
+> ID CLASS WEIGHT  TYPE NAME      UP/DOWN REWEIGHT PRI-AFF
+> -1       0.32996 root default
+> -2       0.08199     host ceph1
+>  0   hdd 0.02399         osd.0       up  1.00000 1.00000
+>  4   ssd 0.05699         osd.4       up  1.00000 1.00000
+> -3       0.08299     host ceph2
+>  1   hdd 0.02399         osd.1       up  1.00000 1.00000
+>  5   ssd 0.05899         osd.5       up  1.00000 1.00000
+> -4       0.08199     host ceph3
+>  2   hdd 0.02399         osd.2       up  1.00000 1.00000
+>  6   ssd 0.05699         osd.6       up  1.00000 1.00000
+> -5       0.08299     host ceph4
+>  3   hdd 0.02399         osd.3       up  1.00000 1.00000
+>  7   ssd 0.05899         osd.7       up  1.00000 1.00000
+> 
+> This looks much more friendly!
+> 
+> $ sudo ceph osd df
+> ID CLASS WEIGHT  REWEIGHT SIZE   USE    AVAIL  %USE  VAR PGS
+>  0   hdd 0.02399  1.00000 25586M 89848k 25498M  0.34 0.03 109
+>  4   ssd 0.05699  1.00000 60314M 10096M 50218M 16.74 1.34 60
+>  1   hdd 0.02399  1.00000 25586M 93532k 25495M  0.36 0.03 103
+>  5   ssd 0.05899  1.00000 61586M  9987M 51598M 16.22 1.30 59
+>  2   hdd 0.02399  1.00000 25586M 88120k 25500M  0.34 0.03 111
+>  6   ssd 0.05699  1.00000 60314M 12403M 47911M 20.56 1.64 75
+>  3   hdd 0.02399  1.00000 25586M 94688k 25494M  0.36 0.03 125
+>  7   ssd 0.05899  1.00000 61586M 10435M 51151M 16.94 1.36 62
+>                     TOTAL   338G 43280M   295G 12.50
+> MIN/MAX VAR: 0.03/1.64  STDDEV: 9.40
+> 
+> ...and this is vastly better too. Bit of a toss up whether ordering by host
+> (which is what it seems to be happening here) or ordering by osd id is better,
+> but clearly there are bound to be differing POV on this - I'm happy with the
+> current choice.
 
-Trying to do some tests with bigdata + S3a + RGW here and ran into a weird 500 error. I checked the log and find the error was due to:
+Great!  I think the result is actaully ordered by the tree code but just 
+doesn't format that way (and show the tree nodes).  It is a little weird, 
+I agree.
+ 
+> One (I think) new thing compared to the 12.1.0 is that restarting the services
+> blitzes the modified crushmap, and we get back to:
+> 
+> $ sudo ceph osd tree
+> ID CLASS WEIGHT  TYPE NAME      UP/DOWN REWEIGHT PRI-AFF
+> -1       0.32996 root default
+> -2       0.08199     host ceph1
+>  0   hdd 0.02399         osd.0       up  1.00000 1.00000
+>  4   hdd 0.05699         osd.4       up  1.00000 1.00000
+> -3       0.08299     host ceph2
+>  1   hdd 0.02399         osd.1       up  1.00000 1.00000
+>  5   hdd 0.05899         osd.5       up  1.00000 1.00000
+> -4       0.08199     host ceph3
+>  2   hdd 0.02399         osd.2       up  1.00000 1.00000
+>  6   hdd 0.05699         osd.6       up  1.00000 1.00000
+> -5       0.08299     host ceph4
+>  3   hdd 0.02399         osd.3       up  1.00000 1.00000
+>  7   hdd 0.05899         osd.7       up  1.00000 1.00000
+> 
+> ...and all the PG are remapped again. Now I might have just missed this
+> happening with 12.1.0 - but I'm (moderately) confident that I did restart
+> stuff and not see this happening. For now I've added:
+> 
+> osd crush update on start = false
+> 
+> to my ceph.conf to avoid being caught by this.
 
-ERROR: flush_read_list(): d->client_c->handle_data() returned -5
+Can you share teh output of 'ceph osd metadata 0' vs 'cpeh osd metadata 
+4'?  I'm not sure why it's getting the class wrong.  I haven't seen this 
+on my cluster (it's bluestore; maybe that's the difference).
 
-After checking the code this function seems trying to send data back to client but something wrong happen. Was this because the connection between client and RGW was closed before the data transferring finish? 
-
-Is there a way to do some debug on this?  
-
-I'm testing with Ceph 10.2.7, the data pool was using EC(3 + 2). Any comments would be appreciated!
-
-The full log is listed as below:
-
-2017-07-19 10:39:53.850687 7f5cfa7fc700  1 ====== starting new request req=0x7f5cfa7f6710 =====
-2017-07-19 10:39:53.850698 7f5cfa7fc700  2 req 19279:0.000011::GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0::initializing 
-for trans_id = tx000000000000000004b4f-00596ec679-47a5c-default
-2017-07-19 10:39:53.850704 7f5cfa7fc700 10 rgw api priority: s3=5 s3website=4
-2017-07-19 10:39:53.850706 7f5cfa7fc700 10 host=10.0.2.254
-2017-07-19 10:39:53.850708 7f5cfa7fc700 20 subdomain= domain= in_hosted_domain=0 in_hosted_domain_s3website=0
-2017-07-19 10:39:53.850710 7f5cfa7fc700 20 final domain/bucket subdomain= domain= in_hosted_domain=0 in_hosted_domain_s3website=0 s->info.domain= s->info.request_uri=/test-
-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0
-2017-07-19 10:39:53.850726 7f5cfa7fc700 20 get_handler handler=22RGWHandler_REST_Obj_S3
-2017-07-19 10:39:53.850728 7f5cfa7fc700 10 handler=22RGWHandler_REST_Obj_S3
-2017-07-19 10:39:53.850729 7f5cfa7fc700  2 req 19279:0.000042:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0::getting op 
-0
-2017-07-19 10:39:53.850732 7f5cfa7fc700 10 op=21RGWGetObj_ObjStore_S3
-2017-07-19 10:39:53.850734 7f5cfa7fc700  2 req 19279:0.000047:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:auth
-orizing
-2017-07-19 10:39:53.850751 7f5cfa7fc700 10 get_canon_resource(): dest=/test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0
-2017-07-19 10:39:53.850753 7f5cfa7fc700 10 auth_hdr:
-GET
-
-application/x-www-form-urlencoded; charset=utf-8
-Wed, 19 Jul 2017 02:35:49 GMT
-/test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0
-2017-07-19 10:39:53.850778 7f5cfa7fc700 15 calculated digest=REpW8++O3jzMIU6iaPpqIFjpwxU=
-2017-07-19 10:39:53.850780 7f5cfa7fc700 15 auth_sign=REpW8++O3jzMIU6iaPpqIFjpwxU=
-2017-07-19 10:39:53.850780 7f5cfa7fc700 15 compare=0
-2017-07-19 10:39:53.850782 7f5cfa7fc700  2 req 19279:0.000095:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:norm
-alizing buckets and tenants
-2017-07-19 10:39:53.850784 7f5cfa7fc700 10 s->object=tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk=2451894/000000_0 s->bucket=test-bucket
-2017-07-19 10:39:53.850797 7f5cfa7fc700  2 req 19279:0.000099:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:init
-permissions
-2017-07-19 10:39:53.850815 7f5cfa7fc700 15 decode_policy Read AccessControlPolicy<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>johndoe</ID
-><DisplayName>John Doe</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CanonicalUser"><ID>johndoe</I
-D><DisplayName>John Doe</DisplayName></Grantee><Permission>FULL_CONTROL</Permission></Grant></AccessControlList></AccessControlPolicy>
-2017-07-19 10:39:53.850822 7f5cfa7fc700  2 req 19279:0.000135:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:reca
-lculating target
-2017-07-19 10:39:53.850824 7f5cfa7fc700  2 req 19279:0.000137:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:read
-ing permissions
-2017-07-19 10:39:53.850838 7f5cfa7fc700 20 get_obj_state: rctx=0x7f5cfa7f5e50 obj=test-bucket:tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk=2451894/000000_0 st
-ate=0x7f5cd800ac98 s->prefetch_data=1
-2017-07-19 10:39:53.853125 7f5cfa7fc700 10 manifest: total_size = 479111
-2017-07-19 10:39:53.853136 7f5cfa7fc700 20 get_obj_state: setting s->obj_tag to c48d4021-fed2-4f05-865a-3b26715fe3e6.233739.2645046^@
-2017-07-19 10:39:53.853144 7f5cfa7fc700 15 decode_policy Read AccessControlPolicy<AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>johndoe</ID
-><DisplayName>John Doe</DisplayName></Owner><AccessControlList><Grant><Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CanonicalUser"><ID>johndoe</I
-D><DisplayName>John Doe</DisplayName></Grantee><Permission>FULL_CONTROL</Permission></Grant></AccessControlList></AccessControlPolicy>
-2017-07-19 10:39:53.853150 7f5cfa7fc700  2 req 19279:0.002463:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:init
-op
-2017-07-19 10:39:53.853154 7f5cfa7fc700  2 req 19279:0.002467:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:veri
-fying op mask
-2017-07-19 10:39:53.853155 7f5cfa7fc700 20 required_mask= 1 user.op_mask=7
-2017-07-19 10:39:53.853156 7f5cfa7fc700  2 req 19279:0.002469:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:veri
-fying op permissions
-2017-07-19 10:39:53.853161 7f5cfa7fc700  5 Searching permissions for uid=johndoe mask=49
-2017-07-19 10:39:53.853163 7f5cfa7fc700  5 Found permission: 15
-2017-07-19 10:39:53.853163 7f5cfa7fc700  5 Searching permissions for group=1 mask=49
-2017-07-19 10:39:53.853165 7f5cfa7fc700  5 Permissions for group not found
-2017-07-19 10:39:53.853166 7f5cfa7fc700  5 Searching permissions for group=2 mask=49
-2017-07-19 10:39:53.853167 7f5cfa7fc700  5 Permissions for group not found
-2017-07-19 10:39:53.853167 7f5cfa7fc700  5 Getting permissions id=johndoe owner=johndoe perm=1
-2017-07-19 10:39:53.853168 7f5cfa7fc700 10  uid=johndoe requested perm (type)=1, policy perm=1, user_perm_mask=15, acl perm=1
-2017-07-19 10:39:53.853169 7f5cfa7fc700  2 req 19279:0.002482:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:veri
-fying op params
-2017-07-19 10:39:53.853170 7f5cfa7fc700  2 req 19279:0.002483:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:pre-
-executing
-2017-07-19 10:39:53.853171 7f5cfa7fc700  2 req 19279:0.002484:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:exec
-uting
-2017-07-19 10:39:53.853178 7f5cfa7fc700 20 get_obj_state: rctx=0x7f5cfa7f5e50 obj=test-bucket:tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk=2451894/000000_0 st
-ate=0x7f5cd800ac98 s->prefetch_data=1
-2017-07-19 10:39:53.853191 7f5cfa7fc700 20 Read xattr: user.rgw.acl
-2017-07-19 10:39:53.853192 7f5cfa7fc700 20 Read xattr: user.rgw.content_type
-2017-07-19 10:39:53.853193 7f5cfa7fc700 20 Read xattr: user.rgw.etag
-2017-07-19 10:39:53.853193 7f5cfa7fc700 20 Read xattr: user.rgw.idtag
-2017-07-19 10:39:53.853193 7f5cfa7fc700 20 Read xattr: user.rgw.manifest
-2017-07-19 10:39:53.853194 7f5cfa7fc700 20 Read xattr: user.rgw.pg_ver
-2017-07-19 10:39:53.853195 7f5cfa7fc700 20 Read xattr: user.rgw.source_zone
-2017-07-19 10:39:53.853195 7f5cfa7fc700 20 Read xattr: user.rgw.x-amz-copy-source
-2017-07-19 10:39:53.853195 7f5cfa7fc700 20 Read xattr: user.rgw.x-amz-metadata-directive
-2017-07-19 10:39:53.853200 7f5cfa7fc700 20 get_obj_state: rctx=0x7f5cfa7f5e50 obj=test-bucket:tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk=2451894/000000_0 st
-ate=0x7f5cd800ac98 s->prefetch_data=1
-2017-07-19 10:39:53.853931 7f5cfa7fc700 20 
-rados->get_obj_iterate_cb oid=c48d4021-fed2-4f05-865a-3b26715fe3e6.233798.8__shadow_.PWx_nnmtTuV9yTPbfQMo81Olo9U34Js_1 
-obj-ofs=458976 read_ofs=0 len=20135
-2017-07-19 10:39:53.854036 7f5cfa7fc700 20 RGWObjManifest::operator++(): rule->part_size=0 rules.size()=1
-2017-07-19 10:39:53.854040 7f5cfa7fc700 20 RGWObjManifest::operator++(): result: ofs=479111 stripe_ofs=479111 part_ofs=0 rule->part_size=0
-2017-07-19 10:39:53.855328 7f5e7dffb700 20 get_obj_aio_completion_cb: io completion ofs=458976 len=20135
-2017-07-19 10:39:53.855395 7f5cfa7fc700  0 ERROR: flush_read_list(): d->client_c->handle_data() returned -5
-2017-07-19 10:39:53.855403 7f5cfa7fc700 10 get_obj_iterate() r=-5, canceling all io
-2017-07-19 10:39:53.855405 7f5cfa7fc700 20 get_obj_data::cancel_all_io()
-2017-07-19 10:39:53.855409 7f5cfa7fc700  0 WARNING: set_req_state_err err_no=5 resorting to 500
-2017-07-19 10:39:53.855430 7f5cfa7fc700  0 ERROR: s->cio->send_content_length() returned err=-5
-2017-07-19 10:39:53.855432 7f5cfa7fc700  0 ERROR: s->cio->print() returned err=-5
-2017-07-19 10:39:53.855433 7f5cfa7fc700  0 ERROR: STREAM_IO(s)->print() returned err=-5
-2017-07-19 10:39:53.855440 7f5cfa7fc700  0 ERROR: STREAM_IO(s)->complete_header() returned err=-5
-2017-07-19 10:39:53.855465 7f5cfa7fc700  2 req 19279:0.004778:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:comp
-leting
-2017-07-19 10:39:53.855469 7f5cfa7fc700  2 req 19279:0.004782:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:op s
-tatus=-5
-2017-07-19 10:39:53.855470 7f5cfa7fc700  2 req 19279:0.004783:s3:GET /test-bucket/tpcds_bin_partitioned_orc_3.db/store_sales/ss_sold_date_sk%3D2451894/000000_0:get_obj:http
-status=500
-2017-07-19 10:39:53.855474 7f5cfa7fc700  1 ====== req done req=0x7f5cfa7f6710 op status=-5 http_status=500 ======
-
-
-Thanks, -yuan
-
+Thanks!
+sage
