@@ -1,50 +1,42 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fixes for 4.13-rc2
-Date: Wed, 19 Jul 2017 17:04:45 +0200
-Message-ID: <1500476685-4843-1-git-send-email-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Jens Harbott <j.rosenboom@x-ion.de>
+Subject: Re: Issue on RGW 500 error: flush_read_list(): d->client_c->handle_data()
+ returned -5
+Date: Wed, 19 Jul 2017 15:48:33 +0000
+Message-ID: <CADr68WakoPGs21PDk3fXfZ2czJ2YRiQv0usQhPKHZW-BDzNyMg@mail.gmail.com>
+References: <06681238D8946F44A60AA400760A1CBF12393956@SHSMSX103.ccr.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:35229 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755409AbdGSPsf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jul 2017 11:48:35 -0400
+Received: by mail-wm0-f46.google.com with SMTP id w126so2743026wme.0
+        for <ceph-devel@vger.kernel.org>; Wed, 19 Jul 2017 08:48:35 -0700 (PDT)
+In-Reply-To: <06681238D8946F44A60AA400760A1CBF12393956@SHSMSX103.ccr.corp.intel.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Zhou, Yuan" <yuan.zhou@intel.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Linus,
+2017-07-19 14:45 GMT+00:00 Zhou, Yuan <yuan.zhou@intel.com>:
+> Hello,
+>
+> Trying to do some tests with bigdata + S3a + RGW here and ran into a weird 500 error. I checked the log and find the error was due to:
+>
+> ERROR: flush_read_list(): d->client_c->handle_data() returned -5
+>
+> After checking the code this function seems trying to send data back to client but something wrong happen. Was this because the connection between client and RGW was closed before the data transferring finish?
+>
+> Is there a way to do some debug on this?
+>
+> I'm testing with Ceph 10.2.7, the data pool was using EC(3 + 2). Any comments would be appreciated!
 
-The following changes since commit 5771a8c08880cdca3bfb4a3fc6d309d6bba20877:
+Error 5 is EIO, so it seems like your OSDs couldn't read some of the
+data properly. You could either check all of your OSD logs at that
+time or add "debug ms=1" to your RGW config and rerun your test, where
+you will have more information about the OSD transactions in your
+radosgw.log then.
 
-  Linux v4.13-rc1 (2017-07-15 15:22:10 -0700)
-
-are available in the git repository at:
-
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.13-rc2
-
-for you to fetch changes up to 7c40b22f6f84c98a1d36e6d0a4346e58f05e45d8:
-
-  libceph: potential NULL dereference in ceph_msg_data_create() (2017-07-17 14:54:59 +0200)
-
-----------------------------------------------------------------
-A number of small fixes for -rc1 Luminous changes plus a readdir race
-fix, marked for stable.
-
-----------------------------------------------------------------
-Arnd Bergmann (1):
-      libceph: fix old style declaration warnings
-
-Dan Carpenter (2):
-      libceph: NULL deref on osdmap_apply_incremental() error path
-      libceph: potential NULL dereference in ceph_msg_data_create()
-
-Ilya Dryomov (3):
-      libceph: set -EINVAL in one place in crush_decode()
-      libceph: use alloc_pg_mapping() in __decode_pg_upmap_items()
-      libceph: don't call encode_request_finish() on MOSDBackoff messages
-
-Yan, Zheng (1):
-      ceph: fix race in concurrent readdir
-
- fs/ceph/dir.c                      |  5 +++++
- include/linux/ceph/ceph_features.h |  8 ++++----
- net/ceph/messenger.c               |  6 ++++--
- net/ceph/osd_client.c              |  5 ++++-
- net/ceph/osdmap.c                  | 31 ++++++++++++++++---------------
- 5 files changed, 33 insertions(+), 22 deletions(-)
+In addition, radosgw is known bad at giving feedback to the client
+about such errors, see http://tracker.ceph.com/issues/20166.
