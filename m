@@ -1,234 +1,146 @@
-From: M Ranga Swami Reddy <swamireddy@gmail.com>
-Subject: v12.1.1 Contributor credits
-Date: Thu, 20 Jul 2017 02:05:43 +0530
-Message-ID: <CANA9Uk7satGz9Y5ELHj+DBuzj95WkwMc9Eszv9G-0sdQ__mZXA@mail.gmail.com>
+From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
+Subject: Re: Luminous RC feedback - device classes and osd df weirdness
+Date: Thu, 20 Jul 2017 10:46:40 +1200
+Message-ID: <77d9e88b-5f51-99b3-4bcd-b022e356d9ff@catalyst.net.nz>
+References: <71ce32a8-6232-0f5b-35a5-d86f30a045db@catalyst.net.nz>
+ <f0536e0e-b9a1-6ef5-c96e-81e873bda624@catalyst.net.nz>
+ <alpine.DEB.2.11.1707191451340.27271@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f179.google.com ([209.85.217.179]:34368 "EHLO
-        mail-ua0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754170AbdGSUfo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 19 Jul 2017 16:35:44 -0400
-Received: by mail-ua0-f179.google.com with SMTP id u4so8624123uaa.1
-        for <ceph-devel@vger.kernel.org>; Wed, 19 Jul 2017 13:35:44 -0700 (PDT)
+Received: from cat-porwal-prod-mail1.catalyst.net.nz ([202.78.240.226]:50334
+        "EHLO cat-porwal-prod-mail1.catalyst.net.nz" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S932437AbdGSWqn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 19 Jul 2017 18:46:43 -0400
+In-Reply-To: <alpine.DEB.2.11.1707191451340.27271@piezo.novalocal>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
-Cc: Loic Dachary <loic@dachary.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Cephers,
+On 20/07/17 02:53, Sage Weil wrote:
 
-Here is a sorted list of authors and organizations who contributed to
-v12.1.1, by the number of commits or reviews back to v12.1.0. Thank
-you, everyone, or contributing, and keep up the good work. The
-affiliation of authors to organizations can be updated by submitting a
-patch to
-https://github.com/ceph/ceph/blob/master/.organizationmap
+> On Wed, 19 Jul 2017, Mark Kirkwood wrote:
+>
+>   
+>> One (I think) new thing compared to the 12.1.0 is that restarting the services
+>> blitzes the modified crushmap, and we get back to:
+>>
+>> $ sudo ceph osd tree
+>> ID CLASS WEIGHT  TYPE NAME      UP/DOWN REWEIGHT PRI-AFF
+>> -1       0.32996 root default
+>> -2       0.08199     host ceph1
+>>   0   hdd 0.02399         osd.0       up  1.00000 1.00000
+>>   4   hdd 0.05699         osd.4       up  1.00000 1.00000
+>> -3       0.08299     host ceph2
+>>   1   hdd 0.02399         osd.1       up  1.00000 1.00000
+>>   5   hdd 0.05899         osd.5       up  1.00000 1.00000
+>> -4       0.08199     host ceph3
+>>   2   hdd 0.02399         osd.2       up  1.00000 1.00000
+>>   6   hdd 0.05699         osd.6       up  1.00000 1.00000
+>> -5       0.08299     host ceph4
+>>   3   hdd 0.02399         osd.3       up  1.00000 1.00000
+>>   7   hdd 0.05899         osd.7       up  1.00000 1.00000
+>>
+>> ...and all the PG are remapped again. Now I might have just missed this
+>> happening with 12.1.0 - but I'm (moderately) confident that I did restart
+>> stuff and not see this happening. For now I've added:
+>>
+>> osd crush update on start = false
+>>
+>> to my ceph.conf to avoid being caught by this.
 
-All commits are reviewed but the number of reviews is a fraction of
-the number of commits. More often than not, the reviewer(s) is only
-mentioned in the message of the merge although it means that all
-associated commits have been reviewed. If you are curious about how it
-is done, do checkout the wiki entry at
-http://tracker.ceph.com/projects/ceph/wiki/Ceph_contributors_list_maintenan=
-ce_guide
+Actually setting the above does *not* prevent the crushmap getting changed.
 
-Commits by authors
-     1      164 Sage Weil <sweil@redhat.com>
-     2       71 Xie Xingguo <xie.xingguo@zte.com.cn>
-     3       45 Kefu Chai <kchai@redhat.com>
-     4       36 John Spray <jspray@redhat.com>
-     5       29 David Zafman <dzafman@redhat.com>
-     6       25 Jason Dillaman <dillaman@redhat.com>
-     7       21 Jos Collin <jcollin@redhat.com>
-     8       17 Nathan Cutler <ncutler@suse.com>
-     9       14 Casey Bodley <cbodley@redhat.com>
-    10       13 Greg Farnum <gfarnum@redhat.com>
-    11       12 Ma Jianpeng <jianpeng.ma@intel.com>
-    12       11 Yehuda Sadeh <ysadehwe@redhat.com>
-    13       11 Yan, Zheng <zyan@redhat.com>
-    14       11 Josh Durgin <jdurgin@redhat.com>
-    15       10 Willem Jan Withagen <wjw@digiware.nl>
-    16        9 Yan Jun <yan.jun8@zte.com.cn>
-    17        8 Wido den Hollander <wido@42on.com>
-    18        7 Abhishek Lekshmanan <abhishek@suse.com>
-    19        6 Zhang Shaowen <zhangshaowen@cmss.chinamobile.com>
-    20        6 Zack Cerza <zack@redhat.com>
-    21        6 Tommi Virtanen <tv@inktank.com>
-    22        6 Orit Wasserman <owasserm@redhat.com>
-    23        6 Matt Benjamin <mbenjamin@redhat.com>
-    24        6 Mark Nelson <mnelson@redhat.com>
-    25        6 lu.shasha <lu.shasha@eisoo.com>
-    26        6 Chang Liu <liuchang0812@gmail.com>
-    27        5 Yanhu Cao <gmayyyha@gmail.com>
-    28        5 Vasu Kulkarni <vasu@redhat.com>
-    29        5 Radoslaw Zarzynski <rzarzyns@redhat.com>
-    30        5 Patrick Donnelly <pdonnell@redhat.com>
-    31        5 Pan Liu <wanjun.lp@alibaba-inc.com>
-    32        5 Jiaying Ren <jiaying.ren@umcloud.com>
-    33        5 Adir Lev <adirl@mellanox.com>
-    34        4 Radoslaw Zarzynski <rzarzynski@mirantis.com>
-    35        4 Jo=C3=A3o Eduardo Lu=C3=ADs <joao@suse.de>
-    36        4 Haomai Wang <haomai@xsky.com>
-    37        4 Adam Kupczyk <akupczyk@mirantis.com>
-    38        4 Abhishek Varshney <abhishek.varshney@flipkart.com>
-    39        3 Warren Usui <wusui@redhat.com>
-    40        3 Ren Huanwen <ren.huanwen@zte.com.cn>
-    41        3 James Page <james.page@ubuntu.com>
-    42        3 Ilya Dryomov <idryomov@redhat.com>
-    43        3 Hong Zhangoole <hong.zhangoole@gmail.com>
-    44        3 Gui Hecheng <guihecheng@cmss.chinamobile.com>
-    45        3 Bassam Tabbara <bassam.tabbara@quantum.com>
-    46        2 Zhao Chao <zhaochao1984@gmail.com>
-    47        2 Samuel Just <sjust@redhat.com>
-    48        2 Piotr Da=C5=82ek <piotr.dalek@corp.ovh.com>
-    49        2 Peng Zhang <zphj1987@gmail.com>
-    50        2 Myoungwon Oh <omwmw@sk.com>
-    51        2 Marcus Watts <mwatts@redhat.com>
-    52        2 Luo Kexue <luo.kexue@zte.com.cn>
-    53        2 Haodong Tang <haodong.tang@intel.com>
-    54        2 Fan Yang <yangf@neunn.com>
-    55        2 Fang Yuxiang <fang.yuxiang@eisoo.com>
-    56        2 Douglas Fuller <dfuller@redhat.com>
-    57        2 Dan Mick <dmick@redhat.com>
-    58        2 Adam Kupczyk <akucpzyk@redhat.com>
-    59        1 zhanglei <243290414@qq.com>
-    60        1 yuliyang <yuliyang@cmss.chinamobile.com>
-    61        1 Yankun Li <liyankun@unitedstack.com>
-    62        1 Yang Honggang <joseph.yang@xtaotech.com>
-    63        1 Xuehan Xu <xxhdx1985126@163.com>
-    64        1 Xie Rui <875016668@qq.com>
-    65        1 wujian <wujian3659@163.com>
-    66        1 Wei Qiaomiao <wei.qiaomiao@zte.com.cn>
-    67        1 Tushar Gohad <tushar.gohad@intel.com>
-    68        1 Tim Serong <tserong@suse.com>
-    69        1 Tianshan Qu <tianshan@xsky.com>
-    70        1 Tang Jin <tang.jin@istuary.com>
-    71        1 Stephon Striplin <stephon.striplin@dreamhost.com>
-    72        1 Song Weibin <song.weibin@zte.com.cn>
-    73        1 Song Baisen <song.baisen@zte.com.cn>
-    74        1 Sander Pool <sander.pool@inktank.com>
-    75        1 Sam Lang <sam.lang@inktank.com>
-    76        1 root <root@dlp-dev01.novalocal>
-    77        1 Pritha Srivastava <prsrivas@redhat.com>
-    78        1 Peng Xie <peng.hse@xtaotech.com>
-    79        1 Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
-    80        1 Pan Liu <pan.liu@istuary.com>
-    81        1 Mykola Golub <mgolub@mirantis.com>
-    82        1 Ming Lin <ming.lin@alibaba-inc.com>
-    83        1 Luo Runbing <runsisi@zte.com.cn>
-    84        1 Loic Dachary <ldachary@redhat.com>
-    85        1 Liu Hong <liuhong@cmss.chinamobile.com>
-    86        1 linbing <hawkerous@gmail.com>
-    87        1 Leo Zhang <nguzcf@gmail.com>
-    88        1 Kuan-Kai Chiu <big.chiu@bigtera.com>
-    89        1 Ken Dreyer <kdreyer@redhat.com>
-    90        1 Joe Buck <jbbuck@gmail.com>
-    91        1 Jin Cai <caijin.caij@alibaba-inc.com>
-    92        1 Jianyu Li <joannyli@foxmail.com>
-    93        1 J. Eric Ivancich <ivancich@redhat.com>
-    94        1 Jens Rosenboom <j.rosenboom@x-ion.de>
-    95        1 Jenkins <jenkins@ceph.com>
-    96        1 Ilsoo Byun <ilsoo.byun@sk.com>
-    97        1 Guo-Fu Tseng <david_tseng@bigtera.com>
-    98        1 Giovani Rinaldi <gr.gigio@terra.com.br>
-    99        1 Ganesh Mahalingam <ganesh.mahalingam@intel.com>
-   100        1 DanielBar-On <danielbo@mellanox.com>
-   101        1 clove <clove@zte.com.cn>
-   102        1 Bryan Stillwell <bstillwell@godaddy.com>
-   103        1 Boris Ranto <branto@redhat.com>
-   104        1 Ali Maredia <amaredia@redhat.com>
-   105        1 Aleksei Gutikov <aleksey.gutikov@synesis.ru>
-Commits by organizations
-     1      413 Red Hat <contact@redhat.com>
-     2       90 ZTE <contact@zte.com.cn>
-     3       37 Inktank <contact@inktank.com>
-     4       29 SUSE <contact@suse.com>
-     5       17 Unaffiliated <no@organization.net>
-     6       16 Intel <contact@intel.com>
-     7       11 China Mobile <contact@chinamobile.com>
-     8       10 Digiware <contact@digiware.nl>
-     9        9 Mirantis <contact@mirantis.com>
-    10        8 Wido 42on <contact@42on.com>
-    11        8 EISOO <contact@eisoo.com>
-    12        7 Alibaba <contact@alibaba-inc.com>
-    13        6 Mellanox <contact@mellanox.com>
-    14        5 Yanhu Cao <gmayyyha@gmail.com>
-    15        5 XSky <contact@xsky.com>
-    16        5 UMCloud <contact@umcloud.com>
-    17        4 Flipkart <contact@flipkart.com>
-    18        3 SK Telecom <rnd@sktelecom.com>
-    19        3 Quantum Corporation <info@quantum.com>
-    20        3 Canonical <contact@canonical.com>
-    21        2 Peng Zhang <zphj1987@gmail.com>
-    22        2 OVH <ceph@ovh.net>
-    23        2 Neunn <service@neunn.com>
-    24        2 Istuary Innovation Group <contact@istuary.com>
-    25        2 Eayun <contact@eayun.com>
-    26        2 Bigtera <contact@bigtera.com>
-    27        1 Xtaotech <contact@xtaotech.com>
-    28        1 X-ION <contact@x-ion.de>
-    29        1 Walmart Labs <contact@walmartlabs.com>
-    30        1 University of California, Santa Cruz <contact@cs.ucsc.edu>
-    31        1 UnitedStack <contact@unitedstack.com>
-    32        1 Terra <contact@terra.com.br>
-    33        1 T2Cloud <contact@t2cloud.net>
-    34        1 SYNESIS <contact@synesis.ru>
-    35        1 Godaddy <contact@godaddy.com>
-    36        1 DreamHost <contact@dreamhost.com>
-Reviews by authors (one review spans multiple commits)
-     1       61 Kefu Chai <kchai@redhat.com>
-     2       60 Sage Weil <sweil@redhat.com>
-     3       38 Casey Bodley <cbodley@redhat.com>
-     4       20 Josh Durgin <jdurgin@redhat.com>
-     5       19 Jos Collin <jcollin@redhat.com>
-     6       14 Xie Xingguo <xie.xingguo@zte.com.cn>
-     7       14 John Spray <jspray@redhat.com>
-     8       10 Yehuda Sadeh <ysadehwe@redhat.com>
-     9        8 Orit Wasserman <owasserm@redhat.com>
-    10        8 Haomai Wang <haomai@xsky.com>
-    11        7 Patrick Donnelly <pdonnell@redhat.com>
-    12        7 Mykola Golub <mgolub@mirantis.com>
-    13        7 Loic Dachary <ldachary@redhat.com>
-    14        7 Jo=C3=A3o Eduardo Lu=C3=ADs <joao@suse.de>
-    15        7 Greg Farnum <gfarnum@redhat.com>
-    16        5 Matt Benjamin <mbenjamin@redhat.com>
-    17        5 Igor Fedotov <ifedotov@mirantis.com>
-    18        4 Nathan Cutler <ncutler@suse.com>
-    19        4 Jason Dillaman <dillaman@redhat.com>
-    20        4 Boris Ranto <branto@redhat.com>
-    21        4 Abhishek Lekshmanan <abhishek@suse.com>
-    22        3 Zheng Yan <zyan@redhat.com>
-    23        3 Alfredo Deza <adeza@redhat.com>
-    24        2 Radoslaw Zarzynski <rzarzynski@mirantis.com>
-    25        2 Pan Liu <pan.liu@istuary.com>
-    26        2 Ken Dreyer <kdreyer@redhat.com>
-    27        2 Brad Hubbard <bhubbard@redhat.com>
-    28        2 Adam C. Emerson <aemerson@redhat.com>
-    29        1 Yuri Weinstein <yuriw@redhat.com>
-    30        1 Yan, Zheng" <zyan@redhat.com>
-    31        1 Warren Usui <wusui@redhat.com>
-    32        1 Robin H. Johnson <robbat2@gentoo.org>
-    33        1 Radoslaw Zarzynski <rzarzyns@redhat.com>
-    34        1 Neha Ojha <nojha@redhat.com>
-    35        1 Mark Nelson <mnelson@redhat.com>
-    36        1 David Zafman <dzafman@redhat.com>
-    37        1 Daniel Gryniewicz <dang@redhat.com>
-    38        1 Adam Kupczyk <akupczyk@redhat.com>
-Reviews by organizations (one review spans multiple commits)
-     1      274 Red Hat <contact@redhat.com>
-     2       15 SUSE <contact@suse.com>
-     3       14 ZTE <contact@zte.com.cn>
-     4       14 Mirantis <contact@mirantis.com>
-     5        8 XSky <contact@xsky.com>
-     6        4 Inktank <contact@inktank.com>
-     7        3 Zheng Yan <zyan@redhat.com>
-     8        2 Istuary Innovation Group <contact@istuary.com>
-     9        1 Yan, Zheng" <zyan@redhat.com>
-    10        1 Neha Ojha <nojha@redhat.com>
-    11        1 Gentoo <contact@gentoo.org>
-    12        1 Cloudwatt <libre.licensing@cloudwatt.com>
-    13        1 Adam Kupczyk <akupczyk@redhat.com>
+> Can you share teh output of 'ceph osd metadata 0' vs 'cpeh osd metadata
+> 4'?  I'm not sure why it's getting the class wrong.  I haven't seen this
+> on my cluster (it's bluestore; maybe that's the difference).
+>
+>
 
----
+Yes, and it is quite interesting: osd 0 is filestore on hdd, osd 4 is 
+bluestore on ssd but (see below) the metadata suggests ceph thinks it is 
+hdd (the fact that the hosts are VMs might be not helping here):
+
+$ sudo ceph osd metadata 0
+{
+     "id": 0,
+     "arch": "x86_64",
+     "back_addr": "192.168.122.21:6806/1712",
+     "backend_filestore_dev_node": "unknown",
+     "backend_filestore_partition_path": "unknown",
+     "ceph_version": "ceph version 12.1.1 
+(f3e663a190bf2ed12c7e3cda288b9a159572c800) luminous (rc)",
+     "cpu": "QEMU Virtual CPU version 1.7.0",
+     "distro": "ubuntu",
+     "distro_description": "Ubuntu 16.04.2 LTS",
+     "distro_version": "16.04",
+     "filestore_backend": "xfs",
+     "filestore_f_type": "0x58465342",
+     "front_addr": "192.168.122.21:6805/1712",
+     "hb_back_addr": "192.168.122.21:6807/1712",
+     "hb_front_addr": "192.168.122.21:6808/1712",
+     "hostname": "ceph1",
+     "kernel_description": "#106-Ubuntu SMP Mon Jun 26 17:54:43 UTC 2017",
+     "kernel_version": "4.4.0-83-generic",
+     "mem_swap_kb": "1047548",
+     "mem_total_kb": "2048188",
+     "os": "Linux",
+     "osd_data": "/var/lib/ceph/osd/ceph-0",
+     "osd_journal": "/var/lib/ceph/osd/ceph-0/journal",
+     "osd_objectstore": "filestore",
+     "rotational": "1"
+}
+
+$ sudo ceph osd metadata 4
+{
+     "id": 4,
+     "arch": "x86_64",
+     "back_addr": "192.168.122.21:6802/1488",
+     "bluefs": "1",
+     "bluefs_db_access_mode": "blk",
+     "bluefs_db_block_size": "4096",
+     "bluefs_db_dev": "253:32",
+     "bluefs_db_dev_node": "vdc",
+     "bluefs_db_driver": "KernelDevice",
+     "bluefs_db_model": "",
+     "bluefs_db_partition_path": "/dev/vdc2",
+     "bluefs_db_rotational": "1",
+     "bluefs_db_size": "63244840960",
+     "bluefs_db_type": "hdd",
+     "bluefs_single_shared_device": "1",
+     "bluestore_bdev_access_mode": "blk",
+     "bluestore_bdev_block_size": "4096",
+     "bluestore_bdev_dev": "253:32",
+     "bluestore_bdev_dev_node": "vdc",
+     "bluestore_bdev_driver": "KernelDevice",
+     "bluestore_bdev_model": "",
+     "bluestore_bdev_partition_path": "/dev/vdc2",
+     "bluestore_bdev_rotational": "1",
+     "bluestore_bdev_size": "63244840960",
+     "bluestore_bdev_type": "hdd",
+     "ceph_version": "ceph version 12.1.1 
+(f3e663a190bf2ed12c7e3cda288b9a159572c800) luminous (rc)",
+     "cpu": "QEMU Virtual CPU version 1.7.0",
+     "distro": "ubuntu",
+     "distro_description": "Ubuntu 16.04.2 LTS",
+     "distro_version": "16.04",
+     "front_addr": "192.168.122.21:6801/1488",
+     "hb_back_addr": "192.168.122.21:6803/1488",
+     "hb_front_addr": "192.168.122.21:6804/1488",
+     "hostname": "ceph1",
+     "kernel_description": "#106-Ubuntu SMP Mon Jun 26 17:54:43 UTC 2017",
+     "kernel_version": "4.4.0-83-generic",
+     "mem_swap_kb": "1047548",
+     "mem_total_kb": "2048188",
+     "os": "Linux",
+     "osd_data": "/var/lib/ceph/osd/ceph-4",
+     "osd_journal": "/var/lib/ceph/osd/ceph-4/journal",
+     "osd_objectstore": "bluestore",
+     "rotational": "1"
+}
+
+
