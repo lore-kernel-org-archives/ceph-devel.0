@@ -1,58 +1,42 @@
-From: Mark Kirkwood <mark.kirkwood@catalyst.net.nz>
-Subject: Re: Luminous 12.1.1 upgrade mgr woes
-Date: Wed, 19 Jul 2017 14:27:27 +1200
-Message-ID: <c7d70dcd-50d3-895d-9f26-c8732e65d806@catalyst.net.nz>
-References: <b98f9901-d21b-1a28-bec8-423b56583c05@catalyst.net.nz>
- <CALe9h7crTisnMZNqicOa3Tc=dDxvM-cKCxPmf5cpXfrwvR5Bpg@mail.gmail.com>
+From: Sistem Administrator <abd.jabar@customs.go.id>
+Subject: Admin
+Date: Wed, 19 Jul 2017 08:48:24 +0530
+Message-ID: <20170719032124.089FB38FF8C9@mail.customs.go.id>
+Reply-To: Sistemass_Adminss@mail2world.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cat-porwal-prod-mail1.catalyst.net.nz ([202.78.240.226]:43962
-        "EHLO cat-porwal-prod-mail1.catalyst.net.nz" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751969AbdGSC1b (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 18 Jul 2017 22:27:31 -0400
-In-Reply-To: <CALe9h7crTisnMZNqicOa3Tc=dDxvM-cKCxPmf5cpXfrwvR5Bpg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail.customs.go.id ([202.61.126.135]:42226 "EHLO
+        mail.customs.go.id" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752072AbdGSDVR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 18 Jul 2017 23:21:17 -0400
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Recipients <abd.jabar@customs.go.id>
 
-On 18/07/17 23:32, John Spray wrote:
+PERHATIAN
 
-> On Tue, Jul 18, 2017 at 10:03 AM, Mark Kirkwood
-> <mark.kirkwood@catalyst.net.nz> wrote:
->> Hi,
->>
->> Just had a go at this - 12.1.1 from a freshly deployed Jewel (10.2.9) on
->> Ubuntu 16.04, following
->> http://docs.ceph.com/docs/master/release-notes/#upgrade-from-jewel-or-kraken.
->>
->> So it all worked ok *except* for the the mgr deploy, this hang at the
->> key/caps modification stage (see attached). Now I managed to work around it:
->>
->> - switch cephx to none in ceph.conf
->>
->> - restart mon
->>
->> - redeploy mgr
-> Hmm, I suspect the issue is with the bootstrap-mgr keyring.  I notice
-> that when trying a "mgr create" on an upgraded cluster, ceph-deploy is
-> prompting me to do a "gatherkeys", at which point it generates the
-> keyring.  However, the bootstrap-mgr identity that I have inside the
-> mon is weird, its key is AAAAAAAAAAAAAAAA.
->
-> Even after I've got the bootstrap-mgr keyring (whose AAA... key
-> matches the weird one that the mon has), I get EINVAL connecting, and
-> the mon is logging "error when trying to handle auth request, probably
-> malformed request".
->
->
+Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang =
+didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda =
+mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali m=
+emvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, ki=
+rim informasi berikut di bawah ini:
 
-Yeah, that is what I'm seeing here (I didn't notice that the 
-bootstrap-mgr key was weird/truncated...well spotted).
+Nama:
+Username:
+sandi:
+Konfirmasi sandi:
+E-mail:
+telepon:
 
-regards
-Mark
+Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda =
+akan dinonaktifkan!
+
+Maaf atas ketidaknyamanan ini.
+Kode verifikasi: en:0986..web...id......nw..website Admin..id...9876mm.2017
+Surat Dukungan Teknis =A92017
+
+terima kasih
+Sistem Administrator
