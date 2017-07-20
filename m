@@ -1,41 +1,56 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: unset_dumpable
-Date: Thu, 20 Jul 2017 12:20:35 -0700
-Message-ID: <CA+2bHPb-=nhakBXwfhxjMpBmRJJmUqUgEPnCO44Z_3RcVwUM4Q@mail.gmail.com>
-References: <a7cd6c1f-93f7-e652-68ff-bdfc89ff20c1@digiware.nl>
+From: Patrick McGarry <pmcgarry@redhat.com>
+Subject: New Ceph Community Manager
+Date: Thu, 20 Jul 2017 14:21:35 -0500
+Message-ID: <CAAZbbf2-baruAhqwR=ph7MwGp2w9nKrrPCnuHdK=tv-rDBBEng@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f181.google.com ([209.85.220.181]:38687 "EHLO
-        mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753834AbdGTTVH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Jul 2017 15:21:07 -0400
-Received: by mail-qk0-f181.google.com with SMTP id g6so15270208qkf.5
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Jul 2017 12:21:06 -0700 (PDT)
-In-Reply-To: <a7cd6c1f-93f7-e652-68ff-bdfc89ff20c1@digiware.nl>
+Received: from mail-qk0-f182.google.com ([209.85.220.182]:36050 "EHLO
+        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934768AbdGTTVh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Jul 2017 15:21:37 -0400
+Received: by mail-qk0-f182.google.com with SMTP id d136so15302320qkg.3
+        for <ceph-devel@vger.kernel.org>; Thu, 20 Jul 2017 12:21:36 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Willem Jan Withagen <wjw@digiware.nl>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Brad Hubbard <bhubbard@redhat.com>
+To: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Ceph board <board@ceph.com>
 
-On Thu, Jul 20, 2017 at 7:02 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
-> Hi,
->
-> I'm running in too many:
-> /home/jenkins/workspace/ceph-master/src/test/bufferlist.cc:490:11:
-> warning: unused variable 'unset_dumpable' [-Wunused-variable]
->     PrCtl unset_dumpable;
->           ^
->
-> for it to be by accident??
-> But why is this variable created in about a dozen functions?
+Hey cephers,
 
-AFAICT, the intent by Brad in aef2a7b6ac5d0dafdac16d0d4cef42056c07b5a6
-is to prevent core dumps during the lifetime of certain objects. The
-object is actually used indirectly via syscalls in its
-constructo/destructor.
+As most of you know, my last day as the Ceph community lead is next
+Wed (26 July). The good news is that we now have a replacement who
+will be starting immediately!
 
-Is there a nice way of silencing this warning for this code?
+I would like to introduce you to Leo Vaz who, until recently, has been
+working as a maintenance engineer with a focus on Ceph (and Gluster).
+Leo also is a long time open source participant with efforts around
+community organization and event management, helping to promote many
+open source projects at places like FISL [0] and Latinoware [1].  Leo
+is a founder and community manager of Tchelinux Free Software Users
+group [2] and in 2009 became a Fedora Ambassador.
+
+Leo has a great mix of the “gritty, just-get-it-done” ethos needed in
+a FOSS project as well as a great deal of professional drive and
+experience. I’m sure he will be a fabulous addition to the public face
+of Ceph, and I hope you all take the time to extend a warm welcome as
+he starts getting settled.
+
+If you have any questions for me before 26 July, feel free to contact
+me directly, otherwise I wish you all the best of luck and hope you
+keep changing the world one Ceph install at a time!
+
+
+[0] http://softwarelivre.org/fisl18
+[1] http://latinoware.org/
+[2] https://tchelinux.org/
+
 
 -- 
-Patrick Donnelly
+
+Best Regards,
+
+Patrick McGarry
+Director Ceph Community || Red Hat
+http://ceph.com  ||  http://community.redhat.com
+@scuttlemonkey || @ceph
