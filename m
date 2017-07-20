@@ -1,50 +1,57 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
 Subject: Re: unset_dumpable
-Date: Thu, 20 Jul 2017 22:06:49 +0200
-Message-ID: <b6e4fd6e-d38a-219b-df89-b500ec63692d@digiware.nl>
+Date: Thu, 20 Jul 2017 23:04:43 +0200
+Message-ID: <24961618-3abf-08c5-e134-1f58b85f0b96@digiware.nl>
 References: <a7cd6c1f-93f7-e652-68ff-bdfc89ff20c1@digiware.nl>
  <CA+2bHPb-=nhakBXwfhxjMpBmRJJmUqUgEPnCO44Z_3RcVwUM4Q@mail.gmail.com>
+ <b6e4fd6e-d38a-219b-df89-b500ec63692d@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:42050 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([176.74.240.9]:31532 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S935984AbdGTUGv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 20 Jul 2017 16:06:51 -0400
-In-Reply-To: <CA+2bHPb-=nhakBXwfhxjMpBmRJJmUqUgEPnCO44Z_3RcVwUM4Q@mail.gmail.com>
+        id S935711AbdGTVEo (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 20 Jul 2017 17:04:44 -0400
+In-Reply-To: <b6e4fd6e-d38a-219b-df89-b500ec63692d@digiware.nl>
 Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Patrick Donnelly <pdonnell@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>, Brad Hubbard <bhubbard@redhat.com>
 
-
-
-Op 20-7-2017 om 21:20 schreef Patrick Donnelly:
-> On Thu, Jul 20, 2017 at 7:02 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> Hi,
->>
->> I'm running in too many:
->> /home/jenkins/workspace/ceph-master/src/test/bufferlist.cc:490:11:
->> warning: unused variable 'unset_dumpable' [-Wunused-variable]
->>      PrCtl unset_dumpable;
->>            ^
->>
->> for it to be by accident??
->> But why is this variable created in about a dozen functions?
-> AFAICT, the intent by Brad in aef2a7b6ac5d0dafdac16d0d4cef42056c07b5a6
-> is to prevent core dumps during the lifetime of certain objects. The
-> object is actually used indirectly via syscalls in its
-> constructo/destructor.
+Op 20-7-2017 om 22:06 schreef Willem Jan Withagen:
 >
-> Is there a nice way of silencing this warning for this code?
-I suspected as much as that.
+>
+> Op 20-7-2017 om 21:20 schreef Patrick Donnelly:
+>> On Thu, Jul 20, 2017 at 7:02 AM, Willem Jan Withagen 
+>> <wjw@digiware.nl> wrote:
+>>> Hi,
+>>>
+>>> I'm running in too many:
+>>> /home/jenkins/workspace/ceph-master/src/test/bufferlist.cc:490:11:
+>>> warning: unused variable 'unset_dumpable' [-Wunused-variable]
+>>>      PrCtl unset_dumpable;
+>>>            ^
+>>>
+>>> for it to be by accident??
+>>> But why is this variable created in about a dozen functions?
+>> AFAICT, the intent by Brad in aef2a7b6ac5d0dafdac16d0d4cef42056c07b5a6
+>> is to prevent core dumps during the lifetime of certain objects. The
+>> object is actually used indirectly via syscalls in its
+>> constructo/destructor.
+>>
+>> Is there a nice way of silencing this warning for this code?
+> I suspected as much as that.
+>
+> Likely there is a pragma that can be wrapped around the declaration.
+> And then stick it in a macro, but I'm not sure that pragma will 
+> survice a macro. 
 
-Likely there is a pragma that can be wrapped around the declaration.
-And then stick it in a macro, but I'm not sure that pragma will survice 
-a macro.
+Pragmas could work, but sticking them in a macro for both GCC and Clang 
+is a real mess.
+Doing a (void) trick seems a lot easier.
+
+     https://github.com/ceph/ceph/pull/16462
 
 --WjW
->
-
