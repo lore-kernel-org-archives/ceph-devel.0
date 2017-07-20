@@ -1,89 +1,35 @@
-From: "Zhou, Yuan" <yuan.zhou@intel.com>
-Subject: RE: Issue on RGW 500 error: flush_read_list():
- d->client_c->handle_data() returned -5
-Date: Thu, 20 Jul 2017 14:31:57 +0000
-Message-ID: <06681238D8946F44A60AA400760A1CBF123950CF@SHSMSX103.ccr.corp.intel.com>
-References: <06681238D8946F44A60AA400760A1CBF12393956@SHSMSX103.ccr.corp.intel.com>
- <CADr68WakoPGs21PDk3fXfZ2czJ2YRiQv0usQhPKHZW-BDzNyMg@mail.gmail.com>
- <CAOi4hNfPb=rsJgcDD+V3qghpz7cZO1mhSV2FH1A-PJghqpaqAw@mail.gmail.com>
- <CAFMfnwrcH0E_TJjLFBaoWUPB6oDKSj3_+dHDk_3XUoQB2NLchg@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: bind_addr bug
+Date: Thu, 20 Jul 2017 17:04:36 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1707201559200.14061@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:61283 "EHLO mga09.intel.com"
+Received: from mx1.redhat.com ([209.132.183.28]:48102 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754227AbdGTOdJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 20 Jul 2017 10:33:09 -0400
-In-Reply-To: <CAFMfnwrcH0E_TJjLFBaoWUPB6oDKSj3_+dHDk_3XUoQB2NLchg@mail.gmail.com>
-Content-Language: en-US
+        id S934523AbdGTREj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 20 Jul 2017 13:04:39 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kyle Bader <kyle.bader@gmail.com>, yuxiang fang <abcdeffyx@gmail.com>
-Cc: Jens Harbott <j.rosenboom@x-ion.de>, Ceph Development <ceph-devel@vger.kernel.org>, "Fu, Yong" <yong.fu@intel.com>
+To: Bassam.Tabbara@Quantum.com, Travis.Nielsen@Quantum.com
+Cc: ceph-devel@vger.kernel.org
 
-SmVucywgSXZhbiBhbmQgS3lsZSwgdGhhbmtzIGZvciBjb21tZW50cyEgDQoNCldlIGRvIGhhdmUg
-YSBoYXByb3h5IHNpdCBpbiBmcm9udCBvZiB0d28gUkdXIHNlcnZlcnMuIFdlIGRpZCBhIHF1aWNr
-IHRyeSB3L28gaGFwcm94eSBhbmQgbWFrZSB0aGUgY2xpZW50cyB0YWxraW5nIHdpdGggb25seSBv
-bmUgUkdXIGRpcmVjdGx5LCB0aGlzIGlzc3VlIHN0aWxsIGV4aXN0cy4gDQoNCkFjdHVhbGx5IGZy
-b20gdGhlIGxvZywgaXQgc2VlbXMgdGhlIHJlcXVlc3QgaXMgbm90IHRoYXQgYmlnIChsZW49MjAx
-MzUpLg0KDQpUaGlzIGlzIGEgZmxhc2ggYmFzZWQgY2x1c3RlciBzbyBhbGwgdGhlIGJ1Y2tldCBp
-bmRleCBzaG91bGQgYmUgb24gU1NEIHJvb3QgYWxyZWFkeS4gIA0KCQ0KU28gbG9va3MgbGlrZSB0
-aGUgRUMgcG9saWN5IHdlIHVzZWQgdG8gYmUgc29tZSBzdXNwZWN0ZWQgY2F1c2UuIFdpbGwgdHJ5
-IHRvIGRlYnVnIG1vcmUgd2l0aCB0aGUgT1NEIHNpZGUuDQoNCg0KVGhhbmtzLCAteXVhbiAgDQoN
-Ci0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjZXBoLWRldmVsLW93bmVyQHZnZXIu
-a2VybmVsLm9yZyBbbWFpbHRvOmNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBC
-ZWhhbGYgT2YgS3lsZSBCYWRlcg0KU2VudDogVGh1cnNkYXksIEp1bHkgMjAsIDIwMTcgMzozNSBQ
-TQ0KVG86IHl1eGlhbmcgZmFuZyA8YWJjZGVmZnl4QGdtYWlsLmNvbT4NCkNjOiBKZW5zIEhhcmJv
-dHQgPGoucm9zZW5ib29tQHgtaW9uLmRlPjsgWmhvdSwgWXVhbiA8eXVhbi56aG91QGludGVsLmNv
-bT47IENlcGggRGV2ZWxvcG1lbnQgPGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KU3ViamVj
-dDogUmU6IElzc3VlIG9uIFJHVyA1MDAgZXJyb3I6IGZsdXNoX3JlYWRfbGlzdCgpOiBkLT5jbGll
-bnRfYy0+aGFuZGxlX2RhdGEoKSByZXR1cm5lZCAtNQ0KDQpDaGVjayB5b3VyIG5naW54L2hhcHJv
-eHkgbG9ncyBpZiB0aGF0IGlzIGluIHBsYWNlLCB0aGF0IGNhbiBiZSBhIHNwaWNlIG9mIHRpbWVv
-dXRzIGFzIHdhcyBwcmV2aW91c2x5IG1lbnRpb25lZC4NCg0KSWYgdGhlIHRyYW5zZmVyIGlzIGxh
-cmdlLCB5b3UgbWF5IHdhbnQgdG8gY2hlY2sga2VybmVsIHRjcCB0aW1lb3V0cyBhdCB0aGUga2Vy
-bmVsIGxldmVsIG9uIGJvdGggZW5kcz8NCg0KQXJlIHlvdXIgT1NEcyBzcGlubmluZyBvciBTU0Qs
-IGFuZCBpZiB0aGUgZm9ybWVyIGRvIHlvdSBoYXZlIHlvdXIgaW5kZXggcG9vbHMgb24gU1NEIGJ5
-IHdheSBvZiBhIGN1c3RvbSBjcnVzaCBydWxlIHBvaW50aW5nIHRvIGFuIGFsbCBTU0Qgcm9vdD8N
-Cg0KT24gV2VkLCBKdWwgMTksIDIwMTcgYXQgNzozOSBQTSwgeXV4aWFuZyBmYW5nIDxhYmNkZWZm
-eXhAZ21haWwuY29tPiB3cm90ZToNCj4gSGkgemhvdSB5dWFuDQo+DQo+IEdldCBsYXJnZSBvYmpl
-Y3Qgd2l0aCBoaWdoIGNvbXByZXNzaW9uIHJhdGUgd2lsbCBjYXVzZSBFSU8gaW4gamV3ZWwsIA0K
-PiBidXQgaXQgc2VlbXMgdGhhdCB5b3UgZGlkbid0IGVuYWJsZSBjb21wcmVzc2lvbi4NCj4NCj4g
-WW91IGFyZSByaWdodCwgdGhlcmUgaXMgc29tZXRoaW5nIHdyb25nIHdpdGggdGhlIGNvbm5lY3Rp
-b24gYmV0d2VlbiANCj4gcmd3IGFuZCB0aGUgY2xpZW50LCBpcyB0aGVyZSBhbnkgbWlkZGxld2Fy
-ZSBiZXR3ZWVuIHRoZSByZWFsIGNsaWVudCANCj4gYW5kIHJndz8gKGUuZyBuZ2lueCwgd2hpY2gg
-bWF5IGNhdXNlIHN1Y2gga2luZCBvZiBlcnJvciB3aGVuIGRvd25sb2FkIA0KPiBiaWcgb2JqZWN0
-KQ0KPg0KPiB0aGFua3MNCj4gaXZhbiBmcm9tIGVpc29vDQo+DQo+DQo+IE9uIFdlZCwgSnVsIDE5
-LCAyMDE3IGF0IDExOjQ4IFBNLCBKZW5zIEhhcmJvdHQgPGoucm9zZW5ib29tQHgtaW9uLmRlPiB3
-cm90ZToNCj4+IDIwMTctMDctMTkgMTQ6NDUgR01UKzAwOjAwIFpob3UsIFl1YW4gPHl1YW4uemhv
-dUBpbnRlbC5jb20+Og0KPj4+IEhlbGxvLA0KPj4+DQo+Pj4gVHJ5aW5nIHRvIGRvIHNvbWUgdGVz
-dHMgd2l0aCBiaWdkYXRhICsgUzNhICsgUkdXIGhlcmUgYW5kIHJhbiBpbnRvIGEgd2VpcmQgNTAw
-IGVycm9yLiBJIGNoZWNrZWQgdGhlIGxvZyBhbmQgZmluZCB0aGUgZXJyb3Igd2FzIGR1ZSB0bzoN
-Cj4+Pg0KPj4+IEVSUk9SOiBmbHVzaF9yZWFkX2xpc3QoKTogZC0+Y2xpZW50X2MtPmhhbmRsZV9k
-YXRhKCkgcmV0dXJuZWQgLTUNCj4+Pg0KPj4+IEFmdGVyIGNoZWNraW5nIHRoZSBjb2RlIHRoaXMg
-ZnVuY3Rpb24gc2VlbXMgdHJ5aW5nIHRvIHNlbmQgZGF0YSBiYWNrIHRvIGNsaWVudCBidXQgc29t
-ZXRoaW5nIHdyb25nIGhhcHBlbi4gV2FzIHRoaXMgYmVjYXVzZSB0aGUgY29ubmVjdGlvbiBiZXR3
-ZWVuIGNsaWVudCBhbmQgUkdXIHdhcyBjbG9zZWQgYmVmb3JlIHRoZSBkYXRhIHRyYW5zZmVycmlu
-ZyBmaW5pc2g/DQo+Pj4NCj4+PiBJcyB0aGVyZSBhIHdheSB0byBkbyBzb21lIGRlYnVnIG9uIHRo
-aXM/DQo+Pj4NCj4+PiBJJ20gdGVzdGluZyB3aXRoIENlcGggMTAuMi43LCB0aGUgZGF0YSBwb29s
-IHdhcyB1c2luZyBFQygzICsgMikuIEFueSBjb21tZW50cyB3b3VsZCBiZSBhcHByZWNpYXRlZCEN
-Cj4+DQo+PiBFcnJvciA1IGlzIEVJTywgc28gaXQgc2VlbXMgbGlrZSB5b3VyIE9TRHMgY291bGRu
-J3QgcmVhZCBzb21lIG9mIHRoZSANCj4+IGRhdGEgcHJvcGVybHkuIFlvdSBjb3VsZCBlaXRoZXIg
-Y2hlY2sgYWxsIG9mIHlvdXIgT1NEIGxvZ3MgYXQgdGhhdCANCj4+IHRpbWUgb3IgYWRkICJkZWJ1
-ZyBtcz0xIiB0byB5b3VyIFJHVyBjb25maWcgYW5kIHJlcnVuIHlvdXIgdGVzdCwgDQo+PiB3aGVy
-ZSB5b3Ugd2lsbCBoYXZlIG1vcmUgaW5mb3JtYXRpb24gYWJvdXQgdGhlIE9TRCB0cmFuc2FjdGlv
-bnMgaW4gDQo+PiB5b3VyIHJhZG9zZ3cubG9nIHRoZW4uDQo+Pg0KPj4gSW4gYWRkaXRpb24sIHJh
-ZG9zZ3cgaXMga25vd24gYmFkIGF0IGdpdmluZyBmZWVkYmFjayB0byB0aGUgY2xpZW50IA0KPj4g
-YWJvdXQgc3VjaCBlcnJvcnMsIHNlZSBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvMjAx
-NjYuDQo+PiAtLQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxp
-bmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIA0KPj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdl
-IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+PiBpbmZvIGF0
-ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gLS0NCj4gVG8g
-dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNl
-cGgtZGV2ZWwiIA0KPiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIu
-a2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVs
-Lm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQoNCg0KDQotLSANCg0KS3lsZSBCYWRlcg0KLS0NClRv
-IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBj
-ZXBoLWRldmVsIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2Vy
-bmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
-am9yZG9tby1pbmZvLmh0bWwNCg==
+Hi Bassam, Travis,
+
+The change in bf4938567943c80345966f9c5a3bdc75a913175b to tolerate a peer 
+addr that is wrong indirectly led to
+
+	http://tracker.ceph.com/issues/20667
+
+The direct bug there should be fixed by
+
+	https://github.com/ceph/ceph/pull/16455
+
+but I think the behavior change in your commit is still problematic.  And 
+looking at this again, I'm not quite sure why we need it.  Once we do 
+the set_addr, can't we just advertise that addr during the handshake so 
+that there is no change in behavior in that regard?
+
+Thanks-
+sage
+
