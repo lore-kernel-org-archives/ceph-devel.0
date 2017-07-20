@@ -1,56 +1,50 @@
-From: Patrick McGarry <pmcgarry@redhat.com>
-Subject: New Ceph Community Manager
-Date: Thu, 20 Jul 2017 14:21:35 -0500
-Message-ID: <CAAZbbf2-baruAhqwR=ph7MwGp2w9nKrrPCnuHdK=tv-rDBBEng@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: unset_dumpable
+Date: Thu, 20 Jul 2017 22:06:49 +0200
+Message-ID: <b6e4fd6e-d38a-219b-df89-b500ec63692d@digiware.nl>
+References: <a7cd6c1f-93f7-e652-68ff-bdfc89ff20c1@digiware.nl>
+ <CA+2bHPb-=nhakBXwfhxjMpBmRJJmUqUgEPnCO44Z_3RcVwUM4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:36050 "EHLO
-        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934768AbdGTTVh (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 20 Jul 2017 15:21:37 -0400
-Received: by mail-qk0-f182.google.com with SMTP id d136so15302320qkg.3
-        for <ceph-devel@vger.kernel.org>; Thu, 20 Jul 2017 12:21:36 -0700 (PDT)
+Received: from smtp.digiware.nl ([176.74.240.9]:42050 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S935984AbdGTUGv (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 20 Jul 2017 16:06:51 -0400
+In-Reply-To: <CA+2bHPb-=nhakBXwfhxjMpBmRJJmUqUgEPnCO44Z_3RcVwUM4Q@mail.gmail.com>
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph-User <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>, Ceph board <board@ceph.com>
-
-Hey cephers,
-
-As most of you know, my last day as the Ceph community lead is next
-Wed (26 July). The good news is that we now have a replacement who
-will be starting immediately!
-
-I would like to introduce you to Leo Vaz who, until recently, has been
-working as a maintenance engineer with a focus on Ceph (and Gluster).
-Leo also is a long time open source participant with efforts around
-community organization and event management, helping to promote many
-open source projects at places like FISL [0] and Latinoware [1].  Leo
-is a founder and community manager of Tchelinux Free Software Users
-group [2] and in 2009 became a Fedora Ambassador.
-
-Leo has a great mix of the “gritty, just-get-it-done” ethos needed in
-a FOSS project as well as a great deal of professional drive and
-experience. I’m sure he will be a fabulous addition to the public face
-of Ceph, and I hope you all take the time to extend a warm welcome as
-he starts getting settled.
-
-If you have any questions for me before 26 July, feel free to contact
-me directly, otherwise I wish you all the best of luck and hope you
-keep changing the world one Ceph install at a time!
+To: Patrick Donnelly <pdonnell@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Brad Hubbard <bhubbard@redhat.com>
 
 
-[0] http://softwarelivre.org/fisl18
-[1] http://latinoware.org/
-[2] https://tchelinux.org/
 
+Op 20-7-2017 om 21:20 schreef Patrick Donnelly:
+> On Thu, Jul 20, 2017 at 7:02 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>> Hi,
+>>
+>> I'm running in too many:
+>> /home/jenkins/workspace/ceph-master/src/test/bufferlist.cc:490:11:
+>> warning: unused variable 'unset_dumpable' [-Wunused-variable]
+>>      PrCtl unset_dumpable;
+>>            ^
+>>
+>> for it to be by accident??
+>> But why is this variable created in about a dozen functions?
+> AFAICT, the intent by Brad in aef2a7b6ac5d0dafdac16d0d4cef42056c07b5a6
+> is to prevent core dumps during the lifetime of certain objects. The
+> object is actually used indirectly via syscalls in its
+> constructo/destructor.
+>
+> Is there a nice way of silencing this warning for this code?
+I suspected as much as that.
 
--- 
+Likely there is a pragma that can be wrapped around the declaration.
+And then stick it in a macro, but I'm not sure that pragma will survice 
+a macro.
 
-Best Regards,
+--WjW
+>
 
-Patrick McGarry
-Director Ceph Community || Red Hat
-http://ceph.com  ||  http://community.redhat.com
-@scuttlemonkey || @ceph
