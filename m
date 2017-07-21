@@ -1,94 +1,130 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: unset_dumpable
-Date: Fri, 21 Jul 2017 01:34:39 +0200
-Message-ID: <7b17556a-6959-4f0f-8fd9-40de86b76500@digiware.nl>
-References: <a7cd6c1f-93f7-e652-68ff-bdfc89ff20c1@digiware.nl>
- <CA+2bHPb-=nhakBXwfhxjMpBmRJJmUqUgEPnCO44Z_3RcVwUM4Q@mail.gmail.com>
- <b6e4fd6e-d38a-219b-df89-b500ec63692d@digiware.nl>
- <24961618-3abf-08c5-e134-1f58b85f0b96@digiware.nl>
- <CAF-wwdGNs7Zqd9y3hE6PP=T2aDrESZmkR0KGRbkNVsbCTAYdiQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:65432 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S936260AbdGTXel (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 20 Jul 2017 19:34:41 -0400
-In-Reply-To: <CAF-wwdGNs7Zqd9y3hE6PP=T2aDrESZmkR0KGRbkNVsbCTAYdiQ@mail.gmail.com>
-Content-Language: nl
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Brad Hubbard <bhubbard@redhat.com>
-Cc: Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+From: Yanhu Cao <gmayyyha@gmail.com>
+Subject: [PATCH] ceph: kernel client startsync can be removed
+Date: Fri, 21 Jul 2017 17:20:10 +0800
+Message-ID: <20170721092010.10918-1-gmayyyha@gmail.com>
+Return-path: <netdev-owner@vger.kernel.org>
+Sender: netdev-owner@vger.kernel.org
+To: idryomov@gmail.com
+Cc: zyan@redhat.com, sage@redhat.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, davem@davemloft.net, netdev@vger.kernel.org, gmayyyha@gmail.com
+List-Id: ceph-devel.vger.kernel.org
 
+kernel client is still sending write,startsync.
+that startsync is a no-op (has been for years) and can probably be removed
 
+Link: http://tracker.ceph.com/issues/20604
 
-Op 21-7-2017 om 00:39 schreef Brad Hubbard:
-> When implemented it was generally though to be OK by reviewers, including yourself.
->
-> https://github.com/ceph/ceph/pull/14821
->
-> Can I asked what changed to make it an issue now? Has there been some recent
-> change in compilers on FreeBSD to make this an issue? It's a valid use of RAII
-> in my humble opinion although it *appears* to be an unused variable. Odd this
-> warning is not present on Linux and I wonder whether sanity prevailed in that
-> regard?
+Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
+---
+ fs/ceph/addr.c             | 9 ++-------
+ fs/ceph/file.c             | 5 +----
+ include/linux/ceph/rados.h | 1 -
+ net/ceph/osd_client.c      | 5 -----
+ 4 files changed, 3 insertions(+), 17 deletions(-)
 
-At that time I only looked at the functionality of your code, and was 
-happy with what it did.
-Which is still the case.
-
-But I'm also trying to get as little warnings as possible, since that 
-will new ones more outstanding.
-And unused variables usually trigger my eye, because that is mostly 
-caused by conditionals.
-And I;ve already put in a large amount  FreeBSD depends, quite a few 
-caused warnings and needed
-some TLC.
-
-I have no opinion as to the sanity of hte compiler makers, and 
-where//what warnings they assert.
-
---WjW
-
->
-> On Fri, Jul 21, 2017 at 7:04 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> Op 20-7-2017 om 22:06 schreef Willem Jan Withagen:
->>>
->>>
->>> Op 20-7-2017 om 21:20 schreef Patrick Donnelly:
->>>> On Thu, Jul 20, 2017 at 7:02 AM, Willem Jan Withagen <wjw@digiware.nl>
->>>> wrote:
->>>>> Hi,
->>>>>
->>>>> I'm running in too many:
->>>>> /home/jenkins/workspace/ceph-master/src/test/bufferlist.cc:490:11:
->>>>> warning: unused variable 'unset_dumpable' [-Wunused-variable]
->>>>>       PrCtl unset_dumpable;
->>>>>             ^
->>>>>
->>>>> for it to be by accident??
->>>>> But why is this variable created in about a dozen functions?
->>>> AFAICT, the intent by Brad in aef2a7b6ac5d0dafdac16d0d4cef42056c07b5a6
->>>> is to prevent core dumps during the lifetime of certain objects. The
->>>> object is actually used indirectly via syscalls in its
->>>> constructo/destructor.
->>>>
->>>> Is there a nice way of silencing this warning for this code?
->>> I suspected as much as that.
->>>
->>> Likely there is a pragma that can be wrapped around the declaration.
->>> And then stick it in a macro, but I'm not sure that pragma will survice a
->>> macro.
->>
->> Pragmas could work, but sticking them in a macro for both GCC and Clang is a
->> real mess.
->> Doing a (void) trick seems a lot easier.
->>
->>      https://github.com/ceph/ceph/pull/16462
->>
->> --WjW
->
->
-
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 5083628..f9a1805 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -939,7 +939,7 @@ static int ceph_writepages_start(struct address_space *mapping,
+ 					break;
+ 				}
+ 
+-				num_ops = 1 + do_sync;
++				num_ops = 1;
+ 				strip_unit_end = page->index +
+ 					((len - 1) >> PAGE_SHIFT);
+ 
+@@ -1045,7 +1045,7 @@ static int ceph_writepages_start(struct address_space *mapping,
+ 		for (i = 0; i < locked_pages; i++) {
+ 			u64 cur_offset = page_offset(pages[i]);
+ 			if (offset + len != cur_offset) {
+-				if (op_idx + do_sync + 1 == req->r_num_ops)
++				if (op_idx + 1 == req->r_num_ops)
+ 					break;
+ 				osd_req_op_extent_dup_last(req, op_idx,
+ 							   cur_offset - offset);
+@@ -1082,17 +1082,12 @@ static int ceph_writepages_start(struct address_space *mapping,
+ 						 0, !!pool, false);
+ 		osd_req_op_extent_update(req, op_idx, len);
+ 
+-		if (do_sync) {
+-			op_idx++;
+-			osd_req_op_init(req, op_idx, CEPH_OSD_OP_STARTSYNC, 0);
+-		}
+ 		BUG_ON(op_idx + 1 != req->r_num_ops);
+ 
+ 		pool = NULL;
+ 		if (i < locked_pages) {
+ 			BUG_ON(num_ops <= req->r_num_ops);
+ 			num_ops -= req->r_num_ops;
+-			num_ops += do_sync;
+ 			locked_pages -= i;
+ 
+ 			/* allocate new pages array for next request */
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 3d48c41..405c99b 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -800,7 +800,6 @@ static void ceph_aio_retry_work(struct work_struct *work)
+ 	}
+ 
+ 	req->r_ops[0] = orig_req->r_ops[0];
+-	osd_req_op_init(req, 1, CEPH_OSD_OP_STARTSYNC, 0);
+ 
+ 	req->r_mtime = aio_req->mtime;
+ 	req->r_data_offset = req->r_ops[0].extent.offset;
+@@ -874,8 +873,7 @@ static void ceph_aio_retry_work(struct work_struct *work)
+ 		vino = ceph_vino(inode);
+ 		req = ceph_osdc_new_request(&fsc->client->osdc, &ci->i_layout,
+ 					    vino, pos, &size, 0,
+-					    /*include a 'startsync' command*/
+-					    write ? 2 : 1,
++					    1,
+ 					    write ? CEPH_OSD_OP_WRITE :
+ 						    CEPH_OSD_OP_READ,
+ 					    flags, snapc,
+@@ -922,7 +920,6 @@ static void ceph_aio_retry_work(struct work_struct *work)
+ 			truncate_inode_pages_range(inode->i_mapping, pos,
+ 					(pos+len) | (PAGE_SIZE - 1));
+ 
+-			osd_req_op_init(req, 1, CEPH_OSD_OP_STARTSYNC, 0);
+ 			req->r_mtime = mtime;
+ 		}
+ 
+diff --git a/include/linux/ceph/rados.h b/include/linux/ceph/rados.h
+index 385db08..ba5adf0 100644
+--- a/include/linux/ceph/rados.h
++++ b/include/linux/ceph/rados.h
+@@ -226,7 +226,6 @@ struct ceph_eversion {
+ 									    \
+ 	/* fancy write */						    \
+ 	f(APPEND,	__CEPH_OSD_OP(WR, DATA, 6),	"append")	    \
+-	f(STARTSYNC,	__CEPH_OSD_OP(WR, DATA, 7),	"startsync")	    \
+ 	f(SETTRUNC,	__CEPH_OSD_OP(WR, DATA, 8),	"settrunc")	    \
+ 	f(TRIMTRUNC,	__CEPH_OSD_OP(WR, DATA, 9),	"trimtrunc")	    \
+ 									    \
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index 901bb82..5c9d696 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -863,8 +863,6 @@ static u32 osd_req_encode_op(struct ceph_osd_op *dst,
+ 		dst->cls.method_len = src->cls.method_len;
+ 		dst->cls.indata_len = cpu_to_le32(src->cls.indata_len);
+ 		break;
+-	case CEPH_OSD_OP_STARTSYNC:
+-		break;
+ 	case CEPH_OSD_OP_WATCH:
+ 		dst->watch.cookie = cpu_to_le64(src->watch.cookie);
+ 		dst->watch.ver = cpu_to_le64(0);
+@@ -916,9 +914,6 @@ static u32 osd_req_encode_op(struct ceph_osd_op *dst,
+  * if the file was recently truncated, we include information about its
+  * old and new size so that the object can be updated appropriately.  (we
+  * avoid synchronously deleting truncated objects because it's slow.)
+- *
+- * if @do_sync, include a 'startsync' command so that the osd will flush
+- * data quickly.
+  */
+ struct ceph_osd_request *ceph_osdc_new_request(struct ceph_osd_client *osdc,
+ 					       struct ceph_file_layout *layout,
+-- 
+1.8.3.1
