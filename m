@@ -1,20 +1,21 @@
-From: Administrator <qiyamal.khoifin@customs.go.id>
+From: Administrator <sri.juliana@agenfirsttravel.co.id>
 Subject: PERHATIAN
-Date: Mon, 24 Jul 2017 10:06:02 +0530
-Message-ID: <20170724043846.25D3F3915BC3@mail.customs.go.id>
+Date: Mon, 24 Jul 2017 10:56:12 +0530
+Message-ID: <20170724052651.30406457881C@mail.agenfirsttravel.co.id>
 Reply-To: Sistemass_Adminss@mail2world.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="iso-8859-1"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.customs.go.id ([202.61.126.135]:49088 "EHLO
-        mail.customs.go.id" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750896AbdGXFW5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 24 Jul 2017 01:22:57 -0400
+Received: from mail.agenfirsttravel.co.id ([117.102.253.125]:51226 "EHLO
+        mail.agenfirsttravel.co.id" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1750942AbdGXF1o (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 24 Jul 2017 01:27:44 -0400
 Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <qiyamal.khoifin@customs.go.id>
+To: Recipients <sri.juliana@agenfirsttravel.co.id>
 
 PERHATIAN
 
