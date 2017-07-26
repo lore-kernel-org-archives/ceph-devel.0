@@ -1,172 +1,126 @@
 From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: unable to build Debian Stretch for 12.1.2
-Date: Wed, 26 Jul 2017 11:18:20 +1000
-Message-ID: <CAF-wwdHQ9Zcp58VBBGqFOTFGz5acsLxe5ZVXX9jTyc_uSSAzvw@mail.gmail.com>
-References: <CAC-Np1y2RLRHTgbjNF7uM6-+nho1tz2PUxDE6pdef1y-bMtZxg@mail.gmail.com>
- <CAF-wwdE4kBKzDjbRNiKwdZ9W9TV9sdd6TJiTZ-MorhKJyUpL3g@mail.gmail.com>
- <CAC-Np1xnvw9KtwdKcTLTsKdarWH25FAeoExWhzB0Ad+TuTHM4A@mail.gmail.com> <CAF-wwdFhpUowuBT7Rxfmw4wPQUWHnxF7ZKQ0hRMoPo79cY-hEQ@mail.gmail.com>
+Subject: kraken + gcc7
+Date: Wed, 26 Jul 2017 17:18:58 +1000
+Message-ID: <CAF-wwdG6nhqFN85=ONTQ+XUc6mea3=QaqsaSfux_-pQvh2Wrsg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/mixed; boundary="EeQfGwPcQSOJBaQU"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f176.google.com ([209.85.223.176]:34290 "EHLO
-        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751621AbdGZBSW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 25 Jul 2017 21:18:22 -0400
-Received: by mail-io0-f176.google.com with SMTP id l7so62706288iof.1
-        for <ceph-devel@vger.kernel.org>; Tue, 25 Jul 2017 18:18:21 -0700 (PDT)
-In-Reply-To: <CAF-wwdFhpUowuBT7Rxfmw4wPQUWHnxF7ZKQ0hRMoPo79cY-hEQ@mail.gmail.com>
+Received: from mail-pg0-f52.google.com ([74.125.83.52]:38664 "EHLO
+        mail-pg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750989AbdGZHTF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Jul 2017 03:19:05 -0400
+Received: by mail-pg0-f52.google.com with SMTP id k190so15065631pgk.5
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Jul 2017 00:19:04 -0700 (PDT)
+Received: from rskikr.localdomain (124-171-93-177.dyn.iinet.net.au. [124.171.93.177])
+        by smtp.gmail.com with ESMTPSA id q199sm28471197pfq.135.2017.07.26.00.19.02
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Wed, 26 Jul 2017 00:19:03 -0700 (PDT)
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
-
-Ah, here's the exact command. Disguised due to multi-threading.
-
-cd /build/ceph-12.1.2/obj-x86_64-linux-gnu/src/test/librbd &&
-/usr/bin/c++   -DCEPH_LIBDIR=\"/usr/lib\"
--DCEPH_PKGLIBDIR=\"/usr/lib/ceph\" -DTEST_LIBRBD_INTERNALS
--D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__linux__ -isystem
-/build/ceph-12.1.2/obj-x86_64-linux-gnu/boost/include
--I/build/ceph-12.1.2/obj-x86_64-linux-gnu/src/include
--I/build/ceph-12.1.2/src -isystem
-/build/ceph-12.1.2/obj-x86_64-linux-gnu/include
--I/build/ceph-12.1.2/src/xxHash -isystem
-/build/ceph-12.1.2/src/rapidjson/include
--I/build/ceph-12.1.2/src/dmclock/src
--I/build/ceph-12.1.2/src/dmclock/support/src
--I/build/ceph-12.1.2/src/googletest/googletest/include
--I/build/ceph-12.1.2/src/googletest/googlemock/include  -g -O2
--fdebug-prefix-map=/build/ceph-12.1.2=. -fstack-protector-strong
--Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -Wall
--Wtype-limits -Wignored-qualifiers -Winit-self -Wpointer-arith
--Werror=format-security -fno-strict-aliasing -fsigned-char
--Wno-unknown-pragmas -rdynamic -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2
--U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fstack-protector-strong
--fdiagnostics-color=auto -I/usr/include/nss -I/usr/include/nspr
--I/usr/include -fno-builtin-malloc -fno-builtin-calloc
--fno-builtin-realloc -fno-builtin-free -fPIE   -DHAVE_CONFIG_H
--D__CEPH__ -D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS
--I/build/ceph-12.1.2/src/googletest/googlemock/include
--I/build/ceph-12.1.2/obj-x86_64-linux-gnu/src/googletest/googlemock/include
--I/build/ceph-12.1.2/src/googletest/googletest/include
--I/build/ceph-12.1.2/obj-x86_64-linux-gnu/src/googletest/googletest/include
--fno-strict-aliasing -std=c++11 -o
-CMakeFiles/unittest_librbd.dir/object_map/test_mock_LockRequest.cc.o
--c /build/ceph-12.1.2/src/test/librbd/object_map/test_mock_LockRequest.cc
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
 
-On Wed, Jul 26, 2017 at 11:14 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
-> This is basically the command it's using (although I think this is
-> generating the preprocessed source so we might have to play with some
-> of the args).
->
-> /usr/lib/gcc/x86_64-linux-gnu/6/cc1plus -quiet -I
-> /build/ceph-12.1.2/obj-x86_64-linux-gnu/src/include -I
-> /build/ceph-12.1.2/src -I /build/ceph-12.1.2/src/xxHash -I
-> /build/ceph-12.1.2/src/dmclock/src -I
-> /build/ceph-12.1.2/src/dmclock/support/src -I
-> /build/ceph-12.1.2/src/googletest/googletest/include -I
-> /build/ceph-12.1.2/src/googletest/googlemock/include -I
-> /usr/include/nss -I /usr/include/nspr -I /usr/include -I
-> /build/ceph-12.1.2/src/googletest/googlemock/include -I
-> /build/ceph-12.1.2/obj-x86_64-linux-gnu/src/googletest/googlemock/include
-> -I /build/ceph-12.1.2/src/googletest/googletest/include -I
-> /build/ceph-12.1.2/obj-x86_64-linux-gnu/src/googletest/googletest/include
-> -imultiarch x86_64-linux-gnu -D_GNU_SOURCE -D CEPH_LIBDIR="/usr/lib"
-> -D CEPH_PKGLIBDIR="/usr/lib/ceph" -D TEST_LIBRBD_INTERNALS -D
-> _FILE_OFFSET_BITS=64 -D _GNU_SOURCE -D __linux__ -D _FORTIFY_SOURCE=2
-> -U _FORTIFY_SOURCE -D _FORTIFY_SOURCE=2 -U _FORTIFY_SOURCE -D
-> _FORTIFY_SOURCE=2 -D HAVE_CONFIG_H -D __CEPH__ -D _REENTRANT -D
-> _THREAD_SAFE -D __STDC_FORMAT_MACROS -isystem
-> /build/ceph-12.1.2/obj-x86_64-linux-gnu/boost/include -isystem
-> /build/ceph-12.1.2/obj-x86_64-linux-gnu/include -isystem
-> /build/ceph-12.1.2/src/rapidjson/include
-> /build/ceph-12.1.2/src/test/librbd/object_map/test_mock_LockRequest.cc
-> -quiet -dumpbase test_mock_LockRequest.cc -mtune=generic -march=x86-64
-> -auxbase-strip CMakeFiles/unittest_librbd.dir/object_map/test_mock_LockRequest.cc.o
-> -g -O2 -Wformat=1 -Werror=format-security -Wdate-time -Wall
-> -Wtype-limits -Wignored-qualifiers -Winit-self -Wpointer-arith
-> -Werror=format-security -Wno-unknown-pragmas -std=c++11
-> -fdiagnostics-color=auto -fdebug-prefix-map=/build/ceph-12.1.2=.
-> -fstack-protector-strong -fsigned-char -fstack-protector-strong
-> -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc
-> -fno-builtin-free -fPIE -fno-strict-aliasing -o - -frandom-seed=0
-> -fdump-noaddr
->
-> If we can set up a machine with env the same as pbuilder is using we
-> can run the command manually and see what we get.
->
-> On Wed, Jul 26, 2017 at 10:23 AM, Alfredo Deza <adeza@redhat.com> wrote:
->> On Tue, Jul 25, 2017 at 5:53 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
->>>
->>>
->>> On Wed, Jul 26, 2017 at 5:02 AM, Alfredo Deza <adeza@redhat.com> wrote:
->>>> We are (consistently) hitting this Segmentation Fault:
->>>>
->>>> /build/ceph-12.1.2/src/test/librbd/object_map/test_mock_LockRequest.cc:61:3:
->>>> internal compiler error: Segmentation fault
->>>>    }
->>>>    ^
->>>>
->>>> https://jenkins.ceph.com/job/ceph-build/ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=stretch,DIST=stretch,MACHINE_SIZE=huge/237/consoleFull#-1443688772a811ea2-3e7b-466b-84b4-d13df7e35809
->>>>
->>>> The builds for Debian distros are all produced from Xenial hosts that
->>>> use pbuilder to accommodate any Deb distro. On the same host, Xenial
->>>> and Trusty works fine for example.
->>>>
->>>> GCC version on the box that failed:
->>>>
->>>> gcc (Ubuntu 5.4.0-6ubuntu1~16.04.4) 5.4.0 20160609
->>>>
->>>> The scripts we use for building are here:
->>>> https://github.com/ceph/ceph-build/tree/master/ceph-build/build
->>>>
->>>> Unless someone can help out identify why this happens and how to fix
->>>> it, it means that we will not be able to have Stretch packages.
->>>
->>> This looks like a compiler error.
->>>
->>> You can use "VERBOSE=1 make" to get it to spit out the command line that it is
->>> running at the time of failure. Then hopefully you can run the compiler in gdb
->>> and get a stack trace or, alternatively capture a coredump and get a stack trace
->>> from that. I'd there compare the stack trace with known gcc bugs and hope we get
->>> a hit.
->>
->> Added it, not sure if that did anything (it might be me though)
->>
->> https://jenkins.ceph.com/job/ceph-build/240/ARCH=x86_64,AVAILABLE_ARCH=x86_64,AVAILABLE_DIST=stretch,DIST=stretch,MACHINE_SIZE=huge/console
->>
->> This is the line that consistently brings this crashing:
->> https://github.com/ceph/ceph/blob/luminous/src/test/librbd/object_map/test_mock_LockRequest.cc#L61
->>
->> We will go ahead with the release without Debian Stretch. Maybe
->> someone can help figure this out, since it seems consistent (it failed
->> in the same way on the same spot every time).
->>
->> This means that Debian Stretch will also be disabled on other releases
->> until we at least build it often enough without issues
->>>
->>>>
->>>> -Alfredo
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->>> --
->>> Cheers,
->>> Brad
->
->
->
-> --
-> Cheers,
-> Brad
+--EeQfGwPcQSOJBaQU
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
+Today I needed to build the current Kraken HEAD using gcc7. Unfortunately, the
+source of both ceph and the rocksdb submodule are incompatible with gcc7.
 
+I came up with the attached patches which allow the sources to compile. I'm
+posting them here as they may help someone make progress until the problems with
+gcc7 are fixed in the kraken branch.
 
 -- 
 Cheers,
 Brad
+
+--EeQfGwPcQSOJBaQU
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: attachment; filename="ceph-kraken.patch"
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 93963cf8be..86abc79b01 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -688,7 +688,10 @@ install(TARGETS ceph-mon DESTINATION bin)
+ # OSD/ObjectStore
+ # make rocksdb statically
+ 
+-set(ROCKSDB_CMAKE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE=ON)
++set(THE_FLAGS "-Wno-expansion-to-defined -Wno-implicit-fallthrough -Wno-format-truncation")
++set(ROCKSDB_CMAKE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE=ON
++  -DCMAKE_CXX_FLAGS=${THE_FLAGS}
++  -DCMAKE_C_FLAGS=${THE_FLAGS})
+ 
+ if(ALLOCATOR STREQUAL "jemalloc")
+   list(APPEND ROCKSDB_CMAKE_ARGS -DWITH_JEMALLOC=ON)
+diff --git a/src/os/FuseStore.h b/src/os/FuseStore.h
+index bb9e59f5f4..04681e645c 100644
+--- a/src/os/FuseStore.h
++++ b/src/os/FuseStore.h
+@@ -7,6 +7,7 @@
+ #include <string>
+ #include <map>
+ #include <mutex>
++#include <functional>
+ 
+ #include "common/Thread.h"
+ #include "include/buffer.h"
+
+--EeQfGwPcQSOJBaQU
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: attachment; filename="rocksdb-kraken.patch"
+
+diff --git a/util/thread_local.h b/util/thread_local.h
+index 5806b544..f0af7504 100644
+--- a/util/thread_local.h
++++ b/util/thread_local.h
+@@ -13,6 +13,7 @@
+ #include <memory>
+ #include <unordered_map>
+ #include <vector>
++#include <functional>
+ 
+ #include "util/autovector.h"
+ #include "port/port.h"
+diff --git a/utilities/persistent_cache/block_cache_tier.h b/utilities/persistent_cache/block_cache_tier.h
+index 9330d053..baefca32 100644
+--- a/utilities/persistent_cache/block_cache_tier.h
++++ b/utilities/persistent_cache/block_cache_tier.h
+@@ -15,6 +15,7 @@
+ #include <stdexcept>
+ #include <string>
+ #include <thread>
++#include <functional>
+ 
+ #include "rocksdb/cache.h"
+ #include "rocksdb/comparator.h"
+diff --git a/utilities/persistent_cache/block_cache_tier_file.h b/utilities/persistent_cache/block_cache_tier_file.h
+index c2311ffc..c77d1d7b 100644
+--- a/utilities/persistent_cache/block_cache_tier_file.h
++++ b/utilities/persistent_cache/block_cache_tier_file.h
+@@ -10,6 +10,7 @@
+ #include <memory>
+ #include <string>
+ #include <vector>
++#include <functional>
+ 
+ #include "rocksdb/comparator.h"
+ #include "rocksdb/env.h"
+diff --git a/utilities/persistent_cache/volatile_tier_impl.h b/utilities/persistent_cache/volatile_tier_impl.h
+index a29c4ac3..f3ca79d6 100644
+--- a/utilities/persistent_cache/volatile_tier_impl.h
++++ b/utilities/persistent_cache/volatile_tier_impl.h
+@@ -12,6 +12,7 @@
+ #include <sstream>
+ #include <string>
+ #include <vector>
++#include <functional>
+ 
+ #include "rocksdb/cache.h"
+ #include "utilities/persistent_cache/hash_table.h"
+
+--EeQfGwPcQSOJBaQU--
