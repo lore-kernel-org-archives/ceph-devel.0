@@ -1,124 +1,43 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] libceph: fix osd request encoding regression
-Date: Wed, 26 Jul 2017 16:22:21 +0800
-Message-ID: <ABE62A8A-1B3B-4E17-8028-FAEFA82D07FB@redhat.com>
-References: <20170724132802.7916-1-zyan@redhat.com>
- <CAOi1vP-oN-_1u3h2owk++=tF9TSRKrDJMBuxAF4FUG1vDy5gvg@mail.gmail.com>
- <E6E0CA48-9FA8-4288-8FF3-27283C1B97DC@redhat.com>
- <CAOi1vP-LT128qzke8yww+zdHEgenZktQ+RsL8BXVP3kRa2+EbA@mail.gmail.com>
- <CAOi1vP_rt7TJbmpqVCokdS_r9UrcvvU5rjHpv+-iN=7nMRB_Gg@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Jenkins trouble.....
+Date: Wed, 26 Jul 2017 12:26:18 +0200
+Message-ID: <643ec0f0-6eb8-731b-4372-d6cf3654bf34@digiware.nl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57398 "EHLO mx1.redhat.com"
+Received: from smtp.digiware.nl ([176.74.240.9]:48732 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750816AbdGZIUs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 26 Jul 2017 04:20:48 -0400
-In-Reply-To: <CAOi1vP_rt7TJbmpqVCokdS_r9UrcvvU5rjHpv+-iN=7nMRB_Gg@mail.gmail.com>
+        id S1751175AbdGZK0W (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 26 Jul 2017 06:26:22 -0400
+Received: from [192.168.10.67] (opteron [192.168.10.67])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id 2CA4D458E7
+        for <ceph-devel@vger.kernel.org>; Wed, 26 Jul 2017 12:26:20 +0200 (CEST)
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
+
+Hi,
+
+I have 2 PRs that report:
+
+--  Using EventEpoll for events.
+CMake Error at src/CMakeLists.txt:668 (add_subdirectory):
+  The source directory
+
+    /home/jenkins-build/build/workspace/ceph-pull-requests/src/lua
+
+  does not contain a CMakeLists.txt file.
 
 
-> On 26 Jul 2017, at 16:04, Ilya Dryomov <idryomov@gmail.com> wrote:
-> 
-> On Tue, Jul 25, 2017 at 3:33 PM, Ilya Dryomov <idryomov@gmail.com> wrote:
->> On Tue, Jul 25, 2017 at 3:14 PM, Yan, Zheng <zyan@redhat.com> wrote:
->>> 
->>>> On 25 Jul 2017, at 21:01, Ilya Dryomov <idryomov@gmail.com> wrote:
->>>> 
->>>> On Mon, Jul 24, 2017 at 3:28 PM, Yan, Zheng <zyan@redhat.com> wrote:
->>>>> The new BUG_ON in encode_request_partial() verifies that space used
->>>>> by encoding request front is exactly equal to request message size.
->>>>> This is wrong because request messages allocated from mempool always
->>>>> have size PAGE_SIZE.
->>>>> 
->>>>> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
->>>>> ---
->>>>> net/ceph/osd_client.c | 17 +++++++++--------
->>>>> 1 file changed, 9 insertions(+), 8 deletions(-)
->>>>> 
->>>>> diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
->>>>> index 5c9d696..81f6199 100644
->>>>> --- a/net/ceph/osd_client.c
->>>>> +++ b/net/ceph/osd_client.c
->>>>> @@ -1913,10 +1913,11 @@ static void encode_request_partial(struct ceph_osd_request *req,
->>>>>       }
->>>>> 
->>>>>       ceph_encode_32(&p, req->r_attempts); /* retry_attempt */
->>>>> -       BUG_ON(p != end - 8); /* space for features */
->>>>> +       BUG_ON(p + 8 > end); /* space for features */
->>>>> 
->>>>>       msg->hdr.version = cpu_to_le16(8); /* MOSDOp v8 */
->>>>> -       /* front_len is finalized in encode_request_finish() */
->>>>> +       msg->front.iov_len = p + 8 - msg->front.iov_base;
->>>>> +       msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
->>>>>       msg->hdr.data_len = cpu_to_le32(data_len);
->>>>>       /*
->>>>>        * The header "data_off" is a hint to the receiver allowing it
->>>>> @@ -1932,7 +1933,7 @@ static void encode_request_partial(struct ceph_osd_request *req,
->>>>> static void encode_request_finish(struct ceph_msg *msg)
->>>>> {
->>>>>       void *p = msg->front.iov_base;
->>>>> -       void *const end = p + msg->front_alloc_len;
->>>>> +       void *const end = p + msg->front.iov_len;
->>>>> 
->>>>>       if (CEPH_HAVE_FEATURE(msg->con->peer_features, RESEND_ON_SPLIT)) {
->>>>>               /* luminous OSD -- encode features and be done */
->>>>> @@ -2008,11 +2009,11 @@ static void encode_request_finish(struct ceph_msg *msg)
->>>>>               p += tail_len;
->>>>> 
->>>>>               msg->hdr.version = cpu_to_le16(4); /* MOSDOp v4 */
->>>>> -       }
->>>>> 
->>>>> -       BUG_ON(p > end);
->>>>> -       msg->front.iov_len = p - msg->front.iov_base;
->>>>> -       msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
->>>>> +               BUG_ON(p > end);
->>>>> +               msg->front.iov_len = p - msg->front.iov_base;
->>>>> +               msg->hdr.front_len = cpu_to_le32(msg->front.iov_len);
->>>>> +       }
->>>>> 
->>>>>       dout("%s msg %p tid %llu %u+%u+%u v%d\n", __func__, msg,
->>>>>            le64_to_cpu(msg->hdr.tid), le32_to_cpu(msg->hdr.front_len),
->>>>> @@ -3981,7 +3982,7 @@ static struct ceph_msg *create_backoff_message(
->>>>>               return NULL;
->>>>> 
->>>>>       p = msg->front.iov_base;
->>>>> -       end = p + msg->front_alloc_len;
->>>>> +       end = p + msg->front.iov_len;
->>>>> 
->>>>>       encode_spgid(&p, &backoff->spgid);
->>>>>       ceph_encode_32(&p, map_epoch);
->>>> 
->>>> Hi Zheng,
->>>> 
->>>> How about the attached patch instead?  It's shorter and more
->>>> importantly preserves the existing structure.
->>> 
->>> does encode_request_finish() get called each time we re-send a message?
->>> If it does, your patch seems incorrect. encode_request_finish() appends extra
->>> 8 bytes to the message each time it get called.
->> 
->> Hrm, it is.  But then your patch doesn't fix it either because the
->> problem is the ->reencode_message() call itself -- I didn't intend it
->> to be called on every resend.  Let me run some tests...
-> 
-> OK, so ->reencode_message() being called more than once could affect
-> the MDS client, but since only the OSD client is using it, there are no
-> immediate issues.  I'll post the attached patch for the sake of
-> robustness though.
-> 
+CMake Error at cmake/modules/MergeStaticLibraries.cmake:21 (message):
+  liblua not a valid target
+Call Stack (most recent call first):
+  src/cls/CMakeLists.txt:269 (merge_static_libraries)
 
-With this new patch, your previous patch looks good.
+And I claim to be inocent.... ;-)
 
-Regards
-Yan, Zheng
-
-> Thanks,
-> 
->                Ilya
-> <0001-libceph-don-t-call-reencode_message-more-than-once-p.patch>
-
+--WjW
