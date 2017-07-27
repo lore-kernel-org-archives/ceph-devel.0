@@ -1,48 +1,77 @@
-From: "J. Eric Ivancich" <ivancich@redhat.com>
-Subject: =?utf-8?Q?Re=3A_About__dmclock_theory_defect__=E7=AD=94=E5=A4=8D?=
- =?utf-8?Q?=3A_About_dmClock_tests_confusion_after_integrating_dm?=
- =?utf-8?Q?Clock_QoS_library_into_ceph_codebase?=
-Date: Thu, 27 Jul 2017 14:30:13 -0400
-Message-ID: <F67D4763-4609-40F7-B4BA-AD71CB009533@redhat.com>
-References: <509B214C5E2CEA4D9C41C1AB2A76BDD1A36C50FC@H3CMLB14-EX.srv.huawei-3com.com> <509B214C5E2CEA4D9C41C1AB2A76BDD1A36C512D@H3CMLB14-EX.srv.huawei-3com.com> <509B214C5E2CEA4D9C41C1AB2A76BDD1AF28A20D@H3CMLB12-EX.srv.huawei-3com.com> <509B214C5E2CEA4D9C41C1AB2A76BDD1AF28A22D@H3CMLB12-EX.srv.huawei-3com.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+From: Casey Bodley <cbodley@redhat.com>
+Subject: design notes: rgw multisite and cleanup of deleted buckets
+Date: Thu, 27 Jul 2017 14:39:51 -0400
+Message-ID: <ad5b5ecf-84fc-3236-aa73-89525fdcb866@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f181.google.com ([209.85.216.181]:38508 "EHLO
-        mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750981AbdG0SaQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jul 2017 14:30:16 -0400
-Received: by mail-qt0-f181.google.com with SMTP id t37so72083840qtg.5
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Jul 2017 11:30:15 -0700 (PDT)
-In-Reply-To: <509B214C5E2CEA4D9C41C1AB2A76BDD1AF28A22D@H3CMLB12-EX.srv.huawei-3com.com>
+Received: from mail-qk0-f169.google.com ([209.85.220.169]:35317 "EHLO
+        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751579AbdG0Sjy (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jul 2017 14:39:54 -0400
+Received: by mail-qk0-f169.google.com with SMTP id d145so101362717qkc.2
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Jul 2017 11:39:54 -0700 (PDT)
+Received: from [10.17.151.126] ([12.118.3.106])
+        by smtp.gmail.com with ESMTPSA id z192sm13636289qka.46.2017.07.27.11.39.51
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 27 Jul 2017 11:39:52 -0700 (PDT)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Lijie <li.jieA@h3c.com>
-Cc: "agulati@vmware.com" <agulati@vmware.com>, "arif@hpl.hp.com" <arif@hpl.hp.com>, "pjv@rice.edu" <pjv@rice.edu>, Ceph Development <ceph-devel@vger.kernel.org>
+To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Hi Jie,
+Motivation:
+When buckets are removed on the master zone in a multisite 
+configuration, the bucket instance and index objects are never removed 
+(only the bucket entrypoint is removed, which makes the bucket 
+unreachable). The reason we don't remove the instance/indices is because 
+the peer zones may not have finished processing all of the object 
+removal entries for that bucket, and they can't make progress with that 
+if the master zone is unable to serve the bucket instance metadata or 
+bucket index logs. This would result in leaked objects/data.
 
-I think you’re right in both cases you describe. There are inherent limitations to any algorithm based on the distribution of requests to multiple servers that are themselves not interchangeable (i.e., a given request must go to a specific server). It seems to me dmclock does a relatively good job without requiring explicit and direct coordination between the servers and instead using the clients to help coordinate the distributed aspect of the algorithm.
+Tracker issue: http://tracker.ceph.com/issues/20802
 
-Eric
+Design:
+In short, the master zone will actually delete its bucket instance and 
+index objects in RGWRados::delete_bucket(), and peer zones will learn to 
+deal with it during sync.
 
-On Jul 4, 2017, at 9:11 PM, Lijie <li.jieA@h3c.com> wrote:
-> 
-> Hi Eric,
->   We applied dmclock in ceph, but in actual environments only the limitation worked while the reservation and proportion had no real effect at all.
->   After careful analysis, we find that the dmclock algrithm developed from the mclock algrithm, has great defects in theory.
-> 
->   First of all , a corepremise of attaining reservation is that all requests which should be scheduled in reservation phase have been completed before
->   it going into proportion phase.This means if the reservation heap has requests with R-tag smaller than current time, it should not process requests
->   in proportion phase. It is very easy to get this point in single server. But in multi-server situation, some servers are in reservation phase while some
->   in proportion phase. So the reservation can not be guaranteed at all.
-> 
->   Second of all, a similar problem remains for proportion. Let's consider an extreme situation . There are 2 servers ,S1 and S2;2 clients C1,C2. All of requests
->   from C1 go to S1 while all requests from C2 go to S2. In this case, proportion cannot be guaranteed . And requests are not equally distributed in real wolrd like
->   ceph, which leads to the failure in proportion.
-> 
->   So in conclusion,we think that dmclock can only work for limitation in theory.
-> 
->   So what about your idea about our conclusion ?
+metadata sync:
+When the master zone deletes a bucket instance, it writes that bucket 
+instance to the metadata log. When another zone sees this entry during 
+metadata sync, it will:
+1) set a new 'remove-only' flag on each of its bucket index objects,
+2) write an entry for each bucket index shard to a new 'bucket gc log' 
+(described below), and
+3) remove its local copy of the bucket instance.
 
+bucket sync:
+When bucket sync discovers that its bucket has been removed (either from 
+getting ENOENT when trying to fetch the bucket instance metadata from 
+the master zone, or from seeing the 'remove-only' flag on the local 
+bucket index when trying to sync an object), it deletes its sync status 
+object and stops processing that bucket (using similar logic to the 
+'bucket sync disable' feature in development at 
+https://github.com/ceph/ceph/pull/15801). If the data changes log 
+triggers another attempt to sync this bucket shard, it will try to fetch 
+its bucket instance metadata from the master zone and fail with ENOENT.
+
+bucket gc:
+Since we stop trying to sync deleted buckets, they may still contain 
+objects. All objects need to be deleted before we can remove the bucket 
+index objects themselves. This process is deferred to a background 
+thread using a new 'bucket gc log'. Object deletion will keep the bucket 
+index consistent so that it can resume its progress across radosgw 
+restarts. The 'remove-only' flag on the bucket index will allow this 
+deletion, while preventing bucket sync from adding new objects. Once all 
+objects are removed from each bucket index, the bucket index object can 
+be safely deleted and its entry trimmed from the bucket gc log. The 
+bucket gc worker thread will process the first N entries in parallel, 
+where N is configurable with a default of ~16. A rados lock on the log 
+object will prevent other gateways in the zone from duplicating the work 
+(similar to DataLogTrimPollCR for datalog trimming).
+
+Casey
