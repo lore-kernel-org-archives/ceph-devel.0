@@ -1,288 +1,896 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: Ceph Bluestore OSD CPU utilization
-Date: Thu, 27 Jul 2017 12:40:48 +1000
-Message-ID: <CAF-wwdG5Z+LBtsdiWcdMOJQVimzsv1n6ApaVhJNiSqKfVMoxxQ@mail.gmail.com>
-References: <694B98CBCEF42547AE4CD1A693225B5D085533EA@CNMAILEX04.lenovo.com>
- <5f6e1242-f0ec-62f2-9778-eb0a28406838@redhat.com>
- <6929185c-7c88-83ee-9e12-62db1cd23ec5@redhat.com>
- <694B98CBCEF42547AE4CD1A693225B5D085544B4@CNMAILEX04.lenovo.com>
- <e09c864a-fb65-a68a-4802-f8b4d29f88fc@gmail.com>
- <694B98CBCEF42547AE4CD1A693225B5D085546CF@CNMAILEX04.lenovo.com>
- <f367fa53-1d0c-3a81-0769-e0a46adb9cdb@gmail.com>
- <694B98CBCEF42547AE4CD1A693225B5D08554965@CNMAILEX04.lenovo.com>
+From: scan-admin@coverity.com
+Subject: New Defects reported by Coverity Scan for ceph
+Date: Thu, 27 Jul 2017 03:50:24 +0000 (UTC)
+Message-ID: <597962ffac427_273d7af32858674@ss1435.mail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f175.google.com ([209.85.192.175]:34200 "EHLO
-        mail-pf0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751421AbdG0Ckz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 26 Jul 2017 22:40:55 -0400
-Received: by mail-pf0-f175.google.com with SMTP id q85so77878980pfq.1
-        for <ceph-devel@vger.kernel.org>; Wed, 26 Jul 2017 19:40:55 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <694B98CBCEF42547AE4CD1A693225B5D08554965@CNMAILEX04.lenovo.com>
+Received: from o5.24nn.shared.sendgrid.net ([50.31.63.1]:22316 "EHLO
+        o5.24nn.shared.sendgrid.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751471AbdG0DuZ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 26 Jul 2017 23:50:25 -0400
+Received: from coverity.com (static-208.69.177.245.nephosdns.com [208.69.177.245])
+        by ismtpd0030p1mdw1.sendgrid.net (SG) with ESMTP id uD1EH_AmTdqwJjmsS-RtjA
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Jul 2017 03:50:24.327 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Junqin JQ7 Zhang <zhangjq7@lenovo.com>
-Cc: Mark Nelson <mark.a.nelson@gmail.com>, Mark Nelson <mnelson@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
-
-Bumping this as I was talking to Junqin in IRC today and he reported it is still
-an issue. I suggested analysis of metrics and profiling data to try to determine
-the bottleneck for bluestore and also suggested Junqin open a tracker so we can
-investigate this thoroughly.
-
-Mark, Did you have any additional thoughts on how this might best be attacked?
+To: ceph-devel@vger.kernel.org
 
 
-On Thu, Jul 13, 2017 at 11:37 PM, Junqin JQ7 Zhang <zhangjq7@lenovo.com> wrote:
-> Hi Mark,
->
-> Thanks for your reply.
->
-> Our SSD model is:
-> Device Model:     SSDSC2BA800G4N
-> Intel SSD DC S3710 Series 800GB
->
-> And BlueStore OSD configure is as I posted before
-> [osd.0]
-> host = ceph-1
-> osd data = /var/lib/ceph/osd/ceph-0    # a 100M SSD partition
-> bluestore block db path = /dev/sda5    # a 10G SSD partition
-> bluestore block wal path = /dev/sda6  # a 10G SSD partition
-> bluestore block path = /dev/sdd            # a HDD disk
->
-> The iostat is a quick snapshot of terminal screen on a 8K write. I forget the detail test configuration.
-> I only can make sure is it is a 8K random write.
-> But we have re-setup the cluster, so I can't get the data right now, but we will do test again later these days.
->
-> Is there any special configure on BlueStore on your lab test? Like, how BlueStore OSD configured in your lab test?
-> Or could you share lab test BlueStore configuration? Like file ceph.conf?
->
-> Thanks a lot!
->
-> B.R.
-> Junqin Zhang
->
-> -----Original Message-----
-> From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
-> Sent: Wednesday, July 12, 2017 11:29 PM
-> To: Junqin JQ7 Zhang; Mark Nelson; Ceph Development
-> Subject: Re: Ceph Bluestore OSD CPU utilization
->
-> Hi Junqin
->
-> On 07/12/2017 05:21 AM, Junqin JQ7 Zhang wrote:
->> Hi Mark,
->>
->> We also compared iostat of filestore and bluestore.
->> Disk write rate of bluestore is only around 10% of filestore in same test case.
->>
->> Here is FileStore iostat during write
->> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
->>           13.06    0.00    9.84   11.52    0.00   65.58
->>
->> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->> sda               0.00     0.00    0.00 8196.00     0.00 73588.00    17.96     0.52    0.06    0.00    0.06   0.04  31.90
->> sdb               0.00     0.00    0.00 8298.00     0.00 75572.00    18.21     0.54    0.07    0.00    0.07   0.04  33.00
->> sdh               0.00  4894.00    0.00  741.00     0.00 30504.00    82.33   207.60  314.51    0.00  314.51   1.35 100.10
->> sdj               0.00  1282.00    0.00  938.00     0.00 15652.00    33.37    14.40   16.04    0.00   16.04   0.90  84.10
->> sdk               0.00  5156.00    0.00  847.00     0.00 34560.00    81.61   199.04  283.83    0.00  283.83   1.18 100.10
->> sdd               0.00  6889.00    0.00  729.00     0.00 38216.00   104.84   138.60  198.14    0.00  198.14   1.37 100.00
->> sde               0.00  6909.00    0.00  763.00     0.00 38608.00   101.20   139.16  190.55    0.00  190.55   1.31 100.00
->> sdf               0.00  3237.00    0.00  708.00     0.00 30548.00    86.29   175.15  310.36    0.00  310.36   1.41  99.80
->> sdg               0.00  4875.00    0.00  745.00     0.00 32312.00    86.74   207.70  291.26    0.00  291.26   1.34 100.00
->> sdi               0.00  7732.00    0.00  812.00     0.00 42136.00   103.78   140.94  181.96    0.00  181.96   1.23 100.00
->>
->> Here is BlueStore iostat during write
->> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
->>            6.50    0.00    3.22    2.36    0.00   87.91
->>
->> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
->> sda               0.00     0.00    0.00 2938.00     0.00 25072.00    17.07     0.14    0.05    0.00    0.05   0.04  12.70
->> sdb               0.00     0.00    0.00 2821.00     0.00 26112.00    18.51     0.15    0.05    0.00    0.05   0.05  12.90
->> sdh               0.00     1.00    0.00  510.00     0.00  3600.00    14.12     5.45   10.68    0.00   10.68   0.24  12.00
->> sdj               0.00     0.00    0.00  424.00     0.00  3072.00    14.49     4.24   10.00    0.00   10.00   0.22   9.30
->> sdk               0.00     0.00    0.00  496.00     0.00  3584.00    14.45     4.10    8.26    0.00    8.26   0.18   9.10
->> sdd               0.00     0.00    0.00  419.00     0.00  3080.00    14.70     3.60    8.60    0.00    8.60   0.19   7.80
->> sde               0.00     0.00    0.00  650.00     0.00  3784.00    11.64    24.39   40.19    0.00   40.19   1.15  74.60
->> sdf               0.00     0.00    0.00  494.00     0.00  3584.00    14.51     5.92   11.98    0.00   11.98   0.26  12.90
->> sdg               0.00     0.00    0.00  493.00     0.00  3584.00    14.54     5.11   10.37    0.00   10.37   0.23  11.20
->> sdi               0.00     0.00    0.00  744.00     0.00  4664.00    12.54   121.41  177.66    0.00  177.66   1.35 100.10
->>
->> sda and sdb are SSD, other are HDD.
->
-> earlier it looked like you were posting the configuration for an 8k randrw test, but this is a pure write test?  Can you provide the test configuration for these results?  Also, the SSD model would be useful to know.
->
-> Having said that, these results look pretty different than what I typically see in the lab.  A big clue is the avgrq-sz.  On filestore you are seeing much larger write requests than with bluestore.  That might indicate that metadata writes are going to the HDD.  Is this still with the 10GB DB partition?
->
-> Mark
->
->>
->> -----Original Message-----
->> From: Junqin JQ7 Zhang
->> Sent: Wednesday, July 12, 2017 10:45 AM
->> To: 'Mark Nelson'; Mark Nelson; Ceph Development
->> Subject: RE: Ceph Bluestore OSD CPU utilization
->>
->> Hi Mark,
->>
->> Actually, we tested filestore on same Ceph version v12.1.0 and same cluster.
->> # ceph -v
->> ceph version 12.1.0 (262617c9f16c55e863693258061c5b25dea5b086)
->> luminous (dev)
->>
->> CPU utilization of each OSD on filestore can reach max to around 200%, but CPU utilization of OSD on bluestore is only around 30%.
->> Then, BlueStore's performance is only about 20% of filestore.
->> We think there must be something wrong with our configuration.
->>
->> I tried to change ceph config, like
->> osd op threads = 8
->> osd disk threads = 4
->>
->> but still can't get a good result.
->>
->> Any idea of this?
->>
->> BTW. We changed some filestore related configured during test
->> filestore fd cache size = 2048576000 filestore fd cache shards = 16
->> filestore async threads = 0 filestore max sync interval = 15 filestore
->> wbthrottle enable = false filestore commit timeout = 1200
->> filestore_op_thread_suicide_timeout = 0 filestore queue max ops =
->> 1048576 filestore queue max bytes = 17179869184 max open files =
->> 262144 filestore fadvise = false filestore ondisk finisher threads = 4
->> filestore op threads = 8
->>
->> Thanks a lot!
->>
->> B.R.
->> Junqin Zhang
->> -----Original Message-----
->> From: ceph-devel-owner@vger.kernel.org
->> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
->> Sent: Tuesday, July 11, 2017 11:47 PM
->> To: Junqin JQ7 Zhang; Mark Nelson; Ceph Development
->> Subject: Re: Ceph Bluestore OSD CPU utilization
->>
->>
->>
->> On 07/11/2017 10:31 AM, Junqin JQ7 Zhang wrote:
->>> Hi Mark,
->>>
->>> Thanks for your reply.
->>>
->>> The hardware is as below for each 3 hosts.
->>> 2 SATA SSD and 8 HDD
->>
->> The model of SSD potentially could be very important here.  The devices we test in our lab are enterprise grade SSDs with power loss protection.
->>   That means they don't have to flush data on sync requests.  O_DSYNC writes are much faster as a result.  I don't know how bad of an impact this has on rocksdb wal/db, but it definitely hurts with filestore journals.
->>
->>> Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz
->>> Network: 20000Mb/s
->>>
->>> I configured OSD like
->>> [osd.0]
->>> host = ceph-1
->>> osd data = /var/lib/ceph/osd/ceph-0        # a 100M partition of SSD
->>> bluestore block db path = /dev/sda5         # a 10G partition of SSD
->>
->> Bluestore automatically roles rocksdb data over to the HDD with the db gets full.  I bet with 10GB you'll see good performance at first and then you'll start seeing lots of extra reads/writes on the HDD once it fills up with metadata (the more extents that are written out the more likely you'll hit this boundary).  You'll want to make the db partitions use the majority of the SSD(s).
->>
->>> bluestore block wal path = /dev/sda6       # a 10G partition of SSD
->>
->> The WAL can be smaller.  1-2GB is enough (potentially even less if you adjust the rocksdb buffer settings, but 1-2GB should be small enough to devote most of your SSDs to DB storage).
->>
->>> bluestore block path = /dev/sdd                # a HDD disk
->>>
->>> We use fio to test one or more 100G RBDs, an example of our fio
->>> config [global] ioengine=rbd clientname=admin pool=rbd rw=randrw
->>> bs=8k
->>> runtime=120
->>> iodepth=16
->>> numjobs=4
->>
->> with the rbd engine I try to avoid numjobs as it can give erroneous results in some cases.  it's probably better generally to stick with multiple independent fio processes (though in this case for a randrw workload it might not matter).
->>
->>> direct=1
->>> rwmixread=0
->>> new_group
->>> group_reporting
->>> [rbd_image0]
->>> rbdname=testimage_100GB_0
->>>
->>> Any suggestion?
->>
->> What kind of performance are you seeing and what do you expect to get?
->>
->> Mark
->>
->>> Thanks.
->>>
->>> B.R.
->>> Junqin zhang
->>>
->>> -----Original Message-----
->>> From: Mark Nelson [mailto:mnelson@redhat.com]
->>> Sent: Tuesday, July 11, 2017 7:32 PM
->>> To: Junqin JQ7 Zhang; Ceph Development
->>> Subject: Re: Ceph Bluestore OSD CPU utilization
->>>
->>> Ugh, small sequential *reads* I meant to say.  :)
->>>
->>> Mark
->>>
->>> On 07/11/2017 06:31 AM, Mark Nelson wrote:
->>>> Hi Junqin,
->>>>
->>>> Can you tell us your hardware configuration (models and quantities
->>>> of cpus, network cards, disks, ssds, etc) and the command and
->>>> options you used to measure performance?
->>>>
->>>> In many cases bluestore is faster than filestore, but there are a
->>>> couple of cases where it is notably slower, the big one being when
->>>> doing small sequential writes without client-side readahead.
->>>>
->>>> Mark
->>>>
->>>> On 07/11/2017 05:34 AM, Junqin JQ7 Zhang wrote:
->>>>> Hi,
->>>>>
->>>>> I installed Ceph luminous v12.1.0 in 3 nodes cluster with BlueStore
->>>>> and did some fio test.
->>>>> During test,  I found the each OSD CPU utilization rate was only
->>>>> aroud 30%.
->>>>> And the performance seems not good to me.
->>>>> Is  there any configuration to help increase OSD CPU utilization to
->>>>> improve performance?
->>>>> Change kernel.pid_max? Any BlueStore specific configuration?
->>>>>
->>>>> Thanks a lot!
->>>>>
->>>>> B.R.
->>>>> Junqin Zhang
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>>> in the body of a message to majordomo@vger.kernel.org More
->>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>>> in the body of a message to majordomo@vger.kernel.org More majordomo
->>>> info at  http://vger.kernel.org/majordomo-info.html
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->>> in the body of a message to majordomo@vger.kernel.org More majordomo
->>> info at  http://vger.kernel.org/majordomo-info.html
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
->> in the body of a message to majordomo@vger.kernel.org More majordomo
->> info at  http://vger.kernel.org/majordomo-info.html
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi,
+
+Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+
+119 new defect(s) introduced to ceph found with Coverity Scan.
+10 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+
+New defect(s) Reported-by: Coverity Scan
+Showing 20 of 119 defect(s)
 
 
+** CID 742343:  Uninitialized members  (UNINIT_CTOR)
+/usr/include/c++/6.3.1/functional: 1862 in std::function<int (std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> *)>::function()()
 
--- 
-Cheers,
-Brad
+
+________________________________________________________________________________________________________
+*** CID 742343:  Uninitialized members  (UNINIT_CTOR)
+/usr/include/c++/6.3.1/functional: 1862 in std::function<int (std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> *, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> *)>::function()()
+1856     
+1857           /**
+1858            *  @brief Default construct creates an empty function call wrapper.
+1859            *  @post @c !(bool)*this
+1860            */
+1861           function() noexcept
+>>>     CID 742343:  Uninitialized members  (UNINIT_CTOR)
+>>>     Non-static class member "_M_invoker" is not initialized in this constructor nor in any functions that it calls.
+1862           : _Function_base() { }
+1863     
+1864           /**
+1865            *  @brief Creates an empty function call wrapper.
+1866            *  @post @c !(bool)*this
+1867            */
+
+** CID 1415737:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/rgw/test_http_manager.cc: 46 in main()
+/home/brad/working/src/ceph/src/test/rgw/test_http_manager.cc: 46 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415737:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/rgw/test_http_manager.cc: 46 in main()
+40       for (size_t i = 0; i < num_requests; i++) {
+41         RGWHTTPClient client{cct};
+42         http.add_request(&client, "PUT", "https://u2389337.ct.sendgrid.net/wf/click?upn=fD34396FQoQ91T9x-2BhmXx3zqBikxIjbLh07rMjDngok-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8F5lXRZqPomtFYhumhQS7Ys56UCLMyraoRU8cAgH5Gb9p-2FOEaXwDBubR7a6vGsxgMl66a2ESHQ-2BDPgGAanQFq9zMj-2BvVvPhZ0KNXhClovkOFoICV8ApnfOJg22A8DyebqOnvcVPoFlLPJ7NKm-2FAP6YCEZCHZIDB4-2Fw8o1j0vzgp57YlHqZFQYywQinyxnevN-2Fg-3D");
+43       }
+44     }
+45     
+>>>     CID 1415737:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+46     int main(int argc, char** argv)
+47     {
+48       vector<const char*> args;
+49       argv_to_vec(argc, (const char **)argv, args);
+50     
+51       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+/home/brad/working/src/ceph/src/test/rgw/test_http_manager.cc: 46 in main()
+40       for (size_t i = 0; i < num_requests; i++) {
+41         RGWHTTPClient client{cct};
+42         http.add_request(&client, "PUT", "https://u2389337.ct.sendgrid.net/wf/click?upn=fD34396FQoQ91T9x-2BhmXx3zqBikxIjbLh07rMjDngok-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8F5lXRZqPomtFYhumhQS7Ys56UCLMyraoRU8cAgH5Gb9nO0iFRmZD9uPWZHcvbCWZ62mEVFjMkDtjtMAALfiMgyOgNHh3OXa0oRFVBiJXDXsNxmMeMbRDVrip9IFae-2B5nLiIMKNjJ6avJaRPApEflKbgvOiIhtgOIYYi6zG36Q7rqnZp786jKHmyzxQQLX-2B3-2FM-3D");
+43       }
+44     }
+45     
+>>>     CID 1415737:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+46     int main(int argc, char** argv)
+47     {
+48       vector<const char*> args;
+49       argv_to_vec(argc, (const char **)argv, args);
+50     
+51       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+
+** CID 1415738:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/journal/test_main.cc: 12 in main()
+/home/brad/working/src/ceph/src/test/journal/test_main.cc: 12 in main()
+/home/brad/working/src/ceph/src/test/journal/test_main.cc: 12 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415738:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/journal/test_main.cc: 12 in main()
+6     #include "common/ceph_crypto.h"
+7     #include "common/config.h"
+8     #include "global/global_context.h"
+9     #include "global/global_init.h"
+10     #include <vector>
+11     
+>>>     CID 1415738:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+12     int main(int argc, char **argv)
+13     {
+14       ::testing::InitGoogleTest(&argc, argv);
+15     
+16       std::vector<const char*> args;
+17       argv_to_vec(argc, (const char **)argv, args);
+/home/brad/working/src/ceph/src/test/journal/test_main.cc: 12 in main()
+6     #include "common/ceph_crypto.h"
+7     #include "common/config.h"
+8     #include "global/global_context.h"
+9     #include "global/global_init.h"
+10     #include <vector>
+11     
+>>>     CID 1415738:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+12     int main(int argc, char **argv)
+13     {
+14       ::testing::InitGoogleTest(&argc, argv);
+15     
+16       std::vector<const char*> args;
+17       argv_to_vec(argc, (const char **)argv, args);
+/home/brad/working/src/ceph/src/test/journal/test_main.cc: 12 in main()
+6     #include "common/ceph_crypto.h"
+7     #include "common/config.h"
+8     #include "global/global_context.h"
+9     #include "global/global_init.h"
+10     #include <vector>
+11     
+>>>     CID 1415738:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+12     int main(int argc, char **argv)
+13     {
+14       ::testing::InitGoogleTest(&argc, argv);
+15     
+16       std::vector<const char*> args;
+17       argv_to_vec(argc, (const char **)argv, args);
+
+** CID 1415739:  Error handling issues  (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/omap_bench.cc: 414 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415739:  Error handling issues  (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/omap_bench.cc: 414 in main()
+408     }
+409     
+410     /**
+411      * runs the specified test with the specified parameters and generates
+412      * a histogram of latencies
+413      */
+>>>     CID 1415739:  Error handling issues  (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+414     int main(int argc, const char** argv) {
+415       OmapBench ob;
+416       int err = ob.setup(argc, argv);
+417       if (err<0) {
+418         cout << "error during setup: "<<err;
+419         cout << std::endl;
+
+** CID 1415740:  Resource leaks  (CTOR_DTOR_LEAK)
+/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 4697 in C_ExtentCmpRead::C_ExtentCmpRead(PrimaryLogPG *, OSDOp &, boost::optional<unsigned int>, unsigned long, OSDService *, hobject_t, unsigned int)()
+
+
+________________________________________________________________________________________________________
+*** CID 1415740:  Resource leaks  (CTOR_DTOR_LEAK)
+/home/brad/working/src/ceph/src/osd/PrimaryLogPG.cc: 4697 in C_ExtentCmpRead::C_ExtentCmpRead(PrimaryLogPG *, OSDOp &, boost::optional<unsigned int>, unsigned long, OSDService *, hobject_t, unsigned int)()
+4691       Context *fill_extent_ctx;
+4692     
+4693       C_ExtentCmpRead(PrimaryLogPG *primary_log_pg, OSDOp &osd_op,
+4694     		  boost::optional<uint32_t> maybe_crc, uint64_t size,
+4695     		  OSDService *osd, hobject_t soid, __le32 flags)
+4696         : primary_log_pg(primary_log_pg), osd_op(osd_op),
+>>>     CID 1415740:  Resource leaks  (CTOR_DTOR_LEAK)
+>>>     The constructor allocates field "fill_extent_ctx" of "C_ExtentCmpRead" but there is no destructor.
+4697           fill_extent_ctx(new FillInVerifyExtent(&read_length, &osd_op.rval,
+4698     					     &read_bl, maybe_crc, size,
+4699     					     osd, soid, flags)) {
+4700       }
+4701     
+4702       void finish(int r) override {
+
+** CID 1415741:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/test_cors.cc: 882 in main()
+/home/brad/working/src/ceph/src/test/test_cors.cc: 882 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415741:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/test_cors.cc: 882 in main()
+876       EXPECT_EQ(204U, g_test->get_resp_code());
+877       g_test->send_request("GET", "/" S3_BUCKET_NAME "?cors");
+878       EXPECT_EQ(404U, g_test->get_resp_code());
+879       ASSERT_EQ(0, delete_bucket());
+880     }
+881     
+>>>     CID 1415741:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+882     int main(int argc, char *argv[]){
+883       vector<const char*> args;
+884       argv_to_vec(argc, (const char **)argv, args);
+885     
+886       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+887                              CODE_ENVIRONMENT_UTILITY, 0);
+/home/brad/working/src/ceph/src/test/test_cors.cc: 882 in main()
+876       EXPECT_EQ(204U, g_test->get_resp_code());
+877       g_test->send_request("GET", "/" S3_BUCKET_NAME "?cors");
+878       EXPECT_EQ(404U, g_test->get_resp_code());
+879       ASSERT_EQ(0, delete_bucket());
+880     }
+881     
+>>>     CID 1415741:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+882     int main(int argc, char *argv[]){
+883       vector<const char*> args;
+884       argv_to_vec(argc, (const char **)argv, args);
+885     
+886       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+887                              CODE_ENVIRONMENT_UTILITY, 0);
+
+** CID 1415742:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/bench/small_io_bench_rbd.cc: 25 in main()
+/home/brad/working/src/ceph/src/test/bench/small_io_bench_rbd.cc: 25 in main()
+/home/brad/working/src/ceph/src/test/bench/small_io_bench_rbd.cc: 25 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415742:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/bench/small_io_bench_rbd.cc: 25 in main()
+19     #include "detailed_stat_collector.h"
+20     #include "distribution.h"
+21     
+22     namespace po = boost::program_options;
+23     using namespace std;
+24     
+>>>     CID 1415742:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+25     int main(int argc, char **argv)
+26     {
+27       po::options_description desc("Allowed options");
+28       desc.add_options()
+29         ("help", "produce help message")
+30         ("num-concurrent-ops", po::value<unsigned>()->default_value(10),
+/home/brad/working/src/ceph/src/test/bench/small_io_bench_rbd.cc: 25 in main()
+19     #include "detailed_stat_collector.h"
+20     #include "distribution.h"
+21     
+22     namespace po = boost::program_options;
+23     using namespace std;
+24     
+>>>     CID 1415742:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+25     int main(int argc, char **argv)
+26     {
+27       po::options_description desc("Allowed options");
+28       desc.add_options()
+29         ("help", "produce help message")
+30         ("num-concurrent-ops", po::value<unsigned>()->default_value(10),
+/home/brad/working/src/ceph/src/test/bench/small_io_bench_rbd.cc: 25 in main()
+19     #include "detailed_stat_collector.h"
+20     #include "distribution.h"
+21     
+22     namespace po = boost::program_options;
+23     using namespace std;
+24     
+>>>     CID 1415742:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+25     int main(int argc, char **argv)
+26     {
+27       po::options_description desc("Allowed options");
+28       desc.add_options()
+29         ("help", "produce help message")
+30         ("num-concurrent-ops", po::value<unsigned>()->default_value(10),
+
+** CID 1415743:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/test_rgw_admin_opstate.cc: 804 in main()
+/home/brad/working/src/ceph/src/test/test_rgw_admin_opstate.cc: 804 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415743:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/test_rgw_admin_opstate.cc: 804 in main()
+798       EXPECT_EQ(200U, g_test->get_resp_code());
+799     
+800       ASSERT_EQ(caps_rm(cname, perm), 0);
+801       ASSERT_EQ(user_rm(uid, display_name), 0);
+802     }
+803     
+>>>     CID 1415743:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+804     int main(int argc, char *argv[]){
+805       vector<const char*> args;
+806       argv_to_vec(argc, (const char **)argv, args);
+807     
+808       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+809     			 CODE_ENVIRONMENT_UTILITY, 0);
+/home/brad/working/src/ceph/src/test/test_rgw_admin_opstate.cc: 804 in main()
+798       EXPECT_EQ(200U, g_test->get_resp_code());
+799     
+800       ASSERT_EQ(caps_rm(cname, perm), 0);
+801       ASSERT_EQ(user_rm(uid, display_name), 0);
+802     }
+803     
+>>>     CID 1415743:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+804     int main(int argc, char *argv[]){
+805       vector<const char*> args;
+806       argv_to_vec(argc, (const char **)argv, args);
+807     
+808       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+809     			 CODE_ENVIRONMENT_UTILITY, 0);
+
+** CID 1415744:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/messenger/simple_server.cc: 35 in main()
+/home/brad/working/src/ceph/src/test/messenger/simple_server.cc: 35 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415744:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/messenger/simple_server.cc: 35 in main()
+29     #include "common/address_helper.h"
+30     #include "simple_dispatcher.h"
+31     
+32     #define dout_subsys ceph_subsys_simple_server
+33     
+34     
+>>>     CID 1415744:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+35     int main(int argc, const char **argv)
+36     {
+37     	vector<const char*> args;
+38     	Messenger *messenger;
+39     	Dispatcher *dispatcher;
+40     	std::vector<const char*>::iterator arg_iter;
+/home/brad/working/src/ceph/src/test/messenger/simple_server.cc: 35 in main()
+29     #include "common/address_helper.h"
+30     #include "simple_dispatcher.h"
+31     
+32     #define dout_subsys ceph_subsys_simple_server
+33     
+34     
+>>>     CID 1415744:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+35     int main(int argc, const char **argv)
+36     {
+37     	vector<const char*> args;
+38     	Messenger *messenger;
+39     	Dispatcher *dispatcher;
+40     	std::vector<const char*>::iterator arg_iter;
+
+** CID 1415745:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/tools/rados/rados.cc: 3555 in main()
+/home/brad/working/src/ceph/src/tools/rados/rados.cc: 3555 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415745:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/tools/rados/rados.cc: 3555 in main()
+3549     
+3550     out:
+3551       delete formatter;
+3552       return (ret < 0) ? 1 : 0;
+3553     }
+3554     
+>>>     CID 1415745:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+3555     int main(int argc, const char **argv)
+3556     {
+3557       vector<const char*> args;
+3558       argv_to_vec(argc, argv, args);
+3559       env_to_vec(args);
+3560     
+/home/brad/working/src/ceph/src/tools/rados/rados.cc: 3555 in main()
+3549     
+3550     out:
+3551       delete formatter;
+3552       return (ret < 0) ? 1 : 0;
+3553     }
+3554     
+>>>     CID 1415745:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+3555     int main(int argc, const char **argv)
+3556     {
+3557       vector<const char*> args;
+3558       argv_to_vec(argc, argv, args);
+3559       env_to_vec(args);
+3560     
+
+** CID 1415746:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/objectstore/test_kv.cc: 329 in main()
+/home/brad/working/src/ceph/src/test/objectstore/test_kv.cc: 329 in main()
+/home/brad/working/src/ceph/src/test/objectstore/test_kv.cc: 329 in main()
+/home/brad/working/src/ceph/src/test/objectstore/test_kv.cc: 329 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415746:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/objectstore/test_kv.cc: 329 in main()
+323     // point defined in that library (fatal error LNK1561: entry point
+324     // must be defined). This dummy test keeps gtest_main linked in.
+325     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
+326     
+327     #endif
+328     
+>>>     CID 1415746:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+329     int main(int argc, char **argv) {
+330       vector<const char*> args;
+331       argv_to_vec(argc, (const char **)argv, args);
+332       env_to_vec(args);
+333     
+334       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+/home/brad/working/src/ceph/src/test/objectstore/test_kv.cc: 329 in main()
+323     // point defined in that library (fatal error LNK1561: entry point
+324     // must be defined). This dummy test keeps gtest_main linked in.
+325     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
+326     
+327     #endif
+328     
+>>>     CID 1415746:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+329     int main(int argc, char **argv) {
+330       vector<const char*> args;
+331       argv_to_vec(argc, (const char **)argv, args);
+332       env_to_vec(args);
+333     
+334       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+/home/brad/working/src/ceph/src/test/objectstore/test_kv.cc: 329 in main()
+323     // point defined in that library (fatal error LNK1561: entry point
+324     // must be defined). This dummy test keeps gtest_main linked in.
+325     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
+326     
+327     #endif
+328     
+>>>     CID 1415746:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+329     int main(int argc, char **argv) {
+330       vector<const char*> args;
+331       argv_to_vec(argc, (const char **)argv, args);
+332       env_to_vec(args);
+333     
+334       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+/home/brad/working/src/ceph/src/test/objectstore/test_kv.cc: 329 in main()
+323     // point defined in that library (fatal error LNK1561: entry point
+324     // must be defined). This dummy test keeps gtest_main linked in.
+325     TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
+326     
+327     #endif
+328     
+>>>     CID 1415746:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+329     int main(int argc, char **argv) {
+330       vector<const char*> args;
+331       argv_to_vec(argc, (const char **)argv, args);
+332       env_to_vec(args);
+333     
+334       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+
+** CID 1415747:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/test_filejournal.cc: 69 in main()
+/home/brad/working/src/ceph/src/test/test_filejournal.cc: 69 in main()
+/home/brad/working/src/ceph/src/test/test_filejournal.cc: 69 in main()
+/home/brad/working/src/ceph/src/test/test_filejournal.cc: 69 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415747:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/test_filejournal.cc: 69 in main()
+63     };
+64     
+65     unsigned size_mb = 200;
+66     //Gtest argument prefix
+67     const char GTEST_PRFIX[] = "--gtest_";
+68     
+>>>     CID 1415747:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+69     int main(int argc, char **argv) {
+70       vector<const char*> args;
+71       argv_to_vec(argc, (const char **)argv, args);
+72     
+73       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+74     			 CODE_ENVIRONMENT_UTILITY, 0);
+/home/brad/working/src/ceph/src/test/test_filejournal.cc: 69 in main()
+63     };
+64     
+65     unsigned size_mb = 200;
+66     //Gtest argument prefix
+67     const char GTEST_PRFIX[] = "--gtest_";
+68     
+>>>     CID 1415747:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+69     int main(int argc, char **argv) {
+70       vector<const char*> args;
+71       argv_to_vec(argc, (const char **)argv, args);
+72     
+73       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+74     			 CODE_ENVIRONMENT_UTILITY, 0);
+/home/brad/working/src/ceph/src/test/test_filejournal.cc: 69 in main()
+63     };
+64     
+65     unsigned size_mb = 200;
+66     //Gtest argument prefix
+67     const char GTEST_PRFIX[] = "--gtest_";
+68     
+>>>     CID 1415747:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+69     int main(int argc, char **argv) {
+70       vector<const char*> args;
+71       argv_to_vec(argc, (const char **)argv, args);
+72     
+73       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+74     			 CODE_ENVIRONMENT_UTILITY, 0);
+/home/brad/working/src/ceph/src/test/test_filejournal.cc: 69 in main()
+63     };
+64     
+65     unsigned size_mb = 200;
+66     //Gtest argument prefix
+67     const char GTEST_PRFIX[] = "--gtest_";
+68     
+>>>     CID 1415747:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+69     int main(int argc, char **argv) {
+70       vector<const char*> args;
+71       argv_to_vec(argc, (const char **)argv, args);
+72     
+73       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+74     			 CODE_ENVIRONMENT_UTILITY, 0);
+
+** CID 1415748:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/ObjectMap/test_keyvaluedb_iterators.cc: 1741 in main()
+/home/brad/working/src/ceph/src/test/ObjectMap/test_keyvaluedb_iterators.cc: 1741 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415748:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/ObjectMap/test_keyvaluedb_iterators.cc: 1741 in main()
+/home/brad/working/src/ceph/src/test/ObjectMap/test_keyvaluedb_iterators.cc: 1741 in main()
+1735       SCOPED_TRACE("MockDB: Empty Store, Upper Bound");
+1736       UpperBound(mock->get_iterator());
+1737       ASSERT_FALSE(HasFatalFailure());
+1738     }
+1739     
+1740     
+>>>     CID 1415748:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+1741     int main(int argc, char *argv[])
+1742     {
+1743       vector<const char*> args;
+1744       argv_to_vec(argc, (const char **) argv, args);
+1745     
+1746       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT, CODE_ENVIRONMENT_UTILITY, 0);
+
+** CID 1415749:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/tools/rbd_mirror/main.cc: 32 in main()
+/home/brad/working/src/ceph/src/tools/rbd_mirror/main.cc: 32 in main()
+/home/brad/working/src/ceph/src/tools/rbd_mirror/main.cc: 32 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415749:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/tools/rbd_mirror/main.cc: 32 in main()
+26     static void handle_signal(int signum)
+27     {
+28       if (mirror)
+29         mirror->handle_signal(signum);
+30     }
+31     
+>>>     CID 1415749:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+32     int main(int argc, const char **argv)
+33     {
+34       std::vector<const char*> args;
+35       env_to_vec(args);
+36       argv_to_vec(argc, argv, args);
+37     
+/home/brad/working/src/ceph/src/tools/rbd_mirror/main.cc: 32 in main()
+26     static void handle_signal(int signum)
+27     {
+28       if (mirror)
+29         mirror->handle_signal(signum);
+30     }
+31     
+>>>     CID 1415749:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+32     int main(int argc, const char **argv)
+33     {
+34       std::vector<const char*> args;
+35       env_to_vec(args);
+36       argv_to_vec(argc, argv, args);
+37     
+/home/brad/working/src/ceph/src/tools/rbd_mirror/main.cc: 32 in main()
+26     static void handle_signal(int signum)
+27     {
+28       if (mirror)
+29         mirror->handle_signal(signum);
+30     }
+31     
+>>>     CID 1415749:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+32     int main(int argc, const char **argv)
+33     {
+34       std::vector<const char*> args;
+35       env_to_vec(args);
+36       argv_to_vec(argc, argv, args);
+37     
+
+** CID 1415750:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/objectstore/test_idempotent_sequence.cc: 202 in main()
+/home/brad/working/src/ceph/src/test/objectstore/test_idempotent_sequence.cc: 202 in main()
+/home/brad/working/src/ceph/src/test/objectstore/test_idempotent_sequence.cc: 202 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415750:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/objectstore/test_idempotent_sequence.cc: 202 in main()
+196       }
+197     
+198       usage(our_name, command);
+199       exit(1);
+200     }
+201     
+>>>     CID 1415750:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+202     int main(int argc, const char *argv[])
+203     {
+204       vector<const char*> def_args;
+205       vector<const char*> args;
+206       our_name = argv[0];
+207       argv_to_vec(argc, argv, args);
+/home/brad/working/src/ceph/src/test/objectstore/test_idempotent_sequence.cc: 202 in main()
+196       }
+197     
+198       usage(our_name, command);
+199       exit(1);
+200     }
+201     
+>>>     CID 1415750:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+202     int main(int argc, const char *argv[])
+203     {
+204       vector<const char*> def_args;
+205       vector<const char*> args;
+206       our_name = argv[0];
+207       argv_to_vec(argc, argv, args);
+/home/brad/working/src/ceph/src/test/objectstore/test_idempotent_sequence.cc: 202 in main()
+196       }
+197     
+198       usage(our_name, command);
+199       exit(1);
+200     }
+201     
+>>>     CID 1415750:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+202     int main(int argc, const char *argv[])
+203     {
+204       vector<const char*> def_args;
+205       vector<const char*> args;
+206       our_name = argv[0];
+207       argv_to_vec(argc, argv, args);
+
+** CID 1415751:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/libcephfs/access.cc: 362 in main()
+/home/brad/working/src/ceph/src/test/libcephfs/access.cc: 362 in main()
+/home/brad/working/src/ceph/src/test/libcephfs/access.cc: 362 in main()
+/home/brad/working/src/ceph/src/test/libcephfs/access.cc: 362 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415751:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/libcephfs/access.cc: 362 in main()
+356     out:
+357       ceph_shutdown(admin);
+358       return r;
+359     }
+360     
+361     
+>>>     CID 1415751:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+362     int main(int argc, char **argv)
+363     {
+364       int r = update_root_mode();
+365       if (r < 0)
+366         exit(1);
+367     
+/home/brad/working/src/ceph/src/test/libcephfs/access.cc: 362 in main()
+356     out:
+357       ceph_shutdown(admin);
+358       return r;
+359     }
+360     
+361     
+>>>     CID 1415751:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+362     int main(int argc, char **argv)
+363     {
+364       int r = update_root_mode();
+365       if (r < 0)
+366         exit(1);
+367     
+/home/brad/working/src/ceph/src/test/libcephfs/access.cc: 362 in main()
+356     out:
+357       ceph_shutdown(admin);
+358       return r;
+359     }
+360     
+361     
+>>>     CID 1415751:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+362     int main(int argc, char **argv)
+363     {
+364       int r = update_root_mode();
+365       if (r < 0)
+366         exit(1);
+367     
+/home/brad/working/src/ceph/src/test/libcephfs/access.cc: 362 in main()
+356     out:
+357       ceph_shutdown(admin);
+358       return r;
+359     }
+360     
+361     
+>>>     CID 1415751:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+362     int main(int argc, char **argv)
+363     {
+364       int r = update_root_mode();
+365       if (r < 0)
+366         exit(1);
+367     
+
+** CID 1415752:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/tools/crushtool.cc: 242 in main()
+/home/brad/working/src/ceph/src/tools/crushtool.cc: 242 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415752:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/tools/crushtool.cc: 242 in main()
+236     struct layer_t {
+237       const char *name;
+238       const char *buckettype;
+239       int size;
+240     };
+241     
+>>>     CID 1415752:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+242     int main(int argc, const char **argv)
+243     {
+244       vector<const char*> args;
+245       argv_to_vec(argc, argv, args);
+246     
+247       const char *me = argv[0];
+/home/brad/working/src/ceph/src/tools/crushtool.cc: 242 in main()
+236     struct layer_t {
+237       const char *name;
+238       const char *buckettype;
+239       int size;
+240     };
+241     
+>>>     CID 1415752:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char const **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+242     int main(int argc, const char **argv)
+243     {
+244       vector<const char*> args;
+245       argv_to_vec(argc, argv, args);
+246     
+247       const char *me = argv[0];
+
+** CID 1415753:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/objectstore/ObjectStoreTransactionBenchmark.cc: 244 in main()
+/home/brad/working/src/ceph/src/test/objectstore/ObjectStoreTransactionBenchmark.cc: 244 in main()
+/home/brad/working/src/ceph/src/test/objectstore/ObjectStoreTransactionBenchmark.cc: 244 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415753:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/objectstore/ObjectStoreTransactionBenchmark.cc: 244 in main()
+238     
+239     void usage(const string &name) {
+240       cerr << "Usage: " << name << " [times] "
+241            << std::endl;
+242     }
+243     
+>>>     CID 1415753:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+244     int main(int argc, char **argv)
+245     {
+246       vector<const char*> args;
+247       argv_to_vec(argc, (const char **)argv, args);
+248     
+249       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+/home/brad/working/src/ceph/src/test/objectstore/ObjectStoreTransactionBenchmark.cc: 244 in main()
+238     
+239     void usage(const string &name) {
+240       cerr << "Usage: " << name << " [times] "
+241            << std::endl;
+242     }
+243     
+>>>     CID 1415753:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+244     int main(int argc, char **argv)
+245     {
+246       vector<const char*> args;
+247       argv_to_vec(argc, (const char **)argv, args);
+248     
+249       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+/home/brad/working/src/ceph/src/test/objectstore/ObjectStoreTransactionBenchmark.cc: 244 in main()
+238     
+239     void usage(const string &name) {
+240       cerr << "Usage: " << name << " [times] "
+241            << std::endl;
+242     }
+243     
+>>>     CID 1415753:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+244     int main(int argc, char **argv)
+245     {
+246       vector<const char*> args;
+247       argv_to_vec(argc, (const char **)argv, args);
+248     
+249       auto cct = global_init(NULL, args, CEPH_ENTITY_TYPE_CLIENT,
+
+** CID 1415754:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/objectstore/test_memstore_clone.cc: 178 in main()
+/home/brad/working/src/ceph/src/test/objectstore/test_memstore_clone.cc: 178 in main()
+
+
+________________________________________________________________________________________________________
+*** CID 1415754:    (UNCAUGHT_EXCEPT)
+/home/brad/working/src/ceph/src/test/objectstore/test_memstore_clone.cc: 178 in main()
+172       t.clone_range(cid, src, dst, 2, 8, 2);
+173       ASSERT_EQ(0u, store->apply_transaction(nullptr, std::move(t)));
+174       ASSERT_EQ(12, store->read(cid, dst, 0, 12, result));
+175       ASSERT_EQ(expected, result);
+176     }
+177     
+>>>     CID 1415754:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+178     int main(int argc, char** argv)
+179     {
+180       // default to memstore
+181       vector<const char*> defaults{
+182         "--osd_objectstore", "memstore",
+183         "--osd_data", "msc.test_temp_dir",
+/home/brad/working/src/ceph/src/test/objectstore/test_memstore_clone.cc: 178 in main()
+172       t.clone_range(cid, src, dst, 2, 8, 2);
+173       ASSERT_EQ(0u, store->apply_transaction(nullptr, std::move(t)));
+174       ASSERT_EQ(12, store->read(cid, dst, 0, 12, result));
+175       ASSERT_EQ(expected, result);
+176     }
+177     
+>>>     CID 1415754:    (UNCAUGHT_EXCEPT)
+>>>     In function "main(int, char **)" an exception of type "boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::bad_get> >" is thrown and never caught.
+178     int main(int argc, char** argv)
+179     {
+180       // default to memstore
+181       vector<const char*> defaults{
+182         "--osd_objectstore", "memstore",
+183         "--osd_data", "msc.test_temp_dir",
+
+** CID 1415755:  Memory - corruptions  (OVERRUN)
+
+
+________________________________________________________________________________________________________
+*** CID 1415755:  Memory - corruptions  (OVERRUN)
+/home/brad/working/src/ceph/src/mon/MonCommand.h: 39 in MonCommand::encode(ceph::buffer::list &) const()
+33     
+34       bool has_flag(uint64_t flag) const { return (flags & flag) != 0; }
+35       void set_flag(uint64_t flag) { flags |= flag; }
+36       void unset_flag(uint64_t flag) { flags &= ~flag; }
+37     
+38       void encode(bufferlist &bl) const {
+>>>     CID 1415755:  Memory - corruptions  (OVERRUN)
+>>>     Overrunning struct type ceph_le32 of 4 bytes by passing it to a function which accesses it at byte offset 7.
+39         ENCODE_START(1, 1, bl);
+40         encode_bare(bl);
+41         ::encode(flags, bl);
+42         ENCODE_FINISH(bl);
+43       }
+44     
+
+
+________________________________________________________________________________________________________
+To view the defects in Coverity Scan visit, https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRaGCnxtQO9E3gxlB2GxVsWFENryh7bC5hIb-2FQBVM85YLQ-3D-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8F5lXRZqPomtFYhumhQS7Ys56UCLMyraoRU8cAgH5Gb9r7Tl14jaYgei9cmXUNtbkKA9CKloT1XjbviuMsCqkdz1egGjn1xXAwJTyshEhHNeYGifRuQQEpdBBZHTWtIurE2UL1R9kFjuncnHFGhWm-2FVRCsu5aVc-2B1KJM2BNeVvtTrdR1ozfp02EGO22F4feolk-3D
+
+To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRbVDbis712qZDP-2FA8y06Nq4Bco8jcmzhh7FSyvoR0E3-2BDgRcBCQ6OuthHBtaTCGNq9OVG2ZVnjrgThgf5hX3GVEkIxvBX-2BorwRZfOftSp7HPfCifRGGak1MlgNFVd3IIPA-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8F5lXRZqPomtFYhumhQS7Ys56UCLMyraoRU8cAgH5Gb9j-2Bpg6pHeTbKjI8DZWvhcJ0ZQPkkgqILLEefrJ3oXrTmCx5mhrh4-2BH5NegCIozE0Zs-2FkYK238q0u-2FoKoWnynQmdqdfGpx2b4vg90WpcOaaYTpFNyKK6W7Wl0SbftvvVpG8XqwTL3XY3hI9hT1r14OCg-3D
+
