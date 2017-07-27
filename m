@@ -1,77 +1,57 @@
-From: Casey Bodley <cbodley@redhat.com>
-Subject: design notes: rgw multisite and cleanup of deleted buckets
-Date: Thu, 27 Jul 2017 14:39:51 -0400
-Message-ID: <ad5b5ecf-84fc-3236-aa73-89525fdcb866@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: "J. Eric Ivancich" <ivancich@redhat.com>
+Subject: Re: How best to integrate dmClock QoS library into ceph codebase
+Date: Thu, 27 Jul 2017 16:24:48 -0400
+Message-ID: <EA67929A-7A8A-4507-AE10-6826BDCBAD73@redhat.com>
+References: <6D8EA95A-572E-4C71-A6AF-6BB8A6E8B26C@redhat.com> <CAF1ivSaa=06CGGJRNQ_9QO_wy6Wc5yK4zbNFiHJLnoJJiqrCSg@mail.gmail.com> <f08daf3b-751a-6887-fce0-f5ab38097af4@redhat.com> <CAB7xdikG-Pc8DfX7VJv905ZdM8E8wXtfgw_4q693SeNnzDZ63g@mail.gmail.com> <cca365ed-5b79-9a56-f683-9db271b842ff@redhat.com> <CAB7xdimrWXD7CnEM_yqzO9BzTrwXBq-FyZ2aLcXZL+3m2Z9_Rw@mail.gmail.com> <b26c6cec-d021-01ce-0a2b-77484e267635@redhat.com> <CAB7xdi=PwRLuE+rYfbAJyd+18fbqObPyZ7n=H1MyaU__VZie_g@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f169.google.com ([209.85.220.169]:35317 "EHLO
-        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751579AbdG0Sjy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jul 2017 14:39:54 -0400
-Received: by mail-qk0-f169.google.com with SMTP id d145so101362717qkc.2
-        for <ceph-devel@vger.kernel.org>; Thu, 27 Jul 2017 11:39:54 -0700 (PDT)
-Received: from [10.17.151.126] ([12.118.3.106])
-        by smtp.gmail.com with ESMTPSA id z192sm13636289qka.46.2017.07.27.11.39.51
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 27 Jul 2017 11:39:52 -0700 (PDT)
-Content-Language: en-US
+Received: from mail-io0-f172.google.com ([209.85.223.172]:37899 "EHLO
+        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751441AbdG0UYv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jul 2017 16:24:51 -0400
+Received: by mail-io0-f172.google.com with SMTP id g13so83118867ioj.5
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Jul 2017 13:24:51 -0700 (PDT)
+In-Reply-To: <CAB7xdi=PwRLuE+rYfbAJyd+18fbqObPyZ7n=H1MyaU__VZie_g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: sheng qiu <herbert1984106@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Motivation:
-When buckets are removed on the master zone in a multisite 
-configuration, the bucket instance and index objects are never removed 
-(only the bucket entrypoint is removed, which makes the bucket 
-unreachable). The reason we don't remove the instance/indices is because 
-the peer zones may not have finished processing all of the object 
-removal entries for that bucket, and they can't make progress with that 
-if the master zone is unable to serve the bucket instance metadata or 
-bucket index logs. This would result in leaked objects/data.
+Hi Sheng,
 
-Tracker issue: http://tracker.ceph.com/issues/20802
+I’ll interleave responses below.
 
-Design:
-In short, the master zone will actually delete its bucket instance and 
-index objects in RGWRados::delete_bucket(), and peer zones will learn to 
-deal with it during sync.
+> On Jul 11, 2017, at 2:14 PM, sheng qiu <herbert1984106@gmail.com> wrote:
+> We are trying to evaluate dmclock's effect on controlling the recovery
+> traffic in order to reducing impact on client io.
+> However, we are experiencing some problem and didn't get our expected results.
+> 
+> we setup a small cluster, with several OSD machines. In our
+> configurations, we set recovery limit = 0.001 or even smaller, and
+> res=0.0, wgt=1.0.
+> we set client res = 20k or even higher, limit=0.0, wgt=500.
 
-metadata sync:
-When the master zone deletes a bucket instance, it writes that bucket 
-instance to the metadata log. When another zone sees this entry during 
-metadata sync, it will:
-1) set a new 'remove-only' flag on each of its bucket index objects,
-2) write an entry for each bucket index shard to a new 'bucket gc log' 
-(described below), and
-3) remove its local copy of the bucket instance.
+As presently implemented limits are not enforced. There is a PR that makes modification to enforce them (https://github.com/ceph/ceph/pull/16242), which I’m still evaluating. You can see some discussion of the issue (see: http://marc.info/?l=ceph-devel&m=149867479701646&w=2).
 
-bucket sync:
-When bucket sync discovers that its bucket has been removed (either from 
-getting ENOENT when trying to fetch the bucket instance metadata from 
-the master zone, or from seeing the 'remove-only' flag on the local 
-bucket index when trying to sync an object), it deletes its sync status 
-object and stops processing that bucket (using similar logic to the 
-'bucket sync disable' feature in development at 
-https://github.com/ceph/ceph/pull/15801). If the data changes log 
-triggers another attempt to sync this bucket shard, it will try to fetch 
-its bucket instance metadata from the master zone and fail with ENOENT.
+> Then we killed osd while doing fio on client side and bring it back to
+> trigger recovery. We saw fio iops still reduced a lot comparable to
+> not using dmclock queue. We did some debugging and saw that when
+> recovery is active, fio requests enqueued much less frequent than
+> before.
 
-bucket gc:
-Since we stop trying to sync deleted buckets, they may still contain 
-objects. All objects need to be deleted before we can remove the bucket 
-index objects themselves. This process is deferred to a background 
-thread using a new 'bucket gc log'. Object deletion will keep the bucket 
-index consistent so that it can resume its progress across radosgw 
-restarts. The 'remove-only' flag on the bucket index will allow this 
-deletion, while preventing bucket sync from adding new objects. Once all 
-objects are removed from each bucket index, the bucket index object can 
-be safely deleted and its entry trimmed from the bucket gc log. The 
-bucket gc worker thread will process the first N entries in parallel, 
-where N is configurable with a default of ~16. A rados lock on the log 
-object will prevent other gateways in the zone from duplicating the work 
-(similar to DataLogTrimPollCR for datalog trimming).
+Are you saying that fio requests from the client slow down? I assume you’re using the fio tool. If so, what is max-jobs set to?
 
-Casey
+Also, are you saying that that fio iops had lower values with mclock compared with the weighted priority queue (“wpq”)?
+
+> overall, seems dmclock's configuration on recovery part does not show
+> any differences. Since the enqueue rate of fio requests are reduced,
+> when dmclock try to dequeue a request, there's less chance to pull a
+> fio request.
+
+Theoretically, at least, with a higher reservation value, the request tags should have smaller reservation tags, which should bias mclock to dequeueing them. So I’d like to know more about your experiment.
+
+Thank you,
+
+Eric
