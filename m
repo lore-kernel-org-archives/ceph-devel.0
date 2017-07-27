@@ -1,48 +1,37 @@
-From: Joao Eduardo Luis <joao@suse.de>
-Subject: Re: Where to submit a blueprint?
-Date: Thu, 27 Jul 2017 13:05:18 +0100
-Message-ID: <8e5eb4b5-fbdd-7236-e7f7-c3f8b0e4579e@suse.de>
-References: <CAJACTuc8nJLOXhUXUwqHZPit76MJUK4_=9R06fF300ZpCj+e9g@mail.gmail.com>
- <CAJ4mKGZK10GLYNt3Xv6CyjXX9b1+4aBUGMXYoen3VaRPcHZ=qA@mail.gmail.com>
- <CAJ4mKGZ2R-Q8Udsi0LBg1Py4dCpUrJF=o-shN2WpvyqKipXrEg@mail.gmail.com>
- <CAJACTuerYSCyMpcyqvwYkN8YxN=XB1NffGGPUuL4ce0FgNv0Pw@mail.gmail.com>
- <CAJACTud4NXYo6FYGhXeigHBpx1ARZOAJQOsq0Q9sQgnkTcPFaQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: "J. Eric Ivancich" <ivancich@redhat.com>
+Subject: Re: About dmClock tests confusion after integrating dmClock QoS library into ceph codebase
+Date: Thu, 27 Jul 2017 13:29:11 -0400
+Message-ID: <9E9D3C7D-1AF0-4DA8-B432-3D27EE72A582@redhat.com>
+References: <509B214C5E2CEA4D9C41C1AB2A76BDD1A36B38B0@H3CMLB12-EX.srv.huawei-3com.com> <5a40a1e8-c1c5-1bc1-86ce-4f5d2593d2d4@redhat.com> <CAB7xdinyGMQMnORDfNknEg4a_y5EpW_ibndNZUyWtRhS9TNgFg@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:45779 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750836AbdG0MFV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 27 Jul 2017 08:05:21 -0400
-In-Reply-To: <CAJACTud4NXYo6FYGhXeigHBpx1ARZOAJQOsq0Q9sQgnkTcPFaQ@mail.gmail.com>
-Content-Language: en-GB
+Received: from mail-qt0-f178.google.com ([209.85.216.178]:37826 "EHLO
+        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750981AbdG0R3N (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 27 Jul 2017 13:29:13 -0400
+Received: by mail-qt0-f178.google.com with SMTP id 16so27018198qtz.4
+        for <ceph-devel@vger.kernel.org>; Thu, 27 Jul 2017 10:29:13 -0700 (PDT)
+In-Reply-To: <CAB7xdinyGMQMnORDfNknEg4a_y5EpW_ibndNZUyWtRhS9TNgFg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xuehan Xu <xxhdx1985126@gmail.com>, Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, Ricardo Dias <rdias@suse.com>
+To: sheng qiu <herbert1984106@gmail.com>
+Cc: Lijie <li.jieA@h3c.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 07/23/2017 04:37 AM, Xuehan Xu wrote:
-> Hi, everyone.
-> I've just uploaded a blueprint in
-> http://tracker.ceph.com/attachments/download/2903/ceph_rados-level_replication.pdf
+Hi Sheng,
 
-Thanks for sharing this!
+The code you see in wip_dmclock_clients was essentially (there may have been some modifications) merged into master on June 26th.
 
-Ricardo and I talked a bit with Sage a while back about RADOS level 
-Disaster Recovery (rough draft of what the architecture can be found in 
-[1]), and despite our lack of time as of late to work on it we're very 
-much interested in this topic still.
+Eric
 
-It appears we will have a CDM next August 2nd, and I see you would like 
-to discuss it by then. However, given the vacation season, we would like 
-to suggest we postponed this discussion until September, so that we 
-could all attend.
-
-Does that seem reasonable to you?
-
-Cheers!
-
-   -Joao
-
-[1] http://pad.ceph.com/p/2017-04-rados-dr
+> On Jun 13, 2017, at 12:06 PM, sheng qiu <herbert1984106@gmail.com> wrote:
+> 
+> Hi Eric,
+> 
+> we are also very interested in your dmclock work in ceph. May I ask if this branch wip_dmclock_clients has both clients and OSD support for dmclock?
+> we want to fully test this implementations.
+> 
+> thanks for your help.
+> 
+> Sheng
