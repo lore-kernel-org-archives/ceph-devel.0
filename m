@@ -1,49 +1,100 @@
-From: Tim Serong <tserong@suse.com>
-Subject: Re: CFP: linux.conf.au 2018 (Sydney, Australia)
-Date: Thu, 27 Jul 2017 18:17:02 +1000
-Message-ID: <ccffb8bd-ef83-3eea-7ac4-4c973d4e1a3b@suse.com>
-References: <e2d43216-c285-cff8-b58d-647f75634b02@suse.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:60605 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751737AbdG0IRO (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Thu, 27 Jul 2017 04:17:14 -0400
-In-Reply-To: <e2d43216-c285-cff8-b58d-647f75634b02@suse.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+From: xiongweijiang666@gmail.com
+Subject: [PATCH] rbd: add timeout function to rbd driver
+Date: Thu, 27 Jul 2017 18:32:57 +0800
+Message-ID: <20170727103257.11608-1-xiongwei.jiang@alibaba-inc.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: idryomov@gmail.com, sage@redhat.com, elder@kernel.org, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: chenggang.qcg@alibaba-inc.com, xiongwei.jiang@alibaba-inc.com
+List-Id: ceph-devel.vger.kernel.org
 
-On 07/03/2017 09:53 PM, Tim Serong wrote:
-> Hi All,
-> 
-> Apparently my earlier message about this[1] made it to ceph-users, but
-> not ceph-devel, because something, somewhere thought it looked too spammy.
-> 
-> So, TL;DR: the CFP for linux.conf.au 2018 (January 22-26 in Sydney,
-> Australia) opened today:
-> 
->   https://linux.conf.au/proposals/
-> 
-> Please everyone go submit talks, or at least plan to attend this most
-> excellent of F/OSS conferences.
+From: Xiongwei Jiang <xiongwei.jiang@alibaba-inc.com>
 
-CFP closes in a bit over a week (August 6).  Get into it if you didn't
-already :-)
+when an application is writing or reading on rbd device, if some or all
+OSDs crash, the application will hang and can't be killed because it is
+in D state. Even though OSDs comes up later, the application may still
+keeps in D state. So we need a timeout mechanism to solve this problem.
 
-> (I thought I might put in a proposal to run a ceph miniconf, unless
-> anyone else was already thinking of doing that?  If accepted, that would
-> give us a whole day of cephy goodness in addition to whatever lands in
-> the main conference programme.)
+Signed-off-by: Xiongwei Jiang <xiongwei.jiang@alibaba-inc.com>
+---
+ drivers/block/rbd.c | 34 +++++++++++++++++++++++++++++++++-
+ 1 file changed, 33 insertions(+), 1 deletion(-)
 
-I *did* put in a proposal for a Ceph miniconf, BTW.  Fingers crossed...
-
-Tim
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index c16f745..33a1c97 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -159,6 +159,13 @@ struct rbd_image_header {
+ 	u64 *snap_sizes;	/* format 1 only */
+ };
+ 
++
++struct rbd_request_linker {
++	struct work_struct work;
++	void *img_request;
++};
++
++
+ /*
+  * An rbd image specification.
+  *
+@@ -4013,6 +4020,7 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 	struct request *rq = blk_mq_rq_from_pdu(work);
+ 	struct rbd_device *rbd_dev = rq->q->queuedata;
+ 	struct rbd_img_request *img_request;
++	struct rbd_request_linker *linker;
+ 	struct ceph_snap_context *snapc = NULL;
+ 	u64 offset = (u64)blk_rq_pos(rq) << SECTOR_SHIFT;
+ 	u64 length = blk_rq_bytes(rq);
+@@ -4120,6 +4128,7 @@ static void rbd_queue_workfn(struct work_struct *work)
+ 		goto err_unlock;
+ 	}
+ 	img_request->rq = rq;
++	linker->img_request = img_request;
+ 	snapc = NULL; /* img_request consumes a ref */
+ 
+ 	if (op_type == OBJ_OP_DISCARD)
+@@ -4358,9 +4367,32 @@ static int rbd_init_request(struct blk_mq_tag_set *set, struct request *rq,
+ 	return 0;
+ }
+ 
++static enum blk_eh_timer_return rbd_request_timeout(struct request *rq,
++		bool reserved)
++{
++	struct rbd_obj_request *obj_request;
++	struct rbd_obj_request *next_obj_request;
++	struct rbd_img_request *img_request;
++	struct rbd_request_linker *linker = blk_mq_rq_to_pdu(rq);
++
++	img_request = (struct rbd_img_request *)linker->img_request;
++	for_each_obj_request_safe(img_request, obj_request, next_obj_request) {
++		struct ceph_osd_request *osd_req = obj_request->osd_req;
++
++		if (!osd_req)
++			printk(KERN_INFO "osd_req is null \n");
++		else
++			ceph_osdc_cancel_request(osd_req);
++	}
++	return BLK_EH_HANDLED;
++}
++
++
++
+ static const struct blk_mq_ops rbd_mq_ops = {
+ 	.queue_rq	= rbd_queue_rq,
+ 	.init_request	= rbd_init_request,
++	.timeout       = rbd_request_timeout,
+ };
+ 
+ static int rbd_init_disk(struct rbd_device *rbd_dev)
+@@ -4392,7 +4424,7 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
+ 	rbd_dev->tag_set.numa_node = NUMA_NO_NODE;
+ 	rbd_dev->tag_set.flags = BLK_MQ_F_SHOULD_MERGE | BLK_MQ_F_SG_MERGE;
+ 	rbd_dev->tag_set.nr_hw_queues = 1;
+-	rbd_dev->tag_set.cmd_size = sizeof(struct work_struct);
++	rbd_dev->tag_set.cmd_size = sizeof(struct rbd_request_linker);
+ 
+ 	err = blk_mq_alloc_tag_set(&rbd_dev->tag_set);
+ 	if (err)
 -- 
-Tim Serong
-Senior Clustering Engineer
-SUSE
-tserong@suse.com
+1.8.3.1
