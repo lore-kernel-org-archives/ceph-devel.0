@@ -1,39 +1,66 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH] ceph: check negative offsets on ceph_llseek()
-Date: Fri, 28 Jul 2017 11:56:40 +0100
-Message-ID: <20170728105640.16268-1-lhenriques@suse.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: BUG: A force promote image remain locked after primary down.
+Date: Fri, 28 Jul 2017 07:35:19 -0400
+Message-ID: <CA+aFP1Cm+h0vz4MVn5shki_9YRuEhjzJgVkz7rE8CotuMjTd+A@mail.gmail.com>
+References: <78608BF7-FC3F-441F-9A0C-E16F439CDB8C@99cloud.net>
+Reply-To: dillaman@redhat.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-yw0-f181.google.com ([209.85.161.181]:35721 "EHLO
+        mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751633AbdG1LfU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Jul 2017 07:35:20 -0400
+Received: by mail-yw0-f181.google.com with SMTP id l82so63829262ywc.2
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Jul 2017 04:35:20 -0700 (PDT)
+In-Reply-To: <78608BF7-FC3F-441F-9A0C-E16F439CDB8C@99cloud.net>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: YuShengzuo <yu.shengzuo@99cloud.net>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-When a user requests SEEK_HOLE or SEEK_DATA with a negative offset
-ceph_llseek should return -ENXIO.  Currently -EINVAL is being returned for
-SEEK_DATA and 0 for SEEK_HOLE.
+You are most likely seeing this issue [1] where hung threads
+associated with the unreachable remote cluster are preventing the
+rbd-mirror daemon from releasing the image's lock on the local
+cluster. It has hopefully been resolved as part of Luminous but it
+isn't a good candidate for backport given all the associated changes
+it depends upon.
 
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
----
- fs/ceph/file.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 3d48c415f3cb..e1912e67843f 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -1481,13 +1481,13 @@ static loff_t ceph_llseek(struct file *file, loff_t offset, int whence)
- 		offset += file->f_pos;
- 		break;
- 	case SEEK_DATA:
--		if (offset >= i_size) {
-+		if (offset < 0 || offset >= i_size) {
- 			ret = -ENXIO;
- 			goto out;
- 		}
- 		break;
- 	case SEEK_HOLE:
--		if (offset >= i_size) {
-+		if (offset < 0 || offset >= i_size) {
- 			ret = -ENXIO;
- 			goto out;
- 		}
+[1] http://tracker.ceph.com/issues/18963
+
+On Fri, Jul 28, 2017 at 3:36 AM, YuShengzuo <yu.shengzuo@99cloud.net> wrote:
+> HI all,
+>
+>
+>
+> env: CentOS 7.2
+> ceph: jewel-10.2.9
+>
+>
+>
+> A image created in primary cluster, and replicated in secondary cluster by
+> rbd-mirror
+>
+> When the primary cluster crash or shutdown, I do promote image in secondary
+> with '--force'
+> the image still can't read or write.
+>
+>
+>
+> So I have to restart rbd-mirror daemon in secondary, it can work.
+>
+>
+>
+> Does anyone have any better method to solved it ?
+>
+>
+>
+> Yu Shengzuo
+>
+>
+
+
+
+-- 
+Jason
