@@ -1,66 +1,51 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: BUG: A force promote image remain locked after primary down.
-Date: Fri, 28 Jul 2017 07:35:19 -0400
-Message-ID: <CA+aFP1Cm+h0vz4MVn5shki_9YRuEhjzJgVkz7rE8CotuMjTd+A@mail.gmail.com>
-References: <78608BF7-FC3F-441F-9A0C-E16F439CDB8C@99cloud.net>
-Reply-To: dillaman@redhat.com
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH 0/6] libceph: luminous semantic changes and fixes
+Date: Fri, 28 Jul 2017 14:41:24 +0200
+Message-ID: <1501245690-2362-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f181.google.com ([209.85.161.181]:35721 "EHLO
-        mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751633AbdG1LfU (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Jul 2017 07:35:20 -0400
-Received: by mail-yw0-f181.google.com with SMTP id l82so63829262ywc.2
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Jul 2017 04:35:20 -0700 (PDT)
-In-Reply-To: <78608BF7-FC3F-441F-9A0C-E16F439CDB8C@99cloud.net>
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:33364 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751690AbdG1Mlk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Jul 2017 08:41:40 -0400
+Received: by mail-wm0-f66.google.com with SMTP id q189so16146128wmd.0
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Jul 2017 05:41:39 -0700 (PDT)
+Received: from orange.brq.redhat.com. (nat-pool-brq-t.redhat.com. [213.175.37.10])
+        by smtp.gmail.com with ESMTPSA id c13sm8263773wrc.7.2017.07.28.05.41.38
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 28 Jul 2017 05:41:38 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: YuShengzuo <yu.shengzuo@99cloud.net>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-You are most likely seeing this issue [1] where hung threads
-associated with the unreachable remote cluster are preventing the
-rbd-mirror daemon from releasing the image's lock on the local
-cluster. It has hopefully been resolved as part of Luminous but it
-isn't a good candidate for backport given all the associated changes
-it depends upon.
+Hello,
 
+All straightforward and tested, but I want to make sure I haven't
+missed anything.
 
-[1] http://tracker.ceph.com/issues/18963
+Thanks,
 
-On Fri, Jul 28, 2017 at 3:36 AM, YuShengzuo <yu.shengzuo@99cloud.net> wrote:
-> HI all,
->
->
->
-> env: CentOS 7.2
-> ceph: jewel-10.2.9
->
->
->
-> A image created in primary cluster, and replicated in secondary cluster by
-> rbd-mirror
->
-> When the primary cluster crash or shutdown, I do promote image in secondary
-> with '--force'
-> the image still can't read or write.
->
->
->
-> So I have to restart rbd-mirror daemon in secondary, it can work.
->
->
->
-> Does anyone have any better method to solved it ?
->
->
->
-> Yu Shengzuo
->
->
+                Ilya
 
 
+Ilya Dryomov (6):
+  libceph: make encode_request_*() work with r_mempool requests
+  libceph: don't call ->reencode_message() more than once per message
+  libceph: fallback for when there isn't a pool-specific choose_arg
+  crush: assume weight_set != null imples weight_set_size > 0
+  libceph: upmap semantic changes
+  libceph: make RECOVERY_DELETES feature create a new interval
+
+ include/linux/ceph/osd_client.h |  1 +
+ include/linux/ceph/osdmap.h     |  2 ++
+ include/linux/ceph/rados.h      |  4 +++
+ include/linux/crush/crush.h     |  2 +-
+ net/ceph/crush/mapper.c         |  2 +-
+ net/ceph/messenger.c            |  6 ++---
+ net/ceph/osd_client.c           | 14 +++++++---
+ net/ceph/osdmap.c               | 60 ++++++++++++++++++++---------------------
+ 8 files changed, 53 insertions(+), 38 deletions(-)
 
 -- 
-Jason
+2.4.3
+
