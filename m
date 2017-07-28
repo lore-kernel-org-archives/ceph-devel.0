@@ -1,82 +1,89 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 3/6] libceph: fallback for when there isn't a pool-specific choose_arg
-Date: Fri, 28 Jul 2017 14:41:27 +0200
-Message-ID: <1501245690-2362-4-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 5/6] libceph: upmap semantic changes
+Date: Fri, 28 Jul 2017 14:41:29 +0200
+Message-ID: <1501245690-2362-6-git-send-email-idryomov@gmail.com>
 References: <1501245690-2362-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:37469 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751740AbdG1Mlm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Jul 2017 08:41:42 -0400
-Received: by mail-wm0-f66.google.com with SMTP id t138so8433372wmt.4
-        for <ceph-devel@vger.kernel.org>; Fri, 28 Jul 2017 05:41:42 -0700 (PDT)
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36741 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751722AbdG1Mlo (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 28 Jul 2017 08:41:44 -0400
+Received: by mail-wm0-f68.google.com with SMTP id 184so27285809wmo.3
+        for <ceph-devel@vger.kernel.org>; Fri, 28 Jul 2017 05:41:43 -0700 (PDT)
 Received: from orange.brq.redhat.com. (nat-pool-brq-t.redhat.com. [213.175.37.10])
-        by smtp.gmail.com with ESMTPSA id c13sm8263773wrc.7.2017.07.28.05.41.40
+        by smtp.gmail.com with ESMTPSA id c13sm8263773wrc.7.2017.07.28.05.41.41
         for <ceph-devel@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 28 Jul 2017 05:41:40 -0700 (PDT)
+        Fri, 28 Jul 2017 05:41:42 -0700 (PDT)
 In-Reply-To: <1501245690-2362-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org
 
-There is now a fallback to a choose_arg index of -1 if there isn't
-a pool-specific choose_arg set.  If you create a per-pool weight-set,
-that works for that pool.  Otherwise we try the compat/default one.  If
-that doesn't exist either, then we use the normal CRUSH weights.
+- apply both pg_upmap and pg_upmap_items
+- allow bidirectional swap of pg-upmap-items
 
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- include/linux/crush/crush.h |  2 +-
- net/ceph/osdmap.c           | 12 +++++++++++-
- 2 files changed, 12 insertions(+), 2 deletions(-)
+ net/ceph/osdmap.c | 39 +++++++++++----------------------------
+ 1 file changed, 11 insertions(+), 28 deletions(-)
 
-diff --git a/include/linux/crush/crush.h b/include/linux/crush/crush.h
-index 92e165d417a6..07eed95e10c7 100644
---- a/include/linux/crush/crush.h
-+++ b/include/linux/crush/crush.h
-@@ -193,7 +193,7 @@ struct crush_choose_arg {
- struct crush_choose_arg_map {
- #ifdef __KERNEL__
- 	struct rb_node node;
--	u64 choose_args_index;
-+	s64 choose_args_index;
- #endif
- 	struct crush_choose_arg *args; /*!< replacement for each bucket
-                                             in the crushmap */
 diff --git a/net/ceph/osdmap.c b/net/ceph/osdmap.c
-index 64ae9f89773a..eb57a06373ca 100644
+index 2586e5546143..0bec71fa712e 100644
 --- a/net/ceph/osdmap.c
 +++ b/net/ceph/osdmap.c
-@@ -2301,10 +2301,17 @@ static u32 raw_pg_to_pps(struct ceph_pg_pool_info *pi,
+@@ -2437,40 +2437,23 @@ static void apply_upmap(struct ceph_osdmap *osdmap,
+ 		for (i = 0; i < pg->pg_upmap.len; i++)
+ 			raw->osds[i] = pg->pg_upmap.osds[i];
+ 		raw->size = pg->pg_upmap.len;
+-		return;
++		/* check and apply pg_upmap_items, if any */
  	}
- }
  
-+/*
-+ * Magic value used for a "default" fallback choose_args, used if the
-+ * crush_choose_arg_map passed to do_crush() does not exist.  If this
-+ * also doesn't exist, fall back to canonical weights.
-+ */
-+#define CEPH_DEFAULT_CHOOSE_ARGS	-1
+ 	pg = lookup_pg_mapping(&osdmap->pg_upmap_items, pgid);
+ 	if (pg) {
+-		/*
+-		 * Note: this approach does not allow a bidirectional swap,
+-		 * e.g., [[1,2],[2,1]] applied to [0,1,2] -> [0,2,1].
+-		 */
+-		for (i = 0; i < pg->pg_upmap_items.len; i++) {
+-			int from = pg->pg_upmap_items.from_to[i][0];
+-			int to = pg->pg_upmap_items.from_to[i][1];
+-			int pos = -1;
+-			bool exists = false;
+-
+-			/* make sure replacement doesn't already appear */
+-			for (j = 0; j < raw->size; j++) {
+-				int osd = raw->osds[j];
+-
+-				if (osd == to) {
+-					exists = true;
++		for (i = 0; i < raw->size; i++) {
++			for (j = 0; j < pg->pg_upmap_items.len; j++) {
++				int from = pg->pg_upmap_items.from_to[j][0];
++				int to = pg->pg_upmap_items.from_to[j][1];
 +
- static int do_crush(struct ceph_osdmap *map, int ruleno, int x,
- 		    int *result, int result_max,
- 		    const __u32 *weight, int weight_max,
--		    u64 choose_args_index)
-+		    s64 choose_args_index)
- {
- 	struct crush_choose_arg_map *arg_map;
- 	int r;
-@@ -2313,6 +2320,9 @@ static int do_crush(struct ceph_osdmap *map, int ruleno, int x,
- 
- 	arg_map = lookup_choose_arg_map(&map->crush->choose_args,
- 					choose_args_index);
-+	if (!arg_map)
-+		arg_map = lookup_choose_arg_map(&map->crush->choose_args,
-+						CEPH_DEFAULT_CHOOSE_ARGS);
- 
- 	mutex_lock(&map->crush_workspace_mutex);
- 	r = crush_do_rule(map->crush, ruleno, x, result, result_max,
++				if (from == raw->osds[i]) {
++					if (!(to != CRUSH_ITEM_NONE &&
++					      to < osdmap->max_osd &&
++					      osdmap->osd_weight[to] == 0))
++						raw->osds[i] = to;
+ 					break;
+ 				}
+-				/* ignore mapping if target is marked out */
+-				if (osd == from && pos < 0 &&
+-				    !(to != CRUSH_ITEM_NONE &&
+-				      to < osdmap->max_osd &&
+-				      osdmap->osd_weight[to] == 0)) {
+-					pos = j;
+-				}
+-			}
+-			if (!exists && pos >= 0) {
+-				raw->osds[pos] = to;
+-				return;
+ 			}
+ 		}
+ 	}
 -- 
 2.4.3
 
