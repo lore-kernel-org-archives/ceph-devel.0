@@ -1,44 +1,43 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: Seeking approval for kraken 11.2.1 release - rbd
-Date: Tue, 1 Aug 2017 09:07:24 -0400
-Message-ID: <CA+aFP1BZeARENT-q8d+h-r3y4j2zse7qNOsp1ZZkb=VHWznuHA@mail.gmail.com>
-References: <d8f72f0c-5ebc-5eac-370b-36efec2f5e33@suse.cz>
-Reply-To: dillaman@redhat.com
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Rados bench with a failed node
+Date: Tue, 1 Aug 2017 13:21:05 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1708011319590.20435@piezo.novalocal>
+References: <CAODUPsHkC153vq5O7TKjt+ZTgMofsyR7m7hdKdi2ASbKTMWpRg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f172.google.com ([209.85.161.172]:32801 "EHLO
-        mail-yw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751012AbdHANH0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Aug 2017 09:07:26 -0400
-Received: by mail-yw0-f172.google.com with SMTP id p68so9513581ywg.0
-        for <ceph-devel@vger.kernel.org>; Tue, 01 Aug 2017 06:07:26 -0700 (PDT)
-In-Reply-To: <d8f72f0c-5ebc-5eac-370b-36efec2f5e33@suse.cz>
+Received: from cobra.newdream.net ([66.33.216.30]:49114 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751887AbdHANVK (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Aug 2017 09:21:10 -0400
+In-Reply-To: <CAODUPsHkC153vq5O7TKjt+ZTgMofsyR7m7hdKdi2ASbKTMWpRg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Oleg Kolosov <olekol@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Indeed -- long overdue. Thanks.
+On Tue, 1 Aug 2017, Oleg Kolosov wrote:
+> Hi
+> I'm developing my own erasure code and I'm trying to run rados
+> benchmark on it. My experiment consists of writing objects, then while
+> reading them I stop an OSD and see how it affects latency.
+> While running this experiment with 'rados bench' I get an error after
+> stopping the osd:
+> 
+> benchmark_data_adm-1_3806_object8 is not correct!
+> read got -5
+> error during benchmark: -5
+> error 5: (5) Input/output error
+> 
+> Is it expected to fail like this?
 
-On Tue, Aug 1, 2017 at 4:25 AM, Nathan Cutler <ncutler@suse.cz> wrote:
-> Hi Jason:
->
-> A number of rbd PRs have been merged to kraken since 11.2.0:
->
-> http://tracker.ceph.com/projects/rbd/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=3&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=530&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D=
->
-> Do you agree it's high time for a 11.2.1 release?
->
-> Regards,
-> Nathan
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+It's hard to say what's happening without logs, but my guess would be that 
+your erasure code isn't correctly reconstructing the stripe when a 
+shard is missing.
 
+> Is there a way to bypass it or somehow perform my experiment?
 
+If it's what I'm guessing, not really... nor would you want to.  I would 
+enable osd logging to see where the EIO is coming from.
 
--- 
-Jason
+sage
