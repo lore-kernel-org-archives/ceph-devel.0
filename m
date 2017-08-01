@@ -1,46 +1,38 @@
-From: Johnny Zhang <johnny.zhang@Istuary.com>
-Subject: rbd-nbd implementation not working well with rbd
-Date: Tue, 1 Aug 2017 19:51:09 +0000
-Message-ID: <MWHPR12MB1216F67528545CECE09F560E84B30@MWHPR12MB1216.namprd12.prod.outlook.com>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: Re: Seeking approval for kraken 11.2.1 release - rados
+Date: Tue, 1 Aug 2017 14:21:42 -0700
+Message-ID: <0cc23f43-359e-b822-ec85-41d787f6659f@redhat.com>
+References: <0bf84195-f820-9608-a1ce-b04688f0331b@suse.cz>
+ <d6e573ab-4771-2f61-db69-1c53770afbd0@suse.cz>
+ <7c51a718-0917-d8d9-cd81-fa9813c425c2@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam03on0104.outbound.protection.outlook.com ([104.47.42.104]:57376
-        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752460AbdHATvN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 1 Aug 2017 15:51:13 -0400
-Content-Language: en-GB
+Received: from mx1.redhat.com ([209.132.183.28]:57280 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752515AbdHAVVn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 1 Aug 2017 17:21:43 -0400
+In-Reply-To: <7c51a718-0917-d8d9-cd81-fa9813c425c2@suse.cz>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-SGVsbG8sDQoNCkkndmUgYmVlbiB0ZXN0aW5nIHRoZSBuZXcgaW1wbGVtZW50YXRpb24gZm9yIHJi
-ZC1uYmQgbWVyZ2VkIGluIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8xNTMxNw0K
-YW5kIGhhdmUgYSBmZXcgb2JzZXJ2YXRpb25zL3F1ZXN0aW9ucyBmb3IgcGVvcGxlIHdpdGggbW9y
-ZSBrbm93bGVkZ2Ugb24gdGhpcyBzdWJqZWN0IHRoYW4gSS4NCg0KRm9yIHRoZSBjZXBoIHJlcG8s
-IGdpdCBsb2cgdGVsbHMgbWUgSSBhbSBhdCB0aGlzIGNvbW1pdA0KY29tbWl0IGRjZThlN2RhODYx
-OGE4MGMzM2Y5MjZhNTg0NTM0MTQ4YTVmZGI3NTENCg0KMS4gbmV3IHJiZC1uYmQgZG9lcyBub3Qg
-c3VwcG9ydCAtYw0KDQp2YWdyYW50QGp6MTp+L2NlcGgvYnVpbGQvYmluJCBzdWRvIC4vcmJkLW5i
-ZCBsaXN0LW1hcHBlZCAtYyAvZXRjL2NlcGgvY2VwaC5jb25mDQpyYmQtbmJkOiB1bmtub3duIGFy
-Z3M6IC1jDQoNCldlIGhhdmUgZml4ZWQgdGhpcyBieSBhZGRpbmcgYSBjZXBoX2FyZ3BhcnNlX2Vh
-cmx5X2FyZ3Mgc29tZXdoZXJlIGluIHJiZC1uYmQuY2MNCg0KDQoyLiBBZnRlciBhIHJiZCBtdiwg
-cmJkLW5iZCBsaXN0LW1hcHBlZCBkb2VzIG5vdCB1cGRhdGUgbGlrZSByYmQgZG9lcw0KDQp2YWdy
-YW50QGp6MTp+L2NlcGgvYnVpbGQvYmluJCBzdWRvIC4vcmJkIG12IHBvb2wxL2ltYWdlMSBwb29s
-MS9pbWFnZTINCnZhZ3JhbnRAanoxOn4vY2VwaC9idWlsZC9iaW4kIC4vcmJkLW5iZCBsaXN0LW1h
-cHBlZA0KcGlkICBwb29sICBpbWFnZSAgc25hcCBkZXZpY2UNCjIzMzcgcG9vbDEgaW1hZ2UxIC0g
-ICAgL2Rldi9uYmQwDQp2YWdyYW50QGp6MTp+L2NlcGgvYnVpbGQvYmluJCBzdWRvIC4vcmJkIGxz
-IHBvb2wxDQppbWFnZTINCg0KDQozLiBBcyBmYXIgYXMgSSBrbm93LCB0aGUgaW1wbGVtZW50YXRp
-b24gaW4gcmJkLW5iZCBub3cgY2hlY2tzIC9wcm9jLzxwaWQ+L2NtZGxpbmUgdG8gZ2V0IHRoZSBj
-b21tYW5kIHRoYXQgcGVyZm9ybWVkIHRoZSBgcmJkLW5iZCBtYXBgIGFuZCB0aGVuIG9idGFpbiB0
-aGUgaW1hZ2Ugc3BlYyBmcm9tIHRoYXQuIFdvdWxkIHRoZXJlIGJlIGFueSB3YXkgdG8gbW9kaWZ5
-IGVpdGhlciByYmQgb3IgcmJkLW5iZCBzbyB0aGF0IHRoZXkgYXJlIGF3YXJlIG9mIGVhY2ggb3Ro
-ZXI/DQoNClRoYW5rcywNCkpvaG5ueQ0KRW1haWwgRGlzY2xhaW1lciAmIENvbmZpZGVudGlhbGl0
-eSBOb3RpY2UNClRoaXMgbWVzc2FnZSBpcyBjb25maWRlbnRpYWwgYW5kIGludGVuZGVkIHNvbGVs
-eSBmb3IgdGhlIHVzZSBvZiB0aGUgcmVjaXBpZW50KHMpIHRvIHdob20gdGhleSBhcmUgYWRkcmVz
-c2VkLiBJZiB5b3UgYXJlIG5vdCBhbiBpbnRlbmRlZCByZWNpcGllbnQgeW91IHNob3VsZCBub3Qg
-ZGVsaXZlciwgZGlzdHJpYnV0ZSBvciBjb3B5IHRoaXMgZS1tYWlsLiBQbGVhc2Ugbm90aWZ5IHRo
-ZSBzZW5kZXIgaW1tZWRpYXRlbHkgYnkgZS1tYWlsIGFuZCBkZWxldGUgdGhpcyBlLW1haWwgZnJv
-bSB5b3VyIHN5c3RlbS4gQ29weXJpZ2h0IMKpIDIwMTcgYnkgSXN0dWFyeSBJbm5vdmF0aW9uIExh
-YnMsIEluYy4gQWxsIHJpZ2h0cyByZXNlcnZlZC4NCg0K
+On 08/01/2017 04:31 AM, Nathan Cutler wrote:
+> Also, in the spirit of full disclosure, please note that one of the 
+> outstanding rados PRs [1] looks like it might fix a problem in the 
+> upgrad/jewel-x suite [2] - however, I marked it DNM because it caused 
+> OSDs to assert [3]. If anyone thinks it's really important to have this 
+> fix in kraken, now would be a good time to debug that.
+
+Thanks for pointing that out. I don't think it's urgent to fix in kraken 
+since it requires using snapshots for an EC pool, which is not a common 
+configuration, and the consequence is minor and a workaround possible.
+
+The existing backports to kraken look good to me - and I see no urgent
+ones outstanding - so going ahead with 11.2.1 sounds good.
+
+Thanks!
+Josh
