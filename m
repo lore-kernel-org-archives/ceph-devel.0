@@ -1,58 +1,42 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Mon stats in luminous rc
-Date: Tue, 1 Aug 2017 03:05:14 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1708010304040.20435@piezo.novalocal>
-References: <D5A4AD67.949E8%travis.nielsen@quantum.com>
+From: Administrator <jadson.rumpia@customs.go.id>
+Subject: Admin
+Date: Tue, 01 Aug 2017 11:18:43 +0530
+Message-ID: <20170801055134.640D0CC8001@mail.customs.go.id>
+Reply-To: Sistemass_Adminss@mail2world.com
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39107 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751759AbdHADFQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 31 Jul 2017 23:05:16 -0400
-In-Reply-To: <D5A4AD67.949E8%travis.nielsen@quantum.com>
+Received: from [103.12.81.54] ([103.12.81.54]:56128 "EHLO
+        zimbra01.customs.go.id" rhost-flags-FAIL-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1751217AbdHAHRT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Aug 2017 03:17:19 -0400
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Travis Nielsen <Travis.Nielsen@Quantum.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Recipients <jadson.rumpia@customs.go.id>
 
-On Mon, 31 Jul 2017, Travis Nielsen wrote:
-> The ceph status -f json command has changed quite a bit in luminous RC. I
-> see the following expected change with the health messages.
-> https://github.com/ceph/ceph/pull/15643
-> 
-> And in the pending release notes there is a new command for
-> time-sync-status.
-> 
-> However, I can't find what happened with the mon stats in the
-> health_services section. Where can I find them? In 12.1.0 they were there,
-> but not seeing them now in 12.1.1.
-> 
-> $ ceph health -f json| jq
-> {
->   "health": {
->     "health_services": [
->       {
->         "mons": [
->           {
->             "name": "mon0",
->             "kb_total": 16888216,
->             "kb_used": 2345480,
->             "kb_avail": 13553604,
->             "avail_percent": 80,
->             "last_updated": "2017-07-31 15:43:49.107186",
->             "store_stats": {
->               "bytes_total": 1486739,
->               "bytes_sst": 1504,
->               "bytes_log": 1476780,
->               "bytes_misc": 8455,
->               "last_updated": "0.000000"
->             },
->             "health": "HEALTH_OK"
->           },
+PERHATIAN
 
-Ah, these are just gone... I didn't expect anyone to be consuming 
-them.  We can add a mon-store-status or similar command to include this 
-information if you need it.
+Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang =
+didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda =
+mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali m=
+emvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, ki=
+rim informasi berikut di bawah ini:
 
-sage
+Nama:
+Username:
+sandi:
+Konfirmasi sandi:
+E-mail:
+telepon:
+
+Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda =
+akan dinonaktifkan!
+
+Maaf atas ketidaknyamanan ini.
+Kode verifikasi: en:0986..web...id......nw..website Admin..id...9876mm.2017
+Surat Dukungan Teknis =A92017
+
+terima kasih
+Sistem Administrator
