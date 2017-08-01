@@ -1,42 +1,46 @@
-From: Mike A <mike.almateia@gmail.com>
-Subject: All Flash installation with BlueStore, RDMA, NVDIMM and SPDK
-Date: Tue, 1 Aug 2017 22:32:45 +0300
-Message-ID: <6ED16C68-6101-44B9-B0DE-CC6E06B6EF27@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+From: Johnny Zhang <johnny.zhang@Istuary.com>
+Subject: rbd-nbd implementation not working well with rbd
+Date: Tue, 1 Aug 2017 19:51:09 +0000
+Message-ID: <MWHPR12MB1216F67528545CECE09F560E84B30@MWHPR12MB1216.namprd12.prod.outlook.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:33865 "EHLO
-        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751959AbdHATcv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Aug 2017 15:32:51 -0400
-Received: by mail-lf0-f49.google.com with SMTP id g25so11234034lfh.1
-        for <ceph-devel@vger.kernel.org>; Tue, 01 Aug 2017 12:32:50 -0700 (PDT)
-Received: from mbp-mihail.lan (broadband-178-140-226-63.moscow.rt.ru. [178.140.226.63])
-        by smtp.gmail.com with ESMTPSA id q3sm3914667ljb.39.2017.08.01.12.32.48
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 01 Aug 2017 12:32:48 -0700 (PDT)
+Received: from mail-by2nam03on0104.outbound.protection.outlook.com ([104.47.42.104]:57376
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752460AbdHATvN (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 1 Aug 2017 15:51:13 -0400
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hello
-
-Our goal it is make fast storage as possible.=20
-By now our configuration of 6 servers look like that:
-* 2 x CPU Intel Gold 6150 20 core 2.4Ghz
-* 2 x 16 Gb NVDIMM DDR4 DIMM
-* 6 x 16 Gb RAM DDR4
-* 6 x Intel DC P4500 4Tb NVMe 2.5"
-* 2 x Mellanox ConnectX-4 EN Lx 25Gb dualport
-
-What a support status in ceph of RDMA, NVDIMM access throughout libpmem =
-and SPDK software?
-Some issues or buggy support?
-
-Thanks for answers.
-
-=E2=80=94=20
-Mike, runs!
-
+SGVsbG8sDQoNCkkndmUgYmVlbiB0ZXN0aW5nIHRoZSBuZXcgaW1wbGVtZW50YXRpb24gZm9yIHJi
+ZC1uYmQgbWVyZ2VkIGluIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvcHVsbC8xNTMxNw0K
+YW5kIGhhdmUgYSBmZXcgb2JzZXJ2YXRpb25zL3F1ZXN0aW9ucyBmb3IgcGVvcGxlIHdpdGggbW9y
+ZSBrbm93bGVkZ2Ugb24gdGhpcyBzdWJqZWN0IHRoYW4gSS4NCg0KRm9yIHRoZSBjZXBoIHJlcG8s
+IGdpdCBsb2cgdGVsbHMgbWUgSSBhbSBhdCB0aGlzIGNvbW1pdA0KY29tbWl0IGRjZThlN2RhODYx
+OGE4MGMzM2Y5MjZhNTg0NTM0MTQ4YTVmZGI3NTENCg0KMS4gbmV3IHJiZC1uYmQgZG9lcyBub3Qg
+c3VwcG9ydCAtYw0KDQp2YWdyYW50QGp6MTp+L2NlcGgvYnVpbGQvYmluJCBzdWRvIC4vcmJkLW5i
+ZCBsaXN0LW1hcHBlZCAtYyAvZXRjL2NlcGgvY2VwaC5jb25mDQpyYmQtbmJkOiB1bmtub3duIGFy
+Z3M6IC1jDQoNCldlIGhhdmUgZml4ZWQgdGhpcyBieSBhZGRpbmcgYSBjZXBoX2FyZ3BhcnNlX2Vh
+cmx5X2FyZ3Mgc29tZXdoZXJlIGluIHJiZC1uYmQuY2MNCg0KDQoyLiBBZnRlciBhIHJiZCBtdiwg
+cmJkLW5iZCBsaXN0LW1hcHBlZCBkb2VzIG5vdCB1cGRhdGUgbGlrZSByYmQgZG9lcw0KDQp2YWdy
+YW50QGp6MTp+L2NlcGgvYnVpbGQvYmluJCBzdWRvIC4vcmJkIG12IHBvb2wxL2ltYWdlMSBwb29s
+MS9pbWFnZTINCnZhZ3JhbnRAanoxOn4vY2VwaC9idWlsZC9iaW4kIC4vcmJkLW5iZCBsaXN0LW1h
+cHBlZA0KcGlkICBwb29sICBpbWFnZSAgc25hcCBkZXZpY2UNCjIzMzcgcG9vbDEgaW1hZ2UxIC0g
+ICAgL2Rldi9uYmQwDQp2YWdyYW50QGp6MTp+L2NlcGgvYnVpbGQvYmluJCBzdWRvIC4vcmJkIGxz
+IHBvb2wxDQppbWFnZTINCg0KDQozLiBBcyBmYXIgYXMgSSBrbm93LCB0aGUgaW1wbGVtZW50YXRp
+b24gaW4gcmJkLW5iZCBub3cgY2hlY2tzIC9wcm9jLzxwaWQ+L2NtZGxpbmUgdG8gZ2V0IHRoZSBj
+b21tYW5kIHRoYXQgcGVyZm9ybWVkIHRoZSBgcmJkLW5iZCBtYXBgIGFuZCB0aGVuIG9idGFpbiB0
+aGUgaW1hZ2Ugc3BlYyBmcm9tIHRoYXQuIFdvdWxkIHRoZXJlIGJlIGFueSB3YXkgdG8gbW9kaWZ5
+IGVpdGhlciByYmQgb3IgcmJkLW5iZCBzbyB0aGF0IHRoZXkgYXJlIGF3YXJlIG9mIGVhY2ggb3Ro
+ZXI/DQoNClRoYW5rcywNCkpvaG5ueQ0KRW1haWwgRGlzY2xhaW1lciAmIENvbmZpZGVudGlhbGl0
+eSBOb3RpY2UNClRoaXMgbWVzc2FnZSBpcyBjb25maWRlbnRpYWwgYW5kIGludGVuZGVkIHNvbGVs
+eSBmb3IgdGhlIHVzZSBvZiB0aGUgcmVjaXBpZW50KHMpIHRvIHdob20gdGhleSBhcmUgYWRkcmVz
+c2VkLiBJZiB5b3UgYXJlIG5vdCBhbiBpbnRlbmRlZCByZWNpcGllbnQgeW91IHNob3VsZCBub3Qg
+ZGVsaXZlciwgZGlzdHJpYnV0ZSBvciBjb3B5IHRoaXMgZS1tYWlsLiBQbGVhc2Ugbm90aWZ5IHRo
+ZSBzZW5kZXIgaW1tZWRpYXRlbHkgYnkgZS1tYWlsIGFuZCBkZWxldGUgdGhpcyBlLW1haWwgZnJv
+bSB5b3VyIHN5c3RlbS4gQ29weXJpZ2h0IMKpIDIwMTcgYnkgSXN0dWFyeSBJbm5vdmF0aW9uIExh
+YnMsIEluYy4gQWxsIHJpZ2h0cyByZXNlcnZlZC4NCg0K
