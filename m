@@ -1,42 +1,31 @@
-From: Administrator <danny@agenfirsttravel.co.id>
-Subject: Admin
-Date: Tue, 01 Aug 2017 14:05:39 +0530
-Message-ID: <20170801083608.2E05F45BDE90@mail.agenfirsttravel.co.id>
-Reply-To: Sistemass_Adminss@mail2world.com
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: Seeking approval for kraken 11.2.1 release - rados
+Date: Tue, 1 Aug 2017 13:31:33 +0200
+Message-ID: <7c51a718-0917-d8d9-cd81-fa9813c425c2@suse.cz>
+References: <0bf84195-f820-9608-a1ce-b04688f0331b@suse.cz>
+ <d6e573ab-4771-2f61-db69-1c53770afbd0@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail.agenfirsttravel.co.id ([117.102.253.125]:60227 "EHLO
-        mail.agenfirsttravel.co.id" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751779AbdHAIgi (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Aug 2017 04:36:38 -0400
-Content-Description: Mail message body
+Received: from mx2.suse.de ([195.135.220.15]:46067 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751978AbdHALbi (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 1 Aug 2017 07:31:38 -0400
+In-Reply-To: <d6e573ab-4771-2f61-db69-1c53770afbd0@suse.cz>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <danny@agenfirsttravel.co.id>
+To: "Durgin, Josh" <jdurgin@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-PERHATIAN
+Also, in the spirit of full disclosure, please note that one of the 
+outstanding rados PRs [1] looks like it might fix a problem in the 
+upgrad/jewel-x suite [2] - however, I marked it DNM because it caused 
+OSDs to assert [3]. If anyone thinks it's really important to have this 
+fix in kraken, now would be a good time to debug that.
 
-Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang =
-didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda =
-mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali m=
-emvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, ki=
-rim informasi berikut di bawah ini:
-
-Nama:
-Username:
-sandi:
-Konfirmasi sandi:
-E-mail:
-telepon:
-
-Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda =
-akan dinonaktifkan!
-
-Maaf atas ketidaknyamanan ini.
-Kode verifikasi: en:0986..web...id......nw..website Admin..id...9876mm.2017
-Surat Dukungan Teknis =A92017
-
-terima kasih
-Sistem Administrator
+[1] https://github.com/ceph/ceph/pull/16082
+[2] 
+http://pulpito.ceph.com/smithfarm-2017-08-01_09:32:53-upgrade:jewel-x-wip-kraken-backports-distro-basic-smithi/1468986/
+[3] http://tracker.ceph.com/issues/19009#note-62
