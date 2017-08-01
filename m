@@ -1,29 +1,42 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Seeking approval for kraken 11.2.1 release - rados
-Date: Tue, 1 Aug 2017 10:32:04 +0200
-Message-ID: <d6e573ab-4771-2f61-db69-1c53770afbd0@suse.cz>
-References: <0bf84195-f820-9608-a1ce-b04688f0331b@suse.cz>
+From: Administrator <danny@agenfirsttravel.co.id>
+Subject: Admin
+Date: Tue, 01 Aug 2017 14:05:39 +0530
+Message-ID: <20170801083608.2E05F45BDE90@mail.agenfirsttravel.co.id>
+Reply-To: Sistemass_Adminss@mail2world.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:47670 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750832AbdHAIcG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 1 Aug 2017 04:32:06 -0400
-In-Reply-To: <0bf84195-f820-9608-a1ce-b04688f0331b@suse.cz>
-Content-Language: en-US
+Received: from mail.agenfirsttravel.co.id ([117.102.253.125]:60227 "EHLO
+        mail.agenfirsttravel.co.id" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751779AbdHAIgi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 1 Aug 2017 04:36:38 -0400
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Durgin, Josh" <jdurgin@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Recipients <danny@agenfirsttravel.co.id>
 
-The first tracker link I sent included all the backports staged for 
-release in 11.2.1, not just the "Ceph" and "RADOS" ones. To see those, 
-click on these two links:
+PERHATIAN
 
-http://tracker.ceph.com/projects/ceph/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=3&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=530&f%5B%5D=subproject_id&op%5Bsubproject_id%5D=%21*&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D=
+Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang =
+didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda =
+mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali m=
+emvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, ki=
+rim informasi berikut di bawah ini:
 
-http://tracker.ceph.com/projects/rados/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=3&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=530&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D=
+Nama:
+Username:
+sandi:
+Konfirmasi sandi:
+E-mail:
+telepon:
 
-Nathan
+Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda =
+akan dinonaktifkan!
+
+Maaf atas ketidaknyamanan ini.
+Kode verifikasi: en:0986..web...id......nw..website Admin..id...9876mm.2017
+Surat Dukungan Teknis =A92017
+
+terima kasih
+Sistem Administrator
