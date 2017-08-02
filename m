@@ -1,49 +1,41 @@
-From: Leonardo Vaz <lvaz@redhat.com>
-Subject: Re: Ceph Developers Monthly - August
-Date: Tue, 1 Aug 2017 23:43:56 -0300
-Message-ID: <20170802024356.GB2568@oops.local>
-References: <20170727050859.GA15435@oops.local>
+From: Administrator <set.sultra@bawaslu.go.id>
+Subject: (unknown)
+Date: Wed, 2 Aug 2017 11:12:07 +0700 (WIB)
+Message-ID: <984882130.471752.1501647127349.JavaMail.zimbra@bawaslu.go.id>
+Reply-To: Sistemass_Adminss@mail2world.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42938 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751655AbdHBCn7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 1 Aug 2017 22:43:59 -0400
-Content-Disposition: inline
-In-Reply-To: <20170727050859.GA15435@oops.local>
+Received: from mail.bawaslu.go.id ([103.249.227.154]:57040 "EHLO
+        mail.bawaslu.go.id" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751019AbdHBE3b (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Aug 2017 00:29:31 -0400
+Subject: 
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph-Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Thu, Jul 27, 2017 at 02:08:59AM -0300, Leonardo Vaz wrote:
-> Hey Cephers,
-> 
-> This is just a friendly reminder that the next Ceph Developer Montly
-> meeting is coming up:
-> 
->  https://wiki.ceph.com/Planning
-> 
-> If you have work that you're doing that it a feature work, significant
-> backports, or anything you would like to discuss with the core team,
-> please add it to the following page:
-> 
->  https://wiki.ceph.com/CDM_02-AUG-2017
-> 
-> If you have questions or comments, please let us know.
+PERHATIAN
 
-This is another reminder, the Ceph Developer Monthly is confirmed for
-this Wednesday, August 2 at 12:30-2:30pm on Eastern Time (EDT).
+Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang =
+didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda =
+mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali m=
+emvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, ki=
+rim informasi berikut di bawah ini:
 
-We will use the following Bluejeans URL for the video conference:
+Nama:
+Username:
+sandi:
+Konfirmasi sandi:
+E-mail:
+telepon:
 
-  https://bluejeans.com/707503600 
+Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda =
+akan dinonaktifkan!
 
-Kindest regards,
+Maaf atas ketidaknyamanan ini.
+Kode verifikasi: en:0986..web...id......nw..website Admin..id...9876mm.2017
+Surat Dukungan Teknis =C2=A92017
 
-Leo
-
--- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
+terima kasih
+Sistem Administrator
