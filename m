@@ -1,94 +1,75 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: unable to build Debian Stretch for 12.1.2
-Date: Wed, 2 Aug 2017 15:52:54 +0800
-Message-ID: <CAJE9aOOfyO4kqZ3OAhYzGFpb=_x_usQrNVREKBbagpP7JJKozg@mail.gmail.com>
-References: <CAC-Np1y2RLRHTgbjNF7uM6-+nho1tz2PUxDE6pdef1y-bMtZxg@mail.gmail.com>
- <CAF-wwdE4kBKzDjbRNiKwdZ9W9TV9sdd6TJiTZ-MorhKJyUpL3g@mail.gmail.com>
- <CAC-Np1xnvw9KtwdKcTLTsKdarWH25FAeoExWhzB0Ad+TuTHM4A@mail.gmail.com>
- <CAF-wwdFhpUowuBT7Rxfmw4wPQUWHnxF7ZKQ0hRMoPo79cY-hEQ@mail.gmail.com>
- <CAF-wwdHQ9Zcp58VBBGqFOTFGz5acsLxe5ZVXX9jTyc_uSSAzvw@mail.gmail.com>
- <68916451.345723.1501076601021.JavaMail.zimbra@oxygem.tv> <CALqRxCx2N6BswvPJXfcpDyPd9dNXhV7P3h-km0NbW7w7eQoiJg@mail.gmail.com>
- <CAC-Np1xuNEo+hX_wvLDN8rmQP_xK1DE7Yf66zzBe33Gz4c+7+g@mail.gmail.com> <CAJE9aOP6Ro+WcCiBv=O45B=p60DszEF8KjW1sYxbx0QvDLmhXQ@mail.gmail.com>
+From: Oleg Kolosov <olekol@gmail.com>
+Subject: Re: Rados bench with a failed node
+Date: Wed, 2 Aug 2017 11:54:13 +0300
+Message-ID: <CAODUPsGuq4o7PtH4JuHBPPLk70NkzHRNGpvEQwZYraZwmPT3Cg@mail.gmail.com>
+References: <CAODUPsHkC153vq5O7TKjt+ZTgMofsyR7m7hdKdi2ASbKTMWpRg@mail.gmail.com>
+ <alpine.DEB.2.11.1708011319590.20435@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f174.google.com ([209.85.217.174]:37233 "EHLO
-        mail-ua0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751066AbdHBHwz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Aug 2017 03:52:55 -0400
-Received: by mail-ua0-f174.google.com with SMTP id f9so17190984uaf.4
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Aug 2017 00:52:55 -0700 (PDT)
-In-Reply-To: <CAJE9aOP6Ro+WcCiBv=O45B=p60DszEF8KjW1sYxbx0QvDLmhXQ@mail.gmail.com>
+Received: from mail-oi0-f54.google.com ([209.85.218.54]:34748 "EHLO
+        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752754AbdHBIyO (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Aug 2017 04:54:14 -0400
+Received: by mail-oi0-f54.google.com with SMTP id x3so38604574oia.1
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Aug 2017 01:54:14 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1708011319590.20435@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: Ken Dreyer <kdreyer@redhat.com>, Alexandre DERUMIER <aderumier@odiso.com>, Brad Hubbard <bhubbard@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, Aug 1, 2017 at 9:35 PM, kefu chai <tchaikov@gmail.com> wrote:
-> On Tue, Aug 1, 2017 at 8:06 PM, Alfredo Deza <adeza@redhat.com> wrote:
->> On Mon, Jul 31, 2017 at 6:20 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
->>> On Wed, Jul 26, 2017 at 7:43 AM, Alexandre DERUMIER <aderumier@odiso.com> wrote:
->>>> Hi,
->>>>
->>>> It's building fine here on a real debian strech.
->>>>
->>>> git clone https://github.com/ceph/ceph
->>>> git submodule update --force --init --recursive
->>>> git checkout v12.1.1
->>>
->>> That looks like an older version, and Alfredo's seeing this crash in 12.1.2.
->>>
->>> Would you please try within pbuilder?
+Hi Sage,
+You are correct! The problem is indeed only for my erasure code,
+however I'm not sure what it is.
+I've reproduced the issue in the virtual cluster created by vstart.sh
+ (logging enabled)
+I've compared the logs of all OSDs with my erasure code versus a
+similar implementation of lrc - however there were no visible
+differences.
+Any tips on what should I look for?
+What might affect this in erasure code source code?
+
+Another iteresting thing I'm seeing is that even cleanup fails:
+
+>  bin/rados -p optlrcpool cleanup
+error during cleanup: -5
+error 5: (5) Input/output error
+
+This only occurs when I set 'noout' & stop and osd and then write and
+read with the benchmark.
+
+
+I should mentioned that my erasure code works properly besides this
+experiment. It manages to recover from a failed node during normal
+mode of operation.
+
+Thanks,
+Oleg
+
+On Tue, Aug 1, 2017 at 4:21 PM, Sage Weil <sage@newdream.net> wrote:
+> On Tue, 1 Aug 2017, Oleg Kolosov wrote:
+>> Hi
+>> I'm developing my own erasure code and I'm trying to run rados
+>> benchmark on it. My experiment consists of writing objects, then while
+>> reading them I stop an OSD and see how it affects latency.
+>> While running this experiment with 'rados bench' I get an error after
+>> stopping the osd:
 >>
->> Right, I was trying to build 12.1.2 (un-released) so that would
->> effectively be the tip of the luminous branch (which at that time was
->> the same as master iirc)
+>> benchmark_data_adm-1_3806_object8 is not correct!
+>> read got -5
+>> error during benchmark: -5
+>> error 5: (5) Input/output error
 >>
->> And we couldn't replicate this without pbuilder running on a Xenial
->> box, *and* it worked fine for 12.1.1
+>> Is it expected to fail like this?
 >
-> i just built 901f14aa7c62ae16072239202a1a9b8329ef3c84 fine in a
-> stretch docker env.
+> It's hard to say what's happening without logs, but my guess would be that
+> your erasure code isn't correctly reconstructing the stripe when a
+> shard is missing.
 >
-> $ git describe
-> v12.1.1-870-g901f14aa7c
+>> Is there a way to bypass it or somehow perform my experiment?
 >
-> $ gcc --version
-> gcc (Debian 6.3.0-18) 6.3.0 20170516
-> Copyright (C) 2016 Free Software Foundation, Inc.
-> This is free software; see the source for copying conditions.  There is NO
-> warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+> If it's what I'm guessing, not really... nor would you want to.  I would
+> enable osd logging to see where the EIO is coming from.
 >
-> i will try with pbuilder later on.
-
-pbuilder works fine also. following are the steps how i built the latest master:
-
-sudo pbuilder create  --distribution stretch
-./make-dist
-tar xjvf ceph-12.1.1-937-g3e21fd6134.tar.bz2
-dpkg-source -b ceph-12.1.1-937-g3e21fd6134/
-sudo pbuilder build *.dsc
-
-please note, the pbuilder base.tgz was created in a debian sid. but i
-don't think it's relevant.
-
->
->>
->>>
->>> - Ken
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Regards
-> Kefu Chai
-
-
-
--- 
-Regards
-Kefu Chai
+> sage
