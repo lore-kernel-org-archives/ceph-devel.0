@@ -1,142 +1,37 @@
-From: Abhishek Lekshmanan <abhishek@suse.com>
-Subject: v12.1.2 Luminous (RC) released
-Date: Wed, 02 Aug 2017 17:28:52 +0200
-Message-ID: <87vam69eff.fsf@suse.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: ceph nagios plugins
+Date: Wed, 2 Aug 2017 10:38:30 -0600
+Message-ID: <CALqRxCy=O2iP-8zv=FcqKLvJ+U_ZkL1wGTjkBuncyc4MdcZT=Q@mail.gmail.com>
+References: <alpine.DEB.2.11.1708011414210.20435@piezo.novalocal>
+ <CALqRxCw2EWH4cHuogSgYSFrqZa0F-nfdgbgG_R1PUbkJekcheg@mail.gmail.com>
+ <80e8e181-3c8a-7932-f1ac-a78fb4358153@switch.ch> <alpine.DEB.2.11.1708021404130.20435@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:53218 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751154AbdHBP2z (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Wed, 2 Aug 2017 11:28:55 -0400
+Received: from mail-ua0-f169.google.com ([209.85.217.169]:33314 "EHLO
+        mail-ua0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751974AbdHBQib (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Aug 2017 12:38:31 -0400
+Received: by mail-ua0-f169.google.com with SMTP id 80so23208526uas.0
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Aug 2017 09:38:31 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1708021404130.20435@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-users@ceph.com, ceph-maintainers@ceph.com, ceph-announce@ceph.com
+To: Sage Weil <sweil@redhat.com>
+Cc: Valery Tschopp <valery.tschopp@switch.ch>, ceph-devel <ceph-devel@vger.kernel.org>
 
-This is the third release candidate for Luminous, the next long term stable
-release. Please note that this is still a *release candidate* and not
-the final release, and hence not yet recommended on production clusters,
-testing is welcome & we would love feedback and bug reports.
+On Wed, Aug 2, 2017 at 8:13 AM, Sage Weil <sweil@redhat.com> wrote:
+>  We can also either just fork your
+> repo into the ceph org and start sending pull requests there, or we can
+> transfer your repo over.  (I'm not sure it matters?)
 
-Ceph Luminous (v12.2.0) will be the foundation for the next long-term
-stable release series.  There have been major changes since Kraken
-(v11.2.z) and Jewel (v10.2.z), and the upgrade process is non-trivial.
-Please read these release notes carefully,
-http://ceph.com/releases/v12-1-2-luminous-rc-released/
+It would be great to do the transfer because GitHub handles redirects
+for the old URLs seamlessly, retains the issues and PR numbers, etc.
 
+I've created a "nagios" team https://github.com/orgs/ceph/teams/nagios
+and invited you to it Valery. I'm not sure if you have access to start
+the transfer at
+https://github.com/valerytschopp/ceph-nagios-plugins/settings into the
+Ceph org or if you'll need to add me as a collaborator.
 
-Notable Changes since v12.1.0 (RC1)
------------------------------------
-
-* choose_args encoding has been changed to make it architecture-independent.
-  If you deployed Luminous dev releases or 12.1.0 rc release and made use of
-  the CRUSH choose_args feature, you need to remove all choose_args mappings
-  from your CRUSH map before starting the upgrade.
-
-* The 'ceph health' structured output (JSON or XML) no longer contains
-  a 'timechecks' section describing the time sync status.  This
-  information is now available via the 'ceph time-sync-status'
-  command.
-
-* Certain extra fields in the 'ceph health' structured output that
-  used to appear if the mons were low on disk space (which duplicated
-  the information in the normal health warning messages) are now gone.
-
-* The "ceph -w" output no longer contains audit log entries by default.
-  Add a "--watch-channel=audit" or "--watch-channel=*" to see them.
-
-* The 'apply' mode of cephfs-journal-tool has been removed
-
-* Added new configuration "public bind addr" to support dynamic environments
-  like Kubernetes. When set the Ceph MON daemon could bind locally to an IP
-  address and advertise a different IP address "public addr" on the network.
-
-* New "ceph -w" behavior - the "ceph -w" output no longer contains I/O rates,
-  available space, pg info, etc. because these are no longer logged to the
-  central log (which is what "ceph -w" shows). The same information can be
-  obtained by running "ceph pg stat"; alternatively, I/O rates per pool can
-  be determined using "ceph osd pool stats". Although these commands do not
-  self-update like "ceph -w" did, they do have the ability to return formatted
-  output by providing a "--format=<format>" option.
-
-* Pools are now expected to be associated with the application using them.
-  Upon completing the upgrade to Luminous, the cluster will attempt to associate
-  existing pools to known applications (i.e. CephFS, RBD, and RGW). In-use pools
-  that are not associated to an application will generate a health warning. Any
-  unassociated pools can be manually associated using the new
-  "ceph osd pool application enable" command. For more details see
-  "Associate Pool to Application" in the documentation.
-
-* ceph-mgr now has a Zabbix plugin. Using zabbix_sender it sends trapper
-  events to a Zabbix server containing high-level information of the Ceph
-  cluster. This makes it easy to monitor a Ceph cluster's status and send
-  out notifications in case of a malfunction.
-
-* The 'mon_warn_osd_usage_min_max_delta' config option has been
-  removed and the associated health warning has been disabled because
-  it does not address clusters undergoing recovery or CRUSH rules that do
-  not target all devices in the cluster.
-
-* Specifying user authorization capabilities for RBD clients has been
-  simplified. The general syntax for using RBD capability profiles is
-  "mon 'profile rbd' osd 'profile rbd[-read-only][ pool={pool-name}[, ...]]'".
-  For more details see "User Management" in the documentation.
-
-* ``ceph config-key put`` has been deprecated in favor of ``ceph config-key set``.
-
-
-Notable Changes since v12.1.1 (RC2)
------------------------------------
-
-* New "ceph -w" behavior - the "ceph -w" output no longer contains I/O rates,
-  available space, pg info, etc. because these are no longer logged to the
-  central log (which is what "ceph -w" shows). The same information can be
-  obtained by running "ceph pg stat"; alternatively, I/O rates per pool can
-  be determined using "ceph osd pool stats". Although these commands do not
-  self-update like "ceph -w" did, they do have the ability to return formatted
-  output by providing a "--format=<format>" option.
-
-* Pools are now expected to be associated with the application using them.
-  Upon completing the upgrade to Luminous, the cluster will attempt to associate
-  existing pools to known applications (i.e. CephFS, RBD, and RGW). In-use pools
-  that are not associated to an application will generate a health warning. Any
-  unassociated pools can be manually associated using the new
-  "ceph osd pool application enable" command. For more details see
-  "Associate Pool to Application" in the documentation.
-
-* ceph-mgr now has a Zabbix plugin. Using zabbix_sender it sends trapper
-  events to a Zabbix server containing high-level information of the Ceph
-  cluster. This makes it easy to monitor a Ceph cluster's status and send
-  out notifications in case of a malfunction.
-
-* The 'mon_warn_osd_usage_min_max_delta' config option has been
-  removed and the associated health warning has been disabled because
-  it does not address clusters undergoing recovery or CRUSH rules that do
-  not target all devices in the cluster.
-
-* Specifying user authorization capabilities for RBD clients has been
-  simplified. The general syntax for using RBD capability profiles is
-  "mon 'profile rbd' osd 'profile rbd[-read-only][ pool={pool-name}[, ...]]'".
-  For more details see "User Management" in the documentation.
-
-* RGW: bucket index resharding now uses the reshard  namespace in log pool
-  upgrade scenarios as well this is a changed behaviour from RC1 where a
-  new pool for reshard was created
-
-* RGW multisite now supports for enabling or disabling sync at a bucket level.
-
-Getting Ceph
-------------
-
-* Git at git://github.com/ceph/ceph.git
-* Tarball at http://download.ceph.com/tarballs/ceph-12.1.2.tar.gz
-* For packages, see http://docs.ceph.com/docs/master/install/get-packages/
-* For ceph-deploy, see http://docs.ceph.com/docs/master/install/install-ceph-deploy
-* Release sha1: b661348f156f148d764b998b65b90451f096cb27
-
--- 
-Abhishek Lekshmanan
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
-HRB 21284 (AG Nürnberg)
+- Ken
