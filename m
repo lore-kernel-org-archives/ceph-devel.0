@@ -1,108 +1,47 @@
 From: Leonardo Vaz <lvaz@redhat.com>
-Subject: Re: Where to submit a blueprint?
-Date: Tue, 1 Aug 2017 23:28:35 -0300
-Message-ID: <20170802022835.GA2568@oops.local>
-References: <CAJACTuc8nJLOXhUXUwqHZPit76MJUK4_=9R06fF300ZpCj+e9g@mail.gmail.com>
- <CAJ4mKGZK10GLYNt3Xv6CyjXX9b1+4aBUGMXYoen3VaRPcHZ=qA@mail.gmail.com>
- <CAJ4mKGZ2R-Q8Udsi0LBg1Py4dCpUrJF=o-shN2WpvyqKipXrEg@mail.gmail.com>
- <CAJACTuerYSCyMpcyqvwYkN8YxN=XB1NffGGPUuL4ce0FgNv0Pw@mail.gmail.com>
- <CAJACTud4NXYo6FYGhXeigHBpx1ARZOAJQOsq0Q9sQgnkTcPFaQ@mail.gmail.com>
- <8e5eb4b5-fbdd-7236-e7f7-c3f8b0e4579e@suse.de>
- <CAJACTufgOBJhFFMKHbfdgpuyPDfAvjDWti9to08PE3acmb7ZVg@mail.gmail.com>
- <CAJACTufpJbXQjtjuq9OGQEgjXLAj96UKZrpAeOdgAwH2SMZ87A@mail.gmail.com>
- <CACKY0b-t6onpc8d2H43t_ebtz-PaM-X54Ovj_DZ6zJ0pDbtTbA@mail.gmail.com>
- <CAJACTuempKW_pQ9=pTAuaBijFN9b5GUFuEzDOZ81veYA1-+tWg@mail.gmail.com>
+Subject: Re: Ceph Developers Monthly - August
+Date: Tue, 1 Aug 2017 23:43:56 -0300
+Message-ID: <20170802024356.GB2568@oops.local>
+References: <20170727050859.GA15435@oops.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55854 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:42938 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751773AbdHBC2k (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 1 Aug 2017 22:28:40 -0400
+        id S1751655AbdHBCn7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 1 Aug 2017 22:43:59 -0400
 Content-Disposition: inline
-In-Reply-To: <CAJACTuempKW_pQ9=pTAuaBijFN9b5GUFuEzDOZ81veYA1-+tWg@mail.gmail.com>
+In-Reply-To: <20170727050859.GA15435@oops.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xuehan Xu <xxhdx1985126@gmail.com>
-Cc: liuchang0812 <liuchang0812@gmail.com>, Joao Eduardo Luis <joao@suse.de>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, Ricardo Dias <rdias@suse.com>
+To: Ceph-Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Wed, Aug 02, 2017 at 10:13:09AM +0800, Xuehan Xu wrote:
-> Hi, everyone.
+On Thu, Jul 27, 2017 at 02:08:59AM -0300, Leonardo Vaz wrote:
+> Hey Cephers,
 > 
-> The CDM for this month is not canceled, right?
+> This is just a friendly reminder that the next Ceph Developer Montly
+> meeting is coming up:
+> 
+>  https://wiki.ceph.com/Planning
+> 
+> If you have work that you're doing that it a feature work, significant
+> backports, or anything you would like to discuss with the core team,
+> please add it to the following page:
+> 
+>  https://wiki.ceph.com/CDM_02-AUG-2017
+> 
+> If you have questions or comments, please let us know.
 
-No, it wasn't cancelled Xuehan.  
+This is another reminder, the Ceph Developer Monthly is confirmed for
+this Wednesday, August 2 at 12:30-2:30pm on Eastern Time (EDT).
 
-The meeting happens tomorrow at 12:30pm-2:30pm on Eastern Time (EDT).
+We will use the following Bluejeans URL for the video conference:
+
+  https://bluejeans.com/707503600 
 
 Kindest regards,
 
 Leo
-
-> On 28 July 2017 at 16:13, liuchang0812 <liuchang0812@gmail.com> wrote:
-> > Xuehan, you need to change your browser's language to English.
-> >
-> > 2017-07-28 11:56 GMT+08:00 Xuehan Xu <xxhdx1985126@gmail.com>:
-> >> This is the error it showed:
-> >>
-> >> An error occured
-> >> The error was reported with the following id: 'lZEjJsXD2IKD8tghjDNC'
-> >>
-> >> Please send this error message to us:
-> >> 'ErrorId: lZEjJsXD2IKD8tghjDNC
-> >> URL: http://pad.ceph.com/p/2017-04-rados-dr
-> >> UserAgent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36
-> >> (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36
-> >> Uncaught TypeError: Cannot read property 'indexOf' of null in
-> >> http://pad.ceph.com/static/js/html10n.js at line 1'
-> >>  0
-> >>
-> >> On 28 July 2017 at 11:53, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
-> >>> Yes, that should be better:-)
-> >>>
-> >>> Also, I really would like to join you developing this feature if it is
-> >>> possible:-) Thank you:-)
-> >>>
-> >>> By the way, it seems that I can't open this link,
-> >>> http://pad.ceph.com/p/2017-04-rados-dr. I can only see an empty
-> >>> pad.....
-> >>>
-> >>> On 27 July 2017 at 20:05, Joao Eduardo Luis <joao@suse.de> wrote:
-> >>>> On 07/23/2017 04:37 AM, Xuehan Xu wrote:
-> >>>>>
-> >>>>> Hi, everyone.
-> >>>>> I've just uploaded a blueprint in
-> >>>>>
-> >>>>> http://tracker.ceph.com/attachments/download/2903/ceph_rados-level_replication.pdf
-> >>>>
-> >>>>
-> >>>> Thanks for sharing this!
-> >>>>
-> >>>> Ricardo and I talked a bit with Sage a while back about RADOS level Disaster
-> >>>> Recovery (rough draft of what the architecture can be found in [1]), and
-> >>>> despite our lack of time as of late to work on it we're very much interested
-> >>>> in this topic still.
-> >>>>
-> >>>> It appears we will have a CDM next August 2nd, and I see you would like to
-> >>>> discuss it by then. However, given the vacation season, we would like to
-> >>>> suggest we postponed this discussion until September, so that we could all
-> >>>> attend.
-> >>>>
-> >>>> Does that seem reasonable to you?
-> >>>>
-> >>>> Cheers!
-> >>>>
-> >>>>   -Joao
-> >>>>
-> >>>> [1] http://pad.ceph.com/p/2017-04-rados-dr
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 -- 
 Leonardo Vaz
