@@ -1,163 +1,388 @@
-From: Valery Tschopp <valery.tschopp@switch.ch>
-Subject: Re: ceph nagios plugins
-Date: Wed, 2 Aug 2017 11:58:45 +0200
-Message-ID: <80e8e181-3c8a-7932-f1ac-a78fb4358153@switch.ch>
-References: <alpine.DEB.2.11.1708011414210.20435@piezo.novalocal>
- <CALqRxCw2EWH4cHuogSgYSFrqZa0F-nfdgbgG_R1PUbkJekcheg@mail.gmail.com>
+From: Junqin JQ7 Zhang <zhangjq7@lenovo.com>
+Subject: RE: Ceph Bluestore OSD CPU utilization
+Date: Wed, 2 Aug 2017 10:39:53 +0000
+Message-ID: <694B98CBCEF42547AE4CD1A693225B5D08557B57@CNMAILEX04.lenovo.com>
+References: <694B98CBCEF42547AE4CD1A693225B5D085533EA@CNMAILEX04.lenovo.com>
+ <5f6e1242-f0ec-62f2-9778-eb0a28406838@redhat.com>
+ <6929185c-7c88-83ee-9e12-62db1cd23ec5@redhat.com>
+ <694B98CBCEF42547AE4CD1A693225B5D085544B4@CNMAILEX04.lenovo.com>
+ <e09c864a-fb65-a68a-4802-f8b4d29f88fc@gmail.com>
+ <694B98CBCEF42547AE4CD1A693225B5D085546CF@CNMAILEX04.lenovo.com>
+ <f367fa53-1d0c-3a81-0769-e0a46adb9cdb@gmail.com>
+ <694B98CBCEF42547AE4CD1A693225B5D08554965@CNMAILEX04.lenovo.com>
+ <CAF-wwdG5Z+LBtsdiWcdMOJQVimzsv1n6ApaVhJNiSqKfVMoxxQ@mail.gmail.com>
+ <de192cba-0bc8-8f29-2cdd-26e7ca48db9e@gmail.com>
+ <694B98CBCEF42547AE4CD1A693225B5D0855744F@CNMAILEX04.lenovo.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256; boundary="------------ms040305040907090208040600"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from teruel.switch.ch ([130.59.193.63]:53945 "EHLO teruel.switch.ch"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752100AbdHBKDw (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 2 Aug 2017 06:03:52 -0400
-In-Reply-To: <CALqRxCw2EWH4cHuogSgYSFrqZa0F-nfdgbgG_R1PUbkJekcheg@mail.gmail.com>
+Received: from mail1.bemta12.messagelabs.com ([216.82.251.14]:13551 "EHLO
+        mail1.bemta12.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752722AbdHBKoJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Aug 2017 06:44:09 -0400
+In-Reply-To: <694B98CBCEF42547AE4CD1A693225B5D0855744F@CNMAILEX04.lenovo.com>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>, Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Junqin JQ7 Zhang <zhangjq7@lenovo.com>, Mark Nelson <mark.a.nelson@gmail.com>, Brad Hubbard <bhubbard@redhat.com>
+Cc: Mark Nelson <mnelson@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-This is a cryptographically signed message in MIME format.
+Hi Mark,
 
---------------ms040305040907090208040600
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+I'd like to share more about test result on BlueStore.
 
-Hi Ken and Sage,
+This time, I use rbd bench and rados bench to test our environment, instead of FIO.
+And find dramatic different performance result.
+Performance of an empty RBD is about twice of a full RBD.
+Performance of rados bench is about 4 times of a full RBD.
 
-Thanks a lot for your interest in my=20
-https://github.com/valerytschopp/ceph-nagios-plugins.
+Did you see this before? 
 
-I'm not against transferring my personal repository to the=20
-https://github.com/ceph organization, but I still have some questions:
+Here are test results.
+1.  an empty 100G RBD VS 100% filled 100G RBD
+Empty RBD:
+# rbd bench --io-type write --io-size 8192 --io-threads 32 --io-total 5G  --io-pattern rand  pool1/test1
+elapsed:    94  ops:   655360  ops/sec:  6935.91  bytes/sec: 56818961.59
 
-- Will I still be able to commit to the repo if I transfer the ownership =
+Full RBD: (fill 100% with Fio before)
+# rbd bench --io-type write --io-size 8192 --io-threads 32 --io-total 5G  --io-pattern rand  pool1/test2
+elapsed:   195  ops:   655360  ops/sec:  3360.39  bytes/sec: 27528307.72
 
-of my repository to the https://github.com/ceph org?
-- Will I become member of the https://github.com/ceph organization?
+2. rados bench
+# rados bench -p pool1 60 -b 8192  -t 32 write
+Total time run:         60.002410
+Total writes made:      750018
+Write size:             8192
+Object size:            8192
+Bandwidth (MB/sec):     97.6547
+Stddev Bandwidth:       11.0842
+Max bandwidth (MB/sec): 118.086
+Min bandwidth (MB/sec): 44.4062
+Average IOPS:           12499
+Stddev IOPS:            1418
+Max IOPS:               15115
+Min IOPS:               5684
+Average Latency(s):     0.00255903
+Stddev Latency(s):      0.00529435
+Max latency(s):         0.216116
+Min latency(s):         0.000913035
 
-Cheers,
-Valery
+I can see Rados bench cause obvious higher OSD CPU usage and disk throughput than RBD bench.
 
-On 01/08/17 18:12 , Ken Dreyer wrote:
-> Hi Valery,
->=20
-> We discussed this a bit more in #ceph-devel today. Would you be ok
-> with moving the Git repo into the https://github.com/ceph org? Then
-> we'd preserve Git history, make it easier to package and distribute,
-> etc.
->=20
-> - Ken
->=20
->=20
-> On Tue, Aug 1, 2017 at 8:30 AM, Sage Weil <sweil@redhat.com> wrote:
->> Hi Valery,
+Thanks.
+
+B.R.
+Junqin Zhang
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Junqin JQ7 Zhang
+Sent: Friday, July 28, 2017 6:35 PM
+To: Mark Nelson; Brad Hubbard
+Cc: Mark Nelson; Ceph Development
+Subject: RE: Ceph Bluestore OSD CPU utilization
+
+Hi,
+
+I just created an issue http://tracker.ceph.com/issues/20842 about this.
+
+I included following files in attachment.
+
+8,0_iops_fp.dat # blktrace
+8,0_mbps_fp.dat # blktrace
+8,48_iops_fp.dat # blktrace
+8,48_mbps_fp.dat # blktrace
+ceph.conf # ceph configuration
+ceph-osd.8.log # osd log
+collectl.log # collectl log
+gdbperf_osd8.log # gdb -ex 'set pagination off' -ex 'attach PID -ex 'source /root/gdbprof.py' -ex 'profile begin' -ex 'quit'
+iostat.log # iostat log
+iotop.log # iotop log
+osd.8.perf.dump # ceph daemon osd.8 perf dump sys_iops_fp.dat # output of blktrace sys_mbps_fp.dat # output of blktrace
+
+If you need any more information, please tell me.
+
+Thanks a lot!
+
+B.R.
+Junqin Zhang
+
+-----Original Message-----
+From: ceph-devel-owner@vger.kernel.org [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+Sent: Thursday, July 27, 2017 11:56 AM
+To: Brad Hubbard; Junqin JQ7 Zhang
+Cc: Mark Nelson; Ceph Development
+Subject: Re: Ceph Bluestore OSD CPU utilization
+
+yeah, metrics and profiling data would be good at this point.  The standard gauntlet of collectl/iostat, gdbprof or poorman's profiling, perf, blktrace, etc.  Don't necessarily need everything but if anything interesting shows up it would be good to see it.
+
+Also, turning on rocksdb bloom filters is worth doing if it hasn't been done yet (happening in master soon via https://github.com/ceph/ceph/pull/16450).
+
+FWIW, I'm tracking down what I think is a sequential write regression vs earlier versions of bluestore but haven't figured out what's going on yet or even how much of a regression we are facing (these tests are on much bigger volumes than previously tested).
+
+Mark
+
+On 07/26/2017 09:40 PM, Brad Hubbard wrote:
+> Bumping this as I was talking to Junqin in IRC today and he reported 
+> it is still an issue. I suggested analysis of metrics and profiling 
+> data to try to determine the bottleneck for bluestore and also 
+> suggested Junqin open a tracker so we can investigate this thoroughly.
+>
+> Mark, Did you have any additional thoughts on how this might best be attacked?
+>
+>
+> On Thu, Jul 13, 2017 at 11:37 PM, Junqin JQ7 Zhang <zhangjq7@lenovo.com> wrote:
+>> Hi Mark,
 >>
->> We're thinking about bringing the nagios plugins into the ceph tree to=
-
->> make them easier to find for users (e.g., making ceph-nagios-plugins
->> available in the upstream ceph.com repos).  It looks like these are th=
-e
->> most complete (and most commonly used) plugins out there.
+>> Thanks for your reply.
 >>
->> Would you object to pulling
+>> Our SSD model is:
+>> Device Model:     SSDSC2BA800G4N
+>> Intel SSD DC S3710 Series 800GB
 >>
->>          https://github.com/valerytschopp/ceph-nagios-plugins
+>> And BlueStore OSD configure is as I posted before [osd.0] host =
+>> ceph-1
+>> osd data = /var/lib/ceph/osd/ceph-0    # a 100M SSD partition
+>> bluestore block db path = /dev/sda5    # a 10G SSD partition
+>> bluestore block wal path = /dev/sda6  # a 10G SSD partition
+>> bluestore block path = /dev/sdd            # a HDD disk
 >>
->> into ceph.git (into, say, contrib/nagios)?
+>> The iostat is a quick snapshot of terminal screen on a 8K write. I forget the detail test configuration.
+>> I only can make sure is it is a 8K random write.
+>> But we have re-setup the cluster, so I can't get the data right now, but we will do test again later these days.
 >>
->> Thanks!
->> sage
+>> Is there any special configure on BlueStore on your lab test? Like, how BlueStore OSD configured in your lab test?
+>> Or could you share lab test BlueStore configuration? Like file ceph.conf?
+>>
+>> Thanks a lot!
+>>
+>> B.R.
+>> Junqin Zhang
+>>
+>> -----Original Message-----
+>> From: ceph-devel-owner@vger.kernel.org 
+>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+>> Sent: Wednesday, July 12, 2017 11:29 PM
+>> To: Junqin JQ7 Zhang; Mark Nelson; Ceph Development
+>> Subject: Re: Ceph Bluestore OSD CPU utilization
+>>
+>> Hi Junqin
+>>
+>> On 07/12/2017 05:21 AM, Junqin JQ7 Zhang wrote:
+>>> Hi Mark,
+>>>
+>>> We also compared iostat of filestore and bluestore.
+>>> Disk write rate of bluestore is only around 10% of filestore in same test case.
+>>>
+>>> Here is FileStore iostat during write
+>>> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+>>>           13.06    0.00    9.84   11.52    0.00   65.58
+>>>
+>>> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+>>> sda               0.00     0.00    0.00 8196.00     0.00 73588.00    17.96     0.52    0.06    0.00    0.06   0.04  31.90
+>>> sdb               0.00     0.00    0.00 8298.00     0.00 75572.00    18.21     0.54    0.07    0.00    0.07   0.04  33.00
+>>> sdh               0.00  4894.00    0.00  741.00     0.00 30504.00    82.33   207.60  314.51    0.00  314.51   1.35 100.10
+>>> sdj               0.00  1282.00    0.00  938.00     0.00 15652.00    33.37    14.40   16.04    0.00   16.04   0.90  84.10
+>>> sdk               0.00  5156.00    0.00  847.00     0.00 34560.00    81.61   199.04  283.83    0.00  283.83   1.18 100.10
+>>> sdd               0.00  6889.00    0.00  729.00     0.00 38216.00   104.84   138.60  198.14    0.00  198.14   1.37 100.00
+>>> sde               0.00  6909.00    0.00  763.00     0.00 38608.00   101.20   139.16  190.55    0.00  190.55   1.31 100.00
+>>> sdf               0.00  3237.00    0.00  708.00     0.00 30548.00    86.29   175.15  310.36    0.00  310.36   1.41  99.80
+>>> sdg               0.00  4875.00    0.00  745.00     0.00 32312.00    86.74   207.70  291.26    0.00  291.26   1.34 100.00
+>>> sdi               0.00  7732.00    0.00  812.00     0.00 42136.00   103.78   140.94  181.96    0.00  181.96   1.23 100.00
+>>>
+>>> Here is BlueStore iostat during write
+>>> avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+>>>            6.50    0.00    3.22    2.36    0.00   87.91
+>>>
+>>> Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+>>> sda               0.00     0.00    0.00 2938.00     0.00 25072.00    17.07     0.14    0.05    0.00    0.05   0.04  12.70
+>>> sdb               0.00     0.00    0.00 2821.00     0.00 26112.00    18.51     0.15    0.05    0.00    0.05   0.05  12.90
+>>> sdh               0.00     1.00    0.00  510.00     0.00  3600.00    14.12     5.45   10.68    0.00   10.68   0.24  12.00
+>>> sdj               0.00     0.00    0.00  424.00     0.00  3072.00    14.49     4.24   10.00    0.00   10.00   0.22   9.30
+>>> sdk               0.00     0.00    0.00  496.00     0.00  3584.00    14.45     4.10    8.26    0.00    8.26   0.18   9.10
+>>> sdd               0.00     0.00    0.00  419.00     0.00  3080.00    14.70     3.60    8.60    0.00    8.60   0.19   7.80
+>>> sde               0.00     0.00    0.00  650.00     0.00  3784.00    11.64    24.39   40.19    0.00   40.19   1.15  74.60
+>>> sdf               0.00     0.00    0.00  494.00     0.00  3584.00    14.51     5.92   11.98    0.00   11.98   0.26  12.90
+>>> sdg               0.00     0.00    0.00  493.00     0.00  3584.00    14.54     5.11   10.37    0.00   10.37   0.23  11.20
+>>> sdi               0.00     0.00    0.00  744.00     0.00  4664.00    12.54   121.41  177.66    0.00  177.66   1.35 100.10
+>>>
+>>> sda and sdb are SSD, other are HDD.
+>>
+>> earlier it looked like you were posting the configuration for an 8k randrw test, but this is a pure write test?  Can you provide the test configuration for these results?  Also, the SSD model would be useful to know.
+>>
+>> Having said that, these results look pretty different than what I typically see in the lab.  A big clue is the avgrq-sz.  On filestore you are seeing much larger write requests than with bluestore.  That might indicate that metadata writes are going to the HDD.  Is this still with the 10GB DB partition?
+>>
+>> Mark
+>>
+>>>
+>>> -----Original Message-----
+>>> From: Junqin JQ7 Zhang
+>>> Sent: Wednesday, July 12, 2017 10:45 AM
+>>> To: 'Mark Nelson'; Mark Nelson; Ceph Development
+>>> Subject: RE: Ceph Bluestore OSD CPU utilization
+>>>
+>>> Hi Mark,
+>>>
+>>> Actually, we tested filestore on same Ceph version v12.1.0 and same cluster.
+>>> # ceph -v
+>>> ceph version 12.1.0 (262617c9f16c55e863693258061c5b25dea5b086)
+>>> luminous (dev)
+>>>
+>>> CPU utilization of each OSD on filestore can reach max to around 200%, but CPU utilization of OSD on bluestore is only around 30%.
+>>> Then, BlueStore's performance is only about 20% of filestore.
+>>> We think there must be something wrong with our configuration.
+>>>
+>>> I tried to change ceph config, like
+>>> osd op threads = 8
+>>> osd disk threads = 4
+>>>
+>>> but still can't get a good result.
+>>>
+>>> Any idea of this?
+>>>
+>>> BTW. We changed some filestore related configured during test 
+>>> filestore fd cache size = 2048576000 filestore fd cache shards = 16 
+>>> filestore async threads = 0 filestore max sync interval = 15 
+>>> filestore wbthrottle enable = false filestore commit timeout = 1200 
+>>> filestore_op_thread_suicide_timeout = 0 filestore queue max ops =
+>>> 1048576 filestore queue max bytes = 17179869184 max open files =
+>>> 262144 filestore fadvise = false filestore ondisk finisher threads =
+>>> 4 filestore op threads = 8
+>>>
+>>> Thanks a lot!
+>>>
+>>> B.R.
+>>> Junqin Zhang
+>>> -----Original Message-----
+>>> From: ceph-devel-owner@vger.kernel.org 
+>>> [mailto:ceph-devel-owner@vger.kernel.org] On Behalf Of Mark Nelson
+>>> Sent: Tuesday, July 11, 2017 11:47 PM
+>>> To: Junqin JQ7 Zhang; Mark Nelson; Ceph Development
+>>> Subject: Re: Ceph Bluestore OSD CPU utilization
+>>>
+>>>
+>>>
+>>> On 07/11/2017 10:31 AM, Junqin JQ7 Zhang wrote:
+>>>> Hi Mark,
+>>>>
+>>>> Thanks for your reply.
+>>>>
+>>>> The hardware is as below for each 3 hosts.
+>>>> 2 SATA SSD and 8 HDD
+>>>
+>>> The model of SSD potentially could be very important here.  The devices we test in our lab are enterprise grade SSDs with power loss protection.
+>>>   That means they don't have to flush data on sync requests.  O_DSYNC writes are much faster as a result.  I don't know how bad of an impact this has on rocksdb wal/db, but it definitely hurts with filestore journals.
+>>>
+>>>> Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz
+>>>> Network: 20000Mb/s
+>>>>
+>>>> I configured OSD like
+>>>> [osd.0]
+>>>> host = ceph-1
+>>>> osd data = /var/lib/ceph/osd/ceph-0        # a 100M partition of SSD
+>>>> bluestore block db path = /dev/sda5         # a 10G partition of SSD
+>>>
+>>> Bluestore automatically roles rocksdb data over to the HDD with the db gets full.  I bet with 10GB you'll see good performance at first and then you'll start seeing lots of extra reads/writes on the HDD once it fills up with metadata (the more extents that are written out the more likely you'll hit this boundary).  You'll want to make the db partitions use the majority of the SSD(s).
+>>>
+>>>> bluestore block wal path = /dev/sda6       # a 10G partition of SSD
+>>>
+>>> The WAL can be smaller.  1-2GB is enough (potentially even less if you adjust the rocksdb buffer settings, but 1-2GB should be small enough to devote most of your SSDs to DB storage).
+>>>
+>>>> bluestore block path = /dev/sdd                # a HDD disk
+>>>>
+>>>> We use fio to test one or more 100G RBDs, an example of our fio 
+>>>> config [global] ioengine=rbd clientname=admin pool=rbd rw=randrw 
+>>>> bs=8k
+>>>> runtime=120
+>>>> iodepth=16
+>>>> numjobs=4
+>>>
+>>> with the rbd engine I try to avoid numjobs as it can give erroneous results in some cases.  it's probably better generally to stick with multiple independent fio processes (though in this case for a randrw workload it might not matter).
+>>>
+>>>> direct=1
+>>>> rwmixread=0
+>>>> new_group
+>>>> group_reporting
+>>>> [rbd_image0]
+>>>> rbdname=testimage_100GB_0
+>>>>
+>>>> Any suggestion?
+>>>
+>>> What kind of performance are you seeing and what do you expect to get?
+>>>
+>>> Mark
+>>>
+>>>> Thanks.
+>>>>
+>>>> B.R.
+>>>> Junqin zhang
+>>>>
+>>>> -----Original Message-----
+>>>> From: Mark Nelson [mailto:mnelson@redhat.com]
+>>>> Sent: Tuesday, July 11, 2017 7:32 PM
+>>>> To: Junqin JQ7 Zhang; Ceph Development
+>>>> Subject: Re: Ceph Bluestore OSD CPU utilization
+>>>>
+>>>> Ugh, small sequential *reads* I meant to say.  :)
+>>>>
+>>>> Mark
+>>>>
+>>>> On 07/11/2017 06:31 AM, Mark Nelson wrote:
+>>>>> Hi Junqin,
+>>>>>
+>>>>> Can you tell us your hardware configuration (models and quantities 
+>>>>> of cpus, network cards, disks, ssds, etc) and the command and 
+>>>>> options you used to measure performance?
+>>>>>
+>>>>> In many cases bluestore is faster than filestore, but there are a 
+>>>>> couple of cases where it is notably slower, the big one being when 
+>>>>> doing small sequential writes without client-side readahead.
+>>>>>
+>>>>> Mark
+>>>>>
+>>>>> On 07/11/2017 05:34 AM, Junqin JQ7 Zhang wrote:
+>>>>>> Hi,
+>>>>>>
+>>>>>> I installed Ceph luminous v12.1.0 in 3 nodes cluster with 
+>>>>>> BlueStore and did some fio test.
+>>>>>> During test,  I found the each OSD CPU utilization rate was only 
+>>>>>> aroud 30%.
+>>>>>> And the performance seems not good to me.
+>>>>>> Is  there any configuration to help increase OSD CPU utilization 
+>>>>>> to improve performance?
+>>>>>> Change kernel.pid_max? Any BlueStore specific configuration?
+>>>>>>
+>>>>>> Thanks a lot!
+>>>>>>
+>>>>>> B.R.
+>>>>>> Junqin Zhang
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>>>> in the body of a message to majordomo@vger.kernel.org More 
+>>>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>>
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>>> in the body of a message to majordomo@vger.kernel.org More 
+>>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>>> in the body of a message to majordomo@vger.kernel.org More 
+>>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel"
+>>> in the body of a message to majordomo@vger.kernel.org More majordomo 
+>>> info at  http://vger.kernel.org/majordomo-info.html
+>>>
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
---=20
-SWITCH
-Val=C3=A9ry Tschopp, Software Engineer
-Werdstrasse 2, P.O. Box, 8021 Zurich, Switzerland
-email: valery.tschopp@switch.ch phone: +41 44 268 1544
-
-30 years of pioneering the Swiss Internet.
-Celebrate with us at https://swit.ch/30years
-
-
-
---------------ms040305040907090208040600
-Content-Type: application/pkcs7-signature; name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Description: S/MIME Cryptographic Signature
-
-MIAGCSqGSIb3DQEHAqCAMIACAQExDzANBglghkgBZQMEAgEFADCABgkqhkiG9w0BBwEAAKCC
-C40wggWaMIIEgqADAgECAhRqKArzRiMoMclbQsKdJMSoLMM14zANBgkqhkiG9w0BAQsFADB/
-MQswCQYDVQQGEwJCTTEZMBcGA1UEChMQUXVvVmFkaXMgTGltaXRlZDElMCMGA1UECxMcUm9v
-dCBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTEuMCwGA1UEAxMlUXVvVmFkaXMgUm9vdCBDZXJ0
-aWZpY2F0aW9uIEF1dGhvcml0eTAeFw0xNDA1MzAxODUwMTNaFw0yMTAzMTcxODMzMzNaMGMx
-CzAJBgNVBAYTAkNIMSwwKgYDVQQKEyNRdW9WYWRpcyBUcnVzdGxpbmsgU3dpdHplcmxhbmQg
-THRkLjEmMCQGA1UEAxMdUXVvVmFkaXMgU3dpc3MgQWR2YW5jZWQgQ0EgRzIwggIiMA0GCSqG
-SIb3DQEBAQUAA4ICDwAwggIKAoICAQCyge5EB5ZP/fnk47KPgdEpuiBd9u7lcdLWxeGLOtrv
-YYp52fawKeNgm3oQogK4gPQxBMD2Wa080nOPo307UzrQQAe37lFCJqXlLpVBluVqjQdPpk9g
-syucalNwstNBHmj1xoXgUfTXhTrRWgkAuxGhGL9odj2+9QxbwVywjikgcidsDzVmo23mXc3x
-KWik6BIp3zbDjfTTyitIX+NIlDiaMxwq6L5QPnazrE2eNsSJrHmwz/Ie3gm8aDVy14+gE1sn
-Ew6CK2x/NncRcl/WcdaBjQN338DHN5u/FJI84NMt58y0BYiH3V3zF6qvntm4n0W216jHXcyy
-DHmSIEDMpbApuAOh/jhRj+BXq9K/Vnm3PghWJAHXembeS4Ax0sXMUrrC8mQUW+OOELONE2L+
-odG0+1cwnnLD2CEJmXCIcoCLsQL1Op7zmF8XXOExLZUtR73oNi1sIs8Ic3mrOln8shz8tVkL
-lKmSskr3ilUKQn7M5zKX7F6WKlbA3Vy4hz+IMyjEMAg2cAxNuu6MKEneoUrlGUiEJnxjvFmW
-segwFRVbBcZepRV+cX0d3aViVieUektNjUGsXrRBeADSqH7jj42IdlA6J0Mcv6HnPjuYn+hU
-8XyR2EhycpVfWzsA3LuKmSfqQfty1qNNE6Tsxb7YCBbEt+ijnnNHQJ1XNV/jR5wg3wIDAQAB
-o4IBKDCCASQwEgYDVR0TAQH/BAgwBgEB/wIBADARBgNVHSAECjAIMAYGBFUdIAAwcQYIKwYB
-BQUHAQEEZTBjMCoGCCsGAQUFBzABhh5odHRwOi8vb2NzcC5xdW92YWRpc2dsb2JhbC5jb20w
-NQYIKwYBBQUHMAKGKWh0dHA6Ly90cnVzdC5xdW92YWRpc2dsb2JhbC5jb20vcXZyY2EuY3J0
-MA4GA1UdDwEB/wQEAwIBBjAfBgNVHSMEGDAWgBSLS23t0ym5BhnsOTmp8JeEasvv3zA4BgNV
-HR8EMTAvMC2gK6AphidodHRwOi8vY3JsLnF1b3ZhZGlzZ2xvYmFsLmNvbS9xdnJjYS5jcmww
-HQYDVR0OBBYEFKAgbW1JXbpKhdN3ILJ6uIsO7dWdMA0GCSqGSIb3DQEBCwUAA4IBAQCuMV65
-UC3RkrbWAhVOWN8VKS1am+0sRTHC379oueJLAv3aWkNL9kDlTC0m+cNiK1/IQ/vVxpPtloqF
-bqWL4VtIlqauzSLOQuSNCuRPftMDkHf5IgbcHEeyCMi5z7ZM8Q3thlDSV6vC+F8lhQ1CNB8Y
-CHL99BtAGwhQs3Zn33FQjCguqAYsAkbmOkXMUSJ9UflrALhI6YXPUqn74JpZVu2lNJ6UgXzl
-d9QpYV3E130Tjx1jdcCBynDL7ibco5VV9CBFxUGdoRiBJr9lomVPyzm7rZJy5hx+qoNnNGoD
-StJklLF7eogKKYZGxgy9DJDmUevdmBiSaUYNmzCOpJwgXlcmMIIF6zCCA9OgAwIBAgIUEZ+8
-ZD67NDFHeP9D8dyVsWSUlH8wDQYJKoZIhvcNAQELBQAwYzELMAkGA1UEBhMCQ0gxLDAqBgNV
-BAoTI1F1b1ZhZGlzIFRydXN0bGluayBTd2l0emVybGFuZCBMdGQuMSYwJAYDVQQDEx1RdW9W
-YWRpcyBTd2lzcyBBZHZhbmNlZCBDQSBHMjAeFw0xNDEyMjIxMDAyMTNaFw0xNzEyMjIxMDAy
-MDlaMFwxCzAJBgNVBAYTAkNIMRAwDgYDVQQIEwdadWVyaWNoMRAwDgYDVQQHEwdadWVyaWNo
-MQ8wDQYDVQQKEwZTV0lUQ0gxGDAWBgNVBAMMD1ZhbMOpcnkgVHNjaG9wcDCCASIwDQYJKoZI
-hvcNAQEBBQADggEPADCCAQoCggEBALw/VUBYWrCYOvbf+sF+bGuY2KKPg3HtZydZjBeQwUiD
-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
---------------ms040305040907090208040600--
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
+>> in the body of a message to majordomo@vger.kernel.org More majordomo 
+>> info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe ceph-devel" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
