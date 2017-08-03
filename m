@@ -1,142 +1,124 @@
-From: yuxiang fang <abcdeffyx@gmail.com>
-Subject: Re: radosgw hang in curl_muti_wait with libcurl 7.37.0
-Date: Fri, 4 Aug 2017 01:45:55 +0800
-Message-ID: <CAOi4hNfhAeSGKahgwRBb4yxzU8S5Lije+Y1K8H4bEukoJS3cQw@mail.gmail.com>
-References: <CAOi4hNdgNoGDMq56A24UPr4v7HMCw93Jd4ico1xwbCoR8333dA@mail.gmail.com>
- <169935fe-8bca-56f0-ed89-9fa1e61c7c2a@redhat.com>
+From: Spandan Kumar Sahu <spandankumarsahu@gmail.com>
+Subject: Re: mgr balancer module
+Date: Fri, 4 Aug 2017 00:05:26 +0530
+Message-ID: <CAAXqJ+o2utqxOCUibq9_xVOszR_y1mJxfi+ffNCuHtUxhHa_3g@mail.gmail.com>
+References: <alpine.DEB.2.11.1707280333250.21289@piezo.novalocal>
+ <CAAXqJ+ovmFtC3dNo_5R5x9cj6smFev2Q9wgXVL_4NcHQCnA2tA@mail.gmail.com>
+ <alpine.DEB.2.11.1707301814040.5035@piezo.novalocal> <CAAXqJ+r1CrBk1mHeHXK4_34uqLPtL9D+BBaKT=SU4s584Bk_sA@mail.gmail.com>
+ <alpine.DEB.2.11.1708031545131.20435@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f48.google.com ([74.125.83.48]:38737 "EHLO
-        mail-pg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751656AbdHCRq0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Aug 2017 13:46:26 -0400
-Received: by mail-pg0-f48.google.com with SMTP id l64so8894899pge.5
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Aug 2017 10:46:26 -0700 (PDT)
-In-Reply-To: <169935fe-8bca-56f0-ed89-9fa1e61c7c2a@redhat.com>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:35873 "EHLO
+        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751696AbdHCSf2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Aug 2017 14:35:28 -0400
+Received: by mail-wm0-f52.google.com with SMTP id t201so2336067wmt.1
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Aug 2017 11:35:27 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1708031545131.20435@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Casey,
-
-updates:
-Issue reproduced with another situation today:
-RGWDataSyncShardCR is blocked by RGWReadRemoteDataLogShardInfoCR, lead
-to data sync incomplete. Using gdb, and I found the http_op of it is
-left in the related RGWHTTPManager's reqs queue, whose
-reqs_thread_entry can't complete that req. event I shutdown the
-net-link of the remote IP.
-
-Have you been able to correlate this hang with the radosgw on the receiving end?
-A: Almost occur in the HTTP sender side, I have seen three kinds of
-request blocked by libcurl, datalog-list, data-log-change-notify and
-fetch-remote-obj.
-
-Are you sure it's getting this request and sending a reply?
-A: I am not sure.
-
-Does this happen on every sync request, or just some?
-A: Just some, occasionally. But I think this may happen on all kinds
-of HTTP request
-
-thanks
-ivan from eisoo
-
-
-On Thu, Aug 3, 2017 at 10:05 PM, Casey Bodley <cbodley@redhat.com> wrote:
-> Hi,
+On Thu, Aug 3, 2017 at 9:23 PM, Sage Weil <sweil@redhat.com> wrote:
+> Hi Spandan,
 >
-> Have you been able to correlate this hang with the radosgw on the receiving
-> end? Are you sure it's getting this request and sending a reply? Does this
-> happen on every sync request, or just some?
->
-> Thanks,
-> Casey
->
->
->
-> On 08/02/2017 11:50 PM, yuxiang fang wrote:
+> On Thu, 3 Aug 2017, Spandan Kumar Sahu wrote:
+>> Sage
 >>
->> Resend mail for denied by the email server.
+>> I think it would be a good idea to include a command in the balancer
+>> module itself, that would optimize the crushmap using the
+>> python-crush, and set the optimized crushmap.
 >>
->> For the sake of radosgw hang in curl_multi_wait, my team has upgraded
->> libcurl from 7.29.0 to 7.37.0, but this issue still appeared.
->> Is this definitely a bug of libcurl? and is there something wrong with
->> radosgw internal? I'm lost. Don't know which version of libcurl to
->> select. We ever tried
->> curl 7.54.0, but it is not stable, crashed usually.
+>> As far as I believe, uneven distributions can be majorly attributed to
+>> the factors:
+>> * using an unoptimized crushmap
+>> * unevenness that occurs due to the (pseudo) random nature of CRUSH
+>> * objects having different sizes.
 >>
->> back trace:
->>
->> Thread 54 (Thread 0x7f32826fb700 (LWP 43459)):
->> #0  0x00007f32f3c54c3d in poll () from /lib64/libc.so.6
->> #1  0x00007f32f4caf039 in Curl_poll () from /lib64/libcurl.so.4
->> #2  0x00007f32f4ca7f04 in curl_multi_wait () from /lib64/libcurl.so.4
->> #3  0x00007f32f529753d in do_curl_wait(CephContext*, void*, int) ()
->> from /lib64/librgw.so.2
->> #4  0x00007f32f52999d9 in RGWHTTPManager::process_requests(bool,
->> bool*) () from /lib64/librgw.so.2
->> #5  0x00007f32f5299ec4 in RGWHTTPManager::complete_requests() () from
->> /lib64/librgw.so.2
->> #6  0x00007f32f5416ac4
->> inRGWRESTStreamRWRequest::get_resource(RGWAccessKey&,
->> std::map<std::string, std::string, std::less<std::string>,
->> std::allocator<std::pair<std::string const, std::string> > >&,
->> std::string const&, RGWHTTPManager*) () from /lib64/librgw.so.2
->> #7  0x00007f32f5416d2a in
->> RGWRESTStreamRWRequest::get_obj(RGWAccessKey&, std::map<std::string,
->> std::string, std::less<std::string>,
->> std::allocator<std::pair<std::string const, std::string> > >&,
->> rgw_obj&) () from /lib64/librgw.so.2
->> #8  0x00007f32f541c0fc in RGWRESTConn::get_obj(rgw_user
->> const&,req_info*, rgw_obj&,
->> std::chrono::time_point<ceph::time_detail::real_clock,
->> std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >
->> const*, std::chrono::time_point<ceph::time_detail::real_clock,
->> std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >
->> const*, unsigned int, unsigned long, bool, bool, bool, bool,
->> RGWGetDataCB*, RGWRESTStreamRWRequest**) () from /lib64/librgw.so.2
->> #9  0x00007f32f53d88d7 in RGWRados::fetch_remote_obj(RGWObjectCtx&,
->> rgw_user const&, std::string const&, std::string const&, bool,
->> req_info*, std::string const&, rgw_obj&, rgw_obj&, RGWBucketInfo&,
->> RGWBucketInfo&, std::chrono::time_point<ceph::time_detail::real_clock,
->> std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >*,
->> std::chrono::time_point<ceph::time_detail::real_clock,
->> std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >*,
->> std::chrono::time_point<ceph::time_detail::real_clock,
->> std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >
->> const*, std::chrono::time_point<ceph::time_detail::real_clock,
->> std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >
->> const*, bool, char const*, char const*, RGWRados::AttrsMod, bool,
->> std::map<std::string, ceph::buffer::list, std::less<std::string>,
->> std::allocator<std::pair<std::string const, ceph::buffer::list> > >&,
->> RGWObjCategory, unsigned long,
->> std::chrono::time_point<ceph::time_detail::real_clock,
->> std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >,
->> std::string*, std::string*, ceph::buffer::list*, rgw_err*, void
->> (*)(long, void*), void*) () from /lib64/librgw.so.2
->> #10 0x00007f32f5249b43 in RGWAsyncFetchRemoteObj::_send_request() ()
->> from /lib64/librgw.so.2
->> #11 0x00007f32f5246d52 in
->> RGWAsyncRadosProcessor::handle_request(RGWAsyncRadosRequest*) () from
->> /lib64/librgw.so.2
->> #12 0x00007f32f5246e1d in
->> RGWAsyncRadosProcessor::RGWWQ::_process(RGWAsyncRadosRequest*,
->> ThreadPool::TPHandle&) () from /lib64/librgw.so.2
->> #13 0x00007f32f57283be in ThreadPool::worker(ThreadPool::WorkThread*)
->> () from /lib64/librgw.so.2
->> #14 0x00007f32f57292a0 in ThreadPool::WorkThread::entry() () from
->> /lib64/librgw.so.2
->> #15 0x00007f32f485bdc5 in start_thread () from /lib64/libpthread.so.0
->> #16 0x00007f32f3c5f28d in clone () from /lib64/libc.so.6
->>
->> thanks
->> ivan from eisoo
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> If we set an optimized crushmap, at the very initial stages, we have
+>> to move very less data in the due course, in order to maintain a
+>> proper distribution. Hence the necessity of including it in the
+>> balancer module. Please give a look at the PR[1], I sent in this
+>> regard, and let me know if I am moving in the right direction.
 >
+> There are a few problems with using python-crush, the main one being that
+> the dependencies are problematic: it's built from a forked repo and is not
+> packaged properly (has to be installed with pip).  It also may not
+> match the CRUSH version being used by the cluster.
 >
+I tried adding it to the install-deps.sh, but I missed the fact that,
+the python-crush, will not get an updated with changes in the crush
+directory of the Ceph source.
+
+> The larger issue though is that it doesn't address all of the other
+> problems I highlighted in my earlier email.  The main thing it *does* to
+> properly is it does the optimization based on a model; this was the main
+> problem with the old reweight-by-utilization.  The new framework in
+> balancer.py has all the pieces now to let you do that.
+>
+
+Okay, may be then, I will try to port only the logic Loic's work and
+see how this works.
+
+> I think the main value in the python-crush optimize code is that it
+> demonstrably works, which means we know that the cost/score fuction being
+> used and the descent method work together.  I think the best path forward
+> is to look at the core of what those two pieces are doing and port it into
+> the balancer environment.  Most recently I've been working on the
+> 'eval' method that will generate a score for a given distribution, but I'm
+> working from first principles (just calculating the layout, its deviation
+> from the target, the standard deviation, etc.) but I'm not sure what
+
+I had done some-work regarding assigning a score to the distribution
+at this[1] PR. It was however done in the pre-existing
+reweight-by-utilization. Would you give a look over it and let me
+know, if I should proceed to port it into the balancer module?
+
+> Loic's optimizer was doing.  Also, my first attempt at a descent function
+> to correct weights was pretty broken, and I know a lot of experimentation
+> went into Loic's method.
+>
+
+Loic's optimizer only fixed defects in the crushmap, and was not (in
+the true sense) a reweight-by-utilization.
+In short, Loic's optimizer was optimizing a pool, on the basis of a
+rule, and then, ran a simulation to determine the new weights. Using
+the `take` in rules, it used to determine a list of OSDs, and move
+weights (about 1% of the overload%) from one OSD to another. This way,
+the weights of the buckets on the next hierarchical level in
+crush-tree wasn't affected. I went through the Loic's optimizer in
+details and also added my own improvisations.
+
+I will try to port the logic, but I am not sure, where would I fit the
+optimizer in? Would that go in as a separate function in module.py or
+would it have different implementations for each of upmaps, crush,
+crush-compat? Loic's python-crush didn't take upmaps into account. But
+the logic will apply in case of upmaps too.
+
+> Do you see any problems with that approach, or things that the
+> balancer framework does not cover?
+>
+
+I was hoping that we have an optimizer that fixes the faults in
+crushmap, whenever, a crushmap is set and/or a new device get added or
+deleted. The current balancer would also fix it, but it would take
+much more time, and much more movement of data to achieve better
+distribution, compared to if we had fixed the crushmap itself, in the
+very beginning. Nevertheless, the balancer module, will eventually
+reach a reasonably good distribution.
+
+Correct me, if I am wrong. :)
+
+[1]: https://github.com/ceph/ceph/pull/16361/files#diff-ecab4c883be988760d61a8a883ddc23fR4559
+
+> Thanks!
+> sage
+>
+
+
+
+-- 
+Spandan Kumar Sahu
+IIT Kharagpur
