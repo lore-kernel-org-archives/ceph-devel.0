@@ -1,7 +1,7 @@
 From: Mike A <mike.almateia@gmail.com>
 Subject: Re: recommended rocksdb/rockswal sizes when using SSD/HDD
-Date: Thu, 3 Aug 2017 18:26:25 +0300
-Message-ID: <31EE5AD8-8E36-4A4D-B075-095E065714A9@gmail.com>
+Date: Thu, 3 Aug 2017 18:37:19 +0300
+Message-ID: <A816AA90-2CE2-4291-9B6C-9503609E1146@gmail.com>
 References: <3D48D7F6-6383-4F9F-9728-6CB6263D0E32@teradata.com>
  <alpine.DEB.2.11.1708022129210.20435@piezo.novalocal>
  <4c48ba58-0ee2-e565-bb56-b8c2cb860a2f@gmail.com>
@@ -11,12 +11,12 @@ Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f45.google.com ([209.85.215.45]:37271 "EHLO
-        mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751158AbdHCP1C (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Aug 2017 11:27:02 -0400
-Received: by mail-lf0-f45.google.com with SMTP id m86so7558677lfi.4
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Aug 2017 08:27:01 -0700 (PDT)
+Received: from mail-lf0-f67.google.com ([209.85.215.67]:36587 "EHLO
+        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751234AbdHCPhX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Aug 2017 11:37:23 -0400
+Received: by mail-lf0-f67.google.com with SMTP id t128so1189084lff.3
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Aug 2017 08:37:23 -0700 (PDT)
 In-Reply-To: <3b012efd-0a0b-4f46-7da1-7de46d62f175@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
@@ -108,7 +108,7 @@ chew through those NVDIMMs.  Even so, every little bit will help.
 Thanks.
 
 This system for RBD workload and Databases, which also will be use RBD.
-I predicted request block size -=20
+I predicting a request block size 4K-16K around, random access.
 
 >> Each 4Tb disks can hold around 960K 4K objects and need around 12Gb =
 storage space.
@@ -127,9 +127,12 @@ and keep L0 on nvdimm.  The Bloom filter settings we are using now in =
 master appear to be doing a pretty good job of keeping metadata reads =
 during writes down now, so I suspect it's mostly an issue of avoiding =
 the compaction work and L0 is the worst.
->=20
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
-in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+The bloom filter now experimental? How I can keep L0 on mvdimm and other =
+DB data on ssd?
+
+Sorry for the previous letter, accidentally clicked to send.
+
+=E2=80=94=20
+Mike, runs
 
