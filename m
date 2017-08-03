@@ -1,199 +1,135 @@
-From: Valery Tschopp <valery.tschopp@switch.ch>
-Subject: Re: ceph nagios plugins
-Date: Thu, 3 Aug 2017 17:15:04 +0200
-Message-ID: <4e03d988-19c1-9ceb-12ce-e77594259d7e@switch.ch>
-References: <alpine.DEB.2.11.1708011414210.20435@piezo.novalocal>
- <CALqRxCw2EWH4cHuogSgYSFrqZa0F-nfdgbgG_R1PUbkJekcheg@mail.gmail.com>
- <80e8e181-3c8a-7932-f1ac-a78fb4358153@switch.ch>
- <alpine.DEB.2.11.1708021404130.20435@piezo.novalocal>
- <CALqRxCy=O2iP-8zv=FcqKLvJ+U_ZkL1wGTjkBuncyc4MdcZT=Q@mail.gmail.com>
- <1f8f7749-dd0c-fa29-b05d-e0d3373a2147@switch.ch>
- <CALqRxCzqpvgFA95+RTA74O4q7xoB0HFxC85oJ3=kGNfn8UwOew@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256; boundary="------------ms030903080402040804030805"
+From: Mike A <mike.almateia@gmail.com>
+Subject: Re: recommended rocksdb/rockswal sizes when using SSD/HDD
+Date: Thu, 3 Aug 2017 18:26:25 +0300
+Message-ID: <31EE5AD8-8E36-4A4D-B075-095E065714A9@gmail.com>
+References: <3D48D7F6-6383-4F9F-9728-6CB6263D0E32@teradata.com>
+ <alpine.DEB.2.11.1708022129210.20435@piezo.novalocal>
+ <4c48ba58-0ee2-e565-bb56-b8c2cb860a2f@gmail.com>
+ <4E87CD84-891B-4115-ACFA-CEC5C562EBB7@gmail.com>
+ <3b012efd-0a0b-4f46-7da1-7de46d62f175@redhat.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from iberico.switch.ch ([130.59.113.143]:53191 "EHLO
-        iberico.switch.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751206AbdHCPPT (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Aug 2017 11:15:19 -0400
-In-Reply-To: <CALqRxCzqpvgFA95+RTA74O4q7xoB0HFxC85oJ3=kGNfn8UwOew@mail.gmail.com>
+Received: from mail-lf0-f45.google.com ([209.85.215.45]:37271 "EHLO
+        mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751158AbdHCP1C (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Aug 2017 11:27:02 -0400
+Received: by mail-lf0-f45.google.com with SMTP id m86so7558677lfi.4
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Aug 2017 08:27:01 -0700 (PDT)
+In-Reply-To: <3b012efd-0a0b-4f46-7da1-7de46d62f175@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ken Dreyer <kdreyer@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mnelson@redhat.com>
+Cc: Mark Nelson <mark.a.nelson@gmail.com>, Sage Weil <sage@newdream.net>, "McFarland, Bruce" <Bruce.McFarland@Teradata.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-This is a cryptographically signed message in MIME format.
 
---------------ms030903080402040804030805
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-
-Hello Ken,
-
-It is done, the repository is now transferred to the Ceph organization:
-
-    https://github.com/ceph/ceph-nagios-plugins
-
-I don't know if the permissions are correct for the other members of=20
-Ceph. For me it is OK, I still can commit.
-
-Cheers,
-Valery
-
-On 03/08/17 16:42 , Ken Dreyer wrote:
-> Hi Valery,
+> 3 =D0=B0=D0=B2=D0=B3. 2017 =D0=B3., =D0=B2 17:25, Mark Nelson =
+<mnelson@redhat.com> =D0=BD=D0=B0=D0=BF=D0=B8=D1=81=D0=B0=D0=BB(=D0=B0):
 >=20
-> Shoot, I think I may have to be added as an admin in
-> https://github.com/red-hat-storage/valerytschopp/ceph-nagios-plugins/se=
-ttings/collaboration.
 >=20
-> If that doesn't work, I've temporarily toggled "Allow members to
-> create repositories" at
-> https://github.com/organizations/ceph/settings/member_privileges , so
-> it might work for you now.
 >=20
-> - Ken
+> On 08/03/2017 08:07 AM, Mike A wrote:
+>>=20
+>>> 3 =D0=B0=D0=B2=D0=B3. 2017 =D0=B3., =D0=B2 1:23, Mark Nelson =
+<mark.a.nelson@gmail.com> =D0=BD=D0=B0=D0=BF=D0=B8=D1=81=D0=B0=D0=BB(=D0=B0=
+):
+>>>=20
+>>>=20
+>>>=20
+>>> On 08/02/2017 04:32 PM, Sage Weil wrote:
+>>>> On Wed, 2 Aug 2017, McFarland, Bruce wrote:
+>>>>> I=E2=80=99m using SDD for the rocksdb/rockswal partitions and =
+putting the data
+>>>>> on HDD=E2=80=99s. What is the recommended sizing for these =
+partitions. I=E2=80=99ve read
+>>>>> various sizes discussed on the perf call and know that the code =
+defaults
+>>>>> of 128MB for rocksdb is small and limits performance. What are the
+>>>>> recommended sizes for these partitions?
+>>>> tl;dr: 1GB for block.wal.  For block.db, as much as you have.
+>>>> For an RBD-only pool, my guess is you want around 1-2% of your =
+total
+>>>> storage, but I'm guessing... we need to deploy a real-ish RBD =
+workload and
+>>>> see what the ratio is in practice.  Mark can probably give us a =
+worst-case
+>>>> value (after a long-running 4kb random-write workload).
+>>>> Omap data will go to block.db (if it will fit), so for RGW clusters =
+there
+>>>> may be more.  OTOH, the object metadata will be smaller (immutable
+>>>> objects, sequentially written), so it depends on how big your RGW =
+objects
+>>>> are.  We have no real-world data on this yet.
+>>>=20
+>>>=20
+>>> While this wasn't 4k writes to 4MB rbd blocks, I noticed that with =
+4kb rados bench objects I was able to fill up an 8GB DB partition and =
+start to see write slowdowns (without bloom filters in place) associated =
+with HDD disk reads from rocksdb after about 670K objects (target was 2M =
+objects).  When increased to 98GB, I was able to write out the 2M =
+objects without slowdown. That would indicate that in that test at =
+least, the final amount of DB space being used for each 4K object after =
+counting for our own overhead and rocksdb's space amp (We are heavily =
+tuning to favor write amp!) could be as high as 12.5KB (there's other =
+stuff in the DB besides object metadata, so it's probably lower than =
+this in reality).
+>>>=20
+>>> I don't think rocksdb's space amplification is necessarily going to =
+be a constant factor either (even assuming a similar ratio of key =
+prefixes/etc).  With LSM a key may with older versions potentially can =
+be in multiple files and fragmentation is also going to affect SA.  We =
+also are leaking at least some WAL data into the DB (though a much lower =
+amount with our current settings than I was originally worried about).
+>>>=20
+>>> The good news is that bloom filters help pretty dramatically when =
+metadata roles over to HDD.  I think maybe the general message should be =
+that the bigger the flash db partition the better, but it's still worth =
+investing in power-loss-protection and write durability when using the =
+SSD as a WAL (And DB).
+>>>=20
+>>> Mark
+>>>=20
+>> Thanks for that info.
+>>=20
+>> If I have 12 SSD 4tb disks and random 4K workload, is it enough have =
+a one 32Gb NVDIMM storage for rocksdb and WAL for all 12 disks?
+>> With your information I see that it=E2=80=99s not.
 >=20
-> On Thu, Aug 3, 2017 at 2:21 AM, Valery Tschopp <valery.tschopp@switch.c=
-h> wrote:
->> Hi Ken and Sage,
->>
->> Ok. I've accepted the invitation, and then tried to transfer my
->> ceph-nagios-plugins repository to the Ceph org, but I only get the fol=
-lowing
->> error:
->>
->> "You don=E2=80=99t have the permission to create repositories on ceph"=
+> "enough" is tough to answer, because it's definitely enough for WAL, =
+and you will certainly see benefit by having some of the metadata hit =
+the NVDIMMs (especially  L0 since L0 compactions are single threaded and =
+often where things slow down).  For RBD with a large block size, you may =
+even get a significant amount of the metadata on NVDIMM, but if you are =
+writing out lots of small objects (ie say 4KB RGW), you'll very quickly =
+chew through those NVDIMMs.  Even so, every little bit will help.
+>=20
 
->>
->> So I've add Ken account 'ktdreyer' as a collaborator. How should we
->> continue?
->>
->> Cheers,
->> Valery
->>
->>
->> On 02/08/17 18:38 , Ken Dreyer wrote:
->>>
->>> On Wed, Aug 2, 2017 at 8:13 AM, Sage Weil <sweil@redhat.com> wrote:
->>>>
->>>>    We can also either just fork your
->>>> repo into the ceph org and start sending pull requests there, or we =
-can
->>>> transfer your repo over.  (I'm not sure it matters?)
->>>
->>>
->>> It would be great to do the transfer because GitHub handles redirects=
+Thanks.
 
->>> for the old URLs seamlessly, retains the issues and PR numbers, etc.
->>>
->>> I've created a "nagios" team https://github.com/orgs/ceph/teams/nagio=
-s
->>> and invited you to it Valery. I'm not sure if you have access to star=
-t
->>> the transfer at
->>> https://github.com/valerytschopp/ceph-nagios-plugins/settings into th=
-e
->>> Ceph org or if you'll need to add me as a collaborator.
->>>
->>> - Ken
->>>
->>
->> --
->> SWITCH
->> Val=C3=A9ry Tschopp, Software Engineer
->> Werdstrasse 2, P.O. Box, 8021 Zurich, Switzerland
->> email: valery.tschopp@switch.ch phone: +41 44 268 1544
->>
->> 30 years of pioneering the Swiss Internet.
->> Celebrate with us at https://swit.ch/30years
->>
->>
+This system for RBD workload and Databases, which also will be use RBD.
+I predicted request block size -=20
 
---=20
-SWITCH
-Val=C3=A9ry Tschopp, Software Engineer
-Werdstrasse 2, P.O. Box, 8021 Zurich, Switzerland
-email: valery.tschopp@switch.ch phone: +41 44 268 1544
+>> Each 4Tb disks can hold around 960K 4K objects and need around 12Gb =
+storage space.
+>> it=E2=80=99s sufficient for best perfomance to place a rocksDB on the =
+same SSD disk, with which rocksDB is working?--
+>=20
+> Placing the WAL on nvdimm should help for small writes since we are =
+still defaulting to 16K min_alloc_size even on SSDs (4KB is a tradeoff =
+between fewer WAL write traffic at the cost of more metadata).  Intel =
+has shown some test results with optane where they can achieve higher =
+performance by moving the WAL off their P3700 cards and putting it on =
+optane instead.
+>=20
+> As far as the DB itself goes, probably the biggest benefit is to try =
+and keep L0 on nvdimm.  The Bloom filter settings we are using now in =
+master appear to be doing a pretty good job of keeping metadata reads =
+during writes down now, so I suspect it's mostly an issue of avoiding =
+the compaction work and L0 is the worst.
+>=20
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-30 years of pioneering the Swiss Internet.
-Celebrate with us at https://swit.ch/30years
-
-
-
---------------ms030903080402040804030805
-Content-Type: application/pkcs7-signature; name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Description: S/MIME Cryptographic Signature
-
-MIAGCSqGSIb3DQEHAqCAMIACAQExDzANBglghkgBZQMEAgEFADCABgkqhkiG9w0BBwEAAKCC
-C40wggWaMIIEgqADAgECAhRqKArzRiMoMclbQsKdJMSoLMM14zANBgkqhkiG9w0BAQsFADB/
-MQswCQYDVQQGEwJCTTEZMBcGA1UEChMQUXVvVmFkaXMgTGltaXRlZDElMCMGA1UECxMcUm9v
-dCBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTEuMCwGA1UEAxMlUXVvVmFkaXMgUm9vdCBDZXJ0
-aWZpY2F0aW9uIEF1dGhvcml0eTAeFw0xNDA1MzAxODUwMTNaFw0yMTAzMTcxODMzMzNaMGMx
-CzAJBgNVBAYTAkNIMSwwKgYDVQQKEyNRdW9WYWRpcyBUcnVzdGxpbmsgU3dpdHplcmxhbmQg
-THRkLjEmMCQGA1UEAxMdUXVvVmFkaXMgU3dpc3MgQWR2YW5jZWQgQ0EgRzIwggIiMA0GCSqG
-SIb3DQEBAQUAA4ICDwAwggIKAoICAQCyge5EB5ZP/fnk47KPgdEpuiBd9u7lcdLWxeGLOtrv
-YYp52fawKeNgm3oQogK4gPQxBMD2Wa080nOPo307UzrQQAe37lFCJqXlLpVBluVqjQdPpk9g
-syucalNwstNBHmj1xoXgUfTXhTrRWgkAuxGhGL9odj2+9QxbwVywjikgcidsDzVmo23mXc3x
-KWik6BIp3zbDjfTTyitIX+NIlDiaMxwq6L5QPnazrE2eNsSJrHmwz/Ie3gm8aDVy14+gE1sn
-Ew6CK2x/NncRcl/WcdaBjQN338DHN5u/FJI84NMt58y0BYiH3V3zF6qvntm4n0W216jHXcyy
-DHmSIEDMpbApuAOh/jhRj+BXq9K/Vnm3PghWJAHXembeS4Ax0sXMUrrC8mQUW+OOELONE2L+
-odG0+1cwnnLD2CEJmXCIcoCLsQL1Op7zmF8XXOExLZUtR73oNi1sIs8Ic3mrOln8shz8tVkL
-lKmSskr3ilUKQn7M5zKX7F6WKlbA3Vy4hz+IMyjEMAg2cAxNuu6MKEneoUrlGUiEJnxjvFmW
-segwFRVbBcZepRV+cX0d3aViVieUektNjUGsXrRBeADSqH7jj42IdlA6J0Mcv6HnPjuYn+hU
-8XyR2EhycpVfWzsA3LuKmSfqQfty1qNNE6Tsxb7YCBbEt+ijnnNHQJ1XNV/jR5wg3wIDAQAB
-o4IBKDCCASQwEgYDVR0TAQH/BAgwBgEB/wIBADARBgNVHSAECjAIMAYGBFUdIAAwcQYIKwYB
-BQUHAQEEZTBjMCoGCCsGAQUFBzABhh5odHRwOi8vb2NzcC5xdW92YWRpc2dsb2JhbC5jb20w
-NQYIKwYBBQUHMAKGKWh0dHA6Ly90cnVzdC5xdW92YWRpc2dsb2JhbC5jb20vcXZyY2EuY3J0
-MA4GA1UdDwEB/wQEAwIBBjAfBgNVHSMEGDAWgBSLS23t0ym5BhnsOTmp8JeEasvv3zA4BgNV
-HR8EMTAvMC2gK6AphidodHRwOi8vY3JsLnF1b3ZhZGlzZ2xvYmFsLmNvbS9xdnJjYS5jcmww
-HQYDVR0OBBYEFKAgbW1JXbpKhdN3ILJ6uIsO7dWdMA0GCSqGSIb3DQEBCwUAA4IBAQCuMV65
-UC3RkrbWAhVOWN8VKS1am+0sRTHC379oueJLAv3aWkNL9kDlTC0m+cNiK1/IQ/vVxpPtloqF
-bqWL4VtIlqauzSLOQuSNCuRPftMDkHf5IgbcHEeyCMi5z7ZM8Q3thlDSV6vC+F8lhQ1CNB8Y
-CHL99BtAGwhQs3Zn33FQjCguqAYsAkbmOkXMUSJ9UflrALhI6YXPUqn74JpZVu2lNJ6UgXzl
-d9QpYV3E130Tjx1jdcCBynDL7ibco5VV9CBFxUGdoRiBJr9lomVPyzm7rZJy5hx+qoNnNGoD
-StJklLF7eogKKYZGxgy9DJDmUevdmBiSaUYNmzCOpJwgXlcmMIIF6zCCA9OgAwIBAgIUEZ+8
-ZD67NDFHeP9D8dyVsWSUlH8wDQYJKoZIhvcNAQELBQAwYzELMAkGA1UEBhMCQ0gxLDAqBgNV
-BAoTI1F1b1ZhZGlzIFRydXN0bGluayBTd2l0emVybGFuZCBMdGQuMSYwJAYDVQQDEx1RdW9W
-YWRpcyBTd2lzcyBBZHZhbmNlZCBDQSBHMjAeFw0xNDEyMjIxMDAyMTNaFw0xNzEyMjIxMDAy
-MDlaMFwxCzAJBgNVBAYTAkNIMRAwDgYDVQQIEwdadWVyaWNoMRAwDgYDVQQHEwdadWVyaWNo
-MQ8wDQYDVQQKEwZTV0lUQ0gxGDAWBgNVBAMMD1ZhbMOpcnkgVHNjaG9wcDCCASIwDQYJKoZI
-hvcNAQEBBQADggEPADCCAQoCggEBALw/VUBYWrCYOvbf+sF+bGuY2KKPg3HtZydZjBeQwUiD
-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
---------------ms030903080402040804030805--
