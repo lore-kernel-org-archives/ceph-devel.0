@@ -1,91 +1,117 @@
-From: yuxiang fang <abcdeffyx@gmail.com>
-Subject: radosgw hang in curl_muti_wait with libcurl 7.37.0
-Date: Thu, 3 Aug 2017 11:50:04 +0800
-Message-ID: <CAOi4hNdgNoGDMq56A24UPr4v7HMCw93Jd4ico1xwbCoR8333dA@mail.gmail.com>
+From: Xuehan Xu <xxhdx1985126@gmail.com>
+Subject: Re: Where to submit a blueprint?
+Date: Thu, 3 Aug 2017 12:34:37 +0800
+Message-ID: <CAJACTuctmexQ36T=ffd+1fgL-srnfLzqeBdg2aLoQm0=Qq63ow@mail.gmail.com>
+References: <CAJACTuc8nJLOXhUXUwqHZPit76MJUK4_=9R06fF300ZpCj+e9g@mail.gmail.com>
+ <CAJ4mKGZK10GLYNt3Xv6CyjXX9b1+4aBUGMXYoen3VaRPcHZ=qA@mail.gmail.com>
+ <CAJ4mKGZ2R-Q8Udsi0LBg1Py4dCpUrJF=o-shN2WpvyqKipXrEg@mail.gmail.com>
+ <CAJACTuerYSCyMpcyqvwYkN8YxN=XB1NffGGPUuL4ce0FgNv0Pw@mail.gmail.com>
+ <CAJACTud4NXYo6FYGhXeigHBpx1ARZOAJQOsq0Q9sQgnkTcPFaQ@mail.gmail.com>
+ <8e5eb4b5-fbdd-7236-e7f7-c3f8b0e4579e@suse.de> <CAJACTufgOBJhFFMKHbfdgpuyPDfAvjDWti9to08PE3acmb7ZVg@mail.gmail.com>
+ <CAJACTufpJbXQjtjuq9OGQEgjXLAj96UKZrpAeOdgAwH2SMZ87A@mail.gmail.com>
+ <CACKY0b-t6onpc8d2H43t_ebtz-PaM-X54Ovj_DZ6zJ0pDbtTbA@mail.gmail.com>
+ <CAJACTuempKW_pQ9=pTAuaBijFN9b5GUFuEzDOZ81veYA1-+tWg@mail.gmail.com> <20170802022835.GA2568@oops.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f42.google.com ([74.125.83.42]:38795 "EHLO
-        mail-pg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751345AbdHCDue (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Aug 2017 23:50:34 -0400
-Received: by mail-pg0-f42.google.com with SMTP id l64so1169883pge.5
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Aug 2017 20:50:34 -0700 (PDT)
+Received: from mail-oi0-f41.google.com ([209.85.218.41]:36686 "EHLO
+        mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750829AbdHCEei (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Aug 2017 00:34:38 -0400
+Received: by mail-oi0-f41.google.com with SMTP id g131so2494315oic.3
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Aug 2017 21:34:37 -0700 (PDT)
+In-Reply-To: <20170802022835.GA2568@oops.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Leonardo Vaz <lvaz@redhat.com>
+Cc: liuchang0812 <liuchang0812@gmail.com>, Joao Eduardo Luis <joao@suse.de>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, Ricardo Dias <rdias@suse.com>
 
-Resend mail for denied by the email server.
+Hi, Leonardo
 
-For the sake of radosgw hang in curl_multi_wait, my team has upgraded
-libcurl from 7.29.0 to 7.37.0, but this issue still appeared.
-Is this definitely a bug of libcurl? and is there something wrong with
-radosgw internal? I'm lost. Don't know which version of libcurl to
-select. We ever tried
-curl 7.54.0, but it is not stable, crashed usually.
+Where can I find the recording of the CDM held last night?
 
-back trace:
+Thank you:-)
 
-Thread 54 (Thread 0x7f32826fb700 (LWP 43459)):
-#0  0x00007f32f3c54c3d in poll () from /lib64/libc.so.6
-#1  0x00007f32f4caf039 in Curl_poll () from /lib64/libcurl.so.4
-#2  0x00007f32f4ca7f04 in curl_multi_wait () from /lib64/libcurl.so.4
-#3  0x00007f32f529753d in do_curl_wait(CephContext*, void*, int) ()
-from /lib64/librgw.so.2
-#4  0x00007f32f52999d9 in RGWHTTPManager::process_requests(bool,
-bool*) () from /lib64/librgw.so.2
-#5  0x00007f32f5299ec4 in RGWHTTPManager::complete_requests() () from
-/lib64/librgw.so.2
-#6  0x00007f32f5416ac4 inRGWRESTStreamRWRequest::get_resource(RGWAccessKey&,
-std::map<std::string, std::string, std::less<std::string>,
-std::allocator<std::pair<std::string const, std::string> > >&,
-std::string const&, RGWHTTPManager*) () from /lib64/librgw.so.2
-#7  0x00007f32f5416d2a in
-RGWRESTStreamRWRequest::get_obj(RGWAccessKey&, std::map<std::string,
-std::string, std::less<std::string>,
-std::allocator<std::pair<std::string const, std::string> > >&,
-rgw_obj&) () from /lib64/librgw.so.2
-#8  0x00007f32f541c0fc in RGWRESTConn::get_obj(rgw_user
-const&,req_info*, rgw_obj&,
-std::chrono::time_point<ceph::time_detail::real_clock,
-std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >
-const*, std::chrono::time_point<ceph::time_detail::real_clock,
-std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >
-const*, unsigned int, unsigned long, bool, bool, bool, bool,
-RGWGetDataCB*, RGWRESTStreamRWRequest**) () from /lib64/librgw.so.2
-#9  0x00007f32f53d88d7 in RGWRados::fetch_remote_obj(RGWObjectCtx&,
-rgw_user const&, std::string const&, std::string const&, bool,
-req_info*, std::string const&, rgw_obj&, rgw_obj&, RGWBucketInfo&,
-RGWBucketInfo&, std::chrono::time_point<ceph::time_detail::real_clock,
-std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >*,
-std::chrono::time_point<ceph::time_detail::real_clock,
-std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >*,
-std::chrono::time_point<ceph::time_detail::real_clock,
-std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >
-const*, std::chrono::time_point<ceph::time_detail::real_clock,
-std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >
-const*, bool, char const*, char const*, RGWRados::AttrsMod, bool,
-std::map<std::string, ceph::buffer::list, std::less<std::string>,
-std::allocator<std::pair<std::string const, ceph::buffer::list> > >&,
-RGWObjCategory, unsigned long,
-std::chrono::time_point<ceph::time_detail::real_clock,
-std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >,
-std::string*, std::string*, ceph::buffer::list*, rgw_err*, void
-(*)(long, void*), void*) () from /lib64/librgw.so.2
-#10 0x00007f32f5249b43 in RGWAsyncFetchRemoteObj::_send_request() ()
-from /lib64/librgw.so.2
-#11 0x00007f32f5246d52 in
-RGWAsyncRadosProcessor::handle_request(RGWAsyncRadosRequest*) () from
-/lib64/librgw.so.2
-#12 0x00007f32f5246e1d in
-RGWAsyncRadosProcessor::RGWWQ::_process(RGWAsyncRadosRequest*,
-ThreadPool::TPHandle&) () from /lib64/librgw.so.2
-#13 0x00007f32f57283be in ThreadPool::worker(ThreadPool::WorkThread*)
-() from /lib64/librgw.so.2
-#14 0x00007f32f57292a0 in ThreadPool::WorkThread::entry() () from
-/lib64/librgw.so.2
-#15 0x00007f32f485bdc5 in start_thread () from /lib64/libpthread.so.0
-#16 0x00007f32f3c5f28d in clone () from /lib64/libc.so.6
-
-thanks
-ivan from eisoo
+On 2 August 2017 at 10:28, Leonardo Vaz <lvaz@redhat.com> wrote:
+> On Wed, Aug 02, 2017 at 10:13:09AM +0800, Xuehan Xu wrote:
+>> Hi, everyone.
+>>
+>> The CDM for this month is not canceled, right?
+>
+> No, it wasn't cancelled Xuehan.
+>
+> The meeting happens tomorrow at 12:30pm-2:30pm on Eastern Time (EDT).
+>
+> Kindest regards,
+>
+> Leo
+>
+>> On 28 July 2017 at 16:13, liuchang0812 <liuchang0812@gmail.com> wrote:
+>> > Xuehan, you need to change your browser's language to English.
+>> >
+>> > 2017-07-28 11:56 GMT+08:00 Xuehan Xu <xxhdx1985126@gmail.com>:
+>> >> This is the error it showed:
+>> >>
+>> >> An error occured
+>> >> The error was reported with the following id: 'lZEjJsXD2IKD8tghjDNC'
+>> >>
+>> >> Please send this error message to us:
+>> >> 'ErrorId: lZEjJsXD2IKD8tghjDNC
+>> >> URL: http://pad.ceph.com/p/2017-04-rados-dr
+>> >> UserAgent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36
+>> >> (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36
+>> >> Uncaught TypeError: Cannot read property 'indexOf' of null in
+>> >> http://pad.ceph.com/static/js/html10n.js at line 1'
+>> >>  0
+>> >>
+>> >> On 28 July 2017 at 11:53, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
+>> >>> Yes, that should be better:-)
+>> >>>
+>> >>> Also, I really would like to join you developing this feature if it is
+>> >>> possible:-) Thank you:-)
+>> >>>
+>> >>> By the way, it seems that I can't open this link,
+>> >>> http://pad.ceph.com/p/2017-04-rados-dr. I can only see an empty
+>> >>> pad.....
+>> >>>
+>> >>> On 27 July 2017 at 20:05, Joao Eduardo Luis <joao@suse.de> wrote:
+>> >>>> On 07/23/2017 04:37 AM, Xuehan Xu wrote:
+>> >>>>>
+>> >>>>> Hi, everyone.
+>> >>>>> I've just uploaded a blueprint in
+>> >>>>>
+>> >>>>> http://tracker.ceph.com/attachments/download/2903/ceph_rados-level_replication.pdf
+>> >>>>
+>> >>>>
+>> >>>> Thanks for sharing this!
+>> >>>>
+>> >>>> Ricardo and I talked a bit with Sage a while back about RADOS level Disaster
+>> >>>> Recovery (rough draft of what the architecture can be found in [1]), and
+>> >>>> despite our lack of time as of late to work on it we're very much interested
+>> >>>> in this topic still.
+>> >>>>
+>> >>>> It appears we will have a CDM next August 2nd, and I see you would like to
+>> >>>> discuss it by then. However, given the vacation season, we would like to
+>> >>>> suggest we postponed this discussion until September, so that we could all
+>> >>>> attend.
+>> >>>>
+>> >>>> Does that seem reasonable to you?
+>> >>>>
+>> >>>> Cheers!
+>> >>>>
+>> >>>>   -Joao
+>> >>>>
+>> >>>> [1] http://pad.ceph.com/p/2017-04-rados-dr
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> >> the body of a message to majordomo@vger.kernel.org
+>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> --
+> Leonardo Vaz
+> Ceph Community Manager
+> Open Source and Standards Team
