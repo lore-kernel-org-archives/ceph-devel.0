@@ -1,21 +1,21 @@
 From: yuxiang fang <abcdeffyx@gmail.com>
-Subject: radosgw hang in curl_multi_wait with libcurl 7.37.0
-Date: Thu, 3 Aug 2017 11:47:31 +0800
-Message-ID: <CAOi4hNcuDX5T48RLoOL7m7Ae7GWU3SP_hHE-xvcKcQTbwiHuug@mail.gmail.com>
+Subject: radosgw hang in curl_muti_wait with libcurl 7.37.0
+Date: Thu, 3 Aug 2017 11:50:04 +0800
+Message-ID: <CAOi4hNdgNoGDMq56A24UPr4v7HMCw93Jd4ico1xwbCoR8333dA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f50.google.com ([74.125.83.50]:35999 "EHLO
-        mail-pg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751188AbdHCDsC (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Aug 2017 23:48:02 -0400
-Received: by mail-pg0-f50.google.com with SMTP id v77so1178474pgb.3
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Aug 2017 20:48:02 -0700 (PDT)
+Received: from mail-pg0-f42.google.com ([74.125.83.42]:38795 "EHLO
+        mail-pg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751345AbdHCDue (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Aug 2017 23:50:34 -0400
+Received: by mail-pg0-f42.google.com with SMTP id l64so1169883pge.5
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Aug 2017 20:50:34 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Resend mail for denied from the email server.
+Resend mail for denied by the email server.
 
 For the sake of radosgw hang in curl_multi_wait, my team has upgraded
 libcurl from 7.29.0 to 7.37.0, but this issue still appeared.
