@@ -1,97 +1,87 @@
-From: Xuehan Xu <xxhdx1985126@gmail.com>
-Subject: Re: About RADOS level replication
-Date: Thu, 3 Aug 2017 09:04:34 +0800
-Message-ID: <CAJACTudB8QV1NGbTWJvwPR=WBe_6KSKAad8K=z90XhR7s88GHA@mail.gmail.com>
-References: <CAJACTueZvpoPB96zcz5mRVSNUYtVLEHxfBERV1J+zPx6WTkAqQ@mail.gmail.com>
- <CAJACTufvJSxmUM84FmseBA=5VB8ZhjSkgY3ACJo7=oZ2Zy59sw@mail.gmail.com> <CAJACTudewhYi7MQN=aaGNYKy_MEXd9nwQQ1zkGueAZU_n4T2Eg@mail.gmail.com>
+From: yuxiang fang <abcdeffyx@gmail.com>
+Subject: radosgw hang in curl_multi_wait with libcurl 7.37.0
+Date: Thu, 3 Aug 2017 11:34:00 +0800
+Message-ID: <CAOi4hNcvY8MCBZxZneVtnkb1nd5AmKjm7wts+bMzjv_9A4BF0g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f42.google.com ([209.85.218.42]:36470 "EHLO
-        mail-oi0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751870AbdHCBEf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Aug 2017 21:04:35 -0400
-Received: by mail-oi0-f42.google.com with SMTP id g131so60155553oic.3
-        for <ceph-devel@vger.kernel.org>; Wed, 02 Aug 2017 18:04:34 -0700 (PDT)
-In-Reply-To: <CAJACTudewhYi7MQN=aaGNYKy_MEXd9nwQQ1zkGueAZU_n4T2Eg@mail.gmail.com>
+Received: from mail-pg0-f52.google.com ([74.125.83.52]:33138 "EHLO
+        mail-pg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751161AbdHCDeb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 2 Aug 2017 23:34:31 -0400
+Received: by mail-pg0-f52.google.com with SMTP id c14so1150884pgn.0
+        for <ceph-devel@vger.kernel.org>; Wed, 02 Aug 2017 20:34:30 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, Joao Eduardo Luis <joao@suse.de>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
+Cc: cbodley <cbodley@redhat.com>
 
-By the way, the advice that you give during the CDM was very
-important, we'll adjust our plan based on those advice.
+For the sake of radosgw hang in curl_multi_wait, my team has upgraded
+libcurl from 7.29.0 to 7.37.0, but this issue still appeared.
+Is this definitely a bug of libcurl? and is there something wrong with
+radosgw internal?
+I'm lost. Don't know which version of libcurl to select. We ever tried
+curl 7.54.0, but it is not stable, crashed usually.
 
-Thanks:-)
-And apologize again.
+back trace:
 
-On 3 August 2017 at 08:57, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
-> We didn't consider condition 2 so detailed before the CDM.
->
-> I think I was just mistakenly confused about the things we considered
-> before the CDM and that we discussed during the CDM, and mistakenly
-> thought we considered some details, which we didn't actually, before
-> the CDM.
->
-> I'm really sorry about this.
->
-> Please forgive me. I'm really sorry
->
-> On 3 August 2017 at 08:34, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->> Um.... Sorry, I just read my algorithm 17 again, it seems that it
->> doesn't have condition 2......
->>
->> I think I just got things confused, it was 04:00 AM and I was really
->> sleepy then. Please forgive me.
->>
->> I'll add this into that algorithm. Really sorry.
->>
->> On 3 August 2017 at 04:05, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->>> Hi, Sage and Joao
->>>
->>> I think there were something I didn't make clear just now, sorry.
->>>
->>> About the second issue, by "insuring consistency of cross-object
->>> operations", I mean:
->>>
->>>      Say, a rbd write X involves two rados object A and B, and turn
->>> them into A1 and B1 respectively, and a following rbd write Y turn
->>> them in to A2 and B2, when these two operations are replicated, the
->>> result on the backup cluster can't be A1, B2 or A2, B1.
->>>
->>> So, just like Joao said, this is all about ORDERING.
->>>
->>> My approach is like this: since RADOS can guarantee the order of OPs
->>> coming from the same client and targeting the same object, we make
->>> "repop"s within the same rbd operation forwarded to the same
->>> intermediate node, and intermediate node forward these "repop"s to the
->>> backup cluster on two conditions: 1) all "repop"s within the same rbd
->>> operation arrived at the intermediate node; 2) all rbd operations, the
->>> id of which are less than that of the current rbd operation(the id is
->>> a monotonously increasing integer that uniquely identifies a rbd
->>> operation, the order of the id indicates the order they are created by
->>> the librbd client), are sent to the backup cluster(not replicated, or
->>> "ondisk" on the backup cluster).
->>>
->>> With these two constrains, I think we can insure the order of rbd
->>> operations. The first condition makes sure that all "repop"s are all
->>> sent to the backup cluster, or none of them are sent, which can insure
->>> the consistency of the resulting rbd image if the master cluster
->>> crashes when only part of a rbd operation are forwarded to the
->>> intermediate node. The second condition can make sure that rbd
->>> operations are replicated to the backup cluster in the order that they
->>> are created by librbd clients. And since RADOS can guarantee the order
->>> of OPs coming from the same client and targeting the same object, we
->>> don't have to replicate a rbd operation after its ancestor is
->>> replicated, only after it's issued to the backup cluster is enough. I
->>> think this should be able to preserve the throughput of the
->>> inter-cluster replication procedure.
->>>
->>> The detail of this approach is shown in Algorithm 17.
->>>
->>> And since we are implementing this at the RADOS level, we shouldn't
->>> directly process "rbd" operations here. So, I think we should involve
->>> the concept "object set" to adapt to the concepts of the upper level
->>> system like "rbd image".
->>>
->>> I don't know if I'm considering this in the right way, and I'm looking
->>> forward to your opinion. Thanks very much:-)
+Thread 54 (Thread 0x7f32826fb700 (LWP 43459)):
+#0  0x00007f32f3c54c3d in poll () from /lib64/libc.so.6
+#1  0x00007f32f4caf039 in Curl_poll () from /lib64/libcurl.so.4
+#2  0x00007f32f4ca7f04 in curl_multi_wait () from /lib64/libcurl.so.4
+#3  0x00007f32f529753d in do_curl_wait(CephContext*, void*, int) ()
+from /lib64/librgw.so.2
+#4  0x00007f32f52999d9 in RGWHTTPManager::process_requests(bool,
+bool*) () from /lib64/librgw.so.2
+#5  0x00007f32f5299ec4 in RGWHTTPManager::complete_requests() () from
+/lib64/librgw.so.2
+#6  0x00007f32f5416ac4 inRGWRESTStreamRWRequest::get_resource(RGWAccessKey&,
+std::map<std::string, std::string, std::less<std::string>,
+std::allocator<std::pair<std::string const, std::string> > >&,
+std::string const&, RGWHTTPManager*) () from /lib64/librgw.so.2
+#7  0x00007f32f5416d2a in
+RGWRESTStreamRWRequest::get_obj(RGWAccessKey&, std::map<std::string,
+std::string, std::less<std::string>,
+std::allocator<std::pair<std::string const, std::string> > >&,
+rgw_obj&) () from /lib64/librgw.so.2
+#8  0x00007f32f541c0fc in RGWRESTConn::get_obj(rgw_user
+const&,req_info*, rgw_obj&,
+std::chrono::time_point<ceph::time_detail::real_clock,
+std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >
+const*, std::chrono::time_point<ceph::time_detail::real_clock,
+std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >
+const*, unsigned int, unsigned long, bool, bool, bool, bool,
+RGWGetDataCB*, RGWRESTStreamRWRequest**) () from /lib64/librgw.so.2
+#9  0x00007f32f53d88d7 in RGWRados::fetch_remote_obj(RGWObjectCtx&,
+rgw_user const&, std::string const&, std::string const&, bool,
+req_info*, std::string const&, rgw_obj&, rgw_obj&, RGWBucketInfo&,
+RGWBucketInfo&, std::chrono::time_point<ceph::time_detail::real_clock,
+std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >*,
+std::chrono::time_point<ceph::time_detail::real_clock,
+std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >*,
+std::chrono::time_point<ceph::time_detail::real_clock,
+std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >
+const*, std::chrono::time_point<ceph::time_detail::real_clock,
+std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >
+const*, bool, char const*, char const*, RGWRados::AttrsMod, bool,
+std::map<std::string, ceph::buffer::list, std::less<std::string>,
+std::allocator<std::pair<std::string const, ceph::buffer::list> > >&,
+RGWObjCategory, unsigned long,
+std::chrono::time_point<ceph::time_detail::real_clock,
+std::chrono::duration<unsigned long, std::ratio<1l, 1000000000l> > >,
+std::string*, std::string*, ceph::buffer::list*, rgw_err*, void
+(*)(long, void*), void*) () from /lib64/librgw.so.2
+#10 0x00007f32f5249b43 in RGWAsyncFetchRemoteObj::_send_request() ()
+from /lib64/librgw.so.2
+#11 0x00007f32f5246d52 in
+RGWAsyncRadosProcessor::handle_request(RGWAsyncRadosRequest*) () from
+/lib64/librgw.so.2
+#12 0x00007f32f5246e1d in
+RGWAsyncRadosProcessor::RGWWQ::_process(RGWAsyncRadosRequest*,
+ThreadPool::TPHandle&) () from /lib64/librgw.so.2
+#13 0x00007f32f57283be in ThreadPool::worker(ThreadPool::WorkThread*)
+() from /lib64/librgw.so.2
+#14 0x00007f32f57292a0 in ThreadPool::WorkThread::entry() () from
+/lib64/librgw.so.2
+#15 0x00007f32f485bdc5 in start_thread () from /lib64/libpthread.so.0
+#16 0x00007f32f3c5f28d in clone () from /lib64/libc.so.6
