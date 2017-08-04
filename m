@@ -1,46 +1,44 @@
 From: Xuehan Xu <xxhdx1985126@gmail.com>
-Subject: Re: Where to find the CDM recording?
-Date: Fri, 4 Aug 2017 11:20:14 +0800
-Message-ID: <CAJACTuekTBeA_UvbqaeWBQ=_RfOcFkNVF91NRDKLV3mUd1smMA@mail.gmail.com>
-References: <CAJACTudA642f57noXgKvGabTPOecTLjvjEBdHvS2asT9Zdierg@mail.gmail.com>
- <20170804004706.GB3381@oops.local>
+Subject: About the problem "export_diff relies on clone_overlap, which is lost
+ when cache tier is enabled"
+Date: Fri, 4 Aug 2017 11:41:11 +0800
+Message-ID: <CAJACTuf6q0r0xk6jzohj94cUDRUKKuweTPv021829M-UZZWTHg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f66.google.com ([209.85.218.66]:37390 "EHLO
-        mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751845AbdHDDUQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Aug 2017 23:20:16 -0400
-Received: by mail-oi0-f66.google.com with SMTP id j194so481941oib.4
-        for <ceph-devel@vger.kernel.org>; Thu, 03 Aug 2017 20:20:16 -0700 (PDT)
-In-Reply-To: <20170804004706.GB3381@oops.local>
+Received: from mail-oi0-f46.google.com ([209.85.218.46]:35612 "EHLO
+        mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751887AbdHDDlM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 3 Aug 2017 23:41:12 -0400
+Received: by mail-oi0-f46.google.com with SMTP id e124so4972375oig.2
+        for <ceph-devel@vger.kernel.org>; Thu, 03 Aug 2017 20:41:12 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Leonardo Vaz <lvaz@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-I got it:-)
+Hi, grep:-)
 
-Thanks, all of you guys:-)
+I finally got what you mean in https://github.com/ceph/ceph/pull/16790.
 
-On 4 August 2017 at 08:47, Leonardo Vaz <lvaz@redhat.com> wrote:
-> On Thu, Aug 03, 2017 at 11:35:24AM +0800, Xuehan Xu wrote:
->> Hi, everyone.
->>
->> Where can I find the recording of the CDM held last night?
->
-> It will be posted soon Xuehan.
->
-> Kindest regards,
->
-> Leo
->
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> --
-> Leonardo Vaz
-> Ceph Community Manager
-> Open Source and Standards Team
+I agree with you in that " clone overlap is supposed to be tracking
+which data is the same on disk".
+
+My thought is that, "ObjectContext::new_snapset.clones" is already an
+indicator about whether there are clone objects on disk, so, in the
+scenario of "cache tier", although a clone oid does not corresponds to
+a "present clone" in cache tier, as long as
+"ObjectContext::new_snapset.clones" is not empty, there must a one
+such clone object in the base tier. And, as long as
+"ObjectContext::new_snapset.clones" has a strict "one-to-one"
+correspondence to "ObjectContext::new_snapset.clone_overlap", passing
+the condition check "if (ctx->new_snapset.clones.size() > 0)" is
+enough to make the judgement that the clone object exists.
+
+So, if I'm right, passing the condition check "if
+(ctx->new_snapset.clones.size() > 0)" is already enough for us to do
+"newest_overlap.subtract(ctx->modified_ranges)", it doesn't have to
+pass "is_present_clone".
+
+Am I right about this? Or am I missing anything?
+
+Please help us, thank you:-)
