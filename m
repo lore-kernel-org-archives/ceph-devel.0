@@ -1,56 +1,24 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: kraken v11.2.1 QE status
-Date: Sat, 5 Aug 2017 09:04:30 -0700
-Message-ID: <CAMMFjmHRoBZP5YbrJEXUDd5F7JUbB5_r2CubuD_j6pL8J0SP3g@mail.gmail.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: kraken v11.2.1 QE status
+Date: Sat, 5 Aug 2017 18:25:54 +0200
+Message-ID: <58a2aee5-4fa2-671c-6b7a-51027ccf6ddb@suse.cz>
+References: <CAMMFjmHRoBZP5YbrJEXUDd5F7JUbB5_r2CubuD_j6pL8J0SP3g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f172.google.com ([209.85.128.172]:36904 "EHLO
-        mail-wr0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751226AbdHEQEc (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 5 Aug 2017 12:04:32 -0400
-Received: by mail-wr0-f172.google.com with SMTP id 33so25887873wrz.4
-        for <ceph-devel@vger.kernel.org>; Sat, 05 Aug 2017 09:04:32 -0700 (PDT)
+Received: from mx2.suse.de ([195.135.220.15]:55431 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752558AbdHEQZ6 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 5 Aug 2017 12:25:58 -0400
+In-Reply-To: <CAMMFjmHRoBZP5YbrJEXUDd5F7JUbB5_r2CubuD_j6pL8J0SP3g@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Development, Ceph" <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>, "Weil, Sage" <sage@redhat.com>, "Deza, Alfredo" <adeza@redhat.com>, Ilya Dryomov <idryomov@redhat.com>
+To: Yuri Weinstein <yweinste@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sage@redhat.com>, "Deza, Alfredo" <adeza@redhat.com>, Ilya Dryomov <idryomov@redhat.com>
 
-Detailed summary of the QE Validation can be found here
-http://tracker.ceph.com/issues/19009#note-91
+> upgrade/client-upgrade - failed as expected, pls confirm approval, exclusion
 
-The following suites were in scope of this point release validation:
+Josh already approved this on IRC.
 
-rados (subset 35/50 245 jobs)
-rbd  (subset 35/50 100 jobs)
-rgw
-fs
-krbd
-kcephfs
-knfs
-rest
-hadoop - EXCLUDED
-samba - EXCLUDED
-ceph-deploy
-ceph-disk
-upgrade/client-upgrade
-upgrade/jewel-x (kraken)
-upgrade/hammer-jewel-x - EXCLUDED
-powercycle
-ceph-ansible
-
-(please let me know if any suites are missing from this ^ list)
-
-Outstanding issues:
-
-krbd - Ilya, pls review and approve/comment for release as appropriate
-
-upgrade/client-upgrade - failed as expected, pls confirm approval, exclusion
-
-upgrade/jewel-x (kraken) - one job failed, I suspect it's the same we
-saw for jewel release (https://github.com/ceph/ceph/pull/16089),
-confirm approval
-
-ceph-ansible - failed, https://github.com/ceph/ceph-ansible/issues/1737
-
-Thx
-YuriW
+Nathan
