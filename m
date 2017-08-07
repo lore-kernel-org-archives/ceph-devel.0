@@ -1,62 +1,62 @@
-From: Ken Dreyer <kdreyer@redhat.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
 Subject: Re: increasingly large packages and longer build times
-Date: Mon, 7 Aug 2017 08:58:52 -0600
-Message-ID: <CALqRxCzmEN0UUD5iGcDw+iSp8+=cBmJpVa2Z=27fyVD_RWzRmw@mail.gmail.com>
+Date: Mon, 7 Aug 2017 17:30:06 +0200
+Message-ID: <1a1057ce-581f-8fe5-b474-d41e75c2f56a@digiware.nl>
 References: <CAC-Np1yg062K==JMEQhRTVKRe7orS3YoXz9hcgfKH+xfiZBiww@mail.gmail.com>
+ <CALqRxCzmEN0UUD5iGcDw+iSp8+=cBmJpVa2Z=27fyVD_RWzRmw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f54.google.com ([209.85.213.54]:35631 "EHLO
-        mail-vk0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751247AbdHGO6y (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Aug 2017 10:58:54 -0400
-Received: by mail-vk0-f54.google.com with SMTP id d124so2638951vkf.2
-        for <ceph-devel@vger.kernel.org>; Mon, 07 Aug 2017 07:58:53 -0700 (PDT)
-In-Reply-To: <CAC-Np1yg062K==JMEQhRTVKRe7orS3YoXz9hcgfKH+xfiZBiww@mail.gmail.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:18120 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751541AbdHGPaM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 7 Aug 2017 11:30:12 -0400
+In-Reply-To: <CALqRxCzmEN0UUD5iGcDw+iSp8+=cBmJpVa2Z=27fyVD_RWzRmw@mail.gmail.com>
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
+To: Ken Dreyer <kdreyer@redhat.com>, Alfredo Deza <adeza@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Aug 2, 2017 at 7:39 AM, Alfredo Deza <adeza@redhat.com> wrote:
-> The ceph-debuginfo package has continued to increase in size on almost
-> every release, reaching 1.5GB for the latest luminous RC (12.1.2).
->
-> To contrast that, the latest ceph-debuginfo in Hammer was about 0.73GB.
->
-> Having packages that large is problematic on a few fronts:
+On 7-8-2017 16:58, Ken Dreyer wrote:
+> On Wed, Aug 2, 2017 at 7:39 AM, Alfredo Deza <adeza@redhat.com> wrote:
+>> The ceph-debuginfo package has continued to increase in size on almost
+>> every release, reaching 1.5GB for the latest luminous RC (12.1.2).
+>>
+>> To contrast that, the latest ceph-debuginfo in Hammer was about 0.73GB.
+>>
+>> Having packages that large is problematic on a few fronts:
+> 
+> I agree Alfredo. Here's a similar issue I am experiencing with the source sizes:
+> 
+> Jewel sizes:
+>   14M ceph-10.2.7.tar.gz
+>   82M ceph-10.2.7 uncompressed
+> 
+> Luminous sizes:
+>   142M ceph-12.1.2.tar.gz
+>   709M ceph-12.1.2  uncompressed
 
-I agree Alfredo. Here's a similar issue I am experiencing with the source sizes:
+I'm on that same page.
 
-Jewel sizes:
-  14M ceph-10.2.7.tar.gz
-  82M ceph-10.2.7 uncompressed
+This is one reason not the use the source at download.ceph.com for
+FreeBSD package building. It is too big, and bulky. And most of the time
+the package builders already have most of the required stuff for other
+packages.
 
-Luminous sizes:
-  142M ceph-12.1.2.tar.gz
-  709M ceph-12.1.2  uncompressed
+The only reason for downloading the tar, would be the version strings in
+the package. But getting 150M just for that is rather wasteful.
 
-This adds minutes onto the build times when we must shuffle these
-large artifacts around:
+And my uncompressed sources to build a package are 332M of which is
+ - 172M boost.
+   Which I actually not use, I'm using the ported/package one)
+ - .tox dirs 2x 25M (but that is after a build/testrun)
+ - 18M dpdk
+   Do not use that either
+ - 13M civetweb
+all in all about 250M on overhead, of which 190M is really not used.
 
-- Upstream we're transferring the artifacts between Jenkins slaves and chacra
-  and download.ceph.com.
+--WjW
 
-- Downstream in Fedora/RHEL land we're uploading these source tars to
-  dist-git's lookaside cache, and it takes a while just to upload/download.
 
-- Downstream in Debian and Ubuntu (AFAICT) they upload the source tars to Git
-  with git-buildpackage, and this increases the time it takes to even "git
-  clone" these repos.
-
-The bundled Boost alone is is 474MB unpacked in 12.1.2. If we could
-build Boost as a separate package (and not bundle it into ceph) it
-would make it easier to manage builds upstream and downstream.
-
-We could build a boost package in the jenkins.ceph.com infrastructure,
-or the CentOS Storage SIG (for RHEL-based distros), and then start
-depending on that system instead of EPEL. For Debian/Ubuntu, we could
-use jenkins.ceph.com/chacra or something else - any suggestions from
-Debian/Ubuntu folks?
-
-- Ken
