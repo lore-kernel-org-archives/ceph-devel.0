@@ -1,46 +1,54 @@
-From: Aleksei Gutikov <aleksey.gutikov@synesis.ru>
-Subject: Is it possible to restrict to map rbd image on different client hosts
- same time?
-Date: Tue, 8 Aug 2017 12:42:25 +0300
-Message-ID: <95c441d8-007c-8e2e-3767-1b85ec8453f0@synesis.ru>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: Is it possible to restrict to map rbd image on different client
+ hosts same time?
+Date: Tue, 8 Aug 2017 13:39:23 +0200
+Message-ID: <CAOi1vP9Aw4CM1U326_T3wDmpTa3ZEK9fX_7un676PBqdUf4Pkw@mail.gmail.com>
+References: <95c441d8-007c-8e2e-3767-1b85ec8453f0@synesis.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f51.google.com ([209.85.215.51]:32900 "EHLO
-        mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751927AbdHHJm3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Aug 2017 05:42:29 -0400
-Received: by mail-lf0-f51.google.com with SMTP id d17so12469990lfe.0
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Aug 2017 02:42:28 -0700 (PDT)
-Received: from [172.20.8.235] ([86.57.155.118])
-        by smtp.gmail.com with ESMTPSA id f78sm137206lji.45.2017.08.08.02.42.26
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 08 Aug 2017 02:42:26 -0700 (PDT)
+Received: from mail-ua0-f171.google.com ([209.85.217.171]:37838 "EHLO
+        mail-ua0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752094AbdHHLjY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Aug 2017 07:39:24 -0400
+Received: by mail-ua0-f171.google.com with SMTP id f9so13335673uaf.4
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Aug 2017 04:39:23 -0700 (PDT)
+In-Reply-To: <95c441d8-007c-8e2e-3767-1b85ec8453f0@synesis.ru>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Aleksei Gutikov <aleksey.gutikov@synesis.ru>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hello
+On Tue, Aug 8, 2017 at 11:42 AM, Aleksei Gutikov
+<aleksey.gutikov@synesis.ru> wrote:
+> Hello
+>
+> I've just created a bug about list of watchers of rbd image and list of
+> clients actually using this rbd image: http://tracker.ceph.com/issues/20943
+>
+> During reproducing of this bug several questions raised:
+>
+> 1) Does watcher in rbd status output should be treated as 100% reliable mark
+> that disk was mapped?
 
-I've just created a bug about list of watchers of rbd image and list of 
-clients actually using this rbd image: http://tracker.ceph.com/issues/20943
+No.  A watch generally means that the image is "open" in rw mode, but
+not necessarily by the kernel client.  rbd CLI tool opens images in
+rw mode when performing maintenance operations, you can do it yourself
+through the API, there are various external daemons, etc.
 
-During reproducing of this bug several questions raised:
+>
+> 2) And in other way: Does watcher absence should be treated as 100% reliable
+> mark that disk was not mapped?
 
-1) Does watcher in rbd status output should be treated as 100% reliable 
-mark that disk was mapped?
+No.  A watch can be temporarily lost and you can catch the client in
+the process of reestablishing the watch.
 
-2) And in other way: Does watcher absence should be treated as 100% 
-reliable mark that disk was not mapped?
+>
+> 3) And finally: Is it possible to restrict to map disk on several clients in
+> the same time (exclusive mapping)?
 
-3) And finally: Is it possible to restrict to map disk on several 
-clients in the same time (exclusive mapping)?
+Yes.  Use "rbd map -o exclusive" (supported since kernel 4.12).
 
+Thanks,
 
-
-Thanks!
-
--- 
-Aleksei
+                Ilya
