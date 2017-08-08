@@ -1,63 +1,60 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: luminous branch is now forked
-Date: Tue, 8 Aug 2017 09:59:46 -0700
-Message-ID: <CAMMFjmG9BkTDiF1iKq4p9Jg2HHMbRAd+CJWUm-LqjHbSHFwJTg@mail.gmail.com>
-References: <alpine.DEB.2.11.1708071600050.20435@piezo.novalocal>
- <CA+aFP1AG6Bf4f++h91GPjcp360+FY5gqXyJ_GEJVbvcXjcF15g@mail.gmail.com> <CAMMFjmEJycSdnvAei7EJJWc4QddEDi3eOnEPrkKgyHj24cVbLw@mail.gmail.com>
+From: Matt Benjamin <mbenjami@redhat.com>
+Subject: Fwd: final luminous blockers
+Date: Tue, 8 Aug 2017 13:11:15 -0400
+Message-ID: <CAKOnarksy6XtFxgVmj9VPNVpX=hMkDczt6ywGEi511Bi6wLGpA@mail.gmail.com>
+References: <alpine.DEB.2.11.1708081556210.20435@piezo.novalocal> <CAKOnarkBrtzUCK46Erje=fArSuSkQPXjH+FXhUqawUeNy_tPoA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:38701 "EHLO
-        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752059AbdHHQ7r (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Aug 2017 12:59:47 -0400
-Received: by mail-wm0-f46.google.com with SMTP id m85so12029438wma.1
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Aug 2017 09:59:47 -0700 (PDT)
-In-Reply-To: <CAMMFjmEJycSdnvAei7EJJWc4QddEDi3eOnEPrkKgyHj24cVbLw@mail.gmail.com>
+Received: from mail-pf0-f175.google.com ([209.85.192.175]:35430 "EHLO
+        mail-pf0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752059AbdHHRLR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Aug 2017 13:11:17 -0400
+Received: by mail-pf0-f175.google.com with SMTP id t86so16976148pfe.2
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Aug 2017 10:11:16 -0700 (PDT)
+In-Reply-To: <CAKOnarkBrtzUCK46Erje=fArSuSkQPXjH+FXhUqawUeNy_tPoA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Dillaman, Jason" <dillaman@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-luminous runs were added to nightlies.
-
-http://tracker.ceph.com/projects/ceph-releases/wiki/sepia
-
-Please let me know if you have any comments/changes for it.
-
-Thx
-YuriW
+resend
+---------- Forwarded message ----------
+From: Matt Benjamin <mbenjami@redhat.com>
+Date: Tue, Aug 8, 2017 at 12:56 PM
+Subject: Re: final luminous blockers
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
 
+With the IAM parser reset use-after-free fix, I think RGW is probably
+in good shape.  I think we believe that the cls-rgw test reproducing
+in Jewel is not a blocker.  I think dynamic resharding bugs are going
+to take longer than 1 day to resolve, so will need to follow the .0.
 
-On Tue, Aug 8, 2017 at 7:59 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
-> Yes I will add it to nightlies.
+Matt
+
+On Tue, Aug 8, 2017 at 11:58 AM, Sage Weil <sweil@redhat.com> wrote:
 >
-> On Tue, Aug 8, 2017 at 5:09 AM, Jason Dillaman <jdillama@redhat.com> wrote:
->> Should we start running teuthology nightlies against the luminous
->> branch (perhaps swapping out kraken)?
->>
->> On Mon, Aug 7, 2017 at 12:01 PM, Sage Weil <sweil@redhat.com> wrote:
->>> The luminous branch is now fully forked from master.  Any fixes merged to
->>> master need to be cherry-pick -x'd to luminous.
->>>
->>> There are only 6 open prs with the luminous tag.  I'm going to clear the
->>> milestone for these shortly so that the luminous milestone can be used for
->>> luminous backport PRs.
->>>
->>> Thanks!
->>> sage
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->>
->> --
->> Jason
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I'm hoping we get get 12.2.0 out the door tomorrow.  On the rados side,
+> there is just one blocker:
+>
+>         http://tracker.ceph.com/issues/20925
+>
+> which I'm testing a fix for now.  There is also the rocskdb build issue
+> that makes things break for folks with really old CPUs, but I don't think
+> it needs to block the initial release.
+>
+> I'm waiting for the latest round of upgrade tests to run as well but I
+> think everything is resolved there.
+>
+> Jason, Matt, Patrick: how are rbd, rgw, and cephfs looking?
+>
+> Everyone else: any other blockers?
+>
+> Thanks!
+> sage
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
