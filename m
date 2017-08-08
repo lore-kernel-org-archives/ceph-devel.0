@@ -1,42 +1,34 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: final luminous blockers
-Date: Tue, 8 Aug 2017 15:58:32 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1708081556210.20435@piezo.novalocal>
+From: Aleksei Gutikov <aleksey.gutikov@synesis.ru>
+Subject: Re: Is it possible to restrict to map rbd image on different client
+ hosts same time?
+Date: Tue, 8 Aug 2017 19:35:12 +0300
+Message-ID: <f41f41fc-2a75-1584-80d3-f17e29d191a0@synesis.ru>
+References: <95c441d8-007c-8e2e-3767-1b85ec8453f0@synesis.ru>
+ <CAOi1vP9Aw4CM1U326_T3wDmpTa3ZEK9fX_7un676PBqdUf4Pkw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60128 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752441AbdHHP6d (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 8 Aug 2017 11:58:33 -0400
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 4B10C7EA83
-        for <ceph-devel@vger.kernel.org>; Tue,  8 Aug 2017 15:58:33 +0000 (UTC)
-Received: from ovpn-112-5.rdu2.redhat.com (ovpn-112-5.rdu2.redhat.com [10.10.112.5])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 12AB470958
-        for <ceph-devel@vger.kernel.org>; Tue,  8 Aug 2017 15:58:32 +0000 (UTC)
+Received: from mail-lf0-f50.google.com ([209.85.215.50]:38344 "EHLO
+        mail-lf0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752017AbdHHQfP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Aug 2017 12:35:15 -0400
+Received: by mail-lf0-f50.google.com with SMTP id y15so17152612lfd.5
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Aug 2017 09:35:15 -0700 (PDT)
+In-Reply-To: <CAOi1vP9Aw4CM1U326_T3wDmpTa3ZEK9fX_7un676PBqdUf4Pkw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-I'm hoping we get get 12.2.0 out the door tomorrow.  On the rados side, 
-there is just one blocker:
 
-	http://tracker.ceph.com/issues/20925
+Ilya, thank you for your suggestion, it works for me.
 
-which I'm testing a fix for now.  There is also the rocskdb build issue 
-that makes things break for folks with really old CPUs, but I don't think 
-it needs to block the initial release.
+But during testing I realized that what actually I need is not just 
+exclusive lock, but some kind of idempotent exclusive lock.
+I mean the last who exclusively mapped image should kick out others.
+Is it possible now?
 
-I'm waiting for the latest round of upgrade tests to run as well but I 
-think everything is resolved there.
-
-Jason, Matt, Patrick: how are rbd, rgw, and cephfs looking?
-
-Everyone else: any other blockers?
-
-Thanks!
-sage
-
+Thanks
+-- 
+Aleksei
