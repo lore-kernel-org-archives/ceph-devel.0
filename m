@@ -1,75 +1,51 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: kraken v11.2.1 QE status
-Date: Tue, 8 Aug 2017 01:27:46 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1708080127340.20435@piezo.novalocal>
-References: <CAMMFjmHRoBZP5YbrJEXUDd5F7JUbB5_r2CubuD_j6pL8J0SP3g@mail.gmail.com> <CAOi1vP83Wfwhxax2S0Hd2Rxht-L5=jtOLL5r14j4WiF=rH0Dvg@mail.gmail.com> <CAMMFjmFhh+U+EH+Qr18DABnNb3dYWD=jB7-wX7zF+Cbdy+DMhw@mail.gmail.com>
+From: Fabian =?iso-8859-1?Q?Gr=FCnbichler?= <f.gruenbichler@proxmox.com>
+Subject: Re: increasingly large packages and longer build times
+Date: Tue, 8 Aug 2017 08:59:06 +0200
+Message-ID: <20170808065906.luvs5b3xmlzfg7we@nora.maurer-it.com>
+References: <CAC-Np1yg062K==JMEQhRTVKRe7orS3YoXz9hcgfKH+xfiZBiww@mail.gmail.com>
+ <CALqRxCzmEN0UUD5iGcDw+iSp8+=cBmJpVa2Z=27fyVD_RWzRmw@mail.gmail.com>
+ <1a1057ce-581f-8fe5-b474-d41e75c2f56a@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:51806 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751828AbdHHB1u (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 7 Aug 2017 21:27:50 -0400
-In-Reply-To: <CAMMFjmFhh+U+EH+Qr18DABnNb3dYWD=jB7-wX7zF+Cbdy+DMhw@mail.gmail.com>
+Received: from proxmox.maurer-it.com ([212.186.127.180]:25016 "EHLO
+        proxmox.maurer-it.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751880AbdHHHFc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Aug 2017 03:05:32 -0400
+Content-Disposition: inline
+In-Reply-To: <1a1057ce-581f-8fe5-b474-d41e75c2f56a@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: Ilya Dryomov <idryomov@gmail.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>, "Deza, Alfredo" <adeza@redhat.com>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: Ken Dreyer <kdreyer@redhat.com>, Alfredo Deza <adeza@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Blessed!  :)
+On Mon, Aug 07, 2017 at 05:30:06PM +0200, Willem Jan Withagen wrote:
+> On 7-8-2017 16:58, Ken Dreyer wrote:
+> > On Wed, Aug 2, 2017 at 7:39 AM, Alfredo Deza <adeza@redhat.com> wrote:
+> >> The ceph-debuginfo package has continued to increase in size on almost
+> >> every release, reaching 1.5GB for the latest luminous RC (12.1.2).
+> >>
+> >> To contrast that, the latest ceph-debuginfo in Hammer was about 0.73GB.
+> >>
+> >> Having packages that large is problematic on a few fronts:
+> > 
+> > I agree Alfredo. Here's a similar issue I am experiencing with the source sizes:
+> > 
+> > Jewel sizes:
+> >   14M ceph-10.2.7.tar.gz
+> >   82M ceph-10.2.7 uncompressed
+> > 
+> > Luminous sizes:
+> >   142M ceph-12.1.2.tar.gz
+> >   709M ceph-12.1.2  uncompressed
+> 
+> I'm on that same page.
+> 
 
-Thanks, everyone!
-sage
++1 (Proxmox VE, also building downstream packages)
 
+Boost seems to be by far the biggest culprit - we initially built our
+packages using the system boost option to save some space, but this
+broke one time too often and we are now also shuffling tons of data
+around for every version bump.
 
-On Mon, 7 Aug 2017, Yuri Weinstein wrote:
-
-> Sage, pending you final blessing.
-> 
-> Otherwise ready for publishing,  Alfredo!
-> 
-> Thx
-> YuriW
-> 
-> On Mon, Aug 7, 2017 at 1:12 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
-> > On Sat, Aug 5, 2017 at 6:04 PM, Yuri Weinstein <yweinste@redhat.com> wrote:
-> >> Detailed summary of the QE Validation can be found here
-> >> http://tracker.ceph.com/issues/19009#note-91
-> >>
-> >> The following suites were in scope of this point release validation:
-> >>
-> >> rados (subset 35/50 245 jobs)
-> >> rbd  (subset 35/50 100 jobs)
-> >> rgw
-> >> fs
-> >> krbd
-> >> kcephfs
-> >> knfs
-> >> rest
-> >> hadoop - EXCLUDED
-> >> samba - EXCLUDED
-> >> ceph-deploy
-> >> ceph-disk
-> >> upgrade/client-upgrade
-> >> upgrade/jewel-x (kraken)
-> >> upgrade/hammer-jewel-x - EXCLUDED
-> >> powercycle
-> >> ceph-ansible
-> >>
-> >> (please let me know if any suites are missing from this ^ list)
-> >>
-> >> Outstanding issues:
-> >>
-> >> krbd - Ilya, pls review and approve/comment for release as appropriate
-> >
-> > Approved.
-> >
-> > Thanks,
-> >
-> >                 Ilya
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
