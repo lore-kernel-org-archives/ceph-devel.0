@@ -1,88 +1,58 @@
-From: Travis Nielsen <Travis.Nielsen@Quantum.com>
-Subject: Re: Mon time to form quorum
-Date: Tue, 8 Aug 2017 19:47:35 +0000
-Message-ID: <D5AF6055.9536F%travis.nielsen@quantum.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: radosgw: stale/leaked bucket index entries
+Date: Tue, 8 Aug 2017 22:37:15 +0000
+Message-ID: <07824FC2-2F4A-4DAD-B38A-39973B4D96E5@TERADATA.COM>
+References: <6B335CE5-2828-47E7-A993-2D5ACC302AC1@walmartlabs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-by2nam01on0074.outbound.protection.outlook.com ([104.47.34.74]:46094
-        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752030AbdHHTri (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 8 Aug 2017 15:47:38 -0400
+Received: from nat13.teradata.com ([153.65.16.13]:32668 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751970AbdHHXCz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Aug 2017 19:02:55 -0400
+In-Reply-To: <6B335CE5-2828-47E7-A993-2D5ACC302AC1@walmartlabs.com>
 Content-Language: en-US
-Content-ID: <F32D8AD892B3114E8D8F4423539D1603@namprd14.prod.outlook.com>
+Content-ID: <8AFEC0AF63C20A4398CD33BD6E931212@namprd13.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-ceph-devel may be a better place for this... This looks related to the
-recent change that allows the mon to bind to a different address from the
-advertised address. Notice that the config below has different addresses
-for "public addr" and "cluster addr". Could this be causing paxos to take
-some time to settle?
-
-Another datapoint is that if there is only one mon (instead of three), the
-quorum only takes about 10 seconds to establish instead of 60s.
-
-
-____________________________________________________
-From: Travis Nielsen <travis.nielsen@quantum.com>
-Date: Tuesday, August 8, 2017 at 10:49 AM
-To: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>
-Subject: Mon time to form quorum
-
-
-
-At cluster creation I'm seeing that the mons are taking a while time to
-form quorum. It seems like I'm hitting a timeout of 60s somewhere. Am I
-missing a config setting that would help paxos establish quorum sooner?
-When initializing with the monmap I would have expected the mons to
-initialize very quickly.
-
-The scenario is:
-
-* Luminous RC 2
-* The mons are initialized with a monmap
-* Running in Kubernetes (Rook)
-
-The symptoms are:
-
-* When all three mons start in parallel, they appear to determine their
-rank immediately. I assume this means they establish communication. A log
-message is seen such as this in each of the mon logs:
-  - 2017-08-08 17:03:16.383599 7f8da7c85f40  0
-mon.rook-ceph-mon1@-1(probing) e0  my rank is now 0 (was =AD1)
-
-* Now paxos enters a loop that times out every two seconds and lasts about
-60s, trying to probe the other monitors. During this wait, I am able to
-curl the mon endpoints successfully.
-  - 2017-08-08 17:03:17.345877 7f02b779af40 10
-mon.rook-ceph-mon0@1(probing) e0 probing other monitors
-  - 2017-08-08 17:03:19.346032 7f02ae568700  4
-mon.rook-ceph-mon0@1(probing) e0 probe_timeout 0x55c93678bb00
-
-* After about 60 seconds the probe succeeds and the mons start responding
-  - 2017-08-08 17:04:17.356928 7f02ae568700 10
-mon.rook-ceph-mon0@1(probing) e0 probing other monitors
-  - 2017-08-08 17:04:17.366587 7f02a855c700 10
-mon.rook-ceph-mon0@1(probing) e0 ms_verify_authorizer 10.0.0.254:6790/0
-mon protocol 2
-
-
-The relevant settings in the config are:
-mon initial members  =3D rook-ceph-mon0 rook-ceph-mon1 rook-ceph-mon2
-mon host                      =3D
-10.0.0.24:6790,10.0.0.163:6790,10.0.0.139:6790
-public addr                   =3D 10.0.0.24
-cluster addr                  =3D 172.17.0.5
-
-The full log for this mon at debug log level 20 can be found here:
-https://gist.github.com/travisn/2c2641a6b80a7479b3b22accb41a5193
-
-Any ideas?
-
-Thanks,
-Travis
-
+R29vZCB5b3UgaGF2ZSBicm91Z2h0IHRoaXMgaXNzdWUuIEkgYWxzbyBoYXZlIHNlZW4gdGhlIHN0
+YWxlIGluZGV4IGVudHJpZXMgbGluZ2VyaW5nIGFmdGVyIG9iamVjdGlvbiBkZWxldGlvbiBmb3Ig
+cmd3LiBJdCB3b3VsZCBiZSBuaWNlIHRvIHNlZSB0aGlzIGlzc3VlIGNhcHR1cmVkIGFuZCBhZGRy
+ZXNzZWQgaW4gYSBidWcuDQoNCk5pdGluDQoNCg0KT24gNi8xOS8xNywgMTA6MzcgQU0sICJjZXBo
+LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2YgUGF2YW4gUmFsbGFiaGFu
+ZGkiIDxjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2YgUFJhbGxh
+YmhhbmRpQHdhbG1hcnRsYWJzLmNvbT4gd3JvdGU6DQoNCiAgICBPbiBtYW55IG9mIG91ciBjbHVz
+dGVycyBydW5uaW5nIEpld2VsICgxMC4yLjUrKSwgYW0gcnVubmluZyBpbnRvIGEgc3RyYW5nZSBw
+cm9ibGVtIG9mIGhhdmluZyBzdGFsZSBidWNrZXQgaW5kZXggZW50cmllcyBsZWZ0IG92ZXIgZm9y
+IChzb21lIG9mIHRoZSkgb2JqZWN0cyBkZWxldGVkLiBUaG91Z2ggaXQgaXMgbm90IHJlcHJvZHVj
+aWJsZSBhdCB3aWxsLCBpdCBoYXMgYmVlbiBwcmV0dHkgY29uc2lzdGVudCBvZiBsYXRlIGFuZCBh
+bSBjbHVlbGVzcyBhdCB0aGlzIHBvaW50IGZvciB0aGUgcG9zc2libGUgcmVhc29ucyB0byBoYXBw
+ZW4gc28uIA0KICAgIA0KICAgIFRoZSBzeW1wdG9tcyBhcmUgdGhhdCB0aGUgYWN0dWFsIGRlbGV0
+ZSBvcGVyYXRpb24gb2YgYW4gb2JqZWN0IGlzIHJlcG9ydGVkIHN1Y2Nlc3NmdWwgaW4gdGhlIFJH
+VyBsb2dzLCBidXQgYSBidWNrZXQgbGlzdCBvbiB0aGUgY29udGFpbmVyIHdvdWxkIHN0aWxsIHNo
+b3cgdGhlIGRlbGV0ZWQgb2JqZWN0LiBBbiBhdHRlbXB0IHRvIGRvd25sb2FkL3N0YXQgb2YgdGhl
+IG9iamVjdCBhcHByb3ByaWF0ZWx5IHJlc3VsdHMgaW4gYSBmYWlsdXJlLiBObyBmYWlsdXJlcyBh
+cmUgc2VlbiBpbiB0aGUgcmVzcGVjdGl2ZSBPU0RzIHdoZXJlIHRoZSBidWNrZXQgaW5kZXggb2Jq
+ZWN0IGlzIGxvY2F0ZWQuIEFuZCByZWJ1aWxkaW5nIHRoZSBidWNrZXQgaW5kZXggYnkgcnVubmlu
+ZyDigJhyYWRvc2d3LWFkbWluIGJ1Y2tldCBjaGVjayDigJNmaXjigJkgd291bGQgZml4IHRoZSBp
+c3N1ZS4NCiAgICANCiAgICBUaG91Z2ggSSBjb3VsZCBzaW11bGF0ZSB0aGUgcHJvYmxlbSBieSBp
+bnN0cnVtZW50aW5nIHRoZSBjb2RlLCB0byBub3QgdG8gaGF2ZSBpbnZva2VkIGBjb21wbGV0ZV9k
+ZWxgIG9uIHRoZSBidWNrZXQgaW5kZXggb3AgaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9i
+bG9iL21hc3Rlci9zcmMvcmd3L3Jnd19yYWRvcy5jYyNMODc5MywgYnV0IHRoYXQgY2FsbCBpcyBh
+bHdheXMgc2VlbSB0byBiZSBtYWRlIHVubGVzcyB0aGVyZSBpcyBhIGNhc2NhZGluZyBlcnJvciBm
+cm9tIHRoZSBhY3R1YWwgZGVsZXRlIG9wZXJhdGlvbiBvZiB0aGUgb2JqZWN0LCB3aGljaCBkb2Vz
+buKAmXQgc2VlbSB0byBiZSB0aGUgY2FzZSBoZXJlLg0KICAgIA0KICAgIEkgd2FudGVkIHRvIGtu
+b3cgdGhlIHBvc3NpYmxlIHJlYXNvbnMgd2hlcmUgdGhlIGJ1Y2tldCBpbmRleCB3b3VsZCBiZSBs
+ZWZ0IGluIHN1Y2ggbGltYm8sIGFueSBwb2ludGVycyB3b3VsZCBiZSBtdWNoIGFwcHJlY2lhdGVk
+LiBGV0lXLCB3ZSBhcmUgbm90IHNoYXJkaW5nIHRoZSBidWNrZXRzIGFuZCB2ZXJ5IHJlY2VudGx5
+IEnigJl2ZSBzZWVuIHRoaXMgaGFwcGVuIHdpdGggYnVja2V0cyBoYXZpbmcgYXMgbG93IGFzIA0K
+ICAgIDwgMTAgb2JqZWN0cywgYW5kIHdlIGFyZSB1c2luZyBzd2lmdCBmb3IgYWxsIHRoZSBvcGVy
+YXRpb25zLg0KICAgIA0KICAgIFRoYW5rcywNCiAgICAtUGF2YW4uDQogICAgDQogICAgP++/vXsu
+bu+/vSvvv73vv73vv73vv73vv73vv73vv70rJe+/ve+/vWx6d23vv73vv71i77+966ey77+977+9
+cu+/ve+/vXnHqe+/vdeveljvv73vv70/77+977+93Kh977+977+977+9xqB677+9Jmo6K3bvv73v
+v73vv70/77+977+977+977+9elor77+977+9K3pm77+977+977+9aO+/ve+/ve+/vX7vv73vv73v
+v73vv71p77+977+977+9eu+/vT/vv71377+977+977+9P++/ve+/ve+/ve+/vSbvv70p36I/Zg0K
+DQo=
