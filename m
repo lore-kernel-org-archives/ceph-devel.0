@@ -1,58 +1,50 @@
-From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+From: Matt Benjamin <mbenjami@redhat.com>
 Subject: Re: radosgw: stale/leaked bucket index entries
-Date: Tue, 8 Aug 2017 22:37:15 +0000
-Message-ID: <07824FC2-2F4A-4DAD-B38A-39973B4D96E5@TERADATA.COM>
-References: <6B335CE5-2828-47E7-A993-2D5ACC302AC1@walmartlabs.com>
+Date: Tue, 8 Aug 2017 19:18:16 -0400
+Message-ID: <CAKOnarm0Lm5Ya_XLz8bXpYTNgikSbOLFA0FYvhuO0fSpB_-SfQ@mail.gmail.com>
+References: <6B335CE5-2828-47E7-A993-2D5ACC302AC1@walmartlabs.com> <07824FC2-2F4A-4DAD-B38A-39973B4D96E5@TERADATA.COM>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nat13.teradata.com ([153.65.16.13]:32668 "EHLO
-        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751970AbdHHXCz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Aug 2017 19:02:55 -0400
-In-Reply-To: <6B335CE5-2828-47E7-A993-2D5ACC302AC1@walmartlabs.com>
-Content-Language: en-US
-Content-ID: <8AFEC0AF63C20A4398CD33BD6E931212@namprd13.prod.outlook.com>
+Received: from mail-pg0-f44.google.com ([74.125.83.44]:37168 "EHLO
+        mail-pg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752094AbdHHXSR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Aug 2017 19:18:17 -0400
+Received: by mail-pg0-f44.google.com with SMTP id y129so20577243pgy.4
+        for <ceph-devel@vger.kernel.org>; Tue, 08 Aug 2017 16:18:17 -0700 (PDT)
+In-Reply-To: <07824FC2-2F4A-4DAD-B38A-39973B4D96E5@TERADATA.COM>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
+Cc: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-R29vZCB5b3UgaGF2ZSBicm91Z2h0IHRoaXMgaXNzdWUuIEkgYWxzbyBoYXZlIHNlZW4gdGhlIHN0
-YWxlIGluZGV4IGVudHJpZXMgbGluZ2VyaW5nIGFmdGVyIG9iamVjdGlvbiBkZWxldGlvbiBmb3Ig
-cmd3LiBJdCB3b3VsZCBiZSBuaWNlIHRvIHNlZSB0aGlzIGlzc3VlIGNhcHR1cmVkIGFuZCBhZGRy
-ZXNzZWQgaW4gYSBidWcuDQoNCk5pdGluDQoNCg0KT24gNi8xOS8xNywgMTA6MzcgQU0sICJjZXBo
-LWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2YgUGF2YW4gUmFsbGFiaGFu
-ZGkiIDxjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9yZyBvbiBiZWhhbGYgb2YgUFJhbGxh
-YmhhbmRpQHdhbG1hcnRsYWJzLmNvbT4gd3JvdGU6DQoNCiAgICBPbiBtYW55IG9mIG91ciBjbHVz
-dGVycyBydW5uaW5nIEpld2VsICgxMC4yLjUrKSwgYW0gcnVubmluZyBpbnRvIGEgc3RyYW5nZSBw
-cm9ibGVtIG9mIGhhdmluZyBzdGFsZSBidWNrZXQgaW5kZXggZW50cmllcyBsZWZ0IG92ZXIgZm9y
-IChzb21lIG9mIHRoZSkgb2JqZWN0cyBkZWxldGVkLiBUaG91Z2ggaXQgaXMgbm90IHJlcHJvZHVj
-aWJsZSBhdCB3aWxsLCBpdCBoYXMgYmVlbiBwcmV0dHkgY29uc2lzdGVudCBvZiBsYXRlIGFuZCBh
-bSBjbHVlbGVzcyBhdCB0aGlzIHBvaW50IGZvciB0aGUgcG9zc2libGUgcmVhc29ucyB0byBoYXBw
-ZW4gc28uIA0KICAgIA0KICAgIFRoZSBzeW1wdG9tcyBhcmUgdGhhdCB0aGUgYWN0dWFsIGRlbGV0
-ZSBvcGVyYXRpb24gb2YgYW4gb2JqZWN0IGlzIHJlcG9ydGVkIHN1Y2Nlc3NmdWwgaW4gdGhlIFJH
-VyBsb2dzLCBidXQgYSBidWNrZXQgbGlzdCBvbiB0aGUgY29udGFpbmVyIHdvdWxkIHN0aWxsIHNo
-b3cgdGhlIGRlbGV0ZWQgb2JqZWN0LiBBbiBhdHRlbXB0IHRvIGRvd25sb2FkL3N0YXQgb2YgdGhl
-IG9iamVjdCBhcHByb3ByaWF0ZWx5IHJlc3VsdHMgaW4gYSBmYWlsdXJlLiBObyBmYWlsdXJlcyBh
-cmUgc2VlbiBpbiB0aGUgcmVzcGVjdGl2ZSBPU0RzIHdoZXJlIHRoZSBidWNrZXQgaW5kZXggb2Jq
-ZWN0IGlzIGxvY2F0ZWQuIEFuZCByZWJ1aWxkaW5nIHRoZSBidWNrZXQgaW5kZXggYnkgcnVubmlu
-ZyDigJhyYWRvc2d3LWFkbWluIGJ1Y2tldCBjaGVjayDigJNmaXjigJkgd291bGQgZml4IHRoZSBp
-c3N1ZS4NCiAgICANCiAgICBUaG91Z2ggSSBjb3VsZCBzaW11bGF0ZSB0aGUgcHJvYmxlbSBieSBp
-bnN0cnVtZW50aW5nIHRoZSBjb2RlLCB0byBub3QgdG8gaGF2ZSBpbnZva2VkIGBjb21wbGV0ZV9k
-ZWxgIG9uIHRoZSBidWNrZXQgaW5kZXggb3AgaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9i
-bG9iL21hc3Rlci9zcmMvcmd3L3Jnd19yYWRvcy5jYyNMODc5MywgYnV0IHRoYXQgY2FsbCBpcyBh
-bHdheXMgc2VlbSB0byBiZSBtYWRlIHVubGVzcyB0aGVyZSBpcyBhIGNhc2NhZGluZyBlcnJvciBm
-cm9tIHRoZSBhY3R1YWwgZGVsZXRlIG9wZXJhdGlvbiBvZiB0aGUgb2JqZWN0LCB3aGljaCBkb2Vz
-buKAmXQgc2VlbSB0byBiZSB0aGUgY2FzZSBoZXJlLg0KICAgIA0KICAgIEkgd2FudGVkIHRvIGtu
-b3cgdGhlIHBvc3NpYmxlIHJlYXNvbnMgd2hlcmUgdGhlIGJ1Y2tldCBpbmRleCB3b3VsZCBiZSBs
-ZWZ0IGluIHN1Y2ggbGltYm8sIGFueSBwb2ludGVycyB3b3VsZCBiZSBtdWNoIGFwcHJlY2lhdGVk
-LiBGV0lXLCB3ZSBhcmUgbm90IHNoYXJkaW5nIHRoZSBidWNrZXRzIGFuZCB2ZXJ5IHJlY2VudGx5
-IEnigJl2ZSBzZWVuIHRoaXMgaGFwcGVuIHdpdGggYnVja2V0cyBoYXZpbmcgYXMgbG93IGFzIA0K
-ICAgIDwgMTAgb2JqZWN0cywgYW5kIHdlIGFyZSB1c2luZyBzd2lmdCBmb3IgYWxsIHRoZSBvcGVy
-YXRpb25zLg0KICAgIA0KICAgIFRoYW5rcywNCiAgICAtUGF2YW4uDQogICAgDQogICAgP++/vXsu
-bu+/vSvvv73vv73vv73vv73vv73vv73vv70rJe+/ve+/vWx6d23vv73vv71i77+966ey77+977+9
-cu+/ve+/vXnHqe+/vdeveljvv73vv70/77+977+93Kh977+977+977+9xqB677+9Jmo6K3bvv73v
-v73vv70/77+977+977+977+9elor77+977+9K3pm77+977+977+9aO+/ve+/ve+/vX7vv73vv73v
-v73vv71p77+977+977+9eu+/vT/vv71377+977+977+9P++/ve+/ve+/ve+/vSbvv70p36I/Zg0K
-DQo=
+Hi Nitin,
+
+It's pending-backport.
+
+Matt
+
+On Tue, Aug 8, 2017 at 6:37 PM, Kamble, Nitin A
+<Nitin.Kamble@teradata.com> wrote:
+> Good you have brought this issue. I also have seen the stale index entries lingering after objection deletion for rgw. It would be nice to see this issue captured and addressed in a bug.
+>
+> Nitin
+>
+>
+> On 6/19/17, 10:37 AM, "ceph-devel-owner@vger.kernel.org on behalf of Pavan Rallabhandi" <ceph-devel-owner@vger.kernel.org on behalf of PRallabhandi@walmartlabs.com> wrote:
+>
+>     On many of our clusters running Jewel (10.2.5+), am running into a strange problem of having stale bucket index entries left over for (some of the) objects deleted. Though it is not reproducible at will, it has been pretty consistent of late and am clueless at this point for the possible reasons to happen so.
+>
+>     The symptoms are that the actual delete operation of an object is reported successful in the RGW logs, but a bucket list on the container would still show the deleted object. An attempt to download/stat of the object appropriately results in a failure. No failures are seen in the respective OSDs where the bucket index object is located. And rebuilding the bucket index by running ‘radosgw-admin bucket check –fix’ would fix the issue.
+>
+>     Though I could simulate the problem by instrumenting the code, to not to have invoked `complete_del` on the bucket index op https://github.com/ceph/ceph/blob/master/src/rgw/rgw_rados.cc#L8793, but that call is always seem to be made unless there is a cascading error from the actual delete operation of the object, which doesn’t seem to be the case here.
+>
+>     I wanted to know the possible reasons where the bucket index would be left in such limbo, any pointers would be much appreciated. FWIW, we are not sharding the buckets and very recently I’ve seen this happen with buckets having as low as
+>     < 10 objects, and we are using swift for all the operations.
+>
+>     Thanks,
+>     -Pavan.
+>
+>     ?�{.n�+�������+%��lzwm��b�맲��r��yǩ�ׯzX��?��ܨ}���Ơz�&j:+v���?����zZ+��+zf���h���~����i���z�?�w���?����&�)ߢ?f
+>
