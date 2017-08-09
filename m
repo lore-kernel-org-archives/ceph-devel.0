@@ -1,29 +1,52 @@
-From: Oleg Kolosov <olekol@gmail.com>
-Subject: Rados bench decreasing performance for large data
-Date: Wed, 9 Aug 2017 14:44:58 +0300
-Message-ID: <CAODUPsE80Dan4YULo26OeEJtyghCUT9r-ux1qOOaT3A_w6gv0A@mail.gmail.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: final luminous blockers
+Date: Wed, 9 Aug 2017 08:43:29 -0400
+Message-ID: <CA+aFP1CWMrnk=k0UY-CmEMXUVHOYgznbm9izeHxmTu0BrfCZyw@mail.gmail.com>
+References: <alpine.DEB.2.11.1708081556210.20435@piezo.novalocal>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f45.google.com ([209.85.218.45]:35337 "EHLO
-        mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752348AbdHILpA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Aug 2017 07:45:00 -0400
-Received: by mail-oi0-f45.google.com with SMTP id e124so58916251oig.2
-        for <ceph-devel@vger.kernel.org>; Wed, 09 Aug 2017 04:44:59 -0700 (PDT)
+Received: from mail-yw0-f182.google.com ([209.85.161.182]:33419 "EHLO
+        mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751884AbdHIMna (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Aug 2017 08:43:30 -0400
+Received: by mail-yw0-f182.google.com with SMTP id p68so39073908ywg.0
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Aug 2017 05:43:30 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1708081556210.20435@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi
-I've began experimenting with rados bench and I've noticed bizarre
-behavior for jerasure and lrc plugins. I'm writing very large amounts
-of data: ~2000 objects of size 64MB.
-When reading the data with 9 parallel client, I'm noticing a linear
-increase in latency around the middle of the read experiment (latency
-was steady up to that point).
-Is that an expected behavior?
-How can it be explained?
+RBD should be good-to-go for 12.2.0.
 
-Thanks,
-Oleg
+On Tue, Aug 8, 2017 at 11:58 AM, Sage Weil <sweil@redhat.com> wrote:
+> I'm hoping we get get 12.2.0 out the door tomorrow.  On the rados side,
+> there is just one blocker:
+>
+>         http://tracker.ceph.com/issues/20925
+>
+> which I'm testing a fix for now.  There is also the rocskdb build issue
+> that makes things break for folks with really old CPUs, but I don't think
+> it needs to block the initial release.
+>
+> I'm waiting for the latest round of upgrade tests to run as well but I
+> think everything is resolved there.
+>
+> Jason, Matt, Patrick: how are rbd, rgw, and cephfs looking?
+>
+> Everyone else: any other blockers?
+>
+> Thanks!
+> sage
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Jason
