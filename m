@@ -1,78 +1,66 @@
-From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
-Subject: Re: radosgw: stale/leaked bucket index entries
-Date: Wed, 9 Aug 2017 16:22:48 +0000
-Message-ID: <537F814C-3EED-448E-9521-C4F42BB2D955@TERADATA.COM>
-References: <90B5C64A-3A70-416A-AB62-57074C8371E2@walmartlabs.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: default debug_client level is too high
+Date: Wed, 9 Aug 2017 18:32:02 +0200
+Message-ID: <CABZ+qq=cNRn+18bLM6_T_weeEAweg9jKe2n8jjitsDz7bgtpNQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nat13.teradata.com ([153.65.16.13]:33326 "EHLO
-        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1752383AbdHIQWw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Aug 2017 12:22:52 -0400
-In-Reply-To: <90B5C64A-3A70-416A-AB62-57074C8371E2@walmartlabs.com>
-Content-Language: en-US
-Content-ID: <E93D3CD10D0A6B4D83BC06985B6CE452@namprd13.prod.outlook.com>
+Received: from mail-oi0-f48.google.com ([209.85.218.48]:34716 "EHLO
+        mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752413AbdHIQcp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 9 Aug 2017 12:32:45 -0400
+Received: by mail-oi0-f48.google.com with SMTP id x3so66470808oia.1
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Aug 2017 09:32:45 -0700 (PDT)
+Received: from mail-oi0-f52.google.com (mail-oi0-f52.google.com. [209.85.218.52])
+        by smtp.gmail.com with ESMTPSA id h11sm4104353oif.34.2017.08.09.09.32.43
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 09 Aug 2017 09:32:43 -0700 (PDT)
+Received: by mail-oi0-f52.google.com with SMTP id x3so66469975oia.1
+        for <ceph-devel@vger.kernel.org>; Wed, 09 Aug 2017 09:32:43 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>, Matt Benjamin <mbenjami@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-R3JlYXQgdG8ga25vdyB0aGUgdXBkYXRlLiBJdCB3YXMgd29ydGggc2VuZGluZyBlbWFpbCB0byBN
-TC4NCg0KVGhhbmtzLA0KTml0aW4NCg0KDQpPbiA4LzgvMTcsIDg6MDcgUE0sICJQYXZhbiBSYWxs
-YWJoYW5kaSIgPFBSYWxsYWJoYW5kaUB3YWxtYXJ0bGFicy5jb20+IHdyb3RlOg0KDQogICAgWWVz
-LCBJIGhhdmUgZ2l2ZW4gdGhlIHRyYWNrZXIgZGV0YWlscyBpbiB0aGUgdXNlcnMgTUwsIGhlcmUg
-aXQgaXMgaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzIwMzgwDQogICAgDQogICAgVGhh
-bmtzLA0KICAgIC1QYXZhbi4NCiAgICANCiAgICBPbiAwOS8wOC8xNywgNDo0OSBBTSwgImNlcGgt
-ZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBNYXR0IEJlbmphbWluIiA8
-Y2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVoYWxmIG9mIG1iZW5qYW1pQHJl
-ZGhhdC5jb20+IHdyb3RlOg0KICAgIA0KICAgICAgICBIaSBOaXRpbiwNCiAgICAgICAgDQogICAg
-ICAgIEl0J3MgcGVuZGluZy1iYWNrcG9ydC4NCiAgICAgICAgDQogICAgICAgIE1hdHQNCiAgICAg
-ICAgDQogICAgICAgIE9uIFR1ZSwgQXVnIDgsIDIwMTcgYXQgNjozNyBQTSwgS2FtYmxlLCBOaXRp
-biBBDQogICAgICAgIDxOaXRpbi5LYW1ibGVAdGVyYWRhdGEuY29tPiB3cm90ZToNCiAgICAgICAg
-PiBHb29kIHlvdSBoYXZlIGJyb3VnaHQgdGhpcyBpc3N1ZS4gSSBhbHNvIGhhdmUgc2VlbiB0aGUg
-c3RhbGUgaW5kZXggZW50cmllcyBsaW5nZXJpbmcgYWZ0ZXIgb2JqZWN0aW9uIGRlbGV0aW9uIGZv
-ciByZ3cuIEl0IHdvdWxkIGJlIG5pY2UgdG8gc2VlIHRoaXMgaXNzdWUgY2FwdHVyZWQgYW5kIGFk
-ZHJlc3NlZCBpbiBhIGJ1Zy4NCiAgICAgICAgPg0KICAgICAgICA+IE5pdGluDQogICAgICAgID4N
-CiAgICAgICAgPg0KICAgICAgICA+IE9uIDYvMTkvMTcsIDEwOjM3IEFNLCAiY2VwaC1kZXZlbC1v
-d25lckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVoYWxmIG9mIFBhdmFuIFJhbGxhYmhhbmRpIiA8Y2Vw
-aC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVoYWxmIG9mIFBSYWxsYWJoYW5kaUB3
-YWxtYXJ0bGFicy5jb20+IHdyb3RlOg0KICAgICAgICA+DQogICAgICAgID4gICAgIE9uIG1hbnkg
-b2Ygb3VyIGNsdXN0ZXJzIHJ1bm5pbmcgSmV3ZWwgKDEwLjIuNSspLCBhbSBydW5uaW5nIGludG8g
-YSBzdHJhbmdlIHByb2JsZW0gb2YgaGF2aW5nIHN0YWxlIGJ1Y2tldCBpbmRleCBlbnRyaWVzIGxl
-ZnQgb3ZlciBmb3IgKHNvbWUgb2YgdGhlKSBvYmplY3RzIGRlbGV0ZWQuIFRob3VnaCBpdCBpcyBu
-b3QgcmVwcm9kdWNpYmxlIGF0IHdpbGwsIGl0IGhhcyBiZWVuIHByZXR0eSBjb25zaXN0ZW50IG9m
-IGxhdGUgYW5kIGFtIGNsdWVsZXNzIGF0IHRoaXMgcG9pbnQgZm9yIHRoZSBwb3NzaWJsZSByZWFz
-b25zIHRvIGhhcHBlbiBzby4NCiAgICAgICAgPg0KICAgICAgICA+ICAgICBUaGUgc3ltcHRvbXMg
-YXJlIHRoYXQgdGhlIGFjdHVhbCBkZWxldGUgb3BlcmF0aW9uIG9mIGFuIG9iamVjdCBpcyByZXBv
-cnRlZCBzdWNjZXNzZnVsIGluIHRoZSBSR1cgbG9ncywgYnV0IGEgYnVja2V0IGxpc3Qgb24gdGhl
-IGNvbnRhaW5lciB3b3VsZCBzdGlsbCBzaG93IHRoZSBkZWxldGVkIG9iamVjdC4gQW4gYXR0ZW1w
-dCB0byBkb3dubG9hZC9zdGF0IG9mIHRoZSBvYmplY3QgYXBwcm9wcmlhdGVseSByZXN1bHRzIGlu
-IGEgZmFpbHVyZS4gTm8gZmFpbHVyZXMgYXJlIHNlZW4gaW4gdGhlIHJlc3BlY3RpdmUgT1NEcyB3
-aGVyZSB0aGUgYnVja2V0IGluZGV4IG9iamVjdCBpcyBsb2NhdGVkLiBBbmQgcmVidWlsZGluZyB0
-aGUgYnVja2V0IGluZGV4IGJ5IHJ1bm5pbmcg4oCYcmFkb3Nndy1hZG1pbiBidWNrZXQgY2hlY2sg
-4oCTZml44oCZIHdvdWxkIGZpeCB0aGUgaXNzdWUuDQogICAgICAgID4NCiAgICAgICAgPiAgICAg
-VGhvdWdoIEkgY291bGQgc2ltdWxhdGUgdGhlIHByb2JsZW0gYnkgaW5zdHJ1bWVudGluZyB0aGUg
-Y29kZSwgdG8gbm90IHRvIGhhdmUgaW52b2tlZCBgY29tcGxldGVfZGVsYCBvbiB0aGUgYnVja2V0
-IGluZGV4IG9wIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgvYmxvYi9tYXN0ZXIvc3JjL3Jn
-dy9yZ3dfcmFkb3MuY2MjTDg3OTMsIGJ1dCB0aGF0IGNhbGwgaXMgYWx3YXlzIHNlZW0gdG8gYmUg
-bWFkZSB1bmxlc3MgdGhlcmUgaXMgYSBjYXNjYWRpbmcgZXJyb3IgZnJvbSB0aGUgYWN0dWFsIGRl
-bGV0ZSBvcGVyYXRpb24gb2YgdGhlIG9iamVjdCwgd2hpY2ggZG9lc27igJl0IHNlZW0gdG8gYmUg
-dGhlIGNhc2UgaGVyZS4NCiAgICAgICAgPg0KICAgICAgICA+ICAgICBJIHdhbnRlZCB0byBrbm93
-IHRoZSBwb3NzaWJsZSByZWFzb25zIHdoZXJlIHRoZSBidWNrZXQgaW5kZXggd291bGQgYmUgbGVm
-dCBpbiBzdWNoIGxpbWJvLCBhbnkgcG9pbnRlcnMgd291bGQgYmUgbXVjaCBhcHByZWNpYXRlZC4g
-RldJVywgd2UgYXJlIG5vdCBzaGFyZGluZyB0aGUgYnVja2V0cyBhbmQgdmVyeSByZWNlbnRseSBJ
-4oCZdmUgc2VlbiB0aGlzIGhhcHBlbiB3aXRoIGJ1Y2tldHMgaGF2aW5nIGFzIGxvdyBhcw0KICAg
-ICAgICA+ICAgICA8IDEwIG9iamVjdHMsIGFuZCB3ZSBhcmUgdXNpbmcgc3dpZnQgZm9yIGFsbCB0
-aGUgb3BlcmF0aW9ucy4NCiAgICAgICAgPg0KICAgICAgICA+ICAgICBUaGFua3MsDQogICAgICAg
-ID4gICAgIC1QYXZhbi4NCiAgICAgICAgPg0KICAgICAgICA+ICAgICA/77+9ey5u77+9K++/ve+/
-ve+/ve+/ve+/ve+/ve+/vSsl77+977+9bHp3be+/ve+/vWLvv73rp7Lvv73vv71y77+977+9ecep
-77+91696WO+/ve+/vT/vv73vv73cqH3vv73vv73vv73GoHrvv70majordu+/ve+/ve+/vT/vv73v
-v73vv73vv716Wivvv73vv70rembvv73vv73vv71o77+977+977+9fu+/ve+/ve+/ve+/vWnvv73v
-v73vv71677+9P++/vXfvv73vv73vv70/77+977+977+977+9Ju+/vSnfoj9mDQogICAgICAgID4N
-CiAgICAgICAgLS0NCiAgICAgICAgVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQg
-dGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQogICAgICAgIHRoZSBib2R5IG9m
-IGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnDQogICAgICAgIE1vcmUgbWFq
-b3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRt
-bA0KICAgICAgICANCiAgICANCiAgICANCg0K
+Hi all,
+
+During some ceph-fuse perf testing I've noticed that small buffered
+write throughput is slowed down by the debug_client ldout logs.
+At the default 0/5, the in mem log is filled with, e.g.:
+
+ -9760> 2017-08-09 18:16:10.487511 7f848c1a5700  3 client.407554315
+xattr_permission 0x7f84a52c8a00 = 0
+ -9759> 2017-08-09 18:16:10.487515 7f848c1a5700  3 client.407554315
+_getxattr(10003284f73, "security.capability", 0) = -61
+ -9758> 2017-08-09 18:16:10.487525 7f848c1a5700  3 client.407554315
+ll_forget 10003284f73 1
+ -9757> 2017-08-09 18:16:10.487542 7f848b9a4700  3 client.407554315
+ll_write 0x7f84a5147680 10003284f73 71824~1
+ -9756> 2017-08-09 18:16:10.487566 7f848b9a4700  3 client.407554315
+ll_write 0x7f84a5147680 71824~1 = 1
+ -9755> 2017-08-09 18:16:10.487599 7f848c9a6700  3 client.407554315
+ll_getxattr 10003284f73.head security.capability size 0
+ -9754> 2017-08-09 18:16:10.487609 7f848c9a6700  3 client.407554315
+xattr_permission 0x7f84a52c8a00 = 0
+ -9753> 2017-08-09 18:16:10.487612 7f848c9a6700  3 client.407554315
+_getxattr(10003284f73, "security.capability", 0) = -61
+
+(so even tiny 1 byte buffered writes result in huge amounts of logging work).
+
+In a simple test [1], I found that 100000 one byte writes takes
+~10-11s with the default client log level, and ~5 to 6s with
+debug_client=0/2.
+
+I would therefore propose either increasing the ldout level for these
+ll_* client ops to 6, or decreasing the default debug_client level to
+0/2.
+
+Any opinions?
+
+Cheers, Dan
+
+[1]
+for i in xrange(100000):
+  f.write('x')
+  f.flush()
+f.close()
