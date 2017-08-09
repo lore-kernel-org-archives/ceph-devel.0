@@ -1,50 +1,70 @@
-From: Matt Benjamin <mbenjami@redhat.com>
+From: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
 Subject: Re: radosgw: stale/leaked bucket index entries
-Date: Tue, 8 Aug 2017 19:18:16 -0400
-Message-ID: <CAKOnarm0Lm5Ya_XLz8bXpYTNgikSbOLFA0FYvhuO0fSpB_-SfQ@mail.gmail.com>
-References: <6B335CE5-2828-47E7-A993-2D5ACC302AC1@walmartlabs.com> <07824FC2-2F4A-4DAD-B38A-39973B4D96E5@TERADATA.COM>
+Date: Wed, 9 Aug 2017 03:07:28 +0000
+Message-ID: <90B5C64A-3A70-416A-AB62-57074C8371E2@walmartlabs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f44.google.com ([74.125.83.44]:37168 "EHLO
-        mail-pg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752094AbdHHXSR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Aug 2017 19:18:17 -0400
-Received: by mail-pg0-f44.google.com with SMTP id y129so20577243pgy.4
-        for <ceph-devel@vger.kernel.org>; Tue, 08 Aug 2017 16:18:17 -0700 (PDT)
-In-Reply-To: <07824FC2-2F4A-4DAD-B38A-39973B4D96E5@TERADATA.COM>
+Received: from ppes-mail-e5.wal-mart.com ([161.165.133.167]:35551 "EHLO
+        ppes-mail-e5.wal-mart.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752497AbdHIDeV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 8 Aug 2017 23:34:21 -0400
+Content-Language: en-GB
+Content-ID: <24F9796DE1A0D946BCC55B9F9CAC5603@NAMP100.PROD.OUTLOOK.COM>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
-Cc: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Matt Benjamin <mbenjami@redhat.com>, "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Nitin,
-
-It's pending-backport.
-
-Matt
-
-On Tue, Aug 8, 2017 at 6:37 PM, Kamble, Nitin A
-<Nitin.Kamble@teradata.com> wrote:
-> Good you have brought this issue. I also have seen the stale index entries lingering after objection deletion for rgw. It would be nice to see this issue captured and addressed in a bug.
->
-> Nitin
->
->
-> On 6/19/17, 10:37 AM, "ceph-devel-owner@vger.kernel.org on behalf of Pavan Rallabhandi" <ceph-devel-owner@vger.kernel.org on behalf of PRallabhandi@walmartlabs.com> wrote:
->
->     On many of our clusters running Jewel (10.2.5+), am running into a strange problem of having stale bucket index entries left over for (some of the) objects deleted. Though it is not reproducible at will, it has been pretty consistent of late and am clueless at this point for the possible reasons to happen so.
->
->     The symptoms are that the actual delete operation of an object is reported successful in the RGW logs, but a bucket list on the container would still show the deleted object. An attempt to download/stat of the object appropriately results in a failure. No failures are seen in the respective OSDs where the bucket index object is located. And rebuilding the bucket index by running ‘radosgw-admin bucket check –fix’ would fix the issue.
->
->     Though I could simulate the problem by instrumenting the code, to not to have invoked `complete_del` on the bucket index op https://github.com/ceph/ceph/blob/master/src/rgw/rgw_rados.cc#L8793, but that call is always seem to be made unless there is a cascading error from the actual delete operation of the object, which doesn’t seem to be the case here.
->
->     I wanted to know the possible reasons where the bucket index would be left in such limbo, any pointers would be much appreciated. FWIW, we are not sharding the buckets and very recently I’ve seen this happen with buckets having as low as
->     < 10 objects, and we are using swift for all the operations.
->
->     Thanks,
->     -Pavan.
->
->     ?�{.n�+�������+%��lzwm��b�맲��r��yǩ�ׯzX��?��ܨ}���Ơz�&j:+v���?����zZ+��+zf���h���~����i���z�?�w���?����&�)ߢ?f
->
+WWVzLCBJIGhhdmUgZ2l2ZW4gdGhlIHRyYWNrZXIgZGV0YWlscyBpbiB0aGUgdXNlcnMgTUwsIGhl
+cmUgaXQgaXMgaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzIwMzgwDQoNClRoYW5rcywN
+Ci1QYXZhbi4NCg0KT24gMDkvMDgvMTcsIDQ6NDkgQU0sICJjZXBoLWRldmVsLW93bmVyQHZnZXIu
+a2VybmVsLm9yZyBvbiBiZWhhbGYgb2YgTWF0dCBCZW5qYW1pbiIgPGNlcGgtZGV2ZWwtb3duZXJA
+dmdlci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBtYmVuamFtaUByZWRoYXQuY29tPiB3cm90ZToN
+Cg0KICAgIEhpIE5pdGluLA0KICAgIA0KICAgIEl0J3MgcGVuZGluZy1iYWNrcG9ydC4NCiAgICAN
+CiAgICBNYXR0DQogICAgDQogICAgT24gVHVlLCBBdWcgOCwgMjAxNyBhdCA2OjM3IFBNLCBLYW1i
+bGUsIE5pdGluIEENCiAgICA8Tml0aW4uS2FtYmxlQHRlcmFkYXRhLmNvbT4gd3JvdGU6DQogICAg
+PiBHb29kIHlvdSBoYXZlIGJyb3VnaHQgdGhpcyBpc3N1ZS4gSSBhbHNvIGhhdmUgc2VlbiB0aGUg
+c3RhbGUgaW5kZXggZW50cmllcyBsaW5nZXJpbmcgYWZ0ZXIgb2JqZWN0aW9uIGRlbGV0aW9uIGZv
+ciByZ3cuIEl0IHdvdWxkIGJlIG5pY2UgdG8gc2VlIHRoaXMgaXNzdWUgY2FwdHVyZWQgYW5kIGFk
+ZHJlc3NlZCBpbiBhIGJ1Zy4NCiAgICA+DQogICAgPiBOaXRpbg0KICAgID4NCiAgICA+DQogICAg
+PiBPbiA2LzE5LzE3LCAxMDozNyBBTSwgImNlcGgtZGV2ZWwtb3duZXJAdmdlci5rZXJuZWwub3Jn
+IG9uIGJlaGFsZiBvZiBQYXZhbiBSYWxsYWJoYW5kaSIgPGNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
+ZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBQUmFsbGFiaGFuZGlAd2FsbWFydGxhYnMuY29tPiB3cm90
+ZToNCiAgICA+DQogICAgPiAgICAgT24gbWFueSBvZiBvdXIgY2x1c3RlcnMgcnVubmluZyBKZXdl
+bCAoMTAuMi41KyksIGFtIHJ1bm5pbmcgaW50byBhIHN0cmFuZ2UgcHJvYmxlbSBvZiBoYXZpbmcg
+c3RhbGUgYnVja2V0IGluZGV4IGVudHJpZXMgbGVmdCBvdmVyIGZvciAoc29tZSBvZiB0aGUpIG9i
+amVjdHMgZGVsZXRlZC4gVGhvdWdoIGl0IGlzIG5vdCByZXByb2R1Y2libGUgYXQgd2lsbCwgaXQg
+aGFzIGJlZW4gcHJldHR5IGNvbnNpc3RlbnQgb2YgbGF0ZSBhbmQgYW0gY2x1ZWxlc3MgYXQgdGhp
+cyBwb2ludCBmb3IgdGhlIHBvc3NpYmxlIHJlYXNvbnMgdG8gaGFwcGVuIHNvLg0KICAgID4NCiAg
+ICA+ICAgICBUaGUgc3ltcHRvbXMgYXJlIHRoYXQgdGhlIGFjdHVhbCBkZWxldGUgb3BlcmF0aW9u
+IG9mIGFuIG9iamVjdCBpcyByZXBvcnRlZCBzdWNjZXNzZnVsIGluIHRoZSBSR1cgbG9ncywgYnV0
+IGEgYnVja2V0IGxpc3Qgb24gdGhlIGNvbnRhaW5lciB3b3VsZCBzdGlsbCBzaG93IHRoZSBkZWxl
+dGVkIG9iamVjdC4gQW4gYXR0ZW1wdCB0byBkb3dubG9hZC9zdGF0IG9mIHRoZSBvYmplY3QgYXBw
+cm9wcmlhdGVseSByZXN1bHRzIGluIGEgZmFpbHVyZS4gTm8gZmFpbHVyZXMgYXJlIHNlZW4gaW4g
+dGhlIHJlc3BlY3RpdmUgT1NEcyB3aGVyZSB0aGUgYnVja2V0IGluZGV4IG9iamVjdCBpcyBsb2Nh
+dGVkLiBBbmQgcmVidWlsZGluZyB0aGUgYnVja2V0IGluZGV4IGJ5IHJ1bm5pbmcg4oCYcmFkb3Nn
+dy1hZG1pbiBidWNrZXQgY2hlY2sg4oCTZml44oCZIHdvdWxkIGZpeCB0aGUgaXNzdWUuDQogICAg
+Pg0KICAgID4gICAgIFRob3VnaCBJIGNvdWxkIHNpbXVsYXRlIHRoZSBwcm9ibGVtIGJ5IGluc3Ry
+dW1lbnRpbmcgdGhlIGNvZGUsIHRvIG5vdCB0byBoYXZlIGludm9rZWQgYGNvbXBsZXRlX2RlbGAg
+b24gdGhlIGJ1Y2tldCBpbmRleCBvcCBodHRwczovL2dpdGh1Yi5jb20vY2VwaC9jZXBoL2Jsb2Iv
+bWFzdGVyL3NyYy9yZ3cvcmd3X3JhZG9zLmNjI0w4NzkzLCBidXQgdGhhdCBjYWxsIGlzIGFsd2F5
+cyBzZWVtIHRvIGJlIG1hZGUgdW5sZXNzIHRoZXJlIGlzIGEgY2FzY2FkaW5nIGVycm9yIGZyb20g
+dGhlIGFjdHVhbCBkZWxldGUgb3BlcmF0aW9uIG9mIHRoZSBvYmplY3QsIHdoaWNoIGRvZXNu4oCZ
+dCBzZWVtIHRvIGJlIHRoZSBjYXNlIGhlcmUuDQogICAgPg0KICAgID4gICAgIEkgd2FudGVkIHRv
+IGtub3cgdGhlIHBvc3NpYmxlIHJlYXNvbnMgd2hlcmUgdGhlIGJ1Y2tldCBpbmRleCB3b3VsZCBi
+ZSBsZWZ0IGluIHN1Y2ggbGltYm8sIGFueSBwb2ludGVycyB3b3VsZCBiZSBtdWNoIGFwcHJlY2lh
+dGVkLiBGV0lXLCB3ZSBhcmUgbm90IHNoYXJkaW5nIHRoZSBidWNrZXRzIGFuZCB2ZXJ5IHJlY2Vu
+dGx5IEnigJl2ZSBzZWVuIHRoaXMgaGFwcGVuIHdpdGggYnVja2V0cyBoYXZpbmcgYXMgbG93IGFz
+DQogICAgPiAgICAgPCAxMCBvYmplY3RzLCBhbmQgd2UgYXJlIHVzaW5nIHN3aWZ0IGZvciBhbGwg
+dGhlIG9wZXJhdGlvbnMuDQogICAgPg0KICAgID4gICAgIFRoYW5rcywNCiAgICA+ICAgICAtUGF2
+YW4uDQogICAgPg0KICAgID4gICAgID/vv717Lm7vv70r77+977+977+977+977+977+977+9KyXv
+v73vv71sendt77+977+9Yu+/veunsu+/ve+/vXLvv73vv715x6nvv73Xr3pY77+977+9P++/ve+/
+vdyofe+/ve+/ve+/vcageu+/vSZqOit277+977+977+9P++/ve+/ve+/ve+/vXpaK++/ve+/vSt6
+Zu+/ve+/ve+/vWjvv73vv73vv71+77+977+977+977+9ae+/ve+/ve+/vXrvv70/77+9d++/ve+/
+ve+/vT/vv73vv73vv73vv70m77+9Kd+iP2YNCiAgICA+DQogICAgLS0NCiAgICBUbyB1bnN1YnNj
+cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZl
+bCIgaW4NCiAgICB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
+Lm9yZw0KICAgIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcv
+bWFqb3Jkb21vLWluZm8uaHRtbA0KICAgIA0KDQo=
