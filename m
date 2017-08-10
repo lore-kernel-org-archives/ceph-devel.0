@@ -1,562 +1,91 @@
-From: Xuehan Xu <xxhdx1985126@gmail.com>
-Subject: Re: About the problem "export_diff relies on clone_overlap, which is
- lost when cache tier is enabled"
-Date: Thu, 10 Aug 2017 15:06:40 +0800
-Message-ID: <CAJACTueHh3FKGHO7vACd5RedTZKELiDL-uEpFn5f2i_+3gAreA@mail.gmail.com>
-References: <CAJACTuf6q0r0xk6jzohj94cUDRUKKuweTPv021829M-UZZWTHg@mail.gmail.com>
- <CAJACTud-qK7WDZnUGfPKP1iTPoStbDGUG28zQ0ftBTBsqQZghA@mail.gmail.com>
- <CAJACTuf3M9tMXROo6waH-_VLFpfhBibEOFM31wUbdfUZDtqh0A@mail.gmail.com>
- <CA+aFP1BG4LQCN7trZ-Z_boiGtLHZ44_Xf9D+Au0Qq1nC=seHkg@mail.gmail.com>
- <CAJACTucaKm+nZUUkQYszZtjt7K=X1uvdpUucxL+pV1AHrmewEw@mail.gmail.com>
- <CA+aFP1Dki1hw+VGZo9Nm4e=qx2P6-pCcG4PLK3FeDHJ1-pAkGA@mail.gmail.com>
- <CAJACTudkLVT=dcWo_FpgrVuxJ8smFD2VqLU6x2eVWyggh9UJAA@mail.gmail.com>
- <CAJACTuf1Wkh9LEw_7MO-0Oka2VoXOEeWe+A5=owVk5tRTuf_2A@mail.gmail.com>
- <CAJACTudXzghOB=RJVcC7PKqnGxWdz8aSXderNePB3=8gqVcdWA@mail.gmail.com> <CA+aFP1D41yBKHwc61+ngeEw83+cxz+PmGHthyihqq_X8DiGiGQ@mail.gmail.com>
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: default debug_client level is too high
+Date: Thu, 10 Aug 2017 09:10:35 +0200
+Message-ID: <CABZ+qqmQyODWL_Df2yKFSt3DSH+eCiJDdD5J0AXCVFc6MG3_FA@mail.gmail.com>
+References: <CABZ+qq=cNRn+18bLM6_T_weeEAweg9jKe2n8jjitsDz7bgtpNQ@mail.gmail.com>
+ <CALe9h7fXYc_nLB-rybtoz7QNaXVwHsMF5k+XH_sgLS7e+ndV+A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f41.google.com ([209.85.218.41]:35678 "EHLO
-        mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751361AbdHJHGl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Aug 2017 03:06:41 -0400
-Received: by mail-oi0-f41.google.com with SMTP id e124so82545254oig.2
-        for <ceph-devel@vger.kernel.org>; Thu, 10 Aug 2017 00:06:41 -0700 (PDT)
-In-Reply-To: <CA+aFP1D41yBKHwc61+ngeEw83+cxz+PmGHthyihqq_X8DiGiGQ@mail.gmail.com>
+Received: from mail-oi0-f65.google.com ([209.85.218.65]:37234 "EHLO
+        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751416AbdHJHLR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 10 Aug 2017 03:11:17 -0400
+Received: by mail-oi0-f65.google.com with SMTP id j194so7786813oib.4
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Aug 2017 00:11:16 -0700 (PDT)
+Received: from mail-oi0-f51.google.com (mail-oi0-f51.google.com. [209.85.218.51])
+        by smtp.gmail.com with ESMTPSA id c22sm6052204oig.27.2017.08.10.00.11.15
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 10 Aug 2017 00:11:15 -0700 (PDT)
+Received: by mail-oi0-f51.google.com with SMTP id x3so82471950oia.1
+        for <ceph-devel@vger.kernel.org>; Thu, 10 Aug 2017 00:11:15 -0700 (PDT)
+In-Reply-To: <CALe9h7fXYc_nLB-rybtoz7QNaXVwHsMF5k+XH_sgLS7e+ndV+A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dillaman@redhat.com
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi, Jason.
-
-I did a test, it turned out that, after flushing the object out of the
-cache tier, the clone overlap in base tier changed to empty, as is
-shown below. I think this maybe because that the flush operation just
-mark the whole range of the object being flushed as modified, so if
-the object's size hasn't changed, the overlap becomes empty. Is this
-right?
-
-Thank you:-)
-
-{
-    "id": {
-        "oid": "test.obj",
-        "key": "",
-        "snapid": -2,
-        "hash": 3575411564,
-        "max": 0,
-        "pool": 10,
-        "namespace": "",
-        "max": 0
-    },
-    "info": {
-        "oid": {
-            "oid": "test.obj",
-            "key": "",
-            "snapid": -2,
-            "hash": 3575411564,
-            "max": 0,
-            "pool": 10,
-            "namespace": ""
-        },
-        "version": "4876'9",
-        "prior_version": "4854'8",
-        "last_reqid": "osd.35.4869:1",
-        "user_version": 16,
-        "size": 4194303,
-        "mtime": "2017-08-10 14:54:56.087387",
-        "local_mtime": "2017-08-10 14:59:15.252755",
-        "lost": 0,
-        "flags": 52,
-        "snaps": [],
-        "truncate_seq": 0,
-        "truncate_size": 0,
-        "data_digest": 2827420887,
-        "omap_digest": 4294967295,
-        "watchers": {}
-    },
-    "stat": {
-        "size": 4194303,
-        "blksize": 4096,
-        "blocks": 8200,
-        "nlink": 1
-    },
-    "SnapSet": {
-        "snap_context": {
-            "seq": 3,
-            "snaps": [
-                3
-            ]
-        },
-        "head_exists": 1,
-        "clones": [
-            {
-                "snap": 3,
-                "size": 4194303,
-                "overlap": "[]"
-            }
-        ]
-    }
-}
-
-On 9 August 2017 at 23:26, Jason Dillaman <jdillama@redhat.com> wrote:
-> If you flush the object out of the cache tier so that its changes are
-> recorded in the base tier, is the overlap correctly recorded in the
-> base tier?
->
-> On Wed, Aug 9, 2017 at 12:24 AM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->> By the way, according to our test, since the modified range is not
->> recorded either in the cache tier or in the base tier, I think
->> proxying the "list-snaps" down to the base tier might not work as
->> well, is that right?
+On Wed, Aug 9, 2017 at 6:42 PM, John Spray <jspray@redhat.com> wrote:
+> On Wed, Aug 9, 2017 at 5:32 PM, Dan van der Ster <dan@vanderster.com> wrote:
+>> Hi all,
 >>
->> On 9 August 2017 at 12:20, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->>> Sorry, I didn't "reply all"....:-)
->>>
->>>
->>> ---------- Forwarded message ----------
->>> From: Xuehan Xu <xxhdx1985126@gmail.com>
->>> Date: 9 August 2017 at 12:14
->>> Subject: Re: About the problem "export_diff relies on clone_overlap,
->>> which is lost when cache tier is enabled"
->>> To: dillaman@redhat.com
->>>
->>>
->>> Um, no, I don't think they are related.
->>>
->>> My problem is this:
->>>
->>> At first , we tried to use "rbd export-diff" to do incremental backup
->>> on Jewel verion ceph cluster which is cache-tier enabled. However,
->>> when we compare the original rbd image and the backup rbd image, we
->>> find that they are different. After a series of debugging, we found
->>> that this is because WRITE ops' "modified_range" is not substracted
->>> from the clone overlap of its targeting object's HEAD version when
->>> that object's HEAD verion is in cache iter and its most recent clone
->>> object is not, which led to the miscalculation of the
->>> "calc_snap_set_diff" function.
->>>
->>> For example, we did such a test: we first made created a snap for an
->>> rbd image "test.2.img" whose size is only 4MB which means it only
->>> contains one object; then, we sent a series of AioWrites to
->>> "test.2.img" to promote its HEAD object into cache tier, while leaving
->>> its clone object in the base tier only; at that time, we used
->>> "ceph-objectstore-tool" to dump the object we wrote to, and the result
->>> was as follows:
->>>
->>> {
->>>     "id": {
->>>         "oid": "rbd_data.2aae62ae8944a.0000000000000000",
->>>         "key": "",
->>>         "snapid": -2,
->>>         "hash": 2375431681,
->>>         "max": 0,
->>>         "pool": 4,
->>>         "namespace": "",
->>>         "max": 0
->>>     },
->>>     "info": {
->>>         "oid": {
->>>             "oid": "rbd_data.2aae62ae8944a.0000000000000000",
->>>             "key": "",
->>>             "snapid": -2,
->>>             "hash": 2375431681,
->>>             "max": 0,
->>>             "pool": 4,
->>>             "namespace": ""
->>>         },
->>>         "version": "4536'2728",
->>>         "prior_version": "4536'2727",
->>>         "last_reqid": "client.174858.0:10",
->>>         "user_version": 14706,
->>>         "size": 68,
->>>         "mtime": "2017-08-09 11:30:18.263983",
->>>         "local_mtime": "2017-08-09 11:30:18.264310",
->>>         "lost": 0,
->>>         "flags": 4,
->>>         "snaps": [],
->>>         "truncate_seq": 0,
->>>         "truncate_size": 0,
->>>         "data_digest": 4294967295,
->>>         "omap_digest": 4294967295,
->>>         "watchers": {}
->>>     },
->>>     "stat": {
->>>         "size": 68,
->>>         "blksize": 4096,
->>>         "blocks": 16,
->>>         "nlink": 1
->>>     },
->>>     "SnapSet": {
->>>         "snap_context": {
->>>             "seq": 28,
->>>             "snaps": [
->>>                 28
->>>             ]
->>>         },
->>>         "head_exists": 1,
->>>         "clones": [
->>>             {
->>>                 "snap": 28,
->>>                 "size": 68,
->>>                 "overlap": "[0~64]"
->>>             }
->>>         ]
->>>     }
->>> }
->>>
->>> In this result, we found that the overlap for clone "28" is [0~64]. So
->>> we specifically sent a AioWrite req to this object to write to the
->>> offset 32 with 4 bytes of ramdon data, which we thought the overlap
->>> should change to [0~32, 36~64]. However, the result is as follows:
->>>
->>> {
->>>     "id": {
->>>         "oid": "rbd_data.2aae62ae8944a.0000000000000000",
->>>         "key": "",
->>>         "snapid": -2,
->>>         "hash": 2375431681,
->>>         "max": 0,
->>>         "pool": 4,
->>>         "namespace": "",
->>>         "max": 0
->>>     },
->>>     "info": {
->>>         "oid": {
->>>             "oid": "rbd_data.2aae62ae8944a.0000000000000000",
->>>             "key": "",
->>>             "snapid": -2,
->>>             "hash": 2375431681,
->>>             "max": 0,
->>>             "pool": 4,
->>>             "namespace": ""
->>>         },
->>>         "version": "4546'2730",
->>>         "prior_version": "4538'2729",
->>>         "last_reqid": "client.155555.0:10",
->>>         "user_version": 14708,
->>>         "size": 4096,
->>>         "mtime": "2017-08-09 11:36:20.717910",
->>>         "local_mtime": "2017-08-09 11:36:20.719039",
->>>         "lost": 0,
->>>         "flags": 4,
->>>         "snaps": [],
->>>         "truncate_seq": 0,
->>>         "truncate_size": 0,
->>>         "data_digest": 4294967295,
->>>         "omap_digest": 4294967295,
->>>         "watchers": {}
->>>     },
->>>     "stat": {
->>>         "size": 4096,
->>>         "blksize": 4096,
->>>         "blocks": 16,
->>>         "nlink": 1
->>>     },
->>>     "SnapSet": {
->>>         "snap_context": {
->>>             "seq": 28,
->>>             "snaps": [
->>>                 28
->>>             ]
->>>         },
->>>         "head_exists": 1,
->>>         "clones": [
->>>             {
->>>                 "snap": 28,
->>>                 "size": 68,
->>>                 "overlap": "[0~64]"
->>>             }
->>>         ]
->>>     }
->>> }
->>>
->>> It's obvious that it didn't change at all. If we do export-diff under
->>> this circumstance, the result would be wrong. Meanwhile, in the base
->>> tier, the "ceph-objectstore-tool" dump's result also showed that the
->>> overlap recorded in the base tier didn't change also:
->>> {
->>>     "id": {
->>>         "oid": "rbd_data.2aae62ae8944a.0000000000000000",
->>>         "key": "",
->>>         "snapid": -2,
->>>         "hash": 2375431681,
->>>         "max": 0,
->>>         "pool": 3,
->>>         "namespace": "",
->>>         "max": 0
->>>     },
->>>     "info": {
->>>         "oid": {
->>>             "oid": "rbd_data.2aae62ae8944a.0000000000000000",
->>>             "key": "",
->>>             "snapid": -2,
->>>             "hash": 2375431681,
->>>             "max": 0,
->>>             "pool": 3,
->>>             "namespace": ""
->>>         },
->>>         "version": "4536'14459",
->>>         "prior_version": "4536'14458",
->>>         "last_reqid": "client.174834.0:10",
->>>         "user_version": 14648,
->>>         "size": 68,
->>>         "mtime": "2017-08-09 11:30:01.412634",
->>>         "local_mtime": "2017-08-09 11:30:01.413614",
->>>         "lost": 0,
->>>         "flags": 36,
->>>         "snaps": [],
->>>         "truncate_seq": 0,
->>>         "truncate_size": 0,
->>>         "data_digest": 4294967295,
->>>         "omap_digest": 4294967295,
->>>         "watchers": {}
->>>     },
->>>     "stat": {
->>>         "size": 68,
->>>         "blksize": 4096,
->>>         "blocks": 16,
->>>         "nlink": 1
->>>     },
->>>     "SnapSet": {
->>>         "snap_context": {
->>>             "seq": 28,
->>>             "snaps": [
->>>                 28
->>>             ]
->>>         },
->>>         "head_exists": 1,
->>>         "clones": [
->>>             {
->>>                 "snap": 28,
->>>                 "size": 68,
->>>                 "overlap": "[0~64]"
->>>             }
->>>         ]
->>>     }
->>> }
->>>
->>> Then we turn to the source code to find the reason for this. And we
->>> found that, the reason should be that, in the
->>> ReplicatedPG::make_writeable method, when determining whether the
->>> write op's modified range should be subtracted from the clone overlap,
->>> it has pass two condition check: "ctx->new_snapset.clones.size() > 0"
->>> and "is_present_clone(last_clone_oid)", as the code below shows.
->>>
->>>   // update most recent clone_overlap and usage stats
->>>   if (ctx->new_snapset.clones.size() > 0) {
->>>     /* we need to check whether the most recent clone exists, if it's
->>> been evicted,
->>>      * it's not included in the stats */
->>>     hobject_t last_clone_oid = soid;
->>>     last_clone_oid.snap = ctx->new_snapset.clone_overlap.rbegin()->first;
->>>     if (is_present_clone(last_clone_oid)) {
->>>       interval_set<uint64_t> &newest_overlap =
->>> ctx->new_snapset.clone_overlap.rbegin()->second;
->>>       ctx->modified_ranges.intersection_of(newest_overlap);
->>>       // modified_ranges is still in use by the clone
->>>       add_interval_usage(ctx->modified_ranges, ctx->delta_stats);
->>>       newest_overlap.subtract(ctx->modified_ranges);
->>>     }
->>>   }
->>>
->>> We thought that the latter condition check
->>> "is_present_clone(last_clone_oid)" might not be reasonable to be a
->>> judgement base for the determination of whether to subtract the clone
->>> overlap with write ops' modified range, so we changed to code above to
->>> the following, which moved the subtraction out of the latter condition
->>> check, and submitted a pr for this:
->>> https://github.com/ceph/ceph/pull/16790:
->>>
->>>   // update most recent clone_overlap and usage stats
->>>   if (ctx->new_snapset.clones.size() > 0) {
->>>     /* we need to check whether the most recent clone exists, if it's
->>> been evicted,
->>>      * it's not included in the stats */
->>>     hobject_t last_clone_oid = soid;
->>>     last_clone_oid.snap = ctx->new_snapset.clone_overlap.rbegin()->first;
->>>     interval_set<uint64_t> &newest_overlap =
->>> ctx->new_snapset.clone_overlap.rbegin()->second;
->>>     ctx->modified_ranges.intersection_of(newest_overlap);
->>>     newest_overlap.subtract(ctx->modified_ranges);
->>>
->>>     if (is_present_clone(last_clone_oid)) {
->>>       // modified_ranges is still in use by the clone
->>>       add_interval_usage(ctx->modified_ranges, ctx->delta_stats);
->>>     }
->>>   }
->>>
->>> In our test, this change solved the problem successfully, however, we
->>> can't confirm that this change won't cause any new problems. So, here
->>> we are discussing how to solve this problem:-)
->>>
->>> On 9 August 2017 at 09:26, Jason Dillaman <jdillama@redhat.com> wrote:
->>>> Is this issue related to https://github.com/ceph/ceph/pull/10626?
->>>>
->>>> On Mon, Aug 7, 2017 at 8:07 PM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->>>>> OK, I'll try that. Thank you:-)
->>>>>
->>>>> On 8 August 2017 at 04:48, Jason Dillaman <jdillama@redhat.com> wrote:
->>>>>> Could you just proxy the "list snaps" op from the cache tier down to
->>>>>> the base tier and combine the cache tier + base tier results? Reading
->>>>>> the associated ticket, it seems kludgy to me to attempt to work around
->>>>>> this within librbd by just refusing the provide intra-object diffs if
->>>>>> cache tiering is in-use.
->>>>>>
->>>>>> On Sat, Aug 5, 2017 at 11:56 AM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->>>>>>> Hi, everyone.
->>>>>>>
->>>>>>> Trying to solve the issue "http://tracker.ceph.com/issues/20896", I
->>>>>>> just did another test: I did some writes to an object
->>>>>>> "rbd_data.1ebc6238e1f29.0000000000000000" to raise its "HEAD" object
->>>>>>> to the cache tier, after which I specifically write to its offset 0x40
->>>>>>> with 4 bytes of random data. Then I used "ceph-objectstore-tool" to
->>>>>>> dump its "HEAD" version in the base tier, the result is as
->>>>>>> follows(before I raise it to cache tier, there is three snaps the
->>>>>>> latest of which is 26):
->>>>>>>
->>>>>>> {
->>>>>>>     "id": {
->>>>>>>         "oid": "rbd_data.1ebc6238e1f29.0000000000000000",
->>>>>>>         "key": "",
->>>>>>>         "snapid": -2,
->>>>>>>         "hash": 1655893237,
->>>>>>>         "max": 0,
->>>>>>>         "pool": 3,
->>>>>>>         "namespace": "",
->>>>>>>         "max": 0
->>>>>>>     },
->>>>>>>     "info": {
->>>>>>>         "oid": {
->>>>>>>             "oid": "rbd_data.1ebc6238e1f29.0000000000000000",
->>>>>>>             "key": "",
->>>>>>>             "snapid": -2,
->>>>>>>             "hash": 1655893237,
->>>>>>>             "max": 0,
->>>>>>>             "pool": 3,
->>>>>>>             "namespace": ""
->>>>>>>         },
->>>>>>>         "version": "4219'16423",
->>>>>>>         "prior_version": "3978'16310",
->>>>>>>         "last_reqid": "osd.70.4213:2359",
->>>>>>>         "user_version": 17205,
->>>>>>>         "size": 4194304,
->>>>>>>         "mtime": "2017-08-03 22:07:34.656122",
->>>>>>>         "local_mtime": "2017-08-05 23:02:33.628734",
->>>>>>>         "lost": 0,
->>>>>>>         "flags": 52,
->>>>>>>         "snaps": [],
->>>>>>>         "truncate_seq": 0,
->>>>>>>         "truncate_size": 0,
->>>>>>>         "data_digest": 2822203961,
->>>>>>>         "omap_digest": 4294967295,
->>>>>>>         "watchers": {}
->>>>>>>     },
->>>>>>>     "stat": {
->>>>>>>         "size": 4194304,
->>>>>>>         "blksize": 4096,
->>>>>>>         "blocks": 8200,
->>>>>>>         "nlink": 1
->>>>>>>     },
->>>>>>>     "SnapSet": {
->>>>>>>         "snap_context": {
->>>>>>>             "seq": 26,
->>>>>>>             "snaps": [
->>>>>>>                 26,
->>>>>>>                 25,
->>>>>>>                 16
->>>>>>>             ]
->>>>>>>         },
->>>>>>>         "head_exists": 1,
->>>>>>>         "clones": [
->>>>>>>             {
->>>>>>>                 "snap": 16,
->>>>>>>                 "size": 4194304,
->>>>>>>                 "overlap": "[4~4194300]"
->>>>>>>             },
->>>>>>>             {
->>>>>>>                 "snap": 25,
->>>>>>>                 "size": 4194304,
->>>>>>>                 "overlap": "[]"
->>>>>>>             },
->>>>>>>             {
->>>>>>>                 "snap": 26,
->>>>>>>                 "size": 4194304,
->>>>>>>                 "overlap": "[]"
->>>>>>>             }
->>>>>>>         ]
->>>>>>>     }
->>>>>>> }
->>>>>>>
->>>>>>> As we can see, its clone_overlap for snap 26 is empty, which,
->>>>>>> combining with the previous test described in
->>>>>>> http://tracker.ceph.com/issues/20896, means that the writes' "modified
->>>>>>> range" is neither recorded in the cache tier nor in the base tier.
->>>>>>>
->>>>>>> I think maybe we really should move the clone overlap modification out
->>>>>>> of the IF block which has the condition check "is_present_clone". As
->>>>>>> for now, I can't see any other way to fix this problem.
->>>>>>>
->>>>>>> Am I right about this?
->>>>>>>
->>>>>>> On 4 August 2017 at 03:14, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->>>>>>>> I mean I think it's the condition check "is_present_clone" that
->>>>>>>> prevent the clone overlap to record the client write operations
->>>>>>>> modified range when the target "HEAD" object exists without its most
->>>>>>>> recent clone object, and if I'm right, just move the clone overlap
->>>>>>>> modification out of the "is_present_clone" condition check block is
->>>>>>>> enough to solve this case, just like the PR
->>>>>>>> "https://github.com/ceph/ceph/pull/16790", and this fix wouldn't cause
->>>>>>>> other problems.
->>>>>>>>
->>>>>>>> In our test, this fix solved the problem successfully, however, we
->>>>>>>> can't confirm it won't cause new problems yet.
->>>>>>>>
->>>>>>>> So if anyone see this and knows the answer, please help us. Thank you:-)
->>>>>>>>
->>>>>>>> On 4 August 2017 at 11:41, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->>>>>>>>> Hi, grep:-)
->>>>>>>>>
->>>>>>>>> I finally got what you mean in https://github.com/ceph/ceph/pull/16790.
->>>>>>>>>
->>>>>>>>> I agree with you in that " clone overlap is supposed to be tracking
->>>>>>>>> which data is the same on disk".
->>>>>>>>>
->>>>>>>>> My thought is that, "ObjectContext::new_snapset.clones" is already an
->>>>>>>>> indicator about whether there are clone objects on disk, so, in the
->>>>>>>>> scenario of "cache tier", although a clone oid does not corresponds to
->>>>>>>>> a "present clone" in cache tier, as long as
->>>>>>>>> "ObjectContext::new_snapset.clones" is not empty, there must a one
->>>>>>>>> such clone object in the base tier. And, as long as
->>>>>>>>> "ObjectContext::new_snapset.clones" has a strict "one-to-one"
->>>>>>>>> correspondence to "ObjectContext::new_snapset.clone_overlap", passing
->>>>>>>>> the condition check "if (ctx->new_snapset.clones.size() > 0)" is
->>>>>>>>> enough to make the judgement that the clone object exists.
->>>>>>>>>
->>>>>>>>> So, if I'm right, passing the condition check "if
->>>>>>>>> (ctx->new_snapset.clones.size() > 0)" is already enough for us to do
->>>>>>>>> "newest_overlap.subtract(ctx->modified_ranges)", it doesn't have to
->>>>>>>>> pass "is_present_clone".
->>>>>>>>>
->>>>>>>>> Am I right about this? Or am I missing anything?
->>>>>>>>>
->>>>>>>>> Please help us, thank you:-)
->>>>>>> --
->>>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>>
->>>>>>
->>>>>>
->>>>>> --
->>>>>> Jason
->>>>
->>>>
->>>>
->>>> --
->>>> Jason
+>> During some ceph-fuse perf testing I've noticed that small buffered
+>> write throughput is slowed down by the debug_client ldout logs.
+>> At the default 0/5, the in mem log is filled with, e.g.:
+>>
+>>  -9760> 2017-08-09 18:16:10.487511 7f848c1a5700  3 client.407554315
+>> xattr_permission 0x7f84a52c8a00 = 0
+>>  -9759> 2017-08-09 18:16:10.487515 7f848c1a5700  3 client.407554315
+>> _getxattr(10003284f73, "security.capability", 0) = -61
+>>  -9758> 2017-08-09 18:16:10.487525 7f848c1a5700  3 client.407554315
+>> ll_forget 10003284f73 1
+>>  -9757> 2017-08-09 18:16:10.487542 7f848b9a4700  3 client.407554315
+>> ll_write 0x7f84a5147680 10003284f73 71824~1
+>>  -9756> 2017-08-09 18:16:10.487566 7f848b9a4700  3 client.407554315
+>> ll_write 0x7f84a5147680 71824~1 = 1
+>>  -9755> 2017-08-09 18:16:10.487599 7f848c9a6700  3 client.407554315
+>> ll_getxattr 10003284f73.head security.capability size 0
+>>  -9754> 2017-08-09 18:16:10.487609 7f848c9a6700  3 client.407554315
+>> xattr_permission 0x7f84a52c8a00 = 0
+>>  -9753> 2017-08-09 18:16:10.487612 7f848c9a6700  3 client.407554315
+>> _getxattr(10003284f73, "security.capability", 0) = -61
+>>
+>> (so even tiny 1 byte buffered writes result in huge amounts of logging work).
+>>
+>> In a simple test [1], I found that 100000 one byte writes takes
+>> ~10-11s with the default client log level, and ~5 to 6s with
+>> debug_client=0/2.
 >
+> Wow, I had no idea the overhead was so high!
 >
+>> I would therefore propose either increasing the ldout level for these
+>> ll_* client ops to 6, or decreasing the default debug_client level to
+>> 0/2.
 >
-> --
-> Jason
+> Hmm.  I'm not sure what would be left in the memory log at 0/2 though?
+>  For example in the case of a crash would we even have the message
+> from the start of the operation that crashed?
+
+AFAICT only mount/umount get logged at level 2.
+
+-- Dan
+
+
+>
+> John
+>
+>>
+>> Any opinions?
+>>
+>> Cheers, Dan
+>>
+>> [1]
+>> for i in xrange(100000):
+>>   f.write('x')
+>>   f.flush()
+>> f.close()
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
