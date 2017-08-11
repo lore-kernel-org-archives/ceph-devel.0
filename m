@@ -1,52 +1,39 @@
-From: Xuehan Xu <xxhdx1985126@gmail.com>
-Subject: Re: How to run ceph_test_rados_api_tier?
-Date: Fri, 11 Aug 2017 15:57:47 +0800
-Message-ID: <CAJACTucr6CqKqO1JSSkyfr0w-owb73CGS2GityPJ0QEChQEWqQ@mail.gmail.com>
-References: <CAJACTueQZG9mjF1OYD3D3MbM=gsjMDsvv8t+-EEA4aAahHw37A@mail.gmail.com>
- <alpine.DEB.2.11.1708091402290.20435@piezo.novalocal> <CAJACTufW9z454UXgR0C3yH1+bx8XgO3Y9QLrVsMbJh9=doLXEg@mail.gmail.com>
+From: Administrator <da@policiacivil.pa.gov.br>
+Subject: (unknown)
+Date: Fri, 11 Aug 2017 00:59:42 -0400 (EDT)
+Message-ID: <214998421.232773.1502427582326.JavaMail.zimbra@policiacivil.pa.gov.br>
+Reply-To: Sistemass_Adminss@mail2world.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f44.google.com ([209.85.218.44]:35998 "EHLO
-        mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751955AbdHKH5s (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 11 Aug 2017 03:57:48 -0400
-Received: by mail-oi0-f44.google.com with SMTP id g131so27227330oic.3
-        for <ceph-devel@vger.kernel.org>; Fri, 11 Aug 2017 00:57:48 -0700 (PDT)
-In-Reply-To: <CAJACTufW9z454UXgR0C3yH1+bx8XgO3Y9QLrVsMbJh9=doLXEg@mail.gmail.com>
+Received: from mail.policiacivil.pa.gov.br ([177.74.63.169]:26085 "EHLO
+        mail.policiacivil.pa.gov.br" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752457AbdHKIYR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 11 Aug 2017 04:24:17 -0400
+Subject: 
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
-
-Do I have to first deploy a ceph test cluster manually to run those
-ceph_test_XXX runnables ?
 
 
-On 9 August 2017 at 22:06, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
-> OK, I got it, thank you:-)
->
-> On 9 August 2017 at 22:04, Sage Weil <sage@newdream.net> wrote:
->> On Wed, 9 Aug 2017, Xuehan Xu wrote:
->>> Hi, everyone.
->>>
->>> I'm trying to write a new test case in tier.cc. However, when I try to
->>> test that test case by running "make check", it seems that "make
->>> check" only run ceph_test_object_map, no other "ceph_test_XXX"
->>> runnables are run including "ceph_test_rados_api_tier". Why? And how
->>> to run other ceph_test_XXX runnables?
->>
->>  ../src/vstart.sh -d -n -x -l
->>  bin/ceph_test_rados_api_tier
->>
->> or probably more like
->>
->>  CEPH_ARGS="--log-file c --no-log-to-stderr --debug-ms=1 ..." bin/ceph_test_rados_api_tier
->>
->> It's also run as part of qa/workunits/rados/test.sh by teuthology.  You
->> can run that fully battery of tests with
->>
->>  PATH=$PATH:bin ../qa/workunits/rados/test.sh
->>
->> sage
->>
+
+PERHATIAN
+
+Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali memvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, kirim informasi berikut di bawah ini:
+
+Nama:
+Username:
+sandi:
+Konfirmasi sandi:
+E-mail:
+telepon:
+
+Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda akan dinonaktifkan!
+
+Maaf atas ketidaknyamanan ini.
+Kode verifikasi: en:0986..web...id......nw..website Admin..id...9876mm.2017
+Surat Dukungan Teknis &copy;2017
+
+terima kasih
+Sistem Administrator
