@@ -1,78 +1,71 @@
-From: Jos Collin <jcollin@redhat.com>
-Subject: Re: warnings in rgw_crypt.cc
-Date: Tue, 15 Aug 2017 07:18:04 +0530
-Message-ID: <74847d74-ed64-163d-eceb-2284d603c077@redhat.com>
+From: "Mahalingam, Ganesh" <ganesh.mahalingam@intel.com>
+Subject: RE: warnings in rgw_crypt.cc
+Date: Tue, 15 Aug 2017 14:46:06 +0000
+Message-ID: <B209D98D8385BE41BC4DE002C072AEBE85C25135@fmsmsx118.amr.corp.intel.com>
 References: <CALe9h7cCO+ZLHysdHr8AueyfkHLMvj1Wsy7CO0763cD3ydcJ3w@mail.gmail.com>
  <CAJ4mKGYODRagB-a6-QRMm1Npj28QdpmPq9jdfo7DygfPvS0qjg@mail.gmail.com>
+ <74847d74-ed64-163d-eceb-2284d603c077@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f47.google.com ([74.125.83.47]:34364 "EHLO
-        mail-pg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753707AbdHOBsJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 14 Aug 2017 21:48:09 -0400
-Received: by mail-pg0-f47.google.com with SMTP id u185so57971429pgb.1
-        for <ceph-devel@vger.kernel.org>; Mon, 14 Aug 2017 18:48:09 -0700 (PDT)
-In-Reply-To: <CAJ4mKGYODRagB-a6-QRMm1Npj28QdpmPq9jdfo7DygfPvS0qjg@mail.gmail.com>
+Received: from mga09.intel.com ([134.134.136.24]:17876 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751624AbdHOOqU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 15 Aug 2017 10:46:20 -0400
+In-Reply-To: <74847d74-ed64-163d-eceb-2284d603c077@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>, John Spray <jspray@redhat.com>
+To: Jos Collin <jcollin@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, John Spray <jspray@redhat.com>
 Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
-
-@Greg:
-No, your PR is not merged it seems.
-Please see:
-https://github.com/ceph/ceph/blob/master/src/rgw/rgw_crypt.cc#L38
-https://github.com/ceph/ceph/blob/master/src/rgw/rgw_crypt.cc#L247
-
-I have created the following tracker the moment I saw this warning:
-http://tracker.ceph.com/issues/19851
-
-and
-
-This PR https://github.com/ceph/ceph/pull/14498, implements this 
-requirement.
-
-But the progress of this PR seems to be very slow. As this warning is 
-annoying and appears in every PR tests and builds, I have created a PR 
-yesterday for removing it sooner:
-https://github.com/ceph/ceph/pull/17012
-
-Please review.
-
-Thanks,
-Jos Collin
-
-On Monday 14 August 2017 10:11 PM, Gregory Farnum wrote:
-> On Mon, Aug 14, 2017 at 9:38 AM, John Spray <jspray@redhat.com> wrote:
->> Hi all,
->>
->> These have been in master for quite a while now:
->>
->> /home/jenkins-build/build/workspace/ceph-pull-requests/src/rgw/rgw_crypt.cc:38:2:
->> warning: #warning "TODO: move this code to auth/Crypto for others to
->> reuse." [-Wcpp]
->>  #warning "TODO: move this code to auth/Crypto for others to reuse."
->>   ^
->> /home/jenkins-build/build/workspace/ceph-pull-requests/src/rgw/rgw_crypt.cc:247:2:
->> warning: #warning "TODO: use auth/Crypto instead of reimplementing."
->> [-Wcpp]
->>  #warning "TODO: use auth/Crypto instead of reimplementing."
->>   ^
->>
->> Is anyone working in this area?  Otherwise we should probably just
->> create tracker tickets instead of using preprocessor macros as
->> reminders.
->
-> Yes. A few key people have had fantasies that this was going to be the
-> next thing on X person's list, but that's clearly not happening. I'd
-> merge a PR changing that. :)
-> -Greg
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJA
+dmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gb3duZXJAdmdlci5rZXJuZWwu
+b3JnXSBPbiBCZWhhbGYgT2YgSm9zIENvbGxpbg0KPiBTZW50OiBNb25kYXksIEF1Z3VzdCAxNCwg
+MjAxNyA2OjQ4IFBNDQo+IFRvOiBHcmVnb3J5IEZhcm51bSA8Z2Zhcm51bUByZWRoYXQuY29tPjsg
+Sm9obiBTcHJheSA8anNwcmF5QHJlZGhhdC5jb20+DQo+IENjOiBDZXBoIERldmVsb3BtZW50IDxj
+ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IHdhcm5pbmdzIGluIHJn
+d19jcnlwdC5jYw0KPiANCj4gSGksDQo+IA0KPiBAR3JlZzoNCj4gTm8sIHlvdXIgUFIgaXMgbm90
+IG1lcmdlZCBpdCBzZWVtcy4NCj4gUGxlYXNlIHNlZToNCj4gaHR0cHM6Ly9naXRodWIuY29tL2Nl
+cGgvY2VwaC9ibG9iL21hc3Rlci9zcmMvcmd3L3Jnd19jcnlwdC5jYyNMMzgNCj4gaHR0cHM6Ly9n
+aXRodWIuY29tL2NlcGgvY2VwaC9ibG9iL21hc3Rlci9zcmMvcmd3L3Jnd19jcnlwdC5jYyNMMjQ3
+DQo+IA0KPiBJIGhhdmUgY3JlYXRlZCB0aGUgZm9sbG93aW5nIHRyYWNrZXIgdGhlIG1vbWVudCBJ
+IHNhdyB0aGlzIHdhcm5pbmc6DQo+IGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8xOTg1
+MQ0KPiANCj4gYW5kDQo+IA0KPiBUaGlzIFBSIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgv
+cHVsbC8xNDQ5OCwgaW1wbGVtZW50cyB0aGlzDQo+IHJlcXVpcmVtZW50Lg0KVGhpcyBQUiBpcyBz
+b21ldGhpbmcgdGhhdCBoYXMgYmVlbiBvZiBpbnRlcmVzdCB0byBtZS4gSSB3aWxsIGJlIG1vcmUg
+dGhhbiBoYXBweSB0byBoZWxwIGluIGdldHRpbmcgdGhpcyBjaGFuZ2UgbWVyZ2VkIGludG8gdGhl
+IHRyZWUgYXNhcC4gDQo+IA0KPiBCdXQgdGhlIHByb2dyZXNzIG9mIHRoaXMgUFIgc2VlbXMgdG8g
+YmUgdmVyeSBzbG93LiBBcyB0aGlzIHdhcm5pbmcgaXMNCj4gYW5ub3lpbmcgYW5kIGFwcGVhcnMg
+aW4gZXZlcnkgUFIgdGVzdHMgYW5kIGJ1aWxkcywgSSBoYXZlIGNyZWF0ZWQgYSBQUg0KPiB5ZXN0
+ZXJkYXkgZm9yIHJlbW92aW5nIGl0IHNvb25lcjoNCj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgv
+Y2VwaC9wdWxsLzE3MDEyDQo+IA0KPiBQbGVhc2UgcmV2aWV3Lg0KPiANCj4gVGhhbmtzLA0KPiBK
+b3MgQ29sbGluDQo+IA0KPiBPbiBNb25kYXkgMTQgQXVndXN0IDIwMTcgMTA6MTEgUE0sIEdyZWdv
+cnkgRmFybnVtIHdyb3RlOg0KPiA+IE9uIE1vbiwgQXVnIDE0LCAyMDE3IGF0IDk6MzggQU0sIEpv
+aG4gU3ByYXkgPGpzcHJheUByZWRoYXQuY29tPiB3cm90ZToNCj4gPj4gSGkgYWxsLA0KPiA+Pg0K
+PiA+PiBUaGVzZSBoYXZlIGJlZW4gaW4gbWFzdGVyIGZvciBxdWl0ZSBhIHdoaWxlIG5vdzoNCj4g
+Pj4NCj4gPj4gL2hvbWUvamVua2lucy1idWlsZC9idWlsZC93b3Jrc3BhY2UvY2VwaC1wdWxsLQ0K
+PiByZXF1ZXN0cy9zcmMvcmd3L3Jnd19jcnlwdC5jYzozODoyOg0KPiA+PiB3YXJuaW5nOiAjd2Fy
+bmluZyAiVE9ETzogbW92ZSB0aGlzIGNvZGUgdG8gYXV0aC9DcnlwdG8gZm9yIG90aGVycyB0bw0K
+PiA+PiByZXVzZS4iIFstV2NwcF0gICN3YXJuaW5nICJUT0RPOiBtb3ZlIHRoaXMgY29kZSB0byBh
+dXRoL0NyeXB0byBmb3INCj4gPj4gb3RoZXJzIHRvIHJldXNlLiINCj4gPj4gICBeDQo+ID4+IC9o
+b21lL2plbmtpbnMtYnVpbGQvYnVpbGQvd29ya3NwYWNlL2NlcGgtcHVsbC0NCj4gcmVxdWVzdHMv
+c3JjL3Jndy9yZ3dfY3J5cHQuY2M6MjQ3OjI6DQo+ID4+IHdhcm5pbmc6ICN3YXJuaW5nICJUT0RP
+OiB1c2UgYXV0aC9DcnlwdG8gaW5zdGVhZCBvZiByZWltcGxlbWVudGluZy4iDQo+ID4+IFstV2Nw
+cF0NCj4gPj4gICN3YXJuaW5nICJUT0RPOiB1c2UgYXV0aC9DcnlwdG8gaW5zdGVhZCBvZiByZWlt
+cGxlbWVudGluZy4iDQo+ID4+ICAgXg0KPiA+Pg0KPiA+PiBJcyBhbnlvbmUgd29ya2luZyBpbiB0
+aGlzIGFyZWE/ICBPdGhlcndpc2Ugd2Ugc2hvdWxkIHByb2JhYmx5IGp1c3QNCj4gPj4gY3JlYXRl
+IHRyYWNrZXIgdGlja2V0cyBpbnN0ZWFkIG9mIHVzaW5nIHByZXByb2Nlc3NvciBtYWNyb3MgYXMN
+Cj4gPj4gcmVtaW5kZXJzLg0KPiA+DQo+ID4gWWVzLiBBIGZldyBrZXkgcGVvcGxlIGhhdmUgaGFk
+IGZhbnRhc2llcyB0aGF0IHRoaXMgd2FzIGdvaW5nIHRvIGJlIHRoZQ0KPiA+IG5leHQgdGhpbmcg
+b24gWCBwZXJzb24ncyBsaXN0LCBidXQgdGhhdCdzIGNsZWFybHkgbm90IGhhcHBlbmluZy4gSSdk
+DQo+ID4gbWVyZ2UgYSBQUiBjaGFuZ2luZyB0aGF0LiA6KSAtR3JlZw0KPiA+IC0tDQo+ID4gVG8g
+dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNl
+cGgtZGV2ZWwiDQo+ID4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2Vy
+Lmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8NCj4gPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJu
+ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gPg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBm
+cm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4g
+dGhlDQo+IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9y
+ZSBtYWpvcmRvbW8gaW5mbyBhdA0KPiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
+bmZvLmh0bWwNCg==
