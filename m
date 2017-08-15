@@ -1,71 +1,120 @@
-From: "Mahalingam, Ganesh" <ganesh.mahalingam@intel.com>
-Subject: RE: warnings in rgw_crypt.cc
-Date: Tue, 15 Aug 2017 14:46:06 +0000
-Message-ID: <B209D98D8385BE41BC4DE002C072AEBE85C25135@fmsmsx118.amr.corp.intel.com>
-References: <CALe9h7cCO+ZLHysdHr8AueyfkHLMvj1Wsy7CO0763cD3ydcJ3w@mail.gmail.com>
- <CAJ4mKGYODRagB-a6-QRMm1Npj28QdpmPq9jdfo7DygfPvS0qjg@mail.gmail.com>
- <74847d74-ed64-163d-eceb-2284d603c077@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Douglas Fuller <dfuller@redhat.com>
+Subject: [PATCH 1/1] fs/ceph: More accurate statfs
+Date: Tue, 15 Aug 2017 14:54:51 -0400
+Message-ID: <04d1b74e1f90539a5bea9d737710ab71039e5eab.1502823001.git.dfuller@redhat.com>
+References: <cover.1502823001.git.dfuller@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:17876 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751624AbdHOOqU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 15 Aug 2017 10:46:20 -0400
-In-Reply-To: <74847d74-ed64-163d-eceb-2284d603c077@redhat.com>
-Content-Language: en-US
+Received: from mail-qk0-f177.google.com ([209.85.220.177]:38780 "EHLO
+        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751129AbdHOSzL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Aug 2017 14:55:11 -0400
+Received: by mail-qk0-f177.google.com with SMTP id x191so8928868qka.5
+        for <ceph-devel@vger.kernel.org>; Tue, 15 Aug 2017 11:55:11 -0700 (PDT)
+Received: from localhost.localdomain (96-38-113-238.dhcp.jcsn.tn.charter.com. [96.38.113.238])
+        by smtp.gmail.com with ESMTPSA id q127sm6640631qkf.9.2017.08.15.11.55.09
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1 cipher=AES128-SHA bits=128/128);
+        Tue, 15 Aug 2017 11:55:09 -0700 (PDT)
+In-Reply-To: <cover.1502823001.git.dfuller@redhat.com>
+In-Reply-To: <cover.1502823001.git.dfuller@redhat.com>
+References: <cover.1502823001.git.dfuller@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jos Collin <jcollin@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGNlcGgtZGV2ZWwtb3duZXJA
-dmdlci5rZXJuZWwub3JnIFttYWlsdG86Y2VwaC1kZXZlbC0NCj4gb3duZXJAdmdlci5rZXJuZWwu
-b3JnXSBPbiBCZWhhbGYgT2YgSm9zIENvbGxpbg0KPiBTZW50OiBNb25kYXksIEF1Z3VzdCAxNCwg
-MjAxNyA2OjQ4IFBNDQo+IFRvOiBHcmVnb3J5IEZhcm51bSA8Z2Zhcm51bUByZWRoYXQuY29tPjsg
-Sm9obiBTcHJheSA8anNwcmF5QHJlZGhhdC5jb20+DQo+IENjOiBDZXBoIERldmVsb3BtZW50IDxj
-ZXBoLWRldmVsQHZnZXIua2VybmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IHdhcm5pbmdzIGluIHJn
-d19jcnlwdC5jYw0KPiANCj4gSGksDQo+IA0KPiBAR3JlZzoNCj4gTm8sIHlvdXIgUFIgaXMgbm90
-IG1lcmdlZCBpdCBzZWVtcy4NCj4gUGxlYXNlIHNlZToNCj4gaHR0cHM6Ly9naXRodWIuY29tL2Nl
-cGgvY2VwaC9ibG9iL21hc3Rlci9zcmMvcmd3L3Jnd19jcnlwdC5jYyNMMzgNCj4gaHR0cHM6Ly9n
-aXRodWIuY29tL2NlcGgvY2VwaC9ibG9iL21hc3Rlci9zcmMvcmd3L3Jnd19jcnlwdC5jYyNMMjQ3
-DQo+IA0KPiBJIGhhdmUgY3JlYXRlZCB0aGUgZm9sbG93aW5nIHRyYWNrZXIgdGhlIG1vbWVudCBJ
-IHNhdyB0aGlzIHdhcm5pbmc6DQo+IGh0dHA6Ly90cmFja2VyLmNlcGguY29tL2lzc3Vlcy8xOTg1
-MQ0KPiANCj4gYW5kDQo+IA0KPiBUaGlzIFBSIGh0dHBzOi8vZ2l0aHViLmNvbS9jZXBoL2NlcGgv
-cHVsbC8xNDQ5OCwgaW1wbGVtZW50cyB0aGlzDQo+IHJlcXVpcmVtZW50Lg0KVGhpcyBQUiBpcyBz
-b21ldGhpbmcgdGhhdCBoYXMgYmVlbiBvZiBpbnRlcmVzdCB0byBtZS4gSSB3aWxsIGJlIG1vcmUg
-dGhhbiBoYXBweSB0byBoZWxwIGluIGdldHRpbmcgdGhpcyBjaGFuZ2UgbWVyZ2VkIGludG8gdGhl
-IHRyZWUgYXNhcC4gDQo+IA0KPiBCdXQgdGhlIHByb2dyZXNzIG9mIHRoaXMgUFIgc2VlbXMgdG8g
-YmUgdmVyeSBzbG93LiBBcyB0aGlzIHdhcm5pbmcgaXMNCj4gYW5ub3lpbmcgYW5kIGFwcGVhcnMg
-aW4gZXZlcnkgUFIgdGVzdHMgYW5kIGJ1aWxkcywgSSBoYXZlIGNyZWF0ZWQgYSBQUg0KPiB5ZXN0
-ZXJkYXkgZm9yIHJlbW92aW5nIGl0IHNvb25lcjoNCj4gaHR0cHM6Ly9naXRodWIuY29tL2NlcGgv
-Y2VwaC9wdWxsLzE3MDEyDQo+IA0KPiBQbGVhc2UgcmV2aWV3Lg0KPiANCj4gVGhhbmtzLA0KPiBK
-b3MgQ29sbGluDQo+IA0KPiBPbiBNb25kYXkgMTQgQXVndXN0IDIwMTcgMTA6MTEgUE0sIEdyZWdv
-cnkgRmFybnVtIHdyb3RlOg0KPiA+IE9uIE1vbiwgQXVnIDE0LCAyMDE3IGF0IDk6MzggQU0sIEpv
-aG4gU3ByYXkgPGpzcHJheUByZWRoYXQuY29tPiB3cm90ZToNCj4gPj4gSGkgYWxsLA0KPiA+Pg0K
-PiA+PiBUaGVzZSBoYXZlIGJlZW4gaW4gbWFzdGVyIGZvciBxdWl0ZSBhIHdoaWxlIG5vdzoNCj4g
-Pj4NCj4gPj4gL2hvbWUvamVua2lucy1idWlsZC9idWlsZC93b3Jrc3BhY2UvY2VwaC1wdWxsLQ0K
-PiByZXF1ZXN0cy9zcmMvcmd3L3Jnd19jcnlwdC5jYzozODoyOg0KPiA+PiB3YXJuaW5nOiAjd2Fy
-bmluZyAiVE9ETzogbW92ZSB0aGlzIGNvZGUgdG8gYXV0aC9DcnlwdG8gZm9yIG90aGVycyB0bw0K
-PiA+PiByZXVzZS4iIFstV2NwcF0gICN3YXJuaW5nICJUT0RPOiBtb3ZlIHRoaXMgY29kZSB0byBh
-dXRoL0NyeXB0byBmb3INCj4gPj4gb3RoZXJzIHRvIHJldXNlLiINCj4gPj4gICBeDQo+ID4+IC9o
-b21lL2plbmtpbnMtYnVpbGQvYnVpbGQvd29ya3NwYWNlL2NlcGgtcHVsbC0NCj4gcmVxdWVzdHMv
-c3JjL3Jndy9yZ3dfY3J5cHQuY2M6MjQ3OjI6DQo+ID4+IHdhcm5pbmc6ICN3YXJuaW5nICJUT0RP
-OiB1c2UgYXV0aC9DcnlwdG8gaW5zdGVhZCBvZiByZWltcGxlbWVudGluZy4iDQo+ID4+IFstV2Nw
-cF0NCj4gPj4gICN3YXJuaW5nICJUT0RPOiB1c2UgYXV0aC9DcnlwdG8gaW5zdGVhZCBvZiByZWlt
-cGxlbWVudGluZy4iDQo+ID4+ICAgXg0KPiA+Pg0KPiA+PiBJcyBhbnlvbmUgd29ya2luZyBpbiB0
-aGlzIGFyZWE/ICBPdGhlcndpc2Ugd2Ugc2hvdWxkIHByb2JhYmx5IGp1c3QNCj4gPj4gY3JlYXRl
-IHRyYWNrZXIgdGlja2V0cyBpbnN0ZWFkIG9mIHVzaW5nIHByZXByb2Nlc3NvciBtYWNyb3MgYXMN
-Cj4gPj4gcmVtaW5kZXJzLg0KPiA+DQo+ID4gWWVzLiBBIGZldyBrZXkgcGVvcGxlIGhhdmUgaGFk
-IGZhbnRhc2llcyB0aGF0IHRoaXMgd2FzIGdvaW5nIHRvIGJlIHRoZQ0KPiA+IG5leHQgdGhpbmcg
-b24gWCBwZXJzb24ncyBsaXN0LCBidXQgdGhhdCdzIGNsZWFybHkgbm90IGhhcHBlbmluZy4gSSdk
-DQo+ID4gbWVyZ2UgYSBQUiBjaGFuZ2luZyB0aGF0LiA6KSAtR3JlZw0KPiA+IC0tDQo+ID4gVG8g
-dW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNl
-cGgtZGV2ZWwiDQo+ID4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2Vy
-Lmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8NCj4gPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJu
-ZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gPg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBm
-cm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4g
-dGhlDQo+IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9y
-ZSBtYWpvcmRvbW8gaW5mbyBhdA0KPiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
-bmZvLmh0bWwNCg==
+Improve accuracy of statfs reporting for Ceph filesystems comprising
+exactly one data pool. In this case, the Ceph monitor can now report
+the space usage for the single data pool instead of the global data
+for the entire Ceph cluster. Include support for this message in
+mon_client and leverage it in ceph/super.
+
+Signed-off-by: Douglas Fuller <dfuller@redhat.com>
+---
+ fs/ceph/super.c                 | 9 ++++++++-
+ include/linux/ceph/ceph_fs.h    | 2 ++
+ include/linux/ceph/mon_client.h | 2 +-
+ net/ceph/mon_client.c           | 6 +++++-
+ 4 files changed, 16 insertions(+), 3 deletions(-)
+
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index 1deb8810d7c7..75facee8b6d1 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -49,9 +49,16 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
+ 	struct ceph_statfs st;
+ 	u64 fsid;
+ 	int err;
++	__le64 data_pool;
++
++	if (fsc->mdsc->mdsmap->m_num_data_pg_pools == 1) {
++		data_pool = fsc->mdsc->mdsmap->m_data_pg_pools[0];
++	} else {
++		data_pool = CEPH_NOPOOL;
++	}
+ 
+ 	dout("statfs\n");
+-	err = ceph_monc_do_statfs(&fsc->client->monc, &st);
++	err = ceph_monc_do_statfs(&fsc->client->monc, data_pool, &st);
+ 	if (err < 0)
+ 		return err;
+ 
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index d1642a4b4c5e..b422170b791a 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -167,6 +167,8 @@ struct ceph_mon_request_header {
+ struct ceph_mon_statfs {
+ 	struct ceph_mon_request_header monhdr;
+ 	struct ceph_fsid fsid;
++	__u8 contains_data_pool;
++	__le64 data_pool;
+ } __attribute__ ((packed));
+ 
+ struct ceph_statfs {
+diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
+index d5a3ecea578d..bd4650ab1248 100644
+--- a/include/linux/ceph/mon_client.h
++++ b/include/linux/ceph/mon_client.h
+@@ -133,7 +133,7 @@ void ceph_monc_renew_subs(struct ceph_mon_client *monc);
+ extern int ceph_monc_wait_osdmap(struct ceph_mon_client *monc, u32 epoch,
+ 				 unsigned long timeout);
+ 
+-extern int ceph_monc_do_statfs(struct ceph_mon_client *monc,
++extern int ceph_monc_do_statfs(struct ceph_mon_client *monc, __le64 data_pool,
+ 			       struct ceph_statfs *buf);
+ 
+ int ceph_monc_get_version(struct ceph_mon_client *monc, const char *what,
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index 875675765531..5ef21986074e 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -676,7 +676,8 @@ static void handle_statfs_reply(struct ceph_mon_client *monc,
+ /*
+  * Do a synchronous statfs().
+  */
+-int ceph_monc_do_statfs(struct ceph_mon_client *monc, struct ceph_statfs *buf)
++int ceph_monc_do_statfs(struct ceph_mon_client *monc, __le64 data_pool,
++			struct ceph_statfs *buf)
+ {
+ 	struct ceph_mon_generic_request *req;
+ 	struct ceph_mon_statfs *h;
+@@ -696,6 +697,7 @@ int ceph_monc_do_statfs(struct ceph_mon_client *monc, struct ceph_statfs *buf)
+ 		goto out;
+ 
+ 	req->u.st = buf;
++	req->request->hdr.version = 2;
+ 
+ 	mutex_lock(&monc->mutex);
+ 	register_generic_request(req);
+@@ -705,6 +707,8 @@ int ceph_monc_do_statfs(struct ceph_mon_client *monc, struct ceph_statfs *buf)
+ 	h->monhdr.session_mon = cpu_to_le16(-1);
+ 	h->monhdr.session_mon_tid = 0;
+ 	h->fsid = monc->monmap->fsid;
++	h->contains_data_pool = (data_pool != CEPH_NOPOOL);
++	h->data_pool = data_pool;
+ 	send_generic_request(monc, req);
+ 	mutex_unlock(&monc->mutex);
+ 
+-- 
+2.11.0 (Apple Git-81)
+
