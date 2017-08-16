@@ -1,88 +1,128 @@
-From: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: v12.1.4 Luminous (RC) released
-Date: Wed, 16 Aug 2017 08:13:01 -0400
-Message-ID: <CAC-Np1xzdfEVQOszKttVEx8KNEspqJ+aBdS9RRVuA--QEEd9Gg@mail.gmail.com>
-References: <062fdb6f788298b7458db9d07ead19d2@suse.com>
-	<CAJ4mKGa7SK+YNE-sdEPKAj+NnTGtZSmxVZJiVXQoSnKF13TNJw@mail.gmail.com>
-	<CAKOnarmpOgZL7PtHnW-xOEH589aPyNPoGkguYpWbhAgV5RcwQw@mail.gmail.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: [PATCH 1/1] fs/ceph: More accurate statfs
+Date: Wed, 16 Aug 2017 14:45:42 +0200
+Message-ID: <CAOi1vP_Xo6ZHPu2MKk00JNKymRCDuZFWZUVk9e+O-bzDJzpaCw@mail.gmail.com>
+References: <cover.1502823001.git.dfuller@redhat.com> <04d1b74e1f90539a5bea9d737710ab71039e5eab.1502823001.git.dfuller@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAKOnarmpOgZL7PtHnW-xOEH589aPyNPoGkguYpWbhAgV5RcwQw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
-	<mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Matt Benjamin <mbenjami-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-ua0-f193.google.com ([209.85.217.193]:34565 "EHLO
+        mail-ua0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751287AbdHPMpn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Aug 2017 08:45:43 -0400
+Received: by mail-ua0-f193.google.com with SMTP id k43so1699274uaf.1
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Aug 2017 05:45:43 -0700 (PDT)
+In-Reply-To: <04d1b74e1f90539a5bea9d737710ab71039e5eab.1502823001.git.dfuller@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Douglas Fuller <dfuller@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-T24gVHVlLCBBdWcgMTUsIDIwMTcgYXQgMTA6MzUgUE0sIE1hdHQgQmVuamFtaW4gPG1iZW5qYW1p
-QHJlZGhhdC5jb20+IHdyb3RlOgo+IEkgdGhpbmsgd2UgbmVlZCBhIHYxMi4xLjUgaW5jbHVkaW5n
-ICMxNzA0MAoKKkkqIHRoaW5rIHRoYXQgdGhpcyBpcyBnZXR0aW5nIHRvIGEgcG9pbnQgd2hlcmUg
-d2Ugc2hvdWxkIGp1c3QgaGF2ZQpuaWdodGx5IGRldmVsb3BtZW50IHJlbGVhc2VzLgoKV2hhdCBp
-cyB0aGUgYmVuZWZpdCBvZiB3YWl0aW5nIGZvciBlYWNoIFJDIGV2ZXJ5IHR3byB3ZWVrcyAob3Ig
-c28pIG90aGVyd2lzZT8KCk9uIG9uZSBzaWRlIHdlIGFyZSB0cmVhdGluZyB0aGUgUkMgcmVsZWFz
-ZXMgc29tZXdoYXQgbGlrZSBub3JtYWwKcmVsZWFzZXMsIHdpdGggcHJvcGVyIGFubm91bmNlbWVu
-dHMsIHdhaXRpbmcgZm9yClFBIHN1aXRlcyB0byBjb21wbGV0ZSwgYW5kIGhhdmUgbGVhZHMgImFj
-ayIgd2hlbiB0aGVpciBjb21wb25lbnRzIGFyZQpnb29kIGVub3VnaC4gQnV0IG9uIHRoZSBvdGhl
-ciBzaWRlIG9mIHRoaW5ncwp3ZSB0aGVuIHRyeSB0byBjdXQgcmVsZWFzZXMgdG8gaW5jbHVkZSBm
-aXhlcyBhcyBpbW1lZGlhdGUgYXMgcG9zc2libGUKKGFuZCBhcyBvZnRlbiBhcyB0aGF0IG1lYW5z
-KQoKV2UndmUgaGFkIDMgcmVsZWFzZXMgYWxyZWFkeSBpbiBBdWd1c3QgYW5kIHRoaXMgd291bGQg
-bWVhbiBkaXNjdXNzaW5nCmEgKmZvdXJ0aCouCgo+Cj4gTWF0dAo+Cj4gT24gVHVlLCBBdWcgMTUs
-IDIwMTcgYXQgNToxNiBQTSwgR3JlZ29yeSBGYXJudW0gPGdmYXJudW1AcmVkaGF0LmNvbT4gd3Jv
-dGU6Cj4+IE9uIFR1ZSwgQXVnIDE1LCAyMDE3IGF0IDI6MDUgUE0sIEFiaGlzaGVrIDxhYmhpc2hl
-a0BzdXNlLmNvbT4gd3JvdGU6Cj4+PiBUaGlzIGlzIHRoZSBmaWZ0aCByZWxlYXNlIGNhbmRpZGF0
-ZSBmb3IgTHVtaW5vdXMsIHRoZSBuZXh0IGxvbmcgdGVybQo+Pj4gc3RhYmxlIHJlbGVhc2UuIFdl
-4oCZdmUgaGFkIHRvIGRvIHRoaXMgcmVsZWFzZSBhcyB0aGVyZSB3YXMgYSBidWcgaW4KPj4+IHRo
-ZSBwcmV2aW91cyBSQywgd2hpY2ggYWZmZWN0ZWQgdXBncmFkZXMgdG8gTHVtaW5vdXMuWzFdCj4+
-Cj4+IEluIHBhcnRpY3VsYXIsIHRoaXMgd2lsbCBmaXggdGhpbmdzIGZvciB0aG9zZSBvZiB5b3Ug
-d2hvIHVwZ3JhZGVkIGZyb20KPj4gSmV3ZWwgb3IgYSBwcmV2aW91cyBSQyBhbmQgc2F3IE9TRHMg
-Y3Jhc2ggaW5zdGFudGx5IG9uIGJvb3QuIFdlIGhhZCBhbgo+PiBvdmVyc2lnaHQgaW4gZGVhbGlu
-ZyB3aXRoIGFub3RoZXIgYnVnLiAoU3RhbmRhcmQgZGlzY2xhaW1lcjogdGhpcyB3YXMKPj4gYSBs
-b2dpYyBlcnJvciB0aGF0IHJlc3VsdGVkIGluIG5vIGRhdGEgY2hhbmdlcy4gVGhlcmUgd2VyZSBu
-bwo+PiBkdXJhYmlsaXR5IGltcGxpY2F0aW9ucyDigJQgbm90IHRoYXQgdGhhdCBoZWxwcyBtdWNo
-IHdoZW4geW91IGNhbid0IHJlYWQKPj4geW91ciBkYXRhIG91dCBhZ2Fpbi4pCj4+Cj4+IFNvcnJ5
-IGd1eXMhCj4+IC1HcmVnCj4+Cj4+Pgo+Pj4gUGxlYXNlIG5vdGUgdGhhdCB0aGlzIGlzIHN0aWxs
-IGEgKnJlbGVhc2UgY2FuZGlkYXRlKiBhbmQKPj4+IG5vdCB0aGUgZmluYWwgcmVsZWFzZSwgd2Un
-cmUgZXhwZWN0aW5nIHRoZSBmaW5hbCBMdW1pbm91cyByZWxlYXNlIGluCj4+PiBhIHdlZWsncyB0
-aW1lLCBtZWFud2hpbGUsIHRlc3RpbmcgYW5kIGZlZWRiYWNrIGlzIHZlcnkgbXVjaCB3ZWxjb20u
-Cj4+Pgo+Pj4gQ2VwaCBMdW1pbm91cyAodjEyLjIuMCkgd2lsbCBiZSB0aGUgZm91bmRhdGlvbiBm
-b3IgdGhlIG5leHQgbG9uZy10ZXJtCj4+PiBzdGFibGUgcmVsZWFzZSBzZXJpZXMuIFRoZXJlIGhh
-dmUgYmVlbiBtYWpvciBjaGFuZ2VzIHNpbmNlIEtyYWtlbgo+Pj4gKHYxMS4yLnopIGFuZCBKZXdl
-bCAodjEwLjIueiksIGFuZCB0aGUgdXBncmFkZSBwcm9jZXNzIGlzIG5vbi10cml2aWFsLgo+Pj4g
-UGxlYXNlIHJlYWQgdGhlc2UgcmVsZWFzZSBub3RlcyBjYXJlZnVsbHkuIEZ1bGwgZGV0YWlscyBh
-bmQgY2hhbmdlbG9nIGF0Cj4+PiBodHRwOi8vY2VwaC5jb20vcmVsZWFzZXMvdjEyLTEtNC1sdW1p
-bm91cy1yYy1yZWxlYXNlZC8KPj4+Cj4+PiBOb3RhYmxlIENoYW5nZXMgZnJvbSAxMi4xLjMKPj4+
-IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQo+Pj4gKiBjb3JlOiBXaXAgMjA5ODUgZGl2ZXJn
-ZW50IGhhbmRsaW5nIGx1bWlub3VzIChpc3N1ZSMyMDk4NSwgcHIjMTcwMDEsIEdyZWcKPj4+IEZh
-cm51bSkKPj4+ICogcWEvdGFza3MvdGhyYXNob3Nkcy1oZWFsdGgueWFtbDogaWdub3JlIE1PTl9E
-T1dOIChpc3N1ZSMyMDkxMCwgcHIjMTcwMDMsCj4+PiBTYWdlIFdlaWwpCj4+PiAqIGNydXNoLCBt
-b246IGZpeCB3ZWlnaHQgc2V0IHZzIGNydXNoIGRldmljZSBjbGFzc2VzIChpc3N1ZSMyMDkzOSwg
-U2FnZQo+Pj4gV2VpbCkKPj4+Cj4+Pgo+Pj4gR2V0dGluZyBDZXBoCj4+PiAtLS0tLS0tLS0tLS0K
-Pj4+ICogR2l0IGF0IGdpdDovL2dpdGh1Yi5jb20vY2VwaC9jZXBoLmdpdAo+Pj4gKiBUYXJiYWxs
-IGF0IGh0dHA6Ly9kb3dubG9hZC5jZXBoLmNvbS90YXJiYWxscy9jZXBoLTEyLjEuNC50YXIuZ3oK
-Pj4+ICogRm9yIHBhY2thZ2VzLCBzZWUgaHR0cDovL2RvY3MuY2VwaC5jb20vZG9jcy9tYXN0ZXIv
-aW5zdGFsbC9nZXQtcGFja2FnZXMvCj4+PiAqIEZvciBjZXBoLWRlcGxveSwgc2VlCj4+PiBodHRw
-Oi8vZG9jcy5jZXBoLmNvbS9kb2NzL21hc3Rlci9pbnN0YWxsL2luc3RhbGwtY2VwaC1kZXBsb3kK
-Pj4+ICogUmVsZWFzZSBzaGExOiBhNWY4NGIzNzY2OGZjOGUwMzE2NWFhZjVjYmIzODBjNzhlNGRl
-YmE0Cj4+Pgo+Pj4gWzFdOiBodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvMjA5ODUKPj4+
-Cj4+Pgo+Pj4gQmVzdCBSZWdhcmRzCj4+PiBBYmhpc2hlawo+Pj4KPj4+IF9fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4+PiBjZXBoLXVzZXJzIG1haWxpbmcg
-bGlzdAo+Pj4gY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQo+Pj4gaHR0cDovL2xpc3RzLmNlcGgu
-Y29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCj4+IF9fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCj4+IGNlcGgtdXNlcnMgbWFpbGluZyBsaXN0
-Cj4+IGNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xp
-c3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCj4gLS0KPiBUbyB1bnN1YnNjcmliZSBmcm9t
-IHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4KPiB0
-aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+IE1vcmUg
-bWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8u
-aHRtbApfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBo
-LXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0
-cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Tue, Aug 15, 2017 at 8:54 PM, Douglas Fuller <dfuller@redhat.com> wrote:
+> Improve accuracy of statfs reporting for Ceph filesystems comprising
+> exactly one data pool. In this case, the Ceph monitor can now report
+> the space usage for the single data pool instead of the global data
+> for the entire Ceph cluster. Include support for this message in
+> mon_client and leverage it in ceph/super.
+>
+> Signed-off-by: Douglas Fuller <dfuller@redhat.com>
+> ---
+>  fs/ceph/super.c                 | 9 ++++++++-
+>  include/linux/ceph/ceph_fs.h    | 2 ++
+>  include/linux/ceph/mon_client.h | 2 +-
+>  net/ceph/mon_client.c           | 6 +++++-
+>  4 files changed, 16 insertions(+), 3 deletions(-)
+>
+> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+> index 1deb8810d7c7..75facee8b6d1 100644
+> --- a/fs/ceph/super.c
+> +++ b/fs/ceph/super.c
+> @@ -49,9 +49,16 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
+>         struct ceph_statfs st;
+>         u64 fsid;
+>         int err;
+> +       __le64 data_pool;
+> +
+> +       if (fsc->mdsc->mdsmap->m_num_data_pg_pools == 1) {
+> +               data_pool = fsc->mdsc->mdsmap->m_data_pg_pools[0];
+> +       } else {
+> +               data_pool = CEPH_NOPOOL;
+> +       }
+
+Missing cpu_to_le64() here -- data_pool is __le64, while CEPH_NOPOOL
+and m_data_pg_pools are in CPU order.
+
+>
+>         dout("statfs\n");
+> -       err = ceph_monc_do_statfs(&fsc->client->monc, &st);
+> +       err = ceph_monc_do_statfs(&fsc->client->monc, data_pool, &st);
+>         if (err < 0)
+>                 return err;
+>
+> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+> index d1642a4b4c5e..b422170b791a 100644
+> --- a/include/linux/ceph/ceph_fs.h
+> +++ b/include/linux/ceph/ceph_fs.h
+> @@ -167,6 +167,8 @@ struct ceph_mon_request_header {
+>  struct ceph_mon_statfs {
+>         struct ceph_mon_request_header monhdr;
+>         struct ceph_fsid fsid;
+> +       __u8 contains_data_pool;
+> +       __le64 data_pool;
+>  } __attribute__ ((packed));
+>
+>  struct ceph_statfs {
+> diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
+> index d5a3ecea578d..bd4650ab1248 100644
+> --- a/include/linux/ceph/mon_client.h
+> +++ b/include/linux/ceph/mon_client.h
+> @@ -133,7 +133,7 @@ void ceph_monc_renew_subs(struct ceph_mon_client *monc);
+>  extern int ceph_monc_wait_osdmap(struct ceph_mon_client *monc, u32 epoch,
+>                                  unsigned long timeout);
+>
+> -extern int ceph_monc_do_statfs(struct ceph_mon_client *monc,
+> +extern int ceph_monc_do_statfs(struct ceph_mon_client *monc, __le64 data_pool,
+>                                struct ceph_statfs *buf);
+>
+>  int ceph_monc_get_version(struct ceph_mon_client *monc, const char *what,
+> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> index 875675765531..5ef21986074e 100644
+> --- a/net/ceph/mon_client.c
+> +++ b/net/ceph/mon_client.c
+> @@ -676,7 +676,8 @@ static void handle_statfs_reply(struct ceph_mon_client *monc,
+>  /*
+>   * Do a synchronous statfs().
+>   */
+> -int ceph_monc_do_statfs(struct ceph_mon_client *monc, struct ceph_statfs *buf)
+> +int ceph_monc_do_statfs(struct ceph_mon_client *monc, __le64 data_pool,
+> +                       struct ceph_statfs *buf)
+>  {
+>         struct ceph_mon_generic_request *req;
+>         struct ceph_mon_statfs *h;
+> @@ -696,6 +697,7 @@ int ceph_monc_do_statfs(struct ceph_mon_client *monc, struct ceph_statfs *buf)
+>                 goto out;
+>
+>         req->u.st = buf;
+> +       req->request->hdr.version = 2;
+
+cpu_to_le16(2)
+
+>
+>         mutex_lock(&monc->mutex);
+>         register_generic_request(req);
+> @@ -705,6 +707,8 @@ int ceph_monc_do_statfs(struct ceph_mon_client *monc, struct ceph_statfs *buf)
+>         h->monhdr.session_mon = cpu_to_le16(-1);
+>         h->monhdr.session_mon_tid = 0;
+>         h->fsid = monc->monmap->fsid;
+> +       h->contains_data_pool = (data_pool != CEPH_NOPOOL);
+
+... and again here, but the other way around.
+
+> +       h->data_pool = data_pool;
+
+I'd make ceph_monc_do_statfs() take u64 and do cpu_to_le64() here, in
+one place.
+
+Thanks,
+
+                Ilya
