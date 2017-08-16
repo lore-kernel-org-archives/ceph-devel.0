@@ -1,120 +1,135 @@
-From: Douglas Fuller <dfuller@redhat.com>
-Subject: [PATCHv2 1/1] fs/ceph: More accurate statfs
-Date: Wed, 16 Aug 2017 10:19:27 -0400
-Message-ID: <947dca7132806e5d4e102460efef2b8d938f496f.1502892972.git.dfuller@redhat.com>
-References: <cover.1502892972.git.dfuller@redhat.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: [ceph-users] v12.1.4 Luminous (RC) released
+Date: Wed, 16 Aug 2017 08:42:31 -0700
+Message-ID: <CAJ4mKGZqB+2ocK3Eo2fLbA8ebzrAuvFFw3Pf2sy-zantTdTkrQ@mail.gmail.com>
+References: <062fdb6f788298b7458db9d07ead19d2@suse.com> <CAJ4mKGa7SK+YNE-sdEPKAj+NnTGtZSmxVZJiVXQoSnKF13TNJw@mail.gmail.com>
+ <CAKOnarmpOgZL7PtHnW-xOEH589aPyNPoGkguYpWbhAgV5RcwQw@mail.gmail.com> <CAC-Np1xzdfEVQOszKttVEx8KNEspqJ+aBdS9RRVuA--QEEd9Gg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f175.google.com ([209.85.216.175]:38271 "EHLO
-        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751637AbdHPOTg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Aug 2017 10:19:36 -0400
-Received: by mail-qt0-f175.google.com with SMTP id t37so21455504qtg.5
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Aug 2017 07:19:36 -0700 (PDT)
-Received: from localhost.localdomain (96-38-113-238.dhcp.jcsn.tn.charter.com. [96.38.113.238])
-        by smtp.gmail.com with ESMTPSA id f56sm653141qta.79.2017.08.16.07.19.35
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1 cipher=AES128-SHA bits=128/128);
-        Wed, 16 Aug 2017 07:19:35 -0700 (PDT)
-In-Reply-To: <cover.1502892972.git.dfuller@redhat.com>
-In-Reply-To: <cover.1502892972.git.dfuller@redhat.com>
-References: <cover.1502892972.git.dfuller@redhat.com>
+Received: from mail-it0-f50.google.com ([209.85.214.50]:37332 "EHLO
+        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752185AbdHPPmf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Aug 2017 11:42:35 -0400
+Received: by mail-it0-f50.google.com with SMTP id 76so18926953ith.0
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Aug 2017 08:42:35 -0700 (PDT)
+In-Reply-To: <CAC-Np1xzdfEVQOszKttVEx8KNEspqJ+aBdS9RRVuA--QEEd9Gg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Alfredo Deza <adeza@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
 
-Improve accuracy of statfs reporting for Ceph filesystems comprising
-exactly one data pool. In this case, the Ceph monitor can now report
-the space usage for the single data pool instead of the global data
-for the entire Ceph cluster. Include support for this message in
-mon_client and leverage it in ceph/super.
+<Reducing this to ceph-devel/ceph-maintainers, this discussion doesn't
+need to blast all over>
 
-Signed-off-by: Douglas Fuller <dfuller@redhat.com>
----
- fs/ceph/super.c                 | 9 ++++++++-
- include/linux/ceph/ceph_fs.h    | 2 ++
- include/linux/ceph/mon_client.h | 2 +-
- net/ceph/mon_client.c           | 6 +++++-
- 4 files changed, 16 insertions(+), 3 deletions(-)
+On Wed, Aug 16, 2017 at 5:13 AM, Alfredo Deza <adeza@redhat.com> wrote:
+> On Tue, Aug 15, 2017 at 10:35 PM, Matt Benjamin <mbenjami@redhat.com> wrote:
+>> I think we need a v12.1.5 including #17040
+>
+> *I* think that this is getting to a point where we should just have
+> nightly development releases.
+>
+> What is the benefit of waiting for each RC every two weeks (or so) otherwise?
 
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index 1deb8810d7c7..324d29ecbe0b 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -49,9 +49,16 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
- 	struct ceph_statfs st;
- 	u64 fsid;
- 	int err;
-+	u64 data_pool;
-+
-+	if (fsc->mdsc->mdsmap->m_num_data_pg_pools == 1) {
-+		data_pool = fsc->mdsc->mdsmap->m_data_pg_pools[0];
-+	} else {
-+		data_pool = CEPH_NOPOOL;
-+	}
- 
- 	dout("statfs\n");
--	err = ceph_monc_do_statfs(&fsc->client->monc, &st);
-+	err = ceph_monc_do_statfs(&fsc->client->monc, data_pool, &st);
- 	if (err < 0)
- 		return err;
- 
-diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-index d1642a4b4c5e..b422170b791a 100644
---- a/include/linux/ceph/ceph_fs.h
-+++ b/include/linux/ceph/ceph_fs.h
-@@ -167,6 +167,8 @@ struct ceph_mon_request_header {
- struct ceph_mon_statfs {
- 	struct ceph_mon_request_header monhdr;
- 	struct ceph_fsid fsid;
-+	__u8 contains_data_pool;
-+	__le64 data_pool;
- } __attribute__ ((packed));
- 
- struct ceph_statfs {
-diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
-index d5a3ecea578d..f52a3a6ce00b 100644
---- a/include/linux/ceph/mon_client.h
-+++ b/include/linux/ceph/mon_client.h
-@@ -133,7 +133,7 @@ void ceph_monc_renew_subs(struct ceph_mon_client *monc);
- extern int ceph_monc_wait_osdmap(struct ceph_mon_client *monc, u32 epoch,
- 				 unsigned long timeout);
- 
--extern int ceph_monc_do_statfs(struct ceph_mon_client *monc,
-+extern int ceph_monc_do_statfs(struct ceph_mon_client *monc, u64 data_pool,
- 			       struct ceph_statfs *buf);
- 
- int ceph_monc_get_version(struct ceph_mon_client *monc, const char *what,
-diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-index 875675765531..63edc6e5f026 100644
---- a/net/ceph/mon_client.c
-+++ b/net/ceph/mon_client.c
-@@ -676,7 +676,8 @@ static void handle_statfs_reply(struct ceph_mon_client *monc,
- /*
-  * Do a synchronous statfs().
-  */
--int ceph_monc_do_statfs(struct ceph_mon_client *monc, struct ceph_statfs *buf)
-+int ceph_monc_do_statfs(struct ceph_mon_client *monc, u64 data_pool,
-+			struct ceph_statfs *buf)
- {
- 	struct ceph_mon_generic_request *req;
- 	struct ceph_mon_statfs *h;
-@@ -696,6 +697,7 @@ int ceph_monc_do_statfs(struct ceph_mon_client *monc, struct ceph_statfs *buf)
- 		goto out;
- 
- 	req->u.st = buf;
-+	req->request->hdr.version = cpu_to_le16(2);
- 
- 	mutex_lock(&monc->mutex);
- 	register_generic_request(req);
-@@ -705,6 +707,8 @@ int ceph_monc_do_statfs(struct ceph_mon_client *monc, struct ceph_statfs *buf)
- 	h->monhdr.session_mon = cpu_to_le16(-1);
- 	h->monhdr.session_mon_tid = 0;
- 	h->fsid = monc->monmap->fsid;
-+	h->contains_data_pool = (data_pool != CEPH_NOPOOL);
-+	h->data_pool = cpu_to_le64(data_pool);
- 	send_generic_request(monc, req);
- 	mutex_unlock(&monc->mutex);
- 
--- 
-2.11.0 (Apple Git-81)
+RC releases are supposed to be release candidates, as in, things that
+we think could be the release. As with much else in the Luminous cycle
+that broke down a bit, and that's frequently not really the case
+because we know it's missing features we want to make available, but
+in general it's not too far off — we believe the code is stable; it's
+passing our nightlies; we want people to test and use it a lot more
+rigorously than dev checkpoints. Every RC is practice for the real
+thing and making them available the same way as real releases is part
+of that.
 
+>
+> On one side we are treating the RC releases somewhat like normal
+> releases, with proper announcements, waiting for
+> QA suites to complete, and have leads "ack" when their components are
+> good enough. But on the other side of things
+> we then try to cut releases to include fixes as immediate as possible
+> (and as often as that means)
+>
+> We've had 3 releases already in August and this would mean discussing
+> a *fourth*.
+
+We had 12.1.2 on August 2 and 12.1.3 on August 9. This last 12.1.4 was
+an emergency because we broke things, and that'll happen sometimes no
+matter what dev process you're using.
+
+Let's not jump overboard just because we had one emergency and another
+idle suggestion that it'd be nice to fix bug X. If your concern is
+that these builds take a lot of time, I'm sure we'd all love a
+smoother build infrastructure. But build time is not the dominating
+issue when deciding how we do releases when we want users to practice
+with them. :)
+-Greg
+
+>
+>>
+>> Matt
+>>
+>> On Tue, Aug 15, 2017 at 5:16 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+>>> On Tue, Aug 15, 2017 at 2:05 PM, Abhishek <abhishek@suse.com> wrote:
+>>>> This is the fifth release candidate for Luminous, the next long term
+>>>> stable release. We’ve had to do this release as there was a bug in
+>>>> the previous RC, which affected upgrades to Luminous.[1]
+>>>
+>>> In particular, this will fix things for those of you who upgraded from
+>>> Jewel or a previous RC and saw OSDs crash instantly on boot. We had an
+>>> oversight in dealing with another bug. (Standard disclaimer: this was
+>>> a logic error that resulted in no data changes. There were no
+>>> durability implications — not that that helps much when you can't read
+>>> your data out again.)
+>>>
+>>> Sorry guys!
+>>> -Greg
+>>>
+>>>>
+>>>> Please note that this is still a *release candidate* and
+>>>> not the final release, we're expecting the final Luminous release in
+>>>> a week's time, meanwhile, testing and feedback is very much welcom.
+>>>>
+>>>> Ceph Luminous (v12.2.0) will be the foundation for the next long-term
+>>>> stable release series. There have been major changes since Kraken
+>>>> (v11.2.z) and Jewel (v10.2.z), and the upgrade process is non-trivial.
+>>>> Please read these release notes carefully. Full details and changelog at
+>>>> http://ceph.com/releases/v12-1-4-luminous-rc-released/
+>>>>
+>>>> Notable Changes from 12.1.3
+>>>> ---------------------------
+>>>> * core: Wip 20985 divergent handling luminous (issue#20985, pr#17001, Greg
+>>>> Farnum)
+>>>> * qa/tasks/thrashosds-health.yaml: ignore MON_DOWN (issue#20910, pr#17003,
+>>>> Sage Weil)
+>>>> * crush, mon: fix weight set vs crush device classes (issue#20939, Sage
+>>>> Weil)
+>>>>
+>>>>
+>>>> Getting Ceph
+>>>> ------------
+>>>> * Git at git://github.com/ceph/ceph.git
+>>>> * Tarball at http://download.ceph.com/tarballs/ceph-12.1.4.tar.gz
+>>>> * For packages, see http://docs.ceph.com/docs/master/install/get-packages/
+>>>> * For ceph-deploy, see
+>>>> http://docs.ceph.com/docs/master/install/install-ceph-deploy
+>>>> * Release sha1: a5f84b37668fc8e03165aaf5cbb380c78e4deba4
+>>>>
+>>>> [1]: http://tracker.ceph.com/issues/20985
+>>>>
+>>>>
+>>>> Best Regards
+>>>> Abhishek
+>>>>
+>>>> _______________________________________________
+>>>> ceph-users mailing list
+>>>> ceph-users@lists.ceph.com
+>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>> _______________________________________________
+>>> ceph-users mailing list
+>>> ceph-users@lists.ceph.com
+>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
