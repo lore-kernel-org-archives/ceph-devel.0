@@ -1,128 +1,118 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 1/1] fs/ceph: More accurate statfs
-Date: Wed, 16 Aug 2017 14:45:42 +0200
-Message-ID: <CAOi1vP_Xo6ZHPu2MKk00JNKymRCDuZFWZUVk9e+O-bzDJzpaCw@mail.gmail.com>
-References: <cover.1502823001.git.dfuller@redhat.com> <04d1b74e1f90539a5bea9d737710ab71039e5eab.1502823001.git.dfuller@redhat.com>
+From: Abhishek Lekshmanan <abhishek@suse.com>
+Subject: Re: [ceph-users] v12.1.4 Luminous (RC) released
+Date: Wed, 16 Aug 2017 15:17:04 +0200
+Message-ID: <8760dn4ppr.fsf@suse.com>
+References: <062fdb6f788298b7458db9d07ead19d2@suse.com> <CAJ4mKGa7SK+YNE-sdEPKAj+NnTGtZSmxVZJiVXQoSnKF13TNJw@mail.gmail.com> <CAKOnarmpOgZL7PtHnW-xOEH589aPyNPoGkguYpWbhAgV5RcwQw@mail.gmail.com> <CAC-Np1xzdfEVQOszKttVEx8KNEspqJ+aBdS9RRVuA--QEEd9Gg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f193.google.com ([209.85.217.193]:34565 "EHLO
-        mail-ua0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751287AbdHPMpn (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Aug 2017 08:45:43 -0400
-Received: by mail-ua0-f193.google.com with SMTP id k43so1699274uaf.1
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Aug 2017 05:45:43 -0700 (PDT)
-In-Reply-To: <04d1b74e1f90539a5bea9d737710ab71039e5eab.1502823001.git.dfuller@redhat.com>
+Received: from smtp.nue.novell.com ([195.135.221.5]:39183 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751843AbdHPNRI (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Wed, 16 Aug 2017 09:17:08 -0400
+In-Reply-To: <CAC-Np1xzdfEVQOszKttVEx8KNEspqJ+aBdS9RRVuA--QEEd9Gg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Douglas Fuller <dfuller@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>, Matt Benjamin <mbenjami@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>, ceph-announce@ceph.com
 
-On Tue, Aug 15, 2017 at 8:54 PM, Douglas Fuller <dfuller@redhat.com> wrote:
-> Improve accuracy of statfs reporting for Ceph filesystems comprising
-> exactly one data pool. In this case, the Ceph monitor can now report
-> the space usage for the single data pool instead of the global data
-> for the entire Ceph cluster. Include support for this message in
-> mon_client and leverage it in ceph/super.
->
-> Signed-off-by: Douglas Fuller <dfuller@redhat.com>
-> ---
->  fs/ceph/super.c                 | 9 ++++++++-
->  include/linux/ceph/ceph_fs.h    | 2 ++
->  include/linux/ceph/mon_client.h | 2 +-
->  net/ceph/mon_client.c           | 6 +++++-
->  4 files changed, 16 insertions(+), 3 deletions(-)
->
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index 1deb8810d7c7..75facee8b6d1 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -49,9 +49,16 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
->         struct ceph_statfs st;
->         u64 fsid;
->         int err;
-> +       __le64 data_pool;
-> +
-> +       if (fsc->mdsc->mdsmap->m_num_data_pg_pools == 1) {
-> +               data_pool = fsc->mdsc->mdsmap->m_data_pg_pools[0];
-> +       } else {
-> +               data_pool = CEPH_NOPOOL;
-> +       }
+Alfredo Deza <adeza@redhat.com> writes:
 
-Missing cpu_to_le64() here -- data_pool is __le64, while CEPH_NOPOOL
-and m_data_pg_pools are in CPU order.
+> On Tue, Aug 15, 2017 at 10:35 PM, Matt Benjamin <mbenjami@redhat.com> wrote:
+>> I think we need a v12.1.5 including #17040
+We discussed this in the RGW Standups today & may not need one more RC
+for the bug above, and should be fine as far as the fix is in 12.2.0
 
 >
->         dout("statfs\n");
-> -       err = ceph_monc_do_statfs(&fsc->client->monc, &st);
-> +       err = ceph_monc_do_statfs(&fsc->client->monc, data_pool, &st);
->         if (err < 0)
->                 return err;
+> *I* think that this is getting to a point where we should just have
+> nightly development releases.
 >
-> diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
-> index d1642a4b4c5e..b422170b791a 100644
-> --- a/include/linux/ceph/ceph_fs.h
-> +++ b/include/linux/ceph/ceph_fs.h
-> @@ -167,6 +167,8 @@ struct ceph_mon_request_header {
->  struct ceph_mon_statfs {
->         struct ceph_mon_request_header monhdr;
->         struct ceph_fsid fsid;
-> +       __u8 contains_data_pool;
-> +       __le64 data_pool;
->  } __attribute__ ((packed));
+> What is the benefit of waiting for each RC every two weeks (or so) otherwise?
+
+We could consider something of this sort for M maybe?
+
+Abhishek
+> On one side we are treating the RC releases somewhat like normal
+> releases, with proper announcements, waiting for
+> QA suites to complete, and have leads "ack" when their components are
+> good enough. But on the other side of things
+> we then try to cut releases to include fixes as immediate as possible
+> (and as often as that means)
 >
->  struct ceph_statfs {
-> diff --git a/include/linux/ceph/mon_client.h b/include/linux/ceph/mon_client.h
-> index d5a3ecea578d..bd4650ab1248 100644
-> --- a/include/linux/ceph/mon_client.h
-> +++ b/include/linux/ceph/mon_client.h
-> @@ -133,7 +133,7 @@ void ceph_monc_renew_subs(struct ceph_mon_client *monc);
->  extern int ceph_monc_wait_osdmap(struct ceph_mon_client *monc, u32 epoch,
->                                  unsigned long timeout);
+> We've had 3 releases already in August and this would mean discussing
+> a *fourth*. 
 >
-> -extern int ceph_monc_do_statfs(struct ceph_mon_client *monc,
-> +extern int ceph_monc_do_statfs(struct ceph_mon_client *monc, __le64 data_pool,
->                                struct ceph_statfs *buf);
->
->  int ceph_monc_get_version(struct ceph_mon_client *monc, const char *what,
-> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
-> index 875675765531..5ef21986074e 100644
-> --- a/net/ceph/mon_client.c
-> +++ b/net/ceph/mon_client.c
-> @@ -676,7 +676,8 @@ static void handle_statfs_reply(struct ceph_mon_client *monc,
->  /*
->   * Do a synchronous statfs().
->   */
-> -int ceph_monc_do_statfs(struct ceph_mon_client *monc, struct ceph_statfs *buf)
-> +int ceph_monc_do_statfs(struct ceph_mon_client *monc, __le64 data_pool,
-> +                       struct ceph_statfs *buf)
->  {
->         struct ceph_mon_generic_request *req;
->         struct ceph_mon_statfs *h;
-> @@ -696,6 +697,7 @@ int ceph_monc_do_statfs(struct ceph_mon_client *monc, struct ceph_statfs *buf)
->                 goto out;
->
->         req->u.st = buf;
-> +       req->request->hdr.version = 2;
+>>
+>> Matt
+>>
+>> On Tue, Aug 15, 2017 at 5:16 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+>>> On Tue, Aug 15, 2017 at 2:05 PM, Abhishek <abhishek@suse.com> wrote:
+>>>> This is the fifth release candidate for Luminous, the next long term
+>>>> stable release. We’ve had to do this release as there was a bug in
+>>>> the previous RC, which affected upgrades to Luminous.[1]
+>>>
+>>> In particular, this will fix things for those of you who upgraded from
+>>> Jewel or a previous RC and saw OSDs crash instantly on boot. We had an
+>>> oversight in dealing with another bug. (Standard disclaimer: this was
+>>> a logic error that resulted in no data changes. There were no
+>>> durability implications — not that that helps much when you can't read
+>>> your data out again.)
+>>>
+>>> Sorry guys!
+>>> -Greg
+>>>
+>>>>
+>>>> Please note that this is still a *release candidate* and
+>>>> not the final release, we're expecting the final Luminous release in
+>>>> a week's time, meanwhile, testing and feedback is very much welcom.
+>>>>
+>>>> Ceph Luminous (v12.2.0) will be the foundation for the next long-term
+>>>> stable release series. There have been major changes since Kraken
+>>>> (v11.2.z) and Jewel (v10.2.z), and the upgrade process is non-trivial.
+>>>> Please read these release notes carefully. Full details and changelog at
+>>>> http://ceph.com/releases/v12-1-4-luminous-rc-released/
+>>>>
+>>>> Notable Changes from 12.1.3
+>>>> ---------------------------
+>>>> * core: Wip 20985 divergent handling luminous (issue#20985, pr#17001, Greg
+>>>> Farnum)
+>>>> * qa/tasks/thrashosds-health.yaml: ignore MON_DOWN (issue#20910, pr#17003,
+>>>> Sage Weil)
+>>>> * crush, mon: fix weight set vs crush device classes (issue#20939, Sage
+>>>> Weil)
+>>>>
+>>>>
+>>>> Getting Ceph
+>>>> ------------
+>>>> * Git at git://github.com/ceph/ceph.git
+>>>> * Tarball at http://download.ceph.com/tarballs/ceph-12.1.4.tar.gz
+>>>> * For packages, see http://docs.ceph.com/docs/master/install/get-packages/
+>>>> * For ceph-deploy, see
+>>>> http://docs.ceph.com/docs/master/install/install-ceph-deploy
+>>>> * Release sha1: a5f84b37668fc8e03165aaf5cbb380c78e4deba4
+>>>>
+>>>> [1]: http://tracker.ceph.com/issues/20985
+>>>>
+>>>>
+>>>> Best Regards
+>>>> Abhishek
+>>>>
+>>>> _______________________________________________
+>>>> ceph-users mailing list
+>>>> ceph-users@lists.ceph.com
+>>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>>> _______________________________________________
+>>> ceph-users mailing list
+>>> ceph-users@lists.ceph.com
+>>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
-cpu_to_le16(2)
-
->
->         mutex_lock(&monc->mutex);
->         register_generic_request(req);
-> @@ -705,6 +707,8 @@ int ceph_monc_do_statfs(struct ceph_mon_client *monc, struct ceph_statfs *buf)
->         h->monhdr.session_mon = cpu_to_le16(-1);
->         h->monhdr.session_mon_tid = 0;
->         h->fsid = monc->monmap->fsid;
-> +       h->contains_data_pool = (data_pool != CEPH_NOPOOL);
-
-... and again here, but the other way around.
-
-> +       h->data_pool = data_pool;
-
-I'd make ceph_monc_do_statfs() take u64 and do cpu_to_le64() here, in
-one place.
-
-Thanks,
-
-                Ilya
