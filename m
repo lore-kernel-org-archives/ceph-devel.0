@@ -1,85 +1,41 @@
-From: Matt Benjamin <mbenjami@redhat.com>
-Subject: Re: [ceph-users] v12.1.4 Luminous (RC) released
-Date: Tue, 15 Aug 2017 22:35:10 -0400
-Message-ID: <CAKOnarmpOgZL7PtHnW-xOEH589aPyNPoGkguYpWbhAgV5RcwQw@mail.gmail.com>
-References: <062fdb6f788298b7458db9d07ead19d2@suse.com> <CAJ4mKGa7SK+YNE-sdEPKAj+NnTGtZSmxVZJiVXQoSnKF13TNJw@mail.gmail.com>
+From: Loic Dachary <loic@dachary.org>
+Subject: libcrush to be merged in Ceph
+Date: Wed, 16 Aug 2017 10:42:50 +0200
+Message-ID: <0a045b84-d77c-30d8-0e87-3b5b32c11997@dachary.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f176.google.com ([209.85.192.176]:36237 "EHLO
-        mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752851AbdHPCfL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 15 Aug 2017 22:35:11 -0400
-Received: by mail-pf0-f176.google.com with SMTP id c28so387105pfe.3
-        for <ceph-devel@vger.kernel.org>; Tue, 15 Aug 2017 19:35:11 -0700 (PDT)
-In-Reply-To: <CAJ4mKGa7SK+YNE-sdEPKAj+NnTGtZSmxVZJiVXQoSnKF13TNJw@mail.gmail.com>
+Received: from slow1-d.mail.gandi.net ([217.70.178.86]:44683 "EHLO
+        slow1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751454AbdHPIqz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Aug 2017 04:46:55 -0400
+Received: from relay6-d.mail.gandi.net (relay6-d.mail.gandi.net [217.70.183.198])
+        by slow1-d.mail.gandi.net (Postfix) with ESMTP id B9EC847B3DF
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Aug 2017 10:42:52 +0200 (CEST)
+Received: from [192.168.3.43] (static-176-158-46-5.ftth.abo.bbox.fr [176.158.46.5])
+        (Authenticated sender: loic@dachary.org)
+        by relay6-d.mail.gandi.net (Postfix) with ESMTPSA id 19257FB89E
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Aug 2017 10:42:50 +0200 (CEST)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, ceph-maintainers@ceph.com, ceph-announce@ceph.com
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-I think we need a v12.1.5 including #17040
+Hi,
 
-Matt
+TL;DR: libcrush rebalancing algorithm is going to be merged in Ceph[0]
 
-On Tue, Aug 15, 2017 at 5:16 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
-> On Tue, Aug 15, 2017 at 2:05 PM, Abhishek <abhishek@suse.com> wrote:
->> This is the fifth release candidate for Luminous, the next long term
->> stable release. We’ve had to do this release as there was a bug in
->> the previous RC, which affected upgrades to Luminous.[1]
->
-> In particular, this will fix things for those of you who upgraded from
-> Jewel or a previous RC and saw OSDs crash instantly on boot. We had an
-> oversight in dealing with another bug. (Standard disclaimer: this was
-> a logic error that resulted in no data changes. There were no
-> durability implications — not that that helps much when you can't read
-> your data out again.)
->
-> Sorry guys!
-> -Greg
->
->>
->> Please note that this is still a *release candidate* and
->> not the final release, we're expecting the final Luminous release in
->> a week's time, meanwhile, testing and feedback is very much welcom.
->>
->> Ceph Luminous (v12.2.0) will be the foundation for the next long-term
->> stable release series. There have been major changes since Kraken
->> (v11.2.z) and Jewel (v10.2.z), and the upgrade process is non-trivial.
->> Please read these release notes carefully. Full details and changelog at
->> http://ceph.com/releases/v12-1-4-luminous-rc-released/
->>
->> Notable Changes from 12.1.3
->> ---------------------------
->> * core: Wip 20985 divergent handling luminous (issue#20985, pr#17001, Greg
->> Farnum)
->> * qa/tasks/thrashosds-health.yaml: ignore MON_DOWN (issue#20910, pr#17003,
->> Sage Weil)
->> * crush, mon: fix weight set vs crush device classes (issue#20939, Sage
->> Weil)
->>
->>
->> Getting Ceph
->> ------------
->> * Git at git://github.com/ceph/ceph.git
->> * Tarball at http://download.ceph.com/tarballs/ceph-12.1.4.tar.gz
->> * For packages, see http://docs.ceph.com/docs/master/install/get-packages/
->> * For ceph-deploy, see
->> http://docs.ceph.com/docs/master/install/install-ceph-deploy
->> * Release sha1: a5f84b37668fc8e03165aaf5cbb380c78e4deba4
->>
->> [1]: http://tracker.ceph.com/issues/20985
->>
->>
->> Best Regards
->> Abhishek
->>
->> _______________________________________________
->> ceph-users mailing list
->> ceph-users@lists.ceph.com
->> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+A few months ago http://libcrush.org started with the goal to provide an library independent from Ceph and usable by other software. The short conclusion is that there is not much interest. Other storage software would have to be re-architectured entirely to take advantage of CRUSH. And other kind of distributed software such as distributed cache or databases also have their own way of addressing content. I'd be happy to share the research if someone is interested in the details.
+
+Although unexpected, the positive outcome of the work done on libcrush is an algorithm to fix uneven CRUSH distributions in Ceph[1]. Instead of bundling it as part of a standalone python module, it will be re-written in C++ and merged into the Ceph mainline[0]. Having a separate library would be worth the effort if projects other than Ceph use it. Since it's not going to be the case in the near future, it would just be a maintenance burden.
+
+Unless someone is willing to takeover libcrush, it is going to be deprecated in the near future.
+
+Cheers
+
+[0] https://github.com/ceph/ceph/pull/16272
+[1] An algorithm to fix uneven CRUSH distributions in Ceph http://dachary.org/?p=4055
+
+-- 
+Loïc Dachary, Artisan Logiciel Libre
