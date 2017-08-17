@@ -1,52 +1,66 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: "ceph versions" dump (was Re: [Ceph-maintainers] [ceph-users] v12.1.4
- Luminous (RC) released)
-Date: Thu, 17 Aug 2017 09:28:39 -0700
-Message-ID: <CAJ4mKGaeF1NdkRr5grxS2LN2jxqXB4u1Nn+O-yLYbgF5tD4dMg@mail.gmail.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+Subject: Re: "ceph versions" dump (was Re: [Ceph-maintainers] [ceph-users]
+ v12.1.4 Luminous (RC) released)
+Date: Thu, 17 Aug 2017 16:39:11 +0000
+Message-ID: <46A6755C-D615-448F-8774-867FEF47CE3F@TERADATA.COM>
+References: <CAJ4mKGaeF1NdkRr5grxS2LN2jxqXB4u1Nn+O-yLYbgF5tD4dMg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f42.google.com ([209.85.214.42]:34319 "EHLO
-        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751107AbdHQQ2l (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Aug 2017 12:28:41 -0400
-Received: by mail-it0-f42.google.com with SMTP id f16so1590826itb.1
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Aug 2017 09:28:41 -0700 (PDT)
+Received: from nat13.teradata.com ([153.65.16.13]:33432 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752335AbdHQQjQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Aug 2017 12:39:16 -0400
+In-Reply-To: <CAJ4mKGaeF1NdkRr5grxS2LN2jxqXB4u1Nn+O-yLYbgF5tD4dMg@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <1A076AB00061B942BB38F2CA5C698DCA@namprd13.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
+To: Gregory Farnum <gfarnum@redhat.com>
 Cc: Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Aug 17, 2017 at 9:18 AM, Kamble, Nitin A
-<Nitin.Kamble@teradata.com> wrote:
->
->
-> On 8/16/17, 6:42 PM, "Dan Mick" <dmick@redhat.com> wrote:
->
->
->     >     >     "overall": {
->     >     >         "ceph version 12.1.0 (262617c9f16c55e863693258061c5b25dea5b086) luminous (dev)": 50,
->     >     >         "ceph version 12.1.4 (a5f84b37668fc8e03165aaf5cbb380c78e4deba4) luminous (rc)": 3
->     >     >     }
->     >     > }
->     >     >
->     >     >
->     >     > # ceph-osd --version
->     >     > ceph version 12.1.4 (a5f84b37668fc8e03165aaf5cbb380c78e4deba4) luminous (rc)
->     >     >
->     >     > Why is it showing old 12.1.0 version for the 50 osds, while all the nodes show ceph osd version as 12.1.4?
->     >
->     >     You didn't say you restarted the osds.  Did you?
->     >
->     > Yes, I did restart them, and that too more than once.
->
->     Dunno, then.  That seems impossible.
->
-> It is showing the version of OSD before the upgrade.
-> Is it possible the old version gets cached somewhere, and that is not getting updated after upgrade?
-
-I looked at the source for this briefly yesterday and it did not seem
-possible; the OSDs report their version as part of the "daemon
-metadata" and that is committed to disk/paxos when they boot. It's
-then read out of their to support this command.
-If you could create a ticket at tracker.ceph.com for this, that would be good!
+DQoNCk9uIDgvMTcvMTcsIDk6MjggQU0sICJHcmVnb3J5IEZhcm51bSIgPGdmYXJudW1AcmVkaGF0
+LmNvbT4gd3JvdGU6DQoNCiAgICBPbiBUaHUsIEF1ZyAxNywgMjAxNyBhdCA5OjE4IEFNLCBLYW1i
+bGUsIE5pdGluIEENCiAgICA8Tml0aW4uS2FtYmxlQHRlcmFkYXRhLmNvbT4gd3JvdGU6DQogICAg
+Pg0KICAgID4NCiAgICA+IE9uIDgvMTYvMTcsIDY6NDIgUE0sICJEYW4gTWljayIgPGRtaWNrQHJl
+ZGhhdC5jb20+IHdyb3RlOg0KICAgID4NCiAgICA+DQogICAgPiAgICAgPiAgICAgPiAgICAgIm92
+ZXJhbGwiOiB7DQogICAgPiAgICAgPiAgICAgPiAgICAgICAgICJjZXBoIHZlcnNpb24gMTIuMS4w
+ICgyNjI2MTdjOWYxNmM1NWU4NjM2OTMyNTgwNjFjNWIyNWRlYTViMDg2KSBsdW1pbm91cyAoZGV2
+KSI6IDUwLA0KICAgID4gICAgID4gICAgID4gICAgICAgICAiY2VwaCB2ZXJzaW9uIDEyLjEuNCAo
+YTVmODRiMzc2NjhmYzhlMDMxNjVhYWY1Y2JiMzgwYzc4ZTRkZWJhNCkgbHVtaW5vdXMgKHJjKSI6
+IDMNCiAgICA+ICAgICA+ICAgICA+ICAgICB9DQogICAgPiAgICAgPiAgICAgPiB9DQogICAgPiAg
+ICAgPiAgICAgPg0KICAgID4gICAgID4gICAgID4NCiAgICA+ICAgICA+ICAgICA+ICMgY2VwaC1v
+c2QgLS12ZXJzaW9uDQogICAgPiAgICAgPiAgICAgPiBjZXBoIHZlcnNpb24gMTIuMS40IChhNWY4
+NGIzNzY2OGZjOGUwMzE2NWFhZjVjYmIzODBjNzhlNGRlYmE0KSBsdW1pbm91cyAocmMpDQogICAg
+PiAgICAgPiAgICAgPg0KICAgID4gICAgID4gICAgID4gV2h5IGlzIGl0IHNob3dpbmcgb2xkIDEy
+LjEuMCB2ZXJzaW9uIGZvciB0aGUgNTAgb3Nkcywgd2hpbGUgYWxsIHRoZSBub2RlcyBzaG93IGNl
+cGggb3NkIHZlcnNpb24gYXMgMTIuMS40Pw0KICAgID4gICAgID4NCiAgICA+ICAgICA+ICAgICBZ
+b3UgZGlkbid0IHNheSB5b3UgcmVzdGFydGVkIHRoZSBvc2RzLiAgRGlkIHlvdT8NCiAgICA+ICAg
+ICA+DQogICAgPiAgICAgPiBZZXMsIEkgZGlkIHJlc3RhcnQgdGhlbSwgYW5kIHRoYXQgdG9vIG1v
+cmUgdGhhbiBvbmNlLg0KICAgID4NCiAgICA+ICAgICBEdW5ubywgdGhlbi4gIFRoYXQgc2VlbXMg
+aW1wb3NzaWJsZS4NCiAgICA+DQogICAgPiBJdCBpcyBzaG93aW5nIHRoZSB2ZXJzaW9uIG9mIE9T
+RCBiZWZvcmUgdGhlIHVwZ3JhZGUuDQogICAgPiBJcyBpdCBwb3NzaWJsZSB0aGUgb2xkIHZlcnNp
+b24gZ2V0cyBjYWNoZWQgc29tZXdoZXJlLCBhbmQgdGhhdCBpcyBub3QgZ2V0dGluZyB1cGRhdGVk
+IGFmdGVyIHVwZ3JhZGU/DQogICAgDQogICAgSSBsb29rZWQgYXQgdGhlIHNvdXJjZSBmb3IgdGhp
+cyBicmllZmx5IHllc3RlcmRheSBhbmQgaXQgZGlkIG5vdCBzZWVtDQogICAgcG9zc2libGU7IHRo
+ZSBPU0RzIHJlcG9ydCB0aGVpciB2ZXJzaW9uIGFzIHBhcnQgb2YgdGhlICJkYWVtb24NCiAgICBt
+ZXRhZGF0YSIgYW5kIHRoYXQgaXMgY29tbWl0dGVkIHRvIGRpc2svcGF4b3Mgd2hlbiB0aGV5IGJv
+b3QuIEl0J3MNCiAgICB0aGVuIHJlYWQgb3V0IG9mIHRoZWlyIHRvIHN1cHBvcnQgdGhpcyBjb21t
+YW5kLg0KICAgIElmIHlvdSBjb3VsZCBjcmVhdGUgYSB0aWNrZXQgYXQgdHJhY2tlci5jZXBoLmNv
+bSBmb3IgdGhpcywgdGhhdCB3b3VsZCBiZSBnb29kIQ0KICAgIA0KT2ssIEkgY2FuIGNyZWF0ZSB0
+aGUgdHJhY2tlci4gQW5vdGhlciBwb3NzaWJpbGl0eSBjb3VsZCBiZSB0aGUgb3NkIGRhZW1vbnMg
+YXJlIG5vdCBhYmxlIHRvIHRhbGsgd2l0aCBtb25pdG9yL21hbmFnZXIgYWZ0ZXIgdGhlIHVwZ3Jh
+ZGUuDQoNCkkgYW0gc2VlaW5nIHRoaXMgZXJyb3IgaW4gdGhlIG9zZCBsb2cgDQoNCjIwMTctMDgt
+MTcgMDk6MzE6MjIuMDM2OTAxIDdmMmVlZTZkOGNjMCAgMSBibHVlc3RvcmUoL3Zhci9saWIvY2Vw
+aC9vc2QvY2VwaC0yKSBmc2NrIGZpbmlzaCB3aXRoIDEgZXJyb3JzIGluIDI3Ny4yMTk3ODggc2Vj
+b25kcw0KMjAxNy0wOC0xNyAwOTozMToyMi4wNDE5ODMgN2YyZWVlNmQ4Y2MwIC0xIGJsdWVzdG9y
+ZSgvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTIpIF9tb3VudCBmc2NrIGZvdW5kIDEgZXJyb3JzDQoy
+MDE3LTA4LTE3IDA5OjMxOjIyLjA0MTk4OCA3ZjJlZWU2ZDhjYzAgLTEgb3NkLjIgMCBPU0Q6aW5p
+dDogdW5hYmxlIHRvIG1vdW50IG9iamVjdCBzdG9yZQ0KMjAxNy0wOC0xNyAwOTozMToyMi4wNDE5
+OTQgN2YyZWVlNmQ4Y2MwIC0xICAqKiBFUlJPUjogb3NkIGluaXQgZmFpbGVkOiAoNSkgSW5wdXQv
+b3V0cHV0IGVycm9yDQoyMDE3LTA4LTE3IDA5OjMxOjQyLjM5NzQ5NyA3ZjMwMmY3MmJjYzAgIDAg
+c2V0IHVpZDpnaWQgdG8gNTAwOjE2NyAoY2VwaDpjZXBoKQ0KMjAxNy0wOC0xNyAwOTozMTo0Mi4z
+OTc1MDkgN2YzMDJmNzJiY2MwICAwIGNlcGggdmVyc2lvbiAxMi4xLjQgKGE1Zjg0YjM3NjY4ZmM4
+ZTAzMTY1YWFmNWNiYjM4MGM3OGU0ZGViYTQpIGx1bWlub3VzIChyYyksIHByb2Nlc3MgKHVua25v
+d24pLCBwaWQgOTIwOA0KMjQNCg0KDQpOaXRpbg0KDQoNCg0K
