@@ -1,7 +1,7 @@
-From: Dan Mick <dmick@redhat.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
 Subject: Re: [Ceph-maintainers] [ceph-users] v12.1.4 Luminous (RC) released
-Date: Wed, 16 Aug 2017 16:18:42 -0700
-Message-ID: <a6a7dd77-8b36-b2fb-183a-ecce43f3b8d7@redhat.com>
+Date: Thu, 17 Aug 2017 01:02:53 +0000
+Message-ID: <B693BFC0-9A9B-4338-BF7D-C9710665350C@TERADATA.COM>
 References: <062fdb6f788298b7458db9d07ead19d2@suse.com>
  <CAJ4mKGa7SK+YNE-sdEPKAj+NnTGtZSmxVZJiVXQoSnKF13TNJw@mail.gmail.com>
  <CAKOnarmpOgZL7PtHnW-xOEH589aPyNPoGkguYpWbhAgV5RcwQw@mail.gmail.com>
@@ -9,59 +9,51 @@ References: <062fdb6f788298b7458db9d07ead19d2@suse.com>
  <CAJ4mKGZqB+2ocK3Eo2fLbA8ebzrAuvFFw3Pf2sy-zantTdTkrQ@mail.gmail.com>
  <CAC-Np1xMKD7TNpXKCy2AyatDOkGubGzifRX_TYyF0D48SG+pEg@mail.gmail.com>
  <DF101E47-D98F-4DF1-8337-6FC44B86676E@TERADATA.COM>
+ <a6a7dd77-8b36-b2fb-183a-ecce43f3b8d7@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58376 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752514AbdHPXSm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 16 Aug 2017 19:18:42 -0400
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id A4513AC2D5
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Aug 2017 23:18:42 +0000 (UTC)
-Received: from [10.17.96.100] (angus.lax.redhat.com [10.17.96.100])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 90CF2619C0
-        for <ceph-devel@vger.kernel.org>; Wed, 16 Aug 2017 23:18:42 +0000 (UTC)
-In-Reply-To: <DF101E47-D98F-4DF1-8337-6FC44B86676E@TERADATA.COM>
+Received: from nat13.teradata.com ([153.65.16.13]:33058 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751943AbdHQBC5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Aug 2017 21:02:57 -0400
+In-Reply-To: <a6a7dd77-8b36-b2fb-183a-ecce43f3b8d7@redhat.com>
 Content-Language: en-US
+Content-ID: <37BD797C6EAF55479F64967ABF3D6E3D@namprd13.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On 08/16/2017 04:01 PM, Kamble, Nitin A wrote:
-> After upgrading all the ceph nodes to v12.1.4 I see that OSD versions are still shown as older version.
-> # ceph versions
-> {
->     "mon": {
->         "ceph version 12.1.4 (a5f84b37668fc8e03165aaf5cbb380c78e4deba4) luminous (rc)": 1
->     },
->     "mgr": {
->         "ceph version 12.1.4 (a5f84b37668fc8e03165aaf5cbb380c78e4deba4) luminous (rc)": 1
->     },
->     "osd": {
->         "ceph version 12.1.0 (262617c9f16c55e863693258061c5b25dea5b086) luminous (dev)": 50
->     },
->     "mds": {
->         "ceph version 12.1.4 (a5f84b37668fc8e03165aaf5cbb380c78e4deba4) luminous (rc)": 1
->     },
->     "overall": {
->         "ceph version 12.1.0 (262617c9f16c55e863693258061c5b25dea5b086) luminous (dev)": 50,
->         "ceph version 12.1.4 (a5f84b37668fc8e03165aaf5cbb380c78e4deba4) luminous (rc)": 3
->     }
-> }
-> 
-> 
-> # ceph-osd --version
-> ceph version 12.1.4 (a5f84b37668fc8e03165aaf5cbb380c78e4deba4) luminous (rc)
-> 
-> Why is it showing old 12.1.0 version for the 50 osds, while all the nodes show ceph osd version as 12.1.4?
-
-You didn't say you restarted the osds.  Did you?
-
--- 
-Dan Mick
-Red Hat, Inc.
-Ceph docs: http://ceph.com/docs
+DQoNCk9uIDgvMTYvMTcsIDQ6MTggUE0sICJjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
+ZyBvbiBiZWhhbGYgb2YgRGFuIE1pY2siIDxjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
+ZyBvbiBiZWhhbGYgb2YgZG1pY2tAcmVkaGF0LmNvbT4gd3JvdGU6DQoNCiAgICBPbiAwOC8xNi8y
+MDE3IDA0OjAxIFBNLCBLYW1ibGUsIE5pdGluIEEgd3JvdGU6DQogICAgPiBBZnRlciB1cGdyYWRp
+bmcgYWxsIHRoZSBjZXBoIG5vZGVzIHRvIHYxMi4xLjQgSSBzZWUgdGhhdCBPU0QgdmVyc2lvbnMg
+YXJlIHN0aWxsIHNob3duIGFzIG9sZGVyIHZlcnNpb24uDQogICAgPiAjIGNlcGggdmVyc2lvbnMN
+CiAgICA+IHsNCiAgICA+ICAgICAibW9uIjogew0KICAgID4gICAgICAgICAiY2VwaCB2ZXJzaW9u
+IDEyLjEuNCAoYTVmODRiMzc2NjhmYzhlMDMxNjVhYWY1Y2JiMzgwYzc4ZTRkZWJhNCkgbHVtaW5v
+dXMgKHJjKSI6IDENCiAgICA+ICAgICB9LA0KICAgID4gICAgICJtZ3IiOiB7DQogICAgPiAgICAg
+ICAgICJjZXBoIHZlcnNpb24gMTIuMS40IChhNWY4NGIzNzY2OGZjOGUwMzE2NWFhZjVjYmIzODBj
+NzhlNGRlYmE0KSBsdW1pbm91cyAocmMpIjogMQ0KICAgID4gICAgIH0sDQogICAgPiAgICAgIm9z
+ZCI6IHsNCiAgICA+ICAgICAgICAgImNlcGggdmVyc2lvbiAxMi4xLjAgKDI2MjYxN2M5ZjE2YzU1
+ZTg2MzY5MzI1ODA2MWM1YjI1ZGVhNWIwODYpIGx1bWlub3VzIChkZXYpIjogNTANCiAgICA+ICAg
+ICB9LA0KICAgID4gICAgICJtZHMiOiB7DQogICAgPiAgICAgICAgICJjZXBoIHZlcnNpb24gMTIu
+MS40IChhNWY4NGIzNzY2OGZjOGUwMzE2NWFhZjVjYmIzODBjNzhlNGRlYmE0KSBsdW1pbm91cyAo
+cmMpIjogMQ0KICAgID4gICAgIH0sDQogICAgPiAgICAgIm92ZXJhbGwiOiB7DQogICAgPiAgICAg
+ICAgICJjZXBoIHZlcnNpb24gMTIuMS4wICgyNjI2MTdjOWYxNmM1NWU4NjM2OTMyNTgwNjFjNWIy
+NWRlYTViMDg2KSBsdW1pbm91cyAoZGV2KSI6IDUwLA0KICAgID4gICAgICAgICAiY2VwaCB2ZXJz
+aW9uIDEyLjEuNCAoYTVmODRiMzc2NjhmYzhlMDMxNjVhYWY1Y2JiMzgwYzc4ZTRkZWJhNCkgbHVt
+aW5vdXMgKHJjKSI6IDMNCiAgICA+ICAgICB9DQogICAgPiB9DQogICAgPiANCiAgICA+IA0KICAg
+ID4gIyBjZXBoLW9zZCAtLXZlcnNpb24NCiAgICA+IGNlcGggdmVyc2lvbiAxMi4xLjQgKGE1Zjg0
+YjM3NjY4ZmM4ZTAzMTY1YWFmNWNiYjM4MGM3OGU0ZGViYTQpIGx1bWlub3VzIChyYykNCiAgICA+
+IA0KICAgID4gV2h5IGlzIGl0IHNob3dpbmcgb2xkIDEyLjEuMCB2ZXJzaW9uIGZvciB0aGUgNTAg
+b3Nkcywgd2hpbGUgYWxsIHRoZSBub2RlcyBzaG93IGNlcGggb3NkIHZlcnNpb24gYXMgMTIuMS40
+Pw0KICAgIA0KICAgIFlvdSBkaWRuJ3Qgc2F5IHlvdSByZXN0YXJ0ZWQgdGhlIG9zZHMuICBEaWQg
+eW91Pw0KDQpZZXMsIEkgZGlkIHJlc3RhcnQgdGhlbSwgYW5kIHRoYXQgdG9vIG1vcmUgdGhhbiBv
+bmNlLg0KDQogICAgLS0gDQogICAgRGFuIE1pY2sNCiAgICBSZWQgSGF0LCBJbmMuDQogICAgQ2Vw
+aCBkb2NzOiBodHRwOi8vY2VwaC5jb20vZG9jcw0KICAgIC0tDQogICAgVG8gdW5zdWJzY3JpYmUg
+ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGlu
+DQogICAgdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcN
+CiAgICBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
+ZG9tby1pbmZvLmh0bWwNCiAgICANCg0K
