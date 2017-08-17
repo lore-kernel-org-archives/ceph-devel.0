@@ -1,62 +1,137 @@
-From: Vasu Kulkarni <vakulkar@redhat.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
 Subject: Re: [Ceph-maintainers] [ceph-users] v12.1.4 Luminous (RC) released
-Date: Thu, 17 Aug 2017 09:42:38 -0700
-Message-ID: <CAKPXa=ZPeMST83ekgUkYbO5yz-ic3q_guY__0=tY7PSwmk-4YA@mail.gmail.com>
-References: <062fdb6f788298b7458db9d07ead19d2@suse.com> <CAJ4mKGa7SK+YNE-sdEPKAj+NnTGtZSmxVZJiVXQoSnKF13TNJw@mail.gmail.com>
+Date: Thu, 17 Aug 2017 16:59:53 +0000
+Message-ID: <1B0B99FE-C6D5-455E-B8B7-1972D9B8FD2F@TERADATA.COM>
+References: <062fdb6f788298b7458db9d07ead19d2@suse.com>
+ <CAJ4mKGa7SK+YNE-sdEPKAj+NnTGtZSmxVZJiVXQoSnKF13TNJw@mail.gmail.com>
  <CAKOnarmpOgZL7PtHnW-xOEH589aPyNPoGkguYpWbhAgV5RcwQw@mail.gmail.com>
  <CAC-Np1xzdfEVQOszKttVEx8KNEspqJ+aBdS9RRVuA--QEEd9Gg@mail.gmail.com>
  <CAJ4mKGZqB+2ocK3Eo2fLbA8ebzrAuvFFw3Pf2sy-zantTdTkrQ@mail.gmail.com>
  <CAC-Np1xMKD7TNpXKCy2AyatDOkGubGzifRX_TYyF0D48SG+pEg@mail.gmail.com>
- <DF101E47-D98F-4DF1-8337-6FC44B86676E@TERADATA.COM> <a6a7dd77-8b36-b2fb-183a-ecce43f3b8d7@redhat.com>
- <B693BFC0-9A9B-4338-BF7D-C9710665350C@TERADATA.COM> <238bc116-e706-031e-ab11-06e2383a9a04@redhat.com>
+ <DF101E47-D98F-4DF1-8337-6FC44B86676E@TERADATA.COM>
+ <a6a7dd77-8b36-b2fb-183a-ecce43f3b8d7@redhat.com>
+ <B693BFC0-9A9B-4338-BF7D-C9710665350C@TERADATA.COM>
+ <238bc116-e706-031e-ab11-06e2383a9a04@redhat.com>
  <469DEC9D-7E3D-49C5-8AE6-71877039B3AC@TERADATA.COM>
+ <CAKPXa=ZPeMST83ekgUkYbO5yz-ic3q_guY__0=tY7PSwmk-4YA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f44.google.com ([209.85.218.44]:35243 "EHLO
-        mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751637AbdHQQmj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Aug 2017 12:42:39 -0400
-Received: by mail-oi0-f44.google.com with SMTP id e124so72304664oig.2
-        for <ceph-devel@vger.kernel.org>; Thu, 17 Aug 2017 09:42:39 -0700 (PDT)
-In-Reply-To: <469DEC9D-7E3D-49C5-8AE6-71877039B3AC@TERADATA.COM>
+Received: from nat13.teradata.com ([153.65.16.13]:33464 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751575AbdHQQ74 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Aug 2017 12:59:56 -0400
+In-Reply-To: <CAKPXa=ZPeMST83ekgUkYbO5yz-ic3q_guY__0=tY7PSwmk-4YA@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <645D6D3D29710040BFC86F5BEB95771D@namprd13.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
+To: Vasu Kulkarni <vakulkar@redhat.com>
 Cc: Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Aug 17, 2017 at 9:18 AM, Kamble, Nitin A
-<Nitin.Kamble@teradata.com> wrote:
->
->
-> On 8/16/17, 6:42 PM, "Dan Mick" <dmick@redhat.com> wrote:
->
->
->     >     >     "overall": {
->     >     >         "ceph version 12.1.0 (262617c9f16c55e863693258061c5b25dea5b086) luminous (dev)": 50,
->     >     >         "ceph version 12.1.4 (a5f84b37668fc8e03165aaf5cbb380c78e4deba4) luminous (rc)": 3
->     >     >     }
->     >     > }
->     >     >
->     >     >
->     >     > # ceph-osd --version
->     >     > ceph version 12.1.4 (a5f84b37668fc8e03165aaf5cbb380c78e4deba4) luminous (rc)
->     >     >
->     >     > Why is it showing old 12.1.0 version for the 50 osds, while all the nodes show ceph osd version as 12.1.4?
->     >
->     >     You didn't say you restarted the osds.  Did you?
->     >
->     > Yes, I did restart them, and that too more than once.
->
->     Dunno, then.  That seems impossible.
->
-> It is showing the version of OSD before the upgrade.
-> Is it possible the old version gets cached somewhere, and that is not getting updated after upgrade?
-I wonder if its a systemd issue, Does the systemd restart actually
-change the process id? (output of ps before/after would be good),
-Hopefully all the pkgs are properly updated when you query them and
-you dont see any old traces left behind.
-
->
-> Nitin
->
+DQoNCk9uIDgvMTcvMTcsIDk6NDIgQU0sICJWYXN1IEt1bGthcm5pIiA8dmFrdWxrYXJAcmVkaGF0
+LmNvbT4gd3JvdGU6DQoNCiAgICBPbiBUaHUsIEF1ZyAxNywgMjAxNyBhdCA5OjE4IEFNLCBLYW1i
+bGUsIE5pdGluIEENCiAgICA8Tml0aW4uS2FtYmxlQHRlcmFkYXRhLmNvbT4gd3JvdGU6DQogICAg
+Pg0KICAgID4NCiAgICA+IE9uIDgvMTYvMTcsIDY6NDIgUE0sICJEYW4gTWljayIgPGRtaWNrQHJl
+ZGhhdC5jb20+IHdyb3RlOg0KICAgID4NCiAgICA+DQogICAgPiAgICAgPiAgICAgPiAgICAgIm92
+ZXJhbGwiOiB7DQogICAgPiAgICAgPiAgICAgPiAgICAgICAgICJjZXBoIHZlcnNpb24gMTIuMS4w
+ICgyNjI2MTdjOWYxNmM1NWU4NjM2OTMyNTgwNjFjNWIyNWRlYTViMDg2KSBsdW1pbm91cyAoZGV2
+KSI6IDUwLA0KICAgID4gICAgID4gICAgID4gICAgICAgICAiY2VwaCB2ZXJzaW9uIDEyLjEuNCAo
+YTVmODRiMzc2NjhmYzhlMDMxNjVhYWY1Y2JiMzgwYzc4ZTRkZWJhNCkgbHVtaW5vdXMgKHJjKSI6
+IDMNCiAgICA+ICAgICA+ICAgICA+ICAgICB9DQogICAgPiAgICAgPiAgICAgPiB9DQogICAgPiAg
+ICAgPiAgICAgPg0KICAgID4gICAgID4gICAgID4NCiAgICA+ICAgICA+ICAgICA+ICMgY2VwaC1v
+c2QgLS12ZXJzaW9uDQogICAgPiAgICAgPiAgICAgPiBjZXBoIHZlcnNpb24gMTIuMS40IChhNWY4
+NGIzNzY2OGZjOGUwMzE2NWFhZjVjYmIzODBjNzhlNGRlYmE0KSBsdW1pbm91cyAocmMpDQogICAg
+PiAgICAgPiAgICAgPg0KICAgID4gICAgID4gICAgID4gV2h5IGlzIGl0IHNob3dpbmcgb2xkIDEy
+LjEuMCB2ZXJzaW9uIGZvciB0aGUgNTAgb3Nkcywgd2hpbGUgYWxsIHRoZSBub2RlcyBzaG93IGNl
+cGggb3NkIHZlcnNpb24gYXMgMTIuMS40Pw0KICAgID4gICAgID4NCiAgICA+ICAgICA+ICAgICBZ
+b3UgZGlkbid0IHNheSB5b3UgcmVzdGFydGVkIHRoZSBvc2RzLiAgRGlkIHlvdT8NCiAgICA+ICAg
+ICA+DQogICAgPiAgICAgPiBZZXMsIEkgZGlkIHJlc3RhcnQgdGhlbSwgYW5kIHRoYXQgdG9vIG1v
+cmUgdGhhbiBvbmNlLg0KICAgID4NCiAgICA+ICAgICBEdW5ubywgdGhlbi4gIFRoYXQgc2VlbXMg
+aW1wb3NzaWJsZS4NCiAgICA+DQogICAgPiBJdCBpcyBzaG93aW5nIHRoZSB2ZXJzaW9uIG9mIE9T
+RCBiZWZvcmUgdGhlIHVwZ3JhZGUuDQogICAgPiBJcyBpdCBwb3NzaWJsZSB0aGUgb2xkIHZlcnNp
+b24gZ2V0cyBjYWNoZWQgc29tZXdoZXJlLCBhbmQgdGhhdCBpcyBub3QgZ2V0dGluZyB1cGRhdGVk
+IGFmdGVyIHVwZ3JhZGU/DQogICAgSSB3b25kZXIgaWYgaXRzIGEgc3lzdGVtZCBpc3N1ZSwgRG9l
+cyB0aGUgc3lzdGVtZCByZXN0YXJ0IGFjdHVhbGx5DQogICAgY2hhbmdlIHRoZSBwcm9jZXNzIGlk
+PyAob3V0cHV0IG9mIHBzIGJlZm9yZS9hZnRlciB3b3VsZCBiZSBnb29kKSwNCiAgICBIb3BlZnVs
+bHkgYWxsIHRoZSBwa2dzIGFyZSBwcm9wZXJseSB1cGRhdGVkIHdoZW4geW91IHF1ZXJ5IHRoZW0g
+YW5kDQogICAgeW91IGRvbnQgc2VlIGFueSBvbGQgdHJhY2VzIGxlZnQgYmVoaW5kLg0KICAgIA0K
+DQpPbiB0aGUgb3NkIG5vZGVzIEkgYW0gZmluZGluZyB0aGF0IE9TRCBkYWVtb25zIGFyZSByZXN0
+YXJ0aW5nIHdpdGggdGhlIGVycm9ycyBtZW50aW9uZWQgaW4gbGFzdCBlbWFpbCBhbmQgc2hvd24g
+YmVsb3cuIExvb2tzIGxpa2UgYmVjYXVzZSB0aGUgcmVzdGFydCB0aW1lIGlzIH41IG1pbnV0ZXMs
+IHN5c3RlbSBpcyBub3QgdGFraW5nIGl0IGFzIGFuIHJlc3RhcnQgbG9vcCBlcnJvci4NCg0KIA0K
+DQojZ3JlcCAiIHBpZCAiIC92YXIvbG9nL2NlcGgvY2VwaC1vc2QuMi5sb2cNCg0KMjAxNy0wOC0x
+NyAwOToyNjo0NC40MDcyMTMgN2YyZWVlNmQ4Y2MwICAwIGNlcGggdmVyc2lvbiAxMi4xLjQgKGE1
+Zjg0YjM3NjY4ZmM4ZTAzMTY1YWFmNWNiYjM4MGM3OGU0ZGViYTQpIGx1bWlub3VzIChyYyksIHBy
+b2Nlc3MgKHVua25vd24pLCBwaWQgOTIwMzA4DQoNCjIwMTctMDgtMTcgMDk6MzE6NDIuMzk3NTA5
+IDdmMzAyZjcyYmNjMCAgMCBjZXBoIHZlcnNpb24gMTIuMS40IChhNWY4NGIzNzY2OGZjOGUwMzE2
+NWFhZjVjYmIzODBjNzhlNGRlYmE0KSBsdW1pbm91cyAocmMpLCBwcm9jZXNzICh1bmtub3duKSwg
+cGlkIDkyMDgyNA0KDQoyMDE3LTA4LTE3IDA5OjM2OjQwLjE1MzQzNCA3ZjU2ZWU1NWJjYzAgIDAg
+Y2VwaCB2ZXJzaW9uIDEyLjEuNCAoYTVmODRiMzc2NjhmYzhlMDMxNjVhYWY1Y2JiMzgwYzc4ZTRk
+ZWJhNCkgbHVtaW5vdXMgKHJjKSwgcHJvY2VzcyAodW5rbm93biksIHBpZCA5MjE0OTYNCg0KMjAx
+Ny0wOC0xNyAwOTozODowMS45NzExNTggN2ZkYjc4NTdlY2MwICAwIGNlcGggdmVyc2lvbiAxMi4x
+LjQgKGE1Zjg0YjM3NjY4ZmM4ZTAzMTY1YWFmNWNiYjM4MGM3OGU0ZGViYTQpIGx1bWlub3VzIChy
+YyksIHByb2Nlc3MgKHVua25vd24pLCBwaWQgOTIxODM5DQoNCjIwMTctMDgtMTcgMDk6NDM6MDAu
+NjUzNTY5IDdmNjkwY2VkZmNjMCAgMCBjZXBoIHZlcnNpb24gMTIuMS40IChhNWY4NGIzNzY2OGZj
+OGUwMzE2NWFhZjVjYmIzODBjNzhlNGRlYmE0KSBsdW1pbm91cyAocmMpLCBwcm9jZXNzICh1bmtu
+b3duKSwgcGlkIDkyMjM4MQ0KDQoyMDE3LTA4LTE3IDA5OjQ3OjU4LjY0NTI5MyA3ZmJjMGY1YWNj
+YzAgIDAgY2VwaCB2ZXJzaW9uIDEyLjEuNCAoYTVmODRiMzc2NjhmYzhlMDMxNjVhYWY1Y2JiMzgw
+Yzc4ZTRkZWJhNCkgbHVtaW5vdXMgKHJjKSwgcHJvY2VzcyAodW5rbm93biksIHBpZCA5MjMxMjcN
+Cg0KIA0KDQojIGdyZXAgRVJST1IgLUMgMyAvdmFyL2xvZy9jZXBoL2NlcGgtb3NkLjIubG9nDQoN
+CjIwMTctMDgtMTcgMDk6MzE6MjIuMDM2OTAxIDdmMmVlZTZkOGNjMCAgMSBibHVlc3RvcmUoL3Zh
+ci9saWIvY2VwaC9vc2QvY2VwaC0yKSBmc2NrIGZpbmlzaCB3aXRoIDEgZXJyb3JzIGluIDI3Ny4y
+MTk3ODggc2Vjb25kcw0KDQoyMDE3LTA4LTE3IDA5OjMxOjIyLjA0MTk4MyA3ZjJlZWU2ZDhjYzAg
+LTEgYmx1ZXN0b3JlKC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMikgX21vdW50IGZzY2sgZm91bmQg
+MSBlcnJvcnMNCg0KMjAxNy0wOC0xNyAwOTozMToyMi4wNDE5ODggN2YyZWVlNmQ4Y2MwIC0xIG9z
+ZC4yIDAgT1NEOmluaXQ6IHVuYWJsZSB0byBtb3VudCBvYmplY3Qgc3RvcmUNCg0KMjAxNy0wOC0x
+NyAwOTozMToyMi4wNDE5OTQgN2YyZWVlNmQ4Y2MwIC0xICAqKiBFUlJPUjogb3NkIGluaXQgZmFp
+bGVkOiAoNSkgSW5wdXQvb3V0cHV0IGVycm9yDQoNCjIwMTctMDgtMTcgMDk6MzE6NDIuMzk3NDk3
+IDdmMzAyZjcyYmNjMCAgMCBzZXQgdWlkOmdpZCB0byA1MDA6MTY3IChjZXBoOmNlcGgpDQoNCjIw
+MTctMDgtMTcgMDk6MzE6NDIuMzk3NTA5IDdmMzAyZjcyYmNjMCAgMCBjZXBoIHZlcnNpb24gMTIu
+MS40IChhNWY4NGIzNzY2OGZjOGUwMzE2NWFhZjVjYmIzODBjNzhlNGRlYmE0KSBsdW1pbm91cyAo
+cmMpLCBwcm9jZXNzICh1bmtub3duKSwgcGlkIDkyMDgyNA0KDQoyMDE3LTA4LTE3IDA5OjMxOjQy
+LjQwMjEzOSA3ZjMwMmY3MmJjYzAgIDAgcGlkZmlsZV93cml0ZTogaWdub3JlIGVtcHR5IC0tcGlk
+LWZpbGUNCg0KLS0NCg0KMjAxNy0wOC0xNyAwOTozNjoxOS44MzI5MDUgN2YzMDJmNzJiY2MwICAx
+IGJsdWVzdG9yZSgvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTIpIGZzY2sgZmluaXNoIHdpdGggMSBl
+cnJvcnMgaW4gMjc3LjEyNzY5MyBzZWNvbmRzDQoNCjIwMTctMDgtMTcgMDk6MzY6MTkuODM4ODAz
+IDdmMzAyZjcyYmNjMCAtMSBibHVlc3RvcmUoL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0yKSBfbW91
+bnQgZnNjayBmb3VuZCAxIGVycm9ycw0KDQoyMDE3LTA4LTE3IDA5OjM2OjE5LjgzODgwOSA3ZjMw
+MmY3MmJjYzAgLTEgb3NkLjIgMCBPU0Q6aW5pdDogdW5hYmxlIHRvIG1vdW50IG9iamVjdCBzdG9y
+ZQ0KDQoyMDE3LTA4LTE3IDA5OjM2OjE5LjgzODgxNSA3ZjMwMmY3MmJjYzAgLTEgICoqIEVSUk9S
+OiBvc2QgaW5pdCBmYWlsZWQ6ICg1KSBJbnB1dC9vdXRwdXQgZXJyb3INCg0KMjAxNy0wOC0xNyAw
+OTozNjo0MC4xNTM0MjMgN2Y1NmVlNTViY2MwICAwIHNldCB1aWQ6Z2lkIHRvIDUwMDoxNjcgKGNl
+cGg6Y2VwaCkNCg0KMjAxNy0wOC0xNyAwOTozNjo0MC4xNTM0MzQgN2Y1NmVlNTViY2MwICAwIGNl
+cGggdmVyc2lvbiAxMi4xLjQgKGE1Zjg0YjM3NjY4ZmM4ZTAzMTY1YWFmNWNiYjM4MGM3OGU0ZGVi
+YTQpIGx1bWlub3VzIChyYyksIHByb2Nlc3MgKHVua25vd24pLCBwaWQgOTIxNDk2DQoNCjIwMTct
+MDgtMTcgMDk6MzY6NDAuMTU4MDUyIDdmNTZlZTU1YmNjMCAgMCBwaWRmaWxlX3dyaXRlOiBpZ25v
+cmUgZW1wdHkgLS1waWQtZmlsZQ0KDQotLQ0KDQoyMDE3LTA4LTE3IDA5OjQyOjQwLjQyODg4OSA3
+ZmRiNzg1N2VjYzAgIDEgYmx1ZXN0b3JlKC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMikgZnNjayBm
+aW5pc2ggd2l0aCAxIGVycm9ycyBpbiAyNzguMTExNzg2IHNlY29uZHMNCg0KMjAxNy0wOC0xNyAw
+OTo0Mjo0MC40MzQ0MDEgN2ZkYjc4NTdlY2MwIC0xIGJsdWVzdG9yZSgvdmFyL2xpYi9jZXBoL29z
+ZC9jZXBoLTIpIF9tb3VudCBmc2NrIGZvdW5kIDEgZXJyb3JzDQoNCjIwMTctMDgtMTcgMDk6NDI6
+NDAuNDM0NDA4IDdmZGI3ODU3ZWNjMCAtMSBvc2QuMiAwIE9TRDppbml0OiB1bmFibGUgdG8gbW91
+bnQgb2JqZWN0IHN0b3JlDQoNCjIwMTctMDgtMTcgMDk6NDI6NDAuNDM0NDE0IDdmZGI3ODU3ZWNj
+MCAtMSAgKiogRVJST1I6IG9zZCBpbml0IGZhaWxlZDogKDUpIElucHV0L291dHB1dCBlcnJvcg0K
+DQoyMDE3LTA4LTE3IDA5OjQzOjAwLjY1MzU1OCA3ZjY5MGNlZGZjYzAgIDAgc2V0IHVpZDpnaWQg
+dG8gNTAwOjE2NyAoY2VwaDpjZXBoKQ0KDQoyMDE3LTA4LTE3IDA5OjQzOjAwLjY1MzU2OSA3ZjY5
+MGNlZGZjYzAgIDAgY2VwaCB2ZXJzaW9uIDEyLjEuNCAoYTVmODRiMzc2NjhmYzhlMDMxNjVhYWY1
+Y2JiMzgwYzc4ZTRkZWJhNCkgbHVtaW5vdXMgKHJjKSwgcHJvY2VzcyAodW5rbm93biksIHBpZCA5
+MjIzODENCg0KMjAxNy0wOC0xNyAwOTo0MzowMC42NTgzMjMgN2Y2OTBjZWRmY2MwICAwIHBpZGZp
+bGVfd3JpdGU6IGlnbm9yZSBlbXB0eSAtLXBpZC1maWxlDQoNCi0tDQoNCjIwMTctMDgtMTcgMDk6
+NDc6MzguNDc2ODc3IDdmNjkwY2VkZmNjMCAgMSBibHVlc3RvcmUoL3Zhci9saWIvY2VwaC9vc2Qv
+Y2VwaC0yKSBmc2NrIGZpbmlzaCB3aXRoIDEgZXJyb3JzIGluIDI3Ny40OTk2OTUgc2Vjb25kcw0K
+DQoyMDE3LTA4LTE3IDA5OjQ3OjM4LjQ4MjU2NSA3ZjY5MGNlZGZjYzAgLTEgYmx1ZXN0b3JlKC92
+YXIvbGliL2NlcGgvb3NkL2NlcGgtMikgX21vdW50IGZzY2sgZm91bmQgMSBlcnJvcnMNCg0KMjAx
+Ny0wOC0xNyAwOTo0NzozOC40ODI1NzIgN2Y2OTBjZWRmY2MwIC0xIG9zZC4yIDAgT1NEOmluaXQ6
+IHVuYWJsZSB0byBtb3VudCBvYmplY3Qgc3RvcmUNCg0KMjAxNy0wOC0xNyAwOTo0NzozOC40ODI1
+NzggN2Y2OTBjZWRmY2MwIC0xICAqKiBFUlJPUjogb3NkIGluaXQgZmFpbGVkOiAoNSkgSW5wdXQv
+b3V0cHV0IGVycm9yDQoNCjIwMTctMDgtMTcgMDk6NDc6NTguNjQ1MjgzIDdmYmMwZjVhY2NjMCAg
+MCBzZXQgdWlkOmdpZCB0byA1MDA6MTY3IChjZXBoOmNlcGgpDQoNCjIwMTctMDgtMTcgMDk6NDc6
+NTguNjQ1MjkzIDdmYmMwZjVhY2NjMCAgMCBjZXBoIHZlcnNpb24gMTIuMS40IChhNWY4NGIzNzY2
+OGZjOGUwMzE2NWFhZjVjYmIzODBjNzhlNGRlYmE0KSBsdW1pbm91cyAocmMpLCBwcm9jZXNzICh1
+bmtub3duKSwgcGlkIDkyMzEyNw0KDQoyMDE3LTA4LTE3IDA5OjQ3OjU4LjY0OTk1OCA3ZmJjMGY1
+YWNjYzAgIDAgcGlkZmlsZV93cml0ZTogaWdub3JlIGVtcHR5IC0tcGlkLWZpbGUNCg0KIA0KDQpU
+aGVyZSBhcmUgbm8gb2xkIHZlcnNpb24gY2VwaCBwYWNrYWdlcyBvbiBhbnkgb2YgdGhlIGNlcGgg
+bm9kZXMuIEFsbCB0aGUgY2VwaCBwYWNrYWdlcyBhcmUgb2YgdmVyc2lvbiAxMi4xLjQgbm93Lg0K
+DQoNCiAgICA+DQogICAgPiBOaXRpbg0KICAgID4NCiAgICANCg0K
