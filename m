@@ -1,47 +1,52 @@
-From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
-Subject: Re: [Ceph-maintainers] [ceph-users] v12.1.4 Luminous (RC) released
-Date: Thu, 17 Aug 2017 16:18:49 +0000
-Message-ID: <469DEC9D-7E3D-49C5-8AE6-71877039B3AC@TERADATA.COM>
-References: <062fdb6f788298b7458db9d07ead19d2@suse.com>
- <CAJ4mKGa7SK+YNE-sdEPKAj+NnTGtZSmxVZJiVXQoSnKF13TNJw@mail.gmail.com>
- <CAKOnarmpOgZL7PtHnW-xOEH589aPyNPoGkguYpWbhAgV5RcwQw@mail.gmail.com>
- <CAC-Np1xzdfEVQOszKttVEx8KNEspqJ+aBdS9RRVuA--QEEd9Gg@mail.gmail.com>
- <CAJ4mKGZqB+2ocK3Eo2fLbA8ebzrAuvFFw3Pf2sy-zantTdTkrQ@mail.gmail.com>
- <CAC-Np1xMKD7TNpXKCy2AyatDOkGubGzifRX_TYyF0D48SG+pEg@mail.gmail.com>
- <DF101E47-D98F-4DF1-8337-6FC44B86676E@TERADATA.COM>
- <a6a7dd77-8b36-b2fb-183a-ecce43f3b8d7@redhat.com>
- <B693BFC0-9A9B-4338-BF7D-C9710665350C@TERADATA.COM>
- <238bc116-e706-031e-ab11-06e2383a9a04@redhat.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: "ceph versions" dump (was Re: [Ceph-maintainers] [ceph-users] v12.1.4
+ Luminous (RC) released)
+Date: Thu, 17 Aug 2017 09:28:39 -0700
+Message-ID: <CAJ4mKGaeF1NdkRr5grxS2LN2jxqXB4u1Nn+O-yLYbgF5tD4dMg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nat13.teradata.com ([153.65.16.13]:33374 "EHLO
-        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1752450AbdHQQSw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Aug 2017 12:18:52 -0400
-In-Reply-To: <238bc116-e706-031e-ab11-06e2383a9a04@redhat.com>
-Content-Language: en-US
-Content-ID: <2E75DF5BCB48BD4784EC3208383E40BD@namprd13.prod.outlook.com>
+Received: from mail-it0-f42.google.com ([209.85.214.42]:34319 "EHLO
+        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751107AbdHQQ2l (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Aug 2017 12:28:41 -0400
+Received: by mail-it0-f42.google.com with SMTP id f16so1590826itb.1
+        for <ceph-devel@vger.kernel.org>; Thu, 17 Aug 2017 09:28:41 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
+Cc: Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-DQoNCk9uIDgvMTYvMTcsIDY6NDIgUE0sICJEYW4gTWljayIgPGRtaWNrQHJlZGhhdC5jb20+IHdy
-b3RlOg0KDQogICAgDQogICAgPiAgICAgPiAgICAgIm92ZXJhbGwiOiB7DQogICAgPiAgICAgPiAg
-ICAgICAgICJjZXBoIHZlcnNpb24gMTIuMS4wICgyNjI2MTdjOWYxNmM1NWU4NjM2OTMyNTgwNjFj
-NWIyNWRlYTViMDg2KSBsdW1pbm91cyAoZGV2KSI6IDUwLA0KICAgID4gICAgID4gICAgICAgICAi
-Y2VwaCB2ZXJzaW9uIDEyLjEuNCAoYTVmODRiMzc2NjhmYzhlMDMxNjVhYWY1Y2JiMzgwYzc4ZTRk
-ZWJhNCkgbHVtaW5vdXMgKHJjKSI6IDMNCiAgICA+ICAgICA+ICAgICB9DQogICAgPiAgICAgPiB9
-DQogICAgPiAgICAgPiANCiAgICA+ICAgICA+IA0KICAgID4gICAgID4gIyBjZXBoLW9zZCAtLXZl
-cnNpb24NCiAgICA+ICAgICA+IGNlcGggdmVyc2lvbiAxMi4xLjQgKGE1Zjg0YjM3NjY4ZmM4ZTAz
-MTY1YWFmNWNiYjM4MGM3OGU0ZGViYTQpIGx1bWlub3VzIChyYykNCiAgICA+ICAgICA+IA0KICAg
-ID4gICAgID4gV2h5IGlzIGl0IHNob3dpbmcgb2xkIDEyLjEuMCB2ZXJzaW9uIGZvciB0aGUgNTAg
-b3Nkcywgd2hpbGUgYWxsIHRoZSBub2RlcyBzaG93IGNlcGggb3NkIHZlcnNpb24gYXMgMTIuMS40
-Pw0KICAgID4gICAgIA0KICAgID4gICAgIFlvdSBkaWRuJ3Qgc2F5IHlvdSByZXN0YXJ0ZWQgdGhl
-IG9zZHMuICBEaWQgeW91Pw0KICAgID4gDQogICAgPiBZZXMsIEkgZGlkIHJlc3RhcnQgdGhlbSwg
-YW5kIHRoYXQgdG9vIG1vcmUgdGhhbiBvbmNlLg0KICAgIA0KICAgIER1bm5vLCB0aGVuLiAgVGhh
-dCBzZWVtcyBpbXBvc3NpYmxlLg0KICAgIA0KSXQgaXMgc2hvd2luZyB0aGUgdmVyc2lvbiBvZiBP
-U0QgYmVmb3JlIHRoZSB1cGdyYWRlLg0KSXMgaXQgcG9zc2libGUgdGhlIG9sZCB2ZXJzaW9uIGdl
-dHMgY2FjaGVkIHNvbWV3aGVyZSwgYW5kIHRoYXQgaXMgbm90IGdldHRpbmcgdXBkYXRlZCBhZnRl
-ciB1cGdyYWRlPw0KDQpOaXRpbg0KDQo=
+On Thu, Aug 17, 2017 at 9:18 AM, Kamble, Nitin A
+<Nitin.Kamble@teradata.com> wrote:
+>
+>
+> On 8/16/17, 6:42 PM, "Dan Mick" <dmick@redhat.com> wrote:
+>
+>
+>     >     >     "overall": {
+>     >     >         "ceph version 12.1.0 (262617c9f16c55e863693258061c5b25dea5b086) luminous (dev)": 50,
+>     >     >         "ceph version 12.1.4 (a5f84b37668fc8e03165aaf5cbb380c78e4deba4) luminous (rc)": 3
+>     >     >     }
+>     >     > }
+>     >     >
+>     >     >
+>     >     > # ceph-osd --version
+>     >     > ceph version 12.1.4 (a5f84b37668fc8e03165aaf5cbb380c78e4deba4) luminous (rc)
+>     >     >
+>     >     > Why is it showing old 12.1.0 version for the 50 osds, while all the nodes show ceph osd version as 12.1.4?
+>     >
+>     >     You didn't say you restarted the osds.  Did you?
+>     >
+>     > Yes, I did restart them, and that too more than once.
+>
+>     Dunno, then.  That seems impossible.
+>
+> It is showing the version of OSD before the upgrade.
+> Is it possible the old version gets cached somewhere, and that is not getting updated after upgrade?
+
+I looked at the source for this briefly yesterday and it did not seem
+possible; the OSDs report their version as part of the "daemon
+metadata" and that is committed to disk/paxos when they boot. It's
+then read out of their to support this command.
+If you could create a ticket at tracker.ceph.com for this, that would be good!
