@@ -1,59 +1,37 @@
-From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
-Subject: Re: [Ceph-maintainers] [ceph-users] v12.1.4 Luminous (RC) released
-Date: Thu, 17 Aug 2017 01:02:53 +0000
-Message-ID: <B693BFC0-9A9B-4338-BF7D-C9710665350C@TERADATA.COM>
-References: <062fdb6f788298b7458db9d07ead19d2@suse.com>
- <CAJ4mKGa7SK+YNE-sdEPKAj+NnTGtZSmxVZJiVXQoSnKF13TNJw@mail.gmail.com>
- <CAKOnarmpOgZL7PtHnW-xOEH589aPyNPoGkguYpWbhAgV5RcwQw@mail.gmail.com>
- <CAC-Np1xzdfEVQOszKttVEx8KNEspqJ+aBdS9RRVuA--QEEd9Gg@mail.gmail.com>
- <CAJ4mKGZqB+2ocK3Eo2fLbA8ebzrAuvFFw3Pf2sy-zantTdTkrQ@mail.gmail.com>
- <CAC-Np1xMKD7TNpXKCy2AyatDOkGubGzifRX_TYyF0D48SG+pEg@mail.gmail.com>
- <DF101E47-D98F-4DF1-8337-6FC44B86676E@TERADATA.COM>
- <a6a7dd77-8b36-b2fb-183a-ecce43f3b8d7@redhat.com>
+From: Neha Ojha <nojha@redhat.com>
+Subject: Questions regarding ceph -w
+Date: Wed, 16 Aug 2017 18:27:08 -0700
+Message-ID: <CAKn7kBnGqRsSuatnhJSnp=-YYq1Q9fM7Ma7oRoHzAN9F7Uy_ow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nat13.teradata.com ([153.65.16.13]:33058 "EHLO
-        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751943AbdHQBC5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Aug 2017 21:02:57 -0400
-In-Reply-To: <a6a7dd77-8b36-b2fb-183a-ecce43f3b8d7@redhat.com>
-Content-Language: en-US
-Content-ID: <37BD797C6EAF55479F64967ABF3D6E3D@namprd13.prod.outlook.com>
+Received: from mail-oi0-f50.google.com ([209.85.218.50]:36139 "EHLO
+        mail-oi0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751509AbdHQB1J (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 16 Aug 2017 21:27:09 -0400
+Received: by mail-oi0-f50.google.com with SMTP id g131so53042634oic.3
+        for <ceph-devel@vger.kernel.org>; Wed, 16 Aug 2017 18:27:09 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: ncutler@suse.cz, Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-DQoNCk9uIDgvMTYvMTcsIDQ6MTggUE0sICJjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
-ZyBvbiBiZWhhbGYgb2YgRGFuIE1pY2siIDxjZXBoLWRldmVsLW93bmVyQHZnZXIua2VybmVsLm9y
-ZyBvbiBiZWhhbGYgb2YgZG1pY2tAcmVkaGF0LmNvbT4gd3JvdGU6DQoNCiAgICBPbiAwOC8xNi8y
-MDE3IDA0OjAxIFBNLCBLYW1ibGUsIE5pdGluIEEgd3JvdGU6DQogICAgPiBBZnRlciB1cGdyYWRp
-bmcgYWxsIHRoZSBjZXBoIG5vZGVzIHRvIHYxMi4xLjQgSSBzZWUgdGhhdCBPU0QgdmVyc2lvbnMg
-YXJlIHN0aWxsIHNob3duIGFzIG9sZGVyIHZlcnNpb24uDQogICAgPiAjIGNlcGggdmVyc2lvbnMN
-CiAgICA+IHsNCiAgICA+ICAgICAibW9uIjogew0KICAgID4gICAgICAgICAiY2VwaCB2ZXJzaW9u
-IDEyLjEuNCAoYTVmODRiMzc2NjhmYzhlMDMxNjVhYWY1Y2JiMzgwYzc4ZTRkZWJhNCkgbHVtaW5v
-dXMgKHJjKSI6IDENCiAgICA+ICAgICB9LA0KICAgID4gICAgICJtZ3IiOiB7DQogICAgPiAgICAg
-ICAgICJjZXBoIHZlcnNpb24gMTIuMS40IChhNWY4NGIzNzY2OGZjOGUwMzE2NWFhZjVjYmIzODBj
-NzhlNGRlYmE0KSBsdW1pbm91cyAocmMpIjogMQ0KICAgID4gICAgIH0sDQogICAgPiAgICAgIm9z
-ZCI6IHsNCiAgICA+ICAgICAgICAgImNlcGggdmVyc2lvbiAxMi4xLjAgKDI2MjYxN2M5ZjE2YzU1
-ZTg2MzY5MzI1ODA2MWM1YjI1ZGVhNWIwODYpIGx1bWlub3VzIChkZXYpIjogNTANCiAgICA+ICAg
-ICB9LA0KICAgID4gICAgICJtZHMiOiB7DQogICAgPiAgICAgICAgICJjZXBoIHZlcnNpb24gMTIu
-MS40IChhNWY4NGIzNzY2OGZjOGUwMzE2NWFhZjVjYmIzODBjNzhlNGRlYmE0KSBsdW1pbm91cyAo
-cmMpIjogMQ0KICAgID4gICAgIH0sDQogICAgPiAgICAgIm92ZXJhbGwiOiB7DQogICAgPiAgICAg
-ICAgICJjZXBoIHZlcnNpb24gMTIuMS4wICgyNjI2MTdjOWYxNmM1NWU4NjM2OTMyNTgwNjFjNWIy
-NWRlYTViMDg2KSBsdW1pbm91cyAoZGV2KSI6IDUwLA0KICAgID4gICAgICAgICAiY2VwaCB2ZXJz
-aW9uIDEyLjEuNCAoYTVmODRiMzc2NjhmYzhlMDMxNjVhYWY1Y2JiMzgwYzc4ZTRkZWJhNCkgbHVt
-aW5vdXMgKHJjKSI6IDMNCiAgICA+ICAgICB9DQogICAgPiB9DQogICAgPiANCiAgICA+IA0KICAg
-ID4gIyBjZXBoLW9zZCAtLXZlcnNpb24NCiAgICA+IGNlcGggdmVyc2lvbiAxMi4xLjQgKGE1Zjg0
-YjM3NjY4ZmM4ZTAzMTY1YWFmNWNiYjM4MGM3OGU0ZGViYTQpIGx1bWlub3VzIChyYykNCiAgICA+
-IA0KICAgID4gV2h5IGlzIGl0IHNob3dpbmcgb2xkIDEyLjEuMCB2ZXJzaW9uIGZvciB0aGUgNTAg
-b3Nkcywgd2hpbGUgYWxsIHRoZSBub2RlcyBzaG93IGNlcGggb3NkIHZlcnNpb24gYXMgMTIuMS40
-Pw0KICAgIA0KICAgIFlvdSBkaWRuJ3Qgc2F5IHlvdSByZXN0YXJ0ZWQgdGhlIG9zZHMuICBEaWQg
-eW91Pw0KDQpZZXMsIEkgZGlkIHJlc3RhcnQgdGhlbSwgYW5kIHRoYXQgdG9vIG1vcmUgdGhhbiBv
-bmNlLg0KDQogICAgLS0gDQogICAgRGFuIE1pY2sNCiAgICBSZWQgSGF0LCBJbmMuDQogICAgQ2Vw
-aCBkb2NzOiBodHRwOi8vY2VwaC5jb20vZG9jcw0KICAgIC0tDQogICAgVG8gdW5zdWJzY3JpYmUg
-ZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGlu
-DQogICAgdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcN
-CiAgICBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
-ZG9tby1pbmZvLmh0bWwNCiAgICANCg0K
+Hi John,
+
+I am working on the following tracker issue:
+http://tracker.ceph.com/issues/20995.
+I was wondering if you could help me figure out a couple of things -
+
+1. What should be the expected output of only using ceph -w? Adding
+--watch-channel=* logs things properly, but as for ceph -w alone, I am
+unable to understand why I see very few log messages(in some cases
+none).
+
+2. For which cases would it show log messages? Like for example, for
+"ceph osd out" it does, but not for "ceph osd in", "ceph osd pool
+create" etc.
+
+I would really appreciate your help on this issue.
+
+Thanks,
+Neha
