@@ -1,31 +1,59 @@
-From: Jesse Williamson <jwilliamson@suse.de>
-Subject: Re: multi-line comments
-Date: Thu, 17 Aug 2017 11:05:12 -0700 (PDT)
-Message-ID: <alpine.LSU.2.21.1708171100570.15772@linux-psd4>
-References: <CAJE9aOMyuw2dgnxRCbYwOB74C_ixMxT-f1DZB5HzyMXkeoL_2w@mail.gmail.com> <CAJ4mKGZ10RyY6HmDy3sf_5howHuhB=78meX_St0F5N+v75awrg@mail.gmail.com>
+From: Luis Henriques <lhenriques@suse.com>
+Subject: Re: [PATCH] ceph: check negative offsets on ceph_llseek()
+Date: Thu, 17 Aug 2017 19:40:39 +0100
+Message-ID: <87lgmixck8.fsf@hermes>
+References: <20170728105640.16268-1-lhenriques@suse.com>
+        <87pobuz4s2.fsf@hermes>
+        <CAOi1vP9RYiFuscyJqetRO3p68Bj14To5whwM6EByvtjChCk0_g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; format=flowed; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:34018 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753283AbdHQSFW (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 17 Aug 2017 14:05:22 -0400
-In-Reply-To: <CAJ4mKGZ10RyY6HmDy3sf_5howHuhB=78meX_St0F5N+v75awrg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: kefu chai <tchaikov@gmail.com>, amitkuma@redhat.com, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAOi1vP9RYiFuscyJqetRO3p68Bj14To5whwM6EByvtjChCk0_g@mail.gmail.com>
+        (Ilya Dryomov's message of "Thu, 17 Aug 2017 19:57:01 +0200")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Thu, 17 Aug 2017, Gregory Farnum wrote:
+Ilya Dryomov <idryomov@gmail.com> writes:
 
-> Similarly, do we have a rule or guidance about contractions anywhere?
+> On Thu, Aug 17, 2017 at 3:45 PM, Luis Henriques <lhenriques@suse.com> wrote:
+>> Luis Henriques <lhenriques@suse.com> writes:
+>>
+>>> When a user requests SEEK_HOLE or SEEK_DATA with a negative offset
+>>> ceph_llseek should return -ENXIO.  Currently -EINVAL is being returned for
+>>> SEEK_DATA and 0 for SEEK_HOLE.
+>>
+>> Ping
+>>
+>> This patch should make xfstest generic/448 happy.
+>
+> It should or it does? ;)
+>
 
-I vote to not ban them with a rule. I agree that it's got an element of 
-personal preference involved, and accordingly folks should be allowed to 
-choose what they feel makes the most sense to them.
+Heh, it *does* make generic/448 happy.
 
-I disagree with Nitin that it has much to do with modern C++: both styles 
-are used freely. For example, have a peek at Boost or your favorite 
-standard library implementation.
+>
+> I saw generic/448 failures on ext4 with Darrick's recent test
+>change,
+> haven't tried ceph yet.
 
--Jesse
+The generic/448 test currently fails with the error codes described in
+the commit log.  I didn't found it useful to include in the commit
+log, but here's the full test output:
+
+File system supports the default behavior.
+File system does not support unwritten extents.
+File system magic#: 0xc36400
+Allocation size: 4194304
+18. Test file with negative SEEK_{HOLE,DATA} offsets
+18.01 SEEK_HOLE expected -1 or -1, got 0.                         FAIL
+18.02 SEEK_DATA expected -1 with errno -6, got -22.               FAIL
+
+seek sanity check failed!
+
+
+Cheers,
+-- 
+Luís
