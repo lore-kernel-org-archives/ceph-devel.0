@@ -1,47 +1,66 @@
-From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
-Subject: Re: [Ceph-maintainers] [ceph-users] v12.1.4 Luminous (RC) released
-Date: Thu, 17 Aug 2017 17:37:23 +0000
-Message-ID: <66B27C76-0184-452F-9BC8-A91E6D6C9B60@TERADATA.COM>
-References: <062fdb6f788298b7458db9d07ead19d2@suse.com>
- <CAJ4mKGa7SK+YNE-sdEPKAj+NnTGtZSmxVZJiVXQoSnKF13TNJw@mail.gmail.com>
- <CAKOnarmpOgZL7PtHnW-xOEH589aPyNPoGkguYpWbhAgV5RcwQw@mail.gmail.com>
- <CAC-Np1xzdfEVQOszKttVEx8KNEspqJ+aBdS9RRVuA--QEEd9Gg@mail.gmail.com>
- <CAJ4mKGZqB+2ocK3Eo2fLbA8ebzrAuvFFw3Pf2sy-zantTdTkrQ@mail.gmail.com>
- <CAC-Np1xMKD7TNpXKCy2AyatDOkGubGzifRX_TYyF0D48SG+pEg@mail.gmail.com>
- <DF101E47-D98F-4DF1-8337-6FC44B86676E@TERADATA.COM>
- <a6a7dd77-8b36-b2fb-183a-ecce43f3b8d7@redhat.com>
- <B693BFC0-9A9B-4338-BF7D-C9710665350C@TERADATA.COM>
- <238bc116-e706-031e-ab11-06e2383a9a04@redhat.com>
- <469DEC9D-7E3D-49C5-8AE6-71877039B3AC@TERADATA.COM>
- <CAKPXa=ZPeMST83ekgUkYbO5yz-ic3q_guY__0=tY7PSwmk-4YA@mail.gmail.com>
- <1B0B99FE-C6D5-455E-B8B7-1972D9B8FD2F@TERADATA.COM>
- <00EA3786-0D39-446A-8E48-0E03D505AC51@TERADATA.COM>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: High memory usage kills OSD while peering
+Date: Thu, 17 Aug 2017 10:53:04 -0700
+Message-ID: <CAJ4mKGa6Nt1Eic9gk=SMbRufUCPnEcGijgJj-K8vHQP7A=HQKw@mail.gmail.com>
+References: <07113ad5-a799-5232-c617-81f323ce4038@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nat13.teradata.com ([153.65.16.13]:33510 "EHLO
-        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1753330AbdHQRh1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Aug 2017 13:37:27 -0400
-In-Reply-To: <00EA3786-0D39-446A-8E48-0E03D505AC51@TERADATA.COM>
-Content-Language: en-US
-Content-ID: <AD9EFCBFF0533043A5806EC72744E9D5@namprd13.prod.outlook.com>
+Received: from mail-it0-f45.google.com ([209.85.214.45]:36910 "EHLO
+        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753189AbdHQRxG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 17 Aug 2017 13:53:06 -0400
+Received: by mail-it0-f45.google.com with SMTP id 76so5438571ith.0
+        for <ceph-devel@vger.kernel.org>; Thu, 17 Aug 2017 10:53:06 -0700 (PDT)
+In-Reply-To: <07113ad5-a799-5232-c617-81f323ce4038@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vasu Kulkarni <vakulkar@redhat.com>
-Cc: Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Linux Chips <linux.chips@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-DQoNCk9uIDgvMTcvMTcsIDEwOjIzIEFNLCAiY2VwaC1kZXZlbC1vd25lckB2Z2VyLmtlcm5lbC5v
-cmcgb24gYmVoYWxmIG9mIEthbWJsZSwgTml0aW4gQSIgPGNlcGgtZGV2ZWwtb3duZXJAdmdlci5r
-ZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBOaXRpbi5LYW1ibGVAVGVyYWRhdGEuY29tPiB3cm90ZToN
-CiAgICAgICAgICAgIA0KICAgIEJUVyBJIGZvdW5kIGEgd29ya2Fyb3VuZCB3aGljaCBpcyB3b3Jr
-aW5nIGFuZCBnaXZpbmcgdGhlIHJpZ2h0IHZlcnNpb25zIG5vdy4NCiAgICANCiAgICBUaGUgd29y
-a2Fyb3VuZCBpcyBtZW50aW9uZWQgaGVyZTogaHR0cHM6Ly9naXRodWIuY29tL2NlcGgvY2VwaC9w
-dWxsLzEwODI1L2ZpbGVzDQogICAgDQogICAgQmFzaWNhbGx5IGFkZGluZyB0aGlzIGxpbmUgdG8g
-Z2xvYmFsIHNlY3Rpb24gb2YgY2VwaC5jb25mIHJlc29sdmVzIHRoZSBpc3N1ZS4NCiAgICBibHVl
-c3RvcmUgZnNjayBvbiBtb3VudCA9ICdmYWxzZScNCiAgICAgICAgDQogICAgDQoNClN0aWxsIG5v
-dCBzdXJlIHdoeSBmc2NrIGZhaWxlZC4gQ2FuIHRoaXMgYmUgdGhlIHJlYXNvbj8gc3lzdGVtZCBz
-dG9wL3N0YXJ0IG9mIG9zZCBkYWVtb25zIGRvZXMgbm90IHBlcmZvcm0gdW1vdW50IGFuZCByZW1v
-dW50LCBhbmQgZnNjayBvbiBtb3VudGVkIGZpbGVzeXN0ZW0gZmFpbHMuDQoNCg0KVGhhbmtzLA0K
-Tml0aW4NCg0KDQo=
+On Thu, Aug 17, 2017 at 7:13 AM, Linux Chips <linux.chips@gmail.com> wrote:
+> Hello everybody,
+> I have Kraken cluster with 660 OSD, currently it is down due to not
+> being able to complete peering, OSDs start consuming lots of memory
+> draining the system and killing the node, so I set a limit on the OSD
+> service (on some OSDs 28G and others as high as 35G), so they get
+> killed before taking down the whole node.
+> Now I still can't peer, one OSD entering the cluster (with about 300
+> already up) makes memory usage of most other OSDs so high (15G+, some as
+> much as 30G) and
+> sometimes kills them when they reach the service limit. which cause a spiral
+> load and causing all the OSDs to consume all the available.
+>
+> I found this thread with similar symptoms:
+>
+> http://lists.ceph.com/pipermail/ceph-users-ceph.com/2017-April/017522.html
+>
+> with a request for stack trace, I have a 14G core dump, we generated it by
+> running the osd from the terminal, enabling the core dumps, and setting
+> ulimits to 15G. what kind of a trace would be useful? all thread?! any
+> better way to debug this?
+>
+> What can I do do make it work, is this memory allocation normal?
+>
+> some info about the cluster:
+> 41 hdd nodes with 12 x 4TB osd each, 5 of the nodes have 8TB disks. 324 GB
+> RAM and dula socket intel xeon.
+> 7 nodes with 400GB x 24 ssd and 256GB RAM, and dual socket cpu.
+> 3 monitors
+>
+> all dual 10GB ethernet, except for the monitor with dual 1GB ethers.
+>
+> all nodes running centos 7.2
+> it is an old cluster that was upgraded continuously for the past 3 years.
+> the cluster was on jewel when the issue happened due to some accidental OSD
+> map changes, causing a heavy recovery operations on the cluster. then we
+> upgraded to kraken in the hope of less memory foot prints.
+>
+> any advice on how to proceed?
+
+It's not normal but if something really bad happened to your cluster,
+it's been known to occur. You should go through the troubleshooting
+guides at docs.ceph.com, but the general strategy is to set
+nodown/noout/etc flags, undo whatever horrible thing you tried to make
+the map do, and then turn all the OSDs back on.
+-Greg
