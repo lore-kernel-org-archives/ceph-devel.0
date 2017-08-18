@@ -1,33 +1,31 @@
 From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: [ceph-users] v12.1.4 Luminous (RC) released
-Date: Fri, 18 Aug 2017 19:39:40 +0200
-Message-ID: <5470e345-0274-0fd3-8fbb-3826dcaaa5ee@suse.cz>
-References: <062fdb6f788298b7458db9d07ead19d2@suse.com>
- <CAJ4mKGa7SK+YNE-sdEPKAj+NnTGtZSmxVZJiVXQoSnKF13TNJw@mail.gmail.com>
- <CAKOnarmpOgZL7PtHnW-xOEH589aPyNPoGkguYpWbhAgV5RcwQw@mail.gmail.com>
- <CAC-Np1xzdfEVQOszKttVEx8KNEspqJ+aBdS9RRVuA--QEEd9Gg@mail.gmail.com>
+Subject: Re: libradosstriper
+Date: Fri, 18 Aug 2017 20:35:56 +0200
+Message-ID: <ccfc902f-e483-6d62-7232-c646c2c7c8d4@suse.cz>
+References: <alpine.LSU.2.21.1708171218020.18428@linux-psd4>
+ <CAJ4mKGb8tEU9xVcuk2hWMTsZvU6X+Pza1XTrW4uwegLxzmm_tg@mail.gmail.com>
+ <CABZ+qqmcJa13bevAhQhQbDqvHM6Z9XfUKXxL-em-mJAmELYHCA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:55993 "EHLO mx1.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:60035 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750846AbdHRRjm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 18 Aug 2017 13:39:42 -0400
-In-Reply-To: <CAC-Np1xzdfEVQOszKttVEx8KNEspqJ+aBdS9RRVuA--QEEd9Gg@mail.gmail.com>
+        id S1750949AbdHRSf7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 18 Aug 2017 14:35:59 -0400
+In-Reply-To: <CABZ+qqmcJa13bevAhQhQbDqvHM6Z9XfUKXxL-em-mJAmELYHCA@mail.gmail.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>, Matt Benjamin <mbenjami@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
+To: Dan van der Ster <dan@vanderster.com>, Gregory Farnum <gfarnum@redhat.com>
+Cc: Jesse Williamson <jwilliamson@suse.de>, Squid Cybernetic <ceph-devel@vger.kernel.org>, Giuseppe Lo Presti <Giuseppe.LoPresti@cern.ch>
 
-> *I* think that this is getting to a point where we should just have
-> nightly development releases.
+> As to maintenance, it's true that the original contributor is
+> currently on a different assignment, so it hasn't seen much dev
+> activity. Are there any issues we should be aware of that need
+> following up?
 
-What if that night's development release is totally broken?
-
-The point of having a release is that someone (a human - preferably one 
-of the lead developers) has signed off on it. Releasing is inherently 
-unautomatable, because when you automate it you lose that assurance.
+If it's not being maintained, would it make sense to have a 
+WITH_RADOSSTRIPER toggle so one could build Ceph without it?
 
 Nathan
