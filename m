@@ -1,85 +1,54 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: Requesting to change "doesn't" to "does not", isn't to "is not".
-Date: Fri, 18 Aug 2017 22:34:21 +0800
-Message-ID: <CAJE9aOPYEb1rPypmU4sUS+oQPaj1T+WwFnhCc-hMZmXsQcUbDw@mail.gmail.com>
-References: <5996d47e.4ef9620a.e0733.1ba8@mx.google.com> <87378p3wi2.fsf@suse.com>
+From: Jos Collin <jcollin@redhat.com>
+Subject: Re: multi-line comments
+Date: Fri, 18 Aug 2017 20:16:06 +0530
+Message-ID: <74552be3-a556-3a8b-f232-26fb4c8f1c80@redhat.com>
+References: <CAJE9aOMyuw2dgnxRCbYwOB74C_ixMxT-f1DZB5HzyMXkeoL_2w@mail.gmail.com>
+ <CAJ4mKGZ10RyY6HmDy3sf_5howHuhB=78meX_St0F5N+v75awrg@mail.gmail.com>
+ <CALe9h7dN3ogwj80hYXAP2AyKpv8CGc_HK5a=ye+OsTjeqqeRDQ@mail.gmail.com>
+ <5996d531.c26f630a.ad731.d0e9@mx.google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-vk0-f43.google.com ([209.85.213.43]:38292 "EHLO
-        mail-vk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750984AbdHROeW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Aug 2017 10:34:22 -0400
-Received: by mail-vk0-f43.google.com with SMTP id g189so32758508vke.5
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Aug 2017 07:34:22 -0700 (PDT)
-In-Reply-To: <87378p3wi2.fsf@suse.com>
+Received: from mail-pg0-f53.google.com ([74.125.83.53]:32881 "EHLO
+        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750967AbdHROqL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Aug 2017 10:46:11 -0400
+Received: by mail-pg0-f53.google.com with SMTP id t3so37765661pgt.0
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Aug 2017 07:46:11 -0700 (PDT)
+In-Reply-To: <5996d531.c26f630a.ad731.d0e9@mx.google.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Lekshmanan <abhishek@suse.com>
-Cc: Amit <amitkuma@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Amit <amitkuma@redhat.com>, John Spray <jspray@redhat.com>, Gregory Farnum <gfarnum@redhat.com>
+Cc: kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Fri, Aug 18, 2017 at 8:12 PM, Abhishek Lekshmanan <abhishek@suse.com> wr=
-ote:
-> Amit <amitkuma@redhat.com> writes:
->
->> Hello,
->>
->> I believe coding guidelines does not speak about this.
->>
->> But PR (https://github.com/ceph/ceph/pull/16705) talks on it. And its
-> ITYM it's here ;-)
->
->> still open.
->> If we donot agree on contractions, Let's close it.
->>
->> Though "I am" instead of "I'm" -- both are completely correct English.
->> But I read on PR, It suits more on ESL speakers and takes care of
->> non-english speakers.
->>
->> I believe while reviewing the PRs, we can ask developers for changing
->> "isn't" to "is not". [If we accept above PR?]
->> Would be a step in including "Strong Phrases, Active voices" into
->> documentation/Comments/std output..
+> 1. I believe multiline text comment is one entity - which you want to
+> logically keep together. Line breaks in such a comment are nothing more
+> than places to wrap text, so breaking it up into many "separate"
+> comments makes no sense to me though. Therefore, I construct a single
+> comment block around the whole thing - using /* */.
 
-no, i don't think we should enforce this. as this can be processed by
-script. and it *is*. instead of struggling with the use of
-contractions, IMHO, doc writers and reviewers need to focus on the
-content.
+Using /* */ makes difficulty in later use. Especially in lengthy 
+functions and classes where there are lot of comments using /* */. For 
+instance, if we want to comment the code and test the functionality. 
+While // each line doesn't create this problem.
 
->
-> Well there are enough comments on the PR itself supporting/opposing it,
-> however in the PR itself, John Wilkins mentions that if approved, it
-> would be mostly automated scripts that'd doing the cleanups and not an
-> imposition on the community itself to do anything special, and this
-> would be better rather than requesting changes from PR submitters
-> themselves. My stance on contractions themselves resonate Nathan's
-> comments on the PR, but I'd not oppose whatever documentation team
-> decides as it.
->
-> However on code comments themselves I believe we shouldn't impose
-> anything, while typo fixes and obvious mistakes should be fixed, I think
-> it would be too much of an imposition if we expect every PR to confirm
-> to a contract of non contractions
+Try:
 
-agreed. i think it does not make sense to be picky on the code
-comments unless there are typos and syntax errors which fail to convey
-the idea of the author and code.
+void fn1()
+{
+/*
+   /*
+    Call add
+   */
+   obj.add();
+*/
 
->
-> Best,
-> Abhishek
->
-> SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton=
-,
-> HRB 21284 (AG N=C3=BCrnberg)
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+   obj.subtract();
+}
 
 
+I hope you got my point.
 
---=20
-Regards
-Kefu Chai
+Regards,
+Jos Collin
