@@ -1,97 +1,63 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Questions regarding ceph -w
-Date: Fri, 18 Aug 2017 12:03:43 +0200
-Message-ID: <8bf3e67c-8455-3d99-859d-daa444d39374@suse.cz>
-References: <CAKn7kBnGqRsSuatnhJSnp=-YYq1Q9fM7Ma7oRoHzAN9F7Uy_ow@mail.gmail.com>
- <CALe9h7ed29w63Z3my=8dthn94ZusqfQNsosfT54_CKWkk=zpgA@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: multi-line comments
+Date: Fri, 18 Aug 2017 12:35:35 +0100
+Message-ID: <CALe9h7dN3ogwj80hYXAP2AyKpv8CGc_HK5a=ye+OsTjeqqeRDQ@mail.gmail.com>
+References: <CAJE9aOMyuw2dgnxRCbYwOB74C_ixMxT-f1DZB5HzyMXkeoL_2w@mail.gmail.com>
+ <CAJ4mKGZ10RyY6HmDy3sf_5howHuhB=78meX_St0F5N+v75awrg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:41608 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750923AbdHRKDp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 18 Aug 2017 06:03:45 -0400
-In-Reply-To: <CALe9h7ed29w63Z3my=8dthn94ZusqfQNsosfT54_CKWkk=zpgA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-oi0-f52.google.com ([209.85.218.52]:35308 "EHLO
+        mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750847AbdHRLf4 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Aug 2017 07:35:56 -0400
+Received: by mail-oi0-f52.google.com with SMTP id e124so93819306oig.2
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Aug 2017 04:35:56 -0700 (PDT)
+In-Reply-To: <CAJ4mKGZ10RyY6HmDy3sf_5howHuhB=78meX_St0F5N+v75awrg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>, Neha Ojha <nojha@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: kefu chai <tchaikov@gmail.com>, Amit Kumar <amitkuma@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi John:
-
-Thanks for elaborating - can we post that info to the bug?
-
-http://tracker.ceph.com/issues/20995
-
-Nathan
-
-On 08/17/2017 12:13 PM, John Spray wrote:
-> On Thu, Aug 17, 2017 at 2:27 AM, Neha Ojha <nojha@redhat.com> wrote:
->> Hi John,
+On Thu, Aug 17, 2017 at 6:25 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+> On Thu, Aug 17, 2017 at 4:22 AM, kefu chai <tchaikov@gmail.com> wrote:
+>> hi Amit,
 >>
->> I am working on the following tracker issue:
->> http://tracker.ceph.com/issues/20995.
->> I was wondering if you could help me figure out a couple of things -
+>> i found that you started to encourage developers to use "/* */" for
+>> multiple-lined comment while reviewing pull requests. IIUC, it's more
+>> of a gray area, and sort of a personal preferences. so i don't
+>> understand why we need to go this way. and i believe, in modern C++
+>> practice, "//" is more common[0], and works better for developers. in
+>> the sense that, it's more readable, conforms to C++ standards, and
+>> works just fine with editors/tools.
 >>
->> 1. What should be the expected output of only using ceph -w? Adding
->> --watch-channel=* logs things properly, but as for ceph -w alone, I am
->> unable to understand why I see very few log messages(in some cases
->> none).
-> 
-> "ceph -w" just follows the cluster log at "info" severity, so if there
-> is nothing going to the cluster log, the command doesn't output
-> anything.
-> 
-> It used to also include the audit log, but that is now filtered out by
-> default, because it's usually not interesting (the administrator
-> doesn't need to be told what they just typed), and because it's very
-> hard to read (the log lines are basically JSON dumps).  All that
-> content is still going to the log file, it's just not visible by
-> default in ceph -w.
-> 
-> This is causing some confusion, because historically we had code that
-> wrote the PG status to the cluster log continuously (every 5 seconds
-> or so), so people are accustomed to always seeing something.  Also the
-> old documentation talked about this command "watching the cluster's
-> events" which created the impression that this was something other
-> than a log tailing command.
-> 
->> 2. For which cases would it show log messages? Like for example, for
->> "ceph osd out" it does, but not for "ceph osd in", "ceph osd pool
->> create" etc.
-> 
-> In general you'll see messages about bad or unexpected things (every
-> failing health check now comes with log messages).  For actions that
-> are done by the administrator, the audit log is still present (if
-> hidden by default).  If you look at the log at "debug" level of
-> severity (--watch-debug), you can still see the summary prints of the
-> cluster maps (excluding the pg map) when they change.
-> 
-> The motivation behind all this is to have a cluster log that tells a
-> somewhat human-readable story about failures and recovery.  There is
-> certainly scope for adding in some more logging at carefully chosen
-> points, such as:
->   - if a user marks an OSD out which was down, we could log that to
-> indicate that the user pre-empted the timeout-based "out" path.
->   - when a pool is created we could print a message to say that it is
-> being created, and then when all its PGs are out of "creating" we
-> could print another message to that effect.
-> 
-> The key thing is to make sure the messages are intelligible to
-> non-expert users and that they are not overwhelming: there are a set
-> of guidelines here http://docs.ceph.com/docs/master/dev/logging/
-> 
-> John
-> 
->> I would really appreciate your help on this issue.
->>
->> Thanks,
->> Neha
+>
+> Similarly, do we have a rule or guidance about contractions anywhere?
+>
+> I can see how that might be desirable for non-native english speakers,
+> but it's not a rule of any kind that I'm aware of. Do we want it to
+> be? (...perhaps I should add the ceph-china list to this CC).
 
--- 
-Nathan Cutler
-Software Engineer Distributed Storage
-SUSE LINUX, s.r.o.
-Tel.: +420 284 084 037
+Based on the discussion on https://github.com/ceph/ceph/pull/16705,
+there doesn't seem to be much support for removing contractions.
+
+I sympathise with John W's original intent on that PR to make it
+easier to sync up upstream docs with commercial products that might
+have an IBM-ish style, but I don't think it makes sense to make the
+change without making it a rule, and I think it's not something that's
+desirable as a rule.
+
+I would welcome a style guide for our upstream docs though, so that we
+could have a place to refer to for any rules we do want to have.
+
+John
+
+1. As I write that, I realise it's weird that in English we sometimes
+use in- to mean opposite and sometimes not!  What a language...
+
+
+> -Greg
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
