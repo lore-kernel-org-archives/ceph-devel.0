@@ -1,31 +1,37 @@
 From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: libradosstriper
-Date: Fri, 18 Aug 2017 20:35:56 +0200
-Message-ID: <ccfc902f-e483-6d62-7232-c646c2c7c8d4@suse.cz>
-References: <alpine.LSU.2.21.1708171218020.18428@linux-psd4>
- <CAJ4mKGb8tEU9xVcuk2hWMTsZvU6X+Pza1XTrW4uwegLxzmm_tg@mail.gmail.com>
- <CABZ+qqmcJa13bevAhQhQbDqvHM6Z9XfUKXxL-em-mJAmELYHCA@mail.gmail.com>
+Subject: Re: Requesting to change "doesn't" to "does not", isn't to "is not".
+Date: Fri, 18 Aug 2017 21:19:39 +0200
+Message-ID: <537123b3-b227-96d1-f84e-9bc5a4c13c84@suse.cz>
+References: <md5:4EcWvCzo9b/7898pSLmrOQ==>
+ <5996d47e.4ef9620a.e0733.1ba8@mx.google.com>
+ <20170818161005.GA13493@ultraspiritum.eng.arb.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:60035 "EHLO mx1.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:34360 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750949AbdHRSf7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 18 Aug 2017 14:35:59 -0400
-In-Reply-To: <CABZ+qqmcJa13bevAhQhQbDqvHM6Z9XfUKXxL-em-mJAmELYHCA@mail.gmail.com>
+        id S1751852AbdHRTTk (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 18 Aug 2017 15:19:40 -0400
+In-Reply-To: <20170818161005.GA13493@ultraspiritum.eng.arb.redhat.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Dan van der Ster <dan@vanderster.com>, Gregory Farnum <gfarnum@redhat.com>
-Cc: Jesse Williamson <jwilliamson@suse.de>, Squid Cybernetic <ceph-devel@vger.kernel.org>, Giuseppe Lo Presti <Giuseppe.LoPresti@cern.ch>
+To: Amit <amitkuma@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-> As to maintenance, it's true that the original contributor is
-> currently on a different assignment, so it hasn't seen much dev
-> activity. Are there any issues we should be aware of that need
-> following up?
+>> Would be a step in including "Strong Phrases, Active voices" into
+>> documentation/Comments/std output..
 
-If it's not being maintained, would it make sense to have a 
-WITH_RADOSSTRIPER toggle so one could build Ceph without it?
+This is a standard recommendation for improving English writing style.
+
+Like all elements of any language, passive voice is a well-established 
+part of the English language and there are plenty of situations that 
+warrant - or even demand - its use.
+
+Therefore, such a recommendation should not be taken as a blanket law to 
+be applied "roboticly" to all text ever written :-)
+
+The intent of the recommendation is to call attention to a common 
+stylistic failing - i.e. the *overuse* of passive voice.
 
 Nathan
