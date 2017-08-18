@@ -1,76 +1,54 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: multi-line comments
-Date: Fri, 18 Aug 2017 17:18:46 -0400
-Message-ID: <CAC-Np1w9taokXhoqskA-j=AEZevMhLJJFj-vn7FDy_s1kASB+A@mail.gmail.com>
-References: <CAJE9aOMyuw2dgnxRCbYwOB74C_ixMxT-f1DZB5HzyMXkeoL_2w@mail.gmail.com>
- <CAJ4mKGZ10RyY6HmDy3sf_5howHuhB=78meX_St0F5N+v75awrg@mail.gmail.com> <CALe9h7dN3ogwj80hYXAP2AyKpv8CGc_HK5a=ye+OsTjeqqeRDQ@mail.gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: libradosstriper
+Date: Fri, 18 Aug 2017 16:38:45 -0700
+Message-ID: <CAJ4mKGZxxPZRWZYAxduPW9L275LCzWVfa7LnCcPCtFOoNWCSOA@mail.gmail.com>
+References: <alpine.LSU.2.21.1708171218020.18428@linux-psd4>
+ <CAJ4mKGb8tEU9xVcuk2hWMTsZvU6X+Pza1XTrW4uwegLxzmm_tg@mail.gmail.com> <CABZ+qqmcJa13bevAhQhQbDqvHM6Z9XfUKXxL-em-mJAmELYHCA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f178.google.com ([209.85.128.178]:37250 "EHLO
-        mail-wr0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751792AbdHRVSs (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Aug 2017 17:18:48 -0400
-Received: by mail-wr0-f178.google.com with SMTP id z91so66119995wrc.4
-        for <ceph-devel@vger.kernel.org>; Fri, 18 Aug 2017 14:18:47 -0700 (PDT)
-In-Reply-To: <CALe9h7dN3ogwj80hYXAP2AyKpv8CGc_HK5a=ye+OsTjeqqeRDQ@mail.gmail.com>
+Received: from mail-it0-f54.google.com ([209.85.214.54]:32980 "EHLO
+        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752272AbdHRXis (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 18 Aug 2017 19:38:48 -0400
+Received: by mail-it0-f54.google.com with SMTP id o72so2955568ita.0
+        for <ceph-devel@vger.kernel.org>; Fri, 18 Aug 2017 16:38:48 -0700 (PDT)
+In-Reply-To: <CABZ+qqmcJa13bevAhQhQbDqvHM6Z9XfUKXxL-em-mJAmELYHCA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, kefu chai <tchaikov@gmail.com>, Amit Kumar <amitkuma@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Dan van der Ster <dan@vanderster.com>
+Cc: Jesse Williamson <jwilliamson@suse.de>, Squid Cybernetic <ceph-devel@vger.kernel.org>, Giuseppe Lo Presti <Giuseppe.LoPresti@cern.ch>
 
-On Fri, Aug 18, 2017 at 7:35 AM, John Spray <jspray@redhat.com> wrote:
-> On Thu, Aug 17, 2017 at 6:25 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
->> On Thu, Aug 17, 2017 at 4:22 AM, kefu chai <tchaikov@gmail.com> wrote:
->>> hi Amit,
+On Fri, Aug 18, 2017 at 1:28 AM, Dan van der Ster <dan@vanderster.com> wrote:
+> On Thu, Aug 17, 2017 at 11:39 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
+>> On Thu, Aug 17, 2017 at 12:18 PM, Jesse Williamson <jwilliamson@suse.de> wrote:
 >>>
->>> i found that you started to encourage developers to use "/* */" for
->>> multiple-lined comment while reviewing pull requests. IIUC, it's more
->>> of a gray area, and sort of a personal preferences. so i don't
->>> understand why we need to go this way. and i believe, in modern C++
->>> practice, "//" is more common[0], and works better for developers. in
->>> the sense that, it's more readable, conforms to C++ standards, and
->>> works just fine with editors/tools.
+>>> Hi folks,
 >>>
+>>> What are the future plans for libradosstriper? Are we planning on keeping it
+>>> around, or does the crystal ball forsee a fond farewell?
 >>
->> Similarly, do we have a rule or guidance about contractions anywhere?
+>> I've not heard any talk of removing it, and I don't think it adds much
+>> load to carry on.
 >>
->> I can see how that might be desirable for non-native english speakers,
->> but it's not a rule of any kind that I'm aware of. Do we want it to
->> be? (...perhaps I should add the ceph-china list to this CC).
+>> Although I also think the CERN guys who were maintaining it said
+>> they're not making use of it any more, so I don't know if anybody
+>> feels any dedication to maintaining it either.
 >
-> Based on the discussion on https://github.com/ceph/ceph/pull/16705,
-> there doesn't seem to be much support for removing contractions.
+> (cc'ing my colleague Giuseppe)
 >
-> I sympathise with John W's original intent on that PR to make it
-> easier to sync up upstream docs with commercial products that might
-> have an IBM-ish style, but I don't think it makes sense to make the
-> change without making it a rule, and I think it's not something that's
-> desirable as a rule.
+> In fact it is still used at CERN and we're aware of at least one other
+> user in our HEP community at RAL. Xrootd -- the storage framework we
+> use heavily in HEP -- has a Ceph module built around libradosstriper.
 >
-> I would welcome a style guide for our upstream docs though, so that we
-> could have a place to refer to for any rules we do want to have.
+> As to maintenance, it's true that the original contributor is
+> currently on a different assignment, so it hasn't seen much dev
+> activity. Are there any issues we should be aware of that need
+> following up?
 
-We do have a documentation style guide:
-
-    https://github.com/ceph/ceph/blob/master/doc/start/documenting-ceph.rst#documentation-style-guide
-
-Most of the suggestions/rules there aren't really followed :(
-Hopefully with the new fixes that went in, that will change and
-prevent us from going astray again.
->
-> John
->
-> 1. As I write that, I realise it's weird that in English we sometimes
-> use in- to mean opposite and sometimes not!  What a language...
->
->
->> -Greg
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I'm not aware of any issues at the time. Just not having an active
+maintainer does make it susceptible to bitrot; and I'e seen a few
+queries go by on the lists that I don't think anybody was able to
+answer. So those are the potential avenues that would prompt a
+removal, but AFAIK no issues yet.
+-Greg
