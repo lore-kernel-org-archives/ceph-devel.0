@@ -1,8 +1,8 @@
 From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH 1/3] ceph: Delete an error message for a failed memory
- allocation in __get_or_create_frag()
-Date: Sun, 20 Aug 2017 20:38:46 +0200
-Message-ID: <1c62414e-f9c9-3c3b-a6d3-cd1ea582939a@users.sourceforge.net>
+Subject: [PATCH 2/3] ceph: Delete an unnecessary return statement in
+ update_dentry_lease()
+Date: Sun, 20 Aug 2017 20:39:44 +0200
+Message-ID: <8a9a3d91-91b2-81ed-eafc-66fc637de539@users.sourceforge.net>
 References: <b05df66b-b8a7-ac63-989d-091efecf2ab8@users.sourceforge.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
@@ -16,35 +16,30 @@ Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
 From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Sun, 20 Aug 2017 20:00:09 +0200
+Date: Sun, 20 Aug 2017 20:08:25 +0200
 
-Omit an extra message for a memory allocation failure in this function.
+The script "checkpatch.pl" pointed information out like the following.
 
-This issue was detected by using the Coccinelle software.
+WARNING: void function return statements are not generally useful
+
+Thus remove such a statement in the affected function.
 
 Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
 ---
- fs/ceph/inode.c | 7 ++-----
- 1 file changed, 2 insertions(+), 5 deletions(-)
+ fs/ceph/inode.c | 1 -
+ 1 file changed, 1 deletion(-)
 
 diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 220dfd87cbfa..010e7be768e6 100644
+index 010e7be768e6..8eae56b2d1d6 100644
 --- a/fs/ceph/inode.c
 +++ b/fs/ceph/inode.c
-@@ -133,12 +133,9 @@ static struct ceph_inode_frag *__get_or_create_frag(struct ceph_inode_info *ci,
- 	}
+@@ -1067,7 +1067,6 @@ static void update_dentry_lease(struct dentry *dentry,
+ 	spin_unlock(&dentry->d_lock);
+ 	if (old_lease_session)
+ 		ceph_put_mds_session(old_lease_session);
+-	return;
+ }
  
- 	frag = kmalloc(sizeof(*frag), GFP_NOFS);
--	if (!frag) {
--		pr_err("__get_or_create_frag ENOMEM on %p %llx.%llx "
--		       "frag %x\n", &ci->vfs_inode,
--		       ceph_vinop(&ci->vfs_inode), f);
-+	if (!frag)
- 		return ERR_PTR(-ENOMEM);
--	}
-+
- 	frag->frag = f;
- 	frag->split_by = 0;
- 	frag->mds = -1;
+ /*
 -- 
 2.14.0
