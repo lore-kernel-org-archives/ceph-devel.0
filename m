@@ -1,102 +1,45 @@
-From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
-Subject: Re: multi-line comments
-Date: Mon, 21 Aug 2017 14:13:57 +0300
-Message-ID: <CADRKj5R36FNy4Z6SYqa0sw+5HWk-84nXDTD3QpU_Tz9kGbBdmg@mail.gmail.com>
-References: <CAJE9aOMyuw2dgnxRCbYwOB74C_ixMxT-f1DZB5HzyMXkeoL_2w@mail.gmail.com>
- <CAJ4mKGZ10RyY6HmDy3sf_5howHuhB=78meX_St0F5N+v75awrg@mail.gmail.com>
- <CALe9h7dN3ogwj80hYXAP2AyKpv8CGc_HK5a=ye+OsTjeqqeRDQ@mail.gmail.com>
- <CAC-Np1w9taokXhoqskA-j=AEZevMhLJJFj-vn7FDy_s1kASB+A@mail.gmail.com> <CALe9h7coEqdxprPQqyyFmp_N9Nt-418QU=TJiVTpackiQDx3HQ@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: [ceph-users] v12.1.4 Luminous (RC) released
+Date: Mon, 21 Aug 2017 08:14:58 -0400
+Message-ID: <CAC-Np1zS4wxjFVCHBdiNnwOG-D2jyJAZrj4H7Ee2vRQcmvqWgg@mail.gmail.com>
+References: <062fdb6f788298b7458db9d07ead19d2@suse.com> <CAJ4mKGa7SK+YNE-sdEPKAj+NnTGtZSmxVZJiVXQoSnKF13TNJw@mail.gmail.com>
+ <CAKOnarmpOgZL7PtHnW-xOEH589aPyNPoGkguYpWbhAgV5RcwQw@mail.gmail.com>
+ <CAC-Np1xzdfEVQOszKttVEx8KNEspqJ+aBdS9RRVuA--QEEd9Gg@mail.gmail.com> <5470e345-0274-0fd3-8fbb-3826dcaaa5ee@suse.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f47.google.com ([209.85.218.47]:34022 "EHLO
-        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751894AbdHULN7 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Aug 2017 07:13:59 -0400
-Received: by mail-oi0-f47.google.com with SMTP id j144so23398141oib.1
-        for <ceph-devel@vger.kernel.org>; Mon, 21 Aug 2017 04:13:59 -0700 (PDT)
-In-Reply-To: <CALe9h7coEqdxprPQqyyFmp_N9Nt-418QU=TJiVTpackiQDx3HQ@mail.gmail.com>
+Received: from mail-wr0-f176.google.com ([209.85.128.176]:36234 "EHLO
+        mail-wr0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753341AbdHUMPA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 21 Aug 2017 08:15:00 -0400
+Received: by mail-wr0-f176.google.com with SMTP id f8so61301458wrf.3
+        for <ceph-devel@vger.kernel.org>; Mon, 21 Aug 2017 05:15:00 -0700 (PDT)
+In-Reply-To: <5470e345-0274-0fd3-8fbb-3826dcaaa5ee@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Alfredo Deza <adeza@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, kefu chai <tchaikov@gmail.com>, Amit Kumar <amitkuma@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Matt Benjamin <mbenjami@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, "ceph-maintainers@ceph.com" <ceph-maintainers@ceph.com>
 
-On Mon, Aug 21, 2017 at 12:49 PM, John Spray <jspray@redhat.com> wrote:
-> On Fri, Aug 18, 2017 at 10:18 PM, Alfredo Deza <adeza@redhat.com> wrote:
->> On Fri, Aug 18, 2017 at 7:35 AM, John Spray <jspray@redhat.com> wrote:
->>> On Thu, Aug 17, 2017 at 6:25 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
->>>> On Thu, Aug 17, 2017 at 4:22 AM, kefu chai <tchaikov@gmail.com> wrote:
->>>>> hi Amit,
->>>>>
->>>>> i found that you started to encourage developers to use "/* */" for
->>>>> multiple-lined comment while reviewing pull requests. IIUC, it's more
->>>>> of a gray area, and sort of a personal preferences. so i don't
->>>>> understand why we need to go this way. and i believe, in modern C++
->>>>> practice, "//" is more common[0], and works better for developers. in
->>>>> the sense that, it's more readable, conforms to C++ standards, and
->>>>> works just fine with editors/tools.
->>>>>
->>>>
->>>> Similarly, do we have a rule or guidance about contractions anywhere?
->>>>
->>>> I can see how that might be desirable for non-native english speakers,
->>>> but it's not a rule of any kind that I'm aware of. Do we want it to
->>>> be? (...perhaps I should add the ceph-china list to this CC).
->>>
->>> Based on the discussion on https://github.com/ceph/ceph/pull/16705,
->>> there doesn't seem to be much support for removing contractions.
->>>
->>> I sympathise with John W's original intent on that PR to make it
->>> easier to sync up upstream docs with commercial products that might
->>> have an IBM-ish style, but I don't think it makes sense to make the
->>> change without making it a rule, and I think it's not something that's
->>> desirable as a rule.
->>>
->>> I would welcome a style guide for our upstream docs though, so that we
->>> could have a place to refer to for any rules we do want to have.
->>
->> We do have a documentation style guide:
->>
->>     https://github.com/ceph/ceph/blob/master/doc/start/documenting-ceph.rst#documentation-style-guide
->>
->> Most of the suggestions/rules there aren't really followed :(
->> Hopefully with the new fixes that went in, that will change and
->> prevent us from going astray again.
+On Fri, Aug 18, 2017 at 1:39 PM, Nathan Cutler <ncutler@suse.cz> wrote:
+>> *I* think that this is getting to a point where we should just have
+>> nightly development releases.
 >
-> I think that's more of a style guide for the documentation .rst source
-> code, I was thinking of a style guide for the content itself.
 >
+> What if that night's development release is totally broken?
 
-Ceph style guide:
+Broken like needing a new release? That is my point :) You wait until
+the next day.
 
-https://github.com/ceph/ceph/blob/master/CodingStyle
-
-However, we don't follow it religiously, most don't know it exists I
-think. Comments-wise, there's nothing explicit there, and the google
-guide that we derive from is pretty lax. I don't think we should force
-a specific comments style, it's annoying.
-
-Yehuda
-
-
-> John
 >
->>>
->>> John
->>>
->>> 1. As I write that, I realise it's weird that in English we sometimes
->>> use in- to mean opposite and sometimes not!  What a language...
->>>
->>>
->>>> -Greg
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> The point of having a release is that someone (a human - preferably one of
+> the lead developers) has signed off on it. Releasing is inherently
+> unautomatable, because when you automate it you lose that assurance.
+
+A regular, stable release, yes. Not a nightly/dev release.
+
+>
+> Nathan
+>
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
