@@ -1,385 +1,49 @@
-From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH 3/3] ceph: Adjust 36 checks for null pointers
-Date: Sun, 20 Aug 2017 20:40:37 +0200
-Message-ID: <e079fd44-a51d-af3a-07db-bd4377d7739d@users.sourceforge.net>
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [PATCH 0/3] Ceph: Adjustments for some function implementations
+Date: Mon, 21 Aug 2017 09:46:54 +0800
+Message-ID: <621A6044-0445-42A4-AE39-E3E300833A7F@redhat.com>
 References: <b05df66b-b8a7-ac63-989d-091efecf2ab8@users.sourceforge.net>
-Mime-Version: 1.0
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <b05df66b-b8a7-ac63-989d-091efecf2ab8@users.sourceforge.net>
-Content-Language: en-GB
 Sender: linux-kernel-owner@vger.kernel.org
-To: ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, "Yan, Zheng" <zyan@redhat.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
+To: SF Markus Elfring <elfring@users.sourceforge.net>
+Cc: ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, Sage Weil <sage@redhat.com>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Sun, 20 Aug 2017 20:22:02 +0200
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
 
-The script “checkpatch.pl” pointed information out like the following.
+> On 21 Aug 2017, at 02:37, SF Markus Elfring <elfring@users.sourceforge.net> wrote:
+> 
+> From: Markus Elfring <elfring@users.sourceforge.net>
+> Date: Sun, 20 Aug 2017 20:32:10 +0200
+> 
+> Three update suggestions were taken into account
+> from static source code analysis.
+> 
+> Markus Elfring (3):
+>  Delete an error message for a failed memory allocation in __get_or_create_frag()
+>  Delete an unnecessary return statement in update_dentry_lease()
+>  Adjust 36 checks for null pointers
+> 
+> fs/ceph/addr.c       |  2 +-
+> fs/ceph/cache.c      |  2 +-
+> fs/ceph/caps.c       |  4 ++--
+> fs/ceph/debugfs.c    |  2 +-
+> fs/ceph/file.c       |  2 +-
+> fs/ceph/inode.c      | 14 +++++---------
+> fs/ceph/mds_client.c | 22 +++++++++++-----------
+> fs/ceph/mdsmap.c     |  6 +++---
+> fs/ceph/super.c      | 18 +++++++++---------
+> fs/ceph/xattr.c      |  8 ++++----
+> 10 files changed, 38 insertions(+), 42 deletions(-)
+> 
+> — 
 
-Comparison to NULL could be written …
+Whole series applied, thanks
 
-Thus fix the affected source code places.
+Yan, Zheng
 
-Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
----
- fs/ceph/addr.c       |  2 +-
- fs/ceph/cache.c      |  2 +-
- fs/ceph/caps.c       |  4 ++--
- fs/ceph/debugfs.c    |  2 +-
- fs/ceph/file.c       |  2 +-
- fs/ceph/inode.c      |  6 +++---
- fs/ceph/mds_client.c | 22 +++++++++++-----------
- fs/ceph/mdsmap.c     |  6 +++---
- fs/ceph/super.c      | 18 +++++++++---------
- fs/ceph/xattr.c      |  8 ++++----
- 10 files changed, 36 insertions(+), 36 deletions(-)
-
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index 50836280a6f8..981589dbb871 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -541,7 +541,7 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
- 
- 	/* verify this is a writeable snap context */
- 	snapc = page_snap_context(page);
--	if (snapc == NULL) {
-+	if (!snapc) {
- 		dout("writepage %p page %p not dirty?\n", inode, page);
- 		return 0;
- 	}
-diff --git a/fs/ceph/cache.c b/fs/ceph/cache.c
-index 6d3baf61b4d5..a2c849841c48 100644
---- a/fs/ceph/cache.c
-+++ b/fs/ceph/cache.c
-@@ -209,7 +209,7 @@ void ceph_fscache_register_inode_cookie(struct inode *inode)
- 	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
- 
- 	/* No caching for filesystem */
--	if (fsc->fscache == NULL)
-+	if (!fsc->fscache)
- 		return;
- 
- 	/* Only cache for regular files that are read only */
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 7007ae2a5ad2..ea12f689f15a 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -611,7 +611,7 @@ void ceph_add_cap(struct inode *inode,
- 	}
- 
- 	if (flags & CEPH_CAP_FLAG_AUTH) {
--		if (ci->i_auth_cap == NULL ||
-+		if (!ci->i_auth_cap ||
- 		    ceph_seq_cmp(ci->i_auth_cap->mseq, mseq) < 0) {
- 			ci->i_auth_cap = cap;
- 			cap->mds_wanted = wanted;
-@@ -728,7 +728,7 @@ static void __touch_cap(struct ceph_cap *cap)
- 	struct ceph_mds_session *s = cap->session;
- 
- 	spin_lock(&s->s_cap_lock);
--	if (s->s_cap_iterator == NULL) {
-+	if (!s->s_cap_iterator) {
- 		dout("__touch_cap %p cap %p mds%d\n", &cap->ci->vfs_inode, cap,
- 		     s->s_mds);
- 		list_move_tail(&cap->session_caps, &s->s_caps);
-diff --git a/fs/ceph/debugfs.c b/fs/ceph/debugfs.c
-index 4e2d112c982f..d635496ea189 100644
---- a/fs/ceph/debugfs.c
-+++ b/fs/ceph/debugfs.c
-@@ -24,7 +24,7 @@ static int mdsmap_show(struct seq_file *s, void *p)
- 	struct ceph_fs_client *fsc = s->private;
- 	struct ceph_mdsmap *mdsmap;
- 
--	if (fsc->mdsc == NULL || fsc->mdsc->mdsmap == NULL)
-+	if (!fsc->mdsc || !fsc->mdsc->mdsmap)
- 		return 0;
- 	mdsmap = fsc->mdsc->mdsmap;
- 	seq_printf(s, "epoch %d\n", mdsmap->m_epoch);
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 3d48c415f3cb..aeb5445f4c1c 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -175,7 +175,7 @@ static int ceph_init_file(struct inode *inode, struct file *file, int fmode)
- 		dout("init_file %p %p 0%o (regular)\n", inode, file,
- 		     inode->i_mode);
- 		cf = kmem_cache_zalloc(ceph_file_cachep, GFP_KERNEL);
--		if (cf == NULL) {
-+		if (!cf) {
- 			ceph_put_fmode(ceph_inode(inode), fmode); /* clean up */
- 			return -ENOMEM;
- 		}
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 8eae56b2d1d6..49c4e5deac5f 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -52,7 +52,7 @@ struct inode *ceph_get_inode(struct super_block *sb, struct ceph_vino vino)
- 	ino_t t = ceph_vino_to_ino(vino);
- 
- 	inode = iget5_locked(sb, t, ceph_ino_compare, ceph_set_ino_cb, &vino);
--	if (inode == NULL)
-+	if (!inode)
- 		return ERR_PTR(-ENOMEM);
- 	if (inode->i_state & I_NEW) {
- 		dout("get_inode created new inode %p %llx.%llx ino %llx\n",
-@@ -1173,7 +1173,7 @@ int ceph_fill_trace(struct super_block *sb, struct ceph_mds_request *req)
- 				dn = d_alloc(parent, &dname);
- 				dout("d_alloc %p '%.*s' = %p\n", parent,
- 				     dname.len, dname.name, dn);
--				if (dn == NULL) {
-+				if (!dn) {
- 					dput(parent);
- 					err = -ENOMEM;
- 					goto done;
-@@ -1562,7 +1562,7 @@ int ceph_readdir_prepopulate(struct ceph_mds_request *req,
- 			dn = d_alloc(parent, &dname);
- 			dout("d_alloc %p '%.*s' = %p\n", parent,
- 			     dname.len, dname.name, dn);
--			if (dn == NULL) {
-+			if (!dn) {
- 				dout("d_alloc badness\n");
- 				err = -ENOMEM;
- 				goto out;
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 666a9f274832..bcfbaf341e89 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -408,7 +408,7 @@ struct ceph_mds_session *__ceph_lookup_mds_session(struct ceph_mds_client *mdsc,
- {
- 	struct ceph_mds_session *session;
- 
--	if (mds >= mdsc->max_sessions || mdsc->sessions[mds] == NULL)
-+	if (mds >= mdsc->max_sessions || !mdsc->sessions[mds])
- 		return NULL;
- 	session = mdsc->sessions[mds];
- 	dout("lookup_mds_session %p %d\n", session,
-@@ -483,7 +483,7 @@ static struct ceph_mds_session *register_session(struct ceph_mds_client *mdsc,
- 
- 		dout("register_session realloc to %d\n", newmax);
- 		sa = kcalloc(newmax, sizeof(void *), GFP_NOFS);
--		if (sa == NULL)
-+		if (!sa)
- 			goto fail_realloc;
- 		if (mdsc->sessions) {
- 			memcpy(sa, mdsc->sessions,
-@@ -886,7 +886,7 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
- 
- 	/* Calculate serialized length of metadata */
- 	metadata_bytes = 4;  /* map length */
--	for (i = 0; metadata[i][0] != NULL; ++i) {
-+	for (i = 0; metadata[i][0]; ++i) {
- 		metadata_bytes += 8 + strlen(metadata[i][0]) +
- 			strlen(metadata[i][1]);
- 		metadata_key_count++;
-@@ -919,7 +919,7 @@ static struct ceph_msg *create_session_open_msg(struct ceph_mds_client *mdsc, u6
- 	ceph_encode_32(&p, metadata_key_count);
- 
- 	/* Two length-prefixed strings for each entry in the map */
--	for (i = 0; metadata[i][0] != NULL; ++i) {
-+	for (i = 0; metadata[i][0]; ++i) {
- 		size_t const key_len = strlen(metadata[i][0]);
- 		size_t const val_len = strlen(metadata[i][1]);
- 
-@@ -1122,7 +1122,7 @@ static int iterate_session_caps(struct ceph_mds_session *session,
- 
- 		spin_lock(&session->s_cap_lock);
- 		p = p->next;
--		if (cap->ci == NULL) {
-+		if (!cap->ci) {
- 			dout("iterate_session_caps  finishing cap %p removal\n",
- 			     cap);
- 			BUG_ON(cap->session != session);
-@@ -1748,7 +1748,7 @@ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *base,
- 	int len, pos;
- 	unsigned seq;
- 
--	if (dentry == NULL)
-+	if (!dentry)
- 		return ERR_PTR(-EINVAL);
- 
- retry:
-@@ -1771,7 +1771,7 @@ char *ceph_mdsc_build_path(struct dentry *dentry, int *plen, u64 *base,
- 		len--;  /* no leading '/' */
- 
- 	path = kmalloc(len+1, GFP_NOFS);
--	if (path == NULL)
-+	if (!path)
- 		return ERR_PTR(-ENOMEM);
- 	pos = len;
- 	path[pos] = 0;	/* trailing null */
-@@ -3133,7 +3133,7 @@ static void check_new_map(struct ceph_mds_client *mdsc,
- 	     newmap->m_epoch, oldmap->m_epoch);
- 
- 	for (i = 0; i < oldmap->m_num_mds && i < mdsc->max_sessions; i++) {
--		if (mdsc->sessions[i] == NULL)
-+		if (!mdsc->sessions[i])
- 			continue;
- 		s = mdsc->sessions[i];
- 		oldstate = ceph_mdsmap_get_state(oldmap, i);
-@@ -3280,7 +3280,7 @@ static void handle_lease(struct ceph_mds_client *mdsc,
- 	mutex_lock(&session->s_mutex);
- 	session->s_seq++;
- 
--	if (inode == NULL) {
-+	if (!inode) {
- 		dout("handle_lease no inode %llx\n", vino.ino);
- 		goto release;
- 	}
-@@ -3438,7 +3438,7 @@ static void delayed_work(struct work_struct *work)
- 
- 	for (i = 0; i < mdsc->max_sessions; i++) {
- 		struct ceph_mds_session *s = __ceph_lookup_mds_session(mdsc, i);
--		if (s == NULL)
-+		if (!s)
- 			continue;
- 		if (s->s_state == CEPH_MDS_SESSION_CLOSING) {
- 			dout("resending session close request for mds%d\n",
-@@ -3490,7 +3490,7 @@ int ceph_mdsc_init(struct ceph_fs_client *fsc)
- 	fsc->mdsc = mdsc;
- 	mutex_init(&mdsc->mutex);
- 	mdsc->mdsmap = kzalloc(sizeof(*mdsc->mdsmap), GFP_NOFS);
--	if (mdsc->mdsmap == NULL) {
-+	if (!mdsc->mdsmap) {
- 		kfree(mdsc);
- 		return -ENOMEM;
- 	}
-diff --git a/fs/ceph/mdsmap.c b/fs/ceph/mdsmap.c
-index 1a748cf88535..33ced4c22732 100644
---- a/fs/ceph/mdsmap.c
-+++ b/fs/ceph/mdsmap.c
-@@ -112,7 +112,7 @@ struct ceph_mdsmap *ceph_mdsmap_decode(void **p, void *end)
- 	u16 mdsmap_ev;
- 
- 	m = kzalloc(sizeof(*m), GFP_NOFS);
--	if (m == NULL)
-+	if (!m)
- 		return ERR_PTR(-ENOMEM);
- 
- 	ceph_decode_need(p, end, 1 + 1, bad);
-@@ -138,7 +138,7 @@ struct ceph_mdsmap *ceph_mdsmap_decode(void **p, void *end)
- 	m->m_num_mds = m->m_max_mds;
- 
- 	m->m_info = kcalloc(m->m_num_mds, sizeof(*m->m_info), GFP_NOFS);
--	if (m->m_info == NULL)
-+	if (!m->m_info)
- 		goto nomem;
- 
- 	/* pick out active nodes from mds_info (state > 0) */
-@@ -232,7 +232,7 @@ struct ceph_mdsmap *ceph_mdsmap_decode(void **p, void *end)
- 		if (num_export_targets) {
- 			info->export_targets = kcalloc(num_export_targets,
- 						       sizeof(u32), GFP_NOFS);
--			if (info->export_targets == NULL)
-+			if (!info->export_targets)
- 				goto nomem;
- 			for (j = 0; j < num_export_targets; j++)
- 				info->export_targets[j] =
-diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-index aa06a8c24792..96acae76fbad 100644
---- a/fs/ceph/super.c
-+++ b/fs/ceph/super.c
-@@ -576,7 +576,7 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
- 	}
- 	fsc->client->extra_mon_dispatch = extra_mon_dispatch;
- 
--	if (fsopt->mds_namespace == NULL) {
-+	if (!fsopt->mds_namespace) {
- 		ceph_monc_want_map(&fsc->client->monc, CEPH_SUB_MDSMAP,
- 				   0, true);
- 	} else {
-@@ -597,13 +597,13 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
- 	 * to be processed in parallel, limit concurrency.
- 	 */
- 	fsc->wb_wq = alloc_workqueue("ceph-writeback", 0, 1);
--	if (fsc->wb_wq == NULL)
-+	if (!fsc->wb_wq)
- 		goto fail_client;
- 	fsc->pg_inv_wq = alloc_workqueue("ceph-pg-invalid", 0, 1);
--	if (fsc->pg_inv_wq == NULL)
-+	if (!fsc->pg_inv_wq)
- 		goto fail_wb_wq;
- 	fsc->trunc_wq = alloc_workqueue("ceph-trunc", 0, 1);
--	if (fsc->trunc_wq == NULL)
-+	if (!fsc->trunc_wq)
- 		goto fail_pg_inv_wq;
- 
- 	/* set up mempools */
-@@ -674,26 +674,26 @@ static int __init init_caches(void)
- 				      __alignof__(struct ceph_inode_info),
- 				      SLAB_RECLAIM_ACCOUNT|SLAB_MEM_SPREAD|
- 				      SLAB_ACCOUNT, ceph_inode_init_once);
--	if (ceph_inode_cachep == NULL)
-+	if (!ceph_inode_cachep)
- 		return -ENOMEM;
- 
- 	ceph_cap_cachep = KMEM_CACHE(ceph_cap,
- 				     SLAB_RECLAIM_ACCOUNT|SLAB_MEM_SPREAD);
--	if (ceph_cap_cachep == NULL)
-+	if (!ceph_cap_cachep)
- 		goto bad_cap;
- 	ceph_cap_flush_cachep = KMEM_CACHE(ceph_cap_flush,
- 					   SLAB_RECLAIM_ACCOUNT|SLAB_MEM_SPREAD);
--	if (ceph_cap_flush_cachep == NULL)
-+	if (!ceph_cap_flush_cachep)
- 		goto bad_cap_flush;
- 
- 	ceph_dentry_cachep = KMEM_CACHE(ceph_dentry_info,
- 					SLAB_RECLAIM_ACCOUNT|SLAB_MEM_SPREAD);
--	if (ceph_dentry_cachep == NULL)
-+	if (!ceph_dentry_cachep)
- 		goto bad_dentry;
- 
- 	ceph_file_cachep = KMEM_CACHE(ceph_file_info, SLAB_MEM_SPREAD);
- 
--	if (ceph_file_cachep == NULL)
-+	if (!ceph_file_cachep)
- 		goto bad_file;
- 
- 	if ((error = ceph_fscache_register()))
-diff --git a/fs/ceph/xattr.c b/fs/ceph/xattr.c
-index 11263f102e4c..3542b2c364cf 100644
---- a/fs/ceph/xattr.c
-+++ b/fs/ceph/xattr.c
-@@ -777,7 +777,7 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
- 		spin_unlock(&ci->i_ceph_lock);
- 
- 		/* security module gets xattr while filling trace */
--		if (current->journal_info != NULL) {
-+		if (current->journal_info) {
- 			pr_warn_ratelimited("sync getxattr %p "
- 					    "during filling trace\n", inode);
- 			return -EBUSY;
-@@ -809,7 +809,7 @@ ssize_t __ceph_getxattr(struct inode *inode, const char *name, void *value,
- 
- 	memcpy(value, xattr->val, xattr->val_len);
- 
--	if (current->journal_info != NULL &&
-+	if (current->journal_info &&
- 	    !strncmp(name, XATTR_SECURITY_PREFIX, XATTR_SECURITY_PREFIX_LEN))
- 		ci->i_ceph_flags |= CEPH_I_SEC_INITED;
- out:
-@@ -1058,7 +1058,7 @@ int __ceph_setxattr(struct inode *inode, const char *name,
- 		up_read(&mdsc->snap_rwsem);
- 
- 	/* security module set xattr while filling trace */
--	if (current->journal_info != NULL) {
-+	if (current->journal_info) {
- 		pr_warn_ratelimited("sync setxattr %p "
- 				    "during filling trace\n", inode);
- 		err = -EBUSY;
-@@ -1108,7 +1108,7 @@ bool ceph_security_xattr_deadlock(struct inode *in)
- {
- 	struct ceph_inode_info *ci;
- 	bool ret;
--	if (in->i_security == NULL)
-+	if (!in->i_security)
- 		return false;
- 	ci = ceph_inode(in);
- 	spin_lock(&ci->i_ceph_lock);
--- 
-2.14.0
+> 2.14.0
+> 
