@@ -1,133 +1,59 @@
-From: Matt Benjamin <mbenjami@redhat.com>
-Subject: Re: multi-line comments
-Date: Tue, 22 Aug 2017 10:00:11 -0400
-Message-ID: <CAKOnar=HRAvH5xh412YL_WrtUn8m8bHy51rtaqtMs5GTuHYibw@mail.gmail.com>
-References: <CAJE9aOMyuw2dgnxRCbYwOB74C_ixMxT-f1DZB5HzyMXkeoL_2w@mail.gmail.com>
- <CAJ4mKGZ10RyY6HmDy3sf_5howHuhB=78meX_St0F5N+v75awrg@mail.gmail.com>
- <CALe9h7dN3ogwj80hYXAP2AyKpv8CGc_HK5a=ye+OsTjeqqeRDQ@mail.gmail.com>
- <CAC-Np1w9taokXhoqskA-j=AEZevMhLJJFj-vn7FDy_s1kASB+A@mail.gmail.com>
- <CALe9h7coEqdxprPQqyyFmp_N9Nt-418QU=TJiVTpackiQDx3HQ@mail.gmail.com> <CADRKj5R36FNy4Z6SYqa0sw+5HWk-84nXDTD3QpU_Tz9kGbBdmg@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: increasingly large packages and longer build times
+Date: Tue, 22 Aug 2017 16:09:36 +0200
+Message-ID: <d036108b-f38d-109a-5a87-8aa4542dd7fd@digiware.nl>
+References: <CAC-Np1yg062K==JMEQhRTVKRe7orS3YoXz9hcgfKH+xfiZBiww@mail.gmail.com>
+ <CALqRxCzmEN0UUD5iGcDw+iSp8+=cBmJpVa2Z=27fyVD_RWzRmw@mail.gmail.com>
+ <CAJ4mKGZ5eAvOTTDwAzoAjv2Ed0C3mb1E7PxQvphY85rXZy5Oow@mail.gmail.com>
+ <CAJE9aON9ELevTue_DXdcYnqBVO2LbTe8mthbytegbtyfLm+K7A@mail.gmail.com>
+ <71c7b782-6d7e-1e06-e889-bbbf9004ebfe@suse.cz>
+ <CAJE9aONTxPVcyOfoXDw7ZBQrgpWEXpE29b++cct1X816LVY3+w@mail.gmail.com>
+ <CAKOnarkVWxVXSrs+Kbuczie_ob3tDc7hMFRSXDG=5mLy26MeYA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f53.google.com ([74.125.83.53]:36192 "EHLO
-        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932523AbdHVOAM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Aug 2017 10:00:12 -0400
-Received: by mail-pg0-f53.google.com with SMTP id i12so115784460pgr.3
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Aug 2017 07:00:12 -0700 (PDT)
-In-Reply-To: <CADRKj5R36FNy4Z6SYqa0sw+5HWk-84nXDTD3QpU_Tz9kGbBdmg@mail.gmail.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:64745 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932510AbdHVOJj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 22 Aug 2017 10:09:39 -0400
+In-Reply-To: <CAKOnarkVWxVXSrs+Kbuczie_ob3tDc7hMFRSXDG=5mLy26MeYA@mail.gmail.com>
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
-Cc: John Spray <jspray@redhat.com>, Alfredo Deza <adeza@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, kefu chai <tchaikov@gmail.com>, Amit Kumar <amitkuma@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Matt Benjamin <mbenjami@redhat.com>, kefu chai <tchaikov@gmail.com>
+Cc: Nathan Cutler <ncutler@suse.cz>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Alfredo Deza <adeza@redhat.com>, Ken Dreyer <kdreyer@redhat.com>
 
-++yehuda, on preferring to be non-prescriptive;  there seem to me to
-be places where block or single-line c++ comments work better, and it
-is preferable for the developers maintaining a file to pick from the
-available options
-
-Matt
-
-On Mon, Aug 21, 2017 at 7:13 AM, Yehuda Sadeh-Weinraub
-<ysadehwe@redhat.com> wrote:
-> On Mon, Aug 21, 2017 at 12:49 PM, John Spray <jspray@redhat.com> wrote:
->> On Fri, Aug 18, 2017 at 10:18 PM, Alfredo Deza <adeza@redhat.com> wrote:
->>> On Fri, Aug 18, 2017 at 7:35 AM, John Spray <jspray@redhat.com> wrote:
->>>> On Thu, Aug 17, 2017 at 6:25 PM, Gregory Farnum <gfarnum@redhat.com> wrote:
->>>>> On Thu, Aug 17, 2017 at 4:22 AM, kefu chai <tchaikov@gmail.com> wrote:
->>>>>> hi Amit,
->>>>>>
->>>>>> i found that you started to encourage developers to use "/* */" for
->>>>>> multiple-lined comment while reviewing pull requests. IIUC, it's more
->>>>>> of a gray area, and sort of a personal preferences. so i don't
->>>>>> understand why we need to go this way. and i believe, in modern C++
->>>>>> practice, "//" is more common[0], and works better for developers. in
->>>>>> the sense that, it's more readable, conforms to C++ standards, and
->>>>>> works just fine with editors/tools.
->>>>>>
->>>>>
->>>>> Similarly, do we have a rule or guidance about contractions anywhere?
->>>>>
->>>>> I can see how that might be desirable for non-native english speakers,
->>>>> but it's not a rule of any kind that I'm aware of. Do we want it to
->>>>> be? (...perhaps I should add the ceph-china list to this CC).
+On 22-8-2017 15:52, Matt Benjamin wrote:
+> ++kefu
+> 
+> Matt
+> 
+> On Tue, Aug 22, 2017 at 9:35 AM, kefu chai <tchaikov@gmail.com> wrote:
+>> On Tue, Aug 22, 2017 at 4:27 PM, Nathan Cutler <ncutler@suse.cz> wrote:
+>>>> my main concern would be the downstream. how shall we accommodate the
+>>>> packaging of downstream? for example, what if the boost package
+>>>> maintainers of SuSE/fedora/debian/ubuntu are not ready to package the
+>>>> boost version we want to use in future?
 >>>>
->>>> Based on the discussion on https://github.com/ceph/ceph/pull/16705,
->>>> there doesn't seem to be much support for removing contractions.
->>>>
->>>> I sympathise with John W's original intent on that PR to make it
->>>> easier to sync up upstream docs with commercial products that might
->>>> have an IBM-ish style, but I don't think it makes sense to make the
->>>> change without making it a rule, and I think it's not something that's
->>>> desirable as a rule.
->>>>
->>>> I would welcome a style guide for our upstream docs though, so that we
->>>> could have a place to refer to for any rules we do want to have.
+>>>> but as long as we don't require newer boost to build, we are safe on
+>>>> debian and ubuntu at this moment. as boost 1.61 is required for
+>>>> building ceph, and both debian unstable and ubuntu artful package
+>>>> boost v1.62.
 >>>
->>> We do have a documentation style guide:
 >>>
->>>     https://github.com/ceph/ceph/blob/master/doc/start/documenting-ceph.rst#documentation-style-guide
->>>
->>> Most of the suggestions/rules there aren't really followed :(
->>> Hopefully with the new fixes that went in, that will change and
->>> prevent us from going astray again.
->>
->> I think that's more of a style guide for the documentation .rst source
->> code, I was thinking of a style guide for the content itself.
->>
->
-> Ceph style guide:
->
-> https://github.com/ceph/ceph/blob/master/CodingStyle
->
-> However, we don't follow it religiously, most don't know it exists I
-> think. Comments-wise, there's nothing explicit there, and the google
-> guide that we derive from is pretty lax. I don't think we should force
-> a specific comments style, it's annoying.
->
-> Yehuda
->
->
->> John
->>
->>>>
->>>> John
->>>>
->>>> 1. As I write that, I realise it's weird that in English we sometimes
->>>> use in- to mean opposite and sometimes not!  What a language...
->>>>
->>>>
->>>>> -Greg
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> The very latest cutting-edge versions of the distros may ship boost >= 1.61
+>>> but the stable versions most likely do not.
 
+For FreeBSD I use the ports version = 1.64.
+Thus far no problems.
 
+And since we are talking about boost....
 
--- 
+How do I prevent `git submodule ` from downloading all this Boost stuff
+that I'm not going to use it anyways?
+So downloading this massive git-tree over and over, is a waste of time
+and bandwidth.
 
---
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-821-5101
-fax.  734-769-8938
-cel.  734-216-5309
+thanx,
+--WjW
