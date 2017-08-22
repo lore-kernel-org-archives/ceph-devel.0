@@ -1,48 +1,31 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: needs-backport label on github/ceph/ceph
-Date: Tue, 22 Aug 2017 18:00:07 +0200
-Message-ID: <7f97669a-f05d-328b-a854-25f749742ccb@suse.cz>
-References: <CAJE9aONVUvVCuKEdrLxNf8Z1YEard8ZoT9wy+tdzgCn9UTQb-Q@mail.gmail.com>
- <CALe9h7cvEeD27eyL8rMTsbfwzXvX20RebMSDkBm+=F0kKzVBMA@mail.gmail.com>
+From: Oleg Kolosov <olekol@gmail.com>
+Subject: Matching shard to crush bucket in erasure coding
+Date: Tue, 22 Aug 2017 20:47:35 +0300
+Message-ID: <CAODUPsG=wnHdROuNvvCcxeDtahG2V2C24ttEETJtebCGnx6C8Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:55131 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751744AbdHVQAK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 22 Aug 2017 12:00:10 -0400
-In-Reply-To: <CALe9h7cvEeD27eyL8rMTsbfwzXvX20RebMSDkBm+=F0kKzVBMA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-oi0-f47.google.com ([209.85.218.47]:33769 "EHLO
+        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751572AbdHVRrg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Aug 2017 13:47:36 -0400
+Received: by mail-oi0-f47.google.com with SMTP id f11so193136894oic.0
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Aug 2017 10:47:36 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>, kefu chai <tchaikov@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On 08/22/2017 05:12 PM, John Spray wrote:
-> On Tue, Aug 22, 2017 at 4:09 PM, kefu chai <tchaikov@gmail.com> wrote:
->> i noticed that we have a new label named "needs-backport" [0]? could
->> you shed some light on how we are supposed to use it? i thought we
->> were going to cherry-pick all PRs with this label merged after the
->> luminous was forked. but seems we are still marking PRs should be
->> included by luminous with the "luminous" milestone. so i have no clues
->> now =(
-> 
-> I'm curious too -- I believe the authoriative way to mark something
-> for backport is in a tracker ticket, so a separate label probably
-> isn't needed?
+Hi
+I'm working on a new erasure code, different than the one implemented
+in ceph lrc plugin. I'm trying to understand how ceph lrc plugin
+allocates shards in a layer, but it's not clear from the code.
 
-Maybe it was added to accommodate/facilitate a "fast-track" backporting 
-process for the early stages of the luminous release cycle?
+For example, say I have a local group containing shards 0,1,2,5
+While 0,1,2 are data and 5 is parity. I'd like to place all of these
+shards in the same rack.
 
-ISTR that jewel v10.2.1 went very quickly and some of the backports did 
-not "cross all the t's and dot all the i's" wrt the sanctioned 
-backporting process. Maybe something like that is a possibility for 
-luminous as well? (I would welcome it.)
+Where in lrc .cc code  these shards, which are composing a single
+layer, are allocated to the same rack?
 
-It could work like this: if a PR is marked "needs-backport", the 
-developer who merges the PR would be responsible for ensuring that the 
-commits are cherry-picked to luminous and marking the tracker, if any, 
-"Resolved" with a note that the backport is already done.
-
-Nathan
+Thanks,
+Oleg
