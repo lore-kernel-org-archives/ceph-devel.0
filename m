@@ -1,57 +1,87 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: needs-backport label on github/ceph/ceph
-Date: Wed, 23 Aug 2017 11:35:17 +0800
-Message-ID: <CAJE9aOM=312hvBs9LjZXSBj9YgwaYbZ3F+RWoQTbFrpTGTm97Q@mail.gmail.com>
-References: <CAJE9aONVUvVCuKEdrLxNf8Z1YEard8ZoT9wy+tdzgCn9UTQb-Q@mail.gmail.com>
- <CALe9h7cvEeD27eyL8rMTsbfwzXvX20RebMSDkBm+=F0kKzVBMA@mail.gmail.com> <7f97669a-f05d-328b-a854-25f749742ccb@suse.cz>
+From: saumay agrawal <saumay.agrawal@gmail.com>
+Subject: Fwd: Ideas on the UI/UX improvement of ceph-mgr: Cluster Status Dashboard
+Date: Wed, 23 Aug 2017 11:48:17 +0530
+Message-ID: <CA+b5B09RWXJ+XarVeNLV7+taEB_EFoT0R7FHn0_3qyTthfFnig@mail.gmail.com>
+References: <CA+b5B08h7CALL-mC=O3PtFNhWeFQ113CVdEj-TNneZzy8TRVJg@mail.gmail.com>
+ <CA+b5B08Sf5jbqN4HqjL_yg8jtAV0DU2KqRhKG2ZGGBPTe2ci+w@mail.gmail.com>
+ <CAL6sUZZH7rte2eoD-9wec8r1qg0asyYTP9nTRHbDoTAszZV-Ww@mail.gmail.com> <CA+b5B0-sAVrdxy+apb01oKrm7WhrgxBo1xn7emD3_SYu6Gz+QA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f47.google.com ([209.85.218.47]:35910 "EHLO
-        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753142AbdHWDfS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 22 Aug 2017 23:35:18 -0400
-Received: by mail-oi0-f47.google.com with SMTP id g131so5444471oic.3
-        for <ceph-devel@vger.kernel.org>; Tue, 22 Aug 2017 20:35:18 -0700 (PDT)
-In-Reply-To: <7f97669a-f05d-328b-a854-25f749742ccb@suse.cz>
+Received: from mail-io0-f173.google.com ([209.85.223.173]:36699 "EHLO
+        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753238AbdHWGSi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Aug 2017 02:18:38 -0400
+Received: by mail-io0-f173.google.com with SMTP id p141so4072293iop.3
+        for <ceph-devel@vger.kernel.org>; Tue, 22 Aug 2017 23:18:38 -0700 (PDT)
+In-Reply-To: <CA+b5B0-sAVrdxy+apb01oKrm7WhrgxBo1xn7emD3_SYu6Gz+QA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: John Spray <jspray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, Aug 23, 2017 at 12:00 AM, Nathan Cutler <ncutler@suse.cz> wrote:
-> On 08/22/2017 05:12 PM, John Spray wrote:
->>
->> On Tue, Aug 22, 2017 at 4:09 PM, kefu chai <tchaikov@gmail.com> wrote:
->>>
->>> i noticed that we have a new label named "needs-backport" [0]? could
->>> you shed some light on how we are supposed to use it? i thought we
->>> were going to cherry-pick all PRs with this label merged after the
->>> luminous was forked. but seems we are still marking PRs should be
->>> included by luminous with the "luminous" milestone. so i have no clues
->>> now =(
->>
->>
->> I'm curious too -- I believe the authoriative way to mark something
->> for backport is in a tracker ticket, so a separate label probably
->> isn't needed?
->
->
-> Maybe it was added to accommodate/facilitate a "fast-track" backporting
-> process for the early stages of the luminous release cycle?
->
-> ISTR that jewel v10.2.1 went very quickly and some of the backports did not
-> "cross all the t's and dot all the i's" wrt the sanctioned backporting
-> process. Maybe something like that is a possibility for luminous as well? (I
-> would welcome it.)
->
-> It could work like this: if a PR is marked "needs-backport", the developer
-> who merges the PR would be responsible for ensuring that the commits are
-> cherry-picked to luminous and marking the tracker, if any, "Resolved" with a
-> note that the backport is already done.
+---------- Forwarded message ----------
+From: saumay agrawal <saumay.agrawal@gmail.com>
+Date: Wed, Aug 23, 2017 at 11:35 AM
+Subject: Re: Ideas on the UI/UX improvement of ceph-mgr: Cluster
+Status Dashboard
+To: nagarrajan raghunathan <nagu.raghu99@gmail.com>,
+ceph-users@ceph.com, Ceph Development <ceph-devel@vger.kernel.org>
 
-thank you, Nathan! that makes sense.
+
+Hi Nagarrajan,
+
+For graph prototypes you can point your browser to
+localhost:41000/perf_graph_prototypes/{perf counter}. In place of perf
+counter you can pass osd.op_latency, osd.loadavg, etc. You can find
+more of the perf counters at localhost:41000/get_perf_schema/ under
+the osd objects. You will be able to find the perf counter and its
+description there. These graphs work for the perf counters which give
+a time sequence of values.
+
+Also you can view the summary of how these graphs work, and how to
+access them, along with their sample snapshots, in the comments of PR
+https://github.com/ceph/ceph/pull/16621.
+
+Regards,
+Saumay.
+
+On Aug 22, 2017 11:57 PM, "nagarrajan raghunathan"
+<nagu.raghu99@gmail.com> wrote:
+
+Hi Saumay,
+            Could you please tell how to use this tool. For example
+say if i have ceph cluster running how do monitor using this tool. Any
+guideline would be great.
+
+On Tue, Aug 22, 2017 at 5:15 AM, saumay agrawal
+<saumay.agrawal@gmail.com> wrote:
+>
+> Hi,
+>
+> As a part of my project, I have been working on the visualisation of
+> the OSD performance on the dashboard. Based on the community feedback
+> I realised that the visualisation of perf counter values against the
+> first few stdevs was the most needed feature for performance graphs,
+> along with the visualisation of minimum and maximum values.
+>
+> For this, I have created a generalised prototype page, which shows the
+> prototypes of various graphs for a given performance counter. I also
+> added a separate page to the dashboard, which visualises the read and
+> write latency distribution of a ceph cluster.
+>
+> As of now, this is a PR at https://github.com/ceph/ceph/pull/16621.
+> Any suggestions are welcome.
+>
+> Thanks,
+> Saumay
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
 
 -- 
-Regards
-Kefu Chai
+Regards,
+Nagarrajan Raghunathan
