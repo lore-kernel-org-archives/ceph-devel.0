@@ -1,48 +1,49 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Matching shard to crush bucket in erasure coding
-Date: Wed, 23 Aug 2017 14:04:08 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1708231400590.20435@piezo.novalocal>
-References: <CAODUPsG=wnHdROuNvvCcxeDtahG2V2C24ttEETJtebCGnx6C8Q@mail.gmail.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: increasingly large packages and longer build times
+Date: Wed, 23 Aug 2017 08:53:58 -0600
+Message-ID: <CALqRxCz-56kb0PfihpVDnywj4t_4Si3FVeXupFiKgLhs3Q6CFQ@mail.gmail.com>
+References: <CAC-Np1yg062K==JMEQhRTVKRe7orS3YoXz9hcgfKH+xfiZBiww@mail.gmail.com>
+ <CALqRxCzmEN0UUD5iGcDw+iSp8+=cBmJpVa2Z=27fyVD_RWzRmw@mail.gmail.com>
+ <CAJ4mKGZ5eAvOTTDwAzoAjv2Ed0C3mb1E7PxQvphY85rXZy5Oow@mail.gmail.com> <CAJE9aON9ELevTue_DXdcYnqBVO2LbTe8mthbytegbtyfLm+K7A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:32865 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754034AbdHWOEL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Aug 2017 10:04:11 -0400
-In-Reply-To: <CAODUPsG=wnHdROuNvvCcxeDtahG2V2C24ttEETJtebCGnx6C8Q@mail.gmail.com>
+Received: from mail-vk0-f41.google.com ([209.85.213.41]:37434 "EHLO
+        mail-vk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754090AbdHWOyA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Aug 2017 10:54:00 -0400
+Received: by mail-vk0-f41.google.com with SMTP id r199so1200804vke.4
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Aug 2017 07:53:59 -0700 (PDT)
+In-Reply-To: <CAJE9aON9ELevTue_DXdcYnqBVO2LbTe8mthbytegbtyfLm+K7A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Oleg Kolosov <olekol@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: kefu chai <tchaikov@gmail.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Alfredo Deza <adeza@redhat.com>
 
-On Tue, 22 Aug 2017, Oleg Kolosov wrote:
-> Hi
-> I'm working on a new erasure code, different than the one implemented
-> in ceph lrc plugin. I'm trying to understand how ceph lrc plugin
-> allocates shards in a layer, but it's not clear from the code.
-> 
-> For example, say I have a local group containing shards 0,1,2,5
-> While 0,1,2 are data and 5 is parity. I'd like to place all of these
-> shards in the same rack.
-> 
-> Where in lrc .cc code  these shards, which are composing a single
-> layer, are allocated to the same rack?
+On Tue, Aug 22, 2017 at 1:01 AM, kefu chai <tchaikov@gmail.com> wrote:
+> my main concern would be the downstream. how shall we accommodate the
+> packaging of downstream? for example, what if the boost package
+> maintainers of SuSE/fedora/debian/ubuntu are not ready to package the
+> boost version we want to use in future?
 
-The EC code has to be carefully matched with a CRUSH rule that lays things 
-out properly.  This is the reason that the EC crush rules are tied 
-to the erasure code profiles and the plugin handles rule creation.
+Fedora has Boost 1.63.0 for a while, and f27 and f28 will have 1.64 or
+newer. I think we'll be ok there, because Jonathan Wakely tends to
+keep that very up-to-date.
 
-In the LRC case, you have a rule like
+This is just brainstorming, I have nothing concrete here: For the
+CentOS side, and for the RH Ceph Storage downstream layered product, I
+am thinking about building an entirely separate boost RPM and just let
+it override the system version that ships in RHEL 7. I've tested
+rebuilding boost-1.64.0-0.8.fc28.src.rpm on RHEL in mock and it
+worked. (I had to remove the fiber, numpy, and python3 pieces).
 
- take root
- choose 3 rack
- choose 5 osd
+For Debian and older Ubuntu LTSs, we could do something similar:
+rebuild the boost source package from unstable/artful and let those
+override the OS versions.
 
-to get a set of 15 shards, in groups of 5.  The LRC plugin has some logic 
-to put the original data shards in the first 3 or 4 shards of each of 
-those sets of 5, and the parity blocks in the remaing slots.  You'll want 
-to do something similar.  Bonus points if you can reuse the scheme that 
-LRC uses...
+> actually almost all ceph_test_* are linking against libceph-common.
+> but they are linking against libglobal and libos statically.
 
-sage
+Is that the root issue with the debuginfo size?
+
+- Ken
