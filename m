@@ -1,45 +1,62 @@
-From: Abhishek Lekshmanan <abhishek@suse.com>
-Subject: Re: Are we ready for Luminous?
-Date: Wed, 23 Aug 2017 16:00:56 +0200
-Message-ID: <87pobmqt7r.fsf@suse.com>
-References: <87shgir0cl.fsf@suse.com> <CAJE9aOMhuzp-VNX4t7DByqUz78HOLvxgR-p8waX_EdRsgtqBKw@mail.gmail.com>
+From: Abhishek Lekshmanan <alekshmanan@suse.de>
+Subject: Re: needs-backport label on github/ceph/ceph
+Date: Wed, 23 Aug 2017 16:02:54 +0200
+Message-ID: <87mv6qqt4h.fsf@suse.com>
+References: <CAJE9aONVUvVCuKEdrLxNf8Z1YEard8ZoT9wy+tdzgCn9UTQb-Q@mail.gmail.com> <CALe9h7cvEeD27eyL8rMTsbfwzXvX20RebMSDkBm+=F0kKzVBMA@mail.gmail.com> <7f97669a-f05d-328b-a854-25f749742ccb@suse.cz> <CAJE9aOM=312hvBs9LjZXSBj9YgwaYbZ3F+RWoQTbFrpTGTm97Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:59056 "EHLO
+Received: from smtp.nue.novell.com ([195.135.221.5]:52457 "EHLO
         smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754001AbdHWOA7 (ORCPT
+        with ESMTP id S1754034AbdHWOC4 (ORCPT
         <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Wed, 23 Aug 2017 10:00:59 -0400
-In-Reply-To: <CAJE9aOMhuzp-VNX4t7DByqUz78HOLvxgR-p8waX_EdRsgtqBKw@mail.gmail.com>
+        Wed, 23 Aug 2017 10:02:56 -0400
+In-Reply-To: <CAJE9aOM=312hvBs9LjZXSBj9YgwaYbZ3F+RWoQTbFrpTGTm97Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: Sage Weil <sweil@redhat.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Matt Benjamin <mbenjami@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Jason Dillaman <jdillama@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>, Nathan Cutler <ncutler@suse.cz>
+Cc: John Spray <jspray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
 kefu chai <tchaikov@gmail.com> writes:
 
-> On Wed, Aug 23, 2017 at 7:26 PM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
+> On Wed, Aug 23, 2017 at 12:00 AM, Nathan Cutler <ncutler@suse.cz> wrote:
+>> On 08/22/2017 05:12 PM, John Spray wrote:
+>>>
+>>> On Tue, Aug 22, 2017 at 4:09 PM, kefu chai <tchaikov@gmail.com> wrote:
+>>>>
+>>>> i noticed that we have a new label named "needs-backport" [0]? could
+>>>> you shed some light on how we are supposed to use it? i thought we
+>>>> were going to cherry-pick all PRs with this label merged after the
+>>>> luminous was forked. but seems we are still marking PRs should be
+>>>> included by luminous with the "luminous" milestone. so i have no clues
+>>>> now =(
+>>>
+>>>
+>>> I'm curious too -- I believe the authoriative way to mark something
+>>> for backport is in a tracker ticket, so a separate label probably
+>>> isn't needed?
 >>
->> Other than the existing PRs in https://github.com/ceph/ceph/milestone/10,
->> do we have anything else that really needs to go in for Luminous? Any
->> other blockers?
+>>
+>> Maybe it was added to accommodate/facilitate a "fast-track" backporting
+>> process for the early stages of the luminous release cycle?
+>>
+>> ISTR that jewel v10.2.1 went very quickly and some of the backports did not
+>> "cross all the t's and dot all the i's" wrt the sanctioned backporting
+>> process. Maybe something like that is a possibility for luminous as well? (I
+>> would welcome it.)
+>>
+>> It could work like this: if a PR is marked "needs-backport", the developer
+>> who merges the PR would be responsible for ensuring that the commits are
+>> cherry-picked to luminous and marking the tracker, if any, "Resolved" with a
+>> note that the backport is already done.
 >
-> and all tracker tickets whose "backport" has "luminous", and pending
-> on packport [0]. and all needs-backport PRs which are not yet
-> backported [1].
->
-> ---
-> [0] http://tracker.ceph.com/projects/rados/issues?utf8=✓&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%21&v%5Bstatus_id%5D%5B%5D=3&f%5B%5D=cf_2&op%5Bcf_2%5D=%7E&v%5Bcf_2%5D%5B%5D=luminous&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&c%5B%5D=category&c%5B%5D=fixed_version&c%5B%5D=cf_3&group_by=&t%5B%5D=
+> thank you, Nathan! that makes sense.
 
-Staged a backport for the ones which are already in the Pending Backport
-stage (The ones in pending review state are still awaiting comments etc
-in a few)
-> [1] https://github.com/ceph/ceph/pulls?utf8=✓&q=is%3Apr%20label%3Aneeds-backport%20.
-> quite a few of PRs in this list have been backported.
-
-Just started creating issues for these so that they are easier to track
+Can we ensure that we always have a tracker issue when there is a
+pending backport label, makes it easier to track these.
 
 -- 
-Abhishek
+Abhishek Lekshmanan
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
+HRB 21284 (AG Nürnberg)
