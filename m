@@ -1,36 +1,62 @@
-From: David Zafman <dzafman@redhat.com>
-Subject: Backport
-Date: Wed, 23 Aug 2017 14:01:23 -0700
-Message-ID: <e0de34c2-7eb8-e888-f6ff-fdc6e6c55f3b@redhat.com>
+From: Leonardo Vaz <lvaz@redhat.com>
+Subject: Re: Ceph Tech Talk Cancelled
+Date: Wed, 23 Aug 2017 18:01:17 -0300
+Message-ID: <20170823210117.GB22195@oops.local>
+References: <20170823150455.GA15355@oops.local>
+ <CAJACTudkAK4abx4710_WSqCSjXBGV_hbzECMZnW0hKqYcgmo2Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53298 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37938 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932407AbdHWVB0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 23 Aug 2017 17:01:26 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id A907C80B2A
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Aug 2017 21:01:26 +0000 (UTC)
-Content-Language: en-US
+        id S932407AbdHWVBZ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 23 Aug 2017 17:01:25 -0400
+Content-Disposition: inline
+In-Reply-To: <CAJACTudkAK4abx4710_WSqCSjXBGV_hbzECMZnW0hKqYcgmo2Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Xuehan Xu <xxhdx1985126@gmail.com>
+Cc: Ceph Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
+On Thu, Aug 24, 2017 at 12:04:37AM +0800, Xuehan Xu wrote:
+> Hi, Leonardo
+> 
+> Will there be a link for September's CDM in
+> http://tracker.ceph.com/projects/ceph/wiki/Planning?
 
-Sage,
+Yes, I must post the reminder next week.
 
+> And when will the video record of August's CDM be posted in youtube?
 
-Should we backport http://tracker.ceph.com/issues/20730?  It was removal 
-of the code to warn about OSDs space utilization differences.
+It's on the Todo list Xuehan. ;-)
 
-It won't backport with a cherry-pick because in master the code moved 
-then was removed.
+Kindest regards,
 
+Leo
 
-David
+> 
+> Thank you:-)
+> 
+> On 23 August 2017 at 23:04, Leonardo Vaz <lvaz@redhat.com> wrote:
+> > Hey Cephers,
+> >
+> > Sorry for the short notice, but the Ceph Tech Talk for August (scheduled
+> > for today) has been cancelled.
+> >
+> > Kindest regards,
+> >
+> > Leo
+> >
+> > --
+> > Leonardo Vaz
+> > Ceph Community Manager
+> > Open Source and Standards Team
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-
+-- 
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
