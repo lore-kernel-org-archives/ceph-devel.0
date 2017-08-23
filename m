@@ -1,69 +1,56 @@
-From: Linux Chips <linux.chips@gmail.com>
-Subject: Re: High memory usage kills OSD while peering
-Date: Wed, 23 Aug 2017 15:21:54 +0300
-Message-ID: <cf976b97-5173-cf89-010f-a3d492944304@gmail.com>
-References: <07113ad5-a799-5232-c617-81f323ce4038@gmail.com>
- <CAJ4mKGa6Nt1Eic9gk=SMbRufUCPnEcGijgJj-K8vHQP7A=HQKw@mail.gmail.com>
- <15fa2de0-27ad-cc51-6a6c-f306b9f330d2@gmail.com>
- <CAFehDbCzt=Ezffz+D7QQNM4PaPaDTJqU+dm1AhjmNHjw1W1FcA@mail.gmail.com>
- <alpine.DEB.2.11.1708222230080.17029@piezo.novalocal>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: Are we ready for Luminous?
+Date: Wed, 23 Aug 2017 21:11:29 +0800
+Message-ID: <CAJE9aOMhuzp-VNX4t7DByqUz78HOLvxgR-p8waX_EdRsgtqBKw@mail.gmail.com>
+References: <87shgir0cl.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:36600 "EHLO
-        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753904AbdHWMV5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Aug 2017 08:21:57 -0400
-Received: by mail-wm0-f44.google.com with SMTP id z132so14418566wmg.1
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Aug 2017 05:21:57 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1708222230080.17029@piezo.novalocal>
-Content-Language: en-US
+Received: from mail-oi0-f51.google.com ([209.85.218.51]:35877 "EHLO
+        mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753915AbdHWNLa (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Aug 2017 09:11:30 -0400
+Received: by mail-oi0-f51.google.com with SMTP id g131so498674oic.3
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Aug 2017 06:11:30 -0700 (PDT)
+In-Reply-To: <87shgir0cl.fsf@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Mustafa Muhammad <mustafa1024m@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Abhishek Lekshmanan <abhishek@suse.com>
+Cc: Sage Weil <sweil@redhat.com>, Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Matt Benjamin <mbenjami@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Jason Dillaman <jdillama@redhat.com>, John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 08/23/2017 01:33 AM, Sage Weil wrote:
-> One other trick that has been used here: if you look inside the PG
-> directories on the OSDs and find that they are mostly empty then it's
-> possible some of the memory and peering overhead is related to
-> empty and useless PG instances on the wrong OSDs.  You can write a script
-> to find empty directories (or ones that only contain the single pgmeta
-> object with a mostly-empty name) and remove them (using
-> ceph-objectstore-tool).  (For safety I'd recommend doing
-> ceph-objectstore-tool export first, just in case there is some useful
-> metadata there.)
-> 
-> That will only help if most of the pg dirs look empty, though.  If so,
-> it's worth a shot!
-> 
-> The other thing we once did was use a kludge patch to trim the
-> past_intervals metadata, which was respnosible for most of the memory
-> usage.  I can't tell from the profile in this thread if that is the case
-> or not.  There is a patch floating around in git somewhere that can be
-> reused if it looks like that is the thing consuming the memory.
-> 
-> sage
-> 
-> 
+On Wed, Aug 23, 2017 at 7:26 PM, Abhishek Lekshmanan <abhishek@suse.com> wr=
+ote:
+>
+> Other than the existing PRs in https://github.com/ceph/ceph/milestone/10,
+> do we have anything else that really needs to go in for Luminous? Any
+> other blockers?
 
-we ll try the empty pg search. not sure how much is there, but i 
-randomly checked and found a few.
+and all tracker tickets whose "backport" has "luminous", and pending
+on packport [0]. and all needs-backport PRs which are not yet
+backported [1].
 
-as for the "kludge" patch, where can I find it. I searched the git repo, 
-but could not identify it. did not know what to look for specifically.
-also, what would we need to better know if the patch would be useful?
-e.g. if we need another/more mem profiling.
+---
+[0] http://tracker.ceph.com/projects/rados/issues?utf8=3D=E2=9C=93&set_filt=
+er=3D1&f%5B%5D=3Dstatus_id&op%5Bstatus_id%5D=3D%21&v%5Bstatus_id%5D%5B%5D=
+=3D3&f%5B%5D=3Dcf_2&op%5Bcf_2%5D=3D%7E&v%5Bcf_2%5D%5B%5D=3Dluminous&f%5B%5D=
+=3D&c%5B%5D=3Dproject&c%5B%5D=3Dtracker&c%5B%5D=3Dstatus&c%5B%5D=3Dpriority=
+&c%5B%5D=3Dsubject&c%5B%5D=3Dassigned_to&c%5B%5D=3Dupdated_on&c%5B%5D=3Dcat=
+egory&c%5B%5D=3Dfixed_version&c%5B%5D=3Dcf_3&group_by=3D&t%5B%5D=3D
+[1] https://github.com/ceph/ceph/pulls?utf8=3D=E2=9C=93&q=3Dis%3Apr%20label=
+%3Aneeds-backport%20.
+quite a few of PRs in this list have been backported.
 
-we installed a test cluster of 4 nodes and replicated the issue there, 
-and we are testing various scenarios there. if any one cares to 
-replicate it i can elaborate on the steps.
-
-if all failed, do you think moving pgs out of the current dir is safe? 
-we are trying to test it, but we ll never be sure 100%
-
-thanks
-ali
+>
+> Thanks,
+> Abhishek
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
+
+--=20
+Regards
+Kefu Chai
