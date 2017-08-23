@@ -1,17 +1,17 @@
 From: Xuehan Xu <xxhdx1985126@gmail.com>
-Subject: (unknown)
-Date: Wed, 23 Aug 2017 15:23:26 +0800
-Message-ID: <CAJACTud_802smkfv5mkLaBsaMtMbV7oVRnt=q6D-cg82mm50SQ@mail.gmail.com>
+Subject: Extensive attributes not getting copied when flushing HEAD objects
+ from cache pool to base pool.
+Date: Wed, 23 Aug 2017 15:24:53 +0800
+Message-ID: <CAJACTuf_PmJvQVvbMb2UeXugKRd9dhLRVpz7-DzSr3=-UHgv-g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f54.google.com ([209.85.218.54]:34657 "EHLO
-        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753341AbdHWHX1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Aug 2017 03:23:27 -0400
-Received: by mail-oi0-f54.google.com with SMTP id j144so8807884oib.1
-        for <ceph-devel@vger.kernel.org>; Wed, 23 Aug 2017 00:23:27 -0700 (PDT)
-Subject: 
+Received: from mail-oi0-f47.google.com ([209.85.218.47]:36408 "EHLO
+        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753318AbdHWHYy (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 23 Aug 2017 03:24:54 -0400
+Received: by mail-oi0-f47.google.com with SMTP id g131so8788048oic.3
+        for <ceph-devel@vger.kernel.org>; Wed, 23 Aug 2017 00:24:54 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
