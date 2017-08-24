@@ -1,370 +1,97 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Extensive attributes not getting copied when flushing HEAD
- objects from cache pool to base pool.
-Date: Thu, 24 Aug 2017 13:20:15 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1708241319280.20435@piezo.novalocal>
-References: <CAJACTuf_PmJvQVvbMb2UeXugKRd9dhLRVpz7-DzSr3=-UHgv-g@mail.gmail.com> <CAJACTuczuaMokWTkBFmr1um-3k5DuEQ5ZXRm+BqkJ52F_c22sQ@mail.gmail.com> <CAJACTudxBVMtdDLbMqCtCtYm--qA8xHygO8RxA80Uy66C_iavg@mail.gmail.com> <CAJACTuckTMrtVG55eM8wLrzL-F=10oR_GeZq8kC0hGJaV5V89w@mail.gmail.com>
- <alpine.DEB.2.11.1708231602050.20435@piezo.novalocal> <CAJACTud5zsa4zEYwBBaO3P7YdN1yEHQ-7LV6GLWodeYmce+8xg@mail.gmail.com> <alpine.DEB.2.11.1708231646250.20435@piezo.novalocal> <CAJACTufbauYYCDhnpkkZeF0Laef6WiGCx=GDAhhgkbLcptBN1g@mail.gmail.com>
+Subject: Re: increasingly large packages and longer build times
+Date: Thu, 24 Aug 2017 13:36:47 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1708241327080.20435@piezo.novalocal>
+References: <CAC-Np1yg062K==JMEQhRTVKRe7orS3YoXz9hcgfKH+xfiZBiww@mail.gmail.com> <CALqRxCzmEN0UUD5iGcDw+iSp8+=cBmJpVa2Z=27fyVD_RWzRmw@mail.gmail.com> <CAJ4mKGZ5eAvOTTDwAzoAjv2Ed0C3mb1E7PxQvphY85rXZy5Oow@mail.gmail.com> <CAJE9aON9ELevTue_DXdcYnqBVO2LbTe8mthbytegbtyfLm+K7A@mail.gmail.com>
+ <71c7b782-6d7e-1e06-e889-bbbf9004ebfe@suse.cz> <CAJE9aONTxPVcyOfoXDw7ZBQrgpWEXpE29b++cct1X816LVY3+w@mail.gmail.com> <CAC-Np1w22udazP7Pg0PFqgRj+tEOFiRwXncQNVNigPaZpBUejQ@mail.gmail.com> <CAJE9aOMXRGU0L3z_LaMYgX3voDNLuvy5++W3p3Pon+Rbq7Gyug@mail.gmail.com>
+ <CAC-Np1zLsgWG=PznwRtFh8tSkh8Z-xc7T+NeBYQrLQBizjiLhA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38690 "EHLO
+Received: from cobra.newdream.net ([66.33.216.30]:38765 "EHLO
         cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751242AbdHXNUS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Aug 2017 09:20:18 -0400
-In-Reply-To: <CAJACTufbauYYCDhnpkkZeF0Laef6WiGCx=GDAhhgkbLcptBN1g@mail.gmail.com>
+        with ESMTP id S1751140AbdHXNgu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Aug 2017 09:36:50 -0400
+In-Reply-To: <CAC-Np1zLsgWG=PznwRtFh8tSkh8Z-xc7T+NeBYQrLQBizjiLhA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xuehan Xu <xxhdx1985126@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>
+Cc: kefu chai <tchaikov@gmail.com>, Nathan Cutler <ncutler@suse.cz>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Ken Dreyer <kdreyer@redhat.com>
 
-On Thu, 24 Aug 2017, Xuehan Xu wrote:
-> Hi, Sage.
+On Thu, 24 Aug 2017, Alfredo Deza wrote:
+> On Thu, Aug 24, 2017 at 4:41 AM, kefu chai <tchaikov@gmail.com> wrote:
+> > On Wed, Aug 23, 2017 at 2:58 AM, Alfredo Deza <adeza@redhat.com> wrote:
+> >> On Tue, Aug 22, 2017 at 9:35 AM, kefu chai <tchaikov@gmail.com> wrote:
+> >>> On Tue, Aug 22, 2017 at 4:27 PM, Nathan Cutler <ncutler@suse.cz> wrote:
+> >>>>> my main concern would be the downstream. how shall we accommodate the
+> >>>>> packaging of downstream? for example, what if the boost package
+> >>>>> maintainers of SuSE/fedora/debian/ubuntu are not ready to package the
+> >>>>> boost version we want to use in future?
+> >>>>>
+> >>>>> but as long as we don't require newer boost to build, we are safe on
+> >>>>> debian and ubuntu at this moment. as boost 1.61 is required for
+> >>>>> building ceph, and both debian unstable and ubuntu artful package
+> >>>>> boost v1.62.
+> >>>>
+> >>>>
+> >>>> The very latest cutting-edge versions of the distros may ship boost >= 1.61
+> >>>> but the stable versions most likely do not.
+> >>>
+> >>> yeah. but, IIRC, debian stable does not accepts new packages unless
+> >>> they contain critical bug fixes. the new packages will go to the
+> >>> unstable or experimental distribution first. so, presumably, debian
+> >>> will be fine. guess ubuntu is using similar strategy for including
+> >>> packages in its LTS distros.
+> >>
+> >> Why are you concerned with distros and the availability to have a
+> >> package at the version that we need?
+> >>
+> >> We publish our own repos, where we could have whatever boost version
+> >> we need. Distro package maintainers have to
+> >> decide what they can or can't do. For us it shouldn't matter.
+> >>
+> >
+> > i think it matters. and i believe it'd be desirable if Ceph can be
+> > easier for downstream to package. if the downstream finds that Ceph is
+> > too difficult to package, and give up, that's surely not the end of
+> > the world. but it could decrease the popularity level of ceph, and in
+> > long term, it might hurt Ceph.
 > 
-> It seems that, when calculating a clone object's bytes, the amount of
-> data recorded in clone_overlap is subtracted from the clone object's
-> size, as demonstrated in SnapSet::get_clone_bytes. This seems to be
-> right when the underlying ObjectStore is using COW clone, but, for
-> ObjectStores like filestore, this seems not to make sense since all
-> the object's data is copied. Is this right?
+> I fully agree here Kefu, but we don't make it easier by embedding
+> libraries! Those need to
+> get removed in distros. Most distros will *not* allow embedding
+> dependencies like we do. That means that someone (probably
+> a package maintainer) will have to remove these, figure out what
+> versions are needed, and attempt to make it
+> work with whatever that distro version will provide.
 
-Right.  It was done that way when we were targetting FileStore on top of 
-btrfs, which would do the copy-on-write. BlueStore does it now too, so we 
-probably want to preserve the behavior.
+There are several categories here:
+
+Yes:
+- A bunch of stuff we embed can definitely be separated out; we embedded 
+only because distros didn't have packages yet (e.g., zstd).  As soon as 
+they are packages the submodules can be removed.
+
+Maybe:
+- The big one, though, is boost, which is mostly headers... only a *tiny* 
+bit of code can be dynamically loaded, so there is minimal benefit to 
+using the distro package... except that 'git clone' and the build are 
+slightly faster. We could use a more up to date distro package, but we 
+won't be able to put it in el7.  I worry that cases like this will be 
+problematic: even if we build the updated package, it may be undesireable 
+to require users to install a newer version on their system.
+
+No:
+- Then there is stuff that's fast-moving and new and unlikely to be 
+helpful if separated out (spdk, dpdk).  The distro packages will never be 
+up to date.  I'm not sure they even have any dynamically-linkable code... 
+would have to check.
+
+- And then rocksdb and civetweb are truly embedded. We sometimes have to 
+carry modifications so it is a bad idea to use a distro package (our 
+modifications may be incompatible with other users on the system).
+
+Note that although distros complain about static linking, they have never 
+actually taken a stand on the issue with Ceph.  *shrug*
 
 sage
-
-
- > 
-> Thank you:-)
-> 
-> On 24 August 2017 at 00:54, Sage Weil <sage@newdream.net> wrote:
-> > On Thu, 24 Aug 2017, Xuehan Xu wrote:
-> >> Hi, sage.
-> >>
-> >> Thanks for your reply:-)
-> >>
-> >> Actually, our problem is as follows: we are trying to backup the rbd
-> >> data in a ceph cluster which is cache-tier enabled using "rbd
-> >> export-diff", however, due to the missing of some clone overlap, the
-> >> export-diff operation can't be right.
-> >>
-> >> After debugging, we found that there are two reasons for this missing,
-> >> one of which is as mentioned in this thread:
-> >> http://tracker.ceph.com/issues/21072, which would led to the overlap
-> >> recorded in the extensive attrs not to be "copied" to the base tier.
-> >> And when we try to fix it, we found that the "_" policy is in our way,
-> >> because the clone overlap is stored in "snapset" attr which has a non
-> >> "_" prefixed name, and even if we modify the code to ignore the "_"
-> >> policy when getting the extensive attrs, a "_" will be added when
-> >> storing them into the base tier, which would make the following
-> >> "list-snaps" operation not able to find the clone overlap.
-> >
-> > Okay.  The fix will need to explicitly copy the overlap metadata as part
-> > of copy-get, though... not the _ attr(s).  Those are managed locally in
-> > the pool and not meant to be copied across pools (you'll get all sorts of
-> > bugs if you try to do that!).
-> >
-> >> And the other reason that made the export-diff operate incorrectly is
-> >> as described in http://tracker.ceph.com/issues/20896. To fix this, we
-> >> are planning to add a "cache_clone_overlap" in SnapSet to track the
-> >> cache stats while leaving the orignal "clone_overlap" to track
-> >> modifications to the object. Is this the right way to go?
-> >
-> > I see.  I think that would work.  It might make sense to take a fresh look
-> > at what the cache stats are, though, to see if it is possible to get rid
-> > of that condition and avoiding maintaining a
-> > duplicate-but-slightly-different structure just for the cache tier.  I
-> > don't like the conditional behavior there... it really seems like
-> > clone_overlap should not vary between the cache and base tiers, and any
-> > adjustments for missing clones should happen only with the stats
-> > calculation but not with clone_overlap itself.
-> >
-> >
-> >> By the way, last month, when trying to fix the bug:
-> >> http://tracker.ceph.com/issues/17445, you asked for a test case in
-> >> master branch to confirm that master doesn't have the same bug. I've
-> >> submitted that test case in the PR:
-> >> https://github.com/ceph/ceph/pull/17017 and cherry-pick it into PR:
-> >> https://github.com/ceph/ceph/pull/16355. I'm very sorry for taking so
-> >> long, I was very busy during the past month trying to solve the above
-> >> problems. Could you help me review it when you are free, please?
-> >
-> > Thanks!
-> > sage
-> >
-> >
-> >>
-> >> Thanks very much:-)
-> >>
-> >> On 24 August 2017 at 00:07, Sage Weil <sage@newdream.net> wrote:
-> >> > On Wed, 23 Aug 2017, Xuehan Xu wrote:
-> >> >> Hi, everyone.
-> >> >>
-> >> >> In ReplicatedPG::_write_copy_chunk method, I saw the following code:
-> >> >>
-> >> >> if (!cop->temp_cursor.attr_complete) {
-> >> >>     t->touch(cop->results.temp_oid);
-> >> >>     for (map<string, bufferlist>::iterator p = cop->attrs.begin();
-> >> >>     p != cop->attrs.end(); ++p) {
-> >> >>     cop->results.attrs[string("_") + p->first] = p->second;
-> >> >>     t->setattr(cop->results.temp_oid, string("_") + p->first,
-> >> >>        p->second);
-> >> >> }
-> >> >>     cop->attrs.clear();
-> >> >> }
-> >> >>
-> >> >> It seems that user specified attrs are prefixed by "_", but why add
-> >> >> "_" here, in ReplicatedPG::_write_copy_chunk? It seems that this
-> >> >> method is used for copying objects in the RADOS cluster,.
-> >> >
-> >> > That is by design.  The non-_ attributes are managed locally.
-> >> >
-> >> > In this case, the clone_overlap is not preserved because there is no code
-> >> > to attempt to preserve it across the cache tier.  (And blindly copying the
-> >> > _ attribute wouldn't work.)
-> >> >
-> >> > I'm not sure what the issues would be with passing that metadata across
-> >> > the promote and flush operations...  I imagine it will be a bit fragile,
-> >> > though.
-> >> >
-> >> > Is this something that is really worth fixing?
-> >> >
-> >> > sage
-> >> >
-> >> >
-> >> >>
-> >> >> On 23 August 2017 at 15:40, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
-> >> >> > It seems that when calling ReplicatedPG::getattrs_maybe_cache in
-> >> >> > ReplicatedPG::fill_in_copy_get, "user_only" should be false. Is this
-> >> >> > right?
-> >> >> >
-> >> >> > On 23 August 2017 at 15:25, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
-> >> >> >> I submitted an issue for this:
-> >> >> >> http://tracker.ceph.com/issues/21072?next_issue_id=21071
-> >> >> >>
-> >> >> >> On 23 August 2017 at 15:24, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
-> >> >> >>> Hi, everyone.
-> >> >> >>>
-> >> >> >>> Recently, we did a test as follows:
-> >> >> >>>
-> >> >> >>> We enabled cache tier and added a cache pool "vms_back_cache" on top
-> >> >> >>> of the base pool "vms_back". we first created an object, and then
-> >> >> >>> created a snap in the base pool and writing to that object again,
-> >> >> >>> which would make the object be promoted into the cache pool. At this
-> >> >> >>> time, we used "ceph-objectstore-tool" to dump the object, and the
-> >> >> >>> result is as follows:
-> >> >> >>>
-> >> >> >>> {
-> >> >> >>>     "id": {
-> >> >> >>>         "oid": "test.obj.6",
-> >> >> >>>         "key": "",
-> >> >> >>>         "snapid": -2,
-> >> >> >>>         "hash": 750422257,
-> >> >> >>>         "max": 0,
-> >> >> >>>         "pool": 11,
-> >> >> >>>         "namespace": "",
-> >> >> >>>         "max": 0
-> >> >> >>>     },
-> >> >> >>>     "info": {
-> >> >> >>>         "oid": {
-> >> >> >>>             "oid": "test.obj.6",
-> >> >> >>>             "key": "",
-> >> >> >>>             "snapid": -2,
-> >> >> >>>             "hash": 750422257,
-> >> >> >>>             "max": 0,
-> >> >> >>>             "pool": 11,
-> >> >> >>>             "namespace": ""
-> >> >> >>>         },
-> >> >> >>>         "version": "5010'5",
-> >> >> >>>         "prior_version": "4991'3",
-> >> >> >>>         "last_reqid": "client.175338.0:1",
-> >> >> >>>         "user_version": 5,
-> >> >> >>>         "size": 4194303,
-> >> >> >>>         "mtime": "2017-08-23 15:09:03.459892",
-> >> >> >>>         "local_mtime": "2017-08-23 15:09:03.461111",
-> >> >> >>>         "lost": 0,
-> >> >> >>>         "flags": 4,
-> >> >> >>>         "snaps": [],
-> >> >> >>>         "truncate_seq": 0,
-> >> >> >>>         "truncate_size": 0,
-> >> >> >>>         "data_digest": 4294967295,
-> >> >> >>>         "omap_digest": 4294967295,
-> >> >> >>>         "watchers": {}
-> >> >> >>>     },
-> >> >> >>>     "stat": {
-> >> >> >>>         "size": 4194303,
-> >> >> >>>         "blksize": 4096,
-> >> >> >>>         "blocks": 8200,
-> >> >> >>>         "nlink": 1
-> >> >> >>>     },
-> >> >> >>>     "SnapSet": {
-> >> >> >>>         "snap_context": {
-> >> >> >>>             "seq": 13,
-> >> >> >>>             "snaps": [
-> >> >> >>>                 13
-> >> >> >>>             ]
-> >> >> >>>         },
-> >> >> >>>         "head_exists": 1,
-> >> >> >>>         "clones": [
-> >> >> >>>             {
-> >> >> >>>                 "snap": 13,
-> >> >> >>>                 "size": 4194303,
-> >> >> >>>                 "overlap": "[0~100,115~4194188]"
-> >> >> >>>             }
-> >> >> >>>         ]
-> >> >> >>>     }
-> >> >> >>> }
-> >> >> >>>
-> >> >> >>> Then we did cache-flush and cache-evict to flush that object down to
-> >> >> >>> the base pool, and, again, used "ceph-objectstore-tool" to dump the
-> >> >> >>> object in the base pool:
-> >> >> >>>
-> >> >> >>> {
-> >> >> >>>     "id": {
-> >> >> >>>         "oid": "test.obj.6",
-> >> >> >>>         "key": "",
-> >> >> >>>         "snapid": -2,
-> >> >> >>>         "hash": 750422257,
-> >> >> >>>         "max": 0,
-> >> >> >>>         "pool": 10,
-> >> >> >>>         "namespace": "",
-> >> >> >>>         "max": 0
-> >> >> >>>     },
-> >> >> >>>     "info": {
-> >> >> >>>         "oid": {
-> >> >> >>>             "oid": "test.obj.6",
-> >> >> >>>             "key": "",
-> >> >> >>>             "snapid": -2,
-> >> >> >>>             "hash": 750422257,
-> >> >> >>>             "max": 0,
-> >> >> >>>             "pool": 10,
-> >> >> >>>             "namespace": ""
-> >> >> >>>         },
-> >> >> >>>         "version": "5015'4",
-> >> >> >>>         "prior_version": "4991'2",
-> >> >> >>>         "last_reqid": "osd.34.5013:1",
-> >> >> >>>         "user_version": 5,
-> >> >> >>>         "size": 4194303,
-> >> >> >>>         "mtime": "2017-08-23 15:09:03.459892",
-> >> >> >>>         "local_mtime": "2017-08-23 15:10:48.122138",
-> >> >> >>>         "lost": 0,
-> >> >> >>>         "flags": 52,
-> >> >> >>>         "snaps": [],
-> >> >> >>>         "truncate_seq": 0,
-> >> >> >>>         "truncate_size": 0,
-> >> >> >>>         "data_digest": 163942140,
-> >> >> >>>         "omap_digest": 4294967295,
-> >> >> >>>         "watchers": {}
-> >> >> >>>     },
-> >> >> >>>     "stat": {
-> >> >> >>>         "size": 4194303,
-> >> >> >>>         "blksize": 4096,
-> >> >> >>>         "blocks": 8200,
-> >> >> >>>         "nlink": 1
-> >> >> >>>     },
-> >> >> >>>     "SnapSet": {
-> >> >> >>>         "snap_context": {
-> >> >> >>>             "seq": 13,
-> >> >> >>>             "snaps": [
-> >> >> >>>                 13
-> >> >> >>>             ]
-> >> >> >>>         },
-> >> >> >>>         "head_exists": 1,
-> >> >> >>>         "clones": [
-> >> >> >>>             {
-> >> >> >>>                 "snap": 13,
-> >> >> >>>                 "size": 4194303,
-> >> >> >>>                 "overlap": "[]"
-> >> >> >>>             }
-> >> >> >>>         ]
-> >> >> >>>     }
-> >> >> >>> }
-> >> >> >>>
-> >> >> >>> As is shown, the "overlap" field is empty.
-> >> >> >>> In the osd log, we found the following records:
-> >> >> >>>
-> >> >> >>> 2017-08-23 12:46:36.083014 7f675c704700 20 osd.0 pg_epoch: 19 pg[3.3(
-> >> >> >>> v 15'2 (0'0,15'2] local-les=15 n=2 ec=14 les/c/f 15/15/0 14/14/14)
-> >> >> >>> [0,2,1] r=0 lpr=14 crt=0'0 lcod 15'1 mlcod 15'1 active+clean]  got
-> >> >> >>> attrs
-> >> >> >>> 2017-08-23 12:46:36.083021 7f675c704700 15
-> >> >> >>> filestore(/home/xuxuehan/github-xxh-fork/ceph/src/dev/osd0) read
-> >> >> >>> 3.3_head/#3:dd4db749:test-rados-api-xxh02v.ops.corp.qihoo.net-10886-3::foo:head#
-> >> >> >>> 0~8
-> >> >> >>> 2017-08-23 12:46:36.083398 7f675c704700 10
-> >> >> >>> filestore(/home/xuxuehan/github-xxh-fork/ceph/src/dev/osd0)
-> >> >> >>> FileStore::read
-> >> >> >>> 3.3_head/#3:dd4db749:test-rados-api-xxh02v.ops.corp.qihoo.net-10886-3::foo:head#
-> >> >> >>> 0~8/8
-> >> >> >>> 2017-08-23 12:46:36.083414 7f675c704700 20 osd.0 pg_epoch: 19 pg[3.3(
-> >> >> >>> v 15'2 (0'0,15'2] local-les=15 n=2 ec=14 les/c/f 15/15/0 14/14/14)
-> >> >> >>> [0,2,1] r=0 lpr=14 crt=0'0 lcod 15'1 mlcod 15'1 active+clean]  got
-> >> >> >>> data
-> >> >> >>> 2017-08-23 12:46:36.083444 7f675c704700 20 osd.0 pg_epoch: 19 pg[3.3(
-> >> >> >>> v 15'2 (0'0,15'2] local-les=15 n=2 ec=14 les/c/f 15/15/0 14/14/14)
-> >> >> >>> [0,2,1] r=0 lpr=14 crt=0'0 lcod 15'1 mlcod 15'1 active+clean]
-> >> >> >>> cursor.is_complete=0 0 attrs 8 bytes 0 omap header bytes 0 omap data
-> >> >> >>> bytes in 0 keys 0 reqids
-> >> >> >>> 2017-08-23 12:46:36.083457 7f675c704700 10 osd.0 pg_epoch: 19 pg[3.3(
-> >> >> >>> v 15'2 (0'0,15'2] local-les=15 n=2 ec=14 les/c/f 15/15/0 14/14/14)
-> >> >> >>> [0,2,1] r=0 lpr=14 crt=0'0 lcod 15'1 mlcod 15'1 active+clean]
-> >> >> >>> dropping ondisk_read_lock
-> >> >> >>> 2017-08-23 12:46:36.083467 7f675c704700 15 osd.0 pg_epoch: 19 pg[3.3(
-> >> >> >>> v 15'2 (0'0,15'2] local-les=15 n=2 ec=14 les/c/f 15/15/0 14/14/14)
-> >> >> >>> [0,2,1] r=0 lpr=14 crt=0'0 lcod 15'1 mlcod 15'1 active+clean]
-> >> >> >>> do_osd_op_effects osd.0 con 0x7f67874f0d00
-> >> >> >>> 2017-08-23 12:46:36.083478 7f675c704700 15 osd.0 pg_epoch: 19 pg[3.3(
-> >> >> >>> v 15'2 (0'0,15'2] local-les=15 n=2 ec=14 les/c/f 15/15/0 14/14/14)
-> >> >> >>> [0,2,1] r=0 lpr=14 crt=0'0 lcod 15'1 mlcod 15'1 active+clean]
-> >> >> >>> log_op_stats osd_op(osd.0.6:2 3.92edb2bb
-> >> >> >>> test-rados-api-xxh02v.ops.corp
-> >> >> >>>
-> >> >> >>> It seems that, when doing "copy-get", no extensive attributes are
-> >> >> >>> copied. We believe that it's the following code that led to this
-> >> >> >>> result:
-> >> >> >>>
-> >> >> >>> int ReplicatedPG::getattrs_maybe_cache(ObjectContextRef obc,
-> >> >> >>>         map<string, bufferlist> *out,
-> >> >> >>>         bool user_only) {
-> >> >> >>>     int r = 0;
-> >> >> >>>     if (pool.info.require_rollback()) {
-> >> >> >>>         if (out)
-> >> >> >>>             *out = obc->attr_cache;
-> >> >> >>>     } else {
-> >> >> >>>         r = pgbackend->objects_get_attrs(obc->obs.oi.soid, out);
-> >> >> >>>     }
-> >> >> >>>     if (out && user_only) {
-> >> >> >>>         map<string, bufferlist> tmp;
-> >> >> >>>         for (map<string, bufferlist>::iterator i = out->begin();
-> >> >> >>>                 i != out->end(); ++i) {
-> >> >> >>>             if (i->first.size() > 1 && i->first[0] == '_')
-> >> >> >>>                 tmp[i->first.substr(1, i->first.size())].claim(i->second);
-> >> >> >>>         }
-> >> >> >>>         tmp.swap(*out);
-> >> >> >>>     }
-> >> >> >>>     return r;
-> >> >> >>> }
-> >> >> >>>
-> >> >> >>> It seems that when "user_only" is true, extensive attributes without a
-> >> >> >>> '_' as the starting character in its name would be filtered out. Is it
-> >> >> >>> supposed to be doing things in this way?
-> >> >> >>> And we found that there are only two places in the source code that
-> >> >> >>> invoked ReplicatedPG::getattrs_maybe_cache, in both of which
-> >> >> >>> "user_only" is true. Why add this parameter?
-> >> >> >>>
-> >> >> >>> By the way, we also found that these codes are added in commit
-> >> >> >>> 78d9c0072bfde30917aea4820a811d7fc9f10522, but we don't understand the
-> >> >> >>> purpose of it.
-> >> >> >>>
-> >> >> >>> Thank you:-)
-> >> >> --
-> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> >> the body of a message to majordomo@vger.kernel.org
-> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >> >>
-> >> >>
-> >>
-> >>
-> 
-> 
