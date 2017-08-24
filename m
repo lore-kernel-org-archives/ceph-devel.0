@@ -1,390 +1,642 @@
-From: Sage Weil <sweil@redhat.com>
+From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
 Subject: Re: [Ceph-maintainers] [ceph-users] v12.1.4 Luminous (RC) released
-Date: Thu, 24 Aug 2017 19:58:54 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1708241958150.20435@piezo.novalocal>
-References: <062fdb6f788298b7458db9d07ead19d2@suse.com> <DF101E47-D98F-4DF1-8337-6FC44B86676E@TERADATA.COM> <a6a7dd77-8b36-b2fb-183a-ecce43f3b8d7@redhat.com> <B693BFC0-9A9B-4338-BF7D-C9710665350C@TERADATA.COM> <238bc116-e706-031e-ab11-06e2383a9a04@redhat.com>
- <469DEC9D-7E3D-49C5-8AE6-71877039B3AC@TERADATA.COM> <CAKPXa=ZPeMST83ekgUkYbO5yz-ic3q_guY__0=tY7PSwmk-4YA@mail.gmail.com> <1B0B99FE-C6D5-455E-B8B7-1972D9B8FD2F@TERADATA.COM> <00EA3786-0D39-446A-8E48-0E03D505AC51@TERADATA.COM> <66B27C76-0184-452F-9BC8-A91E6D6C9B60@TERADATA.COM>
- <dcbb44f0-c1e9-2acf-133c-fe7dbfcdcd51@redhat.com> <C4D152F9-47F1-4883-A4BC-B9FF8F963A0D@TERADATA.COM> <alpine.DEB.2.11.1708231854570.20435@piezo.novalocal> <13128840-6AA3-4B16-BC18-FC8B9DD8690C@TERADATA.COM> <alpine.DEB.2.11.1708232131360.20435@piezo.novalocal>
- <9E4B0DFF-7676-4F8E-985D-1597A10214D4@TERADATA.COM> <alpine.DEB.2.11.1708240218500.20435@piezo.novalocal> <77FD54D9-0BC7-4B71-A3EC-E361B077F5C1@TERADATA.COM>
+Date: Thu, 24 Aug 2017 21:34:46 +0000
+Message-ID: <FF514A63-F96A-4876-BA6A-20F6235FD03B@TERADATA.COM>
+References: <062fdb6f788298b7458db9d07ead19d2@suse.com>
+ <DF101E47-D98F-4DF1-8337-6FC44B86676E@TERADATA.COM>
+ <a6a7dd77-8b36-b2fb-183a-ecce43f3b8d7@redhat.com>
+ <B693BFC0-9A9B-4338-BF7D-C9710665350C@TERADATA.COM>
+ <238bc116-e706-031e-ab11-06e2383a9a04@redhat.com>
+ <469DEC9D-7E3D-49C5-8AE6-71877039B3AC@TERADATA.COM>
+ <CAKPXa=ZPeMST83ekgUkYbO5yz-ic3q_guY__0=tY7PSwmk-4YA@mail.gmail.com>
+ <1B0B99FE-C6D5-455E-B8B7-1972D9B8FD2F@TERADATA.COM>
+ <00EA3786-0D39-446A-8E48-0E03D505AC51@TERADATA.COM>
+ <66B27C76-0184-452F-9BC8-A91E6D6C9B60@TERADATA.COM>
+ <dcbb44f0-c1e9-2acf-133c-fe7dbfcdcd51@redhat.com>
+ <C4D152F9-47F1-4883-A4BC-B9FF8F963A0D@TERADATA.COM>
+ <alpine.DEB.2.11.1708231854570.20435@piezo.novalocal>
+ <13128840-6AA3-4B16-BC18-FC8B9DD8690C@TERADATA.COM>
+ <alpine.DEB.2.11.1708232131360.20435@piezo.novalocal>
+ <9E4B0DFF-7676-4F8E-985D-1597A10214D4@TERADATA.COM>
+ <alpine.DEB.2.11.1708240218500.20435@piezo.novalocal>
+ <77FD54D9-0BC7-4B71-A3EC-E361B077F5C1@TERADATA.COM>
+ <alpine.DEB.2.11.1708241958150.20435@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-603772697-1503604736=:20435"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53252 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753142AbdHXT65 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 24 Aug 2017 15:58:57 -0400
-In-Reply-To: <77FD54D9-0BC7-4B71-A3EC-E361B077F5C1@TERADATA.COM>
+Received: from nat13.teradata.com ([153.65.16.13]:32829 "EHLO
+        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1753556AbdHXVew (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Aug 2017 17:34:52 -0400
+In-Reply-To: <alpine.DEB.2.11.1708241958150.20435@piezo.novalocal>
+Content-Language: en-US
+Content-ID: <90AEDDFD73B443479BFA1D959E04EC04@namprd13.prod.outlook.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+To: Sage Weil <sweil@redhat.com>
 Cc: David Zafman <dzafman@redhat.com>, Vasu Kulkarni <vakulkar@redhat.com>, Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---8323329-603772697-1503604736=:20435
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-
-On Thu, 24 Aug 2017, Kamble, Nitin A wrote:
-> On 8/23/17, 7:19 PM, "Sage Weil" <sweil@redhat.com> wrote:
-> 
->     Thanks!  It's right at the end of the device, and I can reproduce it with 
->     vstart by making the block device not aligned to a 64k (min_alloc_size) 
->     boundary.
->     
->     sage
-> 
-> Great! 
-> Does that mean ceph-disk needs to consider the min_alloc_size while 
-> creating the block device partitions?
-
-BlueStore should be smart enough to handle it. And it appears to be, now.  
-Did you see my other email?  Can you share what version you originally 
-used when the OSD was created?  I think that's where the bug was.
-
-Thanks!
-sage
-
- > 
-> 
-> Nitin
-> 
->     On Thu, 24 Aug 2017, Kamble, Nitin A wrote:
->     
->     > Hi Sage,
->     >   The log file is uploaded. It gave id like this:
->     >   
->     >   ceph-post-file: 48a58181-5272-40ef-938c-2f9712443d10
->     > 
->     > Thanks,
->     > Nitin
->     > 
->     > 
->     > On 8/23/17, 2:33 PM, "Sage Weil" <sweil@redhat.com> wrote:
->     > 
->     >     On Wed, 23 Aug 2017, Kamble, Nitin A wrote:
->     >     > Hi Sage,
->     >     > My comments inline below.
->     >     > 
->     >     > On 8/23/17, 12:15 PM, "Sage Weil" <sweil@redhat.com> wrote:
->     >     > 
->     >     >     Hi Nitin,
->     >     >     
->     >     >     As David mentioned, it's a non-fatal error, so disabling fsck on mount is 
->     >     >     a fine workaround.  (Out of curiousity, how did fsck get enabled in the 
->     >     >     first place?  It should be off by default.)
->     >     >     
->     >     > I find it is enabled by default.
->     >     
->     >     Which version are you running?  Master branch has
->     >     
->     >         Option("bluestore_fsck_on_mount", Option::TYPE_BOOL, Option::LEVEL_DEV)
->     >         .set_default(false)
->     >     
->     >     >     If you don't mind, I have a branch that will additionally spit out exactly 
->     >     >     which extent(s) were leaked:
->     >     >     
->     >     >     	https://github.com/liewegas/ceph/commit/wip-bluestore-fsck-leaks-luminous
->     >     >     
->     >     >     Would you mind running fsck with that branch and send me the log?
->     >     >     
->     >     > Sure, I can try it out. Looks like I will only need 
->     >     > ceph-objectstore-tool replaced in my ceph setup, correct?
->     >     
->     >     Right.  Thanks!
->     >     
->     >     >      CEPH_ARGS="--log-file c" ceph-objectstore-tool --op fsck --data-path ...
->     >     >     
->     >     >     One with --debug-bluestore 20 in the CEPH_ARGS would be ideal if it's not 
->     >     >     too big.  You can ceph-post-file the log.
->     >     > 
->     >     > What is ceph-post-file thingy? I have not used it before.
->     >     
->     >     It will upload a file or files to a server the developers have access to 
->     >     (any developers with access to the sepia lab) and spit out a uuid they can 
->     >     use to identify which upload is yours.
->     >     
->     >     sage
->     > 
->     >     >     
->     >     > Thanks,
->     >     > Nitin
->     >     > 
->     >     >     Thanks!
->     >     >     sage
->     >     >     
->     >     >     On Thu, 17 Aug 2017, Kamble, Nitin A wrote:
->     >     >     
->     >     >     > 
->     >     >     > 
->     >     >     > On 8/17/17, 1:50 PM, "David Zafman" <dzafman@redhat.com> wrote:
->     >     >     > 
->     >     >     >     
->     >     >     >     I wouldn't run the OSDs without identifying what is going on.  I suggest 
->     >     >     >     you stop the OSD and run fsck using ceph-objectstore-tool:
->     >     >     >     
->     >     >     >     
->     >     >     >     ceph-objectstore-tool --data-path .... --op fsck
->     >     >     >     
->     >     >     >     If you don't get any informative messages add --debug to get detail logging.
->     >     >     >     
->     >     >     >     
->     >     >     >     David
->     >     >     >     
->     >     >     >  
->     >     >     > Thanks, David for your input. It is interesting that all the 50 osds had the same fsck issue immediately after the upgrade.
->     >     >     > 
->     >     >     > Below is the log of manual fsck.
->     >     >     > 
->     >     >     > This is the error line in it:
->     >     >     > fsck error: leaked some space;65536 bytes leaked
->     >     >     > 
->     >     >     > 
->     >     >     > # ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-2 --op fsck --debug
->     >     >     > warning: line 36: 'bluestore_fsck_on_mount' in section 'global' redefined 
->     >     >     > 2017-08-17 14:03:43.895377 7fcb138f8280  1 bluestore(/var/lib/ceph/osd/ceph-2) fsck (shallow) start
->     >     >     > 2017-08-17 14:03:43.895410 7fcb138f8280  1 bdev create path /var/lib/ceph/osd/ceph-2/block type kernel
->     >     >     > 2017-08-17 14:03:43.895416 7fcb138f8280  1 bdev(0x5601f87b3200 /var/lib/ceph/osd/ceph-2/block) open path /var/lib/ceph/osd/ceph-2/block
->     >     >     > 2017-08-17 14:03:43.895684 7fcb138f8280  1 bdev(0x5601f87b3200 /var/lib/ceph/osd/ceph-2/block) open size 4000681103360 (0x3a37b2d1000, 3725 GB) block_size 4096 (4096 B) rotational
->     >     >     > 2017-08-17 14:03:43.895942 7fcb138f8280  1 bluestore(/var/lib/ceph/osd/ceph-2) _set_cache_sizes max 0.5 < ratio 0.99
->     >     >     > 2017-08-17 14:03:43.895957 7fcb138f8280  1 bluestore(/var/lib/ceph/osd/ceph-2) _set_cache_sizes cache_size 1073741824 meta 0.5 kv 0.5 data 0
->     >     >     > 2017-08-17 14:03:43.895990 7fcb138f8280  1 bdev create path /var/lib/ceph/osd/ceph-2/block.db type kernel
->     >     >     > 2017-08-17 14:03:43.895994 7fcb138f8280  1 bdev(0x5601f87b3400 /var/lib/ceph/osd/ceph-2/block.db) open path /var/lib/ceph/osd/ceph-2/block.db
->     >     >     > 2017-08-17 14:03:43.896162 7fcb138f8280  1 bdev(0x5601f87b3400 /var/lib/ceph/osd/ceph-2/block.db) open size 1073741824 (0x40000000, 1024 MB) block_size 4096 (4096 B) non-rotational
->     >     >     > 2017-08-17 14:03:43.896168 7fcb138f8280  1 bluefs add_block_device bdev 1 path /var/lib/ceph/osd/ceph-2/block.db size 1024 MB
->     >     >     > 2017-08-17 14:03:43.896364 7fcb138f8280  1 bdev create path /var/lib/ceph/osd/ceph-2/block type kernel
->     >     >     > 2017-08-17 14:03:43.896372 7fcb138f8280  1 bdev(0x5601f87b3600 /var/lib/ceph/osd/ceph-2/block) open path /var/lib/ceph/osd/ceph-2/block
->     >     >     > 2017-08-17 14:03:43.896529 7fcb138f8280  1 bdev(0x5601f87b3600 /var/lib/ceph/osd/ceph-2/block) open size 4000681103360 (0x3a37b2d1000, 3725 GB) block_size 4096 (4096 B) rotational
->     >     >     > 2017-08-17 14:03:43.896535 7fcb138f8280  1 bluefs add_block_device bdev 2 path /var/lib/ceph/osd/ceph-2/block size 3725 GB
->     >     >     > 2017-08-17 14:03:43.896546 7fcb138f8280  1 bdev create path /var/lib/ceph/osd/ceph-2/block.wal type kernel
->     >     >     > 2017-08-17 14:03:43.896549 7fcb138f8280  1 bdev(0x5601f87b3800 /var/lib/ceph/osd/ceph-2/block.wal) open path /var/lib/ceph/osd/ceph-2/block.wal
->     >     >     > 2017-08-17 14:03:43.896733 7fcb138f8280  1 bdev(0x5601f87b3800 /var/lib/ceph/osd/ceph-2/block.wal) open size 10737418240 (0x280000000, 10240 MB) block_size 4096 (4096 B) non-rotational
->     >     >     > 2017-08-17 14:03:43.896739 7fcb138f8280  1 bluefs add_block_device bdev 0 path /var/lib/ceph/osd/ceph-2/block.wal size 10240 MB
->     >     >     > 2017-08-17 14:03:43.896912 7fcb138f8280  1 bluefs mount
->     >     >     > 2017-08-17 14:03:43.902514 7fcb138f8280  0  set rocksdb option compaction_readahead_size = 2097152
->     >     >     > 2017-08-17 14:03:43.902525 7fcb138f8280  0  set rocksdb option compression = kNoCompression
->     >     >     > 2017-08-17 14:03:43.902533 7fcb138f8280  0  set rocksdb option max_write_buffer_number = 4
->     >     >     > 2017-08-17 14:03:43.902538 7fcb138f8280  0  set rocksdb option min_write_buffer_number_to_merge = 1
->     >     >     > 2017-08-17 14:03:43.902541 7fcb138f8280  0  set rocksdb option recycle_log_file_num = 4
->     >     >     > 2017-08-17 14:03:43.902544 7fcb138f8280  0  set rocksdb option writable_file_max_buffer_size = 0
->     >     >     > 2017-08-17 14:03:43.902548 7fcb138f8280  0  set rocksdb option write_buffer_size = 268435456
->     >     >     > 2017-08-17 14:03:43.902572 7fcb138f8280  0  set rocksdb option compaction_readahead_size = 2097152
->     >     >     > 2017-08-17 14:03:43.902577 7fcb138f8280  0  set rocksdb option compression = kNoCompression
->     >     >     > 2017-08-17 14:03:43.902580 7fcb138f8280  0  set rocksdb option max_write_buffer_number = 4
->     >     >     > 2017-08-17 14:03:43.902584 7fcb138f8280  0  set rocksdb option min_write_buffer_number_to_merge = 1
->     >     >     > 2017-08-17 14:03:43.902587 7fcb138f8280  0  set rocksdb option recycle_log_file_num = 4
->     >     >     > 2017-08-17 14:03:43.902590 7fcb138f8280  0  set rocksdb option writable_file_max_buffer_size = 0
->     >     >     > 2017-08-17 14:03:43.902593 7fcb138f8280  0  set rocksdb option write_buffer_size = 268435456
->     >     >     > 2017-08-17 14:03:43.902706 7fcb138f8280  4 rocksdb: RocksDB version: 5.4.0
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.902713 7fcb138f8280  4 rocksdb: Git sha rocksdb_build_git_sha:@0@
->     >     >     > 2017-08-17 14:03:43.902715 7fcb138f8280  4 rocksdb: Compile date Aug 15 2017
->     >     >     > 2017-08-17 14:03:43.902719 7fcb138f8280  4 rocksdb: DB SUMMARY
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.902727 7fcb138f8280  4 rocksdb: CURRENT file:  CURRENT
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.902729 7fcb138f8280  4 rocksdb: IDENTITY file:  IDENTITY
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.902735 7fcb138f8280  4 rocksdb: MANIFEST file:  MANIFEST-000937 size: 1083 Bytes
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.902739 7fcb138f8280  4 rocksdb: SST files in db dir, Total Num: 0, files: 
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.902745 7fcb138f8280  4 rocksdb: SST files in db.slow dir, Total Num: 6, files: 000187.sst 000199.sst 000219.sst 000220.sst 000934.sst 000935.sst 
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.902753 7fcb138f8280  4 rocksdb: Write Ahead Log file in db.wal: 000938.log size: 0 ; 
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.902755 7fcb138f8280  4 rocksdb:                         Options.error_if_exists: 0
->     >     >     > 2017-08-17 14:03:43.902756 7fcb138f8280  4 rocksdb:                       Options.create_if_missing: 0
->     >     >     > 2017-08-17 14:03:43.902757 7fcb138f8280  4 rocksdb:                         Options.paranoid_checks: 1
->     >     >     > 2017-08-17 14:03:43.902758 7fcb138f8280  4 rocksdb:                                     Options.env: 0x5601f8a43e80
->     >     >     > 2017-08-17 14:03:43.902759 7fcb138f8280  4 rocksdb:                                Options.info_log: 0x5601f8a443e0
->     >     >     > 2017-08-17 14:03:43.902760 7fcb138f8280  4 rocksdb:                          Options.max_open_files: -1
->     >     >     > 2017-08-17 14:03:43.902762 7fcb138f8280  4 rocksdb:                Options.max_file_opening_threads: 16
->     >     >     > 2017-08-17 14:03:43.902763 7fcb138f8280  4 rocksdb:                               Options.use_fsync: 0
->     >     >     > 2017-08-17 14:03:43.902764 7fcb138f8280  4 rocksdb:                       Options.max_log_file_size: 0
->     >     >     > 2017-08-17 14:03:43.902765 7fcb138f8280  4 rocksdb:                  Options.max_manifest_file_size: 18446744073709551615
->     >     >     > 2017-08-17 14:03:43.902766 7fcb138f8280  4 rocksdb:                   Options.log_file_time_to_roll: 0
->     >     >     > 2017-08-17 14:03:43.902767 7fcb138f8280  4 rocksdb:                       Options.keep_log_file_num: 1000
->     >     >     > 2017-08-17 14:03:43.902768 7fcb138f8280  4 rocksdb:                    Options.recycle_log_file_num: 4
->     >     >     > 2017-08-17 14:03:43.902769 7fcb138f8280  4 rocksdb:                         Options.allow_fallocate: 1
->     >     >     > 2017-08-17 14:03:43.902770 7fcb138f8280  4 rocksdb:                        Options.allow_mmap_reads: 0
->     >     >     > 2017-08-17 14:03:43.902771 7fcb138f8280  4 rocksdb:                       Options.allow_mmap_writes: 0
->     >     >     > 2017-08-17 14:03:43.902771 7fcb138f8280  4 rocksdb:                        Options.use_direct_reads: 0
->     >     >     > 2017-08-17 14:03:43.902772 7fcb138f8280  4 rocksdb:                        Options.use_direct_io_for_flush_and_compaction: 0
->     >     >     > 2017-08-17 14:03:43.902774 7fcb138f8280  4 rocksdb:          Options.create_missing_column_families: 0
->     >     >     > 2017-08-17 14:03:43.902781 7fcb138f8280  4 rocksdb:                              Options.db_log_dir: 
->     >     >     > 2017-08-17 14:03:43.902783 7fcb138f8280  4 rocksdb:                                 Options.wal_dir: db.wal
->     >     >     > 2017-08-17 14:03:43.902784 7fcb138f8280  4 rocksdb:                Options.table_cache_numshardbits: 6
->     >     >     > 2017-08-17 14:03:43.902784 7fcb138f8280  4 rocksdb:                      Options.max_subcompactions: 1
->     >     >     > 2017-08-17 14:03:43.902785 7fcb138f8280  4 rocksdb:                  Options.max_background_flushes: 1
->     >     >     > 2017-08-17 14:03:43.902786 7fcb138f8280  4 rocksdb:                         Options.WAL_ttl_seconds: 0
->     >     >     > 2017-08-17 14:03:43.902787 7fcb138f8280  4 rocksdb:                       Options.WAL_size_limit_MB: 0
->     >     >     > 2017-08-17 14:03:43.902788 7fcb138f8280  4 rocksdb:             Options.manifest_preallocation_size: 4194304
->     >     >     > 2017-08-17 14:03:43.902789 7fcb138f8280  4 rocksdb:                     Options.is_fd_close_on_exec: 1
->     >     >     > 2017-08-17 14:03:43.902790 7fcb138f8280  4 rocksdb:                   Options.advise_random_on_open: 1
->     >     >     > 2017-08-17 14:03:43.902790 7fcb138f8280  4 rocksdb:                    Options.db_write_buffer_size: 0
->     >     >     > 2017-08-17 14:03:43.902791 7fcb138f8280  4 rocksdb:         Options.access_hint_on_compaction_start: 1
->     >     >     > 2017-08-17 14:03:43.902792 7fcb138f8280  4 rocksdb:  Options.new_table_reader_for_compaction_inputs: 1
->     >     >     > 2017-08-17 14:03:43.902793 7fcb138f8280  4 rocksdb:               Options.compaction_readahead_size: 2097152
->     >     >     > 2017-08-17 14:03:43.902794 7fcb138f8280  4 rocksdb:           Options.random_access_max_buffer_size: 1048576
->     >     >     > 2017-08-17 14:03:43.902795 7fcb138f8280  4 rocksdb:           Options.writable_file_max_buffer_size: 0
->     >     >     > 2017-08-17 14:03:43.902795 7fcb138f8280  4 rocksdb:                      Options.use_adaptive_mutex: 0
->     >     >     > 2017-08-17 14:03:43.902796 7fcb138f8280  4 rocksdb:                            Options.rate_limiter: (nil)
->     >     >     > 2017-08-17 14:03:43.902798 7fcb138f8280  4 rocksdb:     Options.sst_file_manager.rate_bytes_per_sec: 0
->     >     >     > 2017-08-17 14:03:43.902799 7fcb138f8280  4 rocksdb:                          Options.bytes_per_sync: 0
->     >     >     > 2017-08-17 14:03:43.902801 7fcb138f8280  4 rocksdb:                      Options.wal_bytes_per_sync: 0
->     >     >     > 2017-08-17 14:03:43.902802 7fcb138f8280  4 rocksdb:                       Options.wal_recovery_mode: 0
->     >     >     > 2017-08-17 14:03:43.902803 7fcb138f8280  4 rocksdb:                  Options.enable_thread_tracking: 0
->     >     >     > 2017-08-17 14:03:43.902804 7fcb138f8280  4 rocksdb:         Options.allow_concurrent_memtable_write: 1
->     >     >     > 2017-08-17 14:03:43.902805 7fcb138f8280  4 rocksdb:      Options.enable_write_thread_adaptive_yield: 1
->     >     >     > 2017-08-17 14:03:43.902806 7fcb138f8280  4 rocksdb:             Options.write_thread_max_yield_usec: 100
->     >     >     > 2017-08-17 14:03:43.902807 7fcb138f8280  4 rocksdb:            Options.write_thread_slow_yield_usec: 3
->     >     >     > 2017-08-17 14:03:43.902808 7fcb138f8280  4 rocksdb:                               Options.row_cache: None
->     >     >     > 2017-08-17 14:03:43.902808 7fcb138f8280  4 rocksdb:                              Options.wal_filter: None
->     >     >     > 2017-08-17 14:03:43.902809 7fcb138f8280  4 rocksdb:             Options.avoid_flush_during_recovery: 0
->     >     >     > 2017-08-17 14:03:43.902810 7fcb138f8280  4 rocksdb:             Options.base_background_compactions: 1
->     >     >     > 2017-08-17 14:03:43.902811 7fcb138f8280  4 rocksdb:             Options.max_background_compactions: 1
->     >     >     > 2017-08-17 14:03:43.902812 7fcb138f8280  4 rocksdb:             Options.avoid_flush_during_shutdown: 0
->     >     >     > 2017-08-17 14:03:43.902813 7fcb138f8280  4 rocksdb:             Options.delayed_write_rate : 16777216
->     >     >     > 2017-08-17 14:03:43.902814 7fcb138f8280  4 rocksdb:             Options.max_total_wal_size: 0
->     >     >     > 2017-08-17 14:03:43.902816 7fcb138f8280  4 rocksdb:             Options.delete_obsolete_files_period_micros: 21600000000
->     >     >     > 2017-08-17 14:03:43.902817 7fcb138f8280  4 rocksdb:                   Options.stats_dump_period_sec: 600
->     >     >     > 2017-08-17 14:03:43.902818 7fcb138f8280  4 rocksdb: Compression algorithms supported:
->     >     >     > 2017-08-17 14:03:43.902819 7fcb138f8280  4 rocksdb:     Snappy supported: 0
->     >     >     > 2017-08-17 14:03:43.902820 7fcb138f8280  4 rocksdb:     Zlib supported: 0
->     >     >     > 2017-08-17 14:03:43.902821 7fcb138f8280  4 rocksdb:     Bzip supported: 0
->     >     >     > 2017-08-17 14:03:43.902822 7fcb138f8280  4 rocksdb:     LZ4 supported: 0
->     >     >     > 2017-08-17 14:03:43.902823 7fcb138f8280  4 rocksdb:     ZSTD supported: 0
->     >     >     > 2017-08-17 14:03:43.902824 7fcb138f8280  4 rocksdb: Fast CRC32 supported: 1
->     >     >     > 2017-08-17 14:03:43.902920 7fcb138f8280  4 rocksdb: [/build/nitin/nightly_builds/20170815_141538-luminous/ceph.git/rpmbuild/BUILD/ceph-12.1.4-12.1.4/src/rocksdb/db/version_set.cc:2609] Recovering from manifest file: MANIFEST-000937
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.902958 7fcb138f8280  4 rocksdb: [/build/nitin/nightly_builds/20170815_141538-luminous/ceph.git/rpmbuild/BUILD/ceph-12.1.4-12.1.4/src/rocksdb/db/column_family.cc:407] --------------- Options for column family [default]:
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.902960 7fcb138f8280  4 rocksdb:               Options.comparator: leveldb.BytewiseComparator
->     >     >     > 2017-08-17 14:03:43.902965 7fcb138f8280  4 rocksdb:           Options.merge_operator: .T:int64_array.b:bitwise_xor
->     >     >     > 2017-08-17 14:03:43.902966 7fcb138f8280  4 rocksdb:        Options.compaction_filter: None
->     >     >     > 2017-08-17 14:03:43.902967 7fcb138f8280  4 rocksdb:        Options.compaction_filter_factory: None
->     >     >     > 2017-08-17 14:03:43.902969 7fcb138f8280  4 rocksdb:         Options.memtable_factory: SkipListFactory
->     >     >     > 2017-08-17 14:03:43.902970 7fcb138f8280  4 rocksdb:            Options.table_factory: BlockBasedTable
->     >     >     > 2017-08-17 14:03:43.902985 7fcb138f8280  4 rocksdb:            table_factory options:   flush_block_policy_factory: FlushBlockBySizePolicyFactory (0x5601f8782208)
->     >     >     >   cache_index_and_filter_blocks: 1
->     >     >     >   cache_index_and_filter_blocks_with_high_priority: 1
->     >     >     >   pin_l0_filter_and_index_blocks_in_cache: 1
->     >     >     >   index_type: 0
->     >     >     >   hash_index_allow_collision: 1
->     >     >     >   checksum: 1
->     >     >     >   no_block_cache: 0
->     >     >     >   block_cache: 0x5601f87cddd8
->     >     >     >   block_cache_name: LRUCache
->     >     >     >   block_cache_options:
->     >     >     >     capacity : 536870912
->     >     >     >     num_shard_bits : 4
->     >     >     >     strict_capacity_limit : 0
->     >     >     >     high_pri_pool_ratio: 0.000
->     >     >     >   block_cache_compressed: (nil)
->     >     >     >   persistent_cache: (nil)
->     >     >     >   block_size: 4096
->     >     >     >   block_size_deviation: 10
->     >     >     >   block_restart_interval: 16
->     >     >     >   index_block_restart_interval: 1
->     >     >     >   filter_policy: rocksdb.BuiltinBloomFilter
->     >     >     >   whole_key_filtering: 1
->     >     >     >   format_version: 2
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.902995 7fcb138f8280  4 rocksdb:        Options.write_buffer_size: 268435456
->     >     >     > 2017-08-17 14:03:43.902996 7fcb138f8280  4 rocksdb:  Options.max_write_buffer_number: 4
->     >     >     > 2017-08-17 14:03:43.902997 7fcb138f8280  4 rocksdb:          Options.compression: NoCompression
->     >     >     > 2017-08-17 14:03:43.902999 7fcb138f8280  4 rocksdb:                  Options.bottommost_compression: Disabled
->     >     >     > 2017-08-17 14:03:43.903000 7fcb138f8280  4 rocksdb:       Options.prefix_extractor: nullptr
->     >     >     > 2017-08-17 14:03:43.903000 7fcb138f8280  4 rocksdb:   Options.memtable_insert_with_hint_prefix_extractor: nullptr
->     >     >     > 2017-08-17 14:03:43.903001 7fcb138f8280  4 rocksdb:             Options.num_levels: 7
->     >     >     > 2017-08-17 14:03:43.903002 7fcb138f8280  4 rocksdb:        Options.min_write_buffer_number_to_merge: 1
->     >     >     > 2017-08-17 14:03:43.903008 7fcb138f8280  4 rocksdb:     Options.max_write_buffer_number_to_maintain: 0
->     >     >     > 2017-08-17 14:03:43.903009 7fcb138f8280  4 rocksdb:            Options.compression_opts.window_bits: -14
->     >     >     > 2017-08-17 14:03:43.903010 7fcb138f8280  4 rocksdb:                  Options.compression_opts.level: -1
->     >     >     > 2017-08-17 14:03:43.903010 7fcb138f8280  4 rocksdb:               Options.compression_opts.strategy: 0
->     >     >     > 2017-08-17 14:03:43.903011 7fcb138f8280  4 rocksdb:         Options.compression_opts.max_dict_bytes: 0
->     >     >     > 2017-08-17 14:03:43.903012 7fcb138f8280  4 rocksdb:      Options.level0_file_num_compaction_trigger: 4
->     >     >     > 2017-08-17 14:03:43.903013 7fcb138f8280  4 rocksdb:          Options.level0_slowdown_writes_trigger: 20
->     >     >     > 2017-08-17 14:03:43.903014 7fcb138f8280  4 rocksdb:              Options.level0_stop_writes_trigger: 36
->     >     >     > 2017-08-17 14:03:43.903015 7fcb138f8280  4 rocksdb:                   Options.target_file_size_base: 67108864
->     >     >     > 2017-08-17 14:03:43.903015 7fcb138f8280  4 rocksdb:             Options.target_file_size_multiplier: 1
->     >     >     > 2017-08-17 14:03:43.903016 7fcb138f8280  4 rocksdb:                Options.max_bytes_for_level_base: 268435456
->     >     >     > 2017-08-17 14:03:43.903017 7fcb138f8280  4 rocksdb: Options.level_compaction_dynamic_level_bytes: 0
->     >     >     > 2017-08-17 14:03:43.903018 7fcb138f8280  4 rocksdb:          Options.max_bytes_for_level_multiplier: 10.000000
->     >     >     > 2017-08-17 14:03:43.903021 7fcb138f8280  4 rocksdb: Options.max_bytes_for_level_multiplier_addtl[0]: 1
->     >     >     > 2017-08-17 14:03:43.903022 7fcb138f8280  4 rocksdb: Options.max_bytes_for_level_multiplier_addtl[1]: 1
->     >     >     > 2017-08-17 14:03:43.903023 7fcb138f8280  4 rocksdb: Options.max_bytes_for_level_multiplier_addtl[2]: 1
->     >     >     > 2017-08-17 14:03:43.903024 7fcb138f8280  4 rocksdb: Options.max_bytes_for_level_multiplier_addtl[3]: 1
->     >     >     > 2017-08-17 14:03:43.903025 7fcb138f8280  4 rocksdb: Options.max_bytes_for_level_multiplier_addtl[4]: 1
->     >     >     > 2017-08-17 14:03:43.903026 7fcb138f8280  4 rocksdb: Options.max_bytes_for_level_multiplier_addtl[5]: 1
->     >     >     > 2017-08-17 14:03:43.903026 7fcb138f8280  4 rocksdb: Options.max_bytes_for_level_multiplier_addtl[6]: 1
->     >     >     > 2017-08-17 14:03:43.903027 7fcb138f8280  4 rocksdb:       Options.max_sequential_skip_in_iterations: 8
->     >     >     > 2017-08-17 14:03:43.903028 7fcb138f8280  4 rocksdb:                    Options.max_compaction_bytes: 1677721600
->     >     >     > 2017-08-17 14:03:43.903029 7fcb138f8280  4 rocksdb:                        Options.arena_block_size: 33554432
->     >     >     > 2017-08-17 14:03:43.903030 7fcb138f8280  4 rocksdb:   Options.soft_pending_compaction_bytes_limit: 68719476736
->     >     >     > 2017-08-17 14:03:43.903031 7fcb138f8280  4 rocksdb:   Options.hard_pending_compaction_bytes_limit: 274877906944
->     >     >     > 2017-08-17 14:03:43.903032 7fcb138f8280  4 rocksdb:       Options.rate_limit_delay_max_milliseconds: 100
->     >     >     > 2017-08-17 14:03:43.903033 7fcb138f8280  4 rocksdb:                Options.disable_auto_compactions: 0
->     >     >     > 2017-08-17 14:03:43.903034 7fcb138f8280  4 rocksdb:                         Options.compaction_style: kCompactionStyleLevel
->     >     >     > 2017-08-17 14:03:43.903035 7fcb138f8280  4 rocksdb:                           Options.compaction_pri: kByCompensatedSize
->     >     >     > 2017-08-17 14:03:43.903036 7fcb138f8280  4 rocksdb:  Options.compaction_options_universal.size_ratio: 1
->     >     >     > 2017-08-17 14:03:43.903037 7fcb138f8280  4 rocksdb: Options.compaction_options_universal.min_merge_width: 2
->     >     >     > 2017-08-17 14:03:43.903038 7fcb138f8280  4 rocksdb: Options.compaction_options_universal.max_merge_width: 4294967295
->     >     >     > 2017-08-17 14:03:43.903039 7fcb138f8280  4 rocksdb: Options.compaction_options_universal.max_size_amplification_percent: 200
->     >     >     > 2017-08-17 14:03:43.903040 7fcb138f8280  4 rocksdb: Options.compaction_options_universal.compression_size_percent: -1
->     >     >     > 2017-08-17 14:03:43.903041 7fcb138f8280  4 rocksdb: Options.compaction_options_fifo.max_table_files_size: 1073741824
->     >     >     > 2017-08-17 14:03:43.903042 7fcb138f8280  4 rocksdb:                   Options.table_properties_collectors:
->     >     >     > 2017-08-17 14:03:43.903043 7fcb138f8280  4 rocksdb:                   Options.inplace_update_support: 0
->     >     >     > 2017-08-17 14:03:43.903044 7fcb138f8280  4 rocksdb:                 Options.inplace_update_num_locks: 10000
->     >     >     > 2017-08-17 14:03:43.903045 7fcb138f8280  4 rocksdb:               Options.memtable_prefix_bloom_size_ratio: 0.000000
->     >     >     > 2017-08-17 14:03:43.903046 7fcb138f8280  4 rocksdb:   Options.memtable_huge_page_size: 0
->     >     >     > 2017-08-17 14:03:43.903047 7fcb138f8280  4 rocksdb:                           Options.bloom_locality: 0
->     >     >     > 2017-08-17 14:03:43.903048 7fcb138f8280  4 rocksdb:                    Options.max_successive_merges: 0
->     >     >     > 2017-08-17 14:03:43.903049 7fcb138f8280  4 rocksdb:                Options.optimize_filters_for_hits: 0
->     >     >     > 2017-08-17 14:03:43.903050 7fcb138f8280  4 rocksdb:                Options.paranoid_file_checks: 0
->     >     >     > 2017-08-17 14:03:43.903051 7fcb138f8280  4 rocksdb:                Options.force_consistency_checks: 0
->     >     >     > 2017-08-17 14:03:43.903053 7fcb138f8280  4 rocksdb:                Options.report_bg_io_stats: 0
->     >     >     > 2017-08-17 14:03:43.946483 7fcb138f8280  4 rocksdb: [/build/nitin/nightly_builds/20170815_141538-luminous/ceph.git/rpmbuild/BUILD/ceph-12.1.4-12.1.4/src/rocksdb/db/version_set.cc:2859] Recovered from manifest file:db/MANIFEST-000937 succeeded,manifest_file_number is 937, next_file_number is 939, last_sequence is 64576158, log_number is 0,prev_log_number is 0,max_column_family is 0
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.946492 7fcb138f8280  4 rocksdb: [/build/nitin/nightly_builds/20170815_141538-luminous/ceph.git/rpmbuild/BUILD/ceph-12.1.4-12.1.4/src/rocksdb/db/version_set.cc:2867] Column family [default] (ID 0), log number is 932
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.946530 7fcb138f8280  4 rocksdb: EVENT_LOG_v1 {"time_micros": 1503003823946523, "job": 1, "event": "recovery_started", "log_files": [938]}
->     >     >     > 2017-08-17 14:03:43.946533 7fcb138f8280  4 rocksdb: [/build/nitin/nightly_builds/20170815_141538-luminous/ceph.git/rpmbuild/BUILD/ceph-12.1.4-12.1.4/src/rocksdb/db/db_impl_open.cc:482] Recovering log #938 mode 0
->     >     >     > 2017-08-17 14:03:43.946541 7fcb138f8280  4 rocksdb: [/build/nitin/nightly_builds/20170815_141538-luminous/ceph.git/rpmbuild/BUILD/ceph-12.1.4-12.1.4/src/rocksdb/db/version_set.cc:2395] Creating manifest 940
->     >     >     > 
->     >     >     > 2017-08-17 14:03:43.947010 7fcb138f8280  4 rocksdb: EVENT_LOG_v1 {"time_micros": 1503003823947008, "job": 1, "event": "recovery_finished"}
->     >     >     > 2017-08-17 14:03:43.947694 7fcb138f8280  4 rocksdb: [/build/nitin/nightly_builds/20170815_141538-luminous/ceph.git/rpmbuild/BUILD/ceph-12.1.4-12.1.4/src/rocksdb/db/db_impl_open.cc:1063] DB pointer 0x5601f8a8ab00
->     >     >     > 2017-08-17 14:03:43.947722 7fcb138f8280  1 bluestore(/var/lib/ceph/osd/ceph-2) _open_db opened rocksdb path db options compression=kNoCompression,max_write_buffer_number=4,min_write_buffer_number_to_merge=1,recycle_log_file_num=4,write_buffer_size=268435456,writable_file_max_buffer_size=0,compaction_readahead_size=2097152
->     >     >     > 2017-08-17 14:03:43.995973 7fcb138f8280  1 freelist init
->     >     >     > 2017-08-17 14:03:44.027637 7fcb138f8280  1 bluestore(/var/lib/ceph/osd/ceph-2) _open_alloc opening allocation metadata
->     >     >     > 2017-08-17 14:03:45.927394 7fcb138f8280  1 bluestore(/var/lib/ceph/osd/ceph-2) _open_alloc loaded 3701 G in 3919 extents
->     >     >     > 2017-08-17 14:03:46.426774 7fcb138f8280  1 bluefs fsck
->     >     >     > 2017-08-17 14:03:46.426792 7fcb138f8280  1 bluestore(/var/lib/ceph/osd/ceph-2) fsck walking object keyspace
->     >     >     > 2017-08-17 14:03:50.856077 7fcb138f8280  1 bluestore(/var/lib/ceph/osd/ceph-2) fsck checking shared_blobs
->     >     >     > 2017-08-17 14:03:50.856119 7fcb138f8280  1 bluestore(/var/lib/ceph/osd/ceph-2) fsck checking for stray omap data
->     >     >     > 2017-08-17 14:03:52.405816 7fcb138f8280  1 bluestore(/var/lib/ceph/osd/ceph-2) fsck checking deferred events
->     >     >     > 2017-08-17 14:03:52.405862 7fcb138f8280  1 bluestore(/var/lib/ceph/osd/ceph-2) fsck checking freelist vs allocated
->     >     >     > 2017-08-17 14:04:06.311748 7fcb138f8280 -1 bluestore(/var/lib/ceph/osd/ceph-2) fsck error: leaked some space;65536 bytes leaked
->     >     >     > 2017-08-17 14:04:06.410019 7fcb138f8280  1 freelist shutdown
->     >     >     > 2017-08-17 14:04:06.410080 7fcb138f8280  4 rocksdb: [/build/nitin/nightly_builds/20170815_141538-luminous/ceph.git/rpmbuild/BUILD/ceph-12.1.4-12.1.4/src/rocksdb/db/db_impl.cc:217] Shutdown: canceling all background work
->     >     >     > 2017-08-17 14:04:06.410464 7fcb138f8280  4 rocksdb: [/build/nitin/nightly_builds/20170815_141538-luminous/ceph.git/rpmbuild/BUILD/ceph-12.1.4-12.1.4/src/rocksdb/db/db_impl.cc:343] Shutdown complete
->     >     >     > 2017-08-17 14:04:06.451387 7fcb138f8280  1 bluefs umount
->     >     >     > 2017-08-17 14:04:06.452720 7fcb138f8280  1 bdev(0x5601f87b3800 /var/lib/ceph/osd/ceph-2/block.wal) close
->     >     >     > 2017-08-17 14:04:06.744745 7fcb138f8280  1 bdev(0x5601f87b3400 /var/lib/ceph/osd/ceph-2/block.db) close
->     >     >     > 2017-08-17 14:04:06.988729 7fcb138f8280  1 bdev(0x5601f87b3600 /var/lib/ceph/osd/ceph-2/block) close
->     >     >     > 2017-08-17 14:04:07.200717 7fcb138f8280  1 bdev(0x5601f87b3200 /var/lib/ceph/osd/ceph-2/block) close
->     >     >     > 2017-08-17 14:04:07.448859 7fcb138f8280  1 bluestore(/var/lib/ceph/osd/ceph-2) fsck finish with 1 errors in 23.553470 seconds
->     >     >     > fsck found 1 errors
->     >     >     > 
->     >     >     >     
->     >     >     > 
->     >     >     > N?????r??y??????X??ǧv???)޺{.n?????z?]z????ay??ʇڙ??j???f???h???????w???????j:+v???w?????????????zZ+???????j"????i
->     >     > 
->     >     > N?????r??y??????X??ǧv???)޺{.n?????z?]z????ay??ʇڙ??j???f???h???????w???????j:+v???w?????????????zZ+???????j"????i
->     > 
->     > 
-> 
-> 
---8323329-603772697-1503604736=:20435--
+DQoNCk9uIDgvMjQvMTcsIDEyOjU4IFBNLCAiU2FnZSBXZWlsIiA8c3dlaWxAcmVkaGF0LmNvbT4g
+d3JvdGU6DQoNCiAgICBPbiBUaHUsIDI0IEF1ZyAyMDE3LCBLYW1ibGUsIE5pdGluIEEgd3JvdGU6
+DQogICAgPiBPbiA4LzIzLzE3LCA3OjE5IFBNLCAiU2FnZSBXZWlsIiA8c3dlaWxAcmVkaGF0LmNv
+bT4gd3JvdGU6DQogICAgPiANCiAgICA+ICAgICBUaGFua3MhICBJdCdzIHJpZ2h0IGF0IHRoZSBl
+bmQgb2YgdGhlIGRldmljZSwgYW5kIEkgY2FuIHJlcHJvZHVjZSBpdCB3aXRoIA0KICAgID4gICAg
+IHZzdGFydCBieSBtYWtpbmcgdGhlIGJsb2NrIGRldmljZSBub3QgYWxpZ25lZCB0byBhIDY0ayAo
+bWluX2FsbG9jX3NpemUpIA0KICAgID4gICAgIGJvdW5kYXJ5Lg0KICAgID4gICAgIA0KICAgID4g
+ICAgIHNhZ2UNCiAgICA+IA0KICAgID4gR3JlYXQhIA0KICAgID4gRG9lcyB0aGF0IG1lYW4gY2Vw
+aC1kaXNrIG5lZWRzIHRvIGNvbnNpZGVyIHRoZSBtaW5fYWxsb2Nfc2l6ZSB3aGlsZSANCiAgICA+
+IGNyZWF0aW5nIHRoZSBibG9jayBkZXZpY2UgcGFydGl0aW9ucz8NCiAgICANCiAgICBCbHVlU3Rv
+cmUgc2hvdWxkIGJlIHNtYXJ0IGVub3VnaCB0byBoYW5kbGUgaXQuIEFuZCBpdCBhcHBlYXJzIHRv
+IGJlLCBub3cuICANCiAgICBEaWQgeW91IHNlZSBteSBvdGhlciBlbWFpbD8gIENhbiB5b3Ugc2hh
+cmUgd2hhdCB2ZXJzaW9uIHlvdSBvcmlnaW5hbGx5IA0KICAgIHVzZWQgd2hlbiB0aGUgT1NEIHdh
+cyBjcmVhdGVkPyAgSSB0aGluayB0aGF0J3Mgd2hlcmUgdGhlIGJ1ZyB3YXMuDQogICAgDQpJIGRp
+ZCBub3Qgc2VlIHRoZSBvdGhlciBlbWFpbC4gVGhlIE9TRCB3YXMgY3JlYXRlZCBvbiBjZXBoIHZl
+cnNpb24gdjEyLjEuMC4NCg0KICAgIFRoYW5rcyENCiAgICBzYWdlDQogICAgDQogICAgID4gDQog
+ICAgPiANCiAgICA+IE5pdGluDQogICAgPiANCiAgICA+ICAgICBPbiBUaHUsIDI0IEF1ZyAyMDE3
+LCBLYW1ibGUsIE5pdGluIEEgd3JvdGU6DQogICAgPiAgICAgDQogICAgPiAgICAgPiBIaSBTYWdl
+LA0KICAgID4gICAgID4gICBUaGUgbG9nIGZpbGUgaXMgdXBsb2FkZWQuIEl0IGdhdmUgaWQgbGlr
+ZSB0aGlzOg0KICAgID4gICAgID4gICANCiAgICA+ICAgICA+ICAgY2VwaC1wb3N0LWZpbGU6IDQ4
+YTU4MTgxLTUyNzItNDBlZi05MzhjLTJmOTcxMjQ0M2QxMA0KICAgID4gICAgID4gDQogICAgPiAg
+ICAgPiBUaGFua3MsDQogICAgPiAgICAgPiBOaXRpbg0KICAgID4gICAgID4gDQogICAgPiAgICAg
+PiANCiAgICA+ICAgICA+IE9uIDgvMjMvMTcsIDI6MzMgUE0sICJTYWdlIFdlaWwiIDxzd2VpbEBy
+ZWRoYXQuY29tPiB3cm90ZToNCiAgICA+ICAgICA+IA0KICAgID4gICAgID4gICAgIE9uIFdlZCwg
+MjMgQXVnIDIwMTcsIEthbWJsZSwgTml0aW4gQSB3cm90ZToNCiAgICA+ICAgICA+ICAgICA+IEhp
+IFNhZ2UsDQogICAgPiAgICAgPiAgICAgPiBNeSBjb21tZW50cyBpbmxpbmUgYmVsb3cuDQogICAg
+PiAgICAgPiAgICAgPiANCiAgICA+ICAgICA+ICAgICA+IE9uIDgvMjMvMTcsIDEyOjE1IFBNLCAi
+U2FnZSBXZWlsIiA8c3dlaWxAcmVkaGF0LmNvbT4gd3JvdGU6DQogICAgPiAgICAgPiAgICAgPiAN
+CiAgICA+ICAgICA+ICAgICA+ICAgICBIaSBOaXRpbiwNCiAgICA+ICAgICA+ICAgICA+ICAgICAN
+CiAgICA+ICAgICA+ICAgICA+ICAgICBBcyBEYXZpZCBtZW50aW9uZWQsIGl0J3MgYSBub24tZmF0
+YWwgZXJyb3IsIHNvIGRpc2FibGluZyBmc2NrIG9uIG1vdW50IGlzIA0KICAgID4gICAgID4gICAg
+ID4gICAgIGEgZmluZSB3b3JrYXJvdW5kLiAgKE91dCBvZiBjdXJpb3VzaXR5LCBob3cgZGlkIGZz
+Y2sgZ2V0IGVuYWJsZWQgaW4gdGhlIA0KICAgID4gICAgID4gICAgID4gICAgIGZpcnN0IHBsYWNl
+PyAgSXQgc2hvdWxkIGJlIG9mZiBieSBkZWZhdWx0LikNCiAgICA+ICAgICA+ICAgICA+ICAgICAN
+CiAgICA+ICAgICA+ICAgICA+IEkgZmluZCBpdCBpcyBlbmFibGVkIGJ5IGRlZmF1bHQuDQogICAg
+PiAgICAgPiAgICAgDQogICAgPiAgICAgPiAgICAgV2hpY2ggdmVyc2lvbiBhcmUgeW91IHJ1bm5p
+bmc/ICBNYXN0ZXIgYnJhbmNoIGhhcw0KICAgID4gICAgID4gICAgIA0KICAgID4gICAgID4gICAg
+ICAgICBPcHRpb24oImJsdWVzdG9yZV9mc2NrX29uX21vdW50IiwgT3B0aW9uOjpUWVBFX0JPT0ws
+IE9wdGlvbjo6TEVWRUxfREVWKQ0KICAgID4gICAgID4gICAgICAgICAuc2V0X2RlZmF1bHQoZmFs
+c2UpDQogICAgPiAgICAgPiAgICAgDQogICAgPiAgICAgPiAgICAgPiAgICAgSWYgeW91IGRvbid0
+IG1pbmQsIEkgaGF2ZSBhIGJyYW5jaCB0aGF0IHdpbGwgYWRkaXRpb25hbGx5IHNwaXQgb3V0IGV4
+YWN0bHkgDQogICAgPiAgICAgPiAgICAgPiAgICAgd2hpY2ggZXh0ZW50KHMpIHdlcmUgbGVha2Vk
+Og0KICAgID4gICAgID4gICAgID4gICAgIA0KICAgID4gICAgID4gICAgID4gICAgIAlodHRwczov
+L2dpdGh1Yi5jb20vbGlld2VnYXMvY2VwaC9jb21taXQvd2lwLWJsdWVzdG9yZS1mc2NrLWxlYWtz
+LWx1bWlub3VzDQogICAgPiAgICAgPiAgICAgPiAgICAgDQogICAgPiAgICAgPiAgICAgPiAgICAg
+V291bGQgeW91IG1pbmQgcnVubmluZyBmc2NrIHdpdGggdGhhdCBicmFuY2ggYW5kIHNlbmQgbWUg
+dGhlIGxvZz8NCiAgICA+ICAgICA+ICAgICA+ICAgICANCiAgICA+ICAgICA+ICAgICA+IFN1cmUs
+IEkgY2FuIHRyeSBpdCBvdXQuIExvb2tzIGxpa2UgSSB3aWxsIG9ubHkgbmVlZCANCiAgICA+ICAg
+ICA+ICAgICA+IGNlcGgtb2JqZWN0c3RvcmUtdG9vbCByZXBsYWNlZCBpbiBteSBjZXBoIHNldHVw
+LCBjb3JyZWN0Pw0KICAgID4gICAgID4gICAgIA0KICAgID4gICAgID4gICAgIFJpZ2h0LiAgVGhh
+bmtzIQ0KICAgID4gICAgID4gICAgIA0KICAgID4gICAgID4gICAgID4gICAgICBDRVBIX0FSR1M9
+Ii0tbG9nLWZpbGUgYyIgY2VwaC1vYmplY3RzdG9yZS10b29sIC0tb3AgZnNjayAtLWRhdGEtcGF0
+aCAuLi4NCiAgICA+ICAgICA+ICAgICA+ICAgICANCiAgICA+ICAgICA+ICAgICA+ICAgICBPbmUg
+d2l0aCAtLWRlYnVnLWJsdWVzdG9yZSAyMCBpbiB0aGUgQ0VQSF9BUkdTIHdvdWxkIGJlIGlkZWFs
+IGlmIGl0J3Mgbm90IA0KICAgID4gICAgID4gICAgID4gICAgIHRvbyBiaWcuICBZb3UgY2FuIGNl
+cGgtcG9zdC1maWxlIHRoZSBsb2cuDQogICAgPiAgICAgPiAgICAgPiANCiAgICA+ICAgICA+ICAg
+ICA+IFdoYXQgaXMgY2VwaC1wb3N0LWZpbGUgdGhpbmd5PyBJIGhhdmUgbm90IHVzZWQgaXQgYmVm
+b3JlLg0KICAgID4gICAgID4gICAgIA0KICAgID4gICAgID4gICAgIEl0IHdpbGwgdXBsb2FkIGEg
+ZmlsZSBvciBmaWxlcyB0byBhIHNlcnZlciB0aGUgZGV2ZWxvcGVycyBoYXZlIGFjY2VzcyB0byAN
+CiAgICA+ICAgICA+ICAgICAoYW55IGRldmVsb3BlcnMgd2l0aCBhY2Nlc3MgdG8gdGhlIHNlcGlh
+IGxhYikgYW5kIHNwaXQgb3V0IGEgdXVpZCB0aGV5IGNhbiANCiAgICA+ICAgICA+ICAgICB1c2Ug
+dG8gaWRlbnRpZnkgd2hpY2ggdXBsb2FkIGlzIHlvdXJzLg0KICAgID4gICAgID4gICAgIA0KICAg
+ID4gICAgID4gICAgIHNhZ2UNCiAgICA+ICAgICA+IA0KICAgID4gICAgID4gICAgID4gICAgIA0K
+ICAgID4gICAgID4gICAgID4gVGhhbmtzLA0KICAgID4gICAgID4gICAgID4gTml0aW4NCiAgICA+
+ICAgICA+ICAgICA+IA0KICAgID4gICAgID4gICAgID4gICAgIFRoYW5rcyENCiAgICA+ICAgICA+
+ICAgICA+ICAgICBzYWdlDQogICAgPiAgICAgPiAgICAgPiAgICAgDQogICAgPiAgICAgPiAgICAg
+PiAgICAgT24gVGh1LCAxNyBBdWcgMjAxNywgS2FtYmxlLCBOaXRpbiBBIHdyb3RlOg0KICAgID4g
+ICAgID4gICAgID4gICAgIA0KICAgID4gICAgID4gICAgID4gICAgID4gDQogICAgPiAgICAgPiAg
+ICAgPiAgICAgPiANCiAgICA+ICAgICA+ICAgICA+ICAgICA+IE9uIDgvMTcvMTcsIDE6NTAgUE0s
+ICJEYXZpZCBaYWZtYW4iIDxkemFmbWFuQHJlZGhhdC5jb20+IHdyb3RlOg0KICAgID4gICAgID4g
+ICAgID4gICAgID4gDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAgICAgDQogICAgPiAgICAgPiAg
+ICAgPiAgICAgPiAgICAgSSB3b3VsZG4ndCBydW4gdGhlIE9TRHMgd2l0aG91dCBpZGVudGlmeWlu
+ZyB3aGF0IGlzIGdvaW5nIG9uLiAgSSBzdWdnZXN0IA0KICAgID4gICAgID4gICAgID4gICAgID4g
+ICAgIHlvdSBzdG9wIHRoZSBPU0QgYW5kIHJ1biBmc2NrIHVzaW5nIGNlcGgtb2JqZWN0c3RvcmUt
+dG9vbDoNCiAgICA+ICAgICA+ICAgICA+ICAgICA+ICAgICANCiAgICA+ICAgICA+ICAgICA+ICAg
+ICA+ICAgICANCiAgICA+ICAgICA+ICAgICA+ICAgICA+ICAgICBjZXBoLW9iamVjdHN0b3JlLXRv
+b2wgLS1kYXRhLXBhdGggLi4uLiAtLW9wIGZzY2sNCiAgICA+ICAgICA+ICAgICA+ICAgICA+ICAg
+ICANCiAgICA+ICAgICA+ICAgICA+ICAgICA+ICAgICBJZiB5b3UgZG9uJ3QgZ2V0IGFueSBpbmZv
+cm1hdGl2ZSBtZXNzYWdlcyBhZGQgLS1kZWJ1ZyB0byBnZXQgZGV0YWlsIGxvZ2dpbmcuDQogICAg
+PiAgICAgPiAgICAgPiAgICAgPiAgICAgDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAgICAgDQog
+ICAgPiAgICAgPiAgICAgPiAgICAgPiAgICAgRGF2aWQNCiAgICA+ICAgICA+ICAgICA+ICAgICA+
+ICAgICANCiAgICA+ICAgICA+ICAgICA+ICAgICA+ICANCiAgICA+ICAgICA+ICAgICA+ICAgICA+
+IFRoYW5rcywgRGF2aWQgZm9yIHlvdXIgaW5wdXQuIEl0IGlzIGludGVyZXN0aW5nIHRoYXQgYWxs
+IHRoZSA1MCBvc2RzIGhhZCB0aGUgc2FtZSBmc2NrIGlzc3VlIGltbWVkaWF0ZWx5IGFmdGVyIHRo
+ZSB1cGdyYWRlLg0KICAgID4gICAgID4gICAgID4gICAgID4gDQogICAgPiAgICAgPiAgICAgPiAg
+ICAgPiBCZWxvdyBpcyB0aGUgbG9nIG9mIG1hbnVhbCBmc2NrLg0KICAgID4gICAgID4gICAgID4g
+ICAgID4gDQogICAgPiAgICAgPiAgICAgPiAgICAgPiBUaGlzIGlzIHRoZSBlcnJvciBsaW5lIGlu
+IGl0Og0KICAgID4gICAgID4gICAgID4gICAgID4gZnNjayBlcnJvcjogbGVha2VkIHNvbWUgc3Bh
+Y2U7NjU1MzYgYnl0ZXMgbGVha2VkDQogICAgPiAgICAgPiAgICAgPiAgICAgPiANCiAgICA+ICAg
+ICA+ICAgICA+ICAgICA+IA0KICAgID4gICAgID4gICAgID4gICAgID4gIyBjZXBoLW9iamVjdHN0
+b3JlLXRvb2wgLS1kYXRhLXBhdGggL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0yIC0tb3AgZnNjayAt
+LWRlYnVnDQogICAgPiAgICAgPiAgICAgPiAgICAgPiB3YXJuaW5nOiBsaW5lIDM2OiAnYmx1ZXN0
+b3JlX2ZzY2tfb25fbW91bnQnIGluIHNlY3Rpb24gJ2dsb2JhbCcgcmVkZWZpbmVkIA0KICAgID4g
+ICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My44OTUzNzcgN2ZjYjEzOGY4Mjgw
+ICAxIGJsdWVzdG9yZSgvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTIpIGZzY2sgKHNoYWxsb3cpIHN0
+YXJ0DQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjg5NTQxMCA3
+ZmNiMTM4ZjgyODAgIDEgYmRldiBjcmVhdGUgcGF0aCAvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTIv
+YmxvY2sgdHlwZSBrZXJuZWwNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6
+MDM6NDMuODk1NDE2IDdmY2IxMzhmODI4MCAgMSBiZGV2KDB4NTYwMWY4N2IzMjAwIC92YXIvbGli
+L2NlcGgvb3NkL2NlcGgtMi9ibG9jaykgb3BlbiBwYXRoIC92YXIvbGliL2NlcGgvb3NkL2NlcGgt
+Mi9ibG9jaw0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My44OTU2
+ODQgN2ZjYjEzOGY4MjgwICAxIGJkZXYoMHg1NjAxZjg3YjMyMDAgL3Zhci9saWIvY2VwaC9vc2Qv
+Y2VwaC0yL2Jsb2NrKSBvcGVuIHNpemUgNDAwMDY4MTEwMzM2MCAoMHgzYTM3YjJkMTAwMCwgMzcy
+NSBHQikgYmxvY2tfc2l6ZSA0MDk2ICg0MDk2IEIpIHJvdGF0aW9uYWwNCiAgICA+ICAgICA+ICAg
+ICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuODk1OTQyIDdmY2IxMzhmODI4MCAgMSBibHVl
+c3RvcmUoL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0yKSBfc2V0X2NhY2hlX3NpemVzIG1heCAwLjUg
+PCByYXRpbyAwLjk5DQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQz
+Ljg5NTk1NyA3ZmNiMTM4ZjgyODAgIDEgYmx1ZXN0b3JlKC92YXIvbGliL2NlcGgvb3NkL2NlcGgt
+MikgX3NldF9jYWNoZV9zaXplcyBjYWNoZV9zaXplIDEwNzM3NDE4MjQgbWV0YSAwLjUga3YgMC41
+IGRhdGEgMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My44OTU5
+OTAgN2ZjYjEzOGY4MjgwICAxIGJkZXYgY3JlYXRlIHBhdGggL3Zhci9saWIvY2VwaC9vc2QvY2Vw
+aC0yL2Jsb2NrLmRiIHR5cGUga2VybmVsDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4
+LTE3IDE0OjAzOjQzLjg5NTk5NCA3ZmNiMTM4ZjgyODAgIDEgYmRldigweDU2MDFmODdiMzQwMCAv
+dmFyL2xpYi9jZXBoL29zZC9jZXBoLTIvYmxvY2suZGIpIG9wZW4gcGF0aCAvdmFyL2xpYi9jZXBo
+L29zZC9jZXBoLTIvYmxvY2suZGINCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcg
+MTQ6MDM6NDMuODk2MTYyIDdmY2IxMzhmODI4MCAgMSBiZGV2KDB4NTYwMWY4N2IzNDAwIC92YXIv
+bGliL2NlcGgvb3NkL2NlcGgtMi9ibG9jay5kYikgb3BlbiBzaXplIDEwNzM3NDE4MjQgKDB4NDAw
+MDAwMDAsIDEwMjQgTUIpIGJsb2NrX3NpemUgNDA5NiAoNDA5NiBCKSBub24tcm90YXRpb25hbA0K
+ICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My44OTYxNjggN2ZjYjEz
+OGY4MjgwICAxIGJsdWVmcyBhZGRfYmxvY2tfZGV2aWNlIGJkZXYgMSBwYXRoIC92YXIvbGliL2Nl
+cGgvb3NkL2NlcGgtMi9ibG9jay5kYiBzaXplIDEwMjQgTUINCiAgICA+ICAgICA+ICAgICA+ICAg
+ICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuODk2MzY0IDdmY2IxMzhmODI4MCAgMSBiZGV2IGNyZWF0
+ZSBwYXRoIC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMi9ibG9jayB0eXBlIGtlcm5lbA0KICAgID4g
+ICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My44OTYzNzIgN2ZjYjEzOGY4Mjgw
+ICAxIGJkZXYoMHg1NjAxZjg3YjM2MDAgL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0yL2Jsb2NrKSBv
+cGVuIHBhdGggL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0yL2Jsb2NrDQogICAgPiAgICAgPiAgICAg
+PiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjg5NjUyOSA3ZmNiMTM4ZjgyODAgIDEgYmRldigw
+eDU2MDFmODdiMzYwMCAvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTIvYmxvY2spIG9wZW4gc2l6ZSA0
+MDAwNjgxMTAzMzYwICgweDNhMzdiMmQxMDAwLCAzNzI1IEdCKSBibG9ja19zaXplIDQwOTYgKDQw
+OTYgQikgcm90YXRpb25hbA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDow
+Mzo0My44OTY1MzUgN2ZjYjEzOGY4MjgwICAxIGJsdWVmcyBhZGRfYmxvY2tfZGV2aWNlIGJkZXYg
+MiBwYXRoIC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMi9ibG9jayBzaXplIDM3MjUgR0INCiAgICA+
+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuODk2NTQ2IDdmY2IxMzhmODI4
+MCAgMSBiZGV2IGNyZWF0ZSBwYXRoIC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMi9ibG9jay53YWwg
+dHlwZSBrZXJuZWwNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMu
+ODk2NTQ5IDdmY2IxMzhmODI4MCAgMSBiZGV2KDB4NTYwMWY4N2IzODAwIC92YXIvbGliL2NlcGgv
+b3NkL2NlcGgtMi9ibG9jay53YWwpIG9wZW4gcGF0aCAvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTIv
+YmxvY2sud2FsDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjg5
+NjczMyA3ZmNiMTM4ZjgyODAgIDEgYmRldigweDU2MDFmODdiMzgwMCAvdmFyL2xpYi9jZXBoL29z
+ZC9jZXBoLTIvYmxvY2sud2FsKSBvcGVuIHNpemUgMTA3Mzc0MTgyNDAgKDB4MjgwMDAwMDAwLCAx
+MDI0MCBNQikgYmxvY2tfc2l6ZSA0MDk2ICg0MDk2IEIpIG5vbi1yb3RhdGlvbmFsDQogICAgPiAg
+ICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjg5NjczOSA3ZmNiMTM4ZjgyODAg
+IDEgYmx1ZWZzIGFkZF9ibG9ja19kZXZpY2UgYmRldiAwIHBhdGggL3Zhci9saWIvY2VwaC9vc2Qv
+Y2VwaC0yL2Jsb2NrLndhbCBzaXplIDEwMjQwIE1CDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAy
+MDE3LTA4LTE3IDE0OjAzOjQzLjg5NjkxMiA3ZmNiMTM4ZjgyODAgIDEgYmx1ZWZzIG1vdW50DQog
+ICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjUxNCA3ZmNiMTM4
+ZjgyODAgIDAgIHNldCByb2Nrc2RiIG9wdGlvbiBjb21wYWN0aW9uX3JlYWRhaGVhZF9zaXplID0g
+MjA5NzE1Mg0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI1
+MjUgN2ZjYjEzOGY4MjgwICAwICBzZXQgcm9ja3NkYiBvcHRpb24gY29tcHJlc3Npb24gPSBrTm9D
+b21wcmVzc2lvbg0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45
+MDI1MzMgN2ZjYjEzOGY4MjgwICAwICBzZXQgcm9ja3NkYiBvcHRpb24gbWF4X3dyaXRlX2J1ZmZl
+cl9udW1iZXIgPSA0DQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQz
+LjkwMjUzOCA3ZmNiMTM4ZjgyODAgIDAgIHNldCByb2Nrc2RiIG9wdGlvbiBtaW5fd3JpdGVfYnVm
+ZmVyX251bWJlcl90b19tZXJnZSA9IDENCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgt
+MTcgMTQ6MDM6NDMuOTAyNTQxIDdmY2IxMzhmODI4MCAgMCAgc2V0IHJvY2tzZGIgb3B0aW9uIHJl
+Y3ljbGVfbG9nX2ZpbGVfbnVtID0gNA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0x
+NyAxNDowMzo0My45MDI1NDQgN2ZjYjEzOGY4MjgwICAwICBzZXQgcm9ja3NkYiBvcHRpb24gd3Jp
+dGFibGVfZmlsZV9tYXhfYnVmZmVyX3NpemUgPSAwDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAy
+MDE3LTA4LTE3IDE0OjAzOjQzLjkwMjU0OCA3ZmNiMTM4ZjgyODAgIDAgIHNldCByb2Nrc2RiIG9w
+dGlvbiB3cml0ZV9idWZmZXJfc2l6ZSA9IDI2ODQzNTQ1Ng0KICAgID4gICAgID4gICAgID4gICAg
+ID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI1NzIgN2ZjYjEzOGY4MjgwICAwICBzZXQgcm9ja3Nk
+YiBvcHRpb24gY29tcGFjdGlvbl9yZWFkYWhlYWRfc2l6ZSA9IDIwOTcxNTINCiAgICA+ICAgICA+
+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyNTc3IDdmY2IxMzhmODI4MCAgMCAg
+c2V0IHJvY2tzZGIgb3B0aW9uIGNvbXByZXNzaW9uID0ga05vQ29tcHJlc3Npb24NCiAgICA+ICAg
+ICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyNTgwIDdmY2IxMzhmODI4MCAg
+MCAgc2V0IHJvY2tzZGIgb3B0aW9uIG1heF93cml0ZV9idWZmZXJfbnVtYmVyID0gNA0KICAgID4g
+ICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI1ODQgN2ZjYjEzOGY4Mjgw
+ICAwICBzZXQgcm9ja3NkYiBvcHRpb24gbWluX3dyaXRlX2J1ZmZlcl9udW1iZXJfdG9fbWVyZ2Ug
+PSAxDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjU4NyA3
+ZmNiMTM4ZjgyODAgIDAgIHNldCByb2Nrc2RiIG9wdGlvbiByZWN5Y2xlX2xvZ19maWxlX251bSA9
+IDQNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyNTkwIDdm
+Y2IxMzhmODI4MCAgMCAgc2V0IHJvY2tzZGIgb3B0aW9uIHdyaXRhYmxlX2ZpbGVfbWF4X2J1ZmZl
+cl9zaXplID0gMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45
+MDI1OTMgN2ZjYjEzOGY4MjgwICAwICBzZXQgcm9ja3NkYiBvcHRpb24gd3JpdGVfYnVmZmVyX3Np
+emUgPSAyNjg0MzU0NTYNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6
+NDMuOTAyNzA2IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiBSb2Nrc0RCIHZlcnNpb246IDUuNC4w
+DQogICAgPiAgICAgPiAgICAgPiAgICAgPiANCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTct
+MDgtMTcgMTQ6MDM6NDMuOTAyNzEzIDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiBHaXQgc2hhIHJv
+Y2tzZGJfYnVpbGRfZ2l0X3NoYTpAMEANCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgt
+MTcgMTQ6MDM6NDMuOTAyNzE1IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiBDb21waWxlIGRhdGUg
+QXVnIDE1IDIwMTcNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMu
+OTAyNzE5IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiBEQiBTVU1NQVJZDQogICAgPiAgICAgPiAg
+ICAgPiAgICAgPiANCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMu
+OTAyNzI3IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiBDVVJSRU5UIGZpbGU6ICBDVVJSRU5UDQog
+ICAgPiAgICAgPiAgICAgPiAgICAgPiANCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgt
+MTcgMTQ6MDM6NDMuOTAyNzI5IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiBJREVOVElUWSBmaWxl
+OiAgSURFTlRJVFkNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IA0KICAgID4gICAgID4gICAgID4g
+ICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI3MzUgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6
+IE1BTklGRVNUIGZpbGU6ICBNQU5JRkVTVC0wMDA5Mzcgc2l6ZTogMTA4MyBCeXRlcw0KICAgID4g
+ICAgID4gICAgID4gICAgID4gDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0
+OjAzOjQzLjkwMjczOSA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogU1NUIGZpbGVzIGluIGRiIGRp
+ciwgVG90YWwgTnVtOiAwLCBmaWxlczogDQogICAgPiAgICAgPiAgICAgPiAgICAgPiANCiAgICA+
+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyNzQ1IDdmY2IxMzhmODI4
+MCAgNCByb2Nrc2RiOiBTU1QgZmlsZXMgaW4gZGIuc2xvdyBkaXIsIFRvdGFsIE51bTogNiwgZmls
+ZXM6IDAwMDE4Ny5zc3QgMDAwMTk5LnNzdCAwMDAyMTkuc3N0IDAwMDIyMC5zc3QgMDAwOTM0LnNz
+dCAwMDA5MzUuc3N0IA0KICAgID4gICAgID4gICAgID4gICAgID4gDQogICAgPiAgICAgPiAgICAg
+PiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjc1MyA3ZmNiMTM4ZjgyODAgIDQgcm9ja3Nk
+YjogV3JpdGUgQWhlYWQgTG9nIGZpbGUgaW4gZGIud2FsOiAwMDA5MzgubG9nIHNpemU6IDAgOyAN
+CiAgICA+ICAgICA+ICAgICA+ICAgICA+IA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0w
+OC0xNyAxNDowMzo0My45MDI3NTUgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAg
+ICAgICAgICAgICAgIE9wdGlvbnMuZXJyb3JfaWZfZXhpc3RzOiAwDQogICAgPiAgICAgPiAgICAg
+PiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjc1NiA3ZmNiMTM4ZjgyODAgIDQgcm9ja3Nk
+YjogICAgICAgICAgICAgICAgICAgICAgIE9wdGlvbnMuY3JlYXRlX2lmX21pc3Npbmc6IDANCiAg
+ICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyNzU3IDdmY2IxMzhm
+ODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICAgICAgICAgICAgICBPcHRpb25zLnBhcmFub2lk
+X2NoZWNrczogMQ0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45
+MDI3NTggN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgIE9wdGlvbnMuZW52OiAweDU2MDFmOGE0M2U4MA0KICAgID4gICAgID4gICAgID4g
+ICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI3NTkgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBPcHRpb25zLmluZm9fbG9nOiAweDU2MDFm
+OGE0NDNlMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI3
+NjAgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgICAgICAgICAgICAgICBPcHRp
+b25zLm1heF9vcGVuX2ZpbGVzOiAtMQ0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0x
+NyAxNDowMzo0My45MDI3NjIgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgICAg
+IE9wdGlvbnMubWF4X2ZpbGVfb3BlbmluZ190aHJlYWRzOiAxNg0KICAgID4gICAgID4gICAgID4g
+ICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI3NjMgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE9wdGlvbnMudXNlX2ZzeW5jOiAwDQogICAg
+PiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjc2NCA3ZmNiMTM4Zjgy
+ODAgIDQgcm9ja3NkYjogICAgICAgICAgICAgICAgICAgICAgIE9wdGlvbnMubWF4X2xvZ19maWxl
+X3NpemU6IDANCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAy
+NzY1IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICAgICAgIE9wdGlvbnMubWF4
+X21hbmlmZXN0X2ZpbGVfc2l6ZTogMTg0NDY3NDQwNzM3MDk1NTE2MTUNCiAgICA+ICAgICA+ICAg
+ICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyNzY2IDdmY2IxMzhmODI4MCAgNCByb2Nr
+c2RiOiAgICAgICAgICAgICAgICAgICBPcHRpb25zLmxvZ19maWxlX3RpbWVfdG9fcm9sbDogMA0K
+ICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI3NjcgN2ZjYjEz
+OGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgICAgICAgICAgICBPcHRpb25zLmtlZXBfbG9n
+X2ZpbGVfbnVtOiAxMDAwDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAz
+OjQzLjkwMjc2OCA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICAgICAgICAgICAgICAgIE9w
+dGlvbnMucmVjeWNsZV9sb2dfZmlsZV9udW06IDQNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIw
+MTctMDgtMTcgMTQ6MDM6NDMuOTAyNzY5IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAg
+ICAgICAgICAgICAgICAgICBPcHRpb25zLmFsbG93X2ZhbGxvY2F0ZTogMQ0KICAgID4gICAgID4g
+ICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI3NzAgN2ZjYjEzOGY4MjgwICA0IHJv
+Y2tzZGI6ICAgICAgICAgICAgICAgICAgICAgICAgT3B0aW9ucy5hbGxvd19tbWFwX3JlYWRzOiAw
+DQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjc3MSA3ZmNi
+MTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICAgICAgICAgICAgICAgICAgIE9wdGlvbnMuYWxsb3df
+bW1hcF93cml0ZXM6IDANCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6
+NDMuOTAyNzcxIDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICAgICAgICAgICAg
+IE9wdGlvbnMudXNlX2RpcmVjdF9yZWFkczogMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAx
+Ny0wOC0xNyAxNDowMzo0My45MDI3NzIgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAg
+ICAgICAgICAgICAgICAgT3B0aW9ucy51c2VfZGlyZWN0X2lvX2Zvcl9mbHVzaF9hbmRfY29tcGFj
+dGlvbjogMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI3
+NzQgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgIE9wdGlvbnMuY3JlYXRlX21pc3Np
+bmdfY29sdW1uX2ZhbWlsaWVzOiAwDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3
+IDE0OjAzOjQzLjkwMjc4MSA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICBPcHRpb25zLmRiX2xvZ19kaXI6IA0KICAgID4gICAgID4gICAgID4gICAg
+ID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI3ODMgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgT3B0aW9ucy53YWxfZGlyOiBkYi53YWwNCiAg
+ICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyNzg0IDdmY2IxMzhm
+ODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICAgICBPcHRpb25zLnRhYmxlX2NhY2hlX251bXNo
+YXJkYml0czogNg0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45
+MDI3ODQgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgICAgICAgICAgIE9wdGlv
+bnMubWF4X3N1YmNvbXBhY3Rpb25zOiAxDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4
+LTE3IDE0OjAzOjQzLjkwMjc4NSA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICAgICAgICAg
+ICAgICBPcHRpb25zLm1heF9iYWNrZ3JvdW5kX2ZsdXNoZXM6IDENCiAgICA+ICAgICA+ICAgICA+
+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyNzg2IDdmY2IxMzhmODI4MCAgNCByb2Nrc2Ri
+OiAgICAgICAgICAgICAgICAgICAgICAgICBPcHRpb25zLldBTF90dGxfc2Vjb25kczogMA0KICAg
+ID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI3ODcgN2ZjYjEzOGY4
+MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgICAgICAgICAgICBPcHRpb25zLldBTF9zaXplX2xp
+bWl0X01COiAwDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkw
+Mjc4OCA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICAgICAgICAgT3B0aW9ucy5tYW5pZmVz
+dF9wcmVhbGxvY2F0aW9uX3NpemU6IDQxOTQzMDQNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIw
+MTctMDgtMTcgMTQ6MDM6NDMuOTAyNzg5IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAg
+ICAgICAgICAgICAgIE9wdGlvbnMuaXNfZmRfY2xvc2Vfb25fZXhlYzogMQ0KICAgID4gICAgID4g
+ICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI3OTAgN2ZjYjEzOGY4MjgwICA0IHJv
+Y2tzZGI6ICAgICAgICAgICAgICAgICAgIE9wdGlvbnMuYWR2aXNlX3JhbmRvbV9vbl9vcGVuOiAx
+DQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjc5MCA3ZmNi
+MTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICAgICAgICAgICAgICAgIE9wdGlvbnMuZGJfd3JpdGVf
+YnVmZmVyX3NpemU6IDANCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6
+NDMuOTAyNzkxIDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAgIE9wdGlvbnMuYWNjZXNz
+X2hpbnRfb25fY29tcGFjdGlvbl9zdGFydDogMQ0KICAgID4gICAgID4gICAgID4gICAgID4gMjAx
+Ny0wOC0xNyAxNDowMzo0My45MDI3OTIgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICBPcHRpb25z
+Lm5ld190YWJsZV9yZWFkZXJfZm9yX2NvbXBhY3Rpb25faW5wdXRzOiAxDQogICAgPiAgICAgPiAg
+ICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjc5MyA3ZmNiMTM4ZjgyODAgIDQgcm9j
+a3NkYjogICAgICAgICAgICAgICBPcHRpb25zLmNvbXBhY3Rpb25fcmVhZGFoZWFkX3NpemU6IDIw
+OTcxNTINCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyNzk0
+IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgT3B0aW9ucy5yYW5kb21fYWNjZXNz
+X21heF9idWZmZXJfc2l6ZTogMTA0ODU3Ng0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0w
+OC0xNyAxNDowMzo0My45MDI3OTUgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICBP
+cHRpb25zLndyaXRhYmxlX2ZpbGVfbWF4X2J1ZmZlcl9zaXplOiAwDQogICAgPiAgICAgPiAgICAg
+PiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjc5NSA3ZmNiMTM4ZjgyODAgIDQgcm9ja3Nk
+YjogICAgICAgICAgICAgICAgICAgICAgT3B0aW9ucy51c2VfYWRhcHRpdmVfbXV0ZXg6IDANCiAg
+ICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyNzk2IDdmY2IxMzhm
+ODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICAgICAgICAgICAgICAgICBPcHRpb25zLnJhdGVf
+bGltaXRlcjogKG5pbCkNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6
+NDMuOTAyNzk4IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgT3B0aW9ucy5zc3RfZmlsZV9t
+YW5hZ2VyLnJhdGVfYnl0ZXNfcGVyX3NlYzogMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAx
+Ny0wOC0xNyAxNDowMzo0My45MDI3OTkgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAg
+ICAgICAgICAgICAgICAgICBPcHRpb25zLmJ5dGVzX3Blcl9zeW5jOiAwDQogICAgPiAgICAgPiAg
+ICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjgwMSA3ZmNiMTM4ZjgyODAgIDQgcm9j
+a3NkYjogICAgICAgICAgICAgICAgICAgICAgT3B0aW9ucy53YWxfYnl0ZXNfcGVyX3N5bmM6IDAN
+CiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyODAyIDdmY2Ix
+MzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICAgICAgICAgICAgT3B0aW9ucy53YWxfcmVj
+b3ZlcnlfbW9kZTogMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0
+My45MDI4MDMgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgICAgICAgT3B0aW9u
+cy5lbmFibGVfdGhyZWFkX3RyYWNraW5nOiAwDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3
+LTA4LTE3IDE0OjAzOjQzLjkwMjgwNCA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICAgICBP
+cHRpb25zLmFsbG93X2NvbmN1cnJlbnRfbWVtdGFibGVfd3JpdGU6IDENCiAgICA+ICAgICA+ICAg
+ICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyODA1IDdmY2IxMzhmODI4MCAgNCByb2Nr
+c2RiOiAgICAgIE9wdGlvbnMuZW5hYmxlX3dyaXRlX3RocmVhZF9hZGFwdGl2ZV95aWVsZDogMQ0K
+ICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI4MDYgN2ZjYjEz
+OGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgIE9wdGlvbnMud3JpdGVfdGhyZWFkX21heF95
+aWVsZF91c2VjOiAxMDANCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6
+NDMuOTAyODA3IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgIE9wdGlvbnMud3Jp
+dGVfdGhyZWFkX3Nsb3dfeWllbGRfdXNlYzogMw0KICAgID4gICAgID4gICAgID4gICAgID4gMjAx
+Ny0wOC0xNyAxNDowMzo0My45MDI4MDggN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgIE9wdGlvbnMucm93X2NhY2hlOiBOb25lDQogICAgPiAgICAg
+PiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjgwOCA3ZmNiMTM4ZjgyODAgIDQg
+cm9ja3NkYjogICAgICAgICAgICAgICAgICAgICAgICAgICAgICBPcHRpb25zLndhbF9maWx0ZXI6
+IE5vbmUNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyODA5
+IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICBPcHRpb25zLmF2b2lkX2ZsdXNo
+X2R1cmluZ19yZWNvdmVyeTogMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAx
+NDowMzo0My45MDI4MTAgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgIE9wdGlv
+bnMuYmFzZV9iYWNrZ3JvdW5kX2NvbXBhY3Rpb25zOiAxDQogICAgPiAgICAgPiAgICAgPiAgICAg
+PiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjgxMSA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAg
+ICAgICAgICAgT3B0aW9ucy5tYXhfYmFja2dyb3VuZF9jb21wYWN0aW9uczogMQ0KICAgID4gICAg
+ID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI4MTIgN2ZjYjEzOGY4MjgwICA0
+IHJvY2tzZGI6ICAgICAgICAgICAgIE9wdGlvbnMuYXZvaWRfZmx1c2hfZHVyaW5nX3NodXRkb3du
+OiAwDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjgxMyA3
+ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICAgICAgICAgT3B0aW9ucy5kZWxheWVkX3dyaXRl
+X3JhdGUgOiAxNjc3NzIxNg0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDow
+Mzo0My45MDI4MTQgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgIE9wdGlvbnMu
+bWF4X3RvdGFsX3dhbF9zaXplOiAwDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3
+IDE0OjAzOjQzLjkwMjgxNiA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICAgICAgICAgT3B0
+aW9ucy5kZWxldGVfb2Jzb2xldGVfZmlsZXNfcGVyaW9kX21pY3JvczogMjE2MDAwMDAwMDANCiAg
+ICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyODE3IDdmY2IxMzhm
+ODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICAgICAgICBPcHRpb25zLnN0YXRzX2R1bXBfcGVy
+aW9kX3NlYzogNjAwDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQz
+LjkwMjgxOCA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogQ29tcHJlc3Npb24gYWxnb3JpdGhtcyBz
+dXBwb3J0ZWQ6DQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkw
+MjgxOSA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAgIFNuYXBweSBzdXBwb3J0ZWQ6IDANCiAg
+ICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyODIwIDdmY2IxMzhm
+ODI4MCAgNCByb2Nrc2RiOiAgICAgWmxpYiBzdXBwb3J0ZWQ6IDANCiAgICA+ICAgICA+ICAgICA+
+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyODIxIDdmY2IxMzhmODI4MCAgNCByb2Nrc2Ri
+OiAgICAgQnppcCBzdXBwb3J0ZWQ6IDANCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgt
+MTcgMTQ6MDM6NDMuOTAyODIyIDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgTFo0IHN1cHBv
+cnRlZDogMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI4
+MjMgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICBaU1REIHN1cHBvcnRlZDogMA0KICAgID4g
+ICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI4MjQgN2ZjYjEzOGY4Mjgw
+ICA0IHJvY2tzZGI6IEZhc3QgQ1JDMzIgc3VwcG9ydGVkOiAxDQogICAgPiAgICAgPiAgICAgPiAg
+ICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjkyMCA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjog
+Wy9idWlsZC9uaXRpbi9uaWdodGx5X2J1aWxkcy8yMDE3MDgxNV8xNDE1MzgtbHVtaW5vdXMvY2Vw
+aC5naXQvcnBtYnVpbGQvQlVJTEQvY2VwaC0xMi4xLjQtMTIuMS40L3NyYy9yb2Nrc2RiL2RiL3Zl
+cnNpb25fc2V0LmNjOjI2MDldIFJlY292ZXJpbmcgZnJvbSBtYW5pZmVzdCBmaWxlOiBNQU5JRkVT
+VC0wMDA5MzcNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IA0KICAgID4gICAgID4gICAgID4gICAg
+ID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI5NTggN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6IFsv
+YnVpbGQvbml0aW4vbmlnaHRseV9idWlsZHMvMjAxNzA4MTVfMTQxNTM4LWx1bWlub3VzL2NlcGgu
+Z2l0L3JwbWJ1aWxkL0JVSUxEL2NlcGgtMTIuMS40LTEyLjEuNC9zcmMvcm9ja3NkYi9kYi9jb2x1
+bW5fZmFtaWx5LmNjOjQwN10gLS0tLS0tLS0tLS0tLS0tIE9wdGlvbnMgZm9yIGNvbHVtbiBmYW1p
+bHkgW2RlZmF1bHRdOg0KICAgID4gICAgID4gICAgID4gICAgID4gDQogICAgPiAgICAgPiAgICAg
+PiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjk2MCA3ZmNiMTM4ZjgyODAgIDQgcm9ja3Nk
+YjogICAgICAgICAgICAgICBPcHRpb25zLmNvbXBhcmF0b3I6IGxldmVsZGIuQnl0ZXdpc2VDb21w
+YXJhdG9yDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjk2
+NSA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICAgICAgIE9wdGlvbnMubWVyZ2Vfb3BlcmF0
+b3I6IC5UOmludDY0X2FycmF5LmI6Yml0d2lzZV94b3INCiAgICA+ICAgICA+ICAgICA+ICAgICA+
+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyOTY2IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAg
+ICAgT3B0aW9ucy5jb21wYWN0aW9uX2ZpbHRlcjogTm9uZQ0KICAgID4gICAgID4gICAgID4gICAg
+ID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI5NjcgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAg
+ICAgICBPcHRpb25zLmNvbXBhY3Rpb25fZmlsdGVyX2ZhY3Rvcnk6IE5vbmUNCiAgICA+ICAgICA+
+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyOTY5IDdmY2IxMzhmODI4MCAgNCBy
+b2Nrc2RiOiAgICAgICAgIE9wdGlvbnMubWVtdGFibGVfZmFjdG9yeTogU2tpcExpc3RGYWN0b3J5
+DQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMjk3MCA3ZmNi
+MTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICAgICAgICBPcHRpb25zLnRhYmxlX2ZhY3Rvcnk6IEJs
+b2NrQmFzZWRUYWJsZQ0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0
+My45MDI5ODUgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgdGFibGVfZmFjdG9y
+eSBvcHRpb25zOiAgIGZsdXNoX2Jsb2NrX3BvbGljeV9mYWN0b3J5OiBGbHVzaEJsb2NrQnlTaXpl
+UG9saWN5RmFjdG9yeSAoMHg1NjAxZjg3ODIyMDgpDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAg
+IGNhY2hlX2luZGV4X2FuZF9maWx0ZXJfYmxvY2tzOiAxDQogICAgPiAgICAgPiAgICAgPiAgICAg
+PiAgIGNhY2hlX2luZGV4X2FuZF9maWx0ZXJfYmxvY2tzX3dpdGhfaGlnaF9wcmlvcml0eTogMQ0K
+ICAgID4gICAgID4gICAgID4gICAgID4gICBwaW5fbDBfZmlsdGVyX2FuZF9pbmRleF9ibG9ja3Nf
+aW5fY2FjaGU6IDENCiAgICA+ICAgICA+ICAgICA+ICAgICA+ICAgaW5kZXhfdHlwZTogMA0KICAg
+ID4gICAgID4gICAgID4gICAgID4gICBoYXNoX2luZGV4X2FsbG93X2NvbGxpc2lvbjogMQ0KICAg
+ID4gICAgID4gICAgID4gICAgID4gICBjaGVja3N1bTogMQ0KICAgID4gICAgID4gICAgID4gICAg
+ID4gICBub19ibG9ja19jYWNoZTogMA0KICAgID4gICAgID4gICAgID4gICAgID4gICBibG9ja19j
+YWNoZTogMHg1NjAxZjg3Y2RkZDgNCiAgICA+ICAgICA+ICAgICA+ICAgICA+ICAgYmxvY2tfY2Fj
+aGVfbmFtZTogTFJVQ2FjaGUNCiAgICA+ICAgICA+ICAgICA+ICAgICA+ICAgYmxvY2tfY2FjaGVf
+b3B0aW9uczoNCiAgICA+ICAgICA+ICAgICA+ICAgICA+ICAgICBjYXBhY2l0eSA6IDUzNjg3MDkx
+Mg0KICAgID4gICAgID4gICAgID4gICAgID4gICAgIG51bV9zaGFyZF9iaXRzIDogNA0KICAgID4g
+ICAgID4gICAgID4gICAgID4gICAgIHN0cmljdF9jYXBhY2l0eV9saW1pdCA6IDANCiAgICA+ICAg
+ICA+ICAgICA+ICAgICA+ICAgICBoaWdoX3ByaV9wb29sX3JhdGlvOiAwLjAwMA0KICAgID4gICAg
+ID4gICAgID4gICAgID4gICBibG9ja19jYWNoZV9jb21wcmVzc2VkOiAobmlsKQ0KICAgID4gICAg
+ID4gICAgID4gICAgID4gICBwZXJzaXN0ZW50X2NhY2hlOiAobmlsKQ0KICAgID4gICAgID4gICAg
+ID4gICAgID4gICBibG9ja19zaXplOiA0MDk2DQogICAgPiAgICAgPiAgICAgPiAgICAgPiAgIGJs
+b2NrX3NpemVfZGV2aWF0aW9uOiAxMA0KICAgID4gICAgID4gICAgID4gICAgID4gICBibG9ja19y
+ZXN0YXJ0X2ludGVydmFsOiAxNg0KICAgID4gICAgID4gICAgID4gICAgID4gICBpbmRleF9ibG9j
+a19yZXN0YXJ0X2ludGVydmFsOiAxDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAgIGZpbHRlcl9w
+b2xpY3k6IHJvY2tzZGIuQnVpbHRpbkJsb29tRmlsdGVyDQogICAgPiAgICAgPiAgICAgPiAgICAg
+PiAgIHdob2xlX2tleV9maWx0ZXJpbmc6IDENCiAgICA+ICAgICA+ICAgICA+ICAgICA+ICAgZm9y
+bWF0X3ZlcnNpb246IDINCiAgICA+ICAgICA+ICAgICA+ICAgICA+IA0KICAgID4gICAgID4gICAg
+ID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI5OTUgN2ZjYjEzOGY4MjgwICA0IHJvY2tz
+ZGI6ICAgICAgICBPcHRpb25zLndyaXRlX2J1ZmZlcl9zaXplOiAyNjg0MzU0NTYNCiAgICA+ICAg
+ICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyOTk2IDdmY2IxMzhmODI4MCAg
+NCByb2Nrc2RiOiAgT3B0aW9ucy5tYXhfd3JpdGVfYnVmZmVyX251bWJlcjogNA0KICAgID4gICAg
+ID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDI5OTcgN2ZjYjEzOGY4MjgwICA0
+IHJvY2tzZGI6ICAgICAgICAgIE9wdGlvbnMuY29tcHJlc3Npb246IE5vQ29tcHJlc3Npb24NCiAg
+ICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAyOTk5IDdmY2IxMzhm
+ODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICAgICAgIE9wdGlvbnMuYm90dG9tbW9zdF9jb21w
+cmVzc2lvbjogRGlzYWJsZWQNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6
+MDM6NDMuOTAzMDAwIDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICBPcHRpb25zLnByZWZp
+eF9leHRyYWN0b3I6IG51bGxwdHINCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcg
+MTQ6MDM6NDMuOTAzMDAwIDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgIE9wdGlvbnMubWVtdGFi
+bGVfaW5zZXJ0X3dpdGhfaGludF9wcmVmaXhfZXh0cmFjdG9yOiBudWxscHRyDQogICAgPiAgICAg
+PiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMzAwMSA3ZmNiMTM4ZjgyODAgIDQg
+cm9ja3NkYjogICAgICAgICAgICAgT3B0aW9ucy5udW1fbGV2ZWxzOiA3DQogICAgPiAgICAgPiAg
+ICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMzAwMiA3ZmNiMTM4ZjgyODAgIDQgcm9j
+a3NkYjogICAgICAgIE9wdGlvbnMubWluX3dyaXRlX2J1ZmZlcl9udW1iZXJfdG9fbWVyZ2U6IDEN
+CiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDA4IDdmY2Ix
+MzhmODI4MCAgNCByb2Nrc2RiOiAgICAgT3B0aW9ucy5tYXhfd3JpdGVfYnVmZmVyX251bWJlcl90
+b19tYWludGFpbjogMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0
+My45MDMwMDkgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgT3B0aW9ucy5jb21w
+cmVzc2lvbl9vcHRzLndpbmRvd19iaXRzOiAtMTQNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIw
+MTctMDgtMTcgMTQ6MDM6NDMuOTAzMDEwIDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAg
+ICAgICAgICAgIE9wdGlvbnMuY29tcHJlc3Npb25fb3B0cy5sZXZlbDogLTENCiAgICA+ICAgICA+
+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDEwIDdmY2IxMzhmODI4MCAgNCBy
+b2Nrc2RiOiAgICAgICAgICAgICAgIE9wdGlvbnMuY29tcHJlc3Npb25fb3B0cy5zdHJhdGVneTog
+MA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDMwMTEgN2Zj
+YjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgT3B0aW9ucy5jb21wcmVzc2lvbl9vcHRzLm1h
+eF9kaWN0X2J5dGVzOiAwDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAz
+OjQzLjkwMzAxMiA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICBPcHRpb25zLmxldmVsMF9m
+aWxlX251bV9jb21wYWN0aW9uX3RyaWdnZXI6IDQNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIw
+MTctMDgtMTcgMTQ6MDM6NDMuOTAzMDEzIDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAg
+ICBPcHRpb25zLmxldmVsMF9zbG93ZG93bl93cml0ZXNfdHJpZ2dlcjogMjANCiAgICA+ICAgICA+
+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDE0IDdmY2IxMzhmODI4MCAgNCBy
+b2Nrc2RiOiAgICAgICAgICAgICAgT3B0aW9ucy5sZXZlbDBfc3RvcF93cml0ZXNfdHJpZ2dlcjog
+MzYNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDE1IDdm
+Y2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICAgICAgICBPcHRpb25zLnRhcmdldF9m
+aWxlX3NpemVfYmFzZTogNjcxMDg4NjQNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgt
+MTcgMTQ6MDM6NDMuOTAzMDE1IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICBP
+cHRpb25zLnRhcmdldF9maWxlX3NpemVfbXVsdGlwbGllcjogMQ0KICAgID4gICAgID4gICAgID4g
+ICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDMwMTYgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6
+ICAgICAgICAgICAgICAgIE9wdGlvbnMubWF4X2J5dGVzX2Zvcl9sZXZlbF9iYXNlOiAyNjg0MzU0
+NTYNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDE3IDdm
+Y2IxMzhmODI4MCAgNCByb2Nrc2RiOiBPcHRpb25zLmxldmVsX2NvbXBhY3Rpb25fZHluYW1pY19s
+ZXZlbF9ieXRlczogMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0
+My45MDMwMTggN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgIE9wdGlvbnMubWF4X2J5
+dGVzX2Zvcl9sZXZlbF9tdWx0aXBsaWVyOiAxMC4wMDAwMDANCiAgICA+ICAgICA+ICAgICA+ICAg
+ICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDIxIDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiBP
+cHRpb25zLm1heF9ieXRlc19mb3JfbGV2ZWxfbXVsdGlwbGllcl9hZGR0bFswXTogMQ0KICAgID4g
+ICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDMwMjIgN2ZjYjEzOGY4Mjgw
+ICA0IHJvY2tzZGI6IE9wdGlvbnMubWF4X2J5dGVzX2Zvcl9sZXZlbF9tdWx0aXBsaWVyX2FkZHRs
+WzFdOiAxDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMzAy
+MyA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogT3B0aW9ucy5tYXhfYnl0ZXNfZm9yX2xldmVsX211
+bHRpcGxpZXJfYWRkdGxbMl06IDENCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcg
+MTQ6MDM6NDMuOTAzMDI0IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiBPcHRpb25zLm1heF9ieXRl
+c19mb3JfbGV2ZWxfbXVsdGlwbGllcl9hZGR0bFszXTogMQ0KICAgID4gICAgID4gICAgID4gICAg
+ID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDMwMjUgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6IE9w
+dGlvbnMubWF4X2J5dGVzX2Zvcl9sZXZlbF9tdWx0aXBsaWVyX2FkZHRsWzRdOiAxDQogICAgPiAg
+ICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMzAyNiA3ZmNiMTM4ZjgyODAg
+IDQgcm9ja3NkYjogT3B0aW9ucy5tYXhfYnl0ZXNfZm9yX2xldmVsX211bHRpcGxpZXJfYWRkdGxb
+NV06IDENCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDI2
+IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiBPcHRpb25zLm1heF9ieXRlc19mb3JfbGV2ZWxfbXVs
+dGlwbGllcl9hZGR0bFs2XTogMQ0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAx
+NDowMzo0My45MDMwMjcgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgIE9wdGlvbnMubWF4
+X3NlcXVlbnRpYWxfc2tpcF9pbl9pdGVyYXRpb25zOiA4DQogICAgPiAgICAgPiAgICAgPiAgICAg
+PiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMzAyOCA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAg
+ICAgICAgICAgICAgICAgIE9wdGlvbnMubWF4X2NvbXBhY3Rpb25fYnl0ZXM6IDE2Nzc3MjE2MDAN
+CiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDI5IDdmY2Ix
+MzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICAgICAgICAgICAgIE9wdGlvbnMuYXJlbmFf
+YmxvY2tfc2l6ZTogMzM1NTQ0MzINCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcg
+MTQ6MDM6NDMuOTAzMDMwIDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgIE9wdGlvbnMuc29mdF9w
+ZW5kaW5nX2NvbXBhY3Rpb25fYnl0ZXNfbGltaXQ6IDY4NzE5NDc2NzM2DQogICAgPiAgICAgPiAg
+ICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMzAzMSA3ZmNiMTM4ZjgyODAgIDQgcm9j
+a3NkYjogICBPcHRpb25zLmhhcmRfcGVuZGluZ19jb21wYWN0aW9uX2J5dGVzX2xpbWl0OiAyNzQ4
+Nzc5MDY5NDQNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAz
+MDMyIDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICBPcHRpb25zLnJhdGVfbGltaXRfZGVs
+YXlfbWF4X21pbGxpc2Vjb25kczogMTAwDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4
+LTE3IDE0OjAzOjQzLjkwMzAzMyA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICAgICAgICAg
+ICAgT3B0aW9ucy5kaXNhYmxlX2F1dG9fY29tcGFjdGlvbnM6IDANCiAgICA+ICAgICA+ICAgICA+
+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDM0IDdmY2IxMzhmODI4MCAgNCByb2Nrc2Ri
+OiAgICAgICAgICAgICAgICAgICAgICAgICBPcHRpb25zLmNvbXBhY3Rpb25fc3R5bGU6IGtDb21w
+YWN0aW9uU3R5bGVMZXZlbA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDow
+Mzo0My45MDMwMzUgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgT3B0aW9ucy5jb21wYWN0aW9uX3ByaToga0J5Q29tcGVuc2F0ZWRTaXplDQogICAgPiAg
+ICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMzAzNiA3ZmNiMTM4ZjgyODAg
+IDQgcm9ja3NkYjogIE9wdGlvbnMuY29tcGFjdGlvbl9vcHRpb25zX3VuaXZlcnNhbC5zaXplX3Jh
+dGlvOiAxDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjkwMzAz
+NyA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogT3B0aW9ucy5jb21wYWN0aW9uX29wdGlvbnNfdW5p
+dmVyc2FsLm1pbl9tZXJnZV93aWR0aDogMg0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0w
+OC0xNyAxNDowMzo0My45MDMwMzggN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6IE9wdGlvbnMuY29t
+cGFjdGlvbl9vcHRpb25zX3VuaXZlcnNhbC5tYXhfbWVyZ2Vfd2lkdGg6IDQyOTQ5NjcyOTUNCiAg
+ICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDM5IDdmY2IxMzhm
+ODI4MCAgNCByb2Nrc2RiOiBPcHRpb25zLmNvbXBhY3Rpb25fb3B0aW9uc191bml2ZXJzYWwubWF4
+X3NpemVfYW1wbGlmaWNhdGlvbl9wZXJjZW50OiAyMDANCiAgICA+ICAgICA+ICAgICA+ICAgICA+
+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDQwIDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiBPcHRp
+b25zLmNvbXBhY3Rpb25fb3B0aW9uc191bml2ZXJzYWwuY29tcHJlc3Npb25fc2l6ZV9wZXJjZW50
+OiAtMQ0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDMwNDEg
+N2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6IE9wdGlvbnMuY29tcGFjdGlvbl9vcHRpb25zX2ZpZm8u
+bWF4X3RhYmxlX2ZpbGVzX3NpemU6IDEwNzM3NDE4MjQNCiAgICA+ICAgICA+ICAgICA+ICAgICA+
+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDQyIDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAg
+ICAgICAgICAgICAgICBPcHRpb25zLnRhYmxlX3Byb3BlcnRpZXNfY29sbGVjdG9yczoNCiAgICA+
+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDQzIDdmY2IxMzhmODI4
+MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICAgICAgICBPcHRpb25zLmlucGxhY2VfdXBkYXRlX3N1
+cHBvcnQ6IDANCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAz
+MDQ0IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICAgICAgT3B0aW9ucy5pbnBs
+YWNlX3VwZGF0ZV9udW1fbG9ja3M6IDEwMDAwDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3
+LTA4LTE3IDE0OjAzOjQzLjkwMzA0NSA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogICAgICAgICAg
+ICAgICBPcHRpb25zLm1lbXRhYmxlX3ByZWZpeF9ibG9vbV9zaXplX3JhdGlvOiAwLjAwMDAwMA0K
+ICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDMwNDYgN2ZjYjEz
+OGY4MjgwICA0IHJvY2tzZGI6ICAgT3B0aW9ucy5tZW10YWJsZV9odWdlX3BhZ2Vfc2l6ZTogMA0K
+ICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDMwNDcgN2ZjYjEz
+OGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgICAgICAgICAgICAgICAgT3B0aW9ucy5ibG9v
+bV9sb2NhbGl0eTogMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0
+My45MDMwNDggN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgICAgICAgICBPcHRp
+b25zLm1heF9zdWNjZXNzaXZlX21lcmdlczogMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAx
+Ny0wOC0xNyAxNDowMzo0My45MDMwNDkgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAg
+ICAgICAgIE9wdGlvbnMub3B0aW1pemVfZmlsdGVyc19mb3JfaGl0czogMA0KICAgID4gICAgID4g
+ICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45MDMwNTAgN2ZjYjEzOGY4MjgwICA0IHJv
+Y2tzZGI6ICAgICAgICAgICAgICAgIE9wdGlvbnMucGFyYW5vaWRfZmlsZV9jaGVja3M6IDANCiAg
+ICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDMuOTAzMDUxIDdmY2IxMzhm
+ODI4MCAgNCByb2Nrc2RiOiAgICAgICAgICAgICAgICBPcHRpb25zLmZvcmNlX2NvbnNpc3RlbmN5
+X2NoZWNrczogMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45
+MDMwNTMgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6ICAgICAgICAgICAgICAgIE9wdGlvbnMucmVw
+b3J0X2JnX2lvX3N0YXRzOiAwDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0
+OjAzOjQzLjk0NjQ4MyA3ZmNiMTM4ZjgyODAgIDQgcm9ja3NkYjogWy9idWlsZC9uaXRpbi9uaWdo
+dGx5X2J1aWxkcy8yMDE3MDgxNV8xNDE1MzgtbHVtaW5vdXMvY2VwaC5naXQvcnBtYnVpbGQvQlVJ
+TEQvY2VwaC0xMi4xLjQtMTIuMS40L3NyYy9yb2Nrc2RiL2RiL3ZlcnNpb25fc2V0LmNjOjI4NTld
+IFJlY292ZXJlZCBmcm9tIG1hbmlmZXN0IGZpbGU6ZGIvTUFOSUZFU1QtMDAwOTM3IHN1Y2NlZWRl
+ZCxtYW5pZmVzdF9maWxlX251bWJlciBpcyA5MzcsIG5leHRfZmlsZV9udW1iZXIgaXMgOTM5LCBs
+YXN0X3NlcXVlbmNlIGlzIDY0NTc2MTU4LCBsb2dfbnVtYmVyIGlzIDAscHJldl9sb2dfbnVtYmVy
+IGlzIDAsbWF4X2NvbHVtbl9mYW1pbHkgaXMgMA0KICAgID4gICAgID4gICAgID4gICAgID4gDQog
+ICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjk0NjQ5MiA3ZmNiMTM4
+ZjgyODAgIDQgcm9ja3NkYjogWy9idWlsZC9uaXRpbi9uaWdodGx5X2J1aWxkcy8yMDE3MDgxNV8x
+NDE1MzgtbHVtaW5vdXMvY2VwaC5naXQvcnBtYnVpbGQvQlVJTEQvY2VwaC0xMi4xLjQtMTIuMS40
+L3NyYy9yb2Nrc2RiL2RiL3ZlcnNpb25fc2V0LmNjOjI4NjddIENvbHVtbiBmYW1pbHkgW2RlZmF1
+bHRdIChJRCAwKSwgbG9nIG51bWJlciBpcyA5MzINCiAgICA+ICAgICA+ICAgICA+ICAgICA+IA0K
+ICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45NDY1MzAgN2ZjYjEz
+OGY4MjgwICA0IHJvY2tzZGI6IEVWRU5UX0xPR192MSB7InRpbWVfbWljcm9zIjogMTUwMzAwMzgy
+Mzk0NjUyMywgImpvYiI6IDEsICJldmVudCI6ICJyZWNvdmVyeV9zdGFydGVkIiwgImxvZ19maWxl
+cyI6IFs5MzhdfQ0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45
+NDY1MzMgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6IFsvYnVpbGQvbml0aW4vbmlnaHRseV9idWls
+ZHMvMjAxNzA4MTVfMTQxNTM4LWx1bWlub3VzL2NlcGguZ2l0L3JwbWJ1aWxkL0JVSUxEL2NlcGgt
+MTIuMS40LTEyLjEuNC9zcmMvcm9ja3NkYi9kYi9kYl9pbXBsX29wZW4uY2M6NDgyXSBSZWNvdmVy
+aW5nIGxvZyAjOTM4IG1vZGUgMA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAx
+NDowMzo0My45NDY1NDEgN2ZjYjEzOGY4MjgwICA0IHJvY2tzZGI6IFsvYnVpbGQvbml0aW4vbmln
+aHRseV9idWlsZHMvMjAxNzA4MTVfMTQxNTM4LWx1bWlub3VzL2NlcGguZ2l0L3JwbWJ1aWxkL0JV
+SUxEL2NlcGgtMTIuMS40LTEyLjEuNC9zcmMvcm9ja3NkYi9kYi92ZXJzaW9uX3NldC5jYzoyMzk1
+XSBDcmVhdGluZyBtYW5pZmVzdCA5NDANCiAgICA+ICAgICA+ICAgICA+ICAgICA+IA0KICAgID4g
+ICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45NDcwMTAgN2ZjYjEzOGY4Mjgw
+ICA0IHJvY2tzZGI6IEVWRU5UX0xPR192MSB7InRpbWVfbWljcm9zIjogMTUwMzAwMzgyMzk0NzAw
+OCwgImpvYiI6IDEsICJldmVudCI6ICJyZWNvdmVyeV9maW5pc2hlZCJ9DQogICAgPiAgICAgPiAg
+ICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjk0NzY5NCA3ZmNiMTM4ZjgyODAgIDQgcm9j
+a3NkYjogWy9idWlsZC9uaXRpbi9uaWdodGx5X2J1aWxkcy8yMDE3MDgxNV8xNDE1MzgtbHVtaW5v
+dXMvY2VwaC5naXQvcnBtYnVpbGQvQlVJTEQvY2VwaC0xMi4xLjQtMTIuMS40L3NyYy9yb2Nrc2Ri
+L2RiL2RiX2ltcGxfb3Blbi5jYzoxMDYzXSBEQiBwb2ludGVyIDB4NTYwMWY4YThhYjAwDQogICAg
+PiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQzLjk0NzcyMiA3ZmNiMTM4Zjgy
+ODAgIDEgYmx1ZXN0b3JlKC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMikgX29wZW5fZGIgb3BlbmVk
+IHJvY2tzZGIgcGF0aCBkYiBvcHRpb25zIGNvbXByZXNzaW9uPWtOb0NvbXByZXNzaW9uLG1heF93
+cml0ZV9idWZmZXJfbnVtYmVyPTQsbWluX3dyaXRlX2J1ZmZlcl9udW1iZXJfdG9fbWVyZ2U9MSxy
+ZWN5Y2xlX2xvZ19maWxlX251bT00LHdyaXRlX2J1ZmZlcl9zaXplPTI2ODQzNTQ1Nix3cml0YWJs
+ZV9maWxlX21heF9idWZmZXJfc2l6ZT0wLGNvbXBhY3Rpb25fcmVhZGFoZWFkX3NpemU9MjA5NzE1
+Mg0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowMzo0My45OTU5NzMgN2Zj
+YjEzOGY4MjgwICAxIGZyZWVsaXN0IGluaXQNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTct
+MDgtMTcgMTQ6MDM6NDQuMDI3NjM3IDdmY2IxMzhmODI4MCAgMSBibHVlc3RvcmUoL3Zhci9saWIv
+Y2VwaC9vc2QvY2VwaC0yKSBfb3Blbl9hbGxvYyBvcGVuaW5nIGFsbG9jYXRpb24gbWV0YWRhdGEN
+CiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDM6NDUuOTI3Mzk0IDdmY2Ix
+MzhmODI4MCAgMSBibHVlc3RvcmUoL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0yKSBfb3Blbl9hbGxv
+YyBsb2FkZWQgMzcwMSBHIGluIDM5MTkgZXh0ZW50cw0KICAgID4gICAgID4gICAgID4gICAgID4g
+MjAxNy0wOC0xNyAxNDowMzo0Ni40MjY3NzQgN2ZjYjEzOGY4MjgwICAxIGJsdWVmcyBmc2NrDQog
+ICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjQ2LjQyNjc5MiA3ZmNiMTM4
+ZjgyODAgIDEgYmx1ZXN0b3JlKC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMikgZnNjayB3YWxraW5n
+IG9iamVjdCBrZXlzcGFjZQ0KICAgID4gICAgID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDow
+Mzo1MC44NTYwNzcgN2ZjYjEzOGY4MjgwICAxIGJsdWVzdG9yZSgvdmFyL2xpYi9jZXBoL29zZC9j
+ZXBoLTIpIGZzY2sgY2hlY2tpbmcgc2hhcmVkX2Jsb2JzDQogICAgPiAgICAgPiAgICAgPiAgICAg
+PiAyMDE3LTA4LTE3IDE0OjAzOjUwLjg1NjExOSA3ZmNiMTM4ZjgyODAgIDEgYmx1ZXN0b3JlKC92
+YXIvbGliL2NlcGgvb3NkL2NlcGgtMikgZnNjayBjaGVja2luZyBmb3Igc3RyYXkgb21hcCBkYXRh
+DQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjAzOjUyLjQwNTgxNiA3ZmNi
+MTM4ZjgyODAgIDEgYmx1ZXN0b3JlKC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMikgZnNjayBjaGVj
+a2luZyBkZWZlcnJlZCBldmVudHMNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcg
+MTQ6MDM6NTIuNDA1ODYyIDdmY2IxMzhmODI4MCAgMSBibHVlc3RvcmUoL3Zhci9saWIvY2VwaC9v
+c2QvY2VwaC0yKSBmc2NrIGNoZWNraW5nIGZyZWVsaXN0IHZzIGFsbG9jYXRlZA0KICAgID4gICAg
+ID4gICAgID4gICAgID4gMjAxNy0wOC0xNyAxNDowNDowNi4zMTE3NDggN2ZjYjEzOGY4MjgwIC0x
+IGJsdWVzdG9yZSgvdmFyL2xpYi9jZXBoL29zZC9jZXBoLTIpIGZzY2sgZXJyb3I6IGxlYWtlZCBz
+b21lIHNwYWNlOzY1NTM2IGJ5dGVzIGxlYWtlZA0KICAgID4gICAgID4gICAgID4gICAgID4gMjAx
+Ny0wOC0xNyAxNDowNDowNi40MTAwMTkgN2ZjYjEzOGY4MjgwICAxIGZyZWVsaXN0IHNodXRkb3du
+DQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjA0OjA2LjQxMDA4MCA3ZmNi
+MTM4ZjgyODAgIDQgcm9ja3NkYjogWy9idWlsZC9uaXRpbi9uaWdodGx5X2J1aWxkcy8yMDE3MDgx
+NV8xNDE1MzgtbHVtaW5vdXMvY2VwaC5naXQvcnBtYnVpbGQvQlVJTEQvY2VwaC0xMi4xLjQtMTIu
+MS40L3NyYy9yb2Nrc2RiL2RiL2RiX2ltcGwuY2M6MjE3XSBTaHV0ZG93bjogY2FuY2VsaW5nIGFs
+bCBiYWNrZ3JvdW5kIHdvcmsNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6
+MDQ6MDYuNDEwNDY0IDdmY2IxMzhmODI4MCAgNCByb2Nrc2RiOiBbL2J1aWxkL25pdGluL25pZ2h0
+bHlfYnVpbGRzLzIwMTcwODE1XzE0MTUzOC1sdW1pbm91cy9jZXBoLmdpdC9ycG1idWlsZC9CVUlM
+RC9jZXBoLTEyLjEuNC0xMi4xLjQvc3JjL3JvY2tzZGIvZGIvZGJfaW1wbC5jYzozNDNdIFNodXRk
+b3duIGNvbXBsZXRlDQogICAgPiAgICAgPiAgICAgPiAgICAgPiAyMDE3LTA4LTE3IDE0OjA0OjA2
+LjQ1MTM4NyA3ZmNiMTM4ZjgyODAgIDEgYmx1ZWZzIHVtb3VudA0KICAgID4gICAgID4gICAgID4g
+ICAgID4gMjAxNy0wOC0xNyAxNDowNDowNi40NTI3MjAgN2ZjYjEzOGY4MjgwICAxIGJkZXYoMHg1
+NjAxZjg3YjM4MDAgL3Zhci9saWIvY2VwaC9vc2QvY2VwaC0yL2Jsb2NrLndhbCkgY2xvc2UNCiAg
+ICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDQ6MDYuNzQ0NzQ1IDdmY2IxMzhm
+ODI4MCAgMSBiZGV2KDB4NTYwMWY4N2IzNDAwIC92YXIvbGliL2NlcGgvb3NkL2NlcGgtMi9ibG9j
+ay5kYikgY2xvc2UNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgtMTcgMTQ6MDQ6MDYu
+OTg4NzI5IDdmY2IxMzhmODI4MCAgMSBiZGV2KDB4NTYwMWY4N2IzNjAwIC92YXIvbGliL2NlcGgv
+b3NkL2NlcGgtMi9ibG9jaykgY2xvc2UNCiAgICA+ICAgICA+ICAgICA+ICAgICA+IDIwMTctMDgt
+MTcgMTQ6MDQ6MDcuMjAwNzE3IDdmY2IxMzhmODI4MCAgMSBiZGV2KDB4NTYwMWY4N2IzMjAwIC92
+YXIvbGliL2NlcGgvb3NkL2NlcGgtMi9ibG9jaykgY2xvc2UNCiAgICA+ICAgICA+ICAgICA+ICAg
+ICA+IDIwMTctMDgtMTcgMTQ6MDQ6MDcuNDQ4ODU5IDdmY2IxMzhmODI4MCAgMSBibHVlc3RvcmUo
+L3Zhci9saWIvY2VwaC9vc2QvY2VwaC0yKSBmc2NrIGZpbmlzaCB3aXRoIDEgZXJyb3JzIGluIDIz
+LjU1MzQ3MCBzZWNvbmRzDQogICAgPiAgICAgPiAgICAgPiAgICAgPiBmc2NrIGZvdW5kIDEgZXJy
+b3JzDQogICAgPiAgICAgPiAgICAgPiAgICAgPiANCiAgICA+ICAgICA+ICAgICA+ICAgICA+ICAg
+ICANCiAgICA+ICAgICA+ICAgICA+ICAgICA+IA0KICAgID4gICAgID4gICAgID4gICAgID4gTj8/
+Pz8/cj8/eT8/Pz8/P1g/P8endj8/Pyneunsubj8/Pz8/ej9dej8/Pz9heT8/yofamT8/aj8/P2Y/
+Pz9oPz8/Pz8/P3c/Pz8/Pz8/ajordj8/P3c/Pz8/Pz8/Pz8/Pz8/elorPz8/Pz8/P2oiPz8/P2kN
+CiAgICA+ICAgICA+ICAgICA+IA0KICAgID4gICAgID4gICAgID4gTj8/Pz8/cj8/eT8/Pz8/P1g/
+P8endj8/Pyneunsubj8/Pz8/ej9dej8/Pz9heT8/yofamT8/aj8/P2Y/Pz9oPz8/Pz8/P3c/Pz8/
+Pz8/ajordj8/P3c/Pz8/Pz8/Pz8/Pz8/elorPz8/Pz8/P2oiPz8/P2kNCiAgICA+ICAgICA+IA0K
+ICAgID4gICAgID4gDQogICAgPiANCiAgICA+IA0KDQo=
