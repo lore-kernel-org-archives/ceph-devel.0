@@ -1,97 +1,61 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: increasingly large packages and longer build times
-Date: Thu, 24 Aug 2017 13:36:47 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1708241327080.20435@piezo.novalocal>
-References: <CAC-Np1yg062K==JMEQhRTVKRe7orS3YoXz9hcgfKH+xfiZBiww@mail.gmail.com> <CALqRxCzmEN0UUD5iGcDw+iSp8+=cBmJpVa2Z=27fyVD_RWzRmw@mail.gmail.com> <CAJ4mKGZ5eAvOTTDwAzoAjv2Ed0C3mb1E7PxQvphY85rXZy5Oow@mail.gmail.com> <CAJE9aON9ELevTue_DXdcYnqBVO2LbTe8mthbytegbtyfLm+K7A@mail.gmail.com>
- <71c7b782-6d7e-1e06-e889-bbbf9004ebfe@suse.cz> <CAJE9aONTxPVcyOfoXDw7ZBQrgpWEXpE29b++cct1X816LVY3+w@mail.gmail.com> <CAC-Np1w22udazP7Pg0PFqgRj+tEOFiRwXncQNVNigPaZpBUejQ@mail.gmail.com> <CAJE9aOMXRGU0L3z_LaMYgX3voDNLuvy5++W3p3Pon+Rbq7Gyug@mail.gmail.com>
- <CAC-Np1zLsgWG=PznwRtFh8tSkh8Z-xc7T+NeBYQrLQBizjiLhA@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: Bug#19994
+Date: Thu, 24 Aug 2017 14:47:36 +0100
+Message-ID: <CALe9h7daOGSzH0JQPP9hDmrYugnE_qG+7AKPLFkKMntd-tym5A@mail.gmail.com>
+References: <CAKRxpuvqL6ODrGEpd_Zt+Zi+t2tL92o0RjhzwKJGn6t=wVgHew@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:38765 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751140AbdHXNgu (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Aug 2017 09:36:50 -0400
-In-Reply-To: <CAC-Np1zLsgWG=PznwRtFh8tSkh8Z-xc7T+NeBYQrLQBizjiLhA@mail.gmail.com>
+Received: from mail-wr0-f182.google.com ([209.85.128.182]:33217 "EHLO
+        mail-wr0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752358AbdHXNr6 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 24 Aug 2017 09:47:58 -0400
+Received: by mail-wr0-f182.google.com with SMTP id r6so2644459wrg.0
+        for <ceph-devel@vger.kernel.org>; Thu, 24 Aug 2017 06:47:57 -0700 (PDT)
+In-Reply-To: <CAKRxpuvqL6ODrGEpd_Zt+Zi+t2tL92o0RjhzwKJGn6t=wVgHew@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alfredo Deza <adeza@redhat.com>
-Cc: kefu chai <tchaikov@gmail.com>, Nathan Cutler <ncutler@suse.cz>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Ken Dreyer <kdreyer@redhat.com>
+To: Two Spirit <twospirit6905@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, 24 Aug 2017, Alfredo Deza wrote:
-> On Thu, Aug 24, 2017 at 4:41 AM, kefu chai <tchaikov@gmail.com> wrote:
-> > On Wed, Aug 23, 2017 at 2:58 AM, Alfredo Deza <adeza@redhat.com> wrote:
-> >> On Tue, Aug 22, 2017 at 9:35 AM, kefu chai <tchaikov@gmail.com> wrote:
-> >>> On Tue, Aug 22, 2017 at 4:27 PM, Nathan Cutler <ncutler@suse.cz> wrote:
-> >>>>> my main concern would be the downstream. how shall we accommodate the
-> >>>>> packaging of downstream? for example, what if the boost package
-> >>>>> maintainers of SuSE/fedora/debian/ubuntu are not ready to package the
-> >>>>> boost version we want to use in future?
-> >>>>>
-> >>>>> but as long as we don't require newer boost to build, we are safe on
-> >>>>> debian and ubuntu at this moment. as boost 1.61 is required for
-> >>>>> building ceph, and both debian unstable and ubuntu artful package
-> >>>>> boost v1.62.
-> >>>>
-> >>>>
-> >>>> The very latest cutting-edge versions of the distros may ship boost >= 1.61
-> >>>> but the stable versions most likely do not.
-> >>>
-> >>> yeah. but, IIRC, debian stable does not accepts new packages unless
-> >>> they contain critical bug fixes. the new packages will go to the
-> >>> unstable or experimental distribution first. so, presumably, debian
-> >>> will be fine. guess ubuntu is using similar strategy for including
-> >>> packages in its LTS distros.
-> >>
-> >> Why are you concerned with distros and the availability to have a
-> >> package at the version that we need?
-> >>
-> >> We publish our own repos, where we could have whatever boost version
-> >> we need. Distro package maintainers have to
-> >> decide what they can or can't do. For us it shouldn't matter.
-> >>
-> >
-> > i think it matters. and i believe it'd be desirable if Ceph can be
-> > easier for downstream to package. if the downstream finds that Ceph is
-> > too difficult to package, and give up, that's surely not the end of
-> > the world. but it could decrease the popularity level of ceph, and in
-> > long term, it might hurt Ceph.
-> 
-> I fully agree here Kefu, but we don't make it easier by embedding
-> libraries! Those need to
-> get removed in distros. Most distros will *not* allow embedding
-> dependencies like we do. That means that someone (probably
-> a package maintainer) will have to remove these, figure out what
-> versions are needed, and attempt to make it
-> work with whatever that distro version will provide.
+On Thu, Aug 24, 2017 at 8:35 AM, Two Spirit <twospirit6905@gmail.com> wrote:
+> Hi. I'm a newbie and haven't yet figured out how to comment into the
+> tracker. I was playing with kraken and just switched over to luminous
+> rc4, and I couldn't get the ceph-mgr started. I got an error similiar
+> to bug #19994 with a HEALTH_WARN no active mgr. I can't seem to get
+> the ceph-mgr started manually. the /var/lib/ceph/mgr/ directory is
+> empty, yet I have the mgr keyring file available to my ceph-deploy
+> directory. I'm running ubuntu 16.04.3 LTS. x64
 
-There are several categories here:
+So you're trying to deploy using "ceph-deploy mgr create" with latest
+ceph-deploy code, correct?  And is that giving an error?
 
-Yes:
-- A bunch of stuff we embed can definitely be separated out; we embedded 
-only because distros didn't have packages yet (e.g., zstd).  As soon as 
-they are packages the submodules can be removed.
+BTW, you have some kind of footer that is coming through as raw HTML
+(http://imgur.com/a/jLcNf).
 
-Maybe:
-- The big one, though, is boost, which is mostly headers... only a *tiny* 
-bit of code can be dynamically loaded, so there is minimal benefit to 
-using the distro package... except that 'git clone' and the build are 
-slightly faster. We could use a more up to date distro package, but we 
-won't be able to put it in el7.  I worry that cases like this will be 
-problematic: even if we build the updated package, it may be undesireable 
-to require users to install a newer version on their system.
+John
 
-No:
-- Then there is stuff that's fast-moving and new and unlikely to be 
-helpful if separated out (spdk, dpdk).  The distro packages will never be 
-up to date.  I'm not sure they even have any dynamically-linkable code... 
-would have to check.
-
-- And then rocksdb and civetweb are truly embedded. We sometimes have to 
-carry modifications so it is a bad idea to use a distro package (our 
-modifications may be incompatible with other users on the system).
-
-Note that although distros complain about static linking, they have never 
-actually taken a stand on the issue with Ceph.  *shrug*
-
-sage
+>
+> not sure how to get past this problem.<div
+> id="DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2"><br />
+> <table style="border-top: 1px solid #D3D4DE;">
+>         <tr>
+>         <td style="width: 55px; padding-top: 13px;"><a
+> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
+> target="_blank"><img
+> src="https://ipmcdn.avast.com/images/icons/icon-envelope-tick-green-avg-v1.png"
+> alt="" width="46" height="29" style="width: 46px; height: 29px;"
+> /></a></td>
+>                 <td style="width: 470px; padding-top: 12px; color: #41424e;
+> font-size: 13px; font-family: Arial, Helvetica, sans-serif;
+> line-height: 18px;">Virus-free. <a
+> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
+> target="_blank" style="color: #4453ea;">www.avg.com</a>
+>                 </td>
+>         </tr>
+> </table><a href="#DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2" width="1"
+> height="1"></a></div>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
