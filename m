@@ -1,70 +1,72 @@
-From: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
+From: Sage Weil <sweil@redhat.com>
 Subject: Re: [Ceph-maintainers] [ceph-users] v12.1.4 Luminous (RC) released
-Date: Fri, 25 Aug 2017 22:27:19 +0000
-Message-ID: <0AF6FCC4-52AE-4B06-930A-4593E7CDA99B@TERADATA.COM>
-References: <062fdb6f788298b7458db9d07ead19d2@suse.com>
- <B693BFC0-9A9B-4338-BF7D-C9710665350C@TERADATA.COM>
- <238bc116-e706-031e-ab11-06e2383a9a04@redhat.com>
- <469DEC9D-7E3D-49C5-8AE6-71877039B3AC@TERADATA.COM>
- <CAKPXa=ZPeMST83ekgUkYbO5yz-ic3q_guY__0=tY7PSwmk-4YA@mail.gmail.com>
- <1B0B99FE-C6D5-455E-B8B7-1972D9B8FD2F@TERADATA.COM>
- <00EA3786-0D39-446A-8E48-0E03D505AC51@TERADATA.COM>
- <66B27C76-0184-452F-9BC8-A91E6D6C9B60@TERADATA.COM>
- <dcbb44f0-c1e9-2acf-133c-fe7dbfcdcd51@redhat.com>
- <C4D152F9-47F1-4883-A4BC-B9FF8F963A0D@TERADATA.COM>
- <alpine.DEB.2.11.1708231854570.20435@piezo.novalocal>
- <13128840-6AA3-4B16-BC18-FC8B9DD8690C@TERADATA.COM>
- <alpine.DEB.2.11.1708232131360.20435@piezo.novalocal>
- <9E4B0DFF-7676-4F8E-985D-1597A10214D4@TERADATA.COM>
- <alpine.DEB.2.11.1708240218500.20435@piezo.novalocal>
- <77FD54D9-0BC7-4B71-A3EC-E361B077F5C1@TERADATA.COM>
- <alpine.DEB.2.11.1708241958150.20435@piezo.novalocal>
- <FF514A63-F96A-4876-BA6A-20F6235FD03B@TERADATA.COM>
- <alpine.DEB.2.11.1708252209510.20435@piezo.novalocal>
- <41CD0292-469F-4C4A-B423-E77ECF0A1718@TERADATA.COM>
+Date: Fri, 25 Aug 2017 22:40:39 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1708252240280.20435@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-413119540-1503700840=:20435"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from nat13.teradata.com ([153.65.16.13]:33877 "EHLO
-        rpc7292.td.teradata.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S933777AbdHYW1X (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 25 Aug 2017 18:27:23 -0400
-In-Reply-To: <41CD0292-469F-4C4A-B423-E77ECF0A1718@TERADATA.COM>
-Content-Language: en-US
-Content-ID: <52E33DB973E0B843AECC7854CECACDFD@namprd13.prod.outlook.com>
+Received: from mx1.redhat.com ([209.132.183.28]:58670 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932871AbdHYWkl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 25 Aug 2017 18:40:41 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
+To: "Kamble, Nitin A" <Nitin.Kamble@Teradata.com>
 Cc: David Zafman <dzafman@redhat.com>, Vasu Kulkarni <vakulkar@redhat.com>, Dan Mick <dmick@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SGkgU2FnZSwNCg0KSSBhbSBwbGFubmluZyB0byB0ZXN0IGluIGEgbm9ybWFsIHNldHVwLiBEbyBJ
-IG5lZWQgdG8gc2V0IGRlYnVnIGxldmVsIDIwIGZvciBibHVlc3RvcmUgdG8gc2VlIHRoZXNlIG1l
-c3NhZ2VzPw0KDQpOaXRpbg0KDQpPbiA4LzI1LzE3LCAzOjE3IFBNLCAiY2VwaC1kZXZlbC1vd25l
-ckB2Z2VyLmtlcm5lbC5vcmcgb24gYmVoYWxmIG9mIEthbWJsZSwgTml0aW4gQSIgPGNlcGgtZGV2
-ZWwtb3duZXJAdmdlci5rZXJuZWwub3JnIG9uIGJlaGFsZiBvZiBOaXRpbi5LYW1ibGVAVGVyYWRh
-dGEuY29tPiB3cm90ZToNCg0KICAgIA0KICAgIA0KICAgIE9uIDgvMjUvMTcsIDM6MTEgUE0sICJT
-YWdlIFdlaWwiIDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToNCiAgICBPa2F5LCBJIGhhdmUgYSBw
-YXRjaCB0aGF0IHJlcGFpcnMgdGhpcy4gIFNlZSB3aXAtMjEwODktbHVtaW5vdXMsIHdoaWNoIA0K
-ICAgICAgICBzaG91bGQgYXBwZWFyIGF0DQogICAgICAgIA0KICAgICAgICAJaHR0cHM6Ly9zaGFt
-YW4uY2VwaC5jb20vYnVpbGRzL2NlcGgvd2lwLTIxMDg5LWx1bWlub3VzLw0KICAgICAgICANCiAg
-ICAgICAgaW4gdGhlIG5leHQgaG91ciBvciBzby4gIElmIHlvdSBydW4gZnNjayB3aXRoIHRoaXMg
-YnVpbGQgeW91IHNlZSBhIGxpbmUgDQogICAgICAgIGxpa2UNCiAgICAgICAgDQogICAgICAgIDIw
-MTctMDgtMjUgMTg6MDE6NTguNjU2NDQ2IDdmOWUyMzgyNTQ4MCAtMSBibHVlc3RvcmUoL2hvbWUv
-c2FnZS9zcmMvY2VwaDQvYnVpbGQvZGV2L29zZDApIGZzY2sgd2FybmluZzogZml4aW5nIGxlYWtl
-ZCBibG9jayAweDI4MDAwMDAwMH4xMDAwIGR1ZSB0byBvbGQgYnVnDQogICAgICAgIDIwMTctMDgt
-MjUgMTg6MDE6NTguNjU2NDUxIDdmOWUyMzgyNTQ4MCAtMSBibHVlc3RvcmUoL2hvbWUvc2FnZS9z
-cmMvY2VwaDQvYnVpbGQvZGV2L29zZDApIGZzY2sgIGZyZWVsaXN0IGJsb2NrIGFuZCBrZXkgY291
-bnQgY2hhbmdlZCwgZml4aW5nIDB4MjgwMDAxMDAwfjdmMDAwDQogICAgICAgIA0KICAgICAgICBn
-byBieSBpbiB0aGUgbG9nIG9uIHRoZSBuZXh0IGZzY2ssIGFuZCBubyBzdWNoIG1lc3NhZ2UgdGhl
-cmVhZnRlci4gIENhbiANCiAgICAgICAgeW91IGdpdmUgaXQgYSB0cnkgb24gb25lIG9mIHRob3Nl
-IE9TRHMgdG8gY29uZmlybSBpdCB3b3Jrcz8gIEkgdGVzdGVkIGJvdGggDQogICAgICAgIGNhc2Vz
-IEkgc2VlIGxvY2FsbHkgYnV0IHdhbnQgdG8gZW5zdXJlIGl0IHdvcmtzIGluIHlvdXIgY2FzZSB0
-b28uDQogICAgICAgIA0KICAgICAgICBUaGFua3MhDQogICAgICAgIHNhZ2UNCiAgICAgICAgDQog
-ICAgICAgIA0KICAgIE9rLCB3aWxsIHJlcG9ydCBteSBmaW5kaW5ncyB3aXRoIHRoaXMgY29kZS4N
-CiAgICANCiAgICBUaGFua3MsDQogICAgTml0aW4NCiAgICAgICAgDQogICAgDQogICAgP++/vXsu
-bu+/vSvvv73vv73vv73vv73vv73vv73vv70rJe+/ve+/vWx6d23vv73vv71i77+966ey77+977+9
-cu+/ve+/vXnHqe+/vdeveljvv73vv70/77+977+93Kh977+977+977+9xqB677+9Jmo6K3bvv73v
-v73vv70/77+977+977+977+9elor77+977+9K3pm77+977+977+9aO+/ve+/ve+/vX7vv73vv73v
-v73vv71p77+977+977+9eu+/vT/vv71377+977+977+9P++/ve+/ve+/ve+/vSbvv70p36I/Zg0K
-DQo=
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-413119540-1503700840=:20435
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+
+On Fri, 25 Aug 2017, Kamble, Nitin A wrote:
+> Hi Sage,
+> 
+> I am planning to test in a normal setup. Do I need to set debug level 20 
+> for bluestore to see these messages?
+
+You should see it at normal debug levels.
+
+Thanks!
+sage
+
+
+> 
+> Nitin
+> 
+> On 8/25/17, 3:17 PM, "ceph-devel-owner@vger.kernel.org on behalf of Kamble, Nitin A" <ceph-devel-owner@vger.kernel.org on behalf of Nitin.Kamble@Teradata.com> wrote:
+> 
+>     
+>     
+>     On 8/25/17, 3:11 PM, "Sage Weil" <sweil@redhat.com> wrote:
+>     Okay, I have a patch that repairs this.  See wip-21089-luminous, which 
+>         should appear at
+>         
+>         	https://shaman.ceph.com/builds/ceph/wip-21089-luminous/
+>         
+>         in the next hour or so.  If you run fsck with this build you see a line 
+>         like
+>         
+>         2017-08-25 18:01:58.656446 7f9e23825480 -1 bluestore(/home/sage/src/ceph4/build/dev/osd0) fsck warning: fixing leaked block 0x280000000~1000 due to old bug
+>         2017-08-25 18:01:58.656451 7f9e23825480 -1 bluestore(/home/sage/src/ceph4/build/dev/osd0) fsck  freelist block and key count changed, fixing 0x280001000~7f000
+>         
+>         go by in the log on the next fsck, and no such message thereafter.  Can 
+>         you give it a try on one of those OSDs to confirm it works?  I tested both 
+>         cases I see locally but want to ensure it works in your case too.
+>         
+>         Thanks!
+>         sage
+>         
+>         
+>     Ok, will report my findings with this code.
+>     
+>     Thanks,
+>     Nitin
+>         
+>     
+>     ????{.n???+?????????????????????+%??????lzwm??????b???맲??????r??????yǩ???ׯzX?????????????ܨ}?????????Ơz???&j:+v??????????????????????zZ+??????+zf?????????h?????????~????????????i?????????z???????w??????????????????????&???)ߢ?f
+> 
+> 
+--8323329-413119540-1503700840=:20435--
