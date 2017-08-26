@@ -1,37 +1,58 @@
-From: Linux Chips <linux.chips@gmail.com>
-Subject: Re: High memory usage kills OSD while peering
-Date: Sat, 26 Aug 2017 15:13:28 +0300
-Message-ID: <d335345b-7c66-ee22-096d-31f792070397@gmail.com>
-References: <07113ad5-a799-5232-c617-81f323ce4038@gmail.com>
- <CAJ4mKGa6Nt1Eic9gk=SMbRufUCPnEcGijgJj-K8vHQP7A=HQKw@mail.gmail.com>
- <15fa2de0-27ad-cc51-6a6c-f306b9f330d2@gmail.com>
- <CAFehDbCzt=Ezffz+D7QQNM4PaPaDTJqU+dm1AhjmNHjw1W1FcA@mail.gmail.com>
- <alpine.DEB.2.11.1708222230080.17029@piezo.novalocal>
- <cf976b97-5173-cf89-010f-a3d492944304@gmail.com>
- <alpine.DEB.2.11.1708231343470.20435@piezo.novalocal>
- <e79cb096-bb5c-5e1c-5e03-5ca8b324b9e2@gmail.com>
- <alpine.DEB.2.11.1708240351220.20435@piezo.novalocal>
- <12a4771a-dab2-3e98-c925-119b09c2d2d0@gmail.com>
- <alpine.DEB.2.11.1708252243080.20435@piezo.novalocal>
- <18fbddea-9b94-bc9c-46d5-08076b591d13@gmail.com>
- <alpine.DEB.2.11.1708252306140.20435@piezo.novalocal>
+From: Oleg Kolosov <olekol@gmail.com>
+Subject: Re: Matching shard to crush bucket in erasure coding
+Date: Sat, 26 Aug 2017 20:16:30 +0300
+Message-ID: <CAODUPsFoqad6x20bVFjEOuPdhkvOQLCmK64hOYochOjboMCqDg@mail.gmail.com>
+References: <CAODUPsG=wnHdROuNvvCcxeDtahG2V2C24ttEETJtebCGnx6C8Q@mail.gmail.com>
+ <alpine.DEB.2.11.1708231400590.20435@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:35648 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752153AbdHZMNb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 26 Aug 2017 08:13:31 -0400
-Received: by mail-wr0-f195.google.com with SMTP id a47so1323404wra.2
-        for <ceph-devel@vger.kernel.org>; Sat, 26 Aug 2017 05:13:31 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1708252306140.20435@piezo.novalocal>
-Content-Language: en-US
+Received: from mail-oi0-f54.google.com ([209.85.218.54]:32856 "EHLO
+        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750931AbdHZRQc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 26 Aug 2017 13:16:32 -0400
+Received: by mail-oi0-f54.google.com with SMTP id r203so16271579oih.0
+        for <ceph-devel@vger.kernel.org>; Sat, 26 Aug 2017 10:16:31 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1708231400590.20435@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sage@newdream.net>
-Cc: Mustafa Muhammad <mustafa1024m@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: ceph-devel@vger.kernel.org
 
-Hi, I reported the bug #21142.
-we are seeing another bug that killed some OSDs during peering. i ll 
-collect more info and report another bug.
+Hi Sage,
+Thanks for the answer, it has helped me a lot.
+
+Regards,
+Oleg
+
+On Wed, Aug 23, 2017 at 5:04 PM, Sage Weil <sage@newdream.net> wrote:
+> On Tue, 22 Aug 2017, Oleg Kolosov wrote:
+>> Hi
+>> I'm working on a new erasure code, different than the one implemented
+>> in ceph lrc plugin. I'm trying to understand how ceph lrc plugin
+>> allocates shards in a layer, but it's not clear from the code.
+>>
+>> For example, say I have a local group containing shards 0,1,2,5
+>> While 0,1,2 are data and 5 is parity. I'd like to place all of these
+>> shards in the same rack.
+>>
+>> Where in lrc .cc code  these shards, which are composing a single
+>> layer, are allocated to the same rack?
+>
+> The EC code has to be carefully matched with a CRUSH rule that lays things
+> out properly.  This is the reason that the EC crush rules are tied
+> to the erasure code profiles and the plugin handles rule creation.
+>
+> In the LRC case, you have a rule like
+>
+>  take root
+>  choose 3 rack
+>  choose 5 osd
+>
+> to get a set of 15 shards, in groups of 5.  The LRC plugin has some logic
+> to put the original data shards in the first 3 or 4 shards of each of
+> those sets of 5, and the parity blocks in the remaing slots.  You'll want
+> to do something similar.  Bonus points if you can reuse the scheme that
+> LRC uses...
+>
+> sage
