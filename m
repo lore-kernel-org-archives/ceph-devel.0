@@ -1,388 +1,148 @@
-From: Xuehan Xu <xxhdx1985126@gmail.com>
-Subject: Re: Extensive attributes not getting copied when flushing HEAD
- objects from cache pool to base pool.
-Date: Mon, 28 Aug 2017 15:50:42 +0800
-Message-ID: <CAJACTudn2h6OvyUCEqMqDJMkV-yUCN6UuJ33cJ2FvAuKmZSZwQ@mail.gmail.com>
-References: <CAJACTuf_PmJvQVvbMb2UeXugKRd9dhLRVpz7-DzSr3=-UHgv-g@mail.gmail.com>
- <CAJACTuczuaMokWTkBFmr1um-3k5DuEQ5ZXRm+BqkJ52F_c22sQ@mail.gmail.com>
- <CAJACTudxBVMtdDLbMqCtCtYm--qA8xHygO8RxA80Uy66C_iavg@mail.gmail.com>
- <CAJACTuckTMrtVG55eM8wLrzL-F=10oR_GeZq8kC0hGJaV5V89w@mail.gmail.com>
- <alpine.DEB.2.11.1708231602050.20435@piezo.novalocal> <CAJACTud5zsa4zEYwBBaO3P7YdN1yEHQ-7LV6GLWodeYmce+8xg@mail.gmail.com>
- <alpine.DEB.2.11.1708231646250.20435@piezo.novalocal> <CAJACTufbauYYCDhnpkkZeF0Laef6WiGCx=GDAhhgkbLcptBN1g@mail.gmail.com>
- <alpine.DEB.2.11.1708241319280.20435@piezo.novalocal>
+From: Florian Haas <florian@hastexo.com>
+Subject: Fwd: State of play for RDMA on Luminous
+Date: Mon, 28 Aug 2017 10:42:23 +0200
+Message-ID: <a88cf691-5f93-a8a4-588d-b6880017d405@hastexo.com>
+References: <f2071e94-2b4e-b809-b244-bf7ca62be9ba@hastexo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="HmAewmDDLtvLIH08Ue90XQbmNaCcldxvc"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f52.google.com ([209.85.218.52]:32792 "EHLO
-        mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750735AbdH1Hun (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Aug 2017 03:50:43 -0400
-Received: by mail-oi0-f52.google.com with SMTP id r203so35931638oih.0
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Aug 2017 00:50:43 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1708241319280.20435@piezo.novalocal>
+Received: from mail-wr0-f179.google.com ([209.85.128.179]:38635 "EHLO
+        mail-wr0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753860AbdH1Im2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Aug 2017 04:42:28 -0400
+Received: by mail-wr0-f179.google.com with SMTP id y14so8340194wrd.5
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Aug 2017 01:42:27 -0700 (PDT)
+Received: from [192.168.1.132] (91-119-119-96.dsl.dynamic.surfer.at. [91.119.119.96])
+        by smtp.gmail.com with ESMTPSA id l20sm12000196wre.26.2017.08.28.01.42.24
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 28 Aug 2017 01:42:24 -0700 (PDT)
+In-Reply-To: <f2071e94-2b4e-b809-b244-bf7ca62be9ba@hastexo.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,sage.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--HmAewmDDLtvLIH08Ue90XQbmNaCcldxvc
+Content-Type: multipart/mixed; boundary="8KjjTVu4Ga6HmXPCma3aEUrlXcTw4fX8T";
+ protected-headers="v1"
+From: Florian Haas <florian@hastexo.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Message-ID: <a88cf691-5f93-a8a4-588d-b6880017d405@hastexo.com>
+Subject: Fwd: State of play for RDMA on Luminous
+References: <f2071e94-2b4e-b809-b244-bf7ca62be9ba@hastexo.com>
+In-Reply-To: <f2071e94-2b4e-b809-b244-bf7ca62be9ba@hastexo.com>
 
-About the PR: https://github.com/ceph/ceph/pull/17017, I've tested the
-test case in our test environment multiple times, and it never failed.
-Where can I find the logs of the OSDs on which the test case failed?
-It might be helpful for me to find the cause of the failure.
+--8KjjTVu4Ga6HmXPCma3aEUrlXcTw4fX8T
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-Thanks:-)
+Hello everyone,
+
+I'm taking the liberty to cross-post to the -devel list. I did get a
+couple of off-list replies but they were of the "oh cool, I want to know
+too" type. :)
+
+Looking forward to people's thoughts.
+
+Cheers,
+Florian
 
 
-On 24 August 2017 at 21:20, Sage Weil <sage@newdream.net> wrote:
-> On Thu, 24 Aug 2017, Xuehan Xu wrote:
->> Hi, Sage.
->>
->> It seems that, when calculating a clone object's bytes, the amount of
->> data recorded in clone_overlap is subtracted from the clone object's
->> size, as demonstrated in SnapSet::get_clone_bytes. This seems to be
->> right when the underlying ObjectStore is using COW clone, but, for
->> ObjectStores like filestore, this seems not to make sense since all
->> the object's data is copied. Is this right?
->
-> Right.  It was done that way when we were targetting FileStore on top of
-> btrfs, which would do the copy-on-write. BlueStore does it now too, so we
-> probably want to preserve the behavior.
->
-> sage
->
->
->  >
->> Thank you:-)
->>
->> On 24 August 2017 at 00:54, Sage Weil <sage@newdream.net> wrote:
->> > On Thu, 24 Aug 2017, Xuehan Xu wrote:
->> >> Hi, sage.
->> >>
->> >> Thanks for your reply:-)
->> >>
->> >> Actually, our problem is as follows: we are trying to backup the rbd
->> >> data in a ceph cluster which is cache-tier enabled using "rbd
->> >> export-diff", however, due to the missing of some clone overlap, the
->> >> export-diff operation can't be right.
->> >>
->> >> After debugging, we found that there are two reasons for this missing,
->> >> one of which is as mentioned in this thread:
->> >> http://tracker.ceph.com/issues/21072, which would led to the overlap
->> >> recorded in the extensive attrs not to be "copied" to the base tier.
->> >> And when we try to fix it, we found that the "_" policy is in our way,
->> >> because the clone overlap is stored in "snapset" attr which has a non
->> >> "_" prefixed name, and even if we modify the code to ignore the "_"
->> >> policy when getting the extensive attrs, a "_" will be added when
->> >> storing them into the base tier, which would make the following
->> >> "list-snaps" operation not able to find the clone overlap.
->> >
->> > Okay.  The fix will need to explicitly copy the overlap metadata as part
->> > of copy-get, though... not the _ attr(s).  Those are managed locally in
->> > the pool and not meant to be copied across pools (you'll get all sorts of
->> > bugs if you try to do that!).
->> >
->> >> And the other reason that made the export-diff operate incorrectly is
->> >> as described in http://tracker.ceph.com/issues/20896. To fix this, we
->> >> are planning to add a "cache_clone_overlap" in SnapSet to track the
->> >> cache stats while leaving the orignal "clone_overlap" to track
->> >> modifications to the object. Is this the right way to go?
->> >
->> > I see.  I think that would work.  It might make sense to take a fresh look
->> > at what the cache stats are, though, to see if it is possible to get rid
->> > of that condition and avoiding maintaining a
->> > duplicate-but-slightly-different structure just for the cache tier.  I
->> > don't like the conditional behavior there... it really seems like
->> > clone_overlap should not vary between the cache and base tiers, and any
->> > adjustments for missing clones should happen only with the stats
->> > calculation but not with clone_overlap itself.
->> >
->> >
->> >> By the way, last month, when trying to fix the bug:
->> >> http://tracker.ceph.com/issues/17445, you asked for a test case in
->> >> master branch to confirm that master doesn't have the same bug. I've
->> >> submitted that test case in the PR:
->> >> https://github.com/ceph/ceph/pull/17017 and cherry-pick it into PR:
->> >> https://github.com/ceph/ceph/pull/16355. I'm very sorry for taking so
->> >> long, I was very busy during the past month trying to solve the above
->> >> problems. Could you help me review it when you are free, please?
->> >
->> > Thanks!
->> > sage
->> >
->> >
->> >>
->> >> Thanks very much:-)
->> >>
->> >> On 24 August 2017 at 00:07, Sage Weil <sage@newdream.net> wrote:
->> >> > On Wed, 23 Aug 2017, Xuehan Xu wrote:
->> >> >> Hi, everyone.
->> >> >>
->> >> >> In ReplicatedPG::_write_copy_chunk method, I saw the following code:
->> >> >>
->> >> >> if (!cop->temp_cursor.attr_complete) {
->> >> >>     t->touch(cop->results.temp_oid);
->> >> >>     for (map<string, bufferlist>::iterator p = cop->attrs.begin();
->> >> >>     p != cop->attrs.end(); ++p) {
->> >> >>     cop->results.attrs[string("_") + p->first] = p->second;
->> >> >>     t->setattr(cop->results.temp_oid, string("_") + p->first,
->> >> >>        p->second);
->> >> >> }
->> >> >>     cop->attrs.clear();
->> >> >> }
->> >> >>
->> >> >> It seems that user specified attrs are prefixed by "_", but why add
->> >> >> "_" here, in ReplicatedPG::_write_copy_chunk? It seems that this
->> >> >> method is used for copying objects in the RADOS cluster,.
->> >> >
->> >> > That is by design.  The non-_ attributes are managed locally.
->> >> >
->> >> > In this case, the clone_overlap is not preserved because there is no code
->> >> > to attempt to preserve it across the cache tier.  (And blindly copying the
->> >> > _ attribute wouldn't work.)
->> >> >
->> >> > I'm not sure what the issues would be with passing that metadata across
->> >> > the promote and flush operations...  I imagine it will be a bit fragile,
->> >> > though.
->> >> >
->> >> > Is this something that is really worth fixing?
->> >> >
->> >> > sage
->> >> >
->> >> >
->> >> >>
->> >> >> On 23 August 2017 at 15:40, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->> >> >> > It seems that when calling ReplicatedPG::getattrs_maybe_cache in
->> >> >> > ReplicatedPG::fill_in_copy_get, "user_only" should be false. Is this
->> >> >> > right?
->> >> >> >
->> >> >> > On 23 August 2017 at 15:25, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->> >> >> >> I submitted an issue for this:
->> >> >> >> http://tracker.ceph.com/issues/21072?next_issue_id=21071
->> >> >> >>
->> >> >> >> On 23 August 2017 at 15:24, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
->> >> >> >>> Hi, everyone.
->> >> >> >>>
->> >> >> >>> Recently, we did a test as follows:
->> >> >> >>>
->> >> >> >>> We enabled cache tier and added a cache pool "vms_back_cache" on top
->> >> >> >>> of the base pool "vms_back". we first created an object, and then
->> >> >> >>> created a snap in the base pool and writing to that object again,
->> >> >> >>> which would make the object be promoted into the cache pool. At this
->> >> >> >>> time, we used "ceph-objectstore-tool" to dump the object, and the
->> >> >> >>> result is as follows:
->> >> >> >>>
->> >> >> >>> {
->> >> >> >>>     "id": {
->> >> >> >>>         "oid": "test.obj.6",
->> >> >> >>>         "key": "",
->> >> >> >>>         "snapid": -2,
->> >> >> >>>         "hash": 750422257,
->> >> >> >>>         "max": 0,
->> >> >> >>>         "pool": 11,
->> >> >> >>>         "namespace": "",
->> >> >> >>>         "max": 0
->> >> >> >>>     },
->> >> >> >>>     "info": {
->> >> >> >>>         "oid": {
->> >> >> >>>             "oid": "test.obj.6",
->> >> >> >>>             "key": "",
->> >> >> >>>             "snapid": -2,
->> >> >> >>>             "hash": 750422257,
->> >> >> >>>             "max": 0,
->> >> >> >>>             "pool": 11,
->> >> >> >>>             "namespace": ""
->> >> >> >>>         },
->> >> >> >>>         "version": "5010'5",
->> >> >> >>>         "prior_version": "4991'3",
->> >> >> >>>         "last_reqid": "client.175338.0:1",
->> >> >> >>>         "user_version": 5,
->> >> >> >>>         "size": 4194303,
->> >> >> >>>         "mtime": "2017-08-23 15:09:03.459892",
->> >> >> >>>         "local_mtime": "2017-08-23 15:09:03.461111",
->> >> >> >>>         "lost": 0,
->> >> >> >>>         "flags": 4,
->> >> >> >>>         "snaps": [],
->> >> >> >>>         "truncate_seq": 0,
->> >> >> >>>         "truncate_size": 0,
->> >> >> >>>         "data_digest": 4294967295,
->> >> >> >>>         "omap_digest": 4294967295,
->> >> >> >>>         "watchers": {}
->> >> >> >>>     },
->> >> >> >>>     "stat": {
->> >> >> >>>         "size": 4194303,
->> >> >> >>>         "blksize": 4096,
->> >> >> >>>         "blocks": 8200,
->> >> >> >>>         "nlink": 1
->> >> >> >>>     },
->> >> >> >>>     "SnapSet": {
->> >> >> >>>         "snap_context": {
->> >> >> >>>             "seq": 13,
->> >> >> >>>             "snaps": [
->> >> >> >>>                 13
->> >> >> >>>             ]
->> >> >> >>>         },
->> >> >> >>>         "head_exists": 1,
->> >> >> >>>         "clones": [
->> >> >> >>>             {
->> >> >> >>>                 "snap": 13,
->> >> >> >>>                 "size": 4194303,
->> >> >> >>>                 "overlap": "[0~100,115~4194188]"
->> >> >> >>>             }
->> >> >> >>>         ]
->> >> >> >>>     }
->> >> >> >>> }
->> >> >> >>>
->> >> >> >>> Then we did cache-flush and cache-evict to flush that object down to
->> >> >> >>> the base pool, and, again, used "ceph-objectstore-tool" to dump the
->> >> >> >>> object in the base pool:
->> >> >> >>>
->> >> >> >>> {
->> >> >> >>>     "id": {
->> >> >> >>>         "oid": "test.obj.6",
->> >> >> >>>         "key": "",
->> >> >> >>>         "snapid": -2,
->> >> >> >>>         "hash": 750422257,
->> >> >> >>>         "max": 0,
->> >> >> >>>         "pool": 10,
->> >> >> >>>         "namespace": "",
->> >> >> >>>         "max": 0
->> >> >> >>>     },
->> >> >> >>>     "info": {
->> >> >> >>>         "oid": {
->> >> >> >>>             "oid": "test.obj.6",
->> >> >> >>>             "key": "",
->> >> >> >>>             "snapid": -2,
->> >> >> >>>             "hash": 750422257,
->> >> >> >>>             "max": 0,
->> >> >> >>>             "pool": 10,
->> >> >> >>>             "namespace": ""
->> >> >> >>>         },
->> >> >> >>>         "version": "5015'4",
->> >> >> >>>         "prior_version": "4991'2",
->> >> >> >>>         "last_reqid": "osd.34.5013:1",
->> >> >> >>>         "user_version": 5,
->> >> >> >>>         "size": 4194303,
->> >> >> >>>         "mtime": "2017-08-23 15:09:03.459892",
->> >> >> >>>         "local_mtime": "2017-08-23 15:10:48.122138",
->> >> >> >>>         "lost": 0,
->> >> >> >>>         "flags": 52,
->> >> >> >>>         "snaps": [],
->> >> >> >>>         "truncate_seq": 0,
->> >> >> >>>         "truncate_size": 0,
->> >> >> >>>         "data_digest": 163942140,
->> >> >> >>>         "omap_digest": 4294967295,
->> >> >> >>>         "watchers": {}
->> >> >> >>>     },
->> >> >> >>>     "stat": {
->> >> >> >>>         "size": 4194303,
->> >> >> >>>         "blksize": 4096,
->> >> >> >>>         "blocks": 8200,
->> >> >> >>>         "nlink": 1
->> >> >> >>>     },
->> >> >> >>>     "SnapSet": {
->> >> >> >>>         "snap_context": {
->> >> >> >>>             "seq": 13,
->> >> >> >>>             "snaps": [
->> >> >> >>>                 13
->> >> >> >>>             ]
->> >> >> >>>         },
->> >> >> >>>         "head_exists": 1,
->> >> >> >>>         "clones": [
->> >> >> >>>             {
->> >> >> >>>                 "snap": 13,
->> >> >> >>>                 "size": 4194303,
->> >> >> >>>                 "overlap": "[]"
->> >> >> >>>             }
->> >> >> >>>         ]
->> >> >> >>>     }
->> >> >> >>> }
->> >> >> >>>
->> >> >> >>> As is shown, the "overlap" field is empty.
->> >> >> >>> In the osd log, we found the following records:
->> >> >> >>>
->> >> >> >>> 2017-08-23 12:46:36.083014 7f675c704700 20 osd.0 pg_epoch: 19 pg[3.3(
->> >> >> >>> v 15'2 (0'0,15'2] local-les=15 n=2 ec=14 les/c/f 15/15/0 14/14/14)
->> >> >> >>> [0,2,1] r=0 lpr=14 crt=0'0 lcod 15'1 mlcod 15'1 active+clean]  got
->> >> >> >>> attrs
->> >> >> >>> 2017-08-23 12:46:36.083021 7f675c704700 15
->> >> >> >>> filestore(/home/xuxuehan/github-xxh-fork/ceph/src/dev/osd0) read
->> >> >> >>> 3.3_head/#3:dd4db749:test-rados-api-xxh02v.ops.corp.qihoo.net-10886-3::foo:head#
->> >> >> >>> 0~8
->> >> >> >>> 2017-08-23 12:46:36.083398 7f675c704700 10
->> >> >> >>> filestore(/home/xuxuehan/github-xxh-fork/ceph/src/dev/osd0)
->> >> >> >>> FileStore::read
->> >> >> >>> 3.3_head/#3:dd4db749:test-rados-api-xxh02v.ops.corp.qihoo.net-10886-3::foo:head#
->> >> >> >>> 0~8/8
->> >> >> >>> 2017-08-23 12:46:36.083414 7f675c704700 20 osd.0 pg_epoch: 19 pg[3.3(
->> >> >> >>> v 15'2 (0'0,15'2] local-les=15 n=2 ec=14 les/c/f 15/15/0 14/14/14)
->> >> >> >>> [0,2,1] r=0 lpr=14 crt=0'0 lcod 15'1 mlcod 15'1 active+clean]  got
->> >> >> >>> data
->> >> >> >>> 2017-08-23 12:46:36.083444 7f675c704700 20 osd.0 pg_epoch: 19 pg[3.3(
->> >> >> >>> v 15'2 (0'0,15'2] local-les=15 n=2 ec=14 les/c/f 15/15/0 14/14/14)
->> >> >> >>> [0,2,1] r=0 lpr=14 crt=0'0 lcod 15'1 mlcod 15'1 active+clean]
->> >> >> >>> cursor.is_complete=0 0 attrs 8 bytes 0 omap header bytes 0 omap data
->> >> >> >>> bytes in 0 keys 0 reqids
->> >> >> >>> 2017-08-23 12:46:36.083457 7f675c704700 10 osd.0 pg_epoch: 19 pg[3.3(
->> >> >> >>> v 15'2 (0'0,15'2] local-les=15 n=2 ec=14 les/c/f 15/15/0 14/14/14)
->> >> >> >>> [0,2,1] r=0 lpr=14 crt=0'0 lcod 15'1 mlcod 15'1 active+clean]
->> >> >> >>> dropping ondisk_read_lock
->> >> >> >>> 2017-08-23 12:46:36.083467 7f675c704700 15 osd.0 pg_epoch: 19 pg[3.3(
->> >> >> >>> v 15'2 (0'0,15'2] local-les=15 n=2 ec=14 les/c/f 15/15/0 14/14/14)
->> >> >> >>> [0,2,1] r=0 lpr=14 crt=0'0 lcod 15'1 mlcod 15'1 active+clean]
->> >> >> >>> do_osd_op_effects osd.0 con 0x7f67874f0d00
->> >> >> >>> 2017-08-23 12:46:36.083478 7f675c704700 15 osd.0 pg_epoch: 19 pg[3.3(
->> >> >> >>> v 15'2 (0'0,15'2] local-les=15 n=2 ec=14 les/c/f 15/15/0 14/14/14)
->> >> >> >>> [0,2,1] r=0 lpr=14 crt=0'0 lcod 15'1 mlcod 15'1 active+clean]
->> >> >> >>> log_op_stats osd_op(osd.0.6:2 3.92edb2bb
->> >> >> >>> test-rados-api-xxh02v.ops.corp
->> >> >> >>>
->> >> >> >>> It seems that, when doing "copy-get", no extensive attributes are
->> >> >> >>> copied. We believe that it's the following code that led to this
->> >> >> >>> result:
->> >> >> >>>
->> >> >> >>> int ReplicatedPG::getattrs_maybe_cache(ObjectContextRef obc,
->> >> >> >>>         map<string, bufferlist> *out,
->> >> >> >>>         bool user_only) {
->> >> >> >>>     int r = 0;
->> >> >> >>>     if (pool.info.require_rollback()) {
->> >> >> >>>         if (out)
->> >> >> >>>             *out = obc->attr_cache;
->> >> >> >>>     } else {
->> >> >> >>>         r = pgbackend->objects_get_attrs(obc->obs.oi.soid, out);
->> >> >> >>>     }
->> >> >> >>>     if (out && user_only) {
->> >> >> >>>         map<string, bufferlist> tmp;
->> >> >> >>>         for (map<string, bufferlist>::iterator i = out->begin();
->> >> >> >>>                 i != out->end(); ++i) {
->> >> >> >>>             if (i->first.size() > 1 && i->first[0] == '_')
->> >> >> >>>                 tmp[i->first.substr(1, i->first.size())].claim(i->second);
->> >> >> >>>         }
->> >> >> >>>         tmp.swap(*out);
->> >> >> >>>     }
->> >> >> >>>     return r;
->> >> >> >>> }
->> >> >> >>>
->> >> >> >>> It seems that when "user_only" is true, extensive attributes without a
->> >> >> >>> '_' as the starting character in its name would be filtered out. Is it
->> >> >> >>> supposed to be doing things in this way?
->> >> >> >>> And we found that there are only two places in the source code that
->> >> >> >>> invoked ReplicatedPG::getattrs_maybe_cache, in both of which
->> >> >> >>> "user_only" is true. Why add this parameter?
->> >> >> >>>
->> >> >> >>> By the way, we also found that these codes are added in commit
->> >> >> >>> 78d9c0072bfde30917aea4820a811d7fc9f10522, but we don't understand the
->> >> >> >>> purpose of it.
->> >> >> >>>
->> >> >> >>> Thank you:-)
->> >> >> --
->> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> >> the body of a message to majordomo@vger.kernel.org
->> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >> >>
->> >> >>
->> >>
->> >>
->>
->>
+-------- Forwarded Message --------
+Subject: State of play for RDMA on Luminous
+Date: Wed, 23 Aug 2017 10:26:45 +0200
+From: Florian Haas <florian@hastexo.com>
+To: ceph-users@lists.ceph.com <ceph-users@lists.ceph.com>
+
+Hello everyone,
+
+I'm trying to get a handle on the current state of the async messenger's
+RDMA transport in Luminous, and I've noticed that the information
+available is a little bit sparse (I've found
+https://community.mellanox.com/docs/DOC-2693 and
+https://community.mellanox.com/docs/DOC-2721, which are a great start
+but don't look very complete). So I'm kicking off this thread that might
+hopefully bring interested parties and developers together.
+
+Could someone in the know please confirm that the following assumptions
+of mine are accurate:
+
+- RDMA support for the async messenger is available in Luminous.
+
+- You enable it globally by setting ms_type to "async+rdma", and by
+setting appropriate values for the various ms_async_rdma* options (most
+importantly, ms_async_rdma_device_name).
+
+- You can also set RDMA messaging just for the public or cluster
+network, via ms_public_type and ms_cluster_type.
+
+- Users have to make a global async+rdma vs. async+posix decision on
+either network. For example, if either ms_type or ms_public_type is
+configured to async+rdma on cluster nodes, then a client configured with
+ms_type =3D async+posix can't communicate.
+
+Based on those assumptions, I have the following questions:
+
+- What is the current state of RDMA support in kernel libceph? In other
+words, is there currently a way to map RBDs, or mount CephFS, if a Ceph
+cluster uses RDMA messaging?
+
+- In case there is no such support in the kernel yet: What's the current
+status of RDMA support (and testing) with regard to
+  * libcephfs?
+  * the Samba Ceph VFS?
+  * nfs-ganesha?
+  * tcmu-runner?
+
+- In summary, if a user wants to access their Ceph cluster via a POSIX
+filesystem or via iSCSI, is enabling the RDMA-enabled async messenger in
+the public network an option? Or would they have to continue running on
+TCP/IP (possibly on IPoIB if they already have InfiniBand hardware)
+until the client libraries catch up?
+
+- And more broadly, if a user wants to use the performance benefits of
+RDMA, but not all of their potential Ceph clients have InfiniBand HCAs,
+what are their options? RoCE?
+
+Thanks very much in advance for everyone's insight!
+
+Cheers,
+Florian
+
+
+--=20
+Please feel free to verify my identity:
+https://keybase.io/fghaas
+
+
+
+
+--8KjjTVu4Ga6HmXPCma3aEUrlXcTw4fX8T--
+
+--HmAewmDDLtvLIH08Ue90XQbmNaCcldxvc
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIxBAEBCAAbBQJZo9dvFBxmbG9yaWFuQGhhc3RleG8uY29tAAoJEEqtGHdMPKEn
+5aIQAKruOB1flYuKVyrB4OHnpNNwAbKC152MWfgZ9f0FgzGIKFEC622P3U2YVUF9
+nUVRUK5bF+TJz/dSEY+3DD+pQ2R8GNVNfRfjDuRJyuhy1M6YpPq9JpUH8u0RV46s
+js5GTw+awjDA4rvqNxe9BccNPiW6mDXzRy88YIiHCpyKyQZP8IkoANg5zF4kTQEG
+Lji+oHib5mNJX5hYZKvWBVp1nPWax5A5st2CjMwEXqm/GKBien9IUmLwDmUBZtb9
+8dvCz8ePZHgV8e5CHZy7zu+41/j7IA33LKOfB195Za+5jUWWLithrLEqHy+QGU7n
+HRDS0tLUvH5KDCnL2a2+RDtoE+GAorMsT4nXlDReBccYKFxA4n8g5zyNGJaxwz89
+Itz1qmbXIZPgoKK/1cc+q6aA/93jbo6CZqzBhoja2/uIHs7gHNFTj8cacb/l83bQ
+q/w+U8HxeBuHvEDr3Hn1Y4fLEFZ5E/toe5yEZlBRs0pOyOFLmJThC/EN1j8bW/+e
+eVvrGygym2KkQBOZUT3oFW+0Ank/JrRKJoSZRQAybrtxyDLjAfX3jy7Po0mT3OvF
+KpCZcs2xMY90hWmgkkJbFEplgbAjnxTK47w9/qNoQavEHKgw9BJXrkZe5MyOTQec
+vc14bYQiAVdwouukkH6xh7vD9np86VqVv558vruQK5Udx+CH
+=79F8
+-----END PGP SIGNATURE-----
+
+--HmAewmDDLtvLIH08Ue90XQbmNaCcldxvc--
