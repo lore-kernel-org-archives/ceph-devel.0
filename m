@@ -1,45 +1,22 @@
-From: xiaoyan li <wisher2003@gmail.com>
-Subject: Re: osd pg logs
-Date: Mon, 28 Aug 2017 08:50:51 +0800
-Message-ID: <CAERxPZL_+vDUpmHUjymvrEHVmx+adBFrs3fzo_=VHToQCOjHyA@mail.gmail.com>
-References: <alpine.DEB.2.11.1708251746150.20435@piezo.novalocal>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Static Analysis
+Date: Mon, 28 Aug 2017 14:33:23 +1000
+Message-ID: <CAF-wwdHTQ7zJsR-esG+Voz0WuNFutQBYpuqZAAdom4tB2O-xNA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f52.google.com ([209.85.218.52]:34150 "EHLO
-        mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751496AbdH1Auw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 27 Aug 2017 20:50:52 -0400
-Received: by mail-oi0-f52.google.com with SMTP id g127so19844902oic.1
-        for <ceph-devel@vger.kernel.org>; Sun, 27 Aug 2017 17:50:52 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1708251746150.20435@piezo.novalocal>
+Received: from mail-lf0-f46.google.com ([209.85.215.46]:34611 "EHLO
+        mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750767AbdH1Ed0 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Aug 2017 00:33:26 -0400
+Received: by mail-lf0-f46.google.com with SMTP id d17so17534346lfe.1
+        for <ceph-devel@vger.kernel.org>; Sun, 27 Aug 2017 21:33:25 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi Sage,
-
-Some questions in the pad, please help to clear.
-
-Best wishes
-Lisa
-
-On Sat, Aug 26, 2017 at 1:47 AM, Sage Weil <sweil@redhat.com> wrote:
-> On the perf call yesterday we talked a bit about managing and optimizing
-> for pg log storage.  I wrote down some notes on the current ideas I'm
-> aware of and put them in a pad:
->
->         http://pad.ceph.com/p/osd-pg-log-management
->
-> sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
+Latest static analyser results are up on  http://people.redhat.com/bhubbard/
 
 -- 
-Best wishes
-Lisa
+Cheers,
+Brad
