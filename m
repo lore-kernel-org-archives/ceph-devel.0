@@ -1,148 +1,110 @@
-From: Florian Haas <florian@hastexo.com>
-Subject: Fwd: State of play for RDMA on Luminous
-Date: Mon, 28 Aug 2017 10:42:23 +0200
-Message-ID: <a88cf691-5f93-a8a4-588d-b6880017d405@hastexo.com>
-References: <f2071e94-2b4e-b809-b244-bf7ca62be9ba@hastexo.com>
+From: zengran zhang <z13121369189@gmail.com>
+Subject: question on bluestore wal io behavior
+Date: Mon, 28 Aug 2017 16:48:33 +0800
+Message-ID: <CALi+v1-yrvT1Q_rTHN88s3aTHmVV8c51cxqKkNCxxbKM2bJDJA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="HmAewmDDLtvLIH08Ue90XQbmNaCcldxvc"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f179.google.com ([209.85.128.179]:38635 "EHLO
-        mail-wr0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753860AbdH1Im2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Aug 2017 04:42:28 -0400
-Received: by mail-wr0-f179.google.com with SMTP id y14so8340194wrd.5
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Aug 2017 01:42:27 -0700 (PDT)
-Received: from [192.168.1.132] (91-119-119-96.dsl.dynamic.surfer.at. [91.119.119.96])
-        by smtp.gmail.com with ESMTPSA id l20sm12000196wre.26.2017.08.28.01.42.24
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 28 Aug 2017 01:42:24 -0700 (PDT)
-In-Reply-To: <f2071e94-2b4e-b809-b244-bf7ca62be9ba@hastexo.com>
+Received: from mail-it0-f68.google.com ([209.85.214.68]:35033 "EHLO
+        mail-it0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751209AbdH1Ise (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Aug 2017 04:48:34 -0400
+Received: by mail-it0-f68.google.com with SMTP id b76so3761791itb.2
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Aug 2017 01:48:34 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---HmAewmDDLtvLIH08Ue90XQbmNaCcldxvc
-Content-Type: multipart/mixed; boundary="8KjjTVu4Ga6HmXPCma3aEUrlXcTw4fX8T";
- protected-headers="v1"
-From: Florian Haas <florian@hastexo.com>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Message-ID: <a88cf691-5f93-a8a4-588d-b6880017d405@hastexo.com>
-Subject: Fwd: State of play for RDMA on Luminous
-References: <f2071e94-2b4e-b809-b244-bf7ca62be9ba@hastexo.com>
-In-Reply-To: <f2071e94-2b4e-b809-b244-bf7ca62be9ba@hastexo.com>
+hi,
 
---8KjjTVu4Ga6HmXPCma3aEUrlXcTw4fX8T
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+we are testing bluestore and rocksdb, we observed that the wal block's
+io is some odd... the iostate show that the wal block's `avgrq-sz` is
+arountd 10, the perf record of the `block_rq_issue` captured as
+follow:
 
-Hello everyone,
+bstore_kv_sync 26357 [005] 177034.327414: block:block_rq_issue: 8,96
+WS 0 () 53904888 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [006] 177034.348115: block:block_rq_issue: 8,96
+WS 0 () 77472296 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [006] 177034.359633: block:block_rq_issue: 8,96
+WS 0 () 53904888 + 16 [bstore_kv_sync]
+bstore_kv_sync 26357 [003] 177034.364816: block:block_rq_issue: 8,96
+WS 0 () 77472304 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [009] 177034.550656: block:block_rq_issue: 8,96
+WS 0 () 53904896 + 80 [bstore_kv_sync]
+bstore_kv_sync 26357 [009] 177034.556734: block:block_rq_issue: 8,96
+WS 0 () 77472320 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [008] 177034.592900: block:block_rq_issue: 8,96
+WS 0 () 53904968 + 16 [bstore_kv_sync]
+bstore_kv_sync 26357 [000] 177034.598323: block:block_rq_issue: 8,96
+WS 0 () 77472328 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [011] 177034.635053: block:block_rq_issue: 8,96
+WS 0 () 53904976 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [012] 177034.640036: block:block_rq_issue: 8,96
+WS 0 () 77472336 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [014] 177034.670053: block:block_rq_issue: 8,96
+WS 0 () 53904976 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [015] 177034.681708: block:block_rq_issue: 8,96
+WS 0 () 77472344 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [015] 177034.692890: block:block_rq_issue: 8,96
+WS 0 () 53904976 + 16 [bstore_kv_sync]
+bstore_kv_sync 26357 [015] 177034.698320: block:block_rq_issue: 8,96
+WS 0 () 77472352 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [016] 177034.710399: block:block_rq_issue: 8,96
+WS 0 () 53904984 + 32 [bstore_kv_sync]
+bstore_kv_sync 26357 [016] 177034.740153: block:block_rq_issue: 8,96
+WS 0 () 77472360 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [013] 177034.760271: block:block_rq_issue: 8,96
+WS 0 () 53905008 + 16 [bstore_kv_sync]
+bstore_kv_sync 26357 [015] 177034.931293: block:block_rq_issue: 8,96
+WS 0 () 53905016 + 56 [bstore_kv_sync]
+bstore_kv_sync 26357 [017] 177034.973679: block:block_rq_issue: 8,96
+WS 0 () 77472376 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [018] 177035.001517: block:block_rq_issue: 8,96
+WS 0 () 53905064 + 16 [bstore_kv_sync]
+bstore_kv_sync 26357 [010] 177035.006956: block:block_rq_issue: 8,96
+WS 0 () 77472384 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [019] 177035.018570: block:block_rq_issue: 8,96
+WS 0 () 53905072 + 24 [bstore_kv_sync]
+bstore_kv_sync 26357 [010] 177035.032255: block:block_rq_issue: 8,96
+WS 0 () 77472392 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [012] 177035.157029: block:block_rq_issue: 8,96
+WS 0 () 77472400 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [013] 177035.172142: block:block_rq_issue: 8,96
+WS 0 () 53905096 + 48 [bstore_kv_sync]
+bstore_kv_sync 26357 [014] 177035.182179: block:block_rq_issue: 8,96
+WS 0 () 77472408 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [015] 177035.209644: block:block_rq_issue: 8,96
+WS 0 () 53905136 + 16 [bstore_kv_sync]
+bstore_kv_sync 26357 [016] 177035.215506: block:block_rq_issue: 8,96
+WS 0 () 77472416 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [017] 177035.226028: block:block_rq_issue: 8,96
+WS 0 () 53905144 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [018] 177035.232176: block:block_rq_issue: 8,96
+WS 0 () 77472424 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [000] 177035.246060: block:block_rq_issue: 8,96
+WS 0 () 53905144 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [000] 177035.257132: block:block_rq_issue: 8,96
+WS 0 () 77472432 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [000] 177035.268880: block:block_rq_issue: 8,96
+WS 0 () 53905144 + 24 [bstore_kv_sync]
+bstore_kv_sync 26357 [000] 177035.344242: block:block_rq_issue: 8,96
+WS 0 () 53905160 + 16 [bstore_kv_sync]
+bstore_kv_sync 26357 [000] 177035.382172: block:block_rq_issue: 8,96
+WS 0 () 77472448 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [000] 177035.393062: block:block_rq_issue: 8,96
+WS 0 () 53905168 + 16 [bstore_kv_sync]
+bstore_kv_sync 26357 [000] 177035.398896: block:block_rq_issue: 8,96
+WS 0 () 77472456 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [017] 177035.420992: block:block_rq_issue: 8,96
+WS 0 () 53905176 + 8 [bstore_kv_sync]
+bstore_kv_sync 26357 [018] 177035.432239: block:block_rq_issue: 8,96
+WS 0 () 77472464 + 8 [bstore_kv_sync]
 
-I'm taking the liberty to cross-post to the -devel list. I did get a
-couple of off-list replies but they were of the "oh cool, I want to know
-too" type. :)
+the io request on LBA 77xxx is always 8 sectors, and the the io
+request on LBA 53xxx had some overlay areas...
+my understand of the two sequent address (77xxx and 53xxx) is bluefs's
+log and rocksdb'wal, why they alternate one by one so strictly...
 
-Looking forward to people's thoughts.
-
-Cheers,
-Florian
-
-
--------- Forwarded Message --------
-Subject: State of play for RDMA on Luminous
-Date: Wed, 23 Aug 2017 10:26:45 +0200
-From: Florian Haas <florian@hastexo.com>
-To: ceph-users@lists.ceph.com <ceph-users@lists.ceph.com>
-
-Hello everyone,
-
-I'm trying to get a handle on the current state of the async messenger's
-RDMA transport in Luminous, and I've noticed that the information
-available is a little bit sparse (I've found
-https://community.mellanox.com/docs/DOC-2693 and
-https://community.mellanox.com/docs/DOC-2721, which are a great start
-but don't look very complete). So I'm kicking off this thread that might
-hopefully bring interested parties and developers together.
-
-Could someone in the know please confirm that the following assumptions
-of mine are accurate:
-
-- RDMA support for the async messenger is available in Luminous.
-
-- You enable it globally by setting ms_type to "async+rdma", and by
-setting appropriate values for the various ms_async_rdma* options (most
-importantly, ms_async_rdma_device_name).
-
-- You can also set RDMA messaging just for the public or cluster
-network, via ms_public_type and ms_cluster_type.
-
-- Users have to make a global async+rdma vs. async+posix decision on
-either network. For example, if either ms_type or ms_public_type is
-configured to async+rdma on cluster nodes, then a client configured with
-ms_type =3D async+posix can't communicate.
-
-Based on those assumptions, I have the following questions:
-
-- What is the current state of RDMA support in kernel libceph? In other
-words, is there currently a way to map RBDs, or mount CephFS, if a Ceph
-cluster uses RDMA messaging?
-
-- In case there is no such support in the kernel yet: What's the current
-status of RDMA support (and testing) with regard to
-  * libcephfs?
-  * the Samba Ceph VFS?
-  * nfs-ganesha?
-  * tcmu-runner?
-
-- In summary, if a user wants to access their Ceph cluster via a POSIX
-filesystem or via iSCSI, is enabling the RDMA-enabled async messenger in
-the public network an option? Or would they have to continue running on
-TCP/IP (possibly on IPoIB if they already have InfiniBand hardware)
-until the client libraries catch up?
-
-- And more broadly, if a user wants to use the performance benefits of
-RDMA, but not all of their potential Ceph clients have InfiniBand HCAs,
-what are their options? RoCE?
-
-Thanks very much in advance for everyone's insight!
-
-Cheers,
-Florian
-
-
---=20
-Please feel free to verify my identity:
-https://keybase.io/fghaas
-
-
-
-
---8KjjTVu4Ga6HmXPCma3aEUrlXcTw4fX8T--
-
---HmAewmDDLtvLIH08Ue90XQbmNaCcldxvc
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIxBAEBCAAbBQJZo9dvFBxmbG9yaWFuQGhhc3RleG8uY29tAAoJEEqtGHdMPKEn
-5aIQAKruOB1flYuKVyrB4OHnpNNwAbKC152MWfgZ9f0FgzGIKFEC622P3U2YVUF9
-nUVRUK5bF+TJz/dSEY+3DD+pQ2R8GNVNfRfjDuRJyuhy1M6YpPq9JpUH8u0RV46s
-js5GTw+awjDA4rvqNxe9BccNPiW6mDXzRy88YIiHCpyKyQZP8IkoANg5zF4kTQEG
-Lji+oHib5mNJX5hYZKvWBVp1nPWax5A5st2CjMwEXqm/GKBien9IUmLwDmUBZtb9
-8dvCz8ePZHgV8e5CHZy7zu+41/j7IA33LKOfB195Za+5jUWWLithrLEqHy+QGU7n
-HRDS0tLUvH5KDCnL2a2+RDtoE+GAorMsT4nXlDReBccYKFxA4n8g5zyNGJaxwz89
-Itz1qmbXIZPgoKK/1cc+q6aA/93jbo6CZqzBhoja2/uIHs7gHNFTj8cacb/l83bQ
-q/w+U8HxeBuHvEDr3Hn1Y4fLEFZ5E/toe5yEZlBRs0pOyOFLmJThC/EN1j8bW/+e
-eVvrGygym2KkQBOZUT3oFW+0Ank/JrRKJoSZRQAybrtxyDLjAfX3jy7Po0mT3OvF
-KpCZcs2xMY90hWmgkkJbFEplgbAjnxTK47w9/qNoQavEHKgw9BJXrkZe5MyOTQec
-vc14bYQiAVdwouukkH6xh7vD9np86VqVv558vruQK5Udx+CH
-=79F8
------END PGP SIGNATURE-----
-
---HmAewmDDLtvLIH08Ue90XQbmNaCcldxvc--
+we think this behavior may hurt the performance, hope anyone who could
+give an analysis, thanks so much!
