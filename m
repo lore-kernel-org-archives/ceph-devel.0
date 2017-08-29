@@ -1,76 +1,42 @@
-From: Leonardo Vaz <lvaz@redhat.com>
-Subject: Re: Where to find the CDM recording?
-Date: Tue, 29 Aug 2017 04:13:00 -0300
-Message-ID: <20170829071300.GA14867@oops.local>
-References: <CAJACTudA642f57noXgKvGabTPOecTLjvjEBdHvS2asT9Zdierg@mail.gmail.com>
- <20170804004706.GB3381@oops.local>
- <CAJACTuekTBeA_UvbqaeWBQ=_RfOcFkNVF91NRDKLV3mUd1smMA@mail.gmail.com>
- <CAJACTucOV4NJxJxm=ircTnrJnN+cYCa=Gh4taw5yBPf-Wpc+WQ@mail.gmail.com>
+From: Sistem Administrator <candra.setya@customs.go.id>
+Subject: PERHATIAN
+Date: Tue, 29 Aug 2017 10:52:16 +0530
+Message-ID: <20170829052513.4AB8538E003C@mail.customs.go.id>
+Reply-To: Sistemass_Adminss@mail2world.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47372 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750796AbdH2HND (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 29 Aug 2017 03:13:03 -0400
-Content-Disposition: inline
-In-Reply-To: <CAJACTucOV4NJxJxm=ircTnrJnN+cYCa=Gh4taw5yBPf-Wpc+WQ@mail.gmail.com>
+Received: from mail.customs.go.id ([202.61.126.135]:38855 "EHLO
+        mail.customs.go.id" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750779AbdH2HbM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Aug 2017 03:31:12 -0400
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xuehan Xu <xxhdx1985126@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Recipients <candra.setya@customs.go.id>
 
-On Sat, Aug 19, 2017 at 10:45:53AM +0800, Xuehan Xu wrote:
-> Hi, everyone.
-> 
-> Is the August's CDM still to be posted on youtube?
-> It seems that videos on youtube have not been updated yet.
+PERHATIAN
 
-The recording of August CDM was finally posted on Youtube:
+Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang =
+didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda =
+mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali m=
+emvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, ki=
+rim informasi berikut di bawah ini:
 
- https://youtu.be/-Ok722g-rA0
+Nama:
+Username:
+sandi:
+Konfirmasi sandi:
+E-mail:
+telepon:
 
-My apologies for the delay. I'll manage things to have the upcoming
-recordings posted shortly after the meeting.
+Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda =
+akan dinonaktifkan!
 
-Kindest regards,
+Maaf atas ketidaknyamanan ini.
+Kode verifikasi: en:0986..web...id......nw..website Admin..id...9876mm.2017
+Surat Dukungan Teknis =A92017
 
-Leo
- 
-> Thank you:-)
-> 
-> On 4 August 2017 at 11:20, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
-> > I got it:-)
-> >
-> > Thanks, all of you guys:-)
-> >
-> > On 4 August 2017 at 08:47, Leonardo Vaz <lvaz@redhat.com> wrote:
-> >> On Thu, Aug 03, 2017 at 11:35:24AM +0800, Xuehan Xu wrote:
-> >>> Hi, everyone.
-> >>>
-> >>> Where can I find the recording of the CDM held last night?
-> >>
-> >> It will be posted soon Xuehan.
-> >>
-> >> Kindest regards,
-> >>
-> >> Leo
-> >>
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >>> the body of a message to majordomo@vger.kernel.org
-> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >> --
-> >> Leonardo Vaz
-> >> Ceph Community Manager
-> >> Open Source and Standards Team
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
--- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
+terima kasih
+Sistem Administrator
