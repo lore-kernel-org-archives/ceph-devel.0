@@ -1,131 +1,87 @@
-From: Linux Chips <linux.chips@gmail.com>
-Subject: Re: High memory usage kills OSD while peering
-Date: Tue, 29 Aug 2017 22:49:14 +0300
-Message-ID: <9364fe7f-9d1e-d5c1-27a4-a49da51b39a7@gmail.com>
-References: <07113ad5-a799-5232-c617-81f323ce4038@gmail.com>
- <15fa2de0-27ad-cc51-6a6c-f306b9f330d2@gmail.com>
- <CAFehDbCzt=Ezffz+D7QQNM4PaPaDTJqU+dm1AhjmNHjw1W1FcA@mail.gmail.com>
- <alpine.DEB.2.11.1708222230080.17029@piezo.novalocal>
- <cf976b97-5173-cf89-010f-a3d492944304@gmail.com>
- <alpine.DEB.2.11.1708231343470.20435@piezo.novalocal>
- <e79cb096-bb5c-5e1c-5e03-5ca8b324b9e2@gmail.com>
- <alpine.DEB.2.11.1708240351220.20435@piezo.novalocal>
- <12a4771a-dab2-3e98-c925-119b09c2d2d0@gmail.com>
- <alpine.DEB.2.11.1708252243080.20435@piezo.novalocal>
- <18fbddea-9b94-bc9c-46d5-08076b591d13@gmail.com>
- <alpine.DEB.2.11.1708252306140.20435@piezo.novalocal>
- <d335345b-7c66-ee22-096d-31f792070397@gmail.com>
- <73dc0755-4699-8d61-d5fc-a39e629c582a@gmail.com>
- <alpine.DEB.2.11.1708270157360.20435@piezo.novalocal>
- <CAFehDbAVBmxAhUtOCUx72ZQHkUTmRf4uA87J4qJvuxj+sn7E+w@mail.gmail.com>
- <CAFehDbAN9M5_rc_Rrg5gYdDoez+bbuy-QADzAHHctTiNwmi9-Q@mail.gmail.com>
+From: Two Spirit <twospirit6905@gmail.com>
+Subject: Re: Bug? luminous pkg missing ceph-osd ceph-mon 32bit
+Date: Tue, 29 Aug 2017 14:36:35 -0700
+Message-ID: <CAKRxpuscVsSQUF73T_1THXaF4P=bVr7-guV+WASBTpNsR5FHqw@mail.gmail.com>
+References: <CAKRxpuug+1wc0Js9TczYBv-yevbYWXf+TT26oQmZty2TNYBcCg@mail.gmail.com>
+ <CAKRxpuuNtxA3+P37LD8YffQ3OLiAxj88LqcyiVdDqr=uKe1nxg@mail.gmail.com> <CAC-Np1wK730i5mY1tEmdOu0oVbmALVLF_uc1qiQdbBiwShJwzA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f179.google.com ([209.85.128.179]:37167 "EHLO
-        mail-wr0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751250AbdH2TtS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Aug 2017 15:49:18 -0400
-Received: by mail-wr0-f179.google.com with SMTP id k9so815057wre.4
-        for <ceph-devel@vger.kernel.org>; Tue, 29 Aug 2017 12:49:17 -0700 (PDT)
-In-Reply-To: <CAFehDbAN9M5_rc_Rrg5gYdDoez+bbuy-QADzAHHctTiNwmi9-Q@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-io0-f175.google.com ([209.85.223.175]:33669 "EHLO
+        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751294AbdH2Vgh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Aug 2017 17:36:37 -0400
+Received: by mail-io0-f175.google.com with SMTP id s101so25879400ioe.0
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Aug 2017 14:36:36 -0700 (PDT)
+In-Reply-To: <CAC-Np1wK730i5mY1tEmdOu0oVbmALVLF_uc1qiQdbBiwShJwzA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mustafa Muhammad <mustafa1024m@gmail.com>, Sage Weil <sage@newdream.net>
+To: Alfredo Deza <adeza@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-hi, this would not be normally an issue.
-but i think the whole thing of oom killing them and nodes dying, made 
-the osds do alot of errors when writing files to disk. so we are seeing 
-100s of those files till now. and not sure how much still there is to fix.
-we had to do "ceph osd set pause" to keep recovery moving, other wise it 
-is a mess.
-i am willing to patch this if any one have a nice idea on how to deal 
-with it as i am not sure what is the best to do.
+is it the plan to eventually support 32 bit, or is it only supported on 64 bit?
 
-my idea was (not sure how easy to implement) is to check if we have a 
-size mismatch, we then grab all the chunks, and take enough shards with 
-matching sizes, and decode them.
-and probably mark the pg inconsistent, and let the repair deal with it 
-when the pg finish recovering.
-
-On 08/29/2017 10:34 PM, Mustafa Muhammad wrote:
-> I reported this issue, if you can take a look:
-> 
-> http://tracker.ceph.com/issues/21173
-> 
-> Regards
-> Mustafa
-> 
-> On Tue, Aug 29, 2017 at 10:44 AM, Mustafa Muhammad
-> <mustafa1024m@gmail.com> wrote:
->> Hi all,
->> Not sure if I should open a new thread, but this is the same cluster,
->> so this should provide a little background.
->> Now the cluster is up and recovering, but we are hitting a bug that is
->> crashing the OSD
+On Mon, Aug 28, 2017 at 5:11 AM, Alfredo Deza <adeza@redhat.com> wrote:
+> On Fri, Aug 25, 2017 at 11:40 AM, Two Spirit <twospirit6905@gmail.com> wrote:
+>> the target osd was a ubuntu 16.04 x32
 >>
->>       0> 2017-08-29 10:00:51.699557 7fae66139700 -1
->> /home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/release/12.1.4/rpm/el7/BUILD/ceph-12.1.4/src/osd/ECUtil.cc:
->> In function 'int ECUtil::decode(const ECUtil::stripe_info_t&,
->> ceph::ErasureCodeInterfaceRef&, std::map<int, ceph::buffer::list>&,
->> std::map<int, ceph::buffer::list*>&)' thread 7fae66139700 time
->> 2017-08-29 10:00:51.688625
->> /home/jenkins-build/build/workspace/ceph-build/ARCH/x86_64/AVAILABLE_ARCH/x86_64/AVAILABLE_DIST/centos7/DIST/centos7/MACHINE_SIZE/huge/release/12.1.4/rpm/el7/BUILD/ceph-12.1.4/src/osd/ECUtil.cc:
->> 59: FAILED assert(i->second.length() == total_data_size)
->>
->> Probably http://tracker.ceph.com/issues/14009
->>
->> Some shards are problematic, smaller sizes (definitely a problem) or
->> last part of them is all zeros (not sure if this is padding or
->> problem).
->>
->> Now we have set noup, marked OSDs with corrupt chunks down, and let
->> the recovery proceed, but this is happening in lots of PGs and is very
->> slow.
->> Is there anything we can do to fix this faster, we tried removing the
->> corrupted chunk? and got this crash (I grep the thread in which Abort
->> happened):
->>
->>     -77> 2017-08-28 15:11:40.030178 7f90cd519700  0 osd.377 pg_epoch:
->> 1102631 pg[143.1b0s0( v 1098703'309813 (960110'306653,1098703'309813]
->> local-lis/les=1102586/1102609 n=63499 ec=470378/470378 lis/c
->> 1102586/960364 les/c/f 1102609/960364/1061015 1102545/1102586/1102586)
->> [377,77,248,635,642,111,182,234,531,307,29,648]/[377,77,248,198,529,111,182,234,548,307,29,174]
->> r=0 lpr=1102586 pi=[960339,1102586)/44 rops=1
->> bft=531(8),635(3),642(4),648(11) crt=1098703'309813 lcod 0'0 mlcod 0'0
->> active+remapped+backfilling] failed_push
->> 143:0d9ce204:::default.63296332.1__shadow_2033460653.2~dpBlpEu3nMuFDe6ikBFMso5ivuBb7oj.1_93:head
->> from shard 548(8), reps on  unfound? 0
->>      -2> 2017-08-28 15:11:40.130722 7f90cd519700 -1 osd.377 pg_epoch:
->> 1102631 pg[143.1b0s0( v 1098703'309813 (960110'306653,1098703'309813]
->> local-lis/les=1102586/1102609 n=63499 ec=470378/470378 lis/c
->> 1102586/960364 les/c/f 1102609/960364/1061015 1102545/1102586/1102586)
->> [377,77,248,635,642,111,182,234,531,307,29,648]/[377,77,248,198,529,111,182,234,548,307,29,174]
->> r=0 lpr=1102586 pi=[960339,1102586)/44
->> bft=531(8),635(3),642(4),648(11) crt=1098703'309813 lcod 0'0 mlcod 0'0
->> active+remapped+backfilling] recover_replicas: object
->> 143:0d9ce204:::default.63296332.1__shadow_2033460653.2~dpBlpEu3nMuFDe6ikBFMso5ivuBb7oj.1_93:head
->> last_backfill 143:0d9ce1c5:::default.63296332.1__shadow_26882237.2~mGGm_A45xKldAdADFC13qizbUiC0Yrw.1_158:head
->>      -1> 2017-08-28 15:11:40.130802 7f90cd519700 -1 osd.377 pg_epoch:
->> 1102631 pg[143.1b0s0( v 1098703'309813 (960110'306653,1098703'309813]
->> local-lis/les=1102586/1102609 n=63499 ec=470378/470378 lis/c
->> 1102586/960364 les/c/f 1102609/960364/1061015 1102545/1102586/1102586)
->> [377,77,248,635,642,111,182,234,531,307,29,648]/[377,77,248,198,529,111,182,234,548,307,29,174]
->> r=0 lpr=1102586 pi=[960339,1102586)/44
->> bft=531(8),635(3),642(4),648(11) crt=1098703'309813 lcod 0'0 mlcod 0'0
->> active+remapped+backfilling] recover_replicas: object added to missing
->> set for backfill, but is not in recovering, error!
->>       0> 2017-08-28 15:11:40.134768 7f90cd519700 -1 *** Caught signal
->> (Aborted) **
->> in thread 7f90cd519700 thread_name:tp_osd_tp
->>
->> What we can do to fix this?
->> Will enabling fast_read on the pool benefit us or it is client only?
->> Any ideas?
->>
->> Regards
->> Mustafa
-
+>> On Fri, Aug 25, 2017 at 8:35 AM, Two Spirit <twospirit6905@gmail.com> wrote:
+>>> I built 64 bit ubuntu 16.04 and 14.04 (using crush tunables legacy)
+>>> systems, and I tried to build a 32 bit system, and it complained
+>>> about missing packages so if there is such a thing, I think it might
+>>> be related to 32 bit repository. ubuntu 15.04 doesn't work either, but
+>>> I'm not sure if it is supported.
+>
+> We haven't built any 32bit binaries in a while although the repos
+> might exist (although they are empty).
+>
+>>>
+>>> adminhost$ ceph-deploy install --release luminous vm143
+>>>
+>>> [vm143][DEBUG ] Get:2 http://us.archive.ubuntu.com/ubuntu
+>>> xenial-updates InRelease [102 kB]
+>>> [vm143][DEBUG ] Get:3 http://security.ubuntu.com/ubuntu
+>>> xenial-security InRelease [102 kB]
+>>> [vm143][DEBUG ] Get:4 http://us.archive.ubuntu.com/ubuntu
+>>> xenial-backports InRelease [102 kB]
+>>> [vm143][DEBUG ] Hit:5 https://download.ceph.com/debian-luminous xenial InRelease
+>>> [vm143][DEBUG ] Fetched 306 kB in 1s (172 kB/s)
+>>> [vm143][DEBUG ] Reading package lists...
+>>> [vm143][INFO  ] Running command: sudo env
+>>> DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get
+>>> --assume-yes -q --no-install-recommends install -o
+>>> Dpkg::Options::=--force-confnew ceph ceph-osd ceph-mds ceph-mon
+>>> radosgw
+>>> [vm143][DEBUG ] Reading package lists...
+>>> [vm143][DEBUG ] Building dependency tree...
+>>> [vm143][DEBUG ] Reading state information...
+>>> [vm143][WARNING] E: Unable to locate package ceph-osd
+>>> [vm143][WARNING] E: Unable to locate package ceph-mon
+>>> [vm143][ERROR ] RuntimeError: command returned non-zero exit status: 100
+>>> [ceph_deploy][ERROR ] RuntimeError: Failed to execute command: env
+>>> DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get
+>>> --assume-yes -q --no-install-recommends install -o
+>>> Dpkg::Options::=--force-confnew ceph ceph-osd ceph-mds ceph-mon
+>>> radosgw
+>>> <div id="DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2"><br />
+>>> <table style="border-top: 1px solid #D3D4DE;">
+>>>         <tr>
+>>>         <td style="width: 55px; padding-top: 13px;"><a
+>>> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
+>>> target="_blank"><img
+>>> src="https://ipmcdn.avast.com/images/icons/icon-envelope-tick-green-avg-v1.png"
+>>> alt="" width="46" height="29" style="width: 46px; height: 29px;"
+>>> /></a></td>
+>>>                 <td style="width: 470px; padding-top: 12px; color: #41424e;
+>>> font-size: 13px; font-family: Arial, Helvetica, sans-serif;
+>>> line-height: 18px;">Virus-free. <a
+>>> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
+>>> target="_blank" style="color: #4453ea;">www.avg.com</a>
+>>>                 </td>
+>>>         </tr>
+>>> </table><a href="#DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2" width="1"
+>>> height="1"></a></div>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
