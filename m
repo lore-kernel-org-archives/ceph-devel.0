@@ -1,85 +1,67 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: question about bluefs log sync
-Date: Tue, 29 Aug 2017 13:45:42 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1708291344000.20435@piezo.novalocal>
-References: <CALi+v18qS_hU0P9_iMxABwZFx5HcdeGbAo00yHBk42i_RJTWJg@mail.gmail.com> <alpine.DEB.2.11.1708291317310.20435@piezo.novalocal> <CALi+v18P3Z2dUdy_7Ve0CQZKh-oRsfmm_CidDNMXart6CMxkXw@mail.gmail.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: Building Ceph in Docker
+Date: Tue, 29 Aug 2017 21:53:02 +0800
+Message-ID: <CAJE9aOPNxoui-f5ScSNX3W9YrfGiEmBna3La1zdRVr7WheLdGA@mail.gmail.com>
+References: <CAM+oqtHyc-1RSB1StOt2fUpJCS8b-5gwEHfLP9eDhgC2uq-mNw@mail.gmail.com>
+ <a27efb29-bfc3-305a-5517-eb9b58612484@suse.cz>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:35378 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751288AbdH2Npn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 29 Aug 2017 09:45:43 -0400
-In-Reply-To: <CALi+v18P3Z2dUdy_7Ve0CQZKh-oRsfmm_CidDNMXart6CMxkXw@mail.gmail.com>
+Received: from mail-oi0-f52.google.com ([209.85.218.52]:35728 "EHLO
+        mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751391AbdH2NxD (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Aug 2017 09:53:03 -0400
+Received: by mail-oi0-f52.google.com with SMTP id k77so27776540oib.2
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Aug 2017 06:53:03 -0700 (PDT)
+In-Reply-To: <a27efb29-bfc3-305a-5517-eb9b58612484@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: zengran zhang <z13121369189@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: Mingliang LIU <mingliang.liu@salesforce.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, 29 Aug 2017, zengran zhang wrote:
-> thanks! i open the debug_bluefs to 10, but did not see the
-> "_should_compact_log" log when fio is writing the rbd...so how /offen
-> will BlueFS::sync_metadata() be called?
+On Tue, Aug 29, 2017 at 6:27 PM, Nathan Cutler <ncutler@suse.cz> wrote:
+>> I know we're building Ceph in Linux distributions and many of you use
+>> vstart.sh as I do. Steps to install dependencies are easy so we don't
+>> have to worry about prerequisites in a dev machine.
+>>
+>> I'm thinking if it's useful to build Ceph in Docker. There are reasons
+>> to do this, for example 1) not be able/willing to install quite a few
+>> dependency software/library on a shared Linux, 2) to have a standard
+>> build image for isolated and automatic testing, and 3) to build on
+>> Mac/Windows. I know for this we can create Linux virtual machines on
+>> Mac/ Windows, but I think container is lightweight and better.
+>>
+>> So I attach a small script that creates a Docker image to build the
+>> Ceph from source, and then starts a test cluster with vstart.sh in a
+>> container. Do you think it's something useful and/or worth to have in
+>> source tree?
+>>
+>> When I was building Hadoop, I found its start-build-env.sh helpful,
+>> which is basically the same idea I borrowed here.
+>
+>
+> Have you looked at docker-test.sh ?
+>
+> https://github.com/ceph/ceph/blob/master/src/test/docker-test.sh
+>
+> I have not tried it in awhile, but it used to be able to not only build Ceph
+> but also run "make check", in a Docker container. It support(ed) several
+> different operating systems.
+>
+> It would be nice if someone got it working again.
 
-Not that often.  We only need to write to the bluefs log when new rocksdb 
-files are created.. and they are pretty big.  So it will need to age for 
-quite a while before anything happens.
+it still worked the last time i tried to build luminous on
+debian/stretch. (i hacked src/test/debian-jessie a little bit).
 
-You can get some sense of it by watching the 'ceph daemonperf osd.0' 
-output on a running OSD and watching the bluefs.wal column.  There is also 
-a bluefs.log_bytes counter in the full perf dump, although you won't see 
-the estimated size to compare it against.
+>
+> Nathan
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-sage
 
-> 
-> 2017-08-29 21:19 GMT+08:00 Sage Weil <sweil@redhat.com>:
-> > On Tue, 29 Aug 2017, zengran zhang wrote:
-> >> hi Sage,
-> >>     I want to ask when will the bluefs log be compacted? I only sure
-> >> it will be compacted when umount the bluefs...
-> >> I see the log be compact when rocksdb call Dir.Fsync(), but want to
-> >> know how to trigger this...
-> >
-> > There is a heuristic for when it gets "too big":
-> >
-> > bool BlueFS::_should_compact_log()
-> > {
-> >   uint64_t current = log_writer->file->fnode.size;
-> >   uint64_t expected = _estimate_log_size();
-> >   float ratio = (float)current / (float)expected;
-> >   dout(10) << __func__ << " current 0x" << std::hex << current
-> >            << " expected " << expected << std::dec
-> >            << " ratio " << ratio
-> >            << (new_log ? " (async compaction in progress)" : "")
-> >            << dendl;
-> >   if (new_log ||
-> >       current < cct->_conf->bluefs_log_compact_min_size ||
-> >       ratio < cct->_conf->bluefs_log_compact_min_ratio) {
-> >     return false;
-> >   }
-> >   return true;
-> > }
-> >
-> > and the estimate for the (compacted) size is
-> >
-> > uint64_t BlueFS::_estimate_log_size()
-> > {
-> >   int avg_dir_size = 40;  // fixme
-> >   int avg_file_size = 12;
-> >   uint64_t size = 4096 * 2;
-> >   size += file_map.size() * (1 + sizeof(bluefs_fnode_t));
-> >   for (auto& p : block_all)
-> >     size += p.num_intervals() * (1 + 1 + sizeof(uint64_t) * 2);
-> >   size += dir_map.size() + (1 + avg_dir_size);
-> >   size += file_map.size() * (1 + avg_dir_size + avg_file_size);
-> >   return ROUND_UP_TO(size, super.block_size);
-> > }
-> >
-> > The default min_ratio is 5... so we compact when it's ~5x bigger than it
-> > needs to be.
-> >
-> > sage
-> >
-> 
-> 
+
+-- 
+Regards
+Kefu Chai
