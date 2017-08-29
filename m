@@ -1,118 +1,130 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: osd fails to start, cannot mount the journal
-Date: Mon, 28 Aug 2017 14:25:49 -0400
-Message-ID: <CAC-Np1wMeCoiSPTwkHwe_ejyU7+-e_ftFE9LL1h=d6jdAi6-iQ@mail.gmail.com>
-References: <CAC-Np1zijh2F+jv2pAigBH6fAaxLV=ByGF+NfYaWWNaLPBYyQQ@mail.gmail.com>
+From: Mingliang LIU <mingliang.liu@salesforce.com>
+Subject: Building Ceph in Docker
+Date: Mon, 28 Aug 2017 23:06:42 -0700
+Message-ID: <CAM+oqtHyc-1RSB1StOt2fUpJCS8b-5gwEHfLP9eDhgC2uq-mNw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/mixed; boundary="001a11400b6060760c0557de3810"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:37332 "EHLO
-        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751324AbdH1SZv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 28 Aug 2017 14:25:51 -0400
-Received: by mail-wm0-f51.google.com with SMTP id u26so8706356wma.0
-        for <ceph-devel@vger.kernel.org>; Mon, 28 Aug 2017 11:25:50 -0700 (PDT)
-In-Reply-To: <CAC-Np1zijh2F+jv2pAigBH6fAaxLV=ByGF+NfYaWWNaLPBYyQQ@mail.gmail.com>
+Received: from mail-lf0-f44.google.com ([209.85.215.44]:36281 "EHLO
+        mail-lf0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751050AbdH2GHF (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Aug 2017 02:07:05 -0400
+Received: by mail-lf0-f44.google.com with SMTP id z12so9496639lfd.3
+        for <ceph-devel@vger.kernel.org>; Mon, 28 Aug 2017 23:07:04 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, Aug 24, 2017 at 1:51 PM, Alfredo Deza <adeza@redhat.com> wrote:
-> I'm using the tip of luminous and encountering an inconsistent problem
-> with journals (using filestore).
->
-> The deployment goes well, the single OSD comes up and everything goes
-> well. After rebooting I can find that the OSD fails to start. The logs
-> complain like this:
->
-> Aug 24 20:33:06 ceph-osd0 ceph-osd[17772]: 2017-08-24 20:33:06.415820
-> 7fbb10a08e00 -1 journal FileJournal::open: ondisk fsid
-> 00000000-0000-0000-0000-000000000000 doesn't match expected
-> 56501dc6-6c0a-482f-8252-4406705f1b67, invalid (someone else's?)
-> journal
-> Aug 24 20:33:06 ceph-osd0 ceph-osd[17772]: 2017-08-24 20:33:06.415952
-> 7fbb10a08e00 -1 filestore(/var/lib/ceph/osd/ceph-0) mount(1821):
-> failed to open journal /var/lib/ceph/osd/ceph-0/journal: (22) Invalid
-> argument
-> Aug 24 20:33:06 ceph-osd0 ceph-osd[17772]: 2017-08-24 20:33:06.416625
-> 7fbb10a08e00 -1 osd.0 0 OSD:init: unable to mount object store
-> Aug 24 20:33:06 ceph-osd0 ceph-osd[17772]: 2017-08-24 20:33:06.416632
-> 7fbb10a08e00 -1  ** ERROR: osd init failed: (22) Invalid argument
->
-> At this point /var/lib/ceph/osd/ceph-0 is mounted, with ceph:ceph as
-> owner, and the journal is linked too. Permissions there look correct
-> to me:
->
-> # ls -alh /var/lib/ceph/osd/ceph-0
-> total 44K
-> drwxr-xr-x  3 ceph ceph  194 Aug 24 20:34 .
-> drwxr-xr-x  3 ceph ceph 4.0K Aug 24 20:22 ..
-> -rw-r--r--  1 ceph ceph  195 Aug 24 20:23 activate.monmap
-> -rw-r--r--  1 ceph ceph   37 Aug 24 20:23 ceph_fsid
-> drwxr-xr-x 20 ceph ceph  321 Aug 24 20:23 current
-> -rw-r--r--  1 ceph ceph   37 Aug 24 20:23 fsid
-> lrwxrwxrwx  1 ceph ceph    8 Aug 24 20:23 journal -> /dev/sdc
-> -rw-------  1 ceph ceph   56 Aug 24 20:23 keyring
-> -rw-r--r--  1 ceph ceph   21 Aug 24 20:23 magic
-> -rw-r--r--  1 ceph ceph    6 Aug 24 20:23 ready
-> -rw-r--r--  1 ceph ceph    4 Aug 24 20:23 store_version
-> -rw-r--r--  1 ceph ceph   53 Aug 24 20:23 superblock
-> -rw-r--r--  1 ceph ceph   10 Aug 24 20:23 type
-> -rw-r--r--  1 ceph ceph    2 Aug 24 20:23 whoami
->
-> Checking /dev/sdc/ permissions look OK to me as well:
->
-> # ls -alh /dev/sdc
-> brw-rw---- 1 ceph ceph 8, 32 Aug 24 20:25 /dev/sdc
->
->
-> The OSD logs seem to suggest it can read/write to the journal:
->
-> 2017-08-24 20:34:47.661578 7f4f06178e00  0
-> filestore(/var/lib/ceph/osd/ceph-0) mount(1758): enabling WRITEAHEAD
-> journal mode: checkpoint is not enabled
-> 2017-08-24 20:34:47.661816 7f4f06178e00  1 journal _open
-> /var/lib/ceph/osd/ceph-0/journal fd 30: 11534336000 bytes, block size
-> 4096 bytes, directio = 1, aio = 1
-> 2017-08-24 20:34:47.661921 7f4f06178e00 -1 journal FileJournal::open:
-> ondisk fsid 00000000-0000-0000-0000-000000000000 doesn't match
-> expected 56501dc6-6c0a-482f-8252-4406705f1b67, invalid (someone
-> else's?) journal
-> 2017-08-24 20:34:47.661927 7f4f06178e00  1 journal close
-> /var/lib/ceph/osd/ceph-0/journal
->
-> But immediately after it sees it can't mount, failing to start the OSD:
->
-> 2017-08-24 20:34:47.662030 7f4f06178e00 -1
-> filestore(/var/lib/ceph/osd/ceph-0) mount(1821): failed to open
-> journal /var/lib/ceph/osd/ceph-0/journal: (22) Invalid argument
-> 2017-08-24 20:34:47.662552 7f4f06178e00  4 rocksdb:
-> [/build/ceph-12.1.4-113-gd79b443/src/rocksdb/db/db_impl.cc:217]
-> Shutdown: canceling all background work
-> 2017-08-24 20:34:47.662694 7f4f06178e00  4 rocksdb:
-> [/build/ceph-12.1.4-113-gd79b443/src/rocksdb/db/db_impl.cc:343]
-> Shutdown complete
-> 2017-08-24 20:34:47.662728 7f4f06178e00 -1 osd.0 0 OSD:init: unable to
-> mount object store
->
->
->
-> Not sure what else to try at this point. Any ideas?
+--001a11400b6060760c0557de3810
+Content-Type: text/plain; charset="UTF-8"
 
-Following up on this, Josh Durgin helped me out figure out that this output:
+Hi,
 
- ceph-osd -f --cluster ceph --id 0 --setuser ceph --setgroup ceph
-starting osd.0 at - osd_data /var/lib/ceph/osd/ceph-0
-/var/lib/ceph/osd/ceph-0/journal
-2017-08-24 19:57:08.674929 7f33e226ce00 -1 journal read_header error
-decoding journal header
+I know we're building Ceph in Linux distributions and many of you use
+vstart.sh as I do. Steps to install dependencies are easy so we don't
+have to worry about prerequisites in a dev machine.
 
-Meant that the journal may be pointing to the wrong device, which was
-correct! We were testing this OSD by "re-configuring" the VM
-which caused the /dev/sdc device to change (these names are not persistent).
+I'm thinking if it's useful to build Ceph in Docker. There are reasons
+to do this, for example 1) not be able/willing to install quite a few
+dependency software/library on a shared Linux, 2) to have a standard
+build image for isolated and automatic testing, and 3) to build on
+Mac/Windows. I know for this we can create Linux virtual machines on
+Mac/ Windows, but I think container is lightweight and better.
 
-I am now working on figuring a way to ensure that names persist in our
-setup, and opened https://bugzilla.redhat.com/show_bug.cgi?id=1485011
-to track that.
+So I attach a small script that creates a Docker image to build the
+Ceph from source, and then starts a test cluster with vstart.sh in a
+container. Do you think it's something useful and/or worth to have in
+source tree?
 
-Thanks Josh!
+When I was building Hadoop, I found its start-build-env.sh helpful,
+which is basically the same idea I borrowed here.
+
+Thanks,
+
+Mingliang
+
+--001a11400b6060760c0557de3810
+Content-Type: application/octet-stream;
+	name="0001-Initial-docker-build-scripts-start-build-env.patch"
+Content-Disposition: attachment;
+	filename="0001-Initial-docker-build-scripts-start-build-env.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_j6x6wm1m0
+
+RnJvbSAxZWQyNTliNGQ0ODk1ZGNhZGFiODNmNmVlMDZjOTVlN2ViMWQ1YmEyIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBNaW5nbGlhbmcgTGl1IDxsaXVtbDA3QGdtYWlsLmNvbT4KRGF0
+ZTogU3VuLCAyMCBBdWcgMjAxNyAwMDozMzowNCAtMDcwMApTdWJqZWN0OiBbUEFUQ0hdIEluaXRp
+YWwgZG9ja2VyIGJ1aWxkIHNjcmlwdHMgc3RhcnQtYnVpbGQtZW52CgotLS0KIC5naXRpZ25vcmUg
+ICAgICAgICAgICAgICAgICAgICB8ICAyICsrCiBkZXYtdG9vbHMvZG9ja2VyL0RvY2tlcmZpbGUg
+ICAgfCA0NSArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysKIGRldi10
+b29scy9kb2NrZXIvZW50cnlwb2ludC5zaCB8IDIxICsrKysrKysrKysrKysrKysrKysrCiBzdGFy
+dC1idWlsZC1lbnYuc2ggICAgICAgICAgICAgfCAzNCArKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrCiA0IGZpbGVzIGNoYW5nZWQsIDEwMiBpbnNlcnRpb25zKCspCiBjcmVhdGUgbW9kZSAx
+MDA2NDQgZGV2LXRvb2xzL2RvY2tlci9Eb2NrZXJmaWxlCiBjcmVhdGUgbW9kZSAxMDA3NTUgZGV2
+LXRvb2xzL2RvY2tlci9lbnRyeXBvaW50LnNoCiBjcmVhdGUgbW9kZSAxMDA3NTUgc3RhcnQtYnVp
+bGQtZW52LnNoCgpkaWZmIC0tZ2l0IGEvLmdpdGlnbm9yZSBiLy5naXRpZ25vcmUKaW5kZXggOWEw
+Y2Q5ZjBhMS4uZDY5MTliZDQyYiAxMDA2NDQKLS0tIGEvLmdpdGlnbm9yZQorKysgYi8uZ2l0aWdu
+b3JlCkBAIC02MCwzICs2MCw1IEBAIEdUQUdTCiAKICMgZWRpdG9yIGJhY2t1cCBmaWxlcyBldGMu
+CiBcIypcIworCitkZXYtdG9vbHMvZG9ja2VyL2NvbnRyb2wKZGlmZiAtLWdpdCBhL2Rldi10b29s
+cy9kb2NrZXIvRG9ja2VyZmlsZSBiL2Rldi10b29scy9kb2NrZXIvRG9ja2VyZmlsZQpuZXcgZmls
+ZSBtb2RlIDEwMDY0NAppbmRleCAwMDAwMDAwMDAwLi5hYjg0NzI4NTIzCi0tLSAvZGV2L251bGwK
+KysrIGIvZGV2LXRvb2xzL2RvY2tlci9Eb2NrZXJmaWxlCkBAIC0wLDAgKzEsNDUgQEAKKyMgRG9j
+a2VyZmlsZSBmb3IgYnVpbGRpbmcgYSBkZXYgZG9ja2VyIGltYWdlCisKK0ZST00gdWJ1bnR1OjE2
+LjA0CisKK01BSU5UQUlORVIgTWluZ2xpYW5nIExpdSA8bWluZ2xpYW5nLmxpdUBzYWxlc2ZvcmNl
+LmNvbT4KKworUlVOIGFwdC1nZXQgdXBkYXRlICYmIGFwdC1nZXQgaW5zdGFsbCAteSBcCisgICAg
+bHNiLXJlbGVhc2UgZGV2c2NyaXB0cyBlcXVpdnMgXAorICAgIGRwa2ctZGV2IGdjYyBcCisgICAg
+Y2NhY2hlIGdpdCBzdWRvCisKK0FSRyBVU0VSX0lECitBUkcgVVNFUl9OQU1FCitBUkcgR1JPVVBf
+SUQKKworIyBDcmVhdGUgc3VkbyB1c2VyIHdpdGggZ2l2ZW4gVUlEL0dJRCBmb3IgcHJvcGVyIHZv
+bHVtZSBwZXJtaXNzaW9ucworUlVOIGdyb3VwYWRkIC0tbm9uLXVuaXF1ZSAtZyAke0dST1VQX0lE
+fSAke1VTRVJfTkFNRX0gXAorICYmIHVzZXJhZGQgLWcgJHtHUk9VUF9JRH0gLXUgJHtVU0VSX0lE
+fSAtayAvcm9vdCAtbSAke1VTRVJfTkFNRX0gXAorICYmIGVjaG8gIiR7VVNFUl9OQU1FfSBBTEw9
+KHJvb3QpIE5PUEFTU1dEOkFMTCIgPiAvZXRjL3N1ZG9lcnMuZC8ke1VTRVJfTkFNRX0gXAorICYm
+IGNobW9kIDA0NDAgL2V0Yy9zdWRvZXJzLmQvJHtVU0VSX05BTUV9CisKKyMgSW5zdGFsbCBkZXBl
+bmRlbmNpZXMKK0FERCBjb250cm9sIC9jb250cm9sCitFTlYgREVCSUFOX0ZST05URU5EPW5vbmlu
+dGVyYWN0aXZlCisjIHRoZSBkZXBlbmRlbmNpZXMgYXJlIHZ1bG5lcmFibGUgdG8gaTE4bgorRU5W
+IExDX0FMTD1DCisjIG1ha2UgYSBtZXRhcGFja2FnZSB0aGF0IGV4cHJlc3NlcyB0aGUgYnVpbGQg
+ZGVwZW5kZW5jaWVzLAorIyBpbnN0YWxsIGl0LCBybSB0aGUgLmRlYjsgdGhlbiB1bmluc3RhbGwg
+dGhlIHBhY2thZ2UgYXMgaXRzCisjIHdvcmsgaXMgZG9uZQorUlVOIGFwdC1nZXQgdXBkYXRlIFwK
+KyAmJiBtay1idWlsZC1kZXBzIC0taW5zdGFsbCAtLXJlbW92ZSAtLXRvb2w9ImFwdC1nZXQgLXkg
+LS1uby1pbnN0YWxsLXJlY29tbWVuZHMiIC9jb250cm9sIFwKKyAmJiBhcHQtZ2V0IC15IHJlbW92
+ZSBjZXBoLWJ1aWxkLWRlcHMKKworVVNFUiAke1VTRVJfTkFNRX0KKworRU5WIEhPTUUgL2hvbWUv
+JHtVU0VSX05BTUV9CitFTlYgUEFUSCAiL2hvbWUvJHtVU0VSX05BTUV9L2NlcGgvYnVpbGQvYmlu
+OiR7UEFUSH0iCisjIERlZmF1bHQgaXMgfi8uY2NhY2hlLCBidXQgd2UgZG9uJ3Qgd2FudCB0byBy
+ZW1vdmUgdGhhdCBkaXJlY3Rvcnkgd2hlbiBleGl0aW5nIGNvbnRhaW5lci4KK0VOViBDQ0FDSEVf
+RElSIC9ob21lLyR7VVNFUl9OQU1FfS9jZXBoL2J1aWxkLy5jY2FjaGUKKworV09SS0RJUiAvaG9t
+ZS8ke1VTRVJfTkFNRX0vY2VwaC9idWlsZAorCitFWFBPU0UgNDEwMDAgNDIwMDAKKworRU5UUllQ
+T0lOVCBbIi4uL2Rldi10b29scy9kb2NrZXIvZW50cnlwb2ludC5zaCJdCmRpZmYgLS1naXQgYS9k
+ZXYtdG9vbHMvZG9ja2VyL2VudHJ5cG9pbnQuc2ggYi9kZXYtdG9vbHMvZG9ja2VyL2VudHJ5cG9p
+bnQuc2gKbmV3IGZpbGUgbW9kZSAxMDA3NTUKaW5kZXggMDAwMDAwMDAwMC4uYjExYTkxNzhhYwot
+LS0gL2Rldi9udWxsCisrKyBiL2Rldi10b29scy9kb2NrZXIvZW50cnlwb2ludC5zaApAQCAtMCww
+ICsxLDIxIEBACisjIS9iaW4vYmFzaAorCitzZXQgLWV4CisKK2lmIFsgISAtZCAkSE9NRS9jZXBo
+IF07IHRoZW4KKyAgICBlY2hvICJZb3UgaGF2ZSB0byBhdHRhY2ggY2VwaCBzb3VyY2UgZGlyZWN0
+b3J5IGZpcnN0ISIKKyAgICBleGl0IDEKK2ZpCisKK2NkICRIT01FL2NlcGgKKworIyBSZXVzZSB0
+aGUgZXhpc3RpbmcgYnVpbGQgZGlyZWN0b3J5CitbIC1kIGJ1aWxkIF0gfHwgLi9kb19jbWFrZS5z
+aAorCitjZCBidWlsZCAgIyBBc3N1bWluZyB0aGlzIGlzIHdoZXJlIHlvdSByYW4gY21ha2UKK21h
+a2UgLWokKGV4cHIgJChucHJvYykgLyAyKSB2c3RhcnQKKworIyBJZiBpcyBub3QgTGludXgsIHdl
+IG5vdyBvbmx5IHN1cHBvcnQgbWVtc3RvcmUgYXMgdGhlIG9zZCBvYmplY3RzdG9yZSBiYWNrZW5k
+CisuLi9zcmMvdnN0YXJ0LnNoIC1kIC1uIC14IC0tbWVtc3RvcmUKKworYmluL2NlcGggLXcKZGlm
+ZiAtLWdpdCBhL3N0YXJ0LWJ1aWxkLWVudi5zaCBiL3N0YXJ0LWJ1aWxkLWVudi5zaApuZXcgZmls
+ZSBtb2RlIDEwMDc1NQppbmRleCAwMDAwMDAwMDAwLi5lMWVlZTQ1NzcxCi0tLSAvZGV2L251bGwK
+KysrIGIvc3RhcnQtYnVpbGQtZW52LnNoCkBAIC0wLDAgKzEsMzQgQEAKKyMhL3Vzci9iaW4vZW52
+IGJhc2gKKworc2V0IC1leAorCitjZCAiJChkaXJuYW1lICIkMCIpIiAjIGNvbm5lY3QgdG8gcm9v
+dAorCitjcCAtZiBkZWJpYW4vY29udHJvbCBkZXYtdG9vbHMvZG9ja2VyCisKKyMgV2UgdXNlIGNl
+cGggdXNlciB3aXRoIHBhc3N3b3JkbGVzcyBzdWRvIGFjY2VzcyBpbiBEb2NlciBjb250YWluZXIu
+CisjIEFzc2lnbiBhbiBleHBsaWNpdCBVSUQvR0lEIHRvIGhhbmRsZSB2b2x1bWUgcGVybWlzc2lv
+bnMKK1VTRVJfTkFNRT0kVVNFUgoraWYgWyAiJCh1bmFtZSAtcykiID09ICJMaW51eCIgXTsgdGhl
+bgorICBVU0VSX0lEPSQoaWQgLXUgIiR7VVNFUl9OQU1FfSIpCisgIEdST1VQX0lEPSQoaWQgLWcg
+IiR7VVNFUl9OQU1FfSIpCitlbHNlCisgIFVTRVJfSUQ9MTAwMAorICBHUk9VUF9JRD01MAorZmkK
+KworZG9ja2VyIGJ1aWxkIC10IGNlcGgtYnVpbGQgXAorICAgIC0tYnVpbGQtYXJnIFVTRVJfTkFN
+RT0ke1VTRVJfTkFNRX0gXAorICAgIC0tYnVpbGQtYXJnIFVTRVJfSUQ9JHtVU0VSX0lEfSBcCisg
+ICAgLS1idWlsZC1hcmcgR1JPVVBfSUQ9JHtHUk9VUF9JRH0gXAorICAgIGRldi10b29scy9kb2Nr
+ZXIKKworIyAxLiBXZSBuZWVkIG1vcmUgbWVtb3J5ICg+NEdCKSB0byBhdm9pZCBPT00gd2hlbiBj
+b21waWxpbmcKKyMgICAgSWYgeW91IGFyZSBydW5uaW5nIGRvY2tlciBpbiBWTSwgcGxlYXNlIGlu
+Y3JlYXNlIGl0cyBtZW1vcnkgbGltaXQgZmlyc3QKKyMgMi4gV2UgcHVibGlzaCBleHBvc2VkIHBv
+cnRzIG9uIGhvc3QKKyMgMy4gVGhlIHNvdXJjZSBkaXJlY3RvcnkgaXMgZnJvbSBob3N0IHNvIGFu
+eSBjaGFuZ2VzIHdpbGwgYmUgcmVmbGVjdGVkIGFuZCBwZXJzaXN0ZWQuCisjICAgIFlvdSBtYXkg
+d2FudCB0byBhZGQgbW9yZSBtb3VudCBvcHRpb25zLCBlLmcuIGNvbnNpc3RlbmN5Citkb2NrZXIg
+cnVuIC1tIDhHIFwKKyAgICAtcCA0MTAwMDo0MTAwMCAtcCA0MjAwMDo0MjAwMCBcCisgICAgLS1t
+b3VudCB0eXBlPWJpbmQsc291cmNlPSIkKHB3ZCkiLHRhcmdldD0vaG9tZS8ke1VTRVJfTkFNRX0v
+Y2VwaCBcCisgICAgY2VwaC1idWlsZAotLSAKMi4xNC4xCgo=
+--001a11400b6060760c0557de3810--
