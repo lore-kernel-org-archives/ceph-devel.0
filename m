@@ -1,24 +1,65 @@
-From: zengran zhang <z13121369189@gmail.com>
-Subject: question about bluefs log sync
-Date: Tue, 29 Aug 2017 20:52:46 +0800
-Message-ID: <CALi+v18qS_hU0P9_iMxABwZFx5HcdeGbAo00yHBk42i_RJTWJg@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: question about bluefs log sync
+Date: Tue, 29 Aug 2017 13:19:40 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1708291317310.20435@piezo.novalocal>
+References: <CALi+v18qS_hU0P9_iMxABwZFx5HcdeGbAo00yHBk42i_RJTWJg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f193.google.com ([209.85.223.193]:38508 "EHLO
-        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751906AbdH2Mwr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Aug 2017 08:52:47 -0400
-Received: by mail-io0-f193.google.com with SMTP id m40so3517573ioi.5
-        for <ceph-devel@vger.kernel.org>; Tue, 29 Aug 2017 05:52:47 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:49242 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753021AbdH2NTm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 29 Aug 2017 09:19:42 -0400
+In-Reply-To: <CALi+v18qS_hU0P9_iMxABwZFx5HcdeGbAo00yHBk42i_RJTWJg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org
+To: zengran zhang <z13121369189@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-hi Sage,
-    I want to ask when will the bluefs log be compacted? I only sure
-it will be compacted when umount the bluefs...
-I see the log be compact when rocksdb call Dir.Fsync(), but want to
-know how to trigger this...
+On Tue, 29 Aug 2017, zengran zhang wrote:
+> hi Sage,
+>     I want to ask when will the bluefs log be compacted? I only sure
+> it will be compacted when umount the bluefs...
+> I see the log be compact when rocksdb call Dir.Fsync(), but want to
+> know how to trigger this...
 
-    thanks & regards
+There is a heuristic for when it gets "too big":
+
+bool BlueFS::_should_compact_log()
+{
+  uint64_t current = log_writer->file->fnode.size;
+  uint64_t expected = _estimate_log_size();
+  float ratio = (float)current / (float)expected;
+  dout(10) << __func__ << " current 0x" << std::hex << current
+	   << " expected " << expected << std::dec
+	   << " ratio " << ratio
+	   << (new_log ? " (async compaction in progress)" : "")
+	   << dendl;
+  if (new_log ||
+      current < cct->_conf->bluefs_log_compact_min_size ||
+      ratio < cct->_conf->bluefs_log_compact_min_ratio) {
+    return false;
+  }
+  return true;
+}
+
+and the estimate for the (compacted) size is
+
+uint64_t BlueFS::_estimate_log_size()
+{
+  int avg_dir_size = 40;  // fixme
+  int avg_file_size = 12;
+  uint64_t size = 4096 * 2;
+  size += file_map.size() * (1 + sizeof(bluefs_fnode_t));
+  for (auto& p : block_all)
+    size += p.num_intervals() * (1 + 1 + sizeof(uint64_t) * 2);
+  size += dir_map.size() + (1 + avg_dir_size);
+  size += file_map.size() * (1 + avg_dir_size + avg_file_size);
+  return ROUND_UP_TO(size, super.block_size);
+}
+
+The default min_ratio is 5... so we compact when it's ~5x bigger than it 
+needs to be.
+
+sage
+
