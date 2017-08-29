@@ -1,108 +1,81 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: Bug? luminous pkg missing ceph-osd ceph-mon 32bit
-Date: Tue, 29 Aug 2017 21:41:25 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1708292138430.20435@piezo.novalocal>
-References: <CAKRxpuug+1wc0Js9TczYBv-yevbYWXf+TT26oQmZty2TNYBcCg@mail.gmail.com> <CAKRxpuuNtxA3+P37LD8YffQ3OLiAxj88LqcyiVdDqr=uKe1nxg@mail.gmail.com> <CAC-Np1wK730i5mY1tEmdOu0oVbmALVLF_uc1qiQdbBiwShJwzA@mail.gmail.com>
- <CAKRxpuscVsSQUF73T_1THXaF4P=bVr7-guV+WASBTpNsR5FHqw@mail.gmail.com>
+From: Two Spirit <twospirit6905@gmail.com>
+Subject: Re: feature request to "ceph osd status"
+Date: Tue, 29 Aug 2017 14:50:32 -0700
+Message-ID: <CAKRxpuuS+9ZpE-LagAg6HG01gcCf0XwXxLWBAMOhO3OPUuThDQ@mail.gmail.com>
+References: <CAKRxpuuGOHvvrkg+XkDo3jWnbr2o4eObru5yBEuChyJpD=e=ew@mail.gmail.com>
+ <CALe9h7c-zu=nSARjS1kf8xEqde_bg0FaRkqF8e-Zo=zn8MrBUg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41128 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751280AbdH2Vl1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 29 Aug 2017 17:41:27 -0400
-In-Reply-To: <CAKRxpuscVsSQUF73T_1THXaF4P=bVr7-guV+WASBTpNsR5FHqw@mail.gmail.com>
+Received: from mail-io0-f175.google.com ([209.85.223.175]:36283 "EHLO
+        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751763AbdH2Vud (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Aug 2017 17:50:33 -0400
+Received: by mail-io0-f175.google.com with SMTP id g33so21935582ioj.3
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Aug 2017 14:50:33 -0700 (PDT)
+In-Reply-To: <CALe9h7c-zu=nSARjS1kf8xEqde_bg0FaRkqF8e-Zo=zn8MrBUg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Two Spirit <twospirit6905@gmail.com>
-Cc: Alfredo Deza <adeza@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 29 Aug 2017, Two Spirit wrote:
-> is it the plan to eventually support 32 bit, or is it only supported on 
-> 64 bit?
+I agree the information is redundant, but when I'm trying to figure
+out what is going on, it is very nice to have all info right in front
+of my face instead of uber bare bones. Running 'df -kh' shows  [Total]
+Size, Used, Avail and Use%. That is one step past redundant, but it is
+aweful nice to see whatever information I want quickly as well as in a
+familiar format and bit of info I think unix it guys are use to. I can
+pick the columns of information I need based on what I'm trying to
+debug. just my two bits on a feature request.
 
-It depends on whether someone is willing to fix the 32-bit build issues 
-and get a 32-bit jenkins builder set up (so that new build problems aren't 
-introduced).  There isn't much interest among the current devs, but nobody 
-is opposed!
-
-Actually producing release artifacts for 32-bit is a bit more work; that 
-depends on how slow and/or reliable the 32-bit build is.
-
-There has never been (and likely won't ever be?) any real QA done on the 
-32-bit builds.
-
-sage
-
-
-> 
-> On Mon, Aug 28, 2017 at 5:11 AM, Alfredo Deza <adeza@redhat.com> wrote:
-> > On Fri, Aug 25, 2017 at 11:40 AM, Two Spirit <twospirit6905@gmail.com> wrote:
-> >> the target osd was a ubuntu 16.04 x32
-> >>
-> >> On Fri, Aug 25, 2017 at 8:35 AM, Two Spirit <twospirit6905@gmail.com> wrote:
-> >>> I built 64 bit ubuntu 16.04 and 14.04 (using crush tunables legacy)
-> >>> systems, and I tried to build a 32 bit system, and it complained
-> >>> about missing packages so if there is such a thing, I think it might
-> >>> be related to 32 bit repository. ubuntu 15.04 doesn't work either, but
-> >>> I'm not sure if it is supported.
-> >
-> > We haven't built any 32bit binaries in a while although the repos
-> > might exist (although they are empty).
-> >
-> >>>
-> >>> adminhost$ ceph-deploy install --release luminous vm143
-> >>>
-> >>> [vm143][DEBUG ] Get:2 http://us.archive.ubuntu.com/ubuntu
-> >>> xenial-updates InRelease [102 kB]
-> >>> [vm143][DEBUG ] Get:3 http://security.ubuntu.com/ubuntu
-> >>> xenial-security InRelease [102 kB]
-> >>> [vm143][DEBUG ] Get:4 http://us.archive.ubuntu.com/ubuntu
-> >>> xenial-backports InRelease [102 kB]
-> >>> [vm143][DEBUG ] Hit:5 https://download.ceph.com/debian-luminous xenial InRelease
-> >>> [vm143][DEBUG ] Fetched 306 kB in 1s (172 kB/s)
-> >>> [vm143][DEBUG ] Reading package lists...
-> >>> [vm143][INFO  ] Running command: sudo env
-> >>> DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get
-> >>> --assume-yes -q --no-install-recommends install -o
-> >>> Dpkg::Options::=--force-confnew ceph ceph-osd ceph-mds ceph-mon
-> >>> radosgw
-> >>> [vm143][DEBUG ] Reading package lists...
-> >>> [vm143][DEBUG ] Building dependency tree...
-> >>> [vm143][DEBUG ] Reading state information...
-> >>> [vm143][WARNING] E: Unable to locate package ceph-osd
-> >>> [vm143][WARNING] E: Unable to locate package ceph-mon
-> >>> [vm143][ERROR ] RuntimeError: command returned non-zero exit status: 100
-> >>> [ceph_deploy][ERROR ] RuntimeError: Failed to execute command: env
-> >>> DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get
-> >>> --assume-yes -q --no-install-recommends install -o
-> >>> Dpkg::Options::=--force-confnew ceph ceph-osd ceph-mds ceph-mon
-> >>> radosgw
-> >>> <div id="DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2"><br />
-> >>> <table style="border-top: 1px solid #D3D4DE;">
-> >>>         <tr>
-> >>>         <td style="width: 55px; padding-top: 13px;"><a
-> >>> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
-> >>> target="_blank"><img
-> >>> src="https://ipmcdn.avast.com/images/icons/icon-envelope-tick-green-avg-v1.png"
-> >>> alt="" width="46" height="29" style="width: 46px; height: 29px;"
-> >>> /></a></td>
-> >>>                 <td style="width: 470px; padding-top: 12px; color: #41424e;
-> >>> font-size: 13px; font-family: Arial, Helvetica, sans-serif;
-> >>> line-height: 18px;">Virus-free. <a
-> >>> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
-> >>> target="_blank" style="color: #4453ea;">www.avg.com</a>
-> >>>                 </td>
-> >>>         </tr>
-> >>> </table><a href="#DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2" width="1"
-> >>> height="1"></a></div>
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+On Mon, Aug 28, 2017 at 5:01 AM, John Spray <jspray@redhat.com> wrote:
+> On Sat, Aug 26, 2017 at 7:07 PM, Two Spirit <twospirit6905@gmail.com> wrote:
+>> Hi. I found this command by accident. it doesn't seem to be undocumented.
+>>
+>> ceph osd status
+>>
+>> There is a very similiar command "ceph osd stat" with different info
+>>
+>> The status command is very useful command and I'd like to see it stay
+>> around even tho it seems to be an undocumented command.
+>>
+>> It would be nice to have a 3rd column "total" which is used+avail
+>> columns and then another row at the bottom subtotaling the "used",
+>> "avail", and "total" columns.
+>
+> I prefer to pick two of avail/used/total, rather than printing all
+> three -- otherwise the information is a bit redundant.
+>
+> Putting some totals at the bottom is an interesting idea though.  The
+> "osd status" and "fs status" commands are implemented in a python
+> module[1], so anyone who knows a little python could add that.
+>
+> John
+>
+> 1. https://github.com/ceph/ceph/blob/master/src/pybind/mgr/status/module.py
+>
+>>
+>> I know all these could be be calculated, but with more OSDs, it is
+>> convenient to have it all available at a glance<div
+>> id="DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2"><br />
+>> <table style="border-top: 1px solid #D3D4DE;">
+>>         <tr>
+>>         <td style="width: 55px; padding-top: 13px;"><a
+>> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
+>> target="_blank"><img
+>> src="https://ipmcdn.avast.com/images/icons/icon-envelope-tick-green-avg-v1.png"
+>> alt="" width="46" height="29" style="width: 46px; height: 29px;"
+>> /></a></td>
+>>                 <td style="width: 470px; padding-top: 12px; color: #41424e;
+>> font-size: 13px; font-family: Arial, Helvetica, sans-serif;
+>> line-height: 18px;">Virus-free. <a
+>> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
+>> target="_blank" style="color: #4453ea;">www.avg.com</a>
+>>                 </td>
+>>         </tr>
+>> </table><a href="#DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2" width="1"
+>> height="1"></a></div>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
