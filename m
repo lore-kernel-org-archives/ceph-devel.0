@@ -1,37 +1,44 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: New ceph/ceph-helm repo?
-Date: Tue, 29 Aug 2017 14:13:41 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1708291410300.20435@piezo.novalocal>
-References: <CALe9h7fhkejMOHd6+C9krFpijPpWe_NaVZvsp4dOJuWEU-110A@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: compiling with Clang 5.0
+Date: Tue, 29 Aug 2017 17:08:51 +0200
+Message-ID: <4eacf564-d665-900b-f0f7-ae1f08ade705@digiware.nl>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39832 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751962AbdH2ONo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 29 Aug 2017 10:13:44 -0400
-In-Reply-To: <CALe9h7fhkejMOHd6+C9krFpijPpWe_NaVZvsp4dOJuWEU-110A@mail.gmail.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:37026 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751801AbdH2PIx (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 29 Aug 2017 11:08:53 -0400
+Received: from [192.168.10.67] (opteron [192.168.10.67])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id 4BA4B2FD
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Aug 2017 17:08:51 +0200 (CEST)
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, hchen@redhat.com
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 29 Aug 2017, John Spray wrote:
-> According to a github notification, we now have a new "ceph-helm" repo
-> in the ceph github project, which is a fork of kubernetes/charts.  I
-> don't know how to get github to tell me who created it, so asking the
-> list -- what's the story?
+Hi all,
 
-That's me!  There's a new Containers team with people with commit access.
+Just a point on the timeline
 
-This is where the upstream helm chart for ceph will live. It's a fork of 
-kubernetes/charts so that we can eventually submit the latest upstream to 
-the "official" kubernetes upstream charts repository.
+FreeBSD current has moved to Clang 5.0.
+And other than a few `#pragma GCC` things that start warnings I was able
+to build HEAD without any problems.
 
-The current latest-and-greatest ceph helm chart lives in 
-openstack/openstack-helm[/ceph], but (1) it's nonintuitive that the ceph 
-charts live there, and (2) it has been very slow getting changes submitted 
-upstream (lack of attention from the openstack folks plus the joys of 
-dealing with gerrit and the surrounding openstack process).
+So that is great for the current code base.
 
-sage
+For those that are currious about the warning:
+/home/jenkins/workspace/ceph-master/src/include/encoding.h:300:32:
+warning: unknown warning group '-Wmaybe-uninitialized', ignored
+[-Wunknown-warning-option]
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+                               ^
+1 warning generated.
+
+And given the file, it pops up quite a lot.
+So I might want to submit a PR wrapping this in an `#ifdef`
+
+--WjW
