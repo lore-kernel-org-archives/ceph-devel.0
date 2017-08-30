@@ -1,157 +1,41 @@
-From: Two Spirit <twospirit6905@gmail.com>
-Subject: Re: Bug? luminous pkg missing ceph-osd ceph-mon 32bit
-Date: Wed, 30 Aug 2017 09:58:33 -0700
-Message-ID: <CAKRxpus0=yGx6VLXeZYCPdvdHhw_-Y3X=G064f1pWypaXnYfEQ@mail.gmail.com>
-References: <CAKRxpuug+1wc0Js9TczYBv-yevbYWXf+TT26oQmZty2TNYBcCg@mail.gmail.com>
- <CAKRxpuuNtxA3+P37LD8YffQ3OLiAxj88LqcyiVdDqr=uKe1nxg@mail.gmail.com>
- <CAC-Np1wK730i5mY1tEmdOu0oVbmALVLF_uc1qiQdbBiwShJwzA@mail.gmail.com>
- <CAKRxpuscVsSQUF73T_1THXaF4P=bVr7-guV+WASBTpNsR5FHqw@mail.gmail.com>
- <alpine.DEB.2.11.1708292138430.20435@piezo.novalocal> <CAKRxpuvZKNMaMdUsSSNy+7CDG5sL=o=C+bsEBYs-RFPz=Fnpbw@mail.gmail.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: increasingly large packages and longer build times
+Date: Wed, 30 Aug 2017 11:17:52 -0600
+Message-ID: <CALqRxCzhwwzTiypeHNQWxo3qMrcdBDiK7TSPyrsTzYTYEQMc=w@mail.gmail.com>
+References: <CAC-Np1yg062K==JMEQhRTVKRe7orS3YoXz9hcgfKH+xfiZBiww@mail.gmail.com>
+ <CALqRxCzmEN0UUD5iGcDw+iSp8+=cBmJpVa2Z=27fyVD_RWzRmw@mail.gmail.com>
+ <CAJ4mKGZ5eAvOTTDwAzoAjv2Ed0C3mb1E7PxQvphY85rXZy5Oow@mail.gmail.com>
+ <CAJE9aON9ELevTue_DXdcYnqBVO2LbTe8mthbytegbtyfLm+K7A@mail.gmail.com>
+ <71c7b782-6d7e-1e06-e889-bbbf9004ebfe@suse.cz> <CAJE9aONTxPVcyOfoXDw7ZBQrgpWEXpE29b++cct1X816LVY3+w@mail.gmail.com>
+ <CAC-Np1w22udazP7Pg0PFqgRj+tEOFiRwXncQNVNigPaZpBUejQ@mail.gmail.com>
+ <CAJE9aOMXRGU0L3z_LaMYgX3voDNLuvy5++W3p3Pon+Rbq7Gyug@mail.gmail.com>
+ <CAC-Np1zLsgWG=PznwRtFh8tSkh8Z-xc7T+NeBYQrLQBizjiLhA@mail.gmail.com>
+ <alpine.DEB.2.11.1708241327080.20435@piezo.novalocal> <CAF-wwdH7ummeA96zovQn3hu2pyaAG=gvgyqDVDSfz=e0Ua7OHA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f175.google.com ([209.85.223.175]:37676 "EHLO
-        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751333AbdH3Q6f (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Aug 2017 12:58:35 -0400
-Received: by mail-io0-f175.google.com with SMTP id d78so5739618ioe.4
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Aug 2017 09:58:34 -0700 (PDT)
-In-Reply-To: <CAKRxpuvZKNMaMdUsSSNy+7CDG5sL=o=C+bsEBYs-RFPz=Fnpbw@mail.gmail.com>
+Received: from mail-vk0-f42.google.com ([209.85.213.42]:32823 "EHLO
+        mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752163AbdH3RRy (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Aug 2017 13:17:54 -0400
+Received: by mail-vk0-f42.google.com with SMTP id j7so19288007vke.0
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Aug 2017 10:17:53 -0700 (PDT)
+In-Reply-To: <CAF-wwdH7ummeA96zovQn3hu2pyaAG=gvgyqDVDSfz=e0Ua7OHA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Alfredo Deza <adeza@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, Alfredo Deza <adeza@redhat.com>, kefu chai <tchaikov@gmail.com>, Nathan Cutler <ncutler@suse.cz>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Consider updating docs. remove reference to supporting 32 bit
+On Sun, Aug 27, 2017 at 4:30 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
+> Should we ship a ceph-boost, etc. package then that does not overwrite
+> distro packages (installs in a different location)?
 
-http://docs.ceph.com/docs/luminous/start/hardware-recommendations/
-<div id="DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2"><br />
-<table style="border-top: 1px solid #D3D4DE;">
-	<tr>
-        <td style="width: 55px; padding-top: 13px;"><a
-href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
-target="_blank"><img
-src="https://ipmcdn.avast.com/images/icons/icon-envelope-tick-green-avg-v1.png"
-alt="" width="46" height="29" style="width: 46px; height: 29px;"
-/></a></td>
-		<td style="width: 470px; padding-top: 12px; color: #41424e;
-font-size: 13px; font-family: Arial, Helvetica, sans-serif;
-line-height: 18px;">Virus-free. <a
-href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
-target="_blank" style="color: #4453ea;">www.avg.com</a>
-		</td>
-	</tr>
-</table><a href="#DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2" width="1"
-height="1"></a></div>
+On the RPM side, ceph depends on the libboost_* sonames directly. So
+our ceph-boost package would need to provide those, and Yum may still
+prefer it over the standard system boost.
 
-On Wed, Aug 30, 2017 at 8:38 AM, Two Spirit <twospirit6905@gmail.com> wrote:
-> Thanks for the reply. I totally understand the limited resource thing.
-> I'd totally would do it, but my skills in configuration management is
-> out of date.
->
-> If you guys can build a 32 bit version, I will add equipment to test it.
->
-> From my perspective, the cost of doing large scale simulated testing
-> is lower with the 32 bit support.
->
-> The same goes for support for Ubuntu's non LTS releases.
->
-> I support a lot of heterogeneous networks. The sell is harder to get
-> clients to give a lot of money to setup a whole new unproven file
-> system and R&D time. It's got to work on existing equipment. I see two
-> environments. One that needs stable production environment, and one
-> that needs the latest and greatest(for it's time), and that equipment
-> is not running LTS releases.
->
-> If I can't install it, I can't test it.
->
-> On Tue, Aug 29, 2017 at 2:41 PM, Sage Weil <sweil@redhat.com> wrote:
->> On Tue, 29 Aug 2017, Two Spirit wrote:
->>> is it the plan to eventually support 32 bit, or is it only supported on
->>> 64 bit?
->>
->> It depends on whether someone is willing to fix the 32-bit build issues
->> and get a 32-bit jenkins builder set up (so that new build problems aren't
->> introduced).  There isn't much interest among the current devs, but nobody
->> is opposed!
->>
->> Actually producing release artifacts for 32-bit is a bit more work; that
->> depends on how slow and/or reliable the 32-bit build is.
->>
->> There has never been (and likely won't ever be?) any real QA done on the
->> 32-bit builds.
->>
->> sage
->>
->>
->>>
->>> On Mon, Aug 28, 2017 at 5:11 AM, Alfredo Deza <adeza@redhat.com> wrote:
->>> > On Fri, Aug 25, 2017 at 11:40 AM, Two Spirit <twospirit6905@gmail.com> wrote:
->>> >> the target osd was a ubuntu 16.04 x32
->>> >>
->>> >> On Fri, Aug 25, 2017 at 8:35 AM, Two Spirit <twospirit6905@gmail.com> wrote:
->>> >>> I built 64 bit ubuntu 16.04 and 14.04 (using crush tunables legacy)
->>> >>> systems, and I tried to build a 32 bit system, and it complained
->>> >>> about missing packages so if there is such a thing, I think it might
->>> >>> be related to 32 bit repository. ubuntu 15.04 doesn't work either, but
->>> >>> I'm not sure if it is supported.
->>> >
->>> > We haven't built any 32bit binaries in a while although the repos
->>> > might exist (although they are empty).
->>> >
->>> >>>
->>> >>> adminhost$ ceph-deploy install --release luminous vm143
->>> >>>
->>> >>> [vm143][DEBUG ] Get:2 http://us.archive.ubuntu.com/ubuntu
->>> >>> xenial-updates InRelease [102 kB]
->>> >>> [vm143][DEBUG ] Get:3 http://security.ubuntu.com/ubuntu
->>> >>> xenial-security InRelease [102 kB]
->>> >>> [vm143][DEBUG ] Get:4 http://us.archive.ubuntu.com/ubuntu
->>> >>> xenial-backports InRelease [102 kB]
->>> >>> [vm143][DEBUG ] Hit:5 https://download.ceph.com/debian-luminous xenial InRelease
->>> >>> [vm143][DEBUG ] Fetched 306 kB in 1s (172 kB/s)
->>> >>> [vm143][DEBUG ] Reading package lists...
->>> >>> [vm143][INFO  ] Running command: sudo env
->>> >>> DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get
->>> >>> --assume-yes -q --no-install-recommends install -o
->>> >>> Dpkg::Options::=--force-confnew ceph ceph-osd ceph-mds ceph-mon
->>> >>> radosgw
->>> >>> [vm143][DEBUG ] Reading package lists...
->>> >>> [vm143][DEBUG ] Building dependency tree...
->>> >>> [vm143][DEBUG ] Reading state information...
->>> >>> [vm143][WARNING] E: Unable to locate package ceph-osd
->>> >>> [vm143][WARNING] E: Unable to locate package ceph-mon
->>> >>> [vm143][ERROR ] RuntimeError: command returned non-zero exit status: 100
->>> >>> [ceph_deploy][ERROR ] RuntimeError: Failed to execute command: env
->>> >>> DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get
->>> >>> --assume-yes -q --no-install-recommends install -o
->>> >>> Dpkg::Options::=--force-confnew ceph ceph-osd ceph-mds ceph-mon
->>> >>> radosgw
->>> >>> <div id="DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2"><br />
->>> >>> <table style="border-top: 1px solid #D3D4DE;">
->>> >>>         <tr>
->>> >>>         <td style="width: 55px; padding-top: 13px;"><a
->>> >>> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
->>> >>> target="_blank"><img
->>> >>> src="https://ipmcdn.avast.com/images/icons/icon-envelope-tick-green-avg-v1.png"
->>> >>> alt="" width="46" height="29" style="width: 46px; height: 29px;"
->>> >>> /></a></td>
->>> >>>                 <td style="width: 470px; padding-top: 12px; color: #41424e;
->>> >>> font-size: 13px; font-family: Arial, Helvetica, sans-serif;
->>> >>> line-height: 18px;">Virus-free. <a
->>> >>> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
->>> >>> target="_blank" style="color: #4453ea;">www.avg.com</a>
->>> >>>                 </td>
->>> >>>         </tr>
->>> >>> </table><a href="#DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2" width="1"
->>> >>> height="1"></a></div>
->>> >> --
->>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> >> the body of a message to majordomo@vger.kernel.org
->>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
+What is the specific risk of overriding RHEL's and Ubuntu's system
+boost? (Are there some common packages that users typically install on
+ceph nodes that would also depend on the old system boost?)
+
+- Ken
