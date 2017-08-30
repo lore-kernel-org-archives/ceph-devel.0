@@ -1,44 +1,34 @@
-From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Developers Monthly - September
-Date: Wed, 30 Aug 2017 01:04:51 -0300
-Message-ID: <20170830040451.GA20979@oops.local>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: v12.2.0 Luminous released
+Date: Wed, 30 Aug 2017 12:26:24 +0800
+Message-ID: <CAJE9aOOUkUv_Fq7gZhC+7P07Vkws-DckM4n4FachoV6cMty2Cg@mail.gmail.com>
+References: <871snukzhl.fsf@suse.com> <CAEYCsVKqs63_ZusH_=nPTrp_m4DTHqP5_z1dcRK59iSoVxR2kA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-oi0-f41.google.com ([209.85.218.41]:32781 "EHLO
+        mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750723AbdH3E0Z (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Aug 2017 00:26:25 -0400
+Received: by mail-oi0-f41.google.com with SMTP id r203so42929474oih.0
+        for <ceph-devel@vger.kernel.org>; Tue, 29 Aug 2017 21:26:25 -0700 (PDT)
+In-Reply-To: <CAEYCsVKqs63_ZusH_=nPTrp_m4DTHqP5_z1dcRK59iSoVxR2kA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Xiaoxi Chen <superdebuger@gmail.com>
+Cc: Abhishek Lekshmanan <abhishek@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, ceph-maintainers@ceph.com, ceph-announce@ceph.com
 
-Hey Cephers,
+On Wed, Aug 30, 2017 at 11:50 AM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
+> The ceph -v for 12.2.0 still go with RC, a little bit confusing
+>
+> root@slx03c-5zkd:~# ceph -v
+> ceph version 12.2.0 (32ce2a3ae5239ee33d6150705cdb24d43bab910c) luminous (rc)
 
-This is just a friendly reminder that the next Ceph Developer Montly
-meeting is coming up:
+https://github.com/ceph/ceph/pull/17359
 
- http://wiki.ceph.com/Planning
+probably we can have it fixed in 12.2.1 =)
 
-If you have work that you're doing that it a feature work, significant
-backports, or anything you would like to discuss with the core team,
-please add it to the following page:
-
- http://wiki.ceph.com/CDM_06-SEP-2017
-
-If you have questions or comments, please let us know.
-
-Kindest regards,
-
-Leo
 
 -- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
+Regards
+Kefu Chai
