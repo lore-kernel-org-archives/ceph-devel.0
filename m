@@ -1,7 +1,7 @@
-From: Brad Hubbard <bhubbard@redhat.com>
+From: John Spray <jspray@redhat.com>
 Subject: Re: increasingly large packages and longer build times
-Date: Thu, 31 Aug 2017 09:00:21 +1000
-Message-ID: <CAF-wwdHv8DUuWSR4zVGaFc8dxeidSmOuV=ZWGdhD2o5H7tp-Zw@mail.gmail.com>
+Date: Thu, 31 Aug 2017 00:09:18 +0100
+Message-ID: <CALe9h7cPVXoXj8Ekq+nv=riXeF1qfh_F7_EnZ_Tn34Rs1FdA1A@mail.gmail.com>
 References: <CAC-Np1yg062K==JMEQhRTVKRe7orS3YoXz9hcgfKH+xfiZBiww@mail.gmail.com>
  <CALqRxCzmEN0UUD5iGcDw+iSp8+=cBmJpVa2Z=27fyVD_RWzRmw@mail.gmail.com>
  <CAJ4mKGZ5eAvOTTDwAzoAjv2Ed0C3mb1E7PxQvphY85rXZy5Oow@mail.gmail.com>
@@ -16,19 +16,19 @@ References: <CAC-Np1yg062K==JMEQhRTVKRe7orS3YoXz9hcgfKH+xfiZBiww@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f43.google.com ([209.85.215.43]:35123 "EHLO
-        mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750890AbdH3XAX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Aug 2017 19:00:23 -0400
-Received: by mail-lf0-f43.google.com with SMTP id g18so10433292lfl.2
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Aug 2017 16:00:22 -0700 (PDT)
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:33653 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750919AbdH3XJk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Aug 2017 19:09:40 -0400
+Received: by mail-wm0-f49.google.com with SMTP id r202so4747951wmd.0
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Aug 2017 16:09:39 -0700 (PDT)
 In-Reply-To: <CALqRxCyB4joTgKu1ciuXXXLF_Mqbk0OqEHkFNFUYm=LnWR26uA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Ken Dreyer <kdreyer@redhat.com>
-Cc: John Spray <jspray@redhat.com>, Sage Weil <sage@newdream.net>, Alfredo Deza <adeza@redhat.com>, kefu chai <tchaikov@gmail.com>, Nathan Cutler <ncutler@suse.cz>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Brad Hubbard <bhubbard@redhat.com>, Sage Weil <sage@newdream.net>, Alfredo Deza <adeza@redhat.com>, kefu chai <tchaikov@gmail.com>, Nathan Cutler <ncutler@suse.cz>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Aug 31, 2017 at 8:07 AM, Ken Dreyer <kdreyer@redhat.com> wrote:
+On Wed, Aug 30, 2017 at 11:07 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
 > On Wed, Aug 30, 2017 at 11:53 AM, John Spray <jspray@redhat.com> wrote:
 >> The thing is, our boost could easily end up being the "old" one, if
 >> the distro is shipping security updates to theirs.  Our
@@ -43,8 +43,14 @@ On Thu, Aug 31, 2017 at 8:07 AM, Ken Dreyer <kdreyer@redhat.com> wrote:
 > that would benefit in the way you describe? Ones that require boost
 > and are often co-installed on Ceph nodes?
 
-Any solution would need to protect against this.
+Lots of things depend on boost.  Naturally I don't know what
+specifically people run on their Ceph servers apart from Ceph.  It's
+risky to blow away distro packages in favour of our own, precisely
+because of that lack of knowledge about what else is going on on the
+servers.
 
--- 
-Cheers,
-Brad
+I'm really just pointing out that there's a degree of risk that our
+users would be taking on, in exchange for the (not inconsiderable)
+benefit of knocking 500MB out of a fully checked out tree.
+
+John
