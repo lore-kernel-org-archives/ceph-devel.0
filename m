@@ -1,144 +1,105 @@
-From: Two Spirit <twospirit6905@gmail.com>
-Subject: Re: feature request to "ceph osd status"
-Date: Wed, 30 Aug 2017 08:08:27 -0700
-Message-ID: <CAKRxpuuBO+VgWTDvMTjh1Lw0S7Zg0QKg9NVdyc+twO+nHmxS3Q@mail.gmail.com>
-References: <CAKRxpuuGOHvvrkg+XkDo3jWnbr2o4eObru5yBEuChyJpD=e=ew@mail.gmail.com>
- <CALe9h7c-zu=nSARjS1kf8xEqde_bg0FaRkqF8e-Zo=zn8MrBUg@mail.gmail.com>
- <CAKRxpuuS+9ZpE-LagAg6HG01gcCf0XwXxLWBAMOhO3OPUuThDQ@mail.gmail.com>
- <CAKRxpuuDuEDtkuCkuBUYi-mhteLEOznWE5uhw7Qr5kTykT1zyA@mail.gmail.com> <alpine.DEB.2.11.1708301326300.20435@piezo.novalocal>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: luminous OSD memory usage
+Date: Wed, 30 Aug 2017 15:17:01 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1708301455490.3491@piezo.novalocal>
+References: <d3b8007f-4bdf-65c5-f4e9-7d1d9c85e019@synesis.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f41.google.com ([209.85.214.41]:37920 "EHLO
-        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751317AbdH3PI3 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Aug 2017 11:08:29 -0400
-Received: by mail-it0-f41.google.com with SMTP id 77so8962461itj.1
-        for <ceph-devel@vger.kernel.org>; Wed, 30 Aug 2017 08:08:28 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1708301326300.20435@piezo.novalocal>
+Received: from cobra.newdream.net ([66.33.216.30]:46446 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751358AbdH3PRE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 30 Aug 2017 11:17:04 -0400
+In-Reply-To: <d3b8007f-4bdf-65c5-f4e9-7d1d9c85e019@synesis.ru>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Aleksei Gutikov <aleksey.gutikov@synesis.ru>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-the two outputs I was referring to was  "ceph pg dump" vs "ceph osd
-status". These don't match. I'm guessing it is the osd status that
-must have the wrong info.
+Hi Aleksei,
 
-*never* is too strong of a word. When standard interfaces exist eg
-JSON/XML that is a luxury. From IT perspective where we use tools from
-many vendors, most of the time we don't get that luxury. I use to work
-for a well known unix operating system company prior to the invention
-of JSON and XML and automated the gui testing. Now that was a pure
-waste of time keeping up with the graphical changes, so I've been
-scripting against plaintext for a couple decades now. When I need, I
-place a "compatibility layer" using regex/wrappers/pipes in between
-the tool output and my tool which reformats and normalizes the
-plaintext output to an older version of the output. All this was done
-through single line lookup table or in the rare case of extreme
-changes, a call to a external script filter(still effectively one
-line). The test harness automatically cascaded these through pipes
-allowing basically any version of the output to be represented. This
-allowed all old test tools to keep running with no changes as
-developers kept changing the text interface. It is great that Ceph
-provide the JSON/XML interfaces tho. Helps a lot.
+On Wed, 30 Aug 2017, Aleksei Gutikov wrote:
+> Hi.
+> 
+> I'm trying to synchronize osd daemons memory limits and bluestore cache
+> settings.
+> For 12.1.4 we have hdd osds usage about 4G with default settings.
+> For ssds we have limit 6G and they are been oom killed periodically.
 
-On Wed, Aug 30, 2017 at 6:52 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Tue, 29 Aug 2017, Two Spirit wrote:
->> I found "ceph pg dump" also gives the same OSD disk usage information.
->> It has summary row, as well as 3 columns.
->> The bad thing is that the numbers in ceph pg dump and ceph osd status
->> do not match. I'm guessing someone isn't dividing by 1024.
->> I think for consistency the PG stuff should go under ceph pg, and OSD
->> info go under ceph osd.
->
-> On my test box it matches (current master):
->
-> OSD_STAT USED AVAIL TOTAL HB_PEERS PG_SUM PRIMARY_PG_SUM
-> 0        274G 98.4G  372G       []      0              0
->
-> vs
->
-> $ df -h .
-> Filesystem      Size  Used Avail Use% Mounted on
-> /dev/nvme0n1    373G  274G   99G  74% /nvm
->
->> As an IT person, I like to to write perl scripts around the outputs,
->> and so persistence of the output format is desired
->
-> FWIW you should *never* script against the plaintext output, as it is more
-> like to change (for readability or other reasons... e.g., changing a raw
-> byte count to something like "98.4G").  Use the structured JSON or XML
-> output with -f json[-pretty] or -f xml[-pretty].
->
-> sage
->
->
->>
->> On Tue, Aug 29, 2017 at 2:50 PM, Two Spirit <twospirit6905@gmail.com> wrote:
->> > I agree the information is redundant, but when I'm trying to figure
->> > out what is going on, it is very nice to have all info right in front
->> > of my face instead of uber bare bones. Running 'df -kh' shows  [Total]
->> > Size, Used, Avail and Use%. That is one step past redundant, but it is
->> > aweful nice to see whatever information I want quickly as well as in a
->> > familiar format and bit of info I think unix it guys are use to. I can
->> > pick the columns of information I need based on what I'm trying to
->> > debug. just my two bits on a feature request.
->> >
->> > On Mon, Aug 28, 2017 at 5:01 AM, John Spray <jspray@redhat.com> wrote:
->> >> On Sat, Aug 26, 2017 at 7:07 PM, Two Spirit <twospirit6905@gmail.com> wrote:
->> >>> Hi. I found this command by accident. it doesn't seem to be undocumented.
->> >>>
->> >>> ceph osd status
->> >>>
->> >>> There is a very similiar command "ceph osd stat" with different info
->> >>>
->> >>> The status command is very useful command and I'd like to see it stay
->> >>> around even tho it seems to be an undocumented command.
->> >>>
->> >>> It would be nice to have a 3rd column "total" which is used+avail
->> >>> columns and then another row at the bottom subtotaling the "used",
->> >>> "avail", and "total" columns.
->> >>
->> >> I prefer to pick two of avail/used/total, rather than printing all
->> >> three -- otherwise the information is a bit redundant.
->> >>
->> >> Putting some totals at the bottom is an interesting idea though.  The
->> >> "osd status" and "fs status" commands are implemented in a python
->> >> module[1], so anyone who knows a little python could add that.
->> >>
->> >> John
->> >>
->> >> 1. https://github.com/ceph/ceph/blob/master/src/pybind/mgr/status/module.py
->> >>
->> >>>
->> >>> I know all these could be be calculated, but with more OSDs, it is
->> >>> convenient to have it all available at a glance<div
->> >>> id="DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2"><br />
->> >>> <table style="border-top: 1px solid #D3D4DE;">
->> >>>         <tr>
->> >>>         <td style="width: 55px; padding-top: 13px;"><a
->> >>> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
->> >>> target="_blank"><img
->> >>> src="https://ipmcdn.avast.com/images/icons/icon-envelope-tick-green-avg-v1.png"
->> >>> alt="" width="46" height="29" style="width: 46px; height: 29px;"
->> >>> /></a></td>
->> >>>                 <td style="width: 470px; padding-top: 12px; color: #41424e;
->> >>> font-size: 13px; font-family: Arial, Helvetica, sans-serif;
->> >>> line-height: 18px;">Virus-free. <a
->> >>> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
->> >>> target="_blank" style="color: #4453ea;">www.avg.com</a>
->> >>>                 </td>
->> >>>         </tr>
->> >>> </table><a href="#DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2" width="1"
->> >>> height="1"></a></div>
->> >>> --
->> >>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >>> the body of a message to majordomo@vger.kernel.org
->> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+So,
+ 
+> While
+> osd_op_num_threads_per_shard_hdd=1
+> osd_op_num_threads_per_shard_ssd=2
+> and
+> osd_op_num_shards_hdd=5
+> osd_op_num_shards_ssd=8
+
+aren't relevant to memory usage.  The _per_shard is about how many bytes 
+are stored in each rocksdb key, and the num_shards is about how many 
+threads we use.
+
+This is the one that matters:
+
+> bluestore_cache_size_hdd=1G
+> bluestore_cache_size_ssd=3G
+
+It governs how much memory bluestore limits itself to.  He bad news is 
+that bluestore counts what it allocates, not how much memory the allocator 
+uses, so there is some overhead.  From what I've anecdotally seen it's 
+something like 1.5x, which kind of sucks; there is more to be done here.
+
+On top of that is usage by the OSD outside of bluestore, 
+which is somewhere in the 500m to 1.5g range.
+
+We're very interested in hearing what observed RSS users see relative to 
+the configured bluestore size and pg count, along with a dump of the 
+mempool metadata (ceph daemon osd.NNN dump_mempools).
+
+> Does anybody have an idea about the equation for upper bound of memory
+> consumption?
+
+Very roughly, something like: osd_overhead + bluestore_cache_size * 1.5 ?
+
+> Can bluestore_cache_size be decreased safely for example to 2G, or to 1G?
+
+Yes, you can/should change this to whatever you like (big or small).
+
+> I want to calculate the maximum expected size of bluestore metadata (that must
+> be definitely fit into cache) using size of raw space, average size of
+> objects, rocksdb space amplification.
+> I thought it should be something simple like
+> raw_space/avg_obj_size*obj_overhead*rocksdb_space_amp.
+> For example if obj_overhead=1k, hdd size=1T, rocksdb space amplification is 2
+> and avg obj size=4M then 1T/4M*1k*2=500M so I need at least 512M for cache.
+> But wise guys said that I have to take into account number of extents also.
+> But bluestore_extent_map_shard_max_size=1200, I hope this number is not a
+> multiplicator...
+
+Nope, just a shard size...
+
+> What would be correct approach for calculation of this minimum cache size?
+> What can be expected size of key-values stored in rocksdb per rados object?
+
+This depends, unfortunately, on what the write pattern is for the objects.  
+If they're written by RGW in big chunks, the overhead will be smaller.  
+If it comes out of a 4k random write pattern it will be bigger.  Again, 
+very interestd in hearing user reports of what is observed in real world 
+situations.  I would trust that more than a calculation from first 
+principles like the above.
+
+> Default bluestore_cache_kv_ratio*bluestore_cache_size_ssd=0.99*3G
+> while default bluestore_cache_kv_max=512M
+> Looks like BlueStore::_set_cache_sizes() will set cache_kv_ratio to 1/6 in
+> default case. Is 512M enough for bluestore metadata?
+
+In Mark's testing he found that we got more performance benefit when 
+small caches were devoted to rocksdb and large caches were devoted mostly 
+to the bluestore metadata cache (parsed onodes vs caching the encoded 
+on-disk content).  You can always adjust the 512m value upwards (and that 
+may make sense for large cache sizes).  Again, very interested in hearing 
+whther that works better or worse for your workload!
+
+Thanks-
+sage
+
