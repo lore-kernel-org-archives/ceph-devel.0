@@ -1,42 +1,38 @@
-From: David Zafman <dzafman@redhat.com>
-Subject: Re: Jewel v10.2.10, anyone?
-Date: Wed, 30 Aug 2017 13:58:12 -0700
-Message-ID: <0c47de7d-86d5-aa57-085c-1ed16b81df66@redhat.com>
-References: <7ca238e9-0cd0-d3c6-73c2-76643d7f2ec0@suse.cz>
+From: Sage Weil <sweil@redhat.com>
+Subject: build-integration-branch
+Date: Wed, 30 Aug 2017 20:58:54 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1708302045570.20435@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:47920 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49084 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750761AbdH3U6N (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 30 Aug 2017 16:58:13 -0400
-In-Reply-To: <7ca238e9-0cd0-d3c6-73c2-76643d7f2ec0@suse.cz>
-Content-Language: en-US
+        id S1750973AbdH3U6z (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 30 Aug 2017 16:58:55 -0400
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id A52467E43D
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Aug 2017 20:58:55 +0000 (UTC)
+Received: from ovpn-112-5.rdu2.redhat.com (ovpn-112-5.rdu2.redhat.com [10.10.112.5])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 5B3CE77DE4
+        for <ceph-devel@vger.kernel.org>; Wed, 30 Aug 2017 20:58:55 +0000 (UTC)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
+I got tired of doing this by hand and finally wrote a script to do it 
+instead:
 
-I happen to have 2 backports that have been waiting.
+	https://github.com/ceph/ceph/pull/17382
 
-https://github.com/ceph/ceph/pull/17210
+Go tag your PRs with wip-whatever-testing, then
 
-https://github.com/ceph/ceph/pull/16405
+ git checkout master
+ git pull
+ ../src/script/build-integration-branch wip-whatever-testing
+ make && ctest -j12 && git push ci $(git rev-parse --abbrev-ref HEAD)
 
-David
+All I need to do now is make the ceph-disk tox test pass on Fedora...
 
-
-On 8/30/17 1:23 PM, Nathan Cutler wrote:
-> It's been 6 weeks since the last Jewel point release and progress is 
-> being made towards 10.2.10. I'm thinking that the current integration 
-> branch might be the last, or second-to-last.
->
-> Any last-minute requests or must-haves?
->
-> Nathan
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+sage
