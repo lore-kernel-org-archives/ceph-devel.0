@@ -1,52 +1,54 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: a metadata lost problem when mds breaks down
-Date: Thu, 31 Aug 2017 15:31:15 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1708311529150.20435@piezo.novalocal>
-References: <1228685801.457671.1504191723500.ref@mail.yahoo.com>
- <1228685801.457671.1504191723500@mail.yahoo.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: cephfs kernel bug (4.9.44)?
+Date: Thu, 31 Aug 2017 19:28:44 +0200
+Message-ID: <CAOi1vP_Cp7=jx0rp4=p5x0d4UB6K8c3S64jUOQqqvJSUFqWewQ@mail.gmail.com>
+References: <CAGbvivJVFCGXLC_VroD6JVYjXk7sOV4e6-go1nx4nRg5JtXi7A@mail.gmail.com>
+ <CAOi1vP_SX9MfkxnH3hcS3C2niA-gUnz5mjrkJcanjeO1bwSsqA@mail.gmail.com> <CAGbvivLy-pr5xMwPCzE6uZUcJAmgAq=TKt1cEeOp4uFdARgNgg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1228685801.457671.1504191723500-sAHhhX/85wgbqTNvkayDYw@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Mark Meyers <MarkMeyers.MMY-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-io0-f182.google.com ([209.85.223.182]:33721 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751566AbdHaR2q (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Aug 2017 13:28:46 -0400
+Received: by mail-io0-f182.google.com with SMTP id b2so2761223iof.0
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Aug 2017 10:28:45 -0700 (PDT)
+In-Reply-To: <CAGbvivLy-pr5xMwPCzE6uZUcJAmgAq=TKt1cEeOp4uFdARgNgg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, 31 Aug 2017, Mark Meyers wrote:
-> Hi:
-> 
->         I encountered a metadata lost problem of files when testing the outcome of ceph mds's unpredictable breakdown. 
->         The test shell script is like(not real code):
-> 
->         while i < 100000
->         do 
->             touch $i
->             i++
->         done
->         echo c > /proc/sysrq-trigger
-> 
->         The script is run in the same machine which mds is running on, and the directory is mount point of cephfs. 
->         I created 10,000 files using touch command and forced the system to break down.
->         When the machine rebooted again, the number of new files created is smaller than 10000. So the metadata of those files are lost.
->         My question: Are those losts of metadata allowed by ceph? Or is this a bug of ceph mds which could be solved in the future? My ceph version is 12.1.0, ubuntu kernel version 4.4.0.
->         
->         Thanks for your reading, I really appreciate your rely. Thanks!
+On Thu, Aug 31, 2017 at 4:12 PM, Wyllys Ingersoll
+<wyllys.ingersoll@keepertech.com> wrote:
+> Sorry for lack of detail, here is some more info:
+>
+> Currently using ceph 10.2.7
+>
+> - Prior to the error there was nothing in the kernel log for several hours.
+> - cephfs snapshots are enabled, but are not currently being taken at
+> regular intervals, the last one was 2 days before the error message
+> appeared.
+> - cephfs has a data pool with 17123471 objects (34% full) and a
+> metadata pool with 70K objects
+> - the system has 85 OSDs and 3 MDS servers, all are in a healthy state.
+> - We use 3-copy replication rules:  81739 GB used, 161 TB / 241 TB avail
 
-You have to call fsync(2) on the containing directory if you want metadata 
-changes (link, unlink, rename, create, mknod, open(...O_CREAT)) to be 
-stable... just like you have to call fsync(2) after write(2) if you want 
-the data to be durable.  In the case of creating a file, calling fsync() 
-on the new file is also sufficient to make the new file exist (on most 
-file systems, including CephFS).
+OK, I see what happened.
 
-sage
+You have quite a lot of snapshots -- 4758 of them?  send_request()
+attempted to encode a 8 + 4 + 4758*8 = ~38k snap context into a 4k
+buffer.  Normally it's fine because the snap context is taken into
+account when allocating a message buffer.  However, this particular
+code path (... ceph_osdc_writepages()) uses pre-allocated messages,
+which are always 4k in size.
+
+I think it's a known bug^Wlimitation.  As a short-term fix, we can
+probably increase that pre-allocated size from 4k to something bigger.
+A proper resolution would take a considerable amount of time.  Until
+then I'd recommend a much more aggressive snapshot rotation schedule,
+which is a good idea anyway -- your writes will transmit faster!
+
+Thanks,
+
+                Ilya
