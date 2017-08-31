@@ -1,66 +1,31 @@
-From: YuShengzuo <yu.shengzuo@99cloud.net>
+From: Nathan Cutler <ncutler@suse.cz>
 Subject: Re: Jewel v10.2.10, anyone?
-Date: Thu, 31 Aug 2017 17:56:51 +0800
-Message-ID: <9197A99E-AC8C-4BC6-A446-96472053F650@99cloud.net>
+Date: Thu, 31 Aug 2017 10:36:29 +0200
+Message-ID: <2517ddd9-bbac-2e7a-b58c-b4bd54e2404e@suse.cz>
 References: <7ca238e9-0cd0-d3c6-73c2-76643d7f2ec0@suse.cz>
- <CAKEPnAaYBpSA-k8p4K=qrDzqLBKwyDQGaavOb1Y9hXunjejRCw@mail.gmail.com>
+ <0c47de7d-86d5-aa57-085c-1ed16b81df66@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mr21361.mail.yeah.net ([223.252.213.61]:43040 "EHLO
-        mr21361.mail.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750918AbdHaJyK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Aug 2017 05:54:10 -0400
-In-Reply-To: <CAKEPnAaYBpSA-k8p4K=qrDzqLBKwyDQGaavOb1Y9hXunjejRCw@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:36494 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751455AbdHaKBm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 31 Aug 2017 06:01:42 -0400
+In-Reply-To: <0c47de7d-86d5-aa57-085c-1ed16b81df66@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: shasha lu <lushasha08@gmail.com>, Nathan Cutler <ncutler@suse.cz>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: David Zafman <dzafman@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-HI,
-Can we merge following request into Jewel,
-https://github.com/ceph/ceph/pull/15140 ?
+> I happen to have 2 backports that have been waiting.
+> 
+> https://github.com/ceph/ceph/pull/17210
+> 
+> https://github.com/ceph/ceph/pull/16405
+> 
+> David
 
-It is so badly to restart rbd-mirror every time after failover.
+OK, added those to the integration branch and will try to get them in.
 
-Please!
-
-Yu Shengzuo
-
-
-
-
-On 31/08/2017, 5:40 PM, "shasha lu" <ceph-devel-owner@vger.kernel.org on behalf of lushasha08@gmail.com> wrote:
-
-    This pr for filestore must haves
-    https://github.com/ceph/ceph/pull/14367
-    
-    master is merged, but there is no pr for jewel
-    
-    Shasha from eisoo
-    
-    
-    From: Nathan Cutler
-    Date: 2017-08-31 04:23
-    To: ceph-devel@vger.kernel.org
-    Subject: Jewel v10.2.10, anyone?
-    It's been 6 weeks since the last Jewel point release and progress is
-    being made towards 10.2.10. I'm thinking that the current integration
-    branch might be the last, or second-to-last.
-    
-    Any last-minute requests or must-haves?
-    
-    Nathan
-    --
-    To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-    the body of a message to majordomo@vger.kernel.org
-    More majordomo info at  http://vger.kernel.org/majordomo-info.html
-    --
-    To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-    the body of a message to majordomo@vger.kernel.org
-    More majordomo info at  http://vger.kernel.org/majordomo-info.html
-    
-
-
-
+Nathan
