@@ -1,59 +1,134 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: increasingly large packages and longer build times
-Date: Thu, 31 Aug 2017 02:25:04 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1708310218390.20435@piezo.novalocal>
-References: <CAC-Np1yg062K==JMEQhRTVKRe7orS3YoXz9hcgfKH+xfiZBiww@mail.gmail.com> <CAJ4mKGZ5eAvOTTDwAzoAjv2Ed0C3mb1E7PxQvphY85rXZy5Oow@mail.gmail.com> <CAJE9aON9ELevTue_DXdcYnqBVO2LbTe8mthbytegbtyfLm+K7A@mail.gmail.com> <71c7b782-6d7e-1e06-e889-bbbf9004ebfe@suse.cz>
- <CAJE9aONTxPVcyOfoXDw7ZBQrgpWEXpE29b++cct1X816LVY3+w@mail.gmail.com> <CAC-Np1w22udazP7Pg0PFqgRj+tEOFiRwXncQNVNigPaZpBUejQ@mail.gmail.com> <CAJE9aOMXRGU0L3z_LaMYgX3voDNLuvy5++W3p3Pon+Rbq7Gyug@mail.gmail.com> <CAC-Np1zLsgWG=PznwRtFh8tSkh8Z-xc7T+NeBYQrLQBizjiLhA@mail.gmail.com>
- <alpine.DEB.2.11.1708241327080.20435@piezo.novalocal> <CAF-wwdH7ummeA96zovQn3hu2pyaAG=gvgyqDVDSfz=e0Ua7OHA@mail.gmail.com> <CALqRxCzhwwzTiypeHNQWxo3qMrcdBDiK7TSPyrsTzYTYEQMc=w@mail.gmail.com> <CALe9h7ff+J4AL4NykNcsNh0R-ET8hQ48L57LqM0xPf3PA3GyYg@mail.gmail.com>
- <CALqRxCyB4joTgKu1ciuXXXLF_Mqbk0OqEHkFNFUYm=LnWR26uA@mail.gmail.com> <CALe9h7cPVXoXj8Ekq+nv=riXeF1qfh_F7_EnZ_Tn34Rs1FdA1A@mail.gmail.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: Bluestore memory usage on our test cluster
+Date: Wed, 30 Aug 2017 21:49:01 -0500
+Message-ID: <d455dbea-4dd2-4d33-9d3a-b042b4dd035d@redhat.com>
+References: <ec2dfba7-f026-9f7a-ffe9-1893a499b21b@redhat.com>
+ <CABbLZY3HEowq1WvSty0dS_Wr=+TAGcAgf9NM_b3C=v5oje2fgA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43324 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:56228 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750757AbdHaCZG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 30 Aug 2017 22:25:06 -0400
-In-Reply-To: <CALe9h7cPVXoXj8Ekq+nv=riXeF1qfh_F7_EnZ_Tn34Rs1FdA1A@mail.gmail.com>
+        id S1750757AbdHaCtC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 30 Aug 2017 22:49:02 -0400
+In-Reply-To: <CABbLZY3HEowq1WvSty0dS_Wr=+TAGcAgf9NM_b3C=v5oje2fgA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ken Dreyer <kdreyer@redhat.com>, Brad Hubbard <bhubbard@redhat.com>, Alfredo Deza <adeza@redhat.com>, kefu chai <tchaikov@gmail.com>, Nathan Cutler <ncutler@suse.cz>, Gregory Farnum <gfarnum@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Varada Kari <varada.kari@gmail.com>
+Cc: Sage Weil <sweil@redhat.com>, Josh Durgin <jdurgin@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 31 Aug 2017, John Spray wrote:
-> On Wed, Aug 30, 2017 at 11:07 PM, Ken Dreyer <kdreyer@redhat.com> wrote:
-> > On Wed, Aug 30, 2017 at 11:53 AM, John Spray <jspray@redhat.com> wrote:
-> >> The thing is, our boost could easily end up being the "old" one, if
-> >> the distro is shipping security updates to theirs.  Our
-> >> higher-numbered boost packages would potentially block the distro's
-> >> updates to their lower-numbered boost packages.  If we ship our own
-> >> separate boost, then maybe Ceph is stuck with an un-patched boost, but
-> >> other applications on the system are not.
-> >
-> > That scenario is theoretically possible, and it's good that you bring
-> > it up for consideration. I'm trying to understand the likelihood of
-> > the effort/disruption there. Do you have specific applications in mind
-> > that would benefit in the way you describe? Ones that require boost
-> > and are often co-installed on Ceph nodes?
-> 
-> Lots of things depend on boost.  Naturally I don't know what
-> specifically people run on their Ceph servers apart from Ceph.  It's
-> risky to blow away distro packages in favour of our own, precisely
-> because of that lack of knowledge about what else is going on on the
-> servers.
-> 
-> I'm really just pointing out that there's a degree of risk that our
-> users would be taking on, in exchange for the (not inconsiderable)
-> benefit of knocking 500MB out of a fully checked out tree.
+Yep.  FWIW, the last time I looked at jemalloc it was both faster and 
+resulted in higher memory use vs tcmalloc.  That may have simply been 
+due to more thread cache being used, but I didn't have any way at the 
+time to verify.
 
-We should also keep in mind that boost isn't a very compelling 
-demonstration of the advantages of shared libraries because it's 99% 
-headers, with only a tiny bit of code that gets dynamically linked.  The 
-main impacts of moving to a packaged boost will be (1) faster git clone 
-times, (2) faster shaman builds, and (3) more annoying build dependencies 
-(install-deps.sh would probably have to pull boost from a new repo source 
-or something, instead of relying on distro packages like it does now?).
+I think we still need to audit and make sure there isn't a bunch of 
+memory allocated outside of the mempools.
 
-Are we sure that ccache is working properly?  Maybe we can improve 
-turnaround times elsewhere...
+Mark
 
-sage
+On 08/30/2017 09:25 PM, Varada Kari wrote:
+> Hi Mark,
+>
+> One thing pending in the wish-list is building profiler hooks to
+> jemalloc like we have for tcmalloc now, that will enable us to do a fair
+> comparison with tcmalloc that time and check if this due to
+> fragmentation in the allocators.
+>
+> Varada
+>> On 31-Aug-2017, at 1:18 AM, Mark Nelson <mnelson@redhat.com
+>> <mailto:mnelson@redhat.com>> wrote:
+>>
+>> Based on the recent conversation about bluestore memory usage, I did a
+>> survey of all of the bluestore OSDs in one of our internal test
+>> clusters.  The one with the highest RSS usage at the time was osd.82:
+>>
+>> 6017 ceph      20   0 4488440 2.648g   5004 S   3.0 16.9   5598:01
+>> ceph-osd
+>>
+>> In the grand scheme of bluestore memory usage, I've seen higher RSS
+>> usage, but usually with bluestore_cache cranked up higher.  On these
+>> nodes, I believe Sage said the bluestore_cache size is being set to
+>> 512MB to keep memory usage down.
+>>
+>> To dig into this more, mempool data from the osd can be dumped via:
+>>
+>> sudo ceph daemon osd.82 dump_mempools
+>>
+>> A slightly compressed version of that data follows.  Note that the
+>> allocated space for blueestore_cache_* isn't terribly high.
+>>  buffer_anon and osd_pglog together are taking up more space:
+>>
+>> bloom_filters: 0MB
+>> bluestore_alloc: 13.5MB
+>> blustore_cache_data: 0MB
+>> bluestore_cache_onode: 234.7MB
+>> bluestore_cache_other: 277.3MB
+>> bluestore_fsck: 0MB
+>> bluestore_txc: 0MB
+>> bluestore_writing_deferred: 5.4MB
+>> bluestore_writing: 11.1MB
+>> bluefs: 0.1MB
+>> buffer_anon: 386.1MB
+>> buffer_meta: 0MB
+>> osd: 4.4MB
+>> osd_mapbl: 0MB
+>> osd_pglog: 181.4MB
+>> osdmap: 0.7MB
+>> osdmap_mapping: 0MB
+>> pgmap: 0MB
+>> unittest_1: 0MB
+>> unittest_2: 0MB
+>>
+>> total: 1114.8MB
+>>
+>> A heap dump from tcmalloc shows a fair amount of data yet to be
+>> returned to the OS:
+>>
+>> sudo ceph tell osd.82 heap start_profiler
+>> sudo ceph tell osd.82 heap dump
+>>
+>> osd.82 dumping heap profile now.
+>> ------------------------------------------------
+>> MALLOC:     2364583720 ( 2255.0 MiB) Bytes in use by application
+>> MALLOC: +            0 (    0.0 MiB) Bytes in page heap freelist
+>> MALLOC: +    360267096 (  343.6 MiB) Bytes in central cache freelist
+>> MALLOC: +     10953808 (   10.4 MiB) Bytes in transfer cache freelist
+>> MALLOC: +    114290480 (  109.0 MiB) Bytes in thread cache freelists
+>> MALLOC: +     13562016 (   12.9 MiB) Bytes in malloc metadata
+>> MALLOC:   ------------
+>> MALLOC: =   2863657120 ( 2731.0 MiB) Actual memory used (physical + swap)
+>> MALLOC: +    997007360 (  950.8 MiB) Bytes released to OS (aka unmapped)
+>> MALLOC:   ------------
+>> MALLOC: =   3860664480 ( 3681.8 MiB) Virtual address space used
+>> MALLOC:
+>> MALLOC:         156783              Spans in use
+>> MALLOC:             35              Thread heaps in use
+>> MALLOC:           8192              Tcmalloc page size
+>> ------------------------------------------------
+>>
+>>
+>> The heap profile is showing us about the same as top excluding bytes
+>> released to the OS.  Another ~500MB is being used by tcmalloc for
+>> various cache and metadata, and ~1.1GB we can account for in the mempools.
+>>
+>> The question is where does that other 1GB go.  Is it allocations that
+>> are not made via the mempools?  heap fragmentation?  Maybe a
+>> combination of multiple things?  I don't actually know how to get heap
+>> fragmentation statistics out of tcmalloc, but jemalloc potentially
+>> would allow us to compute it via:
+>>
+>> malloc_stats_print()
+>>
+>> External fragmentation: 1.0 - (allocated/active)
+>> Virtual fragmentation: 1.0 - (active/mapped)
+>>
+>> Mark
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> <mailto:majordomo@vger.kernel.org>
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> <http://vger.kernel.org/majordomo-info.html>
+>
