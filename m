@@ -1,201 +1,183 @@
-From: Two Spirit <twospirit6905@gmail.com>
-Subject: Re: ceph-mon leader election problem, should it be improved ?
-Date: Fri, 1 Sep 2017 09:06:26 -0700
-Message-ID: <CAKRxpusG2D-jKVgWiBJpfkJGdpqVutaSegT-2aXJy4=QfHNivw@mail.gmail.com>
-References: <CAGOEmcO6L2j04NEx5U_wY0WUNnzowW1JkcqKbmtewm6f4rC1PQ@mail.gmail.com>
- <cfb3c139-7423-644f-ce4c-00d55cce5756@suse.de> <CAGOEmcNwuHGoXyAPr51P73pbZL5XOiORhL4P6w7R2yi19e71vA@mail.gmail.com>
- <52301842-ce14-1a1d-72cb-816633f2b860@suse.de>
+From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Subject: ceph-osd fails to start - crash log
+Date: Fri, 1 Sep 2017 12:32:31 -0400
+Message-ID: <CAGbvivJ-67OZ4W68G+OPrr19+6DZciWMb+6qG2nKERdedUnAZQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f173.google.com ([209.85.223.173]:33368 "EHLO
-        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752164AbdIAQGd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Sep 2017 12:06:33 -0400
-Received: by mail-io0-f173.google.com with SMTP id b2so4252427iof.0
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Sep 2017 09:06:33 -0700 (PDT)
-In-Reply-To: <52301842-ce14-1a1d-72cb-816633f2b860@suse.de>
+Received: from mail-io0-f170.google.com ([209.85.223.170]:34619 "EHLO
+        mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752078AbdIAQcd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Sep 2017 12:32:33 -0400
+Received: by mail-io0-f170.google.com with SMTP id i200so4624236ioa.1
+        for <ceph-devel@vger.kernel.org>; Fri, 01 Sep 2017 09:32:33 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Joao Eduardo Luis <joao@suse.de>
-Cc: Z Will <zhao6305@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, Ceph Users <ceph-users@lists.ceph.com>, Sage Weil <sage@newdream.net>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
->This by itself is not a problem since we don't see many real-world cases where this behaviour happens, and we are a lot more interested in making sure we have a quorum - given without a quorum your cluster is effectively unusable.
+ceph 10.2.7
+Ubuntu 16.04.2
+Kernel: 4.9.44
 
-Hello, I'm starting some testcases to simulate some of this. I'm not
-sure I understand all of it, but it sounds very similar to some
-concerns I have. If my Ceph cluster spans US, and I have two region,
-Western and Central and Western campus has multiple buildings (let's
-just say Mon.Western.A, Mon.Western.B, Mon.Central.A -- This could be
-easily Mon.Campus1.BuildingA, Mon.Campus1.BuildingB, and
-Mon.Campus2.BuildingA) and we loose connection between regions, will
-Western and Central both be able to read all their data? Western would
-have quorum so I assume write updates to Western would be fine.
-Or would Central no longer have access to the files?
+I have a system in a bad state, and many of the OSDs are failing to
+start, they come up for a little while, then die.  I need some help
+figuring out how to get these OSDs to come up and stay up so my system
+can rebalance itself.
 
-I haven't found it, but are there any docs on what the the manual
-human intervention requires?<div
-id="DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2"><br />
-<table style="border-top: 1px solid #D3D4DE;">
-	<tr>
-        <td style="width: 55px; padding-top: 13px;"><a
-href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
-target="_blank"><img
-src="https://ipmcdn.avast.com/images/icons/icon-envelope-tick-green-avg-v1.png"
-alt="" width="46" height="29" style="width: 46px; height: 29px;"
-/></a></td>
-		<td style="width: 470px; padding-top: 12px; color: #41424e;
-font-size: 13px; font-family: Arial, Helvetica, sans-serif;
-line-height: 18px;">Virus-free. <a
-href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
-target="_blank" style="color: #4453ea;">www.avg.com</a>
-		</td>
-	</tr>
-</table><a href="#DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2" width="1"
-height="1"></a></div>
+The logs show the following.
 
-On Wed, Jul 5, 2017 at 3:26 AM, Joao Eduardo Luis <joao@suse.de> wrote:
-> On 07/05/2017 08:01 AM, Z Will wrote:
->>
->> Hi Joao:
->>     I think this is all because we choose the monitor with the
->> smallest rank number to be leader. For this kind of network error, no
->> matter which mon has lost connection with the  mon who has the
->> smallest rank num , will be constantly calling an election, that say
->> ,will constantly affact the cluster until it is stopped by human . So
->> do you think it make sense if I try to figure out a way to choose the
->> monitor who can see the most monitors ,  or with  the smallest rank
->> num if the view num is same , to be leader ?
->>     In probing phase:
->>        they will know there own view, so can set a view num.
->>     In election phase:
->>        they send the view num , rank num .
->>        when receiving the election message, it compare the view num (
->> higher is leader ) and rank num ( lower is leader).
->
->
-> As I understand it, our elector trades-off reliability in case of network
-> failure for expediency in forming a quorum. This by itself is not a problem
-> since we don't see many real-world cases where this behaviour happens, and
-> we are a lot more interested in making sure we have a quorum - given without
-> a quorum your cluster is effectively unusable.
->
-> Currently, we form a quorum with a minimal number of messages passed.
-> From my poor recollection, I think the Elector works something like
->
-> - 1 probe message to each monitor in the monmap
-> - receives defer from a monitor, or defers to a monitor
-> - declares victory if number of defers is an absolute majority (including
-> one's defer).
->
-> An election cycle takes about 4-5 messages to complete, with roughly two
-> round-trips (in the best case scenario).
->
-> Figuring out which monitor is able to contact the highest number of
-> monitors, and having said monitor being elected the leader, will necessarily
-> increase the number of messages transferred.
->
-> A rough idea would be
->
-> - all monitors will send probes to all other monitors in the monmap;
-> - all monitors need to ack the other's probes;
-> - each monitor will count the number of monitors it can reach, and then send
-> a message proposing itself as the leader to the other monitors, with the
-> list of monitors they see;
-> - each monitor will propose itself as the leader, or defer to some other
-> monitor.
->
-> This is closer to 3 round-trips.
->
-> Additionally, we'd have to account for the fact that some monitors may be
-> able to reach all other monitors, while some may only be able to reach a
-> portion. How do we handle this scenario?
->
-> - What do we do with monitors that do not reach all other monitors?
-> - Do we ignore them for electoral purposes?
-> - Are they part of the final quorum?
-> - What if we need those monitors to form a quorum?
->
-> Personally, I think the easiest solution to this problem would be
-> blacklisting a problematic monitor (for a given amount a time, or until a
-> new election is needed due to loss of quorum, or by human intervention).
->
-> For example, if a monitor believes it should be the leader, and if all other
-> monitors are deferring to someone else that is not reachable, the monitor
-> could then enter a special case branch:
->
-> - send a probe to all monitors
-> - receive acks
-> - share that with other monitors
-> - if that list is missing monitors, then blacklist the monitor for a period,
-> and send a message to that monitor with that decision
-> - the monitor would blacklist itself and retry in a given amount of time.
->
-> Basically, this would be something similar to heartbeats. If a monitor can't
-> reach all monitors in an existing quorum, then just don't do anything.
->
-> In any case, you are more than welcome to propose a solution. Let us know
-> what you come up with and if you want to discuss this a bit more ;)
->
->   -Joao
->
->
->>
->> On Tue, Jul 4, 2017 at 9:25 PM, Joao Eduardo Luis <joao@suse.de> wrote:
->>>
->>> On 07/04/2017 06:57 AM, Z Will wrote:
->>>>
->>>>
->>>> Hi:
->>>>    I am testing ceph-mon brain split . I have read the code . If I
->>>> understand it right , I know it won't be brain split. But I think
->>>> there is still another problem. My ceph version is 0.94.10. And here
->>>> is my test detail :
->>>>
->>>> 3 ceph-mons , there ranks are 0, 1, 2 respectively.I stop the rank 1
->>>> mon , and use iptables to block the communication between mon 0 and
->>>> mon 1. When the cluster is stable, start mon.1 .  I found the 3
->>>> monitors will all can not work well. They are all trying to call  new
->>>> leader  election . This means the cluster can't work anymore.
->>>>
->>>> Here is my analysis. Because mon will always respond to leader
->>>> election message, so , in my test, communication between  mon.0 and
->>>> mon.1 is blocked , so mon.1 will always try to be leader, because it
->>>> will always see mon.2, and it should win over mon.2. Mon.0 should
->>>> always win over mon.2. But mon.2 will always responsd to the election
->>>> message issued by mon.1, so this loop will never end. Am I right ?
->>>>
->>>> This should be a problem? Or is it  was just designed like this , and
->>>> should be handled by human ?
->>>
->>>
->>>
->>> This is a known behaviour, quite annoying, but easily identifiable by
->>> having
->>> the same monitor constantly calling an election and usually timing out
->>> because the peon did not defer to it.
->>>
->>> In a way, the elector algorithm does what it is intended to. Solving this
->>> corner case would be nice, but I don't think there's a good way to solve
->>> it.
->>> We may be able to presume a monitor is in trouble during the probe phase,
->>> to
->>> disqualify a given monitor from the election, but in the end this is a
->>> network issue that may be transient or unpredictable and there's only so
->>> much we can account for.
->>>
->>> Dealing with it automatically would be nice, but I think, thus far, the
->>> easiest way to address this particular issue is human intervention.
->>>
->>>   -Joao
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+   -14> 2017-09-01 12:27:32.836207 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47945 pg[26.2a3( empty local-les=46494 n=0 ec=35203 les/c/f
+47869/47869/0 47889/47896/47896) [39,30,94] r=0 lpr=0
+pi=46430-47895/15 crt=0'0 mlcod 0'0 inactive NIBBLEWISE] enter Reset
+   -13> 2017-09-01 12:27:32.878713 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47899 pg[7.5f7(unlocked)] enter Initial
+   -12> 2017-09-01 12:27:32.910644 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47899 pg[7.5f7( v 29917'81518 (18780'78457,29917'81518]
+local-les=42702 n=11 ec=1511 les/c/f 42702/41354/0 47896/47896/45989)
+[12,39,82]/[12,39] r=1 lpr=0 pi=41345-47895/44 crt=29917'81518 lcod
+0'0 inactive NOTIFY NIBBLEWISE] exit Initial 0.031932 0 0.000000
+   -11> 2017-09-01 12:27:32.910684 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47899 pg[7.5f7( v 29917'81518 (18780'78457,29917'81518]
+local-les=42702 n=11 ec=1511 les/c/f 42702/41354/0 47896/47896/45989)
+[12,39,82]/[12,39] r=1 lpr=0 pi=41345-47895/44 crt=29917'81518 lcod
+0'0 inactive NOTIFY NIBBLEWISE] enter Reset
+   -10> 2017-09-01 12:27:32.934425 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47899 pg[22.637(unlocked)] enter Initial
+    -9> 2017-09-01 12:27:32.934646 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47899 pg[22.637( empty local-les=46401 n=0 ec=19250 les/c/f
+47869/47869/0 47889/47896/47896) [39,69,35] r=0 lpr=0
+pi=46353-47895/12 crt=0'0 mlcod 0'0 inactive NIBBLEWISE] exit Initial
+0.000220 0 0.000000
+    -8> 2017-09-01 12:27:32.934668 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47899 pg[22.637( empty local-les=46401 n=0 ec=19250 les/c/f
+47869/47869/0 47889/47896/47896) [39,69,35] r=0 lpr=0
+pi=46353-47895/12 crt=0'0 mlcod 0'0 inactive NIBBLEWISE] enter Reset
+    -7> 2017-09-01 12:27:32.976842 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47922 pg[7.67f(unlocked)] enter Initial
+    -6> 2017-09-01 12:27:33.004614 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47922 pg[7.67f( v 30030'90009 (19559'86971,30030'90009]
+local-les=47002 n=12 ec=1511 les/c/f 47869/47141/0 47889/47893/47893)
+[39,13,41] r=0 lpr=0 pi=47001-47892/5 crt=30030'90009 lcod 0'0 mlcod
+0'0 inactive NIBBLEWISE] exit Initial 0.027772 0 0.000000
+    -5> 2017-09-01 12:27:33.004650 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47922 pg[7.67f( v 30030'90009 (19559'86971,30030'90009]
+local-les=47002 n=12 ec=1511 les/c/f 47869/47141/0 47889/47893/47893)
+[39,13,41] r=0 lpr=0 pi=47001-47892/5 crt=30030'90009 lcod 0'0 mlcod
+0'0 inactive NIBBLEWISE] enter Reset
+    -4> 2017-09-01 12:27:33.055420 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47954 pg[7.62d(unlocked)] enter Initial
+    -3> 2017-09-01 12:27:33.128309 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47954 pg[7.62d( v 35215'96652 (18780'93637,35215'96652]
+local-les=47898 n=17 ec=1511 les/c/f 47898/42466/0 47889/47889/47889)
+[39,13,18]/[39,13] r=0 lpr=0 pi=42464-47888/34 crt=35215'96652 lcod
+0'0 mlcod 0'0 inactive NIBBLEWISE] exit Initial 0.072890 0 0.000000
+    -2> 2017-09-01 12:27:33.128343 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47954 pg[7.62d( v 35215'96652 (18780'93637,35215'96652]
+local-les=47898 n=17 ec=1511 les/c/f 47898/42466/0 47889/47889/47889)
+[39,13,18]/[39,13] r=0 lpr=0 pi=42464-47888/34 crt=35215'96652 lcod
+0'0 mlcod 0'0 inactive NIBBLEWISE] enter Reset
+    -1> 2017-09-01 12:27:33.144109 7f7ebe62c8c0  5 osd.39 pg_epoch:
+47889 pg[7.65c(unlocked)] enter Initial
+     0> 2017-09-01 12:27:33.151134 7f7ebe62c8c0 -1 *** Caught signal
+(Aborted) **
+ in thread 7f7ebe62c8c0 thread_name:ceph-osd
+
+ ceph version 10.2.7 (50e863e0f4bc8f4b9e31156de690d765af245185)
+ 1: (()+0x9770ae) [0x511ab2e0ae]
+ 2: (()+0x11390) [0x7f7ebd4ea390]
+ 3: (gsignal()+0x38) [0x7f7ebb488428]
+ 4: (abort()+0x16a) [0x7f7ebb48a02a]
+ 5: (__gnu_cxx::__verbose_terminate_handler()+0x16d) [0x7f7ebbdca84d]
+ 6: (()+0x8d6b6) [0x7f7ebbdc86b6]
+ 7: (()+0x8d701) [0x7f7ebbdc8701]
+ 8: (()+0x8d919) [0x7f7ebbdc8919]
+ 9: (()+0x1230f) [0x7f7ebe1c230f]
+ 10: (operator new[](unsigned long)+0x4e7) [0x7f7ebe1e64b7]
+ 11: (void std::__cxx11::list<pg_log_entry_t,
+std::allocator<pg_log_entry_t> >::_M_insert<pg_log_entry_t
+const&>(std::_List_iterator<pg_log_entry_t>, pg_log_entry_t
+const&)+0x21) [0x511a6f7e21]
+ 12: (PGLog::read_log(ObjectStore*, coll_t, coll_t, ghobject_t,
+pg_info_t const&, std::map<eversion_t, hobject_t,
+std::less<eversion_t>, std::allocator<std::pair<eversion_t const,
+hobject_t> > >&, PGLog::IndexedLog&, pg_missing_t&,
+std::__cxx11::basic_ostringstream<char, std::char_traits<char>,
+std::allocator<char> >&, DoutPrefixProvider const*,
+std::set<std::__cxx11::basic_string<char, std::char_traits<char>,
+std::allocator<char> >, std::less<std::__cxx11::basic_string<char,
+std::char_traits<char>, std::allocator<char> > >,
+std::allocator<std::__cxx11::basic_string<char,
+std::char_traits<char>, std::allocator<char> > > >*)+0xe0c)
+[0x511a7db99c]
+ 13: (PG::read_state(ObjectStore*, ceph::buffer::list&)+0x2f6) [0x511a60d306]
+ 14: (OSD::load_pgs()+0x87a) [0x511a548f0a]
+ 15: (OSD::init()+0x2026) [0x511a5541f6]
+ 16: (main()+0x2ea5) [0x511a4c5dc5]
+ 17: (__libc_start_main()+0xf0) [0x7f7ebb473830]
+ 18: (_start()+0x29) [0x511a507459]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+needed to interpret this.
+
+--- logging levels ---
+   0/ 5 none
+   0/ 1 lockdep
+   0/ 1 context
+   1/ 1 crush
+   0/ 1 mds
+   1/ 5 mds_balancer
+   1/ 5 mds_locker
+   1/ 5 mds_log
+   1/ 5 mds_log_expire
+   1/ 5 mds_migrator
+   0/ 1 buffer
+   0/ 1 timer
+   0/ 1 filer
+   0/ 1 striper
+   0/ 1 objecter
+   0/ 5 rados
+   0/ 5 rbd
+   0/ 5 rbd_mirror
+   0/ 5 rbd_replay
+   0/ 5 journaler
+   0/ 5 objectcacher
+   0/ 5 client
+   0/ 5 osd
+   0/ 5 optracker
+   0/ 5 objclass
+   1/ 3 filestore
+   1/ 3 journal
+   0/ 1 ms
+   0/ 1 mon
+   0/10 monc
+   1/ 5 paxos
+   0/ 5 tp
+   1/ 5 auth
+   1/ 5 crypto
+   1/ 1 finisher
+   1/ 5 heartbeatmap
+   1/ 5 perfcounter
+   1/ 5 rgw
+   1/10 civetweb
+   1/ 5 javaclient
+   1/ 5 asok
+   1/ 1 throttle
+   0/ 0 refs
+   1/ 5 xio
+   1/ 5 compressor
+   1/ 5 newstore
+   1/ 5 bluestore
+   1/ 5 bluefs
+   1/ 3 bdev
+   1/ 5 kstore
+   4/ 5 rocksdb
+   4/ 5 leveldb
+   1/ 5 kinetic
+   1/ 5 fuse
+  99/99 (syslog threshold)
+  -1/-1 (stderr threshold)
+  max_recent     10000
+  max_new         1000
+  log_file /var/log/ceph/ceph-osd.39.log
+--- end dump of recent events ---
