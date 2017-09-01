@@ -1,112 +1,121 @@
 From: xiaoyan li <wisher2003@gmail.com>
-Subject: Re: Bluestore memory usage on our test cluster
-Date: Fri, 1 Sep 2017 09:04:06 +0800
-Message-ID: <CAERxPZKykQF5CgNtirvAgDCECu8Psgr87byzzFL5YMgfOpRJvQ@mail.gmail.com>
-References: <ec2dfba7-f026-9f7a-ffe9-1893a499b21b@redhat.com>
+Subject: Re: luminous OSD memory usage
+Date: Fri, 1 Sep 2017 10:00:38 +0800
+Message-ID: <CAERxPZKokC4j76NMLoc1RLLBS8_cZVkKXavaqF--03LxcF5KJQ@mail.gmail.com>
+References: <d3b8007f-4bdf-65c5-f4e9-7d1d9c85e019@synesis.ru> <alpine.DEB.2.11.1708301455490.3491@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f41.google.com ([209.85.218.41]:36796 "EHLO
-        mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750880AbdIABEI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Aug 2017 21:04:08 -0400
-Received: by mail-oi0-f41.google.com with SMTP id t75so10294827oie.3
-        for <ceph-devel@vger.kernel.org>; Thu, 31 Aug 2017 18:04:08 -0700 (PDT)
-In-Reply-To: <ec2dfba7-f026-9f7a-ffe9-1893a499b21b@redhat.com>
+Received: from mail-oi0-f49.google.com ([209.85.218.49]:36046 "EHLO
+        mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751330AbdIACAj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 31 Aug 2017 22:00:39 -0400
+Received: by mail-oi0-f49.google.com with SMTP id t75so10933547oie.3
+        for <ceph-devel@vger.kernel.org>; Thu, 31 Aug 2017 19:00:39 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1708301455490.3491@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mnelson@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, Josh Durgin <jdurgin@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Aleksei Gutikov <aleksey.gutikov@synesis.ru>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Aug 31, 2017 at 3:48 AM, Mark Nelson <mnelson@redhat.com> wrote:
-> Based on the recent conversation about bluestore memory usage, I did a
-> survey of all of the bluestore OSDs in one of our internal test clusters.
-> The one with the highest RSS usage at the time was osd.82:
+On Wed, Aug 30, 2017 at 11:17 PM, Sage Weil <sage@newdream.net> wrote:
+> Hi Aleksei,
 >
->  6017 ceph      20   0 4488440 2.648g   5004 S   3.0 16.9   5598:01 ceph-osd
+> On Wed, 30 Aug 2017, Aleksei Gutikov wrote:
+>> Hi.
+>>
+>> I'm trying to synchronize osd daemons memory limits and bluestore cache
+>> settings.
+>> For 12.1.4 we have hdd osds usage about 4G with default settings.
+>> For ssds we have limit 6G and they are been oom killed periodically.
 >
-> In the grand scheme of bluestore memory usage, I've seen higher RSS usage,
-> but usually with bluestore_cache cranked up higher.  On these nodes, I
-> believe Sage said the bluestore_cache size is being set to 512MB to keep
-> memory usage down.
+> So,
 >
-> To dig into this more, mempool data from the osd can be dumped via:
+>> While
+>> osd_op_num_threads_per_shard_hdd=1
+>> osd_op_num_threads_per_shard_ssd=2
+>> and
+>> osd_op_num_shards_hdd=5
+>> osd_op_num_shards_ssd=8
 >
-> sudo ceph daemon osd.82 dump_mempools
->
-> A slightly compressed version of that data follows.  Note that the allocated
-> space for blueestore_cache_* isn't terribly high.  buffer_anon and osd_pglog
-> together are taking up more space:
->
-> bloom_filters: 0MB
-> bluestore_alloc: 13.5MB
-> blustore_cache_data: 0MB
-> bluestore_cache_onode: 234.7MB
-> bluestore_cache_other: 277.3MB
-> bluestore_fsck: 0MB
-> bluestore_txc: 0MB
-> bluestore_writing_deferred: 5.4MB
-> bluestore_writing: 11.1MB
-> bluefs: 0.1MB
-> buffer_anon: 386.1MB
-> buffer_meta: 0MB
-> osd: 4.4MB
-> osd_mapbl: 0MB
-> osd_pglog: 181.4MB
-> osdmap: 0.7MB
-> osdmap_mapping: 0MB
-> pgmap: 0MB
-> unittest_1: 0MB
-> unittest_2: 0MB
->
-> total: 1114.8MB
->
-> A heap dump from tcmalloc shows a fair amount of data yet to be returned to
-> the OS:
->
-> sudo ceph tell osd.82 heap start_profiler
-> sudo ceph tell osd.82 heap dump
->
-> osd.82 dumping heap profile now.
-> ------------------------------------------------
-> MALLOC:     2364583720 ( 2255.0 MiB) Bytes in use by application
-> MALLOC: +            0 (    0.0 MiB) Bytes in page heap freelist
-> MALLOC: +    360267096 (  343.6 MiB) Bytes in central cache freelist
-> MALLOC: +     10953808 (   10.4 MiB) Bytes in transfer cache freelist
-> MALLOC: +    114290480 (  109.0 MiB) Bytes in thread cache freelists
-> MALLOC: +     13562016 (   12.9 MiB) Bytes in malloc metadata
-> MALLOC:   ------------
-> MALLOC: =   2863657120 ( 2731.0 MiB) Actual memory used (physical + swap)
-> MALLOC: +    997007360 (  950.8 MiB) Bytes released to OS (aka unmapped)
-> MALLOC:   ------------
-> MALLOC: =   3860664480 ( 3681.8 MiB) Virtual address space used
-> MALLOC:
-> MALLOC:         156783              Spans in use
-> MALLOC:             35              Thread heaps in use
-> MALLOC:           8192              Tcmalloc page size
-> ------------------------------------------------
->
->
-> The heap profile is showing us about the same as top excluding bytes
-> released to the OS.  Another ~500MB is being used by tcmalloc for various
-> cache and metadata, and ~1.1GB we can account for in the mempools.
->
-> The question is where does that other 1GB go.  Is it allocations that are
-> not made via the mempools?  heap fragmentation?  Maybe a combination of
-> multiple things?  I don't actually know how to get heap fragmentation
-> statistics out of tcmalloc, but jemalloc potentially would allow us to
-> compute it via:
->
-> malloc_stats_print()
+> aren't relevant to memory usage.  The _per_shard is about how many bytes
+> are stored in each rocksdb key, and the num_shards is about how many
+> threads we use.
 
-Seems the other 1GB should be for Rocksdb memtables. This is not
-included in kv cache size.
+I can't understand the point about _per_shard. I notice that
+osd_op_num_threads_per_shard is used to set cache shards in BlueStore.
+>
+> This is the one that matters:
+>
+>> bluestore_cache_size_hdd=1G
+>> bluestore_cache_size_ssd=3G
+>
+> It governs how much memory bluestore limits itself to.  He bad news is
+> that bluestore counts what it allocates, not how much memory the allocator
+> uses, so there is some overhead.  From what I've anecdotally seen it's
+> something like 1.5x, which kind of sucks; there is more to be done here.
+>
+> On top of that is usage by the OSD outside of bluestore,
+> which is somewhere in the 500m to 1.5g range.
+>
+> We're very interested in hearing what observed RSS users see relative to
+> the configured bluestore size and pg count, along with a dump of the
+> mempool metadata (ceph daemon osd.NNN dump_mempools).
+>
+>> Does anybody have an idea about the equation for upper bound of memory
+>> consumption?
+>
+> Very roughly, something like: osd_overhead + bluestore_cache_size * 1.5 ?
+>
+>> Can bluestore_cache_size be decreased safely for example to 2G, or to 1G?
+>
+> Yes, you can/should change this to whatever you like (big or small).
+>
+>> I want to calculate the maximum expected size of bluestore metadata (that must
+>> be definitely fit into cache) using size of raw space, average size of
+>> objects, rocksdb space amplification.
+>> I thought it should be something simple like
+>> raw_space/avg_obj_size*obj_overhead*rocksdb_space_amp.
+>> For example if obj_overhead=1k, hdd size=1T, rocksdb space amplification is 2
+>> and avg obj size=4M then 1T/4M*1k*2=500M so I need at least 512M for cache.
+>> But wise guys said that I have to take into account number of extents also.
+>> But bluestore_extent_map_shard_max_size=1200, I hope this number is not a
+>> multiplicator...
+>
+> Nope, just a shard size...
+>
+>> What would be correct approach for calculation of this minimum cache size?
+>> What can be expected size of key-values stored in rocksdb per rados object?
+>
+> This depends, unfortunately, on what the write pattern is for the objects.
+> If they're written by RGW in big chunks, the overhead will be smaller.
+> If it comes out of a 4k random write pattern it will be bigger.  Again,
+> very interestd in hearing user reports of what is observed in real world
+> situations.  I would trust that more than a calculation from first
+> principles like the above.
+>
+>> Default bluestore_cache_kv_ratio*bluestore_cache_size_ssd=0.99*3G
+>> while default bluestore_cache_kv_max=512M
+>> Looks like BlueStore::_set_cache_sizes() will set cache_kv_ratio to 1/6 in
+>> default case. Is 512M enough for bluestore metadata?
+>
+> In Mark's testing he found that we got more performance benefit when
+> small caches were devoted to rocksdb and large caches were devoted mostly
+> to the bluestore metadata cache (parsed onodes vs caching the encoded
+> on-disk content).  You can always adjust the 512m value upwards (and that
+> may make sense for large cache sizes).  Again, very interested in hearing
+> whther that works better or worse for your workload!
+>
+I am wondering whether Bluestore should have Rocksdb block cache.
+Rocksdb uses block cache to cache data blocks in memory for reads. But
+the data is already cached by bluestore metadata cache. And bluestore
+metadata cache has two advantages: 1. no cache for pg_log and deferred
+io logs. 2. Rocksdb cache data blocks. it doesn't have
+fine-granularity.
 
+Thanks-
+> sage
 >
-> External fragmentation: 1.0 - (allocated/active)
-> Virtual fragmentation: 1.0 - (active/mapped)
->
-> Mark
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
