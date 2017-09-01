@@ -1,58 +1,46 @@
-From: Meyers Mark <markmeyers.mmy@gmail.com>
-Subject: why mds sends a caps message of "zero" inode max size to client when
- finishing "open a new created file" ?
-Date: Fri, 1 Sep 2017 21:22:22 +0800
-Message-ID: <CACd4Yje4Ovmv=vvYq0LbeHJUkon+=pcSfqdsF2eDe8jbSf2SAQ@mail.gmail.com>
+From: sa514164-fOMaevN1BEbsJZF79Ady7g@public.gmane.org
+Subject: a question about use of CEPH_IOC_SYNCIO in write
+Date: Fri, 1 Sep 2017 22:24:58 +0800 (GMT+08:00)
+Message-ID: <22be9a24.45942.15e3dd4a1bf.Coremail.sa514164@mail.ustc.edu.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:33279 "EHLO
-        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750955AbdIANWX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 1 Sep 2017 09:22:23 -0400
-Received: by mail-io0-f171.google.com with SMTP id b2so1321604iof.0
-        for <ceph-devel@vger.kernel.org>; Fri, 01 Sep 2017 06:22:23 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
 Hi:
-         I followed the open call of file to mds code. And I found
-that when finishing open a new file(new created), mds will send a cap
-message of inode max size(value of zero) to the client.
+        I want to ask a question about CEPH_IOC_SYNCIO flag.
+        I know that when using O_SYNC flag or O_DIRECT flag, write call executes in other two code paths different than using CEPH_IOC_SYNCIO flag.
+        And I find the comments about CEPH_IOC_SYNCIO here:
 
-        The code in Locker::share_inode_max_size in ceph/src/mds/Server.cc:
+        /*
+         * CEPH_IOC_SYNCIO - force synchronous IO
+         *
+         * This ioctl sets a file flag that forces the synchronous IO that
+         * bypasses the page cache, even if it is not necessary.  This is
+         * essentially the opposite behavior of IOC_LAZYIO.  This forces the
+         * same read/write path as a file opened by multiple clients when one
+         * or more of those clients is opened for write.
+         *
+         * Note that this type of sync IO takes a different path than a file
+         * opened with O_SYNC/D_SYNC (writes hit the page cache and are
+         * immediately flushed on page boundaries).  It is very similar to
+         * O_DIRECT (writes bypass the page cache) except that O_DIRECT writes
+         * are not copied (user page must remain stable) and O_DIRECT writes
+         * have alignment restrictions (on the buffer and file offset).
+         */
+        #define CEPH_IOC_SYNCIO _IO(CEPH_IOCTL_MAGIC, 5)
 
-        class C_MDS_openc_finish : public ServerLogContext {
-        {
-                ...
-        public:
-                void finish(int r) override {
-                        ...
-
-get_mds()->locker->share_inode_max_size(newi);//"inode max size" is
-zero when opening new file//share_inode_max_size will call
-send_message_client_counted to send caps message to client
-                        ...
-                }
-                ...
-        }
-
-        The call code:
-        void Server::handle_client_openc(MDRequestRef& mdr)//open new file here
-        {
-                ...
-                C_MDS_openc_finish *fin = new C_MDS_openc_finish(this,
-mdr, dn, in, follows);
-                ...
-                journal_and_reply(mdr, in, dn, le, fin);
-                ...
-        }
-
-        My question is: is this caps message of max inode size(of
-zero) redundant? Or is this message for other uses?
-
-       Thanks for your reading, I really appreciate your rely. Thanks!
-
-Best Regards!
-Mark Meyers
+        My question is: 
+        1."This forces the same read/write path as a file opened by multiple clients when one or more of those clients is opened for write." -- Does this mean multiple clients can execute in the same code path when they all use the CEPH_IOC_SYNCIO flag? Will the use of CEPH_IOC_SYNCIO in all clients bring effects such as coherency and performance?
+        2."...except that O_DIRECT writes are not copied (user page must remain stable)" -- As I know when threads write with CEPH_IOC_SYNCIO flag, the write call will block until ceph osd and mds send back responses. So even with CEPH_IOC_SYNCIO flag(the user pages are not locked here, I guess), but the user cannot use these pages. How can the use of CEPH_IOC_SYNCIO flag make better use of user space memory?
