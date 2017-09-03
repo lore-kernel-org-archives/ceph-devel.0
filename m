@@ -1,30 +1,49 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: hammer PRs
-Date: Sun, 3 Sep 2017 13:01:48 +0800
-Message-ID: <CAJE9aOO97x_=VxbkDrXfQPv+rte+p6QcUFX-f7PsOr-Qmge0xA@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: FreeBSSD: [Bug 221997] net/ceph: Luminous (12.2.0) release for Ceph
+Date: Sun, 3 Sep 2017 13:24:32 +0200
+Message-ID: <f11a02b7-b663-e4c0-7c7a-abe62298175c@digiware.nl>
+References: <bug-221997-27166-XcsvHCEWOG@https.bugs.freebsd.org/bugzilla/>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f48.google.com ([209.85.218.48]:36662 "EHLO
-        mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751030AbdICFBt (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 3 Sep 2017 01:01:49 -0400
-Received: by mail-oi0-f48.google.com with SMTP id t75so25866700oie.3
-        for <ceph-devel@vger.kernel.org>; Sat, 02 Sep 2017 22:01:49 -0700 (PDT)
+Received: from smtp.digiware.nl ([176.74.240.9]:58405 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751531AbdICLYf (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 3 Sep 2017 07:24:35 -0400
+In-Reply-To: <bug-221997-27166-XcsvHCEWOG@https.bugs.freebsd.org/bugzilla/>
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Nathan Cutler <ncutler@suse.cz>, Abhishek Lekshmanan <abhishek@suse.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>, FreeBSD Filesystems <freebsd-fs@freebsd.org>
 
-hey Nathan and Abhishek,
+Hi all,
 
+Today the FreeBSD luminous release got accepted in ports.
+So in a few days packages should be available.
 
-since Luminous has been released, which marks the EOL of Hammer. shall
-you close  Hammer PRs[0] on github?
+--WjW
 
+-------- Forwarded Message --------
+Subject: [Bug 221997] net/ceph: Luminous (12.2.0) release for Ceph
+Date: Sun, 03 Sep 2017 08:34:28 +0000
+From: bugzilla-noreply@freebsd.org
+To: wjw@digiware.nl
 
----
-[0] https://github.com/ceph/ceph/milestone/5
+https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=221997
+
+Kurt Jaeger <pi@FreeBSD.org> changed:
+
+           What    |Removed                     |Added
+----------------------------------------------------------------------------
+           Assignee|freebsd-ports-bugs@FreeBSD. |pi@FreeBSD.org
+                   |org                         |
+             Status|New                         |Closed
+         Resolution|---                         |FIXED
+
+--- Comment #7 from Kurt Jaeger <pi@FreeBSD.org> ---
+Committed, thanks!
 
 -- 
-Regards
-Kefu Chai
+You are receiving this mail because:
+You reported the bug.
