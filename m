@@ -1,32 +1,50 @@
 From: Two Spirit <twospirit6905@gmail.com>
-Subject: "Unhandled exception in thread started by" ceph-deploy admin
-Date: Sat, 2 Sep 2017 08:02:51 -0700
-Message-ID: <CAKRxpuvvV9WTuKkWr=_B5dekLw3CqDLF=tzWdgw4fM9Sx7SSCA@mail.gmail.com>
+Subject: Feature Request ceph -s recovery and resync estimated completion times
+Date: Sat, 2 Sep 2017 19:29:46 -0700
+Message-ID: <CAKRxpuu6ZoyyPhpEtH4AG-qMepEXqeN++2HZyPKhVzgggCOYyw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f175.google.com ([209.85.223.175]:38666 "EHLO
-        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752660AbdIBPCw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 2 Sep 2017 11:02:52 -0400
-Received: by mail-io0-f175.google.com with SMTP id q64so1940426iod.5
-        for <ceph-devel@vger.kernel.org>; Sat, 02 Sep 2017 08:02:52 -0700 (PDT)
+Received: from mail-io0-f177.google.com ([209.85.223.177]:37168 "EHLO
+        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752806AbdICC3r (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sat, 2 Sep 2017 22:29:47 -0400
+Received: by mail-io0-f177.google.com with SMTP id 62so3560847iok.4
+        for <ceph-devel@vger.kernel.org>; Sat, 02 Sep 2017 19:29:47 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel <ceph-devel@vger.kernel.org>
 
-I upgraded a production server from Ubuntu 15.04 to a fresh install of
-16.04 LTS. running luminous
+Hello,
 
-It is a brand new OS. I installed it I think almost identical to
-numerous other test OSDs servers that are running. This one system is
-spitting out an error "Unhandled exception in thread started by" and
-then there is no other output after. The only other change I made
-different is remove systemd from one of them due to ceph complaints.
+I seem to be in the degraded data redundancy mode most of the time and
+a lot of recovery io going on. I use ceph -s to get an idea of how
+long before I go to active+clean. With smaller test setups, I could
+see 20-40% and within a short time I would be active+clean, but as I
+test with more data, even tho I see a smaller %, it seems like it is
+taking forever. I don't have an idea of how long in estimated hours
+recovery will complete. I've shown some mdadm RAID outputs that I find
+very helpful as I can tell by looking at the finish information to get
+an idea of how long to come back and recheck the status.
 
-I get this error when executing ceph-deploy admin. right after the
-"write cluster configuration to /etc/ceph{cluster}.conf" output
+It would be nice to see that out of Ceph if possible to give some
+estimation of completion based on current instantaneous recovery
+rates.
 
-I'm not sure how to trace it further. Googling shows it generally has
-been a bug with some python code. it seems to say it is a bug but
-Bug#8509 and #9248 are slightly different.
+ 90774/1418378 objects misplaced (6.400%)
+            Degraded data redundancy: 48414/1418378 objects degraded
+(3.413%), 16 pgs unclean, 10 pgs degraded, 4 pgs undersized
+
+
+
+md0 : active raid1 sdc1[2] sdb1[3]
+      2095040 blocks super 1.2 [2/1] [U_]
+      [>....................]  recovery =  0.4% (9600/2095040)
+finish=3.6min speed=9600K/sec
+
+
+
+md0 : active raid1 sdb1[0] sdc1[1]
+     2095040 blocks super 1.2 [2/2] [UU]
+      [===>.................]  resync = 19.7% (414656/2095040)
+finish=0.2min speed=138218K/sec
