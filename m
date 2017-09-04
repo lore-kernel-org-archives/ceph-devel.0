@@ -1,150 +1,132 @@
 From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH 04/13] ceph: queue cap snap only when snap realm's context changes
-Date: Mon,  4 Sep 2017 17:38:59 +0800
-Message-ID: <20170904093908.57316-5-zyan@redhat.com>
+Subject: [PATCH 07/13] ceph: make writepage_nounlock() invalidate page that beyonds EOF
+Date: Mon,  4 Sep 2017 17:39:02 +0800
+Message-ID: <20170904093908.57316-8-zyan@redhat.com>
 References: <20170904093908.57316-1-zyan@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44802 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:50020 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753364AbdIDJjs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 4 Sep 2017 05:39:48 -0400
+        id S1753364AbdIDJkK (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 4 Sep 2017 05:40:10 -0400
 In-Reply-To: <20170904093908.57316-1-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org, jlayton@redhat.com, idryomov@gmail.com
 Cc: "Yan, Zheng" <zyan@redhat.com>
 
-If we create capsnap when snap realm's context does not change, the
-new capsnap's snapc is equal to ci->i_head_snapc. Page wirteback code
-can't differentiates dirty pages associated with the new capsnap from
-dirty pages associated with i_head_snapc.
+Otherwise, the page left in state that page is assocated with a
+snapc, but (PageDirty(page) || PageWriteback(page)) is false.
 
 Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
 ---
- fs/ceph/snap.c | 37 ++++++++++++++++---------------------
- 1 file changed, 16 insertions(+), 21 deletions(-)
+ fs/ceph/addr.c | 50 ++++++++++++++++++++++++++++++++------------------
+ 1 file changed, 32 insertions(+), 18 deletions(-)
 
-diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
-index dab5d6732345..1ffc8b426c1c 100644
---- a/fs/ceph/snap.c
-+++ b/fs/ceph/snap.c
-@@ -299,7 +299,8 @@ static int cmpu64_rev(const void *a, const void *b)
- /*
-  * build the snap context for a given realm.
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index 03a1ee27b33c..8526359c08b2 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -476,7 +476,8 @@ struct ceph_writeback_ctl
+  * only snap context we are allowed to write back.
   */
--static int build_snap_context(struct ceph_snap_realm *realm)
-+static int build_snap_context(struct ceph_snap_realm *realm,
-+			      struct list_head* dirty_realms)
+ static struct ceph_snap_context *
+-get_oldest_context(struct inode *inode, struct ceph_writeback_ctl *ctl)
++get_oldest_context(struct inode *inode, struct ceph_writeback_ctl *ctl,
++		   struct ceph_snap_context *page_snapc)
  {
- 	struct ceph_snap_realm *parent = realm->parent;
- 	struct ceph_snap_context *snapc;
-@@ -313,7 +314,7 @@ static int build_snap_context(struct ceph_snap_realm *realm)
- 	 */
- 	if (parent) {
- 		if (!parent->cached_context) {
--			err = build_snap_context(parent);
-+			err = build_snap_context(parent, dirty_realms);
- 			if (err)
- 				goto fail;
+ 	struct ceph_inode_info *ci = ceph_inode(inode);
+ 	struct ceph_snap_context *snapc = NULL;
+@@ -486,21 +487,33 @@ get_oldest_context(struct inode *inode, struct ceph_writeback_ctl *ctl)
+ 	list_for_each_entry(capsnap, &ci->i_cap_snaps, ci_item) {
+ 		dout(" cap_snap %p snapc %p has %d dirty pages\n", capsnap,
+ 		     capsnap->context, capsnap->dirty_pages);
+-		if (capsnap->dirty_pages) {
+-			snapc = ceph_get_snap_context(capsnap->context);
+-			if (ctl) {
+-				if (capsnap->writing) {
+-					ctl->i_size = i_size_read(inode);
+-					ctl->size_stable = false;
+-				} else {
+-					ctl->i_size = capsnap->size;
+-					ctl->size_stable = true;
+-				}
+-				ctl->truncate_size = capsnap->truncate_size;
+-				ctl->truncate_seq = capsnap->truncate_seq;
++		if (!capsnap->dirty_pages)
++			continue;
++
++		/* get i_size, truncate_{seq,size} for page_snapc? */
++		if (snapc && capsnap->context != page_snapc)
++			continue;
++
++		if (ctl) {
++			if (capsnap->writing) {
++				ctl->i_size = i_size_read(inode);
++				ctl->size_stable = false;
++			} else {
++				ctl->i_size = capsnap->size;
++				ctl->size_stable = true;
+ 			}
+-			break;
++			ctl->truncate_size = capsnap->truncate_size;
++			ctl->truncate_seq = capsnap->truncate_seq;
  		}
-@@ -332,7 +333,7 @@ static int build_snap_context(struct ceph_snap_realm *realm)
- 		     " (unchanged)\n",
- 		     realm->ino, realm, realm->cached_context,
- 		     realm->cached_context->seq,
--		     (unsigned int) realm->cached_context->num_snaps);
-+		     (unsigned int)realm->cached_context->num_snaps);
++
++		if (snapc)
++			break;
++
++		snapc = ceph_get_snap_context(capsnap->context);
++		if (!page_snapc ||
++		    page_snapc == snapc ||
++		    page_snapc->seq > snapc->seq)
++			break;
+ 	}
+ 	if (!snapc && ci->i_wrbuffer_ref_head) {
+ 		snapc = ceph_get_snap_context(ci->i_head_snapc);
+@@ -573,7 +586,7 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 		dout("writepage %p page %p not dirty?\n", inode, page);
+ 		return 0;
+ 	}
+-	oldest = get_oldest_context(inode, &ceph_wbc);
++	oldest = get_oldest_context(inode, &ceph_wbc, snapc);
+ 	if (snapc->seq > oldest->seq) {
+ 		dout("writepage %p page %p snapc %p not writeable - noop\n",
+ 		     inode, page, snapc);
+@@ -588,6 +601,7 @@ static int writepage_nounlock(struct page *page, struct writeback_control *wbc)
+ 	/* is this a partial page at end of file? */
+ 	if (page_off >= ceph_wbc.i_size) {
+ 		dout("%p page eof %llu\n", page, ceph_wbc.i_size);
++		page->mapping->a_ops->invalidatepage(page, 0, PAGE_SIZE);
  		return 0;
  	}
  
-@@ -373,7 +374,11 @@ static int build_snap_context(struct ceph_snap_realm *realm)
- 	     realm->ino, realm, snapc, snapc->seq,
- 	     (unsigned int) snapc->num_snaps);
- 
--	ceph_put_snap_context(realm->cached_context);
-+	if (realm->cached_context) {
-+		ceph_put_snap_context(realm->cached_context);
-+		/* queue realm for cap_snap creation */
-+		list_add_tail(&realm->dirty_item, dirty_realms);
-+	}
- 	realm->cached_context = snapc;
- 	return 0;
- 
-@@ -394,15 +399,16 @@ static int build_snap_context(struct ceph_snap_realm *realm)
- /*
-  * rebuild snap context for the given realm and all of its children.
-  */
--static void rebuild_snap_realms(struct ceph_snap_realm *realm)
-+static void rebuild_snap_realms(struct ceph_snap_realm *realm,
-+				struct list_head *dirty_realms)
+@@ -816,7 +830,7 @@ static int ceph_writepages_start(struct address_space *mapping,
+ retry:
+ 	/* find oldest snap context with dirty data */
+ 	ceph_put_snap_context(snapc);
+-	snapc = get_oldest_context(inode, &ceph_wbc);
++	snapc = get_oldest_context(inode, &ceph_wbc, NULL);
+ 	if (!snapc) {
+ 		/* hmm, why does writepages get called when there
+ 		   is no dirty data? */
+@@ -1162,7 +1176,7 @@ static int ceph_writepages_start(struct address_space *mapping,
+ static int context_is_writeable_or_written(struct inode *inode,
+ 					   struct ceph_snap_context *snapc)
  {
- 	struct ceph_snap_realm *child;
+-	struct ceph_snap_context *oldest = get_oldest_context(inode, NULL);
++	struct ceph_snap_context *oldest = get_oldest_context(inode, NULL, NULL);
+ 	int ret = !oldest || snapc->seq <= oldest->seq;
  
- 	dout("rebuild_snap_realms %llx %p\n", realm->ino, realm);
--	build_snap_context(realm);
-+	build_snap_context(realm, dirty_realms);
- 
- 	list_for_each_entry(child, &realm->children, child_item)
--		rebuild_snap_realms(child);
-+		rebuild_snap_realms(child, dirty_realms);
- }
- 
- 
-@@ -624,13 +630,11 @@ static void queue_realm_cap_snaps(struct ceph_snap_realm *realm)
- {
- 	struct ceph_inode_info *ci;
- 	struct inode *lastinode = NULL;
--	struct ceph_snap_realm *child;
- 
- 	dout("queue_realm_cap_snaps %p %llx inodes\n", realm, realm->ino);
- 
- 	spin_lock(&realm->inodes_with_caps_lock);
--	list_for_each_entry(ci, &realm->inodes_with_caps,
--			    i_snap_realm_item) {
-+	list_for_each_entry(ci, &realm->inodes_with_caps, i_snap_realm_item) {
- 		struct inode *inode = igrab(&ci->vfs_inode);
- 		if (!inode)
- 			continue;
-@@ -643,14 +647,6 @@ static void queue_realm_cap_snaps(struct ceph_snap_realm *realm)
- 	spin_unlock(&realm->inodes_with_caps_lock);
- 	iput(lastinode);
- 
--	list_for_each_entry(child, &realm->children, child_item) {
--		dout("queue_realm_cap_snaps %p %llx queue child %p %llx\n",
--		     realm, realm->ino, child, child->ino);
--		list_del_init(&child->dirty_item);
--		list_add(&child->dirty_item, &realm->dirty_item);
--	}
--
--	list_del_init(&realm->dirty_item);
- 	dout("queue_realm_cap_snaps %p %llx done\n", realm, realm->ino);
- }
- 
-@@ -721,8 +717,6 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
- 		if (err < 0)
- 			goto fail;
- 
--		/* queue realm for cap_snap creation */
--		list_add(&realm->dirty_item, &dirty_realms);
- 		if (realm->seq > mdsc->last_snap_seq)
- 			mdsc->last_snap_seq = realm->seq;
- 
-@@ -741,7 +735,7 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
- 
- 	/* invalidate when we reach the _end_ (root) of the trace */
- 	if (invalidate && p >= e)
--		rebuild_snap_realms(realm);
-+		rebuild_snap_realms(realm, &dirty_realms);
- 
- 	if (!first_realm)
- 		first_realm = realm;
-@@ -758,6 +752,7 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
- 	while (!list_empty(&dirty_realms)) {
- 		realm = list_first_entry(&dirty_realms, struct ceph_snap_realm,
- 					 dirty_item);
-+		list_del_init(&realm->dirty_item);
- 		queue_realm_cap_snaps(realm);
- 	}
- 
+ 	ceph_put_snap_context(oldest);
+@@ -1207,7 +1221,7 @@ static int ceph_update_writeable_page(struct file *file,
+ 		 * this page is already dirty in another (older) snap
+ 		 * context!  is it writeable now?
+ 		 */
+-		oldest = get_oldest_context(inode, NULL);
++		oldest = get_oldest_context(inode, NULL, NULL);
+ 		if (snapc->seq > oldest->seq) {
+ 			ceph_put_snap_context(oldest);
+ 			dout(" page %p snapc %p not current or oldest\n",
 -- 
 2.13.5
 
