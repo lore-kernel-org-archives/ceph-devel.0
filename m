@@ -1,54 +1,150 @@
 From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH 03/13] ceph: handle race between vmtruncate and queuing cap snap
-Date: Mon,  4 Sep 2017 17:38:58 +0800
-Message-ID: <20170904093908.57316-4-zyan@redhat.com>
+Subject: [PATCH 04/13] ceph: queue cap snap only when snap realm's context changes
+Date: Mon,  4 Sep 2017 17:38:59 +0800
+Message-ID: <20170904093908.57316-5-zyan@redhat.com>
 References: <20170904093908.57316-1-zyan@redhat.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:16197 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44802 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753364AbdIDJjl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 4 Sep 2017 05:39:41 -0400
+        id S1753364AbdIDJjs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 4 Sep 2017 05:39:48 -0400
 In-Reply-To: <20170904093908.57316-1-zyan@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: ceph-devel@vger.kernel.org, jlayton@redhat.com, idryomov@gmail.com
 Cc: "Yan, Zheng" <zyan@redhat.com>
 
-It's possible that we create a cap snap while there is pending
-vmtruncate (truncate hasn't been processed by worker thread).
-We should truncate dirty pages beyond capsnap->size in that case.
+If we create capsnap when snap realm's context does not change, the
+new capsnap's snapc is equal to ci->i_head_snapc. Page wirteback code
+can't differentiates dirty pages associated with the new capsnap from
+dirty pages associated with i_head_snapc.
 
 Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
 ---
- fs/ceph/inode.c | 13 ++++++++++++-
- 1 file changed, 12 insertions(+), 1 deletion(-)
+ fs/ceph/snap.c | 37 ++++++++++++++++---------------------
+ 1 file changed, 16 insertions(+), 21 deletions(-)
 
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index a19fafdf87f8..373dab5173ca 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1833,9 +1833,20 @@ void __ceph_do_pending_vmtruncate(struct inode *inode)
- 	 * possibly truncate them.. so write AND block!
+diff --git a/fs/ceph/snap.c b/fs/ceph/snap.c
+index dab5d6732345..1ffc8b426c1c 100644
+--- a/fs/ceph/snap.c
++++ b/fs/ceph/snap.c
+@@ -299,7 +299,8 @@ static int cmpu64_rev(const void *a, const void *b)
+ /*
+  * build the snap context for a given realm.
+  */
+-static int build_snap_context(struct ceph_snap_realm *realm)
++static int build_snap_context(struct ceph_snap_realm *realm,
++			      struct list_head* dirty_realms)
+ {
+ 	struct ceph_snap_realm *parent = realm->parent;
+ 	struct ceph_snap_context *snapc;
+@@ -313,7 +314,7 @@ static int build_snap_context(struct ceph_snap_realm *realm)
  	 */
- 	if (ci->i_wrbuffer_ref_head < ci->i_wrbuffer_ref) {
-+		struct ceph_cap_snap *capsnap;
-+		to = ci->i_truncate_size;
-+		list_for_each_entry(capsnap, &ci->i_cap_snaps, ci_item) {
-+			// MDS should have revoked Frw caps
-+			WARN_ON_ONCE(capsnap->writing);
-+			if (capsnap->dirty_pages && capsnap->size > to)
-+				to = capsnap->size;
-+		}
-+		spin_unlock(&ci->i_ceph_lock);
- 		dout("__do_pending_vmtruncate %p flushing snaps first\n",
- 		     inode);
--		spin_unlock(&ci->i_ceph_lock);
-+
-+		truncate_pagecache(inode, to);
-+
- 		filemap_write_and_wait_range(&inode->i_data, 0,
- 					     inode->i_sb->s_maxbytes);
- 		goto retry;
+ 	if (parent) {
+ 		if (!parent->cached_context) {
+-			err = build_snap_context(parent);
++			err = build_snap_context(parent, dirty_realms);
+ 			if (err)
+ 				goto fail;
+ 		}
+@@ -332,7 +333,7 @@ static int build_snap_context(struct ceph_snap_realm *realm)
+ 		     " (unchanged)\n",
+ 		     realm->ino, realm, realm->cached_context,
+ 		     realm->cached_context->seq,
+-		     (unsigned int) realm->cached_context->num_snaps);
++		     (unsigned int)realm->cached_context->num_snaps);
+ 		return 0;
+ 	}
+ 
+@@ -373,7 +374,11 @@ static int build_snap_context(struct ceph_snap_realm *realm)
+ 	     realm->ino, realm, snapc, snapc->seq,
+ 	     (unsigned int) snapc->num_snaps);
+ 
+-	ceph_put_snap_context(realm->cached_context);
++	if (realm->cached_context) {
++		ceph_put_snap_context(realm->cached_context);
++		/* queue realm for cap_snap creation */
++		list_add_tail(&realm->dirty_item, dirty_realms);
++	}
+ 	realm->cached_context = snapc;
+ 	return 0;
+ 
+@@ -394,15 +399,16 @@ static int build_snap_context(struct ceph_snap_realm *realm)
+ /*
+  * rebuild snap context for the given realm and all of its children.
+  */
+-static void rebuild_snap_realms(struct ceph_snap_realm *realm)
++static void rebuild_snap_realms(struct ceph_snap_realm *realm,
++				struct list_head *dirty_realms)
+ {
+ 	struct ceph_snap_realm *child;
+ 
+ 	dout("rebuild_snap_realms %llx %p\n", realm->ino, realm);
+-	build_snap_context(realm);
++	build_snap_context(realm, dirty_realms);
+ 
+ 	list_for_each_entry(child, &realm->children, child_item)
+-		rebuild_snap_realms(child);
++		rebuild_snap_realms(child, dirty_realms);
+ }
+ 
+ 
+@@ -624,13 +630,11 @@ static void queue_realm_cap_snaps(struct ceph_snap_realm *realm)
+ {
+ 	struct ceph_inode_info *ci;
+ 	struct inode *lastinode = NULL;
+-	struct ceph_snap_realm *child;
+ 
+ 	dout("queue_realm_cap_snaps %p %llx inodes\n", realm, realm->ino);
+ 
+ 	spin_lock(&realm->inodes_with_caps_lock);
+-	list_for_each_entry(ci, &realm->inodes_with_caps,
+-			    i_snap_realm_item) {
++	list_for_each_entry(ci, &realm->inodes_with_caps, i_snap_realm_item) {
+ 		struct inode *inode = igrab(&ci->vfs_inode);
+ 		if (!inode)
+ 			continue;
+@@ -643,14 +647,6 @@ static void queue_realm_cap_snaps(struct ceph_snap_realm *realm)
+ 	spin_unlock(&realm->inodes_with_caps_lock);
+ 	iput(lastinode);
+ 
+-	list_for_each_entry(child, &realm->children, child_item) {
+-		dout("queue_realm_cap_snaps %p %llx queue child %p %llx\n",
+-		     realm, realm->ino, child, child->ino);
+-		list_del_init(&child->dirty_item);
+-		list_add(&child->dirty_item, &realm->dirty_item);
+-	}
+-
+-	list_del_init(&realm->dirty_item);
+ 	dout("queue_realm_cap_snaps %p %llx done\n", realm, realm->ino);
+ }
+ 
+@@ -721,8 +717,6 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
+ 		if (err < 0)
+ 			goto fail;
+ 
+-		/* queue realm for cap_snap creation */
+-		list_add(&realm->dirty_item, &dirty_realms);
+ 		if (realm->seq > mdsc->last_snap_seq)
+ 			mdsc->last_snap_seq = realm->seq;
+ 
+@@ -741,7 +735,7 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
+ 
+ 	/* invalidate when we reach the _end_ (root) of the trace */
+ 	if (invalidate && p >= e)
+-		rebuild_snap_realms(realm);
++		rebuild_snap_realms(realm, &dirty_realms);
+ 
+ 	if (!first_realm)
+ 		first_realm = realm;
+@@ -758,6 +752,7 @@ int ceph_update_snap_trace(struct ceph_mds_client *mdsc,
+ 	while (!list_empty(&dirty_realms)) {
+ 		realm = list_first_entry(&dirty_realms, struct ceph_snap_realm,
+ 					 dirty_item);
++		list_del_init(&realm->dirty_item);
+ 		queue_realm_cap_snaps(realm);
+ 	}
+ 
 -- 
 2.13.5
 
