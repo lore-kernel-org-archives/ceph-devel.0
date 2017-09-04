@@ -1,186 +1,47 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: build-integration-branch
-Date: Mon, 4 Sep 2017 12:28:25 -0700
-Message-ID: <CA+2bHPbwsUwpp7k1P=54uet1SsW7PKDX_U=4xgj=tbPOKN3yiw@mail.gmail.com>
-References: <alpine.DEB.2.11.1708302045570.20435@piezo.novalocal>
+From: =?UTF-8?Q?Pawe=c5=82_Sadowski?= <pawel@sadziu.pl>
+Subject: Re: Jewel v10.2.10, anyone?
+Date: Mon, 4 Sep 2017 21:33:59 +0200
+Message-ID: <db0f5486-3a85-1096-37fa-b662ca9dd270@sadziu.pl>
+References: <7ca238e9-0cd0-d3c6-73c2-76643d7f2ec0@suse.cz>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="001a1136ff122b8a470558621ff3"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f170.google.com ([209.85.216.170]:38001 "EHLO
-        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753953AbdIDT25 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Sep 2017 15:28:57 -0400
-Received: by mail-qt0-f170.google.com with SMTP id q8so862171qtb.5
-        for <ceph-devel@vger.kernel.org>; Mon, 04 Sep 2017 12:28:57 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1708302045570.20435@piezo.novalocal>
+Received: from h82-143-163-170-static.e-wro.net.pl ([82.143.163.170]:35218
+        "EHLO mail.sadziu.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753968AbdIDUPY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Sep 2017 16:15:24 -0400
+Received: from ithaca.sadziu.pl ([82.143.163.170] helo=[192.168.54.5])
+        by mail.sadziu.pl with esmtpsa (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        (Exim 4.89)
+        (envelope-from <pawel@sadziu.pl>)
+        id 1dox8B-0005fG-O8
+        for ceph-devel@vger.kernel.org; Mon, 04 Sep 2017 21:34:00 +0200
+In-Reply-To: <7ca238e9-0cd0-d3c6-73c2-76643d7f2ec0@suse.cz>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
---001a1136ff122b8a470558621ff3
-Content-Type: text/plain; charset="UTF-8"
-
-On Wed, Aug 30, 2017 at 1:58 PM, Sage Weil <sweil@redhat.com> wrote:
-> I got tired of doing this by hand and finally wrote a script to do it
-> instead:
+On 30.08.2017 22:23, Nathan Cutler wrote:
+> It's been 6 weeks since the last Jewel point release and progress is 
+> being made towards 10.2.10. I'm thinking that the current integration 
+> branch might be the last, or second-to-last.
 >
->         https://github.com/ceph/ceph/pull/17382
+> Any last-minute requests or must-haves?
 >
-> Go tag your PRs with wip-whatever-testing, then
->
->  git checkout master
->  git pull
->  ../src/script/build-integration-branch wip-whatever-testing
->  make && ctest -j12 && git push ci $(git rev-parse --abbrev-ref HEAD)
+> Nathan
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-I figure I'll share my own integration branch script (attached) which
-is based on some work John Spray did. It's probably too specific to my
-own workflow but pieces can be pulled out to suit others' needs.
-
-How it's used:
-
-$ python2 ptl_tool.py pr#1 pr#2 [...]
-
-which does:
-
-1) Builds a branch based on refs/upstream/heads/master named
-wip-$NAME-testing-$DATE.
-2) Fetches comments/reviews from GitHub for each PR, looking for
-review approvals for Reviewed-bys.
-3) Merges refs/upstream/pull/pr#/head with a commit message including
-each commit's title and "Reviewed-by".
-4) Labels each merged PR with "wip-$NAME-testing".
-5) Tags the integration branch locally for posterity.
-
-You can also then merge into master or a release branch using:
-
-$ python2 ptl_tool.py master pr#1 [...]
-
-and the commit message is adjusted accordingly. (Also, no testing
-label is applied as it's not an integration branch.)
+Backport of https://github.com/ceph/ceph/pull/17265 would be nice.
 
 
-Some of the quirks to my setup:
+Thanks,
 
-o I don't have a master branch in my local repository as I don't find
-it useful. I use detached HEADs when merging stuff into master and
-then push to upstream.
-
-o I pull all of the upstream references:
-
-[remote "upstream"]
-        url = git@github.com:ceph/ceph.git
-        fetch = +refs/*:refs/remotes/upstream/*
-
-Hope this is useful to someone.
 
 -- 
-Patrick Donnelly
+PS
 
---001a1136ff122b8a470558621ff3
-Content-Type: text/x-python; charset="US-ASCII"; name="ptl_tool.py"
-Content-Disposition: attachment; filename="ptl_tool.py"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_j76k4yb40
-
-IyBUT0RPCiMgTG9vayBmb3IgY2hlY2sgZmFpbHVyZXM/CiMgcmVkbWluZSBpc3N1ZSB1cGRhdGU6
-IGh0dHA6Ly93d3cucmVkbWluZS5vcmcvcHJvamVjdHMvcmVkbWluZS93aWtpL1Jlc3RfSXNzdWVz
-CgppbXBvcnQganNvbgppbXBvcnQgcmUKaW1wb3J0IHJlcXVlc3RzCmltcG9ydCBzeXMKaW1wb3J0
-IGdpdAppbXBvcnQgZGF0ZXRpbWUKaW1wb3J0IGxvZ2dpbmcKZnJvbSBvcy5wYXRoIGltcG9ydCBl
-eHBhbmR1c2VyCgpsb2cgPSBsb2dnaW5nLmdldExvZ2dlcihfX25hbWVfXykKbG9nLmFkZEhhbmRs
-ZXIobG9nZ2luZy5TdHJlYW1IYW5kbGVyKCkpCmxvZy5zZXRMZXZlbChsb2dnaW5nLklORk8pCgpC
-QVNFID0gInJlZnMvcmVtb3Rlcy91cHN0cmVhbS9oZWFkcy8lcyIKVVNFUiA9ICJwZG9ubmVsbCIK
-d2l0aCBvcGVuKGV4cGFuZHVzZXIoIn4vLmdpdGh1Yi5rZXkiKSkgYXMgZjoKICAgIFBBU1NXT1JE
-ID0gZi5yZWFkKCkuc3RyaXAoKQpCUkFOQ0hfUFJFRklYID0gIndpcC0lcy10ZXN0aW5nLSIgJSBV
-U0VSClRFU1RJTkdfTEFCRUwgPSBbIndpcC0lcy10ZXN0aW5nIiAlIFVTRVJdCgpTUEVDSUFMX0JS
-QU5DSEVTID0gKCdtYXN0ZXInLCAnbHVtaW5vdXMnLCAnamV3ZWwnLCAnSEVBRCcpCgpJTkRJQ0FU
-SU9OUyA9IFsKICAgIHJlLmNvbXBpbGUoIihSZXZpZXdlZC1ieTogLisgPFtcd0AuLV0rPikiLCBy
-ZS5JR05PUkVDQVNFKSwKICAgIHJlLmNvbXBpbGUoIihBY2tlZC1ieTogLisgPFtcd0AuLV0rPiki
-LCByZS5JR05PUkVDQVNFKSwKICAgIHJlLmNvbXBpbGUoIihUZXN0ZWQtYnk6IC4rIDxbXHdALi1d
-Kz4pIiwgcmUuSUdOT1JFQ0FTRSksCl0KCkFQUFJPVkFMX1RPX1JFVklFV0VEX0JZID0gewogICAg
-ImFqYXJyIjogIlJldmlld2VkLWJ5OiBSYW1hbmEgUmFqYSA8cnJhamFAcmVkaGF0LmNvbT4iLAog
-ICAgImJhdHJpY2siOiAiUmV2aWV3ZWQtYnk6IFBhdHJpY2sgRG9ubmVsbHkgPHBkb25uZWxsQHJl
-ZGhhdC5jb20+IiwKICAgICJmdWxsZXJkaiI6ICJSZXZpZXdlZC1ieTogRG91Z2xhcyBGdWxsZXIg
-PGRmdWxsZXJAcmVkaGF0LmNvbT4iLAogICAgImdyZWdzZm9ydHl0d28iOiAiUmV2aWV3ZWQtYnk6
-IEdyZWdvcnkgRmFybnVtIDxnZmFybnVtQHJlZGhhdC5jb20+IiwKICAgICJqY3NwIjogIlJldmll
-d2VkLWJ5OiBKb2huIFNwcmF5IDxqb2huLnNwcmF5QHJlZGhhdC5jb20+IiwKICAgICJqbGF5dG9u
-IjogIlJldmlld2VkLWJ5OiBKZWZmIExheXRvbiA8amxheXRvbkByZWRoYXQuY29tPiIsCiAgICAi
-am9zY29sbGluIjogIlJldmlld2VkLWJ5OiBKb3MgQ29sbGluIDxqY29sbGluQHJlZGhhdC5jb20+
-IiwKICAgICJsaWV3ZWdhcyI6ICJSZXZpZXdlZC1ieTogU2FnZSBXZWlsIDxzYWdlQHJlZGhhdC5j
-b20+IiwKICAgICJyZW5od3p0ZXRlY3MiOiAiUmV2aWV3ZWQtYnk6IGh1YW53ZW4gcmVuIDxyZW4u
-aHVhbndlbkB6dGUuY29tLmNuPiIsCiAgICAic21pdGhmYXJtIjogIlJldmlld2VkLWJ5OiBOYXRo
-YW4gQ3V0bGVyIDxuY3V0bGVyQHN1c2UuY29tPiIsCiAgICAidGNoYWlrb3YiOiAiUmV2aWV3ZWQt
-Ynk6IEtlZnUgQ2hhaSA8a2NoYWlAcmVkaGF0LmNvbT4iLAogICAgInRoZWFuYWx5c3QiOiAiUmV2
-aWV3ZWQtYnk6IEFiaGlzaGVrIExla3NobWFuYW4gPGFiaGlzaGVrLmxla3NobWFuYW5AZ21haWwu
-Y29tPiIsCiAgICAidWtlcm5lbCI6ICJSZXZpZXdlZC1ieTogWmhlbmcgWWFuIDx6eWFuQHJlZGhh
-dC5jb20+IiwKfQoKZGVmIGJ1aWxkX2JyYW5jaChicmFuY2hfbmFtZSwgcHVsbF9yZXF1ZXN0cyk6
-CiAgICByZXBvID0gZ2l0LlJlcG8oIi4iKQoKICAgIHJlcG8ucmVtb3Rlcy51cHN0cmVhbS5mZXRj
-aCgpCgogICAgIyBGaXJzdCBnZXQgdGhlIGxhdGVzdCBiYXNlIGJyYW5jaCBmcm9tIHVwc3RyZWFt
-CiAgICBpZiBicmFuY2hfbmFtZSA9PSAnSEVBRCc6CiAgICAgICAgbG9nLmluZm8oIkJyYW5jaCBi
-YXNlIGlzIEhFQUQ7IG5vdCBjaGVja2luZyBvdXQhIikKICAgIGVsc2U6CiAgICAgICAgaWYgYnJh
-bmNoX25hbWUgaW4gU1BFQ0lBTF9CUkFOQ0hFUzoKICAgICAgICAgICAgYmFzZSA9IEJBU0UgJSBi
-cmFuY2hfbmFtZQogICAgICAgIGVsc2U6CiAgICAgICAgICAgIGJhc2UgPSBCQVNFICUgIm1hc3Rl
-ciIKICAgICAgICBsb2cuaW5mbygiQnJhbmNoIGJhc2Ugb24ge30iLmZvcm1hdChiYXNlKSkKICAg
-ICAgICBiYXNlID0gZmlsdGVyKGxhbWJkYSByOiByLnBhdGggPT0gYmFzZSwgcmVwby5yZWZzKVsw
-XQoKICAgICAgICAjIFNvIHdlIGtub3cgdGhhdCB3ZSdyZSBub3Qgb24gYW4gb2xkIHRlc3QgYnJh
-bmNoLCBkZXRhY2ggSEVBRCBvbnRvIHJlZjoKICAgICAgICBiYXNlLmNoZWNrb3V0KCkKCiAgICAj
-IElmIHRoZSBicmFuY2ggaXMgbWFzdGVyLCBsZWF2ZSBIRUFEIGRldGFjaGVkIChidXQgdXNlICJt
-YXN0ZXIiIGZvciBjb21taXQgbWVzc2FnZSkKICAgIGNyZWF0ZWQgPSBGYWxzZQogICAgaWYgYnJh
-bmNoX25hbWUgbm90IGluIFNQRUNJQUxfQlJBTkNIRVM6CiAgICAgICAgIyBEZWxldGUgdGVzdCBi
-cmFuY2ggaWYgaXQgYWxyZWFkeSBleGlzdGVkCiAgICAgICAgdHJ5OgogICAgICAgICAgICBnZXRh
-dHRyKHJlcG8uYnJhbmNoZXMsIGJyYW5jaF9uYW1lKS5kZWxldGUoCiAgICAgICAgICAgICAgICAg
-ICAgcmVwbywgZ2V0YXR0cihyZXBvLmJyYW5jaGVzLCBicmFuY2hfbmFtZSksIGZvcmNlPVRydWUp
-CiAgICAgICAgICAgIGxvZy5pbmZvKCJEZWxldGVkIG9sZCB0ZXN0IGJyYW5jaCAlcyIgJSBicmFu
-Y2hfbmFtZSkKICAgICAgICBleGNlcHQgQXR0cmlidXRlRXJyb3I6CiAgICAgICAgICAgIHBhc3MK
-CiAgICAgICAgbG9nLmluZm8oIkNyZWF0aW5nIGJyYW5jaCB7YnJhbmNoX25hbWV9Ii5mb3JtYXQo
-YnJhbmNoX25hbWU9YnJhbmNoX25hbWUpKQogICAgICAgIGJhc2UuY2hlY2tvdXQoYj1icmFuY2hf
-bmFtZSkKICAgICAgICBjcmVhdGVkID0gVHJ1ZQoKICAgIGZvciBwciBpbiBwdWxsX3JlcXVlc3Rz
-OgogICAgICAgIGxvZy5pbmZvKCJNZXJnaW5nIFBSIHtwcn0iLmZvcm1hdChwcj1wcikpCiAgICAg
-ICAgcHIgPSBpbnQocHIpCiAgICAgICAgciA9IGZpbHRlcihsYW1iZGEgcjogci5wYXRoID09ICJy
-ZWZzL3JlbW90ZXMvdXBzdHJlYW0vcHVsbC8lZC9oZWFkIiAlIHByLCByZXBvLnJlZnMpWzBdCgog
-ICAgICAgIG1lc3NhZ2UgPSAiTWVyZ2UgUFIgIyVkIGludG8gJXNcblxuKiAlczpcbiIgJSAocHIs
-IGJyYW5jaF9uYW1lLCByLnBhdGgpCgogICAgICAgIGZvciBjb21taXQgaW4gcmVwby5pdGVyX2Nv
-bW1pdHMocmV2PSJIRUFELi4iK3IucGF0aCk6CiAgICAgICAgICAgIG1lc3NhZ2UgPSBtZXNzYWdl
-ICsgKCJcdCVzXG4iICUgY29tbWl0Lm1lc3NhZ2Uuc3BsaXQoJ1xuJywgMSlbMF0pCgogICAgICAg
-IG1lc3NhZ2UgPSBtZXNzYWdlICsgIlxuIgoKICAgICAgICBjb21tZW50cyA9IHJlcXVlc3RzLmdl
-dCgiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS9yZXBvcy9jZXBoL2NlcGgvaXNzdWVzL3twcn0vY29t
-bWVudHMiLmZvcm1hdChwcj1wciksIGF1dGg9KFVTRVIsIFBBU1NXT1JEKSkKICAgICAgICBpZiBj
-b21tZW50cy5zdGF0dXNfY29kZSAhPSAyMDA6CiAgICAgICAgICAgIGxvZy5lcnJvcigiUFIgJ3tw
-cn0nIG5vdCBmb3VuZDoge2N9Ii5mb3JtYXQocHI9cHIsYz1jb21tZW50cykpCiAgICAgICAgICAg
-IHJldHVybgoKICAgICAgICByZXZpZXdzID0gcmVxdWVzdHMuZ2V0KCJodHRwczovL2FwaS5naXRo
-dWIuY29tL3JlcG9zL2NlcGgvY2VwaC9wdWxscy97cHJ9L3Jldmlld3MiLmZvcm1hdChwcj1wciks
-IGF1dGg9KFVTRVIsIFBBU1NXT1JEKSkKICAgICAgICBpZiByZXZpZXdzLnN0YXR1c19jb2RlICE9
-IDIwMDoKICAgICAgICAgICAgbG9nLmVycm9yKCJQUiAne3ByfScgbm90IGZvdW5kOiB7Y30iLmZv
-cm1hdChwcj1wcixjPWNvbW1lbnRzKSkKICAgICAgICAgICAgcmV0dXJuCgogICAgICAgIHJldmll
-d19jb21tZW50cyA9IHJlcXVlc3RzLmdldCgiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS9yZXBvcy9j
-ZXBoL2NlcGgvcHVsbHMve3ByfS9jb21tZW50cyIuZm9ybWF0KHByPXByKSwgYXV0aD0oVVNFUiwg
-UEFTU1dPUkQpKQogICAgICAgIGlmIHJldmlld19jb21tZW50cy5zdGF0dXNfY29kZSAhPSAyMDA6
-CiAgICAgICAgICAgIGxvZy5lcnJvcigiUFIgJ3twcn0nIG5vdCBmb3VuZDoge2N9Ii5mb3JtYXQo
-cHI9cHIsYz1jb21tZW50cykpCiAgICAgICAgICAgIHJldHVybgoKICAgICAgICBpbmRpY2F0aW9u
-cyA9IHNldCgpCiAgICAgICAgZm9yIGNvbW1lbnQgaW4gY29tbWVudHMuanNvbigpK3Jldmlld19j
-b21tZW50cy5qc29uKCk6CiAgICAgICAgICAgIGZvciBpbmRpY2F0aW9uIGluIElORElDQVRJT05T
-OgogICAgICAgICAgICAgICAgZm9yIGNhcCBpbiBpbmRpY2F0aW9uLmZpbmRhbGwoY29tbWVudFsi
-Ym9keSJdKToKICAgICAgICAgICAgICAgICAgICBpbmRpY2F0aW9ucy5hZGQoY2FwKQoKICAgICAg
-ICBmb3IgcmV2aWV3IGluIHJldmlld3MuanNvbigpOgogICAgICAgICAgICBpZiByZXZpZXdbInN0
-YXRlIl0gPT0gIkFQUFJPVkVEIjoKICAgICAgICAgICAgICAgIGluZGljYXRpb25zLmFkZChBUFBS
-T1ZBTF9UT19SRVZJRVdFRF9CWVtyZXZpZXdbInVzZXIiXVsibG9naW4iXV0pCgogICAgICAgIGZv
-ciBpbmRpY2F0aW9uIGluIGluZGljYXRpb25zOgogICAgICAgICAgICBtZXNzYWdlID0gbWVzc2Fn
-ZSArIGluZGljYXRpb24gKyAiXG4iCgogICAgICAgIHJlcG8uZ2l0Lm1lcmdlKHIsICctLW5vLWZm
-JywgbT1tZXNzYWdlKQoKICAgICAgICBpZiBicmFuY2hfbmFtZSBub3QgaW4gU1BFQ0lBTF9CUkFO
-Q0hFUzoKICAgICAgICAgICAgcmVxID0gcmVxdWVzdHMucG9zdCgiaHR0cHM6Ly9hcGkuZ2l0aHVi
-LmNvbS9yZXBvcy9jZXBoL2NlcGgvaXNzdWVzL3twcn0vbGFiZWxzIi5mb3JtYXQocHI9cHIpLCBk
-YXRhPWpzb24uZHVtcHMoVEVTVElOR19MQUJFTCksIGF1dGg9KFVTRVIsIFBBU1NXT1JEKSkKICAg
-ICAgICAgICAgaWYgcmVxLnN0YXR1c19jb2RlICE9IDIwMDoKICAgICAgICAgICAgICAgIGxvZy5l
-cnJvcigiUFIgIyVkIGNvdWxkIG5vdCBiZSBsYWJlbGVkICVzOiAlcyIgJSAocHIsIHdpcCwgcmVx
-KSkKICAgICAgICAgICAgICAgIHJldHVybgoKICAgICMgSWYgd2UgY3JlYXRlZCBhIGJyYW5jaCwg
-dGFnIGl0IGZvciBmdXR1cmUgcmVmZXJlbmNlLgogICAgaWYgY3JlYXRlZDoKICAgICAgICBuYW1l
-ID0gInRlc3RpbmcvJXMiICUgYnJhbmNoX25hbWUKICAgICAgICBsb2cuaW5mbygiQ3JlYXRpbmcg
-dGFnICVzIiAlIG5hbWUpCiAgICAgICAgZ2l0LnJlZnMudGFnLlRhZy5jcmVhdGUocmVwbywgbmFt
-ZSwgZm9yY2U9VHJ1ZSkKCmlmIF9fbmFtZV9fID09ICJfX21haW5fXyI6CiAgICBpZiBzeXMuYXJn
-dlsxXSBpbiBTUEVDSUFMX0JSQU5DSEVTOgogICAgICAgIGJyYW5jaF9uYW1lID0gc3lzLmFyZ3Zb
-MV0KICAgICAgICBwdWxsX3JlcXVlc3RzID0gc3lzLmFyZ3ZbMjpdCiAgICBlbHNlOgogICAgICAg
-IGJyYW5jaF9uYW1lID0gQlJBTkNIX1BSRUZJWCArIGRhdGV0aW1lLmRhdGV0aW1lLm5vdygpLnN0
-cmZ0aW1lKCIlWSVtJWQiKQogICAgICAgIHB1bGxfcmVxdWVzdHMgPSBzeXMuYXJndlsxOl0KICAg
-IGJ1aWxkX2JyYW5jaChicmFuY2hfbmFtZSwgcHVsbF9yZXF1ZXN0cykK
---001a1136ff122b8a470558621ff3--
