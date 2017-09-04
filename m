@@ -1,46 +1,38 @@
-From: =?UTF-8?Q?Pawe=c5=82_Sadowski?= <ceph@sadziu.pl>
-Subject: Re: Jewel v10.2.10, anyone?
-Date: Mon, 4 Sep 2017 21:35:33 +0200
-Message-ID: <cc75d1ae-8e85-7f55-453d-932dcda15d8a@sadziu.pl>
-References: <7ca238e9-0cd0-d3c6-73c2-76643d7f2ec0@suse.cz>
+From: Patrick Donnelly <pdonnell@redhat.com>
+Subject: Re: build-integration-branch
+Date: Mon, 4 Sep 2017 13:36:07 -0700
+Message-ID: <CA+2bHPb37yYY8g4ma_cx_ifgvgLXpCXm9sEcBuRNVEfYGL7V5Q@mail.gmail.com>
+References: <alpine.DEB.2.11.1708302045570.20435@piezo.novalocal> <CA+2bHPbwsUwpp7k1P=54uet1SsW7PKDX_U=4xgj=tbPOKN3yiw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from h82-143-163-170-static.e-wro.net.pl ([82.143.163.170]:35200
-        "EHLO mail.sadziu.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753968AbdIDUPW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Sep 2017 16:15:22 -0400
-Received: from ithaca.sadziu.pl ([82.143.163.170] helo=[192.168.54.5])
-        by mail.sadziu.pl with esmtpsa (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
-        (Exim 4.89)
-        (envelope-from <ceph@sadziu.pl>)
-        id 1dox9h-0005iZ-MR
-        for ceph-devel@vger.kernel.org; Mon, 04 Sep 2017 21:35:34 +0200
-In-Reply-To: <7ca238e9-0cd0-d3c6-73c2-76643d7f2ec0@suse.cz>
-Content-Language: en-US
+Received: from mail-qk0-f178.google.com ([209.85.220.178]:36327 "EHLO
+        mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753965AbdIDUgi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 4 Sep 2017 16:36:38 -0400
+Received: by mail-qk0-f178.google.com with SMTP id z143so5370101qkb.3
+        for <ceph-devel@vger.kernel.org>; Mon, 04 Sep 2017 13:36:38 -0700 (PDT)
+In-Reply-To: <CA+2bHPbwsUwpp7k1P=54uet1SsW7PKDX_U=4xgj=tbPOKN3yiw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 30.08.2017 22:23, Nathan Cutler wrote:
-> It's been 6 weeks since the last Jewel point release and progress is 
-> being made towards 10.2.10. I'm thinking that the current integration 
-> branch might be the last, or second-to-last.
->
-> Any last-minute requests or must-haves?
->
-> Nathan
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Mon, Sep 4, 2017 at 12:28 PM, Patrick Donnelly <pdonnell@redhat.com> wrote:
+> I figure I'll share my own integration branch script (attached) which
+> is based on some work John Spray did. It's probably too specific to my
+> own workflow but pieces can be pulled out to suit others' needs.
+> [...]
+> 2) Fetches comments/reviews from GitHub for each PR, looking for
+> review approvals for Reviewed-bys.
+> 3) Merges refs/upstream/pull/pr#/head with a commit message including
+> each commit's title and "Reviewed-by".
 
-Backport of https://github.com/ceph/ceph/pull/17265 would be nice.
+I had hard-coded some of the reviewers I've encountered so far in my
+script. I have a PR to add a .githubmap to Ceph so we can have an
+official map everyone can use for their scripts:
 
-
-Thanks,
-
+https://github.com/ceph/ceph/pull/17457
 
 -- 
-PS
+Patrick Donnelly
