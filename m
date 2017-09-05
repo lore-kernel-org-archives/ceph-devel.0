@@ -1,254 +1,48 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: auth: assert(ckh)
-Date: Tue, 5 Sep 2017 10:55:24 -0700
-Message-ID: <CAJ4mKGats1x13VEHfoHZ-hiDmkfyj64PLDaFsB36S7DieU9WyA@mail.gmail.com>
-References: <CALi+v1_7HkCvTaeDWQPq9tgxZDQMZwPajQyOZXsTX_Tuv14h1w@mail.gmail.com>
+From: Ali Maredia <amaredia-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Ceph Mentors for next Outreachy Round
+Date: Tue, 5 Sep 2017 15:03:18 -0400 (EDT)
+Message-ID: <342883353.5455497.1504638198745.JavaMail.zimbra@redhat.com>
+References: <774034271.5454743.1504637967189.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f181.google.com ([209.85.223.181]:33712 "EHLO
-        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752273AbdIERz0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Sep 2017 13:55:26 -0400
-Received: by mail-io0-f181.google.com with SMTP id y123so19130519iod.0
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Sep 2017 10:55:25 -0700 (PDT)
-In-Reply-To: <CALi+v1_7HkCvTaeDWQPq9tgxZDQMZwPajQyOZXsTX_Tuv14h1w@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: zengran zhang <z13121369189@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <774034271.5454743.1504637967189.JavaMail.zimbra-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Sep 5, 2017 at 7:19 AM, zengran zhang <z13121369189@gmail.com> wrote:
-> Hi,
->
->     in our cluster, we could found some rare and odd assert log, which
-> says that the session key was emtpy. the log happen only once dur some
-> days, and only happen when osd just boot up...
-> is it possible that the `CephxAuthorizeHandler::verify_authorizer`
-> return valid but  the `session_key` was null ?  log as follow:
->
-> 2017-09-05 10:11:00.954356 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG pgs=0 cs=0 l=0).process prev state
-> is STATE_ACCEPTING_WAIT_BANNER_ADDR
-> 2017-09-05 10:11:00.954361 7f898bc3c700 10 Event(0x55c4fff222c0
-> nevent=5000 time_id=1).process_events wait second 30 usec 0
-> 2017-09-05 10:11:00.954363 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG pgs=0 cs=0 l=0).read_until len is
-> 33 state_offset is 0
-> 2017-09-05 10:11:00.954372 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG pgs=0 cs=0 l=0).read_until
-> read_bulk recv_end is 0 left is 33 got 207
-> 2017-09-05 10:11:00.954466 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0 l=0).process prev
-> state is STATE_ACCEPTING_WAIT_CONNECT_MSG
-> 2017-09-05 10:11:00.954488 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0 l=0).read_until len
-> is 174 state_offset is 0
-> 2017-09-05 10:11:00.954495 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0 l=0).read_until got
-> 174 in buffer  left is 0 buffer still has 0
-> 2017-09-05 10:11:00.954502 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0
-> l=0)._process_connection accept got peer connect_seq 0 global_seq 7
-> 2017-09-05 10:11:00.954509 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0
-> l=1)._process_connection accept of host_type 4, policy.lossy=1
-> policy.server=1 policy.standby=0 policy.resetcheck=0
-> 2017-09-05 10:11:00.954525 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0
-> l=1).handle_connect_msg accept my proto 10, their proto 10
-> 2017-09-05 10:11:00.954535 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0
-> l=1).handle_connect_msg accept setting up session_security.
-> 2017-09-05 10:11:00.954542 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0
-> l=1).handle_connect_msg accept new session
-> 2017-09-05 10:11:00.954547 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=7 cs=1
-> l=1).handle_connect_msg accept success, connect_seq = 1 in_seq=0,
-> sending READY
-> 2017-09-05 10:11:00.954572 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=7 cs=1
-> l=1).handle_connect_msg accept features 1152323339925389307
-> 2017-09-05 10:11:00.954632 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=7 cs=1 l=1)._try_send sent
-> bytes 34 remaining bytes 0
-> 2017-09-05 10:11:00.954667 7f898c43d700  2 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_SEQ pgs=7 cs=1 l=1).handle_connect_msg accept
-> write reply msg done
-> 2017-09-05 10:11:00.954682 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_SEQ pgs=7 cs=1 l=1).process prev state is
-> STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH
-> 2017-09-05 10:11:00.954687 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_SEQ pgs=7 cs=1 l=1).read_until len is 8
-> state_offset is 0
-> 2017-09-05 10:11:00.954708 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_SEQ pgs=7 cs=1 l=1).read_until read_bulk
-> recv_end is 0 left is 8 got 8
-> 2017-09-05 10:11:00.954724 7f898c43d700  2 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_SEQ pgs=7 cs=1 l=1)._process_connection accept
-> get newly_acked_seq 0
-> 2017-09-05 10:11:00.954730 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_WAIT_SEQ pgs=7 cs=1 l=1).discard_requeued_up_to 0
-> 2017-09-05 10:11:00.954736 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_READY pgs=7 cs=1 l=1).process prev state is
-> STATE_ACCEPTING_WAIT_SEQ
-> 2017-09-05 10:11:00.954741 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_ACCEPTING_READY pgs=7 cs=1 l=1)._process_connection accept
-> done
-> 2017-09-05 10:11:00.954746 7f898c43d700 10 Event(0x55c4fff22080
-> nevent=5000 time_id=2).create_time_event id=1 trigger after
-> 900000000us
-> 2017-09-05 10:11:00.954759 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-> cs=1 l=1).process prev state is STATE_ACCEPTING_READY
-> 2017-09-05 10:11:00.954765 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-> cs=1 l=1).read_until len is 1 state_offset is 0
-> 2017-09-05 10:11:00.954772 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-> cs=1 l=1).read_until read_bulk recv_end is 0 left is 1 got 0
-> 2017-09-05 10:11:00.954777 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-> cs=1 l=1).read_until need len 1 remaining 1 bytes
-> 2017-09-05 10:11:00.954784 7f898c43d700 30 stack operator() calling
-> event process
-> 2017-09-05 10:11:00.954786 7f898c43d700 10 Event(0x55c4fff22080
-> nevent=5000 time_id=2).process_events wait second 30 usec 0
-> 2017-09-05 10:11:00.955445 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-> cs=1 l=1).process prev state is STATE_OPEN
-> 2017-09-05 10:11:00.955462 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-> cs=1 l=1).read_until len is 1 state_offset is 0
-> 2017-09-05 10:11:00.955472 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-> cs=1 l=1).read_until read_bulk recv_end is 0 left is 1 got 4096
-> 2017-09-05 10:11:00.955478 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_HEADER pgs=7 cs=1 l=1).process prev state is
-> STATE_OPEN
-> 2017-09-05 10:11:00.955483 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_HEADER pgs=7 cs=1 l=1).process begin MSG
-> 2017-09-05 10:11:00.955488 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_HEADER pgs=7 cs=1 l=1).read_until len is 53
-> state_offset is 0
-> 2017-09-05 10:11:00.955494 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_HEADER pgs=7 cs=1 l=1).read_until got 53 in
-> buffer  left is 0 buffer still has 4042
-> 2017-09-05 10:11:00.955499 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_HEADER pgs=7 cs=1 l=1).process got MSG header
-> 2017-09-05 10:11:00.955505 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_HEADER pgs=7 cs=1 l=1).process got envelope
-> type=80 src osd.3 front=111623 data=0 off 0
-> 2017-09-05 10:11:00.955522 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_THROTTLE_MESSAGE pgs=7 cs=1 l=1).process prev
-> state is STATE_OPEN_MESSAGE_HEADER
-> 2017-09-05 10:11:00.955528 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_THROTTLE_BYTES pgs=7 cs=1 l=1).process prev state
-> is STATE_OPEN_MESSAGE_THROTTLE_MESSAGE
-> 2017-09-05 10:11:00.955533 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_THROTTLE_DISPATCH_QUEUE pgs=7 cs=1 l=1).process
-> prev state is STATE_OPEN_MESSAGE_THROTTLE_BYTES
-> 2017-09-05 10:11:00.955540 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_READ_FRONT pgs=7 cs=1 l=1).process prev state is
-> STATE_OPEN_MESSAGE_THROTTLE_DISPATCH_QUEUE
-> 2017-09-05 10:11:00.955552 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_READ_FRONT pgs=7 cs=1 l=1).read_until len is
-> 111623 state_offset is 0
-> 2017-09-05 10:11:00.955558 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_READ_FRONT pgs=7 cs=1 l=1).read_until got 4042 in
-> buffer  left is 107581 buffer still has 0
-> 2017-09-05 10:11:00.955679 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_READ_FRONT pgs=7 cs=1 l=1).read_until read_bulk
-> left is 107581 got 107581
-> 2017-09-05 10:11:00.955696 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_READ_FRONT pgs=7 cs=1 l=1).process got front
-> 111623
-> 2017-09-05 10:11:00.955702 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_READ_FOOTER_AND_DISPATCH pgs=7 cs=1
-> l=1).read_until len is 21 state_offset is 0
-> 2017-09-05 10:11:00.955711 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_READ_FOOTER_AND_DISPATCH pgs=7 cs=1
-> l=1).read_until read_bulk recv_end is 0 left is 21 got 21
-> 2017-09-05 10:11:00.955717 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_READ_FOOTER_AND_DISPATCH pgs=7 cs=1 l=1).process
-> aborted = 0
-> 2017-09-05 10:11:00.955722 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-> 192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-> s=STATE_OPEN_MESSAGE_READ_FOOTER_AND_DISPATCH pgs=7 cs=1 l=1).process
-> got 111623 + 0 + 0 byte message
-> 2017-09-05 10:11:00.965585 7f898c43d700 -1
-> /tmp/release/Ubuntu/WORKDIR/ceph-12.0.2-32-ge885403/src/auth/Crypto.h:
-> In function 'int CryptoKey::encrypt(CephContext*, const bufferlist&,
-> ceph::bufferlist&, std::__cxx11::string*) const' thread 7f898c43d700
-> time 2017-09-05 10:11:00.957267
-> /tmp/release/Ubuntu/WORKDIR/ceph-12.0.2-32-ge885403/src/auth/Crypto.h:
-> 109: FAILED assert(ckh)
+Hey Cephers,
 
-There were several bugs in this area during the Luminous development
-cycle that have been fixed for final release. Since it looks like
-you're using a *very* old development release, you should update! :)
+Leo and I are coordinators for Ceph's particpation in Outreachy 
+(https://www.outreachy.org/), a program similar to the Google Summer of Code 
+for groups that are traditionally underrepresented in tech. During the program, 
+mentee's work on a project for three months under a mentor and with the rest 
+of the community.
 
-(Why were you running that on a cluster anyway? I hope it's just for
-development purposes!)
--Greg
+Outreachy has two rounds each year, one of which is starting in December and
+ending in March.
 
->
->  ceph version 12.0.2 (5a1b6b3269da99a18984c138c23935e5eb96f73e)
->  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-> const*)+0x102) [0x55c4f5cd84d2]
->  2: (CephxSessionHandler::_calc_signature(Message*, unsigned
-> long*)+0x5d2) [0x55c4f5ef7932]
->  3: (CephxSessionHandler::check_message_signature(Message*)+0x7d)
-> [0x55c4f5ef7cfd]
->  4: (AsyncConnection::process()+0x1dbc) [0x55c4f5edf82c]
->  5: (EventCenter::process_events(int)+0x9b1) [0x55c4f5d70f71]
->  6: (()+0xdb5e41) [0x55c4f5d74e41]
->  7: (()+0xb8c80) [0x7f898f0c2c80]
->  8: (()+0x76ba) [0x7f898f7b16ba]
->  9: (clone()+0x6d) [0x7f898e82882d]
->
-> Thanks & Regards
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+If you have any project ideas you would like to be a mentor for this round,
+please send Leo and I a project title and a two to three sentence
+description to start with. The deadline for proposing a project for Ceph this round
+is a week from today, Tuesday September 12th.
+
+If you would like a reference for this summers Google Summer of Code projects
+to get an idea of previous projects, you can see them here:
+
+http://ceph.com/gsoc2017-ideas/
+
+If you have any questions please don't hesitate to ask.
+
+Thanks,
+
+Ali & Leo
