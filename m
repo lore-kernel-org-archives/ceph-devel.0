@@ -1,237 +1,40 @@
-From: zengran zhang <z13121369189@gmail.com>
-Subject: auth: assert(ckh)
-Date: Tue, 5 Sep 2017 22:19:21 +0800
-Message-ID: <CALi+v1_7HkCvTaeDWQPq9tgxZDQMZwPajQyOZXsTX_Tuv14h1w@mail.gmail.com>
+From: Mark Nelson <mark.a.nelson@gmail.com>
+Subject: Re: https://github.com/ceph/rocksdb
+Date: Tue, 5 Sep 2017 10:14:02 -0500
+Message-ID: <c908e0ef-2a05-443e-cd10-c64a7bfa60fa@gmail.com>
+References: <59ae8d6e.19c3620a.f5a02.1b4c@mx.google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f181.google.com ([209.85.223.181]:36255 "EHLO
-        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751749AbdIEOTX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Sep 2017 10:19:23 -0400
-Received: by mail-io0-f181.google.com with SMTP id z67so16793460iof.3
-        for <ceph-devel@vger.kernel.org>; Tue, 05 Sep 2017 07:19:22 -0700 (PDT)
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:36764 "EHLO
+        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751389AbdIEPOE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 5 Sep 2017 11:14:04 -0400
+Received: by mail-qk0-f174.google.com with SMTP id z143so12498326qkb.3
+        for <ceph-devel@vger.kernel.org>; Tue, 05 Sep 2017 08:14:04 -0700 (PDT)
+In-Reply-To: <59ae8d6e.19c3620a.f5a02.1b4c@mx.google.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Amit <amitkuma@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi,
+On 09/05/2017 06:41 AM, Amit wrote:
+> Hello,
+>
+> To submit PR for issues in rocksdb.
+>
+> Do we need to send commits to this upstream? Or other place?
+>
+> I submitted few: https://github.com/ceph/rocksdb/pulls
+>
+> Again I find this is fork of facebook/rocksdb?
+>
+>
 
-    in our cluster, we could found some rare and odd assert log, which
-says that the session key was emtpy. the log happen only once dur some
-days, and only happen when osd just boot up...
-is it possible that the `CephxAuthorizeHandler::verify_authorizer`
-return valid but  the `session_key` was null ?  log as follow:
+I think we probably want any changes to rocksdb to be approved upstream 
+before we start using it.  Probably the first order of business is to 
+get feedback from the rocksdb devs here:
 
-2017-09-05 10:11:00.954356 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG pgs=0 cs=0 l=0).process prev state
-is STATE_ACCEPTING_WAIT_BANNER_ADDR
-2017-09-05 10:11:00.954361 7f898bc3c700 10 Event(0x55c4fff222c0
-nevent=5000 time_id=1).process_events wait second 30 usec 0
-2017-09-05 10:11:00.954363 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG pgs=0 cs=0 l=0).read_until len is
-33 state_offset is 0
-2017-09-05 10:11:00.954372 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG pgs=0 cs=0 l=0).read_until
-read_bulk recv_end is 0 left is 33 got 207
-2017-09-05 10:11:00.954466 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0 l=0).process prev
-state is STATE_ACCEPTING_WAIT_CONNECT_MSG
-2017-09-05 10:11:00.954488 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0 l=0).read_until len
-is 174 state_offset is 0
-2017-09-05 10:11:00.954495 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0 l=0).read_until got
-174 in buffer  left is 0 buffer still has 0
-2017-09-05 10:11:00.954502 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0
-l=0)._process_connection accept got peer connect_seq 0 global_seq 7
-2017-09-05 10:11:00.954509 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0
-l=1)._process_connection accept of host_type 4, policy.lossy=1
-policy.server=1 policy.standby=0 policy.resetcheck=0
-2017-09-05 10:11:00.954525 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0
-l=1).handle_connect_msg accept my proto 10, their proto 10
-2017-09-05 10:11:00.954535 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0
-l=1).handle_connect_msg accept setting up session_security.
-2017-09-05 10:11:00.954542 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0
-l=1).handle_connect_msg accept new session
-2017-09-05 10:11:00.954547 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=7 cs=1
-l=1).handle_connect_msg accept success, connect_seq = 1 in_seq=0,
-sending READY
-2017-09-05 10:11:00.954572 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=7 cs=1
-l=1).handle_connect_msg accept features 1152323339925389307
-2017-09-05 10:11:00.954632 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=7 cs=1 l=1)._try_send sent
-bytes 34 remaining bytes 0
-2017-09-05 10:11:00.954667 7f898c43d700  2 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_SEQ pgs=7 cs=1 l=1).handle_connect_msg accept
-write reply msg done
-2017-09-05 10:11:00.954682 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_SEQ pgs=7 cs=1 l=1).process prev state is
-STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH
-2017-09-05 10:11:00.954687 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_SEQ pgs=7 cs=1 l=1).read_until len is 8
-state_offset is 0
-2017-09-05 10:11:00.954708 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_SEQ pgs=7 cs=1 l=1).read_until read_bulk
-recv_end is 0 left is 8 got 8
-2017-09-05 10:11:00.954724 7f898c43d700  2 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_SEQ pgs=7 cs=1 l=1)._process_connection accept
-get newly_acked_seq 0
-2017-09-05 10:11:00.954730 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_WAIT_SEQ pgs=7 cs=1 l=1).discard_requeued_up_to 0
-2017-09-05 10:11:00.954736 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_READY pgs=7 cs=1 l=1).process prev state is
-STATE_ACCEPTING_WAIT_SEQ
-2017-09-05 10:11:00.954741 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_ACCEPTING_READY pgs=7 cs=1 l=1)._process_connection accept
-done
-2017-09-05 10:11:00.954746 7f898c43d700 10 Event(0x55c4fff22080
-nevent=5000 time_id=2).create_time_event id=1 trigger after
-900000000us
-2017-09-05 10:11:00.954759 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-cs=1 l=1).process prev state is STATE_ACCEPTING_READY
-2017-09-05 10:11:00.954765 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-cs=1 l=1).read_until len is 1 state_offset is 0
-2017-09-05 10:11:00.954772 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-cs=1 l=1).read_until read_bulk recv_end is 0 left is 1 got 0
-2017-09-05 10:11:00.954777 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-cs=1 l=1).read_until need len 1 remaining 1 bytes
-2017-09-05 10:11:00.954784 7f898c43d700 30 stack operator() calling
-event process
-2017-09-05 10:11:00.954786 7f898c43d700 10 Event(0x55c4fff22080
-nevent=5000 time_id=2).process_events wait second 30 usec 0
-2017-09-05 10:11:00.955445 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-cs=1 l=1).process prev state is STATE_OPEN
-2017-09-05 10:11:00.955462 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-cs=1 l=1).read_until len is 1 state_offset is 0
-2017-09-05 10:11:00.955472 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805 s=STATE_OPEN pgs=7
-cs=1 l=1).read_until read_bulk recv_end is 0 left is 1 got 4096
-2017-09-05 10:11:00.955478 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_HEADER pgs=7 cs=1 l=1).process prev state is
-STATE_OPEN
-2017-09-05 10:11:00.955483 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_HEADER pgs=7 cs=1 l=1).process begin MSG
-2017-09-05 10:11:00.955488 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_HEADER pgs=7 cs=1 l=1).read_until len is 53
-state_offset is 0
-2017-09-05 10:11:00.955494 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_HEADER pgs=7 cs=1 l=1).read_until got 53 in
-buffer  left is 0 buffer still has 4042
-2017-09-05 10:11:00.955499 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_HEADER pgs=7 cs=1 l=1).process got MSG header
-2017-09-05 10:11:00.955505 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_HEADER pgs=7 cs=1 l=1).process got envelope
-type=80 src osd.3 front=111623 data=0 off 0
-2017-09-05 10:11:00.955522 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_THROTTLE_MESSAGE pgs=7 cs=1 l=1).process prev
-state is STATE_OPEN_MESSAGE_HEADER
-2017-09-05 10:11:00.955528 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_THROTTLE_BYTES pgs=7 cs=1 l=1).process prev state
-is STATE_OPEN_MESSAGE_THROTTLE_MESSAGE
-2017-09-05 10:11:00.955533 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_THROTTLE_DISPATCH_QUEUE pgs=7 cs=1 l=1).process
-prev state is STATE_OPEN_MESSAGE_THROTTLE_BYTES
-2017-09-05 10:11:00.955540 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_READ_FRONT pgs=7 cs=1 l=1).process prev state is
-STATE_OPEN_MESSAGE_THROTTLE_DISPATCH_QUEUE
-2017-09-05 10:11:00.955552 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_READ_FRONT pgs=7 cs=1 l=1).read_until len is
-111623 state_offset is 0
-2017-09-05 10:11:00.955558 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_READ_FRONT pgs=7 cs=1 l=1).read_until got 4042 in
-buffer  left is 107581 buffer still has 0
-2017-09-05 10:11:00.955679 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_READ_FRONT pgs=7 cs=1 l=1).read_until read_bulk
-left is 107581 got 107581
-2017-09-05 10:11:00.955696 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_READ_FRONT pgs=7 cs=1 l=1).process got front
-111623
-2017-09-05 10:11:00.955702 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_READ_FOOTER_AND_DISPATCH pgs=7 cs=1
-l=1).read_until len is 21 state_offset is 0
-2017-09-05 10:11:00.955711 7f898c43d700 25 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_READ_FOOTER_AND_DISPATCH pgs=7 cs=1
-l=1).read_until read_bulk recv_end is 0 left is 21 got 21
-2017-09-05 10:11:00.955717 7f898c43d700 10 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_READ_FOOTER_AND_DISPATCH pgs=7 cs=1 l=1).process
-aborted = 0
-2017-09-05 10:11:00.955722 7f898c43d700 20 -- 192.168.2.1:6805/7391 >>
-192.168.2.1:6811/7386 conn(0x55c5053b1800 :6805
-s=STATE_OPEN_MESSAGE_READ_FOOTER_AND_DISPATCH pgs=7 cs=1 l=1).process
-got 111623 + 0 + 0 byte message
-2017-09-05 10:11:00.965585 7f898c43d700 -1
-/tmp/release/Ubuntu/WORKDIR/ceph-12.0.2-32-ge885403/src/auth/Crypto.h:
-In function 'int CryptoKey::encrypt(CephContext*, const bufferlist&,
-ceph::bufferlist&, std::__cxx11::string*) const' thread 7f898c43d700
-time 2017-09-05 10:11:00.957267
-/tmp/release/Ubuntu/WORKDIR/ceph-12.0.2-32-ge885403/src/auth/Crypto.h:
-109: FAILED assert(ckh)
+https://www.facebook.com/groups/rocksdb.dev/
 
- ceph version 12.0.2 (5a1b6b3269da99a18984c138c23935e5eb96f73e)
- 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-const*)+0x102) [0x55c4f5cd84d2]
- 2: (CephxSessionHandler::_calc_signature(Message*, unsigned
-long*)+0x5d2) [0x55c4f5ef7932]
- 3: (CephxSessionHandler::check_message_signature(Message*)+0x7d)
-[0x55c4f5ef7cfd]
- 4: (AsyncConnection::process()+0x1dbc) [0x55c4f5edf82c]
- 5: (EventCenter::process_events(int)+0x9b1) [0x55c4f5d70f71]
- 6: (()+0xdb5e41) [0x55c4f5d74e41]
- 7: (()+0xb8c80) [0x7f898f0c2c80]
- 8: (()+0x76ba) [0x7f898f7b16ba]
- 9: (clone()+0x6d) [0x7f898e82882d]
-
-Thanks & Regards
+Mark
