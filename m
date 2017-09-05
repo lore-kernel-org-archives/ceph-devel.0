@@ -1,13 +1,13 @@
-From: Ali Maredia <amaredia-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Mentors for next Outreachy Round
-Date: Tue, 5 Sep 2017 15:03:18 -0400 (EDT)
-Message-ID: <342883353.5455497.1504638198745.JavaMail.zimbra@redhat.com>
-References: <774034271.5454743.1504637967189.JavaMail.zimbra@redhat.com>
+From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: a question about use of CEPH_IOC_SYNCIO in write
+Date: Tue, 5 Sep 2017 13:29:02 -0700
+Message-ID: <CAJ4mKGadR69K7xunZ32XvTfRzyJGXJcOPJuHpSZ76-xtey6eeg@mail.gmail.com>
+References: <22be9a24.45942.15e3dd4a1bf.Coremail.sa514164@mail.ustc.edu.cn>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <774034271.5454743.1504637967189.JavaMail.zimbra-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <22be9a24.45942.15e3dd4a1bf.Coremail.sa514164-fOMaevN1BEbsJZF79Ady7g@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -17,32 +17,47 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+To: sa514164-fOMaevN1BEbsJZF79Ady7g@public.gmane.org
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Hey Cephers,
+On Fri, Sep 1, 2017 at 7:24 AM,  <sa514164-fOMaevN1BEbsJZF79Ady7g@public.gmane.org> wrote:
+> Hi:
+>         I want to ask a question about CEPH_IOC_SYNCIO flag.
+>         I know that when using O_SYNC flag or O_DIRECT flag, write call executes in other two code paths different than using CEPH_IOC_SYNCIO flag.
+>         And I find the comments about CEPH_IOC_SYNCIO here:
+>
+>         /*
+>          * CEPH_IOC_SYNCIO - force synchronous IO
+>          *
+>          * This ioctl sets a file flag that forces the synchronous IO that
+>          * bypasses the page cache, even if it is not necessary.  This is
+>          * essentially the opposite behavior of IOC_LAZYIO.  This forces the
+>          * same read/write path as a file opened by multiple clients when one
+>          * or more of those clients is opened for write.
+>          *
+>          * Note that this type of sync IO takes a different path than a file
+>          * opened with O_SYNC/D_SYNC (writes hit the page cache and are
+>          * immediately flushed on page boundaries).  It is very similar to
+>          * O_DIRECT (writes bypass the page cache) except that O_DIRECT writes
+>          * are not copied (user page must remain stable) and O_DIRECT writes
+>          * have alignment restrictions (on the buffer and file offset).
+>          */
+>         #define CEPH_IOC_SYNCIO _IO(CEPH_IOCTL_MAGIC, 5)
+>
+>         My question is:
+>         1."This forces the same read/write path as a file opened by multiple clients when one or more of those clients is opened for write." -- Does this mean multiple clients can execute in the same code path when they all use the CEPH_IOC_SYNCIO flag? Will the use of CEPH_IOC_SYNCIO in all clients bring effects such as coherency and performance?
 
-Leo and I are coordinators for Ceph's particpation in Outreachy 
-(https://www.outreachy.org/), a program similar to the Google Summer of Code 
-for groups that are traditionally underrepresented in tech. During the program, 
-mentee's work on a project for three months under a mentor and with the rest 
-of the community.
+If you're just using the normal interfaces, you don't need to play
+around with this. I *think* this ioctl is only so that if you are
+using lazyio (which disables the usual cache coherence), you can still
+get get data IO which is coordinated with other clients.
 
-Outreachy has two rounds each year, one of which is starting in December and
-ending in March.
+>         2."...except that O_DIRECT writes are not copied (user page must remain stable)" -- As I know when threads write with CEPH_IOC_SYNCIO flag, the write call will block until ceph osd and mds send back responses. So even with CEPH_IOC_SYNCIO flag(the user pages are not locked here, I guess), but the user cannot use these pages. How can the use of CEPH_IOC_SYNCIO flag make better use of user space memory?
 
-If you have any project ideas you would like to be a mentor for this round,
-please send Leo and I a project title and a two to three sentence
-description to start with. The deadline for proposing a project for Ceph this round
-is a week from today, Tuesday September 12th.
-
-If you would like a reference for this summers Google Summer of Code projects
-to get an idea of previous projects, you can see them here:
-
-http://ceph.com/gsoc2017-ideas/
-
-If you have any questions please don't hesitate to ask.
-
-Thanks,
-
-Ali & Leo
+I'm not very familiar with these mechanisms, but I think it's saying
+that if you use CEPH_IOC_SYNCIO in an async IO interface, once the
+async write returns then it will have done an internal copy and can
+use the pages again?
+Not really sure...
+-Greg
