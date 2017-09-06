@@ -1,152 +1,106 @@
 From: Luis Henriques <lhenriques@suse.com>
-Subject: [RFC PATCH 2/3] ceph: quotas: support for ceph.quota.max_files
-Date: Wed,  6 Sep 2017 15:12:23 +0100
-Message-ID: <20170906141224.11813-3-lhenriques@suse.com>
+Subject: [RFC PATCH 3/3] ceph: quota: don't allow cross-quota renames
+Date: Wed,  6 Sep 2017 15:12:24 +0100
+Message-ID: <20170906141224.11813-4-lhenriques@suse.com>
 References: <20170906141224.11813-1-lhenriques@suse.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:56922 "EHLO mx1.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:56928 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932260AbdIFOMb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 6 Sep 2017 10:12:31 -0400
+        id S932242AbdIFOMd (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 6 Sep 2017 10:12:33 -0400
 In-Reply-To: <20170906141224.11813-1-lhenriques@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Jan Fajerski <jfajerski@suse.com>
 Cc: ceph-devel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 
-This patch adds support for the max_files quota.  It hooks into all the
-ceph functions that add new filesystem objects that need to be checked
-against the quota limit.  -EDQUOT is returned when this limit is hit.
-
-Note that we're not checking quotas on ceph_link().  ceph_link doesn't
-really create a new inode,  and since the MDS doesn't update the directory
-statistics when a new (hard) link is created (only with symlinks), they
-are not accounted as a new file.
+This patch changes ceph_rename so that -EXDEV is returned if an attempt is
+made to mv a file between two different dir trees with different quotas
+setup.
 
 Signed-off-by: Luis Henriques <lhenriques@suse.com>
 ---
- fs/ceph/dir.c   | 11 +++++++++++
- fs/ceph/file.c  |  4 +++-
- fs/ceph/quota.c | 42 ++++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/dir.c   |  4 ++++
+ fs/ceph/quota.c | 35 +++++++++++++++++++++++++++++++++++
  fs/ceph/super.h |  1 +
- 4 files changed, 57 insertions(+), 1 deletion(-)
+ 3 files changed, 40 insertions(+)
 
 diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
-index ef7240ace576..fb6adcf0ff51 100644
+index fb6adcf0ff51..dba96e227b43 100644
 --- a/fs/ceph/dir.c
 +++ b/fs/ceph/dir.c
-@@ -815,6 +815,9 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
- 	if (ceph_snap(dir) != CEPH_NOSNAP)
- 		return -EROFS;
- 
-+	if (ceph_quota_is_quota_files_exceeded(dir))
-+		return -EDQUOT;
-+
- 	err = ceph_pre_init_acls(dir, &mode, &acls);
- 	if (err < 0)
- 		return err;
-@@ -868,6 +871,9 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
- 	if (ceph_snap(dir) != CEPH_NOSNAP)
- 		return -EROFS;
- 
-+	if (ceph_quota_is_quota_files_exceeded(dir))
-+		return -EDQUOT;
-+
- 	dout("symlink in dir %p dentry %p to '%s'\n", dir, dentry, dest);
- 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_SYMLINK, USE_AUTH_MDS);
- 	if (IS_ERR(req)) {
-@@ -917,6 +923,11 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
- 		goto out;
+@@ -1087,6 +1087,10 @@ static int ceph_rename(struct inode *old_dir, struct dentry *old_dentry,
+ 		else
+ 			return -EROFS;
  	}
- 
-+	if (ceph_quota_is_quota_files_exceeded(dir)) {
-+		err = -EDQUOT;
-+		goto out;
-+	}
++	/* don't allow cross-quota renames */
++	if ((old_dir != new_dir) && (!ceph_quota_is_same_root(old_dir, new_dir)))
++		return -EXDEV;
 +
- 	mode |= S_IFDIR;
- 	err = ceph_pre_init_acls(dir, &mode, &acls);
- 	if (err < 0)
-diff --git a/fs/ceph/file.c b/fs/ceph/file.c
-index 3d48c415f3cb..708a9b841382 100644
---- a/fs/ceph/file.c
-+++ b/fs/ceph/file.c
-@@ -370,7 +370,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 	struct ceph_mds_request *req;
- 	struct dentry *dn;
- 	struct ceph_acls_info acls = {};
--       int mask;
-+	int mask;
- 	int err;
- 
- 	dout("atomic_open %p dentry %p '%pd' %s flags %d mode 0%o\n",
-@@ -381,6 +381,8 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
- 		return -ENAMETOOLONG;
- 
- 	if (flags & O_CREAT) {
-+		if (ceph_quota_is_quota_files_exceeded(dir))
-+			return -EDQUOT;
- 		err = ceph_pre_init_acls(dir, &mode, &acls);
- 		if (err < 0)
- 			return err;
+ 	dout("rename dir %p dentry %p to dir %p dentry %p\n",
+ 	     old_dir, old_dentry, new_dir, new_dentry);
+ 	req = ceph_mdsc_create_request(mdsc, op, USE_AUTH_MDS);
 diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
-index c02d73a8d167..1bd02658f16a 100644
+index 1bd02658f16a..80d5231a0905 100644
 --- a/fs/ceph/quota.c
 +++ b/fs/ceph/quota.c
-@@ -57,3 +57,45 @@ void ceph_handle_quota(struct ceph_mds_client *mdsc,
+@@ -20,6 +20,11 @@
+ #include "super.h"
+ #include "mds_client.h"
  
++static inline bool ceph_has_quota(struct ceph_inode_info *ci)
++{
++	return (ci->i_max_files || ci->i_max_bytes);
++}
++
+ void ceph_handle_quota(struct ceph_mds_client *mdsc,
+ 		       struct ceph_mds_session *session,
+ 		       struct ceph_msg *msg)
+@@ -58,6 +63,36 @@ void ceph_handle_quota(struct ceph_mds_client *mdsc,
  	iput(inode);
  }
-+
-+bool ceph_quota_is_quota_files_exceeded(struct inode *inode)
+ 
++static struct ceph_inode_info *get_quota_root(struct inode *inode)
 +{
 +	struct ceph_inode_info *ci;
 +	struct dentry *next, *parent;
-+	u64 max_files;
-+	u64 rentries = 0;
-+	unsigned seq;
-+	bool result = false;
 +
-+	WARN_ON(!S_ISDIR(inode->i_mode));
-+
-+retry:
-+	seq = read_seqbegin(&rename_lock);
-+	ci = ceph_inode(inode);
 +	next = d_find_any_alias(inode);
-+
-+	while (true) {
-+		spin_lock(&ci->i_ceph_lock);
-+		max_files = ci->i_max_files;
-+		rentries = ci->i_rfiles + ci->i_rsubdirs;
-+		spin_unlock(&ci->i_ceph_lock);
-+
-+		if ((max_files && (rentries >= max_files)) || IS_ROOT(next))
-+			break;
-+
++	ci = ceph_inode(d_inode(next));
++	while (!ceph_has_quota(ci) && !IS_ROOT(next)) {
 +		parent = dget_parent(next);
-+		ci = ceph_inode(d_inode(parent));
 +		dput(next);
 +		next = parent;
++		ci = ceph_inode(d_inode(next));
 +	}
 +
 +	dput(next);
-+
-+	if (read_seqretry(&rename_lock, seq))
-+		goto retry;
-+
-+	if (max_files && (rentries >= max_files))
-+		result = true;
-+
-+	return result;
++	if (ceph_has_quota(ci))
++		return ci;
++	return NULL;
 +}
++
++bool ceph_quota_is_same_root(struct inode *old, struct inode *new)
++{
++	struct ceph_inode_info *ci_old, *ci_new;
++
++	ci_old = get_quota_root(old);
++	ci_new = get_quota_root(new);
++
++	return (ci_old == ci_new);
++}
++
+ bool ceph_quota_is_quota_files_exceeded(struct inode *inode)
+ {
+ 	struct ceph_inode_info *ci;
 diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-index 50c96ea7dc7c..ef131107dbf6 100644
+index ef131107dbf6..5e4f23ab556f 100644
 --- a/fs/ceph/super.h
 +++ b/fs/ceph/super.h
-@@ -1011,5 +1011,6 @@ extern void ceph_fs_debugfs_cleanup(struct ceph_fs_client *client);
- extern void ceph_handle_quota(struct ceph_mds_client *mdsc,
+@@ -1012,5 +1012,6 @@ extern void ceph_handle_quota(struct ceph_mds_client *mdsc,
  			      struct ceph_mds_session *session,
  			      struct ceph_msg *msg);
-+extern bool ceph_quota_is_quota_files_exceeded(struct inode *inode);
+ extern bool ceph_quota_is_quota_files_exceeded(struct inode *inode);
++extern bool ceph_quota_is_same_root(struct inode *old, struct inode *new);
  
  #endif /* _FS_CEPH_SUPER_H */
