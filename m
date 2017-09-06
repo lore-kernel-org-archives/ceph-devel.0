@@ -1,63 +1,62 @@
-From: Jan Fajerski <jfajerski@suse.com>
-Subject: Re: Mimic planning: Wed
-Date: Wed, 6 Sep 2017 18:11:22 +0200
-Message-ID: <20170906161121.wp57e2g7gzk46cib@jf_suse_laptop>
-References: <alpine.DEB.2.11.1708281556180.20435@piezo.novalocal>
- <37573530-deac-08f3-1648-1dc74df47cda@suse.de>
- <CAOi1vP-85+b5pP5FDLNhrDPrtaxObMznUA4YGxuiuSK_u_HbtA@mail.gmail.com>
- <057b91af-ab45-8992-1cf8-ff69d5104cd9@suse.de>
- <alpine.DEB.2.11.1709061315560.16664@piezo.novalocal>
+From: Kingsley Tart <ceph-Tk8N0zKFSFdBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: Ceph release cadence
+Date: Wed, 06 Sep 2017 17:15:04 +0100
+Message-ID: <1504714504.24259.187.camel@merry.middle-earth.co.uk>
+References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15; format=flowed
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:33788 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751365AbdIFQLt (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Wed, 6 Sep 2017 12:11:49 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1709061315560.16664@piezo.novalocal>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1709061523170.16664-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Sep 06, 2017 at 01:17:16PM +0000, Sage Weil wrote:
->On Wed, 6 Sep 2017, Joao Eduardo Luis wrote:
->> On 09/06/2017 10:40 AM, Ilya Dryomov wrote:
->> > On Wed, Sep 6, 2017 at 9:46 AM, Joao Eduardo Luis <joao@suse.de> wrote:
->> > > On 08/28/2017 05:02 PM, Sage Weil wrote:
->> > > >
->> > > > I'd like to have an ad hoc call on Wednesday 8/30 at 9am PT/12p ET/1600
->> > > > UTC to go over the plans and priorities for the next major release,
->> > > > mimic.
->> > > > >
->> > > >          https://bluejeans.com/5192676054/
->> > >
->> > >
->> > > Is there a recording available? I was on vacation and totally missed not
->> > > only this email, but (as a consequence) the meeting as well.
->> >
->> > No, I don't think so.
->>
->> sad-panda.png
->
->Yep.  Happy to set up a time in the next week or two to go through the
->board with you or anyone else (Lars?).  In particular we'd like to make
->sure the current plans around install, mgr, and dashboard align with
->downstreams.
-I'd certainly be up for it...although I missed the meeting due to my own 
-tardiness.
->
->sage
->--
->To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->the body of a message to majordomo@vger.kernel.org
->More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+On Wed, 2017-09-06 at 15:23 +0000, Sage Weil wrote:
+> Hi everyone,
+> 
+> Traditionally, we have done a major named "stable" release twice a year, 
+> and every other such release has been an "LTS" release, with fixes 
+> backported for 1-2 years.
+> 
+> With kraken and luminous we missed our schedule by a lot: instead of 
+> releasing in October and April we released in January and August.
+> 
+> A few observations:
+[snip]
+
+Firstly, I'd like to qualify my comments by saying that I haven't yet
+tried Ceph[1], though I have been loosely following its progress. This
+is partly because I've been busy doing other things.
+
+[1] OK, this is a slight fib - I had a very brief play with it a few
+years back but didn't really get anywhere with it and then got diverted
+onto other things.
+
+Unless I absolutely have to deploy now, I find myself doing this:
+
+10 not long for new release, wait a bit
+20 new release is here, but there's talk of a new one
+30 goto 10
+
+Having frequent minor updates and fixes is reassuring, but having
+frequent major update changes with the "L" in "LTS" not being
+particularly long tends to put me off a bit, largely because I find the
+thought of upgrading something so mission critical quite daunting. I
+can't speak from any Ceph experience on this one, obviously, but if
+there's an easy rollback (even if it's never needed) without having to
+rebuild the entire cluster then that would make me more willing to do
+it.
 
 -- 
-Jan Fajerski
-Engineer Enterprise Storage
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
-HRB 21284 (AG Nürnberg)
+Cheers,
+Kingsley.
