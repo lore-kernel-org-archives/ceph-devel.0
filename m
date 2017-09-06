@@ -1,62 +1,152 @@
 From: Luis Henriques <lhenriques@suse.com>
-Subject: [RFC PATCH 0/3] ceph: kernel client cephfs quota support
-Date: Wed,  6 Sep 2017 15:12:21 +0100
-Message-ID: <20170906141224.11813-1-lhenriques@suse.com>
+Subject: [RFC PATCH 2/3] ceph: quotas: support for ceph.quota.max_files
+Date: Wed,  6 Sep 2017 15:12:23 +0100
+Message-ID: <20170906141224.11813-3-lhenriques@suse.com>
+References: <20170906141224.11813-1-lhenriques@suse.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:56908 "EHLO mx1.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:56922 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932242AbdIFOMa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 6 Sep 2017 10:12:30 -0400
+        id S932260AbdIFOMb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 6 Sep 2017 10:12:31 -0400
+In-Reply-To: <20170906141224.11813-1-lhenriques@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Jan Fajerski <jfajerski@suse.com>
 Cc: ceph-devel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 
-A cephfs-specific quota implementation has been available in the
-user-space fuse client for a while.  This quota implementation allows an
-administrator to restrict the number of bytes and/or the number of files
-in a filesystem subtree.  This quota implementation, however, is supported
-at the client-level only, which means that cooperation is required between
-different clients accessing the system.
+This patch adds support for the max_files quota.  It hooks into all the
+ceph functions that add new filesystem objects that need to be checked
+against the quota limit.  -EDQUOT is returned when this limit is hit.
 
-This obviously assumes that all clients are trusted entities and will
-respect the quotas, preventing users from exceeding the quota limits.
-Since the kernel client doesn't support quotas, it has not been possible
-to use it in a cluster where quotas are a requirement.
+Note that we're not checking quotas on ceph_link().  ceph_link doesn't
+really create a new inode,  and since the MDS doesn't update the directory
+statistics when a new (hard) link is created (only with symlinks), they
+are not accounted as a new file.
 
-This patchset is an RFC that adds kernel client support for cephfs quotas
-as it is currently implemented in the ceph fuse client.  Note however that
-this patchset is not yet feature complete, as it only implements the
-max_files quota (max_bytes is still missing).  I just wanted to have some
-early review before continuing, specially in the reverse path walk code,
-as this seems to be the perfect place to fail ;-)
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ fs/ceph/dir.c   | 11 +++++++++++
+ fs/ceph/file.c  |  4 +++-
+ fs/ceph/quota.c | 42 ++++++++++++++++++++++++++++++++++++++++++
+ fs/ceph/super.h |  1 +
+ 4 files changed, 57 insertions(+), 1 deletion(-)
 
-I've obviously done some basic testing on this patchset but nothing really
-complex -- single client on small (VMs) cluster.  Jan (thanks a lot!) has
-pushed a branch that should enable testing using teuthology, but
-unfortunately we haven't tried it:
-
-  https://github.com/jan--f/ceph/tree/wip-quota-kernel-testing
-
-[ Note that the goal is to simply use the existing workunit quota.sh once
-  the kernel client has support for both max_files and max_bytes. ]
-
-Luis Henriques (3):
-  ceph: quota: add initial infrastructure to support cephfs quotas
-  ceph: quotas: support for ceph.quota.max_files
-  ceph: quota: don't allow cross-quota renames
-
- fs/ceph/Makefile                   |   2 +-
- fs/ceph/dir.c                      |  15 ++++
- fs/ceph/file.c                     |   4 +-
- fs/ceph/inode.c                    |   6 ++
- fs/ceph/mds_client.c               |  21 ++++++
- fs/ceph/mds_client.h               |   2 +
- fs/ceph/quota.c                    | 136 +++++++++++++++++++++++++++++++++++++
- fs/ceph/super.h                    |  10 +++
- fs/ceph/xattr.c                    |  45 ++++++++++++
- include/linux/ceph/ceph_features.h |   3 +-
- include/linux/ceph/ceph_fs.h       |  17 +++++
- 11 files changed, 258 insertions(+), 3 deletions(-)
- create mode 100644 fs/ceph/quota.c
-
+diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+index ef7240ace576..fb6adcf0ff51 100644
+--- a/fs/ceph/dir.c
++++ b/fs/ceph/dir.c
+@@ -815,6 +815,9 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
+ 	if (ceph_snap(dir) != CEPH_NOSNAP)
+ 		return -EROFS;
+ 
++	if (ceph_quota_is_quota_files_exceeded(dir))
++		return -EDQUOT;
++
+ 	err = ceph_pre_init_acls(dir, &mode, &acls);
+ 	if (err < 0)
+ 		return err;
+@@ -868,6 +871,9 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
+ 	if (ceph_snap(dir) != CEPH_NOSNAP)
+ 		return -EROFS;
+ 
++	if (ceph_quota_is_quota_files_exceeded(dir))
++		return -EDQUOT;
++
+ 	dout("symlink in dir %p dentry %p to '%s'\n", dir, dentry, dest);
+ 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_SYMLINK, USE_AUTH_MDS);
+ 	if (IS_ERR(req)) {
+@@ -917,6 +923,11 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
+ 		goto out;
+ 	}
+ 
++	if (ceph_quota_is_quota_files_exceeded(dir)) {
++		err = -EDQUOT;
++		goto out;
++	}
++
+ 	mode |= S_IFDIR;
+ 	err = ceph_pre_init_acls(dir, &mode, &acls);
+ 	if (err < 0)
+diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+index 3d48c415f3cb..708a9b841382 100644
+--- a/fs/ceph/file.c
++++ b/fs/ceph/file.c
+@@ -370,7 +370,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 	struct ceph_mds_request *req;
+ 	struct dentry *dn;
+ 	struct ceph_acls_info acls = {};
+-       int mask;
++	int mask;
+ 	int err;
+ 
+ 	dout("atomic_open %p dentry %p '%pd' %s flags %d mode 0%o\n",
+@@ -381,6 +381,8 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+ 		return -ENAMETOOLONG;
+ 
+ 	if (flags & O_CREAT) {
++		if (ceph_quota_is_quota_files_exceeded(dir))
++			return -EDQUOT;
+ 		err = ceph_pre_init_acls(dir, &mode, &acls);
+ 		if (err < 0)
+ 			return err;
+diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
+index c02d73a8d167..1bd02658f16a 100644
+--- a/fs/ceph/quota.c
++++ b/fs/ceph/quota.c
+@@ -57,3 +57,45 @@ void ceph_handle_quota(struct ceph_mds_client *mdsc,
+ 
+ 	iput(inode);
+ }
++
++bool ceph_quota_is_quota_files_exceeded(struct inode *inode)
++{
++	struct ceph_inode_info *ci;
++	struct dentry *next, *parent;
++	u64 max_files;
++	u64 rentries = 0;
++	unsigned seq;
++	bool result = false;
++
++	WARN_ON(!S_ISDIR(inode->i_mode));
++
++retry:
++	seq = read_seqbegin(&rename_lock);
++	ci = ceph_inode(inode);
++	next = d_find_any_alias(inode);
++
++	while (true) {
++		spin_lock(&ci->i_ceph_lock);
++		max_files = ci->i_max_files;
++		rentries = ci->i_rfiles + ci->i_rsubdirs;
++		spin_unlock(&ci->i_ceph_lock);
++
++		if ((max_files && (rentries >= max_files)) || IS_ROOT(next))
++			break;
++
++		parent = dget_parent(next);
++		ci = ceph_inode(d_inode(parent));
++		dput(next);
++		next = parent;
++	}
++
++	dput(next);
++
++	if (read_seqretry(&rename_lock, seq))
++		goto retry;
++
++	if (max_files && (rentries >= max_files))
++		result = true;
++
++	return result;
++}
+diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+index 50c96ea7dc7c..ef131107dbf6 100644
+--- a/fs/ceph/super.h
++++ b/fs/ceph/super.h
+@@ -1011,5 +1011,6 @@ extern void ceph_fs_debugfs_cleanup(struct ceph_fs_client *client);
+ extern void ceph_handle_quota(struct ceph_mds_client *mdsc,
+ 			      struct ceph_mds_session *session,
+ 			      struct ceph_msg *msg);
++extern bool ceph_quota_is_quota_files_exceeded(struct inode *inode);
+ 
+ #endif /* _FS_CEPH_SUPER_H */
