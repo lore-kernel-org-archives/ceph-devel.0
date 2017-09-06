@@ -1,15 +1,11 @@
-From: Haomai Wang <haomai-p1s0O0zx/60@public.gmane.org>
-Subject: Re: Ceph Developers Monthly - September
-Date: Wed, 6 Sep 2017 22:43:42 +0800
-Message-ID: <CACJqLybRz=C+00uNG_sPJHG7m8Y6YN-FgGnvC7-et_KowOm8+Q@mail.gmail.com>
-References: <20170830040451.GA20979@oops.local>
- <20170906050624.GA3981@oops.local>
- <c59f4e18-e391-7ccb-1fae-19c02af94231@suse.de>
+From: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Ceph release cadence
+Date: Wed, 6 Sep 2017 15:23:34 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <c59f4e18-e391-7ccb-1fae-19c02af94231-l3A5Bk7waGM@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,30 +15,73 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
-Cc: Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+To: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Oh, I'm on flight at the time
+Hi everyone,
 
-On Wed, Sep 6, 2017 at 6:28 PM, Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org> wrote:
-> On 09/06/2017 06:06 AM, Leonardo Vaz wrote:
->>
->> Hey cephers,
->>
->> The Ceph Developer Monthly is confirmed for tonight, September 6 at 9pm
->> Eastern Time (EDT), in an APAC-friendly time slot.
->
->
-> As much as I would love to attend and discuss some topics (especially the
-> RADOS replication stuff), this is an ungodly hour to expect my brain to work
-> properly ;)
->
-> Looking forward to the recording though!
->
->   -Joao
->
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Traditionally, we have done a major named "stable" release twice a year, 
+and every other such release has been an "LTS" release, with fixes 
+backported for 1-2 years.
+
+With kraken and luminous we missed our schedule by a lot: instead of 
+releasing in October and April we released in January and August.
+
+A few observations:
+
+- Not a lot of people seem to run the "odd" releases (e.g., infernalis, 
+kraken).  This limits the value of actually making them.  It also means 
+that those who *do* run them are running riskier code (fewer users -> more 
+bugs).
+
+- The more recent requirement that upgrading clusters must make a stop at 
+each LTS (e.g., hammer -> luminous not supported, must go hammer -> jewel 
+-> lumninous) has been hugely helpful on the development side by reducing 
+the amount of cross-version compatibility code to maintain and reducing 
+the number of upgrade combinations to test.
+
+- When we try to do a time-based "train" release cadence, there always 
+seems to be some "must-have" thing that delays the release a bit.  This 
+doesn't happen as much with the odd releases, but it definitely happens 
+with the LTS releases.  When the next LTS is a year away, it is hard to 
+suck it up and wait that long.
+
+A couple of options:
+
+* Keep even/odd pattern, and continue being flexible with release dates
+
+  + flexible
+  - unpredictable
+  - odd releases of dubious value
+
+* Keep even/odd pattern, but force a 'train' model with a more regular 
+cadence
+
+  + predictable schedule
+  - some features will miss the target and be delayed a year
+
+* Drop the odd releases but change nothing else (i.e., 12-month release 
+cadence)
+
+  + eliminate the confusing odd releases with dubious value
+ 
+* Drop the odd releases, and aim for a ~9 month cadence. This splits the 
+difference between the current even/odd pattern we've been doing.
+
+  + eliminate the confusing odd releases with dubious value
+  + waiting for the next release isn't quite as bad
+  - required upgrades every 9 months instead of ever 12 months
+
+* Drop the odd releases, but relax the "must upgrade through every LTS" to 
+allow upgrades across 2 versions (e.g., luminous -> mimic or luminous -> 
+nautilus).  Shorten release cycle (~6-9 months).
+
+  + more flexibility for users
+  + downstreams have greater choice in adopting an upstrema release
+  - more LTS branches to maintain
+  - more upgrade paths to consider
+
+Other options we should consider?  Other thoughts?
+
+Thanks!
+sage
