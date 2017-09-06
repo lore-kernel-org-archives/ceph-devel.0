@@ -1,26 +1,42 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: Jewel v10.2.10, anyone?
-Date: Wed, 6 Sep 2017 10:55:17 +0200
-Message-ID: <5fa9b927-23f1-f5be-6dc0-8837fcc0f233@suse.cz>
-References: <7ca238e9-0cd0-d3c6-73c2-76643d7f2ec0@suse.cz>
- <78583e01-0195-a921-6823-f24f5991fd8a@sadziu.pl>
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: Re: Mimic planning: Wed
+Date: Wed, 6 Sep 2017 11:40:17 +0200
+Message-ID: <CAOi1vP-85+b5pP5FDLNhrDPrtaxObMznUA4YGxuiuSK_u_HbtA@mail.gmail.com>
+References: <alpine.DEB.2.11.1708281556180.20435@piezo.novalocal> <37573530-deac-08f3-1648-1dc74df47cda@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:53498 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751814AbdIFIzT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 6 Sep 2017 04:55:19 -0400
-In-Reply-To: <78583e01-0195-a921-6823-f24f5991fd8a@sadziu.pl>
-Content-Language: en-US
+Received: from mail-io0-f181.google.com ([209.85.223.181]:33023 "EHLO
+        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752473AbdIFJkS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Sep 2017 05:40:18 -0400
+Received: by mail-io0-f181.google.com with SMTP id y123so22639394iod.0
+        for <ceph-devel@vger.kernel.org>; Wed, 06 Sep 2017 02:40:18 -0700 (PDT)
+In-Reply-To: <37573530-deac-08f3-1648-1dc74df47cda@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?Q?Pawe=c5=82_Sadowski?= <ceph@sadziu.pl>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Joao Eduardo Luis <joao@suse.de>
+Cc: Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-> Backport of https://github.com/ceph/ceph/pull/17265 would be nice.
+On Wed, Sep 6, 2017 at 9:46 AM, Joao Eduardo Luis <joao@suse.de> wrote:
+> On 08/28/2017 05:02 PM, Sage Weil wrote:
+>>
+>> I'd like to have an ad hoc call on Wednesday 8/30 at 9am PT/12p ET/1600
+>> UTC to go over the plans and priorities for the next major release, mimic.
+>> >
+>>         https://bluejeans.com/5192676054/
+>
+>
+> Is there a recording available? I was on vacation and totally missed not
+> only this email, but (as a consequence) the meeting as well.
 
-Included in the (hopefully last before 10.2.10) integration branch.
+No, I don't think so.
 
-Nathan
+It's all there in the Ceph Backlog [1] board though -- cards tagged
+with Mimic should be ordered by priority.
+
+[1] https://trello.com/b/ugTc2QFH/ceph-backlog
+
+Thanks,
+
+                Ilya
