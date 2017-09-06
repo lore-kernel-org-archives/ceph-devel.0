@@ -1,33 +1,44 @@
-From: Joao Eduardo Luis <joao@suse.de>
-Subject: Re: Ceph Developers Monthly - September
-Date: Wed, 6 Sep 2017 11:28:18 +0100
-Message-ID: <c59f4e18-e391-7ccb-1fae-19c02af94231@suse.de>
-References: <20170830040451.GA20979@oops.local>
- <20170906050624.GA3981@oops.local>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: admin_socket question
+Date: Wed, 6 Sep 2017 13:14:54 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1709061313530.16664@piezo.novalocal>
+References: <CAO=rSOu+f9rcy=mTv0hk4PSDkyiphN5vJDnQ=nz+_RTfVNF7DQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:34314 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752485AbdIFK2U (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 6 Sep 2017 06:28:20 -0400
-In-Reply-To: <20170906050624.GA3981@oops.local>
-Content-Language: en-GB
+Received: from cobra.newdream.net ([66.33.216.30]:51225 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753034AbdIFNO5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Sep 2017 09:14:57 -0400
+In-Reply-To: <CAO=rSOu+f9rcy=mTv0hk4PSDkyiphN5vJDnQ=nz+_RTfVNF7DQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Leonardo Vaz <lvaz@redhat.com>, Ceph Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: Paul Cuzner <pcuzner@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 09/06/2017 06:06 AM, Leonardo Vaz wrote:
-> Hey cephers,
+On Wed, 6 Sep 2017, Paul Cuzner wrote:
+> Hi,
 > 
-> The Ceph Developer Monthly is confirmed for tonight, September 6 at 9pm
-> Eastern Time (EDT), in an APAC-friendly time slot.
+> One of the users of cephmetrics has seen issues where the response to
+> perf dump requests against an osd seems to hang. (issue #91 -
+> https://github.com/ceph/cephmetrics/issues/91)
+> 
+> When I looked at the admin_command function in ceph[1], it looks to me
+> that the socket interaction is defaulting to blocking mode? So if
+> there is a delay in responding, the caller will see this hanging
+> behaviour that was described in the issue.
+> 
+> If blocking mode is being used, can anyone explain why this is
+> preferred over a non-blocking approach with 'select'?
 
-As much as I would love to attend and discuss some topics (especially 
-the RADOS replication stuff), this is an ungodly hour to expect my brain 
-to work properly ;)
+The queries are generally very short running so there is little value in 
+making them asynchronous.
 
-Looking forward to the recording though!
+In this case, it sounds like the OSD was hung for some other reason, 
+though, so that a thread was holding a lock longer than it should, 
+causing the command to hang.
 
-   -Joao
+Do you know what command was hung, or whether other commands were issued 
+before it?
+
+sage
