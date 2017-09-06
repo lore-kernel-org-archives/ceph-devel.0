@@ -1,33 +1,61 @@
-From: Ken Dreyer <kdreyer@redhat.com>
-Subject: Re: build-integration-branch
-Date: Wed, 6 Sep 2017 11:21:45 -0600
-Message-ID: <CALqRxCyPzj9mR9v-q866PuR09vtosKNoratqh7o7-G9_VL7C=A@mail.gmail.com>
-References: <alpine.DEB.2.11.1708302045570.20435@piezo.novalocal>
- <CA+2bHPbwsUwpp7k1P=54uet1SsW7PKDX_U=4xgj=tbPOKN3yiw@mail.gmail.com> <alpine.DEB.2.11.1709051406000.20435@piezo.novalocal>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: Ceph release cadence
+Date: Wed, 6 Sep 2017 18:52:33 +0100
+Message-ID: <aaefa68b-8221-8e4b-e27a-c2dda2b008f0@suse.de>
+References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ua0-f177.google.com ([209.85.217.177]:35693 "EHLO
-        mail-ua0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932167AbdIFRVq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 6 Sep 2017 13:21:46 -0400
-Received: by mail-ua0-f177.google.com with SMTP id c27so14966029uah.2
-        for <ceph-devel@vger.kernel.org>; Wed, 06 Sep 2017 10:21:46 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1709051406000.20435@piezo.novalocal>
+Received: from mx2.suse.de ([195.135.220.15]:56079 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750807AbdIFRwg (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 6 Sep 2017 13:52:36 -0400
+In-Reply-To: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.com, ceph-users@ceph.com
 
-On Tue, Sep 5, 2017 at 8:08 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Mon, 4 Sep 2017, Patrick Donnelly wrote:
->> On Wed, Aug 30, 2017 at 1:58 PM, Sage Weil <sweil@redhat.com> wrote:
->> and the commit message is adjusted accordingly. (Also, no testing
->> label is applied as it's not an integration branch.)
->
-> Nice! Populating the merge commit with the reviewers is tedious..
-> automating that would be great.
+On 09/06/2017 04:23 PM, Sage Weil wrote:
+> * Keep even/odd pattern, but force a 'train' model with a more regular
+> cadence
+> 
+>    + predictable schedule
+>    - some features will miss the target and be delayed a year
 
-Reminds me of this hub RFE, https://github.com/github/hub/issues/1443 :)
+Personally, I think a predictable schedule is the way to go. Two major 
+reasons come to mind:
 
-- Ken
+1. Developers are actually aware of what the cut-off date is, and will 
+plan accordingly; and,
+
+2. Downstreams will have a better notion of when the next release is to 
+be expected, and plan accordingly.
+
+However, a one year wait for a release may be a can of worms waiting to 
+be opened. Even though it would ideally provide us a lot more time to 
+merge stuff and test it, there's also the downside that some stuff may 
+be pushed further and further down the line, and eventually merged just 
+before the window closes.
+
+For that, I'd argue having an intermediate (staging?) release could be 
+helpful, but I fear it would not be anything more than any other 
+dev-release. Therefore, if we stick to a one-year cadence, let's have 
+frequent dev-releases.
+
+I would also like to argue for a hard cut-off date considerably before 
+major holiday seasons. Because no one really wants to be dealing with 
+bugs or releasing software while a considerable portion of developers 
+are away.
+
+Additionally,
+
+> * Drop the odd releases, but relax the "must upgrade through every LTS" to
+> allow upgrades across 2 versions (e.g., luminous -> mimic or luminous ->
+> nautilus).  Shorten release cycle (~6-9 months).
+
+I can be on board with this too. As long as we have a very clear cut-off 
+date regardless.
+
+   -Joao
