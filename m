@@ -1,75 +1,178 @@
-From: Vincent Godin <vince.mlist@gmail.com>
-Subject: Re: OSD behaviour when an i/o error occurs
-Date: Thu, 7 Sep 2017 15:30:06 +0200
-Message-ID: <CAL2-6b+K9YF6q+t5au=pc0rLju+C_WM7eynyTFtqVs6OnwKfog@mail.gmail.com>
-References: <CAL2-6bKnuoT5Fj7+LXepwy8eDve+VXQmtEqrDX3Bn55J2ESKQg@mail.gmail.com>
- <alpine.DEB.2.11.1709061641330.18091@piezo.novalocal>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [RFC PATCH 2/3] ceph: quotas: support for ceph.quota.max_files
+Date: Thu, 7 Sep 2017 22:22:20 +0800
+Message-ID: <B56DB47D-CFD8-49E5-8483-CF591488DD2D@redhat.com>
+References: <20170906141224.11813-1-lhenriques@suse.com>
+ <20170906141224.11813-3-lhenriques@suse.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f170.google.com ([209.85.216.170]:37610 "EHLO
-        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755353AbdIGNaH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Sep 2017 09:30:07 -0400
-Received: by mail-qt0-f170.google.com with SMTP id h15so27356008qta.4
-        for <ceph-devel@vger.kernel.org>; Thu, 07 Sep 2017 06:30:07 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1709061641330.18091@piezo.novalocal>
+Received: from mx1.redhat.com ([209.132.183.28]:33274 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754862AbdIGOWe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 7 Sep 2017 10:22:34 -0400
+In-Reply-To: <20170906141224.11813-3-lhenriques@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
+To: Luis Henriques <lhenriques@suse.com>
+Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Jan Fajerski <jfajerski@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>, Jeff Layton <jlayton@redhat.com>
 
-What is the normal process when ceph encounter a I/O error while
-reading ? what is the response given to the client ? what is the
-normal OSD behaviour : does it stay blocked and then stop all its
-requests ? does it wait for a timeout (while still executing all other
-read or write operations) ?
-Thanks for your time
 
-2017-09-06 18:44 GMT+02:00 Sage Weil <sage@newdream.net>:
-> On Wed, 6 Sep 2017, Vincent Godin wrote:
->> Hello,
->>
->> I'd like to understand the behaviour of an OSD daemon when an I/O
->> error occurs while reading and while writing.
->> We had some I/O errors while reading during deep-scrub on one OSD and
->> it's lead to hold all client's requests
->> Ceph version : Jewel 10.2.6
->> faulty OSD is a raid 0 on one SATA Disk on a HP SL4540 host
->>
->> Is there a normal process of handling a I/O error by Ceph ? Is this
->> probleme linked to my hardware config. The corrupted sector seems not
->> take in account by the hardware so the error can re-occur a lot of
->> time on the same sector (maybe a problem with the raid0 between ceph
->> and the disk)
->>
->> In the dmesg of the host, we can see the error :
->>
->> sd 0:1:0:22: [sdw] tag#22 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
->> sd 0:1:0:22: [sdw] tag#22 Sense Key : Medium Error [current]
->> sd 0:1:0:22: [sdw] tag#22 Add. Sense: Unrecovered read error
->> sd 0:1:0:22: [sdw] tag#22 CDB: Read(16) 88 00 00 00 00 00 2e 15 24 e0
->> 00 00 01 00 00 00
->> blk_update_request: critical medium error, dev sdw, sector 773137632
->> hpsa 0000:08:00.0: scsi 0:1:0:22: resetting logical Direct-Access HP
->> LOGICAL VOLUME RAID-0 SSDSmartPathCap- En- Exp=1
->> hpsa 0000:08:00.0: scsi 0:1:0:22: reset logical completed successfully
->> Direct-Access HP LOGICAL VOLUME RAID-0 SSDSmartPathCap- En- Exp=1
->> sd 0:1:0:22: [sdw] tag#10 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
->> sd 0:1:0:22: [sdw] tag#10 Sense Key : Medium Error [current]
->> sd 0:1:0:22: [sdw] tag#10 Add. Sense: Unrecovered read error
->> sd 0:1:0:22: [sdw] tag#10 CDB: Read(16) 88 00 00 00 00 01 e1 39 3c 00
->> 00 00 01 00 00 00
->> blk_update_request: critical medium error, dev sdw, sector 8073591808
->>
->> In the OSD log (with a standard level of logging), we can only see the
->> number of slow requests raising (before the system alarm) and a lot of
->> timeout of osd_op_tp thread then OSD is marked down by the others.
->> Nothing on the failed I/O
->
-> It sounds like if the IO had returned sooner with an error (before we hit
-> the internal timeout) then we would have tried to do something, but in
-> this case we didn't survive long enough to get there.  During scrub we
-> note EIO and mark the PG as needing repair, and during read operations we
-> try to recover from another replica or EC shards.
->
-> sage
+> On 6 Sep 2017, at 22:12, Luis Henriques <lhenriques@suse.com> wrote:
+> 
+> This patch adds support for the max_files quota.  It hooks into all the
+> ceph functions that add new filesystem objects that need to be checked
+> against the quota limit.  -EDQUOT is returned when this limit is hit.
+> 
+> Note that we're not checking quotas on ceph_link().  ceph_link doesn't
+> really create a new inode,  and since the MDS doesn't update the directory
+> statistics when a new (hard) link is created (only with symlinks), they
+> are not accounted as a new file.
+> 
+> Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> ---
+> fs/ceph/dir.c   | 11 +++++++++++
+> fs/ceph/file.c  |  4 +++-
+> fs/ceph/quota.c | 42 ++++++++++++++++++++++++++++++++++++++++++
+> fs/ceph/super.h |  1 +
+> 4 files changed, 57 insertions(+), 1 deletion(-)
+> 
+> diff --git a/fs/ceph/dir.c b/fs/ceph/dir.c
+> index ef7240ace576..fb6adcf0ff51 100644
+> --- a/fs/ceph/dir.c
+> +++ b/fs/ceph/dir.c
+> @@ -815,6 +815,9 @@ static int ceph_mknod(struct inode *dir, struct dentry *dentry,
+> 	if (ceph_snap(dir) != CEPH_NOSNAP)
+> 		return -EROFS;
+> 
+> +	if (ceph_quota_is_quota_files_exceeded(dir))
+> +		return -EDQUOT;
+> +
+> 	err = ceph_pre_init_acls(dir, &mode, &acls);
+> 	if (err < 0)
+> 		return err;
+> @@ -868,6 +871,9 @@ static int ceph_symlink(struct inode *dir, struct dentry *dentry,
+> 	if (ceph_snap(dir) != CEPH_NOSNAP)
+> 		return -EROFS;
+> 
+> +	if (ceph_quota_is_quota_files_exceeded(dir))
+> +		return -EDQUOT;
+> +
+> 	dout("symlink in dir %p dentry %p to '%s'\n", dir, dentry, dest);
+> 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_SYMLINK, USE_AUTH_MDS);
+> 	if (IS_ERR(req)) {
+> @@ -917,6 +923,11 @@ static int ceph_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
+> 		goto out;
+> 	}
+> 
+> +	if (ceph_quota_is_quota_files_exceeded(dir)) {
+> +		err = -EDQUOT;
+> +		goto out;
+> +	}
+> +
+> 	mode |= S_IFDIR;
+> 	err = ceph_pre_init_acls(dir, &mode, &acls);
+> 	if (err < 0)
+> diff --git a/fs/ceph/file.c b/fs/ceph/file.c
+> index 3d48c415f3cb..708a9b841382 100644
+> --- a/fs/ceph/file.c
+> +++ b/fs/ceph/file.c
+> @@ -370,7 +370,7 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+> 	struct ceph_mds_request *req;
+> 	struct dentry *dn;
+> 	struct ceph_acls_info acls = {};
+> -       int mask;
+> +	int mask;
+> 	int err;
+> 
+> 	dout("atomic_open %p dentry %p '%pd' %s flags %d mode 0%o\n",
+> @@ -381,6 +381,8 @@ int ceph_atomic_open(struct inode *dir, struct dentry *dentry,
+> 		return -ENAMETOOLONG;
+> 
+> 	if (flags & O_CREAT) {
+> +		if (ceph_quota_is_quota_files_exceeded(dir))
+> +			return -EDQUOT;
+> 		err = ceph_pre_init_acls(dir, &mode, &acls);
+> 		if (err < 0)
+> 			return err;
+> diff --git a/fs/ceph/quota.c b/fs/ceph/quota.c
+> index c02d73a8d167..1bd02658f16a 100644
+> --- a/fs/ceph/quota.c
+> +++ b/fs/ceph/quota.c
+> @@ -57,3 +57,45 @@ void ceph_handle_quota(struct ceph_mds_client *mdsc,
+> 
+> 	iput(inode);
+> }
+> +
+> +bool ceph_quota_is_quota_files_exceeded(struct inode *inode)
+> +{
+> +	struct ceph_inode_info *ci;
+> +	struct dentry *next, *parent;
+> +	u64 max_files;
+> +	u64 rentries = 0;
+> +	unsigned seq;
+> +	bool result = false;
+> +
+> +	WARN_ON(!S_ISDIR(inode->i_mode));
+> +
+> +retry:
+> +	seq = read_seqbegin(&rename_lock);
+> +	ci = ceph_inode(inode);
+> +	next = d_find_any_alias(inode);
+> +
+> +	while (true) {
+> +		spin_lock(&ci->i_ceph_lock);
+> +		max_files = ci->i_max_files;
+> +		rentries = ci->i_rfiles + ci->i_rsubdirs;
+> +		spin_unlock(&ci->i_ceph_lock);
+> +
+> +		if ((max_files && (rentries >= max_files)) || IS_ROOT(next))
+> +			break;
+> +
+> +		parent = dget_parent(next);
+> +		ci = ceph_inode(d_inode(parent));
+> +		dput(next);
+> +		next = parent;
+> +	}
+> +
+> +	dput(next);
+> +
+> +	if (read_seqretry(&rename_lock, seq))
+> +		goto retry;
+> +
+> +	if (max_files && (rentries >= max_files))
+> +		result = true;
+
+This bottom-up dentry traversal code worries me. I vaguely remember that bottom-up
+dentry traversal in kernel is discouraged. Then there are multiples clients modifying
+the filesystem at the same time, the rename_lock does not help. That's why user space
+code Client::get_quota_root() checks dentry lease and does lookup parent. I’m not sure
+if we can do the same operations in kernel, because locking is much more complex in
+kernel.
+
+For the long term, I prefer unifying quota and snapshot implementation. The inode
+trace in MClientReply contains information about which quota realm the inode belongs
+to. So client can find quota information easily. (This requires bigger change for both
+mds and client)
+
+Regards
+Yan, Zheng
+
+
+
+> +
+> +	return result;
+> +}
+> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
+> index 50c96ea7dc7c..ef131107dbf6 100644
+> --- a/fs/ceph/super.h
+> +++ b/fs/ceph/super.h
+> @@ -1011,5 +1011,6 @@ extern void ceph_fs_debugfs_cleanup(struct ceph_fs_client *client);
+> extern void ceph_handle_quota(struct ceph_mds_client *mdsc,
+> 			      struct ceph_mds_session *session,
+> 			      struct ceph_msg *msg);
+> +extern bool ceph_quota_is_quota_files_exceeded(struct inode *inode);
+> 
+> #endif /* _FS_CEPH_SUPER_H */
+
