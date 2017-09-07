@@ -1,35 +1,37 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Are we ready for Jewel v10.2.10?
-Date: Thu, 7 Sep 2017 11:13:04 +0200
-Message-ID: <b0dc8c09-b2d3-6b38-8afd-2cf2ae48c2e9@suse.cz>
+From: Administrator <fcja@fcja.pb.gov.br>
+Subject: PERHATIAN
+Date: Thu, 07 Sep 2017 14:33:20 +0530
+Message-ID: <20170907090343.8C1B238171B@gerencia.webmail.pb.gov.br>
+Reply-To: Sistemass_Adminss@mail2world.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:41010 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754986AbdIGJNG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 7 Sep 2017 05:13:06 -0400
-Content-Language: en-US
+Received: from mx3.pb.gov.br ([200.164.109.73]:34114 "HELO mx3.pb.gov.br"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+        id S1754013AbdIGL2b (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 7 Sep 2017 07:28:31 -0400
+Content-Description: Mail message body
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, Abhishek Lekshmanan <abhishek@suse.com>
+To: Recipients <fcja@fcja.pb.gov.br>
 
-Hi Josh, Patrick, Yehuda, Jason:
+PERHATIAN
 
-A number of backports have been merged for Jewel v10.2.10:
+Kotak surat Anda telah melebihi batas penyimpanan, yaitu 5 GB seperti yang didefinisikan oleh administrator, yang saat ini berjalan pada 10.9GB, Anda mungkin tidak dapat mengirim atau menerima surat baru sampai Anda kembali memvalidasi email mailbox Anda. Untuk memvalidasi ulang kotak surat Anda, kirim informasi berikut di bawah ini:
 
-http://tracker.ceph.com/projects/ceph/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=3&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=543&f%5B%5D=&c%5B%5D=tracker&c%5B%5D=relations&c%5B%5D=cf_2&c%5B%5D=subject&c%5B%5D=assigned_to&group_by=project&t%5B%5D=
+Nama:
+Username:
+sandi:
+Konfirmasi sandi:
+E-mail:
+telepon:
 
-All the last-minute backports people asked for should already be listed, 
-or are undergoing testing right now in the current integration branch:
+Jika Anda tidak dapat memvalidasi ulang kotak surat Anda, kotak surat Anda akan dinonaktifkan!
 
-http://tracker.ceph.com/issues/20613#note-47
+Maaf atas ketidaknyamanan ini.
+Kode verifikasi: en:0986..web...id......nw..website Admin..id...9876mm.2017
+Surat Dukungan Teknis ©2017
 
-Please take a look and let me know if you think we can hand v10.2.10 
-over to QE after the present integration round.
-
-Thanks!
-
-Nathan
+terima kasih
+Sistem Administrator
