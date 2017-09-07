@@ -1,38 +1,114 @@
-From: Adrian Saul <Adrian.Saul-c0gOmZ191bzdje4Cb2DbcYdd74u8MsAO@public.gmane.org>
-Subject: Re: Ceph release cadence
-Date: Thu, 7 Sep 2017 06:07:42 +0000
-Message-ID: <81cc12b5a7624e86b7fd4e94b3545c65@tpgtelecom.com.au>
+From: Henrik Korkuc <lists@kirneh.eu>
+Subject: Re: [ceph-users] Ceph release cadence
+Date: Thu, 7 Sep 2017 09:49:19 +0300
+Message-ID: <a729edd0-cf51-10ed-f528-12ec7bbe0a96@kirneh.eu>
 References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1709061523170.16664-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from alpha.syseng.pro ([37.48.90.241]:51754 "EHLO alpha.syseng.pro"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751328AbdIGGtY (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 7 Sep 2017 02:49:24 -0400
+In-Reply-To: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
 Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>, ceph-devel@vger.kernel.org, ceph-maintainers@ceph.com, ceph-users@ceph.com
 
+On 17-09-06 18:23, Sage Weil wrote:
+> Hi everyone,
+>
+> Traditionally, we have done a major named "stable" release twice a year,
+> and every other such release has been an "LTS" release, with fixes
+> backported for 1-2 years.
+>
+> With kraken and luminous we missed our schedule by a lot: instead of
+> releasing in October and April we released in January and August.
+>
+> A few observations:
+>
+> - Not a lot of people seem to run the "odd" releases (e.g., infernalis,
+> kraken).  This limits the value of actually making them.  It also means
+> that those who *do* run them are running riskier code (fewer users -> more
+> bugs).
+>
+> - The more recent requirement that upgrading clusters must make a stop at
+> each LTS (e.g., hammer -> luminous not supported, must go hammer -> jewel
+> -> lumninous) has been hugely helpful on the development side by reducing
+> the amount of cross-version compatibility code to maintain and reducing
+> the number of upgrade combinations to test.
+>
+> - When we try to do a time-based "train" release cadence, there always
+> seems to be some "must-have" thing that delays the release a bit.  This
+> doesn't happen as much with the odd releases, but it definitely happens
+> with the LTS releases.  When the next LTS is a year away, it is hard to
+> suck it up and wait that long.
+>
+> A couple of options:
+>
+> * Keep even/odd pattern, and continue being flexible with release dates
+>
+>    + flexible
+>    - unpredictable
+>    - odd releases of dubious value
+>
+> * Keep even/odd pattern, but force a 'train' model with a more regular
+> cadence
+>
+>    + predictable schedule
+>    - some features will miss the target and be delayed a year
+>
+> * Drop the odd releases but change nothing else (i.e., 12-month release
+> cadence)
+>
+>    + eliminate the confusing odd releases with dubious value
+>   
 > * Drop the odd releases, and aim for a ~9 month cadence. This splits the
 > difference between the current even/odd pattern we've been doing.
 >
->   + eliminate the confusing odd releases with dubious value
->   + waiting for the next release isn't quite as bad
->   - required upgrades every 9 months instead of ever 12 months
+>    + eliminate the confusing odd releases with dubious value
+>    + waiting for the next release isn't quite as bad
+>    - required upgrades every 9 months instead of ever 12 months
+>
+> * Drop the odd releases, but relax the "must upgrade through every LTS" to
+> allow upgrades across 2 versions (e.g., luminous -> mimic or luminous ->
+> nautilus).  Shorten release cycle (~6-9 months).
+>
+>    + more flexibility for users
+>    + downstreams have greater choice in adopting an upstrema release
+>    - more LTS branches to maintain
+>    - more upgrade paths to consider
+>
+> Other options we should consider?  Other thoughts?
+What about this:
+* drop odd releases
+* have ~9 months release schedule
+* no version jumping
+* bugfix support for 2 release cycles
+* list of major incoming features with their status, disabled by feature 
+flag.
+* have more QA passed dev releases so that people waiting for new 
+features would be able to try them out
 
-As a user is probably closest to the ideal, although a production deployment might slip out of the LTS view in 18 months given once deployed they tend to stay static.
+This way we trade shorter release cycle with longer bugfix support but 
+no version jumping. This way stable folks could upgrade from 
+"legacy-stable" to "old-stable" having already multiple minor fixes in 
+both releases.
 
-From a testing perspective it would be good to know you could deploy the "early access" version of a release and test with that rather than having to switch release to productionise when that release is blessed.
+And bleading-edge people waiting for some features would know current 
+status of new features (e.g. multi-active MDS going stable in L was a 
+surprise for me). With dev releases to run in dev/staging env for testing.
 
-Also, and this might be harder to achieve, but could krbd support for new releases be more aligned with kernel versions?  Or at the least a definitive map of what kernels and backports support which release.
+Potentially shorter releases would have less features in, so it should 
+be less risky to use them and of course shorter wait before new release.
+
+> Thanks!
+> sage
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
 
-Confidentiality: This email and any attachments are confidential and may be subject to copyright, legal or some other professional privilege. They are intended solely for the attention and use of the named addressee(s). They may only be copied, distributed or disclosed with the consent of the copyright owner. If you have received this email by mistake or by breach of the confidentiality clause, please notify the sender immediately by return email and delete or destroy all copies of the email. Any confidentiality, privilege or copyright is not waived or lost because this email has been sent to you by mistake.
