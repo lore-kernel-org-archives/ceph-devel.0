@@ -1,181 +1,75 @@
-From: Lars Marowsky-Bree <lmb-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [Ceph-maintainers] Ceph release cadence
-Date: Thu, 7 Sep 2017 13:39:13 +0200
-Message-ID: <20170907113913.wutbtiy2pavl5mfc@suse.com>
-References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
+From: Vincent Godin <vince.mlist@gmail.com>
+Subject: Re: OSD behaviour when an i/o error occurs
+Date: Thu, 7 Sep 2017 15:30:06 +0200
+Message-ID: <CAL2-6b+K9YF6q+t5au=pc0rLju+C_WM7eynyTFtqVs6OnwKfog@mail.gmail.com>
+References: <CAL2-6bKnuoT5Fj7+LXepwy8eDve+VXQmtEqrDX3Bn55J2ESKQg@mail.gmail.com>
+ <alpine.DEB.2.11.1709061641330.18091@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1709061523170.16664-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-qt0-f170.google.com ([209.85.216.170]:37610 "EHLO
+        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755353AbdIGNaH (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 7 Sep 2017 09:30:07 -0400
+Received: by mail-qt0-f170.google.com with SMTP id h15so27356008qta.4
+        for <ceph-devel@vger.kernel.org>; Thu, 07 Sep 2017 06:30:07 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1709061641330.18091@piezo.novalocal>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>, ceph-devel@vger.kernel.org
 
-On 2017-09-06T15:23:34, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+What is the normal process when ceph encounter a I/O error while
+reading ? what is the response given to the client ? what is the
+normal OSD behaviour : does it stay blocked and then stop all its
+requests ? does it wait for a timeout (while still executing all other
+read or write operations) ?
+Thanks for your time
 
-Hi Sage,
-
-thanks for kicking off this discussion - after the L experience, it was
-on my hot list to talk about too.
-
-I do agree that we need predictable releases more than feature-rich
-releases. Distributors like to plan, but that's not a reason. However,
-we like to plan because *users* like to plan their schedules and
-upgrades, and I think that matters more.
-
-> - Not a lot of people seem to run the "odd" releases (e.g., infernalis, =
-
-> kraken).  This limits the value of actually making them.  It also means =
-
-> that those who *do* run them are running riskier code (fewer users -> mor=
-e =
-
-> bugs).
-
-Yes. Odd releases never really make it to user systems. They're on the
-previous LTS release. In the devel releases, the code is often too
-unstable, and developers seem to cram everything in. Basically, the odd
-releases are long periods working up to the next stable release.
-
-(And they get all the cool names, which I find personally sad. I want my
-users to run Infernalis, Kraken, and Mimic. ;-)
-
-> - The more recent requirement that upgrading clusters must make a stop at =
-
-> each LTS (e.g., hammer -> luminous not supported, must go hammer -> jewel =
-
-> -> lumninous) has been hugely helpful on the development side by reducing =
-
-> the amount of cross-version compatibility code to maintain and reducing =
-
-> the number of upgrade combinations to test.
-
-On this, I feel that it might make more sense to phrase this so that
-such cross version compatibility is not tied to major releases (which
-doesn't really help them plan lifecycles if those releases aren't
-reliable), but to time periods.
-
-> - When we try to do a time-based "train" release cadence, there always =
-
-> seems to be some "must-have" thing that delays the release a bit.  This =
-
-> doesn't happen as much with the odd releases, but it definitely happens =
-
-> with the LTS releases.  When the next LTS is a year away, it is hard to =
-
-> suck it up and wait that long.
-
-Yes, I can see that. This is clearly something we'd want to avoid.
-
-> A couple of options:
-> =
-
-> * Keep even/odd pattern, and continue being flexible with release dates
-
-I admit I'm not a fan of this one.
-
-> * Drop the odd releases but change nothing else (i.e., 12-month release =
-
-> cadence)
->   + eliminate the confusing odd releases with dubious value
-
-Periods too long for regular users. Admittedly, I suspect for RH and
-SUSE with RHCS or SES respectively, this doesn't matter much - but it's
-not good for the community as a whole. Also, this means not enough
-community / end-user testing will happen for 11 out of those 12 months,
-implying such long cycles make it hard to release n+1.0 in high
-quality.
-
-I've been doing software development for almost two decades, and no user
-really touches betas before one calls it an RC, and even then ...
-
-> * Drop the odd releases, and aim for a ~9 month cadence. This splits the =
-
-> difference between the current even/odd pattern we've been doing.
-
-It's a step up, but the period is still both too long, and unaligned.
-This makes lifecycle management for everyone annoying.
-
-> * Drop the odd releases, but relax the "must upgrade through every LTS" t=
-o =
-
-> allow upgrades across 2 versions (e.g., luminous -> mimic or luminous -> =
-
-> nautilus).  Shorten release cycle (~6-9 months).
-> =
-
->   + more flexibility for users
->   + downstreams have greater choice in adopting an upstrema release
->   - more LTS branches to maintain
->   - more upgrade paths to consider
-
-From the list of options you provide, I like this one the best; the ~6
-month release cycle means there should be one about once per year as
-well, which makes cycling easier to plan.
-
-> Other options we should consider?  Other thoughts?
-
-With about 20-odd years in software development, I've become a big
-believer in schedule-driven releases. If it's feature-based, you never
-know when they'll get done.
-
-If the schedule intervals are too long though, the urge to press too
-much in (so as not to miss the next merge window) is just too high,
-meaning the train gets derailed. (Which cascades into the future,
-because the next time the pressure will be even higher based on the
-previous experience.) This requires strictness.
-
-We've had a few Linux kernel releases that were effectively feature
-driven and never quite made it. 1.3.x? 1.5.x? My memory is bad, but they
-were a disaster than eventually led Linus to evolve to the current
-model.
-
-That serves them really well, and I believe it might be worth
-considering for us.
-
-I'd try to move away from the major milestones. Features get integrated
-into the next schedule-driven release when they deemed ready and stable;
-when they're not, not a big deal, the next one is coming up "soonish".
-
-(This effectively decouples feature development slightly from the
-release schedule.)
-
-We could even go for "a release every 3 months, sharp", merge window for
-the first month, stabilization the second, release clean up the third,
-ship.
-
-Interoperability hacks for the cluster/server side are maintained for 2
-years, and then dropped.  Sharp. (Speaking as one of those folks
-affected, we should not burden the community with this.) Client interop
-is a different story, a bit.
-
-Basically, effectively edging towards continuous integration of features
-and bugfixes both. Nobody has to wait for anything much, and can
-schedule reasonably independently.
-
-There is a single LTS release: Ceph. Keep on rolling.
-
-Also, Mimic is a good release to pick for a change like this, because it
-can be everything to everyone ;-)
-
-
-Regards,
-    Lars
-
--- =
-
-Architect SDS, Distinguished Engineer
-SUSE Linux GmbH, GF: Felix Imend=F6rffer, Jane Smithard, Graham Norton, HRB=
- 21284 (AG N=FCrnberg)
-"Experience is the name everyone gives to their mistakes." -- Oscar Wilde
+2017-09-06 18:44 GMT+02:00 Sage Weil <sage@newdream.net>:
+> On Wed, 6 Sep 2017, Vincent Godin wrote:
+>> Hello,
+>>
+>> I'd like to understand the behaviour of an OSD daemon when an I/O
+>> error occurs while reading and while writing.
+>> We had some I/O errors while reading during deep-scrub on one OSD and
+>> it's lead to hold all client's requests
+>> Ceph version : Jewel 10.2.6
+>> faulty OSD is a raid 0 on one SATA Disk on a HP SL4540 host
+>>
+>> Is there a normal process of handling a I/O error by Ceph ? Is this
+>> probleme linked to my hardware config. The corrupted sector seems not
+>> take in account by the hardware so the error can re-occur a lot of
+>> time on the same sector (maybe a problem with the raid0 between ceph
+>> and the disk)
+>>
+>> In the dmesg of the host, we can see the error :
+>>
+>> sd 0:1:0:22: [sdw] tag#22 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
+>> sd 0:1:0:22: [sdw] tag#22 Sense Key : Medium Error [current]
+>> sd 0:1:0:22: [sdw] tag#22 Add. Sense: Unrecovered read error
+>> sd 0:1:0:22: [sdw] tag#22 CDB: Read(16) 88 00 00 00 00 00 2e 15 24 e0
+>> 00 00 01 00 00 00
+>> blk_update_request: critical medium error, dev sdw, sector 773137632
+>> hpsa 0000:08:00.0: scsi 0:1:0:22: resetting logical Direct-Access HP
+>> LOGICAL VOLUME RAID-0 SSDSmartPathCap- En- Exp=1
+>> hpsa 0000:08:00.0: scsi 0:1:0:22: reset logical completed successfully
+>> Direct-Access HP LOGICAL VOLUME RAID-0 SSDSmartPathCap- En- Exp=1
+>> sd 0:1:0:22: [sdw] tag#10 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_SENSE
+>> sd 0:1:0:22: [sdw] tag#10 Sense Key : Medium Error [current]
+>> sd 0:1:0:22: [sdw] tag#10 Add. Sense: Unrecovered read error
+>> sd 0:1:0:22: [sdw] tag#10 CDB: Read(16) 88 00 00 00 00 01 e1 39 3c 00
+>> 00 00 01 00 00 00
+>> blk_update_request: critical medium error, dev sdw, sector 8073591808
+>>
+>> In the OSD log (with a standard level of logging), we can only see the
+>> number of slow requests raising (before the system alarm) and a lot of
+>> timeout of osd_op_tp thread then OSD is marked down by the others.
+>> Nothing on the failed I/O
+>
+> It sounds like if the IO had returned sooner with an error (before we hit
+> the internal timeout) then we would have tried to do something, but in
+> this case we didn't survive long enough to get there.  During scrub we
+> note EIO and mark the PG as needing repair, and during read operations we
+> try to recover from another replica or EC shards.
+>
+> sage
