@@ -1,39 +1,35 @@
-From: Joao Eduardo Luis <joao@suse.de>
-Subject: Re: payload of MPing
-Date: Thu, 7 Sep 2017 09:53:10 +0100
-Message-ID: <413e410d-5fee-7703-e788-a132b26f64c4@suse.de>
-References: <CAJE9aONuZZeDut2boHFU-nWXstCqXEaSEHT+KfGE0xJqJm=SaA@mail.gmail.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Are we ready for Jewel v10.2.10?
+Date: Thu, 7 Sep 2017 11:13:04 +0200
+Message-ID: <b0dc8c09-b2d3-6b38-8afd-2cf2ae48c2e9@suse.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:39410 "EHLO mx1.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:41010 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754068AbdIGIxM (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 7 Sep 2017 04:53:12 -0400
-In-Reply-To: <CAJE9aONuZZeDut2boHFU-nWXstCqXEaSEHT+KfGE0xJqJm=SaA@mail.gmail.com>
-Content-Language: en-GB
+        id S1754986AbdIGJNG (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 7 Sep 2017 05:13:06 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, Abhishek Lekshmanan <abhishek@suse.com>
 
-On 09/07/2017 05:00 AM, kefu chai wrote:
-> hey Joao,
-> 
-> while reviewing https://github.com/ceph/ceph/pull/17269, i found that
-> there is no consumers of the payload of MPing replies. but apparently,
-> we stuff it with the health status on purpose. do you happen to
-> remember why we are doing so? if the feature/functionality depending
-> on it is deprecated or removed or not implemented, probably we can
-> just drop the logic to stuff the payload of MPing?
+Hi Josh, Patrick, Yehuda, Jason:
 
-The only consumer, to date, and possibly ever until we (maybe) 
-piggy-back on it for heartbeats, is the ceph tool.
+A number of backports have been merged for Jewel v10.2.10:
 
-We do consume that reply when we run `ceph ping mon.foo`. The interface 
-is through RadosClient, all the way up to the Objecter, and eventually 
-up the chain to the ceph tool.
+http://tracker.ceph.com/projects/ceph/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=3&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=9&f%5B%5D=fixed_version_id&op%5Bfixed_version_id%5D=%3D&v%5Bfixed_version_id%5D%5B%5D=543&f%5B%5D=&c%5B%5D=tracker&c%5B%5D=relations&c%5B%5D=cf_2&c%5B%5D=subject&c%5B%5D=assigned_to&group_by=project&t%5B%5D=
 
-Unless I'm misunderstanding what you're talking about?
+All the last-minute backports people asked for should already be listed, 
+or are undergoing testing right now in the current integration branch:
 
-   -Joao
+http://tracker.ceph.com/issues/20613#note-47
+
+Please take a look and let me know if you think we can hand v10.2.10 
+over to QE after the present integration round.
+
+Thanks!
+
+Nathan
