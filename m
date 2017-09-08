@@ -1,73 +1,78 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [RFC PATCH 2/3] ceph: quotas: support for ceph.quota.max_files
-Date: Fri, 8 Sep 2017 18:43:02 +0800
-Message-ID: <7CC31908-DDCC-4169-A73E-49CE6A4B52E3@redhat.com>
-References: <20170906141224.11813-1-lhenriques@suse.com>
- <20170906141224.11813-3-lhenriques@suse.com>
- <B56DB47D-CFD8-49E5-8483-CF591488DD2D@redhat.com> <871snhlhcd.fsf@hermes>
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+From: Xiaoxi Chen <superdebuger@gmail.com>
+Subject: Re: [ceph-users] Ceph release cadence
+Date: Fri, 8 Sep 2017 23:12:45 +0800
+Message-ID: <CAEYCsV+4iFCTsufxvJzSU77dd5ZACJ4+jpdFM2fRY6eGEtq1=g@mail.gmail.com>
+References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal> <f939c8a1-2fca-f66f-51b3-048ae0afce18@sanger.ac.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38486 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753877AbdIHKnQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 8 Sep 2017 06:43:16 -0400
-In-Reply-To: <871snhlhcd.fsf@hermes>
+Received: from mail-oi0-f66.google.com ([209.85.218.66]:34251 "EHLO
+        mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752485AbdIHPMr (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 8 Sep 2017 11:12:47 -0400
+Received: by mail-oi0-f66.google.com with SMTP id a197so1996965oib.1
+        for <ceph-devel@vger.kernel.org>; Fri, 08 Sep 2017 08:12:46 -0700 (PDT)
+In-Reply-To: <f939c8a1-2fca-f66f-51b3-048ae0afce18@sanger.ac.uk>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Luis Henriques <lhenriques@suse.com>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Jan Fajerski <jfajerski@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>, Jeff Layton <jlayton@redhat.com>
+To: Matthew Vernon <mv3@sanger.ac.uk>
+Cc: Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ceph-maintainers@ceph.com, ceph-users <ceph-users@ceph.com>
+
+It is not because user want to skip odd release, it just we usually
+land major and important feature to even release:)
+
+We have several large ceph cluster starting from Firefly Although in
+practice we only use LTS release but it is not because we bias LTS
+release, just the timeline is a little bit misleading...  Lets use
+kraken as an example , it is out on late jan , when I deciding whether
+to upgrade all cluster to kraken,  the timeline said Luminous will be
+out on April, although from the community activity it doesn't looks
+like it, but in all public presentation we(the community) were
+releasing the same information.
+
+Considering the effort of  pre-production test and rolling upgrade
+usually take half a month, we decide to skip kraken and wait for
+another 3 month(but actually 8 months).
+
+Rethinking about it now,  if  either
+
+1) community re-adjust the release timeline in Jun, postpone Luminous
+to August , we will do the upgrade.
+2) some important features first ready in Kraken( Multi-mds,
+Bluestore, EC overwrite), we will also do the upgrade.
+
+But both are not true.
 
 
-> On 8 Sep 2017, at 16:33, Luis Henriques <lhenriques@suse.com> wrote:
-> 
-> "Yan, Zheng" <zyan@redhat.com> writes:
-> 
->>> On 6 Sep 2017, at 22:12, Luis Henriques <lhenriques@suse.com> wrote:
-> <snip>
->> This bottom-up dentry traversal code worries me. I vaguely remember that bottom-up
->> dentry traversal in kernel is discouraged. Then there are multiples clients modifying
->> the filesystem at the same time, the rename_lock does not help. That's why user space
->> code Client::get_quota_root() checks dentry lease and does lookup parent. I’m not sure
->> if we can do the same operations in kernel, because locking is much more complex in
->> kernel.
-> 
-> So, you're saying that in addition to using the rename_lock (for local
-> renames), that loop will also need to do something similar to what's
-> being done already in function ceph_d_revalidate.  I.e., it needs to
-> validate the lease (as in function dentry_lease_is_valid) and send a
-> CEPH_MDS_OP_LOOKUP if a dentry is invalid.  Or am I missing something?
 
-yes
 
-> 
->> For the long term, I prefer unifying quota and snapshot implementation. The inode
->> trace in MClientReply contains information about which quota realm the inode belongs
->> to. So client can find quota information easily. (This requires bigger change for both
->> mds and client)
-> 
-> My motivation for trying to bring the kernel client a bit closer to
-> the fuse client was that there are currently valid use-cases for this
-> quota implementation, with all its limitations.
-> 
-> Now, I completely agree that ideally the core quota implementation
-> should be moved to the MDS.  This would simplify the clients side,
-> and, above all, would remove the limitation of requiring clients
-> cooperation.
-> 
-> Obviously, I would be more than happy to help on the kernel client
-> side of this solution.  But I'm afraid that the real hard work would
-> be on the MDS code, where things such as multi-MDS and dir
-> fragmentation would make this solution quite complex.
-
-I will start to hammer this code soon, please wait a few days.
-
-Regards
-Yan, Zheng
-
-> 
-> Cheers,
-> -- 
-> Luís
-
+2017-09-08 17:20 GMT+08:00 Matthew Vernon <mv3@sanger.ac.uk>:
+> Hi,
+>
+> On 06/09/17 16:23, Sage Weil wrote:
+>
+>> Traditionally, we have done a major named "stable" release twice a year,
+>> and every other such release has been an "LTS" release, with fixes
+>> backported for 1-2 years.
+>
+> We use the ceph version that comes with our distribution (Ubuntu LTS);
+> those come out every 2 years (though we won't move to a brand-new
+> distribution until we've done some testing!). So from my POV, LTS ceph
+> releases that come out such that adjacent ceph LTSs fit neatly into
+> adjacent Ubuntu LTSs is the ideal outcome. We're unlikely to ever try
+> putting a non-LTS ceph version into production.
+>
+> I hope this isn't an unusual requirement :)
+>
+> Matthew
+>
+>
+> --
+>  The Wellcome Trust Sanger Institute is operated by Genome Research
+>  Limited, a charity registered in England with number 1021457 and a
+>  company registered in England with number 2742969, whose registered
+>  office is 215 Euston Road, London, NW1 2BE.
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
