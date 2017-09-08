@@ -1,48 +1,73 @@
-From: Matthew Vernon <mv3-5fLPn3lgkryFxr2TtlUqVg@public.gmane.org>
-Subject: Re: Ceph release cadence
-Date: Fri, 8 Sep 2017 10:20:22 +0100
-Message-ID: <f939c8a1-2fca-f66f-51b3-048ae0afce18@sanger.ac.uk>
-References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1709061523170.16664-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
-Hi,
-
-On 06/09/17 16:23, Sage Weil wrote:
-
-> Traditionally, we have done a major named "stable" release twice a year, 
-> and every other such release has been an "LTS" release, with fixes 
-> backported for 1-2 years.
-
-We use the ceph version that comes with our distribution (Ubuntu LTS);
-those come out every 2 years (though we won't move to a brand-new
-distribution until we've done some testing!). So from my POV, LTS ceph
-releases that come out such that adjacent ceph LTSs fit neatly into
-adjacent Ubuntu LTSs is the ideal outcome. We're unlikely to ever try
-putting a non-LTS ceph version into production.
-
-I hope this isn't an unusual requirement :)
-
-Matthew
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: [RFC PATCH 2/3] ceph: quotas: support for ceph.quota.max_files
+Date: Fri, 8 Sep 2017 18:43:02 +0800
+Message-ID: <7CC31908-DDCC-4169-A73E-49CE6A4B52E3@redhat.com>
+References: <20170906141224.11813-1-lhenriques@suse.com>
+ <20170906141224.11813-3-lhenriques@suse.com>
+ <B56DB47D-CFD8-49E5-8483-CF591488DD2D@redhat.com> <871snhlhcd.fsf@hermes>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:38486 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753877AbdIHKnQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 8 Sep 2017 06:43:16 -0400
+In-Reply-To: <871snhlhcd.fsf@hermes>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Luis Henriques <lhenriques@suse.com>
+Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Jan Fajerski <jfajerski@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>, Jeff Layton <jlayton@redhat.com>
 
 
--- 
- The Wellcome Trust Sanger Institute is operated by Genome Research 
- Limited, a charity registered in England with number 1021457 and a 
- company registered in England with number 2742969, whose registered 
- office is 215 Euston Road, London, NW1 2BE. 
+> On 8 Sep 2017, at 16:33, Luis Henriques <lhenriques@suse.com> wrote:
+> 
+> "Yan, Zheng" <zyan@redhat.com> writes:
+> 
+>>> On 6 Sep 2017, at 22:12, Luis Henriques <lhenriques@suse.com> wrote:
+> <snip>
+>> This bottom-up dentry traversal code worries me. I vaguely remember that bottom-up
+>> dentry traversal in kernel is discouraged. Then there are multiples clients modifying
+>> the filesystem at the same time, the rename_lock does not help. That's why user space
+>> code Client::get_quota_root() checks dentry lease and does lookup parent. I’m not sure
+>> if we can do the same operations in kernel, because locking is much more complex in
+>> kernel.
+> 
+> So, you're saying that in addition to using the rename_lock (for local
+> renames), that loop will also need to do something similar to what's
+> being done already in function ceph_d_revalidate.  I.e., it needs to
+> validate the lease (as in function dentry_lease_is_valid) and send a
+> CEPH_MDS_OP_LOOKUP if a dentry is invalid.  Or am I missing something?
+
+yes
+
+> 
+>> For the long term, I prefer unifying quota and snapshot implementation. The inode
+>> trace in MClientReply contains information about which quota realm the inode belongs
+>> to. So client can find quota information easily. (This requires bigger change for both
+>> mds and client)
+> 
+> My motivation for trying to bring the kernel client a bit closer to
+> the fuse client was that there are currently valid use-cases for this
+> quota implementation, with all its limitations.
+> 
+> Now, I completely agree that ideally the core quota implementation
+> should be moved to the MDS.  This would simplify the clients side,
+> and, above all, would remove the limitation of requiring clients
+> cooperation.
+> 
+> Obviously, I would be more than happy to help on the kernel client
+> side of this solution.  But I'm afraid that the real hard work would
+> be on the MDS code, where things such as multi-MDS and dir
+> fragmentation would make this solution quite complex.
+
+I will start to hammer this code soon, please wait a few days.
+
+Regards
+Yan, Zheng
+
+> 
+> Cheers,
+> -- 
+> Luís
+
