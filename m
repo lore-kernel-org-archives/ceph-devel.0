@@ -1,14 +1,16 @@
-From: Alexander Litvak <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Ceph release cadence
-Date: Sun, 10 Sep 2017 01:35:45 -0500
-Message-ID: <ef38766b-a749-4a5f-9b02-550957a3fea6@gmail.com>
+From: Yehuda Sadeh-Weinraub <yehuda-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [Ceph-maintainers] Ceph release cadence
+Date: Sun, 10 Sep 2017 12:56:31 +0300
+Message-ID: <CADRKj5TC26Z=FZpx3TLspQcCoMBXfbpxyMr7iVZfmrxLAtvi_g@mail.gmail.com>
 References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
- <1E38E3EC-3112-4694-8F23-5FEAA19BDAB1@flyingcircus.io>
+ <20170907113913.wutbtiy2pavl5mfc@suse.com>
+ <alpine.DEB.2.11.1709081601550.16664@piezo.novalocal>
+ <CAJ4mKGaht37m-Gz=Y3R54+BM6PfHwux4CkjTcrz79LUGVd9MMg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1E38E3EC-3112-4694-8F23-5FEAA19BDAB1-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org>
+In-Reply-To: <CAJ4mKGaht37m-Gz=Y3R54+BM6PfHwux4CkjTcrz79LUGVd9MMg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -18,119 +20,164 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Christian Theune <ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org>
-Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Unknown <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
+To: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Lars Marowsky-Bree <lmb-IBi9RG/b67k@public.gmane.org>, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-CkFzIGEgdXNlciwgwqBJIHdvdWwgbGlrZSB0byBhZGQsIMKgSSB3b3VsZCBsaWtlIHRvIHNlZSBh
-IHJlYWwgMiB5ZWFyIHN1cHBvcnQgZm9yIExUUyByZWxlYXNlcy7CoCBIYW1tZXIgcmVsZWFzZXMg
-d2VyZSBza2V0Y2h5IGF0IGJlc3QgaW4gMjAxNy7CoCBXaGVuIGx1bWlub3VzIHdhcyByZWxlYXNl
-ZCBUaGUgb3V0c3RhbmRpbmcgYnVncyB3ZXJlIGF1dG8gY2xvc2VkLCBnb29kIGJ1eSBhbmQgZ29v
-ZCByZWFkYW5jZS4KCgrCoEFsc28gdGhlIGRlY2lzaW9uIHRvIGRyb3AgY2VydGFpbiBPUyBzdXBw
-b3J0IGNyZWF0ZWQgYSBiYXJyaWVyIHRvIHVwZ3JhZGUgYW5kIGxvb2tpbmcgYXQgamV3ZWwgYW5k
-IGx1bWlub3VzIHVwZ3JhZGUgcGF0aCB3aGVyZSB5b3UgY2Fubm90IGVhc2lseSBnbyBiYWNrIGFm
-dGVyIHVwZ3JhZGUgaXMgY29tcGxldGVkIGRvZXNuJ3QgYWRkIHRoZSBjb25maWRlbmNlLgoKClNv
-IG1ha2luZyB1cGdyYWRlcyBsZXNzIHJhZGljYWwgbWF5IGhlbHAgcHJvZHVjdGlvbiBzdXBwb3J0
-IHRvIGJlIG1vcmUgY29uc2lzdGVudCBhbmQgdXBkYXRlIHByb2Nlc3MgbGVzcyBkYW5nZXJvdXMu
-CgoKSSB3b3VsZCBzYXkgOSBtb250aCBpcyBhIGdvb2QgcmVmZXJlbmNlIHBvaW50IGJ1dCBmb3Ig
-bWUgwqBpdCBpcyByZWFkeSB3aGVuIGl0IGlzIHJlYWxseSByZWFkeSBhbmQgdGVzdGVkLgoKCktl
-ZXBpbmcgZGV2ZWxvcG1lbnQgcmVsZWFzZSBtYXkgYmUgYmV0dGVyIGZvciBkZXZzIGFuZCBlYXJs
-eSBhZG9wdGVycy7CoCBJIGRvbid0IGJlbGlldmUgcHJvZHVjdGlvbiBhZG1pbnMgd291bGQgZ28g
-Zm9yIGludGVybWVkaWF0ZSBvbmUncyBhcyB0aGV5IGJlaW5nIHJlbGVhc2VkIG5vdy7CoAoKClRo
-aXMgaXMgb25seSBNSE8gYW5kIG1heSBiZSB3cm9uZy4KCgoKCgrigaMKCk9uIFNlcCA5LCAyMDE3
-LCAxNTozMiwgYXQgMTU6MzIsIENocmlzdGlhbiBUaGV1bmUgPGN0QGZseWluZ2NpcmN1cy5pbz4g
-d3JvdGU6Cj5IaSwKPgo+aGF2ZSBiZWVuIHVzaW5nIENlcGggZm9yIG11bHRpcGxlIHllYXJzIG5v
-dy4gSXTigJlzIHVuY2xlYXIgdG8gbWUgd2hpY2gKPm9mIHlvdXIgb3B0aW9ucyBmaXRzIGJlc3Qs
-IGJ1dCBoZXJlIGFyZSBteSBwcmVmZXJlbmNlczoKPgo+KiBVcGRhdGVzIGFyZSByaXNreSBpbiBh
-IHdheSB0aGF0IHdlIHRlbmQgdG8gcmF0aGVyIG5vdCBkbyB0aGVtIGV2ZXJ5Cj55ZWFyLiBBbHNv
-LCBoYXZpbmcgc2VlbiBqZXdlbCwgd2XigJl2ZSBiZWVuIHdlbGwgb2ZmIHRvIGF2b2lkIHR3bwo+
-bWFqb3IgaXNzdWVzIHdoYXQgd291bGQgaGF2ZSBiaXR0ZW4gdXMgYW5kIHdpbGwgdXBncmFkZSBm
-cm9tIGhhbW1lciBpbgo+dGhlIG5leHQgbW9udGggb3Igc28uCj4KPiogTm9uLXByb2R1Y3Rpb24g
-cmVsZWFzZXMgYXJlIG9mIG5vdCBtdWNoIHZhbHVlIHRvIG1lLCBhcyBJIGhhdmUgdG8KPmtlZXAg
-b3VyIGRldi9zdGFnaW5nL3Byb2QgY2x1c3RlcnMgaW4gc3luYyB0byB3b3JrIG9uIG91ciBzdHVm
-Zi4KPkFzIHlvdSBjYW4gbmV2ZXIgZG93bmdyYWRlLCB0aGVyZeKAmXMgbm8gdmFsdWUgaW4gaXQg
-Zm9yIG1lIHRvIHRyeQo+bm9uLXByb2R1Y3Rpb24gcmVsZWFzZXMgKHdpdGhvdXQgZnJ5aW5nIGRl
-diBmb3IgZXZlcnlvbmUpLgo+Cj4qIEnigJlkIHByZWZlciBzdGFiaWxpdHkgb3ZlciBuZXcgZmVh
-dHVyZXMuICpTcGVjaWZpY2FsbHkqIHRoYXQgbmV3Cj5mZWF0dXJlcyBjYW4gYmUgcHJvcGVybHkg
-cmVjb21iaW5lZCB3aXRoIGV4aXN0aW5nIGZlYXR1cmVzIChhbmQgZWFjaAo+b3RoZXIpIHdpdGhv
-dXQgbGVhZGluZyB0byBzdXJwcmlzZXMuIChFLmcuIGNhY2hlIHRpZXJpbmcgYnJlYWtpbmcgd2l0
-aAo+c25hcHNob3RzIGFuZCB0aGVuIG5vIHdheSBnb2luZyBiYWNrIGFuZCBhIGdlbmVyYWwgbm90
-aW9uIG9mCj4gIOKAnHRoYXQgY29tYmluYXRpb24gd2FzbuKAmXQgcmVhbGx5IHdlbGwgdGVzdGVk
-KS4KPgo+KiBJ4oCZZCBwcmVmZXIgdmVyc2lvbnMgdGhhdCBJIGhhdmUgdG8gYmUgbWFpbnRhaW5l
-ZCBmb3IKPnByb2R1Y3Rpb24tY3JpdGljYWwgaXNzdWVzIG1heWJlIDIgeWVhcnMsIHNvIEkgY2Fu
-IGhhdmUgc29tZSB0aW1lIGFmdGVyCj5hIG5ldwo+cHJvZHVjdGlvbiByZWxlYXNlIHRoYXQgb3Zl
-cmxhcHMgd2l0aCB0aGUgbmV3IHByb2R1Y3Rpb24gcmVsZWFzZQo+cmVjZWl2aW5nIGltcG9ydGFu
-dCBidWcgZml4ZXMgdW50aWwgSSBzd2l0Y2guCj4KPk1heWJlIHRoaXMgaXMgY2xvc2UgdG8gd2hh
-dCB5b3VyICJEcm9wIHRoZSBvZGQgcmVsZWFzZXMsIGFuZCBhaW0gZm9yIGEKPn45IG1vbnRoIGNh
-ZGVuY2Uu4oCdIHdvdWxkIHNheS4gV2FpdGluZyBmb3IgYSBmZWF0dXJlIGZvciBhIHllYXIgaXMg
-YQo+cGFpbiwgYnV0IG15IHBlcnNvbmFsIGdvYWwgZm9yIENlcGggaXMgdGhhdCBpdCBmaXJzdCBo
-YXMgdG8gd29yawo+cHJvcGVybHksIG1lYW5pbmc6IG5vdCBsb29zZSB5b3VyIGRhdGEsIG5vdCAi
-c3RvcHBpbmcgdGhlIHNob3figJ0sIGFuZAo+bm90IGRyYXdpbmcgeW91IGludG8gYSBjb3JuZXIg
-eW91IGNhbuKAmXQgZ2V0IG91dC4KPgo+VGhhdOKAmXMgbXkgcGVyc3BlY3RpdmUgYXMgYSB1c2Vy
-LiBBcyBhIGZlbGxvdyBkZXZlbG9wZXIgSSBmZWVsIHlvdXIgcGFpbgo+YWJvdXQgd2FudGluZyB0
-byByZWxlYXNlIGZhc3RlciBhbmQgcmVkdWNpbmcgbWFpbnRlbmFuY2UgbG9hZCwgc28KPnRoYW5r
-cyBmb3IgYXNraW5nIQo+Cj5Ib3BlIHRoaXMgaGVscHMsCj5DaHJpc3RpYW4KPgo+PiBPbiBTZXAg
-NiwgMjAxNywgYXQgNToyMyBQTSwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToK
-Pj4gCj4+IEhpIGV2ZXJ5b25lLAo+PiAKPj4gVHJhZGl0aW9uYWxseSwgd2UgaGF2ZSBkb25lIGEg
-bWFqb3IgbmFtZWQgInN0YWJsZSIgcmVsZWFzZSB0d2ljZSBhCj55ZWFyLAo+PiBhbmQgZXZlcnkg
-b3RoZXIgc3VjaCByZWxlYXNlIGhhcyBiZWVuIGFuICJMVFMiIHJlbGVhc2UsIHdpdGggZml4ZXMK
-Pj4gYmFja3BvcnRlZCBmb3IgMS0yIHllYXJzLgo+PiAKPj4gV2l0aCBrcmFrZW4gYW5kIGx1bWlu
-b3VzIHdlIG1pc3NlZCBvdXIgc2NoZWR1bGUgYnkgYSBsb3Q6IGluc3RlYWQgb2YKPj4gcmVsZWFz
-aW5nIGluIE9jdG9iZXIgYW5kIEFwcmlsIHdlIHJlbGVhc2VkIGluIEphbnVhcnkgYW5kIEF1Z3Vz
-dC4KPj4gCj4+IEEgZmV3IG9ic2VydmF0aW9uczoKPj4gCj4+IC0gTm90IGEgbG90IG9mIHBlb3Bs
-ZSBzZWVtIHRvIHJ1biB0aGUgIm9kZCIgcmVsZWFzZXMgKGUuZy4sCj5pbmZlcm5hbGlzLAo+PiBr
-cmFrZW4pLiAgVGhpcyBsaW1pdHMgdGhlIHZhbHVlIG9mIGFjdHVhbGx5IG1ha2luZyB0aGVtLiAg
-SXQgYWxzbwo+bWVhbnMKPj4gdGhhdCB0aG9zZSB3aG8gKmRvKiBydW4gdGhlbSBhcmUgcnVubmlu
-ZyByaXNraWVyIGNvZGUgKGZld2VyIHVzZXJzIC0+Cj5tb3JlCj4+IGJ1Z3MpLgo+PiAKPj4gLSBU
-aGUgbW9yZSByZWNlbnQgcmVxdWlyZW1lbnQgdGhhdCB1cGdyYWRpbmcgY2x1c3RlcnMgbXVzdCBt
-YWtlIGEKPnN0b3AgYXQKPj4gZWFjaCBMVFMgKGUuZy4sIGhhbW1lciAtPiBsdW1pbm91cyBub3Qg
-c3VwcG9ydGVkLCBtdXN0IGdvIGhhbW1lciAtPgo+amV3ZWwKPj4gLT4gbHVtbmlub3VzKSBoYXMg
-YmVlbiBodWdlbHkgaGVscGZ1bCBvbiB0aGUgZGV2ZWxvcG1lbnQgc2lkZSBieQo+cmVkdWNpbmcK
-Pj4gdGhlIGFtb3VudCBvZiBjcm9zcy12ZXJzaW9uIGNvbXBhdGliaWxpdHkgY29kZSB0byBtYWlu
-dGFpbiBhbmQKPnJlZHVjaW5nCj4+IHRoZSBudW1iZXIgb2YgdXBncmFkZSBjb21iaW5hdGlvbnMg
-dG8gdGVzdC4KPj4gCj4+IC0gV2hlbiB3ZSB0cnkgdG8gZG8gYSB0aW1lLWJhc2VkICJ0cmFpbiIg
-cmVsZWFzZSBjYWRlbmNlLCB0aGVyZQo+YWx3YXlzCj4+IHNlZW1zIHRvIGJlIHNvbWUgIm11c3Qt
-aGF2ZSIgdGhpbmcgdGhhdCBkZWxheXMgdGhlIHJlbGVhc2UgYSBiaXQuIAo+VGhpcwo+PiBkb2Vz
-bid0IGhhcHBlbiBhcyBtdWNoIHdpdGggdGhlIG9kZCByZWxlYXNlcywgYnV0IGl0IGRlZmluaXRl
-bHkKPmhhcHBlbnMKPj4gd2l0aCB0aGUgTFRTIHJlbGVhc2VzLiAgV2hlbiB0aGUgbmV4dCBMVFMg
-aXMgYSB5ZWFyIGF3YXksIGl0IGlzIGhhcmQKPnRvCj4+IHN1Y2sgaXQgdXAgYW5kIHdhaXQgdGhh
-dCBsb25nLgo+PiAKPj4gQSBjb3VwbGUgb2Ygb3B0aW9uczoKPj4gCj4+ICogS2VlcCBldmVuL29k
-ZCBwYXR0ZXJuLCBhbmQgY29udGludWUgYmVpbmcgZmxleGlibGUgd2l0aCByZWxlYXNlCj5kYXRl
-cwo+PiAKPj4gICsgZmxleGlibGUKPj4gIC0gdW5wcmVkaWN0YWJsZQo+PiAgLSBvZGQgcmVsZWFz
-ZXMgb2YgZHViaW91cyB2YWx1ZQo+PiAKPj4gKiBLZWVwIGV2ZW4vb2RkIHBhdHRlcm4sIGJ1dCBm
-b3JjZSBhICd0cmFpbicgbW9kZWwgd2l0aCBhIG1vcmUKPnJlZ3VsYXIKPj4gY2FkZW5jZQo+PiAK
-Pj4gICsgcHJlZGljdGFibGUgc2NoZWR1bGUKPj4gIC0gc29tZSBmZWF0dXJlcyB3aWxsIG1pc3Mg
-dGhlIHRhcmdldCBhbmQgYmUgZGVsYXllZCBhIHllYXIKPj4gCj4+ICogRHJvcCB0aGUgb2RkIHJl
-bGVhc2VzIGJ1dCBjaGFuZ2Ugbm90aGluZyBlbHNlIChpLmUuLCAxMi1tb250aAo+cmVsZWFzZQo+
-PiBjYWRlbmNlKQo+PiAKPj4gICsgZWxpbWluYXRlIHRoZSBjb25mdXNpbmcgb2RkIHJlbGVhc2Vz
-IHdpdGggZHViaW91cyB2YWx1ZQo+PiAKPj4gKiBEcm9wIHRoZSBvZGQgcmVsZWFzZXMsIGFuZCBh
-aW0gZm9yIGEgfjkgbW9udGggY2FkZW5jZS4gVGhpcyBzcGxpdHMKPnRoZQo+PiBkaWZmZXJlbmNl
-IGJldHdlZW4gdGhlIGN1cnJlbnQgZXZlbi9vZGQgcGF0dGVybiB3ZSd2ZSBiZWVuIGRvaW5nLgo+
-PiAKPj4gICsgZWxpbWluYXRlIHRoZSBjb25mdXNpbmcgb2RkIHJlbGVhc2VzIHdpdGggZHViaW91
-cyB2YWx1ZQo+PiAgKyB3YWl0aW5nIGZvciB0aGUgbmV4dCByZWxlYXNlIGlzbid0IHF1aXRlIGFz
-IGJhZAo+PiAgLSByZXF1aXJlZCB1cGdyYWRlcyBldmVyeSA5IG1vbnRocyBpbnN0ZWFkIG9mIGV2
-ZXIgMTIgbW9udGhzCj4+IAo+PiAqIERyb3AgdGhlIG9kZCByZWxlYXNlcywgYnV0IHJlbGF4IHRo
-ZSAibXVzdCB1cGdyYWRlIHRocm91Z2ggZXZlcnkKPkxUUyIgdG8KPj4gYWxsb3cgdXBncmFkZXMg
-YWNyb3NzIDIgdmVyc2lvbnMgKGUuZy4sIGx1bWlub3VzIC0+IG1pbWljIG9yIGx1bWlub3VzCj4t
-Pgo+PiBuYXV0aWx1cykuICBTaG9ydGVuIHJlbGVhc2UgY3ljbGUgKH42LTkgbW9udGhzKS4KPj4g
-Cj4+ICArIG1vcmUgZmxleGliaWxpdHkgZm9yIHVzZXJzCj4+ICArIGRvd25zdHJlYW1zIGhhdmUg
-Z3JlYXRlciBjaG9pY2UgaW4gYWRvcHRpbmcgYW4gdXBzdHJlbWEgcmVsZWFzZQo+PiAgLSBtb3Jl
-IExUUyBicmFuY2hlcyB0byBtYWludGFpbgo+PiAgLSBtb3JlIHVwZ3JhZGUgcGF0aHMgdG8gY29u
-c2lkZXIKPj4gCj4+IE90aGVyIG9wdGlvbnMgd2Ugc2hvdWxkIGNvbnNpZGVyPyAgT3RoZXIgdGhv
-dWdodHM/Cj4+IAo+PiBUaGFua3MhCj4+IHNhZ2UKPj4gLS0KPj4gVG8gdW5zdWJzY3JpYmUgZnJv
-bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiCj5pbgo+
-PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+PiBN
-b3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
-bmZvLmh0bWwKPgo+TGllYmUgR3LDvMOfZSwKPkNocmlzdGlhbiBUaGV1bmUKPgo+LS0KPkNocmlz
-dGlhbiBUaGV1bmUgwrcgY3RAZmx5aW5nY2lyY3VzLmlvIMK3ICs0OSAzNDUgMjE5NDAxIDAKPkZs
-eWluZyBDaXJjdXMgSW50ZXJuZXQgT3BlcmF0aW9ucyBHbWJIIMK3IGh0dHA6Ly9mbHlpbmdjaXJj
-dXMuaW8KPkZvcnN0ZXJzdHJhw59lIDI5IMK3IDA2MTEyIEhhbGxlIChTYWFsZSkgwrcgRGV1dHNj
-aGxhbmQKPkhSIFN0ZW5kYWwgSFJCIDIxMTY5IMK3IEdlc2Now6RmdHNmw7xocmVyOiBDaHJpc3Rp
-YW4gVGhldW5lLCBDaHJpc3RpYW4KPlphZ3JvZG5pY2sKPgo+Cj4KPi0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQo+
-Cj5fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+Y2VwaC11
-c2VycyBtYWlsaW5nIGxpc3QKPmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPmh0dHA6Ly9saXN0
-cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQoKX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxp
-c3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
-Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+I'm not a huge fan of train releases, as they tend to never quite make
+it on time and it always feels a bit artificial timeline anyway. OTOH,
+I do see and understand the need of a predictable schedule with a
+roadmap attached to it. There are many that need to have at least a
+vague idea on what we're going to ship and when, so that they can plan
+ahead. We need it ourselves, as sometimes the schedule can dictate the
+engineering decision that we're going to make.
+On the other hand, I think that working towards a release that come
+out after 9 or 12 months is a bit too long. This is a recipe for more
+delays as the penalty for missing a feature is painful. Maybe we can
+consider returning to shorter iterations for *dev* releases. These are
+checkpoints that need to happen after a short period (2-3 weeks),
+where we end up with a minimally tested release that passes some smoke
+test. Features are incrementally added to the dev release. The idea
+behind a short term dev release is that it minimizes the window where
+master is completely unusable, thus reduces the time to stabilization.
+Then it's easier to enforce a train schedule if we want to. It might
+be easier to let go of a feature that doesn't make it, as it will be
+there soon, and maybe if really needed we (or the downstream
+maintainer) can make the decision to backport it. This makes me think
+that we could revisit the our backport policy/procedure/tooling, so
+that we can do it in a sane and safe way when needed and possible.
+
+Yehuda
+
+On Fri, Sep 8, 2017 at 7:59 PM, Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> I think I'm the resident train release advocate so I'm sure my
+> advocating that model will surprise nobody. I'm not sure I'd go all
+> the way to Lars' multi-release maintenance model (although it's
+> definitely something I'm interested in), but there are two big reasons
+> I wish we were on a train with more frequent real releases:
+>
+> 1) It reduces the cost of features missing a release. Right now if
+> something misses an LTS release, that's it for a year. And nobody
+> likes releasing an LTS without a bunch of big new features, so each
+> LTS is later than the one before as we scramble to get features merged
+> in.
+>
+> ...and then we deal with the fact that we scrambled to get a bunch of
+> features merged in and they weren't quite baked. (Luminous so far
+> seems to have gone much better in this regard! Hurray! But I think
+> that has a lot to do with our feature-release-scramble this year being
+> mostly peripheral stuff around user interfaces that got tacked on
+> about the time we'd initially planned the release to occur.)
+>
+> 2) Train releases increase predictability for downstreams, partners,
+> and users around when releases will happen. Right now, the release
+> process and schedule is entirely opaque to anybody who's not involved
+> in every single upstream meeting we have; and it's unpredictable even
+> to those who are. That makes things difficult, as Xiaoxi said.
+>
+> There are other peripheral but serious benefits I'd expect to see from
+> fully-validated train releases as well. It would be *awesome* to have
+> more frequent known-stable points to do new development against. If
+> you're an external developer and you want a new feature, you have to
+> either keep it rebased against a fast-changing master branch, or you
+> need to settle for writing it against a long-out-of-date LTS and then
+> forward-porting it for merge. If you're an FS developer writing a very
+> small new OSD feature and you try to validate it against RADOS, you've
+> no idea if bugs that pop up and look random are because you really did
+> something wrong or if there's currently an intermittent issue in RADOS
+> master. I would have *loved* to be able to maintain CephFS integration
+> branches for features that didn't touch RADOS and were built on top of
+> the latest release instead of master, but it was utterly infeasible
+> because there were too many missing features with the long delays.
+>
+> On Fri, Sep 8, 2017 at 9:16 AM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>> I'm going to pick on Lars a bit here...
+>>
+>> On Thu, 7 Sep 2017, Lars Marowsky-Bree wrote:
+>>> On 2017-09-06T15:23:34, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>>> > Other options we should consider?  Other thoughts?
+>>>
+>>> With about 20-odd years in software development, I've become a big
+>>> believer in schedule-driven releases. If it's feature-based, you never
+>>> know when they'll get done.
+>>>
+>>> If the schedule intervals are too long though, the urge to press too
+>>> much in (so as not to miss the next merge window) is just too high,
+>>> meaning the train gets derailed. (Which cascades into the future,
+>>> because the next time the pressure will be even higher based on the
+>>> previous experience.) This requires strictness.
+>>>
+>>> We've had a few Linux kernel releases that were effectively feature
+>>> driven and never quite made it. 1.3.x? 1.5.x? My memory is bad, but they
+>>> were a disaster than eventually led Linus to evolve to the current
+>>> model.
+>>>
+>>> That serves them really well, and I believe it might be worth
+>>> considering for us.
+>>
+>> This model is very appealing.  The problem with it that I see is that the
+>> upstream kernel community doesn't really do stable releases.  Mainline
+>> developers are just getting their stuff upstream, and entire separate
+>> organizations and teams are doing the stable distro kernels.  (There are
+>> upstream stable kernels too, yes, but they don't get much testing AFAICS
+>> and I'm not sure who uses them.)
+>>
+>> More importantly, upgrade and on-disk format issues are present for almost
+>> everything that we change in Ceph.  Those things rarely come up for the
+>> kernel.  Even the local file systems (a small piece of the kernel) have
+>> comparatively fewer format changes that we do, it seems.
+>>
+>> These make the upgrade testing a huge concern and burden for the
+>> Ceph development community.
+>>
+>>> I'd try to move away from the major milestones. Features get integrated
+>>> into the next schedule-driven release when they deemed ready and stable;
+>>> when they're not, not a big deal, the next one is coming up "soonish".
+>>>
+>>> (This effectively decouples feature development slightly from the
+>>> release schedule.)
+>>>
+>>> We could even go for "a release every 3 months, sharp", merge window for
+>>> the first month, stabilization the second, release clean up the third,
+>>> ship.
+>>>
+>>> Interoperability hacks for the cluster/server side are maintained for 2
+>>> years, and then dropped.  Sharp. (Speaking as one of those folks
+>>> affected, we should not burden the community with this.) Client interop
+>>> is a different story, a bit.
+>>>
+>>> Basically, effectively edging towards continuous integration of features
+>>> and bugfixes both. Nobody has to wait for anything much, and can
+>>> schedule reasonably independently.
+>>
+>> If I read between the lines a bit here, but this sounds like is:
+>>
+>>  - keep the frequently major releases (but possibly shorten the 6mo
+>>    cadence)
+>>  - do backports for all of them, not just the even ones
+>>  - test upgrades between all of them within a 2 year horizon, instead
+>>    of just the last major one
+>>
+>> Is that accurate?
+>>
+>> Unfortunately it sounds to me like that would significantly increase the
+>> maintenance burden (double it even?) and slow development down.  The user
+>> base will also end up fragmented across a broader range of versions, which
+>> means we'll see a wider variety of bugs and each release will be less
+>> stable.
+>>
+>> This is full of trade-offs... time we spend backporting or testing
+>> upgrades is time we don't spend fixing bugs or improving performance or
+>> adding features.
+>
+> Not all newly-allocated effort for doing maintenance and testing
+> necessarily means reducing effort available for new feature
+> development. Sometimes it just makes that development easier and more
+> efficient!    I think we'd find that more tested and stable releases
+> would spread joy and stability throughout our development process and
+> make life much easier on prospective contributors.
+> -Greg
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
