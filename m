@@ -1,11 +1,12 @@
-From: Sasha Litvak <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Alexander Litvak <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: Ceph release cadence
-Date: Sun, 10 Sep 2017 01:23:43 -0500
-Message-ID: <CALi_L4-mt0++xcJm=31fYqmbX3FJRVCtc5Z9DJo05U=n54NCog@mail.gmail.com>
+Date: Sun, 10 Sep 2017 01:35:45 -0500
+Message-ID: <ef38766b-a749-4a5f-9b02-550957a3fea6@gmail.com>
 References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
  <1E38E3EC-3112-4694-8F23-5FEAA19BDAB1@flyingcircus.io>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0089842772963811470=="
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <1E38E3EC-3112-4694-8F23-5FEAA19BDAB1-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
@@ -18,374 +19,118 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 To: Christian Theune <ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org>
-Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>
+Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Unknown <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
---===============0089842772963811470==
-Content-Type: multipart/alternative; boundary="001a114278d41e645d0558cfda41"
-
---001a114278d41e645d0558cfda41
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-As a user,  I woul like to add,  I would like to see a real 2 year support
-for LTS releases.  Hammer releases were sketchy at best in 2017.  When
-luminous was released The outstanding bugs were auto closed, good buy and
-good readance.
-
- Also the decision to drop certain OS support created a barrier to upgrade
-and looking at jewel and luminous upgrade path where you cannot easily go
-back after upgrade is completed doesn't add the confidence.
-
-So making upgrades less radical may help production support to be more
-consistent and update process less dangerous.
-
-I would say 9 month is a good reference point but for me  it is ready when
-it is really ready and tested.
-
-Keeping development release may be better for devs and early adopters.  I
-don't believe production admins would go for intermediate one's as they
-being released now.
-
-This is only MHO and may be wrong
-
-On Saturday, September 9, 2017, Christian Theune <ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org> wrote=
-:
-
-> Hi,
->
-> have been using Ceph for multiple years now. It=E2=80=99s unclear to me w=
-hich of
-> your options fits best, but here are my preferences:
->
-> * Updates are risky in a way that we tend to rather not do them every
-> year. Also, having seen jewel, we=E2=80=99ve been well off to avoid two
->   major issues what would have bitten us and will upgrade from hammer in
-> the next month or so.
->
-> * Non-production releases are of not much value to me, as I have to keep
-> our dev/staging/prod clusters in sync to work on our stuff.
->   As you can never downgrade, there=E2=80=99s no value in it for me to tr=
-y
-> non-production releases (without frying dev for everyone).
->
-> * I=E2=80=99d prefer stability over new features. *Specifically* that new=
- features
-> can be properly recombined with existing features (and each
->   other) without leading to surprises. (E.g. cache tiering breaking with
-> snapshots and then no way going back and a general notion of
->   =E2=80=9Cthat combination wasn=E2=80=99t really well tested).
->
-> * I=E2=80=99d prefer versions that I have to be maintained for production=
--critical
-> issues maybe 2 years, so I can have some time after a new
->   production release that overlaps with the new production release
-> receiving important bug fixes until I switch.
->
-> Maybe this is close to what your "Drop the odd releases, and aim for a ~9
-> month cadence.=E2=80=9D would say. Waiting for a feature for a year is a =
-pain, but
-> my personal goal for Ceph is that it first has to work properly, meaning:
-> not loose your data, not "stopping the show=E2=80=9D, and not drawing you=
- into a
-> corner you can=E2=80=99t get out.
->
-> That=E2=80=99s my perspective as a user. As a fellow developer I feel you=
-r pain
-> about wanting to release faster and reducing maintenance load, so thanks
-> for asking!
->
-> Hope this helps,
-> Christian
->
-> > On Sep 6, 2017, at 5:23 PM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org <javascript:;>>
-> wrote:
-> >
-> > Hi everyone,
-> >
-> > Traditionally, we have done a major named "stable" release twice a year=
-,
-> > and every other such release has been an "LTS" release, with fixes
-> > backported for 1-2 years.
-> >
-> > With kraken and luminous we missed our schedule by a lot: instead of
-> > releasing in October and April we released in January and August.
-> >
-> > A few observations:
-> >
-> > - Not a lot of people seem to run the "odd" releases (e.g., infernalis,
-> > kraken).  This limits the value of actually making them.  It also means
-> > that those who *do* run them are running riskier code (fewer users ->
-> more
-> > bugs).
-> >
-> > - The more recent requirement that upgrading clusters must make a stop =
-at
-> > each LTS (e.g., hammer -> luminous not supported, must go hammer -> jew=
-el
-> > -> lumninous) has been hugely helpful on the development side by reduci=
-ng
-> > the amount of cross-version compatibility code to maintain and reducing
-> > the number of upgrade combinations to test.
-> >
-> > - When we try to do a time-based "train" release cadence, there always
-> > seems to be some "must-have" thing that delays the release a bit.  This
-> > doesn't happen as much with the odd releases, but it definitely happens
-> > with the LTS releases.  When the next LTS is a year away, it is hard to
-> > suck it up and wait that long.
-> >
-> > A couple of options:
-> >
-> > * Keep even/odd pattern, and continue being flexible with release dates
-> >
-> >  + flexible
-> >  - unpredictable
-> >  - odd releases of dubious value
-> >
-> > * Keep even/odd pattern, but force a 'train' model with a more regular
-> > cadence
-> >
-> >  + predictable schedule
-> >  - some features will miss the target and be delayed a year
-> >
-> > * Drop the odd releases but change nothing else (i.e., 12-month release
-> > cadence)
-> >
-> >  + eliminate the confusing odd releases with dubious value
-> >
-> > * Drop the odd releases, and aim for a ~9 month cadence. This splits th=
-e
-> > difference between the current even/odd pattern we've been doing.
-> >
-> >  + eliminate the confusing odd releases with dubious value
-> >  + waiting for the next release isn't quite as bad
-> >  - required upgrades every 9 months instead of ever 12 months
-> >
-> > * Drop the odd releases, but relax the "must upgrade through every LTS"
-> to
-> > allow upgrades across 2 versions (e.g., luminous -> mimic or luminous -=
->
-> > nautilus).  Shorten release cycle (~6-9 months).
-> >
-> >  + more flexibility for users
-> >  + downstreams have greater choice in adopting an upstrema release
-> >  - more LTS branches to maintain
-> >  - more upgrade paths to consider
-> >
-> > Other options we should consider?  Other thoughts?
-> >
-> > Thanks!
-> > sage
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
-n
-> > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org <javascript:;>
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> Liebe Gr=C3=BC=C3=9Fe,
-> Christian Theune
->
-> --
-> Christian Theune =C2=B7 ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org <javascript:;> =C2=B7 +49 345 =
-219401 0
-> Flying Circus Internet Operations GmbH =C2=B7 http://flyingcircus.io
-> Forsterstra=C3=9Fe 29 =C2=B7 06112 Halle (Saale) =C2=B7 Deutschland
-> HR Stendal HRB 21169 =C2=B7 Gesch=C3=A4ftsf=C3=BChrer: Christian Theune, =
-Christian
-> Zagrodnick
->
->
-
---001a114278d41e645d0558cfda41
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-As a user, =C2=A0I woul like to add, =C2=A0I would like to see a real 2 yea=
-r support for LTS releases.=C2=A0 Hammer releases were sketchy at best in 2=
-017.=C2=A0 When luminous was released The outstanding bugs were auto closed=
-, good buy and good readance.<div dir=3D"auto"><br></div><div dir=3D"auto">=
-=C2=A0Also the decision to drop certain OS support created a barrier to upg=
-rade and looking at jewel and luminous upgrade path where you cannot easily=
- go back after upgrade is completed doesn&#39;t add the confidence.</div><d=
-iv dir=3D"auto"><br></div><div dir=3D"auto">So making upgrades less radical=
- may help production support to be more consistent and update process less =
-dangerous.</div><div dir=3D"auto"><br></div><div dir=3D"auto">I would say 9=
- month is a good reference point but for me =C2=A0it is ready when it is re=
-ally ready and tested.</div><div dir=3D"auto"><br></div><div dir=3D"auto">K=
-eeping development release may be better for devs and early adopters.=C2=A0=
- I don&#39;t believe production admins would go for intermediate one&#39;s =
-as they being released now.=C2=A0</div><div dir=3D"auto"><br></div><div dir=
-=3D"auto">This is only MHO and may be wrong</div><br>On Saturday, September=
- 9, 2017, Christian Theune &lt;<a href=3D"mailto:ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org">ct@fly=
-ingcircus.io</a>&gt; wrote:<br><blockquote class=3D"gmail_quote" style=3D"m=
-argin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">Hi,<br>
-<br>
-have been using Ceph for multiple years now. It=E2=80=99s unclear to me whi=
-ch of your options fits best, but here are my preferences:<br>
-<br>
-* Updates are risky in a way that we tend to rather not do them every year.=
- Also, having seen jewel, we=E2=80=99ve been well off to avoid two<br>
-=C2=A0 major issues what would have bitten us and will upgrade from hammer =
-in the next month or so.<br>
-<br>
-* Non-production releases are of not much value to me, as I have to keep ou=
-r dev/staging/prod clusters in sync to work on our stuff.<br>
-=C2=A0 As you can never downgrade, there=E2=80=99s no value in it for me to=
- try non-production releases (without frying dev for everyone).<br>
-<br>
-* I=E2=80=99d prefer stability over new features. *Specifically* that new f=
-eatures can be properly recombined with existing features (and each<br>
-=C2=A0 other) without leading to surprises. (E.g. cache tiering breaking wi=
-th snapshots and then no way going back and a general notion of<br>
-=C2=A0 =E2=80=9Cthat combination wasn=E2=80=99t really well tested).<br>
-<br>
-* I=E2=80=99d prefer versions that I have to be maintained for production-c=
-ritical issues maybe 2 years, so I can have some time after a new<br>
-=C2=A0 production release that overlaps with the new production release rec=
-eiving important bug fixes until I switch.<br>
-<br>
-Maybe this is close to what your &quot;Drop the odd releases, and aim for a=
- ~9 month cadence.=E2=80=9D would say. Waiting for a feature for a year is =
-a pain, but my personal goal for Ceph is that it first has to work properly=
-, meaning: not loose your data, not &quot;stopping the show=E2=80=9D, and n=
-ot drawing you into a corner you can=E2=80=99t get out.<br>
-<br>
-That=E2=80=99s my perspective as a user. As a fellow developer I feel your =
-pain about wanting to release faster and reducing maintenance load, so than=
-ks for asking!<br>
-<br>
-Hope this helps,<br>
-Christian<br>
-<br>
-&gt; On Sep 6, 2017, at 5:23 PM, Sage Weil &lt;<a href=3D"javascript:;" onc=
-lick=3D"_e(event, &#39;cvml&#39;, &#39;sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org&#39;)">sweil@redhat=
-.com</a>&gt; wrote:<br>
-&gt;<br>
-&gt; Hi everyone,<br>
-&gt;<br>
-&gt; Traditionally, we have done a major named &quot;stable&quot; release t=
-wice a year,<br>
-&gt; and every other such release has been an &quot;LTS&quot; release, with=
- fixes<br>
-&gt; backported for 1-2 years.<br>
-&gt;<br>
-&gt; With kraken and luminous we missed our schedule by a lot: instead of<b=
-r>
-&gt; releasing in October and April we released in January and August.<br>
-&gt;<br>
-&gt; A few observations:<br>
-&gt;<br>
-&gt; - Not a lot of people seem to run the &quot;odd&quot; releases (e.g., =
-infernalis,<br>
-&gt; kraken).=C2=A0 This limits the value of actually making them.=C2=A0 It=
- also means<br>
-&gt; that those who *do* run them are running riskier code (fewer users -&g=
-t; more<br>
-&gt; bugs).<br>
-&gt;<br>
-&gt; - The more recent requirement that upgrading clusters must make a stop=
- at<br>
-&gt; each LTS (e.g., hammer -&gt; luminous not supported, must go hammer -&=
-gt; jewel<br>
-&gt; -&gt; lumninous) has been hugely helpful on the development side by re=
-ducing<br>
-&gt; the amount of cross-version compatibility code to maintain and reducin=
-g<br>
-&gt; the number of upgrade combinations to test.<br>
-&gt;<br>
-&gt; - When we try to do a time-based &quot;train&quot; release cadence, th=
-ere always<br>
-&gt; seems to be some &quot;must-have&quot; thing that delays the release a=
- bit.=C2=A0 This<br>
-&gt; doesn&#39;t happen as much with the odd releases, but it definitely ha=
-ppens<br>
-&gt; with the LTS releases.=C2=A0 When the next LTS is a year away, it is h=
-ard to<br>
-&gt; suck it up and wait that long.<br>
-&gt;<br>
-&gt; A couple of options:<br>
-&gt;<br>
-&gt; * Keep even/odd pattern, and continue being flexible with release date=
-s<br>
-&gt;<br>
-&gt;=C2=A0 + flexible<br>
-&gt;=C2=A0 - unpredictable<br>
-&gt;=C2=A0 - odd releases of dubious value<br>
-&gt;<br>
-&gt; * Keep even/odd pattern, but force a &#39;train&#39; model with a more=
- regular<br>
-&gt; cadence<br>
-&gt;<br>
-&gt;=C2=A0 + predictable schedule<br>
-&gt;=C2=A0 - some features will miss the target and be delayed a year<br>
-&gt;<br>
-&gt; * Drop the odd releases but change nothing else (i.e., 12-month releas=
-e<br>
-&gt; cadence)<br>
-&gt;<br>
-&gt;=C2=A0 + eliminate the confusing odd releases with dubious value<br>
-&gt;<br>
-&gt; * Drop the odd releases, and aim for a ~9 month cadence. This splits t=
-he<br>
-&gt; difference between the current even/odd pattern we&#39;ve been doing.<=
-br>
-&gt;<br>
-&gt;=C2=A0 + eliminate the confusing odd releases with dubious value<br>
-&gt;=C2=A0 + waiting for the next release isn&#39;t quite as bad<br>
-&gt;=C2=A0 - required upgrades every 9 months instead of ever 12 months<br>
-&gt;<br>
-&gt; * Drop the odd releases, but relax the &quot;must upgrade through ever=
-y LTS&quot; to<br>
-&gt; allow upgrades across 2 versions (e.g., luminous -&gt; mimic or lumino=
-us -&gt;<br>
-&gt; nautilus).=C2=A0 Shorten release cycle (~6-9 months).<br>
-&gt;<br>
-&gt;=C2=A0 + more flexibility for users<br>
-&gt;=C2=A0 + downstreams have greater choice in adopting an upstrema releas=
-e<br>
-&gt;=C2=A0 - more LTS branches to maintain<br>
-&gt;=C2=A0 - more upgrade paths to consider<br>
-&gt;<br>
-&gt; Other options we should consider?=C2=A0 Other thoughts?<br>
-&gt;<br>
-&gt; Thanks!<br>
-&gt; sage<br>
-&gt; --<br>
-&gt; To unsubscribe from this list: send the line &quot;unsubscribe ceph-de=
-vel&quot; in<br>
-&gt; the body of a message to <a href=3D"javascript:;" onclick=3D"_e(event,=
- &#39;cvml&#39;, &#39;majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&#39;)">majordomo-u79uwXL29TZNg+MwTxZMZA@public.gmane.org=
-l.org</a><br>
-&gt; More majordomo info at=C2=A0 <a href=3D"http://vger.kernel.org/majordo=
-mo-info.html" target=3D"_blank">http://vger.kernel.org/<wbr>majordomo-info.=
-html</a><br>
-<br>
-Liebe Gr=C3=BC=C3=9Fe,<br>
-Christian Theune<br>
-<br>
---<br>
-Christian Theune =C2=B7 <a href=3D"javascript:;" onclick=3D"_e(event, &#39;=
-cvml&#39;, &#39;ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org&#39;)">ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org</a> =C2=B7 +49=
- 345 219401 0<br>
-Flying Circus Internet Operations GmbH =C2=B7 <a href=3D"http://flyingcircu=
-s.io" target=3D"_blank">http://flyingcircus.io</a><br>
-Forsterstra=C3=9Fe 29 =C2=B7 06112 Halle (Saale) =C2=B7 Deutschland<br>
-HR Stendal HRB 21169 =C2=B7 Gesch=C3=A4ftsf=C3=BChrer: Christian Theune, Ch=
-ristian Zagrodnick<br>
-<br>
-</blockquote>
-
---001a114278d41e645d0558cfda41--
-
---===============0089842772963811470==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
---===============0089842772963811470==--
+CkFzIGEgdXNlciwgwqBJIHdvdWwgbGlrZSB0byBhZGQsIMKgSSB3b3VsZCBsaWtlIHRvIHNlZSBh
+IHJlYWwgMiB5ZWFyIHN1cHBvcnQgZm9yIExUUyByZWxlYXNlcy7CoCBIYW1tZXIgcmVsZWFzZXMg
+d2VyZSBza2V0Y2h5IGF0IGJlc3QgaW4gMjAxNy7CoCBXaGVuIGx1bWlub3VzIHdhcyByZWxlYXNl
+ZCBUaGUgb3V0c3RhbmRpbmcgYnVncyB3ZXJlIGF1dG8gY2xvc2VkLCBnb29kIGJ1eSBhbmQgZ29v
+ZCByZWFkYW5jZS4KCgrCoEFsc28gdGhlIGRlY2lzaW9uIHRvIGRyb3AgY2VydGFpbiBPUyBzdXBw
+b3J0IGNyZWF0ZWQgYSBiYXJyaWVyIHRvIHVwZ3JhZGUgYW5kIGxvb2tpbmcgYXQgamV3ZWwgYW5k
+IGx1bWlub3VzIHVwZ3JhZGUgcGF0aCB3aGVyZSB5b3UgY2Fubm90IGVhc2lseSBnbyBiYWNrIGFm
+dGVyIHVwZ3JhZGUgaXMgY29tcGxldGVkIGRvZXNuJ3QgYWRkIHRoZSBjb25maWRlbmNlLgoKClNv
+IG1ha2luZyB1cGdyYWRlcyBsZXNzIHJhZGljYWwgbWF5IGhlbHAgcHJvZHVjdGlvbiBzdXBwb3J0
+IHRvIGJlIG1vcmUgY29uc2lzdGVudCBhbmQgdXBkYXRlIHByb2Nlc3MgbGVzcyBkYW5nZXJvdXMu
+CgoKSSB3b3VsZCBzYXkgOSBtb250aCBpcyBhIGdvb2QgcmVmZXJlbmNlIHBvaW50IGJ1dCBmb3Ig
+bWUgwqBpdCBpcyByZWFkeSB3aGVuIGl0IGlzIHJlYWxseSByZWFkeSBhbmQgdGVzdGVkLgoKCktl
+ZXBpbmcgZGV2ZWxvcG1lbnQgcmVsZWFzZSBtYXkgYmUgYmV0dGVyIGZvciBkZXZzIGFuZCBlYXJs
+eSBhZG9wdGVycy7CoCBJIGRvbid0IGJlbGlldmUgcHJvZHVjdGlvbiBhZG1pbnMgd291bGQgZ28g
+Zm9yIGludGVybWVkaWF0ZSBvbmUncyBhcyB0aGV5IGJlaW5nIHJlbGVhc2VkIG5vdy7CoAoKClRo
+aXMgaXMgb25seSBNSE8gYW5kIG1heSBiZSB3cm9uZy4KCgoKCgrigaMKCk9uIFNlcCA5LCAyMDE3
+LCAxNTozMiwgYXQgMTU6MzIsIENocmlzdGlhbiBUaGV1bmUgPGN0QGZseWluZ2NpcmN1cy5pbz4g
+d3JvdGU6Cj5IaSwKPgo+aGF2ZSBiZWVuIHVzaW5nIENlcGggZm9yIG11bHRpcGxlIHllYXJzIG5v
+dy4gSXTigJlzIHVuY2xlYXIgdG8gbWUgd2hpY2gKPm9mIHlvdXIgb3B0aW9ucyBmaXRzIGJlc3Qs
+IGJ1dCBoZXJlIGFyZSBteSBwcmVmZXJlbmNlczoKPgo+KiBVcGRhdGVzIGFyZSByaXNreSBpbiBh
+IHdheSB0aGF0IHdlIHRlbmQgdG8gcmF0aGVyIG5vdCBkbyB0aGVtIGV2ZXJ5Cj55ZWFyLiBBbHNv
+LCBoYXZpbmcgc2VlbiBqZXdlbCwgd2XigJl2ZSBiZWVuIHdlbGwgb2ZmIHRvIGF2b2lkIHR3bwo+
+bWFqb3IgaXNzdWVzIHdoYXQgd291bGQgaGF2ZSBiaXR0ZW4gdXMgYW5kIHdpbGwgdXBncmFkZSBm
+cm9tIGhhbW1lciBpbgo+dGhlIG5leHQgbW9udGggb3Igc28uCj4KPiogTm9uLXByb2R1Y3Rpb24g
+cmVsZWFzZXMgYXJlIG9mIG5vdCBtdWNoIHZhbHVlIHRvIG1lLCBhcyBJIGhhdmUgdG8KPmtlZXAg
+b3VyIGRldi9zdGFnaW5nL3Byb2QgY2x1c3RlcnMgaW4gc3luYyB0byB3b3JrIG9uIG91ciBzdHVm
+Zi4KPkFzIHlvdSBjYW4gbmV2ZXIgZG93bmdyYWRlLCB0aGVyZeKAmXMgbm8gdmFsdWUgaW4gaXQg
+Zm9yIG1lIHRvIHRyeQo+bm9uLXByb2R1Y3Rpb24gcmVsZWFzZXMgKHdpdGhvdXQgZnJ5aW5nIGRl
+diBmb3IgZXZlcnlvbmUpLgo+Cj4qIEnigJlkIHByZWZlciBzdGFiaWxpdHkgb3ZlciBuZXcgZmVh
+dHVyZXMuICpTcGVjaWZpY2FsbHkqIHRoYXQgbmV3Cj5mZWF0dXJlcyBjYW4gYmUgcHJvcGVybHkg
+cmVjb21iaW5lZCB3aXRoIGV4aXN0aW5nIGZlYXR1cmVzIChhbmQgZWFjaAo+b3RoZXIpIHdpdGhv
+dXQgbGVhZGluZyB0byBzdXJwcmlzZXMuIChFLmcuIGNhY2hlIHRpZXJpbmcgYnJlYWtpbmcgd2l0
+aAo+c25hcHNob3RzIGFuZCB0aGVuIG5vIHdheSBnb2luZyBiYWNrIGFuZCBhIGdlbmVyYWwgbm90
+aW9uIG9mCj4gIOKAnHRoYXQgY29tYmluYXRpb24gd2FzbuKAmXQgcmVhbGx5IHdlbGwgdGVzdGVk
+KS4KPgo+KiBJ4oCZZCBwcmVmZXIgdmVyc2lvbnMgdGhhdCBJIGhhdmUgdG8gYmUgbWFpbnRhaW5l
+ZCBmb3IKPnByb2R1Y3Rpb24tY3JpdGljYWwgaXNzdWVzIG1heWJlIDIgeWVhcnMsIHNvIEkgY2Fu
+IGhhdmUgc29tZSB0aW1lIGFmdGVyCj5hIG5ldwo+cHJvZHVjdGlvbiByZWxlYXNlIHRoYXQgb3Zl
+cmxhcHMgd2l0aCB0aGUgbmV3IHByb2R1Y3Rpb24gcmVsZWFzZQo+cmVjZWl2aW5nIGltcG9ydGFu
+dCBidWcgZml4ZXMgdW50aWwgSSBzd2l0Y2guCj4KPk1heWJlIHRoaXMgaXMgY2xvc2UgdG8gd2hh
+dCB5b3VyICJEcm9wIHRoZSBvZGQgcmVsZWFzZXMsIGFuZCBhaW0gZm9yIGEKPn45IG1vbnRoIGNh
+ZGVuY2Uu4oCdIHdvdWxkIHNheS4gV2FpdGluZyBmb3IgYSBmZWF0dXJlIGZvciBhIHllYXIgaXMg
+YQo+cGFpbiwgYnV0IG15IHBlcnNvbmFsIGdvYWwgZm9yIENlcGggaXMgdGhhdCBpdCBmaXJzdCBo
+YXMgdG8gd29yawo+cHJvcGVybHksIG1lYW5pbmc6IG5vdCBsb29zZSB5b3VyIGRhdGEsIG5vdCAi
+c3RvcHBpbmcgdGhlIHNob3figJ0sIGFuZAo+bm90IGRyYXdpbmcgeW91IGludG8gYSBjb3JuZXIg
+eW91IGNhbuKAmXQgZ2V0IG91dC4KPgo+VGhhdOKAmXMgbXkgcGVyc3BlY3RpdmUgYXMgYSB1c2Vy
+LiBBcyBhIGZlbGxvdyBkZXZlbG9wZXIgSSBmZWVsIHlvdXIgcGFpbgo+YWJvdXQgd2FudGluZyB0
+byByZWxlYXNlIGZhc3RlciBhbmQgcmVkdWNpbmcgbWFpbnRlbmFuY2UgbG9hZCwgc28KPnRoYW5r
+cyBmb3IgYXNraW5nIQo+Cj5Ib3BlIHRoaXMgaGVscHMsCj5DaHJpc3RpYW4KPgo+PiBPbiBTZXAg
+NiwgMjAxNywgYXQgNToyMyBQTSwgU2FnZSBXZWlsIDxzd2VpbEByZWRoYXQuY29tPiB3cm90ZToK
+Pj4gCj4+IEhpIGV2ZXJ5b25lLAo+PiAKPj4gVHJhZGl0aW9uYWxseSwgd2UgaGF2ZSBkb25lIGEg
+bWFqb3IgbmFtZWQgInN0YWJsZSIgcmVsZWFzZSB0d2ljZSBhCj55ZWFyLAo+PiBhbmQgZXZlcnkg
+b3RoZXIgc3VjaCByZWxlYXNlIGhhcyBiZWVuIGFuICJMVFMiIHJlbGVhc2UsIHdpdGggZml4ZXMK
+Pj4gYmFja3BvcnRlZCBmb3IgMS0yIHllYXJzLgo+PiAKPj4gV2l0aCBrcmFrZW4gYW5kIGx1bWlu
+b3VzIHdlIG1pc3NlZCBvdXIgc2NoZWR1bGUgYnkgYSBsb3Q6IGluc3RlYWQgb2YKPj4gcmVsZWFz
+aW5nIGluIE9jdG9iZXIgYW5kIEFwcmlsIHdlIHJlbGVhc2VkIGluIEphbnVhcnkgYW5kIEF1Z3Vz
+dC4KPj4gCj4+IEEgZmV3IG9ic2VydmF0aW9uczoKPj4gCj4+IC0gTm90IGEgbG90IG9mIHBlb3Bs
+ZSBzZWVtIHRvIHJ1biB0aGUgIm9kZCIgcmVsZWFzZXMgKGUuZy4sCj5pbmZlcm5hbGlzLAo+PiBr
+cmFrZW4pLiAgVGhpcyBsaW1pdHMgdGhlIHZhbHVlIG9mIGFjdHVhbGx5IG1ha2luZyB0aGVtLiAg
+SXQgYWxzbwo+bWVhbnMKPj4gdGhhdCB0aG9zZSB3aG8gKmRvKiBydW4gdGhlbSBhcmUgcnVubmlu
+ZyByaXNraWVyIGNvZGUgKGZld2VyIHVzZXJzIC0+Cj5tb3JlCj4+IGJ1Z3MpLgo+PiAKPj4gLSBU
+aGUgbW9yZSByZWNlbnQgcmVxdWlyZW1lbnQgdGhhdCB1cGdyYWRpbmcgY2x1c3RlcnMgbXVzdCBt
+YWtlIGEKPnN0b3AgYXQKPj4gZWFjaCBMVFMgKGUuZy4sIGhhbW1lciAtPiBsdW1pbm91cyBub3Qg
+c3VwcG9ydGVkLCBtdXN0IGdvIGhhbW1lciAtPgo+amV3ZWwKPj4gLT4gbHVtbmlub3VzKSBoYXMg
+YmVlbiBodWdlbHkgaGVscGZ1bCBvbiB0aGUgZGV2ZWxvcG1lbnQgc2lkZSBieQo+cmVkdWNpbmcK
+Pj4gdGhlIGFtb3VudCBvZiBjcm9zcy12ZXJzaW9uIGNvbXBhdGliaWxpdHkgY29kZSB0byBtYWlu
+dGFpbiBhbmQKPnJlZHVjaW5nCj4+IHRoZSBudW1iZXIgb2YgdXBncmFkZSBjb21iaW5hdGlvbnMg
+dG8gdGVzdC4KPj4gCj4+IC0gV2hlbiB3ZSB0cnkgdG8gZG8gYSB0aW1lLWJhc2VkICJ0cmFpbiIg
+cmVsZWFzZSBjYWRlbmNlLCB0aGVyZQo+YWx3YXlzCj4+IHNlZW1zIHRvIGJlIHNvbWUgIm11c3Qt
+aGF2ZSIgdGhpbmcgdGhhdCBkZWxheXMgdGhlIHJlbGVhc2UgYSBiaXQuIAo+VGhpcwo+PiBkb2Vz
+bid0IGhhcHBlbiBhcyBtdWNoIHdpdGggdGhlIG9kZCByZWxlYXNlcywgYnV0IGl0IGRlZmluaXRl
+bHkKPmhhcHBlbnMKPj4gd2l0aCB0aGUgTFRTIHJlbGVhc2VzLiAgV2hlbiB0aGUgbmV4dCBMVFMg
+aXMgYSB5ZWFyIGF3YXksIGl0IGlzIGhhcmQKPnRvCj4+IHN1Y2sgaXQgdXAgYW5kIHdhaXQgdGhh
+dCBsb25nLgo+PiAKPj4gQSBjb3VwbGUgb2Ygb3B0aW9uczoKPj4gCj4+ICogS2VlcCBldmVuL29k
+ZCBwYXR0ZXJuLCBhbmQgY29udGludWUgYmVpbmcgZmxleGlibGUgd2l0aCByZWxlYXNlCj5kYXRl
+cwo+PiAKPj4gICsgZmxleGlibGUKPj4gIC0gdW5wcmVkaWN0YWJsZQo+PiAgLSBvZGQgcmVsZWFz
+ZXMgb2YgZHViaW91cyB2YWx1ZQo+PiAKPj4gKiBLZWVwIGV2ZW4vb2RkIHBhdHRlcm4sIGJ1dCBm
+b3JjZSBhICd0cmFpbicgbW9kZWwgd2l0aCBhIG1vcmUKPnJlZ3VsYXIKPj4gY2FkZW5jZQo+PiAK
+Pj4gICsgcHJlZGljdGFibGUgc2NoZWR1bGUKPj4gIC0gc29tZSBmZWF0dXJlcyB3aWxsIG1pc3Mg
+dGhlIHRhcmdldCBhbmQgYmUgZGVsYXllZCBhIHllYXIKPj4gCj4+ICogRHJvcCB0aGUgb2RkIHJl
+bGVhc2VzIGJ1dCBjaGFuZ2Ugbm90aGluZyBlbHNlIChpLmUuLCAxMi1tb250aAo+cmVsZWFzZQo+
+PiBjYWRlbmNlKQo+PiAKPj4gICsgZWxpbWluYXRlIHRoZSBjb25mdXNpbmcgb2RkIHJlbGVhc2Vz
+IHdpdGggZHViaW91cyB2YWx1ZQo+PiAKPj4gKiBEcm9wIHRoZSBvZGQgcmVsZWFzZXMsIGFuZCBh
+aW0gZm9yIGEgfjkgbW9udGggY2FkZW5jZS4gVGhpcyBzcGxpdHMKPnRoZQo+PiBkaWZmZXJlbmNl
+IGJldHdlZW4gdGhlIGN1cnJlbnQgZXZlbi9vZGQgcGF0dGVybiB3ZSd2ZSBiZWVuIGRvaW5nLgo+
+PiAKPj4gICsgZWxpbWluYXRlIHRoZSBjb25mdXNpbmcgb2RkIHJlbGVhc2VzIHdpdGggZHViaW91
+cyB2YWx1ZQo+PiAgKyB3YWl0aW5nIGZvciB0aGUgbmV4dCByZWxlYXNlIGlzbid0IHF1aXRlIGFz
+IGJhZAo+PiAgLSByZXF1aXJlZCB1cGdyYWRlcyBldmVyeSA5IG1vbnRocyBpbnN0ZWFkIG9mIGV2
+ZXIgMTIgbW9udGhzCj4+IAo+PiAqIERyb3AgdGhlIG9kZCByZWxlYXNlcywgYnV0IHJlbGF4IHRo
+ZSAibXVzdCB1cGdyYWRlIHRocm91Z2ggZXZlcnkKPkxUUyIgdG8KPj4gYWxsb3cgdXBncmFkZXMg
+YWNyb3NzIDIgdmVyc2lvbnMgKGUuZy4sIGx1bWlub3VzIC0+IG1pbWljIG9yIGx1bWlub3VzCj4t
+Pgo+PiBuYXV0aWx1cykuICBTaG9ydGVuIHJlbGVhc2UgY3ljbGUgKH42LTkgbW9udGhzKS4KPj4g
+Cj4+ICArIG1vcmUgZmxleGliaWxpdHkgZm9yIHVzZXJzCj4+ICArIGRvd25zdHJlYW1zIGhhdmUg
+Z3JlYXRlciBjaG9pY2UgaW4gYWRvcHRpbmcgYW4gdXBzdHJlbWEgcmVsZWFzZQo+PiAgLSBtb3Jl
+IExUUyBicmFuY2hlcyB0byBtYWludGFpbgo+PiAgLSBtb3JlIHVwZ3JhZGUgcGF0aHMgdG8gY29u
+c2lkZXIKPj4gCj4+IE90aGVyIG9wdGlvbnMgd2Ugc2hvdWxkIGNvbnNpZGVyPyAgT3RoZXIgdGhv
+dWdodHM/Cj4+IAo+PiBUaGFua3MhCj4+IHNhZ2UKPj4gLS0KPj4gVG8gdW5zdWJzY3JpYmUgZnJv
+bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiCj5pbgo+
+PiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+PiBN
+b3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
+bmZvLmh0bWwKPgo+TGllYmUgR3LDvMOfZSwKPkNocmlzdGlhbiBUaGV1bmUKPgo+LS0KPkNocmlz
+dGlhbiBUaGV1bmUgwrcgY3RAZmx5aW5nY2lyY3VzLmlvIMK3ICs0OSAzNDUgMjE5NDAxIDAKPkZs
+eWluZyBDaXJjdXMgSW50ZXJuZXQgT3BlcmF0aW9ucyBHbWJIIMK3IGh0dHA6Ly9mbHlpbmdjaXJj
+dXMuaW8KPkZvcnN0ZXJzdHJhw59lIDI5IMK3IDA2MTEyIEhhbGxlIChTYWFsZSkgwrcgRGV1dHNj
+aGxhbmQKPkhSIFN0ZW5kYWwgSFJCIDIxMTY5IMK3IEdlc2Now6RmdHNmw7xocmVyOiBDaHJpc3Rp
+YW4gVGhldW5lLCBDaHJpc3RpYW4KPlphZ3JvZG5pY2sKPgo+Cj4KPi0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQo+
+Cj5fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwo+Y2VwaC11
+c2VycyBtYWlsaW5nIGxpc3QKPmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KPmh0dHA6Ly9saXN0
+cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQoKX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxp
+c3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
+Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
