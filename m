@@ -1,11 +1,11 @@
 From: Sasha Litvak <alexander.v.litvak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: Ceph release cadence
-Date: Sun, 10 Sep 2017 00:58:10 -0500
-Message-ID: <CALi_L49T5g=58SNbXVgGALfRN7_O5UFWdAz2Duv8dYBkoRZGiA@mail.gmail.com>
+Date: Sun, 10 Sep 2017 01:23:43 -0500
+Message-ID: <CALi_L4-mt0++xcJm=31fYqmbX3FJRVCtc5Z9DJo05U=n54NCog@mail.gmail.com>
 References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
  <1E38E3EC-3112-4694-8F23-5FEAA19BDAB1@flyingcircus.io>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============7622199071634493460=="
+Content-Type: multipart/mixed; boundary="===============0089842772963811470=="
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 In-Reply-To: <1E38E3EC-3112-4694-8F23-5FEAA19BDAB1-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
@@ -18,13 +18,13 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
 To: Christian Theune <ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org>
-Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
+Cc: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
---===============7622199071634493460==
-Content-Type: multipart/alternative; boundary="001a114278d4b9a41e0558cf7ea6"
+--===============0089842772963811470==
+Content-Type: multipart/alternative; boundary="001a114278d41e645d0558cfda41"
 
---001a114278d4b9a41e0558cf7ea6
+--001a114278d41e645d0558cfda41
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
@@ -47,9 +47,10 @@ Keeping development release may be better for devs and early adopters.  I
 don't believe production admins would go for intermediate one's as they
 being released now.
 
-This is only MHO and may be wrong.
+This is only MHO and may be wrong
 
-On Sep 9, 2017 15:32, "Christian Theune" <ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org> wrote:
+On Saturday, September 9, 2017, Christian Theune <ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org> wrote=
+:
 
 > Hi,
 >
@@ -97,7 +98,8 @@ r pain
 > Hope this helps,
 > Christian
 >
-> > On Sep 6, 2017, at 5:23 PM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> > On Sep 6, 2017, at 5:23 PM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org <javascript:;>>
+> wrote:
 > >
 > > Hi everyone,
 > >
@@ -177,14 +179,15 @@ e
 > > --
 > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" i=
 n
-> > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org <javascript:;>
 > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
 > Liebe Gr=C3=BC=C3=9Fe,
 > Christian Theune
 >
 > --
-> Christian Theune =C2=B7 ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org =C2=B7 +49 345 219401 0
+> Christian Theune =C2=B7 ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org <javascript:;> =C2=B7 +49 345 =
+219401 0
 > Flying Circus Internet Operations GmbH =C2=B7 http://flyingcircus.io
 > Forsterstra=C3=9Fe 29 =C2=B7 06112 Halle (Saale) =C2=B7 Deutschland
 > HR Stendal HRB 21169 =C2=B7 Gesch=C3=A4ftsf=C3=BChrer: Christian Theune, =
@@ -192,38 +195,30 @@ Christian
 > Zagrodnick
 >
 >
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->
->
 
---001a114278d4b9a41e0558cf7ea6
+--001a114278d41e645d0558cfda41
 Content-Type: text/html; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-<div dir=3D"auto">As a user, =C2=A0I woul like to add, =C2=A0I would like t=
-o see a real 2 year support for LTS releases.=C2=A0 Hammer releases were sk=
-etchy at best in 2017.=C2=A0 When luminous was released The outstanding bug=
-s were auto closed, good buy and good readance.<div dir=3D"auto"><br></div>=
-<div dir=3D"auto">=C2=A0Also the decision to drop certain OS support create=
-d a barrier to upgrade and looking at jewel and luminous upgrade path where=
- you cannot easily go back after upgrade is completed doesn&#39;t add the c=
-onfidence.</div><div dir=3D"auto"><br></div><div dir=3D"auto">So making upg=
-rades less radical may help production support to be more consistent and up=
-date process less dangerous.</div><div dir=3D"auto"><br></div><div dir=3D"a=
-uto">I would say 9 month is a good reference point but for me =C2=A0it is r=
-eady when it is really ready and tested.</div><div dir=3D"auto"><br></div><=
-div dir=3D"auto">Keeping development release may be better for devs and ear=
-ly adopters.=C2=A0 I don&#39;t believe production admins would go for inter=
-mediate one&#39;s as they being released now.=C2=A0</div><div dir=3D"auto">=
-<br></div><div dir=3D"auto">This is only MHO and may be wrong.</div></div><=
-div class=3D"gmail_extra"><br><div class=3D"gmail_quote">On Sep 9, 2017 15:=
-32, &quot;Christian Theune&quot; &lt;<a href=3D"mailto:ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org">=
-ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org</a>&gt; wrote:<br type=3D"attribution"><blockquote class=
-=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padd=
-ing-left:1ex">Hi,<br>
+As a user, =C2=A0I woul like to add, =C2=A0I would like to see a real 2 yea=
+r support for LTS releases.=C2=A0 Hammer releases were sketchy at best in 2=
+017.=C2=A0 When luminous was released The outstanding bugs were auto closed=
+, good buy and good readance.<div dir=3D"auto"><br></div><div dir=3D"auto">=
+=C2=A0Also the decision to drop certain OS support created a barrier to upg=
+rade and looking at jewel and luminous upgrade path where you cannot easily=
+ go back after upgrade is completed doesn&#39;t add the confidence.</div><d=
+iv dir=3D"auto"><br></div><div dir=3D"auto">So making upgrades less radical=
+ may help production support to be more consistent and update process less =
+dangerous.</div><div dir=3D"auto"><br></div><div dir=3D"auto">I would say 9=
+ month is a good reference point but for me =C2=A0it is ready when it is re=
+ally ready and tested.</div><div dir=3D"auto"><br></div><div dir=3D"auto">K=
+eeping development release may be better for devs and early adopters.=C2=A0=
+ I don&#39;t believe production admins would go for intermediate one&#39;s =
+as they being released now.=C2=A0</div><div dir=3D"auto"><br></div><div dir=
+=3D"auto">This is only MHO and may be wrong</div><br>On Saturday, September=
+ 9, 2017, Christian Theune &lt;<a href=3D"mailto:ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org">ct@fly=
+ingcircus.io</a>&gt; wrote:<br><blockquote class=3D"gmail_quote" style=3D"m=
+argin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">Hi,<br>
 <br>
 have been using Ceph for multiple years now. It=E2=80=99s unclear to me whi=
 ch of your options fits best, but here are my preferences:<br>
@@ -262,8 +257,9 @@ ks for asking!<br>
 Hope this helps,<br>
 Christian<br>
 <br>
-&gt; On Sep 6, 2017, at 5:23 PM, Sage Weil &lt;<a href=3D"mailto:sweil@redh=
-at.com">sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt; wrote:<br>
+&gt; On Sep 6, 2017, at 5:23 PM, Sage Weil &lt;<a href=3D"javascript:;" onc=
+lick=3D"_e(event, &#39;cvml&#39;, &#39;sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org&#39;)">sweil@redhat=
+.com</a>&gt; wrote:<br>
 &gt;<br>
 &gt; Hi everyone,<br>
 &gt;<br>
@@ -357,37 +353,31 @@ e<br>
 &gt; --<br>
 &gt; To unsubscribe from this list: send the line &quot;unsubscribe ceph-de=
 vel&quot; in<br>
-&gt; the body of a message to <a href=3D"mailto:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">=
-majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>
+&gt; the body of a message to <a href=3D"javascript:;" onclick=3D"_e(event,=
+ &#39;cvml&#39;, &#39;majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&#39;)">majordomo-u79uwXL29TZNg+MwTxZMZA@public.gmane.org=
+l.org</a><br>
 &gt; More majordomo info at=C2=A0 <a href=3D"http://vger.kernel.org/majordo=
-mo-info.html" rel=3D"noreferrer" target=3D"_blank">http://vger.kernel.org/<=
-wbr>majordomo-info.html</a><br>
+mo-info.html" target=3D"_blank">http://vger.kernel.org/<wbr>majordomo-info.=
+html</a><br>
 <br>
 Liebe Gr=C3=BC=C3=9Fe,<br>
 Christian Theune<br>
 <br>
 --<br>
-Christian Theune =C2=B7 <a href=3D"mailto:ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org">ct@flyingcirc=
-us.io</a> =C2=B7 <a href=3D"tel:%2B49%20345%20219401%200" value=3D"+4934521=
-94010">+49 345 219401 0</a><br>
+Christian Theune =C2=B7 <a href=3D"javascript:;" onclick=3D"_e(event, &#39;=
+cvml&#39;, &#39;ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org&#39;)">ct-4ImjS3E6Ur3YxmODkEiZ1Q@public.gmane.org</a> =C2=B7 +49=
+ 345 219401 0<br>
 Flying Circus Internet Operations GmbH =C2=B7 <a href=3D"http://flyingcircu=
-s.io" rel=3D"noreferrer" target=3D"_blank">http://flyingcircus.io</a><br>
+s.io" target=3D"_blank">http://flyingcircus.io</a><br>
 Forsterstra=C3=9Fe 29 =C2=B7 06112 Halle (Saale) =C2=B7 Deutschland<br>
 HR Stendal HRB 21169 =C2=B7 Gesch=C3=A4ftsf=C3=BChrer: Christian Theune, Ch=
 ristian Zagrodnick<br>
 <br>
-<br>______________________________<wbr>_________________<br>
-ceph-users mailing list<br>
-<a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><=
-br>
-<a href=3D"http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com" rel=3D"n=
-oreferrer" target=3D"_blank">http://lists.ceph.com/<wbr>listinfo.cgi/ceph-u=
-sers-ceph.<wbr>com</a><br>
-<br></blockquote></div></div>
+</blockquote>
 
---001a114278d4b9a41e0558cf7ea6--
+--001a114278d41e645d0558cfda41--
 
---===============7622199071634493460==
+--===============0089842772963811470==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -398,4 +388,4 @@ ceph-users mailing list
 ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
 
---===============7622199071634493460==--
+--===============0089842772963811470==--
