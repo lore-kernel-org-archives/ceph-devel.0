@@ -1,105 +1,107 @@
-From: Oleg Kolosov <olekol@gmail.com>
-Subject: Re: LRC has slower recovery than Jerasure
-Date: Tue, 12 Sep 2017 00:08:32 +0300
-Message-ID: <CAODUPsGGcUk9zKUEnRYBPzEQicvpeM6M6nUHg+sk7v20SP9okg@mail.gmail.com>
-References: <CAODUPsGPdZ7AL1nYpTP5OE8iqWpcgj=Durm_f_4C=y12tbmnYA@mail.gmail.com>
- <alpine.DEB.2.11.1709112048200.24068@piezo.novalocal>
+From: John Spray <jspray-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Ceph release cadence
+Date: Mon, 11 Sep 2017 23:30:46 +0100
+Message-ID: <CALe9h7eFV5sitW+8WAVqjmB+rJvYJw-5C4nizS0HTqffr-_bCA@mail.gmail.com>
+References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f179.google.com ([209.85.223.179]:35185 "EHLO
-        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750957AbdIKVId (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Sep 2017 17:08:33 -0400
-Received: by mail-io0-f179.google.com with SMTP id g32so17442205ioj.2
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Sep 2017 14:08:33 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1709112048200.24068@piezo.novalocal>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1709061523170.16664-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org" <ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Sage,
-Yes, this might be an issue, I wonder if in any way I can minimize the
-effect of recovery at the primary, otherwise LRC plugin misses its
-purpose in such a configuration.
-I'll explain my experiment in detail:
+On Wed, Sep 6, 2017 at 4:23 PM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> Hi everyone,
+>
+> Traditionally, we have done a major named "stable" release twice a year,
+> and every other such release has been an "LTS" release, with fixes
+> backported for 1-2 years.
+>
+> With kraken and luminous we missed our schedule by a lot: instead of
+> releasing in October and April we released in January and August.
+>
+> A few observations:
+>
+> - Not a lot of people seem to run the "odd" releases (e.g., infernalis,
+> kraken).  This limits the value of actually making them.  It also means
+> that those who *do* run them are running riskier code (fewer users -> more
+> bugs).
+>
+> - The more recent requirement that upgrading clusters must make a stop at
+> each LTS (e.g., hammer -> luminous not supported, must go hammer -> jewel
+> -> lumninous) has been hugely helpful on the development side by reducing
+> the amount of cross-version compatibility code to maintain and reducing
+> the number of upgrade combinations to test.
+>
+> - When we try to do a time-based "train" release cadence, there always
+> seems to be some "must-have" thing that delays the release a bit.  This
+> doesn't happen as much with the odd releases, but it definitely happens
+> with the LTS releases.  When the next LTS is a year away, it is hard to
+> suck it up and wait that long.
+>
+> A couple of options:
+>
+> * Keep even/odd pattern, and continue being flexible with release dates
+>
+>   + flexible
+>   - unpredictable
+>   - odd releases of dubious value
+>
+> * Keep even/odd pattern, but force a 'train' model with a more regular
+> cadence
+>
+>   + predictable schedule
+>   - some features will miss the target and be delayed a year
+>
+> * Drop the odd releases but change nothing else (i.e., 12-month release
+> cadence)
+>
+>   + eliminate the confusing odd releases with dubious value
+>
+> * Drop the odd releases, and aim for a ~9 month cadence. This splits the
+> difference between the current even/odd pattern we've been doing.
+>
+>   + eliminate the confusing odd releases with dubious value
+>   + waiting for the next release isn't quite as bad
+>   - required upgrades every 9 months instead of ever 12 months
 
-The code was defined the following:
- plugin=lrc \
- mapping=DD_DD____ \
- layers='[
- [ "DD_DD_ccc", "" ],
-[ "DDc______", "" ],
-[ "___DDc___", "" ],
- ]' \
- ruleset-steps='[
- [ "choose", "host",  3  ],
- [ "chooseleaf", "osd",  3  ],
- ]'
+This is my preferred option (second choice would be the next one up,
+i.e. same thing but annually).
 
+Our focus should be on delivering solid stuff, but not necessarily
+bending over backwards to enable people to run old stuff.  Our
+commitment to releases should be that there are either fixes for that
+release, or a newer (better) release to upgrade to.  Either way there
+is a solution on offer (and any user/vendor who wants to independently
+maintain other stable branches is free to do so).
 
-osd tree is the following:
+John
 
-ID  WEIGHT   TYPE NAME      UP/DOWN REWEIGHT PRIMARY-AFFINITY
- -1 40.00000 root default
--22  8.00000     host host0
-  0  1.00000         osd.0       up  1.00000          1.00000
-  1  1.00000         osd.1       up  1.00000          1.00000
-  2  1.00000         osd.2       up  1.00000          1.00000
-  3  1.00000         osd.3       up  1.00000          1.00000
-  4  1.00000         osd.4       up  1.00000          1.00000
-  5  1.00000         osd.5       up  1.00000          1.00000
-  6  1.00000         osd.6       up  1.00000          1.00000
-  7  1.00000         osd.7       up  1.00000          1.00000
--23  8.00000     host host1
-  8  1.00000         osd.8       up  1.00000          1.00000
-  9  1.00000         osd.9       up  1.00000          1.00000
- 10  1.00000         osd.10      up  1.00000          1.00000
- 11  1.00000         osd.11      up  1.00000          1.00000
- 12  1.00000         osd.12      up  1.00000          1.00000
- 13  1.00000         osd.13      up  1.00000          1.00000
- 14  1.00000         osd.14      up  1.00000          1.00000
- 15  1.00000         osd.15      up  1.00000          1.00000
--24  8.00000     host host2
- 16  1.00000         osd.16      up  1.00000          1.00000
- 17  1.00000         osd.17      up  1.00000          1.00000
- 18  1.00000         osd.18      up  1.00000          1.00000
- 19  1.00000         osd.19      up  1.00000          1.00000
- 20  1.00000         osd.20      up  1.00000          1.00000
- 21  1.00000         osd.21      up  1.00000          1.00000
- 22  1.00000         osd.22      up  1.00000          1.00000
- 23  1.00000         osd.23      up  1.00000          1.00000
--25  8.00000     host host3
- 24  1.00000         osd.24      up  1.00000          1.00000
- 25  1.00000         osd.25      up  1.00000          1.00000
- 26  1.00000         osd.26      up  1.00000          1.00000
- 27  1.00000         osd.27      up  1.00000          1.00000
- 28  1.00000         osd.28      up  1.00000          1.00000
- 29  1.00000         osd.29      up  1.00000          1.00000
- 30  1.00000         osd.30      up  1.00000          1.00000
- 31  1.00000         osd.31      up  1.00000          1.00000
--26  8.00000     host host4
- 32  1.00000         osd.32      up  1.00000          1.00000
- 33  1.00000         osd.33      up  1.00000          1.00000
- 34  1.00000         osd.34      up  1.00000          1.00000
- 35  1.00000         osd.35      up  1.00000          1.00000
- 36  1.00000         osd.36      up  1.00000          1.00000
- 37  1.00000         osd.37      up  1.00000          1.00000
- 38  1.00000         osd.38      up  1.00000          1.00000
- 39  1.00000         osd.39      up  1.00000          1.00000
-
-
-In my experiment I write a certain amount of data, next I kill an osd
-and take measurements during recovery (until cluster is HEALTH_OK
-again). I measure cpu and reads done in every second.
-What I see for the reads is that it reaches some sort of a constant
-value per sec, like there is a threshold for reads during recovery.
-CPU behaved the same, but following the throttling  change the
-threshold became less obvious.
-
-When performing the same experiment with only 'chooseleaf osd'
-defined, I get normal behaviour.
-
-Thanks,
-Oleg
+> * Drop the odd releases, but relax the "must upgrade through every LTS" to
+> allow upgrades across 2 versions (e.g., luminous -> mimic or luminous ->
+> nautilus).  Shorten release cycle (~6-9 months).
+>
+>   + more flexibility for users
+>   + downstreams have greater choice in adopting an upstrema release
+>   - more LTS branches to maintain
+>   - more upgrade paths to consider
+>
+> Other options we should consider?  Other thoughts?
+>
+> Thanks!
+> sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
