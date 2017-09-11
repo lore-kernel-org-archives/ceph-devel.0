@@ -1,54 +1,54 @@
-From: Nathan Cutler <ncutler-AlSwsSmVLrQ@public.gmane.org>
-Subject: Re: Ceph release cadence
-Date: Mon, 11 Sep 2017 22:43:37 +0200
-Message-ID: <e7f5851f-23f2-0d77-d039-56fa46900a35@suse.cz>
-References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: LRC has slower recovery than Jerasure
+Date: Mon, 11 Sep 2017 20:49:36 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1709112048200.24068@piezo.novalocal>
+References: <CAODUPsGPdZ7AL1nYpTP5OE8iqWpcgj=Durm_f_4C=y12tbmnYA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1709061523170.16664-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.216.30]:46597 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750926AbdIKUtj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Sep 2017 16:49:39 -0400
+In-Reply-To: <CAODUPsGPdZ7AL1nYpTP5OE8iqWpcgj=Durm_f_4C=y12tbmnYA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Oleg Kolosov <olekol@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
- From a backporter's perspective, the appealing options are the ones 
-that reduce the number of stable releases in maintenance at any 
-particular time.
+On Mon, 11 Sep 2017, Oleg Kolosov wrote:
+> Hi,
+> I'm working on a new implementation of a new erasure code. During my
+> development, I began testing the performance of my code & ceph LRC
+> plugin vs jerasure.
+> When setting up a cluster with failure domain being only leaf cells
+> (osd) I saw the expected behaviour - recovery of LRC is faster than
+> jerasure.
+> Next I divided my cluster into 5 hosts, each containing 8 osds, and
+> placed each local group under a different host (using ruleset-steps).
+> Jerasure still had osd as failure domain. At this point I noticed that
+> LRC has slower recovery. I've tried a configuration of k=4, l=3 and
+> total of 9 shards.
+> 
+> I don't think it's collisions in crush, since it shouldn't have such a
+> heavy effect.
+> My suspicion is some sort of a throttle. I've tried to set the following:
+>          osd recovery max active = 500
+>         osd recovery op priority = 32
+> 
+> But I didn't see any significant improvement.
+> 
+> Can you think of a reason LRC would recover slower than jerasure when
+> it's constrained to domains as I've described?
 
-In the current practice, there are always at least two LTS releases, and 
-sometimes a non-LTS release as well, that are "live" and supposed to be 
-getting backports. For example:
+I don't have a specific answer for you, but one thing to keep in mind 
+is that even with LRC, recovery is driven by the primary: it will 
+reconstruct the shard(s) on the primary (reading over the network) and 
+then push them out to the OSDs that need them.  That means that the 
+benefits of localizing recovery to a local group in LRC is only realized 
+if the primary happens to be part of that group.
 
-* when kraken was released, hammer and jewel were "live LTS" and kraken 
-was "live non-LTS", for a total of three live releases.
+Perhaps that helps explain the behavior you're seeing?
 
-* when luminous was released, hammer and kraken were declared EoL and 
-there are now only two "live LTS" releases and no "live non-LTS".
+sage
 
-During the period when there are three live releases, almost every 
-bugfix seen as warranting a backport gets marked for backport to the two 
-most recent stable releases. (For example, from January to August 2017 
-with very few exceptions tracker issues got marked "Backport: jewel, 
-kraken", not just "Backport: jewel".) This, of course, doubled the 
-backporting workload, simply because if a bug is severe enough to 
-backport to the most recent non-LTS release, it must be severe enough to 
-be backported to the most recent LTS release as well. Unfortunately, 
-there aren't enough developers working on backports to cover this double 
-workload, so in practice the non-LTS release gets insufficient attention.
-
-A "train" model could lower this backporting workload if it was 
-accompanied by a declaration that the n-1 release gets backports for all 
-important bugfixes and n-2 gets backports for critical bugfixes only 
-(and n-3 gets EOLed).
-
-Nathan
