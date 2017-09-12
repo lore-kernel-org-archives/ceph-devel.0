@@ -1,65 +1,114 @@
-From: Leonardo Vaz <lvaz@redhat.com>
-Subject: Re: Ceph Developers Monthly - September
-Date: Tue, 12 Sep 2017 12:59:19 -0300
-Message-ID: <20170912155919.GA24707@oops.local>
-References: <20170830040451.GA20979@oops.local>
- <20170906050624.GA3981@oops.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph updates for 4.14-rc1
+Date: Tue, 12 Sep 2017 18:05:09 +0200
+Message-ID: <1505232309-15208-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48970 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751404AbdILP7V (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 12 Sep 2017 11:59:21 -0400
-Content-Disposition: inline
-In-Reply-To: <20170906050624.GA3981@oops.local>
+Received: from mail-wr0-f174.google.com ([209.85.128.174]:36802 "EHLO
+        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751431AbdILQFc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Sep 2017 12:05:32 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Wed, Sep 06, 2017 at 02:06:24AM -0300, Leonardo Vaz wrote:
-> On Wed, Aug 30, 2017 at 01:04:51AM -0300, Leonardo Vaz wrote:
-> > Hey Cephers,
-> > 
-> > This is just a friendly reminder that the next Ceph Developer Montly
-> > meeting is coming up:
-> > 
-> >  http://wiki.ceph.com/Planning
-> > 
-> > If you have work that you're doing that it a feature work, significant
-> > backports, or anything you would like to discuss with the core team,
-> > please add it to the following page:
-> > 
-> >  http://wiki.ceph.com/CDM_06-SEP-2017
-> > 
-> > If you have questions or comments, please let us know.
-> 
-> Hey cephers,
-> 
-> The Ceph Developer Monthly is confirmed for tonight, September 6 at 9pm
-> Eastern Time (EDT), in an APAC-friendly time slot.
-> 
-> If you have any topic to discuss on this meeting, please add it
-> on the following pad:
-> 
->    http://tracker.ceph.com/projects/ceph/wiki/CDM_06-SEP-2017
-> 
-> We will use the following Bluejeans URL for the video conference:
-> 
->   https://bluejeans.com/707503600
+Hi Linus,
 
-Hey Cephers,
+The following changes since commit 569dbb88e80deb68974ef6fdd6a13edb9d686261:
 
-In case you missed September's Ceph Developer Monthly, it is now up on
-our YouTube channel:
+  Linux 4.13 (2017-09-03 13:56:17 -0700)
 
-  https://youtu.be/xds1nsDoYqY
+are available in the git repository at:
 
-Kindest regards,
+  https://github.com/ceph/ceph-client.git tags/ceph-for-4.14-rc1
 
-Leo 
+for you to fetch changes up to 15b51bd6badbb373c723aa019cf530c8263efd7e:
 
--- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
+  ceph: stop on-going cached readdir if mds revokes FILE_SHARED cap (2017-09-06 19:57:00 +0200)
+
+----------------------------------------------------------------
+The highlights include:
+
+ * a large series of fixes and improvements to the snapshot-handling
+   code (Zheng Yan)
+
+ * individual read/write OSD requests passed down to libceph are now
+   limited to 16M in size to avoid hitting OSD-side limits (Zheng Yan)
+
+ * encode MStatfs v2 message to allow for more accurate space usage
+   reporting (Douglas Fuller)
+
+ * switch to the new writeback error tracking infrastructure (Jeff
+   Layton)
+
+----------------------------------------------------------------
+Douglas Fuller (1):
+      ceph: more accurate statfs
+
+Jeff Layton (1):
+      ceph: use errseq_t for writeback error reporting
+
+Kefeng Wang (1):
+      rbd: silence bogus uninitialized use warning in rbd_acquire_lock()
+
+Luis Henriques (1):
+      ceph: check negative offsets in ceph_llseek()
+
+Markus Elfring (3):
+      ceph: ENOMEM pr_err in __get_or_create_frag() is redundant
+      ceph: delete an unnecessary return statement in update_dentry_lease()
+      ceph: adjust 36 checks for NULL pointers
+
+Yan, Zheng (27):
+      ceph: remove unused cap_release_safety mount option
+      ceph: limit osd read size to CEPH_MSG_MAX_DATA_LEN
+      ceph: limit osd write size
+      ceph: validate correctness of some mount options
+      ceph: new cap message flags indicate if there is pending capsnap
+      ceph: cleanup ceph_readdir_prepopulate()
+      ceph: don't fill readdir cache for LSSNAP reply
+      ceph: send LSSNAP request to auth mds of directory inode
+      ceph: fix -EOLDSNAPC handling
+      ceph: make sure flushsnap messages are sent in proper order
+      ceph: include snapc in debug message of write
+      ceph: don't use CEPH_OSD_FLAG_ORDERSNAP
+      ceph: properly set snap follows for cap reconnect
+      ceph: fix NULL pointer dereference in ceph_flush_snaps()
+      ceph: fix message order check in handle_cap_export()
+      ceph: handle race between vmtruncate and queuing cap snap
+      ceph: queue cap snap only when snap realm's context changes
+      ceph: remove stale check in ceph_invalidatepage()
+      ceph: properly get capsnap's size in get_oldest_context()
+      ceph: make writepage_nounlock() invalidate page that beyonds EOF
+      ceph: optimize pagevec iterating in ceph_writepages_start()
+      ceph: cleanup local variables in ceph_writepages_start()
+      ceph: fix "range cyclic" mode writepages
+      ceph: ignore wbc->range_{start,end} when write back snapshot data
+      ceph: fix capsnap dirty pages accounting
+      ceph: wait on writeback after writing snapshot data
+      ceph: stop on-going cached readdir if mds revokes FILE_SHARED cap
+
+Yanhu Cao (1):
+      ceph: nuke startsync op
+
+ drivers/block/rbd.c             |   2 +-
+ fs/ceph/addr.c                  | 403 ++++++++++++++++++++++------------------
+ fs/ceph/cache.c                 |   2 +-
+ fs/ceph/caps.c                  |  40 ++--
+ fs/ceph/debugfs.c               |   2 +-
+ fs/ceph/dir.c                   |   6 +-
+ fs/ceph/file.c                  |  50 ++---
+ fs/ceph/inode.c                 |  53 +++---
+ fs/ceph/mds_client.c            |  37 ++--
+ fs/ceph/mdsmap.c                |   6 +-
+ fs/ceph/snap.c                  |  37 ++--
+ fs/ceph/super.c                 |  78 ++++----
+ fs/ceph/super.h                 |  16 +-
+ fs/ceph/xattr.c                 |   8 +-
+ include/linux/ceph/ceph_fs.h    |   6 +-
+ include/linux/ceph/libceph.h    |  11 --
+ include/linux/ceph/mon_client.h |   4 +-
+ include/linux/ceph/rados.h      |   1 -
+ net/ceph/mon_client.c           |   6 +-
+ net/ceph/osd_client.c           |   5 -
+ 20 files changed, 421 insertions(+), 352 deletions(-)
