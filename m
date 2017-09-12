@@ -1,219 +1,98 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH 1/5] ceph: keep auth cap when inode has flocks or posix
- locks
-Date: Tue, 12 Sep 2017 09:21:37 -0400
-Message-ID: <1505222497.28831.12.camel@redhat.com>
-References: <20170912025351.42147-1-zyan@redhat.com>
-         <20170912025351.42147-2-zyan@redhat.com>
+From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Subject: XFS kernel errors bringing up OSD
+Date: Tue, 12 Sep 2017 09:25:22 -0400
+Message-ID: <CAGbviv+yD27MR9YvF2Wn9uNOMHbb=BMky1GyxyNQoMcpbAwbFQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f169.google.com ([209.85.161.169]:34458 "EHLO
-        mail-yw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751289AbdILNVl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Sep 2017 09:21:41 -0400
-Received: by mail-yw0-f169.google.com with SMTP id r85so28143141ywg.1
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Sep 2017 06:21:40 -0700 (PDT)
-In-Reply-To: <20170912025351.42147-2-zyan@redhat.com>
+Received: from mail-it0-f50.google.com ([209.85.214.50]:36865 "EHLO
+        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751289AbdILNZX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Sep 2017 09:25:23 -0400
+Received: by mail-it0-f50.google.com with SMTP id o200so28905156itg.0
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Sep 2017 06:25:23 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org, idryomov@gmail.com
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 2017-09-12 at 10:53 +0800, Yan, Zheng wrote:
-> file locks are tracked by inode's auth mds. releasing auth caps
-> is equivalent to releasing all file locks.
-> 
-> Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
-> ---
->  fs/ceph/inode.c      |  1 +
->  fs/ceph/locks.c      | 62 ++++++++++++++++++++++++++++++++++++++++++++--------
->  fs/ceph/mds_client.c |  2 ++
->  fs/ceph/super.h      |  1 +
->  4 files changed, 57 insertions(+), 9 deletions(-)
-> 
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index 373dab5173ca..c70b26d2bf8a 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -492,6 +492,7 @@ struct inode *ceph_alloc_inode(struct super_block *sb)
->  	ci->i_wb_ref = 0;
->  	ci->i_wrbuffer_ref = 0;
->  	ci->i_wrbuffer_ref_head = 0;
-> +	atomic_set(&ci->i_filelock_ref, 0);
->  	ci->i_shared_gen = 0;
->  	ci->i_rdcache_gen = 0;
->  	ci->i_rdcache_revoking = 0;
-> diff --git a/fs/ceph/locks.c b/fs/ceph/locks.c
-> index 64ae74472046..69f731e75302 100644
-> --- a/fs/ceph/locks.c
-> +++ b/fs/ceph/locks.c
-> @@ -29,19 +29,46 @@ void __init ceph_flock_init(void)
->  	get_random_bytes(&lock_secret, sizeof(lock_secret));
->  }
->  
-> +static void ceph_fl_copy_lock(struct file_lock *dst, struct file_lock *src)
-> +{
-> +	struct inode *inode = file_inode(src->fl_file);
-> +	atomic_inc(&ceph_inode(inode)->i_filelock_ref);
-> +}
-> +
-> +static void ceph_fl_release_lock(struct file_lock *fl)
-> +{
-> +	struct inode *inode = file_inode(fl->fl_file);
-> +	atomic_dec(&ceph_inode(inode)->i_filelock_ref);
-> +}
-> +
-> +static const struct file_lock_operations ceph_fl_lock_ops = {
-> +	.fl_copy_lock = ceph_fl_copy_lock,
-> +	.fl_release_private = ceph_fl_release_lock,
-> +};
-> +
->  /**
->   * Implement fcntl and flock locking functions.
->   */
-> -static int ceph_lock_message(u8 lock_type, u16 operation, struct file *file,
-> +static int ceph_lock_message(u8 lock_type, u16 operation, struct inode *inode,
->  			     int cmd, u8 wait, struct file_lock *fl)
->  {
-> -	struct inode *inode = file_inode(file);
->  	struct ceph_mds_client *mdsc = ceph_sb_to_client(inode->i_sb)->mdsc;
->  	struct ceph_mds_request *req;
->  	int err;
->  	u64 length = 0;
->  	u64 owner;
->  
-> +	if (operation == CEPH_MDS_OP_SETFILELOCK) {
-> +		/*
-> +		 * increasing i_filelock_ref closes race window between
-> +		 * handling request reply and adding file_lock struct to
-> +		 * inode. Otherwise, i_auth_cap may get trimmed in the
-> +		 * window. Caller function will decrease the counter.
-> +		 */
-> +		fl->fl_ops = &ceph_fl_lock_ops;
-> +		atomic_inc(&ceph_inode(inode)->i_filelock_ref);
-> +	}
-> +
->  	if (operation != CEPH_MDS_OP_SETFILELOCK || cmd == CEPH_LOCK_UNLOCK)
->  		wait = 0;
->  
-> @@ -179,10 +206,11 @@ static int ceph_lock_wait_for_completion(struct ceph_mds_client *mdsc,
->   */
->  int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
->  {
-> -	u8 lock_cmd;
-> +	struct inode *inode = file_inode(file);
->  	int err;
-> -	u8 wait = 0;
->  	u16 op = CEPH_MDS_OP_SETFILELOCK;
-> +	u8 lock_cmd;
-> +	u8 wait = 0;
->  
->  	if (!(fl->fl_flags & FL_POSIX))
->  		return -ENOLCK;
-> @@ -198,6 +226,17 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
->  	else if (IS_SETLKW(cmd))
->  		wait = 1;
->  
-> +	if (op == CEPH_MDS_OP_SETFILELOCK) {
-> +		/*
-> +		 * increasing i_filelock_ref closes race window between
-> +		 * handling request reply and adding file_lock struct to
-> +		 * inode. Otherwise, i_auth_cap may get trimmed in the
-> +		 * window. Caller function will decrease the counter.
-> +		 */
-> +		fl->fl_ops = &ceph_fl_lock_ops;
-> +		atomic_inc(&ceph_inode(inode)->i_filelock_ref);
-> +	}
-> +
->  	if (F_RDLCK == fl->fl_type)
->  		lock_cmd = CEPH_LOCK_SHARED;
->  	else if (F_WRLCK == fl->fl_type)
-> @@ -205,7 +244,7 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
->  	else
->  		lock_cmd = CEPH_LOCK_UNLOCK;
->  
-> -	err = ceph_lock_message(CEPH_LOCK_FCNTL, op, file, lock_cmd, wait, fl);
-> +	err = ceph_lock_message(CEPH_LOCK_FCNTL, op, inode, lock_cmd, wait, fl);
->  	if (!err) {
->  		if (op != CEPH_MDS_OP_GETFILELOCK) {
->  			dout("mds locked, locking locally");
-> @@ -214,7 +253,7 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
->  				/* undo! This should only happen if
->  				 * the kernel detects local
->  				 * deadlock. */
-> -				ceph_lock_message(CEPH_LOCK_FCNTL, op, file,
-> +				ceph_lock_message(CEPH_LOCK_FCNTL, op, inode,
->  						  CEPH_LOCK_UNLOCK, 0, fl);
->  				dout("got %d on posix_lock_file, undid lock",
->  				     err);
-> @@ -226,8 +265,9 @@ int ceph_lock(struct file *file, int cmd, struct file_lock *fl)
->  
->  int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
->  {
-> -	u8 lock_cmd;
-> +	struct inode *inode = file_inode(file);
->  	int err;
-> +	u8 lock_cmd;
->  	u8 wait = 0;
->  
->  	if (!(fl->fl_flags & FL_FLOCK))
-> @@ -238,6 +278,10 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
->  
->  	dout("ceph_flock, fl_file: %p", fl->fl_file);
->  
-> +	/* see comment in ceph_lock */
-> +	fl->fl_ops = &ceph_fl_lock_ops;
-> +	atomic_inc(&ceph_inode(inode)->i_filelock_ref);
-> +
->  	if (IS_SETLKW(cmd))
->  		wait = 1;
->  
-> @@ -249,13 +293,13 @@ int ceph_flock(struct file *file, int cmd, struct file_lock *fl)
->  		lock_cmd = CEPH_LOCK_UNLOCK;
->  
->  	err = ceph_lock_message(CEPH_LOCK_FLOCK, CEPH_MDS_OP_SETFILELOCK,
-> -				file, lock_cmd, wait, fl);
-> +				inode, lock_cmd, wait, fl);
->  	if (!err) {
->  		err = locks_lock_file_wait(file, fl);
->  		if (err) {
->  			ceph_lock_message(CEPH_LOCK_FLOCK,
->  					  CEPH_MDS_OP_SETFILELOCK,
-> -					  file, CEPH_LOCK_UNLOCK, 0, fl);
-> +					  inode, CEPH_LOCK_UNLOCK, 0, fl);
->  			dout("got %d on locks_lock_file_wait, undid lock", err);
->  		}
->  	}
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index 9dd6b836ac9e..6146af4ed03c 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -1461,6 +1461,8 @@ static int trim_caps_cb(struct inode *inode, struct ceph_cap *cap, void *arg)
->  			goto out;
->  		if ((used | wanted) & CEPH_CAP_ANY_WR)
->  			goto out;
-> +		if (atomic_read(&ci->i_filelock_ref) > 0)
-> +			goto out;
+Ceph 10.2.7
+Kernel 4.12.10
 
-Is there a potential race here? Could i_filelock_ref do a 0->1
-transition just after you check it?
+We are seeing frequent kernel errors that cause the XFS based OSD
+processes to crash and restart.  Has anyone seen or reported something
+like this before?  Maybe due to bad or failing disks, but its hard to
+tell.
 
->  	}
->  	/* The inode has cached pages, but it's no longer used.
->  	 * we can safely drop it */
-> diff --git a/fs/ceph/super.h b/fs/ceph/super.h
-> index 279a2f401cf5..9e0de8264257 100644
-> --- a/fs/ceph/super.h
-> +++ b/fs/ceph/super.h
-> @@ -351,6 +351,7 @@ struct ceph_inode_info {
->  	int i_pin_ref;
->  	int i_rd_ref, i_rdcache_ref, i_wr_ref, i_wb_ref;
->  	int i_wrbuffer_ref, i_wrbuffer_ref_head;
-> +	atomic_t i_filelock_ref;
->  	u32 i_shared_gen;       /* increment each time we get FILE_SHARED */
->  	u32 i_rdcache_gen;      /* incremented each time we get FILE_CACHE. */
->  	u32 i_rdcache_revoking; /* RDCACHE gen to async invalidate, if any */
 
--- 
-Jeff Layton <jlayton@redhat.com>
+
+[Tue Sep 12 09:18:32 2017] BUG: unable to handle kernel NULL pointer
+dereference at 0000000000000090
+[Tue Sep 12 09:18:32 2017] IP: xfs_da3_node_read+0x2e/0xb0 [xfs]
+[Tue Sep 12 09:18:32 2017] PGD 0
+[Tue Sep 12 09:18:32 2017] P4D 0
+
+[Tue Sep 12 09:18:32 2017] Oops: 0000 [#23] SMP
+[Tue Sep 12 09:18:32 2017] Modules linked in: binfmt_misc xfs
+libcrc32c dm_crypt intel_rapl x86_pkg_temp_thermal ipmi_ssif
+intel_powerclamp coretemp kvm_intel kvm irqbypass crct10dif_pclmul
+crc32_pclmul ghash_clmulni_intel pcbc aesni_intel aes_x86_64
+input_leds crypto_simd glue_helper cryptd shpchp intel_cstate
+intel_rapl_perf lpc_ich mei_me mei mac_hid ipmi_si ipmi_devintf
+ipmi_msghandler acpi_power_meter acpi_pad 8021q garp mrp stp llc
+bonding autofs4 btrfs xor raid6_pq ses enclosure mlx4_en hid_generic
+ttm usbhid hid drm_kms_helper syscopyarea igb sysfillrect e1000e dca
+sysimgblt fb_sys_fops mlx4_core mpt3sas ptp ahci devlink drm
+raid_class pps_core libahci scsi_transport_sas i2c_algo_bit
+[Tue Sep 12 09:18:32 2017] CPU: 8 PID: 40382 Comm: tp_fstore_op
+Tainted: G      D         4.12.10-041210-generic #201708300614
+[Tue Sep 12 09:18:32 2017] Hardware name: AIC SB303-LB/LIBRA, BIOS
+LIBKV070 08/03/2016
+[Tue Sep 12 09:18:32 2017] task: ffff8f03b4220000 task.stack: ffff9a6a75ff0000
+[Tue Sep 12 09:18:32 2017] RIP: 0010:xfs_da3_node_read+0x2e/0xb0 [xfs]
+[Tue Sep 12 09:18:32 2017] RSP: 0018:ffff9a6a75ff3d30 EFLAGS: 00010282
+[Tue Sep 12 09:18:32 2017] RAX: 0000000000000000 RBX: ffff8f08b8ce9d98
+RCX: 0000000000000001
+[Tue Sep 12 09:18:32 2017] RDX: ffffffffc0a37700 RSI: 0000000000000000
+RDI: ffff9a6a75ff3cd8
+[Tue Sep 12 09:18:32 2017] RBP: ffff9a6a75ff3d48 R08: 00000000ffffffff
+R09: 0000000000000001
+[Tue Sep 12 09:18:32 2017] R10: 0000000000000001 R11: 0000000000000001
+R12: ffff9a6a75ff3d78
+[Tue Sep 12 09:18:32 2017] R13: 0000000000000005 R14: 00000000894e93b5
+R15: ffff8f1536502010
+[Tue Sep 12 09:18:32 2017] FS:  00007f82c9b70700(0000)
+GS:ffff8f26ffc00000(0000) knlGS:0000000000000000
+[Tue Sep 12 09:18:32 2017] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[Tue Sep 12 09:18:32 2017] CR2: 0000000000000090 CR3: 00000017cf710000
+CR4: 00000000001406e0
+[Tue Sep 12 09:18:32 2017] Call Trace:
+[Tue Sep 12 09:18:32 2017]  xfs_attr3_node_inactive+0xd0/0x230 [xfs]
+[Tue Sep 12 09:18:32 2017]  xfs_attr_inactive+0x267/0x280 [xfs]
+[Tue Sep 12 09:18:32 2017]  xfs_inactive+0xe2/0x110 [xfs]
+[Tue Sep 12 09:18:32 2017]  xfs_fs_destroy_inode+0x9f/0x200 [xfs]
+[Tue Sep 12 09:18:32 2017]  destroy_inode+0x3b/0x60
+[Tue Sep 12 09:18:32 2017]  evict+0x136/0x1a0
+[Tue Sep 12 09:18:32 2017]  iput+0x14c/0x220
+[Tue Sep 12 09:18:32 2017]  do_unlinkat+0x1a7/0x310
+[Tue Sep 12 09:18:32 2017]  SyS_unlink+0x16/0x20
+[Tue Sep 12 09:18:32 2017]  entry_SYSCALL_64_fastpath+0x1e/0xa9
+[Tue Sep 12 09:18:32 2017] RIP: 0033:0x7f82d7753ea7
+[Tue Sep 12 09:18:32 2017] RSP: 002b:00007f82c9b6d2e8 EFLAGS: 00000246
+ORIG_RAX: 0000000000000057
+[Tue Sep 12 09:18:32 2017] RAX: ffffffffffffffda RBX: 00005606b600e000
+RCX: 00007f82d7753ea7
+[Tue Sep 12 09:18:32 2017] RDX: 00007f82c9b6d2a0 RSI: 0000000000000000
+RDI: 00005606bfd32a80
+[Tue Sep 12 09:18:32 2017] RBP: 000056033335ab20 R08: 0000000000450000
+R09: 0000000000000001
+[Tue Sep 12 09:18:32 2017] R10: 0000000000000000 R11: 0000000000000246
+R12: 00007f82da606c60
+[Tue Sep 12 09:18:32 2017] R13: 00005606812ebd60 R14: 00000000040ffda5
+R15: 00005606dfb64a60
+[Tue Sep 12 09:18:32 2017] Code: 00 00 55 48 89 e5 41 54 53 4d 89 c4
+48 89 fb 48 83 ec 08 68 00 77 a3 c0 e8 e0 fe ff ff 85 c0 5a 75 46 48
+85 db 74 41 49 8b 34 24 <48> 8b 96 90 00 00 00 0f b7 52 08 66 c1 c2 08
+66 81 fa be 3e 74
+[Tue Sep 12 09:18:32 2017] RIP: xfs_da3_node_read+0x2e/0xb0 [xfs] RSP:
+ffff9a6a75ff3d30
+[Tue Sep 12 09:18:32 2017] CR2: 0000000000000090
