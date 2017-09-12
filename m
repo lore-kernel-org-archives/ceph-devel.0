@@ -1,122 +1,142 @@
-From: Two Spirit <twospirit6905@gmail.com>
-Subject: Re: Memory. 100TB OSD?
-Date: Tue, 12 Sep 2017 11:58:31 -0700
-Message-ID: <CAKRxpuvwUBPvVRPdofuOS1YFfnDr11vyGbVEo7170joyUT85Kg@mail.gmail.com>
-References: <CAKRxpuv33KwzAjCu57OjFUVLCY2+t2iHT9mURitXbs1qJOM3DQ@mail.gmail.com>
- <CAE_BDM+kHRr1SnaLcfqYuB9rGSQAvR65aeXc9O7ny4=cJ18w7w@mail.gmail.com> <25ffedbc-a7d3-2aaf-cfa6-10c303ab0c9b@kirneh.eu>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: luminous filesystem is degraded
+Date: Tue, 12 Sep 2017 19:51:39 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1709121950510.24068@piezo.novalocal>
+References: <CAKRxpusdzy+k=v8nhvfW9Y_zciHYOZSo9U8HNvFovAAnH-eGzg@mail.gmail.com> <CALe9h7f48vWZ1g6WtonOKfy9DowGGnJbBK12prfA7YjrWXUkhw@mail.gmail.com> <CAKRxputc+qygj_H9uOf=gQR-YCaOH4nYMR0gQyNVU4hmjrCYaw@mail.gmail.com> <alpine.DEB.2.11.1709051330430.21105@piezo.novalocal>
+ <CAKRxpuusVzh-8qtpjLFn_wg3CUeSUm23jshwFaKL-2r+=N5rpQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f46.google.com ([209.85.214.46]:46148 "EHLO
-        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750850AbdILS6d (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Sep 2017 14:58:33 -0400
-Received: by mail-it0-f46.google.com with SMTP id 6so771098itl.1
-        for <ceph-devel@vger.kernel.org>; Tue, 12 Sep 2017 11:58:32 -0700 (PDT)
-In-Reply-To: <25ffedbc-a7d3-2aaf-cfa6-10c303ab0c9b@kirneh.eu>
+Received: from mx1.redhat.com ([209.132.183.28]:41794 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751831AbdILTvl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 12 Sep 2017 15:51:41 -0400
+In-Reply-To: <CAKRxpuusVzh-8qtpjLFn_wg3CUeSUm23jshwFaKL-2r+=N5rpQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Henrik Korkuc <lists@kirneh.eu>
-Cc: Christian Wuerdig <christian.wuerdig@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Two Spirit <twospirit6905@gmail.com>
+Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
->As for RAID array - go for multiple OSDs per server. This way you'll avoid OSD bottleneck and also in case of one disk failure you'll need to resync up to 10TB, not 100TB.
+On Tue, 12 Sep 2017, Two Spirit wrote:
+> I don't have any OSDs that are down, so the 1 unfound object I think
+> needs to be manually cleared. I ran across a webpage a while ago  that
+> talked about how to clear it, but if you have a reference, would save
+> me a little time.
 
-Good point on the resync, but I'm using a proprietary solution that
-balances the resync to portions of the RAID as well as gives 3 of 12
-disks for redundancy.
+http://docs.ceph.com/docs/master/rados/troubleshooting/troubleshooting-pg/#failures-osd-unfound
 
-I started with 1 OSD per server thinking it was the optimal
-configuration, but I can see now that multiple OSDs per server could
-parallelize disk access (I'm assuming I need to tell CRUSH somehow  to
-get those benefits). Since I've got servers with 14 disk, and the
-newer servers are 24 disks, should I maximize the OSDs per server? or
-is there a balance where too many is not good either? I'm assuming
-multiple OSDs per disk is also bad. Since you are using 4GB per OSD. I
-assume the memory is the ultimate limiting factor in how many OSDs I
-should run per server?
+sage
 
-I'm using 2GB/OSD, and I've seen OOM problems on Luminous. I do wish
-the OSDs were less memory hungry.
-
-
-On Sun, Sep 3, 2017 at 11:06 PM, Henrik Korkuc <lists@kirneh.eu> wrote:
-> Just to add a data point - I run Luminous in one of the clusters with ~400
-> OSDs. Servers have 48GB RAM and 12 OSDs. After some use I got "rolling" OOMs
-> on them.
-> I decreased blustore cache to 512MB, currently situation seems to be fine.
->
-> So OSD can consume up to 4GB or more of RAM per OSD. bluestore_cache_size_*
-> is a way to control that, also take a look at this recent blog post -
-> https://ceph.com/community/new-luminous-bluestore/, it has a section about
-> memory consumption too.
->
-> As for RAID array - go for multiple OSDs per server. This way you'll avoid
-> OSD bottleneck and also in case of one disk failure you'll need to resync up
-> to 10TB, not 100TB.
->
->
-> On 17-09-04 02:39, Christian Wuerdig wrote:
->>
->> Generally the memory requirements are for ceph itself - the rest of
->> the system will also require some RAM, so you should probably add a
->> 1GB basic footprint anyway. Plus the memory recommendations are more
->> general guidelines which often are more applicable to systems with
->> more OSDs for averaging the need between individual OSD processes. So
->> your basic footprint would probably be more like 4GB RAM for a small
->> OSD node. At least on my hacked together home toy cluster all nodes
->> run 4GB RAM and haven't been OOMed yet, although it's still running
->> Jewel so not sure if Luminous will have a massive impact.
->>
->> Regarding the OSD size - more OSDs are generally better since access
->> to a single OSD is generally sequential AFAIK (OPs are queued per
->> OSD). Some people do run RAID backed OSDs but not of that size.
->> With Luminous it's not quite clear to me if it's RAM GB/OSD or still
->> GB/TB or something in between.
->>
->> On Thu, Aug 31, 2017 at 5:30 AM, Two Spirit <twospirit6905@gmail.com>
->> wrote:
->>>
->>> I've been seeing luminous OSD spit out error messages about out of
->>> memory even tho I was within the minimum memory requirements
->>> documented. 2GB with 2TB. I've also tested with 1.5TB, 1TB, and 500GB
->>> configurations.
->>>
->>> I've got 100TB single chassis file servers in production. Does this
->>> mean that to run an OSD on them I need 100GB RAM?
->>>
->>> And am I supose to run 1 daemon per 10T disk or since I've go the
->>> disks in a RAID, can I run 1 daemon for the whole of the 100TB
->>> RAID?<div id="DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2"><br />
->>> <table style="border-top: 1px solid #D3D4DE;">
->>>          <tr>
->>>          <td style="width: 55px; padding-top: 13px;"><a
->>>
->>> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
->>> target="_blank"><img
->>>
->>> src="https://ipmcdn.avast.com/images/icons/icon-envelope-tick-green-avg-v1.png"
->>> alt="" width="46" height="29" style="width: 46px; height: 29px;"
->>> /></a></td>
->>>                  <td style="width: 470px; padding-top: 12px; color:
->>> #41424e;
->>> font-size: 13px; font-family: Arial, Helvetica, sans-serif;
->>> line-height: 18px;">Virus-free. <a
->>>
->>> href="http://www.avg.com/email-signature?utm_medium=email&utm_source=link&utm_campaign=sig-email&utm_content=webmail"
->>> target="_blank" style="color: #4453ea;">www.avg.com</a>
->>>                  </td>
->>>          </tr>
->>> </table><a href="#DAB4FAD8-2DD7-40BB-A1B8-4E2AA1F9FDF2" width="1"
->>> height="1"></a></div>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
+> I've included the outputs of the commands you asked. The ceph test
+> network contains 6 osds, 3 mons, 3 mds, 1rgw 1mgr. ubuntu 64 bit
+> 14.04/16.04 mix.
+> 
+> file system is degraded. Are there procedures how to get this back in operation?
+> 
+> On Tue, Sep 5, 2017 at 6:33 AM, Sage Weil <sweil@redhat.com> wrote:
+> > On Mon, 4 Sep 2017, Two Spirit wrote:
+> >> Thanks for the info. I'm stumped what to do right now to get back to
+> >> an operation cluster -- still trying to find documentation on how to
+> >> recover.
+> >>
+> >>
+> >> 1) I have not yet modified any CRUSH rules from the defaults. I have
+> >> one ubuntu 14.04 OSD in the mix, and I had to set "ceph osd crush
+> >> tunables legacy" just to get it to work.
+> >>
+> >> 2) I have not yet implemented any Erasure Code pool. That is probably
+> >> one of the next tests I was going to do.  I'm still testing with basic
+> >> replication.
+> >
+> > Can you attach 'ceph health detail', 'ceph osd crush dump', and 'ceph osd
+> > dump'?
+> >
+> >> The degraded data redundancy seems to be stuck and not reducing
+> >> anymore. If I manually clear [if this is even possible] the 1 pg
+> >> undersized, should my degraded filesystem go back online?
+> >
+> > The problem is likely the 1 unfound object.  Are there any OSDs that are
+> > down that failed recently?  (Try 'ceph osd tree down' to see a simple
+> > summary.)
+> >
+> > sage
+> >
+> >
+> >>
+> >> On Mon, Sep 4, 2017 at 2:05 AM, John Spray <jspray@redhat.com> wrote:
+> >> > On Sun, Sep 3, 2017 at 2:14 PM, Two Spirit <twospirit6905@gmail.com> wrote:
+> >> >> Setup: luminous on
+> >> >> Ubuntu 14.04/16.04 mix. 5 OSD. all up. 3 or 4 mds, 3mon,cephx
+> >> >> rebooting all 6 ceph systems did not clear the problem. Failure
+> >> >> occurred within 6 hours of start of test.
+> >> >> similar stress test with 4OSD,1MDS,1MON,cephx worked fine.
+> >> >>
+> >> >>
+> >> >> stress test
+> >> >> # cp * /mnt/cephfs
+> >> >>
+> >> >> # ceph -s
+> >> >>     health: HEALTH_WARN
+> >> >>             1 filesystem is degraded
+> >> >>             crush map has straw_calc_version=0
+> >> >>             1/731529 unfound (0.000%)
+> >> >>             Degraded data redundancy: 22519/1463058 objects degraded
+> >> >> (1.539%), 2 pgs unclean, 2 pgs degraded, 1 pg undersized
+> >> >>
+> >> >>   services:
+> >> >>     mon: 3 daemons, quorum xxx233,xxx266,xxx272
+> >> >>     mgr: xxx266(active)
+> >> >>     mds: cephfs-1/1/1 up  {0=xxx233=up:replay}, 3 up:standby
+> >> >>     osd: 5 osds: 5 up, 5 in
+> >> >>     rgw: 1 daemon active
+> >> >
+> >> > Your MDS is probably stuck in the replay state because it can't read
+> >> > from one of your degraded PGs.  Given that you have all your OSDs in,
+> >> > but one of your PGs is undersized (i.e. is short on OSDs), I would
+> >> > guess that something is wrong with your choice of CRUSH rules or EC
+> >> > config.
+> >> >
+> >> > John
+> >> >
+> >> >>
+> >> >> # ceph mds dump
+> >> >> dumped fsmap epoch 590
+> >> >> fs_name cephfs
+> >> >> epoch   589
+> >> >> flags   c
+> >> >> created 2017-08-24 14:35:33.735399
+> >> >> modified        2017-08-24 14:35:33.735400
+> >> >> tableserver     0
+> >> >> root    0
+> >> >> session_timeout 60
+> >> >> session_autoclose       300
+> >> >> max_file_size   1099511627776
+> >> >> last_failure    0
+> >> >> last_failure_osd_epoch  1573
+> >> >> compat  compat={},rocompat={},incompat={1=base v0.20,2=client
+> >> >> writeable ranges,3=default file layouts on dirs,4=dir inode in
+> >> >> separate object,5=mds uses versioned encoding,6=dirfrag is stored in
+> >> >> omap,8=file layout v2}
+> >> >> max_mds 1
+> >> >> in      0
+> >> >> up      {0=579217}
+> >> >> failed
+> >> >> damaged
+> >> >> stopped
+> >> >> data_pools      [5]
+> >> >> metadata_pool   6
+> >> >> inline_data     disabled
+> >> >> balancer
+> >> >> standby_count_wanted    1
+> >> >> 579217: x.x.x.233:6804/1176521332 'xxx233' mds.0.589 up:replay seq 2
+> >> >> --
+> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> >> the body of a message to majordomo@vger.kernel.org
+> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> 
