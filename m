@@ -1,119 +1,113 @@
-From: Blair Bethwaite <blair.bethwaite@gmail.com>
-Subject: Re: [ceph-users] Ceph release cadence
-Date: Tue, 12 Sep 2017 09:59:23 +1000
-Message-ID: <CA+z5Dsy_pr6iMX1UBdAmWnqhdLu4y8N8gL5XWfTUqFoZVJOXXw@mail.gmail.com>
-References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: LRC has slower recovery than Jerasure
+Date: Tue, 12 Sep 2017 00:56:53 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1709120054110.24068@piezo.novalocal>
+References: <CAODUPsGPdZ7AL1nYpTP5OE8iqWpcgj=Durm_f_4C=y12tbmnYA@mail.gmail.com> <alpine.DEB.2.11.1709112048200.24068@piezo.novalocal> <CAODUPsGGcUk9zKUEnRYBPzEQicvpeM6M6nUHg+sk7v20SP9okg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:38910 "EHLO
-        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750853AbdIKX7p (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Sep 2017 19:59:45 -0400
-Received: by mail-qt0-f171.google.com with SMTP id q8so22478853qtb.5
-        for <ceph-devel@vger.kernel.org>; Mon, 11 Sep 2017 16:59:45 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
+Received: from cobra.newdream.net ([66.33.216.30]:47637 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750969AbdILA44 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 11 Sep 2017 20:56:56 -0400
+In-Reply-To: <CAODUPsGGcUk9zKUEnRYBPzEQicvpeM6M6nUHg+sk7v20SP9okg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, ceph-maintainers@ceph.com, Ceph-User <ceph-users@ceph.com>
+To: Oleg Kolosov <olekol@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-(Apologies if this is a double post - I think my phone turned it into
-HTML and so bounced from ceph-devel)...
+On Tue, 12 Sep 2017, Oleg Kolosov wrote:
 
-We currently use both upstream and distro (RHCS) versions on different
-clusters. Downstream releases are still free to apply their own
-models.
+> Hi Sage,
+> Yes, this might be an issue, I wonder if in any way I can minimize the
+> effect of recovery at the primary, otherwise LRC plugin misses its
+> purpose in such a configuration.
+> I'll explain my experiment in detail:
+> 
+> The code was defined the following:
+>  plugin=lrc \
+>  mapping=DD_DD____ \
+>  layers='[
+>  [ "DD_DD_ccc", "" ],
+> [ "DDc______", "" ],
+> [ "___DDc___", "" ],
+>  ]' \
+>  ruleset-steps='[
+>  [ "choose", "host",  3  ],
+>  [ "chooseleaf", "osd",  3  ],
+>  ]'
+> 
+> 
+> osd tree is the following:
+> 
+> ID  WEIGHT   TYPE NAME      UP/DOWN REWEIGHT PRIMARY-AFFINITY
+>  -1 40.00000 root default
+> -22  8.00000     host host0
+>   0  1.00000         osd.0       up  1.00000          1.00000
+>   1  1.00000         osd.1       up  1.00000          1.00000
+>   2  1.00000         osd.2       up  1.00000          1.00000
+>   3  1.00000         osd.3       up  1.00000          1.00000
+>   4  1.00000         osd.4       up  1.00000          1.00000
+>   5  1.00000         osd.5       up  1.00000          1.00000
+>   6  1.00000         osd.6       up  1.00000          1.00000
+>   7  1.00000         osd.7       up  1.00000          1.00000
+> -23  8.00000     host host1
+>   8  1.00000         osd.8       up  1.00000          1.00000
+>   9  1.00000         osd.9       up  1.00000          1.00000
+>  10  1.00000         osd.10      up  1.00000          1.00000
+>  11  1.00000         osd.11      up  1.00000          1.00000
+>  12  1.00000         osd.12      up  1.00000          1.00000
+>  13  1.00000         osd.13      up  1.00000          1.00000
+>  14  1.00000         osd.14      up  1.00000          1.00000
+>  15  1.00000         osd.15      up  1.00000          1.00000
+> -24  8.00000     host host2
+>  16  1.00000         osd.16      up  1.00000          1.00000
+>  17  1.00000         osd.17      up  1.00000          1.00000
+>  18  1.00000         osd.18      up  1.00000          1.00000
+>  19  1.00000         osd.19      up  1.00000          1.00000
+>  20  1.00000         osd.20      up  1.00000          1.00000
+>  21  1.00000         osd.21      up  1.00000          1.00000
+>  22  1.00000         osd.22      up  1.00000          1.00000
+>  23  1.00000         osd.23      up  1.00000          1.00000
+> -25  8.00000     host host3
+>  24  1.00000         osd.24      up  1.00000          1.00000
+>  25  1.00000         osd.25      up  1.00000          1.00000
+>  26  1.00000         osd.26      up  1.00000          1.00000
+>  27  1.00000         osd.27      up  1.00000          1.00000
+>  28  1.00000         osd.28      up  1.00000          1.00000
+>  29  1.00000         osd.29      up  1.00000          1.00000
+>  30  1.00000         osd.30      up  1.00000          1.00000
+>  31  1.00000         osd.31      up  1.00000          1.00000
+> -26  8.00000     host host4
+>  32  1.00000         osd.32      up  1.00000          1.00000
+>  33  1.00000         osd.33      up  1.00000          1.00000
+>  34  1.00000         osd.34      up  1.00000          1.00000
+>  35  1.00000         osd.35      up  1.00000          1.00000
+>  36  1.00000         osd.36      up  1.00000          1.00000
+>  37  1.00000         osd.37      up  1.00000          1.00000
+>  38  1.00000         osd.38      up  1.00000          1.00000
+>  39  1.00000         osd.39      up  1.00000          1.00000
+> 
+> 
+> In my experiment I write a certain amount of data, next I kill an osd
+> and take measurements during recovery (until cluster is HEALTH_OK
+> again). I measure cpu and reads done in every second.
+> What I see for the reads is that it reaches some sort of a constant
+> value per sec, like there is a threshold for reads during recovery.
+> CPU behaved the same, but following the throttling  change the
+> threshold became less obvious.
+> 
+> When performing the same experiment with only 'chooseleaf osd'
+> defined, I get normal behaviour.
 
-I like the idea of a predictable (and more regular) train model (and
-I'd point out that trains can run a little late - there just needs to
-be some process around that.
+Maybe try adjusting your crush rule so that it forces the host choice so 
+that all PGs have the first host as host0 (or whatever), and then compare 
+failing an osd on host0 vs host1 (you can do this with explicit take 
+host0, chooseleaf 1 osd, emit, take host1, chooseleaf 1 osd, emit, etc.)  
+My guess is that you'll see the slowdown is on the non-host0 osds. 
 
-If you were to keep the even/odd release model then I'd suggest
-considering a 4 monthly train cadence on these. If the even/odd model
-is dropped (which would be my preference) then I like the sound of ~9
-monthly releases splitting the difference between today's model.
-OpenStack does 6 monthly cycles, and I think the data shows this is
-too frequent for most operators (of course OpenStack is much more
-complex and multifaceted as well) - many deployments are well behind
-the stable deprecation schedule and it's the norm to hear people
-talking about doing "skip upgrades".
+There are some recovery throttling options (like osd max recovery ops) but 
+those should apply regardless of the EC code in use.  :/
 
-On 7 September 2017 at 01:23, Sage Weil <sweil@redhat.com> wrote:
-> Hi everyone,
->
-> Traditionally, we have done a major named "stable" release twice a year,
-> and every other such release has been an "LTS" release, with fixes
-> backported for 1-2 years.
->
-> With kraken and luminous we missed our schedule by a lot: instead of
-> releasing in October and April we released in January and August.
->
-> A few observations:
->
-> - Not a lot of people seem to run the "odd" releases (e.g., infernalis,
-> kraken).  This limits the value of actually making them.  It also means
-> that those who *do* run them are running riskier code (fewer users -> more
-> bugs).
->
-> - The more recent requirement that upgrading clusters must make a stop at
-> each LTS (e.g., hammer -> luminous not supported, must go hammer -> jewel
-> -> lumninous) has been hugely helpful on the development side by reducing
-> the amount of cross-version compatibility code to maintain and reducing
-> the number of upgrade combinations to test.
->
-> - When we try to do a time-based "train" release cadence, there always
-> seems to be some "must-have" thing that delays the release a bit.  This
-> doesn't happen as much with the odd releases, but it definitely happens
-> with the LTS releases.  When the next LTS is a year away, it is hard to
-> suck it up and wait that long.
->
-> A couple of options:
->
-> * Keep even/odd pattern, and continue being flexible with release dates
->
->   + flexible
->   - unpredictable
->   - odd releases of dubious value
->
-> * Keep even/odd pattern, but force a 'train' model with a more regular
-> cadence
->
->   + predictable schedule
->   - some features will miss the target and be delayed a year
->
-> * Drop the odd releases but change nothing else (i.e., 12-month release
-> cadence)
->
->   + eliminate the confusing odd releases with dubious value
->
-> * Drop the odd releases, and aim for a ~9 month cadence. This splits the
-> difference between the current even/odd pattern we've been doing.
->
->   + eliminate the confusing odd releases with dubious value
->   + waiting for the next release isn't quite as bad
->   - required upgrades every 9 months instead of ever 12 months
->
-> * Drop the odd releases, but relax the "must upgrade through every LTS" to
-> allow upgrades across 2 versions (e.g., luminous -> mimic or luminous ->
-> nautilus).  Shorten release cycle (~6-9 months).
->
->   + more flexibility for users
->   + downstreams have greater choice in adopting an upstrema release
->   - more LTS branches to maintain
->   - more upgrade paths to consider
->
-> Other options we should consider?  Other thoughts?
->
-> Thanks!
-> sage
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users@lists.ceph.com
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+sage
 
-
-
--- 
-Cheers,
-~Blairo
