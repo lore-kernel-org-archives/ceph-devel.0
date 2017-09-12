@@ -1,172 +1,137 @@
-From: Two Spirit <twospirit6905@gmail.com>
-Subject: Re: luminous filesystem is degraded
-Date: Wed, 13 Sep 2017 15:16:25 -0700
-Message-ID: <CAKRxpusMJPDWfs8nzk8GRYMaiuJTXYRuOGgC7CKaq6Fww4gxnw@mail.gmail.com>
-References: <CAKRxpusdzy+k=v8nhvfW9Y_zciHYOZSo9U8HNvFovAAnH-eGzg@mail.gmail.com>
- <CALe9h7f48vWZ1g6WtonOKfy9DowGGnJbBK12prfA7YjrWXUkhw@mail.gmail.com>
- <CAKRxputc+qygj_H9uOf=gQR-YCaOH4nYMR0gQyNVU4hmjrCYaw@mail.gmail.com>
- <alpine.DEB.2.11.1709051330430.21105@piezo.novalocal> <CAKRxpuusVzh-8qtpjLFn_wg3CUeSUm23jshwFaKL-2r+=N5rpQ@mail.gmail.com>
- <alpine.DEB.2.11.1709121950510.24068@piezo.novalocal>
+From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Subject: Re: XFS kernel errors bringing up OSD
+Date: Tue, 12 Sep 2017 19:05:50 -0400
+Message-ID: <CAGbvivKbQ9CV8SiUdQGMN9Onrhengv9fJCArw9YxWyGkWq+g9g@mail.gmail.com>
+References: <CAGbviv+yD27MR9YvF2Wn9uNOMHbb=BMky1GyxyNQoMcpbAwbFQ@mail.gmail.com>
+ <CAF-wwdHVfa_dbc4miUC10aPjZTsWtEwYSuhX4K9NjjcBpjEDcw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f43.google.com ([209.85.214.43]:46864 "EHLO
-        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751128AbdIMWQ1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Sep 2017 18:16:27 -0400
-Received: by mail-it0-f43.google.com with SMTP id 6so704231itl.1
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Sep 2017 15:16:27 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1709121950510.24068@piezo.novalocal>
+Received: from mail-io0-f170.google.com ([209.85.223.170]:38316 "EHLO
+        mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751475AbdILXFv (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 12 Sep 2017 19:05:51 -0400
+Received: by mail-io0-f170.google.com with SMTP id n69so55120027ioi.5
+        for <ceph-devel@vger.kernel.org>; Tue, 12 Sep 2017 16:05:51 -0700 (PDT)
+In-Reply-To: <CAF-wwdHVfa_dbc4miUC10aPjZTsWtEwYSuhX4K9NjjcBpjEDcw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Brad Hubbard <bhubbard@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-I reverted the 1 unfound object(in the MDS). I think that eventually
-cleared despite getting a message initially saying it wasn't found.
+I believe that is indeed the fix. That fix, along with many other XFS
+related fixes were in the most recent 4.13.1 kernel.  I tried it out
+and have not seen any XFS related stack dumps in the logs since then.
+I hope they backport to 4.9 and 4.12.
 
-My filesystem is still degraded. The revert action seemed to have
-damaged my mds.  also the Clearing the unfound didn't seem to unstuck
-the Degraded data redundancy. There is no recovery going on.
-
-I'm looking into clearing  the unclean, degraded, & undersized pg, but
-I don't think that will restore the damaged mds, and degraded
-filesystem.
-help.
-
-    health: HEALTH_ERR
-            1 filesystem is degraded
-            1 mds daemon damaged
-            Degraded data redundancy: 22517/1463016 objects degraded
-(1.539%), 1 pg unclean, 1 pg degraded, 1 pg undersized
-
-  services:
-    mon: 3 daemons, quorum osdmon33,osdmonmgr66,osdmon72
-    mds: cephfs-0/1/1 up , 3 up:standby, 1 damaged
-    osd: 6 osds: 6 up, 6 in
-
-
-On Tue, Sep 12, 2017 at 12:51 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Tue, 12 Sep 2017, Two Spirit wrote:
->> I don't have any OSDs that are down, so the 1 unfound object I think
->> needs to be manually cleared. I ran across a webpage a while ago  that
->> talked about how to clear it, but if you have a reference, would save
->> me a little time.
+On Tue, Sep 12, 2017 at 6:54 PM, Brad Hubbard <bhubbard@redhat.com> wrote:
+> Reading this thread is illuminating, but stops short of pointing to
+> the actual fix.
 >
-> http://docs.ceph.com/docs/master/rados/troubleshooting/troubleshooting-pg/#failures-osd-unfound
+> https://www.spinics.net/lists/linux-xfs/msg07597.html
 >
-> sage
+> Regardless, this seems to be an XFS problem and it is at least implied
+> a fix has been posted upstream.
 >
->> I've included the outputs of the commands you asked. The ceph test
->> network contains 6 osds, 3 mons, 3 mds, 1rgw 1mgr. ubuntu 64 bit
->> 14.04/16.04 mix.
+> I guess (it is just a guess) you could try an xfs_repair on the
+> filesystem to see if that helps or try a newer kernel if that's a
+> possibility.
+>
+> To get a definitive answer about what the exact fix was you'd probably
+> need to post to the linux-xfs mailing list and ask them. If you do
+> please update this thread with the results so others may benefit.
+>
+>
+> On Tue, Sep 12, 2017 at 11:25 PM, Wyllys Ingersoll
+> <wyllys.ingersoll@keepertech.com> wrote:
+>> Ceph 10.2.7
+>> Kernel 4.12.10
 >>
->> file system is degraded. Are there procedures how to get this back in operation?
+>> We are seeing frequent kernel errors that cause the XFS based OSD
+>> processes to crash and restart.  Has anyone seen or reported something
+>> like this before?  Maybe due to bad or failing disks, but its hard to
+>> tell.
 >>
->> On Tue, Sep 5, 2017 at 6:33 AM, Sage Weil <sweil@redhat.com> wrote:
->> > On Mon, 4 Sep 2017, Two Spirit wrote:
->> >> Thanks for the info. I'm stumped what to do right now to get back to
->> >> an operation cluster -- still trying to find documentation on how to
->> >> recover.
->> >>
->> >>
->> >> 1) I have not yet modified any CRUSH rules from the defaults. I have
->> >> one ubuntu 14.04 OSD in the mix, and I had to set "ceph osd crush
->> >> tunables legacy" just to get it to work.
->> >>
->> >> 2) I have not yet implemented any Erasure Code pool. That is probably
->> >> one of the next tests I was going to do.  I'm still testing with basic
->> >> replication.
->> >
->> > Can you attach 'ceph health detail', 'ceph osd crush dump', and 'ceph osd
->> > dump'?
->> >
->> >> The degraded data redundancy seems to be stuck and not reducing
->> >> anymore. If I manually clear [if this is even possible] the 1 pg
->> >> undersized, should my degraded filesystem go back online?
->> >
->> > The problem is likely the 1 unfound object.  Are there any OSDs that are
->> > down that failed recently?  (Try 'ceph osd tree down' to see a simple
->> > summary.)
->> >
->> > sage
->> >
->> >
->> >>
->> >> On Mon, Sep 4, 2017 at 2:05 AM, John Spray <jspray@redhat.com> wrote:
->> >> > On Sun, Sep 3, 2017 at 2:14 PM, Two Spirit <twospirit6905@gmail.com> wrote:
->> >> >> Setup: luminous on
->> >> >> Ubuntu 14.04/16.04 mix. 5 OSD. all up. 3 or 4 mds, 3mon,cephx
->> >> >> rebooting all 6 ceph systems did not clear the problem. Failure
->> >> >> occurred within 6 hours of start of test.
->> >> >> similar stress test with 4OSD,1MDS,1MON,cephx worked fine.
->> >> >>
->> >> >>
->> >> >> stress test
->> >> >> # cp * /mnt/cephfs
->> >> >>
->> >> >> # ceph -s
->> >> >>     health: HEALTH_WARN
->> >> >>             1 filesystem is degraded
->> >> >>             crush map has straw_calc_version=0
->> >> >>             1/731529 unfound (0.000%)
->> >> >>             Degraded data redundancy: 22519/1463058 objects degraded
->> >> >> (1.539%), 2 pgs unclean, 2 pgs degraded, 1 pg undersized
->> >> >>
->> >> >>   services:
->> >> >>     mon: 3 daemons, quorum xxx233,xxx266,xxx272
->> >> >>     mgr: xxx266(active)
->> >> >>     mds: cephfs-1/1/1 up  {0=xxx233=up:replay}, 3 up:standby
->> >> >>     osd: 5 osds: 5 up, 5 in
->> >> >>     rgw: 1 daemon active
->> >> >
->> >> > Your MDS is probably stuck in the replay state because it can't read
->> >> > from one of your degraded PGs.  Given that you have all your OSDs in,
->> >> > but one of your PGs is undersized (i.e. is short on OSDs), I would
->> >> > guess that something is wrong with your choice of CRUSH rules or EC
->> >> > config.
->> >> >
->> >> > John
->> >> >
->> >> >>
->> >> >> # ceph mds dump
->> >> >> dumped fsmap epoch 590
->> >> >> fs_name cephfs
->> >> >> epoch   589
->> >> >> flags   c
->> >> >> created 2017-08-24 14:35:33.735399
->> >> >> modified        2017-08-24 14:35:33.735400
->> >> >> tableserver     0
->> >> >> root    0
->> >> >> session_timeout 60
->> >> >> session_autoclose       300
->> >> >> max_file_size   1099511627776
->> >> >> last_failure    0
->> >> >> last_failure_osd_epoch  1573
->> >> >> compat  compat={},rocompat={},incompat={1=base v0.20,2=client
->> >> >> writeable ranges,3=default file layouts on dirs,4=dir inode in
->> >> >> separate object,5=mds uses versioned encoding,6=dirfrag is stored in
->> >> >> omap,8=file layout v2}
->> >> >> max_mds 1
->> >> >> in      0
->> >> >> up      {0=579217}
->> >> >> failed
->> >> >> damaged
->> >> >> stopped
->> >> >> data_pools      [5]
->> >> >> metadata_pool   6
->> >> >> inline_data     disabled
->> >> >> balancer
->> >> >> standby_count_wanted    1
->> >> >> 579217: x.x.x.233:6804/1176521332 'xxx233' mds.0.589 up:replay seq 2
->> >> >> --
->> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> >> the body of a message to majordomo@vger.kernel.org
->> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >>
->> >>
 >>
+>>
+>> [Tue Sep 12 09:18:32 2017] BUG: unable to handle kernel NULL pointer
+>> dereference at 0000000000000090
+>> [Tue Sep 12 09:18:32 2017] IP: xfs_da3_node_read+0x2e/0xb0 [xfs]
+>> [Tue Sep 12 09:18:32 2017] PGD 0
+>> [Tue Sep 12 09:18:32 2017] P4D 0
+>>
+>> [Tue Sep 12 09:18:32 2017] Oops: 0000 [#23] SMP
+>> [Tue Sep 12 09:18:32 2017] Modules linked in: binfmt_misc xfs
+>> libcrc32c dm_crypt intel_rapl x86_pkg_temp_thermal ipmi_ssif
+>> intel_powerclamp coretemp kvm_intel kvm irqbypass crct10dif_pclmul
+>> crc32_pclmul ghash_clmulni_intel pcbc aesni_intel aes_x86_64
+>> input_leds crypto_simd glue_helper cryptd shpchp intel_cstate
+>> intel_rapl_perf lpc_ich mei_me mei mac_hid ipmi_si ipmi_devintf
+>> ipmi_msghandler acpi_power_meter acpi_pad 8021q garp mrp stp llc
+>> bonding autofs4 btrfs xor raid6_pq ses enclosure mlx4_en hid_generic
+>> ttm usbhid hid drm_kms_helper syscopyarea igb sysfillrect e1000e dca
+>> sysimgblt fb_sys_fops mlx4_core mpt3sas ptp ahci devlink drm
+>> raid_class pps_core libahci scsi_transport_sas i2c_algo_bit
+>> [Tue Sep 12 09:18:32 2017] CPU: 8 PID: 40382 Comm: tp_fstore_op
+>> Tainted: G      D         4.12.10-041210-generic #201708300614
+>> [Tue Sep 12 09:18:32 2017] Hardware name: AIC SB303-LB/LIBRA, BIOS
+>> LIBKV070 08/03/2016
+>> [Tue Sep 12 09:18:32 2017] task: ffff8f03b4220000 task.stack: ffff9a6a75ff0000
+>> [Tue Sep 12 09:18:32 2017] RIP: 0010:xfs_da3_node_read+0x2e/0xb0 [xfs]
+>> [Tue Sep 12 09:18:32 2017] RSP: 0018:ffff9a6a75ff3d30 EFLAGS: 00010282
+>> [Tue Sep 12 09:18:32 2017] RAX: 0000000000000000 RBX: ffff8f08b8ce9d98
+>> RCX: 0000000000000001
+>> [Tue Sep 12 09:18:32 2017] RDX: ffffffffc0a37700 RSI: 0000000000000000
+>> RDI: ffff9a6a75ff3cd8
+>> [Tue Sep 12 09:18:32 2017] RBP: ffff9a6a75ff3d48 R08: 00000000ffffffff
+>> R09: 0000000000000001
+>> [Tue Sep 12 09:18:32 2017] R10: 0000000000000001 R11: 0000000000000001
+>> R12: ffff9a6a75ff3d78
+>> [Tue Sep 12 09:18:32 2017] R13: 0000000000000005 R14: 00000000894e93b5
+>> R15: ffff8f1536502010
+>> [Tue Sep 12 09:18:32 2017] FS:  00007f82c9b70700(0000)
+>> GS:ffff8f26ffc00000(0000) knlGS:0000000000000000
+>> [Tue Sep 12 09:18:32 2017] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+>> [Tue Sep 12 09:18:32 2017] CR2: 0000000000000090 CR3: 00000017cf710000
+>> CR4: 00000000001406e0
+>> [Tue Sep 12 09:18:32 2017] Call Trace:
+>> [Tue Sep 12 09:18:32 2017]  xfs_attr3_node_inactive+0xd0/0x230 [xfs]
+>> [Tue Sep 12 09:18:32 2017]  xfs_attr_inactive+0x267/0x280 [xfs]
+>> [Tue Sep 12 09:18:32 2017]  xfs_inactive+0xe2/0x110 [xfs]
+>> [Tue Sep 12 09:18:32 2017]  xfs_fs_destroy_inode+0x9f/0x200 [xfs]
+>> [Tue Sep 12 09:18:32 2017]  destroy_inode+0x3b/0x60
+>> [Tue Sep 12 09:18:32 2017]  evict+0x136/0x1a0
+>> [Tue Sep 12 09:18:32 2017]  iput+0x14c/0x220
+>> [Tue Sep 12 09:18:32 2017]  do_unlinkat+0x1a7/0x310
+>> [Tue Sep 12 09:18:32 2017]  SyS_unlink+0x16/0x20
+>> [Tue Sep 12 09:18:32 2017]  entry_SYSCALL_64_fastpath+0x1e/0xa9
+>> [Tue Sep 12 09:18:32 2017] RIP: 0033:0x7f82d7753ea7
+>> [Tue Sep 12 09:18:32 2017] RSP: 002b:00007f82c9b6d2e8 EFLAGS: 00000246
+>> ORIG_RAX: 0000000000000057
+>> [Tue Sep 12 09:18:32 2017] RAX: ffffffffffffffda RBX: 00005606b600e000
+>> RCX: 00007f82d7753ea7
+>> [Tue Sep 12 09:18:32 2017] RDX: 00007f82c9b6d2a0 RSI: 0000000000000000
+>> RDI: 00005606bfd32a80
+>> [Tue Sep 12 09:18:32 2017] RBP: 000056033335ab20 R08: 0000000000450000
+>> R09: 0000000000000001
+>> [Tue Sep 12 09:18:32 2017] R10: 0000000000000000 R11: 0000000000000246
+>> R12: 00007f82da606c60
+>> [Tue Sep 12 09:18:32 2017] R13: 00005606812ebd60 R14: 00000000040ffda5
+>> R15: 00005606dfb64a60
+>> [Tue Sep 12 09:18:32 2017] Code: 00 00 55 48 89 e5 41 54 53 4d 89 c4
+>> 48 89 fb 48 83 ec 08 68 00 77 a3 c0 e8 e0 fe ff ff 85 c0 5a 75 46 48
+>> 85 db 74 41 49 8b 34 24 <48> 8b 96 90 00 00 00 0f b7 52 08 66 c1 c2 08
+>> 66 81 fa be 3e 74
+>> [Tue Sep 12 09:18:32 2017] RIP: xfs_da3_node_read+0x2e/0xb0 [xfs] RSP:
+>> ffff9a6a75ff3d30
+>> [Tue Sep 12 09:18:32 2017] CR2: 0000000000000090
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> --
+> Cheers,
+> Brad
