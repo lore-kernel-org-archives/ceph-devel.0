@@ -1,34 +1,71 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: Status of luminous v12.2.1 integration branch
-Date: Wed, 13 Sep 2017 08:49:20 -0700
-Message-ID: <CA+2bHPZ9fjx2Z8uUc-Fo+TsO-m9+PspG2T=NStGdo51FyL-eAQ@mail.gmail.com>
-References: <CAMMFjmHk-YfW6-qnJmgQOWj-cdRO86ggHK-2y27GN1u-Ao8X-w@mail.gmail.com>
+From: Piotr =?utf-8?B?RGHFgmVr?= <branch@predictor.org.pl>
+Subject: Re: recovery priority preemption
+Date: Wed, 13 Sep 2017 20:02:01 +0200
+Message-ID: <20170913180201.GB9903@mailware>
+References: <alpine.DEB.2.11.1709131458410.24068@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f47.google.com ([209.85.214.47]:46448 "EHLO
-        mail-it0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751465AbdIMPtw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Sep 2017 11:49:52 -0400
-Received: by mail-it0-f47.google.com with SMTP id 6so3480985itl.1
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Sep 2017 08:49:52 -0700 (PDT)
-In-Reply-To: <CAMMFjmHk-YfW6-qnJmgQOWj-cdRO86ggHK-2y27GN1u-Ao8X-w@mail.gmail.com>
+Received: from predictor.org.pl ([185.5.97.54]:46518 "EHLO predictor.org.pl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751106AbdIMSLD (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 13 Sep 2017 14:11:03 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.11.1709131458410.24068@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>
-Cc: "Development, Ceph" <ceph-devel@vger.kernel.org>, Abhishek Lekshmanan <abhishek@suse.com>, "Weil, Sage" <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, "gmeno@redhat.com" <gregory.meno@inktank.com>
+To: ceph-devel@vger.kernel.org
 
-On Wed, Sep 13, 2017 at 8:40 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
-> This email is an attempt to make sure that all are clear on luminous
-> v12.2.1 release status.
->
-> Dev leads - what is left before we can start QE validation?
+On Wed, Sep 13, 2017 at 03:03:22PM +0000, Sage Weil wrote:
+> I recently observed a problem on the lab cluster while doing a log of 
+> rebalancing (filestore->bluestore conversion):
+> 
+>  - lots of pgs in backfill_wait
+>  - a few pgs that need pg log recovery, but these appear after backfills 
+> are already in progress, so they end up in backfill_wait too (confusing 
+> state name!)
+>  - ongoing write activity extents pg logs for those pgs, but they cannot 
+> trim
+>  - pg logs reach 5x-10x the max
+>  - OSDs OOM
 
-To be merged into master today and then backported:
-http://tracker.ceph.com/issues/21378
-Luminous backport: http://tracker.ceph.com/issues/21357
-To be merged into master today and then backported:
-http://tracker.ceph.com/issues/20594
+Why we're keeping so many pg logs in RAM anyway? We could dump them to storage
+and once things stabilize, just reload them by few hundred entries at once.
+
+> I think what is needed is for the recovery priority scheduling to allow 
+> preemption.  If we are currently working on recovery/backfill for PG X, 
+> but PG Y appears with a higher priority, we should suspend work on X and 
+> switch to Y.
+> 
+> Piotr, I didn't look too closely at forced recovery changes you folks 
+> recently did, but I'm guessing that it was added to address this sort of 
+> situation, right? 
+
+Not exactly that, but close.
+The problem we wanted to solve (or at least reduce) was the risk of SLA
+reduction for at least some of customers when cascading failures occur. 
+We host multiple Ceph clusters that are used by even more VMs, meaning
+a lot of data to recover and that sometimes takes days to finish - so if
+one rack fails for some reason, the risk of failures in remaining two racks
+is very real and very scary. 
+Because pgs are recovered in pretty much random order (or at least not in
+any order that would recover entire images one-by-one), we wanted to add some
+predictability to that, so if cascading failures do occur, less customers
+would be impacted by that because at least some of them managed to recover. 
+
+> Would a general solution that preempts and always works 
+> on the highest priority PG resolve the problem you've observed?
+
+Preempting (in exact meaning of that - "drop whatever you're doing and focus
+on that instead") any ongoing recovery with force-recovery wasn't exactly a
+priority and we didn't want to make it even more complex than it already got.
+If entire rack needs recovery, waiting for a single pg that is currently
+in progress isn't a *big* issue in the case mentioned above. Still, that would
+be very welcome! Well, except if that would mean stopping recovery of pg that's
+90% done and then restarting it from beginning later.
 
 -- 
-Patrick Donnelly
+Piotr Dałek
+branch@predictor.org.pl
+http://blog.predictor.org.pl
