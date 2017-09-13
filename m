@@ -1,149 +1,65 @@
-From: Two Spirit <twospirit6905@gmail.com>
-Subject: Re: clearing unfound objects
-Date: Wed, 13 Sep 2017 08:46:35 -0700
-Message-ID: <CAKRxpuv0Fi_2YU_pCpcpQf2zcFRj4miu6-FVEhjiqHKb_=mJhw@mail.gmail.com>
-References: <CAKRxpuu-P_Hp4F9KZTN_=OGaN_gHLUgLAosXE09716yAX9Wrag@mail.gmail.com>
- <alpine.DEB.2.11.1709122248360.24068@piezo.novalocal> <CAKRxpuuMbavH4V7zEDaOzJFzG=eLU0XH2KjgF6EJh1EWevxxQw@mail.gmail.com>
- <alpine.DEB.2.11.1709130154080.24068@piezo.novalocal>
+From: Vasu Kulkarni <vakulkar@redhat.com>
+Subject: Re: dmcrypt?
+Date: Wed, 13 Sep 2017 08:47:38 -0700
+Message-ID: <CAKPXa=YBbBJ_rcvV1-4jqw7nbF0YdS285ZYtvBw27em6FtbT1Q@mail.gmail.com>
+References: <CAKRxpuv733NqGs+U5m1TUHK9OyVvCEZDv93bs0Djggop_3vxRA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f182.google.com ([209.85.223.182]:48924 "EHLO
+Received: from mail-io0-f182.google.com ([209.85.223.182]:46774 "EHLO
         mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751123AbdIMPqg (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Sep 2017 11:46:36 -0400
-Received: by mail-io0-f182.google.com with SMTP id n69so3055308ioi.5
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Sep 2017 08:46:36 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1709130154080.24068@piezo.novalocal>
+        with ESMTP id S1751686AbdIMPrj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Sep 2017 11:47:39 -0400
+Received: by mail-io0-f182.google.com with SMTP id d16so3083119ioj.3
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Sep 2017 08:47:39 -0700 (PDT)
+In-Reply-To: <CAKRxpuv733NqGs+U5m1TUHK9OyVvCEZDv93bs0Djggop_3vxRA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Two Spirit <twospirit6905@gmail.com>
+Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-You the man. I'm not sure how you figured that out yet. I've got a
-little reading to do. Is this considered a bug that the MDS is stuck
-and unable to self heal?
+On Tue, Sep 12, 2017 at 4:45 PM, Two Spirit <twospirit6905@gmail.com> wrote:
+> Hi Sage,
+>
+> I tried to install an encrypted OSD, but I found the documentation to
+> be light and not finding any examples. I was able to prepare
+> (ceph-deploy osd prepare --dmcrypt <host>:<relative_device_name>', but
+> I couldn't activate it.
+What  OS Version is this ? and What is the error?  I dont see any
+issues in the nightly runs with CentOS/Ubuntu.
+Have you tried osd create --bluestore --dmcrypt  <host>:<block> ?
 
-On Tue, Sep 12, 2017 at 6:54 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Tue, 12 Sep 2017, Two Spirit wrote:
->> I attached the complete output with the previous email.
->>
->> ...
->>     "objects": [
->>         {
->>             "oid": {
->>                 "oid": "200.0000052d",
+ I found a tracker page that listed you as one
+> of the owners http://tracker.ceph.com/projects/ceph/wiki/Osd_-_simple_ceph-mon_dm-crypt_key_management
+> that seemed to imply that it was in the 'planning' phase. I was
+> wondering if this is in planning phase, or if it is fully supported
+> now ready to begin testing.
 >
-> This is an MDS journal object.. so the MDS is stuck replaying its journal
-> because it is unfound.
+> I have a requirement to place complete disks in encrypted containers
+> (including partition tables. kpartx accesses the encrypted partitions.
+> some versions of Ubuntu I have to do this manually, but newer versions
+> seem to automatically do this).  I haven't absorbed all the ceph
+> dmcrypt architecture yet, but I did not feel comfortable that the keys
+> were available by querying ceph. Not saying I have any idea how to do
+> it better in a ceph environment. Can you accept a network accessible
+> keyfile?
 >
-> In this case I would do 'revert'.
+> I thought I might be able to get some testing by creating my own
+> encrypted container outside of ceph, which was accessible via
+> /dev/mapper/lukscontainer. I tried 'ceph-deploy osd prepare
+> luksosd:/dev/mapper/lukscontainer' and it didn't like that. I saw docs
+> using absolute references (/dev/sdb) so I thought
+> /dev/mapper/lukscontainer should be usable. ceph-deploy osd prepare
+> --dmcrypt luksosd:sdb seemed to work -- maybe it didn't like the fact
+> the path was an extra level deeper. Where is the encrypted ceph data
+> partition to activate?
 >
-> sage
->
->
->>                 "key": "",
->>                 "snapid": -2,
->>                 "hash": 2728386690,
->>                 "max": 0,
->>                 "pool": 6,
->>                 "namespace": ""
->>             },
->>             "need": "1496'15853",
->>             "have": "0'0",
->>             "flags": "none",
->>             "locations": []
->>         }
->>
->>
->> So it goes Filename -> OID -> PG -> OSD? So if I trace down
->> "200.0000052d" I should be able to clear the problem? I seem to get
->> files in the lost+found directory think from fsck. Does the deep
->> scrubbing eventually clear these after a week or will they always
->> require manual intervention?
->>
->> On Tue, Sep 12, 2017 at 3:48 PM, Sage Weil <sweil@redhat.com> wrote:
->> > On Tue, 12 Sep 2017, Two Spirit wrote:
->> >> >On Tue, 12 Sep 2017, Two Spirit wrote:
->> >> >> I don't have any OSDs that are down, so the 1 unfound object I think
->> >> >> needs to be manually cleared. I ran across a webpage a while ago that
->> >> >> talked about how to clear it, but if you have a reference, would save
->> >> >> me a little time.
->> >> >
->> >> >http://docs.ceph.com/docs/master/rados/troubleshooting/troubleshooting-pg/#failures-osd-unfound
->> >>
->> >> Thanks. That was the page I had read earlier.
->> >>
->> >> I've attached the full outputs to this mail and show just clips below.
->> >>
->> >> # ceph health detail
->> >> OBJECT_UNFOUND 1/731529 unfound (0.000%)
->> >>     pg 6.2 has 1 unfound objects
->> >>
->> >> There looks like one number that shouldn't be there...
->> >> # ceph pg 6.2 list_missing
->> >> {
->> >>     "offset": {
->> >> ...
->> >>         "pool": -9223372036854775808,
->> >>         "namespace": ""
->> >>     },
->> >> ...
->> >
->> > I think you've snipped out the bit that has the name of the unfound
->> > object?
->> >
->> > sage
->> >
->> >>
->> >> # ceph -s
->> >>     osd: 6 osds: 6 up, 6 in; 10 remapped pgs
->> >>
->> >> This shows under the pg query that something believes that osd "2" is
->> >> down, but all OSDs are up, as seen in the previous ceph -s command.
->> >> # ceph pg 6.2 query
->> >>     "recovery_state": [
->> >>         {
->> >>             "name": "Started/Primary/Active",
->> >>             "enter_time": "2017-09-12 10:33:11.193486",
->> >>             "might_have_unfound": [
->> >>                 {
->> >>                     "osd": "0",
->> >>                     "status": "already probed"
->> >>                 },
->> >>                 {
->> >>                     "osd": "1",
->> >>                     "status": "already probed"
->> >>                 },
->> >>                 {
->> >>                     "osd": "2",
->> >>                     "status": "osd is down"
->> >>                 },
->> >>                 {
->> >>                     "osd": "4",
->> >>                     "status": "already probed"
->> >>                 },
->> >>                 {
->> >>                     "osd": "5",
->> >>                     "status": "already probed"
->> >>                 }
->> >>
->> >>
->> >> If i go to a couple other OSDs, and run the same command,
->> >> the osd "2" is listed as "already probed". They are not in sync. I
->> >> double checked that all the OSDs were up on all 3 times I ran the
->> >> command.
->> >>
->> >> Now. my question to debug this to figure out if I want to
->> >> "revert|delete", is what in the heck are these file(s)/object(s)
->> >> associated with the pg? I assume this might be in the MDS, but I'd
->> >> like to see a file name associated with this to make a further
->> >> determination of what I should do.  I don't have enough information at
->> >> this point to figure out how I should recover.
->> >>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+> As a temporary workaround, I was thinking I could create a /dev/mdXXX
+> device using mdadm forcing a single disk raid. This would keep key
+> management outside of ceph for now. and be able to run the relative
+> path format 'ceph-deploy osd prepare luksosd:mdXXX'. In theory, this
+> should work and supported by ceph, right?
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
