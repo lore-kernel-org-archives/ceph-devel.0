@@ -1,52 +1,55 @@
-From: "Adam C. Emerson" <aemerson@redhat.com>
+From: Sage Weil <sage@newdream.net>
 Subject: Re: should CephContext be a singleton?
-Date: Wed, 13 Sep 2017 11:09:15 -0400
-Message-ID: <20170913150915.GA31125@ultraspiritum.eng.arb.redhat.com>
+Date: Wed, 13 Sep 2017 15:16:03 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1709131513130.24068@piezo.novalocal>
 References: <1505314715.4822.24.camel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40350 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751870AbdIMPJQ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 13 Sep 2017 11:09:16 -0400
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 7E1C55D5EA
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Sep 2017 15:09:16 +0000 (UTC)
-Content-Disposition: inline
+Received: from cobra.newdream.net ([66.33.216.30]:56111 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751305AbdIMPQG (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Sep 2017 11:16:06 -0400
 In-Reply-To: <1505314715.4822.24.camel@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Jeff Layton <jlayton@redhat.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 13/09/2017, Jeff Layton wrote:
+On Wed, 13 Sep 2017, Jeff Layton wrote:
+> I recently hit the problem described in this bug when rolling some new
+> tests for cephfs:
+> 
+>     http://tracker.ceph.com/issues/20988
+> 
+> While I hit it in a testcase, I suspect something like ganesha or samba
+> could also hit this, as they can create several CephContexts in the
+> course of their duties and their teardown is not necessarily coordinated
+> in any way.
+> 
+> The problem is basically that the CephContext is a random pile of stuff,
+> some of which has an effect on global objects (the lockdep stuff, in
+> particular, but there may be more).
+> 
+> There are a few ways to fix it...we could just ensure that the lockdep
+> stuff is handled cleanly, but I wonder...is there any real-world
+> use-case for having multiple CephContexts in a single process image?
+> 
 > It contains stuff like admin sockets, and certain threads are tied to
 > it, etc. This seems like the sort of thing that should just have a
 > single instance per process. Should we start moving things in that
 > direction, or should I look at fixing this another way?
 
-There was a general consensus of removing use of the g_ceph_context
-variable. A PR of mine removed it from the object store, OSD and
-messenger, though other things needed doing so I haven't got around to
-removing the rest.
+There are a couple of reasons why it's not a singleton:
 
-If you have the cycles for it, feel free to start removing it from
-elsewhere and threading CephContext* in.
+ - It makes library usage awkward.  Having "global" state in a shared lib 
+is an antipattern, so librados was set up with create/destroy functions, 
+which are built around the cct.  In practice it means you can instantiate 
+multiple independent clients in the same process, which is IMO useful.
+ - We would eventually like to host multiple OSD daemons within the same 
+process in order to multiplex the network IO across the same connections 
+(reducing e.g. RDMA connection count) and allowing more efficient use of 
+DPDK/SPDK.  Moving from g_ceph_context -> explicit ccts is a step in that 
+direction, and further away from any singletons.
 
-There isn't really a consensus on splitting out CephContext so it's
-less of a God Object but it might be worth reconsidering that at some
-point.
-
-Also the lockdep stuff may be less of an issue as we move away from
-Mutex to std::mutex. (Though I do have a debugging mutex class that
-lets people into our lockdep code if we find that is an issue. I
-/suspect/ something like helgrind might be better for finding lock
-ordering errors.)
-
--- 
-Senior Software Engineer           Red Hat Storage, Ann Arbor, MI, US
-IRC: Aemerson@{RedHat, OFTC}
-0x80F7544B90EDBFB9 E707 86BA 0C1B 62CC 152C  7C12 80F7 544B 90ED BFB9
+sage
