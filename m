@@ -1,44 +1,149 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: Status of luminous v12.2.1 integration branch
-Date: Wed, 13 Sep 2017 08:45:25 -0700
-Message-ID: <CAMMFjmGoiaEdCsaYNQVZMTQqLspL47AtmoDf8=QXE14OLUAaYQ@mail.gmail.com>
-References: <CAMMFjmHk-YfW6-qnJmgQOWj-cdRO86ggHK-2y27GN1u-Ao8X-w@mail.gmail.com>
- <alpine.DEB.2.11.1709131543030.24068@piezo.novalocal>
+From: Two Spirit <twospirit6905@gmail.com>
+Subject: Re: clearing unfound objects
+Date: Wed, 13 Sep 2017 08:46:35 -0700
+Message-ID: <CAKRxpuv0Fi_2YU_pCpcpQf2zcFRj4miu6-FVEhjiqHKb_=mJhw@mail.gmail.com>
+References: <CAKRxpuu-P_Hp4F9KZTN_=OGaN_gHLUgLAosXE09716yAX9Wrag@mail.gmail.com>
+ <alpine.DEB.2.11.1709122248360.24068@piezo.novalocal> <CAKRxpuuMbavH4V7zEDaOzJFzG=eLU0XH2KjgF6EJh1EWevxxQw@mail.gmail.com>
+ <alpine.DEB.2.11.1709130154080.24068@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:46660 "EHLO
-        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751318AbdIMPp0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Sep 2017 11:45:26 -0400
-Received: by mail-io0-f171.google.com with SMTP id d16so3039361ioj.3
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Sep 2017 08:45:26 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1709131543030.24068@piezo.novalocal>
+Received: from mail-io0-f182.google.com ([209.85.223.182]:48924 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751123AbdIMPqg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Sep 2017 11:46:36 -0400
+Received: by mail-io0-f182.google.com with SMTP id n69so3055308ioi.5
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Sep 2017 08:46:36 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1709130154080.24068@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
-Cc: "Development, Ceph" <ceph-devel@vger.kernel.org>, Abhishek Lekshmanan <abhishek@suse.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, "gmeno@redhat.com" <gregory.meno@inktank.com>
+Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Sage
-I will test 17674, anything else for rgw?
+You the man. I'm not sure how you figured that out yet. I've got a
+little reading to do. Is this considered a bug that the MDS is stuck
+and unable to self heal?
 
-Thx
-YuriW
-
-On Wed, Sep 13, 2017 at 8:43 AM, Sage Weil <sweil@redhat.com> wrote:
-> https://github.com/ceph/ceph/pull/17674 needs to go through rgw suite and
-> get merged!
-> THanks-
->
->
-> On Wed, 13 Sep 2017, Yuri Weinstein wrote:
->
->> This email is an attempt to make sure that all are clear on luminous
->> v12.2.1 release status.
+On Tue, Sep 12, 2017 at 6:54 PM, Sage Weil <sweil@redhat.com> wrote:
+> On Tue, 12 Sep 2017, Two Spirit wrote:
+>> I attached the complete output with the previous email.
 >>
->> Dev leads - what is left before we can start QE validation?
+>> ...
+>>     "objects": [
+>>         {
+>>             "oid": {
+>>                 "oid": "200.0000052d",
+>
+> This is an MDS journal object.. so the MDS is stuck replaying its journal
+> because it is unfound.
+>
+> In this case I would do 'revert'.
+>
+> sage
+>
+>
+>>                 "key": "",
+>>                 "snapid": -2,
+>>                 "hash": 2728386690,
+>>                 "max": 0,
+>>                 "pool": 6,
+>>                 "namespace": ""
+>>             },
+>>             "need": "1496'15853",
+>>             "have": "0'0",
+>>             "flags": "none",
+>>             "locations": []
+>>         }
 >>
->> Thx
->> YuriW
+>>
+>> So it goes Filename -> OID -> PG -> OSD? So if I trace down
+>> "200.0000052d" I should be able to clear the problem? I seem to get
+>> files in the lost+found directory think from fsck. Does the deep
+>> scrubbing eventually clear these after a week or will they always
+>> require manual intervention?
+>>
+>> On Tue, Sep 12, 2017 at 3:48 PM, Sage Weil <sweil@redhat.com> wrote:
+>> > On Tue, 12 Sep 2017, Two Spirit wrote:
+>> >> >On Tue, 12 Sep 2017, Two Spirit wrote:
+>> >> >> I don't have any OSDs that are down, so the 1 unfound object I think
+>> >> >> needs to be manually cleared. I ran across a webpage a while ago that
+>> >> >> talked about how to clear it, but if you have a reference, would save
+>> >> >> me a little time.
+>> >> >
+>> >> >http://docs.ceph.com/docs/master/rados/troubleshooting/troubleshooting-pg/#failures-osd-unfound
+>> >>
+>> >> Thanks. That was the page I had read earlier.
+>> >>
+>> >> I've attached the full outputs to this mail and show just clips below.
+>> >>
+>> >> # ceph health detail
+>> >> OBJECT_UNFOUND 1/731529 unfound (0.000%)
+>> >>     pg 6.2 has 1 unfound objects
+>> >>
+>> >> There looks like one number that shouldn't be there...
+>> >> # ceph pg 6.2 list_missing
+>> >> {
+>> >>     "offset": {
+>> >> ...
+>> >>         "pool": -9223372036854775808,
+>> >>         "namespace": ""
+>> >>     },
+>> >> ...
+>> >
+>> > I think you've snipped out the bit that has the name of the unfound
+>> > object?
+>> >
+>> > sage
+>> >
+>> >>
+>> >> # ceph -s
+>> >>     osd: 6 osds: 6 up, 6 in; 10 remapped pgs
+>> >>
+>> >> This shows under the pg query that something believes that osd "2" is
+>> >> down, but all OSDs are up, as seen in the previous ceph -s command.
+>> >> # ceph pg 6.2 query
+>> >>     "recovery_state": [
+>> >>         {
+>> >>             "name": "Started/Primary/Active",
+>> >>             "enter_time": "2017-09-12 10:33:11.193486",
+>> >>             "might_have_unfound": [
+>> >>                 {
+>> >>                     "osd": "0",
+>> >>                     "status": "already probed"
+>> >>                 },
+>> >>                 {
+>> >>                     "osd": "1",
+>> >>                     "status": "already probed"
+>> >>                 },
+>> >>                 {
+>> >>                     "osd": "2",
+>> >>                     "status": "osd is down"
+>> >>                 },
+>> >>                 {
+>> >>                     "osd": "4",
+>> >>                     "status": "already probed"
+>> >>                 },
+>> >>                 {
+>> >>                     "osd": "5",
+>> >>                     "status": "already probed"
+>> >>                 }
+>> >>
+>> >>
+>> >> If i go to a couple other OSDs, and run the same command,
+>> >> the osd "2" is listed as "already probed". They are not in sync. I
+>> >> double checked that all the OSDs were up on all 3 times I ran the
+>> >> command.
+>> >>
+>> >> Now. my question to debug this to figure out if I want to
+>> >> "revert|delete", is what in the heck are these file(s)/object(s)
+>> >> associated with the pg? I assume this might be in the MDS, but I'd
+>> >> like to see a file name associated with this to make a further
+>> >> determination of what I should do.  I don't have enough information at
+>> >> this point to figure out how I should recover.
+>> >>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>
 >>
