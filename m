@@ -1,70 +1,28 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: dmcrypt?
-Date: Wed, 13 Sep 2017 12:33:31 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1709131232040.24068@piezo.novalocal>
-References: <CAKRxpuv733NqGs+U5m1TUHK9OyVvCEZDv93bs0Djggop_3vxRA@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: REST APIs
+Date: Wed, 13 Sep 2017 14:43:21 +0100
+Message-ID: <CALe9h7e02DdmcXPfJFP56c6KCpZ-DoRdS9nvNg1SHQFKuwr9qg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:50190 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751120AbdIMMdc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 13 Sep 2017 08:33:32 -0400
-In-Reply-To: <CAKRxpuv733NqGs+U5m1TUHK9OyVvCEZDv93bs0Djggop_3vxRA@mail.gmail.com>
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:45296 "EHLO
+        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751012AbdIMNnn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Sep 2017 09:43:43 -0400
+Received: by mail-wm0-f51.google.com with SMTP id g206so7237064wme.0
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Sep 2017 06:43:42 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Two Spirit <twospirit6905@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>, "Ranto, Boris" <branto@redhat.com>
 
-On Tue, 12 Sep 2017, Two Spirit wrote:
-> Hi Sage,
-> 
-> I tried to install an encrypted OSD, but I found the documentation to
-> be light and not finding any examples. I was able to prepare
-> (ceph-deploy osd prepare --dmcrypt <host>:<relative_device_name>', but
-> I couldn't activate it. I found a tracker page that listed you as one
-> of the owners http://tracker.ceph.com/projects/ceph/wiki/Osd_-_simple_ceph-mon_dm-crypt_key_management
-> that seemed to imply that it was in the 'planning' phase. I was
-> wondering if this is in planning phase, or if it is fully supported
-> now ready to begin testing.
+Hi all,
 
-There are still some issues with dmcrypt + bluestore; can you verify it 
-works with --filestore?
+This message is prompted by: https://github.com/ceph/ceph/pull/17530
 
-I was hoping to get ceph-volume support for bluestore ready so that we 
-didn't have to deal with ceph-disk, but we didn't get to it before the 
-luminous release.  That's still my preferred path...
+Questions:
+ - Is anyone using either ceph-rest-api or the restful module?
+ - Is anyone planning on doing any work on either?
+ - Is the CLI pass through of the restful module a sufficient
+replacement for ceph-rest-api for anyone that was using it?
 
-sage
-
-
-> I have a requirement to place complete disks in encrypted containers
-> (including partition tables. kpartx accesses the encrypted partitions.
-> some versions of Ubuntu I have to do this manually, but newer versions
-> seem to automatically do this).  I haven't absorbed all the ceph
-> dmcrypt architecture yet, but I did not feel comfortable that the keys
-> were available by querying ceph. Not saying I have any idea how to do
-> it better in a ceph environment. Can you accept a network accessible
-> keyfile?
-> 
-> I thought I might be able to get some testing by creating my own
-> encrypted container outside of ceph, which was accessible via
-> /dev/mapper/lukscontainer. I tried 'ceph-deploy osd prepare
-> luksosd:/dev/mapper/lukscontainer' and it didn't like that. I saw docs
-> using absolute references (/dev/sdb) so I thought
-> /dev/mapper/lukscontainer should be usable. ceph-deploy osd prepare
-> --dmcrypt luksosd:sdb seemed to work -- maybe it didn't like the fact
-> the path was an extra level deeper. Where is the encrypted ceph data
-> partition to activate?
-> 
-> As a temporary workaround, I was thinking I could create a /dev/mdXXX
-> device using mdadm forcing a single disk raid. This would keep key
-> management outside of ceph for now. and be able to run the relative
-> path format 'ceph-deploy osd prepare luksosd:mdXXX'. In theory, this
-> should work and supported by ceph, right?
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+John
