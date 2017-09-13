@@ -1,65 +1,40 @@
-From: Vasu Kulkarni <vakulkar@redhat.com>
-Subject: Re: dmcrypt?
-Date: Wed, 13 Sep 2017 08:47:38 -0700
-Message-ID: <CAKPXa=YBbBJ_rcvV1-4jqw7nbF0YdS285ZYtvBw27em6FtbT1Q@mail.gmail.com>
-References: <CAKRxpuv733NqGs+U5m1TUHK9OyVvCEZDv93bs0Djggop_3vxRA@mail.gmail.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: Status of luminous v12.2.1 integration branch
+Date: Wed, 13 Sep 2017 11:47:43 -0400
+Message-ID: <CA+aFP1CyBAjRgxkJOx5gjNj9O=Tgvw1AsLpaDxpyKB+ACYWt+w@mail.gmail.com>
+References: <CAMMFjmHk-YfW6-qnJmgQOWj-cdRO86ggHK-2y27GN1u-Ao8X-w@mail.gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f182.google.com ([209.85.223.182]:46774 "EHLO
-        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751686AbdIMPrj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Sep 2017 11:47:39 -0400
-Received: by mail-io0-f182.google.com with SMTP id d16so3083119ioj.3
-        for <ceph-devel@vger.kernel.org>; Wed, 13 Sep 2017 08:47:39 -0700 (PDT)
-In-Reply-To: <CAKRxpuv733NqGs+U5m1TUHK9OyVvCEZDv93bs0Djggop_3vxRA@mail.gmail.com>
+Received: from mail-it0-f50.google.com ([209.85.214.50]:46566 "EHLO
+        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751686AbdIMPro (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Sep 2017 11:47:44 -0400
+Received: by mail-it0-f50.google.com with SMTP id 6so3463161itl.1
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Sep 2017 08:47:44 -0700 (PDT)
+In-Reply-To: <CAMMFjmHk-YfW6-qnJmgQOWj-cdRO86ggHK-2y27GN1u-Ao8X-w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Two Spirit <twospirit6905@gmail.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: "Development, Ceph" <ceph-devel@vger.kernel.org>, Abhishek Lekshmanan <abhishek@suse.com>, "Weil, Sage" <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, "gmeno@redhat.com" <gregory.meno@inktank.com>
 
-On Tue, Sep 12, 2017 at 4:45 PM, Two Spirit <twospirit6905@gmail.com> wrote:
-> Hi Sage,
->
-> I tried to install an encrypted OSD, but I found the documentation to
-> be light and not finding any examples. I was able to prepare
-> (ceph-deploy osd prepare --dmcrypt <host>:<relative_device_name>', but
-> I couldn't activate it.
-What  OS Version is this ? and What is the error?  I dont see any
-issues in the nightly runs with CentOS/Ubuntu.
-Have you tried osd create --bluestore --dmcrypt  <host>:<block> ?
+RBD should be good-to-go
 
- I found a tracker page that listed you as one
-> of the owners http://tracker.ceph.com/projects/ceph/wiki/Osd_-_simple_ceph-mon_dm-crypt_key_management
-> that seemed to imply that it was in the 'planning' phase. I was
-> wondering if this is in planning phase, or if it is fully supported
-> now ready to begin testing.
+On Wed, Sep 13, 2017 at 11:40 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
+> This email is an attempt to make sure that all are clear on luminous
+> v12.2.1 release status.
 >
-> I have a requirement to place complete disks in encrypted containers
-> (including partition tables. kpartx accesses the encrypted partitions.
-> some versions of Ubuntu I have to do this manually, but newer versions
-> seem to automatically do this).  I haven't absorbed all the ceph
-> dmcrypt architecture yet, but I did not feel comfortable that the keys
-> were available by querying ceph. Not saying I have any idea how to do
-> it better in a ceph environment. Can you accept a network accessible
-> keyfile?
+> Dev leads - what is left before we can start QE validation?
 >
-> I thought I might be able to get some testing by creating my own
-> encrypted container outside of ceph, which was accessible via
-> /dev/mapper/lukscontainer. I tried 'ceph-deploy osd prepare
-> luksosd:/dev/mapper/lukscontainer' and it didn't like that. I saw docs
-> using absolute references (/dev/sdb) so I thought
-> /dev/mapper/lukscontainer should be usable. ceph-deploy osd prepare
-> --dmcrypt luksosd:sdb seemed to work -- maybe it didn't like the fact
-> the path was an extra level deeper. Where is the encrypted ceph data
-> partition to activate?
->
-> As a temporary workaround, I was thinking I could create a /dev/mdXXX
-> device using mdadm forcing a single disk raid. This would keep key
-> management outside of ceph for now. and be able to run the relative
-> path format 'ceph-deploy osd prepare luksosd:mdXXX'. In theory, this
-> should work and supported by ceph, right?
+> Thx
+> YuriW
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Jason
