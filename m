@@ -1,84 +1,70 @@
-From: Joao Eduardo Luis <joao@suse.de>
-Subject: On monitor development, bugs, and reviews
-Date: Tue, 12 Sep 2017 17:36:25 +0100
-Message-ID: <dadfa535-5759-f918-cb69-c9e936229bf0@suse.de>
+From: Two Spirit <twospirit6905@gmail.com>
+Subject: Re: clearing unfound objects
+Date: Wed, 13 Sep 2017 14:34:39 -0700
+Message-ID: <CAKRxpuuYuCkYVYwX5FcMHZ9m-MSu8tB2Qs7ZO5MJ7dex4X0VCA@mail.gmail.com>
+References: <CAKRxpuu-P_Hp4F9KZTN_=OGaN_gHLUgLAosXE09716yAX9Wrag@mail.gmail.com>
+ <alpine.DEB.2.11.1709122248360.24068@piezo.novalocal> <CAKRxpuuMbavH4V7zEDaOzJFzG=eLU0XH2KjgF6EJh1EWevxxQw@mail.gmail.com>
+ <alpine.DEB.2.11.1709130154080.24068@piezo.novalocal> <CAKRxpuv0Fi_2YU_pCpcpQf2zcFRj4miu6-FVEhjiqHKb_=mJhw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:48475 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751054AbdILQg1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 12 Sep 2017 12:36:27 -0400
-Content-Language: en-GB
+Received: from mail-it0-f41.google.com ([209.85.214.41]:49107 "EHLO
+        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751125AbdIMVel (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 13 Sep 2017 17:34:41 -0400
+Received: by mail-it0-f41.google.com with SMTP id c195so535371itb.1
+        for <ceph-devel@vger.kernel.org>; Wed, 13 Sep 2017 14:34:40 -0700 (PDT)
+In-Reply-To: <CAKRxpuv0Fi_2YU_pCpcpQf2zcFRj4miu6-FVEhjiqHKb_=mJhw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
-Cc: Kefu Chai <kchai@redhat.com>
+To: Sage Weil <sweil@redhat.com>
+Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hi everyone,
+did not see that one coming. what to do?
 
+# ceph health detail
 
-As you all are certainly aware, the monitors are quite the critical part 
-of Ceph: if we don't have a quorum, the cluster will cease responding to 
-requests. For this reason, we tend to be extremely conservative when it 
-comes to changing or adding things, and, personally, I've grown a bit 
-paranoid when it comes to change them significantly.
+FS_DEGRADED 1 filesystem is degraded
+    fs cephfs is degraded
+OBJECT_UNFOUND 1/731509 unfound (0.000%)
+    pg 6.2 has 1 unfound objects
 
-However, I believe it is time we change quite a bit on the monitors, to 
-avoid mistakes that have become easier to make as time passed, and to 
-make the monitors a lot more resilient. While most of these issues have 
-always been present in our minds, as our contributor base grows we are 
-bound to have people changing parts of the code that may be trickier, 
-and whose nuances may have annoying side-effects.
+# ceph pg 6.2 query
+    "recovery_state": [
+        {
+            "name": "Started/Primary/Active",
+            "enter_time": "2017-09-13 14:22:26.384418",
+            "might_have_unfound": [
+                {
+                    "osd": "0",
+                    "status": "already probed"
+                },
+                {
+                    "osd": "2",
+                    "status": "already probed"
+                },
+                {
+                    "osd": "3",
+                    "status": "already probed"
+                },
+                {
+                    "osd": "4",
+                    "status": "already probed"
+                },
+                {
+                    "osd": "5",
+                    "status": "already probed"
+                }
 
-This became more obvious over the course of Luminous (although this has 
-been a problem for longer); I've noticed that there were quite a few 
-bugs introduced in the monitors due to how tricky it is to deal with all 
-the paxos services' internal data structures consistency requirements.
+# ceph pg 6.2 mark_unfound_lost revert
+pg has no unfound objects
 
-To illustrate this a bit, the most common sources of silent bugs (since 
-ever, really) tend to be:
+I wasn't expecting that error message. I think that is not correct.
+I am a little crazy, so I tried the same thing, expecting a different result
 
-- changing the pending map values based on uncommitted state;
-- changing the committed map value;
-- changing pending map values and not waiting for the value to be 
-committed before returning to the user;
-- validating error conditions after changing the pending map, and 
-returning error having changed pending map values.
+# ceph pg 6.2 mark_unfound_lost revert
+pg has 1 objects unfound and apparently lost marking
 
-On top of this, we sometimes get a few bugs resulting from returning 
-either 'true' or 'false' in a 'preprocess_query()' when it should have 
-been the opposite.
-
-I've also realized we've had a few other bugs that resulted from 
-misunderstanding how the new 'paxos plug' mechanism works. This was a 
-mechanism we introduced to allow cross-service proposals in one go, but 
-at the time we didn't add any sanity or validation mechanisms to ensure 
-readability/writeability on individual services. While this decision 
-guaranteed that we would not be destabilizing the monitors just before 
-the release, it introduced a new vector for mistakes to happen.
-
-Over the course of Mimic I intend to go over a significant rework of the 
-paxos services (discussing on CDM, lists), with the intent to make them 
-easier to contribute to. Whatever change we introduce will likely not be 
-a silver bullet, and the changes will need to be conservative and 
-incremental. I will make an effort to accompany any changes with proper 
-developer documentation -- although this should also be done for the 
-current interface :)
-
-In the mean time -- although this should be viewed as a general rule --, 
-please be mindful of any significant changes you introduce. We would 
-prefer smaller, incremental changes, unless otherwise unavoidable.
-
-And, please, always have someone familiar with the monitors reviewing it 
-first, before merging. I would suggest me and/or Kefu, at the very 
-least. And if, for some reason, we are not responsive, feel free to poke 
-us on IRC or the list*.
-
-
-Cheers!
-
-   -Joao
-
-* Sorry Kefu, I just told everyone to poke you for PRs ;)
+and I got one, but my filesystem is still degraded. I was expecting
+my filesystem to be good again. Do I have to wait for active+clean?
+or what do I do now?
