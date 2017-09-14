@@ -1,58 +1,55 @@
 From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 15/15] afs: Use find_get_pages_range_tag()
-Date: Thu, 14 Sep 2017 15:18:19 +0200
-Message-ID: <20170914131819.26266-16-jack@suse.cz>
+Subject: [PATCH 09/15] nilfs2: Use pagevec_lookup_range_tag()
+Date: Thu, 14 Sep 2017 15:18:13 +0200
+Message-ID: <20170914131819.26266-10-jack@suse.cz>
 References: <20170914131819.26266-1-jack@suse.cz>
-Return-path: <owner-linux-mm@kvack.org>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:34100 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751419AbdINNSl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 14 Sep 2017 09:18:41 -0400
 In-Reply-To: <20170914131819.26266-1-jack@suse.cz>
-Sender: owner-linux-mm@kvack.org
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
 To: linux-mm@kvack.org
-Cc: linux-fsdevel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Jan Kara <jack@suse.cz>, David Howells <dhowells@redhat.com>, linux-afs@lists.infradead.org
-List-Id: ceph-devel.vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Jan Kara <jack@suse.cz>, Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>, linux-nilfs@vger.kernel.org
 
-Use find_get_pages_range_tag() in afs_writepages_region() as we are
-interested only in pages from given range. Remove unnecessary code after
-this conversion.
+We want only pages from given range in
+nilfs_lookup_dirty_data_buffers(). Use pagevec_lookup_range_tag()
+instead of pagevec_lookup_tag() and remove unnecessary code.
 
-CC: David Howells <dhowells@redhat.com>
-CC: linux-afs@lists.infradead.org
+CC: Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>
+CC: linux-nilfs@vger.kernel.org
 Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- fs/afs/write.c | 11 ++---------
- 1 file changed, 2 insertions(+), 9 deletions(-)
+ fs/nilfs2/segment.c | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
 
-diff --git a/fs/afs/write.c b/fs/afs/write.c
-index 106e43db1115..d62a6b54152d 100644
---- a/fs/afs/write.c
-+++ b/fs/afs/write.c
-@@ -497,20 +497,13 @@ static int afs_writepages_region(struct address_space *mapping,
- 	_enter(",,%lx,%lx,", index, end);
+diff --git a/fs/nilfs2/segment.c b/fs/nilfs2/segment.c
+index 70ded52dc1dd..68e5769cef3b 100644
+--- a/fs/nilfs2/segment.c
++++ b/fs/nilfs2/segment.c
+@@ -711,18 +711,14 @@ static size_t nilfs_lookup_dirty_data_buffers(struct inode *inode,
+ 	pagevec_init(&pvec, 0);
+  repeat:
+ 	if (unlikely(index > last) ||
+-	    !pagevec_lookup_tag(&pvec, mapping, &index, PAGECACHE_TAG_DIRTY,
+-				min_t(pgoff_t, last - index,
+-				      PAGEVEC_SIZE - 1) + 1))
++	    !pagevec_lookup_range_tag(&pvec, mapping, &index, last,
++				PAGECACHE_TAG_DIRTY, PAGEVEC_SIZE))
+ 		return ndirties;
  
- 	do {
--		n = find_get_pages_tag(mapping, &index, PAGECACHE_TAG_DIRTY,
--				       1, &page);
-+		n = find_get_pages_range_tag(mapping, &index, end,
-+					PAGECACHE_TAG_DIRTY, 1, &page);
- 		if (!n)
- 			break;
+ 	for (i = 0; i < pagevec_count(&pvec); i++) {
+ 		struct buffer_head *bh, *head;
+ 		struct page *page = pvec.pages[i];
  
- 		_debug("wback %lx", page->index);
- 
--		if (page->index > end) {
--			*_next = index;
--			put_page(page);
--			_leave(" = 0 [%lx]", *_next);
--			return 0;
--		}
+-		if (unlikely(page->index > last))
+-			break;
 -
- 		/* at this point we hold neither mapping->tree_lock nor lock on
- 		 * the page itself: the page may be truncated or invalidated
- 		 * (changing page->mapping to NULL), or even swizzled back from
+ 		lock_page(page);
+ 		if (!page_has_buffers(page))
+ 			create_empty_buffers(page, i_blocksize(inode), 0);
 -- 
 2.12.3
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
