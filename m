@@ -1,76 +1,40 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: undefined references in luminous for librados-devel
-Date: Thu, 14 Sep 2017 21:31:01 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1709142130100.16664@piezo.novalocal>
-References: <CAB2gnbWciSJmZzREHqJvz5Ae=uD+_5TkgkNcaYr+swxYe2iXAA@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: which mds server is damaged?
+Date: Thu, 14 Sep 2017 21:37:37 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1709142134130.16664@piezo.novalocal>
+References: <CAKRxpus_QKHx=Wi8UU-g50i8g3nkEKdg2mGVcu_uO5FbAoHHFA@mail.gmail.com> <CALe9h7fhfWQ1paK7TpCMVv+FA0Ta4_5X5FGWdWdgwyLjDmZxgA@mail.gmail.com> <CAKRxpuurKQp6vQmt2_mc5ckHZMjHajnivDob58eMpcUXodOupw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:34864 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751335AbdINVbE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Sep 2017 17:31:04 -0400
-In-Reply-To: <CAB2gnbWciSJmZzREHqJvz5Ae=uD+_5TkgkNcaYr+swxYe2iXAA@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:59438 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751542AbdINVhj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 14 Sep 2017 17:37:39 -0400
+In-Reply-To: <CAKRxpuurKQp6vQmt2_mc5ckHZMjHajnivDob58eMpcUXodOupw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Noah Watkins <noahwatkins@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Two Spirit <twospirit6905@gmail.com>
+Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 14 Sep 2017, Noah Watkins wrote:
-> Running into some undefined references linking against librados in
-> Luminous. Installed using RPM repo instructions from Ceph docs. Note
-> this issue shows up on Fedora 23,24,25, but not on CentOS 7.
+On Thu, 14 Sep 2017, Two Spirit wrote:
+> >The thing that's damaged is a logical mds rank (0), not a physical MDS
+> >daemon.  What this is telling you is that there is some serious
+> >corruption in your metadata pool that prevents that particular rank
+> >from starting.
+> 
+> Zhang helped identify the bug and put it in tracker. I didn't fully
+> understand the problem but related to mds replay not happening and the
+> write_pos being off. He fixed it after a full scrub was done, the
+> degraded file system came back online. After a couple more hours of
+> stress testing, the file system went back to degraded(earlier today).
 
-It looks a bit like these are C++ ABI differences because you are using 
-el7 libraries on an fc25 box, which probably has a different 
-version of gcc, libraries, etc?
+Can you tell us more than "it went degraded"?  It's hard to know what 
+you're seeing.
 
+More generally, can you share what you did with the system that originally 
+triggered the unfound object?  It ordinarily requires a sequence of 
+multiple not-quite-concurrent failures to induce that state, and we don't 
+see it much.  I'm surprised you're hitting it right off the bat.
+
+Thanks!
 sage
-
-
-> # Test program
-> 
-> [root@0ac98bfcffa2 build]# cat test.cc
-> #include <rados/librados.hpp>
-> 
-> int main(int argc, char **argv)
-> {
->   librados::IoCtx ioctx;
->   return ioctx.create("foo", true);
-> }
-> 
-> # Linking error
-> 
-> [root@0ac98bfcffa2 build]# c++ --std=c++11 -Wall test.cc -lrados
-> /tmp/cc4MZnFR.o: In function `main':
-> test.cc:(.text+0x51): undefined reference to
-> `librados::IoCtx::create(std::__cxx11::basic_string<char,
-> std::char_traits<char>, std::allocator<char> > const&, bool)'
-> collect2: error: ld returned 1 exit status
-> 
-> # Looks like everything is installed correctly.
-> 
-> [root@0ac98bfcffa2 build]# librados-config --version
-> ceph version 12.2.0 (32ce2a3ae5239ee33d6150705cdb24d43bab910c) luminous (rc)
-> 
-> [root@0ac98bfcffa2 build]# rpm -qa | grep 'rados\|ceph'
-> python-rados-12.2.0-0.el7.x86_64
-> python-cephfs-12.2.0-0.el7.x86_64
-> ceph-selinux-12.2.0-0.el7.x86_64
-> ceph-osd-12.2.0-0.el7.x86_64
-> librados2-12.2.0-0.el7.x86_64
-> libradosstriper1-12.2.0-0.el7.x86_64
-> ceph-base-12.2.0-0.el7.x86_64
-> ceph-mds-12.2.0-0.el7.x86_64
-> ceph-mon-12.2.0-0.el7.x86_64
-> ceph-12.2.0-0.el7.x86_64
-> libcephfs2-12.2.0-0.el7.x86_64
-> ceph-common-12.2.0-0.el7.x86_64
-> ceph-mgr-12.2.0-0.el7.x86_64
-> librados-devel-12.2.0-0.el7.x86_64
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
