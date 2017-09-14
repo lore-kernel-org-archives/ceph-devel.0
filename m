@@ -1,33 +1,25 @@
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: [PATCH 02/15] btrfs: Use pagevec_lookup_range_tag()
-Date: Thu, 14 Sep 2017 19:57:07 +0200
-Message-ID: <20170914175707.GX29043@twin.jikos.cz>
-References: <20170914131819.26266-1-jack@suse.cz>
- <20170914131819.26266-3-jack@suse.cz>
-Reply-To: dsterba@suse.cz
+From: Two Spirit <twospirit6905@gmail.com>
+Subject: Re: what I did to fix the damaged
+Date: Thu, 14 Sep 2017 11:39:22 -0700
+Message-ID: <CAKRxpuvEV9rNST=4fFeKPeGZzDaa684dvR40a3n0b1n+RMtfuA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20170914131819.26266-3-jack@suse.cz>
-Sender: owner-linux-mm@kvack.org
-To: Jan Kara <jack@suse.cz>
-Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, linux-btrfs@vger.kernel.org, David Sterba <dsterba@suse.com>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-it0-f50.google.com ([209.85.214.50]:49961 "EHLO
+        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751447AbdINSjX (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Sep 2017 14:39:23 -0400
+Received: by mail-it0-f50.google.com with SMTP id w204so950261itc.4
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Sep 2017 11:39:23 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Sep 14, 2017 at 03:18:06PM +0200, Jan Kara wrote:
-> We want only pages from given range in btree_write_cache_pages() and
-> extent_write_cache_pages(). Use pagevec_lookup_range_tag() instead of
-> pagevec_lookup_tag() and remove unnecessary code.
-> 
-> CC: linux-btrfs@vger.kernel.org
-> CC: David Sterba <dsterba@suse.com>
-> Signed-off-by: Jan Kara <jack@suse.cz>
+> the unfound object is the tail object of mds log. what I did was finding the position of latest valid log entry and set log write_pos to it
 
-Reviewed-by: David Sterba <dsterba@suse.com>
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Thanks for the help. The file system came back up after the scrub, I
+mounted it, started copying files back on to it and within 1-2 hours
+the file system went back degraded. Is this possibly due to the same
+bug you found with mds not replay? Do I need to wait for a patch to
+continue testing this?
