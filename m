@@ -1,75 +1,62 @@
 From: Two Spirit <twospirit6905@gmail.com>
-Subject: Re: file in one file system is a directory in ceph
-Date: Thu, 14 Sep 2017 14:41:04 -0700
-Message-ID: <CAKRxpuuDb6QL6E9rrVS=91E-D6Og54OKExE1cFWENyuuT=7WnQ@mail.gmail.com>
-References: <CAKRxpus4LRh_OyBJpy7KSn5n2L0HEVFzfpj5NywSS=zf8kbGWA@mail.gmail.com>
- <CA+2bHPZiwNGmnSfSr5rHJpbD_oShi5nYymoti3xevcCD49q-5A@mail.gmail.com>
+Subject: Re: which mds server is damaged?
+Date: Thu, 14 Sep 2017 15:04:15 -0700
+Message-ID: <CAKRxputojyrjjarPVwspCqhJQvOCgfhVrnGZJf+7Vq6VhbUnnw@mail.gmail.com>
+References: <CAKRxpus_QKHx=Wi8UU-g50i8g3nkEKdg2mGVcu_uO5FbAoHHFA@mail.gmail.com>
+ <CALe9h7fhfWQ1paK7TpCMVv+FA0Ta4_5X5FGWdWdgwyLjDmZxgA@mail.gmail.com>
+ <CAKRxpuurKQp6vQmt2_mc5ckHZMjHajnivDob58eMpcUXodOupw@mail.gmail.com> <alpine.DEB.2.11.1709142134130.16664@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f45.google.com ([209.85.214.45]:54707 "EHLO
-        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751593AbdINVlG (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Sep 2017 17:41:06 -0400
-Received: by mail-it0-f45.google.com with SMTP id e134so1708754ite.3
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Sep 2017 14:41:05 -0700 (PDT)
-In-Reply-To: <CA+2bHPZiwNGmnSfSr5rHJpbD_oShi5nYymoti3xevcCD49q-5A@mail.gmail.com>
+Received: from mail-io0-f169.google.com ([209.85.223.169]:53931 "EHLO
+        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751724AbdINWEQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Sep 2017 18:04:16 -0400
+Received: by mail-io0-f169.google.com with SMTP id q11so4065291ioe.10
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Sep 2017 15:04:16 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1709142134130.16664@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick Donnelly <pdonnell@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-can I just disable it?
-I didn't see any variable, like client_snapavailable <true|false>.
-feature request?
+> Can you tell us more than "it went degraded"?  It's hard to know what
+you're seeing.
+
+Sorry, I only know of two states for the cephfs. Either it is not
+complaining or it is spitting out a "     1 filesystem is degraded"
+message.  When I saw that, I meant that based on what I read in 'ceph
+-s'. Usually the symptom is I can't mount/access the files, but I've
+also had that symptom without the degraded message, but usually traced
+down to my fault.
+
+ceph is still too new for me to debug much further.
+
+I'd like to explain the testing scenario related to that in more
+details if your interested.. I'm off to a meeting soon, can  email
+more on this later.
 
 
->> In unix, super fast snapshots can be made 'cp -lrp'
->That's not a snapshot. It's a terrible copy.
-Thanks for the insight. I'll read up on this. hardlinks just worked
-and I think lot of snapshot software used this. It is great for rsync
-when renaming or moving data into different directories, since there
-is already a copy in the hardlink, it doesn't have to recopy the file.
-I use to tell people that hardlinks was just yet another reason why
-windows s*ck. I hope I can keep saying that.
-
-On Thu, Sep 14, 2017 at 2:15 PM, Patrick Donnelly <pdonnell@redhat.com> wrote:
-> On Thu, Sep 14, 2017 at 2:00 PM, Two Spirit <twospirit6905@gmail.com> wrote:
->> I was trying to track down a file that keeps showing up as a directory in ceph.
+On Thu, Sep 14, 2017 at 2:37 PM, Sage Weil <sweil@redhat.com> wrote:
+> On Thu, 14 Sep 2017, Two Spirit wrote:
+>> >The thing that's damaged is a logical mds rank (0), not a physical MDS
+>> >daemon.  What this is telling you is that there is some serious
+>> >corruption in your metadata pool that prevents that particular rank
+>> >from starting.
 >>
->> The user literally has a files called ".snap", and it tried to copy
->> into cephfs, and it kept complaining and kept reappearing as a
->> directory. delete the directory and recopy the .snap file. I found out
->> .snap is a special hidden ceph directory. the user is actually on a
->> project called "SNAP".
->>
->> Is there anything that can be done about this? My priority is to the
->> user being able to name their files anything except certain well
->> understood special characters. There is already a little contention
->> between unix and windows filesystems eg ':', but nobody will know that
->> their underlying file system will be changed to ceph or if used for
->> backups systems and that the backup system can't properly copy their
->> file due to the name..nobody is expecting this limitation.
->>
->> I, not know what the .snap was for, force deleted it, not realizing I
->> was removing possible user snapshots.
->>
->> Feels wrong to tell a user they can't name their file .snap.
+>> Zhang helped identify the bug and put it in tracker. I didn't fully
+>> understand the problem but related to mds replay not happening and the
+>> write_pos being off. He fixed it after a full scrub was done, the
+>> degraded file system came back online. After a couple more hours of
+>> stress testing, the file system went back to degraded(earlier today).
 >
-> Change the name using "client_snap_dir" in
-> docs.ceph.com/docs/master/cephfs/client-config-ref/
+> Can you tell us more than "it went degraded"?  It's hard to know what
+> you're seeing.
 >
->> Just food for thought. Is this moveable out of band. I've used
->> snapshot software before -- even whole drive snapshots, and the
->> snapshots for the most part were hidden or explicitly visible from
->> mount.
+> More generally, can you share what you did with the system that originally
+> triggered the unfound object?  It ordinarily requires a sequence of
+> multiple not-quite-concurrent failures to induce that state, and we don't
+> see it much.  I'm surprised you're hitting it right off the bat.
 >
-> It's not simple to expose advanced non-POSIX file system interfaces
-> outside the file system without losing convenience/usability.
->
->> In unix, super fast snapshots can be made 'cp -lrp'
->
-> That's not a snapshot. It's a terrible copy.
->
-> --
-> Patrick Donnelly
+> Thanks!
+> sage
