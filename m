@@ -1,40 +1,73 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: which mds server is damaged?
-Date: Thu, 14 Sep 2017 21:37:37 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1709142134130.16664@piezo.novalocal>
-References: <CAKRxpus_QKHx=Wi8UU-g50i8g3nkEKdg2mGVcu_uO5FbAoHHFA@mail.gmail.com> <CALe9h7fhfWQ1paK7TpCMVv+FA0Ta4_5X5FGWdWdgwyLjDmZxgA@mail.gmail.com> <CAKRxpuurKQp6vQmt2_mc5ckHZMjHajnivDob58eMpcUXodOupw@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: file in one file system is a directory in ceph
+Date: Thu, 14 Sep 2017 22:37:38 +0100
+Message-ID: <CALe9h7dfyOQWVP-wcYVwH3+2oOsDyj0-swFzpOzA99mdvstkeg@mail.gmail.com>
+References: <CAKRxpus4LRh_OyBJpy7KSn5n2L0HEVFzfpj5NywSS=zf8kbGWA@mail.gmail.com>
+ <CA+2bHPZiwNGmnSfSr5rHJpbD_oShi5nYymoti3xevcCD49q-5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:59438 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751542AbdINVhj (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 14 Sep 2017 17:37:39 -0400
-In-Reply-To: <CAKRxpuurKQp6vQmt2_mc5ckHZMjHajnivDob58eMpcUXodOupw@mail.gmail.com>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:45702 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751524AbdINViA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Sep 2017 17:38:00 -0400
+Received: by mail-wm0-f41.google.com with SMTP id g206so3934618wme.0
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Sep 2017 14:37:59 -0700 (PDT)
+In-Reply-To: <CA+2bHPZiwNGmnSfSr5rHJpbD_oShi5nYymoti3xevcCD49q-5A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Two Spirit <twospirit6905@gmail.com>
-Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Patrick Donnelly <pdonnell@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, 14 Sep 2017, Two Spirit wrote:
-> >The thing that's damaged is a logical mds rank (0), not a physical MDS
-> >daemon.  What this is telling you is that there is some serious
-> >corruption in your metadata pool that prevents that particular rank
-> >from starting.
-> 
-> Zhang helped identify the bug and put it in tracker. I didn't fully
-> understand the problem but related to mds replay not happening and the
-> write_pos being off. He fixed it after a full scrub was done, the
-> degraded file system came back online. After a couple more hours of
-> stress testing, the file system went back to degraded(earlier today).
+On Thu, Sep 14, 2017 at 10:15 PM, Patrick Donnelly <pdonnell@redhat.com> wrote:
+> On Thu, Sep 14, 2017 at 2:00 PM, Two Spirit <twospirit6905@gmail.com> wrote:
+>> I was trying to track down a file that keeps showing up as a directory in ceph.
+>>
+>> The user literally has a files called ".snap", and it tried to copy
+>> into cephfs, and it kept complaining and kept reappearing as a
+>> directory. delete the directory and recopy the .snap file. I found out
+>> .snap is a special hidden ceph directory. the user is actually on a
+>> project called "SNAP".
+>>
+>> Is there anything that can be done about this? My priority is to the
+>> user being able to name their files anything except certain well
+>> understood special characters. There is already a little contention
+>> between unix and windows filesystems eg ':', but nobody will know that
+>> their underlying file system will be changed to ceph or if used for
+>> backups systems and that the backup system can't properly copy their
+>> file due to the name..nobody is expecting this limitation.
+>>
+>> I, not know what the .snap was for, force deleted it, not realizing I
+>> was removing possible user snapshots.
+>>
+>> Feels wrong to tell a user they can't name their file .snap.
+>
+> Change the name using "client_snap_dir" in
+> docs.ceph.com/docs/master/cephfs/client-config-ref/
 
-Can you tell us more than "it went degraded"?  It's hard to know what 
-you're seeing.
+I've sometimes wondered if we should have a different default, perhaps
+one with ceph in the name like ".ceph_snapshot" or something?
 
-More generally, can you share what you did with the system that originally 
-triggered the unfound object?  It ordinarily requires a sequence of 
-multiple not-quite-concurrent failures to induce that state, and we don't 
-see it much.  I'm surprised you're hitting it right off the bat.
+Anyone with a home directory workload is liable to see the ".snap"
+issue because you get files with that name in eclipse projects.
 
-Thanks!
-sage
+John
+
+>> Just food for thought. Is this moveable out of band. I've used
+>> snapshot software before -- even whole drive snapshots, and the
+>> snapshots for the most part were hidden or explicitly visible from
+>> mount.
+>
+> It's not simple to expose advanced non-POSIX file system interfaces
+> outside the file system without losing convenience/usability.
+>
+>> In unix, super fast snapshots can be made 'cp -lrp'
+>
+> That's not a snapshot. It's a terrible copy.
+>
+> --
+> Patrick Donnelly
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
