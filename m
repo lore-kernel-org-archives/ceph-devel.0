@@ -1,53 +1,63 @@
 From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 10/15] mm: Use pagevec_lookup_range_tag() in __filemap_fdatawait_range()
-Date: Thu, 14 Sep 2017 15:18:14 +0200
-Message-ID: <20170914131819.26266-11-jack@suse.cz>
+Subject: [PATCH 04/15] ext4: Use pagevec_lookup_range_tag()
+Date: Thu, 14 Sep 2017 15:18:08 +0200
+Message-ID: <20170914131819.26266-5-jack@suse.cz>
 References: <20170914131819.26266-1-jack@suse.cz>
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:34101 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751422AbdINNSl (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 14 Sep 2017 09:18:41 -0400
+Return-path: <owner-linux-mm@kvack.org>
 In-Reply-To: <20170914131819.26266-1-jack@suse.cz>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
+Sender: owner-linux-mm@kvack.org
 To: linux-mm@kvack.org
-Cc: linux-fsdevel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Jan Kara <jack@suse.cz>
+Cc: linux-fsdevel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Jan Kara <jack@suse.cz>, Theodore Ts'o <tytso@mit.edu>, linux-ext4@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Use pagevec_lookup_range_tag() in __filemap_fdatawait_range() as it is
-interested only in pages from given range. Remove unnecessary code
-resulting from this.
+We want only pages from given range in ext4_writepages(). Use
+pagevec_lookup_range_tag() instead of pagevec_lookup_tag() and remove
+unnecessary code.
 
+CC: "Theodore Ts'o" <tytso@mit.edu>
+CC: linux-ext4@vger.kernel.org
 Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- mm/filemap.c | 9 ++-------
- 1 file changed, 2 insertions(+), 7 deletions(-)
+ fs/ext4/inode.c | 14 ++------------
+ 1 file changed, 2 insertions(+), 12 deletions(-)
 
-diff --git a/mm/filemap.c b/mm/filemap.c
-index fe20329c83cd..479fc54b7cd1 100644
---- a/mm/filemap.c
-+++ b/mm/filemap.c
-@@ -421,18 +421,13 @@ static void __filemap_fdatawait_range(struct address_space *mapping,
+diff --git a/fs/ext4/inode.c b/fs/ext4/inode.c
+index 31db875bc7a1..69f11233d0d6 100644
+--- a/fs/ext4/inode.c
++++ b/fs/ext4/inode.c
+@@ -2619,8 +2619,8 @@ static int mpage_prepare_extent_to_map(struct mpage_da_data *mpd)
+ 	mpd->map.m_len = 0;
+ 	mpd->next_page = index;
+ 	while (index <= end) {
+-		nr_pages = pagevec_lookup_tag(&pvec, mapping, &index, tag,
+-			      min(end - index, (pgoff_t)PAGEVEC_SIZE-1) + 1);
++		nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
++				tag, PAGEVEC_SIZE);
+ 		if (nr_pages == 0)
+ 			goto out;
  
- 	pagevec_init(&pvec, 0);
- 	while ((index <= end) &&
--			(nr_pages = pagevec_lookup_tag(&pvec, mapping, &index,
--			PAGECACHE_TAG_WRITEBACK,
--			min(end - index, (pgoff_t)PAGEVEC_SIZE-1) + 1)) != 0) {
-+			(nr_pages = pagevec_lookup_range_tag(&pvec, mapping,
-+			&index, end, PAGECACHE_TAG_WRITEBACK, PAGEVEC_SIZE))) {
- 		unsigned i;
- 
- 		for (i = 0; i < nr_pages; i++) {
+@@ -2628,16 +2628,6 @@ static int mpage_prepare_extent_to_map(struct mpage_da_data *mpd)
  			struct page *page = pvec.pages[i];
  
--			/* until radix tree lookup accepts end_index */
+ 			/*
+-			 * At this point, the page may be truncated or
+-			 * invalidated (changing page->mapping to NULL), or
+-			 * even swizzled back from swapper_space to tmpfs file
+-			 * mapping. However, page->index will not change
+-			 * because we have a reference on the page.
+-			 */
 -			if (page->index > end)
--				continue;
+-				goto out;
 -
- 			wait_on_page_writeback(page);
- 			ClearPageError(page);
- 		}
+-			/*
+ 			 * Accumulated enough dirty pages? This doesn't apply
+ 			 * to WB_SYNC_ALL mode. For integrity sync we have to
+ 			 * keep going because someone may be concurrently
 -- 
 2.12.3
 
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
