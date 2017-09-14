@@ -1,25 +1,61 @@
-From: Two Spirit <twospirit6905@gmail.com>
-Subject: Re: what I did to fix the damaged
-Date: Thu, 14 Sep 2017 11:39:22 -0700
-Message-ID: <CAKRxpuvEV9rNST=4fFeKPeGZzDaa684dvR40a3n0b1n+RMtfuA@mail.gmail.com>
+From: Noah Watkins <noahwatkins@gmail.com>
+Subject: undefined references in luminous for librados-devel
+Date: Thu, 14 Sep 2017 13:07:48 -0700
+Message-ID: <CAB2gnbWciSJmZzREHqJvz5Ae=uD+_5TkgkNcaYr+swxYe2iXAA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f50.google.com ([209.85.214.50]:49961 "EHLO
-        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751447AbdINSjX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Sep 2017 14:39:23 -0400
-Received: by mail-it0-f50.google.com with SMTP id w204so950261itc.4
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Sep 2017 11:39:23 -0700 (PDT)
+Received: from mail-yw0-f174.google.com ([209.85.161.174]:49408 "EHLO
+        mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751795AbdINUHu (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Sep 2017 16:07:50 -0400
+Received: by mail-yw0-f174.google.com with SMTP id l4so279154ywa.6
+        for <ceph-devel@vger.kernel.org>; Thu, 14 Sep 2017 13:07:50 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-> the unfound object is the tail object of mds log. what I did was finding the position of latest valid log entry and set log write_pos to it
+Running into some undefined references linking against librados in
+Luminous. Installed using RPM repo instructions from Ceph docs. Note
+this issue shows up on Fedora 23,24,25, but not on CentOS 7.
 
-Thanks for the help. The file system came back up after the scrub, I
-mounted it, started copying files back on to it and within 1-2 hours
-the file system went back degraded. Is this possibly due to the same
-bug you found with mds not replay? Do I need to wait for a patch to
-continue testing this?
+# Test program
+
+[root@0ac98bfcffa2 build]# cat test.cc
+#include <rados/librados.hpp>
+
+int main(int argc, char **argv)
+{
+  librados::IoCtx ioctx;
+  return ioctx.create("foo", true);
+}
+
+# Linking error
+
+[root@0ac98bfcffa2 build]# c++ --std=c++11 -Wall test.cc -lrados
+/tmp/cc4MZnFR.o: In function `main':
+test.cc:(.text+0x51): undefined reference to
+`librados::IoCtx::create(std::__cxx11::basic_string<char,
+std::char_traits<char>, std::allocator<char> > const&, bool)'
+collect2: error: ld returned 1 exit status
+
+# Looks like everything is installed correctly.
+
+[root@0ac98bfcffa2 build]# librados-config --version
+ceph version 12.2.0 (32ce2a3ae5239ee33d6150705cdb24d43bab910c) luminous (rc)
+
+[root@0ac98bfcffa2 build]# rpm -qa | grep 'rados\|ceph'
+python-rados-12.2.0-0.el7.x86_64
+python-cephfs-12.2.0-0.el7.x86_64
+ceph-selinux-12.2.0-0.el7.x86_64
+ceph-osd-12.2.0-0.el7.x86_64
+librados2-12.2.0-0.el7.x86_64
+libradosstriper1-12.2.0-0.el7.x86_64
+ceph-base-12.2.0-0.el7.x86_64
+ceph-mds-12.2.0-0.el7.x86_64
+ceph-mon-12.2.0-0.el7.x86_64
+ceph-12.2.0-0.el7.x86_64
+libcephfs2-12.2.0-0.el7.x86_64
+ceph-common-12.2.0-0.el7.x86_64
+ceph-mgr-12.2.0-0.el7.x86_64
+librados-devel-12.2.0-0.el7.x86_64
