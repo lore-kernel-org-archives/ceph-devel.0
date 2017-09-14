@@ -1,22 +1,28 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Static Analysis
-Date: Thu, 14 Sep 2017 19:09:58 +1000
-Message-ID: <CAF-wwdF46O9CYpprvZX9Wztjk9s6u11sn8PBqZ7uJfDRNvenhg@mail.gmail.com>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: Status of luminous v12.2.1 integration branch
+Date: Thu, 14 Sep 2017 12:12:50 +0100
+Message-ID: <dacc319a-6a4f-df58-6fba-c10f796c7d22@suse.de>
+References: <CAMMFjmHk-YfW6-qnJmgQOWj-cdRO86ggHK-2y27GN1u-Ao8X-w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f173.google.com ([209.85.223.173]:48604 "EHLO
-        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751549AbdINJJ7 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Sep 2017 05:09:59 -0400
-Received: by mail-io0-f173.google.com with SMTP id n69so16195474ioi.5
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Sep 2017 02:09:59 -0700 (PDT)
+Received: from mx2.suse.de ([195.135.220.15]:50910 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751494AbdINLMy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 14 Sep 2017 07:12:54 -0400
+In-Reply-To: <CAMMFjmHk-YfW6-qnJmgQOWj-cdRO86ggHK-2y27GN1u-Ao8X-w@mail.gmail.com>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, Abhishek Lekshmanan <abhishek@suse.com>, "Weil, Sage" <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, "gmeno@redhat.com" <gregory.meno@inktank.com>
 
-Latest static analyser results are up on  http://people.redhat.com/bhubbard/
+On 09/13/2017 04:40 PM, Yuri Weinstein wrote:
+> This email is an attempt to make sure that all are clear on luminous
+> v12.2.1 release status.
+> 
+> Dev leads - what is left before we can start QE validation?
 
--- 
-Cheers,
-Brad
+http://tracker.ceph.com/issues/21309 needs to go in on the monitors.
+
+   -Joao
