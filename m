@@ -1,92 +1,58 @@
 From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 02/15] btrfs: Use pagevec_lookup_range_tag()
-Date: Thu, 14 Sep 2017 15:18:06 +0200
-Message-ID: <20170914131819.26266-3-jack@suse.cz>
+Subject: [PATCH 15/15] afs: Use find_get_pages_range_tag()
+Date: Thu, 14 Sep 2017 15:18:19 +0200
+Message-ID: <20170914131819.26266-16-jack@suse.cz>
 References: <20170914131819.26266-1-jack@suse.cz>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-f2fs-devel-bounces@lists.sourceforge.net>
+Return-path: <owner-linux-mm@kvack.org>
 In-Reply-To: <20170914131819.26266-1-jack@suse.cz>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/options/linux-f2fs-devel>,
- <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=linux-f2fs-devel>
-List-Post: <mailto:linux-f2fs-devel@lists.sourceforge.net>
-List-Help: <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/linux-f2fs-devel>,
- <mailto:linux-f2fs-devel-request@lists.sourceforge.net?subject=subscribe>
-Errors-To: linux-f2fs-devel-bounces@lists.sourceforge.net
+Sender: owner-linux-mm@kvack.org
 To: linux-mm@kvack.org
-Cc: Jan Kara <jack@suse.cz>, linux-f2fs-devel@lists.sourceforge.net, "Yan,
- Zheng" <zyan@redhat.com>, David Sterba <dsterba@suse.com>, linux-fsdevel@vger.kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, linux-btrfs@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Jan Kara <jack@suse.cz>, David Howells <dhowells@redhat.com>, linux-afs@lists.infradead.org
 List-Id: ceph-devel.vger.kernel.org
 
-We want only pages from given range in btree_write_cache_pages() and
-extent_write_cache_pages(). Use pagevec_lookup_range_tag() instead of
-pagevec_lookup_tag() and remove unnecessary code.
+Use find_get_pages_range_tag() in afs_writepages_region() as we are
+interested only in pages from given range. Remove unnecessary code after
+this conversion.
 
-CC: linux-btrfs@vger.kernel.org
-CC: David Sterba <dsterba@suse.com>
+CC: David Howells <dhowells@redhat.com>
+CC: linux-afs@lists.infradead.org
 Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- fs/btrfs/extent_io.c | 19 ++++---------------
- 1 file changed, 4 insertions(+), 15 deletions(-)
+ fs/afs/write.c | 11 ++---------
+ 1 file changed, 2 insertions(+), 9 deletions(-)
 
-diff --git a/fs/btrfs/extent_io.c b/fs/btrfs/extent_io.c
-index 0f077c5db58e..9b7936ea3a88 100644
---- a/fs/btrfs/extent_io.c
-+++ b/fs/btrfs/extent_io.c
-@@ -3819,8 +3819,8 @@ int btree_write_cache_pages(struct address_space *mapping,
- 	if (wbc->sync_mode == WB_SYNC_ALL)
- 		tag_pages_for_writeback(mapping, index, end);
- 	while (!done && !nr_to_write_done && (index <= end) &&
--	       (nr_pages = pagevec_lookup_tag(&pvec, mapping, &index, tag,
--			min(end - index, (pgoff_t)PAGEVEC_SIZE-1) + 1))) {
-+	       (nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
-+			tag, PAGEVEC_SIZE))) {
- 		unsigned i;
+diff --git a/fs/afs/write.c b/fs/afs/write.c
+index 106e43db1115..d62a6b54152d 100644
+--- a/fs/afs/write.c
++++ b/fs/afs/write.c
+@@ -497,20 +497,13 @@ static int afs_writepages_region(struct address_space *mapping,
+ 	_enter(",,%lx,%lx,", index, end);
  
- 		scanned = 1;
-@@ -3830,11 +3830,6 @@ int btree_write_cache_pages(struct address_space *mapping,
- 			if (!PagePrivate(page))
- 				continue;
+ 	do {
+-		n = find_get_pages_tag(mapping, &index, PAGECACHE_TAG_DIRTY,
+-				       1, &page);
++		n = find_get_pages_range_tag(mapping, &index, end,
++					PAGECACHE_TAG_DIRTY, 1, &page);
+ 		if (!n)
+ 			break;
  
--			if (!wbc->range_cyclic && page->index > end) {
--				done = 1;
--				break;
--			}
+ 		_debug("wback %lx", page->index);
+ 
+-		if (page->index > end) {
+-			*_next = index;
+-			put_page(page);
+-			_leave(" = 0 [%lx]", *_next);
+-			return 0;
+-		}
 -
- 			spin_lock(&mapping->private_lock);
- 			if (!PagePrivate(page)) {
- 				spin_unlock(&mapping->private_lock);
-@@ -3966,8 +3961,8 @@ static int extent_write_cache_pages(struct address_space *mapping,
- 		tag_pages_for_writeback(mapping, index, end);
- 	done_index = index;
- 	while (!done && !nr_to_write_done && (index <= end) &&
--	       (nr_pages = pagevec_lookup_tag(&pvec, mapping, &index, tag,
--			min(end - index, (pgoff_t)PAGEVEC_SIZE-1) + 1))) {
-+	       (nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
-+			tag, PAGEVEC_SIZE))) {
- 		unsigned i;
- 
- 		scanned = 1;
-@@ -3992,12 +3987,6 @@ static int extent_write_cache_pages(struct address_space *mapping,
- 				continue;
- 			}
- 
--			if (!wbc->range_cyclic && page->index > end) {
--				done = 1;
--				unlock_page(page);
--				continue;
--			}
--
- 			if (wbc->sync_mode != WB_SYNC_NONE) {
- 				if (PageWriteback(page))
- 					flush_fn(data);
+ 		/* at this point we hold neither mapping->tree_lock nor lock on
+ 		 * the page itself: the page may be truncated or invalidated
+ 		 * (changing page->mapping to NULL), or even swizzled back from
 -- 
 2.12.3
 
-
-------------------------------------------------------------------------------
-Check out the vibrant tech community on one of the world's most
-engaging tech sites, Slashdot.org! http://sdm.link/slashdot
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
