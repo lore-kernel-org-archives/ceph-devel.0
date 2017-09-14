@@ -1,56 +1,70 @@
-From: Abhishek Lekshmanan <abhishek@suse.com>
-Subject: Re: Status of luminous v12.2.1 integration branch
-Date: Thu, 14 Sep 2017 13:44:22 +0200
-Message-ID: <87inglfqsp.fsf@suse.com>
-References: <CAMMFjmHk-YfW6-qnJmgQOWj-cdRO86ggHK-2y27GN1u-Ao8X-w@mail.gmail.com> <CA+2bHPZ9fjx2Z8uUc-Fo+TsO-m9+PspG2T=NStGdo51FyL-eAQ@mail.gmail.com> <CA+2bHPboXJXgzz-aHkWYFqB1EH-tzDHShXSwbkn8EAeogggUjg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:38890 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751701AbdINLoY (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Thu, 14 Sep 2017 07:44:24 -0400
-In-Reply-To: <CA+2bHPboXJXgzz-aHkWYFqB1EH-tzDHShXSwbkn8EAeogggUjg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick Donnelly <pdonnell@redhat.com>, Yuri Weinstein <yweinste@redhat.com>
-Cc: "Development, Ceph" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, "gmeno@redhat.com" <gregory.meno@inktank.com>
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH 03/15] ceph: Use pagevec_lookup_range_tag()
+Date: Thu, 14 Sep 2017 15:18:07 +0200
+Message-ID: <20170914131819.26266-4-jack@suse.cz>
+References: <20170914131819.26266-1-jack@suse.cz>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20170914131819.26266-1-jack@suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: linux-mm@kvack.org
+Cc: linux-fsdevel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Jan Kara <jack@suse.cz>
+List-Id: ceph-devel.vger.kernel.org
 
-Patrick Donnelly <pdonnell@redhat.com> writes:
+We want only pages from given range in ceph_writepages_start(). Use
+pagevec_lookup_range_tag() instead of pagevec_lookup_tag() and remove
+unnecessary code.
 
-> On Wed, Sep 13, 2017 at 8:49 AM, Patrick Donnelly <pdonnell@redhat.com> wrote:
->> On Wed, Sep 13, 2017 at 8:40 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
->>> This email is an attempt to make sure that all are clear on luminous
->>> v12.2.1 release status.
->>>
->>> Dev leads - what is left before we can start QE validation?
->>
->> To be merged into master today and then backported:
->> http://tracker.ceph.com/issues/21378
->> Luminous backport: http://tracker.ceph.com/issues/21357
->> To be merged into master today and then backported:
->> http://tracker.ceph.com/issues/20594
->
-> Final list of CephFS backports needed for 12.2.1:
->
-> http://tracker.ceph.com/issues/21323
-> http://tracker.ceph.com/issues/21114
-> http://tracker.ceph.com/issues/21107
-> http://tracker.ceph.com/issues/21357
-> http://tracker.ceph.com/issues/21322
-> http://tracker.ceph.com/issues/21384
->
+CC: Ilya Dryomov <idryomov@gmail.com>
+CC: "Yan, Zheng" <zyan@redhat.com>
+CC: ceph-devel@vger.kernel.org
+Signed-off-by: Jan Kara <jack@suse.cz>
+---
+ fs/ceph/addr.c | 19 +++----------------
+ 1 file changed, 3 insertions(+), 16 deletions(-)
 
-So scheduled the relevant suites (rgw,rados,fs) at priority 100 right
-now) for the current PRs targeting Luminous, 
-http://tracker.ceph.com/issues/21296#note-15
-
-if this run goes through, lets merge these PRs to luminous and handover
-to Yuri
-
+diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+index b3e3edc09d80..e57e9d37bf2d 100644
+--- a/fs/ceph/addr.c
++++ b/fs/ceph/addr.c
+@@ -871,13 +871,10 @@ static int ceph_writepages_start(struct address_space *mapping,
+ get_more_pages:
+ 		pvec_pages = min_t(unsigned, PAGEVEC_SIZE,
+ 				   max_pages - locked_pages);
+-		if (end - index < (u64)(pvec_pages - 1))
+-			pvec_pages = (unsigned)(end - index) + 1;
+-
+-		pvec_pages = pagevec_lookup_tag(&pvec, mapping, &index,
+-						PAGECACHE_TAG_DIRTY,
++		pvec_pages = pagevec_lookup_range_tag(&pvec, mapping, &index,
++						end, PAGECACHE_TAG_DIRTY,
+ 						pvec_pages);
+-		dout("pagevec_lookup_tag got %d\n", pvec_pages);
++		dout("pagevec_lookup_range_tag got %d\n", pvec_pages);
+ 		if (!pvec_pages && !locked_pages)
+ 			break;
+ 		for (i = 0; i < pvec_pages && locked_pages < max_pages; i++) {
+@@ -895,16 +892,6 @@ static int ceph_writepages_start(struct address_space *mapping,
+ 				unlock_page(page);
+ 				continue;
+ 			}
+-			if (page->index > end) {
+-				dout("end of range %p\n", page);
+-				/* can't be range_cyclic (1st pass) because
+-				 * end == -1 in that case. */
+-				stop = true;
+-				if (ceph_wbc.head_snapc)
+-					done = true;
+-				unlock_page(page);
+-				break;
+-			}
+ 			if (strip_unit_end && (page->index > strip_unit_end)) {
+ 				dout("end of strip unit %p\n", page);
+ 				unlock_page(page);
 -- 
-Abhishek Lekshmanan
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
-HRB 21284 (AG Nürnberg)
+2.12.3
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
