@@ -1,50 +1,33 @@
-From: Boris Ranto <branto@redhat.com>
-Subject: Re: REST APIs
-Date: Thu, 14 Sep 2017 15:33:34 +0200
-Message-ID: <1505396014.391.8.camel@redhat.com>
-References: <CALe9h7e02DdmcXPfJFP56c6KCpZ-DoRdS9nvNg1SHQFKuwr9qg@mail.gmail.com>
+From: David Sterba <dsterba@suse.cz>
+Subject: Re: [PATCH 02/15] btrfs: Use pagevec_lookup_range_tag()
+Date: Thu, 14 Sep 2017 19:57:07 +0200
+Message-ID: <20170914175707.GX29043@twin.jikos.cz>
+References: <20170914131819.26266-1-jack@suse.cz>
+ <20170914131819.26266-3-jack@suse.cz>
+Reply-To: dsterba@suse.cz
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f179.google.com ([209.85.128.179]:44988 "EHLO
-        mail-wr0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751316AbdINNdn (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Sep 2017 09:33:43 -0400
-Received: by mail-wr0-f179.google.com with SMTP id v109so5940437wrc.1
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Sep 2017 06:33:42 -0700 (PDT)
-In-Reply-To: <CALe9h7e02DdmcXPfJFP56c6KCpZ-DoRdS9nvNg1SHQFKuwr9qg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20170914131819.26266-3-jack@suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: Jan Kara <jack@suse.cz>
+Cc: linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, linux-btrfs@vger.kernel.org, David Sterba <dsterba@suse.com>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
-
-I still plan to port the v1 endpoints from calamari to the restful
-module so that it provides a full replacement for calamari rest api and
-so that it could be used by projects like tendlr.
-
-We do document the restful module in the RHCEPH product and several
-people are/were interested in it. I did not hear of any product/app
-being built on top of it yet though.
-
-We can extend the pass through method in the restful module so that it
-is more user friendly for a more robust/useful replacement of the ceph-
-rest-api.
-
-Regards,
-Boris
-
-
-On Wed, 2017-09-13 at 14:43 +0100, John Spray wrote:
-> Hi all,
+On Thu, Sep 14, 2017 at 03:18:06PM +0200, Jan Kara wrote:
+> We want only pages from given range in btree_write_cache_pages() and
+> extent_write_cache_pages(). Use pagevec_lookup_range_tag() instead of
+> pagevec_lookup_tag() and remove unnecessary code.
 > 
-> This message is prompted by: https://github.com/ceph/ceph/pull/17530
-> 
-> Questions:
->  - Is anyone using either ceph-rest-api or the restful module?
->  - Is anyone planning on doing any work on either?
->  - Is the CLI pass through of the restful module a sufficient
-> replacement for ceph-rest-api for anyone that was using it?
-> 
-> John
+> CC: linux-btrfs@vger.kernel.org
+> CC: David Sterba <dsterba@suse.com>
+> Signed-off-by: Jan Kara <jack@suse.cz>
+
+Reviewed-by: David Sterba <dsterba@suse.com>
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
