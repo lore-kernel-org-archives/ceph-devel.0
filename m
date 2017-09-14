@@ -1,8 +1,7 @@
 From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 11/15] mm: Use pagevec_lookup_range_tag() in
- write_cache_pages()
-Date: Thu, 14 Sep 2017 15:18:15 +0200
-Message-ID: <20170914131819.26266-12-jack@suse.cz>
+Subject: [PATCH 02/15] btrfs: Use pagevec_lookup_range_tag()
+Date: Thu, 14 Sep 2017 15:18:06 +0200
+Message-ID: <20170914131819.26266-3-jack@suse.cz>
 References: <20170914131819.26266-1-jack@suse.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -19,55 +18,71 @@ List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/linux-f2fs-devel>,
 Errors-To: linux-f2fs-devel-bounces@lists.sourceforge.net
 To: linux-mm@kvack.org
 Cc: Jan Kara <jack@suse.cz>, linux-f2fs-devel@lists.sourceforge.net, "Yan,
- Zheng" <zyan@redhat.com>, linux-fsdevel@vger.kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>
+ Zheng" <zyan@redhat.com>, David Sterba <dsterba@suse.com>, linux-fsdevel@vger.kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>, linux-btrfs@vger.kernel.org
 List-Id: ceph-devel.vger.kernel.org
 
-Use pagevec_lookup_range_tag() in write_cache_pages() as it is
-interested only in pages from given range. Remove unnecessary code
-resulting from this.
+We want only pages from given range in btree_write_cache_pages() and
+extent_write_cache_pages(). Use pagevec_lookup_range_tag() instead of
+pagevec_lookup_tag() and remove unnecessary code.
 
+CC: linux-btrfs@vger.kernel.org
+CC: David Sterba <dsterba@suse.com>
 Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- mm/page-writeback.c | 20 ++------------------
- 1 file changed, 2 insertions(+), 18 deletions(-)
+ fs/btrfs/extent_io.c | 19 ++++---------------
+ 1 file changed, 4 insertions(+), 15 deletions(-)
 
-diff --git a/mm/page-writeback.c b/mm/page-writeback.c
-index 0b9c5cbe8eba..43b18e185fbd 100644
---- a/mm/page-writeback.c
-+++ b/mm/page-writeback.c
-@@ -2194,30 +2194,14 @@ int write_cache_pages(struct address_space *mapping,
- 	while (!done && (index <= end)) {
- 		int i;
+diff --git a/fs/btrfs/extent_io.c b/fs/btrfs/extent_io.c
+index 0f077c5db58e..9b7936ea3a88 100644
+--- a/fs/btrfs/extent_io.c
++++ b/fs/btrfs/extent_io.c
+@@ -3819,8 +3819,8 @@ int btree_write_cache_pages(struct address_space *mapping,
+ 	if (wbc->sync_mode == WB_SYNC_ALL)
+ 		tag_pages_for_writeback(mapping, index, end);
+ 	while (!done && !nr_to_write_done && (index <= end) &&
+-	       (nr_pages = pagevec_lookup_tag(&pvec, mapping, &index, tag,
+-			min(end - index, (pgoff_t)PAGEVEC_SIZE-1) + 1))) {
++	       (nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
++			tag, PAGEVEC_SIZE))) {
+ 		unsigned i;
  
--		nr_pages = pagevec_lookup_tag(&pvec, mapping, &index, tag,
--			      min(end - index, (pgoff_t)PAGEVEC_SIZE-1) + 1);
-+		nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
-+				tag, PAGEVEC_SIZE);
- 		if (nr_pages == 0)
- 			break;
+ 		scanned = 1;
+@@ -3830,11 +3830,6 @@ int btree_write_cache_pages(struct address_space *mapping,
+ 			if (!PagePrivate(page))
+ 				continue;
  
- 		for (i = 0; i < nr_pages; i++) {
- 			struct page *page = pvec.pages[i];
- 
--			/*
--			 * At this point, the page may be truncated or
--			 * invalidated (changing page->mapping to NULL), or
--			 * even swizzled back from swapper_space to tmpfs file
--			 * mapping. However, page->index will not change
--			 * because we have a reference on the page.
--			 */
--			if (page->index > end) {
--				/*
--				 * can't be range_cyclic (1st pass) because
--				 * end == -1 in that case.
--				 */
+-			if (!wbc->range_cyclic && page->index > end) {
 -				done = 1;
 -				break;
 -			}
 -
- 			done_index = page->index;
+ 			spin_lock(&mapping->private_lock);
+ 			if (!PagePrivate(page)) {
+ 				spin_unlock(&mapping->private_lock);
+@@ -3966,8 +3961,8 @@ static int extent_write_cache_pages(struct address_space *mapping,
+ 		tag_pages_for_writeback(mapping, index, end);
+ 	done_index = index;
+ 	while (!done && !nr_to_write_done && (index <= end) &&
+-	       (nr_pages = pagevec_lookup_tag(&pvec, mapping, &index, tag,
+-			min(end - index, (pgoff_t)PAGEVEC_SIZE-1) + 1))) {
++	       (nr_pages = pagevec_lookup_range_tag(&pvec, mapping, &index, end,
++			tag, PAGEVEC_SIZE))) {
+ 		unsigned i;
  
- 			lock_page(page);
+ 		scanned = 1;
+@@ -3992,12 +3987,6 @@ static int extent_write_cache_pages(struct address_space *mapping,
+ 				continue;
+ 			}
+ 
+-			if (!wbc->range_cyclic && page->index > end) {
+-				done = 1;
+-				unlock_page(page);
+-				continue;
+-			}
+-
+ 			if (wbc->sync_mode != WB_SYNC_NONE) {
+ 				if (PageWriteback(page))
+ 					flush_fn(data);
 -- 
 2.12.3
 
