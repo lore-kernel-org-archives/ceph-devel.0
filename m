@@ -1,63 +1,44 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: snapshots
-Date: Fri, 15 Sep 2017 18:25:15 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1709151825080.16664@piezo.novalocal>
-References: <CAKRxpuukift+7ovzeDnTbNtAzKM6=sBEmoQyLbQUebLJ9rwCQQ@mail.gmail.com> <alpine.DEB.2.11.1709151734310.16664@piezo.novalocal> <CAKRxputBSva77sH_xhHKoHZL6xKY+Hp0jdzMFnGgn0Z4Udrz=g@mail.gmail.com>
+From: John Spray <jspray@redhat.com>
+Subject: Re: [ceph-users] mon health status gone from display
+Date: Fri, 15 Sep 2017 19:41:54 +0100
+Message-ID: <CALe9h7cEAXP+iKxmDesW9W7WC3Yhz3RzrHQY+5b92CgizZvamw@mail.gmail.com>
+References: <CADb9450qop5MYwHeg-Gw4GR=3bDNx-BPzFNC37kvpLbwpVTnMg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.216.30]:39325 "EHLO
-        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751494AbdIOSZS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Sep 2017 14:25:18 -0400
-In-Reply-To: <CAKRxputBSva77sH_xhHKoHZL6xKY+Hp0jdzMFnGgn0Z4Udrz=g@mail.gmail.com>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:50356 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751480AbdIOSmR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Sep 2017 14:42:17 -0400
+Received: by mail-wm0-f42.google.com with SMTP id v142so10431811wmv.5
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Sep 2017 11:42:17 -0700 (PDT)
+In-Reply-To: <CADb9450qop5MYwHeg-Gw4GR=3bDNx-BPzFNC37kvpLbwpVTnMg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Two Spirit <twospirit6905@gmail.com>
+To: Alex Gorbachev <ag@iss-integration.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, 15 Sep 2017, Two Spirit wrote:
-> Excellent. Yes  was takling about CephFS. So basically it tags and
-> versions all objects and their corresponding metadata. Doesn't
-> actually replicate anything, and keeps the old objects around in the
-> OSDs?
+On Fri, Sep 15, 2017 at 7:01 PM, Alex Gorbachev <ag@iss-integration.com> wrote:
+> In Jewel and prior there was a health status for MONs in ceph -s JSON
+> output, this seems to be gone now.  Is there a place where a status of
+> a given monitor is shown in Luminous?
 
-Something like that.  :)
+Can you say which fields specifically you're missing?  We still have
+the quorum/quorum_names bits that let you work out whether the mon
+cluster is up by comparison to the mon map.
 
-s
+I think we also used to have the clock skew data there, but I think we
+dropped it because it was kind of an obscure thing and didn't fit
+neatly into the new health checks format.
 
-> 
-> On Fri, Sep 15, 2017 at 10:37 AM, Sage Weil <sage@newdream.net> wrote:
-> > On Fri, 15 Sep 2017, Two Spirit wrote:
-> >> few questions
-> >
-> > I'm assuming you're talking about CephFS snapshots here:
-> >
-> >> 1) Is the idea of snapshotting about 100TB of data doable with Ceph?
-> >
-> > You can snapshot the entire file system (petabytes) if you like.
-> >
-> >> 2) How long would such a task take? Are we talking seconds, minutes,
-> >> hours, days, weeks?
-> >
-> > Seconds (if that).
-> >
-> >> 3) what does "stop i/o" mean. Does the filesystem unavailable to the
-> >> user during the snapshot time, or is this administratively unavailable
-> >> to the user, or does ceph stop io somewhere while in parallel the data
-> >> can be read/written to?
-> >
-> > There's no IO stoppage.  Clients essentially mark a barrier in their
-> > writeback caches so that previously buffered writes are contained in the
-> > snapshot and new writes are not.  How long it takes for that data to be
-> > flushed and stable/durable on OSDs depends on how big your client caches
-> > are, but that does not cause any io stoppage or gap in availability for
-> > users of the file system.
-> >
-> > sage
+John
+
+>
+> Thank you
 > --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+> Alex Gorbachev
+> Storcium
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
