@@ -1,81 +1,44 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: Status of luminous v12.2.1 integration branch
-Date: Fri, 15 Sep 2017 14:51:27 -0700
-Message-ID: <CAMMFjmGCNawUhb7tQo2c6zsOCwbRuBb7CrjgX5EL0NP-CaYRTw@mail.gmail.com>
-References: <20890cf9-8e88-45b3-97d2-e6ad5d2ce583@redhat.com> <CAEw75dMVtBnXy9wJAWV+HPCkOYHKXcZOz-wNx+pTW5jwonJKCw@mail.gmail.com>
+From: Henrique Fingler <hfingler@cs.utexas.edu>
+Subject: How do I "install" from source? Service binaries (and /etc/ceph) are
+ missing after make install
+Date: Fri, 15 Sep 2017 19:18:32 -0400
+Message-ID: <CACG+mBVY==QPieFqgP1Qf1tcibRJZS5LhU02Wsca+4q=o2EkFA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f47.google.com ([209.85.218.47]:50256 "EHLO
-        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751413AbdIOVv2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Sep 2017 17:51:28 -0400
-Received: by mail-oi0-f47.google.com with SMTP id w65so59976oia.7
-        for <ceph-devel@vger.kernel.org>; Fri, 15 Sep 2017 14:51:28 -0700 (PDT)
-In-Reply-To: <CAEw75dMVtBnXy9wJAWV+HPCkOYHKXcZOz-wNx+pTW5jwonJKCw@mail.gmail.com>
+Received: from newman.cs.utexas.edu ([128.83.139.110]:55814 "EHLO
+        newman.cs.utexas.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751164AbdIOX0D (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Sep 2017 19:26:03 -0400
+Received: from mail-oi0-f41.google.com (mail-oi0-f41.google.com [209.85.218.41])
+        (authenticated bits=0)
+        by newman.cs.utexas.edu (8.14.4/8.14.4/Debian-4.1ubuntu1) with ESMTP id v8FNIc0p016868
+        (version=TLSv1/SSLv3 cipher=AES128-GCM-SHA256 bits=128 verify=NOT)
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Sep 2017 18:18:38 -0500
+Received: by mail-oi0-f41.google.com with SMTP id p126so246153oih.9
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Sep 2017 16:18:38 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek L <abhishek.lekshmanan@gmail.com>
-Cc: Patrick Donnelly <pdonnell@redhat.com>, Abhishek Lekshmanan <abhishek@suse.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, "gmeno@redhat.com" <gregory.meno@inktank.com>, "Durgin, Josh" <jdurgin@redhat.com>
+To: ceph-devel@vger.kernel.org
 
-Abhishek
+I made some modifications to the source code and I'm trying to deploy it.
 
-Starting !
+ The ceph-deploy fails because I dont want to do "ceph-deploy
+install", and even if I run "sudo make install" some service binaries
+are not found,  /etc/ceph and the dir on /var/ are not created.
 
-On Fri, Sep 15, 2017 at 2:26 PM, Abhishek L
-<abhishek.lekshmanan@gmail.com> wrote:
-> Yuri,
-> Sage also acked on IRC, lets start the QE round for 12.2.1 at the
-> current luminous branch
->
-> (sha1 ddf84249fa8a8ec3655c39bac5331ab81c0307b1)
->
-> Best,
-> Abhishek
->
->
-> On Fri, Sep 15, 2017 at 11:17 PM, Josh Durgin <jdurgin@redhat.com> wrote:
->> Good to go for rados!
->>
->>
->> Sent from Nine
->> ________________________________
->> From: Abhishek L <abhishek.lekshmanan@gmail.com>
->> Sent: Sep 15, 2017 1:50 PM
->> To: Patrick Donnelly
->> Cc: Abhishek Lekshmanan; Yuri Weinstein; Development, Ceph; Weil, Sage;
->> Durgin, Josh; Sadeh-Weinraub, Yehuda; John Spray; gmeno@redhat.com
->> Subject: Re: Status of luminous v12.2.1 integration branch
->>
->> Merged all the pending PRs that went through the run yesterday,
->>
->> Josh, Sage, Patrick, Yehuda are we good to go for the final QE?
->>
->> (We already had Jason's  approval, and #17764 & #17484 as Orit
->> requested were already merged for RGW)
->>
->> On Fri, Sep 15, 2017 at 8:02 PM, Patrick Donnelly <pdonnell@redhat.com>
->> wrote:
->>> On Fri, Sep 15, 2017 at 1:54 AM, Abhishek Lekshmanan <abhishek@suse.com>
->>> wrote:
->>>> So had failures in many jobs of all the 3 suites due to an ansible
->>>> failure, the fs suite, however, has a few failures in this test
->>>> (tasks.cephfs.test_misc.TestMisc), is anyone aware of prior failures of
->>>> this suite, can be seen in this run for eg.
->>>>
->>>>
->>>> http://pulpito.ceph.com/abhi-2017-09-14_11:23:49-fs-wip-luminous-2017-09-14-distro-basic-smithi/1632469/
->>>
->>> That fs failure is known and can be ignored:
->>> http://tracker.ceph.com/issues/21381
->>>
->>> --
->>> Patrick Donnelly
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ So now I'm just trying to do a manual deploy and I can't do the
+monitor part. I run everything, but when I try to actually launch the
+monitor, I can't. The manual says to run "sudo start ceph-mon
+id=node1" if I have ubuntu. Well, AWS's ubuntu doesn't use upstart so
+that doesn't work. I then tried "sudo /etc/init.d/ceph start
+mon.node1", but ceph doesn't exist in init.d.
+
+ How is it created and who does it? Is it a symlink to the binary? Why
+doesn't "make install" do this automatically? Is there a script to do
+the delta between installing from a package manager and installing
+from source?
+
+ My modified version was based on Jewel if that's important.
+
+ Thanks.
