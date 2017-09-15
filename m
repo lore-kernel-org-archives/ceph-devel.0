@@ -1,11 +1,13 @@
-From: Mike A <mike.almateia-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Mixed versions of cluster and clients
-Date: Fri, 15 Sep 2017 18:34:15 +0300
-Message-ID: <401B786D-0403-4136-B902-98A227AA00D8@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: Mixed versions of cluster and clients
+Date: Fri, 15 Sep 2017 15:42:14 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1709151538330.16664@piezo.novalocal>
+References: <401B786D-0403-4136-B902-98A227AA00D8@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <401B786D-0403-4136-B902-98A227AA00D8-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -15,22 +17,29 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+To: Mike A <mike.almateia-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-SGVsbG8hCgpXZSBoYXZlIGEgY2VwaCBjbHVzdGVyIGJhc2VkIG9uIEpld2VsIHJlbGVhc2UgYW5k
-IG9uZSB2aXJ0dWFsaXphdGlvbiBpbmZyYXN0cnVjdHVyZSB0aGF0IGlzIHVzaW5nIHRoZSBjbHVz
-dGVyLiBOb3cgd2UgYXJlIGdvaW5nIHRvIGFkZCBhbm90aGVyIGNlcGggY2x1c3RlciBidXQgYmFz
-ZWQgb24gbHVtaW5vdXMgd2l0aCBibHVlc3RvcmUuIApUaGUgdmlydHVhbGl6YXRpb24gaW5mcmFz
-dHJ1Y3R1cmUgbXVzdCB1c2UgdGhlc2UgY2VwaCBjbHVzdGVycy4gIERvIEkgbmVlZCB0byB1cGRh
-dGUgc29mdHdhcmUgdmVyc2lvbiBvZiBjbGllbnQgKGxpYnJiZC9saWJyYWRvcykgaW5zaWRlIHRo
-ZSB2aXJ0dWFsaXphdGlvbiBpbmZyYT8gCgpJIHRoaW5rIHRoZXJlIGFyZSAzIGRpZmZlcmVudCB3
-YXlzIHRvIGFkZCB0aGUgbmV3IGNsdXN0ZXI6CjEuIFVwZGF0ZSBjbGllbnQgc2lkZSB0byB0aGUg
-THVtaW5vdXMgcmVsZWFzZSBhbmQgbGVhdmUgb2xkIGNsdXN0ZXIgdG8gdGhlIEpld2VsIHJlbGVh
-c2UKMi4gVXBkYXRlIG9sZCBjbHVzdGVyIGFuZCBjbGllbnQgdG8gdGhlIEx1bWlub3VzIHJlbGVh
-c2UKMy4gTGVhdmUgb2xkIGNsdXN0ZXIgYW5kIGNsaWVudCB0byB0aGUgSmV3ZWwgcmVsZWFzZQoK
-UGxlYXNlIHN1Z2dlc3QgcHJvcyBhbmQgY29ucy4KCuKAlCAKTWlrZSwgcnVucyEKX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5n
-IGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlz
-dGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+On Fri, 15 Sep 2017, Mike A wrote:
+> Hello!
+> 
+> We have a ceph cluster based on Jewel release and one virtualization infrastructure that is using the cluster. Now we are going to add another ceph cluster but based on luminous with bluestore. 
+> The virtualization infrastructure must use these ceph clusters.  Do I need to update software version of client (librbd/librados) inside the virtualization infra? 
+> 
+> I think there are 3 different ways to add the new cluster:
+> 1. Update client side to the Luminous release and leave old cluster to the Jewel release
+> 2. Update old cluster and client to the Luminous release
+> 3. Leave old cluster and client to the Jewel release
+> 
+> Please suggest pros and cons.
+
+You can use either jewel or luminous clients.  Just be aware that the 
+luminous cluster can't use luminous-only features until clients are 
+upgrade.  By default, new luminous clusters will set their "min compat 
+client" to jewel, so no special configuration is needed.
+
+3 is the smallest change and least risk, which is appealing. You'll want 
+to do 2 eventually, and 1 is a step along that path.
+
+sage
