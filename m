@@ -1,13 +1,14 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+From: Mike A <mike.almateia-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: Mixed versions of cluster and clients
-Date: Fri, 15 Sep 2017 15:42:14 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1709151538330.16664@piezo.novalocal>
+Date: Fri, 15 Sep 2017 19:05:28 +0300
+Message-ID: <1926F028-85C0-4D5F-8D76-CAF0A5C67544@gmail.com>
 References: <401B786D-0403-4136-B902-98A227AA00D8@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+ <alpine.DEB.2.11.1709151538330.16664@piezo.novalocal>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <401B786D-0403-4136-B902-98A227AA00D8-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1709151538330.16664-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -17,29 +18,33 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Mike A <mike.almateia-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
 Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 15 Sep 2017, Mike A wrote:
-> Hello!
-> 
-> We have a ceph cluster based on Jewel release and one virtualization infrastructure that is using the cluster. Now we are going to add another ceph cluster but based on luminous with bluestore. 
-> The virtualization infrastructure must use these ceph clusters.  Do I need to update software version of client (librbd/librados) inside the virtualization infra? 
-> 
-> I think there are 3 different ways to add the new cluster:
-> 1. Update client side to the Luminous release and leave old cluster to the Jewel release
-> 2. Update old cluster and client to the Luminous release
-> 3. Leave old cluster and client to the Jewel release
-> 
-> Please suggest pros and cons.
-
-You can use either jewel or luminous clients.  Just be aware that the 
-luminous cluster can't use luminous-only features until clients are 
-upgrade.  By default, new luminous clusters will set their "min compat 
-client" to jewel, so no special configuration is needed.
-
-3 is the smallest change and least risk, which is appealing. You'll want 
-to do 2 eventually, and 1 is a step along that path.
-
-sage
+Cj4gMTUg0YHQtdC90YIuIDIwMTcg0LMuLCDQsiAxODo0MiwgU2FnZSBXZWlsIDxzYWdlQG5ld2Ry
+ZWFtLm5ldD4g0L3QsNC/0LjRgdCw0Lso0LApOgo+IAo+IE9uIEZyaSwgMTUgU2VwIDIwMTcsIE1p
+a2UgQSB3cm90ZToKPj4gSGVsbG8hCj4+IAo+PiBXZSBoYXZlIGEgY2VwaCBjbHVzdGVyIGJhc2Vk
+IG9uIEpld2VsIHJlbGVhc2UgYW5kIG9uZSB2aXJ0dWFsaXphdGlvbiBpbmZyYXN0cnVjdHVyZSB0
+aGF0IGlzIHVzaW5nIHRoZSBjbHVzdGVyLiBOb3cgd2UgYXJlIGdvaW5nIHRvIGFkZCBhbm90aGVy
+IGNlcGggY2x1c3RlciBidXQgYmFzZWQgb24gbHVtaW5vdXMgd2l0aCBibHVlc3RvcmUuIAo+PiBU
+aGUgdmlydHVhbGl6YXRpb24gaW5mcmFzdHJ1Y3R1cmUgbXVzdCB1c2UgdGhlc2UgY2VwaCBjbHVz
+dGVycy4gIERvIEkgbmVlZCB0byB1cGRhdGUgc29mdHdhcmUgdmVyc2lvbiBvZiBjbGllbnQgKGxp
+YnJiZC9saWJyYWRvcykgaW5zaWRlIHRoZSB2aXJ0dWFsaXphdGlvbiBpbmZyYT8gCj4+IAo+PiBJ
+IHRoaW5rIHRoZXJlIGFyZSAzIGRpZmZlcmVudCB3YXlzIHRvIGFkZCB0aGUgbmV3IGNsdXN0ZXI6
+Cj4+IDEuIFVwZGF0ZSBjbGllbnQgc2lkZSB0byB0aGUgTHVtaW5vdXMgcmVsZWFzZSBhbmQgbGVh
+dmUgb2xkIGNsdXN0ZXIgdG8gdGhlIEpld2VsIHJlbGVhc2UKPj4gMi4gVXBkYXRlIG9sZCBjbHVz
+dGVyIGFuZCBjbGllbnQgdG8gdGhlIEx1bWlub3VzIHJlbGVhc2UKPj4gMy4gTGVhdmUgb2xkIGNs
+dXN0ZXIgYW5kIGNsaWVudCB0byB0aGUgSmV3ZWwgcmVsZWFzZQo+PiAKPj4gUGxlYXNlIHN1Z2dl
+c3QgcHJvcyBhbmQgY29ucy4KPiAKPiBZb3UgY2FuIHVzZSBlaXRoZXIgamV3ZWwgb3IgbHVtaW5v
+dXMgY2xpZW50cy4gIEp1c3QgYmUgYXdhcmUgdGhhdCB0aGUgCj4gbHVtaW5vdXMgY2x1c3RlciBj
+YW4ndCB1c2UgbHVtaW5vdXMtb25seSBmZWF0dXJlcyB1bnRpbCBjbGllbnRzIGFyZSAKPiB1cGdy
+YWRlLiAgQnkgZGVmYXVsdCwgbmV3IGx1bWlub3VzIGNsdXN0ZXJzIHdpbGwgc2V0IHRoZWlyICJt
+aW4gY29tcGF0IAo+IGNsaWVudCIgdG8gamV3ZWwsIHNvIG5vIHNwZWNpYWwgY29uZmlndXJhdGlv
+biBpcyBuZWVkZWQuCj4gCj4gMyBpcyB0aGUgc21hbGxlc3QgY2hhbmdlIGFuZCBsZWFzdCByaXNr
+LCB3aGljaCBpcyBhcHBlYWxpbmcuIFlvdSdsbCB3YW50IAo+IHRvIGRvIDIgZXZlbnR1YWxseSwg
+YW5kIDEgaXMgYSBzdGVwIGFsb25nIHRoYXQgcGF0aC4KPiAKPiBzYWdlCgpUaGFuayB5b3UgZm9y
+IHRoZSBkZXRhaWxlZCBhbnN3ZXIuCgrigJQgCk1pa2UsIHJ1bnMhCl9fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNl
+cGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNn
+aS9jZXBoLXVzZXJzLWNlcGguY29tCg==
