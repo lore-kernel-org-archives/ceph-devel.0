@@ -1,74 +1,78 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: CephFS HA support network appliance
-Date: Fri, 15 Sep 2017 18:43:16 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1709151841580.16664@piezo.novalocal>
-References: <CAKRxpuuBHzqHK0YvTcWdR3LrsOLFYMqp8GzAg0CnPN9QgQ6sng@mail.gmail.com>
+From: Alex Gorbachev <ag@iss-integration.com>
+Subject: Re: [ceph-users] mon health status gone from display
+Date: Fri, 15 Sep 2017 14:49:17 -0400
+Message-ID: <CADb9450NpZYn0ZkjRBY0Vqx37RnbsqD3Sgd-s100JNKDqvpj0w@mail.gmail.com>
+References: <CADb9450qop5MYwHeg-Gw4GR=3bDNx-BPzFNC37kvpLbwpVTnMg@mail.gmail.com>
+ <CALe9h7cEAXP+iKxmDesW9W7WC3Yhz3RzrHQY+5b92CgizZvamw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-597392942-1505500997=:16664"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55803 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751443AbdIOSnS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 15 Sep 2017 14:43:18 -0400
-In-Reply-To: <CAKRxpuuBHzqHK0YvTcWdR3LrsOLFYMqp8GzAg0CnPN9QgQ6sng@mail.gmail.com>
+Received: from mail-pf0-f180.google.com ([209.85.192.180]:53462 "EHLO
+        mail-pf0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751458AbdIOStT (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Sep 2017 14:49:19 -0400
+Received: by mail-pf0-f180.google.com with SMTP id x78so1868609pff.10
+        for <ceph-devel@vger.kernel.org>; Fri, 15 Sep 2017 11:49:18 -0700 (PDT)
+In-Reply-To: <CALe9h7cEAXP+iKxmDesW9W7WC3Yhz3RzrHQY+5b92CgizZvamw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Two Spirit <twospirit6905@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: John Spray <jspray@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi John,
 
---8323329-597392942-1505500997=:16664
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 
-On Fri, 15 Sep 2017, Two Spirit wrote:
-> Sage, My email is bounced back saying there is a virus. I don't think the
-> mailing list likes ascii art so I'm resending directly to you.
-> cephfs with posix fs works great
-> 
-> [ host1 auto/mount ] --+-- [ceph 1]
->                        |
-> [ host2 auto/mount ] --+-- [ceph 2] 
->                        |
->                        +-- [ceph 3]
-> 
-> automount can automatically connect to available ceph node. Network device
-> that doesn't support ceph or cephx needs access to ceph, I can export it
-> through NFS/SMB
-> 
-> NetAppliance ----exports--[ host1 auto/mount ] --+-- [ceph 1]
->                                                  |
->                         --[ host2 auto/mount ] --+-- [ceph 2] 
->                                                  |
->                                                  +-- [ceph 3]
-> 
-> 
-> host 1 becomes a single point of failure. host 1 goes down,
-> ceph=unavailable. Solution is to create virtual ip with heartbeats for high
-> availability.
-> 
-> NetAppliance --[VIP]--+---[ host1 auto/mount ] --+-- [ceph 1]
->                       |                          |
->                       +---[ host2 auto/mount ] --+-- [ceph 2]  
->                                                  |
->                                                  +-- [ceph 3]
-> 
-> Is this scenario possible with CephFS since thet NetAppliance doesn't
-> support mounting ceph nor cephx, nor round robin mounting multiple IP.
-> 
-> [ host1 auto/mount ] --+-- [ceph 1]
->                        |
-> [ host2 auto/mount ] --+-- [ceph 2] 
->                        |
->   [ NetAppliance ] ----+-- [ceph 3]
+On Fri, Sep 15, 2017 at 2:41 PM, John Spray <jspray@redhat.com> wrote:
+> On Fri, Sep 15, 2017 at 7:01 PM, Alex Gorbachev <ag@iss-integration.com> wrote:
+>> In Jewel and prior there was a health status for MONs in ceph -s JSON
+>> output, this seems to be gone now.  Is there a place where a status of
+>> a given monitor is shown in Luminous?
+>
+> Can you say which fields specifically you're missing?  We still have
+> the quorum/quorum_names bits that let you work out whether the mon
+> cluster is up by comparison to the mon map.
 
-NetAppliance == host re-exporting cephfs via nfs.  The recommended way to 
-do this is with nfs-ganesha.  There is a bunch of info about how to do 
-this in an HA way (with N active servers even) but I'm not sure it is well 
-collated on docs.ceph.com.
+Old style: each mon shows if it's OK or not:
 
-sage
+ "timechecks": {
+            "epoch": 968,
+            "round": 238,
+            "round_status": "finished",
+            "mons": [
+                {
+                    "name": "lab2-mon1",
+                    "skew": 0.000000,
+                    "latency": 0.000000,
+                    "health": "HEALTH_OK"
+                },
+                {
+                    "name": "lab2-mon2",
+                    "skew": 0.000650,
+                    "latency": 0.000595,
+                    "health": "HEALTH_OK"
+                },
+                {
+                    "name": "lab2-mon3",
+                    "skew": 0.001890,
+                    "latency": 0.000557,
+                    "health": "HEALTH_OK"
+                }
 
---8323329-597392942-1505500997=:16664--
+
+
+>
+> I think we also used to have the clock skew data there, but I think we
+> dropped it because it was kind of an obscure thing and didn't fit
+> neatly into the new health checks format.
+>
+> John
+>
+>>
+>> Thank you
+>> --
+>> Alex Gorbachev
+>> Storcium
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users@lists.ceph.com
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
