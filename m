@@ -1,62 +1,38 @@
-From: Two Spirit <twospirit6905@gmail.com>
-Subject: Re: which mds server is damaged?
-Date: Thu, 14 Sep 2017 15:04:15 -0700
-Message-ID: <CAKRxputojyrjjarPVwspCqhJQvOCgfhVrnGZJf+7Vq6VhbUnnw@mail.gmail.com>
-References: <CAKRxpus_QKHx=Wi8UU-g50i8g3nkEKdg2mGVcu_uO5FbAoHHFA@mail.gmail.com>
- <CALe9h7fhfWQ1paK7TpCMVv+FA0Ta4_5X5FGWdWdgwyLjDmZxgA@mail.gmail.com>
- <CAKRxpuurKQp6vQmt2_mc5ckHZMjHajnivDob58eMpcUXodOupw@mail.gmail.com> <alpine.DEB.2.11.1709142134130.16664@piezo.novalocal>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: Re: what I did to fix the damaged
+Date: Fri, 15 Sep 2017 10:14:15 +0800
+Message-ID: <B9914DF0-F3E9-493B-ADD9-AA8D6C94FA23@redhat.com>
+References: <CAKRxpuvEV9rNST=4fFeKPeGZzDaa684dvR40a3n0b1n+RMtfuA@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f169.google.com ([209.85.223.169]:53931 "EHLO
-        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751724AbdINWEQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 14 Sep 2017 18:04:16 -0400
-Received: by mail-io0-f169.google.com with SMTP id q11so4065291ioe.10
-        for <ceph-devel@vger.kernel.org>; Thu, 14 Sep 2017 15:04:16 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1709142134130.16664@piezo.novalocal>
+Received: from mx1.redhat.com ([209.132.183.28]:48870 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751698AbdIOCOU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 14 Sep 2017 22:14:20 -0400
+In-Reply-To: <CAKRxpuvEV9rNST=4fFeKPeGZzDaa684dvR40a3n0b1n+RMtfuA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
-
-> Can you tell us more than "it went degraded"?  It's hard to know what
-you're seeing.
-
-Sorry, I only know of two states for the cephfs. Either it is not
-complaining or it is spitting out a "     1 filesystem is degraded"
-message.  When I saw that, I meant that based on what I read in 'ceph
--s'. Usually the symptom is I can't mount/access the files, but I've
-also had that symptom without the degraded message, but usually traced
-down to my fault.
-
-ceph is still too new for me to debug much further.
-
-I'd like to explain the testing scenario related to that in more
-details if your interested.. I'm off to a meeting soon, can  email
-more on this later.
+To: Two Spirit <twospirit6905@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
 
-On Thu, Sep 14, 2017 at 2:37 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Thu, 14 Sep 2017, Two Spirit wrote:
->> >The thing that's damaged is a logical mds rank (0), not a physical MDS
->> >daemon.  What this is telling you is that there is some serious
->> >corruption in your metadata pool that prevents that particular rank
->> >from starting.
->>
->> Zhang helped identify the bug and put it in tracker. I didn't fully
->> understand the problem but related to mds replay not happening and the
->> write_pos being off. He fixed it after a full scrub was done, the
->> degraded file system came back online. After a couple more hours of
->> stress testing, the file system went back to degraded(earlier today).
->
-> Can you tell us more than "it went degraded"?  It's hard to know what
-> you're seeing.
->
-> More generally, can you share what you did with the system that originally
-> triggered the unfound object?  It ordinarily requires a sequence of
-> multiple not-quite-concurrent failures to induce that state, and we don't
-> see it much.  I'm surprised you're hitting it right off the bat.
->
-> Thanks!
-> sage
+> On 15 Sep 2017, at 02:39, Two Spirit <twospirit6905@gmail.com> wrote:
+> 
+>> the unfound object is the tail object of mds log. what I did was finding the position of latest valid log entry and set log write_pos to it
+> 
+> Thanks for the help. The file system came back up after the scrub, I
+> mounted it, started copying files back on to it and within 1-2 hours
+> the file system went back degraded. Is this possibly due to the same
+> bug you found with mds not replay? Do I need to wait for a patch to
+> continue testing this?
+
+What do you mean fs degraded, mds damaged or mds crashed? Your fs hasn’t been completely fixed. It’s possible that mds encountered
+some inconsistent metatda. I didn’t find any bug in mds replay code. you had an unfound mds log object. mds were supposed to go to damaged
+state in that case. 
+
+ping me at the same irc channel
+
+Regards
+Yan, Zheng
