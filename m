@@ -1,84 +1,67 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Re: rocksdb fails to build with gcc 7.1.1
-Date: Fri, 15 Sep 2017 18:05:29 +1000
-Message-ID: <CAF-wwdGokvp7VXaxZ6h2H8TS_kGL1y5JuA63TqXjyTPQGy_nXg@mail.gmail.com>
-References: <1874d0d4-b311-37ef-b98f-aa099f1168b8@redhat.com>
+From: Abhishek Lekshmanan <abhishek@suse.com>
+Subject: Re: Status of luminous v12.2.1 integration branch
+Date: Fri, 15 Sep 2017 10:54:57 +0200
+Message-ID: <87fubofiji.fsf@suse.com>
+References: <CAMMFjmHk-YfW6-qnJmgQOWj-cdRO86ggHK-2y27GN1u-Ao8X-w@mail.gmail.com> <CA+2bHPZ9fjx2Z8uUc-Fo+TsO-m9+PspG2T=NStGdo51FyL-eAQ@mail.gmail.com> <CA+2bHPboXJXgzz-aHkWYFqB1EH-tzDHShXSwbkn8EAeogggUjg@mail.gmail.com> <87inglfqsp.fsf@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f49.google.com ([209.85.214.49]:54380 "EHLO
-        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751157AbdIOIFb (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Sep 2017 04:05:31 -0400
-Received: by mail-it0-f49.google.com with SMTP id e134so2738800ite.3
-        for <ceph-devel@vger.kernel.org>; Fri, 15 Sep 2017 01:05:30 -0700 (PDT)
-In-Reply-To: <1874d0d4-b311-37ef-b98f-aa099f1168b8@redhat.com>
+Received: from smtp.nue.novell.com ([195.135.221.5]:53861 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751146AbdIOIzA (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Fri, 15 Sep 2017 04:55:00 -0400
+In-Reply-To: <87inglfqsp.fsf@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jos Collin <jcollin@redhat.com>
-Cc: Ceph Devel <ceph-devel@vger.kernel.org>
+To: Patrick Donnelly <pdonnell@redhat.com>, Yuri Weinstein <yweinste@redhat.com>
+Cc: "Development, Ceph" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, "gmeno@redhat.com" <gregory.meno@inktank.com>
 
-On Fri, Sep 15, 2017 at 3:29 PM, Jos Collin <jcollin@redhat.com> wrote:
-> Found this today morning with the latest ceph source. But it went through
-> with the version of gcc in smithi (gcc (Ubuntu 4.8.4-2ubuntu1~14.04.3)
-> 4.8.4).
+Abhishek Lekshmanan <abhishek@suse.com> writes:
+
+> Patrick Donnelly <pdonnell@redhat.com> writes:
 >
+>> On Wed, Sep 13, 2017 at 8:49 AM, Patrick Donnelly <pdonnell@redhat.com> wrote:
+>>> On Wed, Sep 13, 2017 at 8:40 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
+>>>> This email is an attempt to make sure that all are clear on luminous
+>>>> v12.2.1 release status.
+>>>>
+>>>> Dev leads - what is left before we can start QE validation?
+>>>
+>>> To be merged into master today and then backported:
+>>> http://tracker.ceph.com/issues/21378
+>>> Luminous backport: http://tracker.ceph.com/issues/21357
+>>> To be merged into master today and then backported:
+>>> http://tracker.ceph.com/issues/20594
+>>
+>> Final list of CephFS backports needed for 12.2.1:
+>>
+>> http://tracker.ceph.com/issues/21323
+>> http://tracker.ceph.com/issues/21114
+>> http://tracker.ceph.com/issues/21107
+>> http://tracker.ceph.com/issues/21357
+>> http://tracker.ceph.com/issues/21322
+>> http://tracker.ceph.com/issues/21384
+>>
 >
-> [ 14%] Performing forcebuild step for 'rocksdb_ext'
-> [ 14%] Performing build step for 'rocksdb_ext'
-> [  0%] Built target build_version
-> [  0%] Building CXX object CMakeFiles/rocksdb.dir/db/builder.cc.o
-> In file included from
-> /home/jcollin/workspace/testbuild/ceph/src/rocksdb/db/write_batch_internal.h:12:0,
->                  from
-> /home/jcollin/workspace/testbuild/ceph/src/rocksdb/db/column_family.h:20,
->                  from
-> /home/jcollin/workspace/testbuild/ceph/src/rocksdb/db/version_set.h:31,
->                  from
-> /home/jcollin/workspace/testbuild/ceph/src/rocksdb/db/compaction.h:11,
->                  from
-> /home/jcollin/workspace/testbuild/ceph/src/rocksdb/db/compaction_iterator.h:14,
->                  from
-> /home/jcollin/workspace/testbuild/ceph/src/rocksdb/db/builder.cc:16:
-> /home/jcollin/workspace/testbuild/ceph/src/rocksdb/db/write_thread.h: In
-> member function ‘std::mutex& rocksdb::WriteThread::Writer::StateMutex()’:
-> /home/jcollin/workspace/testbuild/ceph/src/rocksdb/db/write_thread.h:192:78:
-> error: dereferencing type-punned pointer will break strict-aliasing rules
-> [-Werror=strict-aliasing]
->        return
-> *static_cast<std::mutex*>(static_cast<void*>(&state_mutex_bytes));
-
-It's a gcc bug, see http://tracker.ceph.com/issues/19864.
-
+> So scheduled the relevant suites (rgw,rados,fs) at priority 100 right
+> now) for the current PRs targeting Luminous, 
+> http://tracker.ceph.com/issues/21296#note-15
 >
->       ^
-> cc1plus: all warnings being treated as errors
-> make[6]: *** [CMakeFiles/rocksdb.dir/build.make:135:
-> CMakeFiles/rocksdb.dir/db/builder.cc.o] Error 1
-> make[5]: *** [CMakeFiles/Makefile2:2225: CMakeFiles/rocksdb.dir/all] Error 2
-> make[4]: *** [CMakeFiles/Makefile2:2237: CMakeFiles/rocksdb.dir/rule] Error
-> 2
-> make[3]: *** [Makefile:875: rocksdb] Error 2
-> make[2]: *** [src/CMakeFiles/rocksdb_ext.dir/build.make:113:
-> src/rocksdb_ext-prefix/src/rocksdb_ext-stamp/rocksdb_ext-build] Error 2
-> make[1]: *** [CMakeFiles/Makefile2:1726: src/CMakeFiles/rocksdb_ext.dir/all]
-> Error 2
-> make: *** [Makefile:139: all] Error 2
-> [jcollin@earth build]$ gcc --version
-> gcc (GCC) 7.1.1 20170503 (Red Hat 7.1.1-1)
-> Copyright (C) 2017 Free Software Foundation, Inc.
-> This is free software; see the source for copying conditions.  There is NO
-> warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
->
-> [jcollin@earth build]$
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> if this run goes through, lets merge these PRs to luminous and handover
+> to Yuri
 
+So had failures in many jobs of all the 3 suites due to an ansible
+failure, the fs suite, however, has a few failures in this test
+(tasks.cephfs.test_misc.TestMisc), is anyone aware of prior failures of
+this suite, can be seen in this run for eg.
 
+http://pulpito.ceph.com/abhi-2017-09-14_11:23:49-fs-wip-luminous-2017-09-14-distro-basic-smithi/1632469/
 
--- 
-Cheers,
-Brad
+reruns updated at http://tracker.ceph.com/issues/21296 
+
+--
+Abhishek Lekshmanan
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
+HRB 21284 (AG Nürnberg)
