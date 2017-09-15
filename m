@@ -1,37 +1,28 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: Status of luminous v12.2.1 integration branch
-Date: Fri, 15 Sep 2017 10:55:42 -0700
-Message-ID: <b6d9a156-f200-8435-eb10-6ea7a31bd4d5@redhat.com>
-References: <CAMMFjmHk-YfW6-qnJmgQOWj-cdRO86ggHK-2y27GN1u-Ao8X-w@mail.gmail.com>
- <CA+2bHPZ9fjx2Z8uUc-Fo+TsO-m9+PspG2T=NStGdo51FyL-eAQ@mail.gmail.com>
- <CA+2bHPboXJXgzz-aHkWYFqB1EH-tzDHShXSwbkn8EAeogggUjg@mail.gmail.com>
- <87inglfqsp.fsf@suse.com> <87fubofiji.fsf@suse.com> <877ex0f9qu.fsf@suse.com>
+From: Alex Gorbachev <ag-VxEtxStO0vCD5NdjQRoWIEEOCMrvLtNR@public.gmane.org>
+Subject: mon health status gone from display
+Date: Fri, 15 Sep 2017 14:01:20 -0400
+Message-ID: <CADb9450qop5MYwHeg-Gw4GR=3bDNx-BPzFNC37kvpLbwpVTnMg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57034 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751184AbdIORzq (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 15 Sep 2017 13:55:46 -0400
-In-Reply-To: <877ex0f9qu.fsf@suse.com>
-Content-Language: en-GB
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Lekshmanan <abhishek@suse.com>, Patrick Donnelly <pdonnell@redhat.com>, Yuri Weinstein <yweinste@redhat.com>
-Cc: "Development, Ceph" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sweil@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, "gmeno@redhat.com" <gregory.meno@inktank.com>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On 09/15/2017 05:04 AM, Abhishek Lekshmanan wrote:
-> RADOS suite saw a failure at
-> http://pulpito.ceph.com/abhi-2017-09-15_08:47:22-rados-wip-luminous-2017-09-14-distro-basic-smithi/1635585/
-> 
-> on  (workunit test cephtool/test.sh), other than the same ansible
-> related env. failures.
+In Jewel and prior there was a health status for MONs in ceph -s JSON
+output, this seems to be gone now.  Is there a place where a status of
+a given monitor is shown in Luminous?
 
-This was a timeout checking the crush rule during pool creation - it's
-safe to ignore.
-
-It seems that https://github.com/ceph/ceph/pull/17179 did not eliminate
-the problem.
-
-Josh
+Thank you
+--
+Alex Gorbachev
+Storcium
