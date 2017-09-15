@@ -1,36 +1,63 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: Status of luminous v12.2.1 integration branch
-Date: Fri, 15 Sep 2017 11:02:45 -0700
-Message-ID: <CA+2bHPa0QL94xckywnrF-j+k1KvZwZv4KVEzcj-DmqDFURby=Q@mail.gmail.com>
-References: <CAMMFjmHk-YfW6-qnJmgQOWj-cdRO86ggHK-2y27GN1u-Ao8X-w@mail.gmail.com>
- <CA+2bHPZ9fjx2Z8uUc-Fo+TsO-m9+PspG2T=NStGdo51FyL-eAQ@mail.gmail.com>
- <CA+2bHPboXJXgzz-aHkWYFqB1EH-tzDHShXSwbkn8EAeogggUjg@mail.gmail.com>
- <87inglfqsp.fsf@suse.com> <87fubofiji.fsf@suse.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: snapshots
+Date: Fri, 15 Sep 2017 18:25:15 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1709151825080.16664@piezo.novalocal>
+References: <CAKRxpuukift+7ovzeDnTbNtAzKM6=sBEmoQyLbQUebLJ9rwCQQ@mail.gmail.com> <alpine.DEB.2.11.1709151734310.16664@piezo.novalocal> <CAKRxputBSva77sH_xhHKoHZL6xKY+Hp0jdzMFnGgn0Z4Udrz=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f175.google.com ([209.85.223.175]:46757 "EHLO
-        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751316AbdIOSDR (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Sep 2017 14:03:17 -0400
-Received: by mail-io0-f175.google.com with SMTP id d16so10332638ioj.3
-        for <ceph-devel@vger.kernel.org>; Fri, 15 Sep 2017 11:03:17 -0700 (PDT)
-In-Reply-To: <87fubofiji.fsf@suse.com>
+Received: from cobra.newdream.net ([66.33.216.30]:39325 "EHLO
+        cobra.newdream.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751494AbdIOSZS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 15 Sep 2017 14:25:18 -0400
+In-Reply-To: <CAKRxputBSva77sH_xhHKoHZL6xKY+Hp0jdzMFnGgn0Z4Udrz=g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Lekshmanan <abhishek@suse.com>
-Cc: Yuri Weinstein <yweinste@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Weil, Sage" <sweil@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, "gmeno@redhat.com" <gregory.meno@inktank.com>
+To: Two Spirit <twospirit6905@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Fri, Sep 15, 2017 at 1:54 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
-> So had failures in many jobs of all the 3 suites due to an ansible
-> failure, the fs suite, however, has a few failures in this test
-> (tasks.cephfs.test_misc.TestMisc), is anyone aware of prior failures of
-> this suite, can be seen in this run for eg.
->
-> http://pulpito.ceph.com/abhi-2017-09-14_11:23:49-fs-wip-luminous-2017-09-14-distro-basic-smithi/1632469/
+On Fri, 15 Sep 2017, Two Spirit wrote:
+> Excellent. Yes  was takling about CephFS. So basically it tags and
+> versions all objects and their corresponding metadata. Doesn't
+> actually replicate anything, and keeps the old objects around in the
+> OSDs?
 
-That fs failure is known and can be ignored:
-http://tracker.ceph.com/issues/21381
+Something like that.  :)
 
--- 
-Patrick Donnelly
+s
+
+> 
+> On Fri, Sep 15, 2017 at 10:37 AM, Sage Weil <sage@newdream.net> wrote:
+> > On Fri, 15 Sep 2017, Two Spirit wrote:
+> >> few questions
+> >
+> > I'm assuming you're talking about CephFS snapshots here:
+> >
+> >> 1) Is the idea of snapshotting about 100TB of data doable with Ceph?
+> >
+> > You can snapshot the entire file system (petabytes) if you like.
+> >
+> >> 2) How long would such a task take? Are we talking seconds, minutes,
+> >> hours, days, weeks?
+> >
+> > Seconds (if that).
+> >
+> >> 3) what does "stop i/o" mean. Does the filesystem unavailable to the
+> >> user during the snapshot time, or is this administratively unavailable
+> >> to the user, or does ceph stop io somewhere while in parallel the data
+> >> can be read/written to?
+> >
+> > There's no IO stoppage.  Clients essentially mark a barrier in their
+> > writeback caches so that previously buffered writes are contained in the
+> > snapshot and new writes are not.  How long it takes for that data to be
+> > flushed and stable/durable on OSDs depends on how big your client caches
+> > are, but that does not cause any io stoppage or gap in availability for
+> > users of the file system.
+> >
+> > sage
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
