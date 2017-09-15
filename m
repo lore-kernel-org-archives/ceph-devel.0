@@ -1,36 +1,36 @@
-From: Chao Yu <chao@kernel.org>
-Subject: Re: [f2fs-dev] [PATCH 07/15] f2fs: Use find_get_pages_tag() for
- looking up single page
-Date: Fri, 15 Sep 2017 21:43:03 +0800
-Message-ID: <2cd84505-3d52-61dc-4a8d-099a58467cc1@kernel.org>
-References: <20170914131819.26266-1-jack@suse.cz>
- <20170914131819.26266-8-jack@suse.cz>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20170914131819.26266-8-jack@suse.cz>
-Content-Language: en-US
-Sender: owner-linux-mm@kvack.org
-To: Jan Kara <jack@suse.cz>, linux-mm@kvack.org
-Cc: linux-f2fs-devel@lists.sourceforge.net, "Yan, Zheng" <zyan@redhat.com>, linux-fsdevel@vger.kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel@vger.kernel.org, Ilya Dryomov <idryomov@gmail.com>
+From: Mike A <mike.almateia-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Mixed versions of cluster and clients
+Date: Fri, 15 Sep 2017 18:34:15 +0300
+Message-ID: <401B786D-0403-4136-B902-98A227AA00D8@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-On 2017/9/14 21:18, Jan Kara wrote:
-> __get_first_dirty_index() wants to lookup only the first dirty page
-> after given index. There's no point in using pagevec_lookup_tag() for
-> that. Just use find_get_pages_tag() directly.
-> 
-> CC: Jaegeuk Kim <jaegeuk@kernel.org>
-> CC: linux-f2fs-devel@lists.sourceforge.net
-> Signed-off-by: Jan Kara <jack@suse.cz>
-
-Reviewed-by: Chao Yu <yuchao0@huawei.com>
-
-Thanks,
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+SGVsbG8hCgpXZSBoYXZlIGEgY2VwaCBjbHVzdGVyIGJhc2VkIG9uIEpld2VsIHJlbGVhc2UgYW5k
+IG9uZSB2aXJ0dWFsaXphdGlvbiBpbmZyYXN0cnVjdHVyZSB0aGF0IGlzIHVzaW5nIHRoZSBjbHVz
+dGVyLiBOb3cgd2UgYXJlIGdvaW5nIHRvIGFkZCBhbm90aGVyIGNlcGggY2x1c3RlciBidXQgYmFz
+ZWQgb24gbHVtaW5vdXMgd2l0aCBibHVlc3RvcmUuIApUaGUgdmlydHVhbGl6YXRpb24gaW5mcmFz
+dHJ1Y3R1cmUgbXVzdCB1c2UgdGhlc2UgY2VwaCBjbHVzdGVycy4gIERvIEkgbmVlZCB0byB1cGRh
+dGUgc29mdHdhcmUgdmVyc2lvbiBvZiBjbGllbnQgKGxpYnJiZC9saWJyYWRvcykgaW5zaWRlIHRo
+ZSB2aXJ0dWFsaXphdGlvbiBpbmZyYT8gCgpJIHRoaW5rIHRoZXJlIGFyZSAzIGRpZmZlcmVudCB3
+YXlzIHRvIGFkZCB0aGUgbmV3IGNsdXN0ZXI6CjEuIFVwZGF0ZSBjbGllbnQgc2lkZSB0byB0aGUg
+THVtaW5vdXMgcmVsZWFzZSBhbmQgbGVhdmUgb2xkIGNsdXN0ZXIgdG8gdGhlIEpld2VsIHJlbGVh
+c2UKMi4gVXBkYXRlIG9sZCBjbHVzdGVyIGFuZCBjbGllbnQgdG8gdGhlIEx1bWlub3VzIHJlbGVh
+c2UKMy4gTGVhdmUgb2xkIGNsdXN0ZXIgYW5kIGNsaWVudCB0byB0aGUgSmV3ZWwgcmVsZWFzZQoK
+UGxlYXNlIHN1Z2dlc3QgcHJvcyBhbmQgY29ucy4KCuKAlCAKTWlrZSwgcnVucyEKX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5n
+IGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlz
+dGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
