@@ -1,43 +1,44 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: [ceph-users] CephFS Segfault 12.2.0
-Date: Mon, 18 Sep 2017 13:48:19 -0700
-Message-ID: <CA+2bHPYXhKyeQAwJ+imwAvxRwe2SxhvQom0rEid-+G19RDtW=w@mail.gmail.com>
-References: <5f43d77d-4684-1dfd-e597-6dd113004d6f@umiacs.umd.edu>
+From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+Subject: Re: Bluestore aio_nr?
+Date: Mon, 18 Sep 2017 21:19:32 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1709182117520.4417@piezo.novalocal>
+References: <CAEYCsVJNnY7yV=VjfdP7B3jtVMz5v=8a9MmVPqS0kyhdKf0Tvg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f43.google.com ([209.85.214.43]:47420 "EHLO
-        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751458AbdIRUsv (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Sep 2017 16:48:51 -0400
-Received: by mail-it0-f43.google.com with SMTP id z8so58500itc.2
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Sep 2017 13:48:50 -0700 (PDT)
-In-Reply-To: <5f43d77d-4684-1dfd-e597-6dd113004d6f@umiacs.umd.edu>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Derek Yarnell <derek@umiacs.umd.edu>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAEYCsVJNnY7yV=VjfdP7B3jtVMz5v=8a9MmVPqS0kyhdKf0Tvg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Derek,
+On Tue, 19 Sep 2017, Xiaoxi Chen wrote:
+> Hi,
+>      I just hit an OSD cannot start due to insufficient aio_nr.  Each
+> OSD is with a separate SSD partition as db.block
 
-On Mon, Sep 18, 2017 at 1:30 PM, Derek Yarnell <derek@umiacs.umd.edu> wrote:
-> We have a recent cluster upgraded from Jewel to Luminous.  Today we had
-> a segmentation fault that led to file system degraded.  Systemd then
-> decided to restart the daemon over and over with a different stack trace
-> (can be seen after the 10k events in the log file[0]).
->
-> After trying to fail over to the standby which also kept failing.  After
-> shutting down both MDSs for some time we brought one back online and
-> what seemed to be the clients had been out long enough to be evicted.
-> We were able to then reboot clients (RHEL 7.4) and have them re-connect
-> to the file system.
+Can you paste the message you saw?  I'm not sure which check you mean.
 
-This looks like an instance of:
+>      Further checking showing 6144 AIO contexts were required per OSD,
+>  could anyone explain a little bit on where the 6144 aio contexts goes
+> to?
+> 
+>      It looks to me like the bdev_aio_max_queue_depth is default to
+> 1024, but  how can we have 6 bdev to get 6144?
 
-http://tracker.ceph.com/issues/21070
+I'm guessing the is fallout from the kernel's behavior.  When you set up 
+an IO queue you specify how many aios you want to allow (that's where we 
+use the max_queue_depth value), but the kernel rounds the buffer up to a 
+page boundary, so in reality it will use more.  That can make you hit the 
+host maximum sooner.
 
-Upcoming v12.2.1 has the fix. Until then, you will need to apply the
-patch locally.
-
--- 
-Patrick Donnelly
+sage
