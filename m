@@ -1,60 +1,77 @@
-From: =?UTF-8?B?5YWz5LqR6aOe?= <gyfelectric@gmail.com>
-Subject: Re: There is a big risk in function bufferlist::claim_prepend()
-Date: Mon, 18 Sep 2017 20:00:40 +0800
-Message-ID: <CAF3FU87581w6JNr8GoQ1_Sx0Zs0gynxCsyB83wTTXZZ4BM+j3g@mail.gmail.com>
-References: <350174ad-7e1d-4ab8-b149-0762e91d19e8@me.com> <CAJE9aOPEAV8POJTSo2BZxGLYdsTe6Vu9zdwS6MuogFRjc+9FzA@mail.gmail.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: Ceph RDMA Memory Leakage
+Date: Mon, 18 Sep 2017 20:06:55 +0800
+Message-ID: <CACJqLybpzfvMP-6t7JyvTzMq9QhfJ28sFaK17w0v3aRf5bAY7Q@mail.gmail.com>
+References: <CAGRcXKaZJBFnTtDVKzPyfVyK3Wrnve0Un83TjAWq4opdGaT+yA@mail.gmail.com>
+ <CACJqLyYBCbvBMK9heRvTn4tmo6jusEA2C6dWFh5H1ysoYfSg-A@mail.gmail.com> <CAGRcXKY+0ecs+6EHKh1VSqC5uMqCD2vR0J_Xi0up45ggGyv4Cw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f67.google.com ([209.85.215.67]:35835 "EHLO
-        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753887AbdIRMAm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Sep 2017 08:00:42 -0400
-Received: by mail-lf0-f67.google.com with SMTP id c8so168467lfe.2
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Sep 2017 05:00:41 -0700 (PDT)
-In-Reply-To: <CAJE9aOPEAV8POJTSo2BZxGLYdsTe6Vu9zdwS6MuogFRjc+9FzA@mail.gmail.com>
+Received: from mail-hk2apc01on0093.outbound.protection.outlook.com ([104.47.124.93]:44341
+        "EHLO APC01-HK2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754183AbdIRMHE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 18 Sep 2017 08:07:04 -0400
+Received: by mail-ua0-f173.google.com with SMTP id k63so150717uak.12
+        for <ceph-devel@vger.kernel.org>; Mon, 18 Sep 2017 05:07:00 -0700 (PDT)
+In-Reply-To: <CAGRcXKY+0ecs+6EHKh1VSqC5uMqCD2vR0J_Xi0up45ggGyv4Cw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: =?UTF-8?B?5YWz5LqR6aOe?= <seven.guanyunfei@icloud.com>, Sage Weil <sage@newdream.net>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Jin Cai <caijin.laurence@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Adir Lev <adirl@mellanox.com>
 
-I agree with that point that would hurts the performance and
-i removed the step of 1-3, please help to review.
-But the kind of situation you said should not appear.
-If we realloc a mem chunk to replace the first memory ptr with it
-when do claim_prepend every time the ptr of bufferslit will not exist
-bubbles except for the first ptr.
+hmm, you may need to uses the next 12.2.x version or master branch to try.
 
-2017-09-18 16:57 GMT+08:00 kefu chai <tchaikov@gmail.com>:
-> On Mon, Sep 18, 2017 at 2:41 PM, =E5=85=B3=E4=BA=91=E9=A3=9E <seven.guany=
-unfei@icloud.com> wrote:
->>
->> hello kefu chai,
->>
->>
->> These two days I carefully considered the pr https://github.com/ceph/cep=
-h/pull/17661 and looked the code about bufferlist and I still think the ste=
-ps of 1-3
->> is needed. Although the ptr::_off can guarantee bufferlist to be copied/=
-read/decode/write_file rightly, this will lead a bufferlist not clean and w=
-ill waste memory
->> like picture below.
->>
->> Of course, it's also possible that i am not thinking about it, do you ha=
-ve any suggestions?
+On Mon, Sep 18, 2017 at 7:27 PM, Jin Cai <caijin.laurence@gmail.com> wrote:
+> Oops, I forgot including the version information of ceph in my mail.
+> The Ceph Version we use is: 12.2.0
 >
-> i think it's the user of the bufferlist's choice to defrag the
-> element(s) in it or not. and it's not a pure win: it hurts the
-> performance in some cases. in the case of PR#17661, we are trying to
-> realloc a smaller mem chunk to replace the first memory ptr with it,
-> if it has "bubbles". what about the second element, or the third one
-> in the buffer::list, shall we also take care of them as well?
 >
-> --
-> Regards
-> Kefu Chai
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> 2017-09-18 18:13 GMT+08:00 Haomai Wang <haomai@xsky.com>:
+>> which version do you use? I think we have fixed some memory problem on masater
+>>
+>> On Mon, Sep 18, 2017 at 2:09 PM, Jin Cai <caijin.laurence@gmail.com> wrote:
+>>> Hi, cephers
+>>>
+>>>     We are testing the RDMA ms type of Ceph.
+>>>
+>>>     The OSDs and MONs are always marked down by their peers because
+>>> they don't have enough buffer to use in the memory buffer pool to
+>>> reply the heartbeat ping message from their peers.
+>>>     And the log always shows "no enough buffer in worker" even though
+>>> the whole cluster is idle without any I/Os from external.
+>>>
+>>>     Ceph configuration about RDMA is as following:
+>>>         ms_async_rdma_roce_ver = 1
+>>>         ms_async_rdma_sl = 5
+>>>         ms_async_rdma_dscp = 136
+>>>         ms_async_rdma_send_buffers = 1024
+>>>         ms_async_rdma_receive_buffers = 1024
+>>>
+>>>    Even we adjust the value of ms_async_rdma_send_buffers to 32,768,
+>>> the 'no enough buffer in worker' log still exists.
+>>>
+>>>    After a deep analysis, we think it is because when a
+>>> RDMAConnectedSocketImpl instance is destructed, its queue pair is
+>>> added to the dead_queue_pair vector container. And the items of
+>>> dead_queue_pair are deleted in the polling thread.
+>>>
+>>> From the doc of rdmamojo:
+>>> When a QP is destroyed any outstanding Work Requests, in either the
+>>> Send or Receive Queues, won't be processed anymore by the RDMA device
+>>> and Work Completions won't be generated for them. It is up to the user
+>>> to clean all of the associated resources of those Work Requests (i.e.
+>>> memory buffers)
+>>>
+>>> We can know the problem here is that when there are still outstanding
+>>> work request in the queue pair to be deleted, the memory buffer
+>>> occupied by these outstanding work request will never be returned to
+>>> memory buffer pool because work completions won't be generated for
+>>> them. So the memory leakage happens.
+>>>
+>>> A more elegant way before destroying a queue pair is set the queue
+>>> pair into error state and wait for the affiliated event
+>>> IBV_EVENT_QP_LAST_WQE_REACHED, finally destroy the queue pair.
+>>>
+>>> Do you have any suggestions or ideas? Thanks in advance.
