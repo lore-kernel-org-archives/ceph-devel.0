@@ -1,28 +1,43 @@
-From: Xiaoxi Chen <superdebuger@gmail.com>
-Subject: Bluestore aio_nr?
-Date: Tue, 19 Sep 2017 00:44:44 +0800
-Message-ID: <CAEYCsVJNnY7yV=VjfdP7B3jtVMz5v=8a9MmVPqS0kyhdKf0Tvg@mail.gmail.com>
+From: Josh Durgin <jdurgin@redhat.com>
+Subject: Re: Time to drop 11429.yaml from jewel?
+Date: Mon, 18 Sep 2017 09:44:54 -0700
+Message-ID: <342b2811-b4e7-9cd4-0b15-9c9ceee33ebd@redhat.com>
+References: <86a21353-e714-df8c-9b31-3dbde91fe2f6@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f182.google.com ([209.85.223.182]:44919 "EHLO
-        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932658AbdIRQop (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Sep 2017 12:44:45 -0400
-Received: by mail-io0-f182.google.com with SMTP id v36so3641126ioi.1
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Sep 2017 09:44:45 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:52172 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932658AbdIRQoz (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 18 Sep 2017 12:44:55 -0400
+In-Reply-To: <86a21353-e714-df8c-9b31-3dbde91fe2f6@suse.cz>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Yuri Weinstein <yweinste@redhat.com>
 
-Hi,
-     I just hit an OSD cannot start due to insufficient aio_nr.  Each
-OSD is with a separate SSD partition as db.block
-     Further checking showing 6144 AIO contexts were required per OSD,
- could anyone explain a little bit on where the 6144 aio contexts goes
-to?
+On 09/18/2017 06:45 AM, Nathan Cutler wrote:
+> Hi Josh:
+> 
+> rados/singleton-nomsgr/{all/11429.yaml rados.yaml} recently started to 
+> fail in the jewel integration branch - here are the two most recent runs:
+> 
+> http://qa-proxy.ceph.com/teuthology/smithfarm-2017-09-12_17:11:54-rados-wip-jewel-backports-distro-basic-smithi/1623590/teuthology.log 
+> 
+> 
+> http://qa-proxy.ceph.com/teuthology/smithfarm-2017-09-13_02:44:35-rados-wip-jewel-backports-distro-basic-smithi/1625890/teuthology.log 
+> 
+> 
+> Could you help analyze these failures?
 
-     It looks to me like the bdev_aio_max_queue_depth is default to
-1024, but  how can we have 6 bdev to get 6144?
+Looks like Kefu diagnosed them well on github - race-prone checks in the
+test.
 
-Xiaoxi
+> I noticed that this test was dropped in the Infernalis development 
+> cycle. Is it time to drop it in Jewel as well?
+
+Yes, we certainly don't need any firefly-based tests at this point.
+
+Josh
