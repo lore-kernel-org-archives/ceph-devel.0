@@ -1,138 +1,82 @@
-From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
-Subject: OSD crashes
-Date: Mon, 18 Sep 2017 14:24:05 -0400
-Message-ID: <CAGbviv+U-ruu37HwH+jRhw0z1Mn1_ZcCsS0DDC655h-qjfcvQg@mail.gmail.com>
+From: Derek Yarnell <derek-+0HnD9Kv66LFajBVf7NWsQ@public.gmane.org>
+Subject: CephFS Segfault 12.2.0
+Date: Mon, 18 Sep 2017 16:30:47 -0400
+Message-ID: <5f43d77d-4684-1dfd-e597-6dd113004d6f@umiacs.umd.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f45.google.com ([209.85.214.45]:44145 "EHLO
-        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751995AbdIRSYH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Sep 2017 14:24:07 -0400
-Received: by mail-it0-f45.google.com with SMTP id r131so6895600itc.1
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Sep 2017 11:24:07 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-We have a cluster going through a heavy rebalance operation, but its
-hampered by several OSDs that keep crashing and restarting.
+We have a recent cluster upgraded from Jewel to Luminous.  Today we had
+a segmentation fault that led to file system degraded.  Systemd then
+decided to restart the daemon over and over with a different stack trace
+(can be seen after the 10k events in the log file[0]).
 
-Jewel 10.2.7
-Ubuntu 16.04.2
+After trying to fail over to the standby which also kept failing.  After
+shutting down both MDSs for some time we brought one back online and
+what seemed to be the clients had been out long enough to be evicted.
+We were able to then reboot clients (RHEL 7.4) and have them re-connect
+to the file system.
 
-Here is a dump of one of the crashing OSD logs:
+2017-09-18 13:27:12.836699 7f9c0ca51700 -1 *** Caught signal
+(Segmentation fault) **
+ in thread 7f9c0ca51700 thread_name:fn_anonymous
+
+ ceph version 12.2.0 (32ce2a3ae5239ee33d6150705cdb24d43bab910c) luminous
+(rc)
+ 1: (()+0x590c21) [0x55a40867ac21]
+ 2: (()+0xf5e0) [0x7f9c17cb75e0]
+ 3:
+(Server::handle_client_readdir(boost::intrusive_ptr<MDRequestImpl>&)+0xbb9)
+[0x55a4083f74b9]
+ 4:
+(Server::dispatch_client_request(boost::intrusive_ptr<MDRequestImpl>&)+0x9c1)
+[0x55a408428591]
+ 5: (MDSInternalContextBase::complete(int)+0x1eb) [0x55a408605c0b]
+ 6: (void finish_contexts<MDSInternalContextBase>(CephContext*,
+std::list<MDSInternalContextBase*,
+std::allocator<MDSInternalContextBase*> >&, int)+0xac) [0x55a4083c69ac]
+ 7: (MDSCacheObject::finish_waiting(unsigned long, int)+0x46)
+[0x55a40861d856]
+ 8: (Locker::eval_gather(SimpleLock*, bool, bool*,
+std::list<MDSInternalContextBase*,
+std::allocator<MDSInternalContextBase*> >*)+0x10df) [0x55a40851f93f]
+ 9: (Locker::wrlock_finish(SimpleLock*, MutationImpl*, bool*)+0x310)
+[0x55a408521210]
+ 10: (Locker::_drop_non_rdlocks(MutationImpl*, std::set<CInode*,
+std::less<CInode*>, std::allocator<CInode*> >*)+0x22c) [0x55a408524adc]
+ 11: (Locker::drop_non_rdlocks(MutationImpl*, std::set<CInode*,
+std::less<CInode*>, std::allocator<CInode*> >*)+0x59) [0x55a4085253d9]
+ 12: (Server::reply_client_request(boost::intrusive_ptr<MDRequestImpl>&,
+MClientReply*)+0x433) [0x55a4083f21a3]
+ 13: (Server::respond_to_request(boost::intrusive_ptr<MDRequestImpl>&,
+int)+0x459) [0x55a4083f2dd9]
+ 14: (Server::_unlink_local_finish(boost::intrusive_ptr<MDRequestImpl>&,
+CDentry*, CDentry*, unsigned long)+0x2ab) [0x55a4083fd7fb]
+ 15: (MDSIOContextBase::complete(int)+0xa4) [0x55a408605d44]
+ 16: (MDSLogContextBase::complete(int)+0x3c) [0x55a4086060fc]
+ 17: (Finisher::finisher_thread_entry()+0x198) [0x55a4086ba718]
+ 18: (()+0x7e25) [0x7f9c17cafe25]
+ 19: (clone()+0x6d) [0x7f9c16d9234dC
 
 
+[0] -
+https://obj.umiacs.umd.edu/derek_support/mds_20170918/ceph-mds.objmds01.log?Signature=VJB4qL34j5UKM%2BCxeiR8n0JA1gE%3D&Expires=1508357409&AWSAccessKeyId=936291C3OMB2LBD7FLK4
 
-     0> 2017-09-18 14:08:18.631931 7f481207d8c0 -1 *** Caught signal
-(Aborted) **
- in thread 7f481207d8c0 thread_name:ceph-osd
-
- ceph version 10.2.7 (50e863e0f4bc8f4b9e31156de690d765af245185)
- 1: (()+0x9770ae) [0x557bbc5fc0ae]
- 2: (()+0x11390) [0x7f4810f3b390]
- 3: (gsignal()+0x38) [0x7f480eed9428]
- 4: (abort()+0x16a) [0x7f480eedb02a]
- 5: (__gnu_cxx::__verbose_terminate_handler()+0x16d) [0x7f480f81b84d]
- 6: (()+0x8d6b6) [0x7f480f8196b6]
- 7: (()+0x8d701) [0x7f480f819701]
- 8: (()+0x8d919) [0x7f480f819919]
- 9: (()+0x1230f) [0x7f4811c1330f]
- 10: (operator new[](unsigned long)+0x4e7) [0x7f4811c374b7]
- 11: (leveldb::ReadBlock(leveldb::RandomAccessFile*,
-leveldb::ReadOptions const&, leveldb::BlockHandle const&,
-leveldb::BlockContents*)+0x313) [0x7f48115c4e63]
- 12: (leveldb::Table::BlockReader(void*, leveldb::ReadOptions const&,
-leveldb::Slice const&)+0x276) [0x7f48115c9426]
- 13: (()+0x421be) [0x7f48115cd1be]
- 14: (()+0x42240) [0x7f48115cd240]
- 15: (()+0x4261e) [0x7f48115cd61e]
- 16: (()+0x3d835) [0x7f48115c8835]
- 17: (()+0x1fffb) [0x7f48115aaffb]
- 18: (_ZN12LevelDBStore29LevelDBWholeSpaceIteratorImpl4nextEv()+0x8f)
-[0x557bbc4b7a3f]
- 19: (_ZN11DBObjectMap23DBObjectMapIteratorImpl4nextEb()+0x34) [0x557bbc46bb24]
- 20: (PGLog::read_log(ObjectStore*, coll_t, coll_t, ghobject_t,
-pg_info_t const&, std::map<eversion_t, hobject_t,
-std::less<eversion_t>, std::allocator<std::pair<eversion_t const,
-hobject_t> > >&, PGLog::IndexedLog&, pg_missing_t&,
-std::__cxx11::basic_ostringstream<char, std::char_traits<char>,
-std::allocator<char> >&, DoutPrefixProvider const*,
-std::set<std::__cxx11::basic_string<char, std::char_traits<char>,
-std::allocator<char> >, std::less<std::__cxx11::basic_string<char,
-std::char_traits<char>, std::allocator<char> > >,
-std::allocator<std::__cxx11::basic_string<char,
-std::char_traits<char>, std::allocator<char> > > >*)+0xac3)
-[0x557bbc2a9653]
- 21: (_ZN2PG10read_stateEP11ObjectStoreRN4ceph6buffer4listE()+0x2f6)
-[0x557bbc0db306]
- 22: (OSD::load_pgs()+0x87a) [0x557bbc016f0a]
- 23: (OSD::init()+0x2026) [0x557bbc0221f6]
- 24: (main()+0x2ea5) [0x557bbbf93dc5]
- 25: (__libc_start_main()+0xf0) [0x7f480eec4830]
- 26: (_start()+0x29) [0x557bbbfd5459]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-
---- logging levels ---
-   0/ 5 none
-   0/ 1 lockdep
-   0/ 1 context
-   1/ 1 crush
-   1/ 5 mds
-   1/ 5 mds_balancer
-   1/ 5 mds_locker
-   1/ 5 mds_log
-   1/ 5 mds_log_expire
-   1/ 5 mds_migrator
-   0/ 1 buffer
-   0/ 1 timer
-   0/ 1 filer
-   0/ 1 striper
-   0/ 1 objecter
-   0/ 5 rados
-   0/ 5 rbd
-   0/ 5 rbd_mirror
-   0/ 5 rbd_replay
-   0/ 5 journaler
-   0/ 5 objectcacher
-   0/ 5 client
-   0/ 5 osd
-   0/ 5 optracker
-   0/ 5 objclass
-   1/ 3 filestore
-   1/ 3 journal
-   0/ 1 ms
-   0/ 1 mon
-   0/10 monc
-   1/ 5 paxos
-   0/ 5 tp
-   1/ 5 auth
-   1/ 5 crypto
-   1/ 1 finisher
-   1/ 5 heartbeatmap
-   1/ 5 perfcounter
-   1/ 5 rgw
-   1/10 civetweb
-   1/ 5 javaclient
-   1/ 5 asok
-   1/ 1 throttle
-   0/ 0 refs
-   1/ 5 xio
-   1/ 5 compressor
-   1/ 5 newstore
-   1/ 5 bluestore
-   1/ 5 bluefs
-   1/ 3 bdev
-   1/ 5 kstore
-   4/ 5 rocksdb
-   0/ 1 leveldb
-   1/ 5 kinetic
-   1/ 5 fuse
-  99/99 (syslog threshold)
-  -1/-1 (stderr threshold)
-  max_recent     10000
-  max_new         1000
-  log_file /var/log/ceph/ceph-osd.70.log
---- end dump of recent events ---
+-- 
+Derek T. Yarnell
+Director of Computing Facilities
+University of Maryland
+Institute for Advanced Computer Studies
