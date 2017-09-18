@@ -1,74 +1,67 @@
-From: =?UTF-8?B?5YWz5LqR6aOe?= <gyfelectric@gmail.com>
-Subject: =?UTF-8?B?UmU6IFtjZXBoL2NlcGhdIGxpYnJhZG9zOiBGaXggYSBwb3RlbnRpYWwgcmlzayBvZiBidQ==?=
-        =?UTF-8?B?ZmZlcjo6bGlzdDo6Y2xhaW1fcHJlcGVuZChsaXN0JiBi4oCmICgjMTc2NjEp?=
-Date: Mon, 18 Sep 2017 16:58:06 +0800
-Message-ID: <CAF3FU87G8nS_vtxCWX3L3qsKybnRP-NcsO4+NmX5AgZcxoy4_A@mail.gmail.com>
-References: <CAF3FU86j+f16H+KOK7bRfjbfBjpDcPfVKg-2es0egFjy6VoB0Q@mail.gmail.com>
- <e08cd364-a997-b282-a164-c4e79d00a98f@corp.ovh.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: Ceph RDMA Memory Leakage
+Date: Mon, 18 Sep 2017 18:13:41 +0800
+Message-ID: <CACJqLyYBCbvBMK9heRvTn4tmo6jusEA2C6dWFh5H1ysoYfSg-A@mail.gmail.com>
+References: <CAGRcXKaZJBFnTtDVKzPyfVyK3Wrnve0Un83TjAWq4opdGaT+yA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f46.google.com ([209.85.215.46]:48762 "EHLO
-        mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751840AbdIRI6I (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 18 Sep 2017 04:58:08 -0400
-Received: by mail-lf0-f46.google.com with SMTP id q132so7179654lfe.5
-        for <ceph-devel@vger.kernel.org>; Mon, 18 Sep 2017 01:58:08 -0700 (PDT)
-In-Reply-To: <e08cd364-a997-b282-a164-c4e79d00a98f@corp.ovh.com>
+Received: from mail-hk2apc01on0136.outbound.protection.outlook.com ([104.47.124.136]:11776
+        "EHLO APC01-HK2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752917AbdIRKNu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 18 Sep 2017 06:13:50 -0400
+Received: by mail-ua0-f175.google.com with SMTP id t36so7305uah.10
+        for <ceph-devel@vger.kernel.org>; Mon, 18 Sep 2017 03:13:46 -0700 (PDT)
+In-Reply-To: <CAGRcXKaZJBFnTtDVKzPyfVyK3Wrnve0Un83TjAWq4opdGaT+yA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek@corp.ovh.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Jin Cai <caijin.laurence@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Adir Lev <adirl@mellanox.com>
 
-ok, thanks. I will update my PR 17661 only keep the step 5.
+which version do you use? I think we have fixed some memory problem on masater
 
-src/common/buffer.cc
-_len +=3D bl._len;
-if (!(flags & CLAIM_ALLOW_NONSHAREABLE))
-bl.make_shareable();
-_buffers.splice(_buffers.begin(), bl._buffers );
-bl._len =3D 0;
-bl.last_p =3D bl.begin();
-+
-+ // 5. update the last_p point to the lasted ptr
-+ last_p =3D begin();
-
-2017-09-18 16:05 GMT+08:00 Piotr Da=C5=82ek <piotr.dalek@corp.ovh.com>:
-> On 17-09-18 09:47 AM, =E5=85=B3=E4=BA=91=E9=A3=9E wrote:
->>
->> hello kefu chai,
->>
->> These two days I carefully considered the pr 17661 and looked the code
->> about bufferlist and I still think the steps of 1-3 is needed.
->>   Although the ptr::_off can guarantee bufferlist to be
->> copied/read/decode/write_file rightly, this will lead a bufferlist not
->> clean and
->> will waste memory like the picture in annex.
->>
->> Of course, it's also possible that i am not thinking about it, do you
->> have any suggestions?
+On Mon, Sep 18, 2017 at 2:09 PM, Jin Cai <caijin.laurence@gmail.com> wrote:
+> Hi, cephers
 >
+>     We are testing the RDMA ms type of Ceph.
 >
-> In your diagram, you show the case where allocated memory blocks are
-> underutilized, wasting memory. If I understand you (and code from your PR=
-)
-> correctly, you want to move data from the middle of allocated blocks to
-> front of them to reclaim memory - but the way you propose isn't any good
-> really, you allocate new block of memory (and accompanying bufferptr), co=
-py
-> data from existing block to newly allocated one, then destroy old - this =
-is
-> very expensive CPU-wise, way more expensive than leaving these bytes wast=
-ed.
-> Most of the time it wouldn't matter anyway, as most of bufferlists have
-> limited lifetime and would get destroyed soon.
+>     The OSDs and MONs are always marked down by their peers because
+> they don't have enough buffer to use in the memory buffer pool to
+> reply the heartbeat ping message from their peers.
+>     And the log always shows "no enough buffer in worker" even though
+> the whole cluster is idle without any I/Os from external.
 >
-> --
-> Piotr Da=C5=82ek
-> piotr.dalek@corp.ovh.com
-> https://www.ovh.com/us/
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>     Ceph configuration about RDMA is as following:
+>         ms_async_rdma_roce_ver = 1
+>         ms_async_rdma_sl = 5
+>         ms_async_rdma_dscp = 136
+>         ms_async_rdma_send_buffers = 1024
+>         ms_async_rdma_receive_buffers = 1024
+>
+>    Even we adjust the value of ms_async_rdma_send_buffers to 32,768,
+> the 'no enough buffer in worker' log still exists.
+>
+>    After a deep analysis, we think it is because when a
+> RDMAConnectedSocketImpl instance is destructed, its queue pair is
+> added to the dead_queue_pair vector container. And the items of
+> dead_queue_pair are deleted in the polling thread.
+>
+> From the doc of rdmamojo:
+> When a QP is destroyed any outstanding Work Requests, in either the
+> Send or Receive Queues, won't be processed anymore by the RDMA device
+> and Work Completions won't be generated for them. It is up to the user
+> to clean all of the associated resources of those Work Requests (i.e.
+> memory buffers)
+>
+> We can know the problem here is that when there are still outstanding
+> work request in the queue pair to be deleted, the memory buffer
+> occupied by these outstanding work request will never be returned to
+> memory buffer pool because work completions won't be generated for
+> them. So the memory leakage happens.
+>
+> A more elegant way before destroying a queue pair is set the queue
+> pair into error state and wait for the affiliated event
+> IBV_EVENT_QP_LAST_WQE_REACHED, finally destroy the queue pair.
+>
+> Do you have any suggestions or ideas? Thanks in advance.
