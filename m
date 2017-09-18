@@ -1,72 +1,57 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: REST APIs
-Date: Sun, 17 Sep 2017 13:15:12 +0100
-Message-ID: <CALe9h7f8wv8t8KzmfZE7wzACJR3FkySNBUUWTU33oWXLmYjNSw@mail.gmail.com>
-References: <CALe9h7e02DdmcXPfJFP56c6KCpZ-DoRdS9nvNg1SHQFKuwr9qg@mail.gmail.com>
- <1505396014.391.8.camel@redhat.com> <CAA3h84tvKAryUt23GGBty9JcFZc8VdndnWx+ZLf7QYj3vUfH8Q@mail.gmail.com>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: [PATCH 13/15] ceph: Use pagevec_lookup_range_nr_tag()
+Date: Mon, 18 Sep 2017 13:35:50 +0800
+Message-ID: <CAAM7YAnHjkGRhzeUUXOMnux70UKqnQ3kG6x0jRpzasSNeyAVCg@mail.gmail.com>
+References: <20170914131819.26266-1-jack@suse.cz> <20170914131819.26266-14-jack@suse.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:46648 "EHLO
-        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751374AbdIQMPe (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 17 Sep 2017 08:15:34 -0400
-Received: by mail-wm0-f50.google.com with SMTP id i189so16473720wmf.1
-        for <ceph-devel@vger.kernel.org>; Sun, 17 Sep 2017 05:15:33 -0700 (PDT)
-In-Reply-To: <CAA3h84tvKAryUt23GGBty9JcFZc8VdndnWx+ZLf7QYj3vUfH8Q@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Ric Wheeler <rwheeler@redhat.com>
-Cc: Boris Ranto <branto@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20170914131819.26266-14-jack@suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: Jan Kara <jack@suse.cz>
+Cc: linux-mm@kvack.org, Linux FS-devel Mailing List <linux-fsdevel@vger.kernel.org>, "Linux F2FS DEV, Mailing List" <linux-f2fs-devel@lists.sourceforge.net>, Jaegeuk Kim <jaegeuk@kernel.org>, ceph-devel <ceph-devel@vger.kernel.org>, "Yan, Zheng" <zyan@redhat.com>, Ilya Dryomov <idryomov@gmail.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On Sat, Sep 16, 2017 at 8:03 AM, Ric Wheeler <rwheeler@redhat.com> wrote:
-> I think that makes sense - having REST APIs will give us a fairly universal
-> way to plug into many other frameworks.
-
-I don't think anyone objects in principle to the idea of a rest api,
-the issue has been whether anyone is actually up for maintaining a
-complete one, and the difficulty of doing that without any real users
-to notice when something is broken.
-
-John
-
+On Thu, Sep 14, 2017 at 9:18 PM, Jan Kara <jack@suse.cz> wrote:
+> Use new function for looking up pages since nr_pages argument from
+> pagevec_lookup_range_tag() is going away.
 >
-> Ric
+> Signed-off-by: Jan Kara <jack@suse.cz>
+> ---
+>  fs/ceph/addr.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
 >
+> diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
+> index e57e9d37bf2d..87789c477381 100644
+> --- a/fs/ceph/addr.c
+> +++ b/fs/ceph/addr.c
+> @@ -869,11 +869,9 @@ static int ceph_writepages_start(struct address_space *mapping,
+>                 max_pages = wsize >> PAGE_SHIFT;
 >
-> On Sep 14, 2017 4:34 PM, "Boris Ranto" <branto@redhat.com> wrote:
->>
->> Hi,
->>
->> I still plan to port the v1 endpoints from calamari to the restful
->> module so that it provides a full replacement for calamari rest api and
->> so that it could be used by projects like tendlr.
->>
->> We do document the restful module in the RHCEPH product and several
->> people are/were interested in it. I did not hear of any product/app
->> being built on top of it yet though.
->>
->> We can extend the pass through method in the restful module so that it
->> is more user friendly for a more robust/useful replacement of the ceph-
->> rest-api.
->>
->> Regards,
->> Boris
->>
->>
->> On Wed, 2017-09-13 at 14:43 +0100, John Spray wrote:
->> > Hi all,
->> >
->> > This message is prompted by: https://github.com/ceph/ceph/pull/17530
->> >
->> > Questions:
->> >  - Is anyone using either ceph-rest-api or the restful module?
->> >  - Is anyone planning on doing any work on either?
->> >  - Is the CLI pass through of the restful module a sufficient
->> > replacement for ceph-rest-api for anyone that was using it?
->> >
->> > John
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  get_more_pages:
+> -               pvec_pages = min_t(unsigned, PAGEVEC_SIZE,
+> -                                  max_pages - locked_pages);
+> -               pvec_pages = pagevec_lookup_range_tag(&pvec, mapping, &index,
+> +               pvec_pages = pagevec_lookup_range_nr_tag(&pvec, mapping, &index,
+>                                                 end, PAGECACHE_TAG_DIRTY,
+> -                                               pvec_pages);
+> +                                               max_pages - locked_pages);
+>                 dout("pagevec_lookup_range_tag got %d\n", pvec_pages);
+>                 if (!pvec_pages && !locked_pages)
+>                         break;
+> --
+> 2.12.3
+>
+
+Reviewed-by: "Yan, Zheng" <zyan@redhat.com>
+
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
