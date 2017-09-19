@@ -1,44 +1,37 @@
-From: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Subject: Re: Bluestore aio_nr?
-Date: Mon, 18 Sep 2017 21:19:32 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1709182117520.4417@piezo.novalocal>
-References: <CAEYCsVJNnY7yV=VjfdP7B3jtVMz5v=8a9MmVPqS0kyhdKf0Tvg@mail.gmail.com>
+From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Subject: OSD crashes (10.2.9)
+Date: Tue, 19 Sep 2017 11:28:08 -0400
+Message-ID: <CAGbviv+ivLU6om240hEn=ajGogLYdR1XRmnEaFDYWHyaEzXZWw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAEYCsVJNnY7yV=VjfdP7B3jtVMz5v=8a9MmVPqS0kyhdKf0Tvg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Xiaoxi Chen <superdebuger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lf0-f53.google.com ([209.85.215.53]:44084 "EHLO
+        mail-lf0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750990AbdISP2L (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 19 Sep 2017 11:28:11 -0400
+Received: by mail-lf0-f53.google.com with SMTP id l196so392056lfl.1
+        for <ceph-devel@vger.kernel.org>; Tue, 19 Sep 2017 08:28:10 -0700 (PDT)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Tue, 19 Sep 2017, Xiaoxi Chen wrote:
-> Hi,
->      I just hit an OSD cannot start due to insufficient aio_nr.  Each
-> OSD is with a separate SSD partition as db.block
+Im seeing this stack trace in a lot of my OSDs (21 out of 92).  I
+suspect its a corrupt leveldb or journal, but not sure how to debug it
+further.  Any suggestions on how to debug further?
 
-Can you paste the message you saw?  I'm not sure which check you mean.
-
->      Further checking showing 6144 AIO contexts were required per OSD,
->  could anyone explain a little bit on where the 6144 aio contexts goes
-> to?
-> 
->      It looks to me like the bdev_aio_max_queue_depth is default to
-> 1024, but  how can we have 6 bdev to get 6144?
-
-I'm guessing the is fallout from the kernel's behavior.  When you set up 
-an IO queue you specify how many aios you want to allow (that's where we 
-use the max_queue_depth value), but the kernel rounds the buffer up to a 
-page boundary, so in reality it will use more.  That can make you hit the 
-host maximum sooner.
-
-sage
+ ceph version 10.2.9 (2ee413f77150c0f375ff6f10edd6c8f9c7d060d0)
+ 1: (()+0x984c4e) [0x56032b65ec4e]
+ 2: (()+0x11390) [0x7f89adce8390]
+ 3: (gsignal()+0x38) [0x7f89abc86428]
+ 4: (abort()+0x16a) [0x7f89abc8802a]
+ 5: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+const*)+0x26b) [0x56032b75f0db]
+ 6: (ceph::HeartbeatMap::_check(ceph::heartbeat_handle_d const*, char
+const*, long)+0x259) [0x56032b69b2d9]
+ 7: (ceph::HeartbeatMap::is_healthy()+0xe6) [0x56032b69bc06]
+ 8: (ceph::HeartbeatMap::check_touch_file()+0x2c) [0x56032b69c45c]
+ 9: (CephContextServiceThread::entry()+0x167) [0x56032b777777]
+ 10: (()+0x76ba) [0x7f89adcde6ba]
+ 11: (clone()+0x6d) [0x7f89abd5782d]
+ NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+needed to interpret this.
