@@ -1,31 +1,39 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: "tobe" and "ready" in ceph-disk source
-Date: Fri, 22 Sep 2017 20:49:51 +0800
-Message-ID: <CAJE9aOOY4Bj-y-fATOeXS3ps5M3mhaypmAUYv=4SaduexN9Znw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f195.google.com ([209.85.223.195]:37277 "EHLO
-        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752261AbdIVMtw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Sep 2017 08:49:52 -0400
-Received: by mail-io0-f195.google.com with SMTP id 93so1467247iol.4
-        for <ceph-devel@vger.kernel.org>; Fri, 22 Sep 2017 05:49:52 -0700 (PDT)
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ldachary@redhat.com
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [GIT PULL] Ceph fixes for 4.14-rc2
+Date: Fri, 22 Sep 2017 15:35:05 +0200
+Message-ID: <1506087305-29607-1-git-send-email-idryomov@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-hi Loic,
+Hi Linus,
 
-while ready the source of ceph-disk, i found the "tobe" and "ready"
-are confusing, why do we need them, instead of just using a single
-ptype? why creating some block partition is atomic, while creating
-some others is not?
+The following changes since commit 2bd6bf03f4c1c59381d62c61d03f6cc3fe71f66e:
 
-could you please shed some insights on it?
+  Linux 4.14-rc1 (2017-09-16 15:47:51 -0700)
 
-thanks,
+are available in the git repository at:
 
--- 
-Regards
-Kefu Chai
+  https://github.com/ceph/ceph-client.git tags/ceph-for-4.14-rc2
+
+for you to fetch changes up to 717e6f2893eb35ce6728c3cacdc297b78d371b31:
+
+  ceph: avoid panic in create_session_open_msg() if utsname() returns NULL (2017-09-19 21:04:52 +0200)
+
+----------------------------------------------------------------
+Two small but important fixes: RADOS semantic change in upcoming v12.2.1
+release and a rare NULL dereference in create_session_open_msg().
+
+----------------------------------------------------------------
+Ilya Dryomov (1):
+      libceph: don't allow bidirectional swap of pg-upmap-items
+
+Yan, Zheng (1):
+      ceph: avoid panic in create_session_open_msg() if utsname() returns NULL
+
+ fs/ceph/mds_client.c |  7 ++++---
+ fs/ceph/mds_client.h |  3 +++
+ net/ceph/osdmap.c    | 35 +++++++++++++++++++++++++----------
+ 3 files changed, 32 insertions(+), 13 deletions(-)
