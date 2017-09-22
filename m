@@ -1,30 +1,31 @@
-From: Nathan Cutler <ncutler@suse.cz>
-Subject: Re: ceph v10.2.10 QE validation status
-Date: Fri, 22 Sep 2017 14:15:18 +0200
-Message-ID: <24a86367-d144-80e6-00f8-5b48f7d403b0@suse.cz>
-References: <CAMMFjmHRF8AA3h0Sta==y5XMXNqZBMtwz-nno4hEpVP24EBMcg@mail.gmail.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: "tobe" and "ready" in ceph-disk source
+Date: Fri, 22 Sep 2017 20:49:51 +0800
+Message-ID: <CAJE9aOOY4Bj-y-fATOeXS3ps5M3mhaypmAUYv=4SaduexN9Znw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:47376 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751928AbdIVMPV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 22 Sep 2017 08:15:21 -0400
-In-Reply-To: <CAMMFjmHRF8AA3h0Sta==y5XMXNqZBMtwz-nno4hEpVP24EBMcg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-io0-f195.google.com ([209.85.223.195]:37277 "EHLO
+        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752261AbdIVMtw (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Sep 2017 08:49:52 -0400
+Received: by mail-io0-f195.google.com with SMTP id 93so1467247iol.4
+        for <ceph-devel@vger.kernel.org>; Fri, 22 Sep 2017 05:49:52 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yuri Weinstein <yweinste@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Abhishek Varshney <abhishek.varshney@flipkart.com>, "Dachary, Loic" <ldachary@redhat.com>, "Dachary, Loic" <loic@dachary.org>, "Weil, Sage" <sage@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, John Spray <jspray@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ldachary@redhat.com
 
-> upgrade/jewel-x/point-to-point-x Nathan is fixing one issue
+hi Loic,
 
-Fixed in master and jewel by:
+while ready the source of ceph-disk, i found the "tobe" and "ready"
+are confusing, why do we need them, instead of just using a single
+ptype? why creating some block partition is atomic, while creating
+some others is not?
 
-https://github.com/ceph/ceph/pull/17910
-https://github.com/ceph/ceph/pull/17892
+could you please shed some insights on it?
 
-(could be merged in that order)
+thanks,
 
-Thanks,
-Nathan
+-- 
+Regards
+Kefu Chai
