@@ -1,82 +1,108 @@
-From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Ceph release cadence
-Date: Fri, 22 Sep 2017 15:53:18 -0700
-Message-ID: <CAJ4mKGbrksDnFvqF2gGb1wzrE4TK4VXALRJi+NoZqje9Ke58qg@mail.gmail.com>
-References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
- <alpine.DEB.2.11.1709222211280.16664@piezo.novalocal>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [ceph-users] Ceph release cadence
+Date: Sat, 23 Sep 2017 01:58:56 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1709230128240.16664@piezo.novalocal>
+References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal> <alpine.DEB.2.11.1709222211280.16664@piezo.novalocal> <CAJ4mKGbrksDnFvqF2gGb1wzrE4TK4VXALRJi+NoZqje9Ke58qg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1709222211280.16664-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-114945740-1506131938=:16664"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from cobra.newdream.net ([66.33.205.236]:55328 "EHLO
+        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751845AbdIWB67 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 22 Sep 2017 21:58:59 -0400
+In-Reply-To: <CAJ4mKGbrksDnFvqF2gGb1wzrE4TK4VXALRJi+NoZqje9Ke58qg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-maintainers@ceph.com, ceph-users <ceph-users@ceph.com>
 
-T24gRnJpLCBTZXAgMjIsIDIwMTcgYXQgMzoyOCBQTSwgU2FnZSBXZWlsIDxzYWdlQG5ld2RyZWFt
-Lm5ldD4gd3JvdGU6Cj4gSGVyZSBpcyBhIGNvbmNyZXRlIHByb3Bvc2FsIGZvciBldmVyeW9uZSB0
-byBzdW1tYXJpbHkgc2hvb3QgZG93biAob3IKPiBoZWFydGlseSBlbmRvcnNlLCBkZXBlbmRpbmcg
-b24gaG93IHlvdXIgZnJpZGF5IGlzIGdvaW5nKToKPgo+IC0gOSBtb250aCBjeWNsZQo+IC0gZW5m
-b3JjZSBhIHByZWRpY3RhYmxlIHJlbGVhc2Ugc2NoZWR1bGUgd2l0aCBhIGZyZWV6ZSBkYXRlIGFu
-ZAo+ICAgYSByZWxlYXNlIGRhdGUuICAoVGhlIGFjdHVhbCAuMCByZWxlYXNlIG9mIGNvdXJzZSBk
-ZXBlbmRzIG9uIG5vIGJsb2NrZXIKPiAgIGJ1Z3MgYmVpbmcgb3Blbjsgbm90IHN1cmUgaG93IHpl
-YWxvdXMgJ3RyYWluJyBzdHlsZSBwcm9qZWN0cyBkbwo+ICAgdGhpcy4pCgpUcmFpbiBwcm9qZWN0
-cyBiYXNpY2FsbHkgY29tbWl0IHRvIGEgZmVhdHVyZSBmcmVlemUgZW5vdWdoIGluIGFkdmFuY2UK
-b2YgdGhlIGV4cGVjdGVkIHJlbGVhc2UgZGF0ZSB0aGF0IGl0J3MgZmVhc2libGUsIGFuZCBkb24n
-dCBsZXQgcGVvcGxlCmZha2UgaXQgYnkgcnVzaGluZyBpbiBzdHVmZiB0aGV5ICJmaW5pc2hlZCIg
-dGhlIGRheSBiZWZvcmUuIEknbSBub3QKc3VyZSBpZiBldmVyeS05LW1vbnRoIExUU2VzIHdpbGwg
-YmUgbW9yZSBjb25kdWNpdmUgdG8gdGhhdCBvciBub3Qg4oCUIGlmCndlIGRvIHNjaGVkdWxlZCBy
-ZWxlYXNlcywgd2Ugc3RpbGwgZnVuZGFtZW50YWxseSBuZWVkIHRvIGJlIGFibGUgdG8Kc2F5ICJu
-b3BlLCB0aGF0IGZlYXR1cmUgd2UndmUgYmVlbiBzYXlpbmcgZm9yIDkgbW9udGhzIHdlIGhvcGUg
-dG8gaGF2ZQpvdXQgaW4gdGhpcyBMVFMgd29uJ3QgbWFrZSBpdCB1bnRpbCB0aGUgbmV4dCBvbmUi
-LiBBbmQgd2Ugc2VlbSBwcmV0dHkKYmFkIGF0IHRoYXQuCgo+IC0gbm8gbW9yZSBldmVuL29kZCBw
-YXR0ZXJuOyBhbGwgc3RhYmxlIHJlbGVhc2VzIGFyZSBjcmVhdGVkIGVxdWFsLgo+IC0gc3VwcG9y
-dCB1cGdyYWRlcyBmcm9tIHVwIHRvIDMgcmVsZWFzZXMgYmFjay4KPgo+IFRoaXMgc2hvcnRlbnMg
-dGhlIGN5Y2xlIGEgYml0IHRvIHJlbGlldmUgdGhlICJ0aGlzIGZlYXR1cmUgbXVzdCBnbyBpbiIK
-PiBzdHJlc3MsIHdpdGhvdXQgbWFraW5nIGl0IHNvIHNob3J0IGFzIHRvIG1ha2UgdGhlIHJlbGVh
-c2UgcG9pbnRsZXNzIChlLmcuLAo+IGluZmVybmFsaXMsIGtyYWtlbikuICAoSSBhbHNvIHRoaW5r
-IHRoYXQgdGhlIGZlYXR1cmUgcHJlc3N1cmUgaXMgbXVjaAo+IGxvd2VyIG5vdyB0aGFuIGl0IGhh
-cyBiZWVuIGluIHRoZSBwYXN0LikKPgo+IFRoaXMgY3JlYXRlcyBtb3JlIHdvcmsgZm9yIHRoZSBk
-ZXZlbG9wZXJzIGJlY2F1c2UgdGhlcmUgYXJlIG1vcmUgdXBncmFkZQo+IHBhdGhzIHRvIGNvbnNp
-ZGVyOiB3ZSBubyBsb25nZXIgaGF2ZSBzdHJpY3QgImNob2tlIHBvaW50cyIgKGxpa2UgYWxsCj4g
-dXBncmFkZXMgbXVzdCBnbyB0aHJvdWdoIGx1bWlub3VzKS4gIFdlIGNvdWxkIHJlc2VydmUgdGhl
-IG9wdGlvbiB0byBwaWNrCj4gc3BlY2lmaWMgY2hva2UgcG9pbnQgcmVsZWFzZXMgaW4gdGhlIGZ1
-dHVyZSwgcGVyaGFwcyB0YWtpbmcgY2FyZSB0byBtYWtlCj4gc3VyZSB0aGVzZSBhcmUgdGhlIHJl
-bGVhc2VzIHRoYXQgZ28gaW50byBkb3duc3RyZWFtIGRpc3Ryb3MuICBXZSdsbCBuZWVkCj4gdG8g
-YmUgbW9yZSBzeXN0ZW1hdGljIGFib3V0IHRoZSB1cGdyYWRlIHRlc3RpbmcuCgpUaGlzIHNvdW5k
-cyBnZW5lcmFsbHkgZ29vZCB0byBtZSDigJQgd2UgZGlkIG11bHRpcGxlLXJlbGVhc2UgdXBncmFk
-ZXMKZm9yIGEgbG9uZyB0aW1lLCBhbmQgc3R1ZmYgaXMgcHJvYmFibHkgbW9yZSBjb21wbGljYXRl
-ZCBub3cgYnV0IEkKZG9uJ3QgdGhpbmsgaXQgd2lsbCBhY3R1YWxseSBiZSB0aGF0IGJpZyBhIGRl
-YWwuCgozIHJlbGVhc2VzIGJhY2sgbWlnaHQgYmUgYSBiaXQgbXVjaCB0aG91Z2gg4oCUIHRoYXQn
-cyAyNyBtb250aHMhIChGb3IKbHVtaW5vdXMsIHRoZSBiZWdpbm5pbmcgb2YgMjAxNS4gSGFtbWVy
-LikKCj4gU29tZXdoYXQgc2VwYXJhdGVseSwgc2V2ZXJhbCBwZW9wbGUgZXhwcmVzc2VkIGNvbmNl
-cm4gYWJvdXQgaGF2aW5nIHN0YWJsZQo+IHJlbGVhc2VzIHRvIGRldmVsb3AgYWdhaW5zdC4gIFRo
-aXMgaXMgc29tZXdoYXQgb3J0aG9nb25hbCB0byB3aGF0IHVzZXJzCj4gbmVlZC4gIFRvIHRoYXQg
-ZW5kLCB3ZSBjYW4gZG8gYSBkZXYgY2hlY2twb2ludCBldmVyeSAxIG9yIDIgbW9udGhzCj4gKHBy
-ZWZlcmVuY2VzPyksIHdoZXJlIHdlIGZvcmsgYSAnbmV4dCcgYnJhbmNoIGFuZCBzdGFiaWxpemUg
-YWxsIG9mIHRoZQo+IHRlc3RzIGJlZm9yZSBtb3Zpbmcgb24uICBUaGlzIGlzIGdvb2QgcHJhY3Rp
-Y2UgYW55d2F5IHRvIGF2b2lkCj4gYWNjdW11bGF0aW5nIGxvdy1mcmVxdWVuY3kgZmFpbHVyZXMg
-aW4gdGhlIHRlc3Qgc3VpdGUgdGhhdCBoYXZlIHRvIGJlCj4gc3F1YXNoZWQgYXQgdGhlIGVuZC4K
-ClNvIHRoaXMgc291bmRzIGxpa2UgYSBmaW5lIGlkZWEgdG8gbWUsIGJ1dCBob3cgZG8gd2UgZGlz
-dGluZ3Vpc2ggdGhpcwpmcm9tIHRoZSBpbnRlcm1lZGlhdGUgc3RhYmxlIHJlbGVhc2VzPwoKQnkg
-d2hpY2ggSSBtZWFuLCBhcmUgd2UgKnJlYWxseSogZ29pbmcgdG8gZG8gYSBzdGFiaWxpemF0aW9u
-IGJyYW5jaAp0aGF0IHdpbGwgbmV2ZXIgZ2V0IHNlZW4gYnkgdXNlcnM/IFdoYXQga2luZCBvZiB0
-ZXN0aW5nIGFuZCBidWcgZml4aW5nCmFyZSB3ZSBnb2luZyB0byBjb21taXQgdG8gZG9pbmcgYWdh
-aW5zdCBpdCwgYW5kIGhvdyBkbyB3ZSBiYWxhbmNlIHRoYXQKZWZmb3J0IHdpdGggZmVhdHVyZSB3
-b3JrPwoKSXQgc2VlbXMgbGlrZSB0aGUgc2FtZSBjb25mbGljdCB3ZSBoYXZlIG5vdywgb25seSBz
-aW5jZSB0aGUgZGV2CmNoZWNrcG9pbnRzIGFyZSBsZXNzIGltcG9ydGFudCB0aGV5J2xsIGxvc2Ug
-bW9yZSBvZnRlbi4gVGhlbiB3ZSdsbCBlbmQKdXAgaGF2aW5nIDkgbW9udGhzIG9mIHNjaGVkdWxl
-ZCB3b3JrIHRvIGRlYnVnIGZvciBhIHVzZXIgcmVsZWFzZQppbnN0ZWFkIG9mIDUgbW9udGhzIHRo
-YXQgc2xpcHBlZCB0byA3IG9yIDguLi4KCi1HcmVnCl9fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fCmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNA
-bGlzdHMuY2VwaC5jb20KaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVz
-ZXJzLWNlcGguY29tCg==
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-114945740-1506131938=:16664
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+
+On Fri, 22 Sep 2017, Gregory Farnum wrote:
+> On Fri, Sep 22, 2017 at 3:28 PM, Sage Weil <sage@newdream.net> wrote:
+> > Here is a concrete proposal for everyone to summarily shoot down (or
+> > heartily endorse, depending on how your friday is going):
+> >
+> > - 9 month cycle
+> > - enforce a predictable release schedule with a freeze date and
+> >   a release date.  (The actual .0 release of course depends on no blocker
+> >   bugs being open; not sure how zealous 'train' style projects do
+> >   this.)
+> 
+> Train projects basically commit to a feature freeze enough in advance
+> of the expected release date that it's feasible, and don't let people
+> fake it by rushing in stuff they "finished" the day before. I'm not
+> sure if every-9-month LTSes will be more conducive to that or not — if
+> we do scheduled releases, we still fundamentally need to be able to
+> say "nope, that feature we've been saying for 9 months we hope to have
+> out in this LTS won't make it until the next one". And we seem pretty
+> bad at that.
+
+I'll be the first to say I'm no small part of the "we" there.  But I'm 
+also suggesting that's not a reason not to try to do better.  As I 
+said I think this will be easier than in the past because we don't 
+have as many headline features we're trying to wedge in.
+
+In any case, is there an alternative way to get to the much-desired 
+regular cadence?
+
+> > - no more even/odd pattern; all stable releases are created equal.
+> > - support upgrades from up to 3 releases back.
+> >
+> > This shortens the cycle a bit to relieve the "this feature must go in"
+> > stress, without making it so short as to make the release pointless (e.g.,
+> > infernalis, kraken).  (I also think that the feature pressure is much
+> > lower now than it has been in the past.)
+> >
+> > This creates more work for the developers because there are more upgrade
+> > paths to consider: we no longer have strict "choke points" (like all
+> > upgrades must go through luminous).  We could reserve the option to pick
+> > specific choke point releases in the future, perhaps taking care to make
+> > sure these are the releases that go into downstream distros.  We'll need
+> > to be more systematic about the upgrade testing.
+> 
+> This sounds generally good to me — we did multiple-release upgrades
+> for a long time, and stuff is probably more complicated now but I
+> don't think it will actually be that big a deal.
+> 
+> 3 releases back might be a bit much though — that's 27 months! (For
+> luminous, the beginning of 2015. Hammer.)
+
+I'm *much* happier with 2 :) so no complaint from me.  I just heard a lot 
+of "2 years" and 2 releases (18 months) doesn't quite cover it.  Maybe 
+it's best to start with that, though?  It's still an improvement over the 
+current ~12 months.
+
+> > Somewhat separately, several people expressed concern about having stable
+> > releases to develop against.  This is somewhat orthogonal to what users
+> > need.  To that end, we can do a dev checkpoint every 1 or 2 months
+> > (preferences?), where we fork a 'next' branch and stabilize all of the
+> > tests before moving on.  This is good practice anyway to avoid
+> > accumulating low-frequency failures in the test suite that have to be
+> > squashed at the end.
+> 
+> So this sounds like a fine idea to me, but how do we distinguish this
+> from the intermediate stable releases?
+> 
+> By which I mean, are we *really* going to do a stabilization branch
+> that will never get seen by users? What kind of testing and bug fixing
+> are we going to commit to doing against it, and how do we balance that
+> effort with feature work?
+> 
+> It seems like the same conflict we have now, only since the dev
+> checkpoints are less important they'll lose more often. Then we'll end
+> up having 9 months of scheduled work to debug for a user release
+> instead of 5 months that slipped to 7 or 8...
+
+What if we frame this stabilization period in terms of stability of the 
+test suite.  That gives us something concrete to aim for, lets us move on 
+when we reach some threshold, and aligns perfectly with the thing that 
+makes it hard to safely land new code (noisy test results)...
+
+sage
+--8323329-114945740-1506131938=:16664--
