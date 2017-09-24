@@ -1,40 +1,42 @@
-From: Elita Lobo <loboelita@gmail.com>
-Subject: Osds shift within Placement group
-Date: Sun, 24 Sep 2017 15:32:22 +0530
-Message-ID: <CAA8xDw32j8wHmT7==k2UsMGs-sfgY4b9f1__6StySVtUWScmdg@mail.gmail.com>
+From: Abhishek <abhishek@suse.com>
+Subject: Re: Status of luminous v12.2.1 QE validation
+Date: Sun, 24 Sep 2017 16:03:12 +0200
+Message-ID: <4d92b984acbdf857f8179bd1509d31fd@suse.com>
+References: <CAMMFjmF5OczC9Yg1F2S3EvPAZO4ZBefpuxNm-f70XG-dr6-31g@mail.gmail.com>
+ <CA+2bHPZf2akxs+WtTmzpSyA0=T8rZcKsHXqUnwPMb9Los0XQYA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f180.google.com ([209.85.161.180]:44168 "EHLO
-        mail-yw0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751813AbdIXKCX (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 24 Sep 2017 06:02:23 -0400
-Received: by mail-yw0-f180.google.com with SMTP id r85so3094643ywg.1
-        for <ceph-devel@vger.kernel.org>; Sun, 24 Sep 2017 03:02:23 -0700 (PDT)
+Received: from mx2.suse.de ([195.135.220.15]:54592 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752206AbdIXODO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sun, 24 Sep 2017 10:03:14 -0400
+In-Reply-To: <CA+2bHPZf2akxs+WtTmzpSyA0=T8rZcKsHXqUnwPMb9Los0XQYA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Patrick Donnelly <pdonnell@redhat.com>
+Cc: Yuri Weinstein <yweinste@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, "gmeno@redhat.com" <gregory.meno@inktank.com>, "Durgin, Josh" <jdurgin@redhat.com>, Nathan Cutler <ncutler@suse.cz>, Zheng Yan <zyan@redhat.com>, Vasu Kulkarni <vakulkar@redhat.com>, "Dreyer, Ken" <kdreyer@redhat.com>, Ilya Dryomov <idryomov@redhat.com>
 
-Hi ,
+On 2017-09-19 23:11, Patrick Donnelly wrote:
+> On Tue, Sep 19, 2017 at 1:10 PM, Yuri Weinstein <yweinste@redhat.com> 
+> wrote:
+>> kcephfs - needs analysis - Patrick, Zheng FYI
+> 
+> http://tracker.ceph.com/issues/21463
+> http://tracker.ceph.com/issues/21462
+> http://tracker.ceph.com/issues/21466
+> http://tracker.ceph.com/issues/21467
+> http://tracker.ceph.com/issues/21468
+> 
+> Last 3 look like blockers. Zheng will have more input.
 
-We are trying to simulate repair of single/multiple erasures using cl
-msr. When we remove one or more osds , we see that other osds shift
-positions within the placement group.
+Here are the results of a rerun with -k testing,
+http://pulpito.ceph.com/abhi-2017-09-22_19:35:04-kcephfs-luminous-testing-basic-smithi/
+& details http://tracker.ceph.com/issues/21296#note-20
+There are a few failures which look environmental but a few look like 
+they are related to the changeset (the ones with cache)
 
-Eg -  This is how our original PG looked -
-[10,8,11,6,12,13,15,14,3,4,0,24,21,19]
- we had 25 osds available in total and  k=10 and m=4 (n=14) . When we
-removed osd 14 and osd 15, some of the osds changed their positions
-within the PG.
-
-Resulting PG: [10,8,11,6,21,19,22,23,3,4,0,24,12,13]
-Original PG:    [10,8,11,6,12,13,15,14,3,4,0,24,21,19]
-
-As you can see osds 12,13 have exchanged positions with osds 21,19.
-
-Can we avoid this and only let the removed osd be replaced by a
-different available osd?
-Also can you please explain under what conditions osds will shift within the PG?
-
-Thanks,
-Elita
+Best,
+Abhishek
