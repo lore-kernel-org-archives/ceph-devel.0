@@ -1,42 +1,25 @@
-From: Abhishek <abhishek@suse.com>
-Subject: Re: Status of luminous v12.2.1 QE validation
-Date: Sun, 24 Sep 2017 16:03:12 +0200
-Message-ID: <4d92b984acbdf857f8179bd1509d31fd@suse.com>
-References: <CAMMFjmF5OczC9Yg1F2S3EvPAZO4ZBefpuxNm-f70XG-dr6-31g@mail.gmail.com>
- <CA+2bHPZf2akxs+WtTmzpSyA0=T8rZcKsHXqUnwPMb9Los0XQYA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
+From: Tomasz Kusmierz <tom.kusmierz@gmail.com>
+Subject: Is anyone aware of bluestor exploding all the time ?
+Date: Mon, 25 Sep 2017 01:05:53 +0100
+Message-ID: <636422C8-A440-4CA8-A7A2-E7F947EA350D@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:54592 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752206AbdIXODO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sun, 24 Sep 2017 10:03:14 -0400
-In-Reply-To: <CA+2bHPZf2akxs+WtTmzpSyA0=T8rZcKsHXqUnwPMb9Los0XQYA@mail.gmail.com>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:48903 "EHLO
+        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932680AbdIYAF4 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 24 Sep 2017 20:05:56 -0400
+Received: by mail-wm0-f52.google.com with SMTP id m127so14964382wmm.3
+        for <ceph-devel@vger.kernel.org>; Sun, 24 Sep 2017 17:05:56 -0700 (PDT)
+Received: from tomaszs-mbp.vixake.com (host31-51-208-20.range31-51.btcentralplus.com. [31.51.208.20])
+        by smtp.gmail.com with ESMTPSA id f127sm8451537wmg.2.2017.09.24.17.05.54
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 24 Sep 2017 17:05:54 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Patrick Donnelly <pdonnell@redhat.com>
-Cc: Yuri Weinstein <yweinste@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, "gmeno@redhat.com" <gregory.meno@inktank.com>, "Durgin, Josh" <jdurgin@redhat.com>, Nathan Cutler <ncutler@suse.cz>, Zheng Yan <zyan@redhat.com>, Vasu Kulkarni <vakulkar@redhat.com>, "Dreyer, Ken" <kdreyer@redhat.com>, Ilya Dryomov <idryomov@redhat.com>
+To: ceph-devel@vger.kernel.org
 
-On 2017-09-19 23:11, Patrick Donnelly wrote:
-> On Tue, Sep 19, 2017 at 1:10 PM, Yuri Weinstein <yweinste@redhat.com> 
-> wrote:
->> kcephfs - needs analysis - Patrick, Zheng FYI
-> 
-> http://tracker.ceph.com/issues/21463
-> http://tracker.ceph.com/issues/21462
-> http://tracker.ceph.com/issues/21466
-> http://tracker.ceph.com/issues/21467
-> http://tracker.ceph.com/issues/21468
-> 
-> Last 3 look like blockers. Zheng will have more input.
-
-Here are the results of a rerun with -k testing,
-http://pulpito.ceph.com/abhi-2017-09-22_19:35:04-kcephfs-luminous-testing-basic-smithi/
-& details http://tracker.ceph.com/issues/21296#note-20
-There are a few failures which look environmental but a few look like 
-they are related to the changeset (the ones with cache)
-
-Best,
-Abhishek
+hi guys just FYI:
+http://tracker.ceph.com/issues/21318
