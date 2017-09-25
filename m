@@ -1,76 +1,108 @@
-From: Abhishek <abhishek@suse.com>
-Subject: Re: Status of luminous v12.2.1 QE validation
-Date: Mon, 25 Sep 2017 11:55:20 +0200
-Message-ID: <b0e4b529f93a0efb25e6404568d81ee1@suse.com>
-References: <CAMMFjmF5OczC9Yg1F2S3EvPAZO4ZBefpuxNm-f70XG-dr6-31g@mail.gmail.com>
- <CA+2bHPZf2akxs+WtTmzpSyA0=T8rZcKsHXqUnwPMb9Los0XQYA@mail.gmail.com>
- <4d92b984acbdf857f8179bd1509d31fd@suse.com>
- <027e6d17-fb8b-1856-bb13-c5c0e9d361da@redhat.com>
- <931ca694dacee7132a1528990ce7b651@suse.com>
+From: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: Ceph release cadence
+Date: Mon, 25 Sep 2017 11:10:00 +0100
+Message-ID: <3fc62772-e24f-b3fc-e0d7-f74e86c3fd39@suse.de>
+References: <alpine.DEB.2.11.1709061523170.16664@piezo.novalocal>
+ <alpine.DEB.2.11.1709222211280.16664@piezo.novalocal>
+ <CAJ4mKGbrksDnFvqF2gGb1wzrE4TK4VXALRJi+NoZqje9Ke58qg@mail.gmail.com>
+ <alpine.DEB.2.11.1709230128240.16664@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:60627 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933130AbdIYJzV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 25 Sep 2017 05:55:21 -0400
-In-Reply-To: <931ca694dacee7132a1528990ce7b651@suse.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: Patrick Donnelly <pdonnell@redhat.com>, Yuri Weinstein <yweinste@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, "gmeno@redhat.com" <gregory.meno@inktank.com>, "Durgin, Josh" <jdurgin@redhat.com>, Nathan Cutler <ncutler@suse.cz>, Vasu Kulkarni <vakulkar@redhat.com>, "Dreyer, Ken" <kdreyer@redhat.com>, Ilya Dryomov <idryomov@redhat.com>, ceph-devel-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1709230128240.16664-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+Content-Language: en-GB
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>, Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-On 2017-09-25 11:43, Abhishek wrote:
-> On 2017-09-25 03:08, Yan, Zheng wrote:
->> On 2017/9/24 22:03, Abhishek wrote:
->>> On 2017-09-19 23:11, Patrick Donnelly wrote:
->>>> On Tue, Sep 19, 2017 at 1:10 PM, Yuri Weinstein 
->>>> <yweinste@redhat.com> wrote:
->>>>> kcephfs - needs analysis - Patrick, Zheng FYI
->>>> 
->>>> http://tracker.ceph.com/issues/21463
->>>> http://tracker.ceph.com/issues/21462
->>>> http://tracker.ceph.com/issues/21466
->>>> http://tracker.ceph.com/issues/21467
->>>> http://tracker.ceph.com/issues/21468
->>>> 
->>>> Last 3 look like blockers. Zheng will have more input.
->>> 
->>> Here are the results of a rerun with -k testing,
->>> http://pulpito.ceph.com/abhi-2017-09-22_19:35:04-kcephfs-luminous-testing-basic-smithi/ 
->>> & details http://tracker.ceph.com/issues/21296#note-20
->>> There are a few failures which look environmental but a few look like 
->>> they are related to the changeset (the ones with cache)
->>> 
->> "MDS cache is too large" issue should be fixed by
->> https://github.com/ceph/ceph/pull/17922
-> Ah alright this is a qa suite fix, we can run a the suite with a qa
-> suite argument just to be sure.
-
-alternatively we can just merge this in luminous branch and this gets 
-tested in the final qe run anyway, since we may have to do that since 
-there are some rados and cephfs changes?
-> 
-  Are there any other cephfs patches that needs to go in to the luminous
-> brancha as such? I believe we would want the qe suites after the RADOS
-> PR went in (https://github.com/ceph/ceph/pull/17796)
-> Sage, Josh, Yehuda, Patrick
-> Is there anything else that needs to go in before we start a second 
-> round?
-> 
-> 
-> 
->> Regards
->> Yan, Zheng
->> 
->>> Best,
->>> Abhishek
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" 
-> in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+SSBhbSBoYXBweSB3aXRoIHRoaXMgYnJhbmNoIG9mIHRoZSB0aHJlYWQhCgpJJ20gZ3Vlc3Npbmcg
+dGhpcyB3b3VsZCBzdGFydCBwb3N0LU1pbWljIHRob3VnaCwgaWYgbm8gb25lIG9iamVjdHMgYW5k
+IAppZiB3ZSB3YW50IHRvIHRhcmdldCBhIE1hcmNoIHJlbGVhc2U/CgogICAtSm9hbwoKT24gMDkv
+MjMvMjAxNyAwMjo1OCBBTSwgU2FnZSBXZWlsIHdyb3RlOgo+IE9uIEZyaSwgMjIgU2VwIDIwMTcs
+IEdyZWdvcnkgRmFybnVtIHdyb3RlOgo+PiBPbiBGcmksIFNlcCAyMiwgMjAxNyBhdCAzOjI4IFBN
+LCBTYWdlIFdlaWwgPHNhZ2VAbmV3ZHJlYW0ubmV0PiB3cm90ZToKPj4+IEhlcmUgaXMgYSBjb25j
+cmV0ZSBwcm9wb3NhbCBmb3IgZXZlcnlvbmUgdG8gc3VtbWFyaWx5IHNob290IGRvd24gKG9yCj4+
+PiBoZWFydGlseSBlbmRvcnNlLCBkZXBlbmRpbmcgb24gaG93IHlvdXIgZnJpZGF5IGlzIGdvaW5n
+KToKPj4+Cj4+PiAtIDkgbW9udGggY3ljbGUKPj4+IC0gZW5mb3JjZSBhIHByZWRpY3RhYmxlIHJl
+bGVhc2Ugc2NoZWR1bGUgd2l0aCBhIGZyZWV6ZSBkYXRlIGFuZAo+Pj4gICAgYSByZWxlYXNlIGRh
+dGUuICAoVGhlIGFjdHVhbCAuMCByZWxlYXNlIG9mIGNvdXJzZSBkZXBlbmRzIG9uIG5vIGJsb2Nr
+ZXIKPj4+ICAgIGJ1Z3MgYmVpbmcgb3Blbjsgbm90IHN1cmUgaG93IHplYWxvdXMgJ3RyYWluJyBz
+dHlsZSBwcm9qZWN0cyBkbwo+Pj4gICAgdGhpcy4pCj4+Cj4+IFRyYWluIHByb2plY3RzIGJhc2lj
+YWxseSBjb21taXQgdG8gYSBmZWF0dXJlIGZyZWV6ZSBlbm91Z2ggaW4gYWR2YW5jZQo+PiBvZiB0
+aGUgZXhwZWN0ZWQgcmVsZWFzZSBkYXRlIHRoYXQgaXQncyBmZWFzaWJsZSwgYW5kIGRvbid0IGxl
+dCBwZW9wbGUKPj4gZmFrZSBpdCBieSBydXNoaW5nIGluIHN0dWZmIHRoZXkgImZpbmlzaGVkIiB0
+aGUgZGF5IGJlZm9yZS4gSSdtIG5vdAo+PiBzdXJlIGlmIGV2ZXJ5LTktbW9udGggTFRTZXMgd2ls
+bCBiZSBtb3JlIGNvbmR1Y2l2ZSB0byB0aGF0IG9yIG5vdCDigJQgaWYKPj4gd2UgZG8gc2NoZWR1
+bGVkIHJlbGVhc2VzLCB3ZSBzdGlsbCBmdW5kYW1lbnRhbGx5IG5lZWQgdG8gYmUgYWJsZSB0bwo+
+PiBzYXkgIm5vcGUsIHRoYXQgZmVhdHVyZSB3ZSd2ZSBiZWVuIHNheWluZyBmb3IgOSBtb250aHMg
+d2UgaG9wZSB0byBoYXZlCj4+IG91dCBpbiB0aGlzIExUUyB3b24ndCBtYWtlIGl0IHVudGlsIHRo
+ZSBuZXh0IG9uZSIuIEFuZCB3ZSBzZWVtIHByZXR0eQo+PiBiYWQgYXQgdGhhdC4KPiAKPiBJJ2xs
+IGJlIHRoZSBmaXJzdCB0byBzYXkgSSdtIG5vIHNtYWxsIHBhcnQgb2YgdGhlICJ3ZSIgdGhlcmUu
+ICBCdXQgSSdtCj4gYWxzbyBzdWdnZXN0aW5nIHRoYXQncyBub3QgYSByZWFzb24gbm90IHRvIHRy
+eSB0byBkbyBiZXR0ZXIuICBBcyBJCj4gc2FpZCBJIHRoaW5rIHRoaXMgd2lsbCBiZSBlYXNpZXIg
+dGhhbiBpbiB0aGUgcGFzdCBiZWNhdXNlIHdlIGRvbid0Cj4gaGF2ZSBhcyBtYW55IGhlYWRsaW5l
+IGZlYXR1cmVzIHdlJ3JlIHRyeWluZyB0byB3ZWRnZSBpbi4KPiAKPiBJbiBhbnkgY2FzZSwgaXMg
+dGhlcmUgYW4gYWx0ZXJuYXRpdmUgd2F5IHRvIGdldCB0byB0aGUgbXVjaC1kZXNpcmVkCj4gcmVn
+dWxhciBjYWRlbmNlPwo+IAo+Pj4gLSBubyBtb3JlIGV2ZW4vb2RkIHBhdHRlcm47IGFsbCBzdGFi
+bGUgcmVsZWFzZXMgYXJlIGNyZWF0ZWQgZXF1YWwuCj4+PiAtIHN1cHBvcnQgdXBncmFkZXMgZnJv
+bSB1cCB0byAzIHJlbGVhc2VzIGJhY2suCj4+Pgo+Pj4gVGhpcyBzaG9ydGVucyB0aGUgY3ljbGUg
+YSBiaXQgdG8gcmVsaWV2ZSB0aGUgInRoaXMgZmVhdHVyZSBtdXN0IGdvIGluIgo+Pj4gc3RyZXNz
+LCB3aXRob3V0IG1ha2luZyBpdCBzbyBzaG9ydCBhcyB0byBtYWtlIHRoZSByZWxlYXNlIHBvaW50
+bGVzcyAoZS5nLiwKPj4+IGluZmVybmFsaXMsIGtyYWtlbikuICAoSSBhbHNvIHRoaW5rIHRoYXQg
+dGhlIGZlYXR1cmUgcHJlc3N1cmUgaXMgbXVjaAo+Pj4gbG93ZXIgbm93IHRoYW4gaXQgaGFzIGJl
+ZW4gaW4gdGhlIHBhc3QuKQo+Pj4KPj4+IFRoaXMgY3JlYXRlcyBtb3JlIHdvcmsgZm9yIHRoZSBk
+ZXZlbG9wZXJzIGJlY2F1c2UgdGhlcmUgYXJlIG1vcmUgdXBncmFkZQo+Pj4gcGF0aHMgdG8gY29u
+c2lkZXI6IHdlIG5vIGxvbmdlciBoYXZlIHN0cmljdCAiY2hva2UgcG9pbnRzIiAobGlrZSBhbGwK
+Pj4+IHVwZ3JhZGVzIG11c3QgZ28gdGhyb3VnaCBsdW1pbm91cykuICBXZSBjb3VsZCByZXNlcnZl
+IHRoZSBvcHRpb24gdG8gcGljawo+Pj4gc3BlY2lmaWMgY2hva2UgcG9pbnQgcmVsZWFzZXMgaW4g
+dGhlIGZ1dHVyZSwgcGVyaGFwcyB0YWtpbmcgY2FyZSB0byBtYWtlCj4+PiBzdXJlIHRoZXNlIGFy
+ZSB0aGUgcmVsZWFzZXMgdGhhdCBnbyBpbnRvIGRvd25zdHJlYW0gZGlzdHJvcy4gIFdlJ2xsIG5l
+ZWQKPj4+IHRvIGJlIG1vcmUgc3lzdGVtYXRpYyBhYm91dCB0aGUgdXBncmFkZSB0ZXN0aW5nLgo+
+Pgo+PiBUaGlzIHNvdW5kcyBnZW5lcmFsbHkgZ29vZCB0byBtZSDigJQgd2UgZGlkIG11bHRpcGxl
+LXJlbGVhc2UgdXBncmFkZXMKPj4gZm9yIGEgbG9uZyB0aW1lLCBhbmQgc3R1ZmYgaXMgcHJvYmFi
+bHkgbW9yZSBjb21wbGljYXRlZCBub3cgYnV0IEkKPj4gZG9uJ3QgdGhpbmsgaXQgd2lsbCBhY3R1
+YWxseSBiZSB0aGF0IGJpZyBhIGRlYWwuCj4+Cj4+IDMgcmVsZWFzZXMgYmFjayBtaWdodCBiZSBh
+IGJpdCBtdWNoIHRob3VnaCDigJQgdGhhdCdzIDI3IG1vbnRocyEgKEZvcgo+PiBsdW1pbm91cywg
+dGhlIGJlZ2lubmluZyBvZiAyMDE1LiBIYW1tZXIuKQo+IAo+IEknbSAqbXVjaCogaGFwcGllciB3
+aXRoIDIgOikgc28gbm8gY29tcGxhaW50IGZyb20gbWUuICBJIGp1c3QgaGVhcmQgYSBsb3QKPiBv
+ZiAiMiB5ZWFycyIgYW5kIDIgcmVsZWFzZXMgKDE4IG1vbnRocykgZG9lc24ndCBxdWl0ZSBjb3Zl
+ciBpdC4gIE1heWJlCj4gaXQncyBiZXN0IHRvIHN0YXJ0IHdpdGggdGhhdCwgdGhvdWdoPyAgSXQn
+cyBzdGlsbCBhbiBpbXByb3ZlbWVudCBvdmVyIHRoZQo+IGN1cnJlbnQgfjEyIG1vbnRocy4KPiAK
+Pj4+IFNvbWV3aGF0IHNlcGFyYXRlbHksIHNldmVyYWwgcGVvcGxlIGV4cHJlc3NlZCBjb25jZXJu
+IGFib3V0IGhhdmluZyBzdGFibGUKPj4+IHJlbGVhc2VzIHRvIGRldmVsb3AgYWdhaW5zdC4gIFRo
+aXMgaXMgc29tZXdoYXQgb3J0aG9nb25hbCB0byB3aGF0IHVzZXJzCj4+PiBuZWVkLiAgVG8gdGhh
+dCBlbmQsIHdlIGNhbiBkbyBhIGRldiBjaGVja3BvaW50IGV2ZXJ5IDEgb3IgMiBtb250aHMKPj4+
+IChwcmVmZXJlbmNlcz8pLCB3aGVyZSB3ZSBmb3JrIGEgJ25leHQnIGJyYW5jaCBhbmQgc3RhYmls
+aXplIGFsbCBvZiB0aGUKPj4+IHRlc3RzIGJlZm9yZSBtb3Zpbmcgb24uICBUaGlzIGlzIGdvb2Qg
+cHJhY3RpY2UgYW55d2F5IHRvIGF2b2lkCj4+PiBhY2N1bXVsYXRpbmcgbG93LWZyZXF1ZW5jeSBm
+YWlsdXJlcyBpbiB0aGUgdGVzdCBzdWl0ZSB0aGF0IGhhdmUgdG8gYmUKPj4+IHNxdWFzaGVkIGF0
+IHRoZSBlbmQuCj4+Cj4+IFNvIHRoaXMgc291bmRzIGxpa2UgYSBmaW5lIGlkZWEgdG8gbWUsIGJ1
+dCBob3cgZG8gd2UgZGlzdGluZ3Vpc2ggdGhpcwo+PiBmcm9tIHRoZSBpbnRlcm1lZGlhdGUgc3Rh
+YmxlIHJlbGVhc2VzPwo+Pgo+PiBCeSB3aGljaCBJIG1lYW4sIGFyZSB3ZSAqcmVhbGx5KiBnb2lu
+ZyB0byBkbyBhIHN0YWJpbGl6YXRpb24gYnJhbmNoCj4+IHRoYXQgd2lsbCBuZXZlciBnZXQgc2Vl
+biBieSB1c2Vycz8gV2hhdCBraW5kIG9mIHRlc3RpbmcgYW5kIGJ1ZyBmaXhpbmcKPj4gYXJlIHdl
+IGdvaW5nIHRvIGNvbW1pdCB0byBkb2luZyBhZ2FpbnN0IGl0LCBhbmQgaG93IGRvIHdlIGJhbGFu
+Y2UgdGhhdAo+PiBlZmZvcnQgd2l0aCBmZWF0dXJlIHdvcms/Cj4+Cj4+IEl0IHNlZW1zIGxpa2Ug
+dGhlIHNhbWUgY29uZmxpY3Qgd2UgaGF2ZSBub3csIG9ubHkgc2luY2UgdGhlIGRldgo+PiBjaGVj
+a3BvaW50cyBhcmUgbGVzcyBpbXBvcnRhbnQgdGhleSdsbCBsb3NlIG1vcmUgb2Z0ZW4uIFRoZW4g
+d2UnbGwgZW5kCj4+IHVwIGhhdmluZyA5IG1vbnRocyBvZiBzY2hlZHVsZWQgd29yayB0byBkZWJ1
+ZyBmb3IgYSB1c2VyIHJlbGVhc2UKPj4gaW5zdGVhZCBvZiA1IG1vbnRocyB0aGF0IHNsaXBwZWQg
+dG8gNyBvciA4Li4uCj4gCj4gV2hhdCBpZiB3ZSBmcmFtZSB0aGlzIHN0YWJpbGl6YXRpb24gcGVy
+aW9kIGluIHRlcm1zIG9mIHN0YWJpbGl0eSBvZiB0aGUKPiB0ZXN0IHN1aXRlLiAgVGhhdCBnaXZl
+cyB1cyBzb21ldGhpbmcgY29uY3JldGUgdG8gYWltIGZvciwgbGV0cyB1cyBtb3ZlIG9uCj4gd2hl
+biB3ZSByZWFjaCBzb21lIHRocmVzaG9sZCwgYW5kIGFsaWducyBwZXJmZWN0bHkgd2l0aCB0aGUg
+dGhpbmcgdGhhdAo+IG1ha2VzIGl0IGhhcmQgdG8gc2FmZWx5IGxhbmQgbmV3IGNvZGUgKG5vaXN5
+IHRlc3QgcmVzdWx0cykuLi4KPiAKPiBzYWdlCj4gCgpfX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJz
+QGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11
+c2Vycy1jZXBoLmNvbQo=
