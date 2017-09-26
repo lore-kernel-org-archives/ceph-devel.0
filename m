@@ -1,94 +1,74 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: Status of luminous v12.2.1 QE validation
-Date: Tue, 26 Sep 2017 09:05:46 -0700
-Message-ID: <CAMMFjmEyBrwoQVCm4n0wggH=gXmT1WKc06fvbrrzG=2-HXdYSA@mail.gmail.com>
-References: <CAMMFjmF5OczC9Yg1F2S3EvPAZO4ZBefpuxNm-f70XG-dr6-31g@mail.gmail.com>
- <CA+2bHPZf2akxs+WtTmzpSyA0=T8rZcKsHXqUnwPMb9Los0XQYA@mail.gmail.com>
- <4d92b984acbdf857f8179bd1509d31fd@suse.com> <027e6d17-fb8b-1856-bb13-c5c0e9d361da@redhat.com>
- <931ca694dacee7132a1528990ce7b651@suse.com> <b0e4b529f93a0efb25e6404568d81ee1@suse.com>
- <alpine.DEB.2.11.1709251728090.27895@piezo.novalocal> <CA+2bHPZs7BOdOG9Vv-hhzcpjmhOPS=ekjOOZuCVkW81kGD=7ZA@mail.gmail.com>
- <c9ffa337c70dd576e07f7c384bf346c1@suse.com>
+From: Jeff Layton <jlayton@poochiereds.net>
+Subject: Re: lingering caps outstanding after client shutdown?
+Date: Tue, 26 Sep 2017 13:34:32 -0400
+Message-ID: <1506447272.2552.7.camel@poochiereds.net>
+References: <1506432289.3182.16.camel@redhat.com>
+         <alpine.DEB.2.11.1709261330380.27895@piezo.novalocal>
+         <1506434813.3182.27.camel@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f41.google.com ([209.85.218.41]:53512 "EHLO
-        mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S966178AbdIZQFr (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Sep 2017 12:05:47 -0400
-Received: by mail-oi0-f41.google.com with SMTP id j126so12628204oia.10
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Sep 2017 09:05:47 -0700 (PDT)
-In-Reply-To: <c9ffa337c70dd576e07f7c384bf346c1@suse.com>
+Received: from mail-qt0-f175.google.com ([209.85.216.175]:46867 "EHLO
+        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1031084AbdIZReh (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Sep 2017 13:34:37 -0400
+Received: by mail-qt0-f175.google.com with SMTP id s18so11129505qta.3
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Sep 2017 10:34:37 -0700 (PDT)
+In-Reply-To: <1506434813.3182.27.camel@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek <abhishek@suse.com>
-Cc: Patrick Donnelly <pdonnell@redhat.com>, Sage Weil <sweil@redhat.com>, "Yan, Zheng" <zyan@redhat.com>, "Development, Ceph" <ceph-devel@vger.kernel.org>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, John Spray <jspray@redhat.com>, "gmeno@redhat.com" <gregory.meno@inktank.com>, "Durgin, Josh" <jdurgin@redhat.com>, Nathan Cutler <ncutler@suse.cz>, Vasu Kulkarni <vakulkar@redhat.com>, "Dreyer, Ken" <kdreyer@redhat.com>, Ilya Dryomov <idryomov@redhat.com>, ceph-devel-owner@vger.kernel.org
+To: Sage Weil <sage@newdream.net>
+Cc: "open list:CEPH DISTRIBUTED..." <ceph-devel@vger.kernel.org>
 
-Those suite are already done and look good.
-fs and kcephfs were reviewed and approved by Patrick.
+On Tue, 2017-09-26 at 10:06 -0400, Jeff Layton wrote:
+> On Tue, 2017-09-26 at 13:31 +0000, Sage Weil wrote:
+> > On Tue, 26 Sep 2017, Jeff Layton wrote:
+> > > In order to get the correct semantics for a delegation or oplock,
+> > 
+> > we
+> > > need to be able to break delegations on open.
+> > 
+> > Can you explain this part?  How do the delegation/oplock semantics
+> > relate 
+> > to open(2)?  I would assume they are related to reads and writes (and
+> > data 
+> > consistency).  Unless it's a CIFS thing?
+> 
+> 
+> You're correct that we only really need to break delegations on
+> conflicting access, but there is a problem here:
+> 
+> NFS clients can cache shared/deny mode locks if they hold a delegation.
+> Once you've granted an open, it's too late to go back and enforce it
+> once you go to recall the delegation.
+> 
+> Since we don't enforce deny mode locks in cephfs, we could argue that
+> all of that is the purview of the NFS server and not worry about
+> it...at least until we toss something like samba into the mix, at which
+> point things get a bit more complicated...
+> 
 
-On Mon, Sep 25, 2017 at 11:20 PM, Abhishek <abhishek@suse.com> wrote:
-> On 2017-09-25 19:33, Patrick Donnelly wrote:
->>
->> On Mon, Sep 25, 2017 at 10:28 AM, Sage Weil <sweil@redhat.com> wrote:
->>>
->>> On Mon, 25 Sep 2017, Abhishek wrote:
->>>>
->>>> On 2017-09-25 11:43, Abhishek wrote:
->>>> > On 2017-09-25 03:08, Yan, Zheng wrote:
->>>> > > On 2017/9/24 22:03, Abhishek wrote:
->>>> > > > On 2017-09-19 23:11, Patrick Donnelly wrote:
->>>> > > > > On Tue, Sep 19, 2017 at 1:10 PM, Yuri Weinstein
->>>> > > > > <yweinste@redhat.com>
->>>> > > > > wrote:
->>>> > > > > > kcephfs - needs analysis - Patrick, Zheng FYI
->>>> > > > >
->>>> > > > > http://tracker.ceph.com/issues/21463
->>>> > > > > http://tracker.ceph.com/issues/21462
->>>> > > > > http://tracker.ceph.com/issues/21466
->>>> > > > > http://tracker.ceph.com/issues/21467
->>>> > > > > http://tracker.ceph.com/issues/21468
->>>> > > > >
->>>> > > > > Last 3 look like blockers. Zheng will have more input.
->>>> > > >
->>>> > > > Here are the results of a rerun with -k testing,
->>>> > > >
->>>> > > > http://pulpito.ceph.com/abhi-2017-09-22_19:35:04-kcephfs-luminous-testing-basic-smithi/
->>>> > > > & details http://tracker.ceph.com/issues/21296#note-20
->>>> > > > There are a few failures which look environmental but a few look
->>>> > > > like
->>>> > > > they are related to the changeset (the ones with cache)
->>>> > > >
->>>> > > "MDS cache is too large" issue should be fixed by
->>>> > > https://github.com/ceph/ceph/pull/17922
->>>> > Ah alright this is a qa suite fix, we can run a the suite with a qa
->>>> > suite argument just to be sure.
->>>>
->>>> alternatively we can just merge this in luminous branch and this gets
->>>> tested
->>>> in the final qe run anyway, since we may have to do that since there are
->>>> some
->>>> rados and cephfs changes?
->>>
->>>
->>> Yes, let's do that.
->>>
->>> I think all of the other blockers are resolved now?
->>
->>
->> These whitelist QA fixes would be good to merge to silence spurious
->> failures for QE:
->>
->> https://github.com/ceph/ceph/pull/17945
->> https://github.com/ceph/ceph/pull/17821
->
->
-> About QE validation, my vote is to just go through cephfs & rados suites as
-> we have a rados and a few (mostly qe related) cephfs prs that went in.
->
-> Sage/Yuri/Patrick thoughts?
->
->
->>
->> Otherwise CephFS looks good to go.
->
->
+After some discussion with Sage on IRC, I think I understand what's
+going on now.
+
+The issue is that Client::get_caps doesn't actually request any caps.
+It just waits on the needed caps, under the assumption that you've
+already requested the ones you need via an earlier call.
+
+In this case, the file already existed before the client connected, and
+there is no interaction with the file by that client prior to the open.
+ There is no reason that the MDS thinks that the client wants any caps
+for this file, and so the call hangs waiting on caps that will never
+arrive.
+
+I've been able to fix the patch by having it call get_caps after the
+open call. With that, the MDS knows that the client is holding the file
+open, and so will want Fr and/or Fw caps for that. That's sufficient to
+satisfy the right delegation break semantic.
+
+The upshot here is that this isn't a bug, after all...
+
+Cheers,
+-- 
+Jeff Layton <jlayton@poochiereds.net>
