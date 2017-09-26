@@ -1,62 +1,49 @@
-From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
-Subject: inconsistent pg will not repair
-Date: Tue, 26 Sep 2017 10:03:13 -0400
-Message-ID: <CAGbvivJWLXaGzZjAFLpqBFP9N7QHkYt8uZyo9z3qpSnrHz8YZQ@mail.gmail.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: lingering caps outstanding after client shutdown?
+Date: Tue, 26 Sep 2017 10:06:53 -0400
+Message-ID: <1506434813.3182.27.camel@redhat.com>
+References: <1506432289.3182.16.camel@redhat.com>
+         <alpine.DEB.2.11.1709261330380.27895@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:55768 "EHLO
-        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S937257AbdIZODQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Sep 2017 10:03:16 -0400
-Received: by mail-lf0-f49.google.com with SMTP id u21so4628325lfk.12
-        for <ceph-devel@vger.kernel.org>; Tue, 26 Sep 2017 07:03:15 -0700 (PDT)
+Received: from mail-qt0-f176.google.com ([209.85.216.176]:54258 "EHLO
+        mail-qt0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S937263AbdIZOG5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 26 Sep 2017 10:06:57 -0400
+Received: by mail-qt0-f176.google.com with SMTP id 47so10408529qts.10
+        for <ceph-devel@vger.kernel.org>; Tue, 26 Sep 2017 07:06:56 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1709261330380.27895@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: "open list:CEPH DISTRIBUTED..." <ceph-devel@vger.kernel.org>
 
-I have an inconsistent PG that I cannot seem to get to repair cleanly.
-I can find the 3 objects in question and they all have the same size
-and md5sum, but yet whenever I repair it, it is reported as an error
-"failed to pick suitable auth object".
+On Tue, 2017-09-26 at 13:31 +0000, Sage Weil wrote:
+> On Tue, 26 Sep 2017, Jeff Layton wrote:
+> > In order to get the correct semantics for a delegation or oplock,
+> we
+> > need to be able to break delegations on open.
+> 
+> Can you explain this part?  How do the delegation/oplock semantics
+> relate 
+> to open(2)?  I would assume they are related to reads and writes (and
+> data 
+> consistency).  Unless it's a CIFS thing?
 
-Any suggestions for fixing or workaround this issue to resolve the
-inconsistency?
 
-Ceph 10.2.9
-Ubuntu 16.04.2
+You're correct that we only really need to break delegations on
+conflicting access, but there is a problem here:
 
+NFS clients can cache shared/deny mode locks if they hold a delegation.
+Once you've granted an open, it's too late to go back and enforce it
+once you go to recall the delegation.
 
-2017-09-26 09:54:03.123938 7fd31048e700 -1 log_channel(cluster) log
-[ERR] : 1.5b8 shard 7: soid 1:1daab06b:::100004d6662.00000000:head
-data_digest 0x923deb74 != data_digest 0x23f10be8 from auth oi
-1:1daab06b:::100004d6662.00000000:head(204442'221517
-client.5654254.1:2371279 dirty|data_digest|omap_digest s 1421644 uv
-203993 dd 23f10be8 od ffffffff alloc_hint [0 0])
-2017-09-26 09:54:03.123944 7fd31048e700  0 log_channel(cluster) do_log
-log to syslog
-2017-09-26 09:54:03.123999 7fd31048e700 -1 log_channel(cluster) log
-[ERR] : 1.5b8 shard 26: soid 1:1daab06b:::100004d6662.00000000:head
-data_digest 0x923deb74 != data_digest 0x23f10be8 from auth oi
-1:1daab06b:::100004d6662.00000000:head(204442'221517
-client.5654254.1:2371279 dirty|data_digest|omap_digest s 1421644 uv
-203993 dd 23f10be8 od ffffffff alloc_hint [0 0])
-2017-09-26 09:54:03.124005 7fd31048e700  0 log_channel(cluster) do_log
-log to syslog
-2017-09-26 09:54:03.124013 7fd31048e700 -1 log_channel(cluster) log
-[ERR] : 1.5b8 shard 44: soid 1:1daab06b:::100004d6662.00000000:head
-data_digest 0x923deb74 != data_digest 0x23f10be8 from auth oi
-1:1daab06b:::100004d6662.00000000:head(204442'221517
-client.5654254.1:2371279 dirty|data_digest|omap_digest s 1421644 uv
-203993 dd 23f10be8 od ffffffff alloc_hint [0 0])
-2017-09-26 09:54:03.124015 7fd31048e700  0 log_channel(cluster) do_log
-log to syslog
-2017-09-26 09:54:03.124022 7fd31048e700 -1 log_channel(cluster) log
-[ERR] : 1.5b8 soid 1:1daab06b:::100004d6662.00000000:head: failed to
-pick suitable auth object
-2017-09-26 09:54:03.124023 7fd31048e700  0 log_channel(cluster) do_log
-log to syslog
-2017-09-26 09:56:14.461015 7fd31048e700 -1 log_channel(cluster) log
-[ERR] : 1.5b8 deep-scrub 3 errors
-2017-09-26 09:56:14.461021 7fd31048e700  0 log_channel(cluster) do_log
-log to syslog
+Since we don't enforce deny mode locks in cephfs, we could argue that
+all of that is the purview of the NFS server and not worry about
+it...at least until we toss something like samba into the mix, at which
+point things get a bit more complicated...
+
+-- 
+Jeff Layton <jlayton@redhat.com>
