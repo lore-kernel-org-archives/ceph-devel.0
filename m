@@ -1,22 +1,52 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Static Analysis
-Date: Thu, 28 Sep 2017 14:00:55 +1000
-Message-ID: <CAF-wwdH4NumQ_Nj4dMqw7Ha4UVfPYVRcXx5vo3+PTD8UzNfmBA@mail.gmail.com>
+From: Shinobu Kinjo <skinjo@redhat.com>
+Subject: Re: [ceph-users] Ceph Developers Monthly - October
+Date: Thu, 28 Sep 2017 13:20:28 +0900
+Message-ID: <CAHX7ARskEbONz5L8L1bw9XkPztLQfCQCQYgXnNXUqZecrOwJMw@mail.gmail.com>
+References: <20170928030800.GB27915@oops.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f47.google.com ([209.85.214.47]:56619 "EHLO
-        mail-it0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751091AbdI1EA5 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Sep 2017 00:00:57 -0400
-Received: by mail-it0-f47.google.com with SMTP id g18so713678itg.5
-        for <ceph-devel@vger.kernel.org>; Wed, 27 Sep 2017 21:00:56 -0700 (PDT)
+Received: from mail-wr0-f180.google.com ([209.85.128.180]:45473 "EHLO
+        mail-wr0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750794AbdI1EUa (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 28 Sep 2017 00:20:30 -0400
+Received: by mail-wr0-f180.google.com with SMTP id m18so477683wrm.2
+        for <ceph-devel@vger.kernel.org>; Wed, 27 Sep 2017 21:20:30 -0700 (PDT)
+In-Reply-To: <20170928030800.GB27915@oops.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Leonardo Vaz <lvaz@redhat.com>
+Cc: Ceph Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Latest static analyser results are up on  http://people.redhat.com/bhubbard/
+Are we going to have next CDM in an APAC friendly time slot again?
 
--- 
-Cheers,
-Brad
+
+
+On Thu, Sep 28, 2017 at 12:08 PM, Leonardo Vaz <lvaz@redhat.com> wrote:
+> Hey Cephers,
+>
+> This is just a friendly reminder that the next Ceph Developer Montly
+> meeting is coming up:
+>
+>  http://wiki.ceph.com/Planning
+>
+> If you have work that you're doing that it a feature work, significant
+> backports, or anything you would like to discuss with the core team,
+> please add it to the following page:
+>
+>  http://wiki.ceph.com/CDM_04-OCT-2017
+>
+> If you have questions or comments, please let us know.
+>
+> Kindest regards,
+>
+> Leo
+>
+> --
+> Leonardo Vaz
+> Ceph Community Manager
+> Open Source and Standards Team
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users@lists.ceph.com
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
