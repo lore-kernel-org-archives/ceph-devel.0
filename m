@@ -1,122 +1,33 @@
-From: David Zafman <dzafman@redhat.com>
-Subject: Re: Strange behavior of OSD after an IO error
-Date: Wed, 27 Sep 2017 11:04:30 -0700
-Message-ID: <e65666dc-ee50-8d2b-daab-e9b247815c19@redhat.com>
-References: <CAL2-6bLM8HMNkqPsF401TX2ppANBVtD_h40=kYg1uisAa3ruOw@mail.gmail.com>
+From: Leonardo Vaz <lvaz@redhat.com>
+Subject: Ceph Tech Talk - September
+Date: Thu, 28 Sep 2017 00:04:00 -0300
+Message-ID: <20170928030400.GA27915@oops.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46458 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:60626 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751016AbdI0SEb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 27 Sep 2017 14:04:31 -0400
-In-Reply-To: <CAL2-6bLM8HMNkqPsF401TX2ppANBVtD_h40=kYg1uisAa3ruOw@mail.gmail.com>
-Content-Language: en-US
+        id S1752589AbdI1DEE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 27 Sep 2017 23:04:04 -0400
+Content-Disposition: inline
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Vincent Godin <vince.mlist@gmail.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Ceph Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
+Hey Cephers,
 
-The support for this was included in the Luminous release: 
-https://github.com/ceph/ceph/pull/14760
+Just a reminder that the monthly Ceph Tech Talk will be this Thursday
+at 1pm (EDT). This month John Spray will be talking about ceph-mgr.
 
-David
+Everyone is invited to join us.
 
+ http://ceph.com/ceph-tech-talks/
 
-On 9/27/17 7:37 AM, Vincent Godin wrote:
-> I have a pretty big ceph cluster in jewel 10.2.7 (2 PB) and IO errors
-> are common. I notice two different behaviors of OSDs when they
-> encounter an IO error
->
-> On JBOD mode, the OSD get the IO error and then abort ... The pgs are
-> peering on others OSDs, the OSD restart, get it's pgs and everything
-> is going as usual. Ceph health is OK and the degraded object is not
-> declared to the cluster. So, if another read is needed on the same
-> object, the process will restart (abort, perring, restart, peering).
-> Only a deep-scrub will tell the cluster that one pg have a degraded
-> object. Then a repair command will repair the pg (only a write
-> operation can force a disk to reallocate a bad sector). Why the
-> degraded object is not declared when the first read operation get the
-> IO error ? If we have multiple IO errors on different OSDs, different
-> read operations will make them flap till a deep-scrub ... The abort
-> operation seems to be the current behavior according to the code !!!
-> How the rbd_client deals with that (IO error or retry till the new
-> peering of the pg ?)
->
-> osd log
->
-> IO error and abort
->
-> 2017-09-27 00:55:52.100678 7faceba7b700 -1
-> filestore(/var/lib/ceph/osd/ceph-276)
-> FileStore::read(9.103_head/#9:c086eeb2:::rbd_data.6592c12eb141f2.0000000000058795:head#)
-> pread error: (5) Input/output error
-> 2017-09-27 00:55:52.128147 7faceba7b700 -1 os/filestore/FileStore.cc:
-> In function 'virtual int FileStore::read(const coll_t&, const
-> ghobject_t&, uint64_t, size_t, ceph::bufferlist&, uint32_t, bool) '
-> thread 7faceba7b700 time 2017-09-27 00:55:52.101208
-> os/filestore/FileStore.cc: 3016: FAILED assert(0 == "eio on pread")
->
->   ceph version 10.2.6 (656b5b63ed7c43bd014bcafd81b001959d5f089f)
->   1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
-> const*)+0x85) [0x7fad141219f5]
->   2: (FileStore::read(coll_t const&, ghobject_t const&, unsigned long,
-> unsigned long, ceph::buffer::list&, unsigned int, bool)+0xd91)
-> [0x7fad13df0661]
-> ...
->
-> then restart
->
-> 2017-09-27 00:56:26.859560 7fd53b8b0800  0 osd.276 341224 load_pgs
-> 2017-09-27 00:56:35.881155 7fd53b8b0800  0 osd.276 341224 load_pgs
-> opened 167 pgs
-> 2017-09-27 00:56:35.881531 7fd53b8b0800  0 osd.276 341224 using 0 op
-> queue with priority op cut off at 64.
-> 2017-09-27 00:56:35.883165 7fd53b8b0800 -1 osd.276 341224
-> log_to_monitors {default=true}
-> 2017-09-27 00:56:36.875207 7fd53b8b0800  0 osd.276 341224 done with
-> init, starting boot process
->
-> then deep-scrub (manually)
->
-> 2017-09-27 10:34:22.481133 7fd50b196700  0 log_channel(cluster) log
-> [INF] : 9.103 deep-scrub starts
-> 2017-09-27 10:44:05.819995 7fd50b196700 -1 log_channel(cluster) log
-> [ERR] : 9.103 shard 276: soid
-> 9:c086eeb2:::rbd_data.6592c12eb141f2.0000000000058795:head candidate
-> had a read error
-> 2017-09-27 10:55:22.272655 7fd508991700 -1 log_channel(cluster) log
-> [ERR] : 9.103 deep-scrub 0 missing, 1 inconsistent objects
-> 2017-09-27 10:55:22.272663 7fd508991700 -1 log_channel(cluster) log
-> [ERR] : 9.103 deep-scrub 1 errors
->
-> then repair
->
-> 2017-09-27 11:01:10.648292 7fd50b196700  0 log_channel(cluster) log
-> [INF] : 9.103 repair starts
-> 2017-09-27 11:08:57.329571 7fd50b196700 -1 log_channel(cluster) log
-> [ERR] : 9.103 shard 276: soid
-> 9:c086eeb2:::rbd_data.6592c12eb141f2.0000000000058795:head candidate
-> had a read error
-> 2017-09-27 11:18:42.498541 7fd50b196700 -1 log_channel(cluster) log
-> [ERR] : 9.103 repair 0 missing, 1 inconsistent objects
-> 2017-09-27 11:18:42.498730 7fd50b196700 -1 log_channel(cluster) log
-> [ERR] : 9.103 repair 1 errors, 1 fixed
->
->
-> The second behavior is more linked to the hardware and i just want to
-> give a drawback of using raid0 disk
->
-> On our cluster, whe used OSD hosts with JBOD and some olders with RAID0 disks
-> On RAID0 hosts, we notice than when a IO error occured, the OSD never
-> catch the information (it only appears in dmesg). On OSD log, we can
-> only see the thread timing out and blocked requests. The OSD behaviour
-> then depend of the load. Sometime it survive, sometime not but from a
-> client side, i think it's an IO error for sure. It's probably linked
-> to my hardware (SmartArray on HP SL4540) but maybe not ...
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Kindest regards,
 
+Leo
+
+-- 
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
