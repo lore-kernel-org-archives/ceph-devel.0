@@ -1,60 +1,43 @@
-From: scan-admin@coverity.com
-Subject: New Defects reported by Coverity Scan for ceph
-Date: Thu, 28 Sep 2017 05:09:08 +0000 (UTC)
-Message-ID: <59cc83f4587ad_1cc671733478d1@ss1435.mail>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: Ceph Developers Monthly - October
+Date: Thu, 28 Sep 2017 09:51:19 +0100
+Message-ID: <dd705adf-713a-3f99-2c03-30a4de70edc8@suse.de>
+References: <20170928030800.GB27915@oops.local>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from o5.24nn.shared.sendgrid.net ([50.31.63.1]:37213 "EHLO
-        o5.24nn.shared.sendgrid.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750914AbdI1FJJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 28 Sep 2017 01:09:09 -0400
-Received: from coverity.com (static-208.69.177.245.nephosdns.com [208.69.177.245])
-        by ismtpd0023p1las1.sendgrid.net (SG) with ESMTP id B7QRKkOjQnOSqyeYT7FGFQ
-        for <ceph-devel@vger.kernel.org>; Thu, 28 Sep 2017 05:09:08.588 +0000 (UTC)
+Received: from mx2.suse.de ([195.135.220.15]:46643 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751918AbdI1IvV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 28 Sep 2017 04:51:21 -0400
+In-Reply-To: <20170928030800.GB27915@oops.local>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Leonardo Vaz <lvaz@redhat.com>, Ceph Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
+On 09/28/2017 04:08 AM, Leonardo Vaz wrote:
+> Hey Cephers,
+> 
+> This is just a friendly reminder that the next Ceph Developer Montly
+> meeting is coming up:
+> 
+>   http://wiki.ceph.com/Planning
+> 
+> If you have work that you're doing that it a feature work, significant
+> backports, or anything you would like to discuss with the core team,
+> please add it to the following page:
+> 
+>   http://wiki.ceph.com/CDM_04-OCT-2017
 
-Hi,
+Will we, at some point, have a european-friendly time? :)
 
-Please find the latest report on new defect(s) introduced to ceph found with Coverity Scan.
+ From the planning page, I see that we've been alternating between 21h00 
+EDT and 12h30 EDT for over a year, but this time around we're having two 
+straight 21h00 EDT sessions instead.
 
-1 new defect(s) introduced to ceph found with Coverity Scan.
-8 defect(s), reported by Coverity Scan earlier, were marked fixed in the recent build analyzed by Coverity Scan.
+Was this a copy-paste mistake, or are we actually having another APAC 
+friendly session again?
 
-New defect(s) Reported-by: Coverity Scan
-Showing 1 of 1 defect(s)
-
-
-** CID 1418596:  Program hangs  (ORDER_REVERSAL)
-
-
-________________________________________________________________________________________________________
-*** CID 1418596:  Program hangs  (ORDER_REVERSAL)
-/home/brad/working/src/ceph/src/tools/cephfs/Dumper.cc: 64 in Dumper::recover_journal(Journaler *)()
-58     
-59     
-60     int Dumper::recover_journal(Journaler *journaler)
-61     {
-62       C_SaferCond cond;
-63       lock.Lock();
->>>     CID 1418596:  Program hangs  (ORDER_REVERSAL)
->>>     Calling "recover" acquires lock "Journaler.lock" while holding lock "Mutex._m" (count: 1 / 6).
-64       journaler->recover(&cond);
-65       lock.Unlock();
-66       const int r = cond.wait();
-67     
-68       if (r < 0) { // Error
-69         derr << "error on recovery: " << cpp_strerror(r) << dendl;
-
-
-________________________________________________________________________________________________________
-To view the defects in Coverity Scan visit, https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRaGCnxtQO9E3gxlB2GxVsWFENryh7bC5hIb-2FQBVM85YLQ-3D-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8Gm8nnXjGdSCg3Y3xJLzJka5OSmtSf-2BpUegs4H9v0CBigN85le6zVzYYwpgazONa6fU9p92NkrJbrUVT4aNO4guK9R6ITym49IktPI8IzeuyOQ7NY4AUM1lqvKPRmubM0kw0tXn90C3Ytd5iJ-2Boif1yj85E5vF2fOnU6QsJ0s5tIJdqN5a3DvwBDMY9w43Nwdg-3D
-
-To manage Coverity Scan email notifications for "ceph-devel@vger.kernel.org", click https://u2389337.ct.sendgrid.net/wf/click?upn=08onrYu34A-2BWcWUl-2F-2BfV0V05UPxvVjWch-2Bd2MGckcRbVDbis712qZDP-2FA8y06Nq4Bco8jcmzhh7FSyvoR0E3-2BDgRcBCQ6OuthHBtaTCGNq9OVG2ZVnjrgThgf5hX3GVEkIxvBX-2BorwRZfOftSp7HPfCifRGGak1MlgNFVd3IIPA-3D_2sw0G7ICm9mxCh1lYW1t9y1lfDrIerWzLwB67LZ-2Bn8Gm8nnXjGdSCg3Y3xJLzJka5OSmtSf-2BpUegs4H9v0CBilB9hnyE1u8H6YPr85gqxxRIYgD7GieCWnZKVoDvLULn9JV0oJDUW6HUoyHV2Eyp9wGGAkh4xLlxe0LuCzLREu30rbCGrbH6kxuDNkfPxJ47brJv8wMXUXTN1puP0hdVcKGDHWv23YvvEM8i6vD4KNg-3D
-
+   -Joao
