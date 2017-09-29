@@ -1,46 +1,29 @@
-From: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
-Subject: ec overwrite issue
-Date: Fri, 29 Sep 2017 18:02:17 +0800
-Message-ID: <CANE=7sUPY=qoJSpprXc5QHo+3eiUbK=Qjp9MAE7Oze33Kg-sQQ@mail.gmail.com>
+From: Two Spirit <twospirit6905@gmail.com>
+Subject: Write to Secondary Zone?
+Date: Fri, 29 Sep 2017 08:41:21 -0700
+Message-ID: <CAKRxpuv1CtoEJHhsp3tk3Az1PrWZ3bP9kOT_fiAOmXutzPsXrw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f175.google.com ([209.85.192.175]:44523 "EHLO
-        mail-pf0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751830AbdI2KCT (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Sep 2017 06:02:19 -0400
-Received: by mail-pf0-f175.google.com with SMTP id e1so528698pfk.1
-        for <ceph-devel@vger.kernel.org>; Fri, 29 Sep 2017 03:02:19 -0700 (PDT)
+Received: from mail-io0-f178.google.com ([209.85.223.178]:51499 "EHLO
+        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751349AbdI2PlW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 29 Sep 2017 11:41:22 -0400
+Received: by mail-io0-f178.google.com with SMTP id l15so145185iol.8
+        for <ceph-devel@vger.kernel.org>; Fri, 29 Sep 2017 08:41:22 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-hi, all
+Is it now supported to be able to write to a secondary zone without problems?
 
-    I confuse the roll_forward logic in the PG::append_log. The
-pg_log.roll_forward func may roll forward the all inflight
-transactions which maybe not be completed by all shards.
+If not supported, is there a timeframe that this (being able to write
+to secondary zones) would be supported?
 
-    The comment also makes me wonder. so could anyone explain it in
-detail. thanks.
+It also looks like the federated solution does not scale well with
+multi region all in sync.
 
-
-  if (!transaction_applied) {
-     /* We must be a backfill peer, so it's ok if we apply
-      * out-of-turn since we won't be considered when
-      * determining a min possible last_update.
-      */
-    pg_log.roll_forward(&handler);
-  }
-
-    /* We don't want to leave the rollforward artifacts around
-     * here past last_backfill.  It's ok for the same reason as
-     * above */
-    if (transaction_applied &&
-       p->soid > info.last_backfill) {
-      pg_log.roll_forward(&handler);
-    }
-
--- 
-Regards,
-Xinze Chi
+Is there support in Ceph for region-to-region syncing. Based on the
+figure in the documentation, it appears that zone to zone syncing does
+not happen across a slow wan link (as there are 3 MONs in the backend,
+and unified Ceph cluster is not recommended across a WAN)
