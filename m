@@ -1,32 +1,28 @@
-From: Joao Eduardo Luis <joao@suse.de>
-Subject: Re: Encrypted over WAN?
-Date: Mon, 2 Oct 2017 09:02:58 +0100
-Message-ID: <bc3240a6-1f91-8711-dc59-d8319825b5fb@suse.de>
-References: <CAKRxpuuFHUgoQh8MfhS=vK9f6NVRbAWyccMWWGwJM9UCnw8dtw@mail.gmail.com>
+From: Justinas LINGYS <jlingys@connect.ust.hk>
+Subject: Why AsyncMessenger/AsyncConnection doesn't use
+ support_zero_copy_read/zero_copy_read?
+Date: Mon, 2 Oct 2017 08:19:18 +0000
+Message-ID: <HK2PR01MB12974352BA7760B1C8361162997D0@HK2PR01MB1297.apcprd01.prod.exchangelabs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:34033 "EHLO mx1.suse.de"
+Received: from mail-hk2apc01on0096.outbound.protection.outlook.com ([104.47.124.96]:8889
+        "EHLO APC01-HK2-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750770AbdJBIDB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 2 Oct 2017 04:03:01 -0400
-In-Reply-To: <CAKRxpuuFHUgoQh8MfhS=vK9f6NVRbAWyccMWWGwJM9UCnw8dtw@mail.gmail.com>
-Content-Language: en-GB
+        id S1750940AbdJBITU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 2 Oct 2017 04:19:20 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Two Spirit <twospirit6905@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 10/02/2017 07:18 AM, Two Spirit wrote:
->> The Ceph Object Gateway supports server-side encryption of uploaded objects, with 3 options for the management of encryption keys. Server-side encryption means that the data is sent over HTTP in its unencrypted form, and the Ceph Object Gateway stores that data in the Ceph Storage Cluster in encrypted form.
-> 
-> It sounds like OSD to OSD traffic is unencrypted.
-> 
-> 1) Does "stores data in the cluster in encrypted form" mean *only* if
-> the --dmcrypt option is used?
-> 
-> 2) Does that mean the zone  to zone copy across a WAN is also unencrypted?
+I am wondering why AyncMessenger (src/msg/async/AsyncMessenger.h) does not
+use the Stack's (src/msg/async/Stack.h) support_zero_copy_read method?  In =
+addition, I would be interested in knowing why the RDMAStack (src/msg/async=
+/rdma/RDMAStack.h) always returns false in its support_zero_copy_read metho=
+d? Isn't RDMA supposed to be used for zero-copy communications?
 
-Ceph does not have on-the-wire encryption.
-
-   -Joao
+Furthermore, I cannot understand why the AsyncConnection class does not use
+the ConnectedSocket's zero_copy_read method for reading data since the DPDK=
+Stack.h supports it. =
