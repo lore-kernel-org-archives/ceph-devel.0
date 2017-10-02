@@ -1,28 +1,48 @@
 From: Justinas LINGYS <jlingys@connect.ust.hk>
-Subject: Why AsyncMessenger/AsyncConnection doesn't use
+Subject: Re: Why AsyncMessenger/AsyncConnection doesn't use
  support_zero_copy_read/zero_copy_read?
-Date: Mon, 2 Oct 2017 08:19:18 +0000
-Message-ID: <HK2PR01MB12974352BA7760B1C8361162997D0@HK2PR01MB1297.apcprd01.prod.exchangelabs.com>
+Date: Mon, 2 Oct 2017 09:11:44 +0000
+Message-ID: <HK2PR01MB1297B25F1BAF9F6E35CF0C89997D0@HK2PR01MB1297.apcprd01.prod.exchangelabs.com>
+References: <HK2PR01MB12974352BA7760B1C8361162997D0@HK2PR01MB1297.apcprd01.prod.exchangelabs.com>,<384688B4-113D-478A-9F36-06616A64394C@xsky.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-hk2apc01on0096.outbound.protection.outlook.com ([104.47.124.96]:8889
-        "EHLO APC01-HK2-obe.outbound.protection.outlook.com"
+Received: from mail-pu1apc01on0102.outbound.protection.outlook.com ([104.47.126.102]:58573
+        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750940AbdJBITU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 2 Oct 2017 04:19:20 -0400
+        id S1750927AbdJBJLt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 2 Oct 2017 05:11:49 -0400
+In-Reply-To: <384688B4-113D-478A-9F36-06616A64394C@xsky.com>
 Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: =?gb2312?B?zfW6wML1?= <haomai@xsky.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-I am wondering why AyncMessenger (src/msg/async/AsyncMessenger.h) does not
-use the Stack's (src/msg/async/Stack.h) support_zero_copy_read method?  In =
-addition, I would be interested in knowing why the RDMAStack (src/msg/async=
-/rdma/RDMAStack.h) always returns false in its support_zero_copy_read metho=
-d? Isn't RDMA supposed to be used for zero-copy communications?
-
-Furthermore, I cannot understand why the AsyncConnection class does not use
-the ConnectedSocket's zero_copy_read method for reading data since the DPDK=
-Stack.h supports it. =
+RGVhciBIYW9tYWksDQoNClRoYW5rIHlvdSBmb3IgeW91ciBxdWljayByZXNwb25zZS4NCg0KDQpf
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQpGcm9tOiDN9brAwvUgPGhh
+b21haUB4c2t5LmNvbT4NClNlbnQ6IE1vbmRheSwgT2N0b2JlciAyLCAyMDE3IDQ6NTI6MDAgUE0N
+ClRvOiBKdXN0aW5hcyBMSU5HWVMNCkNjOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogV2h5IEFz
+eW5jTWVzc2VuZ2VyL0FzeW5jQ29ubmVjdGlvbiBkb2Vzbid0IHVzZSBzdXBwb3J0X3plcm9fY29w
+eV9yZWFkL3plcm9fY29weV9yZWFkPw0KDQpPbiBPY3QgMiwgMjAxNywgYXQgMTY6MTksIEp1c3Rp
+bmFzIExJTkdZUyA8amxpbmd5c0Bjb25uZWN0LnVzdC5oazxtYWlsdG86amxpbmd5c0Bjb25uZWN0
+LnVzdC5oaz4+IHdyb3RlOg0KDQpJIGFtIHdvbmRlcmluZyB3aHkgQXluY01lc3NlbmdlciAoc3Jj
+L21zZy9hc3luYy9Bc3luY01lc3Nlbmdlci5oKSBkb2VzIG5vdA0KdXNlIHRoZSBTdGFjaydzIChz
+cmMvbXNnL2FzeW5jL1N0YWNrLmgpIHN1cHBvcnRfemVyb19jb3B5X3JlYWQgbWV0aG9kPyAgSW4g
+YWRkaXRpb24sIEkgd291bGQgYmUgaW50ZXJlc3RlZCBpbiBrbm93aW5nIHdoeSB0aGUgUkRNQVN0
+YWNrIChzcmMvbXNnL2FzeW5jL3JkbWEvUkRNQVN0YWNrLmgpIGFsd2F5cyByZXR1cm5zIGZhbHNl
+IGluIGl0cyBzdXBwb3J0X3plcm9fY29weV9yZWFkIG1ldGhvZD8gSXNuJ3QgUkRNQSBzdXBwb3Nl
+ZCB0byBiZSB1c2VkIGZvciB6ZXJvLWNvcHkgY29tbXVuaWNhdGlvbnM/DQoNCg0KQmVjYXVzZSB0
+aGUgcmVjZWl2ZWQgYnVmZmVyIGFsbG9jYXRlZCBieSBtZXNzZW5nZXIgd2lsbCB0cmFuc2ZlciB0
+byBvdGhlciBtb2R1bGVzLCBjdXJyZW50bHkgb3NkLCBmaWxlc3RvcmUsIGJsdWVzdG9yZSB3aWxs
+IGhvbGQgbmV0d29yayBkYXRhIGluIHNvbWUgY2FzZXMuIFVudGlsIHdlIGNvdWxkIHJlc29sdmUg
+dGhlIHNoYXJpbmcgZGF0YSBidWZmZXIsIHdlIG5lZWQgdG8gY29weSBpbiBtZXNzZW5nZXIgZmly
+c3RseS4NCg0KRnVydGhlcm1vcmUsIEkgY2Fubm90IHVuZGVyc3RhbmQgd2h5IHRoZSBBc3luY0Nv
+bm5lY3Rpb24gY2xhc3MgZG9lcyBub3QgdXNlDQp0aGUgQ29ubmVjdGVkU29ja2V0J3MgemVyb19j
+b3B5X3JlYWQgbWV0aG9kIGZvciByZWFkaW5nIGRhdGEgc2luY2UgdGhlIERQREtTdGFjay5oIHN1
+cHBvcnRzIGl0LiAtLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxp
+bmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQp0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8g
+bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZzxtYWlsdG86bWFqb3Jkb21vQHZnZXIua2VybmVsLm9y
+Zz4NCk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
+b21vLWluZm8uaHRtbA0KDQpCZXN0IHJlZ2FyZHMNCg0K
