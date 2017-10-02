@@ -1,37 +1,53 @@
-From: Loic Dachary <ldachary@redhat.com>
-Subject: Re: "tobe" and "ready" in ceph-disk source
-Date: Mon, 2 Oct 2017 15:42:20 +0200
-Message-ID: <c08b3f45-7ab6-711d-aae5-dce053938cbd@redhat.com>
-References: <CAJE9aOOY4Bj-y-fATOeXS3ps5M3mhaypmAUYv=4SaduexN9Znw@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: Docs: build check failed
+Date: Mon, 2 Oct 2017 10:20:11 -0400
+Message-ID: <CAC-Np1xwbGd_eNnmPBoMrZpiR90Dk+XjLu-Ra3AVE=iJTKcUqA@mail.gmail.com>
+References: <ee4a39c3-fe12-99f7-4e07-5d096a54a8c4@redhat.com> <CALe9h7dvfWg0-xTg6q=Aik8LWEghWBOwbdYdnzw3_ydx80UCpg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60070 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751357AbdJBNmX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 2 Oct 2017 09:42:23 -0400
-In-Reply-To: <CAJE9aOOY4Bj-y-fATOeXS3ps5M3mhaypmAUYv=4SaduexN9Znw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:54703 "EHLO
+        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751067AbdJBOUN (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Oct 2017 10:20:13 -0400
+Received: by mail-wm0-f45.google.com with SMTP id i124so10918329wmf.3
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Oct 2017 07:20:12 -0700 (PDT)
+In-Reply-To: <CALe9h7dvfWg0-xTg6q=Aik8LWEghWBOwbdYdnzw3_ydx80UCpg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: Jos Collin <jcollin@redhat.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-Hi Kefu,
-
-On 09/22/2017 02:49 PM, kefu chai wrote:
-> hi Loic,
+On Tue, Sep 26, 2017 at 6:34 AM, John Spray <jspray@redhat.com> wrote:
+> Kefu fixed it: https://github.com/ceph/ceph/pull/17961
 >
-> while ready the source of ceph-disk, i found the "tobe" and "ready"
-> are confusing, why do we need them, instead of just using a single
-> ptype? why creating some block partition is atomic, while creating
-> some others is not?
+> John
 >
-> could you please shed some insights on it?
->
-In the case of a journal, it is enough to create the partition with the appropriate type and it is ready to be used by ceph-osd. For a data partition, there is an intermediate step: creating the file system and populating it with the required files.
+> On Tue, Sep 26, 2017 at 11:21 AM, Jos Collin <jcollin@redhat.com> wrote:
+>> Docs: build check failed for all PRs today.
+>>
+>>
+>> Identified problems
+>>
+>> No identified problem
+>> No problems were identified. If you know why this problem occurred, please
+>> add a suitable Cause for it.
 
-Does that answer your question ? If not I'd be happy to explain further.
+Please note that the message above is for a *plugin* that *parses the
+log output* and if a regex is matched
+it will display that as an "identified problem".
 
-Cheers
+It *does not mean* that there aren't any problems :)
 
+It is always necessary to go read the logs, which in this case were
+indicating what the actual problem was (and was later fixed by Kefu)
+
+
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
