@@ -1,48 +1,59 @@
-From: Justinas LINGYS <jlingys@connect.ust.hk>
-Subject: Re: Why AsyncMessenger/AsyncConnection doesn't use
- support_zero_copy_read/zero_copy_read?
-Date: Mon, 2 Oct 2017 09:11:44 +0000
-Message-ID: <HK2PR01MB1297B25F1BAF9F6E35CF0C89997D0@HK2PR01MB1297.apcprd01.prod.exchangelabs.com>
-References: <HK2PR01MB12974352BA7760B1C8361162997D0@HK2PR01MB1297.apcprd01.prod.exchangelabs.com>,<384688B4-113D-478A-9F36-06616A64394C@xsky.com>
+From: Two Spirit <twospirit6905@gmail.com>
+Subject: Re: Encrypted over WAN?
+Date: Mon, 2 Oct 2017 02:46:10 -0700
+Message-ID: <CAKRxpuu-BKh1h4X9_Vr-pDmGFT=BmVztk1gg9de0X96Sj4-55w@mail.gmail.com>
+References: <CAKRxpuuFHUgoQh8MfhS=vK9f6NVRbAWyccMWWGwJM9UCnw8dtw@mail.gmail.com>
+ <bc3240a6-1f91-8711-dc59-d8319825b5fb@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pu1apc01on0102.outbound.protection.outlook.com ([104.47.126.102]:58573
-        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750927AbdJBJLt (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 2 Oct 2017 05:11:49 -0400
-In-Reply-To: <384688B4-113D-478A-9F36-06616A64394C@xsky.com>
-Content-Language: en-US
+Received: from mail-it0-f42.google.com ([209.85.214.42]:45323 "EHLO
+        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751036AbdJBJqL (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Oct 2017 05:46:11 -0400
+Received: by mail-it0-f42.google.com with SMTP id x15so6626949itb.0
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Oct 2017 02:46:11 -0700 (PDT)
+In-Reply-To: <bc3240a6-1f91-8711-dc59-d8319825b5fb@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?gb2312?B?zfW6wML1?= <haomai@xsky.com>
+To: Joao Eduardo Luis <joao@suse.de>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-RGVhciBIYW9tYWksDQoNClRoYW5rIHlvdSBmb3IgeW91ciBxdWljayByZXNwb25zZS4NCg0KDQpf
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fDQpGcm9tOiDN9brAwvUgPGhh
-b21haUB4c2t5LmNvbT4NClNlbnQ6IE1vbmRheSwgT2N0b2JlciAyLCAyMDE3IDQ6NTI6MDAgUE0N
-ClRvOiBKdXN0aW5hcyBMSU5HWVMNCkNjOiBjZXBoLWRldmVsDQpTdWJqZWN0OiBSZTogV2h5IEFz
-eW5jTWVzc2VuZ2VyL0FzeW5jQ29ubmVjdGlvbiBkb2Vzbid0IHVzZSBzdXBwb3J0X3plcm9fY29w
-eV9yZWFkL3plcm9fY29weV9yZWFkPw0KDQpPbiBPY3QgMiwgMjAxNywgYXQgMTY6MTksIEp1c3Rp
-bmFzIExJTkdZUyA8amxpbmd5c0Bjb25uZWN0LnVzdC5oazxtYWlsdG86amxpbmd5c0Bjb25uZWN0
-LnVzdC5oaz4+IHdyb3RlOg0KDQpJIGFtIHdvbmRlcmluZyB3aHkgQXluY01lc3NlbmdlciAoc3Jj
-L21zZy9hc3luYy9Bc3luY01lc3Nlbmdlci5oKSBkb2VzIG5vdA0KdXNlIHRoZSBTdGFjaydzIChz
-cmMvbXNnL2FzeW5jL1N0YWNrLmgpIHN1cHBvcnRfemVyb19jb3B5X3JlYWQgbWV0aG9kPyAgSW4g
-YWRkaXRpb24sIEkgd291bGQgYmUgaW50ZXJlc3RlZCBpbiBrbm93aW5nIHdoeSB0aGUgUkRNQVN0
-YWNrIChzcmMvbXNnL2FzeW5jL3JkbWEvUkRNQVN0YWNrLmgpIGFsd2F5cyByZXR1cm5zIGZhbHNl
-IGluIGl0cyBzdXBwb3J0X3plcm9fY29weV9yZWFkIG1ldGhvZD8gSXNuJ3QgUkRNQSBzdXBwb3Nl
-ZCB0byBiZSB1c2VkIGZvciB6ZXJvLWNvcHkgY29tbXVuaWNhdGlvbnM/DQoNCg0KQmVjYXVzZSB0
-aGUgcmVjZWl2ZWQgYnVmZmVyIGFsbG9jYXRlZCBieSBtZXNzZW5nZXIgd2lsbCB0cmFuc2ZlciB0
-byBvdGhlciBtb2R1bGVzLCBjdXJyZW50bHkgb3NkLCBmaWxlc3RvcmUsIGJsdWVzdG9yZSB3aWxs
-IGhvbGQgbmV0d29yayBkYXRhIGluIHNvbWUgY2FzZXMuIFVudGlsIHdlIGNvdWxkIHJlc29sdmUg
-dGhlIHNoYXJpbmcgZGF0YSBidWZmZXIsIHdlIG5lZWQgdG8gY29weSBpbiBtZXNzZW5nZXIgZmly
-c3RseS4NCg0KRnVydGhlcm1vcmUsIEkgY2Fubm90IHVuZGVyc3RhbmQgd2h5IHRoZSBBc3luY0Nv
-bm5lY3Rpb24gY2xhc3MgZG9lcyBub3QgdXNlDQp0aGUgQ29ubmVjdGVkU29ja2V0J3MgemVyb19j
-b3B5X3JlYWQgbWV0aG9kIGZvciByZWFkaW5nIGRhdGEgc2luY2UgdGhlIERQREtTdGFjay5oIHN1
-cHBvcnRzIGl0LiAtLQ0KVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxp
-bmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluDQp0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8g
-bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZzxtYWlsdG86bWFqb3Jkb21vQHZnZXIua2VybmVsLm9y
-Zz4NCk1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jk
-b21vLWluZm8uaHRtbA0KDQpCZXN0IHJlZ2FyZHMNCg0K
+I think that is a hard security pill to swallow sending data in
+plaintext over the WAN. I think there are mitm and replay attack
+issues. I dont think anyone would knowingly send unencrypted file
+server content across the WAN.
+
+I think in about 15 states or so, Sarbanes Oxley laws prevents certain
+personal information to be "transmitted" in the clear. You need to ask
+a lawyer what that means. maybe it doesn't apply here.  This is
+information HR and Finance depts typically hold. I could see that some
+HR could be clueless on what their file system is doing with their
+data. Also IT guys don't necessarily know corporate law. I don't know
+if HIPAA or Gramm-Leach-Blilely Act would have problems. I don't think
+Equifax will use Ceph.
+
+In a federated setup, is there a way to wrap the region to region
+traffic and encrypt?
+
+On Mon, Oct 2, 2017 at 1:02 AM, Joao Eduardo Luis <joao@suse.de> wrote:
+> On 10/02/2017 07:18 AM, Two Spirit wrote:
+>>>
+>>> The Ceph Object Gateway supports server-side encryption of uploaded
+>>> objects, with 3 options for the management of encryption keys. Server-side
+>>> encryption means that the data is sent over HTTP in its unencrypted form,
+>>> and the Ceph Object Gateway stores that data in the Ceph Storage Cluster in
+>>> encrypted form.
+>>
+>>
+>> It sounds like OSD to OSD traffic is unencrypted.
+>>
+>> 1) Does "stores data in the cluster in encrypted form" mean *only* if
+>> the --dmcrypt option is used?
+>>
+>> 2) Does that mean the zone  to zone copy across a WAN is also unencrypted?
+>
+>
+> Ceph does not have on-the-wire encryption.
+>
+>   -Joao
