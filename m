@@ -1,65 +1,37 @@
-From: Fabian =?iso-8859-1?Q?Gr=FCnbichler?= <f.gruenbichler-YTcQvvOqK21BDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [Ceph-announce] Luminous v12.2.1 released
-Date: Mon, 2 Oct 2017 14:10:45 +0200
-Message-ID: <20171002121045.ydbzidb2cofdrzek@nora.maurer-it.com>
-References: <1b8b25baf4d8e5c661bf56d50ee17aa5@suse.com>
+From: Loic Dachary <ldachary@redhat.com>
+Subject: Re: "tobe" and "ready" in ceph-disk source
+Date: Mon, 2 Oct 2017 15:42:20 +0200
+Message-ID: <c08b3f45-7ab6-711d-aae5-dce053938cbd@redhat.com>
+References: <CAJE9aOOY4Bj-y-fATOeXS3ps5M3mhaypmAUYv=4SaduexN9Znw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1b8b25baf4d8e5c661bf56d50ee17aa5-IBi9RG/b67k@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Abhishek <abhishek-IBi9RG/b67k@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org, ceph-maintainers-Qp0mS5GaXlQ@public.gmane.org, ceph-announce-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:60070 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751357AbdJBNmX (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 2 Oct 2017 09:42:23 -0400
+In-Reply-To: <CAJE9aOOY4Bj-y-fATOeXS3ps5M3mhaypmAUYv=4SaduexN9Znw@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Sep 28, 2017 at 05:46:30PM +0200, Abhishek wrote:
-> This is the first bugfix release of Luminous v12.2.x long term stable
-> release series. It contains a range of bug fixes and a few features
-> across CephFS, RBD & RGW. We recommend all the users of 12.2.x series
-> update.
-> 
-> For more details, refer to the release notes entry at the official
-> blog[1] and the complete changelog[2]
-> 
-> Notable Changes
-> ---------------
-> 
-> [ snip ]
-> 
-> * The maximum number of PGs per OSD before the monitor issues a
->    warning has been reduced from 300 to 200 PGs.  200 is still twice
->    the generally recommended target of 100 PGs per OSD.  This limit can
->    be adjusted via the ``mon_max_pg_per_osd`` option on the
->    monitors.  The older ``mon_pg_warn_max_per_osd`` option has been
-> removed.
-> 
-> * Creating pools or adjusting pg_num will now fail if the change would
->    make the number of PGs per OSD exceed the configured
->    ``mon_max_pg_per_osd`` limit.  The option can be adjusted if it
->    is really necessary to create a pool with more PGs.
-> 
-> [ snip ]
-> 
-> Getting Ceph
-> ------------
-> 
-> [ snip ]
-> 
-> [1]: http://ceph.com/releases/v12-2-1-luminous-released/
-> [2]: https://github.com/ceph/ceph/blob/master/doc/changelog/v12.2.1.txt
-> 
+Hi Kefu,
 
-those release notes should be corrected, [1] did apparently not make the
-cut for 12.2.1 but makes up 1/3 of the notable changes..
+On 09/22/2017 02:49 PM, kefu chai wrote:
+> hi Loic,
+>
+> while ready the source of ceph-disk, i found the "tobe" and "ready"
+> are confusing, why do we need them, instead of just using a single
+> ptype? why creating some block partition is atomic, while creating
+> some others is not?
+>
+> could you please shed some insights on it?
+>
+In the case of a journal, it is enough to create the partition with the appropriate type and it is ready to be used by ceph-osd. For a data partition, there is an intermediate step: creating the file system and populating it with the required files.
 
-1: https://github.com/ceph/ceph/pull/17814
+Does that answer your question ? If not I'd be happy to explain further.
+
+Cheers
+
