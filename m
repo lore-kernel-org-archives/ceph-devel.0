@@ -1,47 +1,130 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: break_lock in librbd API without blacklisting client
-Date: Mon, 2 Oct 2017 14:59:20 -0400
-Message-ID: <CA+aFP1B+oUOXH0zpAyNf5U+QmfbEdV1DNcUFM1Jv9JtWUwq67A@mail.gmail.com>
-References: <CAAVaRixW--NfN6a65xj7ekNGhbc+ZT7VMBdXVGtOgCaFxnesgQ@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Two Spirit <twospirit6905@gmail.com>
+Subject: Re: Encrypted over WAN?
+Date: Mon, 2 Oct 2017 13:20:07 -0700
+Message-ID: <CAKRxpusbLgXBvMCAcLtR2Ox37ORtc4m=z=r605BcqQ6H+YfUMQ@mail.gmail.com>
+References: <CAKRxpuuFHUgoQh8MfhS=vK9f6NVRbAWyccMWWGwJM9UCnw8dtw@mail.gmail.com>
+ <c1e95b98-8f83-0ab4-b812-999401ae12ee@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f175.google.com ([209.85.216.175]:46732 "EHLO
-        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751120AbdJBS7X (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Oct 2017 14:59:23 -0400
-Received: by mail-qt0-f175.google.com with SMTP id s18so8744150qta.3
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Oct 2017 11:59:23 -0700 (PDT)
-In-Reply-To: <CAAVaRixW--NfN6a65xj7ekNGhbc+ZT7VMBdXVGtOgCaFxnesgQ@mail.gmail.com>
+Received: from mail-io0-f173.google.com ([209.85.223.173]:53727 "EHLO
+        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751816AbdJBUUI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Oct 2017 16:20:08 -0400
+Received: by mail-io0-f173.google.com with SMTP id q11so5796699ioe.10
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Oct 2017 13:20:08 -0700 (PDT)
+In-Reply-To: <c1e95b98-8f83-0ab4-b812-999401ae12ee@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mauricio Garavaglia <mauricio@medallia.com>
+To: Casey Bodley <cbodley@redhat.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-First, I would like to advise that disabling blacklist on lock break
-can result in data corruption if the old lock owner continues to write
-after the lock has been broken. If that doesn't deter you, you can
-just set the configuration value programmatically [1] just like the
-rbd CLI allows you to override configuration values via optionals.
+Thank you for the details. Very helpful to understand the state of
+this. I needed some more clarifications inline below:
 
-[1] http://docs.ceph.com/docs/master/rados/api/python/#rados.Rados.conf_set
+>This encryption only applies to object data. Other metadata, such as
+> object names, sizes and etags, are still visible to any client that can
+> GET the bucket listing or HEAD the objects.
 
-On Mon, Oct 2, 2017 at 1:28 PM, Mauricio Garavaglia
-<mauricio@medallia.com> wrote:
-> Hello,
-> What's the correct way to use break_lock in the python/golang bindings
-> without blacklisting the client?
-> This can be done in the rbd cli using
-> --rbd_blacklist_on_break_lock=false but I can't find a way to do it
-> with the api.
-> Thanks
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Just for clarification, does the "object data" imply block data too?
+and was this statement about the S3 only or also applies to Swift?
 
 
+>> It sounds like OSD to OSD traffic is unencrypted.
+>>
+>> 1) Does "stores data in the cluster in encrypted form" mean *only* if
+>> the --dmcrypt option is used?
+>
+>RGW server side encryption does not rely on the dmcrypt configuration
+>of the OSDs. For SSE-enabled objects, RGW will encrypt the object
+>data before sending it to OSDs, so unencrypted data is not sent over
+>Ceph's client/cluster networks.
 
--- 
-Jason
+Got it, so --dmcrypt is basically on disk encryption of the OSDs and
+not related to any transport encryption.
+
+
+>> 2) Does that mean the zone  to zone copy across a WAN is also
+>> unencrypted?
+>In a multisite configuration, SSE-enabled objects are replicated between
+>zones in their encrypted form. The same requirements for decryption
+>apply to both zones.
+
+I'm considering evaluating Swift integration with Ceph for multisite
+configuration. Does "and will not apply to the Swift protocol at all",
+mean there is no encryption between RGWs? (I wasn't sure if I even
+needed RGWs if Swift handles all the multisite traffic -- haven't
+looked into details yet) Or is there an implication that the Swift
+protocol itself could potentially now or in the future handle
+encrypted transport?
+
+
+
+thanks!
+
+On Mon, Oct 2, 2017 at 11:40 AM, Casey Bodley <cbodley@redhat.com> wrote:
+> Hi,
+>
+> As this quoted text came from the RGW server-side encryption docs [1], I'll
+> add some details about that.
+>
+> First, this is an S3-only feature that implements two of Amazon's
+> specifications, SSE-C and SSE-KMS. For each upload, the S3 client must
+> specifically request server side encryption by providing extra headers for
+> each object upload. For example, you can do this with boto3 [2] by providing
+> a ServerSideEncryption with either a SSEKMSKeyId or
+> SSECustomerKey/SSECustomerAlgorithm when uploading an object.
+>
+> Because this encryption must be requested by the client on a per-object
+> basis, and will not apply to the Swift protocol at all, it can't be used to
+> provide blanket encryption for all radosgw object data. At best, a bucket
+> policy could require SSE-KMS encryption for all contained objects, but this
+> is not yet implemented in RGW.
+>
+> This encryption only applies to object data. Other metadata, such as object
+> names, sizes and etags, are still visible to any client that can GET the
+> bucket listing or HEAD the objects.
+>
+>
+> On 10/02/2017 02:18 AM, Two Spirit wrote:
+>>>
+>>> The Ceph Object Gateway supports server-side encryption of uploaded
+>>> objects, with 3 options for the management of encryption keys. Server-side
+>>> encryption means that the data is sent over HTTP in its unencrypted form,
+>>> and the Ceph Object Gateway stores that data in the Ceph Storage Cluster in
+>>> encrypted form.
+>
+>
+> While this says that data is sent over HTTP in its unencrypted form, the
+> Amazon specifications do require that SSE requests be made over an SSL
+> connection, and RGW does enforce this.
+>
+>> It sounds like OSD to OSD traffic is unencrypted.
+>>
+>> 1) Does "stores data in the cluster in encrypted form" mean *only* if
+>> the --dmcrypt option is used?
+>
+>
+> RGW server side encryption does not rely on the dmcrypt configuration of the
+> OSDs. For SSE-enabled objects, RGW will encrypt the object data before
+> sending it to OSDs, so unencrypted data is not sent over Ceph's
+> client/cluster networks.
+>
+>>
+>> 2) Does that mean the zone  to zone copy across a WAN is also unencrypted?
+>
+>
+> In a multisite configuration, SSE-enabled objects are replicated between
+> zones in their encrypted form. The same requirements for decryption apply to
+> both zones.
+>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+> [1] http://docs.ceph.com/docs/luminous/radosgw/encryption/
+> [2]
+> http://boto3.readthedocs.io/en/latest/reference/services/s3.html#S3.Client.put_object
