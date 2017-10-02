@@ -1,30 +1,32 @@
-From: Two Spirit <twospirit6905@gmail.com>
-Subject: Encrypted over WAN?
-Date: Sun, 1 Oct 2017 23:18:44 -0700
-Message-ID: <CAKRxpuuFHUgoQh8MfhS=vK9f6NVRbAWyccMWWGwJM9UCnw8dtw@mail.gmail.com>
+From: Joao Eduardo Luis <joao@suse.de>
+Subject: Re: Encrypted over WAN?
+Date: Mon, 2 Oct 2017 09:02:58 +0100
+Message-ID: <bc3240a6-1f91-8711-dc59-d8319825b5fb@suse.de>
+References: <CAKRxpuuFHUgoQh8MfhS=vK9f6NVRbAWyccMWWGwJM9UCnw8dtw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f172.google.com ([209.85.223.172]:43173 "EHLO
-        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750770AbdJBGSp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Oct 2017 02:18:45 -0400
-Received: by mail-io0-f172.google.com with SMTP id k101so3941484iod.0
-        for <ceph-devel@vger.kernel.org>; Sun, 01 Oct 2017 23:18:45 -0700 (PDT)
+Received: from mx2.suse.de ([195.135.220.15]:34033 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750770AbdJBIDB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 2 Oct 2017 04:03:01 -0400
+In-Reply-To: <CAKRxpuuFHUgoQh8MfhS=vK9f6NVRbAWyccMWWGwJM9UCnw8dtw@mail.gmail.com>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Two Spirit <twospirit6905@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
->The Ceph Object Gateway supports server-side encryption of uploaded object=
-s, with 3 options for the management of encryption keys. Server-side encryp=
-tion means that the data is sent over HTTP in its unencrypted form, and the=
- Ceph Object Gateway stores that data in the Ceph Storage Cluster in encryp=
-ted form.
+On 10/02/2017 07:18 AM, Two Spirit wrote:
+>> The Ceph Object Gateway supports server-side encryption of uploaded objects, with 3 options for the management of encryption keys. Server-side encryption means that the data is sent over HTTP in its unencrypted form, and the Ceph Object Gateway stores that data in the Ceph Storage Cluster in encrypted form.
+> 
+> It sounds like OSD to OSD traffic is unencrypted.
+> 
+> 1) Does "stores data in the cluster in encrypted form" mean *only* if
+> the --dmcrypt option is used?
+> 
+> 2) Does that mean the zone  to zone copy across a WAN is also unencrypted?
 
-It sounds like OSD to OSD traffic is unencrypted.
+Ceph does not have on-the-wire encryption.
 
-1) Does "stores data in the cluster in encrypted form" mean *only* if
-the --dmcrypt option is used?
-
-2) Does that mean the zone  to zone copy across a WAN is also unencrypted?
+   -Joao
