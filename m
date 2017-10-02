@@ -1,130 +1,37 @@
 From: Two Spirit <twospirit6905@gmail.com>
-Subject: Re: Encrypted over WAN?
-Date: Mon, 2 Oct 2017 13:20:07 -0700
-Message-ID: <CAKRxpusbLgXBvMCAcLtR2Ox37ORtc4m=z=r605BcqQ6H+YfUMQ@mail.gmail.com>
-References: <CAKRxpuuFHUgoQh8MfhS=vK9f6NVRbAWyccMWWGwJM9UCnw8dtw@mail.gmail.com>
- <c1e95b98-8f83-0ab4-b812-999401ae12ee@redhat.com>
+Subject: Multisite 3+ zones
+Date: Mon, 2 Oct 2017 13:41:16 -0700
+Message-ID: <CAKRxpusXtf+Xj9+nsbN_GP7CmeqF09vMZnMnM7wA-JvvuJypYw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f173.google.com ([209.85.223.173]:53727 "EHLO
-        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751816AbdJBUUI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Oct 2017 16:20:08 -0400
-Received: by mail-io0-f173.google.com with SMTP id q11so5796699ioe.10
-        for <ceph-devel@vger.kernel.org>; Mon, 02 Oct 2017 13:20:08 -0700 (PDT)
-In-Reply-To: <c1e95b98-8f83-0ab4-b812-999401ae12ee@redhat.com>
+Received: from mail-io0-f181.google.com ([209.85.223.181]:52832 "EHLO
+        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751354AbdJBUlU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 2 Oct 2017 16:41:20 -0400
+Received: by mail-io0-f181.google.com with SMTP id i197so5843909ioe.9
+        for <ceph-devel@vger.kernel.org>; Mon, 02 Oct 2017 13:41:20 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Casey Bodley <cbodley@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Orit Wasserman <owasserm@redhat.com>, Sage Weil <sweil@redhat.com>
 
-Thank you for the details. Very helpful to understand the state of
-this. I needed some more clarifications inline below:
+The documenation I saw talked about multi-zones, but seems to stop in
+the details at 2 zones whereas,  before, Jewel's Master zone(RW) wrote
+to Slave Zone(RO), and now after Jewel, writing to the Slave is doable
+(implying RW) to either zone. and didn't address the case of 3 or more
+zones. I thought the Master/Slave architecture implied it was limited
+to 2 zones.
 
->This encryption only applies to object data. Other metadata, such as
-> object names, sizes and etags, are still visible to any client that can
-> GET the bucket listing or HEAD the objects.
+Is RW to any zone supported in 3+ zone configurations? The whole
+master/slave idea doesn't seem to make sense when talking about 3+
+zones. I'm taking a guess that this must be fully meshed, and RW to
+any modifications in one zone replicates to *all* other zones
+(independent on the number of replicas specified in any cluster)
 
-Just for clarification, does the "object data" imply block data too?
-and was this statement about the S3 only or also applies to Swift?
+If this is supported, what happens if zone1 data is modified, while at
+the same time a zone2 modifies the same data but the data was not yet
+copied from the zone1 to zone2. How is this conflict handled? Does
+last write win?
 
-
->> It sounds like OSD to OSD traffic is unencrypted.
->>
->> 1) Does "stores data in the cluster in encrypted form" mean *only* if
->> the --dmcrypt option is used?
->
->RGW server side encryption does not rely on the dmcrypt configuration
->of the OSDs. For SSE-enabled objects, RGW will encrypt the object
->data before sending it to OSDs, so unencrypted data is not sent over
->Ceph's client/cluster networks.
-
-Got it, so --dmcrypt is basically on disk encryption of the OSDs and
-not related to any transport encryption.
-
-
->> 2) Does that mean the zone  to zone copy across a WAN is also
->> unencrypted?
->In a multisite configuration, SSE-enabled objects are replicated between
->zones in their encrypted form. The same requirements for decryption
->apply to both zones.
-
-I'm considering evaluating Swift integration with Ceph for multisite
-configuration. Does "and will not apply to the Swift protocol at all",
-mean there is no encryption between RGWs? (I wasn't sure if I even
-needed RGWs if Swift handles all the multisite traffic -- haven't
-looked into details yet) Or is there an implication that the Swift
-protocol itself could potentially now or in the future handle
-encrypted transport?
-
-
-
-thanks!
-
-On Mon, Oct 2, 2017 at 11:40 AM, Casey Bodley <cbodley@redhat.com> wrote:
-> Hi,
->
-> As this quoted text came from the RGW server-side encryption docs [1], I'll
-> add some details about that.
->
-> First, this is an S3-only feature that implements two of Amazon's
-> specifications, SSE-C and SSE-KMS. For each upload, the S3 client must
-> specifically request server side encryption by providing extra headers for
-> each object upload. For example, you can do this with boto3 [2] by providing
-> a ServerSideEncryption with either a SSEKMSKeyId or
-> SSECustomerKey/SSECustomerAlgorithm when uploading an object.
->
-> Because this encryption must be requested by the client on a per-object
-> basis, and will not apply to the Swift protocol at all, it can't be used to
-> provide blanket encryption for all radosgw object data. At best, a bucket
-> policy could require SSE-KMS encryption for all contained objects, but this
-> is not yet implemented in RGW.
->
-> This encryption only applies to object data. Other metadata, such as object
-> names, sizes and etags, are still visible to any client that can GET the
-> bucket listing or HEAD the objects.
->
->
-> On 10/02/2017 02:18 AM, Two Spirit wrote:
->>>
->>> The Ceph Object Gateway supports server-side encryption of uploaded
->>> objects, with 3 options for the management of encryption keys. Server-side
->>> encryption means that the data is sent over HTTP in its unencrypted form,
->>> and the Ceph Object Gateway stores that data in the Ceph Storage Cluster in
->>> encrypted form.
->
->
-> While this says that data is sent over HTTP in its unencrypted form, the
-> Amazon specifications do require that SSE requests be made over an SSL
-> connection, and RGW does enforce this.
->
->> It sounds like OSD to OSD traffic is unencrypted.
->>
->> 1) Does "stores data in the cluster in encrypted form" mean *only* if
->> the --dmcrypt option is used?
->
->
-> RGW server side encryption does not rely on the dmcrypt configuration of the
-> OSDs. For SSE-enabled objects, RGW will encrypt the object data before
-> sending it to OSDs, so unencrypted data is not sent over Ceph's
-> client/cluster networks.
->
->>
->> 2) Does that mean the zone  to zone copy across a WAN is also unencrypted?
->
->
-> In a multisite configuration, SSE-enabled objects are replicated between
-> zones in their encrypted form. The same requirements for decryption apply to
-> both zones.
->
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> [1] http://docs.ceph.com/docs/luminous/radosgw/encryption/
-> [2]
-> http://boto3.readthedocs.io/en/latest/reference/services/s3.html#S3.Client.put_object
+Is the RADOS "primary copy", "Chain", and "Splay" replication strategy
+also used in multisite traffic?
