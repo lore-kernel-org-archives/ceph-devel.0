@@ -1,66 +1,62 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: ceph-iscsi packages
-Date: Tue, 3 Oct 2017 13:48:11 -0400
-Message-ID: <CA+aFP1BtuR--wrPxVKFKj-=ZL9x=Gf0=FRTrvn-tCWtJHaMqsg@mail.gmail.com>
-References: <CAMzumdYvfZYb+4S6bmWCn+zjbbr=wPqmi8Qs3Nwrt=fpdP695g@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Ceph Developers Monthly - October
+Date: Wed, 4 Oct 2017 03:02:09 -0300
+Message-ID: <20171004060209.GA12681@t460.local>
+References: <20170928030800.GB27915@oops.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f181.google.com ([209.85.216.181]:48884 "EHLO
-        mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750797AbdJCRsN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 3 Oct 2017 13:48:13 -0400
-Received: by mail-qt0-f181.google.com with SMTP id d13so13774781qta.5
-        for <ceph-devel@vger.kernel.org>; Tue, 03 Oct 2017 10:48:12 -0700 (PDT)
-In-Reply-To: <CAMzumdYvfZYb+4S6bmWCn+zjbbr=wPqmi8Qs3Nwrt=fpdP695g@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Barclay Jameson <almightybeeij@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20170928030800.GB27915-P41qYDs/Hces1BDpvl8NfQ@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-The Open-iSCSI targetcli, python-rtslib, and tcmu-runner projects
-should eventually trickle down into distributions, but before that we
-hope to find some responsible entity / person to provide COPR, PPA,
-etc repositories for these packages since we don't want to maintain
-these packages long-term. We do, from time-to-time, build these as
-part of the Ceph development repos available here [1][2].
+On Thu, Sep 28, 2017 at 12:08:00AM -0300, Leonardo Vaz wrote:
+> Hey Cephers,
+> 
+> This is just a friendly reminder that the next Ceph Developer Montly
+> meeting is coming up:
+> 
+>  http://wiki.ceph.com/Planning
+> 
+> If you have work that you're doing that it a feature work, significant
+> backports, or anything you would like to discuss with the core team,
+> please add it to the following page:
+> 
+>  http://wiki.ceph.com/CDM_04-OCT-2017
+> 
+> If you have questions or comments, please let us know.
 
-The story with the Ceph organization's ceph-iscsi-config and
-ceph-iscsi-cli packages are a similar story. We hope to get these
-officially build and available as part of Ceph's production repos. In
-the meantime, development repos are available here [3][4].
+Hey cephers,
 
-[1] https://shaman.ceph.com/repos/python-rtslib/
-[2] https://shaman.ceph.com/repos/tcmu-runner/
-[3] https://shaman.ceph.com/repos/ceph-iscsi-config/
-[4] https://shaman.ceph.com/repos/ceph-iscsi-cli/
+This is just a friendly reminder the Ceph Developer Montly is confirmed
+for today, October 4 at 12:30pm Eastern Time (EDT), on US/EMEA friendly
+hours.
 
-Note that the current ceph-iscsi-config package expect an upstream
-4.14 kernel with an patch that has not yet been merged into the most
-recent release candidate.
+If you have any topic to discuss on this meeting, please add it to the
+following pad:
 
-On Tue, Oct 3, 2017 at 11:07 AM, Barclay Jameson
-<almightybeeij@gmail.com> wrote:
-> From the docs:
->
-> The following packages must be installed from your Linux
-> distribution's software repository:
->
->     targetcli-2.1.fb47 or newer package
->     python-rtslib-2.1.fb64 or newer package
->     tcmu-runner-1.3.0 or newer package
->     ceph-iscsi-config-2.3 or newer package
->     ceph-iscsi-cli-2.5 or newer package
->
->
-> Where do I find said packages?
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  http://tracker.ceph.com/projects/ceph/wiki/CDM_04-OCT-2017
 
+We will use the following Bluejeans URL for the video conference:
 
+  https://bluejeans.com/707503600
+
+Kindest regards,
+
+Leo
 
 -- 
-Jason
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
