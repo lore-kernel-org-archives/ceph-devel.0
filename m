@@ -1,68 +1,89 @@
-From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Ceph Developers Monthly - October
-Date: Wed, 4 Oct 2017 13:16:46 -0300
-Message-ID: <20171004161646.GA25159@t460.local>
-References: <20170928030800.GB27915@oops.local>
- <20171004060209.GA12681@t460.local>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: ec overwrite issue
+Date: Wed, 4 Oct 2017 11:11:32 -0700
+Message-ID: <CAJ4mKGbVTYUSMO2tQ8PQfrpXO6=eTHxK6Agn=C+dxU4XOvuk5A@mail.gmail.com>
+References: <CANE=7sUPY=qoJSpprXc5QHo+3eiUbK=Qjp9MAE7Oze33Kg-sQQ@mail.gmail.com>
+ <CAJ4mKGZ0GX-FXKsVGTkdSJTUNr5J26=+EcYKRxxYuOWSM-TBXA@mail.gmail.com> <CANE=7sVXHsM40i5aWTgzErKRbUeL2AEOKDa0mkuih_3Uyaxq_Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20171004060209.GA12681-wGZc43OlCras1BDpvl8NfQ@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-io0-f181.google.com ([209.85.223.181]:48794 "EHLO
+        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751114AbdJDSLd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Oct 2017 14:11:33 -0400
+Received: by mail-io0-f181.google.com with SMTP id f72so4842549ioj.5
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Oct 2017 11:11:33 -0700 (PDT)
+In-Reply-To: <CANE=7sVXHsM40i5aWTgzErKRbUeL2AEOKDa0mkuih_3Uyaxq_Q@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Wed, Oct 04, 2017 at 03:02:09AM -0300, Leonardo Vaz wrote:
-> On Thu, Sep 28, 2017 at 12:08:00AM -0300, Leonardo Vaz wrote:
-> > Hey Cephers,
-> > 
-> > This is just a friendly reminder that the next Ceph Developer Montly
-> > meeting is coming up:
-> > 
-> >  http://wiki.ceph.com/Planning
-> > 
-> > If you have work that you're doing that it a feature work, significant
-> > backports, or anything you would like to discuss with the core team,
-> > please add it to the following page:
-> > 
-> >  http://wiki.ceph.com/CDM_04-OCT-2017
-> > 
-> > If you have questions or comments, please let us know.
-> 
-> Hey cephers,
-> 
-> This is just a friendly reminder the Ceph Developer Montly is confirmed
-> for today, October 4 at 12:30pm Eastern Time (EDT), on US/EMEA friendly
-> hours.
-> 
-> If you have any topic to discuss on this meeting, please add it to the
-> following pad:
-> 
->   http://tracker.ceph.com/projects/ceph/wiki/CDM_04-OCT-2017
-> 
-> We will use the following Bluejeans URL for the video conference:
-> 
->   https://bluejeans.com/707503600
+On Fri, Sep 29, 2017 at 5:19 PM, Xinze Chi (信泽) <xmdxcxz@gmail.com> wrote:
+> such as transaction a would modify the object a < last_backfill, so
+> transaction_applied would be true. Before transaction a is completed,
+> the transaction b which modify the object b > last_backfill,
+> so transaction_applied would be false, the current logic would
+> roll_forward which including object a and b? is it right?
 
-Sorry for the short notice but the meeting URL has been changed:
+Yes, I believe that's the case. It's just that we don't care very much
+— if we copied the data while backfilling, we know that our source
+peer has the rollback state. Keep in mind that we only have rollback
+so that we can avoid the "RAID write hole" — eg, if we manage to write
+down an update on 4 nodes in a 5+3 erasure code, we can recover
+neither the old nor new data if it was written in-place. So we keep
+rollback data in that case and everybody goes back to the previous
+state.
 
-  https://bluejeans.com/9290089010 
+I *think* that if we manage to backfill an object for a particular
+shard, then we know that we can roll forward on it anyway or the read
+would have failed and the OSDs would have already rolled back. But I
+didn't check that. Certainly doing something other than this automatic
+roll forward would require a lot more bookkeeping that would make
+everything else going on more difficult.
+-Greg
 
-Kindest regards,
-
-Leo
-
--- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
+>
+>
+> 2017-09-30 2:27 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
+>> On Fri, Sep 29, 2017 at 3:02 AM, Xinze Chi (信泽) <xmdxcxz@gmail.com> wrote:
+>>> hi, all
+>>>
+>>>     I confuse the roll_forward logic in the PG::append_log. The
+>>> pg_log.roll_forward func may roll forward the all inflight
+>>> transactions which maybe not be completed by all shards.
+>>>
+>>>     The comment also makes me wonder. so could anyone explain it in
+>>> detail. thanks.
+>>>
+>>>
+>>>   if (!transaction_applied) {
+>>>      /* We must be a backfill peer, so it's ok if we apply
+>>>       * out-of-turn since we won't be considered when
+>>>       * determining a min possible last_update.
+>>>       */
+>>>     pg_log.roll_forward(&handler);
+>>>   }
+>>>
+>>>     /* We don't want to leave the rollforward artifacts around
+>>>      * here past last_backfill.  It's ok for the same reason as
+>>>      * above */
+>>>     if (transaction_applied &&
+>>>        p->soid > info.last_backfill) {
+>>>       pg_log.roll_forward(&handler);
+>>>     }
+>>
+>> transaction_applied can only be false if we are being backfilled. If
+>> we are being backfilled, we may not *have* the older data that we
+>> would rollback to, and our peers don't rely on us having that data. So
+>> there's no point in our trying to keep rollback data around, and
+>> keeping it around would mean finding a way to clean it up later. Thus,
+>> delete it now.
+>> -Greg
+>
+>
+>
+> --
+> Regards,
+> Xinze Chi
