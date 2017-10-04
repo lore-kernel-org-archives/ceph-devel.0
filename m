@@ -1,62 +1,31 @@
-From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Ceph Developers Monthly - October
-Date: Wed, 4 Oct 2017 03:02:09 -0300
-Message-ID: <20171004060209.GA12681@t460.local>
-References: <20170928030800.GB27915@oops.local>
+From: Justinas LINGYS <jlingys@connect.ust.hk>
+Subject: What is the progress of RDMA READ/WRITE?
+Date: Wed, 4 Oct 2017 06:29:53 +0000
+Message-ID: <HK2PR01MB1297B775CACF2508C3F734DD99730@HK2PR01MB1297.apcprd01.prod.exchangelabs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20170928030800.GB27915-P41qYDs/Hces1BDpvl8NfQ@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pu1apc01on0126.outbound.protection.outlook.com ([104.47.126.126]:6502
+        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751132AbdJDG34 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 4 Oct 2017 02:29:56 -0400
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Sep 28, 2017 at 12:08:00AM -0300, Leonardo Vaz wrote:
-> Hey Cephers,
-> 
-> This is just a friendly reminder that the next Ceph Developer Montly
-> meeting is coming up:
-> 
->  http://wiki.ceph.com/Planning
-> 
-> If you have work that you're doing that it a feature work, significant
-> backports, or anything you would like to discuss with the core team,
-> please add it to the following page:
-> 
->  http://wiki.ceph.com/CDM_04-OCT-2017
-> 
-> If you have questions or comments, please let us know.
+I am wondering if there has been made any progress in the RDMA of Ceph
+so that Ceph could use READ/WRITE verbs for some of operations (like data r=
+eplication).
 
-Hey cephers,
+I would be interested in knowing since the official code does not contain n=
+ew updates on
+RDMA regarding RDMA READ/WRITE. Also, tracker.ceph seems not to have any sp=
+ecific
+information about it.
 
-This is just a friendly reminder the Ceph Developer Montly is confirmed
-for today, October 4 at 12:30pm Eastern Time (EDT), on US/EMEA friendly
-hours.
 
-If you have any topic to discuss on this meeting, please add it to the
-following pad:
 
-  http://tracker.ceph.com/projects/ceph/wiki/CDM_04-OCT-2017
 
-We will use the following Bluejeans URL for the video conference:
-
-  https://bluejeans.com/707503600
-
-Kindest regards,
-
-Leo
-
--- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
