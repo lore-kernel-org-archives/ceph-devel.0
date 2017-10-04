@@ -1,89 +1,32 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: ec overwrite issue
-Date: Wed, 4 Oct 2017 11:11:32 -0700
-Message-ID: <CAJ4mKGbVTYUSMO2tQ8PQfrpXO6=eTHxK6Agn=C+dxU4XOvuk5A@mail.gmail.com>
-References: <CANE=7sUPY=qoJSpprXc5QHo+3eiUbK=Qjp9MAE7Oze33Kg-sQQ@mail.gmail.com>
- <CAJ4mKGZ0GX-FXKsVGTkdSJTUNr5J26=+EcYKRxxYuOWSM-TBXA@mail.gmail.com> <CANE=7sVXHsM40i5aWTgzErKRbUeL2AEOKDa0mkuih_3Uyaxq_Q@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Mimic timeline
+Date: Wed, 4 Oct 2017 20:58:56 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1710042054030.27705@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f181.google.com ([209.85.223.181]:48794 "EHLO
-        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751114AbdJDSLd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Oct 2017 14:11:33 -0400
-Received: by mail-io0-f181.google.com with SMTP id f72so4842549ioj.5
-        for <ceph-devel@vger.kernel.org>; Wed, 04 Oct 2017 11:11:33 -0700 (PDT)
-In-Reply-To: <CANE=7sVXHsM40i5aWTgzErKRbUeL2AEOKDa0mkuih_3Uyaxq_Q@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:53056 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750797AbdJDU66 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 4 Oct 2017 16:58:58 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org, ceph-maintainers@ceph.com, ceph-users@ceph.com
 
-On Fri, Sep 29, 2017 at 5:19 PM, Xinze Chi (信泽) <xmdxcxz@gmail.com> wrote:
-> such as transaction a would modify the object a < last_backfill, so
-> transaction_applied would be true. Before transaction a is completed,
-> the transaction b which modify the object b > last_backfill,
-> so transaction_applied would be false, the current logic would
-> roll_forward which including object a and b? is it right?
+Hi everyone,
 
-Yes, I believe that's the case. It's just that we don't care very much
-— if we copied the data while backfilling, we know that our source
-peer has the rollback state. Keep in mind that we only have rollback
-so that we can avoid the "RAID write hole" — eg, if we manage to write
-down an update on 4 nodes in a 5+3 erasure code, we can recover
-neither the old nor new data if it was written in-place. So we keep
-rollback data in that case and everybody goes back to the previous
-state.
+After further discussion we are targetting 9 months for Mimic 13.2.0:
 
-I *think* that if we manage to backfill an object for a particular
-shard, then we know that we can roll forward on it anyway or the read
-would have failed and the OSDs would have already rolled back. But I
-didn't check that. Certainly doing something other than this automatic
-roll forward would require a lot more bookkeeping that would make
-everything else going on more difficult.
--Greg
+ - Mar 16, 2018 feature freeze
+ - May 1, 2018 release
 
->
->
-> 2017-09-30 2:27 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
->> On Fri, Sep 29, 2017 at 3:02 AM, Xinze Chi (信泽) <xmdxcxz@gmail.com> wrote:
->>> hi, all
->>>
->>>     I confuse the roll_forward logic in the PG::append_log. The
->>> pg_log.roll_forward func may roll forward the all inflight
->>> transactions which maybe not be completed by all shards.
->>>
->>>     The comment also makes me wonder. so could anyone explain it in
->>> detail. thanks.
->>>
->>>
->>>   if (!transaction_applied) {
->>>      /* We must be a backfill peer, so it's ok if we apply
->>>       * out-of-turn since we won't be considered when
->>>       * determining a min possible last_update.
->>>       */
->>>     pg_log.roll_forward(&handler);
->>>   }
->>>
->>>     /* We don't want to leave the rollforward artifacts around
->>>      * here past last_backfill.  It's ok for the same reason as
->>>      * above */
->>>     if (transaction_applied &&
->>>        p->soid > info.last_backfill) {
->>>       pg_log.roll_forward(&handler);
->>>     }
->>
->> transaction_applied can only be false if we are being backfilled. If
->> we are being backfilled, we may not *have* the older data that we
->> would rollback to, and our peers don't rely on us having that data. So
->> there's no point in our trying to keep rollback data around, and
->> keeping it around would mean finding a way to clean it up later. Thus,
->> delete it now.
->> -Greg
->
->
->
-> --
-> Regards,
-> Xinze Chi
+Upgrades for Mimic will be from Luminous only (we've already made that a 
+required stop), but we plan to allow Luminous -> Nautilus too (and Mimic 
+-> O).
+
+Nautilus is planned for 9 months after that... Feb 1, 2019.
+
+Thanks, everyone, for your input!  We hope this works well enough for 
+everyone, and that additional predictability makes your planning easier.
+
+sage
