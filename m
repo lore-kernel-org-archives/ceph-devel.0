@@ -1,35 +1,22 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Mimic timeline
-Date: Wed, 4 Oct 2017 21:46:27 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1710042110310.28409@piezo.us.to>
-References: <alpine.DEB.2.11.1710042054030.27705@piezo.novalocal>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Static Analysis
+Date: Thu, 5 Oct 2017 10:00:34 +1000
+Message-ID: <CAF-wwdHKQpN_XeY2eVsXX9LOxi530Qwg5TFWs1+1H4i6zmk-jg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.205.236]:45871 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750951AbdJDVqa (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Oct 2017 17:46:30 -0400
-In-Reply-To: <alpine.DEB.2.11.1710042054030.27705@piezo.novalocal>
+Received: from mail-io0-f170.google.com ([209.85.223.170]:52470 "EHLO
+        mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751133AbdJEAAg (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 4 Oct 2017 20:00:36 -0400
+Received: by mail-io0-f170.google.com with SMTP id i197so11992051ioe.9
+        for <ceph-devel@vger.kernel.org>; Wed, 04 Oct 2017 17:00:36 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org, ceph-maintainers@ceph.com, ceph-users@ceph.com
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, 4 Oct 2017, Sage Weil wrote:
-> Hi everyone,
-> 
-> After further discussion we are targetting 9 months for Mimic 13.2.0:
-> 
->  - Mar 16, 2018 feature freeze
->  - May 1, 2018 release
-> 
-> Upgrades for Mimic will be from Luminous only (we've already made that a 
-> required stop), but we plan to allow Luminous -> Nautilus too (and Mimic 
-> -> O).
+Latest static analyser results are up on  http://people.redhat.com/bhubbard/
 
-Also, each release will be stable, with bug fixes for 2 cycles (18 
-months).  Here are the proposed changes to the release cycle docs:
-
-	https://github.com/ceph/ceph/pull/18117/files
-
-sage
+-- 
+Cheers,
+Brad
