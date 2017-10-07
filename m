@@ -1,127 +1,43 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: ec overwrite issue
-Date: Fri, 6 Oct 2017 14:17:11 -0700
-Message-ID: <CAJ4mKGYrfDqktS9zGbd+4P1O1qsG0oafUhQ8SAbcJ_eqjxsdmg@mail.gmail.com>
-References: <CANE=7sUPY=qoJSpprXc5QHo+3eiUbK=Qjp9MAE7Oze33Kg-sQQ@mail.gmail.com>
- <CAJ4mKGZ0GX-FXKsVGTkdSJTUNr5J26=+EcYKRxxYuOWSM-TBXA@mail.gmail.com>
- <CANE=7sVXHsM40i5aWTgzErKRbUeL2AEOKDa0mkuih_3Uyaxq_Q@mail.gmail.com>
- <CAJ4mKGbVTYUSMO2tQ8PQfrpXO6=eTHxK6Agn=C+dxU4XOvuk5A@mail.gmail.com>
- <CANE=7sVZj5SioT30AtW9OiatBcV51n5pnSE2EX1wdDFYDmQR6A@mail.gmail.com>
- <CAJ4mKGY6by1mPOwka0OF-YuOKbyzw9GosyK90zMLPW276Whc6Q@mail.gmail.com> <CANE=7sW3Mi5RQCTCsqyTpot3_DgG-gpXh1Fokss66KLCR2vRqA@mail.gmail.com>
+From: Thomas Meyer <thomas@m3y3r.de>
+Subject: [PATCH] ceph: Fix bool initialization/comparison
+Date: Sat, 07 Oct 2017 16:02:21 +0200
+Message-ID: <1507383097083-770412664-4-diffsplit-thomas@m3y3r.de>
+References: <1507383097081-778026979-0-diffsplit-thomas@m3y3r.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f181.google.com ([209.85.223.181]:43052 "EHLO
-        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751491AbdJFVRN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 6 Oct 2017 17:17:13 -0400
-Received: by mail-io0-f181.google.com with SMTP id f202so2098782ioe.0
-        for <ceph-devel@vger.kernel.org>; Fri, 06 Oct 2017 14:17:13 -0700 (PDT)
-In-Reply-To: <CANE=7sW3Mi5RQCTCsqyTpot3_DgG-gpXh1Fokss66KLCR2vRqA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1507383097081-778026979-0-diffsplit-thomas@m3y3r.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: ceph-devel.vger.kernel.org
 
-Oh, if you look at the patch adding the "backfill" member there,
-you'll see it was for a specific thing that used to be implied by
-other state in the message. It's much newer than most of these code
-checks and states, so I think Sam just didn't think about switching
-other stuff to rely on it at the time, and nobody else has gone
-through and audited which things it might make sense to switch out.
-(And we do need to be very careful about these things, unfortunately.)
+Bool initializations should use true and false. Bool tests don't need
+comparisons.
 
-On Fri, Oct 6, 2017 at 5:58 AM, Xinze Chi (信泽) <xmdxcxz@gmail.com> wrote:
-> I just wonder why we set backfill in ECSubWrite base on should_send_op func.:-)
->
-> 2017-10-06 1:35 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
->> I...think so? Did you have a specific purpose in mind, though? I might
->> have missed something when I was going through it. ;)
->> -Greg
->>
->> On Thu, Oct 5, 2017 at 7:11 AM, Xinze Chi (信泽) <xmdxcxz@gmail.com> wrote:
->>> so we could roll forward no matter object > last_backfill or <
->>> last_backfill,  as long as it is backfill target?
->>> If so, we could set backfill in ECSubWrite true if it is backfill target?
->>>
->>> 2017-10-05 2:11 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
->>>> On Fri, Sep 29, 2017 at 5:19 PM, Xinze Chi (信泽) <xmdxcxz@gmail.com> wrote:
->>>>> such as transaction a would modify the object a < last_backfill, so
->>>>> transaction_applied would be true. Before transaction a is completed,
->>>>> the transaction b which modify the object b > last_backfill,
->>>>> so transaction_applied would be false, the current logic would
->>>>> roll_forward which including object a and b? is it right?
->>>>
->>>> Yes, I believe that's the case. It's just that we don't care very much
->>>> — if we copied the data while backfilling, we know that our source
->>>> peer has the rollback state. Keep in mind that we only have rollback
->>>> so that we can avoid the "RAID write hole" — eg, if we manage to write
->>>> down an update on 4 nodes in a 5+3 erasure code, we can recover
->>>> neither the old nor new data if it was written in-place. So we keep
->>>> rollback data in that case and everybody goes back to the previous
->>>> state.
->>>>
->>>> I *think* that if we manage to backfill an object for a particular
->>>> shard, then we know that we can roll forward on it anyway or the read
->>>> would have failed and the OSDs would have already rolled back. But I
->>>> didn't check that. Certainly doing something other than this automatic
->>>> roll forward would require a lot more bookkeeping that would make
->>>> everything else going on more difficult.
->>>> -Greg
->>>>
->>>>>
->>>>>
->>>>> 2017-09-30 2:27 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
->>>>>> On Fri, Sep 29, 2017 at 3:02 AM, Xinze Chi (信泽) <xmdxcxz@gmail.com> wrote:
->>>>>>> hi, all
->>>>>>>
->>>>>>>     I confuse the roll_forward logic in the PG::append_log. The
->>>>>>> pg_log.roll_forward func may roll forward the all inflight
->>>>>>> transactions which maybe not be completed by all shards.
->>>>>>>
->>>>>>>     The comment also makes me wonder. so could anyone explain it in
->>>>>>> detail. thanks.
->>>>>>>
->>>>>>>
->>>>>>>   if (!transaction_applied) {
->>>>>>>      /* We must be a backfill peer, so it's ok if we apply
->>>>>>>       * out-of-turn since we won't be considered when
->>>>>>>       * determining a min possible last_update.
->>>>>>>       */
->>>>>>>     pg_log.roll_forward(&handler);
->>>>>>>   }
->>>>>>>
->>>>>>>     /* We don't want to leave the rollforward artifacts around
->>>>>>>      * here past last_backfill.  It's ok for the same reason as
->>>>>>>      * above */
->>>>>>>     if (transaction_applied &&
->>>>>>>        p->soid > info.last_backfill) {
->>>>>>>       pg_log.roll_forward(&handler);
->>>>>>>     }
->>>>>>
->>>>>> transaction_applied can only be false if we are being backfilled. If
->>>>>> we are being backfilled, we may not *have* the older data that we
->>>>>> would rollback to, and our peers don't rely on us having that data. So
->>>>>> there's no point in our trying to keep rollback data around, and
->>>>>> keeping it around would mean finding a way to clean it up later. Thus,
->>>>>> delete it now.
->>>>>> -Greg
->>>>>
->>>>>
->>>>>
->>>>> --
->>>>> Regards,
->>>>> Xinze Chi
->>>
->>>
->>>
->>> --
->>> Regards,
->>> Xinze Chi
->
->
->
-> --
-> Regards,
-> Xinze Chi
+Signed-off-by: Thomas Meyer <thomas@m3y3r.de>
+---
+
+diff -u -p a/fs/ceph/caps.c b/fs/ceph/caps.c
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -1711,7 +1711,7 @@ void ceph_check_caps(struct ceph_inode_i
+ 
+ 	/* if we are unmounting, flush any unused caps immediately. */
+ 	if (mdsc->stopping)
+-		is_delayed = 1;
++		is_delayed = true;
+ 
+ 	spin_lock(&ci->i_ceph_lock);
+ 
+@@ -3185,8 +3185,8 @@ static void handle_cap_flush_ack(struct
+ 	int dirty = le32_to_cpu(m->dirty);
+ 	int cleaned = 0;
+ 	bool drop = false;
+-	bool wake_ci = 0;
+-	bool wake_mdsc = 0;
++	bool wake_ci = false;
++	bool wake_mdsc = false;
+ 
+ 	list_for_each_entry_safe(cf, tmp_cf, &ci->i_cap_flush_list, i_list) {
+ 		if (cf->tid == flush_tid)
