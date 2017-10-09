@@ -1,54 +1,404 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: Fix bool initialization/comparison
-Date: Mon, 9 Oct 2017 09:52:40 +0800
-Message-ID: <CE98214F-1FB7-4F7A-AB96-102EFF9A725C@redhat.com>
-References: <1507383097081-778026979-0-diffsplit-thomas@m3y3r.de>
- <1507383097083-770412664-4-diffsplit-thomas@m3y3r.de>
-Mime-Version: 1.0 (Mac OS X Mail 11.0 \(3445.1.7\))
-Content-Type: text/plain;
-        charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1507383097083-770412664-4-diffsplit-thomas@m3y3r.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Thomas Meyer <thomas@m3y3r.de>
-Cc: Sage Weil <sage@redhat.com>, idryomov@gmail.com, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Ugis <ugis22@gmail.com>
+Subject: Re: bug in luminous bluestore?
+Date: Mon, 9 Oct 2017 09:26:45 +0300
+Message-ID: <CAE63xUPx8N2rsTaxJE=KP92zDUKVbmFe0ZRz=oEXGLyywdXTdw@mail.gmail.com>
+References: <CAE63xUNB8ZZhyiPDSJqd=kxfaEMLAdTR3bHH8Y6_=pGw=fiQtw@mail.gmail.com>
+ <alpine.DEB.2.11.1710081859080.26702@piezo.us.to>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-it0-f51.google.com ([209.85.214.51]:50973 "EHLO
+        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751361AbdJIG0r (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Oct 2017 02:26:47 -0400
+Received: by mail-it0-f51.google.com with SMTP id 72so8050581itl.5
+        for <ceph-devel@vger.kernel.org>; Sun, 08 Oct 2017 23:26:47 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1710081859080.26702@piezo.us.to>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
+We have used "rados put" in some scripts to store files as objects in
+rados as that is very conveniet for scripting. Seems that this tool is
+not intended for that but just for rados management itself.
+Thanks for hint, will have to look at RadosGW and CephFS for storing
+large files into rados.
 
+Ugis
 
-> On 7 Oct 2017, at 22:02, Thomas Meyer <thomas@m3y3r.de> wrote:
-> 
-> Bool initializations should use true and false. Bool tests don't need
-> comparisons.
-> 
-> Signed-off-by: Thomas Meyer <thomas@m3y3r.de>
-> ---
-> 
-> diff -u -p a/fs/ceph/caps.c b/fs/ceph/caps.c
-> --- a/fs/ceph/caps.c
-> +++ b/fs/ceph/caps.c
-> @@ -1711,7 +1711,7 @@ void ceph_check_caps(struct ceph_inode_i
-> 
-> 	/* if we are unmounting, flush any unused caps immediately. */
-> 	if (mdsc->stopping)
-> -		is_delayed = 1;
-> +		is_delayed = true;
-> 
-> 	spin_lock(&ci->i_ceph_lock);
-> 
-> @@ -3185,8 +3185,8 @@ static void handle_cap_flush_ack(struct
-> 	int dirty = le32_to_cpu(m->dirty);
-> 	int cleaned = 0;
-> 	bool drop = false;
-> -	bool wake_ci = 0;
-> -	bool wake_mdsc = 0;
-> +	bool wake_ci = false;
-> +	bool wake_mdsc = false;
-> 
-> 	list_for_each_entry_safe(cf, tmp_cf, &ci->i_cap_flush_list, i_list) {
-> 		if (cf->tid == flush_tid)
-
-Applied, thanks
-
-Yan, Zheng
+2017-10-08 22:00 GMT+03:00 Sage Weil <sage@newdream.net>:
+> On Sun, 8 Oct 2017, Ugis wrote:
+>> ceph version 12.2.1 (3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e) luminous (stable)
+>> I'm in process of migrating OSDs to bluestore. Several migrations
+>> successful but last one failed. OSD has gone down after some time
+>> backfilling, found some errors in log, tried to start it again, but
+>> same errors appeared and OSD went down. After completing this
+>> bugreport I started OSD again out of curiosity and now it works ok.
+>> During this time I have started another bluestore OSD for backfilling.
+>> Nevertheless errors logged below.
+>>
+>> This seems rather like a bug in OSD not HDD problem. I do not see
+>> SMART problems or any issues related to HDD in dmesg for this OSD.
+>>
+>> The log:
+>>     -3> 2017-10-08 16:56:31.861941 7f7481b4f700 -1
+>> bluestore(/var/lib/ceph/osd/ceph-3) _txc_add_transaction error (7)
+>> Argument list too long not handled on operation 12 (op 2, counting
+>> from 0)
+>>     -2> 2017-10-08 16:56:31.861960 7f7481b4f700 -1
+>> bluestore(/var/lib/ceph/osd/ceph-3) unexpected error code
+>>     -1> 2017-10-08 16:56:31.861962 7f7481b4f700  0
+>> bluestore(/var/lib/ceph/osd/ceph-3)  transaction dump:
+>> {
+>>     "ops": [
+>>         {
+>>             "op_num": 0,
+>>             "op_name": "remove",
+>>             "collection": "53.67_head",
+>>             "oid":
+>> "#-55:e6289795:::temp_recovering_53.67_273646'437437_280059_head:head#"
+>>         },
+>>         {
+>>             "op_num": 1,
+>>             "op_name": "touch",
+>>             "collection": "53.67_head",
+>>             "oid":
+>> "#-55:e6289795:::temp_recovering_53.67_273646'437437_280059_head:head#"
+>>         },
+>>         {
+>>             "op_num": 2,
+>>             "op_name": "truncate",
+>>             "collection": "53.67_head",
+>>             "oid":
+>> "#-55:e6289795:::temp_recovering_53.67_273646'437437_280059_head:head#",
+>>             "offset": 15560314374
+>
+> That's a 15GB object!  What is this pool use for?  Is there really an
+> object that big, or is there a bug?
+>
+> Bluestore has a hard limit of ~4gb for objects.  That is about 3 orders of
+> magnitude higher than what we normally store so it not expected to be a
+> problem...
+>
+> sage
+>
+>
+>
+>>         },
+>>         {
+>>             "op_num": 3,
+>>             "op_name": "op_setallochint",
+>>             "collection": "53.67_head",
+>>             "oid":
+>> "#-55:e6289795:::temp_recovering_53.67_273646'437437_280059_head:head#",
+>>             "expected_object_size": "0",
+>>             "expected_write_size": "0"
+>>         },
+>>         {
+>>             "op_num": 4,
+>>             "op_name": "write",
+>>             "collection": "53.67_head",
+>>             "oid":
+>> "#-55:e6289795:::temp_recovering_53.67_273646'437437_280059_head:head#",
+>>             "length": 8388608,
+>>             "offset": 0,
+>>             "bufferlist length": 8388608
+>>         },
+>>         {
+>>             "op_num": 5,
+>>             "op_name": "setattrs",
+>>             "collection": "53.67_head",
+>>             "oid":
+>> "#-55:e6289795:::temp_recovering_53.67_273646'437437_280059_head:head#",
+>>             "attr_lens": {
+>>                 "_": 286,
+>>                 "snapset": 31
+>>             }
+>>         }
+>>     ]
+>> }
+>>
+>>      0> 2017-10-08 16:56:31.871938 7f7481b4f700 -1
+>> /build/ceph-12.2.1/src/os/bluestore/BlueStore.cc: In function 'void
+>> BlueStore::_txc_add_transaction(BlueStore::TransContext*,
+>> ObjectStore::Transaction*)' thread 7f7481b4f700 time 2017-10-08
+>> 16:56:31.862077
+>> /build/ceph-12.2.1/src/os/bluestore/BlueStore.cc: 9299: FAILED
+>> assert(0 == "unexpected error")
+>>
+>>  ceph version 12.2.1 (3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e)
+>> luminous (stable)
+>>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>> const*)+0x102) [0x55fc757a53f2]
+>>  2: (BlueStore::_txc_add_transaction(BlueStore::TransContext*,
+>> ObjectStore::Transaction*)+0x1644) [0x55fc7565f404]
+>>  3: (BlueStore::queue_transactions(ObjectStore::Sequencer*,
+>> std::vector<ObjectStore::Transaction,
+>> std::allocator<ObjectStore::Transaction> >&,
+>> boost::intrusive_ptr<TrackedOp>, ThreadPool::TPHandle*)+0x52e)
+>> [0x55fc75660a7e]
+>>  4: (ObjectStore::queue_transaction(ObjectStore::Sequencer*,
+>> ObjectStore::Transaction&&, Context*, Context*, Context*,
+>> boost::intrusive_ptr<TrackedOp>, ThreadPool::TPHandle*)+0x17c)
+>> [0x55fc7520dd8c]
+>>  5: (PrimaryLogPG::queue_transaction(ObjectStore::Transaction&&,
+>> boost::intrusive_ptr<OpRequest>)+0x58) [0x55fc75399598]
+>>  6: (ReplicatedBackend::_do_push(boost::intrusive_ptr<OpRequest>)+0x391)
+>> [0x55fc754a8a41]
+>>  7: (ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)+0x2c1)
+>> [0x55fc754b7a21]
+>>  8: (PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)+0x50)
+>> [0x55fc753c7aa0]
+>>  9: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
+>> ThreadPool::TPHandle&)+0x55d) [0x55fc7532c62d]
+>>  10: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3a9)
+>> [0x55fc751af1a9]
+>>  11: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
+>> const&)+0x57) [0x55fc75448ae7]
+>>  12: (OSD::ShardedOpWQ::_process(unsigned int,
+>> ceph::heartbeat_handle_d*)+0x130e) [0x55fc751d67de]
+>>  13: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x884)
+>> [0x55fc757aa1e4]
+>>  14: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x55fc757ad220]
+>>  15: (()+0x76ba) [0x7f749b6d36ba]
+>>  16: (clone()+0x6d) [0x7f749a74a82d]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to interpret this.
+>>
+>> --- logging levels ---
+>>    0/ 5 none
+>>    0/ 1 lockdep
+>>    0/ 1 context
+>>    1/ 1 crush
+>>    1/ 5 mds
+>>    1/ 5 mds_balancer
+>>    1/ 5 mds_locker
+>>    1/ 5 mds_log
+>>    1/ 5 mds_log_expire
+>>    1/ 5 mds_migrator
+>>    0/ 1 buffer
+>>    0/ 1 timer
+>>    0/ 1 filer
+>>    0/ 1 striper
+>>    0/ 1 objecter
+>>    0/ 5 rados
+>>    0/ 5 rbd
+>>    0/ 5 rbd_mirror
+>>    0/ 5 rbd_replay
+>>    0/ 5 journaler
+>>    0/ 5 objectcacher
+>>    0/ 5 client
+>>    1/ 5 osd
+>>    0/ 5 optracker
+>>    0/ 5 objclass
+>>    1/ 3 filestore
+>>    1/ 3 journal
+>>    0/ 5 ms
+>>    1/ 5 mon
+>>    0/10 monc
+>>    1/ 5 paxos
+>>    0/ 5 tp
+>>    1/ 5 auth
+>>    1/ 5 crypto
+>>    1/ 1 finisher
+>>    1/ 5 heartbeatmap
+>>    1/ 5 perfcounter
+>>    1/ 5 rgw
+>>    1/10 civetweb
+>>    1/ 5 javaclient
+>>    1/ 5 asok
+>>    1/ 1 throttle
+>>    0/ 0 refs
+>>    1/ 5 xio
+>>    1/ 5 compressor
+>>    1/ 5 bluestore
+>>    1/ 5 bluefs
+>>    1/ 3 bdev
+>>    1/ 5 kstore
+>>    4/ 5 rocksdb
+>>    4/ 5 leveldb
+>>    4/ 5 memdb
+>>    1/ 5 kinetic
+>>    1/ 5 fuse
+>>    1/ 5 mgr
+>>    1/ 5 mgrc
+>>    1/ 5 dpdk
+>>    1/ 5 eventtrace
+>>   -2/-2 (syslog threshold)
+>>   -1/-1 (stderr threshold)
+>>   max_recent     10000
+>>   max_new         1000
+>>   log_file /var/log/ceph/ceph-osd.3.log
+>> --- end dump of recent events ---
+>> 2017-10-08 16:56:31.909899 7f7481b4f700 -1 *** Caught signal (Aborted) **
+>>  in thread 7f7481b4f700 thread_name:tp_osd_tp
+>>
+>>  ceph version 12.2.1 (3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e)
+>> luminous (stable)
+>>  1: (()+0xa5a634) [0x55fc75762634]
+>>  2: (()+0x11390) [0x7f749b6dd390]
+>>  3: (gsignal()+0x38) [0x7f749a679428]
+>>  4: (abort()+0x16a) [0x7f749a67b02a]
+>>  5: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>> const*)+0x28e) [0x55fc757a557e]
+>>  6: (BlueStore::_txc_add_transaction(BlueStore::TransContext*,
+>> ObjectStore::Transaction*)+0x1644) [0x55fc7565f404]
+>>  7: (BlueStore::queue_transactions(ObjectStore::Sequencer*,
+>> std::vector<ObjectStore::Transaction,
+>> std::allocator<ObjectStore::Transaction> >&,
+>> boost::intrusive_ptr<TrackedOp>, ThreadPool::TPHandle*)+0x52e)
+>> [0x55fc75660a7e]
+>>  8: (ObjectStore::queue_transaction(ObjectStore::Sequencer*,
+>> ObjectStore::Transaction&&, Context*, Context*, Context*,
+>> boost::intrusive_ptr<TrackedOp>, ThreadPool::TPHandle*)+0x17c)
+>> [0x55fc7520dd8c]
+>>  9: (PrimaryLogPG::queue_transaction(ObjectStore::Transaction&&,
+>> boost::intrusive_ptr<OpRequest>)+0x58) [0x55fc75399598]
+>>  10: (ReplicatedBackend::_do_push(boost::intrusive_ptr<OpRequest>)+0x391)
+>> [0x55fc754a8a41]
+>>  11: (ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)+0x2c1)
+>> [0x55fc754b7a21]
+>>  12: (PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)+0x50)
+>> [0x55fc753c7aa0]
+>>  13: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
+>> ThreadPool::TPHandle&)+0x55d) [0x55fc7532c62d]
+>>  14: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3a9)
+>> [0x55fc751af1a9]
+>>  15: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
+>> const&)+0x57) [0x55fc75448ae7]
+>>  16: (OSD::ShardedOpWQ::_process(unsigned int,
+>> ceph::heartbeat_handle_d*)+0x130e) [0x55fc751d67de]
+>>  17: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x884)
+>> [0x55fc757aa1e4]
+>>  18: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x55fc757ad220]
+>>  19: (()+0x76ba) [0x7f749b6d36ba]
+>>  20: (clone()+0x6d) [0x7f749a74a82d]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to interpret this.
+>>
+>> --- begin dump of recent events ---
+>>      0> 2017-10-08 16:56:31.909899 7f7481b4f700 -1 *** Caught signal
+>> (Aborted) **
+>>  in thread 7f7481b4f700 thread_name:tp_osd_tp
+>>
+>>  ceph version 12.2.1 (3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e)
+>> luminous (stable)
+>>  1: (()+0xa5a634) [0x55fc75762634]
+>>  2: (()+0x11390) [0x7f749b6dd390]
+>>  3: (gsignal()+0x38) [0x7f749a679428]
+>>  4: (abort()+0x16a) [0x7f749a67b02a]
+>>  5: (ceph::__ceph_assert_fail(char const*, char const*, int, char
+>> const*)+0x28e) [0x55fc757a557e]
+>>  6: (BlueStore::_txc_add_transaction(BlueStore::TransContext*,
+>> ObjectStore::Transaction*)+0x1644) [0x55fc7565f404]
+>>  7: (BlueStore::queue_transactions(ObjectStore::Sequencer*,
+>> std::vector<ObjectStore::Transaction,
+>> std::allocator<ObjectStore::Transaction> >&,
+>> boost::intrusive_ptr<TrackedOp>, ThreadPool::TPHandle*)+0x52e)
+>> [0x55fc75660a7e]
+>>  8: (ObjectStore::queue_transaction(ObjectStore::Sequencer*,
+>> ObjectStore::Transaction&&, Context*, Context*, Context*,
+>> boost::intrusive_ptr<TrackedOp>, ThreadPool::TPHandle*)+0x17c)
+>> [0x55fc7520dd8c]
+>>  9: (PrimaryLogPG::queue_transaction(ObjectStore::Transaction&&,
+>> boost::intrusive_ptr<OpRequest>)+0x58) [0x55fc75399598]
+>>  10: (ReplicatedBackend::_do_push(boost::intrusive_ptr<OpRequest>)+0x391)
+>> [0x55fc754a8a41]
+>>  11: (ReplicatedBackend::_handle_message(boost::intrusive_ptr<OpRequest>)+0x2c1)
+>> [0x55fc754b7a21]
+>>  12: (PGBackend::handle_message(boost::intrusive_ptr<OpRequest>)+0x50)
+>> [0x55fc753c7aa0]
+>>  13: (PrimaryLogPG::do_request(boost::intrusive_ptr<OpRequest>&,
+>> ThreadPool::TPHandle&)+0x55d) [0x55fc7532c62d]
+>>  14: (OSD::dequeue_op(boost::intrusive_ptr<PG>,
+>> boost::intrusive_ptr<OpRequest>, ThreadPool::TPHandle&)+0x3a9)
+>> [0x55fc751af1a9]
+>>  15: (PGQueueable::RunVis::operator()(boost::intrusive_ptr<OpRequest>
+>> const&)+0x57) [0x55fc75448ae7]
+>>  16: (OSD::ShardedOpWQ::_process(unsigned int,
+>> ceph::heartbeat_handle_d*)+0x130e) [0x55fc751d67de]
+>>  17: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x884)
+>> [0x55fc757aa1e4]
+>>  18: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x55fc757ad220]
+>>  19: (()+0x76ba) [0x7f749b6d36ba]
+>>  20: (clone()+0x6d) [0x7f749a74a82d]
+>>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+>> needed to interpret this.
+>>
+>> --- logging levels ---
+>>    0/ 5 none
+>>    0/ 1 lockdep
+>>    0/ 1 context
+>>    1/ 1 crush
+>>    1/ 5 mds
+>>    1/ 5 mds_balancer
+>>    1/ 5 mds_locker
+>>    1/ 5 mds_log
+>>    1/ 5 mds_log_expire
+>>    1/ 5 mds_migrator
+>>    0/ 1 buffer
+>>    0/ 1 timer
+>>    0/ 1 filer
+>>    0/ 1 striper
+>>    0/ 1 objecter
+>>    0/ 5 rados
+>>    0/ 5 rbd
+>>    0/ 5 rbd_mirror
+>>    0/ 5 rbd_replay
+>>    0/ 5 journaler
+>>    0/ 5 objectcacher
+>>    0/ 5 client
+>>    1/ 5 osd
+>>    0/ 5 optracker
+>>    0/ 5 objclass
+>>    1/ 3 filestore
+>>    1/ 3 journal
+>>    0/ 5 ms
+>>    1/ 5 mon
+>>    0/10 monc
+>>    1/ 5 paxos
+>>    0/ 5 tp
+>>    1/ 5 auth
+>>    1/ 5 crypto
+>>    1/ 1 finisher
+>>    1/ 5 heartbeatmap
+>>    1/ 5 perfcounter
+>>    1/ 5 rgw
+>>    1/10 civetweb
+>>    1/ 5 javaclient
+>>    1/ 5 asok
+>>    1/ 1 throttle
+>>    0/ 0 refs
+>>    1/ 5 xio
+>>    1/ 5 compressor
+>>    1/ 5 bluestore
+>>    1/ 5 bluefs
+>>    1/ 3 bdev
+>>    1/ 5 kstore
+>>    4/ 5 rocksdb
+>>    4/ 5 leveldb
+>>    4/ 5 memdb
+>>    1/ 5 kinetic
+>>    1/ 5 fuse
+>>    1/ 5 mgr
+>>    1/ 5 mgrc
+>>    1/ 5 dpdk
+>>    1/ 5 eventtrace
+>>   -2/-2 (syslog threshold)
+>>   -1/-1 (stderr threshold)
+>>   max_recent     10000
+>>   max_new         1000
+>>   log_file /var/log/ceph/ceph-osd.3.log
+>> --- end dump of recent events ---
+>>
+>> Best regards
+>> Ugis
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
