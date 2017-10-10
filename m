@@ -1,126 +1,63 @@
-From: Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org>
-Subject: Re: killing ceph-disk [was Re: ceph-volume: migration
- and disk partition support]
-Date: Tue, 10 Oct 2017 09:50:14 +0900
-Message-ID: <20171010095014.64940afa@batzmaru.gol.ad.jp>
-References: <CAC-Np1xUasg0C34HEuCFims18zPyRZ17p9-mp3xYCUETAYnn_A@mail.gmail.com>
- <alpine.DEB.2.11.1710091448500.26711@piezo.us.to>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: deleting snapshots in batches?
+Date: Tue, 10 Oct 2017 12:03:43 +0800
+Message-ID: <CAAM7YAm08zrKjFvKRZamJYDSDHd1Z3aacXJxyiEpqTcPW-RiTQ@mail.gmail.com>
+References: <CAGbvivLpWC=WUgmPA0q5Tt5wXF=1bx3kcAWP7drnYWfznBBUBg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1710091448500.26711-ie3vfNGmdjePKud3HExfWg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-oi0-f50.google.com ([209.85.218.50]:44550 "EHLO
+        mail-oi0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750734AbdJJEDo (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Oct 2017 00:03:44 -0400
+Received: by mail-oi0-f50.google.com with SMTP id v132so23712513oie.1
+        for <ceph-devel@vger.kernel.org>; Mon, 09 Oct 2017 21:03:44 -0700 (PDT)
+In-Reply-To: <CAGbvivLpWC=WUgmPA0q5Tt5wXF=1bx3kcAWP7drnYWfznBBUBg@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-
-Hello,
-
-(pet peeve alert)
-On Mon, 9 Oct 2017 15:09:29 +0000 (UTC) Sage Weil wrote:
-
-> To put this in context, the goal here is to kill ceph-disk in mimic.  
-> 
-> One proposal is to make it so new OSDs can *only* be deployed with LVM, 
-> and old OSDs with the ceph-disk GPT partitions would be started via 
-> ceph-volume support that can only start (but not deploy new) OSDs in that 
-> style.
-> 
-> Is the LVM-only-ness concerning to anyone?
+On Tue, Oct 10, 2017 at 12:13 AM, Wyllys Ingersoll
+<wyllys.ingersoll@keepertech.com> wrote:
+> We have a cluster (10.2.9 based) with a cephfs filesytem that has
+> 4800+ snapshots. We want to delete most of the very old ones to get it
+> to a more manageable number (such as 0).  However, deleting even 1
+> snapshot right now takes up to a full 24 hours due to their age and
+> size. It would literally take 13 years to delete all of them at the
+> current pace.
 >
-If the provision below is met, not really.
- 
-> Looking further forward, NVMe OSDs will probably be handled a bit 
-> differently, as they'll eventually be using SPDK and kernel-bypass (hence, 
-> no LVM).  For the time being, though, they would use LVM.
+> Here is one snapshot directory statistics:
 >
-And so it begins.
-LVM does a lot of nice things, but not everything for everybody. 
-It is also another layer added with all the (minor) reductions in
-performance (with normal storage, not NVMe) and of course potential bugs.
- 
-> 
-> On Fri, 6 Oct 2017, Alfredo Deza wrote:
-> > Now that ceph-volume is part of the Luminous release, we've been able
-> > to provide filestore support for LVM-based OSDs. We are making use of
-> > LVM's powerful mechanisms to store metadata which allows the process
-> > to no longer rely on UDEV and GPT labels (unlike ceph-disk).
-> > 
-> > Bluestore support should be the next step for `ceph-volume lvm`, and
-> > while that is planned we are thinking of ways to improve the current
-> > caveats (like OSDs not coming up) for clusters that have deployed OSDs
-> > with ceph-disk.
-> > 
-> > --- New clusters ---
-> > The `ceph-volume lvm` deployment is straightforward (currently
-> > supported in ceph-ansible), but there isn't support for plain disks
-> > (with partitions) currently, like there is with ceph-disk.
-> > 
-> > Is there a pressing interest in supporting plain disks with
-> > partitions? Or only supporting LVM-based OSDs fine?  
-> 
-> Perhaps the "out" here is to support a "dir" option where the user can 
-> manually provision and mount an OSD on /var/lib/ceph/osd/*, with 'journal' 
-> or 'block' symlinks, and ceph-volume will do the last bits that initialize 
-> the filestore or bluestore OSD from there.  Then if someone has a scenario 
-> that isn't captured by LVM (or whatever else we support) they can always 
-> do it manually?
-> 
-Basically this.
-Since all my old clusters were deployed like this, with no
-chance/intention to upgrade to GPT or even LVM.
-How would symlinks work with Bluestore, the tiny XFS bit?
+> # file: cephfs/.snap/snapshot.2017-02-24_22_17_01-1487992621
+> ceph.dir.entries="3"
+> ceph.dir.files="0"
+> ceph.dir.rbytes="30500769204664"
+> ceph.dir.rctime="1504695439.09966088000"
+> ceph.dir.rentries="7802785"
+> ceph.dir.rfiles="7758691"
+> ceph.dir.rsubdirs="44094"
+> ceph.dir.subdirs="3"
+>
+> There is a bug filed with details here: http://tracker.ceph.com/issues/21412
+>
+> Im wondering if there is a faster, undocumented, "backdoor" way to
+> clean up our snapshot mess without destroying the entire filesystem
+> and recreating it.
 
-> > --- Existing clusters ---
-> > Migration to ceph-volume, even with plain disk support means
-> > re-creating the OSD from scratch, which would end up moving data.
-> > There is no way to make a GPT/ceph-disk OSD become a ceph-volume one
-> > without starting from scratch.
-> > 
-> > A temporary workaround would be to provide a way for existing OSDs to
-> > be brought up without UDEV and ceph-disk, by creating logic in
-> > ceph-volume that could load them with systemd directly. This wouldn't
-> > make them lvm-based, nor it would mean there is direct support for
-> > them, just a temporary workaround to make them start without UDEV and
-> > ceph-disk.
-> > 
-> > I'm interested in what current users might look for here,: is it fine
-> > to provide this workaround if the issues are that problematic? Or is
-> > it OK to plan a migration towards ceph-volume OSDs?  
-> 
-> IMO we can't require any kind of data migration in order to upgrade, which 
-> means we either have to (1) keep ceph-disk around indefinitely, or (2) 
-> teach ceph-volume to start existing GPT-style OSDs.  Given all of the 
-> flakiness around udev, I'm partial to #2.  The big question for me is 
-> whether #2 alone is sufficient, or whether ceph-volume should also know 
-> how to provision new OSDs using partitions and no LVM.  Hopefully not?
-> 
-I really disliked the udev/GPT stuff from the get-go and flakiness is
-being kind for sometimes completely indeterministic behavior.
+deleting snapshot in cephfs is a simple operation, it should complete
+in seconds. something must  go wrong If 'rmdir .snap/xxx' tooks hours.
+please set debug_mds to 10, retry deleting a snapshot and send us the
+log. (it's better to stop all other fs activities while deleting
+snapshot)
 
-Since there never was an (non-disruptive) upgrade process from non-GPT
-based OSDs to GPT based ones, I wonder what changed minds here.
-Not that the GPT based users won't appreciate it.
+Regards
+Yan, Zheng
 
-Christian
-> sage
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-> 
-
-
--- 
-Christian Balzer        Network/Systems Engineer                
-chibi-FW+hd8ioUD0@public.gmane.org   	Rakuten Communications
+>
+> -Wyllys Ingersoll
+>  Keeper Technology, LLC
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
