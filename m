@@ -1,98 +1,174 @@
-From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
-Subject: Re: deleting snapshots in batches?
-Date: Tue, 10 Oct 2017 08:46:00 -0400
-Message-ID: <CAGbvivL8SKGgVVDoxCQKTdcewEwSbk=gxHGjVsdr-0VpJNsRZA@mail.gmail.com>
-References: <CAGbvivLpWC=WUgmPA0q5Tt5wXF=1bx3kcAWP7drnYWfznBBUBg@mail.gmail.com>
- <CAAM7YAm08zrKjFvKRZamJYDSDHd1Z3aacXJxyiEpqTcPW-RiTQ@mail.gmail.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: Understanding some of the Cmake logics
+Date: Tue, 10 Oct 2017 21:31:37 +0800
+Message-ID: <CAJE9aOMeOOM9sOdS10gk47R6hykYUQLST_+L7JkXr9Y-e+Si8A@mail.gmail.com>
+References: <b06780c7-13ce-1274-735f-806a1f4f8062@digiware.nl>
+ <CAJE9aONEKsSnh7De6-TcS_BwKsCnqav8MXkDR6aUFuMp2out6A@mail.gmail.com> <c8081893-bfbf-483f-01ed-1fd7a1c260d5@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:53041 "EHLO
-        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751415AbdJJMqC (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Oct 2017 08:46:02 -0400
-Received: by mail-lf0-f49.google.com with SMTP id b190so5574680lfg.9
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Oct 2017 05:46:02 -0700 (PDT)
-In-Reply-To: <CAAM7YAm08zrKjFvKRZamJYDSDHd1Z3aacXJxyiEpqTcPW-RiTQ@mail.gmail.com>
+Received: from mail-oi0-f41.google.com ([209.85.218.41]:52767 "EHLO
+        mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755349AbdJJNbi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Oct 2017 09:31:38 -0400
+Received: by mail-oi0-f41.google.com with SMTP id p126so45148617oih.9
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Oct 2017 06:31:38 -0700 (PDT)
+In-Reply-To: <c8081893-bfbf-483f-01ed-1fd7a1c260d5@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-The "rmdir" command takes seconds.
-
-However, the resulting storm of activity on the cluster AFTER the
-deletion is bringing our cluster down completely.   The blocked
-requests count goes into the thousands.  The individual OSD processes
-begin taking up all of the memory that they can grab which causes the
-kernel to kill them off, which further throws the cluster into
-disarray due to down/out OSDs.  It takes multiple DAYS to completely
-recover from deleting 1 snapshot and constant monitoring to make sure
-OSDs come up and stay up after they get killed for eating too much
-memory.  This is a serious issue that we have been fighting with for
-over a month now.  The obvious solution is to destroy the cephfs
-entirely, but that would mean we have to then recover about 40TB of
-data, which could take a very long time and we'd prefer not to do
-that.
-
-For example:
-2521055 ceph      20   0 16.908g 0.013t  29172 S  28.4 10.6  36:39.52
-ceph-osd
-2507582 ceph      20   0 22.919g 0.019t  42076 S  17.6 15.5  58:48.00
-ceph-osd
-2501393 ceph      20   0 22.024g 0.018t  39648 S  14.7 14.9  79:05.28
-ceph-osd
-2547090 ceph      20   0 21.316g 0.017t  26584 S   7.8 14.0  18:14.76
-ceph-osd
-2455703 ceph      20   0 20.872g 0.017t  19784 S   4.9 13.8 111:02.06
-ceph-osd
- 246368 ceph      20   0 22.657g 0.018t  37416 S   3.9 14.5 462:31.79
-ceph-osd
-
-
-
-
-On Tue, Oct 10, 2017 at 12:03 AM, Yan, Zheng <ukernel@gmail.com> wrote:
-> On Tue, Oct 10, 2017 at 12:13 AM, Wyllys Ingersoll
-> <wyllys.ingersoll@keepertech.com> wrote:
->> We have a cluster (10.2.9 based) with a cephfs filesytem that has
->> 4800+ snapshots. We want to delete most of the very old ones to get it
->> to a more manageable number (such as 0).  However, deleting even 1
->> snapshot right now takes up to a full 24 hours due to their age and
->> size. It would literally take 13 years to delete all of them at the
->> current pace.
+On Tue, Oct 10, 2017 at 8:06 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> On 10-10-2017 13:14, kefu chai wrote:
+>> + ceph-devel
 >>
->> Here is one snapshot directory statistics:
+>> On Tue, Oct 10, 2017 at 4:49 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>> Hi Kefu,
+>>>
+>>> Sort of wondering what in the current code below is the relation between
+>>> gpertools and tcmalloc?
 >>
->> # file: cephfs/.snap/snapshot.2017-02-24_22_17_01-1487992621
->> ceph.dir.entries="3"
->> ceph.dir.files="0"
->> ceph.dir.rbytes="30500769204664"
->> ceph.dir.rctime="1504695439.09966088000"
->> ceph.dir.rentries="7802785"
->> ceph.dir.rfiles="7758691"
->> ceph.dir.rsubdirs="44094"
->> ceph.dir.subdirs="3"
->>
->> There is a bug filed with details here: http://tracker.ceph.com/issues/21412
->>
->> Im wondering if there is a faster, undocumented, "backdoor" way to
->> clean up our snapshot mess without destroying the entire filesystem
->> and recreating it.
+>> could you be more specific?
 >
-> deleting snapshot in cephfs is a simple operation, it should complete
-> in seconds. something must  go wrong If 'rmdir .snap/xxx' tooks hours.
-> please set debug_mds to 10, retry deleting a snapshot and send us the
-> log. (it's better to stop all other fs activities while deleting
-> snapshot)
+> While looking at the code of CMakeLists.txt:286, in the case that no
+> ALLOCATOR is defined.
+> There the current flow of code seems to suggest that gperf-tools is
+> always linked to tcmalloc. And once gperftools is found, the ALLOCATOR
+> is set to tcmalloc. This then breaks rocksdb building.
+>     `set(HAVE_LIBTCMALLOC ${GPERFTOOLS_FOUND})`
+> like:
+> ```
+>  CMake Error at cmake/modules/BuildRocksDB.cmake:63 (message):
+>    Incompatible tcmalloc v2.6.1 and rocksdb v5.8.0, please install
+>  gperf-tools
+>    2.5 (not 2.5.93) or >= 2.6.2, or switch to another allocator using
+> 'cmake -DALLOCATOR=libc'.
+>  Call Stack (most recent call first):
+>    src/CMakeLists.txt:825 (build_rocksdb)
+> ```
 >
-> Regards
-> Yan, Zheng
+>>> Reason for the question is that once the gperf packages is installed,
+>>> as a bonus the code below declares the allocator to be tcmalloc.
+>>> But gperf under FreeBSD does not have tcmalloc.
+>>
+>> please note gperf here is not GNU perf [1] but google-perftools. and
+>> why do you claim the gperf under FreeBSD does not have tcmalloc? could
+>> you elaborate this a little bit?
+>
+> My bad, I mixed gperf and gperf-tools. We are talking about gperf-tools.
+> And yes, gperftools brings tcmalloc but not in the version mix that is
+> asked for. gperf-tools was at 2.5 one time, but has upgraded to 2.6.1_1
+> on FreeBSD[1]. Getting other versions will require manual work to get it
+> to work.
+>
+> But the question is:
+>     Do I really want my allocator to be tcmalloc when the native
+>     libc allocator is jemalloc?
+
+i think it's up to you.
+
+> So is the test in CMakeLists.txt:286-324 what we want on FreeBSD?
+
+see http://tracker.ceph.com/issues/21422. so again, it's up to you.
+
+>
+> The workaround this (for the time being) is to call cmake with
+> -DALLOCATOR=libc as is suggested.
+>
+> --WjW
+>
+> [1]
+> https://svnweb.freebsd.org/ports/head/devel/google-perftools/Makefile?revision=450353&view=markup
 >
 >>
->> -Wyllys Ingersoll
->>  Keeper Technology, LLC
 >> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> [1] http://portsmon.freebsd.org/portoverview.py?category=devel&portname=gperf
+>> [2] http://portsmon.freebsd.org/portoverview.py?category=devel&portname=google-perftools
+>>
+>>>
+>>> So I guess I need to fix the code below the to prevent this implicit
+>>> relation
+>>> under FreeBSD.
+>>>
+>>> And the problem that arises from this all lies in compiling rocksdb,
+>>> because
+>>> under FreeBSD that also needs to be build with libc as allocator.
+>>> The introduction of the new rocksdb building makes this clear.
+>>>
+>>> CMake Error at cmake/modules/BuildRocksDB.cmake:63 (message):
+>>>   Incompatible tcmalloc v2.6.1 and rocksdb v5.8.0, please install
+>>> gperf-tools
+>>>   2.5 (not 2.5.93) or >= 2.6.2, or switch to another allocator using 'cmake
+>>>   -DALLOCATOR=libc'.
+>>> Call Stack (most recent call first):
+>>>   src/CMakeLists.txt:825 (build_rocksdb)
+>>>
+>>>
+>>> --WjW
+>>>
+>>>
+>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 286)
+>>> if(ALLOCATOR)
+>>> ca9946d2b5a (Bassam Tabbara      2016-10-10 14:37:58 -0700 287)
+>>> if(${ALLOCATOR} MATCHES "tcmalloc(_minimal)?")
+>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 288)
+>>> find_package(gperftools REQUIRED)
+>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 289)
+>>> set(HAVE_LIBTCMALLOC ON)
+>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 290)
+>>> elseif(${ALLOCATOR} STREQUAL "jemalloc")
+>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 291)
+>>> find_package(JeMalloc REQUIRED)
+>>> 0ef09f32d46 (Ali Maredia         2016-05-02 18:21:32 -0400 292)
+>>> set(HAVE_LIBJEMALLOC ${JEMALLOC_FOUND})
+>>> 83b74f52501 (Matt Benjamin       2016-12-21 23:36:37 -0500 293)
+>>> set(HAVE_JEMALLOC 1)
+>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 294)   endif()
+>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 295)
+>>> else(ALLOCATOR)
+>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 296)
+>>> find_package(gperftools)
+>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 297)
+>>> set(HAVE_LIBTCMALLOC ${GPERFTOOLS_FOUND})
+>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 298)   if(NOT
+>>> GPERFTOOLS_FOUND)
+>>> 0ef09f32d46 (Ali Maredia         2016-05-02 18:21:32 -0400 299)
+>>> find_package(JeMalloc)
+>>> 0ef09f32d46 (Ali Maredia         2016-05-02 18:21:32 -0400 300)
+>>> set(HAVE_LIBJEMALLOC ${JEMALLOC_FOUND})
+>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 301)
+>>> endif(NOT GPERFTOOLS_FOUND)
+>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 302)
+>>> if(GPERFTOOLS_FOUND)
+>>> 48a1f8eff5b (Kefu Chai           2016-06-08 11:34:44 +0800 303)
+>>> set(ALLOCATOR tcmalloc)
+>>> 48a1f8eff5b (Kefu Chai           2016-06-08 11:34:44 +0800 304)
+>>> elseif(JEMALLOC_FOUND)
+>>> 48a1f8eff5b (Kefu Chai           2016-06-08 11:34:44 +0800 305)
+>>> set(ALLOCATOR jemalloc)
+>>> 48a1f8eff5b (Kefu Chai           2016-06-08 11:34:44 +0800 306)   else()
+>>> ce3b71acd20 (Willem Jan Withagen 2017-02-12 15:03:56 +0100 307)
+>>> if(NOT FREEBSD)
+>>> ce3b71acd20 (Willem Jan Withagen 2017-02-12 15:03:56 +0100 308)       #
+>>> FreeBSD already has jemalloc as its default allocator
+>>> ce3b71acd20 (Willem Jan Withagen 2017-02-12 15:03:56 +0100 309)
+>>> message(WARNING "tcmalloc and jemalloc not found, falling back to libc")
+>>> ce3b71acd20 (Willem Jan Withagen 2017-02-12 15:03:56 +0100 310)     endif()
+>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 311)
+>>> set(ALLOCATOR "libc")
+>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 312)
+>>> endif(GPERFTOOLS_FOUND)
+>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 313)
+>>> endif(ALLOCATOR)
+>>>
+>>
+>>
+>>
+>
+
+
+
+-- 
+Regards
+Kefu Chai
