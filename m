@@ -1,90 +1,126 @@
-From: Orit Wasserman <owasserm@redhat.com>
-Subject: Re: Multisite 3+ zones
-Date: Mon, 9 Oct 2017 20:10:51 +0300
-Message-ID: <CABo9giSBr3aXkZ2eBS0jwwEBEmEWR4nFzFF4Qp3DBPHtYfiG0A@mail.gmail.com>
-References: <CAKRxpusXtf+Xj9+nsbN_GP7CmeqF09vMZnMnM7wA-JvvuJypYw@mail.gmail.com>
- <CABo9giS0K_2U-TdP-H-tVcA494jynf-NmzHeoXxO5a2DF4payA@mail.gmail.com> <CAKRxputmk4OUq4UPDi357HEUvr6U2UhiBEuQpyPmrKdiiB42wA@mail.gmail.com>
+From: Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org>
+Subject: Re: killing ceph-disk [was Re: ceph-volume: migration
+ and disk partition support]
+Date: Tue, 10 Oct 2017 09:50:14 +0900
+Message-ID: <20171010095014.64940afa@batzmaru.gol.ad.jp>
+References: <CAC-Np1xUasg0C34HEuCFims18zPyRZ17p9-mp3xYCUETAYnn_A@mail.gmail.com>
+ <alpine.DEB.2.11.1710091448500.26711@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:54172 "EHLO
-        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754246AbdJIRKw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 9 Oct 2017 13:10:52 -0400
-Received: by mail-qk0-f176.google.com with SMTP id w63so24233576qkd.10
-        for <ceph-devel@vger.kernel.org>; Mon, 09 Oct 2017 10:10:52 -0700 (PDT)
-In-Reply-To: <CAKRxputmk4OUq4UPDi357HEUvr6U2UhiBEuQpyPmrKdiiB42wA@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Two Spirit <twospirit6905@gmail.com>
-Cc: Casey Bodley <cbodley@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1710091448500.26711-ie3vfNGmdjePKud3HExfWg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Mon, Oct 9, 2017 at 6:45 PM, Two Spirit <twospirit6905@gmail.com> wrote:
-> Thanks for the clarifications. one comment below.
+
+Hello,
+
+(pet peeve alert)
+On Mon, 9 Oct 2017 15:09:29 +0000 (UTC) Sage Weil wrote:
+
+> To put this in context, the goal here is to kill ceph-disk in mimic.  
+> 
+> One proposal is to make it so new OSDs can *only* be deployed with LVM, 
+> and old OSDs with the ceph-disk GPT partitions would be started via 
+> ceph-volume support that can only start (but not deploy new) OSDs in that 
+> style.
+> 
+> Is the LVM-only-ness concerning to anyone?
 >
->>> If this is supported, what happens if zone1 data is modified, while at
->>> the same time a zone2 modifies the same data but the data was not yet
->>> copied from the zone1 to zone2. How is this conflict handled? Does
->>> last write win?
->>>
->>Yes the last write will win (in the end)
+If the provision below is met, not really.
+ 
+> Looking further forward, NVMe OSDs will probably be handled a bit 
+> differently, as they'll eventually be using SPDK and kernel-bypass (hence, 
+> no LVM).  For the time being, though, they would use LVM.
 >
-> (feature request)I know this is a very popular solution, but I wanted
-> to shine in on this. I think it is a very bad solution. We have run
-> into catastrophic loss of data due to this algorithm and has happened
-> many times, just because someone eventually close out files not
-> realizing there were other instances. Usually the lost data is very
-> recently modified. The analogy for developers is if there was source
-> code conflict, the last write wins. It would be more helpful if both
-> versions were preserved for manual merge.
->
+And so it begins.
+LVM does a lot of nice things, but not everything for everybody. 
+It is also another layer added with all the (minor) reductions in
+performance (with normal storage, not NVMe) and of course potential bugs.
+ 
+> 
+> On Fri, 6 Oct 2017, Alfredo Deza wrote:
+> > Now that ceph-volume is part of the Luminous release, we've been able
+> > to provide filestore support for LVM-based OSDs. We are making use of
+> > LVM's powerful mechanisms to store metadata which allows the process
+> > to no longer rely on UDEV and GPT labels (unlike ceph-disk).
+> > 
+> > Bluestore support should be the next step for `ceph-volume lvm`, and
+> > while that is planned we are thinking of ways to improve the current
+> > caveats (like OSDs not coming up) for clusters that have deployed OSDs
+> > with ceph-disk.
+> > 
+> > --- New clusters ---
+> > The `ceph-volume lvm` deployment is straightforward (currently
+> > supported in ceph-ansible), but there isn't support for plain disks
+> > (with partitions) currently, like there is with ceph-disk.
+> > 
+> > Is there a pressing interest in supporting plain disks with
+> > partitions? Or only supporting LVM-based OSDs fine?  
+> 
+> Perhaps the "out" here is to support a "dir" option where the user can 
+> manually provision and mount an OSD on /var/lib/ceph/osd/*, with 'journal' 
+> or 'block' symlinks, and ceph-volume will do the last bits that initialize 
+> the filestore or bluestore OSD from there.  Then if someone has a scenario 
+> that isn't captured by LVM (or whatever else we support) they can always 
+> do it manually?
+> 
+Basically this.
+Since all my old clusters were deployed like this, with no
+chance/intention to upgrade to GPT or even LVM.
+How would symlinks work with Bluestore, the tiny XFS bit?
 
-Radosgw is object storage (S3 compatible), this means object are
-immutable and when you write on an object you completely overwrite it.
-If you want to be able to revert to a different version, you can
-enable versioning on the bucket.
-This means every write of the object will create a new version of the
-object and keep the old one. The replication will replicate all the
-versions.
-You can delete automatically very old versions using the life cycle
-feature to free space.
+> > --- Existing clusters ---
+> > Migration to ceph-volume, even with plain disk support means
+> > re-creating the OSD from scratch, which would end up moving data.
+> > There is no way to make a GPT/ceph-disk OSD become a ceph-volume one
+> > without starting from scratch.
+> > 
+> > A temporary workaround would be to provide a way for existing OSDs to
+> > be brought up without UDEV and ceph-disk, by creating logic in
+> > ceph-volume that could load them with systemd directly. This wouldn't
+> > make them lvm-based, nor it would mean there is direct support for
+> > them, just a temporary workaround to make them start without UDEV and
+> > ceph-disk.
+> > 
+> > I'm interested in what current users might look for here,: is it fine
+> > to provide this workaround if the issues are that problematic? Or is
+> > it OK to plan a migration towards ceph-volume OSDs?  
+> 
+> IMO we can't require any kind of data migration in order to upgrade, which 
+> means we either have to (1) keep ceph-disk around indefinitely, or (2) 
+> teach ceph-volume to start existing GPT-style OSDs.  Given all of the 
+> flakiness around udev, I'm partial to #2.  The big question for me is 
+> whether #2 alone is sufficient, or whether ceph-volume should also know 
+> how to provision new OSDs using partitions and no LVM.  Hopefully not?
+> 
+I really disliked the udev/GPT stuff from the get-go and flakiness is
+being kind for sometimes completely indeterministic behavior.
 
-Cheers,
-Orit
+Since there never was an (non-disruptive) upgrade process from non-GPT
+based OSDs to GPT based ones, I wonder what changed minds here.
+Not that the GPT based users won't appreciate it.
 
-> On Tue, Oct 3, 2017 at 5:52 AM, Orit Wasserman <owasserm@redhat.com> wrote:
->> On Mon, Oct 2, 2017 at 11:41 PM, Two Spirit <twospirit6905@gmail.com> wrote:
->>> The documenation I saw talked about multi-zones, but seems to stop in
->>> the details at 2 zones whereas,  before, Jewel's Master zone(RW) wrote
->>> to Slave Zone(RO), and now after Jewel, writing to the Slave is doable
->>> (implying RW) to either zone. and didn't address the case of 3 or more
->>> zones. I thought the Master/Slave architecture implied it was limited
->>> to 2 zones.
->>>
->> In the new multisite (from Jewel) the default is RW but it is possible to set a
->> zone to be read only (slave).
->>
->>> Is RW to any zone supported in 3+ zone configurations? The whole
->>> master/slave idea doesn't seem to make sense when talking about 3+
->>> zones. I'm taking a guess that this must be fully meshed, and RW to
->>> any modifications in one zone replicates to *all* other zones
->>> (independent on the number of replicas specified in any cluster)
->>>
->>
->> Yes, we support 3+ zones configuration. All the zones in the zonegroup
->> replicated to each other , so yes it is a mesh. the Read Only zones only
->> read from the other zones.
->>
->>> If this is supported, what happens if zone1 data is modified, while at
->>> the same time a zone2 modifies the same data but the data was not yet
->>> copied from the zone1 to zone2. How is this conflict handled? Does
->>> last write win?
->>>
->> Yes the last write will win (in the end)
->>
->>> Is the RADOS "primary copy", "Chain", and "Splay" replication strategy
->>> also used in multisite traffic?
->> don't think those are related to multisite traffic which is based on REST API
->>
->> Regards,
->> Orit
+Christian
+> sage
+> _______________________________________________
+> ceph-users mailing list
+> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+
+
+-- 
+Christian Balzer        Network/Systems Engineer                
+chibi-FW+hd8ioUD0@public.gmane.org   	Rakuten Communications
