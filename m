@@ -1,71 +1,98 @@
-From: Willem Jan Withagen <wjw-dOtk1Lsa4IaEVqv0pETR8A@public.gmane.org>
-Subject: Re: killing ceph-disk [was Re: ceph-volume: migration
- and disk partition support]
-Date: Tue, 10 Oct 2017 14:42:48 +0200
-Message-ID: <61d1a237-90ad-04af-cf97-c314579e92a7@digiware.nl>
-References: <CAC-Np1xUasg0C34HEuCFims18zPyRZ17p9-mp3xYCUETAYnn_A@mail.gmail.com>
- <alpine.DEB.2.11.1710091448500.26711@piezo.us.to>
- <20171010095014.64940afa@batzmaru.gol.ad.jp>
- <CAC-Np1yBe3_mTzLvMfxvO+0CW20p1txjVwL2zg6ACqu6L1s7iQ@mail.gmail.com>
- <a1c7e8df-44a1-a03f-ddbc-2bb66494256a@digiware.nl>
- <CAC-Np1wLx-fqJ2kJv9TT0Hny520bCLZAcen=8rTU0zsS-zGJhQ@mail.gmail.com>
+From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+Subject: Re: deleting snapshots in batches?
+Date: Tue, 10 Oct 2017 08:46:00 -0400
+Message-ID: <CAGbvivL8SKGgVVDoxCQKTdcewEwSbk=gxHGjVsdr-0VpJNsRZA@mail.gmail.com>
+References: <CAGbvivLpWC=WUgmPA0q5Tt5wXF=1bx3kcAWP7drnYWfznBBUBg@mail.gmail.com>
+ <CAAM7YAm08zrKjFvKRZamJYDSDHd1Z3aacXJxyiEpqTcPW-RiTQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAC-Np1wLx-fqJ2kJv9TT0Hny520bCLZAcen=8rTU0zsS-zGJhQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-lf0-f49.google.com ([209.85.215.49]:53041 "EHLO
+        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751415AbdJJMqC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Oct 2017 08:46:02 -0400
+Received: by mail-lf0-f49.google.com with SMTP id b190so5574680lfg.9
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Oct 2017 05:46:02 -0700 (PDT)
+In-Reply-To: <CAAM7YAm08zrKjFvKRZamJYDSDHd1Z3aacXJxyiEpqTcPW-RiTQ@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 10-10-2017 14:21, Alfredo Deza wrote:
-> On Tue, Oct 10, 2017 at 8:14 AM, Willem Jan Withagen <wjw-dOtk1Lsa4IaEVqv0pETR8A@public.gmane.org> wrote:
->> On 10-10-2017 13:51, Alfredo Deza wrote:
->>> On Mon, Oct 9, 2017 at 8:50 PM, Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org> wrote:
->>>>
->>>> Hello,
->>>>
->>>> (pet peeve alert)
->>>> On Mon, 9 Oct 2017 15:09:29 +0000 (UTC) Sage Weil wrote:
->>>>
->>>>> To put this in context, the goal here is to kill ceph-disk in mimic.
+The "rmdir" command takes seconds.
+
+However, the resulting storm of activity on the cluster AFTER the
+deletion is bringing our cluster down completely.   The blocked
+requests count goes into the thousands.  The individual OSD processes
+begin taking up all of the memory that they can grab which causes the
+kernel to kill them off, which further throws the cluster into
+disarray due to down/out OSDs.  It takes multiple DAYS to completely
+recover from deleting 1 snapshot and constant monitoring to make sure
+OSDs come up and stay up after they get killed for eating too much
+memory.  This is a serious issue that we have been fighting with for
+over a month now.  The obvious solution is to destroy the cephfs
+entirely, but that would mean we have to then recover about 40TB of
+data, which could take a very long time and we'd prefer not to do
+that.
+
+For example:
+2521055 ceph      20   0 16.908g 0.013t  29172 S  28.4 10.6  36:39.52
+ceph-osd
+2507582 ceph      20   0 22.919g 0.019t  42076 S  17.6 15.5  58:48.00
+ceph-osd
+2501393 ceph      20   0 22.024g 0.018t  39648 S  14.7 14.9  79:05.28
+ceph-osd
+2547090 ceph      20   0 21.316g 0.017t  26584 S   7.8 14.0  18:14.76
+ceph-osd
+2455703 ceph      20   0 20.872g 0.017t  19784 S   4.9 13.8 111:02.06
+ceph-osd
+ 246368 ceph      20   0 22.657g 0.018t  37416 S   3.9 14.5 462:31.79
+ceph-osd
+
+
+
+
+On Tue, Oct 10, 2017 at 12:03 AM, Yan, Zheng <ukernel@gmail.com> wrote:
+> On Tue, Oct 10, 2017 at 12:13 AM, Wyllys Ingersoll
+> <wyllys.ingersoll@keepertech.com> wrote:
+>> We have a cluster (10.2.9 based) with a cephfs filesytem that has
+>> 4800+ snapshots. We want to delete most of the very old ones to get it
+>> to a more manageable number (such as 0).  However, deleting even 1
+>> snapshot right now takes up to a full 24 hours due to their age and
+>> size. It would literally take 13 years to delete all of them at the
+>> current pace.
 >>
->> Right, that means we need a ceph-volume zfs before things get shot down.
->> Fortunately there is little history to carry over.
+>> Here is one snapshot directory statistics:
 >>
->> But then still somebody needs to do the work. ;-|
->> Haven't looked at ceph-volume, but I'll put it on the agenda.
-> 
-> An interesting take on zfs (and anything else we didn't set up from
-> the get-go) is that we envisioned developers might
-> want to craft plugins for ceph-volume and expand its capabilities,
-> without placing the burden of coming up
-> with new device technology to support.
-> 
-> The other nice aspect of this is that a plugin would get to re-use all
-> the tooling in place in ceph-volume. The plugin architecture
-> exists but it isn't fully developed/documented yet.
-
-I was part of the original discussion when ceph-volume said it was going
-to be plugable... And would be a great proponent of thye plugins.
-If only because ceph-disk is rather convoluted to add to. Not that it
-cannot be done, but the code is rather loaded with linuxisms for its
-devices. And it takes some care to not upset the old code, even to the
-point that code for a routine is refactored into 3 new routines: one OS
-selctor and then the old code for Linux, and the new code for FreeBSD.
-And that starts to look like a poor mans plugin. :)
-
-But still I need to find the time, and sharpen my python skills.
-Luckily mimic is 9 months away. :)
-
---WjW
+>> # file: cephfs/.snap/snapshot.2017-02-24_22_17_01-1487992621
+>> ceph.dir.entries="3"
+>> ceph.dir.files="0"
+>> ceph.dir.rbytes="30500769204664"
+>> ceph.dir.rctime="1504695439.09966088000"
+>> ceph.dir.rentries="7802785"
+>> ceph.dir.rfiles="7758691"
+>> ceph.dir.rsubdirs="44094"
+>> ceph.dir.subdirs="3"
+>>
+>> There is a bug filed with details here: http://tracker.ceph.com/issues/21412
+>>
+>> Im wondering if there is a faster, undocumented, "backdoor" way to
+>> clean up our snapshot mess without destroying the entire filesystem
+>> and recreating it.
+>
+> deleting snapshot in cephfs is a simple operation, it should complete
+> in seconds. something must  go wrong If 'rmdir .snap/xxx' tooks hours.
+> please set debug_mds to 10, retry deleting a snapshot and send us the
+> log. (it's better to stop all other fs activities while deleting
+> snapshot)
+>
+> Regards
+> Yan, Zheng
+>
+>>
+>> -Wyllys Ingersoll
+>>  Keeper Technology, LLC
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
