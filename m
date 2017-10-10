@@ -1,63 +1,59 @@
-From: Stefan Kooman <stefan-68+x73Hep80@public.gmane.org>
-Subject: Re: ceph-volume: migration and disk partition support
-Date: Tue, 10 Oct 2017 09:28:31 +0200
-Message-ID: <20171010072831.GB20633@shell.dmz.bit.nl>
-References: <CAC-Np1xUasg0C34HEuCFims18zPyRZ17p9-mp3xYCUETAYnn_A@mail.gmail.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: librados on OSX
+Date: Tue, 10 Oct 2017 10:07:41 +0200
+Message-ID: <a000d7c5-f75a-4f3e-02d8-5d45bee6f61d@digiware.nl>
+References: <CAFCcFszkS0O7Q0we7NZV3nD904Lh_95jjT+HmOUCYJ7eoyus0A@mail.gmail.com>
+ <1534752289.14577933.1507613155200.JavaMail.zimbra@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAC-Np1xUasg0C34HEuCFims18zPyRZ17p9-mp3xYCUETAYnn_A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.digiware.nl ([176.74.240.9]:43405 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932095AbdJJIIC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 10 Oct 2017 04:08:02 -0400
+In-Reply-To: <1534752289.14577933.1507613155200.JavaMail.zimbra@redhat.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Kefu Chai <kchai@redhat.com>, Chris Blum <chris.blu@gmx.net>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
-
-Quoting Alfredo Deza (adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org):
-> Hi,
+On 10-10-2017 07:25, Kefu Chai wrote:
+> + ceph-devel
 > 
-> Now that ceph-volume is part of the Luminous release, we've been able
-> to provide filestore support for LVM-based OSDs. We are making use of
-> LVM's powerful mechanisms to store metadata which allows the process
-> to no longer rely on UDEV and GPT labels (unlike ceph-disk).
+> ----- Original Message -----
+>> From: "Chris Blum" <chris.blu@gmx.net>
+>> To: kchai@redhat.com
+>> Sent: Tuesday, October 10, 2017 12:10:47 AM
+>> Subject: librados on OSX
+>>
+>> Hi Kefu,
+>>
+>> I stumbled across your pull request [1] to make ceph modules compile on OSX.
+>> Since I'm working on a little side-project which requires librados and
+>> since I'm developing on OSX I would be very happy to figure out how
+>> you made librados build on your mac.
 > 
-> Bluestore support should be the next step for `ceph-volume lvm`, and
-> while that is planned we are thinking of ways to improve the current
-> caveats (like OSDs not coming up) for clusters that have deployed OSDs
-> with ceph-disk.
-
-I'm a bit confused after reading this. Just to make things clear. Would
-bluestore be put on top of a LVM volume (in an ideal world)? Has
-bluestore in Ceph luminious support for LVM? I.e. is there code in
-bluestore to support LVM? Or is it _just_ support of `ceph-volume lvm`
-for bluestore?
-
-> --- New clusters ---
-> The `ceph-volume lvm` deployment is straightforward (currently
-> supported in ceph-ansible), but there isn't support for plain disks
-> (with partitions) currently, like there is with ceph-disk.
+> install all the dependencies, clang, nss, cmake, etc.
 > 
-> Is there a pressing interest in supporting plain disks with
-> partitions? Or only supporting LVM-based OSDs fine?
+> https://github.com/ceph/ceph/pull/17615#issuecomment-329122356
 
-We're still in a green field situation. Users with an installed base
-will have to comment on this. If the assumption that bluestore would be
-put on top of LVM is true, it would make things simpler (in our own Ceph
-ansible playbook).
+ceph.spec.in contains the dependancies that are for Linux systems.
+./install-deps.sh contains a fair list of dependancies I needed for FreeBSD.
 
-Gr. Stefan
+In the mix of the 2 you should be able to get it working.
 
--- 
-| BIT BV  http://www.bit.nl/        Kamer van Koophandel 09090351
-| GPG: 0xD14839C6                   +31 318 648 688 / info-68+x73Hep80@public.gmane.org
+Now the thing you need to be aware of, when you run into "bugs", is that
+there is a translation shim that translates the Ceph-errors codes ( ==
+Linux errorcodes) to their FreeBSD equivalents. And since not all
+rewrites have matching counterparts, there is some optimism there.
+
+Not sure how much of that would be applicable for OSX, and if all
+rewrites are precise enough.
+
+For the remark of Kefu in the PR, interoperability seems to work, but it
+is certainly rough terrain.
+
+--WjW
+
+
