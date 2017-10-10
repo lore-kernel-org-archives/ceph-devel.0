@@ -1,136 +1,199 @@
 From: kefu chai <tchaikov@gmail.com>
-Subject: Re: OSD crashes
-Date: Tue, 10 Oct 2017 22:54:59 +0800
-Message-ID: <CAJE9aOPkVSjGvDzArVr6ZMyNvAws=CcyWemVj16OJn-E0BJPaQ@mail.gmail.com>
-References: <CAGbvivKhwJcLtLGqOovkLazkH-gPwzUPYkbqP+atGPPdL_0_kA@mail.gmail.com>
+Subject: Re: Understanding some of the Cmake logics
+Date: Tue, 10 Oct 2017 22:58:51 +0800
+Message-ID: <CAJE9aOOHonNsfFj8+umCOFEOtJM9u8o-WefAyVbfU3JGtp5j-Q@mail.gmail.com>
+References: <b06780c7-13ce-1274-735f-806a1f4f8062@digiware.nl>
+ <CAJE9aONEKsSnh7De6-TcS_BwKsCnqav8MXkDR6aUFuMp2out6A@mail.gmail.com>
+ <c8081893-bfbf-483f-01ed-1fd7a1c260d5@digiware.nl> <CAJE9aOMeOOM9sOdS10gk47R6hykYUQLST_+L7JkXr9Y-e+Si8A@mail.gmail.com>
+ <ebf1e5c5-ff39-9026-25d8-c9216d1671b0@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f49.google.com ([209.85.218.49]:46787 "EHLO
-        mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751385AbdJJOzA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Oct 2017 10:55:00 -0400
-Received: by mail-oi0-f49.google.com with SMTP id n82so38364878oig.3
-        for <ceph-devel@vger.kernel.org>; Tue, 10 Oct 2017 07:55:00 -0700 (PDT)
-In-Reply-To: <CAGbvivKhwJcLtLGqOovkLazkH-gPwzUPYkbqP+atGPPdL_0_kA@mail.gmail.com>
+Received: from mail-oi0-f45.google.com ([209.85.218.45]:45879 "EHLO
+        mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756315AbdJJO6w (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 10 Oct 2017 10:58:52 -0400
+Received: by mail-oi0-f45.google.com with SMTP id f66so1380174oib.2
+        for <ceph-devel@vger.kernel.org>; Tue, 10 Oct 2017 07:58:52 -0700 (PDT)
+In-Reply-To: <ebf1e5c5-ff39-9026-25d8-c9216d1671b0@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Willem Jan Withagen <wjw@digiware.nl>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Oct 10, 2017 at 10:36 PM, Wyllys Ingersoll
-<wyllys.ingersoll@keepertech.com> wrote:
-> Im seeing the following OSD crashes on my system that is in a heavy
-> recovery state.
+On Tue, Oct 10, 2017 at 9:54 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> On 10-10-2017 15:31, kefu chai wrote:
+>> On Tue, Oct 10, 2017 at 8:06 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>> On 10-10-2017 13:14, kefu chai wrote:
+>>>> + ceph-devel
+>>>>
+>>>> On Tue, Oct 10, 2017 at 4:49 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+>>>>> Hi Kefu,
+>>>>>
+>>>>> Sort of wondering what in the current code below is the relation between
+>>>>> gpertools and tcmalloc?
+>>>>
+>>>> could you be more specific?
+>>>
+>>> While looking at the code of CMakeLists.txt:286, in the case that no
+>>> ALLOCATOR is defined.
+>>> There the current flow of code seems to suggest that gperf-tools is
+>>> always linked to tcmalloc. And once gperftools is found, the ALLOCATOR
+>>> is set to tcmalloc. This then breaks rocksdb building.
+>>>     `set(HAVE_LIBTCMALLOC ${GPERFTOOLS_FOUND})`
+>>> like:
+>>> ```
+>>>  CMake Error at cmake/modules/BuildRocksDB.cmake:63 (message):
+>>>    Incompatible tcmalloc v2.6.1 and rocksdb v5.8.0, please install
+>>>  gperf-tools
+>>>    2.5 (not 2.5.93) or >= 2.6.2, or switch to another allocator using
+>>> 'cmake -DALLOCATOR=libc'.
+>>>  Call Stack (most recent call first):
+>>>    src/CMakeLists.txt:825 (build_rocksdb)
+>>> ```
+>>>
+>>>>> Reason for the question is that once the gperf packages is installed,
+>>>>> as a bonus the code below declares the allocator to be tcmalloc.
+>>>>> But gperf under FreeBSD does not have tcmalloc.
+>>>>
+>>>> please note gperf here is not GNU perf [1] but google-perftools. and
+>>>> why do you claim the gperf under FreeBSD does not have tcmalloc? could
+>>>> you elaborate this a little bit?
+>>>
+>>> My bad, I mixed gperf and gperf-tools. We are talking about gperf-tools.
+>>> And yes, gperftools brings tcmalloc but not in the version mix that is
+>>> asked for. gperf-tools was at 2.5 one time, but has upgraded to 2.6.1_1
+>>> on FreeBSD[1]. Getting other versions will require manual work to get it
+>>> to work.
+>>>
+>>> But the question is:
+>>>     Do I really want my allocator to be tcmalloc when the native
+>>>     libc allocator is jemalloc?
+>>
+>> i think it's up to you.
 >
-> Ceph 10.2.9
-> Ubuntu 16.04.2
-> XFS disks with both journal and data on the same dmcrypt protected devices.
+> Oke, it is what the code now forces...
+> And I've tried avoiding tcmalloc uptil now, and would like to do so for
+> the time being..
 >
+>>> So is the test in CMakeLists.txt:286-324 what we want on FreeBSD?
+>>
+>> see http://tracker.ceph.com/issues/21422. so again, it's up to you.
 >
->    -13> 2017-10-10 10:33:44.202555 7f49da1158c0  5 osd.78 pg_epoch:
-> 288706 pg[23.3bc(unlocked)] enter Initial
->    -12> 2017-10-10 10:33:44.204120 7f49da1158c0  5 osd.78 pg_epoch:
-> 288706 pg[23.3bc( v 29854'429 (0'0,29854'429] local-les=285261 n=4
-> ec=19254 les/c/f 285261/285281/0 285343/285343/285343) [101,39,100]
-> r=-1 lpr=0 pi=203138-285342/152 crt=29854'429 lcod 0'0 inactive NOTIFY
-> NIBBLEWISE] exit Initial 0.001559 0 0.000000
->    -11> 2017-10-10 10:33:44.204139 7f49da1158c0  5 osd.78 pg_epoch:
-> 288706 pg[23.3bc( v 29854'429 (0'0,29854'429] local-les=285261 n=4
-> ec=19254 les/c/f 285261/285281/0 285343/285343/285343) [101,39,100]
-> r=-1 lpr=0 pi=203138-285342/152 crt=29854'429 lcod 0'0 inactive NOTIFY
-> NIBBLEWISE] enter Reset
->    -10> 2017-10-10 10:33:44.233836 7f49da1158c0  5 osd.78 pg_epoch:
-> 288730 pg[9.8(unlocked)] enter Initial
->     -9> 2017-10-10 10:33:44.245781 7f49da1158c0  5 osd.78 pg_epoch:
-> 288730 pg[9.8( v 113941'62509 (35637'59509,113941'62509]
-> local-les=288727 n=26 ec=1076 les/c/f 288727/288730/0
-> 288719/288725/279537) [78,81,100] r=0 lpr=0 crt=113941'62509 lcod 0'0
-> mlcod 0'0 inactive NIBBLEWISE] exit Initial 0.011945 0 0.000000
->     -8> 2017-10-10 10:33:44.245803 7f49da1158c0  5 osd.78 pg_epoch:
-> 288730 pg[9.8( v 113941'62509 (35637'59509,113941'62509]
-> local-les=288727 n=26 ec=1076 les/c/f 288727/288730/0
-> 288719/288725/279537) [78,81,100] r=0 lpr=0 crt=113941'62509 lcod 0'0
-> mlcod 0'0 inactive NIBBLEWISE] enter Reset
->     -7> 2017-10-10 10:33:44.509240 7f49da1158c0  5 osd.78 pg_epoch:
-> 288753 pg[1.5e7(unlocked)] enter Initial
->     -6> 2017-10-10 10:33:47.185265 7f49da1158c0  5 osd.78 pg_epoch:
-> 288753 pg[1.5e7( v 286018'307337 (208416'292664,286018'307337]
-> local-les=279555 n=8426 ec=23117 les/c/f 279555/279564/0
-> 279532/279544/279544) [78,34,30] r=0 lpr=0 crt=286018'307337 lcod 0'0
-> mlcod 0'0 inactive NIBBLEWISE] exit Initial 2.676025 0 0.000000
->     -5> 2017-10-10 10:33:47.185302 7f49da1158c0  5 osd.78 pg_epoch:
-> 288753 pg[1.5e7( v 286018'307337 (208416'292664,286018'307337]
-> local-les=279555 n=8426 ec=23117 les/c/f 279555/279564/0
-> 279532/279544/279544) [78,34,30] r=0 lpr=0 crt=286018'307337 lcod 0'0
-> mlcod 0'0 inactive NIBBLEWISE] enter Reset
->     -4> 2017-10-10 10:33:47.345265 7f49da1158c0  5 osd.78 pg_epoch:
-> 288706 pg[2.36a(unlocked)] enter Initial
->     -3> 2017-10-10 10:33:47.360864 7f49da1158c0  5 osd.78 pg_epoch:
-> 288706 pg[2.36a( v 279380'86262 (36401'83241,279380'86262]
-> local-les=285038 n=56 ec=23131 les/c/f 285038/285160/0
-> 284933/284985/284985) [2,78,59] r=1 lpr=0 pi=284823-284984/2
-> crt=279380'86262 lcod 0'0 inactive NOTIFY NIBBLEWISE] exit Initial
-> 0.015599 0 0.000000
->     -2> 2017-10-10 10:33:47.360893 7f49da1158c0  5 osd.78 pg_epoch:
-> 288706 pg[2.36a( v 279380'86262 (36401'83241,279380'86262]
-> local-les=285038 n=56 ec=23131 les/c/f 285038/285160/0
-> 284933/284985/284985) [2,78,59] r=1 lpr=0 pi=284823-284984/2
-> crt=279380'86262 lcod 0'0 inactive NOTIFY NIBBLEWISE] enter Reset
->     -1> 2017-10-10 10:33:47.589722 7f49da1158c0  5 osd.78 pg_epoch:
-> 288663 pg[1.2ad(unlocked)] enter Initial
->      0> 2017-10-10 10:33:48.931168 7f49da1158c0 -1 *** Caught signal
-> (Aborted) **
->  in thread 7f49da1158c0 thread_name:ceph-osd
->
->  ceph version 10.2.9 (2ee413f77150c0f375ff6f10edd6c8f9c7d060d0)
->  1: (()+0x984c4e) [0x5597b21e7c4e]
->  2: (()+0x11390) [0x7f49d8fd3390]
->  3: (gsignal()+0x38) [0x7f49d6f71428]
->  4: (abort()+0x16a) [0x7f49d6f7302a]
->  5: (__gnu_cxx::__verbose_terminate_handler()+0x16d) [0x7f49d78b384d]
+> The tracker suggests that it is an error in 2.5.93, but
+> cmake/modules/BuildRocksDB.cmake suggests that it is only fixed in
+> 2.6.2...??
 
-looks like an uncaught bad_alloc() exception when we are reading the
-pg log from the underlying omap backed by leveldb. it would be weird
-if the leveldb returns a HUGE slice that fails the allocator.  Wyllys,
-how did the memory usage look like when the ceph-osd crashes?
+2.6.2 is not yet released. so if you want to stick with tcmalloc, you
+need to build from the latest (or recent enough) source. actually, i
+am not sure what you question is..
 
->  6: (()+0x8d6b6) [0x7f49d78b16b6]
->  7: (()+0x8d701) [0x7f49d78b1701]
->  8: (()+0x8d919) [0x7f49d78b1919]
->  9: (ceph::buffer::create_aligned(unsigned int, unsigned int)+0x146)
-> [0x5597b22f0f86]
->  10: (ceph::buffer::copy(char const*, unsigned int)+0x15) [0x5597b22f10f5]
->  11: (ceph::buffer::ptr::ptr(char const*, unsigned int)+0x18) [0x5597b22f1128]
->  12: (LevelDBStore::to_bufferlist(leveldb::Slice)+0x75) [0x5597b20a09b5]
->  13: (LevelDBStore::LevelDBWholeSpaceIteratorImpl::value()+0x32)
-> [0x5597b20a4232]
->  14: (KeyValueDB::IteratorImpl::value()+0x22) [0x5597b1c843f2]
->  15: (DBObjectMap::DBObjectMapIteratorImpl::value()+0x25) [0x5597b204cbd5]
->  16: (PGLog::read_log(ObjectStore*, coll_t, coll_t, ghobject_t,
-> pg_info_t const&, std::map<eversion_t, hobject_t,
-> std::less<eversion_t>, std::allocator<std::pair<eversion_t const,
-> hobject_t> > >&, PGLog::IndexedLog&, pg_missing_t&,
-> std::__cxx11::basic_ostringstream<char, std::char_traits<char>,
-> std::allocator<char> >&, bool, DoutPrefixProvider const*,
-> std::set<std::__cxx11::basic_string<char, std::char_traits<char>,
-> std::allocator<char> >, std::less<std::__cxx11::basic_string<char,
-> std::char_traits<char>, std::allocator<char> > >,
-> std::allocator<std::__cxx11::basic_string<char,
-> std::char_traits<char>, std::allocator<char> > > >*)+0xb99)
-> [0x5597b1e92a19]
->  17: (PG::read_state(ObjectStore*, ceph::buffer::list&)+0x313) [0x5597b1cc0fb3]
->  18: (OSD::load_pgs()+0x87a) [0x5597b1bfb96a]
->  19: (OSD::init()+0x2026) [0x5597b1c06c56]
->  20: (main()+0x2ef1) [0x5597b1b78391]
->  21: (__libc_start_main()+0xf0) [0x7f49d6f5c830]
->  22: (_start()+0x29) [0x5597b1bb9b99]
->  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-> needed to interpret this.
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>>> The workaround this (for the time being) is to call cmake with
+>>> -DALLOCATOR=libc as is suggested.
+>
+> I'll use this as workaround for the time being, since that is least
+> invasive. And when that works out, try and make a PR for the allocator
+> selector in CmakeLists.txt, and/or wait until gperf-tools 2.6.2 is
+> available on FreeBSD.
+
+what is issue you want to address?
+
+>
+> --WjW
+>
+>>> [1]
+>>> https://svnweb.freebsd.org/ports/head/devel/google-perftools/Makefile?revision=450353&view=markup
+>>>
+>>>>
+>>>> --
+>>>> [1] http://portsmon.freebsd.org/portoverview.py?category=devel&portname=gperf
+>>>> [2] http://portsmon.freebsd.org/portoverview.py?category=devel&portname=google-perftools
+>>>>
+>>>>>
+>>>>> So I guess I need to fix the code below the to prevent this implicit
+>>>>> relation
+>>>>> under FreeBSD.
+>>>>>
+>>>>> And the problem that arises from this all lies in compiling rocksdb,
+>>>>> because
+>>>>> under FreeBSD that also needs to be build with libc as allocator.
+>>>>> The introduction of the new rocksdb building makes this clear.
+>>>>>
+>>>>> CMake Error at cmake/modules/BuildRocksDB.cmake:63 (message):
+>>>>>   Incompatible tcmalloc v2.6.1 and rocksdb v5.8.0, please install
+>>>>> gperf-tools
+>>>>>   2.5 (not 2.5.93) or >= 2.6.2, or switch to another allocator using 'cmake
+>>>>>   -DALLOCATOR=libc'.
+>>>>> Call Stack (most recent call first):
+>>>>>   src/CMakeLists.txt:825 (build_rocksdb)
+>>>>>
+>>>>>
+>>>>> --WjW
+>>>>>
+>>>>>
+>>>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 286)
+>>>>> if(ALLOCATOR)
+>>>>> ca9946d2b5a (Bassam Tabbara      2016-10-10 14:37:58 -0700 287)
+>>>>> if(${ALLOCATOR} MATCHES "tcmalloc(_minimal)?")
+>>>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 288)
+>>>>> find_package(gperftools REQUIRED)
+>>>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 289)
+>>>>> set(HAVE_LIBTCMALLOC ON)
+>>>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 290)
+>>>>> elseif(${ALLOCATOR} STREQUAL "jemalloc")
+>>>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 291)
+>>>>> find_package(JeMalloc REQUIRED)
+>>>>> 0ef09f32d46 (Ali Maredia         2016-05-02 18:21:32 -0400 292)
+>>>>> set(HAVE_LIBJEMALLOC ${JEMALLOC_FOUND})
+>>>>> 83b74f52501 (Matt Benjamin       2016-12-21 23:36:37 -0500 293)
+>>>>> set(HAVE_JEMALLOC 1)
+>>>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 294)   endif()
+>>>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 295)
+>>>>> else(ALLOCATOR)
+>>>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 296)
+>>>>> find_package(gperftools)
+>>>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 297)
+>>>>> set(HAVE_LIBTCMALLOC ${GPERFTOOLS_FOUND})
+>>>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 298)   if(NOT
+>>>>> GPERFTOOLS_FOUND)
+>>>>> 0ef09f32d46 (Ali Maredia         2016-05-02 18:21:32 -0400 299)
+>>>>> find_package(JeMalloc)
+>>>>> 0ef09f32d46 (Ali Maredia         2016-05-02 18:21:32 -0400 300)
+>>>>> set(HAVE_LIBJEMALLOC ${JEMALLOC_FOUND})
+>>>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 301)
+>>>>> endif(NOT GPERFTOOLS_FOUND)
+>>>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 302)
+>>>>> if(GPERFTOOLS_FOUND)
+>>>>> 48a1f8eff5b (Kefu Chai           2016-06-08 11:34:44 +0800 303)
+>>>>> set(ALLOCATOR tcmalloc)
+>>>>> 48a1f8eff5b (Kefu Chai           2016-06-08 11:34:44 +0800 304)
+>>>>> elseif(JEMALLOC_FOUND)
+>>>>> 48a1f8eff5b (Kefu Chai           2016-06-08 11:34:44 +0800 305)
+>>>>> set(ALLOCATOR jemalloc)
+>>>>> 48a1f8eff5b (Kefu Chai           2016-06-08 11:34:44 +0800 306)   else()
+>>>>> ce3b71acd20 (Willem Jan Withagen 2017-02-12 15:03:56 +0100 307)
+>>>>> if(NOT FREEBSD)
+>>>>> ce3b71acd20 (Willem Jan Withagen 2017-02-12 15:03:56 +0100 308)       #
+>>>>> FreeBSD already has jemalloc as its default allocator
+>>>>> ce3b71acd20 (Willem Jan Withagen 2017-02-12 15:03:56 +0100 309)
+>>>>> message(WARNING "tcmalloc and jemalloc not found, falling back to libc")
+>>>>> ce3b71acd20 (Willem Jan Withagen 2017-02-12 15:03:56 +0100 310)     endif()
+>>>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 311)
+>>>>> set(ALLOCATOR "libc")
+>>>>> 6c12edbf9d2 (Kefu Chai           2016-08-11 00:12:05 +0800 312)
+>>>>> endif(GPERFTOOLS_FOUND)
+>>>>> a614c3b9c1e (Ali Maredia         2015-12-30 21:06:08 -0500 313)
+>>>>> endif(ALLOCATOR)
+>>>>>
+>>>>
+>>>>
+>>>>
+>>>
+>>
+>>
+>>
+>
 
 
 
