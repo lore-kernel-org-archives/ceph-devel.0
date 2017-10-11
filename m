@@ -1,143 +1,106 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Understanding some of the Cmake logics
-Date: Tue, 10 Oct 2017 17:41:53 +0200
-Message-ID: <73007f73-0468-9aad-bbc0-c07ace4f8ba2@digiware.nl>
-References: <b06780c7-13ce-1274-735f-806a1f4f8062@digiware.nl>
- <CAJE9aONEKsSnh7De6-TcS_BwKsCnqav8MXkDR6aUFuMp2out6A@mail.gmail.com>
- <c8081893-bfbf-483f-01ed-1fd7a1c260d5@digiware.nl>
- <CAJE9aOMeOOM9sOdS10gk47R6hykYUQLST_+L7JkXr9Y-e+Si8A@mail.gmail.com>
- <ebf1e5c5-ff39-9026-25d8-c9216d1671b0@digiware.nl>
- <CAJE9aOOHonNsfFj8+umCOFEOtJM9u8o-WefAyVbfU3JGtp5j-Q@mail.gmail.com>
- <d9fcfa2d-bdb6-bc27-3f53-caacd864999e@digiware.nl>
- <CAJE9aOO8Jfa+xRKUupSY_gBD6Fk7tnMHUZMasfM3aYX=g7uLfw@mail.gmail.com>
- <4e52a7ba-f0eb-5cc0-4bce-1bab78cbcad5@digiware.nl>
- <CAJE9aOOu96GRJOYW1mSUem=7JbyWK9mZ7tBGPyaOOyFUWFWnRQ@mail.gmail.com>
+From: Chris Blum <chris.blu@gmx.net>
+Subject: Re: librados on OSX
+Date: Wed, 11 Oct 2017 12:11:30 +0200
+Message-ID: <CAFCcFsx0vAin5MT6_b57C4MJ2TVBBqzGn3GCfCFgVH_0OTQG+A@mail.gmail.com>
+References: <CAFCcFszkS0O7Q0we7NZV3nD904Lh_95jjT+HmOUCYJ7eoyus0A@mail.gmail.com>
+ <1534752289.14577933.1507613155200.JavaMail.zimbra@redhat.com> <a000d7c5-f75a-4f3e-02d8-5d45bee6f61d@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:44353 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751347AbdJJPmP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 10 Oct 2017 11:42:15 -0400
-In-Reply-To: <CAJE9aOOu96GRJOYW1mSUem=7JbyWK9mZ7tBGPyaOOyFUWFWnRQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-qt0-f175.google.com ([209.85.216.175]:50914 "EHLO
+        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751235AbdJKKLc (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 11 Oct 2017 06:11:32 -0400
+Received: by mail-qt0-f175.google.com with SMTP id f15so3535943qtf.7
+        for <ceph-devel@vger.kernel.org>; Wed, 11 Oct 2017 03:11:31 -0700 (PDT)
+In-Reply-To: <a000d7c5-f75a-4f3e-02d8-5d45bee6f61d@digiware.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Kefu Chai <kchai@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On 10-10-2017 17:35, kefu chai wrote:
-> On Tue, Oct 10, 2017 at 11:27 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> On 10-10-2017 17:19, kefu chai wrote:
->>> On Tue, Oct 10, 2017 at 11:13 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>>> On 10-10-2017 16:58, kefu chai wrote:
->>>>> On Tue, Oct 10, 2017 at 9:54 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>>>>> On 10-10-2017 15:31, kefu chai wrote:
->>>>>>> On Tue, Oct 10, 2017 at 8:06 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>>>>>>> On 10-10-2017 13:14, kefu chai wrote:
->>>>>>>>> + ceph-devel
->>>>>>>>>
->>>>>>>>> On Tue, Oct 10, 2017 at 4:49 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->>>>>>>>>> Hi Kefu,
->>>>>>>>>>
->>>>>>>>>> Sort of wondering what in the current code below is the relation between
->>>>>>>>>> gpertools and tcmalloc?
->>>>>>>>>
->>>>>>>>> could you be more specific?
->>>>>>>>
->>>>>>>> While looking at the code of CMakeLists.txt:286, in the case that no
->>>>>>>> ALLOCATOR is defined.
->>>>>>>> There the current flow of code seems to suggest that gperf-tools is
->>>>>>>> always linked to tcmalloc. And once gperftools is found, the ALLOCATOR
->>>>>>>> is set to tcmalloc. This then breaks rocksdb building.
->>>>>>>>     `set(HAVE_LIBTCMALLOC ${GPERFTOOLS_FOUND})`
->>>>>>>> like:
->>>>>>>> ```
->>>>>>>>  CMake Error at cmake/modules/BuildRocksDB.cmake:63 (message):
->>>>>>>>    Incompatible tcmalloc v2.6.1 and rocksdb v5.8.0, please install
->>>>>>>>  gperf-tools
->>>>>>>>    2.5 (not 2.5.93) or >= 2.6.2, or switch to another allocator using
->>>>>>>> 'cmake -DALLOCATOR=libc'.
->>>>>>>>  Call Stack (most recent call first):
->>>>>>>>    src/CMakeLists.txt:825 (build_rocksdb)
->>>>>>>> ```
->>>>>>>>
->>>>>>>>>> Reason for the question is that once the gperf packages is installed,
->>>>>>>>>> as a bonus the code below declares the allocator to be tcmalloc.
->>>>>>>>>> But gperf under FreeBSD does not have tcmalloc.
->>>>>>>>>
->>>>>>>>> please note gperf here is not GNU perf [1] but google-perftools. and
->>>>>>>>> why do you claim the gperf under FreeBSD does not have tcmalloc? could
->>>>>>>>> you elaborate this a little bit?
->>>>>>>>
->>>>>>>> My bad, I mixed gperf and gperf-tools. We are talking about gperf-tools.
->>>>>>>> And yes, gperftools brings tcmalloc but not in the version mix that is
->>>>>>>> asked for. gperf-tools was at 2.5 one time, but has upgraded to 2.6.1_1
->>>>>>>> on FreeBSD[1]. Getting other versions will require manual work to get it
->>>>>>>> to work.
->>>>>>>>
->>>>>>>> But the question is:
->>>>>>>>     Do I really want my allocator to be tcmalloc when the native
->>>>>>>>     libc allocator is jemalloc?
->>>>>>>
->>>>>>> i think it's up to you.
->>>>>>
->>>>>> Oke, it is what the code now forces...
->>>>>> And I've tried avoiding tcmalloc uptil now, and would like to do so for
->>>>>> the time being..
->>>>>>
->>>>>>>> So is the test in CMakeLists.txt:286-324 what we want on FreeBSD?
->>>>>>>
->>>>>>> see http://tracker.ceph.com/issues/21422. so again, it's up to you.
->>>>>>
->>>>>> The tracker suggests that it is an error in 2.5.93, but
->>>>>> cmake/modules/BuildRocksDB.cmake suggests that it is only fixed in
->>>>>> 2.6.2...??
->>>>>
->>>>> 2.6.2 is not yet released. so if you want to stick with tcmalloc, you
->>>>> need to build from the latest (or recent enough) source. actually, i
->>>>> am not sure what you question is..
->>>>
->>>> The question: Do you know if 2.6.2 is the first gperf-tools-version >
->>>> 2.5.93 where this bug from the tracker is solved?
+Hi Kefu,
+
+I have read your comment [1], sadly this doesn't even comes close to
+giving me enough information.
+Assuming that all I need is dependencies, I have installed a bunch of
+brew and pip packages... [2]
+Then I also installed OSX-fuse[3] which provided the fuse development libraries.
+Then I figured out that your comment is already outdated since the NSS
+version now moved from v3.31 to v3.33.
+After that - cmake was still not happy - triggering me to provide
+include and library paths for NSS. So I ended up with this command:
+
+PKG_CONFIG_PATH=/usr/local/Cellar/nss/3.33/lib/pkgconfig; \
+cmake .. -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang \
+-DWITH_EMBEDDED=OFF -DWITH_MANPAGE=OFF -DWITH_LIBCEPHFS=OFF \
+-DWITH_XFS=OFF -DWITH_KRBD=OFF -DWITH_NSS=ON -DWITH_LTTNG=OFF \
+-DWITH_BABELTRACE=OFF -DCMAKE_BUILD_TYPE=Debug -DWITH_CCACHE=ON \
+-DWITH_RADOSGW=OFF \
+-DNSS_LIBRARIES=/usr/local/opt/nss/lib \
+-DNSS_INCLUDE_DIRS=/usr/local/opt/nss/include
+
+Since cmake is executed with '..' you probably run this in some kind
+of subdirectory of the repository - most probably /build?
+
+Still after all these steps, I'm not able to build librados... Since
+I'm not that dependent on a Mac, I will move my development to a Linux
+VM - which is definitely less convenient, but at least I can continue
+the actual work I was trying to do.
+I'm leaving this so that maybe someone else will find the steps I
+tried and continues the effort ;)
+
+
+
+[1] https://github.com/ceph/ceph/pull/17615#issuecomment-329122356
+[2] Hopefully more or less complete list of all my additional dependencies:
+pip install:
+cython
+
+brew install:
+cmake
+ccache
+leveldb
+NSS
+[3] https://osxfuse.github.io/
+
+On Tue, Oct 10, 2017 at 10:07 AM, Willem Jan Withagen <wjw@digiware.nl> wrote:
+> On 10-10-2017 07:25, Kefu Chai wrote:
+>> + ceph-devel
+>>
+>> ----- Original Message -----
+>>> From: "Chris Blum" <chris.blu@gmx.net>
+>>> To: kchai@redhat.com
+>>> Sent: Tuesday, October 10, 2017 12:10:47 AM
+>>> Subject: librados on OSX
 >>>
->>> https://github.com/ceph/ceph/pull/17788/commits/ff8d6a730bb774271b9eea6af338e2d3ce3c48a5
->>
->> fascinating reading...
->> Shows that managing version can be a bitch.
->>
->>>>>>>> The workaround this (for the time being) is to call cmake with
->>>>>>>> -DALLOCATOR=libc as is suggested.
->>>>>>
->>>>>> I'll use this as workaround for the time being, since that is least
->>>>>> invasive. And when that works out, try and make a PR for the allocator
->>>>>> selector in CmakeLists.txt, and/or wait until gperf-tools 2.6.2 is
->>>>>> available on FreeBSD.
->>>>>
->>>>> what is issue you want to address?
->>>>
->>>> The issue I want to address is that I'm not able to build the intree
->>>> rocksdb ATM. Because tcmalloc is not => 2.6.2, and tcmalloc is required
->>>> because gperf-tools is detected.
+>>> Hi Kefu,
 >>>
->>> the error message offered two solutions. i think, what you need is
->>> just to choose one of them.
+>>> I stumbled across your pull request [1] to make ceph modules compile on OSX.
+>>> Since I'm working on a little side-project which requires librados and
+>>> since I'm developing on OSX I would be very happy to figure out how
+>>> you made librados build on your mac.
 >>
->> Right, so I'm going with libc for the moment...
+>> install all the dependencies, clang, nss, cmake, etc.
 >>
->> Thanx for your patient explanations,
-> 
-> i did send a mail with title of 'fix for "crash in rocksdb LRUCache
-> destructor with tcmalloc"' to this mailing list. if you have had read
-> it, it'd save both of us some time.
-
-I was/am about a zillion mails behind on Ceph-lists due to too much work
-at my paying dayjob. And then still I might have forgotten about it
-because it speaks about fc25/26 and tcmalloc. Where I only just today
-found out that gperf-tools does use tcmalloc.
-
-So I'm sorry for your time, but for me I feel a bit more educated.
-
---WjW
-
+>> https://github.com/ceph/ceph/pull/17615#issuecomment-329122356
+>
+> ceph.spec.in contains the dependancies that are for Linux systems.
+> ./install-deps.sh contains a fair list of dependancies I needed for FreeBSD.
+>
+> In the mix of the 2 you should be able to get it working.
+>
+> Now the thing you need to be aware of, when you run into "bugs", is that
+> there is a translation shim that translates the Ceph-errors codes ( ==
+> Linux errorcodes) to their FreeBSD equivalents. And since not all
+> rewrites have matching counterparts, there is some optimism there.
+>
+> Not sure how much of that would be applicable for OSX, and if all
+> rewrites are precise enough.
+>
+> For the remark of Kefu in the PR, interoperability seems to work, but it
+> is certainly rough terrain.
+>
+> --WjW
+>
+>
