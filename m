@@ -1,87 +1,232 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: =?utf-8?Q?Re=C2=A0=3A?= [ceph-users] general protection fault:
- 0000 [#1] SMP
-Date: Thu, 12 Oct 2017 14:58:47 +0100
-Message-ID: <87lgkgcvs8.fsf@suse.com>
-References: <1507732840.2812.10.camel@daevel.fr>
-        <CAOi1vP--q8y696g5W_AUmR9Yxe5Xop3BH3xjEQG6_pmQmXO6kA@mail.gmail.com>
-        <1507793194.26826.8.camel@daevel.fr>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: removed_snaps
+Date: Thu, 12 Oct 2017 14:02:15 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1710121354490.26702@piezo.us.to>
+References: <alpine.DEB.2.11.1710111556410.26702@piezo.us.to> <CAJ4mKGaw-6Yu5pK97r0GK5q2_Kt=O2d6SG9um+Xvr8JdAKX88A@mail.gmail.com> <alpine.DEB.2.11.1710111841060.26702@piezo.us.to> <CAJ4mKGZbPjKNchv+cqcx_uRhb3GtX5D7ZNj-0UHTapbaHascrQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:40648 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:7480 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751138AbdJLN6u (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 12 Oct 2017 09:58:50 -0400
-In-Reply-To: <1507793194.26826.8.camel@daevel.fr> (Olivier Bonvalet's message
-        of "Thu, 12 Oct 2017 09:26:34 +0200")
+        id S1750964AbdJLOCR (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 12 Oct 2017 10:02:17 -0400
+In-Reply-To: <CAJ4mKGZbPjKNchv+cqcx_uRhb3GtX5D7ZNj-0UHTapbaHascrQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Olivier Bonvalet <ceph.list@daevel.fr>
-Cc: Jeff Layton <jlayton@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, Ceph Users <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Mclean, Patrick" <Patrick.Mclean@sony.com>
 
-Olivier Bonvalet <ceph.list@daevel.fr> writes:
+On Wed, 11 Oct 2017, Gregory Farnum wrote:
+> On Wed, Oct 11, 2017 at 12:02 PM, Sage Weil <sweil@redhat.com> wrote:
+> > On Wed, 11 Oct 2017, Gregory Farnum wrote:
+> >> On Wed, Oct 11, 2017 at 9:13 AM, Sage Weil <sweil@redhat.com> wrote:
+> >> > I'm working on removing the removed_snaps field from pg_pool_t (and
+> >> > thus the OSDMap) as this can get very large for clusters that have aged
+> >> > and use snapshots.
+> >> >
+> >> >         https://github.com/ceph/ceph/blob/master/src/osd/osd_types.h#L1320
+> >> >
+> >> > The short version of the plan is only include recently removed snaps in
+> >> > the map.  Once all PGs in a pool have reported that the snap has been
+> >> > trimmed, we can safely retire the snapid from that set.
+> >> >
+> >> > There are a couple of possible problems related to the fact that the
+> >> > OSD currently santizes the SnapContext with every write by removing
+> >> > snapids that appear in removed_snaps.  This is meant to deal with race
+> >> > conditions where the IO was submitted before the snap was removed, but the
+> >> > OSD has already logically removed it (or scheduled it for removal).
+> >> >
+> >> > I see two categories of problems:
+> >> >
+> >> > 1. The IO was prepared at the librados client before the snap was removed,
+> >> > the IO is delayed (e.g., client can't connect, or PG is inactive, etc.)
+> >> > until after the snap is deleted and retired from removed_snaps, and then
+> >> > the IO is processed.  This could trigger a clone on the OSD that will
+> >> > then never get cleaned up.
+> >> >
+> >> > Specifically, a librbd example:
+> >> >
+> >> >  a. librbd prepares a IOContext that includes snap S
+> >> >  b. librbd initiates a librados IO with on that ioc.  That request is
+> >> >     delayed.
+> >> >  c. Snap S is removed (someone tells the mon to delete it)
+> >> >     - either our librbd client did it, or another one did and we get a
+> >> >       notify telling us to refresh our header; doesn't matter which.
+> >> >  d. S is included in OSDMap removed_snaps.
+> >> >  e. all OSDs prune S
+> >> >  f. S is removed from removed_snaps some time later
+> >> >  g. The request from (b) finally reaches the OSD and triggers a clone S
+> >> >     (which will never get cleaned up)
+> >> >
+> >> > I think we can fix this problem by making Objecter slightly smarter: it
+> >> > can watch OSDMaps it receives and prune snapc's for in-flight requests.
+> >> > In the above scenario, sometime between d and g, when it finally
+> >> > gets a recent OSDMap, it will have pruned S from the request's snapc.  If
+> >> > it didn't get the map, and the request is still tagged with an old
+> >> > OSDMap, the OSD can kill the OSD session to force a reconnect/resend. It
+> >> > can do this for any incoming client request tagged with an OSDMap prior to
+> >> > a low-water-mark epoch in the OSDMap for which older removed_snaps
+> >> > have been proved (e.g. removed_snaps_pruned_epoch, or some better name).
+> >> >
+> >> > In the extreme case where a client is disconnected for so long that they
+> >> > can't advance their map to the current one due to the mon having trimmed
+> >> > maps, and they have outstanding writes with snapcs, the client
+> >> > can choose to fail the requests with EIO or ESTALE or something, or crash
+> >> > itself, or otherwise behave as if it has been blacklisted/fenced (if it's
+> >> > RBD, it probably has anyway).
+> >>
+> >> This all sounds good, except...
+> >> How on earth do we process these snapc trims in a way that doesn't
+> >> bring us back down to effectively single-threaded transfer speeds?
+> >>
+> >> We might be able to do something with publishing a list of trimmed
+> >> snaps and having the dispatch threads check their op snapcs against
+> >> that shared data, but I'm not sure and we'd need to performance test
+> >> very carefully...
+> >
+> > The only Objecter change here is that when we get a new osdmap we would
+> > apply removed_snaps_this_epoch to the current in-flight requests.  We
+> > already walk all in-flight ops on map changes to recheck the CRUSH
+> > mapping, and the snapc lists are short, and we can construct the OSDMap so
+> > that it has the list of newly-deleted snaps for just that epoch in a new
+> > field, so I don't think this will have any measureable impact on
+> > performance.
+> >
+> > Is there a different effect I'm missing?
+> 
+> I was worried about the map walk. I hadn't thought about the CRUSH
+> mapping changes so I guess I don't know how that's implemented, but if
+> it works that's good!
+> 
+> >
+> >> > 2. There is a bug, and the librbd image is out of sync: it thinks that
+> >> > snap S still exists but in reality it has been pruned.  If this happens,
+> >> > then the librbd client may use S and it may trigger a clone.  However,
+> >> > that snap still is referenced from the image, so it will presumably
+> >> > eventually get deleted and cleaned up.
+> >> >
+> >> > Greg suggested the possibility of a similar CephFS bug, where for example
+> >> > a CephFS client gets confused and continues sending snapcs with removed
+> >> > snaps.  I think we can catch this category of bug (and probably #2 as
+> >> > well) if we make the OSD log an error/warning to the cluster log if it
+> >> > gets an incoming request including a deleted snapid when the request is
+> >> > marked with an epoch after when the snap was deleted.  This would
+> >> > would mean adding the deleted_epoch for each removed snapid to pg_pool_t
+> >> > to do properly; maybe worth it, maybe not?
+> >>
+> >> I don't quite understand; can you expand on this?
+> >
+> > The annoyingly confusing thing about this is that snapids are kind of like
+> > time points, but the set of existing snapids has nothing to do with what
+> > we've trimmed from removed_snaps... it's not like we can just drop low
+> > snapids out of the set, since the snapid is the snap creation "when" and
+> > not the deletion "when."
+> >
+> > So, if we want to catch buggy clients that try to use snapcontexts with
+> > deleted snapids, we need to know which epoch each snapid was deleted in so
+> > that we can compare that to the request epoch.
+> >
+> > I'm not so sure this will work out.  For one, there is a sort of race
+> > condition when librbd is setting up the snapc itself, since a
+> > concurrent client might delete the snap before it refreshes, so that it
+> > constructs a snapc with a bad snap after librados sees the osdmap deleting
+> > it.  :/  Maybe it's not worth worrying about this piece.
+> 
+> Oh, so instead of having just "interval_set<snapid> deleted_snaps",
+> we'd have to add "map<snapid, epoch_t> deleted_snap_epochs" (or
+> equivalent) and then compare those (plus a floor epoch for
+> oldest-known-deletion) to any incoming snapcontext?
+> 
+> And for the warning, we'd have some of the snapids that should have
+> been deleted still around for comparison. So we wouldn't have any way
+> of reliably identifying them all, but we'd expect to see some of them
+> turning up if it's an ongoing problem?
 
-> Le jeudi 12 octobre 2017 à 09:12 +0200, Ilya Dryomov a écrit :
->> It's a crash in memcpy() in skb_copy_ubufs().  It's not in ceph, but
->> ceph-induced, it looks like.  I don't remember seeing anything
->> similar
->> in the context of krbd.
->> 
->> This is a Xen dom0 kernel, right?  What did the workload look like?
->> Can you provide dmesg before the crash?
->
-> Hi,
->
-> yes it's a Xen dom0 kernel. Linux 4.13.3, Xen 4.8.2, with an old
-> 0.94.10 Ceph (so, Hammer).
->
-> Before this error, I add this in logs :
->
-> Oct 11 16:00:41 lorunde kernel: [310548.899082] libceph: read_partial_message ffff88021a910200 data crc 2306836368 != exp. 2215155875
-> Oct 11 16:00:41 lorunde kernel: [310548.899841] libceph: osd117 10.0.0.31:6804 bad crc/signature
-> Oct 11 16:02:25 lorunde kernel: [310652.695015] libceph: read_partial_message ffff880220b10100 data crc 842840543 != exp. 2657161714
-> Oct 11 16:02:25 lorunde kernel: [310652.695731] libceph: osd3 10.0.0.26:6804 bad crc/signature
-> Oct 11 16:07:24 lorunde kernel: [310952.485202] libceph: read_partial_message ffff88025d1aa400 data crc 938978341 != exp. 4154366769
-> Oct 11 16:07:24 lorunde kernel: [310952.485870] libceph: osd117 10.0.0.31:6804 bad crc/signature
-> Oct 11 16:10:44 lorunde kernel: [311151.841812] libceph: read_partial_message ffff880260300400 data crc 2988747958 != exp. 319958859
-> Oct 11 16:10:44 lorunde kernel: [311151.842672] libceph: osd9 10.0.0.51:6802 bad crc/signature
-> Oct 11 16:10:57 lorunde kernel: [311165.211412] libceph: read_partial_message ffff8802208b8300 data crc 369498361 != exp. 906022772
-> Oct 11 16:10:57 lorunde kernel: [311165.212135] libceph: osd87 10.0.0.5:6800 bad crc/signature
-> Oct 11 16:12:27 lorunde kernel: [311254.635767] libceph: read_partial_message ffff880236f9a000 data crc 2586662963 != exp. 2886241494
-> Oct 11 16:12:27 lorunde kernel: [311254.636493] libceph: osd90 10.0.0.5:6814 bad crc/signature
-> Oct 11 16:14:31 lorunde kernel: [311378.808191] libceph: read_partial_message ffff88027e633c00 data crc 1102363051 != exp. 679243837
-> Oct 11 16:14:31 lorunde kernel: [311378.808889] libceph: osd13 10.0.0.21:6804 bad crc/signature
-> Oct 11 16:15:01 lorunde kernel: [311409.431034] libceph: read_partial_message ffff88024ce0a800 data crc 2467415342 != exp. 1753860323
-> Oct 11 16:15:01 lorunde kernel: [311409.431718] libceph: osd111 10.0.0.30:6804 bad crc/signature
-> Oct 11 16:15:11 lorunde kernel: [311418.891238] general protection fault: 0000 [#1] SMP
->
->
-> We had to switch to TCP Cubic (instead of badly configured TCP BBR, without FQ), to reduce the data crc errors.
-> But since we still had some errors, last night we rebooted all the OSD nodes in Linux 4.4.91, instead of Linux 4.9.47 & 4.9.53.
->
-> Since the last 7 hours, we haven't got any data crc errors from OSD, but we had one from a MON. Without hang/crash.
+Yeah exactly.  I think this check isn't so bad to implement, but not 
+strictly necessary.
 
-Since there are a bunch of errors before the GPF I suspect this bug is
-related to some error paths that haven't been thoroughly tested (as it is
-the case for error paths in general I guess).
+> >> Let me also suggest one other idea that came up when I was discussing
+> >> snapshots with Patrick, by first laying out the problems we're aware
+> >> of:
+> >> 1) the OSDMap itself might grow too large
+> >> 2) comparing very large interval sets of snapIDs is computationally
+> >> expensive for the OSD. We do this
+> >>   a) when processing a new OSDMap against each PG's local list of deleted snaps
+> >>   b) when comparing the deleted snaps against incoming snapcontexts
+> >> (although this is usually not an issue because incoming snapcontexts
+> >> tend to be pretty small)
+> >>
+> >> So we want to limit the size of the OSDMap, and we also want to avoid
+> >> very large comparisons. Why don't we attack these problems
+> >> individually?
+> >>
+> >> 1) Switch from a deleted_snaps set to a deleting_snaps set in the
+> >> OSDMap, and trim it based on per-PG feedback to the manager.
+> >> 2) Maintain a *full* deleted_snaps set in the PG info on the OSDs.
+> >> 3) Only load into memory the deleted_snaps we reasonably expect to
+> >> see, *along* with a boundary snapid indicating what range the set is
+> >> valid for.
+> >> 4) If we get a snapid smaller than the range is valid for (in a
+> >> client's SnapContext, or I suppose in the deleting_snaps map), load
+> >> load more deleted snapids off disk to do the comparison.
+> >>
+> >> I haven't sketched out all the code paths but when I skimmed things
+> >> over I think that snapcontext check (and possible off-disk loading) is
+> >> actually in any easy-to-wait location. This avoids us needing to
+> >> change the client wire protocol or introduce more ordering
+> >> dependencies.
+> >>
+> >> The biggest downside I can see is that it adds a pretty obvious
+> >> DoS/resource consumption attack for malicious clients, but we're not
+> >> exactly immune to those in general. Thoughts?
+> >
+> > I think this would definitly work.  I'm still hoping that we can avoid
+> > having the full set of deleted snaps maintained on the OSD at all,
+> > though--that will cut out a lot of complexity (and memory (and storage)).
+> >
+> >
+> > FWIW what I'm currently trying is adding new fields to the map for snapids
+> > deleted *this* epoch.  That makes it easy for Objecter to adjust its
+> > requests accordingly.  On the OSD, it also makes the interval_set
+> > calculcations on map updates faster (we already know what hte new snapids
+> > are).
+> >
+> > And I think it will open up the possibility of removing removed_snaps
+> > entirely from pg_pool_t if the PGs track the same set locally.  In fact, I
+> > think in the limit we'll end up with each osdmap epoch just containing (1)
+> > newly deleted snapids this epoch, and (2) newly purged snapids this epoch.
+> > The PGs will maintain the set of deleting snapids (in pg_info_t or
+> > similar, sharing it during peering etc), and we'll keep that window
+> > short-ish to prevent it from getting too big.  I'm thinking a 1-5 day
+> > window... basically, whatever the window of laggy clients getting the boot
+> > is that you can tolerate.  The OSDs will only be pruning incoming snapcs
+> > against that deleting_snaps set (small!), OSDMaps themselves won't be big
+> > (each one will only include newly deleted or purged ids).  If a PG falls
+> > behind and jumps a map gap, it will backfill anyway and get mopped up that
+> > way...
+> >
+> > But... the cost of eliminating all of that crap is losing the client's
+> > ability to have an in-flight request that is days old reconnect and
+> > proceed.  Fair trade?
+> 
+> Well, thinking about it more I'm not sure how we could sensibly store
+> a good boundary for storing some of the deleted snaps out of memory
+> anyway. So I think we have to go this direction. But I want to think
+> about it a bit more because I'm still concerned about the buggy
+> resurrection of snapids.
+> 
+> Maybe we store the full set on disk, cache what we see in-memory, and
+> check validity against the disk on any snapid we don't have cached? :/
 
-My initial guess was a race in ceph_con_workfn:
+Just had another thought last night: the mon can preserve the full history 
+of deletions, by epoch.  When the objecter encounters a map gap it can 
+request the removed_snaps over teh gap period from the mon at the same 
+time it's getting the next map (i.e., the oldest full map stored by 
+the mon).  Since this is a pretty rare/excpetional thing, I don't 
+worry much about the extra work for the mon, and it avoids the ugly 
+client-must-crash behavior... a laggy client will always be able to catch 
+up.
 
- - An error returned from try_read() would cause a delayed retry (in
-   function con_fault())
- - con_fault_finish() would then trigger a ceph_con_close/ceph_con_open in
-   osd_fault.
- - the delayed retry kicks-in and the above close+open, which includes
-   releasing con->in_msg and con->out_msg, could cause this GPF.
+I updated the plan B notes in the pad to include this bit!
 
-Unfortunately, I wasn't yet able to find any race there (probably because
-there's none), but maybe there's a small window where this could occur.
-
-I wonder if this occurred only once, or if this is something that is
-easily triggerable.
-
-Cheers,
--- 
-Luis
+sage
