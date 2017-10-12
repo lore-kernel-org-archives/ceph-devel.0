@@ -1,137 +1,79 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [ceph-users] general protection fault: 0000 [#1] SMP
-Date: Thu, 12 Oct 2017 09:12:03 +0200
-Message-ID: <CAOi1vP--q8y696g5W_AUmR9Yxe5Xop3BH3xjEQG6_pmQmXO6kA@mail.gmail.com>
+From: Olivier Bonvalet <ceph.list-PaEMFeTk6C1QFI55V6+gNQ@public.gmane.org>
+Subject: =?iso-8859-1?q?Re=A0=3A__general_protection_fault=3A?=
+ =?iso-8859-1?q?_0000_=5B=231=5D_SMP?=
+Date: Thu, 12 Oct 2017 09:26:34 +0200
+Message-ID: <1507793194.26826.8.camel@daevel.fr>
 References: <1507732840.2812.10.camel@daevel.fr>
+ <CAOi1vP--q8y696g5W_AUmR9Yxe5Xop3BH3xjEQG6_pmQmXO6kA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f50.google.com ([209.85.214.50]:52599 "EHLO
-        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751712AbdJLHME (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Oct 2017 03:12:04 -0400
-Received: by mail-it0-f50.google.com with SMTP id j140so5760212itj.1
-        for <ceph-devel@vger.kernel.org>; Thu, 12 Oct 2017 00:12:04 -0700 (PDT)
-In-Reply-To: <1507732840.2812.10.camel@daevel.fr>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Olivier Bonvalet <ceph.list@daevel.fr>
-Cc: Ceph Users <ceph-users@lists.ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAOi1vP--q8y696g5W_AUmR9Yxe5Xop3BH3xjEQG6_pmQmXO6kA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Ilya Dryomov <idryomov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ceph Users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Wed, Oct 11, 2017 at 4:40 PM, Olivier Bonvalet <ceph.list@daevel.fr> wro=
-te:
-> Hi,
->
-> I had a "general protection fault: 0000" with Ceph RBD kernel client.
-> Not sure how to read the call, is it Ceph related ?
->
->
-> Oct 11 16:15:11 lorunde kernel: [311418.891238] general protection fault:=
- 0000 [#1] SMP
-> Oct 11 16:15:11 lorunde kernel: [311418.891855] Modules linked in: cpuid =
-binfmt_misc nls_iso8859_1 nls_cp437 vfat fat tcp_diag inet_diag xt_physdev =
-br_netfilter iptable_filter xen_netback loop xen_blkback cbc rbd libceph xe=
-n_gntdev xen_evtchn xenfs xen_privcmd ipmi_ssif intel_rapl iosf_mbi sb_edac=
- x86_pkg_temp_thermal intel_powerclamp coretemp crct10dif_pclmul ghash_clmu=
-lni_intel iTCO_wdt pcbc iTCO_vendor_support mxm_wmi aesni_intel aes_x86_64 =
-crypto_simd glue_helper cryptd mgag200 i2c_algo_bit drm_kms_helper intel_ra=
-pl_perf ttm drm syscopyarea sysfillrect efi_pstore sysimgblt fb_sys_fops lp=
-c_ich efivars mfd_core evdev ioatdma shpchp acpi_power_meter ipmi_si wmi bu=
-tton ipmi_devintf ipmi_msghandler bridge efivarfs ip_tables x_tables autofs=
-4 dm_mod dax raid10 raid456 async_raid6_recov async_memcpy async_pq async_x=
-or xor async_tx raid6_pq
-> Oct 11 16:15:11 lorunde kernel: [311418.895403]  libcrc32c raid1 raid0 mu=
-ltipath linear md_mod hid_generic usbhid i2c_i801 crc32c_intel i2c_core xhc=
-i_pci ahci ixgbe xhci_hcd libahci ehci_pci ehci_hcd libata usbcore dca ptp =
-usb_common pps_core mdio
-> Oct 11 16:15:11 lorunde kernel: [311418.896551] CPU: 1 PID: 4916 Comm: kw=
-orker/1:0 Not tainted 4.13-dae-dom0 #2
-> Oct 11 16:15:11 lorunde kernel: [311418.897134] Hardware name: Intel Corp=
-oration S2600CWR/S2600CWR, BIOS SE5C610.86B.01.01.0019.101220160604 10/12/2=
-016
-> Oct 11 16:15:11 lorunde kernel: [311418.897745] Workqueue: ceph-msgr ceph=
-_con_workfn [libceph]
-> Oct 11 16:15:11 lorunde kernel: [311418.898355] task: ffff8801ce434280 ta=
-sk.stack: ffffc900151bc000
-> Oct 11 16:15:11 lorunde kernel: [311418.899007] RIP: e030:memcpy_erms+0x6=
-/0x10
-> Oct 11 16:15:11 lorunde kernel: [311418.899616] RSP: e02b:ffffc900151bfac=
-0 EFLAGS: 00010202
-> Oct 11 16:15:11 lorunde kernel: [311418.900228] RAX: ffff8801b63df000 RBX=
-: ffff88021b41be00 RCX: 0000000004df0000
-> Oct 11 16:15:11 lorunde kernel: [311418.900848] RDX: 0000000004df0000 RSI=
-: 4450736e24806564 RDI: ffff8801b63df000
-> Oct 11 16:15:11 lorunde kernel: [311418.901479] RBP: ffffea0005fdd8c8 R08=
-: ffff88028545d618 R09: 0000000000000010
-> Oct 11 16:15:11 lorunde kernel: [311418.902104] R10: 0000000000000000 R11=
-: ffff880215815000 R12: 0000000000000000
-> Oct 11 16:15:11 lorunde kernel: [311418.902723] R13: ffff8802158156c0 R14=
-: 0000000000000000 R15: ffff8801ce434280
-> Oct 11 16:15:11 lorunde kernel: [311418.903359] FS:  0000000000000000(000=
-0) GS:ffff880285440000(0000) knlGS:ffff880285440000
-> Oct 11 16:15:11 lorunde kernel: [311418.903994] CS:  e033 DS: 0000 ES: 00=
-00 CR0: 0000000080050033
-> Oct 11 16:15:11 lorunde kernel: [311418.904627] CR2: 000055a8461cfc20 CR3=
-: 0000000001809000 CR4: 0000000000042660
-> Oct 11 16:15:11 lorunde kernel: [311418.905271] Call Trace:
-> Oct 11 16:15:11 lorunde kernel: [311418.905909]  ? skb_copy_ubufs+0xef/0x=
-290
-> Oct 11 16:15:11 lorunde kernel: [311418.906548]  ? skb_clone+0x82/0x90
-> Oct 11 16:15:11 lorunde kernel: [311418.907225]  ? tcp_transmit_skb+0x74/=
-0x930
-> Oct 11 16:15:11 lorunde kernel: [311418.907858]  ? tcp_write_xmit+0x1bd/0=
-xfb0
-> Oct 11 16:15:11 lorunde kernel: [311418.908490]  ? __sk_mem_raise_allocat=
-ed+0x4e/0x220
-> Oct 11 16:15:11 lorunde kernel: [311418.909122]  ? __tcp_push_pending_fra=
-mes+0x28/0x90
-> Oct 11 16:15:11 lorunde kernel: [311418.909755]  ? do_tcp_sendpages+0x4fc=
-/0x590
-> Oct 11 16:15:11 lorunde kernel: [311418.910386]  ? tcp_sendpage+0x7c/0xa0
-> Oct 11 16:15:11 lorunde kernel: [311418.911026]  ? inet_sendpage+0x37/0xe=
-0
-> Oct 11 16:15:11 lorunde kernel: [311418.911655]  ? kernel_sendpage+0x12/0=
-x20
-> Oct 11 16:15:11 lorunde kernel: [311418.912297]  ? ceph_tcp_sendpage+0x5c=
-/0xc0 [libceph]
-> Oct 11 16:15:11 lorunde kernel: [311418.912926]  ? ceph_tcp_recvmsg+0x53/=
-0x70 [libceph]
-> Oct 11 16:15:11 lorunde kernel: [311418.913553]  ? ceph_con_workfn+0xd08/=
-0x22a0 [libceph]
-> Oct 11 16:15:11 lorunde kernel: [311418.914179]  ? ceph_osdc_start_reques=
-t+0x23/0x30 [libceph]
-> Oct 11 16:15:11 lorunde kernel: [311418.914807]  ? rbd_img_obj_request_su=
-bmit+0x1ac/0x3c0 [rbd]
-> Oct 11 16:15:11 lorunde kernel: [311418.915458]  ? process_one_work+0x1ad=
-/0x340
-> Oct 11 16:15:11 lorunde kernel: [311418.916083]  ? worker_thread+0x45/0x3=
-f0
-> Oct 11 16:15:11 lorunde kernel: [311418.916706]  ? kthread+0xf2/0x130
-> Oct 11 16:15:11 lorunde kernel: [311418.917327]  ? process_one_work+0x340=
-/0x340
-> Oct 11 16:15:11 lorunde kernel: [311418.917946]  ? kthread_create_on_node=
-+0x40/0x40
-> Oct 11 16:15:11 lorunde kernel: [311418.918565]  ? do_group_exit+0x35/0xa=
-0
-> Oct 11 16:15:11 lorunde kernel: [311418.919215]  ? ret_from_fork+0x25/0x3=
-0
-> Oct 11 16:15:11 lorunde kernel: [311418.919826] Code: 43 4e 5b eb ec eb 1=
-e 0f 1f 00 48 89 f8 48 89 d1 48 c1 e9 03 83 e2 07 f3 48 a5 89 d1 f3 a4 c3 6=
-6 0f 1f 44 00 00 48 89 f8 48 89 d1 <f3> a4 c3 0f 1f 80 00 00 00 00 48 89 f8=
- 48 83 fa 20 72 7e 40 38
-> Oct 11 16:15:11 lorunde kernel: [311418.921094] RIP: memcpy_erms+0x6/0x10=
- RSP: ffffc900151bfac0
-> Oct 11 16:15:11 lorunde kernel: [311418.921970] ---[ end trace 904278a63c=
-b49fca ]---
-
-It's a crash in memcpy() in skb_copy_ubufs().  It's not in ceph, but
-ceph-induced, it looks like.  I don't remember seeing anything similar
-in the context of krbd.
-
-This is a Xen dom0 kernel, right?  What did the workload look like?
-Can you provide dmesg before the crash?
-
-Thanks,
-
-                Ilya
+TGUgamV1ZGkgMTIgb2N0b2JyZSAyMDE3IMOgIDA5OjEyICswMjAwLCBJbHlhIERyeW9tb3YgYSDD
+qWNyaXQgOgo+IEl0J3MgYSBjcmFzaCBpbiBtZW1jcHkoKSBpbiBza2JfY29weV91YnVmcygpLiAg
+SXQncyBub3QgaW4gY2VwaCwgYnV0Cj4gY2VwaC1pbmR1Y2VkLCBpdCBsb29rcyBsaWtlLiAgSSBk
+b24ndCByZW1lbWJlciBzZWVpbmcgYW55dGhpbmcKPiBzaW1pbGFyCj4gaW4gdGhlIGNvbnRleHQg
+b2Yga3JiZC4KPiAKPiBUaGlzIGlzIGEgWGVuIGRvbTAga2VybmVsLCByaWdodD8gIFdoYXQgZGlk
+IHRoZSB3b3JrbG9hZCBsb29rIGxpa2U/Cj4gQ2FuIHlvdSBwcm92aWRlIGRtZXNnIGJlZm9yZSB0
+aGUgY3Jhc2g/CgpIaSwKCnllcyBpdCdzIGEgWGVuIGRvbTAga2VybmVsLiBMaW51eCA0LjEzLjMs
+IFhlbiA0LjguMiwgd2l0aCBhbiBvbGQKMC45NC4xMCBDZXBoIChzbywgSGFtbWVyKS4KCkJlZm9y
+ZSB0aGlzIGVycm9yLCBJIGFkZCB0aGlzIGluIGxvZ3MgOgoKT2N0IDExIDE2OjAwOjQxIGxvcnVu
+ZGUga2VybmVsOiBbMzEwNTQ4Ljg5OTA4Ml0gbGliY2VwaDogcmVhZF9wYXJ0aWFsX21lc3NhZ2Ug
+ZmZmZjg4MDIxYTkxMDIwMCBkYXRhIGNyYyAyMzA2ODM2MzY4ICE9IGV4cC4gMjIxNTE1NTg3NQpP
+Y3QgMTEgMTY6MDA6NDEgbG9ydW5kZSBrZXJuZWw6IFszMTA1NDguODk5ODQxXSBsaWJjZXBoOiBv
+c2QxMTcgMTAuMC4wLjMxOjY4MDQgYmFkIGNyYy9zaWduYXR1cmUKT2N0IDExIDE2OjAyOjI1IGxv
+cnVuZGUga2VybmVsOiBbMzEwNjUyLjY5NTAxNV0gbGliY2VwaDogcmVhZF9wYXJ0aWFsX21lc3Nh
+Z2UgZmZmZjg4MDIyMGIxMDEwMCBkYXRhIGNyYyA4NDI4NDA1NDMgIT0gZXhwLiAyNjU3MTYxNzE0
+Ck9jdCAxMSAxNjowMjoyNSBsb3J1bmRlIGtlcm5lbDogWzMxMDY1Mi42OTU3MzFdIGxpYmNlcGg6
+IG9zZDMgMTAuMC4wLjI2OjY4MDQgYmFkIGNyYy9zaWduYXR1cmUKT2N0IDExIDE2OjA3OjI0IGxv
+cnVuZGUga2VybmVsOiBbMzEwOTUyLjQ4NTIwMl0gbGliY2VwaDogcmVhZF9wYXJ0aWFsX21lc3Nh
+Z2UgZmZmZjg4MDI1ZDFhYTQwMCBkYXRhIGNyYyA5Mzg5NzgzNDEgIT0gZXhwLiA0MTU0MzY2NzY5
+Ck9jdCAxMSAxNjowNzoyNCBsb3J1bmRlIGtlcm5lbDogWzMxMDk1Mi40ODU4NzBdIGxpYmNlcGg6
+IG9zZDExNyAxMC4wLjAuMzE6NjgwNCBiYWQgY3JjL3NpZ25hdHVyZQpPY3QgMTEgMTY6MTA6NDQg
+bG9ydW5kZSBrZXJuZWw6IFszMTExNTEuODQxODEyXSBsaWJjZXBoOiByZWFkX3BhcnRpYWxfbWVz
+c2FnZSBmZmZmODgwMjYwMzAwNDAwIGRhdGEgY3JjIDI5ODg3NDc5NTggIT0gZXhwLiAzMTk5NTg4
+NTkKT2N0IDExIDE2OjEwOjQ0IGxvcnVuZGUga2VybmVsOiBbMzExMTUxLjg0MjY3Ml0gbGliY2Vw
+aDogb3NkOSAxMC4wLjAuNTE6NjgwMiBiYWQgY3JjL3NpZ25hdHVyZQpPY3QgMTEgMTY6MTA6NTcg
+bG9ydW5kZSBrZXJuZWw6IFszMTExNjUuMjExNDEyXSBsaWJjZXBoOiByZWFkX3BhcnRpYWxfbWVz
+c2FnZSBmZmZmODgwMjIwOGI4MzAwIGRhdGEgY3JjIDM2OTQ5ODM2MSAhPSBleHAuIDkwNjAyMjc3
+MgpPY3QgMTEgMTY6MTA6NTcgbG9ydW5kZSBrZXJuZWw6IFszMTExNjUuMjEyMTM1XSBsaWJjZXBo
+OiBvc2Q4NyAxMC4wLjAuNTo2ODAwIGJhZCBjcmMvc2lnbmF0dXJlCk9jdCAxMSAxNjoxMjoyNyBs
+b3J1bmRlIGtlcm5lbDogWzMxMTI1NC42MzU3NjddIGxpYmNlcGg6IHJlYWRfcGFydGlhbF9tZXNz
+YWdlIGZmZmY4ODAyMzZmOWEwMDAgZGF0YSBjcmMgMjU4NjY2Mjk2MyAhPSBleHAuIDI4ODYyNDE0
+OTQKT2N0IDExIDE2OjEyOjI3IGxvcnVuZGUga2VybmVsOiBbMzExMjU0LjYzNjQ5M10gbGliY2Vw
+aDogb3NkOTAgMTAuMC4wLjU6NjgxNCBiYWQgY3JjL3NpZ25hdHVyZQpPY3QgMTEgMTY6MTQ6MzEg
+bG9ydW5kZSBrZXJuZWw6IFszMTEzNzguODA4MTkxXSBsaWJjZXBoOiByZWFkX3BhcnRpYWxfbWVz
+c2FnZSBmZmZmODgwMjdlNjMzYzAwIGRhdGEgY3JjIDExMDIzNjMwNTEgIT0gZXhwLiA2NzkyNDM4
+MzcKT2N0IDExIDE2OjE0OjMxIGxvcnVuZGUga2VybmVsOiBbMzExMzc4LjgwODg4OV0gbGliY2Vw
+aDogb3NkMTMgMTAuMC4wLjIxOjY4MDQgYmFkIGNyYy9zaWduYXR1cmUKT2N0IDExIDE2OjE1OjAx
+IGxvcnVuZGUga2VybmVsOiBbMzExNDA5LjQzMTAzNF0gbGliY2VwaDogcmVhZF9wYXJ0aWFsX21l
+c3NhZ2UgZmZmZjg4MDI0Y2UwYTgwMCBkYXRhIGNyYyAyNDY3NDE1MzQyICE9IGV4cC4gMTc1Mzg2
+MDMyMwpPY3QgMTEgMTY6MTU6MDEgbG9ydW5kZSBrZXJuZWw6IFszMTE0MDkuNDMxNzE4XSBsaWJj
+ZXBoOiBvc2QxMTEgMTAuMC4wLjMwOjY4MDQgYmFkIGNyYy9zaWduYXR1cmUKT2N0IDExIDE2OjE1
+OjExIGxvcnVuZGUga2VybmVsOiBbMzExNDE4Ljg5MTIzOF0gZ2VuZXJhbCBwcm90ZWN0aW9uIGZh
+dWx0OiAwMDAwIFsjMV0gU01QCgoKV2UgaGFkIHRvIHN3aXRjaCB0byBUQ1AgQ3ViaWMgKGluc3Rl
+YWQgb2YgYmFkbHkgY29uZmlndXJlZCBUQ1AgQkJSLCB3aXRob3V0IEZRKSwgdG8gcmVkdWNlIHRo
+ZSBkYXRhIGNyYyBlcnJvcnMuCkJ1dCBzaW5jZSB3ZSBzdGlsbCBoYWQgc29tZSBlcnJvcnMsIGxh
+c3QgbmlnaHQgd2UgcmVib290ZWQgYWxsIHRoZSBPU0Qgbm9kZXMgaW4gTGludXggNC40LjkxLCBp
+bnN0ZWFkIG9mIExpbnV4IDQuOS40NyAmIDQuOS41My4KClNpbmNlIHRoZSBsYXN0IDcgaG91cnMs
+IHdlIGhhdmVuJ3QgZ290IGFueSBkYXRhIGNyYyBlcnJvcnMgZnJvbSBPU0QsIGJ1dCB3ZSBoYWQg
+b25lIGZyb20gYSBNT04uIFdpdGhvdXQgaGFuZy9jcmFzaC4KCkFib3V0IHRoZSB3b3JrbG9hZCwg
+dGhlIFhlbiBWTXMgYXJlIG1haW5seSBMQU1QIHNlcnZlcnMgOiBodHRwIHRyYWZmaWMsIGhhbmRs
+ZSBieSBuZ2lueCBvciBhcGFjaGUsIHBocCwgYW5kIE15U1FMIGRhdGFiYXNlcy4KClRoYW5rcywK
+Ck9saXZpZXIKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18K
+Y2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8v
+bGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
