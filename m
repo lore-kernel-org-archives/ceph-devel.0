@@ -1,67 +1,91 @@
-From: Christos Gkekas <chris.gekas@gmail.com>
-Subject: [PATCH] ceph: Delete unused variables in mds_client
-Date: Thu, 12 Oct 2017 22:55:11 +0100
-Message-ID: <1507845311-28087-1-git-send-email-chris.gekas@gmail.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: [PATCH] ceph: Delete unused variables in mds_client
+Date: Thu, 12 Oct 2017 15:45:42 -0700
+Message-ID: <CAJ4mKGaXKA8v74OS+ziW_4=Cid6jC3ijpdfxfiKy+8EOtbgSwA@mail.gmail.com>
+References: <1507845311-28087-1-git-send-email-chris.gekas@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1507845311-28087-1-git-send-email-chris.gekas@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Christos Gkekas <chris.gekas@gmail.com>
+To: Christos Gkekas <chris.gekas@gmail.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-Remove variables in mds_client that are set but never used.
+On Thu, Oct 12, 2017 at 2:55 PM, Christos Gkekas <chris.gekas@gmail.com> wrote:
+> Remove variables in mds_client that are set but never used.
 
-Signed-off-by: Christos Gkekas <chris.gekas@gmail.com>
----
- fs/ceph/mds_client.c | 11 -----------
- 1 file changed, 11 deletions(-)
+Hmm, it looks like all the values removed here (except err) *are* used
+and this patch would break the world. Specifically...
 
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index f23c820..cadf9b6 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -3797,11 +3797,8 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
- 	void *p = msg->front.iov_base;
- 	void *end = p + msg->front.iov_len;
- 	u32 epoch;
--	u32 map_len;
- 	u32 num_fs;
- 	u32 mount_fscid = (u32)-1;
--	u8 struct_v, struct_cv;
--	int err = -EINVAL;
- 
- 	ceph_decode_need(&p, end, sizeof(u32), bad);
- 	epoch = ceph_decode_32(&p);
-@@ -3809,10 +3806,6 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
- 	dout("handle_fsmap epoch %u\n", epoch);
- 
- 	ceph_decode_need(&p, end, 2 + sizeof(u32), bad);
--	struct_v = ceph_decode_8(&p);
--	struct_cv = ceph_decode_8(&p);
--	map_len = ceph_decode_32(&p);
--
- 	ceph_decode_need(&p, end, sizeof(u32) * 3, bad);
- 	p += sizeof(u32) * 2; /* skip epoch and legacy_client_fscid */
- 
-@@ -3820,12 +3813,9 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
- 	while (num_fs-- > 0) {
- 		void *info_p, *info_end;
- 		u32 info_len;
--		u8 info_v, info_cv;
- 		u32 fscid, namelen;
- 
- 		ceph_decode_need(&p, end, 2 + sizeof(u32), bad);
--		info_v = ceph_decode_8(&p);
--		info_cv = ceph_decode_8(&p);
- 		info_len = ceph_decode_32(&p);
- 		ceph_decode_need(&p, end, info_len, bad);
- 		info_p = p;
-@@ -3852,7 +3842,6 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
- 				   0, true);
- 		ceph_monc_renew_subs(&fsc->client->monc);
- 	} else {
--		err = -ENOENT;
- 		goto err_out;
- 	}
- 	return;
--- 
-2.7.4
+>
+> Signed-off-by: Christos Gkekas <chris.gekas@gmail.com>
+> ---
+>  fs/ceph/mds_client.c | 11 -----------
+>  1 file changed, 11 deletions(-)
+>
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index f23c820..cadf9b6 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -3797,11 +3797,8 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
+>         void *p = msg->front.iov_base;
+>         void *end = p + msg->front.iov_len;
+>         u32 epoch;
+> -       u32 map_len;
+>         u32 num_fs;
+>         u32 mount_fscid = (u32)-1;
+> -       u8 struct_v, struct_cv;
+> -       int err = -EINVAL;
+>
+>         ceph_decode_need(&p, end, sizeof(u32), bad);
+>         epoch = ceph_decode_32(&p);
+> @@ -3809,10 +3806,6 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
+>         dout("handle_fsmap epoch %u\n", epoch);
+>
+>         ceph_decode_need(&p, end, 2 + sizeof(u32), bad);
+> -       struct_v = ceph_decode_8(&p);
+> -       struct_cv = ceph_decode_8(&p);
+> -       map_len = ceph_decode_32(&p);
+> -
+
+p here is a pointer into a buffer which was sent to us over the
+network (msg->front.iov_base, shown at top of patch). ceph_decode is
+reading data out of that buffer into these variables and advancing p
+for the subsequent readers. If you drop these statements, we start
+trying to read values at the wrong offsets, and obviously nothing
+makes sense.
+
+>         ceph_decode_need(&p, end, sizeof(u32) * 3, bad);
+>         p += sizeof(u32) * 2; /* skip epoch and legacy_client_fscid */
+>
+> @@ -3820,12 +3813,9 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
+>         while (num_fs-- > 0) {
+>                 void *info_p, *info_end;
+>                 u32 info_len;
+> -               u8 info_v, info_cv;
+>                 u32 fscid, namelen;
+>
+>                 ceph_decode_need(&p, end, 2 + sizeof(u32), bad);
+> -               info_v = ceph_decode_8(&p);
+> -               info_cv = ceph_decode_8(&p);
+>                 info_len = ceph_decode_32(&p);
+>                 ceph_decode_need(&p, end, info_len, bad);
+>                 info_p = p;
+> @@ -3852,7 +3842,6 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
+>                                    0, true);
+>                 ceph_monc_renew_subs(&fsc->client->monc);
+>         } else {
+> -               err = -ENOENT;
+>                 goto err_out;
+
+Amusingly, this bit does seem to be correct, as the err_out block just
+unconditionally sets mdsc->mdsmap_err to -ENOENT (and is only
+reachable from this goto).
+
+>         }
+>         return;
+
+I assume this patch was generated by some code cleanliness tool, so it
+appears to need some work... :)
+-Greg
