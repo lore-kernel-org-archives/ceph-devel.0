@@ -1,91 +1,70 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: [PATCH] ceph: Delete unused variables in mds_client
-Date: Thu, 12 Oct 2017 15:45:42 -0700
-Message-ID: <CAJ4mKGaXKA8v74OS+ziW_4=Cid6jC3ijpdfxfiKy+8EOtbgSwA@mail.gmail.com>
-References: <1507845311-28087-1-git-send-email-chris.gekas@gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: major infrastructure outage
+Date: Thu, 12 Oct 2017 19:15:14 -0400
+Message-ID: <CAC-Np1xkBQEaVLgpRd4YRCT_+tP6rkFoCNu84Q9Uh2ZrTuwY8w@mail.gmail.com>
+References: <CAC-Np1xnrr-RXUV3m87bJ6QP-b-xV7KtQrQud5HckEgBQ-fDDw@mail.gmail.com>
+ <bc4c8883-ab21-a81d-33f4-a4f77f05a8c1@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1507845311-28087-1-git-send-email-chris.gekas@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Christos Gkekas <chris.gekas@gmail.com>
-Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:48885 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751168AbdJLXPP (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Oct 2017 19:15:15 -0400
+Received: by mail-wm0-f48.google.com with SMTP id i124so16875212wmf.3
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Oct 2017 16:15:15 -0700 (PDT)
+In-Reply-To: <bc4c8883-ab21-a81d-33f4-a4f77f05a8c1@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: David Galloway <dgallowa@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Oct 12, 2017 at 2:55 PM, Christos Gkekas <chris.gekas@gmail.com> wrote:
-> Remove variables in mds_client that are set but never used.
-
-Hmm, it looks like all the values removed here (except err) *are* used
-and this patch would break the world. Specifically...
-
+On Thu, Oct 12, 2017 at 9:15 AM, David Galloway <dgallowa@redhat.com> wrote:
 >
-> Signed-off-by: Christos Gkekas <chris.gekas@gmail.com>
-> ---
->  fs/ceph/mds_client.c | 11 -----------
->  1 file changed, 11 deletions(-)
+> On 10/12/2017 07:24 AM, Alfredo Deza wrote:
+>> We are currently going through a severe outage. All critical
+>> infrastructure services are currently unavailable.
+>>
+>> This includes the following:
+>>
+>> * Both Jenkins masters (one is for Ceph the other one for ceph-ansible)
+>> * Anything in Shaman
+>> * All build nodes
+>> * All repositories (anything *chacra.ceph.com)
+>>
+>> Some services are up, like docs.ceph.com, tracker, and download.ceph.com
+>>
+>> We are currently trying to determine the reason why these are
+>> completely unreachable with the service provider.
+>>
+>> We will keep updating once we have anything to report.
+>>
 >
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index f23c820..cadf9b6 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -3797,11 +3797,8 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
->         void *p = msg->front.iov_base;
->         void *end = p + msg->front.iov_len;
->         u32 epoch;
-> -       u32 map_len;
->         u32 num_fs;
->         u32 mount_fscid = (u32)-1;
-> -       u8 struct_v, struct_cv;
-> -       int err = -EINVAL;
+> All services have been restored.  The outage only affected the CI
+> infrastructure (Jenkins, Shaman, Chacra, etc.).
+
+Some of you may have experienced some builds being "stale" and not
+completed to get repos.
+
+This happened because the service that polls to check repos to build
+was not started on one of the servers. That server is
+2.chacra.ceph.com
+
+So if you were impacted, I apologize, this was very hard to catch. The
+good news is that the binaries are there, and the server will pick up
+where it needs to, building
+the repos as it finds them.
+
+Because there is a backlog on that server, please be patient, at some
+point it will up to date.
+
+Again, apologies, this was totally something that we didn't
+anticipate. Created an issue to make sure this is tracked next time
+
+http://tracker.ceph.com/issues/21779
 >
->         ceph_decode_need(&p, end, sizeof(u32), bad);
->         epoch = ceph_decode_32(&p);
-> @@ -3809,10 +3806,6 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
->         dout("handle_fsmap epoch %u\n", epoch);
+> OVH temporarily suspended our CI public cloud account due to a past due
+> bill.
 >
->         ceph_decode_need(&p, end, 2 + sizeof(u32), bad);
-> -       struct_v = ceph_decode_8(&p);
-> -       struct_cv = ceph_decode_8(&p);
-> -       map_len = ceph_decode_32(&p);
-> -
-
-p here is a pointer into a buffer which was sent to us over the
-network (msg->front.iov_base, shown at top of patch). ceph_decode is
-reading data out of that buffer into these variables and advancing p
-for the subsequent readers. If you drop these statements, we start
-trying to read values at the wrong offsets, and obviously nothing
-makes sense.
-
->         ceph_decode_need(&p, end, sizeof(u32) * 3, bad);
->         p += sizeof(u32) * 2; /* skip epoch and legacy_client_fscid */
->
-> @@ -3820,12 +3813,9 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
->         while (num_fs-- > 0) {
->                 void *info_p, *info_end;
->                 u32 info_len;
-> -               u8 info_v, info_cv;
->                 u32 fscid, namelen;
->
->                 ceph_decode_need(&p, end, 2 + sizeof(u32), bad);
-> -               info_v = ceph_decode_8(&p);
-> -               info_cv = ceph_decode_8(&p);
->                 info_len = ceph_decode_32(&p);
->                 ceph_decode_need(&p, end, info_len, bad);
->                 info_p = p;
-> @@ -3852,7 +3842,6 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
->                                    0, true);
->                 ceph_monc_renew_subs(&fsc->client->monc);
->         } else {
-> -               err = -ENOENT;
->                 goto err_out;
-
-Amusingly, this bit does seem to be correct, as the err_out block just
-unconditionally sets mdsc->mdsmap_err to -ENOENT (and is only
-reachable from this goto).
-
->         }
->         return;
-
-I assume this patch was generated by some code cleanliness tool, so it
-appears to need some work... :)
--Greg
+> I'm currently monitoring a build to verify packages are being created
+> and pushed to the chacra nodes but I think we're in the clear.
