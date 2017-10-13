@@ -1,70 +1,44 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: major infrastructure outage
-Date: Thu, 12 Oct 2017 19:15:14 -0400
-Message-ID: <CAC-Np1xkBQEaVLgpRd4YRCT_+tP6rkFoCNu84Q9Uh2ZrTuwY8w@mail.gmail.com>
-References: <CAC-Np1xnrr-RXUV3m87bJ6QP-b-xV7KtQrQud5HckEgBQ-fDDw@mail.gmail.com>
- <bc4c8883-ab21-a81d-33f4-a4f77f05a8c1@redhat.com>
+From: Xiaoxi Chen <superdebuger@gmail.com>
+Subject: Re: mds client reconnect
+Date: Fri, 13 Oct 2017 14:10:21 +0800
+Message-ID: <CAEYCsVL+_DanFXSCGLxY+WUq2gZoRi8N1D8maFeHsCr5ndOaCA@mail.gmail.com>
+References: <CAEYCsVL1MxuYKf3vVN+UQchgaj=X7vxjZ0PfD2Oqsz2To2smRg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:48885 "EHLO
-        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751168AbdJLXPP (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 12 Oct 2017 19:15:15 -0400
-Received: by mail-wm0-f48.google.com with SMTP id i124so16875212wmf.3
-        for <ceph-devel@vger.kernel.org>; Thu, 12 Oct 2017 16:15:15 -0700 (PDT)
-In-Reply-To: <bc4c8883-ab21-a81d-33f4-a4f77f05a8c1@redhat.com>
+Received: from mail-io0-f178.google.com ([209.85.223.178]:56821 "EHLO
+        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751353AbdJMGKW (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2017 02:10:22 -0400
+Received: by mail-io0-f178.google.com with SMTP id m81so7857876ioi.13
+        for <ceph-devel@vger.kernel.org>; Thu, 12 Oct 2017 23:10:22 -0700 (PDT)
+In-Reply-To: <CAEYCsVL1MxuYKf3vVN+UQchgaj=X7vxjZ0PfD2Oqsz2To2smRg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Galloway <dgallowa@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Thu, Oct 12, 2017 at 9:15 AM, David Galloway <dgallowa@redhat.com> wrote:
+resend with plain txt
+
+2017-10-13 10:56 GMT+08:00 Xiaoxi Chen <superdebuger@gmail.com>:
+> Hi,
 >
-> On 10/12/2017 07:24 AM, Alfredo Deza wrote:
->> We are currently going through a severe outage. All critical
->> infrastructure services are currently unavailable.
->>
->> This includes the following:
->>
->> * Both Jenkins masters (one is for Ceph the other one for ceph-ansible)
->> * Anything in Shaman
->> * All build nodes
->> * All repositories (anything *chacra.ceph.com)
->>
->> Some services are up, like docs.ceph.com, tracker, and download.ceph.com
->>
->> We are currently trying to determine the reason why these are
->> completely unreachable with the service provider.
->>
->> We will keep updating once we have anything to report.
->>
+>     We sometimes seen client (fs kernel) get evicted by MDS and try to
+> reconnect,  even we set  mds_session_blacklist_on_evict = True, client still
+> cannot reconnect due to below code:
 >
-> All services have been restored.  The outage only affected the CI
-> infrastructure (Jenkins, Shaman, Chacra, etc.).
-
-Some of you may have experienced some builds being "stale" and not
-completed to get repos.
-
-This happened because the service that polls to check repos to build
-was not started on one of the servers. That server is
-2.chacra.ceph.com
-
-So if you were impacted, I apologize, this was very hard to catch. The
-good news is that the binaries are there, and the server will pick up
-where it needs to, building
-the repos as it finds them.
-
-Because there is a backlog on that server, please be patient, at some
-point it will up to date.
-
-Again, apologies, this was totally something that we didn't
-anticipate. Created an issue to make sure this is tracked next time
-
-http://tracker.ceph.com/issues/21779
+>  if (!mds->is_reconnect() && mds->get_want_state() ==
+> CEPH_MDS_STATE_RECONNECT) {
+>     dout(10) << " we're almost in reconnect state (mdsmap delivery race?);
+> waiting" << dendl;
+>     mds->wait_for_reconnect(new C_MDS_RetryMessage(mds, m));
+>     return;
+>   }
 >
-> OVH temporarily suspended our CI public cloud account due to a past due
-> bill.
+>      Could someone share any insight on why MDS only accept reconnect in
+> reconnect state? and how, if the client is get evicted , can automatically
+> recovered? note that remount is usually impossible as umount will always
+> hang(due to cannot talk to mds).
 >
-> I'm currently monitoring a build to verify packages are being created
-> and pushed to the chacra nodes but I think we're in the clear.
+>
+>
+> Xiaoxi
