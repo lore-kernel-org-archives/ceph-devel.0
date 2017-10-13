@@ -1,78 +1,76 @@
-From: Xiaoxi Chen <superdebuger@gmail.com>
-Subject: Re: mds client reconnect
-Date: Fri, 13 Oct 2017 22:38:04 +0800
-Message-ID: <CAEYCsVJryo8Q9x4U4_4iK2QB-W1a6zvKS4x0pJ77QOO9Q1Ng1Q@mail.gmail.com>
-References: <CAEYCsVL1MxuYKf3vVN+UQchgaj=X7vxjZ0PfD2Oqsz2To2smRg@mail.gmail.com>
- <CAEYCsVL+_DanFXSCGLxY+WUq2gZoRi8N1D8maFeHsCr5ndOaCA@mail.gmail.com> <CAAM7YAnxQcaBHU=KgZhU9UM-=zksW-h206q2fuzHoM_kBcYsMw@mail.gmail.com>
+From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: assert(objiter->second->version >
+ last_divergent_update) when testing pull out disk and insert
+Date: Fri, 13 Oct 2017 09:33:44 -0700
+Message-ID: <CAJ4mKGYez6NWCZheRFsG+cu02dFzmW7awZYLUVd8Z2WKEkaeNQ@mail.gmail.com>
+References: <1CB94550540AE44E9CAAE8CD5AF40BF894B8428B@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f52.google.com ([209.85.214.52]:56637 "EHLO
-        mail-it0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753415AbdJMOiF (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2017 10:38:05 -0400
-Received: by mail-it0-f52.google.com with SMTP id g18so10812088itg.5
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2017 07:38:05 -0700 (PDT)
-In-Reply-To: <CAAM7YAnxQcaBHU=KgZhU9UM-=zksW-h206q2fuzHoM_kBcYsMw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <1CB94550540AE44E9CAAE8CD5AF40BF894B8428B-JwQOC20i6vT3cnzPNjVLboSsE/coCuR8pWgKQ6/u3Fg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: zhaomingyue <zhao.mingyue-vVzyEvZLFYE@public.gmane.org>
+Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi Zheng,
-    Thanks for the input. So we dont client to reconnect due to dirty
-metadata?  Does client drop dirty data(page cached data) when
-reconnect get denied and try tro re-open session?
-
-     And would you mind pointing the commit/kernel version considered
-recent enough with re-open session?  We are on CentOS 7.3
-(3.10.0-514.21.2.el7.x86_64) but seems not the behavior.
-
-
-Xiaoxi
-
-2017-10-13 21:59 GMT+08:00 Yan, Zheng <ukernel@gmail.com>:
-> On Fri, Oct 13, 2017 at 2:10 PM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
->>
->> resend with plain txt
->>
->> 2017-10-13 10:56 GMT+08:00 Xiaoxi Chen <superdebuger@gmail.com>:
->> > Hi,
->> >
->> >     We sometimes seen client (fs kernel) get evicted by MDS and try to
->> > reconnect,  even we set  mds_session_blacklist_on_evict = True, client still
->> > cannot reconnect due to below code:
->> >
->> >  if (!mds->is_reconnect() && mds->get_want_state() ==
->> > CEPH_MDS_STATE_RECONNECT) {
->> >     dout(10) << " we're almost in reconnect state (mdsmap delivery race?);
->> > waiting" << dendl;
->> >     mds->wait_for_reconnect(new C_MDS_RetryMessage(mds, m));
->> >     return;
->> >   }
->> >
->> >      Could someone share any insight on why MDS only accept reconnect in
->> > reconnect state? and how, if the client is get evicted , can automatically
->> > recovered? note that remount is usually impossible as umount will always
->> > hang(due to cannot talk to mds).
->> >
->
-> If reconnect get denied, unflushed dirty metadata on client get lost.
->
-> If mds_session_blacklist_on_evict is set to FALSE, recent version kernel client
-> should re-open session automatically after reconnect get denied. For
-> fuse client,
-> client_reconnect_stale need to be set to true.
->
-> FYI: 'umount -f' works for evicted client.
->
->
->
->>
->> >
->> >
->> > Xiaoxi
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+T24gRnJpLCBPY3QgMTMsIDIwMTcgYXQgMTI6NDggQU0sIHpoYW9taW5neXVlIDx6aGFvLm1pbmd5
+dWVAaDNjLmNvbT4gd3JvdGU6Cj4gSGnvvJoKPiAgICAgSSBoYWQgbWV0IGFuIGFzc2VydCBwcm9i
+bGVtIGxpa2UKPiBidWcxNjI3OShodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvMTYyNzkp
+IHdoZW4gdGVzdGluZyBwdWxsIG91dCBkaXNrCj4gYW5kIGluc2VydCwgY2VwaCB2ZXJzaW9uIDEw
+LjIuNe+8jGFzc2VydChvYmppdGVyLT5zZWNvbmQtPnZlcnNpb24gPgo+IGxhc3RfZGl2ZXJnZW50
+X3VwZGF0ZSkKPgo+IGFjY29yZGluZyB0byBvc2QgbG9n77yMSSB0aGluayB0aGlzIG1heWJlIGR1
+ZSB0byAobG9nLmhlYWQgIT0KPiAqbG9nLmxvZy5yYmVnaW4udmVyc2lvbi52ZXJzaW9uKSB3aGVu
+IHNvbWUgYWJub3JtYWwgY29uZGl0aW9uIGhhcHBlbmVkLHN1Y2gKPiBhcyBwb3dlciBvZmYgLHB1
+bGwgb3V0IGRpc2sgYW5kIGluc2VydC4KCkkgZG9uJ3QgdGhpbmsgaXMgc3VwcG9zZWQgdG8gYmUg
+cG9zc2libGUuIFdlIGFwcGx5IGFsbCBjaGFuZ2VzIGxpa2UKdGhpcyBhdG9taWNhbGx5OyBGaWxl
+U3RvcmUgZG9lcyBhbGwgaXRzIGpvdXJuYWxpbmcgdG8gcHJldmVudCBwYXJ0aWFsCnVwZGF0ZXMg
+bGlrZSB0aGlzLgoKQSBmZXcgb3RoZXIgcGVvcGxlIGhhdmUgcmVwb3J0ZWQgdGhlIHNhbWUgaXNz
+dWUgb24gZGlzayBwdWxsLCBzbyBtYXliZQp0aGVyZSdzIHNvbWUgKm90aGVyKiBpc3N1ZSBnb2lu
+ZyBvbiwgYnV0IHRoZSBjb3JyZWN0IGZpeCBpcyBieQpwcmV2ZW50aW5nIHRob3NlIHR3byBmcm9t
+IGRpZmZlcmluZyAodW5sZXNzIEkgbWlzdW5kZXJzdGFuZCB0aGUKY29udGV4dCkuCgpHaXZlbiBv
+bmUgb2YgdGhlIHJlcG9ydGVycyBvbiB0aGF0IHRpY2tldCBjb25maXJtcyB0aGV5IGFsc28gaGFk
+IHhmcwppc3N1ZXMsIEkgZmluZCBpdCB2YXN0bHkgbW9yZSBsaWtlbHkgdGhhdCBzb21ldGhpbmcg
+aW4geW91ciBrZXJuZWwKY29uZmlndXJhdGlvbiBhbmQgaGFyZHdhcmUgc3RhY2sgaXMgbm90IHdy
+aXRpbmcgb3V0IGRhdGEgdGhlIHdheSBpdApjbGFpbXMgdG8uIEJlIHZlcnksIHZlcnkgc3VyZSBh
+bGwgdGhhdCBpcyB3b3JraW5nIGNvcnJlY3RseSEKCgo+IEluIGJlbG93IHNpdHVhdGlvbiwgbWVy
+Z2VfbG9nIHdvdWxkIHB1c2ggMjM04oCZMTAzNCBpbnRvIGRpdmVyZ2VudCBsaXN0O2FuZAo+IGRp
+dmVyZ2VudCBoYXMgb25seSBvbmUgbm9kZTt0aGVuIGxlYWQgdG8gYXNzZXJ0KG9iaml0ZXItPnNl
+Y29uZC0+dmVyc2lvbiA+Cj4gbGFzdF9kaXZlcmdlbnRfdXBkYXRlKS4KPgo+IG9sb2cgIC0tLS0t
+LS0tLS0tLS0tLS0gICAoMOKAmTAsIDIzNOKAmTEwMzQpICBvbG9nLmhlYWQgPSAyMzTigJkxMDM0
+Cj4KPiBsb2cgICAtLS0tLS0tLS0tLS0tLS0tICAgKDDigJkwLCAyMzTigJkxMDM0KSAgbG9nLmhl
+YWQgPSAyMzTigJkxMDMzCj4KPgo+Cj4gSSBzZWUgb3NkIGxvYWRfcGdzIGNvZGUsaW4gZnVuY3Rp
+b24gUEdMb2c6OnJlYWRfbG9nKCkgLCBjb2RlIGxpa2UgdGhpczoKPiAgLi4uLi4KPiAgZm9yIChw
+LT5zZWVrX3RvX2ZpcnN0KCk7IHAtPnZhbGlkKCkgOyBwLT5uZXh0KCkpIHsKPgo+IC4uLi4uCj4K
+PiAgICAgbG9nLmxvZy5wdXNoX2JhY2soZSk7Cj4KPiAgICAgbG9nLmhlYWQgPSBlLnZlcnNpb247
+ICAvLyBldmVyeSBwZyBsb2cgbm9kZQo+Cj4gICB9Cj4KPiAuLi4uLgo+Cj4gIGxvZy5oZWFkID0g
+aW5mby5sYXN0X3VwZGF0ZTsKPgo+Cj4KPiB0d28gZG91YnQ6Cj4KPiBmaXJzdCA6IHdoeSBzZXQg
+KGxvZy5oZWFkID0gaW5mby5sYXN0X3VwZGF0ZSkgYWZ0ZXIgYWxsIHBnIGxvZyBub2RlCj4gcHJv
+Y2Vzc2VkKGV2ZXJ5IG5vZGUgaGFzIHVwZGF0ZWQgbG9nLmhlYWQgPSBlLnZlcnNpb24pPwo+Cj4g
+c2Vjb25kOiBXaGV0aGVyIGl0IGNhbiBvY2N1ciB0aGF0IGluZm8ubGFzdF91cGRhdGUgaXMgbGVz
+cyB0aGFuCj4gKmxvZy5sb2cucmJlZ2luLnZlcnNpb24gb3Igbm90IGFuZCB3aGF0IHNjZW5lIGhh
+cHBlbnM/CgpJJ20gbG9va2luZyBhdCB0aGUgbHVtaW5vdXMgY29kZSBiYXNlIHJpZ2h0IG5vdyBh
+bmQgdGhpbmdzIGhhdmUKY2hhbmdlZCBhIGJpdCBzbyBJIGRvbid0IGhhdmUgdGhlIHNwZWNpZmlj
+cyBvZiB5b3VyIHF1ZXN0aW9uIG9uIGhhbmQuCgpCdXQgdGhlIGdlbmVyYWwgcmVhc29uIHdlIGNo
+YW5nZSB0aGVzZSB2ZXJzaW9ucyBhcm91bmQgaXMgYmVjYXVzZSB3ZQpuZWVkIHRvIHJlY29uY2ls
+ZSB0aGUgbG9ncyBhY3Jvc3MgYWxsIE9TRHMuIElmIG9uZSBPU0QgaGFzIGFuIGVudHJ5CmZvciBh
+biBvcGVyYXRpb24gdGhhdCB3YXMgbmV2ZXIgcmV0dXJuZWQgdG8gdGhlIGNsaWVudCwgd2UgbWF5
+IG5lZWQgdG8KZGVjbGFyZSBpdCBkaXZlcmdlbnQgYW5kIHVuZG8gaXQuIChJbiByZXBsaWNhdGVk
+IHBvb2xzLCBlbnRyaWVzIGFyZQpvbmx5IGRpdmVyZ2VudCBpZiB0aGUgT1NEIGhvc3RpbmcgaXQg
+d2FzIGVpdGhlciBuZXRzcGxpdCBmcm9tIHRoZQpwcmltYXJ5LCBvciBlbHNlIG1hbmFnZWQgdG8g
+Y29tbWl0IHNvbWV0aGluZyBkdXJpbmcgYSBmYWlsdXJlIGV2ZW50CnRoYXQgaXRzIHBlZXJzIGRp
+ZG4ndCBhbmQgdGhlbiB3YXMgcmVzdWJtaXR0ZWQgdW5kZXIgYSBkaWZmZXJlbnQgSUQgYnkKdGhl
+IGNsaWVudCBvbiByZWNvdmVyeS4gSW4gZXJhc3VyZS1jb2RlZCBwb29scyB0aGluZ3MgYXJlIG1v
+cmUKY29tcGxpY2F0ZWQgYmVjYXVzZSB3ZSBjYW4gb25seSByb2xsIG9wZXJhdGlvbnMgZm9yd2Fy
+ZCBpZiBhIHF1b3J1bSBvZgp0aGUgc2hhcmRzIGFyZSBwcmVzZW50LikKLUdyZWcKX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5n
+IGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlz
+dGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
