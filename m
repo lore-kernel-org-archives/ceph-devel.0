@@ -1,43 +1,65 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: some questions about ceph issues#15034 & 17379
-Date: Fri, 13 Oct 2017 07:02:21 -0400
-Message-ID: <CA+aFP1AWkVtvjQyu+_X4o5jTs0BU+Bi2PmpiMMc4H=SNjkks0A@mail.gmail.com>
-References: <70cb8e99.4fe6.15f13c50151.Coremail.hs170779@163.com>
-Reply-To: dillaman@redhat.com
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: mds client reconnect
+Date: Fri, 13 Oct 2017 21:59:33 +0800
+Message-ID: <CAAM7YAnxQcaBHU=KgZhU9UM-=zksW-h206q2fuzHoM_kBcYsMw@mail.gmail.com>
+References: <CAEYCsVL1MxuYKf3vVN+UQchgaj=X7vxjZ0PfD2Oqsz2To2smRg@mail.gmail.com>
+ <CAEYCsVL+_DanFXSCGLxY+WUq2gZoRi8N1D8maFeHsCr5ndOaCA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:50266 "EHLO
-        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751564AbdJMLCW (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2017 07:02:22 -0400
-Received: by mail-qt0-f171.google.com with SMTP id f15so18817859qtf.7
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2017 04:02:21 -0700 (PDT)
-In-Reply-To: <70cb8e99.4fe6.15f13c50151.Coremail.hs170779@163.com>
+Received: from mail-oi0-f48.google.com ([209.85.218.48]:52364 "EHLO
+        mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753446AbdJMN7e (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2017 09:59:34 -0400
+Received: by mail-oi0-f48.google.com with SMTP id c202so14274395oih.9
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2017 06:59:34 -0700 (PDT)
+In-Reply-To: <CAEYCsVL+_DanFXSCGLxY+WUq2gZoRi8N1D8maFeHsCr5ndOaCA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?6YOd6LWP?= <hs170779@163.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Xiaoxi Chen <superdebuger@gmail.com>
+Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-The possibility for inconsistent IO was already fixed under [1] a year
-ago, but we left the "rbd_op_threads" hard-coded to 1 due to other
-unrelated race conditions as you are discovering. Fixing those race
-conditions is being tracked under a different ticket [2].
-
-[1] http://tracker.ceph.com/issues/15034
-[2] http://tracker.ceph.com/issues/17379
-
-On Thu, Oct 12, 2017 at 11:26 PM, 郝赏 <hs170779@163.com> wrote:
-> now i have also encountered the same problem as #15034 with 5
-> rbd_op_threads, it caused some assert failures，why does this happen ？ and，
-> how can we avoid this problem by guaranteeing that the data written in the
-> client cache is written in the same order as in the journal log？
+On Fri, Oct 13, 2017 at 2:10 PM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
 >
+> resend with plain txt
 >
-> 【网易自营】好吃到爆！鲜香弹滑加热即食，经典13香/麻辣小龙虾仅75元3斤>>
+> 2017-10-13 10:56 GMT+08:00 Xiaoxi Chen <superdebuger@gmail.com>:
+> > Hi,
+> >
+> >     We sometimes seen client (fs kernel) get evicted by MDS and try to
+> > reconnect,  even we set  mds_session_blacklist_on_evict = True, client still
+> > cannot reconnect due to below code:
+> >
+> >  if (!mds->is_reconnect() && mds->get_want_state() ==
+> > CEPH_MDS_STATE_RECONNECT) {
+> >     dout(10) << " we're almost in reconnect state (mdsmap delivery race?);
+> > waiting" << dendl;
+> >     mds->wait_for_reconnect(new C_MDS_RetryMessage(mds, m));
+> >     return;
+> >   }
+> >
+> >      Could someone share any insight on why MDS only accept reconnect in
+> > reconnect state? and how, if the client is get evicted , can automatically
+> > recovered? note that remount is usually impossible as umount will always
+> > hang(due to cannot talk to mds).
+> >
+
+If reconnect get denied, unflushed dirty metadata on client get lost.
+
+If mds_session_blacklist_on_evict is set to FALSE, recent version kernel client
+should re-open session automatically after reconnect get denied. For
+fuse client,
+client_reconnect_stale need to be set to true.
+
+FYI: 'umount -f' works for evicted client.
 
 
 
--- 
-Jason
+>
+> >
+> >
+> > Xiaoxi
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
