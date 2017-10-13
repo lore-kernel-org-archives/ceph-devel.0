@@ -1,76 +1,72 @@
-From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: assert(objiter->second->version >
- last_divergent_update) when testing pull out disk and insert
-Date: Fri, 13 Oct 2017 09:33:44 -0700
-Message-ID: <CAJ4mKGYez6NWCZheRFsG+cu02dFzmW7awZYLUVd8Z2WKEkaeNQ@mail.gmail.com>
-References: <1CB94550540AE44E9CAAE8CD5AF40BF894B8428B@H3CMLB12-EX.srv.huawei-3com.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: removed_snaps
+Date: Fri, 13 Oct 2017 10:22:47 -0700
+Message-ID: <CAJ4mKGYxQO7QErAkwaaOjrV48M5k-0RVHscn2gjKYs0T3qMyLA@mail.gmail.com>
+References: <alpine.DEB.2.11.1710111556410.26702@piezo.us.to>
+ <CAJ4mKGaw-6Yu5pK97r0GK5q2_Kt=O2d6SG9um+Xvr8JdAKX88A@mail.gmail.com>
+ <alpine.DEB.2.11.1710111841060.26702@piezo.us.to> <CAJ4mKGZbPjKNchv+cqcx_uRhb3GtX5D7ZNj-0UHTapbaHascrQ@mail.gmail.com>
+ <alpine.DEB.2.11.1710121354490.26702@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1CB94550540AE44E9CAAE8CD5AF40BF894B8428B-JwQOC20i6vT3cnzPNjVLboSsE/coCuR8pWgKQ6/u3Fg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: zhaomingyue <zhao.mingyue-vVzyEvZLFYE@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-it0-f42.google.com ([209.85.214.42]:55552 "EHLO
+        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751633AbdJMRWs (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2017 13:22:48 -0400
+Received: by mail-it0-f42.google.com with SMTP id l196so11370111itl.4
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2017 10:22:48 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1710121354490.26702@piezo.us.to>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Mclean, Patrick" <Patrick.Mclean@sony.com>
 
-T24gRnJpLCBPY3QgMTMsIDIwMTcgYXQgMTI6NDggQU0sIHpoYW9taW5neXVlIDx6aGFvLm1pbmd5
-dWVAaDNjLmNvbT4gd3JvdGU6Cj4gSGnvvJoKPiAgICAgSSBoYWQgbWV0IGFuIGFzc2VydCBwcm9i
-bGVtIGxpa2UKPiBidWcxNjI3OShodHRwOi8vdHJhY2tlci5jZXBoLmNvbS9pc3N1ZXMvMTYyNzkp
-IHdoZW4gdGVzdGluZyBwdWxsIG91dCBkaXNrCj4gYW5kIGluc2VydCwgY2VwaCB2ZXJzaW9uIDEw
-LjIuNe+8jGFzc2VydChvYmppdGVyLT5zZWNvbmQtPnZlcnNpb24gPgo+IGxhc3RfZGl2ZXJnZW50
-X3VwZGF0ZSkKPgo+IGFjY29yZGluZyB0byBvc2QgbG9n77yMSSB0aGluayB0aGlzIG1heWJlIGR1
-ZSB0byAobG9nLmhlYWQgIT0KPiAqbG9nLmxvZy5yYmVnaW4udmVyc2lvbi52ZXJzaW9uKSB3aGVu
-IHNvbWUgYWJub3JtYWwgY29uZGl0aW9uIGhhcHBlbmVkLHN1Y2gKPiBhcyBwb3dlciBvZmYgLHB1
-bGwgb3V0IGRpc2sgYW5kIGluc2VydC4KCkkgZG9uJ3QgdGhpbmsgaXMgc3VwcG9zZWQgdG8gYmUg
-cG9zc2libGUuIFdlIGFwcGx5IGFsbCBjaGFuZ2VzIGxpa2UKdGhpcyBhdG9taWNhbGx5OyBGaWxl
-U3RvcmUgZG9lcyBhbGwgaXRzIGpvdXJuYWxpbmcgdG8gcHJldmVudCBwYXJ0aWFsCnVwZGF0ZXMg
-bGlrZSB0aGlzLgoKQSBmZXcgb3RoZXIgcGVvcGxlIGhhdmUgcmVwb3J0ZWQgdGhlIHNhbWUgaXNz
-dWUgb24gZGlzayBwdWxsLCBzbyBtYXliZQp0aGVyZSdzIHNvbWUgKm90aGVyKiBpc3N1ZSBnb2lu
-ZyBvbiwgYnV0IHRoZSBjb3JyZWN0IGZpeCBpcyBieQpwcmV2ZW50aW5nIHRob3NlIHR3byBmcm9t
-IGRpZmZlcmluZyAodW5sZXNzIEkgbWlzdW5kZXJzdGFuZCB0aGUKY29udGV4dCkuCgpHaXZlbiBv
-bmUgb2YgdGhlIHJlcG9ydGVycyBvbiB0aGF0IHRpY2tldCBjb25maXJtcyB0aGV5IGFsc28gaGFk
-IHhmcwppc3N1ZXMsIEkgZmluZCBpdCB2YXN0bHkgbW9yZSBsaWtlbHkgdGhhdCBzb21ldGhpbmcg
-aW4geW91ciBrZXJuZWwKY29uZmlndXJhdGlvbiBhbmQgaGFyZHdhcmUgc3RhY2sgaXMgbm90IHdy
-aXRpbmcgb3V0IGRhdGEgdGhlIHdheSBpdApjbGFpbXMgdG8uIEJlIHZlcnksIHZlcnkgc3VyZSBh
-bGwgdGhhdCBpcyB3b3JraW5nIGNvcnJlY3RseSEKCgo+IEluIGJlbG93IHNpdHVhdGlvbiwgbWVy
-Z2VfbG9nIHdvdWxkIHB1c2ggMjM04oCZMTAzNCBpbnRvIGRpdmVyZ2VudCBsaXN0O2FuZAo+IGRp
-dmVyZ2VudCBoYXMgb25seSBvbmUgbm9kZTt0aGVuIGxlYWQgdG8gYXNzZXJ0KG9iaml0ZXItPnNl
-Y29uZC0+dmVyc2lvbiA+Cj4gbGFzdF9kaXZlcmdlbnRfdXBkYXRlKS4KPgo+IG9sb2cgIC0tLS0t
-LS0tLS0tLS0tLS0gICAoMOKAmTAsIDIzNOKAmTEwMzQpICBvbG9nLmhlYWQgPSAyMzTigJkxMDM0
-Cj4KPiBsb2cgICAtLS0tLS0tLS0tLS0tLS0tICAgKDDigJkwLCAyMzTigJkxMDM0KSAgbG9nLmhl
-YWQgPSAyMzTigJkxMDMzCj4KPgo+Cj4gSSBzZWUgb3NkIGxvYWRfcGdzIGNvZGUsaW4gZnVuY3Rp
-b24gUEdMb2c6OnJlYWRfbG9nKCkgLCBjb2RlIGxpa2UgdGhpczoKPiAgLi4uLi4KPiAgZm9yIChw
-LT5zZWVrX3RvX2ZpcnN0KCk7IHAtPnZhbGlkKCkgOyBwLT5uZXh0KCkpIHsKPgo+IC4uLi4uCj4K
-PiAgICAgbG9nLmxvZy5wdXNoX2JhY2soZSk7Cj4KPiAgICAgbG9nLmhlYWQgPSBlLnZlcnNpb247
-ICAvLyBldmVyeSBwZyBsb2cgbm9kZQo+Cj4gICB9Cj4KPiAuLi4uLgo+Cj4gIGxvZy5oZWFkID0g
-aW5mby5sYXN0X3VwZGF0ZTsKPgo+Cj4KPiB0d28gZG91YnQ6Cj4KPiBmaXJzdCA6IHdoeSBzZXQg
-KGxvZy5oZWFkID0gaW5mby5sYXN0X3VwZGF0ZSkgYWZ0ZXIgYWxsIHBnIGxvZyBub2RlCj4gcHJv
-Y2Vzc2VkKGV2ZXJ5IG5vZGUgaGFzIHVwZGF0ZWQgbG9nLmhlYWQgPSBlLnZlcnNpb24pPwo+Cj4g
-c2Vjb25kOiBXaGV0aGVyIGl0IGNhbiBvY2N1ciB0aGF0IGluZm8ubGFzdF91cGRhdGUgaXMgbGVz
-cyB0aGFuCj4gKmxvZy5sb2cucmJlZ2luLnZlcnNpb24gb3Igbm90IGFuZCB3aGF0IHNjZW5lIGhh
-cHBlbnM/CgpJJ20gbG9va2luZyBhdCB0aGUgbHVtaW5vdXMgY29kZSBiYXNlIHJpZ2h0IG5vdyBh
-bmQgdGhpbmdzIGhhdmUKY2hhbmdlZCBhIGJpdCBzbyBJIGRvbid0IGhhdmUgdGhlIHNwZWNpZmlj
-cyBvZiB5b3VyIHF1ZXN0aW9uIG9uIGhhbmQuCgpCdXQgdGhlIGdlbmVyYWwgcmVhc29uIHdlIGNo
-YW5nZSB0aGVzZSB2ZXJzaW9ucyBhcm91bmQgaXMgYmVjYXVzZSB3ZQpuZWVkIHRvIHJlY29uY2ls
-ZSB0aGUgbG9ncyBhY3Jvc3MgYWxsIE9TRHMuIElmIG9uZSBPU0QgaGFzIGFuIGVudHJ5CmZvciBh
-biBvcGVyYXRpb24gdGhhdCB3YXMgbmV2ZXIgcmV0dXJuZWQgdG8gdGhlIGNsaWVudCwgd2UgbWF5
-IG5lZWQgdG8KZGVjbGFyZSBpdCBkaXZlcmdlbnQgYW5kIHVuZG8gaXQuIChJbiByZXBsaWNhdGVk
-IHBvb2xzLCBlbnRyaWVzIGFyZQpvbmx5IGRpdmVyZ2VudCBpZiB0aGUgT1NEIGhvc3RpbmcgaXQg
-d2FzIGVpdGhlciBuZXRzcGxpdCBmcm9tIHRoZQpwcmltYXJ5LCBvciBlbHNlIG1hbmFnZWQgdG8g
-Y29tbWl0IHNvbWV0aGluZyBkdXJpbmcgYSBmYWlsdXJlIGV2ZW50CnRoYXQgaXRzIHBlZXJzIGRp
-ZG4ndCBhbmQgdGhlbiB3YXMgcmVzdWJtaXR0ZWQgdW5kZXIgYSBkaWZmZXJlbnQgSUQgYnkKdGhl
-IGNsaWVudCBvbiByZWNvdmVyeS4gSW4gZXJhc3VyZS1jb2RlZCBwb29scyB0aGluZ3MgYXJlIG1v
-cmUKY29tcGxpY2F0ZWQgYmVjYXVzZSB3ZSBjYW4gb25seSByb2xsIG9wZXJhdGlvbnMgZm9yd2Fy
-ZCBpZiBhIHF1b3J1bSBvZgp0aGUgc2hhcmRzIGFyZSBwcmVzZW50LikKLUdyZWcKX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5n
-IGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlz
-dGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+On Thu, Oct 12, 2017 at 7:02 AM, Sage Weil <sweil@redhat.com> wrote:
+> Just had another thought last night: the mon can preserve the full history
+> of deletions, by epoch.  When the objecter encounters a map gap it can
+> request the removed_snaps over teh gap period from the mon at the same
+> time it's getting the next map (i.e., the oldest full map stored by
+> the mon).  Since this is a pretty rare/excpetional thing, I don't
+> worry much about the extra work for the mon, and it avoids the ugly
+> client-must-crash behavior... a laggy client will always be able to catch
+> up.e
+
+That seems useful and will probably work in a practical sense, but I'm
+still a bit concerned. There's an in-built assumption here that the
+OSD map epoch of a client is a useful proxy for "has the correct set
+of snapids". And...well, it's a *reasonable* proxy, especially if the
+Objecter starts trimming snapids. But CephFS certainly doesn't have
+any explicit relationship (or even much of an implicit one) between
+the OSDMap epochs and the set of live snapshots. I don't think RBD
+does either, although since it passes around snapids via header
+objects and watch-notify it might come closer?
+
+I'm tossing around in my head if there's some good way to attach a
+"valid as of this epoch" tag to snapcontexts generated by external
+systems. All snapshot users *do* already maintain a snapid_t for
+versioning that they use; maybe we can tie into or extend it somehow?
+(A trivial but presumably too-slow implementation for CephFS could do
+something like, on every load of a SnapRealm in the MDS, validate the
+snap ids against the monitor's full list and attach the current osd
+epoch to it.)
+
+
+Moving on to the stuff actually written down:
+How comfortable are we with the size of the currently-deleting
+snapshots maps, for computation purposes? I don't have a good way of
+quantifying that cost but I'm definitely tempted to split the sets
+into
+newly_deleted_snaps (for *this epoch*)
+deleting_snaps (which are kept around until removed_snaps_lb_epoch)
+newly_purged_snaps (also for this epoch, which I think is how you have
+it written?)
+
+There are also two questions down at the bottom. For (1) I think it's
+good to keep the deleted snaps set for all time (always good for
+debugging!), but we need to be careful: if there is a divergence
+between RADOS' metadata and those of RBD or CephFS, we need a
+mechanism for re-deleting snaps even if they were already zapped.
+For (2), yes the removed_snaps_lb_epoch should be per-pool, not
+global. We don't have any other global snap data, why would we
+introduce a linkage? :)
+-Greg
