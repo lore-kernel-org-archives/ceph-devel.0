@@ -1,110 +1,86 @@
-From: zhaomingyue <zhao.mingyue@h3c.com>
-Subject: =?utf-8?B?562U5aSNOiBbY2VwaC11c2Vyc10gYXNzZXJ0KG9iaml0ZXItPnNlY29uZC0+?=
- =?utf-8?B?dmVyc2lvbiA+IGxhc3RfZGl2ZXJnZW50X3VwZGF0ZSkgd2hlbiB0ZXN0aW5n?=
- =?utf-8?Q?_pull_out_disk_and_insert?=
-Date: Sat, 14 Oct 2017 14:24:00 +0000
-Message-ID: <1CB94550540AE44E9CAAE8CD5AF40BF8AB728094@H3CMLB14-EX.srv.huawei-3com.com>
-References: <1CB94550540AE44E9CAAE8CD5AF40BF894B8428B@H3CMLB12-EX.srv.huawei-3com.com>
- <CAJ4mKGYez6NWCZheRFsG+cu02dFzmW7awZYLUVd8Z2WKEkaeNQ@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: removed_snaps
+Date: Sat, 14 Oct 2017 15:56:54 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1710141549170.26702@piezo.us.to>
+References: <alpine.DEB.2.11.1710111556410.26702@piezo.us.to> <CAJ4mKGaw-6Yu5pK97r0GK5q2_Kt=O2d6SG9um+Xvr8JdAKX88A@mail.gmail.com> <alpine.DEB.2.11.1710111841060.26702@piezo.us.to> <CAJ4mKGZbPjKNchv+cqcx_uRhb3GtX5D7ZNj-0UHTapbaHascrQ@mail.gmail.com>
+ <alpine.DEB.2.11.1710121354490.26702@piezo.us.to> <CAJ4mKGYxQO7QErAkwaaOjrV48M5k-0RVHscn2gjKYs0T3qMyLA@mail.gmail.com> <alpine.DEB.2.11.1710132052540.26702@piezo.us.to> <CAJ4mKGaauoPR9KnHBhp2C50qBypy4q=Sa7pA-WF-BXeNfBAOXQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:33888 "EHLO h3cmg01-ex.h3c.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751741AbdJNOYb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 14 Oct 2017 10:24:31 -0400
-In-Reply-To: <CAJ4mKGYez6NWCZheRFsG+cu02dFzmW7awZYLUVd8Z2WKEkaeNQ@mail.gmail.com>
-Content-Language: zh-CN
+Received: from mx1.redhat.com ([209.132.183.28]:38414 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753759AbdJNP45 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 14 Oct 2017 11:56:57 -0400
+In-Reply-To: <CAJ4mKGaauoPR9KnHBhp2C50qBypy4q=Sa7pA-WF-BXeNfBAOXQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: 'Gregory Farnum' <gfarnum@redhat.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "ceph-users@ceph.com" <ceph-users@ceph.com>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Mclean, Patrick" <Patrick.Mclean@sony.com>
 
-MeOAgXRoaXMgYXNzZXJ0IGhhcHBlbmVkIGFjY2lkZW50bHksIG5vdCBlYXN5IHRvIHJlcHJvZHVj
-ZTsgSW4gZmFjdCwgSSBhbHNvIHN1cHBvc2UgdGhpcyBhc3NlcnQgaXMgY2F1c2VkIGJ5IGRldmlj
-ZSBkYXRhIGxvc3Q7DQpidXQgaWYgaGFzIGxvc3QsaG93IGl0IGNhbiBhY2N1ciB0aGF0IChsYXN0
-X3VwZGF0ZSArMSA9IGxvZy5yYmVnaW4udmVyc2lvbikgLCBpbiBjYXNlIG9mIGxvc3RpbmcgZGF0
-YSwgaXQncyBtb3JlIGxpa2VseSB0byBiZSBjb25mdXNlZC4gQXQgcHJlc2VudCwgdGhpcyBzaXR1
-YXRpb24gY2FuJ3QgdGhpbmsgY2xlYXJseS4NCg0KMuOAgUFjY29yZGluZyByZWFkX2xvZyBjb2Rl
-77yMYXNzdW1lIGEgc2l0dWF0aW9uOg0KV2hlbiBvc2Qgc3RhcnQgLGlmIHBnIGxvZyBoYXMgYmVl
-biBsb3N0IHNvbWUgY29udGVudCBiZWNhdXNlIG9mIHBvd2VyIG9mZiBvciB4ZnMgZXJyb3IsdGhl
-biBsb2cuaGVhZCB3b3VsZCBiZSBiaWdnZXIgdGhhbiBsb2cucmJlZ2luLnZlcnNpb24gaW4gbWVt
-b3J5Ow0KZHVyaW5nIHBlZXJpbmcgLCB1c2luZyBsYXN0X3VwZGF0ZSBhcyBvbmUgZGV0ZXJtaW5h
-bCBhcmcgdG8gZmluZF9iZXN0LCBzbyB0aGUgY29uc2lzdGVudCBvbmUob3NkIHdobyBoYXMgc2hv
-cnRlciBwZyBsb2csYnV0IGxhc3RfdXBkYXRlIGlzIG5vcm1hbCkgbWF5IGJlY29tZSB0aGUgYXV0
-aCBsb2csDQpvdGhlciBvc2QgdXNlICd0aGlzIGF1dGggbG9nJyB3b3VsZCBsZWFkIHRvIHBnIGlu
-Y29uc2lzdGVudCBpZiBzY3J1YiB0aGlzIHBnLGlzbuKAmXQgaXQ/DQoNCg0KDQotLS0tLemCruS7
-tuWOn+S7ti0tLS0tDQrlj5Hku7bkuro6IEdyZWdvcnkgRmFybnVtIFttYWlsdG86Z2Zhcm51bUBy
-ZWRoYXQuY29tXQ0K5Y+R6YCB5pe26Ze0OiAyMDE35bm0MTDmnIgxNOaXpSAwOjM0DQrmlLbku7bk
-uro6IHpoYW9taW5neXVlIDA5NDQwIChSRCkNCuaKhOmAgTogY2VwaC1kZXZlbEB2Z2VyLmtlcm5l
-bC5vcmc7IGNlcGgtdXNlcnNAY2VwaC5jb20NCuS4u+mimDogUmU6IFtjZXBoLXVzZXJzXSBhc3Nl
-cnQob2JqaXRlci0+c2Vjb25kLT52ZXJzaW9uID4gbGFzdF9kaXZlcmdlbnRfdXBkYXRlKSB3aGVu
-IHRlc3RpbmcgcHVsbCBvdXQgZGlzayBhbmQgaW5zZXJ0DQoNCk9uIEZyaSwgT2N0IDEzLCAyMDE3
-IGF0IDEyOjQ4IEFNLCB6aGFvbWluZ3l1ZSA8emhhby5taW5neXVlQGgzYy5jb20+IHdyb3RlOg0K
-PiBIae+8mg0KPiAgICAgSSBoYWQgbWV0IGFuIGFzc2VydCBwcm9ibGVtIGxpa2UNCj4gYnVnMTYy
-NzkoaHR0cDovL3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzE2Mjc5KSB3aGVuIHRlc3RpbmcgcHVs
-bCBvdXQNCj4gZGlzayBhbmQgaW5zZXJ0LCBjZXBoIHZlcnNpb24gMTAuMi4177yMYXNzZXJ0KG9i
-aml0ZXItPnNlY29uZC0+dmVyc2lvbiA+DQo+IGxhc3RfZGl2ZXJnZW50X3VwZGF0ZSkNCj4NCj4g
-YWNjb3JkaW5nIHRvIG9zZCBsb2fvvIxJIHRoaW5rIHRoaXMgbWF5YmUgZHVlIHRvIChsb2cuaGVh
-ZCAhPQ0KPiAqbG9nLmxvZy5yYmVnaW4udmVyc2lvbi52ZXJzaW9uKSB3aGVuIHNvbWUgYWJub3Jt
-YWwgY29uZGl0aW9uDQo+IGhhcHBlbmVkLHN1Y2ggYXMgcG93ZXIgb2ZmICxwdWxsIG91dCBkaXNr
-IGFuZCBpbnNlcnQuDQoNCkkgZG9uJ3QgdGhpbmsgaXMgc3VwcG9zZWQgdG8gYmUgcG9zc2libGUu
-IFdlIGFwcGx5IGFsbCBjaGFuZ2VzIGxpa2UgdGhpcyBhdG9taWNhbGx5OyBGaWxlU3RvcmUgZG9l
-cyBhbGwgaXRzIGpvdXJuYWxpbmcgdG8gcHJldmVudCBwYXJ0aWFsIHVwZGF0ZXMgbGlrZSB0aGlz
-Lg0KDQpBIGZldyBvdGhlciBwZW9wbGUgaGF2ZSByZXBvcnRlZCB0aGUgc2FtZSBpc3N1ZSBvbiBk
-aXNrIHB1bGwsIHNvIG1heWJlIHRoZXJlJ3Mgc29tZSAqb3RoZXIqIGlzc3VlIGdvaW5nIG9uLCBi
-dXQgdGhlIGNvcnJlY3QgZml4IGlzIGJ5IHByZXZlbnRpbmcgdGhvc2UgdHdvIGZyb20gZGlmZmVy
-aW5nICh1bmxlc3MgSSBtaXN1bmRlcnN0YW5kIHRoZSBjb250ZXh0KS4NCg0KR2l2ZW4gb25lIG9m
-IHRoZSByZXBvcnRlcnMgb24gdGhhdCB0aWNrZXQgY29uZmlybXMgdGhleSBhbHNvIGhhZCB4ZnMg
-aXNzdWVzLCBJIGZpbmQgaXQgdmFzdGx5IG1vcmUgbGlrZWx5IHRoYXQgc29tZXRoaW5nIGluIHlv
-dXIga2VybmVsIGNvbmZpZ3VyYXRpb24gYW5kIGhhcmR3YXJlIHN0YWNrIGlzIG5vdCB3cml0aW5n
-IG91dCBkYXRhIHRoZSB3YXkgaXQgY2xhaW1zIHRvLiBCZSB2ZXJ5LCB2ZXJ5IHN1cmUgYWxsIHRo
-YXQgaXMgd29ya2luZyBjb3JyZWN0bHkhDQoNCg0KPiBJbiBiZWxvdyBzaXR1YXRpb24sIG1lcmdl
-X2xvZyB3b3VsZCBwdXNoIDIzNOKAmTEwMzQgaW50byBkaXZlcmdlbnQNCj4gbGlzdDthbmQgZGl2
-ZXJnZW50IGhhcyBvbmx5IG9uZSBub2RlO3RoZW4gbGVhZCB0bw0KPiBhc3NlcnQob2JqaXRlci0+
-c2Vjb25kLT52ZXJzaW9uID4gbGFzdF9kaXZlcmdlbnRfdXBkYXRlKS4NCj4NCj4gb2xvZyAgLS0t
-LS0tLS0tLS0tLS0tLSAgICgw4oCZMCwgMjM04oCZMTAzNCkgIG9sb2cuaGVhZCA9IDIzNOKAmTEw
-MzQNCj4NCj4gbG9nICAgLS0tLS0tLS0tLS0tLS0tLSAgICgw4oCZMCwgMjM04oCZMTAzNCkgIGxv
-Zy5oZWFkID0gMjM04oCZMTAzMw0KPg0KPg0KPg0KPiBJIHNlZSBvc2QgbG9hZF9wZ3MgY29kZSxp
-biBmdW5jdGlvbiBQR0xvZzo6cmVhZF9sb2coKSAsIGNvZGUgbGlrZSB0aGlzOg0KPiAgLi4uLi4N
-Cj4gIGZvciAocC0+c2Vla190b19maXJzdCgpOyBwLT52YWxpZCgpIDsgcC0+bmV4dCgpKSB7DQo+
-DQo+IC4uLi4uDQo+DQo+ICAgICBsb2cubG9nLnB1c2hfYmFjayhlKTsNCj4NCj4gICAgIGxvZy5o
-ZWFkID0gZS52ZXJzaW9uOyAgLy8gZXZlcnkgcGcgbG9nIG5vZGUNCj4NCj4gICB9DQo+DQo+IC4u
-Li4uDQo+DQo+ICBsb2cuaGVhZCA9IGluZm8ubGFzdF91cGRhdGU7DQo+DQo+DQo+DQo+IHR3byBk
-b3VidDoNCj4NCj4gZmlyc3QgOiB3aHkgc2V0IChsb2cuaGVhZCA9IGluZm8ubGFzdF91cGRhdGUp
-IGFmdGVyIGFsbCBwZyBsb2cgbm9kZQ0KPiBwcm9jZXNzZWQoZXZlcnkgbm9kZSBoYXMgdXBkYXRl
-ZCBsb2cuaGVhZCA9IGUudmVyc2lvbik/DQo+DQo+IHNlY29uZDogV2hldGhlciBpdCBjYW4gb2Nj
-dXIgdGhhdCBpbmZvLmxhc3RfdXBkYXRlIGlzIGxlc3MgdGhhbg0KPiAqbG9nLmxvZy5yYmVnaW4u
-dmVyc2lvbiBvciBub3QgYW5kIHdoYXQgc2NlbmUgaGFwcGVucz8NCg0KSSdtIGxvb2tpbmcgYXQg
-dGhlIGx1bWlub3VzIGNvZGUgYmFzZSByaWdodCBub3cgYW5kIHRoaW5ncyBoYXZlIGNoYW5nZWQg
-YSBiaXQgc28gSSBkb24ndCBoYXZlIHRoZSBzcGVjaWZpY3Mgb2YgeW91ciBxdWVzdGlvbiBvbiBo
-YW5kLg0KDQpCdXQgdGhlIGdlbmVyYWwgcmVhc29uIHdlIGNoYW5nZSB0aGVzZSB2ZXJzaW9ucyBh
-cm91bmQgaXMgYmVjYXVzZSB3ZSBuZWVkIHRvIHJlY29uY2lsZSB0aGUgbG9ncyBhY3Jvc3MgYWxs
-IE9TRHMuIElmIG9uZSBPU0QgaGFzIGFuIGVudHJ5IGZvciBhbiBvcGVyYXRpb24gdGhhdCB3YXMg
-bmV2ZXIgcmV0dXJuZWQgdG8gdGhlIGNsaWVudCwgd2UgbWF5IG5lZWQgdG8gZGVjbGFyZSBpdCBk
-aXZlcmdlbnQgYW5kIHVuZG8gaXQuIChJbiByZXBsaWNhdGVkIHBvb2xzLCBlbnRyaWVzIGFyZSBv
-bmx5IGRpdmVyZ2VudCBpZiB0aGUgT1NEIGhvc3RpbmcgaXQgd2FzIGVpdGhlciBuZXRzcGxpdCBm
-cm9tIHRoZSBwcmltYXJ5LCBvciBlbHNlIG1hbmFnZWQgdG8gY29tbWl0IHNvbWV0aGluZyBkdXJp
-bmcgYSBmYWlsdXJlIGV2ZW50IHRoYXQgaXRzIHBlZXJzIGRpZG4ndCBhbmQgdGhlbiB3YXMgcmVz
-dWJtaXR0ZWQgdW5kZXIgYSBkaWZmZXJlbnQgSUQgYnkgdGhlIGNsaWVudCBvbiByZWNvdmVyeS4g
-SW4gZXJhc3VyZS1jb2RlZCBwb29scyB0aGluZ3MgYXJlIG1vcmUgY29tcGxpY2F0ZWQgYmVjYXVz
-ZSB3ZSBjYW4gb25seSByb2xsIG9wZXJhdGlvbnMgZm9yd2FyZCBpZiBhIHF1b3J1bSBvZiB0aGUg
-c2hhcmRzIGFyZSBwcmVzZW50LikgLUdyZWcNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCuacrOmCruS7
-tuWPiuWFtumZhOS7tuWQq+acieaWsOWNjuS4ieaKgOacr+aciemZkOWFrOWPuOeahOS/neWvhuS/
-oeaBr++8jOS7hemZkOS6juWPkemAgee7meS4iumdouWcsOWdgOS4reWIl+WHug0K55qE5Liq5Lq6
-5oiW576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP5L2/55So77yI
-5YyF5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw5rOE6Zyy44CB5aSN5Yi244CBDQrm
-iJbmlaPlj5HvvInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnmlLbkuobmnKzp
-gq7ku7bvvIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDp
-maTmnKwNCumCruS7tu+8gQ0KVGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWlu
-IGNvbmZpZGVudGlhbCBpbmZvcm1hdGlvbiBmcm9tIE5ldyBIM0MsIHdoaWNoIGlzDQppbnRlbmRl
-ZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIGlzIGxpc3RlZCBh
-Ym92ZS4gQW55IHVzZSBvZiB0aGUNCmluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJlaW4gaW4gYW55
-IHdheSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBhcnRpYWwNCmRp
-c2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVyc29ucyBvdGhl
-ciB0aGFuIHRoZSBpbnRlbmRlZA0KcmVjaXBpZW50KHMpIGlzIHByb2hpYml0ZWQuIElmIHlvdSBy
-ZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5kZXINCmJ5
-IHBob25lIG9yIGVtYWlsIGltbWVkaWF0ZWx5IGFuZCBkZWxldGUgaXQhDQo=
+On Fri, 13 Oct 2017, Gregory Farnum wrote:
+> On Fri, Oct 13, 2017 at 2:32 PM, Sage Weil <sweil@redhat.com> wrote:
+> > On Fri, 13 Oct 2017, Gregory Farnum wrote:
+> >> Moving on to the stuff actually written down:
+> >> How comfortable are we with the size of the currently-deleting
+> >> snapshots maps, for computation purposes? I don't have a good way of
+> >> quantifying that cost but I'm definitely tempted to split the sets
+> >> into
+> >> newly_deleted_snaps (for *this epoch*)
+> >> deleting_snaps (which are kept around until removed_snaps_lb_epoch)
+> >> newly_purged_snaps (also for this epoch, which I think is how you have
+> >> it written?)
+> >
+> > The code I have now has 2 sets: removed_snaps and purged_snaps.
+> > purged_snapd was already there before; removed_snaps is the superset that
+> > includes stuff not yet purged.  (I made it a superset thinking that
+> > the filter_snapc() thing on every op will be faster if it only has to
+> > filter against a single set instead of 2 of them, and that matters more
+> > than the memory.)
+> 
+> No, what I mean is:
+> * we know that computing the overlap of interval sets can be expensive
+> * so we want to only compute overlaps of small sets
+> * this is especially true if we're doing it on all outstanding
+> operations in librados, within a single thread
+> 
+> So we definitely don't want to repeat comparisons if we don't have to.
+> And I suspect there will be occasional periods of intense snapshot
+> deletion from admins where they remove a number large enough to cause
+> trouble, and we don't want that to result in noticeably slower IO
+> submission on the client-side!
+> 
+> So we should have a separate set of snaps which were just added to the
+> removed_snaps during this epoch, that librados and the OSD map
+> processing can use in their normal-course-of-business scanning.
+
+I definitely get that we want to avoid any set intersections (and I think 
+the current code actually has only 1 of them, during peering activate).  
+But I'm not quite following which lookup you're thinking of.  FTR 
+filter_snapc iterates over the vector<snapid_t> in SnapContext and does an 
+interval_set lookup on each one to make sure it isn't deleted.
+
+I think there are basically two cases:
+
+1- The request comes in with the same epoch as our epoch, and the mimic 
+feature, so we could skip the filter_snapc entirely (client will have done 
+it).  Yay!  Hopefully this will be true for most requests in steady state.
+
+2- The request comes in with an older osdmap epoch, so we have to 
+filter_snapc against the recent_removed_snaps interval_set<>.  This is 
+what we do today, except instead of recent_removed_snaps we have 
+removed_snaps_over_all_time, so we are going from a huge set to a 
+relatively small one.
+
+We could do something like
+
+3- Maintain a small interval_set with a smaller range of epochs (e.g., 
+only the last 20 epochs instead of the last 500) and filter against that 
+if the request's epoch is recent enough.
+
+or,
+
+4- Remember the new_removed_snaps for the last N epochs and filter against 
+them individually.  This turns into m log(n) lookups instead of one 
+log(n*500) lookup (where m << 500)... probably a small win?
+
+sage
