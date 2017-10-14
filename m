@@ -1,59 +1,87 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: removed_snaps
-Date: Fri, 13 Oct 2017 15:25:29 -0700
-Message-ID: <CAJ4mKGaauoPR9KnHBhp2C50qBypy4q=Sa7pA-WF-BXeNfBAOXQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1710111556410.26702@piezo.us.to>
- <CAJ4mKGaw-6Yu5pK97r0GK5q2_Kt=O2d6SG9um+Xvr8JdAKX88A@mail.gmail.com>
- <alpine.DEB.2.11.1710111841060.26702@piezo.us.to> <CAJ4mKGZbPjKNchv+cqcx_uRhb3GtX5D7ZNj-0UHTapbaHascrQ@mail.gmail.com>
- <alpine.DEB.2.11.1710121354490.26702@piezo.us.to> <CAJ4mKGYxQO7QErAkwaaOjrV48M5k-0RVHscn2gjKYs0T3qMyLA@mail.gmail.com>
- <alpine.DEB.2.11.1710132052540.26702@piezo.us.to>
+From: "Yan, Zheng" <ukernel@gmail.com>
+Subject: Re: mds client reconnect
+Date: Sat, 14 Oct 2017 09:16:19 +0800
+Message-ID: <CAAM7YAkv5Q1HvG_fkz8aGJpmx2P68rfk0VquKq0zgvSZvJ9i=A@mail.gmail.com>
+References: <CAEYCsVL1MxuYKf3vVN+UQchgaj=X7vxjZ0PfD2Oqsz2To2smRg@mail.gmail.com>
+ <CAEYCsVL+_DanFXSCGLxY+WUq2gZoRi8N1D8maFeHsCr5ndOaCA@mail.gmail.com>
+ <CAAM7YAnxQcaBHU=KgZhU9UM-=zksW-h206q2fuzHoM_kBcYsMw@mail.gmail.com> <CAEYCsVJryo8Q9x4U4_4iK2QB-W1a6zvKS4x0pJ77QOO9Q1Ng1Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f42.google.com ([209.85.214.42]:44034 "EHLO
-        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751414AbdJMWZa (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2017 18:25:30 -0400
-Received: by mail-it0-f42.google.com with SMTP id n195so19523980itg.1
-        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2017 15:25:30 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1710132052540.26702@piezo.us.to>
+Received: from mail-oi0-f47.google.com ([209.85.218.47]:49632 "EHLO
+        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751617AbdJNBQV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 13 Oct 2017 21:16:21 -0400
+Received: by mail-oi0-f47.google.com with SMTP id w197so16790378oif.6
+        for <ceph-devel@vger.kernel.org>; Fri, 13 Oct 2017 18:16:20 -0700 (PDT)
+In-Reply-To: <CAEYCsVJryo8Q9x4U4_4iK2QB-W1a6zvKS4x0pJ77QOO9Q1Ng1Q@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Mclean, Patrick" <Patrick.Mclean@sony.com>
+To: Xiaoxi Chen <superdebuger@gmail.com>
+Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, Oct 13, 2017 at 2:32 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Fri, 13 Oct 2017, Gregory Farnum wrote:
->> Moving on to the stuff actually written down:
->> How comfortable are we with the size of the currently-deleting
->> snapshots maps, for computation purposes? I don't have a good way of
->> quantifying that cost but I'm definitely tempted to split the sets
->> into
->> newly_deleted_snaps (for *this epoch*)
->> deleting_snaps (which are kept around until removed_snaps_lb_epoch)
->> newly_purged_snaps (also for this epoch, which I think is how you have
->> it written?)
+On Fri, Oct 13, 2017 at 10:38 PM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
+> Hi Zheng,
+>     Thanks for the input. So we dont client to reconnect due to dirty
+> metadata?  Does client drop dirty data(page cached data) when
+> reconnect get denied and try tro re-open session?
+
+it only drop dirty metadata, dropping dirty metadata does not affect reconnect
+
 >
-> The code I have now has 2 sets: removed_snaps and purged_snaps.
-> purged_snapd was already there before; removed_snaps is the superset that
-> includes stuff not yet purged.  (I made it a superset thinking that
-> the filter_snapc() thing on every op will be faster if it only has to
-> filter against a single set instead of 2 of them, and that matters more
-> than the memory.)
+>      And would you mind pointing the commit/kernel version considered
+> recent enough with re-open session?  We are on CentOS 7.3
+> (3.10.0-514.21.2.el7.x86_64) but seems not the behavior.
+>
 
-No, what I mean is:
-* we know that computing the overlap of interval sets can be expensive
-* so we want to only compute overlaps of small sets
-* this is especially true if we're doing it on all outstanding
-operations in librados, within a single thread
+check if your kernel includes backports up to commit 8242c9f3 (ceph:
+fix wrong check in ceph_renew_caps())
 
-So we definitely don't want to repeat comparisons if we don't have to.
-And I suspect there will be occasional periods of intense snapshot
-deletion from admins where they remove a number large enough to cause
-trouble, and we don't want that to result in noticeably slower IO
-submission on the client-side!
-
-So we should have a separate set of snaps which were just added to the
-removed_snaps during this epoch, that librados and the OSD map
-processing can use in their normal-course-of-business scanning.
--Greg
+>
+> Xiaoxi
+>
+> 2017-10-13 21:59 GMT+08:00 Yan, Zheng <ukernel@gmail.com>:
+>> On Fri, Oct 13, 2017 at 2:10 PM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
+>>>
+>>> resend with plain txt
+>>>
+>>> 2017-10-13 10:56 GMT+08:00 Xiaoxi Chen <superdebuger@gmail.com>:
+>>> > Hi,
+>>> >
+>>> >     We sometimes seen client (fs kernel) get evicted by MDS and try to
+>>> > reconnect,  even we set  mds_session_blacklist_on_evict = True, client still
+>>> > cannot reconnect due to below code:
+>>> >
+>>> >  if (!mds->is_reconnect() && mds->get_want_state() ==
+>>> > CEPH_MDS_STATE_RECONNECT) {
+>>> >     dout(10) << " we're almost in reconnect state (mdsmap delivery race?);
+>>> > waiting" << dendl;
+>>> >     mds->wait_for_reconnect(new C_MDS_RetryMessage(mds, m));
+>>> >     return;
+>>> >   }
+>>> >
+>>> >      Could someone share any insight on why MDS only accept reconnect in
+>>> > reconnect state? and how, if the client is get evicted , can automatically
+>>> > recovered? note that remount is usually impossible as umount will always
+>>> > hang(due to cannot talk to mds).
+>>> >
+>>
+>> If reconnect get denied, unflushed dirty metadata on client get lost.
+>>
+>> If mds_session_blacklist_on_evict is set to FALSE, recent version kernel client
+>> should re-open session automatically after reconnect get denied. For
+>> fuse client,
+>> client_reconnect_stale need to be set to true.
+>>
+>> FYI: 'umount -f' works for evicted client.
+>>
+>>
+>>
+>>>
+>>> >
+>>> >
+>>> > Xiaoxi
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
