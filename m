@@ -1,86 +1,93 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: removed_snaps
-Date: Sat, 14 Oct 2017 15:56:54 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1710141549170.26702@piezo.us.to>
-References: <alpine.DEB.2.11.1710111556410.26702@piezo.us.to> <CAJ4mKGaw-6Yu5pK97r0GK5q2_Kt=O2d6SG9um+Xvr8JdAKX88A@mail.gmail.com> <alpine.DEB.2.11.1710111841060.26702@piezo.us.to> <CAJ4mKGZbPjKNchv+cqcx_uRhb3GtX5D7ZNj-0UHTapbaHascrQ@mail.gmail.com>
- <alpine.DEB.2.11.1710121354490.26702@piezo.us.to> <CAJ4mKGYxQO7QErAkwaaOjrV48M5k-0RVHscn2gjKYs0T3qMyLA@mail.gmail.com> <alpine.DEB.2.11.1710132052540.26702@piezo.us.to> <CAJ4mKGaauoPR9KnHBhp2C50qBypy4q=Sa7pA-WF-BXeNfBAOXQ@mail.gmail.com>
+From: "Gustavo A. R. Silva" <garsilva@embeddedor.com>
+Subject: [PATCH] net: ceph: mark expected switch fall-throughs
+Date: Sun, 15 Oct 2017 12:55:23 -0500
+Message-ID: <20171015175523.GA4705@embeddedor.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38414 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753759AbdJNP45 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Sat, 14 Oct 2017 11:56:57 -0400
-In-Reply-To: <CAJ4mKGaauoPR9KnHBhp2C50qBypy4q=Sa7pA-WF-BXeNfBAOXQ@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Mclean, Patrick" <Patrick.Mclean@sony.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>, "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>
+Cc: ceph-devel@vger.kernel.org, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, "Gustavo A. R. Silva" <garsilva@embeddedor.com>
+List-Id: ceph-devel.vger.kernel.org
 
-On Fri, 13 Oct 2017, Gregory Farnum wrote:
-> On Fri, Oct 13, 2017 at 2:32 PM, Sage Weil <sweil@redhat.com> wrote:
-> > On Fri, 13 Oct 2017, Gregory Farnum wrote:
-> >> Moving on to the stuff actually written down:
-> >> How comfortable are we with the size of the currently-deleting
-> >> snapshots maps, for computation purposes? I don't have a good way of
-> >> quantifying that cost but I'm definitely tempted to split the sets
-> >> into
-> >> newly_deleted_snaps (for *this epoch*)
-> >> deleting_snaps (which are kept around until removed_snaps_lb_epoch)
-> >> newly_purged_snaps (also for this epoch, which I think is how you have
-> >> it written?)
-> >
-> > The code I have now has 2 sets: removed_snaps and purged_snaps.
-> > purged_snapd was already there before; removed_snaps is the superset that
-> > includes stuff not yet purged.  (I made it a superset thinking that
-> > the filter_snapc() thing on every op will be faster if it only has to
-> > filter against a single set instead of 2 of them, and that matters more
-> > than the memory.)
-> 
-> No, what I mean is:
-> * we know that computing the overlap of interval sets can be expensive
-> * so we want to only compute overlaps of small sets
-> * this is especially true if we're doing it on all outstanding
-> operations in librados, within a single thread
-> 
-> So we definitely don't want to repeat comparisons if we don't have to.
-> And I suspect there will be occasional periods of intense snapshot
-> deletion from admins where they remove a number large enough to cause
-> trouble, and we don't want that to result in noticeably slower IO
-> submission on the client-side!
-> 
-> So we should have a separate set of snaps which were just added to the
-> removed_snaps during this epoch, that librados and the OSD map
-> processing can use in their normal-course-of-business scanning.
+In preparation to enabling -Wimplicit-fallthrough, mark switch cases
+where we are expecting to fall through.
 
-I definitely get that we want to avoid any set intersections (and I think 
-the current code actually has only 1 of them, during peering activate).  
-But I'm not quite following which lookup you're thinking of.  FTR 
-filter_snapc iterates over the vector<snapid_t> in SnapContext and does an 
-interval_set lookup on each one to make sure it isn't deleted.
+Signed-off-by: Gustavo A. R. Silva <garsilva@embeddedor.com>
+---
+ net/ceph/ceph_hash.c  | 12 +++++++++++-
+ net/ceph/messenger.c  |  1 +
+ net/ceph/mon_client.c |  1 +
+ 3 files changed, 13 insertions(+), 1 deletion(-)
 
-I think there are basically two cases:
-
-1- The request comes in with the same epoch as our epoch, and the mimic 
-feature, so we could skip the filter_snapc entirely (client will have done 
-it).  Yay!  Hopefully this will be true for most requests in steady state.
-
-2- The request comes in with an older osdmap epoch, so we have to 
-filter_snapc against the recent_removed_snaps interval_set<>.  This is 
-what we do today, except instead of recent_removed_snaps we have 
-removed_snaps_over_all_time, so we are going from a huge set to a 
-relatively small one.
-
-We could do something like
-
-3- Maintain a small interval_set with a smaller range of epochs (e.g., 
-only the last 20 epochs instead of the last 500) and filter against that 
-if the request's epoch is recent enough.
-
-or,
-
-4- Remember the new_removed_snaps for the last N epochs and filter against 
-them individually.  This turns into m log(n) lookups instead of one 
-log(n*500) lookup (where m << 500)... probably a small win?
-
-sage
+diff --git a/net/ceph/ceph_hash.c b/net/ceph/ceph_hash.c
+index 67bb1f1..9a5850f2 100644
+--- a/net/ceph/ceph_hash.c
++++ b/net/ceph/ceph_hash.c
+@@ -47,28 +47,38 @@ unsigned int ceph_str_hash_rjenkins(const char *str, unsigned int length)
+ 
+ 	/* handle the last 11 bytes */
+ 	c = c + length;
+-	switch (len) {            /* all the case statements fall through */
++	switch (len) {
+ 	case 11:
+ 		c = c + ((__u32)k[10] << 24);
++		/* fall through */
+ 	case 10:
+ 		c = c + ((__u32)k[9] << 16);
++		/* fall through */
+ 	case 9:
+ 		c = c + ((__u32)k[8] << 8);
+ 		/* the first byte of c is reserved for the length */
++		/* fall through */
+ 	case 8:
+ 		b = b + ((__u32)k[7] << 24);
++		/* fall through */
+ 	case 7:
+ 		b = b + ((__u32)k[6] << 16);
++		/* fall through */
+ 	case 6:
+ 		b = b + ((__u32)k[5] << 8);
++		/* fall through */
+ 	case 5:
+ 		b = b + k[4];
++		/* fall through */
+ 	case 4:
+ 		a = a + ((__u32)k[3] << 24);
++		/* fall through */
+ 	case 3:
+ 		a = a + ((__u32)k[2] << 16);
++		/* fall through */
+ 	case 2:
+ 		a = a + ((__u32)k[1] << 8);
++		/* fall through */
+ 	case 1:
+ 		a = a + k[0];
+ 		/* case 0: nothing left to add */
+diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+index a67298c..73dac9d 100644
+--- a/net/ceph/messenger.c
++++ b/net/ceph/messenger.c
+@@ -429,6 +429,7 @@ static void ceph_sock_state_change(struct sock *sk)
+ 	switch (sk->sk_state) {
+ 	case TCP_CLOSE:
+ 		dout("%s TCP_CLOSE\n", __func__);
++		/* fall through */
+ 	case TCP_CLOSE_WAIT:
+ 		dout("%s TCP_CLOSE_WAIT\n", __func__);
+ 		con_sock_state_closing(con);
+diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+index 63edc6e..b97c047 100644
+--- a/net/ceph/mon_client.c
++++ b/net/ceph/mon_client.c
+@@ -1281,6 +1281,7 @@ static struct ceph_msg *mon_alloc_msg(struct ceph_connection *con,
+ 		 * request had a non-zero tid.  Workaround this weirdness
+ 		 * by falling through to the allocate case.
+ 		 */
++		/* fall through */
+ 	case CEPH_MSG_MON_MAP:
+ 	case CEPH_MSG_MDS_MAP:
+ 	case CEPH_MSG_OSD_MAP:
+-- 
+2.7.4
