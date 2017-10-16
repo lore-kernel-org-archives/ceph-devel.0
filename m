@@ -1,86 +1,99 @@
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] ceph: Delete unused variable in mds_client
-Date: Mon, 16 Oct 2017 11:12:53 +0200
-Message-ID: <CAOi1vP-MTz5sfpYGW_PipSOqKafQoPecSQY4Zq7OAHeUd-o9qw@mail.gmail.com>
-References: <1507975272-8264-1-git-send-email-chris.gekas@gmail.com>
+Subject: Re: [PATCH] net: ceph: mark expected switch fall-throughs
+Date: Mon, 16 Oct 2017 11:25:03 +0200
+Message-ID: <CAOi1vP9DEiYWFw_uTrj51VfwWtXJ3Kqnsc61zVCEJaJAEFk_7Q@mail.gmail.com>
+References: <20171015175523.GA4705@embeddedor.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1507975272-8264-1-git-send-email-chris.gekas@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Christos Gkekas <chris.gekas@gmail.com>
-Cc: Gregory Farnum <gfarnum@redhat.com>, Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <20171015175523.GA4705@embeddedor.com>
+Sender: netdev-owner@vger.kernel.org
+To: "Gustavo A. R. Silva" <garsilva@embeddedor.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Sage Weil <sage@redhat.com>, "David S. Miller" <davem@davemloft.net>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: ceph-devel.vger.kernel.org
 
-On Sat, Oct 14, 2017 at 12:01 PM, Christos Gkekas <chris.gekas@gmail.com> wrote:
-> Variable 'err' is set but never used, so should be removed.
+On Sun, Oct 15, 2017 at 7:55 PM, Gustavo A. R. Silva
+<garsilva@embeddedor.com> wrote:
+> In preparation to enabling -Wimplicit-fallthrough, mark switch cases
+> where we are expecting to fall through.
 >
-> Signed-off-by: Christos Gkekas <chris.gekas@gmail.com>
+> Signed-off-by: Gustavo A. R. Silva <garsilva@embeddedor.com>
 > ---
->  fs/ceph/mds_client.c | 2 --
->  1 file changed, 2 deletions(-)
+>  net/ceph/ceph_hash.c  | 12 +++++++++++-
+>  net/ceph/messenger.c  |  1 +
+>  net/ceph/mon_client.c |  1 +
+>  3 files changed, 13 insertions(+), 1 deletion(-)
 >
-> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-> index f23c820..7cd4fd9 100644
-> --- a/fs/ceph/mds_client.c
-> +++ b/fs/ceph/mds_client.c
-> @@ -3801,7 +3801,6 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
->         u32 num_fs;
->         u32 mount_fscid = (u32)-1;
->         u8 struct_v, struct_cv;
-> -       int err = -EINVAL;
+> diff --git a/net/ceph/ceph_hash.c b/net/ceph/ceph_hash.c
+> index 67bb1f1..9a5850f2 100644
+> --- a/net/ceph/ceph_hash.c
+> +++ b/net/ceph/ceph_hash.c
+> @@ -47,28 +47,38 @@ unsigned int ceph_str_hash_rjenkins(const char *str, unsigned int length)
 >
->         ceph_decode_need(&p, end, sizeof(u32), bad);
->         epoch = ceph_decode_32(&p);
-> @@ -3852,7 +3851,6 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
->                                    0, true);
->                 ceph_monc_renew_subs(&fsc->client->monc);
->         } else {
-> -               err = -ENOENT;
->                 goto err_out;
->         }
->         return;
+>         /* handle the last 11 bytes */
+>         c = c + length;
+> -       switch (len) {            /* all the case statements fall through */
+> +       switch (len) {
+>         case 11:
+>                 c = c + ((__u32)k[10] << 24);
+> +               /* fall through */
+>         case 10:
+>                 c = c + ((__u32)k[9] << 16);
+> +               /* fall through */
+>         case 9:
+>                 c = c + ((__u32)k[8] << 8);
+>                 /* the first byte of c is reserved for the length */
+> +               /* fall through */
+>         case 8:
+>                 b = b + ((__u32)k[7] << 24);
+> +               /* fall through */
+>         case 7:
+>                 b = b + ((__u32)k[6] << 16);
+> +               /* fall through */
+>         case 6:
+>                 b = b + ((__u32)k[5] << 8);
+> +               /* fall through */
+>         case 5:
+>                 b = b + k[4];
+> +               /* fall through */
+>         case 4:
+>                 a = a + ((__u32)k[3] << 24);
+> +               /* fall through */
+>         case 3:
+>                 a = a + ((__u32)k[2] << 16);
+> +               /* fall through */
+>         case 2:
+>                 a = a + ((__u32)k[1] << 8);
+> +               /* fall through */
+>         case 1:
+>                 a = a + k[0];
+>                 /* case 0: nothing left to add */
+> diff --git a/net/ceph/messenger.c b/net/ceph/messenger.c
+> index a67298c..73dac9d 100644
+> --- a/net/ceph/messenger.c
+> +++ b/net/ceph/messenger.c
+> @@ -429,6 +429,7 @@ static void ceph_sock_state_change(struct sock *sk)
+>         switch (sk->sk_state) {
+>         case TCP_CLOSE:
+>                 dout("%s TCP_CLOSE\n", __func__);
+> +               /* fall through */
+>         case TCP_CLOSE_WAIT:
+>                 dout("%s TCP_CLOSE_WAIT\n", __func__);
+>                 con_sock_state_closing(con);
+> diff --git a/net/ceph/mon_client.c b/net/ceph/mon_client.c
+> index 63edc6e..b97c047 100644
+> --- a/net/ceph/mon_client.c
+> +++ b/net/ceph/mon_client.c
+> @@ -1281,6 +1281,7 @@ static struct ceph_msg *mon_alloc_msg(struct ceph_connection *con,
+>                  * request had a non-zero tid.  Workaround this weirdness
+>                  * by falling through to the allocate case.
+>                  */
+> +               /* fall through */
+>         case CEPH_MSG_MON_MAP:
+>         case CEPH_MSG_MDS_MAP:
+>         case CEPH_MSG_OSD_MAP:
 
-This doesn't seem right.  I think the original intent was to return
--EINVAL if decoding fails (like we do in many other places) and -ENOENT
-if there is no filesystem with that name.  This is user-visible: it's
-propagated all the way up and reported by mount(8).
-
-I'd rather we do something like this:
-
-commit 2b330133e10e7f53f0b169335c3b6000782e9123
-Author: Ilya Dryomov <idryomov@gmail.com>
-Date:   Mon Oct 16 10:32:50 2017 +0200
-
-    ceph: -EINVAL on decoding failure in ceph_mdsc_handle_fsmap()
-
-    Don't set ->mdsmap_err to -ENOENT unconditionally, and drop unneeded
-    return statement while at it.
-
-    Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-
-diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
-index 51f8af685a1f..aaa8879c8098 100644
---- a/fs/ceph/mds_client.c
-+++ b/fs/ceph/mds_client.c
-@@ -3878,14 +3878,14 @@ void ceph_mdsc_handle_fsmap(struct
-ceph_mds_client *mdsc, struct ceph_msg *msg)
-                goto err_out;
-        }
-        return;
-+
- bad:
-        pr_err("error decoding fsmap\n");
- err_out:
-        mutex_lock(&mdsc->mutex);
--       mdsc->mdsmap_err = -ENOENT;
-+       mdsc->mdsmap_err = err;
-        __wake_requests(mdsc, &mdsc->waiting_for_map);
-        mutex_unlock(&mdsc->mutex);
--       return;
- }
-
- /*
+Applied.
 
 Thanks,
 
