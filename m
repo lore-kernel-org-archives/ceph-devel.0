@@ -1,92 +1,118 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: removed_snaps
-Date: Mon, 16 Oct 2017 18:38:36 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1710161837010.26702@piezo.us.to>
-References: <alpine.DEB.2.11.1710111556410.26702@piezo.us.to> <CAJ4mKGaw-6Yu5pK97r0GK5q2_Kt=O2d6SG9um+Xvr8JdAKX88A@mail.gmail.com> <alpine.DEB.2.11.1710111841060.26702@piezo.us.to> <CAJ4mKGZbPjKNchv+cqcx_uRhb3GtX5D7ZNj-0UHTapbaHascrQ@mail.gmail.com>
- <alpine.DEB.2.11.1710121354490.26702@piezo.us.to> <CAJ4mKGYxQO7QErAkwaaOjrV48M5k-0RVHscn2gjKYs0T3qMyLA@mail.gmail.com> <alpine.DEB.2.11.1710132052540.26702@piezo.us.to> <CAJ4mKGaauoPR9KnHBhp2C50qBypy4q=Sa7pA-WF-BXeNfBAOXQ@mail.gmail.com>
- <alpine.DEB.2.11.1710141549170.26702@piezo.us.to> <CAJ4mKGYg8=-VRs3ODuHUMJ=2esgu3LvYLdZbfoJA0svsHTUKiA@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: preparing a bluestore OSD fails with no (useful) output
+Date: Mon, 16 Oct 2017 14:53:55 -0400
+Message-ID: <CAC-Np1wAy2VY6VSZBFgW4GjXd8YPU+5-C=AqymSDfNtfa0Vwdw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54142 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932074AbdJPSii (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 16 Oct 2017 14:38:38 -0400
-In-Reply-To: <CAJ4mKGYg8=-VRs3ODuHUMJ=2esgu3LvYLdZbfoJA0svsHTUKiA@mail.gmail.com>
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:52452 "EHLO
+        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753370AbdJPSx5 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Oct 2017 14:53:57 -0400
+Received: by mail-wm0-f53.google.com with SMTP id k4so5956935wmc.1
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Oct 2017 11:53:56 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Mclean, Patrick" <Patrick.Mclean@sony.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, 16 Oct 2017, Gregory Farnum wrote:
-> On Sat, Oct 14, 2017 at 8:56 AM, Sage Weil <sweil@redhat.com> wrote:
-> > On Fri, 13 Oct 2017, Gregory Farnum wrote:
-> >> On Fri, Oct 13, 2017 at 2:32 PM, Sage Weil <sweil@redhat.com> wrote:
-> >> > On Fri, 13 Oct 2017, Gregory Farnum wrote:
-> >> >> Moving on to the stuff actually written down:
-> >> >> How comfortable are we with the size of the currently-deleting
-> >> >> snapshots maps, for computation purposes? I don't have a good way of
-> >> >> quantifying that cost but I'm definitely tempted to split the sets
-> >> >> into
-> >> >> newly_deleted_snaps (for *this epoch*)
-> >> >> deleting_snaps (which are kept around until removed_snaps_lb_epoch)
-> >> >> newly_purged_snaps (also for this epoch, which I think is how you have
-> >> >> it written?)
-> >> >
-> >> > The code I have now has 2 sets: removed_snaps and purged_snaps.
-> >> > purged_snapd was already there before; removed_snaps is the superset that
-> >> > includes stuff not yet purged.  (I made it a superset thinking that
-> >> > the filter_snapc() thing on every op will be faster if it only has to
-> >> > filter against a single set instead of 2 of them, and that matters more
-> >> > than the memory.)
-> >>
-> >> No, what I mean is:
-> >> * we know that computing the overlap of interval sets can be expensive
-> >> * so we want to only compute overlaps of small sets
-> >> * this is especially true if we're doing it on all outstanding
-> >> operations in librados, within a single thread
-> >>
-> >> So we definitely don't want to repeat comparisons if we don't have to.
-> >> And I suspect there will be occasional periods of intense snapshot
-> >> deletion from admins where they remove a number large enough to cause
-> >> trouble, and we don't want that to result in noticeably slower IO
-> >> submission on the client-side!
-> >>
-> >> So we should have a separate set of snaps which were just added to the
-> >> removed_snaps during this epoch, that librados and the OSD map
-> >> processing can use in their normal-course-of-business scanning.
-> >
-> > I definitely get that we want to avoid any set intersections (and I think
-> > the current code actually has only 1 of them, during peering activate).
-> > But I'm not quite following which lookup you're thinking of.  FTR
-> > filter_snapc iterates over the vector<snapid_t> in SnapContext and does an
-> > interval_set lookup on each one to make sure it isn't deleted.
-> >
-> > I think there are basically two cases:
-> >
-> > 1- The request comes in with the same epoch as our epoch, and the mimic
-> > feature, so we could skip the filter_snapc entirely (client will have done
-> > it).  Yay!  Hopefully this will be true for most requests in steady state.
-> >
-> > 2- The request comes in with an older osdmap epoch, so we have to
-> > filter_snapc against the recent_removed_snaps interval_set<>.  This is
-> > what we do today, except instead of recent_removed_snaps we have
-> > removed_snaps_over_all_time, so we are going from a huge set to a
-> > relatively small one.
-> 
-> You're leaving out
-> 
-> 3) Every client runs a set intersection on its outstanding ops on
-> every map update (which we did not run before).
-> 
-> This is the one I'm thinking about when I say we should have a
-> this-epoch-only set of additions.
+I'm trying to manually get an OSD prepared, but can't seem to get the
+data directory fully populated with `--mkfs` and even though I've
+raised the log levels I can't see anything useful to point to what is
+the command missing.
 
-Oh, I see what you mean.
+The directory is created, chown'd to ceph:ceph, the block device is
+linked, and the data is mounted.
 
-Each OSDMap::Incremental has the new_removed_snaps, so it will be small 
-list to filter against (esp compared to the CRUSH calculation).  I'm also 
-going to switch it a flat_set<>, which gives log(n) lookup w/ 1 
-allocation.
+The /var/lib/ceph/osd/ceph-1 directory ends up with two files:
+activate.monmap (we fetch this from the monitor) and a 'block'
+symlink.
 
-sage
+We then run the following command:
+
+# sudo ceph-osd --cluster ceph --osd-objectstore bluestore --mkfs -i 1
+--monmap /var/lib/ceph/osd/ceph-1/activate.monmap --key
+AQDa6uRZBqjoIRAAJSNl6k9vGce2gGAYUF4nSg== --osd-data
+/var/lib/ceph/osd/ceph-1 --osd-uuid
+3b3090c7-8bc2-4d01-bfb7-9a364d4c469a --setuser ceph --setgroup ceph
+
+
+Which will not give any stdout/stderr output and will return with a
+non-zero exit code of 1
+
+
+Inspecting the /var/lib/ceph/osd/ceph-1 directory now shows a few more files:
+
+# ls -alh /var/lib/ceph/osd/ceph-1
+-rw-r--r--. 1 ceph ceph 183 Oct 16 17:22 activate.monmap
+lrwxrwxrwx. 1 ceph ceph  56 Oct 16 17:22 block ->
+/dev/ceph/osd-block-3b3090c7-8bc2-4d01-bfb7-9a364d4c469a
+-rw-r--r--. 1 ceph ceph   0 Oct 16 17:23 fsid
+-rw-r--r--. 1 ceph ceph  10 Oct 16 17:23 type
+
+In this case "fsid" is empty, and "type" has "bluestore".
+
+After raising log level output (debug_osd 20) shows the following:
+
+2017-10-16 18:03:54.679031 7f654a562d00  0 set uid:gid to 167:167 (ceph:ceph)
+2017-10-16 18:03:54.679053 7f654a562d00  0 ceph version 12.2.1
+(3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e) luminous (stable), process
+(unknown), pid 5674
+2017-10-16 18:03:54.679323 7f654a562d00  5 object store type is bluestore
+2017-10-16 18:03:54.702667 7f6543733700  2 Event(0x7f6555a0bc80
+nevent=5000 time_id=1).set_owner idx=0 owner=140072900048640
+2017-10-16 18:03:54.702681 7f6543733700 20 Event(0x7f6555a0bc80
+nevent=5000 time_id=1).create_file_event create event started fd=7
+mask=1 original mask is 0
+2017-10-16 18:03:54.702683 7f6543733700 20 EpollDriver.add_event add
+event fd=7 cur_mask=0 add_mask=1 to 6
+2017-10-16 18:03:54.702691 7f6543733700 20 Event(0x7f6555a0bc80
+nevent=5000 time_id=1).create_file_event create event end fd=7 mask=1
+original mask is 1
+2017-10-16 18:03:54.702692 7f6543733700 10 stack operator() starting
+2017-10-16 18:03:54.702972 7f6542f32700  2 Event(0x7f6555a0b680
+nevent=5000 time_id=1).set_owner idx=1 owner=140072891655936
+2017-10-16 18:03:54.703095 7f6542f32700 20 Event(0x7f6555a0b680
+nevent=5000 time_id=1).create_file_event create event started fd=10
+mask=1 original mask is 0
+2017-10-16 18:03:54.703169 7f6542f32700 20 EpollDriver.add_event add
+event fd=10 cur_mask=0 add_mask=1 to 9
+2017-10-16 18:03:54.703178 7f6542f32700 20 Event(0x7f6555a0b680
+nevent=5000 time_id=1).create_file_event create event end fd=10 mask=1
+original mask is 1
+2017-10-16 18:03:54.703181 7f6542f32700 10 stack operator() starting
+2017-10-16 18:03:54.703474 7f6542731700  2 Event(0x7f6555a0a480
+nevent=5000 time_id=1).set_owner idx=2 owner=140072883263232
+2017-10-16 18:03:54.703520 7f6542731700 20 Event(0x7f6555a0a480
+nevent=5000 time_id=1).create_file_event create event started fd=13
+mask=1 original mask is 0
+2017-10-16 18:03:54.703524 7f6542731700 20 EpollDriver.add_event add
+event fd=13 cur_mask=0 add_mask=1 to 12
+2017-10-16 18:03:54.703527 7f6542731700 20 Event(0x7f6555a0a480
+nevent=5000 time_id=1).create_file_event create event end fd=13 mask=1
+original mask is 1
+2017-10-16 18:03:54.703529 7f6542731700 10 stack operator() starting
+2017-10-16 18:03:54.703571 7f654a562d00 10 -- - ready -
+2017-10-16 18:03:54.703575 7f654a562d00  1  Processor -- start
+2017-10-16 18:03:54.703625 7f654a562d00  1 -- - start start
+2017-10-16 18:03:54.703649 7f654a562d00 10 -- - shutdown -
+2017-10-16 18:03:54.703650 7f654a562d00 10  Processor -- stop
+2017-10-16 18:03:54.703652 7f654a562d00  1 -- - shutdown_connections
+2017-10-16 18:03:54.703655 7f654a562d00 20 Event(0x7f6555a0bc80
+nevent=5000 time_id=1).wakeup
+2017-10-16 18:03:54.703668 7f654a562d00 20 Event(0x7f6555a0b680
+nevent=5000 time_id=1).wakeup
+2017-10-16 18:03:54.703673 7f654a562d00 20 Event(0x7f6555a0a480
+nevent=5000 time_id=1).wakeup
+2017-10-16 18:03:54.703896 7f654a562d00 10 -- - wait: waiting for dispatch queue
+2017-10-16 18:03:54.704285 7f654a562d00 10 -- - wait: dispatch queue is stopped
+2017-10-16 18:03:54.704290 7f654a562d00  1 -- - shutdown_connections
+2017-10-16 18:03:54.704293 7f654a562d00 20 Event(0x7f6555a0bc80
+nevent=5000 time_id=1).wakeup
+2017-10-16 18:03:54.704300 7f654a562d00 20 Event(0x7f6555a0b680
+nevent=5000 time_id=1).wakeup
+2017-10-16 18:03:54.704303 7f654a562d00 20 Event(0x7f6555a0a480
+nevent=5000 time_id=1).wakeup
+
+
+I can't tell what am I missing or if there is any need to pre-populate
+the path with something else.
