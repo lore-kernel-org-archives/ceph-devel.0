@@ -1,113 +1,126 @@
-From: =?utf-8?B?6Zm25Yas5Yas?= <tdd21151186@gmail.com>
-Subject: osd assertion failure during scrub
-Date: Mon, 16 Oct 2017 20:58:27 +0800
-Message-ID: <2C34118C-8D26-43B0-88A4-207CC7361440@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.2 \(3259\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+From: Sage Weil <sweil@redhat.com>
+Subject: Re: Work update related to rocksdb
+Date: Mon, 16 Oct 2017 13:28:11 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1710161314220.26702@piezo.us.to>
+References: <AEE495BD65FC0144A24ECB647C8270EF384559B2@shsmsx102.ccr.corp.intel.com> <alpine.DEB.2.11.1708240228380.3491@piezo.novalocal> <AEE495BD65FC0144A24ECB647C8270EF384559F1@shsmsx102.ccr.corp.intel.com> <fd7b00ef-66e4-cfae-fc76-6300b86a3b86@redhat.com>
+ <AEE495BD65FC0144A24ECB647C8270EF38455A21@shsmsx102.ccr.corp.intel.com> <3ae1878e-9b70-669a-6596-e8480ae14537@redhat.com> <AEE495BD65FC0144A24ECB647C8270EF3846073B@shsmsx102.ccr.corp.intel.com> <AEE495BD65FC0144A24ECB647C8270EF38475E4A@shsmsx102.ccr.corp.intel.com>
+ <416b7e16-6422-f572-7a2b-b7db7eabcb20@redhat.com> <AEE495BD65FC0144A24ECB647C8270EF384825EC@shsmsx102.ccr.corp.intel.com> <cfebf4b4-67ec-8826-997e-6b6b1faa605d@redhat.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f43.google.com ([74.125.83.43]:47001 "EHLO
-        mail-pg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751982AbdJPM6d (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Oct 2017 08:58:33 -0400
-Received: by mail-pg0-f43.google.com with SMTP id k7so6744627pga.3
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Oct 2017 05:58:33 -0700 (PDT)
-Received: from [127.0.0.1] ([104.207.157.57])
-        by smtp.gmail.com with ESMTPSA id z6sm14942388pfe.114.2017.10.16.05.58.30
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 16 Oct 2017 05:58:32 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:52670 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752379AbdJPN2P (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 16 Oct 2017 09:28:15 -0400
+In-Reply-To: <cfebf4b4-67ec-8826-997e-6b6b1faa605d@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Mark Nelson <mnelson@redhat.com>
+Cc: "Li, Xiaoyan" <xiaoyan.li@intel.com>, "Gohad, Tushar" <tushar.gohad@intel.com>, ceph-devel@vger.kernel.org
 
-Dear Cephers,
+[adding ceph-devel]
 
-ceph version: 10.2.5
+On Mon, 16 Oct 2017, Mark Nelson wrote:
+> Hi Lisa,
+> 
+> Excellent testing!   This is exactly what we were trying to understand.
+> 
+> On 10/16/2017 12:55 AM, Li, Xiaoyan wrote:
+> > Hi Mark,
+> > 
+> > Based on my testing, when setting min_write_buffer_number_to_merge as 2, the
+> > onodes and deferred data written into L0 SST can decreased a lot with my
+> > rocksdb dedup package.
+> > 
+> > But for omap data, it needs to span more memtables. I tested omap data in
+> > separate column family. From the data, you can see when
+> > min_write_buffer_number_to_merge is set to 4, the data written into L0 SST
+> > is good. That means it has to compare current memTable to flush with later 3
+> > memtables recursively.
+> > kFlushStyleDedup is to new flush style in my rocksdb dedup package.
+> > kFlushStyleMerge is current flush style in master branch.
+> > 
+> > But this is just considered from data written into L0. With more memtables
+> > to compare, it sacrifices CPU and computing time.
+> > 
+> > Memtable size: 256MB
+> > max_write_buffer_number	min_write_buffer_number_to_merge
+> > flush_style	Omap data written into L0 SST(unit: MB)
+> > 16	8	kFlushStyleMerge	7665
+> > 16	8	kFlushStyleDedup	3770
+> > 8	4	kFlushStyleMerge	11470
+> > 8	4	kFlushStyleDedup	3922
+> > 6	3	kFlushStyleMerge	14059
+> > 6	3	kFlushStyleDedup	5001
+> > 4	2	kFlushStyleMerge	18683
+> > 4	2	kFlushStyleDedup	15394
+> 
+> Is this only omap data or all data?  It looks like the 6/3 or 8/4 is still
+> probably the optimal point (And the improvements are quite noticeable!).
+> Sadly we were hoping we might be able to get away with smaller memtables (say
+> 64MB) with KFlushStyleDedup.  It looks like that might not be the case unless
+> we increase the number very high.
+> 
+> Sage, this is going to be even worse if we try to keep more pglog entries
+> around on flash OSD backends?
 
-log below here:
-0> 2017-10-16 03:30:18.346892 7fa278797700 -1 os/filestore/LFNIndex.cc: =
-In function 'int LFNIndex::list_objects(const =
-std::vector<std::basic_string<char> >&, int, long int*, =
-std::map<std::basic_string<char>, ghobject_t>*)' thread 7fa278797700 =
-time 2017-10-16 03:30:18.342894
-os/filestore/LFNIndex.cc: 443: FAILED assert(long_name =3D=3D =
-short_name)
+I think there are three or more factors at play here:
 
- ceph version 10.2.5 (c461ee19ecbc0c5c330aca20f7392c9a00730367)
- 1: (ceph::__ceph_assert_fail(char const*, char const*, int, char =
-const*)+0x85) [0x55ca3e69a425]
- 2: (LFNIndex::list_objects(std::vector<std::string, =
-std::allocator<std::string> > const&, int, long*, std::map<std::string, =
-ghobject_t, std::less<std::string>, std::allocator<std::pair<std::string =
-const, ghobject_t> > >*)+0x282) [0x55ca3e399642]
- 3: =
-(HashIndex::get_path_contents_by_hash_bitwise(std::vector<std::string, =
-std::allocator<std::string> > const&, ghobject_t const*, =
-std::set<std::string, HashIndex::CmpHexdigitStringBitwise, =
-std::allocator<std::string> >*, std::set<std::pair<std::string, =
-ghobject_t>, HashIndex::CmpPairBitwise, =
-std::allocator<std::pair<std::string, ghobject_t> > >*)+0x92) =
-[0x55ca3e44c3c2]
- 4: (HashIndex::list_by_hash_bitwise(std::vector<std::string, =
-std::allocator<std::string> > const&, ghobject_t const&, int, =
-ghobject_t*, std::vector<ghobject_t, std::allocator<ghobject_t> =
->*)+0x157) [0x55ca3e44ccd7]
- 5: (HashIndex::list_by_hash_bitwise(std::vector<std::string, =
-std::allocator<std::string> > const&, ghobject_t const&, int, =
-ghobject_t*, std::vector<ghobject_t, std::allocator<ghobject_t> =
->*)+0x43b) [0x55ca3e44cfbb]
- 6: (HashIndex::list_by_hash_bitwise(std::vector<std::string, =
-std::allocator<std::string> > const&, ghobject_t const&, int, =
-ghobject_t*, std::vector<ghobject_t, std::allocator<ghobject_t> =
->*)+0x43b) [0x55ca3e44cfbb]
- 7: (HashIndex::list_by_hash_bitwise(std::vector<std::string, =
-std::allocator<std::string> > const&, ghobject_t const&, int, =
-ghobject_t*, std::vector<ghobject_t, std::allocator<ghobject_t> =
->*)+0x43b) [0x55ca3e44cfbb]
- 8: (HashIndex::_collection_list_partial(ghobject_t const&, ghobject_t =
-const&, bool, int, std::vector<ghobject_t, std::allocator<ghobject_t> =
->*, ghobject_t*)+0x1c2) [0x55ca3e44ea72]
- 9: (FileStore::collection_list(coll_t const&, ghobject_t, ghobject_t, =
-bool, int, std::vector<ghobject_t, std::allocator<ghobject_t> >*, =
-ghobject_t*)+0x38e) [0x55ca3e3430fe]
- 10: =
-(ObjectStore::collection_list(boost::intrusive_ptr<ObjectStore::Collection=
-Impl>&, ghobject_t, ghobject_t, bool, int, std::vector<ghobject_t, =
-std::allocator<ghobject_t> >*, ghobject_t*)+0x1a8) [0x55ca3e2cc4b8]
- 11: (PGBackend::objects_list_partial(hobject_t const&, int, int, =
-std::vector<hobject_t, std::allocator<hobject_t> >*, hobject_t*)+0x4d4) =
-[0x55ca3e1d89a4]
- 12: (PG::chunky_scrub(ThreadPool::TPHandle&)+0x9af) [0x55ca3e0dfddf]
- 13: (PG::scrub(unsigned int, ThreadPool::TPHandle&)+0x230) =
-[0x55ca3e0e0fb0]
- 14: (OSD::ShardedOpWQ::_process(unsigned int, =
-ceph::heartbeat_handle_d*)+0x80e) [0x55ca3e012b3e]
- 15: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x887) =
-[0x55ca3e68a3c7]
- 16: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) =
-[0x55ca3e68c330]
+1- If we reduce the memtable size, the CPU cost of insertion (baseline) 
+and the dedup cost will go down.
 
-Paste the failure code here:
------------------------------------------
-if (lfn_is_objecthort_name)) {
-      r =3D lfn_translate(to_list, short_name, &obj);
-      if (r =3D=3D -EINVAL) {
-        continue;
-      } else if (r < 0) {
-        goto cleanup;
-      } else {
-        string long_name =3D lfn_generate_object_name(obj);=20
-        if (!lfn_must_hash(long_name)) {
-          assert(long_name =3D=3D short_name);     =E2=80=94 assert =
-failure here.
-        }
---------------------------------------
-is there any way could let me know which object is causing this failure? =
-=20
-and what would cause such kind failure?=20
+2- If we switch to a small min pg log entries, then most pg log keys 
+*will* fall into the smaller window (of small memtables * small 
+min_write_buffer_to_merge).  The dup op keys probably won't, though... 
+except maybe they will because the values are small and more of them will 
+fit into the memtables.  But then
 
-Regards,
-Dongdong
+3- If we have more keys and smaller values, then the CPU overhead will be 
+higher again.
+
+For PG logs, I didn't really expect that the dedup style would help; I was 
+only thinking about the deferred keys.  I wonder if it would make sense to 
+specify a handful of key prefixes to attempt dedup on, and not bother on 
+the others?
+
+Also, there is the question of where the CPU time is spent.
+
+1- Big memtables means we spend more time in submit_transaction, called by 
+the kv_sync_thread, which is a bottleneck.
+
+2- Higher dedup style flush CPU usage is spent in the compaction thread(s) 
+(I think?), which are asynchronous.
+
+At the end of the day I think we need to use less CPU total, so the 
+optimization of the above factors is a bit complicated.  OTOH if the goal 
+is IOPS at whatever cost it'll probably mean a slightly different choice.
+
+I would *expect* that if we go from, say, 256mb tables to 64mb tables and 
+dedup of <= 4 of them, then we'll see a modest net reduction of total CPU 
+*and* a shift to the compaction threads.
+
+And changing the pg log min entries will counterintuitively increase the 
+costs of insertion and dedup flush because more keys will fit in the same 
+amount of memtable... but if we reduce the memtable size at the same time 
+we might get a win there too?  Maybe?
+
+Lisa, do you think limiting the dedup check during flush to specific 
+prefixes would make sense as a general capability?  If so, we could target 
+this *just* at the high-value keys (e.g., deferred writes) and avoid 
+incurring very much additional overhead for the key ranges that aren't 
+sure bets.
+
+sage
 
 
+> > The above KV operation sequences come from 4k random writes in 30mins.
+> > Overall, the Rocksdb dedup package can decrease the data written into L0
+> > SST, but it needs more comparison. In my opinion, whether to use dedup, it
+> > depends on the configuration of the OSD host: whether disk is over busy or
+> > CPU is over busy.
+> 
+> Do you have any insight into how much CPU overhead it adds?
+> 
+> > 
+> > Best wishes
+> > Lisa
