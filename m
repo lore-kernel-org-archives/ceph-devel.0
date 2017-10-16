@@ -1,103 +1,95 @@
-From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: removed_snaps
-Date: Mon, 16 Oct 2017 08:27:41 -0700
-Message-ID: <CAJ4mKGYg8=-VRs3ODuHUMJ=2esgu3LvYLdZbfoJA0svsHTUKiA@mail.gmail.com>
-References: <alpine.DEB.2.11.1710111556410.26702@piezo.us.to>
- <CAJ4mKGaw-6Yu5pK97r0GK5q2_Kt=O2d6SG9um+Xvr8JdAKX88A@mail.gmail.com>
- <alpine.DEB.2.11.1710111841060.26702@piezo.us.to> <CAJ4mKGZbPjKNchv+cqcx_uRhb3GtX5D7ZNj-0UHTapbaHascrQ@mail.gmail.com>
- <alpine.DEB.2.11.1710121354490.26702@piezo.us.to> <CAJ4mKGYxQO7QErAkwaaOjrV48M5k-0RVHscn2gjKYs0T3qMyLA@mail.gmail.com>
- <alpine.DEB.2.11.1710132052540.26702@piezo.us.to> <CAJ4mKGaauoPR9KnHBhp2C50qBypy4q=Sa7pA-WF-BXeNfBAOXQ@mail.gmail.com>
- <alpine.DEB.2.11.1710141549170.26702@piezo.us.to>
+From: Christos Gkekas <chris.gekas@gmail.com>
+Subject: Re: [PATCH] ceph: Delete unused variable in mds_client
+Date: Mon, 16 Oct 2017 18:44:08 +0100
+Message-ID: <20171016174408.GA2656@inspiron>
+References: <1507975272-8264-1-git-send-email-chris.gekas@gmail.com>
+ <CAOi1vP-MTz5sfpYGW_PipSOqKafQoPecSQY4Zq7OAHeUd-o9qw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f54.google.com ([209.85.214.54]:57293 "EHLO
-        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753622AbdJPP1n (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Oct 2017 11:27:43 -0400
-Received: by mail-it0-f54.google.com with SMTP id r127so1583685itb.5
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Oct 2017 08:27:43 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1710141549170.26702@piezo.us.to>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, "Mclean, Patrick" <Patrick.Mclean@sony.com>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAOi1vP-MTz5sfpYGW_PipSOqKafQoPecSQY4Zq7OAHeUd-o9qw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Sat, Oct 14, 2017 at 8:56 AM, Sage Weil <sweil@redhat.com> wrote:
-> On Fri, 13 Oct 2017, Gregory Farnum wrote:
->> On Fri, Oct 13, 2017 at 2:32 PM, Sage Weil <sweil@redhat.com> wrote:
->> > On Fri, 13 Oct 2017, Gregory Farnum wrote:
->> >> Moving on to the stuff actually written down:
->> >> How comfortable are we with the size of the currently-deleting
->> >> snapshots maps, for computation purposes? I don't have a good way of
->> >> quantifying that cost but I'm definitely tempted to split the sets
->> >> into
->> >> newly_deleted_snaps (for *this epoch*)
->> >> deleting_snaps (which are kept around until removed_snaps_lb_epoch)
->> >> newly_purged_snaps (also for this epoch, which I think is how you have
->> >> it written?)
->> >
->> > The code I have now has 2 sets: removed_snaps and purged_snaps.
->> > purged_snapd was already there before; removed_snaps is the superset that
->> > includes stuff not yet purged.  (I made it a superset thinking that
->> > the filter_snapc() thing on every op will be faster if it only has to
->> > filter against a single set instead of 2 of them, and that matters more
->> > than the memory.)
->>
->> No, what I mean is:
->> * we know that computing the overlap of interval sets can be expensive
->> * so we want to only compute overlaps of small sets
->> * this is especially true if we're doing it on all outstanding
->> operations in librados, within a single thread
->>
->> So we definitely don't want to repeat comparisons if we don't have to.
->> And I suspect there will be occasional periods of intense snapshot
->> deletion from admins where they remove a number large enough to cause
->> trouble, and we don't want that to result in noticeably slower IO
->> submission on the client-side!
->>
->> So we should have a separate set of snaps which were just added to the
->> removed_snaps during this epoch, that librados and the OSD map
->> processing can use in their normal-course-of-business scanning.
->
-> I definitely get that we want to avoid any set intersections (and I think
-> the current code actually has only 1 of them, during peering activate).
-> But I'm not quite following which lookup you're thinking of.  FTR
-> filter_snapc iterates over the vector<snapid_t> in SnapContext and does an
-> interval_set lookup on each one to make sure it isn't deleted.
->
-> I think there are basically two cases:
->
-> 1- The request comes in with the same epoch as our epoch, and the mimic
-> feature, so we could skip the filter_snapc entirely (client will have done
-> it).  Yay!  Hopefully this will be true for most requests in steady state.
->
-> 2- The request comes in with an older osdmap epoch, so we have to
-> filter_snapc against the recent_removed_snaps interval_set<>.  This is
-> what we do today, except instead of recent_removed_snaps we have
-> removed_snaps_over_all_time, so we are going from a huge set to a
-> relatively small one.
+On 16/10/17 11:12:53 +0200, Ilya Dryomov wrote:
+> On Sat, Oct 14, 2017 at 12:01 PM, Christos Gkekas <chris.gekas@gmail.com> wrote:
+> > Variable 'err' is set but never used, so should be removed.
+> >
+> > Signed-off-by: Christos Gkekas <chris.gekas@gmail.com>
+> > ---
+> >  fs/ceph/mds_client.c | 2 --
+> >  1 file changed, 2 deletions(-)
+> >
+> > diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> > index f23c820..7cd4fd9 100644
+> > --- a/fs/ceph/mds_client.c
+> > +++ b/fs/ceph/mds_client.c
+> > @@ -3801,7 +3801,6 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
+> >         u32 num_fs;
+> >         u32 mount_fscid = (u32)-1;
+> >         u8 struct_v, struct_cv;
+> > -       int err = -EINVAL;
+> >
+> >         ceph_decode_need(&p, end, sizeof(u32), bad);
+> >         epoch = ceph_decode_32(&p);
+> > @@ -3852,7 +3851,6 @@ void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
+> >                                    0, true);
+> >                 ceph_monc_renew_subs(&fsc->client->monc);
+> >         } else {
+> > -               err = -ENOENT;
+> >                 goto err_out;
+> >         }
+> >         return;
+> 
+> This doesn't seem right.  I think the original intent was to return
+> -EINVAL if decoding fails (like we do in many other places) and -ENOENT
+> if there is no filesystem with that name.  This is user-visible: it's
+> propagated all the way up and reported by mount(8).
+> 
+> I'd rather we do something like this:
+> 
+> commit 2b330133e10e7f53f0b169335c3b6000782e9123
+> Author: Ilya Dryomov <idryomov@gmail.com>
+> Date:   Mon Oct 16 10:32:50 2017 +0200
+> 
+>     ceph: -EINVAL on decoding failure in ceph_mdsc_handle_fsmap()
+> 
+>     Don't set ->mdsmap_err to -ENOENT unconditionally, and drop unneeded
+>     return statement while at it.
+> 
+>     Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> 
+> diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+> index 51f8af685a1f..aaa8879c8098 100644
+> --- a/fs/ceph/mds_client.c
+> +++ b/fs/ceph/mds_client.c
+> @@ -3878,14 +3878,14 @@ void ceph_mdsc_handle_fsmap(struct
+> ceph_mds_client *mdsc, struct ceph_msg *msg)
+>                 goto err_out;
+>         }
+>         return;
+> +
+>  bad:
+>         pr_err("error decoding fsmap\n");
+>  err_out:
+>         mutex_lock(&mdsc->mutex);
+> -       mdsc->mdsmap_err = -ENOENT;
+> +       mdsc->mdsmap_err = err;
+>         __wake_requests(mdsc, &mdsc->waiting_for_map);
+>         mutex_unlock(&mdsc->mutex);
+> -       return;
+>  }
+> 
+>  /*
+> 
+> Thanks,
+> 
+>                 Ilya
 
-You're leaving out
+Thanks very much for your thoughts, this makes sense.
 
-3) Every client runs a set intersection on its outstanding ops on
-every map update (which we did not run before).
-
-This is the one I'm thinking about when I say we should have a
-this-epoch-only set of additions.
--Greg
-
->
-> We could do something like
->
-> 3- Maintain a small interval_set with a smaller range of epochs (e.g.,
-> only the last 20 epochs instead of the last 500) and filter against that
-> if the request's epoch is recent enough.
->
-> or,
->
-> 4- Remember the new_removed_snaps for the last N epochs and filter against
-> them individually.  This turns into m log(n) lookups instead of one
-> log(n*500) lookup (where m << 500)... probably a small win?
->
-> sage
+Regards,
+Christos
