@@ -1,18 +1,15 @@
-From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re:
-	=?utf-8?b?562U5aSNOiAgYXNzZXJ0KG9iaml0ZXItPnNlY29u?=
-	=?utf-8?q?d-=3Eversion_=3E_last=5Fdivergent=5Fupdate=29_when_testi?=
-	=?utf-8?q?ng_pull_out_disk_and_insert?=
-Date: Mon, 16 Oct 2017 15:35:40 -0700
-Message-ID: <CAJ4mKGasbYo07vUfsFpDKDUfGk2pwRULZUkUtnMr+bBLKM0rMA@mail.gmail.com>
-References: <1CB94550540AE44E9CAAE8CD5AF40BF894B8428B@H3CMLB12-EX.srv.huawei-3com.com>
- <CAJ4mKGYez6NWCZheRFsG+cu02dFzmW7awZYLUVd8Z2WKEkaeNQ@mail.gmail.com>
- <1CB94550540AE44E9CAAE8CD5AF40BF8AB728094@H3CMLB14-EX.srv.huawei-3com.com>
+From: Christian Balzer <chibi-FW+hd8ioUD0@public.gmane.org>
+Subject: Re: killing ceph-disk [was Re: ceph-volume: migration
+ and disk partition support]
+Date: Tue, 17 Oct 2017 08:25:32 +0900
+Message-ID: <20171017082532.1de8b6a3@batzmaru.gol.ad.jp>
+References: <alpine.DEB.2.11.1710091448500.26711@piezo.us.to>
+ <dae3fb33-f7ac-454b-9a3c-1c311ab8ce71@zimbra>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1CB94550540AE44E9CAAE8CD5AF40BF8AB728094-LYFlsCYEEzr3cnzPNjVLboSsE/coCuR8pWgKQ6/u3Fg@public.gmane.org>
+In-Reply-To: <dae3fb33-f7ac-454b-9a3c-1c311ab8ce71@zimbra>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -22,108 +19,46 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: zhaomingyue <zhao.mingyue-vVzyEvZLFYE@public.gmane.org>
-Cc: "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
+To: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-T24gU2F0LCBPY3QgMTQsIDIwMTcgYXQgNzoyNCBBTSwgemhhb21pbmd5dWUgPHpoYW8ubWluZ3l1
-ZUBoM2MuY29tPiB3cm90ZToKPiAx44CBdGhpcyBhc3NlcnQgaGFwcGVuZWQgYWNjaWRlbnRseSwg
-bm90IGVhc3kgdG8gcmVwcm9kdWNlOyBJbiBmYWN0LCBJIGFsc28gc3VwcG9zZSB0aGlzIGFzc2Vy
-dCBpcyBjYXVzZWQgYnkgZGV2aWNlIGRhdGEgbG9zdDsKPiBidXQgaWYgaGFzIGxvc3QsaG93IGl0
-IGNhbiBhY2N1ciB0aGF0IChsYXN0X3VwZGF0ZSArMSA9IGxvZy5yYmVnaW4udmVyc2lvbikgLCBp
-biBjYXNlIG9mIGxvc3RpbmcgZGF0YSwgaXQncyBtb3JlIGxpa2VseSB0byBiZSBjb25mdXNlZC4g
-QXQgcHJlc2VudCwgdGhpcyBzaXR1YXRpb24gY2FuJ3QgdGhpbmsgY2xlYXJseS4KPgo+IDLjgIFB
-Y2NvcmRpbmcgcmVhZF9sb2cgY29kZe+8jGFzc3VtZSBhIHNpdHVhdGlvbjoKPiBXaGVuIG9zZCBz
-dGFydCAsaWYgcGcgbG9nIGhhcyBiZWVuIGxvc3Qgc29tZSBjb250ZW50IGJlY2F1c2Ugb2YgcG93
-ZXIgb2ZmIG9yIHhmcyBlcnJvcix0aGVuIGxvZy5oZWFkIHdvdWxkIGJlIGJpZ2dlciB0aGFuIGxv
-Zy5yYmVnaW4udmVyc2lvbiBpbiBtZW1vcnk7Cj4gZHVyaW5nIHBlZXJpbmcgLCB1c2luZyBsYXN0
-X3VwZGF0ZSBhcyBvbmUgZGV0ZXJtaW5hbCBhcmcgdG8gZmluZF9iZXN0LCBzbyB0aGUgY29uc2lz
-dGVudCBvbmUob3NkIHdobyBoYXMgc2hvcnRlciBwZyBsb2csYnV0IGxhc3RfdXBkYXRlIGlzIG5v
-cm1hbCkgbWF5IGJlY29tZSB0aGUgYXV0aCBsb2csCj4gb3RoZXIgb3NkIHVzZSAndGhpcyBhdXRo
-IGxvZycgd291bGQgbGVhZCB0byBwZyBpbmNvbnNpc3RlbnQgaWYgc2NydWIgdGhpcyBwZyxpc27i
-gJl0IGl0PwoKSSdtIG5vdCBzdXJlIEkgdW5kZXJzdGFuZCB3aGF0IHlvdSdyZSBzYXlpbmcgaGVy
-ZS4KCkkgZG9uJ3QgdGhpbmsgT1NEcyB3aWxsIHdyaXRlIGRvd24gZGF0YSBmcm9tIHRoZWlyIHBl
-ZXJzIHVudGlsIHRoZXkKZ2V0IGZhciBlbm91Z2ggYWxvbmcgdG8gYWN0dWFsbHkgY29tbWl0IHRv
-IHNvbWVib2R5IGJlaW5nIHByaW1hcnksCnRob3VnaC4gU28gaWYgd2UgaGF2ZSBhbiBpbmNvbnNp
-c3RlbnQgZ3V5IHdpdGggbG9zdCBsb2csIGhlJ2xsIGhpdCBvbmUKb2YgdGhlc2UgYXNzZXJ0cyBh
-bmQgdGhlbiBvbmUgb2YgdGhlIHJlbWFpbmluZyAoY29uc2lzdGVudCkgT1NEcyB3aWxsCnN0YXJ0
-IG92ZXIgYWdhaW4gYW5kIGdldCBzZWxlY3RlZCBhcyB0aGUgd2lubmVyLgoKS2VlcCBpbiBtaW5k
-IHRoYXQgb25jZSB3ZSBrbm93IHRoZSBQRyBtZXRhZGF0YSBpcyBpbmNvbnNpc3RlbnQsIHdlCmRv
-bid0IHdhbnQgdG8ga2VlcCBvbiB1c2luZyB0aGF0IGRpc2sgZm9yIGRhdGEgYXMgd2Uga25vdyBp
-dCdzIG5vdAp0cnVzdGVkIQotR3JlZwoKPgo+Cj4KPiAtLS0tLemCruS7tuWOn+S7ti0tLS0tCj4g
-5Y+R5Lu25Lq6OiBHcmVnb3J5IEZhcm51bSBbbWFpbHRvOmdmYXJudW1AcmVkaGF0LmNvbV0KPiDl
-j5HpgIHml7bpl7Q6IDIwMTflubQxMOaciDE05pelIDA6MzQKPiDmlLbku7bkuro6IHpoYW9taW5n
-eXVlIDA5NDQwIChSRCkKPiDmioTpgIE6IGNlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnOyBjZXBo
-LXVzZXJzQGNlcGguY29tCj4g5Li76aKYOiBSZTogW2NlcGgtdXNlcnNdIGFzc2VydChvYmppdGVy
-LT5zZWNvbmQtPnZlcnNpb24gPiBsYXN0X2RpdmVyZ2VudF91cGRhdGUpIHdoZW4gdGVzdGluZyBw
-dWxsIG91dCBkaXNrIGFuZCBpbnNlcnQKPgo+IE9uIEZyaSwgT2N0IDEzLCAyMDE3IGF0IDEyOjQ4
-IEFNLCB6aGFvbWluZ3l1ZSA8emhhby5taW5neXVlQGgzYy5jb20+IHdyb3RlOgo+PiBIae+8mgo+
-PiAgICAgSSBoYWQgbWV0IGFuIGFzc2VydCBwcm9ibGVtIGxpa2UKPj4gYnVnMTYyNzkoaHR0cDov
-L3RyYWNrZXIuY2VwaC5jb20vaXNzdWVzLzE2Mjc5KSB3aGVuIHRlc3RpbmcgcHVsbCBvdXQKPj4g
-ZGlzayBhbmQgaW5zZXJ0LCBjZXBoIHZlcnNpb24gMTAuMi4177yMYXNzZXJ0KG9iaml0ZXItPnNl
-Y29uZC0+dmVyc2lvbiA+Cj4+IGxhc3RfZGl2ZXJnZW50X3VwZGF0ZSkKPj4KPj4gYWNjb3JkaW5n
-IHRvIG9zZCBsb2fvvIxJIHRoaW5rIHRoaXMgbWF5YmUgZHVlIHRvIChsb2cuaGVhZCAhPQo+PiAq
-bG9nLmxvZy5yYmVnaW4udmVyc2lvbi52ZXJzaW9uKSB3aGVuIHNvbWUgYWJub3JtYWwgY29uZGl0
-aW9uCj4+IGhhcHBlbmVkLHN1Y2ggYXMgcG93ZXIgb2ZmICxwdWxsIG91dCBkaXNrIGFuZCBpbnNl
-cnQuCj4KPiBJIGRvbid0IHRoaW5rIGlzIHN1cHBvc2VkIHRvIGJlIHBvc3NpYmxlLiBXZSBhcHBs
-eSBhbGwgY2hhbmdlcyBsaWtlIHRoaXMgYXRvbWljYWxseTsgRmlsZVN0b3JlIGRvZXMgYWxsIGl0
-cyBqb3VybmFsaW5nIHRvIHByZXZlbnQgcGFydGlhbCB1cGRhdGVzIGxpa2UgdGhpcy4KPgo+IEEg
-ZmV3IG90aGVyIHBlb3BsZSBoYXZlIHJlcG9ydGVkIHRoZSBzYW1lIGlzc3VlIG9uIGRpc2sgcHVs
-bCwgc28gbWF5YmUgdGhlcmUncyBzb21lICpvdGhlciogaXNzdWUgZ29pbmcgb24sIGJ1dCB0aGUg
-Y29ycmVjdCBmaXggaXMgYnkgcHJldmVudGluZyB0aG9zZSB0d28gZnJvbSBkaWZmZXJpbmcgKHVu
-bGVzcyBJIG1pc3VuZGVyc3RhbmQgdGhlIGNvbnRleHQpLgo+Cj4gR2l2ZW4gb25lIG9mIHRoZSBy
-ZXBvcnRlcnMgb24gdGhhdCB0aWNrZXQgY29uZmlybXMgdGhleSBhbHNvIGhhZCB4ZnMgaXNzdWVz
-LCBJIGZpbmQgaXQgdmFzdGx5IG1vcmUgbGlrZWx5IHRoYXQgc29tZXRoaW5nIGluIHlvdXIga2Vy
-bmVsIGNvbmZpZ3VyYXRpb24gYW5kIGhhcmR3YXJlIHN0YWNrIGlzIG5vdCB3cml0aW5nIG91dCBk
-YXRhIHRoZSB3YXkgaXQgY2xhaW1zIHRvLiBCZSB2ZXJ5LCB2ZXJ5IHN1cmUgYWxsIHRoYXQgaXMg
-d29ya2luZyBjb3JyZWN0bHkhCj4KPgo+PiBJbiBiZWxvdyBzaXR1YXRpb24sIG1lcmdlX2xvZyB3
-b3VsZCBwdXNoIDIzNOKAmTEwMzQgaW50byBkaXZlcmdlbnQKPj4gbGlzdDthbmQgZGl2ZXJnZW50
-IGhhcyBvbmx5IG9uZSBub2RlO3RoZW4gbGVhZCB0bwo+PiBhc3NlcnQob2JqaXRlci0+c2Vjb25k
-LT52ZXJzaW9uID4gbGFzdF9kaXZlcmdlbnRfdXBkYXRlKS4KPj4KPj4gb2xvZyAgLS0tLS0tLS0t
-LS0tLS0tLSAgICgw4oCZMCwgMjM04oCZMTAzNCkgIG9sb2cuaGVhZCA9IDIzNOKAmTEwMzQKPj4K
-Pj4gbG9nICAgLS0tLS0tLS0tLS0tLS0tLSAgICgw4oCZMCwgMjM04oCZMTAzNCkgIGxvZy5oZWFk
-ID0gMjM04oCZMTAzMwo+Pgo+Pgo+Pgo+PiBJIHNlZSBvc2QgbG9hZF9wZ3MgY29kZSxpbiBmdW5j
-dGlvbiBQR0xvZzo6cmVhZF9sb2coKSAsIGNvZGUgbGlrZSB0aGlzOgo+PiAgLi4uLi4KPj4gIGZv
-ciAocC0+c2Vla190b19maXJzdCgpOyBwLT52YWxpZCgpIDsgcC0+bmV4dCgpKSB7Cj4+Cj4+IC4u
-Li4uCj4+Cj4+ICAgICBsb2cubG9nLnB1c2hfYmFjayhlKTsKPj4KPj4gICAgIGxvZy5oZWFkID0g
-ZS52ZXJzaW9uOyAgLy8gZXZlcnkgcGcgbG9nIG5vZGUKPj4KPj4gICB9Cj4+Cj4+IC4uLi4uCj4+
-Cj4+ICBsb2cuaGVhZCA9IGluZm8ubGFzdF91cGRhdGU7Cj4+Cj4+Cj4+Cj4+IHR3byBkb3VidDoK
-Pj4KPj4gZmlyc3QgOiB3aHkgc2V0IChsb2cuaGVhZCA9IGluZm8ubGFzdF91cGRhdGUpIGFmdGVy
-IGFsbCBwZyBsb2cgbm9kZQo+PiBwcm9jZXNzZWQoZXZlcnkgbm9kZSBoYXMgdXBkYXRlZCBsb2cu
-aGVhZCA9IGUudmVyc2lvbik/Cj4+Cj4+IHNlY29uZDogV2hldGhlciBpdCBjYW4gb2NjdXIgdGhh
-dCBpbmZvLmxhc3RfdXBkYXRlIGlzIGxlc3MgdGhhbgo+PiAqbG9nLmxvZy5yYmVnaW4udmVyc2lv
-biBvciBub3QgYW5kIHdoYXQgc2NlbmUgaGFwcGVucz8KPgo+IEknbSBsb29raW5nIGF0IHRoZSBs
-dW1pbm91cyBjb2RlIGJhc2UgcmlnaHQgbm93IGFuZCB0aGluZ3MgaGF2ZSBjaGFuZ2VkIGEgYml0
-IHNvIEkgZG9uJ3QgaGF2ZSB0aGUgc3BlY2lmaWNzIG9mIHlvdXIgcXVlc3Rpb24gb24gaGFuZC4K
-Pgo+IEJ1dCB0aGUgZ2VuZXJhbCByZWFzb24gd2UgY2hhbmdlIHRoZXNlIHZlcnNpb25zIGFyb3Vu
-ZCBpcyBiZWNhdXNlIHdlIG5lZWQgdG8gcmVjb25jaWxlIHRoZSBsb2dzIGFjcm9zcyBhbGwgT1NE
-cy4gSWYgb25lIE9TRCBoYXMgYW4gZW50cnkgZm9yIGFuIG9wZXJhdGlvbiB0aGF0IHdhcyBuZXZl
-ciByZXR1cm5lZCB0byB0aGUgY2xpZW50LCB3ZSBtYXkgbmVlZCB0byBkZWNsYXJlIGl0IGRpdmVy
-Z2VudCBhbmQgdW5kbyBpdC4gKEluIHJlcGxpY2F0ZWQgcG9vbHMsIGVudHJpZXMgYXJlIG9ubHkg
-ZGl2ZXJnZW50IGlmIHRoZSBPU0QgaG9zdGluZyBpdCB3YXMgZWl0aGVyIG5ldHNwbGl0IGZyb20g
-dGhlIHByaW1hcnksIG9yIGVsc2UgbWFuYWdlZCB0byBjb21taXQgc29tZXRoaW5nIGR1cmluZyBh
-IGZhaWx1cmUgZXZlbnQgdGhhdCBpdHMgcGVlcnMgZGlkbid0IGFuZCB0aGVuIHdhcyByZXN1Ym1p
-dHRlZCB1bmRlciBhIGRpZmZlcmVudCBJRCBieSB0aGUgY2xpZW50IG9uIHJlY292ZXJ5LiBJbiBl
-cmFzdXJlLWNvZGVkIHBvb2xzIHRoaW5ncyBhcmUgbW9yZSBjb21wbGljYXRlZCBiZWNhdXNlIHdl
-IGNhbiBvbmx5IHJvbGwgb3BlcmF0aW9ucyBmb3J3YXJkIGlmIGEgcXVvcnVtIG9mIHRoZSBzaGFy
-ZHMgYXJlIHByZXNlbnQuKSAtR3JlZwo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiDmnKzpgq7ku7bl
-j4rlhbbpmYTku7blkKvmnInmlrDljY7kuInmioDmnK/mnInpmZDlhazlj7jnmoTkv53lr4bkv6Hm
-ga/vvIzku4XpmZDkuo7lj5HpgIHnu5nkuIrpnaLlnLDlnYDkuK3liJflh7oKPiDnmoTkuKrkurrm
-iJbnvqTnu4TjgILnpoHmraLku7vkvZXlhbbku5bkurrku6Xku7vkvZXlvaLlvI/kvb/nlKjvvIjl
-jIXmi6zkvYbkuI3pmZDkuo7lhajpg6jmiJbpg6jliIblnLDms4TpnLLjgIHlpI3liLbjgIEKPiDm
-iJbmlaPlj5HvvInmnKzpgq7ku7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnmlLbkuobmnKzp
-gq7ku7bvvIzor7fmgqjnq4vljbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDp
-maTmnKwKPiDpgq7ku7bvvIEKPiBUaGlzIGUtbWFpbCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRh
-aW4gY29uZmlkZW50aWFsIGluZm9ybWF0aW9uIGZyb20gTmV3IEgzQywgd2hpY2ggaXMKPiBpbnRl
-bmRlZCBvbmx5IGZvciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIGlzIGxpc3Rl
-ZCBhYm92ZS4gQW55IHVzZSBvZiB0aGUKPiBpbmZvcm1hdGlvbiBjb250YWluZWQgaGVyZWluIGlu
-IGFueSB3YXkgKGluY2x1ZGluZywgYnV0IG5vdCBsaW1pdGVkIHRvLCB0b3RhbCBvciBwYXJ0aWFs
-Cj4gZGlzY2xvc3VyZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25z
-IG90aGVyIHRoYW4gdGhlIGludGVuZGVkCj4gcmVjaXBpZW50KHMpIGlzIHByb2hpYml0ZWQuIElm
-IHlvdSByZWNlaXZlIHRoaXMgZS1tYWlsIGluIGVycm9yLCBwbGVhc2Ugbm90aWZ5IHRoZSBzZW5k
-ZXIKPiBieSBwaG9uZSBvciBlbWFpbCBpbW1lZGlhdGVseSBhbmQgZGVsZXRlIGl0IQpfX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBoLXVzZXJzIG1haWxp
-bmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0cy5jZXBoLmNvbS9s
-aXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Mon, 16 Oct 2017 18:32:06 -0400 (EDT) Anthony Verevkin wrote:
+
+> > From: "Sage Weil" <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
+> > To: "Alfredo Deza" <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > Cc: "ceph-devel" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+> > Sent: Monday, October 9, 2017 11:09:29 AM
+> > Subject: [ceph-users] killing ceph-disk [was Re: ceph-volume: migration and disk partition support]
+> > 
+> > To put this in context, the goal here is to kill ceph-disk in mimic.
+> >   
+> 
+>  
+> > Perhaps the "out" here is to support a "dir" option where the user
+> > can
+> > manually provision and mount an OSD on /var/lib/ceph/osd/*, with
+> > 'journal'
+> > or 'block' symlinks, and ceph-volume will do the last bits that
+> > initialize
+> > the filestore or bluestore OSD from there.  Then if someone has a
+> > scenario
+> > that isn't captured by LVM (or whatever else we support) they can
+> > always
+> > do it manually?
+> >   
+> 
+> 
+> In fact, now that bluestore only requires a few small files and symlinks to remain in /var/lib/ceph/osd/* without the extra requirements for xattrs support and xfs, why not simply leave those folders on OS root filesystem and only point symlinks to bluestore block and db devices? That would simplify the osd deployment so much - and the symlinks can then point to /dev/disk/by-uuid or by-path or lvm path or whatever. The only downside for this approach that I see is that disks themselves would no longer be transferable between the hosts as those few files that describe the OSD are no longer on the disk itself.
+> 
+
+If the OS is on a RAID1 the chances of things being lost entirely is
+reduced very much, so moving OSDs to another host becomes a trivial
+exercise one would assume.
+
+But yeah, this sounds fine to me, as it's extremely flexible.
+
+Christian
+-- 
+Christian Balzer        Network/Systems Engineer                
+chibi-FW+hd8ioUD0@public.gmane.org   	Rakuten Communications
