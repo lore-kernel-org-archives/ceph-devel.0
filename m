@@ -1,175 +1,82 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: preparing a bluestore OSD fails with no (useful) output
-Date: Mon, 16 Oct 2017 16:53:56 -0400
-Message-ID: <CAC-Np1wbSpsAjW8aNNeZaTvBCV0=SeNDgKFCffF7KnCTp0-QKA@mail.gmail.com>
-References: <CAC-Np1wAy2VY6VSZBFgW4GjXd8YPU+5-C=AqymSDfNtfa0Vwdw@mail.gmail.com>
- <alpine.DEB.2.11.1710162000330.26702@piezo.us.to> <CAC-Np1wgLSRKU9PKMgdBjXW1yjG4LJ3b2HxrmmfkE=WP-2k31g@mail.gmail.com>
- <alpine.DEB.2.11.1710162011280.26702@piezo.us.to>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: osd assertion failure during scrub
+Date: Mon, 16 Oct 2017 15:30:52 -0700
+Message-ID: <CAJ4mKGYUKKZXVSxiRXYCdCXds5-L12mNNwZOf790WUJ42=+BhA@mail.gmail.com>
+References: <2C34118C-8D26-43B0-88A4-207CC7361440@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:49745 "EHLO
-        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753480AbdJPUx6 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Oct 2017 16:53:58 -0400
-Received: by mail-wm0-f48.google.com with SMTP id b189so6348236wmd.4
-        for <ceph-devel@vger.kernel.org>; Mon, 16 Oct 2017 13:53:57 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1710162011280.26702@piezo.us.to>
+Received: from mail-io0-f180.google.com ([209.85.223.180]:54074 "EHLO
+        mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752563AbdJPWay (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 16 Oct 2017 18:30:54 -0400
+Received: by mail-io0-f180.google.com with SMTP id 189so153573iow.10
+        for <ceph-devel@vger.kernel.org>; Mon, 16 Oct 2017 15:30:54 -0700 (PDT)
+In-Reply-To: <2C34118C-8D26-43B0-88A4-207CC7361440@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
+To: =?UTF-8?B?6Zm25Yas5Yas?= <tdd21151186@gmail.com>
 Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, Oct 16, 2017 at 4:12 PM, Sage Weil <sage@newdream.net> wrote:
-> On Mon, 16 Oct 2017, Alfredo Deza wrote:
->> On Mon, Oct 16, 2017 at 4:01 PM, Sage Weil <sage@newdream.net> wrote:
->> > Hey-
->> >
->> > On Mon, 16 Oct 2017, Alfredo Deza wrote:
->> >> I'm trying to manually get an OSD prepared, but can't seem to get the
->> >> data directory fully populated with `--mkfs` and even though I've
->> >> raised the log levels I can't see anything useful to point to what is
->> >> the command missing.
->> >>
->> >> The directory is created, chown'd to ceph:ceph, the block device is
->> >> linked, and the data is mounted.
->> >>
->> >> The /var/lib/ceph/osd/ceph-1 directory ends up with two files:
->> >> activate.monmap (we fetch this from the monitor) and a 'block'
->> >> symlink.
->> >>
->> >> We then run the following command:
->> >>
->> >> # sudo ceph-osd --cluster ceph --osd-objectstore bluestore --mkfs -i 1
->> >> --monmap /var/lib/ceph/osd/ceph-1/activate.monmap --key
->> >> AQDa6uRZBqjoIRAAJSNl6k9vGce2gGAYUF4nSg== --osd-data
->> >> /var/lib/ceph/osd/ceph-1 --osd-uuid
->> >> 3b3090c7-8bc2-4d01-bfb7-9a364d4c469a --setuser ceph --setgroup ceph
->> >
->> > I just tried this and it works for me.  Are you using the
->> > wip-bluestore-superblock branch?
->>
->> I am not, because I am trying to get bluestore by having the small
->> 100MB data and block only for now until superblock gets merged
->
-> It will merge as soon as Kefu reviews my revisions... probably tonight.
-> Can you test this against that branch?  I changed several things in the
-> mkfs behavior and it's confusing to think about the old behavior.  I think
-> it's not worth implementing the separate partition behavior when it's
-> about to be unnecessary...
+[ Resend to avoid HTML email; sorry for the double. ]
 
-Sure. Can you push to ceph-ci so I can grab builds from
-https://shaman.ceph.com/api/repos/ceph/wip-bluestore-superblock/
-
-
+On Mon, Oct 16, 2017 at 5:58 AM, 陶冬冬 <tdd21151186@gmail.com> wrote:
+> Dear Cephers,
 >
-> sage
+> ceph version: 10.2.5
 >
->>
->> >
->> > You can turn up debugging with --debug-bluestore 20 and --log-to-stderr.
->>
->> Didn't get anything extra other than these two lines:
->>
->> 2017-10-16 20:05:42.160992 7f6449b28d00 10
->> bluestore(/var/lib/ceph/osd/ceph-1) set_cache_shards 1
->> 2017-10-16 20:05:42.182607 7f6449b28d00 10
->> bluestore(/var/lib/ceph/osd/ceph-1) _set_csum csum_type crc32c
->>
->> >
->> > sage
->> >
->> >>
->> >>
->> >> Which will not give any stdout/stderr output and will return with a
->> >> non-zero exit code of 1
->> >>
->> >>
->> >> Inspecting the /var/lib/ceph/osd/ceph-1 directory now shows a few more files:
->> >>
->> >> # ls -alh /var/lib/ceph/osd/ceph-1
->> >> -rw-r--r--. 1 ceph ceph 183 Oct 16 17:22 activate.monmap
->> >> lrwxrwxrwx. 1 ceph ceph  56 Oct 16 17:22 block ->
->> >> /dev/ceph/osd-block-3b3090c7-8bc2-4d01-bfb7-9a364d4c469a
->> >> -rw-r--r--. 1 ceph ceph   0 Oct 16 17:23 fsid
->> >> -rw-r--r--. 1 ceph ceph  10 Oct 16 17:23 type
->> >>
->> >> In this case "fsid" is empty, and "type" has "bluestore".
->> >>
->> >> After raising log level output (debug_osd 20) shows the following:
->> >>
->> >> 2017-10-16 18:03:54.679031 7f654a562d00  0 set uid:gid to 167:167 (ceph:ceph)
->> >> 2017-10-16 18:03:54.679053 7f654a562d00  0 ceph version 12.2.1
->> >> (3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e) luminous (stable), process
->> >> (unknown), pid 5674
->> >> 2017-10-16 18:03:54.679323 7f654a562d00  5 object store type is bluestore
->> >> 2017-10-16 18:03:54.702667 7f6543733700  2 Event(0x7f6555a0bc80
->> >> nevent=5000 time_id=1).set_owner idx=0 owner=140072900048640
->> >> 2017-10-16 18:03:54.702681 7f6543733700 20 Event(0x7f6555a0bc80
->> >> nevent=5000 time_id=1).create_file_event create event started fd=7
->> >> mask=1 original mask is 0
->> >> 2017-10-16 18:03:54.702683 7f6543733700 20 EpollDriver.add_event add
->> >> event fd=7 cur_mask=0 add_mask=1 to 6
->> >> 2017-10-16 18:03:54.702691 7f6543733700 20 Event(0x7f6555a0bc80
->> >> nevent=5000 time_id=1).create_file_event create event end fd=7 mask=1
->> >> original mask is 1
->> >> 2017-10-16 18:03:54.702692 7f6543733700 10 stack operator() starting
->> >> 2017-10-16 18:03:54.702972 7f6542f32700  2 Event(0x7f6555a0b680
->> >> nevent=5000 time_id=1).set_owner idx=1 owner=140072891655936
->> >> 2017-10-16 18:03:54.703095 7f6542f32700 20 Event(0x7f6555a0b680
->> >> nevent=5000 time_id=1).create_file_event create event started fd=10
->> >> mask=1 original mask is 0
->> >> 2017-10-16 18:03:54.703169 7f6542f32700 20 EpollDriver.add_event add
->> >> event fd=10 cur_mask=0 add_mask=1 to 9
->> >> 2017-10-16 18:03:54.703178 7f6542f32700 20 Event(0x7f6555a0b680
->> >> nevent=5000 time_id=1).create_file_event create event end fd=10 mask=1
->> >> original mask is 1
->> >> 2017-10-16 18:03:54.703181 7f6542f32700 10 stack operator() starting
->> >> 2017-10-16 18:03:54.703474 7f6542731700  2 Event(0x7f6555a0a480
->> >> nevent=5000 time_id=1).set_owner idx=2 owner=140072883263232
->> >> 2017-10-16 18:03:54.703520 7f6542731700 20 Event(0x7f6555a0a480
->> >> nevent=5000 time_id=1).create_file_event create event started fd=13
->> >> mask=1 original mask is 0
->> >> 2017-10-16 18:03:54.703524 7f6542731700 20 EpollDriver.add_event add
->> >> event fd=13 cur_mask=0 add_mask=1 to 12
->> >> 2017-10-16 18:03:54.703527 7f6542731700 20 Event(0x7f6555a0a480
->> >> nevent=5000 time_id=1).create_file_event create event end fd=13 mask=1
->> >> original mask is 1
->> >> 2017-10-16 18:03:54.703529 7f6542731700 10 stack operator() starting
->> >> 2017-10-16 18:03:54.703571 7f654a562d00 10 -- - ready -
->> >> 2017-10-16 18:03:54.703575 7f654a562d00  1  Processor -- start
->> >> 2017-10-16 18:03:54.703625 7f654a562d00  1 -- - start start
->> >> 2017-10-16 18:03:54.703649 7f654a562d00 10 -- - shutdown -
->> >> 2017-10-16 18:03:54.703650 7f654a562d00 10  Processor -- stop
->> >> 2017-10-16 18:03:54.703652 7f654a562d00  1 -- - shutdown_connections
->> >> 2017-10-16 18:03:54.703655 7f654a562d00 20 Event(0x7f6555a0bc80
->> >> nevent=5000 time_id=1).wakeup
->> >> 2017-10-16 18:03:54.703668 7f654a562d00 20 Event(0x7f6555a0b680
->> >> nevent=5000 time_id=1).wakeup
->> >> 2017-10-16 18:03:54.703673 7f654a562d00 20 Event(0x7f6555a0a480
->> >> nevent=5000 time_id=1).wakeup
->> >> 2017-10-16 18:03:54.703896 7f654a562d00 10 -- - wait: waiting for dispatch queue
->> >> 2017-10-16 18:03:54.704285 7f654a562d00 10 -- - wait: dispatch queue is stopped
->> >> 2017-10-16 18:03:54.704290 7f654a562d00  1 -- - shutdown_connections
->> >> 2017-10-16 18:03:54.704293 7f654a562d00 20 Event(0x7f6555a0bc80
->> >> nevent=5000 time_id=1).wakeup
->> >> 2017-10-16 18:03:54.704300 7f654a562d00 20 Event(0x7f6555a0b680
->> >> nevent=5000 time_id=1).wakeup
->> >> 2017-10-16 18:03:54.704303 7f654a562d00 20 Event(0x7f6555a0a480
->> >> nevent=5000 time_id=1).wakeup
->> >>
->> >>
->> >> I can't tell what am I missing or if there is any need to pre-populate
->> >> the path with something else.
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >>
->> >>
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
+> log below here:
+> 0> 2017-10-16 03:30:18.346892 7fa278797700 -1 os/filestore/LFNIndex.cc: In function 'int LFNIndex::list_objects(const std::vector<std::basic_string<char> >&, int, long int*, std::map<std::basic_string<char>, ghobject_t>*)' thread 7fa278797700 time 2017-10-16 03:30:18.342894
+> os/filestore/LFNIndex.cc: 443: FAILED assert(long_name == short_name)
+>
+>  ceph version 10.2.5 (c461ee19ecbc0c5c330aca20f7392c9a00730367)
+>  1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0x85) [0x55ca3e69a425]
+>  2: (LFNIndex::list_objects(std::vector<std::string, std::allocator<std::string> > const&, int, long*, std::map<std::string, ghobject_t, std::less<std::string>, std::allocator<std::pair<std::string const, ghobject_t> > >*)+0x282) [0x55ca3e399642]
+>  3: (HashIndex::get_path_contents_by_hash_bitwise(std::vector<std::string, std::allocator<std::string> > const&, ghobject_t const*, std::set<std::string, HashIndex::CmpHexdigitStringBitwise, std::allocator<std::string> >*, std::set<std::pair<std::string, ghobject_t>, HashIndex::CmpPairBitwise, std::allocator<std::pair<std::string, ghobject_t> > >*)+0x92) [0x55ca3e44c3c2]
+>  4: (HashIndex::list_by_hash_bitwise(std::vector<std::string, std::allocator<std::string> > const&, ghobject_t const&, int, ghobject_t*, std::vector<ghobject_t, std::allocator<ghobject_t> >*)+0x157) [0x55ca3e44ccd7]
+>  5: (HashIndex::list_by_hash_bitwise(std::vector<std::string, std::allocator<std::string> > const&, ghobject_t const&, int, ghobject_t*, std::vector<ghobject_t, std::allocator<ghobject_t> >*)+0x43b) [0x55ca3e44cfbb]
+>  6: (HashIndex::list_by_hash_bitwise(std::vector<std::string, std::allocator<std::string> > const&, ghobject_t const&, int, ghobject_t*, std::vector<ghobject_t, std::allocator<ghobject_t> >*)+0x43b) [0x55ca3e44cfbb]
+>  7: (HashIndex::list_by_hash_bitwise(std::vector<std::string, std::allocator<std::string> > const&, ghobject_t const&, int, ghobject_t*, std::vector<ghobject_t, std::allocator<ghobject_t> >*)+0x43b) [0x55ca3e44cfbb]
+>  8: (HashIndex::_collection_list_partial(ghobject_t const&, ghobject_t const&, bool, int, std::vector<ghobject_t, std::allocator<ghobject_t> >*, ghobject_t*)+0x1c2) [0x55ca3e44ea72]
+>  9: (FileStore::collection_list(coll_t const&, ghobject_t, ghobject_t, bool, int, std::vector<ghobject_t, std::allocator<ghobject_t> >*, ghobject_t*)+0x38e) [0x55ca3e3430fe]
+>  10: (ObjectStore::collection_list(boost::intrusive_ptr<ObjectStore::CollectionImpl>&, ghobject_t, ghobject_t, bool, int, std::vector<ghobject_t, std::allocator<ghobject_t> >*, ghobject_t*)+0x1a8) [0x55ca3e2cc4b8]
+>  11: (PGBackend::objects_list_partial(hobject_t const&, int, int, std::vector<hobject_t, std::allocator<hobject_t> >*, hobject_t*)+0x4d4) [0x55ca3e1d89a4]
+>  12: (PG::chunky_scrub(ThreadPool::TPHandle&)+0x9af) [0x55ca3e0dfddf]
+>  13: (PG::scrub(unsigned int, ThreadPool::TPHandle&)+0x230) [0x55ca3e0e0fb0]
+>  14: (OSD::ShardedOpWQ::_process(unsigned int, ceph::heartbeat_handle_d*)+0x80e) [0x55ca3e012b3e]
+>  15: (ShardedThreadPool::shardedthreadpool_worker(unsigned int)+0x887) [0x55ca3e68a3c7]
+>  16: (ShardedThreadPool::WorkThreadSharded::entry()+0x10) [0x55ca3e68c330]
+>
+> Paste the failure code here:
+> -----------------------------------------
+> if (lfn_is_objecthort_name)) {
+>       r = lfn_translate(to_list, short_name, &obj);
+>       if (r == -EINVAL) {
+>         continue;
+>       } else if (r < 0) {
+>         goto cleanup;
+>       } else {
+>         string long_name = lfn_generate_object_name(obj);
+>         if (!lfn_must_hash(long_name)) {
+>           assert(long_name == short_name);     — assert failure here.
+>         }
+> --------------------------------------
+> is there any way could let me know which object is causing this failure?
+> and what would cause such kind failure?
+
+If you post the whole log (you can upload it with ceph-post-file and
+only Ceph devs will have access), it should be trivial to identify.
+Generally you'll see a named object and request which is being
+serviced by this lookup.
+
+In this case, the LFNIndex is trying to convert the naive Long File
+Name of an object into names short enough to play nicely with local
+filesystems. It shortens them via hashing and has a bunch of extension
+tricks to deal with collisions. The particular assert is that, if the
+name is short enough to not need hashing, then the long and short
+names should be identical. Apparently they aren't? I'm surprised you
+found an issue here, though — this is pretty old and stable code. Has
+anything strange happened to your cluster? Or are you running some
+custom code?
+-Greg
