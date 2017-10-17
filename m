@@ -1,35 +1,31 @@
-From: Mohamad Gebai <mgebai@suse.de>
-Subject: Unstable clock
-Date: Tue, 17 Oct 2017 08:30:31 -0400
-Message-ID: <085064b4-2e21-4e54-cdd8-dd8a4560aa92@suse.de>
+From: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: Unstable clock
+Date: Tue, 17 Oct 2017 13:50:26 +0100
+Message-ID: <ddea6991-ebb5-31bc-7bad-02dc6c8cc89a@suse.de>
+References: <085064b4-2e21-4e54-cdd8-dd8a4560aa92@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:60054 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753116AbdJQMag (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 17 Oct 2017 08:30:36 -0400
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
-Cc: Florian Haas <florian@hastexo.com>
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <085064b4-2e21-4e54-cdd8-dd8a4560aa92-l3A5Bk7waGM@public.gmane.org>
+Content-Language: en-GB
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Mohamad Gebai <mgebai-l3A5Bk7waGM@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+On 10/17/2017 01:30 PM, Mohamad Gebai wrote:
+> A concern was raised: are there more critical parts of Ceph where a
+> clock jumping around might interfere with the behavior of the cluster?
+> It would be good to know if there are any, and maybe prepare for them?
 
-I am looking at the following issue: http://tracker.ceph.com/issues/21375
+cephx and monitor paxos leases come to mind.
 
-In summary, during a 'rados bench', impossible latency values (e.g.
-9.00648e+07) are suddenly reported. I looked briefly at the code, it
-seems CLOCK_REALTIME is used, which means that wall clock changes would
-affect this output. This is a VM cluster, so the hypothesis was that the
-system's clock was falling behind for some reason, then getting
-readjusted (that's the only way I could reproduce the issue), which I
-think is quite possible in a virtual environment.
-
-A concern was raised: are there more critical parts of Ceph where a
-clock jumping around might interfere with the behavior of the cluster?
-It would be good to know if there are any, and maybe prepare for them?
-
-Mohamad
+   -Joao
