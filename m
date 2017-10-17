@@ -1,93 +1,35 @@
-From: Xiaoxi Chen <superdebuger@gmail.com>
-Subject: Re: mds client reconnect
-Date: Tue, 17 Oct 2017 15:59:26 +0800
-Message-ID: <CAEYCsVKw8SFONtx=p_PZpCLnCbM_Jo1RYcEiag0=qHqebrbs+Q@mail.gmail.com>
-References: <CAEYCsVL1MxuYKf3vVN+UQchgaj=X7vxjZ0PfD2Oqsz2To2smRg@mail.gmail.com>
- <CAEYCsVL+_DanFXSCGLxY+WUq2gZoRi8N1D8maFeHsCr5ndOaCA@mail.gmail.com>
- <CAAM7YAnxQcaBHU=KgZhU9UM-=zksW-h206q2fuzHoM_kBcYsMw@mail.gmail.com>
- <CAEYCsVJryo8Q9x4U4_4iK2QB-W1a6zvKS4x0pJ77QOO9Q1Ng1Q@mail.gmail.com> <CAAM7YAkv5Q1HvG_fkz8aGJpmx2P68rfk0VquKq0zgvSZvJ9i=A@mail.gmail.com>
+From: Mohamad Gebai <mgebai@suse.de>
+Subject: Unstable clock
+Date: Tue, 17 Oct 2017 08:30:31 -0400
+Message-ID: <085064b4-2e21-4e54-cdd8-dd8a4560aa92@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f169.google.com ([209.85.223.169]:43077 "EHLO
-        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932726AbdJQH72 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Oct 2017 03:59:28 -0400
-Received: by mail-io0-f169.google.com with SMTP id 134so1298944ioo.0
-        for <ceph-devel@vger.kernel.org>; Tue, 17 Oct 2017 00:59:28 -0700 (PDT)
-In-Reply-To: <CAAM7YAkv5Q1HvG_fkz8aGJpmx2P68rfk0VquKq0zgvSZvJ9i=A@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:60054 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753116AbdJQMag (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 17 Oct 2017 08:30:36 -0400
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>
+Cc: Florian Haas <florian@hastexo.com>
 
-Thanks Zheng, checking up to CentOS 7.4 (3.10.0-693.el7.x86_64), the
-ceph_renew_caps()  original commit is even NOT THERE
-https://github.com/ceph/ceph-client/commit/77310320c299b0dc050037ff8fc29fd1861fb005
+Hi,
 
-2017-10-14 9:16 GMT+08:00 Yan, Zheng <ukernel@gmail.com>:
-> On Fri, Oct 13, 2017 at 10:38 PM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
->> Hi Zheng,
->>     Thanks for the input. So we dont client to reconnect due to dirty
->> metadata?  Does client drop dirty data(page cached data) when
->> reconnect get denied and try tro re-open session?
->
-> it only drop dirty metadata, dropping dirty metadata does not affect reconnect
->
->>
->>      And would you mind pointing the commit/kernel version considered
->> recent enough with re-open session?  We are on CentOS 7.3
->> (3.10.0-514.21.2.el7.x86_64) but seems not the behavior.
->>
->
-> check if your kernel includes backports up to commit 8242c9f3 (ceph:
-> fix wrong check in ceph_renew_caps())
->
->>
->> Xiaoxi
->>
->> 2017-10-13 21:59 GMT+08:00 Yan, Zheng <ukernel@gmail.com>:
->>> On Fri, Oct 13, 2017 at 2:10 PM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
->>>>
->>>> resend with plain txt
->>>>
->>>> 2017-10-13 10:56 GMT+08:00 Xiaoxi Chen <superdebuger@gmail.com>:
->>>> > Hi,
->>>> >
->>>> >     We sometimes seen client (fs kernel) get evicted by MDS and try to
->>>> > reconnect,  even we set  mds_session_blacklist_on_evict = True, client still
->>>> > cannot reconnect due to below code:
->>>> >
->>>> >  if (!mds->is_reconnect() && mds->get_want_state() ==
->>>> > CEPH_MDS_STATE_RECONNECT) {
->>>> >     dout(10) << " we're almost in reconnect state (mdsmap delivery race?);
->>>> > waiting" << dendl;
->>>> >     mds->wait_for_reconnect(new C_MDS_RetryMessage(mds, m));
->>>> >     return;
->>>> >   }
->>>> >
->>>> >      Could someone share any insight on why MDS only accept reconnect in
->>>> > reconnect state? and how, if the client is get evicted , can automatically
->>>> > recovered? note that remount is usually impossible as umount will always
->>>> > hang(due to cannot talk to mds).
->>>> >
->>>
->>> If reconnect get denied, unflushed dirty metadata on client get lost.
->>>
->>> If mds_session_blacklist_on_evict is set to FALSE, recent version kernel client
->>> should re-open session automatically after reconnect get denied. For
->>> fuse client,
->>> client_reconnect_stale need to be set to true.
->>>
->>> FYI: 'umount -f' works for evicted client.
->>>
->>>
->>>
->>>>
->>>> >
->>>> >
->>>> > Xiaoxi
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I am looking at the following issue: http://tracker.ceph.com/issues/21375
+
+In summary, during a 'rados bench', impossible latency values (e.g.
+9.00648e+07) are suddenly reported. I looked briefly at the code, it
+seems CLOCK_REALTIME is used, which means that wall clock changes would
+affect this output. This is a VM cluster, so the hypothesis was that the
+system's clock was falling behind for some reason, then getting
+readjusted (that's the only way I could reproduce the issue), which I
+think is quite possible in a virtual environment.
+
+A concern was raised: are there more critical parts of Ceph where a
+clock jumping around might interfere with the behavior of the cluster?
+It would be good to know if there are any, and maybe prepare for them?
+
+Mohamad
