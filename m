@@ -1,39 +1,34 @@
-From: Mohamad Gebai <mgebai@suse.de>
-Subject: Re: Unstable clock
-Date: Tue, 17 Oct 2017 10:58:32 -0400
-Message-ID: <487c8aa4-caa6-bb9c-b15b-e6d57d81e70f@suse.de>
-References: <085064b4-2e21-4e54-cdd8-dd8a4560aa92@suse.de>
- <alpine.DEB.2.11.1710171325500.26702@piezo.us.to>
- <9079f6c0-e37e-74c7-4fcb-4f5fd55cf482@suse.de>
- <alpine.DEB.2.11.1710171356580.26711@piezo.us.to>
+From: Yoann Moulin <yoann.moulin@epfl.ch>
+Subject: Wish list : automatic rebuild with hot swap osd ?
+Date: Tue, 17 Oct 2017 23:06:47 +0200
+Message-ID: <06c8570a-415c-b830-3102-476a0d85cbdf@epfl.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:48128 "EHLO mx2.suse.de"
+Received: from smtp0.epfl.ch ([128.178.224.218]:59548 "EHLO smtp0.epfl.ch"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1757058AbdJQO6g (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 17 Oct 2017 10:58:36 -0400
-In-Reply-To: <alpine.DEB.2.11.1710171356580.26711@piezo.us.to>
-Content-Language: en-US
+        id S1760712AbdJQVNa (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 17 Oct 2017 17:13:30 -0400
+Content-Language: fr-CH
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@lists.ceph.com>, Florian Haas <florian@hastexo.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
+Hello,
 
-On 10/17/2017 09:57 AM, Sage Weil wrote:
-> On Tue, 17 Oct 2017, Mohamad Gebai wrote:
->>
->> Thanks Sage. I assume that's the card you're referring to:
->> https://trello.com/c/SAtGPq0N/65-use-time-span-monotonic-for-durations
->>
->> I can take of that one if no one else has started working on it.
-> That would be wonderful!  I'm pretty sure nobody else is looking at it so 
-> you win today.  :)
->
+I wonder if it's possible to add to ceph the ability to rebuild a new disk automatically freshly added to a slot in replacement of a failed osd
+disk.
 
-Great :) Anything I should, like add my face to the card or something?
+I imagine something like adding a flag on disks (identified by-path for example or a way to have a deterministic access to the device) to be
+auto-reconfigured if detected with no data after the same slot was marked as failed. Only disks identified "by-path" with an auto-rebuild flag
+activated, and previously marked as failed, can run the auto-reconfiguration.
 
-Mohamad
+I know it should take some time to find the best way to implement that feature to avoid zapping a disk with data but that would be great to
+improve maintainability.
 
+Thanks,
+
+-- 
+Yoann Moulin
+EPFL IC-IT
