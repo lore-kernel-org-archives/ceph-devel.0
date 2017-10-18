@@ -1,48 +1,28 @@
-From: Colin King <colin.king@canonical.com>
-Subject: [PATCH] ceph: remove unused and redundant variable dropping
-Date: Wed, 18 Oct 2017 12:34:25 +0100
-Message-ID: <20171018113425.28658-1-colin.king@canonical.com>
+From: 55574742@mylife.unisa.ac.za
+Subject: Answer01
+Date: Wed, 18 Oct 2017 07:41:04 -0400
+Message-ID: <AM4PR0101MB2067C74B91DD9BD858C5DA48B84D0@AM4PR0101MB2067.eurprd01.prod.exchangelabs.com>
+Reply-To: mrlynneerwin97@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: zyan@redhat.com, Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel@vger.kernel.org
-Cc: kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-he1eur02hn0227.outbound.protection.outlook.com ([104.47.5.227]:53206
+        "EHLO EUR02-HE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754386AbdJRLqu (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 18 Oct 2017 07:46:50 -0400
+Content-Description: Mail message body
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Recipients <55574742@mylife.unisa.ac.za>
 
-From: Colin Ian King <colin.king@canonical.com>
+Brauchen Sie eine dringende finanzielle f=FCr weitere Informationen E-Mail =
+mit Kreditbetrag ben=F6tigt: Darlehen Dauer: Telefonnummer: Land: Formular =
+10,000.00euros zu 50,000,000Euros kontaktieren Sie uns  Email: mrlynneerwin=
+97@gmail.com
 
-Variable dropping is set but never read and hence is redundant
-and can be removed. Cleans up clang warning:
-
-fs/ceph/caps.c:1170:2: warning: Value stored to 'dropping' is never read
-
-Signed-off-by: Colin Ian King <colin.king@canonical.com>
 ---
- fs/ceph/caps.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+This email has been checked for viruses by Avast antivirus software.
+https://www.avast.com/antivirus
 
-diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
-index 157fe59fbabe..14df41e3751c 100644
---- a/fs/ceph/caps.c
-+++ b/fs/ceph/caps.c
-@@ -1159,7 +1159,7 @@ static int __send_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
- 	struct ceph_inode_info *ci = cap->ci;
- 	struct inode *inode = &ci->vfs_inode;
- 	struct cap_msg_args arg;
--	int held, revoking, dropping;
-+	int held, revoking;
- 	int wake = 0;
- 	int delayed = 0;
- 	int ret;
-@@ -1167,7 +1167,6 @@ static int __send_cap(struct ceph_mds_client *mdsc, struct ceph_cap *cap,
- 	held = cap->issued | cap->implemented;
- 	revoking = cap->implemented & ~cap->issued;
- 	retain &= ~revoking;
--	dropping = cap->issued & ~retain;
- 
- 	dout("__send_cap %p cap %p session %p %s -> %s (revoking %s)\n",
- 	     inode, cap, cap->session,
--- 
-2.14.1
