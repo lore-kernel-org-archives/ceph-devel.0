@@ -1,54 +1,205 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Wish list : automatic rebuild with hot swap osd ?
-Date: Tue, 17 Oct 2017 21:22:32 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1710172118210.26702@piezo.us.to>
-References: <06c8570a-415c-b830-3102-476a0d85cbdf@epfl.ch>
+From: Brad Hubbard <bhubbard@redhat.com>
+Subject: Re: preparing a bluestore OSD fails with no (useful) output
+Date: Wed, 18 Oct 2017 10:43:19 +1000
+Message-ID: <CAF-wwdGaEDTSacxvTbjZdRrSjAbAxxt7SKqpoup6MEg86xbwQQ@mail.gmail.com>
+References: <CAC-Np1wAy2VY6VSZBFgW4GjXd8YPU+5-C=AqymSDfNtfa0Vwdw@mail.gmail.com>
+ <alpine.DEB.2.11.1710162000330.26702@piezo.us.to> <CAC-Np1wgLSRKU9PKMgdBjXW1yjG4LJ3b2HxrmmfkE=WP-2k31g@mail.gmail.com>
+ <alpine.DEB.2.11.1710162011280.26702@piezo.us.to> <CAC-Np1wbSpsAjW8aNNeZaTvBCV0=SeNDgKFCffF7KnCTp0-QKA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cobra.newdream.net ([66.33.205.236]:40922 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934645AbdJQVWf (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Oct 2017 17:22:35 -0400
-In-Reply-To: <06c8570a-415c-b830-3102-476a0d85cbdf@epfl.ch>
+Received: from mail-io0-f176.google.com ([209.85.223.176]:44809 "EHLO
+        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751360AbdJRAnU (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 17 Oct 2017 20:43:20 -0400
+Received: by mail-io0-f176.google.com with SMTP id m16so4257036iod.1
+        for <ceph-devel@vger.kernel.org>; Tue, 17 Oct 2017 17:43:20 -0700 (PDT)
+In-Reply-To: <CAC-Np1wbSpsAjW8aNNeZaTvBCV0=SeNDgKFCffF7KnCTp0-QKA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Yoann Moulin <yoann.moulin@epfl.ch>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>
+Cc: Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, 17 Oct 2017, Yoann Moulin wrote:
-> Hello,
-> 
-> I wonder if it's possible to add to ceph the ability to rebuild a new disk automatically freshly added to a slot in replacement of a failed osd
-> disk.
-> 
-> I imagine something like adding a flag on disks (identified by-path for example or a way to have a deterministic access to the device) to be
-> auto-reconfigured if detected with no data after the same slot was marked as failed. Only disks identified "by-path" with an auto-rebuild flag
-> activated, and previously marked as failed, can run the auto-reconfiguration.
-> 
-> I know it should take some time to find the best way to implement that feature to avoid zapping a disk with data but that would be great to
-> improve maintainability.
+Hi Alfredo,
 
-The way that we approached this before with ceph-disk was that you would 
-prelabel replacement disks as "blank ceph" or similar.  That way if we saw 
-a ceph labeled disk that hadn't been used yet we would know it was fair 
-game.  This is a lot more work for the admin (you have to attached each of 
-your replacement disks to mark them and then put them in the replacement 
-pile) but it is safer.
+Try '--log_flush_on_exit' and see http://tracker.ceph.com/issues/21667
 
-An alternative model would be to have a reasonably reliable way to 
-identify a fresh disk from the factory.  I'm honest not sure what new 
-disks look like these days (zero? empty NTFS partition?) but we could try 
-to recognized "blank" and go from there.
+Failing that...
 
-Unfortunately we can't assume blank if we see garbage because the disk 
-might be encrypted.
+If the new branch does not resolve the issue you could [1] strace it
+to see where/what is failing?
 
-Anyway, assuming that part was sorted out, I think a complete solution 
-would query the mons to see what OSD id used to live in that particular 
-by-path location/slot and try to re-use that OSD ID.  We have still built 
-in a manual task here of marking the failed osd "destroyed" since reusing 
-the ID means the cluster may make assumptions about PG copies on the OSD 
-being lost.
+A return of '1' may imply EPERM and a strace would show if any system
+call is returning that.
 
-sage
+[1] sudo strace -fyyvttTo /tmp/strace.out -s 1024 ceph-osd --cluster
+ceph --osd-objectstore bluestore --mkfs -i 1
+--monmap /var/lib/ceph/osd/ceph-1/activate.monmap --key
+AQDa6uRZBqjoIRAAJSNl6k9vGce2gGAYUF4nSg== --osd-data
+/var/lib/ceph/osd/ceph-1 --osd-uuid
+3b3090c7-8bc2-4d01-bfb7-9a364d4c469a --setuser ceph --setgroup ceph
+
+On Tue, Oct 17, 2017 at 6:53 AM, Alfredo Deza <adeza@redhat.com> wrote:
+> On Mon, Oct 16, 2017 at 4:12 PM, Sage Weil <sage@newdream.net> wrote:
+>> On Mon, 16 Oct 2017, Alfredo Deza wrote:
+>>> On Mon, Oct 16, 2017 at 4:01 PM, Sage Weil <sage@newdream.net> wrote:
+>>> > Hey-
+>>> >
+>>> > On Mon, 16 Oct 2017, Alfredo Deza wrote:
+>>> >> I'm trying to manually get an OSD prepared, but can't seem to get the
+>>> >> data directory fully populated with `--mkfs` and even though I've
+>>> >> raised the log levels I can't see anything useful to point to what is
+>>> >> the command missing.
+>>> >>
+>>> >> The directory is created, chown'd to ceph:ceph, the block device is
+>>> >> linked, and the data is mounted.
+>>> >>
+>>> >> The /var/lib/ceph/osd/ceph-1 directory ends up with two files:
+>>> >> activate.monmap (we fetch this from the monitor) and a 'block'
+>>> >> symlink.
+>>> >>
+>>> >> We then run the following command:
+>>> >>
+>>> >> # sudo ceph-osd --cluster ceph --osd-objectstore bluestore --mkfs -i 1
+>>> >> --monmap /var/lib/ceph/osd/ceph-1/activate.monmap --key
+>>> >> AQDa6uRZBqjoIRAAJSNl6k9vGce2gGAYUF4nSg== --osd-data
+>>> >> /var/lib/ceph/osd/ceph-1 --osd-uuid
+>>> >> 3b3090c7-8bc2-4d01-bfb7-9a364d4c469a --setuser ceph --setgroup ceph
+>>> >
+>>> > I just tried this and it works for me.  Are you using the
+>>> > wip-bluestore-superblock branch?
+>>>
+>>> I am not, because I am trying to get bluestore by having the small
+>>> 100MB data and block only for now until superblock gets merged
+>>
+>> It will merge as soon as Kefu reviews my revisions... probably tonight.
+>> Can you test this against that branch?  I changed several things in the
+>> mkfs behavior and it's confusing to think about the old behavior.  I think
+>> it's not worth implementing the separate partition behavior when it's
+>> about to be unnecessary...
+>
+> Sure. Can you push to ceph-ci so I can grab builds from
+> https://shaman.ceph.com/api/repos/ceph/wip-bluestore-superblock/
+>
+>
+>>
+>> sage
+>>
+>>>
+>>> >
+>>> > You can turn up debugging with --debug-bluestore 20 and --log-to-stderr.
+>>>
+>>> Didn't get anything extra other than these two lines:
+>>>
+>>> 2017-10-16 20:05:42.160992 7f6449b28d00 10
+>>> bluestore(/var/lib/ceph/osd/ceph-1) set_cache_shards 1
+>>> 2017-10-16 20:05:42.182607 7f6449b28d00 10
+>>> bluestore(/var/lib/ceph/osd/ceph-1) _set_csum csum_type crc32c
+>>>
+>>> >
+>>> > sage
+>>> >
+>>> >>
+>>> >>
+>>> >> Which will not give any stdout/stderr output and will return with a
+>>> >> non-zero exit code of 1
+>>> >>
+>>> >>
+>>> >> Inspecting the /var/lib/ceph/osd/ceph-1 directory now shows a few more files:
+>>> >>
+>>> >> # ls -alh /var/lib/ceph/osd/ceph-1
+>>> >> -rw-r--r--. 1 ceph ceph 183 Oct 16 17:22 activate.monmap
+>>> >> lrwxrwxrwx. 1 ceph ceph  56 Oct 16 17:22 block ->
+>>> >> /dev/ceph/osd-block-3b3090c7-8bc2-4d01-bfb7-9a364d4c469a
+>>> >> -rw-r--r--. 1 ceph ceph   0 Oct 16 17:23 fsid
+>>> >> -rw-r--r--. 1 ceph ceph  10 Oct 16 17:23 type
+>>> >>
+>>> >> In this case "fsid" is empty, and "type" has "bluestore".
+>>> >>
+>>> >> After raising log level output (debug_osd 20) shows the following:
+>>> >>
+>>> >> 2017-10-16 18:03:54.679031 7f654a562d00  0 set uid:gid to 167:167 (ceph:ceph)
+>>> >> 2017-10-16 18:03:54.679053 7f654a562d00  0 ceph version 12.2.1
+>>> >> (3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e) luminous (stable), process
+>>> >> (unknown), pid 5674
+>>> >> 2017-10-16 18:03:54.679323 7f654a562d00  5 object store type is bluestore
+>>> >> 2017-10-16 18:03:54.702667 7f6543733700  2 Event(0x7f6555a0bc80
+>>> >> nevent=5000 time_id=1).set_owner idx=0 owner=140072900048640
+>>> >> 2017-10-16 18:03:54.702681 7f6543733700 20 Event(0x7f6555a0bc80
+>>> >> nevent=5000 time_id=1).create_file_event create event started fd=7
+>>> >> mask=1 original mask is 0
+>>> >> 2017-10-16 18:03:54.702683 7f6543733700 20 EpollDriver.add_event add
+>>> >> event fd=7 cur_mask=0 add_mask=1 to 6
+>>> >> 2017-10-16 18:03:54.702691 7f6543733700 20 Event(0x7f6555a0bc80
+>>> >> nevent=5000 time_id=1).create_file_event create event end fd=7 mask=1
+>>> >> original mask is 1
+>>> >> 2017-10-16 18:03:54.702692 7f6543733700 10 stack operator() starting
+>>> >> 2017-10-16 18:03:54.702972 7f6542f32700  2 Event(0x7f6555a0b680
+>>> >> nevent=5000 time_id=1).set_owner idx=1 owner=140072891655936
+>>> >> 2017-10-16 18:03:54.703095 7f6542f32700 20 Event(0x7f6555a0b680
+>>> >> nevent=5000 time_id=1).create_file_event create event started fd=10
+>>> >> mask=1 original mask is 0
+>>> >> 2017-10-16 18:03:54.703169 7f6542f32700 20 EpollDriver.add_event add
+>>> >> event fd=10 cur_mask=0 add_mask=1 to 9
+>>> >> 2017-10-16 18:03:54.703178 7f6542f32700 20 Event(0x7f6555a0b680
+>>> >> nevent=5000 time_id=1).create_file_event create event end fd=10 mask=1
+>>> >> original mask is 1
+>>> >> 2017-10-16 18:03:54.703181 7f6542f32700 10 stack operator() starting
+>>> >> 2017-10-16 18:03:54.703474 7f6542731700  2 Event(0x7f6555a0a480
+>>> >> nevent=5000 time_id=1).set_owner idx=2 owner=140072883263232
+>>> >> 2017-10-16 18:03:54.703520 7f6542731700 20 Event(0x7f6555a0a480
+>>> >> nevent=5000 time_id=1).create_file_event create event started fd=13
+>>> >> mask=1 original mask is 0
+>>> >> 2017-10-16 18:03:54.703524 7f6542731700 20 EpollDriver.add_event add
+>>> >> event fd=13 cur_mask=0 add_mask=1 to 12
+>>> >> 2017-10-16 18:03:54.703527 7f6542731700 20 Event(0x7f6555a0a480
+>>> >> nevent=5000 time_id=1).create_file_event create event end fd=13 mask=1
+>>> >> original mask is 1
+>>> >> 2017-10-16 18:03:54.703529 7f6542731700 10 stack operator() starting
+>>> >> 2017-10-16 18:03:54.703571 7f654a562d00 10 -- - ready -
+>>> >> 2017-10-16 18:03:54.703575 7f654a562d00  1  Processor -- start
+>>> >> 2017-10-16 18:03:54.703625 7f654a562d00  1 -- - start start
+>>> >> 2017-10-16 18:03:54.703649 7f654a562d00 10 -- - shutdown -
+>>> >> 2017-10-16 18:03:54.703650 7f654a562d00 10  Processor -- stop
+>>> >> 2017-10-16 18:03:54.703652 7f654a562d00  1 -- - shutdown_connections
+>>> >> 2017-10-16 18:03:54.703655 7f654a562d00 20 Event(0x7f6555a0bc80
+>>> >> nevent=5000 time_id=1).wakeup
+>>> >> 2017-10-16 18:03:54.703668 7f654a562d00 20 Event(0x7f6555a0b680
+>>> >> nevent=5000 time_id=1).wakeup
+>>> >> 2017-10-16 18:03:54.703673 7f654a562d00 20 Event(0x7f6555a0a480
+>>> >> nevent=5000 time_id=1).wakeup
+>>> >> 2017-10-16 18:03:54.703896 7f654a562d00 10 -- - wait: waiting for dispatch queue
+>>> >> 2017-10-16 18:03:54.704285 7f654a562d00 10 -- - wait: dispatch queue is stopped
+>>> >> 2017-10-16 18:03:54.704290 7f654a562d00  1 -- - shutdown_connections
+>>> >> 2017-10-16 18:03:54.704293 7f654a562d00 20 Event(0x7f6555a0bc80
+>>> >> nevent=5000 time_id=1).wakeup
+>>> >> 2017-10-16 18:03:54.704300 7f654a562d00 20 Event(0x7f6555a0b680
+>>> >> nevent=5000 time_id=1).wakeup
+>>> >> 2017-10-16 18:03:54.704303 7f654a562d00 20 Event(0x7f6555a0a480
+>>> >> nevent=5000 time_id=1).wakeup
+>>> >>
+>>> >>
+>>> >> I can't tell what am I missing or if there is any need to pre-populate
+>>> >> the path with something else.
+>>> >> --
+>>> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> >> the body of a message to majordomo@vger.kernel.org
+>>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> >>
+>>> >>
+>>> > --
+>>> > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>> > the body of a message to majordomo@vger.kernel.org
+>>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Cheers,
+Brad
