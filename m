@@ -1,112 +1,56 @@
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: cephfs quotas
-Date: Thu, 19 Oct 2017 12:23:07 +0100
-Message-ID: <20171019112307.hn4ckrkb234ns2og@hermes.olymp>
-References: <20171018101122.pfz7e27l32e34b2f@jf_suse_laptop>
- <CALe9h7dun71gFiAqn-1673spDRv95-+VHYWJWWE4CghvdXhjzg@mail.gmail.com>
- <CAJ4mKGZaQ=i6uWiebw+wB=NUmo959Q=TLhgNs98WDApJMZieJw@mail.gmail.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: "debug ms = 0/5" logging ...
+Date: Thu, 19 Oct 2017 07:47:28 -0400
+Message-ID: <1508413648.27011.5.camel@redhat.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:49474 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751710AbdJSLXO (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 19 Oct 2017 07:23:14 -0400
-Content-Disposition: inline
-In-Reply-To: <CAJ4mKGZaQ=i6uWiebw+wB=NUmo959Q=TLhgNs98WDApJMZieJw@mail.gmail.com>
+Received: from mail-qt0-f174.google.com ([209.85.216.174]:48145 "EHLO
+        mail-qt0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753269AbdJSLrb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Oct 2017 07:47:31 -0400
+Received: by mail-qt0-f174.google.com with SMTP id f8so14002058qta.5
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 04:47:30 -0700 (PDT)
+Received: from cube-1 (pool-173-73-60-87.washdc.fios.verizon.net. [173.73.60.87])
+        by smtp.gmail.com with ESMTPSA id s6sm8855331qkd.55.2017.10.19.04.47.28
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Thu, 19 Oct 2017 04:47:28 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Oct 18, 2017 at 02:44:13PM -0700, Gregory Farnum wrote:
-> On Wed, Oct 18, 2017 at 4:27 AM, John Spray <jspray@redhat.com> wrote:
-> > On Wed, Oct 18, 2017 at 11:11 AM, Jan Fajerski <jfajerski@suse.com> wrote:
-<snip>
-> > My immediate thoughts:
-> >  - The key element for implement kclient support is to implement a
-> > mechanism whereby the clients do not have to backwards-traverse from a
-> > file to find the nearest ancestor with a quota set.  I think that if
-> > implementing a voucher-based approach, you'd still have to do this
-> > work in addition to implementing the voucher system (the vouchers
-> > would basically be the security layer on top of the refactor of
-> > quotas)
-> >  - The simple voucher approach is not sufficient for doing efficient
-> > quotas on arbitrary ancestor directories: the OSD doesn't know what
-> > directory a file is in, so how can it know whether a particular
-> > voucher is valid for writes to a particular file?  The hack to make it
-> > work would be to issue vouchers individually for each inode, but then
-> > clients can overshoot their quota very far by opening many files at
-> > once.
-> 
-> I'm not sure we need to focus on the existing directory-based quotas:
-> the reason we chose that model is because uid-based quotas did not
-> seem feasible. If this work does make them feasible, why not use the
-> model people are familiar with? (Bonus: if different UIDs map to
-> different namespaces, it's very easy for the OSDs to check they are
-> valid for a given object.)
+While the default messenger logging setting has always been an
+impediment to high queue-depth, high IOPS workloads, in Luminous it
+appears to have slowed down librbd small block IOPS by an additional 10-
+15%. When compared against cases where the messenger logs are disabled,
+it's more than a 40% IOPS degradation to have the messenger logs
+enabled.
 
-Correct, this could be used to move to a BSD-like quotas implementation,
-where we could have 'user', 'group' and the more recent 'project' quotas
-(which pretty much corresponds to the cephfs directory-based quotas).
+From some quick "perf" runs, the Luminous delta seems to be from from a
+few places: (1) hobject_t is now used in the OSD messages, and it's more
+expensive to construct[2] and print; (2) log messages are longer in
+length; and (3) async messenger is more verbose per message at log level
+1 compared to simple messenger.
 
-Obviously, a challenge would be to ensure consistent user/group IDs across
-the different clients.
+I'd hate to advocate the sledge-hammer approach to say everyone should
+deploy librbd with "debug ms = 0" -- especially since I've relied on
+decoding the in-memory log messages from core dumps as a pseudo-librbd
+flight recorder in the past.
 
-> That said, (without having read the papers) I'm a little skeptical it
-> will work. I've seen several "low-cost" abstractions that have hidden
-> global state computations which turn out to be very costly once you
-> exceed a threshold number of nodes.
-> 
-> 
-> > - In the reconciliation phase, the awkward part would be calculating
-> > the actual size of the data in the quota-enforced directory, as the
-> > vouchers could have been used for either overwrites or appends.  The
-> > OSD voucher refunds would have to do something like tracking the
-> > highest offset written in the file, and they would need passing back
-> > up to the MDS so that it could accurately update its statistics about
-> > the directory, perhaps.
-> > - From reading the PDF link, it seems like they are not implementing
-> > directory quotas, but per-client (or group of client) quotas.
-> >
-> > I imagine that implementing directory quotas in a secure way would
-> > require a more complex scheme, where the client would have to be able
-> > to prove to the OSD which "quota realm" (i.e. ancestor dir with a
-> > quota set) a particular inode belonged to.  You could potentially
-> > issue such a token when granting write caps on a file: for files that
-> > the client is allowed to write, it would get a signed token from the
-> > MDS saying that the client may write, and also saying which quota
-> > realm the file is in.  Then, the client would send that in addition to
-> > a quota voucher for that particular realm, and the OSD would look at
-> > both the token and the voucher.
-> >
-> > This is related to ideas about doing broader OSD-side enforcement of
-> > e.g. permissions: the MDS could issue tokens that said exactly what
-> > the client is allowed to do with specific inodes, rather than clients
-> > having free reign over everything in the data pool.
-> 
-> Yeah, we've read a number of papers relevant to this topic. They were
-> generally focused on access permissions rather than quotas, though,
-> and generally had higher costs than are claimed here. I'm not sure if
-> any of them are extensible to quota enforcement; I tend to think not.
-> (They mostly involved the MDS signing statements with a timeout
-> granting access to the client holding them, but not feeding from the
-> OSD back to the MDS.)
+This seems like an area that could use some team discussion and thought.
+Perhaps it would be possible to re-use tracepoint hooks where we keep
+the last X traces in-memory so that they can be dumped and/or are
+available in the core file. In theory that would at least reduce the
+expense of converting these trace-like log messages to expensive human
+readable strings.
 
-Just out of curiosity, is there any work being done on ceph to implement
-this OSD permissions enforcement?
+Thoughts?
 
-> See especially "Macaroons: Cookies with Contextual Caveats for
-> Decentralized Authorization in the Cloud". "Scalable Security for
-> Petascale Parallel File Systems" was interesting but I think pretty
-> much superseded by macaroons. "Horus: Fine-Grained Encryption-Based
-> Security for Large-Scale Storage" was very different, but has the
-> "security" tag in my database program and might be more useful for
-> quotas, as it is about accessing file ranges rather than inodes.
+[1] http://tracker.ceph.com/issues/21846
+[2] http://tracker.ceph.com/issues/21845
 
-Interesting weekend literature, thanks!
-
-Cheers,
 --
-Luís
+Jason
