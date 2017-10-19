@@ -1,88 +1,30 @@
-From: ceph-devel-owner@vger.kernel.org
-Subject: =?utf-8?B?4piFIGNlbyAtLeKAnDIwMTjkuJbnlYzlpI3lkIjmnZDmlpnlsZU=?=
-        =?utf-8?B?6KeI5Y+K5Lya6K6u4oCd5bCG5LqO4oCcM+aciOKAneWcqOKAnOazleWbveW3tOm7juKAneS4vuihjA==?=
-        =?utf-8?B?ICAgIO+8iOWcsOWPs1AxLUwtTWXvvIk=?=
-Date: Thu, 19 Oct 2017 16:23:00 +0800
-Message-ID: <20171019162308037755@protcc.com>
-Reply-To: <EMAILQUNFA@163.COM>
+From: kefu chai <tchaikov@gmail.com>
+Subject: librados3
+Date: Thu, 19 Oct 2017 17:25:27 +0800
+Message-ID: <CAJE9aOPhPFJdV2BQ4-9LhpzN5gucc4BOuU=0C27geK_d0P4r=A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtphk-r1-1.dns.com.cn ([182.61.104.119]:59599 "EHLO
-        smtphk-r1-1.dns.com.cn" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752153AbdJSIXo (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Oct 2017 04:23:44 -0400
-Received: from smtpbj13.dns.com.cn (smtpbj13.dns.com.cn [180.76.192.163])
-        by smtphk-r1-1.dns.com.cn (Postfix) with ESMTP id 75906DFC0D
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 16:23:42 +0800 (CST)
-Received: from dp1.dns.com.cn (dp1.dns.com.cn [180.76.192.150])
-        by smtpbj13.dns.com.cn (Postfix) with ESMTP id 03E3B1FFE0
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 16:23:40 +0800 (CST)
-Received: from mx32.dns.com.cn (unknown [192.168.16.80])
-        by dp1.dns.com.cn (Postfix) with ESMTP id F3AC080E68
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 16:23:39 +0800 (CST)
+Received: from mail-oi0-f52.google.com ([209.85.218.52]:52053 "EHLO
+        mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751348AbdJSJZ2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Oct 2017 05:25:28 -0400
+Received: by mail-oi0-f52.google.com with SMTP id j126so13444309oib.8
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 02:25:28 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Jason Dillaman <jdillama@redhat.com>
 
-5bCK5pWs55qEIGNlb0BoYW5iYW5nLmNjIOS8geS4mumihuWvvC/lhazlj7jotJ/otKPkurov5Lia
-55WM5LiT5a6277yM5oKo5aW977yaDQrjgIDjgIANCuOAgOOAgOaWsOadkOaWmeS4ujIx5LiW57qq
-5LiJ5aSn5YWx5oCn5YWz6ZSu5oqA5pyv5LmL5LiA77yM5bey5oiQ5Li65YWo55CD57uP5rWO6L+F
-6YCf5aKe6ZW/55qE5rqQ5Yqo5Yqb5ZKM5o+Q5Y2H5qC45b+D56ue5LqJ5Yqb55qE5oiY55Wl54Sm
-54K544CC5p2Q5paZ5L2c5Li65Yi26YCg5Lia55qE5Z+656GA77yM54m55Yir5piv5paw5p2Q5paZ
-56CU56m25ZKM5Lqn5Lia5Y+R5bGV55qE5rC05bmz5LiO6KeE5qih77yM5bey57uP5oiQ5Li66KGh
-6YeP5LiA5Liq5Zu95a6256eR5oqA6L+b5q2l5ZKM57u85ZCI5a6e5Yqb55qE6YeN6KaB5qCH5b+X
-44CC5Zyo5paw5p2Q5paZ5Y+R5bGV5LiO5bqU55So5Lit77yM5aSN5ZCI5p2Q5paZ5Y2g5pyJ55u4
-5b2T6YeN6KaB55qE5Zyw5L2N77yM54m55Yir5bm/5rOb55qE5bqU55So5Zyo5rG96L2m44CB5Lqk
-6YCa44CB6aOO6IO944CB6Iiq56m644CB6Iiq5aSp44CB5YW15Zmo44CB6Ii56Ii244CB5Zu96Ziy
-44CB5py65qKw44CB55S15a2Q44CB5YyW5bel44CB5bu6562R44CB5Yac5Lia44CB5riU5Lia44CB
-57q657uH44CB6L+Q5Yqo5Zmo5p2Q562J6aKG5Z+f77yM5LiA55u05piv5LiW55WM5ZCE5Zu95LyY
-5YWI5Y+R5bGV5ZKM56ue5LqJ5r+A54OI55qE6YeN6KaB6KGM5Lia44CCDQrjgIDjgIANCuOAgOOA
-gOKAnEpFQ+S4lueVjOWkjeWQiOadkOaWmeWxleiniOWPiuS8muiuruKAne+8iEpFQyB3b3JsZCBD
-b21wb3NpdGVzIFNob3cgJiBDb25mZXJlbmNlc++8ieWIm+WKnuS6jjE5NjPlubTvvIzmr4/lubTk
-uL7lip7kuIDlsYrvvIzoh7MyMDE35bm05oC75YWx5Li+5Yqe5LqGNTLlsYrvvIzkuLvlip7ljZXk
-vY3mmK/ms5Xlm71KRUPlpI3lkIjmnZDmlpnlj5HlsZXkv4Pov5vkvJovSkVD6ZuG5Zui77yM5Lit
-5Zu95oC75bGV5Zui5bGV5ZWG57uE57uH5Y2V5L2N5Li65pig5b635Zu96ZmF5Lya5bGV6ZuG5Zui
-5Lit5Zu95Luj6KGo5aSE77yM5Zyo5YyX5Lqs44CB5LiK5rW3562J5Zyw6K6+5pyJ5YiG5pSv5py6
-5p6E77yM6LSf6LSj6K+l5bGV5Lya5Zyo5Lit5Zu955qE5o6o5bm/5ZKM5oub5ZWG5bel5L2c77yI
-SkVD5Lit5Zu95oC75bGV5Zui5oql5ZCN54Ot57q/77yaNDAwMC02ODAtODYw6L2sODE0NOOAgTUy
-MjDvvInjgIJKRUPlpI3lkIjmnZDmlpnlsZXlt7LmiJDkuLrkuJbnlYzkuIrljoblj7LmnIDmgqDk
-uYXjgIHop4TmqKHmnIDlpKfnmoTlpI3lkIjmnZDmlpnooYzkuJrkuJPkuJrlsZXop4jkvJrvvIzl
-sZXnpLrlkozlj43mmKDkuoblvZPliY3lpI3lkIjmnZDmlpnooYzkuJrnmoTmnIDmlrDmioDmnK/l
-kozlupTnlKjmiJDmnpzjgIINCuOAgOOAgA0K44CA44CA5Li65LqG5aKe6L+b5Zu95YaF5aSW5aSN
-5ZCI5p2Q5paZ6KGM5Lia55qE5Lqk5rWB5LiO5ZCI5L2c77yM5ZCM5pe25bGV56S65oiR5Zu95aSN
-5ZCI5p2Q5paZ5Lqn5Lia55qE5Y+R5bGV5LiO5oiQ5bCx77yM5biu5Yqp5aKD5YaF5LyB5Lia5byA
-5ouT5Zu95YaF5aSW5biC5Zy677yM5Lit5Zu95Zu96ZmF5aSN5p2Q5Y2P5Lya44CB5pig5b635Zu9
-6ZmF5Lya5bGV6ZuG5Zui77yIWU9ORCBFWFBP77yJ5Lit5Zu95Luj6KGo5aSE5bey6L+R5Y2B5bm0
-57uE57uH5Lit5Zu95LyB5Lia5Y+C5LiO6K+l5bGV5Lya77yM5Li65Lit5Zu95aSN5ZCI5p2Q5paZ
-6ZuG5Zui44CB5Lit5p2Q56eR5oqA44CB5Lit6ZKi6ZuG5Zui44CB5Lit5Zu95bu65p2Q6ZuG5Zui
-44CB5Lit5Zu95ZWG6aOe44CB5YyX5Lqs54676ZKi6Zmi44CB5LiK5rW35p2w5LqL5p2w5paw5p2Q
-5paZ6ZuG5Zui44CB6YeN5bqG5Zu96ZmF5aSN5ZCI5p2Q5paZ44CB5Lit5Y2X5o6n6IKh6ZuG5Zui
-44CB56em55qH5bKb6ICA5Y2O546755KD6ZKi44CB54Of5Y+w5rCo57q244CB5aSp6ams6ZuG5Zui
-44CB5Y2O5Lic55CG5bel5aSn5a2m44CB5ZOI5bCU5ruo5bel5Lia5aSn5a2m44CB5beo55+z6ZuG
-5Zui44CB5Lit5Ya26ZuG5Zui44CB6YeR5YWJ6ZuG5Zui44CB5rGf6IuP5oGS56We57qk57u05p2Q
-5paZ44CB6YeN5bqG5aSn5a2m44CB5LiK5rW3546755KD6ZKi56CU56m26Zmi44CB5Lit5Y2X5aSn
-5a2m44CB5ZOI5bCU5ruo546755KD6ZKi56CU56m26Zmi562J5LyX5aSa6KGM5Lia5beo5aS05ZKM
-55+l5ZCN5py65p6E5o+Q5L6b5LqG5LyY6LSo6auY5pWI55qE5aKD5aSW5bGV6LS45pyN5Yqh44CC
-DQrjgIDjgIANCuOAgOOAgOKAnEpFQyB3b3JsZCAyMDE4IOesrOS6lOWNgeS4ieS4lueVjOWkjeWQ
-iOadkOaWmeWxleiniOWPiuS8muiuruKAneWwhuS6juKAnDPmnIgwNi0wOOaXpeKAneWcqOKAnOaz
-leWbveW3tOm7juWxleiniOS8muiuruS4reW/g+KAneWGjeW6puS4vuihjO+8jOaIkeS7rOivmumC
-gOWFqOWbveWQhOWcsOWkjeWQiOadkOaWmeWPiuaWsOadkOaWmeebuOWFs+WNleS9jeS4juS4mueV
-jOS6uuWjq+WKoOWFpeWSseS7rOeahOS4reWbveaAu+WxleWbouWJjeW+gOWPguWxleWPguinguOA
-guOAgOOAgA0K44CA44CADQrjgIDjgIDmnInlhbPlj4LlsZXlj4Lop4LigJxKRUPkuJbnlYzlpI3l
-kIjmnZDmlpnlsZXigJ3kuovlrpzvvIzor7fogZTnu5zjgJDkuK3lm73mgLvlsZXlm6LjgJHnu4Tl
-ip7mlrnigJTigJQg5YWo5Zu957uf5LiA5a6i5pyN54Ot57q/77yaNDAwMC01ODAtODUw77yI6L2s
-NTIyMOOAgTgxNDTjgIE4ODg477yJ44CBMDEw4oCUNjkyMy02OTQ077ybIOmCrueusS9RUe+8mjEy
-ODA5Mzk1I3FxLmNvbe+8myDlvq7kv6HvvJogQ2FuWmhhblhpYW9Yae+8iOWPguWxlea2iOaBr++8
-ieOAgVpoYW5TaGFuZ1poaUppYe+8iOWxleWVhuS5i+Wutu+8ie+8myDlvq7ljZrvvJpodHRwOi8v
-d2VpYm8uY29tL2plY3Nob3fvvIjlsZXkvJrvvInjgIFodHRwOi8vd2VpYm8uY29tL3lpbmdkZWh1
-aXpoYW7vvIjlhazlj7jvvInjgIINCuOAgOOAgA0K44CA44CA5Y+C5YqgSkVD5bGV5Lya5piv5LiA
-5Liq5aSN5ZCI5p2Q5paZ5Y+K5paw5p2Q5paZ5LyB5Lia6LWw5ZCR5Zu96ZmF5YyW55qE5qCH5b+X
-5ZKM6YCU5b6E77yBDQrjgIDjgIANCuOAgOOAgA0K44CA44CADQrjgIDjgIANCl9fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX1/jgIDjgIANCu+8iOeZvuS4h+e+pOWPkeezu+e7n3zkuLrmgqjlj5HpgIF8
-5aaC5LiN5biM5pyb5YaN5pS25Yiw5q2k6KGM5Lia6LWE6K6vfOivt+WbnuWkjeKAnFREK0pFQ+KA
-neiHs+mCrueusTEwNTU4MDA4MTJAcXEuY29t77yJDQo=
+in luminous, we introduced a change not backward compatible with
+pre-luminous librados. see see http://tracker.ceph.com/issues/21573.
+and i cannot see an obvious solution without bumping up the so version
+of librados to 3.
 
+if we have the luxury to do it,  we will be able to give librados an
+overhaul. for a todo list, see http://pad.ceph.com/p/librados3.
 
+what do you think?
+
+-- 
+Regards
+Kefu Chai
