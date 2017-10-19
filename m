@@ -1,353 +1,191 @@
-From: xiaoyan li <wisher2003@gmail.com>
-Subject: Re: Work update related to rocksdb
-Date: Thu, 19 Oct 2017 15:24:26 +0800
-Message-ID: <CAERxPZJ05uJV6SvM0-S5HyJyH4rRArdaNvMZefepirDxq-TWGg@mail.gmail.com>
-References: <AEE495BD65FC0144A24ECB647C8270EF384559B2@shsmsx102.ccr.corp.intel.com>
- <fd7b00ef-66e4-cfae-fc76-6300b86a3b86@redhat.com> <AEE495BD65FC0144A24ECB647C8270EF38455A21@shsmsx102.ccr.corp.intel.com>
- <3ae1878e-9b70-669a-6596-e8480ae14537@redhat.com> <AEE495BD65FC0144A24ECB647C8270EF3846073B@shsmsx102.ccr.corp.intel.com>
- <AEE495BD65FC0144A24ECB647C8270EF38475E4A@shsmsx102.ccr.corp.intel.com>
- <416b7e16-6422-f572-7a2b-b7db7eabcb20@redhat.com> <AEE495BD65FC0144A24ECB647C8270EF384825EC@shsmsx102.ccr.corp.intel.com>
- <cfebf4b4-67ec-8826-997e-6b6b1faa605d@redhat.com> <alpine.DEB.2.11.1710161314220.26702@piezo.us.to>
- <c3d3264c-fef8-6d89-1fe9-0863bfb4db1d@redhat.com> <CAERxPZ+-fiP1GL1D7NyLE49hrN92GrOrouJdHPywPf7v2pLFWQ@mail.gmail.com>
- <CAERxPZL7ErKKXi8+kvQ3Q1u4arC+jCFqWDT-9OPnj=OSEHuwhw@mail.gmail.com>
- <alpine.DEB.2.11.1710170244490.26702@piezo.us.to> <CAERxPZ+surE4PjiN=uiJGUhDGr8Z2-is5R6NQqkMzFtwbFd-Cg@mail.gmail.com>
- <alpine.DEB.2.11.1710170320440.26702@piezo.us.to> <CACJqLyb6e+aPaqqxKA_V3Z2OVAhwyb4nK5E3ucqzzqjcYW7m9A@mail.gmail.com>
+From: zhaomingyue <zhao.mingyue-vVzyEvZLFYE@public.gmane.org>
+Subject: [filestore][journal][prepare_entry] rebuild data_align
+ is 4086, maybe a bug
+Date: Thu, 19 Oct 2017 07:59:21 +0000
+Message-ID: <1CB94550540AE44E9CAAE8CD5AF40BF8AB72B935@H3CMLB14-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f47.google.com ([209.85.218.47]:57249 "EHLO
-        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751912AbdJSHY1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Oct 2017 03:24:27 -0400
-Received: by mail-oi0-f47.google.com with SMTP id v9so13021254oif.13
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 00:24:27 -0700 (PDT)
-In-Reply-To: <CACJqLyb6e+aPaqqxKA_V3Z2OVAhwyb4nK5E3ucqzzqjcYW7m9A@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Haomai Wang <haomai@xsky.com>
-Cc: Sage Weil <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>, "Li, Xiaoyan" <xiaoyan.li@intel.com>, "Gohad, Tushar" <tushar.gohad@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>, Radoslaw Zarzynski <rzarzyns@redhat.com>
+Content-Type: multipart/mixed; boundary="===============9212570042466999868=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+Content-Language: zh-CN
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, "ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Liuhao <liu.haoA-vVzyEvZLFYE@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Oct 17, 2017 at 9:17 PM, Haomai Wang <haomai@xsky.com> wrote:
-> To be clarify, we test rm range before and meet several odd bugs with
-> rm range I guess. then from rocksdb commit history, range delete is in
-> heavy changing.
->
-> rocksdb community still doesn't recommend to use range delete.
-Thank you for the advice. As pglog just set and rangdelete, is it
-better than other more complex scerios? Anyway I will have check.
+--===============9212570042466999868==
+Content-Language: zh-CN
+Content-Type: multipart/alternative;
+	boundary="_000_1CB94550540AE44E9CAAE8CD5AF40BF8AB72B935H3CMLB14EXsrvhu_"
 
->
-> On Tue, Oct 17, 2017 at 11:21 AM, Sage Weil <sweil@redhat.com> wrote:
->> On Tue, 17 Oct 2017, xiaoyan li wrote:
->>> On Tue, Oct 17, 2017 at 10:49 AM, Sage Weil <sweil@redhat.com> wrote:
->>> > On Tue, 17 Oct 2017, xiaoyan li wrote:
->>> >> Hi Sage and Mark,
->>> >> A question here: OMAP pg logs are added by "set", are they only
->>> >> deleted by rm_range_keys in BlueStore?
->>> >> https://github.com/ceph/ceph/pull/18279/files
->>> >
->>> > Ooh, I didn't realize we weren't doing this already--we should definitely
->>> > merge this patch.  But:
->>> >
->>> >> If yes, maybe when dedup, we don't need to compare the keys in all
->>> >> memtables, we just compare keys in current memtable with rm_range_keys
->>> >> in later memtables?
->>> >
->>> > They are currently deleted explicitly by key name by the OSD code; it
->>> > doesn't call the range-based delete method.  Radoslaw had a test branch
->>> > last week that tried using rm_range_keys instead but he didn't see any
->>> > real difference... presumably because we didn't realize the bluestore omap
->>> > code wasn't passing a range delete down to KeyValuDB!  We should retest on
->>> > top of your change.
->>> I will also have a check.
->>> A memtable table includes two parts: key/value operations(set, delete,
->>> deletesingle, merge), and range_del(includes range delete). I am
->>> wondering if all the pg logs are deleted by range delete, we can just
->>> check whether a key/value is deleted in range_del parts of later
->>> memtables when dedup flush, this can be save a lot of comparison
->>> effort.
->>
->> That sounds very promising!  Radoslaw, can you share your patch changing
->> the PG log trimming behavior?
->>
->> Thanks!
->> sage
->>
->>>
->>> >
->>> > Thanks!
->>> > sage
->>> >
->>> >
->>> >
->>> >  >
->>> >>
->>> >> On Tue, Oct 17, 2017 at 10:18 AM, xiaoyan li <wisher2003@gmail.com> wrote:
->>> >> > Hi Sage and Mark,
->>> >> > Following tests results I give are tested based on KV sequences got
->>> >> > from librbd+fio 4k or 16k random writes in 30 mins.
->>> >> > In my opinion, we may use dedup flush style for onodes and deferred
->>> >> > data, but use default merge flush style for other data.
->>> >> >
->>> >> > On Mon, Oct 16, 2017 at 9:50 PM, Mark Nelson <mnelson@redhat.com> wrote:
->>> >> >>
->>> >> >>
->>> >> >> On 10/16/2017 08:28 AM, Sage Weil wrote:
->>> >> >>>
->>> >> >>> [adding ceph-devel]
->>> >> >>>
->>> >> >>> On Mon, 16 Oct 2017, Mark Nelson wrote:
->>> >> >>>>
->>> >> >>>> Hi Lisa,
->>> >> >>>>
->>> >> >>>> Excellent testing!   This is exactly what we were trying to understand.
->>> >> >>>>
->>> >> >>>> On 10/16/2017 12:55 AM, Li, Xiaoyan wrote:
->>> >> >>>>>
->>> >> >>>>> Hi Mark,
->>> >> >>>>>
->>> >> >>>>> Based on my testing, when setting min_write_buffer_number_to_merge as 2,
->>> >> >>>>> the
->>> >> >>>>> onodes and deferred data written into L0 SST can decreased a lot with my
->>> >> >>>>> rocksdb dedup package.
->>> >> >>>>>
->>> >> >>>>> But for omap data, it needs to span more memtables. I tested omap data
->>> >> >>>>> in
->>> >> >>>>> separate column family. From the data, you can see when
->>> >> >>>>> min_write_buffer_number_to_merge is set to 4, the data written into L0
->>> >> >>>>> SST
->>> >> >>>>> is good. That means it has to compare current memTable to flush with
->>> >> >>>>> later 3
->>> >> >>>>> memtables recursively.
->>> >> >>>>> kFlushStyleDedup is to new flush style in my rocksdb dedup package.
->>> >> >>>>> kFlushStyleMerge is current flush style in master branch.
->>> >> >>>>>
->>> >> >>>>> But this is just considered from data written into L0. With more
->>> >> >>>>> memtables
->>> >> >>>>> to compare, it sacrifices CPU and computing time.
->>> >> >>>>>
->>> >> >>>>> Memtable size: 256MB
->>> >> >>>>> max_write_buffer_number min_write_buffer_number_to_merge
->>> >> >>>>> flush_style     Omap data written into L0 SST(unit: MB)
->>> >> >>>>> 16      8       kFlushStyleMerge        7665
->>> >> >>>>> 16      8       kFlushStyleDedup        3770
->>> >> >>>>> 8       4       kFlushStyleMerge        11470
->>> >> >>>>> 8       4       kFlushStyleDedup        3922
->>> >> >>>>> 6       3       kFlushStyleMerge        14059
->>> >> >>>>> 6       3       kFlushStyleDedup        5001
->>> >> >>>>> 4       2       kFlushStyleMerge        18683
->>> >> >>>>> 4       2       kFlushStyleDedup        15394
->>> >> >>>>
->>> >> >>>>
->>> >> >>>> Is this only omap data or all data?  It looks like the 6/3 or 8/4 is
->>> >> >>>> still
->>> >> >>>> probably the optimal point (And the improvements are quite noticeable!).
->>> >> > This is only omap data. Dedup can decrease data written into L0 SST,
->>> >> > but it needs to compare too many memtables.
->>> >> >
->>> >> >>>> Sadly we were hoping we might be able to get away with smaller memtables
->>> >> >>>> (say
->>> >> >>>> 64MB) with KFlushStyleDedup.  It looks like that might not be the case
->>> >> >>>> unless
->>> >> >>>> we increase the number very high.
->>> >> >>>>
->>> >> >>>> Sage, this is going to be even worse if we try to keep more pglog entries
->>> >> >>>> around on flash OSD backends?
->>> >> >>>
->>> >> >>>
->>> >> >>> I think there are three or more factors at play here:
->>> >> >>>
->>> >> >>> 1- If we reduce the memtable size, the CPU cost of insertion (baseline)
->>> >> >>> and the dedup cost will go down.
->>> >> >>>
->>> >> >>> 2- If we switch to a small min pg log entries, then most pg log keys
->>> >> >>> *will* fall into the smaller window (of small memtables * small
->>> >> >>> min_write_buffer_to_merge).  The dup op keys probably won't, though...
->>> >> >>> except maybe they will because the values are small and more of them will
->>> >> >>> fit into the memtables.  But then
->>> >> >>>
->>> >> >>> 3- If we have more keys and smaller values, then the CPU overhead will be
->>> >> >>> higher again.
->>> >> >>>
->>> >> >>> For PG logs, I didn't really expect that the dedup style would help; I was
->>> >> >>> only thinking about the deferred keys.  I wonder if it would make sense to
->>> >> >>> specify a handful of key prefixes to attempt dedup on, and not bother on
->>> >> >>> the others?
->>> >> >>
->>> >> >>
->>> >> >> Deferred keys seem to be a much smaller part of the problem right now than
->>> >> >> pglog.  At least based on what I'm seeing at the moment with NVMe testing.
->>> >> >> Regarding dedup, it's probably worth testing at the very least.
->>> >> > I did following tests: all data in default column family. Set
->>> >> > min_write_buffer_to_merge to 2, check the size of kinds of data
->>> >> > written into L0 SST files.
->>> >> > From the data, onodes and deferred data can be removed a lot in dedup style.
->>> >> >
->>> >> > Data written into L0 SST files:
->>> >> >
->>> >> > 4k random writes (unit: MB)
->>> >> > FlushStyle      Omap              onodes            deferred           others
->>> >> > merge       22431.56        23224.54       1530.105          0.906106
->>> >> > dedup       22188.28        14161.18        12.68681         0.90906
->>> >> >
->>> >> > 16k random writes (unit: MB)
->>> >> > FlushStyle      Omap              onodes            deferred           others
->>> >> > merge           19260.20          8230.02           0                    1914.50
->>> >> > dedup           19154.92          2603.90           0
->>> >> >    2517.15
->>> >> >
->>> >> > Note here: for others type, which use "merge" operation, dedup style
->>> >> > can't make it more efficient. In later, we can set it in separate CF,
->>> >> > use default merge flush style.
->>> >> >
->>> >> >>
->>> >> >>>
->>> >> >>> Also, there is the question of where the CPU time is spent.
->>> >> >>
->>> >> >>
->>> >> >> Indeed, but if we can reduce the memtable size it means we save CPU in other
->>> >> >> areas.  Like you say below, it's complicated.
->>> >> >>>
->>> >> >>>
->>> >> >>> 1- Big memtables means we spend more time in submit_transaction, called by
->>> >> >>> the kv_sync_thread, which is a bottleneck.
->>> >> >>
->>> >> >>
->>> >> >> At least on NVMe we see it pretty regularly in the wallclock traces.  I need
->>> >> >> to retest with Radoslav and Adam's hugepages PR to get a feel for how bad it
->>> >> >> is after that.
->>> >> >>
->>> >> >>>
->>> >> >>> 2- Higher dedup style flush CPU usage is spent in the compaction thread(s)
->>> >> >>> (I think?), which are asynchronous.
->>> >> >>
->>> >> >>
->>> >> >> L0 compaction is single threaded though so we must be careful....
->>> >> >>
->>> >> >>>
->>> >> >>> At the end of the day I think we need to use less CPU total, so the
->>> >> >>> optimization of the above factors is a bit complicated.  OTOH if the goal
->>> >> >>> is IOPS at whatever cost it'll probably mean a slightly different choice.
->>> >> >>
->>> >> >>
->>> >> >> I guess we should consider the trends.  Lots of cores, lots of flash cells.
->>> >> >> How do we balance high throughput and low latency?
->>> >> >>
->>> >> >>>
->>> >> >>> I would *expect* that if we go from, say, 256mb tables to 64mb tables and
->>> >> >>> dedup of <= 4 of them, then we'll see a modest net reduction of total CPU
->>> >> >>> *and* a shift to the compaction threads.
->>> >> >>
->>> >> >>
->>> >> >> It seems like based on Lisa's test results that's too short lived? Maybe I'm
->>> >> >> not understanding what you mean?
->>> >> >>
->>> >> >>>
->>> >> >>> And changing the pg log min entries will counterintuitively increase the
->>> >> >>> costs of insertion and dedup flush because more keys will fit in the same
->>> >> >>> amount of memtable... but if we reduce the memtable size at the same time
->>> >> >>> we might get a win there too?  Maybe?
->>> >> >>
->>> >> >>
->>> >> >> There's too much variability here to theorycraft it and your "maybe"
->>> >> >> statement confirms for me. ;)  We need to get a better handle on what's
->>> >> >> going on.
->>> >> >>
->>> >> >>>
->>> >> >>> Lisa, do you think limiting the dedup check during flush to specific
->>> >> >>> prefixes would make sense as a general capability?  If so, we could target
->>> >> >>> this *just* at the high-value keys (e.g., deferred writes) and avoid
->>> >> >>> incurring very much additional overhead for the key ranges that aren't
->>> >> >>> sure bets.
->>> >> > The easiest way to do it is to set data in different CFs, and use
->>> >> > different flush style(dedup or merge) in different CFs.
->>> >> >
->>> >> >>
->>> >> >>
->>> >> >> At least in my testing deferred writes during rbd 4k random writes are
->>> >> >> almost negligible:
->>> >> >>
->>> >> >> http://pad.ceph.com/p/performance_weekly
->>> >> >>
->>> >> >> I suspect it's all going to be about OMAP.  We need a really big WAL that
->>> >> >> can keep OMAP around for a long time while quickly flushing object data into
->>> >> >> small memtables.  On disk it's a big deal that this gets layed out
->>> >> >> sequentially but on flash I'm wondering if we'd be better off with a
->>> >> >> separate WAL for OMAP (a different rocksdb shard or different data store
->>> >> >> entirely).
->>> >> > Yes, OMAP data is main data written into L0 SST.
->>> >> >
->>> >> > Data written into every memtable: (uint: MB)
->>> >> > IO load          omap          ondes          deferred          others
->>> >> > 4k RW          37584          85253          323887          250
->>> >> > 16k RW        33687          73458          0                   3500
->>> >> >
->>> >> > In merge flush style with min_buffer_to_merge=2.
->>> >> > Data written into every L0 SST: (unit MB)
->>> >> > IO load     Omap              onodes            deferred           others
->>> >> > 4k RW       22188.28        14161.18        12.68681         0.90906
->>> >> > 16k RW     19260.20          8230.02           0                    1914.50
->>> >> >
->>> >> >>
->>> >> >> Mark
->>> >> >>
->>> >> >>
->>> >> >>>
->>> >> >>> sage
->>> >> >>>
->>> >> >>>
->>> >> >>>>> The above KV operation sequences come from 4k random writes in 30mins.
->>> >> >>>>> Overall, the Rocksdb dedup package can decrease the data written into L0
->>> >> >>>>> SST, but it needs more comparison. In my opinion, whether to use dedup,
->>> >> >>>>> it
->>> >> >>>>> depends on the configuration of the OSD host: whether disk is over busy
->>> >> >>>>> or
->>> >> >>>>> CPU is over busy.
->>> >> >>>>
->>> >> >>>>
->>> >> >>>> Do you have any insight into how much CPU overhead it adds?
->>> >> >>>>
->>> >> >>>>>
->>> >> >>>>> Best wishes
->>> >> >>>>> Lisa
->>> >> >>
->>> >> >> --
->>> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> >> >> the body of a message to majordomo@vger.kernel.org
->>> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> >> >
->>> >> >
->>> >> >
->>> >> > --
->>> >> > Best wishes
->>> >> > Lisa
->>> >>
->>> >>
->>> >>
->>> >> --
->>> >> Best wishes
->>> >> Lisa
->>> >>
->>> >>
->>>
->>>
->>>
->>> --
->>> Best wishes
->>> Lisa
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--_000_1CB94550540AE44E9CAAE8CD5AF40BF8AB72B935H3CMLB14EXsrvhu_
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 
+SGk6DQp3aGVuIEkgYW5hbHl6ZWQgdGhlIHBlcmZvcm1hbmNlIG9mIGNlcGgsIEkgZm91bmQgdGhh
+dCByZWJ1aWxkX2FsaWduZWQgd2FzIHRpbWUtY29uc3VtaW5nLCBhbmQgdGhlIGFuYWx5c2lzIGZv
+dW5kIHRoYXQgcmVidWlsZCBvcGVyYXRpb25zIHdlcmUgcGVyZm9ybWVkIGV2ZXJ5IHRpbWUuDQoN
+ClNvdXJjZSBjb2RlOg0KRmlsZVN0b3JlOjpxdWV1ZV90cmFuc2FjdGlvbnMNCuKAkz4gam91cm5h
+bC0+cHJlcGFyZV9lbnRyeShvLT50bHMsICZ0YmwpOw0KLT4gZGF0YV9hbGlnbiA9ICgoKnApLmdl
+dF9kYXRhX2FsaWdubWVudCgpIC0gYmwubGVuZ3RoKCkpICYgfkNFUEhfUEFHRV9NQVNLOw0KLT4g
+cmV0ID0gZWJsLnJlYnVpbGRfYWxpZ25lZChDRVBIX0RJUkVDVElPX0FMSUdOTUVOVCk7DQoNCkxv
+ZzoNCjIwMTctMTAtMTcgMTk6NDk6MjkuNzA2MjQ2IDdmYjQ3MmJmZTcwMCAxMCBqb3VybmFsICBs
+ZW4gNDE5NjEzMSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgNDA0NiBibCA0MTk2MTMxIHBv
+c3RfcGFkIDIyMzkgdGFpbCA0MCkgKGJsIGFsaWdubWVudCA0MDg2KQ0KDQpxdWVzdGlvbjoNCkkg
+ZmluZCDigJxhbGlnbm1lbnQgPTQwODbigJ0sIEkgdGhpbmsgSXQgbWF5YmUgYSBidWcNCkkgdGhp
+bmsgaXQgc2hvdWxkIGJlIDQwOTYNCmJlY2F1c2UgQ0VQSF9ESVJFQ1RJT19BTElHTk1FTlQgaXMg
+NDA5Ng0KDQp0aGFuayB5b3UNCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0K5pys6YKu5Lu25Y+K5YW2
+6ZmE5Lu25ZCr5pyJ5paw5Y2O5LiJ5oqA5pyv5pyJ6ZmQ5YWs5Y+455qE5L+d5a+G5L+h5oGv77yM
+5LuF6ZmQ5LqO5Y+R6YCB57uZ5LiK6Z2i5Zyw5Z2A5Lit5YiX5Ye6DQrnmoTkuKrkurrmiJbnvqTn
+u4TjgILnpoHmraLku7vkvZXlhbbku5bkurrku6Xku7vkvZXlvaLlvI/kvb/nlKjvvIjljIXmi6zk
+vYbkuI3pmZDkuo7lhajpg6jmiJbpg6jliIblnLDms4TpnLLjgIHlpI3liLbjgIENCuaIluaVo+WP
+ke+8ieacrOmCruS7tuS4reeahOS/oeaBr+OAguWmguaenOaCqOmUmeaUtuS6huacrOmCruS7tu+8
+jOivt+aCqOeri+WNs+eUteivneaIlumCruS7tumAmuefpeWPkeS7tuS6uuW5tuWIoOmZpOacrA0K
+6YKu5Lu277yBDQpUaGlzIGUtbWFpbCBhbmQgaXRzIGF0dGFjaG1lbnRzIGNvbnRhaW4gY29uZmlk
+ZW50aWFsIGluZm9ybWF0aW9uIGZyb20gTmV3IEgzQywgd2hpY2ggaXMNCmludGVuZGVkIG9ubHkg
+Zm9yIHRoZSBwZXJzb24gb3IgZW50aXR5IHdob3NlIGFkZHJlc3MgaXMgbGlzdGVkIGFib3ZlLiBB
+bnkgdXNlIG9mIHRoZQ0KaW5mb3JtYXRpb24gY29udGFpbmVkIGhlcmVpbiBpbiBhbnkgd2F5IChp
+bmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZCB0bywgdG90YWwgb3IgcGFydGlhbA0KZGlzY2xvc3Vy
+ZSwgcmVwcm9kdWN0aW9uLCBvciBkaXNzZW1pbmF0aW9uKSBieSBwZXJzb25zIG90aGVyIHRoYW4g
+dGhlIGludGVuZGVkDQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4gSWYgeW91IHJlY2VpdmUg
+dGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNlbmRlcg0KYnkgcGhvbmUg
+b3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCENCg==
 
+--_000_1CB94550540AE44E9CAAE8CD5AF40BF8AB72B935H3CMLB14EXsrvhu_
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: base64
 
--- 
-Best wishes
-Lisa
+PGh0bWwgeG1sbnM6dj0idXJuOnNjaGVtYXMtbWljcm9zb2Z0LWNvbTp2bWwiIHhtbG5zOm89InVy
+bjpzY2hlbWFzLW1pY3Jvc29mdC1jb206b2ZmaWNlOm9mZmljZSIgeG1sbnM6dz0idXJuOnNjaGVt
+YXMtbWljcm9zb2Z0LWNvbTpvZmZpY2U6d29yZCIgeG1sbnM6bT0iaHR0cDovL3NjaGVtYXMubWlj
+cm9zb2Z0LmNvbS9vZmZpY2UvMjAwNC8xMi9vbW1sIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcv
+VFIvUkVDLWh0bWw0MCI+DQo8aGVhZD4NCjxtZXRhIGh0dHAtZXF1aXY9IkNvbnRlbnQtVHlwZSIg
+Y29udGVudD0idGV4dC9odG1sOyBjaGFyc2V0PXV0Zi04Ij4NCjxtZXRhIG5hbWU9IkdlbmVyYXRv
+ciIgY29udGVudD0iTWljcm9zb2Z0IFdvcmQgMTQgKGZpbHRlcmVkIG1lZGl1bSkiPg0KPHN0eWxl
+PjwhLS0NCi8qIEZvbnQgRGVmaW5pdGlvbnMgKi8NCkBmb250LWZhY2UNCgl7Zm9udC1mYW1pbHk6
+XDVCOEJcNEY1MzsNCglwYW5vc2UtMToyIDEgNiAwIDMgMSAxIDEgMSAxO30NCkBmb250LWZhY2UN
+Cgl7Zm9udC1mYW1pbHk6XDVCOEJcNEY1MzsNCglwYW5vc2UtMToyIDEgNiAwIDMgMSAxIDEgMSAx
+O30NCkBmb250LWZhY2UNCgl7Zm9udC1mYW1pbHk6Q2FsaWJyaTsNCglwYW5vc2UtMToyIDE1IDUg
+MiAyIDIgNCAzIDIgNDt9DQpAZm9udC1mYWNlDQoJe2ZvbnQtZmFtaWx5OiJcQFw1QjhCXDRGNTMi
+Ow0KCXBhbm9zZS0xOjIgMSA2IDAgMyAxIDEgMSAxIDE7fQ0KLyogU3R5bGUgRGVmaW5pdGlvbnMg
+Ki8NCnAuTXNvTm9ybWFsLCBsaS5Nc29Ob3JtYWwsIGRpdi5Nc29Ob3JtYWwNCgl7bWFyZ2luOjBj
+bTsNCgltYXJnaW4tYm90dG9tOi4wMDAxcHQ7DQoJdGV4dC1hbGlnbjpqdXN0aWZ5Ow0KCXRleHQt
+anVzdGlmeTppbnRlci1pZGVvZ3JhcGg7DQoJZm9udC1zaXplOjEwLjVwdDsNCglmb250LWZhbWls
+eToiQ2FsaWJyaSIsInNhbnMtc2VyaWYiO30NCmE6bGluaywgc3Bhbi5Nc29IeXBlcmxpbmsNCgl7
+bXNvLXN0eWxlLXByaW9yaXR5Ojk5Ow0KCWNvbG9yOmJsdWU7DQoJdGV4dC1kZWNvcmF0aW9uOnVu
+ZGVybGluZTt9DQphOnZpc2l0ZWQsIHNwYW4uTXNvSHlwZXJsaW5rRm9sbG93ZWQNCgl7bXNvLXN0
+eWxlLXByaW9yaXR5Ojk5Ow0KCWNvbG9yOnB1cnBsZTsNCgl0ZXh0LWRlY29yYXRpb246dW5kZXJs
+aW5lO30NCnNwYW4uRW1haWxTdHlsZTE3DQoJe21zby1zdHlsZS10eXBlOnBlcnNvbmFsLWNvbXBv
+c2U7DQoJZm9udC1mYW1pbHk6IkNhbGlicmkiLCJzYW5zLXNlcmlmIjsNCgljb2xvcjp3aW5kb3d0
+ZXh0O30NCi5Nc29DaHBEZWZhdWx0DQoJe21zby1zdHlsZS10eXBlOmV4cG9ydC1vbmx5Ow0KCWZv
+bnQtZmFtaWx5OiJDYWxpYnJpIiwic2Fucy1zZXJpZiI7fQ0KLyogUGFnZSBEZWZpbml0aW9ucyAq
+Lw0KQHBhZ2UgV29yZFNlY3Rpb24xDQoJe3NpemU6NjEyLjBwdCA3OTIuMHB0Ow0KCW1hcmdpbjo3
+Mi4wcHQgOTAuMHB0IDcyLjBwdCA5MC4wcHQ7fQ0KZGl2LldvcmRTZWN0aW9uMQ0KCXtwYWdlOldv
+cmRTZWN0aW9uMTt9DQotLT48L3N0eWxlPjwhLS1baWYgZ3RlIG1zbyA5XT48eG1sPg0KPG86c2hh
+cGVkZWZhdWx0cyB2OmV4dD0iZWRpdCIgc3BpZG1heD0iMTAyNiIgLz4NCjwveG1sPjwhW2VuZGlm
+XS0tPjwhLS1baWYgZ3RlIG1zbyA5XT48eG1sPg0KPG86c2hhcGVsYXlvdXQgdjpleHQ9ImVkaXQi
+Pg0KPG86aWRtYXAgdjpleHQ9ImVkaXQiIGRhdGE9IjEiIC8+DQo8L286c2hhcGVsYXlvdXQ+PC94
+bWw+PCFbZW5kaWZdLS0+DQo8L2hlYWQ+DQo8Ym9keSBsYW5nPSJaSC1DTiIgbGluaz0iYmx1ZSIg
+dmxpbms9InB1cnBsZSIgc3R5bGU9InRleHQtanVzdGlmeS10cmltOnB1bmN0dWF0aW9uIj4NCjxk
+aXYgY2xhc3M9IldvcmRTZWN0aW9uMSI+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIiBhbGlnbj0ibGVm
+dCIgc3R5bGU9InRleHQtYWxpZ246bGVmdCI+PHNwYW4gbGFuZz0iRU4tVVMiIHN0eWxlPSJjb2xv
+cjojMUY0OTdEIj5IaTo8bzpwPjwvbzpwPjwvc3Bhbj48L3A+DQo8cCBjbGFzcz0iTXNvTm9ybWFs
+IiBhbGlnbj0ibGVmdCIgc3R5bGU9InRleHQtYWxpZ246bGVmdCI+PHNwYW4gbGFuZz0iRU4tVVMi
+IHN0eWxlPSJjb2xvcjojMUY0OTdEIj53aGVuIEkgYW5hbHl6ZWQgdGhlIHBlcmZvcm1hbmNlIG9m
+IGNlcGgsIEkgZm91bmQgdGhhdCByZWJ1aWxkX2FsaWduZWQgd2FzIHRpbWUtY29uc3VtaW5nLCBh
+bmQgdGhlIGFuYWx5c2lzIGZvdW5kIHRoYXQgcmVidWlsZCBvcGVyYXRpb25zIHdlcmUgcGVyZm9y
+bWVkIGV2ZXJ5DQogdGltZS48bzpwPjwvbzpwPjwvc3Bhbj48L3A+DQo8cCBjbGFzcz0iTXNvTm9y
+bWFsIiBhbGlnbj0ibGVmdCIgc3R5bGU9InRleHQtYWxpZ246bGVmdCI+PHNwYW4gbGFuZz0iRU4t
+VVMiIHN0eWxlPSJjb2xvcjojMUY0OTdEIj48bzpwPiZuYnNwOzwvbzpwPjwvc3Bhbj48L3A+DQo8
+cCBjbGFzcz0iTXNvTm9ybWFsIiBhbGlnbj0ibGVmdCIgc3R5bGU9InRleHQtYWxpZ246bGVmdCI+
+PHNwYW4gbGFuZz0iRU4tVVMiIHN0eWxlPSJjb2xvcjojMUY0OTdEIj5Tb3VyY2UgY29kZTo8bzpw
+PjwvbzpwPjwvc3Bhbj48L3A+DQo8cCBjbGFzcz0iTXNvTm9ybWFsIiBhbGlnbj0ibGVmdCIgc3R5
+bGU9InRleHQtYWxpZ246bGVmdCI+PHNwYW4gbGFuZz0iRU4tVVMiIHN0eWxlPSJjb2xvcjojMUY0
+OTdEIj5GaWxlU3RvcmU6OnF1ZXVlX3RyYW5zYWN0aW9ucw0KPG86cD48L286cD48L3NwYW4+PC9w
+Pg0KPHAgY2xhc3M9Ik1zb05vcm1hbCIgYWxpZ249ImxlZnQiIHN0eWxlPSJ0ZXh0LWFsaWduOmxl
+ZnQiPjxzcGFuIGxhbmc9IkVOLVVTIiBzdHlsZT0iY29sb3I6IzFGNDk3RCI+4oCTJmd0OyBqb3Vy
+bmFsLSZndDtwcmVwYXJlX2VudHJ5KG8tJmd0O3RscywgJmFtcDt0YmwpOzxvOnA+PC9vOnA+PC9z
+cGFuPjwvcD4NCjxwIGNsYXNzPSJNc29Ob3JtYWwiIGFsaWduPSJsZWZ0IiBzdHlsZT0idGV4dC1h
+bGlnbjpsZWZ0Ij48c3BhbiBsYW5nPSJFTi1VUyIgc3R5bGU9ImNvbG9yOiMxRjQ5N0QiPi0mZ3Q7
+IGRhdGFfYWxpZ24gPSAoKCpwKS5nZXRfZGF0YV9hbGlnbm1lbnQoKSAtIGJsLmxlbmd0aCgpKSAm
+YW1wOyB+Q0VQSF9QQUdFX01BU0s7PG86cD48L286cD48L3NwYW4+PC9wPg0KPHAgY2xhc3M9Ik1z
+b05vcm1hbCIgYWxpZ249ImxlZnQiIHN0eWxlPSJ0ZXh0LWFsaWduOmxlZnQiPjxzcGFuIGxhbmc9
+IkVOLVVTIiBzdHlsZT0iY29sb3I6IzFGNDk3RCI+LSZndDsgcmV0ID0gZWJsLnJlYnVpbGRfYWxp
+Z25lZChDRVBIX0RJUkVDVElPX0FMSUdOTUVOVCk7PG86cD48L286cD48L3NwYW4+PC9wPg0KPHAg
+Y2xhc3M9Ik1zb05vcm1hbCIgYWxpZ249ImxlZnQiIHN0eWxlPSJ0ZXh0LWFsaWduOmxlZnQiPjxz
+cGFuIGxhbmc9IkVOLVVTIiBzdHlsZT0iY29sb3I6IzFGNDk3RCI+PG86cD4mbmJzcDs8L286cD48
+L3NwYW4+PC9wPg0KPHAgY2xhc3M9Ik1zb05vcm1hbCIgYWxpZ249ImxlZnQiIHN0eWxlPSJ0ZXh0
+LWFsaWduOmxlZnQiPjxzcGFuIGxhbmc9IkVOLVVTIiBzdHlsZT0iY29sb3I6IzFGNDk3RCI+TG9n
+OjxvOnA+PC9vOnA+PC9zcGFuPjwvcD4NCjxwIGNsYXNzPSJNc29Ob3JtYWwiIGFsaWduPSJsZWZ0
+IiBzdHlsZT0idGV4dC1hbGlnbjpsZWZ0Ij48c3BhbiBsYW5nPSJFTi1VUyIgc3R5bGU9ImNvbG9y
+OiMxRjQ5N0QiPjIwMTctMTAtMTcgMTk6NDk6MjkuNzA2MjQ2IDdmYjQ3MmJmZTcwMCAxMCBqb3Vy
+bmFsJm5ic3A7IGxlbiA0MTk2MTMxIC0mZ3Q7IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCA0MDQ2
+IGJsIDQxOTYxMzEgcG9zdF9wYWQgMjIzOSB0YWlsIDQwKSAoYmwgYWxpZ25tZW50IDQwODYpPG86
+cD48L286cD48L3NwYW4+PC9wPg0KPHAgY2xhc3M9Ik1zb05vcm1hbCIgYWxpZ249ImxlZnQiIHN0
+eWxlPSJ0ZXh0LWFsaWduOmxlZnQiPjxzcGFuIGxhbmc9IkVOLVVTIiBzdHlsZT0iY29sb3I6IzFG
+NDk3RCI+PG86cD4mbmJzcDs8L286cD48L3NwYW4+PC9wPg0KPHAgY2xhc3M9Ik1zb05vcm1hbCIg
+YWxpZ249ImxlZnQiIHN0eWxlPSJ0ZXh0LWFsaWduOmxlZnQiPjxzcGFuIGxhbmc9IkVOLVVTIiBz
+dHlsZT0iY29sb3I6IzFGNDk3RCI+cXVlc3Rpb246PG86cD48L286cD48L3NwYW4+PC9wPg0KPHAg
+Y2xhc3M9Ik1zb05vcm1hbCIgYWxpZ249ImxlZnQiIHN0eWxlPSJ0ZXh0LWFsaWduOmxlZnQiPjxz
+cGFuIGxhbmc9IkVOLVVTIiBzdHlsZT0iY29sb3I6IzFGNDk3RCI+SSBmaW5kIOKAnGFsaWdubWVu
+dCA9NDA4NuKAnSwgSSB0aGluayBJdCBtYXliZSBhIGJ1ZzxvOnA+PC9vOnA+PC9zcGFuPjwvcD4N
+CjxwIGNsYXNzPSJNc29Ob3JtYWwiIGFsaWduPSJsZWZ0IiBzdHlsZT0idGV4dC1hbGlnbjpsZWZ0
+Ij48c3BhbiBsYW5nPSJFTi1VUyIgc3R5bGU9ImNvbG9yOiMxRjQ5N0QiPkkgdGhpbmsgaXQgc2hv
+dWxkIGJlIDQwOTYNCjxvOnA+PC9vOnA+PC9zcGFuPjwvcD4NCjxwIGNsYXNzPSJNc29Ob3JtYWwi
+IGFsaWduPSJsZWZ0IiBzdHlsZT0idGV4dC1hbGlnbjpsZWZ0Ij48c3BhbiBsYW5nPSJFTi1VUyIg
+c3R5bGU9ImNvbG9yOiMxRjQ5N0QiPmJlY2F1c2UgQ0VQSF9ESVJFQ1RJT19BTElHTk1FTlQgaXMg
+NDA5NjxvOnA+PC9vOnA+PC9zcGFuPjwvcD4NCjxwIGNsYXNzPSJNc29Ob3JtYWwiIGFsaWduPSJs
+ZWZ0IiBzdHlsZT0idGV4dC1hbGlnbjpsZWZ0Ij48c3BhbiBsYW5nPSJFTi1VUyIgc3R5bGU9ImNv
+bG9yOiMxRjQ5N0QiPjxvOnA+Jm5ic3A7PC9vOnA+PC9zcGFuPjwvcD4NCjxwIGNsYXNzPSJNc29O
+b3JtYWwiIGFsaWduPSJsZWZ0IiBzdHlsZT0idGV4dC1hbGlnbjpsZWZ0Ij48c3BhbiBsYW5nPSJF
+Ti1VUyIgc3R5bGU9ImNvbG9yOiMxRjQ5N0QiPnRoYW5rIHlvdTxvOnA+PC9vOnA+PC9zcGFuPjwv
+cD4NCjxwIGNsYXNzPSJNc29Ob3JtYWwiPjxzcGFuIGxhbmc9IkVOLVVTIj48bzpwPiZuYnNwOzwv
+bzpwPjwvc3Bhbj48L3A+DQo8L2Rpdj4NCjxzcGFuIHN0eWxlPSJmb250LXNpemU6Ny41cHQ7Zm9u
+dC1mYW1pbHk65Y2O5paH57uG6buRO2NvbG9yOmdyYXkiPjxzcGFuIGxhbmc9IkVOLVVTIj4tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tPGJyPg0KPC9zcGFuPuacrOmCruS7tuWPiuWFtumZhOS7tuWQq+acieaW
+sOWNjuS4ieaKgOacr+aciemZkOWFrOWPuOeahOS/neWvhuS/oeaBr++8jOS7hemZkOS6juWPkemA
+gee7meS4iumdouWcsOWdgOS4reWIl+WHujxzcGFuIGxhbmc9IkVOLVVTIj48YnI+DQo8L3NwYW4+
+55qE5Liq5Lq65oiW576k57uE44CC56aB5q2i5Lu75L2V5YW25LuW5Lq65Lul5Lu75L2V5b2i5byP
+5L2/55So77yI5YyF5ous5L2G5LiN6ZmQ5LqO5YWo6YOo5oiW6YOo5YiG5Zyw5rOE6Zyy44CB5aSN
+5Yi244CBPHNwYW4gbGFuZz0iRU4tVVMiPjxicj4NCjwvc3Bhbj7miJbmlaPlj5HvvInmnKzpgq7k
+u7bkuK3nmoTkv6Hmga/jgILlpoLmnpzmgqjplJnmlLbkuobmnKzpgq7ku7bvvIzor7fmgqjnq4vl
+jbPnlLXor53miJbpgq7ku7bpgJrnn6Xlj5Hku7bkurrlubbliKDpmaTmnKw8c3BhbiBsYW5nPSJF
+Ti1VUyI+PGJyPg0KPC9zcGFuPumCruS7tu+8gTxzcGFuIGxhbmc9IkVOLVVTIj48YnI+DQo8L3Nw
+YW4+PC9zcGFuPjxzcGFuIGxhbmc9IkVOLVVTIiBzdHlsZT0iZm9udC1zaXplOjcuNXB0O2ZvbnQt
+ZmFtaWx5OiZxdW90O0FyaWFsJnF1b3Q7LCZxdW90O3NhbnMtc2VyaWYmcXVvdDs7Y29sb3I6Z3Jh
+eSI+VGhpcyBlLW1haWwgYW5kIGl0cyBhdHRhY2htZW50cyBjb250YWluIGNvbmZpZGVudGlhbCBp
+bmZvcm1hdGlvbiBmcm9tIE5ldyBIM0MsIHdoaWNoIGlzDQo8YnI+DQppbnRlbmRlZCBvbmx5IGZv
+ciB0aGUgcGVyc29uIG9yIGVudGl0eSB3aG9zZSBhZGRyZXNzIGlzIGxpc3RlZCBhYm92ZS4gQW55
+IHVzZSBvZiB0aGUNCjxicj4NCmluZm9ybWF0aW9uIGNvbnRhaW5lZCBoZXJlaW4gaW4gYW55IHdh
+eSAoaW5jbHVkaW5nLCBidXQgbm90IGxpbWl0ZWQgdG8sIHRvdGFsIG9yIHBhcnRpYWwNCjxicj4N
+CmRpc2Nsb3N1cmUsIHJlcHJvZHVjdGlvbiwgb3IgZGlzc2VtaW5hdGlvbikgYnkgcGVyc29ucyBv
+dGhlciB0aGFuIHRoZSBpbnRlbmRlZCA8YnI+DQpyZWNpcGllbnQocykgaXMgcHJvaGliaXRlZC4g
+SWYgeW91IHJlY2VpdmUgdGhpcyBlLW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdGhlIHNl
+bmRlcg0KPGJyPg0KYnkgcGhvbmUgb3IgZW1haWwgaW1tZWRpYXRlbHkgYW5kIGRlbGV0ZSBpdCE8
+L3NwYW4+DQo8L2JvZHk+DQo8L2h0bWw+DQo=
+
+--_000_1CB94550540AE44E9CAAE8CD5AF40BF8AB72B935H3CMLB14EXsrvhu_--
+
+--===============9212570042466999868==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============9212570042466999868==--
