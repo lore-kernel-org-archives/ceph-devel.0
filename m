@@ -1,73 +1,57 @@
-From: Jason Dillaman <jdillama@redhat.com>
-Subject: Re: librados3
-Date: Thu, 19 Oct 2017 08:00:19 -0400
-Message-ID: <CA+aFP1B5TLKDkMEOE9AOLkuNoOq=_mD4jy_MUTo7x2CKXz9LYw@mail.gmail.com>
-References: <CAJE9aOPhPFJdV2BQ4-9LhpzN5gucc4BOuU=0C27geK_d0P4r=A@mail.gmail.com>
- <CALe9h7fSc5QoNn49o9MewuLqKc1fST8dR2iq9c3LAPkTij6DJA@mail.gmail.com>
-Reply-To: dillaman@redhat.com
+From: Dan van der Ster <dan@vanderster.com>
+Subject: Re: Luminous: osd_crush_location_hook renamed to crush_location_hook
+Date: Thu, 19 Oct 2017 14:00:49 +0200
+Message-ID: <CABZ+qq=pnAjbDKVfHkH_=G3yLpU4-=Ko_Qvyqq8x7XfQ5=pQjw@mail.gmail.com>
+References: <1406455169.3092.1508155374117@ox.pcextreme.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-yw0-f171.google.com ([209.85.161.171]:51486 "EHLO
-        mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753158AbdJSMAV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Oct 2017 08:00:21 -0400
-Received: by mail-yw0-f171.google.com with SMTP id k3so3241679ywk.8
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 05:00:20 -0700 (PDT)
-In-Reply-To: <CALe9h7fSc5QoNn49o9MewuLqKc1fST8dR2iq9c3LAPkTij6DJA@mail.gmail.com>
+Received: from mail-lf0-f43.google.com ([209.85.215.43]:46779 "EHLO
+        mail-lf0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753163AbdJSMBd (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Oct 2017 08:01:33 -0400
+Received: by mail-lf0-f43.google.com with SMTP id g70so9315739lfl.3
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 05:01:32 -0700 (PDT)
+Received: from mail-lf0-f47.google.com (mail-lf0-f47.google.com. [209.85.215.47])
+        by smtp.gmail.com with ESMTPSA id x18sm1672901lja.55.2017.10.19.05.01.30
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 19 Oct 2017 05:01:30 -0700 (PDT)
+Received: by mail-lf0-f47.google.com with SMTP id g70so9315638lfl.3
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 05:01:30 -0700 (PDT)
+In-Reply-To: <1406455169.3092.1508155374117@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Wido den Hollander <wido@42on.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, John Spray <jspray@redhat.com>
 
-As long as we plan to continue to ship librados2 side-by-side with
-librados3 for a while, I'm fine with starting down that path for
-mimic. There are a lot of applications linked against librados2
-floating in the wild.
+Hi Wido,
 
-For luminous, we could perhaps just drop the "_mempool" member
-variable from bufferlist and chance the semantics where the caller
-needs to add at least a single buffer::raw before the mempool can be
-assigned. That preserves the ABI since we aren't changing the size of
-bufferlist and preserves the mempool functionality (with a little
-extra work).  That tweak would only be needed for the first
-buffer::ptr appended to the bufferlist since subsequent appends can
-just copy the mempool value from the first buffer::ptr.
+Unexpected crush location changes can indeed be quite nasty.
 
-On Thu, Oct 19, 2017 at 6:43 AM, John Spray <jspray@redhat.com> wrote:
-> On Thu, Oct 19, 2017 at 10:25 AM, kefu chai <tchaikov@gmail.com> wrote:
->> in luminous, we introduced a change not backward compatible with
->> pre-luminous librados. see see http://tracker.ceph.com/issues/21573.
->> and i cannot see an obvious solution without bumping up the so version
->> of librados to 3.
->>
->> if we have the luxury to do it,  we will be able to give librados an
->> overhaul. for a todo list, see http://pad.ceph.com/p/librados3.
->>
->> what do you think?
+With this in mind, I wonder if a crush lock would be useful.
+
+    ceph osd set nocrushchange
+
+With that flag set, osds could still go in and out, but crush
+move/add/remove/etc..., also tunables changes, would be blocked.
+
+Thoughts?
+
+-- Dan
+
+
+On Mon, Oct 16, 2017 at 2:02 PM, Wido den Hollander <wido@42on.com> wrote:
+> Hi,
 >
-> I've added a couple of items to the pad for deprecated bits to remove
-> when we go up a version.
+> I completely overread this, but I just found out that osd_crush_location_hook was renamed to crush_location_hook in the new config style.
 >
-> I guess we would do the version bump for Mimic and for Luminous we
-> will just have to apologetically tell people they need to recompile?
+> When upgrading from Jewel to Luminous without touching your configuration OSDs will move to the default CRUSH location due to the hook not being executed.
 >
-> Or we could have a so.3 version (ABI change only) in Luminous that
-> just bumps the version to force a recompile, and a so.4 version in
-> Mimic that actually makes the API changes?
+> Was this an oversight with Luminous or was it intentional?
 >
-> John
->
->>
->> --
->> Regards
->> Kefu Chai
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Jason
+> Wido
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
