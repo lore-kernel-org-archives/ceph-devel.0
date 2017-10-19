@@ -1,130 +1,45 @@
-From: Alfredo Deza <adeza@redhat.com>
-Subject: Re: Wish list : automatic rebuild with hot swap osd ?
-Date: Thu, 19 Oct 2017 08:14:26 -0400
-Message-ID: <CAC-Np1xHoNcH4cW7avPL2bv=2-hTZE6N1Q=KmuRwrX27rusPRQ@mail.gmail.com>
-References: <06c8570a-415c-b830-3102-476a0d85cbdf@epfl.ch> <alpine.DEB.2.11.1710172118210.26702@piezo.us.to>
- <CAOtMX2hcnqQT8R_qAkRrDwdE=+S_+wX9FqSTnLcAVyMmuSraJw@mail.gmail.com> <alpine.DEB.2.11.1710181619440.24806@piezo.us.to>
+From: John Spray <jspray@redhat.com>
+Subject: Re: Luminous: osd_crush_location_hook renamed to crush_location_hook
+Date: Thu, 19 Oct 2017 13:22:14 +0100
+Message-ID: <CALe9h7e3703iRKJo2ZzJs8YXpYz4xy4T_1ZEv-nfhdGpBRzEJg@mail.gmail.com>
+References: <1406455169.3092.1508155374117@ox.pcextreme.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:45907 "EHLO
-        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751320AbdJSMO2 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Oct 2017 08:14:28 -0400
-Received: by mail-wm0-f52.google.com with SMTP id q124so15614478wmb.0
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 05:14:27 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1710181619440.24806@piezo.us.to>
+Received: from mail-wr0-f169.google.com ([209.85.128.169]:51670 "EHLO
+        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753054AbdJSMWf (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Oct 2017 08:22:35 -0400
+Received: by mail-wr0-f169.google.com with SMTP id j14so8129285wre.8
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 05:22:35 -0700 (PDT)
+In-Reply-To: <1406455169.3092.1508155374117@ox.pcextreme.nl>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: alan somers <asomers@gmail.com>, Yoann Moulin <yoann.moulin@epfl.ch>, ceph-devel <ceph-devel@vger.kernel.org>, John Spray <jspray@redhat.com>
+To: Wido den Hollander <wido@42on.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Wed, Oct 18, 2017 at 12:25 PM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 18 Oct 2017, alan somers wrote:
->> On Tue, Oct 17, 2017 at 3:22 PM, Sage Weil <sage@newdream.net> wrote:
->> > On Tue, 17 Oct 2017, Yoann Moulin wrote:
->> >> Hello,
->> >>
->> >> I wonder if it's possible to add to ceph the ability to rebuild a new disk automatically freshly added to a slot in replacement of a failed osd
->> >> disk.
->> >>
->> >> I imagine something like adding a flag on disks (identified by-path for example or a way to have a deterministic access to the device) to be
->> >> auto-reconfigured if detected with no data after the same slot was marked as failed. Only disks identified "by-path" with an auto-rebuild flag
->> >> activated, and previously marked as failed, can run the auto-reconfiguration.
->> >>
->> >> I know it should take some time to find the best way to implement that feature to avoid zapping a disk with data but that would be great to
->> >> improve maintainability.
->> >
->> > The way that we approached this before with ceph-disk was that you would
->> > prelabel replacement disks as "blank ceph" or similar.  That way if we saw
->> > a ceph labeled disk that hadn't been used yet we would know it was fair
->> > game.  This is a lot more work for the admin (you have to attached each of
->> > your replacement disks to mark them and then put them in the replacement
->> > pile) but it is safer.
->> >
->> > An alternative model would be to have a reasonably reliable way to
->> > identify a fresh disk from the factory.  I'm honest not sure what new
->> > disks look like these days (zero? empty NTFS partition?) but we could try
->> > to recognized "blank" and go from there.
->> >
->> > Unfortunately we can't assume blank if we see garbage because the disk
->> > might be encrypted.
->> >
->> > Anyway, assuming that part was sorted out, I think a complete solution
->> > would query the mons to see what OSD id used to live in that particular
->> > by-path location/slot and try to re-use that OSD ID.  We have still built
->> > in a manual task here of marking the failed osd "destroyed" since reusing
->> > the ID means the cluster may make assumptions about PG copies on the OSD
->> > being lost.
->> >
->> > sage
->>
->> ZFS handles this with the "autoreplace" pool flag.  If that flag is
->> set, then a blank drive inserted into a slot formerly occupied by a
->> member of the pool will automatically be used to replace that former
->> member.  The nice thing about this scheme is that it requires no
->> per-drive effort on the part of the sysadmin, and it doesn't touch
->> drives inserted into other slots.  The less nice thing is that it only
->> works with SES expanders that provide slot information.  I don't like
->> Sage's second suggestion because it basically takes over the entire
->> server.  If newly inserted blank drives are instantly gobbled up by
->> Ceph, then they can't be used by anything else.  IMHO that kind of
->> greedy functionality shouldn't be builtin to something as general as
->> Ceph (though perhaps it could go in a separately installed daemon).
+On Mon, Oct 16, 2017 at 1:02 PM, Wido den Hollander <wido@42on.com> wrote:
+> Hi,
 >
-> I think in our case it would be a separate daemon either way that is
-> monitoring slots and reprovisioning OSDs when appropriate.  I like this
-> approach!  I think it would involve:
+> I completely overread this, but I just found out that osd_crush_location_hook was renamed to crush_location_hook in the new config style.
 >
-> - A cluster option, not a pool one, since Ceph pools are about
-> logical data collections, not hardware.
+> When upgrading from Jewel to Luminous without touching your configuration OSDs will move to the default CRUSH location due to the hook not being executed.
 >
-> - A clearer mapping between OSDs and the block device(s) they consume, and
-> some additional metadata on those devices (in this case, the
-> /dev/disk/by-path string ought to suffice).
+> Was this an oversight with Luminous or was it intentional?
 
-I am hesitant to rely on by-path here, those can change if devices
-change ports. While testing ceph-volume to make it
-resilient on device name changes, we  weren't able to rely on by-path.
-This is easy to test on a VM and changing the port
-number where the disk is being plugged in.
+Hmm, that setting wasn't part of the existing schema config_opts.h
+schema.  The init script was effectively treating it as a "magic"
+value that ceph-conf would be able to read out of the text ceph.conf.
+Not that that matters from a user POV!
 
-Unless we are describing a scenario where the ports wouldn't change,
-the system would not reboot, and a bad-one-out / good-one-in would
-always be the case?
+It looks like the init-ceph.in is still referring to the old magic
+config setting's name as well.
 
-> I know John has done some
-> work here but I think things are still a bit ad hoc.  For example, the osd
-> metadata reporting for bluestore devices is pretty unstructured.  (We also
-> want a clearer device list and properties for devices for the SMART
-> data reporting.)
+I would vote that we treat this as a bug and change the setting name
+back to osd_crush_location_hook, even if the name isn't quite
+descriptive any more -- Sage?
 
-If these properties also mean device information (vendor, size,
-solid/rotational, etc...) it could help
-to better map/detect an OSD replacement since clusters tend to have a
-certain level of
-homogeneous hardware: if $brand, and $size, and $rotational etc...
+John
 
 >
-> - A daemon (e.g., ceph-osd-autoreplace) that runs on each machine or a
-> tool that is triggered by udev.  It would check for new, empty devices
-> appearing in the locations (as defined by the by-path string) previously
-> occupied by OSDs that are down.  If that happens, it can use 'ceph osd
-> safe-to-destroy' to verify whether it is safe to automatically rebuild
-> that OSD.  (If not, it might want to raise a health alert, since it's
-> possible the drive that was physically pulled should be preserved until
-> the cluster is sure it doesn't need it.)
-
-systemd has some support for devices, so we might not even need a
-daemon, but more a unit that can
-depend on events already handled by systemd (would save us from udev).
-
->
-> ?
->
-> sage
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Wido
