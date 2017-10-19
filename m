@@ -1,7 +1,7 @@
 From: xiaoyan li <wisher2003@gmail.com>
 Subject: Re: Work update related to rocksdb
-Date: Thu, 19 Oct 2017 15:22:54 +0800
-Message-ID: <CAERxPZK=kOY3LKaq90e7hjK2yhNVKAv4FxOk-pWYeKqTpF26zw@mail.gmail.com>
+Date: Thu, 19 Oct 2017 15:24:26 +0800
+Message-ID: <CAERxPZJ05uJV6SvM0-S5HyJyH4rRArdaNvMZefepirDxq-TWGg@mail.gmail.com>
 References: <AEE495BD65FC0144A24ECB647C8270EF384559B2@shsmsx102.ccr.corp.intel.com>
  <fd7b00ef-66e4-cfae-fc76-6300b86a3b86@redhat.com> <AEE495BD65FC0144A24ECB647C8270EF38455A21@shsmsx102.ccr.corp.intel.com>
  <3ae1878e-9b70-669a-6596-e8480ae14537@redhat.com> <AEE495BD65FC0144A24ECB647C8270EF3846073B@shsmsx102.ccr.corp.intel.com>
@@ -11,47 +11,33 @@ References: <AEE495BD65FC0144A24ECB647C8270EF384559B2@shsmsx102.ccr.corp.intel.c
  <c3d3264c-fef8-6d89-1fe9-0863bfb4db1d@redhat.com> <CAERxPZ+-fiP1GL1D7NyLE49hrN92GrOrouJdHPywPf7v2pLFWQ@mail.gmail.com>
  <CAERxPZL7ErKKXi8+kvQ3Q1u4arC+jCFqWDT-9OPnj=OSEHuwhw@mail.gmail.com>
  <alpine.DEB.2.11.1710170244490.26702@piezo.us.to> <CAERxPZ+surE4PjiN=uiJGUhDGr8Z2-is5R6NQqkMzFtwbFd-Cg@mail.gmail.com>
- <alpine.DEB.2.11.1710170320440.26702@piezo.us.to> <CAB-Rz_Xp+5YnTsayCvYFOzmOkd9ACa7TxxU5m1Z34hSBPsxaUg@mail.gmail.com>
+ <alpine.DEB.2.11.1710170320440.26702@piezo.us.to> <CACJqLyb6e+aPaqqxKA_V3Z2OVAhwyb4nK5E3ucqzzqjcYW7m9A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f51.google.com ([209.85.218.51]:45898 "EHLO
-        mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751617AbdJSHW4 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Oct 2017 03:22:56 -0400
-Received: by mail-oi0-f51.google.com with SMTP id f66so13049172oib.2
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 00:22:56 -0700 (PDT)
-In-Reply-To: <CAB-Rz_Xp+5YnTsayCvYFOzmOkd9ACa7TxxU5m1Z34hSBPsxaUg@mail.gmail.com>
+Received: from mail-oi0-f47.google.com ([209.85.218.47]:57249 "EHLO
+        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751912AbdJSHY1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Oct 2017 03:24:27 -0400
+Received: by mail-oi0-f47.google.com with SMTP id v9so13021254oif.13
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 00:24:27 -0700 (PDT)
+In-Reply-To: <CACJqLyb6e+aPaqqxKA_V3Z2OVAhwyb4nK5E3ucqzzqjcYW7m9A@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Radoslaw Zarzynski <rzarzyns@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>, "Li, Xiaoyan" <xiaoyan.li@intel.com>, "Gohad, Tushar" <tushar.gohad@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Haomai Wang <haomai@xsky.com>
+Cc: Sage Weil <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>, "Li, Xiaoyan" <xiaoyan.li@intel.com>, "Gohad, Tushar" <tushar.gohad@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>, Radoslaw Zarzynski <rzarzyns@redhat.com>
 
-Thank you, Radek.
-Sage, I am going to use the patch to do test, and check whether we can
-just compare rang_del in Rocksdb when dedup recursively.
+On Tue, Oct 17, 2017 at 9:17 PM, Haomai Wang <haomai@xsky.com> wrote:
+> To be clarify, we test rm range before and meet several odd bugs with
+> rm range I guess. then from rocksdb commit history, range delete is in
+> heavy changing.
+>
+> rocksdb community still doesn't recommend to use range delete.
+Thank you for the advice. As pglog just set and rangdelete, is it
+better than other more complex scerios? Anyway I will have check.
 
-
-
-On Wed, Oct 18, 2017 at 5:59 PM, Radoslaw Zarzynski <rzarzyns@redhat.com> wrote:
-> Hello Sage,
 >
-> the patch is at my Github [1].
->
-> Please be aware we also need to set "rocksdb_enable_rmrange = true" to
-> use the DeleteRange of rocksdb::WriteBatch's interface. Otherwise our KV
-> abstraction layer would translate rm_range_keys() into a sequence of calls
-> to Delete().
->
-> Regards,
-> Radek
->
-> P.S.
-> My apologies for duplicating the message.
->
-> [1] https://github.com/ceph/ceph/commit/92a28f033a5272b7dc2c5d726e67b6d09f6166ba
->
-> On Tue, Oct 17, 2017 at 5:21 AM, Sage Weil <sweil@redhat.com> wrote:
+> On Tue, Oct 17, 2017 at 11:21 AM, Sage Weil <sweil@redhat.com> wrote:
 >> On Tue, 17 Oct 2017, xiaoyan li wrote:
 >>> On Tue, Oct 17, 2017 at 10:49 AM, Sage Weil <sweil@redhat.com> wrote:
 >>> > On Tue, 17 Oct 2017, xiaoyan li wrote:
@@ -355,6 +341,10 @@ On Wed, Oct 18, 2017 at 5:59 PM, Radoslaw Zarzynski <rzarzyns@redhat.com> wrote:
 >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >>>
 >>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
 
