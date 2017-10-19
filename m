@@ -1,82 +1,130 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: librados3
-Date: Thu, 19 Oct 2017 12:13:21 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1710191212390.24806@piezo.us.to>
-References: <CAJE9aOPhPFJdV2BQ4-9LhpzN5gucc4BOuU=0C27geK_d0P4r=A@mail.gmail.com> <CALe9h7fSc5QoNn49o9MewuLqKc1fST8dR2iq9c3LAPkTij6DJA@mail.gmail.com> <CA+aFP1B5TLKDkMEOE9AOLkuNoOq=_mD4jy_MUTo7x2CKXz9LYw@mail.gmail.com>
+From: Alfredo Deza <adeza@redhat.com>
+Subject: Re: Wish list : automatic rebuild with hot swap osd ?
+Date: Thu, 19 Oct 2017 08:14:26 -0400
+Message-ID: <CAC-Np1xHoNcH4cW7avPL2bv=2-hTZE6N1Q=KmuRwrX27rusPRQ@mail.gmail.com>
+References: <06c8570a-415c-b830-3102-476a0d85cbdf@epfl.ch> <alpine.DEB.2.11.1710172118210.26702@piezo.us.to>
+ <CAOtMX2hcnqQT8R_qAkRrDwdE=+S_+wX9FqSTnLcAVyMmuSraJw@mail.gmail.com> <alpine.DEB.2.11.1710181619440.24806@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:40706 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752540AbdJSMN1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 19 Oct 2017 08:13:27 -0400
-In-Reply-To: <CA+aFP1B5TLKDkMEOE9AOLkuNoOq=_mD4jy_MUTo7x2CKXz9LYw@mail.gmail.com>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:45907 "EHLO
+        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751320AbdJSMO2 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 19 Oct 2017 08:14:28 -0400
+Received: by mail-wm0-f52.google.com with SMTP id q124so15614478wmb.0
+        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 05:14:27 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1710181619440.24806@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: dillaman@redhat.com
-Cc: John Spray <jspray@redhat.com>, kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: alan somers <asomers@gmail.com>, Yoann Moulin <yoann.moulin@epfl.ch>, ceph-devel <ceph-devel@vger.kernel.org>, John Spray <jspray@redhat.com>
 
-On Thu, 19 Oct 2017, Jason Dillaman wrote:
-> As long as we plan to continue to ship librados2 side-by-side with
-> librados3 for a while, I'm fine with starting down that path for
-> mimic. There are a lot of applications linked against librados2
-> floating in the wild.
-> 
-> For luminous, we could perhaps just drop the "_mempool" member
-> variable from bufferlist and chance the semantics where the caller
-> needs to add at least a single buffer::raw before the mempool can be
-> assigned. That preserves the ABI since we aren't changing the size of
-> bufferlist and preserves the mempool functionality (with a little
-> extra work).  That tweak would only be needed for the first
-> buffer::ptr appended to the bufferlist since subsequent appends can
-> just copy the mempool value from the first buffer::ptr.
+On Wed, Oct 18, 2017 at 12:25 PM, Sage Weil <sage@newdream.net> wrote:
+> On Wed, 18 Oct 2017, alan somers wrote:
+>> On Tue, Oct 17, 2017 at 3:22 PM, Sage Weil <sage@newdream.net> wrote:
+>> > On Tue, 17 Oct 2017, Yoann Moulin wrote:
+>> >> Hello,
+>> >>
+>> >> I wonder if it's possible to add to ceph the ability to rebuild a new disk automatically freshly added to a slot in replacement of a failed osd
+>> >> disk.
+>> >>
+>> >> I imagine something like adding a flag on disks (identified by-path for example or a way to have a deterministic access to the device) to be
+>> >> auto-reconfigured if detected with no data after the same slot was marked as failed. Only disks identified "by-path" with an auto-rebuild flag
+>> >> activated, and previously marked as failed, can run the auto-reconfiguration.
+>> >>
+>> >> I know it should take some time to find the best way to implement that feature to avoid zapping a disk with data but that would be great to
+>> >> improve maintainability.
+>> >
+>> > The way that we approached this before with ceph-disk was that you would
+>> > prelabel replacement disks as "blank ceph" or similar.  That way if we saw
+>> > a ceph labeled disk that hadn't been used yet we would know it was fair
+>> > game.  This is a lot more work for the admin (you have to attached each of
+>> > your replacement disks to mark them and then put them in the replacement
+>> > pile) but it is safer.
+>> >
+>> > An alternative model would be to have a reasonably reliable way to
+>> > identify a fresh disk from the factory.  I'm honest not sure what new
+>> > disks look like these days (zero? empty NTFS partition?) but we could try
+>> > to recognized "blank" and go from there.
+>> >
+>> > Unfortunately we can't assume blank if we see garbage because the disk
+>> > might be encrypted.
+>> >
+>> > Anyway, assuming that part was sorted out, I think a complete solution
+>> > would query the mons to see what OSD id used to live in that particular
+>> > by-path location/slot and try to re-use that OSD ID.  We have still built
+>> > in a manual task here of marking the failed osd "destroyed" since reusing
+>> > the ID means the cluster may make assumptions about PG copies on the OSD
+>> > being lost.
+>> >
+>> > sage
+>>
+>> ZFS handles this with the "autoreplace" pool flag.  If that flag is
+>> set, then a blank drive inserted into a slot formerly occupied by a
+>> member of the pool will automatically be used to replace that former
+>> member.  The nice thing about this scheme is that it requires no
+>> per-drive effort on the part of the sysadmin, and it doesn't touch
+>> drives inserted into other slots.  The less nice thing is that it only
+>> works with SES expanders that provide slot information.  I don't like
+>> Sage's second suggestion because it basically takes over the entire
+>> server.  If newly inserted blank drives are instantly gobbled up by
+>> Ceph, then they can't be used by anything else.  IMHO that kind of
+>> greedy functionality shouldn't be builtin to something as general as
+>> Ceph (though perhaps it could go in a separately installed daemon).
+>
+> I think in our case it would be a separate daemon either way that is
+> monitoring slots and reprovisioning OSDs when appropriate.  I like this
+> approach!  I think it would involve:
+>
+> - A cluster option, not a pool one, since Ceph pools are about
+> logical data collections, not hardware.
+>
+> - A clearer mapping between OSDs and the block device(s) they consume, and
+> some additional metadata on those devices (in this case, the
+> /dev/disk/by-path string ought to suffice).
 
-I think that will still be sufficient for bluestore (which relies on 
-mempool accounting to make its cache trimming work).  I can give it a try 
-today!
+I am hesitant to rely on by-path here, those can change if devices
+change ports. While testing ceph-volume to make it
+resilient on device name changes, we  weren't able to rely on by-path.
+This is easy to test on a VM and changing the port
+number where the disk is being plugged in.
 
-sage
+Unless we are describing a scenario where the ports wouldn't change,
+the system would not reboot, and a bad-one-out / good-one-in would
+always be the case?
 
-> On Thu, Oct 19, 2017 at 6:43 AM, John Spray <jspray@redhat.com> wrote:
-> > On Thu, Oct 19, 2017 at 10:25 AM, kefu chai <tchaikov@gmail.com> wrote:
-> >> in luminous, we introduced a change not backward compatible with
-> >> pre-luminous librados. see see http://tracker.ceph.com/issues/21573.
-> >> and i cannot see an obvious solution without bumping up the so version
-> >> of librados to 3.
-> >>
-> >> if we have the luxury to do it,  we will be able to give librados an
-> >> overhaul. for a todo list, see http://pad.ceph.com/p/librados3.
-> >>
-> >> what do you think?
-> >
-> > I've added a couple of items to the pad for deprecated bits to remove
-> > when we go up a version.
-> >
-> > I guess we would do the version bump for Mimic and for Luminous we
-> > will just have to apologetically tell people they need to recompile?
-> >
-> > Or we could have a so.3 version (ABI change only) in Luminous that
-> > just bumps the version to force a recompile, and a so.4 version in
-> > Mimic that actually makes the API changes?
-> >
-> > John
-> >
-> >>
-> >> --
-> >> Regards
-> >> Kefu Chai
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
-> -- 
-> Jason
+> I know John has done some
+> work here but I think things are still a bit ad hoc.  For example, the osd
+> metadata reporting for bluestore devices is pretty unstructured.  (We also
+> want a clearer device list and properties for devices for the SMART
+> data reporting.)
+
+If these properties also mean device information (vendor, size,
+solid/rotational, etc...) it could help
+to better map/detect an OSD replacement since clusters tend to have a
+certain level of
+homogeneous hardware: if $brand, and $size, and $rotational etc...
+
+>
+> - A daemon (e.g., ceph-osd-autoreplace) that runs on each machine or a
+> tool that is triggered by udev.  It would check for new, empty devices
+> appearing in the locations (as defined by the by-path string) previously
+> occupied by OSDs that are down.  If that happens, it can use 'ceph osd
+> safe-to-destroy' to verify whether it is safe to automatically rebuild
+> that OSD.  (If not, it might want to raise a health alert, since it's
+> possible the drive that was physically pulled should be preserved until
+> the cluster is sure it doesn't need it.)
+
+systemd has some support for devices, so we might not even need a
+daemon, but more a unit that can
+depend on events already handled by systemd (would save us from udev).
+
+>
+> ?
+>
+> sage
+>
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
