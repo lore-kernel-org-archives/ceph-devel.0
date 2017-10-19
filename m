@@ -1,51 +1,150 @@
-From: David Galloway <dgallowa@redhat.com>
-Subject: 1.chacra.ceph.com outage
-Date: Thu, 19 Oct 2017 10:08:53 -0400
-Message-ID: <d36611d7-46c1-4435-0d27-a115e2f2dbe4@redhat.com>
+From: Jan Fajerski <jan-fajerski@gmx.net>
+Subject: Re: cephfs quotas
+Date: Thu, 19 Oct 2017 16:28:35 +0200
+Message-ID: <20171019142835.rk2kup4ypf56bpxn@jf_suse_laptop>
+References: <20171018101122.pfz7e27l32e34b2f@jf_suse_laptop>
+ <CALe9h7dun71gFiAqn-1673spDRv95-+VHYWJWWE4CghvdXhjzg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii; format=flowed
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:43644 "EHLO mx1.redhat.com"
+Received: from mout.gmx.net ([212.227.17.21]:61564 "EHLO mout.gmx.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753805AbdJSOIy (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 19 Oct 2017 10:08:54 -0400
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id C747A806C1
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 14:08:54 +0000 (UTC)
-Received: from [10.10.121.132] (ovpn-121-132.rdu2.redhat.com [10.10.121.132])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 9348EB906B
-        for <ceph-devel@vger.kernel.org>; Thu, 19 Oct 2017 14:08:54 +0000 (UTC)
-Content-Language: en-US
+        id S1755197AbdJSO25 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 19 Oct 2017 10:28:57 -0400
+Content-Disposition: inline
+In-Reply-To: <CALe9h7dun71gFiAqn-1673spDRv95-+VHYWJWWE4CghvdXhjzg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Luis Henriques <lhenriques@suse.com>, Sage Weil <sweil@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>
 
-The SSD 1.chacra.ceph.com's root drive ran off of died last night in
-OVH's public cloud.
+On Wed, Oct 18, 2017 at 12:27:18PM +0100, John Spray wrote:
+>On Wed, Oct 18, 2017 at 11:11 AM, Jan Fajerski <jfajerski@suse.com> wrote:
+>> Hi list,
+>> A while ago this list saw a little discussion about quota support for the
+>> cephfs kernel client. The result was that instead of adding kernel support
+>> for the current implementation, a new quota implementation would be the
+>> preferred solution. Here we would like to propose such an implementation.
+>>
+>> The objective is to implement quotas such that the implementation scales
+>> well, it can be implemented in ceph-fuse, the kernel client and libcephfs
+>> based clients and are enforceable without relying on client cooperation. The
+>> latter suggests that ceph daemon(s) must be involved in checking quota
+>> limits. We think that an approach as described in "Quota Enforcement for
+>> High-Performance Distributed Storage Systems" by Pollack et al.
+>> (https://www.ssrc.ucsc.edu/pub/pollack07-msst.html) can provide a good
+>> blueprint for such an implementation. This approach enforces quota limits
+>> with the help of vouchers. At a very high level this system works by one or
+>> more quota servers (in our case MDSs) issuing vouchers carrying (among other
+>> things) an expiration timestamp, an amount, a uid and a (cryptographic)
+>> signature to clients. An MDS can track how much space it has given out by
+>> tracking the vouchers it issues. A client can spend these vouchers on OSDs
+>> by sending them along with a write request. The OSD can verify a valid
+>> voucher by the signature. It will deduct the amount of written data from the
+>> voucher and might return the voucher if the voucher was not used up in full.
+>> The client can return the remaining amount or it can give it back to the
+>> MDS.  Client failures and misbehaving clients are handled through a
+>> periodical reconciliation phase where the MDSs and OSDs reconciles issued
+>> and used vouchers. Vouchers held by a failed client can be detected by the
+>> expiration timestamp attached to the vouchers. Any unused and invalid
+>> vouchers can be reclaimed by an MDS. Clients that try to cheat by spending
+>> the same voucher on multiple OSDs are detected by the uid of the voucher.
+>> This means that adversarial clients can exceed the quota, but will be caught
+>> within a limited time period. The signature ensure that clients can not
+>> fabricate valid vouchers.  For a much better and much more detailed
+>> description please refer to the paper.
+>>
+>> This approach has been implemented in Ceph before as described here
+>> http://drona.csa.iisc.ernet.in/~gopi/docs/amarnath-MSc.pdf. We could however
+>> not find the source code for this and it seemingly didn't find its way in to
+>> the current code base.
+>> The virtues of a protocol like this are that it can scale well, since there
+>> is no central entity that keeps a global state of the quotas, while still
+>> being able to enforce (somewhat) hard quotas.
+>> On the downside there is a protocol overhead that impacts performance.
+>> Research and reports on implementations suggest that this overhead can be
+>> kept fairly small though (2% performance penalty or less). Furthermore
+>> additional state must be kept on MDSs, OSDs and clients. Such a solution
+>> also adds considerable complexity to all involved components.
+>>
+>> We'd like to hear criticism and comments from the community, before a more
+>> in-depth CDM discussion.
+>
+>Interesting!
+>
+>My immediate thoughts:
+> - The key element for implement kclient support is to implement a
+>mechanism whereby the clients do not have to backwards-traverse from a
+>file to find the nearest ancestor with a quota set.  I think that if
+>implementing a voucher-based approach, you'd still have to do this
+>work in addition to implementing the voucher system (the vouchers
+>would basically be the security layer on top of the refactor of
+>quotas)
+> - The simple voucher approach is not sufficient for doing efficient
+>quotas on arbitrary ancestor directories: the OSD doesn't know what
+>directory a file is in, so how can it know whether a particular
+>voucher is valid for writes to a particular file?  The hack to make it
+>work would be to issue vouchers individually for each inode, but then
+>clients can overshoot their quota very far by opening many files at
+>once.
 
-We lost the host around 21:15 UTC.
-
-OVH brought up a fresh VM with the same IP this morning and I was able
-to re-attach whatever existing binaries and repos the host was
-previously serving.
-
-What this means for devs:
-
-  - There's a slight chance a repo or two may be incomplete if a build
-was in the middle of pushing packages to that node
-  - Some teuthology jobs may have failed overnight due to missing repos
-
-I'll leave the host as-is for now.  In a couple weeks, I'll wipe out its
-repos and re-add it to the shaman/CI rotation so new builds start
-getting pushed to it again.
-
-Big thanks to Alfredo & Andrew for designing such a resilient CI system.
-
--- 
-David Galloway
-Systems Administrator, RDU
-Ceph Engineering
-IRC: dgalloway
+One more point here: The OSD doesn't have to know whether a client is allowed to 
+spend a voucher on a particular inode. An OSD only check if the voucher is valid 
+(as in issued by an MDS) and that it is sufficient for the write request it 
+accompanies. It also records the voucher and tracks the total allocation for the 
+vouchers id (in the paper this is a user, but it could also be a snap_realm or 
+something). This should be sufficient for clients that play fairly since an MDS 
+only issues vouchers if the quota hasn't been exceeded.
+A byzantine client can of course spend a voucher on a different file (in another 
+snap_realm or a different user_quota) or spend the same voucher multiple times.  
+This will succeed initially but is bounded, i.e. quotas can be exceeded by a 
+limited amount. This will however be caught during the reconciliation phase.
+At least that is my understanding of the paper...I might of course be missing 
+something.
+ Jan
+>- In the reconciliation phase, the awkward part would be calculating
+>the actual size of the data in the quota-enforced directory, as the
+>vouchers could have been used for either overwrites or appends.  The
+>OSD voucher refunds would have to do something like tracking the
+>highest offset written in the file, and they would need passing back
+>up to the MDS so that it could accurately update its statistics about
+>the directory, perhaps.
+>- From reading the PDF link, it seems like they are not implementing
+>directory quotas, but per-client (or group of client) quotas.
+>
+>I imagine that implementing directory quotas in a secure way would
+>require a more complex scheme, where the client would have to be able
+>to prove to the OSD which "quota realm" (i.e. ancestor dir with a
+>quota set) a particular inode belonged to.  You could potentially
+>issue such a token when granting write caps on a file: for files that
+>the client is allowed to write, it would get a signed token from the
+>MDS saying that the client may write, and also saying which quota
+>realm the file is in.  Then, the client would send that in addition to
+>a quota voucher for that particular realm, and the OSD would look at
+>both the token and the voucher.
+>
+>This is related to ideas about doing broader OSD-side enforcement of
+>e.g. permissions: the MDS could issue tokens that said exactly what
+>the client is allowed to do with specific inodes, rather than clients
+>having free reign over everything in the data pool.
+>
+>It would be ideal to find a design that decouples the security
+>enforcement aspect from the overall protocol aspect as much as
+>possible.  That way we could have an initial implementation that adds
+>quota support to the kernel client (introducing quota realm concept
+>but not actually passing tokens around), then work on the optional
+>crypto enforcement piece separately.
+>
+>John
+>
+>
+>
+>
+>>
+>> Best,
+>> Luis and Jan
+>--
+>To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>the body of a message to majordomo@vger.kernel.org
+>More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
