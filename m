@@ -1,61 +1,55 @@
-From: Wido den Hollander <wido@42on.com>
-Subject: Re: Luminous: osd_crush_location_hook renamed to
- crush_location_hook
-Date: Thu, 19 Oct 2017 14:48:39 +0200 (CEST)
-Message-ID: <1720165360.3364.1508417319544@ox.pcextreme.nl>
-References: <1406455169.3092.1508155374117@ox.pcextreme.nl>
- <CALe9h7e3703iRKJo2ZzJs8YXpYz4xy4T_1ZEv-nfhdGpBRzEJg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+From: Jeff Layton <jlayton@kernel.org>
+Subject: [PATCH] ceph: unlock dangling spinlock in try_flush_caps
+Date: Thu, 19 Oct 2017 08:52:58 -0400
+Message-ID: <20171019125258.19821-1-jlayton@kernel.org>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from se02-out.mail.pcextreme.nl ([185.66.251.201]:53669 "EHLO
-        se02-out.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753174AbdJSMuB (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 19 Oct 2017 08:50:01 -0400
-In-Reply-To: <CALe9h7e3703iRKJo2ZzJs8YXpYz4xy4T_1ZEv-nfhdGpBRzEJg@mail.gmail.com>
+Received: from mail.kernel.org ([198.145.29.99]:38110 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753297AbdJSMxA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 19 Oct 2017 08:53:00 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: zyan@redhat.com
+Cc: sage@redhat.com, idryomov@gmail.com, ceph-devel@vger.kernel.org
 
+From: Jeff Layton <jlayton@redhat.com>
 
-> Op 19 oktober 2017 om 14:22 schreef John Spray <jspray@redhat.com>:
-> 
-> 
-> On Mon, Oct 16, 2017 at 1:02 PM, Wido den Hollander <wido@42on.com> wrote:
-> > Hi,
-> >
-> > I completely overread this, but I just found out that osd_crush_location_hook was renamed to crush_location_hook in the new config style.
-> >
-> > When upgrading from Jewel to Luminous without touching your configuration OSDs will move to the default CRUSH location due to the hook not being executed.
-> >
-> > Was this an oversight with Luminous or was it intentional?
-> 
-> Hmm, that setting wasn't part of the existing schema config_opts.h
-> schema.  The init script was effectively treating it as a "magic"
-> value that ceph-conf would be able to read out of the text ceph.conf.
-> Not that that matters from a user POV!
-> 
-> It looks like the init-ceph.in is still referring to the old magic
-> config setting's name as well.
+sparose warns:
+    fs/ceph/caps.c:2042:9: warning: context imbalance in 'try_flush_caps' - wrong count at exit
 
-Yes, it was done by *ceph-osd-prestart.sh* which is executed by systemd under Jewel.
+We need to exit this function with the lock unlocked, but a couple of
+cases leave it locked.
 
-> 
-> I would vote that we treat this as a bug and change the setting name
-> back to osd_crush_location_hook, even if the name isn't quite
-> descriptive any more -- Sage?
-> 
+Cc: stable@vger.kernel.org
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+---
+ fs/ceph/caps.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-Can't we alias it somehow? I ran into this with a pre-production cluster before we started the upgrade of two production systems.
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index 157fe59fbabe..1978a8cb1cb1 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -1991,6 +1991,7 @@ static int try_flush_caps(struct inode *inode, u64 *ptid)
+ retry:
+ 	spin_lock(&ci->i_ceph_lock);
+ 	if (ci->i_ceph_flags & CEPH_I_NOFLUSH) {
++		spin_unlock(&ci->i_ceph_lock);
+ 		dout("try_flush_caps skipping %p I_NOFLUSH set\n", inode);
+ 		goto out;
+ 	}
+@@ -2008,8 +2009,10 @@ static int try_flush_caps(struct inode *inode, u64 *ptid)
+ 			mutex_lock(&session->s_mutex);
+ 			goto retry;
+ 		}
+-		if (cap->session->s_state < CEPH_MDS_SESSION_OPEN)
++		if (cap->session->s_state < CEPH_MDS_SESSION_OPEN) {
++			spin_unlock(&ci->i_ceph_lock);
+ 			goto out;
++		}
+ 
+ 		flushing = __mark_caps_flushing(inode, session, true,
+ 						&flush_tid, &oldest_flush_tid);
+-- 
+2.13.6
 
-Problem is that this setting is usually only touched by large deployments so not very much tested nor used.
-
-Wido
-
-> John
-> 
-> >
-> > Wido
