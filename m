@@ -1,152 +1,380 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: luminous OSD memory usage
-Date: Fri, 20 Oct 2017 12:12:07 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1710201210540.24806@piezo.us.to>
-References: <d3b8007f-4bdf-65c5-f4e9-7d1d9c85e019@synesis.ru> <alpine.DEB.2.11.1708301455490.3491@piezo.novalocal> <333f45d3-f776-1f8c-9762-3f0f3bdac848@synesis.ru>
+From: Radoslaw Zarzynski <rzarzyns@redhat.com>
+Subject: Re: Work update related to rocksdb
+Date: Fri, 20 Oct 2017 17:12:55 +0200
+Message-ID: <CAB-Rz_V4vHpYdepMRQ-T1TqQ52MHvigtLT7Z0Xb566Fs3HnWnw@mail.gmail.com>
+References: <AEE495BD65FC0144A24ECB647C8270EF384559B2@shsmsx102.ccr.corp.intel.com>
+ <fd7b00ef-66e4-cfae-fc76-6300b86a3b86@redhat.com> <AEE495BD65FC0144A24ECB647C8270EF38455A21@shsmsx102.ccr.corp.intel.com>
+ <3ae1878e-9b70-669a-6596-e8480ae14537@redhat.com> <AEE495BD65FC0144A24ECB647C8270EF3846073B@shsmsx102.ccr.corp.intel.com>
+ <AEE495BD65FC0144A24ECB647C8270EF38475E4A@shsmsx102.ccr.corp.intel.com>
+ <416b7e16-6422-f572-7a2b-b7db7eabcb20@redhat.com> <AEE495BD65FC0144A24ECB647C8270EF384825EC@shsmsx102.ccr.corp.intel.com>
+ <cfebf4b4-67ec-8826-997e-6b6b1faa605d@redhat.com> <alpine.DEB.2.11.1710161314220.26702@piezo.us.to>
+ <c3d3264c-fef8-6d89-1fe9-0863bfb4db1d@redhat.com> <CAERxPZ+-fiP1GL1D7NyLE49hrN92GrOrouJdHPywPf7v2pLFWQ@mail.gmail.com>
+ <CAERxPZL7ErKKXi8+kvQ3Q1u4arC+jCFqWDT-9OPnj=OSEHuwhw@mail.gmail.com>
+ <alpine.DEB.2.11.1710170244490.26702@piezo.us.to> <CAERxPZ+surE4PjiN=uiJGUhDGr8Z2-is5R6NQqkMzFtwbFd-Cg@mail.gmail.com>
+ <alpine.DEB.2.11.1710170320440.26702@piezo.us.to> <CAB-Rz_Xp+5YnTsayCvYFOzmOkd9ACa7TxxU5m1Z34hSBPsxaUg@mail.gmail.com>
+ <CAERxPZ+7VHNLKdzdv4S8yHWNMv3f7H2tXBfzMRRe9sQFrThNJA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:35966 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752727AbdJTMMK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Oct 2017 08:12:10 -0400
-In-Reply-To: <333f45d3-f776-1f8c-9762-3f0f3bdac848@synesis.ru>
+Received: from mail-qt0-f177.google.com ([209.85.216.177]:45511 "EHLO
+        mail-qt0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752285AbdJTPNR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Oct 2017 11:13:17 -0400
+Received: by mail-qt0-f177.google.com with SMTP id p1so18845607qtg.2
+        for <ceph-devel@vger.kernel.org>; Fri, 20 Oct 2017 08:13:17 -0700 (PDT)
+In-Reply-To: <CAERxPZ+7VHNLKdzdv4S8yHWNMv3f7H2tXBfzMRRe9sQFrThNJA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Aleksei Gutikov <aleksey.gutikov@synesis.ru>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: xiaoyan li <wisher2003@gmail.com>
+Cc: Sage Weil <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>, "Li, Xiaoyan" <xiaoyan.li@intel.com>, "Gohad, Tushar" <tushar.gohad@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Fri, 20 Oct 2017, Aleksei Gutikov wrote:
-> Hi,
-> 
-> Here is some stats about OSD memory usage on our lab cluster
-> (110hdd*1T + 36ssd*200G)
-> 
-> https://drive.google.com/drive/folders/0B1s9jTJ0z59JcmtEX283WUd5bzg?usp=sharing
-> 
-> osd_mem_stats.txt contains stats for hdd and ssd OSDs:
-> - stats for process memory usage from /proc/pid/status,
-> - mempools stats
-> - and heap stats
-> 
-> We use luminous 12.2.1.
-> We set 9G memory limit in
-> /lib/systemd/system/ceph-osd@.service.d/override.conf
-> But that is not enough - OSDs are still been killed because they use more
-> (with bluestore_cache_size_ssd=3G)
-> OSDs with hdd (with bluestore_cache_size_hdd=1G) use up to 4.6G.
-> 
-> And, btw, seems that systemd's oom killer looks at VmData, not on VmRss.
+Hello,
 
-There was a fix for the bluestore memory usage calculation that didn't 
-make it into 12.1.1 (e.g., f60a942023088cbba53a816e6ef846994921cab3).  
-You repeat your test with the latest luminous branch or wait a week or so 
-for 12.2.2.
+There was an alternative path calling omap_rmkeys().
+Just pushed the amended patch [1].
 
-Thanks!
-sage
+Big thanks for pointing out the problem! :-)
 
+Regards,
+Radek
 
-> 
-> Thanks.
-> 
-> On 08/30/2017 06:17 PM, Sage Weil wrote:
-> > Hi Aleksei,
-> > 
-> > On Wed, 30 Aug 2017, Aleksei Gutikov wrote:
-> > > Hi.
-> > > 
-> > > I'm trying to synchronize osd daemons memory limits and bluestore cache
-> > > settings.
-> > > For 12.1.4 we have hdd osds usage about 4G with default settings.
-> > > For ssds we have limit 6G and they are been oom killed periodically.
-> > 
-> > So,
-> >   
-> > > While
-> > > osd_op_num_threads_per_shard_hdd=1
-> > > osd_op_num_threads_per_shard_ssd=2
-> > > and
-> > > osd_op_num_shards_hdd=5
-> > > osd_op_num_shards_ssd=8
-> > 
-> > aren't relevant to memory usage.  The _per_shard is about how many bytes
-> > are stored in each rocksdb key, and the num_shards is about how many
-> > threads we use.
-> > 
-> > This is the one that matters:
-> > 
-> > > bluestore_cache_size_hdd=1G
-> > > bluestore_cache_size_ssd=3G
-> > 
-> > It governs how much memory bluestore limits itself to.  He bad news is
-> > that bluestore counts what it allocates, not how much memory the allocator
-> > uses, so there is some overhead.  From what I've anecdotally seen it's
-> > something like 1.5x, which kind of sucks; there is more to be done here.
-> > 
-> > On top of that is usage by the OSD outside of bluestore,
-> > which is somewhere in the 500m to 1.5g range.
-> > 
-> > We're very interested in hearing what observed RSS users see relative to
-> > the configured bluestore size and pg count, along with a dump of the
-> > mempool metadata (ceph daemon osd.NNN dump_mempools).
-> > 
-> > > Does anybody have an idea about the equation for upper bound of memory
-> > > consumption?
-> > 
-> > Very roughly, something like: osd_overhead + bluestore_cache_size * 1.5 ?
-> > 
-> > > Can bluestore_cache_size be decreased safely for example to 2G, or to 1G?
-> > 
-> > Yes, you can/should change this to whatever you like (big or small).
-> > 
-> > > I want to calculate the maximum expected size of bluestore metadata (that
-> > > must
-> > > be definitely fit into cache) using size of raw space, average size of
-> > > objects, rocksdb space amplification.
-> > > I thought it should be something simple like
-> > > raw_space/avg_obj_size*obj_overhead*rocksdb_space_amp.
-> > > For example if obj_overhead=1k, hdd size=1T, rocksdb space amplification
-> > > is 2
-> > > and avg obj size=4M then 1T/4M*1k*2=500M so I need at least 512M for
-> > > cache.
-> > > But wise guys said that I have to take into account number of extents
-> > > also.
-> > > But bluestore_extent_map_shard_max_size=1200, I hope this number is not a
-> > > multiplicator...
-> > 
-> > Nope, just a shard size...
-> > 
-> > > What would be correct approach for calculation of this minimum cache size?
-> > > What can be expected size of key-values stored in rocksdb per rados
-> > > object?
-> > 
-> > This depends, unfortunately, on what the write pattern is for the objects.
-> > If they're written by RGW in big chunks, the overhead will be smaller.
-> > If it comes out of a 4k random write pattern it will be bigger.  Again,
-> > very interestd in hearing user reports of what is observed in real world
-> > situations.  I would trust that more than a calculation from first
-> > principles like the above.
-> > 
-> > > Default bluestore_cache_kv_ratio*bluestore_cache_size_ssd=0.99*3G
-> > > while default bluestore_cache_kv_max=512M
-> > > Looks like BlueStore::_set_cache_sizes() will set cache_kv_ratio to 1/6 in
-> > > default case. Is 512M enough for bluestore metadata?
-> > 
-> > In Mark's testing he found that we got more performance benefit when
-> > small caches were devoted to rocksdb and large caches were devoted mostly
-> > to the bluestore metadata cache (parsed onodes vs caching the encoded
-> > on-disk content).  You can always adjust the 512m value upwards (and that
-> > may make sense for large cache sizes).  Again, very interested in hearing
-> > whther that works better or worse for your workload!
-> > 
-> > Thanks-
-> > sage
-> > 
-> 
-> -- 
-> 
-> Best regards,
-> Aleksei Gutikov
-> Software Engineer | synesis.ru | Minsk. BY
-> 
+[1] https://github.com/ceph/ceph/commit/db2ce11e351d0e8ae1edff625e15a2f8ec1151d8
+
+On Fri, Oct 20, 2017 at 10:44 AM, xiaoyan li <wisher2003@gmail.com> wrote:
+> Hi, Radek
+>
+> I run the commit with the latest master branch, and set
+> rocksdb_enable_rmrange = true, but from logs it indicates no
+> rm_range_keys is called. Do you know why?
+>
+> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#L10936
+> https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#L11081
+>
+> On Wed, Oct 18, 2017 at 5:59 PM, Radoslaw Zarzynski <rzarzyns@redhat.com> wrote:
+>> Hello Sage,
+>>
+>> the patch is at my Github [1].
+>>
+>> Please be aware we also need to set "rocksdb_enable_rmrange = true" to
+>> use the DeleteRange of rocksdb::WriteBatch's interface. Otherwise our KV
+>> abstraction layer would translate rm_range_keys() into a sequence of calls
+>> to Delete().
+>>
+>> Regards,
+>> Radek
+>>
+>> P.S.
+>> My apologies for duplicating the message.
+>>
+>> [1] https://github.com/ceph/ceph/commit/92a28f033a5272b7dc2c5d726e67b6d09f6166ba
+>>
+>> On Tue, Oct 17, 2017 at 5:21 AM, Sage Weil <sweil@redhat.com> wrote:
+>>> On Tue, 17 Oct 2017, xiaoyan li wrote:
+>>>> On Tue, Oct 17, 2017 at 10:49 AM, Sage Weil <sweil@redhat.com> wrote:
+>>>> > On Tue, 17 Oct 2017, xiaoyan li wrote:
+>>>> >> Hi Sage and Mark,
+>>>> >> A question here: OMAP pg logs are added by "set", are they only
+>>>> >> deleted by rm_range_keys in BlueStore?
+>>>> >> https://github.com/ceph/ceph/pull/18279/files
+>>>> >
+>>>> > Ooh, I didn't realize we weren't doing this already--we should definitely
+>>>> > merge this patch.  But:
+>>>> >
+>>>> >> If yes, maybe when dedup, we don't need to compare the keys in all
+>>>> >> memtables, we just compare keys in current memtable with rm_range_keys
+>>>> >> in later memtables?
+>>>> >
+>>>> > They are currently deleted explicitly by key name by the OSD code; it
+>>>> > doesn't call the range-based delete method.  Radoslaw had a test branch
+>>>> > last week that tried using rm_range_keys instead but he didn't see any
+>>>> > real difference... presumably because we didn't realize the bluestore omap
+>>>> > code wasn't passing a range delete down to KeyValuDB!  We should retest on
+>>>> > top of your change.
+>>>> I will also have a check.
+>>>> A memtable table includes two parts: key/value operations(set, delete,
+>>>> deletesingle, merge), and range_del(includes range delete). I am
+>>>> wondering if all the pg logs are deleted by range delete, we can just
+>>>> check whether a key/value is deleted in range_del parts of later
+>>>> memtables when dedup flush, this can be save a lot of comparison
+>>>> effort.
+>>>
+>>> That sounds very promising!  Radoslaw, can you share your patch changing
+>>> the PG log trimming behavior?
+>>>
+>>> Thanks!
+>>> sage
+>>>
+>>>>
+>>>> >
+>>>> > Thanks!
+>>>> > sage
+>>>> >
+>>>> >
+>>>> >
+>>>> >  >
+>>>> >>
+>>>> >> On Tue, Oct 17, 2017 at 10:18 AM, xiaoyan li <wisher2003@gmail.com> wrote:
+>>>> >> > Hi Sage and Mark,
+>>>> >> > Following tests results I give are tested based on KV sequences got
+>>>> >> > from librbd+fio 4k or 16k random writes in 30 mins.
+>>>> >> > In my opinion, we may use dedup flush style for onodes and deferred
+>>>> >> > data, but use default merge flush style for other data.
+>>>> >> >
+>>>> >> > On Mon, Oct 16, 2017 at 9:50 PM, Mark Nelson <mnelson@redhat.com> wrote:
+>>>> >> >>
+>>>> >> >>
+>>>> >> >> On 10/16/2017 08:28 AM, Sage Weil wrote:
+>>>> >> >>>
+>>>> >> >>> [adding ceph-devel]
+>>>> >> >>>
+>>>> >> >>> On Mon, 16 Oct 2017, Mark Nelson wrote:
+>>>> >> >>>>
+>>>> >> >>>> Hi Lisa,
+>>>> >> >>>>
+>>>> >> >>>> Excellent testing!   This is exactly what we were trying to understand.
+>>>> >> >>>>
+>>>> >> >>>> On 10/16/2017 12:55 AM, Li, Xiaoyan wrote:
+>>>> >> >>>>>
+>>>> >> >>>>> Hi Mark,
+>>>> >> >>>>>
+>>>> >> >>>>> Based on my testing, when setting min_write_buffer_number_to_merge as 2,
+>>>> >> >>>>> the
+>>>> >> >>>>> onodes and deferred data written into L0 SST can decreased a lot with my
+>>>> >> >>>>> rocksdb dedup package.
+>>>> >> >>>>>
+>>>> >> >>>>> But for omap data, it needs to span more memtables. I tested omap data
+>>>> >> >>>>> in
+>>>> >> >>>>> separate column family. From the data, you can see when
+>>>> >> >>>>> min_write_buffer_number_to_merge is set to 4, the data written into L0
+>>>> >> >>>>> SST
+>>>> >> >>>>> is good. That means it has to compare current memTable to flush with
+>>>> >> >>>>> later 3
+>>>> >> >>>>> memtables recursively.
+>>>> >> >>>>> kFlushStyleDedup is to new flush style in my rocksdb dedup package.
+>>>> >> >>>>> kFlushStyleMerge is current flush style in master branch.
+>>>> >> >>>>>
+>>>> >> >>>>> But this is just considered from data written into L0. With more
+>>>> >> >>>>> memtables
+>>>> >> >>>>> to compare, it sacrifices CPU and computing time.
+>>>> >> >>>>>
+>>>> >> >>>>> Memtable size: 256MB
+>>>> >> >>>>> max_write_buffer_number min_write_buffer_number_to_merge
+>>>> >> >>>>> flush_style     Omap data written into L0 SST(unit: MB)
+>>>> >> >>>>> 16      8       kFlushStyleMerge        7665
+>>>> >> >>>>> 16      8       kFlushStyleDedup        3770
+>>>> >> >>>>> 8       4       kFlushStyleMerge        11470
+>>>> >> >>>>> 8       4       kFlushStyleDedup        3922
+>>>> >> >>>>> 6       3       kFlushStyleMerge        14059
+>>>> >> >>>>> 6       3       kFlushStyleDedup        5001
+>>>> >> >>>>> 4       2       kFlushStyleMerge        18683
+>>>> >> >>>>> 4       2       kFlushStyleDedup        15394
+>>>> >> >>>>
+>>>> >> >>>>
+>>>> >> >>>> Is this only omap data or all data?  It looks like the 6/3 or 8/4 is
+>>>> >> >>>> still
+>>>> >> >>>> probably the optimal point (And the improvements are quite noticeable!).
+>>>> >> > This is only omap data. Dedup can decrease data written into L0 SST,
+>>>> >> > but it needs to compare too many memtables.
+>>>> >> >
+>>>> >> >>>> Sadly we were hoping we might be able to get away with smaller memtables
+>>>> >> >>>> (say
+>>>> >> >>>> 64MB) with KFlushStyleDedup.  It looks like that might not be the case
+>>>> >> >>>> unless
+>>>> >> >>>> we increase the number very high.
+>>>> >> >>>>
+>>>> >> >>>> Sage, this is going to be even worse if we try to keep more pglog entries
+>>>> >> >>>> around on flash OSD backends?
+>>>> >> >>>
+>>>> >> >>>
+>>>> >> >>> I think there are three or more factors at play here:
+>>>> >> >>>
+>>>> >> >>> 1- If we reduce the memtable size, the CPU cost of insertion (baseline)
+>>>> >> >>> and the dedup cost will go down.
+>>>> >> >>>
+>>>> >> >>> 2- If we switch to a small min pg log entries, then most pg log keys
+>>>> >> >>> *will* fall into the smaller window (of small memtables * small
+>>>> >> >>> min_write_buffer_to_merge).  The dup op keys probably won't, though...
+>>>> >> >>> except maybe they will because the values are small and more of them will
+>>>> >> >>> fit into the memtables.  But then
+>>>> >> >>>
+>>>> >> >>> 3- If we have more keys and smaller values, then the CPU overhead will be
+>>>> >> >>> higher again.
+>>>> >> >>>
+>>>> >> >>> For PG logs, I didn't really expect that the dedup style would help; I was
+>>>> >> >>> only thinking about the deferred keys.  I wonder if it would make sense to
+>>>> >> >>> specify a handful of key prefixes to attempt dedup on, and not bother on
+>>>> >> >>> the others?
+>>>> >> >>
+>>>> >> >>
+>>>> >> >> Deferred keys seem to be a much smaller part of the problem right now than
+>>>> >> >> pglog.  At least based on what I'm seeing at the moment with NVMe testing.
+>>>> >> >> Regarding dedup, it's probably worth testing at the very least.
+>>>> >> > I did following tests: all data in default column family. Set
+>>>> >> > min_write_buffer_to_merge to 2, check the size of kinds of data
+>>>> >> > written into L0 SST files.
+>>>> >> > From the data, onodes and deferred data can be removed a lot in dedup style.
+>>>> >> >
+>>>> >> > Data written into L0 SST files:
+>>>> >> >
+>>>> >> > 4k random writes (unit: MB)
+>>>> >> > FlushStyle      Omap              onodes            deferred           others
+>>>> >> > merge       22431.56        23224.54       1530.105          0.906106
+>>>> >> > dedup       22188.28        14161.18        12.68681         0.90906
+>>>> >> >
+>>>> >> > 16k random writes (unit: MB)
+>>>> >> > FlushStyle      Omap              onodes            deferred           others
+>>>> >> > merge           19260.20          8230.02           0                    1914.50
+>>>> >> > dedup           19154.92          2603.90           0
+>>>> >> >    2517.15
+>>>> >> >
+>>>> >> > Note here: for others type, which use "merge" operation, dedup style
+>>>> >> > can't make it more efficient. In later, we can set it in separate CF,
+>>>> >> > use default merge flush style.
+>>>> >> >
+>>>> >> >>
+>>>> >> >>>
+>>>> >> >>> Also, there is the question of where the CPU time is spent.
+>>>> >> >>
+>>>> >> >>
+>>>> >> >> Indeed, but if we can reduce the memtable size it means we save CPU in other
+>>>> >> >> areas.  Like you say below, it's complicated.
+>>>> >> >>>
+>>>> >> >>>
+>>>> >> >>> 1- Big memtables means we spend more time in submit_transaction, called by
+>>>> >> >>> the kv_sync_thread, which is a bottleneck.
+>>>> >> >>
+>>>> >> >>
+>>>> >> >> At least on NVMe we see it pretty regularly in the wallclock traces.  I need
+>>>> >> >> to retest with Radoslav and Adam's hugepages PR to get a feel for how bad it
+>>>> >> >> is after that.
+>>>> >> >>
+>>>> >> >>>
+>>>> >> >>> 2- Higher dedup style flush CPU usage is spent in the compaction thread(s)
+>>>> >> >>> (I think?), which are asynchronous.
+>>>> >> >>
+>>>> >> >>
+>>>> >> >> L0 compaction is single threaded though so we must be careful....
+>>>> >> >>
+>>>> >> >>>
+>>>> >> >>> At the end of the day I think we need to use less CPU total, so the
+>>>> >> >>> optimization of the above factors is a bit complicated.  OTOH if the goal
+>>>> >> >>> is IOPS at whatever cost it'll probably mean a slightly different choice.
+>>>> >> >>
+>>>> >> >>
+>>>> >> >> I guess we should consider the trends.  Lots of cores, lots of flash cells.
+>>>> >> >> How do we balance high throughput and low latency?
+>>>> >> >>
+>>>> >> >>>
+>>>> >> >>> I would *expect* that if we go from, say, 256mb tables to 64mb tables and
+>>>> >> >>> dedup of <= 4 of them, then we'll see a modest net reduction of total CPU
+>>>> >> >>> *and* a shift to the compaction threads.
+>>>> >> >>
+>>>> >> >>
+>>>> >> >> It seems like based on Lisa's test results that's too short lived? Maybe I'm
+>>>> >> >> not understanding what you mean?
+>>>> >> >>
+>>>> >> >>>
+>>>> >> >>> And changing the pg log min entries will counterintuitively increase the
+>>>> >> >>> costs of insertion and dedup flush because more keys will fit in the same
+>>>> >> >>> amount of memtable... but if we reduce the memtable size at the same time
+>>>> >> >>> we might get a win there too?  Maybe?
+>>>> >> >>
+>>>> >> >>
+>>>> >> >> There's too much variability here to theorycraft it and your "maybe"
+>>>> >> >> statement confirms for me. ;)  We need to get a better handle on what's
+>>>> >> >> going on.
+>>>> >> >>
+>>>> >> >>>
+>>>> >> >>> Lisa, do you think limiting the dedup check during flush to specific
+>>>> >> >>> prefixes would make sense as a general capability?  If so, we could target
+>>>> >> >>> this *just* at the high-value keys (e.g., deferred writes) and avoid
+>>>> >> >>> incurring very much additional overhead for the key ranges that aren't
+>>>> >> >>> sure bets.
+>>>> >> > The easiest way to do it is to set data in different CFs, and use
+>>>> >> > different flush style(dedup or merge) in different CFs.
+>>>> >> >
+>>>> >> >>
+>>>> >> >>
+>>>> >> >> At least in my testing deferred writes during rbd 4k random writes are
+>>>> >> >> almost negligible:
+>>>> >> >>
+>>>> >> >> http://pad.ceph.com/p/performance_weekly
+>>>> >> >>
+>>>> >> >> I suspect it's all going to be about OMAP.  We need a really big WAL that
+>>>> >> >> can keep OMAP around for a long time while quickly flushing object data into
+>>>> >> >> small memtables.  On disk it's a big deal that this gets layed out
+>>>> >> >> sequentially but on flash I'm wondering if we'd be better off with a
+>>>> >> >> separate WAL for OMAP (a different rocksdb shard or different data store
+>>>> >> >> entirely).
+>>>> >> > Yes, OMAP data is main data written into L0 SST.
+>>>> >> >
+>>>> >> > Data written into every memtable: (uint: MB)
+>>>> >> > IO load          omap          ondes          deferred          others
+>>>> >> > 4k RW          37584          85253          323887          250
+>>>> >> > 16k RW        33687          73458          0                   3500
+>>>> >> >
+>>>> >> > In merge flush style with min_buffer_to_merge=2.
+>>>> >> > Data written into every L0 SST: (unit MB)
+>>>> >> > IO load     Omap              onodes            deferred           others
+>>>> >> > 4k RW       22188.28        14161.18        12.68681         0.90906
+>>>> >> > 16k RW     19260.20          8230.02           0                    1914.50
+>>>> >> >
+>>>> >> >>
+>>>> >> >> Mark
+>>>> >> >>
+>>>> >> >>
+>>>> >> >>>
+>>>> >> >>> sage
+>>>> >> >>>
+>>>> >> >>>
+>>>> >> >>>>> The above KV operation sequences come from 4k random writes in 30mins.
+>>>> >> >>>>> Overall, the Rocksdb dedup package can decrease the data written into L0
+>>>> >> >>>>> SST, but it needs more comparison. In my opinion, whether to use dedup,
+>>>> >> >>>>> it
+>>>> >> >>>>> depends on the configuration of the OSD host: whether disk is over busy
+>>>> >> >>>>> or
+>>>> >> >>>>> CPU is over busy.
+>>>> >> >>>>
+>>>> >> >>>>
+>>>> >> >>>> Do you have any insight into how much CPU overhead it adds?
+>>>> >> >>>>
+>>>> >> >>>>>
+>>>> >> >>>>> Best wishes
+>>>> >> >>>>> Lisa
+>>>> >> >>
+>>>> >> >> --
+>>>> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> >> >> the body of a message to majordomo@vger.kernel.org
+>>>> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>> >> >
+>>>> >> >
+>>>> >> >
+>>>> >> > --
+>>>> >> > Best wishes
+>>>> >> > Lisa
+>>>> >>
+>>>> >>
+>>>> >>
+>>>> >> --
+>>>> >> Best wishes
+>>>> >> Lisa
+>>>> >>
+>>>> >>
+>>>>
+>>>>
+>>>>
+>>>> --
+>>>> Best wishes
+>>>> Lisa
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>
+>
+>
+> --
+> Best wishes
+> Lisa
