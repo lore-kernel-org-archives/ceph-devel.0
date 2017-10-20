@@ -1,108 +1,125 @@
-From: Yoann Moulin <yoann.moulin@epfl.ch>
-Subject: Re: Wish list : automatic rebuild with hot swap osd ?
-Date: Fri, 20 Oct 2017 18:58:01 +0200
-Message-ID: <49f687b5-e779-d751-af8e-129518354428@epfl.ch>
-References: <06c8570a-415c-b830-3102-476a0d85cbdf@epfl.ch>
- <alpine.DEB.2.11.1710172118210.26702@piezo.us.to>
- <CAOtMX2hcnqQT8R_qAkRrDwdE=+S_+wX9FqSTnLcAVyMmuSraJw@mail.gmail.com>
- <alpine.DEB.2.11.1710181619440.24806@piezo.us.to>
- <CAC-Np1xHoNcH4cW7avPL2bv=2-hTZE6N1Q=KmuRwrX27rusPRQ@mail.gmail.com>
- <77422e82-aea3-abd6-75ce-d89d2b75945a@digiware.nl>
- <CAOtMX2gKjiibodHKiyBVDJ4Z5n7ECkK2tBBhmN9gyo5dJsyf_Q@mail.gmail.com>
+From: Xiaoxi Chen <superdebuger@gmail.com>
+Subject: Re: Huge lookup when recursively mkdir
+Date: Sat, 21 Oct 2017 02:09:41 +0800
+Message-ID: <CAEYCsV+Xf0iZRwHv--1rf8U=D_izp8s5s9W75fc6k_MinJWDWg@mail.gmail.com>
+References: <CAEYCsVLCS5aPC8M8PAU5UTS0pKzhp1aWBW6L72ZwvUEetbstpw@mail.gmail.com>
+ <CAAM7YAk2+ekeYdJ_E4d5wB_SoiL_eGA0P9fGuxvEkz3r11ytTQ@mail.gmail.com>
+ <CAEYCsVL=bcaQY6SBQ=ujR9EEvK3FgUf38s+Bj5UU2Z8SjoPQtA@mail.gmail.com>
+ <CAAM7YAn9hFCHTQZ62soWBhBbtmKjw-UCxHqYOCe5m587nfugAw@mail.gmail.com> <CAEYCsVLaC14wBQuD0xE9gs53v7ztPdQ-ac_Vh5F5DD02PHYwQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp4.epfl.ch ([128.178.224.219]:52873 "EHLO smtp4.epfl.ch"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751698AbdJTQ6E (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 20 Oct 2017 12:58:04 -0400
-In-Reply-To: <CAOtMX2gKjiibodHKiyBVDJ4Z5n7ECkK2tBBhmN9gyo5dJsyf_Q@mail.gmail.com>
-Content-Language: fr-CH
+Received: from mail-io0-f177.google.com ([209.85.223.177]:51551 "EHLO
+        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751028AbdJTSJn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Oct 2017 14:09:43 -0400
+Received: by mail-io0-f177.google.com with SMTP id b186so14117594iof.8
+        for <ceph-devel@vger.kernel.org>; Fri, 20 Oct 2017 11:09:42 -0700 (PDT)
+In-Reply-To: <CAEYCsVLaC14wBQuD0xE9gs53v7ztPdQ-ac_Vh5F5DD02PHYwQg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Alan Somers <asomers@freebsd.org>, Willem Jan Withagen <wjw@digiware.nl>
-Cc: Alfredo Deza <adeza@redhat.com>, Sage Weil <sage@newdream.net>, ceph-devel <ceph-devel@vger.kernel.org>, John Spray <jspray@redhat.com>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, John Spray <jspray@redhat.com>
 
-Hello,
+@Zheng, my kernel doesn't even has c3f4688a08f.   But 200fd27 ("ceph:
+use lookup request to revalidate dentry") is there.
 
->>> If these properties also mean device information (vendor, size,
->>> solid/rotational, etc...) it could help
->>> to better map/detect an OSD replacement since clusters tend to have a
->>> certain level of
->>> homogeneous hardware: if $brand, and $size, and $rotational etc...
+2017-10-21 0:54 GMT+08:00 Xiaoxi Chen <superdebuger@gmail.com>:
+> Thanks, will check.
+>
+> A general question, does cephfs kernel client drop dentries/inode
+> cache aggressively?   What I know is if MDS issue
+> CEPH_SESSION_RECALL_STATE, client will drop, but is there other cases
+> client will drop cache?
+>
+>
+>
+> 2017-10-20 16:39 GMT+08:00 Yan, Zheng <ukernel@gmail.com>:
+>> On Fri, Oct 20, 2017 at 3:28 PM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
+>>> Centos 7.3, kernel version 3.10.0-514.26.2.el7.x86_64.
 >>>
+>>> I extract the logical of file creation in our workload into a
+>>> reproducer , like below.
+>>>
+>>> Concurrently run the reproducer in 2+ node can see a lots of lookup OP.
+>>> I thought the lookup is to open the directory tree so I tried to
+>>> pre-make most of the dirs ,  use ls -i trying to read the dentries and
+>>> cache it, then re-run the reproducer,  seems nothing different..
+>>>
+>>> #include <sys/stat.h>
+>>> #include <fcntl.h>
+>>> int create_file(char * base, int count, int max, int depth)
+>>> {
+>>>     int i;
+>>>     for(i=0; i<count; i++) {
+>>>         char dir[256];
+>>>         int mydir = rand() % max;
+>>>         sprintf(dir, "%s/%d", path, mydir);
+>>>         if (depth >=1) {
+>>>             mkdir(dir,0777);
+>>>             create_dir(dir, count, max, depth - 1);
+>>>         } else {
+>>>             int fd = open(dir, O_CREAT | O_EXCL| O_WRONLY , 0666);
+>>>             printf("opened path : %s = %d\n", path, fd);
+>>>             close(fd);
+>>>         }
+>>>     }
+>>> }
+>>> int main(int argc, char argv[])
+>>> {
+>>>     char path[256];
+>>>     while(1) {
+>>>       create_file("/import/SQL01", 1, 4 ,10);
+>>>     }
+>>> }
+>>>
+>>
+>> still don't see this behavior on 4.13 kernel. I suspect there is
+>> something wrong with dentry lease. please check if your kernel
+>> include:
+>>
+>> commit c3f4688a08f (ceph: don't set req->r_locked_dir in ceph_d_revalidate)
+>> commit 5eb9f6040f3 (ceph: do a LOOKUP in d_revalidate instead of GETATTR)
+>>
+>> The first commit can cause this issue, the second one fixes it.
+>>
+>> Regards
+>> Yan, Zheng
+>>
+>>>
+>>>
+>>> 2017-10-20 10:55 GMT+08:00 Yan, Zheng <ukernel@gmail.com>:
+>>>> On Fri, Oct 20, 2017 at 12:49 AM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
+>>>>> Hi,
+>>>>>
+>>>>>       I am seeing a lot of lookup request when doing recursive mkdir.
+>>>>>       The workload behavior is like:
+>>>>>           mkdir DIR0
+>>>>>           mkdir DIR0/DIR1
+>>>>>           mkdir DIR0/DIR1/DIR2
+>>>>>           ....
+>>>>>           mkdir DIR0/DIR1/DIR2......./DIR7
+>>>>>           create DIR0/DIR1/DIR2......./DIR7/FILE1
+>>>>>
+>>>>>       and concurrently run on 50+ clients, the dir name in different
+>>>>> clients may or maynot be the same.
+>>>>>
+>>>>>        from the admin socket I was seeing ~50K create requests, but
+>>>>> got 400K lookup requests. The lookup eat up most of the mds capability
+>>>>> so file create is slow.
+>>>>>
+>>>>>        Where is the lookup comes from and can we have anyway to
+>>>>> optimize it out ?
+>>>>>
 >>>>
->>>> - A daemon (e.g., ceph-osd-autoreplace) that runs on each machine or a
->>>> tool that is triggered by udev.  It would check for new, empty devices
->>>> appearing in the locations (as defined by the by-path string) previously
->>>> occupied by OSDs that are down.  If that happens, it can use 'ceph osd
->>>> safe-to-destroy' to verify whether it is safe to automatically rebuild
->>>> that OSD.  (If not, it might want to raise a health alert, since it's
->>>> possible the drive that was physically pulled should be preserved until
->>>> the cluster is sure it doesn't need it.)
->>>
->>>
->>> systemd has some support for devices, so we might not even need a
->>> daemon, but more a unit that can
->>> depend on events already handled by systemd (would save us from udev).
->>
->>
->> FreeBSD does not have systemd. 8-)
->>
->> I'm inclined to say luckily, but then that may be my personal bias.
->> I don't like "automagic" tools like Udev or systemd tinkering with my disks.
->>
->> As Alan says, in ZFS one can designate hot-standby. But even there I prefer
->> to be alerted and then manually intervene.
-> 
-> Actually, I was talking about autoreplace by physical path.  Hot
-> spares are something else.  The physical path of a drive is distinct
-> from its device path.  The physical path is determined by information
-> from a SES[1] expander, which can actually tell you which physical
-> slots contain which logical drives.
-> 
->>
->> A hot-swap daemon that gets instructed to only use explicitly and fully
->> enumerated disk might be something to trust. So something matching
->> disk-serial number would be oke.
-> 
-> Matching disk serial number isn't always safe in a VM.  VMs can
-> generate duplicate serial numbers.  Better to match against a GPT
-> label or something that identifies a drive as belonging to Ceph.
-> That, unfortunately, requires some intervention from the
-> administrator.  The nice thing about a user space daemon is that its
-> behavior can easily be controlled by the sysadmin.  So for example, a
-> sysadmin could opt into a rule that says "Ceph can take over all SCSI
-> disks" or "Ceph can take over all disks without an existing partition
-> table or known filesystem".
-
-I like the idea of mutiple level of "take over".
-
-To begin, we can imagine something like :
-
-there is a daemon which check if a new disk device is added to an OSD server, a quick analyses of the disk tell if there is a partition table,
-which one it is, if there is partitions, if there is zero or garbage (like encrypted data) etc... then  make a resume of the new device to a mon
-or mgr or a new daemon
-
-if an OSD is marked as down/out, give the possibility to replace the osd mark as down by a single command (same place in the crush map same weight
-
-  ceph osd <id> replaceby <new disk ref>
-
-if no OSD mark as down, offers the ability to add a new OSD at the right place in the crush map if possible (maybe calculate the place of the
-new disk can be difficult)
-
-  ceph osd add <new disk ref> [crush map placement]
-
-of just ignore the disk
-
-  ceph osd ignore <new disk ref>
-
-then give the ability of the cluster in some condition to do choose what to do without human interaction.
-
-does this make sense ?
-
-
--- 
-Yoann Moulin
-EPFL IC-IT
+>>>> I don't see this behavior when running following commands in 4.13
+>>>> kernel client and luminous version ceph-fuse. which client do you use?
+>>>>
+>>>> mkdir d1
+>>>> mkdir d1/d2
+>>>> mkdir d1/d2/d3
+>>>> mkdir d1/d2/d3/d4/
+>>>> mkdir d1/d2/d3/d4/d5
+>>>> touch d1/d2/d3/d4/d5/f
+>>>>
+>>>>>      Xiaoxi
