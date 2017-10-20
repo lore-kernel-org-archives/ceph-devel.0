@@ -1,366 +1,471 @@
-From: xiaoyan li <wisher2003@gmail.com>
-Subject: Re: Work update related to rocksdb
-Date: Fri, 20 Oct 2017 16:44:06 +0800
-Message-ID: <CAERxPZ+7VHNLKdzdv4S8yHWNMv3f7H2tXBfzMRRe9sQFrThNJA@mail.gmail.com>
-References: <AEE495BD65FC0144A24ECB647C8270EF384559B2@shsmsx102.ccr.corp.intel.com>
- <fd7b00ef-66e4-cfae-fc76-6300b86a3b86@redhat.com> <AEE495BD65FC0144A24ECB647C8270EF38455A21@shsmsx102.ccr.corp.intel.com>
- <3ae1878e-9b70-669a-6596-e8480ae14537@redhat.com> <AEE495BD65FC0144A24ECB647C8270EF3846073B@shsmsx102.ccr.corp.intel.com>
- <AEE495BD65FC0144A24ECB647C8270EF38475E4A@shsmsx102.ccr.corp.intel.com>
- <416b7e16-6422-f572-7a2b-b7db7eabcb20@redhat.com> <AEE495BD65FC0144A24ECB647C8270EF384825EC@shsmsx102.ccr.corp.intel.com>
- <cfebf4b4-67ec-8826-997e-6b6b1faa605d@redhat.com> <alpine.DEB.2.11.1710161314220.26702@piezo.us.to>
- <c3d3264c-fef8-6d89-1fe9-0863bfb4db1d@redhat.com> <CAERxPZ+-fiP1GL1D7NyLE49hrN92GrOrouJdHPywPf7v2pLFWQ@mail.gmail.com>
- <CAERxPZL7ErKKXi8+kvQ3Q1u4arC+jCFqWDT-9OPnj=OSEHuwhw@mail.gmail.com>
- <alpine.DEB.2.11.1710170244490.26702@piezo.us.to> <CAERxPZ+surE4PjiN=uiJGUhDGr8Z2-is5R6NQqkMzFtwbFd-Cg@mail.gmail.com>
- <alpine.DEB.2.11.1710170320440.26702@piezo.us.to> <CAB-Rz_Xp+5YnTsayCvYFOzmOkd9ACa7TxxU5m1Z34hSBPsxaUg@mail.gmail.com>
+From: Aleksei Gutikov <aleksey.gutikov@synesis.ru>
+Subject: Re: luminous OSD memory usage
+Date: Fri, 20 Oct 2017 11:52:35 +0300
+Message-ID: <333f45d3-f776-1f8c-9762-3f0f3bdac848@synesis.ru>
+References: <d3b8007f-4bdf-65c5-f4e9-7d1d9c85e019@synesis.ru>
+ <alpine.DEB.2.11.1708301455490.3491@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/mixed;
+ boundary="------------2DAC1EEFEC83A19EB5955759"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f50.google.com ([209.85.218.50]:55409 "EHLO
-        mail-oi0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752279AbdJTIoI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Oct 2017 04:44:08 -0400
-Received: by mail-oi0-f50.google.com with SMTP id g125so18982961oib.12
-        for <ceph-devel@vger.kernel.org>; Fri, 20 Oct 2017 01:44:07 -0700 (PDT)
-In-Reply-To: <CAB-Rz_Xp+5YnTsayCvYFOzmOkd9ACa7TxxU5m1Z34hSBPsxaUg@mail.gmail.com>
+Received: from mail-lf0-f54.google.com ([209.85.215.54]:55294 "EHLO
+        mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752471AbdJTIwj (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 20 Oct 2017 04:52:39 -0400
+Received: by mail-lf0-f54.google.com with SMTP id d10so12396361lfg.11
+        for <ceph-devel@vger.kernel.org>; Fri, 20 Oct 2017 01:52:38 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1708301455490.3491@piezo.novalocal>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Radoslaw Zarzynski <rzarzyns@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, Mark Nelson <mnelson@redhat.com>, "Li, Xiaoyan" <xiaoyan.li@intel.com>, "Gohad, Tushar" <tushar.gohad@intel.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sage@newdream.net>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi, Radek
+This is a multi-part message in MIME format.
+--------------2DAC1EEFEC83A19EB5955759
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-I run the commit with the latest master branch, and set
-rocksdb_enable_rmrange = true, but from logs it indicates no
-rm_range_keys is called. Do you know why?
+Hi,
 
-https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#L10936
-https://github.com/ceph/ceph/blob/master/src/os/bluestore/BlueStore.cc#L11081
+Here is some stats about OSD memory usage on our lab cluster
+(110hdd*1T + 36ssd*200G)
 
-On Wed, Oct 18, 2017 at 5:59 PM, Radoslaw Zarzynski <rzarzyns@redhat.com> wrote:
-> Hello Sage,
->
-> the patch is at my Github [1].
->
-> Please be aware we also need to set "rocksdb_enable_rmrange = true" to
-> use the DeleteRange of rocksdb::WriteBatch's interface. Otherwise our KV
-> abstraction layer would translate rm_range_keys() into a sequence of calls
-> to Delete().
->
-> Regards,
-> Radek
->
-> P.S.
-> My apologies for duplicating the message.
->
-> [1] https://github.com/ceph/ceph/commit/92a28f033a5272b7dc2c5d726e67b6d09f6166ba
->
-> On Tue, Oct 17, 2017 at 5:21 AM, Sage Weil <sweil@redhat.com> wrote:
->> On Tue, 17 Oct 2017, xiaoyan li wrote:
->>> On Tue, Oct 17, 2017 at 10:49 AM, Sage Weil <sweil@redhat.com> wrote:
->>> > On Tue, 17 Oct 2017, xiaoyan li wrote:
->>> >> Hi Sage and Mark,
->>> >> A question here: OMAP pg logs are added by "set", are they only
->>> >> deleted by rm_range_keys in BlueStore?
->>> >> https://github.com/ceph/ceph/pull/18279/files
->>> >
->>> > Ooh, I didn't realize we weren't doing this already--we should definitely
->>> > merge this patch.  But:
->>> >
->>> >> If yes, maybe when dedup, we don't need to compare the keys in all
->>> >> memtables, we just compare keys in current memtable with rm_range_keys
->>> >> in later memtables?
->>> >
->>> > They are currently deleted explicitly by key name by the OSD code; it
->>> > doesn't call the range-based delete method.  Radoslaw had a test branch
->>> > last week that tried using rm_range_keys instead but he didn't see any
->>> > real difference... presumably because we didn't realize the bluestore omap
->>> > code wasn't passing a range delete down to KeyValuDB!  We should retest on
->>> > top of your change.
->>> I will also have a check.
->>> A memtable table includes two parts: key/value operations(set, delete,
->>> deletesingle, merge), and range_del(includes range delete). I am
->>> wondering if all the pg logs are deleted by range delete, we can just
->>> check whether a key/value is deleted in range_del parts of later
->>> memtables when dedup flush, this can be save a lot of comparison
->>> effort.
+https://drive.google.com/drive/folders/0B1s9jTJ0z59JcmtEX283WUd5bzg?usp=sharing
+
+osd_mem_stats.txt contains stats for hdd and ssd OSDs:
+- stats for process memory usage from /proc/pid/status,
+- mempools stats
+- and heap stats
+
+We use luminous 12.2.1.
+We set 9G memory limit in 
+/lib/systemd/system/ceph-osd@.service.d/override.conf
+But that is not enough - OSDs are still been killed because they use 
+more (with bluestore_cache_size_ssd=3G)
+OSDs with hdd (with bluestore_cache_size_hdd=1G) use up to 4.6G.
+
+And, btw, seems that systemd's oom killer looks at VmData, not on VmRss.
+
+Thanks.
+
+On 08/30/2017 06:17 PM, Sage Weil wrote:
+> Hi Aleksei,
+> 
+> On Wed, 30 Aug 2017, Aleksei Gutikov wrote:
+>> Hi.
 >>
->> That sounds very promising!  Radoslaw, can you share your patch changing
->> the PG log trimming behavior?
->>
->> Thanks!
->> sage
->>
->>>
->>> >
->>> > Thanks!
->>> > sage
->>> >
->>> >
->>> >
->>> >  >
->>> >>
->>> >> On Tue, Oct 17, 2017 at 10:18 AM, xiaoyan li <wisher2003@gmail.com> wrote:
->>> >> > Hi Sage and Mark,
->>> >> > Following tests results I give are tested based on KV sequences got
->>> >> > from librbd+fio 4k or 16k random writes in 30 mins.
->>> >> > In my opinion, we may use dedup flush style for onodes and deferred
->>> >> > data, but use default merge flush style for other data.
->>> >> >
->>> >> > On Mon, Oct 16, 2017 at 9:50 PM, Mark Nelson <mnelson@redhat.com> wrote:
->>> >> >>
->>> >> >>
->>> >> >> On 10/16/2017 08:28 AM, Sage Weil wrote:
->>> >> >>>
->>> >> >>> [adding ceph-devel]
->>> >> >>>
->>> >> >>> On Mon, 16 Oct 2017, Mark Nelson wrote:
->>> >> >>>>
->>> >> >>>> Hi Lisa,
->>> >> >>>>
->>> >> >>>> Excellent testing!   This is exactly what we were trying to understand.
->>> >> >>>>
->>> >> >>>> On 10/16/2017 12:55 AM, Li, Xiaoyan wrote:
->>> >> >>>>>
->>> >> >>>>> Hi Mark,
->>> >> >>>>>
->>> >> >>>>> Based on my testing, when setting min_write_buffer_number_to_merge as 2,
->>> >> >>>>> the
->>> >> >>>>> onodes and deferred data written into L0 SST can decreased a lot with my
->>> >> >>>>> rocksdb dedup package.
->>> >> >>>>>
->>> >> >>>>> But for omap data, it needs to span more memtables. I tested omap data
->>> >> >>>>> in
->>> >> >>>>> separate column family. From the data, you can see when
->>> >> >>>>> min_write_buffer_number_to_merge is set to 4, the data written into L0
->>> >> >>>>> SST
->>> >> >>>>> is good. That means it has to compare current memTable to flush with
->>> >> >>>>> later 3
->>> >> >>>>> memtables recursively.
->>> >> >>>>> kFlushStyleDedup is to new flush style in my rocksdb dedup package.
->>> >> >>>>> kFlushStyleMerge is current flush style in master branch.
->>> >> >>>>>
->>> >> >>>>> But this is just considered from data written into L0. With more
->>> >> >>>>> memtables
->>> >> >>>>> to compare, it sacrifices CPU and computing time.
->>> >> >>>>>
->>> >> >>>>> Memtable size: 256MB
->>> >> >>>>> max_write_buffer_number min_write_buffer_number_to_merge
->>> >> >>>>> flush_style     Omap data written into L0 SST(unit: MB)
->>> >> >>>>> 16      8       kFlushStyleMerge        7665
->>> >> >>>>> 16      8       kFlushStyleDedup        3770
->>> >> >>>>> 8       4       kFlushStyleMerge        11470
->>> >> >>>>> 8       4       kFlushStyleDedup        3922
->>> >> >>>>> 6       3       kFlushStyleMerge        14059
->>> >> >>>>> 6       3       kFlushStyleDedup        5001
->>> >> >>>>> 4       2       kFlushStyleMerge        18683
->>> >> >>>>> 4       2       kFlushStyleDedup        15394
->>> >> >>>>
->>> >> >>>>
->>> >> >>>> Is this only omap data or all data?  It looks like the 6/3 or 8/4 is
->>> >> >>>> still
->>> >> >>>> probably the optimal point (And the improvements are quite noticeable!).
->>> >> > This is only omap data. Dedup can decrease data written into L0 SST,
->>> >> > but it needs to compare too many memtables.
->>> >> >
->>> >> >>>> Sadly we were hoping we might be able to get away with smaller memtables
->>> >> >>>> (say
->>> >> >>>> 64MB) with KFlushStyleDedup.  It looks like that might not be the case
->>> >> >>>> unless
->>> >> >>>> we increase the number very high.
->>> >> >>>>
->>> >> >>>> Sage, this is going to be even worse if we try to keep more pglog entries
->>> >> >>>> around on flash OSD backends?
->>> >> >>>
->>> >> >>>
->>> >> >>> I think there are three or more factors at play here:
->>> >> >>>
->>> >> >>> 1- If we reduce the memtable size, the CPU cost of insertion (baseline)
->>> >> >>> and the dedup cost will go down.
->>> >> >>>
->>> >> >>> 2- If we switch to a small min pg log entries, then most pg log keys
->>> >> >>> *will* fall into the smaller window (of small memtables * small
->>> >> >>> min_write_buffer_to_merge).  The dup op keys probably won't, though...
->>> >> >>> except maybe they will because the values are small and more of them will
->>> >> >>> fit into the memtables.  But then
->>> >> >>>
->>> >> >>> 3- If we have more keys and smaller values, then the CPU overhead will be
->>> >> >>> higher again.
->>> >> >>>
->>> >> >>> For PG logs, I didn't really expect that the dedup style would help; I was
->>> >> >>> only thinking about the deferred keys.  I wonder if it would make sense to
->>> >> >>> specify a handful of key prefixes to attempt dedup on, and not bother on
->>> >> >>> the others?
->>> >> >>
->>> >> >>
->>> >> >> Deferred keys seem to be a much smaller part of the problem right now than
->>> >> >> pglog.  At least based on what I'm seeing at the moment with NVMe testing.
->>> >> >> Regarding dedup, it's probably worth testing at the very least.
->>> >> > I did following tests: all data in default column family. Set
->>> >> > min_write_buffer_to_merge to 2, check the size of kinds of data
->>> >> > written into L0 SST files.
->>> >> > From the data, onodes and deferred data can be removed a lot in dedup style.
->>> >> >
->>> >> > Data written into L0 SST files:
->>> >> >
->>> >> > 4k random writes (unit: MB)
->>> >> > FlushStyle      Omap              onodes            deferred           others
->>> >> > merge       22431.56        23224.54       1530.105          0.906106
->>> >> > dedup       22188.28        14161.18        12.68681         0.90906
->>> >> >
->>> >> > 16k random writes (unit: MB)
->>> >> > FlushStyle      Omap              onodes            deferred           others
->>> >> > merge           19260.20          8230.02           0                    1914.50
->>> >> > dedup           19154.92          2603.90           0
->>> >> >    2517.15
->>> >> >
->>> >> > Note here: for others type, which use "merge" operation, dedup style
->>> >> > can't make it more efficient. In later, we can set it in separate CF,
->>> >> > use default merge flush style.
->>> >> >
->>> >> >>
->>> >> >>>
->>> >> >>> Also, there is the question of where the CPU time is spent.
->>> >> >>
->>> >> >>
->>> >> >> Indeed, but if we can reduce the memtable size it means we save CPU in other
->>> >> >> areas.  Like you say below, it's complicated.
->>> >> >>>
->>> >> >>>
->>> >> >>> 1- Big memtables means we spend more time in submit_transaction, called by
->>> >> >>> the kv_sync_thread, which is a bottleneck.
->>> >> >>
->>> >> >>
->>> >> >> At least on NVMe we see it pretty regularly in the wallclock traces.  I need
->>> >> >> to retest with Radoslav and Adam's hugepages PR to get a feel for how bad it
->>> >> >> is after that.
->>> >> >>
->>> >> >>>
->>> >> >>> 2- Higher dedup style flush CPU usage is spent in the compaction thread(s)
->>> >> >>> (I think?), which are asynchronous.
->>> >> >>
->>> >> >>
->>> >> >> L0 compaction is single threaded though so we must be careful....
->>> >> >>
->>> >> >>>
->>> >> >>> At the end of the day I think we need to use less CPU total, so the
->>> >> >>> optimization of the above factors is a bit complicated.  OTOH if the goal
->>> >> >>> is IOPS at whatever cost it'll probably mean a slightly different choice.
->>> >> >>
->>> >> >>
->>> >> >> I guess we should consider the trends.  Lots of cores, lots of flash cells.
->>> >> >> How do we balance high throughput and low latency?
->>> >> >>
->>> >> >>>
->>> >> >>> I would *expect* that if we go from, say, 256mb tables to 64mb tables and
->>> >> >>> dedup of <= 4 of them, then we'll see a modest net reduction of total CPU
->>> >> >>> *and* a shift to the compaction threads.
->>> >> >>
->>> >> >>
->>> >> >> It seems like based on Lisa's test results that's too short lived? Maybe I'm
->>> >> >> not understanding what you mean?
->>> >> >>
->>> >> >>>
->>> >> >>> And changing the pg log min entries will counterintuitively increase the
->>> >> >>> costs of insertion and dedup flush because more keys will fit in the same
->>> >> >>> amount of memtable... but if we reduce the memtable size at the same time
->>> >> >>> we might get a win there too?  Maybe?
->>> >> >>
->>> >> >>
->>> >> >> There's too much variability here to theorycraft it and your "maybe"
->>> >> >> statement confirms for me. ;)  We need to get a better handle on what's
->>> >> >> going on.
->>> >> >>
->>> >> >>>
->>> >> >>> Lisa, do you think limiting the dedup check during flush to specific
->>> >> >>> prefixes would make sense as a general capability?  If so, we could target
->>> >> >>> this *just* at the high-value keys (e.g., deferred writes) and avoid
->>> >> >>> incurring very much additional overhead for the key ranges that aren't
->>> >> >>> sure bets.
->>> >> > The easiest way to do it is to set data in different CFs, and use
->>> >> > different flush style(dedup or merge) in different CFs.
->>> >> >
->>> >> >>
->>> >> >>
->>> >> >> At least in my testing deferred writes during rbd 4k random writes are
->>> >> >> almost negligible:
->>> >> >>
->>> >> >> http://pad.ceph.com/p/performance_weekly
->>> >> >>
->>> >> >> I suspect it's all going to be about OMAP.  We need a really big WAL that
->>> >> >> can keep OMAP around for a long time while quickly flushing object data into
->>> >> >> small memtables.  On disk it's a big deal that this gets layed out
->>> >> >> sequentially but on flash I'm wondering if we'd be better off with a
->>> >> >> separate WAL for OMAP (a different rocksdb shard or different data store
->>> >> >> entirely).
->>> >> > Yes, OMAP data is main data written into L0 SST.
->>> >> >
->>> >> > Data written into every memtable: (uint: MB)
->>> >> > IO load          omap          ondes          deferred          others
->>> >> > 4k RW          37584          85253          323887          250
->>> >> > 16k RW        33687          73458          0                   3500
->>> >> >
->>> >> > In merge flush style with min_buffer_to_merge=2.
->>> >> > Data written into every L0 SST: (unit MB)
->>> >> > IO load     Omap              onodes            deferred           others
->>> >> > 4k RW       22188.28        14161.18        12.68681         0.90906
->>> >> > 16k RW     19260.20          8230.02           0                    1914.50
->>> >> >
->>> >> >>
->>> >> >> Mark
->>> >> >>
->>> >> >>
->>> >> >>>
->>> >> >>> sage
->>> >> >>>
->>> >> >>>
->>> >> >>>>> The above KV operation sequences come from 4k random writes in 30mins.
->>> >> >>>>> Overall, the Rocksdb dedup package can decrease the data written into L0
->>> >> >>>>> SST, but it needs more comparison. In my opinion, whether to use dedup,
->>> >> >>>>> it
->>> >> >>>>> depends on the configuration of the OSD host: whether disk is over busy
->>> >> >>>>> or
->>> >> >>>>> CPU is over busy.
->>> >> >>>>
->>> >> >>>>
->>> >> >>>> Do you have any insight into how much CPU overhead it adds?
->>> >> >>>>
->>> >> >>>>>
->>> >> >>>>> Best wishes
->>> >> >>>>> Lisa
->>> >> >>
->>> >> >> --
->>> >> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> >> >> the body of a message to majordomo@vger.kernel.org
->>> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> >> >
->>> >> >
->>> >> >
->>> >> > --
->>> >> > Best wishes
->>> >> > Lisa
->>> >>
->>> >>
->>> >>
->>> >> --
->>> >> Best wishes
->>> >> Lisa
->>> >>
->>> >>
->>>
->>>
->>>
->>> --
->>> Best wishes
->>> Lisa
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
-
-
+>> I'm trying to synchronize osd daemons memory limits and bluestore cache
+>> settings.
+>> For 12.1.4 we have hdd osds usage about 4G with default settings.
+>> For ssds we have limit 6G and they are been oom killed periodically.
+> 
+> So,
+>   
+>> While
+>> osd_op_num_threads_per_shard_hdd=1
+>> osd_op_num_threads_per_shard_ssd=2
+>> and
+>> osd_op_num_shards_hdd=5
+>> osd_op_num_shards_ssd=8
+> 
+> aren't relevant to memory usage.  The _per_shard is about how many bytes
+> are stored in each rocksdb key, and the num_shards is about how many
+> threads we use.
+> 
+> This is the one that matters:
+> 
+>> bluestore_cache_size_hdd=1G
+>> bluestore_cache_size_ssd=3G
+> 
+> It governs how much memory bluestore limits itself to.  He bad news is
+> that bluestore counts what it allocates, not how much memory the allocator
+> uses, so there is some overhead.  From what I've anecdotally seen it's
+> something like 1.5x, which kind of sucks; there is more to be done here.
+> 
+> On top of that is usage by the OSD outside of bluestore,
+> which is somewhere in the 500m to 1.5g range.
+> 
+> We're very interested in hearing what observed RSS users see relative to
+> the configured bluestore size and pg count, along with a dump of the
+> mempool metadata (ceph daemon osd.NNN dump_mempools).
+> 
+>> Does anybody have an idea about the equation for upper bound of memory
+>> consumption?
+> 
+> Very roughly, something like: osd_overhead + bluestore_cache_size * 1.5 ?
+> 
+>> Can bluestore_cache_size be decreased safely for example to 2G, or to 1G?
+> 
+> Yes, you can/should change this to whatever you like (big or small).
+> 
+>> I want to calculate the maximum expected size of bluestore metadata (that must
+>> be definitely fit into cache) using size of raw space, average size of
+>> objects, rocksdb space amplification.
+>> I thought it should be something simple like
+>> raw_space/avg_obj_size*obj_overhead*rocksdb_space_amp.
+>> For example if obj_overhead=1k, hdd size=1T, rocksdb space amplification is 2
+>> and avg obj size=4M then 1T/4M*1k*2=500M so I need at least 512M for cache.
+>> But wise guys said that I have to take into account number of extents also.
+>> But bluestore_extent_map_shard_max_size=1200, I hope this number is not a
+>> multiplicator...
+> 
+> Nope, just a shard size...
+> 
+>> What would be correct approach for calculation of this minimum cache size?
+>> What can be expected size of key-values stored in rocksdb per rados object?
+> 
+> This depends, unfortunately, on what the write pattern is for the objects.
+> If they're written by RGW in big chunks, the overhead will be smaller.
+> If it comes out of a 4k random write pattern it will be bigger.  Again,
+> very interestd in hearing user reports of what is observed in real world
+> situations.  I would trust that more than a calculation from first
+> principles like the above.
+> 
+>> Default bluestore_cache_kv_ratio*bluestore_cache_size_ssd=0.99*3G
+>> while default bluestore_cache_kv_max=512M
+>> Looks like BlueStore::_set_cache_sizes() will set cache_kv_ratio to 1/6 in
+>> default case. Is 512M enough for bluestore metadata?
+> 
+> In Mark's testing he found that we got more performance benefit when
+> small caches were devoted to rocksdb and large caches were devoted mostly
+> to the bluestore metadata cache (parsed onodes vs caching the encoded
+> on-disk content).  You can always adjust the 512m value upwards (and that
+> may make sense for large cache sizes).  Again, very interested in hearing
+> whther that works better or worse for your workload!
+> 
+> Thanks-
+> sage
+> 
 
 -- 
-Best wishes
-Lisa
+
+Best regards,
+Aleksei Gutikov
+Software Engineer | synesis.ru | Minsk. BY
+
+--------------2DAC1EEFEC83A19EB5955759
+Content-Type: text/plain; charset=UTF-8;
+ name="osd_mem_stats.txt"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="osd_mem_stats.txt"
+
+Ck9TRCBkZXZpY2UgY2xhc3M6IHNzZAo9PT09PT09PT09PT09PT09PT09PT0KCgpoZWFwX2R1
+bXAKLS0tLS0tLS0tCgogICAgKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+Ky0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rCiAgICB8ICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgIG1ldHJpYyB8ICAgICAgbWluIHwgICAgICBtZWFuIHwgICAgICAg
+bWF4IHwKICAgICstLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSstLS0tLS0t
+LS0tKy0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKwogICAgfCAgQWN0dWFsX21lbW9yeV91c2Vk
+X3BoeXNpY2FsX3N3YXAgfCAgMS42NyBHaSB8ICAgNi41OCBHaSB8ICAgOC43MCBHaSB8CiAg
+ICB8ICAgQnl0ZXNfaW5fY2VudHJhbF9jYWNoZV9mcmVlbGlzdCB8ICA0Ljk1IE1pIHwgMTE4
+LjE1IE1pIHwgMjk0LjgxIE1pIHwKICAgIHwgICAgICAgICAgQnl0ZXNfaW5fbWFsbG9jX21l
+dGFkYXRhIHwgIDUuMDEgTWkgfCAgMjYuNTYgTWkgfCAgMzkuODIgTWkgfAogICAgfCAgICAg
+ICBCeXRlc19pbl9wYWdlX2hlYXBfZnJlZWxpc3QgfCAgIDAuMCAgICB8ICAgIDAuMCAgICB8
+ICAgIDAuMCAgICB8CiAgICB8ICAgQnl0ZXNfaW5fdGhyZWFkX2NhY2hlX2ZyZWVsaXN0cyB8
+IDI0LjI2IE1pIHwgIDk0LjU3IE1pIHwgMTA5LjQwIE1pIHwKICAgIHwgIEJ5dGVzX2luX3Ry
+YW5zZmVyX2NhY2hlX2ZyZWVsaXN0IHwgIDcuMDQgTWkgfCAgMTAuOTMgTWkgfCAgMTguMDUg
+TWkgfAogICAgfCAgICAgICBCeXRlc19pbl91c2VfYnlfYXBwbGljYXRpb24gfCAgMS42MyBH
+aSB8ICAgNi4zNCBHaSB8ICAgOC40MCBHaSB8CiAgICB8IEJ5dGVzX3JlbGVhc2VkX3RvX09T
+X2FrYV91bm1hcHBlZCB8ICA0LjQyIE1pIHwgNDE3LjAyIE1pIHwgOTMzLjg1IE1pIHwKICAg
+IHwgICAgICAgICAgICAgICAgICAgICAgU3BhbnNfaW5fdXNlIHwgNDQuOTggS2kgfCAzODMu
+MjggS2kgfCA2MTEuMDkgS2kgfAogICAgfCAgICAgICAgICAgICAgICBUY21hbGxvY19wYWdl
+X3NpemUgfCAgOC4wMCBLaSB8ICAgOC4wMCBLaSB8ICAgOC4wMCBLaSB8CiAgICB8ICAgICAg
+ICAgICAgICAgVGhyZWFkX2hlYXBzX2luX3VzZSB8ICA0MS4wICAgIHwgICA0NS44ICAgIHwg
+ICA0Ny4wICAgIHwKICAgIHwgICAgICAgIFZpcnR1YWxfYWRkcmVzc19zcGFjZV91c2VkIHwg
+IDEuNjcgR2kgfCAgIDYuOTkgR2kgfCAgIDkuNjEgR2kgfAogICAgKy0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rLS0tLS0tLS0t
+LS0rCgptZW1wb29sX2J5dGVzCi0tLS0tLS0tLS0tLS0KCiAgICArLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLSstLS0tLS0tLS0tKy0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKwogICAg
+fCAgICAgICAgICAgICAgICAgICAgIG1ldHJpYyB8ICAgICAgbWluIHwgICAgICBtZWFuIHwg
+ICAgICAgbWF4IHwKICAgICstLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0t
+LS0rLS0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rCiAgICB8ICAgICAgICAgICAgICAgYmxvb21f
+ZmlsdGVyIHwgICAwLjAgICAgfCAgICAwLjAgICAgfCAgICAwLjAgICAgfAogICAgfCAgICAg
+ICAgICAgICAgICAgICAgIGJsdWVmcyB8IDIxLjk3IEtpIHwgIDI2LjI3IEtpIHwgIDMzLjM4
+IEtpIHwKICAgIHwgICAgICAgICAgICBibHVlc3RvcmVfYWxsb2MgfCAgMS4wNyBNaSB8ICAg
+MS4zOCBNaSB8ICAgMS43MiBNaSB8CiAgICB8ICAgICAgIGJsdWVzdG9yZV9jYWNoZV9kYXRh
+IHwgNTMuMjAgTWkgfCA5NjUuMTcgTWkgfCAgIDEuNzMgR2kgfAogICAgfCAgICAgIGJsdWVz
+dG9yZV9jYWNoZV9vbm9kZSB8ICAxLjQ0IE1pIHwgNjgyLjc5IE1pIHwgICAxLjI1IEdpIHwK
+ICAgIHwgICAgICBibHVlc3RvcmVfY2FjaGVfb3RoZXIgfCAxMS41OCBNaSB8IDcxOC43MSBN
+aSB8ICAgMS4xNiBHaSB8CiAgICB8ICAgICAgICAgICAgIGJsdWVzdG9yZV9mc2NrIHwgICAw
+LjAgICAgfCAgICAwLjAgICAgfCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAgYmx1
+ZXN0b3JlX3R4YyB8ICAxLjQxIEtpIHwgICA2Ljg0IEtpIHwgIDEyLjY2IEtpIHwKICAgIHwg
+ICAgICAgICAgYmx1ZXN0b3JlX3dyaXRpbmcgfCA4Ny4xNyBLaSB8IDY5My4wNSBLaSB8IDkw
+NS40MCBLaSB8CiAgICB8IGJsdWVzdG9yZV93cml0aW5nX2RlZmVycmVkIHwgNDQuMDAgS2kg
+fCA0NTcuNjcgS2kgfCAgIDQuMDkgTWkgfAogICAgfCAgICAgICAgICAgICAgICBidWZmZXJf
+YW5vbiB8IDEwLjA5IE1pIHwgOTk1LjI0IE1pIHwgICAxLjU1IEdpIHwKICAgIHwgICAgICAg
+ICAgICAgICAgYnVmZmVyX21ldGEgfCA5OC4xNCBLaSB8ICAgMS41MSBNaSB8ICAgMy4wNyBN
+aSB8CiAgICB8ICAgICAgICAgICAgICAgICAgICAgbWRzX2NvIHwgICAwLjAgICAgfCAgICAw
+LjAgICAgfCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgICAgICAgIG9zZCB8
+ICAxLjI3IE1pIHwgICAxLjQ5IE1pIHwgICAxLjc3IE1pIHwKICAgIHwgICAgICAgICAgICAg
+ICAgICBvc2RfbWFwYmwgfCAgIDAuMCAgICB8IDMzOC43OSBLaSB8ICAgMS44MCBNaSB8CiAg
+ICB8ICAgICAgICAgICAgICAgICAgb3NkX3BnbG9nIHwgNjguMzYgTWkgfCAgODkuNDIgTWkg
+fCAxMTcuMzQgTWkgfAogICAgfCAgICAgICAgICAgICAgICAgICAgIG9zZG1hcCB8ICAxLjEx
+IE1pIHwgICAxLjI2IE1pIHwgICAxLjM4IE1pIHwKICAgIHwgICAgICAgICAgICAgb3NkbWFw
+X21hcHBpbmcgfCAgIDAuMCAgICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAgICB8ICAg
+ICAgICAgICAgICAgICAgICAgIHBnbWFwIHwgICAwLjAgICAgfCAgICAwLjAgICAgfCAgICAw
+LjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgICAgICB0b3RhbCB8ICAxLjMxIEdpIHwg
+ICAzLjM4IEdpIHwgICA0LjA5IEdpIHwKICAgIHwgICAgICAgICAgICAgICAgIHVuaXR0ZXN0
+XzEgfCAgIDAuMCAgICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAgICB8ICAgICAgICAg
+ICAgICAgICB1bml0dGVzdF8yIHwgICAwLjAgICAgfCAgICAwLjAgICAgfCAgICAwLjAgICAg
+fAogICAgKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0rLS0tLS0tLS0tLSstLS0tLS0t
+LS0tLSstLS0tLS0tLS0tLSsKCm1lbXBvb2xfaXRlbV9zaXplCi0tLS0tLS0tLS0tLS0tLS0t
+CgogICAgKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0rLS0tLS0tLS0tLSstLS0tLS0t
+LS0tKy0tLS0tLS0tLS0tKwogICAgfCAgICAgICAgICAgICAgICAgICAgIG1ldHJpYyB8ICAg
+ICAgbWluIHwgICAgIG1lYW4gfCAgICAgICBtYXggfAogICAgKy0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0rLS0tLS0tLS0tLSstLS0tLS0tLS0tKy0tLS0tLS0tLS0tKwogICAgfCAg
+ICAgICAgICAgICAgIGJsb29tX2ZpbHRlciB8ICAgMC4wICAgIHwgICAwLjAgICAgfCAgICAw
+LjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgICAgIGJsdWVmcyB8ICAzNC40ICAgIHwg
+IDQ1LjEgICAgfCAgIDYzLjMgICAgfAogICAgfCAgICAgICAgICAgIGJsdWVzdG9yZV9hbGxv
+YyB8ICAgMS4wICAgIHwgICAxLjAgICAgfCAgICAxLjAgICAgfAogICAgfCAgICAgICBibHVl
+c3RvcmVfY2FjaGVfZGF0YSB8IDM0LjczIEtpIHwgNTUuMjIgS2kgfCAgNTguNjcgS2kgfAog
+ICAgfCAgICAgIGJsdWVzdG9yZV9jYWNoZV9vbm9kZSB8IDY4MC4wICAgIHwgNjgwLjAgICAg
+fCAgNjgwLjAgICAgfAogICAgfCAgICAgIGJsdWVzdG9yZV9jYWNoZV9vdGhlciB8ICAgMi45
+ICAgIHwgICA0LjAgICAgfCAgIDE1LjUgICAgfAogICAgfCAgICAgICAgICAgICBibHVlc3Rv
+cmVfZnNjayB8ICAgMC4wICAgIHwgICAwLjAgICAgfCAgICAwLjAgICAgfAogICAgfCAgICAg
+ICAgICAgICAgYmx1ZXN0b3JlX3R4YyB8IDcyMC4wICAgIHwgNzIwLjAgICAgfCAgNzIwLjAg
+ICAgfAogICAgfCAgICAgICAgICBibHVlc3RvcmVfd3JpdGluZyB8IDQzLjU5IEtpIHwgNjUu
+NDcgS2kgfCAgNjkuNjUgS2kgfAogICAgfCBibHVlc3RvcmVfd3JpdGluZ19kZWZlcnJlZCB8
+ICA0LjQwIEtpIHwgMjUuNDAgS2kgfCAyMDkuNjAgS2kgfAogICAgfCAgICAgICAgICAgICAg
+ICBidWZmZXJfYW5vbiB8ICA5Mi40ICAgIHwgMTEyLjMgICAgfCAgMjc2LjcgICAgfAogICAg
+fCAgICAgICAgICAgICAgICBidWZmZXJfbWV0YSB8ICA4OC4wICAgIHwgIDg4LjAgICAgfCAg
+IDg4LjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgICAgIG1kc19jbyB8ICAgMC4wICAg
+IHwgICAwLjAgICAgfCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgICAgICAg
+IG9zZCB8IDExLjc4IEtpIHwgMTEuNzggS2kgfCAgMTEuNzggS2kgfAogICAgfCAgICAgICAg
+ICAgICAgICAgIG9zZF9tYXBibCB8ICAgMC4wICAgIHwgMTQuNDQgS2kgfCAgNDcuMjcgS2kg
+fAogICAgfCAgICAgICAgICAgICAgICAgIG9zZF9wZ2xvZyB8IDIxNy4yICAgIHwgMjYxLjMg
+ICAgfCAgMjc5LjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgICAgIG9zZG1hcCB8ICAy
+OS4yICAgIHwgIDMyLjQgICAgfCAgIDMzLjEgICAgfAogICAgfCAgICAgICAgICAgICBvc2Rt
+YXBfbWFwcGluZyB8ICAgMC4wICAgIHwgICAwLjAgICAgfCAgICAwLjAgICAgfAogICAgfCAg
+ICAgICAgICAgICAgICAgICAgICBwZ21hcCB8ICAgMC4wICAgIHwgICAwLjAgICAgfCAgICAw
+LjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgICAgICB0b3RhbCB8ICAxMC4xICAgIHwg
+IDYwLjQgICAgfCAgNTk5LjYgICAgfAogICAgfCAgICAgICAgICAgICAgICAgdW5pdHRlc3Rf
+MSB8ICAgMC4wICAgIHwgICAwLjAgICAgfCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAg
+ICAgICAgdW5pdHRlc3RfMiB8ICAgMC4wICAgIHwgICAwLjAgICAgfCAgICAwLjAgICAgfAog
+ICAgKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0rLS0tLS0tLS0tLSstLS0tLS0tLS0t
+Ky0tLS0tLS0tLS0tKwoKbWVtcG9vbF9pdGVtcwotLS0tLS0tLS0tLS0tCgogICAgKy0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rLS0tLS0t
+LS0tLS0rCiAgICB8ICAgICAgICAgICAgICAgICAgICAgbWV0cmljIHwgICAgICAgbWluIHwg
+ICAgICBtZWFuIHwgICAgICAgbWF4IHwKICAgICstLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tKy0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKwogICAgfCAgICAgICAg
+ICAgICAgIGJsb29tX2ZpbHRlciB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8ICAgIDAuMCAg
+ICB8CiAgICB8ICAgICAgICAgICAgICAgICAgICAgYmx1ZWZzIHwgIDM4Ny4wICAgIHwgIDYx
+Mi4xICAgIHwgIDkxNy4wICAgIHwKICAgIHwgICAgICAgICAgICBibHVlc3RvcmVfYWxsb2Mg
+fCAgIDEuMDcgTWkgfCAgIDEuMzggTWkgfCAgIDEuNzIgTWkgfAogICAgfCAgICAgICBibHVl
+c3RvcmVfY2FjaGVfZGF0YSB8ICA5ODcuMCAgICB8ICAxNy40NiBLaSB8ICAzNS41NSBLaSB8
+CiAgICB8ICAgICAgYmx1ZXN0b3JlX2NhY2hlX29ub2RlIHwgICAyLjE3IEtpIHwgICAxLjAw
+IE1pIHwgICAxLjg4IE1pIHwKICAgIHwgICAgICBibHVlc3RvcmVfY2FjaGVfb3RoZXIgfCA3
+NjkuNjMgS2kgfCAyNDAuMDYgTWkgfCAzOTIuNjEgTWkgfAogICAgfCAgICAgICAgICAgICBi
+bHVlc3RvcmVfZnNjayB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAg
+ICB8ICAgICAgICAgICAgICBibHVlc3RvcmVfdHhjIHwgICAgMi4wICAgIHwgICAgOS43ICAg
+IHwgICAxOC4wICAgIHwKICAgIHwgICAgICAgICAgYmx1ZXN0b3JlX3dyaXRpbmcgfCAgICAy
+LjAgICAgfCAgIDEwLjQgICAgfCAgIDEzLjAgICAgfAogICAgfCBibHVlc3RvcmVfd3JpdGlu
+Z19kZWZlcnJlZCB8ICAgMTAuMCAgICB8ICAgMTcuNiAgICB8ICAgMjcuMCAgICB8CiAgICB8
+ICAgICAgICAgICAgICAgIGJ1ZmZlcl9hbm9uIHwgIDQ4LjM0IEtpIHwgICA5LjY5IE1pIHwg
+IDE1LjM1IE1pIHwKICAgIHwgICAgICAgICAgICAgICAgYnVmZmVyX21ldGEgfCAgIDEuMTIg
+S2kgfCAgMTcuNTkgS2kgfCAgMzUuNjggS2kgfAogICAgfCAgICAgICAgICAgICAgICAgICAg
+IG1kc19jbyB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAgICB8ICAg
+ICAgICAgICAgICAgICAgICAgICAgb3NkIHwgIDExMC4wICAgIHwgIDEyOS44ICAgIHwgIDE1
+NC4wICAgIHwKICAgIHwgICAgICAgICAgICAgICAgICBvc2RfbWFwYmwgfCAgICAwLjAgICAg
+fCAgICA3LjIgICAgfCAgIDM5LjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgIG9zZF9w
+Z2xvZyB8IDI2Ny4zNCBLaSB8IDM1My4yMSBLaSB8IDUwMS4zOCBLaSB8CiAgICB8ICAgICAg
+ICAgICAgICAgICAgICAgb3NkbWFwIHwgIDM4LjM2IEtpIHwgIDM5Ljc0IEtpIHwgIDQ3LjYx
+IEtpIHwKICAgIHwgICAgICAgICAgICAgb3NkbWFwX21hcHBpbmcgfCAgICAwLjAgICAgfCAg
+ICAwLjAgICAgfCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgICAgICBwZ21h
+cCB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAgICB8ICAgICAgICAg
+ICAgICAgICAgICAgIHRvdGFsIHwgICAyLjUwIE1pIHwgMjUyLjU1IE1pIHwgNDExLjU5IE1p
+IHwKICAgIHwgICAgICAgICAgICAgICAgIHVuaXR0ZXN0XzEgfCAgICAwLjAgICAgfCAgICAw
+LjAgICAgfCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgdW5pdHRlc3RfMiB8
+ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAgICArLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLSstLS0tLS0tLS0tLSstLS0tLS0tLS0tLSstLS0tLS0tLS0tLSsK
+CnByb2Nfc3RhdHVzCi0tLS0tLS0tLS0tCgogICAgKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0rLS0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rCiAgICB8ICAgICAg
+ICAgICAgICAgICAgICAgbWV0cmljIHwgICAgICAgbWluIHwgICAgICBtZWFuIHwgICAgICAg
+bWF4IHwKICAgICstLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKy0t
+LS0tLS0tLS0tKy0tLS0tLS0tLS0tKwogICAgfCAgICAgICAgICAgICAgICAgICAgUnNzQW5v
+biB8ICAgMS42NSBHaSB8ICAgNi41NiBHaSB8ICAgOC42NiBHaSB8CiAgICB8ICAgICAgICAg
+ICAgICAgICAgICBSc3NGaWxlIHwgIDI3LjkxIE1pIHwgIDI4LjcwIE1pIHwgIDI5LjA1IE1p
+IHwKICAgIHwgICAgICAgICAgICAgICAgICAgUnNzU2htZW0gfCAgICAwLjAgICAgfCAgICAw
+LjAgICAgfCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgICAgVGhyZWFkcyB8
+ICAgNjUuMCAgICB8ICAgNjYuOSAgICB8ICAgNjcuMCAgICB8CiAgICB8ICAgICAgICAgICAg
+ICAgICAgICAgVm1EYXRhIHwgICAyLjMwIEdpIHwgICA3LjYzIEdpIHwgIDEwLjI2IEdpIHwK
+ICAgIHwgICAgICAgICAgICAgICAgICAgICAgVm1FeGUgfCAgMTguNzkgTWkgfCAgMTguNzkg
+TWkgfCAgMTguNzkgTWkgfAogICAgfCAgICAgICAgICAgICAgICAgICAgICBWbUhXTSB8ICAg
+MS42OCBHaSB8ICAgNi43NyBHaSB8ICAgOC45MiBHaSB8CiAgICB8ICAgICAgICAgICAgICAg
+ICAgICAgIFZtTGNrIHwgICAgMC4wICAgIHwgICAgMC4wICAgIHwgICAgMC4wICAgIHwKICAg
+IHwgICAgICAgICAgICAgICAgICAgICAgVm1MaWIgfCAgMTUuMjEgTWkgfCAgMTUuMjEgTWkg
+fCAgMTUuMjEgTWkgfAogICAgfCAgICAgICAgICAgICAgICAgICAgICBWbVBNRCB8ICAyMC4w
+MCBLaSB8ICA0My40NCBLaSB8ICA1Ni4wMCBLaSB8CiAgICB8ICAgICAgICAgICAgICAgICAg
+ICAgIFZtUFRFIHwgICAzLjg3IE1pIHwgIDE0LjUyIE1pIHwgIDE5Ljc3IE1pIHwKICAgIHwg
+ICAgICAgICAgICAgICAgICAgICBWbVBlYWsgfCAgIDIuNDMgR2kgfCAgIDguMDggR2kgfCAg
+MTAuNzcgR2kgfAogICAgfCAgICAgICAgICAgICAgICAgICAgICBWbVBpbiB8ICAgIDAuMCAg
+ICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAgICB8ICAgICAgICAgICAgICAgICAgICAg
+IFZtUlNTIHwgICAxLjY3IEdpIHwgICA2LjU4IEdpIHwgICA4LjY5IEdpIHwKICAgIHwgICAg
+ICAgICAgICAgICAgICAgICBWbVNpemUgfCAgIDIuNDMgR2kgfCAgIDcuNzcgR2kgfCAgMTAu
+NDAgR2kgfAogICAgfCAgICAgICAgICAgICAgICAgICAgICBWbVN0ayB8IDgwNC4wMCBLaSB8
+IDgwOC4xMSBLaSB8IDgxMi4wMCBLaSB8CiAgICB8ICAgICAgICAgICAgICAgICAgICAgVm1T
+d2FwIHwgICAgMC4wICAgIHwgICAgMC4wICAgIHwgICAgMC4wICAgIHwKICAgIHwgbm9udm9s
+dW50YXJ5X2N0eHRfc3dpdGNoZXMgfCAgIDUzLjAgICAgfCAgMjk5LjYgICAgfCAgOTc4LjAg
+ICAgfAogICAgfCAgICB2b2x1bnRhcnlfY3R4dF9zd2l0Y2hlcyB8ICAxOS45MyBLaSB8ICAy
+Ni41OSBLaSB8ICAzOS4xNiBLaSB8CiAgICArLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LSstLS0tLS0tLS0tLSstLS0tLS0tLS0tLSstLS0tLS0tLS0tLSsKCk9TRCBkZXZpY2UgY2xh
+c3M6IGhkZAo9PT09PT09PT09PT09PT09PT09PT0KCgpoZWFwX2R1bXAKLS0tLS0tLS0tCgog
+ICAgKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKy0t
+LS0tLS0tLS0tKy0tLS0tLS0tLS0tKwogICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICBtZXRyaWMgfCAgICAgICBtaW4gfCAgICAgIG1lYW4gfCAgICAgICBtYXggfAogICAgKy0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKy0tLS0tLS0t
+LS0tKy0tLS0tLS0tLS0tKwogICAgfCAgQWN0dWFsX21lbW9yeV91c2VkX3BoeXNpY2FsX3N3
+YXAgfCAgIDIuOTMgR2kgfCAgIDMuMTkgR2kgfCAgIDMuNDIgR2kgfAogICAgfCAgIEJ5dGVz
+X2luX2NlbnRyYWxfY2FjaGVfZnJlZWxpc3QgfCAxNzMuMjggTWkgfCAyMzEuMTcgTWkgfCAy
+ODUuNTQgTWkgfAogICAgfCAgICAgICAgICBCeXRlc19pbl9tYWxsb2NfbWV0YWRhdGEgfCAg
+MTIuNjEgTWkgfCAgMTMuNDYgTWkgfCAgMTQuMDAgTWkgfAogICAgfCAgICAgICBCeXRlc19p
+bl9wYWdlX2hlYXBfZnJlZWxpc3QgfCAgICAwLjAgICAgfCAgICAwLjAgICAgfCAgICAwLjAg
+ICAgfAogICAgfCAgIEJ5dGVzX2luX3RocmVhZF9jYWNoZV9mcmVlbGlzdHMgfCAgNzQuNTYg
+TWkgfCAgOTMuOTYgTWkgfCAxMDUuMDkgTWkgfAogICAgfCAgQnl0ZXNfaW5fdHJhbnNmZXJf
+Y2FjaGVfZnJlZWxpc3QgfCAgMTAuODkgTWkgfCAgMTUuNzcgTWkgfCAgMTkuMzUgTWkgfAog
+ICAgfCAgICAgICBCeXRlc19pbl91c2VfYnlfYXBwbGljYXRpb24gfCAgIDIuNjIgR2kgfCAg
+IDIuODUgR2kgfCAgIDMuMDUgR2kgfAogICAgfCBCeXRlc19yZWxlYXNlZF90b19PU19ha2Ff
+dW5tYXBwZWQgfCAgOTUuNzggTWkgfCAyODUuNzEgTWkgfCA0ODAuMjAgTWkgfAogICAgfCAg
+ICAgICAgICAgICAgICAgICAgICBTcGFuc19pbl91c2UgfCAxNzEuMDcgS2kgfCAxODUuMjgg
+S2kgfCAxOTUuMDQgS2kgfAogICAgfCAgICAgICAgICAgICAgICBUY21hbGxvY19wYWdlX3Np
+emUgfCAgIDguMDAgS2kgfCAgIDguMDAgS2kgfCAgIDguMDAgS2kgfAogICAgfCAgICAgICAg
+ICAgICAgIFRocmVhZF9oZWFwc19pbl91c2UgfCAgIDMzLjAgICAgfCAgIDMzLjIgICAgfCAg
+IDM2LjAgICAgfAogICAgfCAgICAgICAgVmlydHVhbF9hZGRyZXNzX3NwYWNlX3VzZWQgfCAg
+IDMuMTQgR2kgfCAgIDMuNDcgR2kgfCAgIDMuNjkgR2kgfAogICAgKy0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKy0tLS0tLS0t
+LS0tKwoKbWVtcG9vbF9ieXRlcwotLS0tLS0tLS0tLS0tCgogICAgKy0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rCiAg
+ICB8ICAgICAgICAgICAgICAgICAgICAgbWV0cmljIHwgICAgICAgbWluIHwgICAgICBtZWFu
+IHwgICAgICAgbWF4IHwKICAgICstLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0t
+LS0tLS0tKy0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKwogICAgfCAgICAgICAgICAgICAgIGJs
+b29tX2ZpbHRlciB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAgICB8
+ICAgICAgICAgICAgICAgICAgICAgYmx1ZWZzIHwgICA5LjYzIEtpIHwgIDExLjk0IEtpIHwg
+IDEzLjY3IEtpIHwKICAgIHwgICAgICAgICAgICBibHVlc3RvcmVfYWxsb2MgfCAgMjYuNjQg
+S2kgfCAzNzkuNjIgS2kgfCAgIDEuMTAgTWkgfAogICAgfCAgICAgICBibHVlc3RvcmVfY2Fj
+aGVfZGF0YSB8ICAgIDAuMCAgICB8IDU1Mi45MSBLaSB8ICAxOS42MSBNaSB8CiAgICB8ICAg
+ICAgYmx1ZXN0b3JlX2NhY2hlX29ub2RlIHwgMTg3LjM1IE1pIHwgMTkyLjcyIE1pIHwgMTk3
+LjgzIE1pIHwKICAgIHwgICAgICBibHVlc3RvcmVfY2FjaGVfb3RoZXIgfCAzMDQuOTggTWkg
+fCAzMTguNjIgTWkgfCAzMjIuNDggTWkgfAogICAgfCAgICAgICAgICAgICBibHVlc3RvcmVf
+ZnNjayB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAgICB8ICAgICAg
+ICAgICAgICBibHVlc3RvcmVfdHhjIHwgICAxLjQxIEtpIHwgIDUzLjgwIEtpIHwgMTEzLjkx
+IEtpIHwKICAgIHwgICAgICAgICAgYmx1ZXN0b3JlX3dyaXRpbmcgfCA4MDguNTIgS2kgfCAg
+IDEuMjUgTWkgfCAgIDcuNzcgTWkgfAogICAgfCBibHVlc3RvcmVfd3JpdGluZ19kZWZlcnJl
+ZCB8ICAgNi45MiBLaSB8IDczMC4wMiBLaSB8ICAgNC42MCBNaSB8CiAgICB8ICAgICAgICAg
+ICAgICAgIGJ1ZmZlcl9hbm9uIHwgODM1LjM0IE1pIHwgOTY3LjQyIE1pIHwgICAxLjA4IEdp
+IHwKICAgIHwgICAgICAgICAgICAgICAgYnVmZmVyX21ldGEgfCAgIDcuNjUgS2kgfCAgMTAu
+MTggS2kgfCAgMjAuNTQgS2kgfAogICAgfCAgICAgICAgICAgICAgICAgICAgIG1kc19jbyB8
+ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAgICB8ICAgICAgICAgICAg
+ICAgICAgICAgICAgb3NkIHwgICAxLjM5IE1pIHwgICAxLjcxIE1pIHwgICAxLjk3IE1pIHwK
+ICAgIHwgICAgICAgICAgICAgICAgICBvc2RfbWFwYmwgfCAgICAwLjAgICAgfCAgICAwLjAg
+ICAgfCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgIG9zZF9wZ2xvZyB8IDEw
+My45MiBNaSB8IDEyOS42MyBNaSB8IDE0OS42MyBNaSB8CiAgICB8ICAgICAgICAgICAgICAg
+ICAgICAgb3NkbWFwIHwgICAxLjI0IE1pIHwgICAxLjI1IE1pIHwgICAxLjI2IE1pIHwKICAg
+IHwgICAgICAgICAgICAgb3NkbWFwX21hcHBpbmcgfCAgICAwLjAgICAgfCAgICAwLjAgICAg
+fCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgICAgICBwZ21hcCB8ICAgIDAu
+MCAgICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAgICB8ICAgICAgICAgICAgICAgICAg
+ICAgIHRvdGFsIHwgICAxLjQyIEdpIHwgICAxLjU4IEdpIHwgICAxLjczIEdpIHwKICAgIHwg
+ICAgICAgICAgICAgICAgIHVuaXR0ZXN0XzEgfCAgICAwLjAgICAgfCAgICAwLjAgICAgfCAg
+ICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgdW5pdHRlc3RfMiB8ICAgIDAuMCAg
+ICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAgICArLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLSstLS0tLS0tLS0tLSstLS0tLS0tLS0tLSstLS0tLS0tLS0tLSsKCm1lbXBvb2xf
+aXRlbV9zaXplCi0tLS0tLS0tLS0tLS0tLS0tCgogICAgKy0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0rLS0tLS0tLS0tLSstLS0tLS0tLS0tKy0tLS0tLS0tLS0tKwogICAgfCAgICAg
+ICAgICAgICAgICAgICAgIG1ldHJpYyB8ICAgICAgbWluIHwgICAgIG1lYW4gfCAgICAgICBt
+YXggfAogICAgKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0rLS0tLS0tLS0tLSstLS0t
+LS0tLS0tKy0tLS0tLS0tLS0tKwogICAgfCAgICAgICAgICAgICAgIGJsb29tX2ZpbHRlciB8
+ICAgMC4wICAgIHwgICAwLjAgICAgfCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAg
+ICAgICAgIGJsdWVmcyB8ICA0MC4wICAgIHwgIDQzLjEgICAgfCAgIDYxLjggICAgfAogICAg
+fCAgICAgICAgICAgIGJsdWVzdG9yZV9hbGxvYyB8ICAgMS4wICAgIHwgICAxLjAgICAgfCAg
+ICAxLjAgICAgfAogICAgfCAgICAgICBibHVlc3RvcmVfY2FjaGVfZGF0YSB8ICAgMC4wICAg
+IHwgMTUuMTggS2kgfCAyNDguMDAgS2kgfAogICAgfCAgICAgIGJsdWVzdG9yZV9jYWNoZV9v
+bm9kZSB8IDY4MC4wICAgIHwgNjgwLjAgICAgfCAgNjgwLjAgICAgfAogICAgfCAgICAgIGJs
+dWVzdG9yZV9jYWNoZV9vdGhlciB8ICAgNy4xICAgIHwgICA3LjMgICAgfCAgICA3LjQgICAg
+fAogICAgfCAgICAgICAgICAgICBibHVlc3RvcmVfZnNjayB8ICAgMC4wICAgIHwgICAwLjAg
+ICAgfCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAgYmx1ZXN0b3JlX3R4YyB8IDcy
+MC4wICAgIHwgNzIwLjAgICAgfCAgNzIwLjAgICAgfAogICAgfCAgICAgICAgICBibHVlc3Rv
+cmVfd3JpdGluZyB8ICA5LjExIEtpIHwgMzcuMzkgS2kgfCAzNTcuMDAgS2kgfAogICAgfCBi
+bHVlc3RvcmVfd3JpdGluZ19kZWZlcnJlZCB8ICA1LjE2IEtpIHwgMjYuMzMgS2kgfCA1MDMu
+MDkgS2kgfAogICAgfCAgICAgICAgICAgICAgICBidWZmZXJfYW5vbiB8IDM4MS4xICAgIHwg
+NDIxLjMgICAgfCAgNDc1LjUgICAgfAogICAgfCAgICAgICAgICAgICAgICBidWZmZXJfbWV0
+YSB8ICA4OC4wICAgIHwgIDg4LjAgICAgfCAgIDg4LjAgICAgfAogICAgfCAgICAgICAgICAg
+ICAgICAgICAgIG1kc19jbyB8ICAgMC4wICAgIHwgICAwLjAgICAgfCAgICAwLjAgICAgfAog
+ICAgfCAgICAgICAgICAgICAgICAgICAgICAgIG9zZCB8IDExLjc4IEtpIHwgMTEuNzggS2kg
+fCAgMTEuNzggS2kgfAogICAgfCAgICAgICAgICAgICAgICAgIG9zZF9tYXBibCB8ICAgMC4w
+ICAgIHwgICAwLjAgICAgfCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgIG9z
+ZF9wZ2xvZyB8IDI2NC4wICAgIHwgMjcyLjYgICAgfCAgMjgxLjQgICAgfAogICAgfCAgICAg
+ICAgICAgICAgICAgICAgIG9zZG1hcCB8ICAzMi42ICAgIHwgIDMyLjcgICAgfCAgIDMzLjEg
+ICAgfAogICAgfCAgICAgICAgICAgICBvc2RtYXBfbWFwcGluZyB8ICAgMC4wICAgIHwgICAw
+LjAgICAgfCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgICAgICBwZ21hcCB8
+ICAgMC4wICAgIHwgICAwLjAgICAgfCAgICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAg
+ICAgICAgICB0b3RhbCB8ICAzMC45ICAgIHwgIDM0LjMgICAgfCAgIDM3LjYgICAgfAogICAg
+fCAgICAgICAgICAgICAgICAgdW5pdHRlc3RfMSB8ICAgMC4wICAgIHwgICAwLjAgICAgfCAg
+ICAwLjAgICAgfAogICAgfCAgICAgICAgICAgICAgICAgdW5pdHRlc3RfMiB8ICAgMC4wICAg
+IHwgICAwLjAgICAgfCAgICAwLjAgICAgfAogICAgKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0rLS0tLS0tLS0tLSstLS0tLS0tLS0tKy0tLS0tLS0tLS0tKwoKbWVtcG9vbF9pdGVt
+cwotLS0tLS0tLS0tLS0tCgogICAgKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0rLS0t
+LS0tLS0tLS0rLS0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rCiAgICB8ICAgICAgICAgICAgICAg
+ICAgICAgbWV0cmljIHwgICAgICAgbWluIHwgICAgICBtZWFuIHwgICAgICAgbWF4IHwKICAg
+ICstLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKy0tLS0tLS0tLS0t
+Ky0tLS0tLS0tLS0tKwogICAgfCAgICAgICAgICAgICAgIGJsb29tX2ZpbHRlciB8ICAgIDAu
+MCAgICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAgICB8ICAgICAgICAgICAgICAgICAg
+ICAgYmx1ZWZzIHwgIDE3Mi4wICAgIHwgIDI4Ni4wICAgIHwgIDMxNS4wICAgIHwKICAgIHwg
+ICAgICAgICAgICBibHVlc3RvcmVfYWxsb2MgfCAgMjYuNjQgS2kgfCAzNzkuNjIgS2kgfCAg
+IDEuMTAgTWkgfAogICAgfCAgICAgICBibHVlc3RvcmVfY2FjaGVfZGF0YSB8ICAgIDAuMCAg
+ICB8ICAgIDMuNyAgICB8ICAxNDcuMCAgICB8CiAgICB8ICAgICAgYmx1ZXN0b3JlX2NhY2hl
+X29ub2RlIHwgMjgyLjEyIEtpIHwgMjkwLjIxIEtpIHwgMjk3LjkxIEtpIHwKICAgIHwgICAg
+ICBibHVlc3RvcmVfY2FjaGVfb3RoZXIgfCAgNDIuMzAgTWkgfCAgNDMuNjUgTWkgfCAgNDQu
+MDMgTWkgfAogICAgfCAgICAgICAgICAgICBibHVlc3RvcmVfZnNjayB8ICAgIDAuMCAgICB8
+ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8CiAgICB8ICAgICAgICAgICAgICBibHVlc3RvcmVf
+dHhjIHwgICAgMi4wICAgIHwgICA3Ni41ICAgIHwgIDE2Mi4wICAgIHwKICAgIHwgICAgICAg
+ICAgYmx1ZXN0b3JlX3dyaXRpbmcgfCAgIDEyLjAgICAgfCAgIDg1LjUgICAgfCAgMTMzLjAg
+ICAgfAogICAgfCBibHVlc3RvcmVfd3JpdGluZ19kZWZlcnJlZCB8ICAgIDEuMCAgICB8ICAg
+NDIuMyAgICB8ICAgODAuMCAgICB8CiAgICB8ICAgICAgICAgICAgICAgIGJ1ZmZlcl9hbm9u
+IHwgICAyLjE4IE1pIHwgICAyLjMwIE1pIHwgICAyLjM1IE1pIHwKICAgIHwgICAgICAgICAg
+ICAgICAgYnVmZmVyX21ldGEgfCAgIDg5LjAgICAgfCAgMTE4LjQgICAgfCAgMjM5LjAgICAg
+fAogICAgfCAgICAgICAgICAgICAgICAgICAgIG1kc19jbyB8ICAgIDAuMCAgICB8ICAgIDAu
+MCAgICB8ICAgIDAuMCAgICB8CiAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgb3NkIHwg
+IDEyMS4wICAgIHwgIDE0OC45ICAgIHwgIDE3MS4wICAgIHwKICAgIHwgICAgICAgICAgICAg
+ICAgICBvc2RfbWFwYmwgfCAgICAwLjAgICAgfCAgICAwLjAgICAgfCAgICAwLjAgICAgfAog
+ICAgfCAgICAgICAgICAgICAgICAgIG9zZF9wZ2xvZyB8IDM3OC4xMSBLaSB8IDQ4Ny4xMCBL
+aSB8IDU2OS44NiBLaSB8CiAgICB8ICAgICAgICAgICAgICAgICAgICAgb3NkbWFwIHwgIDM4
+LjM2IEtpIHwgIDM5LjE4IEtpIHwgIDM5LjY1IEtpIHwKICAgIHwgICAgICAgICAgICAgb3Nk
+bWFwX21hcHBpbmcgfCAgICAwLjAgICAgfCAgICAwLjAgICAgfCAgICAwLjAgICAgfAogICAg
+fCAgICAgICAgICAgICAgICAgICAgICBwZ21hcCB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8
+ICAgIDAuMCAgICB8CiAgICB8ICAgICAgICAgICAgICAgICAgICAgIHRvdGFsIHwgIDQ1LjM5
+IE1pIHwgIDQ3LjExIE1pIHwgIDQ4LjAwIE1pIHwKICAgIHwgICAgICAgICAgICAgICAgIHVu
+aXR0ZXN0XzEgfCAgICAwLjAgICAgfCAgICAwLjAgICAgfCAgICAwLjAgICAgfAogICAgfCAg
+ICAgICAgICAgICAgICAgdW5pdHRlc3RfMiB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8ICAg
+IDAuMCAgICB8CiAgICArLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSstLS0tLS0tLS0t
+LSstLS0tLS0tLS0tLSstLS0tLS0tLS0tLSsKCnByb2Nfc3RhdHVzCi0tLS0tLS0tLS0tCgog
+ICAgKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rLS0tLS0tLS0t
+LS0rLS0tLS0tLS0tLS0rCiAgICB8ICAgICAgICAgICAgICAgICAgICAgbWV0cmljIHwgICAg
+ICAgbWluIHwgICAgICBtZWFuIHwgICAgICAgbWF4IHwKICAgICstLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKwogICAg
+fCAgICAgICAgICAgICAgICAgICAgUnNzQW5vbiB8ICAgMi45MyBHaSB8ICAgMy4xNyBHaSB8
+ICAgMy40MSBHaSB8CiAgICB8ICAgICAgICAgICAgICAgICAgICBSc3NGaWxlIHwgIDI4LjEw
+IE1pIHwgIDI4LjY1IE1pIHwgIDI5LjAxIE1pIHwKICAgIHwgICAgICAgICAgICAgICAgICAg
+UnNzU2htZW0gfCAgICAwLjAgICAgfCAgICAwLjAgICAgfCAgICAwLjAgICAgfAogICAgfCAg
+ICAgICAgICAgICAgICAgICAgVGhyZWFkcyB8ICAgNTYuMCAgICB8ICAgNTYuMCAgICB8ICAg
+NTYuMCAgICB8CiAgICB8ICAgICAgICAgICAgICAgICAgICAgVm1EYXRhIHwgICAzLjcxIEdp
+IHwgICA0LjAzIEdpIHwgICA0LjI1IEdpIHwKICAgIHwgICAgICAgICAgICAgICAgICAgICAg
+Vm1FeGUgfCAgMTguNzkgTWkgfCAgMTguNzkgTWkgfCAgMTguNzkgTWkgfAogICAgfCAgICAg
+ICAgICAgICAgICAgICAgICBWbUhXTSB8ICAgMy4wNiBHaSB8ICAgMy4zNCBHaSB8ICAgMy41
+NCBHaSB8CiAgICB8ICAgICAgICAgICAgICAgICAgICAgIFZtTGNrIHwgICAgMC4wICAgIHwg
+ICAgMC4wICAgIHwgICAgMC4wICAgIHwKICAgIHwgICAgICAgICAgICAgICAgICAgICAgVm1M
+aWIgfCAgMTUuMjEgTWkgfCAgMTUuMjEgTWkgfCAgMTUuMjEgTWkgfAogICAgfCAgICAgICAg
+ICAgICAgICAgICAgICBWbVBNRCB8ICAyNC4wMCBLaSB8ICAyOC42MiBLaSB8ICAzMi4wMCBL
+aSB8CiAgICB8ICAgICAgICAgICAgICAgICAgICAgIFZtUFRFIHwgICA2Ljc5IE1pIHwgICA3
+LjQ1IE1pIHwgICA3Ljg5IE1pIHwKICAgIHwgICAgICAgICAgICAgICAgICAgICBWbVBlYWsg
+fCAgIDMuOTkgR2kgfCAgIDQuMzUgR2kgfCAgIDQuNjAgR2kgfAogICAgfCAgICAgICAgICAg
+ICAgICAgICAgICBWbVBpbiB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8ICAgIDAuMCAgICB8
+CiAgICB8ICAgICAgICAgICAgICAgICAgICAgIFZtUlNTIHwgICAyLjk2IEdpIHwgICAzLjIw
+IEdpIHwgICAzLjQ0IEdpIHwKICAgIHwgICAgICAgICAgICAgICAgICAgICBWbVNpemUgfCAg
+IDMuODQgR2kgfCAgIDQuMTYgR2kgfCAgIDQuMzkgR2kgfAogICAgfCAgICAgICAgICAgICAg
+ICAgICAgICBWbVN0ayB8IDgwNC4wMCBLaSB8IDgwOC40MCBLaSB8IDgxMi4wMCBLaSB8CiAg
+ICB8ICAgICAgICAgICAgICAgICAgICAgVm1Td2FwIHwgICAgMC4wICAgIHwgICAgMC4wICAg
+IHwgICAgMC4wICAgIHwKICAgIHwgbm9udm9sdW50YXJ5X2N0eHRfc3dpdGNoZXMgfCAgNDYy
+LjAgICAgfCAgMjQuMDQgS2kgfCAgNDAuNjEgS2kgfAogICAgfCAgICB2b2x1bnRhcnlfY3R4
+dF9zd2l0Y2hlcyB8ICA0My40NSBLaSB8ICA2MS45NiBLaSB8ICA4OS4wNCBLaSB8CiAgICAr
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSstLS0tLS0tLS0tLSstLS0tLS0tLS0tLSst
+LS0tLS0tLS0tLSsKCg==
+--------------2DAC1EEFEC83A19EB5955759--
