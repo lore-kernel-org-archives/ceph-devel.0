@@ -1,90 +1,134 @@
 From: Xiaoxi Chen <superdebuger@gmail.com>
-Subject: mds: failed to decode msg EXPORT_DIR
-Date: Sat, 21 Oct 2017 17:42:58 +0800
-Message-ID: <CAEYCsVJWvRz-ndaanfpcbEwWYTL3AJW3sSa4anvDDymkNBHfSQ@mail.gmail.com>
+Subject: Re: Huge lookup when recursively mkdir
+Date: Sun, 22 Oct 2017 23:27:49 +0800
+Message-ID: <CAEYCsV++7m=EdyW3dzX0-v+qywx7uxynCBj1WZ5kJo2b=gUhtA@mail.gmail.com>
+References: <CAEYCsVLCS5aPC8M8PAU5UTS0pKzhp1aWBW6L72ZwvUEetbstpw@mail.gmail.com>
+ <CAAM7YAk2+ekeYdJ_E4d5wB_SoiL_eGA0P9fGuxvEkz3r11ytTQ@mail.gmail.com>
+ <CAEYCsVL=bcaQY6SBQ=ujR9EEvK3FgUf38s+Bj5UU2Z8SjoPQtA@mail.gmail.com>
+ <CAAM7YAn9hFCHTQZ62soWBhBbtmKjw-UCxHqYOCe5m587nfugAw@mail.gmail.com>
+ <CAEYCsVLaC14wBQuD0xE9gs53v7ztPdQ-ac_Vh5F5DD02PHYwQg@mail.gmail.com> <CAEYCsV+Xf0iZRwHv--1rf8U=D_izp8s5s9W75fc6k_MinJWDWg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f178.google.com ([209.85.223.178]:54253 "EHLO
-        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753248AbdJUJnA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sat, 21 Oct 2017 05:43:00 -0400
-Received: by mail-io0-f178.google.com with SMTP id 189so15558710iow.10
-        for <ceph-devel@vger.kernel.org>; Sat, 21 Oct 2017 02:43:00 -0700 (PDT)
+Received: from mail-it0-f49.google.com ([209.85.214.49]:52061 "EHLO
+        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751217AbdJVP1u (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 22 Oct 2017 11:27:50 -0400
+Received: by mail-it0-f49.google.com with SMTP id o135so3347199itb.0
+        for <ceph-devel@vger.kernel.org>; Sun, 22 Oct 2017 08:27:50 -0700 (PDT)
+In-Reply-To: <CAEYCsV+Xf0iZRwHv--1rf8U=D_izp8s5s9W75fc6k_MinJWDWg@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>, "Yan, Zheng" <ukernel@gmail.com>, John Spray <jspray@redhat.com>
+To: "Yan, Zheng" <ukernel@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, John Spray <jspray@redhat.com>
 
-Hi , I hit this on one of my MDS rank, it looks to me like the
-export_dir message is way much too big , the hux dump take more than
-20GB(stop by no more disk space...).
+To add another data point, switched to ceph-fuse 12.2.0, still seeing
+lots of lookup.
+lookup avg 1892
+mkdir avg  367
+create avg 222
+open avg 228
 
-
-The only crazy thing in the FS is we have 6 mdses and 5000+ export binding.f
-
-
-2017-10-21 00:47:18.731219 7f27463e0700  0 --
-10.148.245.141:6800/4152861050 >> 10.148.245.48:0/3250358670
-conn(0x558aeb4ac800 :6800 s=STATE_OPEN pgs=44 cs=1 l=0).fault server,
-going to standby
-2017-10-21 00:47:44.500382 7f27463e0700 -1 failed to decode message of
-type 1110 v1: buffer::end_of_buffer
-2017-10-21 00:47:44.503923 7f27463e0700 -1 *** Caught signal (Aborted) **
- in thread 7f27463e0700 thread_name:msgr-worker-1
-
- ceph version 12.2.0 (32ce2a3ae5239ee33d6150705cdb24d43bab910c) luminous (rc)
- 1: (()+0x59b344) [0x558ad5d94344]
- 2: (()+0x11390) [0x7f274910d390]
- 3: (gsignal()+0x38) [0x7f274809d428]
- 4: (abort()+0x16a) [0x7f274809f02a]
- 5: (__gnu_cxx::__verbose_terminate_handler()+0x16d) [0x7f27489e084d]
- 6: (()+0x8d6b6) [0x7f27489de6b6]
- 7: (()+0x8d701) [0x7f27489de701]
- 8: (()+0xb8d38) [0x7f2748a09d38]
- 9: (()+0x76ba) [0x7f27491036ba]
- 10: (clone()+0x6d) [0x7f274816f3dd]
- NOTE: a copy of the executable, or `objdump -rdS <executable>` is
-needed to interpret this.
-
-
--9877> 2017-10-21 00:24:41.764088 7f2745bdf700  1 dump:
-00000000  f1 03 00 00 00 01 00 00  00 00 00 00 26 01 00 00  |............&...|
-00000010  ee a3 0e 00 00 05 00 00  00 00 00 00 77 e6 37 00  |............w.7.|
-00000020  00 02 00 00 00 00 00 00  46 50 13 00 00 04 00 00  |........FP......|
-00000030  00 00 00 00 24 57 a8 00  00 02 00 00 00 00 00 00  |....$W..........|
-00000040  ef aa 20 00 00 03 00 00  00 00 00 00 30 65 16 00  |.. .........0e..|
-00000050  00 04 00 00 00 00 00 00  de e3 93 00 00 02 00 00  |................|
-00000060  00 00 00 00 38 6f a5 00  00 02 00 00 00 00 00 00  |....8o..........|
-00000070  e9 71 16 00 00 03 00 00  00 00 00 00 59 e8 16 00  |.q..........Y...|
-00000080  00 04 00 00 00 00 00 00  95 1a 96 00 00 02 00 00  |................|
-00000090  00 00 00 00 40 52 6a 00  00 02 00 00 00 00 00 00  |....@Rj.........|
-000000a0  98 c7 a6 00 00 02 00 00  00 00 00 00 4b 97 80 00  |............K...|
-000000b0  00 02 00 00 00 00 00 00  b4 7e 1e 00 00 03 00 00  |.........~......|
-000000c0  00 00 00 00 3b 58 a3 00  00 02 00 00 00 00 00 00  |....;X..........|
-000000d0  da b7 15 00 00 04 00 00  00 00 00 00 5e 61 17 00  |............^a..|
-000000e0  00 04 00 00 00 00 00 00  0e 12 98 00 00 01 00 00  |................|
-000000f0  00 00 00 00 0e 03 1e 00  00 03 00 00 00 00 00 00  |................|
-00000100  93 d6 14 00 00 04 00 00  00 00 00 00 74 a4 97 00  |............t...|
-00000110  00 01 00 00 00 00 00 00  65 6a 13 00 00 04 00 00  |........ej......|
-00000120  00 00 00 00 cc 76 1f 00  00 03 00 00 00 00 00 00  |.....v..........|
-00000130  9b da 1f 00 00 03 00 00  00 00 00 00 5d 41 0d 00  |............]A..|
-00000140  00 04 00 00 00 00 00 00  e1 58 18 00 00 04 00 00  |.........X......|
-00000150  00 00 00 00 0a b8 1e 00  00 03 00 00 00 00 00 00  |................|
-00000160  97 f6 13 00 00 04 00 00  00 00 00 00 1b 50 20 00  |.............P .|
-00000170  00 03 00 00 00 00 00 00  10 e8 93 00 00 02 00 00  |................|
-00000180  00 00 00 00 77 71 6a 00  00 02 00 00 00 00 00 00  |....wqj.........|
-00000190  fc d2 b7 00 00 02 00 00  00 00 00 00 bf 6e 95 00  |.............n..|
-000001a0  00 02 00 00 00 00 00 00  fd 0d 93 00 00 02 00 00  |................|
-000001b0  00 00 00 00 fe e5 37 00  00 02 00 00 00 00 00 00  |......7.........|
-000001c0  3f e6 37 00 00 02 00 00  00 00 00 00 55 b5 16 00  |?.7.........U...|
-000001d0  00 03 00 00 00 00 00 00  1a 41 12 00 00 04 00 00  |.........A......|
-000001e0  00 00 00 00 96 e5 37 00  00 02 00 00 00 00 00 00  |......7.........|
-000001f0  a2 dc 10 00 00 04 00 00  00 00 00 00 8c a1 a4 00  |................|
-00000200  00 02 00 00 00 00 00 00  a0 3f 0d 00 00 04 00 00  |.........?......|
-00000210  00 00 00 00 2c 4b 16 00  00 03 00 00 00 00 00 00  |....,K..........|
-00000220  d7 8e 14 00 00 04 00 00  00 00 00 00 45 4d 0d 00  |............EM..|
-00000230  00 04 00 00 00 00 00 00  1a c9 a4 00 00 02 00 00  |................|
-00000240  00 00 00 00 75 ab 16 00  00 03 00 00 00 00 00 00  |....u...........|
-00000250  6f 53 37 00 00 02 00 00  00 00 00 00 c5 8a 37 00  |oS7...........7.|
-00000260  00 02 00 00 00 00 00 00  5c c9 ba 00 00 02 00 00  |........\.......|
-00000270  00 00 00 00 9a 44 ab 00  00 02 00 00 00 00 00 00  |.....D..........|
+2017-10-21 2:09 GMT+08:00 Xiaoxi Chen <superdebuger@gmail.com>:
+> @Zheng, my kernel doesn't even has c3f4688a08f.   But 200fd27 ("ceph:
+> use lookup request to revalidate dentry") is there.
+>
+> 2017-10-21 0:54 GMT+08:00 Xiaoxi Chen <superdebuger@gmail.com>:
+>> Thanks, will check.
+>>
+>> A general question, does cephfs kernel client drop dentries/inode
+>> cache aggressively?   What I know is if MDS issue
+>> CEPH_SESSION_RECALL_STATE, client will drop, but is there other cases
+>> client will drop cache?
+>>
+>>
+>>
+>> 2017-10-20 16:39 GMT+08:00 Yan, Zheng <ukernel@gmail.com>:
+>>> On Fri, Oct 20, 2017 at 3:28 PM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
+>>>> Centos 7.3, kernel version 3.10.0-514.26.2.el7.x86_64.
+>>>>
+>>>> I extract the logical of file creation in our workload into a
+>>>> reproducer , like below.
+>>>>
+>>>> Concurrently run the reproducer in 2+ node can see a lots of lookup OP.
+>>>> I thought the lookup is to open the directory tree so I tried to
+>>>> pre-make most of the dirs ,  use ls -i trying to read the dentries and
+>>>> cache it, then re-run the reproducer,  seems nothing different..
+>>>>
+>>>> #include <sys/stat.h>
+>>>> #include <fcntl.h>
+>>>> int create_file(char * base, int count, int max, int depth)
+>>>> {
+>>>>     int i;
+>>>>     for(i=0; i<count; i++) {
+>>>>         char dir[256];
+>>>>         int mydir = rand() % max;
+>>>>         sprintf(dir, "%s/%d", path, mydir);
+>>>>         if (depth >=1) {
+>>>>             mkdir(dir,0777);
+>>>>             create_dir(dir, count, max, depth - 1);
+>>>>         } else {
+>>>>             int fd = open(dir, O_CREAT | O_EXCL| O_WRONLY , 0666);
+>>>>             printf("opened path : %s = %d\n", path, fd);
+>>>>             close(fd);
+>>>>         }
+>>>>     }
+>>>> }
+>>>> int main(int argc, char argv[])
+>>>> {
+>>>>     char path[256];
+>>>>     while(1) {
+>>>>       create_file("/import/SQL01", 1, 4 ,10);
+>>>>     }
+>>>> }
+>>>>
+>>>
+>>> still don't see this behavior on 4.13 kernel. I suspect there is
+>>> something wrong with dentry lease. please check if your kernel
+>>> include:
+>>>
+>>> commit c3f4688a08f (ceph: don't set req->r_locked_dir in ceph_d_revalidate)
+>>> commit 5eb9f6040f3 (ceph: do a LOOKUP in d_revalidate instead of GETATTR)
+>>>
+>>> The first commit can cause this issue, the second one fixes it.
+>>>
+>>> Regards
+>>> Yan, Zheng
+>>>
+>>>>
+>>>>
+>>>> 2017-10-20 10:55 GMT+08:00 Yan, Zheng <ukernel@gmail.com>:
+>>>>> On Fri, Oct 20, 2017 at 12:49 AM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
+>>>>>> Hi,
+>>>>>>
+>>>>>>       I am seeing a lot of lookup request when doing recursive mkdir.
+>>>>>>       The workload behavior is like:
+>>>>>>           mkdir DIR0
+>>>>>>           mkdir DIR0/DIR1
+>>>>>>           mkdir DIR0/DIR1/DIR2
+>>>>>>           ....
+>>>>>>           mkdir DIR0/DIR1/DIR2......./DIR7
+>>>>>>           create DIR0/DIR1/DIR2......./DIR7/FILE1
+>>>>>>
+>>>>>>       and concurrently run on 50+ clients, the dir name in different
+>>>>>> clients may or maynot be the same.
+>>>>>>
+>>>>>>        from the admin socket I was seeing ~50K create requests, but
+>>>>>> got 400K lookup requests. The lookup eat up most of the mds capability
+>>>>>> so file create is slow.
+>>>>>>
+>>>>>>        Where is the lookup comes from and can we have anyway to
+>>>>>> optimize it out ?
+>>>>>>
+>>>>>
+>>>>> I don't see this behavior when running following commands in 4.13
+>>>>> kernel client and luminous version ceph-fuse. which client do you use?
+>>>>>
+>>>>> mkdir d1
+>>>>> mkdir d1/d2
+>>>>> mkdir d1/d2/d3
+>>>>> mkdir d1/d2/d3/d4/
+>>>>> mkdir d1/d2/d3/d4/d5
+>>>>> touch d1/d2/d3/d4/d5/f
+>>>>>
+>>>>>>      Xiaoxi
