@@ -1,92 +1,53 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: Luminous: osd_crush_location_hook renamed to crush_location_hook
-Date: Mon, 23 Oct 2017 14:29:49 +0200
-Message-ID: <CALe9h7fO0d8NFoA4=1XjqKM9bX2rfCKDEaUnzH+9Ackh-o=32Q@mail.gmail.com>
-References: <1406455169.3092.1508155374117@ox.pcextreme.nl>
- <CABZ+qq=pnAjbDKVfHkH_=G3yLpU4-=Ko_Qvyqq8x7XfQ5=pQjw@mail.gmail.com>
- <alpine.DEB.2.11.1710191331210.24806@piezo.us.to> <1075089278.3447.1508741633932@ox.pcextreme.nl>
- <alpine.DEB.2.11.1710231210310.16763@piezo.us.to>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Jeff Layton <jlayton@kernel.org>
+Subject: [PATCH] ceph: present consistent fsid, regardless of arch endianness
+Date: Mon, 23 Oct 2017 12:23:54 -0400
+Message-ID: <20171023162354.6453-1-jlayton@kernel.org>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f172.google.com ([209.85.128.172]:53197 "EHLO
-        mail-wr0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932093AbdJWMaL (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Oct 2017 08:30:11 -0400
-Received: by mail-wr0-f172.google.com with SMTP id k62so17173745wrc.9
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Oct 2017 05:30:10 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1710231210310.16763@piezo.us.to>
+Received: from mail.kernel.org ([198.145.29.99]:41368 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751277AbdJWQX4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 23 Oct 2017 12:23:56 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Wido den Hollander <wido@42on.com>, Dan van der Ster <dan@vanderster.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: zyan@redhat.com
+Cc: sage@redhat.com, idryomov@gmail.com, ceph-devel@vger.kernel.org
 
-On Mon, Oct 23, 2017 at 2:11 PM, Sage Weil <sage@newdream.net> wrote:
-> On Mon, 23 Oct 2017, Wido den Hollander wrote:
->> > Op 19 oktober 2017 om 15:34 schreef Sage Weil <sage@newdream.net>:
->> >
->> >
->> > On Thu, 19 Oct 2017, Dan van der Ster wrote:
->> > > Hi Wido,
->> > >
->> > > Unexpected crush location changes can indeed be quite nasty.
->> > >
->> > > With this in mind, I wonder if a crush lock would be useful.
->> > >
->> > >     ceph osd set nocrushchange
->> > >
->> > > With that flag set, osds could still go in and out, but crush
->> > > move/add/remove/etc..., also tunables changes, would be blocked.
->> >
->> > The problem I see with this is that it would prevent new OSD additions or
->> > other changes.. and if you went to unset the flag in order to allow a new
->> > node to be adjusted or brought online then you might get an avalance of
->> > blocked changes.
->> >
->> > I think what we actually want is a more targetted variation of
->> > osd_crush_update_on_start that only updates teh location if it has never
->> > been set (i.e., it is a new osd).  Like, osd_crush_update_on_create.  Then
->> > it's left to the admin to move OSDs?
->> >
->> > > On Mon, Oct 16, 2017 at 2:02 PM, Wido den Hollander <wido@42on.com> wrote:
->> > > > Hi,
->> > > >
->> > > > I completely overread this, but I just found out that osd_crush_location_hook was renamed to crush_location_hook in the new config style.
->> > > >
->> > > > When upgrading from Jewel to Luminous without touching your configuration OSDs will move to the default CRUSH location due to the hook not being executed.
->> > > >
->> > > > Was this an oversight with Luminous or was it intentional?
->> >
->> > The implications are an oversight.. I didn't think about customized hooks
->> > that would get reverted if the config option wasn't changed.  Otherwise
->> > the item in the release notes would have read more like a warning:
->> >
->> > * The `osd crush location` config option is no longer supported.  Please
->> >   update your ceph.conf to use the `crush location` option instead.
->> >
->>
->> Yes, we probably need a big warning for this in the ReleaseNotes.
->>
->> Are you going to make sure it goes in?
->
-> https://github.com/ceph/ceph/pull/18482
->
-> I think we also want to make the old config option work too; that isn't
-> done yet.  John, I wonder if it is worth adding an 'alias' mechanism
-> into the options framework, so that all users of the option don't have to
-> check for the old and new?
+From: Jeff Layton <jlayton@redhat.com>
 
-The thought crossed my mind -- it's a little awkward for someone who
-dumps back their config, as they'll see a differently named option
-than the one they thought they set.  However, I think it's worth it on
-balance: I'm a fan of thing that enable us to sanitize the naming.
+Since its inception, ceph has presented the fsid as an opaque value
+without any sort of endianness conversion. This means that the value
+presented is different on architectures of different endianness.
 
-The alias field should come with a mandatory version field that says
-which version the old alias was from, so that we can systematically
-remove them a couple versions later.
+While the value that should be stuffed into f_fsid is poorly-defined,
+I think it would be best to strive for consistency here between
+architectures, and clients (we need to present this properly to the
+userland client as well).
 
-John
+Change ceph_statfs to convert the opaque words to host-endian before
+doing the xor. The value will change between reboots on big-endian
+architectures, but it should not change on little-endian ones.
 
->
-> sage
->
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+---
+ fs/ceph/super.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/fs/ceph/super.c b/fs/ceph/super.c
+index e4082afedcb1..fe9fbb3f13f7 100644
+--- a/fs/ceph/super.c
++++ b/fs/ceph/super.c
+@@ -84,8 +84,9 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
+ 	buf->f_ffree = -1;
+ 	buf->f_namelen = NAME_MAX;
+ 
+-	/* leave fsid little-endian, regardless of host endianness */
+-	fsid = *(u64 *)(&monmap->fsid) ^ *((u64 *)&monmap->fsid + 1);
++	/* Must convert the fsid, for consistent values across arches */
++	fsid = le64_to_cpu(*(__le64 *)(&monmap->fsid)) ^
++	       le64_to_cpu(*((__le64 *)&monmap->fsid + 1));
+ 	buf->f_fsid.val[0] = fsid & 0xffffffff;
+ 	buf->f_fsid.val[1] = fsid >> 32;
+ 
+-- 
+2.13.6
+
