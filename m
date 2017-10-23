@@ -1,70 +1,44 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: [PATCH] ceph: present consistent fsid, regardless of arch
- endianness
-Date: Mon, 23 Oct 2017 16:49:59 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1710231649440.16763@piezo.us.to>
-References: <20171023162354.6453-1-jlayton@kernel.org>
+From: Casey Bodley <cbodley@redhat.com>
+Subject: fun with seastar
+Date: Mon, 23 Oct 2017 16:17:19 -0400
+Message-ID: <91a5fd79-ff50-53f7-d187-97d024cee8ba@redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56018 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751548AbdJWQuB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 23 Oct 2017 12:50:01 -0400
-In-Reply-To: <20171023162354.6453-1-jlayton@kernel.org>
+Received: from mail-oi0-f44.google.com ([209.85.218.44]:54705 "EHLO
+        mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750835AbdJWURV (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Oct 2017 16:17:21 -0400
+Received: by mail-oi0-f44.google.com with SMTP id a132so33013082oih.11
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Oct 2017 13:17:21 -0700 (PDT)
+Received: from [10.17.151.126] ([12.118.3.106])
+        by smtp.gmail.com with ESMTPSA id b44sm2553206otb.36.2017.10.23.13.17.20
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 23 Oct 2017 13:17:20 -0700 (PDT)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: zyan@redhat.com, idryomov@gmail.com, ceph-devel@vger.kernel.org
+To: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-On Mon, 23 Oct 2017, Jeff Layton wrote:
-> From: Jeff Layton <jlayton@redhat.com>
-> 
-> Since its inception, ceph has presented the fsid as an opaque value
-> without any sort of endianness conversion. This means that the value
-> presented is different on architectures of different endianness.
-> 
-> While the value that should be stuffed into f_fsid is poorly-defined,
-> I think it would be best to strive for consistency here between
-> architectures, and clients (we need to present this properly to the
-> userland client as well).
-> 
-> Change ceph_statfs to convert the opaque words to host-endian before
-> doing the xor. The value will change between reboots on big-endian
-> architectures, but it should not change on little-endian ones.
-> 
-> Signed-off-by: Jeff Layton <jlayton@redhat.com>
+Hi folks,
 
-Yeah, sounds good!
+I mentioned in last week's perf call that I've been experimenting with 
+the Seastar library [1] to see how well it can integrate with the ceph 
+codebase. So far I've managed to add bufferlist conversions to/from the 
+seastar buffer types, and build up a seastar messenger that can 
+send/receive ceph Messages. The branch [2] includes a simple echo server 
+unit test and a README with build instructions.
 
-Reviewed-by: Sage Weil <sage@redhat.com>
+This follows some prototype work a couple years ago by Adam Emerson and 
+myself, dubbed Project Crimson [3], to evaluate Seastar as the basis for 
+a low-latency OSD. Interesting parts of this project include a Cap'n 
+Proto-based messenger and an async ObjectStore interface with Memstore 
+implementation.
 
-> ---
->  fs/ceph/super.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
-> 
-> diff --git a/fs/ceph/super.c b/fs/ceph/super.c
-> index e4082afedcb1..fe9fbb3f13f7 100644
-> --- a/fs/ceph/super.c
-> +++ b/fs/ceph/super.c
-> @@ -84,8 +84,9 @@ static int ceph_statfs(struct dentry *dentry, struct kstatfs *buf)
->  	buf->f_ffree = -1;
->  	buf->f_namelen = NAME_MAX;
->  
-> -	/* leave fsid little-endian, regardless of host endianness */
-> -	fsid = *(u64 *)(&monmap->fsid) ^ *((u64 *)&monmap->fsid + 1);
-> +	/* Must convert the fsid, for consistent values across arches */
-> +	fsid = le64_to_cpu(*(__le64 *)(&monmap->fsid)) ^
-> +	       le64_to_cpu(*((__le64 *)&monmap->fsid + 1));
->  	buf->f_fsid.val[0] = fsid & 0xffffffff;
->  	buf->f_fsid.val[1] = fsid >> 32;
->  
-> -- 
-> 2.13.6
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+-Casey
+
+[1] https://github.com/scylladb/seastar
+[2] https://github.com/cbodley/ceph/commits/wip-seastar-msg
+[3] https://github.com/cohortfsllc/crimson
