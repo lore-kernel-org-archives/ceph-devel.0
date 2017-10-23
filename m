@@ -1,75 +1,72 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Luminous: osd_crush_location_hook renamed to
- crush_location_hook
-Date: Mon, 23 Oct 2017 12:11:22 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1710231210310.16763@piezo.us.to>
-References: <1406455169.3092.1508155374117@ox.pcextreme.nl> <CABZ+qq=pnAjbDKVfHkH_=G3yLpU4-=Ko_Qvyqq8x7XfQ5=pQjw@mail.gmail.com> <alpine.DEB.2.11.1710191331210.24806@piezo.us.to> <1075089278.3447.1508741633932@ox.pcextreme.nl>
+Subject: Re: Why does messenger sends the address of himself and of the
+ connecting peer
+Date: Mon, 23 Oct 2017 12:14:28 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1710231214160.16763@piezo.us.to>
+References: <1508513118.10018.8.camel@suse.com>         <alpine.DEB.2.11.1710201536440.26711@piezo.us.to> <1508748456.10018.15.camel@suse.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:57014 "EHLO
+Received: from tragedy.dreamhost.com ([66.33.205.236]:57202 "EHLO
         tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751116AbdJWMLZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Oct 2017 08:11:25 -0400
-In-Reply-To: <1075089278.3447.1508741633932@ox.pcextreme.nl>
+        with ESMTP id S1751116AbdJWMOb (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Oct 2017 08:14:31 -0400
+In-Reply-To: <1508748456.10018.15.camel@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Wido den Hollander <wido@42on.com>
-Cc: Dan van der Ster <dan@vanderster.com>, John Spray <jspray@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ricardo Dias <rdias@suse.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, 23 Oct 2017, Wido den Hollander wrote:
-> > Op 19 oktober 2017 om 15:34 schreef Sage Weil <sage@newdream.net>:
-> > 
-> > 
-> > On Thu, 19 Oct 2017, Dan van der Ster wrote:
-> > > Hi Wido,
+On Mon, 23 Oct 2017, Ricardo Dias wrote:
+> On Fri, 2017-10-20 at 15:40 +0000, Sage Weil wrote:
+> > On Fri, 20 Oct 2017, Ricardo Dias wrote:
+> > > In the current messenger protocol, upon accepting a new connection,
+> > the
+> > > messenger sends it's address and the connecting peer address along
+> > with
+> > > the banner string. Why does the connecting peer need these
+> > addresses?
+> > > Moreover, the connecting peer uses the connecting peer address
+> > (sent
+> > > from the server) to set as it's own address.
 > > > 
-> > > Unexpected crush location changes can indeed be quite nasty.
-> > > 
-> > > With this in mind, I wonder if a crush lock would be useful.
-> > > 
-> > >     ceph osd set nocrushchange
-> > > 
-> > > With that flag set, osds could still go in and out, but crush
-> > > move/add/remove/etc..., also tunables changes, would be blocked.
+> > > What happens if the network is rewriting addresses  because of NAT,
+> > or
+> > > whatever other strange reasons?
 > > 
-> > The problem I see with this is that it would prevent new OSD additions or 
-> > other changes.. and if you went to unset the flag in order to allow a new 
-> > node to be adjusted or brought online then you might get an avalance of 
-> > blocked changes.
+> > There are two cases:
 > > 
-> > I think what we actually want is a more targetted variation of 
-> > osd_crush_update_on_start that only updates teh location if it has never 
-> > been set (i.e., it is a new osd).  Like, osd_crush_update_on_create.  Then 
-> > it's left to the admin to move OSDs?
+> > 1) client -> server connections.  These always are initiated in one 
+> > directly.  The self address thing is included there partly so that
+> > the 
+> > client can discover what its effective (public) address is.  In the
+> > case 
+> > of the OSD, the initial osd -> mon connection allows the osd to learn
+> > what 
+> > it's public IP address will be (we advertise our address as the one 
+> > that is used to connect to the mon).
 > > 
-> > > On Mon, Oct 16, 2017 at 2:02 PM, Wido den Hollander <wido@42on.com> wrote:
-> > > > Hi,
-> > > >
-> > > > I completely overread this, but I just found out that osd_crush_location_hook was renamed to crush_location_hook in the new config style.
-> > > >
-> > > > When upgrading from Jewel to Luminous without touching your configuration OSDs will move to the default CRUSH location due to the hook not being executed.
-> > > >
-> > > > Was this an oversight with Luminous or was it intentional?
+> > 2) server <-> server connections, e.g., mon<->mon, osd<->osd, mds<-
+> > >mds.  
+> > Here, connections can be opened in either direction.  I believe here
+> > it is 
+> > just used as a sanity check.
 > > 
-> > The implications are an oversight.. I didn't think about customized hooks 
-> > that would get reverted if the config option wasn't changed.  Otherwise 
-> > the item in the release notes would have read more like a warning:
+> > > I also saw that the code that encodes these addresses have a
+> > comment
+> > > saying "// legacy". Should we remove these addresses from the new
+> > V2
+> > > protocol, or do we still need them?
 > > 
-> > * The `osd crush location` config option is no longer supported.  Please
-> >   update your ceph.conf to use the `crush location` option instead.
-> > 
+> > I think we'll still need them, since new clients will still need to 
+> > connect to old servers, and new servers will need to allow old
+> > clients to 
+> > connect.
 > 
-> Yes, we probably need a big warning for this in the ReleaseNotes.
-> 
-> Are you going to make sure it goes in?
+> The Messenger will still support the V1 protocol, so if a new client
+> needs to talk with an old server it will instantiate a V1 messenger.
+> Therefore, I think we can drop this from the V2 protocol, right?
 
-https://github.com/ceph/ceph/pull/18482
-
-I think we also want to make the old config option work too; that isn't 
-done yet.  John, I wonder if it is worth adding an 'alias' mechanism 
-into the options framework, so that all users of the option don't have to 
-check for the old and new?
+Oh, right.. yes!
 
 sage
-
