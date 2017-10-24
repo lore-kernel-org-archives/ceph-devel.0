@@ -1,87 +1,51 @@
-From: Liuhao <liu.haoA@h3c.com>
-Subject: about filestore->journal->rebuild_align
-Date: Tue, 24 Oct 2017 01:53:38 +0000
-Message-ID: <7DF47FD5BC069E4BBD28890C798EC7BC69327620@H3CMLB12-EX.srv.huawei-3com.com>
-References: <7DF47FD5BC069E4BBD28890C798EC7BC693272DE@H3CMLB12-EX.srv.huawei-3com.com>
- <7DF47FD5BC069E4BBD28890C798EC7BC69327315@H3CMLB12-EX.srv.huawei-3com.com>
+From: Haomai Wang <haomai@xsky.com>
+Subject: Re: fun with seastar
+Date: Tue, 24 Oct 2017 10:23:30 +0800
+Message-ID: <CACJqLyZ0rAZX3_9iGX9MVkR=PJ9BMF6n2f0yb_PHqWLiqN++Tg@mail.gmail.com>
+References: <91a5fd79-ff50-53f7-d187-97d024cee8ba@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:19487 "EHLO h3cmg01-ex.h3c.com"
+Received: from mail-hk2apc01on0125.outbound.protection.outlook.com ([104.47.124.125]:23877
+        "EHLO APC01-HK2-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751226AbdJXBxs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 23 Oct 2017 21:53:48 -0400
-In-Reply-To: <7DF47FD5BC069E4BBD28890C798EC7BC69327315@H3CMLB12-EX.srv.huawei-3com.com>
-Content-Language: zh-CN
+        id S1751220AbdJXCXn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 23 Oct 2017 22:23:43 -0400
+Received: by mail-vk0-f44.google.com with SMTP id k123so12404719vkb.3
+        for <ceph-devel@vger.kernel.org>; Mon, 23 Oct 2017 19:23:37 -0700 (PDT)
+In-Reply-To: <91a5fd79-ff50-53f7-d187-97d024cee8ba@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
+To: Casey Bodley <cbodley@redhat.com>
+Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-SGksIGxpc3RlcjoNCkkgdXNlIGNlcGjigJl2ZXJzaW9uIDEwLjIuMA0KDQpBbmFseXNpcyBGaWxl
-Sm91cm5hbDo6cHJlcGFyZV9lbnRyee+8jHdoZW4gcHJlcGFyZSBqb3VybmFsIGJ1ZmZlcmxpc3Tv
-vIxpdOKAmXMgZGl2aWRlZCBpbnRvIDUgcGFydHPvvJpoZWFkwqAgcHJlX3BhZMKgIGRhdGHCoCBw
-b3N0X3BhZMKgIGhlYWQNClRoZW4gcmV1aWxkIGZvciBidWZmZXIgbGlzdCB0byA0SyBhbGlnbuOA
-gnJlYnVpbGRfYWxpZ25lZCByZW1hbGxvYyA0SyBhbGlnbmVkIG1lbW9yeeOAgu+8iGVhY2ggNEsg
-YWxpZ25lZCBtZW1vcnkgaXMgYXMgc21hbGwgYXMgcG9zc2libGXvvIkNCg0KRGV0YWlsZWQgY29k
-Ze+8mg0KRmlsZUpvdXJuYWw6OnByZXBhcmVfZW50cnkodmVjdG9yPE9iamVjdFN0b3JlOjpUcmFu
-c2FjdGlvbj4mIHRscywgYnVmZmVybGlzdCogdGJsKQ0KwqDCoMKgwqDCoMKgwqDCoCBFbmNvZGUg
-Zm9yIHRyYW5zYWN0aW9uwqAgOjplbmNvZGUoKnAsIGJsKTsNCuOAgOOAgGVibC5hcHBlbmQoKGNv
-bnN0IGNoYXIqKSZoLCBzaXplb2YoaCkpOw0K44CA44CAZWJsLnB1c2hfYmFjayhidWZmZXI6OmNy
-ZWF0ZV9zdGF0aWMoaC5wcmVfcGFkLCB6ZXJvX2J1ZikpOw0K44CA44CAZWJsLmNsYWltX2FwcGVu
-ZChibCwgYnVmZmVyOjpsaXN0OjpDTEFJTV9BTExPV19OT05TSEFSRUFCTEUpOyAvLyBwb3RlbnRp
-YWwgemVyby1jb3B5DQrjgIDjgIBlYmwucHVzaF9iYWNrKGJ1ZmZlcjo6Y3JlYXRlX3N0YXRpYyho
-LnBvc3RfcGFkLCB6ZXJvX2J1ZikpOw0K44CA44CAZWJsLmFwcGVuZCgoY29uc3QgY2hhciopJmgs
-IHNpemVvZihoKSk7DQrjgIDjgIByZXQgPSBlYmwucmVidWlsZF9hbGlnbmVkKENFUEhfRElSRUNU
-SU9fQUxJR05NRU5UKTsNCuOAgOOAgA0KcXVlc3Rpb246DQpiZWZvcmUgcmVidWlsZF9hbGlnbmVk
-77yMYXMgbWFueSBwdHIgaXMgYWxpZ25lZCBhcyA0S++8jHNvIHlvdSBjYW4gYXBwbHkgbGVzcyBt
-ZW1vcnkuaXMgaXQ/DQpoZWFkIDQwIHByZV9wYWQgMjczNiBibCA0MTk2MjMzIHBvc3RfcGFkIDM0
-NDcgdGFpbCA0MMKgIHRvdGFsOjRLKjEwMjYNCnJlYnVpbGRfYWxpZ25lZCB3aWxsIHJlbWFsbG9j
-IG1lbW9yeSA0SyoxMDI2LCBhbGwgbmVlZCByZWJ1aWxkDQoNCkRldGFpbCBsb2cgaW5mbzoNCklu
-IGNvZGUsIHRoaXMgbG9nIG1lc3NhZ2UgY2F1Z2h0IG15IGF0dGVudGlvbu+8jHRoZSBsb2cgaW5m
-b3JtYXRpb24gb2YgdGhlc2UgNSB2YWx1c2UgaXMgbm90IGV4cGVjdGVkLg0KDQpkb3V0KDEwKSA8
-PCAiIGxlbiAiIDw8IGJsLmxlbmd0aCgpIDw8ICIgLT4gIiA8PCBzaXplwqAgPDwgIiAoaGVhZCAi
-IDw8IGhlYWRfc2l6ZSA8PCAiIHByZV9wYWQgIiA8PCBoLnByZV9wYWQNCsKgwqDCoMKgwqDCoCA8
-PCAiIGJsICIgPDwgYmwubGVuZ3RoKCkgPDwgIiBwb3N0X3BhZCAiIDw8IHBvc3RfcGFkIDw8ICIg
-dGFpbCAiIDw8IGhlYWRfc2l6ZSA8PCAiKSINCsKgwqDCoMKgwqDCoCA8PCAiIChibCBhbGlnbm1l
-bnQgIiA8PCBkYXRhX2FsaWduIDw8ICIpIiA8PCBkZW5kbDsNCg0KMjAxNy0xMC0xNyAxOTo1MDoy
-OC43MjE5MjIgN2YyMWQ3M2ZlNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIzMyAtPiA0MjAyNDk2
-IChoZWFkIDQwIHByZV9wYWQgMjczNiBibCA0MTk2MjMzIHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkg
-KGJsIGFsaWdubWVudCAyNzc2KQ0KMjAxNy0xMC0xNyAxOTo1MDoyOC44NzMyNjEgN2YyMWNjZmZm
-NzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQg
-NDA0NiBibCA0MTk2MTMxIHBvc3RfcGFkIDIyMzkgdGFpbCA0MCkgKGJsIGFsaWdubWVudCA0MDg2
-KQ0KMjAxNy0xMC0xNyAxOTo1MDoyOC44OTc1MjAgN2YyMWQ0M2ZmNzAwIDEwIGpvdXJuYWzCoCBs
-ZW4gNDE5NjEzMSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgNDA0NiBibCA0MTk2MTMxIHBv
-c3RfcGFkIDIyMzkgdGFpbCA0MCkgKGJsIGFsaWdubWVudCA0MDg2KQ0KMjAxNy0xMC0xNyAxOTo1
-MDoyOC45NzQ4MTEgN2YyMWNmODAwNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAtPiA0MjAy
-NDk2IChoZWFkIDQwIHByZV9wYWQgNDA0NiBibCA0MTk2MTMxIHBvc3RfcGFkIDIyMzkgdGFpbCA0
-MCkgKGJsIGFsaWdubWVudCA0MDg2KQ0KMjAxNy0xMC0xNyAxOTo1MDoyOS4wMTM5NDAgN2YyMWNj
-ZmZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIxNSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9w
-YWQgMjc1NCBibCA0MTk2MjE1IHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkgKGJsIGFsaWdubWVudCAy
-Nzk0KQ0KMjAxNy0xMC0xNyAxOTo1MDoyOS4yOTIxNjUgN2YyMWNlM2ZmNzAwIDEwIGpvdXJuYWzC
-oCBsZW4gNDE5NjIxNSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgMjc1NCBibCA0MTk2MjE1
-IHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkgKGJsIGFsaWdubWVudCAyNzk0KQ0KMjAxNy0xMC0xNyAx
-OTo1MDoyOS4zMTEyOTYgN2YyMWNmODAwNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIzMyAtPiA0
-MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgMjczNiBibCA0MTk2MjMzIHBvc3RfcGFkIDM0NDcgdGFp
-bCA0MCkgKGJsIGFsaWdubWVudCAyNzc2KQ0KMjAxNy0xMC0xNyAxOTo1MDoyOS40MTYyNDAgN2Yy
-MWQ0M2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIxNSAtPiA0MjAyNDk2IChoZWFkIDQwIHBy
-ZV9wYWQgMjc1NCBibCA0MTk2MjE1IHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkgKGJsIGFsaWdubWVu
-dCAyNzk0KQ0KMjAxNy0xMC0xNyAxOTo1MDozMC4xMTE1NjEgN2YyMWNjN2ZlNzAwIDEwIGpvdXJu
-YWzCoCBsZW4gNDE5NjEzMSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgNDA0NiBibCA0MTk2
-MTMxIHBvc3RfcGFkIDIyMzkgdGFpbCA0MCkgKGJsIGFsaWdubWVudCA0MDg2KQ0KMjAxNy0xMC0x
-NyAxOTo1MDozMC40NDQ3MjkgN2YyMWQyM2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAt
-PiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgNDA0NiBibCA0MTk2MTMxIHBvc3RfcGFkIDIyMzkg
-dGFpbCA0MCkgKGJsIGFsaWdubWVudCA0MDg2KQ0KMjAxNy0xMC0xNyAxOTo1MDozMC40NDg2ODYg
-N2YyMWNjZmZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIzMyAtPiA0MjAyNDk2IChoZWFkIDQw
-IHByZV9wYWQgMjczNiBibCA0MTk2MjMzIHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkgKGJsIGFsaWdu
-bWVudCAyNzc2KQ0KMjAxNy0xMC0xNyAxOTo1MDozMC41NTk2MjYgN2YyMWQ0M2ZmNzAwIDEwIGpv
-dXJuYWzCoCBsZW4gNDE5NjEzMSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgNDA0NiBibCA0
-MTk2MTMxIHBvc3RfcGFkIDIyMzkgdGFpbCA0MCkgKGJsIGFsaWdubWVudCA0MDg2KQ0KMjAxNy0x
-MC0xNyAxOTo1MDozMC41OTI1NDEgN2YyMWQ2M2ZlNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIz
-MyAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgMjczNiBibCA0MTk2MjMzIHBvc3RfcGFkIDM0
-NDcgdGFpbCA0MCkgKGJsIGFsaWdubWVudCAyNzc2KQ0KMjAxNy0xMC0xNyAxOTo1MDozMC41OTk1
-MjcgN2YyMWNiN2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIxNSAtPiA0MjAyNDk2IChoZWFk
-IDQwIHByZV9wYWQgMjc1NCBibCA0MTk2MjE1IHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkgKGJsIGFs
-aWdubWVudCAyNzk0KQ0KMjAxNy0xMC0xNyAxOTo1MDozMC42MTMxMjMgN2YyMWQxM2ZmNzAwIDEw
-IGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgNDA0NiBi
-bCA0MTk2MTMxIHBvc3RfcGFkIDIyMzkgdGFpbCA0MCkgKGJsIGFsaWdubWVudCA0MDg2KQ0KDQo=
+On Tue, Oct 24, 2017 at 4:17 AM, Casey Bodley <cbodley@redhat.com> wrote:
+> Hi folks,
+>
+> I mentioned in last week's perf call that I've been experimenting with the
+> Seastar library [1] to see how well it can integrate with the ceph codebase.
+> So far I've managed to add bufferlist conversions to/from the seastar buffer
+> types, and build up a seastar messenger that can send/receive ceph Messages.
+> The branch [2] includes a simple echo server unit test and a README with
+> build instructions.
+>
+> This follows some prototype work a couple years ago by Adam Emerson and
+> myself, dubbed Project Crimson [3], to evaluate Seastar as the basis for a
+> low-latency OSD. Interesting parts of this project include a Cap'n
+> Proto-based messenger and an async ObjectStore interface with Memstore
+> implementation.
+
+I'm also interested on seastar, but how we get benefit from it to
+ceph? rewrite lots of codes is needed to fit seastar framework..... I
+think a rough integration can't see much benefit
+
+>
+> -Casey
+>
+> [1] https://github.com/scylladb/seastar
+> [2] https://github.com/cbodley/ceph/commits/wip-seastar-msg
+> [3] https://github.com/cohortfsllc/crimson
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
