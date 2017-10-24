@@ -1,51 +1,103 @@
-From: Haomai Wang <haomai@xsky.com>
-Subject: Re: fun with seastar
-Date: Tue, 24 Oct 2017 10:23:30 +0800
-Message-ID: <CACJqLyZ0rAZX3_9iGX9MVkR=PJ9BMF6n2f0yb_PHqWLiqN++Tg@mail.gmail.com>
-References: <91a5fd79-ff50-53f7-d187-97d024cee8ba@redhat.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: about filestore->journal->rebuild_align
+Date: Tue, 24 Oct 2017 02:32:05 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1710240229050.16763@piezo.us.to>
+References: <7DF47FD5BC069E4BBD28890C798EC7BC693272DE@H3CMLB12-EX.srv.huawei-3com.com> <7DF47FD5BC069E4BBD28890C798EC7BC69327315@H3CMLB12-EX.srv.huawei-3com.com> <7DF47FD5BC069E4BBD28890C798EC7BC69327620@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-2130847395-1508812327=:16763"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-hk2apc01on0125.outbound.protection.outlook.com ([104.47.124.125]:23877
-        "EHLO APC01-HK2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751220AbdJXCXn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 23 Oct 2017 22:23:43 -0400
-Received: by mail-vk0-f44.google.com with SMTP id k123so12404719vkb.3
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Oct 2017 19:23:37 -0700 (PDT)
-In-Reply-To: <91a5fd79-ff50-53f7-d187-97d024cee8ba@redhat.com>
+Received: from tragedy.dreamhost.com ([66.33.205.236]:47815 "EHLO
+        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751259AbdJXCcI (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 23 Oct 2017 22:32:08 -0400
+In-Reply-To: <7DF47FD5BC069E4BBD28890C798EC7BC69327620@H3CMLB12-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Liuhao <liu.haoA@h3c.com>
+Cc: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
 
-On Tue, Oct 24, 2017 at 4:17 AM, Casey Bodley <cbodley@redhat.com> wrote:
-> Hi folks,
->
-> I mentioned in last week's perf call that I've been experimenting with the
-> Seastar library [1] to see how well it can integrate with the ceph codebase.
-> So far I've managed to add bufferlist conversions to/from the seastar buffer
-> types, and build up a seastar messenger that can send/receive ceph Messages.
-> The branch [2] includes a simple echo server unit test and a README with
-> build instructions.
->
-> This follows some prototype work a couple years ago by Adam Emerson and
-> myself, dubbed Project Crimson [3], to evaluate Seastar as the basis for a
-> low-latency OSD. Interesting parts of this project include a Cap'n
-> Proto-based messenger and an async ObjectStore interface with Memstore
-> implementation.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-I'm also interested on seastar, but how we get benefit from it to
-ceph? rewrite lots of codes is needed to fit seastar framework..... I
-think a rough integration can't see much benefit
+--8323329-2130847395-1508812327=:16763
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 
->
-> -Casey
->
-> [1] https://github.com/scylladb/seastar
-> [2] https://github.com/cbodley/ceph/commits/wip-seastar-msg
-> [3] https://github.com/cohortfsllc/crimson
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+On Tue, 24 Oct 2017, Liuhao wrote:
+
+> Hi, lister:
+> I use ceph’version 10.2.0
+> 
+> Analysis FileJournal::prepare_entry，when prepare journal bufferlist，it’s divided into 5 parts：head  pre_pad  data  post_pad  head
+> Then reuild for buffer list to 4K align。rebuild_aligned remalloc 4K aligned memory。（each 4K aligned memory is as small as possible）
+> 
+> Detailed code：
+> FileJournal::prepare_entry(vector<ObjectStore::Transaction>& tls, bufferlist* tbl)
+>          Encode for transaction  ::encode(*p, bl);
+> 　　ebl.append((const char*)&h, sizeof(h));
+
+This copies into the bufferlist::append_buffer, which is a 4k aligned 
+page.
+
+> 　　ebl.push_back(buffer::create_static(h.pre_pad, zero_buf));
+
+This should be ebl.append_zeros(h.pre_pad);
+
+> 　　ebl.claim_append(bl, buffer::list::CLAIM_ALLOW_NONSHAREABLE); // potential zero-copy
+
+This does not, however.  We could probably change this so that if 
+bl.length() < something we copy into the buffer here instead of doing a 
+rebuild later.
+
+> 　　ebl.push_back(buffer::create_static(h.post_pad, zero_buf));
+
+Here too.
+
+> 　　ebl.append((const char*)&h, sizeof(h));
+> 　　ret = ebl.rebuild_aligned(CEPH_DIRECTIO_ALIGNMENT);
+> 　　
+> question:
+> before rebuild_aligned，as many ptr is aligned as 4K，so you can apply less memory.is it?
+> head 40 pre_pad 2736 bl 4196233 post_pad 3447 tail 40  total:4K*1026
+> rebuild_aligned will remalloc memory 4K*1026, all need rebuild
+
+IIRC it's supposed to only rebuild the unaligned buffers.  So the header 
+and padding will get rebuilt, but if the buffer bl is already aligned it 
+will be untouched.  This is normally the case for large writes as the 
+messenger takes care to read the data payload into memory with the correct 
+alignment.
+
+ 
+> Detail log info:
+> In code, this log message caught my attention，the log information of these 5 valuse is not expected.
+> 
+> dout(10) << " len " << bl.length() << " -> " << size  << " (head " << head_size << " pre_pad " << h.pre_pad
+>        << " bl " << bl.length() << " post_pad " << post_pad << " tail " << head_size << ")"
+>        << " (bl alignment " << data_align << ")" << dendl;
+> 
+> 2017-10-17 19:50:28.721922 7f21d73fe700 10 journal  len 4196233 -> 4202496 (head 40 pre_pad 2736 bl 4196233 post_pad 3447 tail 40) (bl alignment 2776)
+> 2017-10-17 19:50:28.873261 7f21ccfff700 10 journal  len 4196131 -> 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl alignment 4086)
+> 2017-10-17 19:50:28.897520 7f21d43ff700 10 journal  len 4196131 -> 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl alignment 4086)
+> 2017-10-17 19:50:28.974811 7f21cf800700 10 journal  len 4196131 -> 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl alignment 4086)
+> 2017-10-17 19:50:29.013940 7f21ccfff700 10 journal  len 4196215 -> 4202496 (head 40 pre_pad 2754 bl 4196215 post_pad 3447 tail 40) (bl alignment 2794)
+> 2017-10-17 19:50:29.292165 7f21ce3ff700 10 journal  len 4196215 -> 4202496 (head 40 pre_pad 2754 bl 4196215 post_pad 3447 tail 40) (bl alignment 2794)
+> 2017-10-17 19:50:29.311296 7f21cf800700 10 journal  len 4196233 -> 4202496 (head 40 pre_pad 2736 bl 4196233 post_pad 3447 tail 40) (bl alignment 2776)
+> 2017-10-17 19:50:29.416240 7f21d43ff700 10 journal  len 4196215 -> 4202496 (head 40 pre_pad 2754 bl 4196215 post_pad 3447 tail 40) (bl alignment 2794)
+> 2017-10-17 19:50:30.111561 7f21cc7fe700 10 journal  len 4196131 -> 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl alignment 4086)
+> 2017-10-17 19:50:30.444729 7f21d23ff700 10 journal  len 4196131 -> 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl alignment 4086)
+> 2017-10-17 19:50:30.448686 7f21ccfff700 10 journal  len 4196233 -> 4202496 (head 40 pre_pad 2736 bl 4196233 post_pad 3447 tail 40) (bl alignment 2776)
+> 2017-10-17 19:50:30.559626 7f21d43ff700 10 journal  len 4196131 -> 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl alignment 4086)
+> 2017-10-17 19:50:30.592541 7f21d63fe700 10 journal  len 4196233 -> 4202496 (head 40 pre_pad 2736 bl 4196233 post_pad 3447 tail 40) (bl alignment 2776)
+> 2017-10-17 19:50:30.599527 7f21cb7ff700 10 journal  len 4196215 -> 4202496 (head 40 pre_pad 2754 bl 4196215 post_pad 3447 tail 40) (bl alignment 2794)
+> 2017-10-17 19:50:30.613123 7f21d13ff700 10 journal  len 4196131 -> 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl alignment 4086)
+
+Is this a CephFS workload?
+
+The alignment is confusing because it's aligning to the object offset.  So 
+if you're writing 200 bytes into a file, you're 200 bytes into the first 
+object, and the padding will be something like 200 - header size.
+
+sage
+--8323329-2130847395-1508812327=:16763--
