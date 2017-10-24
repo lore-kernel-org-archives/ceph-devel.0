@@ -1,60 +1,87 @@
-From: Sage Weil <sage@redhat.com>
-Subject: unclean pgs health warning
-Date: Mon, 23 Oct 2017 21:28:51 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1710232118070.4984@piezo.us.to>
+From: Liuhao <liu.haoA@h3c.com>
+Subject: about filestore->journal->rebuild_align
+Date: Tue, 24 Oct 2017 01:53:38 +0000
+Message-ID: <7DF47FD5BC069E4BBD28890C798EC7BC69327620@H3CMLB12-EX.srv.huawei-3com.com>
+References: <7DF47FD5BC069E4BBD28890C798EC7BC693272DE@H3CMLB12-EX.srv.huawei-3com.com>
+ <7DF47FD5BC069E4BBD28890C798EC7BC69327315@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60298 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751524AbdJWV2x (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 23 Oct 2017 17:28:53 -0400
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id DFB97C04B94A
-        for <ceph-devel@vger.kernel.org>; Mon, 23 Oct 2017 21:28:52 +0000 (UTC)
+Received: from smtp.h3c.com ([60.191.123.56]:19487 "EHLO h3cmg01-ex.h3c.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751226AbdJXBxs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 23 Oct 2017 21:53:48 -0400
+In-Reply-To: <7DF47FD5BC069E4BBD28890C798EC7BC69327315@H3CMLB12-EX.srv.huawei-3com.com>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: jspray@redhat.com
+To: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
 
-I'm frustrated by health output like this:
-
-    id:     98463a16-36f5-4a1e-a232-64f4e987b5a2
-    health: HEALTH_WARN
-            16671/54990 objects misplaced (30.316%)
-            Degraded data redundancy: 8 pgs unclean
-...
-    pgs:     16671/54990 objects misplaced (30.316%)
-             6 active+remapped+backfill_wait
-             2 active+remapped+backfilling
-
-The PGs are 'unclean' because they don't have the 'clean' flag.  But they 
-aren't degraded; just misplaced, and we already report that in the 
-misplaced health message.
-
-I tried changing it to a different health message:
-
-    health: HEALTH_WARN
-            14948/54990 objects misplaced (27.183%)
-            Unclean state: 7 pgs unclean
-...
-    pgs:     14948/54990 objects misplaced (27.183%)
-             6 active+remapped+backfill_wait
-             1 active+remapped+backfilling
-             1 active+clean
-
-...but that looks like it'd be just as confusing to an administrator.  
-(What does "unclean" mean?  What do I do about it?)
-
-Perhaps we should just ignore the 'clean' state?  I'm having a hard time 
-coming up with a reason the PG would be unclean that isn't reflected by 
-another message.  I think the only example I can come up with is the 
-permanently 'remapped' state.. but even there we set 'clean'.
-
-Can we just drop it?
-
-	https://github.com/ceph/ceph/pull/18493	
-
-sage
+SGksIGxpc3RlcjoNCkkgdXNlIGNlcGjigJl2ZXJzaW9uIDEwLjIuMA0KDQpBbmFseXNpcyBGaWxl
+Sm91cm5hbDo6cHJlcGFyZV9lbnRyee+8jHdoZW4gcHJlcGFyZSBqb3VybmFsIGJ1ZmZlcmxpc3Tv
+vIxpdOKAmXMgZGl2aWRlZCBpbnRvIDUgcGFydHPvvJpoZWFkwqAgcHJlX3BhZMKgIGRhdGHCoCBw
+b3N0X3BhZMKgIGhlYWQNClRoZW4gcmV1aWxkIGZvciBidWZmZXIgbGlzdCB0byA0SyBhbGlnbuOA
+gnJlYnVpbGRfYWxpZ25lZCByZW1hbGxvYyA0SyBhbGlnbmVkIG1lbW9yeeOAgu+8iGVhY2ggNEsg
+YWxpZ25lZCBtZW1vcnkgaXMgYXMgc21hbGwgYXMgcG9zc2libGXvvIkNCg0KRGV0YWlsZWQgY29k
+Ze+8mg0KRmlsZUpvdXJuYWw6OnByZXBhcmVfZW50cnkodmVjdG9yPE9iamVjdFN0b3JlOjpUcmFu
+c2FjdGlvbj4mIHRscywgYnVmZmVybGlzdCogdGJsKQ0KwqDCoMKgwqDCoMKgwqDCoCBFbmNvZGUg
+Zm9yIHRyYW5zYWN0aW9uwqAgOjplbmNvZGUoKnAsIGJsKTsNCuOAgOOAgGVibC5hcHBlbmQoKGNv
+bnN0IGNoYXIqKSZoLCBzaXplb2YoaCkpOw0K44CA44CAZWJsLnB1c2hfYmFjayhidWZmZXI6OmNy
+ZWF0ZV9zdGF0aWMoaC5wcmVfcGFkLCB6ZXJvX2J1ZikpOw0K44CA44CAZWJsLmNsYWltX2FwcGVu
+ZChibCwgYnVmZmVyOjpsaXN0OjpDTEFJTV9BTExPV19OT05TSEFSRUFCTEUpOyAvLyBwb3RlbnRp
+YWwgemVyby1jb3B5DQrjgIDjgIBlYmwucHVzaF9iYWNrKGJ1ZmZlcjo6Y3JlYXRlX3N0YXRpYyho
+LnBvc3RfcGFkLCB6ZXJvX2J1ZikpOw0K44CA44CAZWJsLmFwcGVuZCgoY29uc3QgY2hhciopJmgs
+IHNpemVvZihoKSk7DQrjgIDjgIByZXQgPSBlYmwucmVidWlsZF9hbGlnbmVkKENFUEhfRElSRUNU
+SU9fQUxJR05NRU5UKTsNCuOAgOOAgA0KcXVlc3Rpb246DQpiZWZvcmUgcmVidWlsZF9hbGlnbmVk
+77yMYXMgbWFueSBwdHIgaXMgYWxpZ25lZCBhcyA0S++8jHNvIHlvdSBjYW4gYXBwbHkgbGVzcyBt
+ZW1vcnkuaXMgaXQ/DQpoZWFkIDQwIHByZV9wYWQgMjczNiBibCA0MTk2MjMzIHBvc3RfcGFkIDM0
+NDcgdGFpbCA0MMKgIHRvdGFsOjRLKjEwMjYNCnJlYnVpbGRfYWxpZ25lZCB3aWxsIHJlbWFsbG9j
+IG1lbW9yeSA0SyoxMDI2LCBhbGwgbmVlZCByZWJ1aWxkDQoNCkRldGFpbCBsb2cgaW5mbzoNCklu
+IGNvZGUsIHRoaXMgbG9nIG1lc3NhZ2UgY2F1Z2h0IG15IGF0dGVudGlvbu+8jHRoZSBsb2cgaW5m
+b3JtYXRpb24gb2YgdGhlc2UgNSB2YWx1c2UgaXMgbm90IGV4cGVjdGVkLg0KDQpkb3V0KDEwKSA8
+PCAiIGxlbiAiIDw8IGJsLmxlbmd0aCgpIDw8ICIgLT4gIiA8PCBzaXplwqAgPDwgIiAoaGVhZCAi
+IDw8IGhlYWRfc2l6ZSA8PCAiIHByZV9wYWQgIiA8PCBoLnByZV9wYWQNCsKgwqDCoMKgwqDCoCA8
+PCAiIGJsICIgPDwgYmwubGVuZ3RoKCkgPDwgIiBwb3N0X3BhZCAiIDw8IHBvc3RfcGFkIDw8ICIg
+dGFpbCAiIDw8IGhlYWRfc2l6ZSA8PCAiKSINCsKgwqDCoMKgwqDCoCA8PCAiIChibCBhbGlnbm1l
+bnQgIiA8PCBkYXRhX2FsaWduIDw8ICIpIiA8PCBkZW5kbDsNCg0KMjAxNy0xMC0xNyAxOTo1MDoy
+OC43MjE5MjIgN2YyMWQ3M2ZlNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIzMyAtPiA0MjAyNDk2
+IChoZWFkIDQwIHByZV9wYWQgMjczNiBibCA0MTk2MjMzIHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkg
+KGJsIGFsaWdubWVudCAyNzc2KQ0KMjAxNy0xMC0xNyAxOTo1MDoyOC44NzMyNjEgN2YyMWNjZmZm
+NzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQg
+NDA0NiBibCA0MTk2MTMxIHBvc3RfcGFkIDIyMzkgdGFpbCA0MCkgKGJsIGFsaWdubWVudCA0MDg2
+KQ0KMjAxNy0xMC0xNyAxOTo1MDoyOC44OTc1MjAgN2YyMWQ0M2ZmNzAwIDEwIGpvdXJuYWzCoCBs
+ZW4gNDE5NjEzMSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgNDA0NiBibCA0MTk2MTMxIHBv
+c3RfcGFkIDIyMzkgdGFpbCA0MCkgKGJsIGFsaWdubWVudCA0MDg2KQ0KMjAxNy0xMC0xNyAxOTo1
+MDoyOC45NzQ4MTEgN2YyMWNmODAwNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAtPiA0MjAy
+NDk2IChoZWFkIDQwIHByZV9wYWQgNDA0NiBibCA0MTk2MTMxIHBvc3RfcGFkIDIyMzkgdGFpbCA0
+MCkgKGJsIGFsaWdubWVudCA0MDg2KQ0KMjAxNy0xMC0xNyAxOTo1MDoyOS4wMTM5NDAgN2YyMWNj
+ZmZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIxNSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9w
+YWQgMjc1NCBibCA0MTk2MjE1IHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkgKGJsIGFsaWdubWVudCAy
+Nzk0KQ0KMjAxNy0xMC0xNyAxOTo1MDoyOS4yOTIxNjUgN2YyMWNlM2ZmNzAwIDEwIGpvdXJuYWzC
+oCBsZW4gNDE5NjIxNSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgMjc1NCBibCA0MTk2MjE1
+IHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkgKGJsIGFsaWdubWVudCAyNzk0KQ0KMjAxNy0xMC0xNyAx
+OTo1MDoyOS4zMTEyOTYgN2YyMWNmODAwNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIzMyAtPiA0
+MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgMjczNiBibCA0MTk2MjMzIHBvc3RfcGFkIDM0NDcgdGFp
+bCA0MCkgKGJsIGFsaWdubWVudCAyNzc2KQ0KMjAxNy0xMC0xNyAxOTo1MDoyOS40MTYyNDAgN2Yy
+MWQ0M2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIxNSAtPiA0MjAyNDk2IChoZWFkIDQwIHBy
+ZV9wYWQgMjc1NCBibCA0MTk2MjE1IHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkgKGJsIGFsaWdubWVu
+dCAyNzk0KQ0KMjAxNy0xMC0xNyAxOTo1MDozMC4xMTE1NjEgN2YyMWNjN2ZlNzAwIDEwIGpvdXJu
+YWzCoCBsZW4gNDE5NjEzMSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgNDA0NiBibCA0MTk2
+MTMxIHBvc3RfcGFkIDIyMzkgdGFpbCA0MCkgKGJsIGFsaWdubWVudCA0MDg2KQ0KMjAxNy0xMC0x
+NyAxOTo1MDozMC40NDQ3MjkgN2YyMWQyM2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAt
+PiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgNDA0NiBibCA0MTk2MTMxIHBvc3RfcGFkIDIyMzkg
+dGFpbCA0MCkgKGJsIGFsaWdubWVudCA0MDg2KQ0KMjAxNy0xMC0xNyAxOTo1MDozMC40NDg2ODYg
+N2YyMWNjZmZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIzMyAtPiA0MjAyNDk2IChoZWFkIDQw
+IHByZV9wYWQgMjczNiBibCA0MTk2MjMzIHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkgKGJsIGFsaWdu
+bWVudCAyNzc2KQ0KMjAxNy0xMC0xNyAxOTo1MDozMC41NTk2MjYgN2YyMWQ0M2ZmNzAwIDEwIGpv
+dXJuYWzCoCBsZW4gNDE5NjEzMSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgNDA0NiBibCA0
+MTk2MTMxIHBvc3RfcGFkIDIyMzkgdGFpbCA0MCkgKGJsIGFsaWdubWVudCA0MDg2KQ0KMjAxNy0x
+MC0xNyAxOTo1MDozMC41OTI1NDEgN2YyMWQ2M2ZlNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIz
+MyAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgMjczNiBibCA0MTk2MjMzIHBvc3RfcGFkIDM0
+NDcgdGFpbCA0MCkgKGJsIGFsaWdubWVudCAyNzc2KQ0KMjAxNy0xMC0xNyAxOTo1MDozMC41OTk1
+MjcgN2YyMWNiN2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIxNSAtPiA0MjAyNDk2IChoZWFk
+IDQwIHByZV9wYWQgMjc1NCBibCA0MTk2MjE1IHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkgKGJsIGFs
+aWdubWVudCAyNzk0KQ0KMjAxNy0xMC0xNyAxOTo1MDozMC42MTMxMjMgN2YyMWQxM2ZmNzAwIDEw
+IGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAtPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgNDA0NiBi
+bCA0MTk2MTMxIHBvc3RfcGFkIDIyMzkgdGFpbCA0MCkgKGJsIGFsaWdubWVudCA0MDg2KQ0KDQo=
