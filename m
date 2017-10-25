@@ -1,60 +1,37 @@
-From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: rbd rm snap on image with exclusive lock
-Date: Wed, 25 Oct 2017 09:30:33 -0400
-Message-ID: <CA+aFP1DHuYzsrsvoowukkGWGowe1P06vyYSk2oqRjXqkRtstjg@mail.gmail.com>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
+Subject: Re: [ceph-users] rbd rm snap on image with exclusive lock
+Date: Wed, 25 Oct 2017 15:54:21 +0200
+Message-ID: <b1b7b3c9-679d-5371-5fe5-320348da7cec@corp.ovh.com>
 References: <6a5fdefb-cd9e-8a29-b668-945312e9827f@corp.ovh.com>
  <CA+aFP1BA-PvFSeJTYbJYmz1guee+N7CvM0E8p_h0pbP=4dO+4g@mail.gmail.com>
  <49a2cf70-fb3b-45bb-fa36-283c4a6bc310@corp.ovh.com>
-Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+ <CA+aFP1DHuYzsrsvoowukkGWGowe1P06vyYSk2oqRjXqkRtstjg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <49a2cf70-fb3b-45bb-fa36-283c4a6bc310-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from 2.mo302.mail-out.ovh.net ([137.74.110.75]:48406 "EHLO
+        2.mo302.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750765AbdJYNyY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Oct 2017 09:54:24 -0400
+In-Reply-To: <CA+aFP1DHuYzsrsvoowukkGWGowe1P06vyYSk2oqRjXqkRtstjg@mail.gmail.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: dillaman@redhat.com
+Cc: ceph-users <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-SG1tLCBoYXJkIHRvIHNheSBvZmYgdGhlIHRvcCBvZiBteSBoZWFkLiBJZiB5b3UgY291bGQgZW5h
-YmxlICJkZWJ1ZwpsaWJyYmQgPSAyMCIgbG9nZ2luZyBvbiB0aGUgYnVnZ3kgY2xpZW50IHRoYXQg
-b3ducyB0aGUgbG9jaywgY3JlYXRlIGEKbmV3IHNuYXBzaG90LCBhbmQgYXR0ZW1wdCB0byBkZWxl
-dGUgaXQsIGl0IHdvdWxkIGJlIGludGVyZXN0aW5nIHRvCnZlcmlmeSB0aGF0IHRoZSBpbWFnZSBp
-cyBiZWluZyBwcm9wZXJseSByZWZyZXNoZWQuCgpPbiBXZWQsIE9jdCAyNSwgMjAxNyBhdCA5OjIz
-IEFNLCBQaW90ciBEYcWCZWsgPHBpb3RyLmRhbGVrQGNvcnAub3ZoLmNvbT4gd3JvdGU6Cj4gT24g
-MTctMTAtMjUgMDI6MzkgUE0sIEphc29uIERpbGxhbWFuIHdyb3RlOgo+Pgo+PiBUaGF0IGxvZyBp
-cyBzaG93aW5nIHRoYXQgYSBzbmFwIHJlbW92ZSByZXF1ZXN0IHdhcyBtYWRlIGZyb20gYSBjbGll
-bnQKPj4gdGhhdCBjb3VsZG4ndCBhY3F1aXJlIHRoZSBsb2NrIHRvIGEgY2xpZW50IHRoYXQgY3Vy
-cmVudGx5IG93bnMgdGhlCj4+IGxvY2suIFRoZSBjbGllbnQgdGhhdCBjdXJyZW50bHkgb3ducyB0
-aGUgbG9jayByZXNwb25kZWQgdy8gYW4gLUVOT0VOVAo+PiBlcnJvciB0aGF0IHRoZSBzbmFwc2hv
-dCBkb2Vzbid0IGV4aXN0LiBEZXBlbmRpbmcgb24gdGhlIG1haW50ZW5hbmNlCj4+IG9wZXJhdGlv
-biByZXF1ZXN0ZWQsIGRpZmZlcmVudCBlcnJvcnMgY29kZXMgYXJlIGZpbHRlcmVkIG91dCB0byBo
-YW5kbGUKPj4gdGhlIGNhc2Ugd2hlcmUgQ2VwaCBkb3VibGUgKG9yIG1vcmUpIGRlbGl2ZXJzIHRo
-ZSByZXF1ZXN0IG1lc3NhZ2UgdG8KPj4gdGhlIGxvY2sgb3duZXIuIE5vcm1hbGx5IHRoaXMgaXNu
-J3QgYW4gaXNzdWUgc2luY2UgdGhlIGxvY2FsIGNsaWVudAo+PiBwcmUtY2hlY2tzIHRoZSBpbWFn
-ZSBzdGF0ZSBiZWZvcmUgc2VuZGluZyB0aGUgUlBDIG1lc3NhZ2UgKGkuZS4gc25hcAo+PiByZW1v
-dmUgd2lsbCBmaXJzdCBsb2NhbGx5IGVuc3VyZSB0aGUgc25hcCBleGlzdHMgYW5kIHJlc3BvbmQg
-dy8KPj4gLUVOT0VOVCBpZiBpdCBkb2Vzbid0KS4KPj4KPj4gVGhlcmVmb3JlLCBpbiB0aGlzIGNh
-c2UsIHRoZSBxdWVzdGlvbiBpcyB3aG8gaXMgdGhpcyByb2d1ZSBjbGllbnQgdGhhdAo+PiBzdGls
-bCBvd25zIHRoZSBsb2NrIGFuZCBpcyByZXNwb25kaW5nIHRoZSBhIHNuYXAgcmVtb3ZlIHJlcXVl
-c3QgYnV0Cj4+IGhhc24ndCByZWZyZXNoZWQgaXRzIHN0YXRlIHRvIGtub3cgdGhhdCB0aGUgc25h
-cHNob3QgZXhpc3RzLgo+Cj4KPiBUaGFua3MsIHRoYXQgbWFrZXMgdGhpbmdzIGNsZWFyLgo+Cj4g
-U2VlbXMgbGlrZSB3ZSBoYXZlIHNvbWUgQ2luZGVycyB1dGlsaXppbmcgSW5mZXJuYWxpcyAoOS4y
-LjEpIGxpYnJiZC4gQXJlIHlvdQo+IGF3YXJlIG9mIGFueSBidWdzIGluIDkuMi54IHRoYXQgY291
-bGQgY2F1c2Ugc3VjaCBiZWhhdmlvcj8gV2UndmUgc2VlbiB0aGF0Cj4gZm9yIHRoZSBmaXJzdCB0
-aW1lLi4uCj4KPiAtLQo+IFBpb3RyIERhxYJlawo+IHBpb3RyLmRhbGVrQGNvcnAub3ZoLmNvbQo+
-IGh0dHBzOi8vd3d3Lm92aC5jb20vdXMvCj4gLS0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMg
-bGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgY2VwaC1kZXZlbCIgaW4KPiB0aGUgYm9k
-eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+IE1vcmUgbWFqb3Jk
-b21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAoK
-CgotLSAKSmFzb24KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X18KY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRw
-Oi8vbGlzdHMuY2VwaC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
+On 17-10-25 03:30 PM, Jason Dillaman wrote:
+> Hmm, hard to say off the top of my head. If you could enable "debug
+> librbd = 20" logging on the buggy client that owns the lock, create a
+> new snapshot, and attempt to delete it, it would be interesting to
+> verify that the image is being properly refreshed.
+
+I'd love to, but that would require us to restart that client - not an 
+option. We'll try to reproduce this somehow anyway and let you know if 
+something interesting shows up.
+
+-- 
+Piotr Dałek
+piotr.dalek@corp.ovh.com
+https://www.ovh.com/us/
