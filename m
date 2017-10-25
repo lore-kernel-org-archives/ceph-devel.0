@@ -1,60 +1,177 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: about "osd: stateful health warnings: mgr->mon"
-Date: Wed, 25 Oct 2017 17:29:08 +0800
-Message-ID: <CAJE9aOPYDJs1rXUqUMFZx_QKTk2s-fST6pKijvk+19zNis6Vow@mail.gmail.com>
+From: Wei Jin <wjin.cn@gmail.com>
+Subject: Re: pg inconsistent and repair doesn't work
+Date: Wed, 25 Oct 2017 18:15:32 +0800
+Message-ID: <CAPpSHbW-TFsBiJHqmicTORAN4sqMWH9UkdVFD5oY7eZw65qkbQ@mail.gmail.com>
+References: <CAPpSHbWxLApYjY-McF6UXOku9ABKoeNR1ru5U6=xHhGWgrL=bw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f45.google.com ([209.85.218.45]:49357 "EHLO
-        mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932419AbdJYJ3J (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Oct 2017 05:29:09 -0400
-Received: by mail-oi0-f45.google.com with SMTP id w197so41897465oif.6
-        for <ceph-devel@vger.kernel.org>; Wed, 25 Oct 2017 02:29:09 -0700 (PDT)
+Received: from mail-wr0-f176.google.com ([209.85.128.176]:56328 "EHLO
+        mail-wr0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932332AbdJYKPe (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Oct 2017 06:15:34 -0400
+Received: by mail-wr0-f176.google.com with SMTP id r79so23450951wrb.13
+        for <ceph-devel@vger.kernel.org>; Wed, 25 Oct 2017 03:15:33 -0700 (PDT)
+In-Reply-To: <CAPpSHbWxLApYjY-McF6UXOku9ABKoeNR1ru5U6=xHhGWgrL=bw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>, Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users@lists.ceph.com
 
-hi John and Sage,
+I found it is similar to bug: http://tracker.ceph.com/issues/21388.
+And fix it by rados command.
 
-as you know, i am working on [1]. but slow-requests alert are pretty
-much a list of strings, in which the first one is a summary, and the
-following ones are the details: like
+The pg inconsistent info is like following=EF=BC=8Cwish it could be fixed i=
+n the future.
 
-- 1 slow requests, 1 included below; oldest blocked for > 30.005692 secs
-- slow request 30.005692 seconds old, received at {date-time}:
-osd_op(client.4240.0:8 benchmark_data_ceph-1_39426_object7 [write
-0~4194304] 0.69848840) v4 currently waiting for subops from [610]
+root@n10-075-019:/var/lib/ceph/osd/ceph-27/current/1.fcd_head# rados
+list-inconsistent-obj 1.fcd --format=3Djson-pretty
+{
+    "epoch": 2373,
+    "inconsistents": [
+        {
+            "object": {
+                "name": "1000003528d.00000058",
+                "nspace": "fsvolumens_87c46348-9869-11e7-8525-3497f65a8415"=
+,
+                "locator": "",
+                "snap": "head",
+                "version": 147490
+            },
+            "errors": [],
+            "union_shard_errors": [
+                "size_mismatch_oi"
+            ],
+            "selected_object_info":
+"1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.00=
+000058:head(2401'147490
+client.901549.1:33749 dirty|omap_digest s 3461120 uv 147490 od
+ffffffff alloc_hint [0 0])",
+            "shards": [
+                {
+                    "osd": 27,
+                    "errors": [
+                        "size_mismatch_oi"
+                    ],
+                    "size": 0,
+                    "omap_digest": "0xffffffff",
+                    "data_digest": "0xffffffff"
+                },
+                {
+                    "osd": 62,
+                    "errors": [
+                        "size_mismatch_oi"
+                    ],
+                    "size": 0,
+                    "omap_digest": "0xffffffff",
+                    "data_digest": "0xffffffff"
+                },
+                {
+                    "osd": 133,
+                    "errors": [
+                        "size_mismatch_oi"
+                    ],
+                    "size": 0,
+                    "omap_digest": "0xffffffff",
+                    "data_digest": "0xffffffff"
+                }
+            ]
+        }
+    ]
+}
 
-this fits well into a health_check_t struct. and we can add a field in
-MMgrReport, and send it to mgr periodically. but at the mgr side, it
-is supposed to compose a single std::map<string, health_check_t> in
-MMonMgrReport, and send it to monitor.
-
-if we put all slow requests from all osds into this map with the key
-like "OSD_SLOW_OPS/${osd_id}". the monstore will be loaded by a slow
-cluster, and the "health" section of "ceph status" will be flooded
-with the slow requests. or we can just collect all the slow request
-details into a single bucket of "OSD_SLOW_OPS".
-
-but if we just send the summaries from OSDs as the
-"health_check_t::detail" with the alert code of "OSD_SLOW_OPS". all
-the details are practically stripped off. and the total *number* of
-slow requests can be found nowhere unless the user parses the summary
-lines, and sum it up manually.
-
-we could refactor the OpTracker::check_ops_in_flight() so it returns
-an array of info describing slow requests instead of a list of
-human-readable strings. but we still need to face this problem of
-level-of-details.
-
-any thoughts?
-
-
----
-https://trello.com/c/8f9y0YM6/51-osd-stateful-health-warnings-to-mgr-mon-eg-slow-requests
-
-
--- 
-Regards
-Kefu Chai
+On Wed, Oct 25, 2017 at 12:05 PM, Wei Jin <wjin.cn@gmail.com> wrote:
+> Hi, list,
+>
+> We ran into pg deep scrub error. And we tried to repair it by `ceph pg
+> repair pgid`. But it didn't work. We also verified object files,  and
+> found both 3 replicas were zero size. What's the problem, whether it
+> is a bug? And how to fix the inconsistent? I haven't restarted the
+> osds so far as I am not sure whether it works.
+>
+> ceph version: 10.2.9
+> user case: cephfs
+> kernel client: 4.4/4.9
+>
+> Error info from primary osd:
+>
+> root@n10-075-019:~# grep -Hn 'ERR' /var/log/ceph/ceph-osd.27.log.1
+> /var/log/ceph/ceph-osd.27.log.1:3038:2017-10-25 04:47:34.460536
+> 7f39c4829700 -1 log_channel(cluster) log [ERR] : 1.fcd shard 27: soid
+> 1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.0=
+0000058:head
+> size 0 !=3D size 3461120 from auth oi
+> 1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.0=
+0000058:head(2401'147490
+> client.901549.1:33749 dirty|omap_digest s 3461120 uv 147490 od
+> ffffffff alloc_hint [0 0])
+> /var/log/ceph/ceph-osd.27.log.1:3039:2017-10-25 04:47:34.460722
+> 7f39c4829700 -1 log_channel(cluster) log [ERR] : 1.fcd shard 62: soid
+> 1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.0=
+0000058:head
+> size 0 !=3D size 3461120 from auth oi
+> 1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.0=
+0000058:head(2401'147490
+> client.901549.1:33749 dirty|omap_digest s 3461120 uv 147490 od
+> ffffffff alloc_hint [0 0])
+> /var/log/ceph/ceph-osd.27.log.1:3040:2017-10-25 04:47:34.460725
+> 7f39c4829700 -1 log_channel(cluster) log [ERR] : 1.fcd shard 133: soid
+> 1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.0=
+0000058:head
+> size 0 !=3D size 3461120 from auth oi
+> 1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.0=
+0000058:head(2401'147490
+> client.901549.1:33749 dirty|omap_digest s 3461120 uv 147490 od
+> ffffffff alloc_hint [0 0])
+> /var/log/ceph/ceph-osd.27.log.1:3041:2017-10-25 04:47:34.460800
+> 7f39c4829700 -1 log_channel(cluster) log [ERR] : 1.fcd soid
+> 1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.0=
+0000058:head:
+> failed to pick suitable auth object
+> /var/log/ceph/ceph-osd.27.log.1:3042:2017-10-25 04:47:34.461458
+> 7f39c4829700 -1 log_channel(cluster) log [ERR] : deep-scrub 1.fcd
+> 1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.0=
+0000058:head
+> on disk size (0) does not match object info size (3461120) adjusted
+> for ondisk to (3461120)
+> /var/log/ceph/ceph-osd.27.log.1:3043:2017-10-25 04:47:44.645934
+> 7f39c4829700 -1 log_channel(cluster) log [ERR] : 1.fcd deep-scrub 4
+> errors
+>
+>
+> Object file info:
+>
+> root@n10-075-019:/var/lib/ceph/osd/ceph-27/current/1.fcd_head# find .
+> -name "1000003528d.00000058__head_12086FCD*"
+> ./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD_fsvol=
+umens\u87c46348-9869-11e7-8525-3497f65a8415_1
+> root@n10-075-019:/var/lib/ceph/osd/ceph-27/current/1.fcd_head# ls -al
+> ./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD*
+> -rw-r--r-- 1 ceph ceph 0 Oct 24 22:04
+> ./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD_fsvol=
+umens\u87c46348-9869-11e7-8525-3497f65a8415_1
+> root@n10-075-019:/var/lib/ceph/osd/ceph-27/current/1.fcd_head#
+>
+>
+> root@n10-075-028:/var/lib/ceph/osd/ceph-62/current/1.fcd_head# find .
+> -name "1000003528d.00000058__head_12086FCD*"
+> ./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD_fsvol=
+umens\u87c46348-9869-11e7-8525-3497f65a8415_1
+> root@n10-075-028:/var/lib/ceph/osd/ceph-62/current/1.fcd_head# ls -al
+> ./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD*
+> -rw-r--r-- 1 ceph ceph 0 Oct 24 22:04
+> ./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD_fsvol=
+umens\u87c46348-9869-11e7-8525-3497f65a8415_1
+> root@n10-075-028:/var/lib/ceph/osd/ceph-62/current/1.fcd_head#
+>
+>
+> root@n10-075-040:/var/lib/ceph/osd/ceph-133/current/1.fcd_head# find .
+> -name "1000003528d.00000058__head_12086FCD*"
+> ./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD_fsvol=
+umens\u87c46348-9869-11e7-8525-3497f65a8415_1
+> root@n10-075-040:/var/lib/ceph/osd/ceph-133/current/1.fcd_head# ls -al
+> ./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD*
+> -rw-r--r-- 1 ceph ceph 0 Oct 24 22:04
+> ./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD_fsvol=
+umens\u87c46348-9869-11e7-8525-3497f65a8415_1
+> root@n10-075-040:/var/lib/ceph/osd/ceph-133/current/1.fcd_head#
