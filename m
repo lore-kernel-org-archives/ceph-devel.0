@@ -1,46 +1,89 @@
-From: Jason Dillaman <jdillama-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: rbd rm snap on image with exclusive lock
-Date: Wed, 25 Oct 2017 09:56:13 -0400
-Message-ID: <CA+aFP1A11JTpZF8e2EreZhvX7U5wGvTZqHdRerg0gkC+jpZmMQ@mail.gmail.com>
-References: <6a5fdefb-cd9e-8a29-b668-945312e9827f@corp.ovh.com>
- <CA+aFP1BA-PvFSeJTYbJYmz1guee+N7CvM0E8p_h0pbP=4dO+4g@mail.gmail.com>
- <49a2cf70-fb3b-45bb-fa36-283c4a6bc310@corp.ovh.com>
- <CA+aFP1DHuYzsrsvoowukkGWGowe1P06vyYSk2oqRjXqkRtstjg@mail.gmail.com>
- <b1b7b3c9-679d-5371-5fe5-320348da7cec@corp.ovh.com>
-Reply-To: dillaman-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: John Spray <jspray@redhat.com>
+Subject: Re: about "osd: stateful health warnings: mgr->mon"
+Date: Wed, 25 Oct 2017 16:04:02 +0200
+Message-ID: <CALe9h7dYP8LDu47cToaTctkCc_VpRrXDokXx6AefeFn=yWZkow@mail.gmail.com>
+References: <CAJE9aOPYDJs1rXUqUMFZx_QKTk2s-fST6pKijvk+19zNis6Vow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <b1b7b3c9-679d-5371-5fe5-320348da7cec-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
-Cc: ceph-users <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:48775 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932290AbdJYOEY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Oct 2017 10:04:24 -0400
+Received: by mail-wm0-f41.google.com with SMTP id p75so2125766wmg.3
+        for <ceph-devel@vger.kernel.org>; Wed, 25 Oct 2017 07:04:23 -0700 (PDT)
+In-Reply-To: <CAJE9aOPYDJs1rXUqUMFZx_QKTk2s-fST6pKijvk+19zNis6Vow@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-VGhhbmtzIC0tIGxldCBtZSBrbm93LiBJbiB0aGUgZnV0dXJlLCB5b3UgbWF5IHdhbnQgdG8gY29u
-c2lkZXIgaGF2aW5nCmxpYnJiZCBjcmVhdGUgYW4gYWRtaW4gc29ja2V0IHNvIHRoYXQgeW91IGNh
-biBjaGFuZ2UgKGNlcnRhaW4pCnNldHRpbmdzIG9yIGludGVyYWN0IHcvIHRoZSBwcm9jZXNzIHcv
-byByZXN0YXJ0aW5nIGl0LgoKT24gV2VkLCBPY3QgMjUsIDIwMTcgYXQgOTo1NCBBTSwgUGlvdHIg
-RGHFgmVrIDxwaW90ci5kYWxla0Bjb3JwLm92aC5jb20+IHdyb3RlOgo+IE9uIDE3LTEwLTI1IDAz
-OjMwIFBNLCBKYXNvbiBEaWxsYW1hbiB3cm90ZToKPj4KPj4gSG1tLCBoYXJkIHRvIHNheSBvZmYg
-dGhlIHRvcCBvZiBteSBoZWFkLiBJZiB5b3UgY291bGQgZW5hYmxlICJkZWJ1Zwo+PiBsaWJyYmQg
-PSAyMCIgbG9nZ2luZyBvbiB0aGUgYnVnZ3kgY2xpZW50IHRoYXQgb3ducyB0aGUgbG9jaywgY3Jl
-YXRlIGEKPj4gbmV3IHNuYXBzaG90LCBhbmQgYXR0ZW1wdCB0byBkZWxldGUgaXQsIGl0IHdvdWxk
-IGJlIGludGVyZXN0aW5nIHRvCj4+IHZlcmlmeSB0aGF0IHRoZSBpbWFnZSBpcyBiZWluZyBwcm9w
-ZXJseSByZWZyZXNoZWQuCj4KPgo+IEknZCBsb3ZlIHRvLCBidXQgdGhhdCB3b3VsZCByZXF1aXJl
-IHVzIHRvIHJlc3RhcnQgdGhhdCBjbGllbnQgLSBub3QgYW4KPiBvcHRpb24uIFdlJ2xsIHRyeSB0
-byByZXByb2R1Y2UgdGhpcyBzb21laG93IGFueXdheSBhbmQgbGV0IHlvdSBrbm93IGlmCj4gc29t
-ZXRoaW5nIGludGVyZXN0aW5nIHNob3dzIHVwLgo+Cj4KPiAtLQo+IFBpb3RyIERhxYJlawo+IHBp
-b3RyLmRhbGVrQGNvcnAub3ZoLmNvbQo+IGh0dHBzOi8vd3d3Lm92aC5jb20vdXMvCgoKCi0tIApK
-YXNvbgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpjZXBo
-LXVzZXJzIG1haWxpbmcgbGlzdApjZXBoLXVzZXJzQGxpc3RzLmNlcGguY29tCmh0dHA6Ly9saXN0
-cy5jZXBoLmNvbS9saXN0aW5mby5jZ2kvY2VwaC11c2Vycy1jZXBoLmNvbQo=
+On Wed, Oct 25, 2017 at 11:29 AM, kefu chai <tchaikov@gmail.com> wrote:
+> hi John and Sage,
+>
+> as you know, i am working on [1]. but slow-requests alert are pretty
+> much a list of strings, in which the first one is a summary, and the
+> following ones are the details: like
+>
+> - 1 slow requests, 1 included below; oldest blocked for > 30.005692 secs
+> - slow request 30.005692 seconds old, received at {date-time}:
+> osd_op(client.4240.0:8 benchmark_data_ceph-1_39426_object7 [write
+> 0~4194304] 0.69848840) v4 currently waiting for subops from [610]
+>
+> this fits well into a health_check_t struct. and we can add a field in
+> MMgrReport, and send it to mgr periodically. but at the mgr side, it
+> is supposed to compose a single std::map<string, health_check_t> in
+> MMonMgrReport, and send it to monitor.
+>
+> if we put all slow requests from all osds into this map with the key
+> like "OSD_SLOW_OPS/${osd_id}". the monstore will be loaded by a slow
+> cluster, and the "health" section of "ceph status" will be flooded
+> with the slow requests. or we can just collect all the slow request
+> details into a single bucket of "OSD_SLOW_OPS".
+
+The original MDS health items go into a separate store
+(MDS_HEALTHPREFIX in MDSMonitor.cc), with a separate structure for
+each MDS.  However, since the new encode_health stuff in Luminous,
+we're also writing all of those to one data structure in
+MDSMonitor::encode_health.  So I guess we have exactly the same issue
+there as we would for multiple OSD_SLOW_OPS/${osd_id} buckets.
+
+This is perhaps an unacceptable load on the mon in any case, as those
+OSD detail messages will keep changing and we'll end up writing
+O(N_osds)-sized health objects continuously.  We probably need to make
+sure that the *persisted* part only contains the slowly-changing
+summary (the boolean of whether each OSD has slow ops), and then have
+the detail of it be only an in-memory somehow.
+
+Would it be terrible to just expect the user to go do a "ceph tell
+osd.<id> ..." command to find out about the detail of slow requests?
+We could also retain the existing OSD slow request log messages (at
+DEBUG severity) so that it is possible for them to find out some
+information retroactively too.
+
+John
+
+> but if we just send the summaries from OSDs as the
+> "health_check_t::detail" with the alert code of "OSD_SLOW_OPS". all
+> the details are practically stripped off. and the total *number* of
+> slow requests can be found nowhere unless the user parses the summary
+> lines, and sum it up manually.
+>
+> we could refactor the OpTracker::check_ops_in_flight() so it returns
+> an array of info describing slow requests instead of a list of
+> human-readable strings. but we still need to face this problem of
+> level-of-details.
+>
+> any thoughts?
+
+
+
+>
+>
+> ---
+> https://trello.com/c/8f9y0YM6/51-osd-stateful-health-warnings-to-mgr-mon-eg-slow-requests
+>
+>
+> --
+> Regards
+> Kefu Chai
