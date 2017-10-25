@@ -1,97 +1,133 @@
-From: Wei Jin <wjin.cn@gmail.com>
-Subject: pg inconsistent and repair doesn't work
-Date: Wed, 25 Oct 2017 12:05:59 +0800
-Message-ID: <CAPpSHbWxLApYjY-McF6UXOku9ABKoeNR1ru5U6=xHhGWgrL=bw@mail.gmail.com>
+From: Liuhao <liu.haoA@h3c.com>
+Subject: reply: about filestore->journal->rebuild_align
+Date: Wed, 25 Oct 2017 05:06:01 +0000
+Message-ID: <7DF47FD5BC069E4BBD28890C798EC7BC6932785A@H3CMLB12-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:50884 "EHLO
-        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750931AbdJYEGA (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 25 Oct 2017 00:06:00 -0400
-Received: by mail-wm0-f49.google.com with SMTP id u138so19167981wmu.5
-        for <ceph-devel@vger.kernel.org>; Tue, 24 Oct 2017 21:06:00 -0700 (PDT)
+Received: from smtp.h3c.com ([60.191.123.56]:38324 "EHLO h3cmg01-ex.h3c.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932178AbdJYFG1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 25 Oct 2017 01:06:27 -0400
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users@lists.ceph.com
+To: 'Sage Weil' <sage@newdream.net>
+Cc: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
 
-Hi, list,
-
-We ran into pg deep scrub error. And we tried to repair it by `ceph pg
-repair pgid`. But it didn't work. We also verified object files,  and
-found both 3 replicas were zero size. What's the problem, whether it
-is a bug? And how to fix the inconsistent? I haven't restarted the
-osds so far as I am not sure whether it works.
-
-ceph version: 10.2.9
-user case: cephfs
-kernel client: 4.4/4.9
-
-Error info from primary osd:
-
-root@n10-075-019:~# grep -Hn 'ERR' /var/log/ceph/ceph-osd.27.log.1
-/var/log/ceph/ceph-osd.27.log.1:3038:2017-10-25 04:47:34.460536
-7f39c4829700 -1 log_channel(cluster) log [ERR] : 1.fcd shard 27: soid
-1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.00000058:head
-size 0 != size 3461120 from auth oi
-1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.00000058:head(2401'147490
-client.901549.1:33749 dirty|omap_digest s 3461120 uv 147490 od
-ffffffff alloc_hint [0 0])
-/var/log/ceph/ceph-osd.27.log.1:3039:2017-10-25 04:47:34.460722
-7f39c4829700 -1 log_channel(cluster) log [ERR] : 1.fcd shard 62: soid
-1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.00000058:head
-size 0 != size 3461120 from auth oi
-1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.00000058:head(2401'147490
-client.901549.1:33749 dirty|omap_digest s 3461120 uv 147490 od
-ffffffff alloc_hint [0 0])
-/var/log/ceph/ceph-osd.27.log.1:3040:2017-10-25 04:47:34.460725
-7f39c4829700 -1 log_channel(cluster) log [ERR] : 1.fcd shard 133: soid
-1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.00000058:head
-size 0 != size 3461120 from auth oi
-1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.00000058:head(2401'147490
-client.901549.1:33749 dirty|omap_digest s 3461120 uv 147490 od
-ffffffff alloc_hint [0 0])
-/var/log/ceph/ceph-osd.27.log.1:3041:2017-10-25 04:47:34.460800
-7f39c4829700 -1 log_channel(cluster) log [ERR] : 1.fcd soid
-1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.00000058:head:
-failed to pick suitable auth object
-/var/log/ceph/ceph-osd.27.log.1:3042:2017-10-25 04:47:34.461458
-7f39c4829700 -1 log_channel(cluster) log [ERR] : deep-scrub 1.fcd
-1:b3f61048:fsvolumens_87c46348-9869-11e7-8525-3497f65a8415::1000003528d.00000058:head
-on disk size (0) does not match object info size (3461120) adjusted
-for ondisk to (3461120)
-/var/log/ceph/ceph-osd.27.log.1:3043:2017-10-25 04:47:44.645934
-7f39c4829700 -1 log_channel(cluster) log [ERR] : 1.fcd deep-scrub 4
-errors
-
-
-Object file info:
-
-root@n10-075-019:/var/lib/ceph/osd/ceph-27/current/1.fcd_head# find .
--name "1000003528d.00000058__head_12086FCD*"
-./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD_fsvolumens\u87c46348-9869-11e7-8525-3497f65a8415_1
-root@n10-075-019:/var/lib/ceph/osd/ceph-27/current/1.fcd_head# ls -al
-./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD*
--rw-r--r-- 1 ceph ceph 0 Oct 24 22:04
-./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD_fsvolumens\u87c46348-9869-11e7-8525-3497f65a8415_1
-root@n10-075-019:/var/lib/ceph/osd/ceph-27/current/1.fcd_head#
-
-
-root@n10-075-028:/var/lib/ceph/osd/ceph-62/current/1.fcd_head# find .
--name "1000003528d.00000058__head_12086FCD*"
-./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD_fsvolumens\u87c46348-9869-11e7-8525-3497f65a8415_1
-root@n10-075-028:/var/lib/ceph/osd/ceph-62/current/1.fcd_head# ls -al
-./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD*
--rw-r--r-- 1 ceph ceph 0 Oct 24 22:04
-./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD_fsvolumens\u87c46348-9869-11e7-8525-3497f65a8415_1
-root@n10-075-028:/var/lib/ceph/osd/ceph-62/current/1.fcd_head#
-
-
-root@n10-075-040:/var/lib/ceph/osd/ceph-133/current/1.fcd_head# find .
--name "1000003528d.00000058__head_12086FCD*"
-./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD_fsvolumens\u87c46348-9869-11e7-8525-3497f65a8415_1
-root@n10-075-040:/var/lib/ceph/osd/ceph-133/current/1.fcd_head# ls -al
-./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD*
--rw-r--r-- 1 ceph ceph 0 Oct 24 22:04
-./DIR_D/DIR_C/DIR_F/DIR_6/DIR_8/1000003528d.00000058__head_12086FCD_fsvolumens\u87c46348-9869-11e7-8525-3497f65a8415_1
-root@n10-075-040:/var/lib/ceph/osd/ceph-133/current/1.fcd_head#
+VGhhbmtzIGZvciB5b3VyIHJlcGx5Lg0KDQo+SXMgdGhpcyBhIENlcGhGUyB3b3JrbG9hZD8NCj5U
+aGUgYWxpZ25tZW50IGlzIGNvbmZ1c2luZyBiZWNhdXNlIGl0J3MgYWxpZ25pbmcgdG8gdGhlIG9i
+amVjdCBvZmZzZXQuICBTbyBpZiB5b3UncmUgd3JpdGluZyAyMDAgYnl0ZXMgaW50byBhIGZpbGUs
+IHlvdSdyZSAyMDAgYnl0ZXMgaW50byB0aGUgZmlyc3Qgb2JqZWN0LCBhbmQgdGhlIHBhZGRpbmcg
+d2lsbCBiZSBzb21ldGhpbmcgbGlrZSAyMDAgLSBoZWFkZXIgc2l6ZS4NCg0KWWVzLCB0aGlzIGlz
+IGNlcGhGU+OAgg0KV2hlbiBJIHVzZSByYWRvcyBiZW5jaCB0byB0ZXN0LCBsb2cgaW5mbyBpcyBz
+YW1lLHNvIEkgdGhpbmsgbm8gbWF0dGVyIHdoYXQgaXMgdXNlZCBpbiB1cHBlciBsYXllcihubyBt
+YXR0ZXIgY2VwaEZTIG9yIHJiZCApLg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCg0KSW4gZnVuYyAiRmlsZUpvdXJuYWw6OnByZXBhcmVf
+ZW50cnkiLCAgImRhdGFfYWxpZ24iIGlzIHVzZWQgdG8gbWFrZSBoZWFkZXIgdG8gNEsgYWxpZ25l
+ZA0KIA0KRGV0YWlsIGNvZGU6DQpoLnByZV9wYWQgPSAoKHVuc2lnbmVkIGludClkYXRhX2FsaWdu
+IC0gKHVuc2lnbmVkIGludCloZWFkX3NpemUpICYgfkNFUEhfUEFHRV9NQVNLOw0KDQpob3cgdG8g
+Z2V0IGRhdGFfYWxpZ24/IA0KICAgMS4gbGFyZ2VzdF9kYXRhX29mZl9pbl90YmwgaXMgaW1wb3J0
+YW50Lg0KICAgMi4gRmlsZVN0b3JlOjpfZG9fdHJhbnNhY3Rpb24gLT4gX2J1aWxkX2FjdGlvbnNf
+ZnJvbV90YmwgLT4gd3JpdGUoY2lkLCBvaWQsIG9mZiwgbGVuLCBibCkNCiAgIDMuIGRhdGEubGFy
+Z2VzdF9kYXRhX29mZl9pbl90YmwgPSB0YmwubGVuZ3RoKCkgKyBzaXplb2YoX191MzIpOyAgLy8g
+d2UgYXJlIGFib3V0IHRvDQoNCkkgdGhpbmsgYSB0cmFuc2FjdGlvbiBoYXZlIG1hbnkgb3AsIGFu
+ZCAibGFyZ2VzdF9kYXRhX29mZl9pbl90YmwiIGlzIHRoZSBsYXJnZXN0IG9wIGxlbmd0aCwgYW5k
+IHVzZSBsYXJnZXN0X2RhdGFfb2ZmX2luX3RibCBhcyBhbGlnbm1lbnQgDQpJcyB0aGF0IHNvPyAN
+Ckxvb2tpbmcgZm9yd2FyZCB0byB5b3VyIGFuc3dlci4NCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0NCuWPkeS7tuS6ujogU2FnZSBXZWlsIFttYWlsdG86c2FnZUBuZXdk
+cmVhbS5uZXRdIA0K5Y+R6YCB5pe26Ze0OiAyMDE35bm0MTDmnIgyNOaXpSAxMDozMg0K5pS25Lu2
+5Lq6OiBsaXVoYW8gMTM3MDENCuaKhOmAgTogJ2NlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnJw0K
+5Li76aKYOiBSZTogYWJvdXQgZmlsZXN0b3JlLT5qb3VybmFsLT5yZWJ1aWxkX2FsaWduDQoNCg0K
+DQpPbiBUdWUsIDI0IE9jdCAyMDE3LCBMaXVoYW8gd3JvdGU6DQoNCj4gSGksIGxpc3RlcjoNCj4g
+SSB1c2UgY2VwaOKAmXZlcnNpb24gMTAuMi4wDQo+IA0KPiBBbmFseXNpcyBGaWxlSm91cm5hbDo6
+cHJlcGFyZV9lbnRyee+8jHdoZW4gcHJlcGFyZSBqb3VybmFsIA0KPiBidWZmZXJsaXN077yMaXTi
+gJlzIGRpdmlkZWQgaW50byA1IHBhcnRz77yaaGVhZMKgIHByZV9wYWTCoCBkYXRhwqAgcG9zdF9w
+YWTCoCANCj4gaGVhZCBUaGVuIHJldWlsZCBmb3IgYnVmZmVyIGxpc3QgdG8gNEsgYWxpZ27jgIJy
+ZWJ1aWxkX2FsaWduZWQgcmVtYWxsb2MgDQo+IDRLIGFsaWduZWQgbWVtb3J544CC77yIZWFjaCA0
+SyBhbGlnbmVkIG1lbW9yeSBpcyBhcyBzbWFsbCBhcyBwb3NzaWJsZe+8iQ0KPiANCj4gRGV0YWls
+ZWQgY29kZe+8mg0KPiBGaWxlSm91cm5hbDo6cHJlcGFyZV9lbnRyeSh2ZWN0b3I8T2JqZWN0U3Rv
+cmU6OlRyYW5zYWN0aW9uPiYgdGxzLCANCj4gYnVmZmVybGlzdCogdGJsKQ0KPiDCoMKgwqDCoMKg
+wqDCoMKgIEVuY29kZSBmb3IgdHJhbnNhY3Rpb27CoCA6OmVuY29kZSgqcCwgYmwpOw0KPiDjgIDj
+gIBlYmwuYXBwZW5kKChjb25zdCBjaGFyKikmaCwgc2l6ZW9mKGgpKTsNCg0KVGhpcyBjb3BpZXMg
+aW50byB0aGUgYnVmZmVybGlzdDo6YXBwZW5kX2J1ZmZlciwgd2hpY2ggaXMgYSA0ayBhbGlnbmVk
+IHBhZ2UuDQoNCj4g44CA44CAZWJsLnB1c2hfYmFjayhidWZmZXI6OmNyZWF0ZV9zdGF0aWMoaC5w
+cmVfcGFkLCB6ZXJvX2J1ZikpOw0KDQpUaGlzIHNob3VsZCBiZSBlYmwuYXBwZW5kX3plcm9zKGgu
+cHJlX3BhZCk7DQoNCj4g44CA44CAZWJsLmNsYWltX2FwcGVuZChibCwgYnVmZmVyOjpsaXN0OjpD
+TEFJTV9BTExPV19OT05TSEFSRUFCTEUpOyAvLyANCj4gcG90ZW50aWFsIHplcm8tY29weQ0KDQpU
+aGlzIGRvZXMgbm90LCBob3dldmVyLiAgV2UgY291bGQgcHJvYmFibHkgY2hhbmdlIHRoaXMgc28g
+dGhhdCBpZg0KYmwubGVuZ3RoKCkgPCBzb21ldGhpbmcgd2UgY29weSBpbnRvIHRoZSBidWZmZXIg
+aGVyZSBpbnN0ZWFkIG9mIGRvaW5nIGEgcmVidWlsZCBsYXRlci4NCg0KPiDjgIDjgIBlYmwucHVz
+aF9iYWNrKGJ1ZmZlcjo6Y3JlYXRlX3N0YXRpYyhoLnBvc3RfcGFkLCB6ZXJvX2J1ZikpOw0KDQpI
+ZXJlIHRvby4NCg0KPiDjgIDjgIBlYmwuYXBwZW5kKChjb25zdCBjaGFyKikmaCwgc2l6ZW9mKGgp
+KTsNCj4g44CA44CAcmV0ID0gZWJsLnJlYnVpbGRfYWxpZ25lZChDRVBIX0RJUkVDVElPX0FMSUdO
+TUVOVCk7DQo+IOOAgOOAgA0KPiBxdWVzdGlvbjoNCj4gYmVmb3JlIHJlYnVpbGRfYWxpZ25lZO+8
+jGFzIG1hbnkgcHRyIGlzIGFsaWduZWQgYXMgNEvvvIxzbyB5b3UgY2FuIGFwcGx5IGxlc3MgbWVt
+b3J5LmlzIGl0Pw0KPiBoZWFkIDQwIHByZV9wYWQgMjczNiBibCA0MTk2MjMzIHBvc3RfcGFkIDM0
+NDcgdGFpbCA0MMKgIHRvdGFsOjRLKjEwMjYgDQo+IHJlYnVpbGRfYWxpZ25lZCB3aWxsIHJlbWFs
+bG9jIG1lbW9yeSA0SyoxMDI2LCBhbGwgbmVlZCByZWJ1aWxkDQoNCklJUkMgaXQncyBzdXBwb3Nl
+ZCB0byBvbmx5IHJlYnVpbGQgdGhlIHVuYWxpZ25lZCBidWZmZXJzLiAgU28gdGhlIGhlYWRlciBh
+bmQgcGFkZGluZyB3aWxsIGdldCByZWJ1aWx0LCBidXQgaWYgdGhlIGJ1ZmZlciBibCBpcyBhbHJl
+YWR5IGFsaWduZWQgaXQgd2lsbCBiZSB1bnRvdWNoZWQuICBUaGlzIGlzIG5vcm1hbGx5IHRoZSBj
+YXNlIGZvciBsYXJnZSB3cml0ZXMgYXMgdGhlIG1lc3NlbmdlciB0YWtlcyBjYXJlIHRvIHJlYWQg
+dGhlIGRhdGEgcGF5bG9hZCBpbnRvIG1lbW9yeSB3aXRoIHRoZSBjb3JyZWN0IGFsaWdubWVudC4N
+Cg0KIA0KPiBEZXRhaWwgbG9nIGluZm86DQo+IEluIGNvZGUsIHRoaXMgbG9nIG1lc3NhZ2UgY2F1
+Z2h0IG15IGF0dGVudGlvbu+8jHRoZSBsb2cgaW5mb3JtYXRpb24gb2YgdGhlc2UgNSB2YWx1c2Ug
+aXMgbm90IGV4cGVjdGVkLg0KPiANCj4gZG91dCgxMCkgPDwgIiBsZW4gIiA8PCBibC5sZW5ndGgo
+KSA8PCAiIC0+ICIgPDwgc2l6ZcKgIDw8ICIgKGhlYWQgIiA8PCANCj4gaGVhZF9zaXplIDw8ICIg
+cHJlX3BhZCAiIDw8IGgucHJlX3BhZA0KPiDCoMKgwqDCoMKgwqAgPDwgIiBibCAiIDw8IGJsLmxl
+bmd0aCgpIDw8ICIgcG9zdF9wYWQgIiA8PCBwb3N0X3BhZCA8PCAiIHRhaWwgIiA8PCBoZWFkX3Np
+emUgPDwgIikiDQo+IMKgwqDCoMKgwqDCoCA8PCAiIChibCBhbGlnbm1lbnQgIiA8PCBkYXRhX2Fs
+aWduIDw8ICIpIiA8PCBkZW5kbDsNCj4gDQo+IDIwMTctMTAtMTcgMTk6NTA6MjguNzIxOTIyIDdm
+MjFkNzNmZTcwMCAxMCBqb3VybmFswqAgbGVuIDQxOTYyMzMgLT4gDQo+IDQyMDI0OTYgKGhlYWQg
+NDAgcHJlX3BhZCAyNzM2IGJsIDQxOTYyMzMgcG9zdF9wYWQgMzQ0NyB0YWlsIDQwKSAoYmwgDQo+
+IGFsaWdubWVudCAyNzc2KQ0KPiAyMDE3LTEwLTE3IDE5OjUwOjI4Ljg3MzI2MSA3ZjIxY2NmZmY3
+MDAgMTAgam91cm5hbMKgIGxlbiA0MTk2MTMxIC0+IA0KPiA0MjAyNDk2IChoZWFkIDQwIHByZV9w
+YWQgNDA0NiBibCA0MTk2MTMxIHBvc3RfcGFkIDIyMzkgdGFpbCA0MCkgKGJsIA0KPiBhbGlnbm1l
+bnQgNDA4NikNCj4gMjAxNy0xMC0xNyAxOTo1MDoyOC44OTc1MjAgN2YyMWQ0M2ZmNzAwIDEwIGpv
+dXJuYWzCoCBsZW4gNDE5NjEzMSAtPiANCj4gNDIwMjQ5NiAoaGVhZCA0MCBwcmVfcGFkIDQwNDYg
+YmwgNDE5NjEzMSBwb3N0X3BhZCAyMjM5IHRhaWwgNDApIChibCANCj4gYWxpZ25tZW50IDQwODYp
+DQo+IDIwMTctMTAtMTcgMTk6NTA6MjguOTc0ODExIDdmMjFjZjgwMDcwMCAxMCBqb3VybmFswqAg
+bGVuIDQxOTYxMzEgLT4gDQo+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCA0MDQ2IGJsIDQxOTYx
+MzEgcG9zdF9wYWQgMjIzOSB0YWlsIDQwKSAoYmwgDQo+IGFsaWdubWVudCA0MDg2KQ0KPiAyMDE3
+LTEwLTE3IDE5OjUwOjI5LjAxMzk0MCA3ZjIxY2NmZmY3MDAgMTAgam91cm5hbMKgIGxlbiA0MTk2
+MjE1IC0+IA0KPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgMjc1NCBibCA0MTk2MjE1IHBvc3Rf
+cGFkIDM0NDcgdGFpbCA0MCkgKGJsIA0KPiBhbGlnbm1lbnQgMjc5NCkNCj4gMjAxNy0xMC0xNyAx
+OTo1MDoyOS4yOTIxNjUgN2YyMWNlM2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIxNSAtPiAN
+Cj4gNDIwMjQ5NiAoaGVhZCA0MCBwcmVfcGFkIDI3NTQgYmwgNDE5NjIxNSBwb3N0X3BhZCAzNDQ3
+IHRhaWwgNDApIChibCANCj4gYWxpZ25tZW50IDI3OTQpDQo+IDIwMTctMTAtMTcgMTk6NTA6Mjku
+MzExMjk2IDdmMjFjZjgwMDcwMCAxMCBqb3VybmFswqAgbGVuIDQxOTYyMzMgLT4gDQo+IDQyMDI0
+OTYgKGhlYWQgNDAgcHJlX3BhZCAyNzM2IGJsIDQxOTYyMzMgcG9zdF9wYWQgMzQ0NyB0YWlsIDQw
+KSAoYmwgDQo+IGFsaWdubWVudCAyNzc2KQ0KPiAyMDE3LTEwLTE3IDE5OjUwOjI5LjQxNjI0MCA3
+ZjIxZDQzZmY3MDAgMTAgam91cm5hbMKgIGxlbiA0MTk2MjE1IC0+IA0KPiA0MjAyNDk2IChoZWFk
+IDQwIHByZV9wYWQgMjc1NCBibCA0MTk2MjE1IHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkgKGJsIA0K
+PiBhbGlnbm1lbnQgMjc5NCkNCj4gMjAxNy0xMC0xNyAxOTo1MDozMC4xMTE1NjEgN2YyMWNjN2Zl
+NzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAtPiANCj4gNDIwMjQ5NiAoaGVhZCA0MCBwcmVf
+cGFkIDQwNDYgYmwgNDE5NjEzMSBwb3N0X3BhZCAyMjM5IHRhaWwgNDApIChibCANCj4gYWxpZ25t
+ZW50IDQwODYpDQo+IDIwMTctMTAtMTcgMTk6NTA6MzAuNDQ0NzI5IDdmMjFkMjNmZjcwMCAxMCBq
+b3VybmFswqAgbGVuIDQxOTYxMzEgLT4gDQo+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCA0MDQ2
+IGJsIDQxOTYxMzEgcG9zdF9wYWQgMjIzOSB0YWlsIDQwKSAoYmwgDQo+IGFsaWdubWVudCA0MDg2
+KQ0KPiAyMDE3LTEwLTE3IDE5OjUwOjMwLjQ0ODY4NiA3ZjIxY2NmZmY3MDAgMTAgam91cm5hbMKg
+IGxlbiA0MTk2MjMzIC0+IA0KPiA0MjAyNDk2IChoZWFkIDQwIHByZV9wYWQgMjczNiBibCA0MTk2
+MjMzIHBvc3RfcGFkIDM0NDcgdGFpbCA0MCkgKGJsIA0KPiBhbGlnbm1lbnQgMjc3NikNCj4gMjAx
+Ny0xMC0xNyAxOTo1MDozMC41NTk2MjYgN2YyMWQ0M2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5
+NjEzMSAtPiANCj4gNDIwMjQ5NiAoaGVhZCA0MCBwcmVfcGFkIDQwNDYgYmwgNDE5NjEzMSBwb3N0
+X3BhZCAyMjM5IHRhaWwgNDApIChibCANCj4gYWxpZ25tZW50IDQwODYpDQo+IDIwMTctMTAtMTcg
+MTk6NTA6MzAuNTkyNTQxIDdmMjFkNjNmZTcwMCAxMCBqb3VybmFswqAgbGVuIDQxOTYyMzMgLT4g
+DQo+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCAyNzM2IGJsIDQxOTYyMzMgcG9zdF9wYWQgMzQ0
+NyB0YWlsIDQwKSAoYmwgDQo+IGFsaWdubWVudCAyNzc2KQ0KPiAyMDE3LTEwLTE3IDE5OjUwOjMw
+LjU5OTUyNyA3ZjIxY2I3ZmY3MDAgMTAgam91cm5hbMKgIGxlbiA0MTk2MjE1IC0+IA0KPiA0MjAy
+NDk2IChoZWFkIDQwIHByZV9wYWQgMjc1NCBibCA0MTk2MjE1IHBvc3RfcGFkIDM0NDcgdGFpbCA0
+MCkgKGJsIA0KPiBhbGlnbm1lbnQgMjc5NCkNCj4gMjAxNy0xMC0xNyAxOTo1MDozMC42MTMxMjMg
+N2YyMWQxM2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAtPiANCj4gNDIwMjQ5NiAoaGVh
+ZCA0MCBwcmVfcGFkIDQwNDYgYmwgNDE5NjEzMSBwb3N0X3BhZCAyMjM5IHRhaWwgNDApIChibCAN
+Cj4gYWxpZ25tZW50IDQwODYpDQoNCklzIHRoaXMgYSBDZXBoRlMgd29ya2xvYWQ/DQoNClRoZSBh
+bGlnbm1lbnQgaXMgY29uZnVzaW5nIGJlY2F1c2UgaXQncyBhbGlnbmluZyB0byB0aGUgb2JqZWN0
+IG9mZnNldC4gIFNvIGlmIHlvdSdyZSB3cml0aW5nIDIwMCBieXRlcyBpbnRvIGEgZmlsZSwgeW91
+J3JlIDIwMCBieXRlcyBpbnRvIHRoZSBmaXJzdCBvYmplY3QsIGFuZCB0aGUgcGFkZGluZyB3aWxs
+IGJlIHNvbWV0aGluZyBsaWtlIDIwMCAtIGhlYWRlciBzaXplLg0KDQpzYWdlDQo=
