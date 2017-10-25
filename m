@@ -1,63 +1,68 @@
-From: Josh Durgin <jdurgin@redhat.com>
-Subject: Re: librados3
-Date: Wed, 25 Oct 2017 12:06:09 -0700
-Message-ID: <72ed7ce0-4656-7671-8c54-b78b5db0a347@redhat.com>
-References: <CAJE9aOPhPFJdV2BQ4-9LhpzN5gucc4BOuU=0C27geK_d0P4r=A@mail.gmail.com>
- <CALe9h7fSc5QoNn49o9MewuLqKc1fST8dR2iq9c3LAPkTij6DJA@mail.gmail.com>
- <CA+aFP1B5TLKDkMEOE9AOLkuNoOq=_mD4jy_MUTo7x2CKXz9LYw@mail.gmail.com>
- <alpine.DEB.2.11.1710191212390.24806@piezo.us.to>
- <CAOtMX2h7r4H0YRr7d-7HWWU9eY7zqQtjW+AtZpHndrG7gwaNkQ@mail.gmail.com>
- <CAF-wwdHpVomqNtJkxaQJm05M17WN=5zJi5owxOOQw3_bgh3zKA@mail.gmail.com>
- <CAJE9aOOdYpepu3O+WUxLv_0kZHc6EB8_gSBTqeunXLRxY1RFQg@mail.gmail.com>
+From: Sage Weil <sweil@redhat.com>
+Subject: announcing ceph-helm (ceph on kubernetes orchestration)
+Date: Wed, 25 Oct 2017 19:09:19 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1710251848140.22592@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56160 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41376 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932221AbdJYTGV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 25 Oct 2017 15:06:21 -0400
-In-Reply-To: <CAJE9aOOdYpepu3O+WUxLv_0kZHc6EB8_gSBTqeunXLRxY1RFQg@mail.gmail.com>
-Content-Language: en-US
+        id S932162AbdJYTJV (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 25 Oct 2017 15:09:21 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>, Brad Hubbard <bhubbard@redhat.com>
-Cc: Alan Somers <asomers@freebsd.org>, Sage Weil <sweil@redhat.com>, Jason Dillaman <dillaman@redhat.com>, John Spray <jspray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: ceph-users@ceph.com
 
-On 10/25/2017 01:35 AM, kefu chai wrote:
-> thanks for your inputs, guys!
-> 
-> On Fri, Oct 20, 2017 at 8:15 AM, Brad Hubbard <bhubbard@redhat.com> wrote:
->> On Fri, Oct 20, 2017 at 1:26 AM, Alan Somers <asomers@freebsd.org> wrote:
->>> Would it be possible to use ELF symbol versioning to bump the versions
->>> of all affected functions without bumping the .so number?  That would
->>> provide an upgrade path for distros.  The downside is that the new
->>> librados would need to keep compat shims for old clients.
-> 
-> we don't release header files and library with versioned symbols at
-> least in pre-mimic, so i don't think this approach would help the
-> librados client to link against the expected old functions. see the
-> output of
-> 
-> $ objdump -x bin/rados | grep -A42 References
-> 
-> 
-> anyway, thanks to Jason and Sage, we now have a fix for the
-> ceph::buffer ABI incompatibility and it's backported to luminous. see
-> https://github.com/ceph/ceph/pull/18408. probably we won't have
-> librados3 in this release.
+There is a new repo under the ceph org, ceph-helm, which includes helm 
+charts for deploying ceph on kubernetes.  The code is based on the ceph 
+charts from openstack-helm, but we've moved them into their own upstream 
+repo here so that they can be developed more quickly and independently 
+from the openstack-helm work.  The code has already evolved a fair bit, 
+mostly to support luminous and fix a range of issues:
 
-The most common culprit for ABI issues is bufferlist since we expose the
-internal ceph type directly. This has caused problems with almost every
-release lately.
+	https://github.com/ceph/ceph-helm/tree/master/ceph/ceph
 
-At this point it it seems worth finally separating the internal and
-external types there, without doing a full new version of librados.
+The repo is a fork of the upstream kubernetes/charts.git repo with an eye 
+toward eventually merging the chart upstream into that repo.  How useful 
+that would be in practice is not entirely clear to me since the version in 
+the ceph-helm repo will presumably always be more up to date and users 
+have to point to *some* source for the chart either way.  Also the current 
+structure of the files in the repo is carried over from openstack-helm, 
+which uses the helm-toolkit stuff and isn't in the correct form for the 
+upstream charts.git.  Suggestions/input here on what direction makes more 
+sense would be welcome!
 
-It may be possible to do this without introducing a new type, by 
-freezing the existing bufferlist as the external type for librados and 
-librbd, and making a conversion if necessary. We could add a true pimpl 
-wrapper as a new type to avoid the overhead of conversion if it is a 
-problem.
+There are also some docs on getting a ceph cluster up in kubernetes using 
+these charts at
 
-Josh
+	https://github.com/ceph/ceph/pull/18520
+	http://docs.ceph.com/ceph-prs/18520/start/kube-helm/
+
+that should be merged shortly.  Not terribly detailed and we're not 
+covering much on the operations side yet, but that all is coming.
+
+A very rough sketch of the direction currently being considered from 
+running ceph in kubernetes is here:
+
+	http://pad.ceph.com/p/containers
+
+and there is a trello board here
+
+	https://trello.com/b/kcXOllJp/kubehelm
+
+All of this builds on the container image that Sebastien has been working 
+on for some time, that has recently been renamed from ceph-docker -> 
+ceph-container
+
+	https://github.com/ceph/ceph-container
+
+Dan is working on getting an image registry up at registry.ceph.com so 
+that we can publish test build images, releases, or both.
+
+We also have a daily sync up call for the folks who are actively working 
+on this.
+
+That's all for now!  :)
+sage
+
