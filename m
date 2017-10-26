@@ -1,7 +1,7 @@
 From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Tech Talk Cancelled
-Date: Thu, 26 Oct 2017 12:27:50 -0200
-Message-ID: <20171026142750.GA21292@t460.local>
+Subject: Ceph Developers Monthly - November
+Date: Thu, 26 Oct 2017 12:44:01 -0200
+Message-ID: <20171026144401.GA21245@t460.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -21,8 +21,18 @@ List-Id: ceph-devel.vger.kernel.org
 
 Hey Cephers,
 
-Sorry for the short notice, but the Ceph Tech Talk for October
-(scheduled for today) has been canceled.
+This is just a friendly reminder that the next Ceph Developer Montly
+meeting is coming up:
+
+ http://wiki.ceph.com/Planning
+
+If you have work that you're doing that it a feature work, significant
+backports, or anything you would like to discuss with the core team,
+please add it to the following page:
+
+ http://wiki.ceph.com/CDM_01-NOV-2017
+
+If you have questions or comments, please let us know.
 
 Kindest regards,
 
