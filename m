@@ -1,51 +1,50 @@
-From: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
-Subject: Re: 12.2.2 status
-Date: Thu, 26 Oct 2017 09:50:09 -0700
-Message-ID: <CADRKj5RuqjfQQoK+ri+WLqh07O9snWvsKSfr+83GmmRtBYiBHw@mail.gmail.com>
-References: <87fua6c4xy.fsf@suse.com>
+From: Matt Benjamin <mbenjami@redhat.com>
+Subject: Re: Why does Erasure-pool not support omap?
+Date: Thu, 26 Oct 2017 13:32:41 -0400
+Message-ID: <CAKOnarnmiDeQxWJLRZ7GJc-xdTzxsR-5=AiUxKTUte0h9XxLoQ@mail.gmail.com>
+References: <201710251652060421729@zte.com.cn> <alpine.DEB.2.11.1710251213140.22592@piezo.us.to>
+ <37aa304a-f13b-2cf8-c5c5-5d03d37feffa@redhat.com> <CAJ4mKGa+Xpt9a2P0y_cz9bohj7R_hP_Ysiar4oqRgW-yWJY+ug@mail.gmail.com>
+ <alpine.DEB.2.11.1710261423200.22592@piezo.us.to> <1e168a03-ec8f-36c9-f444-550738f4c0f1@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f51.google.com ([209.85.218.51]:51677 "EHLO
-        mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932127AbdJZQuK (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Oct 2017 12:50:10 -0400
-Received: by mail-oi0-f51.google.com with SMTP id j126so6712115oib.8
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Oct 2017 09:50:10 -0700 (PDT)
-In-Reply-To: <87fua6c4xy.fsf@suse.com>
+Received: from mail-io0-f178.google.com ([209.85.223.178]:50055 "EHLO
+        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932309AbdJZRcm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Oct 2017 13:32:42 -0400
+Received: by mail-io0-f178.google.com with SMTP id n137so7097842iod.6
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Oct 2017 10:32:42 -0700 (PDT)
+In-Reply-To: <1e168a03-ec8f-36c9-f444-550738f4c0f1@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Lekshmanan <abhishek@suse.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>, Matt Benjamin <mbenjamin@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>
+To: Josh Durgin <jdurgin@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Xie Xingguo <xie.xingguo@zte.com.cn>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Oct 26, 2017 at 8:19 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
+On Thu, Oct 26, 2017 at 12:21 PM, Josh Durgin <jdurgin@redhat.com> wrote:
+> On 10/26/2017 07:26 AM, Sage Weil wrote:
+>>
+
 >
-> A first round of PRs were tested on Luminous integration branch, results
-> updated at http://tracker.ceph.com/issues/21830,
-> RADOS suite was green, RBD, RGW & FS hit some known failures
+> If this is only for rbd, we might as well store k+m copies since there's
+> so little omap data.
 >
-> ceph-disk has hit a failure with dmcrypt, details at
-> http://tracker.ceph.com/issues/21830#note-10 which doesn't seem to have
-> occured in QE runs before but there is a bug report, is anyone aware of
-> past issues with ceph-disk & dmcrypt?
->
-> Also for the leads, Sage, Yehuda. Jason, Josh, Patrick are there any
-> critical PRs that we need to have in 12.2.2 so that we can include
-> them in the next round of testing before handing over to QE?
->
+> I agree cephfs and rgw continue to refuse to use EC for metadata, since
+> their omap use gets far to large and is in the data path.
 
-I'd be happy to see these fixed:
-http://tracker.ceph.com/issues/21819
-http://tracker.ceph.com/issues/21735
+This highlights, but isn't an answer to the problem.  What RGW
+actually has is a split data path, when data is on EC.
 
-however, these are not in master yet, need validation.
+Matt
 
-This one is ready I think:
-http://tracker.ceph.com/issues/21500
+-- 
 
-> Best,
-> Abhishek & Karol
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-821-5101
+fax.  734-769-8938
+cel.  734-216-5309
