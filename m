@@ -1,50 +1,34 @@
-From: Matt Benjamin <mbenjami@redhat.com>
-Subject: Re: Why does Erasure-pool not support omap?
-Date: Thu, 26 Oct 2017 13:32:41 -0400
-Message-ID: <CAKOnarnmiDeQxWJLRZ7GJc-xdTzxsR-5=AiUxKTUte0h9XxLoQ@mail.gmail.com>
-References: <201710251652060421729@zte.com.cn> <alpine.DEB.2.11.1710251213140.22592@piezo.us.to>
- <37aa304a-f13b-2cf8-c5c5-5d03d37feffa@redhat.com> <CAJ4mKGa+Xpt9a2P0y_cz9bohj7R_hP_Ysiar4oqRgW-yWJY+ug@mail.gmail.com>
- <alpine.DEB.2.11.1710261423200.22592@piezo.us.to> <1e168a03-ec8f-36c9-f444-550738f4c0f1@redhat.com>
+From: Patrick Donnelly <pdonnell@redhat.com>
+Subject: Re: 12.2.2 status
+Date: Thu, 26 Oct 2017 11:05:22 -0700
+Message-ID: <CA+2bHPYXuma-e-4_XAdLp6rxcT7NBYL+xF4Rz0PAvptLoXvQdw@mail.gmail.com>
+References: <87fua6c4xy.fsf@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f178.google.com ([209.85.223.178]:50055 "EHLO
-        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932309AbdJZRcm (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Oct 2017 13:32:42 -0400
-Received: by mail-io0-f178.google.com with SMTP id n137so7097842iod.6
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Oct 2017 10:32:42 -0700 (PDT)
-In-Reply-To: <1e168a03-ec8f-36c9-f444-550738f4c0f1@redhat.com>
+Received: from mail-qt0-f175.google.com ([209.85.216.175]:52867 "EHLO
+        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932331AbdJZSFx (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Oct 2017 14:05:53 -0400
+Received: by mail-qt0-f175.google.com with SMTP id 31so5406235qtz.9
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Oct 2017 11:05:53 -0700 (PDT)
+In-Reply-To: <87fua6c4xy.fsf@suse.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Josh Durgin <jdurgin@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, Gregory Farnum <gfarnum@redhat.com>, Xie Xingguo <xie.xingguo@zte.com.cn>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Abhishek Lekshmanan <abhishek@suse.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>, Matt Benjamin <mbenjamin@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>
 
-On Thu, Oct 26, 2017 at 12:21 PM, Josh Durgin <jdurgin@redhat.com> wrote:
-> On 10/26/2017 07:26 AM, Sage Weil wrote:
->>
+On Thu, Oct 26, 2017 at 8:19 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
+> Also for the leads, Sage, Yehuda. Jason, Josh, Patrick are there any
+> critical PRs that we need to have in 12.2.2 so that we can include
+> them in the next round of testing before handing over to QE?
 
->
-> If this is only for rbd, we might as well store k+m copies since there's
-> so little omap data.
->
-> I agree cephfs and rgw continue to refuse to use EC for metadata, since
-> their omap use gets far to large and is in the data path.
+Please include:
 
-This highlights, but isn't an answer to the problem.  What RGW
-actually has is a split data path, when data is on EC.
+https://github.com/ceph/ceph/pull/18019
+https://github.com/ceph/ceph/pull/18008
 
-Matt
+Thanks,
 
 -- 
-
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-821-5101
-fax.  734-769-8938
-cel.  734-216-5309
+Patrick Donnelly
