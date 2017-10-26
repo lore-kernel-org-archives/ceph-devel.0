@@ -1,29 +1,26 @@
-From: Matt Benjamin <mbenjami@redhat.com>
+From: Jason Dillaman <jdillama@redhat.com>
 Subject: Re: Why does Erasure-pool not support omap?
-Date: Thu, 26 Oct 2017 11:07:22 -0400
-Message-ID: <CAKOnarm2DSyKvTLKLsqnUZOOGsXz3rvpyZnjwEWR6LQDmsHs+A@mail.gmail.com>
+Date: Thu, 26 Oct 2017 11:08:36 -0400
+Message-ID: <CA+aFP1CtWxqXR0paxrkYku7+NYK23ncT=ffa-6j4Ft9cfW69Hg@mail.gmail.com>
 References: <201710251652060421729@zte.com.cn> <alpine.DEB.2.11.1710251213140.22592@piezo.us.to>
  <37aa304a-f13b-2cf8-c5c5-5d03d37feffa@redhat.com> <CAJ4mKGa+Xpt9a2P0y_cz9bohj7R_hP_Ysiar4oqRgW-yWJY+ug@mail.gmail.com>
  <alpine.DEB.2.11.1710261423200.22592@piezo.us.to>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f182.google.com ([209.85.223.182]:45527 "EHLO
-        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932211AbdJZPHY (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Oct 2017 11:07:24 -0400
-Received: by mail-io0-f182.google.com with SMTP id i38so6066907iod.2
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Oct 2017 08:07:24 -0700 (PDT)
+Received: from mail-yw0-f172.google.com ([209.85.161.172]:51410 "EHLO
+        mail-yw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932211AbdJZPIi (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Oct 2017 11:08:38 -0400
+Received: by mail-yw0-f172.google.com with SMTP id k3so3171060ywk.8
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Oct 2017 08:08:37 -0700 (PDT)
 In-Reply-To: <alpine.DEB.2.11.1710261423200.22592@piezo.us.to>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Sage Weil <sweil@redhat.com>
 Cc: Gregory Farnum <gfarnum@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Xie Xingguo <xie.xingguo@zte.com.cn>, ceph-devel <ceph-devel@vger.kernel.org>
-
-That sounds like a promising way forward, to me.
-
-Matt
 
 On Thu, Oct 26, 2017 at 10:26 AM, Sage Weil <sweil@redhat.com> wrote:
 > On Thu, 26 Oct 2017, Gregory Farnum wrote:
@@ -80,7 +77,12 @@ On Thu, Oct 26, 2017 at 10:26 AM, Sage Weil <sweil@redhat.com> wrote:
 > That leaves lots of room for improvement, but it makes the feature work
 > without many changes, and means we can drop the specialness around rbd
 > images in EC pools.
->
+
+Potentially negative since RBD relies heavily on class methods.
+Assuming the cls_cxx_map_XYZ operations will never require async work,
+there is still the issue with methods that perform straight read/write
+calls.
+
 > Then we can make CephFS and RGW issue warnings (or even refuse) to use EC
 > pools for their metadata or index pools since it's strictly less efficient
 > than replicated to avoid user mistakes.
@@ -92,14 +94,4 @@ On Thu, Oct 26, 2017 at 10:26 AM, Sage Weil <sweil@redhat.com> wrote:
 
 
 -- 
-
-Matt Benjamin
-Red Hat, Inc.
-315 West Huron Street, Suite 140A
-Ann Arbor, Michigan 48103
-
-http://www.redhat.com/en/technologies/storage
-
-tel.  734-821-5101
-fax.  734-769-8938
-cel.  734-216-5309
+Jason
