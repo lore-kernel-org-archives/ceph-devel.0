@@ -1,60 +1,67 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: recovery scheduling
-Date: Thu, 26 Oct 2017 16:15:24 +0200
-Message-ID: <CAJ4mKGadG=2mV4t_w-yTdEXT8mxAUGbhBdJCQTcq-NzyEgy9OA@mail.gmail.com>
-References: <alpine.DEB.2.11.1710252222360.22592@piezo.us.to> <625e213f-dada-b0c6-86e0-46f69c2a7e18@redhat.com>
+Subject: Re: Why does Erasure-pool not support omap?
+Date: Thu, 26 Oct 2017 16:20:39 +0200
+Message-ID: <CAJ4mKGa+Xpt9a2P0y_cz9bohj7R_hP_Ysiar4oqRgW-yWJY+ug@mail.gmail.com>
+References: <201710251652060421729@zte.com.cn> <alpine.DEB.2.11.1710251213140.22592@piezo.us.to>
+ <37aa304a-f13b-2cf8-c5c5-5d03d37feffa@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f175.google.com ([209.85.223.175]:54540 "EHLO
-        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932255AbdJZOPZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Oct 2017 10:15:25 -0400
-Received: by mail-io0-f175.google.com with SMTP id e89so5660212ioi.11
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Oct 2017 07:15:25 -0700 (PDT)
-In-Reply-To: <625e213f-dada-b0c6-86e0-46f69c2a7e18@redhat.com>
+Received: from mail-io0-f174.google.com ([209.85.223.174]:53397 "EHLO
+        mail-io0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932246AbdJZOUk (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Oct 2017 10:20:40 -0400
+Received: by mail-io0-f174.google.com with SMTP id 189so5703183iow.10
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Oct 2017 07:20:40 -0700 (PDT)
+In-Reply-To: <37aa304a-f13b-2cf8-c5c5-5d03d37feffa@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
 To: Josh Durgin <jdurgin@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Cc: Sage Weil <sweil@redhat.com>, Xie Xingguo <xie.xingguo@zte.com.cn>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Oct 26, 2017 at 12:40 AM, Josh Durgin <jdurgin@redhat.com> wrote:
-> On 10/25/2017 03:26 PM, Sage Weil wrote:
+On Wed, Oct 25, 2017 at 8:57 PM, Josh Durgin <jdurgin@redhat.com> wrote:
+> On 10/25/2017 05:16 AM, Sage Weil wrote:
 >>
->> As I'm watching the mgr balancer module optimizing the layout on the lab
->> cluster I'm seeing a lot of cases where the recovery scheduling in
->> luminous is broken.  For example,
+>> Hi Xingguo,
 >>
->>      pgs:     63895/153086292 objects degraded (0.042%)
->>               1439665/153086292 objects misplaced (0.940%)
->>               12166 active+clean
->>               198   active+remapped+backfill_wait
->>               97    active+remapped+backfilling
->>               10    active+undersized+degraded+remapped+backfill_wait
->>               6     active+recovery_wait+degraded
->>               2     active+recovery_wait+degraded+remapped
->>               1     active+undersized+degraded+remapped+backfilling
+>> On Wed, 25 Oct 2017, xie.xingguo@zte.com.cn wrote:
+>>>
+>>>        I wonder why erasure-pools can not support omap currently.
+>>>
+>>>        The simplest way for erasure-pools to support omap I can figure
+>>> out would be duplicating omap on every shard.
+>>>
+>>>        It is because it consumes too much space when k + m gets bigger?
 >>
->> It is "wrong" that any PGs would be in recovery_wait (a high priority
->> log-based recovery activity) when there is a ton of backfill going on.
->> I've fixed this in master with a few rounds of recovery preemption PRs,
->> and shaken out a few other issues in the process, but can't backport it to
->> luminous without burning a feature bit.
 >>
->> I just took an inventory and we have 12 bits available, and I just marked
->> 8 more deprecated that we can remove after the O release.
+>> Right.  There isn't a nontrivial way to actually erasure code it, and
+>> duplicating on every shard is inefficient.
 >>
->> So... I think it's worth burning one on this.  Any objections?
+>> One reasonableish approach would be to replicate the omap data on m+1
+>> shards.  But it's a bit of work to implement and nobody has done it.
+>>
+>> I can't remember if there were concerns with this approach or it was just
+>> a matter of time/resources... Josh? Greg?
 >
 >
-> That seems reasonable. I don't have any further backports needing a
-> feature bit in mind currently.
+> It restricts us to erasure codes like reed-solomon where a subset of shards
+> are always updated. I think this is a reasonable trade-off though, it's just
+> a matter of implementing it. We haven't written
+> up the required peering changes, but they did not seem too difficult to
+> implement.
+>
+> Some notes on the approach are here - just think of 'replicating omap'
+> as a partial write to m+1 shards:
+>
+> http://pad.ceph.com/p/ec-partial-writes
 
-Likewise, this seems like something we need to do; I don't have
-anything of my own needing a feature bit to backport. Only thing I can
-think of is if we needed something to fix the OSDMap stuff for Kraken,
-but I believe that's done and didn't.
+Yeah. To expand a bit on why this only works for Reed-Solomon,
+consider the minimum and appropriate number of copies — and the actual
+shard placement — for local recovery codes. :/ We were unable to
+generalize for that (or indeed for SHEC, IIRC) when whiteboarding.
+
+I'm also still nervous that this might do weird things to our recovery
+and availability patterns in more complex failure cases, but I don't
+have any concrete issues.
 -Greg
-
->
-> Josh
