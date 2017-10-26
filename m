@@ -1,44 +1,105 @@
-From: Leonardo Vaz <lvaz-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Ceph Developers Monthly - November
-Date: Thu, 26 Oct 2017 12:44:01 -0200
-Message-ID: <20171026144401.GA21245@t460.local>
+From: Matt Benjamin <mbenjami@redhat.com>
+Subject: Re: Why does Erasure-pool not support omap?
+Date: Thu, 26 Oct 2017 11:07:22 -0400
+Message-ID: <CAKOnarm2DSyKvTLKLsqnUZOOGsXz3rvpyZnjwEWR6LQDmsHs+A@mail.gmail.com>
+References: <201710251652060421729@zte.com.cn> <alpine.DEB.2.11.1710251213140.22592@piezo.us.to>
+ <37aa304a-f13b-2cf8-c5c5-5d03d37feffa@redhat.com> <CAJ4mKGa+Xpt9a2P0y_cz9bohj7R_hP_Ysiar4oqRgW-yWJY+ug@mail.gmail.com>
+ <alpine.DEB.2.11.1710261423200.22592@piezo.us.to>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-Content-Disposition: inline
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Ceph Users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, Ceph Devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-io0-f182.google.com ([209.85.223.182]:45527 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932211AbdJZPHY (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Oct 2017 11:07:24 -0400
+Received: by mail-io0-f182.google.com with SMTP id i38so6066907iod.2
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Oct 2017 08:07:24 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1710261423200.22592@piezo.us.to>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Gregory Farnum <gfarnum@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Xie Xingguo <xie.xingguo@zte.com.cn>, ceph-devel <ceph-devel@vger.kernel.org>
 
-Hey Cephers,
+That sounds like a promising way forward, to me.
 
-This is just a friendly reminder that the next Ceph Developer Montly
-meeting is coming up:
+Matt
 
- http://wiki.ceph.com/Planning
+On Thu, Oct 26, 2017 at 10:26 AM, Sage Weil <sweil@redhat.com> wrote:
+> On Thu, 26 Oct 2017, Gregory Farnum wrote:
+>> On Wed, Oct 25, 2017 at 8:57 PM, Josh Durgin <jdurgin@redhat.com> wrote:
+>> > On 10/25/2017 05:16 AM, Sage Weil wrote:
+>> >>
+>> >> Hi Xingguo,
+>> >>
+>> >> On Wed, 25 Oct 2017, xie.xingguo@zte.com.cn wrote:
+>> >>>
+>> >>>        I wonder why erasure-pools can not support omap currently.
+>> >>>
+>> >>>        The simplest way for erasure-pools to support omap I can figure
+>> >>> out would be duplicating omap on every shard.
+>> >>>
+>> >>>        It is because it consumes too much space when k + m gets bigger?
+>> >>
+>> >>
+>> >> Right.  There isn't a nontrivial way to actually erasure code it, and
+>> >> duplicating on every shard is inefficient.
+>> >>
+>> >> One reasonableish approach would be to replicate the omap data on m+1
+>> >> shards.  But it's a bit of work to implement and nobody has done it.
+>> >>
+>> >> I can't remember if there were concerns with this approach or it was just
+>> >> a matter of time/resources... Josh? Greg?
+>> >
+>> >
+>> > It restricts us to erasure codes like reed-solomon where a subset of shards
+>> > are always updated. I think this is a reasonable trade-off though, it's just
+>> > a matter of implementing it. We haven't written
+>> > up the required peering changes, but they did not seem too difficult to
+>> > implement.
+>> >
+>> > Some notes on the approach are here - just think of 'replicating omap'
+>> > as a partial write to m+1 shards:
+>> >
+>> > http://pad.ceph.com/p/ec-partial-writes
+>>
+>> Yeah. To expand a bit on why this only works for Reed-Solomon,
+>> consider the minimum and appropriate number of copies — and the actual
+>> shard placement — for local recovery codes. :/ We were unable to
+>> generalize for that (or indeed for SHEC, IIRC) when whiteboarding.
+>>
+>> I'm also still nervous that this might do weird things to our recovery
+>> and availability patterns in more complex failure cases, but I don't
+>> have any concrete issues.
+>
+> It seems like the minimum-viable variation of this is that we don't change
+> any of the peering or logging behavior at all, but just send the omap
+> writes to all shards (like any other write), but only the annointed shards
+> persist.
+>
+> That leaves lots of room for improvement, but it makes the feature work
+> without many changes, and means we can drop the specialness around rbd
+> images in EC pools.
+>
+> Then we can make CephFS and RGW issue warnings (or even refuse) to use EC
+> pools for their metadata or index pools since it's strictly less efficient
+> than replicated to avoid user mistakes.
+>
+> ?
+>
+> sage
 
-If you have work that you're doing that it a feature work, significant
-backports, or anything you would like to discuss with the core team,
-please add it to the following page:
 
- http://wiki.ceph.com/CDM_01-NOV-2017
-
-If you have questions or comments, please let us know.
-
-Kindest regards,
-
-Leo
 
 -- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
+
+Matt Benjamin
+Red Hat, Inc.
+315 West Huron Street, Suite 140A
+Ann Arbor, Michigan 48103
+
+http://www.redhat.com/en/technologies/storage
+
+tel.  734-821-5101
+fax.  734-769-8938
+cel.  734-216-5309
