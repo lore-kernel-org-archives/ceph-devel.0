@@ -1,33 +1,64 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph fix for 4.14-rc7
-Date: Thu, 26 Oct 2017 10:22:00 +0200
-Message-ID: <1509006120-26925-1-git-send-email-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: librados3
+Date: Thu, 26 Oct 2017 17:22:01 +0800
+Message-ID: <CAJE9aON16w47xcJN+7DkDpSUNS7hjUsc0Wqr6ctGHVpxC-b1iA@mail.gmail.com>
+References: <CAJE9aOPhPFJdV2BQ4-9LhpzN5gucc4BOuU=0C27geK_d0P4r=A@mail.gmail.com>
+ <CALe9h7fSc5QoNn49o9MewuLqKc1fST8dR2iq9c3LAPkTij6DJA@mail.gmail.com>
+ <CA+aFP1B5TLKDkMEOE9AOLkuNoOq=_mD4jy_MUTo7x2CKXz9LYw@mail.gmail.com>
+ <alpine.DEB.2.11.1710191212390.24806@piezo.us.to> <CAOtMX2h7r4H0YRr7d-7HWWU9eY7zqQtjW+AtZpHndrG7gwaNkQ@mail.gmail.com>
+ <CAF-wwdHpVomqNtJkxaQJm05M17WN=5zJi5owxOOQw3_bgh3zKA@mail.gmail.com>
+ <CAJE9aOOdYpepu3O+WUxLv_0kZHc6EB8_gSBTqeunXLRxY1RFQg@mail.gmail.com> <72ed7ce0-4656-7671-8c54-b78b5db0a347@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-oi0-f48.google.com ([209.85.218.48]:54287 "EHLO
+        mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751027AbdJZJWC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Oct 2017 05:22:02 -0400
+Received: by mail-oi0-f48.google.com with SMTP id a132so4504729oih.11
+        for <ceph-devel@vger.kernel.org>; Thu, 26 Oct 2017 02:22:02 -0700 (PDT)
+In-Reply-To: <72ed7ce0-4656-7671-8c54-b78b5db0a347@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Josh Durgin <jdurgin@redhat.com>
+Cc: Brad Hubbard <bhubbard@redhat.com>, Alan Somers <asomers@freebsd.org>, Sage Weil <sweil@redhat.com>, Jason Dillaman <dillaman@redhat.com>, John Spray <jspray@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-Hi Linus,
+On Thu, Oct 26, 2017 at 3:06 AM, Josh Durgin <jdurgin@redhat.com> wrote:
+>
+>
+> The most common culprit for ABI issues is bufferlist since we expose the
+> internal ceph type directly. This has caused problems with almost every
+> release lately.
+>
+> At this point it it seems worth finally separating the internal and
+> external types there, without doing a full new version of librados.
 
-The following changes since commit bb176f67090ca54869fc1262c913aa69d2ede070:
+i don't think we can do this without doing a new version of librados.
+the legacy librados clients are still expecting the internal types at
+some degree, that's how we noticed the problem
+(http://tracker.ceph.com/issues/21573), where the librados client was
+compiled with an old librados header, and inlined the old constructor
+in its binary. and some APIs force us to do so, for example,
+"ObjectReadOperation::getxattrs(std::map<std::string, bufferlist>
+*pattrs, int *prval)" requires a complete type definition of
+ceph::bufferlist. in other words, the buffer.h exposing the innards of
+ceph::buffer types was shipped with librados2, and the librados client
+is using them, we can hardly fix this w/o bumping the so version.
 
-  Linux 4.14-rc6 (2017-10-23 06:49:47 -0400)
+>
+> It may be possible to do this without introducing a new type, by freezing
+> the existing bufferlist as the external type for librados and librbd, and
+> making a conversion if necessary. We could add a true pimpl wrapper as a new
+> type to avoid the overhead of conversion if it is a problem.
 
-are available in the git repository at:
+yeah, probably by introducing a bufferlist2, which is a pimpl wrapper,
+and start to deprecate APIs like getxattrs() with the ones using
+bufferlist2. and convert bufferlist to the actual bufferlist in the
+legacy APIs. feasible, but a pains-taking plan..
 
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.14-rc7
+i still like librados3. =)
 
-for you to fetch changes up to 6c2838fbdedb9b72a81c931d49e56b229b6cdbca:
 
-  ceph: unlock dangling spinlock in try_flush_caps() (2017-10-25 08:31:15 +0200)
-
-----------------------------------------------------------------
-A small lock imbalance fix, marked for stable.
-
-----------------------------------------------------------------
-Jeff Layton (1):
-      ceph: unlock dangling spinlock in try_flush_caps()
-
- fs/ceph/caps.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+-- 
+Regards
+Kefu Chai
