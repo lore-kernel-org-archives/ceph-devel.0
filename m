@@ -1,49 +1,43 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: increasingly large packages and longer build times
-Date: Fri, 27 Oct 2017 11:21:51 +0800
-Message-ID: <CAJE9aOOmYCHwfWk865r-r37_w_hAcUBosPLNdMWdybsiwVnGsQ@mail.gmail.com>
-References: <CAC-Np1yg062K==JMEQhRTVKRe7orS3YoXz9hcgfKH+xfiZBiww@mail.gmail.com>
- <CALqRxCzmEN0UUD5iGcDw+iSp8+=cBmJpVa2Z=27fyVD_RWzRmw@mail.gmail.com>
- <CAJ4mKGZ5eAvOTTDwAzoAjv2Ed0C3mb1E7PxQvphY85rXZy5Oow@mail.gmail.com> <CAJE9aON9ELevTue_DXdcYnqBVO2LbTe8mthbytegbtyfLm+K7A@mail.gmail.com>
+From: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
+Subject: some issue about peering progress
+Date: Fri, 27 Oct 2017 15:45:36 +0800
+Message-ID: <CANE=7sWZ9sBTdqbNZ_UuUZ=K5UJDB=kZbrXh3u09dNaGeUzXRQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f54.google.com ([209.85.218.54]:57018 "EHLO
-        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751399AbdJ0DVw (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 26 Oct 2017 23:21:52 -0400
-Received: by mail-oi0-f54.google.com with SMTP id v9so8947365oif.13
-        for <ceph-devel@vger.kernel.org>; Thu, 26 Oct 2017 20:21:52 -0700 (PDT)
-In-Reply-To: <CAJE9aON9ELevTue_DXdcYnqBVO2LbTe8mthbytegbtyfLm+K7A@mail.gmail.com>
+Received: from mail-pf0-f174.google.com ([209.85.192.174]:44241 "EHLO
+        mail-pf0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751834AbdJ0Hph (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 27 Oct 2017 03:45:37 -0400
+Received: by mail-pf0-f174.google.com with SMTP id x7so4391917pfa.1
+        for <ceph-devel@vger.kernel.org>; Fri, 27 Oct 2017 00:45:37 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>, Alfredo Deza <adeza@redhat.com>, Ken Dreyer <kdreyer@redhat.com>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Aug 22, 2017 at 3:01 PM, kefu chai <tchaikov@gmail.com> wrote:
-> On Thu, Aug 17, 2017 at 5:44 AM, Gregory Farnum <gfarnum@redhat.com> wrot=
-e:
->> On Mon, Aug 7, 2017 at 7:58 AM, Ken Dreyer <kdreyer@redhat.com> wrote:
->>
->> On (3), there are a few causes. One is that we just have a lot of
->> code. But a far bigger impact seems to come from all the ceph_test_*
->> binaries and other things which we have statically linked with
->> ceph-common et al. There are two approaches we can take there: we can
->> figure out how to dynamically link them (which I haven't been involved
->> in but recall being difficult =E2=80=94 but also have caused other issue=
-s to
->
-> actually almost all ceph_test_* are linking against libceph-common.
-> but they are linking against libglobal and libos statically.
+hi, all:
 
-hey guys,
+     I confuse about the notify message during peering. Such as:
 
-i just realized that librados.a is linked by quite a few test
-binaries. so, i am posting https://github.com/ceph/ceph/pull/18576.
-probably it could help a little bit regarding to reduce the size of
-debug-info package.
+    epoch 1, primary osd do Pering , GetInfo and GetMissing, it
+calling the func  proc_replica_log. in this func the last_complete and
+last_update maybe reset.
 
---=20
-Regards
-Kefu Chai
+    Before go to Activate. the OSDMap change (the new osdmap do not
+lead to restart peering), the non-primary osd send the notify to
+primary.
+
+    When the primary receive the notify, Primary::react(const
+MNotifyRec& notevt), so it call the func proc_replica_info.
+
+    In the func, we update the pg info including last_complete and
+last_update which modified in proc_replica_log.
+
+    When the primary call the func activate, the primary osd  process
+recovering based on pg info got by notify instead of proc_replica_log.
+
+    so it is a bug?
+
+-- 
+Regards,
+Xinze Chi
