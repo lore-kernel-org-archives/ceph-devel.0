@@ -1,86 +1,104 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Why does Erasure-pool not support omap?
-Date: Mon, 30 Oct 2017 15:48:52 -0700
-Message-ID: <CAJ4mKGbYnyd1sMFZGM-RZ+448fJ+XsnGquJ-ZOyZwPxQGwaydg@mail.gmail.com>
-References: <201710251652060421729@zte.com.cn> <alpine.DEB.2.11.1710251213140.22592@piezo.us.to>
- <37aa304a-f13b-2cf8-c5c5-5d03d37feffa@redhat.com> <CAJ4mKGa+Xpt9a2P0y_cz9bohj7R_hP_Ysiar4oqRgW-yWJY+ug@mail.gmail.com>
- <alpine.DEB.2.11.1710261423200.22592@piezo.us.to> <1e168a03-ec8f-36c9-f444-550738f4c0f1@redhat.com>
+Subject: Re: mds: failed to decode msg EXPORT_DIR
+Date: Mon, 30 Oct 2017 15:49:24 -0700
+Message-ID: <CAJ4mKGYpiWY2HxVATEGA=GcA6sSPrTxrLmi=ObctVQ+UpDFZmw@mail.gmail.com>
+References: <CAEYCsVJWvRz-ndaanfpcbEwWYTL3AJW3sSa4anvDDymkNBHfSQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f47.google.com ([209.85.215.47]:44472 "EHLO
-        mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751500AbdJ3Wsz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Oct 2017 18:48:55 -0400
-Received: by mail-lf0-f47.google.com with SMTP id 75so16827413lfx.1
-        for <ceph-devel@vger.kernel.org>; Mon, 30 Oct 2017 15:48:54 -0700 (PDT)
-In-Reply-To: <1e168a03-ec8f-36c9-f444-550738f4c0f1@redhat.com>
+Received: from mail-lf0-f50.google.com ([209.85.215.50]:56874 "EHLO
+        mail-lf0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751593AbdJ3Wt1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 30 Oct 2017 18:49:27 -0400
+Received: by mail-lf0-f50.google.com with SMTP id 90so16796834lfs.13
+        for <ceph-devel@vger.kernel.org>; Mon, 30 Oct 2017 15:49:26 -0700 (PDT)
+In-Reply-To: <CAEYCsVJWvRz-ndaanfpcbEwWYTL3AJW3sSa4anvDDymkNBHfSQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Xie Xingguo <xie.xingguo@zte.com.cn>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: Xiaoxi Chen <superdebuger@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, "Yan, Zheng" <ukernel@gmail.com>, John Spray <jspray@redhat.com>
 
-On Thu, Oct 26, 2017 at 9:21 AM Josh Durgin <jdurgin@redhat.com> wrote:
->
-> On 10/26/2017 07:26 AM, Sage Weil wrote:
-> > On Thu, 26 Oct 2017, Gregory Farnum wrote:
-> >> On Wed, Oct 25, 2017 at 8:57 PM, Josh Durgin <jdurgin@redhat.com> wrote:
-> >>> On 10/25/2017 05:16 AM, Sage Weil wrote:
-> >>>>
-> >>>> Hi Xingguo,
-> >>>>
-> >>>> On Wed, 25 Oct 2017, xie.xingguo@zte.com.cn wrote:
-> >>>>>
-> >>>>>         I wonder why erasure-pools can not support omap currently.
-> >>>>>
-> >>>>>         The simplest way for erasure-pools to support omap I can figure
-> >>>>> out would be duplicating omap on every shard.
-> >>>>>
-> >>>>>         It is because it consumes too much space when k + m gets bigger?
-> >>>>
-> >>>>
-> >>>> Right.  There isn't a nontrivial way to actually erasure code it, and
-> >>>> duplicating on every shard is inefficient.
-> >>>>
-> >>>> One reasonableish approach would be to replicate the omap data on m+1
-> >>>> shards.  But it's a bit of work to implement and nobody has done it.
-> >>>>
-> >>>> I can't remember if there were concerns with this approach or it was just
-> >>>> a matter of time/resources... Josh? Greg?
-> >>>
-> >>>
-> >>> It restricts us to erasure codes like reed-solomon where a subset of shards
-> >>> are always updated. I think this is a reasonable trade-off though, it's just
-> >>> a matter of implementing it. We haven't written
-> >>> up the required peering changes, but they did not seem too difficult to
-> >>> implement.
-> >>>
-> >>> Some notes on the approach are here - just think of 'replicating omap'
-> >>> as a partial write to m+1 shards:
-> >>>
-> >>> http://pad.ceph.com/p/ec-partial-writes
-> >>
-> >> Yeah. To expand a bit on why this only works for Reed-Solomon,
-> >> consider the minimum and appropriate number of copies — and the actual
-> >> shard placement — for local recovery codes. :/ We were unable to
-> >> generalize for that (or indeed for SHEC, IIRC) when whiteboarding.
-> >>
-> >> I'm also still nervous that this might do weird things to our recovery
-> >> and availability patterns in more complex failure cases, but I don't
-> >> have any concrete issues.
-> >
-> > It seems like the minimum-viable variation of this is that we don't change
-> > any of the peering or logging behavior at all, but just send the omap
-> > writes to all shards (like any other write), but only the annointed shards
-> > persist.
-> >
-> > That leaves lots of room for improvement, but it makes the feature work
-> > without many changes, and means we can drop the specialness around rbd
-> > images in EC pools.
->
-> Won't that still require recovery and read path changes?
-
-
-I also don't understand at all how this would work. Can you expand, Sage?
+Did this get handled via other channels? I think I heard a discussion
+about a 20GB export and restricting the size of export trees in
+standup but I wasn't following it closely.
 -Greg
+
+On Sat, Oct 21, 2017 at 2:43 AM Xiaoxi Chen <superdebuger@gmail.com> wrote:
+>
+> Hi , I hit this on one of my MDS rank, it looks to me like the
+> export_dir message is way much too big , the hux dump take more than
+> 20GB(stop by no more disk space...).
+>
+>
+> The only crazy thing in the FS is we have 6 mdses and 5000+ export binding.f
+>
+>
+> 2017-10-21 00:47:18.731219 7f27463e0700  0 --
+> 10.148.245.141:6800/4152861050 >> 10.148.245.48:0/3250358670
+> conn(0x558aeb4ac800 :6800 s=STATE_OPEN pgs=44 cs=1 l=0).fault server,
+> going to standby
+> 2017-10-21 00:47:44.500382 7f27463e0700 -1 failed to decode message of
+> type 1110 v1: buffer::end_of_buffer
+> 2017-10-21 00:47:44.503923 7f27463e0700 -1 *** Caught signal (Aborted) **
+>  in thread 7f27463e0700 thread_name:msgr-worker-1
+>
+>  ceph version 12.2.0 (32ce2a3ae5239ee33d6150705cdb24d43bab910c) luminous (rc)
+>  1: (()+0x59b344) [0x558ad5d94344]
+>  2: (()+0x11390) [0x7f274910d390]
+>  3: (gsignal()+0x38) [0x7f274809d428]
+>  4: (abort()+0x16a) [0x7f274809f02a]
+>  5: (__gnu_cxx::__verbose_terminate_handler()+0x16d) [0x7f27489e084d]
+>  6: (()+0x8d6b6) [0x7f27489de6b6]
+>  7: (()+0x8d701) [0x7f27489de701]
+>  8: (()+0xb8d38) [0x7f2748a09d38]
+>  9: (()+0x76ba) [0x7f27491036ba]
+>  10: (clone()+0x6d) [0x7f274816f3dd]
+>  NOTE: a copy of the executable, or `objdump -rdS <executable>` is
+> needed to interpret this.
+>
+>
+> -9877> 2017-10-21 00:24:41.764088 7f2745bdf700  1 dump:
+> 00000000  f1 03 00 00 00 01 00 00  00 00 00 00 26 01 00 00  |............&...|
+> 00000010  ee a3 0e 00 00 05 00 00  00 00 00 00 77 e6 37 00  |............w.7.|
+> 00000020  00 02 00 00 00 00 00 00  46 50 13 00 00 04 00 00  |........FP......|
+> 00000030  00 00 00 00 24 57 a8 00  00 02 00 00 00 00 00 00  |....$W..........|
+> 00000040  ef aa 20 00 00 03 00 00  00 00 00 00 30 65 16 00  |.. .........0e..|
+> 00000050  00 04 00 00 00 00 00 00  de e3 93 00 00 02 00 00  |................|
+> 00000060  00 00 00 00 38 6f a5 00  00 02 00 00 00 00 00 00  |....8o..........|
+> 00000070  e9 71 16 00 00 03 00 00  00 00 00 00 59 e8 16 00  |.q..........Y...|
+> 00000080  00 04 00 00 00 00 00 00  95 1a 96 00 00 02 00 00  |................|
+> 00000090  00 00 00 00 40 52 6a 00  00 02 00 00 00 00 00 00  |....@Rj.........|
+> 000000a0  98 c7 a6 00 00 02 00 00  00 00 00 00 4b 97 80 00  |............K...|
+> 000000b0  00 02 00 00 00 00 00 00  b4 7e 1e 00 00 03 00 00  |.........~......|
+> 000000c0  00 00 00 00 3b 58 a3 00  00 02 00 00 00 00 00 00  |....;X..........|
+> 000000d0  da b7 15 00 00 04 00 00  00 00 00 00 5e 61 17 00  |............^a..|
+> 000000e0  00 04 00 00 00 00 00 00  0e 12 98 00 00 01 00 00  |................|
+> 000000f0  00 00 00 00 0e 03 1e 00  00 03 00 00 00 00 00 00  |................|
+> 00000100  93 d6 14 00 00 04 00 00  00 00 00 00 74 a4 97 00  |............t...|
+> 00000110  00 01 00 00 00 00 00 00  65 6a 13 00 00 04 00 00  |........ej......|
+> 00000120  00 00 00 00 cc 76 1f 00  00 03 00 00 00 00 00 00  |.....v..........|
+> 00000130  9b da 1f 00 00 03 00 00  00 00 00 00 5d 41 0d 00  |............]A..|
+> 00000140  00 04 00 00 00 00 00 00  e1 58 18 00 00 04 00 00  |.........X......|
+> 00000150  00 00 00 00 0a b8 1e 00  00 03 00 00 00 00 00 00  |................|
+> 00000160  97 f6 13 00 00 04 00 00  00 00 00 00 1b 50 20 00  |.............P .|
+> 00000170  00 03 00 00 00 00 00 00  10 e8 93 00 00 02 00 00  |................|
+> 00000180  00 00 00 00 77 71 6a 00  00 02 00 00 00 00 00 00  |....wqj.........|
+> 00000190  fc d2 b7 00 00 02 00 00  00 00 00 00 bf 6e 95 00  |.............n..|
+> 000001a0  00 02 00 00 00 00 00 00  fd 0d 93 00 00 02 00 00  |................|
+> 000001b0  00 00 00 00 fe e5 37 00  00 02 00 00 00 00 00 00  |......7.........|
+> 000001c0  3f e6 37 00 00 02 00 00  00 00 00 00 55 b5 16 00  |?.7.........U...|
+> 000001d0  00 03 00 00 00 00 00 00  1a 41 12 00 00 04 00 00  |.........A......|
+> 000001e0  00 00 00 00 96 e5 37 00  00 02 00 00 00 00 00 00  |......7.........|
+> 000001f0  a2 dc 10 00 00 04 00 00  00 00 00 00 8c a1 a4 00  |................|
+> 00000200  00 02 00 00 00 00 00 00  a0 3f 0d 00 00 04 00 00  |.........?......|
+> 00000210  00 00 00 00 2c 4b 16 00  00 03 00 00 00 00 00 00  |....,K..........|
+> 00000220  d7 8e 14 00 00 04 00 00  00 00 00 00 45 4d 0d 00  |............EM..|
+> 00000230  00 04 00 00 00 00 00 00  1a c9 a4 00 00 02 00 00  |................|
+> 00000240  00 00 00 00 75 ab 16 00  00 03 00 00 00 00 00 00  |....u...........|
+> 00000250  6f 53 37 00 00 02 00 00  00 00 00 00 c5 8a 37 00  |oS7...........7.|
+> 00000260  00 02 00 00 00 00 00 00  5c c9 ba 00 00 02 00 00  |........\.......|
+> 00000270  00 00 00 00 9a 44 ab 00  00 02 00 00 00 00 00 00  |.....D..........|
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
