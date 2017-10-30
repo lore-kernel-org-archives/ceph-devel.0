@@ -1,74 +1,107 @@
-From: Gregory Farnum <gfarnum-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: Ceph @ OpenStack Sydney Summit
-Date: Mon, 30 Oct 2017 10:28:19 -0700
-Message-ID: <CAJ4mKGYHcJm9-=isbBr2+GN7uSZE0b9uCG5DLX-j9Z8-1X+jgw@mail.gmail.com>
-References: <CA+z5Dsz_xCqzq-C3eWvDMBhJXY0xadgu9WnSgq7CehxfO92RFw@mail.gmail.com>
- <CA+z5DszxSoWROk2=T5Uo30ufyW8UEDKDnvOE0Su0bzYOOO4AsQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Karol Mroz <kmroz@suse.de>
+Subject: Re: 12.2.2 status
+Date: Mon, 30 Oct 2017 13:38:44 -0700
+Message-ID: <1495E835-20EE-4D3E-823E-A8D1260AEDD3@suse.de>
+References: <87fua6c4xy.fsf@suse.com>
+ <CADRKj5RuqjfQQoK+ri+WLqh07O9snWvsKSfr+83GmmRtBYiBHw@mail.gmail.com>
+ <FCD206E6-9E88-478C-9230-D0FAD0F8BA4F@suse.de>
+ <393a5637-16da-2c2f-36ab-334fddc01db1@redhat.com>
+Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
+Content-Type: multipart/signed;
+ boundary="Apple-Mail=_265BD1C8-3D0E-4A9A-B004-55113589F48E";
+ protocol="application/pgp-signature"; micalg=pgp-sha512
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:45239 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752735AbdJ3Uip (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 30 Oct 2017 16:38:45 -0400
+In-Reply-To: <393a5637-16da-2c2f-36ab-334fddc01db1@redhat.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Casey Bodley <cbodley@redhat.com>
+Cc: Yehuda Sadeh-Weinraub <yehuda@redhat.com>, Abhishek Lekshmanan <abhishek@suse.com>, ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sage@newdream.net>, Matt Benjamin <mbenjamin@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>
+
+
+--Apple-Mail=_265BD1C8-3D0E-4A9A-B004-55113589F48E
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=utf-8
+
+Hey Casey,
+
+Please see inline=E2=80=A6
+
+> On Oct 27, 2017, at 6:57 AM, Casey Bodley <cbodley@redhat.com> wrote:
+>=20
+>=20
+>=20
+> On 10/26/2017 06:48 PM, Karol Mroz wrote:
+>> +CC Casey
+>>=20
+>> Hi Yehuda and Casey,
+>>=20
+>>=20
+>>> On Oct 26, 2017, at 9:50 AM, Yehuda Sadeh-Weinraub =
+<yehuda@redhat.com> wrote:
+>> [=E2=80=A6]
+>>> I'd be happy to see these fixed:
+>>> http://tracker.ceph.com/issues/21819
+>> Opened backport ticket http://tracker.ceph.com/issues/21937
+>> https://github.com/ceph/ceph/pull/18539
+>>=20
+>>=20
+>>> http://tracker.ceph.com/issues/21735
+>> Opened backport ticket http://tracker.ceph.com/issues/21938
+>> Final commit of https://github.com/ceph/ceph/pull/18198 appears =
+dependent on at least: cbb84cb13db and 53526d5050a in master.  Please =
+advise.
+>=20
+> resolved this conflict in https://github.com/ceph/ceph/pull/18591
+
+Awesome, thanks!
+
+>=20
+>>> however, these are not in master yet, need validation.
+>>>=20
+>>> This one is ready I think:
+>>> http://tracker.ceph.com/issues/21500
+>> Opened: http://tracker.ceph.com/issues/21939
+>> https://github.com/ceph/ceph/pull/18569
+>>   - Still need https://github.com/ceph/s3-tests/pull/189 backported =
+to ceph-luminous branch of s3tests
+>=20
+> do you want me to cherry-pick that s3test before the backport merges? =
+it's likely to cause failures for teuthology runs that don't include =
+https://github.com/ceph/ceph/pull/18569
+
+Taken care of here: https://github.com/ceph/s3-tests/pull/193  If you =
+could please take a look.
+
+Regards,
+Karol Mroz
+kmroz@suse.de
+
+
+
+
+--Apple-Mail=_265BD1C8-3D0E-4A9A-B004-55113589F48E
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CA+z5DszxSoWROk2=T5Uo30ufyW8UEDKDnvOE0Su0bzYOOO4AsQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, Ceph Development <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Disposition: attachment;
+	filename=signature.asc
+Content-Type: application/pgp-signature;
+	name=signature.asc
+Content-Description: Message signed with OpenPGP
 
-On Sun, Oct 29, 2017 at 5:13 AM Blair Bethwaite
-<blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->
-> Hi all,
->
-> (Apologies for the shotgun mail.)
->
-> Following this up for anyone heading to Sydney in a week. I did end up
-> getting a Ceph BoF on the program:
-> https://www.openstack.org/summit/sydney-2017/summit-schedule/events/20490
->
-> If you have stuff you'd like to talk about, or especially share,
-> please shout out and/or add to
-> https://etherpad.openstack.org/p/SYD-forum-Ceph-OpenStack-BoF.
->
-> Also, hope to see some of the core team there!
+-----BEGIN PGP SIGNATURE-----
 
-Not sure how many of us exactly will be there, but I'll be around and
-this will definitely be on the list of things to do for whoever is
-available. I was very sad we didn't have an admin ops session in
-Boston! :)
--Greg
+iQEzBAEBCgAdFiEE8+xsF/Gq4ohtXtiEKnbxtOGDNq0FAln3jdQACgkQKnbxtOGD
+Nq3ITwf8DGlE6/NtJEfU/oeSodfgjjL3IfQgG8Mw5tD2S0jaWpD8KXPBX1iGhZSo
+lUph+CS+Lg4bzdxKaVzqLL6y4PR/jCkCy/k6p7cKLZQBfbmh0+6XocxUvqbJ7Cem
+MaGvYEV8gJd/7Pt18ZiSQlUNe5yRKakRux9+XEjmZElhcxeEaUdMSHQ2ueUgcHzq
+/E5rF79dawI5MRXX6Hw5H6j552ad6CPOA+QYxq9K2iwjvx9L2AvI3Oyr+N6PmnOh
+1/gRL7pOYgCu09bGXg5IghqRRH+hMte7Z43QFDZ7yqJfQzITu2v7t1/JdDh5kO6i
+y3STW/jci4eU5yUxuNU1mE2whPvI/Q==
+=FOUV
+-----END PGP SIGNATURE-----
 
->
-> Cheers,
->
-> On 7 July 2017 at 13:47, Blair Bethwaite <blair.bethwaite-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> > Hi all,
-> >
-> > Are there any "official" plans to have Ceph events co-hosted with OpenStack
-> > Summit Sydney, like in Boston?
-> >
-> > The call for presentations closes in a week. The Forum will be organised
-> > throughout September and (I think) that is the most likely place to have
-> > e.g. Ceph ops sessions like we have in the past. Some of my local colleagues
-> > have also expressed interest in having a CephFS BoF.
-> >
-> > --
-> > Cheers,
-> > ~Blairo
->
->
->
-> --
-> Cheers,
-> ~Blairo
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+--Apple-Mail=_265BD1C8-3D0E-4A9A-B004-55113589F48E--
