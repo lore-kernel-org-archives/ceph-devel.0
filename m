@@ -1,52 +1,45 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: Re: [PATCH] ceph: remove the bump of i_version
-Date: Tue, 31 Oct 2017 15:12:55 +0800
-Message-ID: <6CFECEEA-F354-4B60-82DA-3D400E646A0F@redhat.com>
-References: <20171030145423.32159-1-jlayton@kernel.org>
-Mime-Version: 1.0 (Mac OS X Mail 11.0 \(3445.1.7\))
-Content-Type: text/plain;
-        charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Jeff Layton <jlayton@kernel.org>
+Subject: [PATCH] ceph: silence sparse endianness warning in encode_caps_cb
+Date: Tue, 31 Oct 2017 16:09:24 -0400
+Message-ID: <20171031200924.27875-1-jlayton@kernel.org>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37306 "EHLO mx1.redhat.com"
+Received: from mail.kernel.org ([198.145.29.99]:46096 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751564AbdJaHND (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 31 Oct 2017 03:13:03 -0400
-In-Reply-To: <20171030145423.32159-1-jlayton@kernel.org>
+        id S1752023AbdJaUJ1 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 31 Oct 2017 16:09:27 -0400
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Sage Weil <sage@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: zyan@redhat.com, sage@redhat.com, idryomov@gmail.com, ceph-devel@vger.kernel.org
 
+From: Jeff Layton <jlayton@redhat.com>
 
+fs/ceph/mds_client.c:2887:34: warning: incorrect type in assignment (different base types)
+fs/ceph/mds_client.c:2887:34:    expected restricted __le32 [assigned] [usertype] flock_len
+fs/ceph/mds_client.c:2887:34:    got int
 
-> On 30 Oct 2017, at 22:54, Jeff Layton <jlayton@kernel.org> wrote:
-> 
-> From: Jeff Layton <jlayton@redhat.com>
-> 
-> Eventually, we'll want to wire cephfs up to use the change attribute
-> that the cluster tracks instead, but for now this is unneeded.
-> 
-> Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> ---
-> fs/ceph/inode.c | 1 -
-> 1 file changed, 1 deletion(-)
-> 
-> diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-> index 373dab5173ca..8aae7200a425 100644
-> --- a/fs/ceph/inode.c
-> +++ b/fs/ceph/inode.c
-> @@ -785,7 +785,6 @@ static int fill_inode(struct inode *inode, struct page *locked_page,
-> 
-> 	/* update inode */
-> 	ci->i_version = le64_to_cpu(info->version);
-> -	inode->i_version++;
-> 	inode->i_rdev = le32_to_cpu(info->rdev);
-> 	inode->i_blkbits = fls(le32_to_cpu(info->layout.fl_stripe_unit)) - 1;
-> 
+At this point, it's just being used as a flag. It gets
+overwritten later if the rest of the encoding succeeds.
 
-Reviewed-by: "Yan, Zheng" <zyan@redhat.com>
-> -- 
-> 2.13.6
-> 
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+---
+ fs/ceph/mds_client.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/fs/ceph/mds_client.c b/fs/ceph/mds_client.c
+index f5b1e8d73e85..927afb612e43 100644
+--- a/fs/ceph/mds_client.c
++++ b/fs/ceph/mds_client.c
+@@ -2884,8 +2884,8 @@ static int encode_caps_cb(struct inode *inode, struct ceph_cap *cap,
+ 		rec.v2.issued = cpu_to_le32(cap->issued);
+ 		rec.v2.snaprealm = cpu_to_le64(ci->i_snap_realm->ino);
+ 		rec.v2.pathbase = cpu_to_le64(pathbase);
+-		rec.v2.flock_len =
+-			(ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) ? 0 : 1;
++		rec.v2.flock_len = (__force __le32)
++			((ci->i_ceph_flags & CEPH_I_ERROR_FILELOCK) ? 0 : 1);
+ 	} else {
+ 		rec.v1.cap_id = cpu_to_le64(cap->cap_id);
+ 		rec.v1.wanted = cpu_to_le32(__ceph_caps_wanted(ci));
+-- 
+2.13.6
 
