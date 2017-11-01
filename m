@@ -1,28 +1,39 @@
-From: John Spray <jspray@redhat.com>
-Subject: Does anything still use the separate ceph-qa-suite repo?
-Date: Wed, 1 Nov 2017 22:56:53 +0000
-Message-ID: <CALe9h7c+dYCK4uX4gEoEvRmWY=gjMe+gVx7KtSiwhCDKeiSHLw@mail.gmail.com>
+From: David Disseldorp <ddiss@suse.de>
+Subject: Re: [PATCH] rbd: set discard alignment to zero
+Date: Thu, 2 Nov 2017 00:43:38 +0100
+Message-ID: <20171102004338.39d87dea@suse.de>
+References: <20171101122439.9923-1-ddiss@suse.de>
+        <CAOi1vP_Qt4NMG+8Hi_He6PBiCoJgfg6JBL53Ty=iJtmSRF4cTA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wr0-f181.google.com ([209.85.128.181]:49238 "EHLO
-        mail-wr0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752001AbdKAW5P (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Nov 2017 18:57:15 -0400
-Received: by mail-wr0-f181.google.com with SMTP id g90so3308897wrd.6
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Nov 2017 15:57:14 -0700 (PDT)
+Received: from mx2.suse.de ([195.135.220.15]:40974 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932964AbdKAXnm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 1 Nov 2017 19:43:42 -0400
+In-Reply-To: <CAOi1vP_Qt4NMG+8Hi_He6PBiCoJgfg6JBL53Ty=iJtmSRF4cTA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>, Mike Christie <mchristi@redhat.com>
 
-I think all the old stable branches got their own merge into the
-ceph.git qa/ directory, so is there anything out there that would
-still want the separate repo at https://github.com/ceph/ceph-qa-suite
-?
+Thanks for the feedback, Ilya.
 
-If not, it seems like it's been long enough to just go ahead and
-remove this entirely now?  The value of keeping it around for
-archaeology is probably less than the cost of it occasionally
-confusing folks.
+On Wed, 1 Nov 2017 18:14:04 +0100, Ilya Dryomov wrote:
 
-John
+> Yeah, discard_alignment == discard_granularity seems bogus.  The name
+> is misleading too, but that probably comes from SBC, which talks about
+> OPTIMAL UNMAP GRANULARITY and UNMAP GRANULARITY ALIGNMENT.
+> 
+> 0 is the default -- let's just drop discard_alignment assignment?
+
+Works for me, if you'd prefer. I'll send through a v2 with this.
+
+> Also, you quoted <disk>/<partition>/discard_alignment description, but
+> this is about <disk>/discard_alignment.  This had me confused for
+> a moment.
+
+Oops, my bad. Will use the <disk> only description in the next round.
+
+Cheers, David
