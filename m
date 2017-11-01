@@ -1,60 +1,59 @@
-From: David Galloway <dgallowa@redhat.com>
-Subject: Re: success-comment of github pr trigger
-Date: Wed, 1 Nov 2017 13:14:58 -0400
-Message-ID: <6402d745-c1b9-9fc3-3637-f7db7c9b8c4f@redhat.com>
-References: <CAJE9aOMiVa8SeXJ3Jd5Jyj0agLsoo=SMcu==ypj-i=yC2xQinQ@mail.gmail.com>
- <07f40898-ef71-95da-806d-1187b6986647@redhat.com>
+From: Leonardo Vaz <lvaz@redhat.com>
+Subject: Re: Ceph Developers Monthly - November
+Date: Wed, 1 Nov 2017 16:04:23 -0200
+Message-ID: <20171101180423.GA22480@t460.local>
+References: <20171026144401.GA21245@t460.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:39056 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:57306 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755068AbdKARPA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 1 Nov 2017 13:15:00 -0400
-In-Reply-To: <07f40898-ef71-95da-806d-1187b6986647@redhat.com>
-Content-Language: en-US
+        id S1751587AbdKASE0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 1 Nov 2017 14:04:26 -0400
+Content-Disposition: inline
+In-Reply-To: <20171026144401.GA21245@t460.local>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Alfredo Deza <adeza@redhat.com>
+To: Ceph Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-
-
-On 11/01/2017 12:11 PM, David Galloway wrote:
-> On 11/01/2017 01:48 AM, kefu chai wrote:
->> hi Alfredo,
->>
->> i found that jenkins started to comment on PRs when completing a job.
->> for example, see
->> https://github.com/ceph/ceph/pull/18659#issuecomment-340964973. this
->> is a little bit annoying and distracting. but i checked
->> https://github.com/ceph/ceph-build/blob/master/ceph-pull-requests/config/definitions/ceph-pull-requests.yml#L39,
->> we don't specify the success-comment there. i wonder it might be jjb?
->> but i checked the jjb 2.0.0.0b2, it looks sane. see
->> https://github.com/openstack-infra/jenkins-job-builder/blob/04348c2c00657490b4712ae61c6a1bed691a3e3a/jenkins_jobs/modules/triggers.py#L1122.
->> do you have any idea off the head? are we experimenting some new
->> features?
->>
+On Thu, Oct 26, 2017 at 12:44:01PM -0200, Leonardo Vaz wrote:
+> Hey Cephers,
 > 
+> This is just a friendly reminder that the next Ceph Developer Montly
+> meeting is coming up:
 > 
-> I suspect something in GitHub's API changed and the Github Pull Request
-> Builder plugin is behind/out of date.
+>  http://wiki.ceph.com/Planning
 > 
-> Starting at Nov 01, 2017 2:57:31 AM UTC, ghprb started to indicate it
-> was failing to update PR statuses (although I don't think it was) and
-> started sending comments.
+> If you have work that you're doing that it a feature work, significant
+> backports, or anything you would like to discuss with the core team,
+> please add it to the following page:
 > 
-> "Use comments to report results when updating commit status fails" was
-> checked in the Jenkins settings.  I've unchecked it so hopefully the
-> comments will stop for now.
+>  http://wiki.ceph.com/CDM_01-NOV-2017
 > 
-> Please let me know if that's not the case.
+> If you have questions or comments, please let us know.
 
-Looks like comments stopped.
+Hey Cephers,
 
-We're hitting this/these:
-https://github.com/kohsuke/github-api/issues/387
-https://issues.jenkins-ci.org/browse/JENKINS-47601
+This is just a reminder that the Ceph Developer Monthly meeting is
+confirmed for tonight, November 1st at 9pm Eastern Time (EDT) in an
+APAC-friendly time slot.
 
-I will update the plugins and restart Jenkins when things are quiet.
+If you have any topic to discuss on this meeting, please add it
+on the following pad:
+
+  http://tracker.ceph.com/projects/ceph/wiki/CDM_01-NOV-2017
+
+We will use the following Bluejeans URL for the video conference:
+
+  https://bluejeans.com/9290089010
+
+Please let me know if you have any question or comments.
+
+Kindest regards,
+
+Leo
+
+-- 
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
