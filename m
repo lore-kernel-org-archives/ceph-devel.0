@@ -1,48 +1,64 @@
-From: David Galloway <dgallowa@redhat.com>
-Subject: Re: success-comment of github pr trigger
-Date: Wed, 1 Nov 2017 12:11:30 -0400
-Message-ID: <07f40898-ef71-95da-806d-1187b6986647@redhat.com>
-References: <CAJE9aOMiVa8SeXJ3Jd5Jyj0agLsoo=SMcu==ypj-i=yC2xQinQ@mail.gmail.com>
+From: Ning Yao <zay11022@gmail.com>
+Subject: Re: some issue about peering progress
+Date: Thu, 2 Nov 2017 00:42:02 +0800
+Message-ID: <CALZt5jzHVy3x28fV8ix8oEU1NRonUbs5G289z=FjUToT-vRUJQ@mail.gmail.com>
+References: <CANE=7sWZ9sBTdqbNZ_UuUZ=K5UJDB=kZbrXh3u09dNaGeUzXRQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41676 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754593AbdKAQLe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 1 Nov 2017 12:11:34 -0400
-In-Reply-To: <CAJE9aOMiVa8SeXJ3Jd5Jyj0agLsoo=SMcu==ypj-i=yC2xQinQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-io0-f175.google.com ([209.85.223.175]:53020 "EHLO
+        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751974AbdKAQmD (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Nov 2017 12:42:03 -0400
+Received: by mail-io0-f175.google.com with SMTP id f20so7346445ioj.9
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Nov 2017 09:42:03 -0700 (PDT)
+In-Reply-To: <CANE=7sWZ9sBTdqbNZ_UuUZ=K5UJDB=kZbrXh3u09dNaGeUzXRQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: kefu chai <tchaikov@gmail.com>
-Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Alfredo Deza <adeza@redhat.com>
+To: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On 11/01/2017 01:48 AM, kefu chai wrote:
-> hi Alfredo,
-> 
-> i found that jenkins started to comment on PRs when completing a job.
-> for example, see
-> https://github.com/ceph/ceph/pull/18659#issuecomment-340964973. this
-> is a little bit annoying and distracting. but i checked
-> https://github.com/ceph/ceph-build/blob/master/ceph-pull-requests/config/definitions/ceph-pull-requests.yml#L39,
-> we don't specify the success-comment there. i wonder it might be jjb?
-> but i checked the jjb 2.0.0.0b2, it looks sane. see
-> https://github.com/openstack-infra/jenkins-job-builder/blob/04348c2c00657490b4712ae61c6a1bed691a3e3a/jenkins_jobs/modules/triggers.py#L1122.
-> do you have any idea off the head? are we experimenting some new
-> features?
-> 
+Can anyone take a look?
+
+If anything will go wrong when divergent occurs and peer_info is reset
+in Primary::react(const
+MNotifyRec& notevt)?
+
+@Sage  do you think so?
+Regards
+Ning Yao
 
 
-I suspect something in GitHub's API changed and the Github Pull Request
-Builder plugin is behind/out of date.
-
-Starting at Nov 01, 2017 2:57:31 AM UTC, ghprb started to indicate it
-was failing to update PR statuses (although I don't think it was) and
-started sending comments.
-
-"Use comments to report results when updating commit status fails" was
-checked in the Jenkins settings.  I've unchecked it so hopefully the
-comments will stop for now.
-
-Please let me know if that's not the case.
+2017-10-27 15:45 GMT+08:00 Xinze Chi (=E4=BF=A1=E6=B3=BD) <xmdxcxz@gmail.co=
+m>:
+> hi, all:
+>
+>      I confuse about the notify message during peering. Such as:
+>
+>     epoch 1, primary osd do Pering , GetInfo and GetMissing, it
+> calling the func  proc_replica_log. in this func the last_complete and
+> last_update maybe reset.
+>
+>     Before go to Activate. the OSDMap change (the new osdmap do not
+> lead to restart peering), the non-primary osd send the notify to
+> primary.
+>
+>     When the primary receive the notify, Primary::react(const
+> MNotifyRec& notevt), so it call the func proc_replica_info.
+>
+>     In the func, we update the pg info including last_complete and
+> last_update which modified in proc_replica_log.
+>
+>     When the primary call the func activate, the primary osd  process
+> recovering based on pg info got by notify instead of proc_replica_log.
+>
+>     so it is a bug?
+>
+> --
+> Regards,
+> Xinze Chi
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
