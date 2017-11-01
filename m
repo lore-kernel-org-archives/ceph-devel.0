@@ -1,111 +1,48 @@
-From: "Yan, Zheng" <zyan@redhat.com>
-Subject: [PATCH] ceph: invalidate pages that beyond EOF in ceph_writepages_start()
-Date: Wed,  1 Nov 2017 21:43:54 +0800
-Message-ID: <20171101134354.1556-1-zyan@redhat.com>
+From: David Galloway <dgallowa@redhat.com>
+Subject: Re: success-comment of github pr trigger
+Date: Wed, 1 Nov 2017 12:11:30 -0400
+Message-ID: <07f40898-ef71-95da-806d-1187b6986647@redhat.com>
+References: <CAJE9aOMiVa8SeXJ3Jd5Jyj0agLsoo=SMcu==ypj-i=yC2xQinQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:49932 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41676 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752118AbdKANoB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 1 Nov 2017 09:44:01 -0400
+        id S1754593AbdKAQLe (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 1 Nov 2017 12:11:34 -0400
+In-Reply-To: <CAJE9aOMiVa8SeXJ3Jd5Jyj0agLsoo=SMcu==ypj-i=yC2xQinQ@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
-Cc: jlayton@kernel.org, "Yan, Zheng" <zyan@redhat.com>
+To: kefu chai <tchaikov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Alfredo Deza <adeza@redhat.com>
 
-It's possible there are several pending ceph_cap_snap, and they have
-different i_size. For a given dirty page, value of EOF depends on which
-snap context it's associated. calling truncate_pagecache() in
-__ceph_do_pending_vmtruncate() can not handle such complex situation.
+On 11/01/2017 01:48 AM, kefu chai wrote:
+> hi Alfredo,
+> 
+> i found that jenkins started to comment on PRs when completing a job.
+> for example, see
+> https://github.com/ceph/ceph/pull/18659#issuecomment-340964973. this
+> is a little bit annoying and distracting. but i checked
+> https://github.com/ceph/ceph-build/blob/master/ceph-pull-requests/config/definitions/ceph-pull-requests.yml#L39,
+> we don't specify the success-comment there. i wonder it might be jjb?
+> but i checked the jjb 2.0.0.0b2, it looks sane. see
+> https://github.com/openstack-infra/jenkins-job-builder/blob/04348c2c00657490b4712ae61c6a1bed691a3e3a/jenkins_jobs/modules/triggers.py#L1122.
+> do you have any idea off the head? are we experimenting some new
+> features?
+> 
 
-Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
----
- fs/ceph/addr.c  | 32 +++++++++++++++++++-------------
- fs/ceph/inode.c | 14 +-------------
- 2 files changed, 20 insertions(+), 26 deletions(-)
 
-diff --git a/fs/ceph/addr.c b/fs/ceph/addr.c
-index e57e9d37bf2d..938acb15b4d3 100644
---- a/fs/ceph/addr.c
-+++ b/fs/ceph/addr.c
-@@ -892,16 +892,30 @@ static int ceph_writepages_start(struct address_space *mapping,
- 				unlock_page(page);
- 				continue;
- 			}
--			if (strip_unit_end && (page->index > strip_unit_end)) {
--				dout("end of strip unit %p\n", page);
-+			/* only if matching snap context */
-+			pgsnapc = page_snap_context(page);
-+			if (pgsnapc != snapc) {
-+				dout("page snapc %p %lld != oldest %p %lld\n",
-+				     pgsnapc, pgsnapc->seq, snapc, snapc->seq);
- 				unlock_page(page);
--				break;
-+				continue;
- 			}
- 			if (page_offset(page) >= ceph_wbc.i_size) {
- 				dout("%p page eof %llu\n",
- 				     page, ceph_wbc.i_size);
--				/* not done if range_cyclic */
--				stop = true;
-+				if (ceph_wbc.size_stable) {
-+					mapping->a_ops->invalidatepage(page,
-+								0, PAGE_SIZE);
-+				} else {
-+					stop = true;
-+				}
-+				unlock_page(page);
-+				if (stop)
-+					break;
-+				continue;
-+			}
-+			if (strip_unit_end && (page->index > strip_unit_end)) {
-+				dout("end of strip unit %p\n", page);
- 				unlock_page(page);
- 				break;
- 			}
-@@ -915,14 +929,6 @@ static int ceph_writepages_start(struct address_space *mapping,
- 				wait_on_page_writeback(page);
- 			}
- 
--			/* only if matching snap context */
--			pgsnapc = page_snap_context(page);
--			if (pgsnapc != snapc) {
--				dout("page snapc %p %lld != oldest %p %lld\n",
--				     pgsnapc, pgsnapc->seq, snapc, snapc->seq);
--				unlock_page(page);
--				continue;
--			}
- 
- 			if (!clear_page_dirty_for_io(page)) {
- 				dout("%p !clear_page_dirty_for_io\n", page);
-diff --git a/fs/ceph/inode.c b/fs/ceph/inode.c
-index 8100f8a1a12d..e3515f759998 100644
---- a/fs/ceph/inode.c
-+++ b/fs/ceph/inode.c
-@@ -1838,22 +1838,10 @@ void __ceph_do_pending_vmtruncate(struct inode *inode)
- 	 * possibly truncate them.. so write AND block!
- 	 */
- 	if (ci->i_wrbuffer_ref_head < ci->i_wrbuffer_ref) {
--		struct ceph_cap_snap *capsnap;
--		to = ci->i_truncate_size;
--		list_for_each_entry(capsnap, &ci->i_cap_snaps, ci_item) {
--			// MDS should have revoked Frw caps
--			WARN_ON_ONCE(capsnap->writing);
--			if (capsnap->dirty_pages && capsnap->size > to)
--				to = capsnap->size;
--		}
- 		spin_unlock(&ci->i_ceph_lock);
- 		dout("__do_pending_vmtruncate %p flushing snaps first\n",
- 		     inode);
--
--		truncate_pagecache(inode, to);
--
--		filemap_write_and_wait_range(&inode->i_data, 0,
--					     inode->i_sb->s_maxbytes);
-+		filemap_write_and_wait_range(&inode->i_data, 0, LLONG_MAX);
- 		goto retry;
- 	}
- 
--- 
-2.13.6
+I suspect something in GitHub's API changed and the Github Pull Request
+Builder plugin is behind/out of date.
 
+Starting at Nov 01, 2017 2:57:31 AM UTC, ghprb started to indicate it
+was failing to update PR statuses (although I don't think it was) and
+started sending comments.
+
+"Use comments to report results when updating commit status fails" was
+checked in the Jenkins settings.  I've unchecked it so hopefully the
+comments will stop for now.
+
+Please let me know if that's not the case.
