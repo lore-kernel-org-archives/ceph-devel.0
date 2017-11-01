@@ -1,59 +1,66 @@
-From: Leonardo Vaz <lvaz@redhat.com>
-Subject: Re: Ceph Developers Monthly - November
-Date: Wed, 1 Nov 2017 16:04:23 -0200
-Message-ID: <20171101180423.GA22480@t460.local>
-References: <20171026144401.GA21245@t460.local>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: some issue about peering progress
+Date: Wed, 1 Nov 2017 13:26:59 -0700
+Message-ID: <CAJ4mKGa8+5xa-FJb+XuTn3A3p5quYkmOQZixa11tYEW78nLQKQ@mail.gmail.com>
+References: <CANE=7sWZ9sBTdqbNZ_UuUZ=K5UJDB=kZbrXh3u09dNaGeUzXRQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57306 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751587AbdKASE0 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 1 Nov 2017 14:04:26 -0400
-Content-Disposition: inline
-In-Reply-To: <20171026144401.GA21245@t460.local>
+Received: from mail-io0-f169.google.com ([209.85.223.169]:48605 "EHLO
+        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751852AbdKAU1A (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Nov 2017 16:27:00 -0400
+Received: by mail-io0-f169.google.com with SMTP id d66so8016388ioe.5
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Nov 2017 13:27:00 -0700 (PDT)
+In-Reply-To: <CANE=7sWZ9sBTdqbNZ_UuUZ=K5UJDB=kZbrXh3u09dNaGeUzXRQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Thu, Oct 26, 2017 at 12:44:01PM -0200, Leonardo Vaz wrote:
-> Hey Cephers,
-> 
-> This is just a friendly reminder that the next Ceph Developer Montly
-> meeting is coming up:
-> 
->  http://wiki.ceph.com/Planning
-> 
-> If you have work that you're doing that it a feature work, significant
-> backports, or anything you would like to discuss with the core team,
-> please add it to the following page:
-> 
->  http://wiki.ceph.com/CDM_01-NOV-2017
-> 
-> If you have questions or comments, please let us know.
+On Fri, Oct 27, 2017 at 12:46 AM Xinze Chi (信泽) <xmdxcxz@gmail.com> wrote:
+>
+> hi, all:
+>
+>      I confuse about the notify message during peering. Such as:
+>
+>     epoch 1, primary osd do Pering , GetInfo and GetMissing, it
+> calling the func  proc_replica_log. in this func the last_complete and
+> last_update maybe reset.
+>
+>     Before go to Activate. the OSDMap change (the new osdmap do not
+> lead to restart peering), the non-primary osd send the notify to
+> primary.
 
-Hey Cephers,
 
-This is just a reminder that the Ceph Developer Monthly meeting is
-confirmed for tonight, November 1st at 9pm Eastern Time (EDT) in an
-APAC-friendly time slot.
+I don't think this can happen. The OSD won't re-send a notify during
+the same peering interval, and even if it did the message would be
+tagged with a new (higher) epoch so the PG wouldn't process it until
+after it had switched states, right?
 
-If you have any topic to discuss on this meeting, please add it
-on the following pad:
+>
+>
+>     When the primary receive the notify, Primary::react(const
+> MNotifyRec& notevt), so it call the func proc_replica_info.
+>
+>     In the func, we update the pg info including last_complete and
+> last_update which modified in proc_replica_log.
 
-  http://tracker.ceph.com/projects/ceph/wiki/CDM_01-NOV-2017
+Note also that "PG::RecoveryState::Active::react(const MNotifyRec&
+notevt)" does *not* unconditionally invoke proc_replica_info(). I
+think you were trying to say we hadn't reached this state on receipt
+of the message? But as I mentioned above, I think we block so that's
+not actually possible either.
 
-We will use the following Bluejeans URL for the video conference:
+>
+>     When the primary call the func activate, the primary osd  process
+> recovering based on pg info got by notify instead of proc_replica_log.
+>
+>     so it is a bug?
 
-  https://bluejeans.com/9290089010
-
-Please let me know if you have any question or comments.
-
-Kindest regards,
-
-Leo
-
--- 
-Leonardo Vaz
-Ceph Community Manager
-Open Source and Standards Team
+Have you seen issues in the wild, or just trying to understand this
+code/algorithm? I would be surprised if we had undiscovered issues
+here just because our tests exercise peering quite vigorously, but I
+might be missing what's happening in my own code skims.
+-Greg
