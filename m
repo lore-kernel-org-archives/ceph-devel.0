@@ -1,67 +1,60 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] rbd: set discard alignment to zero
-Date: Wed, 1 Nov 2017 18:14:04 +0100
-Message-ID: <CAOi1vP_Qt4NMG+8Hi_He6PBiCoJgfg6JBL53Ty=iJtmSRF4cTA@mail.gmail.com>
-References: <20171101122439.9923-1-ddiss@suse.de>
+From: David Galloway <dgallowa@redhat.com>
+Subject: Re: success-comment of github pr trigger
+Date: Wed, 1 Nov 2017 13:14:58 -0400
+Message-ID: <6402d745-c1b9-9fc3-3637-f7db7c9b8c4f@redhat.com>
+References: <CAJE9aOMiVa8SeXJ3Jd5Jyj0agLsoo=SMcu==ypj-i=yC2xQinQ@mail.gmail.com>
+ <07f40898-ef71-95da-806d-1187b6986647@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f195.google.com ([209.85.223.195]:55248 "EHLO
-        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751681AbdKAROF (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Nov 2017 13:14:05 -0400
-Received: by mail-io0-f195.google.com with SMTP id e89so7575403ioi.11
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Nov 2017 10:14:05 -0700 (PDT)
-In-Reply-To: <20171101122439.9923-1-ddiss@suse.de>
+Received: from mx1.redhat.com ([209.132.183.28]:39056 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755068AbdKARPA (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 1 Nov 2017 13:15:00 -0400
+In-Reply-To: <07f40898-ef71-95da-806d-1187b6986647@redhat.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Disseldorp <ddiss@suse.de>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Mike Christie <mchristi@redhat.com>
+To: kefu chai <tchaikov@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Alfredo Deza <adeza@redhat.com>
 
-On Wed, Nov 1, 2017 at 1:24 PM, David Disseldorp <ddiss@suse.de> wrote:
-> RBD devices are currently incorrectly initialised with the block queue
-> discard_alignment set to the underlying RADOS object size.
->
-> As per Documentation/ABI/testing/sysfs-block:
->   The discard_alignment parameter indicates how many bytes the beginning
->   of the partition is offset from the internal allocation unit's natural
->   alignment.
->
-> Correcting the discard_alignment parameter from the RADOS object size to
-> zero has no effect on how discard requests are propagated through the
-> block layer - @alignment in __blkdev_issue_discard() remains zero.
-> However, it does fix the UNMAP granularity alignment value advertised
-> to SCSI initiators via the Block Limits VPD.
->
-> Signed-off-by: David Disseldorp <ddiss@suse.de>
-> ---
->  drivers/block/rbd.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
-> index b640ad8a6d20..cd4c65843f77 100644
-> --- a/drivers/block/rbd.c
-> +++ b/drivers/block/rbd.c
-> @@ -4423,7 +4423,7 @@ static int rbd_init_disk(struct rbd_device *rbd_dev)
->         /* enable the discard support */
->         queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, q);
->         q->limits.discard_granularity = segment_size;
-> -       q->limits.discard_alignment = segment_size;
-> +       q->limits.discard_alignment = 0;
->         blk_queue_max_discard_sectors(q, segment_size / SECTOR_SIZE);
->         blk_queue_max_write_zeroes_sectors(q, segment_size / SECTOR_SIZE);
 
-Hi David,
 
-Yeah, discard_alignment == discard_granularity seems bogus.  The name
-is misleading too, but that probably comes from SBC, which talks about
-OPTIMAL UNMAP GRANULARITY and UNMAP GRANULARITY ALIGNMENT.
+On 11/01/2017 12:11 PM, David Galloway wrote:
+> On 11/01/2017 01:48 AM, kefu chai wrote:
+>> hi Alfredo,
+>>
+>> i found that jenkins started to comment on PRs when completing a job.
+>> for example, see
+>> https://github.com/ceph/ceph/pull/18659#issuecomment-340964973. this
+>> is a little bit annoying and distracting. but i checked
+>> https://github.com/ceph/ceph-build/blob/master/ceph-pull-requests/config/definitions/ceph-pull-requests.yml#L39,
+>> we don't specify the success-comment there. i wonder it might be jjb?
+>> but i checked the jjb 2.0.0.0b2, it looks sane. see
+>> https://github.com/openstack-infra/jenkins-job-builder/blob/04348c2c00657490b4712ae61c6a1bed691a3e3a/jenkins_jobs/modules/triggers.py#L1122.
+>> do you have any idea off the head? are we experimenting some new
+>> features?
+>>
+> 
+> 
+> I suspect something in GitHub's API changed and the Github Pull Request
+> Builder plugin is behind/out of date.
+> 
+> Starting at Nov 01, 2017 2:57:31 AM UTC, ghprb started to indicate it
+> was failing to update PR statuses (although I don't think it was) and
+> started sending comments.
+> 
+> "Use comments to report results when updating commit status fails" was
+> checked in the Jenkins settings.  I've unchecked it so hopefully the
+> comments will stop for now.
+> 
+> Please let me know if that's not the case.
 
-0 is the default -- let's just drop discard_alignment assignment?
-Also, you quoted <disk>/<partition>/discard_alignment description, but
-this is about <disk>/discard_alignment.  This had me confused for
-a moment.
+Looks like comments stopped.
 
-Thanks,
+We're hitting this/these:
+https://github.com/kohsuke/github-api/issues/387
+https://issues.jenkins-ci.org/browse/JENKINS-47601
 
-                Ilya
+I will update the plugins and restart Jenkins when things are quiet.
