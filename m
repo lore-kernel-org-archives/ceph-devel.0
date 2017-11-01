@@ -1,57 +1,120 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: omap and xattrs clarifications
-Date: Wed, 1 Nov 2017 13:27:26 -0700
-Message-ID: <CAJ4mKGZCuE5yvMM3Et3azOGjnBMuoixRTSL64qRR3b8bXVFULg@mail.gmail.com>
-References: <FF0E6C8D-BF21-4632-80AF-FBCCEB031A53@TERADATA.COM>
- <CAJ4mKGbms8Bm5uEBSx-ToEPoTvuQ_puSevX2HkqaGN7yJc0O=Q@mail.gmail.com> <4F4980A2-EC2B-4955-B436-121EFFF3197E@TERADATA.COM>
+Subject: Re: Why does Erasure-pool not support omap?
+Date: Wed, 1 Nov 2017 13:27:54 -0700
+Message-ID: <CAJ4mKGb3fZeeGc7+DMjJCU1QrGLmVed877FBiu+oOyw71hee_w@mail.gmail.com>
+References: <201710251652060421729@zte.com.cn> <alpine.DEB.2.11.1710251213140.22592@piezo.us.to>
+ <37aa304a-f13b-2cf8-c5c5-5d03d37feffa@redhat.com> <CAJ4mKGa+Xpt9a2P0y_cz9bohj7R_hP_Ysiar4oqRgW-yWJY+ug@mail.gmail.com>
+ <alpine.DEB.2.11.1710261423200.22592@piezo.us.to> <1e168a03-ec8f-36c9-f444-550738f4c0f1@redhat.com>
+ <CAJ4mKGbYnyd1sMFZGM-RZ+448fJ+XsnGquJ-ZOyZwPxQGwaydg@mail.gmail.com> <alpine.DEB.2.11.1710310220480.2819@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f177.google.com ([209.85.223.177]:46548 "EHLO
-        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754899AbdKAU11 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Nov 2017 16:27:27 -0400
-Received: by mail-io0-f177.google.com with SMTP id 101so8916166ioj.3
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Nov 2017 13:27:27 -0700 (PDT)
-In-Reply-To: <4F4980A2-EC2B-4955-B436-121EFFF3197E@TERADATA.COM>
+Received: from mail-io0-f182.google.com ([209.85.223.182]:49252 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755008AbdKAU14 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Nov 2017 16:27:56 -0400
+Received: by mail-io0-f182.google.com with SMTP id n137so8888074iod.6
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Nov 2017 13:27:56 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1710310220480.2819@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Kamble, Nitin A" <Nitin.Kamble@teradata.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: Xie Xingguo <xie.xingguo@zte.com.cn>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
 
-On Mon, Oct 30, 2017 at 4:45 PM Kamble, Nitin A
-<Nitin.Kamble@teradata.com> wrote:
+On Mon, Oct 30, 2017 at 7:26 PM Sage Weil <sweil@redhat.com> wrote:
 >
-> Hi Greg,
->   I was going over the ceph-devel mailing list to understand omap better. I found your thread [1] explaining omap. I would like to ask few follow up questions, which should be useful for the whole ceph community.
+> On Mon, 30 Oct 2017, Gregory Farnum wrote:
+> > On Thu, Oct 26, 2017 at 9:21 AM Josh Durgin <jdurgin@redhat.com> wrote:
+> > >
+> > > On 10/26/2017 07:26 AM, Sage Weil wrote:
+> > > > On Thu, 26 Oct 2017, Gregory Farnum wrote:
+> > > >> On Wed, Oct 25, 2017 at 8:57 PM, Josh Durgin <jdurgin@redhat.com> wrote:
+> > > >>> On 10/25/2017 05:16 AM, Sage Weil wrote:
+> > > >>>>
+> > > >>>> Hi Xingguo,
+> > > >>>>
+> > > >>>> On Wed, 25 Oct 2017, xie.xingguo@zte.com.cn wrote:
+> > > >>>>>
+> > > >>>>>         I wonder why erasure-pools can not support omap currently.
+> > > >>>>>
+> > > >>>>>         The simplest way for erasure-pools to support omap I can figure
+> > > >>>>> out would be duplicating omap on every shard.
+> > > >>>>>
+> > > >>>>>         It is because it consumes too much space when k + m gets bigger?
+> > > >>>>
+> > > >>>>
+> > > >>>> Right.  There isn't a nontrivial way to actually erasure code it, and
+> > > >>>> duplicating on every shard is inefficient.
+> > > >>>>
+> > > >>>> One reasonableish approach would be to replicate the omap data on m+1
+> > > >>>> shards.  But it's a bit of work to implement and nobody has done it.
+> > > >>>>
+> > > >>>> I can't remember if there were concerns with this approach or it was just
+> > > >>>> a matter of time/resources... Josh? Greg?
+> > > >>>
+> > > >>>
+> > > >>> It restricts us to erasure codes like reed-solomon where a subset of shards
+> > > >>> are always updated. I think this is a reasonable trade-off though, it's just
+> > > >>> a matter of implementing it. We haven't written
+> > > >>> up the required peering changes, but they did not seem too difficult to
+> > > >>> implement.
+> > > >>>
+> > > >>> Some notes on the approach are here - just think of 'replicating omap'
+> > > >>> as a partial write to m+1 shards:
+> > > >>>
+> > > >>> http://pad.ceph.com/p/ec-partial-writes
+> > > >>
+> > > >> Yeah. To expand a bit on why this only works for Reed-Solomon,
+> > > >> consider the minimum and appropriate number of copies — and the actual
+> > > >> shard placement — for local recovery codes. :/ We were unable to
+> > > >> generalize for that (or indeed for SHEC, IIRC) when whiteboarding.
+> > > >>
+> > > >> I'm also still nervous that this might do weird things to our recovery
+> > > >> and availability patterns in more complex failure cases, but I don't
+> > > >> have any concrete issues.
+> > > >
+> > > > It seems like the minimum-viable variation of this is that we don't change
+> > > > any of the peering or logging behavior at all, but just send the omap
+> > > > writes to all shards (like any other write), but only the annointed shards
+> > > > persist.
+> > > >
+> > > > That leaves lots of room for improvement, but it makes the feature work
+> > > > without many changes, and means we can drop the specialness around rbd
+> > > > images in EC pools.
+> > >
+> > > Won't that still require recovery and read path changes?
+> >
+> >
+> > I also don't understand at all how this would work. Can you expand, Sage?
 >
-> What is the need of both omap and xattrs?
-
-It's fair to say there's some overlap here. The honest answer is that
-xattrs exist because filesystems support them so we exposed it, and
-then later on we added the omap interface because we needed more than
-xattrs feasibly support. But there are some practical differences in
-typical deployments (on Filestore).
-
+> On write, the ECTransaction collects the omap operation.  We either send
+> it to all shards or slide just the omap key/value data for shard_id > k.
+> For shard_id <= k, we write the omap data to the local object.  We still
+> send the write op to all shards with attrs and pg log entries.
 >
-> How is each used currently?
-
-omap is used for lots of key-value data (for instance, RGW stores each
-bucket index as a series of omap entries), whereas we use xattrs for
-relatively fixed-size data.
-
+> We take care to always select the first acting shard as the primary, which
+> will ensure a shard_id <= k if we go active, such that cls operations and
+> omap reads can be handled locally.
 >
-> How to use them, and not misuse them?
+> Hmm, I think the problem is with rollback, though.  IIRC the code is
+> structured around rollback and not rollforward, and omap writes are blind.
+>
+> So, not trivial, but it doesn't require any of the stuff we were talking
+> about before where we'd only send writes to a subset of shards and have
+> incomplete pg logs on each shard.
 
-In general:
-1) xattrs have a good chance of being read into memory at the same
-time as the object's local file inode is, which means if that's all
-you need you can expect it to be faster/use less disk time.
-2) omaps support vastly more entries than xattrs are efficient about
-(if you use too many, the xattrs "spill over" into the leveldb/rocksdb
-store we use to back omap, so it's not a huge deal).
 
-Also, I believe in Bluestore systems xattrs and omaps are implemented
-identically. But there's still the convention that xattrs are for
-small constant-sized data and omaps are used for large lists.
+Okay, so by "don't change any of the peering or logging behavior at
+all", you meant we didn't have to do any of the stuff that starts
+accounting for differing pg versions on each shard's object. But of
+course we still need to make a number of changes to the peering and
+recovery code so we select the right shards.
+
+We *could* do that, but it seems like another of the "sorta there"
+features we end up regretting. I guess the apparent hurry to get it in
+before other EC pool enhancements are ready is to avoid the rbd header
+pool? How much effort does that actually save? (Even the minimal
+peering+recovery changes here will take a fair bit of doing and a lot
+of QA qualification.)
 -Greg
