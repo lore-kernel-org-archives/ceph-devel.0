@@ -1,120 +1,79 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: Why does Erasure-pool not support omap?
-Date: Wed, 1 Nov 2017 13:27:54 -0700
-Message-ID: <CAJ4mKGb3fZeeGc7+DMjJCU1QrGLmVed877FBiu+oOyw71hee_w@mail.gmail.com>
-References: <201710251652060421729@zte.com.cn> <alpine.DEB.2.11.1710251213140.22592@piezo.us.to>
- <37aa304a-f13b-2cf8-c5c5-5d03d37feffa@redhat.com> <CAJ4mKGa+Xpt9a2P0y_cz9bohj7R_hP_Ysiar4oqRgW-yWJY+ug@mail.gmail.com>
- <alpine.DEB.2.11.1710261423200.22592@piezo.us.to> <1e168a03-ec8f-36c9-f444-550738f4c0f1@redhat.com>
- <CAJ4mKGbYnyd1sMFZGM-RZ+448fJ+XsnGquJ-ZOyZwPxQGwaydg@mail.gmail.com> <alpine.DEB.2.11.1710310220480.2819@piezo.novalocal>
+Subject: Re: Messenger V2: multiple bind support
+Date: Wed, 1 Nov 2017 14:19:00 -0700
+Message-ID: <CAJ4mKGaQ2EDENqqNpDUH6XG2THGk-XnJ+oR4yu14pF7h+F6r1g@mail.gmail.com>
+References: <1508855817.10018.25.camel@suse.com> <add34139-4ed6-fcca-fdac-a05f58aff433@suse.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f182.google.com ([209.85.223.182]:49252 "EHLO
-        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755008AbdKAU14 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Nov 2017 16:27:56 -0400
-Received: by mail-io0-f182.google.com with SMTP id n137so8888074iod.6
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Nov 2017 13:27:56 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1710310220480.2819@piezo.novalocal>
+Received: from mail-io0-f178.google.com ([209.85.223.178]:50346 "EHLO
+        mail-io0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933563AbdKAVTB (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Nov 2017 17:19:01 -0400
+Received: by mail-io0-f178.google.com with SMTP id 97so9187030iok.7
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Nov 2017 14:19:01 -0700 (PDT)
+In-Reply-To: <add34139-4ed6-fcca-fdac-a05f58aff433@suse.de>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Xie Xingguo <xie.xingguo@zte.com.cn>, ceph-devel <ceph-devel@vger.kernel.org>, Josh Durgin <jdurgin@redhat.com>
+To: Joao Eduardo Luis <joao@suse.de>
+Cc: Ricardo Dias <rdias@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Oct 30, 2017 at 7:26 PM Sage Weil <sweil@redhat.com> wrote:
+On Wed, Oct 25, 2017 at 7:43 AM Joao Eduardo Luis <joao@suse.de> wrote:
 >
-> On Mon, 30 Oct 2017, Gregory Farnum wrote:
-> > On Thu, Oct 26, 2017 at 9:21 AM Josh Durgin <jdurgin@redhat.com> wrote:
-> > >
-> > > On 10/26/2017 07:26 AM, Sage Weil wrote:
-> > > > On Thu, 26 Oct 2017, Gregory Farnum wrote:
-> > > >> On Wed, Oct 25, 2017 at 8:57 PM, Josh Durgin <jdurgin@redhat.com> wrote:
-> > > >>> On 10/25/2017 05:16 AM, Sage Weil wrote:
-> > > >>>>
-> > > >>>> Hi Xingguo,
-> > > >>>>
-> > > >>>> On Wed, 25 Oct 2017, xie.xingguo@zte.com.cn wrote:
-> > > >>>>>
-> > > >>>>>         I wonder why erasure-pools can not support omap currently.
-> > > >>>>>
-> > > >>>>>         The simplest way for erasure-pools to support omap I can figure
-> > > >>>>> out would be duplicating omap on every shard.
-> > > >>>>>
-> > > >>>>>         It is because it consumes too much space when k + m gets bigger?
-> > > >>>>
-> > > >>>>
-> > > >>>> Right.  There isn't a nontrivial way to actually erasure code it, and
-> > > >>>> duplicating on every shard is inefficient.
-> > > >>>>
-> > > >>>> One reasonableish approach would be to replicate the omap data on m+1
-> > > >>>> shards.  But it's a bit of work to implement and nobody has done it.
-> > > >>>>
-> > > >>>> I can't remember if there were concerns with this approach or it was just
-> > > >>>> a matter of time/resources... Josh? Greg?
-> > > >>>
-> > > >>>
-> > > >>> It restricts us to erasure codes like reed-solomon where a subset of shards
-> > > >>> are always updated. I think this is a reasonable trade-off though, it's just
-> > > >>> a matter of implementing it. We haven't written
-> > > >>> up the required peering changes, but they did not seem too difficult to
-> > > >>> implement.
-> > > >>>
-> > > >>> Some notes on the approach are here - just think of 'replicating omap'
-> > > >>> as a partial write to m+1 shards:
-> > > >>>
-> > > >>> http://pad.ceph.com/p/ec-partial-writes
-> > > >>
-> > > >> Yeah. To expand a bit on why this only works for Reed-Solomon,
-> > > >> consider the minimum and appropriate number of copies — and the actual
-> > > >> shard placement — for local recovery codes. :/ We were unable to
-> > > >> generalize for that (or indeed for SHEC, IIRC) when whiteboarding.
-> > > >>
-> > > >> I'm also still nervous that this might do weird things to our recovery
-> > > >> and availability patterns in more complex failure cases, but I don't
-> > > >> have any concrete issues.
-> > > >
-> > > > It seems like the minimum-viable variation of this is that we don't change
-> > > > any of the peering or logging behavior at all, but just send the omap
-> > > > writes to all shards (like any other write), but only the annointed shards
-> > > > persist.
-> > > >
-> > > > That leaves lots of room for improvement, but it makes the feature work
-> > > > without many changes, and means we can drop the specialness around rbd
-> > > > images in EC pools.
-> > >
-> > > Won't that still require recovery and read path changes?
+> On 10/24/2017 03:36 PM, Ricardo Dias wrote:
+> > Hi list,
 > >
+> > I was wondering if it makes sense to support multiple binds with a
+> > single messenger instance.
 > >
-> > I also don't understand at all how this would work. Can you expand, Sage?
+> > The use case I have in mind is when there are multiple public/cluster
+> > networks specified in ceph.conf and we want to listen for connections
+> > in one interface of each network. With the support for multiple binds,
+> > we could use a single messenger instance to listen to all interfaces.
+> >
+> > Do you think it is worth to implement such support or is the above use
+> > case easily handled by having multiple messenger instances?
 >
-> On write, the ECTransaction collects the omap operation.  We either send
-> it to all shards or slide just the omap key/value data for shard_id > k.
-> For shard_id <= k, we write the omap data to the local object.  We still
-> send the write op to all shards with attrs and pg log entries.
+> I would think multiple binds would make sense, but how would this affect
+> setting the policies? Would we be sharing a single policy across
+> multiple binds, or would we be allowed different policies for different
+> binds?
 >
-> We take care to always select the first acting shard as the primary, which
-> will ensure a shard_id <= k if we go active, such that cls operations and
-> omap reads can be handled locally.
+> Regardless, and not knowing the code, wouldn't this make sense for
+> multiplexing multiple daemons on a single messenger? Making the
+> messenger sort of a blackbox, that everyone could just use seamlessly
+> without having to figure too many things out?
 >
-> Hmm, I think the problem is with rollback, though.  IIRC the code is
-> structured around rollback and not rollforward, and omap writes are blind.
+> E.g., instead of multiplexing several osds on a messenger for the public
+> network, and then the same set of osds on a messenger for the cluster
+> network, we could simply have one messenger (bound to public and
+> cluster) and have just that one messenger for all the osds.
 >
-> So, not trivial, but it doesn't require any of the stuff we were talking
-> about before where we'd only send writes to a subset of shards and have
-> incomplete pg logs on each shard.
+> Anyway, from an abstraction point-of-view it makes sense to me; no idea
+> how feasible that would be though.
 
+There's sort of two pieces here, right?
+1) From the Dispatcher perspective, we want a single "Messenger" that
+it talks to. (At least, I'm pretty sure. Unless we need to be making
+routing decisions using internal data? I really hope that never comes
+up.) That could be set up by having multiple Messenger implementations
+behind a "UnifyingMessenger" abstraction layer with pretty minimal
+changes.
 
-Okay, so by "don't change any of the peering or logging behavior at
-all", you meant we didn't have to do any of the stuff that starts
-accounting for differing pg versions on each shard's object. But of
-course we still need to make a number of changes to the peering and
-recovery code so we select the right shards.
+2) From an implementation perspective, which data structures do we end
+up needing to share in order to have a daemon listening on multiple
+ports?
 
-We *could* do that, but it seems like another of the "sorta there"
-features we end up regretting. I guess the apparent hurry to get it in
-before other EC pool enhancements are ready is to avoid the rbd header
-pool? How much effort does that actually save? (Even the minimal
-peering+recovery changes here will take a fair bit of doing and a lot
-of QA qualification.)
+So, from the SimpleMessenger perspective, I don't think we get much
+out of trying to build multi-bind into it. We'd basically get to
+eliminate the duplicated DIspatchQueue, which is not very interesting.
+(Modulo some flow control stuff, perhaps.) From an AsyncMessenger
+implementation perspective, that calculus might shift since we're
+running on a thread pool, but I'm not deeply familiar with the code
+internals.
+
+But I'm curious what brings this up. I thought you were working on the
+v2 protocol — does something in that somehow hinge on the server-side
+implementation of multiple networks?
 -Greg
