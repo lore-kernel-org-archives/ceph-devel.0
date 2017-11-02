@@ -1,30 +1,98 @@
 From: Sage Weil <sage@newdream.net>
-Subject: Re: Does anything still use the separate ceph-qa-suite repo?
-Date: Thu, 2 Nov 2017 02:37:05 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1711020236590.2819@piezo.novalocal>
-References: <CALe9h7c+dYCK4uX4gEoEvRmWY=gjMe+gVx7KtSiwhCDKeiSHLw@mail.gmail.com>
+Subject: Re: Messenger V2: multiple bind support
+Date: Thu, 2 Nov 2017 02:43:15 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1711020238570.23234@piezo.novalocal>
+References: <1508855817.10018.25.camel@suse.com> <add34139-4ed6-fcca-fdac-a05f58aff433@suse.de> <CAJ4mKGaQ2EDENqqNpDUH6XG2THGk-XnJ+oR4yu14pF7h+F6r1g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1909835053-1509590597=:23234"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:49863 "EHLO
+Received: from tragedy.dreamhost.com ([66.33.205.236]:52331 "EHLO
         tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751628AbdKBChI (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Nov 2017 22:37:08 -0400
-In-Reply-To: <CALe9h7c+dYCK4uX4gEoEvRmWY=gjMe+gVx7KtSiwhCDKeiSHLw@mail.gmail.com>
+        with ESMTP id S933975AbdKBCnS (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Nov 2017 22:43:18 -0400
+In-Reply-To: <CAJ4mKGaQ2EDENqqNpDUH6XG2THGk-XnJ+oR4yu14pF7h+F6r1g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>
+Cc: Joao Eduardo Luis <joao@suse.de>, Ricardo Dias <rdias@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Wed, 1 Nov 2017, John Spray wrote:
-> I think all the old stable branches got their own merge into the
-> ceph.git qa/ directory, so is there anything out there that would
-> still want the separate repo at https://github.com/ceph/ceph-qa-suite
-> ?
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-1909835053-1509590597=:23234
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+
+On Wed, 1 Nov 2017, Gregory Farnum wrote:
+> On Wed, Oct 25, 2017 at 7:43 AM Joao Eduardo Luis <joao@suse.de> wrote:
+> >
+> > On 10/24/2017 03:36 PM, Ricardo Dias wrote:
+> > > Hi list,
+> > >
+> > > I was wondering if it makes sense to support multiple binds with a
+> > > single messenger instance.
+> > >
+> > > The use case I have in mind is when there are multiple public/cluster
+> > > networks specified in ceph.conf and we want to listen for connections
+> > > in one interface of each network. With the support for multiple binds,
+> > > we could use a single messenger instance to listen to all interfaces.
+> > >
+> > > Do you think it is worth to implement such support or is the above use
+> > > case easily handled by having multiple messenger instances?
+> >
+> > I would think multiple binds would make sense, but how would this affect
+> > setting the policies? Would we be sharing a single policy across
+> > multiple binds, or would we be allowed different policies for different
+> > binds?
+> >
+> > Regardless, and not knowing the code, wouldn't this make sense for
+> > multiplexing multiple daemons on a single messenger? Making the
+> > messenger sort of a blackbox, that everyone could just use seamlessly
+> > without having to figure too many things out?
+> >
+> > E.g., instead of multiplexing several osds on a messenger for the public
+> > network, and then the same set of osds on a messenger for the cluster
+> > network, we could simply have one messenger (bound to public and
+> > cluster) and have just that one messenger for all the osds.
+> >
+> > Anyway, from an abstraction point-of-view it makes sense to me; no idea
+> > how feasible that would be though.
 > 
-> If not, it seems like it's been long enough to just go ahead and
-> remove this entirely now?  The value of keeping it around for
-> archaeology is probably less than the cost of it occasionally
-> confusing folks.
+> There's sort of two pieces here, right?
+> 1) From the Dispatcher perspective, we want a single "Messenger" that
+> it talks to. (At least, I'm pretty sure. Unless we need to be making
+> routing decisions using internal data? I really hope that never comes
+> up.) That could be set up by having multiple Messenger implementations
+> behind a "UnifyingMessenger" abstraction layer with pretty minimal
+> changes.
+> 
+> 2) From an implementation perspective, which data structures do we end
+> up needing to share in order to have a daemon listening on multiple
+> ports?
+> 
+> So, from the SimpleMessenger perspective, I don't think we get much
+> out of trying to build multi-bind into it. We'd basically get to
+> eliminate the duplicated DIspatchQueue, which is not very interesting.
+> (Modulo some flow control stuff, perhaps.) From an AsyncMessenger
+> implementation perspective, that calculus might shift since we're
+> running on a thread pool, but I'm not deeply familiar with the code
+> internals.
 
-+1
+I'm afraid that the problem that's going to come up is the peer_addr 
+hash_map<> for stateful_peer connections (osd to osd, etc.).  This is down 
+in the messenger layer and is the main piece of shared state left (most 
+everything else works with Connection refs).  I'm worried that we'll want 
+or need to pull that up out of the messenger into the consumer (e.g., a 
+hash_map<int,ConnectionRef> osd_peers in OSDService) and refactor the 
+connection race handling a bit.  I think that will ultimately solve some 
+bugs and will simplify the Messenger greatly, but it's a painful refactor.
+
+> But I'm curious what brings this up. I thought you were working on the
+> v2 protocol — does something in that somehow hinge on the server-side
+> implementation of multiple networks?
+
+The v2 protocol will run on another port and we want to answer on the old 
+port+protocol for old clients too.
+
+sage
+--8323329-1909835053-1509590597=:23234--
