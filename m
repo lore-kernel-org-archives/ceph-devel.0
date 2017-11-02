@@ -1,39 +1,32 @@
-From: "Mr David Williams" <44934599@mylife.unisa.ac.za>
-Subject: Darlehensangebot
-Date: Thu, 02 Nov 2017 18:39:42 +0530
-Message-ID: <VI1PR01MB29908F045861A748B3700551B45C0@VI1PR01MB2990.eurprd01.prod.exchangelabs.com>
-Reply-To: david.loanfirm09@gmail.com
+From: Vasu Kulkarni <vakulkar@redhat.com>
+Subject: Additional backport labels and process improvements
+Date: Thu, 2 Nov 2017 09:16:02 -0700
+Message-ID: <CAKPXa=Z3aXdwRz9OAniOLEpWkLtGUJHyLCTvm2y+n9u8PKXy7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ve1eur02hn0210.outbound.protection.outlook.com ([104.47.6.210]:59369
-        "EHLO EUR02-VE1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1755451AbdKBNIC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Thu, 2 Nov 2017 09:08:02 -0400
-Content-Description: Mail message body
+Received: from mail-ot0-f174.google.com ([74.125.82.174]:56678 "EHLO
+        mail-ot0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932971AbdKBQQE (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Nov 2017 12:16:04 -0400
+Received: by mail-ot0-f174.google.com with SMTP id i19so23183ote.13
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Nov 2017 09:16:03 -0700 (PDT)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Recipients <44934599@mylife.unisa.ac.za>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Sch=C3=B6nen Tag,
- =
+When adding a important code or test fix to the master branch we have
+'needs-backport' label,   can we add more labels that indicate what
+branch it needs to be backported as well eg "needs-jewel-backport" ,
+"needs-luminous-backport"
 
-Sie ben=C3=B6tigen einen echten Kredit online Ihre Rechnungen zu sichern?
-Startet ein neues Unternehmen? Sie ben=C3=B6tigen einen pers=C3=B6nlichen K=
-redit
-oder Business-Darlehen? Wir bieten ein Darlehen von =E2=82=AC 10.000 bis =
-=E2=82=AC
-500,000.000.00 mit 2% Zinsen pro Jahr und auch mit einem
-erschwinglichen R=C3=BCckzahlungsbedingungen und Zustand. Ich suche f=C3=BCr
-Darlehen und Projektinvestmentfonds ? Wir halten professionelle
-Exzellenz, unsere Definition von Exzellenz liegt in hervorragenden
-Kundenservice, erschwingliche Zahlung und R=C3=BCckzahlung Pl=C3=A4ne, schn=
-ell
-und einfach-Prozess.
-Hochachtungsvoll....
- =
+I have personally missed couple of test backports back to branches and
+added labels would help query results right from the github interface
+and make it easier for anyone to check if there are important
+backports missing.
 
-Freundliche Gr=C3=BC=C3=9Fe,
-Herr David Williams
+Also I am +1 on NOT creating a new tracker for every backport, this
+seems redundant work, the original tracker can still be used with few
+additional fields to indicate "fixed in master", "fixed in jewel" etc.
+
+Thanks
