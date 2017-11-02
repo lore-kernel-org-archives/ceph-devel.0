@@ -1,32 +1,33 @@
-From: Vasu Kulkarni <vakulkar@redhat.com>
-Subject: Additional backport labels and process improvements
-Date: Thu, 2 Nov 2017 09:16:02 -0700
-Message-ID: <CAKPXa=Z3aXdwRz9OAniOLEpWkLtGUJHyLCTvm2y+n9u8PKXy7g@mail.gmail.com>
+From: Ken Dreyer <kdreyer@redhat.com>
+Subject: Re: Additional backport labels and process improvements
+Date: Thu, 2 Nov 2017 13:54:42 -0600
+Message-ID: <CALqRxCzEJ88hFKjLyA0-kn4qWGQzPqiVCLnwHQAz92YuZoUjfw@mail.gmail.com>
+References: <CAKPXa=Z3aXdwRz9OAniOLEpWkLtGUJHyLCTvm2y+n9u8PKXy7g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f174.google.com ([74.125.82.174]:56678 "EHLO
-        mail-ot0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932971AbdKBQQE (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Nov 2017 12:16:04 -0400
-Received: by mail-ot0-f174.google.com with SMTP id i19so23183ote.13
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Nov 2017 09:16:03 -0700 (PDT)
+Received: from mail-vk0-f48.google.com ([209.85.213.48]:54719 "EHLO
+        mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934362AbdKBTyn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Nov 2017 15:54:43 -0400
+Received: by mail-vk0-f48.google.com with SMTP id n70so448393vkf.11
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Nov 2017 12:54:42 -0700 (PDT)
+In-Reply-To: <CAKPXa=Z3aXdwRz9OAniOLEpWkLtGUJHyLCTvm2y+n9u8PKXy7g@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>
+To: Vasu Kulkarni <vakulkar@redhat.com>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-When adding a important code or test fix to the master branch we have
-'needs-backport' label,   can we add more labels that indicate what
-branch it needs to be backported as well eg "needs-jewel-backport" ,
-"needs-luminous-backport"
+On Thu, Nov 2, 2017 at 10:16 AM, Vasu Kulkarni <vakulkar@redhat.com> wrote:
+> Also I am +1 on NOT creating a new tracker for every backport, this
+> seems redundant work, the original tracker can still be used with few
+> additional fields to indicate "fixed in master", "fixed in jewel" etc.
 
-I have personally missed couple of test backports back to branches and
-added labels would help query results right from the github interface
-and make it easier for anyone to check if there are important
-backports missing.
+I like the additional tickets because it makes it clearer to me what
+is complete and what is not. But I agree it's pretty heavyweight to do
+it by hand.
 
-Also I am +1 on NOT creating a new tracker for every backport, this
-seems redundant work, the original tracker can still be used with few
-additional fields to indicate "fixed in master", "fixed in jewel" etc.
+I think ceph-workbench (?) automates some of this, but I think we
+could automate it further.
 
-Thanks
+- Ken
