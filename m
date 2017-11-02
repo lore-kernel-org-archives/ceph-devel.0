@@ -1,98 +1,122 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Messenger V2: multiple bind support
-Date: Thu, 2 Nov 2017 02:43:15 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1711020238570.23234@piezo.novalocal>
-References: <1508855817.10018.25.camel@suse.com> <add34139-4ed6-fcca-fdac-a05f58aff433@suse.de> <CAJ4mKGaQ2EDENqqNpDUH6XG2THGk-XnJ+oR4yu14pF7h+F6r1g@mail.gmail.com>
+From: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
+Subject: Re: some issue about peering progress
+Date: Thu, 2 Nov 2017 11:35:15 +0800
+Message-ID: <CANE=7sVop6coM0oTppBxK=CWH5B1XQQ9AHpd-MpAoxrb-Q1gFQ@mail.gmail.com>
+References: <CANE=7sWZ9sBTdqbNZ_UuUZ=K5UJDB=kZbrXh3u09dNaGeUzXRQ@mail.gmail.com>
+ <CAJ4mKGa8+5xa-FJb+XuTn3A3p5quYkmOQZixa11tYEW78nLQKQ@mail.gmail.com>
+ <CANE=7sXWMXTpTfgG6NmwxYYyjYA2_UZ3oNun4eAw+QNiht2nkg@mail.gmail.com> <CAJ4mKGaFP+5vePBNzm0fk3pqONirfCyGhrGynZ4BTD3AwfNMuw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1909835053-1509590597=:23234"
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:52331 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933975AbdKBCnS (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Nov 2017 22:43:18 -0400
-In-Reply-To: <CAJ4mKGaQ2EDENqqNpDUH6XG2THGk-XnJ+oR4yu14pF7h+F6r1g@mail.gmail.com>
+Received: from mail-pg0-f45.google.com ([74.125.83.45]:52414 "EHLO
+        mail-pg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934099AbdKBDfQ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Nov 2017 23:35:16 -0400
+Received: by mail-pg0-f45.google.com with SMTP id a192so3882118pge.9
+        for <ceph-devel@vger.kernel.org>; Wed, 01 Nov 2017 20:35:16 -0700 (PDT)
+In-Reply-To: <CAJ4mKGaFP+5vePBNzm0fk3pqONirfCyGhrGynZ4BTD3AwfNMuw@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Joao Eduardo Luis <joao@suse.de>, Ricardo Dias <rdias@suse.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Gregory Farnum <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+The Stray set send_notify false only if go to activate?
 
---8323329-1909835053-1509590597=:23234
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+2017-11-02 10:27 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
+> On Wed, Nov 1, 2017 at 5:27 PM Xinze Chi (=E4=BF=A1=E6=B3=BD) <xmdxcxz@gm=
+ail.com> wrote:
+>>
+>> 2017-11-02 4:26 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
+>> > On Fri, Oct 27, 2017 at 12:46 AM Xinze Chi (=E4=BF=A1=E6=B3=BD) <xmdxc=
+xz@gmail.com> wrote:
+>> >>
+>> >> hi, all:
+>> >>
+>> >>      I confuse about the notify message during peering. Such as:
+>> >>
+>> >>     epoch 1, primary osd do Pering , GetInfo and GetMissing, it
+>> >> calling the func  proc_replica_log. in this func the last_complete an=
+d
+>> >> last_update maybe reset.
+>> >>
+>> >>     Before go to Activate. the OSDMap change (the new osdmap do not
+>> >> lead to restart peering), the non-primary osd send the notify to
+>> >> primary.
+>> >
+>> >
+>> > I don't think this can happen. The OSD won't re-send a notify during
+>> > the same peering interval, and even if it did the message would be
+>> > tagged with a new (higher) epoch so the PG wouldn't process it until
+>> > after it had switched states, right?
+>> >
+>>
+>>    I just want to understand this algorithm. When the Stray osd received=
+ ActMap
+>>
+>> it would send_notity even if during the same peering interval. see
+>> Stray::react(const ActMap&).
+>
+> Note the
+>
+> if (pg->should_send_notify()
+>
+> check preceding that block. It checks a boolean send_notify value that
+> is set true only when it enters a new peering interval, and is set
+> false as soon as it shares its info. So I don't think the primary's
+> behavior matters at all (other than from a security perspective,
+> anyway).
+>
+>
+>>   You say the priamry osd wouldn't process the notify msg, I do not
+>> find out the code. The primary
+>>
+>> call handle_pg_notify and process it.
+>
+> I didn't actually track the order of the state machine here; I just
+> saw that PG::RecoveryState::Active::react(const MNotifyRec& notevt)
+> will throw them out if it's already seen the info. You're right
+> PG::RecoveryState::Primary::react(const MNotifyRec& notevt) will
+> process it unconditionally. I'm not sure if those are the replica and
+> primary states, or if you move from Primary to Active (or vice versa).
+> -Greg
+>
+>>
+>>
+>> >>
+>> >>
+>> >>     When the primary receive the notify, Primary::react(const
+>> >> MNotifyRec& notevt), so it call the func proc_replica_info.
+>> >>
+>> >>     In the func, we update the pg info including last_complete and
+>> >> last_update which modified in proc_replica_log.
+>> >
+>> > Note also that "PG::RecoveryState::Active::react(const MNotifyRec&
+>> > notevt)" does *not* unconditionally invoke proc_replica_info(). I
+>> > think you were trying to say we hadn't reached this state on receipt
+>> > of the message? But as I mentioned above, I think we block so that's
+>> > not actually possible either.
+>> >
+>> >>
+>> >>     When the primary call the func activate, the primary osd  process
+>> >> recovering based on pg info got by notify instead of proc_replica_log=
+.
+>> >>
+>> >>     so it is a bug?
+>> >
+>> > Have you seen issues in the wild, or just trying to understand this
+>> > code/algorithm? I would be surprised if we had undiscovered issues
+>> > here just because our tests exercise peering quite vigorously, but I
+>> > might be missing what's happening in my own code skims.
+>> > -Greg
+>>
+>>
+>>
+>> --
+>> Regards,
+>> Xinze Chi
 
-On Wed, 1 Nov 2017, Gregory Farnum wrote:
-> On Wed, Oct 25, 2017 at 7:43 AM Joao Eduardo Luis <joao@suse.de> wrote:
-> >
-> > On 10/24/2017 03:36 PM, Ricardo Dias wrote:
-> > > Hi list,
-> > >
-> > > I was wondering if it makes sense to support multiple binds with a
-> > > single messenger instance.
-> > >
-> > > The use case I have in mind is when there are multiple public/cluster
-> > > networks specified in ceph.conf and we want to listen for connections
-> > > in one interface of each network. With the support for multiple binds,
-> > > we could use a single messenger instance to listen to all interfaces.
-> > >
-> > > Do you think it is worth to implement such support or is the above use
-> > > case easily handled by having multiple messenger instances?
-> >
-> > I would think multiple binds would make sense, but how would this affect
-> > setting the policies? Would we be sharing a single policy across
-> > multiple binds, or would we be allowed different policies for different
-> > binds?
-> >
-> > Regardless, and not knowing the code, wouldn't this make sense for
-> > multiplexing multiple daemons on a single messenger? Making the
-> > messenger sort of a blackbox, that everyone could just use seamlessly
-> > without having to figure too many things out?
-> >
-> > E.g., instead of multiplexing several osds on a messenger for the public
-> > network, and then the same set of osds on a messenger for the cluster
-> > network, we could simply have one messenger (bound to public and
-> > cluster) and have just that one messenger for all the osds.
-> >
-> > Anyway, from an abstraction point-of-view it makes sense to me; no idea
-> > how feasible that would be though.
-> 
-> There's sort of two pieces here, right?
-> 1) From the Dispatcher perspective, we want a single "Messenger" that
-> it talks to. (At least, I'm pretty sure. Unless we need to be making
-> routing decisions using internal data? I really hope that never comes
-> up.) That could be set up by having multiple Messenger implementations
-> behind a "UnifyingMessenger" abstraction layer with pretty minimal
-> changes.
-> 
-> 2) From an implementation perspective, which data structures do we end
-> up needing to share in order to have a daemon listening on multiple
-> ports?
-> 
-> So, from the SimpleMessenger perspective, I don't think we get much
-> out of trying to build multi-bind into it. We'd basically get to
-> eliminate the duplicated DIspatchQueue, which is not very interesting.
-> (Modulo some flow control stuff, perhaps.) From an AsyncMessenger
-> implementation perspective, that calculus might shift since we're
-> running on a thread pool, but I'm not deeply familiar with the code
-> internals.
 
-I'm afraid that the problem that's going to come up is the peer_addr 
-hash_map<> for stateful_peer connections (osd to osd, etc.).  This is down 
-in the messenger layer and is the main piece of shared state left (most 
-everything else works with Connection refs).  I'm worried that we'll want 
-or need to pull that up out of the messenger into the consumer (e.g., a 
-hash_map<int,ConnectionRef> osd_peers in OSDService) and refactor the 
-connection race handling a bit.  I think that will ultimately solve some 
-bugs and will simplify the Messenger greatly, but it's a painful refactor.
 
-> But I'm curious what brings this up. I thought you were working on the
-> v2 protocol — does something in that somehow hinge on the server-side
-> implementation of multiple networks?
-
-The v2 protocol will run on another port and we want to answer on the old 
-port+protocol for old clients too.
-
-sage
---8323329-1909835053-1509590597=:23234--
+--=20
+Regards,
+Xinze Chi
