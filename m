@@ -1,122 +1,67 @@
-From: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
-Subject: Re: some issue about peering progress
-Date: Thu, 2 Nov 2017 11:35:15 +0800
-Message-ID: <CANE=7sVop6coM0oTppBxK=CWH5B1XQQ9AHpd-MpAoxrb-Q1gFQ@mail.gmail.com>
-References: <CANE=7sWZ9sBTdqbNZ_UuUZ=K5UJDB=kZbrXh3u09dNaGeUzXRQ@mail.gmail.com>
- <CAJ4mKGa8+5xa-FJb+XuTn3A3p5quYkmOQZixa11tYEW78nLQKQ@mail.gmail.com>
- <CANE=7sXWMXTpTfgG6NmwxYYyjYA2_UZ3oNun4eAw+QNiht2nkg@mail.gmail.com> <CAJ4mKGaFP+5vePBNzm0fk3pqONirfCyGhrGynZ4BTD3AwfNMuw@mail.gmail.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: success-comment of github pr trigger
+Date: Thu, 2 Nov 2017 15:43:52 +0800
+Message-ID: <CAJE9aOPu=2GRdL_HRTq7e53FF1TV3etKOE-ETjgTxru-5zDrpg@mail.gmail.com>
+References: <CAJE9aOMiVa8SeXJ3Jd5Jyj0agLsoo=SMcu==ypj-i=yC2xQinQ@mail.gmail.com>
+ <07f40898-ef71-95da-806d-1187b6986647@redhat.com> <6402d745-c1b9-9fc3-3637-f7db7c9b8c4f@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pg0-f45.google.com ([74.125.83.45]:52414 "EHLO
-        mail-pg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934099AbdKBDfQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 1 Nov 2017 23:35:16 -0400
-Received: by mail-pg0-f45.google.com with SMTP id a192so3882118pge.9
-        for <ceph-devel@vger.kernel.org>; Wed, 01 Nov 2017 20:35:16 -0700 (PDT)
-In-Reply-To: <CAJ4mKGaFP+5vePBNzm0fk3pqONirfCyGhrGynZ4BTD3AwfNMuw@mail.gmail.com>
+Received: from mail-oi0-f53.google.com ([209.85.218.53]:52199 "EHLO
+        mail-oi0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755104AbdKBHnx (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Nov 2017 03:43:53 -0400
+Received: by mail-oi0-f53.google.com with SMTP id j126so7656757oib.8
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Nov 2017 00:43:53 -0700 (PDT)
+In-Reply-To: <6402d745-c1b9-9fc3-3637-f7db7c9b8c4f@redhat.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+To: David Galloway <dgallowa@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Alfredo Deza <adeza@redhat.com>
 
-The Stray set send_notify false only if go to activate?
+On Thu, Nov 2, 2017 at 1:14 AM, David Galloway <dgallowa@redhat.com> wrote:
+>
+>
+> On 11/01/2017 12:11 PM, David Galloway wrote:
+>> On 11/01/2017 01:48 AM, kefu chai wrote:
+>>> hi Alfredo,
+>>>
+>>> i found that jenkins started to comment on PRs when completing a job.
+>>> for example, see
+>>> https://github.com/ceph/ceph/pull/18659#issuecomment-340964973. this
+>>> is a little bit annoying and distracting. but i checked
+>>> https://github.com/ceph/ceph-build/blob/master/ceph-pull-requests/config/definitions/ceph-pull-requests.yml#L39,
+>>> we don't specify the success-comment there. i wonder it might be jjb?
+>>> but i checked the jjb 2.0.0.0b2, it looks sane. see
+>>> https://github.com/openstack-infra/jenkins-job-builder/blob/04348c2c00657490b4712ae61c6a1bed691a3e3a/jenkins_jobs/modules/triggers.py#L1122.
+>>> do you have any idea off the head? are we experimenting some new
+>>> features?
+>>>
+>>
+>>
+>> I suspect something in GitHub's API changed and the Github Pull Request
+>> Builder plugin is behind/out of date.
+>>
+>> Starting at Nov 01, 2017 2:57:31 AM UTC, ghprb started to indicate it
+>> was failing to update PR statuses (although I don't think it was) and
+>> started sending comments.
+>>
+>> "Use comments to report results when updating commit status fails" was
+>> checked in the Jenkins settings.  I've unchecked it so hopefully the
+>> comments will stop for now.
+>>
+>> Please let me know if that's not the case.
+>
+> Looks like comments stopped.
+>
+> We're hitting this/these:
+> https://github.com/kohsuke/github-api/issues/387
+> https://issues.jenkins-ci.org/browse/JENKINS-47601
+>
+> I will update the plugins and restart Jenkins when things are quiet.
 
-2017-11-02 10:27 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
-> On Wed, Nov 1, 2017 at 5:27 PM Xinze Chi (=E4=BF=A1=E6=B3=BD) <xmdxcxz@gm=
-ail.com> wrote:
->>
->> 2017-11-02 4:26 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
->> > On Fri, Oct 27, 2017 at 12:46 AM Xinze Chi (=E4=BF=A1=E6=B3=BD) <xmdxc=
-xz@gmail.com> wrote:
->> >>
->> >> hi, all:
->> >>
->> >>      I confuse about the notify message during peering. Such as:
->> >>
->> >>     epoch 1, primary osd do Pering , GetInfo and GetMissing, it
->> >> calling the func  proc_replica_log. in this func the last_complete an=
-d
->> >> last_update maybe reset.
->> >>
->> >>     Before go to Activate. the OSDMap change (the new osdmap do not
->> >> lead to restart peering), the non-primary osd send the notify to
->> >> primary.
->> >
->> >
->> > I don't think this can happen. The OSD won't re-send a notify during
->> > the same peering interval, and even if it did the message would be
->> > tagged with a new (higher) epoch so the PG wouldn't process it until
->> > after it had switched states, right?
->> >
->>
->>    I just want to understand this algorithm. When the Stray osd received=
- ActMap
->>
->> it would send_notity even if during the same peering interval. see
->> Stray::react(const ActMap&).
->
-> Note the
->
-> if (pg->should_send_notify()
->
-> check preceding that block. It checks a boolean send_notify value that
-> is set true only when it enters a new peering interval, and is set
-> false as soon as it shares its info. So I don't think the primary's
-> behavior matters at all (other than from a security perspective,
-> anyway).
->
->
->>   You say the priamry osd wouldn't process the notify msg, I do not
->> find out the code. The primary
->>
->> call handle_pg_notify and process it.
->
-> I didn't actually track the order of the state machine here; I just
-> saw that PG::RecoveryState::Active::react(const MNotifyRec& notevt)
-> will throw them out if it's already seen the info. You're right
-> PG::RecoveryState::Primary::react(const MNotifyRec& notevt) will
-> process it unconditionally. I'm not sure if those are the replica and
-> primary states, or if you move from Primary to Active (or vice versa).
-> -Greg
->
->>
->>
->> >>
->> >>
->> >>     When the primary receive the notify, Primary::react(const
->> >> MNotifyRec& notevt), so it call the func proc_replica_info.
->> >>
->> >>     In the func, we update the pg info including last_complete and
->> >> last_update which modified in proc_replica_log.
->> >
->> > Note also that "PG::RecoveryState::Active::react(const MNotifyRec&
->> > notevt)" does *not* unconditionally invoke proc_replica_info(). I
->> > think you were trying to say we hadn't reached this state on receipt
->> > of the message? But as I mentioned above, I think we block so that's
->> > not actually possible either.
->> >
->> >>
->> >>     When the primary call the func activate, the primary osd  process
->> >> recovering based on pg info got by notify instead of proc_replica_log=
-.
->> >>
->> >>     so it is a bug?
->> >
->> > Have you seen issues in the wild, or just trying to understand this
->> > code/algorithm? I would be surprised if we had undiscovered issues
->> > here just because our tests exercise peering quite vigorously, but I
->> > might be missing what's happening in my own code skims.
->> > -Greg
->>
->>
->>
->> --
->> Regards,
->> Xinze Chi
+David, thanks for the quick fix!
 
-
-
---=20
-Regards,
-Xinze Chi
+-- 
+Regards
+Kefu Chai
