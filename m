@@ -1,94 +1,69 @@
-From: Vasu Kulkarni <vakulkar@redhat.com>
-Subject: Re: Additional backport labels and process improvements
-Date: Thu, 2 Nov 2017 15:19:25 -0700
-Message-ID: <CAKPXa=ZSr6GU_+jXAAsDV4MEkrRS-q_--axU1btPP=pHmMfu9Q@mail.gmail.com>
-References: <CAKPXa=Z3aXdwRz9OAniOLEpWkLtGUJHyLCTvm2y+n9u8PKXy7g@mail.gmail.com>
- <33616246-099d-0bbc-f071-703733463e79@suse.cz>
+From: Xuehan Xu <xxhdx1985126@gmail.com>
+Subject: Re: distributed point-in-time consistency report
+Date: Fri, 3 Nov 2017 12:57:01 +0800
+Message-ID: <CAJACTufg2H_sjG0V3iuVCXi3Q6kjY7fpTm8L=CU1NfwStSiWZQ@mail.gmail.com>
+References: <alpine.DEB.2.11.1709070119530.16664@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f181.google.com ([74.125.82.181]:44743 "EHLO
-        mail-ot0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934528AbdKBWT0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 2 Nov 2017 18:19:26 -0400
-Received: by mail-ot0-f181.google.com with SMTP id d36so916385otf.1
-        for <ceph-devel@vger.kernel.org>; Thu, 02 Nov 2017 15:19:26 -0700 (PDT)
-In-Reply-To: <33616246-099d-0bbc-f071-703733463e79@suse.cz>
+Received: from mail-ot0-f176.google.com ([74.125.82.176]:45484 "EHLO
+        mail-ot0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751057AbdKCE5D (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Nov 2017 00:57:03 -0400
+Received: by mail-ot0-f176.google.com with SMTP id q99so1512771ota.2
+        for <ceph-devel@vger.kernel.org>; Thu, 02 Nov 2017 21:57:02 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.11.1709070119530.16664@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Nathan Cutler <ncutler@suse.cz>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Thu, Nov 2, 2017 at 2:44 PM, Nathan Cutler <ncutler@suse.cz> wrote:
-> Hi Vasu:
->
-> As I understand it, the "needs-backport" label is there to enable
-> fast-tracking of luminous backports in the early phases of the
-> release/maintenance cycle, not to replace the existing
-> (tracker.ceph.com-based) backport tracking.
->
-> Having separate tracker issues for backports is essential to enable
-> searching for backports in Redmine. For example, if you go to
-> http://tracker.ceph.com/projects/ceph/issues and look over on the right
-> you'll see the following links (among others):
->
-> CUSTOM QUERIES
->
->     Backports: jewel
->     Backports: jewel (pending)
->     Backports: luminous
->     Backports: luminous (pending)
->     Backports: missing release
->
-> These are just some of the more common searches - plenty more are possible.
->
-> Further comments in-line, below.
->
-> On 11/02/2017 05:16 PM, Vasu Kulkarni wrote:
->>
->> When adding a important code or test fix to the master branch we have
->> 'needs-backport' label,   can we add more labels that indicate what
->> branch it needs to be backported as well eg "needs-jewel-backport" ,
->> "needs-luminous-backport"
->
->
-> If anything, I would like to drop the "needs-backport" label after 12.2.2
-> (and perhaps reinstate it when 13.2.0 is released).
->
->> I have personally missed couple of test backports back to branches and
->> added labels would help query results right from the github interface
->> and make it easier for anyone to check if there are important
->> backports missing.
->
->>
->>
->> Also I am +1 on NOT creating a new tracker for every backport, this
->> seems redundant work, the original tracker can still be used with few
->> additional fields to indicate "fixed in master", "fixed in jewel" etc.
->
->
-> That pretty much describes the previous backporting system, which IIRC did
-> not work properly - many issues did not get backported because there was no
-> way to separately track backports or query them.
->
-> Rather than creating additional work, the whole system is geared toward
-> _reducing_ work for developers. Ideally, developer work is reduced to:
->
-> 1. flagging bugfixes for backporting, by filling out the "Backport" field
-> 2. change the bug status to "Pending Backport" when the master PR is merged.
+Hi, sage and other cephers.
 
-Thanks for the explanation, so all one needs to do is set the backport
-field and update status to pending backport in
-the original tracker and the rest is handled automatically.
+Thanks for sharing your tech report:-), and so sorry for not
+responding for so long. I was "offline" for the passed two months due
+to some personal reasons, and I missed the passed two CDMs also.
 
+I just made some modifications according to your advice, and discussed
+the "original op journal" processing in some detail as responding to
+Greg's question:-).
+I don't know if the high level design in this document is sufficient
+to accomplish the replication task, if it does, I can go on to make
+modifications to the details of my original design and discuss with
+you.
+
+My document is at:
+        https://drive.google.com/file/d/12BXq0I3FCetHehqHC8w_r1Dh2_RZjBUS/view?usp=sharing
+
+Thanks:-)
+
+
+On 7 September 2017 at 09:34, Sage Weil <sweil@redhat.com> wrote:
+> Hi Xuehan,
 >
-> That's all. The backporting team takes care of the rest, unless we find the
-> backport is not easy to cherry-pick and we need to ask for your help. In any
-> case, developers should definitely not need to create the backport tracker
-> issues. That is automated (by ceph-workbench) and members of the backporting
-> team run the script semi-regularly (ping us if you need it done sooner
-> rather than later). Maybe we should look into running the script via
-> cronjob. . .
+> Thanks for presenting during CDM!  The final report I mentioned for the
+> Red Hat / Harvey Mudd clinic that looked at the point-in-time consistency
+> and time sync problem is at
 >
-> HTH,
-> Nathan
+>         http://newdream.net/~sage/RedHatFinalReport%2014-15.pdf
+>
+> If I understood correctly, this is essentially what you are proposing,
+> except that the delay is done on the OSD instead of the client.  I think
+> this improves a few things:
+>
+>  - fewer OSDs, fewer clocks to sync
+>  - in most deployments, OSD to OSD latency will be lower
+>  - clock error bound will be smaller
+>  - fewer nodes whose clocks might jitter at the wrong time and invalidate
+> the checkpoint
+>
+> Also, I *think* we can simply delay the OSD replies, preventing any causal
+> link with a subsequent operation; new requests can still be
+> processed, and hopefully the impact on overall workload will be
+> very small.
+>
+> Does that simplify your approach or make it more complex?  I couldn't tell
+> if there were other reasons or advantages to doing it on the client.
+>
+> Thanks!
+> sage
