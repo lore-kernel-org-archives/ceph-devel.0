@@ -1,241 +1,270 @@
-From: Liuhao <liu.haoA@h3c.com>
-Subject: reply: reply: about filestore->journal->rebuild_align
-Date: Fri, 3 Nov 2017 07:17:08 +0000
-Message-ID: <7DF47FD5BC069E4BBD28890C798EC7BC8C8C2DA0@H3CMLB14-EX.srv.huawei-3com.com>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: reply: reply: about filestore->journal->rebuild_align
+Date: Fri, 3 Nov 2017 12:09:06 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1711031208380.23234@piezo.novalocal>
+References: <7DF47FD5BC069E4BBD28890C798EC7BC8C8C2DA0@H3CMLB14-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-722012086-1509710948=:23234"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:42667 "EHLO h3cmg01-ex.h3c.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752238AbdKCHRc (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 3 Nov 2017 03:17:32 -0400
-Content-Language: zh-CN
+Received: from tragedy.dreamhost.com ([66.33.205.236]:40230 "EHLO
+        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752045AbdKCMJJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Nov 2017 08:09:09 -0400
+In-Reply-To: <7DF47FD5BC069E4BBD28890C798EC7BC8C8C2DA0@H3CMLB14-EX.srv.huawei-3com.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: 'Sage Weil' <sage@newdream.net>
+To: Liuhao <liu.haoA@h3c.com>
 Cc: "'ceph-devel@vger.kernel.org'" <ceph-devel@vger.kernel.org>
 
-SGksIA0KdmVyc2lvbiAxMC4yLjANCi4vcmFkb3MgYmVuY2ggMjAgLXAgcmJkIHdyaXRlIC1iIDRN
-DQoNCmFsaWdubWVudCBpcyA0MDg2LCBwcmVfcGFkIGlzIDQwNDYsIHJlYnVpbGRfYWxpZ25lZCB3
-aWxsIHJlYWxsb2MgbWVtb3J5IDQyMDI0OTYNCklmIGFkanVzdCB0aGUgcHJlX3BhZCBmcm9tIDQw
-NDYgdG8gNDA0MiwgcmVhbGxvYyBtZW1vcnkgb25seSA4MTkyLiBJIHRoaW5rIHRoaXMgYW5zd2Vy
-IGlzIGV4cGVjdGVkLg0KSSB0aGluayB0aGUgImdldF9kYXRhX2FsaWdubWVudCIgbWF5IGJlIGhh
-dmUgYSBidWcsIGJlY2F1c2UgcHJlX3BhZCBpcyBjYWxjdWxhdGVkIGJ5IGFsaWdubWVudC4NCkxv
-b2tpbmcgZm9yd2FyZCB0byB5b3VyIGFuc3dlci4NCg0KRGV0YWlsDQpCZWZvcmUgbW9kaWZ5Og0K
-MjAxNy0xMS0wMyAxNDoyMDo1NC42MjU3NzMgN2ZkMzJkN2ZhNzAwIDEwIGpvdXJuYWwgIGxlbiA0
-MTk2MTg4IC0+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCA0MDQ2IGJsIDQxOTYxODggcG9zdF9w
-YWQgMjE4MiB0YWlsIDQwKSAoYmwgYWxpZ25tZW50IDQwODYpDQoNCjIwMTctMTEtMDMgMTQ6MjA6
-NTQuNjI1Nzc4IDdmZDMyZDdmYTcwMCAxMCBqb3VybmFsIGJlZm9yZTBvZmY6MGxlbjo0MCAgICAg
-aGVhZA0KMjAxNy0xMS0wMyAxNDoyMDo1NC42MjU3NzkgN2ZkMzJkN2ZhNzAwIDEwIGpvdXJuYWwg
-YmVmb3JlMW9mZjowbGVuOjQwNDYgICBwcmVfcGFkDQoNCjIwMTctMTEtMDMgMTQ6MjA6NTQuNjI1
-NzgwIDdmZDMyZDdmYTcwMCAxMCBqb3VybmFsIGJlZm9yZTJvZmY6MGxlbjoxMCAgICAgYmwgaGF2
-ZSAxOSBwdHJzDQoyMDE3LTExLTAzIDE0OjIwOjU0LjYyNTc4MCA3ZmQzMmQ3ZmE3MDAgMTAgam91
-cm5hbCBiZWZvcmUzb2ZmOjBsZW46NCAgICAgIDwtLS0tLS0tLSAgICBpbXBvcnRhbnQsIG5vdCBh
-bGlnbiANCjIwMTctMTEtMDMgMTQ6MjA6NTQuNjI1NzgxIDdmZDMyZDdmYTcwMCAxMCBqb3VybmFs
-IGJlZm9yZTRvZmY6MGxlbjo0MTk0MzA0ICA8LS0tLS0tLS0gICB0aGlzIHdpbGwgcmVidWlsZA0K
-MjAxNy0xMS0wMyAxNDoyMDo1NC42MjU3ODEgN2ZkMzJkN2ZhNzAwIDEwIGpvdXJuYWwgYmVmb3Jl
-NW9mZjo0bGVuOjEzDQoyMDE3LTExLTAzIDE0OjIwOjU0LjYyNTc4MiA3ZmQzMmQ3ZmE3MDAgMTAg
-am91cm5hbCBiZWZvcmU2b2ZmOjBsZW46MjU2DQoyMDE3LTExLTAzIDE0OjIwOjU0LjYyNTc4MiA3
-ZmQzMmQ3ZmE3MDAgMTAgam91cm5hbCBiZWZvcmU3b2ZmOjBsZW46MTgNCjIwMTctMTEtMDMgMTQ6
-MjA6NTQuNjI1NzgzIDdmZDMyZDdmYTcwMCAxMCBqb3VybmFsIGJlZm9yZThvZmY6MTdsZW46MTUN
-CjIwMTctMTEtMDMgMTQ6MjA6NTQuNjI1NzgzIDdmZDMyZDdmYTcwMCAxMCBqb3VybmFsIGJlZm9y
-ZTlvZmY6MGxlbjozMQ0KMjAxNy0xMS0wMyAxNDoyMDo1NC42MjU3ODQgN2ZkMzJkN2ZhNzAwIDEw
-IGpvdXJuYWwgYmVmb3JlMTBvZmY6MzJsZW46NDMNCjIwMTctMTEtMDMgMTQ6MjA6NTQuNjI1Nzg1
-IDdmZDMyZDdmYTcwMCAxMCBqb3VybmFsIGJlZm9yZTExb2ZmOjBsZW46NA0KMjAxNy0xMS0wMyAx
-NDoyMDo1NC42MjU3ODUgN2ZkMzJkN2ZhNzAwIDEwIGpvdXJuYWwgYmVmb3JlMTJvZmY6MGxlbjox
-NzUNCjIwMTctMTEtMDMgMTQ6MjA6NTQuNjI1Nzg2IDdmZDMyZDdmYTcwMCAxMCBqb3VybmFsIGJl
-Zm9yZTEzb2ZmOjRsZW46NA0KMjAxNy0xMS0wMyAxNDoyMDo1NC42MjU3ODcgN2ZkMzJkN2ZhNzAw
-IDEwIGpvdXJuYWwgYmVmb3JlMTRvZmY6NzVsZW46MTMNCjIwMTctMTEtMDMgMTQ6MjA6NTQuNjI1
-Nzg3IDdmZDMyZDdmYTcwMCAxMCBqb3VybmFsIGJlZm9yZTE1b2ZmOjBsZW46ODYzDQoyMDE3LTEx
-LTAzIDE0OjIwOjU0LjYyNTc4OCA3ZmQzMmQ3ZmE3MDAgMTAgam91cm5hbCBiZWZvcmUxNm9mZjox
-MGxlbjo0DQoyMDE3LTExLTAzIDE0OjIwOjU0LjYyNTc4OCA3ZmQzMmQ3ZmE3MDAgMTAgam91cm5h
-bCBiZWZvcmUxN29mZjowbGVuOjcyDQoyMDE3LTExLTAzIDE0OjIwOjU0LjYyNTc4OSA3ZmQzMmQ3
-ZmE3MDAgMTAgam91cm5hbCBiZWZvcmUxOG9mZjo3Mmxlbjo3Mg0KMjAxNy0xMS0wMyAxNDoyMDo1
-NC42MjU3OTAgN2ZkMzJkN2ZhNzAwIDEwIGpvdXJuYWwgYmVmb3JlMTlvZmY6MTQ0bGVuOjcyDQoy
-MDE3LTExLTAzIDE0OjIwOjU0LjYyNTc5MCA3ZmQzMmQ3ZmE3MDAgMTAgam91cm5hbCBiZWZvcmUy
-MG9mZjoxNGxlbjoyMTUNCg0KMjAxNy0xMS0wMyAxNDoyMDo1NC42MjU3OTEgN2ZkMzJkN2ZhNzAw
-IDEwIGpvdXJuYWwgYmVmb3JlMjFvZmY6MGxlbjoyMTgyICAgcG9zdF9wYWQNCjIwMTctMTEtMDMg
-MTQ6MjA6NTQuNjI1NzkxIDdmZDMyZDdmYTcwMCAxMCBqb3VybmFsIGJlZm9yZTIyb2ZmOjQwbGVu
-OjQwICAgIGhlYWQNCg0KQWZ0ZXIgcmVidWlsZCwgdGhlIHJlc3VsdCBpcyA6IGEgYmlnIHB0ciwg
-d2lsbCByZWFsbG9jIG1lbW9yeSBpcyA0MjAyNDk2DQoyMDE3LTExLTAzIDE0OjIwOjU0LjYyNzI1
-MSA3ZmQzMmQ3ZmE3MDAgMTAgam91cm5hbCBhZnRlcjBvZmY6MGxlbjo0MjAyNDk2DQoNCklmIGFk
-anVzdCBwcmVfcGFkIHRvIDQwNDLvvIxvbmx5IHJlYWxsb2MgbWVtb3J5IDgxOTIuIGFmdGVyIHJl
-YnVpbGQsIHRoZSBsaXN0IGhhdmUgMyBwdHJzLCA0MDk2ICwgNDE5NDMwNCwgNDA5Ni4NCnRoZSBy
-ZXN1bHQgaXMgOg0KMjAxNy0xMS0wMyAxNDo0MzozNS4wMzI5NTggN2YzMjJmZmZmNzAwIDEwIGpv
-dXJuYWwgIGxlbiA0MTk2MTg4IC0+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCA0MDQyIGJsIDQx
-OTYxODggcG9zdF9wYWQgMjE4NiB0YWlsIDQwKSAoYmwgYWxpZ25tZW50IDQwODYpDQoyMDE3LTEx
-LTAzIDE0OjQzOjM1LjAzMjk2NSA3ZjMyMmZmZmY3MDAgMTAgam91cm5hbCBiZWZvcmUwb2ZmOjBs
-ZW46NDANCjIwMTctMTEtMDMgMTQ6NDM6MzUuMDMyOTY3IDdmMzIyZmZmZjcwMCAxMCBqb3VybmFs
-IGJlZm9yZTFvZmY6MGxlbjo0MDQyICA8LS0tLS0tLSAgSSBtb2RpZnkgdGhlIHByZV9wYWQgZnJv
-bSA0MDQ2IHRvIDQwNDINCg0KMjAxNy0xMS0wMyAxNDo0MzozNS4wMzI5NjggN2YzMjJmZmZmNzAw
-IDEwIGpvdXJuYWwgYmVmb3JlMm9mZjowbGVuOjEwDQoyMDE3LTExLTAzIDE0OjQzOjM1LjAzMjk3
-MCA3ZjMyMmZmZmY3MDAgMTAgam91cm5hbCBiZWZvcmUzb2ZmOjBsZW46NA0KMjAxNy0xMS0wMyAx
-NDo0MzozNS4wMzI5NzEgN2YzMjJmZmZmNzAwIDEwIGpvdXJuYWwgYmVmb3JlNG9mZjowbGVuOjQx
-OTQzMDQgIDwtLS0tLS0tLS0gIHRoaXMgd2lsbCBub3QgcmVidWlsZA0KMjAxNy0xMS0wMyAxNDo0
-MzozNS4wMzI5NzIgN2YzMjJmZmZmNzAwIDEwIGpvdXJuYWwgYmVmb3JlNW9mZjo0bGVuOjEzDQoy
-MDE3LTExLTAzIDE0OjQzOjM1LjAzMjk3MyA3ZjMyMmZmZmY3MDAgMTAgam91cm5hbCBiZWZvcmU2
-b2ZmOjBsZW46MjU2DQoyMDE3LTExLTAzIDE0OjQzOjM1LjAzMjk3NCA3ZjMyMmZmZmY3MDAgMTAg
-am91cm5hbCBiZWZvcmU3b2ZmOjBsZW46MTgNCjIwMTctMTEtMDMgMTQ6NDM6MzUuMDMyOTc2IDdm
-MzIyZmZmZjcwMCAxMCBqb3VybmFsIGJlZm9yZThvZmY6MTdsZW46MTUNCjIwMTctMTEtMDMgMTQ6
-NDM6MzUuMDMyOTc3IDdmMzIyZmZmZjcwMCAxMCBqb3VybmFsIGJlZm9yZTlvZmY6MGxlbjozMQ0K
-MjAxNy0xMS0wMyAxNDo0MzozNS4wMzI5NzggN2YzMjJmZmZmNzAwIDEwIGpvdXJuYWwgYmVmb3Jl
-MTBvZmY6MzJsZW46NDMNCjIwMTctMTEtMDMgMTQ6NDM6MzUuMDMyOTc5IDdmMzIyZmZmZjcwMCAx
-MCBqb3VybmFsIGJlZm9yZTExb2ZmOjBsZW46NA0KMjAxNy0xMS0wMyAxNDo0MzozNS4wMzI5ODAg
-N2YzMjJmZmZmNzAwIDEwIGpvdXJuYWwgYmVmb3JlMTJvZmY6MGxlbjoxNzUNCjIwMTctMTEtMDMg
-MTQ6NDM6MzUuMDMyOTgyIDdmMzIyZmZmZjcwMCAxMCBqb3VybmFsIGJlZm9yZTEzb2ZmOjRsZW46
-NA0KMjAxNy0xMS0wMyAxNDo0MzozNS4wMzI5ODMgN2YzMjJmZmZmNzAwIDEwIGpvdXJuYWwgYmVm
-b3JlMTRvZmY6NzVsZW46MTMNCjIwMTctMTEtMDMgMTQ6NDM6MzUuMDMyOTg0IDdmMzIyZmZmZjcw
-MCAxMCBqb3VybmFsIGJlZm9yZTE1b2ZmOjBsZW46ODYzDQoyMDE3LTExLTAzIDE0OjQzOjM1LjAz
-Mjk4NSA3ZjMyMmZmZmY3MDAgMTAgam91cm5hbCBiZWZvcmUxNm9mZjoxMGxlbjo0DQoyMDE3LTEx
-LTAzIDE0OjQzOjM1LjAzMjk4NiA3ZjMyMmZmZmY3MDAgMTAgam91cm5hbCBiZWZvcmUxN29mZjow
-bGVuOjcyDQoyMDE3LTExLTAzIDE0OjQzOjM1LjAzMjk4NyA3ZjMyMmZmZmY3MDAgMTAgam91cm5h
-bCBiZWZvcmUxOG9mZjo3Mmxlbjo3Mg0KMjAxNy0xMS0wMyAxNDo0MzozNS4wMzI5ODggN2YzMjJm
-ZmZmNzAwIDEwIGpvdXJuYWwgYmVmb3JlMTlvZmY6MTQ0bGVuOjcyDQoyMDE3LTExLTAzIDE0OjQz
-OjM1LjAzMjk5MCA3ZjMyMmZmZmY3MDAgMTAgam91cm5hbCBiZWZvcmUyMG9mZjoxNGxlbjoyMTUN
-Cg0KMjAxNy0xMS0wMyAxNDo0MzozNS4wMzI5OTEgN2YzMjJmZmZmNzAwIDEwIGpvdXJuYWwgYmVm
-b3JlMjFvZmY6MGxlbjoyMTg2DQoyMDE3LTExLTAzIDE0OjQzOjM1LjAzMjk5MiA3ZjMyMmZmZmY3
-MDAgMTAgam91cm5hbCBiZWZvcmUyMm9mZjo0MGxlbjo0MA0KMjAxNy0xMS0wMyAxNDo0MzozNS4w
-MzI5OTMgN2YzMjJmZmZmNzAwIDEwIGpvdXJuYWwgcHJlcGFyZV9lbnRyeSByZWJ1aWxkIHN0YXJ0
-W1RyYW5zYWN0aW9uKDB4N2YzMjFjMDA0OTEwKV1lYmwgbGVuZ3RoIDQyMDI0OTYNCjIwMTctMTEt
-MDMgMTQ6NDM6MzUuMDMzMDIzIDdmMzIyZmZmZjcwMCAxMCBqb3VybmFsIGFmdGVyMG9mZjowbGVu
-OjQwOTYNCjIwMTctMTEtMDMgMTQ6NDM6MzUuMDMzMDI1IDdmMzIyZmZmZjcwMCAxMCBqb3VybmFs
-IGFmdGVyMW9mZjowbGVuOjQxOTQzMDQgICANCjIwMTctMTEtMDMgMTQ6NDM6MzUuMDMzMDI2IDdm
-MzIyZmZmZjcwMCAxMCBqb3VybmFsIGFmdGVyMm9mZjowbGVuOjQwOTYNCjIwMTctMTEtMDMgMTQ6
-NDM6MzUuMDMzMDI3IDdmMzIyZmZmZjcwMCAxMCBqb3VybmFsIFtsaCBkZWJ1Z11wcmVwYXJlX2Vu
-dHJ5IHJlYnVpbGQgZW5kW1RyYW5zYWN0aW9uKDB4N2YzMjFjMDA0OTEwKV1yZWJ1aWxkIHNpemUg
-ODE5Mg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCi0tLS0t6YKu5Lu25Y6f5Lu2LS0tLS0NCuWPkeS7tuS6
-ujogU2FnZSBXZWlsIFttYWlsdG86c2FnZUBuZXdkcmVhbS5uZXRdIA0K5Y+R6YCB5pe26Ze0OiAy
-MDE35bm0MTDmnIgyNeaXpSAyMDowNQ0K5pS25Lu25Lq6OiBsaXVoYW8gMTM3MDENCuaKhOmAgTog
-J2NlcGgtZGV2ZWxAdmdlci5rZXJuZWwub3JnJw0K5Li76aKYOiBSZTogcmVwbHk6IGFib3V0IGZp
-bGVzdG9yZS0+am91cm5hbC0+cmVidWlsZF9hbGlnbg0KDQpPbiBXZWQsIDI1IE9jdCAyMDE3LCBM
-aXVoYW8gd3JvdGU6DQo+IFRoYW5rcyBmb3IgeW91ciByZXBseS4NCj4gDQo+ID5JcyB0aGlzIGEg
-Q2VwaEZTIHdvcmtsb2FkPw0KPiA+VGhlIGFsaWdubWVudCBpcyBjb25mdXNpbmcgYmVjYXVzZSBp
-dCdzIGFsaWduaW5nIHRvIHRoZSBvYmplY3Qgb2Zmc2V0LiAgU28gaWYgeW91J3JlIHdyaXRpbmcg
-MjAwIGJ5dGVzIGludG8gYSBmaWxlLCB5b3UncmUgMjAwIGJ5dGVzIGludG8gdGhlIGZpcnN0IG9i
-amVjdCwgYW5kIHRoZSBwYWRkaW5nIHdpbGwgYmUgc29tZXRoaW5nIGxpa2UgMjAwIC0gaGVhZGVy
-IHNpemUuDQo+IA0KPiBZZXMsIHRoaXMgaXMgY2VwaEZT44CCDQo+IFdoZW4gSSB1c2UgcmFkb3Mg
-YmVuY2ggdG8gdGVzdCwgbG9nIGluZm8gaXMgc2FtZSxzbyBJIHRoaW5rIG5vIG1hdHRlciB3aGF0
-IGlzIHVzZWQgaW4gdXBwZXIgbGF5ZXIobm8gbWF0dGVyIGNlcGhGUyBvciByYmQgKS4NCj4gLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLQ0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+IC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCj4gLS0tLS0tLS0t
-LS0tLS0tLS0NCj4gDQo+IEluIGZ1bmMgIkZpbGVKb3VybmFsOjpwcmVwYXJlX2VudHJ5IiwgICJk
-YXRhX2FsaWduIiBpcyB1c2VkIHRvIG1ha2UgDQo+IGhlYWRlciB0byA0SyBhbGlnbmVkDQo+ICAN
-Cj4gRGV0YWlsIGNvZGU6DQo+IGgucHJlX3BhZCA9ICgodW5zaWduZWQgaW50KWRhdGFfYWxpZ24g
-LSAodW5zaWduZWQgaW50KWhlYWRfc2l6ZSkgJiANCj4gfkNFUEhfUEFHRV9NQVNLOw0KPiANCj4g
-aG93IHRvIGdldCBkYXRhX2FsaWduPyANCj4gICAgMS4gbGFyZ2VzdF9kYXRhX29mZl9pbl90Ymwg
-aXMgaW1wb3J0YW50Lg0KPiAgICAyLiBGaWxlU3RvcmU6Ol9kb190cmFuc2FjdGlvbiAtPiBfYnVp
-bGRfYWN0aW9uc19mcm9tX3RibCAtPiB3cml0ZShjaWQsIG9pZCwgb2ZmLCBsZW4sIGJsKQ0KPiAg
-ICAzLiBkYXRhLmxhcmdlc3RfZGF0YV9vZmZfaW5fdGJsID0gdGJsLmxlbmd0aCgpICsgc2l6ZW9m
-KF9fdTMyKTsgIC8vIA0KPiB3ZSBhcmUgYWJvdXQgdG8NCj4gDQo+IEkgdGhpbmsgYSB0cmFuc2Fj
-dGlvbiBoYXZlIG1hbnkgb3AsIGFuZCAibGFyZ2VzdF9kYXRhX29mZl9pbl90YmwiIGlzIA0KPiB0
-aGUgbGFyZ2VzdCBvcCBsZW5ndGgsIGFuZCB1c2UgbGFyZ2VzdF9kYXRhX29mZl9pbl90YmwgYXMg
-YWxpZ25tZW50IElzIHRoYXQgc28/DQoNCkNvcnJlY3QuIElmIHRoZXJlIGlzLCBzYXksIGEgc21h
-bGwgNGsgd3JpdGUgYW5kIGEgMW1iIHdyaXRlIGluIHRoZSBzYW1lIHRyYW5zYWN0aW9uLCB3ZSB3
-YW50IHRoZSBhbGlnbm1lbnQgb2YgdGhlIDFtYiB3cml0ZSBzbyB0aGF0IHRoYXQgYnVmZmVyIGRv
-ZXNuJ3QgaGF2ZSB0byBiZSBjb3BpZWQgYXJvdW5kIHRvIGdldCBwcm9wZXJseSBhbGlnbm1lbnQg
-Zm9yIGRpcmVjdC1pby4NCg0Kc2FnZQ0KDQoNCj4gTG9va2luZyBmb3J3YXJkIHRvIHlvdXIgYW5z
-d2VyLg0KPiANCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+
-IOWPkeS7tuS6ujogU2FnZSBXZWlsIFttYWlsdG86c2FnZUBuZXdkcmVhbS5uZXRdDQo+IOWPkemA
-geaXtumXtDogMjAxN+W5tDEw5pyIMjTml6UgMTA6MzINCj4g5pS25Lu25Lq6OiBsaXVoYW8gMTM3
-MDENCj4g5oqE6YCBOiAnY2VwaC1kZXZlbEB2Z2VyLmtlcm5lbC5vcmcnDQo+IOS4u+mimDogUmU6
-IGFib3V0IGZpbGVzdG9yZS0+am91cm5hbC0+cmVidWlsZF9hbGlnbg0KPiANCj4gDQo+IA0KPiBP
-biBUdWUsIDI0IE9jdCAyMDE3LCBMaXVoYW8gd3JvdGU6DQo+IA0KPiA+IEhpLCBsaXN0ZXI6DQo+
-ID4gSSB1c2UgY2VwaOKAmXZlcnNpb24gMTAuMi4wDQo+ID4gDQo+ID4gQW5hbHlzaXMgRmlsZUpv
-dXJuYWw6OnByZXBhcmVfZW50cnnvvIx3aGVuIHByZXBhcmUgam91cm5hbA0KPiA+IGJ1ZmZlcmxp
-c3TvvIxpdOKAmXMgZGl2aWRlZCBpbnRvIDUgcGFydHPvvJpoZWFkwqAgcHJlX3BhZMKgIGRhdGHC
-oCBwb3N0X3BhZCANCj4gPiBoZWFkIFRoZW4gcmV1aWxkIGZvciBidWZmZXIgbGlzdCB0byA0SyBh
-bGlnbuOAgnJlYnVpbGRfYWxpZ25lZCANCj4gPiByZW1hbGxvYyA0SyBhbGlnbmVkIG1lbW9yeeOA
-gu+8iGVhY2ggNEsgYWxpZ25lZCBtZW1vcnkgaXMgYXMgc21hbGwgYXMgDQo+ID4gcG9zc2libGXv
-vIkNCj4gPiANCj4gPiBEZXRhaWxlZCBjb2Rl77yaDQo+ID4gRmlsZUpvdXJuYWw6OnByZXBhcmVf
-ZW50cnkodmVjdG9yPE9iamVjdFN0b3JlOjpUcmFuc2FjdGlvbj4mIHRscywNCj4gPiBidWZmZXJs
-aXN0KiB0YmwpDQo+ID4gwqDCoMKgwqDCoMKgwqDCoCBFbmNvZGUgZm9yIHRyYW5zYWN0aW9uwqAg
-OjplbmNvZGUoKnAsIGJsKTsNCj4gPiDjgIDjgIBlYmwuYXBwZW5kKChjb25zdCBjaGFyKikmaCwg
-c2l6ZW9mKGgpKTsNCj4gDQo+IFRoaXMgY29waWVzIGludG8gdGhlIGJ1ZmZlcmxpc3Q6OmFwcGVu
-ZF9idWZmZXIsIHdoaWNoIGlzIGEgNGsgYWxpZ25lZCBwYWdlLg0KPiANCj4gPiDjgIDjgIBlYmwu
-cHVzaF9iYWNrKGJ1ZmZlcjo6Y3JlYXRlX3N0YXRpYyhoLnByZV9wYWQsIHplcm9fYnVmKSk7DQo+
-IA0KPiBUaGlzIHNob3VsZCBiZSBlYmwuYXBwZW5kX3plcm9zKGgucHJlX3BhZCk7DQo+IA0KPiA+
-IOOAgOOAgGVibC5jbGFpbV9hcHBlbmQoYmwsIGJ1ZmZlcjo6bGlzdDo6Q0xBSU1fQUxMT1dfTk9O
-U0hBUkVBQkxFKTsgLy8gDQo+ID4gcG90ZW50aWFsIHplcm8tY29weQ0KPiANCj4gVGhpcyBkb2Vz
-IG5vdCwgaG93ZXZlci4gIFdlIGNvdWxkIHByb2JhYmx5IGNoYW5nZSB0aGlzIHNvIHRoYXQgaWYN
-Cj4gYmwubGVuZ3RoKCkgPCBzb21ldGhpbmcgd2UgY29weSBpbnRvIHRoZSBidWZmZXIgaGVyZSBp
-bnN0ZWFkIG9mIGRvaW5nIGEgcmVidWlsZCBsYXRlci4NCj4gDQo+ID4g44CA44CAZWJsLnB1c2hf
-YmFjayhidWZmZXI6OmNyZWF0ZV9zdGF0aWMoaC5wb3N0X3BhZCwgemVyb19idWYpKTsNCj4gDQo+
-IEhlcmUgdG9vLg0KPiANCj4gPiDjgIDjgIBlYmwuYXBwZW5kKChjb25zdCBjaGFyKikmaCwgc2l6
-ZW9mKGgpKTsNCj4gPiDjgIDjgIByZXQgPSBlYmwucmVidWlsZF9hbGlnbmVkKENFUEhfRElSRUNU
-SU9fQUxJR05NRU5UKTsNCj4gPiDjgIDjgIANCj4gPiBxdWVzdGlvbjoNCj4gPiBiZWZvcmUgcmVi
-dWlsZF9hbGlnbmVk77yMYXMgbWFueSBwdHIgaXMgYWxpZ25lZCBhcyA0S++8jHNvIHlvdSBjYW4g
-YXBwbHkgbGVzcyBtZW1vcnkuaXMgaXQ/DQo+ID4gaGVhZCA0MCBwcmVfcGFkIDI3MzYgYmwgNDE5
-NjIzMyBwb3N0X3BhZCAzNDQ3IHRhaWwgNDDCoCB0b3RhbDo0SyoxMDI2IA0KPiA+IHJlYnVpbGRf
-YWxpZ25lZCB3aWxsIHJlbWFsbG9jIG1lbW9yeSA0SyoxMDI2LCBhbGwgbmVlZCByZWJ1aWxkDQo+
-IA0KPiBJSVJDIGl0J3Mgc3VwcG9zZWQgdG8gb25seSByZWJ1aWxkIHRoZSB1bmFsaWduZWQgYnVm
-ZmVycy4gIFNvIHRoZSBoZWFkZXIgYW5kIHBhZGRpbmcgd2lsbCBnZXQgcmVidWlsdCwgYnV0IGlm
-IHRoZSBidWZmZXIgYmwgaXMgYWxyZWFkeSBhbGlnbmVkIGl0IHdpbGwgYmUgdW50b3VjaGVkLiAg
-VGhpcyBpcyBub3JtYWxseSB0aGUgY2FzZSBmb3IgbGFyZ2Ugd3JpdGVzIGFzIHRoZSBtZXNzZW5n
-ZXIgdGFrZXMgY2FyZSB0byByZWFkIHRoZSBkYXRhIHBheWxvYWQgaW50byBtZW1vcnkgd2l0aCB0
-aGUgY29ycmVjdCBhbGlnbm1lbnQuDQo+IA0KPiAgDQo+ID4gRGV0YWlsIGxvZyBpbmZvOg0KPiA+
-IEluIGNvZGUsIHRoaXMgbG9nIG1lc3NhZ2UgY2F1Z2h0IG15IGF0dGVudGlvbu+8jHRoZSBsb2cg
-aW5mb3JtYXRpb24gb2YgdGhlc2UgNSB2YWx1c2UgaXMgbm90IGV4cGVjdGVkLg0KPiA+IA0KPiA+
-IGRvdXQoMTApIDw8ICIgbGVuICIgPDwgYmwubGVuZ3RoKCkgPDwgIiAtPiAiIDw8IHNpemXCoCA8
-PCAiIChoZWFkICIgDQo+ID4gPDwgaGVhZF9zaXplIDw8ICIgcHJlX3BhZCAiIDw8IGgucHJlX3Bh
-ZA0KPiA+IMKgwqDCoMKgwqDCoCA8PCAiIGJsICIgPDwgYmwubGVuZ3RoKCkgPDwgIiBwb3N0X3Bh
-ZCAiIDw8IHBvc3RfcGFkIDw8ICIgdGFpbCAiIDw8IGhlYWRfc2l6ZSA8PCAiKSINCj4gPiDCoMKg
-wqDCoMKgwqAgPDwgIiAoYmwgYWxpZ25tZW50ICIgPDwgZGF0YV9hbGlnbiA8PCAiKSIgPDwgZGVu
-ZGw7DQo+ID4gDQo+ID4gMjAxNy0xMC0xNyAxOTo1MDoyOC43MjE5MjIgN2YyMWQ3M2ZlNzAwIDEw
-IGpvdXJuYWzCoCBsZW4gNDE5NjIzMyAtPg0KPiA+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCAy
-NzM2IGJsIDQxOTYyMzMgcG9zdF9wYWQgMzQ0NyB0YWlsIDQwKSAoYmwgDQo+ID4gYWxpZ25tZW50
-IDI3NzYpDQo+ID4gMjAxNy0xMC0xNyAxOTo1MDoyOC44NzMyNjEgN2YyMWNjZmZmNzAwIDEwIGpv
-dXJuYWzCoCBsZW4gNDE5NjEzMSAtPg0KPiA+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCA0MDQ2
-IGJsIDQxOTYxMzEgcG9zdF9wYWQgMjIzOSB0YWlsIDQwKSAoYmwgDQo+ID4gYWxpZ25tZW50IDQw
-ODYpDQo+ID4gMjAxNy0xMC0xNyAxOTo1MDoyOC44OTc1MjAgN2YyMWQ0M2ZmNzAwIDEwIGpvdXJu
-YWzCoCBsZW4gNDE5NjEzMSAtPg0KPiA+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCA0MDQ2IGJs
-IDQxOTYxMzEgcG9zdF9wYWQgMjIzOSB0YWlsIDQwKSAoYmwgDQo+ID4gYWxpZ25tZW50IDQwODYp
-DQo+ID4gMjAxNy0xMC0xNyAxOTo1MDoyOC45NzQ4MTEgN2YyMWNmODAwNzAwIDEwIGpvdXJuYWzC
-oCBsZW4gNDE5NjEzMSAtPg0KPiA+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCA0MDQ2IGJsIDQx
-OTYxMzEgcG9zdF9wYWQgMjIzOSB0YWlsIDQwKSAoYmwgDQo+ID4gYWxpZ25tZW50IDQwODYpDQo+
-ID4gMjAxNy0xMC0xNyAxOTo1MDoyOS4wMTM5NDAgN2YyMWNjZmZmNzAwIDEwIGpvdXJuYWzCoCBs
-ZW4gNDE5NjIxNSAtPg0KPiA+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCAyNzU0IGJsIDQxOTYy
-MTUgcG9zdF9wYWQgMzQ0NyB0YWlsIDQwKSAoYmwgDQo+ID4gYWxpZ25tZW50IDI3OTQpDQo+ID4g
-MjAxNy0xMC0xNyAxOTo1MDoyOS4yOTIxNjUgN2YyMWNlM2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4g
-NDE5NjIxNSAtPg0KPiA+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCAyNzU0IGJsIDQxOTYyMTUg
-cG9zdF9wYWQgMzQ0NyB0YWlsIDQwKSAoYmwgDQo+ID4gYWxpZ25tZW50IDI3OTQpDQo+ID4gMjAx
-Ny0xMC0xNyAxOTo1MDoyOS4zMTEyOTYgN2YyMWNmODAwNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5
-NjIzMyAtPg0KPiA+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCAyNzM2IGJsIDQxOTYyMzMgcG9z
-dF9wYWQgMzQ0NyB0YWlsIDQwKSAoYmwgDQo+ID4gYWxpZ25tZW50IDI3NzYpDQo+ID4gMjAxNy0x
-MC0xNyAxOTo1MDoyOS40MTYyNDAgN2YyMWQ0M2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIx
-NSAtPg0KPiA+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCAyNzU0IGJsIDQxOTYyMTUgcG9zdF9w
-YWQgMzQ0NyB0YWlsIDQwKSAoYmwgDQo+ID4gYWxpZ25tZW50IDI3OTQpDQo+ID4gMjAxNy0xMC0x
-NyAxOTo1MDozMC4xMTE1NjEgN2YyMWNjN2ZlNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAt
-Pg0KPiA+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCA0MDQ2IGJsIDQxOTYxMzEgcG9zdF9wYWQg
-MjIzOSB0YWlsIDQwKSAoYmwgDQo+ID4gYWxpZ25tZW50IDQwODYpDQo+ID4gMjAxNy0xMC0xNyAx
-OTo1MDozMC40NDQ3MjkgN2YyMWQyM2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAtPg0K
-PiA+IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCA0MDQ2IGJsIDQxOTYxMzEgcG9zdF9wYWQgMjIz
-OSB0YWlsIDQwKSAoYmwgDQo+ID4gYWxpZ25tZW50IDQwODYpDQo+ID4gMjAxNy0xMC0xNyAxOTo1
-MDozMC40NDg2ODYgN2YyMWNjZmZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIzMyAtPg0KPiA+
-IDQyMDI0OTYgKGhlYWQgNDAgcHJlX3BhZCAyNzM2IGJsIDQxOTYyMzMgcG9zdF9wYWQgMzQ0NyB0
-YWlsIDQwKSAoYmwgDQo+ID4gYWxpZ25tZW50IDI3NzYpDQo+ID4gMjAxNy0xMC0xNyAxOTo1MDoz
-MC41NTk2MjYgN2YyMWQ0M2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAtPg0KPiA+IDQy
-MDI0OTYgKGhlYWQgNDAgcHJlX3BhZCA0MDQ2IGJsIDQxOTYxMzEgcG9zdF9wYWQgMjIzOSB0YWls
-IDQwKSAoYmwgDQo+ID4gYWxpZ25tZW50IDQwODYpDQo+ID4gMjAxNy0xMC0xNyAxOTo1MDozMC41
-OTI1NDEgN2YyMWQ2M2ZlNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIzMyAtPg0KPiA+IDQyMDI0
-OTYgKGhlYWQgNDAgcHJlX3BhZCAyNzM2IGJsIDQxOTYyMzMgcG9zdF9wYWQgMzQ0NyB0YWlsIDQw
-KSAoYmwgDQo+ID4gYWxpZ25tZW50IDI3NzYpDQo+ID4gMjAxNy0xMC0xNyAxOTo1MDozMC41OTk1
-MjcgN2YyMWNiN2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjIxNSAtPg0KPiA+IDQyMDI0OTYg
-KGhlYWQgNDAgcHJlX3BhZCAyNzU0IGJsIDQxOTYyMTUgcG9zdF9wYWQgMzQ0NyB0YWlsIDQwKSAo
-YmwgDQo+ID4gYWxpZ25tZW50IDI3OTQpDQo+ID4gMjAxNy0xMC0xNyAxOTo1MDozMC42MTMxMjMg
-N2YyMWQxM2ZmNzAwIDEwIGpvdXJuYWzCoCBsZW4gNDE5NjEzMSAtPg0KPiA+IDQyMDI0OTYgKGhl
-YWQgNDAgcHJlX3BhZCA0MDQ2IGJsIDQxOTYxMzEgcG9zdF9wYWQgMjIzOSB0YWlsIDQwKSAoYmwg
-DQo+ID4gYWxpZ25tZW50IDQwODYpDQo+IA0KPiBJcyB0aGlzIGEgQ2VwaEZTIHdvcmtsb2FkPw0K
-PiANCj4gVGhlIGFsaWdubWVudCBpcyBjb25mdXNpbmcgYmVjYXVzZSBpdCdzIGFsaWduaW5nIHRv
-IHRoZSBvYmplY3Qgb2Zmc2V0LiAgU28gaWYgeW91J3JlIHdyaXRpbmcgMjAwIGJ5dGVzIGludG8g
-YSBmaWxlLCB5b3UncmUgMjAwIGJ5dGVzIGludG8gdGhlIGZpcnN0IG9iamVjdCwgYW5kIHRoZSBw
-YWRkaW5nIHdpbGwgYmUgc29tZXRoaW5nIGxpa2UgMjAwIC0gaGVhZGVyIHNpemUuDQo+IA0KPiBz
-YWdlDQo+IE4/Pz8/P3I/P3k/Pz8/Pz9YPz/Hp3Y/Pz8p3rp7Lm4/Pz8/P3o/XXo/Pz8/YXk/HcqH
-2pk/P2ogPz9mPz8/aD8/Pz8/Hj93Pz8/DQo/Pz9qOit2Pz8/dz8/Pz8/Pz8/ID8/Pz96Wis/Pz8/
-Pz8/aiI/Pz8/aQ0K
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323329-722012086-1509710948=:23234
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+
+On Fri, 3 Nov 2017, Liuhao wrote:
+> Hi, 
+> version 10.2.0
+> ./rados bench 20 -p rbd write -b 4M
+> 
+> alignment is 4086, pre_pad is 4046, rebuild_aligned will realloc memory 4202496
+> If adjust the pre_pad from 4046 to 4042, realloc memory only 8192. I think this answer is expected.
+> I think the "get_data_alignment" may be have a bug, because pre_pad is calculated by alignment.
+> Looking forward to your answer.
+> 
+> Detail
+> Before modify:
+> 2017-11-03 14:20:54.625773 7fd32d7fa700 10 journal  len 4196188 -> 4202496 (head 40 pre_pad 4046 bl 4196188 post_pad 2182 tail 40) (bl alignment 4086)
+> 
+> 2017-11-03 14:20:54.625778 7fd32d7fa700 10 journal before0off:0len:40     head
+> 2017-11-03 14:20:54.625779 7fd32d7fa700 10 journal before1off:0len:4046   pre_pad
+> 
+> 2017-11-03 14:20:54.625780 7fd32d7fa700 10 journal before2off:0len:10     bl have 19 ptrs
+> 2017-11-03 14:20:54.625780 7fd32d7fa700 10 journal before3off:0len:4      <--------    important, not align 
+> 2017-11-03 14:20:54.625781 7fd32d7fa700 10 journal before4off:0len:4194304  <--------   this will rebuild
+> 2017-11-03 14:20:54.625781 7fd32d7fa700 10 journal before5off:4len:13
+> 2017-11-03 14:20:54.625782 7fd32d7fa700 10 journal before6off:0len:256
+> 2017-11-03 14:20:54.625782 7fd32d7fa700 10 journal before7off:0len:18
+> 2017-11-03 14:20:54.625783 7fd32d7fa700 10 journal before8off:17len:15
+> 2017-11-03 14:20:54.625783 7fd32d7fa700 10 journal before9off:0len:31
+> 2017-11-03 14:20:54.625784 7fd32d7fa700 10 journal before10off:32len:43
+> 2017-11-03 14:20:54.625785 7fd32d7fa700 10 journal before11off:0len:4
+> 2017-11-03 14:20:54.625785 7fd32d7fa700 10 journal before12off:0len:175
+> 2017-11-03 14:20:54.625786 7fd32d7fa700 10 journal before13off:4len:4
+> 2017-11-03 14:20:54.625787 7fd32d7fa700 10 journal before14off:75len:13
+> 2017-11-03 14:20:54.625787 7fd32d7fa700 10 journal before15off:0len:863
+> 2017-11-03 14:20:54.625788 7fd32d7fa700 10 journal before16off:10len:4
+> 2017-11-03 14:20:54.625788 7fd32d7fa700 10 journal before17off:0len:72
+> 2017-11-03 14:20:54.625789 7fd32d7fa700 10 journal before18off:72len:72
+> 2017-11-03 14:20:54.625790 7fd32d7fa700 10 journal before19off:144len:72
+> 2017-11-03 14:20:54.625790 7fd32d7fa700 10 journal before20off:14len:215
+> 
+> 2017-11-03 14:20:54.625791 7fd32d7fa700 10 journal before21off:0len:2182   post_pad
+> 2017-11-03 14:20:54.625791 7fd32d7fa700 10 journal before22off:40len:40    head
+> 
+> After rebuild, the result is : a big ptr, will realloc memory is 4202496
+> 2017-11-03 14:20:54.627251 7fd32d7fa700 10 journal after0off:0len:4202496
+> 
+> If adjust pre_pad to 4042，only realloc memory 8192. after rebuild, the list have 3 ptrs, 4096 , 4194304, 4096.
+
+Yes--this is what is supposed to happen.  What exactly is your code 
+change?
+
+Thanks!
+sage
+
+
+> the result is :
+> 2017-11-03 14:43:35.032958 7f322ffff700 10 journal  len 4196188 -> 4202496 (head 40 pre_pad 4042 bl 4196188 post_pad 2186 tail 40) (bl alignment 4086)
+> 2017-11-03 14:43:35.032965 7f322ffff700 10 journal before0off:0len:40
+> 2017-11-03 14:43:35.032967 7f322ffff700 10 journal before1off:0len:4042  <-------  I modify the pre_pad from 4046 to 4042
+> 
+> 2017-11-03 14:43:35.032968 7f322ffff700 10 journal before2off:0len:10
+> 2017-11-03 14:43:35.032970 7f322ffff700 10 journal before3off:0len:4
+> 2017-11-03 14:43:35.032971 7f322ffff700 10 journal before4off:0len:4194304  <---------  this will not rebuild
+> 2017-11-03 14:43:35.032972 7f322ffff700 10 journal before5off:4len:13
+> 2017-11-03 14:43:35.032973 7f322ffff700 10 journal before6off:0len:256
+> 2017-11-03 14:43:35.032974 7f322ffff700 10 journal before7off:0len:18
+> 2017-11-03 14:43:35.032976 7f322ffff700 10 journal before8off:17len:15
+> 2017-11-03 14:43:35.032977 7f322ffff700 10 journal before9off:0len:31
+> 2017-11-03 14:43:35.032978 7f322ffff700 10 journal before10off:32len:43
+> 2017-11-03 14:43:35.032979 7f322ffff700 10 journal before11off:0len:4
+> 2017-11-03 14:43:35.032980 7f322ffff700 10 journal before12off:0len:175
+> 2017-11-03 14:43:35.032982 7f322ffff700 10 journal before13off:4len:4
+> 2017-11-03 14:43:35.032983 7f322ffff700 10 journal before14off:75len:13
+> 2017-11-03 14:43:35.032984 7f322ffff700 10 journal before15off:0len:863
+> 2017-11-03 14:43:35.032985 7f322ffff700 10 journal before16off:10len:4
+> 2017-11-03 14:43:35.032986 7f322ffff700 10 journal before17off:0len:72
+> 2017-11-03 14:43:35.032987 7f322ffff700 10 journal before18off:72len:72
+> 2017-11-03 14:43:35.032988 7f322ffff700 10 journal before19off:144len:72
+> 2017-11-03 14:43:35.032990 7f322ffff700 10 journal before20off:14len:215
+> 
+> 2017-11-03 14:43:35.032991 7f322ffff700 10 journal before21off:0len:2186
+> 2017-11-03 14:43:35.032992 7f322ffff700 10 journal before22off:40len:40
+> 2017-11-03 14:43:35.032993 7f322ffff700 10 journal prepare_entry rebuild start[Transaction(0x7f321c004910)]ebl length 4202496
+> 2017-11-03 14:43:35.033023 7f322ffff700 10 journal after0off:0len:4096
+> 2017-11-03 14:43:35.033025 7f322ffff700 10 journal after1off:0len:4194304   
+> 2017-11-03 14:43:35.033026 7f322ffff700 10 journal after2off:0len:4096
+> 2017-11-03 14:43:35.033027 7f322ffff700 10 journal [lh debug]prepare_entry rebuild end[Transaction(0x7f321c004910)]rebuild size 8192
+> --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+> -----邮件原件-----
+> 发件人: Sage Weil [mailto:sage@newdream.net] 
+> 发送时间: 2017年10月25日 20:05
+> 收件人: liuhao 13701
+> 抄送: 'ceph-devel@vger.kernel.org'
+> 主题: Re: reply: about filestore->journal->rebuild_align
+> 
+> On Wed, 25 Oct 2017, Liuhao wrote:
+> > Thanks for your reply.
+> > 
+> > >Is this a CephFS workload?
+> > >The alignment is confusing because it's aligning to the object offset.  So if you're writing 200 bytes into a file, you're 200 bytes into the first object, and the padding will be something like 200 - header size.
+> > 
+> > Yes, this is cephFS。
+> > When I use rados bench to test, log info is same,so I think no matter what is used in upper layer(no matter cephFS or rbd ).
+> > ----------------------------------------------------------------------
+> > ----------------------------------------------------------------------
+> > ----------------------------------------------------------------------
+> > -----------------
+> > 
+> > In func "FileJournal::prepare_entry",  "data_align" is used to make 
+> > header to 4K aligned
+> >  
+> > Detail code:
+> > h.pre_pad = ((unsigned int)data_align - (unsigned int)head_size) & 
+> > ~CEPH_PAGE_MASK;
+> > 
+> > how to get data_align? 
+> >    1. largest_data_off_in_tbl is important.
+> >    2. FileStore::_do_transaction -> _build_actions_from_tbl -> write(cid, oid, off, len, bl)
+> >    3. data.largest_data_off_in_tbl = tbl.length() + sizeof(__u32);  // 
+> > we are about to
+> > 
+> > I think a transaction have many op, and "largest_data_off_in_tbl" is 
+> > the largest op length, and use largest_data_off_in_tbl as alignment Is that so?
+> 
+> Correct. If there is, say, a small 4k write and a 1mb write in the same transaction, we want the alignment of the 1mb write so that that buffer doesn't have to be copied around to get properly alignment for direct-io.
+> 
+> sage
+> 
+> 
+> > Looking forward to your answer.
+> > 
+> > ----------------------------------------------------------------------
+> > -------------------------
+> > 发件人: Sage Weil [mailto:sage@newdream.net]
+> > 发送时间: 2017年10月24日 10:32
+> > 收件人: liuhao 13701
+> > 抄送: 'ceph-devel@vger.kernel.org'
+> > 主题: Re: about filestore->journal->rebuild_align
+> > 
+> > 
+> > 
+> > On Tue, 24 Oct 2017, Liuhao wrote:
+> > 
+> > > Hi, lister:
+> > > I use ceph’version 10.2.0
+> > > 
+> > > Analysis FileJournal::prepare_entry，when prepare journal
+> > > bufferlist，it’s divided into 5 parts：head  pre_pad  data  post_pad 
+> > > head Then reuild for buffer list to 4K align。rebuild_aligned 
+> > > remalloc 4K aligned memory。（each 4K aligned memory is as small as 
+> > > possible）
+> > > 
+> > > Detailed code：
+> > > FileJournal::prepare_entry(vector<ObjectStore::Transaction>& tls,
+> > > bufferlist* tbl)
+> > >          Encode for transaction  ::encode(*p, bl);
+> > > 　　ebl.append((const char*)&h, sizeof(h));
+> > 
+> > This copies into the bufferlist::append_buffer, which is a 4k aligned page.
+> > 
+> > > 　　ebl.push_back(buffer::create_static(h.pre_pad, zero_buf));
+> > 
+> > This should be ebl.append_zeros(h.pre_pad);
+> > 
+> > > 　　ebl.claim_append(bl, buffer::list::CLAIM_ALLOW_NONSHAREABLE); // 
+> > > potential zero-copy
+> > 
+> > This does not, however.  We could probably change this so that if
+> > bl.length() < something we copy into the buffer here instead of doing a rebuild later.
+> > 
+> > > 　　ebl.push_back(buffer::create_static(h.post_pad, zero_buf));
+> > 
+> > Here too.
+> > 
+> > > 　　ebl.append((const char*)&h, sizeof(h));
+> > > 　　ret = ebl.rebuild_aligned(CEPH_DIRECTIO_ALIGNMENT);
+> > > 　　
+> > > question:
+> > > before rebuild_aligned，as many ptr is aligned as 4K，so you can apply less memory.is it?
+> > > head 40 pre_pad 2736 bl 4196233 post_pad 3447 tail 40  total:4K*1026 
+> > > rebuild_aligned will remalloc memory 4K*1026, all need rebuild
+> > 
+> > IIRC it's supposed to only rebuild the unaligned buffers.  So the header and padding will get rebuilt, but if the buffer bl is already aligned it will be untouched.  This is normally the case for large writes as the messenger takes care to read the data payload into memory with the correct alignment.
+> > 
+> >  
+> > > Detail log info:
+> > > In code, this log message caught my attention，the log information of these 5 valuse is not expected.
+> > > 
+> > > dout(10) << " len " << bl.length() << " -> " << size  << " (head " 
+> > > << head_size << " pre_pad " << h.pre_pad
+> > >        << " bl " << bl.length() << " post_pad " << post_pad << " tail " << head_size << ")"
+> > >        << " (bl alignment " << data_align << ")" << dendl;
+> > > 
+> > > 2017-10-17 19:50:28.721922 7f21d73fe700 10 journal  len 4196233 ->
+> > > 4202496 (head 40 pre_pad 2736 bl 4196233 post_pad 3447 tail 40) (bl 
+> > > alignment 2776)
+> > > 2017-10-17 19:50:28.873261 7f21ccfff700 10 journal  len 4196131 ->
+> > > 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl 
+> > > alignment 4086)
+> > > 2017-10-17 19:50:28.897520 7f21d43ff700 10 journal  len 4196131 ->
+> > > 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl 
+> > > alignment 4086)
+> > > 2017-10-17 19:50:28.974811 7f21cf800700 10 journal  len 4196131 ->
+> > > 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl 
+> > > alignment 4086)
+> > > 2017-10-17 19:50:29.013940 7f21ccfff700 10 journal  len 4196215 ->
+> > > 4202496 (head 40 pre_pad 2754 bl 4196215 post_pad 3447 tail 40) (bl 
+> > > alignment 2794)
+> > > 2017-10-17 19:50:29.292165 7f21ce3ff700 10 journal  len 4196215 ->
+> > > 4202496 (head 40 pre_pad 2754 bl 4196215 post_pad 3447 tail 40) (bl 
+> > > alignment 2794)
+> > > 2017-10-17 19:50:29.311296 7f21cf800700 10 journal  len 4196233 ->
+> > > 4202496 (head 40 pre_pad 2736 bl 4196233 post_pad 3447 tail 40) (bl 
+> > > alignment 2776)
+> > > 2017-10-17 19:50:29.416240 7f21d43ff700 10 journal  len 4196215 ->
+> > > 4202496 (head 40 pre_pad 2754 bl 4196215 post_pad 3447 tail 40) (bl 
+> > > alignment 2794)
+> > > 2017-10-17 19:50:30.111561 7f21cc7fe700 10 journal  len 4196131 ->
+> > > 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl 
+> > > alignment 4086)
+> > > 2017-10-17 19:50:30.444729 7f21d23ff700 10 journal  len 4196131 ->
+> > > 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl 
+> > > alignment 4086)
+> > > 2017-10-17 19:50:30.448686 7f21ccfff700 10 journal  len 4196233 ->
+> > > 4202496 (head 40 pre_pad 2736 bl 4196233 post_pad 3447 tail 40) (bl 
+> > > alignment 2776)
+> > > 2017-10-17 19:50:30.559626 7f21d43ff700 10 journal  len 4196131 ->
+> > > 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl 
+> > > alignment 4086)
+> > > 2017-10-17 19:50:30.592541 7f21d63fe700 10 journal  len 4196233 ->
+> > > 4202496 (head 40 pre_pad 2736 bl 4196233 post_pad 3447 tail 40) (bl 
+> > > alignment 2776)
+> > > 2017-10-17 19:50:30.599527 7f21cb7ff700 10 journal  len 4196215 ->
+> > > 4202496 (head 40 pre_pad 2754 bl 4196215 post_pad 3447 tail 40) (bl 
+> > > alignment 2794)
+> > > 2017-10-17 19:50:30.613123 7f21d13ff700 10 journal  len 4196131 ->
+> > > 4202496 (head 40 pre_pad 4046 bl 4196131 post_pad 2239 tail 40) (bl 
+> > > alignment 4086)
+> > 
+> > Is this a CephFS workload?
+> > 
+> > The alignment is confusing because it's aligning to the object offset.  So if you're writing 200 bytes into a file, you're 200 bytes into the first object, and the padding will be something like 200 - header size.
+> > 
+> > sage
+> > N?????r??y??????X??ǧv???)޺{.n?????z?]z????ay?ʇڙ??j ??f???h??????w???
+> ???j:+v???w???????? ????zZ+???????j"????i
+> N?????r??y??????X??ǧv???)޺{.n?????z?]z????ay?ʇڙ??j??f???h??????w??????j:+v???w????????????zZ+???????j"????i
+--8323329-722012086-1509710948=:23234--
