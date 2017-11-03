@@ -1,92 +1,73 @@
-From: Bassam Tabbara <bassam@tabbara.com>
-Subject: Re: [ceph-users] announcing ceph-helm (ceph on kubernetes
+From: Bassam Tabbara <bassam-7zw3Wi+BkiFBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: announcing ceph-helm (ceph on kubernetes
  orchestration)
-Date: Fri, 3 Nov 2017 14:10:39 -0700
-Message-ID: <2BFAAC76-F81E-47A4-A234-BCD319D2ECD8@tabbara.com>
+Date: Fri, 3 Nov 2017 14:13:49 -0700
+Message-ID: <FD899CA1-D199-4E3F-AE28-292B0F9B062B@tabbara.com>
 References: <alpine.DEB.2.11.1710251848140.22592@piezo.us.to>
  <CAOugy1vGkPDf7w_+ZMKpA7R2r-MV71=3KnaQ2V6WTaLg5fmTyA@mail.gmail.com>
  <alpine.DEB.2.11.1710251928080.22592@piezo.us.to>
 Mime-Version: 1.0 (Mac OS X Mail 11.0 \(3445.1.7\))
-Content-Type: text/plain;
-        charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-pf0-f180.google.com ([209.85.192.180]:44605 "EHLO
-        mail-pf0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752384AbdKCVKl (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 3 Nov 2017 17:10:41 -0400
-Received: by mail-pf0-f180.google.com with SMTP id x7so3071136pfa.1
-        for <ceph-devel@vger.kernel.org>; Fri, 03 Nov 2017 14:10:41 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.11.1710251928080.22592@piezo.us.to>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Hans van den Bogert <hansbogert@gmail.com>, ceph-devel@vger.kernel.org, ceph-users@ceph.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1710251928080.22592-ie3vfNGmdjePKud3HExfWg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users-Qp0mS5GaXlQ@public.gmane.org
+List-Id: ceph-devel.vger.kernel.org
 
-(sorry for the late response, just catching up on ceph-users)
-
-> Probably the main difference is that ceph-helm aims to run Ceph as =
-part of=20
-> the container infrastructure.  The containers are privileged so they =
-can=20
-> interact with hardware where needed (e.g., lvm for dm-crypt) and the=20=
-
-> cluster runs on the host network.  We use kubernetes some =
-orchestration:=20
-> kube is a bit of a headache for mons and osds but will be very helpful =
-for=20
-> scheduling everything else: mgrs, rgw, rgw-nfs, iscsi, mds, ganesha,=20=
-
-> samba, rbd-mirror, etc.
->=20
-> Rook, as I understand it at least (the rook folks on the list can =
-speak up=20
-> here), aims to run Ceph more as a tenant of kubernetes.  The cluster =
-runs=20
-> in the container network space, and the aim is to be able to deploy =
-ceph=20
-> more like an unprivileged application on e.g., a public cloud =
-providing=20
-> kubernetes as the cloud api.
->=20
-
-Yes Rook=E2=80=99s goal is to run wherever Kubernetes runs without =
-making changes at the host level. Eventually we plan to remove the need =
-to run some of the containers privileged, and automatically work with =
-different kernel versions and heterogeneous environments. It's fair to =
-think of Rook as an application of Kubernetes. As a result you could run =
-it on AWS, Google, bare-metal or wherever.
-
-> The other difference is around rook-operator, which is the thing that =
-lets=20
-> you declare what you want (ceph clusters, pools, etc) via kubectl and =
-goes=20
-> off and creates the cluster(s) and tells it/them what to do.  It makes =
-the=20
-> storage look like it is tightly integrated with and part of kubernetes =
-but=20
-> means that kubectl becomes the interface for ceph cluster management. =20=
-
-
-Rook extends Kubernetes to understand storage concepts like Pool, Object =
-Store, FileSystems. Our goal is for storage to be integrated deeply into =
-Kuberentes. That said, you can easily launch the Rook toolbox and use =
-the ceph tools at any point. I don=E2=80=99t think the goal is for Rook =
-to replace the ceph tools, but instead to offer a Kuberentes-native =
-alternative to them.
-
-> Some of that seems useful to me (still developing opinions here!) and=20=
-
-> perhaps isn't so different than the declarations in your chart's=20
-> values.yaml but I'm unsure about the wisdom of going too far down the =
-road=20
-> of administering ceph via yaml.
->=20
-> Anyway, I'm still pretty new to kubernetes-land and very interested in=20=
-
-> hearing what people are interested in or looking for here!
-
-Would be great to find ways to get these two projects closer.=20
-
-Bassam
-
+KHNvcnJ5IGZvciB0aGUgbGF0ZSByZXNwb25zZSwganVzdCBjYXRjaGluZyB1cCBvbiBjZXBoLXVz
+ZXJzKQoKPiBQcm9iYWJseSB0aGUgbWFpbiBkaWZmZXJlbmNlIGlzIHRoYXQgY2VwaC1oZWxtIGFp
+bXMgdG8gcnVuIENlcGggYXMgcGFydCBvZiAKPiB0aGUgY29udGFpbmVyIGluZnJhc3RydWN0dXJl
+LiAgVGhlIGNvbnRhaW5lcnMgYXJlIHByaXZpbGVnZWQgc28gdGhleSBjYW4gCj4gaW50ZXJhY3Qg
+d2l0aCBoYXJkd2FyZSB3aGVyZSBuZWVkZWQgKGUuZy4sIGx2bSBmb3IgZG0tY3J5cHQpIGFuZCB0
+aGUgCj4gY2x1c3RlciBydW5zIG9uIHRoZSBob3N0IG5ldHdvcmsuICBXZSB1c2Uga3ViZXJuZXRl
+cyBzb21lIG9yY2hlc3RyYXRpb246IAo+IGt1YmUgaXMgYSBiaXQgb2YgYSBoZWFkYWNoZSBmb3Ig
+bW9ucyBhbmQgb3NkcyBidXQgd2lsbCBiZSB2ZXJ5IGhlbHBmdWwgZm9yIAo+IHNjaGVkdWxpbmcg
+ZXZlcnl0aGluZyBlbHNlOiBtZ3JzLCByZ3csIHJndy1uZnMsIGlzY3NpLCBtZHMsIGdhbmVzaGEs
+IAo+IHNhbWJhLCByYmQtbWlycm9yLCBldGMuCj4gCj4gUm9vaywgYXMgSSB1bmRlcnN0YW5kIGl0
+IGF0IGxlYXN0ICh0aGUgcm9vayBmb2xrcyBvbiB0aGUgbGlzdCBjYW4gc3BlYWsgdXAgCj4gaGVy
+ZSksIGFpbXMgdG8gcnVuIENlcGggbW9yZSBhcyBhIHRlbmFudCBvZiBrdWJlcm5ldGVzLiAgVGhl
+IGNsdXN0ZXIgcnVucyAKPiBpbiB0aGUgY29udGFpbmVyIG5ldHdvcmsgc3BhY2UsIGFuZCB0aGUg
+YWltIGlzIHRvIGJlIGFibGUgdG8gZGVwbG95IGNlcGggCj4gbW9yZSBsaWtlIGFuIHVucHJpdmls
+ZWdlZCBhcHBsaWNhdGlvbiBvbiBlLmcuLCBhIHB1YmxpYyBjbG91ZCBwcm92aWRpbmcgCj4ga3Vi
+ZXJuZXRlcyBhcyB0aGUgY2xvdWQgYXBpLgoKWWVzIFJvb2vigJlzIGdvYWwgaXMgdG8gcnVuIHdo
+ZXJldmVyIEt1YmVybmV0ZXMgcnVucyB3aXRob3V0IG1ha2luZyBjaGFuZ2VzIGF0IHRoZSBob3N0
+IGxldmVsLiBFdmVudHVhbGx5IHdlIHBsYW4gdG8gcmVtb3ZlIHRoZSBuZWVkIHRvIHJ1biBzb21l
+IG9mIHRoZSBjb250YWluZXJzIHByaXZpbGVnZWQsIGFuZCBhdXRvbWF0aWNhbGx5IHdvcmsgd2l0
+aCBkaWZmZXJlbnQga2VybmVsIHZlcnNpb25zIGFuZCBoZXRlcm9nZW5lb3VzIGVudmlyb25tZW50
+cy4gSXQncyBmYWlyIHRvIHRoaW5rIG9mIFJvb2sgYXMgYW4gYXBwbGljYXRpb24gb2YgS3ViZXJu
+ZXRlcy4gQXMgYSByZXN1bHQgeW91IGNvdWxkIHJ1biBpdCBvbiBBV1MsIEdvb2dsZSwgYmFyZS1t
+ZXRhbCBvciB3aGVyZXZlci4KCj4gVGhlIG90aGVyIGRpZmZlcmVuY2UgaXMgYXJvdW5kIHJvb2st
+b3BlcmF0b3IsIHdoaWNoIGlzIHRoZSB0aGluZyB0aGF0IGxldHMgCj4geW91IGRlY2xhcmUgd2hh
+dCB5b3Ugd2FudCAoY2VwaCBjbHVzdGVycywgcG9vbHMsIGV0YykgdmlhIGt1YmVjdGwgYW5kIGdv
+ZXMgCj4gb2ZmIGFuZCBjcmVhdGVzIHRoZSBjbHVzdGVyKHMpIGFuZCB0ZWxscyBpdC90aGVtIHdo
+YXQgdG8gZG8uICBJdCBtYWtlcyB0aGUgCj4gc3RvcmFnZSBsb29rIGxpa2UgaXQgaXMgdGlnaHRs
+eSBpbnRlZ3JhdGVkIHdpdGggYW5kIHBhcnQgb2Yga3ViZXJuZXRlcyBidXQgCj4gbWVhbnMgdGhh
+dCBrdWJlY3RsIGJlY29tZXMgdGhlIGludGVyZmFjZSBmb3IgY2VwaCBjbHVzdGVyIG1hbmFnZW1l
+bnQuICAKClJvb2sgZXh0ZW5kcyBLdWJlcm5ldGVzIHRvIHVuZGVyc3RhbmQgc3RvcmFnZSBjb25j
+ZXB0cyBsaWtlIFBvb2wsIE9iamVjdCBTdG9yZSwgRmlsZVN5c3RlbXMuIE91ciBnb2FsIGlzIGZv
+ciBzdG9yYWdlIHRvIGJlIGludGVncmF0ZWQgZGVlcGx5IGludG8gS3ViZXJlbnRlcy4gVGhhdCBz
+YWlkLCB5b3UgY2FuIGVhc2lseSBsYXVuY2ggdGhlIFJvb2sgdG9vbGJveCBhbmQgdXNlIHRoZSBj
+ZXBoIHRvb2xzIGF0IGFueSBwb2ludC4gSSBkb27igJl0IHRoaW5rIHRoZSBnb2FsIGlzIGZvciBS
+b29rIHRvIHJlcGxhY2UgdGhlIGNlcGggdG9vbHMsIGJ1dCBpbnN0ZWFkIHRvIG9mZmVyIGEgS3Vi
+ZXJlbnRlcy1uYXRpdmUgYWx0ZXJuYXRpdmUgdG8gdGhlbS4KCj4gU29tZSBvZiB0aGF0IHNlZW1z
+IHVzZWZ1bCB0byBtZSAoc3RpbGwgZGV2ZWxvcGluZyBvcGluaW9ucyBoZXJlISkgYW5kIAo+IHBl
+cmhhcHMgaXNuJ3Qgc28gZGlmZmVyZW50IHRoYW4gdGhlIGRlY2xhcmF0aW9ucyBpbiB5b3VyIGNo
+YXJ0J3MgCj4gdmFsdWVzLnlhbWwgYnV0IEknbSB1bnN1cmUgYWJvdXQgdGhlIHdpc2RvbSBvZiBn
+b2luZyB0b28gZmFyIGRvd24gdGhlIHJvYWQgCj4gb2YgYWRtaW5pc3RlcmluZyBjZXBoIHZpYSB5
+YW1sLgo+IAo+IEFueXdheSwgSSdtIHN0aWxsIHByZXR0eSBuZXcgdG8ga3ViZXJuZXRlcy1sYW5k
+IGFuZCB2ZXJ5IGludGVyZXN0ZWQgaW4gCj4gaGVhcmluZyB3aGF0IHBlb3BsZSBhcmUgaW50ZXJl
+c3RlZCBpbiBvciBsb29raW5nIGZvciBoZXJlIQoKV291bGQgYmUgZ3JlYXQgdG8gZmluZCB3YXlz
+IHRvIGdldCB0aGVzZSB0d28gcHJvamVjdHMgY2xvc2VyLiAKCkJhc3NhbQoKX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2VycyBtYWlsaW5nIGxp
+c3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2VwaC5jb20vbGlzdGlu
+Zm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
