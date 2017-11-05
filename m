@@ -1,135 +1,52 @@
-From: Stefan Priebe - Profihost AG <s.priebe@profihost.ag>
-Subject: Re: [ceph-users] ceph zstd not for bluestor due to performance
- reasons
-Date: Sun, 5 Nov 2017 09:07:10 +0100
-Message-ID: <5f013ee9-3587-f04c-0005-fa25201a4ecc@profihost.ag>
-References: <BD0427BB-F720-4746-82F9-E082D2396F56@profihost.ag>
- <alpine.DEB.2.11.1710251940520.22592@piezo.us.to>
- <5cf6f721-05ea-4e38-a6b9-04cff5d6aad3@profihost.ag>
- <alpine.DEB.2.11.1710261158070.22592@piezo.us.to>
- <e66d020b-2fba-92a3-fb0a-28236108d1bb@profihost.ag>
- <alpine.DEB.2.11.1711042010330.23234@piezo.novalocal>
+From: Abhishek L <abhishek.lekshmanan@gmail.com>
+Subject: Re: 12.2.2 status
+Date: Sun, 5 Nov 2017 13:17:45 +0100
+Message-ID: <CAEw75dMUFUQ5JAd4LRX=ycjo0d0C7RmvqMq6d+=5qkKcaGf8ow@mail.gmail.com>
+References: <87fua6c4xy.fsf@suse.com> <CA+2bHPYXuma-e-4_XAdLp6rxcT7NBYL+xF4Rz0PAvptLoXvQdw@mail.gmail.com>
+ <874lqbcl5p.fsf@suse.com> <alpine.DEB.2.11.1711031753520.23234@piezo.novalocal>
+ <871slfckae.fsf@suse.com> <CAJE9aOMv3pNFbL3RA3=wiXJKGL9+Mx6N9BazApPZ9E9DMXVp2A@mail.gmail.com>
+ <7fc4336c-40fc-848c-00f7-e7ebc8aa744c@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from cloud1-vm154.de-nserver.de ([178.250.10.56]:21922 "EHLO
-        cloud1-vm154.de-nserver.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751048AbdKEIHN (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Nov 2017 03:07:13 -0500
-In-Reply-To: <alpine.DEB.2.11.1711042010330.23234@piezo.novalocal>
-Content-Language: de-DE
+Received: from mail-io0-f181.google.com ([209.85.223.181]:47800 "EHLO
+        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751095AbdKEMRr (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Nov 2017 07:17:47 -0500
+Received: by mail-io0-f181.google.com with SMTP id h70so12964227ioi.4
+        for <ceph-devel@vger.kernel.org>; Sun, 05 Nov 2017 04:17:47 -0800 (PST)
+In-Reply-To: <7fc4336c-40fc-848c-00f7-e7ebc8aa744c@suse.cz>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-users@lists.ceph.com, ceph-devel@vger.kernel.org
+To: Nathan Cutler <ncutler@suse.cz>, Kefu Chai <kchai@redhat.com>
+Cc: Abhishek Lekshmanan <abhishek@suse.com>, vumrao@redhat.com, Sage Weil <sweil@redhat.com>, Nathan Cutler <NCutler@suse.com>, "Dreyer, Ken" <kdreyer@redhat.com>, Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Matt Benjamin <mbenjamin@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, Karol Mroz <KMroz@suse.com>
 
-The compression unit test does not work for me:
- bin/unittest_compression
-2017-11-05 08:05:36.734567 7f7e8322c180 -1 did not load config file,
-using default settings.
-2017-11-05 08:05:36.735744 7f7e8322c180 -1 Errors while parsing config file!
-2017-11-05 08:05:36.735760 7f7e8322c180 -1 parse_file: cannot open
-/etc/ceph/ceph.conf: (2) No such file or directory
-2017-11-05 08:05:36.735761 7f7e8322c180 -1 parse_file: cannot open
-~/.ceph/ceph.conf: (2) No such file or directory
-2017-11-05 08:05:36.735762 7f7e8322c180 -1 parse_file: cannot open
-ceph.conf: (2) No such file or directory
-2017-11-05 08:05:36.737096 7f7e8322c180 -1 Errors while parsing config file!
-2017-11-05 08:05:36.737109 7f7e8322c180 -1 parse_file: cannot open
-/etc/ceph/ceph.conf: (2) No such file or directory
-2017-11-05 08:05:36.737110 7f7e8322c180 -1 parse_file: cannot open
-~/.ceph/ceph.conf: (2) No such file or directory
-2017-11-05 08:05:36.737110 7f7e8322c180 -1 parse_file: cannot open
-ceph.conf: (2) No such file or directory
-[==========] Running 68 tests from 3 test cases.
-[----------] Global test environment set-up.
-[----------] 3 tests from ZlibCompressor
-[ RUN      ] ZlibCompressor.zlib_isal_compatibility
-[       OK ] ZlibCompressor.zlib_isal_compatibility (3 ms)
-[ RUN      ] ZlibCompressor.isal_compress_zlib_decompress_random
-[       OK ] ZlibCompressor.isal_compress_zlib_decompress_random (76 ms)
-[ RUN      ] ZlibCompressor.isal_compress_zlib_decompress_walk
-[       OK ] ZlibCompressor.isal_compress_zlib_decompress_walk (65 ms)
-[----------] 3 tests from ZlibCompressor (144 ms total)
-
-[----------] 1 test from CompressionPlugin
-[ RUN      ] CompressionPlugin.all
-/build/ceph/src/test/compressor/test_compression.cc:389: Failure
-Value of: factory
-  Actual: false
-Expected: true
-2017-11-05 08:05:36.884467 7f7e8322c180 -1 load failed dlopen():
-"/usr/lib/ceph/compressor/libceph_invalid.so: cannot open shared object
-file: No such file or directory" or "/usr/lib/ceph/libceph_invalid.so:
-cannot open shared object file: No such file or directory"
-2017-11-05 08:05:36.884528 7f7e8322c180 -1 load failed dlopen():
-"/usr/lib/ceph/compressor/libceph_example.so: cannot open shared object
-file: No such file or directory" or "/usr/lib/ceph/libceph_example.so:
-cannot open shared object file: No such file or directory"
-*** Caught signal (Segmentation fault) **
-
-i've no idea why it tries to use libceph_invalid and libceph_example
-
-Stefan
-
-Am 04.11.2017 um 21:10 schrieb Sage Weil:
-> On Sat, 4 Nov 2017, Stefan Priebe - Profihost AG wrote:
->> Hi Sage,
+On Sat, Nov 4, 2017 at 8:51 AM, Nathan Cutler <ncutler@suse.cz> wrote:
+>> all or nothing. if we want to backport the fix of
+>> http://tracker.ceph.com/issues/21762, we will have to backport the
+>> "debian: fix package relationships after" fixes. so i think pull/18589
+>> is self-contained. and no additional step is needed.
 >>
->> Am 26.10.2017 um 13:58 schrieb Sage Weil:
->>> On Thu, 26 Oct 2017, Stefan Priebe - Profihost AG wrote:
->>>> Hi Sage,
->>>>
->>>> Am 25.10.2017 um 21:54 schrieb Sage Weil:
->>>>> On Wed, 25 Oct 2017, Stefan Priebe - Profihost AG wrote:
->>>>>> Hello,
->>>>>>
->>>>>> in the lumious release notes is stated that zstd is not supported by
->>>>>> bluestor due to performance reason. I'm wondering why btrfs instead
->>>>>> states that zstd is as fast as lz4 but compresses as good as zlib.
->>>>>>
->>>>>> Why is zlib than supported by bluestor? And why does btrfs / facebook
->>>>>> behave different?
->>>>>>
->>>>>> "BlueStore supports inline compression using zlib, snappy, or LZ4. (Ceph
->>>>>> also supports zstd for RGW compression but zstd is not recommended for
->>>>>> BlueStore for performance reasons.)"
->>>>>
->>>>> zstd will work but in our testing the performance wasn't great for 
->>>>> bluestore in particular.  The problem was that for each compression run 
->>>>> there is a relatively high start-up cost initializing the zstd 
->>>>> context/state (IIRC a memset of a huge memory buffer) that dominated the 
->>>>> execution time... primarily because bluestore is generally compressing 
->>>>> pretty small chunks of data at a time, not big buffers or streams.
->>>>>
->>>>> Take a look at unittest_compression timings on compressing 16KB buffers 
->>>>> (smaller than bluestore needs usually, but illustrated of the problem):
->>>>>
->>>>> [ RUN      ] Compressor/CompressorTest.compress_16384/0
->>>>> [plugin zlib (zlib/isal)]
->>>>> [       OK ] Compressor/CompressorTest.compress_16384/0 (294 ms)
->>>>> [ RUN      ] Compressor/CompressorTest.compress_16384/1
->>>>> [plugin zlib (zlib/noisal)]
->>>>> [       OK ] Compressor/CompressorTest.compress_16384/1 (1755 ms)
->>>>> [ RUN      ] Compressor/CompressorTest.compress_16384/2
->>>>> [plugin snappy (snappy)]
->>>>> [       OK ] Compressor/CompressorTest.compress_16384/2 (169 ms)
->>>>> [ RUN      ] Compressor/CompressorTest.compress_16384/3
->>>>> [plugin zstd (zstd)]
->>>>> [       OK ] Compressor/CompressorTest.compress_16384/3 (4528 ms)
->>>>>
->>>>> It's an order of magnitude slower than zlib or snappy, which probably 
->>>>> isn't acceptable--even if it is a bit smaller.
->>
->> i've fixed the zstd compression plugin to use reset stream instead of
->> initializing new objects.
->>
->> What's needed to run only / just the unittest_compression test?
-> 
-> make unittest_compression && bin/unittest_compression
-> 
-> should do it!
-> 
-> sage
-> 
+>> and per http://tracker.ceph.com/issues/21762, we need to have it in
+>> luminous. but i have no strong opinion on including it in 12.2.2 or
+>> post 12.2.2. Vikhyat and Nathan, what do you think?
+>
+>
+> Yes, I tried to make 18589 self-contained by pulling in Kefu's and
+> Abhishek's follow-on fixes. I think it would be nice to have it in 12.2.2.
+
+Rebuilt the integration branch with the newer PR and it still fails
+with the same reason
+http://pulpito.ceph.com/abhi-2017-11-05_11:53:02-ceph-disk-wip-abhi-testing-2017-11-05-0933-distro-basic-vps/
+for eg.
+
+Kefu, are there any more commits we need to solve the dependency issue?
+
+Thanks
+Abhishek
+> Nathan
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
