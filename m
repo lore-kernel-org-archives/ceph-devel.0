@@ -1,8 +1,8 @@
 From: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
 Subject: Re: ceph zstd not for bluestor due to performance
  reasons
-Date: Sun, 5 Nov 2017 08:03:36 +0100
-Message-ID: <c46c82fe-93fb-11bb-df8f-964265c7ecc6@profihost.ag>
+Date: Sun, 5 Nov 2017 07:51:12 +0100
+Message-ID: <ad66520f-6fd4-c281-a835-36bd845a8128@profihost.ag>
 References: <BD0427BB-F720-4746-82F9-E082D2396F56@profihost.ag>
  <alpine.DEB.2.11.1710251940520.22592@piezo.us.to>
  <5cf6f721-05ea-4e38-a6b9-04cff5d6aad3@profihost.ag>
@@ -28,13 +28,20 @@ To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
 Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: ceph-devel.vger.kernel.org
 
-Hi,
+Hi Sage,
 
-arg sorry i got it. Building the test right now. Will report results
-shortly.
+this does not work for me.
+>> What's needed to run only / just the unittest_compression test?
+>
+> make unittest_compression && bin/unittest_compression
+>
+> should do it!
 
-Greets,
+#:/build/ceph/src# make unittest_compression && bin/unittest_compression
+make: *** No rule to make target 'unittest_compression'.  Stop.
+
 Stefan
+
 
 Am 04.11.2017 um 21:10 schrieb Sage Weil:
 > On Sat, 4 Nov 2017, Stefan Priebe - Profihost AG wrote:
