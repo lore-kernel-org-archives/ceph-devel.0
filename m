@@ -1,49 +1,95 @@
-From: kefu chai <tchaikov@gmail.com>
-Subject: Re: Ceph Developers Monthly - October
-Date: Mon, 6 Nov 2017 21:54:41 +0800
-Message-ID: <CAJE9aONx09pTycU2ZXfqRNfbs7auxRHakb43mnBzwRQf+TSyBQ@mail.gmail.com>
-References: <20170928030800.GB27915@oops.local> <20171004060209.GA12681@t460.local>
- <20171004161646.GA25159@t460.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH 1/2] rbd: fix and simplify rbd_ioctl_set_ro()
+Date: Mon,  6 Nov 2017 16:49:29 +0100
+Message-ID: <1509983370-1853-1-git-send-email-idryomov@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f46.google.com ([209.85.218.46]:52683 "EHLO
-        mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752886AbdKFNym (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Nov 2017 08:54:42 -0500
-Received: by mail-oi0-f46.google.com with SMTP id r128so7252956oig.9
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Nov 2017 05:54:42 -0800 (PST)
-In-Reply-To: <20171004161646.GA25159@t460.local>
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:53516 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752322AbdKFPty (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Nov 2017 10:49:54 -0500
+Received: by mail-wm0-f68.google.com with SMTP id r196so15203880wmf.2
+        for <ceph-devel@vger.kernel.org>; Mon, 06 Nov 2017 07:49:53 -0800 (PST)
+Received: from orange.brq.redhat.com. (nat-pool-brq-t.redhat.com. [213.175.37.10])
+        by smtp.gmail.com with ESMTPSA id t66sm3349198wme.33.2017.11.06.07.49.52
+        for <ceph-devel@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 06 Nov 2017 07:49:52 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Leonardo Vaz <lvaz@redhat.com>
-Cc: Ceph Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Thu, Oct 5, 2017 at 12:16 AM, Leonardo Vaz <lvaz@redhat.com> wrote:
-> On Wed, Oct 04, 2017 at 03:02:09AM -0300, Leonardo Vaz wrote:
->> On Thu, Sep 28, 2017 at 12:08:00AM -0300, Leonardo Vaz wrote:
->> > Hey Cephers,
->> >
->> > This is just a friendly reminder that the next Ceph Developer Montly
->> > meeting is coming up:
->> >
->> >  http://wiki.ceph.com/Planning
->> >
->> > If you have work that you're doing that it a feature work, significant
->> > backports, or anything you would like to discuss with the core team,
->> > please add it to the following page:
->> >
->> >  http://wiki.ceph.com/CDM_04-OCT-2017
->> >
->> > If you have questions or comments, please let us know.
->>
+->open_count/-EBUSY check is bogus and wrong: when an open device is
+set read-only, blkdev_write_iter() refuses further writes with -EPERM.
+This is standard behaviour and all other block devices allow this.
 
-Leo,
+set_disk_ro() call is also problematic: we affect the entire device
+when called on a single partition.
 
-do we have a recording for the CDM in Oct?
+All rbd_ioctl_set_ro() needs to do is refuse ro -> rw transition for
+mapped snapshots.  Everything else can be handled by generic code.
 
-cheers,
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ drivers/block/rbd.c | 34 ++++++----------------------------
+ 1 file changed, 6 insertions(+), 28 deletions(-)
 
+diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+index 6347ac194e90..832b235b2dc3 100644
+--- a/drivers/block/rbd.c
++++ b/drivers/block/rbd.c
+@@ -640,46 +640,24 @@ static void rbd_release(struct gendisk *disk, fmode_t mode)
+ 
+ static int rbd_ioctl_set_ro(struct rbd_device *rbd_dev, unsigned long arg)
+ {
+-	int ret = 0;
+-	int val;
+-	bool ro;
+-	bool ro_changed = false;
++	int ro;
+ 
+-	/* get_user() may sleep, so call it before taking rbd_dev->lock */
+-	if (get_user(val, (int __user *)(arg)))
++	if (get_user(ro, (int __user *)arg))
+ 		return -EFAULT;
+ 
+-	ro = val ? true : false;
+-	/* Snapshot doesn't allow to write*/
++	/* Snapshots can't be marked read-write */
+ 	if (rbd_dev->spec->snap_id != CEPH_NOSNAP && !ro)
+ 		return -EROFS;
+ 
+-	spin_lock_irq(&rbd_dev->lock);
+-	/* prevent others open this device */
+-	if (rbd_dev->open_count > 1) {
+-		ret = -EBUSY;
+-		goto out;
+-	}
+-
+-	if (rbd_dev->mapping.read_only != ro) {
+-		rbd_dev->mapping.read_only = ro;
+-		ro_changed = true;
+-	}
+-
+-out:
+-	spin_unlock_irq(&rbd_dev->lock);
+-	/* set_disk_ro() may sleep, so call it after releasing rbd_dev->lock */
+-	if (ret == 0 && ro_changed)
+-		set_disk_ro(rbd_dev->disk, ro ? 1 : 0);
+-
+-	return ret;
++	/* Let blkdev_roset() handle it */
++	return -ENOTTY;
+ }
+ 
+ static int rbd_ioctl(struct block_device *bdev, fmode_t mode,
+ 			unsigned int cmd, unsigned long arg)
+ {
+ 	struct rbd_device *rbd_dev = bdev->bd_disk->private_data;
+-	int ret = 0;
++	int ret;
+ 
+ 	switch (cmd) {
+ 	case BLKROSET:
 -- 
-Regards
-Kefu Chai
+2.4.3
+
