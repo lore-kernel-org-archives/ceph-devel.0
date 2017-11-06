@@ -1,46 +1,68 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: Does anything still use the separate ceph-qa-suite repo?
-Date: Mon, 6 Nov 2017 19:55:53 +0100
-Message-ID: <CAOi1vP_tcDsDg3x9pRoKNku7Vq-6UDP0ZX=WswdT7M=f_xH-+Q@mail.gmail.com>
-References: <CALe9h7c+dYCK4uX4gEoEvRmWY=gjMe+gVx7KtSiwhCDKeiSHLw@mail.gmail.com>
- <alpine.DEB.2.11.1711020236590.2819@piezo.novalocal>
+From: Leonardo Vaz <lvaz@redhat.com>
+Subject: Re: Ceph Developers Monthly - October
+Date: Mon, 6 Nov 2017 17:12:31 -0200
+Message-ID: <20171106191231.GA4290@t460.local>
+References: <20170928030800.GB27915@oops.local>
+ <20171004060209.GA12681@t460.local>
+ <20171004161646.GA25159@t460.local>
+ <CAJE9aONx09pTycU2ZXfqRNfbs7auxRHakb43mnBzwRQf+TSyBQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f41.google.com ([209.85.214.41]:48595 "EHLO
-        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753386AbdKFSzy (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Nov 2017 13:55:54 -0500
-Received: by mail-it0-f41.google.com with SMTP id c3so6607558itc.3
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Nov 2017 10:55:54 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1711020236590.2819@piezo.novalocal>
+Received: from mx1.redhat.com ([209.132.183.28]:56370 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751738AbdKFTMn (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 6 Nov 2017 14:12:43 -0500
+Content-Disposition: inline
+In-Reply-To: <CAJE9aONx09pTycU2ZXfqRNfbs7auxRHakb43mnBzwRQf+TSyBQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: John Spray <jspray@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: kefu chai <tchaikov@gmail.com>
+Cc: Ceph Users <ceph-users@ceph.com>, Ceph Devel <ceph-devel@vger.kernel.org>
 
-On Thu, Nov 2, 2017 at 3:37 AM, Sage Weil <sage@newdream.net> wrote:
-> On Wed, 1 Nov 2017, John Spray wrote:
->> I think all the old stable branches got their own merge into the
->> ceph.git qa/ directory, so is there anything out there that would
->> still want the separate repo at https://github.com/ceph/ceph-qa-suite
->> ?
->>
->> If not, it seems like it's been long enough to just go ahead and
->> remove this entirely now?  The value of keeping it around for
->> archaeology is probably less than the cost of it occasionally
->> confusing folks.
->
-> +1
+On Mon, Nov 06, 2017 at 09:54:41PM +0800, kefu chai wrote:
+> On Thu, Oct 5, 2017 at 12:16 AM, Leonardo Vaz <lvaz@redhat.com> wrote:
+> > On Wed, Oct 04, 2017 at 03:02:09AM -0300, Leonardo Vaz wrote:
+> >> On Thu, Sep 28, 2017 at 12:08:00AM -0300, Leonardo Vaz wrote:
+> >> > Hey Cephers,
+> >> >
+> >> > This is just a friendly reminder that the next Ceph Developer Montly
+> >> > meeting is coming up:
+> >> >
+> >> >  http://wiki.ceph.com/Planning
+> >> >
+> >> > If you have work that you're doing that it a feature work, significant
+> >> > backports, or anything you would like to discuss with the core team,
+> >> > please add it to the following page:
+> >> >
+> >> >  http://wiki.ceph.com/CDM_04-OCT-2017
+> >> >
+> >> > If you have questions or comments, please let us know.
+> >>
+> 
+> Leo,
+> 
+> do we have a recording for the CDM in Oct?
 
-I found myself engaged in said archaeology today and remembered about
-this email.  Removing ceph-qa-suite repo would break a lot of links in
-the tracker, eliminate (however occasional) PR discussions, etc.
+We didn't record the CDM in October because some people were not able to
+join us to discuss the topics and we ended having a very quick meeting
+instead. 
 
-Does it really cause that much confusion?  If "DEPRECATED; see
-ceph.git/qa" in the title isn't enough, perhaps add it to README as
-well instead?
+I have the video recording for the CDM we had on Nov 1st, however I need
+to upload it. We are in Sydney for the OpenStack Summit and I'll be able
+to do that later this week.
 
-Thanks,
+Kindest regards,
 
-                Ilya
+Leo
+ 
+> cheers,
+> 
+> -- 
+> Regards
+> Kefu Chai
+
+-- 
+Leonardo Vaz
+Ceph Community Manager
+Open Source and Standards Team
