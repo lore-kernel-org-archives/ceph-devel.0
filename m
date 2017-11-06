@@ -1,108 +1,43 @@
-From: Ricardo Dias <rdias@suse.com>
-Subject: Re: Messenger V2: multiple bind support
-Date: Sun, 5 Nov 2017 10:48:13 -0700
-Message-ID: <FA95FAF5-5C10-4804-BDB9-E122824AF956@suse.com>
-References: <1508855817.10018.25.camel@suse.com>
- <add34139-4ed6-fcca-fdac-a05f58aff433@suse.de>
- <CAJ4mKGaQ2EDENqqNpDUH6XG2THGk-XnJ+oR4yu14pF7h+F6r1g@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 10.3 \(3273\))
-Content-Type: multipart/signed;
- boundary="Apple-Mail=_9014B9CF-01AF-40C8-9447-9E177C4CC0B4";
- protocol="application/pgp-signature"; micalg=pgp-sha512
+From: bhavishya <bhavishya@cse.iitk.ac.in>
+Subject: {pg_num} auto-tuning project
+Date: Mon, 6 Nov 2017 06:02:07 +0530
+Message-ID: <c6f3197f-2f17-efd2-778e-a95efdd1809f@cse.iitk.ac.in>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:60610 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750731AbdKERsr (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Sun, 5 Nov 2017 12:48:47 -0500
-In-Reply-To: <CAJ4mKGaQ2EDENqqNpDUH6XG2THGk-XnJ+oR4yu14pF7h+F6r1g@mail.gmail.com>
+Received: from smtp.cse.iitk.ac.in ([202.3.77.65]:33706 "EHLO
+        smtp.cse.iitk.ac.in" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751107AbdKFAZz (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 5 Nov 2017 19:25:55 -0500
+Received: from [192.168.1.160] (unknown [172.27.24.42])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: bhavishya)
+        by smtp.cse.iitk.ac.in (Postfix) with ESMTPSA id 04E8E160345
+        for <ceph-devel@vger.kernel.org>; Mon,  6 Nov 2017 05:49:24 +0530 (IST)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Gregory Farnum <gfarnum@redhat.com>
-Cc: Joao Eduardo Luis <joao@suse.de>, Ceph Development <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
+Hi,
+I'm resending this since last one failed due to html-subpart.
 
---Apple-Mail=_9014B9CF-01AF-40C8-9447-9E177C4CC0B4
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain;
-	charset=utf-8
+I started to work on {pg_num} autotuning project, needed your advice on 
+some aspects:
 
+1)I'll add `pybind/module.py` which uses {pg_calc} formula to calculate 
+{pg_num}. But for this I'll need the parameters required for {pg_calc} 
+formaula...to get them...what should I do:
 
-> On 1 Nov 2017, at 15:19, Gregory Farnum <gfarnum@redhat.com> wrote:
->=20
->=20
-> There's sort of two pieces here, right?
-> 1) =46rom the Dispatcher perspective, we want a single "Messenger" =
-that
-> it talks to. (At least, I'm pretty sure. Unless we need to be making
-> routing decisions using internal data? I really hope that never comes
-> up.) That could be set up by having multiple Messenger implementations
-> behind a "UnifyingMessenger" abstraction layer with pretty minimal
-> changes.
+--> Use get('pg_summary')['all'] ...but where can I find the complete 
+mapping  of  'pg_summary'?
+--> In OSDMonitor.cc I did found the ALLCHOICES map but it didn't had 
+the all parameters.
+--> Anywhere else I should look?
 
-I agree, with the current code the solution would be to share the same =
-dispatcher
-across multiple messenger instances.
+Also any other suggestion regarding this.
 
->=20
-> 2) =46rom an implementation perspective, which data structures do we =
-end
-> up needing to share in order to have a daemon listening on multiple
-> ports?
->=20
-> So, from the SimpleMessenger perspective, I don't think we get much
-> out of trying to build multi-bind into it. We'd basically get to
-> eliminate the duplicated DIspatchQueue, which is not very interesting.
-> (Modulo some flow control stuff, perhaps.) =46rom an AsyncMessenger
-> implementation perspective, that calculus might shift since we're
-> running on a thread pool, but I'm not deeply familiar with the code
-> internals.
->=20
-> But I'm curious what brings this up. I thought you were working on the
-> v2 protocol =E2=80=94 does something in that somehow hinge on the =
-server-side
-> implementation of multiple networks?
+Thanks!
 
-I remembered this while talking with Joao about why the Mons bind to a =
-single
-network interface even if in ceph.conf the public_network value contains =
-multiple
-networks.
-Then I thought that maybe the mons only bind to a single interface =
-because
-it would be too cumbersome to start a single messenger for each network
-interface and manage the shared dispatcher. Therefore, since I was =
-already
-making changes to the async messenger implementation, I could see if
-it was easy to support multiple-bind in the messenger code and make this
-functionality available to other modules with minimal code changes.
-
-The V2 protocol implementation does not depend on the multiple bind
-functionality, so I would just implement it if people would find it very
-useful.
-
-> -Greg
-
-
---Apple-Mail=_9014B9CF-01AF-40C8-9447-9E177C4CC0B4
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment;
-	filename=signature.asc
-Content-Type: application/pgp-signature;
-	name=signature.asc
-Content-Description: Message signed with OpenPGP
-
------BEGIN PGP SIGNATURE-----
-Comment: GPGTools - https://gpgtools.org
-
-iQEzBAEBCgAdFiEEsK1ZtKJUswT08kqmdDkMV5vTe2gFAln/Tt0ACgkQdDkMV5vT
-e2jF/Af9FKTSXg/5mx/8BOvGEFpVeXWoXC7jiHK9nVg8k9uMjQ51KhAkZaob62KR
-29WFfKANXz0et08MTFX+FGU1LRMAjO8PH3I57TWJsEap83x3aDicJGSYe8BSvm2p
-MCg2YQepeCMlDoqsXJRN0nnBpimSVG5Q3BtYcGM6S/EVo4E239R+MpRx3O8H06V+
-eEHclNROHt/azxB7ifbNZv31Yh2QIM0w9szheJR9wx7bFSFM9yzdLX4HuGsqNSjN
-zoJwsLbrG19/kI4MZc5NDqLfCb//OxBAgUGCH+0m7l9VUVxBIHy+qe8V2YaQczlQ
-eIXsbTHFsjaaaDifNq+h3fGIJADEYg==
-=egfC
------END PGP SIGNATURE-----
-
---Apple-Mail=_9014B9CF-01AF-40C8-9447-9E177C4CC0B4--
