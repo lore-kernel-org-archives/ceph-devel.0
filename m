@@ -1,36 +1,34 @@
-From: Jan Fajerski <jfajerski@suse.com>
-Subject: decompiled crushmap device list after removing osd
-Date: Tue, 7 Nov 2017 15:46:58 +0100
-Message-ID: <20171107144658.crbrv6sxidvyuay2@jf_suse_laptop>
+From: David Disseldorp <ddiss@suse.de>
+Subject: Re: [PATCH] rbd: use GFP_NOIO for parent stat and data requests
+Date: Tue, 7 Nov 2017 16:00:55 +0100
+Message-ID: <20171107160055.1b126519@suse.de>
+References: <1509983480-2051-1-git-send-email-idryomov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:52177 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933147AbdKGOrW (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Tue, 7 Nov 2017 09:47:22 -0500
-Content-Disposition: inline
+Received: from mx2.suse.de ([195.135.220.15]:33268 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933751AbdKGPA4 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 7 Nov 2017 10:00:56 -0500
+In-Reply-To: <1509983480-2051-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi,
-I noticed some weird behaviour of crushtool when decompiling a map after an osd 
-has been removed. Say I have a cluster with 4 osds. When I remove osd.2, get and 
-decompile the crushmap, I get this device list in the crushmap:
+On Mon,  6 Nov 2017 16:51:20 +0100, Ilya Dryomov wrote:
 
-# devices
-device 0 osd.0 class hdd
-device 1 osd.1 class hdd
-device 2 device2
-device 3 osd.3 class hdd
+> rbd_img_obj_exists_submit() and rbd_img_obj_parent_read_full() are on
+> the writeback path for cloned images -- we attempt a stat on the parent
+> object to see if it exists and potentially read it in to call copyup.
+> GFP_NOIO should be used instead of GFP_KERNEL here.
+> 
+> Cc: stable@vger.kernel.org
+> Link: http://tracker.ceph.com/issues/22014
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 
-I'd appreciate some info on whether this is intended behaviour and what the 
-reasoning is. I'd expect the map not to list id 2 at all and afaict the crushmap 
-doesn't contain the id anymore. If there is no reason for listing that I'd be 
-happy to make a PR.
+Looks good.
+Reviewed-by: David Disseldorp <ddiss@suse.de>
 
-Best,
-Jan
-
+Cheers, David
