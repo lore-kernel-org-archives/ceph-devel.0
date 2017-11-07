@@ -1,36 +1,51 @@
-From: Patrick Donnelly <pdonnell@redhat.com>
-Subject: Re: 12.2.2 status
-Date: Tue, 7 Nov 2017 06:55:34 +1100
-Message-ID: <CA+2bHPbrS03kZKUA+bTD09-jArrCy2QY0wyM7ne2H+q0etk6xA@mail.gmail.com>
-References: <87fua6c4xy.fsf@suse.com> <CA+2bHPYXuma-e-4_XAdLp6rxcT7NBYL+xF4Rz0PAvptLoXvQdw@mail.gmail.com>
- <874lqbcl5p.fsf@suse.com> <alpine.DEB.2.11.1711031753520.23234@piezo.novalocal>
- <871slfckae.fsf@suse.com> <CAJE9aOMv3pNFbL3RA3=wiXJKGL9+Mx6N9BazApPZ9E9DMXVp2A@mail.gmail.com>
- <7fc4336c-40fc-848c-00f7-e7ebc8aa744c@suse.cz> <CAEw75dMUFUQ5JAd4LRX=ycjo0d0C7RmvqMq6d+=5qkKcaGf8ow@mail.gmail.com>
- <CAJE9aOP+11MR+kKDKiCQx4FQPjofBkQcecEFOJjubZX30br-Og@mail.gmail.com>
- <87y3njbuh7.fsf@suse.com> <87o9ofb6r3.fsf@suse.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH] libceph: don't WARN() if user tries to add invalid key
+Date: Mon,  6 Nov 2017 21:57:26 -0800
+Message-ID: <20171107055726.28099-1-ebiggers3@gmail.com>
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f177.google.com ([209.85.216.177]:53383 "EHLO
-        mail-qt0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753973AbdKFT4G (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 6 Nov 2017 14:56:06 -0500
-Received: by mail-qt0-f177.google.com with SMTP id n61so12465335qte.10
-        for <ceph-devel@vger.kernel.org>; Mon, 06 Nov 2017 11:56:05 -0800 (PST)
-In-Reply-To: <87o9ofb6r3.fsf@suse.com>
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:55231 "EHLO
+        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753828AbdKGF6e (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Nov 2017 00:58:34 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Lekshmanan <abhishek@suse.com>
-Cc: kefu chai <tchaikov@gmail.com>, Abhishek L <abhishek.lekshmanan@gmail.com>, Nathan Cutler <ncutler@suse.cz>, Kefu Chai <kchai@redhat.com>, vumrao@redhat.com, Sage Weil <sweil@redhat.com>, Nathan Cutler <NCutler@suse.com>, "Dreyer, Ken" <kdreyer@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, Matt Benjamin <mbenjamin@redhat.com>, "Sadeh-Weinraub, Yehuda" <yehuda@redhat.com>, "Dillaman, Jason" <dillaman@redhat.com>, "Durgin, Josh" <jdurgin@redhat.com>, Karol Mroz <KMroz@suse.com>
+To: Ilya Dryomov <idryomov@gmail.com>, Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, ceph-devel@vger.kernel.org
+Cc: netdev@vger.kernel.org, keyrings@vger.kernel.org, Eric Biggers <ebiggers@google.com>, stable@vger.kernel.org
 
-On Tue, Nov 7, 2017 at 5:29 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
-> CephFS runs seem to hit http://tracker.ceph.com/issues/22039
-> consistently, the other failures look environmental. run info
-> http://tracker.ceph.com/issues/21830#note-23
-> @Patrick can you take a look.
+From: Eric Biggers <ebiggers@google.com>
 
-Sage has a debug PR for bluestore to run with the fs suite to help
-diagnose that. I'm going to queue up a run now.
+The WARN_ON(!key->len) in set_secret() in net/ceph/crypto.c is hit if a
+user tries to add a key of type "ceph" with an invalid payload as
+follows (assuming CONFIG_CEPH_LIB=y):
 
+    echo -e -n '\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' \
+	| keyctl padd ceph desc @s
+
+This can be hit by fuzzers.  As this is merely bad input and not a
+kernel bug, replace the WARN_ON() with return -EINVAL.
+
+Fixes: 7af3ea189a9a ("libceph: stop allocating a new cipher on every crypto request")
+Cc: <stable@vger.kernel.org> # v4.10+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ net/ceph/crypto.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
+index 489610ac1cdd..bf9d079cbafd 100644
+--- a/net/ceph/crypto.c
++++ b/net/ceph/crypto.c
+@@ -37,7 +37,9 @@ static int set_secret(struct ceph_crypto_key *key, void *buf)
+ 		return -ENOTSUPP;
+ 	}
+ 
+-	WARN_ON(!key->len);
++	if (!key->len)
++		return -EINVAL;
++
+ 	key->key = kmemdup(buf, key->len, GFP_NOIO);
+ 	if (!key->key) {
+ 		ret = -ENOMEM;
 -- 
-Patrick Donnelly
+2.15.0
+
