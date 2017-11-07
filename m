@@ -1,55 +1,36 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH] libceph: don't WARN() if user tries to add invalid key
-Date: Tue, 7 Nov 2017 09:11:07 +0100
-Message-ID: <CAOi1vP9ORzr46306U=dQ=7Wv=FsrjhRBTvw-L=WDDwiKsaURDw@mail.gmail.com>
-References: <20171107055726.28099-1-ebiggers3@gmail.com>
+From: "Brennecke, Simon" <simon.brennecke@sap.com>
+Subject: Fw: XFS on RBD deadlock
+Date: Tue, 7 Nov 2017 10:10:41 +0000
+Message-ID: <5f20f87b0ee243d9a61e852fe72aaf3f@sap.com>
+References: <199f2d4449ab4445a2fc9bd366a7f472@sap.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20171107055726.28099-1-ebiggers3@gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>
-Cc: Yan Zheng <zyan@redhat.com>, Sage Weil <sage@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, netdev <netdev@vger.kernel.org>, keyrings@vger.kernel.org, Eric Biggers <ebiggers@google.com>, stable@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtpgw02.sap-ag.de ([155.56.66.97]:24028 "EHLO smtpgw.sap-ag.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1756152AbdKGKKm (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 7 Nov 2017 05:10:42 -0500
+In-Reply-To: <199f2d4449ab4445a2fc9bd366a7f472@sap.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
+Cc: "Schneider, Robert" <robert.schneider03@sap.com>
 
-On Tue, Nov 7, 2017 at 6:57 AM, Eric Biggers <ebiggers3@gmail.com> wrote:
-> From: Eric Biggers <ebiggers@google.com>
->
-> The WARN_ON(!key->len) in set_secret() in net/ceph/crypto.c is hit if a
-> user tries to add a key of type "ceph" with an invalid payload as
-> follows (assuming CONFIG_CEPH_LIB=y):
->
->     echo -e -n '\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' \
->         | keyctl padd ceph desc @s
->
-> This can be hit by fuzzers.  As this is merely bad input and not a
-> kernel bug, replace the WARN_ON() with return -EINVAL.
->
-> Fixes: 7af3ea189a9a ("libceph: stop allocating a new cipher on every crypto request")
-> Cc: <stable@vger.kernel.org> # v4.10+
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
-> ---
->  net/ceph/crypto.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
->
-> diff --git a/net/ceph/crypto.c b/net/ceph/crypto.c
-> index 489610ac1cdd..bf9d079cbafd 100644
-> --- a/net/ceph/crypto.c
-> +++ b/net/ceph/crypto.c
-> @@ -37,7 +37,9 @@ static int set_secret(struct ceph_crypto_key *key, void *buf)
->                 return -ENOTSUPP;
->         }
->
-> -       WARN_ON(!key->len);
-> +       if (!key->len)
-> +               return -EINVAL;
-> +
->         key->key = kmemdup(buf, key->len, GFP_NOIO);
->         if (!key->key) {
->                 ret = -ENOMEM;
+Hi guys,
 
-Makes sense, applied.
+I have a question regarding an old email which I found via google on the mailling list:
 
-Thanks,
+https://www.spinics.net/lists/ceph-devel/msg33806.html
 
-                Ilya
+The issue described there is pretty much what we are seeing on some of our servers.
+As it appears the kernel runs out of memory while writing back data to a XFS formatted RBD (actually the root volume).
+The kernel version we are using is 4.1.42 - outdated, I know, but we plan on upgrading if it helps the issue.
+
+
+Now my question is: Was the issue fixed? Or is disabling the signature still the only option?
+Also it would be interessting if it only affects XFS, or if other filesystems suffer from the same issue.
+
+Thanks & Rregards
+Simon
