@@ -1,96 +1,168 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: Re: [PATCH 2/2] rbd: get rid of rbd_mapping::read_only
-Date: Tue, 7 Nov 2017 17:56:51 +0100
-Message-ID: <CAOi1vP87GtgauS4OXGXDeBXD3ce_CM+N3p_j8+6XXDsG1TYgwQ@mail.gmail.com>
-References: <1509983370-1853-1-git-send-email-idryomov@gmail.com>
- <1509983370-1853-2-git-send-email-idryomov@gmail.com> <20171107142627.0d66f97b@suse.de>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: [ceph-users] removing cluster name support
+Date: Tue, 7 Nov 2017 19:38:34 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1711071931540.29217@piezo.novalocal>
+References: <alpine.DEB.2.11.1706081936570.3646@piezo.novalocal> <CAJE9aOP99gD3iZbduuRV-nM_fPpNtfW4ah_X11Acag5_a+YTxg@mail.gmail.com> <CAC-Np1xa19Q8rYmAvfxZqFDDTWuMqv0GCfDLZBYVg+k15Jvj0w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f194.google.com ([209.85.223.194]:46953 "EHLO
-        mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758204AbdKGQ4w (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Nov 2017 11:56:52 -0500
-Received: by mail-io0-f194.google.com with SMTP id 101so2845244ioj.3
-        for <ceph-devel@vger.kernel.org>; Tue, 07 Nov 2017 08:56:52 -0800 (PST)
-In-Reply-To: <20171107142627.0d66f97b@suse.de>
+Received: from tragedy.dreamhost.com ([66.33.205.236]:60817 "EHLO
+        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751624AbdKGTih (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 7 Nov 2017 14:38:37 -0500
+In-Reply-To: <CAC-Np1xa19Q8rYmAvfxZqFDDTWuMqv0GCfDLZBYVg+k15Jvj0w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: David Disseldorp <ddiss@suse.de>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>
+Cc: kefu chai <tchaikov@gmail.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, Ceph-User <ceph-users@ceph.com>
 
-On Tue, Nov 7, 2017 at 2:26 PM, David Disseldorp <ddiss@suse.de> wrote:
-> Hi Ilya,
->
-> On Mon,  6 Nov 2017 16:49:30 +0100, Ilya Dryomov wrote:
->
->> -     /* Only reads are allowed to a read-only device */
->> -
->> -     if (op_type != OBJ_OP_READ) {
->> -             if (rbd_dev->mapping.read_only) {
->> -                     result = -EROFS;
->> -                     goto err_rq;
->> -             }
->> -             rbd_assert(rbd_dev->spec->snap_id == CEPH_NOSNAP);
->> -     }
->> +     rbd_assert(op_type == OBJ_OP_READ ||
->> +                rbd_dev->spec->snap_id == CEPH_NOSNAP);
->
-> AFAICT, the block layer can still queue non-read requests, despite the
-> block device read-only policy flag, so I think an -EROFS handler needs
-> to stay.
-> The following was run on mainline (e4880bc5dfb1f02b152e62a894b5c6f3e995)
-> with these two patches applied:
->
-> RBD mapped at: /dev/rbd/rbd/img@snap
-> rapido1:/# blockdev --getro /dev/rbd/rbd/img@snap
-> 1
-> rapido1:/# mkfs.xfs /dev/rbd/rbd/img@snap
-> [   12.346216]
-> [   12.346216] Assertion failure in rbd_queue_workfn() at line 4028:
-> [   12.346216]
-> [   12.346216]  rbd_assert(op_type == OBJ_OP_READ || rbd_dev->spec->snap_id == CEPH_NOSNAP);
-> [   12.346216]
-> [   12.347529] ------------[ cut here ]------------
-> [   12.347910] kernel BUG at drivers/block/rbd.c:4028!
-> [   12.348479] invalid opcode: 0000 [#1] SMP
-> [   12.349044] Modules linked in:
-> [   12.349499] CPU: 1 PID: 17 Comm: kworker/1:0 Not tainted 4.14.0-rc8+ #405
-> [   12.350407] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.0.0-prebuilt.qemu-project.org 04/01/2014
-> [   12.352001] Workqueue: rbd rbd_queue_workfn
-> [   12.352498] task: ffff88001d27b480 task.stack: ffffc90000090000
-> [   12.353058] RIP: 0010:rbd_queue_workfn+0x4f9/0x500
-> [   12.353527] RSP: 0018:ffffc90000093e08 EFLAGS: 00010282
-> [   12.354036] RAX: 0000000000000086 RBX: ffff88001a7c7980 RCX: ffffffff81829398
-> [   12.354890] RDX: 0000000000000001 RSI: 0000000000000086 RDI: ffffffff819f9f6c
-> [   12.355580] RBP: ffffc90000093e60 R08: 00000000fffffffe R09: 000000000000048f
-> [   12.356285] R10: 0000000000000005 R11: 000000000000048e R12: ffff88001ca6f000
-> [   12.356964] R13: 0000000000000000 R14: 0000000000000002 R15: ffff88001a7c7ac0
-> [   12.357650] FS:  0000000000000000(0000) GS:ffff88001e500000(0000) knlGS:0000000000000000
-> [   12.358443] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [   12.359031] CR2: 00007fcd19a14000 CR3: 000000001f069000 CR4: 00000000000006a0
-> [   12.359806] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> [   12.360604] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-> [   12.361397] Call Trace:
-> [   12.361686]  process_one_work+0x11e/0x280
-> [   12.362145]  worker_thread+0x45/0x3b0
-> [   12.362564]  kthread+0xff/0x140
-> [   12.362935]  ? process_one_work+0x280/0x280
-> [   12.363409]  ? kthread_create_on_node+0x40/0x40
-> [   12.363936]  ret_from_fork+0x22/0x30
-> [   12.364338] Code: 85 e1 fb ff ff e9 99 fb ff ff 48 c7 c1 e8 af 71 81 ba bc 0f 00 00 48 c7 c6 f0 bb 64 81 48 c7 c7 40 9d 71 81 31 c0 e8 65 df d5 ff <0f> 0b 0f 1f 44 00 00 55 48 89 e5 41 56 41 55 41 54 49 89 fc 53
-> [   12.366440] RIP: rbd_queue_workfn+0x4f9/0x500 RSP: ffffc90000093e08
-> [   12.367147] ---[ end trace 75c22000d1a0b248 ]---
+On Tue, 7 Nov 2017, Alfredo Deza wrote:
+> On Tue, Nov 7, 2017 at 7:09 AM, kefu chai <tchaikov@gmail.com> wrote:
+> > On Fri, Jun 9, 2017 at 3:37 AM, Sage Weil <sweil@redhat.com> wrote:
+> >> At CDM yesterday we talked about removing the ability to name your ceph
+> >> clusters.  There are a number of hurtles that make it difficult to fully
+> >> get rid of this functionality, not the least of which is that some
+> >> (many?) deployed clusters make use of it.  We decided that the most we can
+> >> do at this point is remove support for it in ceph-deploy and ceph-ansible
+> >> so that no new clusters or deployed nodes use it.
+> >>
+> >> The first PR in this effort:
+> >>
+> >>         https://github.com/ceph/ceph-deploy/pull/441
+> >
+> > okay, i am closing https://github.com/ceph/ceph/pull/18638 and
+> > http://tracker.ceph.com/issues/3253
+> 
+> This brings us to a limbo were we aren't supporting it in some places
+> but we do in some others.
+> 
+> It was disabled for ceph-deploy, but ceph-ansible wants to support it
+> still (see:  https://bugzilla.redhat.com/show_bug.cgi?id=1459861 )
 
-Hi David,
+I still haven't seen a case where customer server names for *daemons* is 
+needed.  Only for client-side $cluster.conf info for connecting.
+ 
+> Sebastien argues that these reasons are strong enough to keep that support in:
+> 
+> - Ceph cluster on demand with containers
 
-Heh, apparently I only tested writes and didn't do discards...  Writes
-go through blkdev_write_iter() but zeroout/discards seem to rely solely
-on FMODE_WRITE checks, which the block layer doesn't enforce.
+With kubernetes, the cluster will existin in a cluster namespace, and 
+daemons live in containers, so inside the container hte cluster will be 
+'ceph'.
 
-I'd rather try to fix it in the block layer before working around it in
-krbd.  I'll work up a patch tomorrow.
+> - Distributed compute nodes
 
-Thanks,
+?
 
-                Ilya
+> - rbd-mirror integration as part of OSPd
+
+This is the client-side $cluster.conf for connecting to the remove 
+cluster.
+
+> - Disaster scenario with OpenStack Cinder in OSPd
+
+Ditto.
+
+> The problem is that, as you can see with the ceph-disk PR just closed,
+> there are still other tools that have to implement the juggling of
+> custom cluster names
+> all over the place and they will hit some corner place where the
+> cluster name was not added and things will fail.
+> 
+> Just recently ceph-volume hit one of these places:
+> https://bugzilla.redhat.com/show_bug.cgi?id=1507943
+> 
+> Are we going to support custom cluster names? In what
+> context/scenarios are we going to allow it?
+
+It seems like we could drop this support in ceph-volume, unless someone 
+can present a compelling reason to keep it?
+
+...
+
+I'd almost want to go a step further and change
+
+/var/lib/ceph/$type/$cluster-$id/
+
+to
+
+ /var/lib/ceph/$type/$id
+
+In kubernetes, we're planning on bind mounting the host's 
+/var/lib/ceph/$namespace/$type/$id to the container's 
+/var/lib/ceph/$type/ceph-$id.  It might be a good time to drop some of the 
+awkward path names, though.  Or is it useless churn?
+
+sage
+
+
+
+> 
+> 
+> >
+> >>
+> >> Background:
+> >>
+> >> The cluster name concept was added to allow multiple clusters to have
+> >> daemons coexist on the same host.  At the type it was a hypothetical
+> >> requirement for a user that never actually made use of it, and the
+> >> support is kludgey:
+> >>
+> >>  - default cluster name is 'ceph'
+> >>  - default config is /etc/ceph/$cluster.conf, so that the normal
+> >> 'ceph.conf' still works
+> >>  - daemon data paths include the cluster name,
+> >>      /var/lib/ceph/osd/$cluster-$id
+> >>    which is weird (but mostly people are used to it?)
+> >>  - any cli command you want to touch a non-ceph cluster name
+> >> needs -C $name or --cluster $name passed to it.
+> >>
+> >> Also, as of jewel,
+> >>
+> >>  - systemd only supports a single cluster per host, as defined by $CLUSTER
+> >> in /etc/{sysconfig,default}/ceph
+> >>
+> >> which you'll notice removes support for the original "requirement".
+> >>
+> >> Also note that you can get the same effect by specifying the config path
+> >> explicitly (-c /etc/ceph/foo.conf) along with the various options that
+> >> substitute $cluster in (e.g., osd_data=/var/lib/ceph/osd/$cluster-$id).
+> >>
+> >>
+> >> Crap preventing us from removing this entirely:
+> >>
+> >>  - existing daemon directories for existing clusters
+> >>  - various scripts parse the cluster name out of paths
+> >>
+> >>
+> >> Converting an existing cluster "foo" back to "ceph":
+> >>
+> >>  - rename /etc/ceph/foo.conf -> ceph.conf
+> >>  - rename /var/lib/ceph/*/foo-* -> /var/lib/ceph/*/ceph-*
+> >>  - remove the CLUSTER=foo line in /etc/{default,sysconfig}/ceph
+> >>  - reboot
+> >>
+> >>
+> >> Questions:
+> >>
+> >>  - Does anybody on the list use a non-default cluster name?
+> >>  - If so, do you have a reason not to switch back to 'ceph'?
+> >>
+> >> Thanks!
+> >> sage
+> >> _______________________________________________
+> >> ceph-users mailing list
+> >> ceph-users@lists.ceph.com
+> >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> >
+> >
+> >
+> > --
+> > Regards
+> > Kefu Chai
+> > _______________________________________________
+> > ceph-users mailing list
+> > ceph-users@lists.ceph.com
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> 
+> 
