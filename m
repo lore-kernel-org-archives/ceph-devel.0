@@ -1,79 +1,40 @@
-From: "Marc Roos" <M.Roos@f1-outsourcing.eu>
-Subject: RE: [ceph-users] who is using nfs-ganesha and cephfs?
-Date: Wed, 8 Nov 2017 22:53:37 +0100
-Message-ID: <15555.9471030303$1510179826@news.gmane.org>
-References: <alpine.DEB.2.11.1711082140180.29217@piezo.novalocal>
+From: David Galloway <dgallowa@redhat.com>
+Subject: Re: Redmine problem
+Date: Wed, 8 Nov 2017 17:40:27 -0500
+Message-ID: <d67aad8c-5c9a-d967-edc4-b56ec40185f3@redhat.com>
+References: <7f49bc39-c717-273e-c2d2-adade2df172e@suse.cz>
+ <e83efaf2-e811-df08-ccf5-84ec516e7131@redhat.com>
+ <8e167ff1-f62a-6ce1-6674-16d98284a866@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain;
-        charset="US-ASCII"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail03.roosit.eu ([212.19.193.213]:55098 "EHLO mail03.roosit.eu"
+Received: from mx1.redhat.com ([209.132.183.28]:56948 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751245AbdKHWXp (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 8 Nov 2017 17:23:45 -0500
-In-Reply-To: <alpine.DEB.2.11.1711082140180.29217@piezo.novalocal>
-Content-Disposition: inline
+        id S1752670AbdKHWk3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 8 Nov 2017 17:40:29 -0500
+In-Reply-To: <8e167ff1-f62a-6ce1-6674-16d98284a866@suse.cz>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>, sweil <sweil@redhat.com>
-
- 
-
-I, in test environment, centos7, on a luminous osd node, with binaries 
-from 
-download.ceph.com::ceph/nfs-ganesha/rpm-V2.5-stable/luminous/x86_64/
-
-Having these:
-Nov  6 17:41:34 c01 kernel: ganesha.nfsd[31113]: segfault at 0 ip 
-00007fa80a151a43 sp 00007fa755ffa2f0 error 4 in 
-libdbus-1.so.3.7.4[7fa80a12b000+46000]
-Nov  6 17:41:34 c01 kernel: ganesha.nfsd[31113]: segfault at 0 ip 
-00007fa80a151a43 sp 00007fa755ffa2f0 error 4 in 
-libdbus-1.so.3.7.4[7fa80a12b000+46000]
-Nov  6 17:42:16 c01 kernel: ganesha.nfsd[6839]: segfault at 8 ip 
-00007fc97a5d3f98 sp 00007fc8c6ffc2f8 error 6 in 
-libdbus-1.so.3.7.4[7fc97a5ac000+46000]
-Nov  6 17:42:16 c01 kernel: ganesha.nfsd[6839]: segfault at 8 ip 
-00007fc97a5d3f98 sp 00007fc8c6ffc2f8 error 6 in 
-libdbus-1.so.3.7.4[7fc97a5ac000+46000]
-Nov  6 17:47:47 c01 kernel: ganesha.nfsd[7662]: segfault at 4 ip 
-00007f15e2afc060 sp 00007f152effc388 error 6 in 
-libdbus-1.so.3.7.4[7f15e2ad6000+46000]
-Nov  6 17:47:47 c01 kernel: ganesha.nfsd[7662]: segfault at 4 ip 
-00007f15e2afc060 sp 00007f152effc388 error 6 in 
-libdbus-1.so.3.7.4[7f15e2ad6000+46000]
-Nov  6 17:52:25 c01 kernel: ganesha.nfsd[14415]: segfault at 88 ip 
-00007f9258eed453 sp 00007f91a9ff2348 error 4 in 
-libdbus-1.so.3.7.4[7f9258eda000+46000]
-Nov  6 17:52:25 c01 kernel: ganesha.nfsd[14415]: segfault at 88 ip 
-00007f9258eed453 sp 00007f91a9ff2348 error 4 in 
-libdbus-1.so.3.7.4[7f9258eda000+46000]
-
-
-And reported this
-https://github.com/nfs-ganesha/nfs-ganesha/issues/215
+To: Nathan Cutler <ncutler@suse.cz>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Dachary, Loic" <loic@dachary.org>
 
 
 
------Original Message-----
-From: Sage Weil [mailto:sweil@redhat.com] 
-Sent: woensdag 8 november 2017 22:42
-To: ceph-users@ceph.com; ceph-devel@vger.kernel.org
-Subject: [ceph-users] who is using nfs-ganesha and cephfs?
+On 11/08/2017 05:03 PM, Nathan Cutler wrote:
+>> Could it possibly be because Loic no longer has Redmine Administrator
+>> privileges per his request?
+> 
+> I don't think so. Was the revocation of Loic's admin privs done within
+> the past 72 hours?
 
-Who is running nfs-ganesha's FSAL to export CephFS?  What has your 
-experience been?
+Yes.
 
-(We are working on building proper testing and support for this into 
-Mimic, but the ganesha FSAL has been around for years.)
+> 
+> (The script uses the Redmine key provided on the command line, and I'm
+> providing my own key since that's the only one I have.)
+> 
 
-Thanks!
-sage
-
-_______________________________________________
-ceph-users mailing list
-ceph-users@lists.ceph.com
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
-
-
+Can you share the script without the API key and maybe some timestamps
+so I can check out the logs?
