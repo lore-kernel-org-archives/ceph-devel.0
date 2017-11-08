@@ -1,44 +1,80 @@
-From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
+From: "Marc Roos" <M.Roos-yG4tGvGIC004hcxptnrGZodd74u8MsAO@public.gmane.org>
 Subject: Re: who is using nfs-ganesha and cephfs?
-Date: Wed, 8 Nov 2017 16:52:14 -0500
-Message-ID: <CAGbvivLN_YzDR4XDHsJK5kiYZMBrMSeE71kqQysq7p7-AgZ8fQ@mail.gmail.com>
+Date: Wed, 8 Nov 2017 22:53:37 +0100
+Message-ID: <41371.4566770524$1510178026@news.gmane.org>
 References: <alpine.DEB.2.11.1711082140180.29217@piezo.novalocal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f41.google.com ([209.85.215.41]:55685 "EHLO
-        mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751241AbdKHVwQ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 8 Nov 2017 16:52:16 -0500
-Received: by mail-lf0-f41.google.com with SMTP id e143so4852980lfg.12
-        for <ceph-devel@vger.kernel.org>; Wed, 08 Nov 2017 13:52:16 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1711082140180.29217@piezo.novalocal>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: Ceph-User <ceph-users@ceph.com>, Ceph Development <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.11.1711082140180.29217-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
+Content-Disposition: inline
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ceph-users <ceph-users-Qp0mS5GaXlQ@public.gmane.org>, sweil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-We use Ganesha (currently version 2.5.2) for exporting cephfs
-subdirectories over NFS, but we have been using the VFS FSAL as
-opposed to the ceph one due to problems encountered in the past. Im
-not sure if the past issues have been resolved or not.  It would be
-good to know with some confidence if the ceph FSAL is production
-ready, so proper testing would be great.
+ 
 
-Wyllys Ingersoll
-Keeper Technology, LLC
+I, in test environment, centos7, on a luminous osd node, with binaries 
+from 
+download.ceph.com::ceph/nfs-ganesha/rpm-V2.5-stable/luminous/x86_64/
 
-On Wed, Nov 8, 2017 at 4:41 PM, Sage Weil <sweil@redhat.com> wrote:
-> Who is running nfs-ganesha's FSAL to export CephFS?  What has your
-> experience been?
->
-> (We are working on building proper testing and support for this into
-> Mimic, but the ganesha FSAL has been around for years.)
->
-> Thanks!
-> sage
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Having these:
+Nov  6 17:41:34 c01 kernel: ganesha.nfsd[31113]: segfault at 0 ip 
+00007fa80a151a43 sp 00007fa755ffa2f0 error 4 in 
+libdbus-1.so.3.7.4[7fa80a12b000+46000]
+Nov  6 17:41:34 c01 kernel: ganesha.nfsd[31113]: segfault at 0 ip 
+00007fa80a151a43 sp 00007fa755ffa2f0 error 4 in 
+libdbus-1.so.3.7.4[7fa80a12b000+46000]
+Nov  6 17:42:16 c01 kernel: ganesha.nfsd[6839]: segfault at 8 ip 
+00007fc97a5d3f98 sp 00007fc8c6ffc2f8 error 6 in 
+libdbus-1.so.3.7.4[7fc97a5ac000+46000]
+Nov  6 17:42:16 c01 kernel: ganesha.nfsd[6839]: segfault at 8 ip 
+00007fc97a5d3f98 sp 00007fc8c6ffc2f8 error 6 in 
+libdbus-1.so.3.7.4[7fc97a5ac000+46000]
+Nov  6 17:47:47 c01 kernel: ganesha.nfsd[7662]: segfault at 4 ip 
+00007f15e2afc060 sp 00007f152effc388 error 6 in 
+libdbus-1.so.3.7.4[7f15e2ad6000+46000]
+Nov  6 17:47:47 c01 kernel: ganesha.nfsd[7662]: segfault at 4 ip 
+00007f15e2afc060 sp 00007f152effc388 error 6 in 
+libdbus-1.so.3.7.4[7f15e2ad6000+46000]
+Nov  6 17:52:25 c01 kernel: ganesha.nfsd[14415]: segfault at 88 ip 
+00007f9258eed453 sp 00007f91a9ff2348 error 4 in 
+libdbus-1.so.3.7.4[7f9258eda000+46000]
+Nov  6 17:52:25 c01 kernel: ganesha.nfsd[14415]: segfault at 88 ip 
+00007f9258eed453 sp 00007f91a9ff2348 error 4 in 
+libdbus-1.so.3.7.4[7f9258eda000+46000]
+
+
+And reported this
+https://github.com/nfs-ganesha/nfs-ganesha/issues/215
+
+
+
+-----Original Message-----
+From: Sage Weil [mailto:sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org] 
+Sent: woensdag 8 november 2017 22:42
+To: ceph-users-Qp0mS5GaXlQ@public.gmane.org; ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Subject: [ceph-users] who is using nfs-ganesha and cephfs?
+
+Who is running nfs-ganesha's FSAL to export CephFS?  What has your 
+experience been?
+
+(We are working on building proper testing and support for this into 
+Mimic, but the ganesha FSAL has been around for years.)
+
+Thanks!
+sage
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
