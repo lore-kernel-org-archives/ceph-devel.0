@@ -1,54 +1,44 @@
-From: Lincoln Bryant <lincolnb-t4+EzPmVLfD2fBVCVOL8/A@public.gmane.org>
-Subject: Re: who is using nfs-ganesha and cephfs?
-Date: Wed, 8 Nov 2017 16:42:32 -0600
-Message-ID: <68AC447D-36B4-4085-AF0F-387B2FB1A6AB@uchicago.edu>
-References: <alpine.DEB.2.11.1711082140180.29217@piezo.novalocal>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2104\))
-Content-Type: text/plain; charset="us-ascii"
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: Redmine problem
+Date: Wed, 8 Nov 2017 23:50:36 +0100
+Message-ID: <40f46081-c90b-cadc-771a-28f305923581@suse.cz>
+References: <7f49bc39-c717-273e-c2d2-adade2df172e@suse.cz>
+ <e83efaf2-e811-df08-ccf5-84ec516e7131@redhat.com>
+ <8e167ff1-f62a-6ce1-6674-16d98284a866@suse.cz>
+ <d67aad8c-5c9a-d967-edc4-b56ec40185f3@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1711082140180.29217-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:60019 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752659AbdKHWui (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 8 Nov 2017 17:50:38 -0500
+In-Reply-To: <d67aad8c-5c9a-d967-edc4-b56ec40185f3@redhat.com>
+Content-Language: en-US
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: David Galloway <dgallowa@redhat.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, "Dachary, Loic" <loic@dachary.org>
 
-Hi Sage,
+> Can you share the script without the API key and maybe some timestamps
+> so I can check out the logs?
 
-We have been running the Ganesha FSAL for a while (as far back as Hammer / Ganesha 2.2.0), primarily for uid/gid squashing.
+The Redmine bits of the script are in this file: 
+http://ceph-workbench.dachary.org/root/ceph-workbench/blob/master/ceph_workbench/wbredmine.py
 
-Things are basically OK for our application, but we've seen the following weirdness*:
-	- Sometimes there are duplicated entries when directories are listed. Same filename, same inode, just shows up twice in 'ls'.
-	- There can be a considerable latency between new files added to CephFS and those files becoming visible on our NFS clients. I understand this might be related to dentry caching. 
-	- Occasionally, the Ganesha FSAL seems to max out at 100,000 caps claimed which don't get released until the MDS is restarted.
+I first started seeing this at around 11:40 a.m. CET (10:40 UTC) and it 
+was happening all afternoon - the script would run for some time and 
+then fail with the same error, but not at the same spot. Sometimes it 
+would process 10 or 20 pending backport issues, other times it would get 
+through more.
 
-*note: these issues are with Ganesha 2.2.0 and Hammer/Jewel, and have perhaps since been fixed upstream. 
+I just ran it again and it completed twice in a row without error, so I 
+guess it was a transient issue. Timestamp after completing the second run:
 
-(We've recently updated to Luminous / Ganesha 2.5.2, and will be happy to complain if any issues show up :))
+$ date --utc
+Wed Nov  8 22:48:34 UTC 2017
 
-Cheers,
-Lincoln
+Thanks for looking into it.
 
-> On Nov 8, 2017, at 3:41 PM, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> 
-> Who is running nfs-ganesha's FSAL to export CephFS?  What has your 
-> experience been?
-> 
-> (We are working on building proper testing and support for this into 
-> Mimic, but the ganesha FSAL has been around for years.)
-> 
-> Thanks!
-> sage
-> 
-> _______________________________________________
-> ceph-users mailing list
-> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Nathan
