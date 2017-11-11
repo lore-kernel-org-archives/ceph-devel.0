@@ -1,52 +1,101 @@
-From: Yaarit Hatuka <yaarit@gmail.com>
-Subject: Re: SMART disk monitoring
-Date: Fri, 10 Nov 2017 22:36:46 -0500
-Message-ID: <CAP6jbrTOujE+DrsgAnne16zLaXubKUZzyn_rpF5FD1ubBTycPw@mail.gmail.com>
-References: <alpine.DEB.2.11.1711101751430.2819@piezo.novalocal> <207642670.33700582.1510357519950.JavaMail.zimbra@redhat.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Fwd: Build failed in Jenkins: ceph-master #1408
+Date: Sat, 11 Nov 2017 13:38:02 +0100
+Message-ID: <6c930c4f-d269-7185-d4ba-bb2b4b96bb69@digiware.nl>
+References: <14085029.62.1509737256278.JavaMail.jenkins@cephdev.digiware.nl>
+ <fe5aaa26-d32e-916f-2af6-91ba5a4ab11e@digiware.nl>
+ <dc1cdc3e-4b95-85dd-5ccd-94fe0cbecba0@redhat.com>
+ <6bfee3c0-2320-cc93-2815-429040ccac47@digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f174.google.com ([209.85.220.174]:47207 "EHLO
-        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751366AbdKKDhH (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 10 Nov 2017 22:37:07 -0500
-Received: by mail-qk0-f174.google.com with SMTP id 136so3348179qkd.4
-        for <ceph-devel@vger.kernel.org>; Fri, 10 Nov 2017 19:37:07 -0800 (PST)
-In-Reply-To: <207642670.33700582.1510357519950.JavaMail.zimbra@redhat.com>
+Received: from smtp.digiware.nl ([176.74.240.9]:33106 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752611AbdKKMiC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 11 Nov 2017 07:38:02 -0500
+In-Reply-To: <6bfee3c0-2320-cc93-2815-429040ccac47@digiware.nl>
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel@vger.kernel.org
+To: Casey Bodley <cbodley@redhat.com>
+Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
 
-Many thanks! I'm very excited to join Ceph's outstanding community!
-I'm looking forward to working on this challenging project, and I'm
-very grateful for the opportunity to be guided by Sage.
+On 04/11/2017 18:40, Willem Jan Withagen wrote:
+> On 3-11-2017 22:24, Casey Bodley wrote:
+>> Hi Willem, (and cc list)
+>>
+>> I think this one is related to your boost version. In my builds, I see 
+>> that boost::beast::string_ref is typedef'd to boost::string_ref and 
+>> this builds. Your output implies that it's typedef'ed to 
+>> boost::string_view.
+>>
+>> https://github.com/boostorg/beast/commit/64ff766b2304c751e1a46d2b7ca948cd274c5739 
+>> added some preprocessor stuff that switches from one to the other 
+>> based on whether BOOST_VERSION >= 106400. You might try defining 
+>> BEAST_NO_BOOST_STRING_VIEW to work around that for now.
+> 
+> That did not do it.
+> So we might need to change some of the functions-sigs and conversion is 
+> possible.
 
-Best,
-Yaarit
+Casey,
 
-On Fri, Nov 10, 2017 at 6:45 PM, Ali Maredia <amaredia@redhat.com> wrote:
-> Congrats Yaarit! Welcome!
->
-> -Ali
->
-> ----- Original Message -----
->> From: "Sage Weil" <sweil@redhat.com>
->> To: ceph-devel@vger.kernel.org, yaarit@gmail.com
->> Sent: Friday, November 10, 2017 12:58:16 PM
->> Subject: SMART disk monitoring
->>
->> Hi everyone,
->>
->> I'm delighted to share that Yaarit Hatuka has been selected for an
->> Outreachy internship adding support for monitoring SMART information for
->> OSD devices!  I'm looking forward to working with her over the next few
->> months to add support to the osd, mgr, and some smartmontools
->> infrastructure to make this all work.
->>
->> Congratulations!
->> sage
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+Any chance you have a fix for Clang for this?
+
+--WjW
+
+> --WjW
+> 
+> cd /home/jenkins/workspace/ceph-master/build/src/test && ccache 
+> /usr/bin/c++  -DCEPH_LIBDIR=\"/usr/local/lib\" 
+> -DCEPH_PKGLIBDIR=\"/usr/local/lib/ceph\" -D_FILE_OFFSET_BITS=64 
+> -I/home/jenkins/workspace/ceph-master/build/src/include 
+> -I/home/jenkins/workspace/ceph-master/src -isystem /usr/local/include 
+> -isystem /home/jenkins/workspace/ceph-master/build/include -isystem 
+> /home/jenkins/workspace/ceph-master/src/xxHash -isystem 
+> /home/jenkins/workspace/ceph-master/src/rapidjson/include 
+> -I/home/jenkins/workspace/ceph-master/src/dmclock/src 
+> -I/home/jenkins/workspace/ceph-master/src/dmclock/support/src -isystem 
+> /home/jenkins/workspace/ceph-master/src/googletest/googletest/include 
+> -I/home/jenkins/workspace/ceph-master/src/googletest/googlemock/include 
+> -Wall -Wtype-limits -Wignored-qualifiers -Winit-self -Wpointer-arith 
+> -Werror=format-security -fno-strict-aliasing -fsigned-char 
+> -Wno-unknown-pragmas -Wno-unused-function -Wno-unused-local-typedef 
+> -Wno-varargs -Wno-gnu-designator -Wno-missing-braces -Wno-parentheses 
+> -Wno-deprecated-register  -ftemplate-depth-1024 -Wno-invalid-offsetof 
+> -Wnon-virtual-dtor -Wno-unknown-pragmas 
+> -Wno-inconsistent-missing-override -Wno-mismatched-tags 
+> -Wno-unused-private-field -Wno-address-of-packed-member 
+> -fdiagnostics-color=auto -I/usr/local/include/nss/nss 
+> -I/usr/local/include/nspr  -O0 -g -DBEAST_NO_BOOST_STRING_VIEW -fPIE 
+> -DHAVE_CONFIG_H -D__CEPH__ -D_REENTRANT -D_THREAD_SAFE 
+> -D__STDC_FORMAT_MACROS 
+> -I/home/jenkins/workspace/ceph-master/src/googletest/googlemock/include 
+> -I/home/jenkins/workspace/ceph-master/build/src/googletest/googlemock/include 
+> -I/home/jenkins/workspace/ceph-master/src/googletest/googletest/include 
+> -I/home/jenkins/workspace/ceph-master/build/src/googletest/googletest/include 
+> -fno-strict-aliasing -std=c++11 -o 
+> CMakeFiles/ceph_test_librgw_file_aw.dir/librgw_file_aw.cc.o -c 
+> /home/jenkins/workspace/ceph-master/src/test/librgw_file_aw.cc
+> /home/jenkins/workspace/ceph-master/src/rgw/rgw_asio_client.cc:35:33: 
+> error: no viable conversion from 'const boost::basic_string_view<char, 
+> std::__1::char_traits<char> >' to 'const boost::string_ref' (aka 'const 
+> basic_string_ref<char, std::char_traits<char> >')
+>        env.set("CONTENT_LENGTH", value);
+>                                  ^~~~~
+> /usr/local/include/boost/utility/string_ref.hpp:70:25: note: candidate 
+> constructor not viable: no known conversion from 'const 
+> boost::basic_string_view<char, std::__1::char_traits<char> >' to 'const 
+> boost::basic_string_ref<char, std::__1::char_traits<char> > &' for 1st 
+> argument
+>          BOOST_CONSTEXPR basic_string_ref (const basic_string_ref &rhs) 
+> BOOST_NOEXCEPT
+>                          ^
+> 
+> 
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
