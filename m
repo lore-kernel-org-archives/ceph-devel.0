@@ -1,104 +1,67 @@
-From: Stefan Priebe - Profihost AG <s.priebe-2Lf/h1ldwEHR5kwTpVNS9A@public.gmane.org>
-Subject: Re: ceph zstd not for bluestor due to performance
- reasons
-Date: Sun, 12 Nov 2017 20:10:14 +0100
-Message-ID: <b61634d4-f2fe-8a8b-c269-e086fca6bc47@profihost.ag>
-References: <BD0427BB-F720-4746-82F9-E082D2396F56@profihost.ag>
- <alpine.DEB.2.11.1710251940520.22592@piezo.us.to>
- <alpine.DEB.2.11.1711121651120.2819@piezo.novalocal>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: SMART disk monitoring
+Date: Sun, 12 Nov 2017 20:16:39 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1711122003420.23234@piezo.novalocal>
+References: <alpine.DEB.2.11.1711101751430.2819@piezo.novalocal> <207642670.33700582.1510357519950.JavaMail.zimbra@redhat.com> <CAP6jbrTOujE+DrsgAnne16zLaXubKUZzyn_rpF5FD1ubBTycPw@mail.gmail.com> <20171112171653.q7dn7bw52ijltb3q@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1711121651120.2819-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-Content-Language: de-DE
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sage-BnTBU8nroG7k1uMJSBkQmQ@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from tragedy.dreamhost.com ([66.33.205.236]:43207 "EHLO
+        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750910AbdKLUQm (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 12 Nov 2017 15:16:42 -0500
+In-Reply-To: <20171112171653.q7dn7bw52ijltb3q@suse.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Lars Marowsky-Bree <lmb@suse.com>
+Cc: ceph-devel@vger.kernel.org
 
-
-Am 12.11.2017 um 17:55 schrieb Sage Weil:
-> On Wed, 25 Oct 2017, Sage Weil wrote:
->> On Wed, 25 Oct 2017, Stefan Priebe - Profihost AG wrote:
->>> Hello,
->>>
->>> in the lumious release notes is stated that zstd is not supported by
->>> bluestor due to performance reason. I'm wondering why btrfs instead
->>> states that zstd is as fast as lz4 but compresses as good as zlib.
->>>
->>> Why is zlib than supported by bluestor? And why does btrfs / facebook
->>> behave different?
->>>
->>> "BlueStore supports inline compression using zlib, snappy, or LZ4. (Ceph
->>> also supports zstd for RGW compression but zstd is not recommended for
->>> BlueStore for performance reasons.)"
->>
->> zstd will work but in our testing the performance wasn't great for 
->> bluestore in particular.  The problem was that for each compression run 
->> there is a relatively high start-up cost initializing the zstd 
->> context/state (IIRC a memset of a huge memory buffer) that dominated the 
->> execution time... primarily because bluestore is generally compressing 
->> pretty small chunks of data at a time, not big buffers or streams.
->>
->> Take a look at unittest_compression timings on compressing 16KB buffers 
->> (smaller than bluestore needs usually, but illustrated of the problem):
->>
->> [ RUN      ] Compressor/CompressorTest.compress_16384/0
->> [plugin zlib (zlib/isal)]
->> [       OK ] Compressor/CompressorTest.compress_16384/0 (294 ms)
->> [ RUN      ] Compressor/CompressorTest.compress_16384/1
->> [plugin zlib (zlib/noisal)]
->> [       OK ] Compressor/CompressorTest.compress_16384/1 (1755 ms)
->> [ RUN      ] Compressor/CompressorTest.compress_16384/2
->> [plugin snappy (snappy)]
->> [       OK ] Compressor/CompressorTest.compress_16384/2 (169 ms)
->> [ RUN      ] Compressor/CompressorTest.compress_16384/3
->> [plugin zstd (zstd)]
->> [       OK ] Compressor/CompressorTest.compress_16384/3 (4528 ms)
->>
->> It's an order of magnitude slower than zlib or snappy, which probably 
->> isn't acceptable--even if it is a bit smaller.
+On Sun, 12 Nov 2017, Lars Marowsky-Bree wrote:
+> On 2017-11-10T22:36:46, Yaarit Hatuka <yaarit@gmail.com> wrote:
 > 
-> Update!  Zstd developer Yann Collet debugged this and it turns out it was 
-> a build issue, fixed by https://github.com/ceph/ceph/pull/18879/files 
-> (missing quotes!  yeesh).  The results now look quite good!
+> > Many thanks! I'm very excited to join Ceph's outstanding community!
+> > I'm looking forward to working on this challenging project, and I'm
+> > very grateful for the opportunity to be guided by Sage.
 > 
-> [ RUN      ] Compressor/CompressorTest.compress_16384/0
-> [plugin zlib (zlib/isal)]
-> [       OK ] Compressor/CompressorTest.compress_16384/0 (370 ms)
-> [ RUN      ] Compressor/CompressorTest.compress_16384/1
-> [plugin zlib (zlib/noisal)]
-> [       OK ] Compressor/CompressorTest.compress_16384/1 (1926 ms)
-> [ RUN      ] Compressor/CompressorTest.compress_16384/2
-> [plugin snappy (snappy)]
-> [       OK ] Compressor/CompressorTest.compress_16384/2 (163 ms)
-> [ RUN      ] Compressor/CompressorTest.compress_16384/3
-> [plugin zstd (zstd)]
-> [       OK ] Compressor/CompressorTest.compress_16384/3 (723 ms)
+> That's all excellent news!
 > 
-> Not as fast as snappy, but somewhere between intel-accellerated zlib and 
-> non-accellerated zlib, with better compression ratios.
+> Can we discuss though if/how this belongs into ceph-osd? Given that this
+> can (and is) already collected via smartmon, either via prometheus or, I
+> assume, collectd as well? Does this really need to be added to the OSD
+> code?
 > 
-> Also, the zstd compression level is currently hard-coded to level 5.  
-> That should be fixed at some point.
-> 
-> We can backport this to luminous so it's available in 12.2.3.
+> Would the goal be for them to report this to ceph-mgr, or expose
+> directly as something to be queried via, say, a prometheus exporter
+> binding? Or are the OSDs supposed to directly act on this information?
 
-thanks a lot - i already ported your improvements and the fix to my
-local branch but will also change the compression level to 3 or may be 2.
+The OSD is just a convenient channel, but needn't be the only 
+one or only option.
 
-5 is still far too slow and also higher than most apps using zstd.
+Part 1 of the project is to get JSON output out of smartctl so we avoid 
+one of the many crufty projects floating around to parse its weird output; 
+that'll be helpful all consumers, presumably.
 
-I'm happy that my post to the zstd github project had so much success.
+Part 2 is to map OSDs to host:device pairs; that merged already.
 
-Greets,
-Stefan
+Part 3 is to gather the actual data.  The prototype has the OSD polling 
+this because it (1) knows which devices it consumes and (2) is present on 
+every node.  We're contemplating a per-host ceph-volume-agent for 
+assisting with OSD (de)provisioning (i.e., running ceph-volume); that 
+could be an option.  Of if some other tool is already scraping it and can 
+be queried, that would work too.
+
+I think the OSD will end up being a necessary path (perhaps among many), 
+though, because when we are using SPDK I don't think we'll be able to get 
+the SMART data via smartctl (or any other tool) at all because the OSD 
+process will be running the NVMe driver.
+
+Part 4 is to archive the results.  The original thought was to dump it 
+into RADOS.  I hadn't considered prometheus, but that might be a better 
+fit!  I'm generally pretty cautious about introducing dependencies like 
+this but we're already expecting prometheus to be used for other metrics 
+for the dashboard.  I'm not sure whether prometheus' query interface lends 
+itself to the failure models, though...
+
+Part 5 is to do some basic failure prediction!
+
+sage
