@@ -1,64 +1,35 @@
-From: Jan Fajerski <jfajerski@suse.com>
-Subject: Re: decompiled crushmap device list after removing osd
-Date: Mon, 13 Nov 2017 15:12:32 +0100
-Message-ID: <20171113141232.dm3stov7lep7hqkf@jf_suse_laptop>
-References: <20171107144658.crbrv6sxidvyuay2@jf_suse_laptop>
- <alpine.DEB.2.11.1711071940140.29217@piezo.novalocal>
+From: Simon Leinen <simon.leinen@switch.ch>
+Subject: "Hybrid SMR" drive spec proposal for OCP
+Date: Mon, 13 Nov 2017 17:08:06 +0100
+Message-ID: <aa375igo0p.fsf@switch.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15; format=flowed
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.nue.novell.com ([195.135.221.5]:44320 "EHLO
-        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752551AbdKMPGb (ORCPT
-        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
-        Mon, 13 Nov 2017 10:06:31 -0500
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1711071940140.29217@piezo.novalocal>
+Received: from teruel.switch.ch ([130.59.193.63]:59650 "EHLO teruel.switch.ch"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753034AbdKMQOB (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 13 Nov 2017 11:14:01 -0500
+Received: from surlej.switch.ch (surlej.switch.ch [IPv6:2001:620:0:1001::69])
+        by teruel.switch.ch (8.14.4/8.14.4/Debian-4+deb7u1) with ESMTP id vADG868n031481
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NOT)
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Nov 2017 17:08:08 +0100
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: ceph-devel@vger.kernel.org
 
-On Tue, Nov 07, 2017 at 07:41:53PM +0000, Sage Weil wrote:
->On Tue, 7 Nov 2017, Jan Fajerski wrote:
->> Hi,
->> I noticed some weird behaviour of crushtool when decompiling a map after an
->> osd has been removed. Say I have a cluster with 4 osds. When I remove osd.2,
->> get and decompile the crushmap, I get this device list in the crushmap:
->>
->> # devices
->> device 0 osd.0 class hdd
->> device 1 osd.1 class hdd
->> device 2 device2
->> device 3 osd.3 class hdd
->>
->> I'd appreciate some info on whether this is intended behaviour and what the
->> reasoning is. I'd expect the map not to list id 2 at all and afaict the
->> crushmap doesn't contain the id anymore. If there is no reason for listing
->> that I'd be happy to make a PR.
->
->There's no good rason to print it.  It comes from
->
->  out << "\n# devices\n";
->  for (int i=0; i<crush.get_max_devices(); i++) {
->    out << "device " << i << " ";
->    print_item_name(out, i, crush);
->    print_item_class(out, i, crush);
->    out << "\n";
->  }
->
->There isn't a convenient way at this point to know whether the device is
->used in the hierarchy, so exclusing it is a bit of a hassle.  Happy to
->take a PR doing so, though!
-https://github.com/ceph/ceph/pull/18901
->
->sage
->
->
+Ted Ts'o from Google wrote a small spec for a new kind of disk drive
+that could be partly "traditional" and partly SMR (Shingled Magnetic
+Recording), and you could convert parts of the disk (at 100GB
+granularity) between traditional and SMR (and back):
 
+https://www.blog.google/topics/google-cloud/dynamic-hybrid-smr-ocp-proposal-improve-data-center-disk-drives/
+
+SMR is supposed to "lower the cost per byte of an HDD by up to 10-20
+percent".
+
+The spec is being proposed to the Open Compute Project (OCP).
+
+Maybe this is something that a future version of Ceph could leverage.
+Seems easier (though not "easy") with Bluestore than with Filestore.
 -- 
-Jan Fajerski
-Engineer Enterprise Storage
-SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
-HRB 21284 (AG Nürnberg)
+Simon.
