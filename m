@@ -1,91 +1,47 @@
-From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
-Subject: Re: SMART disk monitoring
-Date: Mon, 13 Nov 2017 12:53:16 +0100
-Message-ID: <3ac76cc3-92f2-5180-4389-c5334506fac4@corp.ovh.com>
-References: <alpine.DEB.2.11.1711101751430.2819@piezo.novalocal>
- <207642670.33700582.1510357519950.JavaMail.zimbra@redhat.com>
- <CAP6jbrTOujE+DrsgAnne16zLaXubKUZzyn_rpF5FD1ubBTycPw@mail.gmail.com>
- <20171112171653.q7dn7bw52ijltb3q@suse.com>
- <alpine.DEB.2.11.1711122003420.23234@piezo.novalocal>
+From: Liuhao <liu.haoA@h3c.com>
+Subject: about memory alignment
+Date: Mon, 13 Nov 2017 13:11:18 +0000
+Message-ID: <7DF47FD5BC069E4BBD28890C798EC7BC8C8D2EB5@H3CMLB14-EX.srv.huawei-3com.com>
+References: <7DF47FD5BC069E4BBD28890C798EC7BC8C8D2E79@H3CMLB14-EX.srv.huawei-3com.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from 10.mo301.mail-out.ovh.net ([137.74.110.73]:51713 "EHLO
-        10.mo301.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752601AbdKMLxT (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Nov 2017 06:53:19 -0500
-In-Reply-To: <alpine.DEB.2.11.1711122003420.23234@piezo.novalocal>
-Content-Language: en-US
+Received: from smtp.h3c.com ([60.191.123.56]:28367 "EHLO h3cmg01-ex.h3c.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751174AbdKMNLb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 13 Nov 2017 08:11:31 -0500
+In-Reply-To: <7DF47FD5BC069E4BBD28890C798EC7BC8C8D2E79@H3CMLB14-EX.srv.huawei-3com.com>
+Content-Language: zh-CN
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, Lars Marowsky-Bree <lmb@suse.com>
-Cc: ceph-devel@vger.kernel.org
+To: 'ceph-devel' <ceph-devel@vger.kernel.org>
 
-On 17-11-12 09:16 PM, Sage Weil wrote:
-> On Sun, 12 Nov 2017, Lars Marowsky-Bree wrote:
->> On 2017-11-10T22:36:46, Yaarit Hatuka <yaarit@gmail.com> wrote:
->>
->>> Many thanks! I'm very excited to join Ceph's outstanding community!
->>> I'm looking forward to working on this challenging project, and I'm
->>> very grateful for the opportunity to be guided by Sage.
->>
->> That's all excellent news!
->>
->> Can we discuss though if/how this belongs into ceph-osd? Given that this
->> can (and is) already collected via smartmon, either via prometheus or, I
->> assume, collectd as well? Does this really need to be added to the OSD
->> code?
->>
->> Would the goal be for them to report this to ceph-mgr, or expose
->> directly as something to be queried via, say, a prometheus exporter
->> binding? Or are the OSDs supposed to directly act on this information?
-> 
-> The OSD is just a convenient channel, but needn't be the only
-> one or only option.
-> 
-> Part 1 of the project is to get JSON output out of smartctl so we avoid
-> one of the many crufty projects floating around to parse its weird output;
-> that'll be helpful all consumers, presumably.
+HI, developers:
 
-That means a new patch to smartctl itself, right?
+data.largest_data_off_in_data_bl = orig_len + sizeof(__u32);† // we are about to
+What 's mean of sizeof(__u32)?† Why add sizeof(__u32)?
 
-> Part 2 is to map OSDs to host:device pairs; that merged already.
-> 
-> Part 3 is to gather the actual data.  The prototype has the OSD polling
-> this because it (1) knows which devices it consumes and (2) is present on
-> every node.  We're contemplating a per-host ceph-volume-agent for
-> assisting with OSD (de)provisioning (i.e., running ceph-volume); that
-> could be an option.  Of if some other tool is already scraping it and can
-> be queried, that would work too.
-> 
-> I think the OSD will end up being a necessary path (perhaps among many),
-> though, because when we are using SPDK I don't think we'll be able to get
-> the SMART data via smartctl (or any other tool) at all because the OSD
-> process will be running the NVMe driver.
+Detail:
+oid write(const coll_t& cid, const ghobject_t& oid, uint64_t off, uint64_t len,
+†††††††† †††††† const bufferlist& write_data, uint32_t flags = 0) {
+††††† uint32_t orig_len = data_bl.length();
+††††† Op* _op = _get_next_op();
+††††† _op->op = OP_WRITE;
+††††† _op->cid = _get_coll_id(cid);
+††††† _op->oid = _get_object_id(oid);
+††††† _op->off = off;
+††††† _op->len = len;
+††††† ::encode(write_data, data_bl);
 
-This may not work anyway, because  many controllers (including JBOD 
-controllers) don't pass-through SMART data, or the data don't make sense.
+††††† assert(len == write_data.length());
+††††† data.fadvise_flags = data.fadvise_flags | flags;
+††††† if (write_data.length() > data.largest_data_len) {
+†††††††† data.largest_data_len = write_data.length();
+†††††††† data.largest_data_off = off;
+†††††††† data.largest_data_off_in_data_bl = orig_len + sizeof(__u32);† // we are about to
+††††† }
+††††† data.ops++;
+}
 
-> Part 4 is to archive the results.  The original thought was to dump it
-> into RADOS.  I hadn't considered prometheus, but that might be a better
-> fit!  I'm generally pretty cautious about introducing dependencies like
-> this but we're already expecting prometheus to be used for other metrics
-> for the dashboard.  I'm not sure whether prometheus' query interface lends
-> itself to the failure models, though...
-> Part 5 is to do some basic failure prediction!
-
-SMART is unreliable on spinning disks, and on SSDs it's only as reliable as 
-firmware goes (and that is often questionable).
-Also, many vendors give different meaning to different SMART attributes, 
-making some of obvious choices (like power-on hours or power-cycle count) 
-useless (see https://www.backblaze.com/blog/hard-drive-smart-stats/ for 
-example).
-
-Anyway, we'd love to see that this feature can be completely disabled by 
-config change and don't incur any backwards incompatibility by itself.
-
--- 
-Piotr Da≈Çek
-piotr.dalek@corp.ovh.com
-https://www.ovh.com/us/
+Thanks
