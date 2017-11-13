@@ -1,108 +1,126 @@
-From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
-Subject: Re: config on mons
-Date: Sun, 12 Nov 2017 17:43:11 -0800
-Message-ID: <CADRKj5TuUyaT=pT3vXDnMEzE_tPYQhQvx7X94SOZuHSydrBQhQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1711101521180.23234@piezo.novalocal>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: rgw: storing (and securing?) totp seed information
+Date: Mon, 13 Nov 2017 02:23:09 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1711130220150.23234@piezo.novalocal>
+References: <CADRKj5SCQ-Hkb+=oWLQe_SXRnbXZm7L-MoHEG1p2tH2MxXHAfQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f47.google.com ([209.85.218.47]:46086 "EHLO
-        mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751704AbdKMBnM (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Sun, 12 Nov 2017 20:43:12 -0500
-Received: by mail-oi0-f47.google.com with SMTP id n16so1217778oig.3
-        for <ceph-devel@vger.kernel.org>; Sun, 12 Nov 2017 17:43:12 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1711101521180.23234@piezo.novalocal>
+Received: from tragedy.dreamhost.com ([66.33.205.236]:53997 "EHLO
+        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751100AbdKMCXM (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Sun, 12 Nov 2017 21:23:12 -0500
+In-Reply-To: <CADRKj5SCQ-Hkb+=oWLQe_SXRnbXZm7L-MoHEG1p2tH2MxXHAfQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: Yehuda Sadeh-Weinraub <yehuda@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Matt Benjamin <mbenjamin@redhat.com>, Casey Bodley <cbodley@redhat.com>
 
-On Fri, Nov 10, 2017 at 7:30 AM, Sage Weil <sweil@redhat.com> wrote:
-> I've started on this long-discussed feature!  I haven't gotten too far but
-> you can see what's there so far at
->
->         https://github.com/ceph/ceph/pull/18856
->
-> The first thing perhaps is to finalize what flexibility we want to
-> support.  I've a quick summary at
->
->         http://pad.ceph.com/p/config
->
-> Namely,
->
->  config/option = value               # like [global]
->  config/$type/option = value         # like [mon]
->  config/$type.$id/option = value     # like [mon.a]
->
-> There are two new things:
->
->  config/.../class:$classname/option = value
->
-> For OSDs, this matches the device_class.  So you can do something like
->
->  config/osd/class:ssd/bluestore_cache_size = 10485760  # 10gb, woohoo!
->
-> You can also match the crush location:
->
->  config/.../$crushtype:$crushvalue/option = value
->
-> e.g.,
->
->  config/osd/rack:foo/debug_osd = 10    # hunting some issue
->
-> This obviously makes sense for OSDs.  We can also make it makes sense for
-> non-OSDs since everybody (clients and daemons) has a concept of
-> crush_location that is a set of key/value pairs like "host=foo rack=bar"
-> which match the CRUSH hierarchy.  In this case, my plan is to make the
-> initial mon authentication step include the hostname of the host you're
-> connecting from and then extract the rest of the location by lookup
-> up the host in the CRUSH map.
->
-> The precedence for these is described here:
->
->         https://github.com/ceph/ceph/pull/18856/commits/5abbd0c9e279022f185787238d21eabbbe28e336#diff-344645b5339d494e1839ff1fcaa5cb7dR15
->
->
-> Lots of other thorny issues to consider.  For example:
->
-> - What about monitor configs?  If they store their config paxos, and you
-> set an option that breaks paxos, how can you change/fix it?  For the
-> moment I'm just ignoring the mons.
->
-> - What about ceph.conf?  My thought here is to mark which options are
-> legal for bootstrap (i.e., used during the initial connection to mon to
-> authenticate and fetch config), and warn on anything other than that in
-> ceph.conf.  But what about after you connect?  Do these options get reset
-> to default?
+On Fri, 10 Nov 2017, Yehuda Sadeh-Weinraub wrote:
+> I was looking into implementing the S3 multi-factor authentication
+> (mfa) functionality that is related to object versioning. The feature
+> is that when configured, certain operations (e.g., objects removal,
+> change of config) require the use of a totp (time-based one time
+> password) token along with the requests, so that it adds extra level
+> of security to the operation. This also helps prevents accidental
+> removal of objects, and is useful for enforcing archival requirements.
+> I have an issue with where and how should we keep the totp devices
+> seed information. My initial thought was to have it as part of the rgw
+> user metadata structure. Having it there is trivial, and it has the
+> added bonus that it should work out of the box for multisite. There
+> are multiple problems with this solution. First, it is not secure as
+> anyone with the ability to use radosgw-admin can just read it and
+> replicate the totp generator. Another problem is that we need to
+> update the token with information related its usage whenever it's used
+> (token is single use, so need to store info about the last value that
+> was used to avoid replay, and also need to keep info about
+> unsuccessful attempts to avoid malicious client trying to guess the
+> values). This will not work well with the user info object that is
+> designed to be mostly static. Any solution needs to take into account
+> that we need to work correctly in multi-site environment, so the seed
+> information could be distributed to the different zones.
+> 
+> I was thinking of different solutions, but any solution that I come up
+> with ends up either requiring some kind of a trust mechanism between
+> different ceph clusters, or acknowledges that some compromises need to
+> be made.
+> 
+> To illustrate, here's a simple-to-implement solution:
+> 
+>  - create a new objclass for management and authorization of a single
+> totp token. It will deal with creation, sync, verification, tracking
+> of attempts, etc.
+>  - hooks these objects specially into the rgw metadata subsystem, such
+> that the information could be synced via metadata sync
+> 
+> This solves tracking of the totp usage. The user info will only keep a
+> reference to the totp id, and not the seed itself. However, admin can
+> still potentially read the seed info. We can mask that info via
+> radosgw-admin, but one could potentially get that by running a raw
+> rados operation. It might be that I can stop here.
 
-And also hat about configurables passed in as args? I think that other
-than any local configuration (ceph.conf, args) should still be used to
-override config from mons. We can add warnings and whistles to warn
-when such configuration exists, but should not lose it.
->
-> - Bootstrapping/upgrade: So far my best idea is to make the client share
-> it's config with the mon on startup, and the first time a given daemon
-> connects the mon will use that to populate it's config database.
-> Thereafter it will be ignored.
+I would go for this
+ 
+> In addition we can also do this:
+>  - put seed objects (that the totp objclass are executed on) in a
+> separate pool, where radosgw-admin user only has write and execute
+> permissions. Creation is done by an execution of a write objclass
+> method to the object.
+>  - radosgw (not radosgw-admin) users will also have read permissions
+> for that pool, so that they will be able to read from it
+> 
+> In this solution it is possible to limit users' access to the seed
+> data, however, any user that that has rados permissions to the pool
+> will be able to extract that information. It might be that it's
+> enough.
 
-Maybe there could be some flag that we could pass in to select th
-client's behavior. By default it'd take the mon config if that exists.
-Other options would be to take local config, or overlay local over
-mon.
+or probably this.
 
-Yehuda
+Is there an external interface we can/should be hooking into here, or is 
+this really something we should be implementing from scratch?  It doens't 
+seem like there is any way around the ceph admin (client.admin) getting 
+around it unless it's an external tool.  But even if it were, client.admin 
+could still just go and delete the data on the backend, or destory the 
+OSDs, or whatever, so I'm not sure it matters that much?
 
->
-> - OSD startup: lots of stuff happens before we authenticate.  I think
-> there will be a new initial step to fetch config, then do all that work,
-> then start up for real.  And a new option to bypass mon configuration
-> to avoid that (and for old school folks who don't want centralized
-> configs... e.g. mon_config = false and everything works as before).
->
-> Feedback welcome!
-> sage
+sage
+
+> 
+> Another attempt:
+>  - start with previous solution
+>  - create a trust mechanism between different ceph clusters:
+>    - assign a [set of] public/private key[s] to ceph cluster
+>    - osd could validate whether a public key belongs to an osd on a
+> trusted ceph cluster
+>    - osds will be able to access their private key
+>  - radosgw itself will need to provide a public key to the objclass in
+> order to fetch the seed, however, the returned result will be
+> encrypted by that key
+>  - metadata sync operation will first retrieve the public key for the
+> target osd, and send it along with the fetch request.
+>  - totp objclass will store the seed encrypted (*), but decrypt it
+> whenever it needs to fetch it.
+> 
+> This is an order of magnitude or two more complicated solution, and
+> requires changes all around ceph to get it working. Not sure it's
+> worth the trouble.
+> In here both radosgw and radosgw-admin cannot see the unecrypted seed.
+> Potentially rados users will not be able to do it without having the
+> cluster's private key. Cluster's admins are the weak link here as they
+> are able to gain access to the cluster's private keys. Also,
+> revocation of keys is problematic (*) unless the seeds are kept
+> unencrypted in the osds , in which case why bother. There are
+> solutions to that, but I think I dug too deep of a hole here.
+> 
+> Thinking about it, I think that a trust mechanism between different
+> clusters can be useful. I don't think this feature really needs it.
+> 
+> Thoughts?
+> 
+> Yehuda
 > --
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
