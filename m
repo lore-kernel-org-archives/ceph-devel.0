@@ -1,75 +1,118 @@
-From: Yehuda Sadeh-Weinraub <ysadehwe@redhat.com>
+From: Mark Nelson <mnelson@redhat.com>
 Subject: Re: config on mons
-Date: Mon, 13 Nov 2017 08:29:25 -0800
-Message-ID: <CADRKj5Q5S57kmaqbmLbGE-3c8paO8sTTZ2T5Fff-NMK821dKXQ@mail.gmail.com>
+Date: Mon, 13 Nov 2017 10:45:16 -0600
+Message-ID: <0fc42e25-2944-e020-00f5-8ed56a9464b7@redhat.com>
 References: <alpine.DEB.2.11.1711101521180.23234@piezo.novalocal>
- <CADRKj5TuUyaT=pT3vXDnMEzE_tPYQhQvx7X94SOZuHSydrBQhQ@mail.gmail.com> <CALe9h7dwXEFvArnDg7A+=zCmD6R7DR0_S2yx9hxnhgW2U6dgcA@mail.gmail.com>
+ <CAE_BDMLSLKw0+nvuibuFLQG8C2tVWw8UqtmevffQXjAd=becyg@mail.gmail.com>
+ <CALe9h7dEru5XbHpNOpSbSd3O-7SB=8=-VkYLQYH5na8bA9AMtQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f179.google.com ([74.125.82.179]:47078 "EHLO
-        mail-ot0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753443AbdKMQ31 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Nov 2017 11:29:27 -0500
-Received: by mail-ot0-f179.google.com with SMTP id o9so14124001ota.3
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Nov 2017 08:29:27 -0800 (PST)
-In-Reply-To: <CALe9h7dwXEFvArnDg7A+=zCmD6R7DR0_S2yx9hxnhgW2U6dgcA@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51532 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753739AbdKMQpS (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 13 Nov 2017 11:45:18 -0500
+In-Reply-To: <CALe9h7dEru5XbHpNOpSbSd3O-7SB=8=-VkYLQYH5na8bA9AMtQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: John Spray <jspray@redhat.com>
-Cc: Sage Weil <sweil@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>, Christian Wuerdig <christian.wuerdig@gmail.com>
+Cc: Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On Mon, Nov 13, 2017 at 1:57 AM, John Spray <jspray@redhat.com> wrote:
-> On Mon, Nov 13, 2017 at 1:43 AM, Yehuda Sadeh-Weinraub
-> <ysadehwe@redhat.com> wrote:
+
+
+On 11/13/2017 04:00 AM, John Spray wrote:
+> On Mon, Nov 13, 2017 at 4:30 AM, Christian Wuerdig
+> <christian.wuerdig@gmail.com> wrote:
+>> Hm, have you guys considered utilizing existing key-value stores like
+>> Consul or etcd for this instead of rolling your own? Not sure about
+>> the details of etcd but the Consul API is quite nice, supports long
+>> polling and transactional support. Obvious downside is that you depend
+>> on a separate service but that can also be an advantage.
+>
+> When it comes to putting and getting values, Consul and etcd don't
+> really offer much that the ceph mons don't already do.  As you say, it
+> would be a new dependency, but more importantly it would also be a
+> whole new network comms path with its own authentication, ports, etc.
+>
+> This is one of those situations where using something off the shelf is
+> actually way more effort (for developers and for users) than building
+> it in.
+>
+> John
+>
+
+I don't disagree, but I could imagine there are a number of sysadmins 
+that want Ceph to play nice with whatever they are currently using for 
+everything else they maintain.  Whatever we do here, we probably want to 
+be mindful (ie I'd argue that deprecating ceph.conf might not be well 
+liked by folks that are happy with their current setup).
+
+Mark
+
+>>
+>> On Sat, Nov 11, 2017 at 4:30 AM, Sage Weil <sweil@redhat.com> wrote:
+>>> I've started on this long-discussed feature!  I haven't gotten too far but
+>>> you can see what's there so far at
+>>>
+>>>         https://github.com/ceph/ceph/pull/18856
+>>>
+>>> The first thing perhaps is to finalize what flexibility we want to
+>>> support.  I've a quick summary at
+>>>
+>>>         http://pad.ceph.com/p/config
+>>>
+>>> Namely,
+>>>
+>>>  config/option = value               # like [global]
+>>>  config/$type/option = value         # like [mon]
+>>>  config/$type.$id/option = value     # like [mon.a]
+>>>
+>>> There are two new things:
+>>>
+>>>  config/.../class:$classname/option = value
+>>>
+>>> For OSDs, this matches the device_class.  So you can do something like
+>>>
+>>>  config/osd/class:ssd/bluestore_cache_size = 10485760  # 10gb, woohoo!
+>>>
+>>> You can also match the crush location:
+>>>
+>>>  config/.../$crushtype:$crushvalue/option = value
+>>>
+>>> e.g.,
+>>>
+>>>  config/osd/rack:foo/debug_osd = 10    # hunting some issue
+>>>
+>>> This obviously makes sense for OSDs.  We can also make it makes sense for
+>>> non-OSDs since everybody (clients and daemons) has a concept of
+>>> crush_location that is a set of key/value pairs like "host=foo rack=bar"
+>>> which match the CRUSH hierarchy.  In this case, my plan is to make the
+>>> initial mon authentication step include the hostname of the host you're
+>>> connecting from and then extract the rest of the location by lookup
+>>> up the host in the CRUSH map.
+>>>
+>>> The precedence for these is described here:
+>>>
+>>>         https://github.com/ceph/ceph/pull/18856/commits/5abbd0c9e279022f185787238d21eabbbe28e336#diff-344645b5339d494e1839ff1fcaa5cb7dR15
+>>>
+>>>
+>>> Lots of other thorny issues to consider.  For example:
+>>>
+>>> - What about monitor configs?  If they store their config paxos, and you
+>>> set an option that breaks paxos, how can you change/fix it?  For the
+>>> moment I'm just ignoring the mons.
+>>>
 >>> - What about ceph.conf?  My thought here is to mark which options are
 >>> legal for bootstrap (i.e., used during the initial connection to mon to
 >>> authenticate and fetch config), and warn on anything other than that in
 >>> ceph.conf.  But what about after you connect?  Do these options get reset
 >>> to default?
->>
->> And also hat about configurables passed in as args? I think that other
->> than any local configuration (ceph.conf, args) should still be used to
->> override config from mons. We can add warnings and whistles to warn
->> when such configuration exists, but should not lose it.
->
-> This comes up whenever we talk about the centralized config so I guess
-> it never quite got put to rest...
->
-> The big downside to letting services selectively ignore the mons is
-> that anyone building a user interface is pretty much screwed if they
-> want to show the current value of a config setting, unless we make the
-> MonClient config subscription a two-way thing that enables services to
-> *set* their own config (from their ceph.conf) in addition to receiving
-> it.
-
-More like have them report it, not necessarily set it. We should have that.
-I don't like the idea of not being able to modify it without going to
-the monitors. There might be cases where either doing that via the
-monitors is not practical, or cumbersome, or you'd just want to try
-different values quickly, or running in a test or dev environment,
-etc. And given that we need to have that subsystem working anyway, as
-we need it for bootstrapping, and not everything that we run even
-connects or should connect to the cluster, I think it would also make
-logical sense.
-
-Yehuda
-
->
-> John
->
+>>>
 >>> - Bootstrapping/upgrade: So far my best idea is to make the client share
 >>> it's config with the mon on startup, and the first time a given daemon
 >>> connects the mon will use that to populate it's config database.
 >>> Thereafter it will be ignored.
->>
->> Maybe there could be some flag that we could pass in to select th
->> client's behavior. By default it'd take the mon config if that exists.
->> Other options would be to take local config, or overlay local over
->> mon.
->>
->> Yehuda
->>
 >>>
 >>> - OSD startup: lots of stuff happens before we authenticate.  I think
 >>> there will be a new initial step to fetch config, then do all that work,
@@ -87,3 +130,8 @@ Yehuda
 >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
