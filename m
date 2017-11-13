@@ -1,47 +1,72 @@
-From: Liuhao <liu.haoA@h3c.com>
-Subject: about memory alignment
-Date: Mon, 13 Nov 2017 13:11:18 +0000
-Message-ID: <7DF47FD5BC069E4BBD28890C798EC7BC8C8D2EB5@H3CMLB14-EX.srv.huawei-3com.com>
-References: <7DF47FD5BC069E4BBD28890C798EC7BC8C8D2E79@H3CMLB14-EX.srv.huawei-3com.com>
+From: Jason Dillaman <jdillama@redhat.com>
+Subject: Re: [PATCH] rbd: default to single-major device number scheme
+Date: Mon, 13 Nov 2017 08:18:18 -0500
+Message-ID: <CA+aFP1AubmBQxMKs=cm1z77rEx2Mv3_21ZQVE8wDbtfGQRF0BQ@mail.gmail.com>
+References: <1510570217-14811-1-git-send-email-idryomov@gmail.com>
+Reply-To: dillaman@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.h3c.com ([60.191.123.56]:28367 "EHLO h3cmg01-ex.h3c.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751174AbdKMNLb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 13 Nov 2017 08:11:31 -0500
-In-Reply-To: <7DF47FD5BC069E4BBD28890C798EC7BC8C8D2E79@H3CMLB14-EX.srv.huawei-3com.com>
-Content-Language: zh-CN
+Received: from mail-yw0-f196.google.com ([209.85.161.196]:51901 "EHLO
+        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751153AbdKMNST (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Nov 2017 08:18:19 -0500
+Received: by mail-yw0-f196.google.com with SMTP id k3so13338153ywk.8
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Nov 2017 05:18:18 -0800 (PST)
+In-Reply-To: <1510570217-14811-1-git-send-email-idryomov@gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: 'ceph-devel' <ceph-devel@vger.kernel.org>
+To: Ilya Dryomov <idryomov@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>, Sage Weil <sweil@redhat.com>
 
-HI, developers:
+Reviewed-by: Jason Dillaman <dillaman@redhat.com>
 
-data.largest_data_off_in_data_bl = orig_len + sizeof(__u32);  // we are about to
-What 's mean of sizeof(__u32)?  Why add sizeof(__u32)?
+On Mon, Nov 13, 2017 at 5:50 AM, Ilya Dryomov <idryomov@gmail.com> wrote:
+> It's been 3.5 years, let's turn it on by default.  Support in rbd(8)
+> utility goes back to pre-firefly, "rbd map" has been loading the module
+> with single_major=Y ever since.  However, if the module is already
+> loaded (whether by hand or at boot time), we end up with single_major=N.
+> Also, some people don't install rbd(8) and use the sysfs interface
+> directly.
+>
+> (With single-major=N, a major number is consumed for every mapping,
+> imposing a limit of ~240 rbd images per host.  single-major=Y allows
+> mapping thousands of rbd images on a single machine.)
+>
+> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> ---
+>  drivers/block/rbd.c | 7 +++----
+>  1 file changed, 3 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/block/rbd.c b/drivers/block/rbd.c
+> index 57275298d9fc..f40050c97bb3 100644
+> --- a/drivers/block/rbd.c
+> +++ b/drivers/block/rbd.c
+> @@ -449,12 +449,11 @@ static DEFINE_IDA(rbd_dev_id_ida);
+>  static struct workqueue_struct *rbd_wq;
+>
+>  /*
+> - * Default to false for now, as single-major requires >= 0.75 version of
+> - * userspace rbd utility.
+> + * single-major requires >= 0.75 version of userspace rbd utility.
+>   */
+> -static bool single_major = false;
+> +static bool single_major = true;
+>  module_param(single_major, bool, S_IRUGO);
+> -MODULE_PARM_DESC(single_major, "Use a single major number for all rbd devices (default: false)");
+> +MODULE_PARM_DESC(single_major, "Use a single major number for all rbd devices (default: true)");
+>
+>  static int rbd_img_request_submit(struct rbd_img_request *img_request);
+>
+> --
+> 2.4.3
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Detail:
-oid write(const coll_t& cid, const ghobject_t& oid, uint64_t off, uint64_t len,
-                const bufferlist& write_data, uint32_t flags = 0) {
-      uint32_t orig_len = data_bl.length();
-      Op* _op = _get_next_op();
-      _op->op = OP_WRITE;
-      _op->cid = _get_coll_id(cid);
-      _op->oid = _get_object_id(oid);
-      _op->off = off;
-      _op->len = len;
-      ::encode(write_data, data_bl);
 
-      assert(len == write_data.length());
-      data.fadvise_flags = data.fadvise_flags | flags;
-      if (write_data.length() > data.largest_data_len) {
-         data.largest_data_len = write_data.length();
-         data.largest_data_off = off;
-         data.largest_data_off_in_data_bl = orig_len + sizeof(__u32);  // we are about to
-      }
-      data.ops++;
-}
 
-Thanks
+-- 
+Jason
