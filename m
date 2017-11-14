@@ -1,44 +1,120 @@
-From: Mark Nelson <mark.a.nelson@gmail.com>
-Subject: new wallclock profiler github repo
-Date: Mon, 13 Nov 2017 14:37:42 -0600
-Message-ID: <51cd7a83-1677-9c68-0d81-b61ad6d58071@gmail.com>
+From: Ric Wheeler <rwheeler@redhat.com>
+Subject: Re: SMART disk monitoring
+Date: Tue, 14 Nov 2017 09:39:05 +0530
+Message-ID: <ce55d8a4-040f-e107-9d86-0b3f2456988d@redhat.com>
+References: <alpine.DEB.2.11.1711101751430.2819@piezo.novalocal>
+ <207642670.33700582.1510357519950.JavaMail.zimbra@redhat.com>
+ <CAP6jbrTOujE+DrsgAnne16zLaXubKUZzyn_rpF5FD1ubBTycPw@mail.gmail.com>
+ <20171112171653.q7dn7bw52ijltb3q@suse.com>
+ <alpine.DEB.2.11.1711122003420.23234@piezo.novalocal>
+ <3ac76cc3-92f2-5180-4389-c5334506fac4@corp.ovh.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f52.google.com ([209.85.218.52]:44281 "EHLO
-        mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755592AbdKMUhp (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Nov 2017 15:37:45 -0500
-Received: by mail-oi0-f52.google.com with SMTP id a75so6553298oib.1
-        for <ceph-devel@vger.kernel.org>; Mon, 13 Nov 2017 12:37:44 -0800 (PST)
-Received: from [192.168.1.100] (c-68-46-79-22.hsd1.mn.comcast.net. [68.46.79.22])
-        by smtp.googlemail.com with ESMTPSA id g18sm5240114otd.81.2017.11.13.12.37.42
-        for <ceph-devel@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 13 Nov 2017 12:37:42 -0800 (PST)
+Received: from mail-pf0-f176.google.com ([209.85.192.176]:53490 "EHLO
+        mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751182AbdKNEJJ (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 13 Nov 2017 23:09:09 -0500
+Received: by mail-pf0-f176.google.com with SMTP id b6so13219600pff.10
+        for <ceph-devel@vger.kernel.org>; Mon, 13 Nov 2017 20:09:09 -0800 (PST)
+In-Reply-To: <3ac76cc3-92f2-5180-4389-c5334506fac4@corp.ovh.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>, Sage Weil <sage@newdream.net>, Lars Marowsky-Bree <lmb@suse.com>
+Cc: ceph-devel@vger.kernel.org
 
-Hi Guys,
+On 11/13/2017 05:23 PM, Piotr Dałek wrote:
+> On 17-11-12 09:16 PM, Sage Weil wrote:
+>> On Sun, 12 Nov 2017, Lars Marowsky-Bree wrote:
+>>> On 2017-11-10T22:36:46, Yaarit Hatuka <yaarit@gmail.com> wrote:
+>>>
+>>>> Many thanks! I'm very excited to join Ceph's outstanding community!
+>>>> I'm looking forward to working on this challenging project, and I'm
+>>>> very grateful for the opportunity to be guided by Sage.
+>>>
+>>> That's all excellent news!
+>>>
+>>> Can we discuss though if/how this belongs into ceph-osd? Given that this
+>>> can (and is) already collected via smartmon, either via prometheus or, I
+>>> assume, collectd as well? Does this really need to be added to the OSD
+>>> code?
+>>>
+>>> Would the goal be for them to report this to ceph-mgr, or expose
+>>> directly as something to be queried via, say, a prometheus exporter
+>>> binding? Or are the OSDs supposed to directly act on this information?
+>>
+>> The OSD is just a convenient channel, but needn't be the only
+>> one or only option.
+>>
+>> Part 1 of the project is to get JSON output out of smartctl so we avoid
+>> one of the many crufty projects floating around to parse its weird output;
+>> that'll be helpful all consumers, presumably.
+>
+> That means a new patch to smartctl itself, right?
+>
+>> Part 2 is to map OSDs to host:device pairs; that merged already.
+>>
+>> Part 3 is to gather the actual data.  The prototype has the OSD polling
+>> this because it (1) knows which devices it consumes and (2) is present on
+>> every node.  We're contemplating a per-host ceph-volume-agent for
+>> assisting with OSD (de)provisioning (i.e., running ceph-volume); that
+>> could be an option.  Of if some other tool is already scraping it and can
+>> be queried, that would work too.
+>>
+>> I think the OSD will end up being a necessary path (perhaps among many),
+>> though, because when we are using SPDK I don't think we'll be able to get
+>> the SMART data via smartctl (or any other tool) at all because the OSD
+>> process will be running the NVMe driver.
+>
+> This may not work anyway, because  many controllers (including JBOD 
+> controllers) don't pass-through SMART data, or the data don't make sense.
 
-A few of you have been playing with the gdbprof fork that I made a while 
-back to profile some of the OSD and client side code.  Last week I took 
-a day and cleaned the code up.  I made a new repository/name for it here:
+You are right that many controllers don't pass this information without going 
+through their non-open source tools. The libstoragemgmt project - 
+https://github.com/libstorage/libstoragemgmt - has added support for doing some 
+types of access for the physical back end drives. It is worth syncing up with 
+them I think to see how we might be able to extract interesting bits.
 
-https://github.com/markhpc/gdbpmp
+>
+>> Part 4 is to archive the results.  The original thought was to dump it
+>> into RADOS.  I hadn't considered prometheus, but that might be a better
+>> fit!  I'm generally pretty cautious about introducing dependencies like
+>> this but we're already expecting prometheus to be used for other metrics
+>> for the dashboard.  I'm not sure whether prometheus' query interface lends
+>> itself to the failure models, though...
+>> Part 5 is to do some basic failure prediction!
+>
+> SMART is unreliable on spinning disks, and on SSDs it's only as reliable as 
+> firmware goes (and that is often questionable).
+> Also, many vendors give different meaning to different SMART attributes, 
+> making some of obvious choices (like power-on hours or power-cycle count) 
+> useless (see https://www.backblaze.com/blog/hard-drive-smart-stats/ for example).
 
-Some of the changes include being able to run it directly from the 
-commandline or within gdb, settings the sample count and sleep time, 
-filtering which threads to monitor, and saving the results so you can 
-re-parse the data (not super useful now, but eventually I'll try to 
-include different ways to examine the data, possibly things like 
-time-based correlation of events in different threads).
+SMART data has been used selectively by major storage vendors for years to help 
+flag errors. For spinning drives, one traditional red flag was the number of 
+reallocated sectors (normalized by the number a spinning drive has). When you 
+start chewing through those, that is a pretty good flag. Seagate and others did 
+a lot of work (and models) that turned smart data into a good predictor for 
+failure on spinning drives, but it is not entirely trivial to do.
 
-Adam is looking at writing a similar wallclock profiler that would use 
-libunwind directly and hopefully will be much faster, but for now 
-hopefully this will be easier and more useful than the earlier attempt.
+For example, at the USENIX Vault conference, there was this presentation which 
+showed some interesting recent work:
 
-Thanks,
-Mark
+http://sched.co/9WQT
+
+There is also a lot of information about drive failures (SSD and spinning) at 
+USENIX FAST over many years. Things have improved a lot over the years, 
+especially with modern SSD's and NVME where a lot of hard work has happened to 
+add improved metrics to the data.
+
+Regards,
+
+Ric
+
+>
+> Anyway, we'd love to see that this feature can be completely disabled by 
+> config change and don't incur any backwards incompatibility by itself.
+>
+
