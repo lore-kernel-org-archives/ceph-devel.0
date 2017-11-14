@@ -1,90 +1,161 @@
-From: Sage Weil <sweil@redhat.com>
-Subject: Re: SMART disk monitoring
-Date: Tue, 14 Nov 2017 14:19:45 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1711141320110.23234@piezo.novalocal>
-References: <alpine.DEB.2.11.1711101751430.2819@piezo.novalocal> <207642670.33700582.1510357519950.JavaMail.zimbra@redhat.com> <CAP6jbrTOujE+DrsgAnne16zLaXubKUZzyn_rpF5FD1ubBTycPw@mail.gmail.com> <20171112171653.q7dn7bw52ijltb3q@suse.com>
- <alpine.DEB.2.11.1711122003420.23234@piezo.novalocal> <3ac76cc3-92f2-5180-4389-c5334506fac4@corp.ovh.com> <ce55d8a4-040f-e107-9d86-0b3f2456988d@redhat.com> <096024a3-7aea-5f07-b915-ed35fc867cf9@corp.ovh.com>
+From: Mark Nelson <mnelson@redhat.com>
+Subject: Re: config on mons
+Date: Tue, 14 Nov 2017 08:33:05 -0600
+Message-ID: <3fe910a6-3a6c-510d-ae32-6c072e99f046@redhat.com>
+References: <alpine.DEB.2.11.1711101521180.23234@piezo.novalocal>
+ <CAE_BDMLSLKw0+nvuibuFLQG8C2tVWw8UqtmevffQXjAd=becyg@mail.gmail.com>
+ <CALe9h7dEru5XbHpNOpSbSd3O-7SB=8=-VkYLQYH5na8bA9AMtQ@mail.gmail.com>
+ <0fc42e25-2944-e020-00f5-8ed56a9464b7@redhat.com>
+ <CAFMfnwoD8q+kaF9BEDFpT71qAfb62cdbajrNboR9MbsWO_-=8Q@mail.gmail.com>
+ <CALe9h7fqDsREGHE-v2tjNOpGHpB6qA51m6prE6+TXjORrXz8_Q@mail.gmail.com>
+ <ea84cfd4-5405-d647-be63-1d259c5702e5@corp.ovh.com>
+ <CALe9h7ezuNOrH4prN3oKHHmCaqD=z19rw5frj97hXX8T=gOm_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-507672735-1510664669=:23234"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45458 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:32844 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754211AbdKNOTs (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 14 Nov 2017 09:19:48 -0500
-In-Reply-To: <096024a3-7aea-5f07-b915-ed35fc867cf9@corp.ovh.com>
-Content-ID: <alpine.DEB.2.11.1711141304310.23234@piezo.novalocal>
+        id S1755432AbdKNOdI (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Tue, 14 Nov 2017 09:33:08 -0500
+In-Reply-To: <CALe9h7ezuNOrH4prN3oKHHmCaqD=z19rw5frj97hXX8T=gOm_w@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?ISO-8859-2?Q?Piotr_Da=B3ek?= <piotr.dalek@corp.ovh.com>
-Cc: Ric Wheeler <rwheeler@redhat.com>, Lars Marowsky-Bree <lmb@suse.com>, ceph-devel@vger.kernel.org
+To: John Spray <jspray@redhat.com>, =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
+Cc: Kyle Bader <kyle.bader@gmail.com>, Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
 
---8323329-507672735-1510664669=:23234
-Content-Type: TEXT/PLAIN; CHARSET=ISO-8859-2
-Content-Transfer-Encoding: 8BIT
-Content-ID: <alpine.DEB.2.11.1711141304311.23234@piezo.novalocal>
 
-On Tue, 14 Nov 2017, Piotr Da≥ek wrote:
-> On 17-11-14 05:09 AM, Ric Wheeler wrote:
-> > On 11/13/2017 05:23 PM, Piotr Da≥ek wrote:
-> > > This may not work anyway, because† many controllers (including JBOD
-> > > controllers) don't pass-through SMART data, or the data don't make sense.
-> > 
-> > You are right that many controllers don't pass this information without
-> > going through their non-open source tools. The libstoragemgmt project -
-> > https://github.com/libstorage/libstoragemgmt - has added support for doing
-> > some types of access for the physical back end drives. It is worth syncing
-> > up with them I think to see how we might be able to extract interesting
-> > bits.
-> 
-> There's another problem - bcache/flashcache/<insert your favorite vendor>
-> cache - osds often reside on top of some cache device, and accessing SMART
-> values for that might not work, or might not return all required values.
+On 11/14/2017 05:36 AM, John Spray wrote:
+> On Tue, Nov 14, 2017 at 10:18 AM, Piotr Da≈Çek <piotr.dalek@corp.ovh.com> wrote:
+>> On 17-11-13 07:40 PM, John Spray wrote:
+>>>
+>>> On Mon, Nov 13, 2017 at 6:20 PM, Kyle Bader <kyle.bader@gmail.com> wrote:
+>>>>
+>>>> Configuration files are often driven by configuration management, with
+>>>> previous versions stored in some kind of version control systems. We
+>>>> should make sure that if configuration moves to the monitors that you
+>>>> have some form of history and rollback capabilities. It might be worth
+>>>> modeling it similar to network switch configuration shells, a la
+>>>> Junos.
+>>>>
+>>>> * change configuration
+>>>> * require commit configuration change
+>>>> * ability to rollback N configuration changes
+>>>> * ability to diff to configuration versions
+>>>>
+>>>> That way an admin can figure out when the last configuration change
+>>>> was, what changed, and rollback if necessary.
+>>>
+>>>
+>>> That is an extremely good idea.
+>>>
+>>> As a minimal thing, it should be pretty straightforward to implement a
+>>> snapshot/rollback.
+>>
+>>
+>> https://thedailywtf.com/articles/The_Complicator_0x27_s_Gloves
+>>
+>>> I imagine many users today are not so disciplined as to version
+>>> control their configs, but this is a good opportunity to push that as
+>>> the norm by building it in.
+>>
+>>
+>> Using Ceph on any decent scale actually requires one to use at least Puppet
+>> or similar tool, I wouldn't add any unnecessary complexity to already
+>> complex code just because of novice users that are going to have hard time
+>> using Ceph anyway once a disk breaks and needs to be replaced, or when
+>> performance goes to hell because users are free to create and remove
+>> snapshots every 5 minutes.
+>
+> All of the experienced users were novice users once -- making Ceph
+> work well for those people is worthwhile.  It's not easy to build
+> things that are easy enough for a newcomer but also powerful enough
+> for the general case, but it is worth doing.
+>
+> When we have to trade internal complexity vs. complexity at
+> interfaces, it's generally better to keep the interfaces simple.
 
-For devicemapper devices at least it is pretty straightforward to work out 
-the underlying physical device.
+I've seen too many examples both in our code and in other projects where 
+that kind of internal complexity leaks out and makes things worse.  If 
+we want to reduce complexity we need to reduce complexity.  I'm not 
+against having the mon to centrally report state.  I think it's a great 
+idea.  Management I'm not sold on, see below.
 
-I'm sure there will always be some devices and stacks that successfully 
-obscure the reliablity data, but most deployments will benefit.
+> Currently a Ceph cluster with 1000 OSDs has 1000 places to input the
+> configuration, and no one place that a person can ask "what is setting
+> X on my OSDs?".  Even when they look at a ceph.conf file, they can't
+> be sure that those are really the values in use (has the service
+> restarted since the file was updated?) or that they will ever be (are
+> they invalid values that Ceph will reject on load?).
 
-> > There is also a lot of information about drive failures (SSD and spinning)
-> > at USENIX FAST over many years. Things have improved a lot over the years,
-> > especially with modern SSD's and NVME where a lot of hard work has happened
-> > to add improved metrics to the data.
-> 
-> That's my point. That's a lot of statistics to chew through and most of it
-> relies on assumptions that can be already wrong or be wrong some time after.
-> All it takes is a brand-new product line with different characteristics.
-> SSDs are different - you just measure number of erase/program cycles and
-> (again) do assumptions based on that - that's easier and more reliable.
-> Still, I would be *very* unhappy if I'd be woken up in the middle of the night
-> just to realize that cluster incorrectly predicted disk failure and my company
-> (and I'm pretty sure not only my company) wouldn't be happy either if cluster
-> would force it to throw away perfectly good disks, because reusing them would
-> yield the same result.
-> On the other hand, this creates a back door for vendors to force device
-> replacement even if it's perfectly fine, some SSD vendors already do this with
-> their devices going into read-only mode even when there's a whole lot of p/e
-> cycles left in flash cells. I don't think we need Ceph to go this way.
+How many folks with 1000 OSD clusters are manually managing 
+configuration files though?  These are the kinds of customers that have 
+dedicated linux/storage administrators on staff that have preferences 
+regarding how they do things.  When I was managing distributed storage 
+systems few things angered me more than trying to deal with each storage 
+vendor's custom management systems.  I was never particularly concerned 
+with being able to manage (user-facing) state on my own.  What I was 
+*very* concerned about was bug-ridden code that got shipped out at the 
+last minute so the vendor could checkbox a feature that I couldn't 
+easily work around.  There was a particular vendor's Lustre HA 
+management/stonith solution that comes to mind.  They weren't the only 
+one though.  We had a variety of interesting and horrific issues with 
+other non-lustre storage too.  The worst cases were the ones where the 
+solution could have been fast/easy but we had to go through all kinds of 
+gymnastics to circumvent the vendor's bad behavior.
 
-OT: I view building good prediction models as an orthogonal problem, and 
-one that relies on collecting a large data set.  Patrick McGarry and 
-several others are working on a related project to build a public data set 
-of SMART etc reliability data so that such models can be built for use in 
-open systems.  Current data sets from backblaze suffer from a small set of 
-device models, which means only large cloud providers or system vendor 
-with large deployments are able to gather enough healthy metrics and 
-failure data to build good models.  The goal of the other project is to 
-allow regular users (of systmes like Ceph) to opt into sharing reliability 
-data so that better models can be built--ones that cover a broader range 
-of devices.
- 
-> tl;dr - I'm fine with that feature as long as there'll be a possibility to
-> disable it entirely.
+> The "dump a text file in /etc" interface looks simple on the face of
+> it, but is actually quite complex when you look to automate a Ceph
+> cluster from a central user interface, or build more intelligence into
+> Ceph for avoiding dangerous configurations.  It's also painful for
+> non-expert users who are required to type precisely correct syntax
+> into that text file.
+>
 
-Of course!
+This feels a bit like a proxy war over whether we are designing a 
+storage appliance or a traditional linux style service.  I'm not 
+convinced we can do both well at the same time.  If we want both, maybe 
+we need to think about each as independent products with their own 
+goals/management/code/etc.
 
-sage
---8323329-507672735-1510664669=:23234--
+>> And I can already imagine clusters breaking down once config
+>> database/history breaks for whatever reason, including early implementation
+>> bugs.
+>>
+>> Distributing configs through mon isn't bad idea by itself, I can imagine
+>> having changes to runtime-changeable settings propagated to OSDs without the
+>> need for extra step (actually injecting them) and without the need for
+>> restart, but for anything else, there are already good tools and I see no
+>> value in trying to mimic them.
+>
+> Remember that the goal here is not to just invent an alternative way
+> of distributing ceph.conf.  Even Puppet is overkill for that!  The
+> goal is to change the way configuration is defined in Ceph, so that
+> there is a central point of truth for how the cluster is configured,
+> which will enable us to create a user experience that is more robust,
+> and an interface that enables building better interactive tooling on
+> top of Ceph.
+>
+> When it comes to using something like Puppet as that central point of
+> truth, there are two major problems with that:
+>  - If someone wants to write a GUI, they would need to integrate with
+> your Puppet, someone else's Chef, someone else's Ansible, etc -- a lot
+> of work, and in many cases the interfaces for doing it don't even
+> exist (believe me, I've tried writing dashboards that drove Puppet in
+> the past).
+>  - If Ceph wants to validate configuration options, and say "No, that
+> setting is no good" when someone tries to change something, we can't,
+> because we're not hooked in to Puppet at the point that the user is
+> changing the setting.
+>
+> The ultimate benefit to you is that by making Ceph easier to use, we
+> grow our community, and we grow the population of people who want to
+> invest in Ceph (all of it, not just the new user friendly bits).
+>
+> John
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
