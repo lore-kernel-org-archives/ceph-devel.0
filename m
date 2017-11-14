@@ -1,52 +1,73 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: Fwd: Build failed in Jenkins: ceph-master #1408
-Date: Tue, 14 Nov 2017 11:04:15 +0100
-Message-ID: <f08831ed-0611-704e-5280-8dfef6de6fae@digiware.nl>
-References: <14085029.62.1509737256278.JavaMail.jenkins@cephdev.digiware.nl>
- <fe5aaa26-d32e-916f-2af6-91ba5a4ab11e@digiware.nl>
- <dc1cdc3e-4b95-85dd-5ccd-94fe0cbecba0@redhat.com>
- <6bfee3c0-2320-cc93-2815-429040ccac47@digiware.nl>
- <6c930c4f-d269-7185-d4ba-bb2b4b96bb69@digiware.nl>
+From: =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek@corp.ovh.com>
+Subject: Re: config on mons
+Date: Tue, 14 Nov 2017 11:18:57 +0100
+Message-ID: <ea84cfd4-5405-d647-be63-1d259c5702e5@corp.ovh.com>
+References: <alpine.DEB.2.11.1711101521180.23234@piezo.novalocal>
+ <CAE_BDMLSLKw0+nvuibuFLQG8C2tVWw8UqtmevffQXjAd=becyg@mail.gmail.com>
+ <CALe9h7dEru5XbHpNOpSbSd3O-7SB=8=-VkYLQYH5na8bA9AMtQ@mail.gmail.com>
+ <0fc42e25-2944-e020-00f5-8ed56a9464b7@redhat.com>
+ <CAFMfnwoD8q+kaF9BEDFpT71qAfb62cdbajrNboR9MbsWO_-=8Q@mail.gmail.com>
+ <CALe9h7fqDsREGHE-v2tjNOpGHpB6qA51m6prE6+TXjORrXz8_Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:51561 "EHLO smtp.digiware.nl"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753080AbdKNKEb (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 14 Nov 2017 05:04:31 -0500
-In-Reply-To: <6c930c4f-d269-7185-d4ba-bb2b4b96bb69@digiware.nl>
-Content-Language: nl
+Received: from 2.mo302.mail-out.ovh.net ([137.74.110.75]:60677 "EHLO
+        2.mo302.mail-out.ovh.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753449AbdKNKTA (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Nov 2017 05:19:00 -0500
+In-Reply-To: <CALe9h7fqDsREGHE-v2tjNOpGHpB6qA51m6prE6+TXjORrXz8_Q@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: John Spray <jspray@redhat.com>, Kyle Bader <kyle.bader@gmail.com>
+Cc: Mark Nelson <mnelson@redhat.com>, Christian Wuerdig <christian.wuerdig@gmail.com>, Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-On 11-11-2017 13:38, Willem Jan Withagen wrote:
-> On 04/11/2017 18:40, Willem Jan Withagen wrote:
->> On 3-11-2017 22:24, Casey Bodley wrote:
->>> Hi Willem, (and cc list)
->>>
->>> I think this one is related to your boost version. In my builds, I 
->>> see that boost::beast::string_ref is typedef'd to boost::string_ref 
->>> and this builds. Your output implies that it's typedef'ed to 
->>> boost::string_view.
->>>
->>> https://github.com/boostorg/beast/commit/64ff766b2304c751e1a46d2b7ca948cd274c5739 
->>> added some preprocessor stuff that switches from one to the other 
->>> based on whether BOOST_VERSION >= 106400. You might try defining 
->>> BEAST_NO_BOOST_STRING_VIEW to work around that for now.
+On 17-11-13 07:40 PM, John Spray wrote:
+> On Mon, Nov 13, 2017 at 6:20 PM, Kyle Bader <kyle.bader@gmail.com> wrote:
+>> Configuration files are often driven by configuration management, with
+>> previous versions stored in some kind of version control systems. We
+>> should make sure that if configuration moves to the monitors that you
+>> have some form of history and rollback capabilities. It might be worth
+>> modeling it similar to network switch configuration shells, a la
+>> Junos.
 >>
->> That did not do it.
->> So we might need to change some of the functions-sigs and conversion 
->> is possible.
+>> * change configuration
+>> * require commit configuration change
+>> * ability to rollback N configuration changes
+>> * ability to diff to configuration versions
+>>
+>> That way an admin can figure out when the last configuration change
+>> was, what changed, and rollback if necessary.
 > 
-> Casey,
+> That is an extremely good idea.
 > 
-> Any chance you have a fix for Clang for this?
+> As a minimal thing, it should be pretty straightforward to implement a
+> snapshot/rollback.
 
-Thanx for fixing this.
+https://thedailywtf.com/articles/The_Complicator_0x27_s_Gloves
 
---WjW
+> I imagine many users today are not so disciplined as to version
+> control their configs, but this is a good opportunity to push that as
+> the norm by building it in.
 
+Using Ceph on any decent scale actually requires one to use at least Puppet 
+or similar tool, I wouldn't add any unnecessary complexity to already 
+complex code just because of novice users that are going to have hard time 
+using Ceph anyway once a disk breaks and needs to be replaced, or when 
+performance goes to hell because users are free to create and remove 
+snapshots every 5 minutes.
+And I can already imagine clusters breaking down once config 
+database/history breaks for whatever reason, including early implementation 
+bugs.
 
+Distributing configs through mon isn't bad idea by itself, I can imagine 
+having changes to runtime-changeable settings propagated to OSDs without the 
+need for extra step (actually injecting them) and without the need for 
+restart, but for anything else, there are already good tools and I see no 
+value in trying to mimic them.
+
+-- 
+Piotr Dałek
+piotr.dalek@corp.ovh.com
+https://www.ovh.com/us/
