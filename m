@@ -1,134 +1,123 @@
-From: John Spray <jspray@redhat.com>
-Subject: Re: config on mons
-Date: Tue, 14 Nov 2017 23:45:18 +0000
-Message-ID: <CALe9h7ciU3ajzPTkh1iCC=+qdEdHbt3n97NCgQDgsML6cLUS2w@mail.gmail.com>
-References: <alpine.DEB.2.11.1711101521180.23234@piezo.novalocal> <alpine.DEB.2.11.1711142208490.28240@piezo.novalocal>
+From: Huang Zhiteng <winston.d@gmail.com>
+Subject: Re: SMART disk monitoring
+Date: Wed, 15 Nov 2017 08:09:26 +0800
+Message-ID: <CAE7zfpOVvxC1G2=FbszoFV9PoCz7LH0mxf87G7-2QuuUPWJBJg@mail.gmail.com>
+References: <alpine.DEB.2.11.1711101751430.2819@piezo.novalocal>
+ <207642670.33700582.1510357519950.JavaMail.zimbra@redhat.com>
+ <CAP6jbrTOujE+DrsgAnne16zLaXubKUZzyn_rpF5FD1ubBTycPw@mail.gmail.com>
+ <20171112171653.q7dn7bw52ijltb3q@suse.com> <alpine.DEB.2.11.1711122003420.23234@piezo.novalocal>
+ <3ac76cc3-92f2-5180-4389-c5334506fac4@corp.ovh.com> <ce55d8a4-040f-e107-9d86-0b3f2456988d@redhat.com>
+ <096024a3-7aea-5f07-b915-ed35fc867cf9@corp.ovh.com> <alpine.DEB.2.11.1711141320110.23234@piezo.novalocal>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:51631 "EHLO
-        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755000AbdKNXpk (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Nov 2017 18:45:40 -0500
-Received: by mail-wm0-f49.google.com with SMTP id b189so18445019wmd.0
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Nov 2017 15:45:40 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1711142208490.28240@piezo.novalocal>
+Received: from mail-io0-f176.google.com ([209.85.223.176]:45159 "EHLO
+        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751105AbdKOAJ1 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Nov 2017 19:09:27 -0500
+Received: by mail-io0-f176.google.com with SMTP id i38so11804623iod.2
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Nov 2017 16:09:27 -0800 (PST)
+In-Reply-To: <alpine.DEB.2.11.1711141320110.23234@piezo.novalocal>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Sage Weil <sweil@redhat.com>
+Cc: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek@corp.ovh.com>, Ric Wheeler <rwheeler@redhat.com>, Lars Marowsky-Bree <lmb@suse.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Tue, Nov 14, 2017 at 10:21 PM, Sage Weil <sage@newdream.net> wrote:
-> I've updated the pad at
+Another work done (probably against similar dataset from BackBlaze) by
+IBM, which is pretty impressive:
+https://www.ibm.com/blogs/research/2016/08/predicting-disk-failures-reliabl=
+e-clouds/
+
+On Tue, Nov 14, 2017 at 10:19 PM, Sage Weil <sweil@redhat.com> wrote:
+> On Tue, 14 Nov 2017, Piotr Da=C5=82ek wrote:
+>> On 17-11-14 05:09 AM, Ric Wheeler wrote:
+>> > On 11/13/2017 05:23 PM, Piotr Da=C5=82ek wrote:
+>> > > This may not work anyway, because  many controllers (including JBOD
+>> > > controllers) don't pass-through SMART data, or the data don't make s=
+ense.
+>> >
+>> > You are right that many controllers don't pass this information withou=
+t
+>> > going through their non-open source tools. The libstoragemgmt project =
+-
+>> > https://github.com/libstorage/libstoragemgmt - has added support for d=
+oing
+>> > some types of access for the physical back end drives. It is worth syn=
+cing
+>> > up with them I think to see how we might be able to extract interestin=
+g
+>> > bits.
+>>
+>> There's another problem - bcache/flashcache/<insert your favorite vendor=
 >
->         http://pad.ceph.com/p/config
+>> cache - osds often reside on top of some cache device, and accessing SMA=
+RT
+>> values for that might not work, or might not return all required values.
 >
-> After thinking about this a bit more, I think we may need to abandon the
-> idea of a pure ceph.conf-less world.  Lots of people already have tooling
-> around ceph.conf, getting rid of it will be an awkward process (even for a
-> one-time upgrade), and I'm not sure we can eliminate it entirely anyway
-> since many options affect the bootstrapping phase, authentication, and so
-> on.
+> For devicemapper devices at least it is pretty straightforward to work ou=
+t
+> the underlying physical device.
 >
-> Instead, I'm currently partial to giving processes a more nuanced view of
-> their config based on where the value comes from.  A single option may
-> include
+> I'm sure there will always be some devices and stacks that successfully
+> obscure the reliablity data, but most deployments will benefit.
 >
-> 1- a default value (compiled in)
-> 2- a value from the mon
-> 3- a value from ceph.conf
-> 4- a value set via command line, 'ceph tell', 'ceph daemon ... config set
-> ...', etc.
+>> > There is also a lot of information about drive failures (SSD and spinn=
+ing)
+>> > at USENIX FAST over many years. Things have improved a lot over the ye=
+ars,
+>> > especially with modern SSD's and NVME where a lot of hard work has hap=
+pened
+>> > to add improved metrics to the data.
+>>
+>> That's my point. That's a lot of statistics to chew through and most of =
+it
+>> relies on assumptions that can be already wrong or be wrong some time af=
+ter.
+>> All it takes is a brand-new product line with different characteristics.
+>> SSDs are different - you just measure number of erase/program cycles and
+>> (again) do assumptions based on that - that's easier and more reliable.
+>> Still, I would be *very* unhappy if I'd be woken up in the middle of the=
+ night
+>> just to realize that cluster incorrectly predicted disk failure and my c=
+ompany
+>> (and I'm pretty sure not only my company) wouldn't be happy either if cl=
+uster
+>> would force it to throw away perfectly good disks, because reusing them =
+would
+>> yield the same result.
+>> On the other hand, this creates a back door for vendors to force device
+>> replacement even if it's perfectly fine, some SSD vendors already do thi=
+s with
+>> their devices going into read-only mode even when there's a whole lot of=
+ p/e
+>> cycles left in flash cells. I don't think we need Ceph to go this way.
 >
-> We would always use the highest-priority value on that list.  This means
-> that ceph.conf can override the mon, just like a command-line argument
-> overrides ceph.conf.
-
-I think that if there are some folks who just cannot work without
-loading local configs onto their nodes, I want to insulate folks
-working on user interfaces from having to handle the resulting
-complexity.  The folks pushing config files out to their nodes
-presumably have their own preferred way of dealing with this stuff, so
-they shouldn't miss it from the Ceph UI.
-
-In that spirit, I think that we don't need to have a per-setting
-granularity of what is overridden and what isn't: daemons should just
-flag whether they are consuming the mon config (default), or whether
-they are using local ceph.conf.  That way, folks building UIs can grey
-things out at a whole-page level if the cluster is not using
-centralized config.  It sacrifices some flexibility for the people who
-want to use local conf for some things but central conf for others (do
-those people exist?) but I think it's worth it to avoid having a
-complicated UI that has to worry about displaying and communicating
-the subtle distinctions between those 1/2/3/4 values which might all
-be different.
-
-The upshot would be that UI developers could build elements that work
-as expected by default for systems that use the central config, but
-safely disable themselves on systems where the user has gone their own
-way and pushed out local configuration.
-
-> On the flip side of this, all of these values are also reported to the mgr
-> and tracked along with the other daemon state.  So regardless of where
-> config values come from, it is all still visible via the CLI, GUI, or
-> whatever else.
+> OT: I view building good prediction models as an orthogonal problem, and
+> one that relies on collecting a large data set.  Patrick McGarry and
+> several others are working on a related project to build a public data se=
+t
+> of SMART etc reliability data so that such models can be built for use in
+> open systems.  Current data sets from backblaze suffer from a small set o=
+f
+> device models, which means only large cloud providers or system vendor
+> with large deployments are able to gather enough healthy metrics and
+> failure data to build good models.  The goal of the other project is to
+> allow regular users (of systmes like Ceph) to opt into sharing reliabilit=
+y
+> data so that better models can be built--ones that cover a broader range
+> of devices.
 >
-> Further, we can then make the GUI (or CLI or whatever) act on that
-> information to, say,
+>> tl;dr - I'm fine with that feature as long as there'll be a possibility =
+to
+>> disable it entirely.
 >
-> - assimilate ceph.conf values into the mon so that ceph.cong can be
-> removed/abbreviated (i.e., the upgrade/transition path to centralized
-> config)
-
-> - see override values set via cli (i.e., in gui)
-> - clear override values (i.e., ceph tell <daemon> config rm <name>)
-> - surface a HEALTH_WARN if a CLI or 'config set' override has been
-> set on one or more daemons (so the operator knows the running config is
-> not persistent).
-
-This comes back to our recurring discussion about whether a
-HEALTH_INFO level should exist: I'm increasingly of the opinion that
-when we run into things like this, it's nature's way of telling us
-that maybe our underlying model is weird (in this case, maybe we
-didn't need to have the concept of ephemeral configuration settings in
-the system at all).
-
-Maybe ephemeral config changes should be treated the same way I
-propose to treat local overrides: the daemon reports just that it has
-been overridden, and the GUI goes hands-off and does not attempt to
-communicate the story to the user "Well, you see, it's currently set
-to xyz until the next restart, at which point it will revert to abc,
-that is unless you have a local ceph.conf in which case...".
-
-The ability to rollback config changes seems like it would be the
-"right way" to accomplish having some config settings that we set and
-then subsequently revert, rather than having the revert happen
-implicitly when the daemon next restarts (intentionally or not).
-
-> - surface a HEALTH_WARN if a mon option is overriden by a daemon's local
-> ceph.conf file.
-
-Hmm, this makes me a bit confused, as if you're still thinking of the
-local ceph.conf being a deprecated/upgrade thing?  If it's really
-permitted in general than it wouldn't make sense for it to be a WARN.
-
-John
-
-> Notably, the user can also do nothing and the cluster can continue to
-> operate as it always has.  The mgr will still have the new visibility into
-> running daemon options, so the GUI experience will still be
-> consistent--they just won't be able to change configs centrally (or
-> rather, those settings won't have any effect if old ceph.conf's override
-> them).
+> Of course!
 >
-> I think Kyle's revision history suggestion is a great one.  I don't have
-> any bright ideas about how this should be managed on the mon side yet, but
-> I agree that it is an important function and should be baked in from day
-> 1.
->
-> Thoughts?
 > sage
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+--=20
+Regards
+Huang Zhiteng
