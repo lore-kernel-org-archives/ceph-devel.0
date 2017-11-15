@@ -1,28 +1,30 @@
-From: Mark Nelson <mnelson@redhat.com>
-Subject: Ceph Benchmark Visualization Project
-Date: Wed, 15 Nov 2017 17:29:40 -0600
-Message-ID: <05d959d3-17e5-214f-4bca-0f8978802433@redhat.com>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Re: Fwd: Build failed in Jenkins: ceph-master #1445
+Date: Thu, 16 Nov 2017 00:47:28 +0100
+Message-ID: <45dd7dab-1860-b2a0-b89f-4b2b632bf162@digiware.nl>
+References: <1228960304.1.1510773466154.JavaMail.jenkins@cephdev.digiware.nl>
+ <a5f41084-8dc3-7b61-bfed-5f5a5fe5ae63@digiware.nl>
+ <82f00bd8-51d2-fd9f-1478-ff84ada4aa8c@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41878 "EHLO mx1.redhat.com"
+Received: from smtp.digiware.nl ([176.74.240.9]:64155 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933185AbdKOX3m (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 15 Nov 2017 18:29:42 -0500
+        id S1753976AbdKOXr3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 15 Nov 2017 18:47:29 -0500
+In-Reply-To: <82f00bd8-51d2-fd9f-1478-ff84ada4aa8c@redhat.com>
+Content-Language: en-GB
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>, "cbt@lists.ceph.com" <cbt@lists.ceph.com>
-Cc: "M.S." <ms.soumya12@gmail.com>
+To: Casey Bodley <cbodley@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi All,
+On 15/11/2017 22:37, Casey Bodley wrote:
+> Sorry! See https://github.com/ceph/ceph/pull/18953
 
-Please join me in giving a warm welcome to Soumya who was selected as 
-one of our Outreachy interns this season.  She is going to be helping us 
-visualize benchmarking data from Neha's CBT / Teuthology integration 
-work over the coming months.
+Fix is working
+Thanx for te fast response.
 
-Welcome Soumya!
+--WjW
 
-Thanks,
-Mark
+
