@@ -1,123 +1,79 @@
-From: Huang Zhiteng <winston.d@gmail.com>
-Subject: Re: SMART disk monitoring
-Date: Wed, 15 Nov 2017 08:09:26 +0800
-Message-ID: <CAE7zfpOVvxC1G2=FbszoFV9PoCz7LH0mxf87G7-2QuuUPWJBJg@mail.gmail.com>
-References: <alpine.DEB.2.11.1711101751430.2819@piezo.novalocal>
- <207642670.33700582.1510357519950.JavaMail.zimbra@redhat.com>
- <CAP6jbrTOujE+DrsgAnne16zLaXubKUZzyn_rpF5FD1ubBTycPw@mail.gmail.com>
- <20171112171653.q7dn7bw52ijltb3q@suse.com> <alpine.DEB.2.11.1711122003420.23234@piezo.novalocal>
- <3ac76cc3-92f2-5180-4389-c5334506fac4@corp.ovh.com> <ce55d8a4-040f-e107-9d86-0b3f2456988d@redhat.com>
- <096024a3-7aea-5f07-b915-ed35fc867cf9@corp.ovh.com> <alpine.DEB.2.11.1711141320110.23234@piezo.novalocal>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: C++11, std::list::size(), and trusty
+Date: Wed, 15 Nov 2017 14:47:25 +0800
+Message-ID: <CAJE9aOOHLD5fV=bGWHB35_1YTpn1vRoRAcvqKSKHp=f-ah9aJA@mail.gmail.com>
+References: <alpine.DEB.2.11.1711101747120.2819@piezo.novalocal>
+ <CAJE9aONaA7dmGWZRtD+SC=nk=JmFV1BU3ouRyAS9wag+HeDuCQ@mail.gmail.com>
+ <CAJE9aOMpZgoFoad9j2Onsdza6iYQq8in2bqfiDRvgoQgh+2OMA@mail.gmail.com> <CALqRxCyVA5X326pDaC0iT-OhsmFiUvCc1dmVgAVj+LS9r=C8yA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-io0-f176.google.com ([209.85.223.176]:45159 "EHLO
-        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751105AbdKOAJ1 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 14 Nov 2017 19:09:27 -0500
-Received: by mail-io0-f176.google.com with SMTP id i38so11804623iod.2
-        for <ceph-devel@vger.kernel.org>; Tue, 14 Nov 2017 16:09:27 -0800 (PST)
-In-Reply-To: <alpine.DEB.2.11.1711141320110.23234@piezo.novalocal>
+Received: from mail-qt0-f179.google.com ([209.85.216.179]:56372 "EHLO
+        mail-qt0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750718AbdKOGr0 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Wed, 15 Nov 2017 01:47:26 -0500
+Received: by mail-qt0-f179.google.com with SMTP id r39so15839627qtr.13
+        for <ceph-devel@vger.kernel.org>; Tue, 14 Nov 2017 22:47:26 -0800 (PST)
+In-Reply-To: <CALqRxCyVA5X326pDaC0iT-OhsmFiUvCc1dmVgAVj+LS9r=C8yA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sweil@redhat.com>
-Cc: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek@corp.ovh.com>, Ric Wheeler <rwheeler@redhat.com>, Lars Marowsky-Bree <lmb@suse.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: Ken Dreyer <kdreyer@redhat.com>
+Cc: Sage Weil <sweil@redhat.com>, "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>, ceph-maintainers@ceph.com, "kchai@redhat.com" <kchai@redhat.com>, Nathan Cutler <ncutler@suse.com>, James Page <james.page@ubuntu.com>
 
-Another work done (probably against similar dataset from BackBlaze) by
-IBM, which is pretty impressive:
-https://www.ibm.com/blogs/research/2016/08/predicting-disk-failures-reliabl=
-e-clouds/
-
-On Tue, Nov 14, 2017 at 10:19 PM, Sage Weil <sweil@redhat.com> wrote:
-> On Tue, 14 Nov 2017, Piotr Da=C5=82ek wrote:
->> On 17-11-14 05:09 AM, Ric Wheeler wrote:
->> > On 11/13/2017 05:23 PM, Piotr Da=C5=82ek wrote:
->> > > This may not work anyway, because  many controllers (including JBOD
->> > > controllers) don't pass-through SMART data, or the data don't make s=
-ense.
->> >
->> > You are right that many controllers don't pass this information withou=
-t
->> > going through their non-open source tools. The libstoragemgmt project =
--
->> > https://github.com/libstorage/libstoragemgmt - has added support for d=
-oing
->> > some types of access for the physical back end drives. It is worth syn=
-cing
->> > up with them I think to see how we might be able to extract interestin=
-g
->> > bits.
+On Wed, Nov 15, 2017 at 6:04 AM, Ken Dreyer <kdreyer@redhat.com> wrote:
+> On Tue, Nov 14, 2017 at 5:49 AM, kefu chai <tchaikov@gmail.com> wrote:
+>> On Mon, Nov 13, 2017 at 5:29 PM, kefu chai <tchaikov@gmail.com> wrote:
+>>> On Sat, Nov 11, 2017 at 1:47 AM, Sage Weil <sweil@redhat.com> wrote:
+>>>> We noticed a big performance regression when switching some code to
+>>>> use list::size() because although C++11 promizes that it is O(1), some of
+>>>> the libstdc++'s out there are still O(n).  This PR aims to fix that
+>>>>
+>>>>         https://github.com/ceph/ceph/pull/18863
+>>>>
+>>>> by adding the various devtoolset packages as dependencies to pull in
+>>>> updated build toolchains.  For el7 that's devtoolset-7-{binutils,gcc-c++}.
+>>>>
 >>
->> There's another problem - bcache/flashcache/<insert your favorite vendor=
->
->> cache - osds often reside on top of some cache device, and accessing SMA=
-RT
->> values for that might not work, or might not return all required values.
->
-> For devicemapper devices at least it is pretty straightforward to work ou=
-t
-> the underlying physical device.
->
-> I'm sure there will always be some devices and stacks that successfully
-> obscure the reliablity data, but most deployments will benefit.
->
->> > There is also a lot of information about drive failures (SSD and spinn=
-ing)
->> > at USENIX FAST over many years. Things have improved a lot over the ye=
-ars,
->> > especially with modern SSD's and NVME where a lot of hard work has hap=
-pened
->> > to add improved metrics to the data.
+>> when running the binaries built using GCC 5.1 in an env where an old
+>> libstdc++ (typically comes with GCC 4.8):
 >>
->> That's my point. That's a lot of statistics to chew through and most of =
-it
->> relies on assumptions that can be already wrong or be wrong some time af=
-ter.
->> All it takes is a brand-new product line with different characteristics.
->> SSDs are different - you just measure number of erase/program cycles and
->> (again) do assumptions based on that - that's easier and more reliable.
->> Still, I would be *very* unhappy if I'd be woken up in the middle of the=
- night
->> just to realize that cluster incorrectly predicted disk failure and my c=
-ompany
->> (and I'm pretty sure not only my company) wouldn't be happy either if cl=
-uster
->> would force it to throw away perfectly good disks, because reusing them =
-would
->> yield the same result.
->> On the other hand, this creates a back door for vendors to force device
->> replacement even if it's perfectly fine, some SSD vendors already do thi=
-s with
->> their devices going into read-only mode even when there's a whole lot of=
- p/e
->> cycles left in flash cells. I don't think we need Ceph to go this way.
+>> $ rados
+>> rados: relocation error: /usr/lib/ceph/libceph-common.so.0: symbol
+>> _ZTINSt8ios_base7failureB5cxx11E, version GLIBCXX_3.4.21 not defined
+>> in file libstdc++.so.6 with link time reference
+>>
+>> because libstdc++ introduced a new ABI which is incompatible with the old one.
+>> see https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
+>> and https://developers.redhat.com/blog/2015/02/05/gcc5-and-the-c11-abi/ .
+>>
+>> in other words, we need to either 1) link statically with libstdc++.so or
+>> 2) include it in librados2 on distros with GCC version less than 5.1. because
+>> ceph-osd (and other daemons packages) => ceph-base => ceph-common =>
+>> python-rados => librados2.
 >
-> OT: I view building good prediction models as an orthogonal problem, and
-> one that relies on collecting a large data set.  Patrick McGarry and
-> several others are working on a related project to build a public data se=
-t
-> of SMART etc reliability data so that such models can be built for use in
-> open systems.  Current data sets from backblaze suffer from a small set o=
-f
-> device models, which means only large cloud providers or system vendor
-> with large deployments are able to gather enough healthy metrics and
-> failure data to build good models.  The goal of the other project is to
-> allow regular users (of systmes like Ceph) to opt into sharing reliabilit=
-y
-> data so that better models can be built--ones that cover a broader range
-> of devices.
+> For 1), what does that imply for packages' debuginfo sizes?
+
+since we don't compile the source of libstdc++, i don't think this
+will increase the size of debuginfo.
+
 >
->> tl;dr - I'm fine with that feature as long as there'll be a possibility =
-to
->> disable it entirely.
->
-> Of course!
->
-> sage
+> For 2), where would libstdc++.so ship in the filesystem? What does
+> that mean for other applications that would load libstdc++.so and also
+> link with ceph?
+
+if we just statically link libceph-common against libstdc++, and let
+daemons link againt libceph-common, the problem will be solved. that's
+actually 2) but after a second thought, i think it's a better
+approach. please note, the daemons are linked against libceph-common
+statically. [OT] we could let daemon link libceph-common dynamically,
+but the downside is that the daemon will need to depend on a client
+side library: librados2. which is a little bit weird. but the upside
+is: this will shrink the size of debug-info and the size of daemons,
+as the daemon will not include ceph-common statically.
 
 
 
---=20
+
+-- 
 Regards
-Huang Zhiteng
+Kefu Chai
