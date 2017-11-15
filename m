@@ -1,75 +1,69 @@
 From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Running a FreeBSD bhyve instance on a Ceph cluster
-Date: Wed, 15 Nov 2017 18:17:55 +0100
-Message-ID: <ff37f99b-2919-4781-0ec1-63a280ab90f6@digiware.nl>
+Subject: MDS connection problem
+Date: Wed, 15 Nov 2017 20:06:15 +0100
+Message-ID: <d635ebd2-7ad0-5313-8245-3cc26b9d02c3@digiware.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:17102 "EHLO smtp.digiware.nl"
+Received: from smtp.digiware.nl ([176.74.240.9]:43873 "EHLO smtp.digiware.nl"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751664AbdKORR7 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Wed, 15 Nov 2017 12:17:59 -0500
+        id S1758735AbdKOTGT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 15 Nov 2017 14:06:19 -0500
+Received: from [192.168.10.67] (opteron [192.168.10.67])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id AEA6B2E965
+        for <ceph-devel@vger.kernel.org>; Wed, 15 Nov 2017 20:06:16 +0100 (CET)
 Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Ceph Development <ceph-devel@vger.kernel.org>, "freebsd-virtualization@freebsd.org" <freebsd-virtualization@freebsd.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi,
+After a server restart my MDS does not want to start, and it looks like 
+keys don't match or something?
 
-Just an info point.
+This is de MDS log:
 
-I'm preparing for a lecture tomorrow, and thought why not do an actual 
-demo.... Like to be friends with Murphy :)
-
-So after I started the cluster:
-	5 jails with 7 OSDs
-
-This what I manually needed to do to boot a memory stick
-================
-# Start een Bhyve instance
-
-rbd --dest-pool rbd_data --no-progress import memstick.img memstick
-rbd-ggate map rbd_data/memstick
-# ggate-devvice is available on /dev/ggate1
-
-kldload vmm
-kldload nmdm
-kldload if_tap
-kldload if_bridge
-kldload cpuctl
-sysctl net.link.tap.up_on_open=1
-ifconfig bridge0 create
-ifconfig bridge0 addm em0 up
-ifconfig
-ifconfig tap11 create
-ifconfig bridge0 addm tap11
-ifconfig tap11 up
-
-# load the GGate disk in bhyve
-bhyveload -c /dev/nmdm11A -m 2G -d /dev/ggate1 FB11
-
-# and boot a single from it.
-bhyve -H -P -A -c 1 -m 2G -l com1,/dev/nmdm11A -s 0:0,hostbridge -s 
-1:0,lpc -s 2:0,virtio-net,tap11 -s 4,ahci-hd,/dev/ggate1 FB11 &
-bhyvectl --vm=FB11 --get-stats
-
-# Connect to the VM
-cu -l /dev/nmdm11B
-=========
-
-And that'll give you a bhyve VM running on an RBD image over ggate.
-In the installer I tested reading from the bootdisk:
-====
-root@:/ # dd if=/dev/ada0 of=/dev/null bs=32M
-21+1 records in
-21+1 records out
-734077952 bytes transferred in 5.306260 secs (138341865 bytes/sec)
-====
-which is a nice 138Mb/sec.
-
-Hope the demonstration does work out tomorrow.
-
---WjW
-
-
+2017-11-15 20:03:18.180242 9e0e000 10 mds.a MDSDaemon::ms_get_authorizer 
+type=mon
+2017-11-15 20:03:18.181387 9e0f200 10 cephx: set_have_need_key no 
+handler for service mon
+2017-11-15 20:03:18.181394 9e0f200 10 cephx: set_have_need_key no 
+handler for service mds
+2017-11-15 20:03:18.181396 9e0f200 10 cephx: set_have_need_key no 
+handler for service osd
+2017-11-15 20:03:18.181399 9e0f200 10 cephx: set_have_need_key no 
+handler for service mgr
+2017-11-15 20:03:18.181401 9e0f200 10 cephx: set_have_need_key no 
+handler for service auth
+2017-11-15 20:03:18.181402 9e0f200 10 cephx: validate_tickets want 55 
+have 0 need 55
+2017-11-15 20:03:18.181414 9e0f200 10 cephx client: handle_response ret = 0
+2017-11-15 20:03:18.181417 9e0f200 10 cephx client:  got initial server 
+challenge 7d0dda00ee4847b8
+2017-11-15 20:03:18.181420 9e0f200 10 cephx client: validate_tickets: 
+want=55 need=55 have=0
+2017-11-15 20:03:18.181424 9e0f200 10 cephx: set_have_need_key no 
+handler for service mon
+2017-11-15 20:03:18.181426 9e0f200 10 cephx: set_have_need_key no 
+handler for service mds
+2017-11-15 20:03:18.181427 9e0f200 10 cephx: set_have_need_key no 
+handler for service osd
+2017-11-15 20:03:18.181428 9e0f200 10 cephx: set_have_need_key no 
+handler for service mgr
+2017-11-15 20:03:18.181429 9e0f200 10 cephx: set_have_need_key no 
+handler for service auth
+2017-11-15 20:03:18.181430 9e0f200 10 cephx: validate_tickets want 55 
+have 0 need 55
+2017-11-15 20:03:18.181433 9e0f200 10 cephx client: want=55 need=55 have=0
+2017-11-15 20:03:18.181439 9e0f200 10 cephx client: build_request
+2017-11-15 20:03:18.181451 9e0f200 20 cephx client: no secret found for 
+entity: mds.a
+2017-11-15 20:03:18.182114 9e0f200 10 cephx client: handle_response ret 
+= -22
+2017-11-15 20:03:18.182214 9b54480 -1 mds.a ERROR: failed to 
+authenticate: (22) Invalid argument
+2017-11-15 20:03:18.182253 9b54480  1 mds.a suicide.  wanted state up:boot
+2017-11-15 20:03:18.182401 9b54480 10 mds.beacon.a set_want_state: 
+up:boot -> down:dne
