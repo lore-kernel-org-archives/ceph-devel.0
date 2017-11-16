@@ -1,297 +1,539 @@
-From: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: ceph-deploy failed to deploy osd randomly
-Date: Thu, 16 Nov 2017 08:08:47 -0500
-Message-ID: <CAC-Np1y4yGf0Za5B6rkbWojij0yQwLWBWTfZkRXHN7dLM+waCg@mail.gmail.com>
-References: <A80E9066-6266-49E2-9BD7-137E8136D6B9@gmail.com>
- <AC28A0DB-A570-44F4-85E0-00835B91B1E9@gmail.com>
- <CAPpSHbUxYxekAOib+jE7y+7nQE44GkBwbrWN3FFaUh2Ev3ENvg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAPpSHbUxYxekAOib+jE7y+7nQE44GkBwbrWN3FFaUh2Ev3ENvg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Wei Jin <wjin.cn-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ceph-users-Qp0mS5GaXlQ@public.gmane.org" <ceph-users-Qp0mS5GaXlQ@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+From: "Yan, Zheng" <zyan@redhat.com>
+Subject: [PATCH v2] ceph: snapshot nfs re-export
+Date: Thu, 16 Nov 2017 21:52:05 +0800
+Message-ID: <20171116135205.10335-1-zyan@redhat.com>
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:33062 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1759232AbdKPNwJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 16 Nov 2017 08:52:09 -0500
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 09CD8A8342
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Nov 2017 13:52:09 +0000 (UTC)
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: ceph-devel@vger.kernel.org
+Cc: jlayton@redhat.com, bfields@redhat.com, "Yan, Zheng" <zyan@redhat.com>
 
-T24gV2VkLCBOb3YgMTUsIDIwMTcgYXQgODozMSBBTSwgV2VpIEppbiA8d2ppbi5jbkBnbWFpbC5j
-b20+IHdyb3RlOgo+IEkgdHJpZWQgdG8gZG8gcHVyZ2UvcHVyZ2VkYXRhIGFuZCB0aGVuIHJlZG8g
-dGhlIGRlcGxveSBjb21tYW5kIGZvciBhCj4gZmV3IHRpbWVzLCBhbmQgaXQgc3RpbGwgZmFpbHMg
-dG8gc3RhcnQgb3NkLgo+IEFuZCB0aGVyZSBpcyBubyBlcnJvciBsb2csIGFueW9uZSBrbm93IHdo
-YXQncyB0aGUgcHJvYmxlbT8KClNlZW1zIGxpa2UgdGhpcyBpcyBPU0QgMCwgcmlnaHQ/IEhhdmUg
-eW91IGNoZWNrZWQgdGhlIHN0YXJ0dXAgZXJyb3JzCm9uIC92YXIvbG9nL2NlcGgvID8gT3IgYnkg
-Y2hlY2tpbmcgdGhlIG91dHB1dCBvZiB0aGUgZGFlbW9uIHdpdGgKc3lzdGVtY3RsPwoKSWYgbm90
-aGluZyBpcyB3b3JraW5nIHN0aWxsLCBtYXliZSB0cnkgcnVubmluZyB0aGUgT1NEIGluIHRoZQpm
-b3JlZ3JvdW5kIHdpdGggKGFzc3VtaW5nIE9TRCAwKToKCiAgICAvdXNyL2Jpbi9jZXBoLW9zZCAt
-LWRlYnVnX29zZCAyMCAtZCAtZiAtLWNsdXN0ZXIgY2VwaCAtLWlkIDAKLS1zZXR1c2VyIGNlcGgg
-LS1zZXRncm91cCBjZXBoCgpCZWhpbmQgdGhlIHNjZW5lcywgY2VwaC1kaXNrIGlzIGdldHRpbmcg
-dGhlc2UgZGV2aWNlcyByZWFkeSBhbmQKYXNzb2NpYXRlZCB3aXRoIHRoZSBjbHVzdGVyIGFzIE9T
-RCAwLCBpZiB5b3UndmUgdHJpZWQgdGhpcyBtYW55IHRpbWVzCmFscmVhZHkgSSBhbSBzdXNwaWNp
-b3VzCm9uIHRoZSBzYW1lIE9TRCBpZCBiZWluZyB1c2VkIG9yIGRyaXZlcyBiZWluZyBwb2xsdXRl
-ZC4KClNlZW1zIGxpa2UgeW91IGFyZSB1c2luZyBmaWxlc3RvcmUgYXMgd2VsbCwgc28gc2RiMSB3
-aWxsIHByb2JhYmx5IGJlCnlvdXIgZGF0YSBhbmQgbW91bnRlZCBhdCAvdmFyL2xpYi9jZXBoL29z
-ZC9jZXBoLTAgYW5kIHNkYjIgeW91cgpqb3VybmFsLCBsaW5rZWQgYXQgL3Zhci9saWIvY2VwaC9v
-c2QvY2VwaC0wL2pvdXJuYWwKCk1ha2Ugc3VyZSB0aG9zZSBhcmUgbW91bnRlZCBhbmQgbGlua2Vk
-IHByb3Blcmx5LgoKPiBCVFcsIG15IG9zIGlzIGRlZGlhbiB3aXRoIDQuNCBrZXJuZWwuCj4gVGhh
-bmtzLgo+Cj4KPiBPbiBXZWQsIE5vdiAxNSwgMjAxNyBhdCA4OjI0IFBNLCBXZWkgSmluIDx3amlu
-LmNuQGdtYWlsLmNvbT4gd3JvdGU6Cj4+IEhpLCBMaXN0LAo+Pgo+PiBNeSBtYWNoaW5lIGhhcyAx
-MiBTU0RzIGRpc2ssIGFuZCBJIHVzZSBjZXBoLWRlcGxveSB0byBkZXBsb3kgdGhlbS4gQnV0IGZv
-cgo+PiBzb21lIG1hY2hpbmUvZGlza3PvvIxpdCBmYWlsZWQgdG8gc3RhcnQgb3NkLgo+PiBJIHRy
-aWVkIG1hbnkgdGltZXMsIHNvbWUgc3VjY2VzcyBidXQgb3RoZXJzIGZhaWxlZC4gQnV0IHRoZXJl
-IGlzIG5vIGVycm9yCj4+IGluZm8uCj4+IEZvbGxvd2luZyBpcyBjZXBoLWRlcGxveSBsb2cgZm9y
-IG9uZSBkaXNrOgo+Pgo+Pgo+PiByb290QG4xMC0wNzUtMDEyOn4jIGNlcGgtZGVwbG95IG9zZCBj
-cmVhdGUgLS16YXAtZGlzayBuMTAtMDc1LTA5NDpzZGI6c2RiCj4+IFtjZXBoX2RlcGxveS5jb25m
-XVtERUJVRyBdIGZvdW5kIGNvbmZpZ3VyYXRpb24gZmlsZSBhdDoKPj4gL3Jvb3QvLmNlcGhkZXBs
-b3kuY29uZgo+PiBbY2VwaF9kZXBsb3kuY2xpXVtJTkZPICBdIEludm9rZWQgKDEuNS4zOSk6IC91
-c3IvYmluL2NlcGgtZGVwbG95IG9zZCBjcmVhdGUKPj4gLS16YXAtZGlzayBuMTAtMDc1LTA5NDpz
-ZGI6c2RiCj4+IFtjZXBoX2RlcGxveS5jbGldW0lORk8gIF0gY2VwaC1kZXBsb3kgb3B0aW9uczoK
-Pj4gW2NlcGhfZGVwbG95LmNsaV1bSU5GTyAgXSAgdXNlcm5hbWUgICAgICAgICAgICAgICAgICAg
-ICAgOiBOb25lCj4+IFtjZXBoX2RlcGxveS5jbGldW0lORk8gIF0gIGJsb2NrX2RiICAgICAgICAg
-ICAgICAgICAgICAgIDogTm9uZQo+PiBbY2VwaF9kZXBsb3kuY2xpXVtJTkZPICBdICBkaXNrICAg
-ICAgICAgICAgICAgICAgICAgICAgICA6IFsoJ24xMC0wNzUtMDk0JywKPj4gJy9kZXYvc2RiJywg
-Jy9kZXYvc2RiJyldCj4+IFtjZXBoX2RlcGxveS5jbGldW0lORk8gIF0gIGRtY3J5cHQgICAgICAg
-ICAgICAgICAgICAgICAgIDogRmFsc2UKPj4gW2NlcGhfZGVwbG95LmNsaV1bSU5GTyAgXSAgdmVy
-Ym9zZSAgICAgICAgICAgICAgICAgICAgICAgOiBGYWxzZQo+PiBbY2VwaF9kZXBsb3kuY2xpXVtJ
-TkZPICBdICBibHVlc3RvcmUgICAgICAgICAgICAgICAgICAgICA6IE5vbmUKPj4gW2NlcGhfZGVw
-bG95LmNsaV1bSU5GTyAgXSAgYmxvY2tfd2FsICAgICAgICAgICAgICAgICAgICAgOiBOb25lCj4+
-IFtjZXBoX2RlcGxveS5jbGldW0lORk8gIF0gIG92ZXJ3cml0ZV9jb25mICAgICAgICAgICAgICAg
-IDogRmFsc2UKPj4gW2NlcGhfZGVwbG95LmNsaV1bSU5GTyAgXSAgc3ViY29tbWFuZCAgICAgICAg
-ICAgICAgICAgICAgOiBjcmVhdGUKPj4gW2NlcGhfZGVwbG95LmNsaV1bSU5GTyAgXSAgZG1jcnlw
-dF9rZXlfZGlyICAgICAgICAgICAgICAgOgo+PiAvZXRjL2NlcGgvZG1jcnlwdC1rZXlzCj4+IFtj
-ZXBoX2RlcGxveS5jbGldW0lORk8gIF0gIHF1aWV0ICAgICAgICAgICAgICAgICAgICAgICAgIDog
-RmFsc2UKPj4gW2NlcGhfZGVwbG95LmNsaV1bSU5GTyAgXSAgY2RfY29uZiAgICAgICAgICAgICAg
-ICAgICAgICAgOgo+PiA8Y2VwaF9kZXBsb3kuY29uZi5jZXBoZGVwbG95LkNvbmYgb2JqZWN0IGF0
-IDB4N2Y1NjZiODJhMTEwPgo+PiBbY2VwaF9kZXBsb3kuY2xpXVtJTkZPICBdICBjbHVzdGVyICAg
-ICAgICAgICAgICAgICAgICAgICA6IGNlcGgKPj4gW2NlcGhfZGVwbG95LmNsaV1bSU5GTyAgXSAg
-ZnNfdHlwZSAgICAgICAgICAgICAgICAgICAgICAgOiB4ZnMKPj4gW2NlcGhfZGVwbG95LmNsaV1b
-SU5GTyAgXSAgZmlsZXN0b3JlICAgICAgICAgICAgICAgICAgICAgOiBOb25lCj4+IFtjZXBoX2Rl
-cGxveS5jbGldW0lORk8gIF0gIGZ1bmMgICAgICAgICAgICAgICAgICAgICAgICAgIDogPGZ1bmN0
-aW9uIG9zZCBhdAo+PiAweDdmNTY2YWU5YTkzOD4KPj4gW2NlcGhfZGVwbG95LmNsaV1bSU5GTyAg
-XSAgY2VwaF9jb25mICAgICAgICAgICAgICAgICAgICAgOiBOb25lCj4+IFtjZXBoX2RlcGxveS5j
-bGldW0lORk8gIF0gIGRlZmF1bHRfcmVsZWFzZSAgICAgICAgICAgICAgIDogRmFsc2UKPj4gW2Nl
-cGhfZGVwbG95LmNsaV1bSU5GTyAgXSAgemFwX2Rpc2sgICAgICAgICAgICAgICAgICAgICAgOiBU
-cnVlCj4+IFtjZXBoX2RlcGxveS5vc2RdW0RFQlVHIF0gUHJlcGFyaW5nIGNsdXN0ZXIgY2VwaCBk
-aXNrcwo+PiBuMTAtMDc1LTA5NDovZGV2L3NkYjovZGV2L3NkYgo+PiBbbjEwLTA3NS0wOTRdW0RF
-QlVHIF0gY29ubmVjdGVkIHRvIGhvc3Q6IG4xMC0wNzUtMDk0Cj4+IFtuMTAtMDc1LTA5NF1bREVC
-VUcgXSBkZXRlY3QgcGxhdGZvcm0gaW5mb3JtYXRpb24gZnJvbSByZW1vdGUgaG9zdAo+PiBbbjEw
-LTA3NS0wOTRdW0RFQlVHIF0gZGV0ZWN0IG1hY2hpbmUgdHlwZQo+PiBbbjEwLTA3NS0wOTRdW0RF
-QlVHIF0gZmluZCB0aGUgbG9jYXRpb24gb2YgYW4gZXhlY3V0YWJsZQo+PiBbY2VwaF9kZXBsb3ku
-b3NkXVtJTkZPICBdIERpc3RybyBpbmZvOiBkZWJpYW4gOC45IGplc3NpZQo+PiBbY2VwaF9kZXBs
-b3kub3NkXVtERUJVRyBdIERlcGxveWluZyBvc2QgdG8gbjEwLTA3NS0wOTQKPj4gW24xMC0wNzUt
-MDk0XVtERUJVRyBdIHdyaXRlIGNsdXN0ZXIgY29uZmlndXJhdGlvbiB0bwo+PiAvZXRjL2NlcGgv
-e2NsdXN0ZXJ9LmNvbmYKPj4gW2NlcGhfZGVwbG95Lm9zZF1bREVCVUcgXSBQcmVwYXJpbmcgaG9z
-dCBuMTAtMDc1LTA5NCBkaXNrIC9kZXYvc2RiIGpvdXJuYWwKPj4gL2Rldi9zZGIgYWN0aXZhdGUg
-VHJ1ZQo+PiBbbjEwLTA3NS0wOTRdW0RFQlVHIF0gZmluZCB0aGUgbG9jYXRpb24gb2YgYW4gZXhl
-Y3V0YWJsZQo+PiBbbjEwLTA3NS0wOTRdW0lORk8gIF0gUnVubmluZyBjb21tYW5kOiAvdXNyL3Ni
-aW4vY2VwaC1kaXNrIC12IHByZXBhcmUKPj4gLS16YXAtZGlzayAtLWNsdXN0ZXIgY2VwaCAtLWZz
-LXR5cGUgeGZzIC0tIC9kZXYvc2RiIC9kZXYvc2RiCj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBj
-b21tYW5kOiBSdW5uaW5nIGNvbW1hbmQ6IC91c3IvYmluL2NlcGgtb3NkCj4+IC0tY2x1c3Rlcj1j
-ZXBoIC0tc2hvdy1jb25maWctdmFsdWU9ZnNpZAo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gY29t
-bWFuZDogUnVubmluZyBjb21tYW5kOiAvdXNyL2Jpbi9jZXBoLW9zZAo+PiAtLWNoZWNrLWFsbG93
-cy1qb3VybmFsIC1pIDAgLS1sb2ctZmlsZSAkcnVuX2Rpci8kY2x1c3Rlci1vc2QtY2hlY2subG9n
-Cj4+IC0tY2x1c3RlciBjZXBoIC0tc2V0dXNlciBjZXBoIC0tc2V0Z3JvdXAgY2VwaAo+PiBbbjEw
-LTA3NS0wOTRdW1dBUk5JTl0gY29tbWFuZDogUnVubmluZyBjb21tYW5kOiAvdXNyL2Jpbi9jZXBo
-LW9zZAo+PiAtLWNoZWNrLXdhbnRzLWpvdXJuYWwgLWkgMCAtLWxvZy1maWxlICRydW5fZGlyLyRj
-bHVzdGVyLW9zZC1jaGVjay5sb2cKPj4gLS1jbHVzdGVyIGNlcGggLS1zZXR1c2VyIGNlcGggLS1z
-ZXRncm91cCBjZXBoCj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBjb21tYW5kOiBSdW5uaW5nIGNv
-bW1hbmQ6IC91c3IvYmluL2NlcGgtb3NkCj4+IC0tY2hlY2stbmVlZHMtam91cm5hbCAtaSAwIC0t
-bG9nLWZpbGUgJHJ1bl9kaXIvJGNsdXN0ZXItb3NkLWNoZWNrLmxvZwo+PiAtLWNsdXN0ZXIgY2Vw
-aCAtLXNldHVzZXIgY2VwaCAtLXNldGdyb3VwIGNlcGgKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5d
-IGdldF9kbV91dWlkOiBnZXRfZG1fdXVpZCAvZGV2L3NkYiB1dWlkIHBhdGggaXMKPj4gL3N5cy9k
-ZXYvYmxvY2svODoxNi9kbS91dWlkCj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBjb21tYW5kOiBS
-dW5uaW5nIGNvbW1hbmQ6IC91c3IvYmluL2NlcGgtb3NkCj4+IC0tY2x1c3Rlcj1jZXBoIC0tc2hv
-dy1jb25maWctdmFsdWU9b3NkX2pvdXJuYWxfc2l6ZQo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0g
-Z2V0X2RtX3V1aWQ6IGdldF9kbV91dWlkIC9kZXYvc2RiIHV1aWQgcGF0aCBpcwo+PiAvc3lzL2Rl
-di9ibG9jay84OjE2L2RtL3V1aWQKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIGdldF9kbV91dWlk
-OiBnZXRfZG1fdXVpZCAvZGV2L3NkYiB1dWlkIHBhdGggaXMKPj4gL3N5cy9kZXYvYmxvY2svODox
-Ni9kbS91dWlkCj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBnZXRfZG1fdXVpZDogZ2V0X2RtX3V1
-aWQgL2Rldi9zZGIgdXVpZCBwYXRoIGlzCj4+IC9zeXMvZGV2L2Jsb2NrLzg6MTYvZG0vdXVpZAo+
-PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gZ2V0X2RtX3V1aWQ6IGdldF9kbV91dWlkIC9kZXYvc2Ri
-MSB1dWlkIHBhdGggaXMKPj4gL3N5cy9kZXYvYmxvY2svODoxNy9kbS91dWlkCj4+IFtuMTAtMDc1
-LTA5NF1bV0FSTklOXSBnZXRfZG1fdXVpZDogZ2V0X2RtX3V1aWQgL2Rldi9zZGIyIHV1aWQgcGF0
-aCBpcwo+PiAvc3lzL2Rldi9ibG9jay84OjE4L2RtL3V1aWQKPj4gW24xMC0wNzUtMDk0XVtXQVJO
-SU5dIGNvbW1hbmQ6IFJ1bm5pbmcgY29tbWFuZDogL3Vzci9iaW4vY2VwaC1jb25mCj4+IC0tY2x1
-c3Rlcj1jZXBoIC0tbmFtZT1vc2QuIC0tbG9va3VwIG9zZF9ta2ZzX29wdGlvbnNfeGZzCj4+IFtu
-MTAtMDc1LTA5NF1bV0FSTklOXSBjb21tYW5kOiBSdW5uaW5nIGNvbW1hbmQ6IC91c3IvYmluL2Nl
-cGgtY29uZgo+PiAtLWNsdXN0ZXI9Y2VwaCAtLW5hbWU9b3NkLiAtLWxvb2t1cCBvc2RfZnNfbWtm
-c19vcHRpb25zX3hmcwo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gY29tbWFuZDogUnVubmluZyBj
-b21tYW5kOiAvdXNyL2Jpbi9jZXBoLWNvbmYKPj4gLS1jbHVzdGVyPWNlcGggLS1uYW1lPW9zZC4g
-LS1sb29rdXAgb3NkX21vdW50X29wdGlvbnNfeGZzCj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBn
-ZXRfZG1fdXVpZDogZ2V0X2RtX3V1aWQgL2Rldi9zZGIgdXVpZCBwYXRoIGlzCj4+IC9zeXMvZGV2
-L2Jsb2NrLzg6MTYvZG0vdXVpZAo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gemFwOiBaYXBwaW5n
-IHBhcnRpdGlvbiB0YWJsZSBvbiAvZGV2L3NkYgo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gY29t
-bWFuZF9jaGVja19jYWxsOiBSdW5uaW5nIGNvbW1hbmQ6IC9zYmluL3NnZGlzawo+PiAtLXphcC1h
-bGwgLS0gL2Rldi9zZGIKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIENhdXRpb246IGludmFsaWQg
-YmFja3VwIEdQVCBoZWFkZXIsIGJ1dCB2YWxpZCBtYWluCj4+IGhlYWRlcjsgcmVnZW5lcmF0aW5n
-Cj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBiYWNrdXAgaGVhZGVyIGZyb20gbWFpbiBoZWFkZXIu
-Cj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXQo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gV2Fybmlu
-ZyEgTWFpbiBhbmQgYmFja3VwIHBhcnRpdGlvbiB0YWJsZXMgZGlmZmVyISBVc2UKPj4gdGhlICdj
-JyBhbmQgJ2UnIG9wdGlvbnMKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIG9uIHRoZSByZWNvdmVy
-eSAmIHRyYW5zZm9ybWF0aW9uIG1lbnUgdG8gZXhhbWluZSB0aGUKPj4gdHdvIHRhYmxlcy4KPj4g
-W24xMC0wNzUtMDk0XVtXQVJOSU5dCj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBXYXJuaW5nISBP
-bmUgb3IgbW9yZSBDUkNzIGRvbid0IG1hdGNoLiBZb3Ugc2hvdWxkCj4+IHJlcGFpciB0aGUgZGlz
-ayEKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dCj4+IFtuMTAtMDc1LTA5NF1bREVCVUcgXQo+PiAq
-KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqCj4+IFtuMTAtMDc1LTA5NF1bREVCVUcgXSBDYXV0aW9uOiBGb3Vu
-ZCBwcm90ZWN0aXZlIG9yIGh5YnJpZCBNQlIgYW5kIGNvcnJ1cHQKPj4gR1BULiBVc2luZyBHUFQs
-IGJ1dCBkaXNrCj4+IFtuMTAtMDc1LTA5NF1bREVCVUcgXSB2ZXJpZmljYXRpb24gYW5kIHJlY292
-ZXJ5IGFyZSBTVFJPTkdMWSByZWNvbW1lbmRlZC4KPj4gW24xMC0wNzUtMDk0XVtERUJVRyBdCj4+
-ICoqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
-KioqKioqKioqKioqKioqKioqKioKPj4gW24xMC0wNzUtMDk0XVtERUJVRyBdIEdQVCBkYXRhIHN0
-cnVjdHVyZXMgZGVzdHJveWVkISBZb3UgbWF5IG5vdyBwYXJ0aXRpb24KPj4gdGhlIGRpc2sgdXNp
-bmcgZmRpc2sgb3IKPj4gW24xMC0wNzUtMDk0XVtERUJVRyBdIG90aGVyIHV0aWxpdGllcy4KPj4g
-W24xMC0wNzUtMDk0XVtXQVJOSU5dIGNvbW1hbmRfY2hlY2tfY2FsbDogUnVubmluZyBjb21tYW5k
-OiAvc2Jpbi9zZ2Rpc2sKPj4gLS1jbGVhciAtLW1icnRvZ3B0IC0tIC9kZXYvc2RiCj4+IFtuMTAt
-MDc1LTA5NF1bREVCVUcgXSBDcmVhdGluZyBuZXcgR1BUIGVudHJpZXMuCj4+IFtuMTAtMDc1LTA5
-NF1bREVCVUcgXSBUaGUgb3BlcmF0aW9uIGhhcyBjb21wbGV0ZWQgc3VjY2Vzc2Z1bGx5Lgo+PiBb
-bjEwLTA3NS0wOTRdW1dBUk5JTl0gdXBkYXRlX3BhcnRpdGlvbjogQ2FsbGluZyBwYXJ0cHJvYmUg
-b24gemFwcGVkIGRldmljZQo+PiAvZGV2L3NkYgo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gY29t
-bWFuZF9jaGVja19jYWxsOiBSdW5uaW5nIGNvbW1hbmQ6IC9zYmluL3VkZXZhZG0KPj4gc2V0dGxl
-IC0tdGltZW91dD02MDAKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIGNvbW1hbmQ6IFJ1bm5pbmcg
-Y29tbWFuZDogL3Vzci9iaW4vZmxvY2sgLXMgL2Rldi9zZGIKPj4gL3NiaW4vcGFydHByb2JlIC9k
-ZXYvc2RiCj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBjb21tYW5kX2NoZWNrX2NhbGw6IFJ1bm5p
-bmcgY29tbWFuZDogL3NiaW4vdWRldmFkbQo+PiBzZXR0bGUgLS10aW1lb3V0PTYwMAo+PiBbbjEw
-LTA3NS0wOTRdW1dBUk5JTl0gZ2V0X2RtX3V1aWQ6IGdldF9kbV91dWlkIC9kZXYvc2RiIHV1aWQg
-cGF0aCBpcwo+PiAvc3lzL2Rldi9ibG9jay84OjE2L2RtL3V1aWQKPj4gW24xMC0wNzUtMDk0XVtX
-QVJOSU5dIGdldF9kbV91dWlkOiBnZXRfZG1fdXVpZCAvZGV2L3NkYiB1dWlkIHBhdGggaXMKPj4g
-L3N5cy9kZXYvYmxvY2svODoxNi9kbS91dWlkCj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBwdHlw
-ZV90b2JlX2Zvcl9uYW1lOiBuYW1lID0gam91cm5hbAo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0g
-Z2V0X2RtX3V1aWQ6IGdldF9kbV91dWlkIC9kZXYvc2RiIHV1aWQgcGF0aCBpcwo+PiAvc3lzL2Rl
-di9ibG9jay84OjE2L2RtL3V1aWQKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIGNyZWF0ZV9wYXJ0
-aXRpb246IENyZWF0aW5nIGpvdXJuYWwgcGFydGl0aW9uIG51bSAyCj4+IHNpemUgNDA5NjAgb24g
-L2Rldi9zZGIKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIGNvbW1hbmRfY2hlY2tfY2FsbDogUnVu
-bmluZyBjb21tYW5kOiAvc2Jpbi9zZ2Rpc2sKPj4gLS1uZXc9MjowOis0MDk2ME0gLS1jaGFuZ2Ut
-bmFtZT0yOmNlcGggam91cm5hbAo+PiAtLXBhcnRpdGlvbi1ndWlkPTI6YjdmMDFmMzgtZjBkNS00
-NWJhLWE5MTMtYWM3MjQyODIwYWVkCj4+IC0tdHlwZWNvZGU9Mjo0NWIwOTY5ZS05YjAzLTRmMzAt
-YjRjNi1iNGI4MGNlZmYxMDYgLS1tYnJ0b2dwdCAtLSAvZGV2L3NkYgo+PiBbbjEwLTA3NS0wOTRd
-W0RFQlVHIF0gU2V0dGluZyBuYW1lIQo+PiBbbjEwLTA3NS0wOTRdW0RFQlVHIF0gcGFydE51bSBp
-cyAxCj4+IFtuMTAtMDc1LTA5NF1bREVCVUcgXSBSRUFMTFkgc2V0dGluZyBuYW1lIQo+PiBbbjEw
-LTA3NS0wOTRdW0RFQlVHIF0gVGhlIG9wZXJhdGlvbiBoYXMgY29tcGxldGVkIHN1Y2Nlc3NmdWxs
-eS4KPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIHVwZGF0ZV9wYXJ0aXRpb246IENhbGxpbmcgcGFy
-dHByb2JlIG9uIGNyZWF0ZWQgZGV2aWNlCj4+IC9kZXYvc2RiCj4+IFtuMTAtMDc1LTA5NF1bV0FS
-TklOXSBjb21tYW5kX2NoZWNrX2NhbGw6IFJ1bm5pbmcgY29tbWFuZDogL3NiaW4vdWRldmFkbQo+
-PiBzZXR0bGUgLS10aW1lb3V0PTYwMAo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gY29tbWFuZDog
-UnVubmluZyBjb21tYW5kOiAvdXNyL2Jpbi9mbG9jayAtcyAvZGV2L3NkYgo+PiAvc2Jpbi9wYXJ0
-cHJvYmUgL2Rldi9zZGIKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIGNvbW1hbmRfY2hlY2tfY2Fs
-bDogUnVubmluZyBjb21tYW5kOiAvc2Jpbi91ZGV2YWRtCj4+IHNldHRsZSAtLXRpbWVvdXQ9NjAw
-Cj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBnZXRfZG1fdXVpZDogZ2V0X2RtX3V1aWQgL2Rldi9z
-ZGIgdXVpZCBwYXRoIGlzCj4+IC9zeXMvZGV2L2Jsb2NrLzg6MTYvZG0vdXVpZAo+PiBbbjEwLTA3
-NS0wOTRdW1dBUk5JTl0gZ2V0X2RtX3V1aWQ6IGdldF9kbV91dWlkIC9kZXYvc2RiIHV1aWQgcGF0
-aCBpcwo+PiAvc3lzL2Rldi9ibG9jay84OjE2L2RtL3V1aWQKPj4gW24xMC0wNzUtMDk0XVtXQVJO
-SU5dIGdldF9kbV91dWlkOiBnZXRfZG1fdXVpZCAvZGV2L3NkYjIgdXVpZCBwYXRoIGlzCj4+IC9z
-eXMvZGV2L2Jsb2NrLzg6MTgvZG0vdXVpZAo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gcHJlcGFy
-ZV9kZXZpY2U6IEpvdXJuYWwgaXMgR1BUIHBhcnRpdGlvbgo+PiAvZGV2L2Rpc2svYnktcGFydHV1
-aWQvYjdmMDFmMzgtZjBkNS00NWJhLWE5MTMtYWM3MjQyODIwYWVkCj4+IFtuMTAtMDc1LTA5NF1b
-V0FSTklOXSBwcmVwYXJlX2RldmljZTogSm91cm5hbCBpcyBHUFQgcGFydGl0aW9uCj4+IC9kZXYv
-ZGlzay9ieS1wYXJ0dXVpZC9iN2YwMWYzOC1mMGQ1LTQ1YmEtYTkxMy1hYzcyNDI4MjBhZWQKPj4g
-W24xMC0wNzUtMDk0XVtXQVJOSU5dIGdldF9kbV91dWlkOiBnZXRfZG1fdXVpZCAvZGV2L3NkYiB1
-dWlkIHBhdGggaXMKPj4gL3N5cy9kZXYvYmxvY2svODoxNi9kbS91dWlkCj4+IFtuMTAtMDc1LTA5
-NF1bV0FSTklOXSBzZXRfZGF0YV9wYXJ0aXRpb246IENyZWF0aW5nIG9zZCBwYXJ0aXRpb24gb24g
-L2Rldi9zZGIKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIGdldF9kbV91dWlkOiBnZXRfZG1fdXVp
-ZCAvZGV2L3NkYiB1dWlkIHBhdGggaXMKPj4gL3N5cy9kZXYvYmxvY2svODoxNi9kbS91dWlkCj4+
-IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBwdHlwZV90b2JlX2Zvcl9uYW1lOiBuYW1lID0gZGF0YQo+
-PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gZ2V0X2RtX3V1aWQ6IGdldF9kbV91dWlkIC9kZXYvc2Ri
-IHV1aWQgcGF0aCBpcwo+PiAvc3lzL2Rldi9ibG9jay84OjE2L2RtL3V1aWQKPj4gW24xMC0wNzUt
-MDk0XVtXQVJOSU5dIGNyZWF0ZV9wYXJ0aXRpb246IENyZWF0aW5nIGRhdGEgcGFydGl0aW9uIG51
-bSAxIHNpemUgMAo+PiBvbiAvZGV2L3NkYgo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gY29tbWFu
-ZF9jaGVja19jYWxsOiBSdW5uaW5nIGNvbW1hbmQ6IC9zYmluL3NnZGlzawo+PiAtLWxhcmdlc3Qt
-bmV3PTEgLS1jaGFuZ2UtbmFtZT0xOmNlcGggZGF0YQo+PiAtLXBhcnRpdGlvbi1ndWlkPTE6NmU5
-ODRlMTEtMWI0Yi00NzQxLTkwODAtMTMxZjEzYTczZGFhCj4+IC0tdHlwZWNvZGU9MTo4OWM1N2Y5
-OC0yZmU1LTRkYzAtODljMS1mM2FkMGNlZmYyYmUgLS1tYnJ0b2dwdCAtLSAvZGV2L3NkYgo+PiBb
-bjEwLTA3NS0wOTRdW0RFQlVHIF0gU2V0dGluZyBuYW1lIQo+PiBbbjEwLTA3NS0wOTRdW0RFQlVH
-IF0gcGFydE51bSBpcyAwCj4+IFtuMTAtMDc1LTA5NF1bREVCVUcgXSBSRUFMTFkgc2V0dGluZyBu
-YW1lIQo+PiBbbjEwLTA3NS0wOTRdW0RFQlVHIF0gVGhlIG9wZXJhdGlvbiBoYXMgY29tcGxldGVk
-IHN1Y2Nlc3NmdWxseS4KPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIHVwZGF0ZV9wYXJ0aXRpb246
-IENhbGxpbmcgcGFydHByb2JlIG9uIGNyZWF0ZWQgZGV2aWNlCj4+IC9kZXYvc2RiCj4+IFtuMTAt
-MDc1LTA5NF1bV0FSTklOXSBjb21tYW5kX2NoZWNrX2NhbGw6IFJ1bm5pbmcgY29tbWFuZDogL3Ni
-aW4vdWRldmFkbQo+PiBzZXR0bGUgLS10aW1lb3V0PTYwMAo+PiBbbjEwLTA3NS0wOTRdW1dBUk5J
-Tl0gY29tbWFuZDogUnVubmluZyBjb21tYW5kOiAvdXNyL2Jpbi9mbG9jayAtcyAvZGV2L3NkYgo+
-PiAvc2Jpbi9wYXJ0cHJvYmUgL2Rldi9zZGIKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIGNvbW1h
-bmRfY2hlY2tfY2FsbDogUnVubmluZyBjb21tYW5kOiAvc2Jpbi91ZGV2YWRtCj4+IHNldHRsZSAt
-LXRpbWVvdXQ9NjAwCj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBnZXRfZG1fdXVpZDogZ2V0X2Rt
-X3V1aWQgL2Rldi9zZGIgdXVpZCBwYXRoIGlzCj4+IC9zeXMvZGV2L2Jsb2NrLzg6MTYvZG0vdXVp
-ZAo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gZ2V0X2RtX3V1aWQ6IGdldF9kbV91dWlkIC9kZXYv
-c2RiIHV1aWQgcGF0aCBpcwo+PiAvc3lzL2Rldi9ibG9jay84OjE2L2RtL3V1aWQKPj4gW24xMC0w
-NzUtMDk0XVtXQVJOSU5dIGdldF9kbV91dWlkOiBnZXRfZG1fdXVpZCAvZGV2L3NkYjEgdXVpZCBw
-YXRoIGlzCj4+IC9zeXMvZGV2L2Jsb2NrLzg6MTcvZG0vdXVpZAo+PiBbbjEwLTA3NS0wOTRdW1dB
-Uk5JTl0gcG9wdWxhdGVfZGF0YV9wYXRoX2RldmljZTogQ3JlYXRpbmcgeGZzIGZzIG9uCj4+IC9k
-ZXYvc2RiMQo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gY29tbWFuZF9jaGVja19jYWxsOiBSdW5u
-aW5nIGNvbW1hbmQ6IC9zYmluL21rZnMgLXQgeGZzCj4+IC1mIC1pIHNpemU9MjA0OCAtLSAvZGV2
-L3NkYjEKPj4gW24xMC0wNzUtMDk0XVtERUJVRyBdIG1ldGEtZGF0YT0vZGV2L3NkYjEgICAgICAg
-ICAgICAgIGlzaXplPTIwNDgKPj4gYWdjb3VudD00LCBhZ3NpemU9NTU5ODQyNzcgYmxrcwo+PiBb
-bjEwLTA3NS0wOTRdW0RFQlVHIF0gICAgICAgICAgPSAgICAgICAgICAgICAgICAgICAgICAgc2Vj
-dHN6PTQwOTYgIGF0dHI9MiwKPj4gcHJvamlkMzJiaXQ9MQo+PiBbbjEwLTA3NS0wOTRdW0RFQlVH
-IF0gICAgICAgICAgPSAgICAgICAgICAgICAgICAgICAgICAgY3JjPTAgICAgICAgIGZpbm9idD0w
-Cj4+IFtuMTAtMDc1LTA5NF1bREVCVUcgXSBkYXRhICAgICA9ICAgICAgICAgICAgICAgICAgICAg
-ICBic2l6ZT00MDk2Cj4+IGJsb2Nrcz0yMjM5MzcxMDUsIGltYXhwY3Q9MjUKPj4gW24xMC0wNzUt
-MDk0XVtERUJVRyBdICAgICAgICAgID0gICAgICAgICAgICAgICAgICAgICAgIHN1bml0PTAgICAg
-ICBzd2lkdGg9MAo+PiBibGtzCj4+IFtuMTAtMDc1LTA5NF1bREVCVUcgXSBuYW1pbmcgICA9dmVy
-c2lvbiAyICAgICAgICAgICAgICBic2l6ZT00MDk2Cj4+IGFzY2lpLWNpPTAgZnR5cGU9MAo+PiBb
-bjEwLTA3NS0wOTRdW0RFQlVHIF0gbG9nICAgICAgPWludGVybmFsIGxvZyAgICAgICAgICAgYnNp
-emU9NDA5Ngo+PiBibG9ja3M9MTA5MzQ0LCB2ZXJzaW9uPTIKPj4gW24xMC0wNzUtMDk0XVtERUJV
-RyBdICAgICAgICAgID0gICAgICAgICAgICAgICAgICAgICAgIHNlY3Rzej00MDk2ICBzdW5pdD0x
-Cj4+IGJsa3MsIGxhenktY291bnQ9MQo+PiBbbjEwLTA3NS0wOTRdW0RFQlVHIF0gcmVhbHRpbWUg
-PW5vbmUgICAgICAgICAgICAgICAgICAgZXh0c3o9NDA5Ngo+PiBibG9ja3M9MCwgcnRleHRlbnRz
-PTAKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIG1vdW50OiBNb3VudGluZyAvZGV2L3NkYjEgb24K
-Pj4gL3Zhci9saWIvY2VwaC90bXAvbW50Lk44RDVLZCB3aXRoIG9wdGlvbnMKPj4gcncsbm9leGVj
-LG5vYXRpbWUsYXR0cjIsaW5vZGU2NCxsb2didWZzPTgsbG9nYnNpemU9MjU2ayxub3F1b3RhCj4+
-IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBjb21tYW5kX2NoZWNrX2NhbGw6IFJ1bm5pbmcgY29tbWFu
-ZDogL2Jpbi9tb3VudCAtdCB4ZnMKPj4gLW8gcncsbm9leGVjLG5vYXRpbWUsYXR0cjIsaW5vZGU2
-NCxsb2didWZzPTgsbG9nYnNpemU9MjU2ayxub3F1b3RhIC0tCj4+IC9kZXYvc2RiMSAvdmFyL2xp
-Yi9jZXBoL3RtcC9tbnQuTjhENUtkCj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBwb3B1bGF0ZV9k
-YXRhX3BhdGg6IFByZXBhcmluZyBvc2QgZGF0YSBkaXIKPj4gL3Zhci9saWIvY2VwaC90bXAvbW50
-Lk44RDVLZAo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gY29tbWFuZDogUnVubmluZyBjb21tYW5k
-OiAvYmluL2Nob3duIC1SIGNlcGg6Y2VwaAo+PiAvdmFyL2xpYi9jZXBoL3RtcC9tbnQuTjhENUtk
-L2NlcGhfZnNpZC4xMTUzMS50bXAKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIGNvbW1hbmQ6IFJ1
-bm5pbmcgY29tbWFuZDogL2Jpbi9jaG93biAtUiBjZXBoOmNlcGgKPj4gL3Zhci9saWIvY2VwaC90
-bXAvbW50Lk44RDVLZC9mc2lkLjExNTMxLnRtcAo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gY29t
-bWFuZDogUnVubmluZyBjb21tYW5kOiAvYmluL2Nob3duIC1SIGNlcGg6Y2VwaAo+PiAvdmFyL2xp
-Yi9jZXBoL3RtcC9tbnQuTjhENUtkL21hZ2ljLjExNTMxLnRtcAo+PiBbbjEwLTA3NS0wOTRdW1dB
-Uk5JTl0gY29tbWFuZDogUnVubmluZyBjb21tYW5kOiAvYmluL2Nob3duIC1SIGNlcGg6Y2VwaAo+
-PiAvdmFyL2xpYi9jZXBoL3RtcC9tbnQuTjhENUtkL2pvdXJuYWxfdXVpZC4xMTUzMS50bXAKPj4g
-W24xMC0wNzUtMDk0XVtXQVJOSU5dIGFkanVzdF9zeW1saW5rOiBDcmVhdGluZyBzeW1saW5rCj4+
-IC92YXIvbGliL2NlcGgvdG1wL21udC5OOEQ1S2Qvam91cm5hbCAtPgo+PiAvZGV2L2Rpc2svYnkt
-cGFydHV1aWQvYjdmMDFmMzgtZjBkNS00NWJhLWE5MTMtYWM3MjQyODIwYWVkCj4+IFtuMTAtMDc1
-LTA5NF1bV0FSTklOXSBjb21tYW5kOiBSdW5uaW5nIGNvbW1hbmQ6IC9iaW4vY2hvd24gLVIgY2Vw
-aDpjZXBoCj4+IC92YXIvbGliL2NlcGgvdG1wL21udC5OOEQ1S2QKPj4gW24xMC0wNzUtMDk0XVtX
-QVJOSU5dIHVubW91bnQ6IFVubW91bnRpbmcgL3Zhci9saWIvY2VwaC90bXAvbW50Lk44RDVLZAo+
-PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gY29tbWFuZF9jaGVja19jYWxsOiBSdW5uaW5nIGNvbW1h
-bmQ6IC9iaW4vdW1vdW50IC0tCj4+IC92YXIvbGliL2NlcGgvdG1wL21udC5OOEQ1S2QKPj4gW24x
-MC0wNzUtMDk0XVtXQVJOSU5dIGdldF9kbV91dWlkOiBnZXRfZG1fdXVpZCAvZGV2L3NkYiB1dWlk
-IHBhdGggaXMKPj4gL3N5cy9kZXYvYmxvY2svODoxNi9kbS91dWlkCj4+IFtuMTAtMDc1LTA5NF1b
-V0FSTklOXSBjb21tYW5kX2NoZWNrX2NhbGw6IFJ1bm5pbmcgY29tbWFuZDogL3NiaW4vc2dkaXNr
-Cj4+IC0tdHlwZWNvZGU9MTo0ZmJkN2UyOS05ZDI1LTQxYjgtYWZkMC0wNjJjMGNlZmYwNWQgLS0g
-L2Rldi9zZGIKPj4gW24xMC0wNzUtMDk0XVtERUJVRyBdIFdhcm5pbmc6IFRoZSBrZXJuZWwgaXMg
-c3RpbGwgdXNpbmcgdGhlIG9sZCBwYXJ0aXRpb24KPj4gdGFibGUuCj4+IFtuMTAtMDc1LTA5NF1b
-REVCVUcgXSBUaGUgbmV3IHRhYmxlIHdpbGwgYmUgdXNlZCBhdCB0aGUgbmV4dCByZWJvb3QuCj4+
-IFtuMTAtMDc1LTA5NF1bREVCVUcgXSBUaGUgb3BlcmF0aW9uIGhhcyBjb21wbGV0ZWQgc3VjY2Vz
-c2Z1bGx5Lgo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gdXBkYXRlX3BhcnRpdGlvbjogQ2FsbGlu
-ZyBwYXJ0cHJvYmUgb24gcHJlcGFyZWQgZGV2aWNlCj4+IC9kZXYvc2RiCj4+IFtuMTAtMDc1LTA5
-NF1bV0FSTklOXSBjb21tYW5kX2NoZWNrX2NhbGw6IFJ1bm5pbmcgY29tbWFuZDogL3NiaW4vdWRl
-dmFkbQo+PiBzZXR0bGUgLS10aW1lb3V0PTYwMAo+PiBbbjEwLTA3NS0wOTRdW1dBUk5JTl0gY29t
-bWFuZDogUnVubmluZyBjb21tYW5kOiAvdXNyL2Jpbi9mbG9jayAtcyAvZGV2L3NkYgo+PiAvc2Jp
-bi9wYXJ0cHJvYmUgL2Rldi9zZGIKPj4gW24xMC0wNzUtMDk0XVtXQVJOSU5dIGNvbW1hbmRfY2hl
-Y2tfY2FsbDogUnVubmluZyBjb21tYW5kOiAvc2Jpbi91ZGV2YWRtCj4+IHNldHRsZSAtLXRpbWVv
-dXQ9NjAwCj4+IFtuMTAtMDc1LTA5NF1bV0FSTklOXSBjb21tYW5kX2NoZWNrX2NhbGw6IFJ1bm5p
-bmcgY29tbWFuZDogL3NiaW4vdWRldmFkbQo+PiB0cmlnZ2VyIC0tYWN0aW9uPWFkZCAtLXN5c25h
-bWUtbWF0Y2ggc2RiMQo+PiBbbjEwLTA3NS0wOTRdW0lORk8gIF0gUnVubmluZyBjb21tYW5kOiBz
-eXN0ZW1jdGwgZW5hYmxlIGNlcGgudGFyZ2V0Cj4+IFtuMTAtMDc1LTA5NF1bSU5GTyAgXSBjaGVj
-a2luZyBPU0Qgc3RhdHVzLi4uCj4+IFtuMTAtMDc1LTA5NF1bREVCVUcgXSBmaW5kIHRoZSBsb2Nh
-dGlvbiBvZiBhbiBleGVjdXRhYmxlCj4+IFtuMTAtMDc1LTA5NF1bSU5GTyAgXSBSdW5uaW5nIGNv
-bW1hbmQ6IC91c3IvYmluL2NlcGggLS1jbHVzdGVyPWNlcGggb3NkIHN0YXQKPj4gLS1mb3JtYXQ9
-anNvbgo+PiBbY2VwaF9kZXBsb3kub3NkXVtERUJVRyBdIEhvc3QgbjEwLTA3NS0wOTQgaXMgbm93
-IHJlYWR5IGZvciBvc2QgdXNlLgo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fCj4gY2VwaC11c2VycyBtYWlsaW5nIGxpc3QKPiBjZXBoLXVzZXJzQGxpc3Rz
-LmNlcGguY29tCj4gaHR0cDovL2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJz
-LWNlcGguY29tCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-CmNlcGgtdXNlcnMgbWFpbGluZyBsaXN0CmNlcGgtdXNlcnNAbGlzdHMuY2VwaC5jb20KaHR0cDov
-L2xpc3RzLmNlcGguY29tL2xpc3RpbmZvLmNnaS9jZXBoLXVzZXJzLWNlcGguY29tCg==
+To support snapshot nfs re-export, we need a way to lookup snapped
+inode by file handle. For directory inode, snapped metadata are always
+stored together with head inode. Client just need to pass vinodeno_t
+to MDS. For non-directory inode, there can be multiple version of
+snapped inodes and they can be stored in different dirfrags. Besides
+vinodeno_t, client also need to tell mds from which dirfrag it got the
+snapped inode.
+
+Another problem of supporting snapshot nfs re-export is that there
+can be multiple paths to access a snapped inode. For example:
+
+mkdir -p d1/d2/d3
+mkdir d1/.snap/s1
+
+Paths 'd1/.snap/s1/d2/d3', 'd1/d2/.snap/_s1_<inode number of d1>/d3'
+and 'd1/d2/d3/.snap/_s1_<inode number of d1>' are all reference to the
+same snapped inode. For a given snapped inode, There is no convenient
+way to get the first form and the second form paths. For simplicity,
+ceph_get_parent() return snapdir.
+
+Furthermore, client may access snapshot of deleted directory. For
+example:
+
+mkdir -p d1/d2
+mkdir d1/.snap/s1
+open d1/.snap/s1/d2
+rm -rf d1/d2
+<nfs server restart>
+
+The path constucted by ceph_get_parent() and ceph_get_name() is
+'<inode of d2>/.snap/_s1_<inode number of d1>'. Futher lookup parent
+of <inode of d2> will fail. To workaround this case, this patch uses
+d_obtain_root() to get dentry for snapdir of deleted directory.
+snapdir dentry has no DCACHE_DISCONNECTED flag set, reconnect_path()
+stops when it reaches snapdir dentry.
+
+MDS patch is at https://github.com/ceph/ceph/pull/18942
+
+Fixes: http://tracker.ceph.com/issues/22105
+Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
+---
+ fs/ceph/export.c             | 344 +++++++++++++++++++++++++++++++++++++++----
+ include/linux/ceph/ceph_fs.h |   6 +
+ 2 files changed, 324 insertions(+), 26 deletions(-)
+
+change since v1:
+ handle deleted directory
+
+diff --git a/fs/ceph/export.c b/fs/ceph/export.c
+index 7df550c13d7f..24190725f996 100644
+--- a/fs/ceph/export.c
++++ b/fs/ceph/export.c
+@@ -21,18 +21,77 @@ struct ceph_nfs_confh {
+ 	u64 ino, parent_ino;
+ } __attribute__ ((packed));
+ 
++/*
++ * fh for snapped inode
++ */
++struct ceph_nfs_snapfh {
++	u64 ino;
++	u64 snapid;
++	u64 parent_ino;
++	u32 hash;
++} __attribute__ ((packed));
++
++static int ceph_encode_snapfh(struct inode *inode, u32 *rawfh, int *max_len,
++			      struct inode *parent_inode)
++{
++	const static int snap_handle_length =
++		sizeof(struct ceph_nfs_snapfh) >> 2;
++	struct ceph_nfs_snapfh *sfh = (void *)rawfh;
++	u64 snapid = ceph_snap(inode);
++	int ret;
++	bool no_parent = true;
++
++	if (*max_len < snap_handle_length) {
++		*max_len = snap_handle_length;
++		ret = FILEID_INVALID;
++		goto out;
++	}
++
++	ret =  -EINVAL;
++	if (snapid != CEPH_SNAPDIR) {
++		struct inode *dir;
++		struct dentry *dentry = d_find_alias(inode);
++		if (!dentry)
++			goto out;
++
++		rcu_read_lock();
++		dir = d_inode_rcu(dentry->d_parent);
++		if (ceph_snap(dir) != CEPH_SNAPDIR) {
++			sfh->parent_ino = ceph_ino(dir);
++			sfh->hash = ceph_dentry_hash(dir, dentry);
++			no_parent = false;
++		}
++		rcu_read_unlock();
++		dput(dentry);
++	}
++
++	if (no_parent) {
++		if (!S_ISDIR(inode->i_mode))
++			goto out;
++		sfh->parent_ino = sfh->ino;
++		sfh->hash = 0;
++	}
++	sfh->ino = ceph_ino(inode);
++	sfh->snapid = snapid;
++
++	*max_len = snap_handle_length;
++	ret = FILEID_BTRFS_WITH_PARENT;
++out:
++	dout("encode_snapfh %llx.%llx ret=%d\n", ceph_vinop(inode), ret);
++	return ret;
++}
++
+ static int ceph_encode_fh(struct inode *inode, u32 *rawfh, int *max_len,
+ 			  struct inode *parent_inode)
+ {
++	const static int handle_length =
++		sizeof(struct ceph_nfs_fh) >> 2;
++	const static int connected_handle_length =
++		sizeof(struct ceph_nfs_confh) >> 2;
+ 	int type;
+-	struct ceph_nfs_fh *fh = (void *)rawfh;
+-	struct ceph_nfs_confh *cfh = (void *)rawfh;
+-	int connected_handle_length = sizeof(*cfh)/4;
+-	int handle_length = sizeof(*fh)/4;
+ 
+-	/* don't re-export snaps */
+ 	if (ceph_snap(inode) != CEPH_NOSNAP)
+-		return -EINVAL;
++		return ceph_encode_snapfh(inode, rawfh, max_len, parent_inode);
+ 
+ 	if (parent_inode && (*max_len < connected_handle_length)) {
+ 		*max_len = connected_handle_length;
+@@ -43,6 +102,7 @@ static int ceph_encode_fh(struct inode *inode, u32 *rawfh, int *max_len,
+ 	}
+ 
+ 	if (parent_inode) {
++		struct ceph_nfs_confh *cfh = (void *)rawfh;
+ 		dout("encode_fh %llx with parent %llx\n",
+ 		     ceph_ino(inode), ceph_ino(parent_inode));
+ 		cfh->ino = ceph_ino(inode);
+@@ -50,6 +110,7 @@ static int ceph_encode_fh(struct inode *inode, u32 *rawfh, int *max_len,
+ 		*max_len = connected_handle_length;
+ 		type = FILEID_INO32_GEN_PARENT;
+ 	} else {
++		struct ceph_nfs_fh *fh = (void *)rawfh;
+ 		dout("encode_fh %llx\n", ceph_ino(inode));
+ 		fh->ino = ceph_ino(inode);
+ 		*max_len = handle_length;
+@@ -58,7 +119,7 @@ static int ceph_encode_fh(struct inode *inode, u32 *rawfh, int *max_len,
+ 	return type;
+ }
+ 
+-static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
++static struct inode *__lookup_inode(struct super_block *sb, u64 ino)
+ {
+ 	struct ceph_mds_client *mdsc = ceph_sb_to_client(sb)->mdsc;
+ 	struct inode *inode;
+@@ -80,7 +141,7 @@ static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
+ 		mask = CEPH_STAT_CAP_INODE;
+ 		if (ceph_security_xattr_wanted(d_inode(sb->s_root)))
+ 			mask |= CEPH_CAP_XATTR_SHARED;
+-		req->r_args.getattr.mask = cpu_to_le32(mask);
++		req->r_args.lookupino.mask = cpu_to_le32(mask);
+ 
+ 		req->r_ino1 = vino;
+ 		req->r_num_caps = 1;
+@@ -89,17 +150,101 @@ static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
+ 		if (inode)
+ 			ihold(inode);
+ 		ceph_mdsc_put_request(req);
+-		if (!inode)
+-			return ERR_PTR(-ESTALE);
+-		if (inode->i_nlink == 0) {
+-			iput(inode);
+-			return ERR_PTR(-ESTALE);
+-		}
+ 	}
++	return inode ? inode : ERR_PTR(-ESTALE);
++}
+ 
++static struct dentry *__fh_to_dentry(struct super_block *sb, u64 ino)
++{
++	struct inode *inode = __lookup_inode(sb, ino);
++	if (IS_ERR(inode))
++		return ERR_CAST(inode);
++	if (inode->i_nlink == 0) {
++		iput(inode);
++		return ERR_PTR(-ESTALE);
++	}
+ 	return d_obtain_alias(inode);
+ }
+ 
++static struct dentry *__snapfh_to_dentry(struct super_block *sb,
++					  struct ceph_nfs_snapfh *sfh,
++					  bool want_parent)
++{
++	struct ceph_mds_client *mdsc = ceph_sb_to_client(sb)->mdsc;
++	struct ceph_mds_request *req;
++	struct inode *inode;
++	struct ceph_vino vino;
++	int mask;
++	int err;
++	bool unlinked = false;
++
++	if (want_parent) {
++		vino.ino = sfh->parent_ino;
++		if (sfh->snapid == CEPH_SNAPDIR)
++			vino.snap = CEPH_NOSNAP;
++		else if (sfh->ino == sfh->parent_ino)
++			vino.snap = CEPH_SNAPDIR;
++		else
++			vino.snap = sfh->snapid;
++	} else {
++		vino.ino = sfh->ino;
++		vino.snap = sfh->snapid;
++	}
++	inode = ceph_find_inode(sb, vino);
++	if (inode)
++		return d_obtain_alias(inode);
++
++	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_LOOKUPINO,
++				       USE_ANY_MDS);
++	if (IS_ERR(req))
++		return ERR_CAST(req);
++
++	mask = CEPH_STAT_CAP_INODE;
++	if (ceph_security_xattr_wanted(d_inode(sb->s_root)))
++		mask |= CEPH_CAP_XATTR_SHARED;
++	req->r_args.lookupino.mask = cpu_to_le32(mask);
++	if (vino.snap < CEPH_NOSNAP) {
++		req->r_args.lookupino.snapid = cpu_to_le64(vino.snap);
++		if (!want_parent && sfh->ino != sfh->parent_ino) {
++			req->r_args.lookupino.parent =
++					cpu_to_le64(sfh->parent_ino);
++			req->r_args.lookupino.hash =
++					cpu_to_le32(sfh->hash);
++		}
++	}
++
++	req->r_ino1 = vino;
++	req->r_num_caps = 1;
++	err = ceph_mdsc_do_request(mdsc, NULL, req);
++	inode = req->r_target_inode;
++	if (inode) {
++		if (vino.snap == CEPH_SNAPDIR) {
++			if (inode->i_nlink == 0)
++				unlinked = true;
++			inode = ceph_get_snapdir(inode);
++		} else if (ceph_snap(inode) == vino.snap) {
++			ihold(inode);
++		} else {
++			/* mds does not support lookup snapped inode */
++			err = -EOPNOTSUPP;
++			inode = NULL;
++		}
++	}
++	ceph_mdsc_put_request(req);
++
++	if (want_parent) {
++		dout("snapfh_to_parent %llx.%llx\n err=%d\n",
++		     vino.ino, vino.snap, err);
++	} else {
++		dout("snapfh_to_dentry %llx.%llx parent %llx hash %x err=%d",
++		      vino.ino, vino.snap, sfh->parent_ino, sfh->hash, err);
++	}
++	if (!inode)
++		return ERR_PTR(-ESTALE);
++	/* see comments in ceph_get_parent() */
++	return unlinked ? d_obtain_root(inode) : d_obtain_alias(inode);
++}
++
+ /*
+  * convert regular fh to dentry
+  */
+@@ -109,6 +254,11 @@ static struct dentry *ceph_fh_to_dentry(struct super_block *sb,
+ {
+ 	struct ceph_nfs_fh *fh = (void *)fid->raw;
+ 
++	if (fh_type == FILEID_BTRFS_WITH_PARENT) {
++		struct ceph_nfs_snapfh *sfh = (void *)fid->raw;
++		return __snapfh_to_dentry(sb, sfh, false);
++	}
++
+ 	if (fh_type != FILEID_INO32_GEN  &&
+ 	    fh_type != FILEID_INO32_GEN_PARENT)
+ 		return NULL;
+@@ -162,13 +312,49 @@ static struct dentry *__get_parent(struct super_block *sb,
+ 
+ static struct dentry *ceph_get_parent(struct dentry *child)
+ {
+-	/* don't re-export snaps */
+-	if (ceph_snap(d_inode(child)) != CEPH_NOSNAP)
+-		return ERR_PTR(-EINVAL);
+-
+-	dout("get_parent %p ino %llx.%llx\n",
+-	     child, ceph_vinop(d_inode(child)));
+-	return __get_parent(child->d_sb, child, 0);
++	struct inode *inode = d_inode(child);
++	struct dentry *dn;
++
++	if (ceph_snap(inode) != CEPH_NOSNAP) {
++		struct inode* dir;
++		bool unlinked = false;
++		/* do not support non-directory */
++		if (!d_is_dir(child)) {
++			dn = ERR_PTR(-EINVAL);
++			goto out;
++		}
++		dir = __lookup_inode(inode->i_sb, ceph_ino(inode));
++		if (IS_ERR(dir)) {
++			dn = ERR_CAST(dir);
++			goto out;
++		}
++		/* There can be multiple paths to access snapped inode.
++		 * For simplicity, treat snapdir of head inode as parent */
++		if (ceph_snap(inode) != CEPH_SNAPDIR) {
++			struct inode *snapdir = ceph_get_snapdir(dir);
++			if (dir->i_nlink == 0)
++				unlinked = true;
++			iput(dir);
++			if (IS_ERR(snapdir)) {
++				dn = ERR_CAST(snapdir);
++				goto out;
++			}
++			dir = snapdir;
++		}
++		/* If directory has already been deleted, futher get_parent
++		 * will fail. Do not mark snapdir dentry as disconnected,
++		 * this prevent exportfs from doing futher get_parent. */
++		if (unlinked)
++			dn = d_obtain_root(dir);
++		else
++			dn = d_obtain_alias(dir);
++	} else {
++		dn = __get_parent(child->d_sb, child, 0);
++	}
++out:
++	dout("get_parent %p ino %llx.%llx err=%ld\n",
++	     child, ceph_vinop(inode), (IS_ERR(dn) ? PTR_ERR(dn) : 0));
++	return dn;
+ }
+ 
+ /*
+@@ -181,6 +367,11 @@ static struct dentry *ceph_fh_to_parent(struct super_block *sb,
+ 	struct ceph_nfs_confh *cfh = (void *)fid->raw;
+ 	struct dentry *dentry;
+ 
++	if (fh_type == FILEID_BTRFS_WITH_PARENT) {
++		struct ceph_nfs_snapfh *sfh = (void *)fid->raw;
++		return __snapfh_to_dentry(sb, sfh, true);
++	}
++
+ 	if (fh_type != FILEID_INO32_GEN_PARENT)
+ 		return NULL;
+ 	if (fh_len < sizeof(*cfh) / 4)
+@@ -193,14 +384,115 @@ static struct dentry *ceph_fh_to_parent(struct super_block *sb,
+ 	return dentry;
+ }
+ 
++static int __get_snap_name(struct dentry *parent, char *name,
++			   struct dentry *child)
++{
++	struct inode *inode = d_inode(child);
++	struct inode *dir = d_inode(parent);
++	struct ceph_fs_client *fsc = ceph_inode_to_client(inode);
++	struct ceph_mds_request *req = NULL;
++	char *last_name = NULL;
++	unsigned next_offset = 2;
++	int err = -EINVAL;
++
++	if (ceph_ino(inode) != ceph_ino(dir))
++		goto out;
++	if (ceph_snap(inode) == CEPH_SNAPDIR) {
++		if (ceph_snap(dir) == CEPH_NOSNAP) {
++			strcpy(name, fsc->mount_options->snapdir_name);
++			err = 0;
++		}
++		goto out;
++	}
++	if (ceph_snap(dir) != CEPH_SNAPDIR)
++		goto out;
++
++	while (1) {
++		struct ceph_mds_reply_info_parsed *rinfo;
++		struct ceph_mds_reply_dir_entry *rde;
++		int i;
++
++		req = ceph_mdsc_create_request(fsc->mdsc, CEPH_MDS_OP_LSSNAP,
++					       USE_AUTH_MDS);
++		if (IS_ERR(req)) {
++			err = PTR_ERR(req);
++			req = NULL;
++			goto out;
++		}
++		err = ceph_alloc_readdir_reply_buffer(req, inode);
++		if (err)
++			goto out;
++
++		req->r_direct_mode = USE_AUTH_MDS;
++		req->r_readdir_offset = next_offset;
++		req->r_args.readdir.flags =
++				cpu_to_le16(CEPH_READDIR_REPLY_BITFLAGS);
++		if (last_name) {
++			req->r_path2 = last_name;
++			last_name = NULL;
++		}
++
++		req->r_inode = dir;
++		ihold(dir);
++		req->r_dentry = dget(parent);
++
++		inode_lock(dir);
++		err = ceph_mdsc_do_request(fsc->mdsc, NULL, req);
++		inode_unlock(dir);
++
++		if (err < 0)
++			goto out;
++
++		 rinfo = &req->r_reply_info;
++		 for (i = 0; i < rinfo->dir_nr; i++) {
++			 rde = rinfo->dir_entries + i;
++			 BUG_ON(!rde->inode.in);
++			 if (ceph_snap(inode) ==
++			     le64_to_cpu(rde->inode.in->snapid)) {
++				 memcpy(name, rde->name, rde->name_len);
++				 name[rde->name_len] = '\0';
++				 err = 0;
++				 goto out;
++			 }
++		 }
++
++		 if (rinfo->dir_end)
++			 break;
++
++		 BUG_ON(rinfo->dir_nr <= 0);
++		 rde = rinfo->dir_entries + (rinfo->dir_nr - 1);
++		 next_offset += rinfo->dir_nr;
++		 last_name = kstrndup(rde->name, rde->name_len, GFP_KERNEL);
++		 if (!last_name) {
++			 err = -ENOMEM;
++			 goto out;
++		 }
++
++		 ceph_mdsc_put_request(req);
++		 req = NULL;
++	}
++	err = -ENOENT;
++out:
++	if (req)
++		ceph_mdsc_put_request(req);
++	kfree(last_name);
++	dout("get_snap_name %p ino %llx.%llx err=%d\n",
++	     child, ceph_vinop(inode), err);
++	return err;
++}
++
+ static int ceph_get_name(struct dentry *parent, char *name,
+ 			 struct dentry *child)
+ {
+ 	struct ceph_mds_client *mdsc;
+ 	struct ceph_mds_request *req;
++	struct inode *inode = d_inode(child);
+ 	int err;
+ 
+-	mdsc = ceph_inode_to_client(d_inode(child))->mdsc;
++	if (ceph_snap(inode) != CEPH_NOSNAP)
++		return __get_snap_name(parent, name, child);
++
++	mdsc = ceph_inode_to_client(inode)->mdsc;
+ 	req = ceph_mdsc_create_request(mdsc, CEPH_MDS_OP_LOOKUPNAME,
+ 				       USE_ANY_MDS);
+ 	if (IS_ERR(req))
+@@ -208,8 +500,8 @@ static int ceph_get_name(struct dentry *parent, char *name,
+ 
+ 	inode_lock(d_inode(parent));
+ 
+-	req->r_inode = d_inode(child);
+-	ihold(d_inode(child));
++	req->r_inode = inode;
++	ihold(inode);
+ 	req->r_ino2 = ceph_vino(d_inode(parent));
+ 	req->r_parent = d_inode(parent);
+ 	set_bit(CEPH_MDS_R_PARENT_LOCKED, &req->r_req_flags);
+@@ -223,10 +515,10 @@ static int ceph_get_name(struct dentry *parent, char *name,
+ 		memcpy(name, rinfo->dname, rinfo->dname_len);
+ 		name[rinfo->dname_len] = 0;
+ 		dout("get_name %p ino %llx.%llx name %s\n",
+-		     child, ceph_vinop(d_inode(child)), name);
++		     child, ceph_vinop(inode), name);
+ 	} else {
+ 		dout("get_name %p ino %llx.%llx err %d\n",
+-		     child, ceph_vinop(d_inode(child)), err);
++		     child, ceph_vinop(inode), err);
+ 	}
+ 
+ 	ceph_mdsc_put_request(req);
+diff --git a/include/linux/ceph/ceph_fs.h b/include/linux/ceph/ceph_fs.h
+index b422170b791a..4abb0fea4fd6 100644
+--- a/include/linux/ceph/ceph_fs.h
++++ b/include/linux/ceph/ceph_fs.h
+@@ -434,6 +434,12 @@ union ceph_mds_request_args {
+ 		__le64 length; /* num bytes to lock from start */
+ 		__u8 wait; /* will caller wait for lock to become available? */
+ 	} __attribute__ ((packed)) filelock_change;
++	struct {
++		__le32 mask;                 /* CEPH_CAP_* */
++		__le64 snapid;
++		__le64 parent;
++		__le32 hash;
++	} __attribute__ ((packed)) lookupino;
+ } __attribute__ ((packed));
+ 
+ #define CEPH_MDS_FLAG_REPLAY        1  /* this is a replayed op */
+-- 
+2.13.6
+
