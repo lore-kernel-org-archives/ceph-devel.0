@@ -1,236 +1,380 @@
-From: Rafael Lopez <rafael.lopez-sFFfwlTeHG43uPMLIKxrzw@public.gmane.org>
-Subject: Re: who is using nfs-ganesha and cephfs?
-Date: Thu, 16 Nov 2017 19:17:21 +1100
-Message-ID: <CAGpUQW0guADd12HryXum9ZnB+VYorymimgtBurWRTwL2aQkKvQ@mail.gmail.com>
-References: <alpine.DEB.2.11.1711082140180.29217@piezo.novalocal>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Unittest_rbd_miiror: Build failed in Jenkins: ceph-master #1448
+Date: Thu, 16 Nov 2017 09:56:36 +0100
+Message-ID: <3eda6263-6c8a-0292-9aaa-863f6075cb77@digiware.nl>
+References: <1672609555.4.1510819269612.JavaMail.jenkins@cephdev.digiware.nl>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============2539640491085506555=="
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.11.1711082140180.29217-qHenpvqtifaMSRpgCs4c+g@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ceph-users-Qp0mS5GaXlQ@public.gmane.org
-List-Id: ceph-devel.vger.kernel.org
-
---===============2539640491085506555==
-Content-Type: multipart/alternative; boundary="001a1140a51cdb823f055e153f83"
-
---001a1140a51cdb823f055e153f83
-Content-Type: text/plain; charset="UTF-8"
-
-We are running RHCS2.3 (jewel) with ganesha 2.4.2 and cephfs fsal, compiled
-from srpm. experimenting with CTDB for controlling ganesha HA since we run
-samba on same servers.
-
-Haven't done much functionality/stress testing but on face value basic
-stuff seems to work well (file operations).
-
-In terms of performance, last time I tested ganesha it seemed comparable to
-ceph-fuse (RHCS2.x/jewel, i think luminous ceph-fuse is better). Though I
-haven't done rigorous metadata tests or multiple client tests. Also our
-ganesha servers are quite small, as we are thus far only serving cephfs
-natively. eg 4G ram 1 core. Here are some FIO results:
-
-jobs in order are:
-1. async 1M
-2. sync 1M
-3. async 4k
-4. sync 4k
-5. seq read 1M
-6. rand read 4k
-
-Ceph cluster is RHCS 2.3 (10.2.7)
-
-CEPH-FUSE (10.2.x)
-  WRITE: io=143652MB, aggrb=490328KB/s, minb=490328KB/s, maxb=490328KB/s,
-mint=300002msec, maxt=300002msec
-  WRITE: io=14341MB, aggrb=48947KB/s, minb=48947KB/s, maxb=48947KB/s,
-mint=300018msec, maxt=300018msec
-  WRITE: io=9808.2MB, aggrb=33478KB/s, minb=33478KB/s, maxb=33478KB/s,
-mint=300001msec, maxt=300001msec
-  WRITE: io=424476KB, aggrb=1414KB/s, minb=1414KB/s, maxb=1414KB/s,
-mint=300003msec, maxt=300003ms
-   READ: io=158069MB, aggrb=539527KB/s, minb=539527KB/s, maxb=539527KB/s,
-mint=300008msec, maxt=300008msec
-   READ: io=1881.2MB, aggrb=6420KB/s, minb=6420KB/s, maxb=6420KB/s,
-mint=300001msec, maxt=300001msec
-
-ganesha (nfs3)
-  WRITE: io=157891MB, aggrb=538923KB/s, minb=538923KB/s, maxb=538923KB/s,
-mint=300006msec, maxt=300006msec
-  WRITE: io=38700MB, aggrb=132093KB/s, minb=132093KB/s, maxb=132093KB/s,
-mint=300006msec, maxt=300006msec
-  WRITE: io=3072.0MB, aggrb=10148KB/s, minb=10148KB/s, maxb=10148KB/s,
-mint=309957msec, maxt=309957msec
-  WRITE: io=397516KB, aggrb=1325KB/s, minb=1325KB/s, maxb=1325KB/s,
-mint=300001msec, maxt=300001msec
-   READ: io=82521MB, aggrb=281669KB/s, minb=281669KB/s, maxb=281669KB/s,
-mint=300002msec, maxt=300002msec
-   READ: io=1322.2MB, aggrb=4513KB/s, minb=4513KB/s, maxb=4513KB/s,
-mint=300001msec, maxt=300001msec
-
-cephfs kernel client
-  WRITE: io=471041MB, aggrb=1568.8MB/s, minb=1568.8MB/s, maxb=1568.8MB/s,
-mint=300394msec, maxt=300394msec
-  WRITE: io=50005MB, aggrb=170680KB/s, minb=170680KB/s, maxb=170680KB/s,
-mint=300006msec, maxt=300006msec
-  WRITE: io=169092MB, aggrb=577166KB/s, minb=577166KB/s, maxb=577166KB/s,
-mint=300000msec, maxt=300000msec
-  WRITE: io=530548KB, aggrb=1768KB/s, minb=1768KB/s, maxb=1768KB/s,
-mint=300003msec, maxt=300003msec
-   READ: io=121501MB, aggrb=414720KB/s, minb=414720KB/s, maxb=414720KB/s,
-mint=300002msec, maxt=300002msec
-   READ: io=3264.6MB, aggrb=11142KB/s, minb=11142KB/s, maxb=11142KB/s,
-mint=300001msec, maxt=300001msec
-
-happy to share fio job file if anyone wants it.
-
-
-On 9 November 2017 at 08:41, Sage Weil <sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-
-> Who is running nfs-ganesha's FSAL to export CephFS?  What has your
-> experience been?
->
-> (We are working on building proper testing and support for this into
-> Mimic, but the ganesha FSAL has been around for years.)
->
-> Thanks!
-> sage
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-
-
--- 
-*Rafael Lopez*
-Research Devops Engineer
-Monash University eResearch Centre
-
-T: +61 3 9905 9118
-M: +61 (0)427682670 <%2B61%204%2027682%20670>
-E: rafael.lopez-sFFfwlTeHG43uPMLIKxrzw@public.gmane.org
-
---001a1140a51cdb823f055e153f83
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><div>We are running RHCS2.3 (jewel) with ganesha 2.4.2 and=
- cephfs fsal, compiled from srpm. experimenting with CTDB for controlling g=
-anesha HA since we run samba on same servers.</div><div><br></div><div>Have=
-n&#39;t done much functionality/stress testing but on face value basic stuf=
-f seems to work well (file operations).</div><div><br></div><div>In terms o=
-f performance, last time I tested ganesha it seemed comparable to ceph-fuse=
- (RHCS2.x/jewel, i think luminous ceph-fuse is better). Though I haven&#39;=
-t done rigorous metadata tests or multiple client tests. Also our ganesha s=
-ervers are quite small, as we are thus far only serving cephfs natively. eg=
- 4G ram 1 core. Here are some FIO results:</div><div><br></div><div>jobs in=
- order are:</div><div>1. async 1M</div><div>2. sync 1M</div><div>3. async 4=
-k</div><div>4. sync 4k</div><div>5. seq read 1M</div><div>6. rand read 4k</=
-div><div><br></div><div>Ceph cluster is RHCS 2.3 (10.2.7)</div><div><br></d=
-iv><div>CEPH-FUSE (10.2.x)</div><div>=C2=A0 WRITE: io=3D143652MB, aggrb=3D4=
-90328KB/s, minb=3D490328KB/s, maxb=3D490328KB/s, mint=3D300002msec, maxt=3D=
-300002msec</div><div>=C2=A0 WRITE: io=3D14341MB, aggrb=3D48947KB/s, minb=3D=
-48947KB/s, maxb=3D48947KB/s, mint=3D300018msec, maxt=3D300018msec</div><div=
->=C2=A0 WRITE: io=3D9808.2MB, aggrb=3D33478KB/s, minb=3D33478KB/s, maxb=3D3=
-3478KB/s, mint=3D300001msec, maxt=3D300001msec</div><div>=C2=A0 WRITE: io=
-=3D424476KB, aggrb=3D1414KB/s, minb=3D1414KB/s, maxb=3D1414KB/s, mint=3D300=
-003msec, maxt=3D300003ms</div><div>=C2=A0 =C2=A0READ: io=3D158069MB, aggrb=
-=3D539527KB/s, minb=3D539527KB/s, maxb=3D539527KB/s, mint=3D300008msec, max=
-t=3D300008msec</div><div>=C2=A0 =C2=A0READ: io=3D1881.2MB, aggrb=3D6420KB/s=
-, minb=3D6420KB/s, maxb=3D6420KB/s, mint=3D300001msec, maxt=3D300001msec</d=
-iv><div><br></div><div>ganesha (nfs3)</div><div>=C2=A0 WRITE: io=3D157891MB=
-, aggrb=3D538923KB/s, minb=3D538923KB/s, maxb=3D538923KB/s, mint=3D300006ms=
-ec, maxt=3D300006msec</div><div>=C2=A0 WRITE: io=3D38700MB, aggrb=3D132093K=
-B/s, minb=3D132093KB/s, maxb=3D132093KB/s, mint=3D300006msec, maxt=3D300006=
-msec</div><div>=C2=A0 WRITE: io=3D3072.0MB, aggrb=3D10148KB/s, minb=3D10148=
-KB/s, maxb=3D10148KB/s, mint=3D309957msec, maxt=3D309957msec</div><div>=C2=
-=A0 WRITE: io=3D397516KB, aggrb=3D1325KB/s, minb=3D1325KB/s, maxb=3D1325KB/=
-s, mint=3D300001msec, maxt=3D300001msec</div><div>=C2=A0 =C2=A0READ: io=3D8=
-2521MB, aggrb=3D281669KB/s, minb=3D281669KB/s, maxb=3D281669KB/s, mint=3D30=
-0002msec, maxt=3D300002msec</div><div>=C2=A0 =C2=A0READ: io=3D1322.2MB, agg=
-rb=3D4513KB/s, minb=3D4513KB/s, maxb=3D4513KB/s, mint=3D300001msec, maxt=3D=
-300001msec</div><div><br></div><div>cephfs kernel client</div><div>=C2=A0 W=
-RITE: io=3D471041MB, aggrb=3D1568.8MB/s, minb=3D1568.8MB/s, maxb=3D1568.8MB=
-/s, mint=3D300394msec, maxt=3D300394msec</div><div>=C2=A0 WRITE: io=3D50005=
-MB, aggrb=3D170680KB/s, minb=3D170680KB/s, maxb=3D170680KB/s, mint=3D300006=
-msec, maxt=3D300006msec</div><div>=C2=A0 WRITE: io=3D169092MB, aggrb=3D5771=
-66KB/s, minb=3D577166KB/s, maxb=3D577166KB/s, mint=3D300000msec, maxt=3D300=
-000msec</div><div>=C2=A0 WRITE: io=3D530548KB, aggrb=3D1768KB/s, minb=3D176=
-8KB/s, maxb=3D1768KB/s, mint=3D300003msec, maxt=3D300003msec</div><div>=C2=
-=A0 =C2=A0READ: io=3D121501MB, aggrb=3D414720KB/s, minb=3D414720KB/s, maxb=
-=3D414720KB/s, mint=3D300002msec, maxt=3D300002msec</div><div>=C2=A0 =C2=A0=
-READ: io=3D3264.6MB, aggrb=3D11142KB/s, minb=3D11142KB/s, maxb=3D11142KB/s,=
- mint=3D300001msec, maxt=3D300001msec</div><div><br></div><div>happy to sha=
-re fio job file if anyone wants it.=C2=A0</div><div><br></div></div><div cl=
-ass=3D"gmail_extra"><br><div class=3D"gmail_quote">On 9 November 2017 at 08=
-:41, Sage Weil <span dir=3D"ltr">&lt;<a href=3D"mailto:sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" ta=
-rget=3D"_blank">sweil-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>&gt;</span> wrote:<br><blockquote class=
-=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padd=
-ing-left:1ex">Who is running nfs-ganesha&#39;s FSAL to export CephFS?=C2=A0=
- What has your<br>
-experience been?<br>
-<br>
-(We are working on building proper testing and support for this into<br>
-Mimic, but the ganesha FSAL has been around for years.)<br>
-<br>
-Thanks!<br>
-sage<br>
-<br>
---<br>
-To unsubscribe from this list: send the line &quot;unsubscribe ceph-devel&q=
-uot; in<br>
-the body of a message to <a href=3D"mailto:majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org">major=
-domo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org</a><br>
-More majordomo info at=C2=A0 <a href=3D"http://vger.kernel.org/majordomo-in=
-fo.html" rel=3D"noreferrer" target=3D"_blank">http://vger.kernel.org/<wbr>m=
-ajordomo-info.html</a><br>
-</blockquote></div><br><br clear=3D"all"><div><br></div>-- <br><div class=
-=3D"gmail_signature" data-smartmail=3D"gmail_signature"><div dir=3D"ltr"><d=
-iv><div dir=3D"ltr"><div><div dir=3D"ltr"><div><div dir=3D"ltr"><div><div d=
-ir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"l=
-tr"><div dir=3D"ltr"><div dir=3D"ltr"><div><div style=3D"font-size:12.8px">=
-<b style=3D"font-size:12.8px"><font face=3D"arial, helvetica, sans-serif">R=
-afael Lopez</font></b><br></div></div><div><font face=3D"arial, helvetica, =
-sans-serif">Research Devops Engineer<br></font><div style=3D"font-size:12.8=
-px"><font face=3D"arial, helvetica, sans-serif">Monash University eResearch=
- Centre</font></div><div style=3D"font-size:12.8px"><font face=3D"arial, he=
-lvetica, sans-serif"><br></font></div><font face=3D"arial, helvetica, sans-=
-serif"><span style=3D"font-size:12.8px">T:=C2=A0</span><a href=3D"tel:%2B61=
-%203%209905%209118" value=3D"+61399059214" style=3D"color:rgb(17,85,204);fo=
-nt-size:12.8px" target=3D"_blank">+61 3 9905 9118</a><br style=3D"font-size=
-:12.8px"><span style=3D"font-size:12.8px">M:=C2=A0</span><a href=3D"tel:%2B=
-61%204%2027682%20670" value=3D"+61399059214" style=3D"font-size:12.8px;colo=
-r:rgb(17,85,204)" target=3D"_blank">+61 (0)427682670</a><br style=3D"font-s=
-ize:12.8px"><span style=3D"font-size:12.8px">E:=C2=A0</span><a href=3D"mail=
-to:rafael.lopez-sFFfwlTeHG43uPMLIKxrzw@public.gmane.org" style=3D"color:rgb(17,85,204);font-size:12.8px"=
- target=3D"_blank">rafael.lopez-sFFfwlTeHG43uPMLIKxrzw@public.gmane.org</a><br style=3D"font-size:12.8px=
-"></font><div><div><br></div></div></div></div></div></div></div></div></di=
-v></div></div></div></div></div></div></div></div></div></div>
-</div>
-
---001a1140a51cdb823f055e153f83--
-
---===============2539640491085506555==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from smtp.digiware.nl ([176.74.240.9]:52093 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932205AbdKPI4j (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 16 Nov 2017 03:56:39 -0500
+Received: from [192.168.11.152] (unknown [192.168.11.152])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.digiware.nl (Postfix) with ESMTPSA id 269972ED33
+        for <ceph-devel@vger.kernel.org>; Thu, 16 Nov 2017 09:56:35 +0100 (CET)
+In-Reply-To: <1672609555.4.1510819269612.JavaMail.jenkins@cephdev.digiware.nl>
+Content-Language: en-GB
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Ceph Development <ceph-devel@vger.kernel.org>
 
-_______________________________________________
-ceph-users mailing list
-ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+Hi
 
---===============2539640491085506555==--
+Unittest_rbd_mirror consistently (twice already) fails in the same test 
+and the same traceback.
+
+Any suggestions as to where to start looking?
+
+--WjW
+
+
+-------- Forwarded Message --------
+Subject: Build failed in Jenkins: ceph-master #1448
+Date: Thu, 16 Nov 2017 09:01:09 +0100 (CET)
+From: jenkins@digiware.nl
+Reply-To: jenkins@digiware.nl
+To: wjw@digiware.nl
+
+See 
+<http://cephdev.digiware.nl:8180/jenkins/job/ceph-master/1448/display/redirect?page=changes>
+
+Changes:
+
+[enming.zhang] rgw: add rewrite related cmd and parameter into 
+radosgw-admin help info
+
+------------------------------------------
+[...truncated 3.74 MB...]
+[       OK ] 
+TestMockImageReplayerEventPreprocessor.PreprocessRefreshError (71 ms)
+[ RUN      ] 
+TestMockImageReplayerEventPreprocessor.PreprocessClientUpdateError
+[       OK ] 
+TestMockImageReplayerEventPreprocessor.PreprocessClientUpdateError (73 ms)
+[----------] 9 tests from TestMockImageReplayerEventPreprocessor (622 ms 
+total)
+
+[----------] 11 tests from TestMockImageReplayerCreateImageRequest
+[ RUN      ] TestMockImageReplayerCreateImageRequest.Create
+[       OK ] TestMockImageReplayerCreateImageRequest.Create (70 ms)
+[ RUN      ] TestMockImageReplayerCreateImageRequest.CreateError
+[       OK ] TestMockImageReplayerCreateImageRequest.CreateError (72 ms)
+[ RUN      ] TestMockImageReplayerCreateImageRequest.Clone
+[       OK ] TestMockImageReplayerCreateImageRequest.Clone (676 ms)
+[ RUN      ] 
+TestMockImageReplayerCreateImageRequest.CloneGetGlobalImageIdError
+[       OK ] 
+TestMockImageReplayerCreateImageRequest.CloneGetGlobalImageIdError (598 ms)
+[ RUN      ] 
+TestMockImageReplayerCreateImageRequest.CloneGetLocalParentImageIdError
+[       OK ] 
+TestMockImageReplayerCreateImageRequest.CloneGetLocalParentImageIdError 
+(617 ms)
+[ RUN      ] 
+TestMockImageReplayerCreateImageRequest.CloneOpenRemoteParentError
+[       OK ] 
+TestMockImageReplayerCreateImageRequest.CloneOpenRemoteParentError (620 ms)
+[ RUN      ] 
+TestMockImageReplayerCreateImageRequest.CloneOpenLocalParentError
+[       OK ] 
+TestMockImageReplayerCreateImageRequest.CloneOpenLocalParentError (687 ms)
+[ RUN      ] TestMockImageReplayerCreateImageRequest.CloneSnapSetError
+[       OK ] TestMockImageReplayerCreateImageRequest.CloneSnapSetError 
+(709 ms)
+[ RUN      ] TestMockImageReplayerCreateImageRequest.CloneError
+[       OK ] TestMockImageReplayerCreateImageRequest.CloneError (700 ms)
+[ RUN      ] 
+TestMockImageReplayerCreateImageRequest.CloneLocalParentCloseError
+[       OK ] 
+TestMockImageReplayerCreateImageRequest.CloneLocalParentCloseError (689 ms)
+[ RUN      ] 
+TestMockImageReplayerCreateImageRequest.CloneRemoteParentCloseError
+[       OK ] 
+TestMockImageReplayerCreateImageRequest.CloneRemoteParentCloseError (683 ms)
+[----------] 11 tests from TestMockImageReplayerCreateImageRequest (6122 
+ms total)
+
+[----------] 8 tests from TestMockImageReplayerBootstrapRequest
+[ RUN      ] 
+TestMockImageReplayerBootstrapRequest.NonPrimaryRemoteSyncingState
+[       OK ] 
+TestMockImageReplayerBootstrapRequest.NonPrimaryRemoteSyncingState (135 ms)
+[ RUN      ] TestMockImageReplayerBootstrapRequest.RemoteDemotePromote
+[       OK ] TestMockImageReplayerBootstrapRequest.RemoteDemotePromote 
+(144 ms)
+[ RUN      ] 
+TestMockImageReplayerBootstrapRequest.MultipleRemoteDemotePromotes
+[       OK ] 
+TestMockImageReplayerBootstrapRequest.MultipleRemoteDemotePromotes (142 ms)
+[ RUN      ] TestMockImageReplayerBootstrapRequest.LocalDemoteRemotePromote
+[       OK ] 
+TestMockImageReplayerBootstrapRequest.LocalDemoteRemotePromote (137 ms)
+[ RUN      ] TestMockImageReplayerBootstrapRequest.SplitBrainForcePromote
+[       OK ] 
+TestMockImageReplayerBootstrapRequest.SplitBrainForcePromote (128 ms)
+[ RUN      ] TestMockImageReplayerBootstrapRequest.ResyncRequested
+[       OK ] TestMockImageReplayerBootstrapRequest.ResyncRequested (132 ms)
+[ RUN      ] TestMockImageReplayerBootstrapRequest.PrimaryRemote
+[       OK ] TestMockImageReplayerBootstrapRequest.PrimaryRemote (134 ms)
+[ RUN      ] TestMockImageReplayerBootstrapRequest.PrimaryRemoteLocalDeleted
+[       OK ] 
+TestMockImageReplayerBootstrapRequest.PrimaryRemoteLocalDeleted (137 ms)
+[----------] 8 tests from TestMockImageReplayerBootstrapRequest (1089 ms 
+total)
+
+[----------] 18 tests from TestMockPoolWatcher
+[ RUN      ] TestMockPoolWatcher.EmptyPool
+[       OK ] TestMockPoolWatcher.EmptyPool (3 ms)
+[ RUN      ] TestMockPoolWatcher.NonEmptyPool
+[       OK ] TestMockPoolWatcher.NonEmptyPool (3 ms)
+[ RUN      ] TestMockPoolWatcher.NotifyDuringRefresh
+[       OK ] TestMockPoolWatcher.NotifyDuringRefresh (4 ms)
+[ RUN      ] TestMockPoolWatcher.Notify
+[       OK ] TestMockPoolWatcher.Notify (3 ms)
+[ RUN      ] TestMockPoolWatcher.RegisterWatcherBlacklist
+[       OK ] TestMockPoolWatcher.RegisterWatcherBlacklist (2 ms)
+[ RUN      ] TestMockPoolWatcher.RegisterWatcherMissing
+[       OK ] TestMockPoolWatcher.RegisterWatcherMissing (4 ms)
+[ RUN      ] TestMockPoolWatcher.RegisterWatcherError
+[       OK ] TestMockPoolWatcher.RegisterWatcherError (3 ms)
+[ RUN      ] TestMockPoolWatcher.RefreshBlacklist
+[       OK ] TestMockPoolWatcher.RefreshBlacklist (3 ms)
+[ RUN      ] TestMockPoolWatcher.RefreshMissing
+[       OK ] TestMockPoolWatcher.RefreshMissing (2 ms)
+[ RUN      ] TestMockPoolWatcher.RefreshError
+[       OK ] TestMockPoolWatcher.RefreshError (3 ms)
+[ RUN      ] TestMockPoolWatcher.GetMirrorUuidBlacklist
+[       OK ] TestMockPoolWatcher.GetMirrorUuidBlacklist (2 ms)
+[ RUN      ] TestMockPoolWatcher.GetMirrorUuidMissing
+[       OK ] TestMockPoolWatcher.GetMirrorUuidMissing (3 ms)
+[ RUN      ] TestMockPoolWatcher.GetMirrorUuidError
+[       OK ] TestMockPoolWatcher.GetMirrorUuidError (3 ms)
+[ RUN      ] TestMockPoolWatcher.Rewatch
+[       OK ] TestMockPoolWatcher.Rewatch (3 ms)
+[ RUN      ] TestMockPoolWatcher.RewatchBlacklist
+[       OK ] TestMockPoolWatcher.RewatchBlacklist (2 ms)
+[ RUN      ] TestMockPoolWatcher.RewatchError
+[       OK ] TestMockPoolWatcher.RewatchError (3 ms)
+[ RUN      ] TestMockPoolWatcher.DeferredRefresh
+[       OK ] TestMockPoolWatcher.DeferredRefresh (4 ms)
+[ RUN      ] TestMockPoolWatcher.MirrorUuidUpdated
+[       OK ] TestMockPoolWatcher.MirrorUuidUpdated (3 ms)
+[----------] 18 tests from TestMockPoolWatcher (57 ms total)
+
+[----------] 5 tests from TestMockLeaderWatcher
+[ RUN      ] TestMockLeaderWatcher.InitShutdown
+[       OK ] TestMockLeaderWatcher.InitShutdown (6 ms)
+[ RUN      ] TestMockLeaderWatcher.InitReleaseShutdown
+[       OK ] TestMockLeaderWatcher.InitReleaseShutdown (6 ms)
+[ RUN      ] TestMockLeaderWatcher.AcquireError
+[       OK ] TestMockLeaderWatcher.AcquireError (7 ms)
+[ RUN      ] TestMockLeaderWatcher.ReleaseError
+[       OK ] TestMockLeaderWatcher.ReleaseError (7 ms)
+[ RUN      ] TestMockLeaderWatcher.Break
+[       OK ] TestMockLeaderWatcher.Break (2101 ms)
+[----------] 5 tests from TestMockLeaderWatcher (2127 ms total)
+
+[----------] 9 tests from TestMockInstanceWatcher
+[ RUN      ] TestMockInstanceWatcher.InitShutdown
+[       OK ] TestMockInstanceWatcher.InitShutdown (3 ms)
+[ RUN      ] TestMockInstanceWatcher.InitError
+[       OK ] TestMockInstanceWatcher.InitError (3 ms)
+[ RUN      ] TestMockInstanceWatcher.ShutdownError
+[       OK ] TestMockInstanceWatcher.ShutdownError (4 ms)
+[ RUN      ] TestMockInstanceWatcher.Remove
+[       OK ] TestMockInstanceWatcher.Remove (2 ms)
+[ RUN      ] TestMockInstanceWatcher.RemoveNoent
+[       OK ] TestMockInstanceWatcher.RemoveNoent (3 ms)
+[ RUN      ] TestMockInstanceWatcher.ImageAcquireRelease
+[       OK ] TestMockInstanceWatcher.ImageAcquireRelease (63 ms)
+[ RUN      ] TestMockInstanceWatcher.PeerImageRemoved
+[       OK ] TestMockInstanceWatcher.PeerImageRemoved (61 ms)
+[ RUN      ] TestMockInstanceWatcher.ImageAcquireReleaseCancel
+[       OK ] TestMockInstanceWatcher.ImageAcquireReleaseCancel (5 ms)
+[ RUN      ] TestMockInstanceWatcher.PeerImageRemovedCancel
+[       OK ] TestMockInstanceWatcher.PeerImageRemovedCancel (3 ms)
+[----------] 9 tests from TestMockInstanceWatcher (148 ms total)
+
+[----------] 11 tests from TestMockInstanceWatcher_NotifySync
+[ RUN      ] TestMockInstanceWatcher_NotifySync.StartStopOnLeader
+[       OK ] TestMockInstanceWatcher_NotifySync.StartStopOnLeader (57 ms)
+[ RUN      ] TestMockInstanceWatcher_NotifySync.CancelStartedOnLeader
+[       OK ] TestMockInstanceWatcher_NotifySync.CancelStartedOnLeader 
+(65 ms)
+[ RUN      ] TestMockInstanceWatcher_NotifySync.StartStopOnNonLeader
+[       OK ] TestMockInstanceWatcher_NotifySync.StartStopOnNonLeader (65 ms)
+[ RUN      ] TestMockInstanceWatcher_NotifySync.CancelStartedOnNonLeader
+[       OK ] TestMockInstanceWatcher_NotifySync.CancelStartedOnNonLeader 
+(68 ms)
+[ RUN      ] TestMockInstanceWatcher_NotifySync.CancelWaitingOnNonLeader
+[       OK ] TestMockInstanceWatcher_NotifySync.CancelWaitingOnNonLeader 
+(75 ms)
+[ RUN      ] TestMockInstanceWatcher_NotifySync.InFlightPrevNotification
+[       OK ] TestMockInstanceWatcher_NotifySync.InFlightPrevNotification 
+(64 ms)
+[ RUN      ] 
+TestMockInstanceWatcher_NotifySync.NoInFlightReleaseAcquireLeader
+[       OK ] 
+TestMockInstanceWatcher_NotifySync.NoInFlightReleaseAcquireLeader (64 ms)
+[ RUN      ] TestMockInstanceWatcher_NotifySync.StartedOnLeaderReleaseLeader
+[       OK ] 
+TestMockInstanceWatcher_NotifySync.StartedOnLeaderReleaseLeader (68 ms)
+[ RUN      ] TestMockInstanceWatcher_NotifySync.WaitingOnLeaderReleaseLeader
+[       OK ] 
+TestMockInstanceWatcher_NotifySync.WaitingOnLeaderReleaseLeader (63 ms)
+[ RUN      ] 
+TestMockInstanceWatcher_NotifySync.StartedOnNonLeaderAcquireLeader
+[       OK ] 
+TestMockInstanceWatcher_NotifySync.StartedOnNonLeaderAcquireLeader (62 ms)
+[ RUN      ] 
+TestMockInstanceWatcher_NotifySync.WaitingOnNonLeaderAcquireLeader
+[       OK ] 
+TestMockInstanceWatcher_NotifySync.WaitingOnNonLeaderAcquireLeader (64 ms)
+[----------] 11 tests from TestMockInstanceWatcher_NotifySync (716 ms total)
+
+[----------] 2 tests from TestMockInstanceReplayer
+[ RUN      ] TestMockInstanceReplayer.AcquireReleaseImage
+[       OK ] TestMockInstanceReplayer.AcquireReleaseImage (4 ms)
+[ RUN      ] TestMockInstanceReplayer.RemoveFinishedImage
+[       OK ] TestMockInstanceReplayer.RemoveFinishedImage (2 ms)
+[----------] 2 tests from TestMockInstanceReplayer (6 ms total)
+
+[----------] 7 tests from TestMockImageSyncThrottler
+[ RUN      ] TestMockImageSyncThrottler.Single_Sync
+[       OK ] TestMockImageSyncThrottler.Single_Sync (1 ms)
+[ RUN      ] TestMockImageSyncThrottler.Multiple_Syncs
+[       OK ] TestMockImageSyncThrottler.Multiple_Syncs (1 ms)
+[ RUN      ] TestMockImageSyncThrottler.Cancel_Running_Sync
+[       OK ] TestMockImageSyncThrottler.Cancel_Running_Sync (2 ms)
+[ RUN      ] TestMockImageSyncThrottler.Cancel_Waiting_Sync
+[       OK ] TestMockImageSyncThrottler.Cancel_Waiting_Sync (1 ms)
+[ RUN      ] TestMockImageSyncThrottler.Cancel_Running_Sync_Start_Waiting
+[       OK ] 
+TestMockImageSyncThrottler.Cancel_Running_Sync_Start_Waiting (2 ms)
+[ RUN      ] TestMockImageSyncThrottler.Increase_Max_Concurrent_Syncs
+[       OK ] TestMockImageSyncThrottler.Increase_Max_Concurrent_Syncs (1 ms)
+[ RUN      ] TestMockImageSyncThrottler.Decrease_Max_Concurrent_Syncs
+[       OK ] TestMockImageSyncThrottler.Decrease_Max_Concurrent_Syncs (1 ms)
+[----------] 7 tests from TestMockImageSyncThrottler (9 ms total)
+
+[----------] 5 tests from TestMockImageSync
+[ RUN      ] TestMockImageSync.SimpleSync
+[       OK ] TestMockImageSync.SimpleSync (134 ms)
+[ RUN      ] TestMockImageSync.RestartSync
+[       OK ] TestMockImageSync.RestartSync (134 ms)
+[ RUN      ] TestMockImageSync.CancelNotifySyncRequest
+[       OK ] TestMockImageSync.CancelNotifySyncRequest (139 ms)
+[ RUN      ] TestMockImageSync.CancelImageCopy
+[       OK ] TestMockImageSync.CancelImageCopy (141 ms)
+[ RUN      ] TestMockImageSync.CancelAfterCopyImage
+[       OK ] TestMockImageSync.CancelAfterCopyImage (135 ms)
+[----------] 5 tests from TestMockImageSync (685 ms total)
+
+[----------] 13 tests from TestMockImageReplayer
+[ RUN      ] TestMockImageReplayer.StartStop
+[       OK ] TestMockImageReplayer.StartStop (146 ms)
+[ RUN      ] TestMockImageReplayer.LocalImagePrimary
+[       OK ] TestMockImageReplayer.LocalImagePrimary (141 ms)
+[ RUN      ] TestMockImageReplayer.LocalImageDNE
+[       OK ] TestMockImageReplayer.LocalImageDNE (141 ms)
+[ RUN      ] TestMockImageReplayer.PrepareLocalImageError
+[       OK ] TestMockImageReplayer.PrepareLocalImageError (145 ms)
+[ RUN      ] TestMockImageReplayer.GetRemoteImageIdDNE
+[       OK ] TestMockImageReplayer.GetRemoteImageIdDNE (134 ms)
+[ RUN      ] TestMockImageReplayer.GetRemoteImageIdNonLinkedDNE
+[       OK ] TestMockImageReplayer.GetRemoteImageIdNonLinkedDNE (135 ms)
+[ RUN      ] TestMockImageReplayer.GetRemoteImageIdError
+[       OK ] TestMockImageReplayer.GetRemoteImageIdError (130 ms)
+[ RUN      ] TestMockImageReplayer.BootstrapError
+[       OK ] TestMockImageReplayer.BootstrapError (132 ms)
+[ RUN      ] TestMockImageReplayer.StartExternalReplayError
+[       OK ] TestMockImageReplayer.StartExternalReplayError (150 ms)
+[ RUN      ] TestMockImageReplayer.StopError
+[       OK ] TestMockImageReplayer.StopError (142 ms)
+[ RUN      ] TestMockImageReplayer.Replay
+[       OK ] TestMockImageReplayer.Replay (135 ms)
+[ RUN      ] TestMockImageReplayer.DecodeError
+[       OK ] TestMockImageReplayer.DecodeError (138 ms)
+[ RUN      ] TestMockImageReplayer.DelayedReplay
+[       OK ] TestMockImageReplayer.DelayedReplay (2273 ms)
+[----------] 13 tests from TestMockImageReplayer (3944 ms total)
+
+[----------] 12 tests from TestMockImageMap
+[ RUN      ] TestMockImageMap.SetLocalImages
+/home/jenkins/workspace/ceph-master/src/tools/rbd_mirror/image_map/StateTransition.cc: 
+In function 'static const StateTransition::Transition 
+&rbd::mirror::image_map::StateTransition::transit(rbd::mirror::image_map::StateTransition::ActionType, 
+rbd::mirror::image_map::StateTransition::State)' thread 8100d6d00 time 
+2017-11-16 09:01:08.164274
+/home/jenkins/workspace/ceph-master/src/tools/rbd_mirror/image_map/StateTransition.cc: 
+78: FAILED assert(false)
+  ceph version Development (no_version) mimic (dev)
+  1: <ceph::__ceph_assert_fail(char const*, char const, int, char 
+const)+0xb06> at 
+/home/jenkins/workspace/ceph-master/build/lib/libceph-common.so.0
+  2: 
+<rbd::mirror::image_map::StateTransition::transit(rbd::mirror::image_map::StateTransition::ActionType, 
+rbd::mirror::image_map::StateTransition::State)+0xa3> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  3: 
+<rbd::mirror::image_map::Policy::start_next_action(std::__1::basic_string<char, 
+rbd::mirror::image_map::Policy::start_next_action::char_traits<char>, 
+rbd::mirror::image_map::Policy::start_next_action::allocator<char> > 
+const&)+0x4a4> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  4: <rbd::mirror::ImageMap<librbd::(anonymous 
+namespace)::MockTestImageCtx>::process_updates(void)+0x5b5> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  5: 
+<_ZZN3rbd6mirror8ImageMapIN6librbd12_GLOBAL__N_116MockTestImageCtxEE20schedule_update_taskEvENKUliE_clEi()+0x6f> 
+at /home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  6: 
+<_ZN5boost6detail8function26void_function_obj_invoker1IZN3rbd6mirror8ImageMapIN6librbd12_GLOBAL__N_116MockTestImageCtxEE20schedule_update_taskEvEUliE_viE6invokeERNS1_15function_bufferEi()+0x36> 
+at /home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  7: <boost::function1<void, int>::operator()(int) const+0x96> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  8: <FunctionContext::finish(int)+0x1f> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  9: <Context::complete(int)+0x22> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  10: 
+<_ZZZN3rbd6mirror16TestMockImageMap16expect_add_eventERNS0_7ThreadsIN6librbd12_GLOBAL__N_116MockTestImageCtxEEEENKUlP7ContextE_clES9_ENKUliE_clEi()+0x52> 
+at /home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  11: 
+<_ZN5boost6detail8function26void_function_obj_invoker1IZZN3rbd6mirror16TestMockImageMap16expect_add_eventERNS4_7ThreadsIN6librbd12_GLOBAL__N_116MockTestImageCtxEEEENKUlP7ContextE_clESD_EUliE_viE6invokeERNS1_15function_bufferEi()+0x36> 
+at /home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  12: <boost::function1<void, int>::operator()(int) const+0x96> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  13: <FunctionContext::finish(int)+0x1f> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  14: <Context::complete(int)+0x22> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  15: <ContextWQ::process(Context*)+0x371> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  16: <ThreadPool::PointerWQ<Context>::_void_process(void*, 
+ThreadPool::TPHandle&)+0x3b> at 
+/home/jenkins/workspace/ceph-master/build/bin/unittest_rbd_mirror
+  17: <ThreadPool::worker(ThreadPool::WorkThread*)+0x13dc> at 
+/home/jenkins/workspace/ceph-master/build/lib/libceph-common.so.0
+  18: <ThreadPool::WorkThread::entry(void)+0x24> at 
+/home/jenkins/workspace/ceph-master/build/lib/libceph-common.so.0
+  19: <Thread::entry_wrapper(void)+0xc6> at 
+/home/jenkins/workspace/ceph-master/build/lib/libceph-common.so.0
+  20: <Thread::_entry_func(void*)+0x15> at 
+/home/jenkins/workspace/ceph-master/build/lib/libceph-common.so.0
+  NOTE: a copy of the executable, or `objdump -rdS <executable>` is 
+needed to interpret this.
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) = 142.05 sec
+
+The following tests FAILED:
+	145 - unittest_rbd_mirror (OTHER_FAULT)
+Errors while running CTest
+Build step 'Execute shell' marked build as failure
