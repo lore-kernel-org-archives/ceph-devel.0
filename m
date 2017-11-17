@@ -1,105 +1,162 @@
-From: Willem Jan Withagen <wjw@digiware.nl>
-Subject: Re: MDS connection problem
-Date: Fri, 17 Nov 2017 09:56:12 +0100
-Message-ID: <3d781c39-3917-6570-05eb-f7ee9c14a3ba@digiware.nl>
-References: <d635ebd2-7ad0-5313-8245-3cc26b9d02c3@digiware.nl>
- <CAAM7YAnojjt9RAd4qubU9Bqm1so3vyfztXW+OkWeTr4Z0yU_hQ@mail.gmail.com>
- <fae14ef9-b13f-f75f-68e0-8805b8430703@digiware.nl>
- <CAAM7YAnC1OqV5NvGUpR-iStPJ7if9eYbKQ=P5ULVtO3f62FZ_w@mail.gmail.com>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: Re: [ceph-users] who is using nfs-ganesha and cephfs?
+Date: Fri, 17 Nov 2017 08:27:12 -0500
+Message-ID: <1510925232.4096.20.camel@kernel.org>
+References: <alpine.DEB.2.11.1711082140180.29217@piezo.novalocal>
+         <CAGpUQW0guADd12HryXum9ZnB+VYorymimgtBurWRTwL2aQkKvQ@mail.gmail.com>
+         <CAKOnarkeD=OtK+f8XGG6TzCMs1k8fudTygWrDPcJSY+g1W5-iQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from smtp.digiware.nl ([176.74.240.9]:19617 "EHLO smtp.digiware.nl"
+Received: from mail.kernel.org ([198.145.29.99]:59586 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S934362AbdKQI4O (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Fri, 17 Nov 2017 03:56:14 -0500
-In-Reply-To: <CAAM7YAnC1OqV5NvGUpR-iStPJ7if9eYbKQ=P5ULVtO3f62FZ_w@mail.gmail.com>
-Content-Language: en-GB
+        id S933859AbdKQN1P (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Fri, 17 Nov 2017 08:27:15 -0500
+In-Reply-To: <CAKOnarkeD=OtK+f8XGG6TzCMs1k8fudTygWrDPcJSY+g1W5-iQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: "Yan, Zheng" <ukernel@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>
+To: Matt Benjamin <mbenjami@redhat.com>, Rafael Lopez <rafael.lopez@monash.edu>
+Cc: Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
 
-On 17/11/2017 09:40, Yan, Zheng wrote:
-> On Fri, Nov 17, 2017 at 4:37 PM, Willem Jan Withagen <wjw@digiware.nl> wrote:
->> On 16/11/2017 13:08, Yan, Zheng wrote:
->>>
->>> On Thu, Nov 16, 2017 at 3:06 AM, Willem Jan Withagen <wjw@digiware.nl>
->>> wrote:
->>>>
->>>> After a server restart my MDS does not want to start, and it looks like
->>>> keys
->>>> don't match or something?
->>>>
->>>> This is de MDS log:
->>>>
->>>> 2017-11-15 20:03:18.180242 9e0e000 10 mds.a MDSDaemon::ms_get_authorizer
->>>> type=mon
->>>> 2017-11-15 20:03:18.181387 9e0f200 10 cephx: set_have_need_key no handler
->>>> for service mon
->>>> 2017-11-15 20:03:18.181394 9e0f200 10 cephx: set_have_need_key no handler
->>>> for service mds
->>>> 2017-11-15 20:03:18.181396 9e0f200 10 cephx: set_have_need_key no handler
->>>> for service osd
->>>> 2017-11-15 20:03:18.181399 9e0f200 10 cephx: set_have_need_key no handler
->>>> for service mgr
->>>> 2017-11-15 20:03:18.181401 9e0f200 10 cephx: set_have_need_key no handler
->>>> for service auth
->>>> 2017-11-15 20:03:18.181402 9e0f200 10 cephx: validate_tickets want 55
->>>> have 0
->>>> need 55
->>>> 2017-11-15 20:03:18.181414 9e0f200 10 cephx client: handle_response ret =
->>>> 0
->>>> 2017-11-15 20:03:18.181417 9e0f200 10 cephx client:  got initial server
->>>> challenge 7d0dda00ee4847b8
->>>> 2017-11-15 20:03:18.181420 9e0f200 10 cephx client: validate_tickets:
->>>> want=55 need=55 have=0
->>>> 2017-11-15 20:03:18.181424 9e0f200 10 cephx: set_have_need_key no handler
->>>> for service mon
->>>> 2017-11-15 20:03:18.181426 9e0f200 10 cephx: set_have_need_key no handler
->>>> for service mds
->>>> 2017-11-15 20:03:18.181427 9e0f200 10 cephx: set_have_need_key no handler
->>>> for service osd
->>>> 2017-11-15 20:03:18.181428 9e0f200 10 cephx: set_have_need_key no handler
->>>> for service mgr
->>>> 2017-11-15 20:03:18.181429 9e0f200 10 cephx: set_have_need_key no handler
->>>> for service auth
->>>> 2017-11-15 20:03:18.181430 9e0f200 10 cephx: validate_tickets want 55
->>>> have 0
->>>> need 55
->>>> 2017-11-15 20:03:18.181433 9e0f200 10 cephx client: want=55 need=55
->>>> have=0
->>>> 2017-11-15 20:03:18.181439 9e0f200 10 cephx client: build_request
->>>> 2017-11-15 20:03:18.181451 9e0f200 20 cephx client: no secret found for
->>>> entity: mds.a
->>>> 2017-11-15 20:03:18.182114 9e0f200 10 cephx client: handle_response ret =
->>>> -22
->>>> 2017-11-15 20:03:18.182214 9b54480 -1 mds.a ERROR: failed to
->>>> authenticate:
->>>> (22) Invalid argument
->>>> 2017-11-15 20:03:18.182253 9b54480  1 mds.a suicide.  wanted state
->>>> up:boot
->>>> 2017-11-15 20:03:18.182401 9b54480 10 mds.beacon.a set_want_state:
->>>> up:boot
->>>> -> down:dne
->>>
->>>
->>> Please check if content of /var/lib/ceph/mds/ceph-a/keyring is
->>> correct. I got similar error after truncating that file
->>
->>
->> Right so how do I do that.
->>
->> One way or another I have a hard time getting my head wrapped around the
->> auth-model that ceph uses...
+FWIW, it might be interesting at some point to hack together a libcephfs
+backend driver for fio. It already has one for librbd so I imagine it
+wouldn't be too hard to do, and would probably give us a better raw
+comparison between the kernel client and libcephfs.
+
+On Thu, 2017-11-16 at 11:29 -0500, Matt Benjamin wrote:
+> Hi Rafael,
 > 
-> ceph auth get mds.a | head -n 2 > /var/lib/ceph/mds/ceph-a/keyring
+> Thanks for taking the time to report your results.
+> 
+> The similarity to Ceph fuse performance is to be expected, because
+> both Ceph fuse and the nfs-ganesha FSAL driver use libcephfs, as Jeff
+> Layton noted.  It's worth noting that nfs-ganesha does not appear to
+> be adding i/o or metadata operation latency.
+> 
+> The interesting questions, pushing further on Jeff's point, I think are
+> 
+> 1. libcephfs vs kernel cephfs performance delta, and in particular
+> 2. the portion of that delta NOT accounted for by the direct OSD data
+> path available to the kernel mode ceph client--the latter can
+> eventually be made available to nfs-ganesha via pNFS as Jeff hinted,
+> but the former is potentially available for performance improvement
+> 
+> The topic of the big client lock is an old one.  I experimented with
+> removing it in 2014, branch api-concurrent here
+> git@github.com:linuxbox2/linuxbox-ceph.git.  I'm not confident that
+> just removing the client lock bottleneck will bring visible
+> improvements, though, especially until MDS concurrency improvements
+> are in place, but it may be worth revisiting.
+> 
+> Matt
+> 
+> On Thu, Nov 16, 2017 at 3:17 AM, Rafael Lopez <rafael.lopez@monash.edu> wrote:
+> > We are running RHCS2.3 (jewel) with ganesha 2.4.2 and cephfs fsal, compiled
+> > from srpm. experimenting with CTDB for controlling ganesha HA since we run
+> > samba on same servers.
+> > 
+> > Haven't done much functionality/stress testing but on face value basic stuff
+> > seems to work well (file operations).
+> > 
+> > In terms of performance, last time I tested ganesha it seemed comparable to
+> > ceph-fuse (RHCS2.x/jewel, i think luminous ceph-fuse is better). Though I
+> > haven't done rigorous metadata tests or multiple client tests. Also our
+> > ganesha servers are quite small, as we are thus far only serving cephfs
+> > natively. eg 4G ram 1 core. Here are some FIO results:
+> > 
+> > jobs in order are:
+> > 1. async 1M
+> > 2. sync 1M
+> > 3. async 4k
+> > 4. sync 4k
+> > 5. seq read 1M
+> > 6. rand read 4k
+> > 
+> > Ceph cluster is RHCS 2.3 (10.2.7)
+> > 
+> > CEPH-FUSE (10.2.x)
+> >   WRITE: io=143652MB, aggrb=490328KB/s, minb=490328KB/s, maxb=490328KB/s,
+> > mint=300002msec, maxt=300002msec
+> >   WRITE: io=14341MB, aggrb=48947KB/s, minb=48947KB/s, maxb=48947KB/s,
+> > mint=300018msec, maxt=300018msec
+> >   WRITE: io=9808.2MB, aggrb=33478KB/s, minb=33478KB/s, maxb=33478KB/s,
+> > mint=300001msec, maxt=300001msec
+> >   WRITE: io=424476KB, aggrb=1414KB/s, minb=1414KB/s, maxb=1414KB/s,
+> > mint=300003msec, maxt=300003ms
+> >    READ: io=158069MB, aggrb=539527KB/s, minb=539527KB/s, maxb=539527KB/s,
+> > mint=300008msec, maxt=300008msec
+> >    READ: io=1881.2MB, aggrb=6420KB/s, minb=6420KB/s, maxb=6420KB/s,
+> > mint=300001msec, maxt=300001msec
+> > 
+> > ganesha (nfs3)
+> >   WRITE: io=157891MB, aggrb=538923KB/s, minb=538923KB/s, maxb=538923KB/s,
+> > mint=300006msec, maxt=300006msec
+> >   WRITE: io=38700MB, aggrb=132093KB/s, minb=132093KB/s, maxb=132093KB/s,
+> > mint=300006msec, maxt=300006msec
+> >   WRITE: io=3072.0MB, aggrb=10148KB/s, minb=10148KB/s, maxb=10148KB/s,
+> > mint=309957msec, maxt=309957msec
+> >   WRITE: io=397516KB, aggrb=1325KB/s, minb=1325KB/s, maxb=1325KB/s,
+> > mint=300001msec, maxt=300001msec
+> >    READ: io=82521MB, aggrb=281669KB/s, minb=281669KB/s, maxb=281669KB/s,
+> > mint=300002msec, maxt=300002msec
+> >    READ: io=1322.2MB, aggrb=4513KB/s, minb=4513KB/s, maxb=4513KB/s,
+> > mint=300001msec, maxt=300001msec
+> > 
+> > cephfs kernel client
+> >   WRITE: io=471041MB, aggrb=1568.8MB/s, minb=1568.8MB/s, maxb=1568.8MB/s,
+> > mint=300394msec, maxt=300394msec
+> >   WRITE: io=50005MB, aggrb=170680KB/s, minb=170680KB/s, maxb=170680KB/s,
+> > mint=300006msec, maxt=300006msec
+> >   WRITE: io=169092MB, aggrb=577166KB/s, minb=577166KB/s, maxb=577166KB/s,
+> > mint=300000msec, maxt=300000msec
+> >   WRITE: io=530548KB, aggrb=1768KB/s, minb=1768KB/s, maxb=1768KB/s,
+> > mint=300003msec, maxt=300003msec
+> >    READ: io=121501MB, aggrb=414720KB/s, minb=414720KB/s, maxb=414720KB/s,
+> > mint=300002msec, maxt=300002msec
+> >    READ: io=3264.6MB, aggrb=11142KB/s, minb=11142KB/s, maxb=11142KB/s,
+> > mint=300001msec, maxt=300001msec
+> > 
+> > happy to share fio job file if anyone wants it.
+> > 
+> > 
+> > On 9 November 2017 at 08:41, Sage Weil <sweil@redhat.com> wrote:
+> > > 
+> > > Who is running nfs-ganesha's FSAL to export CephFS?  What has your
+> > > experience been?
+> > > 
+> > > (We are working on building proper testing and support for this into
+> > > Mimic, but the ganesha FSAL has been around for years.)
+> > > 
+> > > Thanks!
+> > > sage
+> > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > 
+> > 
+> > 
+> > --
+> > Rafael Lopez
+> > Research Devops Engineer
+> > Monash University eResearch Centre
+> > 
+> > T: +61 3 9905 9118
+> > M: +61 (0)427682670
+> > E: rafael.lopez@monash.edu
+> > 
+> > 
+> > _______________________________________________
+> > ceph-users mailing list
+> > ceph-users@lists.ceph.com
+> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+> > 
+> 
+> 
+> 
 
-Great, thanx....
-
-I do have a different key in mds/mds.a/keyring from what ceph itself thinks.
-Turns out that my cluster build script is doing something wrong to get 
-the key.
-
---WjW
+-- 
+Jeff Layton <jlayton@kernel.org>
