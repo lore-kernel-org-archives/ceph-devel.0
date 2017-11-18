@@ -1,170 +1,337 @@
-From: Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
-Subject: Re: [ceph-users] who is using nfs-ganesha and cephfs?
-Date: Fri, 17 Nov 2017 09:09:22 -0500
-Message-ID: <CAGbvivJrrqL7dqHsZb+=Hz8OKZftbPsNbqtGO6OzsbgZvsQb=w@mail.gmail.com>
-References: <alpine.DEB.2.11.1711082140180.29217@piezo.novalocal>
- <CAGpUQW0guADd12HryXum9ZnB+VYorymimgtBurWRTwL2aQkKvQ@mail.gmail.com>
- <CAKOnarkeD=OtK+f8XGG6TzCMs1k8fudTygWrDPcJSY+g1W5-iQ@mail.gmail.com> <1510925232.4096.20.camel@kernel.org>
+From: Willem Jan Withagen <wjw@digiware.nl>
+Subject: Fwd: Build failed in Jenkins: ceph-master #1458
+Date: Sat, 18 Nov 2017 12:55:17 +0100
+Message-ID: <28fc15b3-cc0b-51e2-de65-243a757413cd@digiware.nl>
+References: <1749630341.11.1510988706686.JavaMail.jenkins@cephdev.digiware.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f66.google.com ([209.85.215.66]:37124 "EHLO
-        mail-lf0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933998AbdKQOJZ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Fri, 17 Nov 2017 09:09:25 -0500
-Received: by mail-lf0-f66.google.com with SMTP id y2so1906849lfj.4
-        for <ceph-devel@vger.kernel.org>; Fri, 17 Nov 2017 06:09:24 -0800 (PST)
-In-Reply-To: <1510925232.4096.20.camel@kernel.org>
+Received: from smtp.digiware.nl ([176.74.240.9]:53480 "EHLO smtp.digiware.nl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1761275AbdKRLzU (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Sat, 18 Nov 2017 06:55:20 -0500
+In-Reply-To: <1749630341.11.1510988706686.JavaMail.jenkins@cephdev.digiware.nl>
+Content-Language: nl
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Matt Benjamin <mbenjami@redhat.com>, Rafael Lopez <rafael.lopez@monash.edu>, Sage Weil <sweil@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>, ceph-users <ceph-users@ceph.com>
+To: Ceph Development <ceph-devel@vger.kernel.org>, kefu chai <tchaikov@gmail.com>
 
-+100 to this idea.
+Hi Kefu,
 
-On Fri, Nov 17, 2017 at 8:27 AM, Jeff Layton <jlayton@kernel.org> wrote:
-> FWIW, it might be interesting at some point to hack together a libcephfs
-> backend driver for fio. It already has one for librbd so I imagine it
-> wouldn't be too hard to do, and would probably give us a better raw
-> comparison between the kernel client and libcephfs.
->
-> On Thu, 2017-11-16 at 11:29 -0500, Matt Benjamin wrote:
->> Hi Rafael,
->>
->> Thanks for taking the time to report your results.
->>
->> The similarity to Ceph fuse performance is to be expected, because
->> both Ceph fuse and the nfs-ganesha FSAL driver use libcephfs, as Jeff
->> Layton noted.  It's worth noting that nfs-ganesha does not appear to
->> be adding i/o or metadata operation latency.
->>
->> The interesting questions, pushing further on Jeff's point, I think are
->>
->> 1. libcephfs vs kernel cephfs performance delta, and in particular
->> 2. the portion of that delta NOT accounted for by the direct OSD data
->> path available to the kernel mode ceph client--the latter can
->> eventually be made available to nfs-ganesha via pNFS as Jeff hinted,
->> but the former is potentially available for performance improvement
->>
->> The topic of the big client lock is an old one.  I experimented with
->> removing it in 2014, branch api-concurrent here
->> git@github.com:linuxbox2/linuxbox-ceph.git.  I'm not confident that
->> just removing the client lock bottleneck will bring visible
->> improvements, though, especially until MDS concurrency improvements
->> are in place, but it may be worth revisiting.
->>
->> Matt
->>
->> On Thu, Nov 16, 2017 at 3:17 AM, Rafael Lopez <rafael.lopez@monash.edu> wrote:
->> > We are running RHCS2.3 (jewel) with ganesha 2.4.2 and cephfs fsal, compiled
->> > from srpm. experimenting with CTDB for controlling ganesha HA since we run
->> > samba on same servers.
->> >
->> > Haven't done much functionality/stress testing but on face value basic stuff
->> > seems to work well (file operations).
->> >
->> > In terms of performance, last time I tested ganesha it seemed comparable to
->> > ceph-fuse (RHCS2.x/jewel, i think luminous ceph-fuse is better). Though I
->> > haven't done rigorous metadata tests or multiple client tests. Also our
->> > ganesha servers are quite small, as we are thus far only serving cephfs
->> > natively. eg 4G ram 1 core. Here are some FIO results:
->> >
->> > jobs in order are:
->> > 1. async 1M
->> > 2. sync 1M
->> > 3. async 4k
->> > 4. sync 4k
->> > 5. seq read 1M
->> > 6. rand read 4k
->> >
->> > Ceph cluster is RHCS 2.3 (10.2.7)
->> >
->> > CEPH-FUSE (10.2.x)
->> >   WRITE: io=143652MB, aggrb=490328KB/s, minb=490328KB/s, maxb=490328KB/s,
->> > mint=300002msec, maxt=300002msec
->> >   WRITE: io=14341MB, aggrb=48947KB/s, minb=48947KB/s, maxb=48947KB/s,
->> > mint=300018msec, maxt=300018msec
->> >   WRITE: io=9808.2MB, aggrb=33478KB/s, minb=33478KB/s, maxb=33478KB/s,
->> > mint=300001msec, maxt=300001msec
->> >   WRITE: io=424476KB, aggrb=1414KB/s, minb=1414KB/s, maxb=1414KB/s,
->> > mint=300003msec, maxt=300003ms
->> >    READ: io=158069MB, aggrb=539527KB/s, minb=539527KB/s, maxb=539527KB/s,
->> > mint=300008msec, maxt=300008msec
->> >    READ: io=1881.2MB, aggrb=6420KB/s, minb=6420KB/s, maxb=6420KB/s,
->> > mint=300001msec, maxt=300001msec
->> >
->> > ganesha (nfs3)
->> >   WRITE: io=157891MB, aggrb=538923KB/s, minb=538923KB/s, maxb=538923KB/s,
->> > mint=300006msec, maxt=300006msec
->> >   WRITE: io=38700MB, aggrb=132093KB/s, minb=132093KB/s, maxb=132093KB/s,
->> > mint=300006msec, maxt=300006msec
->> >   WRITE: io=3072.0MB, aggrb=10148KB/s, minb=10148KB/s, maxb=10148KB/s,
->> > mint=309957msec, maxt=309957msec
->> >   WRITE: io=397516KB, aggrb=1325KB/s, minb=1325KB/s, maxb=1325KB/s,
->> > mint=300001msec, maxt=300001msec
->> >    READ: io=82521MB, aggrb=281669KB/s, minb=281669KB/s, maxb=281669KB/s,
->> > mint=300002msec, maxt=300002msec
->> >    READ: io=1322.2MB, aggrb=4513KB/s, minb=4513KB/s, maxb=4513KB/s,
->> > mint=300001msec, maxt=300001msec
->> >
->> > cephfs kernel client
->> >   WRITE: io=471041MB, aggrb=1568.8MB/s, minb=1568.8MB/s, maxb=1568.8MB/s,
->> > mint=300394msec, maxt=300394msec
->> >   WRITE: io=50005MB, aggrb=170680KB/s, minb=170680KB/s, maxb=170680KB/s,
->> > mint=300006msec, maxt=300006msec
->> >   WRITE: io=169092MB, aggrb=577166KB/s, minb=577166KB/s, maxb=577166KB/s,
->> > mint=300000msec, maxt=300000msec
->> >   WRITE: io=530548KB, aggrb=1768KB/s, minb=1768KB/s, maxb=1768KB/s,
->> > mint=300003msec, maxt=300003msec
->> >    READ: io=121501MB, aggrb=414720KB/s, minb=414720KB/s, maxb=414720KB/s,
->> > mint=300002msec, maxt=300002msec
->> >    READ: io=3264.6MB, aggrb=11142KB/s, minb=11142KB/s, maxb=11142KB/s,
->> > mint=300001msec, maxt=300001msec
->> >
->> > happy to share fio job file if anyone wants it.
->> >
->> >
->> > On 9 November 2017 at 08:41, Sage Weil <sweil@redhat.com> wrote:
->> > >
->> > > Who is running nfs-ganesha's FSAL to export CephFS?  What has your
->> > > experience been?
->> > >
->> > > (We are working on building proper testing and support for this into
->> > > Mimic, but the ganesha FSAL has been around for years.)
->> > >
->> > > Thanks!
->> > > sage
->> > >
->> > > --
->> > > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> > > the body of a message to majordomo@vger.kernel.org
->> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >
->> >
->> >
->> >
->> > --
->> > Rafael Lopez
->> > Research Devops Engineer
->> > Monash University eResearch Centre
->> >
->> > T: +61 3 9905 9118
->> > M: +61 (0)427682670
->> > E: rafael.lopez@monash.edu
->> >
->> >
->> > _______________________________________________
->> > ceph-users mailing list
->> > ceph-users@lists.ceph.com
->> > http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
->> >
->>
->>
->>
->
-> --
-> Jeff Layton <jlayton@kernel.org>
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I think the SPDKs setting broke the FreeBSD build.
+But I was under the impression that it would default to off on FreeBSD?
+
+--WjW
+
+
+-------- Forwarded Message --------
+Subject: Build failed in Jenkins: ceph-master #1458
+Date: Sat, 18 Nov 2017 08:05:06 +0100 (CET)
+From: jenkins@digiware.nl
+Reply-To: jenkins@digiware.nl
+To: wjw@digiware.nl
+
+See 
+<http://cephdev.digiware.nl:8180/jenkins/job/ceph-master/1458/display/redirect?page=changes>
+
+Changes:
+
+[kchai] cmake: build spdk/dpdk in cmake modules
+
+[kchai] rpm,deb: add cunit1 as build dependency
+
+[kchai] cmake: WITH_SPDK=ON by default
+
+[kchai] cmake: refactor dpdk related code
+
+[kchai] cmake: remove duplicated spdk linkage
+
+[kchai] cmake: BuildDPDK: do not build kernel modules
+
+[kchai] cmake: add rte_mempool_{ring,stack} to Finddpdk.cmake
+
+[kchai] cmake: use BuildDPDK if libdpdk not found
+
+[kchai] msg/async: rebase msg/async/dpdk to spdk/dpdk
+
+------------------------------------------
+[...truncated 1.24 KB...]
+cleaning Virtualenv locations.
++ sudo rm -rf /tmp/ceph-detect-init-virtualenv
++ sudo rm -rf /tmp/ceph-disk-virtualenv
++ echo Fetch submodules, overwrite just everything that was patched
+Fetch submodules, overwrite just everything that was patched
++ git submodule update --init --recursive --force
+Submodule path 'ceph-erasure-code-corpus': checked out 
+'2d7d78b9cc52e8a9529d8cc2d2954c7d375d5dd7'
+Submodule path 'ceph-object-corpus': checked out 
+'420d02a8a2cbfac010dc62f6ff9017f190bb8312'
+Submodule path 'src/Beast': checked out 
+'dca65932a8055dd3e240633c6a058db8aa7f7915'
+Submodule path 'src/blkin': checked out 
+'f24ceec055ea236a093988237a9821d145f5f7c8'
+Submodule path 'src/civetweb': checked out 
+'de23828cea740032428ce6f288ad061b429ce68e'
+Submodule path 'src/crypto/isa-l/isa-l_crypto': checked out 
+'603529a4e06ac8a1662c13d6b31f122e21830352'
+Submodule path 'src/erasure-code/jerasure/gf-complete': checked out 
+'7e61b44404f0ed410c83cfd3947a52e88ae044e1'
+Submodule path 'src/erasure-code/jerasure/jerasure': checked out 
+'96c76b89d661c163f65a014b8042c9354ccf7f31'
+Submodule path 'src/googletest': checked out 
+'fdb850479284e2aae047b87df6beae84236d0135'
+Submodule path 'src/isa-l': checked out 
+'7e1a337433a340bc0974ed0f04301bdaca374af6'
+Submodule path 'src/lua': checked out 
+'1fce39c6397056db645718b8f5821571d97869a4'
+Submodule path 'src/rapidjson': checked out 
+'f54b0e47a08782a6131cc3d60f94d038fa6e0a51'
+Submodule path 'src/rapidjson/thirdparty/gtest': checked out 
+'0a439623f75c029912728d80cb7f1b8b48739ca4'
+Submodule path 'src/rocksdb': checked out 
+'8dd0a7e11abad6bc32e59a5cba8769961e085312'
+Submodule path 'src/spdk': checked out 
+'7b7f2aa6854745caf6e2803133043132ca400285'
+Submodule path 'src/spdk/dpdk': checked out 
+'193a6860dfd84ddad2a72c567480e0dd959724d4'
+Submodule path 'src/xxHash': checked out 
+'1f40c6511fa8dd9d2e337ca8c9bc18b3e87663c9'
+Submodule path 'src/zstd': checked out 
+'f4340f46b2387bc8de7d5320c0b83bb1499933ad'
++ set -xv
+which patch
++ which patch
+/usr/bin/patch
+echo apply patches that are still in the PR queue with Ceph
++ echo apply patches that are still in the PR queue with Ceph
+apply patches that are still in the PR queue with Ceph
+if [ -d ../patches.master ]; then
+     for p in ../patches.master/*.diff; do
+     	RESULT=0
+         echo Try patch: $p
+         gpatch --quiet -N -p1 -F3 --dry-run < $p || RESULT=1
+         if [ $RESULT -eq 0 ]
+         then
+             echo Patching: $p
+             gpatch --quiet -N -p1 -F3 < $p
+         else
+         	echo Patch: $p, not accepted
+         fi
+     done
+fi
++ [ -d ../patches.master ]
++ RESULT=0
++ echo Try patch: ../patches.master/src_common_blkdev.cc.diff
+Try patch: ../patches.master/src_common_blkdev.cc.diff
++ gpatch --quiet -N -p1 -F3 --dry-run
++ [ 0 -eq 0 ]
++ echo Patching: ../patches.master/src_common_blkdev.cc.diff
+Patching: ../patches.master/src_common_blkdev.cc.diff
++ gpatch --quiet -N -p1 -F3
+
+echo Build Makefiles
++ echo Build Makefiles
+Build Makefiles
+while [ -d build ] ; do
+     sudo rm -rf build || true
+     sleep 2
+done + [ -d build ]
++ sudo rm -rf build
++ sleep 2
++ [ -d build ]
+
+mkdir build
++ mkdir build
+# CXX_FLAGS_DEBUG="-Wno-null-dereference # 
+CXX_FLAGS_DEBUG="$CXX_FLAGS_DEBUG -Wno-expansion-o-defined"
+(cd build; cmake \
+         -D CMAKE_BUILD_TYPE=Debug \
+         -D CMAKE_CXX_FLAGS_DEBUG="$CXX_FLAGS_DEBUG -O0 -g 
+-DBEAST_NO_BOOST_STRING_VIEW" \
+         -D CMAKE_C_FLAGS_DEBUG="$C_FLAGS_DEBUG -O0 -g 
+-DBEAST_NO_BOOST_STRING_VIEW" \
+         -D ALLOCATOR=libc \
+         -D WITH_CCACHE=ON \
+         -D ENABLE_GIT_VERSION=OFF \
+         -D WITH_SYSTEM_BOOST=ON \
+         -D WITH_BABELTRACE=OFF \
+         -D WITH_LTTNG=OFF \
+         -D WITH_BLKID=OFF \
+         -D WITH_BLUESTORE=OFF \
+         -D WITH_FUSE=ON \
+         -D WITH_KRBD=OFF \
+         -D WITH_XFS=OFF \
+         -D WITH_KVS=OFF \
+         -D WITH_EMBEDDED=OFF \
+         -D WITH_MANPAGE=ON \
+         -D WITH_LIBCEPHFS=OFF \
+         -D WITH_CEPHFS=OFF \
+         -D WITH_TESTS=ON \
+     ..
+     )
++ cd build
++ cmake -D 'CMAKE_BUILD_TYPE=Debug' -D 'CMAKE_CXX_FLAGS_DEBUG= -O0 -g 
+-DBEAST_NO_BOOST_STRING_VIEW' -D 'CMAKE_C_FLAGS_DEBUG= -O0 -g 
+-DBEAST_NO_BOOST_STRING_VIEW' -D 'ALLOCATOR=libc' -D 'WITH_CCACHE=ON' -D 
+'ENABLE_GIT_VERSION=OFF' -D 'WITH_SYSTEM_BOOST=ON' -D 
+'WITH_BABELTRACE=OFF' -D 'WITH_LTTNG=OFF' -D 'WITH_BLKID=OFF' -D 
+'WITH_BLUESTORE=OFF' -D 'WITH_FUSE=ON' -D 'WITH_KRBD=OFF' -D 
+'WITH_XFS=OFF' -D 'WITH_KVS=OFF' -D 'WITH_EMBEDDED=OFF' -D 
+'WITH_MANPAGE=ON' -D 'WITH_LIBCEPHFS=OFF' -D 'WITH_CEPHFS=OFF' -D 
+'WITH_TESTS=ON' ..
+-- The CXX compiler identification is Clang 5.0.0
+-- The C compiler identification is Clang 5.0.0
+-- The ASM compiler identification is Clang
+-- Found assembler: /usr/bin/cc
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Looking for pthread_create
+-- Looking for pthread_create - not found
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  -- Building with ccache: /usr/local/bin/ccache, 
+CCACHE_DIR=
+-- Looking for fallocate
+-- Looking for fallocate - not found
+-- Looking for posix_fadvise
+-- Looking for posix_fadvise - found
+-- Looking for posix_fallocate
+-- Looking for posix_fallocate - found
+-- Looking for syncfs
+-- Looking for syncfs - not found
+-- Looking for sync_file_range
+-- Looking for sync_file_range - not found
+-- Looking for pwritev
+-- Looking for pwritev - found
+-- Looking for splice
+-- Looking for splice - not found
+-- Looking for getgrouplist
+-- Looking for getgrouplist - found
+-- Looking for fdatasync
+-- Looking for fdatasync - found
+-- Looking for strerror_r
+-- Looking for strerror_r - found
+-- Looking for name_to_handle_at
+-- Looking for name_to_handle_at - not found
+-- Looking for pipe2
+-- Looking for pipe2 - found
+-- Looking for pthread_spin_init
+-- Looking for pthread_spin_init - found
+-- Looking for pthread_set_name_np
+-- Looking for pthread_set_name_np - found
+-- Looking for pthread_setname_np
+-- Looking for pthread_setname_np - not found
+-- Looking for pthread_getname_np
+-- Looking for pthread_getname_np - not found
+-- Looking for eventfd
+-- Looking for eventfd - not found
+-- Looking for getprogname
+-- Looking for getprogname - found
+-- Looking for include file linux/types.h
+-- Looking for include file linux/types.h - not found
+-- Looking for include file linux/version.h
+-- Looking for include file linux/version.h - not found
+-- Looking for include file arpa/nameser_compat.h
+-- Looking for include file arpa/nameser_compat.h - found
+-- Looking for include file sys/mount.h
+-- Looking for include file sys/mount.h - found
+-- Looking for include file sys/param.h
+-- Looking for include file sys/param.h - found
+-- Looking for include file sys/types.h
+-- Looking for include file sys/types.h - found
+-- Looking for include file sys/vfs.h
+-- Looking for include file sys/vfs.h - not found
+-- Looking for include file sys/prctl.h
+-- Looking for include file sys/prctl.h - not found
+-- Looking for include file execinfo.h
+-- Looking for include file execinfo.h - found
+-- Looking for include file valgrind/helgrind.h
+-- Looking for include file valgrind/helgrind.h - found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for stddef.h
+-- Looking for stddef.h - found
+-- Check size of __be16
+-- Check size of __be16 - failed
+-- Check size of __be32
+-- Check size of __be32 - failed
+-- Check size of __be64
+-- Check size of __be64 - failed
+-- Check size of __le16
+-- Check size of __le16 - failed
+-- Check size of __le32
+-- Check size of __le32 - failed
+-- Check size of __le64
+-- Check size of __le64 - failed
+-- Check size of __u8
+-- Check size of __u8 - failed
+-- Check size of __u16
+-- Check size of __u16 - failed
+-- Check size of __u32
+-- Check size of __u32 - failed
+-- Check size of __u64
+-- Check size of __u64 - failed
+-- Check size of __s8
+-- Check size of __s8 - failed
+-- Check size of __s16
+-- Check size of __s16 - failed
+-- Check size of __s32
+-- Check size of __s32 - failed
+-- Check size of __s64
+-- Check size of __s64 - failed
+-- Looking for res_nquery
+-- Looking for res_nquery - not found
+-- Looking for F_SETPIPE_SZ
+-- Looking for F_SETPIPE_SZ - not found
+-- Looking for __func__
+-- Looking for __func__ - found
+-- Looking for __PRETTY_FUNCTION__
+-- Looking for __PRETTY_FUNCTION__ - found
+-- Looking for getentropy
+-- Looking for getentropy - not found
+-- Performing Test STRERROR_R_CHAR_P
+-- Performing Test STRERROR_R_CHAR_P - Failed
+-- Performing Test HAVE_STAT_ST_MTIM_TV_NSEC
+-- Performing Test HAVE_STAT_ST_MTIM_TV_NSEC - Success
+-- Performing Test HAVE_STAT_ST_MTIMESPEC_TV_NSEC
+-- Performing Test HAVE_STAT_ST_MTIMESPEC_TV_NSEC - Success
+-- Not Found libibverbs: RDMA_LIBRARY-NOTFOUND
+-- Could NOT find ibverbs (missing: RDMA_LIBRARIES RDMA_INCLUDE_DIR) -- 
+Looking for backtrace
+-- Looking for backtrace - not found
+-- Found Backtrace: /usr/lib/libexecinfo.so  -- Not using udev
+-- Not using BLKID
+-- Found OpenLdap: /usr/local/include  -- Found fuse: 
+/usr/local/include/fuse  make: 
+"/home/jenkins/workspace/ceph-master/src/spdk/dpdk/Makefile" line 32: 
+Error please compile using GNU Make (gmake)
+CMake Error at cmake/modules/BuildDPDK.cmake:61 (message):
+   not able to build DPDK support: unsupported target
+   "x86_64-native-bsdapp-clang"
+Call Stack (most recent call first):
+   cmake/modules/BuildDPDK.cmake:82 (do_build_dpdk)
+   cmake/modules/BuildSPDK.cmake:4 (build_dpdk)
+   CMakeLists.txt:225 (build_spdk)
+
+
+-- Configuring incomplete, errors occurred!
+See also 
+"/home/jenkins/workspace/ceph-master/build/CMakeFiles/CMakeOutput.log".
+See also 
+"/home/jenkins/workspace/ceph-master/build/CMakeFiles/CMakeError.log".
+Build step 'Execute shell' marked build as failure
