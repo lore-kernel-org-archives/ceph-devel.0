@@ -1,79 +1,46 @@
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [GIT PULL] Ceph updates for 4.15-rc1
-Date: Mon, 20 Nov 2017 18:41:28 +0100
-Message-ID: <1511199688-31244-1-git-send-email-idryomov@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: ceph-devel@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: ceph-devel.vger.kernel.org
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Small objects in erasure-coded pool
+Date: Mon, 20 Nov 2017 18:02:41 -0800
+Message-ID: <CAJ4mKGZwHLgFUWinvZSg-4EhOKsW1PiEv5anUmUGWD4kb=MAvA@mail.gmail.com>
+References: <01518dce-fc15-0def-958a-c916564effd6@synesis.ru>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-io0-f182.google.com ([209.85.223.182]:44665 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751305AbdKUCCn (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 20 Nov 2017 21:02:43 -0500
+Received: by mail-io0-f182.google.com with SMTP id w127so17796654iow.11
+        for <ceph-devel@vger.kernel.org>; Mon, 20 Nov 2017 18:02:43 -0800 (PST)
+In-Reply-To: <01518dce-fc15-0def-958a-c916564effd6@synesis.ru>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Aleksei Gutikov <aleksey.gutikov@synesis.ru>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Hi Linus,
+On Mon, Nov 20, 2017 at 8:19 AM, Aleksei Gutikov
+<aleksey.gutikov@synesis.ru> wrote:
+> Hello,
+>
+> We tried to store large amount of small objects (about 5KB, at least bigger
+> than 4k and smaller than 8k) in rgw that utilize ec pool
+> xxx.rgw.buckets.data on ssds.
+>
+> osd_pool_erasure_code_stripe_unit=4096
+> And we expected that data+xattrs will occupy for each object in that case
+> max 12k. Maybe some fragmentation occurs, but we did not delete anything.
+>
+> Actually we faced space occupied by each object (from "MAX AVAIL" field from
+> ceph df) is about 64k.
+> Is that expected?
+> What configuration option (maybe in bluestore) can improve this,
+> bluestore_min_alloc_size_ssd?
 
-The following changes since commit bebc6082da0a9f5d47a1ea2edc099bf671058bd4:
+What is your EC config on the pool? What is the output you're using to
+judge how much space they're taking up?
 
-  Linux 4.14 (2017-11-12 10:46:13 -0800)
-
-are available in the git repository at:
-
-  https://github.com/ceph/ceph-client.git tags/ceph-for-4.15-rc1
-
-for you to fetch changes up to 3cfa3b16dd2f1787f9d19d6da2fe9652d806b387:
-
-  rbd: default to single-major device number scheme (2017-11-13 16:33:08 +0100)
-
-----------------------------------------------------------------
-We have a set of file locking improvements from Zheng, rbd rw/ro
-state handling code cleanup from myself and some assorted CephFS fixes
-from Jeff.
-
-rbd now defaults to single-major=Y, lifting the limit of ~240 rbd
-images per host for everyone.
-
-----------------------------------------------------------------
-Colin Ian King (1):
-      ceph: remove unused and redundant variable dropping
-
-David Disseldorp (1):
-      rbd: set discard_alignment to zero
-
-Eric Biggers (1):
-      libceph: don't WARN() if user tries to add invalid key
-
-Gustavo A. R. Silva (1):
-      ceph: mark expected switch fall-throughs
-
-Ilya Dryomov (4):
-      ceph: -EINVAL on decoding failure in ceph_mdsc_handle_fsmap()
-      rbd: fix and simplify rbd_ioctl_set_ro()
-      rbd: get rid of rbd_mapping::read_only
-      rbd: default to single-major device number scheme
-
-Jeff Layton (4):
-      ceph: clean up spinlocking and list handling around cleanup_cap_releases()
-      ceph: present consistent fsid, regardless of arch endianness
-      ceph: remove the bump of i_version
-      ceph: silence sparse endianness warning in encode_caps_cb
-
-Thomas Meyer (1):
-      ceph: fix bool initialization/comparison
-
-Yan, Zheng (5):
-      ceph: keep auth cap when inode has flocks or posix locks
-      ceph: make lock_to_ceph_filelock() static
-      ceph: optimize flock encoding during reconnect
-      ceph: handle 'session get evicted while there are file locks'
-      ceph: disable cached readdir after dropping positive dentry
-
- drivers/block/rbd.c   |  65 ++++--------------
- fs/ceph/caps.c        |   9 ++-
- fs/ceph/inode.c       |   9 ++-
- fs/ceph/locks.c       | 177 +++++++++++++++++++++++++++++++++++---------------
- fs/ceph/mds_client.c  |  96 +++++++++++++++++----------
- fs/ceph/super.c       |   5 +-
- fs/ceph/super.h       |   4 +-
- net/ceph/ceph_hash.c  |  12 +++-
- net/ceph/crypto.c     |   4 +-
- net/ceph/messenger.c  |   1 +
- net/ceph/mon_client.c |   5 +-
- 11 files changed, 237 insertions(+), 150 deletions(-)
+If you're using hard drives, yes, I expect it to require 64KB at
+minimum anyway...but I would have expected the different shards to
+take up that space as well. (Though it might just hide in rocksdb and
+not get counted the same way.)
+-Greg
