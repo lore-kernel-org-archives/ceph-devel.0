@@ -1,59 +1,50 @@
-From: liuchang0812 <liuchang0812@gmail.com>
-Subject: Re: presentation: making rgw's process_request() asynchronous
-Date: Wed, 22 Nov 2017 01:38:19 +0800
-Message-ID: <CACKY0b8pO47T1Y76upnBsdDfrADA6OXzdBKA7HZmiut9ChaF2g@mail.gmail.com>
-References: <ced1785c-834d-d32d-bca6-42e366801e00@redhat.com> <4a9f92bd-d595-a1be-3519-6b50dac53ec9@redhat.com>
+From: Gregory Farnum <gfarnum@redhat.com>
+Subject: Re: Small objects in erasure-coded pool
+Date: Tue, 21 Nov 2017 12:37:16 -0800
+Message-ID: <CAJ4mKGY9DM5x8K8_Cg5nJy8DJ5-+sJ8EieVo-2L4_==pvCf=nw@mail.gmail.com>
+References: <01518dce-fc15-0def-958a-c916564effd6@synesis.ru>
+ <CAJ4mKGZwHLgFUWinvZSg-4EhOKsW1PiEv5anUmUGWD4kb=MAvA@mail.gmail.com> <c8ac1659-6041-c549-cd2d-6c1be70ca1c6@synesis.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-lf0-f42.google.com ([209.85.215.42]:36348 "EHLO
-        mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751191AbdKURiV (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Nov 2017 12:38:21 -0500
-Received: by mail-lf0-f42.google.com with SMTP id k66so15106119lfg.3
-        for <ceph-devel@vger.kernel.org>; Tue, 21 Nov 2017 09:38:20 -0800 (PST)
-In-Reply-To: <4a9f92bd-d595-a1be-3519-6b50dac53ec9@redhat.com>
+Received: from mail-it0-f50.google.com ([209.85.214.50]:35561 "EHLO
+        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751184AbdKUUhR (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 21 Nov 2017 15:37:17 -0500
+Received: by mail-it0-f50.google.com with SMTP id u132so3647947ita.0
+        for <ceph-devel@vger.kernel.org>; Tue, 21 Nov 2017 12:37:17 -0800 (PST)
+In-Reply-To: <c8ac1659-6041-c549-cd2d-6c1be70ca1c6@synesis.ru>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Aleksei Gutikov <aleksey.gutikov@synesis.ru>
+Cc: Ceph Development <ceph-devel@vger.kernel.org>
 
-Thanks for sharing
+On Tue, Nov 21, 2017 at 4:59 AM, Aleksei Gutikov
+<aleksey.gutikov@synesis.ru> wrote:
+>
+>> What is your EC config on the pool?
+> k=3 m=2, on ssds
+>
+>> What is the output you're using to
+>> judge how much space they're taking up?
+> ceph df showed max_avail~=3T for data pool
+> after uploading 50M files each about 5k ceph was 100% full
+> So 3T/50M ~= 60k each file occupied, this is excepting ec-coded blocks.
+>
+> Probably this is because of bluestore_min_alloc_size_ssd=16k
+> So the granularity of occupied space is 16k*3=48k.
+> Plus some space occupied by xargs (profile, etc.),
+> probably 4k for each ec-coded object, i.e. 4k*3=12k
+>
+> So with bluestore_min_alloc_size_ssd=4k
+> I expect minimal raw space occupied by 5k file:
+> 3+2 erasure-coding: 4k*5 + 4k*5 = 40k
+> 3x replication: (8k + 4k)*3 = 36k
+>
+> I plan to test this cases, but theoretically,
+> are this calculations correct?
 
-2017-11-22 1:25 GMT+08:00 Casey Bodley <cbodley@redhat.com>:
-> The recording is available here: https://bluejeans.com/s/DMYtT/
->
-> Etherpad: http://pad.ceph.com/p/rgw_async_process_request
->
->
->
-> On 11/16/2017 01:22 PM, Casey Bodley wrote:
->>
->> Hi all,
->>
->> I've been working on a new http frontend for rgw over the past year and a
->> half that's based on boost::asio and the beast http library. We're aiming to
->> remove its 'experimental' status for the mimic release.
->>
->> Since that project started, I've been brainstorming ways to take advantage
->> of asio's asynchronous primitives throughout more of rgw. I think I've
->> finally landed on a good strategy to incrementally convert process_request()
->> (the main entrypoint for http requests) to be fully asynchronous when used
->> with the beast frontend, without changing how the existing civetweb frontend
->> works at all. The end result would allow us to serve more concurrent
->> requests, reduce the number of threads needed, and plug in
->> qos/prioritization features that would otherwise block frontend threads.
->>
->> I'd like to present this to the rgw team and do a short code walkthrough
->> to show what it looks like. Anyone else that's interested is more than
->> welcome to join us next Tuesday, Nov 21 at 11am EST in
->> https://bluejeans.com/u/cbodley/. I'll share the recording for anyone that
->> can't make it.
->>
->> Casey
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+That seems about right to me. It's possible the empty data shard(s)
+will only take up metadata space in rocksdb, but the EC blocks will
+always have to exist. Those and the existing data blocks will all take
+up a min alloc block.
