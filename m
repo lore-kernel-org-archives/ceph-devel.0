@@ -1,25 +1,57 @@
-From: Brad Hubbard <bhubbard@redhat.com>
-Subject: Static Analysis
-Date: Thu, 23 Nov 2017 13:38:29 +1000
-Message-ID: <CAF-wwdG3MGyui_d8h9aTUtohJ=xqDjmT1zy2yLPKbUQHZwn4QQ@mail.gmail.com>
+From: Abhishek Lekshmanan <abhishek@suse.com>
+Subject: Re: 12.2.2 Luminous validation status
+Date: Thu, 23 Nov 2017 17:04:46 +0100
+Message-ID: <87vai1ugkh.fsf@suse.com>
+References: <CAMMFjmH0-XbJ1P431bErnMS1BEaU3Ln9XhVMPbEte3ixm+YSzQ@mail.gmail.com> <9162c114-44ea-3153-fc3f-76fbd20e06b4@redhat.com> <CAMMFjmG_6UrMOEWmanz76GyGsJioFLt-ZAYRaYzQJ72LH2pRqA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f42.google.com ([209.85.214.42]:42418 "EHLO
-        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752017AbdKWDia (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 22 Nov 2017 22:38:30 -0500
-Received: by mail-it0-f42.google.com with SMTP id n134so8640558itg.1
-        for <ceph-devel@vger.kernel.org>; Wed, 22 Nov 2017 19:38:30 -0800 (PST)
+Received: from smtp.nue.novell.com ([195.135.221.5]:43977 "EHLO
+        smtp.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752901AbdKWQEs (ORCPT
+        <rfc822;groupwise-ceph-devel@vger.kernel.org:0:0>);
+        Thu, 23 Nov 2017 11:04:48 -0500
+In-Reply-To: <CAMMFjmG_6UrMOEWmanz76GyGsJioFLt-ZAYRaYzQJ72LH2pRqA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: ceph-devel <ceph-devel@vger.kernel.org>
+To: Yuri Weinstein <yweinste@redhat.com>, Josh Durgin <jdurgin@redhat.com>, Ilya Dryomov <idryomov@redhat.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-Latest static analyser results are up on  http://people.redhat.com/bhubbard/
+Yuri Weinstein <yweinste@redhat.com> writes:
 
-Weekly Fedora Copr builds are at
-https://copr.fedorainfracloud.org/coprs/badone/ceph-weeklies/build/678106/
+> Josh's fixed merged and tested, so rados is good.
+>
+> Ilya's kernel fix helped sort out knfs and kcepfs failures, however
+> some jobs still failed (see details/bugs in the ticket) and need
+> Patrick, Ilya review.
+
+I saw patrick's approval on cephfs, though k{RBD/cephfs} suites need
+Ilya's approval I belive. 
+>
+> Please review the tests results and either approve or comment.
+>
+> Thx
+> YuriW
+>
+> On Wed, Nov 15, 2017 at 6:07 PM, Josh Durgin <jdurgin@redhat.com> wrote:
+>> On 11/15/2017 02:00 PM, Yuri Weinstein wrote:
+>>>
+>>> Details of this release summarized here
+>>> http://tracker.ceph.com/issues/21830#note-26
+>>
+>>
+>> The rados failures are due to a bug in the test fixed by:
+>>
+>> https://github.com/ceph/ceph/pull/18808
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
 -- 
-Cheers,
-Brad
+Abhishek Lekshmanan
+SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
+HRB 21284 (AG Nürnberg)
