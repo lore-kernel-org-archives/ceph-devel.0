@@ -1,69 +1,53 @@
-From: Yuri Weinstein <yweinste@redhat.com>
-Subject: Re: 12.2.2 Luminous validation status
-Date: Thu, 23 Nov 2017 08:31:54 -0800
-Message-ID: <CAMMFjmGv13B5qLqZj+ZwhDY9H=XgqTJ+hqTFdDeE4vK04iBFTA@mail.gmail.com>
-References: <CAMMFjmH0-XbJ1P431bErnMS1BEaU3Ln9XhVMPbEte3ixm+YSzQ@mail.gmail.com>
- <9162c114-44ea-3153-fc3f-76fbd20e06b4@redhat.com> <CAMMFjmG_6UrMOEWmanz76GyGsJioFLt-ZAYRaYzQJ72LH2pRqA@mail.gmail.com>
- <87vai1ugkh.fsf@suse.com> <CAMMFjmGke9G7i2OLgBxQAdO+irkO7CXrT2zgKF1_KJnGPkE4yw@mail.gmail.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: boost: to download, or not to download?
+Date: Fri, 24 Nov 2017 00:35:27 +0100
+Message-ID: <385d1ed2-23f4-b1d8-4761-f1d1c7642a8b@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f44.google.com ([209.85.218.44]:41091 "EHLO
-        mail-oi0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753178AbdKWQbz (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Thu, 23 Nov 2017 11:31:55 -0500
-Received: by mail-oi0-f44.google.com with SMTP id h81so13482716oib.8
-        for <ceph-devel@vger.kernel.org>; Thu, 23 Nov 2017 08:31:55 -0800 (PST)
-In-Reply-To: <CAMMFjmGke9G7i2OLgBxQAdO+irkO7CXrT2zgKF1_KJnGPkE4yw@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:39536 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752615AbdKWXf3 (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Thu, 23 Nov 2017 18:35:29 -0500
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 91CA5AAF1
+        for <ceph-devel@vger.kernel.org>; Thu, 23 Nov 2017 23:35:28 +0000 (UTC)
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Abhishek Lekshmanan <abhishek@suse.com>
-Cc: Josh Durgin <jdurgin@redhat.com>, Ilya Dryomov <idryomov@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
+To: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-and ceph-disk unresolved
+Background: I'm trying to build Ceph in OBS from the tarball generated 
+by make-dist.
 
-On Thu, Nov 23, 2017 at 8:30 AM, Yuri Weinstein <yweinste@redhat.com> wrote:
-> I need to review latest results next week.
-> But AFAIR Ilya approved krbd
->
-> rest is unresolved and jewel-x maybe not be resolved yet.
->
-> On Thu, Nov 23, 2017 at 8:04 AM, Abhishek Lekshmanan <abhishek@suse.com> wrote:
->> Yuri Weinstein <yweinste@redhat.com> writes:
->>
->>> Josh's fixed merged and tested, so rados is good.
->>>
->>> Ilya's kernel fix helped sort out knfs and kcepfs failures, however
->>> some jobs still failed (see details/bugs in the ticket) and need
->>> Patrick, Ilya review.
->>
->> I saw patrick's approval on cephfs, though k{RBD/cephfs} suites need
->> Ilya's approval I belive.
->>>
->>> Please review the tests results and either approve or comment.
->>>
->>> Thx
->>> YuriW
->>>
->>> On Wed, Nov 15, 2017 at 6:07 PM, Josh Durgin <jdurgin@redhat.com> wrote:
->>>> On 11/15/2017 02:00 PM, Yuri Weinstein wrote:
->>>>>
->>>>> Details of this release summarized here
->>>>> http://tracker.ceph.com/issues/21830#note-26
->>>>
->>>>
->>>> The rados failures are due to a bug in the test fixed by:
->>>>
->>>> https://github.com/ceph/ceph/pull/18808
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->> --
->> Abhishek Lekshmanan
->> SUSE Linux GmbH, GF: Felix Imendörffer, Jane Smithard, Graham Norton,
->> HRB 21284 (AG Nürnberg)
+I noticed that Shaman builds download Boost from the Internet - this is 
+not an option in OBS because the build workers there do not have 
+external network connectivity.
+
+Examining make-dist, it seems very much to be downloading Boost and 
+including it in the tarball, but not in a way that convinces Ceph to not 
+download it again during the actual build.
+
+There are two problems that I can see:
+
+First, make-dist makes its final tarball by merging three tarballs into 
+one, and in the process ends up putting the boost code out-of-tree. This 
+is trivial to fix.
+
+Second, even when I fix that, BuildBoost.cmake ignores it because of 
+this line:
+
+if(EXISTS 
+"${PROJECT_SOURCE_DIR}/src/boost/libs/config/include/boost/config.hpp")
+
+There simply is no such subdirectory "include" under 
+src/boost/libs/config so the EXISTS conditional always evaluates to 
+"false" and hence Boost always gets downloaded from the Internet: 
+https://github.com/ceph/ceph/blob/master/cmake/modules/BuildBoost.cmake#L78-L85
+
+Any hints will be greatly appreciated! It doesn't seem right that 
+make-dist goes to the trouble of downloading Boost and including it in 
+the tarball, only to have to re-download it at build time.
+
+Nathan
