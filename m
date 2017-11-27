@@ -1,33 +1,29 @@
-From: Jesse Williamson <jwilliamson@suse.de>
-Subject: Re: coming in boost 1.66
-Date: Mon, 27 Nov 2017 10:19:35 -0800 (PST)
-Message-ID: <alpine.LSU.2.21.1711271018390.18288@smaug>
-References: <07a75940-72c6-8510-459b-4f4a0ad43d4b@redhat.com>
+From: Nathan Cutler <ncutler@suse.cz>
+Subject: Re: ceph-disk is now deprecated
+Date: Mon, 27 Nov 2017 21:07:02 +0100
+Message-ID: <f6e851fd-b4d8-8f79-c017-267dc0e30199@suse.cz>
+References: <CAC-Np1z7OJNxUeso+FEB8g+7RUABkvKF58_mmXDHt4SeOTHSDw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII; format=flowed
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:47393 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:55149 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752776AbdK0STT (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Mon, 27 Nov 2017 13:19:19 -0500
-In-Reply-To: <07a75940-72c6-8510-459b-4f4a0ad43d4b@redhat.com>
+        id S1752272AbdK0UHE (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 27 Nov 2017 15:07:04 -0500
+In-Reply-To: <CAC-Np1z7OJNxUeso+FEB8g+7RUABkvKF58_mmXDHt4SeOTHSDw@mail.gmail.com>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Casey Bodley <cbodley@redhat.com>
-Cc: The Sacred Order of the Squid Cybernetic <ceph-devel@vger.kernel.org>
+To: Alfredo Deza <adeza@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-On Mon, 27 Nov 2017, Casey Bodley wrote:
+> A few items to consider:
+> 
+> * ceph-disk is expected to be fully removed by the Mimic release
 
-> - the Asio library is getting "interface changes to reflect the Networking 
-> TS" (which is awesome!) but we might see some compilation failures in radosgw 
-> as a result.
+It's pretty standard in the software world to deprecate in one release 
+and remove in the next. Maybe I'm blind, but I didn't see anything in 
+the announcement explaining why deprecation *and* removal in a single 
+release cycle is warranted in this case?
 
-Very cool! IMO the Networking TS makes some worthwhile improvements, this 
-is great news.
-
-> is out, we'll have a better idea how much work that actually requires, but I 
-> wanted to float the idea ahead of time.
-
-+1 for doing it.
-
--Jesse
+Nathan
