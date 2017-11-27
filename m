@@ -1,91 +1,30 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Question about ceph paxos implementation
-Date: Mon, 27 Nov 2017 14:27:54 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1711271426100.28240@piezo.novalocal>
-References: <C3CABE81-22E1-4B8E-AA5A-22CEBF5D45A9@gmail.com>
+From: =?UTF-8?B?5a6L5paw6aKW?= <songxinying.ftd@gmail.com>
+Subject: rgw: who will write a key starting with a character greater than BI_PREFIX_CHAR
+Date: Mon, 27 Nov 2017 22:30:25 +0800
+Message-ID: <CAMWWNq9P2F5WTdkNOd1L_T9KbRgyYBm-3YvCBidXtesXy21yww@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-628470386-1511792877=:28240"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:40221 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751467AbdK0O15 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Nov 2017 09:27:57 -0500
-In-Reply-To: <C3CABE81-22E1-4B8E-AA5A-22CEBF5D45A9@gmail.com>
+Received: from mail-io0-f169.google.com ([209.85.223.169]:32799 "EHLO
+        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752238AbdK0Oa0 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Nov 2017 09:30:26 -0500
+Received: by mail-io0-f169.google.com with SMTP id i184so29068179ioa.0
+        for <ceph-devel@vger.kernel.org>; Mon, 27 Nov 2017 06:30:26 -0800 (PST)
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Kang Wang <beijingwangkang@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: ceph-devel@vger.kernel.org, yehuda@redhat.com
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi, developers:
+    Could anyone explain the commit
+https://github.com/ceph/ceph/commit/7b5ec743f03a16bd9a901b754fcb64598e7d6b17
+?
+    "Previously we assumed that once we encounter the namespace tag
+we're done. That was wrong." This really confuses me. I don't see
+anyone who will write a key that greater than BI_PREFIX_CHAR in
+current rgw codes. In my opinion, BI_PREFIX_CHAR is only used in
+bucket versioning. For default buckets, the bucket index keys are
+always normal ASCII strings, so no keys will greater than
+BI_PREFIX_CHAR.
 
---8323329-628470386-1511792877=:28240
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-
-On Mon, 27 Nov 2017, Kang Wang wrote:
-> hi
-> 
-> I read the code of ceph paxos recently, and have a question about it, which, in my opinion, may violate the consistency.
-> 
-> Assume we have five monitor node m1, m2, m3, m4, m5, the prior one has larger rank than the back one. 
-> 
-> Consider the situation as below:
-> 
-> 1, m1 as the leader, and all node have the same last_commited at begin, then m1 propose a new value ‘2', which then be accept by m1 and m3:
-> m1:   1 2
-> m2:   1
-> m3:   1 2
-> m4:   1
-> m5:   1	
-> 
-> 2, Unfortunatly, both m1 and m3 go down, and m2 become leader without knowledge about the propse, and it propose a new value ‘3' 
-> m1:   1 2  down 
-> m2:   1 3
-> m3:   1 2  down
-> m4:   1
-> m5:   1	
-> 
-> 3, Then m2 goes down before send anything to others, then m1, m3 recovered and commit value ‘2’ with the quorum m1, m3, m4
-> m1:   1 2
-> m2:   1 3  down
-> m3:   1 2
-> m4:   1 2
-> m5:   1	
-> 
-> 4, Before the commit message sent to others, m1 and m3 go down again. So value ‘3’ only commit on m1. Then m2 become leader once more.
-> m1:   1 2  down
-> m2:   1 3
-> m3:   1 2  down
-> m4:   1 2
-> m5:   1
-> 
-> 5, Leader m2 see the uncommited value ‘2’, but discard it by compare uncommitted_pn in function handle_last, so it commit value ‘3’ with the quorum m2, m4, m5
-> m1:   1 2  down
-> m2:   1 3
-> m3:   1 2  down
-> m4:   1 3
-> m5:   1 3
-
-This is what the last->uncommitted_pn value is for.  I believe this 
-prevents us from using 2's pn (and uncommitted value) because 3's pn is 
-larger.  Can you verify?
-
-Thanks!
-sage
-
-
-> 
-> Now we see the value ‘2’ has been commited, but lost soon. Am I right on it?
-> 
-> 
-> Thanks
-> WANG KANG
-> 
->  --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
---8323329-628470386-1511792877=:28240--
+Thanks.
