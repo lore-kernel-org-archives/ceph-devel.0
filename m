@@ -1,42 +1,34 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: Journaler::_flush
-Date: Mon, 27 Nov 2017 17:11:08 +0800
-Message-ID: <CAAM7YAkwCfTojuj5xpB6fT+QfgsjOwSfCTotWVeyZqW6MBrmEw@mail.gmail.com>
-References: <3E5F298A-2C7C-4E70-893F-A624A7C6BB10@gmail.com>
+From: Wido den Hollander <wido@42on.com>
+Subject: Blocked / Slow requests in health JSON from Mon/Mgr
+Date: Mon, 27 Nov 2017 11:29:21 +0100 (CET)
+Message-ID: <666139692.5433.1511778561280@ox.pcextreme.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-oi0-f45.google.com ([209.85.218.45]:39872 "EHLO
-        mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751141AbdK0JLJ (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Mon, 27 Nov 2017 04:11:09 -0500
-Received: by mail-oi0-f45.google.com with SMTP id r190so18873518oie.6
-        for <ceph-devel@vger.kernel.org>; Mon, 27 Nov 2017 01:11:09 -0800 (PST)
-In-Reply-To: <3E5F298A-2C7C-4E70-893F-A624A7C6BB10@gmail.com>
+Received: from se01-out.mail.pcextreme.nl ([185.66.251.200]:60831 "EHLO
+        se01-out.mail.pcextreme.nl" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751332AbdK0K35 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>);
+        Mon, 27 Nov 2017 05:29:57 -0500
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: =?UTF-8?B?6Zm25Yas5Yas?= <tdd21151186@gmail.com>
-Cc: Ceph Development <ceph-devel@vger.kernel.org>, Patrick Donnelly <pdonnell@redhat.com>
+To: ceph-devel <ceph-devel@vger.kernel.org>
 
-On Sun, Nov 26, 2017 at 11:19 PM, =E9=99=B6=E5=86=AC=E5=86=AC <tdd21151186@=
-gmail.com> wrote:
-> Hi Zheng,
->
-> i  have one question about Journaler flush,
-> suppose there are two in flight flushes ?
-> first is flushing (a, b),  second is flushing (b+1, c)
-> let's assume these two range belong to two adjacent objects.
-> is that possible that the second flush got the reply first ?
+Hi,
 
-yes
+For the Zabbix plugin for the Mgr I wanted to report the amount of block and/or slow requests the cluster is experiencing.
 
-> if that so, the safe_pos would be wrong ?
->
+There is no item with a int value in the JSON returned by the Monitors.
 
-no. check Journaler::_finish_flush
+What would be the easiest way to obtain these values in a Mgr Module?
 
+Or would we need to expand the JSON the MON reports?
 
+I'd like to make a trigger in Zabbix that if num slow requests is > X a admin is alerted.
 
-> Thanks,
-> Dongdong
+Right now you would have to parse a string which isn't very stable.
+
+Any ideas?
+
+Wido
