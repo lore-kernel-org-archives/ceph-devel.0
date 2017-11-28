@@ -1,113 +1,91 @@
-From: Igor Fedotov <ifedotov@suse.de>
-Subject: Re: metadata spill back onto block.slow before block.db filled up
-Date: Tue, 28 Nov 2017 18:44:58 +0300
-Message-ID: <da7260ee-d0cd-1873-9faa-36f747745ef7@suse.de>
-References: <CAKEPnAaF60ywk67KeZ4PkEcqKDqu8c_2_EjzSK_DqusDR2Fjog@mail.gmail.com>
- <alpine.DEB.2.11.1711281316180.2819@piezo.novalocal>
- <fc7b7cd0-0b36-7bd7-0310-70cd9dcc1048@suse.de>
- <ceb00aa7-6229-362e-8234-4f7cbfc23cb2@gmail.com>
+From: kefu chai <tchaikov@gmail.com>
+Subject: Re: 12.2.2 Luminous validation status
+Date: Tue, 28 Nov 2017 23:56:25 +0800
+Message-ID: <CAJE9aOMOm8mtSQ8VPb974NRCTvS989_Sxxs48uvw3n_uDDygBA@mail.gmail.com>
+References: <CAMMFjmH0-XbJ1P431bErnMS1BEaU3Ln9XhVMPbEte3ixm+YSzQ@mail.gmail.com>
+ <9162c114-44ea-3153-fc3f-76fbd20e06b4@redhat.com> <CAMMFjmG_6UrMOEWmanz76GyGsJioFLt-ZAYRaYzQJ72LH2pRqA@mail.gmail.com>
+ <87vai1ugkh.fsf@suse.com> <CAMMFjmGke9G7i2OLgBxQAdO+irkO7CXrT2zgKF1_KJnGPkE4yw@mail.gmail.com>
+ <CAMMFjmGv13B5qLqZj+ZwhDY9H=XgqTJ+hqTFdDeE4vK04iBFTA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:41448 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753211AbdK1PpC (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 28 Nov 2017 10:45:02 -0500
-In-Reply-To: <ceb00aa7-6229-362e-8234-4f7cbfc23cb2@gmail.com>
-Content-Language: en-US
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:39496 "EHLO
+        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932087AbdK1P40 (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Nov 2017 10:56:26 -0500
+Received: by mail-qk0-f174.google.com with SMTP id u184so391797qkd.6
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Nov 2017 07:56:26 -0800 (PST)
+In-Reply-To: <CAMMFjmGv13B5qLqZj+ZwhDY9H=XgqTJ+hqTFdDeE4vK04iBFTA@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Mark Nelson <mark.a.nelson@gmail.com>, Sage Weil <sage@newdream.net>, shasha lu <lushasha08@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+To: Yuri Weinstein <yweinste@redhat.com>
+Cc: Abhishek Lekshmanan <abhishek@suse.com>, Josh Durgin <jdurgin@redhat.com>, Ilya Dryomov <idryomov@redhat.com>, ceph-devel <ceph-devel@vger.kernel.org>
 
-here it is
+On Fri, Nov 24, 2017 at 12:31 AM, Yuri Weinstein <yweinste@redhat.com> wrot=
+e:
+> and ceph-disk unresolved
 
-http://tracker.ceph.com/issues/22264
+Yuri, https://github.com/ceph/ceph/pull/19205 should address the
+ceph-disk test failure.
 
-
-On 11/28/2017 6:37 PM, Mark Nelson wrote:
-> Looks like a bug guys! :)  Mind making a ticket in the tracker?
 >
-> Mark
->
-> On 11/28/2017 07:39 AM, Igor Fedotov wrote:
->> Looks like I can easily reproduce that (note slow_used_bytes):
+> On Thu, Nov 23, 2017 at 8:30 AM, Yuri Weinstein <yweinste@redhat.com> wro=
+te:
+>> I need to review latest results next week.
+>> But AFAIR Ilya approved krbd
 >>
->>  "bluefs": {
->>         "gift_bytes": 105906176,
->>         "reclaim_bytes": 0,
->>         "db_total_bytes": 4294959104,
->>         "db_used_bytes": 76546048,
->>         "wal_total_bytes": 1073737728,
->>         "wal_used_bytes": 239075328,
->>         "slow_total_bytes": 1179648000,
->>         "slow_used_bytes": 63963136,
->>         "num_files": 13,
->>         "log_bytes": 2539520,
->>         "log_compactions": 3,
->>         "logged_bytes": 255176704,
->>         "files_written_wal": 3,
->>         "files_written_sst": 10,
->>         "bytes_written_wal": 1932165189,
->>         "bytes_written_sst": 340957748
->>     },
+>> rest is unresolved and jewel-x maybe not be resolved yet.
 >>
->>
->> On 11/28/2017 4:17 PM, Sage Weil wrote:
->>> Hi Shasha,
+>> On Thu, Nov 23, 2017 at 8:04 AM, Abhishek Lekshmanan <abhishek@suse.com>=
+ wrote:
+>>> Yuri Weinstein <yweinste@redhat.com> writes:
 >>>
->>> On Tue, 28 Nov 2017, shasha lu wrote:
->>>> Hi, Mark
->>>> We test bluestore with 12.2.1.
->>>> There are two host in our rgw cluster, each host contain 2 osds. The
->>>> rgw pool size is 2.  Using a 5GB partition for db.wal, a 50GB SSD
->>>> partition for block.db.
+>>>> Josh's fixed merged and tested, so rados is good.
 >>>>
->>>> # ceph --admin-daemon ceph-osd.1.asok config get rocksdb_db_paths
->>>> {
->>>>      "rocksdb_db_paths": "db,51002736640 db.slow,284999998054"
->>>> }
->>>>
->>>> After writing about 400W 4k rgw objects, using ceph-bluestore-tool to
->>>> export rocksdb file.
->>>>
->>>> # ceph-bluestore-tool bluefs-export --path /var/lib/ceph/osd/osd1
->>>> --out-dir /tmp/osd1
->>>> # cd /tmp/osd1
->>>> # ls
->>>> db  db.slow  db.wal
->>>> # du -sh *
->>>> 2.8G    db
->>>> 809M    db.slow
->>>> 439M    db.wal
->>>>
->>>> block.db partition have 50GB space, but it only contains ~3GB files.
->>>> Then the metadata rolling over onto the db.slow.
->>>> It seems that only L0-L2 files located in block.db. (L0 256M; L1 256M;
->>>> L2 2.5GB), L3 and higher level file located in db.slow.
->>>>
->>>> According to ceph docs, the metadata rolling over onto the db.slow
->>>> only when block.db filled up. But in our env the block.db partition is
->>>> far from filled up.
->>>> Did I make any mistakes?  Is there any additional options should be
->>>> set to rocksdb?
->>> You didn't make any mistakes--this should happen automatically.  It 
->>> looks
->>> like rocksdb isn't behaving as advertised.  I've opened
->>> http://tracker.ceph.com/issues/22264 to track this.  We need to 
->>> start by
->>> reproducing the situation.
+>>>> Ilya's kernel fix helped sort out knfs and kcepfs failures, however
+>>>> some jobs still failed (see details/bugs in the ticket) and need
+>>>> Patrick, Ilya review.
 >>>
->>> My guess is that rocksdb is deciding that deciding that all of L3 can't
->>> fit on db and so it's putting all of L3 on db.slow?
+>>> I saw patrick's approval on cephfs, though k{RBD/cephfs} suites need
+>>> Ilya's approval I belive.
+>>>>
+>>>> Please review the tests results and either approve or comment.
+>>>>
+>>>> Thx
+>>>> YuriW
+>>>>
+>>>> On Wed, Nov 15, 2017 at 6:07 PM, Josh Durgin <jdurgin@redhat.com> wrot=
+e:
+>>>>> On 11/15/2017 02:00 PM, Yuri Weinstein wrote:
+>>>>>>
+>>>>>> Details of this release summarized here
+>>>>>> http://tracker.ceph.com/issues/21830#note-26
+>>>>>
+>>>>>
+>>>>> The rados failures are due to a bug in the test fixed by:
+>>>>>
+>>>>> https://github.com/ceph/ceph/pull/18808
+>>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" =
+in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
 >>>
->>> sage
->>>
->>> -- 
->>> To unsubscribe from this list: send the line "unsubscribe 
->>> ceph-devel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>
+>>> --
+>>> Abhishek Lekshmanan
+>>> SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Nort=
+on,
+>>> HRB 21284 (AG N=C3=BCrnberg)
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+
+
+--=20
+Regards
+Kefu Chai
