@@ -1,96 +1,76 @@
-From: Igor Fedotov <ifedotov@suse.de>
-Subject: Re: metadata spill back onto block.slow before block.db filled up
-Date: Tue, 28 Nov 2017 16:39:05 +0300
-Message-ID: <fc7b7cd0-0b36-7bd7-0310-70cd9dcc1048@suse.de>
-References: <CAKEPnAaF60ywk67KeZ4PkEcqKDqu8c_2_EjzSK_DqusDR2Fjog@mail.gmail.com>
- <alpine.DEB.2.11.1711281316180.2819@piezo.novalocal>
+From: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: ceph-disk is now deprecated
+Date: Tue, 28 Nov 2017 14:17:20 +0000
+Message-ID: <5a21d992-e360-66ce-5b72-743a05b59a1a@suse.de>
+References: <CAC-Np1z7OJNxUeso+FEB8g+7RUABkvKF58_mmXDHt4SeOTHSDw@mail.gmail.com>
+ <1821337488.5487.1511856776936@ox.pcextreme.nl>
+ <CAC-Np1zfMoqtW2M75ZAys1_NTEkns6MJ6HimuRR3nFhbMVzjPg@mail.gmail.com>
+ <1db3fa50-d022-bf37-eb4b-098882ea0984@suse.de>
+ <CAC-Np1ynRyeOChGK2k_oBAx0A7XcAFkMDMrxVHZhN-pjGXfAJw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:60767 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752457AbdK1NjJ (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
-        Tue, 28 Nov 2017 08:39:09 -0500
-In-Reply-To: <alpine.DEB.2.11.1711281316180.2819@piezo.novalocal>
-Content-Language: en-US
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Sage Weil <sage@newdream.net>, shasha lu <lushasha08@gmail.com>
-Cc: ceph-devel@vger.kernel.org, Mark Nelson <mark.a.nelson@gmail.com>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAC-Np1ynRyeOChGK2k_oBAx0A7XcAFkMDMrxVHZhN-pjGXfAJw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-GB
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-Looks like I can easily reproduce that (note slow_used_bytes):
+On 11/28/2017 12:52 PM, Alfredo Deza wrote:
+> On Tue, Nov 28, 2017 at 7:38 AM, Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org> wrote:
+>> On 11/28/2017 11:54 AM, Alfredo Deza wrote:
+>>>
+>>> On Tue, Nov 28, 2017 at 3:12 AM, Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org> wrote:
+>>>>
+>>>>
+>>>>> Op 27 november 2017 om 14:36 schreef Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+>>>>>
+>>>>>
+>>>>> For the upcoming Luminous release (12.2.2), ceph-disk will be
+>>>>> officially in 'deprecated' mode (bug fixes only). A large banner with
+>>>>> deprecation information has been added, which will try to raise
+>>>>> awareness.
+>>>>>
+>>>>
+>>>> As much as I like ceph-volume and the work being done, is it really a
+>>>> good idea to use a minor release to deprecate a tool?
+>>>>
+>>>> Can't we just introduce ceph-volume and deprecate ceph-disk at the
+>>>> release of M? Because when you upgrade to 12.2.2 suddenly existing
+>>>> integrations will have deprecation warnings being thrown at them while they
+>>>> haven't upgraded to a new major version.
+>>>
+>>>
+>>> ceph-volume has been present since the very first release of Luminous,
+>>> the deprecation warning in ceph-disk is the only "new" thing
+>>> introduced for 12.2.2.
+>>
+>>
+>> I think Wido's question still stands: why can't ceph-disk be deprecated
+>> solely in M, and removed by N?
+> 
+> Like I mentioned, I don't think this is set in stone (yet), but it was
+> the idea from the beginning (See Oct 9th thread "killing ceph-disk"),
+> and I don't think it would
+> be terribly bad to keep ceph-disk in Mimic, but fully frozen, with no
+> updates or bug fixes. And full removal in N
+> 
+> The deprecation warnings need to stay for Luminous though.
 
-  "bluefs": {
-         "gift_bytes": 105906176,
-         "reclaim_bytes": 0,
-         "db_total_bytes": 4294959104,
-         "db_used_bytes": 76546048,
-         "wal_total_bytes": 1073737728,
-         "wal_used_bytes": 239075328,
-         "slow_total_bytes": 1179648000,
-         "slow_used_bytes": 63963136,
-         "num_files": 13,
-         "log_bytes": 2539520,
-         "log_compactions": 3,
-         "logged_bytes": 255176704,
-         "files_written_wal": 3,
-         "files_written_sst": 10,
-         "bytes_written_wal": 1932165189,
-         "bytes_written_sst": 340957748
-     },
+I can live with this, granted Luminous still sees bug fixes despite the 
+deprecation warning - but I'm guessing that's what you meant by only 
+fully freezing in Mimic :).
 
+Thanks.
 
-On 11/28/2017 4:17 PM, Sage Weil wrote:
-> Hi Shasha,
->
-> On Tue, 28 Nov 2017, shasha lu wrote:
->> Hi, Mark
->> We test bluestore with 12.2.1.
->> There are two host in our rgw cluster, each host contain 2 osds. The
->> rgw pool size is 2.  Using a 5GB partition for db.wal, a 50GB SSD
->> partition for block.db.
->>
->> # ceph --admin-daemon ceph-osd.1.asok config get rocksdb_db_paths
->> {
->>      "rocksdb_db_paths": "db,51002736640 db.slow,284999998054"
->> }
->>
->> After writing about 400W 4k rgw objects, using ceph-bluestore-tool to
->> export rocksdb file.
->>
->> # ceph-bluestore-tool bluefs-export --path /var/lib/ceph/osd/osd1
->> --out-dir /tmp/osd1
->> # cd /tmp/osd1
->> # ls
->> db  db.slow  db.wal
->> # du -sh *
->> 2.8G    db
->> 809M    db.slow
->> 439M    db.wal
->>
->> block.db partition have 50GB space, but it only contains ~3GB files.
->> Then the metadata rolling over onto the db.slow.
->> It seems that only L0-L2 files located in block.db. (L0 256M; L1 256M;
->> L2 2.5GB), L3 and higher level file located in db.slow.
->>
->> According to ceph docs, the metadata rolling over onto the db.slow
->> only when block.db filled up. But in our env the block.db partition is
->> far from filled up.
->> Did I make any mistakes?  Is there any additional options should be
->> set to rocksdb?
-> You didn't make any mistakes--this should happen automatically.  It looks
-> like rocksdb isn't behaving as advertised.  I've opened
-> http://tracker.ceph.com/issues/22264 to track this.  We need to start by
-> reproducing the situation.
->
-> My guess is that rocksdb is deciding that deciding that all of L3 can't
-> fit on db and so it's putting all of L3 on db.slow?
->
-> sage
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+   -Joao
