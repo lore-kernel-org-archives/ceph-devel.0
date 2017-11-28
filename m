@@ -1,79 +1,146 @@
-From: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: ceph-disk is now deprecated
-Date: Tue, 28 Nov 2017 07:52:17 -0500
-Message-ID: <CAC-Np1ynRyeOChGK2k_oBAx0A7XcAFkMDMrxVHZhN-pjGXfAJw@mail.gmail.com>
-References: <CAC-Np1z7OJNxUeso+FEB8g+7RUABkvKF58_mmXDHt4SeOTHSDw@mail.gmail.com>
- <1821337488.5487.1511856776936@ox.pcextreme.nl>
- <CAC-Np1zfMoqtW2M75ZAys1_NTEkns6MJ6HimuRR3nFhbMVzjPg@mail.gmail.com>
- <1db3fa50-d022-bf37-eb4b-098882ea0984@suse.de>
+From: Sage Weil <sage@newdream.net>
+Subject: Re: Question about ceph paxos implementation
+Date: Tue, 28 Nov 2017 13:06:42 +0000 (UTC)
+Message-ID: <alpine.DEB.2.11.1711281302400.19791@piezo.novalocal>
+References: <C3CABE81-22E1-4B8E-AA5A-22CEBF5D45A9@gmail.com> <alpine.DEB.2.11.1711271426100.28240@piezo.novalocal> <A3CDC94E-4353-45F1-86BF-9F334D499EB6@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <1db3fa50-d022-bf37-eb4b-098882ea0984-l3A5Bk7waGM@public.gmane.org>
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-465327521-1511874405=:19791"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from tragedy.dreamhost.com ([66.33.205.236]:47454 "EHLO
+        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751921AbdK1NGp (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Nov 2017 08:06:45 -0500
+In-Reply-To: <A3CDC94E-4353-45F1-86BF-9F334D499EB6@gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Kang Wang <beijingwangkang@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Tue, Nov 28, 2017 at 7:38 AM, Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org> wrote:
-> On 11/28/2017 11:54 AM, Alfredo Deza wrote:
->>
->> On Tue, Nov 28, 2017 at 3:12 AM, Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org> wrote:
->>>
->>>
->>>> Op 27 november 2017 om 14:36 schreef Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
->>>>
->>>>
->>>> For the upcoming Luminous release (12.2.2), ceph-disk will be
->>>> officially in 'deprecated' mode (bug fixes only). A large banner with
->>>> deprecation information has been added, which will try to raise
->>>> awareness.
->>>>
->>>
->>> As much as I like ceph-volume and the work being done, is it really a
->>> good idea to use a minor release to deprecate a tool?
->>>
->>> Can't we just introduce ceph-volume and deprecate ceph-disk at the
->>> release of M? Because when you upgrade to 12.2.2 suddenly existing
->>> integrations will have deprecation warnings being thrown at them while they
->>> haven't upgraded to a new major version.
->>
->>
->> ceph-volume has been present since the very first release of Luminous,
->> the deprecation warning in ceph-disk is the only "new" thing
->> introduced for 12.2.2.
->
->
-> I think Wido's question still stands: why can't ceph-disk be deprecated
-> solely in M, and removed by N?
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Like I mentioned, I don't think this is set in stone (yet), but it was
-the idea from the beginning (See Oct 9th thread "killing ceph-disk"),
-and I don't think it would
-be terribly bad to keep ceph-disk in Mimic, but fully frozen, with no
-updates or bug fixes. And full removal in N
+--8323329-465327521-1511874405=:19791
+Content-Type: TEXT/PLAIN; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 
-The deprecation warnings need to stay for Luminous though.
+Sorry, I misread the scenario before.  I think what will actually happen 
+is that in step 3, when "2" is recovered, it will be re-proposed, so 
+let's actually call it "2'" (it will have the round 3 pn associated with 
+it).  That means that in step 4, "3" wouldn't be reproposed or 
+committed, because m4 has "2'" with a higher pn... "2'" would be 
+re-proposed.
 
->
-> I get that it probably seems nuts to support ceph-disk and ceph-volume; and
-> by deprecating and removing in (less than) a full release cycle will force
-> people to actually move from one to the other. But we're also doing it when
-> roughly 4 months away from Mimic being frozen.
->
-> This is the sort of last minute overall, core, changes that are not expected
-> from a project that should be as mature as Ceph. This is not some internal
-> feature that users won't notice - we're effectively changing the way users
-> deploy and orchestrate their clusters.
->
->
->   -Joao
+You might rewrite out the scenario with parens for uncommited, and 
+something like (n pn=123) so that the proposal number is indicated.  
+Seeing uncomitted vs committed and the pn will make the sequence more 
+clear!
+
+sage
+
+
+
+On Tue, 28 Nov 2017, Kang Wang wrote:
+
+> You mean value ‘2’ wouldn’t be used at the 3rd step?
+> 
+> 3, Then m2 goes down before send anything to others, then m1, m3 recovered and commit value ‘2’ with the quorum m1, m3, m4
+> m1:   1 2
+> m2:   1 3  down
+> m3:   1 2
+> m4:   1 2
+> m5:   1	
+> 
+> 
+> but as I assume that m2 goes down before it could send  MMonPaxos::OP_BEGIN message to others,
+> so the new leader m1 has no chance to know there exists a newer uncommited value ‘3'
+> 
+> 
+> 
+> Thanks
+> WANG KANG
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> > On 27 Nov 2017, at 10:27 PM, Sage Weil <sage@newdream.net> wrote:
+> > 
+> > On Mon, 27 Nov 2017, Kang Wang wrote:
+> >> hi
+> >> 
+> >> I read the code of ceph paxos recently, and have a question about it, which, in my opinion, may violate the consistency.
+> >> 
+> >> Assume we have five monitor node m1, m2, m3, m4, m5, the prior one has larger rank than the back one. 
+> >> 
+> >> Consider the situation as below:
+> >> 
+> >> 1, m1 as the leader, and all node have the same last_commited at begin, then m1 propose a new value ‘2', which then be accept by m1 and m3:
+> >> m1:   1 2
+> >> m2:   1
+> >> m3:   1 2
+> >> m4:   1
+> >> m5:   1	
+> >> 
+> >> 2, Unfortunatly, both m1 and m3 go down, and m2 become leader without knowledge about the propse, and it propose a new value ‘3' 
+> >> m1:   1 2  down 
+> >> m2:   1 3
+> >> m3:   1 2  down
+> >> m4:   1
+> >> m5:   1	
+> >> 
+> >> 3, Then m2 goes down before send anything to others, then m1, m3 recovered and commit value ‘2’ with the quorum m1, m3, m4
+> >> m1:   1 2
+> >> m2:   1 3  down
+> >> m3:   1 2
+> >> m4:   1 2
+> >> m5:   1	
+> >> 
+> >> 4, Before the commit message sent to others, m1 and m3 go down again. So value ‘3’ only commit on m1. Then m2 become leader once more.
+> >> m1:   1 2  down
+> >> m2:   1 3
+> >> m3:   1 2  down
+> >> m4:   1 2
+> >> m5:   1
+> >> 
+> >> 5, Leader m2 see the uncommited value ‘2’, but discard it by compare uncommitted_pn in function handle_last, so it commit value ‘3’ with the quorum m2, m4, m5
+> >> m1:   1 2  down
+> >> m2:   1 3
+> >> m3:   1 2  down
+> >> m4:   1 3
+> >> m5:   1 3
+> > 
+> > This is what the last->uncommitted_pn value is for.  I believe this 
+> > prevents us from using 2's pn (and uncommitted value) because 3's pn is 
+> > larger.  Can you verify?
+> > 
+> > Thanks!
+> > sage
+> > 
+> > 
+> >> 
+> >> Now we see the value ‘2’ has been commited, but lost soon. Am I right on it?
+> >> 
+> >> 
+> >> Thanks
+> >> WANG KANG
+> >> 
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+--8323329-465327521-1511874405=:19791--
