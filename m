@@ -1,125 +1,61 @@
-From: Alfredo Deza <adeza@redhat.com>
+From: Joao Eduardo Luis <joao-l3A5Bk7waGM@public.gmane.org>
 Subject: Re: ceph-disk is now deprecated
-Date: Tue, 28 Nov 2017 07:37:32 -0500
-Message-ID: <CAC-Np1xqg2-wAguu8AO6LSbj41uOGSBZTgdgL45OAi5M080grw@mail.gmail.com>
+Date: Tue, 28 Nov 2017 12:38:36 +0000
+Message-ID: <1db3fa50-d022-bf37-eb4b-098882ea0984@suse.de>
 References: <CAC-Np1z7OJNxUeso+FEB8g+7RUABkvKF58_mmXDHt4SeOTHSDw@mail.gmail.com>
- <CAA1GxO3OwfhXtMx+82k=NO4BXukEyOE9d+Mz-fD4Sr+2psfy1A@mail.gmail.com>
- <CAC-Np1wp1M=qapRO0sCr1HMLpZ2zgLoh-GVv3p01k2DqjxqaOw@mail.gmail.com> <CAA1GxO0Hprv23L-TOR3eKy9M78y+idU0vBZfAeAPt=6YLa6=Tw@mail.gmail.com>
+ <1821337488.5487.1511856776936@ox.pcextreme.nl>
+ <CAC-Np1zfMoqtW2M75ZAys1_NTEkns6MJ6HimuRR3nFhbMVzjPg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qk0-f181.google.com ([209.85.220.181]:33858 "EHLO
-        mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752631AbdK1Mhd (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Nov 2017 07:37:33 -0500
-Received: by mail-qk0-f181.google.com with SMTP id v137so268248qkb.1
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Nov 2017 04:37:33 -0800 (PST)
-In-Reply-To: <CAA1GxO0Hprv23L-TOR3eKy9M78y+idU0vBZfAeAPt=6YLa6=Tw@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Andreas Calminder <andreas.calminder@klarna.com>
-Cc: "ceph-users@lists.ceph.com" <ceph-users@lists.ceph.com>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAC-Np1zfMoqtW2M75ZAys1_NTEkns6MJ6HimuRR3nFhbMVzjPg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-GB
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Nov 28, 2017 at 7:22 AM, Andreas Calminder
-<andreas.calminder@klarna.com> wrote:
->> For the `simple` sub-command there is no prepare/activate, it is just
->> a way of taking over management of an already deployed OSD. For *new*
->> OSDs, yes, we are implying that we are going only with Logical Volumes
->> for data devices. It is a bit more flexible for Journals, block.db,
->> and block.wal as those
->> can be either logical volumes or GPT partitions (ceph-volume will not
->> create these for you).
->
-> Ok, so if I understand this correctly, for future one-device-per-osd
-> setups I would create a volume group per device before handing it over
-> to ceph-volume, to get the "same" functionality as ceph-disk. I
-> understand the flexibility aspect of this, my setup will have an extra
-> step setting up lvm for my osd devices which is fine.
-
-If you don't require any special configuration for your logical volume
-and don't mind a naive LV handling, then ceph-volume can create
-the logical volume for you from either a partition or a device (for
-data), although it will still require a GPT partition for Journals,
-block.wal, and block.db
-
-For example:
-
-    ceph-volume lvm create --data /path/to/device
-
-Would create a new volume group with the device and then produce a
-single LV from it.
-
-> Apologies if I
-> missed the information, but is it possible to get command output as
-> json, something like "ceph-disk list --format json" since it's quite
-> helpful while setting up stuff through ansible
-
-Yes, this is implemented in both "pretty" and JSON formats:
-http://docs.ceph.com/docs/master/ceph-volume/lvm/list/#ceph-volume-lvm-list
->
-> Thanks,
-> Andreas
->
-> On 28 November 2017 at 12:47, Alfredo Deza <adeza@redhat.com> wrote:
->> On Tue, Nov 28, 2017 at 1:56 AM, Andreas Calminder
->> <andreas.calminder@klarna.com> wrote:
->>> Hello,
->>> Thanks for the heads-up. As someone who's currently maintaining a
->>> Jewel cluster and are in the process of setting up a shiny new
->>> Luminous cluster and writing Ansible roles in the process to make
->>> setup reproducible. I immediately proceeded to look into ceph-volume
->>> and I've some questions/concerns, mainly due to my own setup, which is
->>> one osd per device, simple.
->>>
->>> Running ceph-volume in Luminous 12.2.1 suggests there's only the lvm
->>> subcommand available and the man-page only covers lvm. The online
->>> documentation http://docs.ceph.com/docs/master/ceph-volume/ lists
->>> simple however it's lacking some of the ceph-disk commands, like
->>> 'prepare' which seems crucial in the 'simple' scenario. Does the
->>> ceph-disk deprecation imply that lvm is mandatory for using devices
->>> with ceph or is just the documentation and tool features lagging
->>> behind, I.E the 'simple' parts will be added well in time for Mimic
->>> and during the Luminous lifecycle? Or am I missing something?
+On 11/28/2017 11:54 AM, Alfredo Deza wrote:
+> On Tue, Nov 28, 2017 at 3:12 AM, Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org> wrote:
 >>
->> In your case, all your existing OSDs will be able to be managed by
->> `ceph-volume` once scanned and the information persisted. So anything
->> from Jewel should still work. For 12.2.1 you are right, that command
->> is not yet available, it will be present in 12.2.2
->>
->> For the `simple` sub-command there is no prepare/activate, it is just
->> a way of taking over management of an already deployed OSD. For *new*
->> OSDs, yes, we are implying that we are going only with Logical Volumes
->> for data devices. It is a bit more flexible for Journals, block.db,
->> and block.wal as those
->> can be either logical volumes or GPT partitions (ceph-volume will not
->> create these for you).
->>
+>>> Op 27 november 2017 om 14:36 schreef Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
 >>>
->>> Best regards,
->>> Andreas
 >>>
->>> On 27 November 2017 at 14:36, Alfredo Deza <adeza@redhat.com> wrote:
->>>> For the upcoming Luminous release (12.2.2), ceph-disk will be
->>>> officially in 'deprecated' mode (bug fixes only). A large banner with
->>>> deprecation information has been added, which will try to raise
->>>> awareness.
->>>>
->>>> We are strongly suggesting using ceph-volume for new (and old) OSD
->>>> deployments. The only current exceptions to this are encrypted OSDs
->>>> and FreeBSD systems
->>>>
->>>> Encryption support is planned and will be coming soon to ceph-volume.
->>>>
->>>> A few items to consider:
->>>>
->>>> * ceph-disk is expected to be fully removed by the Mimic release
->>>> * Existing OSDs are supported by ceph-volume. They can be "taken over" [0]
->>>> * ceph-ansible already fully supports ceph-volume and will soon default to it
->>>> * ceph-deploy support is planned and should be fully implemented soon
->>>>
->>>>
->>>> [0] http://docs.ceph.com/docs/master/ceph-volume/simple/
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> For the upcoming Luminous release (12.2.2), ceph-disk will be
+>>> officially in 'deprecated' mode (bug fixes only). A large banner with
+>>> deprecation information has been added, which will try to raise
+>>> awareness.
+>>>
+>>
+>> As much as I like ceph-volume and the work being done, is it really a good idea to use a minor release to deprecate a tool?
+>>
+>> Can't we just introduce ceph-volume and deprecate ceph-disk at the release of M? Because when you upgrade to 12.2.2 suddenly existing integrations will have deprecation warnings being thrown at them while they haven't upgraded to a new major version.
+> 
+> ceph-volume has been present since the very first release of Luminous,
+> the deprecation warning in ceph-disk is the only "new" thing
+> introduced for 12.2.2.
+
+I think Wido's question still stands: why can't ceph-disk be deprecated 
+solely in M, and removed by N?
+
+I get that it probably seems nuts to support ceph-disk and ceph-volume; 
+and by deprecating and removing in (less than) a full release cycle will 
+force people to actually move from one to the other. But we're also 
+doing it when roughly 4 months away from Mimic being frozen.
+
+This is the sort of last minute overall, core, changes that are not 
+expected from a project that should be as mature as Ceph. This is not 
+some internal feature that users won't notice - we're effectively 
+changing the way users deploy and orchestrate their clusters.
+
+
+   -Joao
