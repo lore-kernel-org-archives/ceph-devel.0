@@ -1,98 +1,187 @@
-From: Alfredo Deza <adeza@redhat.com>
+From: Maged Mokhtar <mmokhtar-6jkX1og9WkpAfugRpC6u6w@public.gmane.org>
 Subject: Re: ceph-disk is now deprecated
-Date: Tue, 28 Nov 2017 07:00:38 -0500
-Message-ID: <CAC-Np1wF8Xu=Npy5j_mCL0fDwF9QnRSuwczGq=PFBK=zsxr41w@mail.gmail.com>
+Date: Tue, 28 Nov 2017 14:20:33 +0200
+Message-ID: <58d2cc9068a226ef269faac3597a19d3@petasan.org>
 References: <CAC-Np1z7OJNxUeso+FEB8g+7RUABkvKF58_mmXDHt4SeOTHSDw@mail.gmail.com>
- <f6e851fd-b4d8-8f79-c017-267dc0e30199@suse.cz> <20171128082401.wumj4qo5pi4hawtg@nora.maurer-it.com>
- <CALWuvY9mX0Pdr4aMwPi=Dqw0qng959Z5bg5hs5dOxTfSZ+QH4Q@mail.gmail.com>
+ <1821337488.5487.1511856776936@ox.pcextreme.nl>
+ <CAC-Np1zfMoqtW2M75ZAys1_NTEkns6MJ6HimuRR3nFhbMVzjPg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-qt0-f179.google.com ([209.85.216.179]:40493 "EHLO
-        mail-qt0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754454AbdK1MAj (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Nov 2017 07:00:39 -0500
-Received: by mail-qt0-f179.google.com with SMTP id u42so112321qte.7
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Nov 2017 04:00:39 -0800 (PST)
-In-Reply-To: <CALWuvY9mX0Pdr4aMwPi=Dqw0qng959Z5bg5hs5dOxTfSZ+QH4Q@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: nokia ceph <nokiacephusers@gmail.com>
-Cc: Nathan Cutler <ncutler@suse.cz>, ceph-devel <ceph-devel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============6173976105064339000=="
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAC-Np1zfMoqtW2M75ZAys1_NTEkns6MJ6HimuRR3nFhbMVzjPg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, Nov 28, 2017 at 3:42 AM, nokia ceph <nokiacephusers@gmail.com> wrote:
-> Hello,
->
-> Can you share repo url (https://shaman.ceph.com/repos/ceph/) to download
-> these rpms to test this behavior.Currenly I'm testing with 12.2.1 version.
+--===============6173976105064339000==
+Content-Type: multipart/alternative;
+ boundary="=_33aa7341a4a5b2bc03c97e26fcb77bed"
 
-You might want to take a look at: https://shaman.ceph.com/repos/ceph/luminous/
+--=_33aa7341a4a5b2bc03c97e26fcb77bed
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
 
-And see what SHA1 (or latest build) you want to try.
+I tend to agree with Wido. May of us still reply on ceph-disk and hope
+to see it live a little longer. 
 
->
->  Also please let us know when can we expect the official 12.2.2 release ?
->
-> While is more recommended for bluestore , lvm or simple ? in terms of
-> performance / stability ?
+Maged 
 
-The `simple` command would just be for taking over existing OSDs, in
-however manner you've deployed them (even if the OSDs were created
-manually)
+On 2017-11-28 13:54, Alfredo Deza wrote:
 
-For bluestore (the default objectstore in 12.2.2) it will be
-`ceph-volume lvm` what you want.
+> On Tue, Nov 28, 2017 at 3:12 AM, Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org> wrote: 
+> Op 27 november 2017 om 14:36 schreef Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
+> 
+> For the upcoming Luminous release (12.2.2), ceph-disk will be
+> officially in 'deprecated' mode (bug fixes only). A large banner with
+> deprecation information has been added, which will try to raise
+> awareness.
+> 
+> As much as I like ceph-volume and the work being done, is it really a good idea to use a minor release to deprecate a tool?
+> 
+> Can't we just introduce ceph-volume and deprecate ceph-disk at the release of M? Because when you upgrade to 12.2.2 suddenly existing integrations will have deprecation warnings being thrown at them while they haven't upgraded to a new major version.
 
->
-> As per
-> http://docs.ceph.com/docs/master/ceph-volume/simple/#ceph-volume-simple I
-> beleive for existing OSD's created with ceph-disk to convert to simple, I
-> need to trigger below procedure.
->
-> http://docs.ceph.com/docs/master/ceph-volume/simple/activate/#ceph-volume-simple-activate
->
-> So by making this, do we need to disable system-ceph\x2ddisk.slice service ?
+ceph-volume has been present since the very first release of Luminous,
+the deprecation warning in ceph-disk is the only "new" thing
+introduced for 12.2.2.
 
-ceph-volume will disable all ceph-disk systemd units for you, so that
-UDEV triggers will no longer be a problem.
+> As ceph-deploy doesn't support ceph-disk either I don't think it's a good idea to deprecate it right now.
 
->
-> Thanks
->
->
->
-> On Tue, Nov 28, 2017 at 1:54 PM, Fabian Grünbichler
-> <f.gruenbichler@proxmox.com> wrote:
->>
->> On Mon, Nov 27, 2017 at 09:07:02PM +0100, Nathan Cutler wrote:
->> > > A few items to consider:
->> > >
->> > > * ceph-disk is expected to be fully removed by the Mimic release
->> >
->> > It's pretty standard in the software world to deprecate in one release
->> > and
->> > remove in the next. Maybe I'm blind, but I didn't see anything in the
->> > announcement explaining why deprecation *and* removal in a single
->> > release
->> > cycle is warranted in this case?
->>
->> Especially since ceph-volume has been undergoing lots of changes in the
->> recent weeks and months, so I highly doubt it has seen enough testing to
->> support such an abrupt change[1].
->>
->> Maybe removing the deprecation warning for now, highlighting ceph-volume
->> in the release notes for 12.2.2 and then re-adding the deprecation
->> warning later on in the Luminous cycle (or even just the Mimic RCs) is
->> more advisable?
->>
->> 1: 90 commits touching src/ceph-volume since v12.2.1, not counting those
->> having "test" in the commit subject - that's about 12% of all non-"test"
->> commits currently slated for v12.2.2!
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+ceph-deploy work is being done to support ceph-volume exclusively
+(ceph-disk support is dropped fully), which will mean a change in its
+API in a non-backwards compatible
+way. A major version change in ceph-deploy, documentation, and a bunch
+of documentation is being worked on to allow users to transition to
+it.
+
+> How do others feel about this?
+> 
+> Wido
+> 
+>> We are strongly suggesting using ceph-volume for new (and old) OSD
+>> deployments. The only current exceptions to this are encrypted OSDs
+>> and FreeBSD systems
+>> 
+>> Encryption support is planned and will be coming soon to ceph-volume.
+>> 
+>> A few items to consider:
+>> 
+>> * ceph-disk is expected to be fully removed by the Mimic release
+>> * Existing OSDs are supported by ceph-volume. They can be "taken over" [0 [1]]
+>> * ceph-ansible already fully supports ceph-volume and will soon default to it
+>> * ceph-deploy support is planned and should be fully implemented soon
+>> 
+>> [0] http://docs.ceph.com/docs/master/ceph-volume/simple/
+>> _______________________________________________
+>> ceph-users mailing list
+>> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+>> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+ _______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com 
+
+ 
+
+Links:
+------
+[1] http://docs.ceph.com/docs/master/ceph-volume/simple/
+--=_33aa7341a4a5b2bc03c97e26fcb77bed
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset=UTF-8
+
+<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html; charset=
+=3DUTF-8" /></head><body style=3D'font-size: 10pt; font-family: Verdana,Gen=
+eva,sans-serif'>
+<p>I tend to agree with Wido. May of us still reply on ceph-disk and hope t=
+o see it live a little longer.</p>
+<p>Maged</p>
+<p><br /></p>
+<p>On 2017-11-28 13:54, Alfredo Deza wrote:</p>
+<blockquote type=3D"cite" style=3D"padding: 0 0.4em; border-left: #1010ff 2=
+px solid; margin: 0"><!-- html ignored --><!-- head ignored --><!-- meta ig=
+nored -->
+<div class=3D"pre" style=3D"margin: 0; padding: 0; font-family: monospace">=
+On Tue, Nov 28, 2017 at 3:12 AM, Wido den Hollander &lt;<a href=3D"mailto:w=
+ido-fspyXLx8qC4@public.gmane.org" rel=3D"noreferrer">wido-fspyXLx8qC4@public.gmane.org</a>&gt; wrote:
+<blockquote type=3D"cite" style=3D"padding: 0 0.4em; border-left: #1010ff 2=
+px solid; margin: 0"><br />
+<blockquote type=3D"cite" style=3D"padding: 0 0.4em; border-left: #1010ff 2=
+px solid; margin: 0">Op 27 november 2017 om 14:36 schreef Alfredo Deza &lt;=
+<a href=3D"mailto:adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" rel=3D"noreferrer">adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org</a>=
+&gt;:<br /><br /><br /> For the upcoming Luminous release (12.2.2), ceph-di=
+sk will be<br /> officially in 'deprecated' mode (bug fixes only). A large =
+banner with<br /> deprecation information has been added, which will try to=
+ raise<br /> awareness.<br /><br /></blockquote>
+<br /> As much as I like ceph-volume and the work being done, is it really =
+a good idea to use a minor release to deprecate a tool?<br /><br /> Can't w=
+e just introduce ceph-volume and deprecate ceph-disk at the release of M? B=
+ecause when you upgrade to 12.2.2 suddenly existing integrations will have =
+deprecation warnings being thrown at them while they haven't upgraded to a =
+new major version.</blockquote>
+<br /> ceph-volume has been present since the very first release of Luminou=
+s,<br /> the deprecation warning in ceph-disk is the only "new" thing<br />=
+ introduced for 12.2.2.<br /><br />
+<blockquote type=3D"cite" style=3D"padding: 0 0.4em; border-left: #1010ff 2=
+px solid; margin: 0"><br /> As ceph-deploy doesn't support ceph-disk either=
+ I don't think it's a good idea to deprecate it right now.</blockquote>
+<br /> ceph-deploy work is being done to support ceph-volume exclusively<br=
+ /> (ceph-disk support is dropped fully), which will mean a change in its<b=
+r /> API in a non-backwards compatible<br /> way. A major version change in=
+ ceph-deploy, documentation, and a bunch<br /> of documentation is being wo=
+rked on to allow users to transition to<br /> it.<br /><br />
+<blockquote type=3D"cite" style=3D"padding: 0 0.4em; border-left: #1010ff 2=
+px solid; margin: 0"><br /> How do others feel about this?<br /><br /> Wido=
+<br /><br />
+<blockquote type=3D"cite" style=3D"padding: 0 0.4em; border-left: #1010ff 2=
+px solid; margin: 0">We are strongly suggesting using ceph-volume for new (=
+and old) OSD<br /> deployments. The only current exceptions to this are enc=
+rypted OSDs<br /> and FreeBSD systems<br /><br /> Encryption support is pla=
+nned and will be coming soon to ceph-volume.<br /><br /> A few items to con=
+sider:<br /><br /> * ceph-disk is expected to be fully removed by the Mimic=
+ release<br /> * Existing OSDs are supported by ceph-volume. They can be "t=
+aken over" [<a href=3D"http://docs.ceph.com/docs/master/ceph-volume/simple/=
+" target=3D"_blank" rel=3D"noreferrer">0</a>]<br /> * ceph-ansible already =
+fully supports ceph-volume and will soon default to it<br /> * ceph-deploy =
+support is planned and should be fully implemented soon<br /><br /><br /> [=
+0] <a href=3D"http://docs.ceph.com/docs/master/ceph-volume/simple/" target=
+=3D"_blank" rel=3D"noreferrer">http://docs.ceph.com/docs/master/ceph-volume=
+/simple/</a><br /> _______________________________________________<br /> ce=
+ph-users mailing list<br /><a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" rel=
+=3D"noreferrer">ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br /><a href=3D"http://lists=
+=2Eceph.com/listinfo.cgi/ceph-users-ceph.com" target=3D"_blank" rel=3D"nore=
+ferrer">http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com</a></blockqu=
+ote>
+</blockquote>
+_______________________________________________<br /> ceph-users mailing li=
+st<br /><a href=3D"mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" rel=3D"noreferrer">cep=
+h-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org</a><br /><a href=3D"http://lists.ceph.com/listinfo=
+=2Ecgi/ceph-users-ceph.com" target=3D"_blank" rel=3D"noreferrer">http://lis=
+ts.ceph.com/listinfo.cgi/ceph-users-ceph.com</a></div>
+</blockquote>
+<p><br /></p>
+
+</body></html>
+
+--=_33aa7341a4a5b2bc03c97e26fcb77bed--
+
+--===============6173976105064339000==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+ceph-users mailing list
+ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+
+--===============6173976105064339000==--
