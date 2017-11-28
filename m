@@ -1,15 +1,15 @@
-From: Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org>
+From: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: ceph-disk is now deprecated
-Date: Tue, 28 Nov 2017 13:27:13 +0100 (CET)
-Message-ID: <64217292.5518.1511872034180@ox.pcextreme.nl>
+Date: Tue, 28 Nov 2017 07:32:11 -0500
+Message-ID: <CAC-Np1zsf+uqFi+ZdR7K3=re5ODpJvWFrTX-JU_8DkkyVGOz7A@mail.gmail.com>
 References: <CAC-Np1z7OJNxUeso+FEB8g+7RUABkvKF58_mmXDHt4SeOTHSDw@mail.gmail.com>
  <1821337488.5487.1511856776936@ox.pcextreme.nl>
- <CAC-Np1zfMoqtW2M75ZAys1_NTEkns6MJ6HimuRR3nFhbMVzjPg@mail.gmail.com>
+ <4c4b5589-b1ae-3f8b-e900-af0f2895fbc9@corp.ovh.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAC-Np1zfMoqtW2M75ZAys1_NTEkns6MJ6HimuRR3nFhbMVzjPg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <4c4b5589-b1ae-3f8b-e900-af0f2895fbc9-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
 List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
@@ -19,73 +19,49 @@ List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
  <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
 Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
 Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: =?UTF-8?B?UGlvdHIgRGHFgmVr?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: ceph-devel.vger.kernel.org
 
-
-> Op 28 november 2017 om 12:54 schreef Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
-> 
-> 
-> On Tue, Nov 28, 2017 at 3:12 AM, Wido den Hollander <wido-fspyXLx8qC4@public.gmane.org> wrote:
-> >
-> >> Op 27 november 2017 om 14:36 schreef Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>:
-> >>
-> >>
-> >> For the upcoming Luminous release (12.2.2), ceph-disk will be
-> >> officially in 'deprecated' mode (bug fixes only). A large banner with
-> >> deprecation information has been added, which will try to raise
-> >> awareness.
-> >>
-> >
-> > As much as I like ceph-volume and the work being done, is it really a good idea to use a minor release to deprecate a tool?
-> >
-> > Can't we just introduce ceph-volume and deprecate ceph-disk at the release of M? Because when you upgrade to 12.2.2 suddenly existing integrations will have deprecation warnings being thrown at them while they haven't upgraded to a new major version.
-> 
-> ceph-volume has been present since the very first release of Luminous,
-> the deprecation warning in ceph-disk is the only "new" thing
-> introduced for 12.2.2.
-> 
-
-Yes, but deprecating a functional tool in a minor release? Yes, I am aware that ceph-volume works, but suddenly during a release saying it's now deprecated?
-
-Why can't that be moved to the M release? Leave ceph-disk as-is and deprecate it in master.
-
-Again, I really do like ceph-volume! Great work!
-
-Wido
-
-> >
-> > As ceph-deploy doesn't support ceph-disk either I don't think it's a good idea to deprecate it right now.
-> 
-> ceph-deploy work is being done to support ceph-volume exclusively
-> (ceph-disk support is dropped fully), which will mean a change in its
-> API in a non-backwards compatible
-> way. A major version change in ceph-deploy, documentation, and a bunch
-> of documentation is being worked on to allow users to transition to
-> it.
-> 
-> >
-> > How do others feel about this?
-> >
-> > Wido
-> >
-> >> We are strongly suggesting using ceph-volume for new (and old) OSD
-> >> deployments. The only current exceptions to this are encrypted OSDs
-> >> and FreeBSD systems
-> >>
-> >> Encryption support is planned and will be coming soon to ceph-volume.
-> >>
-> >> A few items to consider:
-> >>
-> >> * ceph-disk is expected to be fully removed by the Mimic release
-> >> * Existing OSDs are supported by ceph-volume. They can be "taken over" [0]
-> >> * ceph-ansible already fully supports ceph-volume and will soon default to it
-> >> * ceph-deploy support is planned and should be fully implemented soon
-> >>
-> >>
-> >> [0] http://docs.ceph.com/docs/master/ceph-volume/simple/
-> >> _______________________________________________
-> >> ceph-users mailing list
-> >> ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-> >> http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com
+T24gVHVlLCBOb3YgMjgsIDIwMTcgYXQgMzozOSBBTSwgUGlvdHIgRGHFgmVrIDxwaW90ci5kYWxl
+a0Bjb3JwLm92aC5jb20+IHdyb3RlOgo+IE9uIDE3LTExLTI4IDA5OjEyIEFNLCBXaWRvIGRlbiBI
+b2xsYW5kZXIgd3JvdGU6Cj4+Cj4+Cj4+PiBPcCAyNyBub3ZlbWJlciAyMDE3IG9tIDE0OjM2IHNj
+aHJlZWYgQWxmcmVkbyBEZXphIDxhZGV6YUByZWRoYXQuY29tPjoKPj4+Cj4+Pgo+Pj4gRm9yIHRo
+ZSB1cGNvbWluZyBMdW1pbm91cyByZWxlYXNlICgxMi4yLjIpLCBjZXBoLWRpc2sgd2lsbCBiZQo+
+Pj4gb2ZmaWNpYWxseSBpbiAnZGVwcmVjYXRlZCcgbW9kZSAoYnVnIGZpeGVzIG9ubHkpLiBBIGxh
+cmdlIGJhbm5lciB3aXRoCj4+PiBkZXByZWNhdGlvbiBpbmZvcm1hdGlvbiBoYXMgYmVlbiBhZGRl
+ZCwgd2hpY2ggd2lsbCB0cnkgdG8gcmFpc2UKPj4+IGF3YXJlbmVzcy4KPj4+Cj4+Cj4+IEFzIG11
+Y2ggYXMgSSBsaWtlIGNlcGgtdm9sdW1lIGFuZCB0aGUgd29yayBiZWluZyBkb25lLCBpcyBpdCBy
+ZWFsbHkgYSBnb29kCj4+IGlkZWEgdG8gdXNlIGEgbWlub3IgcmVsZWFzZSB0byBkZXByZWNhdGUg
+YSB0b29sPwo+Pgo+PiBDYW4ndCB3ZSBqdXN0IGludHJvZHVjZSBjZXBoLXZvbHVtZSBhbmQgZGVw
+cmVjYXRlIGNlcGgtZGlzayBhdCB0aGUgcmVsZWFzZQo+PiBvZiBNPyBCZWNhdXNlIHdoZW4geW91
+IHVwZ3JhZGUgdG8gMTIuMi4yIHN1ZGRlbmx5IGV4aXN0aW5nIGludGVncmF0aW9ucyB3aWxsCj4+
+IGhhdmUgZGVwcmVjYXRpb24gd2FybmluZ3MgYmVpbmcgdGhyb3duIGF0IHRoZW0gd2hpbGUgdGhl
+eSBoYXZlbid0IHVwZ3JhZGVkCj4+IHRvIGEgbmV3IG1ham9yIHZlcnNpb24uCj4+Cj4+IEFzIGNl
+cGgtZGVwbG95IGRvZXNuJ3Qgc3VwcG9ydCBjZXBoLWRpc2sgZWl0aGVyIEkgZG9uJ3QgdGhpbmsg
+aXQncyBhIGdvb2QKPj4gaWRlYSB0byBkZXByZWNhdGUgaXQgcmlnaHQgbm93Lgo+Pgo+PiBIb3cg
+ZG8gb3RoZXJzIGZlZWwgYWJvdXQgdGhpcz8KPgo+Cj4gU2FtZSwgYWx0aG91Z2ggd2UgZG9uJ3Qg
+aGF2ZSBhICpiaWcqIHByb2JsZW0gd2l0aCB0aGlzICh3ZSBoYXZlbid0IHVwZ3JhZGVkCj4gdG8g
+THVtaW5vdXMgeWV0LCBzbyB3ZSBjYW4gc2tpcCB0byBuZXh0IHBvaW50IHJlbGVhc2UgYW5kIG1v
+dmUgdG8KPiBjZXBoLXZvbHVtZSB0b2dldGhlciB3aXRoIEx1bWlub3VzKS4gSXQncyBzdGlsbCBh
+IHByb2JsZW0sIHRob3VnaCAtIG5vdyB3ZQo+IGhhdmUgbW9yZSBvZiBvdXIgaW5mcmFzdHJ1Y3R1
+cmUgdG8gbWlncmF0ZSBhbmQgdGVzdCwgbWVhbmluZyBldmVuIG1vcmUKPiBkZWxheXMgaW4gcHJv
+ZHVjdGlvbiB1cGdyYWRlcy4KCkkgdW5kZXJzdGFuZCB0aGF0IHRoaXMgd291bGQgaW52b2x2ZSBh
+IHNpZ25pZmljYW50IGVmZm9ydCB0byBmdWxseQpwb3J0IG92ZXIgYW5kIGRyb3AgY2VwaC1kaXNr
+IGVudGlyZWx5LCBhbmQgSSBkb24ndCB0aGluayB0aGF0IGRyb3BwaW5nCmNlcGgtZGlzayBpbiBN
+aW1pYyBpcyBzZXQgaW4gc3RvbmUgKHlldCkuCgpXZSBjb3VsZCB0cmVhdCBMdW1pbm91cyBhcyBh
+ICJzb2Z0IiBkZXByZWNhdGlvbiB3aGVyZSBjZXBoLWRpc2sgd2lsbApzdGlsbCByZWNlaXZlIGJ1
+Zy1maXhlcywgYW5kIHRoZW4gaW4gTWltaWMsIGl0IHdvdWxkIGJlIGZyb3plbiAtIHdpdGgKbm8g
+dXBkYXRlcyB3aGF0c29ldmVyLgoKQXQgc29tZSBwb2ludCBhIG1pZ3JhdGlvbiB3aWxsIGhhdmUg
+dG8gaGFwcGVuIGZvciBvbGRlciBjbHVzdGVycywKd2hpY2ggaXMgd2h5IHdlJ3ZlIGFkZGVkIHN1
+cHBvcnQgaW4gY2VwaC12b2x1bWUgZm9yIGV4aXN0aW5nIE9TRHMuIEFuCnVwZ3JhZGUgdG8gTHVt
+aW5vdXMgZG9lc24ndCBtZWFuIGNlcGgtZGlzawp3aWxsIG5vdCB3b3JrLCB0aGUgb25seSB0aGlu
+ZyB0aGF0IGhhcyBiZWVuIGFkZGVkIHRvIGNlcGgtZGlzayBpcyBhCmRlcHJlY2F0aW9uIHdhcm5p
+bmcuCgoKPgo+IC0tCj4gUGlvdHIgRGHFgmVrCj4gcGlvdHIuZGFsZWtAY29ycC5vdmguY29tCj4g
+aHR0cHM6Ly93d3cub3ZoLmNvbS91cy8KPgo+IC0tCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlz
+IGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGNlcGgtZGV2ZWwiIGluCj4gdGhlIGJv
+ZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPiBNb3JlIG1ham9y
+ZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwK
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KY2VwaC11c2Vy
+cyBtYWlsaW5nIGxpc3QKY2VwaC11c2Vyc0BsaXN0cy5jZXBoLmNvbQpodHRwOi8vbGlzdHMuY2Vw
+aC5jb20vbGlzdGluZm8uY2dpL2NlcGgtdXNlcnMtY2VwaC5jb20K
