@@ -1,44 +1,53 @@
-From: Willem Jan Withagen <wjw-dOtk1Lsa4IaEVqv0pETR8A@public.gmane.org>
-Subject: Re: ceph-disk is now deprecated
-Date: Tue, 28 Nov 2017 15:26:14 +0100
-Message-ID: <d548c5a8-c0dc-0737-66f4-e3fc04f900d7@digiware.nl>
-References: <CAC-Np1z7OJNxUeso+FEB8g+7RUABkvKF58_mmXDHt4SeOTHSDw@mail.gmail.com>
- <1821337488.5487.1511856776936@ox.pcextreme.nl>
- <4c4b5589-b1ae-3f8b-e900-af0f2895fbc9@corp.ovh.com>
- <CAC-Np1zsf+uqFi+ZdR7K3=re5ODpJvWFrTX-JU_8DkkyVGOz7A@mail.gmail.com>
+From: yuxiang fang <abcdeffyx@gmail.com>
+Subject: Re: DBObjectMap::header_lock forcing filestore threads to be sequentail
+Date: Tue, 28 Nov 2017 23:29:11 +0800
+Message-ID: <CAOi4hNe=A8NisEWRSYAJ_U61yoaKEoO3Bsdu8yWYx53BhYewMg@mail.gmail.com>
+References: <CAJACTueeM+yPph=1sA9YDEa_FB+7w7XObd8ZrzdU-qzvfiCPYA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-In-Reply-To: <CAC-Np1zsf+uqFi+ZdR7K3=re5ODpJvWFrTX-JU_8DkkyVGOz7A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
-List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
- <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
-Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
-Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
-To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, =?UTF-8?Q?Piotr_Da=c5=82ek?= <piotr.dalek-Rm6v+N6rxxBWk0Htik3J/w@public.gmane.org>
-Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-List-Id: ceph-devel.vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <ceph-devel-owner@vger.kernel.org>
+Received: from mail-pf0-f177.google.com ([209.85.192.177]:38738 "EHLO
+        mail-pf0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753195AbdK1P3m (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Nov 2017 10:29:42 -0500
+Received: by mail-pf0-f177.google.com with SMTP id u25so70533pfg.5
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Nov 2017 07:29:42 -0800 (PST)
+In-Reply-To: <CAJACTueeM+yPph=1sA9YDEa_FB+7w7XObd8ZrzdU-qzvfiCPYA@mail.gmail.com>
+Sender: ceph-devel-owner@vger.kernel.org
+List-ID: <ceph-devel.vger.kernel.org>
+To: Xuehan Xu <xxhdx1985126@gmail.com>
+Cc: ceph-devel <ceph-devel@vger.kernel.org>
 
-On 28-11-2017 13:32, Alfredo Deza wrote:
-> 
-> I understand that this would involve a significant effort to fully
-> port over and drop ceph-disk entirely, and I don't think that dropping
-> ceph-disk in Mimic is set in stone (yet).
+Hi Xuehan
 
-Alfredo,
+Perhaps granularity of DBObjectMap::header_lock is a bit coarse, but
+it doesn't matter.
+Threads will be waiting on cache_lock if DBObjectMap::header_lock is
+removed roughly.
+So overhead is brought by lookup and adding header to DBObjectMap::caches.
 
-When I expressed my concers about deprecating ceph-disk, I was led to 
-beleive that I had atleast two release cycles to come up with something 
-of a 'ceph-volume zfs ....'
+thanks
+ivan from eisoo
 
-Reading this, there is a possibility that it will get dropped IN mimic?
-Which means that there is less than 1 release cycle to get it working?
-
-Thanx,
---WjW
+On Tue, Nov 28, 2017 at 5:51 PM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
+>
+> Hi, everone.
+>
+> Recently, we did some stress tests on mds. We found that, when doing
+> file creation test, the mdlog trim operations are very slow. After
+> doing some debugging, we found that this could be due to execution of
+> the OSD's filestore theads being forced to be nearly sequential. This
+> can be found out in our result of gdbprof probing, which is attached
+> with this email. In the gdbprof result, we can see that the most time
+> consuming work of the filestore threads is the sizing of
+> DBObjectMap::caches, and the reason of sequential execution of
+> filestore threads is the locking of DBObjectMap::header_lock.
+>
+> After reading the corresponding source code, we found that
+> MapHeaderLock is already doing the mutual exclusion of access of the
+> omap object header. It seems that the locking of
+> DBObjectMap::header_lock is not very necessary, or at least, it's not
+> needed when adding the header to DBObjectMap::caches, which would lead
+> to the sizing of the cache.
+>
+> Is this right?
