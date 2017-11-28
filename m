@@ -1,267 +1,134 @@
-From: Sage Weil <sage@newdream.net>
-Subject: Re: Upgrade from Jewel to Luminous. REQUIRE_JEWEL OSDMap
-Date: Tue, 28 Nov 2017 13:09:23 +0000 (UTC)
-Message-ID: <alpine.DEB.2.11.1711281308100.19791@piezo.novalocal>
-References: <CADfZm8c9GKuedHA5x0n+2euhXbSqsFYxroimm-aw3Cc5Z00iXQ@mail.gmail.com> <alpine.DEB.2.11.1711280308100.19791@piezo.novalocal> <CADfZm8c1+OhDO36BjYSqLCe-US0Nmvhw87kyUWduc_5X3hL7Pg@mail.gmail.com>
+From: Andreas Calminder <andreas.calminder-HQhCbu9nrx3QT0dZR+AlfA@public.gmane.org>
+Subject: Re: ceph-disk is now deprecated
+Date: Tue, 28 Nov 2017 14:14:36 +0100
+Message-ID: <CAA1GxO2eL9T8WyBQxLKaZs82K+=DitwPpJnvSC5aBCgLKA8mMw@mail.gmail.com>
+References: <CAC-Np1z7OJNxUeso+FEB8g+7RUABkvKF58_mmXDHt4SeOTHSDw@mail.gmail.com>
+ <CAA1GxO3OwfhXtMx+82k=NO4BXukEyOE9d+Mz-fD4Sr+2psfy1A@mail.gmail.com>
+ <CAC-Np1wp1M=qapRO0sCr1HMLpZ2zgLoh-GVv3p01k2DqjxqaOw@mail.gmail.com>
+ <CAA1GxO0Hprv23L-TOR3eKy9M78y+idU0vBZfAeAPt=6YLa6=Tw@mail.gmail.com>
+ <CAC-Np1xqg2-wAguu8AO6LSbj41uOGSBZTgdgL45OAi5M080grw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from tragedy.dreamhost.com ([66.33.205.236]:48416 "EHLO
-        tragedy.dreamhost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751443AbdK1NJ0 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Nov 2017 08:09:26 -0500
-In-Reply-To: <CADfZm8c1+OhDO36BjYSqLCe-US0Nmvhw87kyUWduc_5X3hL7Pg@mail.gmail.com>
-Sender: ceph-devel-owner@vger.kernel.org
-List-ID: <ceph-devel.vger.kernel.org>
-To: Cary <dynamic.cary@gmail.com>
-Cc: ceph-devel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+In-Reply-To: <CAC-Np1xqg2-wAguu8AO6LSbj41uOGSBZTgdgL45OAi5M080grw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.ceph.com/options.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ceph.com/pipermail/ceph-users-ceph.com/>
+List-Post: <mailto:ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+List-Help: <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.ceph.com/listinfo.cgi/ceph-users-ceph.com>,
+ <mailto:ceph-users-request-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org?subject=subscribe>
+Errors-To: ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org
+Sender: "ceph-users" <ceph-users-bounces-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>
+To: Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org" <ceph-users-idqoXFIVOFJgJs9I8MT0rw@public.gmane.org>, ceph-devel <ceph-devel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+List-Id: ceph-devel.vger.kernel.org
 
-On Tue, 28 Nov 2017, Cary wrote:
-> I get this error when I try to start the OSD that has been downgraded
-> to 10.2.3-r2.
-> 
-> 2017-11-28 03:42:35.989754 7fa5e6429940  1
-> filestore(/var/lib/ceph/osd/ceph-3) upgrade
-> 2017-11-28 03:42:35.989788 7fa5e6429940  2 osd.3 0 boot
-> 2017-11-28 03:42:35.990132 7fa5e6429940 -1 osd.3 0 The disk uses
-> features unsupported by the executable.
-> 2017-11-28 03:42:35.990142 7fa5e6429940 -1 osd.3 0  ondisk features
-> compat={},rocompat={},incompat={1=initial feature set(~v.18),2=pginfo
-> object,3=object
-> locator,4=last_epoch_clean,5=categories,6=hobjectpool,7=biginfo,8=leveldbinfo,9=leveldblog,10=snapmapper,12=transaction
-> hints,13=pg meta object,14=explicit missing set,15=fastinfo pg
-> attr,16=deletes in missing set}
-> 2017-11-28 03:42:35.990150 7fa5e6429940 -1 osd.3 0  daemon features
-> compat={},rocompat={},incompat={1=initial feature set(~v.18),2=pginfo
-> object,3=object
-> locator,4=last_epoch_clean,5=categories,6=hobjectpool,7=biginfo,8=leveldbinfo,9=leveldblog,10=snapmapper,11=sharded
-> objects,12=transaction hints,13=pg meta object}
-> 2017-11-28 03:42:35.990160 7fa5e6429940 -1 osd.3 0 Cannot write to
-> disk! Missing features: compat={},rocompat={},incompat={14=explicit
-> missing set,15=fastinfo pg attr,16=deletes in missing set}
-> 2017-11-28 03:42:35.990775 7fa5e6429940  1 journal close
-> /dev/disk/by-partlabel/ceph-3
-> 2017-11-28 03:42:35.992960 7fa5e6429940 -1  ** ERROR: osd init failed:
-> (95) Operation not supported
+Thanks!
+I'll start looking into rebuilding my roles once 12.2.2 is out then.
 
-Oh, right.  In that case, install the 'luminous' branch[1] on the monitors 
-(or just the primary monitor if you're being conservative), restrart it, 
-and you'll be able to do
-
- ceph osd set require_jewel_osds --yes-i-really-mean-it
-
-sage
-
-
-[1] ceph-deploy install --dev luminous HOST
-
-
-
-
-> Cary
-> 
-> On Tue, Nov 28, 2017 at 3:09 AM, Sage Weil <sage@newdream.net> wrote:
-> > On Tue, 28 Nov 2017, Cary wrote:
-> >> Hello,
-> >>
-> >>  Could someone please help me complete my botched upgrade from Jewel
-> >> 10.2.3-r1 to Luminous 12.2.1. I have 9 Gentoo servers, 4 of which have
-> >> 2 OSDs each.
-> >>
-> >>  My OSD servers were accidentally rebooted before the monitor servers
-> >> causing them to be running Luminous before the monitors. All services
-> >> have been restarted and running ceph versions gives the following:
-> >>
-> >> # ceph versions
-> >> 2017-11-27 21:27:24.356940 7fed67efe700 -1 WARNING: the following
-> >> dangerous and experimental features are enabled: btrfs
-> >> 2017-11-27 21:27:24.368469 7fed67efe700 -1 WARNING: the following
-> >> dangerous and experimental features are enabled: btrfs
-> >>
-> >>     "mon": {
-> >>         "ceph version 12.2.1
-> >> (3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e) luminous (stable)": 4
-> >>     },
-> >>     "mgr": {
-> >>         "ceph version 12.2.1
-> >> (3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e) luminous (stable)": 3
-> >>     },
-> >>     "osd": {},
-> >>     "mds": {
-> >>         "ceph version 12.2.1
-> >> (3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e) luminous (stable)": 1
-> >>     },
-> >>     "overall": {
-> >>         "ceph version 12.2.1
-> >> (3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e) luminous (stable)": 8
-> >>
-> >>
-> >>
-> >> For some reason the OSDs do not show what version they are running,
-> >> and a ceph osd tree shows all of the OSD as being down.
-> >>
-> >>  # ceph osd tree
-> >> 2017-11-27 21:32:51.969335 7f483d9c2700 -1 WARNING: the following
-> >> dangerous and experimental features are enabled: btrfs
-> >> 2017-11-27 21:32:51.980976 7f483d9c2700 -1 WARNING: the following
-> >> dangerous and experimental features are enabled: btrfs
-> >> ID CLASS WEIGHT   TYPE NAME              STATUS REWEIGHT PRI-AFF
-> >> -1       27.77998 root default
-> >> -3       27.77998     datacenter DC1
-> >> -6       27.77998         rack 1B06
-> >> -5        6.48000             host ceph3
-> >>  1        1.84000                 osd.1    down        0 1.00000
-> >>  3        4.64000                 osd.3    down        0 1.00000
-> >> -2        5.53999             host ceph4
-> >>  5        4.64000                 osd.5    down        0 1.00000
-> >>  8        0.89999                 osd.8    down        0 1.00000
-> >> -4        9.28000             host ceph6
-> >>  0        4.64000                 osd.0    down        0 1.00000
-> >>  2        4.64000                 osd.2    down        0 1.00000
-> >> -7        6.48000             host ceph7
-> >>  6        4.64000                 osd.6    down        0 1.00000
-> >>  7        1.84000                 osd.7    down        0 1.00000
-> >>
-> >> The OSD logs all have this message:
-> >>
-> >> 20235 osdmap REQUIRE_JEWEL OSDMap flag is NOT set; please set it.
-> >
-> > THis is an annoying corner condition.  12.2.2 (out soon!)  will have a
-> > --force option to set the flag even tho no osds are up.  Until then, the
-> > workaround is to downgrade one host to jewel, start one jewel osd, then
-> > set the flag.  Then upgrade to luminous again and restart all osds.
-> >
-> > sage
-> >
-> >
-> >>
-> >> When I try to set it with "ceph osd set require_jewel_osds" I get this error:
-> >>
-> >> Error EPERM: not all up OSDs have CEPH_FEATURE_SERVER_JEWEL feature
-> >>
-> >>
-> >>
-> >> A "ceph features" returns:
-> >>
-> >>     "mon": {
-> >>         "group": {
-> >>             "features": "0x1ffddff8eea4fffb",
-> >>             "release": "luminous",
-> >>             "num": 4
-> >>         }
-> >>     },
-> >>     "mds": {
-> >>         "group": {
-> >>             "features": "0x1ffddff8eea4fffb",
-> >>             "release": "luminous",
-> >>             "num": 1
-> >>         }
-> >>     },
-> >>     "osd": {
-> >>         "group": {
-> >>             "features": "0x1ffddff8eea4fffb",
-> >>             "release": "luminous",
-> >>             "num": 8
-> >>         }
-> >>     },
-> >>     "client": {
-> >>         "group": {
-> >>             "features": "0x1ffddff8eea4fffb",
-> >>             "release": "luminous",
-> >>             "num": 3
-> >>
-> >>  # ceph tell osd.* versions
-> >> 2017-11-28 02:29:28.565943 7f99c6aee700 -1 WARNING: the following
-> >> dangerous and experimental features are enabled: btrfs
-> >> 2017-11-28 02:29:28.578956 7f99c6aee700 -1 WARNING: the following
-> >> dangerous and experimental features are enabled: btrfs
-> >> Error ENXIO: problem getting command descriptions from osd.0
-> >> osd.0: problem getting command descriptions from osd.0
-> >> Error ENXIO: problem getting command descriptions from osd.1
-> >> osd.1: problem getting command descriptions from osd.1
-> >> Error ENXIO: problem getting command descriptions from osd.2
-> >> osd.2: problem getting command descriptions from osd.2
-> >> Error ENXIO: problem getting command descriptions from osd.3
-> >> osd.3: problem getting command descriptions from osd.3
-> >> Error ENXIO: problem getting command descriptions from osd.5
-> >> osd.5: problem getting command descriptions from osd.5
-> >> Error ENXIO: problem getting command descriptions from osd.6
-> >> osd.6: problem getting command descriptions from osd.6
-> >> Error ENXIO: problem getting command descriptions from osd.7
-> >> osd.7: problem getting command descriptions from osd.7
-> >> Error ENXIO: problem getting command descriptions from osd.8
-> >> osd.8: problem getting command descriptions from osd.8
-> >>
-> >>  # ceph daemon osd.1 status
-> >>
-> >>     "cluster_fsid": "CENSORED",
-> >>     "osd_fsid": "CENSORED",
-> >>     "whoami": 1,
-> >>     "state": "preboot",
-> >>     "oldest_map": 19482,
-> >>     "newest_map": 20235,
-> >>     "num_pgs": 141
-> >>
-> >>  # ceph -s
-> >> 2017-11-27 22:04:10.372471 7f89a3935700 -1 WARNING: the following
-> >> dangerous and experimental features are enabled: btrfs
-> >> 2017-11-27 22:04:10.375709 7f89a3935700 -1 WARNING: the following
-> >> dangerous and experimental features are enabled: btrfs
-> >>   cluster:
-> >>     id:     CENSORED
-> >>     health: HEALTH_ERR
-> >>             513 pgs are stuck inactive for more than 60 seconds
-> >>             126 pgs backfill_wait
-> >>             52 pgs backfilling
-> >>             435 pgs degraded
-> >>             513 pgs stale
-> >>             435 pgs stuck degraded
-> >>             513 pgs stuck stale
-> >>             435 pgs stuck unclean
-> >>             435 pgs stuck undersized
-> >>             435 pgs undersized
-> >>             recovery 854719/3688140 objects degraded (23.175%)
-> >>             recovery 838607/3688140 objects misplaced (22.738%)
-> >>             mds cluster is degraded
-> >>             crush map has straw_calc_version=0
-> >>
-> >>   services:
-> >>     mon: 4 daemons, quorum 0,1,3,2
-> >>     mgr: 0(active), standbys: 1, 5
-> >>     mds: cephfs-1/1/1 up  {0=a=up:replay}, 1 up:standby
-> >>     osd: 8 osds: 0 up, 0 in
-> >>
-> >>   data:
-> >>     pools:   7 pools, 513 pgs
-> >>     objects: 1199k objects, 4510 GB
-> >>     usage:   13669 GB used, 15150 GB / 28876 GB avail
-> >>     pgs:     854719/3688140 objects degraded (23.175%)
-> >>              838607/3688140 objects misplaced (22.738%)
-> >>              257 stale+active+undersized+degraded
-> >>              126 stale+active+undersized+degraded+remapped+backfill_wait
-> >>              78  stale+active+clean
-> >>              52  stale+active+undersized+degraded+remapped+backfilling
-> >>
-> >>
-> >> I ran "ceph auth list", and client.admin has the following permissions.
-> >> auid: 0
-> >> caps: [mds] allow
-> >> caps: [mgr] allow *
-> >> caps: [mon] allow *
-> >> caps: [osd] allow *
-> >>
-> >> Thank you for your time.
-> >>
-> >> Is there any way I can get these OSDs to join the cluster now, or
-> >> recover my data?
-> >>
-> >> Cary
-> >> -Dynamic
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> >>
-> 
-> 
+On 28 November 2017 at 13:37, Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> On Tue, Nov 28, 2017 at 7:22 AM, Andreas Calminder
+> <andreas.calminder-HQhCbu9nrx3QT0dZR+AlfA@public.gmane.org> wrote:
+>>> For the `simple` sub-command there is no prepare/activate, it is just
+>>> a way of taking over management of an already deployed OSD. For *new*
+>>> OSDs, yes, we are implying that we are going only with Logical Volumes
+>>> for data devices. It is a bit more flexible for Journals, block.db,
+>>> and block.wal as those
+>>> can be either logical volumes or GPT partitions (ceph-volume will not
+>>> create these for you).
+>>
+>> Ok, so if I understand this correctly, for future one-device-per-osd
+>> setups I would create a volume group per device before handing it over
+>> to ceph-volume, to get the "same" functionality as ceph-disk. I
+>> understand the flexibility aspect of this, my setup will have an extra
+>> step setting up lvm for my osd devices which is fine.
+>
+> If you don't require any special configuration for your logical volume
+> and don't mind a naive LV handling, then ceph-volume can create
+> the logical volume for you from either a partition or a device (for
+> data), although it will still require a GPT partition for Journals,
+> block.wal, and block.db
+>
+> For example:
+>
+>     ceph-volume lvm create --data /path/to/device
+>
+> Would create a new volume group with the device and then produce a
+> single LV from it.
+>
+>> Apologies if I
+>> missed the information, but is it possible to get command output as
+>> json, something like "ceph-disk list --format json" since it's quite
+>> helpful while setting up stuff through ansible
+>
+> Yes, this is implemented in both "pretty" and JSON formats:
+> http://docs.ceph.com/docs/master/ceph-volume/lvm/list/#ceph-volume-lvm-list
+>>
+>> Thanks,
+>> Andreas
+>>
+>> On 28 November 2017 at 12:47, Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>>> On Tue, Nov 28, 2017 at 1:56 AM, Andreas Calminder
+>>> <andreas.calminder-HQhCbu9nrx3QT0dZR+AlfA@public.gmane.org> wrote:
+>>>> Hello,
+>>>> Thanks for the heads-up. As someone who's currently maintaining a
+>>>> Jewel cluster and are in the process of setting up a shiny new
+>>>> Luminous cluster and writing Ansible roles in the process to make
+>>>> setup reproducible. I immediately proceeded to look into ceph-volume
+>>>> and I've some questions/concerns, mainly due to my own setup, which is
+>>>> one osd per device, simple.
+>>>>
+>>>> Running ceph-volume in Luminous 12.2.1 suggests there's only the lvm
+>>>> subcommand available and the man-page only covers lvm. The online
+>>>> documentation http://docs.ceph.com/docs/master/ceph-volume/ lists
+>>>> simple however it's lacking some of the ceph-disk commands, like
+>>>> 'prepare' which seems crucial in the 'simple' scenario. Does the
+>>>> ceph-disk deprecation imply that lvm is mandatory for using devices
+>>>> with ceph or is just the documentation and tool features lagging
+>>>> behind, I.E the 'simple' parts will be added well in time for Mimic
+>>>> and during the Luminous lifecycle? Or am I missing something?
+>>>
+>>> In your case, all your existing OSDs will be able to be managed by
+>>> `ceph-volume` once scanned and the information persisted. So anything
+>>> from Jewel should still work. For 12.2.1 you are right, that command
+>>> is not yet available, it will be present in 12.2.2
+>>>
+>>> For the `simple` sub-command there is no prepare/activate, it is just
+>>> a way of taking over management of an already deployed OSD. For *new*
+>>> OSDs, yes, we are implying that we are going only with Logical Volumes
+>>> for data devices. It is a bit more flexible for Journals, block.db,
+>>> and block.wal as those
+>>> can be either logical volumes or GPT partitions (ceph-volume will not
+>>> create these for you).
+>>>
+>>>>
+>>>> Best regards,
+>>>> Andreas
+>>>>
+>>>> On 27 November 2017 at 14:36, Alfredo Deza <adeza-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>>>>> For the upcoming Luminous release (12.2.2), ceph-disk will be
+>>>>> officially in 'deprecated' mode (bug fixes only). A large banner with
+>>>>> deprecation information has been added, which will try to raise
+>>>>> awareness.
+>>>>>
+>>>>> We are strongly suggesting using ceph-volume for new (and old) OSD
+>>>>> deployments. The only current exceptions to this are encrypted OSDs
+>>>>> and FreeBSD systems
+>>>>>
+>>>>> Encryption support is planned and will be coming soon to ceph-volume.
+>>>>>
+>>>>> A few items to consider:
+>>>>>
+>>>>> * ceph-disk is expected to be fully removed by the Mimic release
+>>>>> * Existing OSDs are supported by ceph-volume. They can be "taken over" [0]
+>>>>> * ceph-ansible already fully supports ceph-volume and will soon default to it
+>>>>> * ceph-deploy support is planned and should be fully implemented soon
+>>>>>
+>>>>>
+>>>>> [0] http://docs.ceph.com/docs/master/ceph-volume/simple/
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
+>>>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
