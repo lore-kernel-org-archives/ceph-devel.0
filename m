@@ -1,51 +1,132 @@
 From: Gregory Farnum <gfarnum@redhat.com>
-Subject: Re: DBObjectMap::header_lock forcing filestore threads to be sequentail
-Date: Tue, 28 Nov 2017 14:59:28 -0800
-Message-ID: <CAJ4mKGaWZnm-cvTtXfPrteHnN0zAyHYyCfQ9vgL+-m1Kdo=EaA@mail.gmail.com>
-References: <CAJACTueeM+yPph=1sA9YDEa_FB+7w7XObd8ZrzdU-qzvfiCPYA@mail.gmail.com>
+Subject: Re: some issue about peering progress
+Date: Tue, 28 Nov 2017 15:35:00 -0800
+Message-ID: <CAJ4mKGba0sCTPoO__G8gG6DRzc49NnwxAozZRxCa7T0ssfvDnw@mail.gmail.com>
+References: <CANE=7sWZ9sBTdqbNZ_UuUZ=K5UJDB=kZbrXh3u09dNaGeUzXRQ@mail.gmail.com>
+ <CAJ4mKGa8+5xa-FJb+XuTn3A3p5quYkmOQZixa11tYEW78nLQKQ@mail.gmail.com>
+ <CANE=7sXWMXTpTfgG6NmwxYYyjYA2_UZ3oNun4eAw+QNiht2nkg@mail.gmail.com>
+ <CAJ4mKGaFP+5vePBNzm0fk3pqONirfCyGhrGynZ4BTD3AwfNMuw@mail.gmail.com> <CANE=7sVop6coM0oTppBxK=CWH5B1XQQ9AHpd-MpAoxrb-Q1gFQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-it0-f49.google.com ([209.85.214.49]:38449 "EHLO
-        mail-it0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752433AbdK1W73 (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Nov 2017 17:59:29 -0500
-Received: by mail-it0-f49.google.com with SMTP id r6so1811346itr.3
-        for <ceph-devel@vger.kernel.org>; Tue, 28 Nov 2017 14:59:29 -0800 (PST)
-In-Reply-To: <CAJACTueeM+yPph=1sA9YDEa_FB+7w7XObd8ZrzdU-qzvfiCPYA@mail.gmail.com>
+Received: from mail-io0-f170.google.com ([209.85.223.170]:43848 "EHLO
+        mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752054AbdK1XfC (ORCPT
+        <rfc822;ceph-devel@vger.kernel.org>); Tue, 28 Nov 2017 18:35:02 -0500
+Received: by mail-io0-f170.google.com with SMTP id s37so1757156ioe.10
+        for <ceph-devel@vger.kernel.org>; Tue, 28 Nov 2017 15:35:02 -0800 (PST)
+In-Reply-To: <CANE=7sVop6coM0oTppBxK=CWH5B1XQQ9AHpd-MpAoxrb-Q1gFQ@mail.gmail.com>
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xuehan Xu <xxhdx1985126@gmail.com>
-Cc: ceph-devel <ceph-devel@vger.kernel.org>
+To: =?UTF-8?B?WGluemUgQ2hpICjkv6Hms70p?= <xmdxcxz@gmail.com>
+Cc: "ceph-devel@vger.kernel.org" <ceph-devel@vger.kernel.org>
 
-On Tue, Nov 28, 2017 at 1:51 AM, Xuehan Xu <xxhdx1985126@gmail.com> wrote:
-> Hi, everone.
->
-> Recently, we did some stress tests on mds. We found that, when doing
-> file creation test, the mdlog trim operations are very slow. After
-> doing some debugging, we found that this could be due to execution of
-> the OSD's filestore theads being forced to be nearly sequential. This
-> can be found out in our result of gdbprof probing, which is attached
-> with this email. In the gdbprof result, we can see that the most time
-> consuming work of the filestore threads is the sizing of
-> DBObjectMap::caches, and the reason of sequential execution of
-> filestore threads is the locking of DBObjectMap::header_lock.
->
-> After reading the corresponding source code, we found that
-> MapHeaderLock is already doing the mutual exclusion of access of the
-> omap object header. It seems that the locking of
-> DBObjectMap::header_lock is not very necessary, or at least, it's not
-> needed when adding the header to DBObjectMap::caches, which would lead
-> to the sizing of the cache.
->
-> Is this right?
+Hmm, just noticed I never replied to this.
 
-I'm a bit confused; can you explain exactly what you're testing and
-exactly what you're measuring that leads you to think the mutexes are
-overly expensive?
+You are correct and I was not reading carefully enough; the
+send_notify is only set to false on Activate.
 
-Note that there's both a header_lock and a cache_lock; in a quick skim
-they don't seem to be in gratuitous use (unless there are some disk
-accesses hiding underneath the header_lock?) and the idea of them
-being a performance bottleneck has not come up before.
+I still think something in the stack will block messages if they're
+from a too-new epoch, or that this is correct because of something
+else (we do a *lot* of OSD thrashing tests), but I didn't track down
+exactly how/why.
 -Greg
+
+On Wed, Nov 1, 2017 at 11:35 PM Xinze Chi (信泽) <xmdxcxz@gmail.com> wrote:
+>
+> The Stray set send_notify false only if go to activate?
+>
+> 2017-11-02 10:27 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
+> > On Wed, Nov 1, 2017 at 5:27 PM Xinze Chi (信泽) <xmdxcxz@gmail.com> wrote:
+> >>
+> >> 2017-11-02 4:26 GMT+08:00 Gregory Farnum <gfarnum@redhat.com>:
+> >> > On Fri, Oct 27, 2017 at 12:46 AM Xinze Chi (信泽) <xmdxcxz@gmail.com> wrote:
+> >> >>
+> >> >> hi, all:
+> >> >>
+> >> >>      I confuse about the notify message during peering. Such as:
+> >> >>
+> >> >>     epoch 1, primary osd do Pering , GetInfo and GetMissing, it
+> >> >> calling the func  proc_replica_log. in this func the last_complete and
+> >> >> last_update maybe reset.
+> >> >>
+> >> >>     Before go to Activate. the OSDMap change (the new osdmap do not
+> >> >> lead to restart peering), the non-primary osd send the notify to
+> >> >> primary.
+> >> >
+> >> >
+> >> > I don't think this can happen. The OSD won't re-send a notify during
+> >> > the same peering interval, and even if it did the message would be
+> >> > tagged with a new (higher) epoch so the PG wouldn't process it until
+> >> > after it had switched states, right?
+> >> >
+> >>
+> >>    I just want to understand this algorithm. When the Stray osd received ActMap
+> >>
+> >> it would send_notity even if during the same peering interval. see
+> >> Stray::react(const ActMap&).
+> >
+> > Note the
+> >
+> > if (pg->should_send_notify()
+> >
+> > check preceding that block. It checks a boolean send_notify value that
+> > is set true only when it enters a new peering interval, and is set
+> > false as soon as it shares its info. So I don't think the primary's
+> > behavior matters at all (other than from a security perspective,
+> > anyway).
+> >
+> >
+> >>   You say the priamry osd wouldn't process the notify msg, I do not
+> >> find out the code. The primary
+> >>
+> >> call handle_pg_notify and process it.
+> >
+> > I didn't actually track the order of the state machine here; I just
+> > saw that PG::RecoveryState::Active::react(const MNotifyRec& notevt)
+> > will throw them out if it's already seen the info. You're right
+> > PG::RecoveryState::Primary::react(const MNotifyRec& notevt) will
+> > process it unconditionally. I'm not sure if those are the replica and
+> > primary states, or if you move from Primary to Active (or vice versa).
+> > -Greg
+> >
+> >>
+> >>
+> >> >>
+> >> >>
+> >> >>     When the primary receive the notify, Primary::react(const
+> >> >> MNotifyRec& notevt), so it call the func proc_replica_info.
+> >> >>
+> >> >>     In the func, we update the pg info including last_complete and
+> >> >> last_update which modified in proc_replica_log.
+> >> >
+> >> > Note also that "PG::RecoveryState::Active::react(const MNotifyRec&
+> >> > notevt)" does *not* unconditionally invoke proc_replica_info(). I
+> >> > think you were trying to say we hadn't reached this state on receipt
+> >> > of the message? But as I mentioned above, I think we block so that's
+> >> > not actually possible either.
+> >> >
+> >> >>
+> >> >>     When the primary call the func activate, the primary osd  process
+> >> >> recovering based on pg info got by notify instead of proc_replica_log.
+> >> >>
+> >> >>     so it is a bug?
+> >> >
+> >> > Have you seen issues in the wild, or just trying to understand this
+> >> > code/algorithm? I would be surprised if we had undiscovered issues
+> >> > here just because our tests exercise peering quite vigorously, but I
+> >> > might be missing what's happening in my own code skims.
+> >> > -Greg
+> >>
+> >>
+> >>
+> >> --
+> >> Regards,
+> >> Xinze Chi
+>
+>
+>
+> --
+> Regards,
+> Xinze Chi
