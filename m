@@ -1,49 +1,136 @@
-From: "Yan, Zheng" <ukernel@gmail.com>
-Subject: Re: Questions regarding mds early reply
-Date: Wed, 29 Nov 2017 16:33:45 +0800
-Message-ID: <CAAM7YAm4Dnzcc9uz-5iL9kaigoFbKjsZJjVP9J_LQX00zeia2w@mail.gmail.com>
-References: <CAEYCsVJCz4ecJNXyKLF0EyovJw8sLHwb_uzMBQaZVfasuuy+cw@mail.gmail.com>
- <CAEYCsVJAamRkFeH_3St0dMybks97q09P4b-h0+nVrFNPy_c-BA@mail.gmail.com>
+From: Igor Fedotov <ifedotov@suse.de>
+Subject: Re: metadata spill back onto block.slow before block.db filled up
+Date: Wed, 29 Nov 2017 13:15:10 +0300
+Message-ID: <adca6bbb-ffb0-78d0-1cc2-36dc286bf15c@suse.de>
+References: <CAKEPnAaF60ywk67KeZ4PkEcqKDqu8c_2_EjzSK_DqusDR2Fjog@mail.gmail.com>
+ <alpine.DEB.2.11.1711281316180.2819@piezo.novalocal>
+ <fc7b7cd0-0b36-7bd7-0310-70cd9dcc1048@suse.de>
+ <ceb00aa7-6229-362e-8234-4f7cbfc23cb2@gmail.com>
+ <da7260ee-d0cd-1873-9faa-36f747745ef7@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <ceph-devel-owner@vger.kernel.org>
-Received: from mail-ot0-f175.google.com ([74.125.82.175]:32894 "EHLO
-        mail-ot0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750760AbdK2Idq (ORCPT
-        <rfc822;ceph-devel@vger.kernel.org>); Wed, 29 Nov 2017 03:33:46 -0500
-Received: by mail-ot0-f175.google.com with SMTP id h9so2364631oti.0
-        for <ceph-devel@vger.kernel.org>; Wed, 29 Nov 2017 00:33:46 -0800 (PST)
-In-Reply-To: <CAEYCsVJAamRkFeH_3St0dMybks97q09P4b-h0+nVrFNPy_c-BA@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:46185 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752681AbdK2KPP (ORCPT <rfc822;ceph-devel@vger.kernel.org>);
+        Wed, 29 Nov 2017 05:15:15 -0500
+In-Reply-To: <da7260ee-d0cd-1873-9faa-36f747745ef7@suse.de>
+Content-Language: en-US
 Sender: ceph-devel-owner@vger.kernel.org
 List-ID: <ceph-devel.vger.kernel.org>
-To: Xiaoxi Chen <superdebuger@gmail.com>
-Cc: Patrick Donnelly <pdonnell@redhat.com>, Ceph Development <ceph-devel@vger.kernel.org>
+To: Mark Nelson <mark.a.nelson@gmail.com>, Sage Weil <sage@newdream.net>, shasha lu <lushasha08@gmail.com>
+Cc: ceph-devel@vger.kernel.org
 
-On Wed, Nov 29, 2017 at 10:15 AM, Xiaoxi Chen <superdebuger@gmail.com> wrote:
-> Hi,
+I've just updated the bug notes.
+
+Most probably the issue is caused by an already fixed bug in RocksDB,
+
+see 
+https://github.com/facebook/rocksdb/commit/65a9cd616876c7a1204e1a50990400e4e1f61d7e
+
+Hence the question is if we plan to backport the fix and how to arrange 
+that.
+
+Thanks,
+Igor
+
+On 11/28/2017 6:44 PM, Igor Fedotov wrote:
+> here it is
 >
->       When reading the early reply logical,  i am not very understand
-> why we can reply to the client before committing to journal?  Is there
-> anywhere the change get persisted or we rely on client-replay when MDS
-> failure happens?
-
-Early reply is similar to the return of syscall on local filesystem.
-It only tells request initiator that mds has made the change to its
-cache. Later requests from the same client (request initiator) can
-read the change. Other clients can not read the change until the
-change get committed to journal.
-
->       If this is the case, what if the client also failed during this period?
+> http://tracker.ceph.com/issues/22264
 >
-
-If both mds and client failed, the change gets lost. This does not
-compromise consistency because no other clients have seem the change.
-
-
->       Thanks for providing the hints.
 >
-> Xiaoxi
-> --
+> On 11/28/2017 6:37 PM, Mark Nelson wrote:
+>> Looks like a bug guys! :)  Mind making a ticket in the tracker?
+>>
+>> Mark
+>>
+>> On 11/28/2017 07:39 AM, Igor Fedotov wrote:
+>>> Looks like I can easily reproduce that (note slow_used_bytes):
+>>>
+>>>  "bluefs": {
+>>>         "gift_bytes": 105906176,
+>>>         "reclaim_bytes": 0,
+>>>         "db_total_bytes": 4294959104,
+>>>         "db_used_bytes": 76546048,
+>>>         "wal_total_bytes": 1073737728,
+>>>         "wal_used_bytes": 239075328,
+>>>         "slow_total_bytes": 1179648000,
+>>>         "slow_used_bytes": 63963136,
+>>>         "num_files": 13,
+>>>         "log_bytes": 2539520,
+>>>         "log_compactions": 3,
+>>>         "logged_bytes": 255176704,
+>>>         "files_written_wal": 3,
+>>>         "files_written_sst": 10,
+>>>         "bytes_written_wal": 1932165189,
+>>>         "bytes_written_sst": 340957748
+>>>     },
+>>>
+>>>
+>>> On 11/28/2017 4:17 PM, Sage Weil wrote:
+>>>> Hi Shasha,
+>>>>
+>>>> On Tue, 28 Nov 2017, shasha lu wrote:
+>>>>> Hi, Mark
+>>>>> We test bluestore with 12.2.1.
+>>>>> There are two host in our rgw cluster, each host contain 2 osds. The
+>>>>> rgw pool size is 2.  Using a 5GB partition for db.wal, a 50GB SSD
+>>>>> partition for block.db.
+>>>>>
+>>>>> # ceph --admin-daemon ceph-osd.1.asok config get rocksdb_db_paths
+>>>>> {
+>>>>>      "rocksdb_db_paths": "db,51002736640 db.slow,284999998054"
+>>>>> }
+>>>>>
+>>>>> After writing about 400W 4k rgw objects, using ceph-bluestore-tool to
+>>>>> export rocksdb file.
+>>>>>
+>>>>> # ceph-bluestore-tool bluefs-export --path /var/lib/ceph/osd/osd1
+>>>>> --out-dir /tmp/osd1
+>>>>> # cd /tmp/osd1
+>>>>> # ls
+>>>>> db  db.slow  db.wal
+>>>>> # du -sh *
+>>>>> 2.8G    db
+>>>>> 809M    db.slow
+>>>>> 439M    db.wal
+>>>>>
+>>>>> block.db partition have 50GB space, but it only contains ~3GB files.
+>>>>> Then the metadata rolling over onto the db.slow.
+>>>>> It seems that only L0-L2 files located in block.db. (L0 256M; L1 
+>>>>> 256M;
+>>>>> L2 2.5GB), L3 and higher level file located in db.slow.
+>>>>>
+>>>>> According to ceph docs, the metadata rolling over onto the db.slow
+>>>>> only when block.db filled up. But in our env the block.db 
+>>>>> partition is
+>>>>> far from filled up.
+>>>>> Did I make any mistakes?  Is there any additional options should be
+>>>>> set to rocksdb?
+>>>> You didn't make any mistakes--this should happen automatically.  It 
+>>>> looks
+>>>> like rocksdb isn't behaving as advertised.  I've opened
+>>>> http://tracker.ceph.com/issues/22264 to track this.  We need to 
+>>>> start by
+>>>> reproducing the situation.
+>>>>
+>>>> My guess is that rocksdb is deciding that deciding that all of L3 
+>>>> can't
+>>>> fit on db and so it's putting all of L3 on db.slow?
+>>>>
+>>>> sage
+>>>>
+>>>> -- 
+>>>> To unsubscribe from this list: send the line "unsubscribe 
+>>>> ceph-devel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at http://vger.kernel.org/majordomo-info.html
+>>>
+>
+> -- 
 > To unsubscribe from this list: send the line "unsubscribe ceph-devel" in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
